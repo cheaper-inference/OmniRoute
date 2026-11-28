@@ -99,31 +99,31 @@ Kombinációnként:
 
 ---
 
-## Állapot-ellenőrzési API
+## állapotfelmérés API
 
-Az OmniRoute **két** HTTP-s állapotfelületet biztosít. Ezek nem cserélhetők fel egymással az orchestratorokban.
+OmniRoute kiteszi** két** HTTP egészségügyi felületek. Nem cserélhetők fel a hangszerelők számára.
 
-| Útvonal                      | Cél                                                                           | Terhelés                                   | Használat                                                                                                   |
-| ---------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `GET /healthz`               | Életciklus-alapú működésképesség/készenlét (`ok` / `starting` / `stopping`)   | Elhanyagolható (csak fázisjelző)           | Kubernetes-**készenlét**; kíméletes **működésképességi** ellenőrzés, ha mindenképpen HTTP-t kell használnia |
-| `GET /api/monitoring/health` | Mélyreható rendszer- és szolgáltatói összegzés (DB, heap, katalógusszámok, …) | Nagy (szinkron DB-/monitorozási műveletek) | Irányítópultok, mélyreható blackbox-ellenőrzések, a Docker beépített állapot-ellenőrzése                    |
+| Útvonal                      | Cél                                                                        | Súly                                             | Használja                                                                      |
+| ---------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `GET /healthz`               | Életciklus liveness/readiness (`ok` / `starting` / `stopping`)             | Triviális (csak fázisjelző)                      | Kubernetes** készenlét** ; puha** elevenség** ha HTTP kell használnia          |
+| `GET /api/monitoring/health` | Mélyrendszerű + -szolgáltató összefoglalója (DB, kupac, katalógusszámok,…) | Nehéz ( DB szinkronizálása / megfigyelési munka) | Irányítópultok, blackbox mélyellenőrzések, Docker beépített állapotellenőrzése |
 
-> **Megjegyzés:** A szolgáltatói állapotmátrixok, az autopilot problémái, a kvótafigyelők, a tokenek állapota és a `/api/monitoring/health` által biztosítottnál részletesebb késleltetési adatok az **MCP-eszköz** `observability_snapshot` használatával vagy az **irányítópult** oldalain érhetők el — ezekhez nincsenek külön REST-útvonalak.
+> **Jegyzet:** A szolgáltatói állapotmátrixok, az autopilot-problémák, a kvótafigyelők, a token állapota és `/api/monitoring/health` túli késleltetési részletek elérhetők a**MCP eszköz** `observability_snapshot` vagy a** műszerfal** oldalak — nincsenek dedikált REST útvonalak ezekhez.
 
-Mindkét útvonal ugyanazon a **Node-eseményhurkon** fut, mint a kérések kezelése. Egy CPU-igényes útvonal (nagy `GET /v1/models` katalógus feldolgozása, hosszú kontextus tömörítése/tokenek számlálása) **minden** HTTP-kezelőt késleltethet, beleértve a `/healthz` útvonalat is. Foglalt eseményhurok ≠ leállt folyamat. Elsősorban az erőforrásigényes műveletet javítsa; a próbák hangolása csak a téves leállítások számát csökkenti.
+Mindkét útvonal a** ugyanaz a Node eseményhurok** kéréskezelésként. A CPU-hoz kötött útvonal (nagy `GET /v1/models` katalógusmunka, hosszú kontextusú tömörítés / token számlálás) késleltetheti** minden** HTTP kezelők, beleértve `/healthz`. Az eseményhurok foglalt ≠ folyamata leállt. Inkább rögzítse a disznót; A szonda hangolása csak csökkenti a hamis ölések számát.
 
-### Könnyűsúlyú orchestrator-próba
+### Könnyű hangszerelő szonda
 
 ```bash
 GET /healthz
-# vagy HEAD /healthz
+# or HEAD /healthz
 ```
 
-- **200** + `ok` törzs, amikor a kiszolgáló életciklusfázisa készen áll
+- **200** + body `ok` ha a szerver életciklus fázisa készen áll
 - **503** + `starting` / `stopping` rendszerindítás vagy leállítás közben
-- Megvalósítás: `src/app/healthz/route.ts` (nincs DB-ping)
+- Megvalósítás: `src/app/healthz/route.ts` (nincs DB ping)
 
-### Rendszerállapot (mélyreható)
+### Rendszer állapota (mély)
 
 ```bash
 GET /api/monitoring/health
@@ -153,43 +153,35 @@ Válasz:
 }
 ```
 
-#### `credentialHealth`: próbagyorsítótár kontra SQLite `test_status`
+#### `credentialHealth`: probe-cache vs SQLite `test_status`
 
-A `GET /api/monitoring/health` → `credentialHealth` a **memóriában tárolt próbagyorsítótár
-mérőszáma**, nem pedig a `provider_connections.test_status` élő lekérdezése. A #12532 után a
-kérésfeldolgozási útvonal kizárólag a `getCachedCredentialHealthSummary()` értékét olvassa; a háttérpróbák
-az eseményhurkon kívül frissítik a gyorsítótárat.
+`GET /api/monitoring/health` → `credentialHealth` az** a memóriában lévő próba-gyorsítótár mérőeszköz** , nem a `provider_connections.test_status` élő dumpja. #12532 után a kérés elérési útja csak `getCachedCredentialHealthSummary()` olvassa; háttérpróbák frissítik a gyorsítótárat az eseményhurokból.
 
-| Réteg                          | Hely                                                                  | Jelentés                                                                                                                                                                                                                                                      |
-| ------------------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Próbagyorsítótár mérőszáma     | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | A hitelesítő adatok állapotára vonatkozó, a folyamat memóriájában még megőrzött legutóbbi próbaeredmények. A `source` értéke mindig `probe-cache`.                                                                                                            |
-| Sikertelen kapcsolat részletei | `credentialHealth.failedConnections`                                  | **Csak akkor jelenik meg, ha `failed > 0`**. A gyorsítótár `status=error` állapotú sorainak korlátozott listája (`connectionId`, `status`, megtisztított `lastError` / `lastErrorType`). A `failedOmitted` akkor van beállítva, ha a lista elérte a korlátot. |
-| SQLite tartós állapota         | `credentialHealth.staleDbNonOkCount`                                  | Azon **aktív** (`is_active=1`) kapcsolati sorok száma, amelyek tárolt `test_status` értéke ismert, nem megfelelő állapot (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                                                   |
+| Réteg                          | Ahol                                                                  | Mit jelent                                                                                                                                                                                                                                      |
+| ------------------------------ | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Probe-cache mérő               | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Az utolsó hitelesítő adatok-egészségügyi vizsgálat eredményei még mindig a folyamatmemóriában vannak tárolva. `source` mindig `probe-cache`.                                                                                                    |
+| Sikertelen kapcsolat részletei | `credentialHealth.failedConnections`                                  | Jelenlegi** csak amikor `failed > 0`** . A gyorsítótár-sorok korlátozott listája `status=error` (`connectionId`, `status`, megtisztított `lastError` / `lastErrorType`). `failedOmitted` akkor van beállítva, amikor a lista felső határa volt. |
+| SQLite ragadós állapot         | `credentialHealth.staleDbNonOkCount`                                  | Száma** aktív** (`is_active=1`) kapcsolódási sorok, amelyek megmaradt `test_status` je ismert nem-ok (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                                                         |
 
-A két réteg szándékosan eltérhet egymástól:
+A két réteg szándékosan nem érthet egyet:
 
-- A mérőszámnál `failed=0`, miközben `staleDbNonOkCount>0` — az SQLite továbbra is tartós
-  `test_status` értéket tartalmaz (például `expired` vagy `credits_exhausted`), amelyet a legutóbbi
-  próbagyorsítótár-pillanatkép nem számol `status=error` állapotként.
-- A mérőszámnál `failed>0`, miközben az SQLite szerint az állapot megfelelő — egy közelmúltbeli próba sikertelen volt, és
-  bekerült a gyorsítótárba; a DB-sor még nem frissült, vagy később törölték az állapotát.
+- Mérje meg `failed=0`, míg `staleDbNonOkCount>0` — SQLite ben még mindig van egy ragadós `test_status` (például `expired` vagy `credits_exhausted`), amely miatt a legutóbbi próba-gyorsítótár pillanatfelvétel nem számít `status=error` nak.
+- Mérje meg `failed>0` miközben SQLite egészségesnek tűnik. — Egy nemrégiben végzett vizsgálat meghiúsult, és gyorsítótárban van; a DB sort nem frissítették, vagy később törölték.
 
-A végpont lekérésekor ne adjon riasztást kizárólag a `provider_connections.test_status` alapján.
-Az élő próbák hibáihoz használja a `failed` + `failedConnections` értékeket, a tárolt
-tartós állapotok számához pedig a `staleDbNonOkCount` értéket.
+Ennek a végpontnak a lekaparásakor ne csak `provider_connections.test_status` ra figyeljen. Használja `failed` + `failedConnections` az élő szondahiba esetén, és `staleDbNonOkCount` ha a tartós ragadós állapot számlálására van szüksége.
 
-### Kubernetes-próbákra vonatkozó ajánlások
+### Kubernetes szonda ajánlásai
 
-Az OmniRoute **egyetlen Node-folyamat** (egy eseményhurok). Az alapértelmezett Docker `HEALTHCHECK` a könnyűsúlyú `/healthz` útvonalat célozza. A `/api/monitoring/health` **túl nagy terhelésű** a kubelet működésképességi ellenőrzési időközeihez.
+OmniRoute egy** egyetlen csomópontos folyamat** (egy eseményhurok). Stock Docker `HEALTHCHECK` a könnyű `/healthz` célozza meg. `/api/monitoring/health` az** túl nehéz** kubelet elevenségi intervallumokhoz.
 
-| Próba                            | Ajánlott cél                                                                                       | Megjegyzések                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| -------------------------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Indítás**                      | HTTP `GET /healthz` hosszú `failureThreshold` értékkel (vagy nagy `startPeriod` értékkel)          | A hidegindítás és az SQLite-migráció néhány másodpercnél tovább tarthat                                                                                                                                                                                                                                                                                                                                                           |
-| **Készenlét**                    | HTTP `GET /healthz`                                                                                | Életciklus: `ok` / `starting` / `stopping` (200 vagy 503). Továbbra is ingadozik, ha a ciklust a CPU blokkolja. A **több másodperc alatt érkező 200-as válasz nem egészséges állapot** (#10303) — azt jelenti, hogy az eseményciklus erőforráshiányban szenvedett, mielőtt a 3 bájtos kezelő lefutott volna                                                                                                                       |
-| **Életjel**                      | HTTP `GET /livez`, **vagy TCP** a fő szolgáltatási porton (`PORT`, alapértelmezés szerint `20128`) | A `/livez` csak azt jelzi, hogy a folyamat él (mindig 200, ha a kezelő lefut). Továbbra is ugyanazt az eseményciklust használja — a foglalt ≠ halott, és az eseményciklus erőforráshiányát (#10303) sem észleli jobban, mint a TCP. Részesítse előnyben a **TCP**-t, ha a HTTP-próbák időtúllépésbe futnak katalógus- vagy tömörítési terhelés alatt; egyik esetben se állítsa le a podot az eseményciklus rövid megakadása miatt |
-| **Mélyreható állapotellenőrzés** | `GET /api/monitoring/health` külső ellenőrzőből                                                    | Nem használható kubelet `livenessProbe` vagy szigorú `readinessProbe` céljára                                                                                                                                                                                                                                                                                                                                                     |
+| Szonda            | Ajánlott cél                                                                         | Megjegyzések                                                                                                                                                                                                                                                                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Indítás**       | HTTP `GET /healthz` hosszú `failureThreshold` (vagy nagy `startPeriod`)              | Hidegindítás + SQLite migráció meghaladhatja néhány másodpercet                                                                                                                                                                                                                                                                                 |
+| **Készenlét**     | HTTP `GET /healthz`                                                                  | Életciklus `ok` / `starting` / `stopping` (200 vs 503). Továbbra is csapkod, ha a hurok CPU-blokkolt. A** 200 másodperc alatt nem egészséges** (#10303) — azt jelenti, hogy az eseményhurok ki lett éhezve, mielőtt a 3 bájtos kezelő futott volna                                                                                              |
+| **Életesség**     | HTTP `GET /livez`,** vagy TCP** a fő szervizporton (`PORT`, alapértelmezett `20128`) | `/livez` csak folyamatban van (mindig 200, ha a kezelő fut). Továbbra is megosztja a — busy ≠ dead eseményhurkot, és nem érzékeli jobban az eseményhurok éhezést (#10303), mint TCP. Inkább**TCP** ha HTTP szondák időtúllépése catalog/compression terhelés alatt; csináld** nem** öld meg a pod rövid eseményhurkos standokon bármelyik módon |
+| **Mély egészség** | `GET /api/monitoring/health` külső ellenőrzőből                                      | Nem a kubelet `livenessProbe` / szűk `readinessProbe` számára                                                                                                                                                                                                                                                                                   |
 
-Példastruktúra (igazítsa a küszöbértékeket a hidegindítási és tömörítési terheléshez):
+Példaforma (igazítsa a küszöbértékeket a hidegindítási és kompressziós terheléshez):
 
 ```yaml
 ports:
@@ -215,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Az eseményciklus megakadása esetén a HTTP /livez továbbra is időtúllépésbe
-  # futhat. A TCP a konzervatív alternatíva:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-**Ne** irányítsa a kubelet **életjel-ellenőrzését** az `/api/monitoring/health` útvonalra. Ez az útvonal tényleges adatbázis- és megfigyelési műveleteket végez, és terhelés alatt téves pozitív eredményt adhat.
+**Nem** pont kubelet** elevenség** a `/api/monitoring/health`. Ez az elérési út valódi DB/monitoring munkát végez, és terhelés alatt hamis pozitív lesz.
 
-Kapcsolódó: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (próbák, miközben az eseményciklus foglalt), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (a katalógusárak feldolgozása lefoglalja a rendszert), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (a tömörítés tokenszámlálása lefoglalja a rendszert).
+Kapcsolódó: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (vizsgálat, amíg az eseményhurok foglalt), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (katalógus árképzési hog), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (tömörítési token-számláló hog).
 
-### systemd watchdog (lefagyott eseményciklus)
+### systemd watchdog (lefagyott eseményhurok)
 
-Egy systemd-gazdagépen az OmniRoute jelzi a szolgáltatáskezelőnek, amikor készen áll, és folyamatosan életjeleket küld neki, így az elakadt eseményciklusú kiszolgálót a rendszer leállítja és újraindítja ahelyett, hogy működőnek tűnve, de válasz nélkül maradna. Az életjelek a kiszolgáló saját eseményciklusából érkeznek: amikor az blokkolódik, az életjelek leállnak, és a systemd újraindítja a szolgáltatást, amint a `WatchdogSec` időtartama úgy telik el, hogy nem érkezik életjel.
+A rendszeres gazdagépen OmniRoute közli a szolgáltatásmenedzserrel, ha készen áll, és folyamatosan pingeli, így az eseményhurok elakadt kiszolgálója megsemmisül és újraindul, ahelyett, hogy csendben maradna. A pingek a szerver saját eseményhurkából származnak: amikor az blokkol, leállnak, és a systemd újraindítja a szolgáltatást, ha `WatchdogSec` eltelik anélkül.
 
-Az [`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) már eleve egy ilyen felhasználói egységet ír. A saját kezűleg létrehozott egység (az alapértelmezett `Type=simple` beállítással) nem kap watchdogot, ezért adja hozzá a következő sorokat a `[Service]` szakaszához:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) ezzel már felhasználói egységet ír. A saját maga által írt egység (az alapértelmezett `Type=simple`) nem kap figyelőt, ezért adja hozzá a következő sorokat `[Service]` szakaszához:
 
 ```ini
 [Service]
@@ -239,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-A generált egység beállítja a `Restart=on-failure` értéket, ezért ezt a sort is adja hozzá — nélküle a watchdog csak leállítja az elakadt szolgáltatást, de nem indítja újra.
+A generált egység beállítja `Restart=on-failure`, ezért add hozzá azt a sort is — nélküle a watchdog csak megöli az elakadt szolgáltatást ahelyett, hogy újraindítaná.
 
-- `Type=notify`: a szolgáltatás akkor számít „elindítottnak”, amikor a kiszolgáló elküldi a `READY=1` jelzést, nem pedig akkor, amikor a folyamat elágazik. A `TimeoutStartSec` korlátozza a lassú indítás időtartamát.
-- `NotifyAccess=all`: az életjeleket a kiszolgálófolyamat küldi, amely az `omniroute serve` felügyelő gyermekfolyamata.
-- `WatchdogSec`: az életjelek 60 másodpercenként érkeznek, ezért **120 vagy nagyobb** értéket használjon. A kisebb értékek egy megfelelően működő kiszolgálót is újraindítanának.
-- Futtassa az `omniroute serve` parancsot az előtérben. A `--daemon` leválasztja a kiszolgálót az egység cgroupjáról, így az értesítési kézfogás soha nem fejeződik be.
+- `Type=notify`: a szolgáltatás akkor "indul el", amikor a szerver elküldi `READY=1`, nem pedig akkor, amikor a folyamat elágazik. `TimeoutStartSec` lassú indítást határol.
+- `NotifyAccess=all`: a pingeket a szerver folyamat küldi, amely a `omniroute serve` felügyelő gyermeke.
+- `WatchdogSec`: a pingek 60 másodpercenként kialszanak, ezért használd** 120 vagy több** . A kisebb értékek újraindítanák az egészséges szervert.
+- Futtassa `omniroute serve` az előtérben. `--daemon` leválasztja a szervert az egység cgroupjáról, és az értesítési kézfogás soha nem fejeződik be.
 
-Újraindítás után ellenőrizze, hogy aktív-e:
+Ellenőrizze, hogy újraindítás után aktív-e:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-A `WatchdogUSec` a beállított késleltetést mutatja, a `WatchdogTimestamp` pedig percenként frissül. A watchdog által kiváltott újraindítás `Result=watchdog` értékkel kerül rögzítésre. Ha az egység módosítása nélkül szeretné kikapcsolni az életjeleket, állítsa be az `OMNIROUTE_DISABLE_SD_NOTIFY=1` értéket; `NOTIFY_SOCKET` nélkül (terminál, Docker, Electron, Windows) a rendszer nem küld semmit.
+`WatchdogUSec` mutatja a beállított késleltetést, és `WatchdogTimestamp` percenként halad előre. A watchdog által okozott újraindítás `Result=watchdog` ként kerül rögzítésre. A ping kikapcsolásához, miközben a készüléket a jelenlegi állapotában szeretné megtartani, állítsa be `OMNIROUTE_DISABLE_SD_NOTIFY=1`; `NOTIFY_SOCKET` nélkül (terminál, Docker, Electron, Windows) nem kerül elküldésre semmi.
 
-A watchdog csak azt ellenőrzi, hogy az eseményciklus továbbra is fut-e. A lassú, de továbbra is működő kiszolgálót nem indítja újra.
+A watchdog csak azt ellenőrzi, hogy az eseményhurok folyamatosan fut-e. A lassú, de még mindig forgó szerver nem indul újra.
 
-### Opcionális műveletek a kérésfeldolgozási útvonalon (memória, készségek, tokenfrissítés)
+### Választható kérési útvonal munka (memória, készségek, token frissítése)
 
-A memóriakinyerés, a készségek beinjektálása és az OAuth-tokenek frissítése ugyanazt a **fő Node-eseményhurkot** használja, mint a `/healthz`. Ezek az irányítópulton kapcsolható funkciók (`memoryEnabled`, `skillsEnabled`), nem pedig egy feldolgozói készlet. Lásd: [Környezet — az eseményhurok terhelése](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Memóriakivonás, készségek beillesztése és OAuth token frissítése megosztja a** fő Node eseményhurok** `/healthz` vel. Ezek a műszerfal-váltó funkciók (`memoryEnabled`, `skillsEnabled`), nem egy dolgozói csoport. Lásd: [Környezetvédelem — eseményhurok költsége](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
-### Szolgáltató állapota
+### Szolgáltató egészsége
 
-> **Nincs REST-végpont.** A szolgáltatók állapotadatai az `observability_snapshot` MCP-eszközön vagy az irányítópult `/dashboard/providers` oldalán érhetők el.
+> **Nincs REST végpont.** A szolgáltató állapotára vonatkozó adatok a MCP eszköz `observability_snapshot` vagy az irányítópult `/dashboard/providers` oldalon keresztül érhetők el.
 
-### Szolgáltató részletei
+### Szolgáltató adatai
 
-> **Nincs REST-végpont.** Az egyes szolgáltatók részletes adatai az irányítópult `/dashboard/providers` oldalán érhetők el.
+> **Nincs REST végpont.** A szolgáltatónkénti részletek az irányítópult `/dashboard/providers` oldalán érhetők el.
 
 ---
 

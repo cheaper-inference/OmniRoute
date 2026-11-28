@@ -12,25 +12,19 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Prerequisiti
 
-- **Node.js** `>=22.22.2 <23`, oppure `>=24.0.0 <27` (consigliato: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`, o `>=24.0.0 <27` (consigliato: 24 LTS)
+- **npm** 10 +
 
-> **Windows con Node 24:** usa la versione patch LTS corrente della serie 24 (almeno 24.20.0).
-> Le versioni precedenti possono terminare il processo dopo test completati correttamente quando `--test-force-exit` chiude il
-> processo. La [correzione di Windows per libuv](https://github.com/nodejs/node/pull/61999) di Node
-> risolve questo arresto anomalo del runtime; mantieni abilitate le asserzioni dei test e le verifiche di uscita del runner.
+> **Windows con il Nodo 24:** utilizzare l'attuale versione della patch 24 LTS (almeno 24.20.0). Le versioni precedenti possono interrompersi dopo che i test hanno avuto esito positivo quando `--test-force-exit` chiude il processo. [La correzione Windows libuv](https://github.com/nodejs/node/pull/61999) di Node risolve questo arresto anomalo del runtime; mantenere abilitate le asserzioni di test e i controlli di uscita del runner.
 
-> **Utenti di npm v11+ (Node 24+):** dopo `npm install`, verifica che i moduli nativi siano stati installati:
-> `node -e "require('better-sqlite3')"`. Se restituisce `MODULE_NOT_FOUND`,
-> esegui `npm approve-scripts better-sqlite3 && npm install`. Consulta la
-> [Risoluzione dei problemi](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Utenti npm v11 + (nodo 24 +):** Dopo `npm install`, verificare che siano stati installati i moduli nativi: `node -e "require('better-sqlite3')"`. Se fallisce con `MODULE_NOT_FOUND`, esegui `npm approve-scripts better-sqlite3 && npm install`. Vedere [Risoluzione dei problemi](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
-- **Git**
+- **Va bene**
 
-### Clonazione e installazione
+### Clona e installa
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,92 +32,83 @@ npm install
 ### Variabili d'ambiente
 
 ```bash
-# Crea il tuo .env dal modello
+# Create your .env from the template
 cp .env.example .env
 
-# Genera i segreti richiesti
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Variabili chiave per lo sviluppo:
 
-| Variabile              | Valore predefinito per lo sviluppo | Descrizione                  |
-| ---------------------- | ---------------------------------- | ---------------------------- |
-| `PORT`                 | `20128`                            | Porta del server             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | URL di base del frontend     |
-| `JWT_SECRET`           | (genera sopra)                     | Segreto per la firma JWT     |
-| `INITIAL_PASSWORD`     | `CHANGEME`                         | Password del primo accesso   |
-| `APP_LOG_LEVEL`        | `info`                             | Livello di dettaglio dei log |
+| Variabile              | Impostazione predefinita dello sviluppo | Descrizione                      |
+| ---------------------- | --------------------------------------- | -------------------------------- |
+| `PORT`                 | `20128`                                 | Porta del server                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`                | Base URL per il frontend         |
+| `JWT_SECRET`           | (generare sopra)                        | JWT firma segreta                |
+| `INITIAL_PASSWORD`     | `CHANGEME`                              | Prima password di accesso        |
+| `APP_LOG_LEVEL`        | `info`                                  | Registra il livello di verbosità |
 
 ### Impostazioni della dashboard
 
-La dashboard fornisce interruttori nell'interfaccia utente per funzionalità che possono essere configurate anche tramite variabili d'ambiente:
+La dashboard fornisce UI per funzionalità che possono essere configurate anche tramite variabili di ambiente:
 
-| Posizione dell'impostazione | Interruttore                    | Descrizione                                     |
-| --------------------------- | ------------------------------- | ----------------------------------------------- |
-| Settings → Advanced         | Modalità debug                  | Abilita i log delle richieste di debug (UI)     |
-| Settings → General          | Visibilità della barra laterale | Mostra/nasconde le sezioni della barra laterale |
+| Impostazione della posizione | Attiva/disattiva                | Descrizione                                 |
+| ---------------------------- | ------------------------------- | ------------------------------------------- |
+| Impostazioni → Avanzate      | Modalità di debug               | Abilita i log delle richieste di debug (UI) |
+| Impostazioni → Generale      | Visibilità della barra laterale | sezioni della barra laterale Show/hide      |
 
-Queste impostazioni sono archiviate nel database e persistono tra i riavvii, sostituendo i valori predefiniti delle variabili d'ambiente quando impostate.
+Queste impostazioni vengono archiviate nel database e persistono dopo i riavvii, sovrascrivendo le impostazioni predefinite di env var quando impostate.
 
-### Esecuzione in locale
+### Esecuzione locale
 
 ```bash
-# Modalità di sviluppo (ricaricamento automatico)
+# Development mode (hot reload)
 npm run dev
 
-# Build di produzione
-npm run build    # next build → .build/next/ e poi assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Compilazione rapida solo backend/API per le modifiche dei contributori
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Build di rilascio (ricompilazione pulita + sentinel HEAD — richiesto per il deploy)
-npm run build:release   # rm -rf .build dist e poi build + scrive dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Configurazione comune della porta
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-La build per i contributori esegue la validazione della sola compilazione: non assembla la
-distribuzione standalone né crea gli asset nativi opzionali. Usa la normale build di produzione quando
-devi validare il bundle pronto per la distribuzione.
+La build del collaboratore esegue la convalida di sola compilazione: non assembla la distribuzione autonoma né crea risorse di packaging native opzionali. Utilizza la normale build di produzione quando è necessario convalidare il pacchetto spedibile.
 
-### Struttura dell'output della build
+### Crea layout di output
 
-| Directory | Contenuto                                                                            | Tracciata |
-| --------- | ------------------------------------------------------------------------------------ | --------- |
-| `src/`    | Codice sorgente dell'applicazione (TypeScript / TSX)                                 | Sì        |
-| `.build/` | File intermedi — output di `next build` (gitignored, `distDir = .build/next`)        | No        |
-| `dist/`   | Bundle pronto per la distribuzione — assemblato da `assembleStandalone` (gitignored) | No        |
+| Direttorio | Contenuto                                                             | Seguito |
+| ---------- | --------------------------------------------------------------------- | ------- |
+| `src/`     | Origine dell'applicazione (TypeScript / TSX)                          | SÌ      |
+| `.build/`  | Intermedi — `next build` output (gitignored, `distDir = .build/next`) | NO      |
+| `dist/`    | Pacchetto spedibile — assemblato da `assembleStandalone` (gitignored) | NO      |
 
-La pipeline di build è un'unica passata:
+La pipeline di compilazione è un singolo passaggio:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (output di Next.js)
-  └─ assembleStandalone()                 (copia standalone + static + public + asset nativi)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` pulisce inoltre entrambe le directory prima della build e scrive
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) come indicatore di integrità per il deploy.
+`npm run build:release` inoltre pulisce prima entrambe le directory e scrive `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) come sentinella dell'integrità della distribuzione.
 
-`npm run build:contributor` utilizza il profilo di build solo backend. Sostituisce temporaneamente
-i file dell'interfaccia della dashboard con stub durante la build, mantiene i gestori delle route API
-e ripristina i file originali al termine della build. Usa `npm run build` per le modifiche che
-interessano l'interfaccia della dashboard o per la validazione completa del rilascio; il profilo per
-i contributori non sostituisce la build di rilascio.
+`npm run build:contributor` utilizza il profilo di build solo backend. Blocca temporaneamente i file UI del dashboard durante la creazione, mantiene i gestori di percorsi API e ripristina i file originali dopo la compilazione. Utilizza `npm run build` per modifiche che influiscono sulla dashboard UI o per la convalida completa della versione; il profilo del collaboratore non sostituisce la build di rilascio.
 
-> **Nota sul deploy VPS:** la directory remota dell'immagine `/usr/lib/node_modules/omniroute/app/`
-> non viene modificata. Le procedure di deploy eseguono il comando rsync dei contenuti di `dist/` al suo interno.
-> È cambiato solo il percorso dell'output della build all'interno del repository (`app/` → `dist/`).
+> **nota di distribuzione VPS :** la directory delle immagini remote `/usr/lib/node_modules/omniroute/app/` è rimasta invariata. Le abilità di distribuzione sincronizzano i contenuti di `dist/` al suo interno. È stato spostato solo il percorso di output della build in-repo (`app/` → `dist/`).
 
-URL predefiniti:
+URLs predefinito:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **Pannello di controllo** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -433,8 +418,8 @@ Quindi usa le skill `/deploy-vps-*-cc`, che sincronizzano `dist/` tramite rsync 
 
 ## Ottenere aiuto
 
-- **Architettura**: Consulta [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Riferimento API**: Consulta [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Documentazione sulla sicurezza**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Documentazione operativa**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Segnalazioni**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Architettura** : Vedi [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Riferimento** : Vedi [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Documenti sulla sicurezza** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Documenti operativi** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Problemi** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

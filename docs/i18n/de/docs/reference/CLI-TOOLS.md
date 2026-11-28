@@ -4,8 +4,6 @@
 
 ---
 
-Letzte Aktualisierung: 23.08.2026
-
 OmniRoute lässt sich in drei Kategorien von CLI -Tools integrieren, die auf drei spezielle Dashboard-Seiten verteilt sind:
 
 | Seite           | Route                   | Konzept                                                                                | Zählen         |
@@ -224,18 +222,18 @@ interface ToolBatchStatus {
 
 Neue Tools mit `configType: "custom"` verfügen über spezielle Einstellungen API -Routen:
 
-| Route                                       | Werkzeug                                                                     |
-| ------------------------------------------- | ---------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                      |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url Flag)                                                      |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, Legacy)                                       |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primäre + Legacy `~/.deepseek` Synchronisierung) |
-| `POST /api/cli-tools/smelt-settings`        | Stint                                                                        |
-| `POST /api/cli-tools/pi-settings`           | Pi-Codierungsagent (`~/.pi/agent/models.json`, `providers.omniroute`)        |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                        |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + dedizierter `.env` Schlüssel)           |
+| Route                                       | Werkzeug                                                                      |
+| ------------------------------------------- | ----------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                       |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url Flag)                                                       |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, Legacy)                                        |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primäre + Legacy- `~/.deepseek` Synchronisierung) |
+| `POST /api/cli-tools/smelt-settings`        | Stint                                                                         |
+| `POST /api/cli-tools/pi-settings`           | Pi-Codierungsagent (`~/.pi/agent/models.json`, `providers.omniroute`)         |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                         |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + dedizierter `.env` Schlüssel)            |
 
-Alle Routen verwenden `sanitizeErrorMessage()` für Fehlerantworten (harte Regel Nr. 12).
+Alle Routen verwenden `sanitizeErrorMessage()` für Fehlerantworten (harte Regel #12).
 
 ---
 

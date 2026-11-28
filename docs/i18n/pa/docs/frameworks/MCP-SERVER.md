@@ -37,27 +37,29 @@ omniroute mcp restart                                 # resets active sse/stream
 
 `mcp enable`/`mcp disable` PATCH ਉਹੀ `mcpEnabled` (ਅਤੇ ਵਿਕਲਪਿਕ ਤੌਰ 'ਤੇ `mcpTransport`) ਡੈਸ਼ਬੋਰਡ ਨੂੰ `/api/settings` ਰਾਹੀਂ ਟੌਗਲ ਕਰਨਾ ਸੈੱਟ ਕਰਨਾ। `mcp restart` `POST /api/mcp/restart` ਨੂੰ ਕਾਲ ਕਰਦਾ ਹੈ: ਇਹ ਕਿਰਿਆਸ਼ੀਲ `sse`/`streamable-http` ਸੈਸ਼ਨਾਂ ਨੂੰ ਢਾਹ ਦਿੰਦਾ ਹੈ ਤਾਂ ਜੋ ਅਗਲੀ ਬੇਨਤੀ ਸਾਫ਼-ਸੁਥਰੀ ਮੁੜ-ਸ਼ੁਰੂ ਹੋ ਜਾਂਦੀ ਹੈ, `409` ਵਾਪਸ ਕਰਦਾ ਹੈ ਜੇਕਰ MCP ਅਸਮਰੱਥ ਹੈ, ਅਤੇ `stdio` ਟ੍ਰਾਂਸਪੋਰਟ ਲਈ `501` (stdio ਕਲਾਇੰਟਸ ਆਪਣੇ ਖੁਦ ਦੇ ਉਪ-ਪ੍ਰਕਿਰਿਆ — ਨੂੰ ਮੁੜ ਚਾਲੂ ਕਰਨ ਲਈ ਕੋਈ ਇਨ-ਪ੍ਰੋਸੈਸ ਹੈਂਡਲ ਨਹੀਂ ਹੈ)।
 
-## ਟ੍ਰਾਂਸਪੋਰਟ
+## ਆਵਾਜਾਈ
 
-MCP ਸਰਵਰ ਤਿੰਨ ਟ੍ਰਾਂਸਪੋਰਟ ਉਪਲਬਧ ਕਰਦਾ ਹੈ, ਜਿਨ੍ਹਾਂ ਸਭ ਦਾ ਆਧਾਰ ਇੱਕੋ `createMcpServer()` ਫੈਕਟਰੀ ਹੈ:
+MCP ਸਰਵਰ ਤਿੰਨ ਟ੍ਰਾਂਸਪੋਰਟਾਂ ਦਾ ਪਰਦਾਫਾਸ਼ ਕਰਦਾ ਹੈ, ਸਾਰੇ ਇੱਕੋ `createMcpServer()` ਫੈਕਟਰੀ ਦੁਆਰਾ ਸਮਰਥਤ ਹਨ:
 
-| ਟ੍ਰਾਂਸਪੋਰਟ        | ਕਿੱਥੇ                                       | ਕਦੋਂ ਵਰਤਣਾ ਹੈ                                                      |
-| :---------------- | :------------------------------------------ | :----------------------------------------------------------------- |
-| `stdio`           | `open-sse/mcp-server/server.ts`             | IDE ਏਕੀਕਰਨਾਂ ਲਈ (Claude Desktop, Cursor ਆਦਿ)                       |
-| `sse`             | `POST/GET /api/mcp/sse` via `httpTransport` | ਉਹਨਾਂ ਬ੍ਰਾਊਜ਼ਰ/ਏਜੰਟ ਕਲਾਇੰਟਾਂ ਲਈ ਜਿਨ੍ਹਾਂ ਨੂੰ ਇਵੈਂਟ ਸਟ੍ਰੀਮ ਦੀ ਲੋੜ ਹੈ |
-| `streamable-http` | `POST/GET/DELETE /api/mcp/stream`           | ਬਹੁ-ਸੈਸ਼ਨ HTTP ਕਲਾਇੰਟਾਂ ਲਈ (`mcp-session-id` ਹੈਡਰ)                 |
+| ਆਵਾਜਾਈ            | ਜਿੱਥੇ                                        | ਕਦੋਂ ਵਰਤਣਾ ਹੈ                                             |
+| :---------------- | :------------------------------------------- | :-------------------------------------------------------- |
+| `stdio`           | `open-sse/mcp-server/server.ts`              | IDE ਏਕੀਕਰਣ (Claude ਡੈਸਕਟਾਪ, Cursor, ਆਦਿ)                  |
+| `sse`             | `httpTransport` ਦੁਆਰਾ`POST/GET /api/mcp/sse` | Browser/agent ਗਾਹਕ ਜਿਨ੍ਹਾਂ ਨੂੰ ਇੱਕ ਇਵੈਂਟ ਸਟ੍ਰੀਮ ਦੀ ਲੋੜ ਹੈ |
+| `streamable-http` | `POST/GET/DELETE /api/mcp/stream`            | ਮਲਟੀ-ਸੈਸ਼ਨ HTTP ਕਲਾਇੰਟਸ (`mcp-session-id` ਸਿਰਲੇਖ)         |
 
-ਸਰਗਰਮ HTTP ਟ੍ਰਾਂਸਪੋਰਟ (`sse` ਜਾਂ `streamable-http`) ਦੀ ਚੋਣ `mcpTransport` ਸੈਟਿੰਗ ਦੁਆਰਾ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਟ੍ਰਾਂਸਪੋਰਟ ਬਦਲਣ ਨਾਲ ਦੂਜੇ ਟ੍ਰਾਂਸਪੋਰਟ ਉੱਤੇ ਮੌਜੂਦਾ ਸੈਸ਼ਨ ਬੰਦ ਹੋ ਜਾਂਦੇ ਹਨ।
+ਕਿਰਿਆਸ਼ੀਲ HTTP ਟ੍ਰਾਂਸਪੋਰਟ (`sse` ਜਾਂ `streamable-http`) ਨੂੰ `mcpTransport` ਸੈਟਿੰਗ ਦੁਆਰਾ ਚੁਣਿਆ ਜਾਂਦਾ ਹੈ। ਟਰਾਂਸਪੋਰਟਾਂ ਨੂੰ ਬਦਲਣ ਨਾਲ ਦੂਜੇ ਟ੍ਰਾਂਸਪੋਰਟ 'ਤੇ ਮੌਜੂਦਾ ਸੈਸ਼ਨ ਬੰਦ ਹੋ ਜਾਂਦੇ ਹਨ।
 
-### ਰਿਮੋਟ ਪਹੁੰਚ (manage-ਸਕੋਪ ਬਾਈਪਾਸ)
+### ਰਿਮੋਟ ਐਕਸੈਸ (ਮੈਨੇਜ-ਸਕੋਪ ਬਾਈਪਾਸ)
 
-`/api/mcp/*`, LOCAL_ONLY ਪੱਧਰ (`src/server/authz/routeGuard.ts`) ਵਿੱਚ ਹੈ—ਮੂਲ ਰੂਪ ਵਿੱਚ ਸਿਰਫ਼ ਲੂਪਬੈਕ ਹੋਸਟ (`localhost`, `127.0.0.1`, `::1`) ਹੀ ਇਸ ਤੱਕ ਪਹੁੰਚ ਸਕਦੇ ਹਨ। v3.8.2 ਤੋਂ, ਗੈਰ-ਲੂਪਬੈਕ ਕਲਾਇੰਟ ਕਨੈਕਟ ਕਰ ਸਕਦੇ ਹਨ ਜੇ ਉਹ ਅਜਿਹਾ `Authorization: Bearer <api-key>` ਪੇਸ਼ ਕਰਨ ਜਿਸ ਦੀ ਕੁੰਜੀ ਕੋਲ `manage` ਸਕੋਪ ਹੋਵੇ। ਕਿਸੇ ਟਨਲ, ਰਿਵਰਸ ਪ੍ਰਾਕਸੀ ਜਾਂ ਪਬਲਿਕ ਹੋਸਟਨੇਮ ਰਾਹੀਂ ਰਿਮੋਟ MCP ਸਰਵਰ ਤੱਕ ਪਹੁੰਚਣ ਦਾ ਇਹੀ ਇਕਲੌਤਾ ਤਰੀਕਾ ਹੈ।
+`/api/mcp/*` LOCAL_ONLY ਟੀਅਰ (`src/server/authz/routeGuard.ts`) ਵਿੱਚ ਹੈ। ਰੂਟ ਗਾਰਡ ਲੂਪਬੈਕ ਅਤੇ ਭਰੋਸੇਯੋਗ ਪ੍ਰਾਈਵੇਟ-LAN ਸਾਥੀਆਂ ਨੂੰ ਪਛਾਣਦਾ ਹੈ। ਹੋਰ ਕਲਾਇੰਟ ਟ੍ਰਾਂਸਪੋਰਟਾਂ ਤੱਕ ਪਹੁੰਚ ਸਕਦੇ ਹਨ ਜਦੋਂ ਸੰਰਚਿਤ `/api/mcp/` ਬਾਈਪਾਸ ਸਮਰੱਥ ਹੁੰਦਾ ਹੈ ਅਤੇ ਉਹ `mcp:connect`, `manage` ਜਾਂ `admin` ਦੇ ਨਾਲ ਇੱਕ `Authorization: Bearer <api-key>` ਪੇਸ਼ ਕਰਦੇ ਹਨ। ਇੱਕ ਪ੍ਰਮਾਣਿਤ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਵੀ ਇਸ ਬਾਈਪਾਸ ਨੂੰ ਸੰਤੁਸ਼ਟ ਕਰ ਸਕਦਾ ਹੈ।
+
+ਇੱਕ ਰਿਮੋਟ MCP-ਸਿਰਫ ਕਲਾਇੰਟ ਲਈ, `mcp:connect` ਅਤੇ ਲੋੜੀਂਦੇ ਸਾਧਨਾਂ ਦੇ ਸਕੋਪ ਦਿਓ; ਉਦਾਹਰਨ ਲਈ, `mcp:connect` ਅਤੇ `read:health` ਪਰਮਿਟ `omniroute_get_health` ਨੂੰ ਕਨੈਕਟ ਕਰਨ ਅਤੇ ਕਾਲ ਕਰਨ ਲਈ। ਇਕੱਲਾ ਕੁਨੈਕਸ਼ਨ ਸਕੋਪ ਟੂਲ ਓਪਰੇਸ਼ਨਾਂ ਨੂੰ ਅਧਿਕਾਰਤ ਨਹੀਂ ਕਰਦਾ ਹੈ। `manage` ਜਾਂ `admin` ਤੋਂ ਬਿਨਾਂ HTTP/SSE ਕੁੰਜੀਆਂ ਲਈ ਟੂਲ-ਸਕੋਪ ਜਾਂਚ ਲਾਜ਼ਮੀ ਹੈ, `OMNIROUTE_MCP_ENFORCE_SCOPES` ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ।
 
 ```bash
-# manage ਸਕੋਪ ਦਿਓ: ਡੈਸ਼ਬੋਰਡ ਦਾ API Keys ਸਫ਼ਾ ਖੋਲ੍ਹੋ ਅਤੇ ਕੁੰਜੀ ਉੱਤੇ
-# "Management Access" ਨੂੰ ਟੌਗਲ ਕਰੋ, ਜਾਂ ਬਣਾਉਂਦੇ ਸਮੇਂ POST scopes:["manage"] ਕਰੋ।
+# Create an OmniRoute key with mcp:connect and the required tool scopes.
+# A key with manage or admin also passes the remote route gate.
 
-# ਫਿਰ ਕਿਸੇ ਰਿਮੋਟ MCP ਕਲਾਇੰਟ ਤੋਂ ਕਨੈਕਟ ਕਰੋ:
+# Then connect from a remote MCP client:
 curl -i \
   -H "Host: your-public-host.example" \
   -H "Authorization: Bearer sk-…" \
@@ -67,17 +69,17 @@ curl -i \
   https://your-public-host.example/api/mcp/stream
 ```
 
-ਕੋਈ ਗੈਰ-`manage` ਕੁੰਜੀ (ਜਾਂ Bearer ਨਾ ਹੋਣਾ) `403 LOCAL_ONLY` ਵਾਪਸ ਕਰਦੀ ਹੈ। ਨਾਲ ਵਾਲੇ ਪ੍ਰੀਫਿਕਸ `/api/cli-tools/runtime/*` ਨੂੰ ਜਾਣ-ਬੁੱਝ ਕੇ ਬਾਈਪਾਸਯੋਗ ਨਹੀਂ ਬਣਾਇਆ ਗਿਆ—[Route Guard ਪੱਧਰ—Manage-ਸਕੋਪ ਛੋਟ](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) ਵੇਖੋ।
+ਇੱਕ ਬਾਹਰੀ ਕਲਾਇੰਟ ਜੋ ਸਮਰਥਿਤ ਬਾਈਪਾਸ ਨੂੰ ਸੰਤੁਸ਼ਟ ਨਹੀਂ ਕਰ ਸਕਦਾ `403 LOCAL_ONLY` ਵਾਪਸ ਕਰਦਾ ਹੈ। `localOnlyManageScopeBypassEnabled` ਅਯੋਗ ਕਰਨਾ ਜਾਂ `/api/mcp/` ਅਗੇਤਰ ਨੂੰ ਹਟਾਉਣਾ ਪ੍ਰਬੰਧਨ ਕੁੰਜੀ ਲਈ ਵੀ ਬਾਹਰੀ ਰੂਟ ਪਹੁੰਚ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਉਂਦਾ ਹੈ। ਸਿਬਲਿੰਗ ਪ੍ਰੀਫਿਕਸ `/api/cli-tools/runtime/*` ਜਾਣਬੁੱਝ ਕੇ ਬਾਈਪਾਸ ਕਰਨ ਯੋਗ ਨਹੀਂ ਹੈ — [ਰੂਟ ਗਾਰਡ ਟੀਅਰਜ਼ — ਪ੍ਰਬੰਧਨ-ਸਕੋਪ ਕਾਰਵ-ਆਊਟ](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) ਦੇਖੋ।
 
-### Origin ਪ੍ਰਮਾਣਿਕਤਾ
+### ਮੂਲ ਪ੍ਰਮਾਣਿਕਤਾ
 
-ਪ੍ਰਮਾਣੀਕਰਨ ਤੋਂ ਬਾਅਦ `/api/mcp/*` ਨੂੰ ਜਾਣ ਵਾਲੀ ਹਰ ਬੇਨਤੀ — ਟ੍ਰਾਂਸਪੋਰਟ ਅਤੇ `status`, `tools`, `audit`, `restart` ਵਰਗੇ ਪ੍ਰਬੰਧਨ ਰੂਟ — ਦੇ `Origin` ਹੈਡਰ ਦੀ ਜਾਂਚ ਹੁੰਦੀ ਹੈ, ਕਾਲਰ ਭਾਵੇਂ ਕੋਈ ਵੀ ਹੋਵੇ (API ਕੁੰਜੀ, CLI ਟੋਕਨ, ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਜਾਂ ਲੌਗਇਨ ਬੰਦ ਹੋਣ 'ਤੇ ਅਗਿਆਤ loopback)। ਇਹ MCP Streamable HTTP ਨਿਰਧਾਰਨ ਵੱਲੋਂ ਲੋੜੀਂਦੀ DNS rebinding ਸੁਰੱਖਿਆ ਹੈ।
+ਪ੍ਰਮਾਣਿਕਤਾ ਤੋਂ ਬਾਅਦ, ਟਰਾਂਸਪੋਰਟਾਂ ਅਤੇ ਪ੍ਰਬੰਧਨ ਰੂਟਾਂ ਜਿਵੇਂ ਕਿ `status`, `tools`, `audit` ਅਤੇ `restart` — `/api/mcp/*` — ਕਰਨ ਦੀ ਹਰ ਬੇਨਤੀ ਨੂੰ ਇਸਦੇ `Origin` ਸਿਰਲੇਖ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਜੋ ਵੀ ਕਾਲਰ (API ਕੁੰਜੀ, CLI ਟੋਕਨ, ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਜਾਂ ਅਗਿਆਤ ਲੂਪਬੈਕ ਦੇ ਨਾਲ)। ਇਹ DNS-ਰੀਬਾਈਡਿੰਗ ਸੁਰੱਖਿਆ ਹੈ ਜਿਸਦੀ MCP Streamable HTTP ਸਪੇਕ ਦੀ ਲੋੜ ਹੈ।
 
-- **ਕੋਈ `Origin` ਹੈਡਰ ਨਹੀਂ** → ਇਜਾਜ਼ਤ ਹੈ। OmniRoute CLI, SDK ਅਤੇ IDE ਕਲਾਇੰਟ ਇਸਨੂੰ ਨਹੀਂ ਭੇਜਦੇ।
-- **ਮਨਜ਼ੂਰ `Origin`** → ਕਿਸੇ ਵੀ ਪੋਰਟ 'ਤੇ `localhost` / `127.0.0.1` / `[::1]`, ਜਾਂ OmniRoute ਦਾ ਆਪਣਾ ਜਨਤਕ origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, ਭਰੋਸੇਯੋਗ ਰਿਵਰਸ ਪ੍ਰੌਕਸੀ ਵੱਲੋਂ ਫਾਰਵਰਡ ਕੀਤਾ origin (`OMNIROUTE_TRUST_PROXY`, ਸਿਰਫ਼ ਜਦੋਂ base URL ਸੈੱਟ ਨਾ ਹੋਵੇ), ਜਾਂ ਸਿੱਧਾ ਪਹੁੰਚਿਆ loopback/LAN IP ਹੋਸਟ। ਸਿਰਫ਼ `Host` ਹੈਡਰ ਕਦੇ ਵੀ ਕਿਸੇ origin ਨੂੰ ਭਰੋਸੇਯੋਗ ਨਹੀਂ ਬਣਾਉਂਦਾ।
-- **`null` ਸਮੇਤ ਕੋਈ ਵੀ ਹੋਰ `Origin`** → JSON-RPC ਗਲਤੀ ਬਾਡੀ ਨਾਲ `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`। ਵੈਧ CSRF ਟੋਕਨ ਪੇਸ਼ ਕਰਨ ਵਾਲਾ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਹੋਰ ਡੈਸ਼ਬੋਰਡ ਲਿਖਤਾਂ ਵਾਂਗ, ਅਜੇ ਵੀ ਸਵੀਕਾਰ ਹੁੰਦਾ ਹੈ।
+- **`Origin` ਸਿਰਲੇਖ ਨਹੀਂ** → ਦੀ ਇਜਾਜ਼ਤ ਹੈ। OmniRoute CLI, SDK ਅਤੇ IDE ਕਲਾਇੰਟ ਇੱਕ ਨਹੀਂ ਭੇਜਦੇ ਹਨ।
+- **`Origin` ਦੀ ਇਜਾਜ਼ਤ ਹੈ** ਕਿਸੇ ਵੀ ਪੋਰਟ 'ਤੇ → `localhost`, `127.0.0.1` ਜਾਂ `[::1]`, ਜਾਂ OmniRoute ਦਾ ਆਪਣਾ ਜਨਤਕ ਮੂਲ: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, ਇੱਕ ਭਰੋਸੇਯੋਗ ਰਿਵਰਸ ਪ੍ਰੌਕਸੀ ਦਾ ਫਾਰਵਰਡ ਮੂਲ (`OMNIROUTE_TRUST_PROXY`, ਕੇਵਲ ਉਦੋਂ ਜਦੋਂ ਕੋਈ ਅਧਾਰ URL ਸੈੱਟ ਨਾ ਹੋਵੇ), ਜਾਂ ਇੱਕ ਸਿੱਧਾ loopback/LAN IP । ਇਕੱਲਾ `Host` ਸਿਰਲੇਖ ਕਦੇ ਵੀ ਮੂਲ ਨੂੰ ਭਰੋਸੇਯੋਗ ਨਹੀਂ ਬਣਾਉਂਦਾ।
+- **ਕੋਈ ਹੋਰ `Origin`, `null` ਸਮੇਤ** ਇੱਕ JSON-RPC ਤਰੁੱਟੀ ਬਾਡੀ ਦੇ ਨਾਲ → `403` : `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. ਇੱਕ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਜੋ ਇੱਕ ਵੈਧ CSRF ਟੋਕਨ ਪੇਸ਼ ਕਰਦਾ ਹੈ, ਅਜੇ ਵੀ ਸਵੀਕਾਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਜਿਵੇਂ ਕਿ ਦੂਜੇ ਡੈਸ਼ਬੋਰਡ ਰਾਈਟਸ ਲਈ।
 
-ਰਿਵਰਸ ਪ੍ਰੌਕਸੀ ਪਿੱਛੇ ਪਰੋਸੇ ਜਾਂਦੇ ਬ੍ਰਾਊਜ਼ਰ MCP ਕਲਾਇੰਟ ਨੂੰ `OMNIROUTE_PUBLIC_BASE_URL` ਚਾਹੀਦਾ ਹੈ; ਹੋਰ origins ਲਈ ਕੋਈ ਇਜਾਜ਼ਤ-ਸੂਚੀ ਨਹੀਂ। CORS ਪ੍ਰੀਫਲਾਈਟ (`OPTIONS`) ਦੀ Origin ਜਾਂਚ ਨਹੀਂ ਹੁੰਦੀ; ਉਸ ਤੋਂ ਬਾਅਦ ਵਾਲੀ ਬੇਨਤੀ ਦੀ ਹੁੰਦੀ ਹੈ।
+ਇੱਕ ਬ੍ਰਾਊਜ਼ਰ MCP ਕਲਾਇੰਟ ਨੂੰ ਰਿਵਰਸ ਪ੍ਰੌਕਸੀ `OMNIROUTE_PUBLIC_BASE_URL` ਦੀ ਲੋੜ ਹੈ; ਹੋਰ ਮੂਲ ਲਈ ਕੋਈ ਇਜਾਜ਼ਤ-ਸੂਚੀ ਨਹੀਂ ਹੈ। CORS ਪ੍ਰੀਫਲਾਈਟ (`OPTIONS`) ਮੂਲ-ਜਾਂਚ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ; ਹੇਠ ਦਿੱਤੀ ਬੇਨਤੀ ਹੈ.
 
 ## IDE ਸੰਰਚਨਾ
 
@@ -288,7 +290,7 @@ MCP ਟੂਲ ਕਾਲ ਕਾਲਰ ਤੋਂ ਸਕੋਪ ਸਤਰ ਪੜ੍�
 
 ### ਤਿੰਨ ਦਾਇਰੇ ਵਾਲੇ ਨਾਮ-ਸਥਾਨਾਂ
 
-ਇੱਕ API ਕੁੰਜੀ ਉੱਤੇ`manage`, ਇੱਕ MCP ਟੂਲ ਉੱਤੇ `read:compression`, ਅਤੇ ਇੱਕ `oma_live_…` ਐਕਸੈਸ ਟੋਕਨ ਉੱਤੇ `read` ਤਿੰਨ ਵੱਖ-ਵੱਖ ਗ੍ਰਾਂਟਾਂ ਹਨ। ਕਾਲਰ ਜੋ ਇੱਕ ਪਰਿਵਰਤਨ ਪ੍ਰਬੰਧਨ ਰੂਟ ਤੇ ਇੱਕ `read` ਪਹੁੰਚ ਟੋਕਨ ਭੇਜਦੇ ਹਨ ਉਹਨਾਂ ਨੂੰ HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` ਮਿਲਦਾ ਹੈ ਉਹ ਰੈਂਕ `scopeSatisfies` ਹੈ। ਇਹ MCP ਸਾਰਣੀ ਨਾਲ ਸਲਾਹ ਨਹੀਂ ਕਰਦਾ, ਅਤੇ MCP ਮੈਚਰ ਇਸ ਨਾਲ ਸਲਾਹ ਨਹੀਂ ਕਰਦਾ.
+ਇੱਕ API ਕੁੰਜੀ ਉੱਤੇ`manage`, ਇੱਕ MCP ਟੂਲ ਉੱਤੇ `read:compression`, ਅਤੇ ਇੱਕ `oma_live_…` ਐਕਸੈਸ ਟੋਕਨ ਉੱਤੇ `read` ਤਿੰਨ ਵੱਖ-ਵੱਖ ਗ੍ਰਾਂਟਾਂ ਹਨ। ਕਾਲਰ ਜੋ ਇੱਕ ਪਰਿਵਰਤਨ ਪ੍ਰਬੰਧਨ ਰੂਟ ਤੇ ਇੱਕ `read` ਪਹੁੰਚ ਟੋਕਨ ਭੇਜਦੇ ਹਨ ਉਹਨਾਂ ਨੂੰ HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` ਮਿਲਦਾ ਹੈ ਉਹ ਰੈਂਕ `scopeSatisfies` ਹੈ। ਇਹ MCP ਸਾਰਣੀ ਨਾਲ ਸਲਾਹ ਨਹੀਂ ਕਰਦਾ, ਅਤੇ MCP ਮੈਚਰ ਇਸ ਨਾਲ ਸਲਾਹ ਨਹੀਂ ਕਰਦਾ।
 
 | ਨੇਮਸਪੇਸ           | ਪ੍ਰਮਾਣ-ਪੱਤਰ                                                             | ਚੈਕਰ              | ਇੱਕ ਪਾਸ ਆਗਿਆ ਦਿੰਦਾ ਹੈ                                      |
 | :---------------- | :---------------------------------------------------------------------- | :---------------- | :--------------------------------------------------------- |
@@ -297,7 +299,7 @@ MCP ਟੂਲ ਕਾਲ ਕਾਲਰ ਤੋਂ ਸਕੋਪ ਸਤਰ ਪੜ੍�
 | MCP ਟੂਲ ਸਕੋਪ      | ਸਮਾਨ ਐਰੇ, else MCP `_meta` (ਸਿਰਫ਼HTTP/SSE ), ਹੋਰ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`    | ਉਹ ਟੂਲ, ਜਦੋਂ ਲਾਗੂ ਕਰਨਾ ਚਾਲੂ ਹੁੰਦਾ ਹੈ                       |
 | ਪਹੁੰਚ ਟੋਕਨ        | `oma_live_…`                                                            | `scopeSatisfies`  | ਪ੍ਰਬੰਧਨ ਰੂਟ ਜਿਸਦੀ ਵਿਧੀ ਅਤੇ ਮਾਰਗ ਲਈ ਉਸ ਦਰਜੇ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ |
 
-[ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣਿਕਤਾ](../guides/MANAGEMENT-AUTH.md) ਵਿੱਚ ਹਰੇਕ ਪ੍ਰਮਾਣ-ਪੱਤਰ ਨੂੰ ਮਿਨਟਿੰਗ ਕਰਨਾ ਸ਼ਾਮਲ ਹੈ।
+[ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣਿਕਤਾ](../guides/MANAGEMENT-AUTH.md) ਵਿੱਚ ਹਰੇਕ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਨੂੰ ਮਿਨਟਿੰਗ ਕਰਨਾ ਸ਼ਾਮਲ ਹੈ।
 
 #### API-ਕੁੰਜੀ ਸਕੋਪ
 
@@ -316,26 +318,26 @@ MCP ਟੂਲ ਕਾਲ ਕਾਲਰ ਤੋਂ ਸਕੋਪ ਸਤਰ ਪੜ੍�
 
 #### ਮੇਲ ਖਾਂਦਾ ਹੈ
 
-ਕੈਟਾਲਾਗ [MCP ਟੂਲ ਸਕੋਪ](#mcp-tool-scopes) ਦੇ ਅਧੀਨ ਸਾਰਣੀ ਹੈ। `src/shared/constants/mcpScopes.ts` ਵਿੱਚ `MCP_SCOPE_LIST` ਉਸ ਕੈਟਾਲਾਗ ਵਜੋਂ ਨਾ ਮੰਨੋ: ਇਹ ਮੂਲ ਟਾਈਪ ਕੀਤਾ ਸਬਸੈੱਟ ਹੈ। ਬਾਅਦ ਵਿੱਚ ਟੂਲ ਇਸਦੇ ਨਾਲ ਹੋਰ ਸਕੋਪਾਂ ਦਾ ਐਲਾਨ ਕਰਦੇ ਹਨ (`read:notion`, `read:skills`, `read:local-corpus`, ਅਤੇ ਬਾਕੀ ਟੇਬਲ)।
+ਕੈਟਾਲਾਗ [MCP ਟੂਲ ਸਕੋਪ](#mcp-tool-scopes) ਦੇ ਅਧੀਨ ਸਾਰਣੀ ਹੈ। `src/shared/constants/mcpScopes.ts` ਵਿੱਚ `MCP_SCOPE_LIST` ਉਸ ਕੈਟਾਲਾਗ ਵਜੋਂ ਨਾ ਮੰਨੋ: ਇਹ ਮੂਲ ਟਾਈਪ ਕੀਤਾ ਸਬਸੈੱਟ ਹੈ। ਬਾਅਦ ਵਿੱਚ ਟੂਲ ਇਸਦੇ ਨਾਲ ਹੋਰ ਸਕੋਪਾਂ ਦੀ ਘੋਸ਼ਣਾ ਕਰਦੇ ਹਨ (`read:notion`, `read:skills`, `read:local-corpus`, ਅਤੇ ਬਾਕੀ ਟੇਬਲ)।
 
 `open-sse/mcp-server/scopeEnforcement.ts` ਵਿੱਚ `evaluateToolScopes` ਇੱਕ ਕਾਲ ਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦਾ ਹੈ ਜਦੋਂ ਹਰ ਲੋੜੀਂਦਾ ਸਕੋਪ ਕੁਝ ਦਿੱਤੇ ਗਏ ਸਕੋਪ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ:
 
 - `*` ਹਰ ਲੋੜੀਂਦੇ ਦਾਇਰੇ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ।
 - ਇੱਕ ਪ੍ਰਵਾਨਿਤ ਸਕੋਪ ਜੋ `*` ਵਿੱਚ ਖਤਮ ਹੁੰਦਾ ਹੈ ਇੱਕ ਲੋੜੀਂਦੇ ਸਕੋਪ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ ਜੋ ਸਟਾਰ ਤੋਂ ਪਹਿਲਾਂ ਅਗੇਤਰ ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ। `read:*` `read:compression` ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ।
-- ਹਰ ਦੂਜੀ ਦਿੱਤੀ ਗਈ ਸਕੋਪ ਸਿਰਫ਼ ਇੱਕੋ ਜਿਹੀ ਲੋੜੀਂਦੀ ਸਤਰ ਨਾਲ ਮੇਲ ਖਾਂਦੀ ਹੈ।
+- ਹਰ ਦੂਜਾ ਦਿੱਤਾ ਗਿਆ ਸਕੋਪ ਸਿਰਫ਼ ਸਮਾਨ ਲੋੜੀਂਦੀ ਸਤਰ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ।
 
-ਇੱਕ ਕੁੰਜੀ ਜਿਸਦਾ ਸਕੋਪ `["manage"]` ਹੈ `read:compression` ਲਈ `scopeMatches` ਫੇਲ ਹੋ ਜਾਂਦਾ ਹੈ। ਉਹੀ ਕਾਲ `admin`, `mcp:connect`, `read`, ਅਤੇ `write` ਲਈ ਫੇਲ ਹੋ ਜਾਂਦੀ ਹੈ ਜਦੋਂ ਇਹ ਸਿਰਫ਼ ਦਿੱਤੀਆਂ ਗਈਆਂ ਸਤਰ ਹੁੰਦੀਆਂ ਹਨ। ਟਰੇਲਿੰਗ `*` ਤੋਂ ਪਰੇ MCP ਟੂਲ ਸਕੋਪਾਂ ਵਿੱਚ ਕੋਈ ਲੜੀ ਨਹੀਂ ਹੈ।
+ਇੱਕ ਕੁੰਜੀ ਜਿਸਦਾ ਸਕੋਪ `["manage"]` ਹੈ `read:compression` ਲਈ `scopeMatches` ਫੇਲ ਹੋ ਜਾਂਦਾ ਹੈ। ਉਹੀ ਕਾਲ `admin`, `mcp:connect`, `read`, ਅਤੇ `write` ਲਈ ਫੇਲ ਹੋ ਜਾਂਦੀ ਹੈ ਜਦੋਂ ਉਹ ਸਿਰਫ਼ ਪ੍ਰਦਾਨ ਕੀਤੀਆਂ ਸਟ੍ਰਿੰਗਾਂ ਹੁੰਦੀਆਂ ਹਨ। ਟਰੇਲਿੰਗ `*` ਤੋਂ ਪਰੇ MCP ਟੂਲ ਸਕੋਪਾਂ ਵਿੱਚ ਕੋਈ ਲੜੀ ਨਹੀਂ ਹੈ।
 
-ਜਦੋਂ ਤੱਕ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (ਡਿਫਾਲਟ `false`) ਨਹੀਂ ਹੁੰਦਾ, ਲਾਗੂ ਕਰਨਾ ਬੰਦ ਹੈ। ਜਦੋਂ ਇਹ ਬੰਦ ਹੁੰਦਾ ਹੈ, `evaluateToolScopes` ਕਾਲ ਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦਾ ਹੈ ਅਤੇ ਕੈਟਾਲਾਗ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ। ਜਦੋਂ ਇਹ ਚਾਲੂ ਹੁੰਦਾ ਹੈ, HTTP ਬੇਅਰਰ ਕੁੰਜੀ ਦੇ `api_keys.scopes` `authInfo` ਵਜੋਂ ਵਰਤਦਾ ਹੈ ( [ਪਰ-ਕੀ HTTP ਸਕੋਪ ਬਾਈਡਿੰਗ](#per-key-http-scope-binding-7895) ਦੇਖੋ)। ਜਦੋਂ ਕੋਈ ਵੀ ਮੁੱਖ ਸਕੋਪ ਹੱਲ ਨਹੀਂ ਹੁੰਦਾ, ਤਾਂ ਅਨੁਦਾਨ ਸੈੱਟ MCP `_meta` (ਕੇਵਲ HTTP/SSE ਕਾਲਰਾਂ ਲਈ ਸਨਮਾਨਤ, ਇੱਕ HTTP ਪ੍ਰਮਾਣਿਕਤਾ ਸੰਦਰਭ ਦੇ ਅੰਦਰ; ਇੱਕ stdio ਕਾਲਰ ਦੇ `_meta` ਅਣਡਿੱਠ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਕਿਉਂਕਿ ਕਲਾਇੰਟ ਇਸ ਨੂੰ ਨਿਯੰਤਰਿਤ ਕਰਦਾ ਹੈ ਅਤੇ ਇਹ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਨਹੀਂ ਰੱਖਦਾ ਹੈ), ਫਿਰ `OMNIROUTE_MCP_SCOPES`.
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` ਵਿਸ਼ਵ ਪੱਧਰ 'ਤੇ ਲਾਗੂ ਕਰਨ ਨੂੰ ਸਮਰੱਥ ਬਣਾਉਂਦਾ ਹੈ (ਡਿਫਾਲਟ `false`)। ਜਦੋਂ ਵੀ HTTP/SSE `authInfo` ਤੋਂ ਇੱਕ ਕੁੰਜੀ ਦੇ ਸਕੋਪਾਂ ਨੂੰ ਹੱਲ ਕਰਦਾ ਹੈ ਅਤੇ ਕੁੰਜੀ ਵਿੱਚ `manage` ਜਾਂ `admin` ਘਾਟ ਹੁੰਦੀ ਹੈ, ਤਾਂ ਲਾਗੂ ਕਰਨਾ ਲਾਜ਼ਮੀ ਹੁੰਦਾ ਹੈ, ਲੂਪਬੈਕ ਉੱਤੇ ਕੀਤੀਆਂ ਬੇਨਤੀਆਂ ਸਮੇਤ। ਬਾਕੀ ਬਚੇ ਵਹਾਅ ਵਿੱਚ, ਗਲੋਬਲ ਫਲੈਗ ਕੰਟਰੋਲ ਕਰਦਾ ਹੈ ਕਿ ਕੀ `evaluateToolScopes` ਕੈਟਾਲਾਗ ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ। HTTP/SSE ਬੇਅਰਰ ਕੁੰਜੀ ਦੇ `api_keys.scopes` ਨੂੰ ਉਸ ਫਲੈਗ ਤੋਂ ਸੁਤੰਤਰ ਤੌਰ 'ਤੇ `authInfo` ਨਾਲ ਬੰਨ੍ਹਦਾ ਹੈ ( [ਪਰ-ਕੀ HTTP ਸਕੋਪ ਬਾਈਡਿੰਗ](#per-key-http-scope-binding-7895) ਦੇਖੋ)। ਜਦੋਂ ਕੋਈ ਮੁੱਖ ਸਕੋਪ ਹੱਲ ਨਹੀਂ ਹੁੰਦਾ, ਤਾਂ ਅਨੁਦਾਨ ਸੈੱਟ MCP `_meta` (ਕੇਵਲ HTTP/SSE ਕਾਲਰਾਂ ਲਈ ਸਨਮਾਨਤ, ਇੱਕ HTTP ਪ੍ਰਮਾਣਿਕਤਾ ਸੰਦਰਭ ਵਿੱਚ; ਇੱਕ stdio ਕਾਲਰ ਦੇ `_meta` ਅਣਡਿੱਠ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਕਿਉਂਕਿ ਕਲਾਇੰਟ ਇਸ ਨੂੰ ਨਿਯੰਤਰਿਤ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸ ਵਿੱਚ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਨਹੀਂ ਹੁੰਦੀ ਹੈ), ਫਿਰ `OMNIROUTE_MCP_SCOPES`.
 
 #### ਪਹੁੰਚ-ਟੋਕਨ ਸਕੋਪ
 
-`oma_live_…` ਟੋਕਨ (`src/lib/accessTokens/scopes.ts`) `read`, `write`, ਜਾਂ `admin` ਲੈ ਕੇ ਜਾਂਦੇ ਹਨ। `scopeSatisfies` ਇੱਕ ਰੈਂਕ ਹੈ: `admin` `write` ਅਤੇ `read` ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ, ਅਤੇ `write` `read` ਕਵਰ ਕਰਦਾ ਹੈ। ਅਗਿਆਤ ਸਕੋਪ ਕੁਝ ਵੀ ਕਵਰ ਨਹੀਂ ਕਰਦੇ।
+`oma_live_…` ਟੋਕਨ (`src/lib/accessTokens/scopes.ts`) `read`, `write`, ਜਾਂ `admin` ਲੈ ਕੇ ਜਾਂਦੇ ਹਨ। `scopeSatisfies` ਇੱਕ ਦਰਜਾ ਹੈ: `admin` `write` ਅਤੇ `read` ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ, ਅਤੇ `write` `read` ਕਵਰ ਕਰਦਾ ਹੈ। ਅਗਿਆਤ ਸਕੋਪ ਕੁਝ ਵੀ ਕਵਰ ਨਹੀਂ ਕਰਦੇ।
 
 `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ਉਸ ਦਰਜੇ ਦੀ `inferRequiredScope` (`src/server/authz/accessScopes.ts`) ਨਾਲ ਤੁਲਨਾ ਕਰਦਾ ਹੈ :
 
 - `GET`, `HEAD`, ਅਤੇ `OPTIONS` `read` ਲੋੜ ਹੈ।
-- ਹਰ ਦੂਜੇ ਢੰਗ ਲਈ `write` ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।
+- ਹਰ ਦੂਜੇ ਢੰਗ ਲਈ `write` ਲੋੜ ਹੁੰਦੀ ਹੈ।
 - `ADMIN_SCOPE_PREFIXES` ਵਿੱਚ ਮਾਰਗਾਂ ਨੂੰ ਹਰ ਵਿਧੀ ਲਈ `admin` ਲੋੜ ਹੁੰਦੀ ਹੈ। `/api/mcp` ਉਸ ਸੂਚੀ ਵਿੱਚ ਹੈ, ਇਸਲਈ ਇੱਕ `write` ਪਹੁੰਚ ਟੋਕਨ ਅਜੇ ਵੀ MCP HTTP ਸਤਹ ਨੂੰ ਕਾਲ ਨਹੀਂ ਕਰ ਸਕਦਾ ਹੈ।
 - `ADMIN_MUTATION_PREFIXES` ਵਿੱਚ ਮਾਰਗਾਂ ਨੂੰ ਸਿਰਫ ਪਰਿਵਰਤਨ ਲਈ `admin` ਲੋੜ ਹੁੰਦੀ ਹੈ।
 - `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) ਵਿੱਚ ਮਾਰਗਾਂ ਨੂੰ ਸਿਰਫ਼ ਮਿਊਟੇਸ਼ਨਾਂ ਲਈ `admin` ਲੋੜ ਹੁੰਦੀ ਹੈ, ਅਤੇ ਸਿਰਫ਼ ਉਸੇ ਸਹੀ ਮਾਰਗ 'ਤੇ — ਹੋਰ `/api/settings/*` ਉਪ-ਮਾਰਗ `write` ਰੱਖਦੇ ਹਨ।
@@ -388,31 +390,31 @@ MCP ਟੂਲ ਕਾਲ ਕਾਲਰ ਤੋਂ ਸਕੋਪ ਸਤਰ ਪੜ੍�
 
 ### `mcp:connect` — ਤੰਗ ਰੂਟ ਸਮਰੱਥਾ (#7895)
 
-ਗੈਰ-ਲੂਪਬੈਕ ਤੋਂ HTTP/SSE MCP ਟ੍ਰਾਂਸਪੋਰਟ (`/api/mcp/*`) ਤੱਕ ਪਹੁੰਚਣ ਲਈ `/api/mcp/` LOCAL_ONLY ਕਾਰਵ-ਆਊਟ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ (ਵੇਖੋ `docs/security/ROUTE_GUARD_TIERS.md`)। ਇਤਿਹਾਸਕ ਤੌਰ 'ਤੇ ਕਿ ਕਾਰਵ-ਆਊਟ ਨੇ ਸਿਰਫ਼ ਇੱਕ ਕਾਲਰ ਲਈ ਇੱਕ ਪੂਰੀ `manage`/`admin` -scope API ਕੁੰਜੀ — ਸਵੀਕਾਰ ਕੀਤਾ ਹੈ ਜਿਸਨੂੰ ਸਿਰਫ਼ MCP ਨਾਲ ਗੱਲ ਕਰਨ ਦੀ ਲੋੜ ਹੈ। `src/shared/constants/managementScopes.ts` ਹੁਣ `MCP_CONNECT_SCOPE = "mcp:connect"` ਨੂੰ ਨਿਰਯਾਤ ਕਰਦਾ ਹੈ: ਇੱਕ ਜੋੜਨ ਵਾਲਾ, ਤੰਗ ਸਕੋਪ ( `SELF_USAGE_SCOPE` ਵਾਂਗ ਹੀ ਪੂਰਵ) ਜੋ `src/server/authz/policies/management.ts` — ਵਿੱਚ ONLY `/api/mcp/` ਬਾਈਪਾਸ ਦਾ ਅਧਿਕਾਰ ਦਿੰਦਾ ਹੈ ਇਹ ਕੋਈ ਹੋਰ ਪ੍ਰਬੰਧਨ-ਰੂਟ ਪਹੁੰਚ ਨਹੀਂ ਦਿੰਦਾ ਹੈ ਅਤੇ ਜਾਣਬੁੱਝ ਕੇ `MANAGEMENT_API_KEY_SCOPES` ਦਾ OUT ਰੱਖਿਆ ਜਾਂਦਾ ਹੈ। `manage`/`admin` ਰੱਖਣ ਵਾਲੀ ਇੱਕ ਕੁੰਜੀ ਅਜੇ ਵੀ ਕਾਰਵ-ਆਊਟ ਨੂੰ ਬਿਨਾਂ ਕਿਸੇ ਬਦਲਾਅ ਦੇ ਪਾਸ ਕਰਦੀ ਹੈ; `mcp:connect` ਰਿਮੋਟ MCP-ਸਿਰਫ ਕਾਲਰਾਂ ਲਈ ਇੱਕ ਘੱਟ-ਅਧਿਕਾਰ ਵਾਲਾ ਵਿਕਲਪ ਹੈ, `hasMcpConnectOrManageScope()` ਦੁਆਰਾ ਜਾਂਚਿਆ ਜਾਂਦਾ ਹੈ।
+ਬਾਹਰਲੇ ਲੂਪਬੈਕ ਜਾਂ ਭਰੋਸੇਮੰਦ LAN ਤੋਂ HTTP/SSE MCP ਟ੍ਰਾਂਸਪੋਰਟ (`/api/mcp/*`) ਤੱਕ ਪਹੁੰਚਣ ਲਈ `/api/mcp/` LOCAL_ONLY ਕਾਰਵ-ਆਊਟ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ ( ਦੇਖੋ `docs/security/ROUTE_GUARD_TIERS.md`)। ਇਤਿਹਾਸਕ ਤੌਰ 'ਤੇ ਕਿ ਕਾਰਵ-ਆਊਟ ਨੇ ਸਿਰਫ਼ ਇੱਕ ਕਾਲਰ ਲਈ ਇੱਕ ਪੂਰੀ `manage`/`admin` -scope API ਕੁੰਜੀ — ਸਵੀਕਾਰ ਕੀਤਾ ਹੈ, ਜਿਸਨੂੰ ਸਿਰਫ਼ MCP ਨਾਲ ਗੱਲ ਕਰਨ ਦੀ ਲੋੜ ਹੈ। `src/shared/constants/managementScopes.ts` ਹੁਣ `MCP_CONNECT_SCOPE = "mcp:connect"` ਨੂੰ ਨਿਰਯਾਤ ਕਰਦਾ ਹੈ: ਇੱਕ ਐਡਿਟਿਵ, ਤੰਗ ਸਕੋਪ ( `SELF_USAGE_SCOPE` ਵਾਂਗ ਹੀ ਪੂਰਵ) ਜੋ `src/server/authz/policies/management.ts` — ਵਿੱਚ ONLY ਨੂੰ `/api/mcp/` ਬਾਈਪਾਸ ਨੂੰ ਅਧਿਕਾਰਤ ਕਰਦਾ ਹੈ ਇਹ ਕੋਈ ਹੋਰ ਪ੍ਰਬੰਧਨ-ਰੂਟ ਪਹੁੰਚ ਨਹੀਂ ਦਿੰਦਾ ਹੈ ਅਤੇ ਜਾਣਬੁੱਝ ਕੇ `MANAGEMENT_API_KEY_SCOPES` ਦਾ OUT ਰੱਖਿਆ ਜਾਂਦਾ ਹੈ। ਇੱਕ ਕੁੰਜੀ ਹੋਲਡਿੰਗ `manage`/`admin` ਅਜੇ ਵੀ ਕਾਰਵ-ਆਊਟ ਨੂੰ ਬਿਨਾਂ ਕਿਸੇ ਬਦਲਾਅ ਦੇ ਪਾਸ ਕਰਦੀ ਹੈ; `mcp:connect` ਰਿਮੋਟ MCP-ਸਿਰਫ ਕਾਲਰਾਂ ਲਈ ਇੱਕ ਘੱਟ-ਅਧਿਕਾਰ ਵਾਲਾ ਵਿਕਲਪ ਹੈ, `hasMcpConnectOrManageScope()` ਦੁਆਰਾ ਜਾਂਚਿਆ ਜਾਂਦਾ ਹੈ।
 
 ### ਪ੍ਰਤੀ-ਕੁੰਜੀ HTTP ਸਕੋਪ ਬਾਈਡਿੰਗ (#7895)
 
-HTTP/SSE ਉੱਤੇ, `open-sse/mcp-server/httpTransport.ts` ਹੁਣ ਕਾਲਰ ਦੇ ਅਸਲੀ `api_keys.scopes` `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) ਰਾਹੀਂ ਹੱਲ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸਨੂੰ MCP SDK ਦੇ `transport.handleRequest(req, { authInfo })` ਵਿੱਚ ਭੇਜਦਾ ਹੈ, ਇਸਲਈ `extra.authInfo.scopes` ਹਰ ਟੂਲ ਕਾਲ ਤੱਕ ਪਹੁੰਚਣਾ ਬੇਅਰਰ ਕੁੰਜੀ ਦੇ ਆਪਣੇ ਸਕੋਪਾਂ ਨੂੰ ਦਰਸਾਉਂਦਾ ਹੈ। `scopeEnforcement.ts` ਦੇ `resolveCallerScopeContext()` ਨੇ ਪਹਿਲਾਂ ਹੀ `_meta` ਅਤੇ `OMNIROUTE_MCP_SCOPES` env ਫਾਲਬੈਕ — ਤੇ `authInfo` ਤਰਜੀਹ ਦਿੱਤੀ ਹੈ, ਇਹ ਸਿਰਫ ਉਸ ਪਹਿਲੇ, ਉੱਚ-ਪ੍ਰਾਥਮਿਕ ਸਰੋਤ ਨੂੰ ਭਰਦਾ ਹੈ, ਜਿਸ ਨੂੰ ਪਹਿਲਾਂ HTTP ਤੇ ਅਣਗੌਲਿਆ ਗਿਆ ਸੀ। ਜਦੋਂ ਕੋਈ API ਕੁੰਜੀ ਹੱਲ ਨਹੀਂ ਕਰਦੀ (ਕੋਈ ਸਿਰਲੇਖ, ਅਵੈਧ ਕੁੰਜੀ ਨਹੀਂ), `authInfo` `undefined` ਰਹਿੰਦਾ ਹੈ ਅਤੇ ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਮੌਜੂਦਾ `meta`/env ਚੇਨ ਵਿੱਚ ਬਦਲਿਆ ਨਹੀਂ ਜਾਂਦਾ ਹੈ। stdio ਦੀ ਕੋਈ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਨਹੀਂ ਹੈ ( `mcpCallerIdentity.ts` ਦੇਖੋ) ਅਤੇ ਪ੍ਰਤੀ-ਕੁੰਜੀ ਬਾਈਡਿੰਗ — ਦੁਆਰਾ ਪ੍ਰਭਾਵਿਤ ਨਹੀਂ ਹੈ ਇਹ `_meta` ਕਦਮ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ (`_meta` ਸਿਰਫ ਇੱਕ HTTP ਪ੍ਰਮਾਣਿਕਤਾ ਸੰਦਰਭ, #15159 ਦੇ ਅੰਦਰ ਸਨਮਾਨਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ) ਅਤੇ ਕੇਵਲ `OMNIROUTE_MCP_SCOPES` env ਕੁੰਜੀ ਤੋਂ ਹੱਲ ਹੁੰਦਾ ਹੈ।
+HTTP/SSE ਉੱਤੇ, `open-sse/mcp-server/httpTransport.ts` ਹੁਣ ਕਾਲਰ ਦੇ ਅਸਲੀ `api_keys.scopes` `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) ਰਾਹੀਂ ਹੱਲ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸਨੂੰ MCP SDK ਦੇ `transport.handleRequest(req, { authInfo })` ਵਿੱਚ ਭੇਜਦਾ ਹੈ, ਇਸਲਈ `extra.authInfo.scopes` ਹਰ ਟੂਲ ਕਾਲ ਤੱਕ ਪਹੁੰਚਣਾ ਬੇਅਰਰ ਕੁੰਜੀ ਦੇ ਆਪਣੇ ਸਕੋਪਾਂ ਨੂੰ ਦਰਸਾਉਂਦਾ ਹੈ। `scopeEnforcement.ts` ਦੇ `resolveCallerScopeContext()` ਨੇ ਪਹਿਲਾਂ ਹੀ `_meta` ਅਤੇ `OMNIROUTE_MCP_SCOPES` env ਫਾਲਬੈਕ — ਤੇ `authInfo` ਤਰਜੀਹ ਦਿੱਤੀ ਹੈ, ਇਹ ਸਿਰਫ ਉਸ ਪਹਿਲੇ, ਉੱਚ-ਪ੍ਰਾਥਮਿਕ ਸਰੋਤ ਨੂੰ ਭਰਦਾ ਹੈ, ਜਿਸ ਨੂੰ ਪਹਿਲਾਂ HTTP ਤੇ ਅਣਗੌਲਿਆ ਗਿਆ ਸੀ। ਜਦੋਂ ਕੋਈ API ਕੁੰਜੀ ਹੱਲ ਨਹੀਂ ਕਰਦੀ (ਕੋਈ ਸਿਰਲੇਖ, ਅਵੈਧ ਕੁੰਜੀ ਨਹੀਂ), `authInfo` `undefined` ਰਹਿੰਦਾ ਹੈ ਅਤੇ ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਮੌਜੂਦਾ `meta`/env ਚੇਨ ਵਿੱਚ ਬਦਲਿਆ ਨਹੀਂ ਜਾਂਦਾ ਹੈ। stdio ਦੀ ਕੋਈ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਨਹੀਂ ਹੈ ( `mcpCallerIdentity.ts` ਦੇਖੋ) ਅਤੇ ਪ੍ਰਤੀ-ਕੁੰਜੀ ਬਾਈਡਿੰਗ — ਦੁਆਰਾ ਪ੍ਰਭਾਵਿਤ ਨਹੀਂ ਹੈ ਇਹ `_meta` ਸਟੈਪ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ (`_meta` ਸਿਰਫ ਇੱਕ HTTP ਪ੍ਰਮਾਣਿਕਤਾ ਸੰਦਰਭ, #15159 ਵਿੱਚ ਸਨਮਾਨਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ) ਅਤੇ ਸਿਰਫ਼ `OMNIROUTE_MCP_SCOPES` env ਕੁੰਜੀ ਤੋਂ ਹੱਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
 
-**`OMNIROUTE_MCP_ENFORCE_SCOPES` ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ ਤੰਗ-ਸਕੋਪ ਵਾਲੇ HTTP/SSE ਕਾਲਰਾਂ ਲਈ ਲਾਗੂ ਕਰਨ ਲਈ ਮਜਬੂਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।** `OMNIROUTE_MCP_ENFORCE_SCOPES` ਨੂੰ `false` ਲਈ ਡਿਫਾਲਟ ਕਰਨਾ ਸਿਰਫ਼ local/stdio ਸਿੰਗਲ-ਓਪਰੇਟਰ ਪ੍ਰਵਾਹ ਲਈ ਸੁਰੱਖਿਅਤ ਹੈ, ਜਿੱਥੇ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਦੀ ਕੋਈ ਗੁੰਜਾਇਸ਼ ਨਹੀਂ ਹੈ। `open-sse/mcp-server/server.ts::withScopeEnforcement()` ਬਿਨਾਂ ਸ਼ਰਤ ( `scopeEnforcement.ts` ਵਿੱਚ `shouldForceScopeEnforcement()` ) 'ਤੇ ਪ੍ਰਤੀ-ਟੂਲ ਸਕੋਪ ਇਨਫੋਰਸਮੈਂਟ ਨੂੰ ਬਦਲ ਦਿੰਦਾ ਹੈ ਜਦੋਂ ਵੀ `resolveCallerScopeContext()` `source === "authInfo"` ਹੱਲ ਕੀਤਾ (ਭਾਵ ਇੱਕ ਅਸਲੀ ਪ੍ਰਤੀ-ਕੁੰਜੀ HTTP ਅਧਿਕਾਰ ਸਿਰਲੇਖ, HTTP/SSE-only) AND ਉਹ ਕੁੰਜੀ ਪੂਰੀ `manage`/`admin` ਸਕੋਪ ਨਹੀਂ ਰੱਖਦੀ ਹੈ। ਇਹ ਉਸ ਪਾੜੇ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਿੱਥੇ ਇੱਕ ਕੁੰਜੀ ONLY ਦੇ ਤੰਗ `mcp:connect` ਬਾਈਪਾਸ ਸਕੋਪ — ਉੱਪਰ ਦਸਤਾਵੇਜ਼ੀ ਤੌਰ 'ਤੇ ਕੁਝ ਵੀ ਅਧਿਕਾਰਤ ਨਹੀਂ ਕਰਦਾ ਹੈ ਪਰ `/api/mcp/` LOCAL_ONLY ਕਾਰਵ-ਆਊਟ — ਨਹੀਂ ਤਾਂ ਇੱਕ ਵਾਰ ਓਪਰੇਟਰ ਦੁਆਰਾ remote/non-loopback MCP ਪਹੁੰਚ ਨੂੰ ਸਮਰੱਥ ਕਰਨ ਤੋਂ ਬਾਅਦ ਹਰ MCP ਟੂਲ ਦੀ ਮੰਗ ਕਰ ਸਕਦਾ ਹੈ, ਸਿਰਫ਼ ਇਸ ਲਈ ਕਿ `OMNIROUTE_MCP_ENFORCE_SCOPES` ਜਹਾਜ਼ਾਂ ਦੁਆਰਾ ਡਿਜ਼ਾਲਟ `false`. HTTP ਉੱਤੇ ਇੱਕ ਪੂਰੀ `manage`/`admin` ਕੁੰਜੀ, ਅਤੇ ਹਰੇਕ stdio/local ਕਾਲਰ, ਮੌਜੂਦਾ `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated ਵਿਵਹਾਰ ਨੂੰ ਬਿਨਾਂ ਕਿਸੇ ਬਦਲਾਅ ਦੇ ਰੱਖੋ।
+**`OMNIROUTE_MCP_ENFORCE_SCOPES` ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ ਤੰਗ-ਸਕੋਪ ਵਾਲੇ HTTP/SSE ਕਾਲਰਾਂ ਲਈ ਲਾਗੂ ਕਰਨ ਲਈ ਮਜਬੂਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।** `open-sse/mcp-server/server.ts::withScopeEnforcement()` ਬਿਨਾਂ ਸ਼ਰਤ ( `scopeEnforcement.ts` ਵਿੱਚ `shouldForceScopeEnforcement()` ) 'ਤੇ ਪ੍ਰਤੀ-ਟੂਲ ਸਕੋਪ ਇਨਫੋਰਸਮੈਂਟ ਨੂੰ ਬਦਲ ਦਿੰਦਾ ਹੈ ਜਦੋਂ ਵੀ `resolveCallerScopeContext()` `source === "authInfo"` (ਭਾਵ ਇੱਕ ਅਸਲੀ ਪ੍ਰਤੀ-ਕੁੰਜੀ HTTP ਅਧਿਕਾਰ ਸਿਰਲੇਖ, HTTP/SSE-only) AND ਹੱਲ ਕੀਤਾ ਹੈ, ਜੋ ਕਿ ਕੁੰਜੀ ਪੂਰੀ `manage`/`admin` ਸਕੋਪ ਨਹੀਂ ਰੱਖਦੀ ਹੈ। ਇਹ ਉਸ ਪਾੜੇ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਿੱਥੇ ਇੱਕ ਕੁੰਜੀ ONLY ਤੰਗ `mcp:connect` ਬਾਈਪਾਸ ਸਕੋਪ — ਉੱਪਰ ਦਸਤਾਵੇਜ਼ੀ ਤੌਰ 'ਤੇ ਕੁਝ ਵੀ ਪ੍ਰਮਾਣਿਤ ਨਹੀਂ ਕਰਦੀ ਹੈ ਪਰ `/api/mcp/` LOCAL_ONLY ਕਾਰਵ-ਆਊਟ — ਨਹੀਂ ਤਾਂ ਇੱਕ ਵਾਰ ਓਪਰੇਟਰ ਦੁਆਰਾ remote/non-loopback MCP ਪਹੁੰਚ ਨੂੰ ਸਮਰੱਥ ਕਰਨ ਤੋਂ ਬਾਅਦ ਹਰ MCP ਟੂਲ ਨੂੰ ਬੁਲਾ ਸਕਦਾ ਹੈ, ਸਿਰਫ਼ ਇਸ ਲਈ ਕਿ `OMNIROUTE_MCP_ENFORCE_SCOPES` ਦੁਆਰਾ `false` ਜਹਾਜ਼ਾਂ ਨੂੰ ਡਿਜ਼ਾਇਨ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। HTTP'ਤੇ ਇੱਕ `manage`/`admin` ਕੁੰਜੀ, stdio ਕਾਲਰ ਅਤੇ HTTP ਵਹਾਅ ਬਿਨਾਂ ਪ੍ਰਤੀ-ਕੁੰਜੀ `authInfo` ਗਲੋਬਲ ਫਲੈਗ ਦੇ ਵਿਵਹਾਰ ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਦੇ ਹਨ। ਲੋਕਲਹੋਸਟ ਲਾਜ਼ਮੀ ਜਾਂਚ ਤੋਂ ਤੰਗ ਕੁੰਜੀ ਸਕੋਪਾਂ ਵਾਲੇ ਇੱਕ HTTP ਕਾਲਰ ਨੂੰ ਛੋਟ ਨਹੀਂ ਦਿੰਦਾ ਹੈ।
 
 ---
 
 ## ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ
 
-| ਵੇਰੀਏਬਲ                                 | ਡਿਫੌਲਟ                                       | ਉਦੇਸ਼                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| :-------------------------------------- | :------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                     | ਉਹ ਬੇਸ URL ਜਿਸਦੀ ਵਰਤੋਂ MCP ਸਰਵਰ OmniRoute ਦੀਆਂ ਅੰਦਰੂਨੀ APIs ਨੂੰ ਕਾਲ ਕਰਨ ਵੇਲੇ ਕਰਦਾ ਹੈ                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `OMNIROUTE_API_KEY`                     | (ਖਾਲੀ)                                       | ਅੰਦਰੂਨੀ API ਕਾਲਾਂ ਲਈ `Authorization: Bearer` ਵਜੋਂ ਅੱਗੇ ਭੇਜੀ ਜਾਣ ਵਾਲੀ API ਕੁੰਜੀ                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (ਸਿਰਫ਼ `"true"` ਇਸਨੂੰ ਸਮਰੱਥ ਕਰਦਾ ਹੈ) | ਸਮਰੱਥ ਹੋਣ 'ਤੇ, ਗੁੰਮ ਸਕੋਪ ਟੂਲ ਕਾਲਾਂ ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਦੇ ਹਨ ਅਤੇ ਆਡਿਟ ਲੌਗ ਵਿੱਚ `scope_denied:<reason>` ਦਰਜ ਕਰਦੇ ਹਨ। ਇਸ ਫਲੈਗ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਹਰ ਉਸ HTTP/SSE ਕਾਲਰ ਲਈ ਲਾਗੂਕਰਨ ਵੀ ਲਾਜ਼ਮੀ ਤੌਰ 'ਤੇ ਚਾਲੂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਜਿਸਦੀ ਪਛਾਣ ਪ੍ਰਤੀ-ਕੁੰਜੀ Authorization ਹੈਡਰ (`source === "authInfo"`) ਤੋਂ ਕੀਤੀ ਗਈ ਹੋਵੇ ਅਤੇ ਜਿਸ ਕੋਲ ਪੂਰਾ `manage`/`admin` ਸਕੋਪ ਨਾ ਹੋਵੇ — ਉਦਾਹਰਨ ਵਜੋਂ, ਸਿਰਫ਼ ਸੀਮਤ `mcp:connect` ਬਾਈਪਾਸ ਸਕੋਪ ਰੱਖਣ ਵਾਲੀ ਕੁੰਜੀ — ਇਸ ਲਈ ਇਹ ਡਿਫੌਲਟ ਕੇਵਲ ਸਥਾਨਕ/stdio ਇਕੱਲੇ-ਓਪਰੇਟਰ ਪ੍ਰਵਾਹ ਲਈ ਹੀ ਸੁਰੱਖਿਅਤ ਹੈ, ਰਿਮੋਟ ਗੈਰ-ਲੂਪਬੈਕ ਪਹੁੰਚ ਲਈ ਕਦੇ ਨਹੀਂ |
-| `OMNIROUTE_MCP_SCOPES`                  | (ਖਾਲੀ)                                       | ਡਿਫੌਲਟ ਤੌਰ 'ਤੇ "ਉਪਲਬਧ" ਮੰਨੇ ਜਾਣ ਵਾਲੇ ਸਕੋਪਾਂ ਦੀ ਕਾਮਾ-ਵੱਖ ਕੀਤੀ ਮਨਜ਼ੂਰ-ਸੂਚੀ (ਜਦੋਂ ਕਾਲਰ ਆਪਣੇ ਸਕੋਪ ਪ੍ਰਦਾਨ ਨਹੀਂ ਕਰਦਾ, ਉਦੋਂ ਵਰਤੀ ਜਾਂਦੀ ਹੈ)                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (ਸੈੱਟ ਨਾ ਹੋਵੇ = ਚਾਲੂ)                        | `0/false/off/no` 'ਤੇ ਸੈੱਟ ਕੀਤੇ ਜਾਣ 'ਤੇ, ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਸਮੇਂ MCP ਵਰਣਨ ਸੰਕੁਚਨ ਨੂੰ ਅਸਮਰੱਥ ਕਰਦਾ ਹੈ                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (ਸੈੱਟ ਨਾ ਹੋਵੇ = ਚਾਲੂ)                        | ਉਪਰੋਕਤ ਟੌਗਲ ਲਈ ਵਿਕਲਪਕ ਉਪਨਾਮ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                      | ਅੰਦਰੂਨੀ ਪ੍ਰਬੰਧਨ ਰੀਡਾਂ (ਸਿਹਤ, ਲਚਕੀਲਾਪਣ, ਸੰਯੋਜਨ, ਕੋਟਾ, ਵਰਤੋਂ) ਲਈ ਅਬੋਰਟ ਸਮਾਂ-ਸੀਮਾ                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                      | ਪ੍ਰਦਾਤਾ ਦੀ ਉਡੀਕ ਕਰਨ ਵਾਲੇ ਹੌਪਾਂ (`route_request`, `web_search`, `web_fetch`) ਲਈ ਅਬੋਰਟ ਸਮਾਂ-ਸੀਮਾ                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `MCP_TOOL_DENY`                         | (ਸੈੱਟ ਨਾ ਹੋਵੇ = ਕੋਈ ਫਿਲਟਰ ਨਹੀਂ)              | `tools/list` ਵਿੱਚੋਂ ਹਟਾਉਣ ਲਈ ਟੂਲ ਨਾਮਾਂ ਦੀ ਕਾਮਾ-ਵੱਖ ਕੀਤੀ ਸੂਚੀ (ਟੂਲ-ਕਾਰਡੀਨੈਲਿਟੀ ਵਿੱਚ ਕਮੀ — ਹੇਠਾਂ ਵੇਖੋ)                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `MCP_TOOL_ALLOW`                        | (ਸੈੱਟ ਨਹੀਂ = ਕੋਈ ਫਿਲਟਰ ਨਹੀਂ)                 | ਸਿਰਫ਼ ਰੱਖੇ ਜਾਣ ਵਾਲੇ ਟੂਲ ਨਾਮ, ਕਾਮਿਆਂ ਨਾਲ ਵੱਖ ਕੀਤੇ ਹੋਏ (ਮਨਜ਼ੂਰ-ਸੂਚੀ ਮੋਡ — ਹੇਠਾਂ ਵੇਖੋ)                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `DATA_DIR`                              | `~/.omniroute`                               | ਹਾਰਟਬੀਟ ਫ਼ਾਈਲ `${DATA_DIR}/runtime/mcp-heartbeat.json` ਵਿੱਚ ਲਿਖੀ ਜਾਂਦੀ ਹੈ                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ਵੇਰੀਏਬਲ                                 | ਡਿਫਾਲਟ                                    | ਮਕਸਦ                                                                                                                                                                                                                                                      |
+| :-------------------------------------- | :---------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                  | ਬੇਸ URL MCP ਸਰਵਰ OmniRoute ਅੰਦਰੂਨੀ APIs ਨੂੰ ਕਾਲ ਕਰਨ ਵੇਲੇ ਵਰਤਦਾ ਹੈ                                                                                                                                                                                         |
+| `OMNIROUTE_API_KEY`                     | (ਖਾਲੀ)                                    | API ਕੁੰਜੀ ਨੂੰ ਅੰਦਰੂਨੀ API ਕਾਲਾਂ ਲਈ `Authorization: Bearer` ਵਜੋਂ ਅੱਗੇ ਭੇਜਿਆ ਗਿਆ                                                                                                                                                                            |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (ਸਿਰਫ `"true"` ਇਸਨੂੰ ਯੋਗ ਕਰਦਾ ਹੈ) | ਗਲੋਬਲ ਟੂਲ-ਸਕੋਪ ਜਾਂਚਾਂ ਨੂੰ ਸਮਰੱਥ ਬਣਾਉਂਦਾ ਹੈ; ਇਨਕਾਰ ਲਾਗ `scope_denied:<reason>`. ਪ੍ਰਤੀ-ਕੁੰਜੀ `authInfo` ਦੇ ਨਾਲ `manage`/`admin` ਘਾਟ ਵਾਲੇ HTTP/SSE ਕਾਲਰਾਂ ਲਈ ਚੈਕ ਹਮੇਸ਼ਾ ਲਾਗੂ ਕੀਤੇ ਜਾਂਦੇ ਹਨ, ਇੱਥੋਂ ਤੱਕ ਕਿ ਲੂਪਬੈਕ ਤੋਂ ਵੀ। ਹੋਰ ਪ੍ਰਵਾਹ ਇਸ ਝੰਡੇ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ। |
+| `OMNIROUTE_MCP_SCOPES`                  | (ਖਾਲੀ)                                    | ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ 'ਤੇ "ਉਪਲਬਧ" ਮੰਨੇ ਜਾਂਦੇ ਸਕੋਪਾਂ ਦੀ ਕਾਮੇ ਨਾਲ ਵੱਖ ਕੀਤੀ ਅਨੁਮਤੀ ਸੂਚੀ (ਉਦੋਂ ਵਰਤੀ ਜਾਂਦੀ ਹੈ ਜਦੋਂ ਕਾਲਰ ਆਪਣਾ ਸਕੋਪ ਪ੍ਰਦਾਨ ਨਹੀਂ ਕਰਦਾ)                                                                                                                 |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (ਅਨਸੈੱਟ = ਚਾਲੂ)                           | ਜਦੋਂ `0/false/off/no`'ਤੇ ਸੈੱਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਸਮੇਂ MCP ਵਰਣਨ ਕੰਪਰੈਸ਼ਨ ਨੂੰ ਅਯੋਗ ਕਰ ਦਿੰਦਾ ਹੈ                                                                                                                                                  |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (ਅਨਸੈੱਟ = ਚਾਲੂ)                           | ਉੱਪਰ ਦਿੱਤੇ ਸਮਾਨ ਟੌਗਲ ਲਈ ਵਿਕਲਪਕ ਉਪਨਾਮ                                                                                                                                                                                                                      |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                   | ਅੰਦਰੂਨੀ ਪ੍ਰਬੰਧਨ ਰੀਡਜ਼ (ਸਿਹਤ, ਲਚਕੀਲੇਪਨ, ਕੰਬੋਜ਼, ਕੋਟਾ, ਵਰਤੋਂ) ਲਈ ਅਧੂਰਾ ਬਜਟ                                                                                                                                                                                  |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                   | ਇੱਕ ਪ੍ਰਦਾਤਾ (`route_request`, `web_search`, `web_fetch`) ਦੀ ਉਡੀਕ ਕਰਨ ਵਾਲੇ ਹੌਪਸ ਲਈ ਬਜਟ ਨੂੰ ਅਧੂਰਾ ਛੱਡੋ                                                                                                                                                      |
+| `MCP_TOOL_DENY`                         | ( = ਕੋਈ ਫਿਲਟਰ ਅਣਸੈੱਟ ਕਰੋ)                 | `tools/list` ਤੋਂ ਛੱਡਣ ਲਈ ਕਾਮੇ ਨਾਲ ਵੱਖ ਕੀਤੇ ਟੂਲ ਨਾਮ (ਟੂਲ-ਕਾਰਡੀਨੈਲਿਟੀ ਰਿਡਕਸ਼ਨ — ਹੇਠਾਂ ਦੇਖੋ)                                                                                                                                                                 |
+| `MCP_TOOL_ALLOW`                        | ( = ਕੋਈ ਫਿਲਟਰ ਅਣਸੈੱਟ ਕਰੋ)                 | ਵਿਸ਼ੇਸ਼ ਤੌਰ 'ਤੇ ਰੱਖਣ ਲਈ ਕਾਮੇ ਨਾਲ ਵੱਖ ਕੀਤੇ ਟੂਲ ਨਾਮ (ਅਲੋਡ-ਲਿਸਟ ਮੋਡ — ਹੇਠਾਂ ਦੇਖੋ)                                                                                                                                                                            |
+| `DATA_DIR`                              | `~/.omniroute`                            | ਦਿਲ ਦੀ ਧੜਕਣ ਦੀ ਫਾਈਲ `${DATA_DIR}/runtime/mcp-heartbeat.json` ਨੂੰ ਲਿਖੀ ਜਾਂਦੀ ਹੈ                                                                                                                                                                            |
 
 ---
 

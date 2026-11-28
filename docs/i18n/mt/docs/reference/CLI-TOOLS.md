@@ -4,17 +4,15 @@
 
 ---
 
-Aġġornata l-aħħar: 2026-08-23
-
 OmniRoute jintegra ma' tliet kategoriji ta' għodod CLI mifruxa fuq tliet paġni tad-dashboard iddedikati:
 
-| Paġna          | Rotta                   | Kunċett                                                                                     | Għadd        |
-| -------------- | ----------------------- | ------------------------------------------------------------------------------------------- | ------------ |
-| **CLI Code's** | `/dashboard/cli-code`   | Għodod tal-kodifikazzjoni li tipponta lejn OmniRoute (Klijent → CLI → OmniRoute → Fornitur) | 26           |
-| **CLI Aġenti** | `/dashboard/cli-agents` | Aġenti awtonomi li inti tipponta lejn OmniRoute (l-istess fluss, ambitu usa')               | 11           |
-| **ACP Aġenti** | `/dashboard/acp-agents` | CLIs li OmniRoute ibid bħala backend permezz ta stdio/ACP (fluss invers)                    | ara reġistru |
+| Paġna          | Rotta                   | Kunċett                                                                                    | Għadd        |
+| -------------- | ----------------------- | ------------------------------------------------------------------------------------------ | ------------ |
+| **CLI Code's** | `/dashboard/cli-code`   | Għodod tal-kodifikazzjoni li tipponta lejn OmniRoute (Client → CLI → OmniRoute → Provider) | 26           |
+| **CLI Aġenti** | `/dashboard/cli-agents` | Aġenti awtonomi li inti tipponta lejn OmniRoute (l-istess fluss, ambitu usa')              | 11           |
+| **ACP Aġenti** | `/dashboard/acp-agents` | CLIs li OmniRoute ibid bħala backend permezz ta stdio/ACP (fluss invers)                   | ara reġistru |
 
-Legacy rotot redirect permezz 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Legacy rotot redirect permezz ta' 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 

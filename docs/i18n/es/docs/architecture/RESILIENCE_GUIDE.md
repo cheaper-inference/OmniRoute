@@ -12,54 +12,53 @@ OmniRoute tiene tres mecanismos de resiliencia distintos pero relacionados. Cada
 
 > **Prioridad de entorno frente a panel para cambios de resiliencia.** Los conmutadores de resistencia de inclusión seleccionados desde el entorno — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — solo proporcionan el _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Un booleano persistió en `resilienceSettings` (Dashboard →** Configuración de resiliencia →** / `PATCH /api/resilience`, almacenado en `key_value`) gana sobre el valor env: la normalización (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) mantiene el booleano almacenado siempre que exista. Establecer dicha var de entorno en `true` en una implementación donde el panel ya guardó `false` por lo tanto, no cambia nada — activa la palanca** Configuración de resiliencia →** (o borre el campo almacenado) en su lugar.
 
-## 1. Circuit Breaker de proveedor
+## 1. Disyuntor del proveedor
 
 **Alcance:** proveedor completo (p. ej., `glm`, `openai`, `anthropic`).
 
-**Propósito:** dejar de enviar tráfico a un proveedor que está fallando repetidamente a nivel de servicio ascendente (upstream).
+**Objetivo:** dejar de enviar tráfico a un proveedor que falla repetidamente a nivel upstream/service.
 
 **Implementación:**
 
 - Clase principal: `src/shared/utils/circuitBreaker.ts`
-- Integración: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API de estado: `GET /api/monitoring/health`
-- API de restablecimiento: `POST /api/resilience/reset`
+- Cableado: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Estado API: `GET /api/monitoring/health`
+- Restablecer API: `POST /api/resilience/reset`
 - Envoltorios: `open-sse/services/accountFallback.ts`
-- Tabla de BD: `domain_circuit_breakers`
+- tabla DB : `domain_circuit_breakers`
 
 **Estados:**
 
-- `CLOSED` — se permite el tráfico normal
-- `DEGRADED` — el tráfico sigue permitido, pero se están rastreando fallos elevados del proveedor; vuelve a `CLOSED` tras suficientes éxitos, tras una prueba de conexión válida, o después de la retención `OPEN` más larga para el último tipo de fallo (su valor `cooldownByKind`, o en su defecto `resetTimeout`, × `maxBackoffMultiplier`, con un mínimo de un cooldown) sin un nuevo fallo
-- `OPEN` — proveedor bloqueado temporalmente; el enrutamiento combo lo omite
-- `HALF_OPEN` — el tiempo de espera de restablecimiento ha transcurrido; se permite una solicitud de sondeo
+- `CLOSED` — tráfico normal permitido
+- El tráfico `DEGRADED` — aún se permite, pero se están rastreando fallas elevadas del proveedor; regresa a `CLOSED` con suficientes éxitos, en una prueba de conexión válida o después de la retención `OPEN` más larga para el último tipo de falla (su valor `cooldownByKind`, de lo contrario `resetTimeout`, × `maxBackoffMultiplier`, al menos un tiempo de reutilización) sin una nueva falla
+- proveedor `OPEN` — bloqueado temporalmente; el enrutamiento combinado lo omite
+- tiempo de espera de reinicio de `HALF_OPEN` — transcurrido; solicitud de sonda permitida
 
-**Valores predeterminados configurables (`open-sse/config/constants.ts`, expuestos en Panel → Configuración → Resiliencia):**
+**Valores predeterminados configurables (`open-sse/config/constants.ts`, expuestos en Dashboard → Settings → Resilience):**
 
-| Clase   | Se degrada a los | Se abre a los | Tiempo de restablecimiento |
-| ------- | ---------------- | ------------- | -------------------------- |
-| OAuth   | 5 fallos         | 8 fallos      | 60s                        |
-| API-key | 7 fallos         | 12 fallos     | 30s                        |
-| Local   | derivado         | 2 fallos      | 15s                        |
+| Clase     | Degradado en | Abre en     | Restablecer el tiempo de espera |
+| --------- | ------------ | ----------- | ------------------------------- |
+| OAuth     | 5 fracasos   | 8 fracasos  | años 60                         |
+| clave API | 7 fracasos   | 12 fracasos | 30 años                         |
 
-`degradationThreshold` controla cuándo un proveedor entra en `DEGRADED`; `failureThreshold` controla cuándo se abre y se omite. Los perfiles de proveedor local aún no están expuestos en la página de configuración de Resiliencia.
+`degradationThreshold` controla cuándo un proveedor ingresa `DEGRADED`; `failureThreshold` controla cuándo se abre y se omite. `PROVIDER_PROFILES.local` (2 fallos/15 s) está definido en `open-sse/config/constants.ts` pero** aún no conectado** : `getProviderCategory()` devuelve solo `oauth` o `apikey`, por lo que los proveedores locales usan el perfil OAuth o de clave API.
 
-**Códigos de disparo:** solo estados a nivel de proveedor `[408, 500, 502, 503, 504]`. NO se dispara por errores a nivel de cuenta (la mayoría de los 401/403/429 — esos pertenecen al cooldown o al bloqueo).
+**Códigos de viaje:** solo estados a nivel de proveedor `[408, 500, 502, 503, 504]`. Realice NOT trip para errores a nivel de cuenta (la mayoría 401/403/429 — pertenecen al tiempo de reutilización o bloqueo).
 
-**Recuperación diferida:** cuando `OPEN` expira, `getStatus()`, `canExecute()`, `getRetryAfterMs()` actualizan el estado a `HALF_OPEN`. Las mismas lecturas (y el siguiente fallo) hacen decaer un `DEGRADED` obsoleto de vuelta a `CLOSED`. No se necesita ningún temporizador en segundo plano.
+**Recuperación perezosa:** cuando `OPEN` expira, `getStatus()`, `canExecute()`, `getRetryAfterMs()` actualizan el estado a `HALF_OPEN`. Las mismas lecturas (y el siguiente error) degradan un `DEGRADED` obsoleto a `CLOSED`. No se necesita temporizador de fondo.
 
 ---
 
-### Cooldown global de proveedor optativo (window gate)
+### Optar por el tiempo de espera global del proveedor (puerta de ventana)
 
-Una cuarta capa, **optativa** (`PROVIDER_COOLDOWN_ENABLED`, predeterminada en **desactivada**), mantiene una memoria entre solicitudes de los proveedores que fallan en `open-sse/services/providerCooldownTracker.ts`, consultada por la resolución de destinos de combo para que las solicitudes combo consecutivas dejen de recorrer de nuevo un proveedor que acaba de fallar. Las entradas a nivel de proveedor respetan el window gate de `PROVIDER_PROFILES`:
+Un cuarto,** optar por** capa (`PROVIDER_COOLDOWN_ENABLED`, predeterminado** apagado** ) mantiene una memoria de solicitudes cruzadas de proveedores fallidos en `open-sse/services/providerCooldownTracker.ts`, consultada por la resolución de destino combinado para que las solicitudes combinadas consecutivas dejen de volver a recorrer un proveedor que acaba de fallar. Las entradas a nivel de proveedor respetan la puerta de ventana `PROVIDER_PROFILES` :
 
-| Perfil  | se dispara tras (`providerFailureThreshold`) | dentro de (`providerFailureWindowMs`) | se enfría durante (`providerCooldownMs`) |
-| ------- | -------------------------------------------: | ------------------------------------: | ---------------------------------------: |
-| OAuth   |                                         `10` |                               `15min` |                                   `5min` |
-| API key |                                         `15` |                               `30min` |                                  `10min` |
+| Perfil    | viajes después (`providerFailureThreshold`) | dentro (`providerFailureWindowMs`) | se enfría por (`providerCooldownMs`) |
+| --------- | ------------------------------------------: | ---------------------------------: | -----------------------------------: |
+| OAuth     |                                        `10` |                            `15min` |                               `5min` |
+| llave API |                                        `15` |                            `30min` |                              `10min` |
 
-Por debajo del umbral, el proveedor **no** se considera en enfriamiento; un éxito limpia la ventana. Las entradas a nivel de conexión (`provider:connectionId`) mantienen en su lugar el backoff exponencial `minRetryCooldownMs → maxRetryCooldownMs`. Anulaciones: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Protección contra regresiones: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Por debajo del umbral el proveedor está** no** considerado enfriamiento; un éxito limpia la ventana. Las entradas a nivel de conexión (`provider:connectionId`) mantienen el retroceso exponencial `minRetryCooldownMs → maxRetryCooldownMs`. Anulaciones: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Guardia de regresión: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Enfriamiento de la conexión
 
@@ -764,6 +763,21 @@ tiempo de espera a la familia de IP. Límites razonables:
 
 ---
 
+## Cuando el propio OmniRoute es inalcanzable
+
+El disyuntor del proveedor, el tiempo de reutilización de la conexión y el bloqueo del modelo se ejecutan dentro de la puerta de enlace. Si el cliente no puede llegar a la puerta de enlace, recibe un error de conexión. OmniRoute no puede interceptar ese fallo. El cliente decide si vuelve a intentarlo y qué mensaje mostrar.
+
+Actualmente,OmniRoute no proporciona ningún respaldo del lado del cliente y no define ninguna política para ello. Configure cualquier ruta alternativa en el cliente o frente a la puerta de enlace.
+
+- `GET /api/health` comprueba la vida sin autenticación.
+- `GET /api/health/ping` comprueba la preparación, incluso si la base de datos responde.
+- `GET /api/monitoring/health` brinda a las personas que llaman autenticadas una descripción general más profunda de su salud.
+- `omniroute launch <tool>` prueba `/api/monitoring/health` antes de iniciar el cliente. Puede iniciar una puerta de enlace local automáticamente. Con `--no-start`, una puerta de enlace inalcanzable da como resultado `GatewayUnreachable` y el código de salida `69`.
+
+Para desconectar un cliente de OmniRoute, siga [Revertir configuración del cliente](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Depuración
 
 - El combo weighted responde `503 all_targets_cooling_down` (`Retry-After` establecido, `diagnostics.excluded` enumera cada objetivo con `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → el pool está configurado y conectado, simplemente cada objetivo está excluido por un temporizador de resiliencia; la advertencia `[COMBO] Weighted selection: every target excluded before dispatch — …` indica los motivos y los segundos restantes. Un `404 no_executable_targets` del mismo combo significa que no intervino ningún temporizador de resiliencia (no hay nada que ejecutar, o todas las cuentas fallaron la sonda de disponibilidad). Implementado en `open-sse/services/combo/pinRecovery.ts` a partir de las exclusiones recopiladas en `targetResolution.ts`.
@@ -775,95 +789,68 @@ tiempo de espera a la familia de IP. Límites razonables:
 
 ---
 
-## Estado en tiempo de ejecución — referencia rápida para el agente
+## Referencia rápida del agente — del estado del tiempo de ejecución
 
-> Trasladado literalmente desde `AGENTS.md` → "Resilience Runtime State" (PR #12743) para que la
-> guía del agente se mantenga por debajo del presupuesto de contexto de 40k. Es la vista condensada,
-> orientada al agente, de las secciones anteriores; las secciones numeradas siguen siendo la
-> referencia completa.
+> Se movió textualmente de `AGENTS.md` → "Estado de tiempo de ejecución de resiliencia" (PR #12743) para que la guía del agente se mantenga por debajo del presupuesto de contexto de 40k. Es la vista condensada orientada al agente de las secciones anteriores; las secciones numeradas siguen siendo la referencia completa.
 
-OmniRoute tiene tres mecanismos de fallo temporal relacionados pero distintos. Mantén su
-alcance separado al depurar el comportamiento de enrutamiento. Consulta el
-[diagrama de resiliencia de 3 capas](../diagrams/exported/resilience-3layers.svg)
-(fuente: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-para obtener un mapa de un vistazo.
+OmniRoute tiene tres mecanismos de falla temporal relacionados pero distintos. Mantenga su alcance separado al depurar el comportamiento de enrutamiento. Consulte el [diagrama de resiliencia de 3 capas](../diagrams/exported/resilience-3layers.svg) (fuente: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) para obtener un mapa de un vistazo.
 
-### Circuit breaker de proveedor
+### Disyuntor del proveedor
 
-**Alcance**: todo el proveedor, p. ej. `glm`, `openai`, `anthropic`.
+**Alcance** : proveedor completo, por ejemplo, `glm`, `openai`, `anthropic`.
 
-**Propósito**: dejar de enviar tráfico a un proveedor que falla repetidamente a nivel de
-upstream/servicio, de modo que un proveedor en mal estado no ralentice cada solicitud.
+**Objetivo** : deja de enviar tráfico a un proveedor que falla repetidamente en el nivel upstream/service, para que un proveedor en mal estado no ralentice todas las solicitudes.
 
-**Implementación**:
+**Implementación** :
 
 - Clase principal: `src/shared/utils/circuitBreaker.ts`
-- Integración de la puerta de acceso/ejecución del chat: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API de estado en tiempo de ejecución: `src/app/api/monitoring/health/route.ts`
-- Wrappers compartidos: `open-sse/services/accountFallback.ts`
-- Tabla de estado persistido: `domain_circuit_breakers`
+- Cableado de chat gate/execution : `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Estado de tiempo de ejecución API: `src/app/api/monitoring/health/route.ts`
+- Envoltorios compartidos: `open-sse/services/accountFallback.ts`
+- Tabla de estado persistente: `domain_circuit_breakers`
 
 **Estados** (4 — `src/shared/utils/circuitBreaker.ts`):
 
 - `CLOSED`: se permite el tráfico normal.
-- `DEGRADED`: banda de alerta temprana — los fallos superaron el umbral de degradación pero aún
-  no el umbral del breaker; el tráfico sigue fluyendo y los paneles muestran la advertencia. Una
-  prueba de conexión válida o una ventana tranquila sin nuevos fallos lo devuelve a `CLOSED`
-  (`docs/architecture/RESILIENCE_GUIDE.md` indica la ventana).
-- `OPEN`: el proveedor está bloqueado temporalmente; los llamadores reciben una respuesta de
-  circuito de proveedor abierto o el enrutamiento de combo salta a otro objetivo.
-- `HALF_OPEN`: ha transcurrido el tiempo de espera de reinicio; se permite una solicitud de sondeo.
-  Si tiene éxito, el breaker se cierra; si falla, se abre de nuevo.
+- `DEGRADED`: las fallas — de la banda de alerta temprana cruzaron el umbral de degradación pero aún no el umbral del disyuntor; El tráfico sigue fluyendo, los paneles muestran la advertencia. Una prueba de conexión válida o una ventana silenciosa sin nuevos fallos la devuelve a `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` tiene la ventana).
+- `OPEN`: el proveedor está bloqueado temporalmente; las personas que llaman obtienen una respuesta de circuito abierto del proveedor o un enrutamiento combinado salta a otro objetivo.
+- `HALF_OPEN`: ha transcurrido el tiempo de espera de reinicio; permitir una solicitud de sondeo. El éxito cierra el interruptor, el fracaso lo abre de nuevo.
 
-**Valores predeterminados** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, consumidos a través de
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` en `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` en `src/sse/handlers/chatHelpers.ts`). El breaker de proveedor
-completo funciona con `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Valores predeterminados** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, consumido vía `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` en `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` en `src/sse/handlers/chatHelpers.ts`). El disyuntor de proveedor completo se ejecuta en `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Perfil  | se degrada en | se abre en (`circuitBreakerThreshold`) | reinicio (`circuitBreakerReset`) |
-| ------- | ------------: | -------------------------------------: | -------------------------------: |
-| OAuth   |           `5` |                                    `8` |                            `60s` |
-| API key |           `7` |                                   `12` |                            `30s` |
-| Local   |    (derivado) |                                    `2` |                            `15s` |
+| Perfil    | se degrada en | abre en (`circuitBreakerThreshold`) | restablecer (`circuitBreakerReset`) |
+| --------- | ------------: | ----------------------------------: | ----------------------------------: |
+| OAuth     |           `5` |                                 `8` |                               `60s` |
+| llave API |           `7` |                                `12` |                               `30s` |
 
-`PROVIDER_PROFILES` también define `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) y `providerCooldownMs` (5/10/1 min): estos alimentan la
-**puerta de ventana del Provider Cooldown global opcional** (`PROVIDER_COOLDOWN_ENABLED`,
-desactivado por defecto): una entrada a nivel de proveedor en
-`open-sse/services/providerCooldownTracker.ts` solo cuenta como en enfriamiento tras
-`providerFailureThreshold` fallos dentro de `providerFailureWindowMs`, y luego se enfría durante
-`providerCooldownMs`. NO son los umbrales del breaker activo — no los ajustes esperando un
-comportamiento de breaker. Todos los valores predeterminados se pueden sobrescribir mediante las
-variables de entorno `OMNIROUTE_PROVIDER_BREAKER_*` y `OMNIROUTE_CIRCUIT_BREAKER_*`; la tabla de
-referencia precisa en tiempo de ejecución está en `docs/architecture/RESILIENCE_GUIDE.md`.
+También existe un perfil `local` (`2` Failures/ `15s`) en `PROVIDER_PROFILES`, pero no está conectado al disyuntor: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) solo acepta `oauth` o `apikey`, y `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) devuelve uno de esos dos (los proveedores no registrados obtienen `apikey`).
 
-Solo los estados de fallo a nivel de proveedor deberían disparar el breaker de proveedor:
+`PROVIDER_PROFILES` también define `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) y `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, donde los valores locales son inertes por la misma razón que antes: estos alimentan el** puerta de ventana del tiempo de reutilización del proveedor global de suscripción voluntaria** (`PROVIDER_COOLDOWN_ENABLED`, predeterminado desactivado) — una entrada de nivel de proveedor en `open-sse/services/providerCooldownTracker.ts` solo cuenta como enfriamiento después de fallas `providerFailureThreshold` dentro de `providerFailureWindowMs` y luego se enfría para `providerCooldownMs`. Son NOT los umbrales del interruptor en vivo — no los sintonizan esperando el comportamiento del interruptor. Cada valor predeterminado se puede anular mediante `OMNIROUTE_PROVIDER_BREAKER_*` y `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; la tabla de referencia con precisión en tiempo de ejecución se encuentra en `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Solo los estados de falla a nivel de proveedor deberían activar el disyuntor del proveedor:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-No dispares el breaker de proveedor completo por errores normales de cuenta/clave/modelo como la
-mayoría de los casos `401`, `403` o `429`. Normalmente pertenecen al cooldown de conexión o al
-bloqueo de modelo. Un `403` de un proveedor genérico con clave API debería ser recuperable a menos
-que se clasifique como un error terminal de proveedor/cuenta.
+No active el disyuntor de todo el proveedor para errores account/key/model normales, como en la mayoría de los casos `401`, `403` o `429`. Por lo general, pertenecen al tiempo de recuperación de la conexión o al bloqueo del modelo. Un proveedor de claves API genérico `403` debería ser recuperable a menos que se clasifique como un error provider/account de terminal.
 
-El breaker usa recuperación diferida (lazy), no un temporizador en segundo plano. Cuando `OPEN` expira, las lecturas como `getStatus()`, `canExecute()` y `getRetryAfterMs()` actualizan el estado a `HALF_OPEN`, de modo que los dashboards y los constructores de candidatos de combos no sigan excluyendo indefinidamente a un proveedor expirado.
+El interruptor utiliza recuperación diferida, no un temporizador en segundo plano. Cuando `OPEN` caduca, lecturas como `getStatus()`, `canExecute()` y `getRetryAfterMs()` actualizan el estado a `HALF_OPEN`, de modo que los paneles y los creadores de candidatos combinados no sigan excluyendo a un proveedor caducado para siempre.
 
-### Cooldown de conexión
+### Enfriamiento de conexión
 
-**Alcance**: una conexión/cuenta/clave de proveedor.
+**Alcance** : un proveedor connection/account/key.
 
-**Objetivo**: omitir temporalmente una clave/cuenta defectuosa mientras se permite que otras conexiones del mismo proveedor sigan atendiendo solicitudes.
+**Objetivo** : omite temporalmente un key/account incorrecto mientras permite que otras conexiones del mismo proveedor continúen atendiendo solicitudes.
 
-**Implementación**:
+**Implementación** :
 
-- Ruta de escritura/actualización: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Selección/filtrado de cuentas: `src/sse/services/auth.ts::getProviderCredentials...`
-- Cálculo del cooldown: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- ruta Write/update : `src/sse/services/auth.ts::markAccountUnavailable()`
+- Cuenta selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Cálculo de tiempo de reutilización: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Configuración: `src/lib/resilience/settings.ts`
 
-Campos importantes en las conexiones de proveedor:
+Campos importantes sobre conexiones de proveedores:
 
 ```ts
 rateLimitedUntil;
@@ -874,50 +861,50 @@ errorCode;
 backoffLevel;
 ```
 
-Durante la selección de cuentas, una conexión se omite mientras:
+Durante la selección de cuenta, se omite una conexión mientras:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Los cooldowns también son diferidos: cuando `rateLimitedUntil` queda en el pasado, la conexión vuelve a ser elegible. Tras un uso exitoso, `clearAccountError()` limpia `testStatus`, `rateLimitedUntil`, los campos de error y `backoffLevel`.
+Los tiempos de reutilización también son lentos: cuando `rateLimitedUntil` está en el pasado, la conexión vuelve a ser elegible. Si se utiliza correctamente, `clearAccountError()` borra `testStatus`, `rateLimitedUntil`, los campos de error y `backoffLevel`.
 
-Comportamiento predeterminado del cooldown de conexión:
+Comportamiento predeterminado de enfriamiento de la conexión:
 
-- Cooldown base de OAuth: `5s`.
-- Cooldown base de clave API: `3s`.
-- El `429` de clave API debería preferir las sugerencias de reintento del upstream (`Retry-After`, encabezados de reinicio o texto de reinicio interpretable) cuando estén disponibles.
-- Los fallos recuperables repetidos usan backoff exponencial:
+- Enfriamiento de la base de OAuth : `5s`.
+- Enfriamiento base de clave API: `3s`.
+- La clave API `429` debería preferir sugerencias de reintento ascendentes (`Retry-After`, encabezados de reinicio o texto de reinicio analizable) cuando estén disponibles.
+- Los fallos recuperables repetidos utilizan un retroceso exponencial:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-La protección anti-thundering-herd evita que fallos concurrentes en la misma conexión extiendan repetidamente el cooldown o incrementen dos veces `backoffLevel`.
+La protección anti-truenos evita que fallas simultáneas en la misma conexión extiendan repetidamente el tiempo de reutilización o incrementen doblemente `backoffLevel`.
 
-Los estados terminales no son cooldowns. `banned`, `expired` (que solo se vuelve terminal después de N reintentos acotados mediante `EXPIRED_RETRY_MAX`) y `credits_exhausted` están pensados para permanecer no disponibles hasta que cambien las credenciales/configuración o un operador los restablezca. No sobrescribas los estados terminales con estado transitorio de cooldown.
+Los estados terminales no son tiempos de reutilización. `banned`, `expired` (que se convierte en terminal solo después de N reintentos limitados a través de `EXPIRED_RETRY_MAX`) y `credits_exhausted` están destinados a permanecer no disponibles hasta que credentials/settings cambie o un operador los restablezca. No sobrescriba los estados de los terminales con estados de enfriamiento transitorios.
 
-### Bloqueo de modelo
+### Bloqueo del modelo
 
-**Alcance**: proveedor + conexión + modelo.
+**Alcance** : proveedor + conexión modelo +.
 
-**Objetivo**: evitar deshabilitar una conexión completa cuando solo un modelo no está disponible o tiene la cuota limitada para esa conexión.
+**Objetivo** : evite deshabilitar una conexión completa cuando solo un modelo no esté disponible o tenga una cuota limitada para esa conexión.
 
 Ejemplos:
 
-- Proveedores con cuota por modelo que devuelven `429`.
-- Proveedores locales que devuelven `404` para un modelo faltante.
-- Fallos de permisos de modo/modelo específicos del proveedor, como ciertos modos de Grok.
+- Proveedores de cuotas por modelo que devuelven `429`.
+- Proveedores locales que devuelven `404` por un modelo faltante.
+- Fallos de permisos mode/model específicos del proveedor, como modos Grok seleccionados.
 
-El bloqueo de modelo reside en `open-sse/services/accountFallback.ts` y permite que la misma conexión siga atendiendo otros modelos.
+El bloqueo del modelo reside en `open-sse/services/accountFallback.ts` y permite que la misma conexión continúe sirviendo a otros modelos.
 
 ### Guía de depuración
 
-- Si se omiten todas las claves de un proveedor, inspecciona tanto el estado del breaker del proveedor como el `rateLimitedUntil`/`testStatus` de cada conexión.
-- Si un proveedor parece excluido permanentemente después de la ventana de reinicio, verifica si el código está leyendo el `state` en bruto en lugar de usar `getStatus()`/`canExecute()`.
-- Si una clave de proveedor falla pero otras deberían funcionar, prefiere el cooldown de conexión sobre el breaker del proveedor.
-- Si solo falla un modelo, prefiere el bloqueo de modelo sobre el cooldown de conexión.
-- Si un estado debería autorrecuperarse, debe tener una marca de tiempo futura/tiempo de espera de reinicio y una ruta de lectura que actualice el estado expirado. Los estados permanentes requieren cambios manuales en las credenciales o en la configuración.
+- Si se omiten todas las claves de un proveedor, inspeccione tanto el estado del disyuntor del proveedor como `rateLimitedUntil`/`testStatus` de cada conexión.
+- Si un proveedor aparece excluido permanentemente después de la ventana de reinicio, verifique si el código lee `state` sin formato en lugar de usar `getStatus()`/`canExecute()`.
+- Si una clave de proveedor falla pero otras deberían funcionar, prefiera el enfriamiento de la conexión al interruptor del proveedor.
+- Si solo falla un modelo, prefiera el bloqueo del modelo al tiempo de reutilización de la conexión.
+- Si un estado se recupera automáticamente, debe tener un tiempo de espera timestamp/reset futuro y una ruta de lectura que actualice el estado caducado. Los estados permanentes requieren cambios manuales de credenciales o configuración.
 
 ---
 

@@ -67,37 +67,37 @@ Direktyva sąmoningai taikoma **kiekvienam tarpiniam serveriui atskirai**, o ne 
 
 ---
 
-## Trys reikšmės
+## Trys vertybės
 
-| Reikšmė | Naudotojo sąsajos etiketė        | Veikimas                                                                                                                                                                                                           |
-| ------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auto`  | `Automatiškai (dvigubas dėklas)` | OS parenka šeimą. Kai tarpinio serverio prieglobos adresas yra tiesioginis IP adresas, šeimą lemia pats adresas; kai naudojamas pagrindinio kompiuterio vardas, galima naudoti abi šeimas. Tai numatytoji reikšmė. |
-| `ipv4`  | `Tik IPv4`                       | Apriboja ryšį iki IPv4. Ryšys saugiai nutraukiamas, jei tarpinio serverio pagrindinio kompiuterio vardas neturi IPv4 (A) įrašo.                                                                                    |
-| `ipv6`  | `Tik IPv6`                       | Apriboja ryšį iki IPv6. Ryšys saugiai nutraukiamas, jei tarpinio serverio pagrindinio kompiuterio vardas neturi IPv6 (AAAA) įrašo.                                                                                 |
+| Vertė  | UI etiketė          | Elgesys                                                                                                                                           |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS renkasi šeimą. IP-literal įgaliotajam serveriui šeima yra neatsiejama pažodinė; prieglobos vardo atveju tinka abi šeimos. Tai yra numatytasis. |
+| `ipv4` | `IPv4 only`         | Prisega jungtį prie IPv4. Nepavyksta uždaryti, jei tarpinis serveris neturi IPv4 (A) įrašo.                                                       |
+| `ipv6` | `IPv6 only`         | Prisega jungtį prie IPv6. Nepavyksta uždaryti, jei tarpinio serverio priegloba neturi IPv6 (AAAA) įrašo.                                          |
 
-Naudotojo sąsajos eilutės yra faile `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+UI eilutės gyvena `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Kaip tai sukonfigūruoti
+## Kaip jį sukonfigūruoti
 
-### Valdymo skydelis
+### Prietaisų skydelis
 
-Parinkiklis yra skirtuko **Tarpinių serverių telkinys** tarpinio serverio formoje:
+Parinkiklis yra įgaliotojo serverio formoje** Proxy baseinas** skirtukas:
 
-1. Atidarykite **Valdymo skydelis → Nustatymai → Tarpinis serveris → Tarpinių serverių telkinys**
+1. Atidaryti** Dashboard → Settings → Proxy → Proxy Pool**
 2. Pridėkite arba redaguokite tarpinį serverį
-3. Išskleidžiamajame sąraše **IP šeima** pasirinkite `Automatiškai (dvigubas dėklas)`, `Tik IPv4` arba `Tik IPv6`
-4. Išsaugokite
+3. Nustatykite**IP šeima** išskleidžiamąjį meniu į `Auto (dual-stack)`, `IPv4 only` arba `IPv6 only`
+4. Išsaugoti
 
-Valdiklį atvaizduoja `ProxyRegistryManager.tsx` (prijungtas faile `proxy/ProxyPoolTab.tsx`).
+Valdymas atliekamas `ProxyRegistryManager.tsx` (montuojamas `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Laukas `family` yra tarpinio serverio registro kūrimo ir atnaujinimo naudingųjų apkrovų dalis; jį tikrina `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ir apdoroja `POST` / `PATCH /api/v1/management/proxies`:
+Laukas `family` yra tarpinio serverio registro create/update naudingųjų apkrovų dalis, patvirtinta `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ir tvarkoma `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Sukurti tik IPv6 naudojantį tarpinį serverį
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Pakeisti esamą tarpinį serverį, kad jis naudotų tik IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Tas pats laukas taip pat priimamas įterptajame tarpinio serverio konfigūracijos objekte, naudojamame aukštesnio lygio tarpinio serverio įrašams (`upstream_proxy_config.family`, žr. [Duomenų modelį](#data-model)).
+Tą patį lauką taip pat priima įterptinis tarpinio serverio konfigūracijos objektas, naudojamas ankstesnio tarpinio serverio įrašams (`upstream_proxy_config.family`, žr. [duomenų modelį](#data-model) ).
 
-Likusi tarpinio serverio CRUD / priskyrimo API aprašyta faile [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Apie likusią tarpinio serverio CRUD/assignment API dalį žr. [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

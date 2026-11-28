@@ -13,29 +13,23 @@ CI in koraki usklajevanja.
 
 ---
 
-## Nastavitev razvojnega okolja
+## Nastavitev razvoja
 
 ### Predpogoji
 
 - **Node.js** `>=22.22.2 <23` ali `>=24.0.0 <27` (priporočeno: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows z Node 24:** uporabite trenutno izdajo popravkov 24 LTS (vsaj 24.20.0).
-> Starejše izdaje lahko po uspešnih testih prekinejo izvajanje, ko `--test-force-exit` zapre
-> proces. Node-jev [popravek Windows libuv](https://github.com/nodejs/node/pull/61999) odpravlja
-> to sesutje izvajalnega okolja; preverjanja trditev testov in izhoda izvajalnika naj ostanejo omogočena.
+> **Windows z vozliščem 24:** uporabite trenutno izdajo popravka 24 LTS (vsaj 24.20.0). Prejšnje izdaje se lahko prekinejo po uspešnih preizkusih, ko `--test-force-exit` zapre postopek. [Popravek Windows libuv](https://github.com/nodejs/node/pull/61999) podjetja Node obravnava to zrušitev med izvajanjem; pusti omogočene preskusne trditve in izhodna preverjanja izvajalca.
 
-> **Uporabniki npm v11+ (Node 24+):** po `npm install` preverite, ali so bili nameščeni izvorni moduli:
-> `node -e "require('better-sqlite3')"`. Če se izvede z napako `MODULE_NOT_FOUND`,
-> zaženite `npm approve-scripts better-sqlite3 && npm install`. Oglejte si
-> [odpravljanje težav](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **uporabniki npm v11 + (vozlišče 24 +):** Po `npm install` preverite, ali so bili nameščeni izvorni moduli: `node -e "require('better-sqlite3')"`. Če z `MODULE_NOT_FOUND` ne uspe, zaženite `npm approve-scripts better-sqlite3 && npm install`. Glejte [Odpravljanje težav](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Kloniranje in namestitev
+### Kloniraj in namesti
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -43,92 +37,83 @@ npm install
 ### Spremenljivke okolja
 
 ```bash
-# Ustvarite svoj .env iz predloge
+# Create your .env from the template
 cp .env.example .env
 
-# Ustvarite zahtevane skrivnosti
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Ključne spremenljivke za razvoj:
 
-| Spremenljivka          | Privzeta razvojna vrednost | Opis                          |
-| ---------------------- | -------------------------- | ----------------------------- |
-| `PORT`                 | `20128`                    | Vrata strežnika               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Osnovni URL za čelni del      |
-| `JWT_SECRET`           | (ustvarite zgoraj)         | Skrivnost za podpisovanje JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`                 | Geslo za prvo prijavo         |
-| `APP_LOG_LEVEL`        | `info`                     | Raven podrobnosti dnevnika    |
+| Spremenljivka          | Privzeto za razvoj       | Opis                         |
+| ---------------------- | ------------------------ | ---------------------------- |
+| `PORT`                 | `20128`                  | Vrata strežnika              |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Osnovna URL za frontend      |
+| `JWT_SECRET`           | (generiraj zgoraj)       | skrivnost podpisovanja JWT   |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Prvo geslo za prijavo        |
+| `APP_LOG_LEVEL`        | `info`                   | Stopnja podrobnosti dnevnika |
 
 ### Nastavitve nadzorne plošče
 
-Nadzorna plošča ponuja preklopne gumbe uporabniškega vmesnika za funkcije, ki jih je mogoče konfigurirati tudi prek spremenljivk okolja:
+Na nadzorni plošči so na voljo preklopi UI za funkcije, ki jih je mogoče konfigurirati tudi prek spremenljivk okolja:
 
-| Mesto nastavitve      | Preklopni gumb           | Opis                                           |
-| --------------------- | ------------------------ | ---------------------------------------------- |
-| Nastavitve → Napredno | Način razhroščevanja     | Omogoči dnevnike zahtev za razhroščevanje (UI) |
-| Nastavitve → Splošno  | Vidnost stranske vrstice | Prikaži/skrij razdelke stranske vrstice        |
+| Nastavitev lokacije   | Preklopi                 | Opis                                               |
+| --------------------- | ------------------------ | -------------------------------------------------- |
+| Nastavitve → Napredno | Način odpravljanja napak | Omogoči dnevnike zahtev za odpravljanje napak (UI) |
+| Nastavitve → Splošno  | Vidnost stranske vrstice | razdelki stranske vrstice Show/hide                |
 
-Te nastavitve so shranjene v zbirki podatkov in se ohranijo po ponovnih zagonih ter ob nastavitvi preglasijo privzete vrednosti spremenljivk okolja.
+Te nastavitve so shranjene v zbirki podatkov in ostanejo ob vnovičnih zagonih ter preglasijo privzete nastavitve env var, ko so nastavljene.
 
-### Lokalni zagon
+### Teče lokalno
 
 ```bash
-# Razvojni način (samodejno osveževanje)
+# Development mode (hot reload)
 npm run dev
 
-# Produkcijska gradnja
+# Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Hiter prevod samo zaledja/API za spremembe sodelavcev
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Gradnja izdaje (čista ponovna gradnja + oznaka HEAD — zahtevano za namestitev)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Običajna konfiguracija vrat
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Gradnja za sodelavce izvaja preverjanje samo s prevajanjem: ne sestavi samostojne
-distribucije in ne zgradi izbirnih izvornih paketnih sredstev. Kadar morate preveriti
-paket, pripravljen za izdajo, uporabite običajno produkcijsko gradnjo.
+Zgradba sodelujočega izvaja preverjanje samo za prevajanje: ne sestavlja samostojne distribucije ali gradi izbirnih izvornih sredstev pakiranja. Uporabite običajno produkcijsko gradnjo, ko morate potrditi paket, ki ga je mogoče poslati.
 
-### Struktura izhodnih datotek gradnje
+### Izdelajte izhodno postavitev
 
-| Imenik    | Vsebina                                                                     | Sledenje |
-| --------- | --------------------------------------------------------------------------- | -------- |
-| `src/`    | Izvorna koda aplikacije (TypeScript / TSX)                                  | Da       |
-| `.build/` | Vmesni rezultati — izhod `next build` (gitignored, `distDir = .build/next`) | Ne       |
-| `dist/`   | Paket, pripravljen za izdajo — sestavi ga `assembleStandalone` (gitignored) | Ne       |
+| Imenik    | Vsebina                                                                     | Sledi |
+| --------- | --------------------------------------------------------------------------- | ----- |
+| `src/`    | Vir aplikacije (TypeScript / TSX)                                           | ja    |
+| `.build/` | Vmesni izhod — `next build` (gitignored, `distDir = .build/next`)           | št    |
+| `dist/`   | Paket — ki ga je mogoče poslati, sestavil `assembleStandalone` (gitignored) | št    |
 
-Cevovod gradnje je izveden v enem prehodu:
+Gradbeni cevovod je en prehod:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (izhod Next.js)
-  └─ assembleStandalone()                 (kopira standalone + static + public + native assets)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` poleg tega najprej počisti oba imenika in zapiše
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kot označbo celovitosti za namestitev.
+`npm run build:release` dodatno najprej očisti oba imenika in zapiše `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kot nadzornika celovitosti razmestitve.
 
-`npm run build:contributor` uporablja profil gradnje samo za zaledje. Med gradnjo začasno
-ustvari nadomestne datoteke uporabniškega vmesnika nadzorne plošče, ohrani obravnavalnike
-poti API-ja in po končani gradnji obnovi izvirne datoteke. Za spremembe, ki vplivajo na
-uporabniški vmesnik nadzorne plošče, ali za popolno preverjanje izdaje uporabite
-`npm run build`; profil za sodelavce ni nadomestilo za gradnjo izdaje.
+`npm run build:contributor` uporablja samo zaledni gradbeni profil. Med gradnjo začasno odstrani datoteke UI nadzorne plošče, ohrani obdelovalce poti API in obnovi izvirne datoteke po gradnji. Uporabite `npm run build` za spremembe, ki vplivajo na nadzorno ploščo UI ali za celotno preverjanje izdaje; profil sodelavca ni nadomestilo za gradnjo izdaje.
 
-> **Opomba za namestitev na VPS:** oddaljeni imenik s sliko `/usr/lib/node_modules/omniroute/app/`
-> ostane nespremenjen. Orodja za namestitev vanj z rsync kopirajo vsebino imenika `dist/`.
-> Premaknjena je bila samo izhodna pot gradnje znotraj repozitorija (`app/` → `dist/`).
+> **opomba o uvedbi VPS :** oddaljeni imenik slik `/usr/lib/node_modules/omniroute/app/` je nespremenjen. Spretnosti uvajanja rsync vsebino `dist/` vanj. Premaknila se je samo izhodna pot gradnje v skladišču (`app/` → `dist/`).
 
-Privzeti URL-ji:
+Privzeti URLs:
 
-- **Nadzorna plošča**: `http://localhost:20128/dashboard`
+- **Nadzorna plošča** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -435,10 +420,10 @@ Nato uporabite veščine `/deploy-vps-*-cc`, ki z rsync sinhronizirajo `dist/` z
 
 ---
 
-## Pridobivanje pomoči
+## Iskanje pomoči
 
-- **Arhitektura**: Glejte [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Referenca API-ja**: Glejte [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Varnostna dokumentacija**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Operativna dokumentacija**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Težave**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Arhitektura** : Glej [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **Referenca API** : Glej [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Varnostni dokumenti** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Operacijski dokumenti** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Težave** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

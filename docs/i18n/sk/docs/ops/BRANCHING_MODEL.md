@@ -48,7 +48,7 @@ Pri zosúlaďovaní vydania sa otvorí problém označenia označený `release-f
 Pred predpokladaním, že požadovaná vetva je zlúčiteľná, skontrolujte, či nedošlo k otvorenému zmrazeniu:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mechanika zlúčenia (vlastník `queue` label → Mergify) je zdokumentovaná v [MERGE_TRAIN.md](./MERGE_TRAIN.md).

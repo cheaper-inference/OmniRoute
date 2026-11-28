@@ -4,12 +4,9 @@
 
 ---
 
-> **अंतिम अपडेट:** 2026-08-28 — v3.8.51
-> सुव्यवस्थित रिलीज़ प्रवाह, जो स्वचालन के लिए Claude Code कौशलों का उपयोग करता है।
+> सुव्यवस्थित रिलीज़ प्रवाह जो स्वचालन के लिए Claude कोड कौशल का लाभ उठाता है।
 >
-> **रिलीज़ के बीच क्यू/ब्रांच को ग्रीन रखें:** [RELEASE_GREEN.md](./RELEASE_GREEN.md) देखें
-> (`/green-prs` परिवार + `npm run check:release-green` + `/babysit` + रात्रिकालीन प्रक्रिया)। इसे समय-समय पर चलाने से —
-> और विशेष रूप से इस चेकलिस्ट से **पहले** — रिलीज़ PR ग्रीन स्थिति में शुरू होता है।
+> **रिलीज़ के बीच queue/branch हरा रखें:** [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` परिवार + `npm run check:release-green` + `/babysit` + रात्रिकालीन) देखें। इसे समय-समय पर — और विशेष रूप से चलाना** पहले** यह चेकलिस्ट — रिलीज़ PR हरा प्रारंभ करती है।
 
 ## संक्षेप में
 
@@ -60,7 +57,9 @@ npm run test:e2e           # वैकल्पिक, लेकिन अनु
 
 **Docker हब `latest` (प्रत्येक स्थिर SemVer प्रकाशन पर आवश्यक):** `docker-publish` वर्कफ़्लो को टैग करना होगा** दोनों** `X.Y.Z` और, जब `should-promote-latest.sh` सहमत होता है तो यह उच्चतम स्थिर SemVer है, `:latest` इसके साथ** वही डाइजेस्ट** . कार्य के बाद: हब `latest` डाइजेस्ट नए SemVer डाइजेस्ट के बराबर है और `last_updated` स्थानांतरित हो गया है। `:latest` पुराने बिल्ड पर न छोड़ें जबकि रिलीज़ नोट्स उन सुधारों के बारे में बात करते हैं जो केवल git पर मौजूद हैं। क्विकस्टार्ट लिखें `:latest` उपयोग करें; GitOps `X.Y.Z` पिन करते रहना चाहिए। [Docker रिलीज़ चैनल](../guides/DOCKER_GUIDE.md#release-channels) और #10317 देखें।
 
-**Docker हब संगठन रिपॉजिटरी (`cheaperinference/omniroute`):** Docker हब नामस्थानों के बीच एक रिपॉजिटरी को स्थानांतरित नहीं कर सकता है, इसलिए `diegosouzapw/omniroute` अपना पुल इतिहास और प्रत्येक रिलीज़ रखता है, और `docker-publish` का `mirror-org-dockerhub` कार्य प्रत्येक रिलीज़ किए गए संस्करण (और प्रचारित होने पर `:latest` ) को `ghcr.io/cheaper-inference/omniroute` से संगठन रिपॉजिटरी में कॉपी करता है। इसे `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` रहस्यों की आवश्यकता है; उनके बिना कार्य "Docker हब ऑर्ग मिरर स्किप्ड" चेतावनी के साथ हरा रहता है और अन्य रजिस्ट्रियां सामान्य रूप से प्रकाशित होती हैं। वहां जारी संस्करण को बाद में प्रकाशित करने के लिए, चलाएँ** क्रियाएँ → मिरर Docker छवि को Docker हब org → पर वर्कफ़्लो चलाएँ** `version=X.Y.Z` के साथ (और उच्चतम स्थिर संस्करण के लिए `promote_latest` ): यह मौजूदा छवियों की प्रतिलिपि बनाता है, कोई पुनर्निर्माण नहीं।
+**Docker हब संगठन रिपॉजिटरी (`cheaperinference/omniroute`):** Docker हब नामस्थानों के बीच एक रिपॉजिटरी को स्थानांतरित नहीं कर सकता है, इसलिए `diegosouzapw/omniroute` अपना पुल इतिहास और प्रत्येक रिलीज़ रखता है, और `docker-publish` का `mirror-org-dockerhub` कार्य प्रत्येक रिलीज़ किए गए संस्करण (और प्रचारित होने पर `:latest` ) को `ghcr.io/cheaper-inference/omniroute` से संगठन रिपॉजिटरी में कॉपी करता है। इसे `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` रहस्यों की आवश्यकता है; उनके बिना कार्य "Docker हब ऑर्ग मिरर स्किप्ड" चेतावनी के साथ हरा रहता है और अन्य रजिस्ट्रियां सामान्य रूप से प्रकाशित होती हैं। वहां जारी संस्करण को बाद में प्रकाशित करने के लिए, चलाएँ** क्रियाएँ → मिरर Docker छवि को Docker हब org → पर वर्कफ़्लो चलाएँ** `version=X.Y.Z` के साथ (और उच्चतम स्थिर संस्करण के लिए `promote_latest` ): यह मौजूदा छवियों की प्रतिलिपि बनाता है, कोई पुनर्निर्माण नहीं। उस रिपॉजिटरी का Docker हब अवलोकन हाथ से सेट किया गया है: जो API इसे संपादित करता है वह संगठन एक्सेस टोकन को अस्वीकार कर देता है।
+
+वही वर्कफ़्लो 2027-06-30 तक प्रत्येक रिलीज़ को लीगेसी GHCR पैकेज `ghcr.io/diegosouzapw/omniroute` में कॉपी करता है, इसलिए इसमें पिन किए गए इंस्टॉल अभी भी अपडेट होते रहते हैं; इसके सूचकांक में " `ghcr.io/cheaper-inference/omniroute` में स्थानांतरित" विवरण दिया गया है। इसे `GHCR_LEGACY_TOKEN` रहस्य ( `write:packages` के साथ `diegosouzapw` का एक क्लासिक व्यक्तिगत एक्सेस टोकन) की आवश्यकता है; इसके बिना वह कार्य "लीगेसी GHCR मिरर स्किप्ड" चेतावनी के साथ छूट जाता है।
 
 ## हॉटफिक्स फ़ास्ट-लेन (लेबल `hotfix`)
 
@@ -151,7 +150,7 @@ E2E मैट्रिक्स को स्वचालित रूप से
 ### प्रलेखन
 
 - [ ] `npm run check:docs-sync` पास (प्री-कमिट द्वारा ऑटो-रन)
-- [ ] `npm run check:docs-all` पास (छाता: दस्तावेज़-सिंक + दस्तावेज़-गणना + env-doc-सिंक + अप्रचलित-संस्करण + दस्तावेज़-लिंक)
+- [ ] `npm run check:docs-all` पास हो जाता है। इसके सलाहकार `check:deprecated-versions` फ़्लैग संस्करणों को स्पष्ट रूप से OmniRoute (3.6.x और पहले) के लिए जिम्मेदार ठहराया गया है और तारीखों को अनदेखा किया गया है।
 - [ ] `npm run check:env-doc-sync` 0 — कोड से बाहर निकलता है ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env अनुबंध बरकरार है
 - [ ] `npm run check:doc-links` 0 — से बाहर निकलता है, पुनर्गठन के बाद कोई टूटा हुआ आंतरिक मार्कडाउन संदर्भ नहीं है
 - [ ] storage/runtime ड्रिफ्ट के लिए `docs/architecture/ARCHITECTURE.md` की समीक्षा की गई
@@ -228,9 +227,9 @@ npm run build:release
 ### विरूपण साक्ष्य सत्यापन
 
 - [ ] `npm run build:release` सफल होता है और `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` क्लीन — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, या अन्य स्थानीय अवशेष
+- [ ] `npm run check:pack-artifact` स्वच्छ — कोई `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, या अन्य स्थानीय अवशेष नहीं
 - [ ] `dist/server.js` निर्माण के बाद मौजूद है
-- [ ] वैकल्पिक स्थानीय पैकेज्ड-रनटाइम धुआं: `npm run dev:candidate -- validate` के बाद `npm run dev:candidate -- build` एक पृथक `DATA_DIR` पर पैक किए गए टारबॉल को बूट करता है और `/api/health` + `/v1/models` जाँच करता है ( [योगदान गोल्डन पाथ](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) देखें)
+- [ ] वैकल्पिक स्थानीय पैकेज्ड-रनटाइम धुआं: `npm run dev:candidate -- validate` के बाद `npm run dev:candidate -- build` एक अलग `DATA_DIR` पर पैक किए गए टारबॉल को बूट करता है और `/api/health` + `/v1/models` जाँच करता है ( [योगदान गोल्डन पाथ](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) देखें)
 
 ### टैग करना एवं जारी करना
 
@@ -399,7 +398,7 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

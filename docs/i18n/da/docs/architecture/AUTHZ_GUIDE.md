@@ -4,12 +4,11 @@
 
 ---
 
-> **Sandhedskilde:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Senest opdateret:** 2026-09-22 — scope-navnerum peger på MCP-SERVER.md
+> **Sandhedens kilde:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute har en rutebevidst autorisationspipeline, der beskytter hver API-anmodning. Klassificeringen er **deterministisk** og **lukket som standard** — alt, der ikke kan klassificeres, ender som `MANAGEMENT` og kræver en session eller et token på administrationsniveau. Denne side forklarer modellen for teknikere, der vedligeholder ruter eller designer nye slutpunkter.
+OmniRoute har en rutebevidst autorisationspipeline, der porterer hver API anmodning. Klassificering er** deterministisk** og** fejl-lukket** — alt, der ikke kan klassificeres, ender som `MANAGEMENT` og kræver et sessions- eller management-grade token. Denne side forklarer modellen for ingeniører, der vedligeholder ruter eller designer nye endepunkter.
 
-![AuthZ-pipeline (3 ruteklasser + politikevaluering)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Kilde: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -187,7 +186,7 @@ Hver ruteklasse har en politik i `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — returnerer altid `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — udtrækker bærer, validerer via `validateApiKey()`. Falder kun igennem til anonym, når det effektive `REQUIRE_API_KEY` funktionsflag er deaktiveret. Det effektive flag løses gennem `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), så Dashboard-funktionsflag og miljøvariabler styrer `/api/v1/*`, `/api/v1beta/*` og aliaser konsekvent; resolver fejl fejl lukket. Tillader anmodninger om dashboard-session på klient- API ruter (inklusive `/api/v1/models`, brugt af dashboard-modelkataloget). Når Entra ID SSO er aktiveret, håndteres en bærer, der strukturelt er en Entra-token (tre base64url-segmenter, `RS*` alg, `kid`) af SSO -grenen** før** `validateApiKey()` og dens dom er endelig — Statiske API nøgler er upåvirkede. Se [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — accepterer dashboardsession, interne modelsynkroniseringsanmodninger (matchet mod `/api/providers/[name]/(sync-models|models)`) eller springer helt over, hvis `isAuthRequired()` returnerer falsk. Returnerer 403 (`AUTH_001`), når et bærer-token er til stede, men ugyldigt, ellers 401. Håndhæver også rutebeskyttelsesniveauerne (LOCAL_ONLY / ALWAYS_PROTECTED) før enhver godkendelsesgren — se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY stier i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (i dag: `/api/mcp/`) kan tilgås fra non-loopback, når bærer-nøglen bærer `manage` omfanget; alle andre LOCAL_ONLY stier forbliver strict-loopback uanset omfang.
+- **`managementPolicy`** (`policies/management.ts`) — accepterer dashboard-session, interne modelsynkroniseringsanmodninger (matchet mod `/api/providers/[name]/(sync-models|models)`) eller springer helt over, hvis `isAuthRequired()` returnerer falsk. Returnerer 403 (`AUTH_001`), når et bærer-token er til stede, men ugyldigt, ellers 401. Håndhæver også rute-vagt-niveauerne (LOCAL_ONLY / ALWAYS_PROTECTED) før enhver godkendelsesgren — se [Route Guard-niveauer](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY -stier i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (i dag: `/api/mcp/`) kan tilgås fra non-loopback, når bærer-tasten bærer `manage`/`admin` -omfanget eller det smalle `mcp:connect` omfang (`hasMcpConnectOrManageScope`), eller med en autentificeret dashboard-session; alle andre LOCAL_ONLY stier forbliver strict-loopback uanset omfang.
 
 En vellykket politik returnerer `AuthSubject` med `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Downstream-handlere kan læse det via `assertAuth(request, "CLIENT_API")` i `src/server/authz/assertAuth.ts` i stedet for at køre godkendelseslogik igen.
 
@@ -278,38 +277,24 @@ export async function POST(request: Request) {
 
 Vælg sættet efter form, ikke efter bekvemmelighed. En enkelt rute placeres i `PUBLIC_API_ROUTES_EXACT` (eller `PUBLIC_READONLY_CORS_API_ROUTES`, hvis den kun understøtter GET); kun et reelt undertræ placeres i `PUBLIC_API_ROUTE_PREFIXES`, og det **skal slutte med `/`**. Hvis en enkelt rute placeres på præfikslisten, offentliggøres også alle tilstødende stier, der deler dens indledende tegn — herunder søskenderuter med dynamiske segmenter, som tilføjes senere (GHSA-74g9-q8f6-793h). Opdater enhedstestene i `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` og `tests/unit/authz/classify.test.ts`.
 
-## Scopes
+## Omfang
 
-Tre navnerum. Hver kontrolfunktion læser kun sine egne strenge. Sammenligningen side om side,
-herunder hvorfor `manage` ikke består `scopeMatches` for `read:compression`, og hvorfor et
-`read`-adgangstoken ikke kan udføre `PATCH /api/keys/{id}`, findes i
-[Tre scope-navnerum](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Tre navnerum. Hver brik læser kun sine egne strenge. Side-om-side, herunder hvorfor `manage` fejler `scopeMatches` for `read:compression`, og hvorfor et `read` adgangstoken ikke kan `PATCH /api/keys/{id}`, er [Three scope namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API-nøgler indeholder et `scopes`-array (gemt som JSON i `api_keys.scopes`, se `src/lib/db/apiKeys.ts`).
+API nøgler bærer et `scopes` array (lagret som JSON i `api_keys.scopes`, se `src/lib/db/apiKeys.ts`).
 
-### Administrations-scope
+### Ledelsens omfang
 
-- `manage` / `admin` — `hasManageScope`. Bearer-adgang til administrations-API-ruter.
-- `mcp:connect`, `self:usage`, `self:account-quota` og
-  `policy:bypass-provider-quota` er additive scopes med eksakt match. De ligger
-  uden for `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` åbner kun
-  `/api/mcp/`-undtagelsen for trafik uden for loopback.
+- `manage` / `admin` — `hasManageScope`. Bæreradgang til styrings- API ruter.
+- `mcp:connect`, `self:usage`, `self:account-quota` og `policy:bypass-provider-quota` er additive eksakt-match-omfang. De sidder udenfor `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` åbner kun `/api/mcp/` non-loopback carve-out.
 
-### MCP-værktøjsscopes
+### MCP værktøj scopes
 
-Katalog og matchningsregler (identisk streng eller et tildelt scope, der slutter med `*`):
-[MCP-værktøjsscopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` i `src/shared/constants/mcpScopes.ts` er den oprindelige typede
-delmængde, ikke hele kataloget. Håndhævelsen kører i
-`open-sse/mcp-server/scopeEnforcement.ts`, efter at `resolveCallerScopeContext()`
-har fundet scopes fra MCP-godkendelsesoplysninger, request-metadata eller `OMNIROUTE_MCP_SCOPES`.
-Den forbliver deaktiveret, medmindre `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Katalog og matchningsregler (identisk streng eller et givet omfang, der ender på `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` i `src/shared/constants/mcpScopes.ts` er det originale indtastede undersæt, ikke det fulde katalog. Håndhævelse kører i `open-sse/mcp-server/scopeEnforcement.ts` efter `resolveCallerScopeContext()` løser omfang fra MCP auth info, request metadata eller `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` slår det til globalt (standard `false`), men det håndhæves altid for en HTTP/SSE kalder, hvis API nøgle mangler `manage`/`admin` (se `shouldForceScopeEnforcement()` i `open-sse/mcp-server/scopeEnforcement.ts`), uanset flaget.
 
-### Adgangstoken-scopes
+### Adgangstoken-omfang
 
-`read` / `write` / `admin` på `oma_live_…`-tokens, rangeret af `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Denne rangering gælder kun for
-adgangstoken-legitimationsoplysningerne. Se [Administrationsgodkendelse](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` på `oma_live_…` tokens, rangeret efter `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Denne rangering gælder kun for legitimationsoplysningerne for adgangstoken. Se [Administrationsgodkendelse](../guides/MANAGEMENT-AUTH.md).
 
 ## Godkendelse påkrævet til/fra
 

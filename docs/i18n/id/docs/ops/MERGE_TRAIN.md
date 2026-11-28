@@ -4,90 +4,63 @@
 
 ---
 
-> **19-11-2026: antrean penggabungan Mergify dihentikan** (keputusan pemilik). `.mergify.yml` tidak lagi mendefinisikan antrian dan menolak perintah Mergify yang menggabungkan atau menulis ulang permintaan tarik. Rilis PRs digabungkan secara manual di bawah aturan repositori "Memerlukan gerbang hijau pada rilis aktif" (`Gate / CI` + `Gate / Quality`) hingga omni-queue berjalan dalam mode langsung, dan melalui omni-queue setelah itu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Bagian Gabungkan di bawah menggambarkan antrean sebagaimana adanya.
+## Mendarat di cabang rilis
 
-Sejak v3.8.49 (WS3.2/WS3.4 dari paket quality/velocity ) jalur penggabungan default untuk PRs yang ditinjau ke `release/vX.Y.Z` adalah** Gabungkan antrian penggabungan** (`.mergify.yml`); itu** kereta gabungan manual** yang didokumentasikan di bawah ini adalah FALLBACK — yang digunakan selama insiden, rilis terhenti, atau jika paket Mergify Open Source berubah.
+Antrian omni mengatur pendaratan ke `release/vX.Y.Z`. Baca `mode` tingkat atas di `config/merge-queue/config.json` di cabang default sebelum mendapatkan PR. Lihat [Omni-Antrian](OMNI_QUEUE.md).
 
-## Jalur default: antrean Mergify
+- **`shadow`** menjalankan validasi dan meninggalkan pendaratan ke penggabungan manual. Terapkan `omni-queue` ke PR yang disetujui pada head terakhirnya. Periksa kelayakan dengan `npm run queue -- why <PR>`. Tunggu keputusan untuk kepala itu di `npm run queue -- history --base <branch>`. Lanjutkan pada `would-land`. Pada `culprit-found` atau `would-dequeue`, tahan penggabungan dan perbaiki penyebabnya.
+- **Pengecualian bayangan.** Kereta api dengan CI penuh berwarna hijau terhadap ujung pangkalan saat ini dapat melanjutkan perjalanan tanpa keputusan antrian terpisah. Pengecualian yang sama berlaku ketika kepala PR sudah berisi ujung dasar saat ini.
+- **`live`** menggunakan label `omni-queue` untuk memicu pendaratan. Antriannya sendiri yang mendaratkan PR. Tinggalkan perintah penggabungan dan arahkan dorongan ke antrian.
 
-1. PR ditinjau/dinyatakan hijau oleh kampanye dan disetujui melalui gerbang ⭐
-   pra-penggabungan milik pemilik (laporan + keputusan per item — lihat `/merge-prs` Langkah 0.75).
-2. Pemilik (atau sesi yang bertindak berdasarkan keputusan pemilik) menerapkan label **`queue`**.
-   Label tersebut ADALAH persetujuan penggabungan; Mergify hanya mengeksekusinya.
-3. Mergify memvalidasi PR yang masuk antrean **secara serial** (satu per satu) terhadap
-   gerbang cepat dan menggabungkannya (squash). Pemrosesan batch + biseksi otomatis merupakan
-   tingkat Mergify berbayar ("Cannot use Merge Queue batch" pada paket gratis, #7220),
-   sehingga `.mergify.yml` tidak menetapkan `batch_size`; pemrosesan batch tetap menjadi tugas
-   rangkaian penggabungan manual di bawah. PR yang pemeriksaannya masih tertunda setelah
-   `checks_timeout` (240 min = 2× p95 terukur dari `quality.yml`) dikeluarkan dari antrean
-   alih-alih menghambat antrean.
-4. Setelah penggabungan, alur kerja berkelanjutan untuk memastikan rilis tetap hijau
-   memvalidasi tip baru saat push dan membuka isu atribusi jika kombinasi tersebut
-   mengalami regresi (tidak pernah melakukan auto-revert).
+Setiap pendaratan memerlukan izin pemilik dan pemeriksaan wajib yang berlaku. Terapkan `omni-queue` hanya setelah pemilik mengizinkan pendaratan. Antrean PRs yang menyentuh jalur yang dilindungi juga memerlukan keputusan `protected-approved` pemilik untuk PR tersebut.
 
-Pagar pengaman (mencerminkan Aturan Keras #21/#22 di `CLAUDE.md`):
+Aturan "Memerlukan gerbang hijau pada rilis aktif" memerlukan `Gate / CI` dan `Gate / Quality` hijau di kepala. Jangan pernah menggunakan `--admin` untuk melewati gerbang merah. Blok pembekuan rilis bergabung ke dalam cabang beku. Lihat [Aturan Keras 21](HARD_RULES_DETAIL.md). Jangan pernah memberi label, menggabungkan, atau mendorong permintaan tarik agar sesi lain berfungsi. Lihat [Aturan Keras 22](HARD_RULES_DETAIL.md).
 
-- **Pembekuan rilis aktif** → JANGAN beri label pada PR yang menargetkan cabang yang
-  dibekukan; targetkan ulang terlebih dahulu ke `release/vX+1` yang aktif.
-- **PR dalam proses milik sesi lain** → jangan pernah memberinya label; hanya sesi
-  pemilik yang memasukkan pekerjaannya sendiri ke antrean.
-- Diff khusus pengujian dan PR berlabel `hotfix` sudah menjalankan CI yang dikurangi
-  (lihat `RELEASE_CHECKLIST.md` → Jalur Cepat Hotfix); kondisi antrean menerima kumpulan
-  pemeriksaan apa pun yang benar-benar dijalankan (`#check-failure=0` +
-  `#check-pending=0`).
+## Permintaan tarik kereta
 
-## Jalur cadangan: merge-train manual
+1. Mulai cabang kereta di ujung basis rilis saat ini. Integrasikan kepala anggota yang disetujui secara tepat menggunakan komitmen gabungan. Pertahankan riwayat komitmen mereka dengan menghindari squash dan rebase.
+2. Buka satu permintaan tarik untuk cabang kereta. Validasi PR tersebut dengan CI penuhnya sendiri di ujung dasar saat ini. Periksa kembali ujung dasar dan kepala anggota yang disetujui sebelum mendarat. Refresh kereta dan CI -nya ketika kandidat yang divalidasi berubah.
+3. Mendaratkan kereta PR dengan komit gabungan dalam mode antrian yang berlaku. Dalam mode langsung, metode pendaratan `merge-ff` antrian mempertahankan komit penggabungan. Kepala anggota asli dapat dijangkau dari cabang rilis. GitHub menandai anggota PRs sebagai gabungan dan komit tetap mempertahankan penulisnya.
 
-Digunakan ketika antrean tidak tersedia. Ini membakukan praktik yang menuntaskan 33 PR
-dalam satu hari selama siklus v3.8.47:
+Contoh publiknya adalah [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Itu menggabungkan 18 anggota PRs dan mendarat dengan komitmen penggabungan pada 24-11-2026.
 
-1. **Susun batch** (~10–30 PR yang telah ditinjau+disetujui). Periksa benturan `linked:`
-   (`tap.testFiles` yang sama, bagian CHANGELOG yang sama) dan proses PR tersebut secara berurutan.
-2. **Validasi SEKALI**: dalam worktree terisolasi yang dibuat dari tip rilis, gabungkan semua head
-   batch secara lokal, lalu jalankan rangkaian yang setara dengan rilis
-   (`npm run check:release-green`, tambahkan `--with-build` sebelum rilis).
-   `scripts/release/merge-train.sh <base> <PR#>…` mengotomatiskan langkah 1–2 (PR yang berkonflik
-   dikeluarkan, train tetap berlanjut). Mode penuh menjalankan `npm run test:unit` — runner
-   yang disetel untuk mesin tersebut (`--test-concurrency=20`), **bukan** dua shard CI 4-core
-   berurutan, yang membuat fase dominan hanya menggunakan ~25% dari mesin 16-core (diperbaiki
-   2026-07-18). `--fast` (untuk menuntaskan mega-train dalam satu hari, disetujui pemilik pada 2026-07-18)
-   mempertahankan setiap gerbang statis + vitest, tetapi hanya menjalankan file node:test yang diubah oleh
-   PR yang dimasukkan; rangkaian PENUH tetap harus dijalankan setidaknya sekali per hari pada
-   tip akumulatif (satu train tanpa `--fast`).
-3. **Hijau** → gabungkan PR secara berurutan (periksa ulang `state,headRefOid` sebelum masing-masing —
-   PR yang head-nya berubah harus ditinjau ulang). Buktikan bahwa diff bersih dari setiap penggabungan adalah
-   perubahan milik PR itu sendiri (tidak ada revert akibat auto-resolve: audit `git diff --stat` untuk
-   penghapusan di luar cakupan).
-4. **Merah** → bagi batch menjadi dua bagian (validasi setiap bagian), alih-alih memvalidasi ulang
-   satu per satu; kembalikan PR yang bermasalah ke antrean peninjauan beserta buktinya.
-5. **Jangan pernah**: menggabungkan ke branch yang dibekukan selama pembekuan; menggunakan `git stash`
-   di mana pun; menjalankan ulang CI secara menyeluruh dengan harapan status merah akan hilang
-   (aturan: status merah adalah informasi).
+Sinkronisasi kembali dari `main` ke cabang rilis berikutnya juga dilakukan melalui komit gabungan. Mempertahankan leluhur `main` diperlukan untuk sinkronisasi kembali nanti. Lihat [Isolasi Worktree](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Tingkatan (alasan antrean aman hanya dengan fast-gates)
+## Validator kereta gabungan lokal
 
-- **Per PR** (fast-gates quality.yml): pengujian yang terdampak TIA + unit lengkap 4-shard +
-  vitest + kumpulan lint + typecheck + integritas dokumentasi/changelog.
-- **Per batch/tip** (release-green berkelanjutan): gerbang KERAS `--quick` pada setiap push ke
-  branch rilis; penyisiran penuh `--with-build --full-ci` 3×/hari.
-- **Per rilis** (ci.yml pada PR rilis): matriks lengkap termasuk E2E ×9,
-  artefak paket + boot-smoke tarball, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Tidak ada yang divalidasi lebih sedikit daripada sebelumnya — cakupan berat hanya dijalankan per batch/tip,
-bukan per PR, dan inilah yang menghilangkan perjalanan bolak-balik O(N).
+Validator mengambil basis dan kepala PR dan menggabungkannya dalam pohon kerja sekali pakai. Ia menjalankan rangkaian paritasnya satu kali pada pohon yang dihasilkan. Konflik pengambilan atau penggabungan head yang gagal akan mengeluarkan PR tersebut dan skrip melanjutkan dengan PRs yang tersisa.
 
-## Prasyarat checkout baru untuk `merge-train.sh`
+- **`--plan`** mencetak langkah-langkah mode yang dipilih dan keluar tanpa membuat pohon kerja atau menghubungi remote. Gabungkan dengan `--fast` untuk memeriksa rencana cepat.
+- **`--fast`** menjalankan gerbang statis umum, file `node:test` yang diubah dan dipilih di bawah `tests/unit/`, dan `npm run test:vitest`. Jalankan validasi lokal penuh setidaknya sekali sehari pada tip yang terakumulasi saat menggunakan mode cepat.
+- **Modus penuh** menambahkan gerbang statis penuh saja dan menjalankan `npm run test:unit` dan `npm run test:vitest`.
 
-Skrip menjalankan **preflight** fail-fast pada checkout root (sebelum pekerjaan worktree apa pun)
-agar instalasi yang rusak tidak pernah menyamar sebagai train merah:
+Gerbang statis yang gagal dijalankan kembali pada pangkalan yang tidak tersentuh jika probe pangkalan tersedia. Skrip melaporkan kegagalan yang diwariskan dan berlanjut ketika setiap baris pelanggaran yang diketahui juga muncul di pangkalan dan jumlah totalnya tidak bertambah.
 
-1. `npm ci`, lalu jalankan postinstall `bun` yang diblokir npm:
-   `(cd node_modules/bun && node install.js)` — jika tidak, `check:provider-consistency`
-   dan `check:known-symbols` (keduanya `bun scripts/…`) gagal pada train DAN base tanpa
-   baris pelanggaran.
-2. Tidak boleh ada `node_modules/node_modules` yang tersisa (pohon dependensi duplikat; React dimuat dua kali
-   dan rangkaian UI vitest langsung gagal).
-3. `node_modules/.bin/tsc` tersedia dan dapat dieksekusi (instalasi parsial tidak memilikinya).
+| KELUAR | Arti                                                                                                                                                              |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`    | Mencetak rencana atau menyelesaikan suite. Ringkasan suite mencantumkan semua kegagalan statis yang diwarisi dan PRs yang dikeluarkan.                            |
+| `1`    | Argumen tidak valid, tidak ada checkout Git, preflight gagal, atau tidak ada PR yang masuk.                                                                       |
+| `2`    | Pemeriksaan suite gagal dan tidak memenuhi syarat sebagai warisan. Operator dapat membagi dua batch, mengeluarkan PR yang mengganggu, dan menjalankannya kembali. |
 
-Train menjalankan `npm run check:cycles:ratchet` yang bersifat memblokir; `npm run check:cycles`
-saja bersifat saran (perintah tersebut mencantumkan SCC dan keluar dengan status non-zero bahkan pada base yang sehat).
+Izin lokal hanya memberikan bukti diagnostik untuk dokumen pemiliknya. Setiap pendaratan masih memerlukan otorisasi pemilik, pemeriksaan yang diperlukan, dan keputusan antrean bayangan jika berlaku.
+
+## Berjenjang
+
+- **Per PR.** CI dan Pemeriksaan pemilihan kualitas berdasarkan jalur yang diubah. Kode PRs menjalankan gerbang kualitas cepat dan pengujian yang terkena dampak, dengan unit terpisah dan pekerjaan Vitest di CI.
+- **Per kandidat antrian.** CI dan Quality menjalankan profil lengkap untuk kandidat yang disusun pada referensi antriannya.
+- **Per tip rilis.** Release-Green menjalankan gerbang keras dengan cepat pada dorongan yang cocok dengan filter jalurnya. Tiga proses terjadwal per hari menggunakan sapuan penuh untuk cabang rilis.
+- **Per rilis.** Matriks CI lengkap mencakup pecahan E2E, validasi paket, asap boot tarball, dan pemeriksaan cakupan. Lihat [Daftar Periksa Rilis](RELEASE_CHECKLIST.md).
+
+## Prasyarat pembayaran baru untuk `merge-train.sh`
+
+Preflight dijalankan sebelum membuat pohon kerja. Instal dependensi dengan `npm ci`. Konfirmasikan bahwa `node_modules/.bin/tsc` dapat dieksekusi dan `node_modules/node_modules` tidak ada. Periksa apakah `node_modules/.bin/bun --version` berhasil.
+
+Jika postinstall Bun dilewati, jalankan `(cd node_modules/bun && node install.js)`. Konsistensi penyedia dan pemeriksaan simbol yang diketahui menggunakan Bun. Validator menjalankan `npm run check:cycles:ratchet` sebagai gerbang pemblokiran. Perintah `npm run check:cycles` yang berdiri sendiri bersifat penasehat.
+
+## Sejarah
+
+Antrean penggabungan Mergify dihentikan pada 19-11-2026.

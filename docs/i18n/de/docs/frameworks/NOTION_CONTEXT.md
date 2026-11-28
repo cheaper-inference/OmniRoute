@@ -68,43 +68,31 @@ Alle drei Methoden erfordern eine Dashboard-Authentifizierung (`isAuthenticated`
 durch. Wenn Notion ein Fehlerobjekt zurückgibt, wird das Token gelöscht und der Aufruf
 schlägt mit `400` fehl.
 
-## MCP-Tools (6)
+## MCP Werkzeuge (6)
 
-Definiert in `open-sse/mcp-server/tools/notionTools.ts`. Das Token wird zum Zeitpunkt
-des Aufrufs über `getNotionToken()` aufgelöst. Falls keines konfiguriert ist, löst das
-Tool folgenden Fehler aus:
-`"Notion-Integrationstoken nicht konfiguriert. Legen Sie es unter Einstellungen > Kontextquellen fest."`
+Definiert in `open-sse/mcp-server/tools/notionTools.ts`. Das Token wird zum Zeitpunkt des Aufrufs über `getNotionToken()` aufgelöst; Wenn keine konfiguriert ist, löst das Tool `"Notion integration token not configured. Set it in Settings > Context Sources."` aus
 
-| Tool                         | Scope          | Beschreibung                                                                                                |
-| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Durchsucht Seiten und Datenbanken anhand einer Textabfrage (gibt Titel, IDs und URLs zurück). Paginiert.    |
-| `notion_get_page`            | `read:notion`  | Ruft Inhalt und Metadaten einer Seite anhand ihrer ID ab.                                                   |
-| `notion_list_block_children` | `read:notion`  | Listet alle untergeordneten Blöcke eines Blocks oder einer Seite auf (die Blockstruktur). Paginiert.        |
-| `notion_query_database`      | `read:notion`  | Fragt eine Datenbank mit optionalen `filter` + `sorts` ab (Notion-API-Format). Paginiert.                   |
-| `notion_get_database`        | `read:notion`  | Ruft das Schema/die Metadaten einer Datenbank anhand ihrer ID ab.                                           |
-| `notion_append_blocks`       | `write:notion` | Hängt untergeordnete Blöcke an einen bestehenden Block oder eine Seite an (maximal 100 Blöcke pro Anfrage). |
+| Werkzeug                     | Umfang         | Beschreibung                                                                                                                |
+| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Durchsuchen Sie Seiten und Datenbanken per Textabfrage (gibt Titel, IDs, URLs zurück). Paginiert.                           |
+| `notion_get_page`            | `read:notion`  | Erhalten Sie Inhalte und Metadaten einer Seite über deren ID.                                                               |
+| `notion_list_block_children` | `read:notion`  | Listen Sie alle untergeordneten Blöcke eines Blocks oder einer Seite (des Blockbaums) auf. Paginiert.                       |
+| `notion_query_database`      | `read:notion`  | Fragen Sie eine Datenbank mit optionalem `filter` + `sorts` (Notion API Format) ab. Paginiert.                              |
+| `notion_get_database`        | `read:notion`  | Rufen Sie den schema/metadata einer Datenbank mit ID ab.                                                                    |
+| `notion_append_blocks`       | `write:notion` | Hängen Sie untergeordnete Blöcke an einen vorhandenen Block oder eine vorhandene Seite an (maximal 100 Blöcke pro Anfrage). |
 
 ### Eingabeparameter
 
-- `notion_search` — `query` (1–500 Zeichen), `pageSize` (1–100, Standardwert 20),
-  `startCursor` (optional).
-- `notion_get_page` — `pageId` (32-stellige Hexadezimalzahl oder UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, Standardwert 50),
-  `startCursor` (optional).
-- `notion_query_database` — `databaseId`, `filter` (optional, Notion-Filterformat),
-  `sorts` (optionales Array), `pageSize` (1–100, Standardwert 50), `startCursor` (optional).
+- `notion_search` — `query` (1–500 Zeichen), `pageSize` (1–100, Standard 20), `startCursor` (optional).
+- `notion_get_page` — `pageId` (32 Zeichen hexadezimal oder UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, Standard 50), `startCursor` (optional).
+- `notion_query_database` — `databaseId`, `filter` (optional, Notion Filterformat), `sorts` (optionales Array), `pageSize` (1–100, Standard 50), `startCursor` (optional).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (Array von Blockobjekten),
-  `after` (optionale Position).
+- `notion_append_blocks` — `blockId`, `children` (Array von Blockobjekten), `after` (optionale Position).
 
-### Scopes
+### Bereiche
 
-Die Lese-Tools erfordern `read:notion`, das Schreib-Tool erfordert `write:notion`.
-Scopes werden von `withScopeEnforcement()` in
-`open-sse/mcp-server/server.ts` nur erzwungen, wenn `OMNIROUTE_MCP_ENFORCE_SCOPES=true`
-gilt. Die zulässigen Scopes des Aufrufers stammen aus `OMNIROUTE_MCP_SCOPES`
-(durch Kommas getrennt) oder aus dem Scope-Kontext des authentifizierten API-Schlüssels.
-Das vollständige Scope-Modell finden Sie unter [MCP-SERVER.md](./MCP-SERVER.md).
+Die Lesetools erfordern `read:notion` und das Schreibtool erfordert `write:notion`. Bereiche werden von `withScopeEnforcement()` in `open-sse/mcp-server/server.ts` erzwungen, wenn `OMNIROUTE_MCP_ENFORCE_SCOPES=true` und immer für einen HTTP/SSE Aufrufer, dessen API Schlüssel `manage`/`admin` fehlt; Die zulässigen Bereiche des Aufrufers stammen aus `OMNIROUTE_MCP_SCOPES` (durch Kommas getrennt) oder dem Bereichskontext des authentifizierten API Schlüssels. Das vollständige Modell finden Sie unter [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Endpunkte
 

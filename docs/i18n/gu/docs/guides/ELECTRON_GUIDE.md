@@ -4,9 +4,9 @@
 
 ---
 
-> **સત્યનો સ્ત્રોત:** `electron/` વર્કસ્પેસ** છેલ્લે અપડેટ કર્યું:** 2026-06-28 — v3.8.40
+> **સત્યનો સ્ત્રોત:** `electron/` વર્કસ્પેસ
 
-OmniRoute એક ક્રોસ-પ્લેટફોર્મ ડેસ્કટોપ એપ (Windows / macOS / Linux) પર બિલ્ટ**Electron 41** +** ઇલેક્ટ્રોન-બિલ્ડર 26.10** . ડેસ્કટોપ એપ બાળ પ્રક્રિયા તરીકે Next.js સ્ટેન્ડઅલોન સર્વરને બનાવે છે, તેના પર `BrowserWindow` નિર્દેશ કરે છે અને સિસ્ટમ ટ્રે, ઓટો-અપડેટર, IPC બ્રિજ અને ઝીરો-કોન્ફિગ સિક્રેટ બુટસ્ટ્રેપ ઉમેરે છે.
+OmniRoute એક ક્રોસ-પ્લેટફોર્મ ડેસ્કટોપ એપ (Windows / macOS / Linux) પર બિલ્ટ**Electron 41** +** ઇલેક્ટ્રોન-બિલ્ડર 26.10** . ડેસ્કટોપ એપ Next.js સ્ટેન્ડઅલોન સર્વરને બાળ પ્રક્રિયા તરીકે બનાવે છે, તેના પર `BrowserWindow` નિર્દેશ કરે છે અને સિસ્ટમ ટ્રે, ઓટો-અપડેટર, IPC બ્રિજ અને ઝીરો-કોન્ફિગ સિક્રેટ બુટસ્ટ્રેપ ઉમેરે છે.
 
 ## આર્કિટેક્ચર
 
@@ -196,9 +196,9 @@ spawn(process.execPath, [serverScript], {
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
 - દેવ મોડ ફક્ત `script-src` માં `'unsafe-eval'` ઉમેરે છે
 
-## સ્વતઃ-અપડેટ
+## સ્વતઃ અપડેટ
 
-GitHub પ્રદાતા (`diegosouzapw/OmniRoute`) સાથે `electron-updater` ઉપયોગ કરે છે.
+GitHub પ્રદાતા (`cheaper-inference/OmniRoute`) સાથે `electron-updater` ઉપયોગ કરે છે.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC દ્વારા રેન્ડરરને મોકલેલ ઇવેન્ટ્સ : `checking`, `available`, `not-available`, `downloading` ( `percent` સાથે), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage હસ્તાક્ષર વૈકલ્પિક છે — સે�
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-પ્રકાશનોને GitHub રીલીઝ (`diegosouzapw/OmniRoute`) પર પ્રકાશિત કરવામાં આવે છે, જ્યાં `electron-updater` નવા સંસ્કરણો માટે તપાસ કરે છે.
+પ્રકાશનોને GitHub રીલીઝ (`cheaper-inference/OmniRoute`) પર પ્રકાશિત કરવામાં આવે છે, જ્યાં `electron-updater` નવા સંસ્કરણો માટે તપાસ કરે છે.
 
 ## મુશ્કેલીનિવારણ
 

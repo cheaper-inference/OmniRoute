@@ -20,24 +20,21 @@ URL ของ app-server ที่กำหนดค่าไว้** และ 
 ## 1. สถาปัตยกรรม
 
 ```
-┌─ แอป OmniRoute ─────────────────┐        ┌─ ไซด์คาร์ codex-app-server ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ โทเค็นความสามารถ)            │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  จัดการ OpenAI OAuth ด้วยตนเอง      │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, รีเฟรชอัตโนมัติ) │
-        │ ใช้ร่วมกัน (วอลุ่ม compose)        └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → โทเค็นความสามารถของ WS (ทั้งสองฝั่งเมานต์วอลุ่มนี้)
-  codex-appserver-home    → ~/.codex (แดชบอร์ดเขียน auth.json
-                             และ codex app-server ของไซด์คาร์อ่านไฟล์นี้)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- ไซด์คาร์รับฟัง **เฉพาะ** บนเครือข่าย compose ภายใน
-  (`ws://codex-app-server:1456`) โดยมีโทเค็นความสามารถป้องกันอยู่ และจะ **ไม่**
-  ถูกเผยแพร่ไปยังโฮสต์หรืออินเทอร์เน็ต
-- Codex CLI รวมอยู่ใน `omniroute:base` แล้ว ดังนั้นจึงไม่จำเป็นต้องติดตั้ง codex
-  บนโฮสต์หรือเครื่องของผู้ใช้เมื่อคุณเรียกใช้ไซด์คาร์
+- รถเทียมข้างรถจักรยานยนต์ฟัง** เท่านั้น** บนเครือข่ายการเขียนภายใน (`ws://codex-app-server:1456`) ด้านหลังโทเค็นความสามารถ มันคือ** ไม่เคย** เผยแพร่ไปยังโฮสต์หรืออินเทอร์เน็ต
+- รถเทียมข้างรถจักรยานยนต์ใช้ `omniroute:cli-no-docker` ซึ่งสร้างจากเป้าหมาย `runner-cli-no-docker` ซึ่งรวมถึง Codex CLI
 
 ## 2. เริ่มระบบ
 

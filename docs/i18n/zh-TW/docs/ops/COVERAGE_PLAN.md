@@ -1,4 +1,9 @@
+# Test Coverage Plan (中文 (繁體))
+
+🌐 **Languages:** 🇺🇸 [English](../../../../ops/COVERAGE_PLAN.md) · 🇪🇹 [am](../../../am/docs/ops/COVERAGE_PLAN.md) · 🇸🇦 [ar](../../../ar/docs/ops/COVERAGE_PLAN.md) · 🇦🇿 [az](../../../az/docs/ops/COVERAGE_PLAN.md) · 🇧🇬 [bg](../../../bg/docs/ops/COVERAGE_PLAN.md) · 🇧🇩 [bn](../../../bn/docs/ops/COVERAGE_PLAN.md) · 🇧🇦 [bs](../../../bs/docs/ops/COVERAGE_PLAN.md) · 🇨🇿 [cs](../../../cs/docs/ops/COVERAGE_PLAN.md) · 🇩🇰 [da](../../../da/docs/ops/COVERAGE_PLAN.md) · 🇩🇪 [de](../../../de/docs/ops/COVERAGE_PLAN.md) · 🇬🇷 [el](../../../el/docs/ops/COVERAGE_PLAN.md) · 🇪🇸 [es](../../../es/docs/ops/COVERAGE_PLAN.md) · 🇪🇪 [et](../../../et/docs/ops/COVERAGE_PLAN.md) · 🇮🇷 [fa](../../../fa/docs/ops/COVERAGE_PLAN.md) · 🇫🇮 [fi](../../../fi/docs/ops/COVERAGE_PLAN.md) · 🇫🇷 [fr](../../../fr/docs/ops/COVERAGE_PLAN.md) · 🇮🇪 [ga](../../../ga/docs/ops/COVERAGE_PLAN.md) · 🇮🇳 [gu](../../../gu/docs/ops/COVERAGE_PLAN.md) · 🇳🇬 [ha](../../../ha/docs/ops/COVERAGE_PLAN.md) · 🇮🇱 [he](../../../he/docs/ops/COVERAGE_PLAN.md) · 🇮🇳 [hi](../../../hi/docs/ops/COVERAGE_PLAN.md) · 🇭🇷 [hr](../../../hr/docs/ops/COVERAGE_PLAN.md) · 🇭🇺 [hu](../../../hu/docs/ops/COVERAGE_PLAN.md) · 🇦🇲 [hy](../../../hy/docs/ops/COVERAGE_PLAN.md) · 🇮🇩 [id](../../../id/docs/ops/COVERAGE_PLAN.md) · 🇳🇬 [ig](../../../ig/docs/ops/COVERAGE_PLAN.md) · 🇮🇹 [it](../../../it/docs/ops/COVERAGE_PLAN.md) · 🇯🇵 [ja](../../../ja/docs/ops/COVERAGE_PLAN.md) · 🇬🇪 [ka](../../../ka/docs/ops/COVERAGE_PLAN.md) · 🇰🇭 [km](../../../km/docs/ops/COVERAGE_PLAN.md) · 🇮🇳 [kn](../../../kn/docs/ops/COVERAGE_PLAN.md) · 🇰🇷 [ko](../../../ko/docs/ops/COVERAGE_PLAN.md) · 🇱🇹 [lt](../../../lt/docs/ops/COVERAGE_PLAN.md) · 🇱🇻 [lv](../../../lv/docs/ops/COVERAGE_PLAN.md) · 🇮🇳 [ml](../../../ml/docs/ops/COVERAGE_PLAN.md) · 🇮🇳 [mr](../../../mr/docs/ops/COVERAGE_PLAN.md) · 🇲🇾 [ms](../../../ms/docs/ops/COVERAGE_PLAN.md) · 🇲🇹 [mt](../../../mt/docs/ops/COVERAGE_PLAN.md) · 🇲🇲 [my](../../../my/docs/ops/COVERAGE_PLAN.md) · 🇳🇵 [ne](../../../ne/docs/ops/COVERAGE_PLAN.md) · 🇳🇱 [nl](../../../nl/docs/ops/COVERAGE_PLAN.md) · 🇳🇴 [no](../../../no/docs/ops/COVERAGE_PLAN.md) · 🇮🇳 [or](../../../or/docs/ops/COVERAGE_PLAN.md) · 🇮🇳 [pa](../../../pa/docs/ops/COVERAGE_PLAN.md) · 🇵🇭 [phi](../../../phi/docs/ops/COVERAGE_PLAN.md) · 🇵🇱 [pl](../../../pl/docs/ops/COVERAGE_PLAN.md) · 🇵🇹 [pt](../../../pt/docs/ops/COVERAGE_PLAN.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/COVERAGE_PLAN.md) · 🇷🇴 [ro](../../../ro/docs/ops/COVERAGE_PLAN.md) · 🇷🇺 [ru](../../../ru/docs/ops/COVERAGE_PLAN.md) · 🇱🇰 [si](../../../si/docs/ops/COVERAGE_PLAN.md) · 🇸🇰 [sk](../../../sk/docs/ops/COVERAGE_PLAN.md) · 🇸🇮 [sl](../../../sl/docs/ops/COVERAGE_PLAN.md) · 🇷🇸 [sr](../../../sr/docs/ops/COVERAGE_PLAN.md) · 🇸🇪 [sv](../../../sv/docs/ops/COVERAGE_PLAN.md) · 🇰🇪 [sw](../../../sw/docs/ops/COVERAGE_PLAN.md) · 🇮🇳 [ta](../../../ta/docs/ops/COVERAGE_PLAN.md) · 🇮🇳 [te](../../../te/docs/ops/COVERAGE_PLAN.md) · 🇹🇭 [th](../../../th/docs/ops/COVERAGE_PLAN.md) · 🇹🇷 [tr](../../../tr/docs/ops/COVERAGE_PLAN.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/ops/COVERAGE_PLAN.md) · 🇵🇰 [ur](../../../ur/docs/ops/COVERAGE_PLAN.md) · 🇺🇿 [uz](../../../uz/docs/ops/COVERAGE_PLAN.md) · 🇻🇳 [vi](../../../vi/docs/ops/COVERAGE_PLAN.md) · 🇳🇬 [yo](../../../yo/docs/ops/COVERAGE_PLAN.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/COVERAGE_PLAN.md)
+
 ---
+
 title: "測試覆蓋率計畫"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -14,11 +19,11 @@ lastUpdated: 2026-06-28
 
 根據報告計算方式的不同，會有多組覆蓋率數字。在規劃上，只有其中一組具有參考價值。
 
-| 指標                   | 範圍                                                  | 陳述式／行 | 條件分支 | 函式      | 備註                                              |
-| ---------------------- | ----------------------------------------------------- | ---------: | -------: | --------: | ------------------------------------------------- |
-| 舊版                   | 舊有 `npm run test:coverage`                          |     79.42% |   75.15% |    67.94% | 失真：計入了測試檔且排除 `open-sse`                |
-| 診斷用                 | 僅原始碼，排除測試檔且排除 `open-sse`                 |     68.16% |   63.55% |    64.06% | 僅用於隔離 `src/**` 分析                          |
-| 建議基準               | 僅原始碼，排除測試檔且納入 `open-sse`                 |     82.58% |   75.22% |    84.23% | 這是應改善的專案級基準                             |
+| 指標     | 範圍                                  | 陳述式／行 | 條件分支 |   函式 | 備註                                |
+| -------- | ------------------------------------- | ---------: | -------: | -----: | ----------------------------------- |
+| 舊版     | 舊有 `npm run test:coverage`          |     79.42% |   75.15% | 67.94% | 失真：計入了測試檔且排除 `open-sse` |
+| 診斷用   | 僅原始碼，排除測試檔且排除 `open-sse` |     68.16% |   63.55% | 64.06% | 僅用於隔離 `src/**` 分析            |
+| 建議基準 | 僅原始碼，排除測試檔且納入 `open-sse` |     82.58% |   75.22% | 84.23% | 這是應改善的專案級基準              |
 
 建議基準是應優化的目標數字。
 
@@ -42,15 +47,15 @@ lastUpdated: 2026-06-28
 
 ## 里程碑
 
-| 階段     |                  目標 | 重點                                             | 狀態          |
-| -------- | -------------------: | ------------------------------------------------ | ------------- |
-| 第 1 階段 | 60% 陳述式／行       | 快速取勝與低風險通用工具覆蓋率                    | ✅ 已完成     |
-| 第 2 階段 | 65% 陳述式／行       | 資料庫與路由基礎                                  | ✅ 已完成     |
-| 第 3 階段 | 70% 陳述式／行       | Provider 驗證與使用分析                           | ✅ 已完成     |
-| 第 4 階段 | 75% 陳述式／行       | `open-sse` 轉換器與輔助工具                       | ✅ 已完成     |
-| 第 5 階段 | 80% 陳述式／行       | `open-sse` 處理器與執行器分支                     | ✅ 已完成     |
-| 第 6 階段 | 85% 陳述式／行       | 較難的邊界案例、分支負債、回歸測試套件            | 進行中        |
-| 第 7 階段 | 90% 陳述式／行       | 最終掃蕩、缺口補齊、嚴格棘輪機制                  | 待處理        |
+| 階段      |           目標 | 重點                                   | 狀態      |
+| --------- | -------------: | -------------------------------------- | --------- |
+| 第 1 階段 | 60% 陳述式／行 | 快速取勝與低風險通用工具覆蓋率         | ✅ 已完成 |
+| 第 2 階段 | 65% 陳述式／行 | 資料庫與路由基礎                       | ✅ 已完成 |
+| 第 3 階段 | 70% 陳述式／行 | Provider 驗證與使用分析                | ✅ 已完成 |
+| 第 4 階段 | 75% 陳述式／行 | `open-sse` 轉換器與輔助工具            | ✅ 已完成 |
+| 第 5 階段 | 80% 陳述式／行 | `open-sse` 處理器與執行器分支          | ✅ 已完成 |
+| 第 6 階段 | 85% 陳述式／行 | 較難的邊界案例、分支負債、回歸測試套件 | 進行中    |
+| 第 7 階段 | 90% 陳述式／行 | 最終掃蕩、缺口補齊、嚴格棘輪機制       | 待處理    |
 
 條件分支與函式應隨各階段逐步提升，但主要硬目標仍為陳述式／行。
 
@@ -58,28 +63,28 @@ lastUpdated: 2026-06-28
 
 這些檔案目前行覆蓋率最低（< 60%），在第 6–7 階段中能帶來最佳改善效益。資料來源為 `coverage/coverage-summary.json`（2026-05-13）：
 
-| #   | 檔案                                                          | 行覆蓋率 % |
-| --- | ------------------------------------------------------------- | --------: |
-| 1   | `open-sse/services/compression/validation.ts`                 |     7.87% |
-| 2   | `src/app/api/v1/batches/route.ts`                             |     9.67% |
-| 3   | `src/app/docs/components/FeedbackWidget.tsx`                  |     9.80% |
-| 4   | `open-sse/services/compression/toolResultCompressor.ts`       |    10.00% |
-| 5   | `src/app/docs/components/DocCodeBlocks.tsx`                   |    10.63% |
-| 6   | `open-sse/services/compression/engines/rtk/lineFilter.ts`     |    10.96% |
-| 7   | `open-sse/services/specificityRules.ts`                       |    11.28% |
-| 8   | `src/mitm/systemCommands.ts`                                  |    12.19% |
-| 9   | `open-sse/services/compression/aggressive.ts`                 |    12.77% |
-| 10  | `src/app/api/v1/batches/[id]/cancel/route.ts`                 |    12.98% |
-| 11  | `open-sse/services/compression/progressiveAging.ts`           |    13.26% |
-| 12  | `open-sse/services/compression/engines/rtk/smartTruncate.ts`  |    13.43% |
-| 13  | `open-sse/services/compression/engines/rtk/deduplicator.ts`   |    13.51% |
-| 14  | `src/lib/cloudAgent/agents/jules.ts`                          |    13.52% |
-| 15  | `open-sse/services/compression/lite.ts`                       |    14.46% |
-| 16  | `src/app/api/v1/rerank/route.ts`                              |    14.94% |
-| 17  | `open-sse/services/compression/preservation.ts`               |    15.07% |
-| 18  | `src/lib/cloudAgent/agents/codex.ts`                          |    15.54% |
-| 19  | `open-sse/services/tierResolver.ts`                           |    16.66% |
-| 20  | `src/app/docs/components/DocsLazyWrapper.tsx`                 |    16.66% |
+| #   | 檔案                                                         | 行覆蓋率 % |
+| --- | ------------------------------------------------------------ | ---------: |
+| 1   | `open-sse/services/compression/validation.ts`                |      7.87% |
+| 2   | `src/app/api/v1/batches/route.ts`                            |      9.67% |
+| 3   | `src/app/docs/components/FeedbackWidget.tsx`                 |      9.80% |
+| 4   | `open-sse/services/compression/toolResultCompressor.ts`      |     10.00% |
+| 5   | `src/app/docs/components/DocCodeBlocks.tsx`                  |     10.63% |
+| 6   | `open-sse/services/compression/engines/rtk/lineFilter.ts`    |     10.96% |
+| 7   | `open-sse/services/specificityRules.ts`                      |     11.28% |
+| 8   | `src/mitm/systemCommands.ts`                                 |     12.19% |
+| 9   | `open-sse/services/compression/aggressive.ts`                |     12.77% |
+| 10  | `src/app/api/v1/batches/[id]/cancel/route.ts`                |     12.98% |
+| 11  | `open-sse/services/compression/progressiveAging.ts`          |     13.26% |
+| 12  | `open-sse/services/compression/engines/rtk/smartTruncate.ts` |     13.43% |
+| 13  | `open-sse/services/compression/engines/rtk/deduplicator.ts`  |     13.51% |
+| 14  | `src/lib/cloudAgent/agents/jules.ts`                         |     13.52% |
+| 15  | `open-sse/services/compression/lite.ts`                      |     14.46% |
+| 16  | `src/app/api/v1/rerank/route.ts`                             |     14.94% |
+| 17  | `open-sse/services/compression/preservation.ts`              |     15.07% |
+| 18  | `src/lib/cloudAgent/agents/codex.ts`                         |     15.54% |
+| 19  | `open-sse/services/tierResolver.ts`                          |     16.66% |
+| 20  | `src/app/docs/components/DocsLazyWrapper.tsx`                |     16.66% |
 
 第 6–7 階段的主題：
 
@@ -153,30 +158,30 @@ lastUpdated: 2026-06-28
 - [ ] 為在推進至 90% 過程中所修正的每一個未覆蓋的正式環境錯誤，新增回歸測試
 - [ ] 僅在本地基準連續兩次執行穩定後，才在 CI 中調高覆蓋率閘門
 
-## 棘輪機制
+## 棘輪政策
 
-僅在專案實際以充裕緩衝超越下一里程碑後，才更新 `npm run test:coverage` 的閾值。
+僅在專案實際超過下一個里程碑並具有舒適的緩衝後才更新`npm run test:coverage`閾值。
 
-**當前閘門：**`npm run test:coverage` 強制執行 **60 陳述式 / 60 行 / 60 函式 / 60 條件分支**（該指標已在 Quality-Gates 第 6A.1 階段重新基準化——先前的 82.58% 基準因計入測試檔且排除 `open-sse` 而有失真）。`test:coverage:legacy` 指令保留舊有的 50/50/50 指標以供歷史比較。
+**目前門：** `npm run test:coverage`強制執行**60 個語句/60 行/60 個函數/60 個分支**（該指標在 Quality-Gates Fase 6A.1 —中重新確定了基礎，早期的 82.58% 基線被誇大，因為它計算了測試文件並排除了`open-sse`）。 `test:coverage:legacy`指令保留舊的50/50/50指標以進行歷史比較。
 
-如需針對最新報告進行臨時閾值檢查，請使用：
+對於針對最新報告的臨時閾值檢查，請使用：
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-建議的棘輪序列（順序為 `陳述式-行 / 條件分支 / 函式`）：
+建議的棘輪順序（順序是`statements-lines / branches / functions`）：
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- 當前閘門（75/70/75）
+5. 75/70/72 <-- 目前門 (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-下一個棘輪目標為 `80/75/78`，當條件分支覆蓋率連續兩次執行維持在 78% 以上時即生效。
+一旦分支覆蓋率連續兩次運行保持在 78% 以上，下一個棘輪目標是`80/75/78` 。
 
 ## 已知缺口
 

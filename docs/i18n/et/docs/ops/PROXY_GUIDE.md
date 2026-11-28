@@ -270,114 +270,114 @@ See toimub üks kord esimesel käivitamisel pärast versiooniuuendust. Uuesti k�
 
 ---
 
-## 1proxy tasuta puhverserverite turg
+## 1 puhverserveri tasuta puhverserveri turg
 
-> 🆕 **Lisas [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (probleem [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** Panustas [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (probleem [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute integreerub **[1proxy](https://1proxy-api.aitradepulse.com)** kogukonnaplatvormiga, et pakkuda juurdepääsu **sadadele tasuta valideeritud puhverserveritele** üle kogu maailma. See sobib ideaalselt kasutajatele, kellel puudub oma puhverserveritaristu.
+OmniRoute integreerub** [1 puhverserver](https://1proxy-api.aitradepulse.com)** kogukonna platvorm, millele juurdepääsu pakkuda** sadu tasuta kinnitatud puhverservereid** kogu maailmast. See sobib suurepäraselt kasutajatele, kellel pole oma puhverserveri infrastruktuuri.
 
-### Tööpõhimõte
+### Kuidas see töötab
 
 ```
-┌─────────────┐  Sünkroonimine ┌─────────────────┐  Rotatsioon  ┌──────────────────┐
-│  1proxy API │ ──────────────▶ │  proxy_registry │ ───────────▶ │ Teenusepakkuja   │
-│   (väline)  │   kuni 500      │ source=oneproxy │  kvaliteedi  │       API        │
-└─────────────┘ puhverserverit  └─────────────────┘    järgi     └──────────────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Sünkroonimine** — OmniRoute hangib 1proxy API-st valideeritud puhverserverid
-2. **Salvestamine** — Puhverserverid salvestatakse samasse tabelisse `proxy_registry` väärtusega `source = 'oneproxy'`
-3. **Filtreerimine** — Filtreerige protokolli, riigi ja kvaliteediskoori järgi
-4. **Rotatsioon** — Valige parim puhverserver kvaliteedi-, juhusliku või järjestikuse strateegia abil
-5. **Automaatne halvendamine** — Ebaõnnestunud puhverserverite kvaliteediskoori vähendatakse; alla lävendi langemisel → märgitakse mitteaktiivseks
+1. **Sünkroonimine** — OmniRoute toob kinnitatud puhverserverid 1-puhverserverist API
+2. **Kauplus** — Puhverserverid salvestatakse `source = 'oneproxy'`-ga samasse `proxy_registry` tabelisse
+3. **Filter** — Filtreeri protokolli, riigi, kvaliteediskoori järgi
+4. **Pööra** — Valige parim puhverserver, kasutades kvaliteetseid, juhuslikke või järjestikuseid strateegiaid
+5. **Automaatne lagunemine** — Ebaõnnestunud puhverserverite kvaliteediskoor väheneb; alla läve → märgitud passiivseks
 
 ### Puhverserverite sünkroonimine
 
 **Juhtpaneeli kaudu:**
 
-1. Avage vahekaart **Seaded → 1proxy**
-2. Klõpsake nuppu **„Sünkrooni kohe”**
-3. Vaadake statistikat: puhverserverite koguarv, aktiivsete arv, keskmine kvaliteet ja jaotus riikide kaupa
+1. Mine aadressile** Seaded → 1 puhverserver** sakk
+2. Klõpsake** "Sünkrooni kohe"**
+3. Vaata statistikat: puhverserverid kokku, aktiivsete arv, keskmine kvaliteet, jaotus riikide kaupa
 
 **API kaudu:**
 
 ```bash
-# Käivita sünkroonimine
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Vastus:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
 ### Puhverserverite filtreerimine
 
 ```bash
-# Filtreeri protokolli järgi
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Filtreeri riigi järgi
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Filtreeri minimaalse kvaliteediskoori järgi
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Kombineeri filtrid
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### Puhverserverite kvaliteediskoorid
+### Puhverserveri kvaliteediskoorid
 
-Iga 1proxy puhverserver sisaldab metaandmeid:
+Igal 1-puhverserveril on metaandmed:
 
 | Väli            | Kirjeldus                                          |
 | --------------- | -------------------------------------------------- |
-| `qualityScore`  | 1proxy valideerimise hinnang skaalal 0–100         |
-| `latencyMs`     | Mõõdetud võrgu latentsus                           |
+| `qualityScore`  | Hinnang 0–100 alates 1 puhverserveri kinnitamisest |
+| `latencyMs`     | Mõõdetud võrgu latentsusaeg                        |
 | `anonymity`     | `transparent`, `anonymous` või `elite`             |
-| `googleAccess`  | Kas puhverserver pääseb juurde Google'i teenustele |
+| `googleAccess`  | Kas puhverserver pääseb juurde Google teenustele   |
 | `countryCode`   | Kahetäheline ISO riigikood                         |
-| `lastValidated` | Viimase valideerimise ajatempel                    |
+| `lastValidated` | Viimase kinnitamise ajatempel                      |
 
 Kvaliteediskoore kohandatakse dünaamiliselt:
 
-- **Ebaõnnestunud päringud** vähendavad skoori 10 punkti võrra
-- **Skoori langemisel väärtuseni ≤10** → puhverserver märgitakse olekuga `inactive`
-- Mitteaktiivsed puhverserverid jäetakse rotatsioonist välja
+- **Ebaõnnestunud taotlused** vähendage punktisummat 10 punkti võrra
+- **Tulemus langeb ≤ 10-ni** → puhverserver on tähistatud kui `inactive`
+- Mitteaktiivsed puhverserverid jäetakse pööramisest välja
 
 ### Rotatsioonistrateegiad
 
 ```bash
-# Kvaliteedipõhine rotatsioon (parim puhverserver esimesena) — vaikimisi
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Juhuslik rotatsioon
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# Järjestikune (kõige varem valideeritud esimesena)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
 ### Kaitselüliti
 
-1proxy sünkroonimisel on sisseehitatud kaitselüliti:
+1 puhverserveri sünkroonimisel on sisseehitatud kaitselüliti:
 
-- Pärast **5 järjestikust sünkroonimistõrget** blokeeritakse edasised sünkroonimiskatsed
-- Lähtestamiseks kasutage funktsiooni `resetOneproxyCircuitBreaker()` või taaskäivitage server
+- Pärast** 5 järjestikust sünkroonimistõrget** , edasised sünkroonimiskatsed on blokeeritud
+- Lähtestage: `resetOneproxyCircuitBreaker()` või taaskäivitage server
 - Sünkroonimise olek on saadaval aadressil `GET /api/settings/oneproxy?action=status`
 
-### 1proxy puhverserverite kustutamine
+### 1 puhverserveri tühjendamine
 
 ```bash
-# Kustuta üks 1proxy puhverserver
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# Kustuta KÕIK 1proxy puhverserverid (käsitsi lisatud puhverservereid ei muudeta)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
@@ -777,52 +777,28 @@ Kasutage `random`
 ühtlaselt)
 ```
 
-## Teie enda puhverserverite automaatne välistamine tõrgete korral
+## Automaatne rikete välistamine teie enda puhverserveritele
 
-1proxy turuplatsi puul vähendab juba iseseisvalt automaatselt tõrkuvate puhverserverite prioriteeti (vt
-[Puhverserveri kvaliteediskoorid](#proxy-quality-scores)). Registrisse **teie**
-lisatud puhverserverite jaoks pakub taustal töötav seisundikontrolli ajastaja
-(`src/lib/proxyHealth/scheduler.ts`) samasugust käitumist, mille puhul „tõrkuv liige
-välistatakse ahelast automaatselt“, ilma midagi kustutamata:
+1-puhverserveri turukogum degradeerib juba automaatselt ebaõnnestunud puhverserverid iseseisvalt (vt [puhverserveri kvaliteediskoorid](#proxy-quality-scores) ). Puhverserveritele** sina** Registrisse lisatuna pakub tausta tervise ajakava (`src/lib/proxyHealth/scheduler.ts`) sama käitumist "välja surnud liige automaatselt ketist välja" ilma midagi kustutamata:
 
 ```bash
-# .env — keela puhverserver ajutiselt pärast 3 järjestikust nurjunud kontrolli ja luba see
-# automaatselt uuesti, kui see hakkab kontrollidele jälle vastama.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Kuidas see sobitub mitme puhverserveriga ahelasse:
+Kuidas see sobib mitme puhverserveri ahelasse:
 
-1. Ajastaja kontrollib iga registreeritud puhverserverit iga `PROXY_HEALTH_INTERVAL_MS`
-   järel (vaikimisi 10 min; minimaalselt 1 min).
-2. Pärast `PROXY_AUTO_REMOVE_AFTER` järjestikust **lõplikku** tõrget (tegelik
-   ühenduse tõrge — ajalõppu ega kontrollsihtmärgi enda 5xx-vastust ei arvestata; vt
-   [Puhverserveri seisundi kontrollimine](#proxy-health-checking-v3816)) määratakse puhverserveri
-   `status` väärtuseks `dead`.
-3. `dead` on üks olekutest, mille puuli/rotatsiooni lahendamisel kasutatav aktiivse
-   oleku filter välistab, mistõttu ulatuse rotatsioon (tsükliline / juhuslik / kleepuv /
-   latentsuspõhine — vt [Rotatsioonistrateegia otsustuspuu](#rotation-strategy-decision-tree))
-   lõpetab kohe selle puhverserveri määramise uutele päringutele. See ei mõjuta
-   ühtegi teist puuli puhverserverit ning kogu puul ei lähe kunagi märkamatult üle
-   otseühendusele — vt [4-tasemelise puhverserverisüsteemi](#4-level-proxy-system)
-   tõrkekindlalt suletud kaitsemehhanismi.
-4. Ajastaja jätkab `dead` olekus puhverserverite kontrollimist sama intervalliga.
-   Järgmine edukas kontroll muudab `status` väärtuse tagasi väärtuseks `active`
-   ning puhverserver lisatakse uuesti rotatsiooni — käsitsi taaslisamine pole vajalik.
+1. Planeerija uurib iga registreeritud puhverserverit iga `PROXY_HEALTH_INTERVAL_MS` järel (vaikimisi 10 min; minimaalselt 1 min).
+2. Pärast `PROXY_AUTO_REMOVE_AFTER` järjest** veenev** tõrkeid (tõeline ühenduse tõrge — ajalõpp või sondi sihtmärgi enda 5xx ei lähe kunagi arvesse, vt [Puhverserveri tervisekontroll](#proxy-health-checking-v3816) ), puhverserveri `status` on seatud väärtusele `dead`.
+3. `dead` on üks olekutest, mille pool/rotation eraldusvõimega kasutatav elusoleku filter välistab, seega peatab ulatuse pööramine (ümber-robin / juhuslik / kleepuv / latentsus / seanss — vt [Rotation Strategy Decision Tree](#rotation-strategy-decision-tree) ) koheselt selle puhverserveri üleandmise uutele päringutele. Ühtegi teist puhverserverit basseinis see ei mõjuta ja kogu bassein ei lange kunagi vaikselt tagasi otseühendusse — vt [4-tasemelise puhverserveri süsteemi](#4-level-proxy-system) tõrkesulgemise kaitset.
+4. Planeerija uurib `dead` puhverservereid samal intervallil. Järgmine edukas sond pöörab `status` tagasi `active` ja see siseneb uuesti pöörlemisse — käsitsi uuesti lisamist pole vaja.
 
-See on teadlikult **valikuline ja mittekahjustav**: vaikimisi ajastaja ainult
-loendab ja logib tõrkeid (vt poliitikat C failis `decision.ts`) ning
-`PROXY_AUTO_DISABLE` ei kustuta kunagi rida — selleks on eraldi agressiivsem
-lipp `PROXY_AUTO_REMOVE`. Kui mõlema väärtuseks on määratud `true`, on
-`PROXY_AUTO_REMOVE` ülimuslik (kustutamisele kuuluva puhverserveri ajutisel
-vahepealsel keelamisel pole mõtet). Muutujate täieliku loendi leiate
-[Keskkonna konfiguratsiooni](../reference/ENVIRONMENT.md) teatmikust.
+See on meelega** vabatahtlik ja mittepurustav** : vaikimisi loendab ja logib planeerija ainult tõrkeid (vt poliitikat C jaotises `decision.ts`) ja `PROXY_AUTO_DISABLE` ei kustuta kunagi rida — selleks on eraldiseisev, agressiivsem `PROXY_AUTO_REMOVE` lipp. Kui mõlemad on seatud väärtusele `true`, võidab `PROXY_AUTO_REMOVE` (kustutaval puhverserveril pole vahepealset pehmet keelamist kasu). Täieliku muutujate loendi leiate viitest [Environment Config](../reference/ENVIRONMENT.md).
 
 ---
 
-> 📖 **Seotud dokumentatsioon:**
+> 📖** Seotud dokumentatsioon:**
 >
-> - [Kasutusjuhend](../guides/USER_GUIDE.md) — Üldine seadistamine ja konfigureerimine
-> - [API teatmik](../reference/API_REFERENCE.md) — Täielik API dokumentatsioon
-> - [Keskkonna konfiguratsioon](../reference/ENVIRONMENT.md) — Kõik keskkonnamuutujad
+> - [Kasutusjuhend](../guides/USER_GUIDE.md) — Üldine häälestus ja konfiguratsioon – [API Viide](../reference/API_REFERENCE.md) — Täielik API dokumentatsioon – [Keskkonna konfiguratsioon](../reference/ENVIRONMENT.md) — Kõik keskkonnamuutujad

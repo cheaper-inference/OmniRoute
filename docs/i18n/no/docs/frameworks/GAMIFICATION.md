@@ -505,27 +505,27 @@ når resultatlistedataene faktisk er endret siden forrige utsending.
 
 ---
 
-## Tokendeling
+## Token-deling
 
 **Fil:** `src/lib/gamification/sharing.ts`
 
-### Dobbelt bokføring
+### Dobbel bokføring
 
-Hver overføring oppretter to rader i `token_ledger`:
+Hver overføring lager to rader i `token_ledger`:
 
-| Rad    | `from_key_id` | `to_key_id` | `amount` |
-| ------ | ------------- | ----------- | -------- |
-| Debet  | avsender      | mottaker    | +amount  |
-| Kredit | mottaker      | avsender    | -amount  |
+| Rad     | `from_key_id` | `to_key_id` | `amount` |
+| ------- | ------------- | ----------- | -------- |
+| Debet   | avsender      | mottaker    | + beløp  |
+| Kreditt | mottaker      | avsender    | -amount  |
 
-Vent — konvensjonen er:
+Vent — er konvensjonen:
 
-| Rad     | `from_key_id` | `to_key_id` | `amount` | Betydning              |
-| ------- | ------------- | ----------- | -------- | ---------------------- |
-| Sending | avsender      | mottaker    | +amount  | Utgående fra avsender  |
-| Mottak  | mottaker      | avsender    | +amount  | Inngående til mottaker |
+| Rad   | `from_key_id` | `to_key_id` | `amount` | Betydning                 |
+| ----- | ------------- | ----------- | -------- | ------------------------- |
+| Sende | avsender      | mottaker    | + beløp  | Utstrømning fra avsender  |
+| Motta | mottaker      | avsender    | + beløp  | Innstrømning til mottaker |
 
-Saldoen beregnes slik:
+Saldoen beregnes som:
 
 ```sql
 SELECT
@@ -547,19 +547,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Validering**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotens**: kontroller om `idempotency_key` allerede finnes i hovedboken.
-   Hvis ja, returner det bufrede resultatet.
-3. **Transaksjon** (én enkelt SQLite-transaksjon):
-   a. Beregn avsenderens saldo.
-   b. Hvis `balance < amount`, avbryt (utilstrekkelige midler).
-   c. Sett inn senderaden (`from=sender,`.
+1. **Bekreft** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotens** : sjekk om `idempotency_key` allerede finnes i hovedbok. Hvis ja, returner bufret resultat.
+3. **Transaksjon** (enkelt SQLite transaksjon): a. Beregn avsenderbalansen. b. Hvis `balance < amount`, avbryt (ikke nok midler). c. Sett inn senderad (`from=sender, to=receiver, amount`). d. Sett inn mottaksrad (`from=receiver, to=sender, amount`).
+4. **Satsgrense** : sjekk overføringshastighet for avsender (maks 10 transfers/min).
+5. **Hendelse** : send ut `token_share` gamification-hendelse for evaluering XP + -merket.
+6. Returner `{ success: true, balance: newBalance }`.
 
-### Hastighetsbegrensning
+### Satsbegrensende
 
-- Maks. 10 overføringer per minutt per API-nøkkel.
-- Maks. 10 000 tokens per enkelt overføring.
-- Maks. 100 000 tokens overført per dag per API-nøkkel.
+- Maks 10 overføringer per minutt per API nøkkel.
+- Maks 10 000 tokens per enkelt overføring.
+- Maks 100 000 tokens overføres per dag per API nøkkel.
 
 ---
 

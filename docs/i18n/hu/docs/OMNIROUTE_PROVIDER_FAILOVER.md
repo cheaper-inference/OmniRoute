@@ -21,3 +21,5 @@ Az alapértelmezett szolgáltatók közötti házirend legfeljebb három szolgá
   - Az előtaggal ellátott azonosító (`provider/model`) soha nem kerül átirányításra másik szolgáltatóhoz.
 
 Az áramkör állapotai a következők: `closed`, `open` és `half_open`. A lehűlés ütemez egy korlátozott szondát; a sikeres szonda lezárja az áramkört, a sikertelen szonda pedig újra kinyitja.
+
+A szolgáltató feladatátvétele az átjárón belül fut. Lásd: [Mikor maga OmniRoute nem érhető el](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) az ügyfél viselkedéséhez az átjáró kimaradása során.

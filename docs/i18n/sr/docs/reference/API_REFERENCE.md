@@ -49,7 +49,7 @@
 
 ---
 
-## Довршавања ћаскања
+## Завршетак ћаскања
 
 ```bash
 POST /v1/chat/completions
@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### Прилагођена заглавља
 
-| Header                   | Smer    | Opis                                                                                                                                                                                                                                  |
-| ------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Zahtev  | Postavite na `true` da biste zaobišli keš                                                                                                                                                                                             |
-| `x-omniroute-no-memory`  | Zahtev  | Postavite na `true` da biste preskočili ubacivanje memorije + veština za ovaj zahtev (preslikava ponašanje no-cache; izbegava dodatne tokene/troškove po pozivu)                                                                      |
-| `X-OmniRoute-Progress`   | Zahtev  | Postavite na `true` za događaje napretka                                                                                                                                                                                              |
-| `X-Session-Id`           | Zahtev  | Ključ lepljive sesije za afinitet spoljne sesije                                                                                                                                                                                      |
-| `x_session_id`           | Zahtev  | Varijanta sa donjom crtom je takođe podržana (direktan HTTP)                                                                                                                                                                          |
-| `X-OmniRoute-Session-Id` | Zahtev  | Oznaka sesije/razgovora koju prosleđuje pozivalac (takođe se prosleđuje memoriji). Kada je prisutna, čuva se doslovno u `call_logs.session_tag` radi atribucije troškova po sesiji (#8249) — nikada se ne generiše kada nije prisutna |
-| `Idempotency-Key`        | Zahtev  | Ključ za uklanjanje duplikata (prozor od 5 s)                                                                                                                                                                                         |
-| `X-Request-Id`           | Zahtev  | Alternativni ključ za uklanjanje duplikata                                                                                                                                                                                            |
-| `x-omniroute-connection` | Zahtev  | Usmerite zahtev ka jednom modelu na jednu vezu provajdera (nalog) prema njegovom ID-u — pogledajte [Usmeravanje zahteva na određeni nalog](#account-pinning-per-request)                                                              |
-| `X-OmniRoute-Cache`      | Odgovor | `HIT` ili `MISS` (bez strimovanja)                                                                                                                                                                                                    |
-| `X-OmniRoute-Idempotent` | Odgovor | `true` ako je uklonjen duplikat                                                                                                                                                                                                       |
-| `X-OmniRoute-Progress`   | Odgovor | `enabled` ako je praćenje napretka uključeno                                                                                                                                                                                          |
-| `X-OmniRoute-Session-Id` | Odgovor | Efektivni ID sesije koji koristi OmniRoute                                                                                                                                                                                            |
-| `X-OmniRoute-Request-Id` | Odgovor | ID korelacije zahteva (kada je poznat)                                                                                                                                                                                                |
-| `X-OmniRoute-Version`    | Odgovor | Verzija izdanja OmniRoute-a (uvek prisutna)                                                                                                                                                                                           |
-| `X-OmniRoute-Cost-Saved` | Odgovor | Iznos u USD koji je keš uštedeo pri `HIT`-u (samo pogodci keša)                                                                                                                                                                       |
-| `X-OmniRoute-Decision`   | Odgovor | Trag rutiranja: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` je kombinovana strategija ili `single` za zahtev koji nije kombinovan) — uvek prisutno u odgovorima po završetku                                        |
+| Хеадер                   | Правац  | Опис                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Захтев  | Поставите на `true` да бисте заобишли кеш меморију                                                                                                                                                                                                                                                                                                                                     |
+| `x-omniroute-no-memory`  | Захтев  | Подесите на `true` да бисте прескочили убацивање меморије + вештина за овај захтев (пресликава без кеша; избегава token/cost оверхеад по позиву)                                                                                                                                                                                                                                       |
+| `x-omniroute-no-log`     | Захтев  | Поставите на `true` да бисте изоставили request/response корисне податке из евиденције позива за овај захтев за закључивање (све руте породице ћаскања: Завршеци ћаскања, Одговори, Поруке, Завршеци, Gemini). Временска ознака, модел, статус, трајање и број токена се и даље бележе. Комбинујте са `x-omniroute-no-memory` и `x-omniroute-no-cache` за потпуно искључивање садржаја |
+| `X-OmniRoute-Progress`   | Захтев  | Поставите на `true` за догађаје напретка                                                                                                                                                                                                                                                                                                                                               |
+| `X-Session-Id`           | Захтев  | Лепљиви кључ сесије за афинитет спољне сесије                                                                                                                                                                                                                                                                                                                                          |
+| `x_session_id`           | Захтев  | Варијанта доње црте такође је прихваћена (директно HTTP)                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Session-Id` | Захтев  | session/conversation ознака коју обезбеђује позивалац (такође храни меморију). Када је присутан, опстао дословно на `call_logs.session_tag` за приписивање трошкова по сесији (#8249) — се никада не синтетизује када је одсутан                                                                                                                                                       |
+| `Idempotency-Key`        | Захтев  | Деуп кључ (5с прозор)                                                                                                                                                                                                                                                                                                                                                                  |
+| `X-Request-Id`           | Захтев  | Алтернативни дедуп кључ                                                                                                                                                                                                                                                                                                                                                                |
+| `x-omniroute-connection` | Захтев  | Закачите захтев једног модела на везу са једним провајдером (налог) помоћу његовог ИД- — погледајте [Качење налога по захтеву](#account-pinning-per-request)                                                                                                                                                                                                                           |
+| `X-OmniRoute-Cache`      | Одговор | `HIT` или `MISS` (не-стриминг)                                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Idempotent` | Одговор | `true` ако се уклони дупликати                                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Progress`   | Одговор | `enabled` ако је праћење напретка укључено                                                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Session-Id` | Одговор | Ефективна сесија ID коју користи OmniRoute                                                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Request-Id` | Одговор | ИД захтева корелације (када је познат)                                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Version`    | Одговор | OmniRoute буилд верзија (увек присутна)                                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Cost-Saved` | Одговор | USD кеш избегнут на HIT (само погоци у кеш меморији)                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Decision`   | Одговор | Траг рутирања: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` је комбинована стратегија, или `single` за некомбо захтев) — је увек присутан на одговорима о завршетку                                                                                                                                                                                                   |
 
-> Napomena za Nginx: ako se oslanjate na zaglavlja sa donjom crtom (na primer `x_session_id`), omogućite `underscores_in_headers on;`.
+> Нгинк напомена: ако се ослањате на заглавља доње црте (на пример `x_session_id`), омогућите `underscores_in_headers on;`.
 
-#### Usmeravanje zahteva na određeni nalog
+#### Качење налога по захтеву
 
-Kada provajder ima više veza (naloga ili ključeva), OmniRoute obično bira jednu
-pomoću svoje strategije za izbor naloga. Zahtev umesto toga može da usmeri na jednu konkretnu vezu
-pomoću zaglavlja `x-omniroute-connection`:
+Када провајдер има неколико веза (налога или кључева), OmniRoute обично бира једну кроз своју стратегију избора налога. Уместо тога, захтев може да закачи једну конкретну везу са `x-omniroute-connection` заглављем:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,22 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Где пронаћи ID.** Отворите страницу провајдера на контролној табли
-  (**Контролна табла → Провајдери → <provider>**) и кликните на `xxxxxxxx…` чип са ID-јем у реду
-  везе — тиме се копира цео ID везе.
-- **На које захтеве се примењује.** Захтеви за један модел (`provider/model`) на
-  `/v1/chat/completions`, `/v1/messages` и `/v1/responses`. Комбинације занемарују заглавље: закачите
-  налог за сваки корак комбинације преко сопствене везе тог корака.
-- **Закачена веза је обавезујућа, а не само преференција.** Закачена веза се користи искључиво. Ако
-  дође до грешке унутар захтева, бележи се период хлађења налога, али се не прелази на
-  сродни налог истог провајдера.
-- **Период хлађења и квота ослобађају закачену везу.** Док се закачена веза хлади, када је квота
-  исцрпљена или је веза блокирана политиком квоте, каснији захтеви прелазе на друге везе провајдера, баш као и незаквачени саобраћај.
-- **Непознати или онемогућени ID-јеви доводе до грешке.** ID који није у активном скупу провајдера (обрисан,
-  деактивиран или припада другом провајдеру) не оставља ниједан доступан налог, па захтев не успева уместо да се тихо усмери на друго место.
+- **Где пронаћи ИД.** Отворите страницу добављача на контролној табли (** Контролна табла → Провајдери → <provider>** ) и кликните на `xxxxxxxx…` ид чип на реду везе — он копира пун ИД везе.
+- **Који захтеви то поштују.** Захтеви једног модела (`provider/model`) на `/v1/chat/completions`, `/v1/messages` и `/v1/responses`. Комбинације игноришу заглавље: уместо тога закачите налог по комбинованом кораку преко сопствене везе корака.
+- **Игла је строга, а не преференција.** Искључиво се користи пинова веза. Грешка у захтеву бележи хлађење налога, али то јесте** не** ротирати на налог брата и сестре истог провајдера.
+- **Хлађење и квота ослобађају пин.** Док се везана веза хлади, исцрпљена је квота или је блокирана политиком квота, каснији захтеви се враћају на друге везе провајдера, баш као и невезани саобраћај.
+- **Непознати или онемогућени ИД-ови не успевају.** ИД који није у активном скупу провајдера (избрисан, деактивиран или припада другом провајдеру) не оставља налог који испуњава услове, тако да захтев не успева уместо да се тихо усмерава на друго место.
 
-Claude Code шаље прилагођена заглавља кроз `ANTHROPIC_CUSTOM_HEADERS`. Поставите га у блок
-`env` датотеке `~/.claude/settings.json`, или у `.claude/settings.json` на нивоу пројекта да бисте закачили други налог по пројекту:
+Claude код шаље прилагођена заглавља преко `ANTHROPIC_CUSTOM_HEADERS`. Ставите га у `env` блок `~/.claude/settings.json`-а или у `.claude/settings.json` на нивоу пројекта да бисте закачили други налог по пројекту:
 
 ```jsonc
 {
@@ -130,12 +120,11 @@ Claude Code шаље прилагођена заглавља кроз `ANTHROPIC
 }
 ```
 
-Извор: `src/sse/handlers/chat.ts` (читање заглавља), `src/sse/services/auth.ts` и
-`src/sse/services/sessionAffinityPin.ts` (ослобађање закачене везе и провера да ли недостаје у скупу).
+Извор: `src/sse/handlers/chat.ts` (читање заглавља), `src/sse/services/auth.ts` и `src/sse/services/sessionAffinityPin.ts` (ослобађање пинова и провера недостајућих из групе).
 
-> **Заглавља телеметрије трошкова:** одговори на успешне захтеве без стримовања такође садрже скуп `X-OmniRoute-*` телеметрије трошкова — `X-OmniRoute-Response-Cost` (USD, фиксно 10 децимала; `0.0000000000` за бесплатне/без цене), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` и `X-OmniRoute-Fallback-Attempts` (само када је > 0), као и `X-OmniRoute-Request-Id` и `X-OmniRoute-Version`. Ова заглавља се шаљу за довршавања ћаскања, `/v1/responses`, `/v1/messages`, **и крајње тачке за медије** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` и `/v1/moderations` (увек са трошком `0`). Трошак медија се израчунава по модалитету (по слици, по секунди, по карактеру, по јединици претраге) када је цена доступна, иначе је `0` (fail-open).
+> **Заглавља телеметрије трошкова:** Успешни одговори који нису стримовани такође носе `X-OmniRoute-*` скуп трошкова телеметрије — `X-OmniRoute-Response-Cost` (USD, фиксних 10 децимала; `0.0000000000` за free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` и `X-OmniRoute-Fallback-Attempts` (само када > зко), `X-OmniRoute-Version` `X-OmniRoute-Request-Id` Оне се емитују од завршетка ћаскања, `/v1/responses`, `/v1/messages`,** и крајње тачке медија** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` и `/v1/moderations` (увек кошта `0`). Цена медија се израчунава по модалитету (по слици, по секунди, по карактеру, по јединици претраге) када је цена доступна, у супротном `0` (фаил-опен).
 
-> **Семантика трошка при поготку кеша:** код ПОГОТКА семантичког кеша (`X-OmniRoute-Cache-Hit: true`) не упућује се позив према upstream-у, па је `X-OmniRoute-Response-Cost` `0.0000000000` (**инкрементални** трошак испоруке поготка). Оригинални/очекивани трошак се пријављује одвојено у `X-OmniRoute-Cost-Saved`. Потрошачи за обрачун треба да сабирају `X-OmniRoute-Response-Cost` (поготци не коштају ништа); аналитика кеша може да агрегира `X-OmniRoute-Cost-Saved`.
+> **Семантика трошкова погођених кешом:** на семантичком кешу HIT (`X-OmniRoute-Cache-Hit: true`) не врши се упстреам позив, тако да је `X-OmniRoute-Response-Cost` `0.0000000000` (** инкрементално** трошак служења поготка). Трошкови original/would-have-been се исказују посебно у `X-OmniRoute-Cost-Saved`. Потрошачи наплате треба да збир `X-OmniRoute-Response-Cost` (погоци не коштају ништа); аналитика кеша може да агрегира `X-OmniRoute-Cost-Saved`.
 
 ## Ексклузивни управљани закупи сесија
 
@@ -370,6 +359,8 @@ Content-Type: application/json
 
 `n` враћа `n` слике у `data[]`. Провајдери чији упстреам API враћа једну слику по позиву (Блацк Форест Лабс, Стабилити AI, Леонардо, Идеограм, Хаипер, Хиперболиц, Magnific/Freepik, NVIDIA NIM, Cloudflare Воркерс AI) добијају `n` одвојена упстреам позива, највише 4 у лету. Фиксни `seed` је померен индексом позива (`seed`, `seed + 1`, …), тако да се слике разликују, али остају поновљиве. `n` је ограничен на 10. Захтев не успе у целини ако било који позив не успе. Листа формата за одвајање је `SINGLE_IMAGE_FANOUT_FORMATS` у `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Модели слика (`codex/gpt-image-*`) враћају само PNG : узводни одговара `200` са PNG бајтовима чак и када се захтева `jpeg` или `webp`. Захтев са било којим другим `output_format` (`webp`, `jpeg`, ...) се одбија са HTTP 400 уместо да се прећутно игнорише; изоставите или пошаљите `png`. `output_compression` се не прослеђује.
+
 ZenMux поново користи постојећу везу са АПИ кључем и прихвата `zenmux/` или `zm/` префиксе:
 
 - `zenmux/openai/gpt-image-2` користи ZenMuxOpenAI слике API. Опције укључују `size`, `quality`, `n`, `output_format`, `output_compression`, `background` и `response_format`.
@@ -387,7 +378,7 @@ GET /v1/images/generations
 
 ---
 
-## OCR dokumenata
+## Документ OCR
 
 ```bash
 POST /v1/ocr
@@ -403,17 +394,15 @@ Content-Type: application/json
 }
 ```
 
-`model` bira OCR provajdera putem prefiksa `provider/model`; samostalni ID modela (npr.
-`mistral-ocr-latest`) razrešava se na registrovanog provajdera, a ako je `model` izostavljen,
-podrazumeva se Mistral (`mistral-ocr-latest`). Registrovani provajderi (`open-sse/config/ocrRegistry.ts`):
+`model` бира OCR провајдера преко `provider/model` префикса; голи ид модела (нпр. `mistral-ocr-latest`) се решава до свог регистрованог добављача, а изостављени `model` подразумевано је Mistral (`mistral-ocr-latest`). Регистровани провајдери (`open-sse/config/ocrRegistry.ts`):
 
-| ID provajdera                 | ID modela            | Vrednost `model`                                                   | Napomene                                                                                                                             |
-| ----------------------------- | -------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (ili samostalni `mistral-ocr-latest`) | Sinhrono — odgovor se direktno vraća iz jednog upstream poziva.                                                                      |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                        | Asinhroni upstream (`analyze` + polling) — pogledajte u nastavku.                                                                    |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                            | Sinhrono, putem Vertex AI partnerske krajnje tačke `openapi/chat/completions` — detalje o autentikaciji/URL-u pogledajte u nastavku. |
+| Провајдер ид                  | ИД модела                                     | `model` валуе                                                | Напомене                                                                                                                                                                                                             |
+| ----------------------------- | --------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                          | `mistral/mistral-ocr-latest` (или голи `mistral-ocr-latest`) | Синхрони — одговор се враћа директно из једног упстреам позива.                                                                                                                                                      |
+| `azure-document-intelligence` | `prebuilt-read`                               | `azure-document-intelligence/prebuilt-read`                  | Асинхрони узводни (`analyze` + анкета) — види испод.                                                                                                                                                                 |
+| `vertex-deepseek-ocr`         | самостално распоређено (без уграђеног модела) | `vertex-deepseek-ocr/<your-deployed-model-id>`               | Синхрони, преко вашег сопственог Вертек AI Модел Гарден ДеепСеек-ОЦР крајње тачке (`openapi/chat/completions` облик); Google је повукао управљани `deepseek-ocr-maas` 21.10.2026 (#20423), тако да тај ид враћа 400. |
 
-Sva tri provajdera odgovaraju telom istog oblika kao kod Mistral-a:
+Сва три провајдера одговарају у истом телу у облику Мистрала:
 
 ```json
 {
@@ -423,28 +412,13 @@ Sva tri provajdera odgovaraju telom istog oblika kao kod Mistral-a:
 }
 ```
 
-### Tok polling-a za Azure Document Intelligence
+### Ток анкете Азуре Доцумент Интеллигенце
 
-Azure Document Intelligence `analyze` API je asinhron: početni zahtev vraća zaglavlje
-`Operation-Location` umesto tela, a rezultat se mora dobiti polling-om. Handler
-(`open-sse/handlers/ocr.ts`) proverava tu URL adresu svake sekunde, do 30 pokušaja, odmah
-prekida rad (ne nastavlja polling) ako odgovor na polling nema status `ok` ili ako je status
-`"failed"`, a vraća `504` ako je operacija i dalje u toku nakon iscrpljivanja budžeta pokušaja.
-Konačni Azure odgovor se normalizuje u isti oblik `pages`/`markdown` koji koristi Mistral pre
-nego što se vrati pozivaocu, tako da klijentski kod ne mora posebno da obrađuje ovog provajdera.
+`analyze` API Азуре Доцумент Интеллигенце је асинхрона: почетни захтев враћа `Operation-Location` заглавље уместо тела, а резултат мора да се тражи. Руковалац (`open-sse/handlers/ocr.ts`) испитује тај URL сваке секунде до 30 покушаја, не успева брзо (не наставља са анкетирањем) на одговору анкете који није `ok` или статусу `"failed"`, и враћа `504` ако операција и даље ради након што је буџет за покушај исцрпљен. Коначни Азуре одговор се нормализује у исти `pages`/`markdown` облик који користи Mistral пре него што се врати позиваоцу, тако да код клијента не мора да означава провајдера посебним великим словима.
 
-### Autentikacija i razrešavanje krajnje tačke za Vertex AI DeepSeek OCR
+### Вертек AI DeepSeek OCR аутх и резолуција крајње тачке
 
-`vertex-deepseek-ocr` ponovo koristi istu Vertex AI autentikaciju koju OmniRoute već podržava za
-chat/saobraćaj sa slikama (`open-sse/executors/vertex.ts`): API ključ veze je ili JSON akreditiv
-Service Account-a (razmenjen za kratkotrajni OAuth pristupni token putem JWT-bearer
-toka) ili već izdat OAuth pristupni token koji se koristi bez izmena. URL upstream krajnje tačke je
-Vertex-ova generička partnerska krajnja tačka `openapi/chat/completions`, izgrađena na osnovu
-projekta i regiona veze — eksplicitne vrednosti `providerSpecificData.project`/`providerSpecificData.region`
-uvek imaju prednost; u suprotnom se projekat izvodi iz `project_id` JSON-a Service Account-a, a
-region podrazumevano postaje `us-central1`. Oba razrešavanja odvijaju se u `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), a koriste se u
-`src/app/api/v1/ocr/route.ts` pre prosleđivanja poziva funkciji `handleOcr`.
+`vertex-deepseek-ocr` поново користи исту вертек AI аутентификацију OmniRoute већ подржава за chat/image саобраћај (`open-sse/executors/vertex.ts`): API кључ везе је или акредитив JSON налога услуге (замењен за краткотрајни OAuth приступни токен преко тока ЈВТ-носиоца) или већ исковани OAuth токен за приступ који се користи као токен за приступ. Узводна крајња тачка URL је Вертек-ова генеричка `openapi/chat/completions` партнерска крајња тачка, изграђена од пројекта везе и региона — експлицитно `providerSpecificData.project`/`providerSpecificData.region` увек побеђује; у супротном је пројекат изведен из `project_id` налога услуге JSON, а регион подразумевано је `us-central1`. Обе резолуције се дешавају у `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), које троши `src/app/api/v1/ocr/route.ts` пре слања у `handleOcr`.
 
 ---
 
@@ -692,98 +666,104 @@ curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
 
 ---
 
-## Kompatibilne krajnje tačke
+## Крајње тачке компатибилности
 
-| Metod | Putanja                                   | Format                                  |
-| ----- | ----------------------------------------- | --------------------------------------- |
-| POST  | `/v1/chat/completions`                    | OpenAI                                  |
-| POST  | `/v1/messages`                            | Anthropic                               |
-| POST  | `/v1/responses`                           | OpenAI Responses                        |
-| POST  | `/v1/embeddings`                          | OpenAI                                  |
-| POST  | `/v1/images/generations`                  | OpenAI Images                           |
-| POST  | `/v1/images/edits`                        | OpenAI Images (uređivanje/inpainting)   |
-| POST  | `/v1/videos/generations`                  | Generisanje video zapisa u OpenAI stilu |
-| POST  | `/v1/music/generations`                   | Generisanje muzike u OpenAI stilu       |
-| POST  | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                      |
-| POST  | `/v1/audio/speech`                        | OpenAI TTS (vraća audio telo)           |
-| POST  | `/v1/rerank`                              | Rangiranje u stilu Cohere/Voyage        |
-| POST  | `/v1/classify`                            | Jina klasifikacija (`api.jina.ai`)      |
-| POST  | `/v1/segment`                             | Jina segmentator (`segment.jina.ai`)    |
-| POST  | `/v1/moderations`                         | OpenAI Moderations                      |
-| GET   | `/v1/models`                              | OpenAI                                  |
-| POST  | `/v1/models/query`                        | Filtrirani uži izbor modela             |
-| POST  | `/v1/messages/count_tokens`               | Anthropic                               |
-| GET   | `/v1beta/models`                          | Gemini                                  |
-| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                  |
-| POST  | `/v1/api/chat`                            | Ollama                                  |
-| GET   | `/api/v1/vscode/{token}/`                 | OpenAI pseudonim kataloga               |
-| GET   | `/api/v1/vscode/{token}/models`           | Pseudonim OpenAI modela                 |
-| POST  | `/api/v1/vscode/{token}/chat/completions` | Tokenizovani pseudonim OpenAI-ja        |
-| POST  | `/api/v1/vscode/{token}/responses`        | Tokenizovani pseudonim OpenAI Responses |
-| POST  | `/api/v1/vscode/{token}/api/chat`         | Tokenizovani pseudonim Ollama           |
-| GET   | `/api/v1/vscode/{token}/api/tags`         | Tokenizovani pseudonim Ollama oznaka    |
+| Метод | Пут                                       | Формат                                 |
+| ----- | ----------------------------------------- | -------------------------------------- |
+| POST  | `/v1/chat/completions`                    | OpenAI                                 |
+| POST  | `/v1/messages`                            | Anthropic                              |
+| POST  | `/v1/responses`                           | OpenAI Респонсес                       |
+| POST  | `/v1/embeddings`                          | OpenAI                                 |
+| POST  | `/v1/images/generations`                  | OpenAI                                 |
+| POST  | `/v1/images/edits`                        | OpenAI слике (edit/inpaint)            |
+| POST  | `/v1/videos/generations`                  | Генерисање видео записа у ОпенАИ стилу |
+| POST  | `/v1/music/generations`                   | Генерација музике у стилу ОпенАИ       |
+| POST  | `/v1/audio/transcriptions`                | OpenAI аудио (STT)                     |
+| POST  | `/v1/audio/speech`                        | OpenAI TTS (враћа аудио тело)          |
+| POST  | `/v1/rerank`                              | Cohere/Voyage-style реранк             |
+| POST  | `/v1/classify`                            | Јина класификовати (`api.jina.ai`)     |
+| POST  | `/v1/segment`                             | Јина сегментер (`segment.jina.ai`)     |
+| POST  | `/v1/moderations`                         | OpenAI Модератионс                     |
+| POST  | `/v1/systemone`                           | Систем Оне откуцане одлуке             |
+| POST  | `/v1/decisions`                           | OpenAI одлуке (нативе)                 |
+| GET   | `/v1/systemone/models`                    | Каталог модела одлука                  |
+| GET   | `/v1/models`                              | OpenAI                                 |
+| POST  | `/v1/models/query`                        | Ужи избор филтрираних модела           |
+| POST  | `/v1/messages/count_tokens`               | Anthropic                              |
+| GET   | `/v1beta/models`                          | Gemini                                 |
+| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                 |
+| POST  | `/v1/api/chat`                            | Ollama                                 |
+| GET   | `/api/v1/vscode/{token}/`                 | OpenAI каталог алиас                   |
+| GET   | `/api/v1/vscode/{token}/models`           | OpenAI моделс алиас                    |
+| POST  | `/api/v1/vscode/{token}/chat/completions` | OpenAI токенизовани алиас              |
+| POST  | `/api/v1/vscode/{token}/responses`        | OpenAI Одговори токенизовани алиас     |
+| POST  | `/api/v1/vscode/{token}/api/chat`         | Ollama токенизовани алиас              |
+| GET   | `/api/v1/vscode/{token}/api/tags`         | Ollama ознаке токенизовани алиас       |
 
-Sve POST rute prate isti oblik: `Bearer your-api-key` + JSON telo validirano pomoću Zod-a (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` itd.; pogledajte `src/shared/validation/schemas.ts`). Kod neuspešne validacije šeme vraća se odgovor 4xx.
+Све POST руте прате исти облик: `Bearer your-api-key` + Зод валидирано JSON тело (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, итд., види `src/shared/validation/schemas.ts`). 4кк се враћа у случају неуспеха шеме.
 
-Za klijente koji ne mogu da dodaju `Authorization: Bearer ...`, OmniRoute takođe prihvata API ključeve u URL-u putem kompatibilnosti sa niskom upita (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ili putem namenskih `/api/v1/vscode/{token}/...` krajnjih tačaka dokumentovanih u nastavku.
+За клијенте који не могу да прикаче `Authorization: Bearer ...`, OmniRoute такође прихвата API кључеве у URL путем компатибилности стрингова упита (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) или наменских крајњих тачака `/api/v1/vscode/{token}/...` документованих у наставку.
 
 ```bash
-# Rangiranje (provajder iz cloud registra ili čvor provajdera kompatibilan sa OpenAI-jem kao "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina klasifikacija (akreditivi Foundation API-ja)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina segmentator
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina pretraga (s.jina.ai; pseudonimi provajdera: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderacija
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — vraća telo audio/mpeg formata (ili traženog formata)
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS zahteva jezik i glas: `language` podrazumevano ima vrednost "en"; ako nedostaje
-# glas ili je navedeno OpenAI podrazumevano ime glasa (alloy, nova, …), koristi se "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Uređivanje slike (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Generisanje video zapisa / muzike (ID modela sa prefiksom provajdera)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Čvorovi provajdera za rerangiranje:** `POST /v1/rerank` takođe rutira ka čvorovima provajdera kompatibilnim sa OpenAI-jem
-> (oMLX, vLLM, Infinity, TEI iza gejtveja, …) adresiranim kao `<node-prefix>/<model>`. Loopback
-> čvorovi (`localhost`, `127.0.0.1`, `172.16.0.0/12`) su uvek prihvatljivi, kao i imena hostova koje
-> operator navede u `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (npr. naziv Docker/Compose servisa kao što je
-> `http://reranker:8080/v1`; njima se pristupa direktno, nikada preko `HTTP(S)_PROXY` niti preko
-> zakačenog proksija konekcije). Čvorovi na bilo kom drugom
-> hostu — računaru u LAN-u ili Tailscale peer-u — prihvatljivi su samo kada operator omogući
-> oznaku funkcionalnosti `RERANK_REMOTE_PROVIDER_NODES` **i** osnovni URL čvora prođe politiku odlaznih URL-ova provajdera
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Korak rerangiranja memorijskog mehanizma poziva ovu rutu preko
-> loopback-a, tako da isto pravilo važi za `rerankProviderModel` u podešavanjima memorije.
+> **Поново рангирајте чворове добављача:** `POST /v1/rerank` такође усмерава до чворова добављача компатибилних са ОпенАИ (oMLX, vLLM, Инфинити, TEI иза мрежног пролаза, …) адресираних као `<node-prefix>/<model>`. Чворови повратне петље (`localhost`, `127.0.0.1`, `172.16.0.0/12`) су увек подобни, као и имена хостова које оператор наводи у `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (нпр. назив услуге Docker/Compose као што је `http://reranker:8080/v1`; они се позивају директно, никада преко `HTTP(S)_PROXY` или закаченог проксија везе). Чворови на било ком другом хосту — а LAN бок или Tailscale пеер — су подобни само када оператер омогући ознаку функције `RERANK_REMOTE_PROVIDER_NODES`** и** база чвора URL прослеђује одлазну URL политику добављача (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Корак поновног рангирања меморијског механизма позива ову руту преко повратне петље, тако да исто правило управља `rerankProviderModel` у подешавањима меморије.
 >
-> **Oblici lokalnog servera:** čvor se poziva na `<base>/v1/rerank` i, pri odgovoru 404, na `<base>/rerank`
-> (Infinity, TEI). Telo zahteva ka upstream-u sadrži oba naziva kompatibilna sa Cohere/OpenAI
-> (`documents`, `return_documents`) i naziva kompatibilna sa TEI-jem (`texts`, `return_text`), a odgovor upstream-a
-> normalizuje se u Cohere omotač: TEI-jev neupakovan odgovor `[{index, score, text}]`, `{results: [{index, score}]}`
-> tankih gejtveja i Voyage-ov oblik `{data: [...]}` svi se klijentu vraćaju kao
-> `{results: [{index, relevance_score, document?}]}`, sortirani po skoru i ograničeni na `top_n`.
+> **Локални облици сервера:** чвор се позива на `<base>/v1/rerank` и, на 404, на `<base>/rerank` (Бесконачност, TEI). Узводно тело носи и Cohere/OpenAI правопис (`documents`, `return_documents`) и TEI правопис (`texts`, `return_text`), а узводни одговор је нормализован на Cohere омотницу: TEI голи `[{index, score, text}]`, `{results: [{index, score}]}` са танких капија и клијент у стилу Воиаге `{data: [...]}`, сортиран по `{results: [{index, relevance_score, document?}]}` назад на `top_n`.
 
-> **Otkrivanje čvorova provajdera:** modeli na čvoru provajdera kompatibilnom sa OpenAI-jem pojavljuju se u `GET /v1/models`
-> pod prefiksom čvora. Redovi koji ne sadrže metapodatke o krajnjoj tački (što je uobičajeno za lokalne `/v1/models` liste)
-> nasleđuju `apiType` čvora, tako da su modeli čvora `embeddings` tipa `type: "embedding"`, a
-> modeli čvora `rerank` tipa `type: "rerank"`, umesto da podrazumevano budu tipa chat; eksplicitni
-> `supportedEndpoints` u sinhronizovanom ili ručno dodatom redu i dalje ima prednost.
+> **Откривање чвора добављача:** модели на ОпенАИ-компатибилном чвору добављача појављују се у `GET /v1/models` под префиксом чвора. Редови који не носе метаподатке крајње тачке (типично за локалне `/v1/models` листе) наслеђују `apiType` чвора, тако да су модели `embeddings` чвора `type: "embedding"`, а модели `rerank` чвора `type: "rerank"` уместо да подразумевају ћаскање; експлицитни `supportedEndpoints` на синхронизованом или ручно додатом реду и даље има предност.
 
-### Namenske rute provajdera
+### Откуцане одлуке
+
+Модели одлучивања одговарају на откуцана питања са калибрисаним вероватноћама уместо да генеришу текст. Они никада нису модели за ћаскање, а два формата жице се никада не преводе један у други:
+
+- `POST /v1/systemone` — Систем Оне `{ model, state, questions: { <id>: … } }` (TypeSafe Јев, OpenRouter одлуке, Cloudflare Радници AI, локални Ollama).
+- `POST /v1/decisions` — изворне OpenAI Одлуке `{ model, input, questions: [...] }`, које служи `openai` веза. Модел је `openai/gpt-6-luna` (голи `gpt-6-luna` такође ради). Одговори се враћају упитним редоследом, нетакнути.
+- `GET /v1/systemone/models` — један каталог обе врсте; сваки ред именује свој `api_format` (`systemone` или `decisions`). `limit` / `after` страница коначна листа. Заглавље `X-OmniRoute-Catalog-Status` гласи `complete`, `partial` или `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+На листи дозвољених модела `/v1/decisions` API кључа, категорија `decisions` крајње тачке, буџет и опсег везе се проверавају пре него што се прочита било који акредитив. Акредитив је сачувана `openai` веза унутар опсега кључа (никада кључ окружења); база везе URL се поштује само када је `http(s)` URL без акредитива, упита или фрагмента који не показује на овај OmniRoute. Позив одлази кроз исти заштићени транспорт као и `decision` ауто-рутер ( [АУТО-ЦОМБО](../routing/AUTO-COMBO.md) ): заштита одлазног сигнала провајдера, без поновних покушаја, без преусмеравања, временско ограничење од 5 с и ограничење одговора од 64 KB (већи одговор је 502). Тела захтева су ограничена на 4 MiB. Сваки позив шаље нови `Idempotency-Key`. Грешке носе само узводни статус, а никада његово тело, URL, кључ или промпт.
+
+### Руте наменских добављача
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -791,7 +771,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Prefiks provajdera se automatski dodaje ako nedostaje. Neusklađeni modeli vraćaju `400`.
+Префикс добављача се аутоматски додаје ако недостаје. Неусклађени модели враћају `400`.
 
 ---
 

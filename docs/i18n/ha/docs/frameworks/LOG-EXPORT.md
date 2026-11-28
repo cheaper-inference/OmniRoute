@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Jadawali** — aikin cron guda ɗaya na `JobRegistry`, `log_export`, wanda ƙimarsa ta asali ita ce `0 * * * *` (duk sa'a,
-  UTC). An yi masa rajista a `src/lib/initCloudSync.ts`; ana iya sauya shi da `OMNIROUTE_LOG_EXPORT_CRON`.
-  Kowace bugawar jadawali tana kwashe bayanai zuwa kowane wurin karɓa da aka **kunna**, ɗaya bayan ɗaya.
-- **Alamar ci gaba** — `call_logs.rowid` na SQLite na ɓoye, ana adana shi ga kowane wurin karɓa a
-  `log_export_destinations.cursor_row_id`. Da gangan ba a amfani da `timestamp` a matsayin alamar ci gaba: masu kira
-  na iya bayar da ƙimarsu, don haka ana iya rubuta buƙata mai jinkiri bayan wata mai sauri da ta fara
-  daga baya, kuma alamar ci gaba ta lokaci za ta tsallake ta.
-- **Rarrabawa zuwa rukuni** — layuka `batch_size` a kowace buƙata (ƙimar asali 500), layuka `max_rows_per_run` a kowane zagaye
-  (ƙimar asali 10000), domin a kwashe tarin bayanai mai yawa a bugawar jadawali da dama maimakon ya toshe guda ɗaya.
-- **Isarwa** — alamar ci gaba tana matsawa ne kawai bayan `send()` ya kammala cikin nasara. Rukunin da ya gaza yana barin
-  alamar ci gaba a inda take, don haka a sake gwada layukan a zagaye na gaba. Tabbacin shi ne
-  isarwa aƙalla sau ɗaya tare da kawar da maimaituwa a wurin karɓa, ba ainihin isarwa sau ɗaya tak ba: BigQuery yana ba kowane
-  layi maɓalli bisa id na rajistar kira, wanda yake ƙoƙarin mutuntawa gwargwadon iko a cikin wa'adinsa na kawar da maimaituwa.
-- **Kariyar cin karo** — bugawar cron da `POST .../run` na iya faruwa tare. Ana tsallake wurin karɓa
-  da ake riga ake kwashe bayanai zuwa gare shi maimakon a yi haka sau biyu (`skipped: true` a sakamakon zagaye),
-  don haka zagayen da ke gudana a lokaci guda ba zai iya sake aika rukuni ko mayar da alamar ci gaba baya ba.
-- **Farfadowa bayan sharewa** — idan `cursor_row_id` ya wuce `MAX(rowid)` (an
-  share dukkan teburin kuma rowids sun sake farawa), mai gudanarwa yana komawa 0 maimakon ya daina ganin sabbin bayanai har abada.
+- **Jadawalin** — daya `JobRegistry` cron job, `log_export`, sabawa zuwa `0 * * * *` (sa'a, UTC). Rajista a `src/lib/initCloudSync.ts`; m tare da `OMNIROUTE_LOG_EXPORT_CRON`. Kowane kaska yana magudana kowane** kunna** makoma, bi da bi.
+- **Cursor** — SQLite ta fayyace `call_logs.rowid`, ya dage a kowace manufa a cikin `log_export_destinations.cursor_row_id`. `timestamp` ba da gangan ba ne siginan kwamfuta: masu kira za su iya ba da ƙimar kansu, don haka za a iya rubuta buƙatun jinkiri bayan wanda ya fara sauri daga baya, kuma siginan lokaci na lokaci zai tsallake shi.
+- **Batching** layuka — `batch_size` a kowane buƙatu (tsoho 500), layin `max_rows_per_run` a kowace gudu (default 10000) don haka babban maƙallan baya yana magudana akan ticks da yawa maimakon toshe ɗaya.
+- **Bayarwa** — mai siginar ya ci gaba ne kawai bayan `send()` ya warware. Batch ɗin da bai yi nasara ba yana barin siginan kwamfuta inda yake, don haka ana sake gwada layuka iri ɗaya akan gudu na gaba. Garanti shine aƙalla-sau ɗaya tare da kwafin-gefen-gefen, ba gaskiya bane sau ɗaya: maɓallan BigQuery kowane jere ta ID ɗin kira, wanda yake girmamawa akan ingantaccen ƙoƙari a cikin taga da aka raba.
+- **Mai gadi zoba** — cron tick da `POST .../run` na iya yin harbi tare. An tsallake wurin da aka riga an yi magudanar ruwa maimakon a zubar da shi sau biyu (`skipped: true` a cikin sakamakon gudu), don haka gudu na lokaci ɗaya ba zai iya sake aika tsari ba ko rubuta siginan kwamfuta a baya.
+- **Share farfadowa** — idan `cursor_row_id` ya ƙare sama da `MAX(rowid)` (an wanke tebur gabaɗaya kuma an sake kunna layuka), mai gudu ya koma 0 maimakon ya makance na dindindin.
 
-### Mai gudanarwa da aka ware da iyakoki
+### Keɓe mai gudu da iyaka
 
-Kowane zagayen wurin karɓa a Node yana fara wani keɓantaccen ƙaramin tsari na OS mai ɗan gajeren rai (`child_process`
-tare da IPC, ba `worker_threads` ba). Karanta jikin bayanai, fassara/tsara JSON na bayanan da za a aika,
-`prepare()` na wurin karɓa da shigarwa/fitarwar sadarwar wurin karɓa duk suna gudana a can, ba a madaukin abubuwan da ke faruwa na uwar garke ba.
-Saituna da ƙananan saƙonnin ci gaba ne kawai suke ketare IPC; bayanan da aka fitar ba sa komawa
-uwar garke. Aikin cron da hanyar Run now suna riƙe sakamakon da ake nunawa da kariyar cin karo iri ɗaya.
+Kowane wurin da ke gudana akan Node yana farawa daban, tsarin OS na ɗan gajeren lokaci (`child_process` tare da IPC, ba `worker_threads`). Jiki yana karantawa, zazzagewa JSON parsing/serialization, `prepare()` manufa da cibiyar sadarwa I/O duk suna gudana a wurin, ba akan madauki na taron uwar garken ba. Sai kawai daidaitawa da ƙananan saƙonnin ci gaba sun haye IPC; bayanan da aka fitar ba su dawo zuwa uwar garken ba. Aikin cron da Gudu yanzu hanya tana kiyaye sakamakon jama'a iri ɗaya da gadi zoba.
 
-Ƙaramin tsarin yana buɗe `DATA_DIR/storage.sqlite` da uwar garke ta tantance don karantawa kawai ta amfani da `node:sqlite`,
-tare da `busy_timeout=5000` da `query_only=ON`. Ba ya shigo da DB singleton kuma ba ya yin
-ƙaura, ajiyar madadin bayanai ko sabunta SQLite. Kula da bayanan artifact da suka ɓace/lalace (ciki har da
-UPDATE na artifact da ya lalace) yana nan a hanyar cikakkun bayanai ta dashboard kawai. Hanyoyin biyu suna amfani da mai
-warware cikakkun bayanai marar sauya yanayi guda ɗaya; fitarwa yana amfani da karatun tsarin fayil na asynchronous da jerin warwarewa iri ɗaya: artifact → tsohon
-inline → tsohon disk → babu. Zagaye yana ɗaukar hoton iyakar rowid na shigarwa
-lokacin da ƙaramin tsarin ya buɗe mai karatunsa; shigarwar da ta biyo baya tana jira zagaye na gaba. Wannan iyakar
-shigarwa ce, ba mu'amalar SQLite mai ɗorewa ba: masu rubutun WAL da wuraren tabbatarwa suna nan a sake yayin
-jiran sadarwa. Wannan iyaka ba ta daskarar da sabuntawa/share layukan da suke akwai ba.
+Yaron yana buɗe uwar garken warware `DATA_DIR/storage.sqlite` karanta-kawai ta amfani da `node:sqlite`, tare da `busy_timeout=5000` da `query_only=ON`. Yana shigo da babu DB singleton kuma baya yin ƙaura, madadin ko sabunta SQLite. lissafin kayan tarihi Missing/corrupt (gami da gurɓataccen kayan aikin UPDATE) ya rage a cikin dashboard ɗin hanyar dalla-dalla kawai. Dukansu hanyoyi suna raba tsaftataccen mai warwarewa; fitarwa yana amfani da tsarin fayil ɗin asynchronous karanta da kuma kayan tarihi iri ɗaya → gadon layi → gadon diski → babu wani tsari na ƙuduri. Gudu yana ɗaukar matsakaicin matsakaicin layin saka lokacin da yaro ya buɗe karatunsa; daga baya sakawa jira na gaba gudu. Wannan iyaka ce ta sakawa, ba ma'amalar SQLite mai tsawo ba: marubutan WAL da wuraren bincike suna kasancewa kyauta yayin jiran hanyar sadarwa. ba a daskarar da Updates/deletions na layuka da ake da su ta wannan iyaka.
 
-Bayan kowane rukuni da aka amince da shi, ƙaramin tsarin yana jiran saƙon tabbatarwa. Uwar garke da farko tana adana
-alamar ci gaba ta `advanceLogExportCursor`, sannan ta aika `ack`; babu rukunin gaba da zai fara kafin haka.
-Gazawar aikawa, rushewa ko ƙarewar lokaci yana rubuta gazawa ba tare da matsar da alamar wannan rukunin ba. Rukunonin da aka
-riga aka tabbatar suna nan a adane; aƙalla rukunin guda ɗaya da ba a tabbatar ba ne kaɗai za a iya sake aikawa.
-Ana rubuta nasara ne kawai bayan `done` da fitowar ƙaramin tsarin ba tare da matsala ba. Gazawa tana dakatar da ƙaramin tsarin
-da SIGTERM, sannan ta koma SIGKILL bayan 500 ms, kuma mai gudanarwa yana jira tsarin ya rufe.
+Bayan kowane rukunin da aka karɓa, yaron yana jiran sanarwa. Sabar ta fara dage siginan kwamfuta da `advanceLogExportCursor`, sannan ta aika da `ack`; babu wani rukuni na gaba da zai fara kafin shi. Rashin gazawar aika, karo ko ƙarewar lokaci yana rikodin gazawar ba tare da haɓaka wannan rukunin ba. Batches da aka yarda da su a baya sun kasance masu himma; a mafi yawan abin da ba a san shi ba za a iya sake aikawa. Ana yin rikodin nasara ne kawai bayan `done` da fitar da yaro mai tsabta. Rashin gazawa yana ƙare yaron da SIGTERM, yana ƙaruwa zuwa SIGKILL bayan 500 ms, kuma mai gudu yana jiran rufewar tsari.
 
-| Canjin muhalli                                | Ƙimar asali | Manufa                                        |
-| --------------------------------------------- | ----------- | --------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000      | Iyakar lokacin gaske ga kowane wurin karɓa    |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024        | Iyakar old-space na V8 na ƙaramin tsarin a MB |
+| Canjin yanayi                                 | Tsohuwar | Manufar                                    |
+| --------------------------------------------- | -------- | ------------------------------------------ |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Iyakar bangon agogon kowane-wuri           |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Yaro V8 iyakar sararin samaniya a cikin MB |
 
-Ƙimomin da ba su inganta ba/ba su fi sifili ba/ba cikakkun lambobi ba suna amfani da ƙimomin asali. Saitin heap ba iyakar
-jimillar RSS ba ne; manyan rukunoni sosai har yanzu na iya ƙarar da ƙwaƙwalwar ƙaramin tsarin su sa zagaye ya gaza cikin aminci.
-Ƙimar asali ta 1024 MB tana barin isasshen sarari ga rukunin asali mai layuka 500 na artifacts masu 512 KiB tare da
-kunna jikin bayanai, ciki har da tsara JSON na BigQuery zuwa gutsattsari bisa bytes. Ba ya sa
-rukunin jikin bayanai mai layuka 10000 ya zama amintacce. Ƙarewar heap na V8 yana rubuta gazawar da ke da matakin gyara: rage girman
-rukuni ko ƙara `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; alamar ci gaba tana nan a rukunin ƙarshe
-da aka tabbatar. Iyakacin artifact na zamani bai shafi tsoffin jikin bayanai na inline/disk ba.
-Masu gudanarwa dole su ware kasafin RSS dabam, musamman a cikin containers masu iyakantacciyar ƙwaƙwalwa.
+ƙimar Invalid/non-positive/non-integer suna amfani da abubuwan da ba a so. Saitin tarin ba jimlar RSS ba ne; Manya-manyan batches har yanzu suna iya kawar da ƙwaƙwalwar yara kuma su kasa gudu cikin aminci. Tsohuwar 1024 MB tana barin ɗakin kai don tsohowar jeri 500 na kayan tarihi na 512 KiB tare da kunna jikin, gami da jeri na BigQuery's byte-chunked JSON. Ba ya sanya rukunin jikkuna mai jere 10000 lafiya. Rashin gajiyar tudu na V8 yana rikodin gazawar da za a iya aiwatarwa: ƙaramin tsari ko haɓaka `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; siginan kwamfuta ya tsaya a ƙarshen da aka yarda da shi. Jikin inline/disk na tarihi ba su rufe da hular kayan tarihi na zamani. Masu aiki dole ne su tsara kasafin RSS daban, musamman a cikin kwantena masu iyakacin ƙwaƙwalwar ajiya.
 
-Tsarin ɗan yana gadon `DATA_DIR` da aka tantance, `NODE_ENV`, `TZ` da aka saita kai tsaye (tsohuwar hanyar
-tantance lokacin gida daga sunan fayil), `ELECTRON_RUN_AS_NODE` idan yana nan, da waɗannan saitunan haɗin fita kawai:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (da sigoginsu na ƙananan haruffa),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Mai rarraba buƙatu na Undici na gama-gari yana amfani da hanyar sabar ta tantance wakilin haɗi daga muhalli kawai da ƙa'idodin
-ƙetare wakili don na'urorin gida, ciki har da `NO_PROXY`; ba ya shigo da `proxyFetch.ts` ko tutocinsa na DB/fasaloli.
-Ana ɓoye bayanan shaidar wakilin haɗi daga fitarwar da aka tura da kurakuran da aka rubuta. Bayanan shaidar wurin aika bayanai
-suna tafiya ne kawai a saƙon IPC guda ɗaya na farawa, ba ta argv ko muhalli ba; ana ƙara alamar farko ga fitarwa/kurakuran da ake turawa
-kuma ana tsabtace su. `ExperimentalWarning` kawai ake kashewa a muhawarar exec ta tsarin ɗan don guje wa
-maimaita gargaɗin SQLite na Node a kowane aikin cron; sauran nau'ikan gargaɗi suna ci gaba da bayyana.
+Yaron ya gaji `DATA_DIR` da aka warware kawai , `NODE_ENV`, `TZ` bayyananne (ƙaddamar da sunan gado na gida), `ELECTRON_RUN_AS_NODE` lokacin da yake nan, da abubuwan shigarwa masu zuwa: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (da ƙananan siffofinsu), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Mai aikawa da Undici na duniya yana raba tsaftataccen mahalli na uwar garke-ƙudurin wakili da ƙa'idodin kewayawa na gida, gami da `NO_PROXY`; ba ya shigo da `proxyFetch.ts` ko tutocinsa na DB/feature. Ana cire takaddun shaidar wakili daga fitarwa da aka tura da kurakurai da aka yi rikodi. Takaddun shaida suna tafiya ne kawai a farkon saƙon IPC ɗaya, ba a taɓa argv ko muhalli ba; tura output/error an riga an tsara shi kuma an tsabtace shi. `ExperimentalWarning` ne kawai aka kashe a cikin muhawarar exec na yara don guje wa maimaita SQLite na Node na gargaɗin kowane cron gudu; sauran nau'ikan gargaɗin sun kasance a bayyane.
 
-Dole ne a iya shigo da modulolin wurin aika bayanai ba tare da dogaro da Next.js/abubuwan da suka keɓanta ga sabar ba. Tsarin
-BigQuery da ake da shi ya riga ya cika wannan sharaɗi. Ma'ajiyar wucin gadi ta token ɗin samun dama tana ɗorewa ne kawai a lokacin
-gudanarwar tsarin ɗan, ba tsakanin gudanarwa ba. Node shi ne muhallin gudanarwa da ake tallafawa (`package.json` engines), amma sashen
-shigar da Bun a README da `Dockerfile.bun` su ma suna nuna hanyar dacewa don amfani a samarwa ta
-`bun:sqlite` (`src/lib/db/core.ts` / adaftoci). Saboda haka, a ƙarƙashin Bun, fitar da bayanai yana riƙe tsohuwar
-hanyar cikin tsari ɗaya kuma yana fitar da gargaɗi sau ɗaya: ba a samun keɓancewar heap/lokacin ƙarewar tsarin ɗan. Yi amfani da
-Node don keɓance madaukin abubuwan da ke faruwa da OOM; ba a ɗauki Bun a nan a matsayin na haɓakawa kawai ba.
+Dole ne samfuran hanyar zuwa su kasance masu shigo da su ba tare da dogaro da Next.js/server-only ba. Aiwatar da BigQuery ɗin da ke akwai ya riga ya cika waccan kwangilar. Caches-token yana dawwama don gudun yaro kawai, ba a kan gudu ba. Node shine lokacin aiki mai goyan baya (injunan `package.json` ). Mafi kyawun ƙoƙari, hanyar dacewa Bun mara goyan baya akwai (`bun:sqlite` a cikin `src/lib/db/core.ts` / adaftar, da `Dockerfile.bun`), don haka fitarwa dole ne ya karye a ƙarƙashinsa. Karkashin Bun, fitar da kaya zuwa kasashen waje yana riƙe hanyar da ta gabata a cikin aiwatarwa kuma tana fitar da gargaɗin lokaci ɗaya: babu keɓewar heap/timeout na yaro. Yi amfani da Node don madauki na taron da keɓewar OOM.
 
-Idan an kunna `includeBodies`, a fi son jadawalin da ke gudana bayan wasu mintuna kamar
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` maimakon tara nauyin bayanai na sa'a guda.
-Iyakokin rukuni da layuka har yanzu suna iyakance kowace gudanarwa. Ana biyan kuɗin fara tsari ga kowane wurin aika bayanai a kowace gudanarwa;
-wannan yana musanya ƙaramin kuɗin farawa da keɓance madaukin abubuwan da ke faruwa na sabar, ba rage jimillar amfani da CPU ba.
+Lokacin da aka kunna `includeBodies`, fi son matakin matakin minti ɗaya kamar `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` maimakon tara bayanan dawo da kaya na sa'a. Matsakaicin tsari da iyakokin jere har yanzu suna daure kowane gudu. Ana biyan farawa tsarin kowane makoma ta gudu; wannan yana cinikin ɗan ƙaramin farashin farawa don keɓewar taron madauki na uwar garken, ba a rage yawan amfani da CPU ba.
 
-### Nauyin bayanai (saƙonnin umarni da amsoshi)
+### Abubuwan da aka biya (sarrafa da kammalawa)
 
-A tsari na asali, fitarwar tana ɗauke da filayen taƙaitawa kawai waɗanda **jerin** Rajistan ke nunawa. Kunna
-**Fitar da saƙonnin umarni da amsoshi** (`includeBodies`) yana kuma aika abin da ɓangaren **cikakken bayani**
-na Rajistan ke nunawa ga kowace kira:
+Ta tsohuwa fitarwa tana ɗaukar filayen taƙaice kawai Logs** jeri** nuna. Kunnawa** Fitar da tsokaci da martani** (`includeBodies`) kuma suna jigilar abin da logs** daki-daki** Rubutun yana nuna kowane kira:
 
-| Fili                             | Abin da yake ɗauke da shi                                       |
-| -------------------------------- | --------------------------------------------------------------- |
-| `request_body` / `response_body` | Nauyin bayanan kira kamar yadda allon bayanai ke nuna su        |
-| `pipeline_route_decision`        | Wurin da samfurin da mai tsara hanya ya zaɓa                    |
-| `pipeline_client_request`        | Buƙatar asali daidai yadda abokin hulɗa ya aika ta              |
-| `pipeline_openai_request`        | Bayan sauya ta zuwa tsarin OpenAI na ciki                       |
-| `pipeline_provider_request`      | Yadda aka aika ta a zahiri zuwa mai samarwa, a tsarinsa         |
-| `pipeline_provider_response`     | Amsar asali daga mai samarwa                                    |
-| `pipeline_client_response`       | Abin da aka mayar wa mai kira                                   |
-| `pipeline_error`                 | Cikakken kuskuren matakin bututun sarrafawa ga kiran da ya gaza |
-| `bodies_truncated`               | Gaskiya idan wani filin da ke sama ya kai `maxBodyBytes`        |
+| Filin                            | Abin da ya rike                                                                   |
+| -------------------------------- | --------------------------------------------------------------------------------- |
+| `request_body` / `response_body` | Kiran yana ɗaukar kaya yayin da dashboard ɗin ke sanya su                         |
+| `pipeline_route_decision`        | Wanne manufa da samfurin na'ura mai ba da hanya tsakanin hanyoyin sadarwa ya zaba |
+| `pipeline_client_request`        | Buƙatun ɗanyen daidai kamar yadda abokin ciniki ya aiko shi                       |
+| `pipeline_openai_request`        | Bayan fassara zuwa siffar OpenAI ta ciki                                          |
+| `pipeline_provider_request`      | Kamar yadda a zahiri aika sama, a cikin yaren mai bayarwa                         |
+| `pipeline_provider_response`     | Amsa danye na sama                                                                |
+| `pipeline_client_response`       | Me aka mayar wa mai kiran                                                         |
+| `pipeline_error`                 | Dalla-dalla kuskuren matakin bututu don kiran da bai yi nasara ba                 |
+| `bodies_truncated`               | Gaskiya ne lokacin da kowane filin da ke sama ya buga `maxBodyBytes`              |
 
-Wannan abun cikin saƙon umarni ne, don haka **a kashe yake a tsari na asali** kuma da gangan zaɓinsa yake ga kowane wurin aika bayanai.
-Abin da ake aikawa shi ne abin da allon bayanai ke nunawa, domin fitarwa da `getCallLogById` suna amfani da hanyar samo cikakkun bayanai
-ɗaya: an riga an
-tsabtace nauyin bayanan daga bayanan gano mutum (PII) kuma an ɓoye sirrinsu lokacin rubuta su, kuma kiran da aka yi da
-maɓallin API na `noLog` ba ya adana wani nauyin bayanai kwata-kwata, don haka babu abin fitarwa.
+Wannan abun cikin gaggawa ne, haka yake** kashe ta tsohuwa** kuma da gangan zaɓin makoma. Abin da jirgin ruwa shi ne abin da dashboard ya nuna, saboda fitarwa da `getCallLogById` suna raba ƙuduri dalla-dalla: an riga an cire kayan aikin PII kuma an cire su a asirce lokacin da aka rubuta su, kuma kiran da aka yi tare da maɓalli na `noLog` API ba a adana kaya ba kwata-kwata, don haka babu wani abu don fitarwa.
 
-Ana karanta nauyin bayanai ga kowane layi daga fayil ɗin da aka adana a tsarin fayiloli, don haka cika cikakkun bayanai yana gudana ne kawai ga wuraren aika bayanai
-da suka nema. Idan fayil ɗin ya ɓace ko ya lalace, ana fitar da taƙaitawarsa tare da nauyin bayanai na null maimakon
-kasa gudanar da rukunin gaba ɗaya da barin ma'aunin matsayi a makale.
+Ana karanta abubuwan biyan kuɗi a jere daga kayan aikin tsarin fayil, don haka ruwa yana gudana ne kawai don wuraren da ya nemi sa. Wani ɓoyayyen kayan tarihi da ya ɓace ko ɓarna yana fitar da taƙaitaccen bayanin sa tare da kayan aikin da ba shi da amfani maimakon gazawar tsari da kuma ɗaure siginan kwamfuta.
 
-`maxBodyBytes` (na asali 262144) yana iyakance kowane fili. Nauyin bayanai da ya fi tsawo ana **datse shi maimakon
-watsar da shi** — saƙon umarni da aka datse har yanzu yana amsa "me aka tambaya" — kuma ana sa wa layin alamar
-`bodies_truncated`. Ba a fitar da sauye-sauyen da aka jera sashe-sashe ta rafi; amsar da aka haɗa tana
-nan tuni a `pipeline_provider_response` da `pipeline_client_response`.
+`maxBodyBytes` (default 262144) ya cika kowane filin. Dogayen kaya masu yawa** yanke maimakon faduwa** — wani guntuwar faɗakarwa har yanzu yana amsa "abin da aka tambaya" — kuma layin yana da alamar `bodies_truncated`. Ba a fitar da magudanar ruwa-da-chunk deltas; Amsar da aka haɗa ta riga ta kasance a cikin `pipeline_provider_response` da `pipeline_client_response`.
 
 ---
 

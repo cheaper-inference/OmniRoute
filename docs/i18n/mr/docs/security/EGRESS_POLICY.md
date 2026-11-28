@@ -69,13 +69,13 @@ PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777) मध्ये 
 
 ## तीन मूल्ये
 
-| मूल्य  | UI लेबल                | वर्तन                                                                                                                                             |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `स्वयं (ड्युअल-स्टॅक)` | OS फॅमिली निवडते. IP-लिटरल प्रॉक्सी होस्टसाठी, फॅमिली त्या लिटरलमध्येच अंतर्निहित असते; होस्टनावासाठी, दोन्ही फॅमिली पात्र असतात. हे डीफॉल्ट आहे. |
-| `ipv4` | `केवळ IPv4`            | कनेक्शन IPv4 वर निश्चित करते. प्रॉक्सी होस्टची IPv4 (A) नोंद नसल्यास सुरक्षितपणे अपयशी होते.                                                      |
-| `ipv6` | `केवळ IPv6`            | कनेक्शन IPv6 वर निश्चित करते. प्रॉक्सी होस्टची IPv6 (AAAA) नोंद नसल्यास सुरक्षितपणे अपयशी होते.                                                   |
+| मूल्य  | UI लेबल             | वागणूक                                                                                                                                          |
+| ------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS कुटुंबाची निवड करते. आयपी-लिटरल प्रॉक्सी होस्टसाठी, कुटुंब शाब्दिकसाठी आंतरिक आहे; होस्टनावासाठी, दोन्ही कुटुंबे पात्र आहेत. हे डीफॉल्ट आहे. |
+| `ipv4` | `IPv4 only`         | IPv4 ला कनेक्शन पिन करते. प्रॉक्सी होस्टकडे कोणतेही IPv4 (A) रेकॉर्ड नसल्यास बंद होते.                                                          |
+| `ipv6` | `IPv6 only`         | IPv6 ला कनेक्शन पिन करते. प्रॉक्सी होस्टकडे IPv6 (AAAA) रेकॉर्ड नसल्यास अयशस्वी बंद होते.                                                       |
 
-UI स्ट्रिंग्ज `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`) मध्ये आहेत.
+UI स्ट्रिंग्स `src/i18n/messages/en.json` मध्ये राहतात (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
@@ -83,21 +83,21 @@ UI स्ट्रिंग्ज `src/i18n/messages/en.json` (`labelFamily`, `f
 
 ### डॅशबोर्ड
 
-निवडकर्ता **प्रॉक्सी पूल** टॅबमधील प्रॉक्सी फॉर्ममध्ये आहे:
+निवडकर्ता प्रॉक्सी फॉर्ममध्ये आहे** प्रॉक्सी पूल** टॅब:
 
-1. **डॅशबोर्ड → सेटिंग्ज → प्रॉक्सी → प्रॉक्सी पूल** उघडा
+1. उघडा** डॅशबोर्ड → सेटिंग्ज → प्रॉक्सी → प्रॉक्सी पूल**
 2. प्रॉक्सी जोडा किंवा संपादित करा
-3. **IP फॅमिली** ड्रॉपडाउन `स्वयं (ड्युअल-स्टॅक)`, `केवळ IPv4`, किंवा `केवळ IPv6` वर सेट करा
+3. सेट करा**IP कुटुंब** `Auto (dual-stack)`, `IPv4 only` किंवा `IPv6 only` वर ड्रॉपडाउन
 4. जतन करा
 
-हे नियंत्रण `ProxyRegistryManager.tsx` द्वारे रेंडर केले जाते (`proxy/ProxyPoolTab.tsx` मध्ये माउंट केलेले).
+नियंत्रण `ProxyRegistryManager.tsx` ( `proxy/ProxyPoolTab.tsx` मध्ये आरोहित) द्वारे प्रस्तुत केले जाते.
 
 ### API
 
-`family` फील्ड प्रॉक्सी रजिस्ट्रीच्या तयार/अद्यतन पेलोडचा भाग आहे, ज्याचे प्रमाणीकरण `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) द्वारे केले जाते आणि जे `POST` / `PATCH /api/v1/management/proxies` द्वारे हाताळले जाते:
+`family` फील्ड प्रॉक्सी रेजिस्ट्री create/update पेलोडचा भाग आहे, `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) द्वारे प्रमाणित आणि `POST` / `PATCH /api/v1/management/proxies` द्वारे हाताळले जाते :
 
 ```bash
-# केवळ-IPv6 प्रॉक्सी तयार करा
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# अस्तित्वातील प्रॉक्सी केवळ-IPv4 वर बदला
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-हेच फील्ड अपस्ट्रीम-प्रॉक्सी नोंदींसाठी वापरल्या जाणाऱ्या इनलाइन प्रॉक्सी कॉन्फिग ऑब्जेक्टद्वारेही स्वीकारले जाते (`upstream_proxy_config.family`, [डेटा मॉडेल](#data-model) पहा).
+हेच फील्ड अपस्ट्रीम-प्रॉक्सी नोंदींसाठी वापरल्या जाणाऱ्या इनलाइन प्रॉक्सी कॉन्फिगरेशन ऑब्जेक्टद्वारे देखील स्वीकारले जाते (`upstream_proxy_config.family`, [डेटा मॉडेल](#data-model) पहा).
 
-प्रॉक्सीच्या उर्वरित CRUD/असाइनमेंट API साठी, [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) पहा.
+बाकीच्या प्रॉक्सी CRUD/assignment API साठी , [PROXY_GUIDE पहा .md](../ops/PROXY_GUIDE.md).
 
 ---
 

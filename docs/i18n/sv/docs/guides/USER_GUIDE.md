@@ -229,33 +229,41 @@ Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Kombinationer
+## 🎨 Combos
 
-Du kan ändra ordningen på kombinationskort direkt i **Kontrollpanel → Kombinationer** genom att dra i handtaget på varje kort. Ordningen lagras i SQLite och återställs vid omladdning.
+Du kan beställa om kombokort direkt i** Dashboard → Combos** genom att dra i handtaget på varje kort. Ordern lagras i SQLite och återställs vid omladdning.
 
-### Exempel 1: Maximera prenumeration → Billig reservmodell
+### Hitta en leverantör, modell eller konto
 
-```
-Kontrollpanel → Kombinationer → Skapa ny
+I Skapa eller redigera kombination inkluderar steg-för-steg-leverantör, modell, konto och kombinationsreferensväljare ett lokalt sökfält. Sök efter ett visat namn, identifierare, leverantörsalias eller modellkälla, klicka sedan på ett resultat eller använd piltangenterna och Enter. Alla söktermer måste matcha. Om du rensar sökningen eller trycker på Escape lämnas det valda värdet oförändrat.
 
-Namn: premium-coding
-Modeller:
-  1. cc/claude-opus-4-7 (Primär prenumerationsmodell)
-  2. glm/glm-4.7 (Billig reservmodell, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Billigaste reservalternativet, $0.3/1M)
+Det automatiska kontovalet förblir synligt under sökning. Dess valfria kontobegränsningslista har ett separat filter: valda konton utanför de synliga resultaten förblir valda och antalet inkluderar dem. Dolda e-postfragment är inte sökbara när e-postsekretess är på. Lägg till steget och spara kombinationen som vanligt; att skriva en fråga sparar eller testar ingenting.
 
-Använd i CLI: premium-coding
-```
+Samma lokala sökning är tillgänglig för anslutningstestmodeller, anpassade CLI standard- och aliasmodeller och sparade proxyval. Befintliga spara, tillämpa och testa åtgärder förblir separata.
 
-### Exempel 2: Endast kostnadsfria modeller (noll kostnad)
+### Exempel 1: Maximera prenumeration → Cheap Backup
 
 ```
-Namn: free-combo
-Modeller:
-  1. if/kimi-k2.7-code (angiven som kostnadsfri åtkomst; leverantörsbegränsningar kan gälla)
-  2. kr/qwen3-coder-next (kostnadsfri reservmodell från Kiro)
+Dashboard → Combos → Create New
 
-Kostnad: anges för närvarande som $0; villkor och tillgänglighet kan ändras
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### Exempel 2: Endast gratis (noll kostnad)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -415,7 +423,7 @@ När du inte längre behöver OmniRoute tillhandahåller vi två snabba skript f
 ### VPS distribution
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -497,8 +505,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -688,12 +696,12 @@ Eller använd Dashboard:** Leverantörer → [Provider] → anpassade modeller**
 
 Anmärkningar:
 
-- OpenRouter och OpenAI/Anthropic-compatible -leverantörer hanteras från** Tillgängliga modeller** endast. Manuell tillägg, import och automatisk synkronisering hamnar i samma lista med tillgängliga modeller, så det finns inget separat avsnitt för anpassade modeller för dessa leverantörer.
-- De** Anpassade modeller** sektionen är avsedd för leverantörer som inte exponerar hanterade importer av tillgängliga modeller.
+- OpenRouter och OpenAI/Anthropic-compatible -leverantörer hanteras från** Tillgängliga modeller** endast. Manuell tillägg, import och automatisk synkronisering hamnar i samma lista med tillgängliga modeller, så det finns ingen separat avsnitt för anpassade modeller för dessa leverantörer.
+- De** Anpassade modeller** sektionen är avsedd för leverantörer som inte exponerar hanterad import av tillgängliga modeller.
 
 ### Anpassade OpenAI-kompatibla leverantörer
 
-Vilken gateway som helst som talar OpenAI API (en proxy, vLLM, en tredjepartsaggregator) kan läggas till som sin egen leverantörsnod:
+Vilken gateway som helst som talar OpenAI API (en självvärdad proxy, vLLM, en tredjepartsaggregator) kan läggas till som sin egen leverantörsnod:
 
 1. **Leverantörer → Lägg till OpenAI kompatibel** .
 2. **Namn** : en displayetikett för noden.
@@ -796,7 +804,7 @@ curl http://localhost:20128/api/models/catalog
 
 Returnerar modeller grupperade efter leverantör med typer (`chat`, `embedding`, `image`).
 
-### Molnsynkronisering
+### Cloud Sync
 
 - Synkronisera leverantörer, kombinationer och inställningar mellan enheter
 - Automatisk bakgrundssynkronisering med timeout + misslyckas snabbt
@@ -866,8 +874,8 @@ Konfigurera via** Dashboard → Inställningar → Routing** . Instrumentpanelen
 - `least-used` och `cost-optimized`
 - `auto` — poängstyrd över alla kandidater
 - `lkgp` (Last Known Good Provider) — stiftar till den senaste framgångsrika leverantören och faller sedan tillbaka till reglerna
-- `context-optimized` — väljer modellen med det största fria sammanhangsfönstret
-- `context-relay` — kedjer långsammanhangsmodeller för uppföljande svängar
+- `context-optimized` — provar modellen med det största kända sammanhangsfönstret först
+- `context-relay` — prioritetsordning plus en överlämningssammanfattning när konversationen flyttas till ett annat konto
 
 #### Extern Sticky Session Header
 
@@ -1046,7 +1054,7 @@ Inställningssidan är organiserad i** 7 flikar** för enkel navigering:
 | **Allmän**      | Systemlagringsverktyg, standardbeteende, synlighet för slutpunktstunnel                                                                                           |
 | **Utseende**    | Temakontroller (light/dark/system), sidofältssynlighet, panelväxlar för Cloudflare/Tailscale/ngrok -tunnelkort                                                    |
 | **AI**          | Tänkande budget (passthrough / auto-strip / anpassad / adaptiv — se [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), global systemprompt, prompt cachestatistik      |
-| **Säkerhet**    | Login/Password inställningar, IP åtkomstkontroll, API auth för `/models`, leverantörsblockering, prompt-injektionsskydd                                           |
+| **Säkerhet**    | Login/Password inställningar, IP åtkomstkontroll, API auth för `/models`, Provider Blocking, prompt-injection guard                                               |
 | **Routing**     | Global routingstrategi (Fill First / Round Robin / P2C / Random / Minst använd / Kostnadsoptimerad), jokerteckenmodellalias, reservkedjor, kombinationsstandarder |
 | **Elasticitet** | Begärkö, nedkylning av anslutning, konfiguration av leverantörsbrytare och beteende för att vänta på nedkylning                                                   |
 | **Avancerad**   | Global proxykonfiguration (HTTP/SOCKS5), åsidosättande av proxy per leverantör                                                                                    |
@@ -1142,7 +1150,7 @@ Konfigurera injustering per kombination** Dashboard → Combos → Create/Edit �
 
 Globala kombinationsstandarder kan ställas in** Dashboard → Inställningar → Routing → Combo Standarder** . Kombinerade måltidsgränser ärver som standard den aktuella tidsgränsen för begäran. Använda** Måltidsgräns (sekunder)** på kombinationsstandarder eller en individuell kombination endast när en kortare gräns per mål bör utlösa snabbare reserv.
 
-Kombinationsoptimeringar med noll latens är opt-in. Lämna** Noll latensoptimeringar** inaktiverad för att förhindra dessa latensfunktioner från att tävla mot reservmål, hoppa över mål baserat på TTFT historik eller komprimera reservförfrågningar; genom att möjliggöra konfigurerad säkring, prediktiva TTFT hopp och proaktiv reservkomprimering för att byta ut routing/request trohet mot lägre svansfördröjning.
+Kombinationsoptimeringar med noll latens är opt-in. Lämna** Noll latensoptimeringar** inaktiverad för att förhindra dessa latensfunktioner från att tävla mot reservmål, hoppa över mål baserat på TTFT historik eller komprimera reservförfrågningar; aktiverar det tillåter konfigurerad säkring, prediktiva TTFT hopp och proaktiv reservkomprimering för att byta ut routing/request trohet mot lägre svansfördröjning.
 
 Inaktivera** Resonera token buffert** när uppströmsleverantörer kräver strikta `max_tokens` / `maxOutputTokens` -gränser. När kombinerad routing är aktiverad lägger den bara till resonemangsmodellens utrymme för modeller med ett känt utdatatak och lämnar klienttokengränsen oförändrad när det säkra buffrade värdet skulle överskrida det taket. Om klientgränsen redan är över ett känt tak, klämmer OmniRoute ner det till det locket innan uppströmsbegäran skickas.
 
@@ -1314,34 +1322,36 @@ Se [API_REFERENCE.md](../reference/API_REFERENCE.md) för den fullständiga kata
 
 ---
 
-## 💻 Internt CLI
+## 💻 Intern CLI
 
-OmniRoute levereras med ett internt CLI (`omniroute …`) för konfiguration, diagnostik och körningskontroll. Detta är **separat från sidan "CLI-verktyg" i kontrollpanelen**, där CLI-verktyg från tredje part (Claude Code, Cursor, Codex, Cline, …) konfigureras så att de kan kommunicera med OmniRoute.
+OmniRoute levererar en intern CLI (`omniroute …`) för installation, diagnostik och körtidskontroll. Detta är** separat från sidan "CLI Tools" i instrumentpanelen** , som konfigurerar tredje part CLIs (Claude Code, Cursor, Codex, Cline, ...) så att de kan prata med OmniRoute.
 
 ```bash
-omniroute setup                    # Interaktiv guide (lösenord, leverantörer, kombinationer)
-omniroute setup --non-interactive  # Anpassat för CI
-omniroute doctor                   # Hälsodiagnostik (datakatalog, databas, leverantörer, portar)
-omniroute providers available      # Lista leverantörer som stöds
-omniroute providers list           # Lista konfigurerade anslutningar
-omniroute providers test <id>      # Testa en leverantörsanslutning i realtid
-omniroute combos list              # Lista kombinationer
-omniroute combos switch <name>     # Ange standardkombination
-omniroute models                   # Lista tillgängliga modeller (--json, --search)
-omniroute keys add | list | remove # Hantera API-nycklar från terminalen
-omniroute backup                   # Skapa en ögonblicksbild av konfigurationen och databasen
-omniroute restore [<timestamp>]    # Återställ från en ögonblicksbild
-omniroute health                   # Detaljerad hälsa (brytare, cache, minne)
-omniroute quota                    # Leverantörernas kvotanvändning
-omniroute mcp status               # MCP-serverns status
-omniroute a2a status               # A2A-serverns status
-omniroute tunnel list|create|stop  # Cloudflare-/Tailscale-/ngrok-tunnlar
-omniroute reset-password           # Återställ administratörslösenordet
-omniroute --mcp                    # Starta MCP-servern via stdio
-omniroute --port 3000              # Starta servern på en anpassad port
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Tips: kombinera `omniroute doctor --json` med ditt övervakningsverktyg för att få varningar om leverantörsanslutningar med felstatus.
+Tips: koppla `omniroute doctor --json` med ditt övervakningsverktyg för att varna om en trasig lokal installation. `doctor` testar inte leverantörsanslutningar; använd `omniroute providers test <id>` för det.
 
 ---
 

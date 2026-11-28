@@ -62,41 +62,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute ቶከኑን ያስቀምጣል እና ወዲያውኑ 1 ውጤት ያለው የሙከራ ፍለጋ ያከናውናል፤ Notion
 የስህተት ነገር ከመለሰ ቶከኑ ይጸዳል እና ጥሪው በ`400` ይከሽፋል።
 
-## MCP መሣሪያዎች (6)
+## MCP መሳሪያዎች (6)
 
-በ`open-sse/mcp-server/tools/notionTools.ts` ውስጥ ተገልጸዋል። ቶከኑ በጥሪ ጊዜ
-በ`getNotionToken()` በኩል ይፈለጋል፤ ምንም ካልተዋቀረ መሣሪያው
-`"Notion integration token not configured. Set it in Settings > Context Sources."` የሚለውን ስህተት ይጥላል።
+በ `open-sse/mcp-server/tools/notionTools.ts` ይገለጻል። ማስመሰያው በጥሪ ጊዜ በ `getNotionToken()` በኩል መፍትሄ ያገኛል; ምንም ካልተዋቀረ መሣሪያው `"Notion integration token not configured. Set it in Settings > Context Sources."` ይጥላል
 
-| መሣሪያ                         | ወሰን            | መግለጫ                                                                  |
-| ---------------------------- | -------------- | --------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | ገጾችን እና ዳታቤዞችን በጽሑፍ ጥያቄ ይፈልጋል (ርዕሶችን፣ IDsን፣ URLsን ይመልሳል)። በገጽ የተከፋፈለ። |
-| `notion_get_page`            | `read:notion`  | የአንድን ገጽ ይዘት እና ሜታዳታ በIDው ያገኛል።                                       |
-| `notion_list_block_children` | `read:notion`  | የብሎክ ወይም የገጽ ልጅ ብሎኮችን በሙሉ (የብሎክ ዛፉን) ይዘረዝራል። በገጽ የተከፋፈለ።              |
-| `notion_query_database`      | `read:notion`  | ዳታቤዝን በአማራጭ `filter` + `sorts` (የNotion API ቅርጸት) ይጠይቃል። በገጽ የተከፋፈለ።  |
-| `notion_get_database`        | `read:notion`  | የዳታቤዝን መዋቅር/ሜታዳታ በID ያገኛል።                                            |
-| `notion_append_blocks`       | `write:notion` | በነባር ብሎክ ወይም ገጽ ላይ ልጅ ብሎኮችን ያክላል (በአንድ ጥያቄ ከፍተኛው 100 ብሎኮች)።           |
+| መሳሪያ                         | ወሰን            | መግለጫ                                                               |
+| ---------------------------- | -------------- | ------------------------------------------------------------------ |
+| `notion_search`              | `read:notion`  | ገጾችን እና የውሂብ ጎታዎችን በጽሑፍ መጠይቅ ይፈልጉ (ርዕሶችን፣ IDs፣ URLs ይመልሳል)። የተለጠፈ። |
+| `notion_get_page`            | `read:notion`  | የአንድ ገጽ ይዘት እና ዲበዳታ በ ID ያግኙ።                                      |
+| `notion_list_block_children` | `read:notion`  | ሁሉንም ብሎክ ወይም ገጽ (የብሎክ ዛፍ) ልጆችን ይዘርዝሩ። የተለጠፈ።                       |
+| `notion_query_database`      | `read:notion`  | የውሂብ ጎታ ከአማራጭ `filter` + `sorts` (Notion API ቅርጸት) ጋር ጠይቅ። የተለጠፈ።  |
+| `notion_get_database`        | `read:notion`  | የመረጃ ቋቱን schema/metadata በ ID ያግኙ።                                 |
+| `notion_append_blocks`       | `write:notion` | የማገጃ ልጆችን ወደ አንድ ብሎክ ወይም ገጽ (በጥያቄ ቢበዛ 100 ብሎኮች) ያያይዙ።              |
 
 ### የግቤት መለኪያዎች
 
-- `notion_search` — `query` (1–500 ቁምፊዎች), `pageSize` (1–100፣ ነባሪ 20),
-  `startCursor` (አማራጭ)።
-- `notion_get_page` — `pageId` (32 ቁምፊ ሄክስ ወይም UUID)።
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100፣ ነባሪ 50),
-  `startCursor` (አማራጭ)።
-- `notion_query_database` — `databaseId`, `filter` (አማራጭ፣ የNotion ማጣሪያ ቅርጸት),
-  `sorts` (አማራጭ ድርድር), `pageSize` (1–100፣ ነባሪ 50), `startCursor` (አማራጭ)።
-- `notion_get_database` — `databaseId`።
-- `notion_append_blocks` — `blockId`, `children` (የብሎክ ነገሮች ድርድር),
-  `after` (አማራጭ ቦታ)።
+- `notion_search` — `query` (1–500 ቻሮች)፣ `pageSize` (1–100፣ ነባሪ 20)፣ `startCursor` (አማራጭ)።
+- `notion_get_page` — `pageId` (32-char hex ወይም UUID)።
+- `notion_list_block_children` — `blockId`፣ `pageSize` (1–100፣ ነባሪ 50)፣ `startCursor` (አማራጭ)።
+- `notion_query_database` — `databaseId`፣ `filter` (አማራጭ፣ Notion ማጣሪያ ቅርጸት)፣ `sorts` (አማራጭ ድርድር)፣ `pageSize` (1–100፣ ነባሪ 50)፣ `startCursor` (አማራጭ)።
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`፣ `children` (የማገጃ ዕቃዎች ድርድር)፣ `after` (አማራጭ ቦታ)።
 
 ### ወሰኖች
 
-የማንበብ መሣሪያዎቹ `read:notion`ን እና የመጻፍ መሣሪያው `write:notion`ን ይፈልጋሉ።
-ወሰኖቹ በ`open-sse/mcp-server/server.ts` ውስጥ ባለው `withScopeEnforcement()` የሚተገበሩት
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` ሲሆን ብቻ ነው፤ የጠሪው የተፈቀዱ ወሰኖች ከ
-`OMNIROUTE_MCP_SCOPES` (በኮማ የተለዩ) ወይም ከተረጋገጠው API ቁልፍ የወሰን ዐውድ
-ይመጣሉ። ለሙሉ የወሰን ሞዴሉ [MCP-SERVER.md](./MCP-SERVER.md)ን ይመልከቱ።
+የንባብ መሳሪያዎች `read:notion` ያስፈልጋቸዋል እና የመጻፍ መሳሪያው `write:notion` ያስፈልገዋል. ወሰኖች የሚተገበረው በ `withScopeEnforcement()` በ `open-sse/mcp-server/server.ts` `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ሲሆን ሁልጊዜም API ቁልፍ ለሌለው `manage`/`admin` ለ HTTP/SSE ደዋይ ነው። የደዋዩ የተፈቀደላቸው ወሰኖች ከ `OMNIROUTE_MCP_SCOPES` (በነጠላ ሰረዝ የተለዩ) ወይም ከተረጋገጠው API ቁልፍ ወሰን አውድ ይመጣሉ። ለሙሉ ስፋት ሞዴል [MCP-SERVER.md](./MCP-SERVER.md) ይመልከቱ።
 
 ## መጨረሻ ነጥቦች
 

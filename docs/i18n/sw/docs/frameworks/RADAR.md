@@ -93,52 +93,30 @@ uelekezaji au uteuzi wa modeli — tazama idhini tofauti hapa chini.
 
 ---
 
-## Ulandanishi wa data ni idhini TOFAUTI — ahadi ya faragha
+## Usawazishaji wa data ni SEPARATE kuchagua kuingia — ahadi ya faragha
 
-Kuwasha `RADAR_ENABLED` hufungua UI pekee. Kulandanisha mlisho kunahitaji idhini ya pili,
-iliyo huru, iliyohifadhiwa katika `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-uhamishaji `136_radar_cache_settings.sql`). `syncRadar()` hukagua alama _na_ idhini
-kabla ya kufanya ombi lolote la mtandao:
+Kuwasha `RADAR_ENABLED` hufungua tu UI. Kusawazisha mipasho kunahitaji chaguo la pili, huru la kuingia lililohifadhiwa katika `radar_settings.opt_in` (`src/lib/db/radar.ts`, migration `136_radar_cache_settings.sql`). `syncRadar()` hukagua bendera _na_ chaguo la kuingia kabla ya kupiga simu yoyote ya mtandao:
 
 ```
-Alama imezimwa  → { status: "disabled" }   — hakuna ombi la mtandao
-Idhini ni false → { status: "opt_out" }    — hakuna ombi la mtandao
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Wakati zote mbili zimewashwa, njia ya ulandanishi ni:
+Wakati zote zimewashwa, njia ya kusawazisha ni:
 
-1. `GET <feed base URL>/v1/catalog/latest` yenye `x-omniroute-radar-schema: 2` na kichwa cha hiari cha
-   `Authorization: Bearer <supporter key>` (tazama hapa chini). Kwa chaguo-msingi, seva hutumia rasilimali ya mpito ya v1 iliyotiwa
-   sahihi kando wakati kichwa cha skima hakipo, ili wateja wa zamani waliosakinishwa waendelee
-   kupokea masasisho.
-2. Huu ni mtiririko wa programu wa kupakua pekee, lakini bado ni ombi la HTTPS. Miundombinu
-   inayopangishwa hupokea metadata ya kawaida ya muunganisho kama vile IP ya chanzo. Wakati ufunguo wa msaidizi
-   umesanidiwa, ulandanishi pia hutuma ufunguo huo katika kichwa cha Bearer ili huduma iweze kubaini
-   haki ya ufikiaji. Katika sahihisho mahususi la seva binafsi lililotambuliwa katika mpaka wa ushahidi hapo juu,
-   uhasibu wa maombi ya mlisho hutumia heshi za funguo, matumizi ya jumla, na HMAC iliyofupishwa inayobadilishwa kila siku
-   ya IP kwa ajili ya ukaguzi wa matumizi mabaya unaofanywa na binadamu; majedwali hayo hayahifadhi ufunguo wala IP katika muundo ghafi.
-   Kumbukumbu za ufikiaji wa miundombinu na kisanduku toezi cha uwasilishaji kilichosimbwa kwa njia fiche ni mipaka tofauti ya
-   uendeshaji.
-3. OmniRoute haitumi kamwe vidokezo, majibu, mazungumzo, vitambulisho vya watoa huduma, trafiki ya modeli,
-   muda wa upatikanaji, ukawiaji, wala usanidi wa ndani wa mtoa huduma kwenda kwenye huduma ya Radar.
-4. Jibu huthibitishwa, huhakikiwa, na kuhifadhiwa ndani kwenye akiba (tazama
-   [Muundo wa usalama](#security-model)). Radar ina njia nne kamili za mtandao upande wa seva:
-   `syncRadar()` kwa katalogi, `syncRadarReferrals()` kwa rufaa, na
-   `syncRadarOffers()` / `syncRadarIntel()` kwa ofa na Intel za wafuasi pekee.
+1. `GET <feed base URL>/v1/catalog/latest` na `x-omniroute-radar-schema: 2` na kichwa cha hiari cha `Authorization: Bearer <supporter key>` (tazama hapa chini). Seva chaguomsingi kwa vizalia vya programu vya mpito vya v1 vilivyotiwa saini tofauti wakati kichwa cha taratibu hakipo, kwa hivyo viteja vya zamani vilivyosakinishwa vinaendelea kupokea masasisho.
+2. Huu ni mtiririko wa programu ya upakuaji pekee, lakini bado ni ombi la HTTPS. Miundombinu iliyopangishwa hupokea metadata ya kawaida ya muunganisho kama vile chanzo IP. Wakati ufunguo wa tegemezi umesanidiwa, usawazishaji pia hutuma ufunguo huo katika kichwa cha Kibeba ili huduma iweze kutatua haki. Katika masahihisho kamili ya seva ya kibinafsi yaliyotambuliwa katika mpaka wa ushahidi hapo juu, uhasibu wa ombi la malisho hutumia heshi muhimu, matumizi ya jumla, na HMAC iliyopunguzwa ya kila siku ya IP kwa ukaguzi wa matumizi mabaya mwenyewe; jedwali hizo haziendelei ufunguo wala IP katika umbo mbichi. Kumbukumbu za ufikiaji wa miundombinu na kisanduku toezi kilichosimbwa kwa njia fiche ni mipaka tofauti ya kiutendaji.
+3. OmniRoute kamwe haitume vidokezo, majibu, mazungumzo, kitambulisho cha mtoa huduma, modeli ya trafiki, muda wa kusubiri, muda wa kusubiri, au usanidi wa mtoa huduma wa ndani kwa huduma ya Rada.
+4. Jibu limethibitishwa, kuthibitishwa, na kuakibishwa ndani ya nchi (angalia [Muundo wa Usalama](#security-model) ). Rada ina njia nne haswa za mtandao za upande wa seva: `syncRadar()` kwa katalogi, `syncRadarReferrals()` kwa marejeleo, na `syncRadarOffers()` / `syncRadarIntel()` kwa matoleo ya wasaidizi pekee na Intel.
 
-**Ufunguo wa msaidizi** ni tokeni ya hiari ya Bearer (`radar_settings.supporter_key`)
-inayoruhusu huduma ya mlisho kuamua kiwango kitakachotolewa (tazama
-[Viwango](#tiers-community-and-live)). Ufunguo huu:
+Ukaguzi wa katalogi hufanyika kila baada ya saa 24. Wakati mpasho ulioidhinishwa bado unabeba toleo na daraja lililoakibishwa, usawazishaji huweka malipo yaliyoakibishwa, husasisha `fetchedAt`, na hundi inayofuata inakuja saa 24 baadaye badala ya tiki inayofuata ya kila saa.
 
-- Huhifadhiwa ukiwa **umesimbwa kwa njia fiche wakati umepumzika** kwa kutumia visaidizi vilevile vya AES-256-GCM vya `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`) vinavyotumika kwa vitambulisho vya watoa huduma.
-- Huwekwa kupitia `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) na
-  **hauonyeshwi tena kamwe** — jibu hurejesha muundo uliofichwa (`omr_****abcd`).
-- Kuubadilisha au kuufuta hubatilisha kwa pamoja akiba za katalogi, rufaa, ofa na Intel. Ulandanishi/usomaji
-  unaofuata hubaini haki mpya ya ufikiaji upande wa seva; kuhifadhi ufunguo hakufanyi
-  ombi la mtandao wala kutumia ufunguo wa uwezeshaji wa matumizi moja.
-- Hutumwa kwenda kwenye huduma ya mlisho kama tokeni ya Bearer katika ombi la GET la ulandanishi — hakuna kitu kingine kuhusu
-  ufunguo kinachowahi kuondoka kwenye kiteja.
+The** ufunguo wa msaidizi** ni tokeni ya hiari ya Bearer (`radar_settings.supporter_key`) ambayo huruhusu huduma ya mlisho kuamua ni kiwango kipi cha kuhudumia ( angalia [Viwango](#tiers-community-and-live) ). Ni:
+
+- Imehifadhiwa** imesimbwa wakati wa mapumziko** na visaidizi sawa vya AES-256-GCM `encrypt()`/`decrypt()` (`src/lib/db/encryption.ts`) vinavyotumika kwa vitambulisho vya mtoa huduma.
+- Weka kupitia `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) na** kamwe aliunga mkono nyuma** — majibu yanarudisha fomu iliyofunikwa (`omr_****abcd`).
+- Kuibadilisha au kuifuta kunabatilisha katalogi, marejeleo, ofa na akiba za Intel. sync/read inayofuata inasuluhisha upande mpya wa seva ya haki; kuhifadhi ufunguo yenyewe hakufanyi ombi la mtandao au kutumia kitufe cha kuwezesha matumizi moja.
+- Imetumwa kwa huduma ya mlisho kama tokeni ya Bearer kwenye usawazishaji GET — hakuna kitu kingine chochote kuhusu ufunguo ambacho huwahi kumwacha mteja.
 
 ---
 
@@ -266,94 +244,56 @@ Tumia URL ya HTTPS tunnel/tailnet isiyo na vitambulisho. HTTP isiyo salama inaku
 
 ---
 
-## Muundo wa usalama
+## Mfano wa usalama
 
-### Sahihi ya Ed25519 kwenye baiti halisi
+### Ed25519 sahihi juu ya baiti kamili
 
-Data ya mpasho hutiwa sahihi kwa Ed25519. `verifyFeedBytes()`
-(`src/lib/radar/verify.ts`) huthibitisha sahihi kwenye **baiti halisi za jibu**
-zilizopokewa kupitia mtandao — data hiyo haisasishwi kamwe kabla ya uthibitishaji, kwa hivyo
-usimbaji upya wa baiti kwa baiti hauwezi kubatilisha au kukwepa kimyakimya ukaguzi wa sahihi.
-Kushindwa kwa uthibitishaji (`invalid_signature`) husitisha ulandanishaji kabla data hiyo
-haijachanganuliwa au kuhifadhiwa kwenye akiba.
+Upakiaji wa malisho umetiwa saini na Ed25519. `verifyFeedBytes()` (`src/lib/radar/verify.ts`) inathibitisha saini juu ya** baiti za majibu kamili** inapokewa kupitia waya — upakiaji haujasawazishwa tena kabla ya uthibitishaji, kwa hivyo usimbaji upya wa byte-for-byte hauwezi kubatilisha kimya kimya au kupita ukaguzi wa sahihi. Kushindwa kwa uthibitishaji (`invalid_signature`) kunakomesha usawazishaji kabla ya mzigo kuchanganuliwa au kuakibishwa.
 
-### Ufunguo wa umma uliobandikwa + ubadilishaji
+### Umebandika ufunguo wa + wa umma
 
-Ufunguo wa umma wa uthibitishaji umebandikwa kwenye `src/lib/radar/pinnedKeys.ts`
-(`PINNED_FEED_PUBLIC_KEYS`), ambayo ni safu ili ufunguo mpya uweze kuongezwa mwanzoni kabla ya
-ubadilishaji huku mipasho ya zamani iliyohifadhiwa kwenye akiba na kutiwa sahihi kwa ufunguo wa awali ikiendelea kuwa halali hadi
-ilandanishwe upya.
+Ufunguo wa umma unaothibitisha umebandikwa `src/lib/radar/pinnedKeys.ts` (`PINNED_FEED_PUBLIC_KEYS`), safu ili ufunguo mpya uweze kutanguliwa kabla ya kuzungushwa huku milisho ya zamani iliyoakibishwa iliyotiwa saini na ufunguo wa awali inasalia kuwa halali hadi isawazishwe tena.
 
-### Ubatilishaji kwa env unaofaa kwa fork
+### Ubatilishaji wa env ambao ni rafiki kwa uma
 
-Vigeu viwili vya env huruhusu fork na wanaojiendeshea huduma waelekeze mteja kwenye mpasho wao wenyewe badala ya
-huduma chaguomsingi ya OmniRoute — tazama
-[Jinsi ya kujiendeshea mpasho](#how-to-self-host-a-feed) hapa chini:
+Vyombo viwili vya env huruhusu uma na vipangishi binafsi kuelekeza mteja kwenye mipasho yao wenyewe badala ya huduma chaguo-msingi OmniRoute — tazama [Jinsi ya kupangisha mwenyewe mipasho](#how-to-self-host-a-feed) hapa chini:
 
-| Kigeu               | Kusudi                                                                                                                           |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `RADAR_FEED_URL`    | Hubatilisha URL msingi ya mpasho (chaguomsingi `https://radar.omniroute.online`).                                                |
-| `RADAR_FEED_PUBKEY` | Hubatilisha ufunguo wa umma uliobandikwa (base64-DER SPKI au PEM), na kubadilisha safu iliyojengewa ndani kwa ufunguo huu mmoja. |
+| Var                 | Kusudi                                                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `RADAR_FEED_URL`    | Inabatilisha msingi wa mipasho URL (chaguo-msingi `https://radar.omniroute.online`).                                                   |
+| `RADAR_FEED_PUBKEY` | Hubatilisha ufunguo wa umma uliobandikwa (base64-DER SPKI au PEM), na kuchukua nafasi ya safu iliyojengewa ndani na ufunguo huu mmoja. |
 
-### Kikomo cha chini cha toleo
+### Toleo la sakafu
 
-`syncRadar()` hukataa mpasho uliopakuliwa ambao `version` yake si mpya kabisa kuliko
-toleo lililohifadhiwa sasa kwenye akiba (ulinganishaji wa `compareVersions()`, wenye nukta wa `YYYY.MM.DD.n`) —
-`{ status: "stale" }`. Hii huzuia kituo cha mwisho cha mpasho kilichodukuliwa au kusanidiwa vibaya
-kumrudisha mteja kwenye data ya zamani, iliyotiwa sahihi kwa njia tofauti.
+`syncRadar()` inakataa mpasho uliopakuliwa ambao `version` si mpya kabisa kuliko toleo la sasa lililoakibishwa (`compareVersions()`, ulinganisho wa nukta `YYYY.MM.DD.n` ) — `{ status: "stale" }`. Hii huzuia sehemu ya mwisho ya mipasho iliyoathiriwa au isiyosanidiwa kurudisha kiteja kwenye mzigo wa awali uliotiwa saini tofauti.
 
-### Tarehe mbili, na kwa nini zote mbili huhifadhiwa
+### Tarehe mbili, na kwa nini zote mbili zinatunzwa
 
-Mpasho uliohifadhiwa kwenye akiba huwa na tarehe mbili tofauti, na uwezekano wa kuzichanganya ndiyo sababu kuu ya
-kuhifadhi zote mbili:
+Mlisho uliohifadhiwa hubeba tarehe mbili tofauti, na kuzichanganya ni suala zima la kutunza zote mbili:
 
-| Sehemu        | Hutoka kwa                      | Hujibu                              |
-| ------------- | ------------------------------- | ----------------------------------- |
-| `generatedAt` | mwili wa mpasho uliotiwa sahihi | **data** ina umri gani              |
-| `fetchedAt`   | saa ya usakinishaji huu         | usakinishaji huu **uliipakua** lini |
+| Shamba        | Inatoka                      | Majibu                                       |
+| ------------- | ---------------------------- | -------------------------------------------- |
+| `generatedAt` | mwili wa kulisha uliosainiwa | umri gani** data** ni                        |
+| `fetchedAt`   | saa ya usakinishaji huu      | wakati usakinishaji huu** imepakuliwa** hiyo |
 
-Mpasho uliopakuliwa dakika chache zilizopita unaweza kuwa na takwimu za wiki kadhaa zilizopita, kwa hivyo `fetchedAt` pekee haiwezi
-kumwambia mwendeshaji ikiwa tabaka la juu ni jipya kuliko data msingi iliyo chini yake. Zote mbili
-hudumishwa katika `radar_feed_cache`, hurejeshwa na `getRadarCatalog().meta`, na huripotiwa
-kando na `GET /api/radar/status`. Safu mlalo iliyohifadhiwa kwenye akiba kabla safu wima ya `generated_at`
-kuwepo (uhamishaji 163) husomwa tena kama `null` — kisichojulikana hubaki kisichojulikana badala ya
-kutumia muda wa upakuaji. `radar_referrals_cache` imehifadhi `generated_at` yake yenyewe tangu
-uhamishaji 142.
+Mlisho ulioletwa dakika chache zilizopita unaweza kubeba takwimu za wiki kadhaa, kwa hivyo `fetchedAt` pekee haiwezi kumwambia mwendeshaji kama wekeleo ni safi zaidi kuliko msingi unaokalia. Zote mbili zimedumishwa katika `radar_feed_cache`, zikirejeshwa na `getRadarCatalog().meta`, na zimeripotiwa tofauti na `GET /api/radar/status`. Safu mlalo iliyoakibishwa kabla ya safuwima ya `generated_at` kuwepo (uhamishaji 163) inasomwa kama `null` — isiyojulikana inabakia kujulikana badala ya kuazima muda wa kuleta. `radar_referrals_cache` imehifadhi `generated_at` yake tangu kuhama 142.
 
-Kikomo cha chini cha toleo hapo juu hulinganisha `version`, si mojawapo ya tarehe hizo.
+Sakafu ya toleo hapo juu inalinganisha `version`, sio tarehe zozote.
 
-Mapengo mawili yamesalia, yote kwa makusudi: dashibodi bado huonyesha tu `Mara ya mwisho kupakuliwa`, kwa hivyo kusoma
-tarehe ya uundaji hapo kunahitaji lebo mpya (na maingizo yake 41 ya lugha); na akiba za ofa na taarifa
-hazihifadhi kabisa tarehe ya uundaji, ingawa miundo ya mipasho yake ina tarehe hiyo — `GET
-/api/radar/status` kwa hivyo huacha sehemu hiyo kwa hizo mbili badala ya kuripoti `null`
-ambayo ingesomeka kama "haijulikani".
+Mapengo mawili yamesalia, kwa makusudi: dashibodi bado inaonyesha tu `Last fetched`, kwa hivyo kusoma tarehe ya ujenzi kunahitaji lebo mpya (na maingizo yake 41 ya eneo); na matoleo na kache za intel hazihifadhi tarehe ya ujenzi hata kidogo, ingawa miundo yao ya mipasho ina — `GET /api/radar/status` moja kwa hivyo inaacha uga kwa hizo mbili badala ya kuripoti `null` ambayo ingesomeka kama "haijulikani".
 
-### Uthibitishaji wa skima
+### Uthibitishaji wa schema
 
-Baiti zilizopakuliwa huchanganuliwa na kuthibitishwa dhidi ya `RadarFeedSchema`
-(`src/lib/radar/feedSchema.ts`, skima ya Zod) **baada ya** uthibitishaji wa sahihi. Kutolingana kwa
-skima hurejesha `{ status: "invalid_schema" }` na akiba huachwa
-bila kuguswa. Data iliyohifadhiwa kwenye akiba huthibitishwa tena kwa tahadhari kila inaposomwa
-(`getRadarCatalog()`) — safu mlalo ya akiba iliyoharibika au kuhaririwa kwa mkono hurudi kutumia
-data msingi badala ya kutolewa.
+Baiti zilizopakuliwa huchanganuliwa na kuthibitishwa dhidi ya `RadarFeedSchema` (`src/lib/radar/feedSchema.ts`, schema ya Zod )** baada ya** uthibitishaji wa saini. Kutolingana kwa schema kunarudisha `{ status: "invalid_schema" }` na kache huachwa bila kuguswa. Mzigo wa malipo ulioakibishwa unathibitishwa tena kwa utetezi kwa kila kusomwa (`getRadarCatalog()`) — safu mlalo ya akiba iliyoharibika au iliyohaririwa kwa mkono inarudi kwenye msingi badala ya kuhudumiwa.
 
-### Kikomo cha ukubwa wa jibu (10 MB)
+### Kikomo cha ukubwa wa jibu ( MB 10)
 
-`syncRadar()` hutekeleza **kikomo kamili cha 10 MB** kwenye mwili wa jibu la mpasho — mpasho
-uliotiwa sahihi ni hati ya JSON yenye ukubwa wa KB, kwa hivyo chochote kinachozidi hiki huashiria `RADAR_FEED_URL`
-iliyosanidiwa vibaya au hasidi (au chanzo cha juu kinachotoa data taka), si katalogi halali.
-Utekelezaji una tabaka mbili:
+`syncRadar()` inatekeleza a** Kofia ngumu ya MB 10** kwenye mwili wa majibu ya mipasho — mlisho uliotiwa saini ni hati JSON ya kiwango cha KB, kwa hivyo chochote kinachopita hii kinaelekeza kwenye `RADAR_FEED_URL` iliyosanidiwa vibaya au yenye uadui (au takataka inayotoa mkondo wa juu), si katalogi halali. Utekelezaji una tabaka mbili:
 
-1. Ukaguzi wa awali wa `Content-Length` huruka kabisa usomaji wa mwili wakati
-   kichwa tayari kinatangaza thamani inayozidi kikomo.
-2. Ukaguzi wa jumla inayoendelea wakati wa kusoma mwili hutekeleza kikomo hata wakati
-   `Content-Length` haipo au inaonyesha ukubwa mdogo kuliko ukubwa halisi — kichwa hakiaminiwi kamwe
-   peke yake. Kuunganisha vipande vilivyokusanywa huhifadhi baiti halisi
-   zinazohitajika baadaye kwa ukaguzi wa sahihi ya Ed25519.
+1. Cheki cha `Content-Length` kabla ya kuruka kinaruka kusoma mwili kabisa wakati kichwa tayari kinatangaza thamani juu ya kofia.
+2. Ukaguzi wa jumla wakati wa kusoma mwili hutekeleza kikomo hata wakati `Content-Length` haipo au inapunguza ukubwa halisi — kichwa hakiaminiki chenyewe kamwe. Kuunganisha vipande vilivyokusanywa huhifadhi baiti kamili zinazohitajika kwa ukaguzi wa sahihi wa Ed25519 baadaye.
 
-Kuzidi kikomo hurejesha `{ status: "too_large" }` na huacha akiba bila kuguswa,
-kwa kufuata utaratibu uleule usioharibu kama kila hitilafu nyingine ya ulandanishaji
-(`invalid_signature`, `invalid_schema`, `stale`).
+Kuzidisha kikomo hurejesha `{ status: "too_large" }` na kuacha akiba bila kuguswa, ikifuata muundo ule ule usio na uharibifu kama kushindwa kwa kila kusawazisha nyingine (`invalid_signature`, `invalid_schema`, `stale`).
 
 ---
 
@@ -398,84 +338,45 @@ version, tier }` — hii ndiyo thamani inayoonyeshwa na dashibodi, kamwe si sehe
 
 ---
 
-## Kanuni za kuunganisha tabaka wakati wa kusoma
+## Sheria za kuunganisha wakati wa kusoma
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) huunganisha mlisho uliohifadhiwa kwenye kache **juu ya**
-msingi tuli **wakati wa kusoma**, ndani ya `getRadarCatalog()`. Safu ya msingi
-(`FREE_MODEL_BUDGETS`) haibadilishwi kamwe — `MergedEntry[]` huhesabiwa upya katika kila
-mwito.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) huunganisha mlisho uliohifadhiwa** juu** msingi tuli katika** kusoma wakati** , ndani ya `getRadarCatalog()`. Safu ya msingi (`FREE_MODEL_BUDGETS`) haibadilishwi — a `MergedEntry[]` inakokotolewa upya kwa kila simu.
 
-Kanuni nne, kwa mpangilio wa kipaumbele:
+Sheria nne, kwa mpangilio wa utangulizi:
 
-1. **Mlisho hauandiki kamwe juu ya ubatilishaji wa ndani.** Kwa kila sehemu: ikiwa opereta
-   amebinafsisha sehemu kwenye ingizo (`localOverrides` map, yenye ufunguo `provider:modelId`),
-   thamani ya mlisho kwa sehemu hiyo mahususi hurukwa — thamani ya opereta hushinda.
-2. **`enabled: false` huzima ingizo, huku chanzo chake kikihifadhiwa.** Ingizo la mlisho linalozima
-   ingizo huweka `enabled: false` na `disabledBy: "radar"` kwenye matokeo yaliyounganishwa,
-   ili UI iweze kueleza _kwa nini_ ingizo lilibadilika kutoka kupatikana hadi kuzimwa.
-3. **Ingizo lililoongezwa na mtumiaji ambalo halipo kwenye mlisho hubaki bila kubadilishwa.** Maingizo ambayo
-   yapo tu kwenye msingi (au yaliongezwa ndani) na hayana ingizo linalolingana kwenye mlisho
-   hupitishwa bila kubadilishwa.
-4. **Ingizo lililowekewa alama ya kufutwa halifufuliwi kamwe.** Ikiwa opereta alifuta kwa uwazi
-   ingizo (`tombstones` set), mlisho unapoongeza tena `provider:modelId` hiyo katika toleo la
-   baadaye haulirejeshi.
+1. **Mipasho haibadilishi ubatilishaji wa ndani.** Kwa kila sehemu: ikiwa opereta amegeuza uga kukufaa kwenye ingizo (`localOverrides` map, keyed `provider:modelId`), thamani ya mlisho wa sehemu hiyo mahususi inarukwa — thamani ya opereta inashinda.
+2. **`enabled: false` inalemaza kiingilio, na asili.** Ingizo la mlisho ambalo huzima ingizo huweka `enabled: false` na `disabledBy: "radar"` kwenye matokeo yaliyounganishwa, ili UI iweze kueleza _why_ ingizo lilitoka kwa kupatikana hadi kulemazwa.
+3. **Ingizo lililoongezwa na mtumiaji ambalo halipo kwenye mpasho husalia bila kuguswa.** Maingizo ambayo yapo katika msingi pekee (au yaliongezwa ndani) na hayana ingizo la mlisho unaolingana hupitia bila kubadilishwa.
+4. **Ingizo la kaburi halifufuliwi.** Iwapo opereta alifuta ingizo (`tombstones` set), mlisho ukiongeza tena kuwa `provider:modelId` katika toleo la baadaye haurudishi tena.
 
-Sehemu zinazoweza kuhaririwa na alama za kufutwa huhifadhiwa kwa kudumu kwenye
-`radar_local_model_state` (uhamishaji `153_radar_local_model_state.sql`). Adapta ya DB ya umma
-(`src/lib/db/radar.ts`) hubadilisha safu hizo kuwa `localOverrides` map na
-`tombstones` set zinazotumiwa na `applyFeed()`; katika uzalishaji, `getRadarCatalog()` hupakia hali hiyo
-baada ya vizuizi vya bendera, kache na muundo kupita. Ni `displayName` na `enabled` pekee
-zinazoweza kuhaririwa na opereta. Utambulisho wa mtoa huduma/modeli, chanzo cha mlisho, mgawo, uwezo, ToS,
-na data ya usanidi haviwezi kuandikwa kupitia kiolesura hiki.
+Sehemu zinazoweza kuhaririwa na mawe ya kaburi yanaendelea katika `radar_local_model_state` (uhamiaji `153_radar_local_model_state.sql`). Adapta DB ya umma (`src/lib/db/radar.ts`) inabadilisha safu mlalo hizo kuwa ramani `localOverrides` na seti `tombstones` inayotumiwa na `applyFeed()`; upakiaji wa `getRadarCatalog()` wa uzalishaji ambao unasema baada ya bendera, kashe, na milango ya schema kupita. `displayName` na `enabled` pekee ndizo zinazoweza kuhaririwa na opereta. Provider/model utambulisho, asili ya mlisho, kiasi, uwezo, ToS, na data ya usanidi haiwezi kuandikwa kupitia uso huu.
 
-Dashibodi hutoa vitendo vinne vya ndani:
+Dashibodi inafichua vitendo vinne vya ndani:
 
-- **Hariri** hubadilisha jina la kuonyesha la ndani na hali ya kuwashwa.
-- **Weka upya mabadiliko ya ndani** huondoa sehemu zote mbili zinazoweza kuhaririwa bila kubadilisha alama ya kufutwa.
-- **Ficha** huunda alama ya kufutwa, ili masasisho ya baadaye ya mlisho yasiweze kuunda upya safu hiyo.
-- **Rejesha** huondoa alama ya kufutwa; ubatilishaji wowote uliohifadhiwa kando hubaki kutumika.
+- **Hariri** hubadilisha jina la onyesho la ndani na hali iliyowezeshwa.
+- **Weka upya mabadiliko ya ndani** husafisha sehemu zote mbili zinazoweza kuhaririwa bila kubadilisha jiwe la kaburi.
+- **Ficha** huunda jiwe la kaburi, kwa hivyo sasisho za baadaye za mipasho haziwezi kuunda safu mlalo tena.
+- **Rejesha** huondoa jiwe la kaburi; ubatilishaji wowote uliohifadhiwa kando unabaki kufanya kazi.
 
-`enabled: false` ya mlisho hubaki kuwa hali ya kipekee ya usalama: hushinda `enabled: true`
-ya ndani iliyopitwa na wakati, huweka ingizo lililounganishwa likiwa limezimwa, na hurekodi `disabledBy: "radar"`.
+Mlisho `enabled: false` unasalia kuwa ubaguzi wa usalama: hushinda `enabled: true` ya ndani iliyochakaa, huzuia ingizo lililounganishwa, na kurekodi `disabledBy: "radar"`.
 
-Machapisho ya katalogi hutumia `schemaVersion: 2`. `contextWindow` na kila moja ya `tools`, `vision`, na
-`thinking` hujitegemea kama `number | null` / `boolean | null`: `null` humaanisha haijulikani, huku
-`false` ikimaanisha chanzo rasmi cha mtoa huduma kilichothibitishwa na D16 kinasema kwa uwazi kuwa uwezo huo haupo.
-Bendera za ndani za sajili/vibainisho vya modeli za OmniRoute hazipandishwi kamwe moja kwa moja kuwa taarifa za mlisho. Kiteja
-bado kinakubali vijipicha vya v1; kwa sababu kiundaji cha zamani kilitumia `false` kama kishikilia nafasi cha kutokuwepo, `false` ya v1
-husawazishwa kuwa haijulikani huku `true` ya v1 ikibaki kuwa taarifa halisi. Matoleo ya muundo yasiyojulikana hukataliwa kwa usalama na
-kache halali ya mwisho hubaki kupatikana. Kila modeli ya v2 yenye muktadha/uwezo usio null lazima iwe na
-`metadataEvidenceUrls[]` ya HTTPS isiyohitaji kitambulisho; vinginevyo uthibitishaji wa muundo hushindwa na kache
-haibadilishwi. Jedwali la katalogi huonyesha hali zote tatu kama `✓`, `✕`, na `?`.
+Machapisho ya katalogi hutumia `schemaVersion: 2`. `contextWindow` na kila moja ya `tools`, `vision`, na `thinking` zinajitegemea `number | null` / `boolean | null`: `null` maana yake haijulikani, wakati `false` inamaanisha mtoa huduma D16-confirmed chanzo rasmi kinasema kwa uwazi uwezo haupo. Bendera za OmniRoute registry/model-spec za ndani hazitangazwi kamwe moja kwa moja ili kulisha ukweli. Mteja bado anakubali vijipicha vya v1; kwa sababu mjenzi wa zamani alitumia `false` kama kishikilia nafasi cha kutokuwepo, v1 `false` inasawazishwa kuwa isiyojulikana huku v1 `true` ikisalia kuwa ya kweli. Matoleo ya taratibu yasiyojulikana yameshindwa kufungwa na akiba halali ya mwisho bado inapatikana. Kila muundo wa v2 wenye context/capability isiyo batili lazima uwe na HTTPS `metadataEvidenceUrls[]` isiyo na sifa; vinginevyo uthibitisho wa schema utashindwa na kache haijabadilishwa. Jedwali la katalogi linaonyesha majimbo yote matatu kama `✓`, `✕`, na `?`.
 
-### Michanganyiko elekezi na ufikiaji wa MCP
+### Mchanganyiko unaoongozwa na ufikiaji wa MCP
 
-Thamani za `familyId` zilizothibitishwa hubaki baada ya tabaka kuunganishwa wakati wa kusoma na huendesha moduli halisi ya
-`buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Familia hupendekezwa
-tu wakati angalau watoa huduma wawili tofauti wana miunganisho inayotumika na wanatoa kitambulisho halisi cha modeli
-kilichoratibiwa. Modeli zilizozimwa, watoa huduma wasiotumika, vitambulisho vya modeli vinavyokosekana, familia zenye mtoa huduma mmoja, na
-ulinganishaji tata wa lakabu/kiambishi awali hukataliwa kwa usalama. Mapendekezo hutumia mkakati uliopo wa `priority`, yakipanga
-bajeti kubwa zaidi inayojirudia kila mwezi kwanza; UI huyaunda tu kupitia `POST /api/combos`.
+Thamani za `familyId` zilizoidhinishwa zinaendelea kuwepo kwenye safu ya wakati wa kusoma na kuendesha moduli safi `buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Familia inapendekezwa tu wakati angalau watoa huduma wawili tofauti wana miunganisho inayotumika na kufichua muundo kamili ulioratibiwa ID. Miundo iliyozimwa, watoa huduma wasiotumika, muundo unaokosekana IDs, familia za singleton, na mechi zisizoeleweka alias/prefix zimeshindwa kufungwa. Mapendekezo hutumia mkakati uliopo `priority`, kuagiza bajeti kubwa zaidi ya kila mwezi inayorudiwa kwanza; UI inaziumba kupitia `POST /api/combos` tu.
 
-UI elekezi inapatikana kwenye `/dashboard/radar/combos`. Inasoma tu sehemu za mwisho za ndani za
-`GET /api/radar/catalog` na `GET /api/combos/builder/options`. Kamwe haianzishi usawazishaji wa Radar,
-haisomi vitambulisho vya uthibitishaji vya mtoa huduma, wala haiandiki moja kwa moja kwenye hifadhidata ya combo.
+UI aliyeongozwa anaishi `/dashboard/radar/combos`. Inasoma tu mwisho wa `GET /api/radar/catalog` na `GET /api/combos/builder/options`. Kamwe haianzishi usawazishaji wa Rada, husoma vitambulisho vya mtoa huduma, au kuandika moja kwa moja kwenye hifadhidata ya mseto.
 
-Wateja wa MCP wanaweza kusoma makadirio hayohayo ya ndani kwa kutumia `omniroute_radar_catalog` (`read:radar`). Vichujio vya
-hiari vya `provider`, `familyId`, na `enabledOnly` hutathminiwa baada ya usomaji mmoja wa ndani wa
-`GET /api/radar/catalog`. Tokeo lake funge linajumuisha metadata ya katalogi pamoja na mtoa huduma/muundo,
-jina la kuonyesha, `familyId`, mgao, uwezo, hali ya kuwezeshwa, chanzo, na `disabledBy`; URL za usanidi,
-hatua, miunganisho, anwani za barua pepe, funguo, na data ya marejeleo hazirejeshwi kamwe. Zana hii ni
-ya kusoma pekee na kamwe haiiti `/api/radar/sync`.
+wateja MCP wanaweza kusoma makadirio sawa ya ndani na `omniroute_radar_catalog` (`read:radar`). Vichujio vya hiari vya `provider`, `familyId`, na `enabledOnly` hutathminiwa baada ya `GET /api/radar/catalog` moja ya ndani kusomwa. Toleo lake lililofungwa ni pamoja na metadata ya katalogi pamoja na provider/model, jina la kuonyesha, `familyId`, kiasi, uwezo, hali iliyowezeshwa, asili, na `disabledBy`; kuanzisha URLs, hatua, miunganisho, anwani za barua pepe, funguo, na data ya rufaa hazirudishwi kamwe. Zana hii ni ya kusoma tu na haitumii kamwe `/api/radar/sync`. Mipasho iliyoakibishwa inapotangulia katalogi iliyosakinishwa, `meta.olderThanRelease` ni `true` na zana hurejesha miundo kutoka kwa katalogi iliyosakinishwa ikiwa na ubatilishaji wa ndani na mawe ya kaburi yakitumika.
 
-### Viashirio vya asili
+### Alama za asili
 
-Kila ingizo lililounganishwa lina uga wa `origin` ambao UI huonyesha kama beji:
+Kila ingizo lililounganishwa hubeba sehemu ya `origin` ambayo UI inatoa kama beji:
 
-- `"baseline"` — halijabadilishwa kutoka kwenye katalogi tuli ya toleo.
-- `"radar"` — uga mmoja au zaidi ulisasishwa na mlisho.
-- `"local"` — mwendeshaji ana angalau ubatilishaji mmoja wa ndani kwenye ingizo hili (ubatirishaji wa ndani
-  daima hushinda mlisho kulingana na kanuni ya 1, bila kujali mlisho unasema nini).
+- `"baseline"` — haijaguswa kutoka kwa katalogi ya kutolewa tuli.
+- `"radar"` — sehemu moja au zaidi zilionyeshwa upya na mipasho.
+- `"local"` — opereta ana angalau ubatilishaji mmoja wa ndani kwenye ingizo hili (ubatilishaji wa ndani kila wakati hushinda mlisho kwa kila kanuni ya 1, bila kujali mipasho inasema nini).
 
 ---
 

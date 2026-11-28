@@ -8,21 +8,22 @@
 
 ## Sisukord
 
-- [Kiirkäivitus](#quick-run)
+- [Kiire jooks](#quick-run)
 - [Keskkonnafailiga](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Docker Koosta](#docker-compose)
 - [Saadaolevad profiilid](#available-profiles)
-- [Hosti CLI-tööriistade seadistamine, kui OmniRoute töötab Dockeris](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Redise külgkonteiner](#redis-sidecar)
-- [Tootmiskeskkonna Compose](#production-compose)
+- [Konteinerite kõvenemine](#container-hardening)
+- [Hosti CLI tööriistade konfigureerimine, kui OmniRoute töötab Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis külgkorv](#redis-sidecar)
+- [Tootmine Koosta](#production-compose)
 - [Dockerfile'i etapid](#dockerfile-stages)
 - [Kriitilised keskkonnamuutujad](#critical-environment-variables)
-- [Docker Compose koos Caddyga (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare'i kiirtunnel](#cloudflare-quick-tunnel)
-- [Tõmmisesildid](#image-tags)
-- [Töölaua uuendamine Dockeris](#dashboard-updates-in-docker)
-- [Kättesaadavus: vaikimisi SQLite toetab ühte replikat](#availability-default-sqlite-is-single-replica)
-- [Gemini piirkondlikud vead Dockeris](#gemini-regional-errors-inside-docker)
+- [Docker Loo koos Caddyga (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
+- [Pildisildid](#image-tags)
+- [Armatuurlaua värskendused Docker](#dashboard-updates-in-docker)
+- [Kättesaadavus: vaikimisi SQLite on ühe koopia](#availability-default-sqlite-is-single-replica)
+- [Gemini piirkondlikud vead Docker s](#gemini-regional-errors-inside-docker)
 - [Olulised märkused](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute sisaldab peamiste juurutusviiside jaoks Compose'i profiile. Valige oma
 | `web`              | `omniroute-web`  | Brauserit vajavad veebiseansi pakkujad: `gemini-web`, `claude-web`, `claude-turnstile` (ehitab `runner-web`; Chromium on kaasas)                       | `docker compose --profile web up -d`         |
 
 > Mitut profiili saab kombineerida: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Konteinerite kõvenemine
+
+Rakenduste `base`, `web`, `cli` ja `host` teenused `docker-compose.yml` kasutavad `cap_drop: [ALL]` ja `no-new-privileges:true` turvavalikut. Pilt töötab mitte-juurkasutajana `node` ja kuulab kõrgetel portidel, seega ei vaja see Linux võimalusi. Turvasuvand takistab protsessidel setuid-binaarfailide kaudu õiguste omandamist.
+
+Ainult `cli` profiil kinnitab Docker pesa automaatse värskendaja jaoks. Vaadake jaotist [Escape Hatch: konfigureerige konteineri enda CLIs](#escape-hatch-configure-the-containers-own-clis-use-sparingly) turvamõjude jaoks.
+
+Juurfailisüsteem jääb vaikimisi kirjutatavaks. `cli` profiil kirjutab CLI konfiguratsiooni ja vahemälud konteineri kodukataloogi, `web` profiil salvestab Chromiumi seansi oleku ja Next.js käitusaeg saab kirjutada vahemälu väljaspool `/app/data`.
+
+Kirjutuskaitstud juurfailisüsteemi proovimiseks `base` profiiliga salvestage see `docker-compose.yml` kõrval `docker-compose.override.yml` na. Koostamine loeb alistamise automaatselt.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Olemasolev `/app/data` kinnitus jääb kirjutatavaks. Testige oma töökoormust enne selle alistamise kasutamist tootmises, kuna see võib vajada kirjutamist teistele teedele.
 
 ## Hosti CLI-tööriistade seadistamine, kui OmniRoute töötab Dockeris
 
@@ -289,13 +314,13 @@ Sellel puul mõõdetuna (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144
 Mälu käitumine Docker:
 
 - Pilt määrab `OMNIROUTE_MEMORY_MB=1024` ja tuletab sellest `NODE_OPTIONS=--max-old-space-size=1024`.
-- Tegeliku serveriprotsessi käivitab iseseisev käivitusprogramm, mis loeb `OMNIROUTE_MEMORY_MB` ja lisab `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Tegeliku serveriprotsessi käivitab iseseisev käivitaja, mis loeb `OMNIROUTE_MEMORY_MB` ja lisab `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
 - Sõlm kasutab viimast korduvat `--max-old-space-size` väärtust, seega juhib `OMNIROUTE_MEMORY_MB` seadistus efektiivset Docker kuhja piirangut.
-- Kuna pilt määrab selle alati, ei kehti käivitusprogrammi enda RAM-kalibreeritud varufunktsioon kunagi Docker all. Tõstke seda selgelt töökoormuse jaoks (tabel allpool). `2048` on kodeerimisagendi `/v1/responses` jaoks endiselt liiga väike.
+- Kuna pilt määrab selle alati, ei kehti Docker all kunagi käivitusprogrammi enda RAM-kalibreeritud tagavara. Tõstke seda töökoormuse jaoks selgesõnaliselt (tabel allpool). `2048` on kodeerimisagendi `/v1/responses` jaoks endiselt liiga väike.
 
 ### Kodeerivate ainete käitusaegne RAM
 
-Vaikimisi 1 GiB Docker on dashboard/light-chat põrand, mitte tootmismaht. Pikad `POST /v1/responses` kehad (sadu teateid, kümneid tööriistu) säilitavad tihendamise ajal mitu mälus olevat graafikut. Kaks kattuvat ~ 3 MiB / ~ 750 000 märgi taotlust katkestasid V8** 12 GiB** vana tühik (`FATAL ERROR: Reached heap limit`) ja tabas ka 16 GiB cgruppi OOM. Vaadake [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Vaikimisi 1 GiB Docker on dashboard/light-chat põrand, mitte tootmismaht. Pikad `POST /v1/responses` kehad (sadu sõnumeid, kümneid tööriistu) säilitavad tihendamise ajal mitu mälus olevat graafikut. Kaks kattuvat ~ 3 MiB / ~ 750 000 märgi taotlust katkestasid V8** 12 GiB** vana tühik (`FATAL ERROR: Reached heap limit`) ja tabas ka 16 GiB cgruppi OOM. Vaadake [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Suurus** cgroup `--memory` kuhja kohal** — loomulikud puhvrid, SQLite ja tihendamise vaheühendid asuvad väljaspool V8.
 
@@ -588,14 +613,14 @@ sudo systemctl enable --now omniroute-update.path
 Teenus eemaldab taotluse enne tõmbamist, et nurjunud käivitus ei jääks korduma. Ilma
 `DOCKER_UPDATE_TRIGGER_FILE`-ita säilitab juhtpaneel käsitsi käskude töövoo.
 
-## Kättesaadavus: vaikimisi SQLite on ühekoopia
+## Kättesaadavus: vaikimisi SQLite on ühe koopia
 
 Stock Docker / Kubernetes OmniRoute on** üks sõlm töötleb + üks SQLite kirjutaja** . Kõrge kättesaadavus on** ei toetata** sellel topoloogial.
 
 | Piirang                                       | Tagajärg                                                                                                                                                                                                                                                                                              |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Üksik kirjanik                                | Tee** mitte** käivitada mitu koopiat sama SQLite faili vastu. See rikub DB.                                                                                                                                                                                                                           |
-| Loo uuesti / taaskäivitage / HEALTHCHECK kill | **Täielik katkestus** SSE, armatuurlaua seansside ja mälu oleku kohta. Iga ühendatud klient langeb. Uued päringud tühja lõpp-punkti akna ajal saavad pöördpuhverserveri**`502 Bad Gateway: Unknown error`** , mitte OmniRoute JSON — kliendid ei suuda seda teenusepakkuja tõrkest eristada (#11015). |
+| Loo uuesti / taaskäivitage / HEALTHCHECK kill | **Täielik katkestus** SSE, armatuurlaua seansside ja mälu oleku kohta. Iga ühendatud klient langeb. Uued päringud tühja lõpp-punkti akna ajal saavad pöördpuhverserveri**`502 Bad Gateway: Unknown error`** , mitte OmniRoute JSON — kliendid ei suuda seda teenusepakkuja tõrkest (#11015) eristada. |
 | Sama sündmusetsükkel nagu `/healthz`          | Hõivatud kataloog või tihendusmärk võib viivitada sondidega; lühike ajalõpp ja seejärel taaskäivitab** ainult** koopia.                                                                                                                                                                               |
 
 **Sondi maatriks** (vt ka [Kubernetese sondi soovitusi](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
@@ -606,9 +631,9 @@ Stock Docker / Kubernetes OmniRoute on** üks sõlm töötleb + üks SQLite kirj
 | Valmisolek       | HTTP `GET /healthz`                                      | Tihedad ajalõpud, mis käsitlevad sündmusetsüklit hõivatud kui surnud |
 | Sügav / inimesed | `/api/monitoring/health`                                 | Automatiseeritud kubeleti elavus                                     |
 
-**Uuendused:** eeldada, et iga seanss langeb. Kui saate, tühjendage kliendid; SQLite vaikevärskendust ei toimu. Koosta `restart: unless-stopped` pluss Docker `HEALTHCHECK` asendab ka ainsa protsessi, kui konteiner on ebatervislik – sama plahvatuse raadius.
+**Uuendused:** eeldada, et iga seanss langeb. Kui saate, tühjendage kliendid; SQLite vaikevärskendust ei toimu. Koostamine `restart: unless-stopped` pluss Docker `HEALTHCHECK` asendab ka ainsa protsessi, kui konteiner on Ebatervislik — sama plahvatuse raadiusega.
 
-Valmis manifestid ja Helmi diagramm on reaalajas `deploy/kubernetes/` ja `deploy/helm/omniroute/` puhul – vaadake [Kubernetese juurutusjuhendit](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+Valmis manifestid ja Helmi diagramm reaalajas `deploy/kubernetes/` ja `deploy/helm/omniroute/` — puhul vaadake [Kubernetese juurutusjuhendit](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
 Kubernetesi katkend a** üksik koopia** (Nõutav on uuesti loomine; ärge tõstke `replicas` ühe SQLite faili vastu):
 
@@ -637,9 +662,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep laseb kube'il loobuda teenuse lõpp-punktidest enne SIGTERM d nii** uus** liiklus lakkab tabamast surevat protsessi. Lennu ajal `/v1/responses` SSE tühjendatakse kuni `SHUTDOWN_TIMEOUT_MS` (vaikimisi 30 s) raskekaalu sissepääsulepingute (#11015) kaudu. Uued taotlused, mis ikka protsessi jõuavad, saavad `503` + `Retry-After: 5`. Tühja lõpp-punkti tühiku taasloomine, kuni asendus on valmis, jääb tõsiseks katkestuseks – see on SQLite topoloogia, mitte sondi vale konfiguratsioon.
+`preStop` sleep laseb kube'il loobuda teenuse lõpp-punktidest enne SIGTERM d nii** uus** liiklus lakkab tabamast surevat protsessi. Lennu ajal `/v1/responses` SSE tühjendatakse kuni `SHUTDOWN_TIMEOUT_MS` (vaikimisi 30 s) raskekaalu sissepääsulepingute (#11015) kaudu. Uued taotlused, mis ikka protsessi jõuavad, saavad `503` + `Retry-After: 5`. Tühja lõpp-punkti tühiku taasloomine, kuni asendus on valmis, jääb raskeks katkestuseks — mis on SQLite topoloogia, mitte sondi vale konfiguratsioon.
 
-Väline Postgres / mitmekirjutaja HA on** mitte** dokumenteeritud aktsiatee. Kui vajate HA, säilitage üks koopia või käivitage topoloogia, mida projekt on eraldi testinud ja dokumenteerinud. Postgres/MySQL teos asub asukohas [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kuni selle tarnimiseni on ainus toetatud viis paljundamiseks** suur** `/v1/responses` võimsus on N sõltumatut protsessi (järgmine jaotis), mitte `replicas > 1` ühel köitel.
+Väline Postgres / mitmekirjutaja HA on** mitte** dokumenteeritud aktsiatee. Kui vajate HA, säilitage üks koopia või käivitage topoloogia, mida projekt on eraldi testinud ja dokumenteerinud. Postgres/MySQL teos elab [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Kuni selle tarnimiseni on ainus toetatud viis paljundamiseks** suur** `/v1/responses` võimsus on N sõltumatut protsessi (järgmine jaotis), mitte `replicas > 1` ühel köitel.
 
 ## Scale-out: N sõltumatut protsessi
 
@@ -649,11 +674,11 @@ Väline Postgres / mitmekirjutaja HA on** mitte** dokumenteeritud aktsiatee. Kui
 
 Passiivne eksemplar loeb ühenduse uuesti, kui on vaja värskendust, ja võtab kasutusele ainult erineva, aegumata juurdepääsuloa. Vastasel juhul on värskendamine keelatud ilma ühendust aegumata või desaktiveerimata või värskenduslüliti tõrkeid arvestamata. Tõelised ülesvoolu autentimise tõrked kasutavad endiselt tavalist rikete arvestust, eksponentsiaalset jahtumist ja tavalist kliendi viga; konto deaktiveerimine jääb püsivaks. Sünkroonige omaniku pööratud märgid enne juurdepääsulubade aegumist (vaikimisi ennetav värskendusviis on viis minutit) või importige Codex autentimisfail uuesti. Passiivne import salvestab tarnitud märgid ilma neid loa lõpp-punktis kinnitamata. Manuaalne dashboard/API refresh tagastab `409 refresh_disabled`; uued OAuth sisselogimised on muutumatud. Vaata [keskkonnaviiteid](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-One Node protsess on** üks V8 hunnik** . Kaks kattuvat ~ 3 MiB / ~ 750k-märgiga kodeerimisagent `POST /v1/responses` (RTK + Caveman) katkestavad selle kuhja ~ 12 Gi (`FATAL ERROR: Reached heap limit`) juures ja võivad OOM 16 Gi crühma. Vt [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). See mõõtmine on a** mälu-eelarve** hoiatus, mitte toote hard-max kahe samaaegse pika `/v1/responses`. Raskekaalulise vestluse lubamist piirab automaatselt tuletatud sisestusbaitide eelarve (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), mille suurus on sama V8/cgroup ülemmäära järgi. — alistamine ülespoole (või pärand `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` taotluste arvu ülempiiri määramine) juba suure protsessi korral taastab katkestamise. Väikesed vestlused, `/healthz`, `/v1/models` ja MCP on** mitte** selles korgis.
+One Node protsess on** üks V8 hunnik** . Kaks kattuvat ~ 3 MiB / ~ 750k-märgiga kodeerimisagent `POST /v1/responses` (RTK + Caveman) katkestavad selle kuhja ~ 12 Gi (`FATAL ERROR: Reached heap limit`) juures ja võivad OOM 16 Gi crühma. Vaadake [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). See mõõtmine on a** mälu-eelarve** hoiatus, mitte toote hard-max kahe samaaegse pika `/v1/responses`. Raskekaalulise vestluse lubamist piirab automaatselt tuletatud sisestusbaitide eelarve (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), mille suurus on sama V8/cgroup ülemmäära järgi. — alistamine seda ülespoole (või pärand `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` päringute arvu ülemmäära määramine) juba suure protsessi korral taastab katkestamise. Väikesed vestlused, `/healthz`, `/v1/models` ja MCP on** mitte** selles korgis.
 
 ### Üks protsess: rohkem kui kaks pikka `/v1/responses`
 
-A** terve** protsess (hunnik allpool `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, vaikimisi `0.75`)** võib** käitage rohkem kui kahte samaaegset pikka `POST /v1/responses` kui kogu protsessi hõlmavas lennubaidieelarves (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) on veel ruumi. Kehad, mille väärtus on `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (vaikeväärtus 256 KiB) või sellest kõrgemal, võtavad sama raskekaalu rendilepingu kui struktuursed päringud ja kasutavad sama [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` põgenemist (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Kümned samaaegsed pikad SSE kliendid (operaatorid vajavad sageli 40–50) on a** mälu-eelarve** küsimus — suurus hunnik + primary/headroom pesad + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ei ole range "max 2" tootelimiit. Korduvproovitava `503` ga kaob endiselt survestatud hunnik, nii et #7849 ei naase.
+A** terve** protsess (hunnik allpool `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, vaikimisi `0.75`)** võib** käitage rohkem kui kahte samaaegset pikka `POST /v1/responses` kui kogu protsessi hõlmavas lennubaidieelarves (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) on veel ruumi. Kehad, mille väärtus on `OMNIROUTE_CHAT_LARGE_BODY_BYTES` või kõrgem (vaikeväärtus 256 KiB), võtavad sama raskekaalu rendilepingu kui struktuursed päringud ja kasutavad sama [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` põgenemist (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Kümned samaaegsed pikad SSE kliendid (operaatorid vajavad sageli 40–50) on a** mälu-eelarve** küsimus — suurus hunnik + primary/headroom pesad + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ei ole range "max 2" tootelimiit. Survehunnik kaob endiselt uuesti proovitava `503`, nii et #7849 ei naase.
 
 To** hunnikuid korrutada** (iseseisvad V8 vanad ruumid)** täna** :
 
@@ -665,9 +690,9 @@ To** hunnikuid korrutada** (iseseisvad V8 vanad ruumid)** täna** :
 | Dubleerige pakkuja saladused igasse eksemplari (või aktsepteerige partitsioonidega armatuurlaudu)                                     | Kõigil juhtudel on oodata ühte armatuurlauda / ühte kõnelogi |
 | Esiosa mis tahes koormuse tasakaalustajaga; kleepuv API klahvi või seansi abil piisab                                                 | Nõua müüjaspetsiifilist suurusteadlikku vahevara             |
 
-Seansi ja konto afiinsust saab jagada ka Redis kaudu: määrake igale protsessile `OMNIROUTE_SESSION_AFFINITY_STORE=redis` ja `REDIS_URL` sama `REDIS_KEY_PREFIX` ja positiivse `sessionAffinityTtlMs` sätetega. Nööpnõelad lahendavad räsistatud kasutuskonto identiteedid iga protsessi sobiliku kohaliku ühenduse jaoks, seega ei pea OAuth kontodel, millel on identiteedi metaandmed, olema vastavat ühendust IDs. Tuntud konto identiteedid on tihvtide eraldusvõimes ja valvatud väljatõstmises ülimuslikud vastuolulise kohaliku IDs ees; identiteedita kirjed (või identiteedita väljatõstmise helistajad) säilitavad ID pärandkaitse. Stabiilse kasutusidentiteedita kontod nõuavad siiski IDs sobitamist. Redis vead või üle 100 ms kõned langevad tagasi kohalikule SQLite. Iga Redis afiinsussalv seab silmapaistvate toimingute piiriks 8, möödub Redis kohe, kui see on täis, ja vabastab teenindusajad alles siis, kui aluseks olev töö laheneb, mitte helistaja tähtajal. Redis katkestuse ajal pole jagatud tõde: iga eksemplar langeb tagasi oma kohaliku afiinsusega, seansid võivad eksemplari kohta kord uuesti kinnitada ja eksemplarid võivad erineda. Kleepuvus koondub uuesti läbi Redis, kui see taastub. Ajalõpu piir jääb ootama, mitte saadetud EVAL, mis võib pärast tagasilööki maanduda. Marsruutimise kirjutised võrdlevad marsruutimise otsusega täheldatud täpset väärtust, mitte värsket mutatsiooniaja lugemist; täheldatud möödalaskmist või SQLite varuvaatlust võrreldakse Redis klahvi puudumisega. Vananenud tihvtid asendatakse ühes CAS, nii et hilinenud käsk ei saa asendada ega kustutada uuemat erinevat tihvti. Redis loeb atomaarselt tagastab väärtuse ja ülejäänud serveri TTL; positiivne PTTL (või aegumise puudumine) määrab elavuse, mitte kirjutaja JSON ajatempel või lugeja kell. Kohalikud hetktõmmised kaardistavad selle järelejäänud TTL kohaliku tähtajani; olemasolevad JSON -klahvid jäävad loetavaks ja nende töötlemata baidid säilitatakse CAS jaoks. Redis on ainus tõe allikas, kui see vastab. Kinnitatud jagatud muudatused, puudutused ja kustutamised eemaldavad kohaliku kirje, ei installi ega värskenda seda kunagi. SQLite Redis -teel sisaldab ainult selle eksemplari enda varuotsuseid Redis vigadest, ajalõppudest või lubamisküllastusest, nagu varemgi. Hilisema katkestuse korral puuduv kohalik nööpnõel maksab ühe uue valiku (ühe kiire vahemälu vahele jätmise), mitte vale või välja tõstetud konto eest. Tagasilükatud muudatused tagastavad jagatud võitja ja selle järelejäänud TTL aatomiliselt: tavaline valik kontrollib uuesti kaardistatud kohalikku tähtaega ja kasutab endiselt elavat sobivat võitjat, puudutades selle konto kasutust ja sisselogimist ilma teise jagatud kirjutamiseta. Kui see pole saadaval, säilitab valik kohaliku kandidaadi, jätab jagatud nööpnõela muutmata ja saadab ühe silumissõnumi. Tagasilükatud CAS ei kirjuta SQLite; Redis vead, ajalõpud või sissepääsu küllastus rakendavad selle asemel olemasolevat kohalikku operatsiooni. Kui saadetud mutatsiooni vastus saabub pärast ajalõpu (aktsepteeritud, tagasi lükatud või viga), eemaldab sünkroonne täpne jadaväärtusega võrdlemine ja kustutamine ainult baididentse ajalõpu tagavararea. Selle võrdluse ja kustutamise vahel ei ole vaja oodata; säilib uuem katkestuskiri. Valvega väljatõstmine eemaldab ebaõnnestunud konto kohaliku PIN-koodi isegi siis, kui Redis on alla lülitatud, ja puhastab selle uuesti pärast kinnitatud jagatud väljatõstmist. Varasemate jagatud vastuste ootel ei saa välja tõstetud kohalikku PIN-koodi taastada, kuna jagatud õnnestumiste puhul ei kirjutata kunagi SQLite. Hilisem katkestus võib konto uuesti avada; hiljem aktsepteeritud jagatud kirjutamine on olemas ainult Redis. Redis miss ei konsulteeri kohaliku varuseisundiga. Kui draiver on välja lülitatud, säilitavad äsja valitud tihvtid neljaväljaga SQLite JSON pärandkuju; ainult Redis marsruutimine lisab räsikonto identiteedi. Eellaaditud tihvtid kontrollitakse uuesti nende aegumispiiril. Redis mitteliisingu valik loeb poodi uuesti, kuid sünkroonrendi planeerimisel saab siiski kasutada eellaadimise ja planeerimise vahelt välja tõstetud nööpnõela (aktsepteeritud parima jõupingutuse aken). Liisingukohustus ei saa pärast püsivat nõuet kontot vahetada: tagasilükatud muudatuse korral säilitab see taotletud kandidaadi ainult selle taotluse jaoks ja jätab jagatud võitja puutumata, nii et eksemplaridevaheline kokkulepe on sellel teel piiratud. Ülejäänud tabel kehtib endiselt: see ei jaga kombineeritud seansi kleepuvust, natiivseid Codex nööpnõelu, konto semafoore, lukustusi, kululimiite, konfiguratsiooni ega kõneloge.
+Seansi ja konto afiinsust saab jagada ka Redis kaudu: määrake igale protsessile `OMNIROUTE_SESSION_AFFINITY_STORE=redis` ja `REDIS_URL` sama `REDIS_KEY_PREFIX` ja positiivse `sessionAffinityTtlMs` sätetega. Nööpnõelad lahendavad räsistatud kasutuskonto identiteedid iga protsessi sobiliku kohaliku ühenduse jaoks, seega ei pea OAuth kontodel, millel on identiteedi metaandmed, olema vastavat ühendust IDs. Tuntud konto identiteedid on tihvtide eraldusvõimes ja valvatud väljatõstmises ülimuslikud vastuolulise kohaliku IDs ees; identiteedita kirjed (või identiteedita väljatõstmise helistajad) säilitavad ID pärandkaitse. Stabiilse kasutusidentiteedita kontod nõuavad siiski IDs sobitamist. Redis vead või üle 100 ms kõned langevad tagasi kohalikule SQLite. Iga Redis afiinsussalv seab silmapaistvate toimingute piiriks 8, möödub Redis kohe, kui see on täis, ja vabastab teenindusajad alles siis, kui aluseks olev töö laheneb, mitte helistaja tähtajal. Redis katkestuse ajal pole jagatud tõde: iga eksemplar langeb tagasi oma kohaliku afiinsusega, seansid võivad eksemplari kohta kord uuesti kinnitada ja eksemplarid võivad erineda. Kleepuvus koondub uuesti läbi Redis, kui see taastub. Ajalõpu piirid ootavad, mitte saadetud EVAL, mis võib pärast tagasilööki maanduda. Marsruutimise kirjutised võrdlevad marsruutimise otsusega täheldatud täpset väärtust, mitte värsket mutatsiooniaja lugemist; täheldatud möödalaskmist või SQLite varuvaatlust võrreldakse Redis klahvi puudumisega. Vananenud tihvtid asendatakse ühes CAS, nii et hilinenud käsk ei saa asendada ega kustutada uuemat erinevat tihvti. Redis loeb atomaarselt tagastab väärtuse ja ülejäänud serveri TTL; positiivne PTTL (või aegumise puudumine) määrab elavuse, mitte kirjutaja JSON ajatempel või lugeja kell. Kohalikud hetktõmmised kaardistavad selle järelejäänud TTL kohaliku tähtajani; olemasolevad JSON -klahvid jäävad loetavaks ja nende töötlemata baidid säilitatakse CAS jaoks. Redis on ainus tõe allikas, kui see vastab. Kinnitatud jagatud muudatused, puudutused ja kustutamised eemaldavad kohaliku kirje, ei installi ega värskenda seda kunagi. SQLite Redis -teel sisaldab ainult selle eksemplari enda varuotsuseid Redis vigadest, ajalõppudest või lubamisküllastusest, nagu varemgi. Hilisema katkestuse korral puuduv kohalik nööpnõel maksab ühe uue valiku (ühe kiire vahemälu vahele jätmise), mitte vale või välja tõstetud konto eest. Tagasilükatud muudatused tagastavad jagatud võitja ja selle järelejäänud TTL aatomiliselt: tavaline valik kontrollib uuesti kaardistatud kohalikku tähtaega ja kasutab endiselt elavat sobivat võitjat, puudutades selle konto kasutust ja sisselogimist ilma teise jagatud kirjutamiseta. Kui see pole saadaval, säilitab valik kohaliku kandidaadi, jätab jagatud nööpnõela muutmata ja saadab ühe silumissõnumi. Tagasilükatud CAS ei kirjuta SQLite; Redis vead, ajalõpud või sissepääsu küllastus rakendavad selle asemel olemasolevat kohalikku operatsiooni. Kui saadetud mutatsiooni vastus saabub pärast ajalõpu (aktsepteeritud, tagasi lükatud või viga), eemaldab sünkroonne täpne jadaväärtusega võrdlemine ja kustutamine ainult baididentse ajalõpu tagavararea. Selle võrdluse ja kustutamise vahel ei ole vaja oodata; säilib uuem katkestuskiri. Valvega väljatõstmine eemaldab ebaõnnestunud konto kohaliku PIN-koodi isegi siis, kui Redis on alla lülitatud, ja puhastab selle uuesti pärast kinnitatud jagatud väljatõstmist. Varasemate jagatud vastuste ootel ei saa välja tõstetud kohalikku PIN-koodi taastada, sest jagatud õnnestumiste puhul ei kirjutata kunagi SQLite. Hilisem katkestus võib konto uuesti avada; hiljem aktsepteeritud jagatud kirjutamine on olemas ainult Redis. Redis miss ei konsulteeri kohaliku varuseisundiga. Kui draiver on välja lülitatud, säilitavad äsja valitud tihvtid neljaväljaga SQLite JSON pärandkuju; ainult Redis marsruutimine lisab räsikonto identiteedi. Eellaaditud tihvtid kontrollitakse uuesti nende aegumispiiril. Redis mitteliisingu valik loeb poodi uuesti, kuid sünkroonrendi planeerimisel saab siiski kasutada eellaadimise ja planeerimise vahelt välja tõstetud nööpnõela (aktsepteeritud parima jõupingutuse aken). Liisingukohustus ei saa pärast püsivat nõuet kontot vahetada: tagasilükatud muudatuse korral säilitab see taotletud kandidaadi ainult selle taotluse jaoks ja jätab jagatud võitja puutumata, nii et eksemplaridevaheline kokkulepe on sellel teel piiratud. Ülejäänud tabel kehtib endiselt: see ei jaga kombineeritud seansi kleepuvust, natiivseid Codex nööpnõelu, konto semafoore, lukustusi, kululimiite, konfiguratsiooni ega kõneloge.
 
-Riistvara: eksemplari samaaegne pikk `/v1/responses` on a** mälu-eelarve** küsimus (kuhja + inflight-byte / #10110). `N` sõltumatud `DATA_DIR`-d korrutavad endiselt hunnikuid: host RAM peab katma `N × cgroup`, mitte "üks 16 Gi pod koos N = 8". Ärge kunagi `replicas > 1` ühel SQLite failil.
+Riistvara: eksemplari samaaegne pikk `/v1/responses` on a** mälu-eelarve** küsimus (kuhja + inflight-byte / #10110). `N` sõltumatud `DATA_DIR`-d korrutavad endiselt hunnikuid: host RAM peab katma `N × cgroup`, mitte "üks 16 Gi pod koos N = 8". Ärge kunagi `replicas > 1` d ühel SQLite failil.
 
 Koostage visand (kaks hunnikut, kaks köidet — mitte `deploy.replicas: 2`):
 
@@ -696,55 +721,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Protsessi tihedus ( HTTP isolaadi kokkusurumine) on [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Üks loogiline klaster jagatud püsivas olekus on [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Protsessi tihedus ( HTTP isolaadi kokkusurumine) on [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Üks loogiline klaster jagatud püsivas olekus on [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Gemini piirkondlikud vead Dockeris
+## Gemini piirkondlikud vead Docker s
 
-Google AI Studio / Gemini API võib tagastada HTTP 400 veakoodiga FAILED_PRECONDITION ja teatega
-`User location is not supported for the API use.` Edukas päring hostis
-ei tõesta, et konteiner kasutab sama väljaminevat marsruuti. DNS-i järjestus,
-IPv4/IPv6 ühenduvus, VPN-i marsruutimine ja seadistatud puhverserverid võivad erineda. Kontrollige
-[Google'i toetatud piirkondi](https://ai.google.dev/gemini-api/docs/available-regions)
-ning tegelikku ühenduse marsruuti; ainuüksi see viga ei viita vigasele API-võtmele.
+Google AI Studio / Gemini API saab tagastada HTTP 400 koos FAILED_PRECONDITION ja `User location is not supported for the API use.` Edukas päring hostis ei tõenda, et konteiner kasutab sama väljuvat marsruuti. DNS -järjestus, IPv4/IPv6 -ühenduvus, VPN marsruutimine ja konfigureeritud puhverserverid võivad erineda. Kontrollige [Google toetatud piirkondi](https://ai.google.dev/gemini-api/docs/available-regions) ja tegelikku ühenduse marsruuti; see viga üksi ei tuvasta halba API võtit.
 
-### Eelistage ühendusepõhist puhverserverit
+### Eelista ühendusepõhist puhverserverit
 
-Kasutage mõjutatud Gemini ühenduse jaoks OmniRoute'i [ühendusepõhist puhverserveri seadistust](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-ning seejärel korrake toimingut **Test Connection** ja väikest päringut
-sama mudeliga. Nii piirdub marsruudimuudatus selle ühendusega. Veenduge,
-et puhverserver oleks konteinerist ligipääsetav ja et ühendus selle ka tegelikult valiks.
-Marsruudi muutmine ei taga, et ülesvooluteenus peab piirkonda sobivaks.
+Kasutage mõjutatud Gemini ühenduse jaoks OmniRoute[ühendusepõhist puhverserveri konfiguratsiooni](../ops/PROXY_GUIDE.md#4-level-proxy-system), seejärel korrake** Testi ühendus** ja väike palve sama mudeliga. See hoiab marsruutimise muudatuse hõlmatuna sellele ühendusele. Veenduge, et puhverserver oleks konteinerist kättesaadav ja ühendus tõesti selle valib. Marsruudi muutmine ei taga ülesvoolu piirkondlikku abikõlblikkust.
 
-### Võrrelge hosti ja konteineri võrguühendust
+### Võrrelge hosti ja konteineri võrku
 
-Autenditud tulemuste võrdlemisel hoidke võti, mudel ja päring samana; ärge kunagi
-lisage probleemikirjeldusse mandaate, puhverserveri paroole ega täielikke autoriseerimispäiseid.
-Kõigepealt kontrollige, milliseid aadressiperekondi operatsioonisüsteemi nimelahendaja pakub, kasutades sama käsku
-hostis ja konteineris:
+Hoidke autentitud tulemuste võrdlemisel võti, mudel ja päring identsed; Ärge kunagi kleepige probleemisse mandaate, puhverserveri paroole ega täielikke autoriseerimispäiseid. Esmalt kontrollige, milliseid aadressiperekondi OS lahendaja pakub, kasutades hostis ja konteineris sama käsku:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Asendage `omniroute` kasutatava teenusega (näiteks `omniroute-web`). Need
-käsud väljastavad aadressiperekonnad ilma mandaatide või IP-aadressideta. Tagastatud `6`
-näitab ainult IPv6 DNS-i tulemust: see **ei** tõesta toimiva IPv6-marsruudi ega API-juurdepääsu olemasolu.
-Kui `curl` on installitud, võrrelge käsku `curl -4 -I https://generativelanguage.googleapis.com`
-käsuga `curl -6 -I https://generativelanguage.googleapis.com` mõlemas keskkonnas.
-HTTP-vastus tõendab selle kontrollpäringu ühenduvust isegi siis, kui vastuseks on autentimata
-päringu viga; Gemini kasutusõigust kontrollib ainult autenditud mudelipäring.
+Asendage `omniroute` teie käitatava teenusega (näiteks `omniroute-web`). Need käsud prindivad aadresside perekonnad ilma mandaatide või IP -aadressideta. Tagastatud `6` näitab ainult IPv6 DNS tulemust: see on nii** mitte** tõestada kasutatav IPv6 marsruut või API juurdepääs. Kui `curl` on installitud, võrrelge `curl -4 -I https://generativelanguage.googleapis.com` ja `curl -6 -I https://generativelanguage.googleapis.com` mõlemas keskkonnas. HTTP vastus tõestab selle sondi ühenduvust, isegi kui tegemist on autentimata veaga; ainult autentitud mudelipäring testib Gemini sobivust.
 
-### Hostitaseme alternatiiv: toimiv IPv6 ja nimelahendaja poliitika
+### Hostitaseme alternatiiv: töötav IPv6 ja lahendaja poliitika
 
-Probleemi [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) raporteerija taastas
-oma keskkonnas juurdepääsu, lubades konteineri IPv6 ja muutes glibc aadressivalikut.
-Käsitlege seda keskkonnaspetsiifilise alternatiivina. Enne nimelahendaja eelistuste muutmist
-veenduge, et hosti IPv6, konteineri väljaminev ühendus/marsruutimine ja tulemüürireeglid töötaksid.
-Privaatne ULA-aadress üksi ei tõenda avaliku IPv6-ühenduse olemasolu.
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) reporter taastas juurdepääsu nende keskkonnale, lubades konteineri IPv6 ja muutes glibc aadressi valikut. Käsitlege seda keskkonnaspetsiifilise alternatiivina. Enne lahendaja eelistuste kohandamist kinnitage töötav host IPv6, konteiner egress/routing ja tulemüürireeglid. Privaatne ULA -aadress iseenesest ei loo avalikku IPv6 ühenduvust.
 
-Teenuste puhul, mis on juba ühendatud Compose'i vaikevõrguga, lubab järgmine fragment
-selles võrgus IPv6; säilitage ülejäänud teenuse, portide, andmeköidete ja seadistuse osa:
+Teenuste puhul, mis on juba Compose'i vaikevõrguga ühendatud, lubab see fragment selles võrgus IPv6 ; säilitage ülejäänud teenus, pordid, helitugevused ja konfiguratsioon:
 
 ```yaml
 networks:
@@ -752,30 +754,13 @@ networks:
     enable_ipv6: true
 ```
 
-Nimega võrgu puhul lubage see võrgus, millega teenus tegelikult liitub. Docker võib
-eraldada ULA-alamvõrgu; valige selgesõnaline, mittekattuv alamvõrk ainult siis, kui teie võrk
-seda nõuab. Vaadake [Dockeri IPv6-võrgundust](https://docs.docker.com/engine/daemon/ipv6/)
-ja [Compose'i võrgusuvandeid](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Nimega võrgu puhul lubage see võrgus, millega teenus tegelikult liitub. Docker eraldada ULA alamvõrgu; valige selgesõnaline, mittekattuv alamvõrk ainult siis, kui teie võrk seda nõuab. Vaadake jaotisi [Docker IPv6 võrgundus](https://docs.docker.com/engine/daemon/ipv6/) ja [Võrgu koostamise valikud](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-**glibc-põhises tõmmises** saab `/etc/gai.conf` muuta aadressivalikut. Hoidla praegune
-Dockerfile kasutab Debiani; kohandatud musl-põhised tõmmised seda mehhanismi ei kasuta.
-Raporteeritud muudatus asendab ULA sildi `label fc00::/7 6` sildiga
-`label fc00::/7 1`. Alustage tõmmise täielikust poliitikatabelist ja säilitage selle muud
-kirjed: kirje `label` või `precedence` lisamine asendab selle vaiketabeli, mistõttu ainult
-muudetud rida sisaldav fail ei ole piisav.
-[glibc seadistuse viitedokumentatsioon](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-kirjeldab neid semantikaid. Ühendage ülevaadatud fail kirjutuskaitstult asukohta `/etc/gai.conf`
-ja looge teenus muudatuse rakendamiseks uuesti.
+On a** glibc-põhine pilt** , `/etc/gai.conf` saab aadressivalikut muuta. Praegune hoidla Dockerfile kasutab Debianit; kohandatud muslipõhised pildid seda mehhanismi ei jaga. Teatatud korrigeerimine muudab ULA sildi `label fc00::/7 6` asemel `label fc00::/7 1`. Alustage pildi täielikust poliitikatabelist ja säilitage selle muud kirjed: `label` või `precedence` kirje lisamine asendab selle vaiketabeli, seega ei piisa ainult muudetud rida sisaldavast failist. [Glibc konfiguratsiooni viide](https://github.com/bminor/glibc/blob/master/posix/gai.conf) dokumenteerib selle semantika. Ühendage ülevaadatud fail kirjutuskaitstud failiga `/etc/gai.conf` -s ja looge teenus selle rakendamiseks uuesti.
 
-See muudab operatsioonisüsteemi aadressivalikut **kogu sellest konteinerist väljuva liikluse jaoks**.
-See ei sunni iga rakendust IPv6 valima: olulised on ka Node'i DNS-i järjestus ja ühenduse
-valik. Eelkõige eelistab `--dns-result-order=ipv4first` IPv4 ja
-see ei lahenda ainult IPv4 kasutamisel tekkivat tõrget. Vaadake [Node'i DNS-i järjestust](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+See muudab OS aadressi valikut** kogu väljuv liiklus selles konteineris** . See ei sunni iga rakendust valima IPv6: sõlme DNS järjekord ja ühenduse valik on samuti olulised. Eelkõige eelistab `--dns-result-order=ipv4first` IPv4 ja see ei ole vahend IPv4-only rikke korral. Vaadake [jaotist Sõlme DNS tellimine](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Pärast iga hostitaseme muudatust testige uuesti Geminit ja teisi teenusepakkujaid. Tagasipööramiseks
-eemaldage kohandatud `gai.conf`-i ühendus, taastage varasem võrguseadistus ning
-looge mõjutatud teenus/võrk hooldusakna ajal uuesti. Võrgu uuesti loomine
-võib katkestada teiste sellega ühendatud konteinerite töö; ärge kustutage püsivate andmete andmeköidet.
+Pärast hostitaseme muudatusi testige Gemini ja teisi teenusepakkujaid uuesti. Tagasipööramiseks eemaldage kohandatud `gai.conf` -kinnitus, taastage eelmine võrgukonfiguratsioon ja looge hooldusakna ajal mõjutatud service/network uuesti. Võrgu taasloomine võib katkestada teised sellega ühendatud konteinerid; ärge kustutage püsivat andmemahtu.
 
 ## Olulised märkused
 

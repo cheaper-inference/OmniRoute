@@ -151,30 +151,30 @@ Schwerpunkte für die Phasen 6–7:
 - [ ] Regressionstests für jeden nicht abgedeckten Produktionsfehler hinzufügen, der während der Steigerung auf 90 % behoben wird
 - [ ] Den Abdeckungs-Schwellenwert in CI erst erhöhen, nachdem der lokale Ausgangswert bei mindestens zwei aufeinanderfolgenden Durchläufen stabil geblieben ist
 
-## Ratchet-Richtlinie
+## Ratschenpolitik
 
-Aktualisieren Sie die Schwellenwerte von `npm run test:coverage` erst, nachdem das Projekt den nächsten Meilenstein tatsächlich mit einem komfortablen Puffer überschritten hat.
+Aktualisieren Sie `npm run test:coverage` -Schwellenwerte erst, wenn das Projekt tatsächlich den nächsten Meilenstein mit einem komfortablen Puffer überschreitet.
 
-**Aktuelle Schwelle:** `npm run test:coverage` erzwingt **60 Statements / 60 Zeilen / 60 Funktionen / 60 Verzweigungen** (die Metrik wurde in Quality-Gates-Phase 6A.1 neu festgelegt — die frühere Ausgangsbasis von 82,58 % war überhöht, da sie Testdateien mitzählte und `open-sse` ausschloss). Der Befehl `test:coverage:legacy` behält zum historischen Vergleich die alte 50/50/50-Metrik bei.
+**Aktuelles Tor:** `npm run test:coverage` erzwingt** 60 Anweisungen / 60 Zeilen / 60 Funktionen / 60 Verzweigungen** (Die Metrik wurde in Quality-Gates Phase 6A.1 — neu basiert. Die frühere Basislinie von 82,58 % wurde überhöht, da Testdateien gezählt und `open-sse` ausgeschlossen wurden.) Der Befehl `test:coverage:legacy` behält die alte 50/50/50 -Metrik für den historischen Vergleich bei.
 
-Für Ad-hoc-Prüfungen der Schwellenwerte anhand des neuesten Berichts verwenden Sie:
+Für Ad-hoc-Schwellenwertprüfungen anhand des neuesten Berichts verwenden Sie Folgendes:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Empfohlene Ratchet-Abfolge (Reihenfolge: `Statements-Zeilen / Verzweigungen / Funktionen`):
+Empfohlene Ratschenreihenfolge (Reihenfolge ist `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- aktuelle Schwelle (75/70/75)
+5. 75/70/72 <– aktuelles Gate (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Das nächste Ratchet-Ziel ist `80/75/78`, sobald die Verzweigungsabdeckung bei zwei aufeinanderfolgenden Durchläufen über 78 % liegt.
+Das nächste Ratschenziel ist `80/75/78`, sobald die Zweigabdeckung in zwei aufeinanderfolgenden Läufen über 78 % bleibt.
 
 ## Bekannte Lücke
 

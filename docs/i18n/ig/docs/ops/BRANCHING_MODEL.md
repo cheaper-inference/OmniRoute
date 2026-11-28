@@ -53,7 +53,7 @@ Mgbe a na-emekọrịta ntọhapụ, a na-emepe ihe nrịbama akpọrọ `releas
 Lelee maka friji mepere emepe tupu ị were na alaka ụlọ ọrụ ịchọrọ na-ejikọta:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Ngwakọta igwe (onye nwe `queue` label → Mergify) ka edekọtara na [MERGE_TRAIN.md](./MERGE_TRAIN.md).

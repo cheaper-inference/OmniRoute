@@ -69,13 +69,13 @@ Direktif ini sengaja diterapkan **per proxy**, bukan secara global — proxy yan
 
 ## Tiga Nilai
 
-| Nilai  | Label UI                | Perilaku                                                                                                                                                                 |
-| ------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auto` | `Otomatis (dual-stack)` | OS memilih famili. Untuk host proxy berupa literal IP, familinya melekat pada literal tersebut; untuk nama host, kedua famili dapat digunakan. Ini adalah nilai default. |
-| `ipv4` | `Hanya IPv4`            | Mengunci koneksi ke IPv4. Koneksi langsung gagal jika host proxy tidak memiliki rekaman IPv4 (A).                                                                        |
-| `ipv6` | `Hanya IPv6`            | Mengunci koneksi ke IPv6. Koneksi langsung gagal jika host proxy tidak memiliki rekaman IPv6 (AAAA).                                                                     |
+| Nilai  | label UI            | Perilaku                                                                                                                                                                 |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto` | `Auto (dual-stack)` | OS memilih keluarga. Untuk host proksi IP-literal, keluarga bersifat intrinsik terhadap literal; untuk nama host, kedua keluarga memenuhi syarat. Ini adalah standarnya. |
+| `ipv4` | `IPv4 only`         | Sematkan koneksi ke IPv4. Gagal ditutup jika host proxy tidak memiliki catatan IPv4 (A).                                                                                 |
+| `ipv6` | `IPv6 only`         | Sematkan koneksi ke IPv6. Gagal ditutup jika host proxy tidak memiliki catatan IPv6 (AAAA).                                                                              |
 
-String UI berada di `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+string UI tinggal di `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
@@ -83,21 +83,21 @@ String UI berada di `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `f
 
 ### Dasbor
 
-Pemilih tersedia di formulir proxy pada tab **Kumpulan Proxy**:
+Pemilihnya dalam bentuk proksi** Kumpulan Proksi** tab:
 
-1. Buka **Dasbor → Pengaturan → Proxy → Kumpulan Proxy**
-2. Tambahkan atau edit proxy
-3. Atur menu tarik-turun **Famili IP** ke `Otomatis (dual-stack)`, `Hanya IPv4`, atau `Hanya IPv6`
-4. Simpan
+1. Membuka** Dasbor → Pengaturan → Proxy → Proxy Pool**
+2. Tambahkan atau edit proksi
+3. Atur** keluarga IP** tarik-turun ke `Auto (dual-stack)`, `IPv4 only`, atau `IPv6 only`
+4. Menyimpan
 
-Kontrol ini dirender oleh `ProxyRegistryManager.tsx` (dipasang di `proxy/ProxyPoolTab.tsx`).
+Kontrol diberikan oleh `ProxyRegistryManager.tsx` (dipasang di `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Kolom `family` merupakan bagian dari payload pembuatan/pembaruan registri proxy, divalidasi oleh `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) dan ditangani oleh `POST` / `PATCH /api/v1/management/proxies`:
+Bidang `family` adalah bagian dari muatan create/update registri proxy, divalidasi oleh `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) dan ditangani oleh `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Buat proxy khusus IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Ubah proxy yang sudah ada menjadi khusus IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Kolom yang sama juga diterima oleh objek konfigurasi proxy inline yang digunakan untuk entri proxy upstream (`upstream_proxy_config.family`, lihat [Model Data](#data-model)).
+Bidang yang sama juga diterima oleh objek konfigurasi proksi inline yang digunakan untuk entri proksi upstream (`upstream_proxy_config.family`, lihat [Model Data](#data-model) ).
 
-Untuk API CRUD/penetapan proxy lainnya, lihat [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Untuk proksi lainnya CRUD/assignment API, lihat [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

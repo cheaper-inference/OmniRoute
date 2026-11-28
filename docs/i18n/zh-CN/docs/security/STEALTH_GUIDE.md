@@ -4,11 +4,9 @@
 
 ---
 
-> **事实来源：** `open-sse/utils/tlsClient.ts`、`open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`、`open-sse/config/cliFingerprints.ts`、`src/mitm/`
-> **最后更新：** 2026-09-02 — v3.8.51
-> **目标读者：** 维护特定提供者隐蔽集成的工程师。
+> **事实来源：** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`**观众：**工程师维护特定于提供者的隐形集成。
 
-OmniRoute 与一些提供者集成，这些提供者的边缘服务会主动识别非官方客户端的指纹（TLS JA3/JA4、请求头顺序、JSON 请求体结构、完整性令牌）。本文档介绍 OmniRoute 提供的隐蔽能力及其实现位置。
+OmniRoute与边缘主动识别非官方客户端的提供者集成（TLS JA3/JA4、标头排序、 JSON主体形状、完整性令牌）。本页记录了OmniRoute公开的隐形表面及其实现位置。
 
 ## 法律与道德声明
 
@@ -73,65 +71,68 @@ OmniRoute 与一些提供者集成，这些提供者的边缘服务会主动识�
 
 ---
 
-## Claude Code 隐身套件
+## Claude代码隐形捆绑包
 
-启用 `cliCompatMode` 后，OmniRoute 会重塑发出的 Claude 请求，使其与 `claude-cli` 流量无法区分。三个模块协同工作：
+当`cliCompatMode`打开时， OmniRoute会重新调整传出Claude请求，以便它们与`claude-cli`流量无法区分。三个模块协作：
 
 ### `claudeCodeFingerprint.ts`
 
-计算嵌入计费请求头中的 3 字符 `cc_version` 指纹：
+计算嵌入在账单标头中的 3 字符`cc_version`指纹：
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"`（硬编码；与官方客户端一致）
-- 输入：第一条用户消息文本中索引为 4、7、20 的字符 + 版本字符串
-- 输出：3 字符十六进制前缀
+- `FINGERPRINT_SALT = "59cf53e54c78"` （硬编码；匹配官方客户端）
+- 输入：第一个用户消息文本+版本字符串的索引 4、7、20 处的字符
+- 输出：3 个字符的十六进制前缀
 
-### `claudeCodeCCH.ts`（客户端内容哈希）
+### `claudeCodeCCH.ts` （客户端内容哈希）
 
-官方 Claude Code CLI 通过 Bun/Zig 计算的服务端完整性校验。OmniRoute 使用 `xxhash-wasm` 重新实现：
+服务器端完整性检查官方Claude代码CLI通过Bun/Zig.计算OmniRoute使用`xxhash-wasm`重新实现：
 
-1. 使用 `cch=00000;` 占位符序列化请求体
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. 补零至 5 字符的小写十六进制值
-4. 将 `cch=00000;` 替换为计算出的令牌
+1. 使用`cch=00000;`占位符序列化正文
+2. 按以下顺序使用两个纯文本替换构建哈希视图 (`hashView()`)：
+   - `/"model":"[^"]*"/g`的每个匹配都变成`"model":""` —匹配在第一个`"`停止，因此带有转义引号 (`"model":"a\"b"`) 的值仅清空到该引号，就像客户端一样
+   - `/"max_tokens":\d+,|,?"max_tokens":\d+/g`的每个匹配都被删除—在任何深度仅数字值
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. 零填充的 5 个字符小写十六进制
+5. 将`cch=00000;`替换为计算出的令牌
 
-常量：
+常数：
 
-- 种子：`0x6e52736ac806831e`
-- 模式：`/\bcch=([0-9a-f]{5});/`
+- 种子： `0x4d659218e32a3268` （与Claude代码 2.1.252 和 2.1.322 的环回捕获匹配）
+- 图案： `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-在“敏感”客户端名称的第一个字符后插入 Unicode **零宽连接符**（`U+200D`），使上游过滤器无法通过 grep 检测它们。默认词语列表：
+插入 Unicode**零宽度连接符**(`U+200D`) 在“敏感”客户端名称的第一个字符之后，因此上游过滤器无法对它们进行 grep。默认单词列表：
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-应用于：`system` 块、所有 `messages[].content`，以及 `tools[].description` / `tools[].function.description`。操作员可通过 `setSensitiveWords()` 覆盖。
+应用于： `system`块、所有`messages[].content`和`tools[].description` / `tools[].function.description`。操作员可通过`setSensitiveWords()`重写。
 
-### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` 提供者
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`提供者
 
-适用于只接受“真实 Claude Code”流量的第三方 Anthropic 中继：
+对于仅接受“真实Claude代码”流量的第三方Anthropic中继：
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`（默认值）
-- 当某个 CC Compatible 上游明确要求经过删减的思考流时，单连接的“启用 redact-thinking beta”开关会添加 `redact-thinking-2026-02-12`
-- 单连接的“启用摘要式思考显示”开关会存储 `providerSpecificData.requestDefaults.summarizeThinking`，并为尚未设置显示模式的 CC Compatible 思考请求添加 `display: "summarized"`
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"`（Opus/Sonnet 4.x 系列）
-- 默认路径：`/v1/messages?beta=true`
+- 默认为`anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
+- 当CC兼容上游特别需要编辑思维流时，每个连接的“启用编辑思维测试版”切换会添加`redact-thinking-2026-02-12`
+- 每个连接的“启用汇总思维显示”切换存储`providerSpecificData.requestDefaults.summarizeThinking`并将`display: "summarized"`添加到CC尚未设置显示模式的兼容思维请求
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` （Opus/Sonnet 4.x 系列）
+- 默认路径： `/v1/messages?beta=true`
 
-同一套件中的配套模块：
+同一捆绑包中的姐妹模块：
 
-- `claudeCodeConstraints.ts` — 温度 + 缓存控制规则
-- `claudeCodeToolRemapper.ts` — 工具名称重映射
-- `claudeCodeExtraRemap.ts` — 额外的载荷规范化
+- `claudeCodeConstraints.ts` —温度+缓存控制规则
+- `claudeCodeToolRemapper.ts` —工具名称重新映射
+- `claudeCodeExtraRemap.ts` —额外有效负载标准化
 
 ---
 
@@ -159,7 +160,7 @@ Antigravity请求逐字节保留调用者文本。 OmniRoute不会在提示或re
 
 1. 保留默认`ANTIGRAVITY_CREDITS=off`除非运营商明确接受付费信用和账户执行风险。 `retry`先发送普通请求，在达到合格配额429后最多注入一次积分； `always`在第一个请求时注入积分。
 2. **通过自动组合在提供者之间分散负载**（`model: "auto"`或`kr/glm/etc` -combo）而不是使单个Antigravity帐户饱和。
-3. **设置每个连接的RPM限制**在Antigravity提供者的编辑页面（仪表板→提供者→ Antigravity →连接→速率限制）。 30-60 RPM是持续使用的合理上限。
+3. **设置每个连接的RPM限制**在Antigravity提供者的编辑页面中（仪表板→提供者→ Antigravity →连接→速率限制）。 30-60 RPM是持续使用的合理上限。
 4. **使用稳定的、运营商控制的上游网络**避免在不相关的用户或工作负载之间共享一个帐户。
 5. **如果被禁止**：通过`support.google.com` → “恢复Workspace/Account访问”进行申诉，并发送准确的`quota_exceeded` / `service disabled`响应正文Google 。无法保证恢复。
 
@@ -191,7 +192,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` —读取`process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` —凭证管道
-- 原始事件报告：讨论[#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- 原始事件报告：讨论[#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

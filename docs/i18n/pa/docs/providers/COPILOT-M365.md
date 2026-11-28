@@ -168,9 +168,9 @@ Microsoft 365 ਪ੍ਰਦਾਤਾ ਵਿੱਚ** ਕਨੈਕਸ਼ਨ ਜੋ�
 
 ## ਹਵਾਲੇ
 
-- ਮੁੱਦਾ: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- ਚਰਚਾ: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- ਮੁੱਦਾ: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- ਚਰਚਾ: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - ਸਰੋਤ: `src/shared/constants/providers/web-cookie.ts` (ਪ੍ਰਦਾਤਾ ਪਰਿਭਾਸ਼ਾ)
-- HAR ਇੰਪੋਰਟ: `src/shared/utils/m365HarImport.ts`
-- ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਫੀਲਡ: `src/shared/providers/webSessionCredentials.ts`
-- ਟੀਅਰ ਮੋਡਲ: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- HAR ਆਯਾਤ: `src/shared/utils/m365HarImport.ts`
+- ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਖੇਤਰ: `src/shared/providers/webSessionCredentials.ts`
+- ਟੀਅਰ ਮਾਡਲ: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

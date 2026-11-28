@@ -4,32 +4,13 @@
 
 ---
 
-> **Sursa oficială:** `src/lib/memory/` și `src/app/api/memory/`
-> **Ultima actualizare:** 2026-06-28 — v3.8.40 (dezactivată implicit + recuperarea decalajului cuantizării int8)
+> **Sursa adevărului:** `src/lib/memory/` și `src/app/api/memory/`
 
-OmniRoute oferă memorie conversațională persistentă, asociată cheii API (și,
-opțional, ID-ului sesiunii). Amintirile sunt extrase automat din răspunsurile LLM
-prin identificarea simplă a unor tipare regex și reinjectate în solicitările
-ulterioare sub forma unui mesaj system inițial (sau a primului mesaj al
-utilizatorului pentru furnizorii care resping rolul system).
+OmniRoute oferă o memorie conversațională persistentă tastată de cheia API (și opțional ID de sesiune). Amintirile sunt extrase automat din răspunsurile LLM prin potrivire ușoară a modelelor regex și injectate înapoi în solicitările ulterioare ca mesaj principal de sistem (sau primul mesaj de utilizator pentru furnizorii care resping rolul de sistem).
 
-> **Memoria este DEZACTIVATĂ implicit (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> este acum `false` (`src/lib/memory/settings.ts`). Activarea memoriei injectează
-> până la `maxTokens` (~2k) de context recuperat în **fiecare** solicitare de chat,
-> ceea ce este facturat — un cost neașteptat pentru instalările noi și pentru
-> clienții care își gestionează propriul context. Activați-o explicit din
-> **Settings → Memory** (`MemorySkillsTab` afișează un avertisment privind costul
-> tokenurilor atunci când memoria este activată). Un client poate exclude o
-> singură solicitare folosind antetul de solicitare `x-omniroute-no-memory`
-> (`true`/`1`/`yes`) — consultați tabelul anteturilor de solicitare din
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). O solicitare fără memorie
-> setează `memoryOwnerId = null`, ceea ce dezactivează **atât** injectarea memoriei,
-> **cât și** pe cea a abilităților pentru solicitarea respectivă
-> (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Memoria este OFF în mod implicit (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` este acum `false` (`src/lib/memory/settings.ts`). Activarea memoriei injectează până la `maxTokens` (~ 2k) de context recuperat în** fiecare** cerere de chat, care este facturată — un cost surprinzător pentru noile instalări și pentru clienții care își gestionează propriul context. Înscrieți-vă în mod explicit sub** Setări → Memorie** ( `MemorySkillsTab` afișează un semnal de avertizare privind costul simbolului când memoria este activată). Un client poate renunța la o singură cerere cu antetul cererii `x-omniroute-no-memory` (`true`/`1`/`yes`) — a se vedea tabelul cu antetul cererii în [API_REFERENCE.md](../reference/API_REFERENCE.md). O solicitare fără memorie setează `memoryOwnerId = null`, care se dezactivează** ambele** memorie și injecție de abilități pentru acea cerere (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Memoria este **izolată pentru fiecare cheie API**, nu pentru fiecare utilizator —
-toate solicitările autentificate cu aceeași cheie API folosesc în comun același
-fond de memorie, cu posibilitatea unei izolări suplimentare prin `sessionId`.
+Memoria este** scoped per API key** , nu pentru fiecare utilizator — fiecare cerere autentificată cu aceeași cheie API partajează același pool de memorie, cu o definiție suplimentară opțională de către `sessionId`.
 
 ## Arhitectură
 
@@ -307,27 +288,17 @@ Strategia de regăsire `MemoryConfig` este una dintre `exact`, `semantic` sau `h
 iar domeniul este unul dintre `session`, `apiKey` sau `global`. Domeniul implicit din
 `getMemorySettings()` este `apiKey`.
 
-## Extragerea informațiilor (`extraction.ts`)
+## Extragerea faptelor (`extraction.ts`)
 
-Extragerea este **bazată pe expresii regulate**, nu pe LLM — rulează în cadrul procesului cu
-`setImmediate()`, astfel încât nu blochează niciodată fluxul de răspuns:
+Extracția este** bazat pe regex** , nu — bazat pe LLM, rulează în proces cu `setImmediate()`, așa că nu blochează niciodată fluxul de răspuns:
 
-- **Tipare de preferințe** → `MemoryType.FACTUAL`
-  (de ex. `Prefer …`, `Îmi place foarte mult …`, `preferatul meu este …`, `Urăsc …`)
-- **Tipare de decizii** → `MemoryType.EPISODIC`
-  (de ex. `Voi folosi …`, `Am ales …`, `Am optat pentru …`, `Voi adopta …`)
-- **Tipare comportamentale** → `MemoryType.FACTUAL`
-  (de ex. `De obicei …`, `Întotdeauna …`, `Am tendința să …`)
+- **Modele de preferințe** → `MemoryType.FACTUAL` (de exemplu, `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Modele de decizie** → `MemoryType.EPISODIC` (de exemplu, `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Modele de model** → `MemoryType.FACTUAL` (de exemplu, `I usually …`, `I always …`, `I tend to …`)
 
-Fiecare potrivire este igienizată (`trim`, restrângerea spațiilor albe, limitare la 500 de caractere),
-deduplicată în cadrul lotului printr-un `factKey(category, content)` stabil și
-stocată prin `createMemory()` cu metadatele
-`{category, extractedAt, source: "llm_response"}`. Textul de intrare este limitat la
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — când este mai lung, este utilizată **partea finală** a textului,
-astfel încât cel mai recent conținut al asistentului să fie întotdeauna inclus.
+Fiecare potrivire este dezinfectată (`trim`, spații albe - colaps, limitat la 500 de caractere), deduplicată în lot printr-un `factKey(category, content)` stabil și stocată prin `createMemory()` cu metadate `{category, extractedAt, source: "llm_response"}`. Textul introdus este limitat la 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — când este mai lung,** coadă** din text este utilizat, astfel încât cel mai recent conținut de asistent să participe întotdeauna.
 
-`extractFactsFromText(text)` este exportată pentru teste și returnează informațiile
-structurate fără a le stoca.
+`extractFactsFromText(text)` este exportat pentru teste și returnează faptele structurate fără a le stoca.
 
 ## Regăsirea (`retrieval.ts`)
 
@@ -683,22 +654,22 @@ Benchmark pe un server x86 tipic cu 4 nuclee (texte de aproximativ 100 de tokenu
 
 ---
 
-## Modele de extragere a faptelor (v3.8.16+)
+## Modele de extragere a faptelor (v3.8.16 +)
 
-Modulul `extraction.ts` (`src/lib/memory/extraction.ts`) utilizează **potrivirea modelelor prin expresii regulate** pentru a extrage fapte structurate din mesajele conversațiilor. Înțelegerea acestor modele vă ajută să ajustați calitatea extragerii pentru cazul dumneavoastră de utilizare.
+Modulul `extraction.ts` (`src/lib/memory/extraction.ts`) folosește** potrivirea modelului regex** pentru a extrage fapte structurate din mesajele de conversație. Înțelegerea acestor modele vă ajută să reglați calitatea extracției pentru cazul dvs. de utilizare.
 
-### Categorii implicite de modele
+### Categorii de modele implicite
 
-| Categorie           | Exemplu de model                                          | Ce capturează                        |
-| ------------------- | --------------------------------------------------------- | ------------------------------------ |
-| PREFERENCE_PATTERNS | `"Prefer <X>"`, `"Îmi place <X>"`, `"Urăsc <X>"`          | Preferințele utilizatorului          |
-| DECISION_PATTERNS   | `"Voi folosi <X>"`, `"Am decis să <X>"`, `"Am ales <X>"`  | Deciziile utilizatorului (episodice) |
-| PATTERN_PATTERNS    | `"De obicei <X>"`, `"Întotdeauna <X>"`, `"Niciodată <X>"` | Modele comportamentale persistente   |
+| Categorie           | Exemplu de model                                            | Capturi                              |
+| ------------------- | ----------------------------------------------------------- | ------------------------------------ |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Preferințele utilizatorului          |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Deciziile utilizatorilor (episodice) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Modele comportamentale persistente   |
 
 ### Exemple de modele (simplificate)
 
 ```ts
-// Din src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -715,31 +686,23 @@ const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\
 
 Când un utilizator spune:
 
-> „Prefer TypeScript. Voi folosi Postgres pentru acest proiect. Fac întotdeauna commit înainte de push. Nu îmi place Python.”
-> Extragerea produce 4 memorii:
+> "Prefer TypeScript. Voi folosi Postgres pentru acest proiect. Mă angajez întotdeauna înainte de a împinge. Nu îmi place Python." Extragerea produce 4 amintiri:
 >
-> | Cheie                                | Categorie  | Tip      | Conținut                        |
-> | ------------------------------------ | ---------- | -------- | ------------------------------- |
-> | `preference:typescript`              | preference | factual  | „TypeScript”                    |
-> | `decision:postgres_for_this_project` | decision   | episodic | „Postgres pentru acest proiect” |
-> | `pattern:commit_before_pushing`      | pattern    | factual  | „commit înainte de push”        |
-> | `preference:python`                  | preference | factual  | „Python”                        |
+> | Cheie | Categorie | Tip | Conținut | | ------------------------------------ | ---------- | -------- | --------------------------- | | `preference:typescript` | preferință | factual | "TypeScript" | | `decision:postgres_for_this_project` | decizie | episodic | "Postgres pentru acest proiect model | | | `pattern:commit_before_pushing` | | before pushing” | | `preference:python` | preference | factual | „Python” |
 
-### Limitele extragerii
+### Limite de extracție
 
-Pentru a preveni extragerea necontrolată, se aplică următoarele limite:
+Pentru a preveni extragerea prin fugă, se aplică următoarele limite:
 
-| Lungimea minimă a conținutului | 3 caractere |
-| Lungimea maximă a conținutului | 500 caractere |
+| Lungime minimă a conținutului | 3 caractere |
+| Lungimea maximă a conținutului | 500 de caractere |
 
 ### Când să dezactivați extragerea
 
-Extragerea rulează automat ori de câte ori memoria este activată; nu există un comutator separat
-doar pentru extragere. Pentru a o opri, dezactivați complet memoria (`enabled: false`
-prin `PUT /api/settings/memory`). Luați în considerare această opțiune atunci când:
+Extragerea rulează automat ori de câte ori memoria este activată; nu există nicio comutare separată numai pentru extracție. Pentru a o dezactiva, dezactivați memoria complet (`enabled: false` prin `PUT /api/settings/memory`). Luați în considerare să faceți acest lucru atunci când:
 
-- Aveți un volum mare de mesaje, iar costul extragerii nu este neglijabil
-- Conversațiile dumneavoastră sunt în mare parte temporare (chat, depanare), fără valoare pe termen lung
+- Aveți un volum mare de mesaje, iar costul de extracție nu este banal
+- Conversațiile tale sunt în mare parte trecătoare (chat, depanare) fără valoare pe termen lung
 - Capturați deja contextul prin pluginuri personalizate
 
 ---

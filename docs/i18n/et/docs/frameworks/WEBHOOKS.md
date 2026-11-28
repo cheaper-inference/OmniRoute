@@ -4,15 +4,11 @@
 
 ---
 
-> **Tõeallikas:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Viimati uuendatud:** 2026-06-28 — v3.8.40
+> **Tõe allikas:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-OmniRoute saab platvormisündmuste korral käivitada HTTP-veebihaake. Kasutage neid lõimimiseks
-Slacki, PagerDuty, Datadogi, sisemiste teavitusteenuste või mis tahes HTTP-vastuvõtjaga.
+OmniRoute saab käivitada platvormi sündmustel HTTP veebihaake. Kasutage neid Slack, PagerDuty, Datadogi, sisemiste hoiatusteenuste või mis tahes HTTP vastuvõtjaga integreerimiseks.
 
-Dispetšer allkirjastab iga edastuse HMAC-SHA256 abil, proovib ajutiste
-tõrgete korral uuesti, jälgib iga veebihaagi edastuste töökindlust ja keelab automaatselt lõpp-punktid,
-mille tõrked jätkuvad.
+Dispetšer allkirjastab iga tarne märgiga HMAC-SHA256, proovib mööduvate tõrgete korral uuesti, jälgib kohaletoimetamise seisukorda veebihaagi kaupa ja keelab automaatselt lõpp-punktid, mis pidevalt ebaõnnestuvad.
 
 ## Toetatud sündmused
 

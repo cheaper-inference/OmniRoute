@@ -16,8 +16,10 @@ Kebijakan lintas penyedia default mengizinkan hingga tiga upaya penyedia, mencob
 - **ID model telanjang** (tanpa awalan `provider/` ) yang dilayani oleh beberapa penyedia aktif, tanpa kombinasi nama persis tersebut, pertama kali dikirim ke pilihan inferensi penyedia. Jika upaya tersebut gagal sehingga kebijakan gagal, permintaan yang sama dikirim ke penyedia aktif berikutnya yang menyajikan id. Responsnya membawa `x-omniroute-fallback-attempts` dengan jumlah penyedia yang mencoba sebelum yang menjawab.
   - Setiap alternatif diotorisasi persis seolah-olah inferensi telah memilihnya. Target yang diblokir atau tidak diakui oleh kunci API dilewati tanpa panggilan upstream, dan klien mendapatkan kesalahan upstream yang sebenarnya, bukan penolakan kebijakan untuk target yang tidak pernah disebutkan namanya.
   - Hanya respons gagal yang berlanjut: tidak ada yang gagal setelah byte streaming pertama.
-  - Pertukaran model cadangan darurat hanya berlaku setelah setiap penyedia model yang diminta gagal.
+  - Pertukaran model fallback darurat hanya berlaku setelah setiap penyedia model yang diminta gagal.
   - Permintaan yang disematkan ke koneksi (`x-omniroute-connection`) tetap ada di dalamnya.
   - Id awalan (`provider/model`) tidak pernah dialihkan ke penyedia lain.
 
 Status sirkuit adalah `closed`, `open`, dan `half_open`. Cooldown menjadwalkan penyelidikan terbatas; probe yang berhasil menutup sirkuit dan probe yang gagal membukanya kembali.
+
+Failover penyedia berjalan di dalam gateway. Lihat [Ketika OmniRoute sendiri tidak dapat dijangkau](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) untuk mengetahui perilaku klien selama pemadaman gateway.

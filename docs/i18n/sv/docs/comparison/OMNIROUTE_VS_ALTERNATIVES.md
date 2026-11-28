@@ -11,7 +11,7 @@ Objektiv jämförelse av funktioner kontra populära AI routrar med öppen käll
 | Särdrag                                                   |                OmniRoute 3.8                |     LiteLLM 1.x      | OpenRouter (SaaS) | Portnyckel |
 | --------------------------------------------------------- | :-----------------------------------------: | :------------------: | :---------------: | :--------: |
 | **Leverantörer**                                          |                   **329**                   |         ~100         |        ~50        |    ~30     |
-| **Free/no-auth katalogposter**                            |                   **155**                   |         n/a          |     genomgång     |    n/a     |
+| **Leverantörer med fri tillgång**                         |           **50 med fri tillgång**           |         n/a          |     genomgång     |    n/a     |
 | **Självvärd**                                             |                     ✅                      |          ✅          |        ❌         | ⚠ betalat  |
 | **OAuth katalogposter**                                   |                   **23**                    |       partiell       |        ❌         |     ❌     |
 | **Automatiska reservkombinationer**                       |              **22 strategier**              | prioriteringsbaserad |    nivåbaserad    |   viktad   |
@@ -38,9 +38,9 @@ Objektiv jämförelse av funktioner kontra populära AI routrar med öppen käll
 
 ## När ska man välja OmniRoute
 
-- Du är självvärd och vill** maximal leverantörstäckning** (394 leverantörer, 155 free/no-auth -katalogposter)
+- Du är självvärd och vill** maximal leverantörstäckning** (394 leverantörer, 50 med fri tillgång)
 - Du behöver en** inbyggd MCP server** (LLM verktyg, minne, färdigheter exponerade som verktyg)
-- Du behöver**A2A protokoll** för agent-till-agent-arbetsflöden
+- Du behöver**A2A protokoll** för agent-till-agent arbetsflöden
 - Du vill** fingeravtryck smygande** (JA3/JA4) för att undvika upptäckt av uppströms CAPTCHAs
 - Du behöver** företagsfunktioner** (räcke, evals, revisionsspår) utan en SaaS -sedel
 
@@ -56,12 +56,12 @@ Objektiv jämförelse av funktioner kontra populära AI routrar med öppen käll
 - Du accepterar att betala per token med SaaS-påslag
 - Du behöver en **enda betalningsmetod** för alla leverantörer
 
-## När du bör välja Portkey
+## När ska man välja Portkey
 
-- Du behöver ett **kommersiellt SLA** med drifttidsgarantier
-- Du föredrar en **hanterad kontrollpanel** utan driftskostnader
-- Du behöver **funktioner för regelefterlevnad i företag** direkt från start
+- Du behöver en** kommersiella SLA** med upptidsgarantier
+- Du föredrar a** hanterad instrumentpanel** utan ops overhead
+- Du behöver** företags efterlevnad** funktioner ur kartongen
 
 ---
 
-_Senast uppdaterad: 2026-08-02. Skicka korrigeringar via PR för att hålla tabellen korrekt._
+_Skicka in korrigeringar via PR för att hålla denna tabell korrekt._

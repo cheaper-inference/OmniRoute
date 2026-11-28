@@ -60,15 +60,13 @@ Exemplos de representação da nossa comunidade incluem a utilização de um end
 a publicação através de uma conta oficial nas redes sociais ou a atuação como
 representante designado num evento online ou presencial.
 
-## Enforcement
+## Aplicação
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Instâncias de comportamento abusivo, de assédio ou de outra forma inaceitável podem ser denunciadas aos líderes comunitários responsáveis pela aplicação da lei, abrindo um aviso de segurança privada em
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+ou enviando um e-mail para o mantenedor para diegosouza.pw@outlook.com. Para incidentes sensíveis à segurança, consulte [`SECURITY.md`](SECURITY.md). Todas as reclamações serão analisadas e investigadas de forma rápida e justa.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Todos os líderes comunitários são obrigados a respeitar a privacidade e a segurança do relator de qualquer incidente.
 
 ## Diretrizes de Aplicação
 

@@ -48,7 +48,7 @@ flowchart LR
 בדוק אם יש הקפאה פתוחה לפני הנחה שהסניף הרצוי ניתן למיזוג:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 מכניקת המיזוג (תווית הבעלים `queue` → Mergify) מתועדת ב- [MERGE_TRAIN.md](./MERGE_TRAIN.md).

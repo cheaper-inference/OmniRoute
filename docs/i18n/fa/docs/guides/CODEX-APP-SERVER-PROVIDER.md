@@ -20,24 +20,21 @@ OmniRoute **دو** روش برای استفاده از OpenAI Codex ارائه �
 ## 1. معماری
 
 ```
-┌─ برنامهٔ OmniRoute ──────────────┐        ┌─ سایدکار codex-app-server ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ توکن قابلیت)                 │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  مدیریت خودکار OAuth مربوط به OpenAI│
-└──────────────────────────────────┘        │  (~/.codex/auth.json، تازهسازی خودکار) │
-        │ اشتراکگذاری (والیومهای compose)  └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → توکن قابلیت WS (هر دو آن را mount میکنند)
-  codex-appserver-home    → ~/.codex (فایل auth.json توسط داشبورد نوشته و
-                             توسط codex app-server در سایدکار خوانده میشود)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- سایدکار، پشت یک توکن قابلیت، **فقط** روی شبکهٔ داخلی compose
-  (`ws://codex-app-server:1456`) گوش میدهد. این سرویس **هرگز** روی میزبان یا
-  اینترنت منتشر نمیشود.
-- Codex CLI درون `omniroute:base` تعبیه شده است؛ بنابراین هنگام اجرای سایدکار،
-  نیازی به نصب codex روی میزبان یا دستگاه کاربر نیست.
+- ماشین کناری گوش می دهد** فقط** در شبکه کامپوزی داخلی (`ws://codex-app-server:1456`) پشت یک توکن قابلیت. هست** هرگز** به میزبان یا اینترنت منتشر شده است.
+- خودروی کناری از `omniroute:cli-no-docker` استفاده می کند که از هدف `runner-cli-no-docker` ساخته شده است که شامل Codex CLI می شود.
 
 ## 2. راهاندازی
 

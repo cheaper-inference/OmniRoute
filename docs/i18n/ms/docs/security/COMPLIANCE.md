@@ -4,12 +4,11 @@
 
 ---
 
-> **Sumber rujukan utama:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Kemas kini terakhir:** 2026-06-28 — v3.8.40
+> **Sumber kebenaran:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute merekodkan tindakan pentadbiran, peristiwa pengesahan, perubahan kitar hayat kelayakan penyedia, dan pemanggilan alat MCP ke dalam jadual audit berasaskan SQLite. Halaman ini menerangkan perkara yang direkodkan, lokasi penyimpanannya, tempoh penyimpanannya, cara kunci API boleh memilih untuk tidak menyertainya, dan cara membuat pertanyaan terhadap data tersebut.
+OmniRoute merekodkan tindakan pentadbiran, peristiwa pengesahan, perubahan kitaran hayat kelayakan penyedia dan permintaan alat MCP ke jadual audit yang disokong SQLite. Halaman ini merangkumi perkara yang dilog, tempat ia tinggal, berapa lama ia disimpan, cara kunci API boleh menarik diri dan cara untuk menanyakan data.
 
-Pelaksanaannya terdapat dalam `src/lib/compliance/index.ts` (T-43 — "Kawalan Pematuhan") dan `src/lib/compliance/providerAudit.ts`. Penulisan audit tidak pernah mencetuskan ralat: sekiranya berlaku sebarang kegagalan, panggilan tersebut diabaikan secara senyap supaya pengelogan audit tidak menjejaskan aliran permintaan utama.
+Pelaksanaan hidup dalam `src/lib/compliance/index.ts` (T-43 — "Kawalan Pematuhan") dan `src/lib/compliance/providerAudit.ts`. Penulisan audit jangan sekali-kali membuang: pada sebarang kegagalan panggilan itu ditelan secara senyap jadi pengelogan audit tidak boleh memecahkan aliran permintaan utama.
 
 ## Perkara yang Direkodkan
 
@@ -126,14 +125,12 @@ memanggil `POST /api/settings/purge-request-history`, yang memadamkan `call_logs
 Nilai lalai ditakrifkan dalam `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## Pilihan Keluar `noLog` (bagi setiap kunci API)
+## `noLog` Pilih Keluar (setiap kunci API )
 
-Kunci API boleh ditandakan supaya trafik panggilan hilirannya tidak dilog. Tanda tersebut
-disimpan dalam jadual `api_keys` (`no_log INTEGER DEFAULT 0`) dan dicerminkan
-ke dalam set dalam memori untuk carian laluan pantas.
+kunci API boleh dibenderakan supaya trafik panggilan hiliran mereka tidak dilog. Bendera hidup pada jadual `api_keys` (`no_log INTEGER DEFAULT 0`) dan dicerminkan ke dalam set dalam memori untuk carian laluan panas.
 
 ```bash
-# Cipta kunci tanpa log (pengesahan pengurusan diperlukan)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
@@ -142,15 +139,19 @@ curl -X POST http://localhost:20128/api/keys \
 
 Pembantu (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — togol entri dalam memori
-- `isNoLog(apiKeyId)` — disemak pada laluan permintaan; jika gagal, beralih kepada bacaan
-  bercache selama 30 s daripada `api_keys.no_log`
-- `NO_LOG_API_KEY_IDS` (env, dipisahkan dengan koma) — dipramuatkan ke dalam set dalam memori
-  semasa but; berguna apabila anda tidak boleh menogol lajur secara langsung
+- `setNoLog(apiKeyId, true|false)` — togol entri dalam ingatan
+- `isNoLog(apiKeyId)` — diperiksa pada laluan permintaan; kembali kepada bacaan cache 30 s daripada `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, dipisahkan koma) — dipramuat ke dalam set dalam memori semasa but; berguna apabila anda tidak boleh menogol lajur secara langsung
 
-Peristiwa audit pentadbiran (log masuk, perubahan penyedia, panggilan alat MCP, dan sebagainya)
-**tidak** dipengaruhi oleh `noLog` — hanya pengelogan trafik bagi setiap permintaan yang
-dikecualikan.
+Acara audit pentadbiran (log masuk, perubahan penyedia, panggilan alat MCP, dll.) adalah** bukan** dipengaruhi oleh `noLog` — hanya pengelogan trafik setiap permintaan akan diketepikan.
+
+### Pilih keluar mengikut permintaan (`x-omniroute-no-log`)
+
+Pelanggan boleh memilih permintaan inferens tunggal daripada kegigihan muatan tanpa membuat kunci khusus. Hantar `x-omniroute-no-log: true` atas permintaan (`1` dan `yes` juga diterima, tidak peka huruf besar-besaran). Ia terpakai pada setiap laluan sembang-keluarga yang berjalan melalui pengendali sembang: Selesai Sembang, Respons, Mesej, Selesai dan laluan yang serasi dengan Gemini. Baris log panggilan masih ditulis dengan cap masa, model, pembekal, status, tempoh dan kiraan token, tetapi `request_body`, `response_body`, ringkasan permintaan dan artifak saluran paip ditinggalkan.
+
+Pengepala ialah ORed dengan bendera kunci: kunci tanpa log kekal tanpa log tanpa mengira pengepala dan pengepala tidak boleh mendayakan semula pengelogan untuk kunci tanpa log. Pengepala dilucutkan sebelum permintaan dimajukan ke hulu.
+
+Pengepala ini tidak** bukan** lumpuhkan Pengekstrakan memori atau cache semantik. Hantar `x-omniroute-no-memory: true` dan `x-omniroute-no-cache: true` di sebelahnya apabila permintaan itu tidak boleh mengekalkan kandungan dalam subsistem tersebut sama ada.
 
 ## REST API
 

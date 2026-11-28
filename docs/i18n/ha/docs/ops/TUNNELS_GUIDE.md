@@ -275,39 +275,29 @@ Don sa ido ta hanyar shirye-shirye, yi polling na endpoints na `GET` na kowane
 backend. An yarda a tafiyar da backend fiye da ɗaya a lokaci guda; OmniRoute zai
 bibiyi kowannensu da kansa.
 
-## Warware matsaloli
+## Shirya matsala
 
-### "Ba a sami binary na cloudflared ba"
+### "Ba a sami binary Cloudflared"
 
-OmniRoute yana ƙoƙarin girka shi kai tsaye lokacin amfani na farko. Idan an hana
-girkawar (ƙuntatacciyar hanyar sadarwa, babu damar shiga GitHub), sauke
-`cloudflared` da hannu daga
-<https://github.com/cloudflare/cloudflared/releases> sannan saita
+OmniRoute yayi ƙoƙarin shigarwa ta atomatik akan amfani da farko. Idan an katange shigarwar (Ƙuntataccen cibiyar sadarwa, babu damar GitHub ), zazzage `cloudflared` da hannu daga
+<https://github.com/cloudflare/cloudflared/releases> and set
 `CLOUDFLARED_BIN=/path/to/cloudflared`.
 
-### "ngrok: ana buƙatar authtoken"
+### "ngrok: authtoken bukata"
 
-`phase: "needs_auth"` yana nufin ba a sami authtoken ba. Saita `NGROK_AUTHTOKEN` a
-cikin `.env`, daidaita shi ta dashboard, ko aika `authToken` a cikin body na POST
-na enable.
+`phase: "needs_auth"` yana nufin ba a sami ma'ana ba. Saita `NGROK_AUTHTOKEN` a cikin `.env`, saita shi ta dashboard, ko wuce `authToken` a cikin jikin POST mai kunnawa.
 
-### "tailscale: ba a kunna funnel ba"
+### "tailscale: mazurari ba a kunna"
 
-Lokacin da amsar enable ta ƙunshi `funnelNotEnabled: true`, an kashe Funnel
-ga tailnet ɗinka. Buɗe `enableUrl` da aka mayar (ko shafin fasalin admin console)
-sannan kunna Funnel.
+Lokacin da kunna amsa ya haɗa da `funnelNotEnabled: true`, Funnel ba a kashe don tailnet ɗin ku. Bude `enableUrl` da aka dawo (ko shafin fasalin wasan bidiyo) kuma kunna Funnel.
 
-### Canje-canjen URL na tunnel suna lalata OAuth
+### Tunnel URL yana canza karya OAuth
 
-Yi amfani da ngrok mai domain da aka tanada ko Tailscale Funnel (dukansu suna da
-kwanciyar hankali ga kowane node). Cloudflare Quick Tunnels na wucin gadi ne bisa
-ƙira kuma ba a ba da shawarar amfani da su don callbacks na OAuth na dogon lokaci
-ba.
+Yi amfani da ngrok tare da keɓaɓɓen yanki ko Tailscale Funnel (dukansu barga kowane kumburi). Tunnels na sauri Cloudflare suna da ƙima ta ƙira kuma ba a ba da shawarar don sake kiran OAuth na tsawon rai ba.
 
-### An hana izini a Linux/macOS don Tailscale
+### An ƙi izini akan Linux/macOS don Tailscale
 
-`talescaled` yana buƙatar root. Bayar da `sudoPassword` ga endpoint na POST da ya
-dace, ko ka gudanar da daemon da kanka (`sudo systemctl start tailscaled`).
+`tailscaled` na bukatar tushe. Bayar da `sudoPassword` zuwa ƙarshen POST mai dacewa, ko gudanar da daemon da kanku (`sudo systemctl start tailscaled`).
 
 ## Duba kuma
 

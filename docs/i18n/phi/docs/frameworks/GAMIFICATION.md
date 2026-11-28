@@ -509,21 +509,21 @@ kapag talagang nagbago ang data ng leaderboard mula noong huling pagpapadala.
 
 ### Double-Entry Ledger
 
-Bawat paglilipat ay lumilikha ng dalawang row sa `token_ledger`:
+Ang bawat paglipat ay lumilikha ng dalawang hilera sa `token_ledger`:
 
-| Row    | `from_key_id` | `to_key_id` | `amount` |
-| ------ | ------------- | ----------- | -------- |
-| Debit  | nagpadala     | tumanggap   | +amount  |
-| Credit | tumanggap     | nagpadala   | -amount  |
+| hilera | `from_key_id` | `to_key_id` | `amount`  |
+| ------ | ------------- | ----------- | --------- |
+| Debit  | nagpadala     | receiver    | dami ng + |
+| Credit | receiver      | nagpadala   | -amount   |
 
-Sandali — ang sinusunod na kumbensiyon ay:
+Wait — ang convention ay:
 
-| Row     | `from_key_id` | `to_key_id` | `amount` | Kahulugan                  |
-| ------- | ------------- | ----------- | -------- | -------------------------- |
-| Padala  | nagpadala     | tumanggap   | +amount  | Paglabas mula sa nagpadala |
-| Tanggap | tumanggap     | nagpadala   | +amount  | Pagpasok para sa tumanggap |
+| hilera    | `from_key_id` | `to_key_id` | `amount`  | Ibig sabihin              |
+| --------- | ------------- | ----------- | --------- | ------------------------- |
+| Ipadala   | nagpadala     | receiver    | dami ng + | Outflow mula sa nagpadala |
+| Tumanggap | receiver      | nagpadala   | dami ng + | Pag-agos sa receiver      |
 
-Kinukuwenta ang balanse bilang:
+Ang balanse ay kinakalkula bilang:
 
 ```sql
 SELECT
@@ -534,7 +534,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Daloy ng Paglilipat
+### Daloy ng Paglipat
 
 ```typescript
 export async function transferTokens(
@@ -545,19 +545,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Pagpapatunay**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotency**: tingnan kung mayroon nang `idempotency_key` sa ledger.
-   Kung mayroon, ibalik ang naka-cache na resulta.
-3. **Transaksyon** (iisang transaksyon sa SQLite):
-   a. Kuwentahin ang balanse ng nagpadala.
-   b. Kung `balance < amount`, ihinto (kulang ang pondo).
-   c. Ipasok ang row ng pagpapadala (`from=nagpadala,`.
+1. **Patunayan** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idepotency** : suriin kung mayroon na `idempotency_key` sa ledger. Kung oo, ibalik ang naka-cache na resulta.
+3. **Transaksyon** (iisang transaksyong SQLite ): a. I-compute ang balanse ng nagpadala. b. Kung `balance < amount`, i-abort (hindi sapat ang pondo). c. Ipasok ang send row (`from=sender, to=receiver, amount`). d. Ipasok ang hanay ng pagtanggap (`from=receiver, to=sender, amount`).
+4. **Limitasyon sa rate** : suriin ang rate ng paglipat para sa nagpadala (max 10 transfers/min).
+5. **Kaganapan** : maglabas ng `token_share` gamification event para sa XP + badge evaluation.
+6. Bumalik `{ success: true, balance: newBalance }`.
 
 ### Paglilimita sa Rate
 
-- Maximum na 10 paglilipat bawat minuto para sa bawat API key.
-- Maximum na 10,000 token sa isang paglilipat.
-- Maximum na 100,000 token na inililipat bawat araw para sa bawat API key.
+- Max 10 transfer kada minuto bawat API key.
+- Max na 10,000 token sa bawat paglipat.
+- Max 100,000 token na inilipat bawat araw bawat API key.
 
 ---
 

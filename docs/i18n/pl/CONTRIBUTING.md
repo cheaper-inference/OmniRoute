@@ -13,29 +13,23 @@ i kroków uzgadniania.
 
 ---
 
-## Konfiguracja środowiska deweloperskiego
+## Konfiguracja rozwoju
 
-### Wymagania wstępne
+### Warunki wstępne
 
-- **Node.js** `>=22.22.2 <23` lub `>=24.0.0 <27` (zalecana wersja: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` lub `>=24.0.0 <27` (zalecane: 24 LTS)
+- **npm** 10 +
 
-> **Windows z Node 24:** użyj bieżącej poprawkowej wersji 24 LTS (co najmniej 24.20.0).
-> Wcześniejsze wersje mogą przerwać działanie po pomyślnym przejściu testów, gdy `--test-force-exit` zamyka
-> proces. [Poprawka Windows w bibliotece libuv](https://github.com/nodejs/node/pull/61999) dla Node.js
-> rozwiązuje ten błąd środowiska uruchomieniowego; pozostaw włączone asercje testów i kontrole wyjścia runnera.
+> **Windows z węzłem 24:** użyj aktualnej wersji 24 łatek LTS (co najmniej 24.20.0). Wcześniejsze wydania mogą zostać przerwane po pomyślnych testach, gdy `--test-force-exit` zamknie proces. [Poprawka Windows libuv](https://github.com/nodejs/node/pull/61999) Node rozwiązuje tę awarię środowiska wykonawczego; pozostaw włączone potwierdzenia testów i kontrole wyjścia biegacza.
 
-> **Użytkownicy npm v11+ (Node 24+):** Po wykonaniu `npm install` sprawdź, czy moduły natywne zostały zainstalowane:
-> `node -e "require('better-sqlite3')"`. Jeśli polecenie zakończy się błędem `MODULE_NOT_FOUND`,
-> uruchom `npm approve-scripts better-sqlite3 && npm install`. Zobacz
-> [Rozwiązywanie problemów](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Użytkownicy npm v11 + (węzeł 24 +):** Po `npm install` sprawdź, czy zainstalowano moduły natywne: `node -e "require('better-sqlite3')"`. Jeśli nie powiedzie się z `MODULE_NOT_FOUND`, uruchom `npm approve-scripts better-sqlite3 && npm install`. Zobacz [Rozwiązywanie problemów](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klonowanie i instalacja
+### Sklonuj i zainstaluj
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -43,91 +37,83 @@ npm install
 ### Zmienne środowiskowe
 
 ```bash
-# Utwórz plik .env na podstawie szablonu
+# Create your .env from the template
 cp .env.example .env
 
-# Wygeneruj wymagane sekrety
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Najważniejsze zmienne w środowisku deweloperskim:
+Kluczowe zmienne dla rozwoju:
 
-| Zmienna                | Wartość domyślna w środowisku deweloperskim | Opis                           |
-| ---------------------- | ------------------------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                                     | Port serwera                   |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`                    | Bazowy URL frontendu           |
-| `JWT_SECRET`           | (wygeneruj powyżej)                         | Sekret podpisywania JWT        |
-| `INITIAL_PASSWORD`     | `CHANGEME`                                  | Hasło przy pierwszym logowaniu |
-| `APP_LOG_LEVEL`        | `info`                                      | Poziom szczegółowości logów    |
+| Zmienny                | Domyślne rozwiązanie rozwojowe | Opis                            |
+| ---------------------- | ------------------------------ | ------------------------------- |
+| `PORT`                 | `20128`                        | Port serwera                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`       | Baza URL dla frontendu          |
+| `JWT_SECRET`           | (wygeneruj powyżej)            | tajemnica podpisania JWT        |
+| `INITIAL_PASSWORD`     | `CHANGEME`                     | Hasło pierwszego logowania      |
+| `APP_LOG_LEVEL`        | `info`                         | Poziom szczegółowości dziennika |
 
 ### Ustawienia panelu
 
-Panel udostępnia przełączniki interfejsu użytkownika dla funkcji, które można również konfigurować za pomocą zmiennych środowiskowych:
+Pulpit nawigacyjny udostępnia przełączniki UI dla funkcji, które można również skonfigurować za pomocą zmiennych środowiskowych:
 
-| Lokalizacja ustawienia    | Przełącznik               | Opis                              |
-| ------------------------- | ------------------------- | --------------------------------- |
-| Ustawienia → Zaawansowane | Tryb debugowania          | Włącz debugowe logi żądań (UI)    |
-| Ustawienia → Ogólne       | Widoczność paska bocznego | Pokaż/ukryj sekcje paska bocznego |
+| Ustawianie lokalizacji    | Dźwignia kolankowa        | Opis                                   |
+| ------------------------- | ------------------------- | -------------------------------------- |
+| Ustawienia → Zaawansowane | Tryb debugowania          | Włącz dzienniki żądań debugowania (UI) |
+| Ustawienia → Ogólne       | Widoczność paska bocznego | sekcje paska bocznego Show/hide        |
 
-Te ustawienia są przechowywane w bazie danych i zachowują się po ponownym uruchomieniu, zastępując wartości domyślne zmiennych środowiskowych, jeśli zostały ustawione.
+Te ustawienia są przechowywane w bazie danych i zachowują się po ponownym uruchomieniu, zastępując wartości domyślne env var, gdy są ustawione.
 
-### Uruchamianie lokalne
+### Działa lokalnie
 
 ```bash
-# Tryb deweloperski (automatyczne przeładowywanie)
+# Development mode (hot reload)
 npm run dev
 
-# Kompilacja produkcyjna
+# Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Szybka kompilacja tylko backendu/API dla zmian wprowadzanych przez współtwórców
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Kompilacja wydania (czysta kompilacja + znacznik HEAD — wymagane przed wdrożeniem)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Typowa konfiguracja portu
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Kompilacja dla współtwórców wykonuje wyłącznie walidację kompilacji: nie składa dystrybucji standalone
-ani nie buduje opcjonalnych natywnych zasobów pakietowania. Użyj standardowej kompilacji produkcyjnej,
-jeśli chcesz zweryfikować pakiet przeznaczony do wdrożenia.
+Kompilacja współautora sprawdza tylko kompilację: nie składa samodzielnej dystrybucji ani nie tworzy opcjonalnych zasobów pakietu natywnego. Użyj zwykłej kompilacji produkcyjnej, jeśli chcesz sprawdzić poprawność pakietu, który można wysłać.
 
-### Układ danych wyjściowych kompilacji
+### Zbuduj układ wyjściowy
 
-| Katalog   | Zawartość                                                                                     | Śledzony |
-| --------- | --------------------------------------------------------------------------------------------- | -------- |
-| `src/`    | Kod źródłowy aplikacji (TypeScript / TSX)                                                     | Tak      |
-| `.build/` | Pliki pośrednie — dane wyjściowe `next build` (ignorowane przez git, `distDir = .build/next`) | Nie      |
-| `dist/`   | Pakiet przeznaczony do wdrożenia — składany przez `assembleStandalone` (ignorowany przez git) | Nie      |
+| Informator | Zawartość                                                                | Śledzone |
+| ---------- | ------------------------------------------------------------------------ | -------- |
+| `src/`     | Źródło aplikacji (TypeScript / TSX)                                      | Tak      |
+| `.build/`  | Półprodukty — `next build` wyjście (gitignored, `distDir = .build/next`) | NIE      |
+| `dist/`    | Pakiet do wysyłki — zmontowany przez `assembleStandalone` (gitignored)   | NIE      |
 
-Potok kompilacji składa się z jednego przebiegu:
+Potok kompilacji to pojedynczy przebieg:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (dane wyjściowe Next.js)
-  └─ assembleStandalone()                 (kopiuje standalone + static + public + zasoby natywne)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` dodatkowo najpierw czyści oba katalogi i zapisuje
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) jako znacznik integralności wdrożenia.
+`npm run build:release` dodatkowo najpierw czyści oba katalogi i zapisuje `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) jako wskaźnik integralności wdrażania.
 
-`npm run build:contributor` używa profilu kompilacji tylko backendu. Tymczasowo zastępuje pliki interfejsu
-panelu podczas kompilacji, zachowuje procedury obsługi tras API i przywraca oryginalne pliki
-po zakończeniu kompilacji. Użyj `npm run build` w przypadku zmian wpływających na interfejs panelu
-lub pełnej walidacji wydania; profil dla współtwórców nie zastępuje kompilacji wydania.
+`npm run build:contributor` używa profilu kompilacji przeznaczonego wyłącznie do zaplecza. Tymczasowo blokuje pliki UI panelu kontrolnego podczas budowania, zachowuje procedury obsługi tras API i przywraca oryginalne pliki po kompilacji. Użyj `npm run build` do zmian wpływających na pulpit nawigacyjny UI lub do sprawdzenia pełnej wersji; profil współautora nie zastępuje kompilacji wydania.
 
-> **Uwaga dotycząca wdrożenia na VPS:** zdalny katalog obrazów `/usr/lib/node_modules/omniroute/app/`
-> pozostaje bez zmian. Narzędzia wdrożeniowe rsyncują do niego zawartość `dist/`.
-> Zmieniono tylko ścieżkę danych wyjściowych kompilacji w repozytorium (`app/` → `dist/`).
+> **VPS wdrożyć notatkę:** zdalny katalog obrazów `/usr/lib/node_modules/omniroute/app/` pozostaje niezmieniony. Umiejętności wdrażania rsynchronizują z nim zawartość `dist/`. Przesunięto tylko ścieżkę wyjściową kompilacji w repo (`app/` → `dist/`).
 
-Domyślne adresy URL:
+Domyślne URLs:
 
-- **Panel**: `http://localhost:20128/dashboard`
+- **Panel** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -436,8 +422,8 @@ Następnie użyj umiejętności `/deploy-vps-*-cc`, które synchronizują katalo
 
 ## Uzyskiwanie pomocy
 
-- **Architektura**: Zobacz [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Dokumentacja API**: Zobacz [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Dokumentacja bezpieczeństwa**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Dokumentacja operacyjna**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Zgłoszenia**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Architektura** : Patrz [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Odniesienie** : Patrz [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Dokumenty bezpieczeństwa** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Dokumenty operacyjne** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Kwestie** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

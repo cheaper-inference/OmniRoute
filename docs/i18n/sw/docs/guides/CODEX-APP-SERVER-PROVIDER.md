@@ -21,25 +21,21 @@ akaunti**.
 ## 1. Usanifu
 
 ```
-┌─ Programu ya OmniRoute ──────────┐        ┌─ Huduma saidizi ya codex-app-server ┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ tokeni ya uwezo)             │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  hujidhibitia OpenAI OAuth          │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, kujisasisha)   │
-        │ hushiriki (volumu za compose)      └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → tokeni ya uwezo wa WS (zote mbili huiunganisha)
-  codex-appserver-home    → ~/.codex (auth.json huandikwa na dashibodi,
-                             na kusomwa na codex app-server ya huduma saidizi)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Huduma saidizi husikiliza **pekee** kwenye mtandao wa ndani wa compose
-  (`ws://codex-app-server:1456`) nyuma ya tokeni ya uwezo. **Haichapishwi kamwe**
-  kwa seva mwenyeji au intaneti.
-- Codex CLI imejumuishwa ndani ya `omniroute:base`, kwa hivyo hakuna haja ya
-  kusakinisha codex kwenye seva mwenyeji au mashine ya mtumiaji unapoendesha
-  huduma saidizi.
+- Gari la pembeni linasikiliza** pekee** kwenye mtandao wa ndani wa kutunga (`ws://codex-app-server:1456`) nyuma ya tokeni ya uwezo. Ni** kamwe** iliyochapishwa kwa mwenyeji au mtandao.
+- Kando ya gari hutumia `omniroute:cli-no-docker`, iliyojengwa kutoka kwa lengo la `runner-cli-no-docker`, ambalo linajumuisha Codex CLI.
 
 ## 2. Iwashe
 

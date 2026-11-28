@@ -4,13 +4,7 @@
 
 ---
 
-> **مصدر الحقيقة:** `open-sse/utils/errorSanitization.ts`،
-> و`open-sse/utils/errorPathRedaction.ts`، وأدوات البناء العامة في `open-sse/utils/error.ts`
-> **الاختبارات:** `tests/unit/error-message-sanitization.test.ts`،
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **آخر تحديث:** 2026-09-02 — v3.8.51
-> **الجمهور المستهدف:** أي مهندس يتعامل مع استجابات الأخطاء (مسارات HTTP، وتدفقات SSE، والمنفّذات، ومعالجات MCP).
-> **الحالة:** **إلزامي** لكل مسار برمجي يعيد رسالة خطأ إلى العميل.
+> **مصدر الحقيقة:** `open-sse/utils/errorSanitization.ts` و `open-sse/utils/errorPathRedaction.ts` والبنائين العامين في `open-sse/utils/error.ts`** الاختبارات:** `tests/unit/error-message-sanitization.test.ts`، `tests/unit/error-public-boundaries-hardening.test.ts`** جمهور:** أي مهندس يلمس استجابات الأخطاء (مسارات HTTP ، تدفقات SSE ، المنفذين، معالجات MCP ).** حالة:****MANDATORY** لكل مسار تعليمات برمجية يُرجع رسالة خطأ إلى العميل.
 
 ## سبب وجود هذا
 

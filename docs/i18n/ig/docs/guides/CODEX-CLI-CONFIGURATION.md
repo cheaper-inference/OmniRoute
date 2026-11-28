@@ -411,7 +411,7 @@ region  = "us-east-1"
 
 ---
 
-## Sava ọtụtụ
+## Ọtụtụ sava
 
 ```toml
 [model_providers.omniroute-main]
@@ -471,107 +471,107 @@ N'ime session mmekọrịta:
 
 ---
 
-## Ọrụ ndị na-ewe ogologo oge
+## Ọrụ na-adịte aka
 
-Ndabara OmniRoute abụọ nwere ike imebi session Codex CLI na-ewe ọtụtụ awa n'enweghị ọkwa. Ọ dịghị nke ọ bụla n'ime ha bụ ntọala Codex CLI — ha abụọ dị n'akụkụ OmniRoute. Ndị ọrụ na-ebufe nhazi site na proxy upstream ndị na-ejikọ account n'otu ebe ma gbanyụọ nkwụsị n'ihi ịnọ nkịtị na-ezutekarị ha abụọ, wee kwubie na OmniRoute “enweghị ike idobe session ogologo oge.”
+Ihe ndabara OmniRoute abụọ nwere ike mebie nnọkọ Codex CLI ọtụtụ awa. Ọ bụghịkwa Codex CLI ntọala — ha abụọ bi n'akụkụ OmniRoute. Ndị ọrụ na-akwaga nhazi site na proxies dị elu nke na-atụnye akaụntụ ma gbanyụọ nkwụsị ọrụ na-adakarị ma kwubie OmniRoute "enweghị ike ịkwado ogologo oge."
 
-| Mgbaàmà                                                                              | Ihe nwere ike ịkpata ya                                                      | Ihe njikwa               |
-| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- | ------------------------ |
-| Session na-agbanwe account mgbe niile / a na-atụfu ịdịgide prompt-cache n'etiti turn | TTL nke session affinity bụ `0` (agbanyụrụ)                                  | `sessionAffinityTtlMs`   |
-| Njikọ na-anwụ n'etiti reasoning n'enweghị prompt a na-egosi client                   | Stream idle watchdog malitere mgbe nkeji 10 gachara n'enweghị chunk upstream | `STREAM_IDLE_TIMEOUT_MS` |
+| Mgbaàmà                                                                        | O yikarịrị ka ọ kpatara ya                                                          | Mkpọchi                  |
+| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- | ------------------------ |
+| Oge na-aga n'ihu na-agbanwe akaụntụ / cache ozugbo na-efunahụ n'etiti ntụgharị | Affinity TTL bụ `0` (nwere nkwarụ)                                                  | `sessionAffinityTtlMs`   |
+| Njikọ na-anwụ n'etiti echiche na-enweghị ọsọ ọsọ na-eche ndị ahịa ihu          | Stream nche nche na-adịghị arụ ọrụ gbara ka nkeji iri gachara na-enweghị mkpụkọ elu | `STREAM_IDLE_TIMEOUT_MS` |
 
-Mkparịta ụka ndị metụtara ya: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ọrụ ogologo na-akwụsị), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (ihe mere affinity ji bụrụ agbanyụrụ na ndabara). Nsuso: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Mkparịta ụka ndị emetụtara: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ogologo ọrụ na-adaba), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) ( gịnị kpatara mmekọ na-apụ apụ). Ndepụta: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Session affinity — jikọta otu mkparịta ụka na otu account
+### 1. Oge mmekọ — pinye otu mkparịta ụka n'otu akaụntụ
 
-**Ndabara:** `sessionAffinityTtlMs = 0` (agbanyụrụ).
+**Ebube:** `sessionAffinityTtlMs = 0` (nkwarụ).
 
-**Ebe a ga-etinye ya**
+**Ebe ịtọ ya**
 
-- Dashboard → **Settings → Routing** → **Session affinity** → **Affinity TTL (seconds)** (`ComboDefaultsTab`)
-- Ma ọ bụ jiri PATCH hazie settings site na `sessionAffinityTtlMs` n'ime **milliseconds** (oke Zod `0`–`86_400_000`, ya bụ, ruo awa 24)
+- Dashboard →** Ntọala → Routing** →** Mmekọrịta nnọkọ** →** Affinity TTL (sekọnd)** (`ComboDefaultsTab`)
+- Ma ọ bụ ntọala PATCH nwere `sessionAffinityTtlMs` in** millisekọnd** (Zod nso `0`–`86_400_000`, ntụgharị ruo awa 24)
 
-> A gbanwere aha ya na #7274 site na `codexSessionAffinityTtlMs` nke bụ naanị maka Codex. A ka na-anabata key ochie ahụ dịka alias a na-agụ naanị; nhazi ọhụrụ kwesịrị iji `sessionAffinityTtlMs`. Ugbu a, affinity na-emetụta provider **ọ bụla** ozugbo TTL karịrị `0`, ọ bụghị naanị Codex — lee [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Session affinity.
+> A kpọgharịrị aha ya na #7274 site na Codex-naanị `codexSessionAffinityTtlMs`. A ka na-anabata igodo ihe nketa ka ọ bụrụ utu aha-agụ naanị; nhazi ọhụrụ kwesịrị iji `sessionAffinityTtlMs`. Mmekọrịta ugbu a na-emetụta** nke ọ bụla** onye na-eweta ozugbo TTL dị n'elu `0`, ọ bụghị naanị Codex — hụ [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Mmekọrịta Oge.
 
-**Ihe na-emebi mgbe ọ nọgidere na 0**
+**Kedu ihe na-agbaji ma ọ nọrọ na 0**
 
-A na-eme routing nke turn ọ bụla n'ime mkparịta ụka Codex nwere ọtụtụ turn n'onwe ya site na combo strategy na-arụ ọrụ, ọ nwekwara ike ịbanye na **account dị iche n'oge turn ọ bụla**. Nke ahụ na-emebi ịdịgide session / prompt-cache upstream. OmniRoute na-enyocha naanị header session Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) na field body dịka `prompt_cache_key` / `session_id` mgbe TTL karịrị `0` (`extractSessionAffinityKey` n'ime `src/sse/services/auth.ts`).
+Ntụgharị ọ bụla nke mkparịta ụka Codex nwere ọtụtụ ntụgharị na-emeri onwe ya site na atụmatụ combo na-arụ ọrụ ma nwee ike ịdaba na a** akaụntụ dị iche iche kwa ntụgharị** . Nke ahụ na-agbaji nnọkọ elu / cache ozugbo. OmniRoute na-enyocha Codex nnọkọ nkụnye eji isi mee (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) na mpaghara ahụ dị ka `prompt_cache_key` / `session_id` mgbe TTL karịrị `0` (`extractSessionAffinityKey` na `src/sse/services/auth.ts`).
 
-**Ihe akwadoro maka otu ọrụ na-ewe ọtụtụ awa**
+**Akwadoro maka otu ọrụ ọtụtụ awa**
 
-Tọọ TTL ka ọ dị **elu karịa ogologo oge wall-clock a tụrụ anya na ọrụ ahụ ga-ewe** (oke kachasị na UI bụ **sekọnd 86400** = awa 24):
+Tọọ TTL** n'elu ogologo elekere mgbidi a na-atụ anya nke ọrụ ahụ** (UI max bụ** 86400 sekọnd** = awa 24):
 
-| Ogologo oge ọrụ a tụrụ anya | Affinity TTL (UI, sekọnd) | `sessionAffinityTtlMs` |
-| --------------------------- | ------------------------- | ---------------------- |
-| Awa ole na ole              | `14400` (4h)              | `14400000`             |
-| Abalị dum / ~12h            | `43200` (12h)             | `43200000`             |
-| Otu ụbọchị zuru ezu         | `86400` (24h, kacha elu)  | `86400000`             |
+| Ogologo ọrụ a tụrụ anya ya | Affinity TTL (UI, sekọnd) | `sessionAffinityTtlMs` |
+| -------------------------- | ------------------------- | ---------------------- |
+| Awa ole na ole             | `14400` (4h)              | `14400000`             |
+| N'abalị / ~ 12h            | `43200` (12h)             | `43200000`             |
+| Ụbọchị zuru ezu            | `86400` (24h, kacha)      | `86400000`             |
 
-Ịhọrọ ịgbanye ya bụ mkpebi e mere ụma: ịgbanyụ affinity na-akwado load-balancing n'etiti account; ịgbanye ya na-akwado ịdịgide maka otu session agent ogologo oge. Nduzi a **anaghị** agbanwe ndabara — ndị operator na-eme ọrụ Codex ogologo oge ga-ahọrọ ịgbanye ya.
+Nbanye bụ ụma: imebi mmekọrịta na-akwado ibu-nhazi n'ofe akaụntụ; na-enyere ya aka ịga n'ihu maka otu nnọkọ ogologo oge. Ntuziaka a na-eme** ọ bụghị** gbanwee ndị na-arụ ọrụ — ndabara na-arụ ogologo ọrụ Codex ga-abanyerịrị.
 
-### 2. Oge njedebe stream mgbe ọ nọ nkịtị — akwụsịla turn reasoning ndị dị jụụ
+### 2. iyi na-abaghị uru oge nkwụsị — egbula jụụ echiche tụgharịa
 
-**Ndabara:** `STREAM_IDLE_TIMEOUT_MS = 600000` (nkeji 10). Ọ na-eketa site na `REQUEST_TIMEOUT_MS` mgbe a na-edoghị ya; baseline a na-ekekọrịta bụkwa 600000. Lee [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Oge njedebe.
+**Ebube:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 nkeji). Ọ na-eketa site na `REQUEST_TIMEOUT_MS` mgbe edobereghị ya; ntọala nkekọrịtara bụkwa 600000. Lee [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**Ihe na-emebi na ndabara**
+**Kedu ihe na-agbaji na ndabara**
 
-Ntugharị echiche / ngwá ọrụ Codex nke gbara nkịtị ihe karịrị nkeji 10 na-enweghị **ezigbo iberibe data si upstream** ga-emechi n’ike site na SSE idle watchdog (`open-sse/utils/stream.ts`). Onye ahịa na-ahụkarị naanị njikọ dara na-enweghị ozi ọ bụla — nke dabara na “kwụsịrị n’onwe ya na-enweghị ọkwa ọ bụla.”
+Ntụgharị echiche Codex / ngwa ọrụ na-agbachi nkịtị ihe karịrị nkeji iri** ọ dịghị ezigbo upstream chunk** bụ ike-emechi site na SSE na-adịghị arụ ọrụ nchedog (`open-sse/utils/stream.ts`). Onye ahịa na-ahụkarị njikọ efu dobe — dakọtara "kwụsị na-akpaghị aka na-enweghị ọkwa ọ bụla."
 
-Nkọwa dị oke mkpa: SSE **heartbeat** nke OmniRoute mepụtara anaghị eme ka elekere idle malitegharịa. Ọ bụ naanị ezigbo iberibe body si upstream na-emelite `lastChunkTime`. N’anya watchdog ahụ, model dị jụụ nke ka “na-eche echiche” yiri nnọọ upstream kwụsịrị ịzaghachi.
+Nkọwa dị mkpa: OmniRoute's synthetic SSE** nkụda obi anaghị atọgharị** elekere na-abaghị uru. Naanị ezigbo mkpọ anụ ahụ na-emelite `lastChunkTime`. Ụdị dị jụụ nke ka na-eche echiche na-adị ka nke a kwụsịrị n'elu elu site n'echiche onye nche.
 
-Oge enweghị ọrụ body nke Undici metụtara nke a: `FETCH_BODY_TIMEOUT_MS` (ọ na-eji otu ntọala mbụ nke nkeji 10; `0` na-agbanyụ ya). Maka streaming, `FETCH_TIMEOUT_MS` na-emetụta naanị nhazi njikọ / headers mbụ — ozugbo stream malitere ịrụ ọrụ, `STREAM_IDLE_TIMEOUT_MS` na `FETCH_BODY_TIMEOUT_MS` na-achịkwa nkwụsị.
+Undici arụghị ọrụ emetụtara: `FETCH_BODY_TIMEOUT_MS` (na-adabakwa n'otu usoro nkeji nkeji iri ahụ; `0` na-ewepụ ya). Maka nkwanye ugwu, `FETCH_TIMEOUT_MS` na-ekpuchi naanị ntọala njikọ / isi nke mbụ — ozugbo iyi ahụ na-arụ ọrụ, `STREAM_IDLE_TIMEOUT_MS` na `FETCH_BODY_TIMEOUT_MS` na-achịkwa ụlọ ahịa.
 
-**Ihe akwadoro maka otu task na-ewe ọtụtụ awa**
+**Akwadoro maka otu ọrụ ọtụtụ awa**
 
-N’ime environment nke process OmniRoute (`.env` / compose / systemd):
+Na gburugburu usoro OmniRoute (`.env` / compose / systemd):
 
 ```bash
-# Gbanyụọ oke nkwụsị n'ihi stream idle na body inactivity maka ntụgharị echiche dị ogologo
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Ma ọ bụ bulie ha karịa oge ịgbachi nkịtị kachasị ogologo ị na-atụ anya ya (ụkpụrụ ndị a bụ milliseconds):
+Ma ọ bụ bulite ha n'elu oghere dị jụụ kachasị ogologo ị tụrụ anya (ụkpụrụ bụ milliseconds):
 
 ```bash
-# Ọmụmaatụ: kwe ka ịgbachi nkịtị ruo awa 2 n'etiti iberibe data si upstream
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Malitegharịa OmniRoute mgbe ị gbanwechara env vars ndị a.
+Malitegharịa OmniRoute mgbe ịgbanwere env vars ndị a.
 
-### Usoro doro anya — task Codex na-ewe ọtụtụ awa
+### Concrete uzommeputa — multi-hour Codex ọrụ
 
-1. **Kpọgide account ahụ:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12h) ma ọ bụ `86400` (24h kachasị).
-2. **Bulie / gbanyụọ oke idle** n’ime environment OmniRoute:
+1. **Tinye akaụntụ ahụ:** Dashboard → Settings → Routing → Oge mmekọ → Affinity TTL = `43200` (12h) ma ọ bụ `86400` (24h max).
+2. **Welie/ gbanyụọ mpụ ndị na-abaghị uru** na gburugburu OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Debe `config.toml` Codex a na-ejikarị (`wire_api = "responses"`, `base_url` ziri ezi, `OMNIROUTE_API_KEY`) — enweghị nhazi affinity/idle n’akụkụ Codex maka omume abụọ a.
-4. Malitegharịa OmniRoute, wee malite task Codex ahụ dị ogologo.
+3. Debe Codex `config.toml` (`wire_api = "responses"`, ziri ezi `base_url`, `OMNIROUTE_API_KEY`) — enweghị Codex-akụkụ affinity/idle knobs dị maka omume abụọ a.
+4. Malitegharịa OmniRoute, wee malite ogologo ọrụ Codex.
 
-### Mkpebi maka ndabara (#7287)
+### Mkpebi ezighi ezi (#7287)
 
-| Nhazi                    | Ndabara e wepụtara | Gbanwee ya na ntuziaka a?                                                                                     |
-| ------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (agbanyụrụ)    | **Mba** — ọ ka bụ ihe a na-ahọrọ ịgbanye (load-balancing vs continuity; lee Discussion #5718)                 |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)  | **Mba** — ọ ka bụ nkeji 10 maka traffic izugbe; ndị na-ahụ maka Codex ogologo oge na-ebuli ma ọ bụ gbanyụọ ya |
+| Mkpọchi                  | Ndabara ụgbọ mmiri | Gbanwee na ntuziaka a?                                                                               |
+| ------------------------ | ------------------ | ---------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (apụ)          | **Mba** — na-anọgide na-nbanye (load-balance vs continuity; lee Mkparịta ụka #5718)                  |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)  | **Mba** — na-anọ nkeji iri maka okporo ụzọ izugbe; ndị ọrụ Codex ogologo na-ebuli ma ọ bụ gbanyụọ ya |
 
-Ịgbanwe nke ọ bụla n’ime ndabara ndị a n’ụwa niile ga-agbanwe omume maka onye ahịa ọ bụla nke instance ahụ, ọ bụghị naanị Codex. Detuo nhazi ndị ahụ n’akwụkwọ; hapụ ndabara ndị ahụ otu ha dị ruo mgbe mkpebi doro anya sitere n’aka operator kwuru ihe ọzọ.
+Ịtụgharị ndabara n'ụwa niile ga-agbanwe omume maka onye ahịa ọ bụla nke ihe atụ, ọ bụghị naanị Codex. Detuo isi ihe; Hapụ ndị ndabara naanị ruo mgbe mkpebi onye ọrụ doro anya kwuru ihe ọzọ.
 
-### Ịchọpụta nkwụsị idle
+### Na-achọpụta mbepụ na-abaghị uru
 
-Mgbe idle watchdog rụrụ ọrụ, OmniRoute na-edekọ ahịrị yiri nke a:
+Mgbe onye nche na-abaghị uru gbara ọkụ, OmniRoute na-edekọ ahịrị dị ka:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Jiri grep chọọ `Idle timeout: no data from` (ma ọ bụ code `stream_idle_timeout` / aha error `StreamIdleTimeoutError`). Akụkụ provider ahụ bụ ihe ọ bụla OmniRoute jiri maka request ahụ (`codex`, id provider ọzọ, ma ọ bụ `provider` ma ọ bụrụ na amaghị ya) — ọ bụghị mgbe niile ka ọ bụ kpọmkwem eriri `codex`.
+Grep maka `Idle timeout: no data from` (ma ọ bụ koodu `stream_idle_timeout` / aha njehie `StreamIdleTimeoutError`). Akụkụ ndị na-eweta bụ OmniRoute ọ bụla ejiri mee ihe maka arịrịọ ahụ (`codex`, id onye na-eweta ọrụ ọzọ, ma ọ bụ `provider` ma ọ bụrụ na amabeghị) — ọ bụghị mgbe niile ka ọ bụ eriri nkịtị `codex`.
 
 ---
 

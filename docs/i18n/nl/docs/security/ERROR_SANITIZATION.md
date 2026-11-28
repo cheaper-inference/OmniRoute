@@ -4,13 +4,7 @@
 
 ---
 
-> **Bron van waarheid:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` en de openbare builders in `open-sse/utils/error.ts`
-> **Tests:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Laatst bijgewerkt:** 2026-09-02 — v3.8.51
-> **Doelgroep:** Elke engineer die werkt aan foutresponses (HTTP-routes, SSE-streams, executors, MCP-handlers).
-> **Status:** **VERPLICHT** voor elk codepad dat een foutmelding aan een client retourneert.
+> **Bron van waarheid:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` en de publieke bouwers in `open-sse/utils/error.ts`** Testen:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Publiek:** Elke ingenieur die foutreacties aanraakt (HTTP routes, SSE streams, uitvoerders, MCP handlers).** Status:****MANDATORY** voor elk codepad dat een foutmelding naar een client retourneert.
 
 ## Waarom dit bestaat
 

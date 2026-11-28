@@ -269,114 +269,114 @@ Proxy registry သည် **host+port ဖြင့် upsert လုပ်ခြ�
 
 ---
 
-## 1proxy အခမဲ့ Proxy စျေးကွက်
+## 1proxy အခမဲ့ Proxy Marketplace
 
-> 🆕 **[@oyi77](https://github.com/oyi77) မှ ပါဝင်ပံ့ပိုးထားသည်** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** [@oyi77](https://github.com/oyi77) မှ ပံ့ပိုးပေးပါသည်။** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (ထုတ်ဝေမှု [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute သည် ကမ္ဘာတစ်ဝန်းမှ **အခမဲ့ဖြစ်ပြီး စစ်ဆေးအတည်ပြုထားသော proxy ရာပေါင်းများစွာ** ကို အသုံးပြုနိုင်ရန် **[1proxy](https://1proxy-api.aitradepulse.com)** ကွန်မြူနတီပလက်ဖောင်းနှင့် ပေါင်းစပ်ထားသည်။ ကိုယ်ပိုင် proxy အခြေခံအဆောက်အအုံမရှိသော အသုံးပြုသူများအတွက် အထူးသင့်လျော်သည်။
+OmniRoute သည် the နှင့်ပေါင်းစပ်သည်။** [1 ပရောက်စီ](https://1proxy-api.aitradepulse.com)** သုံးစွဲခွင့် ပေးဆောင်ရန် အသိုင်းအဝိုင်း ပလက်ဖောင်း** ရာနှင့်ချီသော အခမဲ့၊ တရားဝင်သော proxy များ** ကမ္ဘာတစ်ဝှမ်းမှ။ ၎င်းသည် ၎င်းတို့၏ကိုယ်ပိုင် proxy အခြေခံအဆောက်အအုံမရှိသော အသုံးပြုသူများအတွက် ပြီးပြည့်စုံသည်။
 
-### အလုပ်လုပ်ပုံ
+### ဘယ်လိုအလုပ်လုပ်လဲ။
 
 ```
-┌─────────────┐   တစ်ပြေးညီလုပ်ရန်   ┌─────────────────┐   အလှည့်ကျသုံးရန်   ┌────────────┐
-│  1proxy API │ ──────────────────▶ │  proxy_registry  │ ────────────────▶ │ Provider   │
-│  (ပြင်ပ)    │  proxy 500 အထိ      │  source=oneproxy │ အရည်အသွေးအလိုက်   │ API        │
-└─────────────┘                     └─────────────────┘                  └────────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **တစ်ပြေးညီလုပ်ခြင်း** — OmniRoute သည် 1proxy API မှ စစ်ဆေးအတည်ပြုထားသော proxy များကို ရယူသည်
-2. **သိမ်းဆည်းခြင်း** — Proxy များကို `source = 'oneproxy'` ဖြင့် တူညီသော `proxy_registry` ဇယားထဲတွင် သိမ်းဆည်းသည်
-3. **စစ်ထုတ်ခြင်း** — Protocol၊ နိုင်ငံနှင့် အရည်အသွေးရမှတ်တို့အလိုက် စစ်ထုတ်သည်
-4. **အလှည့်ကျအသုံးပြုခြင်း** — အရည်အသွေးအလိုက်၊ ကျပန်း သို့မဟုတ် အစဉ်လိုက် နည်းဗျူဟာများကို အသုံးပြုပြီး အကောင်းဆုံး proxy ကို ရွေးချယ်သည်
-5. **အလိုအလျောက် အဆင့်လျှော့ခြင်း** — မအောင်မြင်သော proxy များ၏ အရည်အသွေးရမှတ်ကို လျှော့ချပြီး သတ်မှတ်ချက်အောက်ရောက်ပါက → အသုံးမပြုနိုင်ဟု အမှတ်အသားပြုသည်
+1. **ထပ်တူကျသည်။** — OmniRoute သည် 1proxy API မှ တရားဝင်သော ပရောက်စီများကို ထုတ်ယူသည်။
+2. **စတိုး** — Proxies များကို `source = 'oneproxy'` ဖြင့် တူညီသော `proxy_registry` ဇယားတွင် သိမ်းဆည်းထားသည်။
+3. **ဇကာ** — ပရိုတိုကော၊ နိုင်ငံ၊ အရည်အသွေးရမှတ်ဖြင့် စစ်ထုတ်ပါ။
+4. **အလှည့်** — အရည်အသွေး၊ ကျပန်း သို့မဟုတ် ဆက်တိုက်နည်းဗျူဟာများကို အသုံးပြု၍ အကောင်းဆုံး proxy ကို ရွေးပါ။
+5. **အလိုအလျောက် ကျဆင်းခြင်း။** — မအောင်မြင်သော ပရောက်စီများသည် ၎င်းတို့၏ အရည်အသွေးရမှတ်များကို လျှော့ချပေးသည်။ → သတ်မှတ်ချက်အောက်တွင် မလှုပ်ရှားကြောင်း အမှတ်အသားပြုထားသည်။
 
-### Proxy များကို တစ်ပြေးညီလုပ်ခြင်း
+### Proxy များကို ထပ်တူပြုခြင်း။
 
-**Dashboard မှတစ်ဆင့်:**
+**Dashboard မှတဆင့်-**
 
-1. **Settings → 1proxy** တက်ဘ်သို့ သွားပါ
-2. **"Sync Now"** ကို နှိပ်ပါ
-3. စာရင်းအင်းများဖြစ်သည့် proxy စုစုပေါင်း၊ အသုံးပြုနိုင်သည့် အရေအတွက်၊ ပျမ်းမျှအရည်အသွေးနှင့် နိုင်ငံအလိုက်ခွဲခြမ်းချက်တို့ကို ကြည့်ရှုပါ
+1. သွားပါ။** ဆက်တင်များ → 1proxy** တက်ဘ်
+2. နှိပ်ပါ။** "ယခု စင့်ခ်လုပ်ပါ"**
+3. ကိန်းဂဏာန်းများကိုကြည့်ပါ- စုစုပေါင်း ပရောက်စီများ၊ တက်ကြွသောရေတွက်မှု၊ ပျမ်းမျှအရည်အသွေး၊ နိုင်ငံအလိုက် ပိုင်းခြားမှု
 
-**API မှတစ်ဆင့်:**
+**API မှတဆင့်**
 
 ```bash
-# တစ်ပြေးညီလုပ်ခြင်းကို စတင်ရန်
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# တုံ့ပြန်ချက်:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
-### Proxy များကို စစ်ထုတ်ခြင်း
+### Proxies စစ်ထုတ်ခြင်း။
 
 ```bash
-# Protocol အလိုက် စစ်ထုတ်ရန်
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# နိုင်ငံအလိုက် စစ်ထုတ်ရန်
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# အနိမ့်ဆုံး အရည်အသွေးရမှတ်အလိုက် စစ်ထုတ်ရန်
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# စစ်ထုတ်မှုများကို ပေါင်းစပ်ရန်
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
 ### Proxy အရည်အသွေးရမှတ်များ
 
-1proxy proxy တစ်ခုစီတွင် အောက်ပါ metadata များ ပါဝင်သည်-
+1proxy proxy တစ်ခုစီတွင် မက်တာဒေတာများ ပါရှိသည်။
 
-| အကွက်           | ဖော်ပြချက်                                                       |
-| --------------- | ---------------------------------------------------------------- |
-| `qualityScore`  | 1proxy စစ်ဆေးအတည်ပြုမှုမှ 0-100 အဆင့်သတ်မှတ်ချက်                 |
-| `latencyMs`     | တိုင်းတာထားသော ကွန်ရက်တုံ့ပြန်ကြာချိန်                           |
-| `anonymity`     | `transparent`၊ `anonymous` သို့မဟုတ် `elite`                     |
-| `googleAccess`  | Proxy သည် Google ဝန်ဆောင်မှုများကို အသုံးပြုနိုင်ခြင်း ရှိ၊ မရှိ |
-| `countryCode`   | စာလုံးနှစ်လုံးပါ ISO နိုင်ငံကုဒ်                                 |
-| `lastValidated` | နောက်ဆုံးစစ်ဆေးအတည်ပြုခဲ့သည့် အချိန်မှတ်တမ်း                     |
+| လယ်ကွင်း        | ဖော်ပြချက်                                              |
+| --------------- | ------------------------------------------------------- |
+| `qualityScore`  | 1proxy အတည်ပြုခြင်းမှ 0-100 အဆင့်သတ်မှတ်ချက်            |
+| `latencyMs`     | ကွန်ရက် တုံ့ပြန်ချိန်ကို တိုင်းတာသည်။                   |
+| `anonymity`     | `transparent`၊ `anonymous` သို့မဟုတ် `elite`            |
+| `googleAccess`  | ပရောက်စီသည် Google ဝန်ဆောင်မှုများကို ဝင်သုံးနိုင်မလား။ |
+| `countryCode`   | ISO နိုင်ငံကုဒ် စာလုံးနှစ်လုံး                          |
+| `lastValidated` | နောက်ဆုံးအတည်ပြုချက်၏အချိန်တံဆိပ်                       |
 
-အရည်အသွေးရမှတ်များကို အခြေအနေအလိုက် အလိုအလျောက် ချိန်ညှိသည်-
+အရည်အသွေးရမှတ်များကို ဒိုင်းနမစ်ဖြင့် ချိန်ညှိထားသည်-
 
-- **မအောင်မြင်သော request များ** သည် ရမှတ်ကို 10 မှတ် လျှော့ချသည်
-- **ရမှတ် ≤10 သို့ ကျဆင်းပါက** → proxy ကို `inactive` အဖြစ် အမှတ်အသားပြုသည်
-- အသုံးမပြုနိုင်သော proxy များကို အလှည့်ကျရွေးချယ်မှုမှ ဖယ်ထုတ်ထားသည်
+- **တောင်းဆိုချက်များ မအောင်မြင်ပါ။** ရမှတ် 10 မှတ်လျှော့ချပါ။
+- **ရမှတ်သည် ≤ 10 သို့ကျဆင်းသွားသည်။** → ပရောက်စီကို `inactive` အမှတ်အသားပြုထားသည်။
+- မလှုပ်ရှားနိုင်သော ပရောက်စီများကို လည်ပတ်ခြင်းမှ ဖယ်ထုတ်ထားသည်။
 
-### အလှည့်ကျအသုံးပြုမှု နည်းဗျူဟာများ
+### အလှည့်ကျနည်းဗျူဟာများ
 
 ```bash
-# အရည်အသွေးအလိုက် အလှည့်ကျအသုံးပြုရန် (အကောင်းဆုံး proxy ကို ဦးစွာသုံးမည်) — မူလသတ်မှတ်ချက်
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# ကျပန်း အလှည့်ကျအသုံးပြုရန်
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# အစဉ်လိုက်အသုံးပြုရန် (မကြာသေးမီက အနည်းဆုံး စစ်ဆေးအတည်ပြုထားသည့် proxy ကို ဦးစွာသုံးမည်)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
 ### Circuit Breaker
 
-1proxy တစ်ပြေးညီလုပ်ခြင်းတွင် အသင့်ပါဝင်သော circuit breaker တစ်ခု ရှိသည်-
+1proxy စင့်ခ်တွင် တပ်ဆင်ထားသော circuit breaker ပါရှိသည်-
 
-- **တစ်ပြေးညီလုပ်မှု 5 ကြိမ်ဆက်တိုက် မအောင်မြင်ပြီးနောက်** ထပ်မံတစ်ပြေးညီလုပ်ရန် ကြိုးပမ်းမှုများကို ပိတ်ဆို့ထားမည်
-- `resetOneproxyCircuitBreaker()` ဖြင့် ပြန်လည်သတ်မှတ်ပါ သို့မဟုတ် server ကို ပြန်လည်စတင်ပါ
-- တစ်ပြေးညီလုပ်မှု အခြေအနေကို `GET /api/settings/oneproxy?action=status` တွင် ရရှိနိုင်သည်
+- ပြီးနောက်** 5 ဆက်တိုက် ထပ်တူကျမှု မအောင်မြင်ပါ။** နောက်ထပ် ထပ်တူကူးရန် ကြိုးပမ်းမှုများကို ပိတ်ဆို့ထားသည်။
+- `resetOneproxyCircuitBreaker()` ဖြင့် ပြန်လည်သတ်မှတ်ပါ သို့မဟုတ် ဆာဗာကို ပြန်လည်စတင်ပါ။
+- စင့်ခ်လုပ်ခြင်းအခြေအနေကို `GET /api/settings/oneproxy?action=status` တွင်ရနိုင်သည်။
 
-### 1proxy Proxy များကို ရှင်းလင်းခြင်း
+### 1proxy ပရောက်စီများကို ရှင်းလင်းခြင်း။
 
 ```bash
-# 1proxy proxy တစ်ခုတည်းကို ဖျက်ရန်
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# 1proxy proxy အားလုံးကို ရှင်းလင်းရန် (ကိုယ်တိုင်ထည့်ထားသော proxy များကို မထိခိုက်ပါ)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
@@ -559,7 +559,7 @@ curl "http://localhost:20128/api/settings/oneproxy?action=status"
 
 ---
 
-## ဒေတာဘေ့စ်အစီအစဉ်
+## Database Schema
 
 ### `proxy_registry` ဇယား
 
@@ -776,47 +776,28 @@ Scope တစ်ခုတွင် proxy အများအပြားကို 
 ညီမျှစွာ ဖြန့်ဝေရန်)
 ```
 
-## သင်ကိုယ်တိုင် ထည့်သွင်းထားသော Proxy များအတွက် အလိုအလျောက် Failure Exclusion
+## သင့်ကိုယ်ပိုင် Proxies အတွက် အလိုအလျောက် ပျက်ကွက်မှုကို ဖယ်ထုတ်ခြင်း
 
-1proxy marketplace pool သည် ပျက်ကွက်နေသော proxy များကို အလိုအလျောက် အဆင့်လျှော့ချပေးပြီးဖြစ်သည် ([Proxy Quality Scores](#proxy-quality-scores) ကို ကြည့်ပါ)။ Registry ထဲသို့ **သင်ကိုယ်တိုင်** ထည့်သွင်းထားသော proxy များအတွက်မူ နောက်ခံ health scheduler (`src/lib/proxyHealth/scheduler.ts`) သည် မည်သည့်အရာကိုမျှ မဖျက်ဘဲ “အလုပ်မလုပ်တော့သော member ကို chain မှ အလိုအလျောက် ဖယ်ထုတ်ခြင်း” လုပ်ဆောင်ချက်ကို အလားတူ ပံ့ပိုးပေးသည်-
+1proxy စျေးကွက်အုပ်စုသည် မအောင်မြင်သော ပရောက်စီများကို သူ့ဘာသာသူ အလိုအလျောက် ကျဆင်းနေပြီ ( [Proxy အရည်အသွေးရမှတ်များကို](#proxy-quality-scores) ကြည့်ပါ)။ proxy အတွက်** သင်** မှတ်ပုံတင်ခြင်းသို့ ပေါင်းထည့်ထားသော၊ နောက်ခံကျန်းမာရေး အစီအစဉ်ဆွဲသူ (`src/lib/proxyHealth/scheduler.ts`) သည် မည်သည့်အရာမှ မဖျက်ဘဲ တူညီသော "သေနေသော အဖွဲ့ဝင်ကို ကွင်းဆက်မှ အလိုအလျောက် ဖယ်ထုတ်သည်" အပြုအမူကို ပံ့ပိုးပေးသည်-
 
 ```bash
-# .env — probe ၃ ကြိမ်ဆက်တိုက် မအောင်မြင်ပြီးနောက် proxy ကို ယာယီပိတ်ကာ၊
-# probe များကို ပြန်လည်တုံ့ပြန်သည်နှင့် အလိုအလျောက် ပြန်ဖွင့်ပါ။
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Multi-proxy chain ထဲတွင် ၎င်းအလုပ်လုပ်ပုံ-
+၎င်းသည် multi-proxy ကွင်းဆက်သို့ မည်ကဲ့သို့ လိုက်ဖက်သည်-
 
-1. Scheduler သည် မှတ်ပုံတင်ထားသော proxy တိုင်းကို `PROXY_HEALTH_INTERVAL_MS`
-   တိုင်းတွင် probe ပြုလုပ်သည် (ပုံသေ ၁၀ မိနစ်၊ အနည်းဆုံး ၁ မိနစ်)။
-2. **ခိုင်လုံသော** ပျက်ကွက်မှုများ `PROXY_AUTO_REMOVE_AFTER` အကြိမ်ဆက်တိုက် ဖြစ်ပွားပြီးနောက် (အမှန်တကယ်
-   ချိတ်ဆက်မှု ပျက်ကွက်ခြင်းဖြစ်ရမည် — timeout သို့မဟုတ် probe target ကိုယ်တိုင်၏ 5xx ကို မည်သည့်အခါမျှ ထည့်မတွက်ပါ၊
-   [Proxy Health Checking](#proxy-health-checking-v3816) ကို ကြည့်ပါ) proxy ၏ `status` ကို
-   `dead` ဟု သတ်မှတ်သည်။
-3. `dead` သည် pool/rotation resolution က အသုံးပြုသော alive-status filter မှ
-   ဖယ်ထုတ်သည့် status များထဲမှ တစ်ခုဖြစ်သောကြောင့် scope တစ်ခု၏ rotation (round-robin / random / sticky /
-   latency — [Rotation Strategy Decision Tree](#rotation-strategy-decision-tree) ကို ကြည့်ပါ) သည်
-   request အသစ်များထံ အဆိုပါ proxy ကို ချက်ချင်း မပေးတော့ပါ။ Pool ထဲရှိ အခြား proxy များအပေါ်
-   မည်သည့်သက်ရောက်မှုမျှ မရှိသကဲ့သို့ pool တစ်ခုလုံးက direct
-   connection သို့ တိတ်တဆိတ် fallback လုပ်သွားမည်မဟုတ်ပါ — [4-Level Proxy System](#4-level-proxy-system) ၏ fail-closed
-   guard ကို ကြည့်ပါ။
-4. Scheduler သည် `dead` proxy များကို အလားတူ interval အတိုင်း ဆက်လက်
-   probe ပြုလုပ်သည်။ နောက်တစ်ကြိမ် probe အောင်မြင်ပါက `status` ကို `active` သို့ ပြန်ပြောင်းပြီး rotation ထဲသို့ ပြန်လည်ဝင်ရောက်မည် —
-   ကိုယ်တိုင် ပြန်ထည့်ရန် မလိုအပ်ပါ။
+1. အချိန်ဇယားဆွဲသူသည် `PROXY_HEALTH_INTERVAL_MS` တိုင်းတွင် စာရင်းသွင်းထားသော ပရောက်စီတိုင်းကို စစ်ဆေးသည် (ပုံမှန် 10 မိနစ်၊ အနည်းဆုံး 1 မိနစ်)။
+2. `PROXY_AUTO_REMOVE_AFTER` ပြီးနောက်ဆက်တိုက်** ခိုင်လုံသော** ပျက်ကွက်မှုများ (အမှန်တကယ် ချိတ်ဆက်မှု ပျက်ကွက်မှု — အချိန်ကုန်သွားခြင်း သို့မဟုတ် စုံစမ်းစစ်ဆေးမှုပစ်မှတ်၏ ကိုယ်ပိုင် 5xx ကို ဘယ်သောအခါမှ မရေတွက်ပါ၊ [Proxy ကျန်းမာရေးစစ်ဆေးခြင်းကို](#proxy-health-checking-v3816) ကြည့်ပါ)၊ ပရောက်စီ၏ `status` ကို `dead` ဟု သတ်မှတ်သည်။
+3. `dead` သည် pool/rotation ကြည်လင်ပြတ်သားမှုမှ ဖယ်ထုတ်ထားသော ရှင်သန်မှုအခြေအနေ စစ်ထုတ်မှု အခြေအနေများထဲမှ တစ်ခုဖြစ်ပြီး၊ ထို့ကြောင့် နယ်ပယ်တစ်ခု၏ လှည့်ခြင်း ( round-robin / random / sticky / latency / session — ကိုကြည့်ပါ [Rotation Strategy Decision Tree](#rotation-strategy-decision-tree) ) သည် ထို proxy ကို တောင်းဆိုချက်အသစ်များထံ ချက်ချင်းလွှဲပြောင်းပေးခြင်းကို ရပ်တန့်စေသည်။ ရေကူးကန်ရှိ အခြား proxy များကို ထိခိုက်ခြင်းမရှိပါ၊ နှင့် ရေကူးကန်တစ်ခုလုံးသည် တိုက်ရိုက်ချိတ်ဆက်မှု — သို့ တိတ်တဆိတ်ပြန်ကျသွားသည့် [4-Level Proxy System](#4-level-proxy-system) fail-closed guard ကိုကြည့်ပါ။
+4. အချိန်ဇယားဆွဲသူသည် တူညီသောကြားကာလတွင် `dead` ပရောက်စီများကို ဆက်လက်စစ်ဆေးသည်။ နောက်အောင်မြင်သော probe သည် `status` `active` သို့ ပြန်ပြောင်းပြီး ၎င်းသည် rotation — ပြန်လည်ထည့်သွင်းရန်မလိုဘဲ manual re-add လုပ်ရန် မလိုအပ်ပါ။
 
-ဤလုပ်ဆောင်ချက်ကို တမင်တကာ **ကိုယ်တိုင်ဖွင့်သုံးရပြီး အချက်အလက်မပျက်စီးစေသောပုံစံ** အဖြစ် ပြုလုပ်ထားသည်။ ပုံသေအားဖြင့် scheduler သည်
-ပျက်ကွက်မှုများကို ရေတွက်ပြီး log ရေးသားရုံသာ လုပ်သည် (`decision.ts` ထဲရှိ policy C ကို ကြည့်ပါ)။ ထို့အပြင် `PROXY_AUTO_DISABLE`
-သည် row တစ်ခုကို မည်သည့်အခါမျှ မဖျက်ပါ — ယင်းကို သီးခြားဖြစ်ပြီး ပိုမိုပြင်းထန်သော
-`PROXY_AUTO_REMOVE` flag က လုပ်ဆောင်သည်။ နှစ်ခုစလုံးကို `true` ဟု သတ်မှတ်ထားပါက `PROXY_AUTO_REMOVE`
-က ဦးစားပေးမည်ဖြစ်သည် (ဖျက်ပစ်တော့မည့် proxy ကို ကြားတွင် ယာယီပိတ်ထားခြင်းသည် အကျိုးမရှိပါ)။ Variable စာရင်းအပြည့်အစုံအတွက်
-[Environment Config](../reference/ENVIRONMENT.md) အညွှန်းကို ကြည့်ပါ။
+ဒါက တမင်တကာ** ရွေးချယ်ဝင်ရောက်ပြီး အပျက်အဆီးမရှိပါ။** : အစီအစဉ်ဆွဲသူသည် ပုံမှန်အားဖြင့် ပျက်ကွက်မှုများကို ရေတွက်ပြီး မှတ်တမ်းများသာ ( `decision.ts` တွင် မူဝါဒ C ကိုကြည့်ပါ) နှင့် `PROXY_AUTO_DISABLE` သီးခြား၊ ပိုမိုပြင်းထန်သော `PROXY_AUTO_REMOVE` အလံအတွက် ဖြစ်သည့် အတန်း — ဘယ်သောအခါမှ မဖျက်ပါ။ နှစ်ခုလုံးကို `true` ဟုသတ်မှတ်ပါက `PROXY_AUTO_REMOVE` အနိုင်ရသည် (ဖျက်ပစ်မည့် proxy တစ်ခုကြားတွင် soft-disable အတွက် အသုံးမဝင်ပါ)။ ပြောင်းလဲနိုင်သောစာရင်းအပြည့်အစုံအတွက် [Environment Config](../reference/ENVIRONMENT.md) ရည်ညွှန်းချက်ကို ကြည့်ပါ။
 
 ---
 
-> 📖 **ဆက်စပ်စာရွက်စာတမ်းများ-**
+> 📖** ဆက်စပ်စာရွက်စာတမ်း-**
 >
-> - [User Guide](../guides/USER_GUIDE.md) — ယေဘုယျ setup နှင့် configuration
-> - [API Reference](../reference/API_REFERENCE.md) — API စာရွက်စာတမ်းအပြည့်အစုံ
-> - [Environment Config](../reference/ENVIRONMENT.md) — Environment variable အားလုံး
+> - [အသုံးပြုသူလမ်းညွှန်](../guides/USER_GUIDE.md) — အထွေထွေ တပ်ဆင်ခြင်းနှင့် ဖွဲ့စည်းမှု - [API အကိုးအကား](../reference/API_REFERENCE.md) — အပြည့်အစုံ API စာရွက်စာတမ်းများ - [Environment Config](../reference/ENVIRONMENT.md) — ပတ်ဝန်းကျင် ပြောင်းလဲမှုအားလုံး

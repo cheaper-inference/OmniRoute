@@ -5,29 +5,12 @@
 ---
 
 > **Chanzo cha ukweli:** `src/lib/memory/` na `src/app/api/memory/`
-> **Ilisasishwa mwisho:** 2026-06-28 — v3.8.40 (imezimwa kwa chaguo-msingi + ulandanishaji wa ukadiriaji wa int8)
 
-OmniRoute hutoa kumbukumbu endelevu ya mazungumzo inayotambulishwa kwa ufunguo wa API (na
-kwa hiari kitambulisho cha kipindi). Kumbukumbu hutolewa kiotomatiki kutoka kwenye majibu ya LLM
-kupitia ulinganishaji mwepesi wa ruwaza za regex na kuingizwa tena katika
-maombi yanayofuata kama ujumbe wa mfumo unaotangulia (au ujumbe wa kwanza wa mtumiaji kwa watoa huduma
-wanaokataa jukumu la mfumo).
+OmniRoute hutoa kumbukumbu ya mazungumzo inayoendelea iliyowekwa na kitufe cha API (na kitambulisho cha kikao cha hiari). Kumbukumbu hutolewa kiotomatiki kutoka kwa majibu ya LLM kupitia ulinganishaji wa muundo wa regex uzani mwepesi na kurudishwa katika maombi yanayofuata kama ujumbe unaoongoza wa mfumo (au ujumbe wa kwanza wa mtumiaji kwa watoa huduma wanaokataa jukumu la mfumo).
 
-> **Kumbukumbu IMEZIMWA kwa chaguo-msingi (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled` sasa
-> ni `false` (`src/lib/memory/settings.ts`). Kuwasha kumbukumbu huingiza hadi
-> `maxTokens` (~2k) za muktadha uliorejeshwa katika **kila** ombi la gumzo, ambalo
-> hutozwa — gharama isiyotarajiwa kwa usakinishaji mpya na kwa viteja vinavyodhibiti
-> muktadha wao wenyewe. Jiunge kwa uwazi chini ya **Mipangilio → Kumbukumbu** (`MemorySkillsTab`
-> huonyesha tahadhari ya gharama ya tokeni wakati kumbukumbu imewashwa).
-> Kitega kinaweza kuzuia matumizi ya kumbukumbu kwa ombi moja kwa kutumia kichwa cha ombi cha
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — tazama jedwali la vichwa vya maombi katika
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Ombi lisilotumia kumbukumbu huweka
-> `memoryOwnerId = null`, jambo linalozima **zote mbili**, uingizaji wa kumbukumbu na ujuzi, kwa
-> ombi hilo (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Kumbukumbu ni OFF kwa chaguo-msingi ( v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` sasa ni `false` (`src/lib/memory/settings.ts`). Kuwezesha kumbukumbu huingiza hadi `maxTokens` (~ 2k) ya muktadha uliorejeshwa ndani** kila** ombi la gumzo, ambalo linatozwa — gharama ya kushangaza kwa usakinishaji mpya na kwa wateja wanaodhibiti muktadha wao wenyewe. Chagua kwa uwazi chini ya** Mipangilio → Kumbukumbu** ( `MemorySkillsTab` inaonyesha wito wa onyo wa gharama ya ishara wakati kumbukumbu imewashwa). Mteja anaweza kuchagua ombi moja kutoka kwa kichwa cha ombi la `x-omniroute-no-memory` (`true`/`1`/`yes`) — kuona jedwali la kichwa cha ombi katika [API_REFERENCE.md](../reference/API_REFERENCE.md). Ombi la kutokuwa na kumbukumbu huweka `memoryOwnerId = null`, ambayo inalemaza** zote mbili** sindano ya kumbukumbu na ujuzi kwa ombi hilo (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Kumbukumbu **huwekewa upeo kwa kila ufunguo wa API**, si kwa kila mtumiaji — kila ombi lililothibitishwa
-kwa ufunguo uleule wa API hushiriki hifadhi ileile ya kumbukumbu, huku kukiwa na uwezekano wa kuweka upeo zaidi
-kwa kutumia `sessionId`.
+Kumbukumbu ni** scoped kwa ufunguo wa API** , si kwa kila mtumiaji — kila ombi lililoidhinishwa kwa ufunguo sawa API hushiriki hifadhi sawa ya kumbukumbu, kwa hiari kuongezwa kwa `sessionId`.
 
 ## Usanifu
 
@@ -337,27 +320,17 @@ Mkakati wa urejeshaji wa `MemoryConfig` ni mojawapo ya `exact`, `semantic`, au `
 na upeo ni mojawapo ya `session`, `apiKey`, au `global`. Upeo chaguo-msingi kutoka
 `getMemorySettings()` ni `apiKey`.
 
-## Utopoaji wa Taarifa (`extraction.ts`)
+## Uchimbaji wa ukweli (`extraction.ts`)
 
-Utopoaji **unategemea regex**, si LLM — huendeshwa ndani ya mchakato kwa
-`setImmediate()` ili kamwe usizuie mtiririko wa jibu:
+Uchimbaji ni** kulingana na regex** , sio — ya msingi wa LLM inafanya kazi katika mchakato na `setImmediate()` kwa hivyo haizuii mkondo wa majibu:
 
-- **Mifumo ya mapendeleo** → `MemoryType.FACTUAL`
-  (k.m. `Napendelea …`, `Ninapenda sana …`, `ninachopenda zaidi ni …`, `Nachukia …`)
-- **Mifumo ya maamuzi** → `MemoryType.EPISODIC`
-  (k.m. `Nitatumia …`, `Nilichagua …`, `Niliamua kutumia …`, `Nitapitisha …`)
-- **Mifumo ya tabia** → `MemoryType.FACTUAL`
-  (k.m. `Kwa kawaida mimi …`, `Daima mimi …`, `Mimi huwa …`)
+- **Mifumo ya upendeleo** → `MemoryType.FACTUAL` (km `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Mitindo ya maamuzi** → `MemoryType.EPISODIC` (km `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Miundo ya muundo** → `MemoryType.FACTUAL` (km `I usually …`, `I always …`, `I tend to …`)
 
-Kila ulinganifu husafishwa (`trim`, kuunganisha nafasi tupu, na kuwekewa kikomo cha herufi 500),
-huondolewa nakala ndani ya kundi kupitia `factKey(category, content)` thabiti, na
-huhifadhiwa kupitia `createMemory()` ikiwa na metadata
-`{category, extractedAt, source: "llm_response"}`. Maandishi ya ingizo yanawekewa kikomo cha
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — yanapokuwa marefu zaidi, **sehemu ya mwisho** ya maandishi
-hutumika ili maudhui ya hivi karibuni zaidi ya msaidizi yashirikishwe kila wakati.
+Kila mechi husafishwa (`trim`, whitespace-collapse, caped in 500 chars), inatolewa ndani ya bechi kupitia `factKey(category, content)` thabiti, na kuhifadhiwa kupitia `createMemory()` kwa metadata `{category, extractedAt, source: "llm_response"}`. Maandishi ya ingizo yamewekwa 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — yakiwa marefu zaidi,** mkia** ya maandishi hutumika kwa hivyo yaliyomo hivi karibuni zaidi ya msaidizi hushiriki kila wakati.
 
-`extractFactsFromText(text)` husafirishwa kwa ajili ya majaribio na hurudisha taarifa
-zilizopangwa bila kuzihifadhi.
+`extractFactsFromText(text)` inasafirishwa nje ya nchi kwa ajili ya majaribio na kurejesha ukweli uliopangwa bila kuhifadhiwa.
 
 ## Urejeshaji (`retrieval.ts`)
 
@@ -712,22 +685,22 @@ Kipimo linganishi kwenye seva ya kawaida ya x86 yenye viini 4 (maandishi yenye t
 
 ---
 
-## Mifumo ya Uchimbaji wa Taarifa (v3.8.16+)
+## Miundo ya Uchimbaji wa Ukweli (v3.8.16 +)
 
-Moduli ya `extraction.ts` (`src/lib/memory/extraction.ts`) hutumia **ulinganishaji wa mifumo ya regex** ili kuchimba taarifa zilizopangwa kutoka kwenye ujumbe wa mazungumzo. Kuelewa mifumo hii hukusaidia kuboresha ubora wa uchimbaji kwa hali yako ya matumizi.
+Moduli `extraction.ts` (`src/lib/memory/extraction.ts`) hutumia** muundo wa regex unaolingana** kutoa ukweli ulioundwa kutoka kwa ujumbe wa mazungumzo. Kuelewa ruwaza hizi hukusaidia kurekebisha ubora wa uchimbaji kwa kesi yako ya utumiaji.
 
-### Kategoria Chaguo-msingi za Mifumo
+### Aina za Muundo Chaguomsingi
 
-| Kategoria           | Mfano wa mfumo                                              | Kinachonaswa                    |
-| ------------------- | ----------------------------------------------------------- | ------------------------------- |
-| PREFERENCE_PATTERNS | `"Ninapendelea <X>"`, `"Ninapenda <X>"`, `"Ninachukia <X>"` | Mapendeleo ya mtumiaji          |
-| DECISION_PATTERNS   | `"Nitatumia <X>"`, `"Niliamua <X>"`, `"Nilichagua <X>"`     | Maamuzi ya mtumiaji (kiepisodi) |
-| PATTERN_PATTERNS    | `"Kwa kawaida <X>"`, `"Daima <X>"`, `"Kamwe <X>"`           | Mifumo endelevu ya tabia        |
+| Kategoria           | Mfano wa muundo                                             | Inakamata                      |
+| ------------------- | ----------------------------------------------------------- | ------------------------------ |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Mapendeleo ya mtumiaji         |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Maamuzi ya mtumiaji (episodic) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Mitindo ya tabia inayoendelea  |
 
-### Mifano ya Mifumo (Imerahisishwa)
+### Miundo ya Mfano (Iliyorahisishwa)
 
 ```ts
-// Kutoka src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -740,36 +713,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Kinachochimbwa
+### Kinachotolewa
 
-Mtumiaji anaposema:
+Wakati mtumiaji anasema:
 
-> "Ninapendelea TypeScript. Nitatumia Postgres kwa mradi huu. Daima nafanya commit kabla ya push. Sipendi Python."
-> Uchimbaji hutoa kumbukumbu 4:
+> "Napendelea TypeScript. Nitatumia Postgres kwa mradi huu. Mimi hujituma kila mara kabla ya kusukuma. Sipendi Chatu." Uchimbaji hutoa kumbukumbu 4:
 >
-> | Ufunguo                              | Kategoria  | Aina      | Maudhui                  |
-> | ------------------------------------ | ---------- | --------- | ------------------------ |
-> | `preference:typescript`              | mapendeleo | taarifa   | "TypeScript"             |
-> | `decision:postgres_for_this_project` | uamuzi     | kiepisodi | "Postgres kwa mradi huu" |
-> | `pattern:commit_before_pushing`      | mfumo      | taarifa   | "commit kabla ya push"   |
-> | `preference:python`                  | mapendeleo | taarifa   | "Python"                 |
+> | Ufunguo | Kitengo | Aina | Maudhui | | ------------------------------------- | ---------- | -------- | -------------------------------------------------------------------------------------------------------------- | | | `preference:typescript` ukweli | " | "TypeScript| | `decision:postgres_for_this_project` uamuzi | episodic | " | Postgres mradi huu" | | `pattern:commit_before_pushing` | muundo | ukweli | "jitoe kabla ya | kusukuma `preference:python` | " | | | "Python" |
 
-### Vikomo vya Uchimbaji
+### Mipaka ya Uchimbaji
 
-Ili kuzuia uchimbaji usiodhibitiwa, vikomo vifuatavyo hutumika:
+Ili kuzuia uchimbaji wa kukimbia, vizuizi vifuatavyo vinatumika:
 
-| Urefu wa chini wa maudhui | herufi 3 |
+| Urefu wa chini wa maudhui | 3 herufi |
 | Urefu wa juu wa maudhui | herufi 500 |
 
 ### Wakati wa Kuzima Uchimbaji
 
-Uchimbaji huendeshwa kiotomatiki wakati wowote kumbukumbu inapowezeshwa; hakuna
-kibadilishaji tofauti cha uchimbaji pekee. Ili kuuzima, zima kumbukumbu kabisa (`enabled: false`
-kupitia `PUT /api/settings/memory`). Fikiria kufanya hivyo wakati:
+Uchimbaji huendesha kiotomati wakati kumbukumbu imewezeshwa; hakuna kigeuza tofauti cha uchimbaji pekee. Ili kuizima, zima kumbukumbu kabisa (`enabled: false` kupitia `PUT /api/settings/memory`). Fikiria kufanya hivyo wakati:
 
-- Una ujazo mkubwa wa ujumbe na gharama ya uchimbaji si ndogo
-- Mazungumzo yako mengi ni ya muda mfupi (gumzo, utatuzi wa hitilafu) bila thamani ya muda mrefu
-- Tayari unanasa muktadha kupitia programu-jalizi maalum
+- Una sauti ya juu ya ujumbe na gharama ya uchimbaji sio ndogo
+- Mazungumzo yako mara nyingi ni ya muda mfupi (soga, utatuzi) bila thamani ya muda mrefu
+- Tayari unanasa muktadha kupitia programu jalizi maalum
 
 ---
 

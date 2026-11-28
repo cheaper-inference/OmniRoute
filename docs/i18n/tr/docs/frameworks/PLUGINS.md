@@ -90,16 +90,17 @@ export function register(program, ctx) {
 
 ## Keşif
 
-Eklentiler şu konumlardan keşfedilir:
+Eklentiler şuradan keşfedilir:
 
-1. `~/.omniroute/plugins/<name>/` — kullanıcıya özel yerel kurulumlar
-2. `OMNIROUTE_PLUGIN_PATH` ortam değişkeni — özel dizin
+1. `~/.omniroute/plugins/node_modules/<name>/` —, `omniroute plugin install` paketleri yerleştirdiği yer (bir npm `--prefix`, `npm -g` değil)
+2. `~/.omniroute/plugins/<name>/` — elle kopyalanan eklenti dizinleri
+3. `OMNIROUTE_PLUGIN_PATH` env var — özel dizini
 
-Her ikisi de **yalnızca CLI'a özeldir**. Sunucu tarafındaki eklenti çalışma zamanı (proxy içinde çalışan marketplace/`plugin.json` eklentileri), kendi geçersiz kılma ayarı olan `OMNIROUTE_PLUGINS_DIR` ile kendi tarayıcısını kullanır — bkz.
-[PLUGIN_MARKETPLACE.md → Eklenti dizini](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Birinin ayarlanması diğerini etkilemez.
+Sembolik bağlantılı dizinler (npm'nin `plugin install ./dir` için oluşturduğu) takip edilir.
 
-Yükleme hataları yakalanır ve uyarı olarak yazdırılır — bozuk bir eklenti CLI'ın hiçbir zaman çökmesine neden olmaz.
+Her ikisi de** Yalnızca CLI** . Sunucu tarafı eklenti çalışma zamanı (proxy içinde çalışan pazaryeri/`plugin.json` eklentileri) kendi geçersiz kılma özelliğine sahip kendi tarayıcısına sahiptir, `OMNIROUTE_PLUGINS_DIR` — bkz. [PLUGIN_MARKETPLACE.md → Eklenti dizini](./PLUGIN_MARKETPLACE.md#plugin-directory). Birinin ayarlanması diğerini etkilemez.
+
+Yükleme hataları yakalanır ve uyarı olarak yazdırılır — bozuk bir eklenti asla CLI çökertmez.
 
 ## Güvenlik
 

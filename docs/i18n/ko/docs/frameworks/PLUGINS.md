@@ -9,16 +9,16 @@
 ## 빠른 시작
 
 ```bash
-# npm에서 플러그인 설치
+# Install a plugin from npm
 omniroute plugin install stripe
 
-# 개발 중인 로컬 플러그인 설치
+# Install a local plugin in development
 omniroute plugin install ./my-plugin
 
-# 설치된 플러그인 목록 표시
+# List installed plugins
 omniroute plugin list
 
-# 새 플러그인 스캐폴딩
+# Scaffold a new plugin
 omniroute plugin scaffold myplugin
 cd omniroute-cmd-myplugin
 omniroute plugin install .
@@ -88,19 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | 확인된 기본 URL                                      |
 | `ctx.apiKey`                 | `string \| null` | 제공된 경우 API 키                                   |
 
-## 검색
+## 발견
 
-플러그인은 다음 위치에서 검색됩니다.
+플러그인은 다음에서 검색됩니다.
 
-1. `~/.omniroute/plugins/<name>/` — 사용자 로컬 설치
-2. `OMNIROUTE_PLUGIN_PATH` 환경 변수 — 사용자 지정 디렉터리
+1. `~/.omniroute/plugins/node_modules/<name>/` — 여기서 `omniroute plugin install` 패키지( `npm -g` 아닌 npm `--prefix`)를 넣습니다.
+2. `~/.omniroute/plugins/<name>/` — 직접 복사한 플러그인 디렉토리
+3. `OMNIROUTE_PLUGIN_PATH` env var — 사용자 정의 디렉토리
 
-둘 다 **CLI 전용**입니다. 서버 측 플러그인 런타임(프록시 내부에서 실행되는 marketplace/`plugin.json`
-플러그인)은 자체 오버라이드인 `OMNIROUTE_PLUGINS_DIR`을 사용하는 별도의 스캐너를 갖습니다.
-자세한 내용은 [PLUGIN_MARKETPLACE.md → 플러그인 디렉터리](./PLUGIN_MARKETPLACE.md#plugin-directory)를 참조하세요.
-한쪽을 설정해도 다른 쪽에는 영향을 주지 않습니다.
+심볼릭 링크된 디렉터리(npm이 `plugin install ./dir` 에 대해 생성하는 디렉터리)를 따릅니다.
 
-로딩 오류는 포착되어 경고로 출력됩니다. 손상된 플러그인으로 인해 CLI가 중단되는 일은 없습니다.
+둘 다** CLI 전용** . 서버 측 플러그인 런타임(프록시 내부에서 실행되는 마켓플레이스/`plugin.json` 플러그인)에는 자체 재정의가 있는 자체 스캐너가 있습니다. `OMNIROUTE_PLUGINS_DIR` — [PLUGIN_MARKETPLACE.md → 플러그인 디렉토리](./PLUGIN_MARKETPLACE.md#plugin-directory) 참조. 하나를 설정해도 다른 하나는 영향을 받지 않습니다.
+
+로딩 오류는 — 깨진 플러그인이 CLI 와 충돌하지 않는다는 경고로 포착되어 인쇄됩니다.
 
 ## 보안
 

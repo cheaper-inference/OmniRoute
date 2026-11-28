@@ -21,3 +21,5 @@ Varsayılan çapraz sağlayıcı politikası, en fazla üç sağlayıcı girişi
   - Ön ekli kimlik (`provider/model`) hiçbir zaman başka bir sağlayıcıya yönlendirilmez.
 
 Devre durumları `closed`, `open` ve `half_open`. Bir bekleme süresi sınırlı bir araştırmayı planlar; Başarılı bir prob devreyi kapatır ve başarısız bir prob onu yeniden açar.
+
+Sağlayıcı yük devretme ağ geçidinin içinde çalışır. Bkz. Bir ağ geçidi kesintisi sırasında [OmniRoute kendisine istemci davranışı açısından erişilemez olması](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable).

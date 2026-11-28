@@ -63,42 +63,31 @@ Los tres métodos requieren autenticación en el panel (`isAuthenticated`). Al r
 OmniRoute guarda el token y ejecuta de inmediato una búsqueda de prueba limitada a 1 resultado;
 si Notion devuelve un objeto de error, el token se elimina y la llamada falla con `400`.
 
-## Herramientas MCP (6)
+## herramientas MCP (6)
 
-Definidas en `open-sse/mcp-server/tools/notionTools.ts`. El token se obtiene en el momento
-de la llamada mediante `getNotionToken()`; si no hay ninguno configurado, la herramienta genera
-el error `"Notion integration token not configured. Set it in Settings > Context Sources."`
+Definido en `open-sse/mcp-server/tools/notionTools.ts`. El token se resuelve en el momento de la llamada mediante `getNotionToken()`; si no hay ninguno configurado, la herramienta arroja `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Herramienta                  | Ámbito         | Descripción                                                                                           |
-| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Busca páginas y bases de datos mediante una consulta de texto (devuelve títulos, ID y URL). Paginada. |
-| `notion_get_page`            | `read:notion`  | Obtiene el contenido y los metadatos de una página mediante su ID.                                    |
-| `notion_list_block_children` | `read:notion`  | Enumera todos los bloques secundarios de un bloque o una página (el árbol de bloques). Paginada.      |
-| `notion_query_database`      | `read:notion`  | Consulta una base de datos con `filter` + `sorts` opcionales (formato de la API de Notion). Paginada. |
-| `notion_get_database`        | `read:notion`  | Obtiene el esquema y los metadatos de una base de datos mediante su ID.                               |
-| `notion_append_blocks`       | `write:notion` | Añade bloques secundarios a un bloque o una página existentes (máximo de 100 bloques por solicitud).  |
+| Herramienta                  | Alcance        | Descripción                                                                                         |
+| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Busque páginas y bases de datos mediante consulta de texto (devuelve títulos, IDs, URLs). Paginado. |
+| `notion_get_page`            | `read:notion`  | Obtenga contenido y metadatos de una página por su ID.                                              |
+| `notion_list_block_children` | `read:notion`  | Enumera todos los bloques secundarios de un bloque o página (el árbol de bloques). Paginado.        |
+| `notion_query_database`      | `read:notion`  | Consulta una base de datos con `filter` + `sorts` opcional (formato Notion API ). Paginado.         |
+| `notion_get_database`        | `read:notion`  | Obtener el schema/metadata de una base de datos mediante ID.                                        |
+| `notion_append_blocks`       | `write:notion` | Agregue bloques secundarios a un bloque o página existente (máximo 100 bloques por solicitud).      |
 
 ### Parámetros de entrada
 
-- `notion_search`: `query` (1–500 caracteres), `pageSize` (1–100, valor predeterminado: 20),
-  `startCursor` (opcional).
-- `notion_get_page`: `pageId` (hexadecimal de 32 caracteres o UUID).
-- `notion_list_block_children`: `blockId`, `pageSize` (1–100, valor predeterminado: 50),
-  `startCursor` (opcional).
-- `notion_query_database`: `databaseId`, `filter` (opcional, formato de filtro de Notion),
-  `sorts` (array opcional), `pageSize` (1–100, valor predeterminado: 50), `startCursor` (opcional).
-- `notion_get_database`: `databaseId`.
-- `notion_append_blocks`: `blockId`, `children` (array de objetos de bloque),
-  `after` (posición opcional).
+- `notion_search` — `query` (1–500 caracteres), `pageSize` (1–100, predeterminado 20), `startCursor` (opcional).
+- `notion_get_page` — `pageId` (hexadecimal de 32 caracteres o UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, predeterminado 50), `startCursor` (opcional).
+- `notion_query_database` — `databaseId`, `filter` (opcional, formato de filtro Notion ), `sorts` (matriz opcional), `pageSize` (1–100, predeterminado 50), `startCursor` (opcional).
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`, `children` (matriz de objetos de bloque), `after` (posición opcional).
 
-### Ámbitos
+### Alcances
 
-Las herramientas de lectura requieren `read:notion` y la herramienta de escritura requiere
-`write:notion`. `withScopeEnforcement()` aplica los ámbitos en
-`open-sse/mcp-server/server.ts` únicamente cuando `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; los
-ámbitos permitidos del autor de la llamada proceden de `OMNIROUTE_MCP_SCOPES` (separados por
-comas) o del contexto de ámbitos de la clave de API autenticada. Consulta
-[MCP-SERVER.md](./MCP-SERVER.md) para conocer el modelo de ámbitos completo.
+Las herramientas de lectura requieren `read:notion` y la herramienta de escritura requiere `write:notion`. Los alcances son aplicados por `withScopeEnforcement()` en `open-sse/mcp-server/server.ts` cuando `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, y siempre para una persona que llama HTTP/SSE cuya clave API carece `manage`/`admin`; Los alcances permitidos de la persona que llama provienen de `OMNIROUTE_MCP_SCOPES` (separados por comas) o del contexto de alcance de la clave API autenticada. Consulte [MCP-SERVER.md](./MCP-SERVER.md) para ver el modelo de alcance completo.
 
 ## Endpoints
 

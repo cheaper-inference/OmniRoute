@@ -12,25 +12,19 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### المتطلبات الأساسية
 
-- **Node.js** `>=22.22.2 <23`، أو `>=24.0.0 <27` (موصى به: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` أو `>=24.0.0 <27` (موصى به: 24 LTS)
+- **npm** 10 +
 
-> **Windows مع Node 24:** استخدم إصدار التصحيح الحالي من 24 LTS (24.20.0 على الأقل).
-> يمكن للإصدارات الأقدم الإنهاء بعد نجاح الاختبارات عند إغلاق `--test-force-exit`
-> للعملية. يعالج [إصلاح Windows libuv](https://github.com/nodejs/node/pull/61999) في Node
-> هذا التعطل أثناء التشغيل؛ أبقِ تأكيدات الاختبار وفحوصات خروج المشغّل مفعّلة.
+> **Windows مع العقدة 24:** استخدم إصدار تصحيح 24 LTS الحالي (24.20.0 على الأقل). يمكن أن يتم إحباط الإصدارات السابقة بعد إجراء اختبارات ناجحة عندما يقوم `--test-force-exit` بإغلاق العملية. يعالج [إصلاح Windows libuv](https://github.com/nodejs/node/pull/61999) الخاص بالعقدة هذا العطل أثناء التشغيل؛ احتفظ بتأكيدات الاختبار وفحوصات خروج العداء ممكنة.
 
-> **مستخدمو npm v11+ (Node 24+):** بعد تنفيذ `npm install`، تحقّق من تثبيت الوحدات الأصلية:
-> `node -e "require('better-sqlite3')"`. إذا فشل الأمر مع ظهور `MODULE_NOT_FOUND`،
-> نفّذ `npm approve-scripts better-sqlite3 && npm install`. راجع
-> [استكشاف الأخطاء وإصلاحها](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **مستخدمو npm v11 + (العقدة 24 +):** بعد `npm install`، تحقق من تثبيت الوحدات الأصلية: `node -e "require('better-sqlite3')"`. إذا فشل مع `MODULE_NOT_FOUND`، قم بتشغيل `npm approve-scripts better-sqlite3 && npm install`. راجع [استكشاف الأخطاء وإصلاحها](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
-- **Git**
+- **بوابة**
 
-### الاستنساخ والتثبيت
+### استنساخ وتثبيت
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,66 +32,66 @@ npm install
 ### متغيرات البيئة
 
 ```bash
-# أنشئ ملف .env من القالب
+# Create your .env from the template
 cp .env.example .env
 
-# أنشئ الأسرار المطلوبة
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-المتغيرات الأساسية للتطوير:
+المتغيرات الرئيسية للتنمية:
 
-| المتغير                | القيمة الافتراضية للتطوير | الوصف                              |
-| ---------------------- | ------------------------- | ---------------------------------- |
-| `PORT`                 | `20128`                   | منفذ الخادم                        |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | عنوان URL الأساسي للواجهة الأمامية |
-| `JWT_SECRET`           | (أنشئه أعلاه)             | السر المستخدم لتوقيع JWT           |
-| `INITIAL_PASSWORD`     | `CHANGEME`                | كلمة مرور تسجيل الدخول الأولى      |
-| `APP_LOG_LEVEL`        | `info`                    | مستوى إسهاب السجل                  |
+| عامل                   | التنمية الافتراضية       | وصف                              |
+| ---------------------- | ------------------------ | -------------------------------- |
+| `PORT`                 | `20128`                  | منفذ الخادم                      |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | قاعدة URL للواجهة الأمامية       |
+| `JWT_SECRET`           | (أنشئ أعلاه)             | سر التوقيع JWT                   |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | كلمة المرور الأولى لتسجيل الدخول |
+| `APP_LOG_LEVEL`        | `info`                   | تسجيل مستوى الإسهاب              |
 
-### إعدادات لوحة التحكم
+### إعدادات لوحة القيادة
 
-توفر لوحة التحكم مفاتيح تبديل في واجهة المستخدم للميزات التي يمكن تهيئتها أيضًا عبر متغيرات البيئة:
+توفر لوحة المعلومات أدوات تبديل UI للميزات التي يمكن تهيئتها أيضًا عبر متغيرات البيئة:
 
-| موقع الإعداد       | مفتاح التبديل       | الوصف                                      |
-| ------------------ | ------------------- | ------------------------------------------ |
-| الإعدادات ← متقدمة | وضع التصحيح         | تمكين سجلات طلبات التصحيح (واجهة المستخدم) |
-| الإعدادات ← عامة   | ظهور الشريط الجانبي | إظهار/إخفاء أقسام الشريط الجانبي           |
+| تحديد الموقع       | تبديل               | وصف                            |
+| ------------------ | ------------------- | ------------------------------ |
+| إعدادات → المتقدمة | وضع التصحيح         | تمكين سجلات طلبات التصحيح (UI) |
+| إعدادات → عام      | رؤية الشريط الجانبي | أقسام الشريط الجانبي Show/hide |
 
-تُخزَّن هذه الإعدادات في قاعدة البيانات وتستمر عبر عمليات إعادة التشغيل، وتتجاوز القيم الافتراضية لمتغيرات البيئة عند تعيينها.
+يتم تخزين هذه الإعدادات في قاعدة البيانات وتستمر خلال عمليات إعادة التشغيل، مما يؤدي إلى تجاوز إعدادات env var الافتراضية عند ضبطها.
 
-### التشغيل محليًا
+### تشغيل محليا
 
 ```bash
-# وضع التطوير (إعادة التحميل السريع)
+# Development mode (hot reload)
 npm run dev
 
-# بناء الإنتاج
-npm run build    # next build → .build/next/ ثم assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# تجميع سريع للخلفية/واجهة API فقط لتغييرات المساهمين
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# بناء الإصدار (إعادة بناء نظيفة + sentinel لـ HEAD — مطلوب للنشر)
-npm run build:release   # rm -rf .build dist ثم build + يكتب dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# إعداد المنفذ الشائع
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ينفّذ بناء المساهمين عملية تحقق للتجميع فقط: فهو لا ينشئ توزيعًا مستقلًا أو يبني أصول التغليف الأصلية الاختيارية. استخدم بناء الإنتاج العادي عندما تحتاج إلى التحقق من الحزمة الجاهزة للشحن.
+يقوم الإصدار المساهم بإجراء التحقق من صحة الترجمة فقط: فهو لا يقوم بتجميع التوزيع المستقل أو إنشاء أصول تعبئة أصلية اختيارية. استخدم إصدار الإنتاج العادي عندما تحتاج إلى التحقق من صحة الحزمة القابلة للشحن.
 
-### بنية مخرجات البناء
+### بناء تخطيط الإخراج
 
-| الدليل    | المحتويات                                                                       | متتبَّع |
-| --------- | ------------------------------------------------------------------------------- | ------- |
-| `src/`    | مصدر التطبيق (TypeScript / TSX)                                                 | نعم     |
-| `.build/` | الملفات الوسيطة — مخرجات `next build` (متجاهلة في Git، `distDir = .build/next`) | لا      |
-| `dist/`   | الحزمة الجاهزة للشحن — يتم تجميعها بواسطة `assembleStandalone` (متجاهلة في Git) | لا      |
+| دليل      | محتويات                                                                        | تتبع |
+| --------- | ------------------------------------------------------------------------------ | ---- |
+| `src/`    | مصدر التطبيق (TypeScript / TSX)                                                | نعم  |
+| `.build/` | وسيطة إخراج — `next build` (gitignored، `distDir = .build/next`)               | لا   |
+| `dist/`   | حزمة — القابلة للشحن والتي تم تجميعها بواسطة `assembleStandalone` (gitignored) | لا   |
 
-يمر مسار البناء بمرحلة واحدة:
+خط أنابيب البناء عبارة عن ممر واحد:
 
 ```
 npm run build
@@ -106,21 +100,15 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-يعمل `npm run build:release` أيضًا على تنظيف الدليلين أولًا ويكتب
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) باعتباره مؤشرًا لسلامة النشر.
+يقوم `npm run build:release` أيضًا بتنظيف كلا الدليلين أولاً ويكتب `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) كحارس تكامل للنشر.
 
-يستخدم `npm run build:contributor` ملف تعريف البناء الخاص بالخلفية فقط. ويستبدل مؤقتًا
-ملفات واجهة لوحة التحكم بملفات بديلة أثناء البناء، ويُبقي معالجات مسارات API، ثم يستعيد الملفات الأصلية
-بعد انتهاء البناء. استخدم `npm run build` للتغييرات التي تؤثر في واجهة لوحة التحكم أو للتحقق الكامل من الإصدار؛
-فملف تعريف المساهمين ليس بديلًا عن بناء الإصدار.
+يستخدم `npm run build:contributor` ملف تعريف البناء للواجهة الخلفية فقط. يقوم مؤقتًا بإيقاف ملفات UI للوحة المعلومات أثناء الإنشاء، ويحتفظ بمعالجات توجيه API ، ويستعيد الملفات الأصلية بعد الإنشاء. استخدم `npm run build` للتغييرات التي تؤثر على لوحة المعلومات UI أو للتحقق من صحة الإصدار الكامل؛ لا يعد ملف تعريف المساهم بديلاً عن إصدار الإصدار.
 
-> **ملاحظة حول النشر على VPS:** لا يتغير دليل الصور البعيد `/usr/lib/node_modules/omniroute/app/`.
-> تعمل مهارات النشر على مزامنة محتويات `dist/` معه باستخدام rsync.
-> مسار مخرجات البناء داخل المستودع فقط هو الذي تغيّر (`app/` → `dist/`).
+> **ملاحظة نشر VPS :** لم يتغير دليل الصور البعيد `/usr/lib/node_modules/omniroute/app/`. تقوم مهارات النشر بمزامنة محتويات `dist/` فيها. تم نقل مسار إخراج البناء داخل الريبو فقط (`app/` → `dist/`).
 
-عناوين URL الافتراضية:
+URLs الافتراضية :
 
-- **لوحة التحكم**: `http://localhost:20128/dashboard`
+- **لوحة القيادة** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -429,8 +417,8 @@ docs/
 
 ## الحصول على المساعدة
 
-- **البنية المعمارية**: راجع [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **مرجع API**: راجع [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **وثائق الأمان**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md)، [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md)، [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md)، [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **وثائق العمليات**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **المشكلات**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **بنيان** : انظر [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **مرجع API** : انظر [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **مستندات الأمن** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md) ، [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md) ، [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md) ، [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **مستندات العمليات** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **مشاكل** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

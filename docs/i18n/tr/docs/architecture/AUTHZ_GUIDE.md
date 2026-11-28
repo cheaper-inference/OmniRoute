@@ -4,12 +4,11 @@
 
 ---
 
-> **Doğruluk Kaynağı:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Son Güncelleme:** 2026-09-22 — kapsam ad alanları `MCP-SERVER.md`'yi işaret ediyor
+> **Gerçeğin kaynağı:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute, her API isteğini denetleyen rota-farkındalıklı bir yetkilendirme hattına sahiptir. Sınıflandırma **deterministik** ve **kapalı-güvenli**dir — sınıflandırılamayan her şey `MANAGEMENT` olarak sonuçlanır ve bir oturum veya yönetim düzeyinde bir jeton gerektirir. Bu sayfa, rotaları sürdüren veya yeni uç noktalar tasarlayan mühendisler için modeli açıklar.
+OmniRoute her API isteğini kapsayan, rotaya duyarlı bir yetkilendirme hattına sahiptir. Sınıflandırma:** deterministik** Ve** arızalı kapalı** — sınıflandırılamayan her şey `MANAGEMENT` olarak sonuçlanır ve bir oturum veya yönetim düzeyinde belirteç gerektirir. Bu sayfada rotaların bakımını yapan veya yeni uç noktalar tasarlayan mühendislere yönelik model açıklanmaktadır.
 
-![Yetkilendirme hattı (3 rota sınıfı + politika değerlendirmesi)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Kaynak: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -185,7 +184,7 @@ Her rota sınıfının `src/server/authz/policies/` bir politikası vardır:
 
 - **`publicPolicy`** (`policies/public.ts`) — her zaman `allow({ kind: "anonymous", id: "anonymous" })` değerini döndürür.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Taşıyıcıyı çıkarır, `validateApiKey()` aracılığıyla doğrular. Yalnızca etkili `REQUIRE_API_KEY` özelliği bayrağı devre dışı bırakıldığında anonim hale gelir. Etkin bayrak `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) aracılığıyla çözümlenir, böylece Kontrol Paneli Özellik Bayrakları ve ortam değişkenleri `/api/v1/*`, `/api/v1beta/*` ve takma adları tutarlı bir şekilde yönetir; çözümleyici hataları başarısız bir şekilde kapatılır. İstemci API rotalarında kontrol paneli oturumu isteklerine izin verir (pano modeli kataloğu tarafından kullanılan `/api/v1/models` dahil). Entra ID SSO etkinleştirildiğinde, yapısal olarak bir Entra belirteci olan bir Taşıyıcı (üç base64url bölümü, `RS*` alg, `kid`), SSO dalı tarafından işlenir** önce** `validateApiKey()` ve onun kararı nihaidir, — hiçbir zaman API anahtarı yoluna veya anonim şubeye düşmez, dolayısıyla kimlik sağlayıcı kesintisi açık erişime dönüşemez. Statik API anahtarları etkilenmez. Bkz. [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — kontrol paneli oturumunu, dahili model senkronizasyonu isteklerini ( `/api/providers/[name]/(sync-models|models)` ile eşleşen) kabul eder veya `isAuthRequired()` false değerini döndürürse tamamen atlar. Bir Taşıyıcı belirteci mevcut ancak geçersiz olduğunda 403 (`AUTH_001`), aksi durumda 401 değerini döndürür. Ayrıca herhangi bir kimlik doğrulama dalından önce rota koruma katmanlarını (LOCAL_ONLY / ALWAYS_PROTECTED) uygular — bkz. [Rota Koruma Katmanları](../security/ROUTE_GUARD_TIERS.md). Taşıyıcı anahtarı `manage` kapsamını taşıdığında, `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (bugün: `/api/mcp/`) LOCAL_ONLY yollarına geri döngüsüz olarak erişilebilir; diğer tüm LOCAL_ONLY yolları kapsamdan bağımsız olarak katı geri döngü olarak kalır.
+- **`managementPolicy`** (`policies/management.ts`) — kontrol paneli oturumunu, dahili model senkronizasyonu isteklerini ( `/api/providers/[name]/(sync-models|models)` ile eşleşen) kabul eder veya `isAuthRequired()` false değerini döndürürse tamamen atlar. Bir Taşıyıcı belirteci mevcut ancak geçersiz olduğunda 403 (`AUTH_001`), aksi durumda 401 değerini döndürür. Ayrıca herhangi bir kimlik doğrulama dalından önce rota koruma katmanlarını (LOCAL_ONLY / ALWAYS_PROTECTED) uygular — bkz. [Rota Koruma Katmanları](../security/ROUTE_GUARD_TIERS.md). Taşıyıcı anahtarı `manage`/`admin` kapsamını veya dar `mcp:connect` kapsamını (`hasMcpConnectOrManageScope`) taşıdığında veya kimliği doğrulanmış bir kontrol paneli oturumuyla `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (bugün: `/api/mcp/`) LOCAL_ONLY yollarına geri döngüsüz olarak erişilebilir; diğer tüm LOCAL_ONLY yolları kapsamdan bağımsız olarak katı geridöngü olarak kalır.
 
 Başarılı bir politika `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ile döndürür. Aşağı akış işleyicileri, kimlik doğrulama mantığını yeniden çalıştırmak yerine `src/server/authz/assertAuth.ts` `assertAuth(request, "CLIENT_API")` aracılığıyla okuyabilir.
 
@@ -193,7 +192,7 @@ Başarılı bir politika `AuthSubject` `kind ∈ { client_api_key, dashboard_ses
 
 `src/shared/constants/publicApiRoutes.ts` açık izin verilenler listesidir:
 
-Liste şu şekilde bölünmüştür:** şekil** ve bölme yük taşır (GHSA-74g9-q8f6-793h): bir önek `startsWith()` ile eşleştirilir, böylece baş karakterlerini paylaşan her bitişik yolla da eşleşir. `/api/usage/om-usage` `/api/usage/om-usage<anything>` PUBLIC olarak işaretlenmiş bir önek olarak kullanır ve Next, bunu kendi kimlik doğrulaması olmayan bir işleyici olan `/api/usage/[connectionId]` — çözümler.
+Liste şu şekilde bölünmüştür:** şekil** ve bölme yük taşır (GHSA-74g9-q8f6-793h): bir önek `startsWith()` ile eşleştirilir, böylece baş karakterlerini paylaşan her bitişik yolla da eşleşir. `/api/usage/om-usage` `/api/usage/om-usage<anything>` PUBLIC olarak işaretlenmiş bir önek olarak kullanır ve Next bunu kendi kimlik doğrulaması olmayan bir `/api/usage/[connectionId]` — işleyicisine çözümler.
 
 ```ts
 // Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
@@ -278,22 +277,22 @@ Kümeyi kullanım kolaylığına göre değil, şekle göre seçin. Tek bir rota
 
 ## Kapsamlar
 
-Üç ad alanı. Her denetleyici yalnızca kendi dizelerini okur. Yan yana karşılaştırma, `manage`'in `read:compression` için `scopeMatches`'i neden başarısız kıldığını ve bir `read` erişim belirtecinin neden `/api/keys/{id}` adresine `PATCH` yapamadığını içeren detaylar [Üç kapsam ad alanı](../frameworks/MCP-SERVER.md#three-scope-namespaces) bölümündedir.
+Üç ad alanı. Her denetleyici yalnızca kendi dizelerini okur. `manage` `read:compression` için `scopeMatches` neden başarısız olduğu ve `read` erişim belirtecinin neden `PATCH /api/keys/{id}` yapamadığı da dahil olmak üzere yan yana [üç kapsam ad alanı](../frameworks/MCP-SERVER.md#three-scope-namespaces) bulunur.
 
-API anahtarları bir `scopes` dizisi taşır (`api_keys.scopes` içinde JSON olarak saklanır, bkz. `src/lib/db/apiKeys.ts`).
+API anahtarları bir `scopes` dizisi taşır ( `api_keys.scopes` JSON olarak saklanır, bkz. `src/lib/db/apiKeys.ts`).
 
 ### Yönetim kapsamı
 
 - `manage` / `admin` — `hasManageScope`. Yönetim API rotalarına taşıyıcı erişimi.
-- `mcp:connect`, `self:usage`, `self:account-quota` ve `policy:bypass-provider-quota` eklemeli tam eşleşen kapsamlardır. Bunlar `MANAGEMENT_API_KEY_SCOPES` dışında yer alır. `mcp:connect` yalnızca `/api/mcp/` döngüsel olmayan ayrılmış bölümünü açar.
+- `mcp:connect`, `self:usage`, `self:account-quota` ve `policy:bypass-provider-quota` eklemeli tam eşleme kapsamlarıdır. `MANAGEMENT_API_KEY_SCOPES` dışında oturuyorlar. `mcp:connect` yalnızca `/api/mcp/` geri döngüsüz bölümünü açar.
 
-### MCP araç kapsamları
+### MCP aracı kapsamları
 
-Katalog ve eşleştirme kuralları (aynı dize veya `*` ile biten verilmiş bir kapsam): [MCP araç kapsamları](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` içindeki `MCP_SCOPE_LIST`, tam katalog değil, orijinal yazılmış alt kümedir. Uygulama, `resolveCallerScopeContext()` MCP kimlik doğrulama bilgisinden, istek meta verilerinden veya `OMNIROUTE_MCP_SCOPES`'tan kapsamları çözümledikten sonra `open-sse/mcp-server/scopeEnforcement.ts` içinde çalışır. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` olmadığı sürece kapalı kalır.
+Katalog ve eşleştirme kuralları (aynı dize veya `*` ile biten verilmiş bir kapsam): [MCP araç kapsamları](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` `MCP_SCOPE_LIST`, tam katalog değil, orijinal yazılan alt kümedir. `resolveCallerScopeContext()` MCP kimlik doğrulama bilgisi, istek meta verileri veya `OMNIROUTE_MCP_SCOPES` kapsamlarını çözümledikten sonra zorlama `open-sse/mcp-server/scopeEnforcement.ts` çalışır. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` bunu genel olarak açar (varsayılan `false`), ancak bayraktan bağımsız olarak API anahtarında `manage`/`admin` bulunmayan bir HTTP/SSE arayan için her zaman uygulanır ( `open-sse/mcp-server/scopeEnforcement.ts` `shouldForceScopeEnforcement()` bakın).
 
 ### Erişim belirteci kapsamları
 
-`oma_live_…` belirteçlerinde `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) tarafından sıralanır. Bu sıralama yalnızca erişim belirteci kimlik bilgisi için geçerlidir. Bkz. [Yönetim Kimlik Doğrulaması](../guides/MANAGEMENT-AUTH.md).
+`oma_live_…` belirteçlerindeki `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) ile sıralanır. Bu sıralama yalnızca erişim belirteci kimlik bilgileri için geçerlidir. Bkz. [Yönetim Kimlik Doğrulaması](../guides/MANAGEMENT-AUTH.md).
 
 ## Kimlik Doğrulaması Gerekli Geçiş
 

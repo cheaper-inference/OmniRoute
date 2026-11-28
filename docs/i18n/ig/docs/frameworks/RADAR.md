@@ -93,52 +93,30 @@ routing ma ọ bụ nhọpụta model — lee opt-in dị iche n'okpuru.
 
 ---
 
-## Sync data bụ opt-in DỊ ICHE — nkwa nzuzo
+## Mmekọrịta data bụ SEPARATE nwepu-na — nkwa nzuzo
 
-Ịgbanye `RADAR_ENABLED` na-emeghe naanị UI. Ime sync feed chọrọ opt-in nke abụọ,
-nke nọọrọ onwe ya ma echekwara na `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migration `136_radar_cache_settings.sql`). `syncRadar()` na-enyocha akara ahụ _yana_ opt-in
-tupu o mee oku netwọkụ ọ bụla:
+Ịgbanye `RADAR_ENABLED` naanị na-emepe UI. Ịmekọrịta ndepụta a chọrọ nbanye nke abụọ, nke onwe ya echekwara na `radar_settings.opt_in` (`src/lib/db/radar.ts`, migration `136_radar_cache_settings.sql`). `syncRadar()` na-enyocha ọkọlọtọ _na_ Nwepu tupu ịkpọọ netwọkụ ọ bụla:
 
 ```
-Agbanyụrụ akara → { status: "disabled" }   — enweghị oku netwọkụ
-Opt-in bụ false → { status: "opt_out" }    — enweghị oku netwọkụ
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Mgbe ha abụọ dị na on, ụzọ sync bụ:
+Mgbe ha abụọ nọ, ụzọ mmekọrịta bụ:
 
-1. `GET <feed base URL>/v1/catalog/latest` nwere `x-omniroute-radar-schema: 2` na header
-   `Authorization: Bearer <supporter key>` nke bụ nhọrọ (lee n'okpuru). Server na-eji artifact mgbanwe v1
-   a bịanyere aka na ya iche dịka ndabara mgbe schema header adịghị, ka client ochie arụnyere wee nọgide
-   na-anata mmelite.
-2. Nke a bụ usoro ngwa nke na-ebudata naanị, mana ọ ka bụ request HTTPS. Akụrụngwa
-   e hostere na-anata metadata njikọ nkịtị dịka IP isi mmalite. Mgbe ahaziri supporter
-   key, sync na-ezigakwa key ahụ na header Bearer ka service ahụ nwee ike ịchọpụta
-   entitlement. N'otu revision private-server ahụ kpọmkwem nke akọwapụtara n'ókè ihe akaebe dị n'elu,
-   ndekọ request feed na-eji hash key, ojiji agbakọtara, na HMAC e bepụrụ mkpụmkpụ nke IP
-   nke na-agbanwe kwa ụbọchị maka nyocha mmegbu a na-eji aka eme; table ndị ahụ anaghị echekwa key ma ọ bụ IP n'ụdị raw.
-   Log nnweta akụrụngwa na outbox nnyefe ezoro ezo bụ ókè ọrụ
-   dị iche iche.
-3. OmniRoute anaghị eziga prompt, response, mkparịta ụka, credential provider, traffic model,
-   uptime, latency, ma ọ bụ nhazi provider mpaghara gaa na service Radar.
-4. A na-enyocha, validate, ma cache response ahụ na mpaghara (lee
-   [Ụdị nchekwa](#security-model)). Radar nwere kpọmkwem ụzọ netwọkụ server-side anọ:
-   `syncRadar()` maka catalog, `syncRadarReferrals()` maka referral, na
-   `syncRadarOffers()` / `syncRadarIntel()` maka offer na Intel ndị naanị supporter nwere ike inweta.
+1. `GET <feed base URL>/v1/catalog/latest` nwere `x-omniroute-radar-schema: 2` yana nkụnye eji isi `Authorization: Bearer <supporter key>` nhọrọ (lee n'okpuru). Sava na-adabere na ihe mgbanwe v1 bịanyere aka na ya iche mgbe nkụnye eji isi mee adịghị, yabụ ndị ahịa arụnyere megoro na-enweta mmelite.
+2. Nke a bụ nbudata naanị ngwa nbudata, mana ọ ka bụ arịrịọ HTTPS. Akụrụngwa akwadoro na-enweta metadata njikọ nkịtị dị ka isi iyi IP. Mgbe ahazi igodo nkwado, mmekọrịta na-ezigakwa igodo ahụ na nkụnye eji isi mee ka ọrụ ahụ nwee ike dozie ikike ahụ. N'ihe ngbanwe nkeonwe-nke nkesa nke akọwapụtara na oke akaebe dị n'elu, ngụkọ arịrịọ nri na-eji hashes isi, mkpokọta ojiji, yana HMAC nke IP na-atụgharị kwa ụbọchị maka nyocha mmetọ nke aka; Tebụl ndị ahụ anọgideghị na igodo ma ọ bụ IP n'ụdị raw. Ndekọ nnweta akụrụngwa na igbe nnyefe ezoro ezo bụ oke ọrụ dị iche iche.
+3. OmniRoute anaghị eziga mkpasasị, nzaghachi, mkparịta ụka, nzere onye na-eweta, okporo ụzọ ihe nlere anya, oge oge, latency, ma ọ bụ nhazi onye na-eweta mpaghara na ọrụ Radar.
+4. A kwadoro nzaghachi a, kwadoro ma chekwaa ya na mpaghara (lee [ihe nlereanya Nchekwa](#security-model) ). Radar nwere kpọmkwem ụzọ netwọkụ nke akụkụ anọ: `syncRadar()` maka katalọgụ, `syncRadarReferrals()` maka ntinye aka, na `syncRadarOffers()` / `syncRadarIntel()` maka ihe na-akwado naanị na Intel.
 
-**Supporter key** bụ token Bearer nke bụ nhọrọ (`radar_settings.supporter_key`)
-nke na-enye service feed ohere ikpebi tier ọ ga-enye (lee
-[Tier](#tiers-community-and-live)). A na-eme ihe ndị a na ya:
+Nyochaa katalọgụ na-agba awa 24 ọ bụla. Mgbe ndepụta akwadoro ka na-ebu ụdị cache na ọkwa, mmekọrịta na-edobe ụgwọ ọrụ echekwara, megharịa `fetchedAt`, nlele na-esote na-abịa awa 24 ka emechara kama ị na-akọrọ elekere elekere ọzọ.
 
-- A na-echekwa ya **n'ụdị ezoro ezo mgbe echekwara ya** site n'otu helper AES-256-GCM `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`) ndị a na-eji maka credential provider.
-- A na-edobe ya site na `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) ma
-  **anaghị eweghachi ya ma ọlị** — response na-eweghachi ụdị kpuchiri ekpuchi (`omr_****abcd`).
-- Ịgbanwe ma ọ bụ ihichapụ ya na-eme ka cache catalog, referral, offer, na Intel ghara ịdị irè n'otu oge. Sync/ịgụ
-  na-esote ga-achọpụta entitlement ọhụrụ na server-side; ichekwa key anaghị eme
-  request netwọkụ n'onwe ya ma ọ bụ jiri activation key otu-ojiji.
-- A na-eziga ya na service feed dịka token Bearer na sync GET — ọ dịghị ihe ọzọ gbasara
-  key ahụ na-apụ na client.
+Nke** igodo nkwado** bụ ihe nhọrọ nke na-ebu akara (`radar_settings.supporter_key`) nke na-ahapụ ọrụ ndepụta ahụ ikpebi ọkwa nke ga-eje ozi (lee [Tiers](#tiers-community-and-live) ). Ọ bụ:
+
+- Echekwara** ezoro ezo na izu ike** ya na ndị enyemaka AES-256-GCM `encrypt()`/`decrypt()` (`src/lib/db/encryption.ts`) ejiri maka nzere ndị na-eweta.
+- Tọọ site na `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) na** ọ dịghị mgbe ekutere azụ** — nzaghachi na-eweghachite ụdị mkpuchi (`omr_****abcd`).
+- Ịgbanwe ma ọ bụ ikpochapụ ya n'ụzọ zuru oke na-emebi katalọgụ, ntinye aka, onyinye na cache Intel. sync/read ọzọ na-edozi akụkụ nkesa ikike ọhụrụ; Ịchekwa igodo adịghị n'onwe ya na-arịọ netwọkụ ma ọ bụ rie otu igodo mmalite.
+- Ezitere na ọrụ ndepụta dị ka ihe nrịbama na-emekọrịta ihe GET — ọ nweghị ihe ọzọ gbasara igodo na-ahapụ onye ahịa.
 
 ---
 
@@ -426,83 +404,45 @@ version, tier }` — nke a bụ uru dashboard na-egosi, ọ bụghị field raw 
 
 ---
 
-## Iwu njikọta overlay n'oge ọgụgụ
+## Iwu nchikota oge ịgụ ihe
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) na-ejikọta feed dị na cache **n'elu**
-baseline static n'**oge ọgụgụ**, n'ime `getRadarCatalog()`. A naghị agbanwe array baseline
-(`FREE_MODEL_BUDGETS`) mgbe ọ bụla — a na-agbakọ `MergedEntry[]` ọhụrụ na call ọ bụla.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) jikọtara ndepụta nke echekwara** gafere** static baseline na** oge ịgụ** , n'ime `getRadarCatalog()`. Usoro ntọala (`FREE_MODEL_BUDGETS`) anaghị agbanwe agbanwe — a na-agbakọ `MergedEntry[]` dị ọhụrụ na oku ọ bụla.
 
-Iwu anọ, dịka usoro mkpa ha si dị:
+Iwu anọ, n'usoro nke ụzọ:
 
-1. **Feed anaghị edochi local override mgbe ọ bụla.** Maka field ọ bụla: ọ bụrụ na operator
-   ahaziela field dị na entry (`localOverrides` map, nke key ya bụ `provider:modelId`),
-   a na-amafere uru feed maka field ahụ kpọmkwem — uru operator na-emeri.
-2. **`enabled: false` na-eme ka entry ghara ịrụ ọrụ, ma na-edekọ ebe o si pụta.** Feed entry nke na-agbanyụ
-   entry na-etinye `enabled: false` na `disabledBy: "radar"` na nsonaazụ e jikọtara,
-   ka UI nwee ike ịkọwa _ihe kpatara_ entry ji si na nke dị adị ghọọ nke agbanyụrụ.
-3. **Entry onye ọrụ gbakwunyere nke na-adịghị na feed na-adịgide n'enweghị mgbanwe.** Entry ndị
-   dị naanị na baseline (ma ọ bụ ndị agbakwunyere n'ime local) ma na-enweghị feed
-   entry kwekọrọ na ha na-agafe n'enweghị mgbanwe.
-4. **A naghị eweghachi entry e tinyere tombstone mgbe ọ bụla.** Ọ bụrụ na operator hichapụla
-   entry n'ụzọ doro anya (`tombstones` set), feed ịgbakwunye `provider:modelId` ahụ ọzọ na
-   version e mesịrị anaghị eweghachi ya.
+1. **Nri anaghị edegharị mkpochapụ mpaghara.** Otu-ubi: ọ bụrụ na onye ọrụ ahụ ahaziri ubi na ntinye ( map `localOverrides`, keyed `provider:modelId`), uru nri nri maka ubi ahụ akọwapụtara — uru onye ọrụ na-emeri.
+2. **`enabled: false` gbanyụọ ntinye ahụ, jiri provenance.** Ndenye ndepụta nke na-atụgharị ntinye anya na-esetịpụ `enabled: false` na `disabledBy: "radar"` na nsonaazụ agbakwunyere, yabụ UI nwere ike ịkọwa _ihe kpatara ntinye si dị maka nkwarụ.
+3. **Ntinye agbakwunyere onye ọrụ adịghị na ndepụta ahụ na-adị ndụ emetughị ya.** Ndenye ndị dị naanị na ntọala (ma ọ bụ agbakwunyere na mpaghara) na enweghị ntinye ndepụta kwekọrọ na-agafe na-agbanweghị agbanwe.
+4. **A naghị akpọlite ntinye nkume n'ili.** Ọ bụrụ na onye na-ahụ maka ọrụ ehichapụrụ ntinye (`tombstones` set), ndepụta a na-agbakwunye `provider:modelId` na ụdị ọzọ anaghị eweghachi ya azụ.
 
-A na-edobe field ndị a pụrụ idezi na tombstone n'ime
-`radar_local_model_state` (migration `153_radar_local_model_state.sql`). Adapter DB ọha
-(`src/lib/db/radar.ts`) na-atụgharị row ndị ahụ ka ha bụrụ `localOverrides` map na
-`tombstones` set nke `applyFeed()` na-eji; `getRadarCatalog()` nke production na-eburu state ahụ
-mgbe gate nke flag, cache, na schema gafesịrị. Naanị `displayName` na `enabled` ka
-operator nwere ike idezi. A pụghị ide provider/model identity, ebe feed si pụta, quota, capabilities, ToS,
-na data setup site na surface a.
+Ogige ndị a na-edezi na okwute ili ka nọgidere na `radar_local_model_state` (mmigration `153_radar_local_model_state.sql`). Ihe nkwụnye DB ọha (`src/lib/db/radar.ts`) na-atụgharị ahịrị ndị ahụ na maapụ `localOverrides` na `tombstones` setịpụrụ nke `applyFeed()` ji; mmepụta `getRadarCatalog()` ibu nke na-ekwupụta mgbe ọkọlọtọ, cache, na schema gafechara. Naanị `displayName` na `enabled` bụ onye ọrụ-edizizi. njirimara Provider/model, ndepụta nri, oke, ikike, ToS, na data nhazi enweghị ike ide site na elu a.
 
-Dashboard na-enye action local anọ:
+Dashboard ahụ na-ekpughe omume anọ mpaghara:
 
-- **Dezie** na-agbanwe display name local na enabled state.
-- **Tọgharịa mgbanwe local** na-ekpochapụ field abụọ ahụ a pụrụ idezi n'agbanweghị tombstone.
-- **Zoo** na-emepụta tombstone, ka mmelite feed ndị ga-abịa ghara ịmepụta row ahụ ọzọ.
-- **Weghachite** na-ewepụ tombstone; override ọ bụla e debere iche na-anọgide na-arụ ọrụ.
+- **Dezie** na-agbanwe aha ngosi mpaghara yana steeti enyere.
+- **Tọgharia mgbanwe mpaghara** na-ekpochapụ ubi abụọ a na-edezi na-enweghị ịgbanwe nkume ili.
+- **Zoo** na-emepụta nkume ili, ya mere mmelite ndepụta nri emechaa enweghị ike ịmegharị ahịrị ahụ.
+- **Weghachite** na-ewepụ nkume ili; Mbugharị ọ bụla echekwara iche na-anọgide na-arụ ọrụ.
 
-Feed `enabled: false` ka bụ safety exception: ọ na-emeri local
-`enabled: true` ochie, na-eme ka entry e jikọtara nọgide bụrụ nke agbanyụrụ, ma dekọọ `disabledBy: "radar"`.
+A ndepụta `enabled: false` na-anọgide na nchekwa ewepu: ọ na-emeri n'elu a stale local `enabled: true`, na-eme ka merged ntinye nkwarụ, na-edekọ `disabledBy: "radar"`.
 
-Mbipụta katalọgụ na-eji `schemaVersion: 2`. `contextWindow` na nke ọ bụla n'ime `tools`, `vision`, na
-`thinking` bụ `number | null` / `boolean | null` n'onwe ha: `null` pụtara na amaghị, ebe
-`false` pụtara na isi mmalite provider gọọmentị nke D16 kwadoro kwuru n'ụzọ doro anya na capability ahụ adịghị.
-A naghị ebuli flag registry/model-spec dị n'ime OmniRoute ozugbo ka ha bụrụ eziokwu feed. Client
-ka na-anabata snapshot v1; n'ihi na builder ochie ji `false` dịka placeholder maka enweghị ihe, a na-eme ka v1 `false`
-bụrụ nke amaghị ebe v1 `true` na-anọgide bụrụ eziokwu. Schema version ndị a na-amaghị na-ajụ n'ụzọ nchekwa, ebe
-cache ikpeazụ ziri ezi ka na-adị. Model v2 ọ bụla nwere context/capability na-abụghị null ga-enwerịrị
-`metadataEvidenceUrls[]` HTTPS na-achọghị credential; ma ọ bụghị ya, validation schema ga-ada, a gaghịkwa
-edochi cache. Tebụl katalọgụ na-egosi state atọ ahụ dịka `✓`, `✕`, na `?`.
+Akwụkwọ katalọgụ jiri `schemaVersion: 2`. `contextWindow` na nke ọ bụla nke `tools`, `vision`, na `thinking` bụ onwe `number | null` / `boolean | null`: `null` pụtara amaghị, ebe `false` pụtara onye ọrụ D16-confirmed isi iyi na-ekwu hoo haa na ike adịghị. A naghị akwalite ọkọlọtọ ime OmniRoute registry/model-spec ozugbo iji nye eziokwu. Onye ahịa ka na-anabata snapshots v1; n'ihi na onye wuru ochie jiri `false` dị ka onye na-edobe enweghị, v1 `false` bụ nke a na-ahazi na amabeghị ebe v1 `true` ka bụ eziokwu. Ụdị schema amaghi ama emechiela ma cache ikpeazụ dị irè ka dị. Ụdị v2 ọ bụla nwere context/capability na-abụghị null ga-ebu HTTPS `metadataEvidenceUrls[]` na-enweghị nzere; ma ọ bụghị ya, nkwado schema ada ada na cache adịghị edochi ya. Tebụlụ katalọgụ ahụ na-akọwa steeti atọ niile dị ka `✓`, `✕`, na `?`.
 
-### Combo a na-eduzi na ohere MCP
+### combos eduzi na ohere MCP
 
-Uru `familyId` ndị akwadoro na-adịgide mgbe overlay oge ọgụgụ gasịrị ma na-achịkwa module pure
-`buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). A na-atụ aro family
-naanị mgbe ọ dịkarịa ala provider abụọ dị iche iche nwere connection na-arụ ọrụ ma na-enye model
-ID curated ahụ kpọmkwem. Model agbanyụrụ, provider anaghị arụ ọrụ, model ID na-adịghị, family nwere naanị otu,
-na alias/prefix match na-edoghị anya na-ajụ n'ụzọ nchekwa. Atụmatụ na-eji strategy `priority` dị ugbu a, na-ahazi
-budget kwa ọnwa na-emegharị emegharị kachasị ukwuu ka ọ buru ụzọ; UI na-emepụta ha naanị site na `POST /api/combos`.
+Ụkpụrụ `familyId` akwadoro na-adị ndụ machie oge agụ ma chụba modul `buildRadarComboSuggestions()` dị ọcha (`src/lib/radar/comboSuggestions.ts`). A na-atụ aro ezinaụlọ naanị mgbe opekata mpe ndị na-enye ụzọ abụọ nwere njikọ na-arụ ọrụ ma kpughee ụdị ID akọwapụtara nke ọma. Ụdị ndị nwere nkwarụ, ndị na-enye ọrụ anaghị arụ ọrụ, IDs nlereanya efu, ezinụlọ ndị na-alụbeghị di, na egwuregwu alias/prefix na-enweghị mgbagha emechighị. Aro na-eji atụmatụ `priority` dị ugbu a, na-ebute ụzọ mmefu ego kwa ọnwa kachasị ukwuu na-emegharị; UI na-emepụta ha naanị site na `POST /api/combos`.
 
-UI a na-eduzi dị na `/dashboard/radar/combos`. Ọ na-agụ naanị endpoint mpaghara
-`GET /api/radar/catalog` na `GET /api/combos/builder/options`. Ọ dịghị mgbe ọ na-ebute mmekọrịta Radar,
-agụ ozi nzere nke ndị na-eweta ọrụ, ma ọ bụ dee ozugbo na nchekwa data combo.
+UI a duru ndu bi na `/dashboard/radar/combos`. Ọ na-agụ naanị ebe njedebe `GET /api/radar/catalog` na `GET /api/combos/builder/options`. Ọ dịghị mgbe ọ na-akpalite mmekọrịta Radar, na-agụ nzere ndị na-eweta, ma ọ bụ na-ede ozugbo na nchekwa data combo.
 
-Ndị ahịa MCP nwere ike iji `omniroute_radar_catalog` (`read:radar`) gụọ otu ntule mpaghara ahụ. A na-enyocha
-nzacha `provider`, `familyId`, na `enabledOnly` ndị a na-ahọrọ iji mee ihe mgbe otu
-ọgụgụ `GET /api/radar/catalog` mpaghara gasịrị. Mmepụta ya e mechiri emechi gụnyere metadata katalọgụ yana onye na-eweta ọrụ/model,
-aha ngosipụta, `familyId`, oke ojiji, ikike, ọnọdụ agbanyere, mmalite, na `disabledBy`; URL nhazi,
-usoro, njikọ, adreesị ozi-e, igodo, na data ntụnye anaghị alaghachi ma ọlị. Ngwaọrụ a bụ
-naanị maka ịgụ ihe, ọ dịghịkwa mgbe ọ na-akpọ `/api/radar/sync`.
+Ndị ahịa MCP nwere ike ịgụ otu amụma mpaghara na `omniroute_radar_catalog` (`read:radar`). A na-enyocha ihe nzacha `provider`, `familyId` na `enabledOnly` mgbe otu mpaghara `GET /api/radar/catalog` gụchara. Ihe mmepụta mechiri emechi gụnyere katalọgụ metadata gbakwunyere provider/model, aha ngosi, `familyId`, oke, ikike, steeti enyere, mmalite, na `disabledBy`; setup URLs, nzọụkwụ, njikọ, adreesị ozi-e, igodo, na data ntugharị adịghị eweghachite. Ngwa a bụ naanị ọgụgụ na-akpọkughị `/api/radar/sync`. Mgbe ndepụta nke echekwara tupu katalọgụ arụnyere, `meta.olderThanRelease` bụ `true` na ngwá ọrụ ahụ na-eweghachite ụdị si na katalọgụ arụnyere na mgbagha mpaghara na nkume ili.
 
-### Ihe nrịbama mmalite
+### Ihe nrịbama
 
-Ndenye ọ bụla e jikọtara nwere mpaghara `origin` nke UI na-egosipụta dịka baajị:
+Ntinye ọ bụla jikọtara ọnụ na-ebu oghere `origin` nke UI na-atụgharị dị ka baajị:
 
-- `"baseline"` — agbanweghị ya site na katalọgụ mwepụta statik.
-- `"radar"` — feed ahụ emelitela otu mpaghara ma ọ bụ karịa.
-- `"local"` — onye nchịkwa nwere opekata mpe otu mgbanwe mpaghara na ndenye a (mgbanwe
-  mpaghara na-emeri feed mgbe niile dịka iwu 1 si dị, n'agbanyeghị ihe feed kwuru).
+- `"baseline"` — emetughi ya site na katalọgụ ntọhapụ static.
+- `"radar"` — otu ubi ma ọ bụ karịa ka nri mere ka ume ọhụrụ.
+- `"local"` — onye ọrụ nwere opekata mpe otu nbibi mpaghara na ntinye a (nkwụsị mpaghara mgbe niile na-emeri nri n'otu iwu 1, n'agbanyeghị ihe nri na-ekwu).
 
 ---
 

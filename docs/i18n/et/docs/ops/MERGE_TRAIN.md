@@ -4,91 +4,63 @@
 
 ---
 
-> **2026-11-19: Mergify ühendamisjärjekord on lõpetatud** (omaniku otsus). `.mergify.yml` ei määratle enam järjekorda ja lükkab tagasi Mergify käsud, mis liidavad või kirjutavad ümber tõmbetaotluse. Tõmbetaotlused väljalaskeharule liidetakse käsitsi hoidla reeglistiku "Require green gates on the active release" (`Gate / CI` + `Gate / Quality`) alusel, kuni omni-queue töötab live-režiimis ja seejärel omni-queue kaudu ([OMNI_QUEUE.md](./OMNI_QUEUE.md)). Allolevad Mergify jaotised kirjeldavad järjekorda sellisena, nagu see oli.
+## Maandumine vabastusharule
 
-Alates versioonist v3.8.49 (kvaliteedi-/kiirusplaani WS3.2/WS3.4) on üle vaadatud PR-ide harusse `release/vX.Y.Z` liitmise vaikimisi tee **Mergify liitmisjärjekord** (`.mergify.yml`);
-allpool dokumenteeritud **käsitsi hallatav liitmisrong** on VARULAHENDUS — seda kasutatakse intsidentide ja väljalaske külmutamise ajal või juhul, kui Mergify avatud lähtekoodiga projektide pakett peaks kunagi muutuma.
+Kogu järjekord reguleerib `release/vX.Y.Z` maandumisi. Enne PR maandumist lugege vaikeharu `config/merge-queue/config.json` ülataseme `mode`. Vaadake jaotist [Omni-Queue](OMNI_QUEUE.md).
 
-## Vaiketee: Mergify järjekord
+- **`shadow`** käivitab valideerimise ja jätab maandumise käsitsi ühendamisele. Rakendage `omni-queue` kinnitatud PR -le selle viimases otsas. Kontrollige sobivust `npm run queue -- why <PR>` abil. Oodake selle pea kohta otsust `npm run queue -- history --base <branch>`'s. Jätkake `would-land`. `culprit-found` või `would-dequeue` puhul hoidke liitmist ja kõrvaldage põhjus.
+- **Varjude erandid.** Rohelise täis CI -ga rong praeguse baasotsa vastu võib edasi sõita ilma eraldi järjekorraotsuseta. Sama erand kehtib ka siis, kui PR pea sisaldab juba praegust alusotsakut.
+- **`live`** kasutab maandumise käivitamiseks silti `omni-queue`. Järjekord üksi maandub PR. Jätke ühendamiskäsud ja suunake tõuke järjekorda.
 
-1. PR vaadatakse kampaaniate käigus üle / märgitakse roheliseks ning kinnitatakse omaniku liitmiseelse ⭐
-   kontrollvärava kaudu (aruanne + iga üksuse otsus — vt `/merge-prs` samm 0.75).
-2. Omanik (või omaniku otsuse alusel tegutsev seanss) lisab sildi **`queue`**.
-   Silt ON liitmiskinnitus; Mergify üksnes teostab selle.
-3. Mergify valideerib järjekorras olevad PR-id **järjestikku** (ükshaaval) kiirkontrollide
-   suhtes ja liidab need (squash). Pakettidena töötlemine + automaatne poolitamine kuulub
-   Mergify tasulisse paketti („Cannot use Merge Queue batch“ tasuta paketis, #7220),
-   mistõttu `.mergify.yml` ei määra väärtust `batch_size`; pakettidena töötlemine jääb
-   allpool kirjeldatud käsitsi hallatava liitmisrongi ülesandeks. PR eemaldatakse järjekorrast,
-   kui selle kontrollid on pärast `checks_timeout` väärtuse täitumist endiselt ootel
-   (240 min = `quality.yml` mõõdetud p95 kahekordne väärtus), selle asemel et järjekord
-   seisma panna.
-4. Pärast liitmist valideerib pidev väljalaske rohelisuse töövoog saatmisel uue tipu
-   ja avab kombinatsiooni regressiooni korral omistamisprobleemi (automaatset tagasivõtmist
-   ei tehta kunagi).
+Iga maandumine nõuab omaniku luba ja asjakohast nõutavat kontrolli. Kandke `omni-queue` peale alles pärast seda, kui omanik on maandumiseks loa andnud. Järjekorras PRs mis puudutab kaitstud teid, nõuab ka selle PR omaniku `protected-approved` otsust.
 
-Kaitsepiirded (vastavad faili `CLAUDE.md` rangetele reeglitele #21/#22):
+Reeglikomplekt "Nõua aktiivsel vabastamisel rohelisi väravaid" nõuab peas rohelist `Gate / CI` ja `Gate / Quality`. Ärge kunagi kasutage `--admin` et punasest väravast mööda minna. Vabastavad külmutusplokid sulanduvad külmutatud haruga. Vaata [kõva reeglit 21](HARD_RULES_DETAIL.md). Ärge kunagi sildistage, ühendage ega suruge tõmbetaotlusele, et mõni teine seanss töötab. Vaata [kõva reeglit 22](HARD_RULES_DETAIL.md).
 
-- **Väljalaske külmutamine on aktiivne** → ÄRGE lisage silte PR-idele, mille sihiks on
-  külmutatud haru; suunake need esmalt ümber aktiivsele harule `release/vX+1`.
-- **Teise seansi töös olev PR** → ärge kunagi lisage sellele silti; ainult omanikseanss
-  lisab oma töö järjekorda.
-- Ainult teste sisaldavad muudatused ja sildiga `hotfix` PR-id kasutavad juba vähendatud
-  CI-d (vt `RELEASE_CHECKLIST.md` → kiirparanduste kiirrada); järjekorra tingimused
-  aktsepteerivad tegelikult käivitatud kontrollikomplekti (`#check-failure=0` +
-  `#check-pending=0`).
+## Rongi tõmbamise taotlus
 
-## Varulahendus: käsitsi hallatav liitmisrong
+1. Käivitage rongi haru praeguse vabastusaluse otsast. Integreerige täpsed kinnitatud liikmepead, kasutades liitmiskohustusi. Säilitage nende kohustuste ajalugu, vältides squashi ja rebase'i.
+2. Avage üks tõmbetaotlus rongiharu jaoks. Kinnitage see PR oma täieliku CI praegusel baasotsal. Enne maandumist kontrollige uuesti aluse otsa ja heakskiidetud osade päid. Kui valideeritud kandidaat muutub, värskendage rongi ja selle CI.
+3. Maandage rong PR koos liitmiskohustusega kehtivas järjekorrarežiimis. Reaalajas režiimis säilitab järjekorra `merge-ff` maandumismeetod liitmiskohustused. Algsed liikmepead muutuvad vabastusharust ligipääsetavaks. GitHub märgib liikme PRs liidetuks ja kohustuste autorid jäävad alles.
 
-Kasutatakse siis, kui järjekord pole saadaval. See vormistab praktika, millega tühjendati v3.8.47
-tsükli ajal ühe päevaga 33 PR-i:
+Avalik näide on [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). See ühendas 18 liiget PRs ja saavutati ühinemiskohustusega 24.11.2026.
 
-1. **Koosta rühm** (~10–30 üle vaadatud ja heaks kiidetud PR-i). Kontrolli `linked:` kokkupõrkeid
-   (samad `tap.testFiles`, samad CHANGELOG-i lõigud) ja töötle need järjestikku.
-2. **Valideeri ÜKS KORD**: loo väljalaskeharu tipust eraldatud worktree, liida kõik rühma
-   harutipud lokaalselt ning seejärel käivita väljalaskega samaväärne testikogum
-   (`npm run check:release-green`; enne väljalaset lisa `--with-build`).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatiseerib sammud 1–2 (konfliktsed
-   PR-id heidetakse välja ja rong jätkab). Täisrežiim käivitab `npm run test:unit` — masinale
-   häälestatud käitaja (`--test-concurrency=20`), **mitte** kaks järjestikust 4-tuumalist CI
-   killustikku, mille tõttu kasutas domineeriv etapp 16-tuumalisest masinast ainult ~25% (parandatud
-   2026-07-18). `--fast` (päevasiseste hiigelrongide tühjendamiseks, omaniku heaks kiidetud 2026-07-18)
-   säilitab kõik staatilised kontrollväravad + vitest, kuid käivitab ainult pardale võetud PR-ide
-   muudetud node:test failid; TÄIS testikogum tuleb kuhjunud tipu peal siiski vähemalt kord päevas
-   käivitada (üks rong ilma liputa `--fast`).
-3. **Roheline** → liida PR-id järjestikku (kontrollides enne igaüht uuesti väärtusi `state,headRefOid` —
-   PR, mille harutipp on liikunud, läheb uuesti ülevaatusele). Tõesta, et iga liitmise netomuutus on
-   PR-i enda muudatus (automaatse lahendamisega tagasipööramisi ei tehta: kontrolli käsuga `git diff --stat`
-   ulatusest väljapoole jäävaid kustutamisi).
-4. **Punane** → poolita rühm (valideeri kumbki pool), selle asemel et iga PR-i ükshaaval uuesti valideerida;
-   vii probleemi põhjustav PR koos tõenditega tagasi ülevaatusjärjekorda.
-5. **Ära kunagi**: liida külmutamise ajal külmutatud harusse; kasuta kus tahes käsku `git stash`;
-   käivita CI-d pimesi uuesti lootuses, et punane tulemus kaob (reegel: punane tulemus on informatsioon).
+Sünkroonimine `main` -lt järgmisele väljalaskeharule toimub samuti ühendamise kaudu. Hilisemate sünkroonimiste jaoks on vaja säilitada `main` esivanemad. Vt [Tööpuu isoleerimine](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Tasemed (miks järjekord on turvaline ainult kiirete kontrollväravatega)
+## Kohalik ühendamise-rongi validaator
 
-- **PR-i kohta** (quality.yml kiired kontrollväravad): TIA mõjutatud testid + täielik 4 killustikuga ühiktestimine +
-  vitest + lintimise kogum + tüübikontroll + dokumentatsiooni/CHANGELOG-i terviklus.
-- **Rühma/tipu kohta** (pidev väljalaske rohelisus): `--quick` RANGED kontrollväravad iga push'i korral
-  väljalaskeharusse; täielikud `--with-build --full-ci` läbimised 3× päevas.
-- **Väljalaske kohta** (ci.yml väljalaske-PR-is): täielik maatriks, sh E2E ×9,
-  paketiartefakt + tarball'i käivitumise kiirtest, katvus/piirajad.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Midagi ei valideerita varasemast vähem — mahukas osa käivitatakse lihtsalt rühma/tipu,
-mitte iga PR-i kohta, mis kõrvaldab O(N) edasi-tagasi tsüklid.
+Validaator tõmbab aluse ja PR -pead ning ühendab need ühekordseks tööpuuks. See käivitab saadud puul oma pariteedikomplekti üks kord. Ebaõnnestunud peatoomise või ühendamise konflikt väljutab selle PR ja skript jätkab ülejäänud PRs.
 
-## `merge-train.sh` eeldused värske checkout'i korral
+- **`--plan`** prindib valitud režiimi sammud ja väljub tööpuud loomata või kaugjuhtimispuldiga ühendust võtmata. Kiirplaani kontrollimiseks ühendage see `--fast` ga.
+- **`--fast`** käitab ühiseid staatilisi väravaid, valitud muudetud `node:test` faile `tests/unit/` all ja `npm run test:vitest`. Kiirrežiimi kasutamisel käivitage kogunenud jootraha täielik kohalik valideerimine vähemalt kord päevas.
+- **Täisrežiim** lisab ainult täisväärtuslikud staatilised väravad ja käivitab `npm run test:unit` ja `npm run test:vitest`.
 
-Skript käivitab juur-checkout'is kiirelt katkestava **eelkontrolli** (enne mis tahes worktree
-toiminguid), et katkine paigaldus ei saaks kunagi näida punase rongina:
+Rike staatiline värav käivitatakse puutumata alusel uuesti, kui baassond on saadaval. Skript teatab päritud tõrgetest ja jätkab, kui iga tuvastatud rikkumise rida kuvatakse ka alusele ja koguarv ei ole kasvanud.
 
-1. Käivita `npm ci`, seejärel `bun`-i postinstall, mille npm blokeerib:
-   `(cd node_modules/bun && node install.js)` — vastasel juhul ebaõnnestuvad `check:provider-consistency`
-   ja `check:known-symbols` (mõlemad `bun scripts/…`) nii rongil KUI ka baasil ilma
-   rikkumise reata.
-2. Ei tohi olla kõrvalist kataloogi `node_modules/node_modules` (duplikaatne sõltuvuspuu; React laaditakse kaks korda
-   ja kasutajaliidese vitest-testikogumid ebaõnnestuvad kohe).
-3. `node_modules/.bin/tsc` peab olemas olema ja olema käivitatav (osalisest paigaldusest see puudub).
+| Välju | Tähendus                                                                                                                                          |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`   | Printis plaani või lõpetas komplekti. Komplekti kokkuvõte loetleb kõik päritud staatilised tõrked ja väljutatud PRs.                              |
+| `1`   | Kehtetud argumendid, Git Checkout puudub, eelkontroll ebaõnnestus või PR pole sisse lülitatud.                                                    |
+| `2`   | Komplekti kontroll ebaõnnestus ja seda ei kvalifitseerunud päritavaks. Operaator saab partii poolitada, rikkuva PR väljutada ja uuesti käivitada. |
 
-Rong käivitab blokeeriva käsu `npm run check:cycles:ratchet`; paljas `npm run check:cycles`
-on informatiivne (see loetleb SCC-d ja lõpetab nullist erineva väljumiskoodiga isegi terve baasi korral).
+Kohalik pass pakub diagnostilisi tõendeid ainult omaniku toimiku jaoks. Iga maandumine nõuab endiselt omaniku luba, oma nõutud kontrolle ja vajaduse korral varijärjekorra otsust.
+
+## Tasandumine
+
+- **PR kohta.** CI ja kvaliteedivaliku kontrollid muudetud teede põhjal. Kood PRs käivitab kiireid kvaliteediväravaid ja mõjutatud teste, eraldi üksuse ja Vitest töödega CI.
+- **Järjekorra kandidaadi kohta.** CI ja Quality käitavad koostatud kandidaadi täielikku profiili oma viitejärjekorras.
+- **Vabastamise näpunäide.** Release-Green käivitab tõugetel kiired kõvad väravad, mis vastavad selle teefiltritele. Kolm ajastatud käitamist päevas kasutavad väljalaskeharu täielikku pühkimist.
+- **Väljalaske kohta.** Täielik CI maatriks sisaldab E2E -kilde, paketi valideerimist, tarballi alglaadimissuitsu ja leviala kontrolle. Vaadake [vabastamise kontrollnimekirja](RELEASE_CHECKLIST.md).
+
+## Värske väljaregistreerimise eeldused `merge-train.sh` jaoks
+
+Enne tööpuude loomist toimub eelproov. Paigaldage sõltuvused `npm ci` abil. Veenduge, et `node_modules/.bin/tsc` on käivitatav ja `node_modules/node_modules` puudub. Kontrollige, kas `node_modules/.bin/bun --version` õnnestub.
+
+Kui Bun järelinstall jäeti vahele, käivitage `(cd node_modules/bun && node install.js)`. Pakkuja järjepidevuse ja tuntud sümbolite kontrollimisel kasutatakse Bun. Validaator käivitab blokeeriva väravana `npm run check:cycles:ratchet`. Eraldiseisev `npm run check:cycles` käsk on soovituslik.
+
+## Ajalugu
+
+Mergify liitmisjärjekord suleti 2026-11-19.

@@ -12,6 +12,12 @@ Nkwekọrịta `config/cli-tools-manifest.json` na-anọpụ iche na-ekwupụta 
 
 A na-ezigara nwa ahụ akara nkwụsịtụ na nkwụsị. Onye na-ebupụta na-echere ihe mmechi nwata ahụ tupu iwepu nhazi oge. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` na-achịkwa oge amara tupu njedebe mmanye (nke bụ 5000 milliseconds).
 
+`omniroute launch <tool>` (lee [LAUNCH.md](./LAUNCH.md) ) na-agbaso otu iwu gburugburu ebe obibi na mbugharị mgbaama, ma gbakwụnye:
+
+- **Mmalite ọnụ ụzọ ámá.** Maka ebumnuche mpaghara, mgbe enweghị azịza ọnụ ụzọ n'ọdụ ụgbọ mmiri ahụ, onye nrụpụta na-amalite `omniroute serve --headless --no-open` jikọtara ya na `127.0.0.1` n'okpuru usoro ihe ubi ewepụrụ. Mwepụta ọ bụla na-agba ọsọ na-ejide ụgwọ mgbazinye na `DATA_DIR/launch/leases/` (obi mgbawa ọ bụla 15 s, stale mgbe 45 s ma ọ bụ mgbe usoro ya na-apụ). Onye na-ewe ihe ubi na-akwụsị ọnụ ụzọ ámá ọ malitere ozugbo ọ nweghị mgbazinye ebirila maka amara na-abaghị uru (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, ndabara 10000 milliseconds). A na-eji ọnụ ụzọ ámá onye malitere mana ọ kwụsịghị. `--keep-gateway` ma ọ bụ `omniroute gateway keep` na-atụgharị ọnụ ụzọ mmalite ka ọ bụrụ nke nkịtị; `--no-start` weghachi omume ochie dara ada ma ọ bụrụ na-agbada. A na-enyocha ebumnuche ndị dịpụrụ adịpụ naanị.
+- **Mmalite nnọkọ.** Mwepụta ọ bụla na-ewepụta akara ngosi `olx_` dị mkpụmkpụ dị mkpirikpi sitere na nzere nne na nna (`POST /api/launch/sessions`), obi na-akụ ya ka ngwa ọrụ na-agba, na-agụ nchịkọta ojiji wee bugharịa ya mgbe ngwa ahụ pụtachara. Ihe nrịbama a bụ akụkụ siri ike nke nne na nna ya: otu ikike, otu ma ọ bụ katalọgụ dị warara, ndụ dị mkpụmkpụ, na ọ bụghị nzere dashboard. Ngwá ọrụ ahụ na-enweta akara ngosi nnọkọ, ọ dịghị mgbe ọ bụla nzere nne na nna, a na-akpadokwa arịrịọ `launch:<tool>:<sessionId>` ma ọ bụrụ na enyereghị `--tag`. Ọnụ ụzọ na-enweghị nnọkọ API na-ada na `GatewayTooOld` kama ịlaghachi azụ na mbido enweghị nkọwa.
+- **Nhazi kwa mbido.** A na-ede faịlụ nhazi ngwa ọrụ na akwụkwọ ndekọ oge nkeonwe (mode 0700, prefix `omnirouter-`) ma wepụ ya mgbe nwatakịrị ahụ pụọ. Otu `SIGKILL` nke onye nrụpụta na-ahapụ akwụkwọ ndekọ aha n'azụ; `omniroute launch --cleanup` na-ewepu ụdị akwụkwọ ndekọ aha ozugbo ha tolitere otu ụbọchị.
+
 ## ntọlite na Gemini adịgide adịgide
 
 ```bash

@@ -4,13 +4,7 @@
 
 ---
 
-> **ప్రామాణిక మూలం:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, మరియు `open-sse/utils/error.ts`లోని పబ్లిక్ బిల్డర్లు
-> **పరీక్షలు:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **చివరిగా నవీకరించబడింది:** 2026-09-02 — v3.8.51
-> **లక్ష్య పాఠకులు:** ఎర్రర్ ప్రతిస్పందనలను నిర్వహించే ఏ ఇంజినీర్ అయినా (HTTP రూట్లు, SSE స్ట్రీమ్లు, ఎగ్జిక్యూటర్లు, MCP హ్యాండ్లర్లు).
-> **స్థితి:** క్లయింట్కు ఎర్రర్ సందేశాన్ని తిరిగి పంపే ప్రతి కోడ్ పాత్కు **తప్పనిసరి**.
+> **సత్యానికి మూలం:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, మరియు `open-sse/utils/error.ts` లో పబ్లిక్ బిల్డర్లు** పరీక్షలు:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** ప్రేక్షకులు:** ఏదైనా ఇంజనీర్ తాకిన దోష ప్రతిస్పందనలు (HTTP మార్గాలు, SSE స్ట్రీమ్లు, ఎగ్జిక్యూటర్లు, MCP హ్యాండ్లర్లు).** స్థితి:****MANDATORY** క్లయింట్కి ఎర్రర్ మెసేజ్ని అందించే ప్రతి కోడ్ పాత్ కోసం.
 
 ## ఇది ఎందుకు ఉంది
 

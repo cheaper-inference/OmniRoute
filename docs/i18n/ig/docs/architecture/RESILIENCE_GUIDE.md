@@ -12,54 +12,53 @@ OmniRoute nwere usoro nkwụghachi azụ atọ dị iche iche. Nke ọ bụla nw
 
 > **Env-vs-dashboard ụzọ maka mgbanwe ngbanwe.** Mwepu nnabata na-atụgharị mkpụrụ sitere na gburugburu — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — na-enye naanị _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Otu boolean nọgidere na `resilienceSettings` (Dashboard →** Ntọala → Resilience** / `PATCH /api/resilience`, echekwara na `key_value`) meriri uru env: normalization (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) na-edobe boolean echekwara mgbe ọ bụla ọ dị. Ịtọlite ụdị env var ka `true` na mbugharị ebe dashboard echekwara `false` ya mere ọ dịghị agbanwe ihe ọ bụla — tụgharịa ngbanwe ahụ.** Ntọala → Resilience** (ma ọ bụ kpochapụ ubi echekwara) kama.
 
-## 1. Mgbochi Sekiti Provider
+## 1. Onye na-agbaji sekit
 
-**Oke:** provider niile (dịka `glm`, `openai`, `anthropic`).
+**Oke:** ndị na-eweta ya niile (dịka, `glm`, `openai`, `anthropic`).
 
-**Ebumnuche:** kwụsị iziga traffic na provider na-adà ugboro ugboro na ogo upstream/ọrụ.
+**Ebumnuche:** kwụsị iziga okporo ụzọ gaa na onye na-eweta nke na-adaghachi ugboro ugboro na ọkwa upstream/service.
 
-**Nmejuputa:**
+**Mmejuputa:**
 
-- Klasu bụ isi: `src/shared/utils/circuitBreaker.ts`
-- Njikọta: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API ọnọdụ: `GET /api/monitoring/health`
-- API nrụzigharị: `POST /api/resilience/reset`
-- Ihe mkpuchi: `open-sse/services/accountFallback.ts`
-- Tebulu DB: `domain_circuit_breakers`
+- Isi klas: `src/shared/utils/circuitBreaker.ts`
+- Wiring: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Ọnọdụ API: `GET /api/monitoring/health`
+- Tọgharia API: `POST /api/resilience/reset`
+- Mpempe akwụkwọ: `open-sse/services/accountFallback.ts`
+- okpokoro DB : `domain_circuit_breakers`
 
-**Ọnọdụ:**
+**Steeti:**
 
-- `CLOSED` — a na-anabata traffic nkịtị
-- `DEGRADED` — a ka na-anabata traffic, mana a na-esochi ndaa nke provider rịgoro elu; ọ na-alaghachi na `CLOSED` mgbe ihe ịga nke ọma zuru ezu, mgbe ule njikọ ziri ezi gafere, ma ọ bụ mgbe njide `OPEN` kacha ogologo maka ụdị ndaa ikpeazụ gachara (urụ `cooldownByKind` ya, ma ọ bụ `resetTimeout`, × `maxBackoffMultiplier`, opekata mpe otu oge cooldown) n'enweghị ndaa ọhụrụ
-- `OPEN` — egbochiri provider nwa oge; combo routing na-agafere ya
-- `HALF_OPEN` — oge nrụzigharị agafeela; a na-anabata arịrị nyocha
+- `CLOSED` — nkịtị okporo ụzọ kwere
+- `DEGRADED` — okporo ụzọ ka anabatara, mana a na-enyocha ọdịda ndị na-eweta ọrụ dị elu; laghachi na `CLOSED` na ihe ịga nke ọma zuru oke, na ule njikọ ziri ezi, ma ọ bụ mgbe `OPEN` kachasị ogologo maka ụdị ọdịda ikpeazụ (uru `cooldownByKind` ya, ọzọ `resetTimeout`, × `maxBackoffMultiplier`, ọ dịkarịa ala otu cooldown) na-enweghị ọdịda ọhụrụ.
+- onye na-eweta `OPEN` — egbochiri nwa oge; combo routing na-awụ ya
+- `HALF_OPEN` — ntọgharị oge agafeela; anabata arịrịọ nyocha
 
-**Ndabara nke enwere ike ịhazigharị (`open-sse/config/constants.ts`, a na-egosi na Dashboard → Settings → Resilience):**
+**Ihe ndabara nwere ike ịhazi (`open-sse/config/constants.ts`, ekpughere na Dashboard → Settings → Resilience):**
 
-| Klasu   | Na-abanye DEGRADED na | Na-emeghe na | Oge nrụzigharị |
-| ------- | --------------------- | ------------ | -------------- |
-| OAuth   | ndaa 5                | ndaa 8       | 60s            |
-| API-key | ndaa 7                | ndaa 12      | 30s            |
-| Local   | enweta ya site        | ndaa 2       | 15s            |
+| Klas      | Ewedara na | Na-emepe na | Tọgharịa oge nkwụsị |
+| --------- | ---------- | ----------- | ------------------- |
+| OAuth     | 5 ọdịda    | 8 ọdịda     | 60s                 |
+| API-igodo | 7 ọdịda    | 12 ọdịda    | 30s                 |
 
-`degradationThreshold` na-achịkwa oge provider na-abanye na `DEGRADED`; `failureThreshold` na-achịkwa oge ọ na-emeghe wee bụrụ nke a na-agafere. A ka adjị egosi profaịlụ provider Local na ibe ntọala Resilience.
+`degradationThreshold` na-achịkwa mgbe onye na-eweta ya na-abanye `DEGRADED`; `failureThreshold` na-achịkwa mgbe ọ mepere ma mafe ya. `PROVIDER_PROFILES.local` (2 ọdịda / 15s) ka akọwara na `open-sse/config/constants.ts` mana** emebeghi wired ma** `getProviderCategory()` na-eweghachi naanị `oauth` ma ọ bụ `apikey`, yabụ ndị na-eweta mpaghara na-eji profaịlụ OAuth ma ọ bụ API-igodo.
 
-**Koodu ndị na-akpali (trip):** naanị ọnọdụ nke ogo provider `[408, 500, 502, 503, 504]`. EGBULA akpali maka njehie nke ogo akaụntụ (ọtụtụ 401/403/429 — ndị ahụ bụ nke cooldown ma ọ bụ lockout).
+**Koodu njem:** naanị ọkwa ọkwa `[408, 500, 502, 503, 504]`. Mee njem NOT maka njehie ọkwa ọkwa akaụntụ (ọtụtụ 401/403/429 — bụ nke jụrụ oyi ma ọ bụ mkpọchi).
 
-**Nweghachite n'ụzọ nwayọọ:** mgbe `OPEN` gụsịrị oge, `getStatus()`, `canExecute()`, `getRetryAfterMs()` na-emelite ọnọdụ ka ọ bụrụ `HALF_OPEN`. Ịgụ otu ahụ (na ndaa na-esote) na-ebelata `DEGRADED` ochie laghachi na `CLOSED`. Achọghị timer nke azụ.
+**mgbake ume ume:** mgbe `OPEN` kubie ume, `getStatus()`, `canExecute()`, `getRetryAfterMs()` nweta ume ka ọ bụrụ `HALF_OPEN`. Otu ihe ahụ na-agụ (na ọdịda na-esote) rere ure `DEGRADED` stale laghachi na `CLOSED`. Enweghị ngụ oge ndabere achọrọ.
 
 ---
 
-### Provider Cooldown zuru ụwa ọnụ nke nhọrọ onwe (ọnụ ụzọ windo)
+### Wepụ na-eweta zuru ụwa ọnụ Cooldown (ọnụ ụzọ windo)
 
-Ọkwa nke anọ, nke **nhọrọ onwe** (`PROVIDER_COOLDOWN_ENABLED`, ndabara **gbanyụrụ**) na-echekwa ncheta nke gafee arịrị banyere provider ndị na-adà na `open-sse/services/providerCooldownTracker.ts`, nke nkwubi ihe mgbaru ọsọ combo na-arịọ aka, ka arịrị combo ndị na-eso ibe ha kwụsị ịgaghari ọzọ provider nke dara na-adịbeghị anya. Ntinye nke ogo provider na-erubere ọnụ ụzọ windo nke `PROVIDER_PROFILES` isi:
+Nke anọ,** Nwepu** oyi akwa (`PROVIDER_COOLDOWN_ENABLED`, ndabara** gbanyụọ** ) na-edobe a cross-arịrịọ ebe nchekwa nke ọdịda na-eweta na `open-sse/services/providerCooldownTracker.ts`, enyocha site combo target resolution mere consecutive combos Arịrịọ kwụsị re-eje ije a na-eweta na dị nnọọ dara. Ndenye ọkwa ndị na-eweta ihe na-asọpụrụ ọnụ ụzọ windo `PROVIDER_PROFILES` :
 
-| Profaịlụ | na-akpali mgbe (`providerFailureThreshold`) | n'ime (`providerFailureWindowMs`) | na-adị jụụ ruo (`providerCooldownMs`) |
-| -------- | ------------------------------------------: | --------------------------------: | ------------------------------------: |
-| OAuth    |                                        `10` |                           `15min` |                                `5min` |
-| API key  |                                        `15` |                           `30min` |                               `10min` |
+| Profaịlụ  | njem mgbe (`providerFailureThreshold`) | n'ime (`providerFailureWindowMs`) | dị jụụ maka (`providerCooldownMs`) |
+| --------- | -------------------------------------: | --------------------------------: | ---------------------------------: |
+| OAuth     |                                   `10` |                           `15min` |                             `5min` |
+| igodo API |                                   `15` |                           `30min` |                            `10min` |
 
-N'okpuru ọkọlọtọ ahụ, **anaghị** agụ provider dị ka nke na-adị jụụ; ihe ịga nke ọma na-ehichapụ windo ahụ. Ntinye nke ogo njikọ (`provider:connectionId`) kama na-ejide backoff exponential nke `minRetryCooldownMs → maxRetryCooldownMs`. Ihe ndị na-anọchi anya: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Nchekwa regression: `tests/unit/provider-cooldown-window-gate.test.ts`.
+N'okpuru ọnụ ụzọ onye na-eweta ya dị** ọ bụghị** weere jụrụ oyi; ihe ịga nke ọma na-ekpochapụ windo. Ndenye ọkwa njikọ (`provider:connectionId`) na-edebe `minRetryCooldownMs → maxRetryCooldownMs` nhụsianya azụ kama. Mgbanwe: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. nche mgbagha: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Oge Nkwụsị Njikọ
 
@@ -847,6 +846,21 @@ IP` a nyochabeghị mbụ) ma ọ bụ enweghị ahịrị → a ka na-eme ka nj
 
 ---
 
+## Mgbe OmniRoute n'onwe ya enweghị ike iru ya
+
+Ihe mgbaji sekit onye na-eweta, njikọ jụrụ oyi, na mkpọchi ihe nlereanya na-agba ọsọ n'ime ọnụ ụzọ ámá. Ọ bụrụ na onye ahịa enweghị ike iru ọnụ ụzọ ámá, ọ na-enweta njehie njikọ. OmniRoute enweghị ike igbochi ọdịda ahụ. Onye ahịa ahụ na-ekpebi ma ọ ga-anwalegharị yana ozi ọ ga-egosi.
+
+OmniRoute ugbu a na-enye enweghị ndaghachi azụ n'akụkụ ndị ahịa ma kọwaa enweghị amụma maka ya. Hazie ụzọ ọ bụla ọzọ na onye ahịa ma ọ bụ n'ihu ọnụ ụzọ ámá.
+
+- `GET /api/health` na-enyocha ndụ na-enweghị nyocha.
+- `GET /api/health/ping` na-enyocha ịdị njikere, gụnyere ma nchekwa data ọ na-aza.
+- `GET /api/monitoring/health` na-enye ndị na-akpọ oku elele anya ahụike miri emi.
+- `omniroute launch <tool>` nyochaa `/api/monitoring/health` tupu ịmalite onye ahịa. Ọ nwere ike ịmalite ọnụ ụzọ ámá mpaghara na-akpaghị aka. Site na `--no-start`, ọnụ ụzọ enweghị ike iru ga-ebute `GatewayUnreachable` wee wepụ koodu `69`.
+
+Iji kwụpụ onye ahịa na OmniRoute, soro [nhazigharị onye ahịa](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Nchọpụta mmejọ
 
 - Weighted combo na-azaghachi `503 all_targets_cooling_down` (e tinyela `Retry-After`, `diagnostics.excluded` na-edepụta target ọ bụla tinyere `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → e haziri pool ma jikọọ ya, naanị timer resilience ka wepụrụ target ọ bụla; ịdọ aka ná ntị `[COMBO] Weighted selection: every target excluded before dispatch — …` na-akpọ aha ihe kpatara ya na sekọnd fọdụrụ. `404 no_executable_targets` sitere na combo otu ahụ pụtara na ọ dịghị timer resilience sonyere (ọ dịghị ihe ọ bụla ga-arụ, ma ọ bụ akaụntụ ọ bụla dara na ule nnọdụ). E wuru ya na `open-sse/services/combo/pinRecovery.ts` site na ndị a wepụrụ nke e chịkọtara na `targetResolution.ts`.
@@ -858,93 +872,68 @@ IP` a nyochabeghị mbụ) ma ọ bụ enweghị ahịrị → a ka na-eme ka nj
 
 ---
 
-## Ọnọdụ runtime — ntụaka ngwa ngwa maka agent
+## Oge ojiri gaa steeti — nnọchite ngwa ngwa
 
-> E bufere ya oku site na `AGENTS.md` → "Resilience Runtime State" (PR #12743) ka
-> ntụziaka agent nọgide n'okpuru ego context 40k. Ọ bụ nlele mkpirikpi nke na-eche
-> ihu agent nke ngalaba ndị dị n'elu; ngalaba ndị a na-agụ ọnụ ka ọ bụrụ ntụaka zuru oke.
+> Ebufere verbatim site na `AGENTS.md` → "Resilience Runtime State" (PR #12743) ya mere onye nduzi onye nnọchi anya na-anọ n'okpuru mmefu ego ọnọdụ 40k. Ọ bụ condensed, ndị nnọchiteanya chere ihu nke ngalaba n'elu; ngalaba ndị e depụtara ọnụ ka bụ ntụaka zuru oke.
 
-OmniRoute nwere usoro atọ metụtara ibe ha ma dị iche maka ọdịda nwa oge. Kwe ka
-oke ha dị iche mgbe ị na-achọpụta mmejọ omume routing. Lee
-[diagram resilience 3-ọkwa](../diagrams/exported/resilience-3layers.svg)
-(isi: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-maka maapụ nke a hụrụ n'anya ngwa ngwa.
+OmniRoute nwere usoro atọ metụtara mana dị iche iche-ọdịda nwa oge. Debe oke ha iche mgbe ị na-emezi omume ụzọ ụzọ. Hụ [eserese resilience nke oyi akwa 3](../diagrams/exported/resilience-3layers.svg) (isi iyi: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) maka maapụ nlere anya.
 
-### Circuit Breaker nke Provider
+### Onye na-agbaji sekit
 
-**Oke**: provider niile, dịka `glm`, `openai`, `anthropic`.
+**Oke** : onye na-eweta ya niile, dịka `glm`, `openai`, `anthropic`.
 
-**Ebumnuche**: ịkwụsị iziga traffic na provider na-adaghị ugboro ugboro n'ọkwa
-upstream/ọrụ, ka otu provider na-adịghị mma ghara ịsọsụ arịrị ọ bụla.
+**Ebumnuche** : kwụsị iziga okporo ụzọ gaa na onye na-eweta nke na-adaghachi ugboro ugboro na ọkwa upstream/service, ya mere otu onye na-enye ahụike adịghị ebelata arịrịọ ọ bụla.
 
-**Ebe e mepụtara ya**:
+**Mmejuputa** :
 
-- Klas isi: `src/shared/utils/circuitBreaker.ts`
-- Nhazi ọnụ ụzọ/ọrụ chat: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API ọnọdụ runtime: `src/app/api/monitoring/health/route.ts`
-- Mkpọchi ndị a na-ekekọrịta: `open-sse/services/accountFallback.ts`
-- Tabelu ọnọdụ echekwara: `domain_circuit_breakers`
+- Isi klas: `src/shared/utils/circuitBreaker.ts`
+- Mkparịta ụka gate/execution wiring: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Oge ojiri gaa API: `src/app/api/monitoring/health/route.ts`
+- Ihe mkpuchi nkekọrịtara: `open-sse/services/accountFallback.ts`
+- Tebụlụ steeti akagidere: `domain_circuit_breakers`
 
-**Ọnọdụ** (4 — `src/shared/utils/circuitBreaker.ts`):
+**Steeti** (4 — `src/shared/utils/circuitBreaker.ts`:
 
-- `CLOSED`: a na-anabata traffic nkịtị.
-- `DEGRADED`: mpaghara ịdọ aka ná ntị n'oge — ọdịda gafere oke mbelata ma
-  erubeghị oke breaker; traffic ka na-asọ, dashboard na-egosi ịdọ aka ná ntị. Ule njikọ
-  ziri ezi ma ọ bụ windo dị jụụ na-enweghị ọdịda ọhụrụ na-eweghachi ya na `CLOSED`
-  (`docs/architecture/RESILIENCE_GUIDE.md` nwere windo ahụ).
-- `OPEN`: e gbochiri provider nwa oge; ndị na-akpọ na-enweta nzaghachi
-  provider-circuit-open ma ọ bụ routing combo na-agafe na target ọzọ.
-- `HALF_OPEN`: oge nrụzi gachara; kwenyere arịrị nyocha (probe). Ihe ịga nke ọma
-  na-emechi breaker, ọdịda na-emeghe ya ọzọ.
+- `CLOSED`: a na-anabata okporo ụzọ nkịtị.
+- `DEGRADED`: mgbanaka ịdọ aka ná ntị mmalite — ọdịda gafere n'ókè mmebi mana ọ bụghị ọnụ ụzọ nkwụsị; okporo ụzọ ka na-aga, dashboards na-egosi ịdọ aka ná ntị. Nnwale njikọ dị irè ma ọ bụ windo dị jụụ na-enweghị ọdịda ọhụrụ na-eweghachi ya na `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` nwere windo).
+- `OPEN`: egbochiri onye na-eweta ya nwa oge; Ndị na-akpọ oku na-enweta nzaghachi ghe oghe ma ọ bụ ụzọ mkpọmkpọ na-amafe na ebumnuche ọzọ.
+- `HALF_OPEN`: ịtọgharịa oge agafeela; hapụ arịrịọ nyocha. Ihe ịga nke ọma na-emechi ihe nbibi, ọdịda ga-emepe ya ọzọ.
 
-**Ndabara** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, nke a na-eri site na
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` na `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` na `src/sse/handlers/chatHelpers.ts`). Breaker nke
-provider niile na-arụ ọrụ na `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Ihe ndabara** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, eripịa ya site `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` na `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` na `src/sse/handlers/chatHelpers.ts`). Onye na-eweta ihe niile na-agba ọsọ na `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profaịlụ |   na-ada na | na-emeghe na (`circuitBreakerThreshold`) | nrụzi (`circuitBreakerReset`) |
-| -------- | ----------: | ---------------------------------------: | ----------------------------: |
-| OAuth    |         `5` |                                      `8` |                         `60s` |
-| API key  |         `7` |                                     `12` |                         `30s` |
-| Local    | (ewepụtara) |                                      `2` |                         `15s` |
+| Profaịlụ  | na-eweda ala na | na-emepe na (`circuitBreakerThreshold`) | tọgharịa (`circuitBreakerReset`) |
+| --------- | --------------: | --------------------------------------: | -------------------------------: |
+| OAuth     |             `5` |                                     `8` |                            `60s` |
+| igodo API |             `7` |                                    `12` |                            `30s` |
 
-`PROVIDER_PROFILES` na-akọwakwa `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 nkeji) na `providerCooldownMs` (5/10/1 nkeji): ndị a na-akwalite
-**ọnụ ụzọ windo nke Provider Cooldown zuru ụwa ọnụ nke a họọrọ (opt-in)** (`PROVIDER_COOLDOWN_ENABLED`, ndabara
-gbanyụrụ) — ntinye ọkwa provider na `open-sse/services/providerCooldownTracker.ts` na-agụ naanị dị ka
-na-ajụ jụ mgbe ọdịda ruru `providerFailureThreshold` n'ime `providerFailureWindowMs`, ma jụụ
-maka `providerCooldownMs`. Ha ABỤGHỊ oke nke breaker dị ndụ — atụnula ha
-na-atụ anya omume breaker. Enwere ike ịkagbu ndabara ọ bụla site na
-env vars `OMNIROUTE_PROVIDER_BREAKER_*` na `OMNIROUTE_CIRCUIT_BREAKER_*`;
-tabelu ntụaka ziri ezi nke runtime bi na `docs/architecture/RESILIENCE_GUIDE.md`.
+Profaịlụ `local` (`2` ọdịda / `15s`) dịkwa na `PROVIDER_PROFILES`, mana anaghị etinye ya n'ime onye na-agbaji: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) na-anabata `oauth` ma ọ bụ `apikey`, na `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) na-eweghachi otu n'ime abụọ ahụ (ndị na-enye ahaghị aha ga-enweta `apikey`).
 
-Naanị ọnọdụ ọdịda ọkwa provider kwesịrị ịkpasu provider breaker:
+`PROVIDER_PROFILES` na-akọwakwa `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) na `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, ebe ụkpụrụ mpaghara na-adịghị agwụ agwụ maka otu ihe kpatara ya dị n'elu: ike ndị a** ọnụ ụzọ mpio nke Nwepu-na Global Provider Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, ndabara kwụsịrị) — ntinye ọkwa onye na-eweta na `open-sse/services/providerCooldownTracker.ts` na-agụta dị ka jụrụ oyi mgbe `providerFailureThreshold` dara n'ime `providerFailureWindowMs`, wee mee ka ọ dị jụụ maka `providerCooldownMs`. Ha bụ NOT ọnụ ụzọ onye nbibi dị ndụ — adịghị emegharị ha na-atụ anya omume mmebi. Ihe ndabara ọ bụla nwere ike ịkagbu site na `OMNIROUTE_PROVIDER_BREAKER_*` na `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; Tebụlụ ntụaka oge ojiri gaa na-ebi na `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Naanị ọkwa ọdịda ọkwa onye na-eweta ga-emebi onye na-eweta ihe:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Adakwasịla breaker nke provider niile maka mmejọ akaụntụ/igodo/model nkịtị dị ka ọtụtụ
-ọnọdụ `401`, `403`, ma ọ bụ `429`. Ndị ahụ na-abụkarị nke connection cooldown ma ọ bụ model
-lockout. `403` nke provider API-key n'ozuzu kwesịrị ịzọlite belụsọ na a kọwapụtaghị ya
-dị ka mmejọ provider/akaụntụ njedebe.
+Etugharịla onye na-eweta ihe niile maka njehie account/key/model nkịtị dịka ọtụtụ `401`, `403`, ma ọ bụ `429`. Ndị ahụ na-esonyekarị na nkwụsị njikọ ma ọ bụ mkpọchi ihe nlereanya. Onye na-eweta igodo API `403` kwesịrị ị nwetaghachi ọ gwụla ma ewepụtara ya dị ka njehie provider/account njedebe.
 
-Breaker ahụ na-eji mweghachi lazy, ọ bụghị timer na-arụ ọrụ n'azụ. Mgbe `OPEN` gachara, ọgụgụ dị ka `getStatus()`, `canExecute()`, na `getRetryAfterMs()` na-emelite steeti ahụ ka ọ bụrụ `HALF_OPEN`, ka dashboards na ndị na-ewu ndị ga-eso n'otu (combo candidates) ghara ịga n'ihu na-ewepụ provider gachara ruo mgbe ebighi ebi.
+Onye na-agbaji na-eji mgbake ume ume, ọ bụghị oge ndabere. Mgbe `OPEN` kubie ume, na-agụ dị ka `getStatus()`, `canExecute()`, na `getRetryAfterMs()` na-eme ka steeti ahụ nwee ume ka ọ `HALF_OPEN`, ya mere dashboards na ndị na-ewu ihe nhọpụta anaghị anọgide na-ewepụ onye na-eweta kubie ume ruo mgbe ebighị ebi.
 
-### Oge Iju Anya Njikọ
+### Jikọọ Jikọọ
 
-**Oke**: otu njikọ/akaụntụ/igodo nke provider.
+**Oke** : otu onye na-enye connection/account/key.
 
-**Ebumnuche**: ịwụfe otu igodo/akaụntụ na-adịghị mma n'obere oge ka njikọ ndị ọzọ maka otu provider ahụ gaa n'ihu na-eje ozi arịrị.
+**Ebumnuche** : mafee otu key/account ọjọọ nwa oge ka ị na-ahapụ njikọ ndị ọzọ maka otu onye na-eweta ka ọ gaa n'ihu na-enye arịrịọ.
 
-**Mmejuputa**:
+**Mmejuputa** :
 
-- Ụzọ ide/ihe mmelite: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Nhọrọ/inyocha akaụntụ: `src/sse/services/auth.ts::getProviderCredentials...`
-- Ịgbakọ oge iju anya: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Write/update : `src/sse/services/auth.ts::markAccountUnavailable()`
+- Akaụntụ selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Ngụkọ jụrụ oyi: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Ntọala: `src/lib/resilience/settings.ts`
 
-Ubi dị mkpa na njikọ provider:
+Mpaghara ndị dị mkpa na njikọ ndị na-eweta:
 
 ```ts
 rateLimitedUntil;
@@ -955,50 +944,50 @@ errorCode;
 backoffLevel;
 ```
 
-N'oge a na-ahọrọ akaụntụ, a na-awụfe njikọ mgbe:
+N'oge nhọrọ akaụntụ, a na-amafe njikọ mgbe:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Oge iju anya bụkwa nke lazy: mgbe `rateLimitedUntil` gafere n'oge gara aga, njikọ ahụ na-alaghachi inwe ike a họrọ ọzọ. Mgbe ejiri ya nke ọma, `clearAccountError()` na-ehichapụ `testStatus`, `rateLimitedUntil`, ubi njehie, na `backoffLevel`.
+Cooldowns dịkwa umengwụ: mgbe `rateLimitedUntil` dị n'oge gara aga, njikọ ahụ ga-erukwa ọzọ. Na iji ihe ịga nke ọma, `clearAccountError()` na-ekpochapụ `testStatus`, `rateLimitedUntil`, mpaghara njehie, na `backoffLevel`.
 
-Omume oge iju anya njikọ ndabara:
+Àgwà jụrụ oyi njikọ:
 
-- Oge iju anya ntọala OAuth: `5s`.
-- Oge iju anya ntọala igodo API: `3s`.
-- `429` nke igodo API kwesịrị ịhọrọ ntụaka ịgbanwaghari nke upstream (`Retry-After`, isi reset, ma ọ bụ ederede reset a nwere ike ịkọwapụta) mgbe ha dị.
-- Ndịda ugboro ugboro nke a nwere ike ịlọghachi na-eji backoff exponential:
+- OAuth base cooldown: `5s`.
+- Ndabere isi igodo API: `3s`.
+- API igodo `429` kwesịrị ịmasị nnwagharị mgbagharị mgbago elu (`Retry-After`, nkụnye eji isi mee, ma ọ bụ ederede nrụpụta ntụgharị) mgbe ọ dị.
+- Ọdịda enwere ike nwetaghachi ugboro ugboro na-eji ihe nkwụghachi azụ nke exponential:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Nchebe megide thundering-herd na-egbochi ndịda na-emekọ n'otu oge na otu njikọ ịghara ịgbatị oge iju anya ugboro ugboro ma ọ bụ ịgụkwasị `backoffLevel` ugboro abụọ.
+Onye na-eche nche na-egbochi égbè eluigwe na-egbochi ọdịda nke otu oge na otu njikọ site na ịgbatị oyi oyi ma ọ bụ okpukpu abụọ na-abawanye `backoffLevel`.
 
-Steeti ikpeazụ abụghị oge iju anya. `banned`, `expired` (nke na-aghọ ikpeazụ naanị mgbe ịgbanwaghari nwere oke N gachara site na `EXPIRED_RETRY_MAX`), na `credits_exhausted` bu n'echiche ka ha nọrọ na-enweghị ike iji ruo mgbe akwụkwọ njirimara/ntọala gbanwere ma ọ bụ onye ọrụ tọgharịa ha. Emula idegharị steeti ikpeazụ n'elu steeti oge iju anya nke obere oge.
+Steeti ọdụ abụghị ihe nkwụghachi azụ. `banned`, `expired` (nke na-aghọ ọnụ naanị mgbe N bounded emegharịghachi site `EXPIRED_RETRY_MAX`), na `credits_exhausted` e bu n'obi ka ọ ghara ịdị ruo mgbe credentials/settings gbanwere ma ọ bụ onye ọrụ megharịa ha. Edeghachila steeti ọnụ nwere ọnọdụ nkwụsịtụ na-adịru nwa oge.
 
-### Mgbachi Ụdị
+### Mkpọchi ụdị
 
-**Oke**: provider + njikọ + ụdị.
+**Oke** : onye na-eweta + njikọ + nlereanya.
 
-**Ebumnuche**: izere ịgbanyụsị njikọ dum mgbe naanị otu ụdị na-adịghị ma ọ bụ nwere oke quota maka njikọ ahụ.
+**Ebumnuche** : zere imebi njikọ niile mgbe naanị otu ụdị adịghị ma ọ bụ oke oke maka njikọ ahụ.
 
-Ihe atụ:
+Ọmụmaatụ:
 
-- Ndị na-enye quota kwa ụdị na-alọghachi `429`.
-- Ndị na-enye nke mpaghara na-alọghachi `404` maka otu ụdị na-efu.
-- Ndịda ikike ọnọdụ/ụdị kpọmkwem nke provider dị ka ọnọdụ Grok a họpụtara.
+- Ndị na-eweta oke ihe nlereanya na-eweghachi `429`.
+- Ndị na-eweta mpaghara na-eweghachi `404` maka otu ụdị efu.
+- Ọdịda ikike mode/model akọwapụtara onye na-eweta dị ka ụdị Grok ahọpụtara.
 
-Mgbachi ụdị nọ na `open-sse/services/accountFallback.ts` ma na-ekwe ka otu njikọ ahụ gaa n'ihu na-eje ozi ụdị ndị ọzọ.
+Mkpọchi Model na-ebi na `open-sse/services/accountFallback.ts` wee hapụ otu njikọ ahụ gaa n'ihu na-ejere ụdị ndị ọzọ ozi.
 
-### Ntụziaka Ịchọpụta Njehie
+### Ntuzi ndozi
 
-- Ọ bụrụ na a wụsịrị igodo niile nke provider, lelee ma steeti breaker nke provider na `rateLimitedUntil`/`testStatus` nke njikọ ọ bụla.
-- Ọ bụrụ na a pụtara na wepụla provider ruo mgbe ebighi ebi mgbe windo reset gachara, chọpụta ma koodu na-agụ `state` gburugburu kama iji `getStatus()`/`canExecute()`.
-- Ọ bụrụ na otu igodo provider daa ma ndị ọzọ kwesịrị ịrụ ọrụ, họrọ oge iju anya njikọ karia breaker nke provider.
-- Ọ bụrụ na naanị otu ụdị daa, họrọ mgbachi ụdị karia oge iju anya njikọ.
-- Ọ bụrụ na steeti kwesịrị ịmewe onwe ya, ọ kwesịrị ịnwe timestamp nke ọdịnihu/oge reset agwụla yana ụzọ ọgụgụ na-emelite steeti gachara. Ọnọdụ ebighi ebi chọrọ mgbanwe aka n'akwụkwọ njirimara ma ọ bụ nhazi.
+- Ọ bụrụ na ahapụchara igodo niile maka onye na-eweta ya, lelee ma steeti ndị na-eweta ihe na-eweta yana `rateLimitedUntil`/`testStatus` njikọ ọ bụla.
+- Ọ bụrụ na onye na-eweta egosi na ewepụrụ kpamkpam mgbe mpio nrụpụta, lelee ma koodu ọ na-agụ `state` raw kama iji `getStatus()`/`canExecute()`.
+- Ọ bụrụ na otu igodo ndị na-eweta ọrụ daa mana ndị ọzọ kwesịrị ịrụ ọrụ, họrọ njikọ jụrụ oyi karịa onye na-eweta ihe.
+- Ọ bụrụ na naanị otu ụdị ada ada, na-ahọrọ mkpọchi nlereanya karịa njikọ jụrụ oyi.
+- Ọ bụrụ na steeti kwesịrị ị nwetaghachi onwe ya, ọ ga-enwerịrị oge timestamp/reset n'ọdịnihu yana ụzọ ịgụ ihe na-eme ka steeti kubie ume. Ọkwa ọkwa na-adịgide adịgide chọrọ nzere ntuziaka ma ọ bụ mgbanwe nhazi.
 
 ---
 

@@ -21,25 +21,21 @@ une **CLI Codex accessible à l’URL app-server configurée**, et cette CLI doi
 ## 1. Architecture
 
 ```
-┌─ Application OmniRoute ──────────┐        ┌─ Side-car codex-app-server ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ jeton de capacité)            │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  gère lui-même l’OAuth OpenAI       │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, actualisation │
-        │ partage (volumes compose)          │  automatique)                       │
-        ▼                                    └─────────────────────────────────────┘
-  codex-appserver-token   → le jeton de capacité WS (monté par les deux)
-  codex-appserver-home    → ~/.codex (auth.json écrit par le tableau de bord,
-                             lu par le codex app-server du side-car)
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
+        ▼
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Le side-car écoute **uniquement** sur le réseau compose interne
-  (`ws://codex-app-server:1456`), derrière un jeton de capacité. Il n’est
-  **jamais** exposé sur l’hôte ni sur Internet.
-- La CLI Codex est intégrée à `omniroute:base` ; aucune installation de Codex
-  n’est donc nécessaire sur l’hôte ni sur la machine de l’utilisateur lorsque
-  vous exécutez le side-car.
+- Le side-car écoute** seulement** sur le réseau de composition interne (`ws://codex-app-server:1456`) derrière un jeton de capacité. C'est** jamais** publié sur l'hôte ou sur Internet.
+- Le side-car utilise `omniroute:cli-no-docker`, construit à partir de la cible `runner-cli-no-docker`, qui inclut le Codex CLI.
 
 ## 2. Démarrage
 

@@ -13,9 +13,9 @@
 
 ## Hva det er
 
-OmniRoute registrerer 394 leverandører, inkludert 155 katalogoppføringer merket**free/no-auth** (no-auth, free-tier OAuth eller free-tier API key — se [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) og hele [Free Tiers-katalogen](../reference/FREE_TIERS.md) ). Fangsten: gratisleverandører varierer veldig i modellkvalitet. En leverandør uten godkjenning som betjener en grensemodell er langt mer nyttig enn en som betjener en liten eldre modell.
+OmniRoute registrerer 394 leverandører, 50 av dem med gratis tilgang (no-auth, free-tier OAuth eller free-tier API key — se [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) og hele [Free Tiers-katalogen](../reference/FREE_TIERS.md) ). Fangsten: gratisleverandører varierer veldig i modellkvalitet. En leverandør uten godkjenning som betjener en grensemodell er langt mer nyttig enn en som betjener en liten eldre modell.
 
-**Gratis leverandørrangeringer** svar"** hvilken gratis leverandør gir meg den beste modellen?** ved å bli med i hver gratis leverandørs katalog med** publikumsbaserte kvalitetspoeng** fra** Arena AI leaderboard** (human-preferanse ELO, den samme ideen bak LMArena chatbot-arenaen). Leverandører blir deretter rangert etter styrken til deres** beste gratismodell** .
+**Gratis leverandørrangeringer** svar"** hvilken gratis leverandør gir meg den beste modellen?** ved å bli med i hver gratis leverandørs katalog med** kvalitetspoeng fra publikum** fra** Arena AI leaderboard** (human-preferanse ELO, den samme ideen bak LMArena chatbot-arenaen). Leverandører blir deretter rangert etter styrken til deres** beste gratismodell** .
 
 Rangeringen er beregnet fra tre reelle kilder:
 

@@ -12,6 +12,12 @@ Tarafsız `config/cli-tools-manifest.json` sözleşmesi kanonik IDs, takma adlar
 
 Kesinti ve sonlandırma sinyalleri çocuğa iletilir. Başlatıcı, geçici yapılandırmayı kaldırmadan önce alt öğenin close olayını bekler. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` zorunlu fesih öncesindeki ek süreyi kontrol eder (varsayılan 5000 milisaniye).
 
+`omniroute launch <tool>` (bkz. [LAUNCH.md](./LAUNCH.md) ) aynı ortam kurallarını ve sinyal iletmeyi takip eder ve şunu ekler:
+
+- **Ağ geçidinin otomatik başlatılması.** Yerel bir hedef için, bağlantı noktasında hiçbir ağ geçidi yanıt vermediğinde başlatıcı, ayrı bir reaper işlemi altında `127.0.0.1` bağlı `omniroute serve --headless --no-open` başlatır. Çalışan her başlatma, `DATA_DIR/launch/leases/` cinsinden bir kiralama tutar (her 15 saniyede bir kalp atışı, 45 saniye sonra veya işlemi bittiğinde eski). Reaper, boşta kalma yetkisi için hiçbir kira yayınlanmadığında başlattığı ağ geçidini durdurur (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, varsayılan 10000 milisaniye). Kullanıcının başlattığı bir ağ geçidi kullanılır ancak hiçbir zaman durdurulmaz. `--keep-gateway` veya `omniroute gateway keep` başlatıcı ağ geçidini normal ağ geçidine dönüştürür; `--no-start` eski arıza durumunda arıza davranışını geri yükler. Yalnızca uzak hedefler araştırılır.
+- **Oturumları başlatın.** Her başlatma, ana kimlik bilgisinden (`POST /api/launch/sessions`) kısa ömürlü bir `olx_` oturum belirteci basar, araç çalışırken bunu gönderir, kullanım özetini okur ve araçtan çıktıktan sonra onu iptal eder. Belirteç, üst öğenin katı bir alt kümesidir: aynı izinler, aynı veya daha dar bir katalog, daha kısa ömür ve bir kontrol paneli kimlik bilgisi değildir. Araç, oturum belirtecini alır, asla üst kimlik bilgisini almaz ve `--tag` verilmediği sürece istekler `launch:<tool>:<sessionId>` etiketlenir. API oturumu olmayan bir ağ geçidi, kapsam dışı başlatmaya geri dönmek yerine `GatewayTooOld` ile başarısız olur.
+- **Lansman başına yapılandırma.** Araç yapılandırma dosyaları özel bir geçici dizine (mod 0700, `omnirouter-` öneki) yazılır ve çocuk çıktıktan sonra kaldırılır. Başlatıcının bir `SIGKILL` dizini geride bırakır; `omniroute launch --cleanup` bu tür dizinleri bir günden eski olduklarında kaldırır.
+
 ## Gemini kalıcı kurulum
 
 ```bash

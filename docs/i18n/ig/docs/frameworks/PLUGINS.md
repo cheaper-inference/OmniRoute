@@ -90,18 +90,17 @@ Ihe `ctx` e zigara na `register(program, ctx)`:
 
 ## Nchọpụta
 
-A na-achọpụta plugins site na:
+A na-achọpụta ngwa mgbakwunye site na:
 
-1. `~/.omniroute/plugins/<name>/` — nrụnye mpaghara onye ọrụ
-2. Mgbanwe gburugburu `OMNIROUTE_PLUGIN_PATH` — ndekọ ahaziri iche
+1. `~/.omniroute/plugins/node_modules/<name>/` — ebe `omniroute plugin install` na-etinye ngwugwu (ihe npm `--prefix`, ọ bụghị `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — akwụkwọ ndekọ aha ngwa mgbakwunye ejiri aka depụtaghachi
+3. `OMNIROUTE_PLUGIN_PATH` env var — akwụkwọ ndekọ aha
 
-Ha abụọ bụ naanị maka **CLI**. Ebe plugin nke dị n'akụkụ sava na-arụ ọrụ (marketplace/plugins `plugin.json`
-nke na-arụ ọrụ n'ime proxy) nwere scanner nke ya yana override nke ya,
-`OMNIROUTE_PLUGINS_DIR` — lee
-[PLUGIN_MARKETPLACE.md → Ndekọ plugin](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Ịtọ otu anaghị emetụta nke ọzọ.
+A na-agbaso akwụkwọ ndekọ aha nwere njikọ (ihe npm na-emepụta maka `plugin install ./dir`).
 
-A na-ejide njehie nbudata ma bipụta ha dịka ịdọ aka ná ntị — plugin mebiri emebi anaghị eme ka CLI daa.
+Ha abụọ bụ** CLI-naanị** . Oge ngwa mgbakwunye n'akụkụ ihe nkesa (ebe ahịa/`plugin.json` plugins na-agba ọsọ n'ime proxy) nwere nyocha nke ya nwere ngbanwe nke ya, `OMNIROUTE_PLUGINS_DIR` — lee [PLUGIN_MARKETPLACE.md → Plugin directory](./PLUGIN_MARKETPLACE.md#plugin-directory). Ịtọlite otu anaghị emetụta nke ọzọ.
+
+A na-ejide ma bipụta njehie nbudata dị ka ịdọ aka ná ntị — ngwa mgbakwunye gbajiri agbaji anaghị emebi CLI.
 
 ## Nche
 

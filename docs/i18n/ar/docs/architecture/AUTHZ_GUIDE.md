@@ -5,11 +5,10 @@
 ---
 
 > **مصدر الحقيقة:** `src/server/authz/`، `src/shared/constants/publicApiRoutes.ts`، `src/lib/api/requireManagementAuth.ts`، `src/shared/utils/apiAuth.ts`
-> **آخر تحديث:** 2026-09-22 — تشير مساحات أسماء النطاقات إلى MCP-SERVER.md
 
-لدى OmniRoute مسار معالجة تخويل مُدرك للمسارات، يتحكم في كل طلب API. ويُعد التصنيف **حتميًا** و**مغلقًا عند الفشل** — فأي شيء يتعذر تصنيفه ينتهي به المطاف ضمن `MANAGEMENT` ويتطلب جلسة أو رمزًا مميزًا بمستوى الإدارة. تشرح هذه الصفحة النموذج للمهندسين الذين يتولون صيانة المسارات أو تصميم نقاط نهاية جديدة.
+يحتوي OmniRoute على مسار تفويض مدرك للمسار والذي يبواب كل طلب API. التصنيف هو** حتمية** و** مغلق بالفشل** — أي شيء لا يمكن تصنيفه ينتهي به الأمر على أنه `MANAGEMENT` ويتطلب جلسة أو رمزًا مميزًا على مستوى الإدارة. تشرح هذه الصفحة النموذج المخصص للمهندسين الذين يقومون بصيانة المسارات أو تصميم نقاط نهاية جديدة.
 
-![مسار معالجة AuthZ (3 فئات للمسارات + تقييم السياسات)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > المصدر: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -177,8 +176,8 @@ Incoming request → src/proxy.ts
 كل فئة مسار لها سياسة في `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — يُرجع دائمًا `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — يستخرج Bearer، ويتم التحقق من صحته عبر `validateApiKey()`. يصل إلى المجهول فقط عند تعطيل علامة ميزة `REQUIRE_API_KEY` الفعالة. يتم حل العلامة الفعالة من خلال `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) لذا فإن علامات ميزات لوحة المعلومات ومتغيرات البيئة تحكم `/api/v1/*` و `/api/v1beta/*` والأسماء المستعارة بشكل متسق؛ فشل محلل مغلقة. يسمح بطلبات جلسة لوحة المعلومات على مسارات API للعميل (بما في ذلك `/api/v1/models`، المستخدمة بواسطة كتالوج نموذج لوحة المعلومات). عند تمكين Entra ID SSO ، تتم معالجة الحامل الذي يمثل رمز Entra من الناحية الهيكلية (ثلاثة مقاطع base64url، `RS*` alg، `kid`) بواسطة فرع SSO** قبل** `validateApiKey()` وحكمه نهائي — فهو لا يصل أبدًا إلى مسار مفتاح واجهة برمجة التطبيقات (API) أو الفرع الذي يتحول إلى مجهول، لذلك لا يمكن أن يصبح انقطاع موفر الهوية وصولاً مفتوحًا. لا تتأثر مفاتيح API الثابتة. انظر [إنترا ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) يقبل — جلسة لوحة المعلومات، أو طلبات مزامنة النموذج الداخلي (المتطابقة مع `/api/providers/[name]/(sync-models|models)`)، أو يتخطى كليًا إذا أعاد `isAuthRequired()` خطأ. تُرجع 403 (`AUTH_001`) في حالة وجود رمز حامل ولكنه غير صالح، وتُرجع 401 بخلاف ذلك. يفرض أيضًا طبقات حماية الطريق (LOCAL_ONLY / ALWAYS_PROTECTED) قبل أي فرع مصادقة — راجع [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). يمكن الوصول إلى مسارات LOCAL_ONLY في `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (اليوم: `/api/mcp/`) من دون استرجاع عندما يحمل المفتاح Bearer نطاق `manage` ؛ تظل كافة مسارات LOCAL_ONLY الأخرى ذات استرجاع صارم بغض النظر عن النطاق.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — يستخرج Bearer، ويتحقق من صحته عبر `validateApiKey()`. يصل إلى المجهول فقط عند تعطيل علامة ميزة `REQUIRE_API_KEY` الفعالة. يتم حل العلامة الفعالة من خلال `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) لذا فإن علامات ميزات لوحة المعلومات ومتغيرات البيئة تحكم `/api/v1/*` و `/api/v1beta/*` والأسماء المستعارة بشكل متسق؛ فشل محلل مغلقة. يسمح بطلبات جلسة لوحة المعلومات على مسارات API للعميل (بما في ذلك `/api/v1/models`، المستخدمة بواسطة كتالوج نموذج لوحة المعلومات). عند تمكين Entra ID SSO ، تتم معالجة الحامل الذي يمثل رمز Entra من الناحية الهيكلية (ثلاثة مقاطع base64url، `RS*` alg، `kid`) بواسطة فرع SSO** قبل** `validateApiKey()` وحكمه نهائي — فهو لا يصل أبدًا إلى مسار مفتاح واجهة برمجة التطبيقات (API) أو الفرع الذي يتحول إلى مجهول، لذلك لا يمكن أن يصبح انقطاع موفر الهوية وصولاً مفتوحًا. لا تتأثر مفاتيح API الثابتة. انظر [إنترا ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) يقبل — جلسة لوحة المعلومات، أو طلبات مزامنة النموذج الداخلي (المتطابقة مع `/api/providers/[name]/(sync-models|models)`)، أو يتخطى كليًا إذا أعاد `isAuthRequired()` خطأ. تُرجع 403 (`AUTH_001`) في حالة وجود رمز حامل ولكنه غير صالح، وتُرجع 401 بخلاف ذلك. يفرض أيضًا طبقات حماية الطريق (LOCAL_ONLY / ALWAYS_PROTECTED) قبل أي فرع مصادقة — راجع [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). يمكن الوصول إلى مسارات LOCAL_ONLY في `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (اليوم: `/api/mcp/`) من عدم الاسترجاع عندما يحمل مفتاح Bearer نطاق `manage`/`admin` أو نطاق `mcp:connect` الضيق (`hasMcpConnectOrManageScope`)، أو من خلال جلسة لوحة معلومات مصادق عليها؛ تظل جميع مسارات LOCAL_ONLY الأخرى ذات استرجاع صارم بغض النظر عن النطاق.
 
 السياسة الناجحة ترجع `AuthSubject` مع `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. يمكن للمعالجات النهائية قراءتها عبر `assertAuth(request, "CLIENT_API")` في `src/server/authz/assertAuth.ts` بدلاً من إعادة تشغيل منطق المصادقة.
 
@@ -271,34 +270,22 @@ export async function POST(request: Request) {
 
 ## النطاقات
 
-ثلاثة مساحات أسماء. يقرأ كل مدقّق السلاسل النصية الخاصة به فقط. للمقارنة جنبًا إلى جنب، بما في ذلك سبب فشل `manage` في `scopeMatches` بالنسبة إلى `read:compression` وسبب عدم تمكّن رمز وصول ذي نطاق `read` من تنفيذ `PATCH /api/keys/{id}`، راجع
-[مساحات أسماء النطاقات الثلاث](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+ثلاث مساحات أسماء. يقرأ كل مدقق السلاسل الخاصة به فقط. جنبًا إلى جنب، بما في ذلك سبب فشل `manage` `scopeMatches` لـ `read:compression` ولماذا لا يمكن لرمز الوصول `read` `PATCH /api/keys/{id}`، هو [مساحات أسماء النطاق الثلاثة](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-تحمل مفاتيح API مصفوفة `scopes` (مخزّنة بصيغة JSON في `api_keys.scopes`، راجع `src/lib/db/apiKeys.ts`).
+تحمل مفاتيح API مصفوفة `scopes` (مخزنة كـ JSON في `api_keys.scopes`، راجع `src/lib/db/apiKeys.ts`).
 
 ### نطاق الإدارة
 
-- `manage` / `admin` — `hasManageScope`. وصول حامل الرمز إلى مسارات واجهة API الإدارية.
-- إن `mcp:connect` و`self:usage` و`self:account-quota` و
-  `policy:bypass-provider-quota` هي نطاقات تراكمية تعتمد على التطابق التام. وهي تقع
-  خارج `MANAGEMENT_API_KEY_SCOPES`. لا يتيح `mcp:connect` سوى
-  استثناء الوصول غير المحلي إلى `/api/mcp/`.
+- `manage` / `admin` — `hasManageScope`. وصول حاملها إلى طرق إدارة API.
+- `mcp:connect` و `self:usage` و `self:account-quota` و `policy:bypass-provider-quota` عبارة عن نطاقات متطابقة تمامًا. يجلسون خارج `MANAGEMENT_API_KEY_SCOPES`. يفتح `mcp:connect` فقط اقتطاع `/api/mcp/` غير القابل للاسترجاع.
 
-### نطاقات أدوات MCP
+### نطاقات أداة MCP
 
-دليل النطاقات وقواعد المطابقة (سلسلة نصية متطابقة، أو نطاق ممنوح ينتهي بـ `*`):
-[نطاقات أدوات MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-تمثّل `MCP_SCOPE_LIST` في `src/shared/constants/mcpScopes.ts` المجموعة الفرعية الأصلية
-ذات الأنواع المحددة، وليست الدليل الكامل. يجري الإنفاذ في
-`open-sse/mcp-server/scopeEnforcement.ts` بعد أن تحلّ `resolveCallerScopeContext()`
-النطاقات من معلومات مصادقة MCP أو بيانات الطلب الوصفية أو `OMNIROUTE_MCP_SCOPES`.
-ويظل معطّلًا ما لم تكن `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+قواعد الكتالوج والمطابقة (سلسلة متطابقة، أو نطاق محدد ينتهي بـ `*`): [نطاقات أداة MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` في `src/shared/constants/mcpScopes.ts` هي المجموعة الفرعية الأصلية المكتوبة، وليس هذا الكتالوج الكامل. يتم تنفيذ التنفيذ في `open-sse/mcp-server/scopeEnforcement.ts` بعد أن يقوم `resolveCallerScopeContext()` بحل النطاقات من معلومات مصادقة MCP أو بيانات تعريف الطلب أو `OMNIROUTE_MCP_SCOPES`. يقوم `OMNIROUTE_MCP_ENFORCE_SCOPES=true` بتشغيله عالميًا (الافتراضي `false`) ، ولكن يتم فرضه دائمًا على المتصل HTTP/SSE الذي يفتقر مفتاح API الخاص به إلى `manage`/`admin` (انظر `shouldForceScopeEnforcement()` في `open-sse/mcp-server/scopeEnforcement.ts`) ، بغض النظر عن العلامة.
 
-### نطاقات رموز الوصول
+### نطاقات رمز الوصول
 
-`read` / `write` / `admin` على رموز `oma_live_…`، مرتبة بواسطة `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). ينطبق هذا الترتيب على بيانات اعتماد رمز الوصول
-فقط. راجع [مصادقة الإدارة](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` على رموز `oma_live_…` ، مرتبة حسب `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). ينطبق هذا التصنيف على بيانات اعتماد رمز الوصول فقط. راجع [مصادقة الإدارة](../guides/MANAGEMENT-AUTH.md).
 
 ## المصادقة مطلوبة للتبديل
 

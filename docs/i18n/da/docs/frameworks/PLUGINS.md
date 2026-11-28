@@ -88,18 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | Den fortolkede basis-URL                                      |
 | `ctx.apiKey`                 | `string \| null` | API-nøgle, hvis den er angivet                                |
 
-## Registrering
+## Opdagelse
 
-Plugins registreres fra:
+Plugins findes fra:
 
-1. `~/.omniroute/plugins/<name>/` — bruger-lokale installationer
-2. Miljøvariablen `OMNIROUTE_PLUGIN_PATH` — brugerdefineret mappe
+1. `~/.omniroute/plugins/node_modules/<name>/` — hvor `omniroute plugin install` sætter pakker (en npm `--prefix`, ikke `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — håndkopierede plugin-mapper
+3. `OMNIROUTE_PLUGIN_PATH` env var — brugerdefineret mappe
 
-Begge er **kun til CLI'en**. Plugin-kørselsmiljøet på serversiden (marketplace-/`plugin.json`-plugins, der kører inde i proxyen) har sin egen scanner med sin egen tilsidesættelse, `OMNIROUTE_PLUGINS_DIR` — se
-[PLUGIN_MARKETPLACE.md → Plugin-mappe](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Indstilling af den ene påvirker ikke den anden.
+Symlinkede mapper (hvad npm opretter for `plugin install ./dir`) følges.
 
-Indlæsningsfejl opfanges og udskrives som advarsler — et defekt plugin får aldrig CLI'en til at gå ned.
+Begge er** Kun CLI** . Server-side plugin runtime (markedspladsen/`plugin.json` plugins, der kører inde i proxyen) har sin egen scanner med sin egen tilsidesættelse, `OMNIROUTE_PLUGINS_DIR` — se [PLUGIN_MARKETPLACE.md → Plugin bibliotek](./PLUGIN_MARKETPLACE.md#plugin-directory). Indstilling af den ene påvirker ikke den anden.
+
+Indlæsningsfejl fanges og udskrives som advarsler — et ødelagt plugin bryder aldrig CLI ned.
 
 ## Sikkerhed
 

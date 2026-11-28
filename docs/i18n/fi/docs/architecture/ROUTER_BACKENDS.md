@@ -63,50 +63,31 @@ Bifrost on vain `external` (saavutettavissa ainoastaan muuttujan `BIFROST_BASE_U
 suodattaa moottoreita niiden todellisten ominaisuuksien perusteella sen sijaan, että
 jokaiselle tunnisteelle kovakoodattaisiin erillisiä haaroja.
 
-## Akseli A — upotetut palvelut (valvotun prosessin puoli)
+## Axis A — sulautetut palvelut (valvottu prosessipuoli)
 
-- **Valvottujen prosessien rekisteri:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (tällä hetkellä: `9router`, `cliproxy`).
-- **Elinkaaren hallinta:** `src/lib/services/ServiceSupervisor.ts` — `start()` käynnistää
-  lapsiprosessin, odottaa `waitForHealthy()`-tarkistuksen onnistumista ja ohjaa stdout-/stderr-tulosteet rengaspuskuriin;
-  `stop()` käyttää SIGTERM→SIGKILL-menettelyä; kaikki operaatiot sarjallistetaan lukon avulla.
-- **Tilojen unioni** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error` sekä tästä
-  riippumaton `HealthState = healthy | unhealthy | unknown`.
-- **Miksi erillinen prosessi (eikä prosessin sisäinen SDK)?** Prosessieristys mahdollistaa
-  kunkin sivuprosessin asennuksen, käynnistyksen, pysäytyksen, terveystarkistusten ja lokien
-  itsenäisen hallinnan sekä takaisinkytkentäosoitteeseen perustuvan käynnistyssuojauksen.
-  Prosessin sisäisen sovittimen mallintaminen on tulevaa työtä — se ilmaistaisiin
-  `native-hot-path`-ominaisuuslipulla.
+- **Valvottujen prosessien rekisteri:** `src/lib/services/bootstrap.ts` `SERVICES[]` (tänään: `9router`, `cliproxy`).
+- **Elinkaari omistaja:** `src/lib/services/ServiceSupervisor.ts` — `start()` synnyttää lapsen, portit `waitForHealthy()`, napauttaa stdout/stderr :n rengaspuskuriin; `stop()` SIGTERM→SIGKILL; kaikki sarjoitetaan lukon alla.
+- **Valtioliitto** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error` plus ortogonaalinen `HealthState = healthy | unhealthy | unknown`.
+- **Miksi erillinen prosessi (ei in-proc SDK)?** Prosessin eristäminen tekee install/start/stop/health/logs itsenäisesti ohjattavan sivuvaunua kohden ja mahdollistaa takaisinkytkentäsuojan käytön. In-proc-sovittimen mallintaminen on tulevaa työtä. — `native-hot-path` -ominaisuuslippu on siellä, missä se ilmaistaan.
 
-### Elinkaarireittien sopimus (`/api/services/<tool>/…`)
+### Elinkaarireittisopimus (`/api/services/<tool>/…`)
 
-Tilakoodit ovat **tarkoituksella tila-, verbi- ja polkukohtaisia** — tämä on sopimus,
-ei epäjohdonmukaisuus:
+Tilakoodit ovat**state/verb/path-specific suunnittelun mukaan** — tämä on sopimus, ei epäjohdonmukaisuus:
 
-| Kutsu                              | Ehto                                                                     | Tila                                 |
-| ---------------------------------- | ------------------------------------------------------------------------ | ------------------------------------ |
-| `POST .../start`                   | palvelu on `not_installed`                                               | **409** (ennakkoehto)                |
-| `POST .../stop`                    | jo pysäytetty                                                            | **200** (idempotentti ei-operaatio)  |
-| `GET .../status`                   | OK                                                                       | **200** (`live ?? row ?? "unknown"`) |
-| `POST .../start`                   | prosessin käynnistys epäonnistuu                                         | **503** (tilapäinen)                 |
-| `GET .../status`, `.../stop`       | käsittelemätön virhe                                                     | **500**                              |
-| `GET /api/services/<x>/logs`       | tuntematon työkalu `<x>`                                                 | **404** `Service '<x>' not found`    |
-| `GET .../status?reveal=key`        | `X-Reveal-Confirm: yes` puuttuu                                          | **403** (vain 9router)               |
-| **mikä tahansa** `/api/services/*` | kutsuja ei ole takaisinkytkentäosoitteessa tai yksityisessä lähiverkossa | **403 LOCAL_ONLY**                   |
+| Soittaa                            | Kunto                            | Status                               |
+| ---------------------------------- | -------------------------------- | ------------------------------------ |
+| `POST .../start`                   | palvelu `not_installed`          | **409** (edellytys)                  |
+| `POST .../stop`                    | jo pysähtynyt                    | **200** (idempotentti ei-op)         |
+| `GET .../status`                   | OK                               | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`                   | kutemisen epäonnistuminen        | **503** ( ohimenevä )                |
+| `GET .../status`, `.../stop`       | huomaamaton virhe                | **500**                              |
+| `GET /api/services/<x>/logs`       | tuntematon työkalu `<x>`         | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`        | `X-Reveal-Confirm: yes` puuttuu  | **403** (vain 9 reititin)            |
+| **mikä tahansa** `/api/services/*` | soittaja ei loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-Kaikki virherungot muodostetaan funktiolla `createErrorResponse()` →
-`{ error: { message, type }, requestId }`, jossa `type` johdetaan tilakoodista
-(`500→server_error`, `404→not_found`, `409→conflict`, muulloin `invalid_request`) ja toimii
-koneellisesti käsiteltävänä erottimena. Viestit puhdistetaan ennalta
-(`sanitizeErrorMessage()`, ehdoton sääntö nro 12).
+Kaikki virhekappaleet muotoilee `createErrorResponse()` → `{ error: { message, type }, requestId }`, jossa `type` on johdettu tilasta (`500→server_error`, `404→not_found`, `409→conflict`, else `invalid_request`) ja on konetoiminen erottelija. Viestit on valmiiksi desinfioitu (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**Takaisinkytkentäsuojaus** on yleisin `403`-vastauksen syy: `/api/services/` sisältyy
-`LOCAL_ONLY_API_PREFIXES`-luetteloon (`src/server/authz/routeGuard.ts`), ja
-`src/server/authz/policies/management.ts` hylkää kaikki kutsujat, jotka eivät käytä
-takaisinkytkentäosoitetta tai yksityistä lähiverkkoa, **ennen todennusta**, koska nämä
-reitit käynnistävät lapsiprosesseja (ehdottomat säännöt 15 ja 17). Niiden käyttäminen
-julkisen tunnelin kautta tuottaa tarkoituksella `403`-vastauksen.
+**Silmukkasuoja** on yleisin `403`:n lähde: `/api/services/` on `LOCAL_ONLY_API_PREFIXES` ssä (`src/server/authz/routeGuard.ts`) ja `src/server/authz/policies/management.ts` hylkää kaikki ei-paluupalauttimet/ei-yksityiset LAN-soittajat** ennen todennusta** , koska nämä reitit synnyttävät lapsiprosesseja (Kovat säännöt 15 ja 17). Niiden saavuttaminen julkisen tunnelin kautta on suunniteltu `403`.
 
 ## Akseli B — välityksen reititystaustajärjestelmä (välityksen puoli)
 

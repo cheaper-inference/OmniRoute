@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Pianificazione** — un unico processo cron di `JobRegistry`, `log_export`, con valore predefinito `0 * * * *` (ogni ora,
-  UTC). Registrato in `src/lib/initCloudSync.ts`; può essere sovrascritto con `OMNIROUTE_LOG_EXPORT_CRON`.
-  Ogni esecuzione elabora tutti i dati in attesa di ciascuna destinazione **abilitata**, in sequenza.
-- **Cursore** — il valore implicito `call_logs.rowid` di SQLite, salvato per ciascuna destinazione in
-  `log_export_destinations.cursor_row_id`. `timestamp` non viene usato come cursore per scelta: i chiamanti
-  possono fornire un proprio valore, quindi una richiesta lenta può essere scritta dopo una più veloce iniziata
-  più tardi, e un cursore basato sul timestamp la salterebbe.
-- **Elaborazione in batch** — `batch_size` righe per richiesta (valore predefinito 500), `max_rows_per_run` righe per esecuzione
-  (valore predefinito 10000), così che un arretrato consistente venga smaltito in più esecuzioni pianificate anziché bloccarne una.
-- **Consegna** — il cursore avanza solo dopo che `send()` si è risolta. Un batch non riuscito lascia il
-  cursore invariato, quindi le stesse righe vengono ritentate all'esecuzione successiva. La garanzia è
-  di consegna almeno una volta con deduplicazione lato destinazione, non di vera consegna esattamente una volta: BigQuery identifica ogni
-  riga tramite l'ID del log della chiamata, che rispetta su base best effort all'interno della propria finestra di deduplicazione.
-- **Protezione dalle sovrapposizioni** — l'esecuzione cron e `POST .../run` possono attivarsi contemporaneamente. Una destinazione
-  già in elaborazione viene saltata anziché elaborata due volte (`skipped: true` nel risultato dell'esecuzione),
-  quindi un'esecuzione concorrente non può reinviare un batch o far arretrare il cursore.
-- **Ripristino dopo lo svuotamento** — se `cursor_row_id` risulta superiore a `MAX(rowid)` (l'intera tabella è stata
-  svuotata e i rowid sono ripartiti da capo), il runner torna a 0 anziché smettere definitivamente di rilevare i dati.
+- **Programma** — un lavoro cron `JobRegistry`, `log_export`, per impostazione predefinita `0 * * * *` (orario, UTC). Registrato in `src/lib/initCloudSync.ts`; sovrascrivibile con `OMNIROUTE_LOG_EXPORT_CRON`. Ogni segno di spunta si scarica ogni** abilitato** destinazione, in sequenza.
+- **Cursor** — SQLite implicito `call_logs.rowid`, persistente per destinazione in `log_export_destinations.cursor_row_id`. `timestamp` non è deliberatamente il cursore: i chiamanti possono fornire il proprio valore, quindi una richiesta lenta può essere scritta dopo una più veloce iniziata più tardi, e un cursore timestamp la salterebbe.
+- **Batch** — `batch_size` righe per richiesta (impostazione predefinita 500), `max_rows_per_run` righe per esecuzione (impostazione predefinita 10000), quindi un grande arretrato si prosciuga su diversi tick invece di bloccarne uno.
+- **Consegna** — il cursore avanza solo dopo che `send()` si è risolto. Un batch non riuscito lascia il cursore nella posizione in cui si trovava, quindi le stesse righe vengono riprovate all'esecuzione successiva. La garanzia è almeno una volta più la deduplicazione lato destinazione, non vera esattamente una volta: BigQuery digita ogni riga in base all'ID del registro delle chiamate, che rispetta con il massimo impegno all'interno della propria finestra di deduplicazione.
+- **Protezione di sovrapposizione** — il tick cron e `POST .../run` possono attivarsi insieme. Una destinazione già scaricata viene saltata anziché svuotata due volte (`skipped: true` nel risultato dell'esecuzione), quindi un'esecuzione simultanea non può inviare nuovamente un batch o scrivere il cursore all'indietro.
+- **Ripristino dell'eliminazione** — se `cursor_row_id` finisce sopra `MAX(rowid)` (l'intera tabella è stata eliminata e i rowid sono stati riavviati), il corridore riavvolge a 0 anziché diventare permanentemente cieco.
 
-### Runner isolato e limiti
+### Corridore isolato e limiti
 
-Ogni esecuzione di una destinazione su Node avvia un processo figlio del sistema operativo separato e di breve durata (`child_process`
-con IPC, non `worker_threads`). Le letture dei corpi, il parsing e la serializzazione JSON dei payload, il metodo
-`prepare()` della destinazione e l'I/O di rete della destinazione vengono tutti eseguiti lì, non nel ciclo degli eventi del server.
-Solo la configurazione e piccoli messaggi di avanzamento attraversano IPC; i record esportati non tornano mai al
-server. Il processo cron e la route Esegui ora mantengono lo stesso risultato pubblico e la stessa protezione dalle sovrapposizioni.
+Ogni destinazione eseguita su Node avvia un processo figlio OS separato e di breve durata (`child_process` con IPC, non `worker_threads`). Le letture del corpo, il payload JSON parsing/serialization, la destinazione `prepare()` e la rete di destinazione I/O vengono eseguiti tutti lì, non nel loop degli eventi del server. Solo la configurazione e piccoli messaggi di avanzamento attraversano IPC; i record esportati non ritornano mai al server. Il processo cron e il percorso Esegui ora mantengono lo stesso risultato pubblico e la stessa protezione dalla sovrapposizione.
 
-Il processo figlio apre in sola lettura il percorso `DATA_DIR/storage.sqlite` risolto dal server usando `node:sqlite`,
-con `busy_timeout=5000` e `query_only=ON`. Non importa alcun singleton del database e non esegue
-migrazioni, backup o aggiornamenti SQLite. La gestione dei metadati degli artefatti mancanti o danneggiati (incluso
-l'UPDATE degli artefatti danneggiati) rimane esclusivamente nel percorso dei dettagli della dashboard. Entrambi i percorsi condividono un
-resolver dei dettagli puro; l'esportazione usa letture asincrone del filesystem e lo stesso ordine di risoluzione: artefatto → dati legacy
-inline → dati legacy su disco → nessuno. Un'esecuzione acquisisce il rowid massimo di inserimento
-quando il processo figlio apre il proprio lettore; gli inserimenti successivi attendono l'esecuzione seguente. Si tratta di un
-limite di inserimento, non di una transazione SQLite di lunga durata: le scritture WAL e i checkpoint restano liberi di procedere durante
-le attese di rete. Gli aggiornamenti e le eliminazioni delle righe esistenti non vengono congelati da questo limite.
+Il bambino apre il `DATA_DIR/storage.sqlite` risolto in sola lettura del server utilizzando `node:sqlite`, con `busy_timeout=5000` e `query_only=ON`. Non importa alcun singleton DB e non esegue migrazioni, backup o aggiornamenti SQLite. La contabilità degli artefatti Missing/corrupt (incluso l'artefatto corrotto UPDATE) rimane solo nel percorso dei dettagli del dashboard. Entrambi i percorsi condividono un risolutore di dettagli puro; l'esportazione utilizza letture asincrone del file system e lo stesso artefatto → legacy inline → disco legacy → nessuno ordine di risoluzione. Una corsa esegue uno snapshot della riga di inserimento massima quando il bambino apre il suo lettore; gli inserimenti successivi attendono l'esecuzione successiva. Questo è un limite di inserimento, non una transazione SQLite di lunga durata: i writer e i checkpoint WAL rimangono liberi durante le attese della rete. Updates/deletions di righe esistenti non vengono congelate da questo limite.
 
-Dopo ogni batch accettato, il processo figlio attende una conferma. Il server prima salva
-il cursore con `advanceLogExportCursor`, poi invia `ack`; nessun batch successivo inizia prima di questa conferma.
-Un errore di invio, un arresto anomalo o un timeout registra un errore senza far avanzare il cursore per quel batch. I batch
-già confermati restano salvati; al massimo può essere reinviato l'unico batch non confermato.
-Il successo viene registrato solo dopo `done` e un'uscita regolare del processo figlio. In caso di errore, il processo figlio viene terminato
-con SIGTERM, passando a SIGKILL dopo 500 ms, e il runner attende la chiusura del processo.
+Dopo ogni lotto accettato, il bambino attende un riconoscimento. Il server prima persiste il cursore con `advanceLogExportCursor`, quindi invia `ack`; nessun batch successivo inizia prima di esso. Un errore di invio, arresto anomalo o timeout registra l'errore senza far avanzare il batch. I batch precedentemente riconosciuti rimangono impegnati; al massimo è possibile inviare nuovamente il batch non riconosciuto. Il successo viene registrato solo dopo l'uscita `done` e di un figlio pulito. Gli errori terminano il figlio con SIGTERM, passando a SIGKILL dopo 500 ms e il corridore attende la chiusura del processo.
 
-| Variabile d'ambiente                          | Valore predefinito | Scopo                                              |
-| --------------------------------------------- | ------------------ | -------------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000             | Limite di tempo effettivo per destinazione         |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024               | Limite in MB dell'old space V8 del processo figlio |
+| Variabile d'ambiente                          | Predefinito | Scopo                                          |
+| --------------------------------------------- | ----------- | ---------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000      | Limite dell'orologio a muro per destinazione   |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024        | Limite del vecchio spazio V8 per bambini in MB |
 
-Per i valori non validi, non positivi o non interi vengono usati i valori predefiniti. L'impostazione dell'heap non è un limite
-RSS totale; batch molto grandi possono comunque esaurire la memoria del processo figlio e far fallire l'esecuzione in sicurezza.
-Il valore predefinito di 1024 MB lascia un margine per il batch predefinito di 500 righe di artefatti da 512 KiB con
-i corpi abilitati, inclusa la serializzazione JSON di BigQuery suddivisa in blocchi di byte. Non rende sicuro un
-batch di 10000 righe con i corpi inclusi. L'esaurimento dell'heap V8 registra un errore con indicazioni operative: ridurre la dimensione
-del batch o aumentare `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; il cursore rimane all'ultimo
-batch confermato. I corpi storici inline o su disco non sono coperti dal limite previsto per gli artefatti moderni.
-Gli operatori devono pianificare separatamente il consumo di RSS, soprattutto all'interno di container con memoria limitata.
+I valori Invalid/non-positive/non-integer utilizzano i valori predefiniti. L'impostazione dell'heap non è un limite RSS totale; batch molto grandi possono comunque esaurire la memoria figlio e fallire l'esecuzione in modo sicuro. Il valore predefinito 1024 MB lascia spazio per il batch predefinito di 500 righe di 512 artefatti KiB con corpi abilitati, inclusa la serializzazione JSON in blocchi di byte di BigQuery. Non rende sicuro un batch di corpi da 10.000 righe. L'esaurimento dell'heap V8 registra un errore risolvibile: ridurre la dimensione del batch o aumentare `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; il cursore rimane sull'ultimo batch riconosciuto. I corpi storici inline/disk non sono coperti dal cappuccio del manufatto moderno. Gli operatori devono preventivare RSS separatamente, soprattutto all'interno di contenitori con memoria limitata.
 
-Il processo figlio eredita solo il valore risolto di `DATA_DIR`, `NODE_ENV`, `TZ` esplicito (risoluzione
-dell'ora locale per i nomi file legacy), `ELECTRON_RUN_AS_NODE` quando presente e i seguenti parametri per le connessioni in uscita:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (e le rispettive forme minuscole),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Un dispatcher Undici globale condivide la risoluzione del proxy basata esclusivamente sull'ambiente e le regole
-di esclusione degli host locali del server, incluso `NO_PROXY`; non importa `proxyFetch.ts` né i relativi flag del database o delle funzionalità.
-Le credenziali del proxy vengono oscurate nell'output inoltrato e negli errori registrati. Le credenziali di destinazione
-vengono trasmesse solo in un singolo messaggio IPC di avvio, mai in argv o nell'ambiente; all'output e agli errori inoltrati
-viene aggiunto un prefisso e vengono rimossi i dati sensibili. Solo `ExperimentalWarning` viene disabilitato negli argomenti di esecuzione del processo figlio per evitare
-di ripetere l'avviso SQLite di Node a ogni esecuzione cron; gli altri tipi di avviso rimangono visibili.
+Il figlio eredita solo `DATA_DIR`, `NODE_ENV`, `TZ` esplicito (risoluzione in tempo locale del nome file legacy), `ELECTRON_RUN_AS_NODE` quando presente e i seguenti input in uscita: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (e le relative forme minuscole), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Un dispatcher Undici globale condivide la pura risoluzione del proxy dell'ambiente del server e le regole di bypass dell'host locale, incluso `NO_PROXY`; non importa `proxyFetch.ts` o i suoi flag DB/feature. Le credenziali proxy vengono oscurate dall'output inoltrato e dagli errori registrati. Le credenziali di destinazione viaggiano solo in un messaggio IPC iniziale, mai argv o ambiente; L'inoltro output/error è prefissato e igienizzato. Solo `ExperimentalWarning` è disabilitato negli argomenti exec figlio per evitare di ripetere l'avviso SQLite di Node a ogni esecuzione di cron; gli altri tipi di avviso rimangono visibili.
 
-I moduli di destinazione devono essere importabili senza dipendenze Next.js o riservate al server. L'implementazione
-BigQuery esistente soddisfa già questo requisito. Le cache dei token di accesso durano solo per l'esecuzione del processo
-figlio, non tra esecuzioni diverse. Node è il runtime supportato (engines in `package.json`), ma la sezione di installazione
-di Bun nel README e `Dockerfile.bun` indicano anche un percorso di compatibilità per la produzione che usa
-`bun:sqlite` (`src/lib/db/core.ts` / adattatori). Con Bun, le esportazioni mantengono quindi il precedente
-percorso all'interno del processo ed emettono un avviso una sola volta: l'isolamento dell'heap e del timeout tramite processo figlio non è disponibile. Usa
-Node per l'isolamento dell'event loop e dagli errori OOM; qui Bun non è considerato riservato allo sviluppo.
+I moduli di destinazione devono essere importabili senza dipendenze Next.js/server-only. L'implementazione BigQuery esistente soddisfa già tale contratto. Le cache dei token di accesso durano solo per l'esecuzione figlio, non per tutte le esecuzioni. Node è il runtime supportato (motori `package.json` ). Esiste un percorso di compatibilità Bun ottimale e non supportato (`bun:sqlite` in `src/lib/db/core.ts` / adattatori e `Dockerfile.bun`), quindi le esportazioni non devono interrompersi sotto di esso. In Bun, le esportazioni mantengono il percorso in-process precedente ed emettono un avviso una tantum: l'isolamento heap/timeout secondario non è disponibile. Utilizza Node per l'isolamento del loop di eventi e OOM.
 
-Quando `includeBodies` è abilitato, preferisci una cadenza nell'ordine dei minuti, ad esempio
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, anziché accumulare un arretrato orario di payload.
-I limiti di batch e righe continuano a vincolare ogni esecuzione. Il costo di avvio del processo viene sostenuto per ogni destinazione a ogni esecuzione;
-questo comporta un piccolo costo di avvio in cambio dell'isolamento dell'event loop del server, non una riduzione dell'uso totale della CPU.
+Quando `includeBodies` è abilitato, preferisci una cadenza a livello di minuto come `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` piuttosto che accumulare un backlog di carico utile orario. I limiti di batch e righe continuano a vincolare ogni esecuzione. L'avvio del processo viene pagato per destinazione per esecuzione; questo comporta un piccolo costo di avvio per l'isolamento del loop di eventi del server, non una riduzione dell'utilizzo totale CPU.
 
-### Payload (prompt e completamenti)
+### Payload (richieste e completamenti)
 
-Per impostazione predefinita, l'esportazione contiene solo i campi di riepilogo mostrati nell'**elenco** dei log. Attivando
-**Esporta prompt e risposte** (`includeBodies`), vengono trasmessi anche i dati mostrati nel pannello dei **dettagli**
-dei log per ogni chiamata:
+Per impostazione predefinita l'esportazione trasporta solo i campi di riepilogo Logs** lista** spettacoli. Accensione** Esporta richieste e risposte** (`includeBodies`) spedisce inoltre ciò che i Logs** dettaglio** il riquadro mostra per ogni chiamata:
 
-| Campo                            | Contenuto                                                                 |
-| -------------------------------- | ------------------------------------------------------------------------- |
-| `request_body` / `response_body` | I payload della chiamata così come visualizzati nella dashboard           |
-| `pipeline_route_decision`        | La destinazione e il modello scelti dal router                            |
-| `pipeline_client_request`        | La richiesta grezza esattamente come inviata dal client                   |
-| `pipeline_openai_request`        | Dopo la traduzione nel formato OpenAI interno                             |
-| `pipeline_provider_request`      | Come effettivamente inviata al servizio a monte, nel formato del provider |
-| `pipeline_provider_response`     | La risposta grezza del servizio a monte                                   |
-| `pipeline_client_response`       | Ciò che è stato restituito al chiamante                                   |
-| `pipeline_error`                 | Dettagli dell'errore a livello di pipeline per una chiamata non riuscita  |
-| `bodies_truncated`               | Vero quando un qualsiasi campo precedente ha raggiunto `maxBodyBytes`     |
+| Campo                            | Cosa contiene                                                                                 |
+| -------------------------------- | --------------------------------------------------------------------------------------------- |
+| `request_body` / `response_body` | I payload della chiamata vengono visualizzati man mano che vengono visualizzati nel dashboard |
+| `pipeline_route_decision`        | Quale target e modello ha scelto il router                                                    |
+| `pipeline_client_request`        | La richiesta grezza esattamente come l'ha inviata il client                                   |
+| `pipeline_openai_request`        | Dopo la traduzione nella forma interna OpenAI                                                 |
+| `pipeline_provider_request`      | Come effettivamente inviato a monte, nel dialetto del provider                                |
+| `pipeline_provider_response`     | La risposta grezza a monte                                                                    |
+| `pipeline_client_response`       | Ciò che è stato restituito al chiamante                                                       |
+| `pipeline_error`                 | Dettagli dell'errore a livello di pipeline per una chiamata non riuscita                      |
+| `bodies_truncated`               | Vero quando qualsiasi campo sopra raggiunge `maxBodyBytes`                                    |
 
-Si tratta del contenuto dei prompt, quindi è **disattivato per impostazione predefinita** ed è volutamente una scelta per singola destinazione.
-Viene trasmesso ciò che mostra la dashboard, perché l'esportazione e `getCallLogById` condividono la risoluzione
-dei dettagli: nei payload
-i dati personali e i segreti vengono già rimossi o oscurati al momento della scrittura, e una chiamata effettuata con una
-chiave API `noLog` non memorizza alcun payload, quindi non c'è nulla da esportare.
+Questo è un contenuto immediato, così è** disattivato per impostazione predefinita** e deliberatamente una scelta per destinazione. Ciò che viene spedito è ciò che mostra la dashboard, perché export e `getCallLogById` condividono la risoluzione dei dettagli: i payload sono già privati delle informazioni personali e oscurati segretamente quando vengono scritti, e una chiamata effettuata con una chiave `noLog` API non memorizza alcun payload, quindi non c'è nulla da esportare.
 
-I payload vengono letti per ogni riga dall'artefatto nel filesystem, quindi il caricamento completo dei dati viene eseguito solo per le destinazioni
-che lo hanno richiesto. Se un artefatto manca o è danneggiato, viene esportato il relativo riepilogo con payload nulli, anziché
-far fallire il batch e lasciare bloccato il cursore.
+I payload vengono letti per riga dall'artefatto del file system, quindi l'idratazione viene eseguita solo per le destinazioni che la richiedono. Un artefatto mancante o danneggiato esporta il proprio riepilogo con payload nulli anziché fallire il batch e incagliare il cursore.
 
-`maxBodyBytes` (valore predefinito 262144) limita ogni campo. I payload più lunghi vengono **troncati anziché
-eliminati** — un prompt tagliato risponde comunque alla domanda "che cosa è stato chiesto" — e la riga viene contrassegnata con
-`bodies_truncated`. I delta trasmessi in streaming, frammento per frammento, non vengono esportati; la risposta assemblata è
-già presente in `pipeline_provider_response` e `pipeline_client_response`.
+`maxBodyBytes` (predefinito 262144) chiude ogni campo. I carichi utili più lunghi lo sono** troncato anziché abbassato** — un prompt troncato risponde ancora a "cosa è stato chiesto" — e la riga è contrassegnata con `bodies_truncated`. I delta pezzo per pezzo trasmessi in streaming non vengono esportati; la risposta assemblata è già in `pipeline_provider_response` e `pipeline_client_response`.
 
 ---
 

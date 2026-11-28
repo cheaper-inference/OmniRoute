@@ -248,31 +248,39 @@ GitHub के अपने खर्च नियंत्रणों का �
 
 ## 🎨 कॉम्बो
 
-आप प्रत्येक कार्ड के हैंडल को खींचकर सीधे **Dashboard → Combos** में कॉम्बो कार्ड का क्रम बदल सकते हैं। क्रम SQLite में संग्रहीत होता है और पुनः लोड करने पर बहाल हो जाता है।
+आप कॉम्बो कार्ड को सीधे पुनः व्यवस्थित कर सकते हैं** डैशबोर्ड → Combos** प्रत्येक कार्ड पर हैंडल खींचकर। ऑर्डर SQLite में संग्रहीत किया जाता है और पुनः लोड करने पर पुनर्स्थापित किया जाता है।
 
-### उदाहरण 1: सब्सक्रिप्शन का अधिकतम उपयोग → सस्ता बैकअप
+### एक प्रदाता, मॉडल या खाता खोजें
 
-```
-Dashboard → Combos → नया बनाएँ
+कॉम्बो बनाएं या संपादित करें में, चरण-दर-चरण प्रदाता, मॉडल, खाता और कॉम्बो-संदर्भ पिकर में एक स्थानीय खोज फ़ील्ड शामिल है। प्रदर्शित नाम, पहचानकर्ता, प्रदाता उपनाम या मॉडल स्रोत के आधार पर खोजें, फिर परिणाम पर क्लिक करें या तीर कुंजियों का उपयोग करें और एंटर करें। एकाधिक खोज शब्द सभी मेल खाने चाहिए. खोज साफ़ करने या एस्केप दबाने से चयनित मान अपरिवर्तित रह जाता है।
 
-नाम: premium-coding
-मॉडल:
-  1. cc/claude-opus-4-7 (प्राथमिक सब्सक्रिप्शन)
-  2. glm/glm-4.7 (सस्ता बैकअप, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (सबसे सस्ता फ़ॉलबैक, $0.3/1M)
+खोज करते समय स्वचालित खाता विकल्प दृश्यमान रहता है। इसकी वैकल्पिक खाता प्रतिबंध सूची में एक अलग फ़िल्टर है: दृश्यमान परिणामों के बाहर चयनित खाते चयनित रहते हैं, और गिनती में उन्हें शामिल किया जाता है। ईमेल गोपनीयता चालू होने पर छिपे हुए ईमेल अंश खोजे जाने योग्य नहीं हैं। चरण जोड़ें और कॉम्बो को हमेशा की तरह सहेजें; कोई क्वेरी टाइप करने से कुछ भी सहेजा या परीक्षण नहीं किया जाता है।
 
-CLI में उपयोग करें: premium-coding
-```
+वही स्थानीय खोज कनेक्शन-परीक्षण मॉडल, कस्टम CLI डिफ़ॉल्ट और उपनाम मॉडल और सहेजे गए-प्रॉक्सी विकल्पों के लिए उपलब्ध है। मौजूदा सहेजें, लागू करें और परीक्षण क्रियाएं अलग-अलग रहती हैं।
 
-### उदाहरण 2: केवल मुफ़्त (शून्य लागत)
+### उदाहरण 1: सस्ते बैकअप → सदस्यता को अधिकतम करें
 
 ```
-नाम: free-combo
-मॉडल:
-  1. if/kimi-k2.7-code (सूचीबद्ध मुफ़्त एक्सेस; प्रदाता की सीमाएँ लागू हो सकती हैं)
-  2. kr/qwen3-coder-next (Kiro का मुफ़्त फ़ॉलबैक)
+Dashboard → Combos → Create New
 
-लागत: वर्तमान में $0 के रूप में सूचीबद्ध; शर्तें और उपलब्धता बदल सकती हैं
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### उदाहरण 2: केवल निःशुल्क (शून्य लागत)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -410,7 +418,7 @@ omniroute serve --tray
 omniroute autostart enable
 ```
 
-ऑटो-स्टार्ट macOS, Windows, और ग्राफ़िकल Linux सत्रों पर ट्रे मोड का उपयोग करता है। हेडलेस Linux मौजूदा सिस्टमडी उपयोगकर्ता सेवा का उपयोग करता है।
+ऑटो-स्टार्ट macOS, Windows, और ग्राफ़िकल Linux सत्रों पर ट्रे मोड का उपयोग करता है। हेडलेस Linux मौजूदा सिस्टमड उपयोगकर्ता सेवा का उपयोग करता है।
 
 लॉगिन पर स्टार्टअप अक्षम करें:
 
@@ -432,7 +440,7 @@ omniroute autostart disable
 ### VPS परिनियोजन
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -514,8 +522,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -717,7 +725,7 @@ curl -X POST http://localhost:20128/api/provider-models \
 3. **उपसर्ग** : रूटिंग नाम. ग्राहक मॉडल को `<prefix>/<model>` कहते हैं, इसलिए उपसर्ग `mygw` वाला एक नोड `mygw/gpt-4o-mini` परोसता है। आवश्यक; कोई चरित्र प्रतिबंध नहीं है.
 4. **API प्रकार** : गेटवे जिस समापन बिंदु परिवार को सेवा प्रदान करता है (चैट पूर्णताएं, प्रतिक्रियाएं, एंबेडिंग, ऑडियो, छवियां)।
 5. **आधार URL** : API रूट, `/v1` तक और इसमें शामिल (उदाहरण के लिए `https://gateway.example.com/v1`), पूर्ण `/chat/completions` पथ नहीं। गैर-मानक पथ वाले गेटवे उन्हें नीचे सेट करते हैं** एडवांस सेटिंग** (चैट पथ, मॉडल पथ)।
-6. **API कुंजी (चेक के लिए)** फ़ील्ड केवल कनेक्शन का परीक्षण करती है. नोड बनाने के बाद इसे खोलें और उपयोग करें** कनेक्शन जोड़ें** अनुरोधों द्वारा उपयोग की जाने वाली कुंजी को संग्रहीत करने के लिए।
+6. **API कुंजी (चेक के लिए)** फ़ील्ड केवल कनेक्शन का परीक्षण करती है। नोड बनाने के बाद इसे खोलें और उपयोग करें** कनेक्शन जोड़ें** अनुरोधों द्वारा उपयोग की जाने वाली कुंजी को संग्रहीत करने के लिए।
 
 नोड को `openai-compatible-<apiType>-<uuid>` फॉर्म की एक आंतरिक आईडी मिलती है; आपको इसे कभी भी टाइप करने की आवश्यकता नहीं है, उपसर्ग सार्वजनिक नाम है।
 
@@ -825,7 +833,7 @@ curl http://localhost:20128/api/models/catalog
 - एक अस्थायी `https://*.trycloudflare.com` URL बनाता है जो आपके वर्तमान OpenAI-संगत `/v1` समापन बिंदु पर अग्रेषित होता है
 - सबसे पहले जरूरत पड़ने पर ही `cloudflared` इंस्टॉल सक्षम करें; बाद में पुनरारंभ उसी प्रबंधित बाइनरी का पुन: उपयोग करता है
 - OmniRoute या कंटेनर पुनरारंभ के बाद त्वरित सुरंगें स्वतः बहाल नहीं होती हैं; आवश्यकता पड़ने पर उन्हें डैशबोर्ड से पुनः सक्षम करें
-- सुरंग URLs अल्पकालिक हैं और हर बार जब आप सुरंग को stop/start तो बदल जाते हैं
+- सुरंग URLs क्षणिक है और हर बार जब आप सुरंग को stop/start तो बदल जाते हैं
 - प्रतिबंधित कंटेनरों में शोर वाले QUIC UDP बफर चेतावनियों से बचने के लिए प्रबंधित त्वरित सुरंगें HTTP/2 परिवहन के लिए डिफ़ॉल्ट हैं
 - यदि आप प्रबंधित परिवहन विकल्प को ओवरराइड करना चाहते हैं तो `CLOUDFLARED_PROTOCOL=quic` या `auto` सेट करें
 - यदि आप प्रबंधित डाउनलोड के बजाय पूर्वस्थापित `cloudflared` बाइनरी का उपयोग करना पसंद करते हैं तो `CLOUDFLARED_BIN` सेट करें
@@ -869,7 +877,7 @@ curl http://localhost:20128/api/models/catalog
 | **पहले भरें**                  | प्राथमिकता क्रम में खातों का उपयोग करता है — प्राथमिक खाता अनुपलब्ध होने तक सभी अनुरोधों को संभालता है  |
 | **राउंड रोबिन**                | एक विन्यास योग्य चिपचिपा सीमा के साथ सभी खातों के माध्यम से चक्र (डिफ़ॉल्ट: प्रति खाता 3 कॉल)           |
 | **P2C (दो विकल्पों की शक्ति)** | स्वास्थ्य के बारे में जागरूकता के साथ 2 यादृच्छिक खातों और स्वस्थ एक — संतुलन भार के लिए मार्ग चुनता है |
-| **यादृच्छिक**                  | फिशर-येट्स शफ़ल का उपयोग करके प्रत्येक अनुरोध के लिए यादृच्छिक रूप से एक खाता चुनता है                  |
+| **यादृच्छिक**                  | फिशर-येट्स शफल का उपयोग करके प्रत्येक अनुरोध के लिए यादृच्छिक रूप से एक खाता चुनता है                   |
 | **सबसे कम इस्तेमाल किया गया**  | सबसे पुराने `lastUsedAt` टाइमस्टैम्प के साथ खाते तक रूट, ट्रैफ़िक को समान रूप से वितरित करना            |
 | **लागत अनुकूलित**              | सबसे कम लागत वाले प्रदाताओं के लिए अनुकूलन करते हुए, सबसे कम प्राथमिकता वाले मूल्य वाले खाते तक रूट     |
 
@@ -883,8 +891,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` और `cost-optimized`
 - सभी उम्मीदवारों के लिए `auto` — स्कोर संचालित
 - `lkgp` (अंतिम ज्ञात अच्छा प्रदाता) — अंतिम सफल प्रदाता को पिन करता है, फिर नियमों पर वापस आ जाता है
-- `context-optimized` — सबसे बड़ी निःशुल्क संदर्भ विंडो वाला मॉडल चुनता है
-- `context-relay` — फॉलो-अप टर्न के लिए लंबे-संदर्भ मॉडल को श्रृंखलाबद्ध करता है
+- `context-optimized` — सबसे पहले सबसे बड़ी ज्ञात संदर्भ विंडो वाले मॉडल को आज़माता है
+- जब वार्तालाप किसी अन्य खाते में चला जाता है तो`context-relay` — प्राथमिकता क्रम और एक हैंडऑफ़ सारांश
 
 #### बाहरी स्टिकी सत्र शीर्षलेख
 
@@ -1001,7 +1009,7 @@ OmniRoute पांच घटकों के साथ प्रदाता-�
    - **अपस्ट्रीम पुनः प्रयास संकेत का उपयोग करें** — आधिकारिक `Retry-After` का सम्मान करता है या प्रदान किए जाने पर संकेत रीसेट करता है
    - **मैक्स बैकऑफ़ चरण** — बार-बार विफलताओं के लिए अधिकतम घातीय बैकऑफ़ स्तर
 
-3. **प्रदाता सर्किट ब्रेकर** — एंड-टू-एंड प्रदाता विफलताओं को ट्रैक करता है, कॉन्फ़िगर किए गए चेतावनी सीमा पर खराब प्रदाता को चिह्नित करता है, और कॉन्फ़िगर विफलता सीमा तक पहुंचने पर ब्रेकर खोलता है:
+3. **प्रदाता सर्किट ब्रेकर** — एंड-टू-एंड प्रदाता विफलताओं को ट्रैक करता है, कॉन्फ़िगर की गई चेतावनी सीमा पर खराब प्रदाता को चिह्नित करता है, और कॉन्फ़िगर विफलता सीमा तक पहुंचने पर ब्रेकर खोलता है:
    - **ह्रास सीमा** — `DEGRADED` में प्रवेश करने से पहले लगातार प्रदाता विफलताएँ
    - **असफलता की दहलीज** — `OPEN` में प्रवेश करने से पहले लगातार प्रदाता विफलताएँ
    - **टाइमआउट रीसेट करें** प्रदाता के दोबारा परीक्षण से पहले — समय विंडो
@@ -1157,7 +1165,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **सबसे कम इस्तेमाल किया गया** | सबसे कम हालिया अनुरोधों के साथ मॉडल पर रूट (कॉम्बो मेट्रिक्स का उपयोग करता है) |
 | **लागत-अनुकूलित**             | सबसे सस्ते उपलब्ध मॉडल के लिए मार्ग (मूल्य निर्धारण तालिका का उपयोग करता है)   |
 
-वैश्विक कॉम्बो डिफॉल्ट्स सेट किए जा सकते हैं** डैशबोर्ड → सेटिंग्स → रूटिंग → कॉम्बो डिफॉल्ट्स** . कॉम्बो लक्ष्य टाइमआउट डिफ़ॉल्ट रूप से वर्तमान अनुरोध टाइमआउट को इनहेरिट करता है। उपयोग** लक्ष्य समयबाह्य (सेकंड)** कॉम्बो डिफॉल्ट्स या व्यक्तिगत कॉम्बो पर केवल तभी जब प्रति-लक्ष्य सीमा कम होने से तेजी से फ़ॉलबैक ट्रिगर होना चाहिए।
+वैश्विक कॉम्बो डिफॉल्ट्स सेट किए जा सकते हैं** डैशबोर्ड → सेटिंग्स → रूटिंग → कॉम्बो डिफ़ॉल्ट** . कॉम्बो लक्ष्य टाइमआउट डिफ़ॉल्ट रूप से वर्तमान अनुरोध टाइमआउट को इनहेरिट करता है। उपयोग** लक्ष्य समयबाह्य (सेकंड)** कॉम्बो डिफॉल्ट्स या व्यक्तिगत कॉम्बो पर केवल तभी जब प्रति-लक्ष्य सीमा कम होने से तेजी से फ़ॉलबैक ट्रिगर होना चाहिए।
 
 शून्य-विलंबता कॉम्बो अनुकूलन ऑप्ट-इन हैं। छुट्टी** शून्य-विलंबता अनुकूलन** फ़ॉलबैक लक्ष्यों को दौड़ने, TTFT इतिहास के आधार पर लक्ष्यों को छोड़ने, या फ़ॉलबैक अनुरोधों को संपीड़ित करने से इन विलंबता सुविधाओं को रोकने के लिए अक्षम किया गया; इसे सक्षम करने से निचली पूंछ विलंबता के लिए routing/request निष्ठा का व्यापार करने के लिए कॉन्फ़िगर हेजिंग, पूर्वानुमानित TTFT स्किप और सक्रिय फ़ॉलबैक संपीड़न की अनुमति मिलती है।
 
@@ -1333,32 +1341,34 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ## 💻 आंतरिक CLI
 
-OmniRoute सेटअप, निदान और रनटाइम नियंत्रण के लिए एक आंतरिक CLI (`omniroute …`) प्रदान करता है। यह **डैशबोर्ड के "CLI टूल्स" पेज से अलग है**, जो तृतीय-पक्ष CLI (Claude Code, Cursor, Codex, Cline, …) को कॉन्फ़िगर करता है, ताकि वे OmniRoute से संचार कर सकें।
+OmniRoute सेटअप, डायग्नोस्टिक्स और रनटाइम नियंत्रण के लिए एक आंतरिक CLI (`omniroute …`) शिप करता है। यह है** डैशबोर्ड में "CLI टूल्स" पेज से अलग करें** , जो तृतीय-पक्ष CLIs (Claude Code, Cursor, Codex, Cline,…) को कॉन्फ़िगर करता है ताकि वे OmniRoute से बात कर सकें।
 
 ```bash
-omniroute setup                    # इंटरैक्टिव विज़ार्ड (पासवर्ड, प्रोवाइडर, कॉम्बो)
-omniroute setup --non-interactive  # CI के अनुकूल
-omniroute doctor                   # स्वास्थ्य निदान (डेटा डायरेक्टरी, DB, प्रोवाइडर, पोर्ट)
-omniroute providers available      # समर्थित प्रोवाइडर सूचीबद्ध करें
-omniroute providers list           # कॉन्फ़िगर किए गए कनेक्शन सूचीबद्ध करें
-omniroute providers test <id>      # प्रोवाइडर कनेक्शन का लाइव परीक्षण करें
-omniroute combos list              # कॉम्बो सूचीबद्ध करें
-omniroute combos switch <name>     # डिफ़ॉल्ट कॉम्बो सेट करें
-omniroute models                   # उपलब्ध मॉडल सूचीबद्ध करें (--json, --search)
-omniroute keys add | list | remove # टर्मिनल से API कुंजियाँ प्रबंधित करें
-omniroute backup                   # कॉन्फ़िगरेशन + DB का स्नैपशॉट बनाएँ
-omniroute restore [<timestamp>]    # स्नैपशॉट से पुनर्स्थापित करें
-omniroute health                   # विस्तृत स्वास्थ्य जानकारी (ब्रेकर, कैश, मेमोरी)
-omniroute quota                    # प्रोवाइडर कोटा उपयोग
-omniroute mcp status               # MCP सर्वर की स्थिति
-omniroute a2a status               # A2A सर्वर की स्थिति
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok टनल
-omniroute reset-password           # एडमिन पासवर्ड रीसेट करें
-omniroute --mcp                    # stdio पर MCP सर्वर शुरू करें
-omniroute --port 3000              # कस्टम पोर्ट पर सर्वर शुरू करें
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-सुझाव: अस्वस्थ प्रोवाइडर कनेक्शन के लिए अलर्ट प्राप्त करने हेतु अपने मॉनिटरिंग टूल के साथ `omniroute doctor --json` का उपयोग करें।
+युक्ति: टूटे हुए स्थानीय इंस्टाल पर सचेत करने के लिए `omniroute doctor --json` अपने मॉनिटरिंग टूल के साथ जोड़ें। `doctor` प्रदाता कनेक्शन का परीक्षण नहीं करता है; उसके लिए `omniroute providers test <id>` उपयोग करें।
 
 ---
 

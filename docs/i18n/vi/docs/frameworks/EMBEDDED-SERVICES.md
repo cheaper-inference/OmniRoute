@@ -4,7 +4,7 @@
 
 ---
 
-> **Phiên bản:** v3.8.44** Cập nhật lần cuối:** 28-10-2026** Khán giả:** Các kỹ sư thêm, duy trì hoặc gỡ lỗi các dịch vụ nhúng (9Router, CLIProxyAPI, Mux, Bifröst, open-wa, LLMLingua, sing-box).
+> **Phiên bản:** v3.8.44** Khán giả:** Các kỹ sư thêm, duy trì hoặc gỡ lỗi các dịch vụ nhúng (9Router, CLIProxyAPI, Mux, Bifröst, open-wa, LLMLingua, sing-box).
 
 Các dịch vụ nhúng là các công cụ sidecar quy trình được cài đặt cục bộ mà OmniRoute cài đặt, giám sát và hiển thị dưới dạng mục tiêu định tuyến hạng nhất. Không giống như các nhà cung cấp bên ngoài (được kết nối qua internet thông qua khóa API ), các dịch vụ nhúng chạy trên cùng một máy với OmniRoute và giao tiếp qua vòng lặp.
 
@@ -29,23 +29,23 @@ Các dịch vụ nhúng là các công cụ sidecar quy trình được cài đ�
 
 Tám dịch vụ được nhúng:
 
-| Dịch vụ              | gói npm                                | Cổng mặc định | Mục đích                                                                                                                                                                                                                                                                                                                                        |
-| -------------------- | -------------------------------------- | :-----------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Bộ định tuyến**   | `9router`                              |     20130     | bộ định tuyến AI mà OmniRoute có thể sử dụng làm nhà cung cấp phụ. Mô hình được hiển thị dưới dạng `9router/{sub}/{model}`                                                                                                                                                                                                                      |
-| **CLIProxyAPI**      | GitHub phát hành nhị phân (`cliproxy`) |     8317      | Bộ điều hợp proxy cục bộ cho các luồng xác thực Anthropic CLI. Cung cấp định tuyến dự phòng khi mã thông báo OAuth hết hạn                                                                                                                                                                                                                      |
-| **Mux**              | `mux` ( `mux server` không đầu)        |     8322      | Daemon điều phối đại lý cục bộ (coder/mux). Chỉ — được quản lý vòng đời chứ không phải mục tiêu định tuyến (không có ủy quyền LLM ).                                                                                                                                                                                                            |
-| **hai lớp băng giá** | `@maximhq/bifrost`                     |     8080      | Đi đến phần phụ trợ chuyển tiếp cổng AI. Khi chạy, tự động chọn theo tuyến chuyển tiếp (`/v1/relay/`)                                                                                                                                                                                                                                           |
-| **Dario**            | `@askalf/dario`                        |     3456      | Proxy đăng ký Claude — alternative/failover tới CLIProxyAPI cho lưu lượng truy cập có hình dạng Claude; khóa được chèn trở thành `DARIO_ADMIN_TOKEN` điều khiển mặt phẳng điều khiển `/admin/*` OAuth của nó                                                                                                                                    |
-| **mở-wa**            | `@open-wa/wa-automate`                 |     8323      | WhatsApp Tự động hóa web (Chrome không đầu thông qua Puppeteer). Chỉ — được quản lý vòng đời chứ không phải mục tiêu định tuyến.                                                                                                                                                                                                                |
-| **LLMLingua**        | `@atjsh/llmlingua-2`                   |     20135     | Mô hình sidecar nén nhanh — real LLMLingua-2 ONNX ( cổng JS/TS của thuật toán Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` gửi `/compress` qua HTTP tới nó, quay trở lại chương trình phụ trợ luồng công nhân đang xử lý khi sidecar ngừng hoạt động. Chỉ — được quản lý vòng đời chứ không phải mục tiêu định tuyến. |
-| **hộp hát**          | GitHub phát hành nhị phân (`singbox`)  |     20140     | TPROXY sidecar ủng hộ việc chặn proxy trong suốt của `applyTproxy()`(`src/mitm/tproxy/setup.ts`). Trình cài đặt tải xuống bản phát hành được ghim, đã được xác minh bằng tổng kiểm tra. Chỉ — được quản lý vòng đời chứ không phải mục tiêu định tuyến (không có ủy quyền LLM )                                                                 |
+| Dịch vụ            | gói npm                                | Cổng mặc định | Mục đích                                                                                                                                                                                                                                                                                                                                        |
+| ------------------ | -------------------------------------- | :-----------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Bộ định tuyến** | `9router`                              |     20130     | bộ định tuyến AI mà OmniRoute có thể sử dụng làm nhà cung cấp phụ. Mô hình được hiển thị dưới dạng `9router/{sub}/{model}`                                                                                                                                                                                                                      |
+| **CLIProxyAPI**    | GitHub phát hành nhị phân (`cliproxy`) |     8317      | Bộ điều hợp proxy cục bộ cho các luồng xác thực Anthropic CLI. Cung cấp định tuyến dự phòng khi mã thông báo OAuth hết hạn                                                                                                                                                                                                                      |
+| **Mux**            | `mux` ( `mux server` không đầu)        |     8322      | Daemon điều phối đại lý cục bộ (coder/mux). Chỉ — được quản lý vòng đời chứ không phải mục tiêu định tuyến (không có ủy quyền LLM ).                                                                                                                                                                                                            |
+| **lưỡng cực**      | `@maximhq/bifrost`                     |     8080      | Đi đến phần phụ trợ chuyển tiếp cổng AI. Khi chạy, tự động chọn theo tuyến chuyển tiếp (`/v1/relay/`)                                                                                                                                                                                                                                           |
+| **Dario**          | `@askalf/dario`                        |     3456      | Proxy đăng ký Claude — alternative/failover tới CLIProxyAPI cho lưu lượng truy cập có hình dạng Claude; khóa được chèn trở thành `DARIO_ADMIN_TOKEN` điều khiển mặt phẳng điều khiển `/admin/*` OAuth của nó                                                                                                                                    |
+| **mở-wa**          | `@open-wa/wa-automate`                 |     8323      | WhatsApp Tự động hóa web (Chrome không đầu thông qua Puppeteer). Chỉ — được quản lý vòng đời chứ không phải mục tiêu định tuyến.                                                                                                                                                                                                                |
+| **LLMLingua**      | `@atjsh/llmlingua-2`                   |     20135     | Mô hình sidecar nén nhanh — real LLMLingua-2 ONNX ( cổng JS/TS của thuật toán Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` gửi `/compress` qua HTTP tới nó, quay trở lại chương trình phụ trợ luồng công nhân đang xử lý khi sidecar ngừng hoạt động. Chỉ — được quản lý vòng đời chứ không phải mục tiêu định tuyến. |
+| **hộp hát**        | GitHub phát hành nhị phân (`singbox`)  |     20140     | TPROXY sidecar ủng hộ việc chặn proxy trong suốt của `applyTproxy()`(`src/mitm/tproxy/setup.ts`). Trình cài đặt tải xuống bản phát hành được ghim, đã được kiểm tra tổng kiểm tra. Chỉ — được quản lý vòng đời chứ không phải mục tiêu định tuyến (không có ủy quyền LLM )                                                                      |
 
 Tất cả tám đều theo cùng một mô hình giám sát:
 
 - OmniRoute cài đặt chúng dưới `DATA_DIR/services/{name}/` (tách biệt với `package.json` của chính OmniRoute)
 - OmniRoute sinh ra và giám sát chúng như các tiến trình con
 - OmniRoute đưa một khóa API tạm thời vào môi trường của trẻ và xoay nó mà không có thời gian chết (nếu có)
-- Tất cả các tuyến quản lý (`/api/services/*`) đều**LOCAL_ONLY** — chỉ có thể truy cập được từ loopback (quy tắc cứng số 17)
+- Tất cả các tuyến quản lý (`/api/services/*`) đều**LOCAL_ONLY** — chỉ có thể truy cập được từ loopback (quy tắc cứng #17)
 
 ### Các quyết định quan trọng (từ kế hoạch thiết kế)
 
@@ -209,7 +209,7 @@ các tình trạng tranh chấp, chẳng hạn khi tính năng tự động kh�
 
 ## 4. tham khảo API
 
-Tất cả các tuyến đường dưới `/api/services/` là**LOCAL_ONLY** (chỉ vòng lặp, quy tắc cứng số 17). Các yêu cầu không lặp lại sẽ nhận được `403 LOCAL_ONLY` bất kể mã thông báo xác thực.
+Tất cả các tuyến đường dưới `/api/services/` là**LOCAL_ONLY** (chỉ vòng lặp, quy tắc cứng #17). Các yêu cầu không lặp lại sẽ nhận được `403 LOCAL_ONLY` bất kể mã thông báo xác thực.
 
 ### 4.1 9Điểm cuối của bộ định tuyến (11 tuyến)
 
@@ -236,7 +236,7 @@ Cài đặt 9Router từ npm. Tạo `DATA_DIR/services/9router/` với `package.
 | `409`      | Đã cài đặt (đã khóa)                                                |
 | `500`      | cài đặt npm không thành công — xem `message` để biết lỗi thân thiện |
 
-**Ghi chú:** Sử dụng `execFile('npm', [...])` — không có shell, không có nội suy (quy tắc cứng số 13). lỗi EACCES được hiển thị dưới dạng thông báo thân thiện.
+**Ghi chú:** Sử dụng `execFile('npm', [...])` — không có shell, không có nội suy (quy tắc cứng #13). Lỗi EACCES được hiển thị dưới dạng thông báo thân thiện.
 
 ---
 
@@ -515,7 +515,7 @@ LLMLingua là một gói `@atjsh/llmlingua-2` sidecar nén nhanh chóng (mô hì
 
 **Hợp đồng xe sidecar:** tập lệnh máy chủ hiển thị `GET /health` ( — tức thời không chờ trên mô hình) và `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). Mô hình tải chậm trong lệnh gọi `/compress` đầu tiên.
 
-**Dây nén:** `open-sse/services/compression/engines/llmlingua/index.ts` của `httpSidecarBackend` gọi `LLMLINGUA_BASE_URL` (mặc định `http://127.0.0.1:20135`) và chỉ chấp nhận phản hồi của sidecar khi nó hoàn toàn ngắn hơn đầu vào; bất kỳ lỗi nào (không chạy, hết thời gian chờ, phản hồi không hoạt động) đều quay trở lại chương trình phụ trợ luồng công nhân đang xử lý (`./worker.ts`).
+**Dây nén:** `open-sse/services/compression/engines/llmlingua/index.ts` của `httpSidecarBackend` gọi `LLMLINGUA_BASE_URL` (mặc định `http://127.0.0.1:20135`) và chỉ chấp nhận phản hồi của sidecar khi nó hoàn toàn ngắn hơn đầu vào; bất kỳ lỗi nào (không chạy, hết thời gian chờ, phản hồi không hoạt động) sẽ quay trở lại chương trình phụ trợ luồng công nhân đang xử lý (`./worker.ts`).
 
 ---
 
@@ -555,9 +555,7 @@ Proxy này:
 - Loại bỏ `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` khỏi phản hồi
 - Viết lại các phản hồi HTML để tiêm `<base href>` và chuẩn hóa các đường dẫn tuyệt đối (`/foo` → `/dashboard/.../embed/foo`)
 
-Các bản nâng cấp WebSocket cho bảng thông tin nhúng được xử lý bởi máy chủ đồng hành trên một cổng chuyên dụng (xem `src/lib/services/embedWsProxy.ts`).
-
-Mọi nâng cấp đều được ủy quyền trước khi đường hầm mở ra, với các quy tắc tương tự như tuyến nhúng HTTP : thiết bị ngang hàng phải là loopback không có tiêu đề chuyển tiếp proxy ngược, `Origin` trình duyệt phải là nguồn gốc của bảng thông tin (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` mở rộng mặc định vòng lặp) và người gọi cần có phiên bảng thông tin hoặc khóa API trong phạm vi quản lý trừ khi tính năng đăng nhập bảng thông tin bị tắt.
+Các bản nâng cấp WebSocket cho bảng thông tin nhúng được xử lý bởi máy chủ đồng hành trên một cổng chuyên dụng (xem `src/lib/services/embedWsProxy.ts`). Mọi nâng cấp đều được ủy quyền trước khi đường hầm mở ra, với các quy tắc tương tự như tuyến nhúng HTTP : thiết bị ngang hàng phải là loopback không có tiêu đề chuyển tiếp proxy ngược, `Origin` trình duyệt phải là nguồn gốc của bảng thông tin (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` mở rộng mặc định vòng lặp) và người gọi cần có phiên bảng thông tin hoặc khóa API phạm vi quản lý trừ khi đăng nhập bảng thông tin bị tắt.
 
 **Bảo vệ:** Các tuyến proxy nhúng được phân loại theo `LOCAL_ONLY_API_PREFIXES` và chỉ có thể truy cập được từ loopback. Kẻ tấn công lấy được JWT thông qua đường hầm Cloudflare/Ngrok không thể ủy quyền vào các dịch vụ nhúng.
 

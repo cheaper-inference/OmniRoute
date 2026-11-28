@@ -185,84 +185,49 @@ ei sisalda.
 
 ---
 
-## Viirusetõrje valepositiivsed tuvastused
+## Viirusetõrje Valepositiivsed
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG paigutab faili `README.md` karantiini tuvastusega `MD:HttpRequest-inf[Susp]`
+### Avast/AVG karantiini `README.md` koos `MD:HttpRequest-inf[Susp]`
 
-**See on valepositiivne tuvastus. Miski pole nakatunud ja midagi pole vaja teha.**
+**See on valepositiivne. Miski pole nakatunud ja midagi pole vaja teha.**
 
-Avast ja AVG kasutavad heuristikat, mis märgistab lihtteksti-/Markdown-faile, mis sisaldavad
-palju HTTP-päringutena näivaid linke. OmniRoute'i `README.md` kuulub npm-paketti (see on
-loetletud failis `package.json` → `files`), seega paigutatakse see globaalse installimise
-korral asukohta `node_modules/omniroute/README.md` — ning see sisaldab umbes 15 näidet kujul
-`http://localhost:20128/...` (MCP HTTP/SSE lõpp-punktid, A2A `.well-known` URL ja `curl`-i
-näited). Selline linkide tihedus on heuristika käivitamiseks piisav.
+Avast ja AVG käitavad heuristikat, mis märgistab plain-text/Markdown -failid, mis sisaldavad palju HTTP-päringu välimusega linke. OmniRoute `README.md` tarnitakse npm-paketi sees (see on loetletud jaotises `package.json` → `files`), nii et see maandub globaalse installi — juures `node_modules/omniroute/README.md` ja sisaldab ~ 15 `http://localhost:20128/...` näidet ( MCP HTTP/SSE lõpp-punktid, A2A `.well-known` URL ja `curl` ). Sellest lingi tihedusest piisab heuristika väljalülitamiseks.
 
-Kui see algas alles hiljuti, ei ole faili olemus muutunud. README lõpp-punktide tabelit
-laiendati (lisati MCP HTTP + SSE + A2A) ja lisati rohkem `curl`-i näiteid, mistõttu ületas
-see lävendi.
+Kui see algas alles hiljuti: fail ei muutunud mitterahaliselt. README suurendas lõpp-punktide tabelit (lisati MCP HTTP + SSE + A2A ) ja rohkem `curl` näiteid, mis lükkas selle lävest üle.
 
-Fail on passiivne dokumentatsioon ega sisalda käivitatavat sisu. Võite selle turvaliselt
-karantiinist taastada.
+Fail on inertne dokumentatsioon, millel pole käivitatavat sisu. Saate selle karantiinist ohutult taastada.
 
 **Mida teha:**
 
-1. **Peatage teavitused** — lisage installikaust viirusetõrje välistuste hulka
-   (Avast: Settings → Exceptions), lisades oma globaalse `node_modules`-i tee ja/või
-   OmniRoute'i andmekausta (`~/.omniroute/`).
-2. **Teatage valepositiivsest tuvastusest** — <https://www.avast.com/false-positive-file-form.php>,
-   lisades karantiini paigutatud faili `README.md`. See lahendus aitab kõiki, sest probleemi
-   põhjustab tootja heuristika ülereageerimine tekstifailile.
+1. **Peatage märguanded** — välistage oma viirusetõrje installikataloog (Avast: Settings → Exceptions), lisades oma globaalse `node_modules` tee and/or OmniRoute andmekataloogi (`~/.omniroute/`).
+2. **Teatage valepositiivsest tulemusest** — <https://www.avast.com/false-positive-file-form.php>, karantiinis oleva `README.md` kinnitamine. See on parandus, mis aitab kõiki, kuna see on müüja heuristiline ülereageerimine tekstifailile.
 
-**Miks me seda omalt poolt ei „paranda”:** kõik näited kasutavad aadressi `http://localhost`
-ja localhost ei saa kasutada `https`-i ilma iseallkirjastatud sertifikaatidest tulenevate
-ebamugavusteta. Dokumentatsiooni moonutamine ühe tootja heuristikast möödahiilimiseks
-kahjustaks kõigi lugejate kasutuskogemust pelgalt skanneri vea tõttu.
+**Miks me seda enda poolel ei "paranda":** Kõik näited on `http://localhost` ja localhost ei saa olla `https` ilma iseallkirjastatud sertifikaadi hõõrdumiseta. Dokumentide moonutamine ühe müüja heuristikast kõrvalehoidmiseks kahjustaks iga lugeja skanneri viga.
 
-### Kaspersky märgistab töölauarakenduse tuvastusega `PDM:Trojan.Win32.Generic`
+### Kaspersky märgib töölauarakenduse kui `PDM:Trojan.Win32.Generic`
 
-**See on käitumusliku heuristika valepositiivne tuvastus. Miski pole nakatunud.** Kaspersky
-prefiks `PDM:` tähendab, et otsus pärineb selle moodulist Proactive Defense Module (System
-Watcher), mis hindab seda, mida installer _teeb_, selle asemel et võrrelda seda teadaoleva
-pahavaraga. Käivitumisel „pöörab Kaspersky tagasi” kogu installi — kustutades juba kirjutatud
-failid —, mistõttu rakendus jääb katkiseks või kaob.
+**See on käitumusliku heuristika valepositiivne tulemus. Midagi pole nakatunud.** Kaspersky `PDM:` eesliide tähendab, et otsus pärineb selle proaktiivsest kaitsemoodulist (System Watcher), mis hindab installija _tegemist_, mitte ei võrdle seda teadaoleva pahavaraga. Kui see käivitub, "kerib" Kaspersky kogu installi — tagasi, kustutades failid, mille ta oli juba — kirjutanud, nii et rakendus läheb katki või puudub.
 
-Märgistatud failid on töölauarakendusse kaasatud deklareeritud avatud lähtekoodiga sõltuvuste
-standardsed osad, näiteks:
+Selle märgistatud failid on deklareeritud avatud lähtekoodiga sõltuvuste varuosad, mis on komplekteeritud töölauarakendusega, näiteks:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` ja
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), brauseri automatiseerimise
-  teek, mida kasutatakse rakendusesiseseks teenusepakkujasse sisselogimiseks ja brauseripõhiseks vestluseks.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — fikseeritud versiooniga `wreq-js`-i omakomponent, mida kasutatakse brauseri sõrmejäljega
-  HTTP jaoks veebiküpsiseid kasutavate teenusepakkujate puhul (`<arch>` on `x64` või `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` ja `workerProcessEntry.js` — [Playwright](https://playwright.dev), brauseri automatiseerimise teek, mida kasutatakse rakendusesisese teenusepakkuja sisselogimiseks ja brauseri toega vestluseks.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — kinnitatud `wreq-js` natiivne sidumine, mida kasutatakse veebiküpsiste pakkujate brauseri sõrmejäljega HTTP jaoks (`<arch>` on `x64` või `arm64`).
 
-**Miks see käivitub:** Windowsi installer **ei ole veel koodiallkirjastatud**, seega pole
-allkirjastamata NSIS-i installeril mingit mainet ja käitumuslikud heuristikad töötavad
-maksimaalse agressiivsusega. Koos kaasatud omaplatvormi DLL-i ja sadade `.js`-failidega, mis
-kirjutatakse kausta `%LOCALAPPDATA%\Programs\OmniRoute` (sealhulgas Next.js-i autonoomse
-järgu räsisufiksiga paketikaustad), piisab sellest heuristika käivitamiseks. Koodi
-allkirjastamine on kavandatud; kuni see teoks saab, võib probleem uute väljalasetega korduda.
+**Miks see süttib:** Windows paigaldaja on** pole veel koodiga allkirjastatud** , nii et allkirjastamata NSIS installijal on null maine ja käitumuslik heuristika töötab maksimaalse agressiivsusega. Kombineerituna komplekteeritud natiivse DLL ja sadade `%LOCALAPPDATA%\Programs\OmniRoute` all kirjutatud `.js` failidega (sealhulgas Next.js -i eraldiseisva järgu räsiliitega paketikataloogid) piisab heuristika käivitamiseks. Plaanis on koodi allkirjastamine; kuni selle maandumiseni võivad uued väljalasked seda korrata.
 
 **Mida teha:**
 
-1. **Kontrollige esmalt allalaaditud faili** (see välistab faili muutmise). Iga väljalaskega
-   avaldatakse `latest.yml`, mille väli `sha512` (base64) hõlmab installerit
-   `OmniRoute.Setup.<version>.exe`. Käivitage PowerShellis installeri kaustas:
+1. **Esmalt kinnitage oma allalaadimine** (välistab rikutud faili). Iga väljalase avaldab `latest.yml`, mille `sha512` väli (base64) katab `OmniRoute.Setup.<version>.exe` installeri. PowerShell s installiprogrammi sisaldavast kaustast:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Väljund peab ühtima väärtusega `latest.yml` → `sha512`. Kui see ei ühti, kustutage fail ja
-   laadige see uuesti alla ainult [GitHubi väljalasete lehelt](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Taastage + välistage** — taastage tagasi pööratud üksused karantiinist ja lisage välistus
-   kaustale `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
-   seejärel installige rakendus uuesti.
-3. **Teatage valepositiivsest tuvastusest** — <https://opentip.kaspersky.com/>. Kasutajate
-   esitatud valepositiivsete tuvastuste teated kiirendavad tõepoolest lubatud failide loendisse lisamist.
+   Väljund peab ühtima `latest.yml` → `sha512`. Kui seda ei juhtu, kustutage fail ja laadige see uuesti alla ainult [GitHub väljaannete lehelt](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Taasta + välistamine** — taastab karantiini tagasipööratud üksused ja lisage `%LOCALAPPDATA%\Programs\OmniRoute` -le välistamine (Kaspersky → Settings → Threats and Exclusions), seejärel installige uuesti.
+3. **Teatage valepositiivsest tulemusest** — <https://opentip.kaspersky.com/>. Kasutajate esitatud FP -aruanded kiirendavad tõeliselt lubade loendisse lisamist.
 
 ---
 
@@ -870,10 +835,10 @@ Veel sümptomeid:
 
 ---
 
-## Kas probleem püsib?
+## Ikka ummikus?
 
-- **GitHubi probleemid**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Arhitektuur**: sisemise ülesehituse üksikasju vaadake failist [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
-- **API viitedokumentatsioon**: kõigi lõpp-punktide kohta vaadake faili [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
-- **Süsteemi seisundi töölaud**: reaalajas süsteemi oleku vaatamiseks avage **Dashboard → Health**
-- **Tõlkija**: vorminguprobleemide silumiseks kasutage valikut **Dashboard → Translator**
+- **GitHub probleemid** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Arhitektuur** : Sisemiste üksikasjade kohta vaadake [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
+- **API viide** : vaadake [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) kõigi lõpp-punktide kohta
+- **Tervise armatuurlaud** : Kontrollige** Armatuurlaud → Health** reaalajas süsteemi oleku jaoks
+- **Tõlkija** : Kasutage** Armatuurlaua → tõlkija** vorminguprobleemide silumiseks

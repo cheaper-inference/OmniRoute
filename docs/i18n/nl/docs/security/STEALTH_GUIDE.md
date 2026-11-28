@@ -4,11 +4,9 @@
 
 ---
 
-> **Waarheidsbron:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Laatst bijgewerkt:** 2026-09-02 — v3.8.51
-> **Doelgroep:** Engineers die providerspecifieke stealth-integraties onderhouden.
+> **Bron van waarheid:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Publiek:** Ingenieurs die providerspecifieke stealth-integraties onderhouden.
 
-OmniRoute integreert met providers waarvan de edge-infrastructuur actief niet-officiële clients fingerprint (TLS JA3/JA4, headervolgorde, vorm van de JSON-body, integriteitstokens). Deze pagina documenteert de stealth-oppervlakken die OmniRoute beschikbaar stelt en waar deze zijn geïmplementeerd.
+OmniRoute kan worden geïntegreerd met providers waarvan de randen actief vingerafdrukken maken op niet-officiële klanten (TLS JA3/JA4, header-volgorde, JSON lichaamsvorm, integriteitstokens). Deze pagina documenteert de stealth-oppervlakken OmniRoute blootlegt en waar ze worden geïmplementeerd.
 
 ## Juridische en ethische kennisgeving
 
@@ -87,63 +85,66 @@ geclaimd.
 
 ## Claude Code Stealth-bundel
 
-Wanneer `cliCompatMode` is ingeschakeld, past OmniRoute uitgaande Claude-verzoeken zo aan dat ze niet te onderscheiden zijn van `claude-cli`-verkeer. Drie modules werken hierbij samen:
+Wanneer `cliCompatMode` is ingeschakeld, hervormt OmniRoute uitgaande Claude verzoeken zodat ze niet te onderscheiden zijn van `claude-cli` -verkeer. Drie modules werken samen:
 
 ### `claudeCodeFingerprint.ts`
 
-Berekent de 3 tekens lange `cc_version`-vingerafdruk die in de factureringsheader is opgenomen:
+Berekent de `cc_version` vingerafdruk van 3 tekens die is ingebed in de factuurheader:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (hardcoded; komt overeen met de officiële client)
-- Invoer: tekens op index 4, 7 en 20 van de tekst van het eerste gebruikersbericht + versietekenreeks
+- `FINGERPRINT_SALT = "59cf53e54c78"` (hardcoded; komt overeen met officiële client)
+- Invoer: tekens op index 4, 7, 20 van de eerste gebruikersberichttekst + versiestring
 - Uitvoer: hexadecimaal voorvoegsel van 3 tekens
 
-### `claudeCodeCCH.ts` (Client Content Hash)
+### `claudeCodeCCH.ts` (hash van klantinhoud)
 
-Integriteitscontrole aan de serverzijde die de officiële Claude Code CLI via Bun/Zig berekent. OmniRoute implementeert deze opnieuw met `xxhash-wasm`:
+Server-side integriteit controleer de officiële Claude code CLI berekent via Bun/Zig. OmniRoute herimplementeert met `xxhash-wasm`:
 
-1. Serialiseer de body met de tijdelijke aanduiding `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Hexadecimale waarde van 5 kleine letters/tekens, links aangevuld met nullen
-4. Vervang `cch=00000;` door het berekende token
+1. Serialiseer de hoofdtekst met `cch=00000;` tijdelijke aanduiding
+2. Bouw de hash-weergave met twee vervangingen van platte tekst, in deze volgorde (`hashView()`):
+   - elke match van `/"model":"[^"]*"/g` wordt `"model":""` — de match stopt bij de eerste `"`, dus een waarde met een ontsnapte quote (`"model":"a\"b"`) wordt alleen geleegd tot aan die quote, zoals de client doet
+   - elke match van `/"max_tokens":\d+,|,?"max_tokens":\d+/g` wordt alleen — numerieke waarden verwijderd, op elke diepte
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Nul-opgevulde 5-karakter kleine letter hex
+5. Vervang `cch=00000;` door het berekende token
 
 Constanten:
 
-- Seed: `0x6e52736ac806831e`
+- Seed: `0x4d659218e32a3268` (komt overeen met loopback-opnamen van Claude -code 2.1.252 en 2.1.322)
 - Patroon: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Voegt een Unicode-**zero-width joiner** (`U+200D`) toe na het eerste teken van ‘gevoelige’ clientnamen, zodat upstreamfilters er niet met grep naar kunnen zoeken. Standaardwoordenlijst:
+Voegt een Unicode in** verbinder met nulbreedte** (`U+200D`) na het eerste teken van "gevoelige" clientnamen, zodat upstream-filters deze niet kunnen grep. Standaard woordenlijst:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Toegepast op: `system`-blokken, alle `messages[].content` en `tools[].description` / `tools[].function.description`. Kan door de operator worden overschreven via `setSensitiveWords()`.
+Toegepast op: `system` blokken, alle `messages[].content` en `tools[].description` / `tools[].function.description`. Operator-overschrijfbaar via `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`-providers
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` aanbieders
 
-Voor Anthropic-relays van derden die uitsluitend ‘echt Claude Code’-verkeer accepteren:
+Voor Anthropic -relais van derden die alleen 'echte Claude code'-verkeer accepteren:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` standaard
-- De schakelaar ‘Enable redact-thinking beta’ per verbinding voegt `redact-thinking-2026-02-12` toe wanneer een CC Compatible-upstream specifiek geredigeerde redeneerstreams vereist
-- De schakelaar ‘Enable summarized thinking display’ per verbinding slaat `providerSpecificData.requestDefaults.summarizeThinking` op en voegt `display: "summarized"` toe aan CC Compatible-redeneerverzoeken waarvoor nog geen weergavemodus was ingesteld
+- standaard `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
+- De schakelknop 'Redact-denken bèta inschakelen' per verbinding voegt `redact-thinking-2026-02-12` toe wanneer een CC compatibele upstream specifiek geredigeerde denkstromen vereist
+- De schakeloptie "Samenvattende denkweergave inschakelen" per verbinding slaat `providerSpecificData.requestDefaults.summarizeThinking` op en voegt `display: "summarized"` toe aan CC Compatibele denkverzoeken waarvoor nog geen weergavemodus is ingesteld
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x-familie)
 - Standaardpad: `/v1/messages?beta=true`
 
-Gerelateerde modules in dezelfde bundel:
+Zustermodules in dezelfde bundel:
 
-- `claudeCodeConstraints.ts` — regels voor temperatuur en cachebeheer
-- `claudeCodeToolRemapper.ts` — hertoewijzing van toolnamen
-- `claudeCodeExtraRemap.ts` — aanvullende normalisatie van de payload
+- `claudeCodeConstraints.ts` — temperatuur + cachecontroleregels
+- `claudeCodeToolRemapper.ts` — toolnaam opnieuw toewijzen
+- `claudeCodeExtraRemap.ts` — extra payload-normalisatie
 
 ---
 
@@ -163,7 +164,7 @@ De stroomopwaartse handhaving is aan de gang**Google's kant** , niets wat OmniRo
 
 **Waarom dit de detectie van misbruik agressiever maakt dan gebruik van alleen free-tier:**
 
-- Aanhoudende geautomatiseerde uitgaven voor één Google -account worden anders gemarkeerd dan gratis hits-quota-and-stops.
+- Aanhoudende geautomatiseerde uitgaven voor één Google account worden anders gemarkeerd dan gratis hits-quota-and-stops.
 - Er is geen tariefplafond voor kredietoverschrijdingen, dus een verkeerd geconfigureerde klant kan in enkele minuten honderden USD verbranden en eruitzien als wederverkoop van API-sleutels of botverkeer.
 - Meerdere OmniRoute gebruikers die parallel te veel kredieten van dezelfde externe IP ontvangen, versterken het signaal.
 
@@ -203,7 +204,7 @@ Aanraakpunten:
 
 - `open-sse/executors/antigravity.ts` — leest `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — referentieloodgieterswerk
-- Origineel incidentrapport: Bespreking [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Origineel incidentrapport: Bespreking [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

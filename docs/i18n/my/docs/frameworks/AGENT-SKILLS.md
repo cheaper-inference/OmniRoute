@@ -13,12 +13,12 @@ Agent Skills များသည် ပြင်ပ agent များ၊ MCP cli
 
 ## ခြုံငုံသုံးသပ်ချက်
 
-ကတ်တလောက်တွင် **Agent Skills 45 ခု** (REST API 23 ခု + CLI 21 ခု + configuration workflow 1 ခု) ပါဝင်သည်။ Skill တစ်ခုစီတွင် အောက်ပါတို့ပါဝင်သည်-
+ကတ်တလောက်တွင် ပါရှိသည်။** 45 အေးဂျင့်ကျွမ်းကျင်မှု** (23 REST API + 21 CLI + 1 configuration workflow)။ ကျွမ်းကျင်မှုတစ်ခုစီတွင်-
 
-- **တရားဝင် ID** တစ်ခု (`omni-auth`, `cli-serve` စသည်)
-- YAML frontmatter (`name`, `description`) နှင့် အကြောင်းအရာပြည့်စုံသော markdown body ပါဝင်သည့် `skills/{id}/SKILL.md` ရှိ **SKILL.md** ဖိုင်တစ်ခု
-- OpenAPI spec နှင့် CLI registry တို့မှ ရယူထားသော **REST endpoint များ** (API skill များ) သို့မဟုတ် **CLI subcommand များ** (CLI skill များ)
-- တိုက်ရိုက်ရယူနိုင်ရန် **GitHub raw URL** တစ်ခု- `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- တစ်** canonical ID** (`omni-auth`၊ `cli-serve` စသည်ဖြင့်)
+- တစ်**SKILL.md** `skills/{id}/SKILL.md` တွင် YAML frontmatter (`name`, `description`) + ကြွယ်ဝသော markdown body
+- **REST အဆုံးမှတ်များ** (API ကျွမ်းကျင်မှု) သို့မဟုတ်**CLI ညွှန်ကြားချက်များ** OpenAPI spec နှင့် CLI registry မှဆင်းသက်လာသော (CLI ကျွမ်းကျင်မှုများ)
+- တစ်**GitHub အကြမ်း URL** တိုက်ရိုက်ထုတ်ယူမှုအတွက်: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Generator ၏ response သည် `GeneratorReport` တစ်ခုဖြစ်�
 
 ---
 
-## Coverage API
+## လွှမ်းခြုံ API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

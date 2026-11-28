@@ -245,33 +245,41 @@ fail open: קריאה חסרה או לא עדכנית (ישנה יותר מ־15 
 
 ---
 
-## 🎨 קומבואים
+## 🎨 Combos
 
-ניתן לשנות את סדר כרטיסי הקומבו ישירות ב-**לוח הבקרה → קומבואים** באמצעות גרירת הידית שבכל כרטיס. הסדר נשמר ב-SQLite ומשוחזר בעת טעינה מחדש.
+אתה יכול להזמין מחדש כרטיסים משולבים ישירות פנימה** לוח מחוונים → Combos** על ידי גרירת הידית בכל כרטיס. ההזמנה מאוחסנת ב- SQLite ומשוחזרת בטעינה מחדש.
 
-### דוגמה 1: מקסום המינוי → גיבוי זול
+### מצא ספק, דגם או חשבון
 
-```
-לוח הבקרה → קומבואים → יצירת חדש
+ביצירה או עריכה משולבת, בוחרי הספק, המודל, החשבון וההפניות המשולבות שלב אחר שלב כוללים שדה חיפוש מקומי. חפש לפי שם המוצג, מזהה, כינוי ספק או מקור מודל, ולאחר מכן לחץ על תוצאה או השתמש במקשי החצים ו-Enter. מונחי חיפוש מרובים חייבים כולם להתאים. ניקוי החיפוש או לחיצה על Escape משאירה את הערך שנבחר ללא שינוי.
 
-שם: premium-coding
-מודלים:
-  1. cc/claude-opus-4-7 (מינוי ראשי)
-  2. glm/glm-4.7 (גיבוי זול, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (חלופה זולה ביותר, $0.3/1M)
+בחירת החשבון האוטומטית נשארת גלויה בזמן החיפוש. לרשימת הגבלות החשבונות האופציונליים שלה יש מסנן נפרד: חשבונות נבחרים מחוץ לתוצאות הגלויות נשארים נבחרים, והספירה כוללת אותם. לא ניתן לחפש קטעי דוא"ל מוסתרים כאשר פרטיות הדוא"ל מופעלת. הוסף את השלב ושמור את המשולב כרגיל; הקלדת שאילתה אינה שומרת או בודקת דבר.
 
-שימוש ב-CLI: premium-coding
-```
+אותו חיפוש מקומי זמין עבור דגמי בדיקת חיבור, דגמי ברירת מחדל וכינוי מותאמים אישית CLI ואפשרויות פרוקסי שמור. פעולות השמירה, ההחלה והבדיקה הקיימות נשארות נפרדות.
 
-### דוגמה 2: חינמי בלבד (ללא עלות)
+### דוגמה 1: מקסימום מנוי → Cheap Backup
 
 ```
-שם: free-combo
-מודלים:
-  1. if/kimi-k2.7-code (מופיע כבעל גישה חינמית; ייתכן שיחולו מגבלות ספק)
-  2. kr/qwen3-coder-next (חלופה חינמית של Kiro)
+Dashboard → Combos → Create New
 
-עלות: מופיעה כעת כ-$0; התנאים והזמינות עשויים להשתנות
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### דוגמה 2: חינם בלבד (עלות אפס)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -431,7 +439,7 @@ omniroute autostart disable
 ### פריסת VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +521,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -774,7 +782,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 שרשרת עמיתים אינה שכפול מסד נתונים או כשל במארח. כל שער שומר על מצב SQLite עצמאי, מטמונים, מוני תעריפים והפעלות. השתמש בפרוקסי הפוך שנבדק תקינות או ב-failover של לקוח עבור זמינות active/passive או active/active, ולעולם אל תעלה מסד נתונים SQLite אחד למספר מופעי OmniRoute פועלים.
 
-### מסלולי ספקים ייעודיים
+### מסלולי ספק ייעודיים
 
 נתב בקשות ישירות לספק ספציפי עם אימות מודל:
 
@@ -802,7 +810,7 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**עֲדִיפוּת:** למפתח ספציפי → Combo ספציפי → לספק ספציפי → Global → סביבה.
+**עֲדִיפוּת:** → ספציפי למפתח Combo → ספציפי לספק → Global → סביבה.
 
 ### קטלוג דגמים API
 
@@ -840,7 +848,7 @@ curl http://localhost:20128/api/models/catalog
 
 ### מגרש משחקים של מתרגמים
 
-גישה דרך** לוח מחוונים → מתרגם** . נפה באגים ודמיין כיצד OmniRoute מתרגם בקשות API בין ספקים.
+גישה דרך** לוח מחוונים מתרגם →** . נפה באגים ודמיין כיצד OmniRoute מתרגם בקשות API בין ספקים.
 
 | מצב                     | מַטָרָה                                                                |
 | ----------------------- | ---------------------------------------------------------------------- |
@@ -882,12 +890,12 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` `cost-optimized`
 - `auto` — מונע על פני כל המועמדים
 - `lkgp` (הספק האחרון הידוע הטוב) — מצמיד את הספק האחרון שהצליח, ואז חוזר לכללים
-- `context-optimized` — בוחר את המודל עם חלון ההקשר הפנוי הגדול ביותר
-- `context-relay` — מרשתת דגמים עם הקשר ארוך להמשך פניות
+- `context-optimized` — מנסה תחילה את המודל עם חלון ההקשר הידוע הגדול ביותר
+- סדר עדיפות `context-relay` — בתוספת סיכום מסירה כאשר השיחה עוברת לחשבון אחר
 
 #### כותרת הפעלה דביקה חיצונית
 
-עבור זיקה להפעלה חיצונית (לדוגמה, סוכני Claude Code/Codex מאחורי פרוקסי הפוכים), שלח:
+עבור זיקה להפעלה חיצונית (לדוגמה, סוכני Claude Code/Codex מאחורי פרוקסי הפוך), שלח:
 
 ```http
 X-Session-Id: your-session-key
@@ -1011,7 +1019,7 @@ OmniRoute מיישמת חוסן ברמת הספק עם חמישה מרכיבים
 
    מגבלות תעריף `429` בהיקף חיבור נשארות** קירור חיבור** ואל תספרו כלפי מפסק הספק.
 
-   מצב זמן הריצה של מפסק הספק מוצג** לוח מחוונים → Health** רַק.
+   מצב זמן הריצה של מפסק הספק מוצג** לוח המחוונים → Health** רַק.
 
 4. **המתן להתקררות** — אם כל חיבור מועמד כבר מתקרר, OmniRoute יכול לחכות להתקררות המוקדמת ביותר ולנסות שוב את אותה בקשת לקוח באופן אוטומטי.
 
@@ -1152,11 +1160,11 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **עגול-רובין**        | מסתובב בין דגמים ברצף                                      |
 | **עֲדִיפוּת**         | תמיד מנסה את הדגם הראשון; נופל רק על טעות                  |
 | **אַקרַאִי**          | בוחר דגם אקראי מהשילוב עבור כל בקשה                        |
-| **מְשׁוּקלָל**        | מסלולים באופן פרופורציונלי על סמך משקלים שהוקצו לכל דגם    |
+| **מְשׁוּקלָל**        | מסלולים באופן פרופורציונלי על בסיס משקלים שהוקצו לכל דגם   |
 | **הכי פחות בשימוש**   | מנתב למודל עם הכי מעט בקשות אחרונות (משתמש במדדים משולבים) |
 | **אופטימיזציית עלות** | מסלולים לדגם הזול ביותר הזמין (משתמש בטבלת תמחור)          |
 
-ניתן להגדיר ברירת מחדל משולבת גלובלית** לוח המחוונים → הגדרות → ניתוב → Combo ברירת מחדל** . תפוגת יעד משולבת יורשת את הזמן הקצוב של הבקשה הנוכחית כברירת מחדל. לְהִשְׁתַמֵשׁ** פסק זמן יעד (שניות)** על ברירות מחדל משולבות או משולבות בודדות רק כאשר מגבלה קצרה יותר לכל יעד אמורה להפעיל ירידה מהירה יותר.
+ניתן להגדיר ברירת מחדל משולבת גלובלית** לוח המחוונים → הגדרות → ניתוב → Combo ברירת מחדל** . תפוגת יעד משולבת יורשת את הזמן הקצוב של הבקשה הנוכחית כברירת מחדל. לְהִשְׁתַמֵשׁ** פסק זמן יעד (שניות)** ברירות מחדל משולבות או משולבות בודדות רק כאשר מגבלה קצרה יותר לכל יעד אמורה להפעיל ירידה מהירה יותר.
 
 אופטימיזציות משולבות של אפס השהייה הן הסכמה. לַעֲזוֹב** אופטימיזציות של אפס השהייה** מושבתת כדי למנוע מתכונות האחזור הללו להתחרות במטרות חילופיות, לדלג על יעדים המבוססים על היסטוריית TTFT או לדחיסת בקשות חזרה; הפעלתו מאפשרת גידור מוגדר, דילוגים חזויים TTFT ודחיסת fallback פרואקטיבית כדי לסחור בנאמנות routing/request עבור חביון זנב נמוך יותר.
 
@@ -1166,7 +1174,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 ### לוח מחוונים לבריאות
 
-גישה דרך** לוח מחוונים → Health** . סקירת תקינות מערכת בזמן אמת עם 6 כרטיסים:
+גישה דרך** לוח המחוונים → Health** . סקירת תקינות מערכת בזמן אמת עם 6 כרטיסים:
 
 | כַּרְטִיס          | מה זה מראה                                                             |
 | ------------------ | ---------------------------------------------------------------------- |
@@ -1330,34 +1338,36 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ---
 
-## 💻 CLI פנימי
+## 💻 פנימי CLI
 
-OmniRoute כולל CLI פנימי (`omniroute …`) להגדרה, לאבחון ולשליטה בזמן ריצה. הוא **נפרד מהעמוד "כלי CLI" בלוח הבקרה**, שמגדיר כלי CLI של צד שלישי (Claude Code, Cursor, Codex, Cline, …) כדי שיוכלו לתקשר עם OmniRoute.
+OmniRoute שולחת CLI פנימי (`omniroute …`) להגדרה, אבחון ובקרת זמן ריצה. זֶהוּ** נפרד מהדף "כלים CLI " בלוח המחוונים** , שמגדיר CLIs של צד שלישי (Claude Code, Cursor, Codex, Cline, ...) כך שהם יכולים לדבר עם OmniRoute.
 
 ```bash
-omniroute setup                    # אשף אינטראקטיבי (סיסמה, ספקים, שילובים)
-omniroute setup --non-interactive  # מתאים ל-CI
-omniroute doctor                   # אבחון תקינות (ספריית נתונים, מסד נתונים, ספקים, יציאות)
-omniroute providers available      # הצגת הספקים הנתמכים
-omniroute providers list           # הצגת החיבורים המוגדרים
-omniroute providers test <id>      # בדיקה חיה של חיבור לספק
-omniroute combos list              # הצגת שילובים
-omniroute combos switch <name>     # הגדרת שילוב ברירת המחדל
-omniroute models                   # הצגת המודלים הזמינים (--json, --search)
-omniroute keys add | list | remove # ניהול מפתחות API מהמסוף
-omniroute backup                   # יצירת תמונת מצב של התצורה ומסד הנתונים
-omniroute restore [<timestamp>]    # שחזור מתמונת מצב
-omniroute health                   # מצב תקינות מפורט (מנתקי מעגל, מטמון, זיכרון)
-omniroute quota                    # שימוש במכסת הספק
-omniroute mcp status               # מצב שרת MCP
-omniroute a2a status               # מצב שרת A2A
-omniroute tunnel list|create|stop  # מנהרות Cloudflare/Tailscale/ngrok
-omniroute reset-password           # איפוס סיסמת מנהל המערכת
-omniroute --mcp                    # הפעלת שרת MCP דרך stdio
-omniroute --port 3000              # הפעלת השרת ביציאה מותאמת אישית
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-טיפ: שלבו את `omniroute doctor --json` עם כלי הניטור שלכם כדי לקבל התראות על חיבורים לא תקינים לספקים.
+טיפ: חבר `omniroute doctor --json` לכלי הניטור שלך כדי להתריע על התקנה מקומית פגומה. `doctor` לא בודק חיבורי ספקים; השתמש `omniroute providers test <id>` בשביל זה.
 
 ---
 

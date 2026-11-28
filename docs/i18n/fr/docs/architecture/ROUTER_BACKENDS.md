@@ -41,48 +41,31 @@ Le contrat `domain/routing/routerBackends.ts` (dont le code sera intégré avec 
 
 Les `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`, `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) permettent aux appelants de filtrer selon ce qu'un moteur peut réellement faire, plutôt que de coder en dur des branches propres à chaque identifiant.
 
-## Axe A — services intégrés (côté processus supervisé)
+## Services embarqués Axis A — (côté processus supervisé)
 
-- **Registre des processus supervisés :** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (actuellement : `9router`, `cliproxy`).
-- **Responsable du cycle de vie :** `src/lib/services/ServiceSupervisor.ts` — `start()` lance le
-  processus enfant, attend la validation de `waitForHealthy()`, redirige stdout/stderr vers un tampon circulaire ;
-  `stop()` effectue SIGTERM→SIGKILL ; toutes les opérations sont sérialisées à l’aide d’un verrou.
-- **Union d’états** (`src/lib/services/types.ts`) :
-  `not_installed | stopped | starting | running | stopping | error`, avec en plus un
-  `HealthState = healthy | unhealthy | unknown` orthogonal.
-- **Pourquoi un processus séparé (et non un SDK intégré au processus) ?** L’isolation des processus permet
-  de contrôler indépendamment l’installation, le démarrage, l’arrêt, l’état de santé et les journaux de chaque sidecar, et permet
-  l’application de la protection de lancement en boucle locale. La modélisation d’un adaptateur intégré au processus est prévue ultérieurement — l’indicateur de capacité
-  `native-hot-path` est l’endroit où cela serait exprimé.
+- **Registre des processus supervisés :** `src/lib/services/bootstrap.ts` `SERVICES[]` (aujourd'hui : `9router`, `cliproxy`).
+- **Propriétaire du cycle de vie :** `src/lib/services/ServiceSupervisor.ts` — `start()` engendre l'enfant, se lance sur `waitForHealthy()`, tape stdout/stderr dans un tampon en anneau ; `stop()` SIGTERM→SIGKILL; le tout sérialisé sous une serrure.
+- **Union d'État** (`src/lib/services/types.ts`) : `not_installed | stopped | starting | running | stopping | error`, plus un `HealthState = healthy | unhealthy | unknown` orthogonal.
+- **Pourquoi un processus séparé (pas un SDK in-proc) ?** L'isolation des processus est ce qui rend install/start/stop/health/logs contrôlable indépendamment par side-car et permet au spawn-guard de bouclage de s'appliquer. La modélisation d'un adaptateur in-proc est un travail futur — l'indicateur de capacité `native-hot-path` est l'endroit où cela serait exprimé.
 
-### Contrat des routes de cycle de vie (`/api/services/<tool>/…`)
+### Contrat de parcours de vie (`/api/services/<tool>/…`)
 
-Les codes de statut sont **spécifiques à l’état, au verbe et au chemin par conception** — il s’agit du contrat, et non
-d’une incohérence :
+Les codes d'état sont**state/verb/path-specific par conception** — c'est le contrat, pas une incohérence :
 
-| Appel                        | Condition                             | Statut                                |
-| ---------------------------- | ------------------------------------- | ------------------------------------- |
-| `POST .../start`             | service `not_installed`               | **409** (précondition)                |
-| `POST .../stop`              | déjà arrêté                           | **200** (opération nulle idempotente) |
-| `GET .../status`             | OK                                    | **200** (`live ?? row ?? "unknown"`)  |
-| `POST .../start`             | échec du lancement                    | **503** (transitoire)                 |
-| `GET .../status`, `.../stop` | erreur non interceptée                | **500**                               |
-| `GET /api/services/<x>/logs` | outil `<x>` inconnu                   | **404** `Service '<x>' not found`     |
-| `GET .../status?reveal=key`  | `X-Reveal-Confirm: yes` manquant      | **403** (9router uniquement)          |
-| **toute** `/api/services/*`  | appelant hors boucle locale/LAN privé | **403 LOCAL_ONLY**                    |
+| Appel                                  | Condition                                 | Statut                               |
+| -------------------------------------- | ----------------------------------------- | ------------------------------------ |
+| `POST .../start`                       | service `not_installed`                   | **409** (condition préalable)        |
+| `POST .../stop`                        | déjà arrêté                               | **200** (idempotent sans opération)  |
+| `GET .../status`                       | OK                                        | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`                       | échec d'apparition                        | **503** (transitoire)                |
+| `GET .../status`, `.../stop`           | erreur non détectée                       | **500**                              |
+| `GET /api/services/<x>/logs`           | outil inconnu `<x>`                       | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`            | `X-Reveal-Confirm: yes` manquant          | **403** (9routeur uniquement)        |
+| **n'importe lequel** `/api/services/*` | l'appelant n'est pas loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-Tous les corps d’erreur sont structurés par `createErrorResponse()` →
-`{ error: { message, type }, requestId }`, où `type` est dérivé du statut
-(`500→server_error`, `404→not_found`, `409→conflict`, sinon `invalid_request`) et constitue
-le discriminant exploitable par la machine. Les messages sont préalablement assainis
-(`sanitizeErrorMessage()`, règle stricte nº 12).
+Tous les corps d'erreur sont façonnés par `createErrorResponse()` → `{ error: { message, type }, requestId }`, où `type` est dérivé du statut (`500→server_error`, `404→not_found`, `409→conflict`, else `invalid_request`) et est le discriminateur exploitable par la machine. Les messages sont pré-assainis (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**La protection de la boucle locale** est la source la plus courante d’un `403` : `/api/services/` figure dans
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) et
-`src/server/authz/policies/management.ts` rejette tout appelant qui ne provient pas de la boucle locale ou d’un LAN privé
-**avant l’authentification**, car ces routes lancent des processus enfants (règles strictes 15
-et 17). Y accéder au moyen d’un tunnel public renvoie un `403` par conception.
+**La garde de bouclage** est la source la plus courante d'un `403`: `/api/services/` est dans `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) et `src/server/authz/policies/management.ts` rejette tout appelant sans bouclage/non-LAN privé** avant l'authentification** , car ces routes génèrent des processus enfants (Règles strictes 15 et 17). Les atteindre via un tunnel public est `403` par conception.
 
 ## Axe B — backend de routage du relais (côté répartition)
 

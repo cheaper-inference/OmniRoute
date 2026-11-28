@@ -270,71 +270,71 @@ Proses ini hanya terjadi sekali saat startup pertama setelah upgrade. Gunakan `m
 
 ---
 
-## Marketplace Proxy Gratis 1proxy
+## 1proxy Pasar Proxy Gratis
 
-> 🆕 **Dikontribusikan oleh [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Isu [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** Dikontribusikan oleh [@ oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Masalah [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute terintegrasi dengan platform komunitas **[1proxy](https://1proxy-api.aitradepulse.com)** untuk menyediakan akses ke **ratusan proxy gratis yang telah divalidasi** dari seluruh dunia. Fitur ini sangat cocok bagi pengguna yang tidak memiliki infrastruktur proxy sendiri.
+OmniRoute terintegrasi dengan** [1proksi](https://1proxy-api.aitradepulse.com)** platform komunitas untuk menyediakan akses** ratusan proxy gratis dan tervalidasi** dari seluruh dunia. Ini sempurna untuk pengguna yang tidak memiliki infrastruktur proxy sendiri.
 
 ### Cara Kerjanya
 
 ```
-┌─────────────┐   Sinkronisasi ┌─────────────────┐    Rotasi     ┌──────────┐
-│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Penyedia │
-│ (eksternal) │ hingga 500    │  source=oneproxy │ berdasarkan   │   API    │
-└─────────────┘    proxy      └─────────────────┘   kualitas    └──────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Sinkronisasi** — OmniRoute mengambil proxy yang telah divalidasi dari 1proxy API
-2. **Penyimpanan** — Proxy disimpan dalam tabel `proxy_registry` yang sama dengan `source = 'oneproxy'`
-3. **Pemfilteran** — Filter berdasarkan protokol, negara, dan skor kualitas
-4. **Rotasi** — Pilih proxy terbaik menggunakan strategi berdasarkan kualitas, acak, atau berurutan
-5. **Penurunan otomatis** — Skor kualitas proxy yang gagal akan dikurangi; jika di bawah ambang batas → ditandai tidak aktif
+1. **Sinkronisasi** — OmniRoute mengambil proxy yang divalidasi dari 1proxy API
+2. **Toko** — Proksi disimpan dalam tabel `proxy_registry` yang sama dengan `source = 'oneproxy'`
+3. **Menyaring** — Filter berdasarkan protokol, negara, skor kualitas
+4. **Memutar** — Pilih proxy terbaik menggunakan strategi berkualitas, acak, atau berurutan
+5. **Degradasi otomatis** — Proxy yang gagal mendapatkan skor kualitasnya berkurang; di bawah ambang batas → ditandai tidak aktif
 
-### Menyinkronkan Proxy
+### Menyinkronkan Proksi
 
 **Melalui Dasbor:**
 
-1. Buka tab **Pengaturan → 1proxy**
-2. Klik **"Sinkronkan Sekarang"**
-3. Lihat statistik: jumlah total proxy, jumlah aktif, kualitas rata-rata, dan perincian berdasarkan negara
+1. Pergi ke** Pengaturan → 1proxy** tab
+2. Klik** "Sinkronkan Sekarang"**
+3. Lihat statistik: total proxy, jumlah aktif, kualitas rata-rata, perincian menurut negara
 
 **Melalui API:**
 
 ```bash
-# Picu sinkronisasi
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Respons:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
-### Memfilter Proxy
+### Memfilter Proksi
 
 ```bash
-# Filter berdasarkan protokol
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Filter berdasarkan negara
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Filter berdasarkan skor kualitas minimum
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Gabungkan filter
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### Skor Kualitas Proxy
+### Angka Mutu Proksi
 
-Setiap proxy 1proxy dilengkapi dengan metadata:
+Setiap proksi 1proxy dilengkapi dengan metadata:
 
-| Bidang          | Deskripsi                                   |
+| Bidang          | Keterangan                                  |
 | --------------- | ------------------------------------------- |
-| `qualityScore`  | Peringkat 0-100 dari validasi 1proxy        |
-| `latencyMs`     | Latensi jaringan yang diukur                |
+| `qualityScore`  | Peringkat 0-100 dari 1 validasi proxy       |
+| `latencyMs`     | Latensi jaringan diukur                     |
 | `anonymity`     | `transparent`, `anonymous`, atau `elite`    |
 | `googleAccess`  | Apakah proxy dapat mengakses layanan Google |
 | `countryCode`   | Kode negara ISO dua huruf                   |
@@ -342,78 +342,78 @@ Setiap proxy 1proxy dilengkapi dengan metadata:
 
 Skor kualitas disesuaikan secara dinamis:
 
-- **Permintaan yang gagal** mengurangi skor sebanyak 10 poin
-- **Skor turun hingga ≤10** → proxy ditandai `inactive`
-- Proxy yang tidak aktif dikecualikan dari rotasi
+- **Permintaan gagal** mengurangi skor sebanyak 10 poin
+- **Skor turun menjadi ≤ 10** proksi → ditandai `inactive`
+- Proksi yang tidak aktif dikecualikan dari rotasi
 
 ### Strategi Rotasi
 
 ```bash
-# Rotasi berdasarkan kualitas (proxy terbaik terlebih dahulu) — default
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Rotasi acak
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# Berurutan (yang paling lama tidak divalidasi didahulukan)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
-### Circuit Breaker
+### Pemutus Arus
 
-Sinkronisasi 1proxy memiliki circuit breaker bawaan:
+Sinkronisasi 1proxy memiliki pemutus sirkuit bawaan:
 
-- Setelah **5 kegagalan sinkronisasi berturut-turut**, upaya sinkronisasi berikutnya akan diblokir
-- Atur ulang dengan: `resetOneproxyCircuitBreaker()` atau mulai ulang server
+- Setelah** 5 kegagalan sinkronisasi berturut-turut** , upaya sinkronisasi lebih lanjut diblokir
+- Reset dengan: `resetOneproxyCircuitBreaker()` atau restart server
 - Status sinkronisasi tersedia di `GET /api/settings/oneproxy?action=status`
 
-### Menghapus Proxy 1proxy
+### Menghapus 1proxy Proxy
 
 ```bash
-# Hapus satu proxy 1proxy
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# Hapus SEMUA proxy 1proxy (proxy manual tidak terpengaruh)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
 ---
 
-## Anti-Deteksi & Mode Siluman
+## Anti-Deteksi & Siluman
 
-OmniRoute tidak hanya merutekan lalu lintas melalui proksi — OmniRoute membuat lalu lintas tersebut terlihat sah:
+OmniRoute tidak hanya mengarahkan lalu lintas melalui proxy — tetapi juga membuat lalu lintas terlihat sah:
 
-### Pemalsuan Sidik Jari TLS
+### TLS Pemalsuan Sidik Jari
 
-Menggunakan `wreq-js` untuk menghasilkan sidik jari TLS yang menyerupai browser, sehingga dapat melewati sistem deteksi bot yang menandai handshake TLS non-browser.
+Menggunakan `wreq-js` untuk menghasilkan sidik jari TLS seperti browser, melewati sistem deteksi bot yang menandai jabat tangan TLS non-browser.
 
-### Pencocokan Sidik Jari CLI
+### CLI Pencocokan Sidik Jari
 
-**Tombol Sidik Jari CLI** (`Pengaturan → Keamanan`) mengurutkan ulang header HTTP dan bidang isi JSON agar cocok dengan karakteristik persis biner CLI native (Claude Code, Codex, dll.). Fitur ini bekerja **di atas** proksi:
+Itu**CLI Pengalih Sidik Jari** (`Settings → Security`) menyusun ulang header HTTP dan bidang isi JSON agar sesuai dengan tanda tangan persis binari CLI asli ( Kode Claude, Codex, dll.). Ini berhasil** di atas** proksi:
 
 ```
-IP Anda (diblokir) → IP Proksi (AS) → API Penyedia
-                     + pemalsuan TLS
-                     + sidik jari CLI
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-Anda mendapatkan **penyamaran IP** dan **keaslian permintaan** secara bersamaan.
+Anda mendapatkan keduanya** penyamaran IP** Dan** meminta keaslian** serentak.
 
-### Pemeliharaan IP Proksi
+### Pelestarian proksi IP
 
-Lencana berkode warna di dasbor menunjukkan tingkat proksi yang sedang aktif:
+Lencana berkode warna di dasbor menunjukkan tingkat proxy mana yang aktif:
 
-| Lencana | Tingkat  | Arti                                            |
-| ------- | -------- | ----------------------------------------------- |
-| 🟢      | Global   | Semua lalu lintas melewati proksi ini           |
-| 🟡      | Penyedia | Hanya lalu lintas penyedia ini yang diproksikan |
-| 🔵      | Koneksi  | Kunci/akun tertentu ini menggunakan proksi ini  |
+| Lencana | Tingkat  | Arti                                         |
+| ------- | -------- | -------------------------------------------- |
+| 🟢      | Global   | Semua lalu lintas melewati proxy ini         |
+| 🟡      | Penyedia | Hanya lalu lintas penyedia ini yang diproksi |
+| 🔵      | Koneksi  | key/account khusus ini menggunakan proxy ini |
 
-Lencana tersebut juga menampilkan IP proksi yang telah di-resolve untuk verifikasi.
+Lencana juga menunjukkan proksi IP yang terselesaikan untuk verifikasi.
 
 ---
 
@@ -779,49 +779,26 @@ secara merata)
 
 ## Pengecualian Kegagalan Otomatis untuk Proksi Anda Sendiri
 
-Pool marketplace 1proxy sudah secara otomatis menurunkan prioritas proksi yang gagal
-(lihat [Skor Kualitas Proksi](#proxy-quality-scores)). Untuk
-proksi yang **Anda** tambahkan ke registri, penjadwal kesehatan latar belakang
-(`src/lib/proxyHealth/scheduler.ts`) menyediakan perilaku yang sama untuk "mengecualikan anggota yang mati
-dari rantai secara otomatis", tanpa menghapus apa pun:
+Kumpulan pasar 1proxy sudah secara otomatis mendegradasi proxy yang gagal (lihat [Skor Kualitas Proxy](#proxy-quality-scores) ). Untuk proxy** Anda** ditambahkan ke registri, penjadwal kesehatan latar belakang (`src/lib/proxyHealth/scheduler.ts`) memberikan perilaku "kecualikan anggota mati dari rantai secara otomatis" yang sama, tanpa menghapus apa pun:
 
 ```bash
-# .env — nonaktifkan sementara proksi setelah 3 pemeriksaan berturut-turut gagal, lalu aktifkan kembali
-# secara otomatis setelah proksi mulai merespons pemeriksaan lagi.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Cara kerjanya dalam rantai multi-proksi:
+Bagaimana ini cocok dengan rantai multi-proxy:
 
-1. Penjadwal memeriksa setiap proksi terdaftar setiap `PROXY_HEALTH_INTERVAL_MS`
-   (default 10 menit; minimum 1 menit).
-2. Setelah `PROXY_AUTO_REMOVE_AFTER` kegagalan **konklusif** berturut-turut (kegagalan
-   koneksi nyata — timeout atau respons 5xx dari target pemeriksaan itu sendiri tidak pernah dihitung, lihat
-   [Pemeriksaan Kesehatan Proksi](#proxy-health-checking-v3816)), `status` proksi
-   diatur menjadi `dead`.
-3. `dead` adalah salah satu status yang dikecualikan oleh filter status aktif yang digunakan dalam
-   resolusi pool/rotasi, sehingga rotasi suatu cakupan (round-robin / acak / sticky /
-   latensi — lihat [Pohon Keputusan Strategi Rotasi](#rotation-strategy-decision-tree))
-   segera berhenti memberikan proksi tersebut kepada permintaan baru. Proksi lain di dalam
-   pool tidak terpengaruh, dan seluruh pool tidak pernah secara diam-diam beralih ke koneksi
-   langsung — lihat pengaman fail-closed pada [Sistem Proksi 4 Tingkat](#4-level-proxy-system).
-4. Penjadwal terus memeriksa proksi `dead` pada interval yang sama. Pemeriksaan
-   berhasil berikutnya mengubah `status` kembali menjadi `active` dan proksi masuk kembali ke rotasi —
-   tidak perlu menambahkannya kembali secara manual.
+1. Penjadwal memeriksa setiap proxy yang terdaftar setiap `PROXY_HEALTH_INTERVAL_MS` (default 10 menit; minimum 1 menit).
+2. Setelah `PROXY_AUTO_REMOVE_AFTER` berturut-turut** pasti** kegagalan (kegagalan koneksi nyata — batas waktu atau 5xx milik target probe tidak pernah dihitung, lihat [Pemeriksaan Kesehatan Proxy](#proxy-health-checking-v3816) ), `status` proxy disetel ke `dead`.
+3. `dead` adalah salah satu status yang tidak termasuk dalam filter status hidup yang digunakan oleh resolusi pool/rotation, sehingga rotasi cakupan (round-robin / acak / lengket / latensi / sesi — lihat [Pohon Keputusan Strategi Rotasi](#rotation-strategy-decision-tree) ) segera berhenti menyerahkan proksi tersebut ke permintaan baru. Tidak ada proxy lain di kumpulan yang terpengaruh, dan seluruh kumpulan tidak pernah secara diam-diam kembali ke koneksi langsung — lihat penjaga [sistem Proksi 4 Tingkat](#4-level-proxy-system) yang gagal ditutup.
+4. Penjadwal terus memeriksa proxy `dead` pada interval yang sama. Probe berikutnya yang berhasil membalik `status` kembali ke `active` dan memasuki kembali rotasi — tidak diperlukan penambahan ulang secara manual.
 
-Fitur ini sengaja dibuat **opsional dan tidak destruktif**: secara default, penjadwal hanya
-menghitung dan mencatat kegagalan (lihat kebijakan C di `decision.ts`), dan `PROXY_AUTO_DISABLE`
-tidak pernah menghapus baris — fungsi tersebut disediakan oleh flag terpisah yang lebih agresif,
-`PROXY_AUTO_REMOVE`. Jika keduanya diatur ke `true`, `PROXY_AUTO_REMOVE`
-akan diprioritaskan (proksi yang akan dihapus tidak memerlukan penonaktifan sementara terlebih dahulu). Lihat
-referensi [Konfigurasi Lingkungan](../reference/ENVIRONMENT.md) untuk daftar
-variabel lengkap.
+Ini sengaja** ikut serta dan tidak merusak** : secara default, penjadwal hanya menghitung dan mencatat kegagalan (lihat kebijakan C di `decision.ts`), dan `PROXY_AUTO_DISABLE` tidak pernah menghapus baris — itulah gunanya tanda `PROXY_AUTO_REMOVE` yang terpisah dan lebih agresif. Jika keduanya disetel ke `true`, `PROXY_AUTO_REMOVE` menang (proxy yang akan dihapus tidak ada gunanya untuk soft-disable di antaranya). Lihat referensi [Konfigurasi Lingkungan](../reference/ENVIRONMENT.md) untuk daftar variabel lengkap.
 
 ---
 
-> 📖 **Dokumentasi terkait:**
+> 📖** Dokumentasi terkait:**
 >
-> - [Panduan Pengguna](../guides/USER_GUIDE.md) — Penyiapan dan konfigurasi umum
-> - [Referensi API](../reference/API_REFERENCE.md) — Dokumentasi API lengkap
-> - [Konfigurasi Lingkungan](../reference/ENVIRONMENT.md) — Semua variabel lingkungan
+> - [Panduan Pengguna](../guides/USER_GUIDE.md) — Pengaturan dan konfigurasi umum - [API Referensi](../reference/API_REFERENCE.md) — Dokumentasi API lengkap - [Konfigurasi Lingkungan](../reference/ENVIRONMENT.md) — Semua variabel lingkungan

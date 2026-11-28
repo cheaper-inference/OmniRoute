@@ -4,13 +4,7 @@
 
 ---
 
-> **ዋና የእውነት ምንጭ:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`፣ እና በ`open-sse/utils/error.ts` ውስጥ ያሉ ይፋዊ builders
-> **ሙከራዎች:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **መጨረሻ የተዘመነው:** 2026-09-02 — v3.8.51
-> **የታለመለት ታዳሚ:** የስህተት ምላሾችን የሚነካ ማንኛውም መሐንዲስ (HTTP routes፣ SSE streams፣ executors፣ MCP handlers)።
-> **ሁኔታ:** የስህተት መልዕክትን ለደንበኛ ለሚመልስ ለእያንዳንዱ የኮድ መንገድ **ግዴታ** ነው።
+> **የእውነት ምንጭ፡-** `open-sse/utils/errorSanitization.ts`፣ `open-sse/utils/errorPathRedaction.ts` እና የህዝብ ግንበኞች በ `open-sse/utils/error.ts`** ሙከራዎች፡-** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** ታዳሚዎች፡-** ማንኛውም መሐንዲስ የሚነካ የስህተት ምላሾች (HTTP መንገዶች፣ SSE ዥረቶች፣ አስፈፃሚዎች፣ MCP ተቆጣጣሪዎች)።** ሁኔታ፡****MANDATORY** የስህተት መልእክት ወደ ደንበኛ ለሚመልስ ለእያንዳንዱ ኮድ መንገድ።
 
 ## ይህ ለምን እንደሚኖር
 

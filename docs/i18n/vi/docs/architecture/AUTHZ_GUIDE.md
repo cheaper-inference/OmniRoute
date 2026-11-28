@@ -4,12 +4,11 @@
 
 ---
 
-> **Nguồn đáng tin cậy:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Cập nhật lần cuối:** 2026-09-22 — các không gian tên phạm vi trỏ đến MCP-SERVER.md
+> **Nguồn của sự thật:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute có một quy trình ủy quyền nhận biết tuyến đường, kiểm soát mọi yêu cầu API. Phân loại là **xác định** và **đóng khi lỗi** — bất cứ thứ gì không thể phân loại sẽ được xếp vào loại `MANAGEMENT` và yêu cầu một phiên hoặc mã thông báo cấp quản lý. Trang này giải thích mô hình cho các kỹ sư duy trì các tuyến đường hoặc thiết kế các điểm cuối mới.
+OmniRoute có một quy trình ủy quyền nhận biết tuyến đường giúp xử lý mọi yêu cầu API. Phân loại là** mang tính quyết định** Và** không đóng được** — bất kỳ thứ gì không thể phân loại đều sẽ trở thành `MANAGEMENT` và yêu cầu mã thông báo cấp phiên hoặc cấp quản lý. Trang này giải thích mô hình dành cho các kỹ sư duy trì tuyến đường hoặc thiết kế điểm cuối mới.
 
-![Quy trình AuthZ (3 lớp tuyến đường + đánh giá chính sách)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Nguồn: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -177,7 +176,7 @@ Incoming request → src/proxy.ts
        - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Các tiêu đề nội bộ đáng tin cậy (được xác định trong `src/server/authz/headers.ts`) là** bị loại bỏ khỏi các yêu cầu đến** trước khi phân loại máy khách — không thể điền trước `x-omniroute-auth-*` để mạo danh một chủ đề.
+Các tiêu đề nội bộ đáng tin cậy (được xác định trong `src/server/authz/headers.ts`) là** bị loại khỏi các yêu cầu đến** trước khi phân loại máy khách — không thể điền trước `x-omniroute-auth-*` để mạo danh một chủ đề.
 
 ### Hợp đồng chính sách
 
@@ -185,7 +184,7 @@ Mỗi lớp tuyến có một chính sách trong `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — luôn trả về `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — trích xuất Bearer, xác thực thông qua `validateApiKey()`. Chỉ chuyển sang ẩn danh khi cờ tính năng `REQUIRE_API_KEY` hiệu quả bị tắt. Cờ hiệu quả được giải quyết thông qua `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) vì vậy Cờ tính năng của Bảng điều khiển và các biến môi trường chi phối `/api/v1/*`, `/api/v1beta/*` và bí danh một cách nhất quán; lỗi trình giải quyết không đóng được. Cho phép yêu cầu phiên bảng thông tin trên các tuyến API của máy khách (bao gồm `/api/v1/models`, được sử dụng bởi danh mục mô hình bảng thông tin). Khi Entra ID SSO được bật, Bearer có cấu trúc là mã thông báo Entra (ba phân đoạn base64url, `RS*` alg, `kid`) được xử lý bởi nhánh SSO** trước** `validateApiKey()` và phán quyết của nó là — cuối cùng, nó không bao giờ đi đến đường dẫn khóa API hoặc nhánh chuyển đổi thành ẩn danh, do đó, việc ngừng hoạt động của nhà cung cấp danh tính không thể trở thành quyền truy cập mở. Các phím API tĩnh không bị ảnh hưởng. Xem [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — chấp nhận phiên bảng điều khiển, yêu cầu đồng bộ hóa mô hình nội bộ (khớp với `/api/providers/[name]/(sync-models|models)`) hoặc bỏ qua hoàn toàn nếu `isAuthRequired()` trả về sai. Trả về 403 (`AUTH_001`) khi có mã thông báo Bearer nhưng không hợp lệ, nếu không thì trả về 401. Đồng thời thực thi các cấp độ bảo vệ tuyến đường (LOCAL_ONLY / ALWAYS_PROTECTED) trước bất kỳ nhánh xác thực — hãy xem [Cấp độ bảo vệ tuyến đường](../security/ROUTE_GUARD_TIERS.md). Các đường dẫn LOCAL_ONLY trong `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hôm nay: `/api/mcp/`) có thể được truy cập từ chế độ không lặp lại khi khóa Bearer mang phạm vi `manage` ; tất cả các đường dẫn LOCAL_ONLY khác vẫn ở chế độ vòng lặp nghiêm ngặt bất kể phạm vi.
+- **`managementPolicy`** (`policies/management.ts`) — chấp nhận phiên bảng điều khiển, yêu cầu đồng bộ hóa mô hình nội bộ (khớp với `/api/providers/[name]/(sync-models|models)`) hoặc bỏ qua hoàn toàn nếu `isAuthRequired()` trả về sai. Trả về 403 (`AUTH_001`) khi có mã thông báo Bearer nhưng không hợp lệ, nếu không thì trả về 401. Đồng thời thực thi các cấp độ bảo vệ tuyến đường (LOCAL_ONLY / ALWAYS_PROTECTED) trước bất kỳ nhánh xác thực — hãy xem [Cấp độ bảo vệ tuyến đường](../security/ROUTE_GUARD_TIERS.md). Đường dẫn LOCAL_ONLY trong `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hôm nay: `/api/mcp/`) có thể được truy cập từ không vòng lặp khi khóa Bearer mang phạm vi `manage`/`admin` hoặc phạm vi `mcp:connect` hẹp (`hasMcpConnectOrManageScope`) hoặc với phiên bảng điều khiển được xác thực; tất cả các đường dẫn LOCAL_ONLY khác vẫn ở chế độ vòng lặp nghiêm ngặt bất kể phạm vi.
 
 Chính sách thành công trả về `AuthSubject` với `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Trình xử lý xuôi dòng có thể đọc nó qua `assertAuth(request, "CLIENT_API")` trong `src/server/authz/assertAuth.ts` thay vì chạy lại logic xác thực.
 
@@ -278,36 +277,22 @@ Chọn tập hợp dựa trên hình dạng, không phải sự tiện lợi. M�
 
 ## Phạm vi
 
-Ba không gian tên. Mỗi trình kiểm tra chỉ đọc các chuỗi của riêng nó. So sánh song song,
-bao gồm lý do tại sao `manage` không vượt qua `scopeMatches` cho `read:compression` và tại sao một
-mã thông báo truy cập `read` không thể `PATCH /api/keys/{id}`, được giải thích tại
-[Ba không gian tên phạm vi](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Ba không gian tên. Mỗi bộ kiểm tra chỉ đọc các chuỗi riêng của nó. Bên cạnh đó, bao gồm lý do tại sao `manage` không thành công `scopeMatches` đối với `read:compression` và tại sao mã thông báo truy cập `read` không thể `PATCH /api/keys/{id}`, là [Three phạm vi không gian tên](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Các khóa API mang một mảng `scopes` (được lưu trữ dưới dạng JSON trong `api_keys.scopes`, xem `src/lib/db/apiKeys.ts`).
+các khóa API mang một mảng `scopes` (được lưu dưới dạng JSON trong `api_keys.scopes`, xem `src/lib/db/apiKeys.ts`).
 
 ### Phạm vi quản lý
 
-- `manage` / `admin` — `hasManageScope`. Quyền truy cập bearer vào các tuyến API quản lý.
-- `mcp:connect`, `self:usage`, `self:account-quota`, và
-  `policy:bypass-provider-quota` là các phạm vi khớp chính xác có tính bổ sung. Chúng nằm
-  ngoài `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` chỉ mở phần
-  `/api/mcp/` không phải loopback.
+- `manage` / `admin` — `hasManageScope`. Quyền truy cập mang vào các tuyến đường API quản lý.
+- `mcp:connect`, `self:usage`, `self:account-quota` và `policy:bypass-provider-quota` là các phạm vi đối sánh chính xác bổ sung. Họ ngồi bên ngoài `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` chỉ mở phần khắc `/api/mcp/` không vòng lặp ngược.
 
-### Phạm vi công cụ MCP
+### phạm vi công cụ MCP
 
-Danh mục và các quy tắc khớp (chuỗi giống hệt, hoặc một phạm vi được cấp kết thúc bằng `*`):
-[Phạm vi công cụ MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` trong `src/shared/constants/mcpScopes.ts` là tập con được định kiểu ban đầu,
-không phải toàn bộ danh mục đó. Việc thực thi chạy trong
-`open-sse/mcp-server/scopeEnforcement.ts` sau khi `resolveCallerScopeContext()`
-giải quyết các phạm vi từ thông tin xác thực MCP, siêu dữ liệu yêu cầu, hoặc `OMNIROUTE_MCP_SCOPES`.
-Nó vẫn tắt trừ khi `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Danh mục và quy tắc khớp (chuỗi giống hệt nhau hoặc phạm vi được cấp kết thúc bằng `*`): [phạm vi công cụ MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` trong `src/shared/constants/mcpScopes.ts` là tập hợp con được nhập ban đầu, không phải danh mục đầy đủ. Việc thực thi chạy trong `open-sse/mcp-server/scopeEnforcement.ts` sau khi `resolveCallerScopeContext()` giải quyết các phạm vi từ thông tin xác thực MCP, siêu dữ liệu yêu cầu hoặc `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` bật nó trên toàn cầu (mặc định `false`), nhưng nó luôn được thực thi đối với người gọi HTTP/SSE có khóa API thiếu `manage`/`admin` (xem `shouldForceScopeEnforcement()` trong `open-sse/mcp-server/scopeEnforcement.ts`), bất kể cờ.
 
 ### Phạm vi mã thông báo truy cập
 
-`read` / `write` / `admin` trên các mã thông báo `oma_live_…`, được xếp hạng bởi `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Thứ hạng này chỉ áp dụng cho thông tin xác thực
-mã thông báo truy cập. Xem [Xác thực quản lý](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` trên mã thông báo `oma_live_…`, được xếp hạng theo `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Thứ hạng này chỉ áp dụng cho thông tin xác thực mã thông báo truy cập. Xem [Xác thực quản lý](../guides/MANAGEMENT-AUTH.md).
 
 ## Yêu cầu xác thực Chuyển đổi
 

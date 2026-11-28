@@ -13,12 +13,12 @@ Agent Skills ਸੰਰਚਿਤ SKILL.md ਫ਼ਾਈਲਾਂ ਹਨ ਜੋ ਬ
 
 ## ਸੰਖੇਪ ਜਾਣਕਾਰੀ
 
-ਕੈਟਾਲਾਗ ਵਿੱਚ **45 Agent Skills** (23 REST API + 21 CLI + 1 ਸੰਰਚਨਾ ਵਰਕਫ਼ਲੋ) ਸ਼ਾਮਲ ਹਨ। ਹਰ ਸਕਿੱਲ ਵਿੱਚ ਇਹ ਹੁੰਦਾ ਹੈ:
+ਕੈਟਾਲਾਗ ਵਿੱਚ ਸ਼ਾਮਲ ਹਨ** 45 ਏਜੰਟ ਹੁਨਰ** (23 REST API + 21 CLI + 1 ਸੰਰਚਨਾ ਵਰਕਫਲੋ)। ਹਰੇਕ ਹੁਨਰ ਹੈ:
 
-- ਇੱਕ **ਮਿਆਰੀ ID** (`omni-auth`, `cli-serve`, ਆਦਿ)
-- `skills/{id}/SKILL.md` ਵਿੱਚ ਇੱਕ **SKILL.md** ਫ਼ਾਈਲ, ਜਿਸ ਵਿੱਚ YAML ਫਰੰਟਮੈਟਰ (`name`, `description`) + ਵਿਸਤ੍ਰਿਤ ਮਾਰਕਡਾਊਨ ਬਾਡੀ ਹੁੰਦੀ ਹੈ
-- OpenAPI ਵਿਸ਼ੇਸ਼ਤਾ ਅਤੇ CLI ਰਜਿਸਟਰੀ ਤੋਂ ਪ੍ਰਾਪਤ **REST ਐਂਡਪੌਇੰਟ** (API ਸਕਿੱਲਾਂ) ਜਾਂ **CLI ਸਬਕਮਾਂਡਾਂ** (CLI ਸਕਿੱਲਾਂ)
-- ਲਾਈਵ ਪ੍ਰਾਪਤੀ ਲਈ ਇੱਕ **GitHub ਰੌ URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ਏ** ਕੈਨੋਨੀਕਲ ID** (`omni-auth`, `cli-serve`, ਆਦਿ)
+- ਏ**SKILL.md** `skills/{id}/SKILL.md` ਵਿੱਚ YAML ਫਰੰਟਮੈਟਰ (`name`, `description`) + ਰਿਚ ਮਾਰਕਡਾਊਨ ਬਾਡੀ ਨਾਲ ਫਾਈਲ ਕਰੋ
+- **REST ਅੰਤ ਬਿੰਦੂ** (API ਹੁਨਰ) ਜਾਂ**CLI ਉਪ ਕਮਾਂਡਾਂ** (CLI ਹੁਨਰ) OpenAPI spec ਅਤੇ CLI ਰਜਿਸਟਰੀ ਤੋਂ ਲਿਆ ਗਿਆ ਹੈ
+- ਏ**GitHub ਕੱਚਾ URL** ਲਾਈਵ ਪ੍ਰਾਪਤੀ ਲਈ: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 

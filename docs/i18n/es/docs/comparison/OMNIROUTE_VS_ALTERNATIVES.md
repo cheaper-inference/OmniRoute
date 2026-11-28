@@ -11,7 +11,7 @@ Comparación objetiva de características frente a enrutadores AI populares de c
 | Característica                                               |                 OmniRoute 3.8                  |      LiteLLM 1.x      | OpenRouter (SaaS) | Traslador |
 | ------------------------------------------------------------ | :--------------------------------------------: | :-------------------: | :---------------: | :-------: |
 | **Proveedores**                                              |                    **329**                     |         ~100          |        ~50        |    ~30    |
-| **entradas del catálogo Free/no-auth**                       |                    **155**                     |          n/a          |   paso a través   |    n/a    |
+| **Proveedores con acceso gratuito**                          |           **50 con acceso gratuito**           |          n/a          |   paso a través   |    n/a    |
 | **Autohospedable**                                           |                       ✅                       |          ✅           |        ❌         | ⚠ pagado  |
 | **entradas del catálogo OAuth**                              |                     **23**                     |        parcial        |        ❌         |    ❌     |
 | **Combos de respaldo automático**                            |               **22 estrategias**               | basado en prioridades | basado en niveles | ponderado |
@@ -38,7 +38,7 @@ Comparación objetiva de características frente a enrutadores AI populares de c
 
 ## Cuando elegir OmniRoute
 
-- Eres autohospedador y quieres** cobertura máxima del proveedor** (394 proveedores, 155 entradas de catálogo free/no-auth )
+- Eres autohospedador y quieres** cobertura máxima del proveedor** (394 proveedores, 50 con acceso gratuito)
 - Necesitas un** servidor MCP incorporado** (herramientas LLM, memoria, habilidades expuestas como herramientas)
 - necesitas** protocolo A2A** para flujos de trabajo de agente a agente
 - Quieres** sigilo de huellas dactilares** (JA3/JA4) para evitar la detección por CAPTCHAs ascendente
@@ -56,12 +56,12 @@ Comparación objetiva de características frente a enrutadores AI populares de c
 - No te importa pagar por token con el recargo de un SaaS
 - Necesitas un **único método de pago** para todos los proveedores
 
-## Cuándo elegir Portkey
+## Cuándo elegir traslador
 
-- Necesitas un **SLA comercial** con garantías de disponibilidad
-- Prefieres un **panel de control gestionado** sin carga operativa
-- Necesitas **funcionalidades de cumplimiento normativo empresarial** listas para usar
+- Necesitas un** SLA comercial** con garantías de disponibilidad
+- prefieres un** panel administrado** sin operaciones aéreas
+- necesitas** cumplimiento empresarial** características listas para usar
 
 ---
 
-_Última actualización: 2026-08-02. Envía correcciones mediante un PR para mantener actualizada esta tabla._
+_Envíe correcciones a través de PR para mantener esta tabla precisa._

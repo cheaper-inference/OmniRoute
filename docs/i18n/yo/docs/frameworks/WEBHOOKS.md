@@ -4,15 +4,11 @@
 
 ---
 
-> **Orísun òtítọ́:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Ìgbà ìmúdójúìwọ̀n tó kẹ́yìn:** 2026-06-28 — v3.8.40
+> **Orisun otitọ:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-OmniRoute lè fi àwọn webhook HTTP ránṣẹ́ nígbà tí àwọn ìṣẹ̀lẹ̀ bá ṣẹlẹ̀ lórí pèpéle. Lo wọn láti so pọ̀ mọ́
-Slack, PagerDuty, Datadog, àwọn iṣẹ́ ìkìlọ̀ inú ètò, tàbí olùgbà HTTP èyíkéyìí.
+OmniRoute le ina HTTP webhooks lori awọn iṣẹlẹ Syeed. Lo wọn lati ṣepọ pẹlu Slack, PagerDuty, Datadog, awọn iṣẹ titaniji inu, tabi eyikeyi HTTP olugba.
 
-Olùpín náà máa ń fi ìfọwọ́sí HMAC-SHA256 sí ìfiránṣẹ́ kọ̀ọ̀kan, ó máa ń tún gbìyànjú nígbà
-ìkùnà fún ìgbà díẹ̀, ó máa ń tọpinpin ìlera ìfiránṣẹ́ fún webhook kọ̀ọ̀kan, ó sì máa ń pa àwọn endpoint
-tí ìkùnà wọn ń bá a lọ láìfọwọ́sí.
+Olupin naa n ṣe ami si ifijiṣẹ kọọkan pẹlu HMAC-SHA256, tun gbiyanju lori awọn ikuna igba diẹ, ṣe atẹle ilera ifijiṣẹ fun webhook, ati adaṣe-pa awọn opin opin ti o tọju kuna.
 
 ## Awọn iṣẹlẹ atilẹyin
 

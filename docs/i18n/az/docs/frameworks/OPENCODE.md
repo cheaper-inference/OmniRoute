@@ -4,14 +4,11 @@
 
 ---
 
-> **Status:** Ümumi istifadəyə açıqdır.
-> **Auditoriya:** OpenCode-u OmniRoute yerləşdirməsinə qoşan operatorlar.
-> **Həqiqət mənbəyi (konfiqurasiya sxemi):** `src/shared/services/opencodeConfig.ts`
-> **Həqiqət mənbəyi (npm paketi):** `@omniroute/opencode-provider/` (dərc edilə bilən iş sahəsi)
+> **Vəziyyət:** Ümumiyyətlə mövcuddur.** Tamaşaçılar:** Operatorlar OpenCode OmniRoute yerləşdirməsinə bağlayır.** Həqiqət mənbəyi (konfiqurasiya sxemi):** `src/shared/services/opencodeConfig.ts`** Tövsiyə olunan npm paketləri:** `@omniroute/opencode-plugin/` (OpenCode v1, `omniroute setup opencode` tərəfindən quraşdırılıb ) və `@omniroute/opencode-plugin-v2/` (OpenCode v2). Köhnə `@omniroute/opencode-provider/` paketidir** köhnəlmişdir** (2-ci yola baxın).
 
-[OpenCode](https://opencode.ai) agent əsaslı CLI/masaüstü süni intellekt müştərisidir. O, provayder kataloqunu `~/.config/opencode/opencode.json` (və ya `opencode.jsonc`) faylından oxuyur və `https://opencode.ai/config.json` ünvanındakı sxemə uyğun işləyir. OmniRoute özünü OpenCode-a həmin provayderlərdən biri kimi təqdim edir — hər sorğu OmniRoute-un standart OpenAI-uyğun `/v1` interfeysindən keçir, buna görə OpenCode avtomatik olaraq Auto-Combo marşrutlaşdırması, dövrə kəsiciləri, açar siyasətləri, müşahidəolunma və digər imkanlardan faydalanır.
+[OpenCode](https://opencode.ai) agent CLI/desktop AI müştərisidir. O, öz provayder kataloqunu `~/.config/opencode/opencode.json` (və ya `opencode.jsonc`)-dən oxuyur və `https://opencode.ai/config.json` dəki sxemi izləyir. OmniRoute özünü OpenCode a məruz qoyur, çünki bu provayderlərdən biri — hər sorğu OmniRoute-nin standart OpenAI-uyğun `/v1` səthi vasitəsilə axır, beləliklə, OpenCode avtomatik olaraq Auto-Combo marşrutlaşdırma, elektrik açarları, əsas siyasətlər, müşahidə qabiliyyəti və s.-dən faydalanır.
 
-**İki dəstəklənən inteqrasiya yolu** mövcuddur. Onlardan birini seçin — hər ikisi eyni konfiqurasiyanı yaradır.
+Bu səhifə aşağıdakı iki statik konfiqurasiya yolunu sənədləşdirir; hər ikisi eyni konfiqurasiya yaradır. Canlı kataloqunuzu izləyən model siyahısı üçün əvəzinə plaqindən istifadə edin: `omniroute setup opencode` `@omniroute/opencode-plugin` (OpenCode v1) quraşdırır və `@omniroute/opencode-plugin-v2` OpenCode v2-ni hədəfləyir ( [CLI inteqrasiyalarına](../guides/CLI-INTEGRATIONS.md) və [OpenCode v2 plagin bələdçisinə](../guides/OPENCODE-V2-PLUGIN.md) baxın).
 
 ---
 
@@ -54,9 +51,11 @@ Nəticədə yaranan fayl (standart model kataloqu):
 
 ---
 
-## Yol 2 — npm paketi `@omniroute/opencode-provider`
+## Yol 2 — npm paketi `@omniroute/opencode-provider` (köhnəlmişdir)
 
-Konfiqurasiyanı Node/TS vasitəsilə skriptləşdirdiyiniz zaman (CI konveyerləri, monorepolar, fərdi quraşdırıcı axınları) tövsiyə olunur.
+> **Köhnəlmişdir.** Paket canlı OmniRoute kataloqunuzun arxasında sürüşən statik model siyahısını yazır. Onun README `@omniroute/opencode-plugin` (və ya OpenCode v2-də `@omniroute/opencode-plugin-v2` ) köçməyi tövsiyə edir. Aşağıdakı API yalnız mövcud skriptlər üçün saxlanılır.
+
+Konfiqurasiyanı Node/TS -dan skript edərkən istifadə olunur (CI boru kəmərləri, monoreposlar, xüsusi quraşdırıcı axınları).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // İstəyə bağlı: OpenCode-a təqdim edilən model kataloqunu dəyişdirin
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Mövcud faylla məlumat itkisinə səbəb olmayan birləşdirmə üçün `opencodeConfig.ts` faylındakı `mergeOpenCodeConfigText()` funksiyasını təkrarlayın və ya CLI generatorunu çağırın.
+Mövcud fayla qarşı qeyri-dağıdıcı birləşmə üçün `mergeOpenCodeConfigText()` `opencodeConfig.ts` dən təkrarlayın və ya CLI generatoruna zəng edin.
 
-Tam API üçün [paketin README faylına](../../@omniroute/opencode-provider/README.md) baxın.
+Tam API üçün [README paketinə](../../@omniroute/opencode-provider/README.md) baxın.
 
 ---
 
@@ -157,7 +156,9 @@ Bu təkrarlanmanın aradan qaldırılması köhnə konfiqurasiyalarda rast gəli
 
 ## Həmçinin baxın
 
-- [API arayışı](../reference/API_REFERENCE.md) — OmniRoute REST interfeysinin tam təsviri
-- [Auto-Combo](../routing/AUTO-COMBO.md) — `model: "auto"` ifadəsinin mənası
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [API arayışı](../reference/API_REFERENCE.md) — tam OmniRoute REST səthi
+- [Auto-Combo](../routing/AUTO-COMBO.md) — `model: "auto"` deməkdir
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (tövsiyə olunur)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (köhnəlmişdir)
 - Mənbə: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

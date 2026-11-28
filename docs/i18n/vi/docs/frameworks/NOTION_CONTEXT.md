@@ -62,42 +62,31 @@ Cả ba phương thức đều yêu cầu xác thực bảng điều khiển (`i
 OmniRoute lưu token và ngay lập tức chạy một tìm kiếm thử với 1 kết quả; nếu Notion
 trả về một đối tượng lỗi, token sẽ bị xóa và lệnh gọi thất bại với `400`.
 
-## Công cụ MCP (6)
+## công cụ MCP (6)
 
-Được định nghĩa trong `open-sse/mcp-server/tools/notionTools.ts`. Token được phân giải tại thời điểm
-gọi thông qua `getNotionToken()`; nếu chưa được cấu hình, công cụ sẽ ném ra lỗi
-`"Token tích hợp Notion chưa được cấu hình. Hãy thiết lập token trong Cài đặt > Nguồn ngữ cảnh."`
+Được xác định trong `open-sse/mcp-server/tools/notionTools.ts`. Mã thông báo được giải quyết tại thời điểm gọi qua `getNotionToken()`; nếu không có cấu hình nào thì công cụ sẽ ném `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Công cụ                      | Phạm vi        | Mô tả                                                                                           |
-| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Tìm kiếm trang và cơ sở dữ liệu bằng truy vấn văn bản (trả về tiêu đề, ID, URL). Có phân trang. |
-| `notion_get_page`            | `read:notion`  | Lấy nội dung và siêu dữ liệu của một trang theo ID.                                             |
-| `notion_list_block_children` | `read:notion`  | Liệt kê tất cả khối con của một khối hoặc trang (cây khối). Có phân trang.                      |
-| `notion_query_database`      | `read:notion`  | Truy vấn cơ sở dữ liệu với `filter` + `sorts` tùy chọn (định dạng API Notion). Có phân trang.   |
-| `notion_get_database`        | `read:notion`  | Lấy lược đồ/siêu dữ liệu của một cơ sở dữ liệu theo ID.                                         |
-| `notion_append_blocks`       | `write:notion` | Nối thêm các khối con vào một khối hoặc trang hiện có (tối đa 100 khối cho mỗi yêu cầu).        |
+| Dụng cụ                      | Phạm vi        | Sự miêu tả                                                                                               |
+| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Tìm kiếm các trang và cơ sở dữ liệu bằng truy vấn văn bản (trả về tiêu đề, IDs, URLs). Đã đánh số trang. |
+| `notion_get_page`            | `read:notion`  | Nhận nội dung và siêu dữ liệu của một trang bằng ID của nó.                                              |
+| `notion_list_block_children` | `read:notion`  | Liệt kê tất cả các khối con của một khối hoặc một trang (cây khối). Đã đánh số trang.                    |
+| `notion_query_database`      | `read:notion`  | Truy vấn cơ sở dữ liệu với `filter` + `sorts` (định dạng Notion API ) tùy chọn. Đã đánh số trang.        |
+| `notion_get_database`        | `read:notion`  | Lấy schema/metadata của cơ sở dữ liệu bằng ID.                                                           |
+| `notion_append_blocks`       | `write:notion` | Nối khối con vào khối hoặc trang hiện có (tối đa 100 khối cho mỗi yêu cầu).                              |
 
-### Tham số đầu vào
+### Thông số đầu vào
 
-- `notion_search` — `query` (1–500 ký tự), `pageSize` (1–100, mặc định 20),
-  `startCursor` (tùy chọn).
-- `notion_get_page` — `pageId` (chuỗi hex 32 ký tự hoặc UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, mặc định 50),
-  `startCursor` (tùy chọn).
-- `notion_query_database` — `databaseId`, `filter` (tùy chọn, định dạng bộ lọc Notion),
-  `sorts` (mảng tùy chọn), `pageSize` (1–100, mặc định 50), `startCursor` (tùy chọn).
+- `notion_search` — `query` (1–500 ký tự), `pageSize` (1–100, mặc định 20), `startCursor` (tùy chọn).
+- `notion_get_page` — `pageId` (32-char hex hoặc UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, mặc định 50), `startCursor` (tùy chọn).
+- `notion_query_database` — `databaseId`, `filter` (tùy chọn, định dạng bộ lọc Notion ), `sorts` (mảng tùy chọn), `pageSize` (1–100, mặc định 50), `startCursor` (tùy chọn).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (mảng các đối tượng khối),
-  `after` (vị trí tùy chọn).
+- `notion_append_blocks` — `blockId`, `children` (mảng các đối tượng khối), `after` (vị trí tùy chọn).
 
 ### Phạm vi
 
-Các công cụ đọc yêu cầu `read:notion` và công cụ ghi yêu cầu `write:notion`.
-Phạm vi được thực thi bởi `withScopeEnforcement()` trong
-`open-sse/mcp-server/server.ts` chỉ khi `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; các
-phạm vi được phép của bên gọi đến từ `OMNIROUTE_MCP_SCOPES` (phân tách bằng dấu phẩy) hoặc
-ngữ cảnh phạm vi của khóa API đã xác thực. Xem [MCP-SERVER.md](./MCP-SERVER.md) để biết
-đầy đủ mô hình phạm vi.
+Công cụ đọc yêu cầu `read:notion` và công cụ ghi yêu cầu `write:notion`. Phạm vi được thực thi bởi `withScopeEnforcement()` trong `open-sse/mcp-server/server.ts` khi `OMNIROUTE_MCP_ENFORCE_SCOPES=true` và luôn dành cho người gọi HTTP/SSE có khóa API thiếu `manage`/`admin`; phạm vi được phép của người gọi đến từ `OMNIROUTE_MCP_SCOPES` (được phân tách bằng dấu phẩy) hoặc bối cảnh phạm vi của khóa API đã xác thực. Xem [MCP-SERVER.md](./MCP-SERVER.md) để biết mô hình phạm vi đầy đủ.
 
 ## Điểm cuối
 

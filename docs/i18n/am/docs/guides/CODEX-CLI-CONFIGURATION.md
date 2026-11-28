@@ -409,7 +409,7 @@ region  = "us-east-1"
 
 ---
 
-## በርካታ ሰርቨሮች
+## በርካታ አገልጋዮች
 
 ```toml
 [model_providers.omniroute-main]
@@ -469,107 +469,107 @@ codex debug models --bundled       # አብሮ የታሸገውን የሞዴል �
 
 ---
 
-## ለረጅም ጊዜ የሚሄዱ ተግባራት
+## ለረጅም ጊዜ የሚቆዩ ተግባራት
 
-ሁለት የOmniRoute ነባሪ ቅንብሮች ለብዙ ሰዓታት የሚቆዩ የCodex CLI ክፍለ ጊዜዎችን በድብቅ ሊያበላሹ ይችላሉ። አንዳቸውም የCodex CLI ቅንብር አይደሉም — ሁለቱም በOmniRoute በኩል ይገኛሉ። መለያዎችን ከሚያጣብቁ እና የስራ-ፈት ጊዜ ማቋረጫዎችን ከሚያሰናክሉ የላይኛው ዥረት ፕሮክሲዎች ውቅርን የሚያዛውሩ ተጠቃሚዎች ብዙውን ጊዜ ሁለቱንም ችግሮች ያጋጥማቸዋል እና OmniRoute “ረጅም ክፍለ ጊዜን ማስቀጠል አይችልም” ብለው ይደመድማሉ።
+ሁለት OmniRoute ነባሪዎች የባለብዙ-ሰዓት Codex CLI ክፍለ-ጊዜዎችን በጸጥታ ማበላሸት ይችላሉ። ሁለቱም በ OmniRoute በኩል የሚኖሩት Codex CLI ቅንብር — አይደለም። መለያዎችን ከሚሰኩ እና የስራ ፈት ማቋረጦችን ከሚያሰናክሉ የላይ ተፋሰስ ፕሮክሲዎች የሚሰደዱ ተጠቃሚዎች ብዙውን ጊዜ ሁለቱንም በመምታት OmniRoute “ረጅም ክፍለ ጊዜን ማቆየት አይችሉም።
 
-| ምልክት                                                             | ሊሆን የሚችለው ምክንያት                                            | ማስተካከያ                   |
-| ---------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------ |
-| ክፍለ ጊዜው መለያዎችን መቀያየሩን ይቀጥላል / በዙሮች መካከል የprompt-cache ቀጣይነት ይጠፋል | የክፍለ ጊዜ ቁርኝት TTL `0` ነው (ተሰናክሏል)                           | `sessionAffinityTtlMs`   |
-| ለደንበኛው የሚታይ ማሳወቂያ ሳይኖር ግንኙነቱ በማመዛዘን መሃል ይቋረጣል                    | ከላይኛው ዥረት ምንም ቁራጭ ሳይመጣ ከ10 ደቂቃ በኋላ የዥረት ስራ-ፈት ተቆጣጣሪው ተነስቷል | `STREAM_IDLE_TIMEOUT_MS` |
+| ምልክት                                                       | መንስኤ ሊሆን ይችላል።                              | እንቡጥ                     |
+| ---------------------------------------------------------- | ------------------------------------------- | ------------------------ |
+| ክፍለ-ጊዜ መለያዎችን መቀያየርን ይቀጥላል/የመሸጎጫ መሸጎጫ ቀጣይነት በተራው መካከል ይጠፋል | የክፍለ ጊዜው `0` TTL (የተሰናከለ)                   | `sessionAffinityTtlMs`   |
+| ግንኙነቱ በምክንያት መሃል ይሞታል ያለ ደንበኛ የሚመለከት ጥያቄ                   | ዥረት ፈት ጠባቂ ከ10 ደቂቃ በኋላ ምንም ወደላይ ያለ ቅንጣቢ ተኮሰ | `STREAM_IDLE_TIMEOUT_MS` |
 
-ተዛማጅ ውይይቶች፦ [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (የረጅም ተግባር መቋረጦች)፣ [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (ቁርኝት በነባሪ የሚጠፋበት ምክንያት)። ክትትል፦ [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)።
+ተዛማጅ ውይይቶች [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ረጅም ተግባር ይወድቃል)፣ [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (ለምን ዝምድና ይቋረጣል)። መከታተል [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. የክፍለ ጊዜ ቁርኝት — አንድን ውይይት ከአንድ መለያ ጋር ማጣበቅ
+### 1. የክፍለ ጊዜ ዝምድና — አንድ ውይይት ወደ አንድ መለያ ይሰኩት
 
-**ነባሪ፦** `sessionAffinityTtlMs = 0` (ተሰናክሏል)።
+**ነባሪ፡** `sessionAffinityTtlMs = 0` (የተሰናከለ)
 
-**የሚዋቀርበት ቦታ**
+**የት እንደሚያቀናብር**
 
-- ዳሽቦርድ → **ቅንብሮች → ማዞሪያ** → **የክፍለ ጊዜ ቁርኝት** → **የቁርኝት TTL (ሰከንዶች)** (`ComboDefaultsTab`)
-- ወይም ቅንብሮችን በ`sessionAffinityTtlMs` እና **ሚሊሰከንዶች** በመጠቀም PATCH ያድርጉ (የZod ክልል `0`–`86_400_000`፣ ማለትም እስከ 24 ሰዓታት)
+- ዳሽቦርድ →** ቅንብሮች → መስመር** →** የክፍለ-ጊዜ ግንኙነት** →** ዝምድና TTL (ሰከንዶች)** (`ComboDefaultsTab`)
+- ወይም PATCH ቅንብሮች ከ `sessionAffinityTtlMs` ጋር** ሚሊሰከንዶች** (Zod ክልል `0`–`86_400_000`፣ ማለትም እስከ 24 ሰዓታት ድረስ)
 
-> በ#7274 ውስጥ ከCodex-ብቻ `codexSessionAffinityTtlMs` ስሙ ተቀይሯል። የቀድሞው ቁልፍ አሁንም እንደ ለንባብ-ብቻ ተለዋጭ ስም ተቀባይነት አለው፤ አዳዲስ ውቅሮች `sessionAffinityTtlMs`ን መጠቀም አለባቸው። አሁን TTL ከ`0` በላይ ከሆነ ቁርኝት በCodex ብቻ ሳይሆን በ**ማንኛውም** አቅራቢ ላይ ይተገበራል — [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → የክፍለ ጊዜ ቁርኝትን ይመልከቱ።
+> ከኮዴክስ-ብቻ `codexSessionAffinityTtlMs` በ #7274 ተሰይሟል። የቅርስ ቁልፍ አሁንም እንደ ተነባቢ-ብቻ ተለዋጭ ስም ተቀባይነት አለው; አዲስ ውቅሮች `sessionAffinityTtlMs` መጠቀም አለባቸው. ዝምድና አሁን ተፈጻሚ ይሆናል።** ማንኛውም** አቅራቢው አንዴ TTL `0` በላይ ከሆነ፣ Codex — ብቻ ሳይሆን [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → የክፍለ ጊዜ ዝምድናን ይመልከቱ።
 
-**በ0 ላይ ሲቆይ የሚበላሸው ነገር**
+**0 ላይ ሲቆይ ምን ይሰበራል።**
 
-ባለብዙ ዙር የCodex ውይይት እያንዳንዱ ዙር በንቁው የcombo ስትራቴጂ በተናጥል ይመራል እና በ**እያንዳንዱ ዙር የተለየ መለያ** ላይ ሊደርስ ይችላል። ይህም የላይኛው ዥረት ክፍለ ጊዜ / የprompt-cache ቀጣይነትን ያቋርጣል። OmniRoute የCodex ክፍለ ጊዜ ራስጌዎችን (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) እና እንደ `prompt_cache_key` / `session_id` ያሉ የbody መስኮችን የሚመለከተው TTL ከ`0` በላይ ሲሆን ብቻ ነው (`extractSessionAffinityKey` በ`src/sse/services/auth.ts` ውስጥ)።
+እያንዳንዱ ዙር ባለብዙ ዙር Codex ምልልስ በተናጥል በነቃ ጥምር ስልት ይመራል እና በ ሀ** በየተራ የተለየ መለያ** . ይህ የላይኛው ክፍለ ጊዜ/የመሸጎጫ መሸጎጫ ቀጣይነትን ይሰብራል። OmniRoute Codex ክፍለ ጊዜ ራስጌዎችን (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) እና የሰውነት መስኮችን እንደ `prompt_cache_key` / `session_id` ብቻ ያማክራል TTL ከ `0` (`extractSessionAffinityKey` በ `src/sse/services/auth.ts`) ሲበልጥ።
 
-**ለብዙ ሰዓታት ለሚቆይ ነጠላ ተግባር የሚመከር**
+**ለብዙ ሰዓታት ነጠላ ተግባር የሚመከር**
 
-TTLን **ከተግባሩ ከሚጠበቀው የጠቅላላ የሰዓት ርዝመት በላይ** ያዘጋጁ (የUI ከፍተኛው **86400 ሰከንዶች** = 24 ሰዓታት ነው)፦
+TTL ያዘጋጁ** ከሥራው ከሚጠበቀው የግድግዳ ሰዓት ርዝመት በላይ** (UI ከፍተኛ ነው።** 86400 ሰከንድ** = 24 ሰዓታት):
 
-| የሚጠበቀው የተግባር ርዝመት | የቁርኝት TTL (UI፣ ሰከንዶች) | `sessionAffinityTtlMs` |
-| ----------------- | --------------------- | ---------------------- |
-| ጥቂት ሰዓታት          | `14400` (4h)          | `14400000`             |
-| ሌሊቱን ሙሉ / ~12h    | `43200` (12h)         | `43200000`             |
-| ሙሉ ቀን             | `86400` (24h፣ ከፍተኛው)  | `86400000`             |
+| የሚጠበቀው የተግባር ርዝመት | Affinity TTL (UI፣ ሰከንድ) | `sessionAffinityTtlMs` |
+| ----------------- | ----------------------- | ---------------------- |
+| ጥቂት ሰዓታት          | `14400` (4ሰ)            | `14400000`             |
+| በአንድ ሌሊት / ~ 12h  | `43200` (12 ሰ)          | `43200000`             |
+| ሙሉ ቀን             | `86400` (24 ሰ፣ ከፍተኛ)    | `86400000`             |
 
-መርጦ መግባት ሆን ተብሎ የተደረገ ነው፦ ቁርኝትን ማሰናከል በመለያዎች መካከል የጭነት ማመጣጠንን ይደግፋል፤ ማንቃት ደግሞ ለአንድ ረጅም የወኪል ክፍለ ጊዜ ቀጣይነትን ይደግፋል። ይህ መመሪያ ነባሪውን **አይለውጥም** — ረጅም የCodex ተግባራትን የሚያስኬዱ ኦፕሬተሮች መርጠው መግባት አለባቸው።
+መርጦ መግባቱ ሆን ተብሎ ነው፡ ዝምድናን ማሰናከል በመለያዎች ላይ ያለውን ጭነት ማመጣጠን ይደግፋል። ማስቻል ለአንድ ረጅም ወኪል ክፍለ ጊዜ ቀጣይነትን ይደግፋል። ይህ መመሪያ ያደርጋል** አይደለም** ረጅም Codex ተግባራትን የሚያሄዱ — ኦፕሬተሮችን ቀይር መርጠው መግባት አለባቸው።
 
-### 2. የዥረት ስራ-ፈት ጊዜ ገደብ — ጸጥ ያሉ የማመዛዘን ዙሮችን አታቋርጡ
+### 2. የስራ ፈት ጊዜ ማብቂያ — ጸጥ ያለ የማመዛዘን መዞሪያዎችን አይገድሉም።
 
-**ነባሪ፦** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 ደቂቃዎች)። ካልተዋቀረ `REQUEST_TIMEOUT_MS`ን ይወርሳል፤ የጋራው መነሻ መስመርም 600000 ነው። [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → የጊዜ ገደቦችን ይመልከቱ።
+**ነባሪ፡** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 ደቂቃዎች). ሳይዋቀር ከ `REQUEST_TIMEOUT_MS` ይወርሳል; የተጋራው መነሻ መስመርም 600000 ነው። [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeoutsን ይመልከቱ።
 
-**በነባሪው ላይ የሚበላሸው ነገር**
+**በነባሪነት ምን ይሰብራል**
 
-ከ10 ደቂቃዎች በላይ **ምንም እውነተኛ upstream chunk ሳይኖር** ዝም ብሎ የሚቆይ የCodex reasoning / tool turn በSSE idle watchdog (`open-sse/utils/stream.ts`) በግድ ይዘጋል። ደንበኛው ብዙውን ጊዜ ምንም መልዕክት ሳይኖር ግንኙነቱ ሲቋረጥ ብቻ ያያል — ይህም “ምንም ማሳወቂያ ሳይኖር በራስ-ሰር ቆመ” ከሚለው ጋር ይዛመዳል።
+ከ10 ደቂቃ በላይ በፀጥታ የሚቆይ የ Codex ማመዛዘን/የመሳሪያ ማዞሪያ** ምንም እውነተኛ የወለል ጅረት ቁራጭ የለም።** በ SSE ስራ ፈት ጠባቂ (`open-sse/utils/stream.ts`) በግዳጅ ተዘግቷል። ደንበኛው ብዙውን ጊዜ ባዶ የግንኙነት ጠብታ — ተዛማጅ "ያለ ምንም ማሳወቂያ በራስ-ሰር የቆመ" ያያል።
 
-ወሳኝ ዝርዝር፦ የOmniRoute ሰው ሠራሽ SSE **heartbeat የidle ሰዓት ቆጠራውን ዳግም አያስጀምርም**። `lastChunkTime`ን የሚያዘምነው እውነተኛ upstream body chunk ብቻ ነው። አሁንም “እያሰበ” ያለ ጸጥ ያለ ሞዴል፣ ከwatchdog እይታ አንጻር ከቆመ upstream ጋር ተመሳሳይ ይመስላል።
+ወሳኝ ዝርዝር OmniRoute's ሠራሽ SSE** የልብ ምት ዳግም አይጀምርም** የስራ ፈት ሰዓቱ ። ትክክለኛ ወደላይ የሚሄድ የሰውነት ክፍል ብቻ ነው `lastChunkTime` ያሻሽላል። ጸጥ ያለ ሞዴል አሁንም “በማሰብ ላይ” ከጠባቂው እይታ አንጻር ከቆመ ወደ ላይ ካለው ጋር ተመሳሳይ ነው።
 
-ተዛማጅ የUndici body inactivity፦ `FETCH_BODY_TIMEOUT_MS` (ይህም በነባሪ ተመሳሳዩን የ10 ደቂቃ መነሻ ይጠቀማል፤ `0` ያሰናክለዋል)። ለstreaming፣ `FETCH_TIMEOUT_MS` የሚሸፍነው የግንኙነት ማዋቀርን / የመጀመሪያ headersን ብቻ ነው — streamው ንቁ ከሆነ በኋላ፣ መቆም የሚተዳደረው በ`STREAM_IDLE_TIMEOUT_MS` እና `FETCH_BODY_TIMEOUT_MS` ነው።
+ተዛማጅ Undici አካል እንቅስቃሴ-አልባነት `FETCH_BODY_TIMEOUT_MS` (እንዲሁም ለተመሳሳይ የ10 ደቂቃ መነሻ መስመር ነባሪ ነው፤ `0` ያሰናክለዋል)። ለመልቀቅ፣ `FETCH_TIMEOUT_MS` የግንኙነት ማዋቀርን ብቻ ይሸፍናል/ የመጀመሪያ ራስጌዎች — አንዴ ዥረቱ ገባሪ ከሆነ፣ ድንኳኖቹ በ `STREAM_IDLE_TIMEOUT_MS` እና `FETCH_BODY_TIMEOUT_MS` ነው የሚተዳደሩት።
 
-**ለብዙ ሰዓታት የሚቆይ አንድ ተግባር የሚመከር**
+**ለብዙ ሰዓታት ነጠላ ተግባር የሚመከር**
 
-በOmniRoute process environment (`.env` / compose / systemd) ውስጥ፦
+በ OmniRoute ሂደት አካባቢ (`.env` / compose/systemd)፡-
 
 ```bash
-# ለረጅም reasoning turns የstream idle + body inactivity ማቋረጫዎችን ያሰናክሉ
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-ወይም ከሚጠብቁት ረጅሙ የጸጥታ ክፍተት በላይ ያድርጓቸው (እሴቶቹ በሚሊሰከንድ ናቸው)፦
+ወይም እርስዎ ከሚጠብቁት ረጅሙ ጸጥታ ክፍተት በላይ ያሳድጓቸው (እሴቶቹ ሚሊሰከንዶች ናቸው)
 
 ```bash
-# ምሳሌ፦ በupstream chunks መካከል እስከ 2 ሰዓታት የሚደርስ ጸጥታን ይፍቀዱ
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-እነዚህን env vars ከቀየሩ በኋላ OmniRouteን ዳግም ያስጀምሩ።
+እነዚህን env vars ከቀየሩ በኋላ OmniRoute እንደገና ያስጀምሩ።
 
-### ተግባራዊ የአሠራር ዘዴ — የብዙ ሰዓታት Codex ተግባር
+### የኮንክሪት አዘገጃጀት — ባለብዙ-ሰዓት Codex ተግባር
 
-1. **መለያውን ይሰኩ፦** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12h) ወይም `86400` (ከፍተኛው 24h)።
-2. በOmniRoute environment ውስጥ **የidle ማቋረጫዎችን ያሳድጉ / ያሰናክሉ**፦
+1. **መለያውን ይሰኩት፡-** ዳሽቦርድ → ቅንጅቶች → ማዘዋወር → የክፍለ ጊዜ ቅርበት → ቅርበት TTL = `43200` (12ሰ) ወይም `86400` (24ሰ ከፍተኛ)።
+2. **የስራ ፈት ማቋረጦችን ከፍ ያድርጉ/አቦዝን** OmniRoute አካባቢ፡-
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. የተለመደውን Codex `config.toml` (`wire_api = "responses"`፣ ትክክለኛ `base_url`፣ `OMNIROUTE_API_KEY`) ያቆዩ — ለእነዚህ ሁለት ባህሪያት በCodex በኩል ያሉ affinity/idle knobs የሉም።
-4. OmniRouteን ዳግም ያስጀምሩ፣ ከዚያም ረጅሙን Codex ተግባር ይጀምሩ።
+3. የተለመደው Codex `config.toml` (`wire_api = "responses"`፣ ትክክለኛ `base_url`፣ `OMNIROUTE_API_KEY`) — ምንም Codex-side affinity/idle knobs የለም ለእነዚህ ሁለት ባህሪያት አቆይ።
+4. OmniRoute እንደገና ያስጀምሩ፣ ከዚያ ረጅሙን Codex ተግባር ይጀምሩ።
 
-### የነባሪ ቅንብሮች ውሳኔ (#7287)
+### ነባሪ ውሳኔ (#7287)
 
-| Knob                     | የሚላከው ነባሪ         | በዚህ መመሪያ ውስጥ ይቀየር?                                                                  |
-| ------------------------ | ----------------- | ----------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (ጠፍቷል)        | **አይ** — በምርጫ የሚነቃ ሆኖ ይቀጥላል (load-balancing እና continuity፤ Discussion #5718ን ይመልከቱ) |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 ደቂቃ) | **አይ** — ለአጠቃላይ traffic 10 ደቂቃ ሆኖ ይቀጥላል፤ የረጅም Codex ኦፕሬተሮች ያሳድጉታል ወይም ያሰናክሉታል       |
+| እንቡጥ                     | የመርከብ ነባሪ         | በዚህ መመሪያ ውስጥ ይቀየር?                                                      |
+| ------------------------ | ----------------- | ----------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (ጠፍቷል)        | **አይ** — መርጦ መግባቱን ይቀጥላል (የጭነት ማመጣጠን እና ቀጣይነት፤ ውይይት #5718 ይመልከቱ)        |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 ደቂቃ) | **አይ** — ለአጠቃላይ ትራፊክ 10 ደቂቃዎች ይቀራል; ረጅም Codex ኦፕሬተሮች ያነሱታል ወይም ያሰናክሉታል። |
 
-ከሁለቱ ነባሪዎች አንዱን በዓለም አቀፍ ደረጃ መቀየር፣ የCodexን ብቻ ሳይሆን የአንድ instanceን እያንዳንዱን client ባህሪ ይቀይራል። knobsን በሰነድ ይግለጹ፤ ግልጽ የoperator ውሳኔ ሌላ እስኪል ድረስ ነባሪዎቹን እንዳሉ ይተዉ።
+በነባሪነት በአለምአቀፍ ደረጃ መገልበጥ Codex ብቻ ሳይሆን ለእያንዳንዱ የአብነት ደንበኛ ባህሪን ይለውጣል። እንቡጦቹን በሰነድ; ግልጽ የሆነ የኦፕሬተር ውሳኔ ሌላ እስኪል ድረስ ነባሪዎችን ብቻውን ይተዉት።
 
-### የidle መቋረጦችን መመርመር
+### የስራ ፈት መቆራረጥን መመርመር
 
-idle watchdog ሲነሳ፣ OmniRoute እንደሚከተለው የተቀረጸ መስመር log ያደርጋል፦
+ስራ ፈት ጠባቂው ሲተኮሰ OmniRoute የሚከተለውን የመሰለ መስመር ይመዘግባል፡-
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-`Idle timeout: no data from`ን (ወይም code `stream_idle_timeout`ን / error name `StreamIdleTimeoutError`ን) grep ያድርጉ። provider segment ማለት OmniRoute ለዚያ request የተጠቀመው ማንኛውም ነገር (`codex`፣ ሌላ provider id፣ ወይም የማይታወቅ ከሆነ `provider`) ነው — ሁልጊዜ ቃል በቃል `codex` አይደለም።
+Grep ለ `Idle timeout: no data from` (ወይም የ `stream_idle_timeout` ኮድ / የስህተት ስም `StreamIdleTimeoutError`)። የአቅራቢው ክፍል ለጥያቄው የሚጠቀመው ማንኛውም OmniRoute ነው (`codex`፣ ሌላ የአቅራቢ መታወቂያ፣ ወይም `provider` የማይታወቅ ከሆነ) — ሁልጊዜ ትክክለኛ ሕብረቁምፊ `codex` አይደለም።
 
 ---
 

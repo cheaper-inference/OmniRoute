@@ -4,85 +4,63 @@
 
 ---
 
-> **2026-11-19: kwụ n'ahịrị Mergify agwụla** (mkpebi onye nwe). `.mergify.yml` anaghị akọwapụta kwụ n'ahịrị wee jụ iwu Mergify nke jikọtara ma ọ bụ degharịa arịrịọ ịdọrọ. A na-ejikọta ntọhapụ PRs na aka n'okpuru iwu nchekwa nchekwa "Chọọ ọnụ ụzọ ndụ akwụkwọ ndụ na ntọhapụ na-arụ ọrụ" (`Gate / CI` + `Gate / Quality`) ruo mgbe omni-queue na-agba ọsọ na ọnọdụ ndụ, na site na omni-queue mgbe nke ahụ gasịrị ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Ngalaba Mergify dị n'okpuru na-akọwa kwụ n'ahịrị ka ọ dị.
+## Ịdakwasị na ngalaba ntọhapụ
 
-Ebe ọ bụ na v3.8.49 (WS3.2/WS3.4 nke atụmatụ quality/velocity ) ụzọ njikọ ndabara maka PRs tụlere n'ime `release/vX.Y.Z` bụ** Mekọrịta kwụ n'ahịrị ọnụ** (`.mergify.yml`); nke** ntuziaka jikota-ụgbọ okporo ígwè** Edere n'okpuru bụ FALLBACK — a na-eji n'oge ihe omume, ntọhapụ freezes, ma ọ bụ ọ bụrụ na atụmatụ Mergify Open Source na-agbanwe agbanwe.
+Omni kwụ n'ahịrị na-achịkwa ọdịda n'ime `release/vX.Y.Z`. Gụọ `mode` ọkwa dị elu na `config/merge-queue/config.json` na ngalaba ndabara tupu ị rute PR. Lee [Omni-Queue](OMNI_QUEUE.md).
 
-## Ụzọ ndabara: kwụ Mergify
+- **`shadow`** na-agba ọsọ nkwado wee hapụ ọdịda na ngwakọta akwụkwọ ntuziaka. Tinye `omni-queue` na PR akwadoro n'isi ikpeazụ ya. Lelee ntozu na `npm run queue -- why <PR>`. Chere mkpebi maka isi ahụ na `npm run queue -- history --base <branch>`. Gaba na `would-land`. Na `culprit-found` ma ọ bụ `would-dequeue`, jide njikọ wee dozie ihe kpatara ya.
+- **Mwepu onyinyo.** Ụgbọ oloko nwere CI akwụkwọ ndụ akwụkwọ ndụ zuru oke megide isi isi ugbu a nwere ike ịga n'ihu na-enweghị mkpebi kwụ n'ahịrị dị iche. Otu ihe ahụ na-emetụta mgbe isi PR nwere n'ọnụ isi ugbu a.
+- **`live`** na-eji akara `omni-queue` kpalite ọdịda. Naanị kwụ n'ahịrị na-agbada PR. Hapụ iwu nchikota na ntinye aka na kwụ n'ahịrị.
 
-1. Ndị campaign na-enyocha PR ma mee ka ọ bụrụ akwụkwọ ndụ akwụkwọ ndụ, onye nwe ya na-akwadokwa ya site n'ọnụ ụzọ ⭐ tupu njikọta
-   (akụkọ ahụ + mkpebi maka ihe ọ bụla — lee `/merge-prs` Nzọụkwụ 0.75).
-2. Onye nwe ya (ma ọ bụ session na-eme ihe dabere na mkpebi onye nwe ya) na-etinye akara **`queue`**.
-   Akara ahụ BỤ nkwado njikọta; Mergify na-emezu naanị ya.
-3. Mergify na-enyocha PR ndị nọ n'ahịrị **n'otu n'otu** (otu n'otu oge) site na fast-gates
-   wee jikọta ha (squash). Ịchịkọta n'ìgwè + nkewa akpaka iji chọpụta nsogbu bụ ọkwa Mergify a na-akwụ ụgwọ
-   ("Cannot use Merge Queue batch" na atụmatụ efu, #7220), ya mere `.mergify.yml` anaghị edobe
-   `batch_size`; ịchịkọta n'ìgwè ka bụ ọrụ nke manual merge-train dị n'okpuru. A ga-ewepụ PR nke
-   nyocha ya ka na-eche mgbe `checks_timeout` gafere (240 min = 2× p95 a tụrụ nke
-   `quality.yml`) n'ahịrị kama ikwe ka ọ kwụsị ahịrị ahụ.
-4. Mgbe njikọta gasịrị, continuous release-green workflow na-enyocha tip ọhụrụ ahụ mgbe a push
-   wee mepee issue attribution ma ọ bụrụ na ngwakọta ahụ laghachiri azụ (ọ dịghị mgbe ọ na-eme auto-revert).
+Ọdịda ọ bụla chọrọ ikike onye nwe ya yana ndenye ego achọrọ. Tinye `omni-queue` naanị mgbe onye nwe ya nyechara ikike mbudata. PRs kwụ n'ahịrị emetụ n'ahụ ụzọ echedoro chọkwara mkpebi `protected-approved` onye nwe maka PR ahụ.
 
-Ihe nchedo (na-egosipụta `CLAUDE.md` Hard Rules #21/#22):
+"Chọọ ọnụ ụzọ ndụ akwụkwọ ndụ na ntọhapụ nọ n'ọrụ" ruleset chọrọ akwụkwọ ndụ akwụkwọ ndụ `Gate / CI` na `Gate / Quality` n'isi. Ejila `--admin` gafee ọnụ ụzọ uhie. Ihe mgbochi ntọhapụ ntọhapụ jikọtara n'ime alaka oyi kpọnwụrụ. Lee [Iwu siri ike 21](HARD_RULES_DETAIL.md). Akpọla aha, jikọta ma ọ bụ kwanye na arịrịọ ịdọrọ na nnọkọ ọzọ na-arụ ọrụ. Lee [Iwu siri ike 22](HARD_RULES_DETAIL.md).
 
-- **Release freeze emeghe** → etinyela akara na PR ndị na-ezube branch a kpọchiri akpọchi; buru ụzọ gbanwee ebumnuche ha gaa na
-  `release/vX+1` nke na-arụ ọrụ ugbu a.
-- **PR session ọzọ nke ka na-aga n'ihu** → etinyela akara na ya ma ọlị; naanị session nwe ya ga-etinye ọrụ nke ya n'ahịrị.
-- Diffs nke naanị tests na PR ndị nwere akara `hotfix` na-agba CI ebelatara (lee
-  `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); ọnọdụ kwụ ahụ na-anabata ụdị checks ọ bụla
-  e mere n'ezie (`#check-failure=0` + `#check-pending=0`).
+## Ụgbọ oloko dọkpụrụ arịrịọ
 
-## Ụzọ ndabere: ụgbọ-njikọta aka
+1. Malite alaka ụgbọ oloko n'ọnụ ntọala ntọala ugbu a. Jikọta ndị isi otu akwadoro site na iji mmekọ ọnụ. Chekwaa akụkọ ihe mere eme ha site n'izere skwọsh na rebase.
+2. Mepee arịrịọ ịdọrọ maka alaka ụgbọ oloko. Kwado PR ahụ jiri CI nke ya zuru oke n'ọnụ ntọala dị ugbu a. Lelee ntụzịaka isi na isi ndị otu akwadoro tupu ịdatuo. Mee ka ụgbọ oloko na CI nwee ume mgbe onye ndoro-ndoro anya gbanwere.
+3. Wetuo PR ụgbọ oloko ahụ na njikọ njikọta n'okpuru ọnọdụ kwụ n'ahịrị. N'ụdị ndụ, usoro mgbada `merge-ff` kwụ n'ahịrị na-echekwa njikọ aka. Ndị isi ndị otu mbụ na-aghọ ndị a na-enweta site na ngalaba ntọhapụ. GitHub na-akara onye otu PRs ka ejikọta ya na ihe omume ahụ na-ejigide ndị odee ha.
 
-A na-eji ya mgbe ahịrị adịghị. Nke a na-eme ka usoro e ji kpochapụ PR 33 n'ime
-otu ụbọchị n'oge okirikiri v3.8.47 bụrụ iwu:
+Ihe atụ ọha bụ [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Ọ jikọtara ndị otu PRs 18 wee rute na njikọta ọnụ na 2026-11-24.
 
-1. **Chịkọta batch ahụ** (~PR 10–30 a nyochara+kwadoro). Lelee esemokwu `linked:`
-   (otu `tap.testFiles`, otu hunks CHANGELOG) ma hazie ndị ahụ ka ha soro n'usoro.
-2. **Nyochaa OTU UGBO**: n'ime worktree dịpụrụ adịpụ sitere na tip mwepụta, jikọta isi batch
-   niile na mpaghara, wee gbaa suite kwekọrọ na nke mwepụta
-   (`npm run check:release-green`, tinye `--with-build` tupu mwepụta).
-   `scripts/release/merge-train.sh <base> <PR#>…` na-eme nzọụkwụ 1–2 na-akpaghị aka (PR ndị
-   nwere esemokwu na-apụ, ụgbọ ahụ na-aga n'ihu). Ọnọdụ zuru ezu na-agba `npm run test:unit` — runner
-   a haziri maka igwe ahụ (`--test-concurrency=20`), **ọ bụghị** shards CI 4-core abụọ na-agba
-   n'otu n'otu, nke mere ka usoro kachasị ukwuu jiri ihe dịka 25% nke igwe 16-core (edoziiri
-   2026-07-18). `--fast` (mkpochapụ mega-train n'ime ụbọchị, onye nwe ya kwadoro 2026-07-18)
-   na-edobe ọnụ ụzọ static niile + vitest mana na-agba naanị faịlụ node:test ndị PR
-   batara gbanwere; suite ZURU EZI ka ga-agba ma ọ dịkarịa ala otu ugboro kwa ụbọchị na
-   tip a chịkọtara (otu ụgbọ na-enweghị `--fast`).
-3. **Gafere** → jikọta PR ndị ahụ n'usoro (na-enyocha `state,headRefOid` ọzọ tupu nke ọ bụla —
-   PR isi ya gbanwere ga-alaghachi na nyocha). Gosipụta na net diff nke njikọta ọ bụla bụ
-   mgbanwe nke PR ahụ n'onwe ya (enweghị auto-resolve reverts: nyochaa `git diff --stat` maka
-   nhichapụ ndị na-abụghị akụkụ ọrụ ahụ).
-4. **Dara** → kewaa batch ahụ ụzọ abụọ (nyochaa ọkara nke ọ bụla) kama imeghachi nyocha
-   n'otu n'otu; weghachite PR kpatara nsogbu ahụ n'ahịrị nyocha tinyere ihe akaebe.
-5. **Emela ma ọlị**: njikọta n'oge mgbochi n'ime alaka a machibidoro; `git stash` ebe ọ bụla;
-   ịgba CI niile ọzọ n'olileanya na ọdịda ga-apụ (iwu: ọdịda bụ ozi).
+Mmekọrịta-azụ si `main` gaa na ngalaba ntọhapụ na-esote ga-agbadata site na ntinye aka. Achọrọ ichekwa nna nna `main` maka mmekọ-azụ. Lee [Mwepu nke Worktree](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Nkewa n'ọkwa (ihe mere ahịrị ahụ ji dị nchebe site naanị na ọnụ ụzọ-ngwa-ngwa)
+## Ihe nkwado njikọ ụgbọ oloko mpaghara
 
-- **Kwa PR** (quality.yml fast-gates): ule TIA metụtara + unit zuru ezu 4-shard +
-  vitest + nchịkọta lint + typecheck + iguzosi ike nke docs/changelog.
-- **Kwa batch/tip** (release-green na-aga n'ihu): ọnụ ụzọ siri ike `--quick` na push ọ bụla gaa
-  na alaka mwepụta; nyocha zuru ezu `--with-build --full-ci` ugboro 3/ụbọchị.
-- **Kwa mwepụta** (ci.yml na PR mwepụta): matrix zuru ezu gụnyere E2E ×9,
-  package-artifact + tarball boot-smoke, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Ọ dịghị ihe a na-enyocha obere karịa ka ọ dị na mbụ — naanị na a na-agba akụkụ dị arọ kwa batch/tip
-kama kwa PR, nke bụ ihe na-ewepụ njem ugboro O(N).
+Onye nkwado ahụ na-ewepụta isi na isi PR wee jikọta ha n'osisi ọrụ enwere ike iwepu. Ọ na-agba ọsọ nke parity suite otu ugboro n'elu osisi nke pụta. Isi dara ada ma ọ bụ jikọta esemokwu na-ewepụ PR na edemede ahụ na-aga n'ihu na PRs fọdụrụnụ.
 
-## Ihe ndị a chọrọ na checkout ọhụrụ maka `merge-train.sh`
+- **`--plan`** na-ebipụta usoro nke ahọpụtara wee pụọ na-emepụtaghị osisi ọrụ ma ọ bụ ịkpọtụrụ ebe dịpụrụ adịpụ. Jikọta ya na `--fast` iji nyochaa atụmatụ ngwa ngwa.
+- **`--fast`** na-agba ọsọ ọnụ ụzọ static nkịtị, faịlụ `node:test` ahọpụtara gbanwere n'okpuru `tests/unit/`, yana `npm run test:vitest`. Gbaa nkwado mpaghara zuru oke ma ọ dịkarịa ala otu ugboro n'ụbọchị n'ọnụ ọnụ mgbe ị na-eji ọnọdụ ngwa ngwa.
+- **Ụdị zuru oke** na-agbakwụnye ọnụ ụzọ ámá kwụ ọtọ zuru ezu ma na-agba `npm run test:unit` na `npm run test:vitest`.
 
-Script ahụ na-agba **preflight** nke na-akwụsị ozugbo mgbe e nwere ọdịda na checkout mgbọrọgwụ (tupu ọrụ
-worktree ọ bụla) ka nrụnye mebiri emebi ghara iyi ka ụgbọ dara ada:
+A na-emegharị ọnụ ụzọ static na-ada ada na ntọala a na-emetụghị aka ma ọ bụrụ na nyocha ntọala dị. Edemede a na-akọ ọdịda ketara wee na-aga n'ihu mgbe ahịrị mmebi ọ bụla amatara pụtakwara na ntọala yana mkpokọta etolitebeghị.
 
-1. `npm ci`, wee gbaa postinstall `bun` nke npm na-egbochi:
-   `(cd node_modules/bun && node install.js)` — ma ọ bụghị ya `check:provider-consistency`
-   na `check:known-symbols` (ha abụọ bụ `bun scripts/…`) ga-ada na ụgbọ ahụ NA base n'enweghị
-   ahịrị mmebi iwu.
-2. Enweghị `node_modules/node_modules` fọdụrụ (osisi dependency oyiri; React na-ebunye ugboro abụọ
-   ma suite UI vitest daa ozugbo).
-3. `node_modules/.bin/tsc` ga-adị ma nwee ike ịrụ ọrụ (nrụnye ezughị ezu enweghị ya).
+| Ụzọ ọpụpụ | Pụtara                                                                                                                            |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `0`       | Bipụta atụmatụ ma ọ bụ mechaa suite ahụ. Nchịkọta ụlọ ahụ depụtara ọdịda adaghị ada ọ bụla ketara na PRs ewepụrụ.                 |
+| `1`       | Arụmụka na-ezighi ezi, enweghị nlele Git, ụgbọ elu dara ada, ma ọ bụ enweghị PR banye.                                            |
+| `2`       | Ntụle ego suite dara ma erughị eru ka eketara. Onye na-arụ ọrụ nwere ike kewaa ogbe ahụ, wepụ PR na-adịghị mma, wee malitegharịa. |
 
-Ụgbọ ahụ na-agba `npm run check:cycles:ratchet` nke na-egbochi; `npm run check:cycles`
-nkịtị bụ naanị ndụmọdụ (ọ na-edepụta SCC ndị ahụ ma jiri non-zero pụọ ọbụna na base dị mma).
+Akwụkwọ ngafe mpaghara na-enye ihe akaebe nyocha maka naanị dossier onye nwe ya. Ọdịda ọ bụla ka na-achọ ikike onye nwe ya, ndenye ego nke ya chọrọ, yana mkpebi kwụ n'ahịrị onyinyo mgbe ọ dị.
+
+## Tiering
+
+- **PR.** CI na Ogo họrọ ndenye ego dabere na ụzọ ndị gbanwere. Koodu PRs na-agba ọsọ ọnụ ụzọ ámá dị mma yana ule emetụtara, yana otu dị iche iche yana ọrụ Vitest na CI.
+- **Onye na-azọ ọkwa kwụ n'ahịrị.** CI na Quality na-eme profaịlụ zuru oke maka onye omere mejupụtara na kwụ n'ahịrị ref.
+- **Ọnụ ntọhapụ kwa ọ bụla.** Ntọhapụ-Green na-agba ọsọ ọsọ ọnụ ụzọ ámá siri ike na mkpọ nke dabara na nzacha ụzọ ya. A na-agba ọsọ atọ akwadoro kwa ụbọchị na-eji mkpochapụ zuru ezu maka alaka ụlọ ọrụ ntọhapụ.
+- **Kwa ntọhapụ.** Matriks CI zuru ezu gụnyere E2E shards, nkwado ngwugwu, anwụrụ ọkụ bọọlụ tarball, na nlele mkpuchi. Hụ [ndepụta nlele mwepụta](RELEASE_CHECKLIST.md).
+
+## Ihe achọrọ nlele ọhụrụ maka `merge-train.sh`
+
+Ụgbọ elu na-ebu ụzọ na-aga tupu ịmepụta osisi ọrụ. Wụnye ndabere na `npm ci`. Kwenye na `node_modules/.bin/tsc` nwere ike ime ya na `node_modules/node_modules` adịghị. Lelee na `node_modules/.bin/bun --version` na-aga nke ọma.
+
+Ọ bụrụ na awụsara Bun postinstall, gbaa `(cd node_modules/bun && node install.js)`. Nkwekọrịta onye na-eweta ya na nlele akara ama ama na-eji Bun. Ihe nkwado ahụ na-agba `npm run check:cycles:ratchet` dị ka ọnụ ụzọ mgbochi. Iwu `npm run check:cycles` kwụ ọtọ bụ ndụmọdụ.
+
+## Akụkọ ihe mere eme
+
+Ahịrị njikọ Mergify lara ezumike nká na 2026-11-19.

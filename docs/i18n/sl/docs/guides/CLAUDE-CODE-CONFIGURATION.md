@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) in OpenCode (`x-opencode-session`) sta prep
 
 Delovni imenik se med stroji razlikuje, zato se lahko isti repozitorij prikaže pod različnimi potmi. Namesto tega pošljite projekt eksplicitno: koda Claude vsaki zahtevi po modelu doda vse glave, navedene v `ANTHROPIC_CUSTOM_HEADERS`, in OmniRoute prebere dve izmed njih:
 
-| Glava                      | Vrednost                                                                     |
-| -------------------------- | ---------------------------------------------------------------------------- |
-| `x-omniroute-project`      | Ime projekta, npr. `omniroute`                                               |
-| `x-omniroute-project-repo` | Normaliziran daljinski upravljalnik, npr `github.com/diegosouzapw/OmniRoute` |
+| Glava                      | Vrednost                                                                          |
+| -------------------------- | --------------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Ime projekta, npr. `omniroute`                                                    |
+| `x-omniroute-project-repo` | Normaliziran daljinski upravljalnik, npr `github.com/cheaper-inference/OmniRoute` |
 
 Oboje se bere samo zaradi pripisa; nikoli niso posredovani zgornjemu ponudniku.
 
@@ -286,27 +286,20 @@ zastavice niso potrebne. Za posamezen klic lahko to preglasite z `--remote` / `-
 
 ## Odpravljanje težav
 
-**Claude Code prezre prehod** — preverite, da `ANTHROPIC_BASE_URL` **ne vsebuje
-`/v1`**, in znova zaženite `claude` (okoljske spremenljivke se preberejo samo enkrat ob zagonu). `omniroute launch`
-to uredi namesto vas.
+**koda Claude ignorira prehod** — potrdi, da ima `ANTHROPIC_BASE_URL`** brez `/v1`** in znova zaženite `claude` (env se prebere enkrat ob zagonu). `omniroute launch` to uredi namesto vas.
 
-**Izbirnik `/model` je prazen / modeli prehoda manjkajo** — potrebujete Claude Code
-v2.1.219+ in `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. V izbirniku so prikazani samo ID-ji modelov `claude*` /
-`anthropic*`; kateri koli drug model vsilite z
-`ANTHROPIC_MODEL=<id>` (to počnejo profili).
+**izbirnik `/model` je prazen / manjkajo modeli prehodov** — potrebuje kodo Claude v2.1.219 + in `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. V izbirniku se prikaže samo `claude*` / `anthropic*` model IDs ; vsili kateri koli drug model z `ANTHROPIC_MODEL=<id>` (to počnejo profili).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code vedno pošilja **ID-je modelov brez predpone**
-(npr. `claude-opus-4-8`), zato se pri hkratni povezavi ponudnikov Claude Code (`cc/…`) in
-Claude (`claude/…`) goli ID ujema z dvema potema, OmniRoute pa zavrne ugibanje. Težavo lahko odpravite na enega od dveh načinov: določite ID s predpono z
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` ali omogočite **Daj prednost Claude Code za
-modele Claude brez predpone** — s preklopnikom na strani ponudnika Claude ali z
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (privzeto izklopljeno;
-glejte [Okolje](../reference/ENVIRONMENT.md)) — s čimer se goli ID-ji `claude-*`
-namesto tega usmerijo v Claude Code. Izrecne predpone ponudnikov imajo vedno prednost.
+**`400 Ambiguous model 'claude-…'`** — Claude Koda vedno pošilja** brez predpone** model IDs (npr. `claude-opus-4-8`), torej ko sta oba ponudnika kode Claude (`cc/…`) in Claude (`claude/…`) povezana, se goli ID ujema z dvema smerema in OmniRoute noče uganiti. Popravite tako ali drugače: pripnite predpono ID z `ANTHROPIC_MODEL=cc/claude-opus-4-8` ali omogočite** Dajte prednost kodi Claude za modele Claude brez predpone** — preklop na strani ponudnika Claude ali `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (privzeto izklopljen; glejte [Okolje](../reference/ENVIRONMENT.md) ) — ki namesto tega preusmeri goli `claude-*` IDs v kodo Claude. Eksplicitne predpone ponudnika vedno zmagajo.
 
-**Napake pri preverjanju pristnosti** — profil ne vsebuje žetona. Uporabite `omniroute launch --profile`
-(ki ga vstavi) ali izvozite `ANTHROPIC_AUTH_TOKEN`.
+**"samodejni način … ta seja ni primerna" (zaračunane zahteve klasifikatorja)** — v samodejnem načinu Koda Claude zahteva od strežnika, da pregleda dejanja znotraj lastnih zahtev za model ( [Anthropic dokumenti](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). To potrebuje vrednost `anthropic-beta` `dangerous-tool-use-2026-09-03` in polje telesa `safeguards`, da dosežeta Anthropic kot par, in `safeguard_results` plus IDs uporabe orodja navzgor, da se vrneta nespremenjena. OmniRoute to naredi, ko je zahteva usmerjena k izvornemu ponudniku `claude` ali k vozlišču `anthropic-compatible-*`, pretočno ali ne (regresijska zaščita: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Drugi cilji ne morejo vrniti pregleda, zato se koda Claude vrne k lastnim zahtevam klasifikatorja in prikaže obvestilo:
 
-**Profili niso ločeni** — vsak profil je ločen `CLAUDE_CONFIG_DIR`;
-preverite, ali `echo $CLAUDE_CONFIG_DIR` znotraj seje kaže na
-`~/.claude/profiles/<name>`.
+- model pri neantropičnem ponudniku ali kombinacija, ki pristane pri enem;
+- relejno vozlišče (`anthropic-compatible-cc-*`), združljivo s Claude-Code, ki ponovno zgradi telo zahteve in ne nosi `safeguards`;
+- starejša različica OmniRoute, ki je starejša od beta različic na seznamu dovoljenih, ali različica kode Claude pod tisto, ki jo stran Anthropic navaja za seje prehoda.
+
+Zaženite `/status` v kodi Claude : the** Strežnik samodejnega načina** vrstica bere `Enabled` medtem ko je pregled strežnika aktiven. O tem, ali bodo te zahteve zaračunane, odloča Anthropic, ne OmniRoute.
+
+**Napake pri preverjanju** — profil nima žetona. Uporabite `omniroute launch --profile` (vstavi ga) ali izvozite `ANTHROPIC_AUTH_TOKEN`.
+
+**Profili ne izolirajo** — vsak profil je poseben `CLAUDE_CONFIG_DIR`; preverite `echo $CLAUDE_CONFIG_DIR` znotraj točk seje na `~/.claude/profiles/<name>`.

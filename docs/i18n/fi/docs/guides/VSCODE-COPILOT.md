@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** tuo kaikki OmniRouten tarjoamat mallit _suoraan_ GitHub Copilot Chatin
-natiiviin mallinvalitsimeen. Ei toista sivupalkkia eikä erillistä keskustelukäyttöliittymää — Copilotin agenttitila, työkalukutsut,
-MCP-palvelimet ja mukautetut ohjeet toimivat edelleen, mutta käyttävät valitsemaasi mallia.
+**OmniCopilot** lisää OmniRoute -chat-mallisi ja -yhdistelmäsi alkuperäiseen Copilot -chat-mallivalitsimeen. Käytä editorin olemassa olevia keskustelu- ja agenttityönkulkuja työkalukutsujen ja visioiden kanssa, kun valittu malli tukee niitä.
 
-|                           |                                                                                                                                                 |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Asennus (VS Code)**     | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Asennus (forkit)**      | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Lähdekoodi / ongelmat** | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Vaatimukset**           | VS Code 1.104+                                                                                                                                  |
+|                       |                                                                                                                               |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Asenna (VS Code)**  | [Markkinapaikka → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)   |
+| **Asenna (Avaa VSX)** | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — vaatii yhteensopivan kielimallin tarjoajan ja chat APIs |
+| **Lähde / ongelmat**  | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                            |
+| **Vaatii**            | VS Code 1.104 + (1.122 + käyttääksesi sitä ilman GitHub -sisäänkirjautumista tai Copilot suunnitelmaa)                        |
+| **Nykyinen julkaisu** | OmniCopilot v1.5.1 molemmissa myymälöissä (julkaistu 2026-11-24)                                                              |
 
-> **Copilot-tilausta ei tarvita.** VS Code 1.122:sta alkaen kielimallipalveluntarjoaja toimii
-> ilman GitHub-kirjautumista ja ilman Copilot-tilausta. Automaattiset täydennykset suoraan editorissa ja
-> upotuksiin perustuvat ominaisuudet eivät kuulu palveluntarjoajan APIin ja vaativat edelleen Copilotin.
+Tallenna tilannekuva päälle** 25.11.2026 (01:43 UTC)** , nykyinen julkaisu:** 52 081 Marketplace-asennusta** ja** 20 989 avointa VSX -latausta** . Nämä ovat erilaisia myymälämittareita, eivät yhdistettyä käyttäjämäärää. Lähteet: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) ja [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Avoin VSX saatavuus ei itsessään varmista yhteensopivuutta kaikkien kyseistä rekisteriä käyttävien editorien kanssa. Tarkista editorin chat- ja kielimallin API tuki.
+
+> **Copilot -tilausta ei tarvita BYOK keskusteluun VS koodilla 1.122 +.** Microsoft tukee chattia, työkaluja ja MCP ilman GitHub -sisäänkirjautumista, kun palveluntarjoaja on määritetty. VS koodissa 1.104–1.121 laajennus toimii edelleen, mutta VS Code vaatii sisäänkirjautuneen Copilot suunnitelman. Sisäiset ehdotukset ja upotuksiin perustuvat ominaisuudet jäävät palveluntarjoajan API ulkopuolelle ja vaativat silti Copilot:n; Copilot Business/Enterprise järjestelmänvalvojat voivat poistaa käytöstä kolmannen osapuolen mallintarjoajat käytännöillä; haarukka näyttää mallit vain, jos se toteuttaa chat-palveluntarjoajan API. Varsinaisen palveluntarjoajan käytöstä voi silti periä maksuja. Katso [VS Code 1.122 -julkaisutiedot](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) ja [kielimalliopas](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
-## Määritys
+## Asennus
 
-1. **Käynnistä OmniRoute** — `npm install -g omniroute && omniroute` (hallintapaneeli osoitteessa `http://localhost:20128`).
-2. **Asenna laajennus** — etsi laajennusnäkymässä hakusanalla "OmniRoute".
-3. **Valitse malli** — Copilot Chat → mallinvalitsin → **Manage Models…** → **OmniRoute** ja valitse sitten
-   haluamasi mallit.
+1. **Juokse OmniRoute** — `npm install -g omniroute && omniroute` (kojelauta `http://localhost:20128`:ssä).
+2. **Asenna laajennus** — etsi "OmniRoute" Laajennukset-näkymässä.
+3. **Yhdistä** — säilytä oletusarvoinen `http://localhost:20128` tai aseta palvelimesi URL ja API -avain läpi**OmniRoute: Hallitse yhteyttä** .
+4. **Valitse malli** — Copilot Chat → mallivalitsin →** Hallinnoi malleja…** →**OmniRoute** , valitse sitten mitä haluat.
 
-Mitään ei tarvitse määrittää, kun OmniRoute käyttää oletusporttia. Etäinstanssia varten avaa
-**OmniRoute-kuvake toimintopalkissa** (tai suorita `OmniRoute: Manage Connection`) ja määritä:
+Avaa yhteysasetukset**OmniRoute -kuvake toimintopalkissa** (tai suorita `OmniRoute: Manage Connection`) ja aseta:
 
-- **Palvelimen URL-osoite** — palvelimen juuriosoite, esim. `http://192.168.0.15:20128`. Laajennus lisää
-  `/v1`-päätteen; älä sisällytä sitä osoitteeseen.
-- **API-avain** — vain, kun palvelimella on asetettu `REQUIRE_API_KEY`. Tallennetaan käyttöjärjestelmän avainnippuun VS
-  Coden SecretStoragen kautta, ei koskaan `settings.json`-tiedostoon.
+- **Palvelin URL** — palvelimen juuri, esim. `http://omniroute.example.com:20128`. `/v1` -liite on liitetty laajennuksella; älä sisällytä sitä.
+- **API avain** — vaaditaan, kun palvelimen päättelytodennuskäytäntö vaatii sellaisen. Tallennettu VS kautta Code SecretStorage, ei koskaan `settings.json` ssä; työtilakohtaisia avaimia on saatavana. Käytä avainta, joka on valtuutettu niille malleille, jotka haluat paljastaa.
+
+Laajennus tarjoaa myös yhteysilmaisimen, mallin päivityksen, mallikontekstin ja hinnoittelun metatiedot (sisältää yhdistelmät), suoratoiston perustelujen kanssa** Ajatteleva yritys** VS Code 1.120 +-valikko, tilapalkin päivittäisen rajan ilmaisin ja käyttöpaneeli (OmniRoute 3.8.50 +), CLI kokoonpano ja valinnainen kojelautavälilehti. Valittu malli ja palvelinkäytäntö määrittävät käytettävissä olevat ominaisuudet.
 
 ---
 
@@ -112,23 +112,25 @@ Katso [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ja ongelma
 
 ---
 
-## Muiden työkalujen määrittäminen VS Codesta käsin
+## Muiden työkalujen konfigurointi VS Coden sisältä
 
-**`OmniRoute: Configure Coding CLI`** käyttää `omniroute`-komentorivityökalua kirjoittaakseen käyttövalmiit profiilit työkaluille Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo ja Roo — samat määritykset on kuvattu tiedostossa
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). API-avain välitetään komentorivityökalulle `OMNIROUTE_API_KEY`-ympäristömuuttujan kautta, ei koskaan komentorivillä.
+**`OmniRoute: Configure Coding CLI`** ajaa `omniroute` CLI kirjoittamaan käyttövalmiita profiileja 16 työkalulle: Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLIWhyCodes Zed dive Laajennus kutsuu `setup-*` -komentoja integroidussa päätteessä; asenna OmniRoute CLI -versio, joka sisältää valitun komennon. Katso [CLI integrointioppaasta](CLI-INTEGRATIONS.md) kunkin reseptin käyttämät tiedostot ja liput sekä [laajennuksen työkalurekisteri](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+API -näppäin luovutetaan CLI lle `OMNIROUTE_API_KEY` kautta, ei koskaan komentorivillä. Asennusreseptit voivat säilyttää tunnistetiedot kohdetyökalun määrityksissä. Kun jaat työtilakohtaisen avaimen työkalun käyttäjätason kokoonpanon kanssa, laajennus pyytää ensin vahvistusta.
 
 ---
 
-## Vianmääritys
+## Vianetsintä
 
-| Oire                                                            | Syy / korjaus                                                                                                                                                                                                                                                                                             |
-| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| OmniRoute-malleja ei näy valitsimessa                           | Palvelimeen ei saada yhteyttä. Tilarivin piste muuttuu harmaaksi; suorita `OmniRoute: Check Connection`. Mallien etsintä on tarkoituksella hiljainen eikä kehota käyttäjää, vaan jättää mallit lisäämättä.                                                                                                |
-| Jokainen malli näkyy kahdesti                                   | Käytössäsi on OmniCopilot-versio, joka on vanhempi kuin 1.0.1 — päivitä se. Laajennus pyytää nyt `?prefix=alias`.                                                                                                                                                                                         |
-| Aiemmin luettelossa ollut kuva-/äänimalli on kadonnut           | Tämä on tarkoituksellista versiosta 1.0.1 lähtien — kyseinen malli ei pystynyt koskaan vastaamaan keskustelupyyntöön.                                                                                                                                                                                     |
-| Paneeli puuttuu aktiviteettipalkista                            | VS Code siirtää ylimääräiset näkymäsäilöt aktiviteettipalkin alareunan **"…"**-ylivuotovalikkoon, ja hiiren kakkospainikkeella piilotettu säilö pysyy piilotettuna. Napsauta aktiviteettipalkkia hiiren kakkospainikkeella → valitse **OmniRoute** tai avaa se komennolla `OmniRoute: Manage Connection`. |
-| Hallintapaneeli avautuu selaimessa `editor`-tilasta huolimatta  | Palvelinta ei **käännetty** asetuksella `DASHBOARD_ALLOW_EMBED=vscode` (katso yllä) — sen asettaminen valmiiksi käännetyn asennuksen käynnistyksen yhteydessä ei vaikuta mihinkään. Vararatkaisu on tarkoituksellinen.                                                                                    |
-| Malliluettelo ei päivity palveluntarjoajien vaihtamisen jälkeen | Suorita `OmniRoute: Refresh Models` tai käytä paneelin ↻-linkkiä.                                                                                                                                                                                                                                         |
+| Oire                                                      | Syy/korjaus                                                                                                                                                                                                                                                                                |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Ei OmniRoute -malleja keräilijässä                        | Palvelimeen ei saada yhteyttä. Tilapalkin piste muuttuu harmaaksi; ajaa `OmniRoute: Check Connection`. Discovery on suunnittelultaan hiljainen, eikä se tarjoa mallia sen sijaan, että se kannustaa.                                                                                       |
+| Jokainen malli näkyy kahdesti                             | Käytät OmniCopilot päivitystä, joka on vanhempi kuin 1.0.1 —. Laajennus pyytää nyt `?prefix=alias`.                                                                                                                                                                                        |
+| Aiemmin listalla oli image/audio malli, joka on poissa    | Tarkoituksellisesti 1.0.1 — lähtien se ei koskaan pystynyt vastaamaan chat-pyyntöön.                                                                                                                                                                                                       |
+| Paneeli puuttuu toimintopalkista                          | VS Code siirtää ylimääräisiä näkymäsäiliöitä** "…"** ylivuoto toimintopalkin alareunassa, ja hiiren kakkospainikkeella piilotettu säilö pysyy piilossa. Napsauta hiiren kakkospainikkeella toimintopalkin → -merkkiä**OmniRoute** , tai avaa se komennolla `OmniRoute: Manage Connection`. |
+| Kojelauta avautuu selaimessa `editor` -tilasta huolimatta | Palvelin ei ollut** rakennettu** `DASHBOARD_ALLOW_EMBED=vscode` (katso yllä) — asettaminen käynnistyksen yhteydessä valmiiksi rakennetussa asennuksessa ei tee mitään. Takautus on tahallinen.                                                                                             |
+| Malliluettelo on vanhentunut toimittajan vaihdon jälkeen  | `OmniRoute: Refresh Models` tai paneelin ↻ linkki.                                                                                                                                                                                                                                         |
+| Paneelissa lukee _Online (mallit estetty)_, poimija tyhjä | Palvelin hylkää avaimen. Tallenna oikea avain** Tallenna & Testaa** . Jos avain korjattiin sen sijaan palvelimella (otettiin käyttöön tai annettiin pääsy malleihin), laajennus ei huomaa itsestään: suorita `OmniRoute: Refresh Models` tai avaa OmniRoute paneeli.                       |
 
 ---
 

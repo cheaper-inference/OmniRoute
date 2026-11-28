@@ -90,18 +90,17 @@ L-oġġett `ctx` mgħoddi lil `register(program, ctx)`:
 
 ## Skoperta
 
-Il-plugins jiġu skoperti minn:
+Il-plugins huma skoperti minn:
 
-1. `~/.omniroute/plugins/<name>/` — installazzjonijiet lokali tal-utent
-2. Il-varjabbli tal-ambjent `OMNIROUTE_PLUGIN_PATH` — direttorju personalizzat
+1. `~/.omniroute/plugins/node_modules/<name>/` — fejn `omniroute plugin install` ipoġġi pakketti (an npm `--prefix`, mhux `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — direttorji tal-plugin ikkupjati bl-idejn
+3. `OMNIROUTE_PLUGIN_PATH` env var — direttorju tad-dwana
 
-It-tnejn huma **għas-CLI biss**. Ir-runtime tal-plugins fuq in-naħa tas-server (il-plugins tal-marketplace/`plugin.json`
-li jaħdmu ġewwa l-proxy) għandu l-iskaner tiegħu stess bl-override tiegħu,
-`OMNIROUTE_PLUGINS_DIR` — ara
-[PLUGIN_MARKETPLACE.md → Direttorju tal-plugins](./PLUGIN_MARKETPLACE.md#plugin-directory).
-L-issettjar ta’ wieħed ma jaffettwax lill-ieħor.
+Direttorji symlinked (dak li npm joħloq għal `plugin install ./dir`) huma segwiti.
 
-L-iżbalji tat-tagħbija jinqabdu u jintwerew bħala twissijiet — plugin difettuż qatt ma jwaqqa’ s-CLI.
+It-tnejn huma** CLI biss** . Ir-runtime tal-plugin tan-naħa tas-server (is-suq/plugins `plugin.json` li jaħdmu ġewwa l-prokura) għandu l-iskaner tiegħu stess bl-override tiegħu stess, `OMNIROUTE_PLUGINS_DIR` — ara [PLUGIN_MARKETPLACE.md → Plugin directory](./PLUGIN_MARKETPLACE.md#plugin-directory). Issettjar wieħed ma jaffettwax l-ieħor.
+
+L-iżbalji tat-tagħbija jinqabdu u jiġu stampati bħala twissijiet — plugin miksur qatt ma jikkraxxja l- CLI.
 
 ## Sigurtà
 

@@ -21,3 +21,5 @@ Numatytoji kelių paslaugų teikėjų politika leidžia iki trijų tiekėjų ban
   - Priešdėlis ID (`provider/model`) niekada neperadresuojamas kitam teikėjui.
 
 Grandinės būsenos yra `closed`, `open` ir `half_open`. Atvėsinimas suplanuoja ribotą zondą; sėkmingas zondas uždaro grandinę, o nesėkmingas zondas vėl ją atidaro.
+
+Teikėjo perjungimas veikia šliuzo viduje. Žr. [Kai pats OmniRoute yra nepasiekiamas](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) kliento elgesiui šliuzo gedimo metu.

@@ -4,7 +4,7 @@
 
 ---
 
-> **verzija:** v3.8.44** Posljednje ažurirano:** 2026-10-28** publika:** Inženjeri koji dodaju, održavaju ili otklanjaju greške u ugrađenim servisima (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **verzija:** v3.8.44** publika:** Inženjeri koji dodaju, održavaju ili otklanjaju greške u ugrađenim servisima (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Ugrađene usluge su lokalno instalirani procesni pomoćni alati koje OmniRoute instalira, nadzire i izlaže kao prvoklasne ciljeve rutiranja. Za razliku od eksternih provajdera (do kojih se dolazi preko interneta preko API ključeva), ugrađene usluge rade na istoj mašini kao OmniRoute i komuniciraju preko povratne petlje.
 

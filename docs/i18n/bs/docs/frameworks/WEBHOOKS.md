@@ -4,14 +4,11 @@
 
 ---
 
-# Webhooks
-
 > **Izvor istine:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Posljednje ažurirano:** 2026-06-28 — v3.8.40
 
-OmniRoute može aktivirati HTTP webhooks na događaje platforme. Koristite ih za integraciju sa Slack-om, PagerDuty-jem, Datadog-om, internim servisima za obavještavanje ili bilo kojim HTTP primaocem.
+OmniRoute može pokrenuti HTTP webhookove na događajima platforme. Koristite ih za integraciju sa Slack, PagerDuty, Datadog, internim servisima za upozorenje ili bilo kojim HTTP prijemnikom.
 
-Dispatcher potpisuje svaku isporuku sa HMAC-SHA256, ponovo pokušava u slučaju prolaznih grešaka, prati zdravlje isporuke po webhook-u i automatski onemogućava krajnje tačke koje nastavljaju da ne uspijevaju.
+Dispečer potpisuje svaku isporuku sa HMAC-SHA256, pokušava ponovo u slučaju prolaznih kvarova, prati zdravlje isporuke po webhooku i automatski onemogućuje krajnje tačke koje i dalje ne uspijevaju.
 
 ## Podržani događaji
 

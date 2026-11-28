@@ -18,111 +18,102 @@ agus céimeanna réitigh.
 ### Réamhriachtanais
 
 - **Node.js** `>=22.22.2 <23`, nó `>=24.0.0 <27` (molta: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows le Node 24:** bain úsáid as an leagan paiste reatha de 24 LTS (24.20.0 ar a laghad).
-> Is féidir le leaganacha níos luaithe scor tar éis tástálacha rathúla nuair a dhúnann `--test-force-exit` an
-> próiseas. Réitíonn [socrú Windows libuv de chuid Node](https://github.com/nodejs/node/pull/61999) an
-> timpiste rite seo; coinnigh na dearbhuithe tástála agus na seiceálacha scoir den rithitheoir cumasaithe.
+> **Windows le Nód 24:** bain úsáid as an scaoileadh paiste 24 LTS reatha (24.20.0 ar a laghad). Is féidir le heisiúintí níos luaithe deireadh a chur le tástálacha rathúla nuair a dhúnann `--test-force-exit` an próiseas. Tugann [socrú Windows libuv](https://github.com/nodejs/node/pull/61999) Node aghaidh ar an timpiste ama rite seo; coinnigh na dearbhuithe tástála agus seiceálacha imeachta an rádala cumasaithe.
 
-> **Úsáideoirí npm v11+ (Node 24+):** Tar éis `npm install`, fíoraigh gur suiteáladh na modúil dhúchasacha:
-> `node -e "require('better-sqlite3')"`. Má theipeann air le `MODULE_NOT_FOUND`,
-> rith `npm approve-scripts better-sqlite3 && npm install`. Féach ar
-> [Fabhtcheartú](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **úsáideoirí npm v11 + (Nód 24 +):** Tar éis `npm install`, fíoraigh gur suiteáladh modúil dhúchasacha: `node -e "require('better-sqlite3')"`. Má theipeann air le `MODULE_NOT_FOUND`, rith `npm approve-scripts better-sqlite3 && npm install`. Féach [Fabhtcheartú](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Clónáil agus Suiteáil
+### Clón & Suiteáil
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Athróga Timpeallachta
+### Athróga Comhshaoil
 
 ```bash
-# Cruthaigh do .env ón teimpléad
+# Create your .env from the template
 cp .env.example .env
 
-# Gin na rúin riachtanacha
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Príomhathróga don fhorbairt:
+Príomh-athróga le haghaidh forbartha:
 
-| Athróg                 | Réamhshocrú Forbartha    | Cur Síos                             |
-| ---------------------- | ------------------------ | ------------------------------------ |
-| `PORT`                 | `20128`                  | Port an fhreastalaí                  |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | BuntURL don chomhéadan tosaigh       |
-| `JWT_SECRET`           | (gin thuas)              | Rún sínithe JWT                      |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Focal faire don chéad logáil isteach |
-| `APP_LOG_LEVEL`        | `info`                   | Leibhéal mionsonraithe na logála     |
+| Athróg                 | Réamhshocrú Forbartha    | Cur síos                           |
+| ---------------------- | ------------------------ | ---------------------------------- |
+| `PORT`                 | `20128`                  | Port freastalaí                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Bonn URL don aghaidh               |
+| `JWT_SECRET`           | (gin thuas)              | JWT síniú rúnda                    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | An chéad phasfhocal logáil isteach |
+| `APP_LOG_LEVEL`        | `info`                   | Loga leibhéal briathra             |
 
-### Socruithe an Phainéil
+### Socruithe Painéal
 
-Soláthraíonn an painéal scoránna Chomhéadain le haghaidh gnéithe ar féidir iad a chumrú trí athróga timpeallachta freisin:
+Soláthraíonn an painéal scoránaigh UI do ghnéithe ar féidir iad a chumrú freisin trí athróga timpeallachta:
 
-| Suíomh an tSocraithe | Scorán                          | Cur Síos                                             |
-| -------------------- | ------------------------------- | ---------------------------------------------------- |
-| Settings → Advanced  | Mód Dífhabhtaithe               | Cumasaigh logaí iarratas dífhabhtaithe (Chomhéadain) |
-| Settings → General   | Infheictheacht an Bharra Taoibh | Taispeáin/folaigh rannóga an bharra taoibh           |
+| Socrú Suíomh           | Scoránaigh                      | Cur síos                                     |
+| ---------------------- | ------------------------------- | -------------------------------------------- |
+| Socruithe → Advanced   | Mód Dífhabhtaithe               | Cumasaigh logaí iarratais dífhabhtaithe (UI) |
+| Socruithe → Ginearálta | Infheictheacht an Bharra Taoibh | ailt barra taobh Show/hide                   |
 
-Stóráiltear na socruithe seo sa bhunachar sonraí agus maireann siad thar atosuithe, rud a sháraíonn réamhshocruithe na n-athróg timpeallachta nuair a shocraítear iad.
+Stóráiltear na socruithe seo sa bhunachar sonraí agus fanann siad ar feadh atosaithe, ag sárú réamhshocruithe env var nuair a shocraítear iad.
 
-### Rith go hÁitiúil
+### Ag Rith go hÁitiúil
 
 ```bash
-# Mód forbartha (athlódáil te)
+# Development mode (hot reload)
 npm run dev
 
-# Tógáil táirgeachta
-npm run build    # next build → .build/next/ agus ansin assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Tiomsú tapa backend/API amháin le haghaidh athruithe rannpháirtithe
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Tógáil eisiúna (atógáil ghlan + comhartha HEAD — riachtanach don imscaradh)
-npm run build:release   # rm -rf .build dist agus build + scríobhann sé dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Cumraíocht choitianta poirt
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Déanann tógáil an rannpháirtí bailíochtú tiomsaithe amháin: ní chóimeálann sí an dáileadh neamhspleách ná ní thógann sí sócmhainní roghnacha pacáistithe dúchasacha. Bain úsáid as an ngnáththógáil táirgeachta nuair is gá duit an beart is féidir a sheoladh a bhailíochtú.
+Déanann an tógáil rannchuiditheora bailíochtú tiomsaithe amháin: ní chóimeálann sé an dáileadh neamhspleách ná ní thógann sé sócmhainní pacáistithe dúchasacha roghnacha. Bain úsáid as an tógáil táirgeachta rialta nuair is gá duit an bundle shippable a bhailíochtú.
 
-### Leagan Amach Aschur na Tógála
+### Tógáil Leagan Amach Aschuir
 
-| Comhadlann | Ábhar                                                                                   | Rianaithe |
-| ---------- | --------------------------------------------------------------------------------------- | --------- |
-| `src/`     | Foinse an fheidhmchláir (TypeScript / TSX)                                              | Tá        |
-| `.build/`  | Idirmheánacha — aschur `next build` (neamhshuimithe ag git, `distDir = .build/next`)    | Níl       |
-| `dist/`    | Beart is féidir a sheoladh — cóimeáilte ag `assembleStandalone` (neamhshuimithe ag git) | Níl       |
+| Eolaire   | Clár ábhair                                                             | Rianaithe |
+| --------- | ----------------------------------------------------------------------- | --------- |
+| `src/`    | Foinse feidhmchláir (TypeScript / TSX)                                  | Tá        |
+| `.build/` | Aschur idirmheánach — `next build` (gitgnored, `distDir = .build/next`) | Níl       |
+| `dist/`   | Beard inseolta — curtha le chéile ag `assembleStandalone` (gitignered)  | Níl       |
 
-Is pas aonair é píblíne na tógála:
+Is pas amháin é an phíblíne tógála:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (aschur Next.js)
-  └─ assembleStandalone()                 (cóipeálann standalone + static + public + native assets)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-Glanann `npm run build:release` an dá chomhadlann ar dtús freisin agus scríobhann sé
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) mar chomhartha sláine imscartha.
+Glanann `npm run build:release` freisin an dá eolaire ar dtús agus scríobhann `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) mar fheighlí sláine imlonnaithe.
 
-Úsáideann `npm run build:contributor` próifíl tógála backend amháin. Cuireann sé comhaid Chomhéadain an phainéil ina n-ionad go sealadach agus é á thógáil, coinníonn sé láimhseálaithe ródanna API, agus cuireann sé na comhaid bhunaidh ar ais tar éis na tógála. Bain úsáid as `npm run build` le haghaidh athruithe a théann i bhfeidhm ar Chomhéadain an phainéil nó le haghaidh bailíochtú iomlán eisiúna; ní ionadach don tógáil eisiúna é próifíl an rannpháirtí.
+Úsáideann `npm run build:contributor` próifíl tógála an inneall amháin. Stúnálann sé comhaid UI ar an deais go sealadach agus é ag tógáil, coinníonn sé láimhseálaithe bealaigh API, agus athchóiríonn sé na comhaid bhunaidh tar éis an tógáil. Úsáid `npm run build` le haghaidh athruithe a théann i bhfeidhm ar an painéal UI nó le haghaidh bailíochtú scaoilte iomlán; níl próifíl an ranníocóra in ionad an leagan scaoilte.
 
-> **Nóta maidir le himscaradh VPS:** níl aon athrú ar chomhadlann na híomhá cianda `/usr/lib/node_modules/omniroute/app/`.
-> Déanann na scileanna imscartha inneachar `dist/` a rsync inti.
-> Níor athraíodh ach cosán aschuir na tógála sa stór (`app/` → `dist/`).
+> **nóta imscaradh VPS :** níl aon athrú ar an gcianeolaire íomhá `/usr/lib/node_modules/omniroute/app/`. Déanann na scileanna imscaradh inneachar `dist/` a shioncronú isteach ann. Níor athraíodh ach an cosán aschuir tógála in-repo (`app/` → `dist/`).
 
-URLanna réamhshocraithe:
+URLs réamhshocraithe :
 
-- **Painéal**: `http://localhost:20128/dashboard`
+- **Deais** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -430,8 +421,8 @@ Ansin úsáid na scileanna `/deploy-vps-*-cc`, a dhéanann `dist/` a rsyncáil c
 
 ## Cabhair a Fháil
 
-- **Ailtireacht**: Féach [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Tagairt API**: Féach [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Doiciméid slándála**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Doiciméid oibríochtaí**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Fadhbanna**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Ailtireacht** : Féach [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **Tagairt API** : Féach [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Doiciméid slándála** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops doiciméid** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Saincheisteanna** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

@@ -67,64 +67,63 @@ Jums vajadzētu redzēt pievienoto modeļu sarakstu.
 
 ---
 
-## 5. darbība: norādiet savai IDE vai CLI izmantot OmniRoute
+## 5. darbība. Norādiet savu IDE vai CLI uz OmniRoute
 
 Savā IDE vai CLI rīkā iestatiet:
 
 ```
-Bāzes URL: http://localhost:20128/v1
-API atslēga:  [kopējiet no Informācijas panelis → Galapunkti]
-Modelis:    auto
+Base URL: http://localhost:20128/v1
+API Key:  [the key you created in Step 4 (Dashboard → API Keys)]
+Model:    auto
 ```
 
-Tas arī viss! Tagad jūsu IDE izmanto OmniRoute ar automātisku pakalpojumu sniedzēja atlasi.
+Tas arī viss! Jūsu IDE tagad izmanto OmniRoute ar automātisku pakalpojumu sniedzēja atlasi.
 
-### IDE piemērs: VSCode/Continue.dev
+### IDE Piemērs: VSCode/Continue.dev
 
 1. Programmā VSCode instalējiet paplašinājumu [Continue.dev](https://marketplace.visualstudio.com/items?itemName=Continue.continue).
-2. Atjauniniet `~/.continue/config.yaml`, pievienojot tālāk norādītās rindas:
+2. Atjauniniet savu `~/.continue/config.yaml`, lai pievienotu šādas rindas:
 
 ```
-  - name: OmniRoute - Automātiski
+  - name: OmniRoute - Auto
     provider: openai
     model: auto
     apiBase: http://localhost:20128/v1
     apiKey: <YOUR_KEY>
 ```
 
-3. Continue.dev tērzēšanas rūtī atlasiet `OmniRoute - Automātiski`, un pieprasījumi tiks nosūtīti uz OmniRoute.
-4. (Neobligāti) Uzdevums lasītājam — lieciet savai IDE atjaunināt `config.yaml` ar visām pārējām iepriekš sagatavotajām konfigurācijām 😊
+3. Tērzēšanas rūtī Continue.dev atlasiet `OmniRoute - Auto`, un jūs veiksit pieprasījumus OmniRoute.
+4. (Pēc izvēles) Vingrinājums lasītājam — lieciet savam IDE atjaunināt `config.yaml` ar visām pārējām iepriekš iebūvētajām konfigurācijām 😊
 
-### CLI piemērs: Codex CLI
+### CLI Piemērs: Codex CLI
 
-1. Savā operētājsistēmā iestatiet vides mainīgo pastāvīgai lietošanai.
-   Operētājsistēmā macOS/Linux (pievienojiet failam `~/.bashrc` vai `~/.zshrc`):
+1. Operētājsistēmā pastāvīgi iestatiet vides mainīgo. macOS/Linux (pievienojiet savam `~/.bashrc` vai `~/.zshrc`):
 
 ```bash
 export OMNIROUTE_API_KEY="<YOUR_KEY>"
 ```
 
-Operētājsistēmā Windows (komandu uzvednē):
+Windows (komandrinda):
 
 ```
 setx OMNIROUTE_API_KEY <YOUR_KEY>
 ```
 
-2. Tagad palaidīsim Codex, konfigurējot to darbam ar OmniRoute. Izpildiet:
+2. Tagad palaidīsim Codex, bet konfigurēts OmniRoute. Palaist:
 
 ```
 omniroute launch-codex --model auto
 ```
 
-Varat to paveikt manuāli, izmantojot `codex` un komandrindas parametrus, lai norādītu galapunktu un API atslēgu, taču ar iepriekš norādīto komandu OmniRoute par visu parūpējas jūsu vietā.
+To var izdarīt manuāli, izmantojot `codex` un komandrindas parametrus, lai norādītu beigu punktu un api atslēgu, taču ar iepriekš minēto komandu OmniRoute parūpēsies par visu jūsu vietā.
 
-Tāda pati palaišana ar vienu komandu darbojas arī citiem CLI, izmantojot universālo palaidēju — `omniroute run <target>` atbalsta `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` un `gemini` (skatiet [CLI integrācijas](../guides/CLI-INTEGRATIONS.md)).
+Tā pati vienas komandas palaišana darbojas arī citiem CLIs, izmantojot vispārējo palaidēju — `omniroute run <target>` atbalsta `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` un `gemini` (skatiet [CLI Integrācijas](../guides/CLI-INTEGRATIONS.md) ).
 
-3. Tagad CLI vajadzētu sūtīt pieprasījumus uz OmniRoute.
+3. CLI tagad vajadzētu sūtīt pieprasījumus uz OmniRoute.
 
-### Pārliecinieties, ka jūsu rīks maršrutē pieprasījumus uz OmniRoute
+### Apstipriniet, ka jūsu rīks tiek maršrutēts uz OmniRoute
 
-Pieprasījuma informāciju varat apskatīt, kreisajā sānjoslā noklikšķinot uz [Uzraudzība/žurnāli](http://localhost:20128/dashboard/logs). Atverot ierakstus, varat skatīt detalizētāku informāciju. Turklāt varat redzēt, kādu informāciju nosūta jūsu iecienītais rīks. Tas ir noderīgi mācību un atkļūdošanas nolūkos.
+Detalizētu informāciju par pieprasījumu varat skatīt, kreisajā sānjoslā noklikšķinot [Monitoring/Logs](http://localhost:20128/dashboard/logs). Noklikšķinot, tiek parādīta sīkāka informācija. Kā sānu piezīmi, varat redzēt, kāda informācija tiek nosūtīta no jūsu iecienītākās siksnas. Tas ir noderīgi no izglītības un atkļūdošanas viedokļa.
 
 ---
 

@@ -112,58 +112,48 @@ tilgang. Gyldig miljølegitimasjon som identifiseres som `env-key`, støttes for
 Autentiserte nøkler uten egen Obsidian-konfigurasjon beholder den globale reservekonfigurasjonen.
 De fire `obsidian_sync_*`-verktøyene beholder sin separate håndtering av synkroniseringstokener.
 
-## MCP-verktøy (22)
+## MCP verktøy (22)
 
-Definert i `open-sse/mcp-server/tools/obsidianTools.ts`. Tokenet og basis-URL-en løses
-per kall (først per API-nøkkel, deretter globalt). Verktøy som bruker OmniRoute-**synkroniseringsserveren**
-(de fire `obsidian_sync_*`-verktøyene), krever i tillegg autentiseringstokenet for synkronisering som er konfigurert
-i OmniRoute-innstillingene.
+Definert i `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL løses per samtale (per-API-nøkkel først, deretter global). Verktøy som treffer OmniRoute** synkroniseringsserver** (de fire `obsidian_sync_*` verktøyene) krever i tillegg synkroniseringsgodkjenningstoken konfigurert i OmniRoute innstillinger.
 
 ### Leseverktøy (`read:obsidian`)
 
-| Verktøy                      | Beskrivelse                                                                                           |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Kontroller om det lokale REST-API-et er tilgjengelig og autentisert.                                  |
-| `obsidian_search_simple`     | Fulltekstsøk i notatinnhold; returnerer utdrag med filbaner.                                          |
-| `obsidian_search_structured` | Søk ved hjelp av et JSON Logic-uttrykk (and/or/regex/path-filtre).                                    |
-| `obsidian_read_note`         | Les et notat etter hvelvrelativ bane; eventuelt en bestemt overskrift/blokk/frontmatter.              |
-| `obsidian_list_vault`        | List opp filer og mapper i hvelvet (trestruktur med oppføringer).                                     |
-| `obsidian_get_document_map`  | Hent notatets overskriftsstruktur som en tilordning av overskrifter → linjenumre.                     |
-| `obsidian_get_note_metadata` | Hent frontmatter, tagger, lenker og antall tegn/ord uten hele innholdet.                              |
-| `obsidian_get_active_file`   | Hent banen og innholdet til filen som er aktiv i Obsidian.                                            |
-| `obsidian_get_periodic_note` | Hent det daglige/ukentlige/månedlige periodiske notatet for en dato (i dag hvis utelatt).             |
-| `obsidian_get_tags`          | List opp alle tagger i hvelvet med forekomstfrekvens.                                                 |
-| `obsidian_list_commands`     | List opp tilgjengelige Obsidian-kommando-ID-er (brukes med `obsidian_execute_command`).               |
-| `obsidian_sync_status`       | Status for OmniRoute-synkroniseringsserveren: kjører, hvelvnavn, port, oppetid, siste synkronisering. |
-| `obsidian_sync_conflicts`    | List opp uløste synkroniseringskonflikter (bane, konfliktbane, tidspunkt for oppdagelse).             |
+| Verktøy                      | Beskrivelse                                                                              |
+| ---------------------------- | ---------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Sjekk om den lokale REST API er tilgjengelig og autentisert.                             |
+| `obsidian_search_simple`     | Fulltekstsøk av notatinnhold; returnerer utdrag med filstier.                            |
+| `obsidian_search_structured` | Søk med et JSON Logic-uttrykk (and/or/regex/path -filtre).                               |
+| `obsidian_read_note`         | Les et notat etter hvelv-relativ bane; eventuelt en spesifikk heading/block/frontmatter. |
+| `obsidian_list_vault`        | List filer og kataloger i hvelvet (tre med oppføringer).                                 |
+| `obsidian_get_document_map`  | Få notatets overskriftsstruktur som et kart over overskrifter → linjenummer.             |
+| `obsidian_get_note_metadata` | Få frontmatter, tags, lenker, char/word count uten hele innholdet.                       |
+| `obsidian_get_active_file`   | Få banen + innholdet til den aktive filen i Obsidian.                                    |
+| `obsidian_get_periodic_note` | Få daily/weekly/monthly periodiske notat for en dato (i dag hvis utelatt).               |
+| `obsidian_get_tags`          | List opp alle hvelvtagger med deres frekvenser.                                          |
+| `obsidian_list_commands`     | List tilgjengelig Obsidian -kommando IDs (bruk med `obsidian_execute_command`).          |
+| `obsidian_sync_status`       | OmniRoute sync server status: kjører, hvelvnavn, port, oppetid, siste synkronisering.    |
+| `obsidian_sync_conflicts`    | List opp uløste synkroniseringskonflikter (bane, konfliktbane, oppdaget-ved).            |
 
 ### Skriveverktøy (`write:obsidian`)
 
-| Verktøy                          | Beskrivelse                                                                                                     |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Opprett eller overskriv et notat med angitt Markdown-innhold.                                                   |
-| `obsidian_append_note`           | Legg til innhold i et notat; eventuelt under en bestemt overskrift/blokk.                                       |
-| `obsidian_patch_note`            | Legg presist til foran/bak eller erstatt ved en overskrift, blokk eller et frontmatter-felt.                    |
-| `obsidian_delete_note`           | Slett et notat permanent fra hvelvet.                                                                           |
-| `obsidian_move_note`             | Flytt eller gi nytt navn til et notat i hvelvet.                                                                |
-| `obsidian_execute_command`       | Utfør en Obsidian-kommando ved hjelp av kommando-ID-en.                                                         |
-| `obsidian_open_file`             | Åpne en fil i Obsidian (oppretter den hvis den ikke finnes).                                                    |
-| `obsidian_sync_trigger`          | Utløs en umiddelbar toveis synkronisering av hvelvet mellom skrivebord↔mobil.                                   |
-| `obsidian_sync_resolve_conflict` | Løs en synkroniseringskonflikt: behold `local` (mobil), `remote` (skrivebord) eller `keep-both` (behold begge). |
+| Verktøy                          | Beskrivelse                                                                                     |
+| -------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Opprett eller overskriv et notat med gitt Markdown-innhold.                                     |
+| `obsidian_append_note`           | Legg til innhold i et notat; eventuelt til en bestemt heading/block.                            |
+| `obsidian_patch_note`            | Kirurgisk append/prepend/replace ved et overskrift-, blokk- eller frontmatter-felt.             |
+| `obsidian_delete_note`           | Slett et notat fra hvelvet permanent.                                                           |
+| `obsidian_move_note`             | Flytt eller gi nytt navn til en lapp i hvelvet.                                                 |
+| `obsidian_execute_command`       | Utfør en Obsidian -kommando med dens kommando ID.                                               |
+| `obsidian_open_file`             | Åpne en fil i Obsidian (oppretter den hvis den ikke eksisterer).                                |
+| `obsidian_sync_trigger`          | Utløs en umiddelbar toveis synkronisering av desktop ↔ mobilhvelv.                              |
+| `obsidian_sync_resolve_conflict` | Løs en synkroniseringskonflikt: behold `local` (mobil), `remote` (stasjonær) eller `keep-both`. |
 
 > [!NOTE]
-> Mål for `obsidian_patch_note` godtar `targetType` med verdiene `heading | block | frontmatter`
-> og `operation` med verdiene `append | prepend | replace`, med en valgfri
-> `createTargetIfMissing`. De fire `obsidian_sync_*`-verktøyene kommuniserer med den lokale synkroniseringsserveren
-> (`http://127.0.0.1:27781` som standard) og krever synkroniseringstokenet.
+> `obsidian_patch_note` mål aksepterer `targetType` av `heading | block | frontmatter` og `operation` av `append | prepend | replace`, med en valgfri `createTargetIfMissing`. De fire `obsidian_sync_*` verktøyene snakker med den lokale synkroniseringsserveren (`http://127.0.0.1:27781` som standard) og krever synkroniseringstokenet.
 
-### Tilgangsområder
+### Omfang
 
-Leseverktøy krever `read:obsidian`; skriveverktøy krever `write:obsidian`. Håndhevingen
-er identisk med Notion — håndteres av `withScopeEnforcement()` i
-`open-sse/mcp-server/server.ts`, styres av `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, med
-tillatte tilgangsområder hentet fra `OMNIROUTE_MCP_SCOPES` eller API-nøkkelens tilgangskontekst. Se
-[MCP-SERVER.md](./MCP-SERVER.md).
+Leseverktøy krever `read:obsidian`; skriveverktøy krever `write:obsidian`. Håndhevelse er identisk med Notion — som håndteres av `withScopeEnforcement()` i `open-sse/mcp-server/server.ts`, lukket på `OMNIROUTE_MCP_ENFORCE_SCOPES=true` og tvunget på for HTTP/SSE oppringere hvis API nøkkel mangler `manage`/`admin`, med tillatte omfang hentet fra `OMNIROUTE_MCP_SCOPES` eller API -nøkkelens omfangskontekst. Se [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Endepunkter
 

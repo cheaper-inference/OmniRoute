@@ -168,9 +168,9 @@ Gbaa mbọ hụ na agbanyere `copilot-m365-web`** Dashboard → ndị na-enye** 
 
 ## Ntụaka
 
-- Nsogbu: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Mkparịta ụka: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Isi mmalite: `src/shared/constants/providers/web-cookie.ts` (nkọwa onye na-eweta ọrụ)
-- Mbubata HAR: `src/shared/utils/m365HarImport.ts`
-- Oghere nzere: `src/shared/providers/webSessionCredentials.ts`
-- Modal ọkwa: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Isi okwu: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Mkparịta ụka: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Isi mmalite: `src/shared/constants/providers/web-cookie.ts` (nkọwa onye na-eweta)
+- mbubata HAR : `src/shared/utils/m365HarImport.ts`
+- Ogige nzere: `src/shared/providers/webSessionCredentials.ts`
+- Ụdị usoro: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

@@ -226,32 +226,32 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Yana goyan bayan** 22 dabarun kwatance** (duba `src/shared/constants/routingStrategies.ts`):
+Yana goyan bayan** 22 dabarun sarrafa hanya** (duba `src/shared/constants/routingStrategies.ts`):
 
-| Dabarun             | Hali                                                                                         |
-| ------------------- | -------------------------------------------------------------------------------------------- |
-| `priority`          | Jerin oda na farko                                                                           |
-| `weighted`          | Yiwuwa ta kowane nau'in manufa                                                               |
-| `round-robin`       | Zagaya ta hanyar hari cikin tsari                                                            |
-| `context-relay`     | Kashe mahallin cikin maƙasudai                                                               |
-| `fill-first`        | Cika adadin kafin matsawa zuwa gaba                                                          |
-| `p2c`               | Ikon zabi biyu                                                                               |
-| `random`            | Uniform bazuwar                                                                              |
-| `least-used`        | Zaɓi wanda yake da mafi ƙarancin amfani                                                      |
-| `cost-optimized`    | Maƙasudin lafiya mafi arha na farko                                                          |
-| `reset-aware`       | Sane da sake saitin windows                                                                  |
-| `reset-window`      | Sake saita hanyar tagar tagar                                                                |
-| `expiry-first`      | Kashe asusun da adadin sa zai ƙare ba a fara amfani da shi ba                                |
-| `headroom`          | Mafi saura babban ɗakin kwana na farko                                                       |
-| `quota-weighted`    | Tsallake matattun asusu, sannan zana da ragowar adadin ÷ a cikin jirgin sama                 |
-| `strict-random`     | Gaskiya uniform (babu ingancin nauyi)                                                        |
-| `auto`              | Yi amfani da maki 16-factor (`autoCombo/`)                                                   |
-| `lkgp`              | Ƙarshe sanannen mai bada sabis na farko                                                      |
-| `context-optimized` | Mafi kyawun buƙatun dogon yanayi                                                             |
-| `cache-optimized`   | Sanya kowane prefix na gaggawar da za a sake amfani da shi zuwa asusu ɗaya (saukar da sauri) |
-| `fusion`            | Fita zuwa panel a layi daya, sannan haɗa ta hanyar alƙali (`fusion.ts`)                      |
-| `pipeline`          | Sarkar matakan — kowane abin da aka yi niyya yana ciyar da na gaba                           |
-| `jev`               | Ficewa: TypeSafe Jev ya yarda da waɗanne abubuwan shigarwa ke gudana; in ba haka ba odar ku  |
+| Dabarun             | Hali                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| `priority`          | Jerin oda na farko                                                                          |
+| `weighted`          | Yiwuwa ta kowane nau'in manufa                                                              |
+| `round-robin`       | Zagaya ta hanyar hari cikin tsari                                                           |
+| `context-relay`     | Kashe mahallin cikin maƙasudai                                                              |
+| `fill-first`        | Cika adadin kafin matsawa zuwa gaba                                                         |
+| `p2c`               | Ikon zabi biyu                                                                              |
+| `random`            | Sabbin shuffle kowace bukata                                                                |
+| `least-used`        | Zaɓi wanda yake da mafi ƙarancin buƙatun da aka yi rikodi                                   |
+| `cost-optimized`    | Mafi ƙasƙanci farashin shigarwar kasida na farko                                            |
+| `reset-aware`       | Ƙidayar da aka bari + sake saitin gaggawa                                                   |
+| `reset-window`      | Ƙota taga wanda zai sake saitawa da wuri                                                    |
+| `expiry-first`      | Kashe asusun da adadin sa zai ƙare ba a fara amfani da shi ba                               |
+| `headroom`          | Mafi saura babban ɗakin kwana na farko                                                      |
+| `quota-weighted`    | Tsallake matattun asusu, sannan zana da ragowar adadin ÷ a cikin jirgin sama                |
+| `strict-random`     | Shaffed bene: kowace manufa sau ɗaya kafin a maimaita                                       |
+| `auto`              | Yi amfani da maki 16-factor (`autoCombo/`)                                                  |
+| `lkgp`              | Ƙarshe sanannen mai bada sabis na farko                                                     |
+| `context-optimized` | Babban sanannen taga mahallin farko                                                         |
+| `cache-optimized`   | An fi son asusun da wataƙila ya riƙe prefix ɗin gaggawa a cikin cache                       |
+| `fusion`            | Fita zuwa panel a layi daya, sannan haɗa ta hanyar alƙali (`fusion.ts`)                     |
+| `pipeline`          | Sarkar matakan — kowane abin da aka yi niyya yana ciyar da na gaba                          |
+| `jev`               | Ficewa: TypeSafe Jev ya yarda da waɗanne abubuwan shigarwa ke gudana; in ba haka ba odar ku |
 
 ### base.ts (1170 LOC)
 
@@ -341,7 +341,7 @@ Galibi fayil ɗaya kowane mai bayarwa. Azuzuwan masu zartarwa duk sun shimfiɗa 
 
 Ana warware masu samarwa ta hanyar `getExecutor(providerId)`, wanda ke dawo da mai zartarwa da aka saita. masu samar da OpenAI/Anthropic-compatible suna amfani da `DefaultExecutor` (`executors/default.ts`). Halaye na musamman na mai bayarwa (tushe URL, masu rubutun auth, sigar API ) an saita su a cikin `open-sse/config/providers/`, yayin da ake sarrafa canjin jiki a `open-sse/translator/`.
 
-**Custom URL** an saita ta ta hanyar daidaitawar mai bada:
+**Custom URL** an saita ta hanyar daidaitawar mai bada:
 
 ```ts
 // Provider config in open-sse/config/providers/

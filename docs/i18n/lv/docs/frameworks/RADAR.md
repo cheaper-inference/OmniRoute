@@ -93,52 +93,30 @@ maršrutēšanu vai modeļa izvēli — skatiet tālāk aprakstīto atsevišķo 
 
 ---
 
-## Datu sinhronizācijai nepieciešama ATSEVIŠĶA piekrišana — privātuma solījums
+## Datu sinhronizācija ir SEPARATE izvēle, — apsolīja privātumu
 
-`RADAR_ENABLED` ieslēgšana tikai atbloķē lietotāja saskarni. Plūsmas sinhronizēšanai nepieciešama otra,
-neatkarīga piekrišana, kas tiek glabāta `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migrācija `136_radar_cache_settings.sql`). `syncRadar()` pirms jebkāda tīkla izsaukuma pārbauda gan karogu, _gan_
-piekrišanu:
+Ieslēdzot `RADAR_ENABLED`, tiek atbloķēta tikai UI. Plūsmas sinhronizēšanai ir nepieciešama otra neatkarīga izvēle, kas tiek saglabāta `radar_settings.opt_in` (`src/lib/db/radar.ts`, migration `136_radar_cache_settings.sql`). `syncRadar()` pārbauda karogu _un_ izvēles iespēju pirms jebkura tīkla zvana veikšanas:
 
 ```
-Karogs izslēgts   → { status: "disabled" }   — tīkla izsaukums netiek veikts
-Piekrišana nav dota → { status: "opt_out" }    — tīkla izsaukums netiek veikts
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Kad abi ir ieslēgti, sinhronizācijas process ir šāds:
+Kad abi ir ieslēgti, sinhronizācijas ceļš ir:
 
-1. `GET <plūsmas bāzes URL>/v1/catalog/latest` ar `x-omniroute-radar-schema: 2` un neobligātu
-   `Authorization: Bearer <atbalstītāja atslēga>` galveni (skatiet tālāk). Ja shēmas galvenes nav, serveri pēc noklusējuma
-   izmanto atsevišķi parakstīto v1 pārejas artefaktu, lai vecāki instalētie klienti turpinātu
-   saņemt atjauninājumus.
-2. Šī ir tikai lejupielādei paredzēta lietojumprogrammas datu plūsma, tomēr tas joprojām ir HTTPS pieprasījums. Mitinātā
-   infrastruktūra saņem parastus savienojuma metadatus, piemēram, avota IP adresi. Ja ir konfigurēta atbalstītāja
-   atslēga, sinhronizācija nosūta arī šo atslēgu Bearer galvenē, lai pakalpojums varētu noteikt
-   tiesības. Precīzajā privātā servera revīzijā, kas norādīta iepriekš aprakstītajā pierādījumu tvēruma robežā,
-   plūsmas pieprasījumu uzskaitei izmanto atslēgu jaucējvērtības, apkopotu lietojumu un ik dienu rotētu saīsinātu IP adreses HMAC
-   manuālai ļaunprātīgas izmantošanas pārbaudei; šajās tabulās ne atslēga, ne IP adrese netiek glabāta neapstrādātā formā.
-   Infrastruktūras piekļuves žurnāli un šifrētā piegādes izsūtne ir atsevišķas darbības
-   robežas.
-3. OmniRoute nekad nesūta Radar pakalpojumam uzvednes, atbildes, sarunas, pakalpojumu sniedzēju akreditācijas datus, modeļu datplūsmu,
-   darbspējas laiku, latentumu vai lokālo pakalpojumu sniedzēja konfigurāciju.
-4. Atbilde tiek verificēta, validēta un lokāli saglabāta kešatmiņā (skatiet
-   [Drošības modelis](#security-model)). Radar ir tieši četri servera puses tīkla ceļi:
-   `syncRadar()` katalogam, `syncRadarReferrals()` ieteikumiem un
-   `syncRadarOffers()` / `syncRadarIntel()` tikai atbalstītājiem paredzētiem piedāvājumiem un Intel.
+1. `GET <feed base URL>/v1/catalog/latest` ar `x-omniroute-radar-schema: 2` un izvēles `Authorization: Bearer <supporter key>` galveni (skatiet tālāk). Ja shēmas galvenes nav, serveri pēc noklusējuma izmanto atsevišķi parakstīto v1 pārejas artefaktu, tāpēc vecāki instalētie klienti turpina saņemt atjauninājumus.
+2. Šī ir tikai lejupielādes lietojumprogrammu plūsma, taču tā joprojām ir HTTPS pieprasījums. Mitinātā infrastruktūra saņem parastus savienojuma metadatus, piemēram, avota IP. Kad atbalstītāja atslēga ir konfigurēta, sinhronizācija arī nosūta šo atslēgu nesēja galvenē, lai pakalpojums varētu atrisināt šīs tiesības. Precīzā privātā servera pārskatīšanā, kas norādīta iepriekš norādītajā pierādījumu robežās, plūsmas pieprasījuma uzskaite izmanto atslēgu jaucējumus, apkopoto lietojumu un katru dienu rotējošu saīsinātu IP HMAC manuālai ļaunprātīgas izmantošanas pārskatīšanai; šīs tabulas neapstrādātā veidā saglabā ne taustiņu, ne IP. Infrastruktūras piekļuves žurnāli un šifrētā piegādes izsūtne ir atsevišķas darbības robežas.
+3. OmniRoute nekad nesūta uzvednes, atbildes, sarunas, pakalpojumu sniedzēja akreditācijas datus, modeļa trafiku, darbspējas laiku, latentumu vai vietējā nodrošinātāja konfigurāciju pakalpojumam Radars.
+4. Atbilde tiek pārbaudīta, apstiprināta un lokāli saglabāta kešatmiņā (skatiet [drošības modeli](#security-model) ). Radaram ir tieši četri servera puses tīkla ceļi: `syncRadar()` katalogam, `syncRadarReferrals()` novirzīšanai un `syncRadarOffers()` / `syncRadarIntel()` tikai atbalstītāju piedāvājumiem un Intel.
 
-**Atbalstītāja atslēga** ir neobligāts Bearer marķieris (`radar_settings.supporter_key`),
-kas ļauj plūsmas pakalpojumam izlemt, kuru līmeni nodrošināt (skatiet
-[Līmeņi](#tiers-community-and-live)). Tā tiek:
+Kataloga pārbaude notiek ik pēc 24 stundām. Ja verificētajā plūsmā joprojām ir kešatmiņā saglabātā versija un līmenis, sinhronizācija saglabā kešatmiņā saglabāto lietderīgo slodzi, atjauno `fetchedAt`, un nākamā pārbaude tiek veikta pēc 24 stundām vēlāk, nevis ar nākamo stundu.
 
-- Glabāta **šifrētā veidā miera stāvoklī**, izmantojot tos pašus AES-256-GCM `encrypt()`/`decrypt()`
-  palīgrīkus (`src/lib/db/encryption.ts`), kas tiek izmantoti pakalpojumu sniedzēju akreditācijas datiem.
-- Iestatīta, izmantojot `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`), un
-  **nekad netiek atgriezta pilnā veidā** — atbilde satur maskētu formu (`omr_****abcd`).
-- Mainot vai notīrot atslēgu, atomāri tiek padarītas nederīgas kataloga, ieteikumu, piedāvājumu un Intel kešatmiņas. Nākamā
-  sinhronizācija/lasīšana servera pusē nosaka jaunās tiesības; atslēgas saglabāšana pati par sevi neveic
-  tīkla pieprasījumu un nepatērē vienreizlietojamu aktivizācijas atslēgu.
-- Nosūtīta plūsmas pakalpojumam kā Bearer marķieris sinhronizācijas GET pieprasījumā — nekāda cita informācija par
-  atslēgu nekad nepamet klientu.
+The** atbalstītāja atslēga** ir neobligāts Nesēja marķieris (`radar_settings.supporter_key`), kas ļauj plūsmas pakalpojumam izlemt, kuru līmeni apkalpot (skatiet [sadaļu Līmeņi](#tiers-community-and-live) ). Tas ir:
+
+- Saglabāts** šifrēts miera stāvoklī** ar tiem pašiem AES-256-GCM `encrypt()`/`decrypt()` palīgiem (`src/lib/db/encryption.ts`), kas tiek izmantoti pakalpojumu sniedzēja akreditācijas datiem.
+- Iestatīt, izmantojot `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) un** nekad neatsaucās** — atbilde atgriež maskētu formu (`omr_****abcd`).
+- Mainot vai notīrot to, katalogs, ieteikumi, piedāvājumi un Intel kešatmiņas kļūst nederīgi. Nākamā sync/read atrisina jaunās tiesības servera pusē; atslēgas saglabāšana pati par sevi neveic tīkla pieprasījumu vai neizmanto vienreiz lietojamu aktivizācijas atslēgu.
+- Nosūtīts plūsmas pakalpojumam kā nesēja marķieris sinhronizācijā GET — nekas cits par atslēgu nekad netiek atstāts no klienta.
 
 ---
 
@@ -422,84 +400,45 @@ version, tier }` — informācijas panelī tiek rādīta šī vērtība, nevis n
 
 ---
 
-## Pārklājuma sapludināšanas noteikumi lasīšanas laikā
+## Lasīšanas laika pārklājuma sapludināšanas noteikumi
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) funkcijā `getRadarCatalog()` **lasīšanas laikā**
-sapludina kešatmiņā saglabāto plūsmu **pāri** statiskajai bāzes versijai. Bāzes masīvs
-(`FREE_MODEL_BUDGETS`) nekad netiek mainīts — katrā izsaukumā no jauna tiek aprēķināts
-`MergedEntry[]`.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) apvieno kešatmiņā saglabāto plūsmu** beidzies** statiskā bāzes līnija plkst** lasīšanas laiks** , iekšpusē `getRadarCatalog()`. Bāzes līnijas masīvs (`FREE_MODEL_BUDGETS`) nekad netiek mutēts — a `MergedEntry[]` tiek aprēķināts svaigs katrā izsaukumā.
 
 Četri noteikumi prioritātes secībā:
 
-1. **Plūsma nekad nepārraksta lokālu pielāgojumu.** Katram laukam atsevišķi: ja operators ir
-   pielāgojis ieraksta lauku (`localOverrides` kartē, kuras atslēga ir `provider:modelId`),
-   plūsmas vērtība šim konkrētajam laukam tiek izlaista — priekšroka ir operatora vērtībai.
-2. **`enabled: false` atspējo ierakstu, saglabājot izcelsmes informāciju.** Plūsmas ieraksts, kas
-   izslēdz ierakstu, sapludinātajā rezultātā iestata `enabled: false` un `disabledBy: "radar"`,
-   lai UI varētu izskaidrot, _kāpēc_ ieraksts no pieejama kļuva par atspējotu.
-3. **Lietotāja pievienots ieraksts, kura nav plūsmā, paliek neskarts.** Ieraksti, kas
-   pastāv tikai bāzes versijā (vai tika pievienoti lokāli) un kuriem nav atbilstoša plūsmas
-   ieraksta, tiek nodoti tālāk bez izmaiņām.
-4. **Ar kapakmens marķieri atzīmēts ieraksts nekad netiek atjaunots.** Ja operators ir tieši izdzēsis
-   ierakstu (`tombstones` kopā), plūsmai atkārtoti pievienojot šo `provider:modelId` vēlākā
-   versijā, tas netiek atjaunots.
+1. **Plūsma nekad nepārraksta vietējo ignorēšanu.** Katram laukam: ja operators ir pielāgojis ieraksta lauku (`localOverrides` karte, kodētais `provider:modelId`), plūsmas vērtība konkrētajam laukam tiek izlaista — operatora vērtība uzvar.
+2. **`enabled: false` atspējo ierakstu ar izcelsmi.** Plūsmas ieraksts, kas izslēdz ierakstu, iestata `enabled: false` un `disabledBy: "radar"` sapludinātajam rezultātam, tāpēc UI var izskaidrot, _kāpēc_ ieraksts kļuva no pieejams uz atspējotu.
+3. **Lietotāja pievienots ieraksts, kas nav pieejams plūsmā, paliek neskarts.** Ieraksti, kas eksistē tikai bāzes līnijā (vai tika pievienoti lokāli) un kuriem nav atbilstoša plūsmas ieraksta, tiek izvadīti nemainīgi.
+4. **Ieraksts ar kapa pieminekļiem nekad netiek augšāmcelts.** Ja operators nepārprotami izdzēsa ierakstu (`tombstones` set), plūsmas atkārtota pievienošana `provider:modelId` jaunākā versijā to neatgriež.
 
-Rediģējamie lauki un kapakmens marķieri tiek pastāvīgi glabāti
-`radar_local_model_state` (migrācija `153_radar_local_model_state.sql`). Publiskais DB
-adapteris (`src/lib/db/radar.ts`) pārvērš šīs rindas `localOverrides` kartē un
-`tombstones` kopā, ko izmanto `applyFeed()`; produkcijas `getRadarCatalog()` ielādē šo stāvokli
-pēc tam, kad ir izturētas karodziņa, kešatmiņas un shēmas pārbaudes. Operators var rediģēt tikai `displayName` un `enabled`.
-Nodrošinātāja/modeļa identitāti, plūsmas izcelsmi, kvotu, iespējas, pakalpojumu sniegšanas noteikumus
-un iestatīšanas datus nevar mainīt, izmantojot šo saskarni.
+Rediģējamie lauki un kapakmeņi tiek saglabāti `radar_local_model_state` (migrācijas `153_radar_local_model_state.sql`). Publiskais DB adapteris (`src/lib/db/radar.ts`) pārvērš šīs rindas `localOverrides` kartē un `tombstones` komplektā, ko izmanto `applyFeed()`; ražošanas `getRadarCatalog()` ielādes, kas tiek rādītas pēc karoga, kešatmiņas un shēmas vārtiem. Tikai `displayName` un `enabled` var rediģēt operators. Izmantojot šo virsmu, nevar ierakstīt Provider/model identitāti, barības izcelsmi, kvotu, iespējas, ToS un iestatīšanas datus.
 
-Informācijas panelī ir pieejamas četras lokālas darbības:
+Informācijas panelī ir redzamas četras vietējās darbības:
 
-- **Rediģēt** maina lokālo parādāmo nosaukumu un iespējotības stāvokli.
-- **Atiestatīt lokālās izmaiņas** notīra abus rediģējamos laukus, nemainot kapakmens marķieri.
-- **Paslēpt** izveido kapakmens marķieri, lai vēlākie plūsmas atjauninājumi nevarētu no jauna izveidot šo rindu.
-- **Atjaunot** noņem kapakmens marķieri; jebkurš atsevišķi saglabāts pielāgojums paliek spēkā.
+- **Rediģēt** maina vietējo parādāmo nosaukumu un iespējoto stāvokli.
+- **Atiestatīt vietējās izmaiņas** notīra abus rediģējamos laukus, nemainot kapa pieminekli.
+- **Slēpt** izveido kapa pieminekli, tāpēc vēlāki plūsmas atjauninājumi nevar atkārtoti izveidot rindu.
+- **Atjaunot** noņem kapa pieminekli; jebkura atsevišķi saglabāta ignorēšana paliek spēkā.
 
-Plūsmas `enabled: false` joprojām ir drošības izņēmums: tam ir priekšroka pār novecojušu lokālo
-`enabled: true`, tas saglabā sapludināto ierakstu atspējotu un reģistrē `disabledBy: "radar"`.
+Plūsma `enabled: false` joprojām ir drošības izņēmums: tā uzvar novecojušu vietējo `enabled: true`, apvieno apvienoto ierakstu atspējotu un ieraksta `disabledBy: "radar"`.
 
-Kataloga publikācijas izmanto `schemaVersion: 2`. `contextWindow` un katrs no `tools`, `vision` un
-`thinking` ir neatkarīgi `number | null` / `boolean | null`: `null` nozīmē, ka vērtība nav zināma, savukārt
-`false` nozīmē, ka D16 apstiprināts oficiāls nodrošinātāja avots nepārprotami norāda uz iespējas neesamību.
-Iekšējie OmniRoute reģistra/modeļa specifikācijas karodziņi nekad netiek tieši paaugstināti līdz plūsmas faktiem. Klients
-joprojām pieņem v1 momentuzņēmumus; tā kā vecais būvētājs izmantoja `false` kā neesamības vietturi, v1 `false` tiek
-normalizēts kā nezināms, bet v1 `true` joprojām tiek uzskatīts par faktu. Nezināmas shēmas versijas tiek droši noraidītas, un
-pēdējā derīgā kešatmiņa joprojām ir pieejama. Katram v2 modelim ar konteksta/iespējas vērtību, kas nav nulles vērtība, jāietver
-bez akreditācijas datiem pieejams HTTPS `metadataEvidenceUrls[]`; pretējā gadījumā shēmas validācija neizdodas un kešatmiņa
-netiek aizstāta. Kataloga tabulā visi trīs stāvokļi tiek attēloti kā `✓`, `✕` un `?`.
+Kataloga publikācijās tiek izmantots `schemaVersion: 2`. `contextWindow` un katrs no `tools`, `vision` un `thinking` ir neatkarīgi `number | null` / `boolean | null`: `null` nozīmē nezināms, savukārt `false` nozīmē D16-confirmed oficiālu pakalpojumu sniedzēja avotu, kurā skaidri norādīts, ka iespējas nav. Iekšējie OmniRoute registry/model-spec karodziņi nekad netiek tieši reklamēti, lai sniegtu faktus. Klients joprojām pieņem v1 momentuzņēmumus; jo vecais veidotājs izmantoja `false` kā prombūtnes vietturi, v1 `false` tiek normalizēts uz nezināmu, bet v1 `true` paliek faktisks. Nezināmas shēmas versijas neizdodas aizvērt, un pēdējā derīgā kešatmiņa paliek pieejama. Katram v2 modelim ar context/capability kas nav nulle, ir jābūt bez akreditācijas datiem HTTPS `metadataEvidenceUrls[]`; pretējā gadījumā shēmas validācija neizdodas un kešatmiņa netiek aizstāta. Kataloga tabulā visi trīs stāvokļi tiek attēloti kā `✓`, `✕` un `?`.
 
-### Vadītās kombinācijas un MCP piekļuve
+### Vadāmas kombinācijas un piekļuve MCP
 
-Apstiprinātās `familyId` vērtības saglabājas lasīšanas laika pārklājumā un vada tīro
-`buildRadarComboSuggestions()` moduli (`src/lib/radar/comboSuggestions.ts`). Saime tiek ieteikta
-tikai tad, ja vismaz diviem atšķirīgiem nodrošinātājiem ir aktīvi savienojumi un tie piedāvā precīzi norādīto atlasītā modeļa
-ID. Atspējoti modeļi, neaktīvi nodrošinātāji, trūkstoši modeļu ID, saimes ar vienu elementu un neviennozīmīgas
-aizstājvārdu/prefiksu atbilstības tiek droši noraidītas. Ieteikumi izmanto esošo `priority` stratēģiju, vispirms kārtojot
-lielāko periodisko mēneša budžetu; UI tos izveido tikai ar `POST /api/combos`.
+Apstiprinātās `familyId` vērtības saglabā lasīšanas laika pārklājumu un vada tīro `buildRadarComboSuggestions()` moduli (`src/lib/radar/comboSuggestions.ts`). Ģimene tiek ieteikta tikai tad, ja vismaz diviem atšķirīgiem pakalpojumu sniedzējiem ir aktīvi savienojumi un tie atklāj precīzu atlasīto modeli ID. Atspējotie modeļi, neaktīvi pakalpojumu sniedzēji, trūkstošais modelis IDs, atsevišķas ģimenes un neskaidras alias/prefix atbilstības neizdodas aizvērt. Ieteikumos tiek izmantota esošā `priority` stratēģija, vispirms pasūtot lielāko periodisko mēneša budžetu; UI tos rada tikai caur `POST /api/combos`.
 
-Vadāmā lietotāja saskarne atrodas ceļā `/dashboard/radar/combos`. Tā nolasa tikai lokālos
-galapunktus `GET /api/radar/catalog` un `GET /api/combos/builder/options`. Tā nekad neaktivizē Radar sinhronizāciju,
-nenolasa pakalpojumu sniedzēja akreditācijas datus un neraksta tieši kombināciju datubāzē.
+Vadītā UI dzīvo `/dashboard/radar/combos`. Tas nolasa tikai vietējos `GET /api/radar/catalog` un `GET /api/combos/builder/options` galapunktus. Tas nekad neaktivizē radara sinhronizāciju, nenolasa pakalpojumu sniedzēja akreditācijas datus vai neieraksta tieši kombinētajā datu bāzē.
 
-MCP klienti var nolasīt to pašu lokālo projekciju ar `omniroute_radar_catalog` (`read:radar`). Neobligātie
-filtri `provider`, `familyId` un `enabledOnly` tiek piemēroti pēc vienas lokālas
-`GET /api/radar/catalog` nolasīšanas. Tā slēgtā izvade ietver kataloga metadatus, kā arī pakalpojumu sniedzēju/modeli,
-attēlojamo nosaukumu, `familyId`, kvotu, iespējas, iespējoto stāvokli, izcelsmi un `disabledBy`; iestatīšanas URL,
-darbības, savienojumi, e-pasta adreses, atslēgas un ieteikumu dati nekad netiek atgriezti. Šis rīks ir
-tikai lasāms un nekad neizsauc `/api/radar/sync`.
+MCP klienti var lasīt to pašu lokālo projekciju ar `omniroute_radar_catalog` (`read:radar`). Izvēles `provider`, `familyId` un `enabledOnly` filtri tiek novērtēti pēc vienas vietējās `GET /api/radar/catalog` nolasīšanas. Tās slēgtajā izvadē ir iekļauti kataloga metadati plus provider/model, parādāmais nosaukums, `familyId`, kvota, iespējas, iespējotais stāvoklis, izcelsme un `disabledBy`; setup URLs, soļi, savienojumi, e-pasta adreses, atslēgas un novirzīšanas dati nekad netiek atgriezti. Šis rīks ir tikai lasāms un nekad neizsauc `/api/radar/sync`. Ja kešatmiņā saglabātā plūsma ir pirms instalētā kataloga, `meta.olderThanRelease` ir `true`, un rīks atgriež modeļus no instalētā kataloga ar vietējiem ignorējumiem un lietotajiem kapakmeņiem.
 
 ### Izcelsmes marķieri
 
-Katram apvienotajam ierakstam ir lauks `origin`, kuru lietotāja saskarne attēlo kā emblēmu:
+Katram apvienotajam ierakstam ir `origin` lauks, ko UI atveido kā emblēmu:
 
-- `"baseline"` — nav mainīts, salīdzinot ar statisko laidiena katalogu.
-- `"radar"` — vienu vai vairākus laukus ir atsvaidzinājusi plūsma.
-- `"local"` — operators šim ierakstam ir definējis vismaz vienu lokālu pārrakstījumu (lokālie
-  pārrakstījumi vienmēr prevalē pār plūsmu saskaņā ar 1. noteikumu neatkarīgi no plūsmas sniegtās informācijas).
+- `"baseline"` — neskarts no statiskā izlaiduma kataloga.
+- `"radar"` — viens vai vairāki lauki tika atsvaidzināti ar plūsmu.
+- `"local"` — operatoram šim ierakstam ir vismaz viena vietēja ignorēšana (vietējie ignorējumi vienmēr uzvar plūsmu saskaņā ar 1. kārtulu neatkarīgi no plūsmas teiktā).
 
 ---
 

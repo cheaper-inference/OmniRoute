@@ -337,35 +337,22 @@ RTK režīmu iedvesmojis **[RTK - Rust Token Killer](https://github.com/rtk-ai/r
 
 ## Uzlabotas saspiešanas sistēmas
 
-Papildus iepriekš aprakstītajiem 7 režīmiem (avota kods pieņem arī režīmus `codex-responses` un
-`omniglyph`, kas šajā rokasgrāmatā nav aplūkoti) tālākajās sadaļās ir aprakstītas funkcijas,
-kas darbojas šajos režīmos vai kopā ar tiem: rīku rezultātu saspiešana un progresīvā novecošana
-ir agresīvā dzinēja 1. un 2. darbība (režīmā Aggressive un saliktā konveijera darbībā
-`aggressive`), saliktais konveijers nosaka režīma Stacked darbību, kešatmiņu ņemošā saspiešana
-pazemina `aggressive` un `ultra` līmeni uz `standard` kešatmiņu izmantojošiem nodrošinātājiem,
-kamēr saspiešana ir ieslēgta, savukārt primitīvās izvades režīms un izvades stili ir pēc
-izvēles lietojamas sistēmas uzvednes instrukcijas, kas pēc noklusējuma ir izslēgtas un
-veido modeļa izvadi, nevis saspiež pieprasījumu.
+Papildus iepriekš aprakstītajiem 7 režīmiem (avots pieņem arī `codex-responses` un `omniglyph` režīmus, uz kuriem šī rokasgrāmata neattiecas), tālāk esošajās sadaļās ir apskatītas funkcijas, kas darbojas šajos režīmos vai tiem līdzās: Rīka rezultātu saspiešana un Progresīvā novecošana ir agresīvā dzinēja 1. un 2. darbība (agresīvais režīms un `aggressive` solis ir stacked konveijera). Kešatmiņas saspiešana samazina `aggressive` un `ultra` uz `standard` kešatmiņas nodrošinātājiem, kamēr saspiešana ir ieslēgta, un Caveman izvades režīms un izvades stili ir izvēles sistēmas uzvednes instrukcijas, kas pēc noklusējuma ir izslēgtas un kas veido modeļa izvadi, nevis saspiež pieprasījumu.
 
-### Kešatmiņu ņemoša saspiešana
+### Kešatmiņas saspiešana
 
-Daži nodrošinātāji (piemēram, Anthropic ar uzvedņu kešošanu) atbalsta **uzvedņu kešošanu**,
-kas ļauj tiem saglabāt uzvednes daļas kešatmiņā, lai samazinātu izmaksas un latentumu. Kad
-kešošana ir iespējota, agresīva saspiešana faktiski var **pasliktināt** veiktspēju,
-jo tā maina kešatmiņā saglabātos tokenus, padarot kešatmiņu nederīgu.
+Daži pakalpojumu sniedzēji (piemēram, Anthropic ar ātru kešatmiņu) atbalsta** ātra kešatmiņa** , kas ļauj kešatmiņā saglabāt uzvednes daļas, lai samazinātu izmaksas un latentumu. Ja ir iespējota kešatmiņa, faktiski var tikt veikta agresīva saspiešana** ievainots** veiktspēju, jo tas maina kešatmiņas marķierus, padarot kešatmiņu nederīgu.
 
-Modulis `cachingAware.ts` to atrisina, **nosakot kešošanas kontekstu** un
-**atbilstoši pielāgojot saspiešanas stratēģiju**.
+`cachingAware.ts` modulis to atrisina ar** kešatmiņas konteksta noteikšana** un** saspiešanas stratēģijas pielāgošana** attiecīgi.
 
 #### Kā tas darbojas
 
-1. **Kešošanas konteksta noteikšana** — pieprasījuma ķermenī meklē `cache_control` marķierus
-2. **Kešošanas nodrošinātāju identificēšana** — pārbauda, vai mērķa nodrošinātājs atbalsta kešošanu
-3. **Stratēģijas pielāgošana** — kešošanas nodrošinātājiem pazemina `aggressive`/`ultra` līmeni uz `standard`
-4. **Sistēmas uzvednes izlaišana** — sistēmas uzvednes parasti tiek kešotas, tāpēc tās netiek saspiestas
+1. **Noteikt kešatmiņas kontekstu** — Skenē pieprasījuma pamattekstu `cache_control` marķieriem
+2. **Identificējiet kešatmiņas nodrošinātājus** — Pārbauda, vai mērķa nodrošinātājs atbalsta kešatmiņu
+3. **Pielāgojiet stratēģiju** — samazina `aggressive`/`ultra` uz `standard` kešatmiņas nodrošinātājiem
+4. **Izlaist sistēmas uzvedni** — Sistēmas uzvednes parasti tiek saglabātas kešatmiņā, tāpēc nesaspiediet tās
 
-Stratēģijas palīgfunkcija atgriež arī karogu `deterministicOnly`, taču plāna veidotājs izmanto
-tikai stratēģiju — pašlaik nekas tālākajā apstrādes ķēdē šo karogu nelasa.
+Stratēģijas palīgs arī atgriež `deterministicOnly` karogu, bet plāna veidotājs patērē tikai stratēģiju — šodien nekas lejup pa straumi nelasa karogu.
 
 #### Koda piemērs
 
@@ -378,7 +365,7 @@ import {
 const body = {
   model: "anthropic/claude-sonnet-4.5",
   messages: [{ role: "user", content: "Hello" }],
-  cache_control: { type: "ephemeral" }, // ← Kešatmiņas marķieris
+  cache_control: { type: "ephemeral" }, // ← Cache marker
 };
 
 const ctx = detectCachingContext(body, { provider: "anthropic" });
@@ -388,29 +375,19 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 // → { strategy: "standard", skipSystemPrompt: true, deterministicOnly: true }
 ```
 
-#### Kad izmantot
+#### Kad lietot
 
-Kešatmiņu ņemoša saspiešana ir **vienmēr ieslēgta** — konfigurācija nav nepieciešama. Tā
-aktivizējas ikreiz, kad saspiešana ir ieslēgta un mērķa nodrošinātājs atbalsta uzvedņu kešošanu
-(Anthropic, OpenAI utt.); nepārprotami `cache_control` marķieri nav nepieciešami — līmeņa
-pazemināšanu izraisa jau pats kešošanas nodrošinātājs, savukārt marķieri vieni paši to nekad
-neizraisa (marķieru noteikšana nodrošina kešatmiņas telemetrijas datus, nevis ietekmē
-stratēģijas izvēli).
+Kešatmiņas saspiešana ir** vienmēr ieslēgts** — nav nepieciešama konfigurācija. Tas tiek aktivizēts ikreiz, kad ir ieslēgta saspiešana, un mērķa nodrošinātājs atbalsta tūlītēju kešatmiņu (Anthropic, OpenAI utt.); skaidri `cache_control` marķieri nav nepieciešami. — tikai kešatmiņas nodrošinātājs aktivizē pazemināšanu, un tikai marķieri to nekad nedara (marķieru noteikšana nodrošina kešatmiņas telemetrijas plūsmu, nevis stratēģijas lēmumu).
+
+OpenRouter tiek uzskatīts par kešatmiņas nodrošinātāju tikai `anthropic/*` modeļiem: Claude koda pieprasījumos tiek saglabāti `cache_control` pārtraukuma punkti (ne vairāk kā 4), un aizsargs aizsargā prefiksu, savukārt katra pārējā OpenRouter saime (`openai/`, `google/`, `qwen/`, …) paliek noņemta un neapsargāta.
 
 ### Progresīvā novecošana
 
-Garās sarunās uzkrājas daudzi ziņojumu cikli, taču vecāki cikli kļūst mazāk
-būtiski. Modulis `progressiveAging.ts` **vienkāršo ziņojumus atkarībā no ciklu attāluma**
-(attālums tiek mērīts no sarunas beigām). Ar komplektācijā iekļautajām noklusējuma vērtībām
-(`verbatim: 2, light: 2, moderate: 3`):
+Garās sarunās uzkrājas daudzi ziņojumu pagriezieni, bet vecāki pagriezieni kļūst mazāk aktuāli. `progressiveAging.ts` modulis** degradē ziņojumus pēc pagrieziena attāluma** (attālums mērīts no sarunas beigām). Ar piegādātajiem noklusējuma iestatījumiem (`verbatim: 2, light: 2, moderate: 3`):
 
-- **Pēdējie 2 cikli (attālums ≤ 2)**: tiek saglabāti burtiski
-- **Attālums 3**: primitīvā saspiešana (liekvārdības noņemšana)
-- **Attālums 4+**: asistenta ziņojumi tiek apkopoti; lietotāja ziņojumi tiek saīsināti līdz to
-  pirmajai rindai, nepārsniedzot 120 rakstzīmes; citas lomas netiek mainītas. Sistēmas uzvednes,
-  jau novecinātie ziņojumi un jaunākais lietotāja ziņojums vienmēr tiek saglabāti burtiski
-  neatkarīgi no attāluma. Nekas netiek pilnībā atmests, un josla `light`
-  nav sasniedzama ar komplektācijā iekļautajām noklusējuma vērtībām (`light` ir vienāds ar `verbatim`).
+- **Pēdējie 2 pagriezieni (attālums ≤ 2)** : Saglabāts burtiski
+- **3. attālums** : alu cilvēka saspiešana (pildvielas noņemšana)
+- **Attālums 4 +** : apkopoti palīga ziņojumi; lietotāju ziņojumi ir samazināti līdz pirmajai rindiņai, nepārsniedzot 120 rakstzīmes; citas lomas neskartas. Sistēmas uzvednes, jau novecojuši ziņojumi un jaunākie lietotāja ziņojumi vienmēr tiek saglabāti burtiski neatkarīgi no attāluma. Nekas netiek uzreiz pamests, un `light` josla nav sasniedzama ar piegādātajiem noklusējuma iestatījumiem (`light` ir vienāds `verbatim`).
 
 #### Koda piemērs
 
@@ -421,68 +398,47 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... vēl 50 cikli ...
+  // ... 50 more turns ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // pēdējie 3 cikli: burtiski
-  light: 8, // attālums <= 8: viegla saspiešana
-  moderate: 20, // attālums <= 20: primitīvā saspiešana
-  fullSummary: 5, // nepieciešams tipam, bet joslu noteikšanas kods to nelasa
-  // attālums > 20: apkopots (asistents) / saglabāta pirmā rinda (lietotājs)
+  verbatim: 3, // last 3 turns: verbatim
+  light: 8, // distance <= 8: lite compression
+  moderate: 20, // distance <= 20: caveman compression
+  fullSummary: 5, // required by the type, not read by the banding code
+  // distance > 20: summarized (assistant) / first line kept (user)
 });
 
-// saved = ietaupīto tokenu skaits
+// saved = number of tokens saved
 ```
 
-#### Kad izmantot
+#### Kad lietot
 
-Progresīvā novecošana režīmā `aggressive` ir **vienmēr ieslēgta** — tā ir funkcijas
-`compressAggressive()` 2. darbība. Ultra režīms to neizpilda. Tā ir
-īpaši efektīva šādos gadījumos:
+Progresējoša novecošana ir** vienmēr ieslēgts** `aggressive` režīmam — tas ir `compressAggressive()` 2. darbība. Ultra režīms to nedarbina. Tas ir īpaši efektīvs:
 
-- Ilgstošas programmēšanas sesijas
+- Ilgstošas kodēšanas sesijas
 - Vairāku dienu sarunas
 - Aģentu darbplūsmas ar daudziem rīku izsaukumiem
 
-### Primitīvās izvades režīms
+### Caveman izvades režīms
 
-Primitīvās izvades režīms pievieno **sistēmas uzvednes instrukcijas**, kas modelim prasa
-sniegt kodolīgu izvadi — līmenis `lite` prasa īsas atbildes, saglabājot pilnus teikumus,
-`full` prasa tam „atbildēt kodolīgi kā gudram alu cilvēkam”, bet `ultra` prasa telegrāfisku
-izvadi; instrukcijas tikai izsaka prasību un nevar garantēt tās izpildi. Pieprasījumi tās saņem,
-izmantojot `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`):
-`open-sse/handlers/chatCore.ts` vispirms nosaka izvēli, izmantojot atpakaļsaderības starpslāni
-(`resolveOutputStyleSelection()` failā
-`open-sse/services/compression/outputStyles/backCompat.ts`), kas, kamēr `outputStyles`
-ir tukšs, kartē iespējotu `cavemanOutputMode` uz izvades stilu `terse-prose` ar
-`cavemanOutputMode.intensity` līmeni (skatiet tālāk sadaļu par atpakaļsaderību); netukša
-`outputStyles` izvēle tiek izmantota bez izmaiņām, un tad `cavemanOutputMode.enabled` un
-`intensity` neko neietekmē, taču tā `autoClarity` slēdzis joprojām tiek lietots. Fails
-`outputMode.ts` satur instrukciju tekstus (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), satura
-apiešanas loģiku un izvietojuma palīgfunkciju, ko izmanto ievietošana; tā paša
-`applyCavemanOutputMode()` ievietotājam produkcijas vidē nav izsaucēja.
+Tiek pievienots alu cilvēka izvades režīms** sistēmas uzvednes instrukcijas** kas prasa pašam modelim īsu izvadi — `lite` līmenis prasa īsas atbildes, kurās ir pilni teikumi, `full` prasa "atbildēt īsi kā viedais alu cilvēks", un `ultra` prasa telegrāfa izvadi; instrukcijas tikai prasa, viņi to nevar garantēt. Pieprasījumi tos saņem, izmantojot `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`): `open-sse/handlers/chatCore.ts` vispirms atrisina atlasi ar back-compat starpliku (`resolveOutputStyleSelection()` in `open-sse/services/compression/outputStyles/backCompat.ts`), kas, lai gan `outputStyles` ir tukšs, iezīmē iespējotu `cavemanOutputMode` ar `terse-prose` izvades stilu pie `cavemanOutputMode.intensity` (skatiet tālāk sadaļu Back-compat); `outputStyles` atlase, kas nav tukša, tiek izmantota tāda, kāda tā ir, un `cavemanOutputMode.enabled` un `intensity` tad nav nekādas ietekmes, kamēr tās `autoClarity` pārslēgs joprojām ir spēkā. `outputMode.ts` satur instrukciju tekstus (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), satura apiešanu un izvietošanas palīgu, ko izmanto injekcija; savam `applyCavemanOutputMode()` inžektoram nav ražošanas zvanītāja.
 
 #### Kā tas darbojas
 
-Šis režīms nesaspiež ievadi. Tas sistēmas uzvednei pievieno instrukciju bloku
-(skatiet tālāk sadaļu Kā darbojas ievietošana), un jebkurš pieprasījumam atlasītais ievades saspiešanas režīms
-pēc tam joprojām tiek izpildīts pamattekstam, kas tagad ietver šo bloku. Pirms koplietotās
-robežu klauzulas, ar kuru beidzas katrs līmenis, angļu valodas `full` līmenī ir rakstīts:
+Šis režīms nesaspiež ievadi. Sistēmas uzvednei tiek pievienots instrukciju bloks (skatiet tālāk sadaļu Kā injekcija darbojas), un jebkurš pieprasījumam atlasītais ievades saspiešanas režīms joprojām darbojas pēc tam korpusā, kurā tagad ir šis bloks. Pirms kopīgu robežu klauzulas, ar kuru katrs līmenis beidzas, angļu valodas `full` līmenis skan:
 
-> "Atbildi lakoniski kā gudrs alu cilvēks. Izlaid artikulus (a/an/the), liekvārdību (just/really/basically/actually/simply), pieklājības frāzes, izvairīgu izteiksmi. Fragmenti der. Īsi sinonīmi (big, nevis extensive; fix, nevis implement). Precīzi saglabā visu tehnisko saturu, kodu, kļūdas, URL un identifikatorus."
+> "Atbildiet īsi kā viedais alu cilvēks. Nometiet rakstus (a/an/the), pildījumu (just/really/basically/actually/simply), patīkamus priekšmetus, riska ierobežošanu. Fragmenti OK. Īsi sinonīmi (lieli, nevis plaši, labojiet, neieviesiet). Saglabājiet precīzu visu tehnisko saturu, kodu, kļūdas, URLs, identifikatorus."
 
-Tas īpaši labi darbojas šādiem uzdevumiem:
+Tas īpaši labi darbojas:
 
-- Koda ģenerēšana (lakoniskāka izvade = mazāk tokenu)
-- Īsi jautājumi un atbildes (nav vajadzīgi izvērsti skaidrojumi)
-- Pakešapstrāde (maksimāla caurlaidspēja)
+- Koda ģenerēšana (terser izvade = mazāk marķieru)
+- Ātri jautājumi un atbildes (nav nepieciešami izvērsti paskaidrojumi)
+- Pakešu apstrāde (maksimizēta caurlaidspēja)
 
-#### Kad izmantot
+#### Kad lietot
 
-Alu cilvēka izvades režīms ir **jāiespējo apzināti**. Kad saspiešana ir ieslēgta (`enabled: true`, galvenais slēdzis
-lapā Compression Settings), ieslēdziet to ar `cavemanOutputMode.enabled`; `intensity`
-izvēlas `lite`, `full` vai `ultra`:
+Caveman izvades režīms ir** pieteikšanās** . Kad saspiešana ir ieslēgta (`enabled: true`, galvenais pārslēgs kompresijas iestatījumu lapā), ieslēdziet to ar `cavemanOutputMode.enabled`; `intensity` izvēlas `lite`, `full` vai `ultra`:
 
 ```json
 {
@@ -494,101 +450,44 @@ izvēlas `lite`, `full` vai `ultra`:
 }
 ```
 
-Saspiešanas kombinācijas slēdzis **Output Mode** (`outputMode`, līmenis laukā `outputModeIntensity`)
-iestata to pašu slēdzi pieprasījumiem, uz kuriem attiecas šī kombinācija, un
-`omniroute_set_compression_engine` MCP rīks to ieraksta, izmantojot savu Būla tipa `outputMode`
-argumentu. Ne-tukša `outputStyles` atlase ir prioritāra pār šo slēdzi. Informācijas
-panelī izvades stila **Terse prose** iespējošana ievieto to pašu bloku (skatiet tālāk sadaļu Output
-Styles).
+Kompresijas kombinācija** Izvades režīms** pārslēgt (`outputMode`, līmenis `outputModeIntensity`) iestata to pašu slēdzi pieprasījumiem, uz kuriem attiecas kombinācija, un `omniroute_set_compression_engine` MCP rīks to ieraksta, izmantojot Būla `outputMode` argumentu. Netukšai `outputStyles` atlasei ir prioritāte pār šo slēdzi. Informācijas panelī iespējojot** Īsā proza** izvades stils ievada to pašu bloku (skatiet tālāk izvades stilus).
 
 ### Izvades stili (katalogs)
 
-Iepriekš aprakstītais alu cilvēka izvades režīms ir **mantotais viena stila ceļš**. 4. fāzē tas tika vispārināts,
-izveidojot kombinējamu izvades stilu katalogu: `OUTPUT_STYLE_CATALOG` failā
-`open-sse/services/compression/outputStyles/catalog.ts`. Katrs stils ir sistēmas uzvednes
-instrukcija, kas pašam modelim pieprasa lētāku izvadi; stilus var iespējot
-kopā, un tie tiek ievietoti kataloga secībā.
+Iepriekš redzamais Caveman izvades režīms ir** mantotais viena stila ceļš** . 4. fāze to vispārināja saliekamo izvades stilu katalogā: `OUTPUT_STYLE_CATALOG` in `open-sse/services/compression/outputStyles/catalog.ts`. Katrs stils ir sistēmas uzvedne, kas prasa pašam modelim lētāku izvadi; stilus var iespējot kopā, un tie tiek ievadīti kataloga secībā.
 
-| Stils                                   | `id`            | Ko tas dara                                                                                                                                                                                                                                                                                            | Instrukciju valodas                              |
-| --------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| Lakoniska proza                         | `terse-prose`   | Izlaiž liekvārdību/artikulus/izvairīgu izteiksmi; precīzi saglabā tehnisko saturu. Tas pats teksts, kas mantotajā alu cilvēka izvades režīmā (uz to ir atsauce, tas netiek atkārtots).                                                                                                                 | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi    |
-| Mazāk koda                              | `less-code`     | YAGNI pieeja: mazākās funkcionējošās izmaiņas, bez nepieprasītām abstrakcijām.                                                                                                                                                                                                                         | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi    |
-| Zirgaste (slinks vecākais izstrādātājs) | `ponytail`      | "Labākais kods ir kods, kas nekad nav uzrakstīts": atkārtota izmantošana > pārrakstīšana, pamatcēlonis > simptoms, īsākais funkcionējošais izmaiņu kopums.                                                                                                                                             | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi    |
-| Man ir ADHD (vispirms darbība)          | `i-have-adhd`   | Vispirms darbība (komanda/ceļš/fragments pirms prozas), numurētas un ierobežotas darbības, VIENS konkrēts nākamais solis, bez ievada/kopsavilkuma/nobeiguma. Pielāgots no [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                                                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi    |
-| Antislop UI filtrs                      | `antislop-ui`   | Katrai vizuālajai metodei jāiztur lietderības pārbaude (hierarhija, identitāte, lasāmība); bez noklusējuma gradientiem/stikla efektiem/mirdzuma, ierobežota palete, bez veidņu izkārtojumiem. Abi antislop stili pievieno robežu, kas aizliedz nefunkcionējošas vadīklas un safabricētus apgalvojumus. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi    |
-| Antislop teksta un cilvēcīguma filtrs   | `antislop-copy` | Konkrēts teksts (bez domuzīmēm, vispārīgiem aicinājumiem uz darbību, modes vārdiem, tērzēšanas robota nobeigumiem un izdomātiem faktiem), kā arī cilvēkiem paredzēti noteikumi: WCAG AA kontrasts, redzams fokuss, vadība ar tastatūru, tukši/ielādes/kļūdu stāvokļi, mobilais pārkārtojums.           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi    |
-| Lakonisks CJK (文言)                    | `terse-cjk`     | `full`/`ultra` atbilde klasiskajā ķīniešu valodā (文言); `lite` tikai pieprasa īsas atbildes bez palīgvārdiem, pieklājības frāzēm vai izskaistinājumiem.                                                                                                                                               | zh (ierobežots pēc lokalizācijas; skatiet tālāk) |
+| Stils                                   | `id`            | Ko tas dara                                                                                                                                                                                                                                                                  | Mācību valodas                                |
+| --------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Īsā proza                               | `terse-prose`   | Nometiet filler/articles/hedging; ievērot precīzu tehnisko vielu. Tas pats teksts kā mantotajā alu cilvēka izvades režīmā (norādīts, nav atkārtoti ievadīts).                                                                                                                | lv, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Mazāk kodu                              | `less-code`     | YAGNI kāpnes: mazākās darba izmaiņas, nav nepieprasītu abstrakciju.                                                                                                                                                                                                          | lv, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Zirgaste (slinks vecākais izstrādātājs) | `ponytail`      | "Labākais kods ir kods, kas nekad nav rakstīts": atkārtoti izmantojiet > pārrakstīšanu, galvenais iemesls > simptoms, īsākā darba atšķirība.                                                                                                                                 | lv, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Man ir ADHD (vispirms darbība)          | `i-have-adhd`   | Vispirms darbība (command/path/snippet pirms prozas), numurēti ierobežoti soļi, ONE konkrēts nākamais solis, bez preamble/recap/closers. Pielāgots no [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                                                     | lv, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Pretslīdes UI filtrs                    | `antislop-ui`   | Katrai vizuālajai tehnikai ir jāiztur mērķa pārbaude (hierarhija, identitāte, lasāmība); nav noklusējuma gradients/glass/glow, ierobežotas paletes, nav veidņu izkārtojumu. Abiem pretslīdes stiliem tiek pievienota robeža bez atslābuma kontroles/no-fabricated-pretended. | lv, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop kopija un cilvēka filtrs       | `antislop-copy` | Konkrēta kopija (bez em domuzīmes, vispārīgs CTAs, modes vārdi, tērzēšanas robotu aizvērēji, izdomāti fakti), kā arī cilvēku noteikumi: WCAG AA kontrasts, redzamais fokuss, tastatūras sasniedzamība, empty/loading/error stāvokļi, mobilā plūsma.                          | lv, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Terse CJK (文言)                        | `terse-cjk`     | `full`/`ultra` atbilde klasiskajā ķīniešu valodā (文言); `lite` prasa tikai īsas atbildes bez funkcijas vārdiem, patīkamiem vārdiem vai izrotājumiem.                                                                                                                        | zh (ar lokalizāciju, skatiet tālāk)           |
 
-Katram stilam ir trīs intensitātes līmeņi — `lite`, `full`, `ultra` —, un katrs līmenis
-beidzas ar koplietoto robežu klauzulu (`SHARED_BOUNDARIES` failā `outputMode.ts`), kas
-precīzi saglabā koda blokus, failu ceļus, komandas, kļūdas un URL. `terse-prose` un
-`terse-cjk` līmeņu teksti šim sarakstam pievieno identifikatorus.
+Katrs stils nodrošina trīs intensitātes līmeņus — `lite`, `full`, `ultra` —, un katrs līmenis beidzas ar koplietojamo robežu klauzulu (`SHARED_BOUNDARIES` in `outputMode.ts`), kas precīzi saglabā kodu blokus, failu ceļus, komandas, kļūdas un URLs. `terse-prose` un `terse-cjk` līmeņa teksti pievieno šim sarakstam identifikatorus.
 
-`terse-cjk` pieejamība ir ierobežota līdz `zh` divās vietās. Compression Settings lapā
-tā rinda tiek rādīta tikai tad, ja informācijas paneļa saskarnes valoda ir ķīniešu (`zh-CN` vai `zh-TW`), un
-`applyOutputStyles()` to ievieto tikai tad, ja pieprasījumam noteiktā valoda (skatiet tālāk sadaļu Valodas
-atlase) ir `zh`. Rindas paslēpšana neizdzēš saglabāto `terse-cjk` atlasi:
-iestatījumu API pieņem jebkuru stila id, un citu stilu saglabāšana lapā to patur. Pieprasījuma
-izpildes laikā `applyOutputStyles()` valodas pārbaude ir vienīgais lokalizācijas ierobežojums.
+`terse-cjk` ir lokalizēts ar `zh` divās vietās. Lapā Saspiešanas iestatījumi ir norādīta rinda tikai tad, ja informācijas paneļa UI valoda ir ķīniešu (`zh-CN` vai `zh-TW`), un `applyOutputStyles()` to ievada tikai tad, ja pieprasījuma atrisinātā valoda (skatiet tālāk sadaļu Valodas atlase) ir `zh`. Paslēpjot rindu, saglabātā `terse-cjk` atlase netiek notīrīta: iestatījumi API pieņem jebkuru stila ID, un, saglabājot citus stilus lapā, tas tiek saglabāts. Pēc pieprasījuma `applyOutputStyles()` valodas pārbaude ir vienīgā lokalizācijas vārti.
 
-#### Kā darbojas ievietošana
+#### Kā darbojas injekcija
 
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) salīdzina
-atlasi ar katalogu (nezināmi ID un lokalizācijai neatbilstoši stili tiek atmesti, un tā
-nekad nav kļūda; ja atlases rezultātā nav neviena stila, pamatteksts paliek nemainīts un
-apstrāde tiek izlaista ar statusu `no_styles`), apvieno atlasītās instrukcijas kataloga
-secībā,
-**vienreiz** pievieno robežu klauzulu (kā arī drošības klauzulu, `SAFETY_BOUNDARIES` vai tās
-tulkojumu, ja ir atlasīts `less-code` vai `ponytail`) un sāk bloku ar vienu
-idempotences marķieri (`[OmniRoute Output Styles]`), tādēļ atkārtota lietošana neko
-nemaina. Ja noteiktajai valodai (skatiet tālāk sadaļu par valodas atlasi) ir pieejams
-tulkojums, angļu valodas instrukcijas vietā tiek ievietota lokalizētā instrukcija.
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) atrisina atlasi pēc kataloga (nezināmi ID un lokāli neatbilstoši stili tiek atmesti, nekad nav kļūda; atlase, kas atrisina bez stila, atstāj pamattekstu nemainītu, izlaiž kā `no_styles`), savieno atlasītās instrukcijas kataloga secībā, pievieno robežu klauzulu.** vienreiz** (kā arī drošības klauzula, `SAFETY_BOUNDARIES` vai tā tulkojums, ja ir atlasīts `less-code` vai `ponytail` ), un sāk bloku ar vienu idempotences marķieri (`[OmniRoute Output Styles]`), tāpēc atkārtota pieteikšanās ir no-op. Ja atrisinātajai valodai (skatiet tālāk norādīto valodu atlasi) ir tulkojums, angļu valodas vietā tiek ievadīta lokalizēta instrukcija.
 
-Pamattekstā ar netukšu `messages` masīvu idempotences pārbaude tiek veikta pirms
-satura apiešanas: ja marķieris `[OmniRoute Output Styles]` jau atrodas augšējā līmeņa
-laukā `system` (virknē vai satura bloku masīvā) vai sistēmas ziņojumā ar virknes
-saturu, pamatteksts paliek nemainīts ar statusu `already_applied`, un atslēgvārdu pārbaude
-netiek veikta. Pretējā gadījumā satura apiešana (`shouldBypassCavemanOutputMode()` failā
-`open-sse/services/compression/outputMode.ts`) pārbauda pēdējo trīs ziņojumu tekstu
-neatkarīgi no to lomas un izlaiž stilus visam pieprasījumam, ja teksts atbilst drošības,
-neatgriezeniskas darbības vai precizēšanas atslēgvārdiem vai secībai, kurā ir nozīmīga
-kārtība: `first`, `then`, `after that`, `before`, `rollback` vai
-`backup`, kam 240 rakstzīmju robežās seko `delete`, `drop`, `migrate`, `deploy` vai
-`release`. Apiešana darbojas, kamēr ir ieslēgts slēdzis **Auto-Clarity Bypass**
-(`cavemanOutputMode.autoClarity`, pēc noklusējuma ieslēgts); izslēdzot šo slēdzi,
-atslēgvārdu pārbaude tiek izlaista.
+Pamattekstam ar `messages` masīvu, kas nav tukšs, idempotences pārbaude tiek izpildīta pirms satura apiešanas: kad `[OmniRoute Output Styles]` marķieris jau atrodas augstākā līmeņa `system` laukā (virkne vai satura bloka masīvs) vai sistēmas ziņojumā ar virknes saturu, pamatteksts tiek atstāts nemainīgs kā `already_applied` un atslēgvārdu pārbaude netiek izpildīta. Pretējā gadījumā satura apiešana (`shouldBypassCavemanOutputMode()` in `open-sse/services/compression/outputMode.ts`) pārbauda pēdējo trīs ziņojumu tekstu neatkarīgi no to lomas un izlaiž stilus visam gājienam `before` ja teksts atbilst tā drošības, neatgriezeniskas darbības vai precizēšanas atslēgvārdiem vai secības jutīgai secībai: `first`, `then`, `after that`, `rollback`, kam seko rakstzīme 2 vai `backup` `delete`, `drop`, `migrate`, `deploy` vai `release`. Apvedceļš darbojas, kamēr** Automātiskā skaidrības apiešana** pārslēgt (`cavemanOutputMode.autoClarity`, ieslēgts pēc noklusējuma) ir ieslēgts; izslēdzot slēdzi, tiek izlaista atslēgvārdu pārbaude.
 
-Ja apiešana ļauj turpināt pieprasījuma apstrādi, `placeSystemInstruction()` (tajā pašā
-failā), kas nekad neizveido jaunu `messages[0]`, ievieto bloku pirmajā atrastajā vietā
-šādā secībā:
+Kad apvedceļš ļauj apgriezties, `placeSystemInstruction()` (tas pats fails), kas nekad nerada jaunu `messages[0]`, ievieto bloku pirmajā no tiem, ko tas atrod:
 
-1. Sākuma sistēmas ziņojums ar virknes saturu: bloks tiek pievienots aiz tā teksta.
-2. Augšējā līmeņa lauks `system`: bloks tiek pievienots aiz virknes teksta vai
-   pievienots kā jauns teksta bloks satura bloku masīvam.
-3. Pirmais vēlāk esošais sistēmas ziņojums ar virknes saturu: bloks tiek pievienots aiz
-   tā teksta.
-4. Neviens no iepriekš minētajiem: bloks tiek ievietots jaunā sistēmas ziņojumā
-   `messages` beigās.
+1. Vadošais sistēmas ziņojums ar virknes saturu: bloks tiek pievienots aiz tā teksta.
+2. Augšējā līmeņa `system` lauks: bloks tiek pievienots pēc virknes teksta vai pievienots satura bloka masīvam kā jauns teksta bloks.
+3. Pirmais vēlākais sistēmas ziņojums ar virknes saturu: bloks tiek pievienots aiz tā teksta.
+4. Nekas no iepriekš minētā: bloks tiek ievadīts jaunā sistēmas ziņojumā `messages` beigās.
 
-Pamattekstam bez `messages` masīva (vai ar tukšu masīvu) satura apiešana netiek veikta,
-un augšējā līmeņa lauks `system` netiek pārbaudīts. Bloks tiek pievienots aiz virknes
-lauka `instructions` teksta, ja vien šajā laukā jau nav marķiera
-`[OmniRoute Output Styles]`; tādā gadījumā pamatteksts paliek nemainīts ar statusu
-`already_applied`. Ja pamattekstā nav virknes lauka `instructions`, bet ir `input`
-(virkne vai masīvs), bloks kļūst par `instructions`, aizstājot jebkuru iepriekš tajā
-laukā esošu vērtību, kas nav virkne. Pamatteksts, kurā nav ne virknes lauka
-`instructions`, ne virknes vai masīva `input`, paliek nemainīts, un apstrāde tiek
-izlaista ar statusu `no_messages`.
+Pamattekstā bez `messages` masīva (vai ar tukšu) satura apvedceļš nedarbojas un netiek izmantots augstākā līmeņa `system` lauks. Bloks tiek pievienots aiz virknes `instructions` lauka teksta, ja vien šajā laukā jau nav ietverts `[OmniRoute Output Styles]` marķieris, un tādā gadījumā pamatteksts tiek atstāts nemainīgs kā `already_applied`. Ja pamattekstā nav virknes `instructions` lauka, bet tajā ir `input` (virkne vai masīvs), bloks kļūst par `instructions`, aizstājot jebkuru šajā laukā esošo vērtību, kas nav virkne. Pamattekstu, kurā nav ne virknes `instructions` lauka, ne virknes vai masīva `input` atstāj nemainīgu un izlaiž kā `no_messages`.
 
 #### Kā iespējot
 
-Informācijas panelī: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`), sadaļā Output styles: katram stilam ir viena rinda ar
-ieslēgšanas/izslēgšanas slēdzi un līmeņa atlasītāju. Stili tiek ievietoti, kamēr ir
-ieslēgta pati saspiešana (lapas galvenais slēdzis `enabled`). Slēdzis
-**Auto-Clarity Bypass** atrodas lapas **Caveman**
-(`/dashboard/context/caveman`) kartītē **Output Mode**. Programmatiski saspiešanas
-konfigurācijā atlase tiek saglabāta šādi:
+Informācijas panelī:** Saspiešanas konteksts → Saspiešanas iestatījumi** (`/dashboard/context/settings`), Izvades stilu sadaļa: viena rinda katram stilam ar on/off pārslēgu un līmeņa atlasītāju. Stili tiek ievadīti, kamēr ir ieslēgta pati saspiešana (lapas galvenā pārslēgšana, `enabled`). The** Automātiskā skaidrības apiešana** pārslēgs atrodas uz** Alu cilvēks** lapa (`/dashboard/context/caveman`), tajā** Izvades režīms** karti. Programmatiski saspiešanas konfigurācija saglabā atlasi šādi:
 
 ```json
 {
@@ -599,146 +498,50 @@ konfigurācijā atlase tiek saglabāta šādi:
 }
 ```
 
-Atpakaļsaderība: kamēr `outputStyles` ir tukšs, mantotais
-`cavemanOutputMode.enabled` iestatījums tiek kartēts uz `terse-prose` ar
-`cavemanOutputMode.intensity`. Tad bloks sākas ar marķieri
-`[OmniRoute Output Styles]`, kur mantotais `applyCavemanOutputMode()` ievietotājs
-rakstīja `[OmniRoute Caveman Output Mode]`. Zem marķiera teksts atbilst mantotajam
-ievietojumam valodās en, pt-BR, es, de, fr, it, ru, id un vi; valodās ja un zh pirms
-robežu klauzulas ir viena papildu atstarpe. `terse-prose` ir tulkots valodās pt-BR, es,
-de, fr, it, ru, zh, ja, id un vi, tādēļ pieprasījums, kura noteiktā valoda ir `hu`,
-saņem tekstu angļu valodā, lai gan mantotais ievietotājs izmantoja tā versiju ungāru
-valodā.
+Back-compat: kamēr `outputStyles` ir tukšs, mantotais `cavemanOutputMode.enabled` iestatījums tiek kartēts uz `terse-prose` pie `cavemanOutputMode.intensity`. Pēc tam bloks sākas ar `[OmniRoute Output Styles]` marķieri, kur mantotais `applyCavemanOutputMode()` inžektors ierakstīja `[OmniRoute Caveman Output Mode]`. Zem marķiera teksts atbilst mantotajai injekcijai en, pt-BR, es, de, fr, it, ru, id un vi; ja un zh ir viena papildu atstarpe pirms robežu klauzulas. `terse-prose` tulko pt-BR, es, de, fr, it, ru, zh, ja, id un vi, tāpēc pieprasījums, kura atrisinātā valoda ir `hu` saņem tekstu angļu valodā, kur mantotais inžektors izmantoja savu ungāru valodu.
 
-Izvades stila valodas atlase (`resolveOutputStyleLanguage()` failā
-`outputStyles/apply.ts`): ja `languageConfig.enabled` ir ieslēgts, `autoDetect` paņem
-paraugu no jaunākā lietotāja ziņojuma pieprasījuma `messages` masīvā, kurā ir teksts
-(virknes saturs vai tā satura daļu `text`), un tam palaiž Caveman dzinēja detektoru
-(`detectCompressionLanguage()`). Detektors atgriež `zh` tekstam ar haņu rakstzīmēm un
-bez kanas; pretējā gadījumā tas atgriež to no `it`, `pt-BR`, `es`, `de`, `fr`, `ru`,
-`ja`, `hu` un `id`, kurai ir visvairāk norāžu atbilstību, bet `en`, ja nav nevienas
-atbilstības — tekstam, ko tas nespēj klasificēt, tiek izmantota angļu valoda, nevis
-`defaultLanguage`, un `vi` nekad netiek noteikta, lai gan stiliem ir pievienots teksts
-`vi` valodā. Responses API pamatteksts glabā savus dialoga gājienus laukā `input`, no
-kura paraugs netiek ņemts, tādēļ tam tiek izmantota `defaultLanguage`, bet pēc tam —
-angļu valoda. Ja nevienā `messages` lietotāja ziņojumā nav teksta vai `autoDetect` ir
-izslēgts, tiek izmantota `defaultLanguage`, bet pēc tam — angļu valoda. Ja
-`languageConfig.enabled` ir izslēgts, tiek izmantota angļu valoda — izņemot gadījumu,
-kad pieprasījumam tiek lietota saspiešanas kombinācija (kombinācija, kas piešķirta
-pieprasījuma maršrutēšanas kombinācijai, vai noklusējuma saspiešanas kombinācija, ko
-chatCore izmanto kā atkāpšanās variantu iebūvētajam vairākslāņu konveijeram):
-kombinācijas lietošana šim pieprasījumam ieslēdz `languageConfig.enabled` un iestata
-`defaultLanguage` no kombinācijas valodu pakotnēm (saglabāto vērtību, ja tā ir viena no
-kombinācijas pakotnēm, pretējā gadījumā kombinācijas pirmo pakotni, kuras noklusējums ir
-`en`), bet saglabātais `autoDetect` (pēc noklusējuma ieslēgts) joprojām tiek izmantots.
-Caveman ievades dzinējs savu noteikumu pakotnes valodu izvēlas citādi — katrai teksta
-daļai atsevišķi un, ja automātiskā noteikšana ir izslēgta, atkarībā no `enabledPacks`.
+Output-style language selection (`resolveOutputStyleLanguage()` in `outputStyles/apply.ts`): with `languageConfig.enabled` on, `autoDetect` samples the latest user message in the request's `messages` array that has text (string content, or the `text` of its content parts) and runs the Caveman engine's detector (`detectCompressionLanguage()`) on it. The detector returns `zh` for text with Han characters and no kana; otherwise it returns whichever of `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` and `id` has the most hint matches, and `en` when none match — text it cannot classify gets English, never `defaultLanguage`, and `vi` is never detected although the styles ship `vi` text. A Responses API body keeps its turns in `input`, which is not sampled, so it gets `defaultLanguage`, then English. When no user message in `messages` has text, or with `autoDetect` off, `defaultLanguage` applies, then English. With `languageConfig.enabled` off, the language is English — unless a compression combo applies to the request (a combo assigned to the request's routing combo, or the default compression combo chatCore falls back to for the built-in stacked pipeline): applying a combo turns `languageConfig.enabled` on for that request and sets `defaultLanguage` from the combo's language packs (the saved value if it is one of the combo's packs, otherwise the combo's first pack, which defaults to `en`), while the saved `autoDetect` (on by default) still applies. The Caveman input engine picks its rule-pack language differently — per text part and, with auto-detect off, gated on `enabledPacks`.
 
-Stila × valodas matrica ir fiksēta failā
-`tests/unit/compression/output-styles-i18n-matrix.test.ts`: katram kataloga stilam ir
-nepieciešams ieraksts testa `BASELINE_LANGUAGES`; stilam, kas nav ierobežots pēc
-lokalizācijas, ir jānodrošina pt-BR tulkojums (no šī noteikuma ir atbrīvots pēc
-lokalizācijas ierobežotais `terse-cjk`), ja vien tas nav norādīts sarakstā
-`KNOWN_ENGLISH_ONLY`, kurā drīkst būt tikai stili bez jebkādiem tulkojumiem —
-ja sarakstā norādītam stilam ir kaut viens tulkojums, tests neizdodas; tests stilam
-neizdodas arī tad, ja tas zaudē valodu, kas norādīta tā `BASELINE_LANGUAGES` ierakstā.
-Lai pievienotu stilu, skatiet
-[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
+Stila × valodas matricu piesprauž `tests/unit/compression/output-styles-i18n-matrix.test.ts`: katram kataloga stilam ir nepieciešams ieraksts testa `BASELINE_LANGUAGES`; stilam, kas nav ierobežots ar lokalizāciju, ir jānosūta pt-BR tulkojums (uz lokalizācijas noteikto `terse-cjk` neattiecas šis noteikums), ja vien tas nav norādīts `KNOWN_ENGLISH_ONLY`, kurā var būt tikai stili bez tulkojuma — un stils neiztur testu, kad tas zaudē valodu, kas norādīta tā `BASELINE_LANGUAGES` ierakstā. Lai pievienotu stilu, skatiet [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
 ### Rīka rezultātu saspiešana
 
-`compressToolResult()` failā `open-sse/services/compression/toolResultCompressor.ts`
-saspiež rīka rezultāta tekstu, izmantojot **5 stratēģijas**. Tās tiek izmēģinātas šādā
-secībā, un rezultātu nosaka pirmā iespējotā stratēģija, kuras pārbaude atbilst saturam:
+`compressToolResult()` `open-sse/services/compression/toolResultCompressor.ts` saspiež rīka rezultāta tekstu ar** 5 stratēģijas** . Tas izmēģina tos šādā secībā, un pirmā iespējotā stratēģija, kuras pārbaude atbilst saturam, nosaka rezultātu:
 
-1. **`fileContent`**: saturam ar 3 vai vairāk rindām, kurā vismaz viena rinda, ignorējot
-   sākuma atkāpi, sākas ar `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` vai `return ` (atslēgvārds un atstarpe), vai ar `if`,
-   `for` vai `while`, kam seko `(` vai ` (`, tiek paturētas pirmās 20 un pēdējās
-   5 rindas, atzīmējot izlaisto vidusdaļu.
-2. **`grepSearch`**: saturam ar vismaz vienu rindu formā `<path>:<digits>:`,
-   kurā tekstā pirms pirmā kola nav atstarpju rakstzīmju, tiek paturētas tikai šīs
-   rindas — ne vairāk kā 30 —, kam seko pārējo atbilstību skaits un atbilstošo failu
-   saraksts; visas pārējās rindas tiek atmestas. Stratēģijas aktivizēšanai pietiek ar
-   vienu šādu rindu, tāpēc tiek ieskaitīta arī žurnāla rinda, kas sākas ar laikspiedolu,
-   piemēram, `12:30:45`.
-3. **`shellOutput`**: izvadē, kas satur ANSI CSI secību (`ESC[`, kam seko cipari vai
-   semikoli un pēc tam burts, kā krāsu kodos) vai jebkurā teksta vietā rakstzīmi `$`,
-   kurai seko atstarpes rakstzīme, šīs secības tiek noņemtas (citas vadsecības,
-   piemēram, `ESC[?25l` vai OSC loga virsraksta secība, tiek paturētas), un tiek
-   paturētas pēdējās 50 rindas, sakļaujot secīgas atkārtotas rindas. Tā kā šī pārbaude
-   tiek izpildīta pirms `json` un `errorMessage`, JSON vai kļūdas izvade, kas satur
-   šādu `$`, nekad nenonāk līdz tām, kamēr `shellOutput` ir ieslēgta.
-4. **`json`**: JSON lietderīgā slodze, kas pārsniedz 2000 rakstzīmes, sākas ar `{` vai
-   `[` (pēc neobligātām atstarpes rakstzīmēm) un ir veiksmīgi parsējama, tiek
-   apkopota: masīvam ar vairāk nekā 7 elementiem tiek paturēti pirmie 5 un pēdējie
-   2 elementi, kā arī tā kopējais elementu skaits, bet objektam tiek paturētas pirmās
-   20 atslēgas, katru ligzdotā objekta vai masīva vērtību aizstājot ar vietturi
-   `{…N keys}` (masīvam N ir tā garums) un pievienojot marķieri
-   `_remaining_<N>_keys`, kas norāda pēc pirmajām 20 atmesto atslēgu skaitu. Skalārās
-   vērtības tiek kopētas pilnībā, tāpēc objekts ar ne vairāk kā 20 atslēgām un bez
-   ligzdotām vērtībām tiek tikai pārformatēts ar atkāpēm — minificētam objektam
-   rakstzīmju skaits palielinās, un tas paliek nemainīts.
-5. **`errorMessage`**: izvadei, kas jebkurā vietā un neatkarīgi no burtu reģistra
-   satur `error:`, `error ` (vārds, kam seko atstarpe, kā piemērā `no error found`),
-   `[error]`, `exception:`, `exception `, `[exception]` vai `traceback`, tiek paturēta
-   pirmā rinda, nākamās 10 rindas un pēdējās 3 rindas, starp tām esošo rindu vietā
-   ievietojot marķieri `… [N frames elided] …`. Marķieris parādās tikai tad, ja pēc
-   pirmās rindas seko vairāk nekā 13 rindas, tāpēc kļūdas izvade ar ne vairāk kā
-   14 rindām netiek saīsināta (ja ir 12 vai 13 rindas, pēdējās 3 rindas atkārto jau
-   paturētās rindas).
+1. **`fileContent`** : 3 vai vairāku rindu saturs, kurā vismaz viena rindiņa, ignorējot sākuma atkāpi, sākas ar `import `, `export `, `function `, `class `, `const `, `let `, `var ` vai `return ` (atslēgvārds plus atstarpe), vai ar `if`, `for` vai zq2 vai `while`, kam seko `(` vai ` (`. pēdējās 5 rindiņas ar iezīmētu vidusdaļu.
+2. **`grepSearch`** : saturs ar vismaz vienu rindiņu formā `<path>:<digits>:`, kur tekstā pirms pirmā kola nav atstarpes, tiek saglabātas tikai tās rindas, ne vairāk kā 30, kam seko visu turpmāko atbilstību skaits un atbilstošo failu saraksts; katra otrā rindiņa tiek atmesta. Ar vienu šādu rindiņu pietiek, lai aktivizētu stratēģiju, tāpēc tiek ņemta vērā arī žurnāla rinda, kas sākas ar laikspiedolu, piemēram, `12:30:45`.
+3. **`shellOutput`** : izvade, kas satur ANSI CSI secību (`ESC[` pēc tam cipari vai semikoli, pēc tam burts, kā krāsu kodos) vai `$` kam seko atstarpe jebkurā tekstā, šīs secības tiek zaudētas (tiek saglabātas citas atslēgšanās vietas, piemēram, `ESC[?25l` vai OSC loga virsrakstu secība) un tiek saglabātas pēdējās secīgās 50 secīgās rindas. Tā kā šī pārbaude tiek izpildīta pirms `json` un `errorMessage`, JSON vai kļūdas izvade, kas satur šādu `$` nekad tos nesasniedz, kamēr `shellOutput` ir ieslēgts.
+4. **`json`** : JSON lietderīgā slodze, kas pārsniedz 2000 rakstzīmes, kas sākas ar `{` vai `[` (pēc izvēles atstarpes) un parsē, tiek apkopota: masīvs, kurā ir vairāk nekā 7 vienumi, saglabā savus pirmos 5 un pēdējos 2 vienumus un kopējo skaitu, un objekts saglabā savas pirmās 20 atslēgas, katra masīva vērtība tiek aizstāta ar ligzdotu objektu vai masīva vērtību. un `{…N keys}` marķieris `_remaining_<N>_keys` kas skaita atslēgas, kas ir nomestas pāri pirmajām 20. Skalārās vērtības tiek kopētas veselas, tāpēc objekts ar 20 vai mazāk atslēgām bez ligzdotām vērtībām tiek tikai atkārtoti ievilkts. — samazināts viens iegūst rakstzīmes un paliek nemainīgs.
+5. **`errorMessage`** : izvade, kas satur `error:`, `error ` (vārds, kam seko atstarpe, tāpat kā `no error found`), `[error]`, `exception:`, `exception `, `[exception]` vai `traceback` saglabā savu pirmo rindiņu, nākamās 10 rindas un pēdējās 3, starp kurām ir `… [N frames elided] …` marķieris. Marķieris parādās tikai tad, ja pirmajai rindai seko vairāk nekā 13 rindiņas, tāpēc kļūdas izvade līdz 14 rindiņām vai mazāk netiek saīsināta (pie 12 vai 13 rindām pēdējās 3 atkārtotās rindas jau ir saglabātas).
 
-Kad kāda stratēģija atbilst, vēlākās stratēģijas netiek izmēģinātas pat tad, ja tā neko
-neietaupa. Ja atbilstošā stratēģija neietaupa nevienu aplēsto marķieri (garums ÷ 4,
-noapaļots uz augšu) — piemēram, kodam līdzīgs fails ar ne vairāk kā 25 rindām vai JSON
-masīvs, kas pārsniedz 2000 rakstzīmes, bet kam ir ne vairāk kā 7 elementi —,
-agresīvais dzinis patur sākotnējo rīka rezultātu: abi izsaucēji (`compressAggressive()`
-un `compressAnthropicToolResultBlock()`) patur oriģinālu, ja `saved` ir 0 vai mazāks,
-savukārt pats `compressToolResult()` joprojām atgriež šīs stratēģijas izvadi. Rīka
-rezultāta posms nav galīgais: dziņa rezerves apkopotājs joprojām var saīsināt `tool`
-vai `function` ziņojumu, kas pārsniedz 8192 rakstzīmes (`maxTokensPerMessage`, 2048,
-reizināts ar 4).
+Pēc stratēģijas atbilstības, pat tādas, kas neko neglābj, vēlākās stratēģijas netiek izmēģinātas. Ja atbilstības stratēģija nesaglabā aptuvenos marķierus (garums ÷ 4, noapaļots uz augšu) — piemēram, kodam līdzīgs fails ar 25 rindiņām vai mazāk, vai JSON masīvs, kas pārsniedz 2000 rakstzīmes ar 7 vai mazāk vienumiem — agresīvā programma saglabā sākotnējo rīka rezultātu: gan zvanītāji `compressAggressive()` gan `compressAnthropicToolResultBlock()`, kad `saved` zemāk, bet pats `compressToolResult()` joprojām atgriež šīs stratēģijas rezultātu. Rīka-rezultāta darbība nav pēdējais vārds: dzinēja atkāpšanās apkopotājs joprojām var saīsināt `tool` vai `function` ziņojumu, kas ir garāks par 8192 rakstzīmēm (`maxTokensPerMessage`, 2048, 4 reizes).
 
-#### Kad izmantot
+#### Kad lietot
 
-Rīka rezultātu saspiešana ir agresīvā dziņa 1. darbība (`compressAggressive()` failā
-`open-sse/services/compression/aggressive.ts`), tāpēc tā tiek izpildīta agresīvajā
-režīmā un salikta konveijera `aggressive` darbībā. Tā saspiež OpenAI formas `tool` un
-`function` ziņojumus, kā arī tekstu Anthropic `tool_result` blokos. Katrai stratēģijai
-ir savs slēdzis sadaļā `aggressive.toolStrategies`, un pēc noklusējuma tie visi ir
-ieslēgti. Informācijas panelī slēdži atrodas Caveman lapas skatā **Papildu**, kamēr
-saspiešana ir ieslēgta un noklusējuma režīms ir Aggressive.
+Rīka rezultāta saspiešana ir agresīvā dzinēja 1. darbība (`compressAggressive()` in `open-sse/services/compression/aggressive.ts`), tāpēc tā darbojas Agresīvā režīmā un `aggressive` solī stacked konveijerā. Tas saspiež OpenAI formas `tool` un `function` ziņojumus un tekstu Anthropic `tool_result` blokos. Katrai stratēģijai zem `aggressive.toolStrategies` ir savs slēdzis, kas pēc noklusējuma ir ieslēgts. Informācijas panelī slēdži atrodas Caveman lapā** Papildu** skats, kamēr ir ieslēgta saspiešana un noklusējuma režīms ir Agresīvs.
 
-### Saliktais konveijers
+### Stacked Pipeline
 
-Saliktajā režīmā **vairāki dziņi tiek izpildīti secīgi** — parasti vispirms RTK
-(60–90% ietaupījums rīka izvadē), pēc tam Caveman atlikušajam tekstam (~46% ievades
-ietaupījums). Kopā tas veido **78–95% piemērotā diapazona ietaupījumu** (skatiet iepriekš
-sadaļu par augšposma ietaupījuma aprēķinu): `1 - (1 - 0.60..0.90) × (1 - 0.46)`
-vidēji ir ≈89%.
+Darbojas stacked režīms** vairākus dzinējus pēc kārtas** — parasti RTK vispirms (60–90% ietaupījums no instrumenta izvades), pēc tam Caveman uz atlikušo tekstu (~ 46% ievades ietaupījums). Sastāvā, tas ir** 78–95% piemērotais diapazons** (skatiet iepriekš sadaļu Upstream Savings Math): `1 - (1 - 0.60..0.90) × (1 - 0.46)` vidējie ≈ 89%.
 
 #### Kā tas darbojas
 
 ```
-Ievade (1000 marķieru)
-  → RTK (komandas ņemošs vērā filtrs) → 200 marķieru
-    → Caveman (liekā satura noņemšana) → 108 marķieri
-  → Izvade (108 marķieri, ~89% ietaupījums)
+Input (1000 tokens)
+  → RTK (command-aware filter) → 200 tokens
+    → Caveman (filler removal) → 108 tokens
+  → Output (108 tokens, ~89% savings)
 ```
 
-#### Kad izmantot
+#### Kad lietot
 
 Izmantojiet salikto režīmu:
 
-- Darbplūsmām, kurās intensīvi izmanto rīkus (aģentiska programmēšana, pētniecība)
-- Pret izmaksām jutīgai pakešapstrādei
-- Kad nepieciešams maksimāls marķieru ietaupījums
+- Darbplūsmas, kas prasa daudz rīku (aģentiskā kodēšana, izpēte)
+- Izmaksu ziņā jutīga pakešu apstrāde
+- Kad jums ir nepieciešams maksimālais marķiera ietaupījums
 
-Saliktie konveijeri tiek konfigurēti, izmantojot globālo `stackedPipeline` saspiešanas
-iestatījumu vai nosauktu saspiešanas kombināciju, kas piešķirta maršrutēšanas
-kombinācijai (skatiet iepriekš sadaļu par pārrakstīšanu katrai kombinācijai), — nevis
-izmantojot automātiskās kombinācijas `modePack` (šis lauks tikai maina automātiskās
-kombinācijas modeļu atlases svarus, un `stacked` nav derīgs pakotnes nosaukums).
+Salikti cauruļvadi tiek konfigurēti, izmantojot globālo `stackedPipeline` saspiešanas iestatījumu vai nosauktu saspiešanas kombināciju, kas piešķirta maršrutēšanas kombinācijai (skatiet iepriekš sadaļu Per-Combo Override) `stacked` nevis izmantojot automātisko kombināciju `modePack` (šajā laukā tiek atkārtoti izsvērta automātiskās kombinācijas modeļa atlase, un — nav derīgs pakotnes nosaukums).
 
 ---
 

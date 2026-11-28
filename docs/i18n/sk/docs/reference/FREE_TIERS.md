@@ -4,10 +4,9 @@
 
 ---
 
-> **Pre používateľov**: Hľadáte jednoduchý návod? Pozrite si [Sprievodcu bezplatnými úrovňami](../getting-started/FREE-TIERS-GUIDE.md), kde nájdete podrobné pokyny, ako získať bezplatnú AI.
+> **Pre používateľov** : Hľadáte jednoduchý návod? Podrobné pokyny na získanie bezplatnej AI nájdete v príručke [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md).
 
-> **Naposledy preskúmané:** 2026-06-17 — webový prieskum jednotlivých poskytovateľov (oficiálna dokumentácia + správy z posledných 7 dní, kontrola 50 agentmi s adversariálnym overením), ktorý aktualizoval všetky kvóty bezplatných úrovní a podmienky používania. **Čiastočný opätovný audit 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — pozrite si poznámku s dátumom nižšie).
-> **Zdroj pravdy (katalóg):** `open-sse/config/freeModelCatalog.ts` (rozpočty pre jednotlivé MODELY, s odstránenými duplicitami fondov). Nižšie uvedené počty rozpočtových tokenov pochádzajú z aktuálneho webového prieskumu a sú **približné** — pozrite si [Metodiku a upozornenia](#methodology--caveats).
+> **Naposledy kontrolované:** 2026-11-23. Každý riadok s kvótou, každá vyradená ponuka a každá kartová brána sa v ten deň znova otvorili na vlastnej stránke poskytovateľa (`config/quality/free-catalog-evidence.json`). Skoršie prechody: 2026-06-17 prieskum na poskytovateľa a 2026-09-02 čiastočný opätovný audit.** Zdroj pravdy (katalóg):** `open-sse/config/freeModelCatalog.ts` (rozpočty na MODELY, zbavené duplicitných zdrojov). Nižšie uvedené čísla tokenového rozpočtu pochádzajú zo živého webového prieskumu a sú** aproximácia** — pozri [Metodika a upozornenia](#methodology--caveats).
 
 ## TL;DR — koľko voľného záveru OmniRoute skutočne agreguje?
 
@@ -15,22 +14,23 @@ Tieto čísla popisujú samostatné účty tretích strán a podmienky oprávnen
 
 **Skontrolované 2026-10-08:** [Cerebras](https://www.cerebras.ai/pricing) ponúka jednorazový propagačný kredit 5 USD vyžadujúci spôsob platby, ktorého platnosť vyprší po 30 dňoch. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) zverejňuje limity sadzieb project/model/tier ; zostáva mimo kvantifikovaného mesačného titulku.
 
-| Metrické                                       | Tokeny / mesiac       | Význam                                                                                                                                                                                                                                                                      |
-| ---------------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Zdokumentovaný opakujúci sa grant (stály)**  | **~ 1,62B**           | Voľná úroveň** bazény** (katalóg podľa modelu), počíta sa každý zdieľaný fond** raz** . Živý zdroj za `/api/free-tier/summary` a stránka Free-Tier Budget na informačnom paneli.** Použite toto číslo.**                                                                    |
-| **+ prvý mesiac s registračnými kreditmi**     | **~ 2,22B**           | Stabilné + jednorazové registračné kredity (Z.AI 20 miliónov, DeepSeek 5 miliónov, ...), odpočítané na účet.** Len prvý mesiac** — sa neopakuje.                                                                                                                            |
-| **+ trvalo zadarmo, bez zverejneného stropu**  | _nekvantifikovateľné_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — skutočný opakujúci sa prístup, rate/concurrency-limited,** žiadny token cap na započítanie** . Uvedené, nikdy nesčítané (započítanie ich v `RPM×24/7` je inflácia, ktorú odmietame). |
-| **+ zvýšenie vkladu a odomknutia**             | **+~ 24 miliónov**    | Jednorazový** 10 dolárov** doplnenie OpenRouter zvyšuje svoj bezplatný fond z 50 → 1 000 req/day. Hlásené samostatne, takže nikdy nezvýši stabilné číslo.                                                                                                                   |
-| **+ za regionálnou kontrolou totožnosti**      | **+~ 6M**             | `modelscope` (Alibaba Cloudová väzba + pevnina-Čína overenie skutočného mena). Skutočná opakujúca sa kvóta zobrazená ako `gatedRecurringTokens` / `gatedProviders` a na prístrojovej doske. Nikdy nie je zhrnuté do nadpisu: +~ 6M za overením regionálnej identity.        |
-| Teoretický strop (všetky limity sadzieb, 24/7) | ~ 10B                 | Súčet limitu sadzby každého poskytovateľa extrapolovaný na nepretržité používanie.** Nie je zárukou** — toto nenapisujte.                                                                                                                                                   |
+| Metrické                                      | Tokeny / mesiac       | Význam                                                                                                                                                                                                                                                                      |
+| --------------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Zdokumentovaný opakujúci sa grant (stály)** | **~ 90 miliónov**     | Voľná úroveň** bazény** (katalóg podľa modelu), počíta sa každý zdieľaný fond** raz** . Živý zdroj za `/api/free-tier/summary` a stránka Free-Tier Budget na informačnom paneli.** Použite toto číslo.**                                                                    |
+| **+ prvý mesiac s registračnými kreditmi**    | **~ 153 miliónov**    | Stabilné + jednorazové registračné kredity (Z.AI 20 miliónov, DeepSeek 5 miliónov, ...), odpočítané na účet.** Len prvý mesiac** — sa neopakuje.                                                                                                                            |
+| **+ trvalo zadarmo, bez zverejneného stropu** | _nekvantifikovateľné_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — skutočný opakujúci sa prístup, rate/concurrency-limited,** žiadny token cap na započítanie** . Uvedené, nikdy nesčítané (započítanie ich v `RPM×24/7` je inflácia, ktorú odmietame). |
+| **+ zvýšenie vkladu a odomknutia**            | **+~ 24 miliónov**    | Jednorazový** 10 dolárov** doplnenie OpenRouter zvyšuje svoj bezplatný fond z 50 → 1 000 req/day. Hlásené samostatne, takže nikdy nezvýši stabilné číslo.                                                                                                                   |
+| **+ za regionálnou kontrolou totožnosti**     | **+~ 6M**             | `modelscope` (Alibaba Cloudová väzba + pevnina-Čína overenie skutočného mena). Skutočná opakujúca sa kvóta zobrazená ako `gatedRecurringTokens` / `gatedProviders` a na prístrojovej doske. Nikdy nie je zhrnuté do nadpisu: +~ 6M za overením regionálnej identity.        |
 
-**Úprimný nadpis:** _OmniRoute agregáty**~ 1,62B zdokumentovaných bezplatných tokenov za mesiac** (až 2,22 miliardy ~ za prvý mesiac s kreditmi za registráciu) v 26 fondoch bezplatných vrstiev — plus dlhý chvost trvalo bezplatných poskytovateľov bez obmedzenia — a RTK + Caveman kompresia (15 – 95 % úspora tokenov) to rozširuje._
+**Úprimný nadpis:** _Katalógy OmniRoute**~ 90 miliónov bezplatných tokenov** mesiac, ktorý môžete skutočne využiť (až 153 miliónov ~ za prvý mesiac s kreditmi za registráciu), z 12 fondov so zverejnenou kvótou, plus dlhý chvost trvalo bezplatných poskytovateľov bez obmedzenia. RTK + kompresia Caveman (úspora tokenov 15–95 %) to ešte viac rozširuje._
 
-> **Prečo to kleslo z predchádzajúceho ~ 1,94B.** Obnovenie 2026-06-17 je opravou poctivosti, nie stratou: `gemini` je teraz zbavený duplicitného fondu (bolo nafúknuté počítaním každého variantu Flash samostatne, 462 miliónov → 60 miliónov), `cloudflare-ai` opravené na skutočné 10k-Neurons/day (122 miliónov → 30 miliónov), `doubao` reklasifikované ako kredit ti (jednorazové vypnutie `kluster` vypnutie)`chutes`/`phind` ukončené). Čiastočne kompenzované `llm7` (správne 5M/day → 150 miliónov) a novými bezplatnými poskytovateľmi (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Historické poznámky. Nasledujúce obrázky popisujú vtedajší katalóg; nie sú to dnešné čísla._
 >
-> **Ďalej opravené na ~ 1.37B vo verzii 3.8.42:** `longcat` bol preklasifikovaný z opakujúceho sa grantu 150M/mo na jednorazový 10-miliónový registračný kredit po skončení bezplatného náhľadu. Rovnaké pravidlo čestnosti — žiadny poskytovateľ nebol omylom vyradený.
+> **Prečo to kleslo z predchádzajúcich 1,94 miliardy.** Obnovenie 2026-06-17 je opravou poctivosti, nie stratou: `gemini` je teraz zbavený duplicitných zdrojov (bol nafúknutý počítaním každého variantu Flash samostatne, 462 miliónov → 60 miliónov), `cloudflare-ai` opravený na jeho skutočný 10k-Neurons/day (122 miliónov → 30 miliónov), `doubao` reklasifikované ako kredit ti (jednorazové vypnutie/nevypnutie `kluster` `chutes`/`phind` ukončené). Čiastočne kompenzovaný `llm7` (správne 5M/day → 150 miliónov) a novými bezplatnými poskytovateľmi (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Aktualizované 26. 8. 2026 po ukončení služby Felo Web:** Felo Web je vylúčený, zatiaľ čo jeho provenance/licensing odvodené od GPL zostáva na HOLD; zdroj v tom čase uvádzal 38 poolových kľúčov. Počet bazénov je aktívny a CI-gated (`check:docs-counts` zlyhá pri zostavovaní, ak sa čísla vyššie odchýlia od `computeFreeModelTotals()`).
+> **Ďalej opravené na 1,37 miliardy vo verzii 3.8.42:** `longcat` bola preklasifikovaná z opakujúceho sa grantu 150M/mo na jednorazový 10-miliónový registračný kredit po skončení bezplatného náhľadu. Rovnaké pravidlo čestnosti — žiadny poskytovateľ nebol omylom vyradený.
+>
+> **Aktualizované 26. 8. 2026 po ukončení služby Felo Web:** Felo Web je vylúčený, zatiaľ čo jeho provenance/licensing odvodené od GPL zostáva na HOLD; zdroj v tom čase uvádzal 38 poolových kľúčov.
 >
 > **Opätovne skontrolované 2026-09-02 oproti vlastným stránkam poskytovateľov** (zdroje: komentáre `// evidence:` vedľa každého prekontrolovaného záznamu v `open-sse/config/freeModelCatalog.data.ts`): `gemini` a `ollama-cloud` už nezverejňujú tokenovú figúrku (Google odstránil bezplatný stôl pre každý model dňa 23. 12. 2025; bezplatný plán Ollama je „počiatočné kredity za použitie“) a teraz sú uvedené ako** bez uzáveru** , nikdy nesčítané (− 80M); `groq` je päť** na model** 200K-TPD čiapky (6M každý, + 15M) s tromi vyradenými IDs ; `nara` je jedno vedro 7M/day (+ 60M, 210M). 1B `mistral` je viditeľná iba v konzole účtu — pozri _Triedy dôkazov_ v časti Metodika.
 >
@@ -38,26 +38,114 @@ Tieto čísla popisujú samostatné účty tretích strán a podmienky oprávnen
 >
 > **Opravené dňa 2026-09-03 (#11773):** `cerebras` bola preklasifikovaná z opakujúceho sa grantu 30M/mo (stará 1- tokens/day skúšobná verzia bez karty) na jednorazový registračný kredit 5 USD, ktorý vyžaduje spôsob platby. Rovnaké pravidlo čestnosti ako LongCat.
 >
-> **Plus xKiro (2026-09-03):** nový fond `xkiro-free` (150M/mo) pridáva 35. opakovaný kľúč fondu. Felo Web zostáva vylúčený, zatiaľ čo jeho provenance/licensing odvodený od GPL zostáva na HOLD. Teraz informuje zdroj** 26 opakujúcich sa bazénových kľúčov** a**~ 1,62B stabilný** — živé, CI-gated číslo (`check:docs-counts` zlyhá pri zostavovaní, ak sa odchýli od `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** nový fond `xkiro-free` (150M/mo) pridáva 35. opakovaný kľúč fondu. Felo Web zostáva vylúčený, zatiaľ čo jeho provenance/licensing odvodený od GPL zostáva na HOLD. V tom čase zdroj uvádzal 34 kľúčov fondu a 1,62 miliardy tokenov mesačne (stále).
 
-Najväčší** zdokumentované** prispievatelia: `mistral` 1,00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (päť čiapok na model), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` je vylúčený — jeho 10 miliónov LongCat-2 0,0 grant je jednorazový, KYC-hradený registračný kredit, nie opakujúci sa mesačný rozpočet.)
+Najväčší** zdokumentované** prispievatelia k dnešnej skutočnej hodnote: `groq` 24M (4 čiapky na model), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` je vylúčený — jeho 10 miliónov LongCat-2.0 grant je jednorazový, KYC-gated registračný kredit, nie opakujúci sa mesačný rozpočet.)
 
-> ⚠️ Teoretický strop (~ 10B) je nafúknutý iba poskytovateľmi s obmedzenou sadzbou** žiadny zverejnený token cap** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`), ktorých čísla by boli `RPM/TPM × 24/7 × 30d` — teoretické maximum, ktoré žiadny účet neudrží. sú** vylúčené** z obhájiteľného čísla (uvedeného namiesto toho v riadku „trvalo voľné, bez čiapky“). Ide o rovnakú infláciu, ktorá robí mnohomiliardové nároky konkurentov nespoľahlivými.
+## Oprava, november 2026
+
+Do tohto vydania táto stránka a README uvádzali 1,62 miliardy bezplatných tokenov mesačne. To bolo nesprávne. Štyri fondy obsahovali 93 % a všetky štyri sa zmenili u poskytovateľa, zatiaľ čo náš katalóg zostal rovnaký. Skutočné číslo je dnes 90 miliónov ~ bezplatných tokenov mesačne. Tabuľka uvádza, čo sa zmenilo u jednotlivých poskytovateľov, vedľa toho, čo sme urobili zle.
+
+| Čo sa zmenilo u poskytovateľa (dátum, zdroj)                                                                                              | Čo sme sa pomýlili (čo, odkedy)                                                                              |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Mistral: bezplatný režim už nezahŕňa prístup API (docs.mistral.ai, prečítajte si 2026-11-18)                                              | Stále sme počítali 1 miliardu tokenov mesačne od čítania konzoly 2026-09-02 a už sme to nikdy nekontrolovali |
+| Nara: bezplatný plán neuvádza žiadne modely ( `router.bynara.id/api/plans` poskytovateľa, prečítajte si 2026-11-18)                       | Mesačne sme napočítali 210 miliónov tokenov                                                                  |
+| xKiro: 500 000 tokenov denne na účet (xkiro.com, čítajte 2026-11-18)                                                                      | V katalógu zostalo 30 modelov IDs, ktoré už neexistujú                                                       |
+| LLM7: stránka limitov je preč a žiadna oficiálna stránka nezverejňuje bezplatnú kvótu (2026-11-23)                                        | Napočítali sme 150 miliónov tokenov za mesiac bez datovaných dôkazov                                         |
+| Groq: jeden model z bezplatného fondu bol vyradený (2026-09-14)                                                                           | Bazén si zachoval svoju starú veľkosť                                                                        |
+| AgentRouter: Poskytovateľ uvádza denný kredit 25 USD na registráciu a ďalších 50 USD na registráciu pozvánok (prečítajte si 23. 11. 2026) | Uviedli sme kredit na registráciu 200 USD                                                                    |
+| Predibase: produkt skončil                                                                                                                | Ešte v prvom mesiaci sme počítali jeho registračný kredit                                                    |
+| (žiadny)                                                                                                                                  | 16 poskytovateľov si po skončení ponuky ponechalo príznak bezplatnej ponuky                                  |
+| (žiadny)                                                                                                                                  | README prisľúbila opätovný audit každé dva týždne. Posledný predtým bol 2026-09-02                           |
+| (žiadny)                                                                                                                                  | Kontrola dokumentov umožnila posun o 0,05 B a nedokázala prečítať čísla v miliónoch                          |
+
+Súčet jednej kvóty na riadok nafúkne akýkoľvek katalóg vrátane nášho. To je dôvod, prečo riadková figúrka nesie svoj štítok a tá skutočná sedí priamo pod ňou.
+
+## Čo sa počíta
+
+Riadok sa započítava do voľných figúrok, ak toto všetko platí:
+
+- Kvóta sa opakuje a zverejňuje sa na vlastnej stránke poskytovateľa s dátumom vedľa riadku v katalógu.
+- Jeden účet na poskytovateľa. Nič, čo si vyžaduje platbu, kartu, zálohu alebo kontrolu totožnosti (KYC). Kvóta, ktorá na registráciu vyžaduje telefónne číslo, Telegram alebo Discord je uvedená oddelene, ako „so sociálnou registráciou“, nikdy nie v skutočnom čísle.
+- Žiadny poskytovateľ nenahlásil `tos: "avoid"`, iba oficiálny API poskytovateľa .
+- Jednorazové registračné kredity sa počítajú iba v prvom mesiaci a iba vtedy, keď sa nepožiada o kartu. Jednorazový vklad, ktorý zvyšuje kvótu, je samostatným zvýšením. Povýšenie sa nikdy nezapočítava do reálnej hodnoty.
+- Poskytovatelia vyhľadávania, hlasu a médií sa nezapočítavajú podľa typu prístupu a žiadneho tokenového čísla. Dostanú svoje vlastné počty vo vlastných jednotkách (výsledky, postavy, obrázky) na tejto stránke, keď ich pridá prepočítanie; tie sa nikdy nepridajú k sebe ani sa nepremenia na žetóny.
+
+Čo znamená každý verejný počet:
+
+- **Poskytovatelia s voľným prístupom** (dnes 50: 43 s kľúčom API, 6 bez kľúča, 1 cez účet nástroja): poskytovatelia s aspoň jedným riadkom katalógu, ktorý poskytuje bezplatný prístup podľa toho, ako sa k nemu dostanete.
+- **Katalógové riadky s voľným prístupom** (dnes 214): jeden riadok na poskytovateľa a model.
+- **Bazény so zverejnenou kvótou** (dnes 12): zdieľané kvóty za skutočným číslom, každá sa počíta raz.
+- **Výrazné bezplatné modely** (dnes 185): riadky zoskupené podľa modelu ID.
+- **Označené s bezplatnou ponukou** (dnes 140 + ): každý poskytovateľ, ktorého záznam v registri obsahuje `hasFree`, vrátane poskytovateľov vyhľadávania, hlasu a médií, skúšobných verzií a kreditov na registráciu.
+
+Každý počet je katalogizovaný, nie je testovaný na hovor: hovorí to, čo uvádza katalóg, nie to, že každá trasa práve odpovedá.
+
+## Ako počítame
+
+Tri čísla pochádzajú z rovnakého katalógu, auditovaného dňa 23.11.2026:
+
+- **Skutočná hodnota, ~ 90 miliónov bezplatných tokenov mesačne.** Každá zdieľaná kvóta sa počíta raz, takže päť modelov za jednou dennou dávkou je jedna dávka. To je to, čo môže skutočne použiť jeden účet u každého poskytovateľa. S jednorazovými registračnými kreditmi 153 miliónov ~ za prvý mesiac.
+- **Veľký údaj, ~ 11,3B sčítané riadok po riadku** , vrátane ukončených ponúk. Takto sa počítajú ostatné katalógy. Takmer všetko je história: 98,6 % z ponúk, ktoré už neexistujú. Potlačíme ho len s jeho štítkom a so skutočnou postavou vedľa.
+- **Živý katalóg, ~ 159 miliónov súčet za živý riadok** : rovnaká suma za riadkom bez ukončených ponúk.
+
+Metóda riadka po riadku (`row-sum-v1`) sa riadi štyrmi pravidlami:
+
+1. Každý uvedený riadok sa pridá tak, ako je, bez zlúčenia riadkov, ktoré zdieľajú jeden fond.
+2. Pridávajú sa iba kvóty zverejnené v tokenoch. Kvóta zverejnená v žiadostiach, kreditoch alebo neurónoch sa počíta ako nula (`FREE_QUOTA_UNIT` v `open-sse/config/freeModelCatalog.ts`).
+3. Registračné kredity, navýšenia vkladov a vypnuté riadky (`enabled: false`) sú vynechané.
+4. Veľké číslo pridáva knihu ukončených ponúk (`open-sse/config/freeModelCatalog.retired.data.ts`) pri poslednej kvóte v každom uvedenom riadku. Vstupujú doň iba riadky vyradené od `RETIRED_LEDGER_SINCE` a každý riadok vypadne 12 mesiacov po jeho skončení.
+
+Ak prestane byť bežný spôsob počítania riadok po riadku, alebo sa tak rozhodne správca, veľká číslica opustí každú stránku a zostane len skutočná číslica.
+
+## Odstránená / žiadna bezplatná úroveň
+
+Poskytovatelia, ktorých bezplatná ponuka skončila alebo sa nepodarilo potvrdiť. Zostávajú v registri so `hasFree: false` (alebo sú vyradené z bezplatného katalógu) a nikdy sa nezapočítavajú do žiadneho voľného čísla. Toto nie je zoznam poskytovateľov odstránených zo OmniRoute na požiadanie (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Poskytovateľ             | Od r       | Prečo?                                                                                     | Zdroj                                          |
+| ------------------------ | ---------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| `mistral`                | 2026-11-23 | Bezplatný režim už nezahŕňa prístup API                                                    | docs.mistral.ai (limity použitia)              |
+| `nara`                   | 2026-11-23 | Bezplatný plán neuvádza žiadne modely                                                      | `router.bynara.id/api/plans`                   |
+| `llm7`                   | 2026-11-23 | Žiadna oficiálna stránka nezverejňuje bezplatnú kvótu                                      | stránky poskytovateľa                          |
+| `navy`                   | 2026-11-23 | Na oficiálnych stránkach nebolo možné potvrdiť žiadnu voľnú kvótu                          | api.navy                                       |
+| `bluesminds`             | 2026-11-23 | Použitie vyžaduje kredit zakúpený od poskytovateľa                                         | `api.bluesminds.com/api/status`                |
+| `arcee-ai`               | 2026-11-23 | Iba platené ceny                                                                           | docs.arcee.ai (ceny)                           |
+| `huggingface`            | 2026-11-23 | Bezplatné účty si musia kúpiť kredity alebo inovovať na PRO                                | huggingface.co (ceny poskytovateľov odvodenia) |
+| `huggingchat`            | 2026-11-23 | Hugging Face inference vyžaduje zakúpené kredity alebo PRO                                 | huggingface.co (ceny poskytovateľov odvodenia) |
+| `ainative`               | 2026-11-23 | Plán Hobbyist je vyplatený po 3-dňovej skúšobnej verzii                                    | stránku s cenami poskytovateľa                 |
+| `stepfun`                | 2026-11-23 | Len cena za použitie                                                                       | stránku s cenami poskytovateľa                 |
+| `predibase`              | 2026-11-23 | Produkt bol prerušený                                                                      | predibase.com                                  |
+| `poolside`               | 2026-10-31 | Priame vyvodzovanie vypnuté                                                                | platforma.poolside.ai                          |
+| `amazon-q`               | 2026-05-15 | Žiadne nové bezplatné registrácie na úrovni                                                | stránku poskytovateľa                          |
+| `chat-oripe`             | 2026-11-23 | Hostiteľ API odpovedá HTTP 530                                                             | API hostiteľ                                   |
+| `naga-ai`                | 2026-11-23 | Duplikát poskytovateľa Naga.ac                                                             | api.naga.ac                                    |
+| `dxnt`                   | 2026-11-23 | Registračný bonus existuje, ale žiadny model ho neprijíma                                  | dxnt.com                                       |
+| `ollama-cloud`           | 2026-11-09 | Cloudové modely sa platia za token alebo sú pokryté platenými plánmi                       | ollama.com (#19334)                            |
+| `chutes`                 | 2026-03    | Voľná vrstva sa skončila                                                                   | stránku poskytovateľa                          |
+| `phind`                  | 2026-01    | Spoločnosť zatvorená                                                                       | stránku poskytovateľa                          |
+| `kluster`                | 2026-06-09 | Západ slnka (presunuté na MITO)                                                            | stránku poskytovateľa                          |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo zadarmo odvolaný; Propagácia Nemotronu skončila 06.06.2026 (znova overená 18.06.2026) | stránku poskytovateľa                          |
+| `aimlapi`                | 2026-06-18 | Voľná úroveň je pozastavená                                                                | stránku poskytovateľa                          |
+| `yi`                     | 2026-06-18 | Yi-Light odišiel do dôchodku, priebežne pracujte                                           | stránku poskytovateľa                          |
+| `featherless-ai`         | 2026-06    | Žiadna aktuálna voľná úroveň                                                               | stránku poskytovateľa                          |
+| `chipotle`               | 2026-09-15 | Miniaplikácia chatu za ním odpovedá 404 na každej trase (#13131, #4037)                    | amelia.chipotle.com                            |
+
+`iflytek` / `sparkdesk` zostávajú uvedené s upozornením ToS: Spark Lite je zadarmo, ale ToS obmedzuje použitie proxy a relé.
 
 ---
 
-## 2026-06-17 aktualizácia — čo sa zmenilo od 2026-06-05
+## 2026-06-17 obnoviť — čo sa zmenilo od 2026-06-05
 
-Prieskum webu vykonaný 50 agentmi (oficiálna dokumentácia + správy za posledných 7 dní, adverzárne overené) aktualizoval celý katalóg. Hlavné body:
+Prieskum webu pre 50 agentov (oficiálne správy docs + last-7-days, overené protivníkom) osviežil celý katalóg. Najdôležitejšie:
 
-- **Odstránené / bez bezplatnej úrovne (2026):** `chutes` (bezplatná úroveň skončila 2026-03), `phind` (spoločnosť zanikla 2026-01), `kluster` (ukončené 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (bezplatný prístup k MiMo zrušený 2026-05-24, promo Nemotron skončilo 2026-06 — opätovne overené 2026-06-18), `aimlapi` (bezplatná úroveň pozastavená — opätovne overené 2026-06-18), `yi` (Yi-Light vyradený, režim pay-as-you-go — opätovne overené 2026-06-18), `featherless-ai` (momentálne žiadna bezplatná úroveň), `chipotle` („Pepper AI" od Chipotle — reverzne analyzovaný chatovací widget Amelia na `amelia.chipotle.com`, s ktorým poskytovateľ komunikoval, teraz vracia 404 na každej trase vrátane koreňovej; backend vyradený z prevádzky/presunutý, potvrdené 2026-09-15 — úplne odstránený z katalógu, #13131/#4037). `iflytek` / `sparkdesk` zostávajú uvedené, ale majú poznámku s upozornením na podmienky služby (Spark Lite je bezplatný; podmienky služby obmedzujú používanie proxy/relay).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` boli vypnuté 2026-06-01 a `2.5 Pro` opustil bezplatnú úroveň (2026-04); bezplatná úroveň je teraz **iba rodina Flash** (2.5/3/3.1/3.5 Flash + Gemma). Katalóg teraz rodinu Flash **združuje** (predtým bola hodnota nafúknutá počítaním každého variantu zvlášť: 462M → 60M).
-- **Opravené čísla:** `cloudflare-ai` 122M → **30M** (reálnych 10k Neuronov/deň), `doubao` reklasifikovaný ako jednorazový registračný kredit (nie opakujúci sa), `llm7` 4M → **150M** (dokumentovaných 5M tokenov/deň), `together` — endpointy „-Free" ukončené → odstránený aj registračný kredit $25 (vyžaduje minimálny nákup $5, žiadna bezplatná skúšobná verzia), `longcat` — Preview skončilo + modely Flash vyradené → iba **LongCat-2.0**, reklasifikovaný ako jednorazový registračný kredit **10M** tokenov (podmienený KYC, nie opakujúci sa).
-- **Priama inferencia Poolside sa končí (overené 2026-10-20):** [oficiálna platforma](https://platform.poolside.ai/) oznamuje vypnutie **2026-10-31** a odkazuje používateľov na stiahnutie jej modelov z Hugging Face na vlastné hosťovanie. Priamy poskytovateľ `poolside` nesie toto upozornenie. Ručne kurátorovaný bezplatný katalóg nemá žiadne priame záznamy Poolside; jeho záznamy s názvom Poolside patria pod `kilo-gateway`. Toto oznámenie nepotvrdzuje dostupnosť modelov servírovaných bránami Kilo, Cline, NVIDIA alebo inými, takže tieto záznamy sa na tomto základe nevyraďujú.
-- **Noví objavení bezplatní poskytovatelia:** ⭐ **Kilo Code** (`kilo-gateway` — rotujúca sada „Auto Free": rodina NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 rotujúcich bezplatných modelov na kódovanie, aktualizované 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash natrvalo bezplatné + registračný bonus 20M) a `arcee-ai` Trinity Large Preview.
-- **Nové čestné úrovne** (pozri Metodiku): kategória _natrvalo bezplatné, ale bez limitu_ (reálny opakujúci sa prístup, žiadny tokenový limit na započítanie) a _boost odomknutý vkladom_ (OpenRouter $10 → +24M/mes.), obe uvádzané **samostatne**, aby nikdy nenafukovali hlavné číslo.
+- **Odstránená / žiadna bezplatná úroveň:** presunutý do [vlastnej sekcie](#removed--no-free-tier).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` sa vypne 2026-06-01 a `2.5 Pro` opustil voľnú úroveň (2026-04); bezplatná úroveň je teraz** Len pre rodinu Flash** (2.5/3/3.1/3.5 Flash + Gemma). Katalóg teraz** bazény** rodina Flash (bola nafúknutá počítaním každého variantu samostatne: 462 miliónov → 60 miliónov).
+- **Opravené čísla:** `cloudflare-ai` 122 miliónov →** 30 mil** (skutočné 10k-Neurons/day), `doubao` preklasifikované ako jednorazový registračný kredit (nie opakujúci sa), `llm7` 4M →** 150 mil** (zdokumentované 5 miliónov tokens/day), `together` ukončené koncové body „-Free“ → bol odstránený aj registračný kredit 25 USD (vyžaduje sa minimálny nákup 5 USD, žiadna bezplatná skúšobná verzia), `longcat` ukážka ukončená + modely Flash vyradené →**LongCat-2 0,0** len, preklasifikované ako jednorazové** 10 mil**-token registračný kredit (blokovaný KYC, neopakuje sa).
+- **Koniec priameho odvodenia pri bazéne (overené 20. 10. 2026):** [oficiálna platforma](https://platform.poolside.ai/) oznamuje vypnutie** 2026-10-31** a nasmeruje používateľov, aby si stiahli svoje modely z Hugging Face na vlastné hosťovanie. Priamy poskytovateľ `poolside` nesie toto varovanie. Ručne zostavený bezplatný katalóg neobsahuje žiadne priame položky pri bazéne; jeho položky s názvom Poolside patria do `kilo-gateway`. Toto oznámenie nestanovuje dostupnosť modelov obsluhovaných Kilo, Cline, NVIDIA alebo inými bránami, takže tieto zoznamy nie sú na základe toho zrušené.
+- **Objavení nových bezplatných poskytovateľov:** ⭐** Kilový kód** (`kilo-gateway` — rotačná sada "Auto Free": NVIDIA Nemotron 3 family, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode Zen** (`opencode-zen` — 10 rotačných bezplatných modelov kódovania, obnovené 2026-10-20), ⭐** Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4,5-Flash / 4,7-Flash permanentne zadarmo + 20 miliónov bonus za registráciu) a `arcee-ai` Trinity Large Preview.
+- **Nové poctivé úrovne** (pozri Metodiku): kategória _permanently-free-but-uncapped_ (skutočný opakovaný prístup, bez obmedzenia tokenu) a _deposit-unlock boost_ (OpenRouter $10 → +24M/mo), obe sa objavili** samostatne** takže nikdy nenafukujú titulok.
 
-> Podrobná tabuľka jednotlivých poskytovateľov nižšie je **snímka k 2026-06-05**; zmeny uvedené vyššie ju nahrádzajú. Živým, kanonickým zdrojom je katalóg podľa modelov `open-sse/config/freeModelCatalog.ts`.
+> Podrobná tabuľka podľa poskytovateľov nižšie je** Snímka 05.06.2026** ; vyššie uvedené delty ho nahrádzajú. Živým kanonickým zdrojom je katalóg jednotlivých modelov `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -114,8 +202,8 @@ z iného, vznikol by náhľad, ktorý by nezodpovedal tomu, čo sa stane po klik
 
 ## Metodika a upozornenia
 
-- Čísla sú** horné odhady** od každého poskytovateľa zdokumentovaných voľných limitov k dátumu** 2026-06-17** , zhromaždené webovým prieskumom. Voľné úrovne sa neustále menia, — znova overujte predtým, ako sa spoľahnete na postavu.
-- **Za čo vlastne vstup ručí.** Žiadna položka má hodnotenie spoľahlivosti na riadok a API neslúži žiadne — považuje každý údaj vyššie za odhad rovnakej, neuvedenej kvality. Dve skutočnosti sú rozdielne, pretože sú kurátorované ručne, a nie odvodzované: 44 záznamov má nezávisle zdokumentovanú pevnú zastávku (39 z nich riadky xKiro, ktoré majú všetky spoločné jeden denný príspevok) a 22 záznamov obsahuje informácie o rýchlom školení. `hardStopGuaranteed` sa nastaví iba vtedy, keď sa vo vlastných podmienkach poskytovateľa uvádza, že prekročenie bezplatnej kvóty odmietne požiadavku, namiesto toho, aby vám v tichosti začalo účtovať, so zdrojom v komentári vedľa položky; nikdy nie je predvolená hodnota `true` a položka, ktorú nikto neoveril, zostáva nenastavená. Chýbajúca vlajka na zastavenie znamená „nezavedený“, nie „známe, že vám to fakturuje“.** režim STRICT** (prihlásený strážca smerovania `freeAccessPolicy=strict` ) dôveruje iba záznamom, ktoré nesú príznak; každá ďalšia voľná úroveň je vylúčená ako `no-hard-stop` (pozri `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Keď strážca filtruje oblasť, operátorom viditeľný protokol hlási počet vylúčení aj jeho podiel `no-hard-stop`.
+- Čísla sú** horné odhady** z dokumentovaných limitov voľnej úrovne každého poskytovateľa, naposledy skontrolované** 2026-11-23** pre každý riadok s kvótou. Voľné úrovne sa neustále menia, — znova overujte predtým, ako sa spoľahnete na postavu.
+- **Za čo vlastne vstup ručí.** Žiadna položka má hodnotenie spoľahlivosti na riadok a API neslúži žiadne — považuje každý údaj vyššie za odhad rovnakej, neuvedenej kvality. Dve skutočnosti sú rozdielne, pretože sú kurátorované ručne, a nie odvodzované: 44 záznamov má nezávisle zdokumentovanú pevnú zastávku (39 z nich riadky xKiro, ktoré majú všetky spoločné jeden denný príspevok) a 22 záznamov obsahuje informácie o rýchlom školení. `hardStopGuaranteed` sa nastaví iba vtedy, keď sa vo vlastných podmienkach poskytovateľa uvádza, že prekročenie bezplatnej kvóty odmietne požiadavku, namiesto toho, aby vám v tichosti začalo účtovať, so zdrojom v komentári vedľa položky; nikdy nie je predvolená hodnota `true` a položka, ktorú nikto neoveril, zostáva nenastavená. Chýbajúci príznak zastavenia znamená „nezavedený“, nie „známe, že vám to fakturuje“.** režim STRICT** (prihlásený strážca smerovania `freeAccessPolicy=strict` ) dôveruje iba záznamom, ktoré nesú príznak; každá ďalšia voľná úroveň je vylúčená ako `no-hard-stop` (pozri `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Keď strážca filtruje fond, operátorom viditeľný protokol hlási počet vylúčení aj jeho podiel `no-hard-stop`.
 - len opakujúce sa mesačné tokeny `estMonthlyFreeTokens` =.** Jednorazové prihlasovacie kredity sa neopakujú** a počítať ako 0. Prerušené úrovne sú tiež 0.
 - Denný token cap → `monthly = daily × 30`. Iba RPD zdokumentované → `RPD × ~800 output tokens × 30`. Iba RPM/TPM (bez denného limitu) →** bez uzáveru** (pozri nižšie).
 - **Voľný prístup, ale bez zverejneného limitu tokenov** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `nvidia`): toto sú rate/concurrency-limited. Klasifikujeme ich `recurring-uncapped` a** nikdy ich nesčítajte** — vynásobením `RPM × 24/7 × 30d` by vznikol fantastický strop (inflácia, ktorú odmietame). NVIDIAAPI je len na skúšobné použitie; pozri jeho upozornenie ToS nižšie.
@@ -125,15 +213,15 @@ z iného, vznikol by náhľad, ktorý by nezodpovedal tomu, čo sa stane po klik
 
 ---
 
-## Prečo je naše číslo nižšie než u iných agregátorov
+## Prečo je náš počet menší ako u iných agregátorov
 
-Väčšina údajov o „bezplatných tokenoch za mesiac“ v tejto oblasti je súčtom hodnôt uvádzaných pre jednotlivé modely. Náš údaj taký zámerne nie je:
+Väčšina čísel „bezplatných tokenov za mesiac“ v tomto priestore sú súčty štítkov pre jednotlivé modely. Naša nie je zámerne:
 
-- **Každý zdieľaný balík sa počíta iba raz.** Bezplatný program Mistral poskytuje jeden limit 1B/mesiac na organizáciu; uvedenie pod piatimi modelmi z neho neurobí 5B. Pri súčte podľa jednotlivých modelov by náš vlastný katalóg uvádzal **~7.4B** (prepočítané 2026-09-03; tento údaj nie je kontrolovaný CI — premerajte ho pri každej zmene katalógu) — hlavný údaj uvádza **~1.47B**, pretože práve to môže jeden účet u každého poskytovateľa reálne využiť.
-- **Denné limity sa prepočítavajú, rýchlostné limity nie.** Zdokumentovaný limit tokenov za deň sa prepočíta ako `× 30`; zdokumentovaný limit požiadaviek za deň ako `RPD × ~800 tokens × 30`; poskytovateľ, ktorý zverejňuje iba počet požiadaviek za minútu, **nemá** mesačný údaj a je uvedený ako _bez limitu_, nikdy sa nezapočítava do súčtu. Násobenie rýchlostného limitu nepretržitou prevádzkou 24/7 je nafukovanie údajov, ktoré odmietame.
-- **Kvóty podmienené regionálnym overením identity sa uvádzajú samostatne** (`+~6M behind regional identity verification`), pretože väčšina čitateľov ich nemôže využívať.
-- **Kredity za registráciu platia iba prvý mesiac** a vykazujú sa ako druhý údaj; nikdy sa nezlučujú s dlhodobým údajom.
-- **Dodržiavanie tohto údaja vynucuje CI.** `npm run check:docs-counts` prepočítava súčty z katalógu a spôsobí zlyhanie zostavenia, keď sa tento súbor, README alebo karta rozpočtu od nich odchýlia.
+- **Každý zdieľaný bazén sa počíta raz.** Päť modelov za jednou dávkou je jedna dávka, nie päť. Čítanie toho istého katalógu po riadkoch a dôvod, prečo ho tlačíme, nájdete na stránke [Ako počítame](#how-we-count).
+- **Denné limity sú prevedené, sadzby nie.** Zdokumentovaná čiapočka tokens/day sa stáva `× 30`; zdokumentovaná čiapočka requests/day sa stáva `RPD × ~800 tokens × 30`; poskytovateľ, ktorý zverejňuje iba žiadosti za minútu** č** mesačný údaj a je uvedený ako _uncapped_, nikdy nie súčet. Vynásobenie limitu sadzby 24/7 je inflácia, ktorú odmietame.
+- **Kvóty za kontrolou regionálnej identity sú zobrazené oddelene** (`+~6M behind regional identity verification`), pretože väčšina čitateľov ich nevie použiť.
+- **Registračné kredity sú len za prvý mesiac** a uvádzané ako druhé číslo, ktoré sa nikdy nezmiešalo do ustáleného čísla.
+- **Čo robí kontrola dokumentov.** `npm run check:docs-counts` (režim vydania) prepočítava skutočnú hodnotu, číslo za prvý mesiac a dva súčty riadok po riadku z katalógu a zlyhá, keď README, táto stránka alebo sprievodca Free Tiers Guide vytlačí inú hodnotu alebo vytlačí veľkú hodnotu bez jej označenia a skutočného čísla. Karta rozpočtu je pri vydaní prekreslená z rovnakých faktov.
 
 ---
 
@@ -242,74 +330,74 @@ Väčšina údajov o „bezplatných tokenoch za mesiac“ v tejto oblasti je s�
 
 ---
 
-## Voľná úroveň podľa poskytovateľa (Bytez/Nous skontrolované 2026-10-15; prekontrolované riadky 2026-09-02; ostatné 2026-06-17)
+## Bezplatná úroveň podľa jednotlivých poskytovateľov (katalóg auditovaný 23. 11. 2026)
 
-> Regenerované z katalógu jednotlivých modelov (`open-sse/config/freeModelCatalog.ts`), zbavené duplicitných zdrojov. Zoradené podľa opakujúceho sa stáleho tokens/mo. `uncapped*` = trvalo voľné, ale bez zverejneného tokenového limitu (rate/concurrency-limited) — skutočného prístupu,** nie** zhrnuté do titulku. `—` = len kreditné / bezkľúčové / nie je možné kvantifikovať tokenom.
+> Udržiavané ručne z katalógu jednotlivých modelov (`open-sse/config/freeModelCatalog.data.ts`); posledná kontrola 23.11.2026. Zoradené podľa skutočných mesačných tokenov každého fondu (každý zdieľaný fond sa počíta raz). `uncapped*` = trvalo zadarmo, ale bez zverejneného limitu tokenov (rate/concurrency-limited): skutočný prístup,** nie** zrátané do reálnej postavy. `not counted` = opakujúca sa kvóta, ktorú skutočný údaj vynecháva (`avoid`, alebo za kontrolou regionálnej identity). Poskytovatelia, ktorých ponuka skončila, sú na [úrovni Odstránené/žiadne bezplatné](#removed--no-free-tier). `—` = len kreditné / bezkľúčové / nie je možné kvantifikovať tokenom.
 
-| Poskytovateľ     | Voľný typ          | Stabilné tokens/mo | Kredit na prvý mesiac | ToS           | Modelky |
-| ---------------- | ------------------ | ------------------ | --------------------- | ------------- | ------- |
-| `mistral`        | opakujúce sa       | ~ 1,00 B           | —                     | opatrnosť     | 5       |
-| `nara`           | opakujúce sa       | ~ 210 miliónov     | —                     | opatrnosť     | 8       |
-| `llm7`           | opakujúce sa       | ~ 150 miliónov     | —                     | opatrnosť     | 4       |
-| `xkiro`          | opakujúce sa       | ~ 150 miliónov     | —                     | opatrnosť     | 39      |
-| `longcat`        | jednorazovo        | —                  | 10 mil                | opatrnosť     | 1       |
-| `cerebras`       | jednorazovo        | —                  | 5 $ kredit            | opatrnosť     | 2       |
-| `cloudflare-ai`  | opakujúce sa       | ~ 30 miliónov      | —                     | opatrnosť     | 9       |
-| `groq`           | opakujúce sa       | ~ 30 miliónov      | —                     | opatrnosť     | 5       |
-| `api-airforce`   | opakujúce sa       | ~ 24 miliónov      | —                     | opatrnosť     | 7       |
-| `bluesminds`     | opakujúce sa       | ~ 7M               | —                     | nejednoznačný | 22      |
-| `sambanova`      | opakujúce sa       | ~ 6M               | —                     | opatrnosť     | 5       |
-| `arcee-ai`       | opakujúce sa       | ~ 5 mil            | —                     | opatrnosť     | 1       |
-| `bazaarlink`     | opakujúce sa       | ~ 4M               | —                     | opatrnosť     | 32      |
-| `openrouter`     | opakujúce sa       | ~ 1 mil            | —                     | opatrnosť     | 1       |
-| `cohere`         | opakujúce sa       | ~ 800 tis          | —                     | opatrnosť     | 6       |
-| `huggingchat`    | opakujúce sa       | ~ 500 tis          | —                     | opatrnosť     | 4       |
-| `morph`          | opakujúce sa       | ~ 400 tis          | —                     | ok            | 2       |
-| `huggingface`    | opakujúce sa       | ~ 200 tis          | —                     | opatrnosť     | 6       |
-| `kiro`           | opakujúce sa       | ~ 25 tis           | —                     | vyhnúť sa     | 12      |
-| `glm-cn`         | bez uzáveru        | bez uzáveru\*      | ~ 20 miliónov         | ok            | 4       |
-| `baidu`          | bez uzáveru        | bez uzáveru\*      | —                     | opatrnosť     | 1       |
-| `gemini`         | bez uzáveru        | bez uzáveru\*      | —                     | opatrnosť     | 4       |
-| `kilo-gateway`   | bez uzáveru        | bez uzáveru\*      | —                     | opatrnosť     | 7       |
-| `opencode-zen`   | bez uzáveru        | bez uzáveru\*      | —                     | opatrnosť     | 10      |
-| `tencent`        | bez uzáveru        | bez uzáveru\*      | —                     | opatrnosť     | 1       |
-| `vertex`         | registračný kredit | —                  | ~ 300 miliónov        | opatrnosť     | 10      |
-| `agentrouter`    | registračný kredit | —                  | ~ 200 miliónov        | opatrnosť     | 4       |
-| `predibase`      | registračný kredit | —                  | ~ 25 miliónov         | opatrnosť     | 1       |
-| `doubao`         | registračný kredit | —                  | ~ 15 miliónov         | nejednoznačný | 1       |
-| `ai21`           | registračný kredit | —                  | ~ 10 mil              | vyhnúť sa     | 2       |
-| `deepseek`       | registračný kredit | —                  | ~ 5 mil               | ok            | 2       |
-| `hyperbolic`     | registračný kredit | —                  | ~ 5 mil               | ok            | 8       |
-| `nscale`         | registračný kredit | —                  | ~ 5 mil               | opatrnosť     | 6       |
-| `bytez`          | kredit (rec.)      | —                  | neznámy               | nejednoznačný | 1       |
-| `deepinfra`      | registračný kredit | —                  | ~ 1 mil               | opatrnosť     | 22      |
-| `fireworks`      | registračný kredit | —                  | ~ 1 mil               | vyhnúť sa     | 10      |
-| `nebius`         | registračný kredit | —                  | ~ 1 mil               | opatrnosť     | 1       |
-| `qoder`          | registračný kredit | —                  | ~ 1 mil               | opatrnosť     | 14      |
-| `scaleway`       | registračný kredit | —                  | ~ 1 mil               | ok            | 6       |
-| `novita`         | registračný kredit | —                  | ~ 500 tis             | opatrnosť     | 1       |
-| `agy`            | bezkľúčový         | —                  | —                     | vyhnúť sa     | 16      |
-| `baichuan`       | bezkľúčový         | —                  | —                     | nejednoznačný | 1       |
-| `blackbox`       | bezkľúčový         | —                  | —                     | vyhnúť sa     | 6       |
-| `coze`           | bezkľúčový         | —                  | —                     | vyhnúť sa     | 1       |
-| `duckduckgo-web` | bezkľúčový         | —                  | —                     | vyhnúť sa     | 6       |
-| `freemodel-dev`  | bezkľúčový         | —                  | —                     | neznámy       | 4       |
-| `friendliai`     | bezkľúčový         | —                  | —                     | vyhnúť sa     | 2       |
-| `iflytek`        | bezkľúčový         | —                  | —                     | vyhnúť sa     | 1       |
-| `inference-net`  | bezkľúčový         | —                  | —                     | opatrnosť     | 3       |
-| `liquid`         | bezkľúčový         | —                  | —                     | neznámy       | 1       |
-| `monsterapi`     | bezkľúčový         | —                  | —                     | nejednoznačný | 1       |
-| `muse-spark-web` | bezkľúčový         | —                  | —                     | vyhnúť sa     | 3       |
-| `nlpcloud`       | bezkľúčový         | —                  | —                     | vyhnúť sa     | 1       |
-| `nvidia`         | bez uzáveru        | bez uzáveru\*      | —                     | opatrnosť     | 3       |
-| `pollinations`   | bezkľúčový         | —                  | —                     | opatrnosť     | 31      |
-| `publicai`       | bezkľúčový         | —                  | —                     | opatrnosť     | 3       |
-| `reka`           | bezkľúčový         | —                  | —                     | opatrnosť     | 2       |
-| `sensenova`      | bezkľúčový         | —                  | —                     | opatrnosť     | 1       |
-| `sparkdesk`      | bezkľúčový         | —                  | —                     | opatrnosť     | 1       |
-| `stepfun`        | bezkľúčový         | —                  | —                     | ok            | 1       |
-| `t3-web`         | bezkľúčový         | —                  | —                     | vyhnúť sa     | 23      |
-| `uncloseai`      | bezkľúčový         | —                  | —                     | opatrnosť     | 3       |
+| Poskytovateľ     | Voľný typ          | Skutočná tokens/mo                  | Kredit na prvý mesiac | ToS           | Modelky |
+| ---------------- | ------------------ | ----------------------------------- | --------------------- | ------------- | ------- |
+| `api-airforce`   | opakujúce sa       | ~ 24 miliónov                       | —                     | opatrnosť     | 5       |
+| `groq`           | opakujúce sa       | ~ 24M (4 čiapky na model)           | —                     | opatrnosť     | 4       |
+| `cloudflare-ai`  | opakujúce sa       | ~ 23 miliónov                       | —                     | opatrnosť     | 8       |
+| `xkiro`          | opakujúce sa       | ~ 15 miliónov                       | —                     | opatrnosť     | 9       |
+| `bazaarlink`     | opakujúce sa       | ~ 1,4 milióna                       | —                     | opatrnosť     | 1       |
+| `openrouter`     | opakujúce sa       | ~ 1,2 milióna                       | —                     | opatrnosť     | 1       |
+| `cohere`         | opakujúce sa       | ~ 800 tis                           | —                     | opatrnosť     | 6       |
+| `sambanova`      | opakujúce sa       | ~ 480 tis                           | —                     | opatrnosť     | 2       |
+| `morph`          | opakujúce sa       | ~ 160 tis                           | —                     | ok            | 2       |
+| `glm-cn`         | bez uzáveru        | bez uzáveru\*                       | 20 mil                | ok            | 4       |
+| `agnes`          | bez uzáveru        | bez uzáveru\*                       | —                     | ok            | 3       |
+| `agnes-cn`       | bez uzáveru        | bez uzáveru\*                       | —                     | ok            | 3       |
+| `aion`           | bez uzáveru        | bez uzáveru\*                       | —                     | ok            | 4       |
+| `baidu`          | bez uzáveru        | bez uzáveru\*                       | —                     | opatrnosť     | 1       |
+| `gemini`         | bez uzáveru        | bez uzáveru\*                       | —                     | opatrnosť     | 4       |
+| `glm`            | bez uzáveru        | bez uzáveru\*                       | —                     | ok            | 2       |
+| `kilo-gateway`   | bez uzáveru        | bez uzáveru\*                       | —                     | opatrnosť     | 12      |
+| `nvidia`         | bez uzáveru        | bez uzáveru\*                       | —                     | opatrnosť     | 3       |
+| `onomeo`         | bez uzáveru        | bez uzáveru\*                       | —                     | opatrnosť     | 2       |
+| `requesty`       | bez uzáveru        | bez uzáveru\*                       | —                     | opatrnosť     | 2       |
+| `sealion`        | bez uzáveru        | bez uzáveru\*                       | —                     | ok            | 5       |
+| `tokenharbor`    | bez uzáveru        | bez uzáveru\*                       | —                     | opatrnosť     | 2       |
+| `coze`           | opakujúce sa       | nepočítané (`avoid`)                | —                     | vyhnúť sa     | 1       |
+| `inference-net`  | opakujúce sa       | nepočítané                          | —                     | opatrnosť     | 3       |
+| `kiro`           | opakujúce sa       | nepočítané (`avoid`)                | —                     | vyhnúť sa     | 7       |
+| `modelscope`     | opakujúce sa       | za regionálnou kontrolou totožnosti | —                     | opatrnosť     | 2       |
+| `nlpcloud`       | opakujúce sa       | nepočítané (`avoid`)                | —                     | vyhnúť sa     | 1       |
+| `reka`           | opakujúce sa       | nepočítané                          | —                     | opatrnosť     | 2       |
+| `t3-web`         | opakujúce sa       | nepočítané (`avoid`)                | —                     | vyhnúť sa     | 23      |
+| `bytez`          | kredit (rec.)      | —                                   | —                     | nejednoznačný | 1       |
+| `doubao`         | registračný kredit | —                                   | 15 mil                | nejednoznačný | 1       |
+| `longcat`        | registračný kredit | —                                   | 10 mil                | opatrnosť     | 1       |
+| `deepseek`       | registračný kredit | —                                   | 5 mil                 | ok            | 2       |
+| `hyperbolic`     | registračný kredit | —                                   | 5 mil                 | ok            | 8       |
+| `nscale`         | registračný kredit | —                                   | 5 mil                 | opatrnosť     | 6       |
+| `deepinfra`      | registračný kredit | —                                   | 1 mil                 | opatrnosť     | 22      |
+| `qoder`          | registračný kredit | —                                   | 1 mil                 | opatrnosť     | 9       |
+| `scaleway`       | registračný kredit | —                                   | 1 mil                 | ok            | 6       |
+| `novita`         | registračný kredit | —                                   | 500 tis               | opatrnosť     | 1       |
+| `agentrouter`    | registračný kredit | —                                   | —                     | opatrnosť     | 1       |
+| `ai21`           | registračný kredit | —                                   | —                     | vyhnúť sa     | 2       |
+| `baichuan`       | registračný kredit | —                                   | —                     | nejednoznačný | 1       |
+| `cerebras`       | registračný kredit | —                                   | —                     | opatrnosť     | 2       |
+| `fireworks`      | registračný kredit | —                                   | —                     | vyhnúť sa     | 10      |
+| `freemodel-dev`  | registračný kredit | —                                   | —                     | neznámy       | 4       |
+| `monsterapi`     | registračný kredit | —                                   | —                     | nejednoznačný | 1       |
+| `nebius`         | registračný kredit | —                                   | —                     | opatrnosť     | 1       |
+| `publicai`       | registračný kredit | —                                   | —                     | opatrnosť     | 3       |
+| `sensenova`      | registračný kredit | —                                   | —                     | opatrnosť     | 1       |
+| `vertex`         | registračný kredit | —                                   | —                     | opatrnosť     | 16      |
+| `agy`            | bezkľúčový         | —                                   | —                     | vyhnúť sa     | 9       |
+| `aihorde`        | bezkľúčový         | —                                   | —                     | ok            | 3       |
+| `blackbox`       | bezkľúčový         | —                                   | —                     | vyhnúť sa     | 6       |
+| `duckduckgo-web` | bezkľúčový         | —                                   | —                     | vyhnúť sa     | 6       |
+| `friendliai`     | bezkľúčový         | —                                   | —                     | vyhnúť sa     | 2       |
+| `iflytek`        | bezkľúčový         | —                                   | —                     | vyhnúť sa     | 1       |
+| `liquid`         | bezkľúčový         | —                                   | —                     | neznámy       | 1       |
+| `muse-spark-web` | bezkľúčový         | —                                   | —                     | vyhnúť sa     | 3       |
+| `ovhcloud`       | bezkľúčový         | —                                   | —                     | ok            | 5       |
+| `pollinations`   | bezkľúčový         | —                                   | —                     | opatrnosť     | 24      |
+| `sparkdesk`      | bezkľúčový         | —                                   | —                     | opatrnosť     | 1       |
+| `uncloseai`      | bezkľúčový         | —                                   | —                     | opatrnosť     | 1       |
 
 ---
 

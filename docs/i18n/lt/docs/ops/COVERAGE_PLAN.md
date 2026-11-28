@@ -151,30 +151,30 @@ Optimizuoti reikia pagal rekomenduojamą pradinį rodiklį.
 - [ ] Pridėti regresijos testus kiekvienai nepadengtai produkcinio kodo klaidai, ištaisytai siekiant 90 %
 - [ ] Padidinti padengimo ribą CI tik tada, kai vietinis pradinis lygis išlieka stabilus bent per du paleidimus iš eilės
 
-## Nuoseklaus kartelės kėlimo politika
+## Raketo politika
 
-Atnaujinkite `npm run test:coverage` slenksčius tik tada, kai projektas iš tikrųjų viršija kitą gairę su pakankama atsarga.
+Atnaujinkite `npm run test:coverage` slenksčius tik tada, kai projektas iš tikrųjų viršys kitą etapą naudodami patogų buferį.
 
-**Dabartinis slenkstis:** `npm run test:coverage` užtikrina **60 teiginių / 60 eilučių / 60 funkcijų / 60 šakų** (metrika buvo perskaičiuota kokybės kontrolės 6A.1 etape — ankstesnis 82.58% pradinis rodiklis buvo išpūstas, nes į jį buvo įtraukti testų failai, o `open-sse` nebuvo įtrauktas). Komanda `test:coverage:legacy` išsaugo senąją 50/50/50 metriką istoriniam palyginimui.
+**Dabartiniai vartai:** `npm run test:coverage` vykdo** 60 teiginių / 60 eilučių / 60 funkcijų / 60 šakų** (metrika buvo iš naujo pagrįsta Quality-Gates Fase 6A.1 — ankstesnis 82,58 % pradinis lygis buvo padidintas, nes buvo skaičiuojami bandomieji failai ir neįtrauktas `open-sse`). Komanda `test:coverage:legacy` išsaugo seną 50/50/50 metriką istoriniam palyginimui.
 
-Norėdami vienkartinai patikrinti slenksčius pagal naujausią ataskaitą, naudokite:
+Ad hoc slenksčio tikrinimui pagal naujausią ataskaitą naudokite:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Rekomenduojama kartelės kėlimo seka (tvarka: `teiginiai-eilutės / šakos / funkcijos`):
+Rekomenduojama reketo seka (tvarka yra `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- dabartinis slenkstis (75/70/75)
+5. 75/70/72 <-- srovės vartai (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Kitas kartelės kėlimo tikslas yra `80/75/78`, kai šakų padengimas per du iš eilės vykdymus išlieka didesnis nei 78%.
+Kitas reketo tikslas yra `80/75/78`, kai du kartus iš eilės šakos aprėptis bus didesnė nei 78 %.
 
 ## Žinoma spraga
 

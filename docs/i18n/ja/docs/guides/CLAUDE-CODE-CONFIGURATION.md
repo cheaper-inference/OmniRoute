@@ -51,7 +51,7 @@ This is how Entra ID SSO works: `scripts/cli/omniroute-sso.mjs token` prints a s
 
 ## 使用量の属性: セッションとプロジェクト
 
-OmniRoute各APIキーのリクエストをグループ化します。**エージェントセッション**そしてそれを記録します**プロジェクト**各セッションで作業が行われたため (`agent_sessions`テーブル)、使用量とコストをチーム メンバーごと、プロジェクトごと、セッションごとにレポートできます。
+OmniRoute各APIキーのリクエストをグループ化します。**エージェントセッション**そしてそれを記録します**プロジェクト**各セッションで作業が行われたため (`agent_sessions`テーブル)、チームメンバーごと、プロジェクトごと、セッションごとに使用量とコストをレポートできます。
 
 クライアントをセットアップせずに記録されるもの:
 
@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) とOpenCode (`x-opencode-session`) は同�
 
 The working directory differs between machines, so the same repository can show up under different paths. Send the project explicitly instead: Claude Code adds any headers listed in `ANTHROPIC_CUSTOM_HEADERS` to every model request, and OmniRoute reads two of them:
 
-| ヘッダ                     | 価値                                                          |
-| -------------------------- | ------------------------------------------------------------- |
-| `x-omniroute-project`      | プロジェクト名、例: `omniroute`                               |
-| `x-omniroute-project-repo` | 正規化されたリモート、例: `github.com/diegosouzapw/OmniRoute` |
+| ヘッダ                     | 価値                                                               |
+| -------------------------- | ------------------------------------------------------------------ |
+| `x-omniroute-project`      | プロジェクト名、例: `omniroute`                                    |
+| `x-omniroute-project-repo` | 正規化されたリモート、例: `github.com/cheaper-inference/OmniRoute` |
 
 どちらも帰属を確認するためにのみ読み取られます。上流のプロバイダーに転送されることはありません。
 
@@ -244,12 +244,20 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL="glm/glm-4.7-flash"
 
 ## トラブルシューティング
 
-**Claude Code がゲートウェイを無視する** — `ANTHROPIC_BASE_URL` に **`/v1` が含まれていない**ことを確認し、`claude` を再起動してください（env は起動時に一度だけ読み込まれます）。`omniroute launch` はこれを自動的に処理します。
+**Claudeコードはゲートウェイを無視します**— `ANTHROPIC_BASE_URL`が持っていることを確認します**`/v1`はありません**`claude`再起動します (env は起動時に 1 回読み取られます)。 `omniroute launch`これを処理します。
 
-**`/model` の選択画面が空、またはゲートウェイモデルが表示されない** — Claude Code v2.1.219+ と `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` が必要です。選択画面には `claude*` / `anthropic*` のモデル ID のみが表示されます。それ以外のモデルを強制的に使用するには、`ANTHROPIC_MODEL=<id>` を指定してください（プロファイルはこの方法を使用します）。
+**`/model`ピッカーが空であるか、ゲートウェイ モデルがありません**— Claudeコード v2.1.219 +および`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`必要です。 `claude*` / `anthropic*`モデルIDsのみがピッカーに表示されます。 `ANTHROPIC_MODEL=<id>`を使用して他のモデルを強制します (これはプロファイルが行うことです)。
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code は常に**プレフィックスなし**のモデル ID（例：`claude-opus-4-8`）を送信するため、Claude Code（`cc/…`）と Claude（`claude/…`）の両方のプロバイダーが接続されている場合、プレフィックスなしの ID が2つのルートに一致し、OmniRoute は推測を行いません。次のいずれかの方法で修正できます。`ANTHROPIC_MODEL=cc/claude-opus-4-8` を指定してプレフィックス付き ID に固定するか、**プレフィックスなしの Claude モデルでは Claude Code を優先する**を有効にします。これは Claude プロバイダーページの切り替え項目、または `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true`（デフォルトではオフ。[環境](../reference/ENVIRONMENT.md)を参照）で設定でき、プレフィックスなしの `claude-*` ID を代わりに Claude Code へルーティングします。明示的なプロバイダープレフィックスが常に優先されます。
+**`400 Ambiguous model 'claude-…'`** — Claudeコードは常に送信します**接頭辞なし**モデルIDs (例`claude-opus-4-8`) であるため、 Claudeコード (`cc/…`) プロバイダーとClaude (`claude/…`) プロバイダーの両方が接続されている場合、裸の ID は 2 つのルートと一致し、 OmniRoute推測を拒否します。いずれかの方法で修正してください: `ANTHROPIC_MODEL=cc/claude-opus-4-8`で接頭辞が付いた ID を固定するか、有効にします**プレフィックスのないClaudeモデルにはClaudeコードを優先する**— Claudeプロバイダー ページのトグル、または`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (デフォルトはオフ。 [「環境」](../reference/ENVIRONMENT.md)を参照) —は、代わりに裸の`claude-*` IDs Claudeコードにルーティングします。明示的なプロバイダー プレフィックスが常に優先されます。
 
-**認証エラー** — プロファイルにはトークンが保持されません。`omniroute launch --profile`（トークンを挿入します）を使用するか、`ANTHROPIC_AUTH_TOKEN` をエクスポートしてください。
+**「自動モード…このセッションは対象外です」（分類子リクエストは課金されます）**自動モードの— Claudeコードは、サーバーに独自のモデル リクエスト内のアクションをレビューするように要求します ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) )。これには、ペアとしてAnthropicに到達するために`anthropic-beta`値`dangerous-tool-use-2026-09-03`と`safeguards` body フィールドが必要であり、変更されずに戻るには`safeguard_results`と上流のツール使用IDs必要です。 OmniRoute 、ストリーミングの有無にかかわらず、リクエストがネイティブ`claude`プロバイダーまたは`anthropic-compatible-*`ノードにルーティングされるときにこれを実行します (回帰ガード: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`)。他のターゲットはレビューを返すことができないため、 Claudeコードは独自の分類子リクエストにフォールバックし、通知を表示します。
 
-**プロファイルが分離されない** — 各プロファイルは個別の `CLAUDE_CONFIG_DIR` です。セッション内で `echo $CLAUDE_CONFIG_DIR` を実行し、`~/.claude/profiles/<name>` を指していることを確認してください。
+- 非 Anthropic プロバイダーのモデル、またはそのプロバイダーに到達するコンボ。
+- クロードコード互換の中継ノード (`anthropic-compatible-cc-*`)。リクエスト本文を再構築し、 `safeguards`を伝送しません。
+- ホワイトリストに登録されたベータ版より前の古いOmniRoute 、またはゲートウェイ セッション用にAnthropicページにリストされているバージョンより下のClaudeコード バージョン。
+
+Claudeコードで`/status`実行します。**自動モードサーバー**サーバーのレビューがアクティブである間、行は`Enabled`を読み取ります。これらのリクエストに課金されるかどうかは、 OmniRouteではなくAnthropicによって決定されます。
+
+**認証エラー**—プロファイルにはトークンが保持されていません。 `omniroute launch --profile`使用する (挿入する) か、 `ANTHROPIC_AUTH_TOKEN`をエクスポートします。
+
+**プロファイルは分離しない**—各プロファイルは別個の`CLAUDE_CONFIG_DIR`です。セッション内の`echo $CLAUDE_CONFIG_DIR`が`~/.claude/profiles/<name>`を指していることを確認します。

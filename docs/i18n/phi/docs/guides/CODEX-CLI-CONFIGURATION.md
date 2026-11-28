@@ -409,7 +409,7 @@ region  = "us-east-1"
 
 ---
 
-## Maramihang server
+## Maramihang mga server
 
 ```toml
 [model_providers.omniroute-main]
@@ -469,107 +469,107 @@ Sa loob ng isang interactive na session:
 
 ---
 
-## Mga gawaing matagal tumakbo
+## Mahabang gawain
 
-May dalawang default ng OmniRoute na maaaring palihim na makasira sa mga session ng Codex CLI na tumatagal nang ilang oras. Wala sa mga ito ang setting ng Codex CLI — parehong nasa panig ng OmniRoute. Madalas na nararanasan ng mga user na naglilipat ng config mula sa mga upstream proxy na nagpi-pin ng mga account at nagdi-disable ng mga idle cutoff ang parehong problema at naghihinuha silang “hindi kayang panatilihin ng OmniRoute ang isang mahabang session.”
+Maaaring tahimik na sabotahe ng dalawang OmniRoute default ang mga multi-hour Codex CLI session. Wala rin ang Codex CLI setting — na parehong nakatira sa gilid ng OmniRoute. Ang mga user na naglilipat ng config mula sa mga upstream na proxy na nagpi-pin ng mga account at nagdi-disable ng mga idle cutoff ay kadalasang tinatamaan ang dalawa at naghihinuha ng OmniRoute na "hindi makakapagpatuloy ng mahabang session."
 
-| Sintomas                                                                                                      | Malamang na sanhi                                                                    | Kontrol                  |
-| ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------ |
-| Patuloy na nagpapalit ng account ang session / nawawala ang continuity ng prompt cache sa pagitan ng mga turn | Ang session affinity TTL ay `0` (naka-disable)                                       | `sessionAffinityTtlMs`   |
-| Napuputol ang koneksyon habang nangangatuwiran nang walang prompt na nakikita ng client                       | Na-trigger ang stream idle watchdog matapos ang 10 minuto nang walang upstream chunk | `STREAM_IDLE_TIMEOUT_MS` |
+| Sintomas                                                                                                                    | Malamang na dahilan                                                                             | Knob                     |
+| --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------ |
+| Ang session ay patuloy na lumilipat ng mga account / ang pagpapatuloy ng prompt-cache ay nawawala sa pagitan ng mga pagliko | Ang affinity ng session TTL ay `0` (naka-disable)                                               | `sessionAffinityTtlMs`   |
+| Namatay ang koneksyon sa kalagitnaan ng pangangatwiran nang walang prompt na nakaharap sa kliyente                          | Ang stream na idle watchdog ay nagpaputok pagkatapos ng 10 minuto nang walang upstream na tipak | `STREAM_IDLE_TIMEOUT_MS` |
 
-Mga kaugnay na talakayan: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (pagkaputol ng mahabang gawain), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (kung bakit naka-off bilang default ang affinity). Pagsubaybay: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Mga kaugnay na talakayan: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (matagal na bumababa ang gawain), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (bakit naka-off ang affinity). Pagsubaybay: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Session affinity — i-pin ang isang pag-uusap sa isang account
+### 1. Session affinity — pin isang pag-uusap sa isang account
 
-**Default:** `sessionAffinityTtlMs = 0` (naka-disable).
+**Default:** `sessionAffinityTtlMs = 0` (hindi pinagana).
 
-**Kung saan ito ise-set**
+**Kung saan ito itatakda**
 
-- Dashboard → **Settings → Routing** → **Session affinity** → **Affinity TTL (seconds)** (`ComboDefaultsTab`)
-- O i-PATCH ang mga setting gamit ang `sessionAffinityTtlMs` sa **milliseconds** (saklaw ng Zod na `0`–`86_400_000`, ibig sabihin, hanggang 24 na oras)
+- Dashboard →** Mga Setting → Routing** →** Affinity ng session** →** Affinity TTL (segundo)** (`ComboDefaultsTab`)
+- O mga setting PATCH na may `sessionAffinityTtlMs` in** millisecond** (Zod range `0`–`86_400_000`, ibig sabihin, hanggang 24 na oras)
 
-> Pinalitan ang pangalan sa #7274 mula sa Codex-only na `codexSessionAffinityTtlMs`. Tinatanggap pa rin ang legacy key bilang read-only na alias; dapat gamitin ng mga bagong config ang `sessionAffinityTtlMs`. Nalalapat na ngayon ang affinity sa **anumang** provider kapag higit sa `0` ang TTL, hindi lamang sa Codex — tingnan ang [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Session affinity.
+> Pinalitan ng pangalan sa #7274 mula sa Codex-only `codexSessionAffinityTtlMs`. Ang legacy key ay tinatanggap pa rin bilang read-only alias; ang mga bagong config ay dapat gumamit `sessionAffinityTtlMs`. Nalalapat na ngayon ang affinity sa** anuman** provider kapag ang TTL ay nasa itaas ng `0`, hindi lang Codex — ang nakikita [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Session affinity.
 
-**Ano ang nasisira kapag nananatili itong 0**
+**Ano ang masisira kapag nananatili ito sa 0**
 
-Ang bawat turn ng isang multi-turn na pag-uusap sa Codex ay hiwalay na niru-route ng aktibong combo strategy at maaaring mapunta sa **ibang account sa bawat turn**. Sinisira nito ang continuity ng upstream session / prompt cache. Kinokonsulta lamang ng OmniRoute ang mga header ng Codex session (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) at mga body field gaya ng `prompt_cache_key` / `session_id` kapag higit sa `0` ang TTL (`extractSessionAffinityKey` sa `src/sse/services/auth.ts`).
+Ang bawat pagliko ng isang multi-turn Codex na pag-uusap ay hiwalay na niruruta ng aktibong combo na diskarte at maaaring mapunta sa a** magkaibang account kada turn** . Sinisira nito ang upstream session / pagpapatuloy ng prompt-cache. Kinokonsulta lang ng OmniRoute ang mga Codex session header (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) at mga body field gaya ng `prompt_cache_key` / `session_id` kapag ang TTL ay mas malaki kaysa sa `0` (`extractSessionAffinityKey` sa `src/sse/services/auth.ts`).
 
-**Inirerekomenda para sa iisang gawaing tatagal nang ilang oras**
+**Inirerekomenda para sa isang multi-hour na solong gawain**
 
-Itakda ang TTL nang **mas mataas sa inaasahang wall-clock na tagal ng gawain** (ang maximum sa UI ay **86400 segundo** = 24 na oras):
+Itakda ang TTL** higit sa inaasahang haba ng wall-clock ng gawain** (UI max ay** 86400 segundo** = 24 na oras):
 
-| Inaasahang tagal ng gawain | Affinity TTL (UI, segundo) | `sessionAffinityTtlMs` |
-| -------------------------- | -------------------------- | ---------------------- |
-| Ilang oras                 | `14400` (4h)               | `14400000`             |
-| Magdamag / ~12h            | `43200` (12h)              | `43200000`             |
-| Buong araw                 | `86400` (24h, maximum)     | `86400000`             |
+| Inaasahang haba ng gawain | Affinity TTL (UI, segundo) | `sessionAffinityTtlMs` |
+| ------------------------- | -------------------------- | ---------------------- |
+| Ilang oras                | `14400` (4h)               | `14400000`             |
+| Magdamag / ~ 12h          | `43200` (12h)              | `43200000`             |
+| Buong araw                | `86400` (24h, maximum)     | `86400000`             |
 
-Sinadya ang pag-opt in: mas pinapaboran ng pag-disable sa affinity ang load-balancing sa maraming account; mas pinapaboran naman ng pag-enable dito ang continuity para sa isang mahabang agent session. **Hindi** binabago ng gabay na ito ang default — kailangang mag-opt in ang mga operator na nagpapatakbo ng mahahabang gawain sa Codex.
+Sinadya ang pag-opt-in: pinapaboran ng hindi pagpapagana ng affinity ang pag-load-balancing sa mga account; ang pagpapagana nito ay pinapaboran ang pagpapatuloy para sa isang mahabang sesyon ng ahente. Ginagawa ng gabay na ito** hindi** baguhin ang default na mga operator — na nagpapatakbo ng mahabang Codex na gawain ay dapat mag-opt in.
 
-### 2. Stream idle timeout — huwag patayin ang mga tahimik na reasoning turn
+### 2. Mag-stream ng idle timeout — huwag patayin ang mga tahimik na pagdadahilan
 
-**Default:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minuto). Nagmamana ito mula sa `REQUEST_TIMEOUT_MS` kapag hindi naka-set; ang shared baseline ay 600000 din. Tingnan ang [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Mga timeout.
+**Default:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minuto). Nagmana ito mula sa `REQUEST_TIMEOUT_MS` kapag hindi nakatakda; ang nakabahaging baseline ay 600000 din. Tingnan ang [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeout.
 
-**Ano ang nasisira sa default**
+**Ano ang nasira sa default**
 
-Ang isang Codex reasoning / tool turn na nananatiling tahimik nang mahigit 10 minuto na **walang totoong upstream chunk** ay sapilitang isinasara ng SSE idle watchdog (`open-sse/utils/stream.ts`). Kadalasang nakikita ng client ang biglaang pagkaputol lamang ng koneksyon — tugma sa “awtomatikong huminto nang walang anumang abiso.”
+Isang Codex na pangangatwiran / pagliko ng tool na nananatiling tahimik nang higit sa 10 minuto** walang tunay na upstream na tipak** ay puwersahang isinara ng SSE idle watchdog (`open-sse/utils/stream.ts`). Madalas na nakikita ng kliyente ang isang hubad na koneksyon drop — na tumutugma sa "awtomatikong huminto nang walang anumang abiso."
 
-Mahalagang detalye: **hindi nire-reset** ng synthetic SSE heartbeat ng OmniRoute ang idle clock. Isang totoong upstream body chunk lamang ang nag-a-update sa `lastChunkTime`. Ang isang tahimik na model na patuloy pang “nag-iisip” ay mukhang katulad na katulad ng isang natigil na upstream mula sa pananaw ng watchdog.
+Kritikal na detalye: synthetic SSE ni OmniRoute** hindi nagre-reset ang heartbeat** ang idle na orasan. Tanging isang tunay na upstream body chunk ang nag-update ng `lastChunkTime`. Ang isang tahimik na modelo na "nag-iisip" pa rin ay mukhang kapareho ng isang natigil na upstream mula sa punto ng view ng asong tagapagbantay.
 
-Kaugnay na Undici body inactivity: `FETCH_BODY_TIMEOUT_MS` (nagde-default din sa parehong 10-minutong baseline; dini-disable ito ng `0`). Para sa streaming, sinasaklaw lamang ng `FETCH_TIMEOUT_MS` ang pag-set up ng koneksyon / mga unang header — kapag aktibo na ang stream, ang mga pagkaantala ay pinamamahalaan ng `STREAM_IDLE_TIMEOUT_MS` at `FETCH_BODY_TIMEOUT_MS`.
+Kaugnay na Undici body inactivity: `FETCH_BODY_TIMEOUT_MS` (default din sa parehong 10 minutong baseline; idi-disable ito `0` ). Para sa streaming, sinasaklaw lang ng `FETCH_TIMEOUT_MS` ang setup ng koneksyon / mga unang header — kapag aktibo na ang stream, ang mga stall ay pinamamahalaan ng `STREAM_IDLE_TIMEOUT_MS` at `FETCH_BODY_TIMEOUT_MS`.
 
-**Inirerekomenda para sa isang multi-hour na iisang task**
+**Inirerekomenda para sa isang multi-hour na solong gawain**
 
-Sa process environment ng OmniRoute (`.env` / compose / systemd):
+Sa kapaligiran ng proseso ng OmniRoute (`.env` / compose / systemd):
 
 ```bash
-# I-disable ang stream idle + body inactivity cutoff para sa mahahabang reasoning turn
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-O itaas ang mga ito nang lampas sa pinakamahabang tahimik na pagitan na inaasahan mo (ang mga value ay nasa millisecond):
+O itaas ang mga ito sa itaas ng pinakamahabang tahimik na agwat na iyong inaasahan (ang mga halaga ay millisecond):
 
 ```bash
-# Halimbawa: magbigay-daan sa hanggang 2 oras na katahimikan sa pagitan ng mga upstream chunk
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-I-restart ang OmniRoute pagkatapos baguhin ang mga env var na ito.
+I-restart OmniRoute pagkatapos baguhin ang mga env vars na ito.
 
-### Kongkretong hakbang — multi-hour na Codex task
+### Concrete recipe — multi-hour Codex task
 
-1. **I-pin ang account:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12h) o `86400` (24h max).
-2. **Itaas / i-disable ang mga idle cutoff** sa environment ng OmniRoute:
+1. **I-pin ang account:** Dashboard → Mga Setting → Routing → Session affinity → Affinity TTL = `43200` (12h) o `86400` (24h max).
+2. **Itaas / huwag paganahin ang mga idle cutoff** sa kapaligiran ni OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Panatilihin ang karaniwang Codex `config.toml` (`wire_api = "responses"`, tamang `base_url`, `OMNIROUTE_API_KEY`) — walang mga Codex-side affinity/idle knob para sa dalawang gawi na ito.
-4. I-restart ang OmniRoute, pagkatapos ay simulan ang mahabang Codex task.
+3. Panatilihin ang karaniwang Codex `config.toml` (`wire_api = "responses"`, tamang `base_url`, `OMNIROUTE_API_KEY`) — walang Codex-side affinity/idle knobs na umiiral para sa dalawang gawi na ito.
+4. I-restart OmniRoute, pagkatapos ay simulan ang mahabang Codex na gawain.
 
-### Desisyon sa mga default (#7287)
+### Default na desisyon (#7287)
 
-| Knob                     | Default na ilalabas | Babaguhin ba sa gabay na ito?                                                                                                            |
-| ------------------------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (naka-off)      | **Hindi** — nananatiling opt-in (load-balancing vs continuity; tingnan ang Discussion #5718)                                             |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)   | **Hindi** — nananatiling 10 minuto para sa pangkalahatang traffic; itinataas o dini-disable ito ng mga operator ng mahahabang Codex task |
+| Knob                     | Ipadala ang default | Pagbabago sa gabay na ito?                                                                                                    |
+| ------------------------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (off)           | **Hindi** — ay nananatiling opt-in (load-balancing vs continuity; tingnan ang Talakayan #5718)                                |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)   | **Hindi** nananatiling 10 minuto — para sa pangkalahatang trapiko; itinataas o i-disable ito ng mga mahahabang operator Codex |
 
-Ang pagbago sa alinman sa mga default nang global ay magbabago sa gawi para sa bawat client ng isang instance, hindi lamang sa Codex. Idokumento ang mga knob; panatilihin ang mga default hanggang may tahasang desisyon ang operator na nagsasaad ng iba.
+Ang pag-flip ng alinman sa default sa buong mundo ay magbabago ng gawi para sa bawat kliyente ng isang instance, hindi lang Codex. Idokumento ang mga knobs; iwanan ang mga default na mag-isa hanggang sa isang tahasang desisyon ng operator ang magsabi ng iba.
 
-### Pag-diagnose sa mga idle cut
+### Pag-diagnose ng mga idle cut
 
-Kapag nag-trigger ang idle watchdog, nagla-log ang OmniRoute ng isang linyang ganito ang anyo:
+Kapag nagpaputok ang idle watchdog, nag-log ang OmniRoute ng isang linya na parang:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Gamitin ang grep para sa `Idle timeout: no data from` (o sa code na `stream_idle_timeout` / pangalan ng error na `StreamIdleTimeoutError`). Ang provider segment ay anumang ginamit ng OmniRoute para sa request na iyon (`codex`, ibang provider id, o `provider` kung hindi alam) — hindi ito palaging literal na string na `codex`.
+Grep para sa `Idle timeout: no data from` (o ang code `stream_idle_timeout` / error name `StreamIdleTimeoutError`). Ang segment ng provider ay anumang OmniRoute na ginamit para sa kahilingang iyon (`codex`, isa pang provider id, o `provider` kung hindi alam) — hindi ito palaging literal na string `codex`.
 
 ---
 

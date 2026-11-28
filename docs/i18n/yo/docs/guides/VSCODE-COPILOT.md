@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** ń fi gbogbo model tí OmniRoute rẹ ń pèsè sínú olùyan model GitHub Copilot Chat
-_abínibí_. Kò sí sidebar kejì, kò sí UI ìfọ̀rọ̀wérọ̀ ọ̀tọ̀ — mode aṣojú Copilot, pípè irinṣẹ́,
-àwọn olupin MCP àti àwọn ìtọ́nisọ́nà àdáni yóò máa ṣiṣẹ́ bí ti tẹ́lẹ̀, ṣùgbọ́n lórí model tí o yàn.
+**OmniCopilot** ṣe afikun awọn awoṣe iwiregbe OmniRoute rẹ ati awọn combos si abinibi Copilot Chat oluyan awoṣe. Lo iwiregbe ti olootu ti o wa tẹlẹ ati ṣiṣan iṣẹ aṣoju, pẹlu pipe irinṣẹ ati iran nigba atilẹyin nipasẹ awoṣe ti o yan.
 
-|                               |                                                                                                                                                 |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Fi sílẹ̀ (VS Code)**         | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Fi sílẹ̀ (àwọn fork)**       | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Kóòdù orísun / àwọn ìṣòro** | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Ohun tí ó nílò**            | VS Code 1.104+                                                                                                                                  |
+|                             |                                                                                                                         |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Fi sori ẹrọ (koodu VS )** | [Ibi ọja → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)    |
+| **Fi sori ẹrọ (Ṣi VSX)**    | [Ṣii VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — nbeere olupese awoṣe ede-ibaramu ati iwiregbe APIs |
+| **Orisun / oran**           | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                      |
+| **Nbeere**                  | koodu VS 1.104 + (1.122 + lati lo laisi iwọle GitHub tabi ero Copilot )                                                 |
+| **Itusilẹ lọwọlọwọ**        | OmniCopilot v1.5.1 lori awọn ile itaja mejeeji (ti a tu silẹ 2026-11-24)                                                |
 
-> **Kò nílò ìforúkọsílẹ̀ Copilot.** Láti VS Code 1.122, olùpèsè model èdè kan ń ṣiṣẹ́
-> láì wọlé sí GitHub àti láìní ètò Copilot kankan. Àwọn ìparí inline àti
-> àwọn ẹ̀yà tó dá lórí embeddings kò sí lábẹ́ API olùpèsè, wọ́n sì ṣì nílò Copilot.
+Fi aworan pamọ sori** 2026-11-25 (01:43 UTC)** , itusilẹ lọwọlọwọ:** 52.081 Ibi ọja fifi sori ẹrọ** ati** 20,989 Ṣii awọn igbasilẹ VSX** . Iwọnyi jẹ awọn metiriki itaja ti o yatọ, kii ṣe iṣiro olumulo apapọ. Awọn orisun: [Ibi ọja](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) ati [Ṣii VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Ṣii wiwa VSX ko ṣe funrara rẹ fi idi ibamu pẹlu gbogbo olootu nipa lilo iforukọsilẹ yẹn. Ṣayẹwo iwiregbe olootu ati awoṣe-ede API atilẹyin.
+
+> **Ko si ṣiṣe alabapin Copilot ti o nilo fun iwiregbe BYOK ni koodu VS 1.122 +.** Microsoft ṣe atilẹyin iwiregbe, awọn irinṣẹ ati MCP laisi iwọle GitHub nigbati o ti tunto olupese kan. Lori koodu VS 1.104–1.121 itẹsiwaju naa ṣi ṣiṣẹ, ṣugbọn koodu VS nilo ero Copilot ti a wọle. Awọn aba inu ila ati awọn ẹya ti o da lori awọn ifibọ duro ni ita olupese API ati pe o tun nilo Copilot; Copilot Business/Enterprise admins le mu awọn olupese awoṣe ẹni-kẹta ṣiṣẹ nipasẹ eto imulo; orita kan fihan awọn awoṣe nikan ti o ba ṣe imuse olupese iwiregbe API. Lilo olupese ti oke le tun fa awọn idiyele. Wo [koodu VS 1.122 awọn akọsilẹ idasilẹ](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) ati [itọsọna awoṣe ede](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
-## Ìṣètò
+## Ṣeto
 
-1. **Ṣiṣẹ́ OmniRoute** — `npm install -g omniroute && omniroute` (dashboard wà ní `http://localhost:20128`).
-2. **Fi extension náà sílẹ̀** — wá "OmniRoute" nínú ojú-ìwòye Extensions.
-3. **Yan model kan** — Copilot Chat → olùyan model → **Ṣàkóso Àwọn Model…** → **OmniRoute**, lẹ́yìn náà yan
-   àwọn tí o fẹ́.
+1. **Ṣiṣe OmniRoute** — `npm install -g omniroute && omniroute` (dasibodu lori `http://localhost:20128`).
+2. **Fi itẹsiwaju sii** — search "OmniRoute" ni wiwo awọn amugbooro.
+3. **Sopọ** — tọju `http://localhost:20128` aiyipada tabi ṣeto URL olupin rẹ ati bọtini API nipasẹ**OmniRoute: Ṣakoso awọn Asopọmọra** .
+4. **Yan awoṣe kan** — Copilot Awo → awoṣe picker →** Ṣakoso Awọn awoṣe…** →**OmniRoute** , lẹhinna fi ami si ohun ti o fẹ.
 
-Kò sí ohun tí o nílò láti ṣètò nígbà tí OmniRoute bá ń ṣiṣẹ́ lórí port àìyípadà. Fún instance tó wà ní ọ̀nà jíjìn, ṣí
-**àmì OmniRoute nínú Activity Bar** (tàbí ṣiṣẹ́ `OmniRoute: Manage Connection`) kí o sì ṣètò:
+Fun awọn eto asopọ, ṣii**OmniRoute aami ninu awọn aṣayan iṣẹ-ṣiṣe Pẹpẹ** (tabi ṣiṣe `OmniRoute: Manage Connection`) ati ṣeto:
 
-- **URL olupin** — root olupin náà, fún àpẹẹrẹ `http://192.168.0.15:20128`. Extension náà yóò
-  fi suffix `/v1` kún un; má ṣe fi í sínú rẹ.
-- **Kọ́kọ́rọ́ API** — nígbà tí olupin bá ṣètò `REQUIRE_API_KEY` nìkan. A máa tọ́jú rẹ̀ sínú keychain OS nípasẹ̀ VS
-  Code SecretStorage, kì í ṣe nínú `settings.json` láé.
+- **URL** — root olupin, fun apẹẹrẹ `http://omniroute.example.com:20128`. Suffix `/v1` jẹ afikun nipasẹ itẹsiwaju; maṣe pẹlu rẹ.
+- **bọtini API** — nilo nigbati eto imulo ijẹrisi olupin nilo ọkan. Ti a fipamọ nipasẹ koodu SecretStorageVS, rara ni `settings.json`; awọn bọtini aaye-iṣẹ kan wa. Lo bọtini ti a fun ni aṣẹ fun awọn awoṣe ti o fẹ fi han.
+
+Ifaagun naa tun pese atọka asopọ, isọdọtun awoṣe, ipo awoṣe ati awọn metadata idiyele (awọn akojọpọ pẹlu), ero ṣiṣanwọle pẹlu kan** Igbiyanju ironu** akojọ aṣayan lori koodu VS 1.120 +, ipo-ọpa ipo ojoojumọ-itọkasi ati nronu lilo (OmniRoute 3.8.50 +), iṣeto CLI ati taabu dasibodu yiyan. Awoṣe ti a yan ati eto imulo olupin pinnu awọn agbara ti o le lo.
 
 ---
 
@@ -119,26 +119,25 @@ Wo [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) àti ọ̀ràn
 
 ---
 
-## Ṣíṣètò àwọn irinṣẹ́ rẹ mìíràn láti inú VS Code
+## Ṣiṣeto awọn irinṣẹ miiran lati inu koodu VS
 
-**`OmniRoute: Configure Coding CLI`** máa ń darí CLI `omniroute` láti kọ àwọn prófáìlì tí ó ti ṣetán fún lílò
-fún Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo àti Roo — àwọn ìṣètò kan náà tí a ṣàpèjúwe nínú
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). A máa ń fi kọ́kọ́rọ́ API náà fún CLI nípasẹ̀
-oníyípadà àyíká `OMNIROUTE_API_KEY`, kì í ṣe lórí ìlà àṣẹ láé.
+**`OmniRoute: Configure Coding CLI`** wakọ `omniroute` CLI lati kọ awọn profaili imurasilẹ-lati-lo fun awọn irinṣẹ 16: Codex CLI, koodu Claude, Cline, Tẹsiwaju, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed, WhyCodes ati 5dive. Ifaagun naa n pe awọn aṣẹ `setup-*` ni ebute iṣọpọ; fi ẹya OmniRoute CLI sori ẹrọ ti o pẹlu aṣẹ ti o yan. Wo [itọsọna iṣọpọ CLI](CLI-INTEGRATIONS.md) fun awọn faili ati awọn asia ti ohunelo kọọkan nlo ati [iforukọsilẹ irinṣẹ itẹsiwaju](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+Bọtini API ni a fi si CLI nipasẹ `OMNIROUTE_API_KEY`, kii ṣe lori laini aṣẹ. Awọn ilana iṣeto le tẹsiwaju awọn iwe-ẹri ni iṣeto ni ọpa ibi-afẹde. Nigbati o ba n pin bọtini aaye-iṣẹ kan pato pẹlu iṣeto ni ipele olumulo ọpa kan, ifaagun naa beere fun ijẹrisi ni akọkọ.
 
 ---
 
-## Yíyanjú àwọn ìṣòro
+## Laasigbotitusita
 
-| Àmì ìṣòro                                                    | Okùnfà / àtúnṣe                                                                                                                                                                                                                             |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kò sí àwọn módẹ́ẹ̀lì OmniRoute nínú ohun àṣàyàn                | A kò lè dé ọ̀dọ̀ apèsè. Dọ́ọ̀tì ọ̀pá-ipò máa di ewú; ṣiṣẹ́ `OmniRoute: Check Connection`. A ṣe àwárí láìfi ìkìlọ̀ hàn ní ìmọ̀ọ́mọ̀, kò sì ní fi módẹ́ẹ̀lì kankan kún dípò fífi ìbéèrè hàn.                                                              |
-| Módẹ́ẹ̀lì kọ̀ọ̀kan hàn lẹ́ẹ̀mejì                                   | O ń lo OmniCopilot tí ó dàgbà ju 1.0.1 lọ — ṣe ìmúdójúìwọ̀n. Àfikún náà ń béèrè `?prefix=alias` báyìí.                                                                                                                                       |
-| Módẹ́ẹ̀lì àwòrán/ohùn kan tí ó máa ń wà lórí àtòjọ ti pòórá    | Èyí jẹ́ ìmọ̀ọ́mọ̀ láti 1.0.1 — kò lè dáhùn ìbéèrè ìbánisọ̀rọ̀ láé.                                                                                                                                                                                |
-| Pánẹ́ẹ̀lì kò sí ní Ọ̀pá Ìṣe                                     | VS Code máa ń gbé àwọn àpótí ìwòran àfikún sínú àkúnwọ́sílẹ̀ **"…"** ní ìsàlẹ̀ Ọ̀pá Ìṣe, àpótí tí a sì fi pamọ́ nípasẹ̀ títẹ̀-ọ̀tún yóò ṣì wà ní fífarapamọ́. Tẹ Ọ̀pá Ìṣe ní ọ̀tún → yan **OmniRoute**, tàbí ṣí i pẹ̀lú `OmniRoute: Manage Connection`. |
-| Pátákó ìṣàkóso ṣí nínú aṣàwákiri láìka módù `editor` sí      | A kò **kọ́** apèsè náà pẹ̀lú `DASHBOARD_ALLOW_EMBED=vscode` (wo òkè) — ṣíṣètò rẹ̀ nígbà ìbẹ̀rẹ̀ lórí ìfisílẹ̀ tí a ti kọ́ tẹ́lẹ̀ kò ní ṣe ohunkóhun. Ìpadà sí aṣàwákiri jẹ́ ìmọ̀ọ́mọ̀.                                                                   |
-| Àtòjọ àwọn módẹ́ẹ̀lì kò jẹ́ tuntun lẹ́yìn yíyí àwọn olùpèsè padà | `OmniRoute: Refresh Models`, tàbí ìjápọ̀ ↻ nínú pánẹ́ẹ̀lì.                                                                                                                                                                                     |
+| Aisan                                                  | Idi / ṣatunṣe                                                                                                                                                                                                                                               |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ko si awọn awoṣe OmniRoute ninu oluka                  | A ko le de ọdọ olupin. Aami ipo-ọpa lọ grẹy; ṣiṣe `OmniRoute: Check Connection`. Awari wa ni ipalọlọ nipasẹ apẹrẹ ati pe ko ṣe alabapin si awọn awoṣe kuku ju titọ.                                                                                         |
+| Gbogbo awoṣe han lemeji                                | O wa lori OmniCopilot ti o dagba ju 1.0.1 — imudojuiwọn. Ifaagun naa n beere `?prefix=alias` bayi.                                                                                                                                                          |
+| Awoṣe image/audio ti a lo lati ṣe atokọ ati pe o ti lọ | Momọ lati 1.0.1 — ko le dahun ibeere iwiregbe kan rara.                                                                                                                                                                                                     |
+| Panel sonu lati Pẹpẹ aṣayan iṣẹ-ṣiṣe                   | VS Code gbe awọn apoti wiwo afikun sinu** "..."** aponsedanu ni isalẹ Pẹpẹ Iṣẹ-ṣiṣe, ati apoti ti o farapamọ nipasẹ titẹ-ọtun awọn iduro ti o farapamọ. Tẹ-ọtun Pẹpẹ aṣayan iṣẹ-ṣiṣe → ami**OmniRoute** , tabi ṣi i pẹlu `OmniRoute: Manage Connection`.    |
+| Dasibodu ṣii ni ẹrọ aṣawakiri laibikita ipo `editor`   | Awọn olupin je ko** itumọ ti** pẹlu `DASHBOARD_ALLOW_EMBED=vscode` (wo loke) — ṣeto rẹ ni ibẹrẹ lori fifi sori ẹrọ ti a ti kọ tẹlẹ ko ṣe nkankan. Ipadabọ naa jẹ mọọmọ.                                                                                     |
+| Akojọ awọn awoṣe jẹ stale lẹhin iyipada awọn olupese   | `OmniRoute: Refresh Models`, tabi ọna asopọ ↻ ninu nronu.                                                                                                                                                                                                   |
+| Igbimọ sọ _Online (awọn awoṣe dina mọ) _, oluyanju ofo | Olupin naa kọ bọtini naa. Fi bọtini ọtun pamọ pẹlu** Fipamọ & Idanwo** . Ti bọtini naa ba wa titi lori olupin dipo (ṣiṣẹ, tabi fifun ni iwọle si awọn awoṣe), itẹsiwaju ko ṣe akiyesi funrararẹ: ṣiṣe `OmniRoute: Refresh Models` tabi ṣii nronu OmniRoute. |
 
 ---
 

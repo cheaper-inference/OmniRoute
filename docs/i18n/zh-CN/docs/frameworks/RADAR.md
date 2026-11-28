@@ -92,52 +92,30 @@ Radar 由 `RADAR_ENABLED` 功能标志进行端到端控制
 
 ---
 
-## 数据同步是一个单独的选择加入项——隐私承诺
+## 数据同步是SEPARATE选择加入—隐私承诺
 
-启用 `RADAR_ENABLED` 只会解锁 UI。同步数据源需要第二个
-独立的选择加入项，该设置存储在 `radar_settings.opt_in` 中（`src/lib/db/radar.ts`，
-迁移文件 `136_radar_cache_settings.sql`）。`syncRadar()` 会在发起任何网络调用之前检查该标志_以及_
-选择加入设置：
+打开`RADAR_ENABLED`仅解锁UI。同步 feed 需要存储在`radar_settings.opt_in`中的第二个独立选择加入（`src/lib/db/radar.ts`、迁移`136_radar_cache_settings.sql`）。 `syncRadar()`在进行任何网络调用之前检查标志并选择加入：
 
 ```
-标志关闭      → { status: "disabled" }   — 不进行网络调用
-未选择加入    → { status: "opt_out" }    — 不进行网络调用
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-当两者均启用时，同步路径如下：
+当两者都打开时，同步路径为：
 
-1. 向 `GET <feed base URL>/v1/catalog/latest` 发起请求，并携带 `x-omniroute-radar-schema: 2`，以及可选的
-   `Authorization: Bearer <supporter key>` 请求头（见下文）。如果缺少模式请求头，服务器默认提供单独
-   签名的 v1 过渡制品，因此较旧的已安装客户端仍能
-   接收更新。
-2. 这是一个仅下载的应用流程，但它仍然是 HTTPS 请求。托管
-   基础设施会收到常规连接元数据，例如源 IP。配置支持者
-   密钥后，同步还会在 Bearer 请求头中发送该密钥，以便服务解析
-   权益。在上述证据边界所确定的私有服务器具体修订版本中，
-   数据源请求计量使用密钥哈希、聚合用量以及每日轮换的 IP 截断 HMAC，
-   以供人工滥用审查；这些表不会以原始形式持久化密钥或 IP。
-   基础设施访问日志和加密的投递发件箱属于彼此独立的运营
-   边界。
-3. OmniRoute 绝不会向 Radar 服务发送提示词、响应、对话、提供者凭据、模型流量、
-   运行时间、延迟或本地提供者配置。
-4. 响应会在本地进行验证、校验和缓存（请参阅
-   [安全模型](#security-model)）。Radar 恰好有四条服务端网络路径：
-   用于目录的 `syncRadar()`、用于推荐的 `syncRadarReferrals()`，以及
-   用于支持者专属优惠和 Intel 的 `syncRadarOffers()` / `syncRadarIntel()`。
+1. `GET <feed base URL>/v1/catalog/latest`与`x-omniroute-radar-schema: 2`和可选的`Authorization: Bearer <supporter key>`标头（见下文）。当架构标头不存在时，服务器默认使用单独签名的 v1 转换工件，因此较旧安装的客户端会继续接收更新。
+2. 这是一个仅下载的应用程序流程，但它仍然是一个HTTPS请求。托管基础设施接收普通连接元数据，例如源IP。配置支持者密钥后，sync 还会在 Bearer 标头中发送该密钥，以便服务可以解析权利。在上述证据边界中确定的确切私有服务器修订版中，提要请求会计使用密钥散列、聚合使用以及IP的每日轮换截断HMAC进行手动滥用审查；这些表既不保留原始形式的密钥也不保留IP 。基础设施访问日志和加密的交付发件箱是独立的操作边界。
+3. OmniRoute绝不会向 Radar 服务发送提示、响应、对话、提供者凭证、模型流量、正常运行时间、延迟或本地提供者配置。
+4. 响应经过验证、验证并在本地缓存（请参阅[安全模型](#security-model)）。 Radar 恰好有四个服务器端网络路径： `syncRadar()`用于目录， `syncRadarReferrals()`用于推荐， `syncRadarOffers()` / `syncRadarIntel()`用于仅限支持者的优惠和英特尔。
 
-**支持者密钥**是一个可选的 Bearer 令牌（`radar_settings.supporter_key`），
-数据源服务可据此决定提供哪个层级（请参阅
-[层级](#tiers-community-and-live)）。该密钥：
+目录检查每 24 小时运行一次。当经过验证的 feed 仍然带有缓存的版本和层时，sync 会保留缓存的有效负载，更新`fetchedAt`，并且下一次检查会在 24 小时后进行，而不是在下一个每小时的时间点进行。
 
-- 使用与提供者凭据相同的 AES-256-GCM `encrypt()`/`decrypt()`
-  辅助函数（`src/lib/db/encryption.ts`）进行**静态加密存储**。
-- 通过 `POST /api/radar/settings`（`{ supporterKey: "omr_" + 40 hex chars }`）进行设置，并且
-  **绝不会原样返回**——响应会返回掩码形式（`omr_****abcd`）。
-- 更改或清除该密钥会以原子方式使目录、推荐、优惠和 Intel 缓存失效。
-  下一次同步/读取会在服务端解析新的权益；保存密钥本身不会
-  发起网络请求，也不会消耗一次性激活密钥。
-- 在同步 GET 请求中作为 Bearer 令牌发送给数据源服务——除此之外，不会有任何与该
-  密钥有关的信息离开客户端。
+这**支持者钥匙**是一个可选的 Bearer 令牌 (`radar_settings.supporter_key`)，它让 feed 服务决定提供哪个层（请参阅[Tiers](#tiers-community-and-live) ）。这是：
+
+- 已存储**静态加密**使用与提供者凭证相同的AES-256-GCM `encrypt()`/`decrypt()`帮助程序 (`src/lib/db/encryption.ts`)。
+- 通过`POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) 和**从未回响**—响应返回屏蔽形式 (`omr_****abcd`)。
+- 以原子方式更改或清除它会使目录、引用、优惠和英特尔缓存失效。下一个sync/read在服务器端解析新的权利；保存密钥本身不会发出网络请求或消耗一次性激活密钥。
+- 作为同步GET —上的承载令牌发送到源服务，有关密钥的任何其他内容都不会离开客户端。
 
 ---
 
@@ -374,80 +352,45 @@ version, tier }` 返回——仪表板显示的是此值，而绝不是原始正
 
 ---
 
-## 读取时覆盖合并规则
+## 读取时叠加合并规则
 
-`applyFeed()`（`src/lib/radar/applyFeed.ts`）在 `getRadarCatalog()` 内部**读取时**将缓存的订阅源合并到
-静态基线上。基线数组
-（`FREE_MODEL_BUDGETS`）绝不会被修改——每次调用都会重新计算一个 `MergedEntry[]`。
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) 合并缓存的 feed**超过**静态基线为**阅读时间**，在`getRadarCatalog()`内。基线数组 (`FREE_MODEL_BUDGETS`) 永远不会发生变化— a `MergedEntry[]`在每次调用时都会重新计算。
 
-四条规则，按优先级排序：
+四个规则，按优先顺序排列：
 
-1. **订阅源绝不会覆盖本地覆盖项。** 按字段处理：如果运营者已经
-   自定义某个条目中的字段（`localOverrides` 映射，以 `provider:modelId` 为键），
-   则跳过订阅源中该特定字段的值——以运营者的值为准。
-2. **`enabled: false` 会禁用条目，并记录来源。** 如果订阅源条目关闭了
-   某个条目，则在合并结果上设置 `enabled: false` 和 `disabledBy: "radar"`，
-   以便 UI 解释条目从可用变为禁用的_原因_。
-3. **订阅源中不存在的用户添加条目会原样保留。** 仅存在于基线中（或在本地添加）且没有对应订阅源
-   条目的条目会保持不变。
-4. **已设墓碑的条目绝不会复活。** 如果运营者明确删除了某个
-   条目（`tombstones` 集合），则即使订阅源在后续版本中重新添加该 `provider:modelId`，
-   也不会将其恢复。
+1. **Feed 永远不会覆盖本地覆盖。**每个字段：如果操作员在条目上自定义了一个字段（`localOverrides`映射、键控`provider:modelId`），则该特定字段的提要值将被跳过—操作员的值获胜。
+2. **`enabled: false`禁用该条目，并具有出处。**关闭条目的提要条目会在合并结果上设置`enabled: false`和`disabledBy: "radar"` ，因此UI可以解释_为什么_条目从可用变为禁用。
+3. **提要中不存在的用户添加的条目将保持不变。**仅存在于基线中（或在本地添加）且没有相应提要条目的条目将保持不变。
+4. **墓碑化的条目永远不会复活。**如果操作员显式删除了一个条目（`tombstones`集），则在更高版本中重新添加该`provider:modelId`的 feed 不会将其恢复。
 
-可编辑字段和墓碑会持久化到
-`radar_local_model_state`（迁移 `153_radar_local_model_state.sql`）中。公共数据库
-适配器（`src/lib/db/radar.ts`）会将这些行转换为 `applyFeed()` 使用的 `localOverrides` 映射和
-`tombstones` 集合；生产环境中的 `getRadarCatalog()` 会在功能标志、缓存和架构门控检查通过后加载该状态。
-只有 `displayName` 和 `enabled` 可由运营者编辑。提供者/模型标识、订阅源来源、配额、能力、服务条款
-和设置数据无法通过此界面写入。
+可编辑字段和逻辑删除保留在`radar_local_model_state`中（迁移`153_radar_local_model_state.sql`）。公共DB适配器 (`src/lib/db/radar.ts`) 将这些行转换为`applyFeed()`使用的`localOverrides`映射和`tombstones`集；生产`getRadarCatalog()`在标志、缓存和模式门通过后加载该状态。只有`displayName`和`enabled`是操作员可编辑的。 Provider/model身份、提要出处、配额、功能、 ToS和设置数据无法通过此表面写入。
 
-仪表板提供四种本地操作：
+仪表板公开了四个本地操作：
 
-- **编辑**会更改本地显示名称和启用状态。
-- **重置本地更改**会清除两个可编辑字段，但不会更改墓碑。
-- **隐藏**会创建墓碑，使后续订阅源更新无法重新创建该行。
-- **恢复**会移除墓碑；任何单独保存的覆盖项仍然有效。
+- **编辑**更改本地显示名称和启用状态。
+- **重置本地更改**清除两个可编辑字段而不更改逻辑删除。
+- **隐藏**创建墓碑，因此以后的提要更新无法重新创建该行。
+- **恢复**移除墓碑；任何单独保存的覆盖仍然有效。
 
-订阅源中的 `enabled: false` 仍然是安全例外：它优先于过时的本地
-`enabled: true`，使合并后的条目保持禁用，并记录 `disabledBy: "radar"`。
+feed `enabled: false`仍然是安全例外：它战胜了过时的本地`enabled: true`，保持合并条目禁用，并记录`disabledBy: "radar"`。
 
-目录发布使用 `schemaVersion: 2`。`contextWindow` 以及 `tools`、`vision` 和
-`thinking` 均各自独立为 `number | null` / `boolean | null`：`null` 表示未知，而
-`false` 表示经 D16 确认的官方提供者来源明确指出该能力不存在。
-OmniRoute 内部注册表/模型规范标志绝不会被直接提升为订阅源事实。客户端
-仍接受 v1 快照；由于旧版构建器使用 `false` 作为缺失占位符，因此 v1 `false` 会被
-规范化为未知，而 v1 `true` 仍被视为事实。未知的架构版本会以封闭方式失败，并且
-最后一个有效缓存仍然可用。每个具有非 null 上下文/能力值的 v2 模型都必须携带
-无需凭据的 HTTPS `metadataEvidenceUrls[]`；否则架构验证会失败，且缓存不会被
-替换。目录表格会将全部三种状态呈现为 `✓`、`✕` 和 `?`。
+目录出版物使用`schemaVersion: 2`。 `contextWindow`和`tools`、 `vision`和`thinking`中的每一个都是独立的`number | null` / `boolean | null`： `null`表示未知，而`false`表示D16-confirmed官方提供者来源明确表示不存在该功能。内部OmniRoute registry/model-spec标志永远不会直接提升为 feed 事实。客户端仍然接受v1快照；因为旧的构建器使用`false`作为缺席占位符，所以 v1 `false`被标准化为未知，而 v1 `true`仍然是事实。未知的架构版本无法关闭，并且最后一个有效的缓存仍然可用。每个具有非空context/capability的 v2 模型都必须携带无凭证的HTTPS `metadataEvidenceUrls[]`；否则模式验证失败并且缓存不会被替换。目录表将所有三种状态呈现为`✓`、 `✕`和`?`。
 
-### 引导式组合和 MCP 访问
+### 引导连击和MCP访问
 
-已确认的 `familyId` 值会在读取时覆盖后保留下来，并驱动纯函数
-`buildRadarComboSuggestions()` 模块（`src/lib/radar/comboSuggestions.ts`）。仅当至少两个不同的提供者
-具有活跃连接并提供完全匹配的精选模型 ID 时，才会建议该系列。禁用的模型、不活跃的提供者、缺失的模型 ID、仅有单个提供者的系列，以及有歧义的
-别名/前缀匹配都会以封闭方式失败。建议使用现有的 `priority` 策略，优先排列
-每月周期性预算最大的项；UI 仅通过 `POST /api/combos` 创建这些组合。
+确认的`familyId`值在读取时间覆盖后仍然存在，并驱动纯`buildRadarComboSuggestions()`模块 (`src/lib/radar/comboSuggestions.ts`)。仅当至少两个不同的提供者具有活动连接并公开精确的策划模型ID时才建议使用系列。禁用的模型、不活动的提供程序、缺少模型IDs、单例系列和不明确的alias/prefix匹配失败关闭。建议使用现有的`priority`策略，首先订购最大的经常性每月预算； UI仅通过`POST /api/combos`创建它们。
 
-引导式 UI 位于 `/dashboard/radar/combos`。它仅从本地
-`GET /api/radar/catalog` 和 `GET /api/combos/builder/options` 端点读取数据。它绝不会触发 Radar 同步、
-读取提供者凭据或直接写入组合数据库。
+导游UI住在`/dashboard/radar/combos`。它仅读取本地`GET /api/radar/catalog`和`GET /api/combos/builder/options`端点。它永远不会触发雷达同步、读取提供者凭据或直接写入组合数据库。
 
-MCP 客户端可以通过 `omniroute_radar_catalog`（`read:radar`）读取相同的本地投影。
-可选的 `provider`、`familyId` 和 `enabledOnly` 筛选器会在一次本地
-`GET /api/radar/catalog` 读取后进行求值。其封闭输出包括目录元数据以及提供者/模型、
-显示名称、`familyId`、配额、功能、启用状态、来源和 `disabledBy`；设置 URL、
-步骤、连接、电子邮件地址、密钥和推荐数据绝不会被返回。此工具为
-只读工具，绝不会调用 `/api/radar/sync`。
+MCP客户端可以使用`omniroute_radar_catalog` (`read:radar`) 读取相同的本地投影。可选的`provider`、 `familyId`和`enabledOnly`过滤器在一次本地`GET /api/radar/catalog`读取后进行评估。其关闭输出包括目录元数据以及provider/model、显示名称、 `familyId`、配额、功能、启用状态、起源和`disabledBy`； setup URLs、步骤、连接、电子邮件地址、密钥和推荐数据永远不会返回。该工具是只读的，从不调用`/api/radar/sync`。当缓存的提要早于已安装的目录时， `meta.olderThanRelease`为`true` ，并且该工具从已安装的目录中返回模型，并应用了本地覆盖和逻辑删除。
 
-### 来源标记
+### 出处标记
 
-每个合并后的条目都带有一个 `origin` 字段，UI 会将其呈现为徽章：
+每个合并的条目都带有一个`origin`字段， UI呈现为徽章：
 
-- `"baseline"` — 与静态发布目录相比未经修改。
-- `"radar"` — 一个或多个字段已由数据源刷新。
-- `"local"` — 操作员对此条目至少设置了一项本地覆盖（根据规则 1，无论数据源提供什么内容，本地
-  覆盖始终优先于数据源）。
+- `"baseline"` —未触及静态发布目录。
+- `"radar"` —一个或多个字段已由提要刷新。
+- `"local"` —操作员对此条目至少有一个本地覆盖（本地覆盖总是胜过根据规则 1 的提要，无论提要说什么）。
 
 ---
 

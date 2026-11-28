@@ -69,35 +69,35 @@ Direktiva je namjerno definirana **zasebno za svaki proxy**, a ne globalno — r
 
 ## Tri vrijednosti
 
-| Vrijednost | Oznaka u korisničkom sučelju | Ponašanje                                                                                                                                                                         |
-| ---------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | `Automatski (dual-stack)`    | OS odabire obitelj. Za proxy poslužitelj zadan IP literalom obitelj je određena samim literalom; za naziv poslužitelja mogu se koristiti obje obitelji. Ovo je zadana vrijednost. |
-| `ipv4`     | `Samo IPv4`                  | Ograničava vezu na IPv4. Veza se ne uspostavlja ako proxy poslužitelj nema IPv4 (A) zapis.                                                                                        |
-| `ipv6`     | `Samo IPv6`                  | Ograničava vezu na IPv6. Veza se ne uspostavlja ako proxy poslužitelj nema IPv6 (AAAA) zapis.                                                                                     |
+| Vrijednost | UI oznaka           | Ponašanje                                                                                                                                                  |
+| ---------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | `Auto (dual-stack)` | OS bira obitelj. Za IP-literal proxy host, obitelj je svojstvena literalu; za ime glavnog računala, obje obitelji su prihvatljive. Ovo je zadana postavka. |
+| `ipv4`     | `IPv4 only`         | Prikvači vezu na IPv4. Zatvaranje nije uspjelo ako proxy host nema IPv4 (A) zapis.                                                                         |
+| `ipv6`     | `IPv6 only`         | Prikvači vezu na IPv6. Zatvaranje nije uspjelo ako proxy host nema IPv6 (AAAA) zapis.                                                                      |
 
-Tekstovi korisničkog sučelja nalaze se u `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+UI nizovi žive u `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Kako konfigurirati
+## Kako ga konfigurirati
 
 ### Nadzorna ploča
 
-Izbornik se nalazi u obrascu za proxy na kartici **Skup proxy poslužitelja**:
+Selektor je u proxy obliku** Proxy bazen** kartica:
 
-1. Otvorite **Nadzorna ploča → Postavke → Proxy → Skup proxy poslužitelja**
+1. Otvoriti** Nadzorna ploča → postavke → proxy → proxy skup**
 2. Dodajte ili uredite proxy
-3. Postavite padajući izbornik **IP obitelj** na `Automatski (dual-stack)`, `Samo IPv4` ili `Samo IPv6`
-4. Spremite
+3. Postavite**IP obitelj** padajući izbornik na `Auto (dual-stack)`, `IPv4 only` ili `IPv6 only`
+4. Uštedjeti
 
-Kontrolu prikazuje `ProxyRegistryManager.tsx` (učitan u `proxy/ProxyPoolTab.tsx`).
+Kontrolu donosi `ProxyRegistryManager.tsx` (montiran u `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Polje `family` dio je podataka za stvaranje/ažuriranje registra proxy poslužitelja, a validiraju ga `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) te obrađuju `POST` / `PATCH /api/v1/management/proxies`:
+Polje `family` dio je korisnih podataka create/update proxy registra, potvrđenih od strane `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) i kojima upravlja `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Stvaranje proxy poslužitelja koji koristi samo IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Promjena postojećeg proxy poslužitelja tako da koristi samo IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Isto polje prihvaća i ugrađeni objekt konfiguracije proxy poslužitelja koji se upotrebljava za unose nadređenog proxy poslužitelja (`upstream_proxy_config.family`, pogledajte [Model podataka](#data-model)).
+Isto polje također prihvaća inline proxy konfiguracijski objekt koji se koristi za upstream-proxy unose (`upstream_proxy_config.family`, pogledajte [Data Model](#data-model) ).
 
-Za ostatak API-ja za CRUD operacije i dodjelu proxy poslužitelja pogledajte [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Za ostatak proxyja CRUD/assignment API pogledajte [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

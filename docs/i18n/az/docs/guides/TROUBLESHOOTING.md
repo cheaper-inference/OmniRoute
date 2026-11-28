@@ -179,51 +179,49 @@ Quraşdırmadan sonra OmniRoute-u yenidən başladın, sonra Gemini Web sorğusu
 
 ---
 
-## Antivirusun yanlış müsbət nəticələri
+## Antivirus yalançı pozitivlər
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG `README.md` faylını `MD:HttpRequest-inf[Susp]` kimi karantinə alır
+### Avast/AVG karantin `README.md` `MD:HttpRequest-inf[Susp]` ilə
 
-**Bu, yanlış müsbət nəticədir. Heç nə yoluxmayıb və heç bir tədbir tələb olunmur.**
+**Bu yanlış müsbətdir. Heç bir şey yoluxmamışdır və heç bir tədbir tələb olunmur.**
 
-Avast və AVG çoxlu HTTP sorğusuna bənzəyən keçidlər ehtiva edən düz mətn/Markdown fayllarını işarələyən evristik yoxlama tətbiq edir. OmniRoute-un `README.md` faylı npm paketinə daxildir (`package.json` → `files` siyahısında göstərilib), buna görə də qlobal quraşdırma zamanı `node_modules/omniroute/README.md` ünvanına yerləşdirilir və təxminən 15 `http://localhost:20128/...` nümunəsi (MCP HTTP/SSE son nöqtələri, A2A `.well-known` URL-i və `curl` fraqmentləri) ehtiva edir. Keçidlərin bu sıxlığı evristik yoxlamanın işə düşməsi üçün kifayətdir.
+Avast and AVG run a heuristic that flags plain-text/Markdown files containing many HTTP-request-looking links. OmniRoute's `README.md` ships inside the npm package (it is listed in `package.json` → `files`), so it lands at `node_modules/omniroute/README.md` on a global install — and it contains ~15 `http://localhost:20128/...` examples (the MCP HTTP/SSE endpoints, the A2A `.well-known` URL, and `curl` snippets). That link density is enough to trip the heuristic.
 
-Bu, yalnız yaxın zamanda baş verməyə başlayıbsa: faylın mahiyyəti dəyişməyib. README-dəki son nöqtələr cədvəli genişləndirilib (MCP HTTP + SSE + A2A əlavə olunub) və daha çox `curl` nümunəsi əlavə edilib; bu da faylın həddi keçməsinə səbəb olub.
+Əgər bu yaxınlarda başlayıbsa: fayl naturada dəyişməyib. README son nöqtələr cədvəlini böyütdü (MCP HTTP + SSE + A2A əlavə edildi) və daha çox `curl` nümunələri, bu da onu eşikdən kənara çıxardı.
 
-Fayl heç bir icra edilə bilən məzmunu olmayan passiv sənədləşdirmədir. Onu təhlükəsiz şəkildə karantindən bərpa edə bilərsiniz.
-
-**Nə etməli:**
-
-1. **Bildirişləri dayandırın** — antivirusunuzda quraşdırma qovluğunu istisnalara əlavə edin (Avast: Settings → Exceptions); qlobal `node_modules` yolunuzu və/və ya OmniRoute məlumat qovluğunu (`~/.omniroute/`) əlavə edin.
-2. **Yanlış müsbət nəticəni bildirin** — <https://www.avast.com/false-positive-file-form.php> ünvanına keçərək karantinə alınmış `README.md` faylını əlavə edin. Bu, hər kəsə kömək edən həll yoludur, çünki problem təchizatçının evristik yoxlamasının mətn faylına həddindən artıq reaksiya verməsidir.
-
-**Niyə bunu öz tərəfimizdə «düzəltmirik»:** bütün nümunələr `http://localhost` istifadə edir və localhost öz-özünə imzalanmış sertifikatların yaratdığı çətinliklər olmadan `https` istifadə edə bilməz. Bir təchizatçının evristik yoxlamasından yayınmaq üçün sənədləri təhrif etmək, skaner xətasını aradan qaldırmaq naminə bütün oxuculara zərər verərdi.
-
-### Kaspersky masaüstü tətbiqini `PDM:Trojan.Win32.Generic` kimi işarələyir
-
-**Bu, davranış evristikasından qaynaqlanan yanlış müsbət nəticədir. Heç nə yoluxmayıb.** Kaspersky-nin `PDM:` prefiksi qərarın məlum zərərli proqramla uyğunluğu yoxlamaq əvəzinə quraşdırıcının nə _etdiyini_ qiymətləndirən Proactive Defense Module (System Watcher) tərəfindən verildiyini bildirir. Bu modul işə düşdükdə Kaspersky bütün quraşdırmanı «geri qaytarır» — artıq yazılmış faylları silir — nəticədə tətbiq işləməz vəziyyətə düşür və ya yox olur.
-
-İşarələnən fayllar masaüstü tətbiqlə birlikdə paketlənmiş, bəyan edilmiş açıq mənbəli asılılıqların standart hissələridir, məsələn:
-
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` və
-  `workerProcessEntry.js` — tətbiqdaxili provayder girişində və brauzer əsaslı söhbətdə istifadə olunan brauzer avtomatlaşdırma kitabxanası [Playwright](https://playwright.dev).
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — veb kuki provayderlərində brauzer barmaq izi ilə HTTP sorğuları üçün istifadə olunan sabitlənmiş `wreq-js` yerli bağlaması (`<arch>` `x64` və ya `arm64` olur).
-
-**Niyə işə düşür:** Windows quraşdırıcısı **hələlik kod imzasına malik deyil**, buna görə imzasız NSIS quraşdırıcısının reputasiyası sıfırdır və davranış evristikası maksimum sərtliklə işləyir. Paketlənmiş yerli DLL və `%LOCALAPPDATA%\Programs\OmniRoute` daxilində yazılan yüzlərlə `.js` faylı (Next.js müstəqil yığmasından gələn, adlarına heş əlavə edilmiş paket qovluqları daxil olmaqla) ilə birlikdə bu, evristik yoxlamanın işə düşməsi üçün kifayətdir. Kod imzalanması planlaşdırılır; həyata keçirilənədək yeni buraxılışlarda bu hal təkrarlana bilər.
+Fayl icra edilə bilən məzmunu olmayan inert sənəddir. Onu karantindən etibarlı şəkildə bərpa edə bilərsiniz.
 
 **Nə etməli:**
 
-1. **Əvvəlcə endirdiyiniz faylı yoxlayın** (faylın dəyişdirilməsi ehtimalını aradan qaldırır). Hər buraxılış `latest.yml` faylını dərc edir və onun `sha512` sahəsi (base64) `OmniRoute.Setup.<version>.exe` quraşdırıcısını əhatə edir. PowerShell-də quraşdırıcının yerləşdiyi qovluqdan:
+1. **Bildirişləri dayandırın** — antivirusunuzda quraşdırma qovluğunu istisna edin (Avast: Parametrlər → İstisnaları), qlobal `node_modules` yolunuzu and/or OmniRoute data dir (`~/.omniroute/`) əlavə edin.
+2. **Yanlış müsbəti bildirin** — <https://www.avast.com/false-positive-file-form.php>, karantin qoyulmuş `README.md` əlavə olunur. Bu, hər kəsə kömək edən düzəlişdir, çünki bu, satıcının mətn faylına heuristik reaksiyasıdır.
+
+**Niyə bunu öz tərəfimizdən “düzəltmirik”:** nümunələr hamısı `http://localhost` və localhost öz imzalı sertifikat sürtünməsi olmadan `https` ola bilməz. Bir satıcının evristikasından yayınmaq üçün sənədləri qarışdırmaq skaner səhvini təmin etmək üçün hər bir oxucuya zərər verər.
+
+### Kaspersky Desktop proqramını `PDM:Trojan.Win32.Generic` kimi qeyd edir
+
+**Bu davranış heuristikindən yanlış müsbətdir. Heç bir şey yoluxmamışdır.** Kaspersky-nin `PDM:` prefiksi o deməkdir ki, qərar onun Proaktiv Müdafiə Modulundan (Sistem İzləyicisi) gəlir və bu, quraşdırıcının onu məlum zərərli proqrama uyğunlaşdırmaq əvəzinə nə etdiyini mühakimə edir. Yandırılan zaman Kaspersky bütün quraşdırma — "geri çəkir" və artıq — yazdığı faylları silir, beləliklə proqram xarab və ya itkin olur.
+
+Onun işarələdiyi fayllar masaüstü proqramla birləşdirilmiş elan edilmiş, açıq mənbəli asılılıqların ehtiyat hissələridir, məsələn:
+
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` və `workerProcessEntry.js` — [Playwright](https://playwright.dev), proqramdaxili provayderə daxil olmaq və brauzer tərəfindən dəstəklənən söhbət üçün istifadə edilən brauzer avtomatlaşdırma kitabxanası.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — veb-kuki provayderlərində brauzer-barmaq izi olan HTTP üçün istifadə edilən bərkidilmiş `wreq-js` yerli bağlama (`<arch>` `x64` və ya `arm64` dir).
+
+**Niyə atəş edir:** Windows quraşdırıcısıdır** hələ kod imzalanmamışdır** , buna görə də imzasız NSIS quraşdırıcısının reputasiyası sıfırdır və davranış evristikası maksimum təcavüzlə işləyir. Toplanmış yerli DLL və `%LOCALAPPDATA%\Programs\OmniRoute` altında yazılmış yüzlərlə `.js` faylı ( Next.js müstəqil quruluşundan hash-şəkilli paket qovluqları daxil olmaqla) ilə birlikdə bu, evristikanı keçmək üçün kifayətdir. Kodun imzalanması planlaşdırılır; yerə enənə qədər yeni buraxılışlar bunu təkrarlaya bilər.
+
+**Nə etməli:**
+
+1. **Əvvəlcə yükləmənizi yoxlayın** (saxlanılmış faylı istisna edir). Hər buraxılış `sha512` sahəsini (base64) `OmniRoute.Setup.<version>.exe` quraşdırıcısını əhatə edən `latest.yml` nəşr edir. PowerShell-də quraşdırıcının olduğu qovluqdan:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Çıxış `latest.yml` → `sha512` ilə uyğun olmalıdır. Uyğun deyilsə, faylı silin və yalnız [GitHub buraxılışları səhifəsindən](https://github.com/diegosouzapw/OmniRoute/releases) yenidən endirin.
-2. **Bərpa edin + istisna əlavə edin** — geri qaytarılaraq silinmiş elementləri karantindən bərpa edin və `%LOCALAPPDATA%\Programs\OmniRoute` üçün istisna əlavə edin (Kaspersky → Settings → Threats and Exclusions), sonra yenidən quraşdırın.
-3. **Yanlış müsbət nəticəni bildirin** — <https://opentip.kaspersky.com/>. İstifadəçilərin təqdim etdiyi yanlış müsbət nəticə hesabatları icazə verilənlər siyahısına əlavə olunma prosesini həqiqətən sürətləndirir.
+   Çıxış `latest.yml` → `sha512` ilə uyğun olmalıdır. Əgər belə deyilsə, faylı silin və yalnız [GitHub buraxılışlar səhifəsindən](https://github.com/cheaper-inference/OmniRoute/releases) yenidən yükləyin.
+2. **+ istisna bərpa edin** — geri qaytarılmış elementləri karantindən bərpa edin və `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Parametrləri → Təhdidlər və İstisnalar) üçün istisna əlavə edin, sonra yenidən quraşdırın.
+3. **Yanlış müsbəti bildirin** — <https://opentip.kaspersky.com/>. İstifadəçi tərəfindən təqdim edilən FP hesabatları icazəli siyahıları həqiqətən sürətləndirir.
 
 ---
 
@@ -834,10 +832,10 @@ Daha çox simptomlar:
 
 ---
 
-## Hələ də ilişib qalmısınız?
+## Hələ də yapışmısınız?
 
-- **GitHub Problemləri**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Arxitektura**: Daxili təfərrüatlar üçün [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) sənədinə baxın
-- **API İstinadı**: Bütün son nöqtələr üçün [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) sənədinə baxın
-- **Sağlamlıq Paneli**: Sistemin real vaxtdakı vəziyyəti üçün **İdarəetmə paneli → Sağlamlıq** bölməsini yoxlayın
-- **Tərcüməçi**: Format problemlərini sazlamaq üçün **İdarəetmə paneli → Tərcüməçi** bölməsindən istifadə edin
+- **GitHub Məsələləri** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Memarlıq** : Daxili təfərrüatlar üçün [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) baxın
+- **API İstinad** : Bütün son nöqtələr üçün [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) baxın
+- **Sağlamlıq Paneli** : Yoxlayın** Dashboard → Health** real vaxt sistem statusu üçün
+- **Tərcüməçi** : İstifadə edin** Dashboard → Translator** format problemlərini aradan qaldırmaq üçün

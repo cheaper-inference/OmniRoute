@@ -49,7 +49,7 @@ Hver distribusjon leverer sin egen kopi av spesifikasjonen på `/openapi.yaml`, 
 
 ---
 
-## Chat Completions
+## Chatfullføringer
 
 ```bash
 POST /v1/chat/completions
@@ -65,35 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### Egendefinerte headere
+### Egendefinerte overskrifter
 
-| Header                   | Direction   | Description                                                                                                                                                                                                  |
-| ------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `X-OmniRoute-No-Cache`   | Forespørsel | Sett til `true` for å omgå hurtigbufferet                                                                                                                                                                    |
-| `x-omniroute-no-memory`  | Forespørsel | Sett til `true` for å hoppe over injisering av minne + ferdigheter for denne forespørselen (speiler no-cache; unngår token-/kostnadsbelastningen per kall)                                                   |
-| `X-OmniRoute-Progress`   | Forespørsel | Sett til `true` for fremdriftshendelser                                                                                                                                                                      |
-| `X-Session-Id`           | Forespørsel | Klebrig øktnøkkel for ekstern økttilknytning                                                                                                                                                                 |
-| `x_session_id`           | Forespørsel | Variant med understrek støttes også (direkte HTTP)                                                                                                                                                           |
-| `X-OmniRoute-Session-Id` | Forespørsel | Økt-/samtaleetikett levert av klienten (mates også inn i minnet). Når den finnes, lagres den ordrett i `call_logs.session_tag` for kostnadstildeling per økt (#8249) — genereres aldri når den mangler       |
-| `Idempotency-Key`        | Forespørsel | Dedupliseringsnøkkel (5 sekunders vindu)                                                                                                                                                                     |
-| `X-Request-Id`           | Forespørsel | Alternativ dedupliseringsnøkkel                                                                                                                                                                              |
-| `x-omniroute-connection` | Forespørsel | Fest en forespørsel til én modell til én leverandørtilkobling (konto) etter ID-en — se [Kontofesting per forespørsel](#account-pinning-per-request)                                                          |
-| `X-OmniRoute-Cache`      | Svar        | `HIT` eller `MISS` (ikke-strømmende)                                                                                                                                                                         |
-| `X-OmniRoute-Idempotent` | Svar        | `true` hvis deduplisert                                                                                                                                                                                      |
-| `X-OmniRoute-Progress`   | Svar        | `enabled` hvis fremdriftssporing er aktiv                                                                                                                                                                    |
-| `X-OmniRoute-Session-Id` | Svar        | Effektiv økt-ID brukt av OmniRoute                                                                                                                                                                           |
-| `X-OmniRoute-Request-Id` | Svar        | Korrelasjons-ID for forespørselen (når kjent)                                                                                                                                                                |
-| `X-OmniRoute-Version`    | Svar        | OmniRoute-byggversjon (alltid til stede)                                                                                                                                                                     |
-| `X-OmniRoute-Cost-Saved` | Svar        | USD som hurtigbufferet sparte ved en HIT (kun hurtigbuffer-treff)                                                                                                                                            |
-| `X-OmniRoute-Decision`   | Svar        | Ruting-spor: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` er kombinasjonsstrategien, eller `single` for en forespørsel som ikke er en kombinasjon) — alltid til stede i svar ved fullføring |
+| Overskrift               | Retning     | Beskrivelse                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Forespørsel | Sett til `true` for å omgå cache                                                                                                                                                                                                                                                                                                                                                 |
+| `x-omniroute-no-memory`  | Forespørsel | Sett til `true` for å hoppe over minne- + -ferdighetsinjeksjon for denne forespørselen (speiler no-cache; unngår per-anrop token/cost overhead)                                                                                                                                                                                                                                  |
+| `x-omniroute-no-log`     | Forespørsel | Sett til `true` for å utelate request/response -nyttelast fra anropslogger for denne slutningsforespørselen (alle chat-familieruter: Chat-fullføringer, svar, meldinger, fullføringer, Gemini). Tidsstempel, modell, status, varighet og tokenteller er fortsatt registrert. Kombiner med `x-omniroute-no-memory` og `x-omniroute-no-cache` for å velge bort fullstendig innhold |
+| `X-OmniRoute-Progress`   | Forespørsel | Sett til `true` for fremdriftshendelser                                                                                                                                                                                                                                                                                                                                          |
+| `X-Session-Id`           | Forespørsel | Klistret øktnøkkel for ekstern økttilhørighet                                                                                                                                                                                                                                                                                                                                    |
+| `x_session_id`           | Forespørsel | Understrekvariant aksepteres også (direkte HTTP)                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Session-Id` | Forespørsel | Anroper-levert session/conversation tag (mater også minne). Når tilstede, vedvarte ordrett til `call_logs.session_tag` for kostnadsattribusjon per økt (#8249) — ble aldri syntetisert når fraværende                                                                                                                                                                            |
+| `Idempotency-Key`        | Forespørsel | Dedup-nøkkel (5s-vindu)                                                                                                                                                                                                                                                                                                                                                          |
+| `X-Request-Id`           | Forespørsel | Alternativ dedup-nøkkel                                                                                                                                                                                                                                                                                                                                                          |
+| `x-omniroute-connection` | Forespørsel | Fest en enkeltmodellforespørsel til én leverandørtilkobling (konto) ved hjelp av dens id — se [Kontofesting per forespørsel](#account-pinning-per-request)                                                                                                                                                                                                                       |
+| `X-OmniRoute-Cache`      | Svar        | `HIT` eller `MISS` (ikke-streaming)                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Idempotent` | Svar        | `true` hvis deduplisert                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Progress`   | Svar        | `enabled` hvis fremdriftssporing på                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Session-Id` | Svar        | Effektiv økt ID brukt av OmniRoute                                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Request-Id` | Svar        | Forespørselskorrelasjons-ID (når kjent)                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Version`    | Svar        | OmniRoute byggeversjon (alltid til stede)                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Cost-Saved` | Svar        | USD cachen unngått på en HIT (kun cache-treff)                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Decision`   | Svar        | Rutingsporing: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` er kombinasjonsstrategien, eller `single` for en ikke-kombinasjonsforespørsel) — er alltid til stede ved fullføringssvar                                                                                                                                                                            |
 
-> Nginx-merknad: Hvis du er avhengig av overskrifter med understrek (for eksempel `x_session_id`), aktiver `underscores_in_headers on;`.
+> Nginx-merknad: Hvis du stoler på understrek-overskrifter (for eksempel `x_session_id`), aktiver `underscores_in_headers on;`.
 
 #### Kontofesting per forespørsel
 
-Når en leverandør har flere tilkoblinger (kontoer eller nøkler), velger OmniRoute normalt én
-gjennom strategien for kontovalg. En forespørsel kan i stedet feste én bestemt tilkobling
-med overskriften `x-omniroute-connection`:
+Når en leverandør har flere tilkoblinger (kontoer eller nøkler), velger OmniRoute normalt én gjennom sin kontovalgstrategi. En forespørsel kan i stedet feste én spesifikk forbindelse med `x-omniroute-connection` overskriften:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,25 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Hvor finner du ID-en.** Åpne leverandørsiden i kontrollpanelet
-  (**Dashboard → Providers → <provider>**) og klikk på `xxxxxxxx…`-ID-brikken på en tilkoblingsrad
-  — den kopierer hele tilkoblings-ID-en.
-- **Hvilke forespørsler bruker den.** Forespørsler til én modell (`provider/model`) på
-  `/v1/chat/completions`, `/v1/messages` og `/v1/responses`. Kombinasjoner ignorerer headeren:
-  fest en konto for hvert trinn i kombinasjonen via trinnets egen tilkobling.
-- **Festingen er streng, ikke en preferanse.** Den festede tilkoblingen brukes utelukkende. En
-  feil i forespørselen registrerer kontoens nedkjølingsperiode, men roterer **ikke** til en
-  søsterkonto hos samme leverandør.
-- **Nedkjøling og kvote frigjør festingen.** Mens den festede tilkoblingen er i nedkjøling,
-  kvote er brukt opp eller tilkoblingen er blokkert av en kvotepolicy, faller senere forespørsler
-  tilbake til leverandørens andre tilkoblinger, akkurat som ubundet trafikk.
-- **Ukjente eller deaktiverte ID-er fører til feil.** En ID som ikke finnes i leverandørens aktive
-  utvalg (slettet, deaktivert eller tilhører en annen leverandør) etterlater ingen kvalifisert
-  konto, så forespørselen mislykkes i stedet for å bli rutet et annet sted uten varsel.
+- **Hvor finner man id.** Åpne leverandørsiden i dashbordet (** Dashboard → leverandører → <provider>** ) og klikk på `xxxxxxxx…` id-brikken på en tilkoblingsrad — den kopierer hele tilkoblings-IDen.
+- **Som forespørsler ære det.** Enkeltmodellforespørsler (`provider/model`) på `/v1/chat/completions`, `/v1/messages` og `/v1/responses`. Kombinasjoner ignorerer overskriften: fest en konto per kombinasjonstrinn gjennom trinnets egen tilkobling i stedet.
+- **Pinnen er streng, ikke en preferanse.** Den pinnede tilkoblingen brukes utelukkende. En feil i forespørselen registrerer kontoens nedkjøling, men gjør det** ikke** rotere til en søskenkonto fra samme leverandør.
+- **Nedkjøling og kvote slipper pinnen.** Mens den festede tilkoblingen kjøles ned, kvoten er oppbrukt eller blokkert av en kvotepolicy, faller senere forespørsler tilbake til leverandørens andre tilkoblinger, akkurat som ufestet trafikk.
+- **Ukjente eller deaktiverte IDer mislykkes.** En id som ikke er i leverandørens aktive pool (slettet, deaktivert eller tilhører en annen leverandør) etterlater ingen kvalifisert konto, så forespørselen mislykkes i stedet for å dirigere stille andre steder.
 
-Claude Code sender egendefinerte headere gjennom `ANTHROPIC_CUSTOM_HEADERS`. Legg den i `env`-blokken
-i `~/.claude/settings.json`, eller i en `.claude/settings.json` på prosjektnivå for å feste en
-annen konto per prosjekt:
+Claude Code sender tilpassede overskrifter gjennom `ANTHROPIC_CUSTOM_HEADERS`. Sett den i `env` blokken til `~/.claude/settings.json`, eller i en `.claude/settings.json` på prosjektnivå for å feste en annen konto per prosjekt:
 
 ```jsonc
 {
@@ -133,12 +120,11 @@ annen konto per prosjekt:
 }
 ```
 
-Kilde: `src/sse/handlers/chat.ts` (lesing av headeren), `src/sse/services/auth.ts` og
-`src/sse/services/sessionAffinityPin.ts` (frigjøring av festingen og kontrollen av om den mangler i utvalget).
+Kilde: `src/sse/handlers/chat.ts` (header read), `src/sse/services/auth.ts` og `src/sse/services/sessionAffinityPin.ts` (pin release and the missing-from-pool check).
 
-> **Headere for kostnadstelemetri:** svar uten strømming som lykkes, inneholder også `X-OmniRoute-*`-settet for kostnadstelemetri — `X-OmniRoute-Response-Cost` (USD, alltid 10 desimaler; `0.0000000000` for gratis eller ikke-prissatte forespørsler), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` og `X-OmniRoute-Fallback-Attempts` (bare når > 0), samt `X-OmniRoute-Request-Id` og `X-OmniRoute-Version`. Disse sendes av chat completions, `/v1/responses`, `/v1/messages` **og medieendepunktene** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` og `/v1/moderations` (alltid med kostnaden `0`). Mediekostnaden beregnes per modalitet (per bilde, per sekund, per tegn, per søkeenhet) når prissetting er tilgjengelig, ellers `0` (fail-open).
+> **Kostnadstelemetrioverskrifter:** ikke-streamende suksessresponser har også `X-OmniRoute-*` -kostnadstelemetrisettet — `X-OmniRoute-Response-Cost` (USD, fast 10 desimaler; `0.0000000000` for free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` og `X-OmniRoute-Fallback-Attempts` (bare når > 0), `X-OmniRoute-Version` `X-OmniRoute-Request-Id`. Disse sendes ut av chatfullføringer, `/v1/responses`, `/v1/messages`,** og medias endepunkter** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` og `/v1/moderations` (koster alltid `0`). Mediekostnaden beregnes per modalitet (per bilde, per sekund, per tegn, per søkeenhet) når priser er tilgjengelig, ellers `0` (fail-open).
 
-> **Semantikk for kostnad ved cache-treff:** Ved et treff i den semantiske hurtigbufferen (`X-OmniRoute-Cache-Hit: true`) foretas ingen oppstrømskall, så `X-OmniRoute-Response-Cost` er `0.0000000000` (den **inkrementelle** kostnaden ved å levere treffet). Den opprinnelige kostnaden / kostnaden som ellers ville ha påløpt, rapporteres separat i `X-OmniRoute-Cost-Saved`. Faktureringskonsumenter bør summere `X-OmniRoute-Response-Cost` (treff koster ingenting); hurtigbufferanalyse kan aggregere `X-OmniRoute-Cost-Saved`.
+> **Cache-hit cost semantikk:** på en semantisk cache HIT (`X-OmniRoute-Cache-Hit: true`) blir det ikke gjort noe oppstrøms anrop, så `X-OmniRoute-Response-Cost` er `0.0000000000` (den** inkrementell** kostnadene ved å servere treffet). original/would-have-been kostnaden rapporteres separat i `X-OmniRoute-Cost-Saved`. Faktureringsforbrukere bør summere `X-OmniRoute-Response-Cost` (treff koster ingenting); cache-analyse kan samle `X-OmniRoute-Cost-Saved`.
 
 ## Eksklusive administrerte sesjonsleieavtaler
 
@@ -364,6 +350,8 @@ Tilgjengelige leverandører inkluderer OpenAI (GPT Image 2), xAI (Grok Image), T
 
 `n` returnerer `n` bilder i `data[]`. Leverandører hvis oppstrøms API returnerer ett bilde per samtale (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) får `n` separate oppstrømsanrop, maksimalt 4 under flyturen. En fast `seed` er forskjøvet av anropsindeks (`seed`, `seed + 1`, ...), så bildene er forskjellige, men forblir reproduserbare. `n` er begrenset til 10. Forespørselen mislykkes som helhet hvis et anrop mislykkes. Listen over fan-out-formater er `SINGLE_IMAGE_FANOUT_FORMATS` i `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Bildemodeller (`codex/gpt-image-*`) returnerer kun PNG : oppstrøms svarer `200` med PNG byte selv når `jpeg` eller `webp` er forespurt. En forespørsel med en hvilken som helst annen `output_format` (`webp`, `jpeg`, ...) blir avvist med HTTP 400 i stedet for å bli ignorert stille; utelat det eller send `png`. `output_compression` videresendes ikke.
+
 ZenMux gjenbruker den eksisterende API-nøkkelforbindelsen og godtar `zenmux/` eller `zm/` -prefikser:
 
 - `zenmux/openai/gpt-image-2` bruker ZenMuxOpenAI Images API. Alternativene inkluderer `size`, `quality`, `n`, `output_format`, `output_compression`, `background` og `response_format`.
@@ -381,7 +369,7 @@ GET /v1/images/generations
 
 ---
 
-## Dokument-OCR
+## Dokument OCR
 
 ```bash
 POST /v1/ocr
@@ -397,17 +385,15 @@ Content-Type: application/json
 }
 ```
 
-`model` velger OCR-leverandøren via et `provider/model`-prefiks; en frittstående modell-ID (f.eks.
-`mistral-ocr-latest`) slås opp mot den registrerte leverandøren, og utelatt `model` bruker som
-standard Mistral (`mistral-ocr-latest`). Registrerte leverandører (`open-sse/config/ocrRegistry.ts`):
+`model` velger OCR leverandøren via et `provider/model` prefiks; en bare modell-id (f.eks. `mistral-ocr-latest`) løses til sin registrerte leverandør, og en utelatt `model` er standard til Mistral (`mistral-ocr-latest`). Registrerte leverandører (`open-sse/config/ocrRegistry.ts`):
 
-| Leverandør-ID                 | Modell-ID            | `model`-verdi                                                          | Merknader                                                                                                    |
-| ----------------------------- | -------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (eller frittstående `mistral-ocr-latest`) | Synkron — svaret returneres direkte fra det ene kallet oppstrøms.                                            |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                            | Asynkron oppstrøms (`analyze` + polling) — se nedenfor.                                                      |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                                | Synkron, via Vertex AI sitt `openapi/chat/completions`-partnerendepunkt — se nedenfor for autentisering/URL. |
+| Leverandør-ID                 | Modell-ID                              | `model`                                                        | Notater                                                                                                                                                                                                           |
+| ----------------------------- | -------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                   | `mistral/mistral-ocr-latest` (eller bare `mistral-ocr-latest`) | Synkron — svaret returneres direkte fra enkelt oppstrøms samtale.                                                                                                                                                 |
+| `azure-document-intelligence` | `prebuilt-read`                        | `azure-document-intelligence/prebuilt-read`                    | Asynkron oppstrøms (`analyze` + poll) — se nedenfor.                                                                                                                                                              |
+| `vertex-deepseek-ocr`         | selvutplassert (ingen innebygd modell) | `vertex-deepseek-ocr/<your-deployed-model-id>`                 | Synkron, via ditt eget Vertex AI Model Garden DeepSeek-OCR-endepunkt (`openapi/chat/completions` -form); Google pensjonerte den administrerte `deepseek-ocr-maas` 2026-10-21 (#20423), slik at id returnerer 400. |
 
-Alle tre leverandørene svarer med samme Mistral-formede innhold:
+Alle tre leverandørene svarer i den samme Mistral-formede kroppen:
 
 ```json
 {
@@ -417,29 +403,13 @@ Alle tre leverandørene svarer med samme Mistral-formede innhold:
 }
 ```
 
-### Pollingsflyt for Azure Document Intelligence
+### Azure Document Intelligence avstemningsflyt
 
-Azure Document Intelligence sitt `analyze`-API er asynkront: den første forespørselen returnerer
-en `Operation-Location`-header i stedet for et innhold, og resultatet må hentes gjennom polling.
-Håndtereren (`open-sse/handlers/ocr.ts`) poller denne URL-en hvert sekund i opptil 30 forsøk,
-avslutter umiddelbart (fortsetter ikke å polle) ved et pollingsvar som ikke er `ok`, eller ved
-statusen `"failed"`, og returnerer `504` hvis operasjonen fortsatt kjører etter at forsøksbudsjettet
-er brukt opp. Det endelige Azure-svaret normaliseres til samme `pages`/`markdown`-struktur som
-brukes av Mistral før det returneres til klienten, slik at klientkode ikke trenger å behandle
-leverandøren særskilt.
+Azure Document Intelligences `analyze` API er asynkron: den første forespørselen returnerer en `Operation-Location` header i stedet for en body, og resultatet må spørres etter. Behandleren (`open-sse/handlers/ocr.ts`) poller som URL hvert sekund i opptil 30 forsøk, mislykkes raskt (fortsetter ikke polling) på et ikke-`ok` poll-svar eller en `"failed"` -status, og returnerer `504` hvis operasjonen fortsatt kjører etter at forsøksbudsjettet er oppbrukt. Det endelige Azure-svaret normaliseres til den samme `pages`/`markdown` -formen som brukes av Mistral før det returneres til den som ringer, så klientkoden trenger ikke å spesifisere leverandøren.
 
-### Autentisering og endepunktoppløsning for Vertex AI DeepSeek OCR
+### Vertex AI DeepSeek OCR auth- og endepunktoppløsning
 
-`vertex-deepseek-ocr` gjenbruker den samme Vertex AI-autentiseringen som OmniRoute allerede støtter
-for chat-/bildekommunikasjon (`open-sse/executors/vertex.ts`): Tilkoblingens API-nøkkel er enten en
-Service Account JSON-legitimasjon (utvekslet mot et kortvarig OAuth-tilgangstoken via JWT-bearer-
-flyten) eller et allerede utstedt OAuth-tilgangstoken som brukes direkte. URL-en til endepunktet
-oppstrøms er Vertex sitt generiske `openapi/chat/completions`-partnerendepunkt, bygget fra
-tilkoblingens prosjekt og region — en eksplisitt `providerSpecificData.project`/`providerSpecificData.region` vinner alltid;
-ellers utledes prosjektet fra `project_id` i Service Account JSON, og regionen har standardverdien
-`us-central1`. Begge oppløsningene skjer i `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), og brukes av
-`src/app/api/v1/ocr/route.ts` før videresending til `handleOcr`.
+`vertex-deepseek-ocr` gjenbruker den samme Vertex AI -autentiseringen OmniRoute allerede støtter for chat/image trafikk (`open-sse/executors/vertex.ts`): tilkoblingens API nøkkel er enten en tjenestekonto JSON legitimasjon (byttet ut mot et kortvarig OAuth tilgangstoken via JWT-bærerflyten) eller et allerede preget OAuth tilgangstoken. Oppstrøms endepunktet URL er Vertex sitt generiske `openapi/chat/completions` partner endepunkt, bygget fra tilkoblingens prosjekt og region — en eksplisitt `providerSpecificData.project`/`providerSpecificData.region` vinner alltid; ellers er prosjektet utledet fra tjenestekontoen JSON `project_id` og regionen er standard til `us-central1`. Begge oppløsningene skjer i `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), konsumert av `src/app/api/v1/ocr/route.ts` før de sendes til `handleOcr`.
 
 ---
 
@@ -688,96 +658,102 @@ Oppstrømskontrakter: [lydeffekter](https://elevenlabs.io/docs/api-reference/tex
 
 ## Kompatibilitetsendepunkter
 
-| Metode | Bane                                      | Format                                |
-| ------ | ----------------------------------------- | ------------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                                |
-| POST   | `/v1/messages`                            | Anthropic                             |
-| POST   | `/v1/responses`                           | OpenAI Responses                      |
-| POST   | `/v1/embeddings`                          | OpenAI                                |
-| POST   | `/v1/images/generations`                  | OpenAI Images                         |
-| POST   | `/v1/images/edits`                        | OpenAI Images (redigering/innmaling)  |
-| POST   | `/v1/videos/generations`                  | OpenAI-lignende videogenerering       |
-| POST   | `/v1/music/generations`                   | OpenAI-lignende musikkgenerering      |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (returnerer lydbody)       |
-| POST   | `/v1/rerank`                              | Cohere/Voyage-lignende omrangering    |
-| POST   | `/v1/classify`                            | Jina-klassifisering (`api.jina.ai`)   |
-| POST   | `/v1/segment`                             | Jina-segmentering (`segment.jina.ai`) |
-| POST   | `/v1/moderations`                         | OpenAI-moderering                     |
-| GET    | `/v1/models`                              | OpenAI                                |
-| POST   | `/v1/models/query`                        | Filtrert modellutvalg                 |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                             |
-| GET    | `/v1beta/models`                          | Gemini                                |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                |
-| POST   | `/v1/api/chat`                            | Ollama                                |
-| GET    | `/api/v1/vscode/{token}/`                 | OpenAI-katalogalias                   |
-| GET    | `/api/v1/vscode/{token}/models`           | OpenAI-modellalias                    |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI-tokenisert alias               |
-| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responses-tokenisert alias     |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama-tokenisert alias               |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama-tagger-tokenisert alias        |
+| Metode | Sti                                       | Format                             |
+| ------ | ----------------------------------------- | ---------------------------------- |
+| POST   | `/v1/chat/completions`                    | OpenAI                             |
+| POST   | `/v1/messages`                            | Anthropic                          |
+| POST   | `/v1/responses`                           | OpenAI svar                        |
+| POST   | `/v1/embeddings`                          | OpenAI                             |
+| POST   | `/v1/images/generations`                  | OpenAI bilder                      |
+| POST   | `/v1/images/edits`                        | OpenAI bilder (edit/inpaint)       |
+| POST   | `/v1/videos/generations`                  | Videogenerering i OpenAI-stil      |
+| POST   | `/v1/music/generations`                   | Musikkgenerering i OpenAI-stil     |
+| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                 |
+| POST   | `/v1/audio/speech`                        | OpenAI TTS (returnerer lydtekst)   |
+| POST   | `/v1/rerank`                              | Cohere/Voyage-style omplassering   |
+| POST   | `/v1/classify`                            | Jina klassifisere (`api.jina.ai`)  |
+| POST   | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`) |
+| POST   | `/v1/moderations`                         | OpenAI Moderasjoner                |
+| POST   | `/v1/systemone`                           | System One skrev avgjørelser       |
+| POST   | `/v1/decisions`                           | OpenAI avgjørelser (innfødt)       |
+| GET    | `/v1/systemone/models`                    | Beslutningsmodellkatalog           |
+| GET    | `/v1/models`                              | OpenAI                             |
+| POST   | `/v1/models/query`                        | Filtrert modellkortliste           |
+| POST   | `/v1/messages/count_tokens`               | Anthropic                          |
+| GET    | `/v1beta/models`                          | Gemini                             |
+| POST   | `/v1beta/models/{...path}`                | Gemini generateContent             |
+| POST   | `/v1/api/chat`                            | Ollama                             |
+| GET    | `/api/v1/vscode/{token}/`                 | OpenAI katalog alias               |
+| GET    | `/api/v1/vscode/{token}/models`           | OpenAI modeller alias              |
+| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenisert alias            |
+| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responses tokenisert alias  |
+| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenisert alias            |
+| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama -tagger tokenisert alias    |
 
-Alle POST-ruter følger samme struktur: `Bearer your-api-key` + Zod-validert JSON-body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` osv.; se `src/shared/validation/schemas.ts`). Det returneres 4xx ved skjemafeil.
+Alle POST ruter følger samme form: `Bearer your-api-key` + Zod-validert JSON body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, etc., se `src/shared/validation/schemas.ts`). 4xx returneres ved skjemafeil.
 
-For klienter som ikke kan legge ved `Authorization: Bearer ...`, godtar OmniRoute også API-nøkler i URL-en via enten spørringsstrengkompatibilitet (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) eller de dedikerte `/api/v1/vscode/{token}/...`-endepunktene som er dokumentert nedenfor.
+For klienter som ikke kan koble til `Authorization: Bearer ...`, godtar OmniRoute også API nøkler i URL via enten spørrestrengkompatibilitet (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) eller de dedikerte `/api/v1/vscode/{token}/...` endepunktene som er dokumentert nedenfor.
 
 ```bash
-# Omrangering (leverandør fra skyregisteret eller en OpenAI-kompatibel leverandørnode som "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina-klassifisering (Foundation API-legitimasjon)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina-segmentering
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina-søk (s.jina.ai; leverandøraliaser: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderering
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — returnerer en body med audio/mpeg (eller det forespurte formatet)
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS krever et språk og en stemme: `language` har standardverdien "en"; en manglende
-# stemme eller et OpenAI-standardstemmenavn (alloy, nova, …) blir til "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Bilderedigering (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Video-/musikkgenerering (leverandørprefikset modell-ID)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Noder for omrangeringstilbydere:** `POST /v1/rerank` ruter også til OpenAI-kompatible tilbydernoder
-> (oMLX, vLLM, Infinity, TEI bak en gateway, …) adressert som `<node-prefix>/<model>`. Loopback-
-> noder (`localhost`, `127.0.0.1`, `172.16.0.0/12`) er alltid kvalifisert, og det samme gjelder vertsnavnene
-> operatøren oppgir i `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (f.eks. et Docker-/Compose-tjenestenavn som
-> `http://reranker:8080/v1`; disse kalles direkte, aldri via `HTTP(S)_PROXY` eller en tilkoblings
-> fastlåste proxy). Noder på alle andre
-> verter — en LAN-maskin eller Tailscale-peer — er bare kvalifisert når operatøren aktiverer
-> funksjonsflagget `RERANK_REMOTE_PROVIDER_NODES` **og** nodens basis-URL består policyen for utgående
-> tilbyders-URL-er (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Minnemotorens omrangeringssteg kaller denne ruten via
-> loopback, så den samme regelen gjelder for `rerankProviderModel` i minneinnstillingene.
+> **Ranger leverandørnoder på nytt:** `POST /v1/rerank` ruter også til OpenAI-kompatible leverandørnoder (oMLX, vLLM, Infinity, TEI bak en gateway, …) adressert som `<node-prefix>/<model>`. Loopback-noder (`localhost`, `127.0.0.1`, `172.16.0.0/12`) er alltid kvalifiserte, og det samme er vertsnavn som operatøren viser i `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (f.eks. et Docker/Compose -tjenestenavn som `http://reranker:8080/v1`; disse kalles direkte, aldri gjennom `HTTP(S)_PROXY` eller en tilkoblings festede proxy). Noder på en hvilken som helst annen vert — a LAN box eller Tailscale peer — er kun kvalifisert når operatøren aktiverer `RERANK_REMOTE_PROVIDER_NODES` -funksjonsflagget** og** nodens base URL passerer leverandørens utgående URL policy (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Minnemotorens rerankeringstrinn kaller denne ruten over loopback, så den samme regelen styrer `rerankProviderModel` i minneinnstillingene.
 >
-> **Former for lokale servere:** noden kalles på `<base>/v1/rerank` og, ved 404, på `<base>/rerank`
-> (Infinity, TEI). Oppstrømskroppen inneholder både Cohere-/OpenAI-notasjonen (`documents`,
-> `return_documents`) og TEI-notasjonen (`texts`, `return_text`), og oppstrømssvaret
-> normaliseres til Cohere-konvolutten: TEIs bare `[{index, score, text}]`, `{results: [{index, score}]}`
-> fra tynne gatewayer og Voyage-lignende `{data: [...]}` returneres alle til klienten som
-> `{results: [{index, relevance_score, document?}]}`, sortert etter poengsum og begrenset til `top_n`.
+> **Lokale serverformer:** noden kalles ved `<base>/v1/rerank` og, på 404, ved `<base>/rerank` (Infinity, TEI). Oppstrømskroppen har både Cohere/OpenAI stavingen (`documents`, `return_documents`) og TEI stavingen (`texts`, `return_text`), og oppstrømsresponsen er normalisert til Cohere konvolutten: TEI's bare `[{index, score, text}]`, `{results: [{index, score}]}` fra tynne gatewayer og Voyage-stil `{data: [...]}` som alle kommer tilbake til `{results: [{index, relevance_score, document?}]}` the cap, sortert etter `top_n`.
 
-> **Oppdagelse av tilbydernoder:** Modeller på en OpenAI-kompatibel tilbydernod vises i `GET /v1/models`
-> under nodeprefikset. Rader uten endepunktmetadata (typisk for lokale `/v1/models`-oppføringer)
-> arver nodens `apiType`, slik at modellene til en `embeddings`-node får `type: "embedding"` og
-> modellene til en `rerank`-node får `type: "rerank"` i stedet for å settes til chat som standard;
-> en eksplisitt `supportedEndpoints` på en synkronisert eller manuelt lagt til rad har fortsatt prioritet.
+> **Provider-node-oppdagelse:** modeller på en OpenAI-kompatibel leverandørnode vises i `GET /v1/models` under nodeprefikset. Rader som ikke har noen endepunktmetadata (typisk for lokale `/v1/models` oppføringer) arver nodens `apiType`, så modellene til en `embeddings` node er `type: "embedding"` og en `rerank` -nodes modeller er `type: "rerank"` i stedet for som standard å chatte; en eksplisitt `supportedEndpoints` på en synkronisert eller manuelt lagt til rad har fortsatt forrang.
 
-### Dedikerte tilbyderruter
+### Skrevne avgjørelser
+
+Beslutningsmodeller svarer på maskinskrevne spørsmål med kalibrerte sannsynligheter i stedet for å generere tekst. De er aldri chat-modeller, og de to trådformatene blir aldri oversatt til hverandre:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter beslutninger, Cloudflare Workers AI, lokale Ollama).
+- `POST /v1/decisions` — native OpenAI Decisions `{ model, input, questions: [...] }`, servert av en `openai` -forbindelse. Modellen er `openai/gpt-6-luna` (den bare `gpt-6-luna` fungerer også). Svarene kommer tilbake i spørsmålsrekkefølge, urørt.
+- `GET /v1/systemone/models` — en katalog av begge typer; hver rad navngir sin `api_format` (`systemone` eller `decisions`). `limit` / `after` side den endelige listen. `X-OmniRoute-Catalog-Status` -overskriften leser `complete`, `partial` eller `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+På `/v1/decisions` kontrolleres API -nøkkelens modelltillatelsesliste, `decisions` endepunktkategorien, budsjettet og tilkoblingsomfanget før noen legitimasjon leses. Legitimasjonen er den lagrede `openai` tilkoblingen innenfor nøkkelens omfang (aldri en miljønøkkel); en tilkoblingsbase URL respekteres bare når det er en `http(s)` URL uten legitimasjon, spørring eller fragment som ikke peker på denne OmniRoute. Samtalen går gjennom den samme bevoktede transporten som `decision` auto-ruteren ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): leverandørens utgående vakt, ingen forsøk, ingen omdirigeringer, en 5 s timeout og en 64 KB svartak (et større svar er en 502). Forespørselsinstanser er begrenset til 4 MiB. Hvert anrop sender en ny `Idempotency-Key`. Feil har kun oppstrømsstatus, aldri kroppen, URL, nøkkelen eller ledeteksten.
+
+### Dedikerte leverandørruter
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -785,7 +761,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Tilbyderprefikset legges automatisk til hvis det mangler. Modeller som ikke samsvarer, returnerer `400`.
+Leverandørprefikset blir automatisk lagt til hvis det mangler. Umatchede modeller returnerer `400`.
 
 ---
 

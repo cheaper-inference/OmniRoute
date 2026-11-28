@@ -62,43 +62,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute টোকেনটি সংরক্ষণ করে এবং সঙ্গে সঙ্গে ১টি ফলাফলের একটি পরীক্ষামূলক অনুসন্ধান চালায়; Notion
 কোনো ত্রুটি অবজেক্ট ফেরত দিলে টোকেনটি মুছে ফেলা হয় এবং কলটি `400` সহ ব্যর্থ হয়।
 
-## MCP টুলসমূহ (৬টি)
+## MCP টুলস (6)
 
-`open-sse/mcp-server/tools/notionTools.ts`-এ সংজ্ঞায়িত। কলের সময়
-`getNotionToken()`-এর মাধ্যমে টোকেন নির্ধারণ করা হয়; কোনো টোকেন কনফিগার করা না থাকলে টুলটি
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
-ত্রুটি নিক্ষেপ করে।
+`open-sse/mcp-server/tools/notionTools.ts` তে সংজ্ঞায়িত। টোকেনটি কল টাইমে `getNotionToken()` এর মাধ্যমে সমাধান করা হয়; যদি কোনোটিই কনফিগার করা না থাকে তাহলে টুলটি `"Notion integration token not configured. Set it in Settings > Context Sources."` থ্রো করে
 
-| টুল                          | স্কোপ          | বিবরণ                                                                                      |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------ |
-| `notion_search`              | `read:notion`  | টেক্সট কোয়েরি দিয়ে পেজ ও ডেটাবেস অনুসন্ধান করে (শিরোনাম, ID ও URL ফেরত দেয়)। পেজিনেটেড। |
-| `notion_get_page`            | `read:notion`  | ID দিয়ে একটি পেজের কনটেন্ট ও মেটাডেটা সংগ্রহ করে।                                         |
-| `notion_list_block_children` | `read:notion`  | একটি ব্লক বা পেজের সব চাইল্ড ব্লক তালিকাভুক্ত করে (ব্লক ট্রি)। পেজিনেটেড।                  |
-| `notion_query_database`      | `read:notion`  | ঐচ্ছিক `filter` + `sorts` (Notion API ফরম্যাট) দিয়ে একটি ডেটাবেস কোয়েরি করে। পেজিনেটেড।  |
-| `notion_get_database`        | `read:notion`  | ID দিয়ে একটি ডেটাবেসের স্কিমা/মেটাডেটা সংগ্রহ করে।                                        |
-| `notion_append_blocks`       | `write:notion` | বিদ্যমান কোনো ব্লক বা পেজে চাইল্ড ব্লক যোগ করে (প্রতি রিকোয়েস্টে সর্বোচ্চ ১০০টি ব্লক)।    |
+| টুল                          | ব্যাপ্তি       | বর্ণনা                                                                                                      |
+| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | টেক্সট ক্যোয়ারী দ্বারা পৃষ্ঠা এবং ডাটাবেস অনুসন্ধান করুন (শিরোনাম, IDs, URLs প্রদান করে)। পৃষ্ঠাসংক্রান্ত। |
+| `notion_get_page`            | `read:notion`  | ID দ্বারা একটি পৃষ্ঠার সামগ্রী এবং মেটাডেটা পান।                                                            |
+| `notion_list_block_children` | `read:notion`  | একটি ব্লক বা পৃষ্ঠার (ব্লক ট্রি) সমস্ত ব্লক শিশুদের তালিকা করুন। পৃষ্ঠাসংক্রান্ত।                           |
+| `notion_query_database`      | `read:notion`  | ঐচ্ছিক `filter` + `sorts` (Notion API বিন্যাস) সহ একটি ডাটাবেস অনুসন্ধান করুন। পৃষ্ঠাসংক্রান্ত।             |
+| `notion_get_database`        | `read:notion`  | ID দ্বারা একটি ডাটাবেসের schema/metadata পান।                                                               |
+| `notion_append_blocks`       | `write:notion` | একটি বিদ্যমান ব্লক বা পৃষ্ঠায় ব্লক শিশুদের যুক্ত করুন (প্রতি অনুরোধে সর্বাধিক 100 ব্লক)।                   |
 
-### ইনপুট প্যারামিটার
+### ইনপুট পরামিতি
 
-- `notion_search` — `query` (১–৫০০ অক্ষর), `pageSize` (১–১০০, ডিফল্ট ২০),
-  `startCursor` (ঐচ্ছিক)।
-- `notion_get_page` — `pageId` (৩২-অক্ষরের হেক্স বা UUID)।
-- `notion_list_block_children` — `blockId`, `pageSize` (১–১০০, ডিফল্ট ৫০),
-  `startCursor` (ঐচ্ছিক)।
-- `notion_query_database` — `databaseId`, `filter` (ঐচ্ছিক, Notion ফিল্টার ফরম্যাট),
-  `sorts` (ঐচ্ছিক অ্যারে), `pageSize` (১–১০০, ডিফল্ট ৫০), `startCursor` (ঐচ্ছিক)।
-- `notion_get_database` — `databaseId`।
-- `notion_append_blocks` — `blockId`, `children` (ব্লক অবজেক্টের অ্যারে),
-  `after` (ঐচ্ছিক অবস্থান)।
+- `notion_search` — `query` (1–500 অক্ষর), `pageSize` (1–100, ডিফল্ট 20), `startCursor` (ঐচ্ছিক)।
+- `notion_get_page` — `pageId` (32-char hex বা UUID)।
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ডিফল্ট 50), `startCursor` (ঐচ্ছিক)।
+- `notion_query_database` — `databaseId`, `filter` (ঐচ্ছিক, Notion ফিল্টার বিন্যাস), `sorts` (ঐচ্ছিক অ্যারে), `pageSize` (1–100, ডিফল্ট 50), `startCursor` (ঐচ্ছিক)।
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`, `children` (ব্লক অবজেক্টের অ্যারে), `after` (ঐচ্ছিক অবস্থান)।
 
-### স্কোপসমূহ
+### স্কোপ
 
-পঠন টুলগুলোর জন্য `read:notion` এবং লিখন টুলটির জন্য `write:notion` প্রয়োজন।
-শুধু `OMNIROUTE_MCP_ENFORCE_SCOPES=true` হলে
-`open-sse/mcp-server/server.ts`-এর `withScopeEnforcement()` দ্বারা স্কোপ প্রয়োগ করা হয়;
-কলারের অনুমোদিত স্কোপগুলো `OMNIROUTE_MCP_SCOPES` (কমা দিয়ে পৃথক করা) অথবা
-প্রমাণীকৃত API কী-এর স্কোপ কনটেক্সট থেকে আসে। সম্পূর্ণ স্কোপ মডেলের জন্য
-[MCP-SERVER.md](./MCP-SERVER.md) দেখুন।
+রিড টুলের জন্য `read:notion` প্রয়োজন এবং লেখার টুলের জন্য `write:notion` প্রয়োজন। যখন `OMNIROUTE_MCP_ENFORCE_SCOPES=true` তখন `open-sse/mcp-server/server.ts` এ `withScopeEnforcement()` দ্বারা স্কোপ প্রয়োগ করা হয়, এবং সবসময় একজন HTTP/SSE কলার যার API কী-তে `manage`/`admin` নেই; কলারের অনুমোদিত স্কোপগুলি `OMNIROUTE_MCP_SCOPES` (কমা দ্বারা পৃথক করা) বা প্রমাণীকৃত API কী এর স্কোপ প্রসঙ্গ থেকে আসে৷ সম্পূর্ণ সুযোগ মডেলের জন্য [MCP-SERVER.md](./MCP-SERVER.md) দেখুন।
 
 ## এন্ডপয়েন্টসমূহ
 

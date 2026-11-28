@@ -5,11 +5,10 @@
 ---
 
 > **સત્યનો સ્ત્રોત:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **છેલ્લે અપડેટ કરાયેલ:** 2026-09-22 — સ્કોપ નેમસ્પેસ MCP-SERVER.md તરફ નિર્દેશ કરે છે
 
-ઓમ્નીરૂટ પાસે રૂટ-અવેર ઓથોરાઇઝેશન પાઇપલાઇન છે જે દરેક API વિનંતીને ગેટ કરે છે. વર્ગીકરણ **નિર્ધારિત** અને **ફેઇલ-ક્લોઝ્ડ** છે — જે કંઈપણ વર્ગીકૃત કરી શકાતું નથી તે `MANAGEMENT` તરીકે સમાપ્ત થાય છે અને સત્ર અથવા મેનેજમેન્ટ-ગ્રેડ ટોકનની માંગ કરે છે. આ પૃષ્ઠ રૂટ જાળવતા અથવા નવા એન્ડપોઇન્ટ્સ ડિઝાઇન કરતા ઇજનેરો માટે મોડેલ સમજાવે છે.
+OmniRoute પાસે રૂટ-અવેર અધિકૃતતા પાઇપલાઇન છે જે દરેક API વિનંતીને ગેટ કરે છે. વર્ગીકરણ છે** નિર્ધારિત** અને** નિષ્ફળ-બંધ** — જે કંઈપણ વર્ગીકૃત કરી શકાતું નથી તે `MANAGEMENT` તરીકે સમાપ્ત થાય છે અને સત્ર અથવા મેનેજમેન્ટ-ગ્રેડ ટોકનની માંગ કરે છે. આ પેજ રૂટ જાળવતા અથવા નવા એન્ડપોઇન્ટ ડિઝાઇન કરતા ઇજનેરો માટેનું મોડેલ સમજાવે છે.
 
-![AuthZ પાઇપલાઇન (3 રૂટ ક્લાસ + નીતિ મૂલ્યાંકન)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > સ્ત્રોત: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -172,7 +171,7 @@ Incoming request → src/proxy.ts
        - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-વિશ્વસનીય આંતરિક હેડરો ( `src/server/authz/headers.ts` માં વ્યાખ્યાયિત) છે** આવનારી વિનંતીઓમાંથી છીનવી લેવામાં આવે છે** વર્ગીકરણ પહેલાં — ક્લાયન્ટ કોઈ વિષયનો ઢોંગ કરવા માટે `x-omniroute-auth-*` પૂર્વ-પોપ્યુલેટ કરી શકતા નથી.
+વિશ્વસનીય આંતરિક હેડરો ( `src/server/authz/headers.ts` માં વ્યાખ્યાયિત) છે** ઇનકમિંગ વિનંતીઓમાંથી છીનવી લેવામાં આવે છે** વર્ગીકરણ પહેલાં — ક્લાયન્ટ કોઈ વિષયનો ઢોંગ કરવા માટે `x-omniroute-auth-*` પૂર્વ-પોપ્યુલેટ કરી શકતા નથી.
 
 ### નીતિ કરાર
 
@@ -180,7 +179,7 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) — હંમેશા `allow({ kind: "anonymous", id: "anonymous" })` પરત કરે છે.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — અર્ક બેરર, `validateApiKey()` દ્વારા માન્ય કરે છે. જ્યારે અસરકારક `REQUIRE_API_KEY` સુવિધા ફ્લેગ અક્ષમ હોય ત્યારે જ અનામી પર પડે છે. અસરકારક ધ્વજનું નિરાકરણ `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) દ્વારા કરવામાં આવે છે તેથી ડેશબોર્ડ ફીચર ફ્લેગ્સ અને પર્યાવરણ ચલો `/api/v1/*`, `/api/v1beta/*` અને ઉપનામોને સતત નિયંત્રિત કરે છે; રિઝોલ્વર નિષ્ફળતા નિષ્ફળ બંધ. ક્લાયંટ API રૂટ પર ડેશબોર્ડ-સત્ર વિનંતીઓને મંજૂરી આપે છે ( `/api/v1/models` સહિત, ડેશબોર્ડ મોડલ કેટલોગ દ્વારા ઉપયોગમાં લેવાય છે). જ્યારે Entra ID SSO સક્ષમ હોય, ત્યારે એક વાહક કે જે માળખાકીય રીતે Entra ટોકન હોય (ત્રણ base64url સેગમેન્ટ્સ, `RS*` alg, `kid`) SSO શાખા દ્વારા નિયંત્રિત થાય છે.** પહેલાં** `validateApiKey()` અને તેનો ચુકાદો અંતિમ — છે તે ક્યારેય API-કી પાથ અથવા ડિગ્રેડ-ટુ-અનામી શાખામાં આવતો નથી, તેથી ઓળખ-પ્રદાતા આઉટેજ ઓપન એક્સેસ બની શકતું નથી. સ્ટેટિક API કી અપ્રભાવિત છે. [Entra ID SSO](../security/ENTRA_SSO.md) જુઓ.
-- **`managementPolicy`** (`policies/management.ts`) — ડેશબોર્ડ સત્ર, આંતરિક મોડલ-સિંક વિનંતીઓ ( `/api/providers/[name]/(sync-models|models)` સામે મેળ ખાતી) સ્વીકારે છે અથવા જો `isAuthRequired()` ખોટું પરત કરે છે તો સંપૂર્ણપણે છોડી દે છે. જ્યારે બેરર ટોકન હાજર હોય પરંતુ અમાન્ય હોય ત્યારે 403 (`AUTH_001`) પરત કરે છે, અન્યથા 401. કોઈપણ auth શાખા — [રૂટ ગાર્ડ ટિયર્સ](../security/ROUTE_GUARD_TIERS.md) જુએ તે પહેલાં રૂટ-ગાર્ડ ટિયર્સ (LOCAL_ONLY / ALWAYS_PROTECTED) ને પણ લાગુ કરે છે. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` માં LOCAL_ONLY પાથ (આજે: `/api/mcp/`) નોન-લૂપબેકથી એક્સેસ કરી શકાય છે જ્યારે બેરર કી `manage` સ્કોપ ધરાવે છે; અન્ય તમામ LOCAL_ONLY પાથ અવકાશને ધ્યાનમાં લીધા વિના કડક-લૂપબેક રહે છે.
+- **`managementPolicy`** (`policies/management.ts`) — ડેશબોર્ડ સત્ર, આંતરિક મોડલ-સિંક વિનંતીઓ ( `/api/providers/[name]/(sync-models|models)` સામે મેળ ખાતી) સ્વીકારે છે અથવા જો `isAuthRequired()` ખોટું પરત કરે છે તો સંપૂર્ણપણે છોડી દે છે. જ્યારે બેરર ટોકન હાજર હોય પરંતુ અમાન્ય હોય ત્યારે 403 (`AUTH_001`) પરત કરે છે, અન્યથા 401. કોઈપણ auth શાખા — [રૂટ ગાર્ડ ટિયર્સ](../security/ROUTE_GUARD_TIERS.md) જુએ તે પહેલાં રૂટ-ગાર્ડ ટિયર્સ (LOCAL_ONLY / ALWAYS_PROTECTED) ને પણ લાગુ કરે છે. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` માં LOCAL_ONLY પાથ (આજે: `/api/mcp/`) નોન-લૂપબેકથી એક્સેસ કરી શકાય છે જ્યારે બેરર કી `manage`/`admin` સ્કોપ અથવા સાંકડી `mcp:connect` સ્કોપ (`hasMcpConnectOrManageScope`), અથવા પ્રમાણિત ડેશબોર્ડ સત્ર સાથે ધરાવે છે; અન્ય તમામ LOCAL_ONLY પાથ અવકાશને ધ્યાનમાં લીધા વિના કડક-લૂપબેક રહે છે.
 
 સફળ પોલિસી `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` સાથે `AuthSubject` પરત કરે છે. ડાઉનસ્ટ્રીમ હેન્ડલર્સ તેને ઓથ લોજિકને ફરીથી ચલાવવાને બદલે `src/server/authz/assertAuth.ts` માં `assertAuth(request, "CLIENT_API")` દ્વારા વાંચી શકે છે.
 
@@ -271,24 +270,24 @@ export async function POST(request: Request) {
 
 સુવિધા અનુસાર નહીં, પણ આકાર અનુસાર set પસંદ કરો. એક route `PUBLIC_API_ROUTES_EXACT` માં જાય છે (અથવા માત્ર GET માટે `PUBLIC_READONLY_CORS_API_ROUTES` માં); માત્ર વાસ્તવિક subtree જ `PUBLIC_API_ROUTE_PREFIXES` માં જાય છે, અને તે **`/` પર સમાપ્ત થવું જ જોઈએ**. prefix સૂચિમાં એકલ route મૂકવાથી સમાન શરૂઆતના અક્ષરો ધરાવતા દરેક નજીકના path પણ જાહેર થઈ જાય છે — જેમાં પછીથી ઉમેરાયેલા dynamic-segment siblings પણ સામેલ છે (GHSA-74g9-q8f6-793h). `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` અને `tests/unit/authz/classify.test.ts` ખાતેના unit tests અપડેટ કરો.
 
-## સ્કોપ્સ
+## અવકાશ
 
-ત્રણ નેમસ્પેસ. દરેક ચેકર ફક્ત તેની પોતાની સ્ટ્રિંગ્સ વાંચે છે. બાજુ-બાજુની સરખામણી, જેમાં શા માટે `manage` `read:compression` માટે `scopeMatches` માં નિષ્ફળ જાય છે અને શા માટે `read` એક્સેસ ટોકન `PATCH /api/keys/{id}` કરી શકતું નથી, તે [ત્રણ સ્કોપ નેમસ્પેસ](../frameworks/MCP-SERVER.md#three-scope-namespaces) માં છે.
+ત્રણ નેમસ્પેસ. દરેક ચેકર ફક્ત તેના પોતાના શબ્દમાળાઓ વાંચે છે. `manage` શા માટે `read:compression` માટે `scopeMatches` નિષ્ફળ જાય છે અને શા માટે `read` એક્સેસ ટોકન `PATCH /api/keys/{id}` કરી શકતું નથી તે સહિતની બાજુ-બાજુ, [ત્રણ અવકાશ નેમસ્પેસ](../frameworks/MCP-SERVER.md#three-scope-namespaces) છે.
 
-API કી `scopes` એરે ધરાવે છે (જે `api_keys.scopes` માં JSON તરીકે સંગ્રહિત છે, જુઓ `src/lib/db/apiKeys.ts`).
+API કીઓ `scopes` એરે ધરાવે છે ( `api_keys.scopes` માં JSON તરીકે સંગ્રહિત, `src/lib/db/apiKeys.ts` જુઓ).
 
-### મેનેજમેન્ટ સ્કોપ
+### મેનેજમેન્ટ અવકાશ
 
-- `manage` / `admin` — `hasManageScope`. મેનેજમેન્ટ API રૂટ્સ માટે બેરર એક્સેસ.
-- `mcp:connect`, `self:usage`, `self:account-quota`, અને `policy:bypass-provider-quota` એ એડિટિવ એક્ઝેક્ટ-મેચ સ્કોપ્સ છે. તેઓ `MANAGEMENT_API_KEY_SCOPES` ની બહાર છે. `mcp:connect` ફક્ત `/api/mcp/` નોન-લૂપબેક કાર્વ-આઉટ ખોલે છે.
+- `manage` / `admin` — `hasManageScope`. મેનેજમેન્ટ API રૂટ્સ પર બેરર એક્સેસ.
+- `mcp:connect`, `self:usage`, `self:account-quota`, અને `policy:bypass-provider-quota` એ એડિટિવ સચોટ-મેળ સ્કોપ્સ છે. તેઓ `MANAGEMENT_API_KEY_SCOPES` બહાર બેસે છે. `mcp:connect` ફક્ત `/api/mcp/` નોન-લૂપબેક કોતરણી-આઉટ ખોલે છે.
 
 ### MCP ટૂલ સ્કોપ્સ
 
-કેટલોગ અને મેચિંગ નિયમો (સમાન સ્ટ્રિંગ, અથવા `*` માં સમાપ્ત થતો ગ્રાન્ટેડ સ્કોપ): [MCP ટૂલ સ્કોપ્સ](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` માં `MCP_SCOPE_LIST` એ મૂળ ટાઈપ્ડ સબસેટ છે, તે સંપૂર્ણ કેટલોગ નથી. અમલીકરણ `open-sse/mcp-server/scopeEnforcement.ts` માં `resolveCallerScopeContext()` MCP ઓથ માહિતી, વિનંતી મેટાડેટા, અથવા `OMNIROUTE_MCP_SCOPES` માંથી સ્કોપ્સને રિઝોલ્વ કર્યા પછી ચાલે છે. જો `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ન હોય તો તે બંધ રહે છે.
+કેટલોગ અને મેચિંગ નિયમો (સમાન સ્ટ્રિંગ, અથવા `*` માં સમાપ્ત થયેલ મંજૂર અવકાશ): [MCP ટૂલ સ્કોપ્સ](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` માં `MCP_SCOPE_LIST` એ મૂળ ટાઇપ કરેલ સબસેટ છે, તે સંપૂર્ણ સૂચિ નથી. `resolveCallerScopeContext()` દ્વારા MCP પ્રમાણીકરણ માહિતી, વિનંતી મેટાડેટા અથવા `OMNIROUTE_MCP_SCOPES` માંથી સ્કોપ્સ ઉકેલ્યા પછી અમલીકરણ `open-sse/mcp-server/scopeEnforcement.ts` માં ચાલે છે. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` તેને વૈશ્વિક સ્તરે ચાલુ કરે છે (ડિફૉલ્ટ `false`), પરંતુ તે હંમેશા HTTP/SSE કૉલર માટે લાગુ કરવામાં આવે છે જેની API કીમાં `manage`/`admin` અભાવ હોય છે ( `open-sse/mcp-server/scopeEnforcement.ts` માં `shouldForceScopeEnforcement()` જુઓ), ધ્વજને અનુલક્ષીને.
 
 ### એક્સેસ-ટોકન સ્કોપ્સ
 
-`oma_live_…` ટોકન્સ પર `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) દ્વારા ક્રમાંકિત. આ ક્રમ ફક્ત એક્સેસ-ટોકન ક્રેડેન્શિયલને લાગુ પડે છે. જુઓ [મેનેજમેન્ટ ઓથેન્ટિકેશન](../guides/MANAGEMENT-AUTH.md).
+`scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) દ્વારા ક્રમાંકિત, `oma_live_…` ટોકન્સ પર `read` / `write` / `admin`. આ રેન્ક ફક્ત એક્સેસ-ટોકન ઓળખપત્ર પર લાગુ થાય છે. [મેનેજમેન્ટ ઓથેન્ટિકેશન](../guides/MANAGEMENT-AUTH.md) જુઓ.
 
 ## ઑથ જરૂરી ટૉગલ
 

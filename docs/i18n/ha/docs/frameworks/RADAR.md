@@ -93,52 +93,30 @@ routing ko zaɓin model — duba zaɓin shiga na daban a ƙasa.
 
 ---
 
-## Sync na bayanai zaɓin shiga ne NA DABAN — alkawarin sirri
+## Daidaita bayanai shine SEPARATE ficewa daga — alkawarin sirri
 
-Kunna `RADAR_ENABLED` yana buɗe UI ne kawai. Yin sync na feed yana buƙatar zaɓin shiga na biyu,
-mai zaman kansa, wanda aka adana a `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migration `136_radar_cache_settings.sql`). `syncRadar()` yana duba tutar _da kuma_ zaɓin
-shiga kafin yin kowane kiran hanyar sadarwa:
+Kunna `RADAR_ENABLED` kawai yana buɗe UI. Daidaita ciyarwar yana buƙatar na biyu, shigarwa mai zaman kanta da aka adana a `radar_settings.opt_in` (`src/lib/db/radar.ts`, ƙaura `136_radar_cache_settings.sql`). `syncRadar()` yana duba tuta _da_ shiga kafin yin kowane kiran cibiyar sadarwa:
 
 ```
-Tuta a kashe   → { status: "disabled" }   — babu kiran hanyar sadarwa
-Opt-in false   → { status: "opt_out" }    — babu kiran hanyar sadarwa
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Lokacin da dukansu suke kunne, hanyar sync ita ce:
+Lokacin da duka biyu ke kunne, hanyar daidaitawa ita ce:
 
-1. `GET <feed base URL>/v1/catalog/latest` tare da `x-omniroute-radar-schema: 2` da header na zaɓi
-   `Authorization: Bearer <supporter key>` (duba ƙasa). Servers suna amfani da artifact na sauyin v1
-   da aka sanya wa hannu daban idan schema header ba ya nan, don haka tsofaffin clients da aka girka za su ci gaba da
-   karɓar sabuntawa.
-2. Wannan tsarin aikace-aikacen saukewa-kawai ne, amma har yanzu request ne na HTTPS. Ababen more rayuwa
-   da aka host suna karɓar metadata na haɗi na yau da kullum kamar source IP. Lokacin da aka saita supporter
-   key, sync yana kuma aika wannan key ɗin a cikin Bearer header domin service ɗin ya tantance
-   entitlement. A daidai revision na private-server da aka bayyana a iyakar shaidar da ke sama,
-   lissafin feed-request yana amfani da hashes na key, jimillar amfani, da truncated HMAC na IP
-   mai sauyawa kullum domin duba cin zarafi da hannu; waɗannan tables ba sa adana key ko IP a ɗanyen tsari.
-   Logs na samun damar ababen more rayuwa da encrypted delivery outbox iyakokin aiki ne
-   daban-daban.
-3. OmniRoute ba ya taɓa aika prompts, responses, conversations, provider credentials, model traffic,
-   uptime, latency, ko tsarin provider na gida zuwa service na Radar.
-4. Ana tabbatar da response, a duba ingancinsa, sannan a adana shi a cache na gida (duba
-   [Tsarin tsaro](#security-model)). Radar yana da hanyoyin hanyar sadarwa guda huɗu kacal a server-side:
-   `syncRadar()` don catalog, `syncRadarReferrals()` don referrals, da
-   `syncRadarOffers()` / `syncRadarIntel()` don offers da Intel na supporters kawai.
+1. `GET <feed base URL>/v1/catalog/latest` tare da `x-omniroute-radar-schema: 2` da kan tikitin `Authorization: Bearer <supporter key>` (duba ƙasa). Sabar sabar zuwa kayan aikin canji na v1 daban da aka sanya hannu a lokacin da taken tsari ba ya nan, don haka tsofaffin abokan ciniki suna ci gaba da karɓar sabuntawa.
+2. Wannan aikace-aikacen zazzagewa ne kawai, amma har yanzu buƙatar HTTPS ce. Kayan aikin da aka shirya yana karɓar metadata na haɗin kai na yau da kullun kamar tushen IP. Lokacin da aka saita maɓallin mai goyan baya, sync kuma yana aika wannan maɓalli a cikin taken Bearer domin sabis ɗin zai iya warware haƙƙin. A ainihin bitar uwar garken sirri da aka gano a cikin iyakar shaidar da ke sama, lissafin buƙatar ciyarwa yana amfani da maɓalli na hashes, jimlar amfani, da jujjuyawar yau da kullun na HMAC na IP don bitar cin zarafin hannu; waɗancan teburin ba maɓalli ko IP a ɗanyen sigar ba. Rajistar hanyoyin samar da ababen more rayuwa da akwatin saƙon da aka ɓoye ɓoyayyen iyakokin aiki ne daban.
+3. OmniRoute baya aika tsokaci, martani, tattaunawa, takaddun shaida na mai bada, zirga-zirgar samfuri, lokacin aiki, jinkiri, ko daidaitawar mai bada na gida zuwa sabis na Radar.
+4. An tabbatar da amsa, ingantacce, kuma an adana shi a cikin gida (duba [samfurin Tsaro](#security-model) ). Radar yana da daidai hanyoyin hanyar sadarwa ta gefen uwar garken guda huɗu: `syncRadar()` don kasidar, `syncRadarReferrals()` don masu ba da shawara, da `syncRadarOffers()` / `syncRadarIntel()` don tayin tallafi-kawai da Intel.
 
-**Supporter key** wani Bearer token ne na zaɓi (`radar_settings.supporter_key`)
-wanda ke ba feed service damar yanke shawarar tier ɗin da zai bayar (duba
-[Tiers](#tiers-community-and-live)). Ana:
+Binciken kasida yana gudana kowane awa 24. Lokacin da ingantaccen abinci har yanzu yana ɗaukar sigar cache da matakin, sync yana kiyaye nauyin cache, yana sabunta `fetchedAt`, kuma rajistan na gaba yana zuwa sa'o'i 24 daga baya maimakon a kan tikitin sa'a na gaba.
 
-- Adana shi **a rufaffen tsari lokacin da ba ya aiki** tare da helpers na AES-256-GCM `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`) waɗanda ake amfani da su don provider credentials.
-- Saita shi ta `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) kuma
-  **ba a taɓa maido da shi gaba ɗaya ba** — response ɗin yana mayar da masked form (`omr_****abcd`).
-- Sauyawa ko share shi yana invalidating caches na catalog, referrals, offers, da Intel a matsayin aiki guda marar yankewa. Sync/karatu
-  na gaba yana tantance sabon entitlement a server-side; adana key ba ya yin
-  request na hanyar sadarwa da kansa ko cin single-use activation key.
-- Aika shi zuwa feed service a matsayin Bearer token a sync GET — babu wani abu daban game da
-  key ɗin da ke barin client.
+The** makullin goyon baya** Alamar Mai Ba da zaɓi ce na zaɓi (`radar_settings.supporter_key`) wanda ke ba da damar sabis na ciyarwa su yanke shawarar wane matakin hidima (duba [Tiers](#tiers-community-and-live) ). Yana da:
+
+- Ajiye** rufaffen lokacin hutawa** tare da AES-256-GCM `encrypt()`/`decrypt()` mataimakan (`src/lib/db/encryption.ts`) da aka yi amfani da su don takaddun shaida na mai bayarwa.
+- Saita ta hanyar `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) da** bai ta6a mayar da martani ba** — amsa ta dawo da fom da aka rufe (`omr_****abcd`).
+- Canza shi ko share shi ta atomatik yana lalata kasida, masu ba da shawara, tayi, da cache na Intel. sync/read na gaba yana warware sabon haƙƙin uwar garken-gefen; ajiye maɓalli baya yin buƙatar hanyar sadarwa ko cinye maɓallin kunnawa guda ɗaya.
+- Aika zuwa sabis na ciyarwa azaman alamar mai ɗaukar nauyi akan daidaita GET — babu wani abu game da maɓallin da ya taɓa barin abokin ciniki.
 
 ---
 
@@ -293,94 +271,56 @@ wuraren HTTP na nesa suna ƙin aiki cikin aminci kuma suna barin kewayawa ba ta 
 
 ---
 
-## Samfurin tsaro
+## Tsarin tsaro
 
-### Sa hannun Ed25519 a kan ainihin bytes
+### Ed25519 sa hannu akan ainihin bytes
 
-Ana sanya wa bayanan feed hannu da Ed25519. `verifyFeedBytes()`
-(`src/lib/radar/verify.ts`) yana tabbatar da sa hannun a kan **ainihin bytes na amsa**
-da aka karɓa ta hanyar sadarwa — ba a taɓa sake serializing bayanan kafin tabbatarwa ba, don haka
-sake encoding byte-da-byte ba zai iya ɓata ko ƙetare binciken sa hannu a ɓoye ba.
-Rashin nasarar tabbatarwa (`invalid_signature`) yana dakatar da sync kafin a taɓa
-parsing ko caching na bayanan.
+An sanya hannu akan nauyin ciyarwar abinci tare da Ed25519. `verifyFeedBytes()` (`src/lib/radar/verify.ts`) yana tabbatar da sa hannun akan** daidai bytes amsa** da aka karɓa akan — na waya ba a sake yin lissafin kuɗin da aka biya kafin tabbatarwa, don haka sake shigar da byte-for-byte ba zai iya yin shuru ba ya warware ko ketare rajistan sa hannu. Rashin tabbatarwa (`invalid_signature`) yana kawar da daidaitawa kafin a taɓa yin lissafin abin da aka biya ko cache.
 
-### Maɓallin jama'a da aka kafe + juyawa
+### Juyawa maɓalli na jama'a +
 
-An kafe maɓallin jama'a na tabbatarwa a `src/lib/radar/pinnedKeys.ts`
-(`PINNED_FEED_PUBLIC_KEYS`), wanda yake array ne domin a iya saka sabon maɓalli a gaba kafin
-juyawa, yayin da tsofaffin feeds da aka cache waɗanda aka sanya wa hannu da maɓallin da ya gabata za su ci gaba da aiki har sai
-an sake sync ɗinsu.
+Maɓallin tabbatar da jama'a yana liƙa a cikin `src/lib/radar/pinnedKeys.ts` (`PINNED_FEED_PUBLIC_KEYS`), tsararru don haka za a iya shirya sabon maɓalli kafin juyawa yayin da tsofaffin ciyarwar da aka adana tare da maɓalli na baya suna ci gaba da aiki har sai an sake daidaita su.
 
-### Sauye-sauyen env masu sauƙaƙa forks
+### Fork-friendly env ya soke
 
-Env vars guda biyu suna bai wa forks da masu self-hosting damar sa client ya yi amfani da nasu feed maimakon
-tsohuwar sabis ɗin OmniRoute — duba
-[Yadda ake self-hosting na feed](#how-to-self-host-a-feed) a ƙasa:
+Biyu env vars suna barin cokali mai yatsu da masu karɓar kai su nuna abokin ciniki a abincin nasu maimakon OmniRoute sabis ɗin — duba [Yadda ake ɗaukar nauyin ciyarwa](#how-to-self-host-a-feed) a ƙasa:
 
-| Var                 | Manufa                                                                                                                                |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `RADAR_FEED_URL`    | Yana maye gurbin asalin URL na feed (tsoho `https://radar.omniroute.online`).                                                         |
-| `RADAR_FEED_PUBKEY` | Yana maye gurbin maɓallin jama'a da aka kafe (base64-DER SPKI ko PEM), tare da maye gurbin array na ciki da wannan maɓalli guda ɗaya. |
+| Var                 | Manufar                                                                                                                     |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `RADAR_FEED_URL`    | Ya soke tushen ciyarwar URL (tsoho `https://radar.omniroute.online`).                                                       |
+| `RADAR_FEED_PUBKEY` | Yana soke maɓallin jama'a da aka liƙa (base64-DER SPKI ko PEM), yana maye gurbin ginannen tsararrun da wannan maɓalli ɗaya. |
 
-### Ƙaramin sigar da aka yarda da ita
+### Sigar bene
 
-`syncRadar()` yana ƙin feed da aka sauke idan `version` ɗinsa bai fi
-sigar da ke cikin cache a halin yanzu sabo sosai ba (`compareVersions()`, kwatancen `YYYY.MM.DD.n` mai ɗigo) —
-`{ status: "stale" }`. Wannan yana hana endpoint na feed da aka kutsa ko aka saita ba daidai ba
-mayar da client zuwa tsofaffin bayanai masu wani sa hannu daban.
+`syncRadar()` ya ƙi abincin da aka zazzage wanda `version` bai cika sabon sabo ba fiye da sigar da aka adana a halin yanzu (`compareVersions()`, kwatancen `YYYY.MM.DD.n` dige) — `{ status: "stale" }`. Wannan yana hana madaidaicin madaidaicin madaidaicin wurin ciyarwa daga mirgina abokin ciniki zuwa ga tsofaffi, nau'in biyan kuɗi daban-daban.
 
-### Kwanaki biyu, da dalilin adana su duka
+### Kwanaki biyu, da dalilin da yasa aka ajiye su duka
 
-Feed da aka cache yana ɗauke da kwanaki biyu mabambanta, kuma guje wa rikita su ne ainihin dalilin
-adana su duka:
+Abincin da aka adana yana ɗaukar ranaku daban-daban guda biyu, kuma rikitar da su shine gaba ɗaya batun kiyaye duka biyun:
 
-| Filin         | Inda ya fito                     | Abin da yake amsawa                       |
-| ------------- | -------------------------------- | ----------------------------------------- |
-| `generatedAt` | jikin feed da aka sanya wa hannu | tsawon zaman **bayanan**                  |
-| `fetchedAt`   | agogon wannan install            | lokacin da wannan install ya **sauke** su |
+| Filin         | Ya fito daga                      | Amsa                                       |
+| ------------- | --------------------------------- | ------------------------------------------ |
+| `generatedAt` | jikin ciyarwar da aka sanya hannu | shekara nawa** data** shine                |
+| `fetchedAt`   | wannan agogon shigar              | lokacin da wannan shigar** zazzagewa** shi |
 
-Feed da aka sauke mintuna kaɗan da suka wuce zai iya ɗauke da alƙaluman da suka kai makonni, don haka `fetchedAt` kaɗai ba zai iya
-gaya wa operator ko overlay ɗin ya fi baseline ɗin da yake kansa sabo ba. Ana
-adana su duka a `radar_feed_cache`, ana dawo da su ta `getRadarCatalog().meta`, kuma ana bayar da
-rahotonsu dabam-dabam ta `GET /api/radar/status`. Row da aka cache kafin samuwar column ɗin `generated_at`
-(migration 163) ana karanta shi a matsayin `null` — abin da ba a sani ba yana ci gaba da kasancewa ba a sani ba maimakon
-aro lokacin saukewa. `radar_referrals_cache` yana riƙe da nasa `generated_at` tun
-migration 142.
+Abincin da aka samo mintunan da suka gabata na iya ɗaukar adadi na makonni, don haka `fetchedAt` kaɗai ba zai iya gaya wa ma'aikaci ko rufin ya fi sabo fiye da tushen da yake zaune a kai ba. Dukansu suna dagewa a cikin `radar_feed_cache`, ana mayar da su ta hanyar `getRadarCatalog().meta`, kuma an ruwaito su daban ta hanyar `GET /api/radar/status`. Jeri da aka adana kafin ginshiƙin `generated_at` ya wanzu (hijira 163) yana karantawa kamar yadda `null` — ba a san inda ba a san shi ba maimakon aron lokacin ɗauko. `radar_referrals_cache` ya kiyaye nasa `generated_at` tun hijira 142.
 
-Ƙaramin sigar da ke sama yana kwatanta `version`, ba ɗaya daga cikin kwanakin ba.
+Kasan sigar da ke sama tana kwatanta `version`, ba kwanan wata ba.
 
-Akwai giɓi biyu da suka rage, kuma duka da gangan ne: dashboard har yanzu yana nuna `Lokacin saukewa na ƙarshe` kawai, don haka karanta
-ranar build a can yana buƙatar sabon label (da entries na locales guda 41); sannan caches na offers da intel
-ba sa adana ranar build kwata-kwata, ko da yake schemas na feed ɗinsu suna ɗauke da ita — saboda haka `GET
-/api/radar/status` yana barin filin ga waɗannan biyun maimakon bayar da rahoton `null`
-wanda za a karanta a matsayin "ba a sani ba".
+Guda biyu sun rage, duka da gangan: dashboard ɗin har yanzu yana nuna `Last fetched` kawai, don haka karanta ranar ginin akwai buƙatar sabon lakabin (da kuma shigarwar 41 na gida); kuma tayin da intel caches ba su kiyaye ranar ginawa kwata-kwata, duk da cewa tsarin ciyarwarsu yana ɗauke da — `GET /api/radar/status` ɗaya don haka ya tsallake filin ga waɗannan biyun maimakon ba da rahoton `null` wanda zai karanta a matsayin "ba a sani ba".
 
-### Tabbatar da schema
+### Tabbatar da tsari
 
-Ana yin parsing da validation na bytes da aka sauke da `RadarFeedSchema`
-(`src/lib/radar/feedSchema.ts`, Zod schema) **bayan** tabbatar da sa hannu. Rashin dacewar
-schema yana dawo da `{ status: "invalid_schema" }` kuma ba a taɓa
-cache ba. Ana sake validation na bayanan da ke cache a matsayin kariya duk lokacin da aka karanta su
-(`getRadarCatalog()`) — row na cache da ya lalace ko aka gyara da hannu yana komawa ga
-baseline maimakon a yi amfani da shi.
+Zazzagewar bytes an daidaita su kuma an inganta su akan `RadarFeedSchema` (`src/lib/radar/feedSchema.ts`, tsarin Zod )** bayan** tabbatar da sa hannu. Rashin daidaituwar makirci ya dawo `{ status: "invalid_schema" }` kuma an bar cache ɗin ba a taɓa shi ba. Ana sake sabunta kayan aikin tsaro na tsaro akan kowane karanta (`getRadarCatalog()`) — layin cache da aka lalace ko da aka gyara da hannu ya koma ga tushe maimakon a yi aiki da shi.
 
-### Iyakar girman amsa (10 MB)
+### Girman girman amsa ( MB 10)
 
-`syncRadar()` yana tilasta **ƙayyadadden iyakar 10 MB** a kan jikin amsar feed — feed ɗin da aka sanya wa
-hannu takardar JSON ce mai girman KB, don haka duk abin da ya wuce wannan yana nuna `RADAR_FEED_URL` da aka saita ba daidai ba ko
-mai cutarwa (ko upstream da ke bayar da shara), ba catalog na gaskiya ba.
-Ana aiwatar da wannan a matakai biyu:
+`syncRadar()` tilasta a** 10 MB mai wuya** a jikin amsawar ciyarwar — abincin da aka rattaba hannu shine takardar JSON mai ma'aunin KB, don haka duk wani abu da ya wuce wannan maki a cikin kuskure ko maƙiyi `RADAR_FEED_URL` (ko na sama mai ba da shara), ba katalogi na halal ba. Ƙaddamarwa ya kasu kashi biyu:
 
-1. Binciken farko na `Content-Length` yana tsallake karanta jikin gaba ɗaya idan
-   header ya riga ya bayyana ƙimar da ta wuce iyakar.
-2. Binciken jimillar da ke ƙaruwa yayin karanta jikin yana tilasta iyakar ko da
-   `Content-Length` ba ya nan ko ya rage ainihin girman — ba a taɓa
-   amincewa da header shi kaɗai ba. Haɗa chunks da aka tara yana kiyaye ainihin
-   bytes da ake buƙata domin binciken sa hannun Ed25519 daga baya.
+1. Duban farko na `Content-Length` ya tsallake karanta jiki gaba ɗaya lokacin da taken ya riga ya bayyana ƙima akan hular.
+2. Duban-jimlar dubawa yayin karanta jiki yana tilasta hula koda lokacin da `Content-Length` ba ya nan ko kuma ta faɗi ainihin girman — na kan ba a taɓa amincewa da kansa ba. Ƙirƙirar ƙullun da aka tara yana adana ainihin bytes da ake buƙata don duba sa hannun Ed25519 daga baya.
 
-Wuce iyakar yana dawo da `{ status: "too_large" }` kuma ba ya taɓa cache,
-yana bin tsarin rashin lalata iri ɗaya da kowace sauran gazawar sync
-(`invalid_signature`, `invalid_schema`, `stale`).
+Wucewa da hula yana dawo da `{ status: "too_large" }` kuma ya bar cache ɗin ba a taɓa shi ba, yana bin tsarin mara lalacewa kamar kowane gazawar daidaitawa (`invalid_signature`, `invalid_schema`, `stale`).
 
 ---
 
@@ -424,84 +364,45 @@ version, tier }` — wannan shi ne ƙimar da dashboard ke nunawa, ba ɗanyen fil
 
 ---
 
-## Dokokin haɗewar overlay a lokacin karantawa
+## Dokokin haɗakar da lokacin karantawa
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) yana haɗa feed da aka adana a cache **a saman**
-tushen tsaye a **lokacin karantawa**, a cikin `getRadarCatalog()`. Ba a taɓa canza jerin tushen
-(`FREE_MODEL_BUDGETS`) — ana lissafa sabon `MergedEntry[]` a kowane
-kira.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) yana haɗa abincin da aka adana** a kan** madaidaicin tushe a** lokacin karatu** , cikin `getRadarCatalog()`. Ba a taɓa musanya tsarin tushen (`FREE_MODEL_BUDGETS`) ba — ana ƙididdige `MergedEntry[]` sabo akan kowane kira.
 
-Dokoki huɗu, bisa jerin fifiko:
+Dokoki guda hudu, bisa tsarin fifiko:
 
-1. **Feed ba ya taɓa maye gurbin canjin gida.** Ga kowane fili: idan mai gudanarwa ya
-   keɓance wani fili na shigarwa (`localOverrides` map, mai maɓallin `provider:modelId`),
-   ana tsallake ƙimar feed na wannan takamaiman filin — ƙimar mai gudanarwa ce ke rinjaye.
-2. **`enabled: false` yana kashe shigarwar, tare da bayanin asalinsa.** Shigarwar feed da ke kashe
-   wata shigarwa tana saita `enabled: false` da `disabledBy: "radar"` a sakamakon da aka haɗa,
-   domin UI ya iya bayyana _dalilin_ da ya sa shigarwa ta sauya daga samuwa zuwa kashewa.
-3. **Shigarwar da mai amfani ya ƙara wadda ba ta cikin feed tana ci gaba da kasancewa ba tare da canji ba.** Shigarwar da
-   ke cikin tushen kawai (ko aka ƙara ta a gida) kuma ba ta da shigarwar feed da ta dace da ita
-   tana wucewa ba tare da canji ba.
-4. **Ba a taɓa dawo da shigarwar da aka sanya wa tombstone ba.** Idan mai gudanarwa ya share wata
-   shigarwa a sarari (`tombstones` set), sake ƙara wannan `provider:modelId` ɗin da feed ya yi a siga
-   ta gaba ba zai dawo da ita ba.
+1. **Ciyarwa baya sake rubutawa na gida.** Kowane filin: idan mai aiki ya keɓance filin akan shigarwa ( taswirar `localOverrides`, maɓalli `provider:modelId`), ƙimar ciyarwar ta takamaiman filin ta tsallake — darajar mai aiki ta yi nasara.
+2. **`enabled: false` yana hana shigarwar, tare da provenance.** Shigar da abinci wanda ke kashe shigarwa yana saita `enabled: false` da `disabledBy: "radar"` akan sakamakon da aka haɗa, don haka UI zai iya bayyana _me yasa shigarwar ta tafi daga samuwa zuwa naƙasasshe.
+3. **Shigar da aka ƙara mai amfani da ba a cikin abincin yana tsira ba tare da taɓa shi ba.** Abubuwan shigarwa waɗanda ke wanzuwa kawai a cikin tushe (ko an ƙara su a gida) kuma basu da madaidaicin shigarwar ciyarwa ta hanyar canzawa.
+4. **Ba a ta da wani dutsen kabari.** Idan mai aiki ya share shigarwa (saitin `tombstones` ), ciyarwar ta sake ƙara cewa `provider:modelId` a wani sigar baya baya dawo da ita.
 
-Ana adana filayen da za a iya gyarawa da tombstones a cikin
-`radar_local_model_state` (migration `153_radar_local_model_state.sql`). Adaftan DB na jama'a
-(`src/lib/db/radar.ts`) yana sauya waɗannan layukan zuwa `localOverrides` map da
-`tombstones` set da `applyFeed()` ke amfani da su; `getRadarCatalog()` na production yana loda wannan yanayin
-bayan an wuce shingayen flag, cache, da schema. `displayName` da `enabled` ne kawai
-mai gudanarwa zai iya gyarawa. Ba za a iya rubuta shaidar provider/model, asalin feed, quota, capabilities, ToS,
-da bayanan setup ta wannan hanyar ba.
+Filayen da za a iya gyarawa da duwatsun kaburbura sun dage a cikin `radar_local_model_state` (hijira `153_radar_local_model_state.sql`). Adaftar DB na jama'a (`src/lib/db/radar.ts`) yana canza waɗannan layuka zuwa taswirar `localOverrides` da saitin `tombstones` da `applyFeed()` ke amfani da shi; kayan aikin `getRadarCatalog()` wanda ke bayyana bayan tuta, cache, da ƙofofin ƙirƙira sun wuce. `displayName` da `enabled` ne kawai za a iya gyara ma'aikata. Ba za a iya rubuta asalin Provider/model, ƙimar ciyarwa, ƙididdiga, iyawa, ToS, da bayanan saitin ta wannan saman.
 
-Dashboard yana samar da ayyukan gida guda huɗu:
+Dashboard ɗin yana fallasa ayyuka huɗu na gida:
 
-- **Gyara** yana canza sunan nuni na gida da yanayin enabled.
-- **Sake saita sauye-sauyen gida** yana share dukkan filayen da za a iya gyarawa ba tare da canza tombstone ba.
-- **Ɓoye** yana ƙirƙirar tombstone, don kada sabuntawar feed na gaba su sake ƙirƙirar layin.
-- **Dawo da shi** yana cire tombstone; duk wani override da aka adana dabam yana ci gaba da aiki.
+- **Gyara** yana canza sunan nuni na gida da yanayin kunnawa.
+- **Sake saita canje-canje na gida** yana share duka filayen da za a iya gyarawa ba tare da canza dutsen kabari ba.
+- **Boye** yana ƙirƙira dutsen kabari, don haka sabuntawar ciyarwa daga baya ba zai iya sake ƙirƙirar layin ba.
+- **Maida** yana kawar da dutsen kabari; duk wani abin da aka ajiye daban-daban ya rage yana aiki.
 
-`enabled: false` na feed yana kasancewa keɓantacciyar kariya: yana rinjayar tsohon
-`enabled: true` na gida, yana barin shigarwar da aka haɗa a kashe, kuma yana rubuta `disabledBy: "radar"`.
+Ciyarwar `enabled: false` ta kasance keɓancewar aminci: ta yi nasara a kan tsayayyen `enabled: true` na gida, yana kiyaye shigarwar da aka haɗe, kuma tana yin rikodin `disabledBy: "radar"`.
 
-Wallafar kundin suna amfani da `schemaVersion: 2`. `contextWindow` da kowane ɗaya daga `tools`, `vision`, da
-`thinking` suna zaman kansu a matsayin `number | null` / `boolean | null`: `null` yana nufin ba a sani ba, yayin da
-`false` ke nufin wata majiyar provider ta hukuma da D16 ya tabbatar ta bayyana a sarari cewa babu wannan damar.
-Ba a taɓa ɗaga flags na registry/model-spec na cikin OmniRoute kai tsaye zuwa matsayin hujjojin feed ba. Har yanzu abokin hulɗa
-yana karɓar snapshots na v1; saboda tsohon builder ya yi amfani da `false` a matsayin madadin rashin ƙima, ana daidaita `false` na v1
-zuwa ba a sani ba, yayin da `true` na v1 ke ci gaba da zama tabbatacciyar hujja. Sigogin schema da ba a sani ba suna gaza cikin tsaro kuma
-cache na ƙarshe mai inganci yana ci gaba da samuwa. Kowane model na v2 mai context/capability da ba null ba dole ne ya ɗauki
-`metadataEvidenceUrls[]` na HTTPS da ba ya buƙatar credentials; in ba haka ba tantancewar schema za ta gaza kuma ba za a
-maye gurbin cache ba. Teburin kundin yana nuna dukkan yanayi ukun a matsayin `✓`, `✕`, da `?`.
+Littattafan kasida suna amfani da `schemaVersion: 2`. `contextWindow` da kowane `tools`, `vision`, da `thinking` suna da kansa `number | null` / `boolean | null`: `null` yana nufin ba a sani ba, yayin da `false` na nufin majiyar mai bada D16-confirmed a sarari ta ce ƙarfin baya nan. Tutoci na ciki OmniRoute registry/model-spec ba a taɓa inganta kai tsaye don ciyar da gaskiya ba. Har yanzu abokin ciniki yana karɓar hotunan v1; saboda tsohon magini ya yi amfani da `false` a matsayin mai riƙe da babu, v1 `false` an daidaita shi ba a sani ba yayin da v1 `true` ya kasance na gaskiya. Sigar makircin da ba a san su ba sun kasa rufe kuma ingantaccen ma'aji na ƙarshe ya wanzu. Kowane samfurin v2 tare da context/capability maras amfani dole ne ya ɗauki HTTPS `metadataEvidenceUrls[]` mara sahihanci; in ba haka ba ingantaccen tsari ya gaza kuma ba a maye gurbin cache ba. Teburin kasida yana fassara duka jihohi uku a matsayin `✓`, `✕`, da `?`.
 
-### Haɗe-haɗen da ake jagoranta da samun damar MCP
+### Shirya combos da MCP isa
 
-Ƙimomin `familyId` da aka tabbatar suna ci gaba da kasancewa bayan overlay na lokacin karantawa kuma suna tafiyar da pure
-module na `buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Ana ba da shawarar family
-ne kawai idan aƙalla providers biyu daban-daban suna da active connections kuma suna samar da ainihin curated model
-ID. Disabled models, inactive providers, missing model IDs, singleton families, da ambiguous
-alias/prefix matches duk suna gaza cikin tsaro. Shawarwarin suna amfani da dabarar `priority` da ake da ita, suna jera
-mafi girman recurring monthly budget da farko; UI yana ƙirƙirar su ne kawai ta hanyar `POST /api/combos`.
+Ƙimar `familyId` da aka tabbatar sun tsira daga abin rufewar lokacin karantawa kuma suna fitar da tsantsar tsarin `buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Iyali ana ba da shawarar ne kawai lokacin da aƙalla masu samarwa guda biyu ke da haɗin kai mai aiki kuma suna fallasa ainihin samfurin ID. Samfuran naƙasassu, masu ba da aiki marasa aiki, ƙirar IDs da suka ɓace, iyalai guda ɗaya, da matchesn alias/prefix marasa ma'ana sun kasa rufe. Shawarwari suna amfani da dabarun `priority` na yanzu, suna ba da oda mafi girman maimaita kasafin kuɗi na wata-wata da farko; UI ya halicce su ta hanyar `POST /api/combos` kawai .
 
-UI mai jagora yana a `/dashboard/radar/combos`. Yana karanta kawai maƙurar
-`GET /api/radar/catalog` da `GET /api/combos/builder/options` na cikin gida. Ba ya taɓa tayar da daidaitawar Radar,
-karanta bayanan shaidar mai samarwa, ko rubuta kai tsaye zuwa ma'ajiyar bayanan combo.
+UI shiryarwa tana zaune a `/dashboard/radar/combos`. Yana karanta madaidaicin `GET /api/radar/catalog` na gida da `GET /api/combos/builder/options`. Ba ya taɓa haifar da daidaitawar Radar, karanta bayanan mai badawa, ko rubuta kai tsaye zuwa bayanan haɗin gwiwar.
 
-Abokan cinikin MCP za su iya karanta wannan tsinkayar ta cikin gida da `omniroute_radar_catalog` (`read:radar`). Ana
-tantance matatun `provider`, `familyId`, da `enabledOnly` na zaɓi bayan karatun
-`GET /api/radar/catalog` guda ɗaya na cikin gida. Fitowarsa mai iyaka ta ƙunshi metadata na kasida tare da mai samarwa/samfuri,
-sunan nuni, `familyId`, ƙayyadadden kaso, iyawa, halin kunnawa, asali, da `disabledBy`; ba a taɓa dawo da URL na saiti,
-matakai, haɗe-haɗe, adiresoshin imel, maɓallai, da bayanan tura abokan ciniki ba. Wannan kayan aiki
-na karantawa kawai ne kuma ba ya taɓa kiran `/api/radar/sync`.
+abokan ciniki MCP za su iya karanta tsinkayar gida ɗaya tare da `omniroute_radar_catalog` (`read:radar`). Ana tantance matattun `provider`, `familyId`, da `enabledOnly` bayan karanta `GET /api/radar/catalog` na gida ɗaya. Abubuwan da aka rufe ta sun haɗa da metadata na kasida da provider/model, sunan nuni, `familyId`, ƙididdiga, iyawa, yanayin kunnawa, asali, da `disabledBy`; saitin URLs, matakai, haɗin kai, adiresoshin e-mail, maɓalli, da bayanan da aka tura ba a taɓa dawowa ba. Wannan kayan aikin ana karantawa kawai kuma baya kiran `/api/radar/sync`. Lokacin da ciyarwar da aka adana ta riga an shigar da kasida, `meta.olderThanRelease` shine `true` kuma kayan aikin yana dawo da samfura daga kasidar da aka shigar tare da wuce gona da iri da duwatsun kabari.
 
-### Alamomin asali
+### Alamar alama
 
-Kowane shigarwar da aka haɗe yana ɗauke da filin `origin` wanda UI ke nunawa a matsayin lamba:
+Duk shigarwar da aka haɗa tana ɗauke da filin `origin` wanda UI ke bayarwa azaman alama:
 
-- `"baseline"` — bai canza daga tsayayyen kundin sakin ba.
-- `"radar"` — an sabunta fili ɗaya ko fiye ta hanyar ciyarwar bayanai.
-- `"local"` — mai gudanarwa yana da aƙalla sauyin cikin gida guda ɗaya a wannan shigarwar (sauye-sauyen
-  cikin gida koyaushe suna rinjayar ciyarwar bayanai bisa ƙa'ida ta 1, ko da menene ciyarwar ta ce).
+- `"baseline"` — ba a taɓa shi ba daga kasidar sakin a tsaye.
+- `"radar"` — ɗaya ko fiye filayen an wartsake ta hanyar ciyarwar.
+- `"local"` — ma'aikaci yana da aƙalla juyewar gida ɗaya akan wannan shigarwar (cikewar gida koyaushe yana cin nasara akan ciyarwar kowace ka'ida 1, ba tare da la'akari da abin da ciyarwar ta faɗi ba).
 
 ---
 

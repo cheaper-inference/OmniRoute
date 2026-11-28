@@ -4,10 +4,9 @@
 
 ---
 
-> **Untuk Pengguna**: Mencari panduan ringkas? Lihat [Panduan Peringkat Percuma](../getting-started/FREE-TIERS-GUIDE.md) untuk arahan langkah demi langkah bagi mendapatkan AI percuma.
+> **Untuk Pengguna** : Mencari panduan mudah? Lihat [Panduan Peringkat Percuma](../getting-started/FREE-TIERS-GUIDE.md) untuk arahan langkah demi langkah tentang mendapatkan AI percuma .
 
-> **Kali terakhir diselidik:** 2026-06-17 — penyelidikan web bagi setiap penyedia (dokumentasi rasmi + berita 7 hari terakhir, semakan 50 ejen dengan pengesahan adversarial) yang mengemas kini setiap kuota peringkat percuma + ToS. **Audit semula separa pada 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — lihat nota bertarikh di bawah).
-> **Sumber rujukan utama (katalog):** `open-sse/config/freeModelCatalog.ts` (belanjawan bagi setiap MODEL, dinyahduplikasi mengikut kumpulan). Angka belanjawan token di bawah diperoleh daripada penyelidikan web secara langsung dan merupakan suatu **anggaran** — lihat [Metodologi & kaveat](#methodology--caveats).
+> **Terakhir diaudit:** 2026-11-23. Setiap baris dengan kuota, setiap tawaran bersara dan setiap pintu kad dibuka semula terhadap halaman penyedia sendiri pada hari itu (`config/quality/free-catalog-evidence.json`). Lulus lebih awal: penyelidikan setiap penyedia 2026-06-17 dan audit semula separa 2026-09-02.** Sumber kebenaran (katalog):** `open-sse/config/freeModelCatalog.ts` (belanjawan per-MODEL, dikosongkan). Nombor belanjawan token di bawah datang daripada penyelidikan web langsung dan merupakan** penghampiran** — lihat [Metodologi & kaveat](#methodology--caveats).
 
 ## TL;DR — berapa banyak inferens percuma yang sebenarnya agregat OmniRoute ?
 
@@ -17,20 +16,21 @@ Angka ini menerangkan akaun pihak ketiga yang berasingan dan syarat kelayakan me
 
 | Metrik                                              | Token / bulan     | Maknanya                                                                                                                                                                                                                                                                             |
 | --------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Pemberian berulang yang didokumenkan (tetap)**    | **~ 1.62B**       | Peringkat bebas** kolam** (katalog setiap model), setiap kumpulan kongsi dikira** sekali** . Sumber langsung di belakang `/api/free-tier/summary` dan halaman Belanjawan Peringkat Percuma papan pemuka.** Gunakan nombor ini.**                                                     |
-| **+ bulan pertama dengan kredit pendaftaran**       | **~ 2.22B**       | Kredit pendaftaran sekali + yang stabil (Z.AI 20M, DeepSeek 5M, …), ditolak setiap akaun.** Bulan pertama sahaja** — tidak berulang.                                                                                                                                                 |
+| **Pemberian berulang yang didokumenkan (tetap)**    | **~ 90M**         | Peringkat bebas** kolam** (katalog setiap model), setiap kumpulan kongsi dikira** sekali** . Sumber langsung di belakang `/api/free-tier/summary` dan halaman Belanjawan Peringkat Percuma papan pemuka.** Gunakan nombor ini.**                                                     |
+| **+ bulan pertama dengan kredit pendaftaran**       | **~ 153M**        | Kredit pendaftaran sekali + yang stabil (Z.AI 20M, DeepSeek 5M, …), ditolak setiap akaun.** Bulan pertama sahaja** — tidak berulang.                                                                                                                                                 |
 | **+ percuma selama-lamanya, tiada had diterbitkan** | _un-quantifiable_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — akses berulang sebenar, rate/concurrency-limited,** tiada topi token untuk dikira** . Disenaraikan, tidak pernah dijumlahkan (mengiranya pada `RPM×24/7` ialah inflasi yang kita tolak).      |
 | **rangsangan buka kunci deposit +**                 | **+~ 24M**        | Satu kali** $10** tambah nilai OpenRouter menaikkan kumpulan percumanya daripada 50 → 1000 req/day. Dilaporkan secara berasingan supaya ia tidak sekali-kali meningkatkan jumlah tetap.                                                                                              |
 | **+ di sebalik pemeriksaan identiti serantau**      | **+~ 6M**         | `modelscope` (Alibaba Cloud binding + tanah besar-China pengesahan nama sebenar). Kuota berulang sebenar, terdedah sebagai `gatedRecurringTokens` / `gatedProviders` dan pada papan pemuka. Tidak pernah disimpulkan ke dalam tajuk: +~ 6M di belakang pengesahan identiti serantau. |
-| Siling teori (semua had kadar, 24/7)                | ~ 10B             | Jumlah setiap had kadar pembekal diekstrapolasi kepada penggunaan tanpa henti.** Bukan jaminan** — jangan tajuk ini.                                                                                                                                                                 |
 
-**Tajuk jujur:** _Agregat OmniRoute**~ 1.62B mendokumenkan token percuma setiap bulan** (sehingga ~ 2.22B pada bulan pertama anda dengan kredit pendaftaran) merentas 26 kumpulan peringkat percuma — serta ekor panjang pembekal tanpa had — dan RTK + Caveman (penjimatan token 15–95%) yang panjang secara kekal._
+**Tajuk jujur:** _Katalog OmniRoute**~ 90J token percuma** sebulan yang sebenarnya boleh anda gunakan (sehingga ~ 153M pada bulan pertama anda dengan kredit pendaftaran), daripada 12 kumpulan dengan kuota yang diterbitkan, serta ekor panjang penyedia tanpa had tanpa had secara kekal. RTK + pemampatan Caveman (15–95% penjimatan token) memanjangkan lagi._
 
-> **Mengapa ini menurun daripada ~ 1.94B sebelumnya.** Muat semula 2026-06-17 ialah pembetulan kejujuran, bukan kerugian: `gemini` kini dikosongkan (telah dinaikkan dengan mengira setiap varian Flash secara berasingan, 462M → 60M), `cloudflare-ai` diperbetulkan kepada 10k-Neurons/day sebenar (122M → 30M), `doubao` diklasifikasikan semula sebagai penandatanganan semula masa penutupan dan (tidak diklasifikasikan semula sebagai satu masa penutupan `chutes`/`phind`/`kluster` dihentikan). Sebahagiannya diimbangi oleh `llm7` ( 5M/day → 150M yang betul) dan pembekal percuma baharu (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Nota sejarah. Angka di bawah menerangkan katalog pada masa itu; mereka bukan nombor hari ini._
 >
-> **Dibetulkan lagi kepada ~ 1.37B dalam v3.8.42:** `longcat` telah diklasifikasikan semula daripada geran berulang 150M/mo kepada kredit pendaftaran 10 juta sekali selepas pratonton percumanya tamat. Peraturan kejujuran yang sama — tiada pembekal telah digugurkan secara tidak sengaja.
+> **Mengapa ini menurun daripada 1.94 bilion sebelumnya.** Muat semula 2026-06-17 ialah pembetulan kejujuran, bukan kerugian: `gemini` kini telah dikumpulkan (telah dinaikkan dengan mengira setiap varian Flash secara berasingan, 462M → 60M), `cloudflare-ai` diperbetulkan kepada 10k-Neurons/day sebenarnya (122M → 30M), `doubao` diklasifikasikan semula sebagai pendaftaran semula dan (bukan masa tutup semula)`chutes`/`phind`/`kluster` dihentikan). Sebahagiannya diimbangi oleh `llm7` ( 5M/day → 150M yang betul) dan pembekal percuma baharu (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Dikemas kini pada 2026-08-26 selepas bersara Felo Web:** Felo Web dikecualikan manakala provenance/licensing terbitan GPLnya kekal pada HOLD; sumber itu melaporkan 38 kunci pool pada masa itu. Kiraan kolam adalah hidup dan berpagar CI (`check:docs-counts` gagal binaan jika nombor di atas hanyut daripada `computeFreeModelTotals()`).
+> **Diperbetulkan lagi kepada 1.37 bilion dalam v3.8.42:** `longcat` telah diklasifikasikan semula daripada geran berulang 150M/mo kepada kredit pendaftaran 10 juta sekali selepas pratonton percumanya tamat. Peraturan kejujuran yang sama — tiada pembekal telah digugurkan secara tidak sengaja.
+>
+> **Dikemas kini pada 2026-08-26 selepas bersara Felo Web:** Felo Web dikecualikan manakala provenance/licensing terbitan GPLnya kekal pada HOLD; sumber itu melaporkan 38 kunci pool pada masa itu.
 >
 > **Diaudit semula pada 2026-09-02 terhadap halaman penyedia sendiri** (sumber: komen `// evidence:` di sebelah setiap entri yang diaudit semula dalam `open-sse/config/freeModelCatalog.data.ts`): `gemini` dan `ollama-cloud` tidak lagi menerbitkan angka token (Google mengeluarkan jadual percuma setiap model pada 23-12-2025; Pelan Percuma Ollama ialah "kredit penggunaan permulaan") dan kini disenaraikan sebagai** tidak bertutup** , tidak pernah dijumlahkan (− 80M); `groq` ialah lima** setiap model** Had 200K-TPD (6M setiap satu, + 15M) dengan tiga IDs bersara digugurkan; `nara` ialah satu baldi 7M/day (+ 60M, 210M). 1B `mistral` hanya kelihatan dalam konsol akaun — lihat _Kelas bukti_ di bawah Metodologi.
 >
@@ -38,26 +38,114 @@ Angka ini menerangkan akaun pihak ketiga yang berasingan dan syarat kelayakan me
 >
 > **Dibetulkan pada 2026-09-03 (#11773):** `cerebras` telah diklasifikasikan semula daripada geran berulang 30M/mo (percubaan tokens/day 1M tanpa kad lama) kepada kredit pendaftaran $5 sekali yang memerlukan kaedah pembayaran. Peraturan kejujuran yang sama seperti LongCat.
 >
-> **Plus xKiro (2026-09-03):** kolam `xkiro-free` baharu (150M/mo) menambah kunci kolam berulang ke-35. Felo Web kekal dikecualikan manakala provenance/licensing terbitan GPL kekal pada HOLD. Sumber itu kini melaporkan** 26 kekunci kolam berulang** dan**~ 1.62B mantap** — nombor langsung, berpagar CI (`check:docs-counts` gagal binaan jika ini hanyut dari `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** kolam `xkiro-free` baharu (150M/mo) menambah kunci kolam berulang ke-35. Felo Web kekal dikecualikan manakala provenance/licensing terbitan GPL kekal pada HOLD. Pada masa itu sumber melaporkan 34 kunci kumpulan dan 1.62 bilion token sebulan (tetap).
 
-Terbesar** didokumenkan** penyumbang: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (lima topi setiap model), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` dikecualikan — pemberian 10M LongCat-2.0nya ialah kredit pendaftaran berpagar KYC sekali sahaja, bukan belanjawan bulanan berulang.)
+Terbesar** didokumenkan** penyumbang kepada angka sebenar hari ini: `groq` 24M (4 topi setiap model), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` dikecualikan — geran 10M LongCat-2.0nya ialah kredit pendaftaran berpagar KYC sekali sahaja, bukan belanjawan bulanan berulang.)
 
-> ⚠️ Siling teori (~ 10B) dinaikkan oleh penyedia had kadar sahaja dengan** tiada had token diterbitkan** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`) yang angkanya ialah `RPM/TPM × 24/7 × 30d` — maksimum teoritikal tiada akaun tunggal akan kekal. Mereka adalah** dikecualikan** daripada nombor yang boleh dipertahankan (ditunjukkan dalam baris "bebas kekal, tiada topi" sebaliknya). Ini adalah inflasi yang sama yang menjadikan tuntutan berbilion-bilion pesaing tidak boleh dipercayai.
+## Pembetulan, November 2026
+
+Sehingga keluaran ini, halaman ini dan README berkata 1.62 bilion token percuma sebulan. Itu salah. Empat kolam membawa 93% daripadanya, dan keempat-empatnya telah berubah di penyedia sementara katalog kami kekal sama. Angka sebenar hari ini ialah ~ 90J token percuma sebulan. Jadual meletakkan apa yang berubah pada setiap penyedia bersebelahan dengan kesilapan kami.
+
+| Perkara yang berubah pada pembekal (tarikh, sumber)                                                                                    | Apa yang kami salah (apa, sejak bila)                                                                         |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Mistral: mod percuma tidak lagi termasuk akses API (docs.mistral.ai, baca pada 2026-11-18)                                             | Kami terus mengira 1 bilion token sebulan daripada bacaan konsol 2026-09-02 dan tidak pernah menyemaknya lagi |
+| Nara: pelan Percuma tidak menyenaraikan model ( `router.bynara.id/api/plans` pembekal, baca pada 2026-11-18)                           | Kami mengira 210 juta token sebulan                                                                           |
+| xKiro: 500K token sehari setiap akaun (xkiro.com, baca pada 2026-11-18)                                                                | 30 model IDs yang tidak lagi wujud kekal dalam katalog                                                        |
+| LLM7: halaman had telah hilang dan tiada halaman rasmi menerbitkan kuota percuma (2026-11-23)                                          | Kami mengira 150 juta token sebulan tanpa bukti bertarikh                                                     |
+| Groq: satu model dalam kumpulan percuma telah bersara (2026-09-14)                                                                     | Kolam itu mengekalkan saiz lamanya                                                                            |
+| AgentRouter: penyedia menyenaraikan kredit daftar masuk $25 setiap hari dan $50 lagi untuk pendaftaran jemputan (baca pada 23-11-2026) | Kami menyenaraikan kredit pendaftaran $200                                                                    |
+| Predibase: produk tamat                                                                                                                | Kami masih mengira kredit pendaftarannya pada bulan pertama                                                   |
+| (tiada)                                                                                                                                | 16 pembekal mengekalkan bendera tawaran percuma selepas tawaran mereka tamat                                  |
+| (tiada)                                                                                                                                | README menjanjikan audit semula setiap dua minggu. Yang terakhir sebelum ini ialah pada 2026-09-02            |
+| (tiada)                                                                                                                                | Semakan dokumen membenarkan hanyut 0.05B dan tidak dapat membaca angka dalam jutaan                           |
+
+Menjumlahkan satu kuota setiap baris meningkatkan mana-mana katalog, termasuk kami. Itulah sebabnya angka yang dijumlahkan baris membawa labelnya dan yang sebenar terletak betul-betul di bawahnya.
+
+## Apa yang penting
+
+Satu baris dikira dalam angka percuma apabila semua ini berlaku:
+
+- Kuota berulang dan diterbitkan pada halaman penyedia sendiri, dengan bukti bertarikh di sebelah baris dalam katalog.
+- Satu akaun bagi setiap pembekal. Tiada apa-apa yang memerlukan bayaran, kad, deposit atau semakan pengenalan (KYC). Kuota yang memerlukan nombor telefon, Telegram atau Discord untuk mendaftar disenaraikan secara berasingan, sebagai "dengan pendaftaran sosial", tidak pernah dalam angka sebenar.
+- Tiada pembekal membenderakan `tos: "avoid"`, dan hanya API rasmi pembekal .
+- Kredit pendaftaran sekali dikira hanya dalam angka bulan pertama, dan hanya apabila tiada kad diminta. Deposit sekali yang menaikkan kuota adalah rangsangan yang berasingan. Promosi tidak pernah dikira dalam angka sebenar.
+- Penyedia carian, suara dan media tidak dikira mengikut jenis akses dan di luar setiap angka token. Mereka mendapat kiraan mereka sendiri, dalam unit mereka sendiri (hasil, aksara, imej), pada halaman ini apabila pengiraan semula menambahkannya; itu tidak pernah ditambah antara satu sama lain atau bertukar menjadi token.
+
+Maksud setiap kiraan awam:
+
+- **Pembekal dengan akses percuma** (50 hari ini: 43 dengan kunci API, 6 tanpa kunci, 1 melalui akaun alat): penyedia dengan sekurang-kurangnya satu baris katalog yang memberikan akses percuma, mengikut cara anda mencapainya.
+- **Baris katalog dengan akses percuma** (214 hari ini): satu baris bagi setiap pembekal dan model.
+- **Kumpulan dengan kuota yang diterbitkan** (12 hari ini): kuota yang dikongsi di belakang angka sebenar, setiap satu dikira sekali.
+- **Model percuma yang berbeza** (185 hari ini): baris yang dikumpulkan mengikut model ID.
+- **Ditandakan dengan tawaran percuma** (140 + hari ini): setiap penyedia yang entri pendaftarannya membawa `hasFree`, termasuk carian, suara dan penyedia media, percubaan dan kredit pendaftaran.
+
+Setiap kiraan dikatalogkan, tidak diuji setiap panggilan: ia menyatakan perkara yang disenaraikan katalog, bukannya setiap laluan menjawab sekarang.
+
+## Bagaimana kita mengira
+
+Tiga angka datang daripada katalog yang sama, diaudit pada 2026-11-23:
+
+- **Angka sebenar, ~ 90M token percuma sebulan.** Setiap kuota dikongsi dikira sekali, jadi lima model di belakang satu elaun harian adalah satu elaun. Inilah yang sebenarnya boleh digunakan oleh satu akaun di setiap pembekal. Dengan kredit pendaftaran sekali, ~ 153J pada bulan pertama anda.
+- **Angka besar, ~ 11.3B menjumlahkan baris demi baris** , tawaran tamat disertakan. Ini adalah cara pengiraan katalog lain. Hampir kesemuanya adalah sejarah: 98.6% daripada tawaran yang tidak lagi wujud. Kami mencetaknya hanya dengan labelnya dan dengan angka sebenar di sebelahnya.
+- **Katalog langsung, ~ 159M dijumlahkan setiap baris langsung** : jumlah baris demi baris yang sama tanpa tawaran tamat.
+
+Kaedah baris demi baris (`row-sum-v1`) mengikut empat peraturan:
+
+1. Setiap baris yang disenaraikan ditambah sebagaimana adanya, tanpa menggabungkan baris yang berkongsi satu kumpulan.
+2. Hanya kuota yang diterbitkan dalam token ditambah. Kuota yang diterbitkan dalam permintaan, kredit atau neuron dikira sebagai sifar (`FREE_QUOTA_UNIT` dalam `open-sse/config/freeModelCatalog.ts`).
+3. Kredit pendaftaran, peningkatan deposit dan baris dimatikan (`enabled: false`) ditinggalkan.
+4. Angka besar menambah lejar tawaran tamat (`open-sse/config/freeModelCatalog.retired.data.ts`) pada kuota terakhir setiap baris yang disenaraikan. Hanya baris yang dihentikan sejak `RETIRED_LEDGER_SINCE` memasukinya, dan setiap baris terkeluar 12 bulan selepas ia tamat.
+
+Jika cara pengiraan baris demi baris berhenti menjadi perkara biasa, atau penyelenggara memutuskan sedemikian, angka besar meninggalkan setiap halaman dan hanya angka sebenar yang kekal.
+
+## Dialih keluar / tiada peringkat percuma
+
+Penyedia yang tawaran percumanya tamat atau tidak dapat disahkan. Mereka kekal dalam pendaftaran dengan `hasFree: false` (atau bersara daripada katalog percuma) dan tidak pernah mengira dalam mana-mana angka percuma. Ini bukan senarai pembekal yang dialih keluar daripada OmniRoute atas permintaan (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Pembekal                 | Sejak      | kenapa                                                                                  | Sumber                                   |
+| ------------------------ | ---------- | --------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `mistral`                | 2026-11-23 | Mod percuma tidak lagi termasuk akses API                                               | docs.mistral.ai (had penggunaan)         |
+| `nara`                   | 2026-11-23 | Pelan percuma tidak menyenaraikan model                                                 | `router.bynara.id/api/plans`             |
+| `llm7`                   | 2026-11-23 | Tiada halaman rasmi menerbitkan kuota percuma                                           | tapak pembekal                           |
+| `navy`                   | 2026-11-23 | Tiada kuota percuma boleh disahkan pada halaman rasmi                                   | api.tentera laut                         |
+| `bluesminds`             | 2026-11-23 | Penggunaan memerlukan kredit yang dibeli daripada pembekal                              | `api.bluesminds.com/api/status`          |
+| `arcee-ai`               | 2026-11-23 | Harga berbayar sahaja                                                                   | docs.arcee.ai (harga)                    |
+| `huggingface`            | 2026-11-23 | Akaun percuma mesti membeli kredit atau naik taraf kepada PRO                           | huggingface.co (harga Penyedia Inferens) |
+| `huggingchat`            | 2026-11-23 | Inferens Memeluk Wajah memerlukan kredit atau PRO yang dibeli                           | huggingface.co (harga Penyedia Inferens) |
+| `ainative`               | 2026-11-23 | Pelan Hobbyist dibayar selepas percubaan 3 hari                                         | halaman harga pembekal                   |
+| `stepfun`                | 2026-11-23 | Harga bayar setiap guna sahaja                                                          | halaman harga pembekal                   |
+| `predibase`              | 2026-11-23 | Produk dihentikan                                                                       | predibase.com                            |
+| `poolside`               | 2026-10-31 | Inferens langsung ditutup                                                               | platform.poolside.ai                     |
+| `amazon-q`               | 2026-05-15 | Tiada pendaftaran Peringkat Percuma baharu                                              | halaman pembekal                         |
+| `chat-oripe`             | 2026-11-23 | Hos API menjawab HTTP 530                                                               | API                                      |
+| `naga-ai`                | 2026-11-23 | Pendua penyedia Naga.ac                                                                 | api.naga.ac                              |
+| `dxnt`                   | 2026-11-23 | Bonus pendaftaran wujud, tetapi tiada model yang menerimanya                            | dxnt.com                                 |
+| `ollama-cloud`           | 2026-11-09 | Model awan dibayar setiap token atau dilindungi oleh pelan berbayar                     | ollama.com (#19334)                      |
+| `chutes`                 | 2026-03    | Peringkat percuma tamat                                                                 | halaman pembekal                         |
+| `phind`                  | 2026-01    | Syarikat ditutup                                                                        | halaman pembekal                         |
+| `kluster`                | 2026-06-09 | Matahari terbenam (dipindahkan ke MITO)                                                 | halaman pembekal                         |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo bebas dibatalkan; Promosi Nemotron tamat pada 2026-06 (disahkan semula 2026-06-18) | halaman pembekal                         |
+| `aimlapi`                | 2026-06-18 | Peringkat percuma dijeda                                                                | halaman pembekal                         |
+| `yi`                     | 2026-06-18 | Yi-Light telah bersara, bayar semasa anda pergi                                         | halaman pembekal                         |
+| `featherless-ai`         | 2026-06    | Tiada peringkat percuma semasa                                                          | halaman pembekal                         |
+| `chipotle`               | 2026-09-15 | Widget sembang di belakangnya menjawab 404 pada setiap laluan (#13131, #4037)           | amelia.chipotle.com                      |
+
+`iflytek` / `sparkdesk` kekal disenaraikan dengan nota peringatan ToS: Spark Lite adalah percuma, tetapi ToS mengehadkan penggunaan proksi dan geganti.
 
 ---
 
-## Penyegaran 2026-06-17 — apa yang berubah sejak 2026-06-05
+## 17-06-2026 muat semula — perkara yang berubah sejak 05-06-2026
 
-Satu pusingan penyelidikan web 50 ejen (dokumen rasmi + berita 7 hari terakhir, disahkan secara adversarial) telah menyegarkan keseluruhan katalog. Sorotan:
+Pas penyelidikan web 50 ejen (berita + last-7-days dokumen rasmi, disahkan secara berlawanan) menyegarkan keseluruhan katalog. Sorotan:
 
-- **Dibuang / tiada peringkat percuma (2026):** `chutes` (peringkat percuma tamat 2026-03), `phind` (syarikat ditutup 2026-01), `kluster` (ditamatkan 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo percuma ditarik balik 2026-05-24, promosi Nemotron tamat 2026-06 — disahkan semula 2026-06-18), `aimlapi` (peringkat percuma dihentikan sementara — disahkan semula 2026-06-18), `yi` (Yi-Light ditamatkan, bayar mengikut penggunaan — disahkan semula 2026-06-18), `featherless-ai` (tiada peringkat percuma buat masa ini), `chipotle` ("Pepper AI" Chipotle — widget sembang Amelia `amelia.chipotle.com` hasil kejuruteraian songsang yang dihubungi oleh penyedia kini memulangkan 404 pada setiap laluan, termasuk root; backend ditamatkan/dialihkan, disahkan 2026-09-15 — dibuang sepenuhnya daripada katalog, #13131/#4037). `iflytek` / `sparkdesk` kekal disenaraikan tetapi membawa nota peringatan ToS (Spark Lite adalah percuma; ToS menyekat penggunaan proksi/relay).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` ditutup 2026-06-01 dan `2.5 Pro` meninggalkan peringkat percuma (2026-04); peringkat percuma kini **keluarga Flash sahaja** (2.5/3/3.1/3.5 Flash + Gemma). Katalog kini **mengumpulkan** keluarga Flash (angka sebelum ini melambung kerana setiap varian dikira berasingan: 462M → 60M).
-- **Nombor yang diperbetulkan:** `cloudflare-ai` 122M → **30M** (10k Neuron/hari sebenar), `doubao` diklasifikasikan semula sebagai kredit pendaftaran sekali sahaja (bukan berulang), `llm7` 4M → **150M** (5M token/hari yang didokumentasikan), endpoint "-Free" `together` ditamatkan → kredit pendaftaran $25 turut dibuang (memerlukan pembelian minimum $5, tiada percubaan percuma), `longcat` Preview tamat + model Flash ditamatkan → **LongCat-2.0** sahaja, diklasifikasikan semula sebagai kredit pendaftaran sekali sahaja **10M** token (tertakluk pada KYC, bukan berulang).
-- **Inferens langsung Poolside berakhir (disahkan 2026-10-20):** [platform rasmi](https://platform.poolside.ai/) mengumumkan penutupan pada **2026-10-31** dan mengarahkan pengguna untuk memuat turun modelnya daripada Hugging Face untuk dihoskan sendiri. Penyedia `poolside` langsung membawa amaran ini. Katalog percuma yang disusun secara manual tidak mempunyai entri Poolside langsung; entri yang bernama Poolside adalah kepunyaan `kilo-gateway`. Pengumuman ini tidak memastikan ketersediaan model yang disajikan oleh Kilo, Cline, NVIDIA atau gateway lain, jadi penyenaraian tersebut tidak ditamatkan atas dasar itu.
-- **Penyedia percuma baharu ditemui:** ⭐ **Kilo Code** (`kilo-gateway` — set "Auto Free" yang berputar: keluarga NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 model pengekodan percuma yang berputar, disegarkan 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash percuma secara kekal + bonus pendaftaran 20M), dan `arcee-ai` Trinity Large Preview.
-- **Peringkat jujur baharu** (lihat Metodologi): kategori _percuma-kekal-tetapi-tanpa-had_ (akses berulang sebenar, tiada had token untuk dikira) dan _lonjakan-buka-kunci-deposit_ (OpenRouter $10 → +24M/bulan), kedua-duanya ditampilkan **secara berasingan** supaya tidak pernah melambungkan angka utama.
+- **Dialih keluar / tiada peringkat percuma:** berpindah ke [bahagian sendiri](#removed--no-free-tier).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` ditutup 2026-06-01 dan `2.5 Pro` meninggalkan peringkat percuma (2026-04); peringkat percuma kini** Flash-famili sahaja** (2.5/3/3.1/3.5 Flash + Gemma). Katalog sekarang** kolam** keluarga Flash (telah dinaikkan dengan mengira setiap varian secara berasingan: 462M → 60M).
+- **Nombor yang diperbetulkan:** `cloudflare-ai` 122M →** 30J** ( 10k-Neurons/day sebenar), `doubao` diklasifikasikan semula sebagai kredit pendaftaran sekali (tidak berulang), `llm7` 4M →** 150J** ( tokens/day 5J didokumenkan ), titik akhir `together` "-Percuma" dihentikan → kredit pendaftaran $25 turut dialih keluar (memerlukan pembelian minimum $5, tiada percubaan percuma), `longcat` Pratonton tamat + Model Flash bersara →**LongCat-2.0** sahaja, diklasifikasikan semula sebagai sekali sahaja** 10J** kredit pendaftaran -token (berpagar KYC, tidak berulang).
+- **Inferens langsung tepi kolam berakhir (disahkan 2026-10-20):** [platform rasmi](https://platform.poolside.ai/) mengumumkan penutupan pada** 31-10-2026** dan mengarahkan pengguna untuk memuat turun modelnya daripada Hugging Face untuk pengehosan sendiri. Pembekal `poolside` langsung membawa amaran ini. Katalog percuma pilihan tangan tidak mempunyai entri Poolside langsung; entri bernama Poolside milik `kilo-gateway`. Pengumuman ini tidak menetapkan ketersediaan model yang disediakan oleh Kilo, Cline, NVIDIA atau gerbang lain, jadi penyenaraian tersebut tidak dihentikan atas dasar itu.
+- **Penyedia percuma baharu ditemui:** ⭐** Kod Kilo** (`kilo-gateway` — berputar set "Auto Free": NVIDIA Nemotron 3 family, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode Zen** (`opencode-zen` — 10 berputar model pengekodan percuma, dimuat semula 2026-10-20), ⭐** Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash percuma selama-lamanya bonus pendaftaran 20M + ), dan `arcee-ai` Trinity Large Preview.
+- **Tahap baru yang jujur** (lihat Metodologi): kategori _permanently-free-but-uncapped_ (akses berulang sebenar, tiada had token untuk dikira) dan _deposit-unlock boost_ (OpenRouter $10 → +24M/mo), kedua-duanya muncul** secara berasingan** jadi mereka tidak pernah mengembang tajuk berita.
 
-> Jadual per-penyedia terperinci di bawah ialah **snapshot 2026-06-05**; perubahan di atas menggantikannya. Sumber langsung dan kanonik ialah katalog per-model `open-sse/config/freeModelCatalog.ts`.
+> Jadual terperinci setiap pembekal di bawah ialah** 2026-06-05 petikan** ; delta di atas menggantikannya. Sumber langsung dan berkanun ialah katalog setiap model `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -100,8 +188,8 @@ Pengiraan boleh bertambah baik apabila suapan tersedia. Penentuan kekal berdasar
 
 ## Metodologi & kaveat
 
-- Nombor adalah** anggaran sempadan atas** daripada setiap had peringkat bebas yang didokumenkan oleh setiap pembekal setakat** 17-06-2026** , dikumpulkan oleh penyelidikan web. Peringkat percuma berubah sentiasa — sahkan semula sebelum bergantung pada angka.
-- **Apa entri sebenarnya menjamin.** Tiada entri yang membawa penilaian keyakinan setiap baris, dan API tidak menyajikan satu pun — menganggap setiap angka di atas sebagai anggaran kualiti yang sama dan tidak dinyatakan. Dua fakta adalah berbeza, kerana ia disusun mengikut tangan dan bukannya disimpulkan: 44 entri membawa hentian keras yang didokumenkan secara bebas (39 daripadanya baris xKiro, yang kesemuanya berkongsi satu elaun harian), dan 22 entri membawa pendedahan latihan segera. `hardStopGuaranteed` ditetapkan hanya apabila syarat penyedia sendiri mengatakan bahawa melebihi elaun percuma menolak permintaan dan bukannya secara senyap mula mengebil anda, dengan sumber dalam ulasan di sebelah entri; ia tidak pernah lalai kepada `true`, dan entri yang tiada siapa yang telah disahkan kekal tidak ditetapkan. Jadi bendera henti-henti yang hilang bermaksud "tidak ditubuhkan", bukan "diketahui untuk mengebilkan anda".** mod STRICT** (pengawal laluan `freeAccessPolicy=strict` ikut serta) hanya mempercayai entri yang membawa bendera; setiap peringkat percuma yang lain dikecualikan sebagai `no-hard-stop` (lihat `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Apabila pengawal menapis kolam, log kelihatan pengendali melaporkan kedua-dua kiraan pengecualian dan bahagian `no-hard-stop`.
+- Nombor adalah** anggaran sempadan atas** daripada setiap had peringkat percuma yang didokumenkan oleh setiap pembekal, terakhir diperiksa** 23-11-2026** untuk setiap baris dengan kuota. Peringkat percuma berubah sentiasa — sahkan semula sebelum bergantung pada angka.
+- **Apa yang dijanjikan oleh entri sebenarnya.** Tiada entri yang membawa penilaian keyakinan setiap baris, dan API tidak menyajikan satu pun — menganggap setiap angka di atas sebagai anggaran kualiti yang sama dan tidak dinyatakan. Dua fakta adalah berbeza, kerana ia disusun mengikut tangan dan bukannya disimpulkan: 44 entri membawa hentian keras yang didokumenkan secara bebas (39 daripadanya baris xKiro, yang kesemuanya berkongsi satu elaun harian), dan 22 entri membawa pendedahan latihan segera. `hardStopGuaranteed` ditetapkan hanya apabila syarat penyedia sendiri mengatakan bahawa melebihi elaun percuma menolak permintaan dan bukannya secara senyap mula mengebil anda, dengan sumber dalam ulasan di sebelah entri; ia tidak pernah lalai kepada `true`, dan entri yang tiada siapa yang telah disahkan kekal tidak ditetapkan. Jadi bendera henti-henti yang hilang bermaksud "tidak ditubuhkan", bukan "diketahui untuk mengebilkan anda".** mod STRICT** (pengawal laluan `freeAccessPolicy=strict` ikut serta) hanya mempercayai entri yang membawa bendera; setiap peringkat percuma yang lain dikecualikan sebagai `no-hard-stop` (lihat `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Apabila pengawal menapis kolam, log kelihatan pengendali melaporkan kedua-dua kiraan pengecualian dan bahagian `no-hard-stop`.
 - `estMonthlyFreeTokens` = token bulanan berulang sahaja.** Kredit pendaftaran sekali tidak berulang** dan dikira sebagai 0. Peringkat yang dihentikan juga adalah 0.
 - Token cap harian → `monthly = daily × 30`. Hanya RPD yang didokumenkan → `RPD × ~800 output tokens × 30`. Hanya RPM/TPM (tiada had harian) →** tidak bertutup** (lihat di bawah).
 - **Akses percuma, tetapi tiada had token yang diterbitkan** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `nvidia`): ini adalah rate/concurrency-limited. Kami mengklasifikasikannya `recurring-uncapped` dan** jangan sekali-kali menjumlahkannya** — mendarab `RPM × 24/7 × 30d` akan menghasilkan siling fantasi (inflasi yang kita tolak). NVIDIAAPI adalah kegunaan percubaan sahaja; lihat kaveat ToS di bawah.
@@ -111,15 +199,15 @@ Pengiraan boleh bertambah baik apabila suapan tersedia. Penentuan kekal berdasar
 
 ---
 
-## Mengapa angka kami lebih kecil daripada angka pengagregat lain
+## Mengapa bilangan kami lebih kecil daripada agregator lain
 
-Kebanyakan angka "token percuma sebulan" dalam bidang ini ialah hasil tambah label bagi setiap model. Angka kami sengaja tidak dikira sedemikian:
+Kebanyakan angka "token percuma setiap bulan" dalam ruang ini ialah jumlah label setiap model. Kami tidak, dengan sengaja:
 
-- **Setiap kumpulan dikongsi dikira sekali sahaja.** Pelan percuma Mistral menyediakan satu kuota 1B/bulan bagi setiap organisasi; menyenaraikannya di bawah lima model tidak menjadikannya 5B. Jika dijumlahkan mengikut model, katalog kami sendiri akan menunjukkan **~7.4B** (dikira semula pada 2026-09-03; angka ini tidak dikawal oleh CI — ukur semula setiap kali katalog berubah) — tajuk utama menyatakan **~1.47B** kerana itulah jumlah yang sebenarnya boleh digunakan oleh satu akaun daripada setiap penyedia.
-- **Had harian ditukarkan, kadar tidak.** Had token/hari yang didokumenkan menjadi `× 30`; had permintaan/hari yang didokumenkan menjadi `RPD × ~800 tokens × 30`; penyedia yang hanya menerbitkan permintaan-per-minit **tidak mempunyai** angka bulanan dan disenaraikan sebagai _tanpa had_, serta tidak pernah dijumlahkan. Mendarabkan had kadar dengan penggunaan 24/7 ialah penggelembungan angka yang kami enggan lakukan.
-- **Kuota yang memerlukan semakan identiti serantau ditunjukkan secara berasingan** (`+~6M behind regional identity verification`), kerana kebanyakan pembaca tidak boleh menggunakannya.
-- **Kredit pendaftaran hanya untuk bulan pertama** dan dilaporkan sebagai angka kedua, tanpa dicampurkan ke dalam angka berterusan.
-- **Angka ini dikuatkuasakan oleh CI.** `npm run check:docs-counts` mengira semula jumlah daripada katalog dan menggagalkan binaan apabila fail ini, README atau kad belanjawan menyimpang daripada jumlah tersebut.
+- **Setiap kolam kongsi dikira sekali.** Lima model di belakang satu elaun adalah satu elaun, bukan lima. Bacaan baris demi baris katalog yang sama, dan sebab kami mencetaknya, adalah pada [Cara kami mengira](#how-we-count).
+- **Had harian ditukar, kadar tidak.** Tudung tokens/day yang didokumenkan menjadi `× 30`; had requests/day yang didokumenkan menjadi `RPD × ~800 tokens × 30`; pembekal yang hanya menerbitkan permintaan-per-minit mempunyai** tidak** angka bulanan dan disenaraikan sebagai _tidak dihadkan_, tidak pernah dijumlahkan. Mendarabkan had kadar dengan 24/7 ialah inflasi yang kita tolak.
+- **Kuota di sebalik semakan identiti serantau ditunjukkan secara berasingan** (`+~6M behind regional identity verification`), kerana kebanyakan pembaca tidak boleh menggunakannya.
+- **Kredit pendaftaran adalah bulan pertama sahaja** dan dilaporkan sebagai angka kedua, tidak pernah digabungkan ke dalam nombor tetap.
+- **Perkara yang dilakukan oleh semakan dokumen.** `npm run check:docs-counts` (mod keluaran) mengira semula angka sebenar, angka bulan pertama dan dua jumlah baris demi baris daripada katalog, dan gagal apabila README, halaman ini atau Panduan Peringkat Percuma mencetak nilai yang berbeza atau mencetak angka besar tanpa labelnya dan yang sebenar. Kad belanjawan dilukis semula daripada fakta yang sama semasa dikeluarkan.
 
 ---
 
@@ -228,74 +316,74 @@ Kebanyakan angka "token percuma sebulan" dalam bidang ini ialah hasil tambah lab
 
 ---
 
-## Peringkat percuma setiap penyedia (Bytez/Nous diperiksa 2026-10-15; baris diaudit semula 2026-09-02; lain-lain 2026-06-17)
+## Peringkat percuma setiap penyedia (katalog diaudit 2026-11-23)
 
-> Dijana semula daripada katalog setiap model (`open-sse/config/freeModelCatalog.ts`), dititipkan. Diisih mengikut tokens/mo. `uncapped*` = berterusan berulang secara kekal tetapi tiada had token yang diterbitkan (rate/concurrency-limited) akses sebenar —,** bukan** disimpulkan ke dalam tajuk. `—` = kredit sahaja / tanpa kunci / tidak boleh diukur dengan token.
+> Dikekalkan dengan tangan daripada katalog setiap model (`open-sse/config/freeModelCatalog.data.ts`); terakhir disemak 2026-11-23. Diisih mengikut token bulanan sebenar setiap kumpulan (setiap kumpulan kongsi dikira sekali). `uncapped*` = percuma selama-lamanya tetapi tiada had token yang diterbitkan (rate/concurrency-limited): akses sebenar,** bukan** dijumlahkan ke dalam angka sebenar. `not counted` = kuota berulang yang angka sebenar tinggalkan (`avoid`, atau di belakang semakan identiti serantau). Pembekal yang tawarannya tamat berada dalam [peringkat Dialih keluar / tiada peringkat percuma](#removed--no-free-tier). `—` = kredit sahaja / tanpa kunci / tidak boleh diukur dengan token.
 
-| Pembekal         | Jenis percuma      | Mantap tokens/mo | Kredit bulan pertama | ToS             | model |
-| ---------------- | ------------------ | ---------------- | -------------------- | --------------- | ----- |
-| `mistral`        | berulang           | ~ 1.00B          | —                    | berhati-hati    | 5     |
-| `nara`           | berulang           | ~ 210M           | —                    | berhati-hati    | 8     |
-| `llm7`           | berulang           | ~ 150M           | —                    | berhati-hati    | 4     |
-| `xkiro`          | berulang           | ~ 150M           | —                    | berhati-hati    | 39    |
-| `longcat`        | sekali sahaja      | —                | 10J                  | berhati-hati    | 1     |
-| `cerebras`       | sekali sahaja      | —                | kredit $5            | berhati-hati    | 2     |
-| `cloudflare-ai`  | berulang           | ~ 30M            | —                    | berhati-hati    | 9     |
-| `groq`           | berulang           | ~ 30M            | —                    | berhati-hati    | 5     |
-| `api-airforce`   | berulang           | ~ 24M            | —                    | berhati-hati    | 7     |
-| `bluesminds`     | berulang           | ~ 7M             | —                    | samar-samar     | 22    |
-| `sambanova`      | berulang           | ~ 6M             | —                    | berhati-hati    | 5     |
-| `arcee-ai`       | berulang           | ~ 5M             | —                    | berhati-hati    | 1     |
-| `bazaarlink`     | berulang           | ~ 4M             | —                    | berhati-hati    | 32    |
-| `openrouter`     | berulang           | ~ 1M             | —                    | berhati-hati    | 1     |
-| `cohere`         | berulang           | ~ 800K           | —                    | berhati-hati    | 6     |
-| `huggingchat`    | berulang           | ~ 500K           | —                    | berhati-hati    | 4     |
-| `morph`          | berulang           | ~ 400K           | —                    | ok              | 2     |
-| `huggingface`    | berulang           | ~ 200K           | —                    | berhati-hati    | 6     |
-| `kiro`           | berulang           | ~ 25K            | —                    | elakkan         | 12    |
-| `glm-cn`         | tidak bertutup     | tidak bertutup\* | ~ 20M                | ok              | 4     |
-| `baidu`          | tidak bertutup     | tidak bertutup\* | —                    | berhati-hati    | 1     |
-| `gemini`         | tidak bertutup     | tidak bertutup\* | —                    | berhati-hati    | 4     |
-| `kilo-gateway`   | tidak bertutup     | tidak bertutup\* | —                    | berhati-hati    | 7     |
-| `opencode-zen`   | tidak bertutup     | tidak bertutup\* | —                    | berhati-hati    | 10    |
-| `tencent`        | tidak bertutup     | tidak bertutup\* | —                    | berhati-hati    | 1     |
-| `vertex`         | kredit pendaftaran | —                | ~ 300M               | berhati-hati    | 10    |
-| `agentrouter`    | kredit pendaftaran | —                | ~ 200M               | berhati-hati    | 4     |
-| `predibase`      | kredit pendaftaran | —                | ~ 25M                | berhati-hati    | 1     |
-| `doubao`         | kredit pendaftaran | —                | ~ 15M                | samar-samar     | 1     |
-| `ai21`           | kredit pendaftaran | —                | ~ 10M                | elakkan         | 2     |
-| `deepseek`       | kredit pendaftaran | —                | ~ 5M                 | ok              | 2     |
-| `hyperbolic`     | kredit pendaftaran | —                | ~ 5M                 | ok              | 8     |
-| `nscale`         | kredit pendaftaran | —                | ~ 5M                 | berhati-hati    | 6     |
-| `bytez`          | kredit (rec.)      | —                | tidak diketahui      | samar-samar     | 1     |
-| `deepinfra`      | kredit pendaftaran | —                | ~ 1M                 | berhati-hati    | 22    |
-| `fireworks`      | kredit pendaftaran | —                | ~ 1M                 | elakkan         | 10    |
-| `nebius`         | kredit pendaftaran | —                | ~ 1M                 | berhati-hati    | 1     |
-| `qoder`          | kredit pendaftaran | —                | ~ 1M                 | berhati-hati    | 14    |
-| `scaleway`       | kredit pendaftaran | —                | ~ 1M                 | ok              | 6     |
-| `novita`         | kredit pendaftaran | —                | ~ 500K               | berhati-hati    | 1     |
-| `agy`            | tanpa kunci        | —                | —                    | elakkan         | 16    |
-| `baichuan`       | tanpa kunci        | —                | —                    | samar-samar     | 1     |
-| `blackbox`       | tanpa kunci        | —                | —                    | elakkan         | 6     |
-| `coze`           | tanpa kunci        | —                | —                    | elakkan         | 1     |
-| `duckduckgo-web` | tanpa kunci        | —                | —                    | elakkan         | 6     |
-| `freemodel-dev`  | tanpa kunci        | —                | —                    | tidak diketahui | 4     |
-| `friendliai`     | tanpa kunci        | —                | —                    | elakkan         | 2     |
-| `iflytek`        | tanpa kunci        | —                | —                    | elakkan         | 1     |
-| `inference-net`  | tanpa kunci        | —                | —                    | berhati-hati    | 3     |
-| `liquid`         | tanpa kunci        | —                | —                    | tidak diketahui | 1     |
-| `monsterapi`     | tanpa kunci        | —                | —                    | samar-samar     | 1     |
-| `muse-spark-web` | tanpa kunci        | —                | —                    | elakkan         | 3     |
-| `nlpcloud`       | tanpa kunci        | —                | —                    | elakkan         | 1     |
-| `nvidia`         | tidak bertutup     | tidak bertutup\* | —                    | berhati-hati    | 3     |
-| `pollinations`   | tanpa kunci        | —                | —                    | berhati-hati    | 31    |
-| `publicai`       | tanpa kunci        | —                | —                    | berhati-hati    | 3     |
-| `reka`           | tanpa kunci        | —                | —                    | berhati-hati    | 2     |
-| `sensenova`      | tanpa kunci        | —                | —                    | berhati-hati    | 1     |
-| `sparkdesk`      | tanpa kunci        | —                | —                    | berhati-hati    | 1     |
-| `stepfun`        | tanpa kunci        | —                | —                    | ok              | 1     |
-| `t3-web`         | tanpa kunci        | —                | —                    | elakkan         | 23    |
-| `uncloseai`      | tanpa kunci        | —                | —                    | berhati-hati    | 3     |
+| Pembekal         | Jenis percuma      | tokens/mo sebenar                        | Kredit bulan pertama | ToS             | model |
+| ---------------- | ------------------ | ---------------------------------------- | -------------------- | --------------- | ----- |
+| `api-airforce`   | berulang           | ~ 24M                                    | —                    | berhati-hati    | 5     |
+| `groq`           | berulang           | ~ 24M (4 penutup setiap model)           | —                    | berhati-hati    | 4     |
+| `cloudflare-ai`  | berulang           | ~ 23M                                    | —                    | berhati-hati    | 8     |
+| `xkiro`          | berulang           | ~ 15M                                    | —                    | berhati-hati    | 9     |
+| `bazaarlink`     | berulang           | ~ 1.4M                                   | —                    | berhati-hati    | 1     |
+| `openrouter`     | berulang           | ~ 1.2M                                   | —                    | berhati-hati    | 1     |
+| `cohere`         | berulang           | ~ 800K                                   | —                    | berhati-hati    | 6     |
+| `sambanova`      | berulang           | ~ 480K                                   | —                    | berhati-hati    | 2     |
+| `morph`          | berulang           | ~ 160K                                   | —                    | ok              | 2     |
+| `glm-cn`         | tidak bertutup     | tidak bertutup\*                         | 20J                  | ok              | 4     |
+| `agnes`          | tidak bertutup     | tidak bertutup\*                         | —                    | ok              | 3     |
+| `agnes-cn`       | tidak bertutup     | tidak bertutup\*                         | —                    | ok              | 3     |
+| `aion`           | tidak bertutup     | tidak bertutup\*                         | —                    | ok              | 4     |
+| `baidu`          | tidak bertutup     | tidak bertutup\*                         | —                    | berhati-hati    | 1     |
+| `gemini`         | tidak bertutup     | tidak bertutup\*                         | —                    | berhati-hati    | 4     |
+| `glm`            | tidak bertutup     | tidak bertutup\*                         | —                    | ok              | 2     |
+| `kilo-gateway`   | tidak bertutup     | tidak bertutup\*                         | —                    | berhati-hati    | 12    |
+| `nvidia`         | tidak bertutup     | tidak bertutup\*                         | —                    | berhati-hati    | 3     |
+| `onomeo`         | tidak bertutup     | tidak bertutup\*                         | —                    | berhati-hati    | 2     |
+| `requesty`       | tidak bertutup     | tidak bertutup\*                         | —                    | berhati-hati    | 2     |
+| `sealion`        | tidak bertutup     | tidak bertutup\*                         | —                    | ok              | 5     |
+| `tokenharbor`    | tidak bertutup     | tidak bertutup\*                         | —                    | berhati-hati    | 2     |
+| `coze`           | berulang           | tidak dikira (`avoid`)                   | —                    | elakkan         | 1     |
+| `inference-net`  | berulang           | tidak dikira                             | —                    | berhati-hati    | 3     |
+| `kiro`           | berulang           | tidak dikira (`avoid`)                   | —                    | elakkan         | 7     |
+| `modelscope`     | berulang           | di sebalik pemeriksaan identiti serantau | —                    | berhati-hati    | 2     |
+| `nlpcloud`       | berulang           | tidak dikira (`avoid`)                   | —                    | elakkan         | 1     |
+| `reka`           | berulang           | tidak dikira                             | —                    | berhati-hati    | 2     |
+| `t3-web`         | berulang           | tidak dikira (`avoid`)                   | —                    | elakkan         | 23    |
+| `bytez`          | kredit (rec.)      | —                                        | —                    | samar-samar     | 1     |
+| `doubao`         | kredit pendaftaran | —                                        | 15J                  | samar-samar     | 1     |
+| `longcat`        | kredit pendaftaran | —                                        | 10J                  | berhati-hati    | 1     |
+| `deepseek`       | kredit pendaftaran | —                                        | 5J                   | ok              | 2     |
+| `hyperbolic`     | kredit pendaftaran | —                                        | 5J                   | ok              | 8     |
+| `nscale`         | kredit pendaftaran | —                                        | 5J                   | berhati-hati    | 6     |
+| `deepinfra`      | kredit pendaftaran | —                                        | 1M                   | berhati-hati    | 22    |
+| `qoder`          | kredit pendaftaran | —                                        | 1M                   | berhati-hati    | 9     |
+| `scaleway`       | kredit pendaftaran | —                                        | 1M                   | ok              | 6     |
+| `novita`         | kredit pendaftaran | —                                        | 500K                 | berhati-hati    | 1     |
+| `agentrouter`    | kredit pendaftaran | —                                        | —                    | berhati-hati    | 1     |
+| `ai21`           | kredit pendaftaran | —                                        | —                    | elakkan         | 2     |
+| `baichuan`       | kredit pendaftaran | —                                        | —                    | samar-samar     | 1     |
+| `cerebras`       | kredit pendaftaran | —                                        | —                    | berhati-hati    | 2     |
+| `fireworks`      | kredit pendaftaran | —                                        | —                    | elakkan         | 10    |
+| `freemodel-dev`  | kredit pendaftaran | —                                        | —                    | tidak diketahui | 4     |
+| `monsterapi`     | kredit pendaftaran | —                                        | —                    | samar-samar     | 1     |
+| `nebius`         | kredit pendaftaran | —                                        | —                    | berhati-hati    | 1     |
+| `publicai`       | kredit pendaftaran | —                                        | —                    | berhati-hati    | 3     |
+| `sensenova`      | kredit pendaftaran | —                                        | —                    | berhati-hati    | 1     |
+| `vertex`         | kredit pendaftaran | —                                        | —                    | berhati-hati    | 16    |
+| `agy`            | tanpa kunci        | —                                        | —                    | elakkan         | 9     |
+| `aihorde`        | tanpa kunci        | —                                        | —                    | ok              | 3     |
+| `blackbox`       | tanpa kunci        | —                                        | —                    | elakkan         | 6     |
+| `duckduckgo-web` | tanpa kunci        | —                                        | —                    | elakkan         | 6     |
+| `friendliai`     | tanpa kunci        | —                                        | —                    | elakkan         | 2     |
+| `iflytek`        | tanpa kunci        | —                                        | —                    | elakkan         | 1     |
+| `liquid`         | tanpa kunci        | —                                        | —                    | tidak diketahui | 1     |
+| `muse-spark-web` | tanpa kunci        | —                                        | —                    | elakkan         | 3     |
+| `ovhcloud`       | tanpa kunci        | —                                        | —                    | ok              | 5     |
+| `pollinations`   | tanpa kunci        | —                                        | —                    | berhati-hati    | 24    |
+| `sparkdesk`      | tanpa kunci        | —                                        | —                    | berhati-hati    | 1     |
+| `uncloseai`      | tanpa kunci        | —                                        | —                    | berhati-hati    | 1     |
 
 ---
 

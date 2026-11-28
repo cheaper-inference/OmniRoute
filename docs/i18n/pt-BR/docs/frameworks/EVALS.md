@@ -5,18 +5,16 @@
 ---
 
 > **Fonte da verdade:** `src/lib/evals/`, `src/lib/db/evals.ts`, `src/app/api/evals/`
-> **Última atualização:** 2026-06-28 — v3.8.40
 
-O OmniRoute inclui uma estrutura genérica de avaliação que você pode usar para comparar configurações de roteamento, provedores/modelos individuais ou os conjuntos de testes "golden set" incluídos.
-Use-a para verificar alterações de roteamento, validar novos provedores e controlar lançamentos antes de promovê-los para o tráfego de produção.
+OmniRoute fornece uma estrutura de avaliação genérica que você pode usar para avaliar configurações de roteamento, providers/models único ou conjuntos de "conjunto dourado" agrupados. Use-o para verificar alterações de roteamento, validar novos provedores e liberar lançamentos antes de promovê-los para o tráfego de produção.
 
 A estrutura é implementada como:
 
-- Um executor puro (`src/lib/evals/evalRunner.ts`) que registra na memória conjuntos de testes integrados, avalia as saídas de acordo com os critérios esperados e agrega os cartões de pontuação.
-- Uma camada de persistência (`src/lib/db/evals.ts`) para conjuntos de testes personalizados (definidos pelo usuário) e execuções históricas no SQLite.
-- Uma camada de orquestração (`src/lib/evals/runtime.ts`) que executa cada caso enviando chamadas reais para `POST /v1/chat/completions`, captura a latência e as saídas e persiste a execução.
-- Endpoints REST em `/api/evals/*` (somente com autenticação de gerenciamento).
-- Uma interface no painel em `Dashboard → Uso → Avaliações` (`EvalsTab.tsx`).
+- Um executor puro (`src/lib/evals/evalRunner.ts`) que registra conjuntos integrados na memória, avalia as saídas em relação aos critérios esperados e agrega scorecards.
+- Uma camada de persistência (`src/lib/db/evals.ts`) para conjuntos personalizados (definidos pelo usuário) e execuções históricas em SQLite.
+- Uma camada de orquestração (`src/lib/evals/runtime.ts`) que executa cada caso despachando chamadas reais para `POST /v1/chat/completions`, captura latência e saídas e persiste a execução.
+- Terminais REST em `/api/evals/*` (somente gerenciamento-auth).
+- Uma superfície de painel em `Dashboard → Usage → Evals` (`EvalsTab.tsx`).
 
 ## Conceitos
 

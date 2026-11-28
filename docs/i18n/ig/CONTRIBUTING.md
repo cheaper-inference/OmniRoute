@@ -13,96 +13,90 @@ na usoro ime ka ihe kwekọọ.
 
 ---
 
-## Nhazi Mmepe
+## Ntọala mmepe
 
-### Ihe ndị achọrọ tupu mmalite
+### Ihe achọrọ
 
-- **Node.js** `>=22.22.2 <23`, ma ọ bụ `>=24.0.0 <27` (a na-atụ aro: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`, ma ọ bụ `>=24.0.0 <27` ( akwadoro: 24 LTS)
+- **npm** 10 +
 
-> **Windows na Node 24:** jiri patch release 24 LTS kachasị ọhụrụ (opekata mpe 24.20.0).
-> Releases ndị gara aga nwere ike ịkwụsị mgbe ule mechara nke ọma ma `--test-force-exit` mechie
-> process ahụ. [Windows libuv fix](https://github.com/nodejs/node/pull/61999) nke Node na-edozi
-> crash runtime a; debe nkwenye ule na nlele ọpụpụ runner ka ha rụọ ọrụ.
+> **Windows na Node 24:** jiri ntọhapụ 24 LTS dị ugbu a (opekata mpe 24.20.0). Mwepụta ndị mbụ nwere ike ibibi ka emechara ule gara nke ọma mgbe `--test-force-exit` mechiri usoro a. Node's [Windows libuv fix](https://github.com/nodejs/node/pull/61999) na-agwa okuku oge ojiri gaa; debe nkwuputa ule na nlele ọpụpụ onye na-agba ọsọ.
 
-> **Ndị ọrụ npm v11+ (Node 24+):** Mgbe `npm install` gasịrị, nyochaa na etinyere native modules:
-> `node -e "require('better-sqlite3')"`. Ọ bụrụ na ọ daa na `MODULE_NOT_FOUND`,
-> gbaa `npm approve-scripts better-sqlite3 && npm install`. Lee
-> [Nchọpụta nsogbu](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **ndị ọrụ npm v11 + (Node 24 +):** Mgbe `npm install`, nyochaa na etinyere modul ala: `node -e "require('better-sqlite3')"`. Ọ bụrụ na ọ daa na `MODULE_NOT_FOUND`, gbaa `npm approve-scripts better-sqlite3 && npm install`. Hụ [Nchọpụta nsogbu](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klọnụ na Wụnye
+### Clone & Wụnye
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Variables gburugburu ebe obibi
+### Ngbanwe gburugburu
 
 ```bash
-# Mepụta .env gị site na ndebiri
+# Create your .env from the template
 cp .env.example .env
 
-# Mepụta nzuzo ndị achọrọ
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Variables ndị bụ isi maka mmepe:
+Isi mgbanwe maka mmepe:
 
-| Variable               | Ọnọdụ ndabara maka mmepe | Nkọwa                    |
-| ---------------------- | ------------------------ | ------------------------ |
-| `PORT`                 | `20128`                  | Port sava                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL ntọala maka frontend |
-| `JWT_SECRET`           | (mepụta n'elu)           | Nzuzo mbinye aka JWT     |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Paswọọdụ nbanye mbụ      |
-| `APP_LOG_LEVEL`        | `info`                   | Ọkwa ọtụtụ ndekọ         |
+| Na-agbanwe agbanwe     | Nkwalite mmepe           | Nkọwa                   |
+| ---------------------- | ------------------------ | ----------------------- |
+| `PORT`                 | `20128`                  | ọdụ ụgbọ mmiri sava     |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Base URL maka ihu ihu   |
+| `JWT_SECRET`           | (mepụta n'elu)           | JWT mbinye aka nzuzo    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Paswọdu nbanye mbụ      |
+| `APP_LOG_LEVEL`        | `info`                   | Debanye ọkwa n'okwu ọnụ |
 
-### Ntọala Dashboard
+### Ntọala dashboard
 
-Dashboard na-enye UI toggles maka atụmatụ ndị nwekwara ike ịhazi site na variables gburugburu ebe obibi:
+Dashboard ahụ na-enye toggles UI maka njirimara nwekwara ike ịhazi site na mgbanwe gburugburu ebe obibi:
 
-| Ebe ntọala          | Toggle             | Nkọwa                         |
-| ------------------- | ------------------ | ----------------------------- |
-| Settings → Advanced | Debug Mode         | Kwado ndekọ arịrịọ debug (UI) |
-| Settings → General  | Sidebar Visibility | Gosi/zobe ngalaba sidebar     |
+| Ntọala ebe       | Tụgharịa                | Nkọwa                         |
+| ---------------- | ----------------------- | ----------------------------- |
+| Ntọala → Di elu  | Ụdị nkwụsị              | Kwado ndekọ arịrịọ ndozi (UI) |
+| Ntọala → General | Nhụta mmanya dị n'akụkụ | Show/hide sidebar             |
 
-A na-echekwa ntọala ndị a na nchekwa data ma ha na-adịgide mgbe a malitegharịrị sistemụ, na-emeri ndabara env var mgbe edobere ha.
+A na-echekwa ntọala ndị a na nchekwa data wee na-aga n'ihu n'ofe mmalite, na-ewepụ ndabara env var mgbe edobere ya.
 
-### Ịrụ Ọrụ na Kọmpụta Mpaghara
+### Na-agba ọsọ na mpaghara
 
 ```bash
-# Ọnọdụ mmepe (hot reload)
+# Development mode (hot reload)
 npm run dev
 
-# Nhazi maka production
+# Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Nhazi backend/API-only ngwa ngwa maka mgbanwe ndị ntinye aka
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Nhazi ntọhapụ (rebuild dị ọcha + HEAD sentinel — achọrọ maka deploy)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Nhazi port a na-ejikarị
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Nhazi ntinye aka na-eme nkwenye compile-only: ọ naghị achịkọta nkesa standalone ma ọ bụ wuo akụ native packaging nhọrọ. Jiri nhazi production mgbe niile mgbe ịchọrọ ịkwado bundle a pụrụ izipu.
+Onye ntinye aka na-arụ ọrụ nkwado naanị: ọ naghị achịkọta nkesa kwụ ọtọ ma ọ bụ wuo akụ nkwakọ ngwaahịa nhọrọ. Jiri nrụpụta mmepụta oge niile mgbe ịchọrọ ịkwado ngwugwu mbupu.
 
-### Nhazi Mpụta Build
+### Mee Nhazi mmepụta
 
-| Directory | Ihe dị n'ime                                                          | A na-eso ya |
-| --------- | --------------------------------------------------------------------- | ----------- |
-| `src/`    | Isi mmalite ngwa (TypeScript / TSX)                                   | Ee          |
-| `.build/` | Ihe etiti — `next build` output (gitignored, `distDir = .build/next`) | Mba         |
-| `dist/`   | Bundle a pụrụ izipu — `assembleStandalone` chịkọtara ya (gitignored)  | Mba         |
+| Akwụkwọ ndekọ aha | ọdịnaya                                                                       | Esochiri |
+| ----------------- | ----------------------------------------------------------------------------- | -------- |
+| `src/`            | Isi mmalite ngwa (TypeScript / TSX)                                           | Ee       |
+| `.build/`         | Mpụta — `next build` dị n'etiti (gtignored, `distDir = .build/next`)          | Mba      |
+| `dist/`           | Ngwungwu — nwere ike ibugharị nke `assembleStandalone` gbakọtara (gitignored) | Mba      |
 
-Pipeline build bụ otu ngafe:
+Pipeline wuru bụ otu ngafe:
 
 ```
 npm run build
@@ -111,18 +105,15 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` na-asachapụ directories abụọ ahụ ọzọ tupu ya emee, ma na-ede
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dịka sentinel maka iguzosi ike n'ezi ihe nke deploy.
+`npm run build:release` na-ehichapụ akwụkwọ ndekọ aha abụọ ahụ na mbụ wee dee `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dị ka onye na-ebuga izi ezi sentinel.
 
-`npm run build:contributor` na-eji backend-only build profile. Ọ na-edochi faịlụ UI dashboard nwa oge mgbe ọ na-ewu, na-edobe API route handlers, ma weghachite faịlụ mbụ ahụ mgbe build gasịrị. Jiri `npm run build` maka mgbanwe ndị metụtara UI dashboard ma ọ bụ maka nkwenye ntọhapụ zuru ezu; contributor profile abụghị nnọchi maka release build.
+`npm run build:contributor` na-eji profaịlụ nrụpụta naanị azụ azụ. Ọ na-egbochi faịlụ UI dashboard nwa oge ka ọ na-ewu ụlọ, na-edobe ndị na-ahụ maka ụzọ API, ma weghachi faịlụ mbụ mgbe arụchara ya. Jiri `npm run build` maka mgbanwe na-emetụta dashboard UI ma ọ bụ maka nkwado ntọhapụ zuru oke; profaịlụ onye nkwado abụghị nnọchi maka nrụpụta ntọhapụ.
 
-> **Ihe gbasara deploy VPS:** remote image directory `/usr/lib/node_modules/omniroute/app/`
-> agbanwebeghị. Deploy skills na-eji rsync zipu ọdịnaya `dist/` n'ime ya.
-> Naanị ụzọ mpụta build dị n'ime repo gbanwere (`app/` → `dist/`).
+> **VPS ndetu:** ndekọ ihe onyonyo dịpụrụ adịpụ `/usr/lib/node_modules/omniroute/app/` agbanwebeghị. Nkà na-ebunye rsync ọdịnaya nke `dist/` n'ime ya. Naanị ụzọ mmepụta in-repo wulitere (`app/` → `dist/`).
 
-URL ndabara:
+URLs mbụ:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **Dashboard** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -431,8 +422,8 @@ Mgbe ahụ, jiri skills `/deploy-vps-*-cc` ndị na-eji rsync ebuga `dist/` na d
 
 ## Inweta Enyemaka
 
-- **Nhazi sistemụ**: Hụ [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Ntụaka API**: Hụ [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Akwụkwọ nchekwa**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Akwụkwọ ọrụ sistemụ**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Nsogbu**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Nhazi** : Lee [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API** : hụ [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **akwụkwọ nchekwa** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops doc** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Okwu** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

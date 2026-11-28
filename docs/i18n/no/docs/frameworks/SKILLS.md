@@ -201,26 +201,26 @@ Skjemaet finnes i to migreringer:
 
 ---
 
-## REST-API
+## REST API
 
-Alle endepunkter finnes under `src/app/api/skills/`. Administrasjonsendepunkter (`/api/skills`, `/api/skills/[id]`, `/api/skills/install`) krever **administrasjonsautentisering** via `requireManagementAuth()`. Markedsplass-/installasjonsflytene bruker den enklere `isAuthenticated()` (økt eller API-nøkkel).
+Alle endepunkter lever under `src/app/api/skills/`. Administrasjonsendepunkter (`/api/skills`, `/api/skills/[id]`, `/api/skills/install`) krever** ledelsesaut** via `requireManagementAuth()`. marketplace/install -strømmene bruker den lettere `isAuthenticated()` (økt eller API tast).
 
-| Endepunkt | Metode | Formål |
+| Endepunkt | Metode | Hensikt |
 | --------------------------------- | ------ | ------------------------------------------------------------------------ | --- | ------------------------ | -------- | ------------------ |
-| `/api/skills` | GET | Vis registrerte ferdigheter. Støtter `?q=`, `?mode=on                    | off | auto`, `?source=skillsmp | skillssh | local`, paginering |
+| `/api/skills` | GET | Liste registrerte ferdigheter. Støtter `?q=`, `?mode=on                        | off | auto`, `?source=skillsmp | skillssh | local`, paginering |
 | `/api/skills/[id]` | PUT | Oppdater `enabled` eller `mode` |
-| `/api/skills/[id]` | DELETE | Avregistrer etter ID |
-| `/api/skills/install` | POST | Installer en egendefinert ferdighet (behandlerkode + skjema) |
-| `/api/skills/marketplace` | GET | Søk i SkillsMP-katalogen (returnerer populære standardvalg når `q` er tom) |
-| `/api/skills/marketplace/install` | POST | Installer en SkillsMP-ferdighet (krever aktiv leverandør = `skillsmp`) |
-| `/api/skills/skillssh` | GET | Søk i skills.sh-katalogen (`?q=&limit=`, begrenset til 100) |
-| `/api/skills/skillssh/install` | POST | Installer en skills.sh-ferdighet (krever aktiv leverandør = `skillssh`) |
-| `/api/skills/executions` | GET | Paginert kjøringshistorikk (`?apiKeyId=`) |
-| `/api/skills/executions` | POST | Kjør en registrert ferdighet ad hoc |
+| `/api/skills/[id]` | DELETE | Avregistrer deg med id |
+| `/api/skills/install` | POST | Installer en tilpasset ferdighet (behandlerkode + skjema) |
+| `/api/skills/marketplace` | GET | Søk i SkillsMP -katalogen (returnerer populære standardinnstillinger når `q` er tom) |
+| `/api/skills/marketplace/install` | POST | Installer en SkillsMP -ferdighet (krever aktiv leverandør = `skillsmp`) |
+| `/api/skills/skillssh` | GET | Søk i skills.sh -katalogen (`?q=&limit=`, begrenset til 100) |
+| `/api/skills/skillssh/install` | POST | Installer en skills.sh -ferdighet (krever aktiv leverandør = `skillssh`) |
+| `/api/skills/executions` | GET | Paginert utførelseshistorikk (`?apiKeyId=`) |
+| `/api/skills/executions` | POST | Utfør en registrert ferdighet ad hoc |
 
-Endepunktet `POST /api/skills/executions` returnerer HTTP `503` med `{ error: "Ferdighetskjøring er deaktivert..." }` når `settings.skillsEnabled === false` (`executor.ts:42-45`). Operatører kan slå hovedbryteren av eller på fra **Innstillinger → KI**.
+`POST /api/skills/executions` -endepunktet returnerer HTTP `503` med `{ error: "Skills execution is disabled..." }` når `settings.skillsEnabled === false` (`executor.ts:42-45`). Operatører kan snu hovedbryteren fra** Innstillinger → AI** .
 
-### Eksempel: installer en egendefinert ferdighet
+### Eksempel: installer en tilpasset ferdighet
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/install \
@@ -229,7 +229,7 @@ curl -X POST http://localhost:20128/api/skills/install \
   -d '{
     "name": "reverse-text",
     "version": "1.0.0",
-    "description": "Reverserer en streng",
+    "description": "Reverses a string",
     "schema": {
       "input":  { "type": "object", "properties": { "text": { "type": "string" } }, "required": ["text"] },
       "output": { "type": "object", "properties": { "reversed": { "type": "string" } } }
@@ -239,7 +239,7 @@ curl -X POST http://localhost:20128/api/skills/install \
   }'
 ```
 
-Strengen `handlerCode` er et **oppslag etter behand并lernavn** — ikke kjørbar kode. Kjøreren tilordner den via `skillExecutor.registerHandler(name, fn)` (`executor.ts:25`). Installasjoner fra markedsplassen lagrer SKILL.md-teksten i dette feltet som dokumentasjon og ruter kjøringen gjennom modellgenererte verktøykall. Vilkårlig kildekode levert av brukeren evalueres ikke.
+`handlerCode` -strengen er en** oppslag av behandlernavn** — ikke kjørbar kode. Eksekveren tilordner det via `skillExecutor.registerHandler(name, fn)` (`executor.ts:25`). Marketplace-installasjoner lagrer SKILL.md teksten i dette feltet som dokumentasjon og rutekjøring gjennom modellgenererte verktøykall. Vilkårlig brukerlevert kilde er ikke evaluert.
 
 ---
 

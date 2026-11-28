@@ -8,28 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## ডেভেলপমেন্ট সেটআপ
+## উন্নয়ন সেটআপ
 
 ### পূর্বশর্ত
 
-- **Node.js** `>=22.22.2 <23`, অথবা `>=24.0.0 <27` (প্রস্তাবিত: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`, বা `>=24.0.0 <27` (প্রস্তাবিত: 24 LTS)
+- **npm** 10 +
 
-> **Node 24 সহ Windows:** বর্তমান 24 LTS প্যাচ রিলিজ ব্যবহার করুন (অন্তত 24.20.0)।
-> আগের রিলিজগুলোতে `--test-force-exit` প্রসেস বন্ধ করার পর সফল টেস্টের পরেও অ্যাবর্ট হতে পারে।
-> Node-এর [Windows libuv সংশোধন](https://github.com/nodejs/node/pull/61999) এই রানটাইম ক্র্যাশের সমাধান করে; টেস্ট অ্যাসারশন এবং রানার এক্সিট চেক সক্রিয় রাখুন।
+> **নোড 24 সহ Windows :** বর্তমান 24 LTS প্যাচ রিলিজ ব্যবহার করুন (অন্তত 24.20.0)। `--test-force-exit` প্রক্রিয়াটি বন্ধ করে দিলে পূর্ববর্তী রিলিজগুলি সফল পরীক্ষার পরে বাতিল হতে পারে। নোডের [Windows libuv ফিক্স](https://github.com/nodejs/node/pull/61999) অ্যাড্রেস এই রানটাইম ক্র্যাশ; পরীক্ষার দাবি এবং রানার প্রস্থান চেক সক্রিয় রাখুন।
 
-> **npm v11+ ব্যবহারকারী (Node 24+):** `npm install`-এর পরে নেটিভ মডিউলগুলো ইনস্টল হয়েছে কি না যাচাই করুন:
-> `node -e "require('better-sqlite3')"`. এটি `MODULE_NOT_FOUND` দিয়ে ব্যর্থ হলে,
-> `npm approve-scripts better-sqlite3 && npm install` চালান। দেখুন
-> [সমস্যা সমাধান](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
+> **npm v11 + ব্যবহারকারী (নোড 24 +):** `npm install` পরে, যাচাই করুন নেটিভ মডিউল ইনস্টল করা হয়েছে: `node -e "require('better-sqlite3')"`। যদি এটি `MODULE_NOT_FOUND` এর সাথে ব্যর্থ হয়, `npm approve-scripts better-sqlite3 && npm install` চালান। [সমস্যা সমাধান](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) দেখুন।
 
-- **Git**
+- **গিট**
 
-### ক্লোন ও ইনস্টল
+### ক্লোন এবং ইনস্টল করুন
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -37,91 +32,83 @@ npm install
 ### এনভায়রনমেন্ট ভেরিয়েবল
 
 ```bash
-# টেমপ্লেট থেকে আপনার .env তৈরি করুন
+# Create your .env from the template
 cp .env.example .env
 
-# প্রয়োজনীয় সিক্রেট তৈরি করুন
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ডেভেলপমেন্টের জন্য গুরুত্বপূর্ণ ভেরিয়েবল:
+উন্নয়নের জন্য মূল পরিবর্তনশীল:
 
-| Variable               | Development Default                  | Description            |
-| ---------------------- | ------------------------------------ | ---------------------- |
-| `PORT`                 | `20128`                              | সার্ভার পোর্ট          |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`             | ফ্রন্টএন্ডের বেস URL   |
-| `JWT_SECRET`           | (উপরের নির্দেশনা অনুযায়ী তৈরি করুন) | JWT সাইনিং সিক্রেট     |
-| `INITIAL_PASSWORD`     | `CHANGEME`                           | প্রথম লগইন পাসওয়ার্ড  |
-| `APP_LOG_LEVEL`        | `info`                               | লগের বিস্তারিততার স্তর |
+| পরিবর্তনশীল            | ডেভেলপমেন্ট ডিফল্ট       | বর্ণনা                    |
+| ---------------------- | ------------------------ | ------------------------- |
+| `PORT`                 | `20128`                  | সার্ভার পোর্ট             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ফ্রন্টএন্ডের জন্য বেস URL |
+| `JWT_SECRET`           | (উপরে তৈরি করুন)         | JWT স্বাক্ষর গোপন         |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | প্রথম লগইন পাসওয়ার্ড     |
+| `APP_LOG_LEVEL`        | `info`                   | verbosity স্তর লগ         |
 
 ### ড্যাশবোর্ড সেটিংস
 
-ড্যাশবোর্ডে এমন ফিচারের জন্য UI টগল রয়েছে, যেগুলো এনভায়রনমেন্ট ভেরিয়েবলের মাধ্যমেও কনফিগার করা যায়:
+ড্যাশবোর্ড এমন বৈশিষ্ট্যগুলির জন্য UI টগল প্রদান করে যা পরিবেশ ভেরিয়েবলের মাধ্যমেও কনফিগার করা যেতে পারে:
 
-| Setting Location     | Toggle             | Description                           |
-| -------------------- | ------------------ | ------------------------------------- |
-| সেটিংস → অ্যাডভান্সড | ডিবাগ মোড          | ডিবাগ রিকোয়েস্ট লগ সক্রিয় করুন (UI) |
-| সেটিংস → জেনারেল     | সাইডবার দৃশ্যমানতা | সাইডবারের বিভাগগুলো দেখান/লুকান       |
+| অবস্থান নির্ধারণ | টগল করুন           | বর্ণনা                            |
+| ---------------- | ------------------ | --------------------------------- |
+| সেটিংস → উন্নত   | ডিবাগ মোড          | ডিবাগ অনুরোধ লগ সক্রিয় করুন (UI) |
+| সেটিংস → সাধারণ  | সাইডবার দৃশ্যমানতা | Show/hide সাইডবার বিভাগ           |
 
-এই সেটিংসগুলো ডেটাবেসে সংরক্ষিত হয় এবং রিস্টার্টের পরেও বজায় থাকে; সেট করা থাকলে এগুলো env var-এর ডিফল্টকে অগ্রাহ্য করে।
+এই সেটিংস ডাটাবেসে সংরক্ষিত থাকে এবং পুনরায় আরম্ভ করার সময় টিকে থাকে, সেট করার সময় env var ডিফল্ট ওভাররাইড করে।
 
-### স্থানীয়ভাবে চালানো
+### স্থানীয়ভাবে চলছে
 
 ```bash
-# ডেভেলপমেন্ট মোড (হট রিলোড)
+# Development mode (hot reload)
 npm run dev
 
-# প্রোডাকশন বিল্ড
-npm run build    # next build → .build/next/ তারপর assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# কন্ট্রিবিউটরদের পরিবর্তনের জন্য দ্রুত ব্যাকএন্ড/API-শুধু কম্পাইল
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# রিলিজ বিল্ড (পরিষ্কার রিবিল্ড + HEAD সেন্টিনেল — ডেপ্লয়ের জন্য প্রয়োজনীয়)
-npm run build:release   # rm -rf .build dist এবং build + dist/BUILD_SHA লিখে
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# সাধারণ পোর্ট কনফিগারেশন
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-কন্ট্রিবিউটর বিল্ড শুধু কম্পাইল-ভিত্তিক যাচাই সম্পাদন করে: এটি standalone
-ডিস্ট্রিবিউশন অ্যাসেম্বল করে না বা ঐচ্ছিক নেটিভ প্যাকেজিং অ্যাসেট তৈরি করে না। শিপযোগ্য বান্ডেল
-যাচাই করতে হলে নিয়মিত প্রোডাকশন বিল্ড ব্যবহার করুন।
+অবদানকারী বিল্ড শুধুমাত্র-সংকলন বৈধতা সম্পাদন করে: এটি স্বতন্ত্র বিতরণকে একত্রিত করে না বা ঐচ্ছিক নেটিভ প্যাকেজিং সম্পদ তৈরি করে না। যখন আপনাকে শিপযোগ্য বান্ডেলটি যাচাই করতে হবে তখন নিয়মিত উত্পাদন বিল্ড ব্যবহার করুন।
 
-### বিল্ড আউটপুটের বিন্যাস
+### আউটপুট লেআউট তৈরি করুন
 
-| Directory | Contents                                                                      | Tracked |
-| --------- | ----------------------------------------------------------------------------- | ------- |
-| `src/`    | অ্যাপ্লিকেশনের সোর্স (TypeScript / TSX)                                       | হ্যাঁ   |
-| `.build/` | মধ্যবর্তী ফাইল — `next build`-এর আউটপুট (gitignored, `distDir = .build/next`) | না      |
-| `dist/`   | শিপযোগ্য বান্ডেল — `assembleStandalone` দ্বারা অ্যাসেম্বল করা (gitignored)    | না      |
+| ডিরেক্টরি | বিষয়বস্তু                                                          | ট্র্যাক করা হয়েছে |
+| --------- | ------------------------------------------------------------------- | ------------------ |
+| `src/`    | আবেদনের উৎস (TypeScript / TSX)                                      | হ্যাঁ              |
+| `.build/` | মধ্যবর্তী — `next build` আউটপুট (gitigned, `distDir = .build/next`) | না                 |
+| `dist/`   | শিপযোগ্য বান্ডিল — `assembleStandalone` দ্বারা একত্রিত (gitigned)   | না                 |
 
-বিল্ড পাইপলাইনটি একটি একক ধাপে সম্পন্ন হয়:
+বিল্ড পাইপলাইন একটি একক পাস:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js আউটপুট)
-  └─ assembleStandalone()                 (standalone + static + public + native assets কপি করে)
-       └─ আউটপুট: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` অতিরিক্তভাবে প্রথমে উভয় ডিরেক্টরি পরিষ্কার করে এবং
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ডেপ্লয়ের অখণ্ডতা যাচাইয়ের সেন্টিনেল হিসেবে লিখে।
+`npm run build:release` অতিরিক্তভাবে উভয় ডিরেক্টরিই প্রথমে পরিষ্কার করে এবং `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) কে একটি অখণ্ডতা সেন্টিনেল স্থাপন করে।
 
-`npm run build:contributor` ব্যাকএন্ড-শুধু বিল্ড প্রোফাইল ব্যবহার করে। বিল্ড করার সময় এটি সাময়িকভাবে
-ড্যাশবোর্ড UI ফাইলগুলোর স্টাব তৈরি করে, API রুট হ্যান্ডলারগুলো রেখে দেয় এবং বিল্ডের পরে মূল ফাইলগুলো
-পুনরুদ্ধার করে। ড্যাশবোর্ড UI-কে প্রভাবিত করে এমন পরিবর্তনের জন্য বা সম্পূর্ণ রিলিজ যাচাইয়ের জন্য
-`npm run build` ব্যবহার করুন; কন্ট্রিবিউটর প্রোফাইলটি রিলিজ বিল্ডের বিকল্প নয়।
+`npm run build:contributor` ব্যাকএন্ড-শুধু বিল্ড প্রোফাইল ব্যবহার করে। এটি নির্মাণের সময় অস্থায়ীভাবে ড্যাশবোর্ড UI ফাইলগুলিকে স্টাব করে, API রুট হ্যান্ডলারদের রাখে এবং নির্মাণের পরে মূল ফাইলগুলি পুনরুদ্ধার করে। ড্যাশবোর্ড UI প্রভাবিত করে এমন পরিবর্তনের জন্য বা সম্পূর্ণ রিলিজ বৈধতার জন্য `npm run build` ব্যবহার করুন; অবদানকারী প্রোফাইলটি রিলিজ বিল্ডের প্রতিস্থাপন নয়।
 
-> **VPS ডেপ্লয় নোট:** রিমোট ইমেজ ডিরেক্টরি `/usr/lib/node_modules/omniroute/app/`
-> অপরিবর্তিত থাকে। ডেপ্লয় স্কিলগুলো `dist/`-এর বিষয়বস্তু সেখানে rsync করে।
-> শুধু রিপোজিটরির ভেতরের বিল্ড আউটপুট পাথ পরিবর্তিত হয়েছে (`app/` → `dist/`)।
+> **VPS স্থাপন নোট:** রিমোট ইমেজ ডিরেক্টরি `/usr/lib/node_modules/omniroute/app/` অপরিবর্তিত। ডিপ্লোয় দক্ষতা এটিতে `dist/` এর বিষয়বস্তু rsync করে। শুধুমাত্র ইন-রেপো বিল্ড আউটপুট পাথ সরানো হয়েছে (`app/` → `dist/`)।
 
-ডিফল্ট URL:
+ডিফল্ট URLs:
 
-- **ড্যাশবোর্ড**: `http://localhost:20128/dashboard`
+- **ড্যাশবোর্ড** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -426,10 +413,10 @@ VPS ডিপ্লয়ের জন্য `npm run build:release` ব্য�
 
 ---
 
-## সহায়তা পাওয়া
+## সাহায্য পাচ্ছি
 
-- **আর্কিটেকচার**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) দেখুন
-- **API রেফারেন্স**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) দেখুন
-- **নিরাপত্তা-সংক্রান্ত ডকুমেন্টেশন**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **অপারেশন-সংক্রান্ত ডকুমেন্টেশন**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **সমস্যাসমূহ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **স্থাপত্য** : [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) দেখুন
+- **API রেফারেন্স** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) দেখুন
+- **নিরাপত্তা নথি** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **অপস ডক্স** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **ইস্যু** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

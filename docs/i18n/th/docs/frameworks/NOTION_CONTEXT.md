@@ -64,40 +64,29 @@ OmniRoute จะบันทึกโทเค็นและเรียกใ�
 
 ## เครื่องมือ MCP (6)
 
-กำหนดไว้ใน `open-sse/mcp-server/tools/notionTools.ts` โทเค็นจะถูกดึงมาในขณะเรียกใช้
-ผ่าน `getNotionToken()` หากยังไม่ได้กำหนดค่าโทเค็น เครื่องมือจะส่งข้อผิดพลาด
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
+กำหนดไว้ใน `open-sse/mcp-server/tools/notionTools.ts` โทเค็นได้รับการแก้ไขในเวลาโทรผ่าน `getNotionToken()`; หากไม่มีการกำหนดค่า เครื่องมือจะส่ง `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| เครื่องมือ                   | ขอบเขต         | คำอธิบาย                                                                                            |
-| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | ค้นหาเพจและฐานข้อมูลด้วยข้อความค้นหา (ส่งคืนชื่อ, ID และ URL) รองรับการแบ่งหน้า                     |
-| `notion_get_page`            | `read:notion`  | รับเนื้อหาและข้อมูลเมตาของเพจตาม ID                                                                 |
-| `notion_list_block_children` | `read:notion`  | แสดงบล็อกลูกทั้งหมดของบล็อกหรือเพจ (โครงสร้างบล็อก) รองรับการแบ่งหน้า                               |
-| `notion_query_database`      | `read:notion`  | สืบค้นฐานข้อมูลโดยใช้ `filter` + `sorts` ซึ่งระบุหรือไม่ก็ได้ (รูปแบบ Notion API) รองรับการแบ่งหน้า |
-| `notion_get_database`        | `read:notion`  | รับสคีมา/ข้อมูลเมตาของฐานข้อมูลตาม ID                                                               |
-| `notion_append_blocks`       | `write:notion` | เพิ่มบล็อกลูกต่อท้ายบล็อกหรือเพจที่มีอยู่ (สูงสุด 100 บล็อกต่อคำขอ)                                 |
+| เครื่องมือ                   | ขอบเขต         | คำอธิบาย                                                                      |
+| ---------------------------- | -------------- | ----------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | ค้นหาหน้าและฐานข้อมูลด้วยข้อความค้นหา (ส่งคืนชื่อ IDs, URLs) แบ่งหน้า.        |
+| `notion_get_page`            | `read:notion`  | รับเนื้อหาและข้อมูลเมตาของเพจตาม ID                                           |
+| `notion_list_block_children` | `read:notion`  | แสดงรายการลูกบล็อกทั้งหมดของบล็อกหรือเพจ (แผนผังบล็อก) แบ่งหน้า.              |
+| `notion_query_database`      | `read:notion`  | สืบค้นฐานข้อมูลด้วยตัวเลือก `filter` + `sorts` (รูปแบบ Notion API ) แบ่งหน้า. |
+| `notion_get_database`        | `read:notion`  | รับ schema/metadata ของฐานข้อมูลโดย ID                                        |
+| `notion_append_blocks`       | `write:notion` | เพิ่มบล็อกลูกต่อท้ายบล็อกหรือเพจที่มีอยู่ (สูงสุด 100 บล็อกต่อคำขอ)           |
 
 ### พารามิเตอร์อินพุต
 
-- `notion_search` — `query` (1–500 อักขระ), `pageSize` (1–100, ค่าเริ่มต้น 20),
-  `startCursor` (ไม่บังคับ)
-- `notion_get_page` — `pageId` (เลขฐานสิบหก 32 อักขระหรือ UUID)
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ค่าเริ่มต้น 50),
-  `startCursor` (ไม่บังคับ)
-- `notion_query_database` — `databaseId`, `filter` (ไม่บังคับ, รูปแบบตัวกรองของ Notion),
-  `sorts` (อาร์เรย์ที่ไม่บังคับ), `pageSize` (1–100, ค่าเริ่มต้น 50), `startCursor` (ไม่บังคับ)
-- `notion_get_database` — `databaseId`
-- `notion_append_blocks` — `blockId`, `children` (อาร์เรย์ของอ็อบเจ็กต์บล็อก),
-  `after` (ตำแหน่งที่ไม่บังคับ)
+- `notion_search` — `query` (1–500 ตัวอักษร), `pageSize` (1–100, ค่าเริ่มต้น 20), `startCursor` (เป็นทางเลือก)
+- `notion_get_page` — `pageId` (เลขฐานสิบหก 32 อักขระ หรือ UUID)
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ค่าเริ่มต้น 50), `startCursor` (เป็นทางเลือก)
+- `notion_query_database` — `databaseId`, `filter` (ทางเลือก, รูปแบบตัวกรอง Notion ), `sorts` (อาร์เรย์ทางเลือก), `pageSize` (1–100, ค่าเริ่มต้น 50), `startCursor` (ทางเลือก)
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`, `children` (อาร์เรย์ของวัตถุบล็อก), `after` (ตำแหน่งทางเลือก)
 
 ### ขอบเขต
 
-เครื่องมืออ่านต้องใช้ `read:notion` และเครื่องมือเขียนต้องใช้ `write:notion`
-ขอบเขตจะถูกบังคับใช้โดย `withScopeEnforcement()` ใน
-`open-sse/mcp-server/server.ts` เฉพาะเมื่อ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` เท่านั้น
-ขอบเขตที่ผู้เรียกได้รับอนุญาตมาจาก `OMNIROUTE_MCP_SCOPES` (คั่นด้วยเครื่องหมายจุลภาค) หรือ
-บริบทขอบเขตของคีย์ API ที่ผ่านการยืนยันตัวตนแล้ว ดูโมเดลขอบเขตฉบับเต็มได้ที่
-[MCP-SERVER.md](./MCP-SERVER.md)
+เครื่องมือการอ่านต้องใช้ `read:notion` และเครื่องมือการเขียนต้องใช้ `write:notion` ขอบเขตถูกบังคับใช้โดย `withScopeEnforcement()` ใน `open-sse/mcp-server/server.ts` เมื่อ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` และเสมอสำหรับผู้เรียก HTTP/SSE ที่คีย์ API ขาด `manage`/`admin`; ขอบเขตที่อนุญาตของผู้เรียกมาจาก `OMNIROUTE_MCP_SCOPES` (คั่นด้วยเครื่องหมายจุลภาค) หรือบริบทขอบเขตของคีย์ API ที่ได้รับการรับรองความถูกต้อง ดู [MCP-SERVER.md](./MCP-SERVER.md) สำหรับโมเดลขอบเขตเต็ม
 
 ## เอนด์พอยต์
 

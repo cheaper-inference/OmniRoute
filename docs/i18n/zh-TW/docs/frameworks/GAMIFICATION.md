@@ -485,27 +485,27 @@ SSE 管理器會依範圍追蹤已連線的用戶端，且僅在排行榜資料�
 
 ---
 
-## 代幣分享
+## 代幣共享
 
-**檔案：** `src/lib/gamification/sharing.ts`
+**文件：** `src/lib/gamification/sharing.ts`
 
-### 複式記帳
+### 複式記帳本
 
-每筆轉帳都會在 `token_ledger` 中建立兩個資料列：
+每次傳輸都會在`token_ledger`中建立兩行：
 
-| 資料列 | `from_key_id` | `to_key_id` | `amount` |
-| ------ | ------------- | ----------- | -------- |
-| 借方   | 傳送者        | 接收者      | +金額    |
-| 貸方   | 接收者        | 傳送者      | -金額    |
+| 排   | `from_key_id` | `to_key_id` | `amount` |
+| ---- | ------------- | ----------- | -------- |
+| 借方 | 寄件人        | 接收者      | +金額    |
+| 信用 | 接收者        | 寄件人      | -amount  |
 
-等等——實際的慣例是：
+等等—約定是：
 
-| 資料列 | `from_key_id` | `to_key_id` | `amount` | 含義         |
-| ------ | ------------- | ----------- | -------- | ------------ |
-| 傳送   | 傳送者        | 接收者      | +金額    | 從傳送者流出 |
-| 接收   | 接收者        | 傳送者      | +金額    | 流入接收者   |
+| 排   | `from_key_id` | `to_key_id` | `amount` | 意義         |
+| ---- | ------------- | ----------- | -------- | ------------ |
+| 傳送 | 寄件人        | 接收者      | +金額    | 從發送方流出 |
+| 收到 | 接收者        | 寄件人      | +金額    | 流入接收器   |
 
-餘額的計算方式如下：
+餘額計算如下：
 
 ```sql
 SELECT
@@ -516,7 +516,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### 轉帳流程
+### 轉移流程
 
 ```typescript
 export async function transferTokens(
@@ -527,23 +527,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **驗證**：`amount > 0`、`fromKeyId !== toKeyId`。
-2. **冪等性**：檢查 `idempotency_key` 是否已存在於帳本中。
-   若存在，則傳回快取的結果。
-3. **交易**（單一 SQLite 交易）：
-   a. 計算傳送者的餘額。
-   b. 如果 `balance < amount`，則中止（餘額不足）。
-   c. 插入傳送資料列（`from=傳送者, to=接收者, amount`）。
-   d. 插入接收資料列（`from=接收者, to=傳送者, amount`）。
-4. **速率限制**：檢查傳送者的轉帳速率（每分鐘最多 10 筆轉帳）。
-5. **事件**：發出 `token_share` 遊戲化事件，以進行 XP 與徽章評估。
-6. 傳回 `{ success: true, balance: newBalance }`。
+1. **證實**： `amount > 0`， `fromKeyId !== toKeyId`。
+2. **冪等性**：檢查`idempotency_key`是否已經存在於 ledger 中。如果是，則傳回快取結果。
+3. **交易**（單一SQLite交易）：計算寄件者餘額。 b.如果是`balance < amount`，則中止（資金不足）。 c.插入發送行 (`from=sender, to=receiver, amount`)。 d.插入接收行 (`from=receiver, to=sender, amount`)。
+4. **速率限制**：檢查發送者的傳輸速率（最大 10 transfers/min）。
+5. **事件**：發出`token_share`遊戲化事件以進行XP +徽章評估。
+6. 返回`{ success: true, balance: newBalance }`。
 
 ### 速率限制
 
-- 每個 API 金鑰每分鐘最多 10 筆轉帳。
-- 單筆轉帳最多 10,000 個代幣。
-- 每個 API 金鑰每日最多轉出 100,000 個代幣。
+- 每個API密鑰每分鐘最多 10 次傳輸。
+- 單次轉帳最多 10,000 個代幣。
+- 每個API密鑰每天最多傳輸 100,000 個代幣。
 
 ---
 

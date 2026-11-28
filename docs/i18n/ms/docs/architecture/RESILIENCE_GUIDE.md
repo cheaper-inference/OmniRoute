@@ -14,55 +14,51 @@ OmniRoute mempunyai tiga mekanisme ketahanan yang berbeza tetapi berkaitan. Masi
 
 ## 1. Pemutus Litar Pembekal
 
-**Skop:** keseluruhan pembekal (cth., `glm`, `openai`, `anthropic`).
+**Skop:** keseluruhan pembekal (cth, `glm`, `openai`, `anthropic`).
 
-**Tujuan:** menghentikan penghantaran trafik ke pembekal yang gagal berulang kali pada peringkat huluan/perkhidmatan.
+**Tujuan:** berhenti menghantar trafik kepada pembekal yang berulang kali gagal pada tahap upstream/service.
 
 **Pelaksanaan:**
 
 - Kelas teras: `src/shared/utils/circuitBreaker.ts`
 - Pendawaian: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API status: `GET /api/monitoring/health`
-- API set semula: `POST /api/resilience/reset`
-- Pembalut: `open-sse/services/accountFallback.ts`
-- Jadual DB: `domain_circuit_breakers`
+- Status API: `GET /api/monitoring/health`
+- Tetapkan semula API: `POST /api/resilience/reset`
+- Pembungkus: `open-sse/services/accountFallback.ts`
+- jadual DB : `domain_circuit_breakers`
 
-**Keadaan:**
+**Negeri:**
 
-- `CLOSED` — trafik normal dibenarkan
-- `DEGRADED` — trafik masih dibenarkan, tetapi kegagalan pembekal yang meningkat sedang dijejaki; kembali kepada `CLOSED` apabila terdapat kejayaan yang mencukupi, apabila ujian sambungan sah, atau selepas tempoh pegangan `OPEN` yang paling lama bagi jenis kegagalan terakhir (nilai `cooldownByKind` miliknya, jika tiada `resetTimeout`, × `maxBackoffMultiplier`, sekurang-kurangnya satu tempoh bertenang) tanpa kegagalan baharu
-- `OPEN` — pembekal disekat buat sementara; penghalaan kombo melangkauinya
-- `HALF_OPEN` — tamat tempoh set semula telah berlalu; permintaan siasatan dibenarkan
+- `CLOSED` — lalu lintas biasa dibenarkan
+- trafik `DEGRADED` — masih dibenarkan, tetapi kegagalan pembekal yang tinggi sedang dijejaki; kembali kepada `CLOSED` pada kejayaan yang mencukupi, pada ujian sambungan yang sah, atau selepas penahanan `OPEN` paling lama untuk jenis kegagalan terakhir (nilai `cooldownByKind`, jika tidak `resetTimeout`, × `maxBackoffMultiplier`, sekurang-kurangnya satu cooldown) tanpa kegagalan baharu
+- pembekal `OPEN` — disekat buat sementara waktu; penghalaan kombo melangkaunya
+- tamat masa set semula `HALF_OPEN` — telah berlalu; permintaan siasatan dibenarkan
 
-**Nilai lalai boleh konfigurasi (`open-sse/config/constants.ts`, didedahkan dalam Dashboard → Settings → Resilience):**
+**Lalai boleh dikonfigurasikan (`open-sse/config/constants.ts`, terdedah dalam Papan Pemuka → Tetapan → Ketahanan):**
 
-| Kelas    | Merosot pada | Terbuka pada | Tempoh set semula |
-| -------- | ------------ | ------------ | ----------------- |
-| OAuth    | 5 kegagalan  | 8 kegagalan  | 60s               |
-| API-key  | 7 kegagalan  | 12 kegagalan | 30s               |
-| Tempatan | diterbitkan  | 2 kegagalan  | 15s               |
+| Kelas     | Dihina pada | Dibuka pada  | Tetapkan semula tamat masa |
+| --------- | ----------- | ------------ | -------------------------- |
+| OAuth     | 5 kegagalan | 8 kegagalan  | 60an                       |
+| kunci API | 7 kegagalan | 12 kegagalan | 30-an                      |
 
-`degradationThreshold` mengawal bila sesebuah pembekal memasuki `DEGRADED`; `failureThreshold` mengawal bila ia terbuka dan dilangkau. Profil pembekal tempatan belum didedahkan pada halaman tetapan Resilience lagi.
+`degradationThreshold` mengawal apabila pembekal memasuki `DEGRADED`; `failureThreshold` mengawal apabila ia dibuka dan dilangkau. `PROVIDER_PROFILES.local` (2 kegagalan / 15s) ditakrifkan dalam `open-sse/config/constants.ts` tetapi** belum berwayar** : `getProviderCategory()` hanya mengembalikan `oauth` atau `apikey`, jadi penyedia tempatan menggunakan OAuth atau profil kunci API.
 
-**Kod pencetus:** hanya status peringkat pembekal `[408, 500, 502, 503, 504]`. JANGAN cetuskan untuk ralat peringkat akaun (kebanyakan 401/403/429 — itu tergolong dalam tempoh bertenang atau sekatan akaun).
+**Kod perjalanan:** hanya status peringkat pembekal `[408, 500, 502, 503, 504]`. Lakukan perjalanan NOT untuk ralat peringkat akaun (kebanyakan 401/403/429 — itu tergolong dalam cooldown atau lockout).
 
-**Pemulihan malas:** apabila `OPEN` tamat tempoh, `getStatus()`, `canExecute()`, `getRetryAfterMs()` menyegarkan keadaan kepada `HALF_OPEN`. Bacaan yang sama (dan kegagalan seterusnya) menyusutkan `DEGRADED` yang lapuk kembali kepada `CLOSED`. Tiada pemasa latar belakang diperlukan.
+**Pemulihan malas:** apabila `OPEN` tamat tempoh, `getStatus()`, `canExecute()`, `getRetryAfterMs()` muat semula keadaan kepada `HALF_OPEN`. Bacaan yang sama (dan kegagalan seterusnya) mereputkan `DEGRADED` basi kembali ke `CLOSED`. Tiada pemasa latar belakang diperlukan.
 
 ---
 
-### Provider Cooldown global opt-in (pintu tetingkap)
+### Ikut serta Penyejukan Penyedia global (pintu tetingkap)
 
-Lapisan keempat yang bersifat **opt-in** (`PROVIDER_COOLDOWN_ENABLED`, lalai **mati**) menyimpan ingatan merentas permintaan bagi pembekal yang gagal dalam
-`open-sse/services/providerCooldownTracker.ts`, dirujuk oleh penentuan sasaran kombo supaya permintaan kombo berturut-turut berhenti menjejaki semula pembekal yang baru sahaja gagal. Entri peringkat pembekal mematuhi pintu tetingkap `PROVIDER_PROFILES`:
+Yang keempat,** ikut serta** lapisan (`PROVIDER_COOLDOWN_ENABLED`, lalai** dimatikan** ) menyimpan memori permintaan silang penyedia yang gagal dalam `open-sse/services/providerCooldownTracker.ts`, dirujuk oleh resolusi sasaran kombo supaya permintaan kombo berturut-turut berhenti menjalankan semula penyedia yang baru sahaja gagal. Entri peringkat pembekal menghormati pintu tetingkap `PROVIDER_PROFILES` :
 
-| Profil  | tercetus selepas (`providerFailureThreshold`) | dalam (`providerFailureWindowMs`) | bertenang selama (`providerCooldownMs`) |
-| ------- | --------------------------------------------: | --------------------------------: | --------------------------------------: |
-| OAuth   |                                          `10` |                           `15min` |                                  `5min` |
-| API key |                                          `15` |                           `30min` |                                 `10min` |
+| Profil    | perjalanan selepas (`providerFailureThreshold`) | dalam (`providerFailureWindowMs`) | sejuk untuk (`providerCooldownMs`) |
+| --------- | ----------------------------------------------: | --------------------------------: | ---------------------------------: |
+| OAuth     |                                            `10` |                           `15min` |                             `5min` |
+| kunci API |                                            `15` |                           `30min` |                            `10min` |
 
-Di bawah ambang, pembekal **tidak** dianggap sedang bertenang; kejayaan mengosongkan tetingkap. Entri peringkat sambungan (`provider:connectionId`) mengekalkan peningkatan eksponen `minRetryCooldownMs → maxRetryCooldownMs` sebaliknya. Penggantian:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Pengawal regresi: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Di bawah ambang pembekal adalah** bukan** dianggap penyejukan; kejayaan mengosongkan tingkap. Entri peringkat sambungan (`provider:connectionId`) menyimpan `minRetryCooldownMs → maxRetryCooldownMs` eksponen mundur. Mengatasi: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Pengawal regresi: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Cooldown Sambungan
 
@@ -748,6 +744,21 @@ IP` tidak pernah diproba) atau tiada baris → sambungan yang gagal masih diseju
 
 ---
 
+## Apabila OmniRoute sendiri tidak dapat dihubungi
+
+Pemutus litar pembekal, tempoh sambungan dan kunci keluar model semuanya berjalan di dalam gerbang. Jika pelanggan tidak dapat mencapai gerbang, ia mendapat ralat sambungan. OmniRoute tidak boleh memintas kegagalan itu. Pelanggan memutuskan sama ada untuk mencuba semula dan mesej yang hendak ditunjukkan.
+
+OmniRoute pada masa ini tidak memberikan sandaran pihak pelanggan dan tidak mentakrifkan sebarang dasar untuknya. Konfigurasikan sebarang laluan alternatif dalam klien atau di hadapan pintu masuk.
+
+- `GET /api/health` menyemak keaktifan tanpa pengesahan.
+- `GET /api/health/ping` menyemak kesediaan, termasuk sama ada pangkalan data bertindak balas.
+- `GET /api/monitoring/health` memberikan pemanggil yang disahkan gambaran keseluruhan kesihatan yang lebih mendalam.
+- `omniroute launch <tool>` kuar `/api/monitoring/health` sebelum memulakan klien. Ia boleh memulakan gerbang tempatan secara automatik. Dengan `--no-start`, get laluan yang tidak boleh dicapai menghasilkan `GatewayUnreachable` dan kod keluar `69`.
+
+Untuk memutuskan sambungan pelanggan daripada OmniRoute, ikuti [Kembalikan konfigurasi klien](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Penyahpepijatan
 
 - Combo berwajaran menjawab `503 all_targets_cooling_down` (`Retry-After` ditetapkan, `diagnostics.excluded` menyenaraikan setiap sasaran dengan `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → pool telah dikonfigurasikan dan disambungkan, setiap sasaran hanya dikecualikan oleh pemasa daya tahan; amaran `[COMBO] Weighted selection: every target excluded before dispatch — …` menyatakan sebab dan baki saat. `404 no_executable_targets` daripada combo yang sama bermakna tiada pemasa daya tahan yang terlibat (tiada apa untuk dijalankan, atau setiap akaun gagal ujian ketersediaan). Dibina dalam `open-sse/services/combo/pinRecovery.ts` daripada pengecualian yang dikumpulkan dalam `targetResolution.ts`.
@@ -759,93 +770,68 @@ IP` tidak pernah diproba) atau tiada baris → sambungan yang gagal masih diseju
 
 ---
 
-## Keadaan masa jalan — rujukan pantas ejen
+## Rujukan pantas ejen — negeri masa jalan
 
-> Dipindahkan verbatim daripada `AGENTS.md` → "Resilience Runtime State" (PR #12743) supaya panduan
-> ejen kekal di bawah bajet konteks 40k. Ia adalah paparan ringkas bersemuka ejen bagi
-> bahagian di atas; bahagian bernombor kekal sebagai rujukan penuh.
+> Mengalihkan kata kerja daripada `AGENTS.md` → "Keadaan Masa Jalan Ketahanan" (PR #12743) supaya panduan ejen kekal di bawah belanjawan konteks 40k. Ia adalah pandangan padat, menghadap ejen bagi bahagian di atas; bahagian bernombor kekal sebagai rujukan penuh.
 
-OmniRoute mempunyai tiga mekanisme kegagalan sementara yang berkaitan tetapi berbeza. Kekalkan
-skopnya berasingan semasa menyahpepijat tingkah laku penghalaan. Lihat
-[gambar rajah daya tahan 3 lapisan](../diagrams/exported/resilience-3layers.svg)
-(sumber: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-untuk peta sepintas lalu.
+OmniRoute mempunyai tiga mekanisme kegagalan sementara yang berkaitan tetapi berbeza. Pastikan skop mereka berasingan apabila menyahpepijat gelagat penghalaan. Lihat [gambar rajah daya tahan 3 lapisan](../diagrams/exported/resilience-3layers.svg) (sumber: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) untuk peta sekilas pandang.
 
 ### Pemutus Litar Pembekal
 
-**Skop**: keseluruhan pembekal, cth. `glm`, `openai`, `anthropic`.
+**Skop** : seluruh penyedia, cth `glm`, `openai`, `anthropic`.
 
-**Tujuan**: menghentikan penghantaran trafik kepada pembekal yang berulang kali gagal di
-peringkat upstream/perkhidmatan, supaya satu pembekal yang tidak sihat tidak melambatkan setiap permintaan.
+**Tujuan** : berhenti menghantar trafik kepada penyedia yang berulang kali gagal pada tahap upstream/service, jadi penyedia yang tidak sihat tidak memperlahankan setiap permintaan.
 
-**Implementasi**:
+**Perlaksanaan** :
 
 - Kelas teras: `src/shared/utils/circuitBreaker.ts`
-- Pendawaian gate/perlaksanaan chat: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API status masa jalan: `src/app/api/monitoring/health/route.ts`
-- Pembungkus dikongsi: `open-sse/services/accountFallback.ts`
+- Chat gate/execution wiring: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Status masa jalan API: `src/app/api/monitoring/health/route.ts`
+- Pembalut kongsi: `open-sse/services/accountFallback.ts`
 - Jadual keadaan berterusan: `domain_circuit_breakers`
 
-**Keadaan** (4 — `src/shared/utils/circuitBreaker.ts`):
+**negeri** (4 — `src/shared/utils/circuitBreaker.ts`):
 
 - `CLOSED`: trafik biasa dibenarkan.
-- `DEGRADED`: jalur amaran awal — kegagalan telah melepasi ambang degradasi tetapi belum lagi
-  ambang pemutus; trafik masih mengalir, papan pemuka memaparkan amaran. Ujian sambungan
-  yang sah atau tetingkap tenang tanpa kegagalan baharu mengembalikannya kepada `CLOSED`
-  (`docs/architecture/RESILIENCE_GUIDE.md` mempunyai tetingkap tersebut).
-- `OPEN`: pembekal disekat buat sementara; pemanggil menerima respons provider-circuit-open
-  atau penghalaan combo melangkau ke sasaran lain.
-- `HALF_OPEN`: tamat masa set semula telah berlalu; benarkan permintaan ujian. Kejayaan menutup
-  pemutus, kegagalan membukanya semula.
+- `DEGRADED`: amaran awal kegagalan — band melepasi ambang kemerosotan tetapi belum lagi ambang pemutus; trafik masih mengalir, papan pemuka menunjukkan amaran. Ujian sambungan yang sah atau tetingkap senyap tanpa kegagalan baharu mengembalikannya kepada `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` mempunyai tetingkap).
+- `OPEN`: pembekal disekat buat sementara waktu; pemanggil mendapat respons terbuka litar pembekal atau laluan kombo melangkau ke sasaran lain.
+- `HALF_OPEN`: set semula tamat masa telah berlalu; membenarkan permintaan siasatan. Kejayaan menutup pemutus, kegagalan membukanya semula.
 
-**Lalai** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, digunakan melalui
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` dalam `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` dalam `src/sse/handlers/chatHelpers.ts`). Pemutus seluruh
-pembekal berjalan pada `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Lalai** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, digunakan melalui `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` dalam `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` dalam `src/sse/handlers/chatHelpers.ts`). Pemutus keseluruhan penyedia berjalan pada `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profil  | terdegradasi pada | terbuka pada (`circuitBreakerThreshold`) | set semula (`circuitBreakerReset`) |
-| ------- | ----------------: | ---------------------------------------: | ---------------------------------: |
-| OAuth   |               `5` |                                      `8` |                              `60s` |
-| API key |               `7` |                                     `12` |                              `30s` |
-| Local   |       (diperoleh) |                                      `2` |                              `15s` |
+| Profil    | merendahkan pada | dibuka pada (`circuitBreakerThreshold`) | set semula (`circuitBreakerReset`) |
+| --------- | ---------------: | --------------------------------------: | ---------------------------------: |
+| OAuth     |              `5` |                                     `8` |                              `60s` |
+| kunci API |              `7` |                                    `12` |                              `30s` |
 
-`PROVIDER_PROFILES` juga mentakrifkan `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) dan `providerCooldownMs` (5/10/1 min): ini menggerakkan
-**pintu tetingkap Provider Cooldown global opt-in** (`PROVIDER_COOLDOWN_ENABLED`, lalai
-mati) — entri peringkat pembekal dalam `open-sse/services/providerCooldownTracker.ts` hanya dikira
-sebagai menyejuk selepas `providerFailureThreshold` kegagalan dalam `providerFailureWindowMs`, dan kemudian
-menyejuk selama `providerCooldownMs`. Ia BUKAN ambang pemutus langsung — jangan laraskannya
-dengan menjangkakan tingkah laku pemutus. Setiap lalai boleh ditukar melalui
-pembolehubah persekitaran `OMNIROUTE_PROVIDER_BREAKER_*` dan `OMNIROUTE_CIRCUIT_BREAKER_*`;
-jadual rujukan yang tepat mengikut masa jalan terdapat dalam `docs/architecture/RESILIENCE_GUIDE.md`.
+Profil `local` (`2` failures / `15s`) juga wujud dalam `PROVIDER_PROFILES`, tetapi ia tidak disambungkan ke pemutus: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) hanya menerima `oauth` atau `apikey`, dan `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) mengembalikan salah satu daripada kedua-dua (penyedia tidak berdaftar mendapat `apikey`).
 
-Hanya status kegagalan peringkat pembekal yang harus mengaktifkan pemutus pembekal:
+`PROVIDER_PROFILES` juga mentakrifkan `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) dan `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, di mana nilai setempat adalah lengai atas sebab yang sama seperti di atas: ini menguatkan** pintu tetingkap penyejukan Penyedia global ikut serta** (`PROVIDER_COOLDOWN_ENABLED`, lalai dimatikan) — entri peringkat pembekal dalam `open-sse/services/providerCooldownTracker.ts` hanya dikira sebagai penyejukan selepas kegagalan `providerFailureThreshold` di dalam `providerFailureWindowMs`, dan kemudian menyejukkan untuk `providerCooldownMs`. Mereka adalah NOT ambang pemutus langsung — tidak menala mereka mengharapkan tingkah laku pemutus. Setiap lalai boleh diganti melalui `OMNIROUTE_PROVIDER_BREAKER_*` dan `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; jadual rujukan tepat masa jalan hidup dalam `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Hanya status kegagalan peringkat pembekal yang boleh menghalang pemutus pembekal:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Jangan aktifkan pemutus seluruh pembekal untuk ralat akaun/kunci/model biasa seperti kebanyakan
-kes `401`, `403`, atau `429`. Kes tersebut biasanya tergolong dalam cooldown sambungan atau
-lockout model. `403` pembekal kunci API generik sepatutnya boleh pulih melainkan ia diklasifikasikan
-sebagai ralat pembekal/akaun terminal.
+Jangan tersandung pemutus keseluruhan pembekal untuk ralat account/key/model biasa seperti kebanyakan kes `401`, `403` atau `429`. Mereka biasanya tergolong dalam cooldown sambungan atau model lockout. `403` pembekal kunci API generik harus boleh dipulihkan melainkan ia diklasifikasikan sebagai ralat provider/account terminal.
 
-Breaker menggunakan pemulihan malas (lazy recovery), bukan pemasa latar belakang. Apabila `OPEN` tamat tempoh, bacaan seperti `getStatus()`, `canExecute()`, dan `getRetryAfterMs()` menyegarkan semula keadaan kepada `HALF_OPEN`, supaya papan pemuka dan pembina calon kombo tidak terus mengecualikan penyedia yang telah tamat tempoh selama-lamanya.
+Pemutus menggunakan pemulihan malas, bukan pemasa latar belakang. Apabila `OPEN` tamat tempoh, bacaan seperti `getStatus()`, `canExecute()` dan `getRetryAfterMs()` muat semula keadaan kepada `HALF_OPEN`, jadi papan pemuka dan pembina calon kombo tidak terus mengecualikan penyedia yang telah tamat tempoh selama-lamanya.
 
 ### Cooldown Sambungan
 
-**Skop**: satu sambungan/akaun/kunci penyedia.
+**Skop** : satu pembekal connection/account/key.
 
-**Tujuan**: melangkau buat sementara satu kunci/akaun yang bermasalah sambil membenarkan sambungan lain untuk penyedia yang sama terus melayani permintaan.
+**Tujuan** : langkau satu key/account buruk buat sementara waktu sambil membenarkan sambungan lain untuk pembekal yang sama meneruskan permintaan.
 
-**Implementasi**:
+**Perlaksanaan** :
 
-- Laluan tulis/kemas kini: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Pemilihan/penapisan akaun: `src/sse/services/auth.ts::getProviderCredentials...`
-- Pengiraan cooldown: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- laluan Write/update : `src/sse/services/auth.ts::markAccountUnavailable()`
+- Akaun selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Pengiraan Cooldown: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Tetapan: `src/lib/resilience/settings.ts`
 
-Medan penting pada sambungan penyedia:
+Medan penting pada sambungan pembekal:
 
 ```ts
 rateLimitedUntil;
@@ -856,50 +842,50 @@ errorCode;
 backoffLevel;
 ```
 
-Semasa pemilihan akaun, sesebuah sambungan akan dilangkau apabila:
+Semasa pemilihan akaun, sambungan dilangkau semasa:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Cooldown juga bersifat malas: apabila `rateLimitedUntil` telah berlalu, sambungan itu menjadi layak semula. Selepas penggunaan yang berjaya, `clearAccountError()` mengosongkan `testStatus`, `rateLimitedUntil`, medan ralat, dan `backoffLevel`.
+Cooldown juga malas: apabila `rateLimitedUntil` berada di masa lalu, sambungan menjadi layak semula. Apabila berjaya digunakan, `clearAccountError()` mengosongkan `testStatus`, `rateLimitedUntil`, medan ralat dan `backoffLevel`.
 
-Kelakuan cooldown sambungan lalai:
+Tingkah laku cooldown sambungan lalai:
 
-- Cooldown asas OAuth: `5s`.
+- OAuth base cooldown: `5s`.
 - Cooldown asas kunci API: `3s`.
-- `429` kunci API harus mengutamakan petunjuk cuba semula hulu (`Retry-After`, pengepala reset, atau teks reset yang boleh dihuraikan) apabila tersedia.
-- Kegagalan boleh pulih yang berulang menggunakan backoff eksponen:
+- `429` kunci API harus memilih petunjuk percubaan semula huluan (`Retry-After`, pengepala tetapan semula atau teks tetapan semula boleh dihuraikan) apabila tersedia.
+- Kegagalan boleh pulih berulang menggunakan pengunduran eksponen:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Pengawal anti-thundering-herd menghalang kegagalan serentak pada sambungan yang sama daripada memanjangkan cooldown berulang kali atau menokok `backoffLevel` dua kali.
+Pengawal gerombolan anti-gemuruh menghalang kegagalan serentak pada sambungan yang sama daripada memanjangkan tempoh bertenang atau `backoffLevel` yang meningkat dua kali .
 
-Keadaan terminal bukanlah cooldown. `banned`, `expired` (yang menjadi terminal hanya selepas N percubaan semula terhad melalui `EXPIRED_RETRY_MAX`), dan `credits_exhausted` dimaksudkan untuk kekal tidak tersedia sehingga kelayakan/tetapan berubah atau operator menetapkannya semula. Jangan tulis ganti keadaan terminal dengan keadaan cooldown sementara.
+Keadaan terminal bukan cooldown. `banned`, `expired` (yang menjadi terminal hanya selepas N cuba semula terhad melalui `EXPIRED_RETRY_MAX`), dan `credits_exhausted` bertujuan untuk kekal tidak tersedia sehingga credentials/settings berubah atau pengendali menetapkannya semula. Jangan tulis ganti keadaan terminal dengan keadaan bertenang sementara.
 
-### Penguncian Model
+### Model Lockout
 
-**Skop**: penyedia + sambungan + model.
+**Skop** : pembekal sambungan + model +.
 
-**Tujuan**: mengelakkan pemadaman keseluruhan sambungan apabila hanya satu model tidak tersedia atau terhad kuota untuk sambungan tersebut.
+**Tujuan** : elakkan melumpuhkan keseluruhan sambungan apabila hanya satu model tidak tersedia atau terhad kuota untuk sambungan itu.
 
 Contoh:
 
-- Penyedia kuota setiap model yang mengembalikan `429`.
-- Penyedia tempatan yang mengembalikan `404` untuk satu model yang tiada.
-- Kegagalan kebenaran mod/model khusus penyedia seperti mod Grok terpilih.
+- Pembekal kuota setiap model mengembalikan `429`.
+- Penyedia tempatan mengembalikan `404` untuk satu model yang hilang.
+- Kegagalan kebenaran mode/model khusus pembekal seperti mod Grok yang dipilih.
 
-Penguncian model terletak dalam `open-sse/services/accountFallback.ts` dan membenarkan sambungan yang sama terus melayani model lain.
+Kunci keluar model tinggal di `open-sse/services/accountFallback.ts` dan membolehkan sambungan yang sama terus melayani model lain.
 
 ### Panduan Penyahpepijatan
 
-- Jika semua kunci untuk sesebuah penyedia dilangkau, periksa kedua-dua keadaan breaker penyedia dan `rateLimitedUntil`/`testStatus` setiap sambungan.
-- Jika sesebuah penyedia kelihatan dikecualikan secara kekal selepas tetingkap reset, semak sama ada kod membaca `state` mentah dan bukannya menggunakan `getStatus()`/`canExecute()`.
-- Jika satu kunci penyedia gagal tetapi yang lain sepatutnya berfungsi, utamakan cooldown sambungan berbanding breaker penyedia.
-- Jika hanya satu model gagal, utamakan penguncian model berbanding cooldown sambungan.
-- Jika sesuatu keadaan sepatutnya pulih sendiri, ia perlu mempunyai cap masa masa depan/had masa reset dan laluan bacaan yang menyegarkan keadaan yang tamat tempoh. Status kekal memerlukan perubahan kelayakan atau konfigurasi secara manual.
+- Jika semua kunci untuk pembekal dilangkau, periksa kedua-dua keadaan pemutus pembekal dan setiap `rateLimitedUntil`/`testStatus` sambungan.
+- Jika pembekal muncul secara kekal dikecualikan selepas tetingkap tetapan semula, semak sama ada kod sedang membaca `state` mentah dan bukannya menggunakan `getStatus()`/`canExecute()`.
+- Jika satu kunci pembekal gagal tetapi yang lain harus berfungsi, lebih sukakan sambungan sambungan daripada pemutus pembekal.
+- Jika hanya satu model yang gagal, pilih kunci model berbanding tempoh akhir sambungan.
+- Jika keadaan perlu pulih sendiri, ia sepatutnya mempunyai tamat masa timestamp/reset pada masa hadapan dan laluan baca yang menyegarkan keadaan tamat tempoh. Status kekal memerlukan perubahan kelayakan manual atau konfigurasi.
 
 ---
 

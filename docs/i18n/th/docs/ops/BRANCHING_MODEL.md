@@ -39,7 +39,7 @@ flowchart LR
 
 ## ปล่อยการแช่แข็ง (รอบขนาน)
 
-เมื่อมีการปรับยอดรุ่น จะมีการเปิดปัญหาเครื่องหมายที่มีป้ายกำกับว่า `release-freeze` ที่** ไม่หยุดการพัฒนา** : :
+เมื่อมีการปรับยอดรุ่น จะมีการเปิดเครื่องหมายปัญหาที่มีป้ายกำกับว่า `release-freeze` ที่** ไม่หยุดการพัฒนา** : :
 
 - `release/vX.Y.Z` ที่แช่แข็งนั้นเป็นของกัปตันเรือลำนั้น
 - `release/vX+1` ของรอบถัดไปถูกตัดออกจากปลายที่แข็งตัว เพื่อให้ผู้มีส่วนร่วมยังคงทำงานลงจอดต่อไป
@@ -48,7 +48,7 @@ flowchart LR
 ตรวจสอบการค้างแบบเปิดก่อนที่จะสมมติว่าสาขาที่คุณต้องการสามารถรวมเข้าด้วยกันได้:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 กลไกการผสาน (เจ้าของ `queue` label → Mergify) ได้รับการบันทึกไว้ใน [MERGE_TRAIN.md](./MERGE_TRAIN.md)

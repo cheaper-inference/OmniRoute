@@ -4,13 +4,7 @@
 
 ---
 
-> **સત્યનો સ્રોત:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, અને `open-sse/utils/error.ts` માંના સાર્વજનિક બિલ્ડર્સ
-> **પરીક્ષણો:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **છેલ્લે અપડેટ કરેલું:** 2026-09-02 — v3.8.51
-> **લક્ષિત વાચકો:** ભૂલ પ્રતિસાદોને સ્પર્શતો કોઈપણ એન્જિનિયર (HTTP રૂટ્સ, SSE સ્ટ્રીમ્સ, એક્ઝિક્યુટર્સ, MCP હેન્ડલર્સ).
-> **સ્થિતિ:** ક્લાયન્ટને ભૂલ સંદેશ પરત કરતા દરેક કોડ પાથ માટે **ફરજિયાત**.
+> **સત્યનો સ્ત્રોત:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, અને `open-sse/utils/error.ts` માં જાહેર બિલ્ડરો** પરીક્ષણો:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** પ્રેક્ષક:** કોઈપણ ઈજનેર ટચિંગ એરર રિસ્પોન્સ (HTTP રૂટ, SSE સ્ટ્રીમ્સ, એક્ઝિક્યુટર્સ, MCP હેન્ડલર્સ).** સ્થિતિ:****MANDATORY** દરેક કોડ પાથ માટે કે જે ક્લાયંટને ભૂલ સંદેશ આપે છે.
 
 ## આ શા માટે અસ્તિત્વમાં છે
 

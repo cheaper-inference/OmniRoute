@@ -508,21 +508,21 @@ siis, kui edetabeli andmed on pärast viimast saatmist tegelikult muutunud.
 
 **Fail:** `src/lib/gamification/sharing.ts`
 
-### Kahekordne kirjendamine
+### Kahekordse kirjega pearaamat
 
-Iga ülekanne loob tabelis `token_ledger` kaks rida:
+Iga ülekanne loob `token_ledger` kaks rida:
 
 | Rida    | `from_key_id` | `to_key_id` | `amount` |
 | ------- | ------------- | ----------- | -------- |
-| Deebet  | saatja        | saaja       | +summa   |
-| Kreedit | saaja         | saatja      | -summa   |
+| Deebet  | saatja        | vastuvõtja  | + summa  |
+| Krediit | vastuvõtja    | saatja      | -amount  |
 
-Oot — kasutatav tava on järgmine:
+Oodake — konventsioon on järgmine:
 
-| Rida         | `from_key_id` | `to_key_id` | `amount` | Tähendus           |
-| ------------ | ------------- | ----------- | -------- | ------------------ |
-| Saatmine     | saatja        | saaja       | +summa   | Väljavool saatjalt |
-| Vastuvõtmine | saaja         | saatja      | +summa   | Sissevool saajale  |
+| Rida        | `from_key_id` | `to_key_id` | `amount` | Tähendus                |
+| ----------- | ------------- | ----------- | -------- | ----------------------- |
+| Saada       | saatja        | vastuvõtja  | + summa  | Väljavool saatjalt      |
+| Vastu võtta | vastuvõtja    | saatja      | + summa  | Sissevool vastuvõtjasse |
 
 Saldo arvutatakse järgmiselt:
 
@@ -535,7 +535,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Ülekandevoog
+### Ülekande voog
 
 ```typescript
 export async function transferTokens(
@@ -546,19 +546,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Valideerimine**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotentsus**: kontrollitakse, kas `idempotency_key` on pearaamatus juba olemas.
-   Kui jah, tagastatakse vahemällu salvestatud tulemus.
-3. **Tehing** (üks SQLite'i tehing):
-   a. Arvutatakse saatja saldo.
-   b. Kui `balance < amount`, katkestatakse toiming (raha pole piisavalt).
-   c. Lisatakse saatmisrida (`from=saatja,`.
+1. **Kinnitage** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotentsus** : kontrollige, kas `idempotency_key` on pearaamatus juba olemas. Kui jah, tagastage vahemällu salvestatud tulemus.
+3. **Tehing** (üksik SQLite tehing): a. Arvutage saatja saldo. b. Kui `balance < amount`, katkestage (ebapiisavad vahendid). c. Sisesta saatmisrida (`from=sender, to=receiver, amount`). d. Sisesta vastuvõturida (`from=receiver, to=sender, amount`).
+4. **Hindade piirang** : kontrollige saatja edastuskiirust (max 10 transfers/min).
+5. **Sündmus** : kiirgab `token_share` mängustamise sündmust XP + märgi hindamiseks.
+6. Tagasi `{ success: true, balance: newBalance }`.
 
-### Sageduse piiramine
+### Rate Limiting
 
-- Ühe API-võtme kohta kuni 10 ülekannet minutis.
-- Ühe ülekandega kuni 10 000 tokenit.
-- Ühe API-võtme kohta kuni 100 000 ülekantud tokenit päevas.
+- Max 10 ülekannet minutis API klahvi kohta.
+- Maksimaalselt 10 000 märki ühe ülekande kohta.
+- Maksimaalselt 100 000 märki päevas üle API võtme kohta.
 
 ---
 

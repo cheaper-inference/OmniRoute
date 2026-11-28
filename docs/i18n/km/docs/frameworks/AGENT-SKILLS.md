@@ -13,12 +13,12 @@ Agent Skills គឺជាឯកសារ SKILL.md ដែលមានរចនា
 
 ## ទិដ្ឋភាពទូទៅ
 
-កាតាឡុកនេះមាន **Agent Skills ចំនួន 45** (REST API ចំនួន 23 + CLI ចំនួន 21 + លំហូរការងារកំណត់រចនាសម្ព័ន្ធចំនួន 1)។ ជំនាញនីមួយៗមាន៖
+កាតាឡុកមាន** 45 ជំនាញភ្នាក់ងារ** (23 REST API + 21 CLI + 1 ដំណើរការកំណត់រចនាសម្ព័ន្ធ) ។ ជំនាញនីមួយៗមាន៖
 
-- **ID ផ្លូវការ** មួយ (`omni-auth`, `cli-serve` ជាដើម)
-- ឯកសារ **SKILL.md** មួយនៅក្នុង `skills/{id}/SKILL.md` ដែលមាន YAML frontmatter (`name`, `description`) + ខ្លឹមសារ markdown លម្អិត
-- **REST endpoints** (សម្រាប់ជំនាញ API) ឬ **CLI subcommands** (សម្រាប់ជំនាញ CLI) ដែលទាញយកពី OpenAPI spec និង CLI registry
-- **GitHub raw URL** មួយសម្រាប់ទាញយកដោយផ្ទាល់៖ `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ក** Canonical ID** (`omni-auth`, `cli-serve` ជាដើម)
+- ក**SKILL.md** ឯកសារនៅក្នុង `skills/{id}/SKILL.md` ជាមួយ YAML frontmatter (`name`, `description`) + rich markdown body
+- **ចំណុចបញ្ចប់REST** (ជំនាញ API ) ឬ** ពាក្យបញ្ជារង CLI** (ជំនាញ CLI ) បានមកពី OpenAPI spec និង CLI registry
+- ក**GitHub ឆៅ URL** សម្រាប់ការទាញយកផ្ទាល់៖ `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## Coverage API
+## គ្របដណ្តប់ API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

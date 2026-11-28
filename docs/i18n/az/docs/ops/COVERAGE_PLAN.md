@@ -153,28 +153,28 @@ Mərhələ 6-7 üçün mövzular:
 
 ## Ratchet siyasəti
 
-`npm run test:coverage` hədlərini yalnız layihə növbəti mərhələni rahat ehtiyatla faktiki olaraq keçdikdən sonra yeniləyin.
+`npm run test:coverage` hədlərini yalnız layihə həqiqətən rahat buferlə növbəti mərhələni keçdikdən sonra yeniləyin.
 
-**Cari keçid həddi:** `npm run test:coverage` **60 ifadə / 60 sətir / 60 funksiya / 60 budaq** tələb edir (metrik Quality-Gates Mərhələ 6A.1-də yenidən əsaslandırılıb — əvvəlki 82.58% baza göstəricisi test fayllarını saydığı və `open-sse`-ni istisna etdiyi üçün süni şəkildə yüksək idi). `test:coverage:legacy` əmri tarixi müqayisə üçün köhnə 50/50/50 metrikini qoruyur.
+**Cari qapı:** `npm run test:coverage` tətbiq edir** 60 ifadə / 60 sətir / 60 funksiya / 60 filial** (metrika Quality-Gates Fase 6A.1 — də yenidən əsaslandırıldı, əvvəlki 82.58% baza səviyyəsi şişirdildi, çünki o, sınaq fayllarını saydı və `open-sse` xaric etdi). `test:coverage:legacy` əmri tarixi müqayisə üçün köhnə 50/50/50 metrikasını qoruyur.
 
-Ən son hesabata əsasən xüsusi hədd yoxlamaları üçün istifadə edin:
+Ən son hesabat istifadəsinə qarşı xüsusi hədd yoxlamaları üçün:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Tövsiyə olunan ratchet ardıcıllığı (sıralama `ifadələr-sətirlər / budaqlar / funksiyalar` şəklindədir):
+Tövsiyə olunan mandal ardıcıllığı (sifariş `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- cari keçid həddi (75/70/75)
+5. 75/70/72 <-- cari qapı (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Budaq əhatəsi ardıcıl iki icrada 78%-dən yuxarı qaldıqdan sonra növbəti ratchet hədəfi `80/75/78` olacaq.
+Ardıcıl iki qaçış üçün filialın əhatə dairəsi 78%-dən yuxarı olduqda, növbəti ratchet hədəfi `80/75/78`.
 
 ## Məlum boşluq
 

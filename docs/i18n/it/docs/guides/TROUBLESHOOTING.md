@@ -185,88 +185,49 @@ li include.
 
 ---
 
-## Falsi positivi dell'antivirus
+## Falsi positivi dell’antivirus
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG mette in quarantena `README.md` con `MD:HttpRequest-inf[Susp]`
+### Avast/AVG in quarantena `README.md` con `MD:HttpRequest-inf[Susp]`
 
-**Questo è un falso positivo. Nulla è infetto e non è richiesta alcuna azione.**
+**Questo è un falso positivo. Niente è infetto e non è richiesta alcuna azione.**
 
-Avast e AVG utilizzano un'euristica che segnala i file di testo semplice/Markdown contenenti molti
-link che sembrano richieste HTTP. Il file `README.md` di OmniRoute è incluso nel pacchetto npm (è
-elencato in `package.json` → `files`), quindi, in caso di installazione globale, viene salvato in
-`node_modules/omniroute/README.md` e contiene circa 15 esempi `http://localhost:20128/...` (gli
-endpoint HTTP/SSE MCP, l'URL A2A `.well-known` e frammenti `curl`). Questa densità di link è
-sufficiente per attivare l'euristica.
+Avast e AVG eseguono un'euristica che contrassegna i file plain-text/Markdown contenenti molti collegamenti che sembrano richieste HTTP. OmniRoute di `README.md` viene fornito all'interno del pacchetto npm (è elencato in `package.json` → `files`), quindi arriva a `node_modules/omniroute/README.md` su un'installazione globale — e contiene ~ 15 esempi `http://localhost:20128/...` (gli endpoint MCP HTTP/SSE A2A `.well-known` URL e gli snippet `curl` ). Quella densità di collegamenti è sufficiente per far scattare l’euristica.
 
-Se il problema è iniziato solo di recente: la natura del file non è cambiata. Nel README sono
-aumentati la tabella degli endpoint (sono stati aggiunti MCP HTTP + SSE + A2A) e gli esempi `curl`,
-facendogli superare la soglia.
+Se è iniziato solo di recente: il file non è cambiato nella sua natura. README ha ampliato la sua tabella degli endpoint (sono stati aggiunti MCP HTTP + SSE + A2A ) e altri esempi `curl`, che lo hanno spinto oltre la soglia.
 
-Il file è documentazione inerte e non contiene alcun contenuto eseguibile. Può essere ripristinato
-in sicurezza dalla quarantena.
+Il file è una documentazione inerte con zero contenuto eseguibile. Puoi ripristinarlo in sicurezza dalla quarantena.
 
 **Cosa fare:**
 
-1. **Interrompere le notifiche** — escludere la directory di installazione nell'antivirus
-   (Avast: Impostazioni → Eccezioni), aggiungendo il percorso globale di `node_modules` e/o la
-   directory dei dati di OmniRoute (`~/.omniroute/`).
-2. **Segnalare il falso positivo** — <https://www.avast.com/false-positive-file-form.php>,
-   allegando il file `README.md` in quarantena. Questa è la soluzione che aiuta tutti, poiché è
-   l'euristica del fornitore a reagire in modo eccessivo a un file di testo.
+1. **Interrompi le notifiche** — esclude la directory di installazione nel tuo antivirus (Avast: Impostazioni → Eccezioni), aggiungendo il percorso `node_modules` globale and/or la directory dei dati OmniRoute (`~/.omniroute/`).
+2. **Segnalare il falso positivo** — <https://www.avast.com/false-positive-file-form.php>, allegando lo `README.md` in quarantena . Questa è la soluzione che aiuta tutti, poiché è l'euristica del venditore che reagisce in modo eccessivo a un file di testo.
 
-**Perché non lo "risolviamo" da parte nostra:** tutti gli esempi utilizzano `http://localhost` e
-localhost non può utilizzare `https` senza gli inconvenienti dei certificati autofirmati. Alterare
-la documentazione per aggirare l'euristica di un singolo fornitore danneggerebbe tutti i lettori
-per assecondare un bug dello scanner.
+**Perché non "risolviamo" questo problema da parte nostra:** gli esempi sono tutti `http://localhost` e localhost non può essere `https` senza attriti con il certificato autofirmato. Modificare i documenti per eludere l'euristica di un fornitore danneggerebbe ogni lettore per soddisfare un bug dello scanner.
 
-### Kaspersky segnala l'app desktop come `PDM:Trojan.Win32.Generic`
+### Kaspersky contrassegna l'app desktop come `PDM:Trojan.Win32.Generic`
 
-**Questo è un falso positivo generato da un'euristica comportamentale. Nulla è infetto.** Il
-prefisso `PDM:` di Kaspersky indica che il verdetto proviene dal suo Proactive Defense Module
-(System Watcher), che valuta ciò che il programma di installazione _fa_ anziché confrontarlo con
-malware noto. Quando si attiva, Kaspersky esegue il "rollback" dell'intera installazione,
-eliminando i file già scritti; di conseguenza, l'app risulta danneggiata o mancante.
+**Questo è un falso positivo derivante da un'euristica comportamentale. Niente è infetto.** Il prefisso `PDM:` di Kaspersky indica che il verdetto proviene dal suo modulo di difesa proattiva (System Watcher), che giudica ciò che _fa_ il programma di installazione anziché confrontarlo con malware noto. Quando si attiva, Kaspersky esegue il rollback dell'intera installazione — eliminando i file che aveva già scritto — quindi l'app risulta danneggiata o mancante.
 
-I file segnalati sono componenti standard di dipendenze open source dichiarate e incluse con
-l'app desktop, ad esempio:
+I file contrassegnati sono parti stock di dipendenze open source dichiarate in bundle con l'app desktop, ad esempio:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` e
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), la libreria di automazione del
-  browser utilizzata per l'accesso ai provider all'interno dell'app e per la chat supportata dal
-  browser.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — il binding nativo `wreq-js` con versione bloccata utilizzato per HTTP con fingerprint del
-  browser sui provider basati su cookie web (`<arch>` è `x64` o `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` e `workerProcessEntry.js` — [Playwright](https://playwright.dev), la libreria di automazione del browser utilizzata per l'accesso del provider in-app e la chat supportata dal browser.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — l'associazione nativa `wreq-js` bloccata utilizzata per HTTP con impronta digitale del browser sui fornitori di cookie Web (`<arch>` è `x64` o `arm64`).
 
-**Perché si attiva:** il programma di installazione per Windows **non è ancora firmato
-digitalmente**, quindi un programma di installazione NSIS non firmato non gode di alcuna
-reputazione e le euristiche comportamentali vengono eseguite con la massima aggressività. In
-combinazione con una DLL nativa inclusa e centinaia di file `.js` scritti in
-`%LOCALAPPDATA%\Programs\OmniRoute` (incluse le directory dei pacchetti con hash nel nome generate
-dalla build standalone di Next.js), questo è sufficiente per attivare l'euristica. La firma del
-codice è pianificata; finché non verrà implementata, il problema potrebbe ripresentarsi con le
-nuove versioni.
+**Perché si accende:** il programma di installazione Windows è** non ancora firmato in codice** , quindi un programma di installazione NSIS non firmato ha zero reputazione e l'euristica comportamentale viene eseguita alla massima aggressività. Combinato con uno DLL nativo in bundle e centinaia di file `.js` scritti sotto `%LOCALAPPDATA%\Programs\OmniRoute` (incluse le directory dei pacchetti con suffisso hash dalla build standalone Next.js ), è sufficiente per far scattare l'euristica. È prevista la firma del codice; finché non atterra, le nuove versioni possono ripeterlo.
 
 **Cosa fare:**
 
-1. **Verificare prima il download** (per escludere che il file sia stato manomesso). Ogni versione
-   pubblica `latest.yml`, il cui campo `sha512` (base64) copre il programma di installazione
-   `OmniRoute.Setup.<version>.exe`. In PowerShell, dalla cartella contenente il programma di
-   installazione:
+1. **Verifica prima il download** (esclude un file manomesso). Ogni versione pubblica `latest.yml`, il cui campo `sha512` (base64) copre il programma di installazione `OmniRoute.Setup.<version>.exe`. In PowerShell, dalla cartella contenente il programma di installazione:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   L'output deve corrispondere a `latest.yml` → `sha512`. In caso contrario, eliminare il file e
-   scaricarlo nuovamente esclusivamente dalla [pagina delle release di GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Ripristinare + escludere** — ripristinare dalla quarantena gli elementi eliminati durante il
-   rollback e aggiungere un'esclusione per `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky →
-   Impostazioni → Minacce ed esclusioni), quindi reinstallare.
-3. **Segnalare il falso positivo** — <https://opentip.kaspersky.com/>. Le segnalazioni di falsi
-   positivi inviate dagli utenti accelerano concretamente l'inserimento nella allowlist.
+   L'output deve corrispondere `latest.yml` → `sha512`. In caso contrario, eliminare il file e scaricarlo nuovamente solo dalla [pagina delle versioni GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Ripristina + escludi** — ripristina gli elementi ripristinati dalla quarantena e aggiunge un'esclusione per `%LOCALAPPDATA%\Programs\OmniRoute` (Impostazioni Kaspersky → → Minacce ed esclusioni), quindi reinstalla.
+3. **Segnalare il falso positivo** — <https://opentip.kaspersky.com/>. I report FP inviati dagli utenti accelerano davvero l'inserimento nella lista consentita.
 
 ---
 
@@ -879,8 +840,8 @@ Altri sintomi:
 
 ## Ancora bloccato?
 
-- **Issue di GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Architettura**: consulta [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) per i dettagli interni
-- **Riferimento API**: consulta [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) per tutti gli endpoint
-- **Dashboard di integrità**: controlla **Dashboard → Health** per lo stato del sistema in tempo reale
-- **Traduttore**: usa **Dashboard → Translator** per eseguire il debug dei problemi di formato
+- **GitHub Problemi** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Architettura** : Vedi [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) per i dettagli interni
+- **API Riferimento** : vedere [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) per tutti gli endpoint
+- **Cruscotto della salute** : Controllo** Cruscotto → Salute** per lo stato del sistema in tempo reale
+- **Traduttore** : Utilizzo** Traduttore di dashboard →** per eseguire il debug dei problemi di formato

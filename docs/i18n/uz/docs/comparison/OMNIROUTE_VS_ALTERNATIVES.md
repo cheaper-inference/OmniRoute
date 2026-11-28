@@ -11,7 +11,7 @@ Mashhur ochiq manbali AI routerlar bilan ob'ektiv xususiyatlarni taqqoslash.
 | Xususiyat                                                       |                  OmniRoute 3.8                  |       LiteLLM 1.x       |  OpenRouter (SaaS)   |   Portkey    |
 | --------------------------------------------------------------- | :---------------------------------------------: | :---------------------: | :------------------: | :----------: |
 | **Provayderlar**                                                |                     **329**                     |          ~100           |         ~50          |     ~30      |
-| **Free/no-auth katalogidagi yozuvlar**                          |                     **155**                     |           n/a           |        o'tish        |     n/a      |
+| **Bepul kirish huquqiga ega provayderlar**                      |            **50 bepul kirish bilan**            |           n/a           |        o'tish        |     n/a      |
 | **O'z-o'zidan mezbon**                                          |                       ✅                        |           ✅            |          ❌          | ⚠ to'langan  |
 | **OAuth katalogidagi yozuvlar**                                 |                     **23**                      |         qisman          |          ❌          |      ❌      |
 | **Avtomatik qayta tiklash kombinatsiyalari**                    |              **22 ta strategiya**               | ustuvorlikka asoslangan | bosqichga asoslangan |    vaznli    |
@@ -38,7 +38,7 @@ Mashhur ochiq manbali AI routerlar bilan ob'ektiv xususiyatlarni taqqoslash.
 
 ## Qachon OmniRoute tanlash kerak
 
-- Siz o'zingiz mezbonlik qilasiz va xohlaysiz** maksimal provayder qamrovi** (394 ta provayder, 155 free/no-auth katalog yozuvlari)
+- Siz o'zingizni mezbonlik qilasiz va xohlaysiz** maksimal provayder qamrovi** (394 ta provayder, 50 tasi bepul)
 - Sizga kerak a** o'rnatilgan MCP serveri** (LLM vositalari, xotira, asboblar sifatida ko'rsatilgan ko'nikmalar)
 - Sizga kerak**A2A protokoli** agentdan agentga ish oqimlari uchun
 - Siz xohlaysiz** barmoq izlari yashirin** (JA3/JA4) yuqori oqim CAPTCHAs tomonidan aniqlanmaslik uchun
@@ -56,12 +56,12 @@ Mashhur ochiq manbali AI routerlar bilan ob'ektiv xususiyatlarni taqqoslash.
 - SaaS ustamasi bilan har bir token uchun to‘lashga rozisiz
 - Barcha provayderlar uchun **yagona to‘lov usuli** kerak
 
-## Portkey’ni qachon tanlash kerak
+## Portkeyni qachon tanlash kerak
 
-- Sizga ishlash vaqti kafolatlari bilan **tijoriy SLA** kerak
-- Ekspluatatsion yuksiz **boshqariladigan boshqaruv panelini** afzal ko‘rasiz
-- Sizga foydalanishga tayyor **korporativ muvofiqlik** funksiyalari kerak
+- Sizga kerak a** tijorat SLA** ish vaqti kafolatlari bilan
+- Siz afzal ko'rasiz a** boshqariladigan asboblar paneli** operatsiyalarsiz
+- Sizga kerak** korxona muvofiqligi** qutidan tashqarida bo'lgan xususiyatlar
 
 ---
 
-_Oxirgi yangilanish: 2026-08-02. Ushbu jadval aniqligini saqlash uchun tuzatishlarni PR orqali yuboring._
+_Jadvalni toʻgʻri saqlash uchun tuzatishlarni PR orqali yuboring._

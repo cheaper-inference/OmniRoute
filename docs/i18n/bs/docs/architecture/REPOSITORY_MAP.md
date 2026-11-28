@@ -4,9 +4,9 @@
 
 ---
 
-> **Gdje živi: svaki praćeni direktorij najvišeg nivoa i korijenski fajl, sa svrhom u jednom redu.** Posljednje ažurirano: 2026-11-13 (OmniRoute v3.8.54)
+> **Gdje živi: svaki praćeni direktorij najvišeg nivoa i korijenski fajl, sa svrhom u jednom redu.**
 >
-> Koristite ovu mapu da biste se snašli u bazi kodova, a zatim slijedite veze do namjenskih dokumenata. Broj datoteka mjeren je pomoću `git ls-files` na datum iznad. Oni se mijenjaju sa skoro svakim izdanjem, pa ih tretirajte kao redove veličine.
+> Koristite ovu mapu da biste se snašli u bazi kodova, a zatim slijedite veze do namjenskih dokumenata. Broj datoteka dolazi od `git ls-files` i mijenja se sa skoro svakim izdanjem. Tretirajte ih kao redove veličine.
 
 ## Drvo najvišeg nivoa
 
@@ -36,7 +36,7 @@ OmniRoute/
 └── (root files — see below)
 ```
 
-Lokalne, generirane ili privatne staze (sve gitignorirane, nikad urezane, nisu dalje opisane):
+Lokalni, generirani ili privatni putevi (svi gitignorisani, nikad urezani, nisu dalje opisani):
 
 ```
 node_modules/            # npm dependencies

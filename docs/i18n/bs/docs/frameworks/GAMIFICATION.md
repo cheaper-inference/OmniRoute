@@ -476,27 +476,27 @@ SSE menadžer prati povezane klijente po opsegu i šalje ažuriranja samo kada s
 
 ---
 
-## Dijeljenje tokena
+## Token Sharing
 
-**Datoteka:** `src/lib/gamification/sharing.ts`
+**Fajl:** `src/lib/gamification/sharing.ts`
 
-### Dvojno knjigovodstvo
+### Dvostruka knjiga
 
-Svaki prijenos kreira dva reda u `token_ledger`:
+Svaki prijenos stvara dva reda u `token_ledger`:
 
-| Red       | `from_key_id` | `to_key_id` | `amount` |
-| --------- | ------------- | ----------- | -------- |
-| Duguje    | pošiljatelj   | primatelj   | +iznos   |
-| Potražuje | primatelj     | pošiljatelj | -iznos   |
+| Red    | `from_key_id` | `to_key_id` | `amount` |
+| ------ | ------------- | ----------- | -------- |
+| Debit  | pošiljalac    | prijemnik   | + iznos  |
+| Kredit | prijemnik     | pošiljalac  | -amount  |
 
-Čekaj — konvencija je:
+Sačekajte — konvencija je:
 
-| Red      | `from_key_id` | `to_key_id` | `amount` | Značenje               |
-| -------- | ------------- | ----------- | -------- | ---------------------- |
-| Slanje   | pošiljatelj   | primatelj   | +iznos   | Odljev od pošiljatelja |
-| Primanje | primatelj     | pošiljatelj | +iznos   | Priljev primatelju     |
+| Red     | `from_key_id` | `to_key_id` | `amount` | Značenje            |
+| ------- | ------------- | ----------- | -------- | ------------------- |
+| Pošalji | pošiljalac    | prijemnik   | + iznos  | Odliv od pošiljaoca |
+| Primi   | prijemnik     | pošiljalac  | + iznos  | Priliv u prijemnik  |
 
-Stanje se računa kao:
+Stanje se računa na sljedeći način:
 
 ```sql
 SELECT
@@ -507,7 +507,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Tok prijenosa
+### Transfer Flow
 
 ```typescript
 export async function transferTokens(
@@ -518,19 +518,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Validacija**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotencija**: provjeri postoji li `idempotency_key` već u knjizi.
-   Ako da, vrati keširani rezultat.
-3. **Transakcija** (pojedinačna SQLite transakcija):
-   a. Izračunaj stanje pošiljatelja.
-   b. Ako je `balance < amount`, prekini (nedovoljno sredstava).
-   c. Umetni red za slanje (`from=sender,`.
+1. **Potvrdi** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotencija** : provjeriti da li `idempotency_key` već postoji u knjizi. Ako da, vratite keširani rezultat.
+3. **Transakcija** (jedna SQLite transakcija): a. Izračunajte stanje pošiljaoca. b. Ako `balance < amount`, prekinuti (nedovoljno sredstava). c. Umetni red za slanje (`from=sender, to=receiver, amount`). d. Umetni red primanja (`from=receiver, to=sender, amount`).
+4. **Ograničenje stope** : provjerite brzinu prijenosa za pošiljaoca (maks. 10 transfers/min).
+5. **Događaj** : emitovati događaj `token_share` gamifikacije za procjenu XP + značke.
+6. Vrati `{ success: true, balance: newBalance }`.
 
-### Ograničenje stope (Rate Limiting)
+### Rate Limiting
 
-- Maks. 10 prijenosa u minuti po API ključu.
-- Maks. 10.000 tokena po jednom prijenosu.
-- Maks. 100.000 tokena prenesenih dnevno po API ključu.
+- Maksimalno 10 prijenosa u minuti po API ključu.
+- Maksimalno 10.000 tokena po jednom prijenosu.
+- Maksimalno 100.000 prenesenih tokena dnevno po API ključu.
 
 ---
 

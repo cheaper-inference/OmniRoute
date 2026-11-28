@@ -65,35 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### მორგებული ჰედერები
+### მორგებული სათაურები
 
-| Header                   | Direction | Description                                                                                                                                                                                                                                   |
-| ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | მოთხოვნა  | დააყენეთ `true` მნიშვნელობა ქეშის გვერდის ასავლელად                                                                                                                                                                                           |
-| `x-omniroute-no-memory`  | მოთხოვნა  | დააყენეთ `true` მნიშვნელობა ამ მოთხოვნისთვის მეხსიერებისა და უნარების ინექციის გამოსატოვებლად (ასახავს no-cache-ს; თავიდან იცილებს თითოეულ გამოძახებაზე ტოკენებისა და ხარჯების ზედნადებს)                                                     |
-| `X-OmniRoute-Progress`   | მოთხოვნა  | პროგრესის მოვლენებისთვის დააყენეთ `true`                                                                                                                                                                                                      |
-| `X-Session-Id`           | მოთხოვნა  | გარე სესიის აფინიტეტისთვის განკუთვნილი წებოვანი სესიის გასაღები                                                                                                                                                                               |
-| `x_session_id`           | მოთხოვნა  | ქვედა ტირის შემცველი ვარიანტიც მიიღება (პირდაპირი HTTP)                                                                                                                                                                                       |
-| `X-OmniRoute-Session-Id` | მოთხოვნა  | გამომძახებლის მიერ მიწოდებული სესიის/საუბრის ტეგი (ასევე მიეწოდება მეხსიერებას). არსებობის შემთხვევაში პირდაპირ უცვლელად ინახება `call_logs.session_tag`-ში სესიების მიხედვით ხარჯების ატრიბუციისთვის (#8249) — არ სინთეზდება, თუ არ არსებობს |
-| `Idempotency-Key`        | მოთხოვნა  | დუბლირების აღმოსაფხვრელი გასაღები (5-წამიანი ფანჯარა)                                                                                                                                                                                         |
-| `X-Request-Id`           | მოთხოვნა  | დუბლირების აღმოსაფხვრელი ალტერნატიული გასაღები                                                                                                                                                                                                |
-| `x-omniroute-connection` | მოთხოვნა  | ერთმოდელიანი მოთხოვნის ერთ პროვაიდერის კავშირზე (ანგარიშზე) მიბმა მისი ID-ის მიხედვით — იხილეთ [მოთხოვნის მიხედვით ანგარიშზე მიბმა](#account-pinning-per-request)                                                                             |
-| `X-OmniRoute-Cache`      | პასუხი    | `HIT` ან `MISS` (არასტრიმინგული)                                                                                                                                                                                                              |
-| `X-OmniRoute-Idempotent` | პასუხი    | `true`, თუ დუბლირება აღმოიფხვრა                                                                                                                                                                                                               |
-| `X-OmniRoute-Progress`   | პასუხი    | `enabled`, თუ პროგრესის თვალყურის დევნება ჩართულია                                                                                                                                                                                            |
-| `X-OmniRoute-Session-Id` | პასუხი    | OmniRoute-ის მიერ გამოყენებული ეფექტური სესიის ID                                                                                                                                                                                             |
-| `X-OmniRoute-Request-Id` | პასუხი    | მოთხოვნის კორელაციის ID (თუ ცნობილია)                                                                                                                                                                                                         |
-| `X-OmniRoute-Version`    | პასუხი    | OmniRoute-ის ბილდის ვერსია (ყოველთვის წარმოდგენილია)                                                                                                                                                                                          |
-| `X-OmniRoute-Cost-Saved` | პასუხი    | აშშ დოლარში გამოხატული თანხა, რომელიც ქეშმა დაზოგა HIT-ის შემთხვევაში (მხოლოდ ქეშის HIT-ებისთვის)                                                                                                                                             |
-| `X-OmniRoute-Decision`   | პასუხი    | მარშრუტიზაციის კვალი: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` არის კომბინირებული სტრატეგია, ან `single` არაკომბინირებული მოთხოვნისთვის) — დასრულების პასუხებზე ყოველთვის წარმოდგენილია                                  |
+| სათაური                  | მიმართულება | აღწერა                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | მოთხოვნა    | დააყენეთ `true` ზე ქეშის გვერდის ავლით                                                                                                                                                                                                                                                                                                                                                      |
+| `x-omniroute-no-memory`  | მოთხოვნა    | დააყენეთ `true` ზე, რათა გამოტოვოთ მეხსიერების + უნარების ინექცია ამ მოთხოვნისთვის (არეკულია ქეშის გარეშე; თავიდან აიცილებს თითო ზარის token/cost ზედნადებს)                                                                                                                                                                                                                                |
+| `x-omniroute-no-log`     | მოთხოვნა    | დააყენეთ `true` ზე, რათა გამოტოვოთ request/response დატვირთვები ზარების ჟურნალებიდან ამ დასკვნის მოთხოვნისთვის (ჩეთის ოჯახის ყველა მარშრუტი: ჩეთის დასრულებები, პასუხები, შეტყობინებები, დასრულებები, Gemini). დროის ანაბეჭდი, მოდელი, სტატუსი, ხანგრძლივობა და ნიშნების რაოდენობა კვლავ ჩაწერილია. შეუთავსეთ `x-omniroute-no-memory` და `x-omniroute-no-cache` სრული კონტენტის არჩევისთვის |
+| `X-OmniRoute-Progress`   | მოთხოვნა    | დააყენეთ `true` ზე პროგრესის მოვლენებისთვის                                                                                                                                                                                                                                                                                                                                                 |
+| `X-Session-Id`           | მოთხოვნა    | წებოვანი სესიის ღილაკი გარე სესიის მსგავსებისთვის                                                                                                                                                                                                                                                                                                                                           |
+| `x_session_id`           | მოთხოვნა    | ასევე მიღებულია ხაზგასმული ვარიანტი (პირდაპირი HTTP)                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Session-Id` | მოთხოვნა    | აბონენტის მიერ მოწოდებული session/conversation ტეგი (ასევე კვებავს მეხსიერებას). როდესაც არსებობს, შენარჩუნებული იყო სიტყვასიტყვით `call_logs.session_tag` თითო სესიის ღირებულების მიკუთვნებისთვის (#8249) — არასოდეს სინთეზირებულია არყოფნისას                                                                                                                                             |
+| `Idempotency-Key`        | მოთხოვნა    | ამოღების გასაღები (ფანჯარა 5 წმ)                                                                                                                                                                                                                                                                                                                                                            |
+| `X-Request-Id`           | მოთხოვნა    | ალტერნატიული მოხსნის გასაღები                                                                                                                                                                                                                                                                                                                                                               |
+| `x-omniroute-connection` | მოთხოვნა    | ერთი მოდელის მოთხოვნის ჩამაგრება ერთი პროვაიდერის კავშირთან (ანგარიშთან) მისი ID — ით იხილეთ [ანგარიშის ჩამაგრება თითო მოთხოვნაზე](#account-pinning-per-request)                                                                                                                                                                                                                            |
+| `X-OmniRoute-Cache`      | პასუხი      | `HIT` ან `MISS` (არასტრიმინგი)                                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Idempotent` | პასუხი      | `true` თუ დუბლიკატი                                                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Progress`   | პასუხი      | `enabled` თუ პროგრესის თვალყურის დევნება მიმდინარეობს                                                                                                                                                                                                                                                                                                                                       |
+| `X-OmniRoute-Session-Id` | პასუხი      | ეფექტური სესია ID გამოიყენება OmniRoute მიერ                                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Request-Id` | პასუხი      | მოითხოვეთ კორელაციის ID (როდესაც ცნობილია)                                                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Version`    | პასუხი      | OmniRoute build ვერსია (ყოველთვის იმყოფება)                                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Cost-Saved` | პასუხი      | USD ქეში აცილებული HIT ზე (მხოლოდ ქეში ხვდება)                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Decision`   | პასუხი      | მარშრუტის კვალი: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` არის კომბინირებული სტრატეგია, ან `single` არაკომბინირებული მოთხოვნისთვის) — ყოველთვის წარმოდგენილია დასრულების პასუხებზე                                                                                                                                                                                     |
 
-> Nginx-ის შენიშვნა: თუ ეყრდნობით ქვედა ტირის შემცველ სათაურებს (მაგალითად, `x_session_id`), ჩართეთ `underscores_in_headers on;`.
+> Nginx შენიშვნა: თუ ეყრდნობით ხაზგასმული სათაურებს (მაგალითად `x_session_id`), ჩართეთ `underscores_in_headers on;`.
 
-#### მოთხოვნის მიხედვით ანგარიშზე მიბმა
+#### ანგარიშის დამაგრება თითო მოთხოვნით
 
-როდესაც პროვაიდერს რამდენიმე კავშირი აქვს (ანგარიში ან გასაღები), OmniRoute ჩვეულებრივ ერთ-ერთს ანგარიშების არჩევის სტრატეგიის
-მეშვეობით ირჩევს. ამის ნაცვლად, მოთხოვნას შეუძლია ერთი კონკრეტული კავშირი მიამაგროს `x-omniroute-connection` სათაურის
-გამოყენებით:
+როდესაც პროვაიდერს აქვს რამდენიმე კავშირი (ანგარიშები ან გასაღები), OmniRoute ჩვეულებრივ ირჩევს ერთს თავისი ანგარიშის შერჩევის სტრატეგიით. სანაცვლოდ, მოთხოვნას შეუძლია დაამაგროს ერთი კონკრეტული კავშირი `x-omniroute-connection` სათაურთან:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,25 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **სად ვიპოვოთ ID.** გახსენით პროვაიდერის გვერდი dashboard-ში
-  (**Dashboard → Providers → <provider>**) და კავშირის მწკრივში დააწკაპუნეთ `xxxxxxxx…` ID-ის ჩიპზე —
-  ეს კავშირის სრულ ID-ს დააკოპირებს.
-- **რომელი მოთხოვნები ითვალისწინებს მას.** ერთმოდელიანი მოთხოვნები (`provider/model`)
-  `/v1/chat/completions`, `/v1/messages` და `/v1/responses` მისამართებზე. კომბინაციები ჰედერს
-  უგულებელყოფს: თითოეული კომბინაციის ნაბიჯისთვის ანგარიში დაამაგრეთ უშუალოდ ამ ნაბიჯის კავშირის მეშვეობით.
-- **დამაგრება მკაცრია და არა უბრალოდ პრეფერენცია.** დამაგრებული კავშირი გამოიყენება მხოლოდ.
-  მოთხოვნის შიგნით წარმოქმნილი შეცდომა ანგარიშის cooldown-ს აფიქსირებს, მაგრამ იმავე პროვაიდერის
-  მეზობელ ანგარიშზე გადართვას **არ** იწვევს.
-- **Cooldown და კვოტა ხსნის დამაგრებას.** სანამ დამაგრებული კავშირი cooldown-ის მდგომარეობაშია,
-  კვოტა ამოწურულია ან კვოტის პოლიტიკით დაბლოკილია, შემდგომი მოთხოვნები გადაერთვება პროვაიდერის
-  სხვა კავშირებზე, ზუსტად ისე, როგორც დაუმაგრებელი ტრაფიკი.
-- **უცნობი ან გამორთული ID-ები შეცდომას იწვევს.** ID, რომელიც პროვაიდერის აქტიურ პულში არ
-  არის (წაშლილია, დეაქტივირებულია ან სხვა პროვაიდერს ეკუთვნის), ხელმისაწვდომ ანგარიშს აღარ ტოვებს,
-  ამიტომ მოთხოვნა ჩავარდება და სხვა მიმართულებით ჩუმად არ გადაიგზავნება.
+- **სად ვიპოვოთ ID.** გახსენით პროვაიდერის გვერდი დაფაზე (** დაფა → პროვაიდერები → <provider>** ) და დააწკაპუნეთ `xxxxxxxx…` id ჩიპზე კავშირის მწკრივზე — ის კოპირებს სრულ კავშირის ID-ს.
+- **რომელიც ითხოვს პატივი სცეს მას.** ერთი მოდელის მოთხოვნები (`provider/model`) `/v1/chat/completions`, `/v1/messages` და `/v1/responses` ზე. Combos უგულებელყოფს სათაურს: ჩაამაგრეთ ანგარიში თითო კომბინირებულ ნაბიჯზე ნაბიჯის საკუთარი კავშირის ნაცვლად.
+- **პინი მკაცრია, არა უპირატესობა.** დამაგრებული კავშირი გამოიყენება ექსკლუზიურად. მოთხოვნის შიგნით წარუმატებლობა აღრიცხავს ანგარიშის გაცივებას, მაგრამ ამას აკეთებს** არა** როტაცია იმავე პროვაიდერის და-ძმის ანგარიშზე.
+- **გაგრილება და კვოტი გაათავისუფლეს პინი.** სანამ ჩამაგრებული კავშირი კლებულობს, ამოიწურება კვოტით ან იბლოკება კვოტის პოლიტიკით, მოგვიანებით მოთხოვნები ისევ პროვაიდერის სხვა კავშირებს უბრუნდება, ზუსტად ისე, როგორც დაუმაგრებელი ტრაფიკი.
+- **უცნობი ან გამორთული ID-ები ვერ ხერხდება.** ID, რომელიც არ არის პროვაიდერის აქტიურ აუზში (წაშლილი, დეაქტივირებული ან ეკუთვნის სხვა პროვაიდერს) არ ტოვებს შესაბამის ანგარიშს, ამიტომ მოთხოვნა სხვაგან ჩუმად მარშრუტიზაციის ნაცვლად ვერ ხერხდება.
 
-Claude Code მორგებულ ჰედერებს `ANTHROPIC_CUSTOM_HEADERS`-ის მეშვეობით აგზავნის. დაამატეთ ის
-`~/.claude/settings.json`-ის `env` ბლოკში, ან პროექტის დონის `.claude/settings.json`-ში, რათა
-თითოეული პროექტისთვის განსხვავებული ანგარიში დაამაგროთ:
+Claude Code აგზავნის სათაურებს `ANTHROPIC_CUSTOM_HEADERS` მეშვეობით. ჩადეთ იგი `~/.claude/settings.json` ის `env` ბლოკში, ან პროექტის დონის `.claude/settings.json` ში, რომ დაამაგროთ სხვა ანგარიში თითო პროექტზე:
 
 ```jsonc
 {
@@ -133,12 +120,11 @@ Claude Code მორგებულ ჰედერებს `ANTHROPIC_CUSTOM_
 }
 ```
 
-წყარო: `src/sse/handlers/chat.ts` (ჰედერის წაკითხვა), `src/sse/services/auth.ts` და
-`src/sse/services/sessionAffinityPin.ts` (დამაგრების გათავისუფლება და პულში არყოფნის შემოწმება).
+წყარო: `src/sse/handlers/chat.ts` (სათაურის წაკითხვა), `src/sse/services/auth.ts` და `src/sse/services/sessionAffinityPin.ts` (პინის გამოშვება და დაკარგული აუზიდან შემოწმება).
 
-> **ღირებულების ტელემეტრიის ჰედერები:** არასტრმინგული წარმატებული პასუხები ასევე შეიცავს `X-OmniRoute-*` ღირებულების ტელემეტრიის ნაკრებს — `X-OmniRoute-Response-Cost` (USD, ფიქსირებული 10 ათობითი ნიშნით; `0.0000000000` უფასო/დაუფასებელი შემთხვევებისთვის), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` და `X-OmniRoute-Fallback-Attempts` (მხოლოდ მაშინ, როცა > 0), ასევე `X-OmniRoute-Request-Id` და `X-OmniRoute-Version`. ისინი გამოიცემა chat completions-ის, `/v1/responses`, `/v1/messages` **და მედიის endpoint-ების** მიერ — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` და `/v1/moderations` (ღირებულება ყოველთვის `0`). მედიის ღირებულება გამოითვლება თითოეული მოდალობის მიხედვით (თითოეულ გამოსახულებაზე, წამზე, სიმბოლოზე, საძიებო ერთეულზე), როცა ფასები ხელმისაწვდომია; წინააღმდეგ შემთხვევაში არის `0` (fail-open).
+> **ღირებულება ტელემეტრიის სათაურები:** არასტრიმინგზე წარმატებული პასუხები ასევე შეიცავს `X-OmniRoute-*` cost-telemetry კომპლექტს — `X-OmniRoute-Response-Cost` (USD, ფიქსირებული 10 ათწილადი; `0.0000000000` free/unpriced სთვის), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` და `X-OmniRoute-Fallback-Attempts` (მხოლოდ > 0), პლუს `X-OmniRoute-Request-Id` და `X-OmniRoute-Version`. ეს ემიტირებულია ჩატის დასრულებებით, `/v1/responses`, `/v1/messages`,** და მედიის საბოლოო წერტილები** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` და `/v1/moderations` (ყოველთვის ღირს `0`). მედიის ღირებულება გამოითვლება თითო მოდალობაზე (სურათზე, წამში, სიმბოლოზე, ძიების ერთეულზე), როდესაც ფასი ხელმისაწვდომია, წინააღმდეგ შემთხვევაში `0` (ჩავარდნა-ღია).
 
-> **Cache-hit-ის ღირებულების სემანტიკა:** semantic-cache HIT-ის დროს (`X-OmniRoute-Cache-Hit: true`) upstream გამოძახება არ ხდება, ამიტომ `X-OmniRoute-Response-Cost` არის `0.0000000000` (HIT-ის მოწოდების **ინკრემენტული** ღირებულება). თავდაპირველი/სავარაუდო ღირებულება ცალკე აისახება `X-OmniRoute-Cost-Saved`-ში. ბილინგის მომხმარებლებმა უნდა დააჯამონ `X-OmniRoute-Response-Cost` (HIT-ები არაფერს ღირს); cache-ის ანალიტიკას კი შეუძლია `X-OmniRoute-Cost-Saved`-ის აგრეგირება.
+> **ქეში-ჰიტის ხარჯების სემანტიკა:** სემანტიკურ ქეშზე HIT (`X-OmniRoute-Cache-Hit: true`) არ ხდება ზემორეული ზარი, ამიტომ `X-OmniRoute-Response-Cost` არის `0.0000000000` (** დამატებითი** დარტყმის მომსახურების ღირებულება). original/would-have-been ღირებულება მოცემულია ცალკე `X-OmniRoute-Cost-Saved` ში. ბილინგის მომხმარებლებმა უნდა შეაგროვონ `X-OmniRoute-Response-Cost` (ჰიტები არ ღირს); ქეშის ანალიტიკას შეუძლია `X-OmniRoute-Cost-Saved` აგრეგაცია.
 
 ## ექსკლუზიური მართული სესიის ლიზინგი
 
@@ -333,13 +319,15 @@ Content-Type: application/json
 
 `n` აბრუნებს `n` სურათებს `data[]` ში. პროვაიდერები, რომელთა ზემოთ API აბრუნებს ერთ სურათს თითო ზარზე (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) იღებენ `n` ცალკეულ ზედა დინების ზარებს, მაქსიმუმ 4 ფრენის დროს. ფიქსირებული `seed` ოფსეტურია ზარის ინდექსით (`seed`, `seed + 1`,…), ასე რომ, სურათები განსხვავდება, მაგრამ რჩება რეპროდუცირებადი. `n` დახურულია 10-ზე. მოთხოვნა მთლიანად ვერ ხერხდება, თუ რომელიმე ზარი ვერ მოხერხდა. fan-out ფორმატების სია არის `SINGLE_IMAGE_FANOUT_FORMATS` in `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT გამოსახულების მოდელები (`codex/gpt-image-*`) აბრუნებს მხოლოდ PNG : ზემოთ დინებაში პასუხობს `200` PNG ბაიტით მაშინაც კი, როდესაც `jpeg` ან `webp` არის მოთხოვნილი. მოთხოვნა ნებისმიერი სხვა `output_format` ით (`webp`, `jpeg`, ...) უარყოფილია HTTP 400-ით, ნაცვლად იმისა, რომ ჩუმად იგნორირებული იყოს; გამოტოვეთ იგი ან გაგზავნეთ `png`. `output_compression` არ არის გადაგზავნილი.
+
 ZenMux ხელახლა იყენებს არსებულ API-გასაღების კავშირს და იღებს `zenmux/` ან `zm/` პრეფიქსებს:
 
 - `zenmux/openai/gpt-image-2` იყენებს ZenMux- ის OpenAI სურათებს API. ვარიანტები მოიცავს `size`, `quality`, `n`, `output_format`, `output_compression`, `background` და `response_format`.
-- სხვა გამომცემლები, როგორიცაა `zm/meta/muse-image-1.0`, იყენებენ ZenMux ის Vertex AI `:predict` ბოლო წერტილს. `n` რუკები `sampleCount`, `aspect_ratio` `aspectRatio` ზე და `image_size` (`1K`, `2K`, `4K`) `sampleImageSize` ზე. პიქსელი `size` აწვდის მხოლოდ ასპექტის თანაფარდობას და არ არის გარანტირებული პიქსელის ზომები. მხარდაჭერილი კოეფიციენტები, გარჩევადობა და რაოდენობა განსხვავდება მოდელის მიხედვით.
-- `zm/inclusionai/ming-image-0.1-design` ირჩევს საკუთარ ზომებს. გამოტოვეთ `size`, `aspect_ratio` და `image_size`; გამოკვეთილი მნიშვნელობები აბრუნებს HTTP 400-ს. PNG, JPEG და WebP შეიძლება მოითხოვოს `output_format` ით.
+- სხვა გამომცემლები, როგორიცაა `zm/meta/muse-image-1.0`, იყენებენ ZenMux ის Vertex AI `:predict` ბოლო წერტილს. `n` ასახავს `sampleCount`, `aspect_ratio` `aspectRatio` და `image_size` (`1K`, `2K`, `4K`) `sampleImageSize`. პიქსელი `size` აწვდის მხოლოდ ასპექტის თანაფარდობას და არ არის გარანტირებული პიქსელის ზომები. მხარდაჭერილი კოეფიციენტები, გარჩევადობა და რაოდენობა განსხვავდება მოდელის მიხედვით.
+- `zm/inclusionai/ming-image-0.1-design` ირჩევს საკუთარ ზომებს. გამოტოვეთ `size`, `aspect_ratio` და `image_size`; აშკარა მნიშვნელობები აბრუნებს HTTP 400-ს. PNG, JPEG და WebP შეიძლება მოთხოვნილი იყოს `output_format` ით.
 
-ეს ინტეგრაცია მხარს უჭერს ტექსტის გამოსახულების გენერირებას და არა მიმართვის გამოსახულების რედაქტირებას. Vertex გამომავალი ნორმალიზებულია `data[].b64_json` მდე; `response_format: "url"` აბრუნებს ზედა დინების HTTPS URL ან base64 მონაცემთა URL როდესაც ხელმისაწვდომია მხოლოდ სურათის ბაიტი. Empty/filtered გამომავალი აბრუნებს შეცდომას და არა ცარიელ წარმატებას. მოდელის წვდომა დამოკიდებულია ZenMux ანგარიშზე. იხილეთ [ZenMux- ს Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) და [OpenAI სურათები API](https://docs.zenmux.ai/api/openai/generate-an-image).
+ეს ინტეგრაცია მხარს უჭერს ტექსტის გამოსახულების გენერირებას და არა მიმართვის გამოსახულების რედაქტირებას. Vertex გამომავალი ნორმალიზებულია `data[].b64_json` მდე; `response_format: "url"` აბრუნებს ზემოთ დინებაში HTTPS URL ან base64 მონაცემს URL როდესაც ხელმისაწვდომია მხოლოდ სურათის ბაიტი. Empty/filtered გამომავალი აბრუნებს შეცდომას და არა ცარიელ წარმატებას. მოდელის წვდომა დამოკიდებულია ZenMux ანგარიშზე. იხილეთ [ZenMux- ს Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) და [OpenAI სურათები API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
 Microsoft 365 Copilot შესვლის კავშირი ემსახურება `copilot-m365-web/m365-copilot-image` Copilot ის ჩაშენებული გამოსახულების ხელსაწყოს მეშვეობით: თითო Copilot შემობრუნება თითო სურათზე (`n` 1–4), `size` მართავს მხოლოდ ორიენტაციას და სურათები დაბრუნებული inline (`b64_json`, ან მონაცემები URL `response_format: "url"` სთვის). იხილეთ [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
@@ -350,7 +338,7 @@ GET /v1/images/generations
 
 ---
 
-## დოკუმენტების OCR
+## დოკუმენტი OCR
 
 ```bash
 POST /v1/ocr
@@ -366,18 +354,15 @@ Content-Type: application/json
 }
 ```
 
-`model` ირჩევს OCR პროვაიდერს `provider/model` პრეფიქსის მეშვეობით; მხოლოდ მოდელის ID
-(მაგალითად, `mistral-ocr-latest`) წყდება მის რეგისტრირებულ პროვაიდერამდე, ხოლო გამოტოვებული
-`model` ნაგულისხმევად იყენებს Mistral-ს (`mistral-ocr-latest`). რეგისტრირებული პროვაიდერები
-(`open-sse/config/ocrRegistry.ts`):
+`model` ირჩევს OCR პროვაიდერს `provider/model` პრეფიქსის მეშვეობით; შიშველი მოდელის ID (მაგ. `mistral-ocr-latest`) გადადის მის რეგისტრირებულ პროვაიდერთან, ხოლო გამოტოვებული `model` ნაგულისხმევად არის Mistral (`mistral-ocr-latest`). რეგისტრირებული პროვაიდერები (`open-sse/config/ocrRegistry.ts`):
 
-| პროვაიდერის ID                | მოდელის ID           | `model` მნიშვნელობა                                           | შენიშვნები                                                                                                                           |
-| ----------------------------- | -------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (ან მხოლოდ `mistral-ocr-latest`) | სინქრონული — პასუხი პირდაპირ ერთი upstream გამოძახებიდან ბრუნდება.                                                                   |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                   | ასინქრონული upstream (`analyze` + poll) — იხილეთ ქვემოთ.                                                                             |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                       | სინქრონული, Vertex AI-ის `openapi/chat/completions` პარტნიორი endpoint-ის მეშვეობით — ავტორიზაციისა და URL-ის შესახებ იხილეთ ქვემოთ. |
+| პროვაიდერის ID                | მოდელის ID                                  | `model` ღირებულება                                             | შენიშვნები                                                                                                                                                                                                           |
+| ----------------------------- | ------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                        | `mistral/mistral-ocr-latest` (ან შიშველი `mistral-ocr-latest`) | სინქრონული — პასუხი ბრუნდება პირდაპირ ერთი ზედა დინების ზარიდან.                                                                                                                                                     |
+| `azure-document-intelligence` | `prebuilt-read`                             | `azure-document-intelligence/prebuilt-read`                    | ასინქრონული ზემო დინებაში (`analyze` + გამოკითხვა) — იხილეთ ქვემოთ.                                                                                                                                                  |
+| `vertex-deepseek-ocr`         | თვითგანლაგებული (ჩაშენებული მოდელის გარეშე) | `vertex-deepseek-ocr/<your-deployed-model-id>`                 | სინქრონული, საკუთარი Vertex AI Model Garden DeepSeek-OCR საბოლოო წერტილის მეშვეობით (`openapi/chat/completions` ფორმა); Google გააუქმა მართული `deepseek-ocr-maas` 2026-10-21 (#20423), ასე რომ id დააბრუნებს 400-ს. |
 
-სამივე პროვაიდერი პასუხს აბრუნებს ერთი და იმავე Mistral-ის ფორმის სხეულში:
+სამივე პროვაიდერი პასუხობს იმავე მისტრალის ფორმის სხეულში:
 
 ```json
 {
@@ -387,32 +372,13 @@ Content-Type: application/json
 }
 ```
 
-### Azure Document Intelligence-ის polling-ის ნაკადი
+### Azure Document Intelligence-ის გამოკითხვის ნაკადი
 
-Azure Document Intelligence-ის `analyze` API ასინქრონულია: საწყისი მოთხოვნა სხეულის ნაცვლად
-აბრუნებს `Operation-Location` header-ს და შედეგის მისაღებად საჭიროა polling. დამმუშავებელი
-(`open-sse/handlers/ocr.ts`) ამ URL-ს ყოველ წამს ამოწმებს, მაქსიმუმ 30 მცდელობის განმავლობაში;
-ის დაუყოვნებლივ წყვეტს მუშაობას (polling-ს აღარ აგრძელებს), თუ poll-ის პასუხს არ აქვს `ok`
-მნიშვნელობა ან სტატუსია `"failed"`, ხოლო `504`-ს აბრუნებს, თუ მცდელობებისთვის გამოყოფილი
-ლიმიტის ამოწურვის შემდეგ ოპერაცია კვლავ მიმდინარეობს. საბოლოო Azure პასუხი დაბრუნებამდე
-ნორმალიზდება იმავე `pages`/`markdown` ფორმატში, რომელსაც Mistral იყენებს, ამიტომ კლიენტის
-კოდს არ სჭირდება პროვაიდერის მიხედვით სპეციალური დამუშავება.
+Azure Document Intelligence-ის `analyze` API არის ასინქრონული: თავდაპირველი მოთხოვნა აბრუნებს `Operation-Location` სათაურს სხეულის ნაცვლად და შედეგი უნდა იყოს გამოკითხული. დამმუშავებელი (`open-sse/handlers/ocr.ts`) აკეთებს გამოკითხვას, რომელიც URL ყოველ წამში 30-მდე მცდელობისთვის, მარცხდება სწრაფად (არ აგრძელებს გამოკითხვას) არა-`ok` გამოკითხვის პასუხზე ან `"failed"` სტატუსზე და აბრუნებს `504`, თუ ოპერაცია კვლავ მუშაობს მცდელობის ბიუჯეტის ამოწურვის შემდეგ. Azure-ის საბოლოო პასუხი ნორმალიზდება იმავე `pages`/`markdown` ფორმაში, რომელსაც იყენებს Mistral აბონენტთან დაბრუნებამდე, ასე რომ კლიენტის კოდი არ საჭიროებს პროვაიდერს სპეციალური შემთხვევისთვის.
 
-### Vertex AI DeepSeek OCR-ის ავტორიზაცია და endpoint-ის განსაზღვრა
+### Vertex AI DeepSeek OCR ავტორიზაცია და საბოლოო წერტილის გარჩევადობა
 
-`vertex-deepseek-ocr` ხელახლა იყენებს იმავე Vertex AI-ის ავტორიზაციას, რომელსაც OmniRoute
-უკვე უჭერს მხარს ჩატისა და გამოსახულებების ტრაფიკისთვის
-(`open-sse/executors/vertex.ts`): კავშირის API-გასაღები ან Service Account JSON
-ავტორიზაციის მონაცემებია (რომლებიც JWT-bearer ნაკადის მეშვეობით მოკლევადიან OAuth წვდომის
-ტოკენად იცვლება), ან უკვე გაცემული OAuth წვდომის ტოკენია, რომელიც პირდაპირ გამოიყენება.
-Upstream endpoint URL არის Vertex-ის ზოგადი `openapi/chat/completions` პარტნიორი endpoint,
-რომელიც კავშირის პროექტისა და რეგიონის მიხედვით იგება — მკაფიოდ მითითებული
-`providerSpecificData.project`/`providerSpecificData.region` ყოველთვის უპირატესია;
-წინააღმდეგ შემთხვევაში პროექტი მიიღება Service Account JSON-ის `project_id`-დან, ხოლო
-რეგიონად ნაგულისხმევად გამოიყენება `us-central1`. ორივე განსაზღვრა ხდება
-`open-sse/handlers/ocr.ts`-ში
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), ხოლო მათი გამოყენება ხდება
-`src/app/api/v1/ocr/route.ts`-ში, `handleOcr`-ზე გადაცემამდე.
+`vertex-deepseek-ocr` ხელახლა იყენებს იმავე Vertex AI ავთენტიფიკაციას OmniRoute უკვე მხარს უჭერს chat/image ტრაფიკს (`open-sse/executors/vertex.ts`): კავშირის API გასაღები არის ან Service Account JSON რწმუნებათა სიგელები (გაცვლილია ხანმოკლე OAuth წვდომის ჟეტონზე JWT-გამტარის ნაკადის საშუალებით) ან უკვე შემუშავებული OAuth წვდომის ჟეტონი გამოიყენება. ზედა დინების ბოლო წერტილი URL არის Vertex-ის ზოგადი `openapi/chat/completions` პარტნიორის საბოლოო წერტილი, რომელიც აგებულია კავშირის პროექტისა და — რეგიონიდან, რომელიც ყოველთვის იმარჯვებს აშკარა `providerSpecificData.project`/`providerSpecificData.region` ; წინააღმდეგ შემთხვევაში, პროექტი მომდინარეობს სერვისის ანგარიშიდან JSON ს `project_id` დან და რეგიონი ნაგულისხმევია `us-central1`. ორივე რეზოლუცია ხდება `open-sse/handlers/ocr.ts` ში (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), რომელიც მოიხმარს `src/app/api/v1/ocr/route.ts` `handleOcr` ზე გაგზავნამდე.
 
 ---
 
@@ -663,96 +629,102 @@ Upstream კონტრაქტები: [ხმოვანი ეფექ�
 
 ---
 
-## თავსებადობის endpoint-ები
+## თავსებადობის საბოლოო წერტილები
 
-| მეთოდი | გზა                                       | ფორმატი                             |
-| ------ | ----------------------------------------- | ----------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                              |
-| POST   | `/v1/messages`                            | Anthropic                           |
-| POST   | `/v1/responses`                           | OpenAI Responses                    |
-| POST   | `/v1/embeddings`                          | OpenAI                              |
-| POST   | `/v1/images/generations`                  | OpenAI Images                       |
-| POST   | `/v1/images/edits`                        | OpenAI Images (რედაქტირება/inpaint) |
-| POST   | `/v1/videos/generations`                  | OpenAI-ს სტილის ვიდეოს გენერაცია    |
-| POST   | `/v1/music/generations`                   | OpenAI-ს სტილის მუსიკის გენერაცია   |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                  |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (აბრუნებს აუდიოს სხეულს) |
-| POST   | `/v1/rerank`                              | Cohere/Voyage-ს სტილის rerank       |
-| POST   | `/v1/classify`                            | Jina classify (`api.jina.ai`)       |
-| POST   | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)  |
-| POST   | `/v1/moderations`                         | OpenAI Moderations                  |
-| GET    | `/v1/models`                              | OpenAI                              |
-| POST   | `/v1/models/query`                        | გაფილტრული მოდელების მოკლე სია      |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                           |
-| GET    | `/v1beta/models`                          | Gemini                              |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent              |
-| POST   | `/v1/api/chat`                            | Ollama                              |
-| GET    | `/api/v1/vscode/{token}/`                 | OpenAI-ის კატალოგის alias           |
-| GET    | `/api/v1/vscode/{token}/models`           | OpenAI-ის მოდელების alias           |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI-ის tokenized alias           |
-| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responses-ის tokenized alias |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama-ს tokenized alias            |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama-ს ტეგების tokenized alias    |
+| მეთოდი | ბილიკი                                    | ფორმატი                               |
+| ------ | ----------------------------------------- | ------------------------------------- |
+| POST   | `/v1/chat/completions`                    | OpenAI                                |
+| POST   | `/v1/messages`                            | Anthropic                             |
+| POST   | `/v1/responses`                           | OpenAI პასუხები                       |
+| POST   | `/v1/embeddings`                          | OpenAI                                |
+| POST   | `/v1/images/generations`                  | OpenAI სურათები                       |
+| POST   | `/v1/images/edits`                        | OpenAI სურათები (edit/inpaint)        |
+| POST   | `/v1/videos/generations`                  | OpenAI სტილის ვიდეო გენერაცია         |
+| POST   | `/v1/music/generations`                   | OpenAI სტილის მუსიკის თაობა           |
+| POST   | `/v1/audio/transcriptions`                | OpenAI აუდიო (STT)                    |
+| POST   | `/v1/audio/speech`                        | OpenAI TTS (აბრუნებს აუდიო სხეულს)    |
+| POST   | `/v1/rerank`                              | Cohere/Voyage-style rerank            |
+| POST   | `/v1/classify`                            | ჯინა კლასიფიკაცია (`api.jina.ai`)     |
+| POST   | `/v1/segment`                             | ჯინა სეგმენტერი (`segment.jina.ai`)   |
+| POST   | `/v1/moderations`                         | OpenAI მოდერაციები                    |
+| POST   | `/v1/systemone`                           | System One აკრეფილი გადაწყვეტილებები  |
+| POST   | `/v1/decisions`                           | OpenAI გადაწყვეტილებები (მშობლიური)   |
+| GET    | `/v1/systemone/models`                    | გადაწყვეტილების მოდელის კატალოგი      |
+| GET    | `/v1/models`                              | OpenAI                                |
+| POST   | `/v1/models/query`                        | გაფილტრული მოდელების მოკლე სია        |
+| POST   | `/v1/messages/count_tokens`               | Anthropic                             |
+| GET    | `/v1beta/models`                          | Gemini                                |
+| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                |
+| POST   | `/v1/api/chat`                            | Ollama                                |
+| GET    | `/api/v1/vscode/{token}/`                 | OpenAI კატალოგის მეტსახელი            |
+| GET    | `/api/v1/vscode/{token}/models`           | OpenAI მოდელების მეტსახელი            |
+| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI ტოკენიზებული მეტსახელი         |
+| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responses tokenized alias      |
+| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama ტოკენიზებული მეტსახელი         |
+| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama თეგებს ტოკენიზებულ მეტსახელებს |
 
-ყველა POST მარშრუტი ერთსა და იმავე სტრუქტურას მიჰყვება: `Bearer your-api-key` + Zod-ით ვალიდირებული JSON სხეული (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` და სხვ.; იხილეთ `src/shared/validation/schemas.ts`). სქემის ვალიდაციის წარუმატებლობისას ბრუნდება 4xx.
+ყველა POST მარშრუტი ერთნაირი ფორმისაა: `Bearer your-api-key` + Zod-ით დამოწმებული JSON სხეული (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` და ა.შ., იხ. `src/shared/validation/schemas.ts`). 4xx ბრუნდება სქემის უკმარისობის შემთხვევაში.
 
-კლიენტებისთვის, რომლებსაც `Authorization: Bearer ...`-ის დამატება არ შეუძლიათ, OmniRoute ასევე იღებს API გასაღებებს URL-ში query string-ით თავსებადობის საშუალებით (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ან ქვემოთ დოკუმენტირებული `/api/v1/vscode/{token}/...` endpoint-ების საშუალებით.
+კლიენტებისთვის, რომლებსაც არ შეუძლიათ `Authorization: Bearer ...` მიმაგრება, OmniRoute ასევე იღებს API კლავიშებს URL ში შეკითხვის სტრიქონების თავსებადობის (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ან ქვემოთ დოკუმენტირებული გამოყოფილი `/api/v1/vscode/{token}/...` ბოლო წერტილების მეშვეობით.
 
 ```bash
-# Rerank (ღრუბლოვანი რეესტრის პროვაიდერი ან OpenAI-სთან თავსებადი პროვაიდერის node "<prefix>/<model>" ფორმატით)
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina classify (Foundation API-ის ავტორიზაციის მონაცემები)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina-ს სეგმენტერი
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina-ს ძიება (s.jina.ai; პროვაიდერის alias-ები: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# მოდერაციები
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — აბრუნებს audio/mpeg (ან მოთხოვნილი ფორმატის) სხეულს
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS-ს სჭირდება ენა და ხმა: `language` ნაგულისხმევად არის "en"; თუ
-# ხმა არ არის მითითებული ან გამოყენებულია OpenAI-ს სტანდარტული ხმის სახელი (alloy, nova, …), ის ხდება "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# გამოსახულების რედაქტირება (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# ვიდეოს / მუსიკის გენერაცია (პროვაიდერით პრეფიქსირებული მოდელის ID)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **გადალაგების პროვაიდერის კვანძები:** `POST /v1/rerank` ასევე გადაამისამართებს OpenAI-სთან თავსებად პროვაიდერის კვანძებზე
-> (oMLX, vLLM, Infinity, TEI gateway-ის მიღმა, …), რომელთა მისამართია `<node-prefix>/<model>`. Loopback
-> კვანძები (`localhost`, `127.0.0.1`, `172.16.0.0/12`) ყოველთვის ხელმისაწვდომია, ისევე როგორც ის ჰოსტსახელები, რომლებიც
-> ოპერატორს ჩამოთვლილი აქვს `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`-ში (მაგ., Docker/Compose-ის სერვისის სახელი, როგორიცაა
-> `http://reranker:8080/v1`; მათ პირდაპირ იძახებენ და არასოდეს `HTTP(S)_PROXY`-ის ან
-> კავშირის მიერ დაფიქსირებული პროქსის მეშვეობით). სხვა
-> ჰოსტზე განთავსებული კვანძები — LAN-ის კომპიუტერი ან Tailscale-ის peer — ხელმისაწვდომია მხოლოდ მაშინ, როცა ოპერატორი ჩართავს
-> `RERANK_REMOTE_PROVIDER_NODES` ფუნქციის ალამს **და** კვანძის საბაზისო URL გაივლის პროვაიდერის
-> გამავალი URL-ების პოლიტიკას (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> მეხსიერების ძრავის გადალაგების ეტაპი ამ მარშრუტს loopback-ის მეშვეობით იძახებს, ამიტომ იგივე წესი არეგულირებს
-> `rerankProviderModel`-ს Memory-ის პარამეტრებში.
+> **პროვაიდერის კვანძების გადაადგილება:** `POST /v1/rerank` ასევე მარშრუტებს OpenAI-თან თავსებადი პროვაიდერის კვანძებისკენ (oMLX, vLLM, Infinity, TEI კარიბჭის უკან,…) მიმართული როგორც `<node-prefix>/<model>`. Loopback კვანძები (`localhost`, `127.0.0.1`, `172.16.0.0/12`) ყოველთვის დასაშვებია, ისევე როგორც ჰოსტის სახელები, რომლებსაც ოპერატორი ჩამოთვლის `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` ში (მაგ. Docker/Compose სერვისის სახელი, როგორიცაა `http://reranker:8080/v1`; ისინი იწოდება პირდაპირ, არასდროს `HTTP(S)_PROXY` ან კავშირის დამაგრებული პროქსის მეშვეობით). ნებისმიერი სხვა ჰოსტზე — a LAN box ან Tailscale peer — კვანძები დასაშვებია მხოლოდ მაშინ, როდესაც ოპერატორი ჩართავს `RERANK_REMOTE_PROVIDER_NODES` ფუნქციის დროშას** და** კვანძის ბაზა URL გადის პროვაიდერის გამავალი URL პოლიტიკას (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). მეხსიერების ძრავის რერანგის ნაბიჯი ამ მარშრუტს უწოდებს loopback-ს, ამიტომ იგივე წესი არეგულირებს `rerankProviderModel` მეხსიერების პარამეტრებში.
 >
-> **ლოკალური სერვერის ფორმები:** კვანძს მიმართავენ `<base>/v1/rerank`-ზე და, 404-ის შემთხვევაში, `<base>/rerank`-ზე
-> (Infinity, TEI). upstream-ის სხეული შეიცავს როგორც Cohere/OpenAI-ის აღნიშვნებს (`documents`,
-> `return_documents`), ასევე TEI-ის აღნიშვნებს (`texts`, `return_text`), ხოლო upstream-ის პასუხი
-> ნორმალიზდება Cohere-ის კონვერტში: TEI-ის შიშველი `[{index, score, text}]`, თხელი gateway-ებიდან მიღებული `{results: [{index, score}]}`
-> და Voyage-ის სტილის `{data: [...]}` კლიენტს უბრუნდება როგორც
-> `{results: [{index, relevance_score, document?}]}`, ქულის მიხედვით დალაგებული და `top_n`-ით შეზღუდული.
+> **ლოკალური სერვერის ფორმები:** კვანძს უწოდებენ `<base>/v1/rerank` ზე და 404-ზე `<base>/rerank` ზე (Infinity, TEI). ზედა დინების სხეული ატარებს როგორც Cohere/OpenAI მართლწერას (`documents`, `return_documents`), ასევე TEI მართლწერას (`texts`, `return_text`), ხოლო ზემოთ დინებაში პასუხი ნორმალიზდება Cohere კონვერტში: TEI ის შიშველი `[{index, score, text}]`, `{results: [{index, score}]}` თხელი კარიბჭეებიდან და Voyage-ის სტილის `{data: [...]}` `{results: [{index, relevance_score, document?}]}` ქულა `top_n` ზე დაბრუნებული. .
 
-> **პროვაიდერის კვანძების აღმოჩენა:** OpenAI-სთან თავსებად პროვაიდერის კვანძზე არსებული მოდელები `GET /v1/models`-ში ჩნდება
-> კვანძის პრეფიქსის ქვეშ. სტრიქონები, რომლებსაც endpoint-ის მეტამონაცემები არ ახლავს (რაც ტიპურია ლოკალური `/v1/models` ჩამონათვლებისთვის),
-> მემკვიდრეობით იღებენ კვანძის `apiType`-ს, ამიტომ `embeddings` კვანძის მოდელებს აქვთ `type: "embedding"`, ხოლო
-> `rerank` კვანძის მოდელებს — `type: "rerank"`, ნაცვლად იმისა, რომ ნაგულისხმევად chat ტიპი ჰქონდეთ; სინქრონიზებულ ან ხელით დამატებულ სტრიქონში
-> მითითებულ `supportedEndpoints`-ს კი კვლავ უპირატესობა ენიჭება.
+> **პროვაიდერის კვანძის აღმოჩენა:** OpenAI-თან თავსებადი პროვაიდერის კვანძის მოდელები გამოჩნდება `GET /v1/models` ში კვანძის პრეფიქსის ქვეშ. სტრიქონები, რომლებიც არ ატარებენ ბოლო წერტილის მეტამონაცემებს (ტიპიური ადგილობრივი `/v1/models` ჩამონათვალისთვის) მემკვიდრეობით იღებენ კვანძის `apiType` ს, ამიტომ `embeddings` კვანძის მოდელები არის `type: "embedding"` და `rerank` კვანძის მოდელები არის `type: "rerank"` ნაცვლად ჩეთის ნაგულისხმევად; აშკარა `supportedEndpoints` სინქრონიზებულ ან ხელით დამატებულ მწკრივზე კვლავ უპირატესობას ანიჭებს.
+
+### აკრეფილი გადაწყვეტილებები
+
+გადაწყვეტილების მოდელები ტექსტის გენერირების ნაცვლად პასუხობენ აკრეფილ კითხვებს დაკალიბრებული ალბათობით. ისინი არასოდეს არიან ჩატის მოდელები და ორი მავთულის ფორმატი არასოდეს ითარგმნება ერთმანეთში:
+
+- `POST /v1/systemone` — სისტემა ერთი `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter გადაწყვეტილებები, Cloudflare Workers AI, ადგილობრივი Ollama).
+- `POST /v1/decisions` — მშობლიური OpenAI გადაწყვეტილებები `{ model, input, questions: [...] }`, ემსახურება `openai` კავშირით. მოდელი არის `openai/gpt-6-luna` (შიშველი `gpt-6-luna` ასევე მუშაობს). პასუხები ბრუნდება კითხვის მიხედვით, ხელუხლებელი.
+- `GET /v1/systemone/models` — ორივე სახის ერთი კატალოგი; თითოეული მწკრივი ასახელებს თავის `api_format` (`systemone` ან `decisions`). `limit` / `after` გვერდი საბოლოო სია. `X-OmniRoute-Catalog-Status` სათაური იკითხება `complete`, `partial` ან `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions` API გასაღების მოდელის ნებადართულ სიაში, `decisions` საბოლოო წერტილის კატეგორია, ბიუჯეტი და კავშირის ფარგლები მოწმდება, სანამ რაიმე რწმუნებათა სიგელის წაკითხვას არ აპირებს. სერთიფიკატი არის შენახული `openai` კავშირი გასაღების ფარგლებს შიგნით (არასოდეს გარემოს გასაღები); კავშირის ბაზა URL სარგებლობს მხოლოდ მაშინ, როდესაც ეს არის `http(s)` URL რწმუნებათა სიგელების, მოთხოვნის ან ფრაგმენტის გარეშე, რომელიც არ მიუთითებს ამ OmniRoute ზე. ზარი გადის იმავე დაცულ ტრანსპორტში, როგორც `decision` ავტო-როუტერი ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): პროვაიდერის გამავალი მცველი, ხელახალი მცდელობები, გადამისამართებების გარეშე, 5 წამის დრო და 64 KB პასუხის ქუდი (უფრო დიდი პასუხი არის 502). მოთხოვნის ორგანოები შეზღუდულია 4 MiB. ყოველი ზარი აგზავნის ახალ `Idempotency-Key`. შეცდომებს ახასიათებთ მხოლოდ ზედა დინების სტატუსს, არასოდეს მის სხეულს, URL ს, კლავიშს ან მოთხოვნას.
 
 ### გამოყოფილი პროვაიდერის მარშრუტები
 
@@ -762,7 +734,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-თუ პროვაიდერის პრეფიქსი აკლია, ის ავტომატურად ემატება. შეუსაბამო მოდელები აბრუნებს `400`-ს.
+პროვაიდერის პრეფიქსი ავტომატურად ემატება, თუ აკლია. შეუსაბამო მოდელები აბრუნებენ `400`.
 
 ---
 

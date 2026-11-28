@@ -4,10 +4,9 @@
 
 ---
 
-> **Za uporabnike**: Iščete preprost vodnik? Za navodila po korakih za pridobitev brezplačnega dostopa do umetne inteligence si oglejte [Vodnik po brezplačnih ravneh](../getting-started/FREE-TIERS-GUIDE.md).
+> **Za uporabnike** : Iščete preprost vodnik? Oglejte si [vodnik po brezplačnih stopnjah](../getting-started/FREE-TIERS-GUIDE.md) za navodila po korakih za pridobitev brezplačnega AI.
 
-> **Nazadnje raziskano:** 2026-06-17 — spletna raziskava po posameznih ponudnikih (uradna dokumentacija + novice zadnjih 7 dni, pregled s 50 agenti in kontradiktornim preverjanjem), s katero so bile osvežene vse kvote brezplačnih ravni in pogoji uporabe. **Delna ponovna revizija 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — glejte spodnjo opombo z datumom).
-> **Avtoritativni vir (katalog):** `open-sse/config/freeModelCatalog.ts` (proračuni po posameznih MODELIH, z odpravo podvajanj med skupinami). Spodnje številke proračunov žetonov izvirajo iz sprotnih spletnih raziskav in so **približne** — glejte [Metodologija in opozorila](#methodology--caveats).
+> **Zadnja revizija:** 2026-11-23. Vsaka vrstica s kvoto, vsaka umaknjena ponudba in vsaka vrata kartice so bili tistega dne znova odprti glede na lastno stran ponudnika (`config/quality/free-catalog-evidence.json`). Prejšnji prehodi: raziskava 2026-06-17 na ponudnika in 2026-09-02 delna ponovna revizija.** Vir resnice (katalog):** `open-sse/config/freeModelCatalog.ts` (proračuni na MODEL, deduped v bazenu). Spodnje številke žetonskega proračuna izhajajo iz spletnih raziskav v živo in so** približek** — glejte [Metodologija in opozorila](#methodology--caveats).
 
 ## TL;DR — koliko prostega sklepanja dejansko zbere OmniRoute ?
 
@@ -17,20 +16,21 @@ Te številke opisujejo ločene račune tretjih oseb in pogoje za upravičenost v
 
 | metrika                                               | Žetoni / mesec | Pomen                                                                                                                                                                                                                                                                     |
 | ----------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dokumentirana ponavljajoča se subvencija (stalna)** | **~ 1.62B**    | Brezplačna stopnja** bazeni** (katalog po modelu), se šteje vsak skupni bazen** enkrat** . Vir v živo za `/api/free-tier/summary` in stranjo Free-Tier Budget na nadzorni plošči.** Uporabi to številko.**                                                                |
-| **+ prvi mesec z registracijskimi krediti**           | **~ 2.22B**    | Stalni krediti za enkratno prijavo + (Z.AI 20M, DeepSeek 5M, …), odstranjeni podvojeni krediti na račun.** Samo prvi mesec** — se ne ponovi.                                                                                                                              |
+| **Dokumentirana ponavljajoča se subvencija (stalna)** | **~ 90M**      | Brezplačna stopnja** bazeni** (katalog po modelu), se šteje vsak skupni bazen** enkrat** . Vir v živo za `/api/free-tier/summary` in stranjo Free-Tier Budget na nadzorni plošči.** Uporabi to številko.**                                                                |
+| **+ prvi mesec z registracijskimi krediti**           | **~ 153M**     | Stalni krediti za enkratno prijavo + (Z.AI 20M, DeepSeek 5M, …), odstranjeni podvojeni krediti na račun.** Samo prvi mesec** — se ne ponovi.                                                                                                                              |
 | **+ trajno brezplačno, brez objavljene omejitve**     | _nemerljivo_   | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — pravi ponavljajoči se dostop, rate/concurrency-limited,** brez žetonske omejitve za štetje** . Našteti, nikoli sešteti (štetje pri `RPM×24/7` je inflacija, ki jo zavračamo).      |
 | **+ depozit-odklepanje boost**                        | **+~ 24M**     | Enkratno** 10 $** OpenRouter polnjenje poveča svoj brezplačni sklad s 50 → 1000 req/day. Poroča se ločeno, tako da nikoli ne napihne stalne številke.                                                                                                                     |
 | **+ za regionalnim preverjanjem identitete**          | **+~ 6M**      | `modelscope` (Alibaba Cloud binding + celina-Kitajska preverjanje pravega imena). Realna ponavljajoča se kvota, izpostavljena kot `gatedRecurringTokens` / `gatedProviders` in na nadzorni plošči. Nikoli povzeto v naslov: +~ 6M za regionalnim preverjanjem identitete. |
-| Teoretična zgornja meja (vse omejitve stopnje, 24/7)  | ~ 10B          | Vsota omejitve stopnje vsakega ponudnika, ekstrapolirana na neprekinjeno uporabo.** Ni garancije** — ne naslovi tega.                                                                                                                                                     |
 
-**Iskren naslov:** _OmniRoute agregati**~ 1,62B dokumentiranih brezplačnih žetonov na mesec** (do ~ 2,22B v vašem prvem mesecu s krediti za prijavo) v 26 brezplačnih bazenih — in dolgem repu trajno brezplačnih ponudnikov brez omejitev — in RTK + Caveman stiskanje (15–95 % prihranka žetonov) sega dalje._
+**Iskren naslov:** _OmniRoute katalogi**~ 90 milijonov brezplačnih žetonov** mesec, ki ga lahko dejansko uporabite (do ~ 153M v vašem prvem mesecu s krediti za prijavo), iz 12 skupin z objavljeno kvoto in dolgim repom trajno brezplačnih ponudnikov brez omejitev. RTK + Stiskanje Caveman (15–95 % prihranka žetonov) to še dodatno raztegne._
 
-> **Zakaj je to padlo s prejšnje ~ 1.94B.** Osvežitev 2026-06-17 je popravek poštenosti, ne izguba: `gemini` je zdaj dedupliciran iz skupine (je bil napihnjen s štetjem vsake različice Flasha posebej, 462M → 60M), `cloudflare-ai` popravljen na svoj pravi 10k-Neurons/day (122M → 30M), `doubao` je ponovno razvrščen kot enkratno dobroimetje za prijavo (ne ponavljajoče se) in stopnje zaustavitve odstranjene (`chutes`/`phind`/`kluster` ukinjeno). Delno izravnano z `llm7` (pravilno 5M/day → 150M) in novimi brezplačnimi ponudniki (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Zgodovinski zapiski. Spodnje slike opisujejo takratni katalog; to niso današnje številke._
 >
-> **Nadalje popravljeno na ~ 1.37B v v3.8.42:** `longcat` je bil po prenehanju brezplačnega predogleda prerazvrščen iz ponavljajoče se dotacije 150M/mo v enkratno dobroimetje za prijavo v višini 10 milijonov. Enako pravilo poštenosti — noben ponudnik ni bil po pomoti izpuščen.
+> **Zakaj je to padlo s prejšnjih 1,94 milijarde.** Osvežitev 2026-06-17 je popravek poštenosti, ne pa izguba: `gemini` je zdaj odstranjen iz skupine (bil je napihnjen s štetjem vsake različice Flash posebej, 462M → 60M), `cloudflare-ai` popravljen na svoj pravi 10k-Neurons/day (122M → 30M), `doubao` je prerazvrščen kot enkratno dobroimetje za prijavo (ne ponavljajoče se) in stopnje zaustavitve odstranjene (`chutes`/`phind`/`kluster` ukinjeno). Delno izravnano z `llm7` (pravilno 5M/day → 150M) in novimi brezplačnimi ponudniki (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Posodobljeno 26. 8. 2026 po upokojitvi Felo Web:** Felo Web je izključen, medtem ko provenance/licensing ki izhaja iz GPL, ostaja na HOLD; vir je takrat poročal o 38 ključih bazena. Število bazenov je v živo in je odvisno od CI (`check:docs-counts` ne uspe zgraditi, če zgornje številke odstopajo od `computeFreeModelTotals()`).
+> **Nadalje popravljeno na 1,37 milijarde v v3.8.42:** `longcat` je bila po koncu brezplačnega predogleda prerazvrščena iz ponavljajoče se donacije 150M/mo v enkratno dobroimetje za prijavo v višini 10 milijonov. Enako pravilo poštenosti — noben ponudnik ni bil po pomoti izpuščen.
+>
+> **Posodobljeno 26. 8. 2026 po upokojitvi Felo Web:** Felo Web je izključen, medtem ko provenance/licensing ki izhaja iz GPL, ostaja na HOLD; vir je takrat poročal o 38 ključih bazena.
 >
 > **Ponovno revidirano dne 2026-09-02 glede na lastne strani ponudnikov** (viri: komentarji `// evidence:` ob vsakem ponovno revidiranem vnosu v `open-sse/config/freeModelCatalog.data.ts`): `gemini` in `ollama-cloud` ne objavljata več številke žetona (Google je 2025-12-23 odstranil brezplačno tabelo za posamezne modele; brezplačni načrt Ollama je "krediti za začetno uporabo") in sta zdaj navedena kot** brez pokrovčka** , nikoli sešteti (− 80M); `groq` je pet** na model** 200K-TPD zgornja meja (6M vsak, + 15M) s tremi upokojenimi IDs ; `nara` je eno vedro 7M/day (+ 60M, 210M). 1B `mistral` je viden le v konzoli računa — glejte _Razredi dokazov_ pod Metodologijo.
 >
@@ -38,26 +38,114 @@ Te številke opisujejo ločene račune tretjih oseb in pogoje za upravičenost v
 >
 > **Popravljeno dne 2026-09-03 (#11773):** `cerebras` je bil prerazporejen iz ponavljajoče se dotacije 30M/mo (stara 1-milijonska preskusna različica tokens/day brez kartice) v enkratno dobroimetje za prijavo v višini 5 USD, ki zahteva način plačila. Enako pravilo poštenosti kot LongCat.
 >
-> **Plus xKiro (2026-09-03):** novo polje `xkiro-free` (150M/mo) doda 35. ponavljajoči se ključ bazena. Felo Web ostaja izključen, medtem ko njegov provenance/licensing, ki izhaja iz GPL, ostaja na HOLD. Vir zdaj poroča** 26 ponavljajočih se ključev bazena** in**~ 1.62B stabilen** — živo število, odvisno od CI (`check:docs-counts` ne uspe zgraditi, če to odstopa od `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** novo polje `xkiro-free` (150M/mo) doda 35. ponavljajoči se ključ bazena. Felo Web ostaja izključen, medtem ko njegov provenance/licensing, ki izhaja iz GPL, ostaja na HOLD. Takrat je vir poročal o 34 ključih bazena in 1,62 milijarde žetonov na mesec (stabilno).
 
-Največji** dokumentirano** prispevki: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (pet kapic na model), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` je izključen — njegova 10-milijonska donacija LongCat-2.0 je enkratno dobroimetje za prijavo, odvisno od KYC, in ne ponavljajoči se mesečni proračun.)
+Največji** dokumentirano** ki danes prispevajo k dejanski številki: `groq` 24M (4 kapice na model), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` je izključen — je njegova 10-milijonska donacija LongCat-2.0 enkratno dobroimetje za prijavo, odvisno od KYC, in ne ponavljajoči se mesečni proračun.)
 
-> ⚠️ Teoretično zgornjo mejo (~ 10B) napihnejo ponudniki samo z omejitvijo stopnje** brez objavljene omejitve žetona** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`), katerih številke bi bile `RPM/TPM × 24/7 × 30d` — teoretični maksimum, ki ga noben posamezen račun ne bo vzdržal. So** izključena** od obrambne številke (namesto tega je prikazana v vrstici "trajno prosto, brez omejitve"). To je ista inflacija, zaradi katere so večmilijardne terjatve konkurentov nezanesljive.
+## Popravek, november 2026
+
+Do te izdaje sta ta stran in README navajala 1,62 milijarde brezplačnih žetonov na mesec. To je bilo narobe. Štirje bazeni so ga nosili 93 % in vsi štirje so se pri ponudniku spremenili, naš katalog pa je ostal enak. Dejanska številka je danes ~ 90 milijonov brezplačnih žetonov na mesec. Tabela prikazuje, kaj se je spremenilo pri posameznem ponudniku poleg tega, kar smo naredili narobe.
+
+| Kaj se je spremenilo pri ponudniku (datum, vir)                                                                                 | Kaj smo se zmotili (kaj, od kdaj)                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Mistral: brezplačen način ne vključuje več dostopa API (docs.mistral.ai, preberite 18.11.2026)                                  | Nadaljevali smo šteti 1 milijardo žetonov na mesec od branja konzole 2026-09-02 in tega nismo nikoli več preverili |
+| Nara: brezplačni načrt ne navaja nobenih modelov (ponudnikov `router.bynara.id/api/plans`, preberite 18.11.2026)                | Na mesec smo našteli 210 milijonov žetonov                                                                         |
+| xKiro: 500K žetonov na dan na račun (xkiro.com, preberite 18.11.2026)                                                           | V katalogu je ostalo 30 modelov IDs, ki ne obstajajo več                                                           |
+| LLM7: strani z omejitvami ni več in nobena uradna stran ne objavlja brezplačne kvote (2026-11-23)                               | Prešteli smo 150 milijonov žetonov na mesec brez datiranih dokazov                                                 |
+| Groq: en model v brezplačnem bazenu je bil upokojen (2026-09-14)                                                                | Bazen je ohranil staro velikost                                                                                    |
+| AgentRouter: ponudnik navaja 25 USD dnevnega dobropisa za prijavo in 50 USD več za prijave s povabilom (preberite 23. 11. 2026) | Navedli smo dobropis v višini 200 USD                                                                              |
+| Predbaza: izdelek se je končal                                                                                                  | Še vedno smo šteli dobroimetje za prijavo v prvem mesecu                                                           |
+| (brez)                                                                                                                          | 16 ponudnikov je po izteku ponudbe ohranilo oznako brezplačne ponudbe                                              |
+| (brez)                                                                                                                          | README je obljubil ponovno revizijo vsaka dva tedna. Zadnji pred tem je bil 2. septembra 2026                      |
+| (brez)                                                                                                                          | Preverjanje dokumentov je dovoljevalo zamik 0,05B in ni bilo mogoče brati številk v milijonih                      |
+
+Seštevek ene kvote na vrstico napihne kateri koli katalog, vključno z našim. Zato vrstično seštevana številka nosi svojo oznako, prava pa je tik pod njo.
+
+## Kaj šteje
+
+Vrstica šteje med brezplačne številke, če velja vse to:
+
+- Kvota se ponavlja in je objavljena na lastni strani ponudnika, z datumiranim dokazilom ob vrstici v katalogu.
+- En račun na ponudnika. Nič, kar potrebuje plačilo, kartico, polog ali preverjanje identitete (KYC). Kvota, ki za prijavo potrebuje telefonsko številko, Telegram ali Discord je navedena ločeno, kot "s socialno prijavo", nikoli v dejanski številki.
+- Noben ponudnik ni označil z zastavico `tos: "avoid"`, ampak samo ponudnikov uradni API.
+- Dobroimetje za enkratno prijavo se šteje samo za številko prvega meseca in samo, če ni zahtevana nobena kartica. Enkratni depozit, ki poveča kvoto, je ločena spodbuda. Promocije nikoli ne štejejo v realno številko.
+- Ponudniki iskanja, govora in medijev se ne vključijo v štetje glede na vrsto dostopa in v vsako številko žetona. Na tej strani dobijo lastno štetje v svojih lastnih enotah (rezultati, liki, slike), ko jih ponovno štetje doda; ti nikoli niso dodani drug drugemu ali spremenjeni v žetone.
+
+Kaj pomeni vsako javno štetje:
+
+- **Ponudniki z brezplačnim dostopom** (50 danes: 43 s ključem API, 6 brez ključa, 1 prek računa orodja): ponudniki z vsaj eno kataloško vrstico, ki omogoča brezplačen dostop, glede na to, kako pridete do nje.
+- **Kataloške vrstice s prostim dostopom** (214 danes): ena vrstica na ponudnika in model.
+- **Bazeni z objavljeno kvoto** (12 danes): skupne kvote za realno številko, vsaka se šteje enkrat.
+- **Različni brezplačni modeli** (185 danes): vrstice, razvrščene po modelu ID.
+- **Označeno z brezplačno ponudbo** (140 + danes): vsak ponudnik, katerega vnos v registru vsebuje `hasFree`, vključno z iskalnimi, glasovnimi in medijskimi ponudniki, preizkusi in registracijskimi krediti.
+
+Vsako štetje je katalogizirano, ne preizkušeno na klic: piše, kaj navaja katalog, ne pa, da vsaka pot odgovarja takoj.
+
+## Kako štejemo
+
+Tri številke prihajajo iz istega kataloga, pregledanega 23.11.2026:
+
+- **Prava številka, ~ 90 milijonov brezplačnih žetonov na mesec.** Vsaka skupna kvota se šteje enkrat, tako da je pet modelov za enim dnevnim dodatkom en dodatek. To je tisto, kar lahko dejansko uporablja en račun pri vsakem ponudniku. Z enkratnimi krediti za prijavo ~ 153M v vašem prvem mesecu.
+- **Velika številka ~ 11.3B je seštela vrstico za vrstico** , vključene končane ponudbe. Tako štejejo drugi katalogi. Skoraj vse je zgodovina: 98,6 % iz ponudb, ki ne obstajajo več. Tiskamo le z etiketo in zraven prave figure.
+- **Katalog v živo, ~ 159M seštejenih na živo vrstico** : enaka vsota po vrsticah brez končanih ponudb.
+
+Metoda vrstica za vrstico (`row-sum-v1`) sledi štirim pravilom:
+
+1. Vsaka navedena vrstica je dodana takšna, kot je, brez združevanja vrstic, ki si delijo eno skupino.
+2. Dodane so samo kvote, objavljene v žetonih. Kvota, objavljena v zahtevah, kreditih ali nevronih, šteje kot nič (`FREE_QUOTA_UNIT` in `open-sse/config/freeModelCatalog.ts`).
+3. Vpisni krediti, povečanja vlog in izklopljene vrstice (`enabled: false`) so izpuščeni.
+4. Velika številka doda knjigo končanih ponudb (`open-sse/config/freeModelCatalog.retired.data.ts`) pri zadnji kvoti vsake navedene vrstice. Samo vrstice so umaknjene, odkar je `RETIRED_LEDGER_SINCE` vstopil vanjo, in vsaka vrstica izpade 12 mesecev po koncu.
+
+Če povrstni način štetja preneha biti običajen ali se tako odloči vzdrževalec, velika številka zapusti vsako stran in ostane le prava številka.
+
+## Odstranjeno/ni proste stopnje
+
+Ponudniki, katerih brezplačna ponudba se je končala ali je ni bilo mogoče potrditi. Ostanejo v registru z `hasFree: false` (ali so umaknjeni iz brezplačnega kataloga) in se nikoli ne štejejo v nobeno brezplačno številko. To ni seznam ponudnikov, odstranjenih iz OmniRoute na zahtevo (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Ponudnik                 | Ker        | zakaj                                                                                                | Vir                                        |
+| ------------------------ | ---------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `mistral`                | 2026-11-23 | Brezplačni način ne vključuje več dostopa API                                                        | docs.mistral.ai (omejitve uporabe)         |
+| `nara`                   | 2026-11-23 | Brezplačni načrt ne navaja nobenih modelov                                                           | `router.bynara.id/api/plans`               |
+| `llm7`                   | 2026-11-23 | Nobena uradna stran ne objavlja brezplačne kvote                                                     | spletno mesto ponudnika                    |
+| `navy`                   | 2026-11-23 | Na uradnih straneh ni bilo mogoče potrditi proste kvote                                              | api.navy                                   |
+| `bluesminds`             | 2026-11-23 | Za uporabo je potreben kredit, kupljen pri ponudniku                                                 | `api.bluesminds.com/api/status`            |
+| `arcee-ai`               | 2026-11-23 | Samo plačane cene                                                                                    | docs.arcee.ai (cene)                       |
+| `huggingface`            | 2026-11-23 | Brezplačni računi morajo kupiti kredite ali nadgraditi na PRO                                        | huggingface.co (cene ponudnikov sklepanja) |
+| `huggingchat`            | 2026-11-23 | Za sklepanje Hugging Face so potrebni kupljeni krediti ali PRO                                       | huggingface.co (cene ponudnikov sklepanja) |
+| `ainative`               | 2026-11-23 | Načrt Hobbyist se plača po 3-dnevnem preizkusu                                                       | stran s cenami ponudnika                   |
+| `stepfun`                | 2026-11-23 | Samo cena po uporabi                                                                                 | stran s cenami ponudnika                   |
+| `predibase`              | 2026-11-23 | Izdelek ukinjen                                                                                      | predibase.com                              |
+| `poolside`               | 2026-10-31 | Neposredno sklepanje je izklopljeno                                                                  | platforma.poolside.ai                      |
+| `amazon-q`               | 2026-05-15 | Ni novih prijav na brezplačne stopnje                                                                | stran ponudnika                            |
+| `chat-oripe`             | 2026-11-23 | Gostitelj API odgovori HTTP 530                                                                      | gostitelj API                              |
+| `naga-ai`                | 2026-11-23 | Dvojnik ponudnika Naga.ac                                                                            | api.naga.ac                                |
+| `dxnt`                   | 2026-11-23 | Prijavni bonus obstaja, vendar ga noben model ne sprejme                                             | dxnt.com                                   |
+| `ollama-cloud`           | 2026-11-09 | Oblačni modeli so plačani na žeton ali so zajeti v plačljivih načrtih                                | ollama.com (#19334)                        |
+| `chutes`                 | 2026-03    | Brezplačna stopnja je končana                                                                        | stran ponudnika                            |
+| `phind`                  | 2026-01    | Podjetje zaprto                                                                                      | stran ponudnika                            |
+| `kluster`                | 2026-06-09 | Sončni zahod (premaknjeno na MITO)                                                                   | stran ponudnika                            |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo brezplačno preklicano; Promocija Nemotron se je končala 2026-06 (ponovno preverjeno 2026-06-18) | stran ponudnika                            |
+| `aimlapi`                | 2026-06-18 | Brezplačna raven je zaustavljena                                                                     | stran ponudnika                            |
+| `yi`                     | 2026-06-18 | Yi-Light se je upokojil, plačilo po uporabi                                                          | stran ponudnika                            |
+| `featherless-ai`         | 2026-06    | Ni trenutne brezplačne stopnje                                                                       | stran ponudnika                            |
+| `chipotle`               | 2026-09-15 | Pripomoček za klepet za njim odgovori na 404 na vsaki poti (#13131, #4037)                           | amelia.chipotle.com                        |
+
+`iflytek` / `sparkdesk` ostanejo na seznamu s previdnostjo ToS: Spark Lite je brezplačen, vendar ToS omejuje uporabo proxyja in releja.
 
 ---
 
-## Osvežitev 2026-06-17 — kaj se je spremenilo od 2026-06-05
+## 2026-06-17 osveži — kaj se je spremenilo od 2026-06-05
 
-Raziskava spleta s 50 agenti (uradna dokumentacija + novice zadnjih 7 dni, nasprotovalno preverjena) je osvežila celoten katalog. Poudarki:
+Prepustnica za spletno raziskavo 50 agentov (uradne novice o dokumentih + last-7-days, kontradiktorno preverjena) je osvežila celoten katalog. Poudarki:
 
-- **Odstranjeno / ni brezplačnega nivoja (2026):** `chutes` (brezplačni nivo se je končal 2026-03), `phind` (podjetje se je zaprlo 2026-01), `kluster` (umaknjeno 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo brezplačni dostop preklican 2026-05-24, promocija Nemotron se je končala 2026-06 — ponovno preverjeno 2026-06-18), `aimlapi` (brezplačni nivo začasno ustavljen — ponovno preverjeno 2026-06-18), `yi` (Yi-Light ukinjen, plačilo po uporabi — ponovno preverjeno 2026-06-18), `featherless-ai` (trenutno ni brezplačnega nivoja), `chipotle` (Chipotlejev »Pepper AI« — obratno inženirjen Amelijin klepetalni gradnik `amelia.chipotle.com`, s katerim je ponudnik komuniciral, zdaj vrne 404 na vsaki poti, vključno s korensko; ukinjeno/premaknjeno zaledje, potrjeno 2026-09-15 — popolnoma odstranjeno iz kataloga, #13131/#4037). `iflytek` / `sparkdesk` ostaneta navedena, vendar nosita previdnostno opombo glede pogojev uporabe (Spark Lite je brezplačen; pogoji uporabe omejujejo uporabo proxyja/posredovanja).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` ukinjena 2026-06-01 in `2.5 Pro` je zapustil brezplačni nivo (2026-04); brezplačni nivo je zdaj **samo družina Flash** (2.5/3/3.1/3.5 Flash + Gemma). Katalog zdaj **združuje** družino Flash (prejšnja številka je bila napihnjena zaradi ločenega štetja vsake različice: 462M → 60M).
-- **Popravljene številke:** `cloudflare-ai` 122M → **30M** (dejanskih 10k nevronov/dan), `doubao` preklasificiran kot enkratni kredit ob registraciji (ni ponavljajoč), `llm7` 4M → **150M** (dokumentiranih 5M žetonov/dan), `together` končne točke "-Free" ukinjene → kredit ob registraciji v višini 25 $ prav tako odstranjen (zahteva minimalen nakup 5 $, ni brezplačnega preizkusa), `longcat` Preview končan + Flash modeli umaknjeni → samo **LongCat-2.0**, preklasificiran kot enkratni kredit ob registraciji v višini **10M** žetonov (pogojen s KYC, ni ponavljajoč).
-- **Neposredno sklepanje Poolside se končuje (preverjeno 2026-10-20):** [uradna platforma](https://platform.poolside.ai/) napoveduje zaustavitev **2026-10-31** in uporabnike usmerja, naj njene modele prenesejo s Hugging Face za lastno gostovanje. Neposredni ponudnik `poolside` nosi to opozorilo. Ročno vzdrževani brezplačni katalog nima neposrednih vnosov Poolside; njegovi vnosi z imenom Poolside pripadajo `kilo-gateway`. Ta napoved ne potrjuje razpoložljivosti modelov, ki jih strežejo Kilo, Cline, NVIDIA ali drugi prehodi, zato ti vnosi na tej podlagi niso umaknjeni.
-- **Novi odkriti brezplačni ponudniki:** ⭐ **Kilo Code** (`kilo-gateway` — rotirajoči nabor »Auto Free«: družina NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 rotirajočih brezplačnih modelov za kodiranje, osveženo 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash trajno brezplačni + bonus 20M ob registraciji) in `arcee-ai` Trinity Large Preview.
-- **Novi pošteni nivoji** (glej Metodologijo): kategorija _trajno-brezplačna-vendar-neomejena_ (dejanski ponavljajoči dostop, brez omejitve žetonov, ki bi jo šteli) in _dvig z odklepom depozita_ (OpenRouter 10 $ → +24M/mesec), oba izpostavljena **ločeno**, da nikoli ne napihujeta naslovne številke.
+- **Odstranjeno / brez brezplačne stopnje:** preselil v [svoj del](#removed--no-free-tier).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` zaustavil 2026-06-01 in `2.5 Pro` je zapustil brezplačno raven (2026-04); brezplačna stopnja je zdaj** Samo družina Flash** (2.5/3/3.1/3.5 Flash + Gemma). Katalog zdaj** bazeni** družina Flash (napihnjena s štetjem vsake različice posebej: 462M → 60M).
+- **Popravljene številke:** `cloudflare-ai` 122M →** 30M** (pravi 10k-Neurons/day), `doubao` prerazvrščen kot enkratno dobroimetje za prijavo (ne ponavljajoče se), `llm7` 4M →** 150M** (dokumentirano 5M tokens/day), `together` "-brezplačne" končne točke ukinjene → 25 $ dobroimetja za prijavo prav tako odstranjen (zahteva minimalni nakup 5 $, brez brezplačnega preizkusa), `longcat` Predogled se je končal + Flash modeli umaknjeni →**LongCat-2.0** samo, prerazvrščeno kot enkratno** 10M** dobroimetje za prijavo -token (odvisno od KYC, brez ponavljanja).
+- **Konec neposrednega sklepanja ob bazenu (preverjeno 20. 10. 2026):** [uradna platforma](https://platform.poolside.ai/) napoveduje zaustavitev** 2026-10-31** in usmerja uporabnike, da svoje modele prenesejo iz Hugging Face za samostojno gostovanje. Neposredni ponudnik `poolside` nosi to opozorilo. Ročno pripravljen brezplačni katalog nima neposrednih vnosov ob bazenu; njegovi vnosi z imenom Poolside pripadajo `kilo-gateway`. Ta objava ne določa razpoložljivosti modelov, ki jih strežejo Kilo, Cline, NVIDIA ali drugi prehodi, zato ti seznami niso umaknjeni na tej podlagi.
+- **Odkriti novi brezplačni ponudniki:** ⭐** Koda Kilo** (`kilo-gateway` — vrtljivi komplet "Auto Free": družina NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode zen** (`opencode-zen` — 10 rotirajočih modelov brez kodiranja, osveženo 20. 10. 2026), ⭐** Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash trajno brezplačen + 20M bonus za prijavo) in `arcee-ai` Trinity Large Preview.
+- **Nove poštene stopnje** (glej metodologijo): kategorija _trajno-brezplačno-vendar-neomejeno_ (pravi ponavljajoči se dostop, brez omejitve žetonov za štetje) in _povečanje za odklepanje depozita_ (OpenRouter $10 → +24M/mo), obe sta se pojavili** ločeno** zato nikoli ne napihnejo naslova.
 
-> Podrobna tabela po ponudnikih nižje je **posnetek stanja 2026-06-05**; zgornje spremembe jo preglasijo. Živi, kanonični vir je katalog po modelih `open-sse/config/freeModelCatalog.ts`.
+> Podrobna tabela po ponudnikih spodaj je** Posnetek 05.06.2026** ; zgornje delte ga nadomestijo. Živi, kanonični vir je katalog za posamezne modele `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -112,7 +200,7 @@ razlikoval od tega, kar se zgodi ob kliku — ta ločitev je ohranjena namenoma.
 
 ## Metodologija in opozorila
 
-- Številke so** ocene na zgornji meji** od dokumentiranih omejitev brezplačne ravni vsakega ponudnika od** 2026-06-17** , zbranih s spletno raziskavo. Brezplačne stopnje se nenehno spreminjajo — znova preverite, preden se zanesete na številko.
+- Številke so** ocene na zgornji meji** od dokumentiranih omejitev brezplačne ravni vsakega ponudnika, nazadnje preverjeno dne** 2026-11-23** za vsako vrstico s kvoto. Brezplačne stopnje se nenehno spreminjajo — znova preverite, preden se zanesete na številko.
 - **Za kaj vpis dejansko jamči.** Noben vnos nima ocene zaupanja na vrstico in API ne služi nobenemu — vsako zgornjo številko obravnava kot oceno enake, nenavedene kakovosti. Dve dejstvi sta različni, ker sta kurirani ročno in ne sklepani: 44 vnosov nosi neodvisno dokumentirano težko zaustavitev (39 od njih je vrstic xKiro, ki si vse delijo en dnevni dodatek), 22 vnosov pa vsebuje razkritje takojšnjega usposabljanja. `hardStopGuaranteed` je nastavljen le, če pogoji ponudnika pravijo, da prekoračitev brezplačnega dodatka zavrne zahtevo, namesto da bi vam tiho začela zaračunavati, z virom v komentarju poleg vnosa; nikoli ni privzeta vrednost `true` in vnos, ki ga nihče ni preveril, ostane nenastavljen. Torej manjkajoča zastavica za težko zaustavitev pomeni "ni vzpostavljeno", ne pa "znano, da vam bom zaračunal".** način STRICT** (opt-in `freeAccessPolicy=strict` routing guard) zaupa le vnosom, ki nosijo zastavico; vsaka druga prosta stopnja je izključena kot `no-hard-stop` (glejte `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Ko stražar filtrira skupino, operaterju viden dnevnik poroča o številu izključitev in njegovem deležu `no-hard-stop`.
 - samo ponavljajoči se mesečni žetoni `estMonthlyFreeTokens` =.** Enkratni krediti za prijavo se ne ponavljajo** in štejejo kot 0. Ukinjene stopnje so prav tako 0.
 - Dnevna omejitev žetonov → `monthly = daily × 30`. Samo RPD dokumentiran → `RPD × ~800 output tokens × 30`. Samo RPM/TPM (brez dnevne omejitve) →** brez pokrovčka** (glej spodaj).
@@ -125,13 +213,13 @@ razlikoval od tega, kar se zgodi ob kliku — ta ločitev je ohranjena namenoma.
 
 ## Zakaj je naše število manjše od drugih agregatorjev
 
-Večina številk o "brezplačnih žetonih na mesec" v tem prostoru je vsota oznak na model. Naš namenoma ni:
+Večina številk "brezplačnih žetonov na mesec" v tem prostoru je vsota oznak za model. Naš namenoma ni:
 
-- **Vsak skupni bazen se šteje enkrat.** brezplačni načrt Mistral je en dodatek 1B/month na organizacijo; če ga uvrstimo pod pet modelov, to še ne pomeni 5B. Če povzamemo po modelu, bi se glasil naš lastni katalog**~ 7.4B** (ponovno izračunano dne 2026-09-03; ta številka ni odvisna od CI — jo ponovno izmerite vsakič, ko se spremeni katalog) — naslov pravi**~ 1.47B** saj toliko dejansko lahko porabi en račun vsakega ponudnika.
-- **Dnevne omejitve so pretvorjene, tečaji pa ne.** Dokumentirana zgornja meja tokens/day postane `× 30`; dokumentirana zgornja meja requests/day postane `RPD × ~800 tokens × 30`; ponudnik, ki objavlja le zahteve na minuto, ima** št** mesečna številka in je navedena kot _neomejena_, nikoli seštevana. Množenje mejne stopnje z 24/7 je inflacija, ki jo zavračamo.
+- **Vsak skupni bazen se šteje enkrat.** Pet modelov za enim dodatkom je en dodatek, ne pet. Branje istega kataloga po vrsticah in zakaj ga tiskamo, je na [Kako štejemo](#how-we-count).
+- **Dnevne omejitve so pretvorjene, tečaji pa ne.** Dokumentirana zgornja meja tokens/day postane `× 30`; dokumentirana zgornja meja requests/day postane `RPD × ~800 tokens × 30`; ponudnik, ki objavlja samo zahteve na minuto, ima** št** mesečna številka in je navedena kot _neomejena_, nikoli seštevana. Množenje mejne stopnje z 24/7 je inflacija, ki jo zavračamo.
 - **Kvote za regionalnim preverjanjem identitete so prikazane ločeno** (`+~6M behind regional identity verification`), ker jih večina bralcev ne zna uporabljati.
 - **Dobroimetje za prijavo velja samo za prvi mesec** in poroča kot druga številka, ki se nikoli ne meša v enakomerno število.
-- **Številko uveljavlja CI.** `npm run check:docs-counts` ponovno izračuna vsote iz kataloga in ne uspe zgraditi, ko se ta datoteka, README ali proračunska kartica oddaljijo od njih.
+- **Kaj naredi preverjanje dokumentov.** `npm run check:docs-counts` (način izdaje) znova izračuna dejansko številko, številko za prvi mesec in dve vsoti vrstica za vrstico iz kataloga in ne uspe, ko README, ta stran ali Vodnik po brezplačnih stopnjah natisnejo drugačno vrednost ali natisnejo veliko številko brez oznake in realno. Proračunska kartica je ob izdaji preoblikovana iz istih dejstev.
 
 ---
 
@@ -240,74 +328,74 @@ Večina številk o "brezplačnih žetonih na mesec" v tem prostoru je vsota ozna
 
 ---
 
-## Brezplačna raven na ponudnika (Bytez/Nous preverjeno 2026-10-15; ponovno revidirane vrstice 2026-09-02; druge 2026-06-17)
+## Brezplačna stopnja na ponudnika (katalog revidiran 23.11.2026)
 
-> Ponovno ustvarjeno iz kataloga po modelu (`open-sse/config/freeModelCatalog.ts`), brez podvojenih podatkov. Razvrščeno po ponavljajočem se stabilnem tokens/mo. `uncapped*` = trajno brezplačno, vendar brez objavljene omejitve žetona (rate/concurrency-limited) — pravi dostop,** ne** povzeto v naslovu. `—` = samo kredit / brez ključa / ni merljiv z žetonom.
+> Ročno vzdrževano iz kataloga po modelu (`open-sse/config/freeModelCatalog.data.ts`); nazadnje preverjeno 23.11.2026. Razvrščeno po dejanskih mesečnih žetonih vsakega bazena (vsak skupni bazen se šteje enkrat). `uncapped*` = trajno brezplačno, vendar brez objavljene omejitve žetonov (rate/concurrency-limited): pravi dostop,** ne** sešteti v realno številko. `not counted` = ponavljajoča se kvota, ki je prava številka izpusti (`avoid` ali za regionalno preverjanje identitete). Ponudniki, katerih ponudba se je končala, so na [ravni Odstranjeno/ni brezplačnega](#removed--no-free-tier). `—` = samo kredit / brez ključa / ni merljiv z žetonom.
 
-| Ponudnik         | Prosti tip        | Enakomeren tokens/mo | Kredit za prvi mesec | ToS           | Modeli |
-| ---------------- | ----------------- | -------------------- | -------------------- | ------------- | ------ |
-| `mistral`        | ponavljajoče se   | ~ 1,00B              | —                    | previdnost    | 5      |
-| `nara`           | ponavljajoče se   | ~ 210M               | —                    | previdnost    | 8      |
-| `llm7`           | ponavljajoče se   | ~ 150M               | —                    | previdnost    | 4      |
-| `xkiro`          | ponavljajoče se   | ~ 150M               | —                    | previdnost    | 39     |
-| `longcat`        | enkraten          | —                    | 10M                  | previdnost    | 1      |
-| `cerebras`       | enkraten          | —                    | 5 $ kredita          | previdnost    | 2      |
-| `cloudflare-ai`  | ponavljajoče se   | ~ 30M                | —                    | previdnost    | 9      |
-| `groq`           | ponavljajoče se   | ~ 30M                | —                    | previdnost    | 5      |
-| `api-airforce`   | ponavljajoče se   | ~ 24M                | —                    | previdnost    | 7      |
-| `bluesminds`     | ponavljajoče se   | ~ 7M                 | —                    | dvoumen       | 22     |
-| `sambanova`      | ponavljajoče se   | ~ 6M                 | —                    | previdnost    | 5      |
-| `arcee-ai`       | ponavljajoče se   | ~ 5M                 | —                    | previdnost    | 1      |
-| `bazaarlink`     | ponavljajoče se   | ~ 4M                 | —                    | previdnost    | 32     |
-| `openrouter`     | ponavljajoče se   | ~ 1M                 | —                    | previdnost    | 1      |
-| `cohere`         | ponavljajoče se   | ~ 800K               | —                    | previdnost    | 6      |
-| `huggingchat`    | ponavljajoče se   | ~ 500K               | —                    | previdnost    | 4      |
-| `morph`          | ponavljajoče se   | ~ 400K               | —                    | v redu        | 2      |
-| `huggingface`    | ponavljajoče se   | ~ 200K               | —                    | previdnost    | 6      |
-| `kiro`           | ponavljajoče se   | ~ 25K                | —                    | izogibajte se | 12     |
-| `glm-cn`         | brez pokrovčka    | brez pokrova\*       | ~ 20M                | v redu        | 4      |
-| `baidu`          | brez pokrovčka    | brez pokrova\*       | —                    | previdnost    | 1      |
-| `gemini`         | brez pokrovčka    | brez pokrova\*       | —                    | previdnost    | 4      |
-| `kilo-gateway`   | brez pokrovčka    | brez pokrova\*       | —                    | previdnost    | 7      |
-| `opencode-zen`   | brez pokrovčka    | brez pokrova\*       | —                    | previdnost    | 10     |
-| `tencent`        | brez pokrovčka    | brez pokrova\*       | —                    | previdnost    | 1      |
-| `vertex`         | kredit za prijavo | —                    | ~ 300M               | previdnost    | 10     |
-| `agentrouter`    | kredit za prijavo | —                    | ~ 200M               | previdnost    | 4      |
-| `predibase`      | kredit za prijavo | —                    | ~ 25M                | previdnost    | 1      |
-| `doubao`         | kredit za prijavo | —                    | ~ 15M                | dvoumen       | 1      |
-| `ai21`           | kredit za prijavo | —                    | ~ 10M                | izogibajte se | 2      |
-| `deepseek`       | kredit za prijavo | —                    | ~ 5M                 | v redu        | 2      |
-| `hyperbolic`     | kredit za prijavo | —                    | ~ 5M                 | v redu        | 8      |
-| `nscale`         | kredit za prijavo | —                    | ~ 5M                 | previdnost    | 6      |
-| `bytez`          | kredit (zap.)     | —                    | neznano              | dvoumen       | 1      |
-| `deepinfra`      | kredit za prijavo | —                    | ~ 1M                 | previdnost    | 22     |
-| `fireworks`      | kredit za prijavo | —                    | ~ 1M                 | izogibajte se | 10     |
-| `nebius`         | kredit za prijavo | —                    | ~ 1M                 | previdnost    | 1      |
-| `qoder`          | kredit za prijavo | —                    | ~ 1M                 | previdnost    | 14     |
-| `scaleway`       | kredit za prijavo | —                    | ~ 1M                 | v redu        | 6      |
-| `novita`         | kredit za prijavo | —                    | ~ 500K               | previdnost    | 1      |
-| `agy`            | brez ključa       | —                    | —                    | izogibajte se | 16     |
-| `baichuan`       | brez ključa       | —                    | —                    | dvoumen       | 1      |
-| `blackbox`       | brez ključa       | —                    | —                    | izogibajte se | 6      |
-| `coze`           | brez ključa       | —                    | —                    | izogibajte se | 1      |
-| `duckduckgo-web` | brez ključa       | —                    | —                    | izogibajte se | 6      |
-| `freemodel-dev`  | brez ključa       | —                    | —                    | neznano       | 4      |
-| `friendliai`     | brez ključa       | —                    | —                    | izogibajte se | 2      |
-| `iflytek`        | brez ključa       | —                    | —                    | izogibajte se | 1      |
-| `inference-net`  | brez ključa       | —                    | —                    | previdnost    | 3      |
-| `liquid`         | brez ključa       | —                    | —                    | neznano       | 1      |
-| `monsterapi`     | brez ključa       | —                    | —                    | dvoumen       | 1      |
-| `muse-spark-web` | brez ključa       | —                    | —                    | izogibajte se | 3      |
-| `nlpcloud`       | brez ključa       | —                    | —                    | izogibajte se | 1      |
-| `nvidia`         | brez pokrovčka    | brez pokrova\*       | —                    | previdnost    | 3      |
-| `pollinations`   | brez ključa       | —                    | —                    | previdnost    | 31     |
-| `publicai`       | brez ključa       | —                    | —                    | previdnost    | 3      |
-| `reka`           | brez ključa       | —                    | —                    | previdnost    | 2      |
-| `sensenova`      | brez ključa       | —                    | —                    | previdnost    | 1      |
-| `sparkdesk`      | brez ključa       | —                    | —                    | previdnost    | 1      |
-| `stepfun`        | brez ključa       | —                    | —                    | v redu        | 1      |
-| `t3-web`         | brez ključa       | —                    | —                    | izogibajte se | 23     |
-| `uncloseai`      | brez ključa       | —                    | —                    | previdnost    | 3      |
+| Ponudnik         | Prosti tip        | Pravi tokens/mo                        | Kredit za prvi mesec | ToS           | Modeli |
+| ---------------- | ----------------- | -------------------------------------- | -------------------- | ------------- | ------ |
+| `api-airforce`   | ponavljajoče se   | ~ 24M                                  | —                    | previdnost    | 5      |
+| `groq`           | ponavljajoče se   | ~ 24M (4 pokrovčki na model)           | —                    | previdnost    | 4      |
+| `cloudflare-ai`  | ponavljajoče se   | ~ 23M                                  | —                    | previdnost    | 8      |
+| `xkiro`          | ponavljajoče se   | ~ 15M                                  | —                    | previdnost    | 9      |
+| `bazaarlink`     | ponavljajoče se   | ~ 1,4M                                 | —                    | previdnost    | 1      |
+| `openrouter`     | ponavljajoče se   | ~ 1,2M                                 | —                    | previdnost    | 1      |
+| `cohere`         | ponavljajoče se   | ~ 800K                                 | —                    | previdnost    | 6      |
+| `sambanova`      | ponavljajoče se   | ~ 480K                                 | —                    | previdnost    | 2      |
+| `morph`          | ponavljajoče se   | ~ 160K                                 | —                    | v redu        | 2      |
+| `glm-cn`         | brez pokrovčka    | brez pokrova\*                         | 20M                  | v redu        | 4      |
+| `agnes`          | brez pokrovčka    | brez pokrova\*                         | —                    | v redu        | 3      |
+| `agnes-cn`       | brez pokrovčka    | brez pokrova\*                         | —                    | v redu        | 3      |
+| `aion`           | brez pokrovčka    | brez pokrova\*                         | —                    | v redu        | 4      |
+| `baidu`          | brez pokrovčka    | brez pokrova\*                         | —                    | previdnost    | 1      |
+| `gemini`         | brez pokrovčka    | brez pokrova\*                         | —                    | previdnost    | 4      |
+| `glm`            | brez pokrovčka    | brez pokrova\*                         | —                    | v redu        | 2      |
+| `kilo-gateway`   | brez pokrovčka    | brez pokrova\*                         | —                    | previdnost    | 12     |
+| `nvidia`         | brez pokrovčka    | brez pokrova\*                         | —                    | previdnost    | 3      |
+| `onomeo`         | brez pokrovčka    | brez pokrova\*                         | —                    | previdnost    | 2      |
+| `requesty`       | brez pokrovčka    | brez pokrova\*                         | —                    | previdnost    | 2      |
+| `sealion`        | brez pokrovčka    | brez pokrova\*                         | —                    | v redu        | 5      |
+| `tokenharbor`    | brez pokrovčka    | brez pokrova\*                         | —                    | previdnost    | 2      |
+| `coze`           | ponavljajoče se   | ni šteto (`avoid`)                     | —                    | izogibajte se | 1      |
+| `inference-net`  | ponavljajoče se   | ni šteto                               | —                    | previdnost    | 3      |
+| `kiro`           | ponavljajoče se   | ni šteto (`avoid`)                     | —                    | izogibajte se | 7      |
+| `modelscope`     | ponavljajoče se   | za regionalnim preverjanjem identitete | —                    | previdnost    | 2      |
+| `nlpcloud`       | ponavljajoče se   | ni šteto (`avoid`)                     | —                    | izogibajte se | 1      |
+| `reka`           | ponavljajoče se   | ni šteto                               | —                    | previdnost    | 2      |
+| `t3-web`         | ponavljajoče se   | ni šteto (`avoid`)                     | —                    | izogibajte se | 23     |
+| `bytez`          | kredit (zap.)     | —                                      | —                    | dvoumen       | 1      |
+| `doubao`         | kredit za prijavo | —                                      | 15M                  | dvoumen       | 1      |
+| `longcat`        | kredit za prijavo | —                                      | 10M                  | previdnost    | 1      |
+| `deepseek`       | kredit za prijavo | —                                      | 5M                   | v redu        | 2      |
+| `hyperbolic`     | kredit za prijavo | —                                      | 5M                   | v redu        | 8      |
+| `nscale`         | kredit za prijavo | —                                      | 5M                   | previdnost    | 6      |
+| `deepinfra`      | kredit za prijavo | —                                      | 1M                   | previdnost    | 22     |
+| `qoder`          | kredit za prijavo | —                                      | 1M                   | previdnost    | 9      |
+| `scaleway`       | kredit za prijavo | —                                      | 1M                   | v redu        | 6      |
+| `novita`         | kredit za prijavo | —                                      | 500K                 | previdnost    | 1      |
+| `agentrouter`    | kredit za prijavo | —                                      | —                    | previdnost    | 1      |
+| `ai21`           | kredit za prijavo | —                                      | —                    | izogibajte se | 2      |
+| `baichuan`       | kredit za prijavo | —                                      | —                    | dvoumen       | 1      |
+| `cerebras`       | kredit za prijavo | —                                      | —                    | previdnost    | 2      |
+| `fireworks`      | kredit za prijavo | —                                      | —                    | izogibajte se | 10     |
+| `freemodel-dev`  | kredit za prijavo | —                                      | —                    | neznano       | 4      |
+| `monsterapi`     | kredit za prijavo | —                                      | —                    | dvoumen       | 1      |
+| `nebius`         | kredit za prijavo | —                                      | —                    | previdnost    | 1      |
+| `publicai`       | kredit za prijavo | —                                      | —                    | previdnost    | 3      |
+| `sensenova`      | kredit za prijavo | —                                      | —                    | previdnost    | 1      |
+| `vertex`         | kredit za prijavo | —                                      | —                    | previdnost    | 16     |
+| `agy`            | brez ključa       | —                                      | —                    | izogibajte se | 9      |
+| `aihorde`        | brez ključa       | —                                      | —                    | v redu        | 3      |
+| `blackbox`       | brez ključa       | —                                      | —                    | izogibajte se | 6      |
+| `duckduckgo-web` | brez ključa       | —                                      | —                    | izogibajte se | 6      |
+| `friendliai`     | brez ključa       | —                                      | —                    | izogibajte se | 2      |
+| `iflytek`        | brez ključa       | —                                      | —                    | izogibajte se | 1      |
+| `liquid`         | brez ključa       | —                                      | —                    | neznano       | 1      |
+| `muse-spark-web` | brez ključa       | —                                      | —                    | izogibajte se | 3      |
+| `ovhcloud`       | brez ključa       | —                                      | —                    | v redu        | 5      |
+| `pollinations`   | brez ključa       | —                                      | —                    | previdnost    | 24     |
+| `sparkdesk`      | brez ključa       | —                                      | —                    | previdnost    | 1      |
+| `uncloseai`      | brez ključa       | —                                      | —                    | previdnost    | 1      |
 
 ---
 

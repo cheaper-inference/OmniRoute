@@ -4,12 +4,11 @@
 
 ---
 
-> **信頼できる情報源:** `src/lib/compliance/`、`src/app/api/compliance/`
-> **最終更新:** 2026-06-28 — v3.8.40
+> **真実の情報源:** `src/lib/compliance/`、 `src/app/api/compliance/`
 
-OmniRoute は、管理操作、認証イベント、プロバイダー認証情報のライフサイクル変更、および MCP ツールの呼び出しを、SQLite を基盤とする監査テーブルに記録します。このページでは、記録される内容、保存場所、保持期間、API キーによるオプトアウト方法、およびデータのクエリ方法について説明します。
+OmniRoute 、管理アクション、認証イベント、プロバイダー資格情報のライフサイクル変更、およびMCPツールの呼び出しを SQLite ベースの監査テーブルに記録します。このページでは、ログに記録される内容、保存場所、保存期間、 APIキーのオプトアウト方法、およびデータのクエリ方法について説明します。
 
-実装は `src/lib/compliance/index.ts`（T-43 —「コンプライアンス制御」）および `src/lib/compliance/providerAudit.ts` にあります。監査書き込みは例外をスローしません。監査ログがメインのリクエストフローを中断しないよう、障害が発生しても呼び出しは通知なしに無視されます。
+実装は`src/lib/compliance/index.ts` (T-43 — "Compliance Controls") および`src/lib/compliance/providerAudit.ts`に存在します。監査書き込みは決してスローされません。失敗した場合、呼び出しはサイレントに取り込まれるため、監査ログがメインの要求フローを中断することはありません。
 
 ## 記録される内容
 
@@ -125,30 +124,33 @@ CREATE TABLE IF NOT EXISTS audit_log (
 デフォルト値は `src/lib/logEnv.ts`
 （`DEFAULT_APP_LOG_RETENTION_DAYS = 7`、`DEFAULT_CALL_LOG_RETENTION_DAYS = 7`）で定義されています。
 
-## `noLog` オプトアウト（APIキー単位）
+## `noLog`オプトアウト ( APIキーごと)
 
-APIキーにフラグを設定すると、そのキーによるダウンストリーム呼び出しトラフィックをログに記録しないようにできます。
-このフラグは `api_keys` テーブル（`no_log INTEGER DEFAULT 0`）に保存され、
-ホットパスでの検索用にメモリ内セットにも反映されます。
+APIキーにはフラグを設定して、そのダウンストリーム通話トラフィックがログに記録されないようにすることができます。フラグは`api_keys`テーブル (`no_log INTEGER DEFAULT 0`) 上に存在し、ホットパス ルックアップのためにメモリ内セットにミラーリングされます。
 
 ```bash
-# ログを記録しないキーを作成（管理者認証が必要）
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-ヘルパー（`src/lib/compliance/index.ts`）：
+ヘルパー (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — メモリ内エントリを切り替える
-- `isNoLog(apiKeyId)` — リクエスト処理パスで確認される。確認できない場合は、30秒間
-  キャッシュされた `api_keys.no_log` の読み取りにフォールバックする
-- `NO_LOG_API_KEY_IDS`（環境変数、カンマ区切り）— 起動時にメモリ内
-  セットへ事前読み込みされる。列を直接切り替えられない場合に便利
+- `setNoLog(apiKeyId, true|false)` —メモリ内エントリを切り替えます
+- `isNoLog(apiKeyId)` —リクエスト パスでチェックされました。 `api_keys.no_log`からの 30 秒のキャッシュ読み取りにフォールバックします
+- `NO_LOG_API_KEY_IDS` (env、カンマ区切り) —起動時にメモリ内セットにプリロードされます。列を直接切り替えることができない場合に便利です
 
-管理上の監査イベント（ログイン、プロバイダーの変更、MCPツールの呼び出しなど）は
-`noLog` の影響を**受けません**。オプトアウトの対象となるのは、リクエスト単位のトラフィックログのみです。
+管理監査イベント (ログイン、プロバイダーの変更、 MCPツールの呼び出しなど) は、**ない**`noLog`の影響を受ける—のみ、リクエストごとのトラフィック ログがオプトアウトされます。
+
+### リクエストごとのオプトアウト (`x-omniroute-no-log`)
+
+クライアントは、専用キーを作成せずに、ペイロードの永続性から単一の推論リクエストを選択できます。リクエストで`x-omniroute-no-log: true`送信します (`1`と`yes`も受け入れられ、大文字と小文字は区別されません)。これは、チャット ハンドラーを介して実行されるすべてのチャット ファミリ ルート (チャットの完了、応答、メッセージ、完了、および Gemini 互換パス) に適用されます。呼び出しログの行には、タイムスタンプ、モデル、プロバイダー、ステータス、期間、トークン数が引き続き書き込まれますが、 `request_body`、 `response_body`、リクエストの概要、およびパイプライン アーティファクトは省略されます。
+
+ヘッダーはキー フラグを持つORedです。ログなしキーはヘッダーに関係なくログなしのままであり、ヘッダーはログなしキーのロギングを再度有効にすることはできません。ヘッダーは、リクエストがアップストリームに転送される前に削除されます。
+
+このヘッダーは**ない**メモリ抽出またはセマンティック キャッシュを無効にします。リクエストがこれらのサブシステムにコンテンツを保持してはいけない場合は、 `x-omniroute-no-memory: true`と`x-omniroute-no-cache: true`一緒に送信します。
 
 ## REST API
 

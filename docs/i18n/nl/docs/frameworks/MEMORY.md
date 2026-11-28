@@ -5,31 +5,12 @@
 ---
 
 > **Bron van waarheid:** `src/lib/memory/` en `src/app/api/memory/`
-> **Laatst bijgewerkt:** 2026-06-28 — v3.8.40 (standaard uitgeschakeld + inhaalslag voor int8-kwantisatie)
 
-OmniRoute biedt permanent gespreksgeheugen, gekoppeld aan een API-sleutel (en
-optioneel een sessie-id). Herinneringen worden automatisch uit LLM-antwoorden
-geëxtraheerd via lichtgewicht patroonherkenning met reguliere expressies en
-opnieuw in volgende verzoeken geïnjecteerd als een voorafgaand systeembericht
-(of als eerste gebruikersbericht voor providers die de systeemrol weigeren).
+OmniRoute biedt aanhoudend conversatiegeheugen, gecodeerd met de API sleutel (en optioneel sessie-ID). Herinneringen worden automatisch uit LLM antwoorden gehaald via lichtgewicht regex-patroonmatching en terug in volgende verzoeken geïnjecteerd als een leidend systeembericht (of eerste gebruikersbericht voor providers die de systeemrol afwijzen).
 
-> **Geheugen is standaard UITGESCHAKELD (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> is nu `false` (`src/lib/memory/settings.ts`). Als geheugen wordt ingeschakeld,
-> wordt maximaal `maxTokens` (~2k) aan opgehaalde context in **elk** chatverzoek
-> geïnjecteerd, wat in rekening wordt gebracht — een onverwachte kostenpost voor
-> nieuwe installaties en voor clients die hun eigen context beheren. Schakel dit
-> expliciet in via **Instellingen → Geheugen** (de `MemorySkillsTab` toont een
-> waarschuwing over tokenkosten wanneer geheugen is ingeschakeld). Een client kan
-> geheugen voor één verzoek uitschakelen met de verzoekheader
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — zie de tabel met verzoekheaders in
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Een verzoek zonder geheugen
-> stelt `memoryOwnerId = null` in, waardoor **zowel** geheugeninjectie als
-> vaardigheidsinjectie voor dat verzoek wordt uitgeschakeld
-> (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Het geheugen is standaard OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` is nu `false` (`src/lib/memory/settings.ts`). Het inschakelen van geheugen injecteert maximaal `maxTokens` (~ 2k) opgehaalde context in** elk** chatverzoek, waarvoor verrassende kosten in rekening worden — voor nieuwe installaties en voor klanten die hun eigen context beheren. Meld u expliciet aan onder** Instellingen → Geheugen** (de `MemorySkillsTab` toont een waarschuwing voor tokenkosten wanneer het geheugen is ingeschakeld). Een client kan een enkel verzoek afmelden met de `x-omniroute-no-memory` request header (`true`/`1`/`yes`) — zie de request-header tabel in [API_REFERENCE.md](../reference/API_REFERENCE.md). Een verzoek zonder geheugen stelt `memoryOwnerId = null` in, wat wordt uitgeschakeld** beide** geheugen- en vaardigheidsinjectie voor dat verzoek (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Geheugen is **afgebakend per API-sleutel**, niet per gebruiker — elk verzoek dat
-met dezelfde API-sleutel wordt geauthenticeerd, deelt dezelfde geheugenverzameling,
-met optionele verdere afbakening via `sessionId`.
+Het geheugen is** scoped per API sleutel** , niet per gebruiker — deelt elk verzoek dat is geverifieerd met dezelfde API sleutel dezelfde geheugenpool, met optionele verdere scoping door `sessionId`.
 
 ## Architectuur
 
@@ -725,22 +706,22 @@ Benchmark op een typische x86-server met 4 cores (teksten van elk ~100 tokens):
 
 ---
 
-## Patronen voor feitenextractie (v3.8.16+)
+## Patronen voor feitenextractie (v3.8.16 +)
 
-De module `extraction.ts` (`src/lib/memory/extraction.ts`) gebruikt **patroonherkenning met reguliere expressies** om gestructureerde feiten uit conversatieberichten te extraheren. Inzicht in deze patronen helpt je de extractiekwaliteit af te stemmen op jouw gebruikssituatie.
+De `extraction.ts` module (`src/lib/memory/extraction.ts`) maakt gebruik van** regex-patroonmatching** om gestructureerde feiten uit gespreksberichten te halen. Als u deze patronen begrijpt, kunt u de extractiekwaliteit afstemmen op uw gebruiksscenario.
 
 ### Standaardpatrooncategorieën
 
-| Categorie           | Voorbeeldpatroon                                                       | Legt vast                           |
-| ------------------- | ---------------------------------------------------------------------- | ----------------------------------- |
-| PREFERENCE_PATTERNS | `"Ik geef de voorkeur aan <X>"`, `"Ik vind <X> leuk"`, `"Ik haat <X>"` | Gebruikersvoorkeuren                |
-| DECISION_PATTERNS   | `"Ik gebruik <X>"`, `"Ik heb besloten om <X>"`, `"Ik koos voor <X>"`   | Gebruikersbeslissingen (episodisch) |
-| PATTERN_PATTERNS    | `"Ik doe meestal <X>"`, `"Ik doe altijd <X>"`, `"Ik doe nooit <X>"`    | Aanhoudende gedragspatronen         |
+| Categorie           | Voorbeeld patroon                                           | Opnames                             |
+| ------------------- | ----------------------------------------------------------- | ----------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Gebruikersvoorkeuren                |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Gebruikersbeslissingen (episodisch) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Aanhoudende gedragspatronen         |
 
 ### Voorbeeldpatronen (vereenvoudigd)
 
 ```ts
-// Uit src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -757,32 +738,24 @@ const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\
 
 Wanneer een gebruiker zegt:
 
-> "Ik geef de voorkeur aan TypeScript. Ik gebruik Postgres voor dit project. Ik commit altijd voordat ik push. Ik vind Python niet leuk."
-> Extractie levert 4 herinneringen op:
+> "Ik geef de voorkeur aan TypeScript. Ik gebruik Postgres voor dit project. Ik commit altijd voordat ik push. Ik hou niet van Python." Extractie produceert 4 geheugens:
 >
-> | Sleutel                              | Categorie  | Type       | Inhoud                      |
-> | ------------------------------------ | ---------- | ---------- | --------------------------- |
-> | `preference:typescript`              | voorkeur   | feitelijk  | "TypeScript"                |
-> | `decision:postgres_for_this_project` | beslissing | episodisch | "Postgres voor dit project" |
-> | `pattern:commit_before_pushing`      | patroon    | feitelijk  | "commit voordat ik push"    |
-> | `preference:python`                  | voorkeur   | feitelijk  | "Python"                    |
+> | Sleutel | Categorie | Type | Inhoud | | ---------------------------------- | ---------- | -------- | ------------------------- | | `preference:typescript` | voorkeur | feitelijk | "TypeScript" | | `decision:postgres_for_this_project` | beslissing | episodische | "Postgres voor dit project" | | `pattern:commit_before_pushing` | patroon | feitelijk | "commit before pushen" | | `preference:python` | voorkeur | feitelijk | "Python" |
 
 ### Extractielimieten
 
-Om ongebreidelde extractie te voorkomen, gelden de volgende limieten:
+Om op hol geslagen extractie te voorkomen, gelden de volgende limieten:
 
-| Minimale inhoudslengte | 3 tekens |
-| Maximale inhoudslengte | 500 tekens |
+| Minimale lengte van de inhoud | 3 tekens |
+| Maximale lengte van de inhoud | 500 tekens |
 
-### Wanneer extractie moet worden uitgeschakeld
+### Wanneer moet u extractie uitschakelen?
 
-Extractie wordt automatisch uitgevoerd wanneer het geheugen is ingeschakeld; er is geen afzonderlijke
-schakelaar uitsluitend voor extractie. Schakel het geheugen volledig uit (`enabled: false`
-via `PUT /api/settings/memory`) om dit uit te zetten. Overweeg dit wanneer:
+Het uitpakken wordt automatisch uitgevoerd wanneer het geheugen is ingeschakeld; er is geen aparte schakelaar voor alleen extractie. Om het uit te schakelen, schakelt u het geheugen volledig uit (`enabled: false` via `PUT /api/settings/memory`). Overweeg dit te doen wanneer:
 
-- Je een groot berichtenvolume hebt en de extractiekosten niet verwaarloosbaar zijn
-- Je conversaties voornamelijk tijdelijk zijn (chat, foutopsporing) en geen langetermijnwaarde hebben
-- Je context al vastlegt via aangepaste plug-ins
+- U heeft een hoog berichtenvolume en de extractiekosten zijn niet triviaal
+- Uw gesprekken zijn meestal van voorbijgaande aard (chat, foutopsporing) en hebben geen waarde op de lange termijn
+- U legt al context vast via aangepaste plug-ins
 
 ---
 

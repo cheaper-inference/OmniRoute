@@ -12,6 +12,12 @@ Neitrālajā `config/cli-tools-manifest.json` līgumā ir deklarēti kanoniskie 
 
 Pārtraukšanas un izbeigšanas signāli tiek pārsūtīti bērnam. Pirms pagaidu konfigurācijas noņemšanas palaišanas programma gaida bērna aizvēršanas notikumu. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` kontrolē labvēlības periodu pirms piespiedu pārtraukšanas (noklusējuma 5000 milisekundes).
 
+`omniroute launch <tool>` (sk. [LAUNCH.md](./LAUNCH.md) ) ievēro tos pašus vides noteikumus un signālu pārsūtīšanu, kā arī pievieno:
+
+- **Vārtejas automātiskā palaišana.** Vietējam mērķim, kad portā neatbild neviena vārteja, palaišanas programma sāk `omniroute serve --headless --no-open` kas ir saistīta ar `127.0.0.1`, izmantojot atdalītu pļaujmašīnas procesu. Katram palaišanas palaišanai ir nomas `DATA_DIR/launch/leases/` (sirdspuksti ik pēc 15 s, novecojuši pēc 45 s vai kad process ir pagājis). Labības pļaujmašīna aptur vārteju, ko tā sāka, tiklīdz nav bijusi aktīva noma dīkstāves periodam (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, noklusējuma 10 000 milisekundes). Vārteja, kuru palaida lietotājs, tiek izmantota, bet nekad nav apturēta. `--keep-gateway` vai `omniroute gateway keep` pārvērš palaišanas vārteju par parastu; `--no-start` atjauno veco “fail-ja-down” darbību. Tiek pārbaudīti tikai attālie mērķi.
+- **Uzsākt sesijas.** Katrā palaišanas reizē tiek iegūts īslaicīgs `olx_` sesijas marķieris no vecāka akreditācijas datiem (`POST /api/launch/sessions`), rīks darbojas, nolasa lietošanas kopsavilkumu un atsauc to pēc rīka iziešanas. Marķieris ir stingra tā vecāku apakškopa: tās pašas atļaujas, tas pats vai šaurāks katalogs, īsāks kalpošanas laiks, un tas nav informācijas paneļa akreditācijas dati. Rīks saņem sesijas pilnvaru, nevis vecāku akreditācijas datus, un pieprasījumi tiek atzīmēti ar `launch:<tool>:<sessionId>` ja vien nav norādīts `--tag`. Vārteja bez sesijas API neizdodas, izmantojot `GatewayTooOld` tā vietā, lai atsāktu palaišanu bez darbības jomas.
+- **Palaišanas konfigurācija.** Rīka konfigurācijas faili tiek ierakstīti privātā pagaidu direktorijā (režīms 0700, prefikss `omnirouter-`) un noņemti pēc bērna iziešanas. Palaišanas programmas `SIGKILL` atstāj direktoriju aiz muguras; `omniroute launch --cleanup` noņem šādus direktorijus, kad tie ir vecāki par vienu dienu.
+
 ## Gemini pastāvīga iestatīšana
 
 ```bash

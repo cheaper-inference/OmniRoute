@@ -4,169 +4,176 @@
 
 ---
 
-> **Lyhyesti**: Käytä omia ehdot täyttäviä palveluntarjoajatilejäsi. OmniRoute yhdistää määrittämäsi yhteydet; se ei tarjoa mainostettua yhteenlaskettua token-budjettia. Maksuton käyttö voi edellyttää rekisteröitymistä, API-avainta, hyväksyntää tai maksutapaa. Palveluntarjoajien rajoitukset, tietosuojakäytännöt ja käyttöehdot ovat edelleen voimassa.
+> **TL;DR** : Tuo omat kelvolliset palveluntarjoajatilit. OmniRoute yhdistää määrittämäsi yhteydet; se ei anna mainostettua kokonaisbudjettia. Ilmainen pääsy voi edellyttää rekisteröitymistä, API -avainta, hyväksyntää tai maksutapaa. Palveluntarjoajan rajoitukset, tietosuojakäytännöt ja ehdot ovat edelleen voimassa.
 
 ---
 
-## Mitä ilmaiset käyttöoikeudet ovat?
+## Mitä ilmaiset tasot ovat?
 
-Monet tekoälypalveluntarjoajat tarjoavat jonkinlaisen **ilmaisen käyttöoikeuden**. Palveluntarjoajasta riippuen se voi
-tarkoittaa tunnistautumista vaatimatonta päätepistettä, toistuvaa kiintiötä, nopeusrajoitettua mutta määrältään rajoittamatonta käyttöä, rekisteröitymisetua,
-manuaalista hyväksyntää tai väliaikaista kampanjaa. Jotkin vaihtoehdot edellyttävät käyttäjätiliä, API-avainta,
-luottokorttia, KYC-tunnistautumista tai palveluntarjoajakohtaisten ehtojen hyväksymistä.
+Monet AI palveluntarjoajat tarjoavat jonkinlaista** vapaa pääsy** . Palveluntarjoajalta riippuen tämä voi tarkoittaa ei-tod-päätepistettä, toistuvaa kiintiötä, rajoitettua rajatonta pääsyä, rekisteröitymislupaa, manuaalista hyväksyntää tai väliaikaista ylennystä. Jotkut vaihtoehdot edellyttävät tiliä, API -avainta, luottokorttia, KYC tai palveluntarjoajakohtaisten ehtojen hyväksymistä.
 
-OmniRoute **yhdistää** määritetyt yhteydet yhdeksi päätepisteeksi. Sinun on silti rekisteröidyttävä erikseen jokaiselle palveluntarjoajalle, joka edellyttää käyttäjätiliä. Yhdistä nämä tilit ja käytä asetusta `model: "auto"` reitittääksesi pyynnöt soveltuvien kohteiden välillä. Uudessa asennuksessa ei välttämättä ole yhtään soveltuvaa avaimetonta kohdetta; pelkkä OmniRouten asentaminen ei takaa onnistunutta chat-vastausta.
+OmniRoute** aggregaatteja** konfiguroi yhteydet yhteen päätepisteeseen. Rekisteröidyt silti erikseen jokaiselle palveluntarjoajalle, joka vaatii tilin. Yhdistä nämä tilit ja käytä `model: "auto"` reitittääksesi kelvollisten kohteiden välillä. Uudella asennuksella ei voi olla kelvollista avaimetonta kohdetta; Pelkästään OmniRoute asentaminen ei takaa onnistunutta chat-vastausta.
 
 ---
 
-## Edustavat maksuttoman käytön tarjoajat
+## Edustavat vapaan pääsyn tarjoajat
 
-### Toistuva, avaimeton tai ilman ylärajaa tarjottava käyttö
+### Toistuva, avaimeton tai rajoittamaton pääsy
 
-Näillä tarjoajilla on tarkastetussa luettelossa toistuva, avaimeton tai ilman ylärajaa tarjottava maksuton käyttötapa. ”Ilman ylärajaa” tarkoittaa, ettei julkaistua tokenien enimmäismäärää ole; nopeus-, rinnakkaisuus-, tili-, alue- ja käytäntörajoituksia voidaan silti soveltaa:
+Näillä palveluntarjoajilla on toistuva, avaimeton tai rajoittamaton vapaan pääsyn polku tarkastetussa luettelossa. "Uncapped" tarkoittaa, että ei ole julkaistu tunnuksen ylärajaa; korko-, samanaikaisuus-, tili-, alue- ja käytäntörajoitukset voivat edelleen olla voimassa:
 
-| Tarjoaja          | Mallit                                                                                            | Kiintiö                                                                                                                                                         | Yhdistäminen                                                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 ja muut                                               | Tarkastetun luettelon arvion mukaan 25K tokenin yhteinen kuukausittainen varanto                                                                                | OAuth-/tiliprosessi; käyttöehdot on merkitty luettelossa tunnisteella `avoid`                                                        |
-| **Pollinations**  | Nykyinen avaimettomien mallien valikoima; jotkin aiemmat mallit on lopetettu tai vaativat avaimen | Avaimeton; ei julkaistua tokenien enimmäismäärää                                                                                                                | Avaimettomat mallit eivät edellytä tarjoajan tunnistetietoja                                                                         |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 ja muut                               | Maksuton API-avain (ei nopeusrajoituksia eikä korttia); **jokainen pyyntö kirjataan lokiin** tutkimusta varten (voit kieltäytyä osoitteessa logfare.ai/consent) | Avaimen saa heti osoitteesta logfare.ai/register; käyttöehdot ja tietosuojakäytäntö osoitteissa logfare.ai/tos ja logfare.ai/privacy |
-| **Cloudflare AI** | Workers AI -luettelo                                                                              | Tarkastetun varannon arvion mukaan ~30M tokenia kuukaudessa julkaistujen käyttöyksiköiden perusteella                                                           | Cloudflare-tili ja API-tunnistetiedot                                                                                                |
-| **Gemini**        | Gemini Flash -malliperhe                                                                          | Projektin ja mallin mukaan vaihtelevat nopeusrajoitukset; ilmoitettu etu ei sisällä kiinteää kuukausittaista token-määrää                                       | Google AI Studio API-avain; tarkista projektin aktiiviset rajoitukset                                                                |
-| **Groq**          | Llama-, GPT-OSS- ja Qwen-mallit                                                                   | Tarkastetun varannon arvion mukaan ~15M tokenia kuukaudessa                                                                                                     | Groq API-avain; nopeusrajoituksia sovelletaan                                                                                        |
+| Palveluntarjoaja  | Mallit                                                                                | Kiintiö                                                                                                                                                | Kuinka muodostaa yhteys                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 ja muut                                   | Tarkastettu luettelo arvioi 25 000 tunnuksen jaetun kuukausittaisen poolin                                                                             | OAuth/account virtaus; ToS merkitsi `avoid` :ksi luettelossa                                      |
+| **Pölytyksiä**    | Nykyinen avaimeton mallisarja; Jotkut aiemmat mallit lopetetaan tai vaaditaan avaimet | Avaimeton; ei julkaistua token capa                                                                                                                    | Ei palveluntarjoajan tunnuksia avaimettomille malleille                                           |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 ja paljon muuta           | Ilmainen API avain (ei hintarajoituksia, ei korttia);** jokainen pyyntö kirjataan** tutkimusta varten (poista käytöstä osoitteessa logfare.ai/consent) | Pikanäppäin osoitteessa logfare.ai/register; ToS/privacy logfare.ai/tos ssä ja logfare.ai/privacy |
+| **Cloudflare AI** | Workers AI -luettelo                                                                  | Auditoitu pooliarvio ~ 23M tokens/month julkaistuista käyttöyksiköistä (luettelo tarkastettu 23.11.2026)                                               | Cloudflare -tili ja API -kirjautumistiedot                                                        |
+| **Gemini**        | Gemini Flash -perhe                                                                   | Vaihtelevat project/model nopeuden rajat; otsikkoon ei sisälly kiinteää kuukausittaista tunnusrahaa                                                    | Google AI Studio API avain; tarkista projektin aktiivisuusrajat                                   |
+| **Groq**          | Llama, GPT-OSS- ja Qwen malleissa                                                     | Auditoitu pooliarvio ~ 24M tokens/month (4 mallikohtaista korkkia, luettelo tarkastettu 23.11.2026)                                                    | Groq API avain; hintarajoituksia sovelletaan                                                      |
 
-### Rekisteröitymisedut ja tarjoajakohtaiset hyvitykset
+### Rekisteröitymisapurahat ja palveluntarjoajakohtaiset hyvitykset
 
-Nämä tarjoajat tarjoavat rekisteröitymisetuja tai kampanjahyvityksiä kelpoisuusehtojensa mukaisesti. Päivänä 2026-10-08 tehdyn tarkistuksen mukaan [Cerebrasin hinnoittelu](https://www.cerebras.ai/pricing) edellyttää maksutapaa kertaluonteista $5:n hyvitystä varten, joka vanhenee 30 päivän kuluttua; kyseessä ei ole toistuva token-kiintiö. [Geminin nopeusrajoitukset](https://ai.google.dev/gemini-api/docs/rate-limits) vaihtelevat projektin, mallin ja tason mukaan, joten niitä ei muunneta taatuksi kuukausittaiseksi token-eduksi.
+Nämä palveluntarjoajat tarjoavat liittymisapurahoja tai tarjoushyvityksiä kelpoisuussääntöjensä mukaisesti. Kuten vahvistettiin 2026-10-08, [Cerebras -hinnoittelu](https://www.cerebras.ai/pricing) vaatii maksutavan kertaluonteiselle 5 dollarin hyvitykselle, joka vanhenee 30 päivän kuluttua. se ei ole toistuva tunnuskiintiö. [Gemini nopeusrajat](https://ai.google.dev/gemini-api/docs/rate-limits) vaihtelevat projektin, mallin ja tason mukaan, joten niitä ei muunneta taatuksi kuukausittaisiksi token-avustuksiksi.
 
-| Tarjoaja      | Maksuttomat hyvitykset                                                        | Mallit                    | Näin saat edun                                                                   |
-| ------------- | ----------------------------------------------------------------------------- | ------------------------- | -------------------------------------------------------------------------------- |
-| **Cerebras**  | Kertaluonteinen $5:n kampanjahyvitys; vanhenee 30 päivän kuluttua             | Nykyinen päättelyluettelo | Tili ja kelvollinen maksutapa                                                    |
-| **DeepSeek**  | 5M maksutonta tokenia                                                         | DeepSeek V4               | Rekisteröidy osoitteessa platform.deepseek.com                                   |
-| **LongCat**   | Kertaluonteinen 10M tokenin etu                                               | LongCat 2.0               | API-avain + KYC; käytön mukaan veloitettava hinnoittelu edun käyttämisen jälkeen |
-| **Vertex AI** | $300:n rekisteröitymishyvitys, joka vastaa budjettimallissa noin 300M tokenia | Gemini- ja kumppanimallit | Google Cloud -tili; laskutus- ja kelpoisuusehtoja sovelletaan                    |
+| Palveluntarjoaja | Ilmaiset krediitit                                                      | Mallit                    | Miten saada                                                     |
+| ---------------- | ----------------------------------------------------------------------- | ------------------------- | --------------------------------------------------------------- |
+| **Cerebras**     | Kertaluonteinen 5 dollarin tarjoushyvitys; vanhenee 30 päivän kuluttua  | Nykyinen päättelyluettelo | Tili ja voimassa oleva maksutapa                                |
+| **DeepSeek**     | 5 miljoonaa ilmaista tokenia                                            | DeepSeek V4               | Rekisteröidy osoitteessa platform.deepseek.com                  |
+| **LongCat**      | 10 miljoonan token kertaluonteinen apuraha                              | LongCat 2.0               | API avain + KYC; jako-jako apurahan jälkeen                     |
+| **Vertex AI**    | 300 dollarin kirjautumishyvitys edusti ~ 300M tokeneja budjettimallissa | Gemini ja kumppanimallit  | Google Cloud-tili; laskutus- ja kelpoisuussäännöt ovat voimassa |
 
-### Muu rajoitettu käyttö
+### Muu rajoitettu pääsy
 
-Näillä tarjoajilla on **maksuttomia tasoja**, joihin sovelletaan tiettyjä rajoituksia:
+Näillä palveluntarjoajilla on** ilmaiset tasot** erityisillä rajoituksilla:
 
-| Tarjoaja                   | Maksuton rajoitus                                                                                                   | Mallit                                            | Soveltuu parhaiten |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------ |
-| **GitHub Models**          | Tarkastetun yhteisen varannon arvion mukaan ~18M tokenia kuukaudessa                                                | Laaja mallien arviointi                           |
-| **Hugging Face**           | Pieni toistuva kuukausittainen varanto                                                                              | Kokeilut ja mallien monipuolisuus                 |
-| **OpenRouter free models** | Yhteinen pyyntömäärältään rajoitettu varanto; valinnainen kertaluonteinen lisäys kasvattaa toistuvaa käyttöoikeutta | Laaja varamallien luettelo                        |
-| **AI Horde**               | Avaimeton yhteisökapasiteetti; saatavuus vaihtelee                                                                  | Tilaisuuden mukaan käytettävä hajautettu päättely |
+| Palveluntarjoaja               | Ilmainen raja                                                                                   | Mallit                              | Paras |
+| ------------------------------ | ----------------------------------------------------------------------------------------------- | ----------------------------------- | ----- |
+| **GitHub mallit**              | Auditoitu yhteinen pooli arvioi ~ 18M tokens/month                                              | Laaja mallin arviointi              |
+| **Halaavat kasvot**            | Pieni toistuva kuukausittainen allas                                                            | Kokeilut ja mallivalikoima          |
+| **OpenRouter ilmaiset mallit** | Jaettu pyynnöstä rajoitettu allas; valinnainen kertaluontoinen lisäys lisää toistuvaa korvausta | Laaja varaluettelo                  |
+| **AI Horde**                   | Avaimeton yhteisön kapasiteetti; saatavuus vaihtelee                                            | Opportunistinen hajautettu päättely |
 
 ---
 
-## Näin yhdistät ilmaistasoja
+## Kuinka pinota ilmaisia tasoja
 
-OmniRouten teho perustuu **ilmaistasojen yhdistämiseen**. Sen sijaan, että turvautuisit yhteen palveluntarjoajaan, yhdistät useita ilmaisia palveluntarjoajia ja annat OmniRouten valita automaattisesti parhaan vaihtoehdon kuhunkin pyyntöön.
+OmniRoute taika on** pinoamalla ilmaisia tasoja** . Sen sijaan, että luottaisit yhteen palveluntarjoajaan, yhdistät useita ilmaisia palveluntarjoajia ja annat OmniRoute valita automaattisesti parhaan kullekin pyynnölle.
 
-### Esimerkki: Kattavampi ilmaistasojen hyödyntäminen
+### Esimerkki: Laajempi vapaan tason kattavuus
 
 Yhdistä useita palveluntarjoajia vähentääksesi riippuvuutta yksittäisestä kiintiöstä:
 
-1. **Gemini** — uusiutuva API-avainkiintiö
-2. **Groq** — uusiutuva API-avainkiintiö
-3. **Pollinations** — avaimeton käyttö nopeusrajoituksella
-4. **LongCat** — rekisteröitymisen yhteydessä saatava kertaluonteinen etu (edellyttää KYC-tunnistautumista)
+1. **Gemini** — n toistuva API-avainkiintiö
+2. **Groq** — n toistuva API-avainkiintiö
+3. **Pölytyksiä** — avaimeton, nopeusrajoitettu pääsy
+4. **LongCat** — kertaluonteinen kirjautumisapuraha (vaatii KYC)
 
-Käytä sitten asetusta `model: "auto"`, jolloin OmniRoute:
+Käytä sitten `model: "auto"` ja OmniRoute :
 
-- Kokeilee ensin korkeimmalle sijoitettua kelvollista yhteyttä
-- Jos sen kiintiö on täynnä tai kuntotarkistus epäonnistuu → kokeilee seuraavaa määritettyä palveluntarjoajaa
-- Jos avaimeton palveluntarjoaja ei ole käytettävissä → jatkaa jäljellä olevien kohteiden läpikäyntiä
-- Jos mikään kelvollinen yhteys ei onnistu → palauttaa virheen; rekisteröitymiskrediittejä voi käyttää vain niin kauan kuin ne ovat voimassa ja käytettävissä
+- Kokeile ensin korkeimman luokan kelvollista yhteyttä
+- Jos sen kiintiö tai kuntotarkastus epäonnistuu → kokeile seuraavaa määritettyä palveluntarjoajaa
+- Jos avaimeton palveluntarjoaja ei ole tavoitettavissa, → jatka jäljellä olevien kohteiden läpi
+- Jos mikään kelvollinen yhteys ei onnistu → palauttaa virheilmoituksen; kirjautumishyvitykset ovat käytettävissä vain, kun ne ovat voimassa ja saatavilla
 
-**Tulos**: kattavampi ilmaistasojen hyödyntäminen automaattisella varajärjestelyllä — ei tae rajattomasta kapasiteetista.
+**Tulos** : laajempi vapaan tason kattavuus automaattisella vara- — ei takaa rajatonta kapasiteettia.
 
 ---
 
-## Maksuttomien palveluntarjoajien yhdistäminen
+## Kuinka yhdistää ilmaisia palveluntarjoajia
 
 ### Vaihe 1: Avaa hallintapaneeli
 
-Siirry selaimessasi osoitteeseen `http://localhost:20128`.
+Siirry `http://localhost:20128` selaimessasi.
 
-### Vaihe 2: Siirry palveluntarjoajiin
+### Vaihe 2: Siirry Palveluntarjoajat-sivulle
 
-Napsauta sivupalkissa kohtaa **Palveluntarjoajat**.
+Napsauta** Palveluntarjoajat** sivupalkissa.
 
-### Vaihe 3: Napsauta Lisää palveluntarjoaja
+### Vaihe 3: Napsauta Lisää tarjoaja
 
-Napsauta **+ Lisää palveluntarjoaja** -painiketta.
+Napsauta**+ Lisää toimittaja** -painiketta.
 
-### Vaihe 4: Valitse maksuton palveluntarjoaja
+### Vaihe 4: Valitse ilmainen palveluntarjoaja
 
-Selaa luetteloa ja tarkista kunkin palveluntarjoajan nykyiset `hasFree`-, todennus-, kiintiö-, tietosuoja- ja käyttöehtometatiedot. Palveluntarjoajakortti ja
-[Maksuttomien palvelutasojen viite](../reference/FREE_TIERS.md) erottelevat toistuvasti uusiutuvat käyttökiintiöt,
-rajoittamattoman tai ilman avainta toimivan käytön, rekisteröitymishyvitykset, lopetetut vaihtoehdot ja suuremman riskin lähteet.
+Selaa luetteloa ja tarkista kunkin palveluntarjoajan nykyiset `hasFree`, todennus-, kiintiö-, tietosuoja- ja ToS metatiedot. Palveluntarjoajakortti ja [Free Tiers Reference](../reference/FREE_TIERS.md) erottavat toistuvat poolit, uncapped/keyless -pääsyn, kirjautumishyvitykset, lopetetut merkinnät ja korkeamman riskin lähteet.
 
 ### Vaihe 5: Napsauta Yhdistä
 
-`NOAUTH`-palveluntarjoajan tapauksessa OmniRoute ei pyydä ulkoisen palvelun tunnistetietoa. Tämä ei takaa, että ulkoinen palvelu hyväksyy kolmannen osapuolen asiakasohjelmat tai että sillä on vapaata kapasiteettia. OAuth- ja API-avainpohjaiset palveluntarjoajat on yhdistettävä niiden dokumentoidun tiliprosessin kautta. Asiakasohjelmasi käyttää edelleen kohdassa **Hallintapaneeli → Päätepisteet** näkyvää OmniRoute-API-avainta, kun reitittimen todennus on käytössä.
+`NOAUTH` -palveluntarjoajalle OmniRoute ei pyydä ylävirran valtuustietoja. Tämä ei takaa, että alkupää hyväksyy kolmannen osapuolen asiakkaita tai että sillä on vapaata kapasiteettia. OAuth ja API-avaintoimittajat on yhdistettävä dokumentoidun tilikulunsa kautta. Asiakkaasi käyttää edelleen OmniRoute API -avainta, joka on luotu sisään** Kojelauta → API avaimet** (näkyy vain kerran luomisen yhteydessä), kun reitittimen todennus on käytössä.
 
 ### Vaihe 6: Toista
 
-Yhdistä useita palveluntarjoajia, joiden ehdot ja tietosuojamalli sopivat käyttötarkoitukseesi.
+Yhdistä useita palveluntarjoajia, joiden ehdot ja tietosuojamalli sopivat käyttötapauksiisi.
 
 ---
 
-## Luettelon lukeminen oikein
+## Lähde: dsh "Ilmainen mallimme"
 
-- `NOAUTH` tarkoittaa, että OmniRoute ei pyydä palveluntarjoajan tunnistetietoa; se ei
-  takaa käytettävyyttä, tietosuojaa tai rajatonta kapasiteettia.
-- `hasFree` on hakumetatietoa. Se voi tarkoittaa toistuvaa kiintiötä, avaimetonta käyttöä,
-  rekisteröitymishyvitystä, hyväksyntäohjelmaa tai kampanjaa.
-- `recurring-uncapped` tarkoittaa, ettei julkaistua tunnisteiden enimmäismäärää ollut saatavilla; nopeus- ja
-  samanaikaisuusrajoitukset ovat silti voimassa.
-- `one-time-initial` ei toistu, kun rekisteröitymisen yhteydessä myönnetty etu on käytetty.
-- Palveluntarjoajat, joiden `tos`-arvo on `avoid`, jätetään oletusarvoisesti automaattisen reitityksen ulkopuolelle (`excludeTosAvoid`). Tilin yhdistäminen ei ohita tätä suodatinta. Operaattorin tekemän ohituksen tulee perustua palveluntarjoajan ehtojen ja tiliin liittyvien riskien arviointiin.
-- `discontinued`-merkinnällä varustetut kohteet säilyvät historiallisena aineistona, eikä niitä saa esittää
-  tällä hetkellä maksuttomina.
+[Dsh-our-free-mallin](https://github.com/Ebony-Vinyl/dsh-our-free-model) laajennus dsh-agenttiisännälle saavuttaa kaksi ylävirtaa. OmniRoute on jo palveluntarjoaja jokaiselle, mutta vain yksi niistä on ilmainen polku OmniRoute:ssä:
+
+| Plugin kaista | Vastavirtaan                                      | OmniRoute palveluntarjoaja  | Ilmainen OmniRoute? | Kuinka muodostaa yhteys                                                              |
+| ------------- | ------------------------------------------------- | --------------------------- | ------------------- | ------------------------------------------------------------------------------------ |
+| Kilo kanava   | Kilo AI -yhdyskäytävä (`api.kilo.ai/api/gateway`) | `kilo-gateway` (alias `kg`) | Kyllä               | API -avain valinnainen: jätä se tyhjäksi käyttääksesi yhdyskäytävän ilmaista allasta |
+| Vapaa kaista  | OpenCode Zen (`opencode.ai`)                      | `opencode-zen`              | Ei                  | Your own OpenCode API key from [opencode.ai/zen](https://opencode.ai/zen)            |
+
+**Kilo.** Kutsu ilmaista poolia nimellä `kilo-gateway/<model>` tai `kg/<model>`, esimerkiksi `kg/kilo-auto/free` (Kilon ilmainen automaattireititin) tai jokin yhdyskäytävän `:free` malleista. Vapaa sarja pyörii; `kilo-gateway` kulkee mallitunnisteiden läpi, jotka eivät ole OmniRoute:n sisäänrakennetussa luettelossa, joten malli, jota yhdyskäytäväluettelot nykyään ovat, voidaan kutsua ennen kuin luettelo sisältää sen. Kilon ilmaisissa mallikorteissa sanotaan, että ylävirran toimittaja voi kirjata kehotteet ja käyttää niitä palvelujensa parantamiseen, joten älä lähetä arkaluonteisia tietoja.
+
+**OpenCode.** Laajennuksen vapaa kaista on OpenCode:n avaimeton tarjous. OmniRoute ei tarjoa tätä tarjousta ilmaisena pääsynä:
+
+- OmniRoute avaimeton OpenCode palveluntarjoaja poistettiin OpenCode:n operaattorin pyynnöstä (katso [Poistetut palveluntarjoajat](../reference/REMOVED_PROVIDERS.md) ).
+- OpenCode[päätepisteen dokumentaatio](https://opencode.ai/v2/docs/console/models/#endpoints) sitoo sen ilmaiset chat-tarjoukset OpenCode:n omaan asiakkaaseen, joten OmniRoute ei laske tai mainitse niitä ilmaisiksi.
+
+Liitännäisen näyttämät mallitunnukset, kuten `deepseek-v4.1-flash-free`, `mimo-v2.6-flash-free` ja `nemotron-3.5-lightning-free`, ovat `opencode-zen` -luettelossa. Yhdistä `opencode-zen` omaan OpenCode -avaimeesi käyttääksesi niitä OpenCode -tilisi ehtojen mukaisesti.
+
+**Laajennuksen paikallinen portti.** Plugin voi paljastaa mallinsa paikallisessa OpenAI-yhteensopivassa portissa (oletus `18899`). Mikä tahansa tällainen päätepiste voidaan lisätä [mukautetuksi OpenAI-yhteensopivaksi palveluntarjoajaksi](../guides/USER_GUIDE.md#custom-openai-compatible-providers), mutta OmniRoute ei asenna, käynnistä tai päivitä laajennusta, ja laajennus päättää, mikä ylävirtaan palvelee kutakin pyyntöä. Yllä olevat OpenCode rajoitukset koskevat OpenCode:n tarjousta riippumatta siitä, kumpi asiakas lähettää pyynnön.
 
 ---
 
-## Näin OmniRoute tehostaa ilmaiskiintiöiden käyttöä
+## Katalogin lukeminen oikein
 
-### 1. Automaattinen varajärjestely
+- `NOAUTH` tarkoittaa, että OmniRoute ei kysy sinulta palveluntarjoajan tunnistetietoja; se ei takaa käytettävyyttä, yksityisyyttä tai rajatonta kapasiteettia.
+- `hasFree` on löydön metatiedot. Se voi edustaa toistuvaa kiintiötä, avaimetonta pääsyä, rekisteröitymishyvitystä, hyväksymisohjelmaa tai ylennystä.
+- `recurring-uncapped` tarkoittaa, että julkaistua tunnuksen enimmäismäärää ei ollut saatavilla; hinta- ja samanaikaisuusrajoitukset ovat edelleen voimassa.
+- `one-time-initial` ei toistu sen jälkeen, kun rekisteröintiavustus on käytetty.
+- `tos: avoid` palveluntarjoajat suljetaan oletusarvoisesti automaattisen reitityksen ulkopuolelle (`excludeTosAvoid`). Tilin yhdistäminen ei ohita tätä suodatinta. Operaattorin ohituksen tulee seurata palveluntarjoajan ehtojen ja tiliriskin tarkistamista.
+- Merkinnät `discontinued` ovat historiallisia todisteita, eikä niitä saa esittää tällä hetkellä ilmaisina.
 
-Jos yksi ilmainen palveluntarjoaja on ruuhkautunut tai poissa käytöstä, OmniRoute kokeilee automaattisesti seuraavaa. Sinun ei tarvitse tehdä mitään.
+---
+
+## Kuinka OmniRoute tekee ilmaisista tasoista parempia
+
+### 1. Automaattinen palautus
+
+Jos yksi ilmainen palveluntarjoaja on varattu tai poissa, OmniRoute yrittää automaattisesti seuraavaa. Sinun ei tarvitse tehdä mitään.
 
 ### 2. Älykäs reititys
 
-OmniRoute valitsee **parhaan ilmaisen palveluntarjoajan** kuhunkin pyyntöön seuraavien perusteella:
+OmniRoute valitsee** paras ilmainen palveluntarjoaja** jokaiselle pyynnölle, joka perustuu:
 
-- Nopeus — Mikä palveluntarjoaja on juuri nyt nopein?
-- Laatu — Mikä palveluntarjoaja sopii parhaiten tähän tehtävään?
-- Kapasiteetti — Millä palveluntarjoajalla on kiintiötä jäljellä?
+- Speed — Mikä palveluntarjoaja on nopein juuri nyt?
+- Laatu — Mikä palveluntarjoaja on paras tähän tehtävään?
+- Kapasiteetti — Millä toimittajalla on kiintiö jäljellä?
 
-### 3. Tunnistesäästöt
+### 3. Token Savings
 
-OmniRouten pakkausputki voi vähentää kelvollisten kehotteiden ja työkalutulosteiden tunnistemäärää. Todelliset
-säästöt riippuvat sisällöstä, valituista moottoreista, palveluntarjoajan laskentatavasta ja uskollisuusasetuksista;
-pakkaus ei moninkertaista jokaisen palveluntarjoajan kiintiötä kiinteällä kertoimella.
+OmniRoute pakkausputkisto voi vähentää kelvollisia kehotteita ja työkalutulostustunnuksia. Todelliset säästöt riippuvat sisällöstä, valituista moottoreista, palveluntarjoajan kirjanpidosta ja uskollisuusasetuksista. pakkaus ei kerro jokaista toimittajakiintiötä kiinteällä summalla.
 
-### 4. Useiden tilien tuki
+### 4. Usean tilin tuki
 
-Jos palveluntarjoajan ehdot sallivat useita tilejä tai tunnistetietoja, OmniRoute voi käsitellä kutakin
-yhteyttä erillisenä reititysvaihtoehtona. Älä luo ylimääräisiä tilejä palveluntarjoajan
-kiintiön tai käyttöoikeuskäytännön kiertämiseksi.
+Jos palveluntarjoajan ehdot sallivat useita tilejä tai tunnistetietoja, OmniRoute voi käsitellä jokaista yhteyttä erillisenä reititysehdokkaana. Älä luo ylimääräisiä tilejä kiertääksesi palveluntarjoajan kiintiötä tai käyttöoikeuskäytäntöä.
 
 ---
 
-## Ilmaistason laskelmat
+## Ilmainen tason matematiikka
 
-Ajantasainen, resurssivarannot huomioiden deduplikoitu luettelo ilmoittaa tällä hetkellä:
+Live, poolista poistettu kopioluettelo raportoi tällä hetkellä:
 
-| Mittari                                          |     Nykyinen auditoitu arvo | Tulkinta                                                                                                  |
-| ------------------------------------------------ | --------------------------: | --------------------------------------------------------------------------------------------------------- |
-| Toistuva määrällinen kiintiö                     | **~1.62B tokenia/kuukausi** | Jaetut resurssivarannot lasketaan kerran; rajoittamattomat palveluntarjoajat jätetään summan ulkopuolelle |
-| Ensimmäinen kuukausi rekisteröitymiskrediiteillä |          **~2.22B tokenia** | Toistuva kokonaismäärä sekä kertaluonteiset ja toistuvat krediitit                                        |
+| Metrinen                                        |                 Nykyinen auditoitu arvo | Tulkinta                                                                          |
+| ----------------------------------------------- | --------------------------------------: | --------------------------------------------------------------------------------- |
+| Toistuva määrällinen apuraha                    |         **~ 90M ilmainen tokens/month** | Jaetut poolit lasketaan kerran; sulkee rajattomat palveluntarjoajat pois summasta |
+| Ensimmäinen kuukausi rekisteröitymisapurahoilla | **~ 153M ensimmäisen kuukauden aikana** | Toistuvat yhteensä plus kerta- ja toistuvat krediitit                             |
 
-Nämä ovat koko luettelon kattavia arvioita erillisille kelvollisille tileille, eivät OmniRouten tarjoama kiintiö tai ennuste uudelle asennukselle. Käytettävissä oleva kapasiteettisi riippuu yhdistämistäsi palveluntarjoajista ja niiden kulloisistakin ehdoista. Arvot lasketaan tiedostosta `open-sse/config/freeModelCatalog.ts`; katso
-[Ilmaistasojen viite](../reference/FREE_TIERS.md), jossa käsitellään resurssivarantojen deduplikointia, käyttöehtomerkintöjä,
-lopetettuja merkintöjä ja rekisteröitymiskrediittien laskentamenetelmää.
+Nämä ovat luettelon laajuisia arvioita erillisiltä hyväksytyiltä tileiltä, eivät OmniRoute toimittamia päästöoikeuksia tai ennustetta uudesta asennuksesta. Käytettävä kapasiteettisi riippuu yhdistämistäsi palveluntarjoajista ja niiden nykyisistä ehdoista. Arvot lasketaan arvosta `open-sse/config/freeModelCatalog.ts`; Katso [Free Tiers Reference -oppaasta](../reference/FREE_TIERS.md) poolin päällekkäisyyden poistaminen, ToS -liput, lopetetut merkinnät ja kirjautumishyvitysmenetelmät.
 
 ---
 
@@ -174,43 +181,36 @@ lopetettuja merkintöjä ja rekisteröitymiskrediittien laskentamenetelmää.
 
 ### "Onko tämä todella ilmaista?"
 
-Luettelo tallentaa palveluntarjoajien julkaisemat ehdot ja projektin tutkimustiedot, mutta tarjoukset voivat muuttua.
-Tarkista palveluntarjoajan nykyinen hinnoittelu, kiintiö, tietosuojakäytäntö ja kelpoisuusehdot ennen käyttöä.
+Luetteloon kirjataan toimittajan julkaisemat termit ja projektitutkimukset, mutta tarjoukset voivat muuttua. Tarkista palveluntarjoajan nykyinen hinta, kiintiö, tietosuojakäytäntö ja kelpoisuus ennen käyttöä.
 
-### "Voiko ilmainen kiintiö loppua?"
+### "Loppuuko ilmainen taso?"
 
-Jokainen palveluntarjoaja voi rajoittaa pyyntötiheyttä, vaihtaa malleja, keskeyttää käytön tai poistua käytöstä. Useat
-yhteydet parantavat varareittien kattavuutta, mutta eivät takaa ilmaisen reitin saatavuutta.
+Jokainen palveluntarjoaja voi rajoittaa hintarajoituksia, vaihtaa malleja, keskeyttää pääsyn tai siirtyä offline-tilaan. Useat yhteydet parantavat varapeittoa, mutta eivät takaa vapaata reittiä.
 
-### "Voinko käyttää ilmaisia palveluntarjoajia tuotannossa?"
+### "Voinko käyttää ilmaisia palveluntarjoajia tuotantoon?"
 
-Vain jos palveluntarjoajan palvelutasosopimus, tietojenkäsittely, rajoitukset ja ehdot täyttävät tuotanto-
-vaatimuksesi. Kriittisillä työkuormilla tulisi olla valvottu ja sopimuksellisesti soveltuva vararatkaisu.
+Vain jos palveluntarjoajan SLA, tietojenkäsittely, rajoitukset ja ehdot täyttävät tuotantovaatimukset. Kriittisissä työkuormissa olisi pitänyt olla valvottu, sopimukseen sopiva varavaihtoehto.
 
-### "Mikä tässä on juju?"
+### "Mikä on saalis?"
 
-Kompromisseja voivat olla tiukat rajoitukset, jonotuslistat, KYC-tunnistautuminen, luottokortin vahvistaminen, kehoteaineiston käyttö
-koulutukseen, heikompi tietosuoja, palvelutasosopimuksen puuttuminen, mallien vaihtuvuus, maantieteelliset rajoitukset, maksullinen ylikäyttö tai
-tilikäytäntöihin liittyvä riski. OmniRoute tuo saatavilla olevat metatiedot näkyviin; sinä päätät, mitä otat käyttöön.
+Kompromissit voivat sisältää tiukat rajoitukset, jonotuslistat, KYC, luottokorttivahvistus, kehotteisiin liittyvä koulutus, heikompi yksityisyys, ei SLA, mallin vaihtuvuus, maantieteelliset rajoitukset, maksettu ylijäämä tai tilikäytäntöriski. OmniRoute näyttää saatavilla olevat metatiedot; valitset mitä otat käyttöön.
 
-### "Miten saan lisää ilmaista kiintiötä?"
+### "Kuinka saan lisää ilmaista kiintiötä?"
 
-1. Yhdistä useampia ilmaisia palveluntarjoajia
-2. Ota sopivat pakkausmoottorit käyttöön ja mittaa työkuormasi säästöt
-3. Käytä `auto/cheap`-asetusta ilmaisten ja edullisten palveluntarjoajien priorisointiin
-4. Lisää muita sallittuja palveluntarjoajia tai tunnistetietoja rikkomatta palveluntarjoajien ehtoja
+1. Yhdistä lisää ilmaisia palveluntarjoajia
+2. Ota käyttöön sopivat kompressiomoottorit ja mittaa työmääräsi säästöjä
+3. Käytä `auto/cheap` priorisoidaksesi free/cheap palveluntarjoajat
+4. Lisää muita sallittuja palveluntarjoajia tai valtuustietoja rikkomatta palveluntarjoajan ehtoja
 
-### "Ovatko ilmaiset palveluntarjoajat laadultaan huonompia?"
+### "Onko ilmaisilla palveluntarjoajilla huonompi laatu?"
 
-Eivät välttämättä. Jotkin palveluntarjoajat tarjoavat samoja malliperheitä kuin maksullisilla
-reiteillä, mutta rajoitukset, viive, tietosuoja, luotettavuus ja malliversiot voivat poiketa toisistaan. Käytä
-Ilmaisten palveluntarjoajien sijoitukset -sivua laadun mittarina ja tarkista, mitä mallia todellisuudessa käytetään.
+Ei välttämättä. Jotkut palveluntarjoajat paljastavat samat malliperheet saatavilla maksullisilla reiteillä, mutta rajoitukset, latenssi, yksityisyys, luotettavuus ja malliversiot voivat vaihdella. Käytä Free Provider Rankings -sivua laatusignaalina ja tarkista todellinen tarjottu malli.
 
 ---
 
 ## Mitä seuraavaksi?
 
-- **[Auto-Combo-opas](./AUTO-COMBO-GUIDE.md)** — Anna OmniRouten valita sinulle paras tekoäly
+- **[Automaattinen yhdistelmäopas](./AUTO-COMBO-GUIDE.md)** — Anna OmniRoute n valita sinulle sopivin AI
 - **[Palveluntarjoajien opas](./PROVIDERS-GUIDE.md)** — Yhdistä lisää palveluntarjoajia
-- **[Vianmääritys](../guides/TROUBLESHOOTING.md)** — Korjaa yleisiä ongelmia
-- **[Ilmaistasojen viite](../reference/FREE_TIERS.md)** — Täydellinen luettelo ilmaistasoista
+- **[Vianetsintä](../guides/TROUBLESHOOTING.md)** — Korjaa yleisiä ongelmia
+- **[Ilmainen tasoviittaus](../reference/FREE_TIERS.md)** — Täydellinen luettelo ilmaisista tasoista

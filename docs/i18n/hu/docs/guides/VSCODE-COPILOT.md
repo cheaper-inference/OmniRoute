@@ -4,37 +4,37 @@
 
 ---
 
-**Az OmniCopilot** az OmniRoute által kiszolgált összes modellt elérhetővé teszi a _natív_ GitHub Copilot Chat
-modellválasztójában. Nincs második oldalsáv, nincs külön csevegőfelület — a Copilot ügynökmódja, eszközhívása,
-MCP-kiszolgálói és egyéni utasításai mind tovább működnek, csak éppen az Ön által kiválasztott modellen futnak.
+**OmniCopilot** hozzáadja OmniRoute csevegési modelljeit és kombinációit a natív Copilot Chat modellválasztóhoz. Használja a szerkesztő meglévő csevegési és ügynöki munkafolyamatait, eszközhívással és látásmóddal, ha a kiválasztott modell támogatja.
 
-|                         |                                                                                                                                                 |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Telepítés (VS Code)** | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Telepítés (forkok)**  | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Forrás / hibajegyek** | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Követelmény**         | VS Code 1.104+                                                                                                                                  |
+|                                  |                                                                                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Telepítés (VS kód)**           | [Piactér → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)            |
+| **Telepítés (Nyissa meg a VSX)** | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — requires compatible language-model provider and chat APIs |
+| **Forrás / problémák**           | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                              |
+| **Megköveteli**                  | VS Code 1.104 + (1.122 +, ha GitHub bejelentkezés vagy Copilot terv nélkül használhatod)                                        |
+| **Jelenlegi kiadás**             | OmniCopilot v1.5.1 mindkét boltban (megjelenés: 2026-11-24)                                                                     |
 
-> **Nincs szükség Copilot-előfizetésre.** A VS Code 1.122 óta a nyelvimodell-szolgáltatók
-> GitHub-bejelentkezés és bármilyen Copilot-csomag nélkül is működnek. A soron belüli kódkiegészítések és a
-> beágyazásalapú funkciók nem tartoznak a szolgáltatói API hatókörébe, ezért továbbra is igénylik a Copilotot.
+Pillanatkép tárolása bekapcsolva** 2026-11-25 (01:43 UTC)** , jelenlegi kiadás:** 52 081 Marketplace-telepítés** és** 20 989 nyílt VSX letöltés** . Ezek különböző bolti mutatók, nem pedig kombinált felhasználók száma. Források: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) és [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+A nyílt VSX elérhetősége önmagában nem biztosítja a kompatibilitást az adott beállításjegyzéket használó összes szerkesztővel. Ellenőrizze a szerkesztő csevegési és nyelvi modelljének API támogatását.
+
+> **Nincs szükség Copilot -előfizetésre BYOK csevegéshez a VS 1.122 + kóddal.** Microsoft támogatja a csevegést, az eszközöket és MCP GitHub bejelentkezés nélkül, ha egy szolgáltató be van állítva. Az 1.104–1.121 VS kódon a bővítmény továbbra is működik, de VS kódhoz bejelentkezett Copilot terv szükséges. A soron belüli javaslatok és a beágyazáson alapuló szolgáltatások a szolgáltató API kívül maradnak, és továbbra is Copilot igényelnek; Copilot Business/Enterprise adminisztrátorok házirend szerint letilthatják a harmadik féltől származó modellszolgáltatókat; egy villa csak akkor mutatja a modelleket, ha megvalósítja a API chat-szolgáltatót. Az upstream szolgáltató használatáért továbbra is költségek merülhetnek fel. Tekintse meg a [VS Code 1.122 kiadási megjegyzéseket](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) és [a nyelvi modell útmutatóját](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
 ## Beállítás
 
-1. **Indítsa el az OmniRoute-ot** — `npm install -g omniroute && omniroute` (az irányítópult címe: `http://localhost:20128`).
-2. **Telepítse a bővítményt** — keressen rá az „OmniRoute” kifejezésre a Bővítmények nézetben.
-3. **Válasszon modellt** — Copilot Chat → modellválasztó → **Manage Models…** → **OmniRoute**, majd jelölje be
-   a kívánt modelleket.
+1. **Fuss OmniRoute** — `npm install -g omniroute && omniroute` (műszerfal a `http://localhost:20128`).
+2. **Telepítse a bővítményt** — keressen a "OmniRoute" kifejezésre a Bővítmények nézetben.
+3. **Csatlakozás** — tartsa meg az alapértelmezett `http://localhost:20128`, vagy állítsa be a kiszolgálón URL és API kulcsot**OmniRoute: Kapcsolat kezelése** .
+4. **Válassz egy modellt** — Copilot Chat → modellválasztó →** Modellek kezelése…** →**OmniRoute** , majd jelölje be, amit szeretne.
 
-Ha az OmniRoute az alapértelmezett porton fut, nincs szükség beállításra. Távoli példány esetén nyissa meg az
-**OmniRoute ikont a Tevékenységsávon** (vagy futtassa az `OmniRoute: Manage Connection` parancsot), és állítsa be a következőket:
+A csatlakozási beállításokhoz nyissa meg a**OmniRoute ikonra a tevékenységsávon** (vagy futtassa `OmniRoute: Manage Connection`), és állítsa be:
 
-- **Kiszolgáló URL-címe** — a kiszolgáló gyökércíme, például `http://192.168.0.15:20128`. A `/v1` utótagot
-  a bővítmény fűzi hozzá; ne adja meg.
-- **API-kulcs** — csak akkor szükséges, ha a kiszolgálón be van állítva a `REQUIRE_API_KEY`. Tárolása az operációs rendszer kulcstárában történik a VS
-  Code SecretStorage használatával, soha nem a `settings.json` fájlban.
+- **URL szerver** — a kiszolgáló gyökerét, pl. `http://omniroute.example.com:20128`. A `/v1` utótagot a kiterjesztés fűzi hozzá; ne tartalmazza.
+- **API kulcs** — szükséges, ha a kiszolgáló következtetési hitelesítési házirendje megköveteli. VS n keresztül tárolva SecretStorage kód, soha `settings.json` ben; munkaterület-specifikus kulcsok állnak rendelkezésre. Használjon a megjeleníteni kívánt modellekhez engedélyezett kulcsot.
+
+A bővítmény kapcsolatjelzőt, modellfrissítést, modellkörnyezet- és árképzési metaadatokat (kombinációkat is tartalmaz), streamelt érvelést egy** Gondolkodási erőfeszítés** menü VS Code 1.120 +-n, egy állapotsoros napi határérték-jelző és használati panel (OmniRoute 3.8.50 +), CLI konfiguráció és egy opcionális műszerfali lap. A kiválasztott modell és kiszolgálóházirend határozza meg a használható képességeket.
 
 ---
 
@@ -112,24 +112,25 @@ Lásd az [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) dokumentumot és a
 
 ---
 
-## Más eszközök konfigurálása a VS Code-ból
+## A többi eszköz konfigurálása VS kódon belülről
 
-Az **`OmniRoute: Configure Coding CLI`** az `omniroute` CLI használatával azonnal használható profilokat ír a Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo és Roo számára — ugyanazokat a konfigurációkat, amelyeket a
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md) ismertet. Az API-kulcs a
-`OMNIROUTE_API_KEY` környezeti változón keresztül kerül átadásra a CLI-nek, soha nem a parancssorban.
+**`OmniRoute: Configure Coding CLI`** arra készteti a `omniroute` CLI, hogy használatra kész profilokat írjon 16 eszközhöz: Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, ZedWhyCodes. A kiterjesztés `setup-*` parancsokat hív meg az integrált terminálban; telepítse a OmniRoute CLI olyan verzióját, amely tartalmazza a kiválasztott parancsot. Tekintse meg a [CLI integrációs útmutatót](CLI-INTEGRATIONS.md) az egyes receptek által használt fájlokról és jelzőkről, valamint a [kiterjesztés eszköznyilvántartásáról](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+A API billentyűt a CLI `OMNIROUTE_API_KEY` keresztül adjuk át, soha nem a parancssorban. A beállítási receptek megőrizhetik a hitelesítő adatokat a céleszköz konfigurációjában. Amikor egy munkaterület-specifikus kulcsot megoszt egy eszköz felhasználói szintű konfigurációjával, a bővítmény először megerősítést kér.
 
 ---
 
 ## Hibaelhárítás
 
-| Jelenség                                                    | Ok / megoldás                                                                                                                                                                                                                                                                                                 |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nem jelennek meg OmniRoute-modellek a választóban           | A kiszolgáló nem érhető el. Az állapotsoron lévő pont szürkére vált; futtassa az `OmniRoute: Check Connection` parancsot. A felderítés szándékosan csendben történik, és kérdés megjelenítése helyett egyszerűen nem ad hozzá modelleket.                                                                     |
-| Minden modell kétszer jelenik meg                           | Az OmniCopilot 1.0.1-nél régebbi verzióját használja — frissítse. A bővítmény mostantól a `?prefix=alias` paraméterrel küldi a kéréseket.                                                                                                                                                                     |
-| Egy korábban felsorolt kép-/hangmodell eltűnt               | Az 1.0.1-es verzió óta szándékos — az ilyen modellek soha nem tudtak csevegési kérésre válaszolni.                                                                                                                                                                                                            |
-| A panel hiányzik a Tevékenységsávról                        | A VS Code a további nézettárolókat a Tevékenységsáv alján található **„…”** túlcsordulási menübe helyezi, és a jobb gombbal elrejtett tárolók rejtve maradnak. Kattintson jobb gombbal a Tevékenységsávra → jelölje be az **OmniRoute** elemet, vagy nyissa meg az `OmniRoute: Manage Connection` paranccsal. |
-| Az irányítópult `editor` módban is a böngészőben nyílik meg | A kiszolgáló nem a `DASHBOARD_ALLOW_EMBED=vscode` beállítással lett **összeállítva** (lásd fent) — egy előre összeállított telepítés indításakor beállítva nincs hatása. A visszaváltás szándékos.                                                                                                            |
-| A modelllista elavult a szolgáltatók módosítása után        | `OmniRoute: Refresh Models`, vagy a panelen található ↻ hivatkozás.                                                                                                                                                                                                                                           |
+| Tünet                                                                 | Ok/javítás                                                                                                                                                                                                                                                                                                |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nincsenek OmniRoute modellek a pickerben                              | A szerver nem elérhető. Az állapotsor pontja megszürkül; fuss `OmniRoute: Check Connection`. A Discovery tervezésénél fogva néma, és nem járul hozzá a modellekhez, hanem inkább felszólít.                                                                                                               |
+| Minden modell kétszer jelenik meg                                     | Ön egy OmniCopilot 1.0.1-nél régebbi — frissítést használ. A kiterjesztés most `?prefix=alias` kéri.                                                                                                                                                                                                      |
+| Régen egy image/audio modell szerepelt a listán, és eltűnt            | Szándékos, mivel az 1.0.1 — soha nem tudott válaszolni egy chat kérésre.                                                                                                                                                                                                                                  |
+| A panel hiányzik a tevékenységsávról                                  | VS Code extra nézettárolókat helyez át a** "…"** túlcsordulás a tevékenységsáv alján, és a jobb gombbal elrejtett tároló rejtve marad. Kattintson a jobb gombbal az Activity Bar → pipára**OmniRoute** , vagy nyissa meg `OmniRoute: Manage Connection` vel.                                              |
+| Az irányítópult `editor` mód ellenére megnyílik a böngészőben         | A szerver nem volt** épült** `DASHBOARD_ALLOW_EMBED=vscode` (lásd fent), ha — indításkor beállítja egy előre beépített telepítésen, az nem csinál semmit. A visszalépés szándékos.                                                                                                                        |
+| A modellek listája szolgáltatóváltás után elavult                     | `OmniRoute: Refresh Models`, vagy a ↻ hivatkozás a panelen.                                                                                                                                                                                                                                               |
+| A panel azt írja ki, hogy _Online (blokkolt modellek)_, a picker üres | A szerver elutasítja a kulcsot. Mentse el a megfelelő kulcsot** Mentés és tesztelés** . Ha a kulcsot ehelyett a szerveren rögzítették (engedélyezték, vagy hozzáférést kapott a modellekhez), a bővítmény nem veszi észre magát: futtassa `OmniRoute: Refresh Models` vagy nyissa meg a OmniRoute panelt. |
 
 ---
 

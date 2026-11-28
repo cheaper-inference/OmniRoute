@@ -4,9 +4,9 @@
 
 ---
 
-> **Kedu ihe bi ebe: ndekọ ndekọ ọkwa dị elu ọ bụla enyochara na faịlụ mgbọrọgwụ, nwere ebumnuche nwere otu ahịrị.** Emelitere ikpeazụ: 2026-11-13 (OmniRoute v3.8.54)
+> **Ihe na-ebi ebe: ndekọ ndekọ ọkwa dị elu ọ bụla enyochara na faịlụ mgbọrọgwụ, nwere ebumnuche nwere otu ahịrị.**
 >
-> Jiri map a ka ịchọta ụzọ gị gburugburu codebase, wee soro njikọ dị na docs raara onwe ya nye. Ejiri `git ls-files` tụọ ọnụọgụ faịlụ na ụbọchị dị n'elu. Ha na-agbanwe na ọ fọrọ nke nta ka ọ bụrụ ntọhapụ ọ bụla, yabụ were ha dị ka iwu nke ịdị ukwuu.
+> Jiri map a ka ịchọta ụzọ gị gburugburu codebase, wee soro njikọ dị na docs raara onwe ya nye. Ọnụọgụ faịlụ sitere na `git ls-files` wee gbanwee na ihe fọrọ nke nta ka ọ bụrụ ntọhapụ ọ bụla. Were ha dị ka iwu nke ịdị ukwuu.
 
 ## Osisi dị elu
 

@@ -4,9 +4,9 @@
 
 ---
 
-> **Foinse na fírinne:** `electron/` spás oibre** Nuashonraithe is déanaí:** 2026-06-28 — v3.8.40
+> **Foinse na fírinne:** `electron/` spás oibre
 
-OmniRoute ships a cross-platform desktop app (Windows / macOS / Linux) built on **Electron 41** + **electron-builder 26.10**. The desktop app spawns the Next.js standalone server as a child process, points a `BrowserWindow` at it, and adds a system tray, auto-updater, IPC bridge, and zero-config secret bootstrap.
+cuireann OmniRoute feidhmchlár deisce tras-ardán ar fáil (Windows / macOS / Linux) tógtha ar**Electron** +** leictreon-thógálaí 26.10** . Scaipeann an aip deisce an freastalaí Next.js standalone mar phróiseas linbh, cuireann sé `BrowserWindow` in iúl air, agus cuireann sé tráidire córais, auto-updater, droichead IPC, agus bootstrap rúnda nialas-config leis.
 
 ## Ailtireacht
 
@@ -198,10 +198,10 @@ Socraigh trí `session.defaultSession.webRequest.onHeadersReceived`. Treoracha s
 
 ## Nuashonrú uathoibríoch
 
-Úsáideann sé `electron-updater` leis an soláthraí GitHub (`diegosouzapw/OmniRoute`).
+Úsáideann sé `electron-updater` leis an soláthraí GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Imeachtaí curtha ar aghaidh chuig rindreálaí trí `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (le `percent`), `downloaded`, `error`
+- Imeachtaí curtha ar aghaidh chuig rindreálaí trí `update-status` IPC: `checking`, `available`, `not-available`, `downloading` ( le `percent`), `downloaded`, `error`
 - Maraíonn `installUpdate()` an freastalaí ansin glaonna `autoUpdater.quitAndInstall()`
 - Léimeadh i mód dev (`!app.isPackaged`)
 
@@ -240,7 +240,7 @@ Sáraíonn Env: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON
 
 ## Síniú Cóid
 
-dhéanann `electron/package.json`** nach bhfuil** dintiúir síniú sreinge go díreach. Cuir ar aghaidh iad trí env vars go `electron-builder`:
+déanann `electron/package.json`** nach bhfuil** dintiúir síniú sreinge go díreach. Cuir ar aghaidh iad trí env vars go `electron-builder`:
 
 ### macOS
 
@@ -267,13 +267,13 @@ Tá síniú AppImage roghnach — set `LINUX_GPG_KEY` má tá tú ag síniú.
 
 ## Dáileadh
 
-Artifacts i dtír i `electron/dist-electron/`:
+Talamh artifacts i `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Foilsítear eisiúintí chuig GitHub Releases (`diegosouzapw/OmniRoute`), agus is é sin freisin an áit a seiceálann `electron-updater` le haghaidh leaganacha nua.
+Foilsítear eisiúintí chuig GitHub Releases (`cheaper-inference/OmniRoute`), agus is é sin freisin an áit a seiceálann `electron-updater` le haghaidh leaganacha nua.
 
 ## Fabhtcheartú
 

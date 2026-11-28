@@ -5,11 +5,10 @@
 ---
 
 > **Source de vérité :** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Dernière mise à jour :** 2026-09-22 — les espaces de noms de portée pointent vers MCP-SERVER.md
 
-OmniRoute dispose d'un pipeline d'autorisation sensible aux routes qui filtre chaque requête API. La classification est **déterministe** et **fermée par défaut** — tout ce qui ne peut pas être classifié est considéré comme `MANAGEMENT` et exige une session ou un jeton de niveau gestion. Cette page explique le modèle aux ingénieurs qui maintiennent des routes ou conçoivent de nouveaux points de terminaison.
+OmniRoute dispose d'un pipeline d'autorisation prenant en compte l'itinéraire qui contrôle chaque requête API. Le classement est** déterministe** et** fermé par défaut** — tout ce qui ne peut pas être classé finit comme `MANAGEMENT` et nécessite un jeton de session ou de gestion. Cette page explique le modèle destiné aux ingénieurs qui maintiennent les itinéraires ou conçoivent de nouveaux points de terminaison.
 
-![Pipeline d'autorisation (3 classes de routes + évaluation des politiques)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Source : [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -191,7 +190,7 @@ Chaque classe de route a une politique dans `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — renvoie toujours `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extrait Bearer, valide via `validateApiKey()`. Passe à l'anonymat uniquement lorsque l'indicateur de fonctionnalité `REQUIRE_API_KEY` efficace est désactivé. L'indicateur effectif est résolu via `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), de sorte que les indicateurs de fonctionnalités du tableau de bord et les variables d'environnement régissent `/api/v1/*`, `/api/v1beta/*` et les alias de manière cohérente ; les échecs du résolveur échouent. Autorise les requêtes de session de tableau de bord sur les routes API du client (y compris `/api/v1/models`, utilisé par le catalogue de modèles de tableau de bord). Lorsque Entra ID SSO est activé, un porteur qui est structurellement un jeton Entra (trois segments base64url, `RS*` alg, `kid`) est géré par la branche SSO** avant** `validateApiKey()` et son verdict est définitif — il ne passe jamais par le chemin de la clé API ou la branche de dégradation vers anonyme, donc une panne du fournisseur d'identité ne peut pas devenir un accès ouvert. Les clés API statiques ne sont pas affectées. Voir [Entrée ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — accepte la session de tableau de bord, les demandes de synchronisation de modèle internes (correspondantes à `/api/providers/[name]/(sync-models|models)`) ou les ignore complètement si `isAuthRequired()` renvoie false. Renvoie 403 (`AUTH_001`) lorsqu'un jeton Bearer est présent mais invalide, 401 sinon. Applique également les niveaux de garde de route (LOCAL_ONLY / ALWAYS_PROTECTED) avant toute branche d'authentification — voir [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). les chemins LOCAL_ONLY dans `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (aujourd'hui : `/api/mcp/`) sont accessibles depuis le non-bouclage lorsque la clé Bearer porte la portée `manage` ; tous les autres chemins LOCAL_ONLY restent en bouclage strict, quelle que soit la portée.
+- **`managementPolicy`** (`policies/management.ts`) — accepte la session de tableau de bord, les demandes de synchronisation de modèle internes (correspondantes à `/api/providers/[name]/(sync-models|models)`) ou les ignore complètement si `isAuthRequired()` renvoie false. Renvoie 403 (`AUTH_001`) lorsqu'un jeton Bearer est présent mais invalide, 401 sinon. Applique également les niveaux de garde de route (LOCAL_ONLY / ALWAYS_PROTECTED) avant toute branche d'authentification — voir [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). les chemins LOCAL_ONLY dans `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (aujourd'hui : `/api/mcp/`) sont accessibles sans bouclage lorsque la clé Bearer porte la portée `manage`/`admin` ou la portée `mcp:connect` étroite (`hasMcpConnectOrManageScope`), ou avec une session de tableau de bord authentifiée ; tous les autres chemins LOCAL_ONLY restent en bouclage strict, quelle que soit la portée.
 
 Une politique réussie renvoie `AuthSubject` avec `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Les gestionnaires en aval peuvent le lire via `assertAuth(request, "CLIENT_API")` dans `src/server/authz/assertAuth.ts` au lieu de réexécuter la logique d'authentification.
 
@@ -284,33 +283,22 @@ Choisissez l’ensemble en fonction de la forme, et non par commodité. Une rout
 
 ## Portées
 
-Trois espaces de noms. Chaque vérificateur ne lit que ses propres chaînes. La comparaison côte à côte, y compris pourquoi `manage` échoue `scopeMatches` pour `read:compression` et pourquoi un jeton d'accès `read` ne peut pas `PATCH /api/keys/{id}`, se trouve dans [Trois espaces de noms de portée](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Trois espaces de noms. Chaque vérificateur lit uniquement ses propres chaînes. Le côte à côte, y compris pourquoi `manage` échoue avec `scopeMatches` pour `read:compression` et pourquoi un jeton d'accès `read` ne peut pas `PATCH /api/keys/{id}`, est [Trois espaces de noms de portée](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Les clés API contiennent un tableau `scopes` (stocké au format JSON dans `api_keys.scopes`, voir `src/lib/db/apiKeys.ts`).
+Les clés API portent un tableau `scopes` (stocké sous JSON dans `api_keys.scopes`, voir `src/lib/db/apiKeys.ts`).
 
-### Portée de gestion
+### Périmètre de gestion
 
-- `manage` / `admin` — `hasManageScope`. Accès Bearer aux routes de l'API de gestion.
-- `mcp:connect`, `self:usage`, `self:account-quota`, et
-  `policy:bypass-provider-quota` sont des portées additives à correspondance exacte. Elles se situent
-  en dehors de `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` ouvre uniquement la
-  découpe non-loopback `/api/mcp/`.
+- `manage` / `admin` — `hasManageScope`. Accès du porteur à la gestion des routes API.
+- `mcp:connect`, `self:usage`, `self:account-quota` et `policy:bypass-provider-quota` sont des étendues de correspondance exacte additives. Ils s'assoient dehors `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` ouvre uniquement l'exclusion sans bouclage `/api/mcp/`.
 
-### Portées des outils MCP
+### Portées de l'outil MCP
 
-Catalogue et règles de correspondance (chaîne identique, ou une portée accordée se terminant par `*`) :
-[Portées des outils MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` dans `src/shared/constants/mcpScopes.ts` est le sous-ensemble typé original,
-et non le catalogue complet. L'application s'exécute dans
-`open-sse/mcp-server/scopeEnforcement.ts` après que `resolveCallerScopeContext()`
-résolve les portées à partir des informations d'authentification MCP, des métadonnées de requête ou de `OMNIROUTE_MCP_SCOPES`.
-Elle reste désactivée à moins que `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Catalogue et règles de correspondance (chaîne identique ou portée accordée se terminant par `*`) : [portées de l'outil MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` dans `src/shared/constants/mcpScopes.ts` est le sous-ensemble typé d'origine, pas ce catalogue complet. L'application s'exécute dans `open-sse/mcp-server/scopeEnforcement.ts` après que `resolveCallerScopeContext()` a résolu les étendues à partir des informations d'authentification MCP, des métadonnées de demande ou `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` l'active globalement (par défaut `false`), mais il est toujours appliqué pour un appelant HTTP/SSE dont la clé API manque `manage`/`admin` (voir `shouldForceScopeEnforcement()` dans `open-sse/mcp-server/scopeEnforcement.ts`), quel que soit l'indicateur.
 
-### Portées des jetons d'accès
+### Portées du jeton d'accès
 
-`read` / `write` / `admin` sur les jetons `oma_live_…`, classés par `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Ce classement s'applique uniquement aux identifiants
-du jeton d'accès. Voir [Authentification de gestion](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` sur les jetons `oma_live_…`, classés par `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Ce rang s'applique uniquement aux informations d'identification du jeton d'accès. Voir [Authentification de gestion](../guides/MANAGEMENT-AUTH.md).
 
 ## Bascule Authentification requise
 

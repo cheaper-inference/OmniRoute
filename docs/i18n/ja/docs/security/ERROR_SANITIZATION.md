@@ -4,13 +4,7 @@
 
 ---
 
-> **信頼できる唯一の情報源:** `open-sse/utils/errorSanitization.ts`、
-> `open-sse/utils/errorPathRedaction.ts`、および `open-sse/utils/error.ts` の公開ビルダー
-> **テスト:** `tests/unit/error-message-sanitization.test.ts`、
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **最終更新:** 2026-09-02 — v3.8.51
-> **対象読者:** エラーレスポンスを扱うすべてのエンジニア（HTTP ルート、SSE ストリーム、エグゼキューター、MCP ハンドラー）。
-> **ステータス:** クライアントにエラーメッセージを返す、あらゆるコードパスで **必須**。
+> **真実の情報源:** `open-sse/utils/errorSanitization.ts`、 `open-sse/utils/errorPathRedaction.ts`、および`open-sse/utils/error.ts`のパブリック ビルダー**テスト:** `tests/unit/error-message-sanitization.test.ts`、 `tests/unit/error-public-boundaries-hardening.test.ts`**観客：**エラー応答 (HTTPルート、 SSEストリーム、エグゼキュータ、 MCPハンドラ) に触れるエンジニア。**状態：\****MANDATORY**クライアントにエラー メッセージを返すすべてのコード パスに対して。
 
 ## この仕組みが必要な理由
 

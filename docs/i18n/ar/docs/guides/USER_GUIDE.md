@@ -233,33 +233,41 @@
 
 ---
 
-## 🎨 التركيبات
+## 🎨
 
-يمكنك إعادة ترتيب بطاقات التركيبات مباشرةً في **لوحة التحكم → التركيبات** عن طريق سحب المقبض الموجود على كل بطاقة. يُخزَّن الترتيب في SQLite ويُستعاد عند إعادة التحميل.
+يمكنك إعادة ترتيب بطاقات التحرير والسرد مباشرة** مجموعات لوحة القيادة →** عن طريق سحب المقبض الموجود على كل بطاقة. يتم تخزين الطلب في SQLite واستعادته عند إعادة التحميل.
 
-### المثال 1: تعظيم الاستفادة من الاشتراك → نسخة احتياطية رخيصة
+### ابحث عن موفر أو نموذج أو حساب
 
-```
-لوحة التحكم → التركيبات → إنشاء جديد
+في إنشاء المجموعة أو تحريرها، يتضمن منتقي الموفر والنموذج والحساب ومرجع التحرير والسرد خطوة بخطوة حقل بحث محلي. ابحث حسب الاسم المعروض أو المعرف أو الاسم المستعار للموفر أو مصدر النموذج، ثم انقر فوق نتيجة أو استخدم مفاتيح الأسهم واضغط على Enter. يجب أن تتطابق جميع مصطلحات البحث المتعددة. يؤدي مسح البحث أو الضغط على Escape إلى ترك القيمة المحددة دون تغيير.
 
-الاسم: premium-coding
-النماذج:
-  1. cc/claude-opus-4-7 (النموذج الأساسي ضمن الاشتراك)
-  2. glm/glm-4.7 (نسخة احتياطية رخيصة، $0.6/1M)
-  3. minimax/MiniMax-M2.7 (الخيار الاحتياطي الأرخص، $0.3/1M)
+يظل اختيار الحساب التلقائي مرئيًا أثناء البحث. تحتوي قائمة تقييد الحساب الاختيارية الخاصة بها على مرشح منفصل: تظل الحسابات المحددة خارج النتائج المرئية محددة، ويتضمن العدد هذه الحسابات. لا يمكن البحث في أجزاء البريد الإلكتروني المخفية أثناء تشغيل خصوصية البريد الإلكتروني. أضف الخطوة واحفظ المجموعة كالمعتاد؛ كتابة استعلام لا يؤدي إلى حفظ أو اختبار أي شيء.
 
-الاستخدام في CLI: premium-coding
-```
+يتوفر نفس البحث المحلي لنماذج اختبار الاتصال، ونماذج CLI الافتراضية والاسم المستعار المخصصة، وخيارات الوكيل المحفوظة. تظل إجراءات الحفظ والتطبيق والاختبار الحالية منفصلة.
 
-### المثال 2: مجاني فقط (دون تكلفة)
+### مثال 1: زيادة الاشتراك إلى الحد الأقصى → النسخ الاحتياطي الرخيص
 
 ```
-الاسم: free-combo
-النماذج:
-  1. if/kimi-k2.7-code (مدرج بوصول مجاني؛ قد تُطبَّق حدود المزوّد)
-  2. kr/qwen3-coder-next (خيار Kiro الاحتياطي المجاني)
+Dashboard → Combos → Create New
 
-التكلفة: مدرجة حاليًا بقيمة $0؛ قد تتغير الشروط والإتاحة
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### المثال 2: مجاني فقط (بدون تكلفة)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -343,7 +351,7 @@ codex "your prompt"
 
 ## نشر 🚀
 
-### تثبيت npm عالمي (مستحسن)
+### تثبيت npm العالمي (مستحسن)
 
 ```bash
 npm install -g omniroute
@@ -360,7 +368,7 @@ omniroute
 omniroute --port 3000
 ```
 
-يقوم CLI تلقائيًا بتحميل `.env` من `~/.omniroute/.env` أو `./.env`. قد يقوم `./.env` في دليل العمل بتعيين قائمة مسموحة قصيرة فقط من المفاتيح (`REQUIRE_API_KEY`، والإعدادات المحلية، والمنطقة الزمنية، وإعدادات الألوان، وليس المنافذ)؛ ضع كل شيء آخر في `~/.omniroute/.env`. انظر [عقود إطلاق CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+يقوم CLI تلقائيًا بتحميل `.env` من `~/.omniroute/.env` أو `./.env`. قد يقوم `./.env` في دليل العمل بتعيين قائمة مسموح بها قصيرة فقط من المفاتيح (`REQUIRE_API_KEY`، والإعدادات المحلية، والمنطقة الزمنية، وإعدادات الألوان، وليس المنافذ)؛ ضع كل شيء آخر في `~/.omniroute/.env`. انظر [عقود إطلاق CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### وضع الدرج
 
@@ -419,7 +427,7 @@ omniroute autostart disable
 ### نشر VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -501,8 +509,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -692,7 +700,7 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 ملحوظات:
 
-- تتم إدارة موفري OpenRouter و OpenAI/Anthropic-compatible من** النماذج المتاحة** فقط. يمكنك إضافة كل العناصر واستيرادها ومزامنتها تلقائيًا يدويًا في نفس قائمة النماذج المتاحة، لذلك لا يوجد قسم منفصل للنماذج المخصصة لهؤلاء الموفرين.
+- تتم إدارة موفري OpenRouter و OpenAI/Anthropic-compatible من** النماذج المتاحة** فقط. يمكنك الإضافة اليدوية والاستيراد والمزامنة التلقائية لجميع العناصر الموجودة في نفس قائمة النماذج المتاحة، لذلك لا يوجد قسم منفصل للنماذج المخصصة لهؤلاء الموفرين.
 - ال** نماذج مخصصة** القسم مخصص للموفرين الذين لا يعرضون عمليات استيراد النماذج المتوفرة المُدارة.
 
 ### مقدمو الخدمات المتوافقون مع OpenAI المخصصون
@@ -706,11 +714,11 @@ curl -X POST http://localhost:20128/api/provider-models \
 5. **قاعدة URL** : جذر API ، حتى `/v1` (على سبيل المثال `https://gateway.example.com/v1`)، وليس مسار `/chat/completions` الكامل. يتم وضع البوابات ذات المسارات غير القياسية تحتها** الإعدادات المتقدمة** (مسار الدردشة، مسار النماذج).
 6. ال** مفتاح API (للفحص)** الحقل يختبر الاتصال فقط. بعد إنشاء العقدة، افتحها واستخدمها** إضافة اتصال** لتخزين المفتاح الذي ستستخدمه الطلبات.
 
-تحصل العقدة على معرف داخلي للنموذج `openai-compatible-<apiType>-<uuid>`؛ لن تحتاج إلى كتابته أبدًا، فالبادئة هي الاسم العام.
+تحصل العقدة على معرف داخلي للنموذج `openai-compatible-<apiType>-<uuid>`؛ لن تحتاج إلى كتابته أبدًا، البادئة هي الاسم العام.
 
 #### البادئات المحجوزة
 
-لا يمكن أن تكون البادئة معرفًا أو اسمًا مستعارًا لموفر مضمن (على سبيل المثال `openai`, `cf`)، ولا معرف موفر متقاعد. يتحقق محلل النموذج من المعرفات والأسماء المستعارة المضمنة قبل العقد المخصصة، وبالتالي فإن العقدة التي تستخدم إحدى هذه البادئات لن تتلقى حركة مرور أبدًا: ستنتقل `<prefix>/model` إلى الموفر المدمج بدلاً من ذلك، أو تفشل في الإغلاق إذا تم تقاعد هذا الموفر. يتم رفض إنشاء أو تحرير عقدة بهذه البادئة باستخدام:
+لا يمكن أن تكون البادئة معرفًا أو اسمًا مستعارًا لموفر مضمن (على سبيل المثال `openai`, `cf`)، ولا معرف موفر متقاعد. يتحقق محلل النموذج من المعرفات والأسماء المستعارة المضمنة قبل العقد المخصصة، وبالتالي فإن العقدة التي تستخدم إحدى هذه البادئات لن تتلقى حركة مرور أبدًا: ستنتقل `<prefix>/model` إلى الموفر المدمج بدلاً من ذلك، أو تفشل في الإغلاق إذا تم تقاعد هذا الموفر. يتم رفض إنشاء عقدة أو تحريرها بهذه البادئة باستخدام:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
@@ -851,7 +859,7 @@ curl http://localhost:20128/api/models/catalog
 
 **الاستراتيجيات المرئية في لوحة المعلومات (التوجيه على مستوى الحساب):**
 
-| استراتيجية               | وصف                                                                                         |
+| الإستراتيجية             | وصف                                                                                         |
 | ------------------------ | ------------------------------------------------------------------------------------------- |
 | **املأ أولاً**           | يستخدم الحسابات بترتيب الأولوية. يتعامل الحساب الأساسي — مع جميع الطلبات حتى تصبح غير متاحة |
 | **جولة روبن**            | التنقل بين جميع الحسابات بحد ثابت قابل للتكوين (الافتراضي: 3 مكالمات لكل حساب)              |
@@ -860,7 +868,7 @@ curl http://localhost:20128/api/models/catalog
 | **الأقل استخدامًا**      | توجيهات إلى الحساب بأقدم طابع زمني `lastUsedAt` ، مع توزيع حركة المرور بالتساوي             |
 | **التكلفة الأمثل**       | التوجيهات إلى الحساب ذي قيمة الأولوية الأقل، مع تحسين موفري الخدمة الأقل تكلفة              |
 
-**التحرير والسرد المتقدم واستراتيجيات السيارات** (قابل للتكوين لكل مجموعة أو عبر بادئات `auto/*` — راجع [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**التحرير والسرد المتقدمة واستراتيجيات السيارات** (قابل للتكوين لكل مجموعة أو عبر بادئات `auto/*` — راجع [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
 - `priority` — أمر صارم، أبدا جولة روبينز
 - `weighted` — حركة المرور النسبية مقسمة حسب الأوزان لكل نموذج
@@ -870,8 +878,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` و `cost-optimized`
 - `auto` — تعتمد على النتيجة عبر جميع المرشحين
 - `lkgp` (Last Known Good Provider) — pins to the last successful provider, then falls back to rules
-- `context-optimized` — يختار النموذج الذي يحتوي على أكبر نافذة سياقية مجانية
-- `context-relay` — سلاسل نماذج طويلة السياق لدورات المتابعة
+- `context-optimized` — يحاول النموذج الذي يحتوي على أكبر نافذة سياق معروفة أولاً
+- `context-relay` — ترتيب الأولوية بالإضافة إلى ملخص التسليم عندما تنتقل المحادثة إلى حساب آخر
 
 #### رأس الجلسة الثابتة الخارجية
 
@@ -947,7 +955,7 @@ curl -X POST http://localhost:20128/api/combos \
 
 سلاسل متعددة من مقدمي الخدمة ذوي المستوى المجاني وبدون مفتاح لزيادة وقت التشغيل إلى أقصى حد دون تكاليف API.
 
-- **استراتيجية** : `Least Used` أو `Round Robin` (يوزع الحمل عبر الحصص)
+- **الإستراتيجية** : `Least Used` أو `Round Robin` (توزيع الحمل عبر الحصص)
 - **نماذج** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
@@ -988,7 +996,7 @@ omniroute combo create free-stack \
    - **استخدم تلميحات إعادة المحاولة الأولية** — يكرم `Retry-After` الرسمي أو تلميحات إعادة التعيين عند تقديمها
    - **أقصى خطوات التراجع** — الحد الأقصى لمستوى التراجع الأسي للفشل المتكرر
 
-3. **قواطع دوائر المزود** — يتتبع فشل الموفر من طرف إلى طرف، ويضع علامة على الموفر المتدهور عند حد التحذير الذي تم تكوينه، ويفتح القاطع عند الوصول إلى حد الفشل الذي تم تكوينه:
+3. **قواطع دوائر المزود** — يتتبع فشل الموفر من طرف إلى طرف، ويضع علامة على الموفر المتدهور عند حد التحذير المكوّن، ويفتح القاطع عند الوصول إلى حد الفشل المكوّن:
    - **عتبة التدهور** — فشل الموفر المتتالي قبل الدخول إلى `DEGRADED`
    - **عتبة الفشل** — فشل الموفر المتتالي قبل الدخول إلى `OPEN`
    - **إعادة ضبط المهلة** — نافذة زمنية قبل اختبار الموفر مرة أخرى
@@ -1005,7 +1013,7 @@ omniroute combo create free-stack \
 
 5. **الكشف التلقائي عن حد المعدل** — عندما يعرض موفري الخدمة الأولية نوافذ انتظار صريحة، تتجاوز هذه التلميحات فترة تباطؤ الاتصال المحلي عند تمكين الإعداد.
 
-**نصيحة للمحترفين:** استخدم** صحة** صفحة لفحص وإعادة ضبط قواطع الموفر المباشر بعد انقطاع التيار. تقوم صفحة المرونة بتغيير التكوين فقط.
+**نصيحة للمحترفين:** استخدم** صحة** صفحة لفحص وإعادة تعيين قواطع الموفر المباشر بعد انقطاع التيار. تقوم صفحة المرونة بتغيير التكوين فقط.
 
 ---
 
@@ -1045,15 +1053,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 يتم تنظيم صفحة الإعدادات في** 7 علامات تبويب** لسهولة التصفح:
 
-| فاتورة غير مدفوعة | محتويات                                                                                                                                                                                       |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **عام**           | أدوات تخزين النظام، والسلوك الافتراضي، ورؤية نفق نقطة النهاية                                                                                                                                 |
-| **مظهر**          | عناصر التحكم في السمات (light/dark/system)، ورؤية الشريط الجانبي، وتبديل اللوحة لبطاقات نفق Cloudflare/Tailscale/ngrok                                                                        |
-| **AI**            | ميزانية التفكير (العبور / الشريط التلقائي / — المخصص / التكيفي، راجع [THINKING_BUDGET.md](./THINKING_BUDGET.md) )، موجه النظام العالمي، إحصائيات ذاكرة التخزين المؤقت السريعة                 |
-| **حماية**         | إعدادات Login/Password ، التحكم في الوصول IP ، مصادقة API لـ `/models`، حظر الموفر، حماية الحقن الفوري                                                                                        |
-| **التوجيه**       | استراتيجية التوجيه العالمية (الملء أولاً / جولة روبن / P2C / عشوائي / الأقل استخدامًا / التكلفة الأمثل)، والأسماء المستعارة لنماذج أحرف البدل، والسلاسل الاحتياطية، وافتراضيات التحرير والسرد |
-| **صمود**          | قائمة انتظار الطلبات، وفترة تباطؤ الاتصال، وتكوين قاطع الموفر، وسلوك انتظار فترة التهدئة                                                                                                      |
-| **متقدم**         | تكوين الوكيل العام (HTTP/SOCKS5)، تجاوزات الوكيل لكل مزود                                                                                                                                     |
+| فاتورة غير مدفوعة | محتويات                                                                                                                                                                                         |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **عام**           | أدوات تخزين النظام، والسلوك الافتراضي، ورؤية نفق نقطة النهاية                                                                                                                                   |
+| **مظهر**          | عناصر التحكم في السمات (light/dark/system)، ورؤية الشريط الجانبي، وتبديل اللوحة لبطاقات نفق Cloudflare/Tailscale/ngrok                                                                          |
+| **AI**            | ميزانية التفكير (العبور / الشريط التلقائي / — المخصص / التكيفي، راجع [THINKING_BUDGET.md](./THINKING_BUDGET.md) )، موجه النظام العالمي، إحصائيات ذاكرة التخزين المؤقت السريعة                   |
+| **حماية**         | إعدادات Login/Password ، التحكم في الوصول IP ، مصادقة API لـ `/models`، حظر الموفر، حماية الحقن الفوري                                                                                          |
+| **التوجيه**       | استراتيجية التوجيه العالمية (التعبئة أولاً / جولة روبن / P2C / عشوائي / الأقل استخدامًا / التكلفة الأمثل)، والأسماء المستعارة لنماذج أحرف البدل، والسلاسل الاحتياطية، وافتراضيات التحرير والسرد |
+| **صمود**          | قائمة انتظار الطلبات، وفترة تباطؤ الاتصال، وتكوين قاطع الموفر، وسلوك انتظار فترة التهدئة                                                                                                        |
+| **متقدم**         | تكوين الوكيل العام (HTTP/SOCKS5)، تجاوزات الوكيل لكل مزود                                                                                                                                       |
 
 لم يعد عام يكرر ملاحظات التسجيل وذاكرة التخزين المؤقت للقراءة فقط. يتم الحفاظ على إعدادات الاحتفاظ بقاعدة البيانات وتحسينها من خلال `/api/settings/database`؛ يستخدم المسح اليدوي لذاكرة التخزين المؤقت `DELETE /api/cache`. يتم التحكم في الحدود القصوى لصفوف سجل الطلب والوكيل بواسطة `CALL_LOGS_TABLE_MAX_ROWS` و `PROXY_LOGS_TABLE_MAX_ROWS`.
 
@@ -1135,7 +1143,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 تكوين موازنة لكل التحرير والسرد في** لوحة القيادة → المجموعات → Create/Edit → الإستراتيجية** .
 
-| استراتيجية                | وصف                                                                                            |
+| الإستراتيجية              | وصف                                                                                            |
 | ------------------------- | ---------------------------------------------------------------------------------------------- |
 | **جولة روبن**             | تدور من خلال النماذج بالتتابع                                                                  |
 | **أولوية**                | يحاول دائمًا النموذج الأول؛ ولا يرجع إلا على الخطأ                                             |
@@ -1318,34 +1326,36 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ---
 
-## 💻 واجهة سطر الأوامر الداخلية
+## 💻 داخلي CLI
 
-يتضمن OmniRoute واجهة سطر أوامر داخلية (`omniroute …`) للإعداد والتشخيص والتحكم في وقت التشغيل. وهي **منفصلة عن صفحة "أدوات سطر الأوامر" في لوحة التحكم**، التي تهيئ أدوات سطر أوامر تابعة لجهات خارجية (Claude Code وCursor وCodex وCline و…) لكي تتمكن من الاتصال بـ OmniRoute.
+يقوم OmniRoute بشحن CLI (`omniroute …`) داخليًا للإعداد والتشخيص والتحكم في وقت التشغيل. هذا هو** منفصل عن صفحة "أدوات CLI " في لوحة المعلومات** ، الذي يقوم بتكوين CLIs لجهة خارجية (Claude Code، Cursor، Codex، Cline، ...) حتى يتمكنوا من التحدث إلى OmniRoute.
 
 ```bash
-omniroute setup                    # معالج تفاعلي (كلمة المرور، والموفرون، والتركيبات)
-omniroute setup --non-interactive  # ملائم لبيئات CI
-omniroute doctor                   # تشخيصات السلامة (دليل البيانات، وقاعدة البيانات، والموفرون، والمنافذ)
-omniroute providers available      # عرض الموفرين المدعومين
-omniroute providers list           # عرض الاتصالات المهيأة
-omniroute providers test <id>      # اختبار اتصال بموفر مباشرةً
-omniroute combos list              # عرض التركيبات
-omniroute combos switch <name>     # تعيين التركيبة الافتراضية
-omniroute models                   # عرض النماذج المتاحة (--json، --search)
-omniroute keys add | list | remove # إدارة مفاتيح API من الطرفية
-omniroute backup                   # إنشاء لقطة للإعدادات وقاعدة البيانات
-omniroute restore [<timestamp>]    # الاستعادة من لقطة
-omniroute health                   # تفاصيل السلامة (قواطع الدارة، وذاكرة التخزين المؤقت، والذاكرة)
-omniroute quota                    # استخدام حصة الموفر
-omniroute mcp status               # حالة خادم MCP
-omniroute a2a status               # حالة خادم A2A
-omniroute tunnel list|create|stop  # أنفاق Cloudflare/Tailscale/ngrok
-omniroute reset-password           # إعادة تعيين كلمة مرور المسؤول
-omniroute --mcp                    # تشغيل خادم MCP عبر stdio
-omniroute --port 3000              # تشغيل الخادم على منفذ مخصص
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-نصيحة: استخدم `omniroute doctor --json` مع أداة المراقبة لديك لإصدار تنبيهات عند وجود اتصالات غير سليمة بالموفرين.
+نصيحة: قم بإقران `omniroute doctor --json` بأداة المراقبة الخاصة بك للتنبيه عند حدوث تثبيت محلي معطل. لا يختبر `doctor` اتصالات الموفر؛ استخدم `omniroute providers test <id>` لذلك.
 
 ---
 

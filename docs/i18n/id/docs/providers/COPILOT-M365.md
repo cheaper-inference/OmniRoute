@@ -168,9 +168,9 @@ Pastikan `copilot-m365-web` diaktifkan di** Penyedia dasbor →** . Penyedia mun
 
 ## Referensi
 
-- Isu: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Diskusi: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Masalah: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Diskusi: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Sumber: `src/shared/constants/providers/web-cookie.ts` (definisi penyedia)
-- Impor HAR: `src/shared/utils/m365HarImport.ts`
-- Kolom kredensial: `src/shared/providers/webSessionCredentials.ts`
-- Modal tingkat langganan: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- HAR impor: `src/shared/utils/m365HarImport.ts`
+- Bidang kredensial: `src/shared/providers/webSessionCredentials.ts`
+- Modal tingkat: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

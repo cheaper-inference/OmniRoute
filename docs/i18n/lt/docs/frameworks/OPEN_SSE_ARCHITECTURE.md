@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Palaiko** 22 maršruto parinkimo strategijos** (žr. `src/shared/constants/routingStrategies.ts`):
 
-| strategija          | Elgesys                                                                                                          |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Pirmas tikslinis užsakytas sąrašas                                                                               |
-| `weighted`          | Tikimybė pagal tikslinį svorį                                                                                    |
-| `round-robin`       | Eilės tvarka eikite per taikinius                                                                                |
-| `context-relay`     | Perduokite kontekstą tarp tikslų                                                                                 |
-| `fill-first`        | Užpildykite kvotą prieš pereidami prie kito                                                                      |
-| `p2c`               | Dviejų pasirinkimų galia                                                                                         |
-| `random`            | Vienodas atsitiktinis                                                                                            |
-| `least-used`        | Pasirinkite tą, kuris pastaruoju metu naudotas mažiausiai                                                        |
-| `cost-optimized`    | Pirmiausia pigiausias sveikas tikslas                                                                            |
-| `reset-aware`       | Žinokite apie teikėjo atstatymo langus                                                                           |
-| `reset-window`      | Iš naujo nustatyti langais pagrįstą maršrutą                                                                     |
-| `expiry-first`      | Pirmiausia išleiskite sąskaitą, kurios kvota baigtųsi nepanaudota                                                |
-| `headroom`          | Pirmoji dauguma likusių kvotų                                                                                    |
-| `quota-weighted`    | Praleiskite išnaudotas paskyras, tada išnaudokite likusią kvotą ÷ skrydžio metu                                  |
-| `strict-random`     | Tikrai vienoda (be kokybės svorio)                                                                               |
-| `auto`              | Naudokite 16 faktorių balą (`autoCombo/`)                                                                        |
-| `lkgp`              | Pirmas paskutinis žinomas geras teikėjas                                                                         |
-| `context-optimized` | Geriausiai tinka ilgo konteksto užklausoms                                                                       |
-| `cache-optimized`   | Prisegti kiekvieną pakartotinai naudojamą raginimo priešdėlį prie tos pačios paskyros (raigos talpyklos įvykiai) |
-| `fusion`            | Lygiagrečiai ištraukite į komisiją, tada sintezuokite per teisėją (`fusion.ts`)                                  |
-| `pipeline`          | Grandinės žingsniai — kiekvieno taikinio išvestis tiekia kitą                                                    |
-| `jev`               | Pasirinkimas: TypeSafe Jev pripažįsta, kurie reitinguoti įrašai vykdomi; kitaip tavo užsakymas                   |
+| strategija          | Elgesys                                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
+| `priority`          | Pirmas tikslinis užsakytas sąrašas                                                             |
+| `weighted`          | Tikimybė pagal tikslinį svorį                                                                  |
+| `round-robin`       | Eilės tvarka eikite per taikinius                                                              |
+| `context-relay`     | Perduokite kontekstą tarp tikslų                                                               |
+| `fill-first`        | Užpildykite kvotą prieš pereidami prie kito                                                    |
+| `p2c`               | Dviejų pasirinkimų galia                                                                       |
+| `random`            | Naujas maišymas pagal užsakymą                                                                 |
+| `least-used`        | Pasirinkite tą, kuriame yra mažiausiai įrašytų užklausų                                        |
+| `cost-optimized`    | Pirmiausia mažiausia katalogo įvesties kaina                                                   |
+| `reset-aware`       | Likusios kvotos + skubos nustatymas iš naujo                                                   |
+| `reset-window`      | Kvotos langas, kuris pirmiausia nustatomas iš naujo                                            |
+| `expiry-first`      | Pirmiausia išleiskite sąskaitą, kurios kvota baigtųsi nepanaudota                              |
+| `headroom`          | Pirmoji dauguma likusių kvotų                                                                  |
+| `quota-weighted`    | Praleiskite išnaudotas paskyras, tada išnaudokite likusią kvotą ÷ skrydžio metu                |
+| `strict-random`     | Sumaišytas kaladė: kiekvienas taikinys vieną kartą prieš kartojasi                             |
+| `auto`              | Naudokite 16 faktorių balą (`autoCombo/`)                                                      |
+| `lkgp`              | Pirmas paskutinis žinomas geras teikėjas                                                       |
+| `context-optimized` | Pirmiausia didžiausias žinomas konteksto langas                                                |
+| `cache-optimized`   | Pirmenybę teikite paskyrai, kurioje spartinamojoje atmintyje gali būti raginimo priešdėlis     |
+| `fusion`            | Lygiagrečiai ištraukite į komisiją, tada sintezuokite per teisėją (`fusion.ts`)                |
+| `pipeline`          | Grandinės žingsniai — kiekvieno taikinio išvestis tiekia kitą                                  |
+| `jev`               | Pasirinkimas: TypeSafe Jev pripažįsta, kurie reitinguoti įrašai vykdomi; kitaip tavo užsakymas |
 
 ### base.ts (1170 LOC)
 
@@ -335,7 +335,7 @@ Paslaugos yra** fokusuoti, vienos paskirties moduliai** kuriuos tvarkytojai suda
 
 ## Vykdytojai (150 modulių)
 
-Dažniausiai vienas failas vienam teikėjui. Visos vykdytojų klasės išplečia `BaseExecutor` ir nepaiso to, kas skiriasi; kiti moduliai yra pagalbininkai pagal teikėją (įrankių schemos, fetch/TTS adapteriai, keiksmažodžių tvarkyklės).
+Dažniausiai vienas failas vienam teikėjui. Visos vykdytojų klasės išplečia `BaseExecutor` ir nepaiso to, kas skiriasi; kiti moduliai yra kiekvieno teikėjo pagalbininkai (įrankių schemos, fetch/TTS adapteriai, keiksmažodžių tvarkyklės).
 
 ### Įprasti modeliai
 

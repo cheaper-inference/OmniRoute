@@ -5,13 +5,12 @@
 ---
 
 > **Źródło prawdy:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Ostatnia aktualizacja:** 2026-09-22 — przestrzenie nazw zakresu wskazują na MCP-SERVER.md
 
-OmniRoute posiada potok autoryzacji świadomy tras, który kontroluje każde żądanie API. Klasyfikacja jest **deterministyczna** i **zamknięta w przypadku awarii** — wszystko, co nie może zostać sklasyfikowane, trafia jako `MANAGEMENT` i wymaga sesji lub tokenu o uprawnieniach zarządzania. Ta strona wyjaśnia model dla inżynierów utrzymujących trasy lub projektujących nowe punkty końcowe.
+OmniRoute posiada potok autoryzacji uwzględniający trasy, który bramkuje każde żądanie API. Klasyfikacja jest** deterministyczny** I** zamknięte** — wszystko, czego nie można sklasyfikować, kończy jako `MANAGEMENT` i wymaga tokena sesji lub klasy zarządzającej. Na tej stronie objaśniono model dla inżynierów utrzymujących trasy lub projektujących nowe punkty końcowe.
 
-![Potok AuthZ (3 klasy tras + ocena polityki)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
-> Źródło: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
+> źródło: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## Dwa tryby uwierzytelniania
 
@@ -178,7 +177,7 @@ Każda klasa trasy ma politykę w `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — zawsze zwraca `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — wyodrębnia nośnik, sprawdza poprawność poprzez `validateApiKey()`. Przechodzi do anonimowego tylko wtedy, gdy efektywna flaga funkcji `REQUIRE_API_KEY` jest wyłączona. Efektywna flaga jest rozpoznawana poprzez `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), więc flagi funkcji pulpitu nawigacyjnego i zmienne środowiskowe spójnie regulują `/api/v1/*`, `/api/v1beta/*` i aliasy; awarie programu rozpoznawania nazw nie są zamknięte. Zezwala na żądania sesji pulpitu nawigacyjnego na trasach API klienta (w tym `/api/v1/models`, używanego przez katalog modeli pulpitu nawigacyjnego). Kiedy Entra ID SSO jest włączona, nośnik będący strukturalnie tokenem Entra (trzy segmenty base64url, `RS*` alg, `kid`) jest obsługiwany przez gałąź SSO** zanim** `validateApiKey()` i jego werdykt jest ostateczny. — nigdy nie przechodzi do ścieżki klucza API ani gałęzi degradującej do anonimowej, więc awaria dostawcy tożsamości nie może stać się otwartym dostępem. Nie ma to wpływu na statyczne klucze API. Zobacz [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — akceptuje sesję dashboardu, żądania synchronizacji modelu wewnętrznego (dopasowane do `/api/providers/[name]/(sync-models|models)`) lub całkowicie pomija, jeśli `isAuthRequired()` zwróci wartość false. Zwraca 403 (`AUTH_001`), gdy token okaziciela jest obecny, ale jest nieprawidłowy, w przeciwnym razie 401. Wymusza także poziomy strażników tras (LOCAL_ONLY / ALWAYS_PROTECTED) przed jakąkolwiek gałęzią autoryzacji — patrz [Poziomy strażników tras](../security/ROUTE_GUARD_TIERS.md). do ścieżek LOCAL_ONLY w `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (dziś: `/api/mcp/`) można uzyskać dostęp bez sprzężenia zwrotnego, gdy klucz nośnika przenosi zakres `manage` ; wszystkie inne ścieżki LOCAL_ONLY pozostają w trybie ścisłej pętli zwrotnej, niezależnie od zakresu.
+- **`managementPolicy`** (`policies/management.ts`) — akceptuje sesję dashboardu, żądania synchronizacji modelu wewnętrznego (dopasowane do `/api/providers/[name]/(sync-models|models)`) lub całkowicie pomija, jeśli `isAuthRequired()` zwróci wartość false. Zwraca 403 (`AUTH_001`), gdy token okaziciela jest obecny, ale jest nieprawidłowy, w przeciwnym razie 401. Wymusza także poziomy strażników tras (LOCAL_ONLY / ALWAYS_PROTECTED) przed jakąkolwiek gałęzią autoryzacji — patrz [Poziomy strażników tras](../security/ROUTE_GUARD_TIERS.md). do ścieżek LOCAL_ONLY w `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (dziś: `/api/mcp/`) można uzyskać dostęp bez sprzężenia zwrotnego, gdy klucz nośnika zawiera zakres `manage`/`admin` lub wąski zakres `mcp:connect` (`hasMcpConnectOrManageScope`) lub z uwierzytelnioną sesją pulpitu nawigacyjnego; wszystkie inne ścieżki LOCAL_ONLY pozostają w trybie ścisłej pętli zwrotnej, niezależnie od zakresu.
 
 Pomyślna polityka zwraca `AuthSubject` z `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Dalsze procedury obsługi mogą to odczytać poprzez `assertAuth(request, "CLIENT_API")` w `src/server/authz/assertAuth.ts` zamiast ponownie uruchamiać logikę uwierzytelniania.
 
@@ -224,13 +223,13 @@ PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Trasy tylko do odczytu są publiczne** tylko** dla bezpiecznych metod. Uwaga: `classifyRoute()` wyklucza `/api/v1/*` i `/api/v1beta/*` z PUBLIC zastępczego — są to zawsze `CLIENT_API` więc nadal obowiązuje polityka klucza na okaziciela.
+Trasy tylko do odczytu są publiczne** tylko** dla bezpiecznych metod. Uwaga: `classifyRoute()` wyklucza `/api/v1/*` i `/api/v1beta/*` z PUBLIC zastępczego — są to zawsze `CLIENT_API` więc nadal obowiązuje zasada klucza na okaziciela.
 
 ## Dodawanie nowej trasy
 
-### Wzorzec 1 — Publiczny endpoint client API (Bearer-auth)
+### Wzorzec 1 — Publiczny punkt końcowy klienta API (Bearer-auth)
 
-Trasy pod `/api/v1/` i `/api/v1beta/` są automatycznie klasyfikowane jako `CLIENT_API`. Middleware egzekwuje sprawdzenie Bearer; handlery tras nie muszą tego powtarzać, ale mogą odczytać subject, jeśli jest to przydatne.
+Trasy w ramach `/api/v1/` i `/api/v1beta/` są automatycznie klasyfikowane `CLIENT_API`. Oprogramowanie pośredniczące wymusza sprawdzenie nośnika; osoby obsługujące trasy nie muszą tego powtarzać, ale mogą przeczytać temat, jeśli jest to przydatne.
 
 ```typescript
 // src/app/api/v1/your-route/route.ts
@@ -244,7 +243,7 @@ export async function POST(req: NextRequest) {
 }
 ```
 
-### Wzorzec 2 — Endpoint management (sesja lub Bearer + manage)
+### Wzorzec 2 Punkt końcowy zarządzania — (zarządzanie sesją lub nośnikiem + )
 
 Użyj `requireManagementAuth()` z `src/lib/api/requireManagementAuth.ts`:
 
@@ -258,35 +257,35 @@ export async function POST(request: Request) {
 }
 ```
 
-`requireManagementAuth()` zwraca `null` przy sukcesie albo błąd JSON `Response`:
+`requireManagementAuth()` zwraca `null` w przypadku powodzenia lub błędu JSON `Response`:
 
-- 401 `AUTH_001` "Authentication required" — brak jakichkolwiek poświadczeń
-- 403 — nieprawidłowy Bearer **lub** Bearer obecny, ale klucz nie ma scope `manage` / `admin`
+- 401 `AUTH_001` „Wymagane uwierzytelnienie” — brak jakichkolwiek poświadczeń
+- 403 — nieprawidłowy okaziciel** Lub** Nośnik obecny, ale klucz nie ma zasięgu `manage` / `admin`
 
-`hasManageScope(scopes)` zwraca true dla `"manage"` lub `"admin"`.
+`hasManageScope(scopes)` zwraca wartość true dla `"manage"` lub `"admin"`.
 
-### Wzorzec 3 — Dodanie do publicznej allowlisty
+### Wzór 3 — Dodanie do publicznej listy dozwolonych
 
-Dodaj prefiks do `PUBLIC_API_ROUTE_PREFIXES` (lub `PUBLIC_READONLY_API_ROUTE_PREFIXES` dla GET-only). Zaktualizuj testy jednostkowe w `tests/unit/public-api-routes.test.ts` i `tests/unit/authz/classify.test.ts`.
+Wybierz zestaw według kształtu, a nie wygody. Jedna trasa prowadzi w `PUBLIC_API_ROUTES_EXACT` (lub `PUBLIC_READONLY_CORS_API_ROUTES` tylko w przypadku GET); tylko prawdziwe poddrzewo trafia do `PUBLIC_API_ROUTE_PREFIXES` i to** musi kończyć się na `/`** . Umieszczenie pojedynczej trasy na liście prefiksów powoduje również publikację każdej sąsiedniej ścieżki, która ma wspólne znaki wiodące — w tym rodzeństwo segmentów dynamicznych dodane później (GHSA-74g9-q8f6-793h). Zaktualizuj testy jednostkowe w `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` i `tests/unit/authz/classify.test.ts`.
 
 ## Zakresy
 
-Trzy przestrzenie nazw. Każdy moduł sprawdzający odczytuje tylko własne ciągi znaków. Porównanie, w tym dlaczego `manage` nie przechodzi `scopeMatches` dla `read:compression` i dlaczego token dostępu `read` nie może `PATCH /api/keys/{id}`, znajduje się w [Trzy przestrzenie nazw zakresów](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Trzy przestrzenie nazw. Każdy moduł sprawdzający odczytuje tylko swoje własne ciągi znaków. Zestawienie obok siebie, w tym dlaczego `manage` zawodzi `scopeMatches` dla `read:compression` i dlaczego token dostępu `read` nie może `PATCH /api/keys/{id}`, to [Przestrzenie nazw o trzech zakresach](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Klucze API zawierają tablicę `scopes` (przechowywaną jako JSON w `api_keys.scopes`, zobacz `src/lib/db/apiKeys.ts`).
+klucze API zawierają tablicę `scopes` (przechowywaną jako JSON w `api_keys.scopes`, patrz `src/lib/db/apiKeys.ts`).
 
 ### Zakres zarządzania
 
-- `manage` / `admin` — `hasManageScope`. Dostęp typu Bearer do tras API zarządzania.
-- `mcp:connect`, `self:usage`, `self:account-quota` i `policy:bypass-provider-quota` to addytywne zakresy o dokładnym dopasowaniu. Znajdują się poza `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` otwiera tylko wydzieloną, nieloopbackową część `/api/mcp/`.
+- `manage` / `admin` — `hasManageScope`. Dostęp na okaziciela do zarządzania trasami API.
+- `mcp:connect`, `self:usage`, `self:account-quota` i `policy:bypass-provider-quota` to zakresy addytywnego dopasowania dokładnego. Siedzą na zewnątrz `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` otwiera tylko wycięcie `/api/mcp/` bez pętli zwrotnej.
 
-### Zakresy narzędzi MCP
+### zakresy narzędzi MCP
 
-Katalog i reguły dopasowania (identyczny ciąg znaków lub przyznany zakres kończący się na `*`): [Zakresy narzędzi MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` w `src/shared/constants/mcpScopes.ts` to oryginalny, typowany podzbiór, a nie pełny katalog. Wymuszanie odbywa się w `open-sse/mcp-server/scopeEnforcement.ts` po tym, jak `resolveCallerScopeContext()` rozpozna zakresy z informacji uwierzytelniających MCP, metadanych żądania lub `OMNIROUTE_MCP_SCOPES`. Pozostaje wyłączone, chyba że `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Katalog i reguły dopasowywania (identyczny ciąg znaków lub przyznany zakres kończący się na `*`): [zakresy narzędzi MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` w `src/shared/constants/mcpScopes.ts` jest oryginalnym podzbiorem, a nie pełnym katalogiem. Egzekwowanie działa w `open-sse/mcp-server/scopeEnforcement.ts` po tym, jak `resolveCallerScopeContext()` rozpoznaje zakresy z informacji o autoryzacji MCP, metadanych żądania lub `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` włącza to globalnie (domyślnie `false`), ale jest to zawsze wymuszane dla wywołującego HTTP/SSE, którego klucz API nie ma `manage`/`admin` (patrz `shouldForceScopeEnforcement()` w `open-sse/mcp-server/scopeEnforcement.ts`), niezależnie od flagi.
 
 ### Zakresy tokenów dostępu
 
-`read` / `write` / `admin` na tokenach `oma_live_…`, uszeregowane według `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Ta ranga dotyczy wyłącznie poświadczeń tokenu dostępu. Zobacz [Uwierzytelnianie zarządzania](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` na tokenach `oma_live_…`, uszeregowane według `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Ta ranga dotyczy tylko poświadczeń tokenu dostępu. Zobacz [Uwierzytelnianie zarządzania](../guides/MANAGEMENT-AUTH.md).
 
 ## Wymagane uwierzytelnienie Przełącz
 

@@ -401,7 +401,7 @@ region  = "us-east-1"
 
 ---
 
-## Birden fazla sunucu
+## Çoklu sunucular
 
 ```toml
 [model_providers.omniroute-main]
@@ -461,107 +461,107 @@ Etkileşimli bir oturum içinde:
 
 ---
 
-## Uzun süreli görevler
+## Uzun süren görevler
 
-İki OmniRoute varsayılanı, saatler süren Codex CLI oturumlarını fark ettirmeden sekteye uğratabilir. Bunların hiçbiri Codex CLI ayarı değildir — ikisi de OmniRoute tarafında bulunur. Hesapları sabitleyen ve boşta kalma kesintilerini devre dışı bırakan üst akış proxy'lerinden bir yapılandırmayı taşıyan kullanıcılar çoğu zaman her iki sorunla da karşılaşır ve OmniRoute'un “uzun bir oturumu sürdüremediği” sonucuna varır.
+İki OmniRoute varsayılanı, birden fazla saat süren Codex CLI oturumlarını sessizce sabote edebilir. Codex CLI ayarı da — her ikisi de OmniRoute tarafında canlı değildir. Hesapları sabitleyen ve boşta kalan kesintileri devre dışı bırakan yukarı akış proxy'lerinden bir yapılandırma geçiren kullanıcılar genellikle her ikisine de ulaşır ve OmniRoute "uzun bir oturumu sürdüremeyeceği" sonucuna varır.
 
-| Belirti                                                                                    | Olası neden                                                                        | Ayar                     |
-| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- | ------------------------ |
-| Oturum sürekli hesap değiştiriyor / istem önbelleği sürekliliği turlar arasında kayboluyor | Oturum benzeşimi TTL değeri `0` (devre dışı)                                       | `sessionAffinityTtlMs`   |
-| İstemciye yönelik bir istem olmadan bağlantı akıl yürütme sırasında kesiliyor              | Üst akıştan 10 dakika boyunca parça gelmeyince akış boşta kalma gözcüsü tetiklendi | `STREAM_IDLE_TIMEOUT_MS` |
+| Belirti                                                                                           | Muhtemel sebep                                                                | Topuz                    |
+| ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------ |
+| Oturumda hesaplar değiştiriliyor / sıralar arasında bilgi istemi önbelleği sürekliliği kayboluyor | Oturum benzeşimi TTL : `0` (devre dışı)                                       | `sessionAffinityTtlMs`   |
+| Müşteriye yönelik bir istem olmadan bağlantı, akıl yürütmenin ortasında kesiliyor                 | Akış boşta denetleyicisi, yukarı akış öbeği olmadan 10 dakika sonra ateşlendi | `STREAM_IDLE_TIMEOUT_MS` |
 
-İlgili tartışmalar: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (uzun görev kesintileri), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (benzeşimin neden varsayılan olarak kapalı olduğu). Takip: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+İlgili tartışmalar: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (uzun görev düşüşleri), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (benzerliğin neden varsayılan olarak devre dışı kaldığı). Takip: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Oturum benzeşimi — bir konuşmayı tek bir hesaba sabitleyin
+### 1. Oturum benzeşimi — bir görüşmeyi tek bir hesaba sabitleme
 
 **Varsayılan:** `sessionAffinityTtlMs = 0` (devre dışı).
 
-**Nerede ayarlanır**
+**Nereye ayarlanacağı**
 
-- Kontrol paneli → **Ayarlar → Yönlendirme** → **Oturum benzeşimi** → **Benzeşim TTL'si (saniye)** (`ComboDefaultsTab`)
-- Alternatif olarak ayarları **milisaniye** cinsinden `sessionAffinityTtlMs` ile PATCH edin (Zod aralığı `0`–`86_400_000`, yani 24 saate kadar)
+- Kontrol paneli →** Ayarlar → Yönlendirme** →** Oturum benzeşimi** →** Yakın ilgi TTL (saniye)** (`ComboDefaultsTab`)
+- Veya `sessionAffinityTtlMs` ile PATCH ayarları** milisaniye** (Zod aralığı `0`–`86_400_000`, yani 24 saate kadar)
 
-> #7274 kapsamında yalnızca Codex'e özgü `codexSessionAffinityTtlMs` olan adı değiştirildi. Eski anahtar, salt okunur bir takma ad olarak hâlâ kabul edilir; yeni yapılandırmalar `sessionAffinityTtlMs` kullanmalıdır. Benzeşim artık TTL `0` değerinin üzerinde olduğunda yalnızca Codex'e değil, **tüm** sağlayıcılara uygulanır — bkz. [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Oturum benzeşimi.
+> Yalnızca Codex `codexSessionAffinityTtlMs` #7274 olarak yeniden adlandırıldı. Eski anahtar hâlâ salt okunur bir takma ad olarak kabul edilmektedir; yeni yapılandırmalar `sessionAffinityTtlMs` kullanmalıdır. Yakın ilgi artık şunlar için geçerlidir:** herhangi** sağlayıcı TTL `0` üzerinde olduğunda, yalnızca Codex — değil, [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Oturum benzeşimine bakın.
 
-**0 olarak kaldığında ne bozulur**
+**0'da kaldığında ne kırılır**
 
-Çok turlu bir Codex konuşmasının her turu, etkin birleşim stratejisi tarafından bağımsız olarak yönlendirilir ve **her tur farklı bir hesaba** ulaşabilir. Bu, üst akış oturumu / istem önbelleği sürekliliğini bozar. OmniRoute, yalnızca TTL `0` değerinden büyük olduğunda Codex oturum üstbilgilerini (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) ve `prompt_cache_key` / `session_id` gibi gövde alanlarını dikkate alır (`src/sse/services/auth.ts` içindeki `extractSessionAffinityKey`).
+Çok turlu bir Codex görüşmesinin her turu, aktif kombo stratejisi tarafından bağımsız olarak yönlendirilir ve** tur başına farklı hesap** . Bu, yukarı akış oturumu/istem-önbellek sürekliliğini bozar. OmniRoute TTL `0` (`extractSessionAffinityKey` `src/sse/services/auth.ts`) büyük olduğunda yalnızca Codex oturum başlıklarına (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) ve `prompt_cache_key` / `session_id` gibi gövde alanlarına başvurur.
 
-**Saatler süren tek bir görev için öneri**
+**Çok saatlik tek bir görev için önerilir**
 
-TTL değerini **görevin beklenen gerçek süresinden daha yüksek** ayarlayın (kullanıcı arayüzündeki maksimum değer **86400 saniye** = 24 saattir):
+TTL ayarlayın** görevin beklenen duvar saati uzunluğunun üzerinde** (UI maksimum** 86400 saniye** = 24 saat):
 
-| Beklenen görev süresi   | Benzeşim TTL'si (kullanıcı arayüzü, saniye) | `sessionAffinityTtlMs` |
-| ----------------------- | ------------------------------------------- | ---------------------- |
-| Birkaç saat             | `14400` (4 saat)                            | `14400000`             |
-| Gece boyunca / ~12 saat | `43200` (12 saat)                           | `43200000`             |
-| Tam gün                 | `86400` (24 saat, maksimum)                 | `86400000`             |
+| Beklenen görev uzunluğu | Yakın ilgi TTL (UI, saniye) | `sessionAffinityTtlMs` |
+| ----------------------- | --------------------------- | ---------------------- |
+| Birkaç saat             | `14400` (4 saat)            | `14400000`             |
+| Gecelik / ~ 12h         | `43200` (12 saat)           | `43200000`             |
+| Tam gün                 | `86400` (24 saat, maksimum) | `86400000`             |
 
-Etkinleştirmenin isteğe bağlı olması bilinçli bir tercihtir: benzeşimi devre dışı bırakmak hesaplar arasında yük dengelemeyi; etkinleştirmek ise uzun süren tek bir aracı oturumu için sürekliliği destekler. Bu kılavuz varsayılanı **değiştirmez** — uzun Codex görevleri çalıştıran operatörlerin bunu etkinleştirmesi gerekir.
+Katılım kasıtlıdır: benzeşimin devre dışı bırakılması, hesaplar arasında yük dengelemeyi kolaylaştırır; bu sayede uzun bir temsilci oturumu boyunca devamlılık sağlanır. Bu kılavuz şunları yapar:** Olumsuz** Uzun Codex görevlerini çalıştıran varsayılan — operatörlerinin etkinleştirilmesi gerekir.
 
-### 2. Akış boşta kalma zaman aşımı — sessiz akıl yürütme turlarını sonlandırmayın
+### 2. Akışın boşta kalma zaman aşımı — sessiz muhakeme dönüşlerini öldürmez
 
-**Varsayılan:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 dakika). Ayarlanmadığında `REQUEST_TIMEOUT_MS` değerini devralır; paylaşılan temel değer de 600000'dir. Bkz. [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Zaman aşımları.
+**Varsayılan:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 dakika). Ayarlanmadığında `REQUEST_TIMEOUT_MS` miras alır; paylaşılan taban çizgisi de 600000'dir. Bkz. [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Zaman Aşımları.
 
-**Varsayılan ayarda ne bozulur**
+**Varsayılanda ne bozulur?**
 
-10 dakikadan uzun süre boyunca **gerçek bir upstream chunk gelmeden** sessiz kalan bir Codex akıl yürütme / araç turu, SSE boşta kalma watchdog'u (`open-sse/utils/stream.ts`) tarafından zorla kapatılır. İstemci çoğu zaman yalnızca bağlantının kesildiğini görür; bu da “herhangi bir bildirim olmadan otomatik olarak durdu” durumuyla eşleşir.
+10 dakikadan fazla sessiz kalan bir Codex akıl yürütme/araç dönüşü** gerçek bir yukarı akış parçası yok** SSE boşta gözlemcisi (`open-sse/utils/stream.ts`) tarafından zorla kapatılır. İstemci genellikle "herhangi bir bildirimde bulunulmadan otomatik olarak durduruldu" ile eşleşen çıplak bir bağlantı düşüşü — görür.
 
-Kritik ayrıntı: OmniRoute’un sentetik SSE **heartbeat'i boşta kalma sayacını sıfırlamaz**. `lastChunkTime` yalnızca gerçek bir upstream gövde chunk'ı geldiğinde güncellenir. Hâlâ “düşünen” ancak sessiz kalan bir model, watchdog açısından takılmış bir upstream ile aynı görünür.
+Kritik detay: OmniRoute sentetik SSE** kalp atışı sıfırlanmıyor** boş saat. Yalnızca gerçek bir yukarı akış gövde parçası `lastChunkTime` dosyasını günceller. Hala "düşünen" sessiz bir model, bekçi köpeğinin bakış açısından, akıntıya karşı durmuş bir modelle aynı görünür.
 
-İlgili Undici gövde hareketsizliği ayarı: `FETCH_BODY_TIMEOUT_MS` (bu da varsayılan olarak aynı 10 dakikalık temel değeri kullanır; `0` bu zaman aşımını devre dışı bırakır). Akış sırasında `FETCH_TIMEOUT_MS` yalnızca bağlantı kurulumunu / ilk header'ları kapsar; akış etkinleştikten sonra duraklamalar `STREAM_IDLE_TIMEOUT_MS` ve `FETCH_BODY_TIMEOUT_MS` tarafından yönetilir.
+İlgili Undici gövdesi hareketsizliği: `FETCH_BODY_TIMEOUT_MS` (ayrıca varsayılan olarak aynı 10 dakikalık taban çizgisine ayarlanır; `0` bunu devre dışı bırakır). Akış için, `FETCH_TIMEOUT_MS` yalnızca akış aktif olduğunda bağlantı kurulumunu / ilk başlıkları — kapsar, duraklamalar `STREAM_IDLE_TIMEOUT_MS` ve `FETCH_BODY_TIMEOUT_MS` tarafından yönetilir.
 
-**Saatler süren tek bir görev için önerilen ayarlar**
+**Çok saatlik tek bir görev için önerilir**
 
-OmniRoute süreç ortamında (`.env` / compose / systemd):
+OmniRoute işlem ortamında (`.env` / compose / systemd):
 
 ```bash
-# Uzun akıl yürütme turlarında akışın boşta kalma ve gövde hareketsizliği nedeniyle kesilmesini devre dışı bırakın
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Alternatif olarak bunları beklediğiniz en uzun sessizlik aralığından daha yüksek bir değere ayarlayın (değerler milisaniye cinsindendir):
+Veya bunları beklediğiniz en uzun sessiz aralığın üzerine çıkarın (değerler milisaniyedir):
 
 ```bash
-# Örnek: upstream chunk'ları arasında 2 saate kadar sessizliğe izin verin
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Bu ortam değişkenlerini değiştirdikten sonra OmniRoute’u yeniden başlatın.
+Bu env değişkenlerini değiştirdikten sonra OmniRoute yeniden başlatın.
 
-### Somut tarif — saatler süren Codex görevi
+### Beton tarifi — çok saatlik Codex görevi
 
-1. **Hesabı sabitleyin:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12 sa.) veya `86400` (maks. 24 sa.).
-2. OmniRoute ortamındaki **boşta kalma eşiklerini yükseltin / devre dışı bırakın**:
+1. **Hesabı sabitle:** Kontrol Paneli → Ayarlar → Yönlendirme → Oturum benzeşimi → Yakın İlgi TTL = `43200` (12 saat) veya `86400` (maks. 24 saat).
+2. **Boşta kalma kesintilerini artırın / devre dışı bırakın** OmniRoute ortamında:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Her zamanki Codex `config.toml` yapılandırmasını (`wire_api = "responses"`, doğru `base_url`, `OMNIROUTE_API_KEY`) kullanmaya devam edin; bu iki davranış için Codex tarafında oturum benzeşimi/boşta kalma ayarı yoktur.
-4. OmniRoute’u yeniden başlatın, ardından uzun Codex görevini başlatın.
+3. Her zamanki Codex `config.toml` koruyun (`wire_api = "responses"`, doğru `base_url`, `OMNIROUTE_API_KEY`) — Bu iki davranış için Codex tarafında affinity/idle düğmeleri yoktur.
+4. OmniRoute yeniden başlatın, ardından uzun Codex görevini başlatın.
 
-### Varsayılanlar kararı (#7287)
+### Temerrüt kararı (#7287)
 
-| Ayar                     | Sunulan varsayılan | Bu kılavuzda değiştirilsin mi?                                                                                                         |
-| ------------------------ | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (kapalı)       | **Hayır** — isteğe bağlı kalır (yük dengeleme ile süreklilik arasındaki denge; bkz. Discussion #5718)                                  |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 dk.)  | **Hayır** — genel trafik için 10 dakika olarak kalır; uzun Codex görevlerinin operatörleri bu değeri yükseltir veya devre dışı bırakır |
+| Topuz                    | Varsayılan gemi  | Bu kılavuzda değişiklik var mı?                                                                          |
+| ------------------------ | ---------------- | -------------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (kapalı)     | **HAYIR** — katılıma devam ediyor (yük dengeleme ve süreklilik; bkz. Tartışma #5718)                     |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 dk) | **HAYIR** — genel trafiğe 10 dakika kalır; uzun Codex operatörleri onu yükseltir veya devre dışı bırakır |
 
-Her iki varsayılanı da genel olarak değiştirmek, yalnızca Codex’in değil bir instance'ın tüm istemcilerinin davranışını değiştirir. Ayarları belgelendirin; açık bir operatör kararı aksini söyleyene kadar varsayılanları değiştirmeyin.
+Varsayılanlardan herhangi birinin global olarak çevrilmesi, yalnızca Codex için değil, örneğin her istemcisi için davranışı değiştirir. Düğmeleri belgeleyin; Açık bir operatör kararı aksini söyleyene kadar varsayılanları olduğu gibi bırakın.
 
-### Boşta kalma kaynaklı kesintıları tanılama
+### Boşta kesmelerin teşhisi
 
-Boşta kalma watchdog'u devreye girdiğinde OmniRoute aşağıdakine benzer bir satır loglar:
+Boştaki bekçi köpeği ateş ettiğinde OmniRoute şu şekilde bir çizgi kaydeder:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-`Idle timeout: no data from` ifadesini (veya `stream_idle_timeout` kodunu / `StreamIdleTimeoutError` hata adını) grep ile arayın. Sağlayıcı bölümü, OmniRoute’un söz konusu istek için kullandığı değerdir (`codex`, başka bir sağlayıcı kimliği veya bilinmiyorsa `provider`); her zaman doğrudan `codex` dizesi değildir.
+`Idle timeout: no data from` için Grep (veya `stream_idle_timeout` kodu / hata adı `StreamIdleTimeoutError`). Sağlayıcı segmenti, bu istek için kullanılan OmniRoute (`codex`, başka bir sağlayıcı kimliği veya bilinmiyorsa `provider` ) — her zaman `codex` değişmez dizgesi değildir.
 
 ---
 

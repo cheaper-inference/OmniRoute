@@ -13,12 +13,12 @@ Agent Skills ovat rakenteisia SKILL.md-tiedostoja, jotka opastavat ulkoisia agen
 
 ## Yleiskatsaus
 
-Luettelo sisältää **45 Agent Skilliä** (23 REST API + 21 CLI + 1 määritystyönkulku). Jokaisella skillillä on:
+Luettelo sisältää** 45 agenttitaidot** (23 REST API + 21 CLI + 1 määritystyönkulku). Jokaisella taidolla on:
 
-- **Kanoninen tunniste** (`omni-auth`, `cli-serve` jne.)
-- **SKILL.md**-tiedosto polussa `skills/{id}/SKILL.md`, joka sisältää YAML-alkumetadatan (`name`, `description`) ja monipuolisen markdown-rungon
-- OpenAPI-määrityksestä ja CLI-rekisteristä johdetut **REST-päätepisteet** (API-skillit) tai **CLI-alikomennot** (CLI-skillit)
-- **GitHubin raakasisällön URL-osoite** reaaliaikaista noutoa varten: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanoninen ID** (`omni-auth`, `cli-serve` jne.)
+- A**SKILL.md** tiedosto `skills/{id}/SKILL.md` :llä YAML frontmatter (`name`, `description`) + rich markdown body
+- **REST päätepisteitä** (API -taidot) tai**CLI alikomennot** (CLI -taidot) johdettu OpenAPI spec- ja CLI -rekisteristä
+- A**GitHub raaka URL** live-haulle: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Generaattorin vastaus on `GeneratorReport`:
 
 ---
 
-## Kattavuusrajapinta
+## Kattavuus API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -8,29 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## הגדרת סביבת פיתוח
+## הגדרת פיתוח
 
 ### דרישות מוקדמות
 
 - **Node.js** `>=22.22.2 <23`, או `>=24.0.0 <27` (מומלץ: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows עם Node 24:** השתמשו בגרסת התיקון הנוכחית של 24 LTS (לפחות 24.20.0).
-> גרסאות קודמות עלולות להפסיק לאחר בדיקות שהסתיימו בהצלחה, כאשר `--test-force-exit` סוגר את
-> התהליך. [התיקון של libuv ל-Windows](https://github.com/nodejs/node/pull/61999) של Node מטפל
-> בקריסת זמן הריצה הזו; השאירו את טענות הבדיקה ובדיקות היציאה של המריץ מופעלות.
+> **Windows עם Node 24:** השתמש במהדורת התיקון הנוכחית של 24 LTS (לפחות 24.20.0). מהדורות מוקדמות יותר יכולות לבטל לאחר בדיקות מוצלחות כאשר `--test-force-exit` סוגרת את התהליך. [תיקון Windows libuv](https://github.com/nodejs/node/pull/61999) של Node נותן מענה לקריסת זמן ריצה זו; השאר את הצהרות הבדיקה ובדיקות היציאה מהרץ מופעלים.
 
-> **משתמשי npm v11+ (Node 24+):** לאחר `npm install`, ודאו שמודולים מקומיים הותקנו:
-> `node -e "require('better-sqlite3')"`. אם הפעולה נכשלת עם `MODULE_NOT_FOUND`,
-> הריצו `npm approve-scripts better-sqlite3 && npm install`. ראו
-> [פתרון בעיות](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **משתמשי npm v11 + (צומת 24 +):** לאחר `npm install`, ודא שהותקנו מודולים מקוריים: `node -e "require('better-sqlite3')"`. אם זה נכשל עם `MODULE_NOT_FOUND`, הפעל `npm approve-scripts better-sqlite3 && npm install`. ראה [פתרון בעיות](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### שכפול והתקנה
+### שכפול והתקן
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,93 +32,83 @@ npm install
 ### משתני סביבה
 
 ```bash
-# צרו את .env שלכם מתבנית
+# Create your .env from the template
 cp .env.example .env
 
-# צרו סודות נדרשים
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-משתנים מרכזיים לפיתוח:
+משתני מפתח לפיתוח:
 
-| משתנה                  | ברירת מחדל בפיתוח        | תיאור                  |
-| ---------------------- | ------------------------ | ---------------------- |
-| `PORT`                 | `20128`                  | יציאת השרת             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | כתובת URL בסיסית לחזית |
-| `JWT_SECRET`           | (נוצר לעיל)              | סוד חתימת JWT          |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | סיסמת ההתחברות הראשונה |
-| `APP_LOG_LEVEL`        | `info`                   | רמת פירוט יומן         |
+| מִשְׁתַנֶה             | ברירת מחדל לפיתוח        | תֵאוּר             |
+| ---------------------- | ------------------------ | ------------------ |
+| `PORT`                 | `20128`                  | יציאת שרת          |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | בסיס URL לחזית     |
+| `JWT_SECRET`           | (הפק למעלה)              | סוד חתימת JWT      |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | סיסמת כניסה ראשונה |
+| `APP_LOG_LEVEL`        | `info`                   | רמת מילוליות יומן  |
 
 ### הגדרות לוח המחוונים
 
-לוח המחוונים מספק מתגים בממשק המשתמש עבור תכונות שניתן להגדיר גם באמצעות משתני סביבה:
+לוח המחוונים מספק מתג UI עבור תכונות שניתן להגדיר גם באמצעות משתני סביבה:
 
-| מיקום ההגדרה        | מתג                | תיאור                               |
-| ------------------- | ------------------ | ----------------------------------- |
-| Settings → Advanced | Debug Mode         | הפעלת יומני בקשות לניפוי באגים (UI) |
-| Settings → General  | Sidebar Visibility | הצגה/הסתרה של מקטעי סרגל הצד        |
+| הגדרת מיקום       | לְמַתֵג          | תֵאוּר                            |
+| ----------------- | ---------------- | --------------------------------- |
+| הגדרות → Advanced | מצב ניפוי באגים  | אפשר יומני בקשות ניפוי באגים (UI) |
+| הגדרות → כללי     | נראות של סרגל צד | קטעי סרגל צד של Show/hide         |
 
-הגדרות אלה מאוחסנות במסד הנתונים ונשמרות לאחר הפעלות מחדש, תוך עקיפת ברירות המחדל של משתני הסביבה כאשר הן מוגדרות.
+הגדרות אלה מאוחסנות במסד הנתונים ונמשכות בכל הפעלה מחדש, תוך עקיפת ברירות מחדל של env var כאשר מוגדרות.
 
-### הפעלה מקומית
+### פועל באופן מקומי
 
 ```bash
-# מצב פיתוח (טעינה מחדש אוטומטית)
+# Development mode (hot reload)
 npm run dev
 
-# בניית ייצור
-npm run build    # next build → .build/next/ ולאחר מכן assembleStandalone → dist/
-
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# הידור מהיר של ה-backend/API בלבד לשינויים של תורמים
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# בניית גרסה (בנייה מחדש נקייה + סמן HEAD — נדרש לפריסה)
-npm run build:release   # rm -rf .build dist ולאחר מכן build + כתיבת dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# הגדרת יציאה נפוצה
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-בניית התורמים מבצעת אימות הכולל הידור בלבד: היא אינה מרכיבה את ההפצה העצמאית
-ואינה בונה נכסי אריזה מקומיים אופציונליים. השתמשו בבניית הייצור הרגילה כאשר
-עליכם לאמת את החבילה המוכנה להפצה.
+ה-Contributor build מבצע אימות קומפילציה בלבד: הוא לא מרכיב את ההפצה העצמאית או בונה נכסי אריזה מקוריים אופציונליים. השתמש במבנה הייצור הרגיל כאשר אתה צריך לאמת את החבילה הניתן למשלוח.
 
-### מבנה פלט הבנייה
+### בניית פריסת פלט
 
-| ספרייה    | תוכן                                                                     | במעקב |
-| --------- | ------------------------------------------------------------------------ | ----- |
-| `src/`    | קוד המקור של היישום (TypeScript / TSX)                                   | כן    |
-| `.build/` | קבצים זמניים — פלט `next build` (מתעלמים ב-git, `distDir = .build/next`) | לא    |
-| `dist/`   | חבילה מוכנה להפצה — מורכבת באמצעות `assembleStandalone` (מתעלמים ב-git)  | לא    |
+| מַדרִיך   | תוֹכֶן                                                               | במעקב |
+| --------- | -------------------------------------------------------------------- | ----- |
+| `src/`    | מקור יישום (TypeScript / TSX)                                        | כֵּן  |
+| `.build/` | פלט ביניים — `next build` (gitignored, `distDir = .build/next`)      | לֹא   |
+| `dist/`   | חבילת — הניתן למשלוח מורכבת על ידי `assembleStandalone` (gitignored) | לֹא   |
 
 צינור הבנייה הוא מעבר יחיד:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (פלט Next.js)
-  └─ assembleStandalone()                 (העתקת standalone + static + public + נכסים מקומיים)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` מנקה בנוסף את שתי הספריות תחילה וכותב
-את `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) כסמן לשלמות הפריסה.
+`npm run build:release` בנוסף מנקה תחילה את שתי הספריות וכותב את `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) כ-deploy integrity sentinel.
 
-`npm run build:contributor` משתמש בפרופיל בנייה של backend בלבד. הוא מחליף זמנית קובצי
-ממשק משתמש של לוח המחוונים בקבצי דמה במהלך הבנייה, שומר על מנהלי נתיבי API,
-ומשחזר את הקבצים המקוריים לאחר הבנייה. השתמשו ב-`npm run build` עבור שינויים
-המשפיעים על ממשק המשתמש של לוח המחוונים או לצורך אימות מלא של גרסה; פרופיל התורמים
-אינו תחליף לבניית הגרסה.
+`npm run build:contributor` משתמש בפרופיל הבנייה האחורי בלבד. הוא דוחק זמנית קבצי UI של לוח המחוונים בזמן הבנייה, שומר על מטפלי מסלולי API ומשחזר את הקבצים המקוריים לאחר הבנייה. השתמש ב- `npm run build` עבור שינויים המשפיעים על UI לוח המחוונים או עבור אימות שחרור מלא; פרופיל התורם אינו תחליף לבניית הגרסה.
 
-> **הערת פריסה ל-VPS:** ספריית התמונות המרוחקת `/usr/lib/node_modules/omniroute/app/`
-> אינה משתנה. כישורי הפריסה מסנכרנים באמצעות rsync את התוכן של `dist/` לתוכה.
-> רק נתיב פלט הבנייה בתוך המאגר השתנה (`app/` → `dist/`).
+> **הערה לפריסת VPS :** ספריית התמונות המרוחקת `/usr/lib/node_modules/omniroute/app/` לא השתנתה. כישורי הפריסה מסנכרנים את התוכן של `dist/` לתוכו. רק נתיב הפלט של בנייה ב-repo זז (`app/` → `dist/`).
 
-כתובות URL ברירת מחדל:
+ברירת מחדל URLs:
 
-- **לוח המחוונים**: `http://localhost:20128/dashboard`
+- **לוּחַ מַחווָנִים** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -433,8 +417,8 @@ docs/
 
 ## קבלת עזרה
 
-- **ארכיטקטורה**: ראו [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **תיעוד API**: ראו [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **מסמכי אבטחה**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **מסמכי תפעול**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **בעיות**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **אַדְרִיכָלוּת** : ראה [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API** : ראה [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **מסמכי אבטחה** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **אופס מסמכים** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **בעיות** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

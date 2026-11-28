@@ -4,9 +4,9 @@
 
 ---
 
-> **Sumber kebenaran:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Kemas kini terakhir:** 2026-06-28 — v3.8.40
+> **Sumber kebenaran:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
-OmniRoute menangkap pembantu `reasoning_content` yang dihasilkan oleh model mod pemikiran dan memainkannya semula secara telus pada permintaan berbilang pusingan apabila penyedia huluan memerlukannya. Ini menghapuskan ralat HTTP 400 yang ditimbulkan oleh pembekal ketat apabila sejarah perbualan pelanggan tiada alasan giliran sebelumnya.
+OmniRoute menangkap pembantu `reasoning_content` yang dihasilkan oleh model mod pemikiran dan memainkannya semula secara telus pada permintaan berbilang pusingan apabila penyedia huluan memerlukannya. Ini menghapuskan ralat HTTP 400 yang ditimbulkan oleh penyedia ketat apabila sejarah perbualan pelanggan tiada alasan giliran sebelumnya.
 
 ## Mengapa Ini Wujud
 

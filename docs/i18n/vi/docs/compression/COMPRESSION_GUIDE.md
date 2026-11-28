@@ -296,7 +296,7 @@ mật khẩu, token và thông tin bí mật trước khi bất kỳ thứ gì �
 
 ## Thống kê nén
 
-Mỗi yêu cầu được nén đều bao gồm các thống kê trong nhật ký máy chủ:
+Mọi yêu cầu nén đều bao gồm số liệu thống kê trong nhật ký máy chủ:
 
 ```json
 {
@@ -334,38 +334,26 @@ Chế độ RTK được lấy cảm hứng từ **[RTK - Rust Token Killer](htt
 
 ---
 
-## Các hệ thống nén nâng cao
+## Hệ thống nén tiên tiến
 
-Ngoài 7 chế độ được mô tả ở trên (mã nguồn cũng chấp nhận các chế độ `codex-responses` và
-`omniglyph`, nhưng hướng dẫn này không đề cập đến chúng), các phần bên dưới trình bày những tính năng
-hoạt động bên trong hoặc song song với các chế độ đó: Nén kết quả công cụ và Lão hóa lũy tiến
-là bước 1 và 2 của công cụ nén mạnh (chế độ Aggressive và một bước `aggressive` trong
-pipeline xếp chồng), Pipeline xếp chồng là cách chế độ Stacked vận hành, Nén có nhận biết bộ nhớ đệm
-hạ cấp `aggressive` và `ultra` xuống `standard` đối với các nhà cung cấp có bộ nhớ đệm khi tính năng nén
-đang bật, còn Chế độ đầu ra Caveman và Kiểu đầu ra là các chỉ dẫn system prompt tùy chọn,
-mặc định bị tắt, dùng để định hình đầu ra của mô hình thay vì nén yêu cầu.
+Ngoài 7 chế độ được mô tả ở trên (nguồn cũng chấp nhận các chế độ `codex-responses` và `omniglyph` mà hướng dẫn này không đề cập), các phần bên dưới bao gồm các tính năng hoạt động bên trong hoặc bên cạnh các chế độ đó: Nén kết quả công cụ và Lão hóa lũy tiến là bước 1 và 2 của công cụ tích cực (Chế độ linh hoạt và bước `aggressive` của đường ống xếp chồng), Đường ống xếp chồng là cách chạy chế độ Xếp chồng, Nén nhận biết bộ đệm hạ cấp `aggressive` và `ultra` xuống `standard` đối với các nhà cung cấp bộ nhớ đệm trong khi nén bật, Chế độ đầu ra Caveman và Kiểu đầu ra là các hướng dẫn chọn tham gia của lời nhắc hệ thống, tắt theo mặc định, định hình đầu ra của mô hình thay vì nén yêu cầu.
 
-### Nén có nhận biết bộ nhớ đệm
+### Nén nhận biết bộ đệm
 
-Một số nhà cung cấp (như Anthropic với tính năng lưu prompt vào bộ nhớ đệm) hỗ trợ **lưu prompt vào bộ nhớ đệm**,
-cho phép họ lưu các phần của prompt để giảm chi phí và độ trễ. Khi
-bộ nhớ đệm được bật, việc nén mạnh thực tế có thể **làm giảm** hiệu năng
-vì nó thay đổi các token đã được lưu, khiến bộ nhớ đệm mất hiệu lực.
+Một số nhà cung cấp (như Anthropic với bộ nhớ đệm nhanh chóng) hỗ trợ** bộ nhớ đệm nhanh chóng** , cho phép họ lưu vào bộ nhớ đệm các phần của lời nhắc để giảm chi phí và độ trễ. Khi bộ nhớ đệm được bật, tính năng nén mạnh mẽ thực sự có thể** đau** hiệu suất vì nó thay đổi mã thông báo được lưu trong bộ đệm, làm mất hiệu lực bộ đệm.
 
-Mô-đun `cachingAware.ts` giải quyết vấn đề này bằng cách **phát hiện ngữ cảnh bộ nhớ đệm** và
-**điều chỉnh chiến lược nén** cho phù hợp.
+Mô-đun `cachingAware.ts` giải quyết vấn đề này bằng cách** phát hiện bối cảnh bộ nhớ đệm** Và** điều chỉnh chiến lược nén** tương ứng.
 
-#### Cách hoạt động
+#### Nó hoạt động như thế nào
 
-1. **Phát hiện ngữ cảnh bộ nhớ đệm** — Quét nội dung yêu cầu để tìm các dấu `cache_control`
-2. **Xác định nhà cung cấp có bộ nhớ đệm** — Kiểm tra xem nhà cung cấp đích có hỗ trợ bộ nhớ đệm hay không
-3. **Điều chỉnh chiến lược** — Hạ cấp `aggressive`/`ultra` xuống `standard` đối với các nhà cung cấp có bộ nhớ đệm
-4. **Bỏ qua system prompt** — System prompt thường được lưu vào bộ nhớ đệm, vì vậy không nén chúng
+1. **Phát hiện bối cảnh bộ nhớ đệm** — Quét phần thân yêu cầu để tìm các điểm đánh dấu `cache_control`
+2. **Xác định nhà cung cấp bộ nhớ đệm** — Kiểm tra xem nhà cung cấp mục tiêu có hỗ trợ bộ đệm không
+3. **Điều chỉnh chiến lược** — Hạ cấp `aggressive`/`ultra` xuống `standard` dành cho nhà cung cấp bộ nhớ đệm
+4. **Bỏ qua lời nhắc hệ thống** — Lời nhắc hệ thống thường được lưu vào bộ nhớ đệm, vì vậy đừng nén chúng
 
-Trình hỗ trợ chiến lược cũng trả về cờ `deterministicOnly`, nhưng trình dựng kế hoạch chỉ sử dụng
-chiến lược — hiện không có thành phần hạ nguồn nào đọc cờ này.
+Trình trợ giúp chiến lược cũng trả về cờ `deterministicOnly`, nhưng trình xây dựng kế hoạch chỉ sử dụng chiến lược — không có gì ở phía dưới đọc cờ ngày hôm nay.
 
-#### Ví dụ mã
+#### Ví dụ về mã
 
 ```ts
 import {
@@ -376,7 +364,7 @@ import {
 const body = {
   model: "anthropic/claude-sonnet-4.5",
   messages: [{ role: "user", content: "Hello" }],
-  cache_control: { type: "ephemeral" }, // ← Dấu hiệu bộ nhớ đệm
+  cache_control: { type: "ephemeral" }, // ← Cache marker
 };
 
 const ctx = detectCachingContext(body, { provider: "anthropic" });
@@ -388,28 +376,19 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### Khi nào nên sử dụng
 
-Nén có nhận biết bộ nhớ đệm **luôn được bật** — không cần cấu hình. Tính năng này được kích hoạt mỗi khi
-chế độ nén được bật và nhà cung cấp đích hỗ trợ lưu prompt vào bộ nhớ đệm (Anthropic, OpenAI,
-v.v.); không bắt buộc phải có các dấu `cache_control` rõ ràng — chỉ riêng một nhà cung cấp có bộ nhớ đệm
-đã kích hoạt việc hạ cấp, còn chỉ có các dấu thì không bao giờ kích hoạt (việc phát hiện dấu cung cấp dữ liệu đo từ xa về
-bộ nhớ đệm, không phải quyết định chiến lược).
+Nén nhận biết bộ đệm là** luôn bật** — không cần cấu hình. Nó khởi động bất cứ khi nào quá trình nén được bật và nhà cung cấp mục tiêu hỗ trợ bộ nhớ đệm nhanh chóng (Anthropic, OpenAI, v.v.); Không bắt buộc phải có các điểm đánh dấu `cache_control` rõ ràng — một mình nhà cung cấp bộ nhớ đệm kích hoạt việc hạ cấp và chỉ riêng các điểm đánh dấu thì không bao giờ làm được (việc phát hiện điểm đánh dấu cung cấp dữ liệu đo từ xa về bộ nhớ đệm chứ không phải quyết định chiến lược).
 
-### Lão hóa lũy tiến
+OpenRouter được tính là nhà cung cấp bộ nhớ đệm chỉ dành cho các mô hình `anthropic/*` : Yêu cầu mã Claude giữ các điểm dừng `cache_control` của chúng (tối đa là 4) và bộ bảo vệ bảo vệ tiền tố, trong khi mọi họ OpenRouter khác (`openai/`, `google/`, `qwen/`, …) vẫn bị loại bỏ và không được bảo vệ.
 
-Các cuộc hội thoại dài tích lũy nhiều lượt tin nhắn, nhưng các lượt cũ trở nên ít
-liên quan hơn. Mô-đun `progressiveAging.ts` **làm suy giảm tin nhắn theo khoảng cách lượt**
-(khoảng cách được đo từ cuối cuộc hội thoại). Với các giá trị mặc định được cung cấp
-(`verbatim: 2, light: 2, moderate: 3`):
+### Lão hóa tiến bộ
 
-- **2 lượt cuối (khoảng cách ≤ 2)**: Được giữ nguyên văn
-- **Khoảng cách 3**: Nén Caveman (loại bỏ từ ngữ thừa)
-- **Khoảng cách 4+**: Tin nhắn của trợ lý được tóm tắt; tin nhắn của người dùng được rút gọn còn dòng
-  đầu tiên, giới hạn ở 120 ký tự; các vai trò khác không bị thay đổi. System prompt, các tin nhắn
-  đã được làm cũ và tin nhắn người dùng mới nhất luôn được giữ nguyên văn bất kể khoảng cách.
-  Không có nội dung nào bị loại bỏ hoàn toàn, và dải `light`
-  không thể đạt tới với các giá trị mặc định được cung cấp (`light` bằng `verbatim`).
+Những cuộc trò chuyện dài sẽ tích lũy nhiều lượt nhắn tin, nhưng những lượt cũ hơn sẽ trở nên ít liên quan hơn. mô-đun `progressiveAging.ts`** làm suy giảm tin nhắn theo khoảng cách lần lượt** (khoảng cách được đo từ khi kết thúc cuộc trò chuyện). Với các giá trị mặc định được vận chuyển (`verbatim: 2, light: 2, moderate: 3`):
 
-#### Ví dụ mã
+- **2 lượt cuối (khoảng cách ≤ 2)** : Được giữ nguyên văn
+- **Khoảng cách 3** : Nén Caveman (loại bỏ phụ)
+- **Khoảng cách 4 +** : Tóm tắt tin nhắn trợ lý; tin nhắn của người dùng giảm xuống dòng đầu tiên, giới hạn ở 120 ký tự; các vai trò khác không bị ảnh hưởng. Lời nhắc của hệ thống, tin nhắn cũ và tin nhắn mới nhất của người dùng luôn được giữ nguyên nguyên văn bất kể khoảng cách. Không có gì bị loại bỏ hoàn toàn và không thể truy cập được dải `light` với các giá trị mặc định được vận chuyển (`light` bằng `verbatim`).
+
+#### Ví dụ về mã
 
 ```ts
 import { applyAging } from "@omniroute/open-sse/services/compression/progressiveAging";
@@ -418,68 +397,47 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... thêm 50 lượt nữa ...
+  // ... 50 more turns ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // 3 lượt cuối: giữ nguyên văn
-  light: 8, // khoảng cách <= 8: nén nhẹ
-  moderate: 20, // khoảng cách <= 20: nén caveman
-  fullSummary: 5, // được kiểu dữ liệu yêu cầu, nhưng mã phân dải không đọc giá trị này
-  // khoảng cách > 20: được tóm tắt (trợ lý) / giữ lại dòng đầu tiên (người dùng)
+  verbatim: 3, // last 3 turns: verbatim
+  light: 8, // distance <= 8: lite compression
+  moderate: 20, // distance <= 20: caveman compression
+  fullSummary: 5, // required by the type, not read by the banding code
+  // distance > 20: summarized (assistant) / first line kept (user)
 });
 
-// saved = số token tiết kiệm được
+// saved = number of tokens saved
 ```
 
 #### Khi nào nên sử dụng
 
-Lão hóa lũy tiến **luôn được bật** cho chế độ `aggressive` — đây là bước 2 của
-`compressAggressive()`. Chế độ Ultra không chạy tính năng này. Tính năng này
-đặc biệt hiệu quả cho:
+Lão hóa tiến triển là** luôn bật** đối với chế độ `aggressive` — đây là bước 2 của `compressAggressive()`. Chế độ Ultra không chạy nó. Nó đặc biệt hiệu quả đối với:
 
-- Các phiên lập trình kéo dài
-- Các cuộc hội thoại kéo dài nhiều ngày
-- Quy trình tác tử có nhiều lệnh gọi công cụ
+- Phiên mã hóa chạy dài
+- Cuộc trò chuyện nhiều ngày
+- Quy trình công việc đại lý với nhiều lệnh gọi công cụ
 
 ### Chế độ đầu ra Caveman
 
-Chế độ đầu ra Caveman thêm **các chỉ dẫn system prompt** yêu cầu chính mô hình tạo
-đầu ra ngắn gọn — cấp độ `lite` yêu cầu câu trả lời súc tích nhưng vẫn giữ câu đầy đủ, `full`
-yêu cầu mô hình "trả lời ngắn gọn như người hang động thông minh", còn `ultra` yêu cầu đầu ra kiểu điện tín;
-các chỉ dẫn chỉ mang tính yêu cầu, không thể đảm bảo mô hình tuân thủ. Các yêu cầu nhận những chỉ dẫn này thông qua
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`):
-`open-sse/handlers/chatCore.ts` trước tiên phân giải lựa chọn bằng lớp tương thích ngược
-(`resolveOutputStyleSelection()` trong
-`open-sse/services/compression/outputStyles/backCompat.ts`), lớp này, khi `outputStyles`
-trống, ánh xạ một `cavemanOutputMode` đang được bật sang kiểu đầu ra `terse-prose` ở
-mức `cavemanOutputMode.intensity` (xem phần Tương thích ngược bên dưới); một lựa chọn `outputStyles`
-không trống được sử dụng nguyên trạng, và khi đó `cavemanOutputMode.enabled` cùng `intensity` không có
-tác dụng, trong khi tùy chọn `autoClarity` của nó vẫn được áp dụng. `outputMode.ts` chứa
-các văn bản chỉ dẫn (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), cơ chế bỏ qua nội dung và
-trình hỗ trợ vị trí mà quá trình chèn sử dụng; trình chèn `applyCavemanOutputMode()` riêng của nó không có
-thành phần gọi nào trong môi trường production.
+Chế độ đầu ra Caveman bổ sung** hướng dẫn nhắc nhở hệ thống** yêu cầu chính mô hình cung cấp đầu ra ngắn gọn — cấp độ `lite` yêu cầu các câu trả lời ngắn gọn giữ nguyên các câu đầy đủ, `full` yêu cầu mô hình "trả lời ngắn gọn như người tiền sử thông minh" và `ultra` yêu cầu đầu ra bằng điện báo; hướng dẫn chỉ yêu cầu, họ không thể đảm bảo điều đó. Các yêu cầu nhận chúng thông qua `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`): `open-sse/handlers/chatCore.ts` trước tiên giải quyết lựa chọn bằng shim tương thích ngược (`resolveOutputStyleSelection()` trong `open-sse/services/compression/outputStyles/backCompat.ts`), trong khi `outputStyles` trống, ánh xạ `cavemanOutputMode` đã bật sang kiểu đầu ra `terse-prose` tại `cavemanOutputMode.intensity` (xem Back-compat bên dưới); một lựa chọn `outputStyles` không trống được sử dụng nguyên trạng, sau đó `cavemanOutputMode.enabled` và `intensity` không có hiệu lực, trong khi chuyển đổi `autoClarity` của nó vẫn được áp dụng. `outputMode.ts` chứa các văn bản hướng dẫn (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), bỏ qua nội dung và trình trợ giúp vị trí mà tính năng tiêm sử dụng; kim phun `applyCavemanOutputMode()` của riêng nó không có lệnh gọi sản xuất.
 
-#### Cách hoạt động
+#### Nó hoạt động như thế nào
 
-Chế độ này không nén đầu vào. Nó thêm một khối chỉ dẫn vào system prompt
-(xem Cách chèn hoạt động bên dưới), và mọi chế độ nén đầu vào được chọn cho yêu cầu
-vẫn chạy sau đó, trên phần nội dung hiện đã chứa khối này. Trước mệnh đề ranh giới dùng chung
-mà mọi cấp độ đều kết thúc bằng nó, cấp độ `full` tiếng Anh có nội dung:
+Chế độ này không nén đầu vào. Nó thêm một khối lệnh vào dấu nhắc hệ thống (xem Cách hoạt động của tính năng chèn bên dưới) và mọi chế độ nén đầu vào được chọn cho yêu cầu vẫn chạy sau đó, trên phần thân hiện mang khối đó. Trước mệnh đề ranh giới chung mà mọi cấp độ đều kết thúc, cấp độ `full` tiếng Anh có nội dung:
 
-> "Trả lời ngắn gọn như người hang động thông minh. Bỏ mạo từ (a/an/the), từ thừa (just/really/basically/actually/simply), lời xã giao, cách diễn đạt dè dặt. Dùng câu rút gọn cũng được. Dùng từ đồng nghĩa ngắn (big thay vì extensive, fix thay vì implement). Giữ nguyên chính xác toàn bộ nội dung kỹ thuật, mã, lỗi, URL, định danh."
+> "Trả lời ngắn gọn như người thượng cổ thông minh. Bỏ bài viết (a/an/the), phụ (just/really/basically/actually/simply), lời nói vui, phòng ngừa rủi ro. Đoạn OK. Từ đồng nghĩa ngắn (lớn không mở rộng, sửa lỗi không triển khai). Giữ tất cả nội dung kỹ thuật, mã, lỗi, URLs, số nhận dạng chính xác."
 
-Chế độ này đặc biệt hiệu quả cho:
+Điều này đặc biệt hiệu quả đối với:
 
-- Sinh mã (đầu ra ngắn gọn hơn = ít token hơn)
-- Hỏi đáp nhanh (không cần giải thích dài dòng)
+- Tạo mã (đầu ra terser = ít mã thông báo hơn)
+- Hỏi đáp nhanh (không cần giải thích phức tạp)
 - Xử lý hàng loạt (tối đa hóa thông lượng)
 
-#### Khi nào nên dùng
+#### Khi nào nên sử dụng
 
-Chế độ đầu ra Caveman là **tùy chọn bật**. Khi bật tính năng nén (`enabled: true`, công tắc chính
-trên trang Compression Settings), hãy bật chế độ này bằng `cavemanOutputMode.enabled`; `intensity`
-chọn `lite`, `full` hoặc `ultra`:
+Chế độ đầu ra Caveman là** chọn tham gia** . Khi bật tính năng nén (`enabled: true`, nút bật tắt chính trên trang Cài đặt nén), hãy bật tính năng này bằng `cavemanOutputMode.enabled`; `intensity` chọn `lite`, `full` hoặc `ultra`:
 
 ```json
 {
@@ -491,101 +449,44 @@ chọn `lite`, `full` hoặc `ultra`:
 }
 ```
 
-Công tắc **Output Mode** của một tổ hợp nén (`outputMode`, với cấp độ trong `outputModeIntensity`)
-thiết lập cùng một tùy chọn cho các yêu cầu mà tổ hợp đó áp dụng, và công cụ MCP
-`omniroute_set_compression_engine` ghi tùy chọn này thông qua đối số boolean `outputMode`.
-Một lựa chọn `outputStyles` không rỗng sẽ được ưu tiên hơn công tắc này. Trên
-dashboard, việc bật kiểu đầu ra **Terse prose** sẽ chèn cùng khối đó (xem Output
-Styles bên dưới).
+Một tổ hợp nén** Chế độ đầu ra** chuyển đổi (`outputMode`, cấp độ trong `outputModeIntensity`) đặt cùng một công tắc cho các yêu cầu mà kết hợp áp dụng và công cụ `omniroute_set_compression_engine` MCP ghi nó thông qua đối số `outputMode` boolean của nó. Lựa chọn `outputStyles` không trống sẽ được ưu tiên hơn công tắc này. Trong bảng điều khiển, việc bật** văn xuôi ngắn gọn** kiểu đầu ra chèn cùng một khối (xem Kiểu đầu ra bên dưới).
 
 ### Kiểu đầu ra (danh mục)
 
-Chế độ đầu ra Caveman ở trên là **cơ chế một kiểu cũ**. Giai đoạn 4 đã tổng quát hóa nó
-thành một danh mục các kiểu đầu ra có thể kết hợp: `OUTPUT_STYLE_CATALOG` trong
-`open-sse/services/compression/outputStyles/catalog.ts`. Mỗi kiểu là một chỉ dẫn trong system prompt
-yêu cầu chính mô hình tạo đầu ra tiết kiệm hơn; có thể bật nhiều kiểu
-cùng lúc và chúng được chèn theo thứ tự trong danh mục.
+Chế độ đầu ra Caveman ở trên là** con đường kiểu đơn kế thừa** . Giai đoạn 4 đã khái quát nó thành một danh mục gồm các kiểu đầu ra có thể kết hợp: `OUTPUT_STYLE_CATALOG` in `open-sse/services/compression/outputStyles/catalog.ts`. Mỗi kiểu là một hướng dẫn do hệ thống nhắc nhở, yêu cầu chính mô hình đó để có đầu ra rẻ hơn; các kiểu có thể được kích hoạt cùng nhau và được đưa vào theo thứ tự danh mục.
 
-| Kiểu                                            | `id`            | Tác dụng                                                                                                                                                                                                                                                                                                         | Ngôn ngữ chỉ dẫn                              |
-| ----------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Văn phong ngắn gọn                              | `terse-prose`   | Bỏ từ thừa/mạo từ/cách diễn đạt dè dặt; giữ nguyên chính xác nội dung kỹ thuật. Cùng văn bản với chế độ đầu ra Caveman cũ (được tham chiếu, không nhập lại).                                                                                                                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ít mã hơn                                       | `less-code`     | Thang YAGNI: thay đổi hoạt động nhỏ nhất, không tạo các lớp trừu tượng không được yêu cầu.                                                                                                                                                                                                                       | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ponytail (lập trình viên cấp cao lười biếng)    | `ponytail`      | "Mã tốt nhất là mã không bao giờ được viết": tái sử dụng > viết lại, nguyên nhân gốc > triệu chứng, diff hoạt động ngắn nhất.                                                                                                                                                                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Tôi bị ADHD (hành động trước)                   | `i-have-adhd`   | Hành động trước (lệnh/đường dẫn/đoạn mã trước phần diễn giải), các bước được đánh số và giới hạn, MỘT bước tiếp theo cụ thể, không có phần mở đầu/tóm tắt/kết lời. Phỏng theo [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                                                                 | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Bộ lọc giao diện chống nội dung rác             | `antislop-ui`   | Mọi kỹ thuật trực quan phải vượt qua kiểm tra mục đích (phân cấp, bản sắc, khả năng đọc); không mặc định dùng gradient/kính/phát sáng, giới hạn bảng màu, không dùng bố cục mẫu. Cả hai kiểu antislop đều bổ sung ranh giới không có điều khiển vô dụng / không có tuyên bố bịa đặt.                             | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Bộ lọc nội dung và con người chống nội dung rác | `antislop-copy` | Nội dung cụ thể (không dùng dấu gạch ngang dài, CTA chung chung, từ ngữ sáo rỗng, lời kết kiểu chatbot, dữ kiện bịa đặt), cộng với các quy tắc hướng đến con người: độ tương phản WCAG AA, tiêu điểm hiển thị rõ, khả năng truy cập bằng bàn phím, trạng thái trống/đang tải/lỗi, dàn lại trên thiết bị di động. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| CJK ngắn gọn (文言)                             | `terse-cjk`     | Câu trả lời `full`/`ultra` bằng Hán văn cổ điển (文言); `lite` chỉ yêu cầu câu trả lời ngắn gọn, không có hư từ, lời xã giao hoặc lời văn tô điểm.                                                                                                                                                               | zh (bị giới hạn theo locale, xem bên dưới)    |
+| Phong cách                                        | `id`            | Nó làm gì                                                                                                                                                                                                                                                                                            | Ngôn ngữ hướng dẫn                                     |
+| ------------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| văn xuôi ngắn gọn                                 | `terse-prose`   | Thả filler/articles/hedging; giữ chính xác nội dung kỹ thuật. Văn bản giống với chế độ đầu ra nguyên thủy (được tham chiếu, không được gõ lại).                                                                                                                                                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi          |
+| Ít mã hơn                                         | `less-code`     | thang YAGNI : thay đổi hoạt động nhỏ nhất, không có sự trừu tượng không được yêu cầu.                                                                                                                                                                                                                | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi          |
+| Tóc đuôi ngựa (nhà phát triển cao cấp lười biếng) | `ponytail`      | "Mã tốt nhất là mã không bao giờ được viết": tái sử dụng > viết lại, nguyên nhân gốc rễ của triệu chứng >, cách làm việc khác biệt ngắn nhất.                                                                                                                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi          |
+| Tôi có ADHD (hành động trước tiên)                | `i-have-adhd`   | Hành động trước (command/path/snippet trước văn xuôi), các bước giới hạn được đánh số, ONE bước tiếp theo cụ thể, không preamble/recap/closers. Chuyển thể từ [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi          |
+| Bộ lọc UI chống trượt                             | `antislop-ui`   | Mọi kỹ thuật hình ảnh đều phải vượt qua bài kiểm tra mục đích (thứ bậc, nhận dạng, khả năng đọc); không có gradients/glass/glow mặc định, bảng màu giới hạn, không có bố cục mẫu. Cả hai kiểu chống trượt đều bổ sung thêm ranh giới xác nhận quyền sở hữu không kiểm soát/không bịa đặt.            | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi          |
+| Bản sao chống trượt và bộ lọc con người           | `antislop-copy` | Bản sao cụ thể (không có dấu gạch ngang, CTAs chung, từ thông dụng, công cụ kết thúc chatbot, sự kiện được phát minh) cộng với các quy tắc về con người: độ tương phản WCAG AA, tiêu điểm hiển thị, phạm vi tiếp cận bàn phím, trạng thái empty/loading/error, chỉnh lại dòng trên thiết bị di động. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi          |
+| Terse CJK (文言)                                  | `terse-cjk`     | câu trả lời `full`/`ultra` bằng tiếng Trung cổ (文言); `lite` chỉ yêu cầu những câu trả lời ngắn gọn mà không có từ chức năng, lời nói vui vẻ hay tô điểm.                                                                                                                                           | zh (được kiểm soát theo miền địa phương, xem bên dưới) |
 
-Mỗi kiểu có ba cấp độ cường độ — `lite`, `full`, `ultra` — và mọi cấp độ
-đều kết thúc bằng mệnh đề ranh giới dùng chung (`SHARED_BOUNDARIES` trong `outputMode.ts`), giúp
-giữ nguyên chính xác các khối mã, đường dẫn tệp, lệnh, lỗi và URL. Văn bản cấp độ của `terse-prose` và
-`terse-cjk` bổ sung cả định danh vào danh sách đó.
+Mỗi kiểu đều có ba mức cường độ — `lite`, `full`, `ultra` — và mọi cấp độ đều kết thúc bằng mệnh đề ranh giới chung (`SHARED_BOUNDARIES` trong `outputMode.ts`), giữ cho các khối mã, đường dẫn tệp, lệnh, lỗi và URLs luôn chính xác. Văn bản cấp độ `terse-prose` và `terse-cjk` thêm số nhận dạng vào danh sách đó.
 
-`terse-cjk` bị giới hạn theo locale `zh` ở hai nơi. Trang Compression Settings chỉ hiển thị
-hàng của kiểu này khi ngôn ngữ giao diện dashboard là tiếng Trung (`zh-CN` hoặc `zh-TW`), và
-`applyOutputStyles()` chỉ chèn nó khi ngôn ngữ đã phân giải của yêu cầu (xem phần Lựa chọn ngôn ngữ
-bên dưới) là `zh`. Việc ẩn hàng này không xóa lựa chọn `terse-cjk` đã lưu:
-API cài đặt chấp nhận mọi id kiểu, và việc lưu các kiểu khác trên trang vẫn giữ lại kiểu này. Tại
-thời điểm xử lý yêu cầu, bước kiểm tra ngôn ngữ của `applyOutputStyles()` là cổng locale duy nhất.
+`terse-cjk` được định vị địa phương cho `zh` ở hai nơi. Trang Cài đặt nén chỉ liệt kê hàng của nó khi ngôn ngữ UI của trang tổng quan là tiếng Trung Quốc (`zh-CN` hoặc `zh-TW`) và `applyOutputStyles()` chỉ chèn nó khi ngôn ngữ được giải quyết của yêu cầu (xem Lựa chọn ngôn ngữ bên dưới) là `zh`. Việc ẩn hàng không xóa lựa chọn `terse-cjk` đã lưu: cài đặt API chấp nhận bất kỳ id kiểu nào và việc lưu các kiểu khác trên trang sẽ giữ nguyên nó. Tại thời điểm yêu cầu, kiểm tra ngôn ngữ `applyOutputStyles()` là cổng ngôn ngữ duy nhất.
 
-#### Cách chèn hoạt động
+#### Cách tiêm hoạt động
 
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) đối chiếu
-lựa chọn với danh mục (các id không xác định và các kiểu không khớp locale sẽ bị
-loại bỏ, không bao giờ gây lỗi; một lựa chọn sau khi đối chiếu không còn kiểu nào sẽ giữ
-nguyên phần body và được bỏ qua với lý do `no_styles`), nối các chỉ dẫn đã chọn theo thứ
-tự trong danh mục,
-chỉ thêm mệnh đề ranh giới **một lần** (cùng với mệnh đề an toàn,
-`SAFETY_BOUNDARIES` hoặc bản dịch của nó, khi `less-code` hoặc `ponytail` được chọn),
-và bắt đầu khối bằng một dấu idempotency duy nhất (`[OmniRoute Output Styles]`), vì vậy
-việc áp dụng lại không tạo ra thay đổi. Khi ngôn ngữ đã phân giải (xem phần Lựa chọn
-ngôn ngữ bên dưới) có bản dịch, chỉ dẫn đã bản địa hóa sẽ được chèn thay cho tiếng Anh.
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) giải quyết lựa chọn dựa trên danh mục (id không xác định và kiểu không khớp với miền địa phương bị loại bỏ, không bao giờ có lỗi; lựa chọn giải quyết không có kiểu nào khiến phần nội dung không thay đổi, bị bỏ qua dưới dạng `no_styles`), nối các hướng dẫn đã chọn theo thứ tự danh mục, nối thêm mệnh đề ranh giới** một lần** (cộng với mệnh đề an toàn, `SAFETY_BOUNDARIES` hoặc bản dịch của nó, khi `less-code` hoặc `ponytail` được chọn) và bắt đầu khối bằng một dấu hiệu bình thường duy nhất (`[OmniRoute Output Styles]`), vì vậy việc áp dụng lại là không thể thực hiện được. Khi ngôn ngữ đã giải quyết (xem phần Lựa chọn ngôn ngữ bên dưới) có bản dịch, hướng dẫn bản địa hóa sẽ được đưa vào thay vì tiếng Anh.
 
-Đối với body có mảng `messages` không rỗng, việc kiểm tra idempotency chạy trước cơ chế
-bỏ qua theo nội dung: khi dấu `[OmniRoute Output Styles]` đã có trong trường `system`
-cấp cao nhất (dạng chuỗi hoặc mảng khối nội dung), hoặc trong một system message có nội
-dung dạng chuỗi, body được giữ nguyên với lý do `already_applied` và không thực hiện
-kiểm tra từ khóa. Nếu không, cơ chế bỏ qua theo nội dung
-(`shouldBypassCavemanOutputMode()` trong
-`open-sse/services/compression/outputMode.ts`) sẽ kiểm tra văn bản của ba message cuối
-cùng, bất kể vai trò của chúng, và bỏ qua các kiểu cho toàn bộ lượt khi văn bản đó khớp
-với các từ khóa về bảo mật, hành động không thể đảo ngược hoặc yêu cầu làm rõ, hay một
-chuỗi phụ thuộc thứ tự: `first`, `then`, `after that`, `before`, `rollback` hoặc
-`backup`, theo sau trong phạm vi 240 ký tự bởi `delete`, `drop`, `migrate`, `deploy`
-hoặc `release`. Cơ chế bỏ qua hoạt động khi nút chuyển **Auto-Clarity Bypass**
-(`cavemanOutputMode.autoClarity`, bật theo mặc định) đang bật; tắt nút chuyển này sẽ bỏ
-qua bước kiểm tra từ khóa.
+Trên phần nội dung có mảng `messages` không trống, kiểm tra idempotency sẽ chạy trước khi bỏ qua nội dung: khi điểm đánh dấu `[OmniRoute Output Styles]` đã ở trong trường `system` cấp cao nhất (một chuỗi hoặc một mảng khối nội dung) hoặc trong thông báo hệ thống có nội dung chuỗi, phần nội dung không thay đổi dưới dạng `already_applied` và không chạy kiểm tra từ khóa. Mặt khác, tính năng bỏ qua nội dung (`shouldBypassCavemanOutputMode()` trong `open-sse/services/compression/outputMode.ts`) sẽ kiểm tra văn bản của ba tin nhắn cuối cùng, bất kể vai trò của chúng là gì và bỏ qua kiểu cho toàn bộ lượt khi văn bản đó khớp với các từ khóa bảo mật, hành động không thể đảo ngược hoặc làm rõ hoặc một chuỗi nhạy cảm với thứ tự: `first`, `then`, `after that`, `before`, `rollback` hoặc `backup` theo sau trong vòng 240 ký tự là `delete`, `drop`, `migrate`, `deploy` hoặc `release`. Đường tránh chạy trong khi** Tự động bỏ qua rõ ràng** chuyển đổi (`cavemanOutputMode.autoClarity`, bật theo mặc định) được bật; tắt nút này sẽ bỏ qua việc kiểm tra từ khóa.
 
-Khi cơ chế bỏ qua cho phép lượt được xử lý, `placeSystemInstruction()` (trong cùng tệp),
-vốn không bao giờ tạo `messages[0]` mới, sẽ đặt khối vào vị trí đầu tiên tìm thấy trong
-các vị trí sau:
+Khi đường vòng cho phép rẽ qua, `placeSystemInstruction()` (cùng một tệp), không bao giờ tạo `messages[0]` mới, đặt khối vào khối đầu tiên trong số này mà nó tìm thấy:
 
-1. Một system message ở đầu có nội dung dạng chuỗi: khối được nối vào sau văn bản của
-   message đó.
-2. Trường `system` cấp cao nhất: khối được nối vào sau văn bản nếu là chuỗi, hoặc được
-   thêm dưới dạng một khối văn bản mới nếu là mảng khối nội dung.
-3. System message đầu tiên xuất hiện sau đó có nội dung dạng chuỗi: khối được nối vào
-   sau văn bản của message đó.
-4. Không có trường hợp nào ở trên: khối được đưa vào một system message mới ở cuối
-   `messages`.
+1. Thông báo hệ thống hàng đầu có nội dung chuỗi: khối được thêm vào sau văn bản của nó.
+2. Trường `system` cấp cao nhất: khối được thêm vào sau văn bản của chuỗi hoặc được thêm dưới dạng khối văn bản mới vào mảng khối nội dung.
+3. Thông báo hệ thống đầu tiên sau này có nội dung chuỗi: khối được thêm vào sau văn bản của nó.
+4. Không có điều nào ở trên: khối đi vào thông báo hệ thống mới ở cuối `messages`.
 
-Đối với body không có mảng `messages` (hoặc có mảng rỗng), cơ chế bỏ qua theo nội dung
-không chạy và trường `system` cấp cao nhất không được xét đến. Khối được nối vào sau văn
-bản của trường `instructions` dạng chuỗi, trừ khi trường đó đã chứa dấu
-`[OmniRoute Output Styles]`; trong trường hợp này, body được giữ nguyên với lý do
-`already_applied`. Khi body không có trường `instructions` dạng chuỗi nhưng có `input`
-(một chuỗi hoặc một mảng), khối sẽ trở thành `instructions`, thay thế mọi giá trị không
-phải chuỗi mà trường đó từng chứa. Body không có cả trường `instructions` dạng chuỗi lẫn
-`input` dạng chuỗi hoặc mảng sẽ được giữ nguyên và bỏ qua với lý do `no_messages`.
+Trên phần nội dung không có mảng `messages` (hoặc có mảng trống), không chạy bỏ qua nội dung và trường `system` cấp cao nhất không được tham khảo. Khối được thêm vào sau văn bản của trường chuỗi `instructions`, trừ khi trường đó đã chứa điểm đánh dấu `[OmniRoute Output Styles]`, trong trường hợp đó phần nội dung được giữ nguyên là `already_applied`. Khi nội dung không có trường `instructions` chuỗi nhưng mang `input` (một chuỗi hoặc một mảng), khối sẽ trở thành `instructions`, thay thế bất kỳ giá trị không phải chuỗi nào mà trường đó giữ. Phần nội dung không có trường `instructions` chuỗi cũng như chuỗi hoặc mảng `input` đều không thay đổi và bị bỏ qua dưới dạng `no_messages`.
 
-#### Cách bật
+#### Cách kích hoạt
 
-Trong bảng điều khiển: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`), phần Output styles: mỗi kiểu có một hàng với nút bật/tắt
-và bộ chọn cấp độ. Các kiểu được chèn khi chính tính năng nén đang bật (nút chuyển chính
-của trang, `enabled`). Nút chuyển **Auto-Clarity Bypass** nằm trên trang **Caveman**
-(`/dashboard/context/caveman`), trong thẻ **Output Mode**. Khi cấu hình bằng mã, cấu
-hình nén lưu lựa chọn dưới dạng:
+Trong bảng điều khiển:** Bối cảnh nén Cài đặt nén →** (`/dashboard/context/settings`), Phần kiểu đầu ra: một hàng cho mỗi kiểu với chuyển đổi on/off và bộ chọn cấp độ. Kiểu được chèn trong khi tính năng nén được bật (chuyển đổi chính của trang, `enabled`). các** Tự động bỏ qua rõ ràng** chuyển đổi đang ở trên** người thượng cổ** trang (`/dashboard/context/caveman`), trong đó** Chế độ đầu ra** thẻ. Theo lập trình, cấu hình nén vẫn duy trì lựa chọn dưới dạng:
 
 ```json
 {
@@ -596,136 +497,50 @@ hình nén lưu lựa chọn dưới dạng:
 }
 ```
 
-Khả năng tương thích ngược: khi `outputStyles` trống, thiết lập cũ
-`cavemanOutputMode.enabled` ánh xạ tới `terse-prose` ở mức
-`cavemanOutputMode.intensity`. Khi đó, khối bắt đầu bằng dấu
-`[OmniRoute Output Styles]`, trong khi bộ chèn `applyCavemanOutputMode()` cũ sử dụng
-`[OmniRoute Caveman Output Mode]`. Bên dưới dấu này, văn bản khớp với nội dung chèn cũ
-trong en, pt-BR, es, de, fr, it, ru, id và vi; trong ja và zh, văn bản có thêm một
-khoảng trắng trước mệnh đề ranh giới. `terse-prose` được dịch sang pt-BR, es, de, fr,
-it, ru, zh, ja, id và vi, vì vậy một yêu cầu có ngôn ngữ đã phân giải là `hu` sẽ nhận
-văn bản tiếng Anh, trong khi bộ chèn cũ sử dụng bản tiếng Hungary.
+Tương thích ngược: trong khi `outputStyles` trống, cài đặt `cavemanOutputMode.enabled` kế thừa sẽ ánh xạ tới `terse-prose` tại `cavemanOutputMode.intensity`. Sau đó, khối bắt đầu bằng điểm đánh dấu `[OmniRoute Output Styles]`, trong đó bộ tiêm `applyCavemanOutputMode()` kế thừa đã viết `[OmniRoute Caveman Output Mode]`. Bên dưới điểm đánh dấu, văn bản khớp với nội dung kế thừa trong en, pt-BR, es, de, fr, it, ru, id và vi; trong ja và zh nó có thêm một khoảng trắng trước mệnh đề ranh giới. `terse-prose` dịch sang pt-BR, es, de, fr, it, ru, zh, ja, id và vi, do đó, một yêu cầu có ngôn ngữ được giải quyết là `hu` sẽ nhận được văn bản tiếng Anh trong đó trình tiêm kế thừa đã sử dụng văn bản tiếng Hungary của nó.
 
-Lựa chọn ngôn ngữ cho kiểu đầu ra (`resolveOutputStyleLanguage()` trong
-`outputStyles/apply.ts`): khi `languageConfig.enabled` bật, `autoDetect` lấy mẫu từ
-user message mới nhất có văn bản trong mảng `messages` của yêu cầu (nội dung dạng chuỗi,
-hoặc `text` của các phần nội dung) và chạy bộ phát hiện của công cụ Caveman
-(`detectCompressionLanguage()`) trên văn bản đó. Bộ phát hiện trả về `zh` cho văn bản
-có ký tự Hán nhưng không có kana; nếu không, nó trả về ngôn ngữ có nhiều gợi ý khớp
-nhất trong số `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` và `id`, và trả về
-`en` khi không có gợi ý nào khớp — văn bản không thể phân loại sẽ nhận tiếng Anh, không
-bao giờ nhận `defaultLanguage`, và `vi` không bao giờ được phát hiện mặc dù các kiểu có
-kèm văn bản `vi`. Body của Responses API lưu các lượt trong `input`, trường này không
-được lấy mẫu, vì vậy nó nhận `defaultLanguage`, rồi đến tiếng Anh. Khi không có user
-message nào trong `messages` chứa văn bản, hoặc khi `autoDetect` tắt,
-`defaultLanguage` được áp dụng, rồi đến tiếng Anh. Khi `languageConfig.enabled` tắt,
-ngôn ngữ là tiếng Anh — trừ khi một combo nén được áp dụng cho yêu cầu (combo được gán
-cho routing combo của yêu cầu, hoặc combo nén mặc định mà chatCore dùng làm phương án
-dự phòng cho pipeline xếp chồng tích hợp sẵn): việc áp dụng combo sẽ bật
-`languageConfig.enabled` cho yêu cầu đó và đặt `defaultLanguage` từ các gói ngôn ngữ
-của combo (giá trị đã lưu nếu giá trị đó thuộc các gói của combo, nếu không thì dùng gói
-đầu tiên của combo, mặc định là `en`), trong khi thiết lập `autoDetect` đã lưu (bật theo
-mặc định) vẫn được áp dụng. Công cụ đầu vào Caveman chọn ngôn ngữ của gói quy tắc theo
-cách khác — theo từng phần văn bản và, khi tính năng tự động phát hiện tắt, bị giới hạn
-bởi `enabledPacks`.
+Lựa chọn ngôn ngữ kiểu đầu ra (`resolveOutputStyleLanguage()` trong `outputStyles/apply.ts`): khi `languageConfig.enabled` bật, `autoDetect` lấy mẫu tin nhắn người dùng mới nhất trong mảng `messages` của yêu cầu có văn bản (nội dung chuỗi hoặc `text` của các phần nội dung của nó) và chạy trình phát hiện của công cụ Caveman (`detectCompressionLanguage()`) trên đó. Trình phát hiện trả về `zh` cho văn bản có ký tự Hán và không có kana; nếu không nó sẽ trả về bất kỳ cái nào trong số `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` và `id` có nhiều gợi ý trùng khớp nhất và `en` khi không khớp với văn bản — thì nó không thể phân loại thành tiếng Anh, không bao giờ `defaultLanguage` và `vi` không bao giờ được phát hiện mặc dù các kiểu gửi văn bản `vi`. Nội dung API của Phản hồi giữ các lượt của nó trong `input`, không được lấy mẫu, do đó, nó nhận được `defaultLanguage`, sau đó là tiếng Anh. Khi không có tin nhắn người dùng nào trong `messages` có văn bản hoặc khi `autoDetect` tắt, `defaultLanguage` sẽ được áp dụng, sau đó là tiếng Anh. Khi tắt `languageConfig.enabled`, ngôn ngữ là — tiếng Anh trừ khi tổ hợp nén áp dụng cho yêu cầu (tổ hợp được gán cho tổ hợp định tuyến của yêu cầu hoặc tổ hợp nén mặc định chatCore quay trở lại cho đường ống xếp chồng tích hợp): áp dụng tổ hợp sẽ bật `languageConfig.enabled` cho yêu cầu đó và đặt `defaultLanguage` từ gói ngôn ngữ của tổ hợp (giá trị đã lưu nếu đó là một trong các gói của tổ hợp, nếu không thì gói đầu tiên của tổ hợp, mặc định là `en`), trong khi `autoDetect` đã lưu (bật theo mặc định) vẫn được áp dụng. Công cụ đầu vào Caveman chọn ngôn ngữ gói quy tắc — khác nhau cho mỗi phần văn bản và, khi tắt tính năng tự động phát hiện, sẽ chọn `enabledPacks`.
 
-Ma trận kiểu × ngôn ngữ được cố định bởi
-`tests/unit/compression/output-styles-i18n-matrix.test.ts`: mọi kiểu trong danh mục đều cần có một
-mục trong `BASELINE_LANGUAGES` của bài kiểm thử; một kiểu không bị giới hạn theo locale phải cung cấp
-bản dịch pt-BR (kiểu `terse-cjk` bị giới hạn theo locale được miễn quy tắc này), trừ khi kiểu đó được
-liệt kê trong `KNOWN_ENGLISH_ONLY`, vốn chỉ được phép chứa các kiểu hoàn toàn không có bản dịch —
-một kiểu được liệt kê mà có bất kỳ bản dịch nào sẽ khiến bài kiểm thử thất bại; và một kiểu sẽ khiến
-bài kiểm thử thất bại khi mất đi một ngôn ngữ được liệt kê trong mục `BASELINE_LANGUAGES` tương ứng.
-Để thêm một kiểu, hãy xem
-[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
+Ma trận ngôn ngữ kiểu × được ghim bởi `tests/unit/compression/output-styles-i18n-matrix.test.ts`: mọi kiểu danh mục đều cần một mục nhập trong `BASELINE_LANGUAGES` của bài kiểm tra; một kiểu không được kiểm soát ngôn ngữ phải gửi một bản dịch pt-BR ( `terse-cjk` được kiểm soát theo ngôn ngữ được miễn quy tắc này) trừ khi nó được liệt kê trong `KNOWN_ENGLISH_ONLY`, kiểu này chỉ có thể chứa các kiểu không có bản dịch nào — một kiểu được liệt kê có bất kỳ bản dịch nào không vượt qua bài kiểm tra; và một kiểu không vượt qua bài kiểm tra khi nó mất ngôn ngữ mà mục nhập `BASELINE_LANGUAGES` của nó liệt kê. Để thêm kiểu, hãy xem [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
-### Nén kết quả công cụ
+### Công cụ nén kết quả
 
-`compressToolResult()` trong `open-sse/services/compression/toolResultCompressor.ts`
-nén văn bản kết quả công cụ bằng **5 chiến lược**. Hàm thử chúng theo thứ tự sau, và
-chiến lược được bật đầu tiên có điều kiện kiểm tra khớp với nội dung sẽ quyết định kết quả:
+`compressToolResult()` trong `open-sse/services/compression/toolResultCompressor.ts` nén văn bản kết quả công cụ bằng** 5 chiến lược** . Nó thử chúng theo thứ tự này và chiến lược được kích hoạt đầu tiên có kiểm tra khớp với nội dung sẽ quyết định kết quả:
 
-1. **`fileContent`**: nội dung có từ 3 dòng trở lên, trong đó ít nhất một dòng, sau khi bỏ qua
-   phần thụt lề đầu dòng, bắt đầu bằng `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` hoặc `return ` (từ khóa cộng với một dấu cách), hoặc bằng `if`,
-   `for` hay `while` theo sau bởi `(` hoặc ` (`, sẽ giữ lại 20 dòng đầu và 5 dòng cuối, đồng thời
-   đánh dấu phần giữa bị lược bỏ.
-2. **`grepSearch`**: nội dung có ít nhất một dòng ở dạng `<path>:<digits>:`,
-   trong đó phần văn bản trước dấu hai chấm đầu tiên không chứa khoảng trắng, sẽ chỉ giữ lại các dòng đó,
-   tối đa 30 dòng, theo sau là số lượng các kết quả khớp còn lại và danh sách các tệp khớp;
-   mọi dòng khác đều bị loại bỏ. Chỉ cần một dòng như vậy là đủ để kích hoạt chiến lược, vì vậy một
-   dòng nhật ký bắt đầu bằng dấu thời gian như `12:30:45` cũng được tính.
-3. **`shellOutput`**: đầu ra chứa chuỗi ANSI CSI (`ESC[` rồi đến các chữ số hoặc
-   dấu chấm phẩy, sau đó là một chữ cái, như trong mã màu) hoặc một ký tự `$` theo sau bởi khoảng trắng
-   ở bất kỳ vị trí nào trong văn bản sẽ bị loại bỏ các chuỗi đó (các escape khác, chẳng hạn như `ESC[?25l`
-   hoặc chuỗi tiêu đề cửa sổ OSC, vẫn được giữ lại) và giữ 50 dòng cuối, đồng thời thu gọn các dòng
-   lặp lại liên tiếp. Vì bước kiểm tra này chạy trước `json` và `errorMessage`,
-   đầu ra JSON hoặc lỗi có chứa ký tự `$` như vậy sẽ không bao giờ đến được các chiến lược đó khi
-   `shellOutput` đang bật.
-4. **`json`**: một payload JSON dài hơn 2.000 ký tự, bắt đầu bằng `{` hoặc `[` (sau
-   khoảng trắng tùy chọn) và phân tích cú pháp thành công, sẽ được tóm tắt: một mảng có hơn 7 phần tử sẽ giữ
-   5 phần tử đầu, 2 phần tử cuối và tổng số phần tử; còn một đối tượng sẽ giữ 20
-   khóa đầu tiên, trong đó mỗi giá trị là đối tượng hoặc mảng lồng nhau được thay bằng phần giữ chỗ `{…N keys}`
-   (đối với mảng, N là độ dài của mảng) cùng với một dấu `_remaining_<N>_keys` đếm số khóa
-   bị loại bỏ sau 20 khóa đầu tiên. Các giá trị vô hướng được sao chép nguyên vẹn, vì vậy một đối tượng có
-   tối đa 20 khóa và không có giá trị lồng nhau chỉ được thụt lề lại — một đối tượng đã được thu gọn sẽ tăng
-   số ký tự và được giữ nguyên.
-5. **`errorMessage`**: đầu ra chứa, ở bất kỳ vị trí nào và không phân biệt chữ hoa chữ thường, `error:`,
-   `error ` (từ này theo sau bởi một dấu cách, như trong `no error found`), `[error]`,
-   `exception:`, `exception `, `[exception]` hoặc `traceback` sẽ giữ dòng đầu tiên,
-   10 dòng tiếp theo và 3 dòng cuối, với dấu `… [N frames elided] …` thay thế cho
-   các dòng nằm giữa. Dấu này chỉ xuất hiện khi có hơn 13 dòng theo sau dòng đầu tiên,
-   vì vậy đầu ra lỗi gồm tối đa 14 dòng sẽ không bị rút ngắn (với 12 hoặc 13 dòng, 3 dòng
-   cuối sẽ lặp lại các dòng đã được giữ).
+1. **`fileContent`** : nội dung từ 3 dòng trở lên trong đó có ít nhất một dòng, bỏ qua thụt đầu dòng, bắt đầu bằng `import `, `export `, `function `, `class `, `const `, `let `, `var ` hoặc `return ` (từ khóa cộng với khoảng trắng) hoặc với `if`, `for` hoặc `while` theo sau là `(` hoặc ` (`, giữ nguyên 20 dòng đầu tiên và 5 dòng cuối cùng, với phần giữa được đánh dấu.
+2. **`grepSearch`** : nội dung có ít nhất một dòng có dạng `<path>:<digits>:`, trong đó văn bản trước dấu hai chấm đầu tiên không có khoảng trắng, chỉ giữ lại những dòng đó, tối đa là 30, theo sau là số lượng bất kỳ kết quả trùng khớp nào khác và danh sách các tệp phù hợp; mọi dòng khác đều bị loại bỏ. Một dòng như vậy là đủ để kích hoạt chiến lược, do đó, một dòng nhật ký bắt đầu bằng dấu thời gian chẳng hạn như `12:30:45` cũng được tính.
+3. **`shellOutput`** : đầu ra chứa một chuỗi ANSI CSI (`ESC[` rồi đến các chữ số hoặc dấu chấm phẩy rồi đến một chữ cái, như trong mã màu) hoặc một `$` theo sau là khoảng trắng ở bất kỳ vị trí nào trong văn bản sẽ làm mất các chuỗi đó (các ký tự thoát khác, chẳng hạn như `ESC[?25l` hoặc chuỗi tiêu đề cửa sổ OSC, được giữ lại) và giữ lại 50 dòng cuối cùng, với các dòng lặp lại liên tiếp được thu gọn. Bởi vì kiểm tra này chạy trước `json` và `errorMessage`, JSON hoặc đầu ra lỗi có chứa `$` như vậy không bao giờ đạt được chúng khi `shellOutput` được bật.
+4. **`json`** : tải trọng JSON trên 2.000 ký tự bắt đầu bằng `{` hoặc `[` (sau khoảng trắng tùy chọn) và các phân tích cú pháp được tóm tắt: một mảng gồm hơn 7 mục giữ 5 mục đầu tiên và 2 mục cuối cùng cùng tổng số lượng của nó, đồng thời một đối tượng giữ 20 khóa đầu tiên, với mỗi đối tượng lồng nhau hoặc giá trị mảng được thay thế bằng phần giữ chỗ `{…N keys}` (đối với một mảng, N là độ dài của nó) và điểm đánh dấu `_remaining_<N>_keys` đếm các khóa bị bỏ qua 20 khóa đầu tiên. được sao chép toàn bộ, do đó, một đối tượng có 20 khóa trở xuống không có giá trị lồng nhau chỉ được thụt lề lại — một đối tượng được rút gọn sẽ nhận được các ký tự và không thay đổi.
+5. **`errorMessage`** : đầu ra chứa, ở bất kỳ đâu và trong bất kỳ trường hợp chữ cái nào, `error:`, `error ` (từ theo sau là khoảng trắng, như trong `no error found`), `[error]`, `exception:`, `exception `, `[exception]` hoặc `traceback` giữ dòng đầu tiên, 10 dòng tiếp theo và 3 dòng cuối cùng, với điểm đánh dấu `… [N frames elided] …` thay cho các dòng giữa chúng. Điểm đánh dấu chỉ xuất hiện khi có hơn 13 dòng theo sau dòng đầu tiên, do đó lỗi đầu ra từ 14 dòng trở xuống không được rút ngắn (ở mức 12 hoặc 13 dòng, 3 dòng lặp lại cuối cùng đã được giữ lại).
 
-Sau khi một chiến lược khớp, ngay cả khi chiến lược đó không tiết kiệm được gì, các chiến lược tiếp theo sẽ không
-được thử. Khi chiến lược khớp không tiết kiệm được token ước tính nào (độ dài ÷ 4, làm tròn lên) —
-ví dụ một tệp giống mã nguồn có tối đa 25 dòng, hoặc một mảng JSON dài hơn 2.000
-ký tự với tối đa 7 phần tử — engine aggressive sẽ giữ nguyên kết quả công cụ:
-cả hai hàm gọi (`compressAggressive()` và `compressAnthropicToolResultBlock()`)
-đều giữ nguyên khi `saved` bằng 0 hoặc nhỏ hơn, trong khi bản thân `compressToolResult()` vẫn
-trả về đầu ra của chiến lược đó. Bước xử lý kết quả công cụ không phải là quyết định cuối cùng:
-bộ tóm tắt dự phòng của engine vẫn có thể rút ngắn một thông báo `tool` hoặc `function` dài hơn
-8.192 ký tự (`maxTokensPerMessage`, 2.048, nhân với 4).
+Sau khi một chiến lược phù hợp, ngay cả một chiến lược không tiết kiệm được gì, các chiến lược sau đó sẽ không được thử. Khi chiến lược so khớp không lưu mã thông báo ước tính (độ dài ÷ 4, làm tròn), — chẳng hạn như tệp giống mã có 25 dòng trở xuống hoặc mảng JSON trên 2.000 ký tự với 7 mục trở xuống — công cụ tích cực sẽ giữ kết quả công cụ ban đầu: cả hai người gọi (`compressAggressive()` và `compressAnthropicToolResultBlock()`) giữ nguyên bản gốc khi `saved` bằng 0 hoặc thấp hơn, trong khi bản thân `compressToolResult()` vẫn trả về kết quả đầu ra của chiến lược đó. Bước kết quả công cụ không phải là từ cuối cùng: trình tóm tắt dự phòng của công cụ vẫn có thể rút ngắn tin nhắn `tool` hoặc `function` dài hơn 8.192 ký tự (`maxTokensPerMessage`, 2.048, lần 4).
 
 #### Khi nào nên sử dụng
 
-Nén kết quả công cụ là bước 1 của engine aggressive (`compressAggressive()` trong
-`open-sse/services/compression/aggressive.ts`), vì vậy nó chạy trong chế độ Aggressive và trong một
-bước `aggressive` của pipeline xếp chồng. Nó nén các thông báo `tool` và `function`
-theo cấu trúc OpenAI, cũng như văn bản bên trong các khối `tool_result` của Anthropic. Mỗi chiến lược có
-công tắc riêng trong `aggressive.toolStrategies`, và tất cả đều được bật theo mặc định. Trên dashboard,
-các công tắc nằm trong chế độ xem **Advanced** của trang Caveman khi tính năng nén đang bật và
-chế độ mặc định là Aggressive.
+Nén kết quả công cụ là bước 1 của công cụ tích cực (`compressAggressive()` trong `open-sse/services/compression/aggressive.ts`), do đó, nó chạy ở chế độ Linh hoạt và ở bước `aggressive` của một đường ống xếp chồng lên nhau. Nó nén các tin nhắn `tool` và `function` có hình dạng OpenAI cũng như văn bản bên trong các khối Anthropic `tool_result`. Mỗi chiến lược đều có công tắc riêng theo `aggressive.toolStrategies`, tất cả đều được bật theo mặc định. Trong bảng điều khiển, các công tắc nằm trong trang Caveman** Trình độ cao** xem trong khi tính năng nén được bật và chế độ mặc định là Linh hoạt.
 
-### Pipeline xếp chồng
+### Đường ống xếp chồng lên nhau
 
-Chế độ xếp chồng chạy **nhiều engine nối tiếp nhau** — thường là RTK trước
-(tiết kiệm 60-90% đối với đầu ra công cụ), sau đó là Caveman trên phần văn bản còn lại (tiết kiệm
-~46% đầu vào). Khi kết hợp, mức tiết kiệm nằm trong **khoảng đủ điều kiện 78-95%** (xem Phép tính mức tiết kiệm ngược dòng
-ở trên): `1 - (1 - 0.60..0.90) × (1 - 0.46)` trung bình ≈89%.
+Chế độ xếp chồng chạy** nhiều động cơ theo trình tự** — thường là RTK trước tiên (tiết kiệm 60-90% đầu ra công cụ), sau đó là Caveman trên văn bản còn lại ( tiết kiệm đầu vào ~ 46%). Sáng tác, đó là** Phạm vi đủ điều kiện 78-95%** (xem Toán tiết kiệm ngược dòng ở trên): `1 - (1 - 0.60..0.90) × (1 - 0.46)` trung bình ≈ 89%.
 
-#### Cách thức hoạt động
+#### Nó hoạt động như thế nào
 
 ```
-Đầu vào (1000 token)
-  → RTK (bộ lọc nhận biết lệnh) → 200 token
-    → Caveman (loại bỏ nội dung dư thừa) → 108 token
-  → Đầu ra (108 token, tiết kiệm ~89%)
+Input (1000 tokens)
+  → RTK (command-aware filter) → 200 tokens
+    → Caveman (filler removal) → 108 tokens
+  → Output (108 tokens, ~89% savings)
 ```
 
 #### Khi nào nên sử dụng
 
 Sử dụng chế độ xếp chồng cho:
 
-- Quy trình làm việc sử dụng nhiều công cụ (lập trình theo tác tử, nghiên cứu)
-- Xử lý hàng loạt nhạy cảm về chi phí
+- Quy trình làm việc nặng về công cụ (mã hóa tác nhân, nghiên cứu)
+- Xử lý hàng loạt nhạy cảm với chi phí
 - Khi bạn cần tiết kiệm token tối đa
 
-Pipeline xếp chồng được cấu hình thông qua cài đặt nén `stackedPipeline`
-toàn cục, hoặc thông qua một combo nén có tên được gán cho một combo định tuyến (xem
-Ghi đè theo combo ở trên) — không phải thông qua `modePack` của auto-combo (trường đó chỉ
-điều chỉnh lại trọng số lựa chọn mô hình của auto-combo, và `stacked` không phải là tên pack hợp lệ).
+Các đường ống xếp chồng được định cấu hình thông qua cài đặt nén `stackedPipeline` chung hoặc thông qua tổ hợp nén có tên được gán cho tổ hợp định tuyến (xem Ghi đè mỗi tổ hợp ở trên) — không thông qua `modePack` tự động kết hợp (trường đó chỉ tính lại lựa chọn mô hình kết hợp tự động và `stacked` không phải là tên gói hợp lệ).
 
 ---
 

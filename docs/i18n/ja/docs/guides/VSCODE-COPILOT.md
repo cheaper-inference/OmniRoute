@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** は、OmniRoute が提供するすべてのモデルを、_ネイティブの_ GitHub Copilot Chat
-モデルピッカーに追加します。2つ目のサイドバーも、別個のチャット UI も不要です。Copilot のエージェントモード、ツール呼び出し、
-MCP サーバー、カスタム指示はすべてそのまま機能し、選択したモデル上で実行されます。
+**OmniCopilot** OmniRouteチャット モデルとコンボをネイティブCopilotチャット モデル ピッカーに追加します。選択したモデルでサポートされている場合は、ツール呼び出しとビジョンを備えたエディターの既存のチャットとエージェントのワークフローを使用します。
 
-|                              |                                                                                                                                                 |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **インストール（VS Code）**  | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **インストール（フォーク）** | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor、Windsurf、VSCodium、Theia、code-server、Gitpod、Antigravity、Kiro |
-| **ソース / Issue**           | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)（MIT）                                                       |
-| **要件**                     | VS Code 1.104+                                                                                                                                  |
+|                               |                                                                                                                                         |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **インストール (VSコード)**   | [マーケットプレイス→ `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)          |
+| **インストール ( VSXを開く)** | [オープンVSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) —には互換性のある言語モデル プロバイダーとチャットAPIsが必要です |
+| **ソース/問題点**             | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                                      |
+| **必要**                      | VSコード 1.104 + ( GitHubサインインまたはCopilotプランなしで使用するには 1.122 + )                                                      |
+| **現在のリリース**            | 両方のストアでOmniCopilot v1.5.1 (2026 年 11 月 24 日にリリース)                                                                        |
 
-> **Copilot のサブスクリプションは不要です。** VS Code 1.122 以降では、GitHub へのサインインや
-> Copilot プランなしで言語モデルプロバイダーが動作します。インライン補完や
-> 埋め込みベースの機能はプロバイダー API の対象外であり、引き続き Copilot が必要です。
+スナップショットを保存する場所**2026-11-25 (01:43 UTC)** 、現在のリリース:** 52,081 マーケットプレイス インストール**そして**20,989 オープンVSXダウンロード**。これらはストアのさまざまな指標であり、ユーザー数を合計したものではありません。出典:[マーケットプレイス](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)および[オープンVSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest) 。
+
+Open VSX可用性自体は、そのレジストリを使用するすべてのエディタとの互換性を確立しません。エディターのチャットと言語モデルAPIサポートを確認してください。
+
+> **VSコード 1.122 +のBYOKチャットには、 Copilotサブスクリプションは必要ありません。** Microsoftプロバイダーが構成されている場合、 GitHubサインインなしでチャット、ツール、およびMCPをサポートします。 VSコード 1.104 ～ 1.121 では拡張機能は引き続き機能しますが、 VSコードではサインインしたCopilotプランが必要です。インライン提案と埋め込みベースの機能はプロバイダーAPIの外部にあり、依然としてCopilot必要とします。 Copilot Business/Enterprise管理者は、ポリシーによってサードパーティ モデル プロバイダーを無効にすることができます。フォークは、チャットプロバイダーAPIを実装している場合にのみモデルを表示します。アップストリームプロバイダーの使用には引き続き料金が発生する可能性があります。 [VS Code 1.122 リリース ノート](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in)および[言語モデル ガイド](https://code.visualstudio.com/docs/agent-customization/language-models)を参照してください。
 
 ---
 
-## セットアップ
+## 設定
 
-1. **OmniRoute を実行** — `npm install -g omniroute && omniroute`（ダッシュボードは `http://localhost:20128`）。
-2. **拡張機能をインストール** — 拡張機能ビューで「OmniRoute」を検索します。
-3. **モデルを選択** — Copilot Chat → モデルピッカー → **Manage Models…** → **OmniRoute** の順に進み、使用するモデルに
-   チェックを入れます。
+1. **OmniRouteを実行する**— `npm install -g omniroute && omniroute` ( `http://localhost:20128`のダッシュボード)。
+2. **拡張機能をインストールする**—拡張機能ビューで「OmniRoute」を検索します。
+3. **接続する**—デフォルトの`http://localhost:20128`を維持するか、サーバーのURLおよびAPIキーを設定します**OmniRoute: 接続の管理**。
+4. **モデルを選択してください**— Copilotチャット→モデルピッカー→**モデルを管理…** →**OmniRoute** 、次に希望するものにチェックを入れます。
 
-OmniRoute がデフォルトポートで実行されている場合、設定は不要です。リモートインスタンスの場合は、
-**アクティビティバーの OmniRoute アイコン**を開く（または `OmniRoute: Manage Connection` を実行する）ことで、次を設定します。
+接続設定については、**アクティビティバーのOmniRouteアイコン**(または`OmniRoute: Manage Connection`を実行して)、次のように設定します。
 
-- **サーバー URL** — サーバーのルート URL（例：`http://192.168.0.15:20128`）。`/v1` サフィックスは
-  拡張機能によって追加されるため、含めないでください。
-- **API キー** — サーバーで `REQUIRE_API_KEY` が設定されている場合のみ必要です。VS Code SecretStorage を介して OS の
-  キーチェーンに保存され、`settings.json` には保存されません。
+- **サーバーURL** —サーバーのルート、たとえば`http://omniroute.example.com:20128`。 `/v1`サフィックスは拡張子によって追加されます。含めないでください。
+- **APIキー**—サーバーの推論認証ポリシーで必要な場合に必要です。 VSコードSecretStorageを通じて保存され、 `settings.json`には決して保存されません。ワークスペース固有のキーが利用可能です。公開したいモデルに対して認可されたキーを使用してください。
+
+この拡張機能は、接続インジケーター、モデルの更新、モデルのコンテキストと価格設定のメタデータ (コンボを含む)、ストリーミングされた推論も提供します。**考える努力**VSコード 1.120 +のメニュー、ステータス バーの 1 日あたりの制限インジケーターと使用状況パネル (OmniRoute 3.8.50 +)、 CLI構成、およびオプションのダッシュボード タブ。選択したモデルとサーバー ポリシーによって、使用できる機能が決まります。
 
 ---
 
@@ -110,23 +110,25 @@ npm start
 
 ---
 
-## VS Code 内から他のツールを設定する
+## VSコード内から他のツールを設定する
 
-**`OmniRoute: Configure Coding CLI`** は `omniroute` CLI を操作し、Codex CLI、Claude Code、Cline、Continue、Cursor、Aider、OpenCode、Goose、Crush、Qwen Code、Kilo、Roo 向けの、すぐに使用できるプロファイルを書き込みます。これらは
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md) で説明されているものと同じ設定です。API キーはコマンドラインではなく、`OMNIROUTE_API_KEY` 環境変数を介して CLI に渡されます。
+**`OmniRoute: Configure Coding CLI`** `omniroute` CLIを駆動して、16 のツール ( Codex CLI、 Claude Code、 Cline、Continue、 Cursor、Aider、 OpenCode、Goose、Crush、 Qwen Code、Kilo、Roo、 Gemini CLI、 Zed、 WhyCodesおよび 5dive) のすぐに使用できるプロファイルを作成します。この拡張機能は、統合端末で`setup-*`コマンドを呼び出します。選択したコマンドを含むバージョンのOmniRoute CLIをインストールします。各レシピが使用するファイルとフラグ、および[拡張機能のツール レジストリ](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts)については、 [CLI統合ガイドを](CLI-INTEGRATIONS.md)参照してください。
+
+APIキーは、コマンド ラインではなく、 `OMNIROUTE_API_KEY`を通じてCLIに渡されます。セットアップ レシピは、ターゲット ツールの構成に資格情報を保持できます。ワークスペース固有のキーをツールのユーザーレベルの構成と共有する場合、拡張機能は最初に確認を求めます。
 
 ---
 
 ## トラブルシューティング
 
-| 症状                                                          | 原因／解決方法                                                                                                                                                                                                                                                                     |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| モデル選択リストに OmniRoute モデルが表示されない             | サーバーに到達できません。ステータスバーのドットが灰色になります。`OmniRoute: Check Connection` を実行してください。検出処理は設計上サイレントに行われ、ユーザーに確認を求める代わりに、モデルを追加しません。                                                                     |
-| すべてのモデルが二重に表示される                              | 使用している OmniCopilot が 1.0.1 より古いため、更新してください。拡張機能は現在 `?prefix=alias` を指定してリクエストします。                                                                                                                                                      |
-| 以前表示されていた画像／音声モデルが表示されなくなった        | 1.0.1 以降の意図的な変更です。これらのモデルはチャットリクエストに応答できませんでした。                                                                                                                                                                                           |
-| Activity Bar にパネルが表示されない                           | VS Code は追加のビューコンテナーを Activity Bar 下部の **「…」** オーバーフローに移動します。また、右クリックで非表示にしたコンテナーは非表示のままになります。Activity Bar を右クリックして **OmniRoute** にチェックを入れるか、`OmniRoute: Manage Connection` で開いてください。 |
-| `editor` モードにもかかわらずダッシュボードがブラウザーで開く | サーバーが `DASHBOARD_ALLOW_EMBED=vscode` を指定して**ビルド**されていません（上記参照）。ビルド済みのインストール環境で起動時に設定しても何も変わりません。このフォールバックは意図された動作です。                                                                               |
-| プロバイダーを変更した後もモデル一覧が古いままである          | `OmniRoute: Refresh Models` を実行するか、パネル内の ↻ リンクをクリックしてください。                                                                                                                                                                                              |
+| 症状                                                                                 | 原因/修正                                                                                                                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ピッカーにOmniRouteモデルがありません                                                | サーバーに到達できません。ステータスバーのドットが灰色になります。 `OmniRoute: Check Connection`を実行します。 Discovery は設計上サイレントであり、プロンプトではなくモデルを提供しません。                                                                                         |
+| すべてのモデルが 2 回登場します                                                      | 1.0.1 —アップデートよりも古いOmniCopilotを使用しています。拡張機能は`?prefix=alias`を要求するようになりました。                                                                                                                                                                     |
+| image/audioモデルは以前はリストされていましたが、削除されました                      | 1.0.1 —以降、意図的にチャット リクエストに応答できなくなりました。                                                                                                                                                                                                                  |
+| アクティビティバーにパネルが表示されない                                             | VSコードは、追加のビュー コンテナを**「…」**アクティビティ バーの下部にオーバーフローが表示され、右クリックで非表示になったコンテナは非表示のままになります。アクティビティ バーの→チェックマークを右クリックします**OmniRoute** 、または`OmniRoute: Manage Connection`で開きます。 |
+| `editor`モードにもかかわらず、ダッシュボードがブラウザで開きます                     | サーバーはそうではありませんでした**建てられた**`DASHBOARD_ALLOW_EMBED=vscode` (上記を参照) を使用すると、事前構築済みインストールの起動時に—を設定しても何も起こりません。フォールバックは意図的に行われます。                                                                     |
+| プロバイダーを変更すると、モデルのリストが古くなります                               | `OmniRoute: Refresh Models`、またはパネル内の↻リンク。                                                                                                                                                                                                                              |
+| パネルには「オンライン (モデルはブロックされています)_」と表示され、ピッカーは空です | The server rejects the key. Save the right key with **Save & Test**. If the key was fixed on the server instead (enabled, or given access to the models), the extension does not notice by itself: run `OmniRoute: Refresh Models` or open the OmniRoute panel.                     |
 
 ---
 

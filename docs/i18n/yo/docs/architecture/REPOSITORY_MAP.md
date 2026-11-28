@@ -4,9 +4,9 @@
 
 ---
 
-> **Kini o ngbe nibo: gbogbo itopase itọsọna ipele-oke ati faili gbongbo, pẹlu idi laini kan.** Imudojuiwọn to kẹhin: 2026-11-13 (OmniRoute v3.8.54)
+> **Kini o ngbe nibo: gbogbo itopase itọsọna ipele-oke ati faili gbongbo, pẹlu idi laini kan.**
 >
-> Lo maapu yii lati wa ọna rẹ ni ayika codebase, lẹhinna tẹle awọn ọna asopọ si awọn iwe aṣẹ iyasọtọ. Awọn iṣiro faili ni a wọn pẹlu `git ls-files` ni ọjọ ti o wa loke. Wọn yipada pẹlu fere gbogbo itusilẹ, nitorina tọju wọn bi awọn aṣẹ ti titobi.
+> Lo maapu yii lati wa ọna rẹ ni ayika codebase, lẹhinna tẹle awọn ọna asopọ si awọn iwe aṣẹ iyasọtọ. Awọn kika faili wa lati `git ls-files` ati yipada pẹlu fere gbogbo itusilẹ. Tọju wọn bi awọn aṣẹ ti titobi.
 
 ## Oke-ipele igi
 

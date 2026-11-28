@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Inasaidia** Mikakati 22 ya uelekezaji** (tazama `src/shared/constants/routingStrategies.ts`):
 
-| Mkakati             | Tabia                                                                                                                  |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Orodha ya walengwa wa kwanza walioagizwa                                                                               |
-| `weighted`          | Uwezekano kwa uzito unaolengwa                                                                                         |
-| `round-robin`       | Pindua malengo kwa mpangilio                                                                                           |
-| `context-relay`     | Sahihisha muktadha kwenye malengo                                                                                      |
-| `fill-first`        | Jaza kiasi kabla ya kuhamia inayofuata                                                                                 |
-| `p2c`               | Nguvu ya chaguzi mbili                                                                                                 |
-| `random`            | Sare nasibu                                                                                                            |
-| `least-used`        | Chagua iliyo na matumizi machache ya hivi majuzi                                                                       |
-| `cost-optimized`    | Lengo la afya bora kwanza                                                                                              |
-| `reset-aware`       | Inafahamu madirisha ya mtoa huduma ya kuweka upya                                                                      |
-| `reset-window`      | Weka upya uelekezaji unaotegemea dirisha                                                                               |
-| `expiry-first`      | Tumia akaunti ambayo mgawo wake utaisha bila kutumiwa kwanza                                                           |
-| `headroom`          | Sehemu kubwa iliyosalia ya nafasi ya kwanza kwanza                                                                     |
-| `quota-weighted`    | Ruka akaunti ambazo zimechoka, kisha chora kwa kiasi kilichosalia cha ÷ ndani ya ndege                                 |
-| `strict-random`     | Sare ya kweli (hakuna uzani wa ubora)                                                                                  |
-| `auto`              | Tumia alama 16 (`autoCombo/`)                                                                                          |
-| `lkgp`              | Mtoa huduma bora anayejulikana mwisho kwanza                                                                           |
-| `context-optimized` | Bora kwa maombi ya muktadha mrefu                                                                                      |
-| `cache-optimized`   | Bandika kila kiambishi awali cha papo hapo kinachoweza kutumika tena kwa akaunti sawa (vibonge vya akiba ya papo hapo) |
-| `fusion`            | Fanya shabiki kwenye paneli sambamba, kisha usanisi kupitia jaji (`fusion.ts`)                                         |
-| `pipeline`          | Hatua za mnyororo — kila pato la lengwa hulisha linalofuata                                                            |
-| `jev`               | Jijumuishe: TypeSafe Jev anakubali ni maingizo gani yaliyoorodheshwa; vinginevyo agizo lako                            |
+| Mkakati             | Tabia                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| `priority`          | Orodha ya walengwa wa kwanza walioagizwa                                                    |
+| `weighted`          | Uwezekano kwa uzito unaolengwa                                                              |
+| `round-robin`       | Pindua malengo kwa mpangilio                                                                |
+| `context-relay`     | Sahihisha muktadha kwenye malengo                                                           |
+| `fill-first`        | Jaza kiasi kabla ya kuhamia inayofuata                                                      |
+| `p2c`               | Nguvu ya chaguzi mbili                                                                      |
+| `random`            | Changanya upya kwa kila ombi                                                                |
+| `least-used`        | Chagua iliyo na maombi machache zaidi yaliyorekodiwa                                        |
+| `cost-optimized`    | Bei ya chini ya ingizo ya katalogi kwanza                                                   |
+| `reset-aware`       | Kiwango kilichosalia + kuweka upya umuhimu                                                  |
+| `reset-window`      | Dirisha la kiasi ambalo litawekwa upya hivi karibuni                                        |
+| `expiry-first`      | Tumia akaunti ambayo mgawo wake utaisha bila kutumiwa kwanza                                |
+| `headroom`          | Sehemu kubwa iliyosalia ya nafasi ya kwanza kwanza                                          |
+| `quota-weighted`    | Ruka akaunti ambazo zimechoka, kisha chora kwa kiasi kilichosalia cha ÷ ndani ya ndege      |
+| `strict-random`     | Staha iliyochanganyika: kila lengo mara moja kabla ya kurudia                               |
+| `auto`              | Tumia alama 16 (`autoCombo/`)                                                               |
+| `lkgp`              | Mtoa huduma bora anayejulikana mwisho kwanza                                                |
+| `context-optimized` | Dirisha kubwa zaidi la muktadha linalojulikana kwanza                                       |
+| `cache-optimized`   | Pendelea akaunti inayoweza kushikilia kiambishi awali cha papo hapo kwenye akiba            |
+| `fusion`            | Fanya shabiki kwenye paneli sambamba, kisha usanisi kupitia jaji (`fusion.ts`)              |
+| `pipeline`          | Hatua za mnyororo — kila pato la lengwa hulisha linalofuata                                 |
+| `jev`               | Jijumuishe: TypeSafe Jev anakubali ni maingizo gani yaliyoorodheshwa; vinginevyo agizo lako |
 
 ### base.ts (1170 LOC)
 

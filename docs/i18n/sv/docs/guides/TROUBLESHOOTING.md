@@ -185,89 +185,49 @@ inte det.
 
 ---
 
-## Falska antiviruslarm
+## Antivirus falska positiva
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG placerar `README.md` i karantän med `MD:HttpRequest-inf[Susp]`
+### Avast/AVG karantän `README.md` med `MD:HttpRequest-inf[Susp]`
 
-**Detta är ett falskt positivt resultat. Ingenting är infekterat och ingen åtgärd krävs.**
+**Detta är ett falskt positivt. Ingenting är infekterat och ingen åtgärd krävs.**
 
-Avast och AVG använder en heuristisk analys som flaggar rena text-/Markdown-filer som innehåller många
-länkar som liknar HTTP-förfrågningar. OmniRoutes `README.md` medföljer npm-paketet (den
-anges i `package.json` → `files`), så vid en global installation hamnar den i
-`node_modules/omniroute/README.md` — och den innehåller cirka 15 exempel med
-`http://localhost:20128/...` (HTTP-/SSE-slutpunkterna för MCP, A2A-adressen under
-`.well-known` och `curl`-exempel). Denna länktäthet är tillräcklig för att utlösa den
-heuristiska analysen.
+Avast och AVG kör en heuristik som flaggar plain-text/Markdown filer som innehåller många länkar som ser ut efter HTTP-förfrågningar. OmniRoute:s `README.md` skickas inuti npm-paketet (det är listat i `package.json` → `files`), så det landar på `node_modules/omniroute/README.md` på en global installation — och det innehåller ~ 15 `http://localhost:20128/...` exempel ( MCP HTTP/SSE slutpunkterna, A2A `.well-known` URL och `curl` -snuttarna). Den länkdensiteten räcker för att utlösa heuristiken.
 
-Om detta började inträffa först nyligen: filens karaktär har inte förändrats. README-filen fick
-en utökad tabell med slutpunkter (MCP HTTP + SSE + A2A lades till) och fler `curl`-exempel,
-vilket gjorde att den passerade tröskelvärdet.
+Om detta började nyligen: filen ändrades inte i natura. README växte sin ändpunktstabell (MCP HTTP + SSE + A2A lades till) och fler `curl` exempel, vilket förde den förbi tröskeln.
 
-Filen är passiv dokumentation helt utan körbart innehåll. Du kan utan risk återställa den
-från karantänen.
+Filen är inert dokumentation med noll körbart innehåll. Du kan säkert återställa den från karantän.
 
-**Så här gör du:**
+**Vad du ska göra:**
 
-1. **Stoppa aviseringarna** — undanta installationskatalogen i ditt antivirusprogram
-   (Avast: Inställningar → Undantag) genom att lägga till sökvägen till din globala
-   `node_modules`-katalog och/eller OmniRoutes datakatalog (`~/.omniroute/`).
-2. **Rapportera det falska positiva resultatet** — <https://www.avast.com/false-positive-file-form.php>,
-   och bifoga den karantänplacerade `README.md`. Detta är den lösning som hjälper alla,
-   eftersom det är leverantörens heuristiska analys som överreagerar på en textfil.
+1. **Stoppa aviseringarna** — exkludera installationskatalogen i ditt antivirusprogram (Avast: Settings → Exceptions), lägg till din globala `node_modules` sökväg and/or OmniRoute data dir (`~/.omniroute/`).
+2. **Rapportera det falska positiva** — <https://www.avast.com/false-positive-file-form.php>, bifogar den i karantän satta `README.md`. Detta är korrigeringen som hjälper alla, eftersom det är säljarens heuristiska överreagerande på en textfil.
 
-**Varför vi inte ”åtgärdar” detta på vår sida:** alla exempel använder `http://localhost`,
-och localhost kan inte använda `https` utan besvär med självsignerade certifikat. Att
-förvanska dokumentationen för att kringgå en leverantörs heuristiska analys skulle försämra
-den för alla läsare bara för att tillgodose ett fel i ett skanningsverktyg.
+**Varför vi inte "fixar" detta på vår sida:** exemplen är alla `http://localhost`, och localhost kan inte vara `https` utan friktion med självsignerat certifikat. Att mangla dokumenten för att undvika en leverantörs heuristik skulle skada varje läsare att tillfredsställa en skannerbugg.
 
-### Kaspersky flaggar skrivbordsappen som `PDM:Trojan.Win32.Generic`
+### Kaspersky flaggar Desktop-appen som `PDM:Trojan.Win32.Generic`
 
-**Detta är ett falskt positivt resultat från en beteendebaserad heuristisk analys. Ingenting är infekterat.**
-Kasperskys prefix `PDM:` innebär att bedömningen kommer från dess Proactive Defense Module
-(System Watcher), som bedömer vad installationsprogrammet _gör_ i stället för att jämföra
-det mot känd skadlig kod. När analysen utlöses ”återställer” Kaspersky hela installationen
-— och raderar filer som redan har skrivits — vilket gör att appen blir trasig eller
-försvinner.
+**Detta är ett falskt positivt från en beteendeheuristik. Inget är infekterat.** Kasperskys `PDM:` prefix betyder att domen kommer från dess proaktiva försvarsmodul (System Watcher), som bedömer vad installationsprogrammet _gör_ snarare än att matcha det mot känd skadlig programvara. När den avfyras, "rullar Kaspersky tillbaka" hela installationen — tar bort filer som den redan hade skrivit — så att appen hamnar trasig eller saknas.
 
-Filerna som flaggas är standardkomponenter från deklarerade beroenden med öppen källkod som
-paketerats med skrivbordsappen, till exempel:
+Filerna som den flaggar är lagerdelar av deklarerade, öppen källkodsberoenden som paketeras med skrivbordsappen, till exempel:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` och
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), biblioteket för
-  webbläsarautomatisering som används för leverantörsinloggning i appen och
-  webbläsarbaserad chatt.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — den versionslåsta inbyggda `wreq-js`-bindningen som används för webbläsarfingeravtryckad
-  HTTP hos leverantörer som använder webbkakor (`<arch>` är `x64` eller `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` och `workerProcessEntry.js` — [Playwright](https://playwright.dev), webbläsarautomatiseringsbiblioteket som används för inloggning av leverantörer i appar och webbläsarstödd chatt.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — den fasta `wreq-js` native bindningen som används för webbläsar-fingeravtrycks- HTTP på webbcookie-leverantörer (`<arch>` är `x64` eller `arm64`).
 
-**Varför analysen utlöses:** Windows-installationsprogrammet är **ännu inte kodsignerat**,
-så ett osignerat NSIS-installationsprogram har inget anseende och beteendebaserade
-heuristiska analyser körs med maximal aggressivitet. I kombination med en paketerad inbyggd
-DLL-fil och hundratals `.js`-filer som skrivs under
-`%LOCALAPPDATA%\Programs\OmniRoute` (inklusive paketskataloger med hash-suffix från det
-fristående Next.js-bygget) är detta tillräckligt för att utlösa den heuristiska analysen.
-Kodsignering är planerad; tills den är på plats kan problemet återkomma i nya utgåvor.
+**Varför det brinner:** Windows -installationsprogrammet är** ännu inte kodsignerad** , så en osignerad NSIS installerare har noll rykte och beteendeheuristik körs med maximal aggression. Kombinerat med en buntad inbyggd DLL och hundratals `.js` filer skrivna under `%LOCALAPPDATA%\Programs\OmniRoute` (inklusive hash-suffixerade paketkataloger från Next.js fristående build), är det tillräckligt för att lösa heuristiken. Kodsignering är planerad; tills den landar kan nya utgåvor upprepa detta.
 
-**Så här gör du:**
+**Vad du ska göra:**
 
-1. **Verifiera först din nedladdning** (detta utesluter att filen har manipulerats). Varje
-   utgåva publicerar `latest.yml`, vars `sha512`-fält (base64) omfattar installationsfilen
-   `OmniRoute.Setup.<version>.exe`. Kör följande i PowerShell från mappen som innehåller
-   installationsfilen:
+1. **Verifiera din nedladdning först** (utesluter en manipulerad fil). Varje utgåva publicerar `latest.yml`, vars `sha512` fält (base64) täcker `OmniRoute.Setup.<version>.exe` installationsprogrammet. I PowerShell, från mappen som innehåller installationsprogrammet:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Utdata måste matcha `latest.yml` → `sha512`. Om de inte matchar ska du radera filen och
-   endast ladda ned den igen från [GitHubs utgivningssida](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Återställ + undanta** — återställ de borttagna objekten från karantänen och lägg till
-   ett undantag för `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Inställningar → Hot och
-   undantag) och installera sedan om.
-3. **Rapportera det falska positiva resultatet** — <https://opentip.kaspersky.com/>.
-   FP-rapporter från användare påskyndar verkligen vitlistningen.
+   Utdata måste matcha `latest.yml` → `sha512`. Om den inte gör det, ta bort filen och ladda ner den igen från [sidan GitHub -utgåvor](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Återställ + exclude** — återställ de återställda objekten från karantänen och lägg till en uteslutning för `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions), installera sedan om.
+3. **Rapportera det falska positiva** — <https://opentip.kaspersky.com/>. Användarinlämnade FP -rapporter påskyndar verkligen godkännandet.
 
 ---
 
@@ -882,8 +842,8 @@ Fler symtom:
 
 ## Fortfarande fast?
 
-- **GitHub-ärenden**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Arkitektur**: Se [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) för interna detaljer
-- **API-referens**: Se [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) för alla slutpunkter
-- **Hälsoöversikt**: Kontrollera **Kontrollpanel → Hälsa** för systemstatus i realtid
-- **Översättare**: Använd **Kontrollpanel → Översättare** för att felsöka formatproblem
+- **GitHub frågor** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Arkitektur** : Se [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) för interna detaljer
+- **API referens** : Se [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) för alla slutpunkter
+- **Hälsa instrumentpanel** : Kontrollera** Dashboard → Health** för systemstatus i realtid
+- **Översättare** : Använd** Dashboard → Översättare** för att felsöka formatproblem

@@ -12,6 +12,12 @@ Nevtralna pogodba `config/cli-tools-manifest.json` navaja kanonični IDs, vzdevk
 
 Signali prekinitve in zaključka so posredovani otroku. Zaganjalnik počaka na podrejeni dogodek zapiranja, preden odstrani začasno konfiguracijo. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` nadzoruje obdobje odloga pred prisilno prekinitvijo (privzeto 5000 milisekund).
 
+`omniroute launch <tool>` (glejte [LAUNCH.md](./LAUNCH.md) ) sledi istim pravilom okolja in posredovanju signalov ter dodaja:
+
+- **Samodejni zagon prehoda.** Za lokalni cilj, ko se na vratih ne oglasi noben prehod, zaganjalnik zažene `omniroute serve --headless --no-open` vezanega na `127.0.0.1` pod ločenim postopkom reaperja. Vsak zagon v teku ima zakup v `DATA_DIR/launch/leases/` (srčni utrip vsakih 15 s, zastarelo po 45 s ali ko je proces izginil). Reaper ustavi prehod, ki ga je zagnal, ko noben najem ni bil v živo za mirovanje (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, privzeto 10000 milisekund). Prehod, ki ga je uporabnik zagnal, se uporablja, vendar se nikoli ne ustavi. `--keep-gateway` ali `omniroute gateway keep` spremeni zaganjalni prehod v običajnega; `--no-start` obnovi staro vedenje fail-if-down. Preiskujejo se samo oddaljeni cilji.
+- **Zagon sej.** Vsak zagon kuje kratkotrajni žeton seje `olx_` iz nadrejene poverilnice (`POST /api/launch/sessions`), ga utripa med izvajanjem orodja, prebere povzetek uporabe in ga prekliče, ko orodje zapre. Žeton je stroga podmnožica svojega nadrejenega: enaka dovoljenja, enak ali ožji katalog, krajša življenjska doba in ni poverilnica nadzorne plošče. Orodje prejme žeton seje, nikoli nadrejene poverilnice, zahteve pa so označene `launch:<tool>:<sessionId>` razen če je podan `--tag`. Prehod brez seje API ne uspe z `GatewayTooOld` namesto da bi se vrnil k zagonu brez obsega.
+- **Konfiguracija za zagon.** Konfiguracijske datoteke orodja so zapisane v zasebni začasni imenik (način 0700, predpona `omnirouter-`) in odstranjene po izstopu podrejenega. `SIGKILL` zaganjalnika zapusti imenik; `omniroute launch --cleanup` odstrani takšne imenike, ko so starejši od enega dneva.
+
 ## trajna nastavitev Gemini
 
 ```bash

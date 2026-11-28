@@ -47,15 +47,13 @@
 आधिकारिक सोशल मीडिया खाते से पोस्ट करना या किसी ऑनलाइन अथवा ऑफ़लाइन कार्यक्रम में
 नियुक्त प्रतिनिधि के रूप में कार्य करना शामिल है।
 
-## Enforcement
+## प्रवर्तन
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+अपमानजनक, परेशान करने वाले या अन्यथा अस्वीकार्य व्यवहार के मामलों की सूचना निजी सुरक्षा सलाहकार खोलकर प्रवर्तन के लिए जिम्मेदार समुदाय के नेताओं को दी जा सकती है।
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+या अनुरक्षक कोdiegosouza.pw@outlook.com पर ईमेल करके। सुरक्षा-संवेदनशील घटनाओं के लिए, [`SECURITY.md`](SECURITY.md) देखें। सभी शिकायतों की समीक्षा और जांच शीघ्र और निष्पक्ष रूप से की जाएगी।
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+सभी समुदाय के नेता किसी भी घटना के रिपोर्टर की गोपनीयता और सुरक्षा का सम्मान करने के लिए बाध्य हैं।
 
 ## प्रवर्तन दिशानिर्देश
 

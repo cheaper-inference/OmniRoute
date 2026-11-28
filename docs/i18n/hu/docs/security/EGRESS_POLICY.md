@@ -69,35 +69,35 @@ A direktíva szándékosan **proxynkénti**, nem pedig globális — a készletb
 
 ## A három érték
 
-| Érték  | Felhasználói felületen megjelenő címke | Viselkedés                                                                                                                                                                                                                  |
-| ------ | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `Automatikus (kettős protokollverem)`  | Az operációs rendszer választja ki a címcsaládot. IP-literálként megadott proxyállomás esetén a címcsaládot maga a literál határozza meg; állomásnév esetén mindkét címcsalád használható. Ez az alapértelmezett beállítás. |
-| `ipv4` | `Csak IPv4`                            | A kapcsolatot az IPv4 használatára rögzíti. Zárt módon meghiúsul, ha a proxyállomás nem rendelkezik IPv4-es (A) rekorddal.                                                                                                  |
-| `ipv6` | `Csak IPv6`                            | A kapcsolatot az IPv6 használatára rögzíti. Zárt módon meghiúsul, ha a proxyállomás nem rendelkezik IPv6-os (AAAA) rekorddal.                                                                                               |
+| Érték  | UI címke            | Viselkedés                                                                                                                                                           |
+| ------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS kiválasztja a családot. Az IP-literális proxy gazdagép esetében a család a literál velejárója; gazdagépnév esetén mindkét család jogosult. Ez az alapértelmezett. |
+| `ipv4` | `IPv4 only`         | Rögzíti a kapcsolatot a IPv4. A bezárás sikertelen, ha a proxy gazdagépnek nincs IPv4 (A) rekordja.                                                                  |
+| `ipv6` | `IPv6 only`         | Rögzíti a kapcsolatot a IPv6. A bezárás sikertelen, ha a proxy gazdagépnek nincs IPv6 (AAAA) rekordja.                                                               |
 
-A felhasználói felület szövegei a `src/i18n/messages/en.json` fájlban találhatók (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+UI karakterláncok `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Beállítás
+## Hogyan kell konfigurálni
 
-### Irányítópult
+### Műszerfal
 
-A választó a **Proxykészlet** lap proxyűrlapján található:
+A választó a proxy formájában van** Proxy Pool** lap:
 
-1. Nyissa meg az **Irányítópult → Beállítások → Proxy → Proxykészlet** menüpontot
-2. Adjon hozzá vagy szerkesszen egy proxyt
-3. Állítsa az **IP-címcsalád** legördülő listát az `Automatikus (kettős protokollverem)`, `Csak IPv4` vagy `Csak IPv6` értékre
-4. Mentse a beállítást
+1. Nyitott** Dashboard → Settings → Proxy → Proxy Pool**
+2. Proxy hozzáadása vagy szerkesztése
+3. Állítsa be a**IP család** legördülő menüből `Auto (dual-stack)`, `IPv4 only` vagy `IPv6 only` elemre
+4. Megtakarítás
 
-A vezérlőt a `ProxyRegistryManager.tsx` jeleníti meg (a `proxy/ProxyPoolTab.tsx` fájlban csatlakoztatva).
+A vezérlést a `ProxyRegistryManager.tsx` adja (a `proxy/ProxyPoolTab.tsx` szerelve).
 
 ### API
 
-A `family` mező a proxyregisztráció létrehozási/frissítési adatainak része. A `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) végzi az ellenőrzését, a kezeléséről pedig a `POST` / `PATCH /api/v1/management/proxies` gondoskodik:
+A `family` mező a proxy-nyilvántartási create/update payloads része, `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ellenőrzi, és `POST` / `PATCH /api/v1/management/proxies` kezeli:
 
 ```bash
-# Csak IPv6-ot használó proxy létrehozása
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Meglévő proxy átállítása kizárólag IPv4 használatára
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Ugyanezt a mezőt a felsőbb rétegbeli proxy bejegyzéseihez használt beágyazott proxykonfigurációs objektum is elfogadja (`upstream_proxy_config.family`, lásd: [Adatmodell](#data-model)).
+Ugyanezt a mezőt az upstream proxy bejegyzésekhez használt inline proxy konfigurációs objektum is elfogadja (`upstream_proxy_config.family`, lásd [Adatmodell](#data-model) ).
 
-A proxy CRUD-/hozzárendelési API-jának további részeiről lásd a [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) dokumentumot.
+A CRUD/assignment API proxy többi részéhez lásd [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) fájlt.
 
 ---
 

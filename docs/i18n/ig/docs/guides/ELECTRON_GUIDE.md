@@ -4,7 +4,7 @@
 
 ---
 
-> **Isi mmalite nke eziokwu:** `electron/` ọrụ** Emelitere ikpeazụ:** 2026-06-28 — v3.8.40
+> **Isi mmalite nke eziokwu:** `electron/` ọrụ
 
 OmniRoute na-ebunye ngwa desktọpụ cross-platform (Windows / macOS / Linux) arụnyere na ya**Electron 41** +** Onye nrụpụta elektrọn 26.10** . Ngwa desktọpụ ahụ na-eme ka ihe nkesa Next.js kwụ ọtọ dị ka usoro nwata, tụọ aka `BrowserWindow` na ya, wee gbakwunye tray sistemu, ihe na-emelite akpaaka, akwa IPC, yana bootstrap nzuzo efu.
 
@@ -198,7 +198,7 @@ Tọọ site na `session.defaultSession.webRequest.onHeadersReceived`. Ntuziaka 
 
 ## Melite onwe ya
 
-Na-eji `electron-updater` na onye na-eweta GitHub (`diegosouzapw/OmniRoute`).
+Na-eji `electron-updater` na onye na-eweta GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Ihe omume ezigara onye nrụpụta site na `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (ya na `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Ihe eji eme ihe na `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-A na-ebipụta mwepụta na GitHub Releases (`diegosouzapw/OmniRoute`), nke bụkwa ebe `electron-updater` na-enyocha nsụgharị ọhụrụ.
+A na-ebipụta mwepụta na GitHub Releases (`cheaper-inference/OmniRoute`), nke bụkwa ebe `electron-updater` na-enyocha nsụgharị ọhụrụ.
 
 ## Nchọpụta nsogbu
 

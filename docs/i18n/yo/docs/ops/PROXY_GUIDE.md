@@ -269,114 +269,114 @@ Ibi ìpamọ́ key_value àtijọ́ → proxy_registry + proxy_assignments
 
 ---
 
-## Ọjà Aṣojú Ọ̀fẹ́ 1proxy
+## 1aṣoju Ọfẹ Ọjà
 
-> 🆕 **Ìfikún láti ọwọ́ [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Ọ̀ràn [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** Ti pese nipasẹ [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (oro [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute ṣepọ̀ mọ́ pèpéle àwùjọ **[1proxy](https://1proxy-api.aitradepulse.com)** láti pèsè ààyè sí **ọ̀pọ̀ ọgọ́rùn-ún àwọn aṣojú ọ̀fẹ́ tí a ti fọwọ́sí** láti gbogbo àgbáyé. Èyí dára gan-an fún àwọn aṣàmúlò tí kò ní ohun amáyédẹrùn aṣojú tiwọn.
+OmniRoute ṣepọ pẹlu awọn** [1aṣoju](https://1proxy-api.aitradepulse.com)** Syeed agbegbe lati pese iraye si** awọn ọgọọgọrun ọfẹ, awọn aṣoju ti a fọwọsi** lati kakiri aye. Eyi jẹ pipe fun awọn olumulo ti ko ni awọn amayederun aṣoju tiwọn.
 
-### Bí Ó Ṣe Ń Ṣiṣẹ́
+### Bawo ni O Nṣiṣẹ
 
 ```
-┌─────────────┐    Múdọ́gba   ┌─────────────────┐    Yípadà    ┌──────────┐
-│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Olùpèsè  │
-│  (òde)      │ tó 500 péré   │  source=oneproxy │ nípa dídára  │   API    │
-└─────────────┘    aṣojú      └─────────────────┘               └──────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Múdọ́gba** — OmniRoute máa ń gba àwọn aṣojú tí a ti fọwọ́sí láti 1proxy API
-2. **Tọ́jú** — A máa ń fi àwọn aṣojú pamọ́ sínú tábìlì `proxy_registry` kan náà pẹ̀lú `source = 'oneproxy'`
-3. **Ṣàsẹ̀** — Ṣàsẹ̀ nípa ìlànà ìbánisọ̀rọ̀, orílẹ̀-èdè, àti àmì dídára
-4. **Yípadà** — Yan aṣojú tó dára jù lọ nípa lílo dídára, àṣàyàn láìlétòlétò, tàbí àwọn ọgbọ́n títẹ̀lé ara wọn
-5. **Dín dídára kù láìfọwọ́ṣe** — A máa ń dín àmì dídára àwọn aṣojú tí ó kùnà kù; nígbà tó bá wà lábẹ́ ààlà → a máa samisi rẹ̀ gẹ́gẹ́ bí aláìṣiṣẹ́
+1. **Amuṣiṣẹpọ** — OmniRoute fetches awọn aṣoju ti a fọwọsi lati 1proxy API
+2. **Itaja** — Awọn aṣoju ti wa ni fipamọ ni tabili `proxy_registry` kanna pẹlu `source = 'oneproxy'`
+3. **Àlẹmọ** Ajọ — nipasẹ ilana, orilẹ-ede, Dimegilio didara
+4. **Yiyi** — Yan aṣoju ti o dara julọ nipa lilo didara, laileto, tabi awọn ilana ilana-tẹle
+5. **Aifọwọyi-rẹwẹsi** — Awọn aṣoju ti kuna gba Dimegilio didara wọn dinku; ni isalẹ ala → samisi aisise
 
-### Mímú Àwọn Aṣojú Dọ́gba
+### Awọn aṣoju amuṣiṣẹpọ
 
-**Nípasẹ̀ Dasibodu:**
+**Nipasẹ Dasibodu:**
 
-1. Lọ sí táàbù **Settings → 1proxy**
-2. Tẹ **"Sync Now"**
-3. Wo àwọn ìṣirò: àpapọ̀ àwọn aṣojú, iye àwọn tó ń ṣiṣẹ́, àárín àmì dídára, àti ìpín gẹ́gẹ́ bí orílẹ̀-èdè
+1. Lọ si** Eto → 1aṣoju** taabu
+2. Tẹ** "Muṣiṣẹpọ Bayi"**
+3. Wo awọn iṣiro: awọn aṣoju lapapọ, iṣiro ti nṣiṣe lọwọ, didara apapọ, didenukole nipasẹ orilẹ-ede
 
-**Nípasẹ̀ API:**
+**Nipasẹ API:**
 
 ```bash
-# Bẹ̀rẹ̀ ìmúdọ́gba
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Ìdáhùn:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
-### Ṣíṣe Àṣàyàn Àwọn Aṣojú
+### Sisẹ Awọn aṣoju
 
 ```bash
-# Ṣàsẹ̀ nípa ìlànà ìbánisọ̀rọ̀
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Ṣàsẹ̀ nípa orílẹ̀-èdè
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Ṣàsẹ̀ nípa àmì dídára tó kéré jù lọ
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Darapọ̀ àwọn àsẹ̀
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### Àwọn Àmì Dídára Aṣojú
+### Aṣoju Didara Ikun
 
-Aṣojú 1proxy kọ̀ọ̀kan ní metadata:
+Aṣoju aṣoju 1 kọọkan wa pẹlu metadata:
 
-| Pápá            | Àpèjúwe                                  |
+| Aaye            | Apejuwe                                  |
 | --------------- | ---------------------------------------- |
-| `qualityScore`  | Ìwọ̀n 0-100 láti inú ìfọwọ́sí 1proxy       |
-| `latencyMs`     | Ìdádúró nẹ́tíwọ́ọ̀kì tí a wọ̀n               |
-| `anonymity`     | `transparent`, `anonymous`, tàbí `elite` |
-| `googleAccess`  | Bóyá aṣojú náà lè wọ àwọn iṣẹ́ Google     |
-| `countryCode`   | Kóòdù orílẹ̀-èdè ISO onílẹ́tà méjì         |
-| `lastValidated` | Àmì àkókò ìfọwọ́sí tó ṣẹ̀ṣẹ̀ jù lọ          |
+| `qualityScore`  | 0-100 Rating lati 1aṣoju afọwọsi         |
+| `latencyMs`     | Wiwọn lairi nẹtiwọki                     |
+| `anonymity`     | `transparent`, `anonymous`, tabi `elite` |
+| `googleAccess`  | Boya aṣoju le wọle si awọn iṣẹ Google    |
+| `countryCode`   | koodu orilẹ-ede ISO -meji                |
+| `lastValidated` | Timestamp ti o kẹhin afọwọsi             |
 
-A máa ń ṣàtúnṣe àwọn àmì dídára lọ́nà alágbára:
+Awọn ikun didara jẹ atunṣe ni agbara:
 
-- **Àwọn ìbéèrè tó kùnà** máa ń dín àmì náà kù ní àmì 10
-- **Àmì bá lọ sí ≤10** → a máa samisi aṣojú náà gẹ́gẹ́ bí `inactive`
-- A kì í fi àwọn aṣojú aláìṣiṣẹ́ sínú ìyípadà
+- **Awọn ibeere ti kuna** din Dimegilio nipa 10 ojuami
+- **Dimegilio ju silẹ si ≤ 10** → aṣoju ti samisi `inactive`
+- Awọn aṣoju aiṣiṣẹ ni a yọkuro lati yiyi
 
-### Àwọn Ọgbọ́n Ìyípadà
+### Yiyi ogbon
 
 ```bash
-# Yípadà nípa dídára (aṣojú tó dára jù lọ ni yóò kọ́kọ́ wá) — àkọ́ṣe
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Ìyípadà láìlétòlétò
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# Títẹ̀lé ara wọn (èyí tí a kò tíì fọwọ́sí láìpẹ́ jù lọ ni yóò kọ́kọ́ wá)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
-### Olùdásí Ìyíká
+### Circuit fifọ
 
-Ìmúdọ́gba 1proxy ní olùdásí ìyíká tí a kọ́ sínú rẹ̀:
+Amuṣiṣẹpọ aṣoju aṣoju 1 naa ni fifọ iyika ti a ṣe sinu:
 
-- Lẹ́yìn **ìkùnà ìmúdọ́gba márùn-ún léraléra**, a máa dí àwọn ìgbìyànjú ìmúdọ́gba míì
-- Tún un ṣe pẹ̀lú: `resetOneproxyCircuitBreaker()` tàbí tún olupin náà bẹ̀rẹ̀
-- Ipò ìmúdọ́gba wà ní `GET /api/settings/oneproxy?action=status`
+- Lẹhin** Awọn ikuna amuṣiṣẹpọ 5 ni itẹlera** , awọn igbiyanju amuṣiṣẹpọ siwaju ti dina
+- Tunto pẹlu: `resetOneproxyCircuitBreaker()` tabi tun olupin naa bẹrẹ
+- Ipo amuṣiṣẹpọ wa ni `GET /api/settings/oneproxy?action=status`
 
-### Pípa Àwọn Aṣojú 1proxy Rẹ́
+### Pa awọn aṣoju aṣoju aṣoju kuro
 
 ```bash
-# Pa aṣojú 1proxy kan ṣoṣo rẹ́
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# Pa GBOGBO àwọn aṣojú 1proxy rẹ́ (àwọn aṣojú àfọwọ́ṣe kò ní yípadà)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
@@ -777,51 +777,28 @@ Lo `random`
 ní dọ́gba)
 ```
 
-## Yíyọ Àṣìṣe Kúrò Láìfọwọ́ṣe fún Àwọn Proxy Tirẹ
+## Iyasoto Ikuna Aifọwọyi fun Awọn Aṣoju tirẹ
 
-Àkójọpọ̀ ọjà 1proxy ti máa ń dín ìwọ̀n àwọn proxy tí ó kùnà kù láìfọwọ́ṣe fúnra rẹ̀ (wo
-[Àwọn Ìwọ̀n Didára Proxy](#proxy-quality-scores)). Fún
-àwọn proxy tí **ìwọ** ṣàfikún sí registry, olùṣètò ìlera abẹ́lẹ̀
-(`src/lib/proxyHealth/scheduler.ts`) ń pèsè ìhùwàsí kan náà ti “yọ ọmọ ẹgbẹ́ tí kò
-ṣiṣẹ́ kúrò nínú chain láìfọwọ́ṣe”, láìpa ohunkóhun rẹ́:
+Adagun ibi-ọja aṣoju 1proxy tẹlẹ ti sọ awọn aṣoju-afọwọyi ti kuna awọn aṣoju lori tirẹ (wo [Awọn Iwọn Didara Aṣoju](#proxy-quality-scores) ). Fun awọn aṣoju** iwo** ti a fi kun si iforukọsilẹ, oluṣeto ilera ilera lẹhin (`src/lib/proxyHealth/scheduler.ts`) pese kanna "yato si ọmọ ẹgbẹ ti o ku lati pq laifọwọyi" ihuwasi, laisi piparẹ ohunkohun:
 
 ```bash
-# .env — pa proxy kan fún ìgbà díẹ̀ lẹ́yìn probe mẹ́ta tí ó kùnà léraléra, kí o sì tún mú un ṣiṣẹ́
-# láìfọwọ́ṣe ní kété tí ó bá bẹ̀rẹ̀ sí í dáhùn sí àwọn probe lẹ́ẹ̀kan sí i.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Bí ó ṣe wọ inú chain proxy-púpọ̀:
+Bii o ṣe baamu si ẹwọn aṣoju-ọpọlọpọ:
 
-1. Olùṣètò náà ń ṣe probe gbogbo proxy tí a forúkọsílẹ̀ ní gbogbo `PROXY_HEALTH_INTERVAL_MS`
-   (àìyípadà jẹ́ ìṣẹ́jú 10; èyí tí ó kéré jù jẹ́ ìṣẹ́jú 1).
-2. Lẹ́yìn àwọn ìkùnà **tí a fìdí rẹ̀ múlẹ̀** léraléra tó jẹ́ `PROXY_AUTO_REMOVE_AFTER` (ìkùnà
-   àsopọ̀ gidi — timeout tàbí 5xx ti ibi-afẹ́ probe fúnra rẹ̀ kì í kà rárá, wo
-   [Ṣíṣe Àyẹ̀wò Ìlera Proxy](#proxy-health-checking-v3816)), a ó ṣètò `status` proxy náà
-   sí `dead`.
-3. `dead` jẹ́ ọ̀kan lára àwọn status tí àlẹ̀mọ́ status-alààyè, tí ìṣàtúnṣe pool/rotation
-   ń lò, máa ń yọ kúrò; nítorí náà rotation ti scope kan (round-robin / random / sticky /
-   latency — wo [Igi Ìpinnu Ètò Rotation](#rotation-strategy-decision-tree))
-   máa dá fífi proxy náà fún àwọn request tuntun dúró lẹ́sẹ̀kẹsẹ̀. Kò sí proxy mìíràn nínú
-   pool tí èyí máa kan, gbogbo pool náà kò sì ní yí padà sí àsopọ̀ tààrà láìsọ —
-   wo olùṣọ́ fail-closed ti [Ètò Proxy Ìpele Mẹ́rin](#4-level-proxy-system).
-4. Olùṣètò náà ń bá a lọ láti ṣe probe àwọn proxy `dead` ní àárín àkókò kan náà. Probe
-   àṣeyọrí tó tẹ̀lé máa yí `status` padà sí `active`, yóò sì tún wọ rotation —
-   kò nílò àfikún-ọ̀wọ́ lẹ́ẹ̀kan sí i.
+1. Oluṣeto ṣe iwadii gbogbo aṣoju ti o forukọsilẹ ni gbogbo `PROXY_HEALTH_INTERVAL_MS` (aiyipada 10 min; o kere ju iṣẹju 1).
+2. Lẹhin `PROXY_AUTO_REMOVE_AFTER` itẹlera** ipari** awọn ikuna (ikuna asopọ gidi kan — akoko kan tabi ibi-afẹde iwadii ti ara 5xx rara, wo [Ṣiṣayẹwo Ilera Aṣoju](#proxy-health-checking-v3816) ), `status` aṣoju ti ṣeto si `dead`.
+3. `dead` jẹ ọkan ninu awọn statuses àlẹmọ ipo laaye ti o lo nipasẹ ipinnu pool/rotation yọkuro, nitorinaa iyipo dopin kan (yika-robin / ID / alalepo / lairi / igba — wo [Ipinnu Ipinnu Ilana Yiyi](#rotation-strategy-decision-tree) ) lẹsẹkẹsẹ dawọ fifun aṣoju yẹn si awọn ibeere tuntun. Ko si awọn aṣoju miiran ninu adagun-odo ti o kan, ati pe gbogbo adagun ko ni idakẹjẹ ṣubu pada si asopọ taara — wo [Eto Aṣoju Ipele 4](#4-level-proxy-system) kuna-pade.
+4. Oluṣeto ntọju awọn aṣoju `dead` iwadii lori aarin kanna. Iwadi aṣeyọri ti o tẹle yi pada `status` pada si `active` ati pe o tun wọ yiyipo — ko si atunṣe afọwọṣe ti o nilo.
 
-A mọ̀ọ́mọ̀ ṣe èyí ní ọ̀nà **opt-in tí kì í ba nǹkan jẹ́**: nípa àìyípadà, olùṣètò náà kàn
-ń ka àwọn ìkùnà, ó sì ń kọ wọ́n sínú log (wo policy C nínú `decision.ts`), àti pé
-`PROXY_AUTO_DISABLE` kì í pa row kan rẹ́ láé — flag ọ̀tọ̀ tí ó le koko jù,
-`PROXY_AUTO_REMOVE`, ni a fi ń ṣe bẹ́ẹ̀. Bí a bá ṣètò àwọn méjèèjì sí `true`,
-`PROXY_AUTO_REMOVE` ni yóò borí (proxy tí a fẹ́rẹ̀ẹ́ pa rẹ́ kò nílò soft-disable
-láàárín). Wo ìtọ́kasí [Àtúnṣe Environment](../reference/ENVIRONMENT.md) fún àkójọ
-variable ní ẹ̀kúnrẹ́rẹ́.
+Eyi jẹ mọọmọ** ijade ati ti kii-ti iparun** : nipa aiyipada oluṣeto kika nikan ati awọn ikuna igbasilẹ (wo eto imulo C ni `decision.ts`), ati `PROXY_AUTO_DISABLE` ko paarẹ — kana ti o jẹ ohun ti o ya sọtọ, asia `PROXY_AUTO_REMOVE` ibinu diẹ sii fun. Ti a ba ṣeto awọn mejeeji si `true`, `PROXY_AUTO_REMOVE` yoo bori (aṣoju ti o fẹ paarẹ ko ni lilo fun mimu-rọsẹ laarin). Wo itọkasi [atunto Ayika](../reference/ENVIRONMENT.md) fun atokọ oniyipada ni kikun.
 
 ---
 
-> 📖 **Ìwé ìtọ́kasí tó jẹmọ́:**
+> 📖** Awọn iwe ti o jọmọ:**
 >
-> - [Ìtọ́sọ́nà Olùlò](../guides/USER_GUIDE.md) — Ìṣètò àti àtúnṣe gbogbogbòò
-> - [Ìtọ́kasí API](../reference/API_REFERENCE.md) — Ìwé API ní ẹ̀kúnrẹ́rẹ́
-> - [Àtúnṣe Environment](../reference/ENVIRONMENT.md) — Gbogbo environment variable
+> - [Itọsọna olumulo](../guides/USER_GUIDE.md) — Iṣeto gbogbogbo ati iṣeto ni - [API Reference](../reference/API_REFERENCE.md) — Kikun iwe API - [Ayika Config](../reference/ENVIRONMENT.md) — Gbogbo awọn oniyipada ayika

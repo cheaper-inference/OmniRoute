@@ -13,98 +13,90 @@ i korake usaglašavanja.
 
 ---
 
-## Podešavanje razvojnog okruženja
+## Девелопмент Сетуп
 
-### Preduslovi
+### Предуслови
 
-- **Node.js** `>=22.22.2 <23`, ili `>=24.0.0 <27` (preporučeno: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` или `>=24.0.0 <27` (препоручено: 24 LTS)
+- **нпм** 10 +
 
-> **Windows sa Node 24:** koristite aktuelno izdanje zakrpe za 24 LTS (najmanje 24.20.0).
-> Starija izdanja mogu prekinuti proces nakon uspešnih testova kada `--test-force-exit` zatvori
-> proces. Node-ova [Windows libuv ispravka](https://github.com/nodejs/node/pull/61999) rešava
-> ovaj pad tokom izvršavanja; zadržite provere tvrdnji testova i izlaza pokretača omogućene.
+> **Windows са чвором 24:** користите актуелно издање закрпе 24 LTS (најмање 24.20.0). Ранија издања се могу прекинути након успешних тестова када `--test-force-exit` затвори процес. Нодеов [Windows либув поправак](https://github.com/nodejs/node/pull/61999) адресира ово рушење током извршавања; нека тестне тврдње и излазне провере покретача буду омогућене.
 
-> **Korisnici npm v11+ (Node 24+):** Nakon `npm install`, proverite da li su izvorni moduli instalirani:
-> `node -e "require('better-sqlite3')"`. Ako ne uspe sa greškom `MODULE_NOT_FOUND`,
-> pokrenite `npm approve-scripts better-sqlite3 && npm install`. Pogledajte
-> [Rešavanje problema](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Корисници нпм в11 + (чвор 24 +):** Након `npm install`, проверите да ли су уграђени изворни модули: `node -e "require('better-sqlite3')"`. Ако не успе са `MODULE_NOT_FOUND`, покрените `npm approve-scripts better-sqlite3 && npm install`. Погледајте [Решавање проблема](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
-- **Git**
+- **Гит**
 
-### Kloniranje i instalacija
+### Клонирај и инсталирај
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Promenljive okruženja
+### Променљиве окружења
 
 ```bash
-# Kreirajte svoj .env na osnovu šablona
+# Create your .env from the template
 cp .env.example .env
 
-# Generišite potrebne tajne
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Ključne promenljive za razvoj:
+Кључне варијабле за развој:
 
-| Promenljiva            | Podrazumevana vrednost za razvoj | Opis                           |
-| ---------------------- | -------------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                          | Port servera                   |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | Osnovni URL frontend-a         |
-| `JWT_SECRET`           | (generišite iznad)               | Tajna za potpisivanje JWT-a    |
-| `INITIAL_PASSWORD`     | `CHANGEME`                       | Lozinka za prvo prijavljivanje |
-| `APP_LOG_LEVEL`        | `info`                           | Nivo detaljnosti zapisnika     |
+| Променљива             | Девелопмент Дефаулт      | Опис                     |
+| ---------------------- | ------------------------ | ------------------------ |
+| `PORT`                 | `20128`                  | Порт сервера             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | База URL за фронтенд     |
+| `JWT_SECRET`           | (генеришите изнад)       | тајна потписивања JWT    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Прва лозинка за пријаву  |
+| `APP_LOG_LEVEL`        | `info`                   | Ниво опширности дневника |
 
-### Podešavanja kontrolne table
+### Подешавања контролне табле
 
-Kontrolna tabla pruža prekidače u korisničkom interfejsu za funkcije koje se takođe mogu konfigurisati putem promenljivih okruženja:
+Контролна табла пружа UI прекидаче за функције које се такође могу конфигурисати преко променљивих окружења:
 
-| Lokacija podešavanja | Prekidač           | Opis                                                  |
-| -------------------- | ------------------ | ----------------------------------------------------- |
-| Settings → Advanced  | Debug Mode         | Omogući zapisnike zahteva za otklanjanje grešaka (UI) |
-| Settings → General   | Sidebar Visibility | Prikaži/sakrij odeljke bočne trake                    |
+| Подешавање локације   | Пребаци                    | Опис                                                 |
+| --------------------- | -------------------------- | ---------------------------------------------------- |
+| Подешавања → Адванцед | Режим за отклањање грешака | Омогући евиденцију захтева за отклањање грешака (UI) |
+| Подешавања → Генерал  | Видљивост бочне траке      | Show/hide секције бочне траке                        |
 
-Ova podešavanja se čuvaju u bazi podataka i opstaju nakon ponovnog pokretanja, nadjačavajući podrazumevane vrednosti promenljivih okruženja kada su postavljena.
+Ова подешавања се чувају у бази података и трају током поновних покретања, замењујући подразумеване вредности енв вар када су подешене.
 
-### Lokalno pokretanje
+### Трчање локално
 
 ```bash
-# Razvojni režim (ponovno učitavanje bez ručnog pokretanja)
+# Development mode (hot reload)
 npm run dev
 
-# Produkciona izgradnja
+# Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Brza kompilacija samo backend-a/API-ja za izmene saradnika
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Izgradnja izdanja (čista ponovna izgradnja + HEAD sentinel — obavezno za postavljanje)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Uobičajena konfiguracija porta
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Izgradnja za saradnike obavlja validaciju samo tokom kompilacije: ne sklapa samostalnu
-distribuciju niti izgrađuje opcionalna izvorna sredstva za pakovanje. Koristite standardnu produkcionu
-izgradnju kada treba da proverite paket spreman za isporuku.
+Цонтрибутор буилд врши проверу ваљаности само за компајлирање: не саставља самосталну дистрибуцију нити прави опционе изворне материјале за паковање. Користите редовну производњу када треба да потврдите пакет који се може испоручити.
 
-### Raspored izlaza izgradnje
+### Израдите излазни изглед
 
-| Direktorijum | Sadržaj                                                                          | Praćeno |
-| ------------ | -------------------------------------------------------------------------------- | ------- |
-| `src/`       | Izvorni kod aplikacije (TypeScript / TSX)                                        | Da      |
-| `.build/`    | Međurezultati — izlaz komande `next build` (gitignored, `distDir = .build/next`) | Ne      |
-| `dist/`      | Paket spreman za isporuku — sklapa ga `assembleStandalone` (gitignored)          | Ne      |
+| Именик    | Садржај                                                                        | Трацкед |
+| --------- | ------------------------------------------------------------------------------ | ------- |
+| `src/`    | Извор апликације (TypeScript / TSX)                                            | Да      |
+| `.build/` | Интермедијари — `next build` излаз (гитигноред, `distDir = .build/next`)       | бр      |
+| `dist/`   | Пакет — који може да се испоручи, саставио `assembleStandalone` (гитигнорисан) | бр      |
 
-Proces izgradnje odvija se u jednom prolazu:
+Цјевовод изградње је један пролаз:
 
 ```
 npm run build
@@ -113,21 +105,15 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` dodatno prvo čisti oba direktorijuma i upisuje
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kao kontrolni pokazatelj integriteta za postavljanje.
+`npm run build:release` додатно чисти оба директоријума и уписује `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) као стражар интегритета имплементације.
 
-`npm run build:contributor` koristi profil izgradnje samo za backend. Privremeno zamenjuje datoteke
-korisničkog interfejsa kontrolne table tokom izgradnje, zadržava rukovaoce API ruta i vraća originalne
-datoteke nakon izgradnje. Koristite `npm run build` za izmene koje utiču na korisnički interfejs kontrolne table
-ili za potpunu validaciju izdanja; profil za saradnike nije zamena za izgradnju izdanja.
+`npm run build:contributor` користи профил изградње само за позадину. Привремено затвара UI датотеке на контролној табли током изградње, чува руковаоце рута API и враћа оригиналне датотеке након изградње. Користите `npm run build` за промене које утичу на UI контролну таблу или за потпуну валидацију издања; профил сарадника није замена за верзију издања.
 
-> **Napomena za VPS postavljanje:** udaljeni direktorijum slike `/usr/lib/node_modules/omniroute/app/`
-> ostaje nepromenjen. Veštine za postavljanje rsync-om sinhronizuju sadržaj direktorijuma `dist/` u njega.
-> Promenjena je samo putanja izlaza izgradnje unutar repozitorijuma (`app/` → `dist/`).
+> **белешка о примени VPS :** удаљени директоријум слика `/usr/lib/node_modules/omniroute/app/` је непромењен. Вештине постављања рсинц садржај `dist/` у њега. Померена је само излазна путања изградње у репо-у (`app/` → `dist/`).
 
-Podrazumevani URL-ovi:
+Подразумевано URLs:
 
-- **Kontrolna tabla**: `http://localhost:20128/dashboard`
+- **Дасхбоард** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -434,10 +420,10 @@ docs/
 
 ---
 
-## Добијање помоћи
+## Добивање помоћи
 
-- **Архитектура**: Погледајте [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API референца**: Погледајте [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Документација о безбедности**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Документација о оперативном раду**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Проблеми**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Архитектура** : Види [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Референце** : Види [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Сигурносни документи** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Опс доцс** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Проблеми** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

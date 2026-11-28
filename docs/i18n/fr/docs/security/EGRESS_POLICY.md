@@ -69,13 +69,13 @@ La directive est volontairement définie **par proxy**, et non globalement : les
 
 ## Les trois valeurs
 
-| Valeur | Libellé dans l’interface | Comportement                                                                                                                                                                                                                           |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `Auto (double pile)`     | Le système d’exploitation choisit la famille. Pour un hôte proxy défini par une adresse IP littérale, la famille est intrinsèque à celle-ci ; pour un nom d’hôte, les deux familles sont possibles. Il s’agit de la valeur par défaut. |
-| `ipv4` | `IPv4 uniquement`        | Force la connexion à utiliser IPv4. La connexion échoue de manière sécurisée si l’hôte proxy ne possède aucun enregistrement IPv4 (A).                                                                                                 |
-| `ipv6` | `IPv6 uniquement`        | Force la connexion à utiliser IPv6. La connexion échoue de manière sécurisée si l’hôte proxy ne possède aucun enregistrement IPv6 (AAAA).                                                                                              |
+| Valeur | étiquette UI        | Comportement                                                                                                                                                                      |
+| ------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS choisit la famille. Pour un hôte proxy littéral IP, la famille est intrinsèque au littéral ; pour un nom d'hôte, les deux familles sont éligibles. C'est la valeur par défaut. |
+| `ipv4` | `IPv4 only`         | Épingle la connexion à IPv4. Échec de la fermeture si l'hôte proxy n'a pas d'enregistrement IPv4 (A).                                                                             |
+| `ipv6` | `IPv6 only`         | Épingle la connexion à IPv6. Échec de la fermeture si l'hôte proxy n'a pas d'enregistrement IPv6 (AAAA).                                                                          |
 
-Les chaînes de l’interface se trouvent dans `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+Les chaînes UI vivent dans `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
@@ -83,21 +83,21 @@ Les chaînes de l’interface se trouvent dans `src/i18n/messages/en.json` (`lab
 
 ### Tableau de bord
 
-Le sélecteur se trouve dans le formulaire de proxy de l’onglet **Pool de proxys** :
+Le sélecteur se trouve dans le formulaire de procuration du** Pool de proxy** languette:
 
-1. Ouvrez **Tableau de bord → Paramètres → Proxy → Pool de proxys**
-2. Ajoutez ou modifiez un proxy
-3. Définissez la liste déroulante **Famille IP** sur `Auto (double pile)`, `IPv4 uniquement` ou `IPv6 uniquement`
-4. Enregistrez
+1. Ouvrir** Tableau de bord Paramètres → Proxy → Pool de proxy →**
+2. Ajouter ou modifier un proxy
+3. Réglez le** famille IP** liste déroulante vers `Auto (dual-stack)`, `IPv4 only` ou `IPv6 only`
+4. Sauvegarder
 
 Le contrôle est rendu par `ProxyRegistryManager.tsx` (monté dans `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Le champ `family` fait partie des charges utiles de création/mise à jour du registre de proxys. Il est validé par `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) et traité par `POST` / `PATCH /api/v1/management/proxies` :
+Le champ `family` fait partie des charges utiles create/update du registre proxy, validées par `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) et gérées par `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Créer un proxy IPv6 uniquement
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Faire passer un proxy existant en IPv4 uniquement
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Le même champ est également accepté par l’objet de configuration de proxy en ligne utilisé pour les entrées de proxy en amont (`upstream_proxy_config.family`, voir [Modèle de données](#data-model)).
+Le même champ est également accepté par l'objet de configuration de proxy en ligne utilisé pour les entrées de proxy en amont (`upstream_proxy_config.family`, voir [Data Model](#data-model) ).
 
-Pour le reste de l’API CRUD/d’affectation des proxys, consultez [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Pour le reste du proxy CRUD/assignment API, voir [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

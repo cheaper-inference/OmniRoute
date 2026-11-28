@@ -49,7 +49,7 @@
 
 ---
 
-## ការបំពេញការជជែក
+## ការបញ្ចប់ការជជែក
 
 ```bash
 POST /v1/chat/completions
@@ -67,31 +67,32 @@ Content-Type: application/json
 
 ### បឋមកថាផ្ទាល់ខ្លួន
 
-| Header                   | Direction | Description                                                                                                                                                                                                            |
-| ------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Request   | កំណត់ជា `true` ដើម្បីរំលងឃ្លាំងសម្ងាត់                                                                                                                                                                                 |
-| `x-omniroute-no-memory`  | Request   | កំណត់ជា `true` ដើម្បីរំលងការបញ្ចូល memory + skills សម្រាប់សំណើនេះ (ដំណើរការដូច no-cache; ជៀសវាងការចំណាយ token/cost ក្នុងមួយការហៅ)                                                                                      |
-| `X-OmniRoute-Progress`   | Request   | កំណត់ជា `true` សម្រាប់ព្រឹត្តិការណ៍វឌ្ឍនភាព                                                                                                                                                                            |
-| `X-Session-Id`           | Request   | គន្លឹះសម័យជាប់លាប់សម្រាប់ការកំណត់ភាពស្អិតនៃសម័យខាងក្រៅ                                                                                                                                                                 |
-| `x_session_id`           | Request   | វ៉ារ្យ៉ង់ដែលប្រើសញ្ញាគូសក្រោមក៏ត្រូវបានទទួលយកដែរ (HTTP ដោយផ្ទាល់)                                                                                                                                                      |
-| `X-OmniRoute-Session-Id` | Request   | ស្លាកសម័យ/ការសន្ទនាដែលអ្នកហៅផ្តល់ជូន (ក៏បញ្ចូលទៅក្នុង memory ផងដែរ)។ នៅពេលមាន វាត្រូវបានរក្សាទុកដូចដើមទៅ `call_logs.session_tag` សម្រាប់ការបែងចែកថ្លៃដើមតាមសម័យ (#8249) — មិនដែលបង្កើតឡើងដោយស្វ័យប្រវត្តិពេលអវត្តមានទេ |
-| `Idempotency-Key`        | Request   | គន្លឹះលុបស្ទួន (បង្អួច 5s)                                                                                                                                                                                             |
-| `X-Request-Id`           | Request   | គន្លឹះលុបស្ទួនជំនួស                                                                                                                                                                                                    |
-| `x-omniroute-connection` | Request   | ភ្ជាប់សំណើដែលប្រើម៉ូដែលតែមួយទៅកាន់ការតភ្ជាប់ provider មួយ (គណនី) តាម id របស់វា — សូមមើល [ការភ្ជាប់គណនីតាមសំណើ](#account-pinning-per-request)                                                                           |
-| `X-OmniRoute-Cache`      | Response  | `HIT` ឬ `MISS` (មិនមែនការបញ្ជូនជាបន្តបន្ទាប់)                                                                                                                                                                          |
-| `X-OmniRoute-Idempotent` | Response  | `true` ប្រសិនបើបានលុបសំណើស្ទួន                                                                                                                                                                                         |
-| `X-OmniRoute-Progress`   | Response  | `enabled` ប្រសិនបើបានបើកការតាមដានវឌ្ឍនភាព                                                                                                                                                                              |
-| `X-OmniRoute-Session-Id` | Response  | លេខសម្គាល់សម័យមានប្រសិទ្ធភាពដែល OmniRoute បានប្រើ                                                                                                                                                                      |
-| `X-OmniRoute-Request-Id` | Response  | លេខសម្គាល់សម្រាប់ភ្ជាប់ទំនាក់ទំនងសំណើ (នៅពេលស្គាល់)                                                                                                                                                                    |
-| `X-OmniRoute-Version`    | Response  | កំណែ build របស់ OmniRoute (មានជានិច្ច)                                                                                                                                                                                 |
-| `X-OmniRoute-Cost-Saved` | Response  | ចំនួន USD ដែលឃ្លាំងសម្ងាត់បានជៀសវាងនៅពេល HIT (មានតែ cache hits ប៉ុណ្ណោះ)                                                                                                                                               |
-| `X-OmniRoute-Decision`   | Response  | ដានការកំណត់ផ្លូវ៖ `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` គឺជាយុទ្ធសាស្ត្ររួម ឬ `single` សម្រាប់សំណើដែលមិនមែនជាសំណើរួម) — មានជានិច្ចនៅក្នុងការឆ្លើយតបពេលបញ្ចប់                                   |
+| បឋមកថា                   | ទិសដៅ      | ការពិពណ៌នា                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | ស្នើសុំ    | កំណត់ទៅ `true` ដើម្បីរំលងឃ្លាំងសម្ងាត់                                                                                                                                                                                                                                                                                                                   |
+| `x-omniroute-no-memory`  | ស្នើសុំ    | កំណត់ទៅ `true` ដើម្បីរំលងការបញ្ចូលជំនាញ + សម្រាប់សំណើនេះ (កញ្ចក់គ្មានឃ្លាំងសម្ងាត់ ជៀសវាងការហៅ token/cost ម្តងមួយៗ)                                                                                                                                                                                                                                      |
+| `x-omniroute-no-log`     | ស្នើសុំ    | កំណត់ទៅ `true` ដើម្បីលុបបន្ទុក request/response ចេញពីកំណត់ហេតុការហៅទូរសព្ទសម្រាប់សំណើការសន្និដ្ឋាននេះ (ផ្លូវគ្រួសារជជែកទាំងអស់៖ ការបញ្ចប់ការជជែក ការឆ្លើយតប សារ ការបំពេញ Gemini)។ ត្រាពេលវេលា គំរូ ស្ថានភាព រយៈពេល និងចំនួនសញ្ញាសម្ងាត់នៅតែត្រូវបានកត់ត្រាទុក។ ផ្សំជាមួយ `x-omniroute-no-memory` និង `x-omniroute-no-cache` សម្រាប់ការបដិសេធមាតិកាពេញលេញ |
+| `X-OmniRoute-Progress`   | ស្នើសុំ    | កំណត់ទៅ `true` សម្រាប់ព្រឹត្តិការណ៍វឌ្ឍនភាព                                                                                                                                                                                                                                                                                                              |
+| `X-Session-Id`           | ស្នើសុំ    | គន្លឹះសម័យស្អិតសម្រាប់ភាពស្និទ្ធស្នាលសម័យខាងក្រៅ                                                                                                                                                                                                                                                                                                         |
+| `x_session_id`           | ស្នើសុំ    | វ៉ារ្យ៉ង់សញ្ញាគូសត្រូវបានទទួលយកផងដែរ ( HTTP ផ្ទាល់)                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Session-Id` | ស្នើសុំ    | ស្លាក session/conversation ដែលផ្តល់ដោយអ្នកហៅចូល (ក៏ផ្តល់អាហារដល់ការចងចាំផងដែរ) ។ នៅពេលមានវត្តមាន បន្តបន្ទាប់បន្សំទៅ `call_logs.session_tag` សម្រាប់ការកំណត់តម្លៃក្នុងមួយវគ្គ (#8249) — មិនដែលសំយោគនៅពេលអវត្តមាន                                                                                                                                          |
+| `Idempotency-Key`        | ស្នើសុំ    | គ្រាប់ចុច Dedup (បង្អួច 5s)                                                                                                                                                                                                                                                                                                                              |
+| `X-Request-Id`           | ស្នើសុំ    | សោជំនួសជំនួស                                                                                                                                                                                                                                                                                                                                             |
+| `x-omniroute-connection` | ស្នើសុំ    | ខ្ទាស់សំណើគំរូតែមួយទៅនឹងការតភ្ជាប់អ្នកផ្តល់សេវាមួយ (គណនី) ដោយលេខសម្គាល់របស់វា — សូមមើល [ការខ្ទាស់គណនីក្នុងមួយសំណើ](#account-pinning-per-request)                                                                                                                                                                                                         |
+| `X-OmniRoute-Cache`      | ការឆ្លើយតប | `HIT` ឬ `MISS` (មិនផ្សាយ)                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Idempotent` | ការឆ្លើយតប | `true` ប្រសិនបើចម្លង                                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Progress`   | ការឆ្លើយតប | `enabled` ប្រសិនបើការតាមដានវឌ្ឍនភាពនៅលើ                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Session-Id` | ការឆ្លើយតប | ID សម័យដែលមានប្រសិទ្ធភាពប្រើដោយ OmniRoute                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Request-Id` | ការឆ្លើយតប | ស្នើសុំលេខសម្គាល់ទំនាក់ទំនង (នៅពេលដឹង)                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Version`    | ការឆ្លើយតប | កំណែស្ថាបនាOmniRoute (តែងតែមានវត្តមាន)                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Cost-Saved` | ការឆ្លើយតប | USD ឃ្លាំងសម្ងាត់ជៀសវាងនៅលើ HIT (ឃ្លាំងសម្ងាត់ចូលតែប៉ុណ្ណោះ)                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Decision`   | ការឆ្លើយតប | ដានផ្លូវ៖ `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` គឺជាយុទ្ធសាស្ត្របន្សំ ឬ `single` សម្រាប់សំណើដែលមិនមែនជាបន្សំ) — តែងតែមានវត្តមាននៅលើការឆ្លើយតបការបញ្ចប់                                                                                                                                                                           |
 
-> ចំណាំអំពី Nginx៖ ប្រសិនបើអ្នកពឹងផ្អែកលើ header ដែលមានសញ្ញាគូសក្រោម (ឧទាហរណ៍ `x_session_id`) សូមបើក `underscores_in_headers on;`។
+> ចំណាំ Nginx៖ ប្រសិនបើអ្នកពឹងផ្អែកលើបឋមកថាក្រោម (ឧទាហរណ៍ `x_session_id`) បើក `underscores_in_headers on;`។
 
-#### ការភ្ជាប់គណនីតាមសំណើ
+#### ការខ្ទាស់គណនីតាមសំណើ
 
-នៅពេល provider មួយមានការតភ្ជាប់ជាច្រើន (គណនី ឬ key) ជាទូទៅ OmniRoute ជ្រើសរើសមួយតាមរយៈយុទ្ធសាស្ត្រជ្រើសរើសគណនីរបស់វា។ ជំនួសវិញ សំណើមួយអាចភ្ជាប់ទៅកាន់ការតភ្ជាប់ជាក់លាក់មួយដោយប្រើ header `x-omniroute-connection`៖
+នៅពេលដែលអ្នកផ្តល់សេវាមានការតភ្ជាប់ជាច្រើន (គណនី ឬកូនសោ) ជាធម្មតា OmniRoute ជ្រើសរើសមួយតាមរយៈយុទ្ធសាស្រ្តជ្រើសរើសគណនីរបស់ខ្លួន។ សំណើអាចជំនួសការភ្ជាប់ជាក់លាក់មួយជាមួយបឋមកថា `x-omniroute-connection` ៖
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -101,25 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **កន្លែងស្វែងរក id។** បើកទំព័រ provider នៅក្នុង dashboard
-  (**Dashboard → Providers → <provider>**) ហើយចុចលើបន្ទះ id `xxxxxxxx…` នៅជួរ connection
-  — វានឹងចម្លង connection id ពេញលេញ។
-- **សំណើណាខ្លះគោរពវា។** សំណើ single-model (`provider/model`) នៅលើ
-  `/v1/chat/completions`, `/v1/messages` និង `/v1/responses`។ Combos មិនអើពើចំពោះ header នេះទេ៖
-  pin account មួយសម្រាប់ជំហាននីមួយៗក្នុង combo តាមរយៈ connection ផ្ទាល់របស់ជំហាននោះ។
-- **Pin នេះមានភាពតឹងរ៉ឹង មិនមែនជាចំណូលចិត្តទេ។** ប្រព័ន្ធប្រើ pinned connection ផ្តាច់មុខ។ ប្រសិនបើមាន
-  failure នៅក្នុងសំណើ វានឹងកត់ត្រា cooldown របស់ account ប៉ុន្តែ **មិន** ប្ដូរទៅ sibling account
-  របស់ provider ដូចគ្នាទេ។
-- **Cooldown និង quota នឹងដោះលែង pin។** ខណៈពេល pinned connection កំពុងស្ថិតក្នុង cooldown,
-  quota អស់ ឬត្រូវបាន block ដោយ quota policy សំណើបន្ទាប់នឹងត្រឡប់ទៅប្រើ connections ផ្សេងទៀត
-  របស់ provider ដូចគ្នានឹង traffic ដែលមិនបាន pin។
-- **id ដែលមិនស្គាល់ ឬត្រូវបានបិទនឹងបរាជ័យ។** id ដែលមិនស្ថិតក្នុង active pool របស់ provider (ត្រូវបានលុប,
-  បិទដំណើរការ ឬជាកម្មសិទ្ធិរបស់ provider ផ្សេង) នឹងមិនមាន account ដែលអាចប្រើបានទេ ដូច្នេះសំណើនឹង
-  បរាជ័យ ជំនួសឱ្យការបញ្ជូនទៅកន្លែងផ្សេងដោយស្ងាត់ៗ។
+- **កន្លែងដែលត្រូវរកលេខសម្គាល់។** បើកទំព័រអ្នកផ្តល់សេវានៅក្នុងផ្ទាំងគ្រប់គ្រង (** ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់ → <provider>** ) ហើយចុចលើបន្ទះឈីប `xxxxxxxx…` id នៅលើជួរដេកតភ្ជាប់ — វាចម្លងលេខសម្គាល់ការតភ្ជាប់ពេញលេញ។
+- **ដែលស្នើសុំកិត្តិយស។** សំណើគំរូតែមួយ (`provider/model`) នៅលើ `/v1/chat/completions`, `/v1/messages` និង `/v1/responses`។ Combos មិនអើពើនឹងបឋមកថា៖ ខ្ទាស់គណនីក្នុងមួយជំហានបន្សំតាមរយៈការភ្ជាប់ផ្ទាល់ខ្លួនរបស់ជំហានជំនួសវិញ។
+- **ម្ជុលគឺតឹងរឹង មិនមែនជាចំណូលចិត្តទេ។** ការតភ្ជាប់ដែលបានខ្ទាស់ត្រូវបានប្រើទាំងស្រុង។ ការបរាជ័យនៅក្នុងសំណើកត់ត្រាការចុះត្រជាក់របស់គណនី ប៉ុន្តែធ្វើបាន។** ទេ។** បង្វិលទៅគណនីបងប្អូនរបស់អ្នកផ្តល់សេវាដូចគ្នា។
+- **Cooldown និងកូតាបញ្ចេញម្ជុល។** ខណៈពេលដែលការតភ្ជាប់ដែលបានខ្ទាស់កំពុងត្រជាក់ចុះ កាត់បន្ថយកូតា ឬត្រូវបានរារាំងដោយគោលការណ៍កូតា សំណើនៅពេលក្រោយនឹងត្រលប់ទៅការតភ្ជាប់ផ្សេងទៀតរបស់អ្នកផ្តល់សេវា ដូចទៅនឹងចរាចរណ៍ដែលមិនបានខ្ទាស់។
+- **លេខសម្គាល់មិនស្គាល់ ឬបិទដំណើរការបរាជ័យ។** លេខសម្គាល់ដែលមិនមាននៅក្នុងក្រុមសកម្មរបស់អ្នកផ្តល់សេវា (លុប បិទដំណើរការ ឬជាកម្មសិទ្ធិរបស់អ្នកផ្តល់សេវាផ្សេងទៀត) មិនទុកគណនីដែលមានសិទ្ធិទេ ដូច្នេះសំណើនឹងបរាជ័យ ជំនួសឱ្យការបញ្ជូនបន្តទៅកន្លែងផ្សេងដោយស្ងៀមស្ងាត់។
 
-Claude Code ផ្ញើ custom headers តាមរយៈ `ANTHROPIC_CUSTOM_HEADERS`។ ដាក់វានៅក្នុងប្លុក `env`
-នៃ `~/.claude/settings.json` ឬក្នុង `.claude/settings.json` កម្រិត project ដើម្បី pin account
-ផ្សេងគ្នាសម្រាប់ project នីមួយៗ៖
+Claude Code ផ្ញើបឋមកថាផ្ទាល់ខ្លួនតាមរយៈ `ANTHROPIC_CUSTOM_HEADERS`។ ដាក់វានៅក្នុងប្លុក `env` នៃ `~/.claude/settings.json` ឬក្នុង `.claude/settings.json` កម្រិតគម្រោង ដើម្បីខ្ទាស់គណនីផ្សេងគ្នាក្នុងមួយគម្រោង៖
 
 ```jsonc
 {
@@ -131,12 +120,11 @@ Claude Code ផ្ញើ custom headers តាមរយៈ `ANTHROPIC_CUSTOM_HEA
 }
 ```
 
-ប្រភព៖ `src/sse/handlers/chat.ts` (ការអាន header), `src/sse/services/auth.ts` និង
-`src/sse/services/sessionAffinityPin.ts` (ការដោះលែង pin និងការត្រួតពិនិត្យថាបាត់ពី pool)។
+ប្រភព៖ `src/sse/handlers/chat.ts` (បឋមកថាអាន) `src/sse/services/auth.ts` និង `src/sse/services/sessionAffinityPin.ts` (ការចេញផ្សាយលេខសម្ងាត់ និងការពិនិត្យដែលបាត់ពីអាង)។
 
-> **Cost telemetry headers:** ចម្លើយជោគជ័យដែលមិនមែនជា streaming ក៏មានសំណុំ cost-telemetry `X-OmniRoute-*` ផងដែរ — `X-OmniRoute-Response-Cost` (USD, ថេរ 10 ខ្ទង់ទសភាគ; `0.0000000000` សម្រាប់ free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` និង `X-OmniRoute-Fallback-Attempts` (មានតែនៅពេល > 0) ព្រមទាំង `X-OmniRoute-Request-Id` និង `X-OmniRoute-Version`។ វាត្រូវបានបញ្ចេញដោយ chat completions, `/v1/responses`, `/v1/messages`, **និង media endpoints** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` និង `/v1/moderations` (តម្លៃតែងតែ `0`)។ Media cost ត្រូវបានគណនាតាម modality (ក្នុងមួយរូបភាព ក្នុងមួយវិនាទី ក្នុងមួយតួអក្សរ ក្នុងមួយ search-unit) នៅពេលមាន pricing បើមិនដូច្នោះទេ វានឹងជា `0` (fail-open)។
+> **ថ្លៃដើមតេឡេម៉ែត្រ៖** ការឆ្លើយតបជោគជ័យដែលមិនស្ទ្រីមក៏មានសំណុំ `X-OmniRoute-*` cost-telemetry — `X-OmniRoute-Response-Cost` (USD, ថេរ 10 ទសភាគ; `0.0000000000` សម្រាប់ free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, និង `X-OmniRoute-Fallback-Attempts` (តែនៅពេល > 0) បូក `X-OmniRoute-Request-Id` `X-OmniRoute-Version` ទាំងនេះត្រូវបានបញ្ចេញដោយការបញ្ចប់ការជជែក, `/v1/responses`, `/v1/messages`,** និងចំណុចបញ្ចប់នៃប្រព័ន្ធផ្សព្វផ្សាយ** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, និង `/v1/moderations` (តែងតែមានតម្លៃ `0`). តម្លៃប្រព័ន្ធផ្សព្វផ្សាយត្រូវបានគណនាតាមគំរូ (ក្នុងមួយរូបភាព ក្នុងមួយវិនាទី ក្នុងមួយតួអក្សរ ក្នុងមួយឯកតាស្វែងរក) នៅពេលដែលតម្លៃអាចរកបាន បើមិនដូច្នោះទេ `0` (fail-open)។
 
-> **Cache-hit cost semantics:** នៅពេល semantic-cache HIT (`X-OmniRoute-Cache-Hit: true`) មិនមានការហៅទៅ upstream ទេ ដូច្នេះ `X-OmniRoute-Response-Cost` គឺ `0.0000000000` (ជា **incremental** cost នៃការផ្តល់ hit)។ តម្លៃដើម/តម្លៃដែលនឹងកើតឡើង ត្រូវបានរាយការណ៍ដោយឡែកក្នុង `X-OmniRoute-Cost-Saved`។ អ្នកប្រើប្រាស់ billing គួរបូកសរុប `X-OmniRoute-Response-Cost` (hits មិនមានតម្លៃទេ); cache analytics អាចប្រមូលផ្តុំ `X-OmniRoute-Cost-Saved`។
+> **សមីការតម្លៃដែលបុកឃ្លាំងសម្ងាត់៖** នៅលើ semantic-cache HIT (`X-OmniRoute-Cache-Hit: true`) គ្មានការហៅតាមចរន្តទេ ដូច្នេះ `X-OmniRoute-Response-Cost` គឺ `0.0000000000` (the** បន្ថែម** តម្លៃនៃការបម្រើបុក) ។ តម្លៃ original/would-have-been ត្រូវបានរាយការណ៍ដោយឡែកពីគ្នានៅក្នុង `X-OmniRoute-Cost-Saved`។ អ្នកប្រើប្រាស់ចេញវិក្កយបត្រគួរតែបូក `X-OmniRoute-Response-Cost` (មិនគិតថ្លៃអ្វីទាំងអស់); ការវិភាគឃ្លាំងសម្ងាត់អាចប្រមូលផ្តុំ `X-OmniRoute-Cost-Saved`។
 
 ## ការជួលសម័យ Managed ផ្តាច់មុខ
 
@@ -339,37 +327,30 @@ Content-Type: application/json
 }
 ```
 
-អ្នកផ្តល់សេវាដែលមានរួមមាន OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (local), ComfyUI (local)។
+អ្នកផ្តល់សេវាដែលមានរួមមាន OpenAI (GPT Image 2), xAI (Grok Image ), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (ក្នុងស្រុក), ComfyUI (ក្នុងស្រុក).
 
-`n` ត្រឡប់រូបភាព `n` នៅក្នុង `data[]`។ អ្នកផ្តល់សេវាដែល API ខាងលើរបស់ពួកគេត្រឡប់រូបភាពមួយក្នុងមួយការហៅ
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) នឹងធ្វើការហៅ API ខាងលើដាច់ដោយឡែកចំនួន `n` ដង ដោយមានការហៅកំពុងដំណើរការជាអតិបរមា 4 ក្នុងពេលតែមួយ។ `seed` ដែលកំណត់ជាក់លាក់នឹងត្រូវបន្ថែមតាមលំដាប់សន្ទស្សន៍នៃការហៅ (`seed`, `seed + 1`, …) ដូច្នេះរូបភាពនឹងខុសគ្នា ប៉ុន្តែនៅតែអាចបង្កើតឡើងវិញបានដដែល។ `n` មានកម្រិតអតិបរមា 10។ សំណើទាំងមូលនឹងបរាជ័យ ប្រសិនបើការហៅណាមួយបរាជ័យ។ បញ្ជីទម្រង់ fan-out គឺ `SINGLE_IMAGE_FANOUT_FORMATS` នៅក្នុង
-`open-sse/handlers/imageGeneration/fanOut.ts`។
+`n` ត្រឡប់រូបភាព `n` ក្នុង `data[]`។ អ្នកផ្តល់សេវាដែល API ខាងលើត្រឡប់រូបភាពមួយក្នុងមួយការហៅទូរសព្ទ (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) ទទួលបានការហៅទូរសព្ទខាងលើដាច់ដោយឡែកពីគ្នា `n` យ៉ាងហោចណាស់ 4 ដងក្នុងជើងហោះហើរ។ `seed` ថេរត្រូវបានទូទាត់ដោយសន្ទស្សន៍ហៅ (`seed`, `seed + 1`, … ) ដូច្នេះរូបភាពមានភាពខុសគ្នា ប៉ុន្តែនៅតែបន្តផលិតឡើងវិញ។ `n` ត្រូវបានបិទនៅត្រឹម 10។ សំណើបរាជ័យទាំងមូល ប្រសិនបើការហៅទូរសព្ទណាមួយបរាជ័យ។ បញ្ជីទម្រង់អ្នកគាំទ្រគឺ `SINGLE_IMAGE_FANOUT_FORMATS` ក្នុង `open-sse/handlers/imageGeneration/fanOut.ts`។
 
-ZenMux ប្រើការតភ្ជាប់ API-key ដែលមានស្រាប់ឡើងវិញ និងទទួលយកបុព្វបទ `zenmux/` ឬ `zm/`៖
+Codex GPT គំរូរូបភាព (`codex/gpt-image-*`) ត្រឡប់តែ PNG ប៉ុណ្ណោះ៖ ចម្លើយខាងលើ `200` ជាមួយ PNG bytes ទោះបីនៅពេលដែល `jpeg` ឬ `webp` ត្រូវបានស្នើសុំក៏ដោយ។ សំណើជាមួយ `output_format` ផ្សេងទៀត (`webp`, `jpeg`, ... ) ត្រូវបានច្រានចោលជាមួយ HTTP 400 ជំនួសឱ្យការមិនអើពើដោយស្ងៀមស្ងាត់។ លុបវា ឬផ្ញើ `png`។ `output_compression` មិនត្រូវបានបញ្ជូនបន្តទេ។
 
-- `zenmux/openai/gpt-image-2` ប្រើ OpenAI Images API របស់ ZenMux។ ជម្រើសរួមមាន `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, និង `response_format`។
-- អ្នកបោះពុម្ពផ្សាយផ្សេងទៀត ដូចជា `zm/meta/muse-image-1.0` ប្រើ endpoint `:predict` របស់ ZenMux Vertex AI។ `n` ត្រូវបានផ្គូផ្គងទៅ `sampleCount`, `aspect_ratio` ទៅ `aspectRatio`, និង `image_size`
-  (`1K`, `2K`, `4K`) ទៅ `sampleImageSize`។ `size` ជា pixel ផ្តល់តែសមាមាត្ររូបភាពប៉ុណ្ណោះ មិនធានាទំហំជា pixel ទេ។ សមាមាត្រ គុណភាពបង្ហាញ និងចំនួនដែលគាំទ្រ អាចខុសគ្នាតាមម៉ូដែល។
-- `zm/inclusionai/ming-image-0.1-design` ជ្រើសរើសទំហំដោយខ្លួនឯង។ កុំដាក់ `size`,
-  `aspect_ratio`, និង `image_size`; ការដាក់តម្លៃជាក់លាក់នឹងត្រឡប់ HTTP 400។ អាចស្នើសុំ PNG, JPEG និង WebP ដោយប្រើ `output_format`។
+ZenMux ប្រើការភ្ជាប់ API-key ដែលមានស្រាប់ឡើងវិញ ហើយទទួលយកបុព្វបទ `zenmux/` ឬ `zm/` ៖
 
-ការរួមបញ្ចូលនេះគាំទ្រការបង្កើតរូបភាពពីអត្ថបទ មិនមែនការកែសម្រួលរូបភាពយោងទេ។ លទ្ធផល Vertex ត្រូវបានធ្វើឱ្យមានទម្រង់ស្តង់ដារទៅជា `data[].b64_json`; `response_format: "url"` នឹងត្រឡប់ URL HTTPS ពី upstream ឬ data URL ដែលមាន base64 នៅពេលមានតែ bytes រូបភាពប៉ុណ្ណោះ។ លទ្ធផលទទេ/ត្រូវបានត្រង នឹងត្រឡប់កំហុស ជំនួសឱ្យជោគជ័យដែលគ្មានទិន្នន័យ។ ការចូលប្រើម៉ូដែលអាស្រ័យលើគណនី ZenMux។ សូមមើល [Vertex API របស់ ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) និង
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image)។
+- `zenmux/openai/gpt-image-2` ប្រើ ZenMux រូបភាព OpenAI API។ ជម្រើសរួមមាន `size`, `quality`, `n`, `output_format`, `output_compression`, `background` និង `response_format`។
+- អ្នកបោះពុម្ពផ្សាយផ្សេងទៀតដូចជា `zm/meta/muse-image-1.0` ប្រើចំណុចបញ្ចប់ Vertex AI `:predict` របស់ ZenMux។ `n` ផែនទីទៅ `sampleCount`, `aspect_ratio` ទៅ `aspectRatio`, និង `image_size` (`1K`, `2K`, `4K`) ទៅ `sampleImageSize` ភីកសែល `size` ផ្គត់ផ្គង់តែសមាមាត្រមួយប៉ុណ្ណោះ មិនត្រូវបានធានាទំហំភីកសែលទេ។ សមាមាត្រ ដំណោះស្រាយ និងចំនួនដែលគាំទ្រ ប្រែប្រួលតាមគំរូ។
+- `zm/inclusionai/ming-image-0.1-design` ជ្រើសរើសវិមាត្រផ្ទាល់ខ្លួនរបស់វា។ លុប `size`, `aspect_ratio`, និង `image_size`; តម្លៃជាក់លាក់ត្រឡប់ HTTP 400. PNG, JPEG, និង WebP អាចត្រូវបានស្នើសុំជាមួយ `output_format`។
 
-ការតភ្ជាប់ចូល Microsoft 365 Copilot បម្រើ `copilot-m365-web/m365-copilot-image`
-តាមរយៈឧបករណ៍រូបភាពដែលមានស្រាប់របស់ Copilot៖ ការបង្វិល Copilot មួយដងក្នុងមួយរូបភាព (`n` 1–4), `size` កំណត់ទិសដៅតែប៉ុណ្ណោះ ហើយរូបភាពត្រូវបានត្រឡប់មកជាបញ្ចូលក្នុងលទ្ធផល (`b64_json` ឬ data URL សម្រាប់
-`response_format: "url"` )។ សូមមើល [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation)។
+This integration supports text-to-image generation, not reference-image editing. Vertex output is normalized to `data[].b64_json`; `response_format: "url"` returns an upstream HTTPS URL or a base64 data URL when only image bytes are available. Empty/filtered outputs return an error rather than an empty success. Model access depends on the ZenMux account. See [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) and [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+ការតភ្ជាប់ចូល Microsoft 365 Copilot បម្រើ `copilot-m365-web/m365-copilot-image` តាមរយៈឧបករណ៍រូបភាពដែលភ្ជាប់មកជាមួយរបស់ Copilot៖ មួយ Copilot វេនក្នុងមួយរូបភាព (`n` 1–4) `size` ដឹកនាំតែការតំរង់ទិស ហើយរូបភាពត្រឡប់ក្នុងជួរ (`b64_json` ឬទិន្នន័យ URL សម្រាប់ `response_format: "url"`)។ សូមមើល [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) ។
 
 ```bash
-# រាយម៉ូដែលរូបភាពទាំងអស់
+# List all image models
 GET /v1/images/generations
 ```
 
 ---
 
-## OCR ឯកសារ
+## ឯកសារ OCR
 
 ```bash
 POST /v1/ocr
@@ -385,17 +366,15 @@ Content-Type: application/json
 }
 ```
 
-`model` ជ្រើសរើសអ្នកផ្តល់សេវា OCR តាមរយៈបុព្វបទ `provider/model`; លេខសម្គាល់ម៉ូដែលដែលគ្មានបុព្វបទ (ឧ.
-`mistral-ocr-latest`) នឹងត្រូវផ្គូផ្គងទៅអ្នកផ្តល់សេវាដែលបានចុះបញ្ជីរបស់វា ហើយប្រសិនបើមិនបញ្ចូល `model` នោះលំនាំដើមគឺ
-Mistral (`mistral-ocr-latest`)។ អ្នកផ្តល់សេវាដែលបានចុះបញ្ជី (`open-sse/config/ocrRegistry.ts`)៖
+`model` ជ្រើសរើសអ្នកផ្តល់សេវា OCR តាមរយៈបុព្វបទ `provider/model` ; លេខសម្គាល់គំរូទទេ (ឧ. `mistral-ocr-latest`) ដោះស្រាយចំពោះអ្នកផ្តល់សេវាដែលបានចុះឈ្មោះរបស់ខ្លួន ហើយ `model` ដែលបានលុបចោលលំនាំដើមទៅ Mistral (`mistral-ocr-latest`) ។ អ្នកផ្តល់សេវាដែលបានចុះឈ្មោះ (`open-sse/config/ocrRegistry.ts`):
 
-| Provider id                   | Model id             | `model` value                                               | Notes                                                                                                                    |
-| ----------------------------- | -------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (or bare `mistral-ocr-latest`) | សមកាលកម្ម — ការឆ្លើយតបត្រូវបានត្រឡប់ដោយផ្ទាល់ពីការហៅទៅ API ខាងលើតែមួយ។                                                   |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                 | API ខាងលើអសមកាលកម្ម (`analyze` + poll) — សូមមើលខាងក្រោម។                                                                 |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                     | សមកាលកម្ម តាមរយៈចំណុចបញ្ចប់ដៃគូ `openapi/chat/completions` របស់ Vertex AI — សូមមើលខាងក្រោមសម្រាប់ការផ្ទៀងផ្ទាត់ និង URL។ |
+| លេខសម្គាល់អ្នកផ្តល់សេវា       | លេខសម្គាល់ម៉ូដែល                                    | តម្លៃ`model`                                              | កំណត់ចំណាំ                                                                                                                                                                                                                            |
+| ----------------------------- | --------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                                | `mistral/mistral-ocr-latest` (ឬ `mistral-ocr-latest` ទទេ) | ធ្វើសមកាលកម្ម — ការឆ្លើយតបត្រូវបានត្រឡប់ដោយផ្ទាល់ពីការហៅឡើងលើតែមួយ។                                                                                                                                                                   |
+| `azure-document-intelligence` | `prebuilt-read`                                     | `azure-document-intelligence/prebuilt-read`               | ចរន្តអសមកាល (`analyze` + poll) — សូមមើលខាងក្រោម។                                                                                                                                                                                      |
+| `vertex-deepseek-ocr`         | ការដាក់ពង្រាយដោយខ្លួនឯង (មិនមានម៉ូដែលភ្ជាប់មកជាមួយ) | `vertex-deepseek-ocr/<your-deployed-model-id>`            | ធ្វើសមកាលកម្មតាមរយៈ Vertex AI Model Garden DeepSeek-OCR ផ្ទាល់ខ្លួនរបស់អ្នក (រាង `openapi/chat/completions` ); Google បានចូលនិវត្តន៍ `deepseek-ocr-maas` ដែលបានគ្រប់គ្រងនៅថ្ងៃទី 2026-10-21 (#20423) ដូច្នេះលេខសម្គាល់នោះត្រឡប់ 400 ។ |
 
-អ្នកផ្តល់សេវាទាំងបីឆ្លើយតបជាតួខ្លឹមសារដែលមានទម្រង់ដូច Mistral ដូចគ្នា៖
+អ្នកផ្តល់សេវាទាំងបីឆ្លើយតបក្នុងទម្រង់ Mistral ដូចគ្នា៖
 
 ```json
 {
@@ -405,26 +384,13 @@ Mistral (`mistral-ocr-latest`)។ អ្នកផ្តល់សេវាដែ�
 }
 ```
 
-### លំហូរ poll របស់ Azure Document Intelligence
+### លំហូរនៃការស្ទង់មតិ Azure Document Intelligence
 
-API `analyze` របស់ Azure Document Intelligence គឺអសមកាលកម្ម៖ សំណើដំបូងនឹងត្រឡប់ header
-`Operation-Location` ជំនួសឱ្យ body ហើយលទ្ធផលត្រូវតែធ្វើ poll។ Handler
-(`open-sse/handlers/ocr.ts`) ធ្វើ poll ទៅ URL នោះរៀងរាល់មួយវិនាទី រហូតដល់ 30 ដង បរាជ័យភ្លាមៗ (មិន
-បន្តធ្វើ poll ទៀត) នៅពេលការឆ្លើយតប poll មិនមែន `ok` ឬស្ថានភាពជា `"failed"` ហើយត្រឡប់ `504` ប្រសិនបើប្រតិបត្តិការនៅតែកំពុងដំណើរការ បន្ទាប់ពីអស់ចំនួនដងដែលបានកំណត់។ ការឆ្លើយតបចុងក្រោយរបស់ Azure ត្រូវបាន
-ធ្វើឱ្យមានទម្រង់ស្តង់ដារទៅជារចនាសម្ព័ន្ធ `pages`/`markdown` ដូចគ្នាដែល Mistral ប្រើ មុនពេលត្រឡប់ទៅអ្នក
-ហៅ ដូច្នេះកូដ client មិនចាំបាច់ដោះស្រាយករណីពិសេសសម្រាប់អ្នកផ្តល់សេវានោះទេ។
+`analyze` API របស់ Azure Document Intelligence គឺអសមកាល៖ សំណើដំបូងត្រឡប់បឋមកថា `Operation-Location` ជំនួសឱ្យតួ ហើយលទ្ធផលត្រូវតែត្រូវបានស្ទង់មតិ។ អ្នកដោះស្រាយ (`open-sse/handlers/ocr.ts`) ធ្វើការស្ទង់មតិដែល URL រាល់វិនាទីសម្រាប់ការប៉ុនប៉ងរហូតដល់ 30 ដង បរាជ័យយ៉ាងឆាប់រហ័ស (មិនបន្តការស្ទង់មតិ) លើការឆ្លើយតបមិន `ok` ឬស្ថានភាព `"failed"` ហើយត្រឡប់ `504` ប្រសិនបើប្រតិបត្តិការនៅតែដំណើរការបន្ទាប់ពីអស់ថវិកាព្យាយាម។ ការឆ្លើយតប Azure ចុងក្រោយត្រូវបានធ្វើឱ្យមានលក្ខណៈធម្មតាទៅជារូបរាង `pages`/`markdown` ដូចគ្នាដែលប្រើដោយ Mistral មុនពេលត្រូវបានបញ្ជូនត្រឡប់ទៅអ្នកហៅចូល ដូច្នេះលេខកូដអតិថិជនមិនចាំបាច់ជាករណីពិសេសសម្រាប់អ្នកផ្តល់សេវានោះទេ។
 
-### ការផ្ទៀងផ្ទាត់ និងការដោះស្រាយចំណុចបញ្ចប់របស់ Vertex AI DeepSeek OCR
+### Vertex AI DeepSeek OCR auth and endpoint resolution
 
-`vertex-deepseek-ocr` ប្រើការផ្ទៀងផ្ទាត់ Vertex AI ដូចគ្នាដែល OmniRoute គាំទ្ររួចហើយសម្រាប់
-ចរាចរណ៍ chat/image (`open-sse/executors/vertex.ts`)៖ API key របស់ការតភ្ជាប់គឺជា
-ព័ត៌មានសម្គាល់ Service Account JSON (ប្តូរទៅជាសញ្ញាសម្ងាត់ OAuth ដែលមានអាយុខ្លី តាមរយៈលំហូរ JWT-bearer)
-ឬជាសញ្ញាសម្ងាត់ OAuth ដែលបានបង្កើតរួច ហើយប្រើតាមដែលមាន។ URL ចំណុចបញ្ចប់ API ខាងលើគឺជាចំណុចបញ្ចប់ដៃគូទូទៅ
-`openapi/chat/completions` របស់ Vertex ដែលបង្កើតឡើងពី project និង region របស់ការតភ្ជាប់ — `providerSpecificData.project`/`providerSpecificData.region` ដែលបានកំណត់ជាក់លាក់ តែងតែមានអាទិភាព;
-បើមិនដូច្នោះទេ project ត្រូវបានរកមកពី `project_id` របស់ Service Account JSON ហើយ region មានលំនាំដើមជា
-`us-central1`។ ការដោះស្រាយទាំងពីរនេះកើតឡើងនៅក្នុង `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) ហើយត្រូវបានប្រើដោយ
-`src/app/api/v1/ocr/route.ts` មុនពេលបញ្ជូនទៅ `handleOcr`។
+`vertex-deepseek-ocr` ប្រើឡើងវិញនូវ Vertex AI authentication OmniRoute រួចហើយសម្រាប់ chat/image traffic (`open-sse/executors/vertex.ts`): API key នៃការតភ្ជាប់គឺជាគណនីសេវាកម្ម JSON credential (ផ្លាស់ប្តូរសម្រាប់លេខសម្ងាត់ចូលប្រើ OAuth រយៈពេលខ្លីតាមរយៈ JWT-bearer flow) ឬ token ចូលប្រើ OAuth ដែលបានបញ្ចូលរួចហើយដែលប្រើ as-is. URL ចុងខាងលើគឺជាចំណុចបញ្ចប់ដៃគូ `openapi/chat/completions` ទូទៅរបស់ Vertex ដែលបង្កើតឡើងពីគម្រោងនៃការតភ្ជាប់ និងតំបន់ — `providerSpecificData.project`/`providerSpecificData.region` ច្បាស់លាស់តែងតែឈ្នះ។ បើមិនដូច្នេះទេ គម្រោងនេះគឺបានមកពីគណនីសេវាកម្ម JSON របស់ `project_id` ហើយតំបន់កំណត់លំនាំដើមទៅ `us-central1`។ ដំណោះស្រាយទាំងពីរកើតឡើងនៅក្នុង `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) ដែលប្រើប្រាស់ដោយ `src/app/api/v1/ocr/route.ts` មុនពេលបញ្ជូនទៅកាន់ `handleOcr`។
 
 ---
 
@@ -667,97 +633,104 @@ Endpoint បង្រួបបង្រួមរក្សាទុក status cod
 
 ---
 
-## ចំណុចបញ្ចប់សម្រាប់ភាពឆបគ្នា
+## ចំណុចបញ្ចប់នៃភាពឆបគ្នា។
 
-| វិធីសាស្ត្រ | ផ្លូវ                                     | ទ្រង់ទ្រាយ                                    |
-| ----------- | ----------------------------------------- | --------------------------------------------- |
-| POST        | `/v1/chat/completions`                    | OpenAI                                        |
-| POST        | `/v1/messages`                            | Anthropic                                     |
-| POST        | `/v1/responses`                           | OpenAI Responses                              |
-| POST        | `/v1/embeddings`                          | OpenAI                                        |
-| POST        | `/v1/images/generations`                  | OpenAI Images                                 |
-| POST        | `/v1/images/edits`                        | OpenAI Images (កែសម្រួល/បំពេញក្នុងរូបភាព)     |
-| POST        | `/v1/videos/generations`                  | ការបង្កើតវីដេអូតាមរចនាប័ទ្ម OpenAI            |
-| POST        | `/v1/music/generations`                   | ការបង្កើតតន្ត្រីតាមរចនាប័ទ្ម OpenAI           |
-| POST        | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                            |
-| POST        | `/v1/audio/speech`                        | OpenAI TTS (បញ្ជូនតួខ្លឹមសារសំឡេងត្រឡប់)      |
-| POST        | `/v1/rerank`                              | រៀបចំលំដាប់ឡើងវិញតាមរចនាប័ទ្ម Cohere/Voyage   |
-| POST        | `/v1/classify`                            | Jina classify (`api.jina.ai`)                 |
-| POST        | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)            |
-| POST        | `/v1/moderations`                         | OpenAI Moderations                            |
-| GET         | `/v1/models`                              | OpenAI                                        |
-| POST        | `/v1/models/query`                        | បញ្ជីម៉ូដែលខ្លីដែលបានចម្រោះ                   |
-| POST        | `/v1/messages/count_tokens`               | Anthropic                                     |
-| GET         | `/v1beta/models`                          | Gemini                                        |
-| POST        | `/v1beta/models/{...path}`                | Gemini generateContent                        |
-| POST        | `/v1/api/chat`                            | Ollama                                        |
-| GET         | `/api/v1/vscode/{token}/`                 | ឈ្មោះកាត់កាតាឡុក OpenAI                       |
-| GET         | `/api/v1/vscode/{token}/models`           | ឈ្មោះកាត់ម៉ូដែល OpenAI                        |
-| POST        | `/api/v1/vscode/{token}/chat/completions` | ឈ្មោះកាត់ដែលមានសញ្ញាសម្គាល់ OpenAI            |
-| POST        | `/api/v1/vscode/{token}/responses`        | ឈ្មោះកាត់ Responses ដែលមានសញ្ញាសម្គាល់ OpenAI |
-| POST        | `/api/v1/vscode/{token}/api/chat`         | ឈ្មោះកាត់ Ollama ដែលមានសញ្ញាសម្គាល់           |
-| GET         | `/api/v1/vscode/{token}/api/tags`         | ឈ្មោះកាត់ស្លាក Ollama ដែលមានសញ្ញាសម្គាល់      |
+| វិធីសាស្រ្ត | ផ្លូវ                                     | ទម្រង់                              |
+| ----------- | ----------------------------------------- | ----------------------------------- |
+| POST        | `/v1/chat/completions`                    | OpenAI                              |
+| POST        | `/v1/messages`                            | Anthropic                           |
+| POST        | `/v1/responses`                           | OpenAI ការឆ្លើយតប                   |
+| POST        | `/v1/embeddings`                          | OpenAI                              |
+| POST        | `/v1/images/generations`                  | រូបភាព OpenAI                       |
+| POST        | `/v1/images/edits`                        | រូបភាព OpenAI (edit/inpaint)        |
+| POST        | `/v1/videos/generations`                  | ការបង្កើតវីដេអូរចនាប័ទ្ម OpenAI     |
+| POST        | `/v1/music/generations`                   | ការបង្កើតតន្ត្រីបែប OpenAI          |
+| POST        | `/v1/audio/transcriptions`                | OpenAI អូឌីយ៉ូ (STT)                |
+| POST        | `/v1/audio/speech`                        | OpenAI TTS (ត្រឡប់តួសំឡេង)          |
+| POST        | `/v1/rerank`                              | ចំណាត់ថ្នាក់Cohere/Voyage-style     |
+| POST        | `/v1/classify`                            | Jina ចាត់ថ្នាក់ (`api.jina.ai`)     |
+| POST        | `/v1/segment`                             | ផ្នែក Jina (`segment.jina.ai`)      |
+| POST        | `/v1/moderations`                         | OpenAI ការសម្របសម្រួល               |
+| POST        | `/v1/systemone`                           | ការសម្រេចចិត្តវាយបញ្ចូលប្រព័ន្ធ One |
+| POST        | `/v1/decisions`                           | OpenAI ការសម្រេចចិត្ត (ដើម)         |
+| GET         | `/v1/systemone/models`                    | កាតាឡុកគំរូនៃការសម្រេចចិត្ត         |
+| GET         | `/v1/models`                              | OpenAI                              |
+| POST        | `/v1/models/query`                        | បញ្ជីសម្រាំងគំរូដែលបានត្រង          |
+| POST        | `/v1/messages/count_tokens`               | Anthropic                           |
+| GET         | `/v1beta/models`                          | Gemini                              |
+| POST        | `/v1beta/models/{...path}`                | Gemini generateContent              |
+| POST        | `/v1/api/chat`                            | Ollama                              |
+| GET         | `/api/v1/vscode/{token}/`                 | ឈ្មោះក្លែងក្លាយកាតាឡុក OpenAI       |
+| GET         | `/api/v1/vscode/{token}/models`           | ម៉ូដែល OpenAI ឈ្មោះក្លែងក្លាយ       |
+| POST        | `/api/v1/vscode/{token}/chat/completions` | OpenAI ឈ្មោះក្លែងក្លាយ              |
+| POST        | `/api/v1/vscode/{token}/responses`        | OpenAI ឆ្លើយតបឈ្មោះក្លែងក្លាយ       |
+| POST        | `/api/v1/vscode/{token}/api/chat`         | Ollama ឈ្មោះក្លែងក្លាយ              |
+| GET         | `/api/v1/vscode/{token}/api/tags`         | Ollama tags tokenized alias         |
 
-ផ្លូវ POST ទាំងអស់ប្រើទម្រង់ដូចគ្នា៖ `Bearer your-api-key` + តួ JSON ដែលបានផ្ទៀងផ្ទាត់ដោយ Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` ជាដើម សូមមើល `src/shared/validation/schemas.ts`)។ ករណីបរាជ័យក្នុងការផ្ទៀងផ្ទាត់ schema នឹងបញ្ជូន 4xx ត្រឡប់មកវិញ។
+ផ្លូវ POST ទាំងអស់ដើរតាមរូបរាងដូចគ្នា៖ `Bearer your-api-key` + Zod-validated JSON body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, etc. សូមមើល `src/shared/validation/schemas.ts`). 4xx ត្រូវបានត្រឡប់វិញនៅពេលដែលបរាជ័យគ្រោងការណ៍។
 
-សម្រាប់ client ដែលមិនអាចភ្ជាប់ `Authorization: Bearer ...` បាន OmniRoute ក៏ទទួល API keys នៅក្នុង URL តាមរយៈ query-string compatibility (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ឬតាមរយៈចំណុចបញ្ចប់ `/api/v1/vscode/{token}/...` ជាក់លាក់ដែលបានចងក្រងជាឯកសារខាងក្រោម។
+សម្រាប់អតិថិជនដែលមិនអាចភ្ជាប់ `Authorization: Bearer ...` OmniRoute ក៏ទទួលយកគ្រាប់ចុច API ក្នុង URL តាមរយៈភាពឆបគ្នានៃខ្សែអក្សរសំណួរ (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ឬចំណុចបញ្ចប់ `/api/v1/vscode/{token}/...` ដែលបានចងក្រងជាឯកសារខាងក្រោម។
 
 ```bash
-# រៀបចំលំដាប់ឡើងវិញ (អ្នកផ្តល់សេវាក្នុង cloud registry ឬ node របស់អ្នកផ្តល់សេវាដែលឆបគ្នាជាមួយ OpenAI ជា "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina classify (ព័ត៌មានសម្ងាត់សម្រាប់ Foundation API)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
 # Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina search (s.jina.ai; ឈ្មោះកាត់អ្នកផ្តល់សេវា៖ jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
 # Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — បញ្ជូនតួខ្លឹមសារ audio/mpeg (ឬទ្រង់ទ្រាយដែលបានស្នើសុំ) ត្រឡប់មកវិញ
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS តម្រូវឱ្យមានភាសា និងសំឡេង៖ `language` មានតម្លៃលំនាំដើមជា "en"; ប្រសិនបើខ្វះ
-# សំឡេង ឬឈ្មោះសំឡេងស្តង់ដារ OpenAI (alloy, nova, …) នោះនឹងក្លាយជា "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# កែសម្រួលរូបភាព (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# ការបង្កើតវីដេអូ / តន្ត្រី (លេខសម្គាល់ម៉ូដែលដែលមានបុព្វបទអ្នកផ្តល់សេវា)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **ថ្នាំងផ្តល់សេវា Rerank៖** `POST /v1/rerank` ក៏បញ្ជូនទៅកាន់ថ្នាំងផ្តល់សេវាដែលអនុលោមតាម OpenAI
-> (oMLX, vLLM, Infinity, TEI នៅពីក្រោយ gateway, …) ដែលកំណត់អាសយដ្ឋានជា `<node-prefix>/<model>`។ ថ្នាំង
-> loopback (`localhost`, `127.0.0.1`, `172.16.0.0/12`) តែងតែមានសិទ្ធិប្រើ ហើយដូចគ្នានេះក៏អនុវត្តចំពោះ hostname ដែល
-> អ្នកប្រតិបត្តិបានរាយក្នុង `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` ផងដែរ (ឧ. ឈ្មោះសេវា Docker/Compose
-> ដូចជា `http://reranker:8080/v1`។ ថ្នាំងទាំងនេះត្រូវបានហៅដោយផ្ទាល់ មិនឆ្លងកាត់ `HTTP(S)_PROXY` ឬ proxy
-> ដែលបានកំណត់ជាប់នឹង connection ឡើយ)។ ថ្នាំងនៅលើ
-> host ផ្សេងទៀត — ប្រអប់ក្នុង LAN ឬ peer របស់ Tailscale — មានសិទ្ធិប្រើបាន លុះត្រាតែអ្នកប្រតិបត្តិបើក
-> feature flag `RERANK_REMOTE_PROVIDER_NODES` **និង** base URL របស់ថ្នាំងឆ្លងកាត់គោលការណ៍ URL outbound របស់ provider
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`)។ ជំហាន rerank របស់ memory engine ហៅ
-> route នេះតាម loopback ដូច្នេះច្បាប់ដូចគ្នានេះគ្រប់គ្រង `rerankProviderModel` នៅក្នុងការកំណត់ Memory ផងដែរ។
+> **ចាត់ថ្នាក់ថ្នាំងអ្នកផ្តល់សេវាឡើងវិញ៖** `POST /v1/rerank` ក៏បញ្ជូនទៅកាន់ថ្នាំងអ្នកផ្តល់សេវាដែលត្រូវគ្នានឹង OpenAI (oMLX, vLLM, Infinity , TEI នៅខាងក្រោយច្រកចេញចូលមួយ ... ) ដែលត្រូវបានដោះស្រាយជា `<node-prefix>/<model>`។ ថ្នាំងរង្វិលជុំ (`localhost`, `127.0.0.1`, `172.16.0.0/12`) តែងតែមានសិទ្ធិ ហើយដូច្នេះឈ្មោះម៉ាស៊ីនដែលរាយបញ្ជីប្រតិបត្តិករនៅក្នុង `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (ឧទាហរណ៍ ឈ្មោះសេវា Docker/Compose ដូចជា `http://reranker:8080/v1` ទាំងនេះត្រូវបានហៅដោយផ្ទាល់ មិនដែលតាមរយៈ `HTTP(S)_PROXY` ឬប្រូកស៊ីដែលបានខ្ទាស់នៃការតភ្ជាប់)។ ថ្នាំងនៅលើម៉ាស៊ីនផ្សេងទៀត — a LAN box ឬ Tailscale peer — មានសិទ្ធិបានតែនៅពេលដែលប្រតិបត្តិករបើកទង់មុខងារ `RERANK_REMOTE_PROVIDER_NODES` ប៉ុណ្ណោះ** និង** URL មូលដ្ឋានរបស់ថ្នាំងឆ្លងកាត់គោលការណ៍ URL ក្រៅប្រទេសរបស់អ្នកផ្តល់សេវា (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) ។ ជំហានឡើងវិញនៃម៉ាស៊ីនអង្គចងចាំហៅផ្លូវនេះលើរង្វិលជុំវិញ ដូច្នេះក្បួនដូចគ្នាគ្រប់គ្រង `rerankProviderModel` នៅក្នុងការកំណត់អង្គចងចាំ។
 >
-> **ទម្រង់ server មូលដ្ឋាន៖** ថ្នាំងត្រូវបានហៅនៅ `<base>/v1/rerank` ហើយ ប្រសិនបើទទួលបាន 404 នឹងហៅនៅ `<base>/rerank`
-> (Infinity, TEI)។ body របស់ upstream ផ្ទុកទាំងរបៀបសរសេររបស់ Cohere/OpenAI (`documents`,
-> `return_documents`) និងរបៀបសរសេររបស់ TEI (`texts`, `return_text`) ហើយ response ពី upstream
-> ត្រូវបានធ្វើឱ្យមានទម្រង់ស្តង់ដារជា envelope របស់ Cohere៖ TEI ដែលមានទម្រង់ទទេជា `[{index, score, text}]`, `{results: [{index, score}]}`
-> ពី gateway ស្តើងៗ និង `{data: [...]}` តាមរចនាប័ទ្ម Voyage សុទ្ធតែត្រឡប់ទៅ client ជា
-> `{results: [{index, relevance_score, document?}]}` ដោយតម្រៀបតាមពិន្ទុ និងកំណត់ចំនួនអតិបរមាត្រឹម `top_n`។
+> **ទម្រង់ម៉ាស៊ីនមេក្នុងស្រុក៖** ថ្នាំងត្រូវបានហៅនៅ `<base>/v1/rerank` និងនៅលើ 404 នៅ `<base>/rerank` (Infinity, TEI) ។ តួខាងលើអនុវត្តទាំងអក្ខរាវិរុទ្ធ Cohere/OpenAI (`documents`, `return_documents`) និងអក្ខរាវិរុទ្ធ TEI (`texts`, `return_text`) ហើយការឆ្លើយតបខាងលើត្រូវបានធ្វើឱ្យមានលក្ខណៈធម្មតាចំពោះស្រោមសំបុត្រ Cohere ៖ TEI's bare `[{index, score, text}]`, `{results: [{index, score}]}` ពីច្រកចេញចូលស្តើង និង `{data: [...]}` រចនាប័ទ្មការធ្វើដំណើរ ទាំងអស់ត្រលប់មកវិញដោយ `{results: [{index, relevance_score, document?}]}` `top_n`
 
-> **ការស្វែងរកថ្នាំងផ្តល់សេវា៖** ម៉ូដែលនៅលើថ្នាំងផ្តល់សេវាដែលអនុលោមតាម OpenAI បង្ហាញនៅក្នុង `GET /v1/models`
-> ក្រោម node prefix។ ជួរដែលមិនមាន metadata អំពី endpoint (ជាទូទៅសម្រាប់បញ្ជី `/v1/models` មូលដ្ឋាន)
-> នឹងទទួល `apiType` របស់ថ្នាំង ដូច្នេះម៉ូដែលរបស់ថ្នាំង `embeddings` នឹងមាន `type: "embedding"` ហើយ
-> ម៉ូដែលរបស់ថ្នាំង `rerank` នឹងមាន `type: "rerank"` ជំនួសឱ្យការកំណត់លំនាំដើមជា chat។ ទោះយ៉ាងណា
-> `supportedEndpoints` ជាក់លាក់នៅលើជួរដែលបានធ្វើសមកាលកម្ម ឬបានបន្ថែមដោយដៃ នៅតែមានអាទិភាព។
+> **ការរកឃើញថ្នាំងអ្នកផ្តល់សេវា៖** ម៉ូដែលនៅលើថ្នាំងអ្នកផ្តល់សេវាដែលត្រូវគ្នានឹង OpenAI បង្ហាញនៅក្នុង `GET /v1/models` ក្រោមបុព្វបទថ្នាំង។ ជួរដេកដែលមិនមានទិន្នន័យមេតាចំណុចបញ្ចប់ (ធម្មតាសម្រាប់ការចុះបញ្ជី `/v1/models` ក្នុងតំបន់) ទទួលមរតក `apiType` របស់ថ្នាំង ដូច្នេះគំរូរបស់ថ្នាំង `embeddings` គឺ `type: "embedding"` ហើយគំរូរបស់ថ្នាំង `rerank` គឺ `type: "rerank"` ជំនួសឱ្យការជជែកតាមលំនាំដើម។ `supportedEndpoints` ច្បាស់លាស់នៅលើជួរដេកដែលបានធ្វើសមកាលកម្ម ឬបន្ថែមដោយដៃនៅតែនាំមុខ។
 
-### Route របស់ Provider ជាក់លាក់
+### សេចក្តីសម្រេចដែលបានវាយបញ្ចូល
+
+គំរូការសម្រេចចិត្តឆ្លើយសំណួរដែលបានវាយបញ្ចូលជាមួយនឹងប្រូបាប៊ីលីតេដែលបានក្រិតតាមខ្នាតជំនួសឱ្យការបង្កើតអត្ថបទ។ ពួកវាមិនមែនជាគំរូជជែកទេ ហើយទម្រង់ខ្សែទាំងពីរមិនដែលត្រូវបានបកប្រែទៅគ្នាទៅវិញទៅមកទេ៖
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter decisions, Cloudflare Workers AI, local Ollama).
+- `POST /v1/decisions` — ដើមកំណើត OpenAI ការសម្រេចចិត្ត `{ model, input, questions: [...] }` បម្រើដោយការតភ្ជាប់ `openai` ។ ម៉ូដែលគឺ `openai/gpt-6-luna` ( `gpt-6-luna` ទទេក៏ដំណើរការផងដែរ) ។ ចម្លើយត្រឡប់មកវិញតាមលំដាប់សំណួរ ដោយមិនបានប៉ះ។
+- `GET /v1/systemone/models` — កាតាឡុកមួយនៃប្រភេទទាំងពីរ; ជួរនីមួយៗដាក់ឈ្មោះរបស់វា `api_format` (`systemone` ឬ `decisions`) ។ `limit` / `after` ទំព័របញ្ជីចុងក្រោយ។ បឋមកថា `X-OmniRoute-Catalog-Status` អាន `complete`, `partial` ឬ `unavailable` (503) ។
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+នៅលើ `/v1/decisions` បញ្ជីអនុញ្ញាតគំរូរបស់កូនសោ API ប្រភេទចំណុចបញ្ចប់ `decisions` ថវិកា និងវិសាលភាពនៃការតភ្ជាប់ត្រូវបានពិនិត្យ មុនពេលដែលលិខិតសម្គាល់ណាមួយត្រូវបានអាន។ លិខិតសម្គាល់គឺជាការតភ្ជាប់ `openai` ដែលបានរក្សាទុកនៅក្នុងវិសាលភាពរបស់សោ (មិនដែលសោបរិស្ថាន); URL មូលដ្ឋាននៃការតភ្ជាប់ត្រូវបានផ្តល់កិត្តិយសតែនៅពេលដែលវាជា `http(s)` URL ដោយគ្មានលិខិតសម្គាល់ សំណួរ ឬបំណែកដែលមិនចង្អុលទៅ OmniRoute នេះ។ ការហៅចេញឆ្លងកាត់ការដឹកជញ្ជូនដែលមានការយាមដូចគ្នានឹង `decision` រ៉ោតទ័រស្វ័យប្រវត្តិ ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): អ្នកផ្តល់សេវាយាមនៅក្រៅប្រទេស គ្មានការព្យាយាមឡើងវិញ គ្មានការបញ្ជូនបន្ត ការអស់ពេល 5 វិនាទី និងមួកចម្លើយ 64 KB (ចម្លើយធំជាងគឺ 502) ។ សាកសពសំណើត្រូវបានកំណត់ត្រឹម 4 MiB។ ការហៅនីមួយៗផ្ញើ `Idempotency-Key` ស្រស់។ កំហុសអនុវត្តតែស្ថានភាពខាងលើប៉ុណ្ណោះ មិនដែលតួរបស់វា URL សោ ឬប្រអប់បញ្ចូលនោះទេ។
+
+### ផ្លូវអ្នកផ្តល់សេវាពិសេស
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -765,7 +738,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-បុព្វបទ provider នឹងត្រូវបានបន្ថែមដោយស្វ័យប្រវត្តិ ប្រសិនបើបាត់។ ម៉ូដែលមិនត្រូវគ្នានឹងត្រឡប់ `400`។
+បុព្វបទអ្នកផ្តល់សេវាត្រូវបានបន្ថែមដោយស្វ័យប្រវត្តិប្រសិនបើបាត់។ ម៉ូដែលមិនត្រូវគ្នាត្រឡប់ `400`។
 
 ---
 

@@ -4,9 +4,9 @@
 
 ---
 
-> **Hva bor hvor: hver sporet topp-nivå katalog og rotfil, med en linje hensikt.** Sist oppdatert: 2026-11-13 (OmniRoute v3.8.54)
+> **Hva bor hvor: hver sporet toppnivåkatalog og rotfil, med en linje hensikt.**
 >
-> Bruk dette kartet til å finne veien rundt i kodebasen, og følg deretter koblingene til de dedikerte dokumentene. Filtall ble målt med `git ls-files` på datoen ovenfor. De endres med nesten hver utgivelse, så behandle dem som størrelsesordener.
+> Bruk dette kartet til å finne veien rundt i kodebasen, og følg deretter koblingene til de dedikerte dokumentene. Filantallet kommer fra `git ls-files` og endres med nesten hver utgivelse. Behandle dem som størrelsesordener.
 
 ## Tre på toppnivå
 
@@ -36,7 +36,7 @@ OmniRoute/
 └── (root files — see below)
 ```
 
-Lokale, genererte eller private stier (alle gitignored, aldri forpliktet, ikke beskrevet nærmere):
+Lokale, genererte eller private stier (alle gitignorert, aldri forpliktet, ikke beskrevet nærmere):
 
 ```
 node_modules/            # npm dependencies

@@ -168,9 +168,9 @@ Microsoft 365 પ્રદાતાઓમાં** કનેક્શન ઉમ�
 
 ## સંદર્ભો
 
-- ઇશ્યૂ: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- ચર્ચા: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- સ્રોત: `src/shared/constants/providers/web-cookie.ts` (પ્રદાતાની વ્યાખ્યા)
-- HAR ઇમ્પોર્ટ: `src/shared/utils/m365HarImport.ts`
-- ઓળખપત્ર ફીલ્ડ્સ: `src/shared/providers/webSessionCredentials.ts`
-- ટિઅર મોડલ: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- મુદ્દો: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- ચર્ચા: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- સ્ત્રોત: `src/shared/constants/providers/web-cookie.ts` (પ્રદાતા વ્યાખ્યા)
+- HAR આયાત: `src/shared/utils/m365HarImport.ts`
+- ઓળખપત્ર ક્ષેત્રો: `src/shared/providers/webSessionCredentials.ts`
+- ટાયર મોડલ: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

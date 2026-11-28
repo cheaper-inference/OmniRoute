@@ -4,12 +4,11 @@
 
 ---
 
-> **事实来源：** `src/lib/compliance/`、`src/app/api/compliance/`
-> **最后更新：** 2026-06-28 — v3.8.40
+> **事实来源：** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute 将管理操作、身份验证事件、提供者凭据生命周期变更以及 MCP 工具调用记录到由 SQLite 支持的审计表中。本页介绍记录的内容、数据的存储位置、保留时长、API 密钥如何选择退出审计，以及如何查询这些数据。
+OmniRoute记录管理操作、身份验证事件、提供者凭证生命周期更改以及对 SQLite 支持的审核表的MCP工具调用。本页介绍了记录的内容、记录的位置、保留的时间、 API密钥如何选择退出以及如何查询数据。
 
-实现位于 `src/lib/compliance/index.ts`（T-43 — “合规控制”）和 `src/lib/compliance/providerAudit.ts` 中。审计写入操作永远不会抛出异常：发生任何故障时，调用都会被静默忽略，确保审计日志不会中断主请求流程。
+实现位于`src/lib/compliance/index.ts` （T-43 — “合规控制”）和`src/lib/compliance/providerAudit.ts`中。审计写入永远不会抛出异常：任何失败都会默默地吞掉调用，因此审计日志记录不会中断主请求流。
 
 ## 记录的内容
 
@@ -116,25 +115,33 @@ CREATE TABLE IF NOT EXISTS audit_log (
 
 默认值在 `src/lib/logEnv.ts` 中定义（`DEFAULT_APP_LOG_RETENTION_DAYS = 7`、`DEFAULT_CALL_LOG_RETENTION_DAYS = 7`）。
 
-## `noLog` 选择退出（按 API 密钥）
+## `noLog`选择退出（每个API密钥）
 
-可以为 API 密钥设置标志，使其下游调用流量不被记录。该标志存储在 `api_keys` 表中（`no_log INTEGER DEFAULT 0`），并同步到内存集合中，以供热路径快速查询。
+API密钥可以被标记，这样它们的下游调用流量就不会被记录。该标志位于`api_keys`表 (`no_log INTEGER DEFAULT 0`) 上，并被镜像到内存集中以进行热路径查找。
 
 ```bash
-# 创建不记录日志的密钥（需要管理身份验证）
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-辅助函数（`src/lib/compliance/index.ts`）：
+帮助者（`src/lib/compliance/index.ts`）：
 
-- `setNoLog(apiKeyId, true|false)` — 切换内存中的条目
-- `isNoLog(apiKeyId)` — 在请求路径上检查；若无结果，则回退到对 `api_keys.no_log` 的缓存读取，缓存时间为 30 秒
-- `NO_LOG_API_KEY_IDS`（环境变量，以逗号分隔）— 启动时预加载到内存集合中；当无法直接切换该列时非常有用
+- `setNoLog(apiKeyId, true|false)` —切换内存条目
+- `isNoLog(apiKeyId)` —检查请求路径；回退到`api_keys.no_log`的 30 秒缓存读取
+- `NO_LOG_API_KEY_IDS` （env，逗号分隔） —在启动时预加载到内存集中；当您无法直接切换列时很有用
 
-管理类审计事件（登录、提供者变更、MCP 工具调用等）**不受** `noLog` 影响——只有每个请求的流量日志会被选择退出。
+管理审计事件（登录、提供者更改、 MCP工具调用等）**不是**受`noLog` —影响，仅选择退出每个请求的流量日志记录。
+
+### 按请求选择退出 (`x-omniroute-no-log`)
+
+客户端可以从有效负载持久性中选择单个推理请求，而无需创建专用密钥。根据请求发送`x-omniroute-no-log: true` （也接受`1`和`yes` ，不区分大小写）。它适用于通过聊天处理程序运行的每个聊天系列路由：聊天完成、响应、消息、完成和 Gemini 兼容路径。调用日志行仍包含其时间戳、模型、提供程序、状态、持续时间和令牌计数，但省略了`request_body`、 `response_body`、请求摘要和管道工件。
+
+标头是带有密钥标志的ORed ：无论标头如何，无日志密钥都保持无日志，并且标头无法重新启用无日志密钥的日志记录。在将请求转发到上游之前，标头将被剥离。
+
+这个标头的作用是**不是**禁用内存提取或语义缓存。当请求也不能在这些子系统中保留内容时，将`x-omniroute-no-memory: true`和`x-omniroute-no-cache: true`与它一起发送。
 
 ## REST API
 

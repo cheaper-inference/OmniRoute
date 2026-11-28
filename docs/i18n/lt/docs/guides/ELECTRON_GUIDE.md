@@ -4,7 +4,7 @@
 
 ---
 
-> **Tiesos šaltinis:** `electron/` darbo vieta** Paskutinį kartą atnaujinta:** 2026-06-28 — v3.8.40
+> **Tiesos šaltinis:** `electron/` darbo vieta
 
 OmniRoute pristato kelių platformų darbalaukio programą (Windows / macOS / Linux), sukurtą**Electron 41** +** elektronų statytojas 26.10** . Staliniams kompiuteriams skirta programa sukuria atskirą Next.js serverį kaip antrinį procesą, nukreipia į jį `BrowserWindow` ir prideda sistemos dėklą, automatinį naujinimo priemonę, IPC tiltą ir nulinės konfigūracijos slaptą įkrovos juostą.
 
@@ -198,7 +198,7 @@ Nustatyti per `session.defaultSession.webRequest.onHeadersReceived`. Svarbios in
 
 ## Automatinis atnaujinimas
 
-Naudoja `electron-updater` su GitHub teikėju (`diegosouzapw/OmniRoute`).
+Naudoja `electron-updater` su GitHub teikėju (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Įvykiai, persiųsti atvaizduotojui per `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (su `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefaktai patenka į `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Leidimai skelbiami GitHub Releases (`diegosouzapw/OmniRoute`), kur `electron-updater` taip pat tikrina, ar nėra naujų versijų.
+Leidimai skelbiami GitHub Releases (`cheaper-inference/OmniRoute`), kur `electron-updater` taip pat tikrina, ar nėra naujų versijų.
 
 ## Trikčių šalinimas
 

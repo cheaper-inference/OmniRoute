@@ -4,30 +4,13 @@
 
 ---
 
-> **Tushen gaskiya:** `src/lib/memory/` da `src/app/api/memory/`
-> **Sabuntawa ta ƙarshe:** 2026-06-28 — v3.8.40 (a kashe ta tsohuwa + cike gibin quantization na int8)
+> **Tushen gaskiya:** `src/lib/memory/` a `src/app/api/memory/`
 
-OmniRoute yana samar da ma’adanar tattaunawa mai ɗorewa wadda aka ware bisa API key (da
-session id idan ana so). Ana cire abubuwan tunawa kai tsaye daga amsoshin LLM
-ta hanyar daidaita tsarin regex mai sauƙi, sannan a sake saka su cikin buƙatu
-na gaba a matsayin saƙon system na farko (ko saƙon user na farko ga masu samarwa waɗanda
-ba sa karɓar rawar system).
+OmniRoute tana ba da ma'aunin ƙwaƙwalwar ajiya na tattaunawa da maɓallin API (da kuma id ɗin zama na zaɓi). Ana fitar da abubuwan tunawa ta atomatik daga martanin LLM ta hanyar daidaita ƙirar regex mai sauƙi kuma a mayar da su cikin buƙatun da ke gaba a matsayin babban saƙon tsarin (ko saƙon mai amfani na farko don masu samarwa waɗanda suka ƙi aikin tsarin).
 
-> **Memory tana KASHE ta tsohuwa (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> yanzu `false` ce (`src/lib/memory/settings.ts`). Kunna memory yana saka har zuwa
-> `maxTokens` (~2k) na mahallin da aka dawo da shi cikin **kowace** buƙatar chat, wanda
-> ake cajinsa — kuɗin da ba a zata ba ga sabbin shigarwa da abokan ciniki waɗanda ke sarrafa
-> nasu mahallin. Yi zaɓin shiga a sarari ƙarƙashin **Settings → Memory** (`MemorySkillsTab`
-> yana nuna gargaɗin kuɗin token lokacin da aka kunna memory).
-> Abokin ciniki zai iya cire buƙata guda daga memory ta amfani da header ɗin buƙata
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — duba teburin header na buƙata a
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Buƙatar no-memory tana saita
-> `memoryOwnerId = null`, wanda ke kashe **duka biyun** saka memory da skill ga
-> wannan buƙatar (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Ƙwaƙwalwar ajiya OFF ce ta tsohuwa (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` yanzu `false` (`src/lib/memory/settings.ts`). Ƙaddamar da ƙwaƙwalwar ajiya yana allura har zuwa `maxTokens` (~ 2k) na mahallin da aka dawo dashi cikin** kowane** buƙatar taɗi, wanda aka biya — farashi mai ban mamaki don sababbin shigarwa da kuma abokan ciniki waɗanda ke sarrafa nasu mahallin. Ficewa a bayyane a ƙarƙashin** Saituna → Ƙwaƙwalwar ajiya** ( `MemorySkillsTab` yana nuna kiran gargadin farashi lokacin da aka kunna ƙwaƙwalwar ajiya). Abokin ciniki zai iya fitar da buƙatu guda ɗaya tare da taken buƙatun `x-omniroute-no-memory` (`true`/`1`/`yes`) — duba teburin buƙatun a cikin [API_REFERENCE.md](../reference/API_REFERENCE.md). Buƙatun rashin ƙwaƙwalwar ajiya yana saita `memoryOwnerId = null`, wanda ke kashewa** duka biyu** ƙwaƙwalwar ajiya da allurar fasaha don wannan buƙatar (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-An **keɓance memory ga kowane API key**, ba ga kowane mai amfani ba — duk buƙatar da aka tantance
-da API key iri ɗaya tana amfani da tafkin memory iri ɗaya, tare da ƙarin
-keɓancewa ta `sessionId` idan ana so.
+Ƙwaƙwalwar ajiya shine** iyaka da maɓallin API** , ba kowane mai amfani da — ba kowane buƙatun da aka inganta tare da maɓallin API iri ɗaya yana raba wurin ajiya iri ɗaya, tare da ƙarin zaɓi ta hanyar `sessionId`.
 
 ## Tsarin gine-gine
 
@@ -337,27 +320,17 @@ Dabarar dawo da bayanai ta `MemoryConfig` tana ɗaya daga cikin `exact`, `semant
 kuma iyakarta tana ɗaya daga cikin `session`, `apiKey`, ko `global`. Tsohuwar iyakar da ake samu daga
 `getMemorySettings()` ita ce `apiKey`.
 
-## Cire Bayanai (`extraction.ts`)
+## Cire Gaskiya (`extraction.ts`)
 
-Ana yin cire bayanai ne bisa **regex**, ba bisa LLM ba — yana gudana a cikin tsari ta amfani da
-`setImmediate()` don haka ba ya taɓa tare rafin amsa:
+Hakar shine** tushen regex** , ba — na tushen LLM ba yana gudanar da tsari tare da `setImmediate()` don haka ba zai taɓa toshe rafin amsawa ba:
 
-- **Tsarin zaɓi** → `MemoryType.FACTUAL`
-  (misali `Na fi son …`, `Ina matuƙar son …`, `wanda na fi so shi ne …`, `Na ƙi …`)
-- **Tsarin shawara** → `MemoryType.EPISODIC`
-  (misali `Zan yi amfani da …`, `Na zaɓi …`, `Na ɗauki …`, `Zan fara amfani da …`)
-- **Tsarin ɗabi’a** → `MemoryType.FACTUAL`
-  (misali `Yawanci ina …`, `Kullum ina …`, `Na saba …`)
+- **Tsarin zaɓi** → `MemoryType.FACTUAL` (misali `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Tsarin yanke shawara** → `MemoryType.EPISODIC` (misali `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Tsarin tsari** → `MemoryType.FACTUAL` (misali `I usually …`, `I always …`, `I tend to …`)
 
-Ana tsabtace kowace daidaituwa (`trim`, haɗa sararin-fari, iyakancewa zuwa haruffa 500),
-ana cire maimaituwa a cikin rukuni ta amfani da tabbataccen `factKey(category, content)`, sannan
-a adana ta ta hanyar `createMemory()` tare da metadata
-`{category, extractedAt, source: "llm_response"}`. Ana iyakance rubutun shigarwa zuwa
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — idan ya fi haka tsawo, ana amfani da **ƙarshen** rubutun
-domin tabbatar da cewa sabon abun cikin mataimaki koyaushe yana shiga.
+Kowane wasa ana tsabtace shi (`trim`, farar sararin samaniya-rushewa, an rufe shi a chars 500), an cire shi a cikin tsari ta hanyar `factKey(category, content)` tsayayye, kuma ana adana shi ta `createMemory()` tare da `{category, extractedAt, source: "llm_response"}` metadata. Rubutun shigarwa an sanya shi a 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — lokacin da ya fi tsayi, da** wutsiya** ana amfani da rubutun don haka mafi kyawun abun ciki na mataimaka koyaushe yana shiga.
 
-Ana fitar da `extractFactsFromText(text)` don gwaje-gwaje, kuma yana mayar da bayanan da aka tsara
-ba tare da adana su ba.
+Ana fitar da `extractFactsFromText(text)` zuwa kasashen waje don gwaje-gwaje kuma yana mayar da bayanan da aka tsara ba tare da adana su ba.
 
 ## Dawo da Bayanai (`retrieval.ts`)
 
@@ -714,22 +687,22 @@ Gwajin ƙima a kan sabar x86 mai cibiya 4 ta yau da kullum (rubutu masu kusan to
 
 ---
 
-## Tsarukan Ciro Bayanai (v3.8.16+)
+## Samfuran Haɗin Gaskiya (v3.8.16 +)
 
-Modulin `extraction.ts` (`src/lib/memory/extraction.ts`) yana amfani da **daidaita tsarin regex** don ciro bayanai masu tsari daga saƙonnin tattaunawa. Fahimtar waɗannan tsarukan yana taimaka maka daidaita ingancin ciro bayanai bisa ga yanayin amfaninka.
+Tsarin `extraction.ts` (`src/lib/memory/extraction.ts`) yana amfani da shi** regex tsarin daidaitawa** don fitar da ingantaccen bayanai daga saƙonnin tattaunawa. Fahimtar waɗannan alamu yana taimaka muku daidaita ingancin hakar don yanayin amfanin ku.
 
-### Rukunonin Tsari na Asali
+### Rukunin Tsarin Tsari
 
-| Rukuni              | Misalin tsari                                                        | Abin da ake kamawa                 |
-| ------------------- | -------------------------------------------------------------------- | ---------------------------------- |
-| PREFERENCE_PATTERNS | `"Na fi son <X>"`, `"Ina son <X>"`, `"Na ƙi <X>"`                    | Abubuwan da mai amfani ya fi so    |
-| DECISION_PATTERNS   | `"Zan yi amfani da <X>"`, `"Na yanke shawarar <X>"`, `"Na zaɓi <X>"` | Shawarwarin mai amfani (na aukuwa) |
-| PATTERN_PATTERNS    | `"Yawanci ina <X>"`, `"Kullum ina <X>"`, `"Ban taɓa <X> ba"`         | Tsarukan ɗabi'a masu ɗorewa        |
+| Kashi               | Misalin tsari                                               | Ɗauka                                  |
+| ------------------- | ----------------------------------------------------------- | -------------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Zaɓuɓɓukan mai amfani                  |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Hukunce-hukuncen mai amfani (episodic) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Tsarin ɗabi'a na dindindin             |
 
-### Misalan Tsaruka (An Sauƙaƙa)
+### Misalai Tsari (Sauƙaƙe)
 
 ```ts
-// Daga src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -742,36 +715,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Abin da Ake Ciro
+### Abin da ake Cire
 
 Lokacin da mai amfani ya ce:
 
-> "Na fi son TypeScript. Zan yi amfani da Postgres don wannan aikin. Kullum ina yin commit kafin pushing. Ba na son Python."
-> Ciro bayanan yana samar da ƙwaƙwalwa guda 4:
+> "Na fi son TypeScript. Zan yi amfani da Postgres don wannan aikin. Kullum ina yin kafin turawa. Ba na son Python." Ciro yana haifar da abubuwan tunawa guda 4:
 >
-> | Maɓalli                              | Rukuni  | Nau'i      | Abun ciki                   |
-> | ------------------------------------ | ------- | ---------- | --------------------------- |
-> | `preference:typescript`              | fifiko  | na gaskiya | "TypeScript"                |
-> | `decision:postgres_for_this_project` | shawara | na aukuwa  | "Postgres don wannan aikin" |
-> | `pattern:commit_before_pushing`      | tsari   | na gaskiya | "yin commit kafin pushing"  |
-> | `preference:python`                  | fifiko  | na gaskiya | "Python"                    |
+> | Maɓalli | Category | Nau'in | Abun ciki | | -------------------------------------- | ---------- | ----------- | ---------------------- | | `preference:typescript` | fifiko | gaskiya | "TypeScript" | | `decision:postgres_for_this_project` | yanke shawara | episodic | Postgres | | tsari `pattern:commit_before_pushing` | | | aiki kafin turawa" | | `preference:python` | fifiko | gaskiya | "Python" |
 
-### Iyakokin Ciro Bayanai
+### Iyakacin cirewa
 
-Don hana ciro bayanai fiye da kima, ana amfani da waɗannan iyakoki:
+Don hana hakar gudu, ana amfani da iyakoki masu zuwa:
 
-| Mafi ƙarancin tsawon abun ciki | haruffa 3 |
-| Mafi girman tsawon abun ciki | haruffa 500 |
+| Min tsayin abun ciki | 3 cawa |
+| Matsakaicin tsayin abun ciki | 500 kaji |
 
-### Lokacin da Ya Kamata a Kashe Ciro Bayanai
+### Lokacin da za a Kashe Fitar
 
-Ciro bayanai yana gudana ta atomatik duk lokacin da aka kunna ƙwaƙwalwa; babu wani maɓalli na musamman
-don ciro bayanai kaɗai. Don kashe shi, kashe ƙwaƙwalwa gaba ɗaya (`enabled: false`
-ta hanyar `PUT /api/settings/memory`). Yi la'akari da yin hakan idan:
+Ana cirewa yana gudana ta atomatik a duk lokacin da aka kunna ƙwaƙwalwar ajiya; babu keɓancewar hakar-kawai juyawa. Don kashe shi, kashe ƙwaƙwalwar ajiya gaba ɗaya (`enabled: false` via `PUT /api/settings/memory`). Yi la'akari da yin haka lokacin:
 
-- Kana da saƙonni masu yawa kuma kuɗin ciro bayanan ba ƙarami ba ne
-- Yawancin tattaunawarka na ɗan lokaci ne kawai (hira, gyaran kurakurai) ba tare da wata ƙima ta dogon lokaci ba
-- Tuni kana tattara mahallin bayanai ta hanyar plugins na musamman
+- Kuna da ƙarar saƙo mai girma kuma farashin hakar ba shi da mahimmanci
+- Tattaunawar ku galibi masu wucewa ne (tattaunawa, gyara kurakurai) ba tare da ƙimar dogon lokaci ba
+- Kun riga kun ɗauki mahallin ta hanyar plugins na al'ada
 
 ---
 

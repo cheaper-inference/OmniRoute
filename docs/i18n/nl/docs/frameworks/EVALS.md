@@ -174,17 +174,13 @@ Cases worden **sequentieel** uitgevoerd. Er is momenteel geen concurrency-flag.
 
 ## Dashboard
 
-De UI bevindt zich onder `Dashboard → Gebruik → Evals`
-(`src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx`). Van daaruit kun
-je:
+De UI woont in `Dashboard → Usage → Evals` (`src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx`). Van daaruit kunt u:
 
-- Ingebouwde en aangepaste suites bekijken met een preview per case.
-- Aangepaste suites maken/bewerken/verwijderen met de casebuilder.
-- Een target kiezen (standaardwaarden van de suite / model / combo), optioneel een tweede
-  `compareTarget`, optioneel een API-sleutel, en vervolgens op aanvraag uitvoeren.
-- De uitvoeringsgeschiedenis, geslaagd/mislukt per case, latentie en vastgelegde uitvoer bekijken.
-- De voortschrijdende scorekaart bekijken, geaggregeerd over de meest recente uitvoering per
-  `(suite, target)`-scope.
+- Blader door ingebouwde en aangepaste suites met een voorbeeld per geval.
+- Create/edit/delete maatwerksuites met de casebuilder.
+- Kies een doel (standaardinstellingen / model / combo), eventueel een tweede `compareTarget`, eventueel een API sleutel, en voer het vervolgens op aanvraag uit.
+- Inspecteer de uitvoeringsgeschiedenis, pass/fail per geval, latentie en vastgelegde uitvoer.
+- Bekijk de voortschrijdende scorekaart voor de laatste run per `(suite, target)` scope.
 
 ## Relatie met de Auto-Assessment-RFC
 

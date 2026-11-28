@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Majburiy parametrlar
+## 5. Kerakli parametrlar
 
-Ushbu loyiha Fly.io’da kamida quyidagi parametrlarni sozlashni tavsiya qiladi.
+Ushbu loyiha Fly.io-da kamida quyidagi parametrlarni sozlashni tavsiya qiladi.
 
-### 5.1 Tekshirilgan parametrlar
+### 5.1 Tasdiqlangan parametrlar
 
-Ushbu parametrlar joriy `omniroute` ilovasining amaldagi joylashtirishlarida ishlatilgan:
+Ushbu parametrlar joriy `omniroute` ilovasida amalda qo'llashda ishlatilgan:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (ishlab chiqarish muhitida majburiy — WebSocket ko‘prigini autentifikatsiya qilish uchun ishlatiladi)
+- `OMNIROUTE_WS_BRIDGE_SECRET` ( WebSocket bridge autentifikatsiyasi uchun ishlatiladigan — ishlab chiqarishda talab qilinadi)
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 `INITIAL_PASSWORD` haqida
 
-Joriy loyihada `INITIAL_PASSWORD` sozlanmagan, chunki ushbu joylashtirish uchun u talab qilinmaydi.
+Joriy loyiha `INITIAL_PASSWORD` o'rnatmaydi, chunki bu joylashtirish buni talab qilmaydi.
 
-Agar u sozlanmasa:
+Agar u o'rnatilmagan bo'lsa:
 
-- Ishga tushirish jurnalida standart parol `CHANGEME` ekanligi ko‘rsatiladi
-- Joylashtirishdan so‘ng imkon qadar tezroq tizim sozlamalarida kirish parolini o‘zgartirishingiz kerak
+- Birinchi tashrifda siz boshqaruv paneli parolini ishga tushirish ustasida yaratasiz. Parolni bajarish bosqichini bajaring: uni o'tkazib yuborsangiz, asboblar paneliga kirish o'chiriladi, bu esa asboblar panelini URL ilovasiga kira oladigan har bir kishi uchun ochiq qoldiradi.
+- Fly proksi-serveri ilovaga orqaga qaytarilmaydigan manzildan yetib boradi, shuning uchun parolni yuborganingizdan so'ng, sehrgar bir martalik yuklash tokenini so'raydi, ilova o'sha paytda o'z jurnalida chop etadi: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Agar bu qator jurnaldan aylanib chiqsa, ilovani qayta ishga tushiring va yangi tokenni chop etish uchun sehrgarni qayta yuboring.
 
-Agar backend parolini foydalanuvchi aralashuvisiz dastlabki sozlashni xohlasangiz, uni keyinroq qo‘shishingiz mumkin:
+Parolni nazoratsiz o'rnatish uchun uni asboblar paneliga birinchi tashrifdan oldin qo'shing (parol saqlanganidan keyin `INITIAL_PASSWORD` e'tiborga olinmaydi):
 
 - `INITIAL_PASSWORD`
 
@@ -274,60 +274,60 @@ Agar konsoldagi `Secrets` sahifasida kutilgan oʻzgaruvchilar koʻrinmasa, quyid
 
 ---
 
-## 9. Keyingi yangilanishlar va relizlar
+## 9. Keyingi yangilanishlar va nashrlar
 
-Kod yangilangandan keyin reliz jarayoni oddiy:
+Kod yangilangandan so'ng, chiqarish jarayoni oddiy:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Agar kodni oʻzgartirmasdan faqat parametrlarni yangilash kerak boʻlsa:
+Agar kodni o'zgartirmasdan faqat parametrlarni yangilashingiz kerak bo'lsa:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly mashinalarni avtomatik ravishda bosqichma-bosqich yangilaydi.
+Fly avtomatik ravishda mashinalarning yangilanishini amalga oshiradi.
 
-### 9.1 Forkingizdagi `fly.toml` faylini saqlagan holda yuqori oqim repozitoriysi yangilanishlarini kuzatish
+### 9.1 Fork `fly.toml` ni saqlab qolgan holda yuqori oqim ombori yangilanishlarini kuzatish
 
-Agar joriy repozitoriy fork boʻlsa va `https://github.com/diegosouzapw/OmniRoute` yuqori oqim repozitoriysidagi yangilanishlarni sinxronlashtirmoqchi boʻlsangiz, quyidagi ish jarayoniga amal qiling.
+Agar joriy ombor vilka bo'lsa va siz yuqoridagi `https://github.com/cheaper-inference/OmniRoute` dan yangilanishlarni sinxronlashni xohlasangiz, quyidagi ish jarayoniga rioya qiling.
 
-Avval masofaviy repozitoriylaringizni tekshiring:
+Birinchidan, masofadan boshqarish pultlarini tekshiring:
 
 ```powershell
 git remote -v
 ```
 
-Kamida quyidagilar koʻrinishi kerak:
+Hech bo'lmaganda ko'rishingiz kerak:
 
-- `origin` oʻzingizning forkingizga ishora qilishi
-- `upstream` asl repozitoriyga ishora qilishi
+- `origin` o'z vilkangizga ishora qiladi
+- `upstream` asl omborga ishora qiladi
 
-Agar `upstream` sozlanmagan boʻlsa, uni qoʻshing:
+Agar `upstream` sozlanmagan bo'lsa, uni qo'shing:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Yuqori oqim bilan sinxronlashtirishdan oldin, eng soʻnggi commitlar va teglarni oling:
+Yuqori oqim bilan sinxronlashdan oldin eng so'nggi majburiyatlar va teglarni oling:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Joriy versiya va yuqori oqim teglarini tekshiring:
+Joriy versiya va yuqoridagi teglarni tekshiring:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Eslatma: Loyihaning joriy versiyasi `v3.8.0`. Quyidagi `v3.4.7` havolalari faqat tarixiy misollar sifatida saqlangan. Amaldagi relizlar uchun `:latest` yoki joriy versiya tegidan (masalan, `:v3.8.0`) foydalaning.
+> Eslatma: Loyihaning joriy versiyasi `v3.8.0`. Quyidagi `v3.4.7` havolalari faqat tarixiy misollar sifatida saqlanadi. Haqiqiy versiyalar uchun `:latest` yoki joriy versiya tegidan foydalaning (masalan, `:v3.8.0`).
 
-Agar forkingizdagi `fly.toml` faylini majburan saqlagan holda yuqori oqimdagi eng soʻnggi `main` tarmogʻini birlashtirmoqchi boʻlsangiz, quyidagi ish jarayoniga amal qiling:
+Agar siz vilkangizning `fly.toml` majburan ushlab turgan holda so'nggi yuqori oqim `main` birlashtirmoqchi bo'lsangiz, quyidagi ish jarayoniga amal qiling:
 
 ```powershell
 git merge upstream/main
@@ -339,32 +339,32 @@ git push origin main
 
 Eslatmalar:
 
-- `git merge upstream/main` asl repozitoriydagi eng soʻnggi kodni sinxronlashtiradi
-- `git checkout HEAD~1 -- fly.toml` forkingizning birlashtirishdan oldingi `fly.toml` faylini tiklaydi
-- Agar yuqori oqimda `fly.toml` oʻzgartirilmagan boʻlsa, bu qadam hech qanday farq kiritmaydi
-- Agar yuqori oqimda `fly.toml` oʻzgartirilgan boʻlsa, bu qadam Fly ilovangiz nomi, jild ulanishi, hududi va boshqa forkka xos joylashtirish sozlamalari ustiga yozilmasligini taʼminlaydi
+- `git merge upstream/main` asl ombordan so'nggi kodni sinxronlashtiradi
+- `git checkout HEAD~1 -- fly.toml` birlashishdan oldin vilkangizning o'z `fly.toml` tiklaydi
+- Agar yuqori oqim `fly.toml` o'zgartirmagan bo'lsa, bu qadam hech qanday farq keltirmaydi
+- Agar yuqori oqim `fly.toml` o'zgartirgan bo'lsa, bu qadam Fly ilovangiz nomi, ovoz balandligi, mintaqa va boshqa vilkalar uchun maxsus joylashtirish konfiguratsiyasi qayta yozilmasligini ta'minlaydi.
 
-Agar muayyan reliz tegiga (masalan, `v3.4.7`) moslashmoqchi boʻlsangiz, avval teg `upstream/main` tarkibiga allaqachon kiritilganini tekshiring:
+Agar siz ma'lum bir reliz yorlig'i bilan (masalan, `v3.4.7`) moslashtirmoqchi bo'lsangiz, avval bu teg allaqachon `upstream/main` ga kiritilganligini tekshiring:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Buyruq muvaffaqiyatli bajarilsa, `upstream/main` ushbu versiyani allaqachon oʻz ichiga olganini anglatadi; shunchaki `upstream/main` tarmogʻini birlashtirishingiz mumkin.
+Muvaffaqiyatli qaytish `upstream/main` allaqachon ushbu versiyani o'z ichiga olganligini anglatadi; `upstream/main` oddiygina birlashtira olasiz.
 
-### 9.2 Yuqori oqim bilan sinxronlashtirilgandan keyingi standart reliz ketma-ketligi
+### 9.2 Yuqori oqimni sinxronlashdan keyin standart chiqarish ketma-ketligi
 
-Asl repozitoriy bilan sinxronlashtirilgandan keyin quyidagi tavsiya etilgan reliz tartibiga amal qiling:
+Asl ombor bilan sinxronlangandan so'ng, tavsiya etilgan nashr tartibiga rioya qiling:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Forkning `fly.toml` faylini tiklang
+3. Vilkaning `fly.toml` tiklang
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Bu joriy loyihani `v3.4.7` versiyasiga yangilashda amalda qoʻllangan ish jarayonidir (misol tarixiy versiyaga tegishli; joriy amaldagi versiya — `v3.8.0`).
+Bu joriy loyihani `v3.4.7` ga yangilashda foydalaniladigan haqiqiy ish jarayonidir (misol tarixiy versiyaga ishora qiladi; joriy haqiqiy versiya `v3.8.0`).
 
 ---
 
@@ -418,40 +418,40 @@ Agar uning oʻrniga `/app/data/...` koʻrsatilsa, `DATA_DIR` notoʻgʻri sozlang
 
 ---
 
-## 12. Keng tarqalgan muammolar
+## 12. Umumiy masalalar
 
-### 12.1 `Secrets` sahifasi boʻsh
+### 12.1 `Secrets` Sahifa boʻsh
 
-Buning odatda ikkita sababi bor:
+Odatda ikkita sabab bor:
 
-- Siz hali `flyctl secrets set` buyrugʻini bajarmagansiz
-- Siz boshqa ilovani koʻryapsiz (masalan, `omniroute` oʻrniga `oroute`)
+- Siz hali `flyctl secrets set` ishga tushirmadingiz
+- Siz boshqa ilovani ko‘ryapsiz (masalan, `omniroute` o‘rniga `oroute` )
 
-### 12.2 `flyctl deploy` buyrugʻi `app not found` xabarini beradi
+### 12.2 `flyctl deploy` Hisobotlar `app not found`
 
-Avval ilovani yarating:
+Avval dasturni yarating:
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-### 12.3 `fly.toml` faylini tahlil qilish muvaffaqiyatsiz tugaydi
+### 12.3 `fly.toml` tahlil qilish muvaffaqiyatsiz tugadi
 
 Quyidagilarni tekshiring:
 
-- Izohlarda buzilgan belgilar mavjud yoki mavjud emasligini
-- TOML qoʻshtirnoqlari va chekinishlari toʻgʻri yoki notoʻgʻriligini
+- Izohlarda buzilgan belgilar bormi
+- TOML iqtibos va chekinish to'g'ri yoki yo'q
 
-### 12.4 Maʼlumotlar doimiy saqlanmayapti
+### 12.4 Ma'lumotlar saqlanib qolmaydi
 
-Quyidagilarning ikkalasini ham tekshiring:
+Quyidagi ikkalasini ham tasdiqlang:
 
-- `fly.toml` faylida `destination = '/data'` mavjud
-- `DATA_DIR` qiymati `/data` etib belgilangan
+- `fly.toml` tarkibida `destination = '/data'` mavjud
+- `DATA_DIR` `/data` ga o'rnatiladi
 
-### 12.5 `INITIAL_PASSWORD`siz ishlay oladimi?
+### 12.5 U `INITIAL_PASSWORD` ishlay oladimi?
 
-Ha, ishlay oladi. Bunday holatda standart `CHANGEME` parolidan foydalaniladi. Ishlab chiqarish muhitida backend parolini imkon qadar tezroq oʻzgartirish tavsiya etiladi.
+Ha. `INITIAL_PASSWORD` o'rnatilmaganda, siz birinchi tashrif buyurganingizda boshqaruv paneli parolini yaratasiz (5.2-bo'lim bir martalik yuklash tokenini va parol bosqichini o'z ichiga oladi).
 
 ---
 

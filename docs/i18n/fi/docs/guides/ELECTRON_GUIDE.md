@@ -4,9 +4,9 @@
 
 ---
 
-> **Totuuden lähde:** `electron/` työtila** Viimeksi päivitetty:** 28.6.2026 — v3.8.40
+> **Totuuden lähde:** `electron/` työtila
 
-OmniRoute toimittaa monikäyttöisen työpöytäsovelluksen (Windows / macOS / Linux), joka on rakennettu**Electron 41** +** elektronien rakentaja 26.10** . Työpöytäsovellus luo itsenäisen Next.js palvelimen aliprosessina, osoittaa siihen `BrowserWindow` n ja lisää järjestelmälokeron, automaattisen päivityksen, IPC sillan ja nollakonfig-salaisen käynnistysohjelman.
+OmniRoute toimittaa monikäyttöisen työpöytäsovelluksen (Windows / macOS / Linux), joka on rakennettu**Electron 41** +** elektronien rakentaja 26.10** . Työpöytäsovellus luo erillisen Next.js palvelimen lapsiprosessina, osoittaa siihen `BrowserWindow` merkin ja lisää järjestelmälokeron, automaattisen päivityksen, IPC sillan ja nollakonfig-salaisen käynnistysohjelman.
 
 ## Arkkitehtuuri
 
@@ -198,7 +198,7 @@ Aseta `session.defaultSession.webRequest.onHeadersReceived` kautta. Huomattavia 
 
 ## Automaattinen päivitys
 
-Käyttää `electron-updater` GitHub -palveluntarjoajan (`diegosouzapw/OmniRoute`) kanssa.
+Käyttää `electron-updater` GitHub -palveluntarjoajan (`cheaper-inference/OmniRoute`) kanssa.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Tapahtumat, jotka on välitetty renderöijälle `update-status` IPC kautta: `checking`, `available`, `not-available`, `downloading` (ja `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefaktit laskeutuvat `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Julkaisut julkaistaan GitHub Releases (`diegosouzapw/OmniRoute`) -sivustolle, josta `electron-updater` myös tarkistaa uudet versiot.
+Julkaisut julkaistaan GitHub Releases (`cheaper-inference/OmniRoute`) -sivustolle, josta `electron-updater` tarkistaa myös uudet versiot.
 
 ## Vianetsintä
 

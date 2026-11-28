@@ -166,11 +166,11 @@ Fun iwe-ẹri ti o lẹẹmọ, Asopọ Idanwo ṣayẹwo apẹrẹ iwe-ẹri at
 
 Rii daju pe `copilot-m365-web` ti ṣiṣẹ ni** Dasibodu → Awọn olupese** . Olupese naa le farapamọ nipasẹ aiyipada ni diẹ ninu awọn ipele.
 
-## Àwọn ìtọ́kasí
+## Awọn itọkasi
 
-- Ọ̀ràn: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Ìjíròrò: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Orísun: `src/shared/constants/providers/web-cookie.ts` (ìtumọ̀ olùpèsè)
-- Àgbéwọlé HAR: `src/shared/utils/m365HarImport.ts`
-- Àwọn pápá ẹ̀rí ìwọlé: `src/shared/providers/webSessionCredentials.ts`
-- Modal ipele: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Oro: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Ifọrọwọrọ: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Orisun: `src/shared/constants/providers/web-cookie.ts` (itumọ ti olupese)
+- HAR agbewọle: `src/shared/utils/m365HarImport.ts`
+- Awọn aaye iwe-ẹri: `src/shared/providers/webSessionCredentials.ts`
+- Ilana ipele: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

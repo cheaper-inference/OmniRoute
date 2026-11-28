@@ -4,18 +4,11 @@
 
 ---
 
-> **Verzió:** v3.8.51
-> **Utolsó frissítés:** 2026-06-28
-> **Célközönség:** Az OmniRoute fejlesztésében közreműködő vagy arra épülő integrációkat készítő mérnökök.
+> **Változat:** v3.8.51** Közönség:** Mérnökök, akik hozzájárulnak OmniRoute hoz, vagy ezen felül az integrációkat építik ki.
 >
-> A magas szintű architekturális diagramokért és az egyes alrendszerek mögötti tervezési megfontolásokért olvassa el az
-> [ARCHITECTURE.md](./ARCHITECTURE.md) fájlt. Az egyes alrendszerek részletes ismertetését
-> (Auto Combo, MCP-kiszolgáló, A2A-kiszolgáló, Skills, Memory, Cloud Agents, Resilience,
-> Compression stb.) a `docs/` könyvtárban található, nekik szentelt fájlokban találja.
+> A magas szintű architektúra diagramokért és az egyes alrendszerek mögötti indoklásért olvassa el [ARCHITECTURE.md](./ARCHITECTURE.md). Az egyes alrendszerek (Auto Combo, MCP szerver, A2A szerver, Skills, Memory, Cloud Agents, Resilience, Compression stb.) mélyrepüléseihez tekintse meg a dedikált fájlokat ebben `docs/` könyvtárban.
 
-Ez a fájl azt ismerteti, **mi található jelenleg az adattárban**, hogy egy új mérnök
-eligazodhasson a könyvtárstruktúrában, megérthesse a futásidejű rétegződést, és tudja, hová kell kódot hozzáadnia
-új modulok kitalálása nélkül.
+Ez a fájl leírja** ami ma létezik az adattárban** hogy egy új mérnök navigálni tudjon a fában, megértse a futásidejű rétegezést, és tudja, hol kell kódot hozzáadni anélkül, hogy új modulokat találna ki.
 
 ---
 
@@ -566,37 +559,14 @@ Gyakori parancsok:
 
 ## 8. `scripts/`
 
-Rendeltetés szerint 6 almappába rendezve.
+Cél szerint 6 almappába rendezve.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, valamint a csak olvasható, PR-felügyeletet segítő eszközök:
-  `ci-discriminate.sh` (egy PR sikertelen ellenőrzéseinek szignatúráit saját /
-  örökölt / ismeretlen kategóriákba sorolja egy referencia-PR-hez vagy az alapon
-  fennálló hibát leíró jegyhez viszonyítva) és `audit-worktree.sh`
-  (módosított fájlok, védett felületek, eltávolított ellenőrző állítások,
-  elnyomások száma, hátramaradt ideiglenes tsconfigok, a PR fejének összevetése
-  a helyi HEAD-del — mielőtt egy közreműködő PR-jét elfogadják).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, valamint az írásvédett PR `ci-discriminate.sh` segítők a saját / öröklött / ismeretlen aláírások ellenőrzésének sikertelensége PR PR az alap-red problémával szemben) és `audit-worktree.sh` (piszkos fájlok, védett felületek, eltávolított állítások, letiltási számlálók, maradék tmp tsconfigok, PR head vs helyi HEAD — mielőtt a dolgozó PR elfogadják).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` megjelöli a kifejezetten OmniRoute (3.6.x és korábbi) tulajdonított verziókat. Az ellenőrzés figyelmen kívül hagyja a dátumokat.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

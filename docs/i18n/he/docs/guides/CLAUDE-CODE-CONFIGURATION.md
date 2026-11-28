@@ -51,7 +51,7 @@ omniroute launch --profile glm52  # Claude Code באמצעות glm/glm-5.2 דר�
 
 ## ייחוס שימוש: הפעלות ופרויקטים
 
-OmniRoute מקבץ את הבקשות של כל מפתח API לתוך** מפגשי סוכנים** ומתעד אילו** פּרוֹיֶקט** כל מפגש שעבד עליו (טבלת `agent_sessions` ), כך שניתן לדווח על שימוש ועלות לכל חבר צוות, לכל פרויקט ולכל מפגש.
+OmniRoute מקבץ את הבקשות של כל מפתח API לתוך** מפגשי סוכנים** ומתעד אשר** פּרוֹיֶקט** כל מפגש שעבד עליו (טבלת `agent_sessions` ), כך שניתן לדווח על שימוש ועלות לכל חבר צוות, לכל פרויקט ולכל מפגש.
 
 מה מוקלט ללא כל הגדרת לקוח:
 
@@ -68,14 +68,14 @@ Codex (`<environment_context><cwd>`) ו- OpenCode (`x-opencode-session`) מזו�
 
 ספריית העבודה שונה בין מחשבים, כך שאותו מאגר יכול להופיע תחת נתיבים שונים. שלח את הפרויקט במפורש במקום זאת: Claude Code מוסיף את כל הכותרות הרשומות ב- `ANTHROPIC_CUSTOM_HEADERS` לכל בקשת דגם, ו- OmniRoute קורא שתיים מהן:
 
-| כּוֹתֶרֶת                  | עֵרֶך                                                |
-| -------------------------- | ---------------------------------------------------- |
-| `x-omniroute-project`      | שם הפרויקט, למשל `omniroute`                         |
-| `x-omniroute-project-repo` | שלט מנורמל, למשל `github.com/diegosouzapw/OmniRoute` |
+| כּוֹתֶרֶת                  | עֵרֶך                                                     |
+| -------------------------- | --------------------------------------------------------- |
+| `x-omniroute-project`      | שם הפרויקט, למשל `omniroute`                              |
+| `x-omniroute-project-repo` | שלט מנורמל, למשל `github.com/cheaper-inference/OmniRoute` |
 
 שניהם נקראים רק לצורך ייחוס; הם לעולם לא מועברים לספק במעלה הזרם.
 
-`ANTHROPIC_CUSTOM_HEADERS` נקרא פעם אחת באתחול, וקבצי הגדרות מאחסנים ערכים מילוליים, אז חשב אותו כאשר Claude Code מופעל. הוסף את זה ל- `~/.zshrc` או `~/.bashrc` והמשיך להתחיל `claude` מתיקיית הפרויקט:
+`ANTHROPIC_CUSTOM_HEADERS` נקרא פעם אחת באתחול, וקובצי הגדרות מאחסנים ערכים מילוליים, אז חשב אותו כאשר Claude Code מופעל. הוסף את זה ל- `~/.zshrc` או `~/.bashrc` והמשיך להתחיל `claude` מתיקיית הפרויקט:
 
 ```bash
 claude() {
@@ -284,28 +284,20 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL="glm/glm-4.7-flash"
 
 ## פתרון בעיות
 
-**Claude Code מתעלם מהשער** — ודא כי `ANTHROPIC_BASE_URL` **אינו מכיל
-`/v1`** והפעל מחדש את `claude` (משתני הסביבה נקראים פעם אחת בעת האתחול). `omniroute launch`
-מטפל בכך עבורך.
+**Claude Code מתעלם מהשער** — אשר ל- `ANTHROPIC_BASE_URL` יש** אין `/v1`** והפעל מחדש `claude` (env נקרא פעם אחת באתחול). `omniroute launch` מטפל בזה בשבילך.
 
-**בורר `/model` ריק / מודלי השער חסרים** — נדרשים Claude Code
-v2.1.219+ ו-`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. רק מזהי מודלים מסוג `claude*` /
-`anthropic*` מופיעים בבורר; ניתן לאלץ שימוש בכל מודל אחר באמצעות
-`ANTHROPIC_MODEL=<id>` (זה מה שהפרופילים עושים).
+**בוחר `/model` ריק / חסרים דגמי שערים** — צריך Claude Code v2.1.219 + ו- `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. רק `claude*` / `anthropic*` מודל IDs מופיעים בבורר; לכפות כל דגם אחר עם `ANTHROPIC_MODEL=<id>` (זה מה שפרופילים עושים).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code תמיד שולח מזהי מודלים **ללא קידומת**
-(לדוגמה, `claude-opus-4-8`), ולכן כאשר גם ספק Claude Code (`cc/…`) וגם ספק
-Claude (`claude/…`) מחוברים, המזהה ללא קידומת תואם לשני נתיבים ו-OmniRoute
-מסרב לנחש. ניתן לפתור זאת באחת משתי דרכים: להצמיד מזהה עם קידומת באמצעות
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, או להפעיל את **העדפת Claude Code עבור
-מודלי Claude ללא קידומת** — המתג בעמוד של ספק Claude, או
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (כבוי כברירת מחדל;
-ראה [סביבה](../reference/ENVIRONMENT.md)) — וכך לנתב מזהי `claude-*` ללא קידומת
-אל Claude Code במקום זאת. קידומות ספק מפורשות תמיד גוברות.
+**`400 Ambiguous model 'claude-…'`** — Claude קוד תמיד שולח** ללא קידומת** דגם IDs (למשל `claude-opus-4-8`), כך שכאשר גם ספקי Claude Code (`cc/…`) וגם Claude (`claude/…`) מחוברים המזהה החשוף מתאים לשני מסלולים ו- OmniRoute מסרב לנחש. תקן את זה בכל מקרה: הצמד מזהה עם `ANTHROPIC_MODEL=cc/claude-opus-4-8`, או הפעל** העדיפו קוד Claude עבור דגמי Claude ללא קידומת** — את החלפת מצב בדף ספק Claude, או `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (ברירת מחדל כבויה; ראה [סביבה](../reference/ENVIRONMENT.md) ) — שמנתב `claude-*` IDs לקוד Claude במקום זאת. קידומות ספק מפורשות תמיד מנצחות.
 
-**שגיאות אימות** — הפרופיל אינו מכיל אסימון. השתמש ב-`omniroute launch --profile`
-(שמזריק אותו) או ייצא את `ANTHROPIC_AUTH_TOKEN`.
+**"מצב אוטומטי ... הפעלה זו אינה כשירה" (חיוב בקשות מסווג)** — במצב אוטומטי Claude Code מבקש מהשרת לסקור פעולות בתוך בקשות המודל שלו ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). זה צריך את ערך `anthropic-beta` `dangerous-tool-use-2026-09-03` ואת שדה הגוף `safeguards` כדי להגיע Anthropic כזוג, ו- `safeguard_results` בתוספת IDs של שימוש בכלי במעלה הזרם כדי לחזור ללא שינוי. OmniRoute עושה זאת כאשר הבקשה מנותבת לספק `claude` המקורי או לצומת `anthropic-compatible-*`, זרימה או לא (משמר רגרסיה: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). יעדים אחרים לא יכולים להחזיר את הסקירה, אז Claude Code חוזר לבקשות המסווגות שלו ומציג את ההודעה:
 
-**פרופילים אינם מבודדים** — כל פרופיל הוא `CLAUDE_CONFIG_DIR` נפרד;
-ודא כי `echo $CLAUDE_CONFIG_DIR` בתוך ההפעלה מצביע אל
-`~/.claude/profiles/<name>`.
+- דגם על ספק לא אנתרופי, או שילוב שנוחת על אחד;
+- צומת ממסר תואם Claude-Code (`anthropic-compatible-cc-*`), שבונה מחדש את גוף הבקשה ואינו נושא `safeguards`;
+- OmniRoute ישן יותר שקודם לגרסת הביטא הרשומה בהרשאה, או גרסת Claude Code מתחת לגרסה שדף Anthropic מפרט עבור הפעלות שער.
+
+הפעל את `/status` בקוד Claude : ה** שרת מצב אוטומטי** שורה קוראת `Enabled` בזמן שהסקירה של השרת פעילה. אם בקשות אלו יחויבו נקבע על ידי Anthropic, לא על ידי OmniRoute.
+
+**שגיאות אימות** — הפרופיל אינו מכיל אסימון. השתמש ב- `omniroute launch --profile` (מזריק אותו) או ייצא `ANTHROPIC_AUTH_TOKEN`.
+
+**פרופילים לא מבודדים** — כל פרופיל הוא `CLAUDE_CONFIG_DIR` מובחן; אמת `echo $CLAUDE_CONFIG_DIR` בתוך נקודות ההפעלה ב- `~/.claude/profiles/<name>`.

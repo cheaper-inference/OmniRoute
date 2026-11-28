@@ -48,15 +48,13 @@ Exemplele de reprezentare a comunității noastre includ utilizarea unei adrese 
 publicarea prin intermediul unui cont oficial de pe rețelele sociale sau participarea în calitate de
 reprezentant desemnat la un eveniment online sau offline.
 
-## Enforcement
+## Executarea
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Instanțe de comportament abuziv, hărțuitor sau inacceptabil în alt mod pot fi raportate liderilor comunității responsabili de aplicarea legii prin deschiderea unui aviz de securitate privată la
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+sau prin e-mail întreținătorul la diegosouza.pw@outlook.com. Pentru incidente sensibile la securitate, consultați [`SECURITY.md`](SECURITY.md). Toate plângerile vor fi examinate și investigate prompt și echitabil.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Toți liderii comunității sunt obligați să respecte confidențialitatea și securitatea raportorului oricărui incident.
 
 ## Ghid privind aplicarea regulilor
 

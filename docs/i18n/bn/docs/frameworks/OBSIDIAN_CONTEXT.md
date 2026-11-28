@@ -117,55 +117,48 @@ environment credential এখনও সমর্থিত। Per-key Obsidian co
 key-গুলো global fallback বজায় রাখে। চারটি `obsidian_sync_*` tool তাদের পৃথক
 sync-token আচরণ বজায় রাখে।
 
-## MCP টুলসমূহ (22)
+## MCP টুলস (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts`-এ সংজ্ঞায়িত। টোকেন/base-URL প্রতিটি কলের জন্য নির্ধারিত হয় (প্রথমে প্রতি-API-key, তারপর গ্লোবাল)। OmniRoute **sync server**-এ অনুরোধ পাঠানো টুলগুলোর (চারটি `obsidian_sync_*` টুল) জন্য অতিরিক্তভাবে OmniRoute সেটিংসে কনফিগার করা sync auth token প্রয়োজন।
+`open-sse/mcp-server/tools/obsidianTools.ts` তে সংজ্ঞায়িত। token/base-URL প্রতি কলে সমাধান করা হয় (প্রতি-API-কী প্রথমে, তারপর বিশ্বব্যাপী)। টুল যে OmniRoute আঘাত** সিঙ্ক সার্ভার** (চারটি `obsidian_sync_*` টুল) অতিরিক্তভাবে OmniRoute সেটিংসে কনফিগার করা সিঙ্ক প্রমাণীকরণ টোকেন প্রয়োজন।
 
-### রিড টুলসমূহ (`read:obsidian`)
+### পড়ার টুল (`read:obsidian`)
 
-| টুল                          | বিবরণ                                                                                               |
-| ---------------------------- | --------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Local REST API-তে পৌঁছানো যাচ্ছে এবং প্রমাণীকরণ করা হয়েছে কি না পরীক্ষা করে।                       |
-| `obsidian_search_simple`     | নোটের কনটেন্টে পূর্ণ-পাঠ অনুসন্ধান; ফাইল পাথসহ স্নিপেট প্রদান করে।                                  |
-| `obsidian_search_structured` | একটি JSON Logic expression (and/or/regex/path ফিল্টার) ব্যবহার করে অনুসন্ধান করে।                   |
-| `obsidian_read_note`         | vault-relative পাথ অনুযায়ী একটি নোট পড়ে; ঐচ্ছিকভাবে নির্দিষ্ট heading/block/frontmatter পড়ে।     |
-| `obsidian_list_vault`        | vault-এর ফাইল ও ডিরেক্টরিগুলো তালিকাভুক্ত করে (এন্ট্রির ট্রি)।                                      |
-| `obsidian_get_document_map`  | নোটের heading কাঠামোকে headings → line numbers-এর ম্যাপ হিসেবে প্রদান করে।                          |
-| `obsidian_get_note_metadata` | সম্পূর্ণ কনটেন্ট ছাড়াই frontmatter, tags, links এবং char/word count প্রদান করে।                    |
-| `obsidian_get_active_file`   | Obsidian-এ বর্তমানে সক্রিয় ফাইলের পাথ + কনটেন্ট প্রদান করে।                                        |
-| `obsidian_get_periodic_note` | একটি তারিখের দৈনিক/সাপ্তাহিক/মাসিক periodic note প্রদান করে (বাদ দিলে আজকের তারিখ)।                 |
-| `obsidian_get_tags`          | vault-এর সব tag তাদের frequency-সহ তালিকাভুক্ত করে।                                                 |
-| `obsidian_list_commands`     | উপলভ্য Obsidian command ID-গুলো তালিকাভুক্ত করে (`obsidian_execute_command`-এর সঙ্গে ব্যবহার করুন)। |
-| `obsidian_sync_status`       | OmniRoute sync server-এর অবস্থা: চালু আছে কি না, vault-এর নাম, port, uptime, সর্বশেষ sync।          |
-| `obsidian_sync_conflicts`    | অমীমাংসিত sync conflict-গুলো তালিকাভুক্ত করে (পাথ, conflict পাথ, শনাক্তকরণের সময়)।                 |
+| টুল                          | বর্ণনা                                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | স্থানীয় REST API নাগালযোগ্য এবং প্রমাণীকৃত কিনা তা পরীক্ষা করুন।                            |
+| `obsidian_search_simple`     | নোট বিষয়বস্তুর সম্পূর্ণ-পাঠ্য অনুসন্ধান; ফাইল পাথ সহ স্নিপেট প্রদান করে।                    |
+| `obsidian_search_structured` | একটি JSON লজিক এক্সপ্রেশন (and/or/regex/path ফিল্টার) ব্যবহার করে অনুসন্ধান করুন।            |
+| `obsidian_read_note`         | ভল্ট-রিলেটিভ পাথ দ্বারা একটি নোট পড়ুন; ঐচ্ছিকভাবে একটি নির্দিষ্ট heading/block/frontmatter. |
+| `obsidian_list_vault`        | ভল্টে ফাইল এবং ডিরেক্টরি তালিকাভুক্ত করুন (এন্ট্রির গাছ)।                                    |
+| `obsidian_get_document_map`  | শিরোনাম → লাইন সংখ্যার মানচিত্র হিসাবে নোটের শিরোনাম গঠন পান।                                |
+| `obsidian_get_note_metadata` | সম্পূর্ণ বিষয়বস্তু ছাড়াই ফ্রন্টম্যাটার, ট্যাগ, লিঙ্ক, char/word গণনা পান।                  |
+| `obsidian_get_active_file`   | Obsidian এ বর্তমানে সক্রিয় ফাইলের পাথ + বিষয়বস্তু পান।                                     |
+| `obsidian_get_periodic_note` | একটি তারিখের জন্য daily/weekly/monthly পর্যায়ক্রমিক নোট পান (আজ যদি বাদ দেওয়া হয়)।        |
+| `obsidian_get_tags`          | তাদের ফ্রিকোয়েন্সি সহ সমস্ত ভল্ট ট্যাগ তালিকাভুক্ত করুন।                                    |
+| `obsidian_list_commands`     | উপলব্ধ Obsidian কমান্ড IDs তালিকা করুন ( `obsidian_execute_command` এর সাথে ব্যবহার করুন)।   |
+| `obsidian_sync_status`       | OmniRoute সিঙ্ক সার্ভারের অবস্থা: চলমান, ভল্টের নাম, পোর্ট, আপটাইম, শেষ সিঙ্ক।               |
+| `obsidian_sync_conflicts`    | অমীমাংসিত সিঙ্ক দ্বন্দ্বগুলি তালিকাভুক্ত করুন (পথ, বিরোধের পথ, সনাক্ত করা-এ)।                |
 
-### রাইট টুলসমূহ (`write:obsidian`)
+### টুল লিখুন (`write:obsidian`)
 
-| টুল                              | বিবরণ                                                                                       |
-| -------------------------------- | ------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | প্রদত্ত Markdown কনটেন্ট দিয়ে একটি নোট তৈরি বা ওভাররাইট করে।                               |
-| `obsidian_append_note`           | একটি নোটে কনটেন্ট যোগ করে; ঐচ্ছিকভাবে নির্দিষ্ট heading/block-এ।                            |
-| `obsidian_patch_note`            | কোনো heading, block বা frontmatter field-এ নির্দিষ্টভাবে append/prepend/replace করে।        |
-| `obsidian_delete_note`           | vault থেকে একটি নোট স্থায়ীভাবে মুছে দেয়।                                                  |
-| `obsidian_move_note`             | vault-এর মধ্যে একটি নোট স্থানান্তর করে বা নাম পরিবর্তন করে।                                 |
-| `obsidian_execute_command`       | কোনো Obsidian command তার command ID দিয়ে কার্যকর করে।                                     |
-| `obsidian_open_file`             | Obsidian-এ একটি ফাইল খোলে (ফাইলটি না থাকলে তৈরি করে)।                                       |
-| `obsidian_sync_trigger`          | তাৎক্ষণিক দ্বিমুখী desktop↔mobile vault sync ট্রিগার করে।                                   |
-| `obsidian_sync_resolve_conflict` | একটি sync conflict সমাধান করে: `local` (mobile), `remote` (desktop), অথবা `keep-both` রাখে। |
+| টুল                              | বর্ণনা                                                                                       |
+| -------------------------------- | -------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | প্রদত্ত মার্কডাউন সামগ্রী সহ একটি নোট তৈরি করুন বা ওভাররাইট করুন৷                            |
+| `obsidian_append_note`           | একটি নোটে বিষয়বস্তু যুক্ত করুন; ঐচ্ছিকভাবে একটি নির্দিষ্ট heading/block.                    |
+| `obsidian_patch_note`            | একটি শিরোনাম, ব্লক, বা ফ্রন্টম্যাটার ক্ষেত্রে অস্ত্রোপচারের মাধ্যমে append/prepend/replace । |
+| `obsidian_delete_note`           | ভল্ট থেকে একটি নোট স্থায়ীভাবে মুছে দিন।                                                     |
+| `obsidian_move_note`             | ভল্টের মধ্যে একটি নোট সরান বা পুনঃনামকরণ করুন।                                               |
+| `obsidian_execute_command`       | একটি Obsidian কমান্ড তার ID কমান্ড দ্বারা চালান।                                             |
+| `obsidian_open_file`             | Obsidian তে একটি ফাইল খুলুন (এটি বিদ্যমান না থাকলে এটি তৈরি করে)।                            |
+| `obsidian_sync_trigger`          | একটি অবিলম্বে দ্বিমুখী ডেস্কটপ ↔ মোবাইল ভল্ট সিঙ্ক ট্রিগার করুন৷                             |
+| `obsidian_sync_resolve_conflict` | একটি সিঙ্ক দ্বন্দ্ব সমাধান করুন: `local` (মোবাইল), `remote` (ডেস্কটপ), বা `keep-both` রাখুন। |
 
 > [!NOTE]
-> `obsidian_patch_note`-এর target-গুলো `heading | block | frontmatter` মানের `targetType`
-> এবং `append | prepend | replace` মানের `operation` গ্রহণ করে, সঙ্গে একটি ঐচ্ছিক
-> `createTargetIfMissing`। চারটি `obsidian_sync_*` টুল স্থানীয় sync
-> server-এর (`http://127.0.0.1:27781` ডিফল্টভাবে) সঙ্গে যোগাযোগ করে এবং sync token প্রয়োজন।
+> `obsidian_patch_note` লক্ষ্যগুলি `heading | block | frontmatter` এর `targetType` এবং `append | prepend | replace` এর `operation` গ্রহণ করে, একটি ঐচ্ছিক `createTargetIfMissing` সহ। চারটি `obsidian_sync_*` টুল স্থানীয় সিঙ্ক সার্ভারের সাথে কথা বলে ( ডিফল্টভাবে`http://127.0.0.1:27781` ) এবং সিঙ্ক টোকেন প্রয়োজন।
 
-### স্কোপসমূহ
+### স্কোপ
 
-রিড টুলগুলোর জন্য `read:obsidian` প্রয়োজন; রাইট টুলগুলোর জন্য `write:obsidian` প্রয়োজন। প্রয়োগব্যবস্থা
-Notion-এর মতোই — `open-sse/mcp-server/server.ts`-এ থাকা `withScopeEnforcement()` দ্বারা পরিচালিত,
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true`-এর ভিত্তিতে নিয়ন্ত্রিত, যেখানে অনুমোদিত স্কোপগুলো
-`OMNIROUTE_MCP_SCOPES` অথবা API key-এর scope context থেকে নেওয়া হয়। দেখুন
-[MCP-SERVER.md](./MCP-SERVER.md)।
+পড়ার সরঞ্জামগুলির জন্য `read:obsidian` প্রয়োজন; লেখার সরঞ্জামগুলির জন্য `write:obsidian` প্রয়োজন। এনফোর্সমেন্ট `open-sse/mcp-server/server.ts` এ `withScopeEnforcement()` দ্বারা পরিচালিত Notion — অনুরূপ, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` এ গেটেড এবং HTTP/SSE কলকারীদের জন্য বাধ্য করা হয়েছে যাদের API কী-তে `manage`/`admin` নেই, `OMNIROUTE_MCP_SCOPES` বা API কী-এর স্কোপ প্রসঙ্গ থেকে প্রাপ্ত অনুমোদিত স্কোপ সহ। [MCP-SERVER.md](./MCP-SERVER.md) দেখুন।
 
 ## এন্ডপয়েন্টসমূহ
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **Versioon:** v3.8.44** Viimati värskendatud:** 28.10.2026** Publik:** Insenerid, kes lisavad, hooldavad või siluvad manustatud teenuseid (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versioon:** v3.8.44** Publik:** Insenerid, kes lisavad, hooldavad või siluvad manustatud teenuseid (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Manustatud teenused on kohapeal installitud protsessi külgkorvi tööriistad, mida OmniRoute installib, jälgib ja esitleb esmaklassiliste marsruutimise sihtmärkidena. Erinevalt välistest pakkujatest (kelleni jõutakse Interneti kaudu API klahvide kaudu), töötavad manustatud teenused samas masinas kui OmniRoute ja suhtlevad tagasisilmuse kaudu.
 
@@ -29,34 +29,34 @@ Manustatud teenused on kohapeal installitud protsessi külgkorvi tööriistad, m
 
 Manustatud on kaheksa teenust:
 
-| Teenindus       | npm pakett                                 | Vaikimisi port | Eesmärk                                                                                                                                                                                                                                                                                                                                                      |
-| --------------- | ------------------------------------------ | :------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **9 Ruuter**    | `9router`                                  |     20130      | AI ruuter, mida OmniRoute saab kasutada alampakkujana. Mudelid, mis on eksponeeritud kui `9router/{sub}/{model}`                                                                                                                                                                                                                                             |
-| **CLIProxyAPI** | GitHub vabastamise kahendfail (`cliproxy`) |      8317      | Kohalik puhverserveri adapter Anthropic CLI autentimisvoogude jaoks. Pakub varumarsruutimist, kui OAuth -märgid aeguvad                                                                                                                                                                                                                                      |
-| **Mux**         | `mux` (peata `mux server`)                 |      8322      | Kohalik agent-orkestreerimisdeemon (coder/mux). Elutsükli järgi hallatav ainult — mitte marsruutimise sihtmärk (pole LLM puhverserverit).                                                                                                                                                                                                                    |
-| **Bifrost**     | `@maximhq/bifrost`                         |      8080      | Mine AI-lüüsi relee taustaprogrammi. Jooksmisel valitakse automaatselt relee marsruudi järgi (`/v1/relay/`)                                                                                                                                                                                                                                                  |
-| **Dario**       | `@askalf/dario`                            |      3456      | Claude'i abonemendi puhverserver — alternative/failover kuni CLIProxyAPI Claude'i koodikujulise liikluse jaoks; sisestatud võti muutub `DARIO_ADMIN_TOKEN` väravaks oma `/admin/*` OAuth juhttasandiks                                                                                                                                                       |
-| **avatud-wa**   | `@open-wa/wa-automate`                     |      8323      | WhatsApp veebiautomaatika (peata Chromium Puppeteeri kaudu). Olelusringi järgi hallatav ainult — mitte marsruutimise sihtmärk.                                                                                                                                                                                                                               |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                       |     20135      | Kiire kokkusurumisega külgkorvi — tõeline LLMLingua-2 ONNX mudel ( Microsoft algoritmi JS/TS port). `open-sse/services/compression/engines/llmlingua/index.ts` saadab `/compress` üle HTTP sellele, langedes tagasi protsessis olevale töötaja lõime taustaprogrammi, kui külgkorv on maas. Elutsükli järgi hallatav ainult — ei ole marsruutimise sihtmärk. |
-| **laulukast**   | GitHub vabastamise kahendfail (`singbox`)  |     20140      | TPROXY külgkorv, mis toetab `applyTproxy()`-i läbipaistvat puhverserveri pealtkuulamist (`src/mitm/tproxy/setup.ts`). Installer laadib alla kinnitatud, kontrollsummaga kinnitatud versiooni. Ainult elutsükli järgi hallatav — mitte marsruutimise sihtmärk (pole LLM puhverserverit)                                                                       |
+| Teenindus       | npm pakett                                 | Vaikimisi port | Eesmärk                                                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ------------------------------------------ | :------------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9 Ruuter**    | `9router`                                  |     20130      | AI ruuter, mida OmniRoute saab kasutada alampakkujana. Mudelid, mis on eksponeeritud kui `9router/{sub}/{model}`                                                                                                                                                                                                                                               |
+| **CLIProxyAPI** | GitHub vabastamise kahendfail (`cliproxy`) |      8317      | Kohalik puhverserveri adapter Anthropic CLI autentimisvoogude jaoks. Pakub varumarsruutimist, kui OAuth -märgid aeguvad                                                                                                                                                                                                                                        |
+| **Mux**         | `mux` (peata `mux server`)                 |      8322      | Kohalik agent-orkestreerimisdeemon (coder/mux). Elutsükli järgi hallatav ainult — mitte marsruutimise sihtmärk (pole LLM puhverserverit).                                                                                                                                                                                                                      |
+| **Bifrost**     | `@maximhq/bifrost`                         |      8080      | Mine AI-lüüsi relee taustaprogrammi. Jooksmisel valitakse automaatselt relee marsruudi järgi (`/v1/relay/`)                                                                                                                                                                                                                                                    |
+| **Dario**       | `@askalf/dario`                            |      3456      | Claude'i abonemendi puhverserver — alternative/failover kuni CLIProxyAPI Claude'i koodikujulise liikluse jaoks; sisestatud võti muutub `DARIO_ADMIN_TOKEN` väravaks oma `/admin/*` OAuth juhttasandiks                                                                                                                                                         |
+| **avatud-wa**   | `@open-wa/wa-automate`                     |      8323      | WhatsApp veebiautomaatika (peata Chromium Puppeteeri kaudu). Olelusringi järgi hallatav ainult — mitte marsruutimise sihtmärk.                                                                                                                                                                                                                                 |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                       |     20135      | Kiire kokkusurumisega külgkorvi — tõeline LLMLingua-2 ONNX mudel ( Microsoft algoritmi JS/TS port). `open-sse/services/compression/engines/llmlingua/index.ts` saadab `/compress` üle HTTP sellele, langedes tagasi protsessis olevale töötaja lõime taustaprogrammi, kui külgkorv on maas. Olelusringi järgi hallatav ainult — ei ole marsruutimise sihtmärk. |
+| **laulukast**   | GitHub vabastamise kahendfail (`singbox`)  |     20140      | TPROXY külgkorv, mis toetab `applyTproxy()`-i läbipaistvat puhverserveri pealtkuulamist (`src/mitm/tproxy/setup.ts`). Installer laadib alla kinnitatud, kontrollsummaga kinnitatud versiooni. Ainult elutsükli järgi hallatav — mitte marsruutimise sihtmärk (pole LLM puhverserverit)                                                                         |
 
 Kõik kaheksa järgivad sama järelevalvemudelit:
 
 - OmniRoute installib need `DATA_DIR/services/{name}/` alla (isoleeritud OmniRoute enda `package.json`)
 - OmniRoute kudeb ja jälgib neid kui lapse protsesse
 - OmniRoute süstib lapse keskkonda lühiajalise API -võtme ja pöörab seda ilma seisakuta (kui see on asjakohane)
-- Kõik juhtimismarsruudid (`/api/services/*`) on**LOCAL_ONLY** — on juurdepääsetav ainult tagasisilmuse kaudu (kõva reegel nr 17)
+- Kõik juhtimismarsruudid (`/api/services/*`) on**LOCAL_ONLY** — on juurdepääsetav ainult tagasisilmuse kaudu (kõva reegel #17)
 
 ### Peamised otsused (projektiplaanist)
 
 | Otsus                                            | Väärtus                                                                          |
 | ------------------------------------------------ | -------------------------------------------------------------------------------- |
-| Juurdepääs armatuurlauale 9Routeri natiivsele UI | Vastupidine puhverserver `/dashboard/providers/services/9router/embed/*` juures  |
+| Juurdepääs armatuurlauale 9Routeri natiivsele UI | Pöördpuhverserver `/dashboard/providers/services/9router/embed/*` juures         |
 | Paigaldusmehhanism                               | `npm install {package}` `execFile` kaudu (sh shell-interpolatsioonita)           |
 | Tarbimisrežiim                                   | Pakkuja on marsruutimismootoris registreeritud kui `9router/{sub}/{model}`       |
 | API võtmehaldus                                  | OmniRoute genereerib, krüpteerib puhkeolekus (AES-256-GCM) ja sisestab env kaudu |
 | Armatuurlaua asukoht                             | `/dashboard/providers/services` (kolm vahekaarti)                                |
-| Automaatne käivitamine                           | Lülita teenuse kohta, vaikeseade OFF                                             |
+| Automaatkäivitus                                 | Lülita teenuse kohta, vaikeseade OFF                                             |
 
 ---
 
@@ -210,7 +210,7 @@ aktiveeruvad samal ajal.
 
 ## 4. API viide
 
-Kõik `/api/services/` all olevad marsruudid on**LOCAL_ONLY** (ainult loopback, range reegel nr 17). Tagasisilmuseta taotlused saavad `403 LOCAL_ONLY` sõltumata autentimisloast.
+Kõik `/api/services/` all olevad marsruudid on**LOCAL_ONLY** (ainult loopback, kõva reegel #17). Tagasisilmuseta päringud saavad `403 LOCAL_ONLY` sõltumata autentimisloast.
 
 ### 4.1 9Ruuteri lõpp-punktid (11 marsruuti)
 
@@ -237,7 +237,7 @@ Installige 9Router alates npm. Loob `DATA_DIR/services/9router/` oma `package.js
 | `409` | Juba paigaldamine (lukk hoitakse)                               |
 | `500` | npm installimine ebaõnnestus — vt sõbraliku vea kohta `message` |
 
-**Märkused:** Kasutab `execFile('npm', [...])` — ei kesta ega interpolatsiooni (kõva reegel nr 13). EACCES vead kuvatakse sõbralike sõnumitena.
+**Märkused:** Kasutab `execFile('npm', [...])` — ei kesta ega interpolatsiooni (kõva reegel #13). EACCES vead kuvatakse sõbralike sõnumitena.
 
 ---
 
@@ -536,7 +536,7 @@ sing-boxil on sama lõpp-punkti kuju kui Mux — no `rotate-key` route, no API k
 | `POST` | `/api/services/singbox/auto-restart-adopted` | Vastuvõetud (olemasoleva) protsessi automaatse taaskäivitamise sisse- ja väljalülitamine |
 | `GET`  | `/api/services/singbox/logs`                 | SSE log saba (jagatud `[name]/logs` dünaamilise marsruudi kaudu)                         |
 
-**TPROXY juhtmestik:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) kirjutab `config.json` ja käivitab järelevaataja enne, kui `applyTproxy()` installib TPROXY tulemüürireeglid. Kui järelevaataja puudub või ei jõua `running`, logib see nüüd veatasemel (selle asemel, et tõrke vaikselt alla neelata), et operaator saaks teada, et TPROXY reegleid rakendati ilma töötava kuulajata.
+**TPROXY juhtmestik:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) kirjutab `config.json` ja käivitab järelevaataja enne, kui `applyTproxy()` installib TPROXY tulemüürireeglid. Kui järelevaataja puudub või ei jõua `running`, logib see nüüd veatasemel (selle asemel, et tõrke vaikselt alla neelata), et operaator saaks teada, et TPROXY -reeglid rakendati ilma töötava kuulajata.
 
 ---
 
@@ -556,9 +556,7 @@ See puhverserver:
 - Eemaldab vastusest `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
 - Kirjutab HTML vastused ümber, et sisestada `<base href>` ja normaliseerida absoluutsed teed (`/foo` → `/dashboard/.../embed/foo`)
 
-Manustatud armatuurlaua WebSocket versiooniuuendusi haldab kaasserver spetsiaalses pordis (vt `src/lib/services/embedWsProxy.ts`).
-
-Iga täiendus volitatakse enne tunneli avanemist samade reeglitega nagu HTTP manustamismarsruudil: partner peab olema tagasisilmus ilma pöördpuhverserveri edasisuunamise päiseta, brauseri `Origin` peab olema armatuurlaua lähtepunkt (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` pikendab tagasisilmuse vaikeseadeid) ja helistaja vajab armatuurlaua seanssi või on z dashqeco logiless API dashqen key.
+Manustatud armatuurlaua WebSocket versiooniuuendusi haldab kaasserver spetsiaalses pordis (vt `src/lib/services/embedWsProxy.ts`). Iga täiendus volitatakse enne tunneli avanemist samade reeglitega nagu HTTP manustamismarsruudil: partner peab olema tagasisilmus ilma pöördpuhverserveri edasisuunamise päiseta, brauseri `Origin` peab olema armatuurlaua lähtepunkt (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` pikendab tagasisilmuse vaikeseadeid) ja helistaja vajab armatuurlaua seanssi või on dashboard-sco loginless dashboard- API login.
 
 **Turvalisus:** Manustatud puhverserveri marsruudid on klassifitseeritud `LOCAL_ONLY_API_PREFIXES` alla ja neile pääseb juurde ainult loopback kaudu. Ründaja, kes saab JWT Cloudflare/Ngrok tunneli kaudu, ei saa manustatud teenustesse puhverserverit kasutada.
 
@@ -856,65 +854,44 @@ Väljal `lastError` kuvatakse `"Fast crash (exited with code 1)"`.
 
 ---
 
-## 8. KKK
+## 8. FAQ
 
-**K: Kas ma saan teha manustatud teenuste lõpp-punktid kättesaadavaks klientidele, kes ei kasuta tagasisideaadressi?**
+**K: Kas ma saan avaldada manustatud teenuste lõpp-punktid mitte-loopback klientidele?**
 
-Ei. LOCAL_ONLY tase on tahtlik (range reegel nr 17). Marsruudid, mis saavad käivitada
-`npm install` või luua `node` protsesse, ei tohi olla kättesaadavad liiklusele, mis ei
-pärine tagasisideaadressilt, sest tunneli (Cloudflare, Ngrok, Tailscale) kaudu lekkinud JWT
-võimaldaks vastasel juhul suvalisi protsesse luua. `/api/services/` jaoks puudub
-sellest loobumise erand — erinevalt marsruudist `/api/mcp/` on see haldusõiguse
-kontrollist möödumise loendist välja jäetud. Vt `docs/security/ROUTE_GUARD_TIERS.md`.
+Ei. LOCAL_ONLY tasand on tahtlik (kõva reegel #17). Marsruudid, mis võivad kutsuda `npm install` või luua `node` -protsesse, ei tohi olla kättesaadavad mitte-tagasiliiklusest, sest tunneli (Cloudflare, Ngrok, Tailscale) kaudu lekkinud JWT võimaldaks vastasel juhul suvalise protsessi kudemist. Erinevalt `/api/mcp/` ei ole `/api/services/` — jaoks loobumisvõimalust, see on haldusulatuse möödaviiguloendist välja jäetud. Vaata `docs/security/ROUTE_GUARD_TIERS.md`.
 
 ---
 
-**K: Kas 9Router ja CLIProxyAPI on saadaval tootmis- või pilvekeskkondades?**
+**K: Kas 9Router ja CLIProxyAPI on saadaval production/cloud juurutustes?**
 
-Jah. Mõlemad teenused järgivad sama kohalik-kõigepealt mudelit nagu OmniRoute ise. Need
-töötavad samas masinas ja suhtlevad tagasisideaadressi kaudu. „Tootmiskeskkond“ tähendab
-siin VPS-i või kohalikku serverit, kuhu OmniRoute on juurutatud, mitte kaugpilveteenuse
-pakkujat.
+Jah. Mõlemad teenused järgivad sama kohalikku mudelit nagu OmniRoute ise. Nad töötavad samas masinas ja suhtlevad loopbacki kaudu. "Tootmine" tähendab siin VPS või kohalikku serverit, kus OmniRoute on juurutatud, mitte kaugpilveteenuse pakkujat.
 
 ---
 
-**K: Kuidas järelevaataja tööd siluda?**
+**K: Kuidas juhendajat siluda?**
 
-1. Jälgige SSE logivoogu: `curl -N http://localhost:20128/api/services/9router/logs`.
-2. Kontrollige OmniRoute'i pino väljundis olevaid struktureeritud logisid, filtreerides
-   nimeruumi `service:supervisor` järgi.
-3. Uurige andmebaasirida: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
-4. Kasutage päringut `GET /api/services/9router/status`, et näha ühe kutsega praegust
-   reaalajas olekut, PID-d, seisundit ja välja `lastError`.
+1. SSE palgivoo saba: `curl -N http://localhost:20128/api/services/9router/logs`.
+2. Kontrollige struktureeritud logisid OmniRoute pino väljundis, mis on filtreeritud `service:supervisor` nimeruumi järgi.
+3. Kontrollige DB rida: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
+4. Kasutage `GET /api/services/9router/status`, et näha ühes kõnes praegust reaalajas olekut, PID, tervist ja `lastError`.
 
 ---
 
-**K: Järelevaataja näitab `health: "degraded"` või `health: "unknown"`, kuid olek on `"running"`. Kas see on probleem?**
+**K: Juhendaja näitab `health: "degraded"` või `health: "unknown"`, kuid olek on `"running"`. Kas see on probleem?**
 
-`"degraded"` tähendab, et seisundikontroll tagastas vastuse, mille kood ei olnud 200.
-`"unknown"` tähendab, et ükski kontroll pole veel lõpule jõudnud (võidujooks esimese
-küsitlusega). Mõlemad on käivitamise ajal ajutised. Kui seisund püsib väärtusel
-`"degraded"` kauem kui `healthIntervalMs * 3` ms pärast oleku `"running"` saavutamist,
-siis manustatud teenus töötab, kuid selle HTTP API ei vasta. Kontrollige, kas olekuvastuses
-olev port on õige ja kas teenus tegelikult kuulab sellel pordil.
+`"degraded"` tähendab, et tervisesond andis non-200 vastuse. `"unknown"` tähendab, et ükski sond pole veel lõppenud (jooks esimese küsitlusega). Mõlemad on käivitamise ajal mööduvad. Kui seisukord püsib `"degraded"` pärast `"running"` kauem kui `healthIntervalMs * 3` ms, siis manustatud teenus töötab, kuid selle HTTP API ei reageeri. Kontrollige, kas port on olekuvastuses õige ja kas teenus tegelikult kuulab seda porti.
 
 ---
 
-**K: Kas ma saan 9Routeri API-võtit muuta ilma täieliku taaskäivituseta?**
+**K: Kas ma saan muuta 9Routeri API klahvi ilma täieliku taaskäivituseta?**
 
-Ei. API-võti edastatakse 9Routerile protsessi loomise ajal keskkonnamuutuja kaudu.
-Töötava protsessi keskkonnamuutujaid ei saa muuta. `POST .../rotate-key` peatab teenuse
-automaatselt ja käivitab selle uuesti, et uus võti rakendada. Võtme vahetamine jõustub
-teenuse `stopTimeoutMs` aja (vaikimisi 15 s) ja sellele lisanduva käivitusaja jooksul.
+Ei. API klahv edastatakse 9Routerile keskkonnamuutuja kaudu kudemise ajal. Keskkonnamuutujaid ei saa tööprotsessis muuta. `POST .../rotate-key` peatab ja taaskäivitab teenuse automaatselt uue võtme rakendamiseks. Klahvide pööramine jõustub teenuse `stopTimeoutMs` (vaikimisi 15 s) ja selle käivitusaja jooksul.
 
 ---
 
-**K: Kui suur on ringpuhvri piirang ja mis juhtub selle täitumisel?**
+**K: Mis on helipuhvri limiit ja mis juhtub, kui see täitub?**
 
-Igal teenusel on eraldi 5 MB ringpuhver. Kui puhver saab täis, eemaldatakse vanimad
-logiread, et teha ruumi uutele. SSE sündmus `snapshot` tagastab piirangu `tail` piires
-kõige uuemad read. Logisid ei salvestata kettale, kui andmebaasireal pole määratud
-`logsBufferPath`.
+Igal teenusel on spetsiaalne 5 MB ringpuhver. Kui puhver on täis, tõstetakse vanimad palgiliinid välja, et teha ruumi uutele. Sündmus SSE `snapshot` tagastab uusimad read `tail` piirangu piires. Logisid kettale ei säilitata, välja arvatud juhul, kui `logsBufferPath` real on DB määratud.
 
 ---
 

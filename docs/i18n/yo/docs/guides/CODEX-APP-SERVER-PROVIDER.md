@@ -17,27 +17,24 @@ ní URL app-server tí a ti ṣètò**, CLI náà sì gbọ́dọ̀ ti **wọlé
 
 ---
 
-## 1. Àwòrán-ilana
+## 1. faaji
 
 ```
-┌─ Ìṣàfilọ́lẹ̀ OmniRoute ──────────┐        ┌─ sidecar codex-app-server ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ tọ́kìnì agbára)              │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  ń ṣàkóso OpenAI OAuth fúnra rẹ̀    │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, ìmúdójúìwọ̀n  │
-        │ ń pín (àwọn volume compose)       │   aládàáṣe)                          │
-        ▼                                   └─────────────────────────────────────┘
-  codex-appserver-token   → tọ́kìnì agbára WS (àwọn méjèèjì ni wọ́n mount rẹ̀)
-  codex-appserver-home    → ~/.codex (auth.json tí dashboard kọ,
-                             tí codex app-server sidecar náà kà)
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
+        ▼
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidecar náà ń tẹ́tí **nikan** lórí nẹ́tíwọ́ọ̀kì compose inú
-  (`ws://codex-app-server:1456`) lẹ́yìn tọ́kìnì agbára kan. A **kò** tẹ̀ ẹ́ jáde
-  sí host tàbí íńtánẹ́ẹ̀tì láé.
-- Codex CLI wà nínú `omniroute:base` láti ìbẹ̀rẹ̀, nítorí náà kò sí ìdí láti
-  fi codex sori host tàbí ẹ̀rọ onílò nígbà tí o bá ń ṣiṣẹ́ sidecar náà.
+- Awọn sidecar gbọ** nikan** lori nẹtiwọọki akojọpọ inu (`ws://codex-app-server:1456`) lẹhin ami agbara kan. O jẹ** rara** ti a tẹjade si agbalejo tabi intanẹẹti.
+- Ọkọ ayọkẹlẹ naa nlo `omniroute:cli-no-docker`, ti a ṣe lati ibi-afẹde `runner-cli-no-docker`, eyiti o pẹlu Codex CLI.
 
 ## 2. Gbé e dìde
 

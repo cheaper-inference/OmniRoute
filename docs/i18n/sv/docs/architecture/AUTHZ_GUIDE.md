@@ -4,12 +4,11 @@
 
 ---
 
-> **Sanningskälla:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Senast uppdaterad:** 2026-09-22 — scope-namnrymder pekar på MCP-SERVER.md
+> **Sanningens källa:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute har en ruttmedveten auktoriseringspipeline som spärrar varje API-förfrågan. Klassificeringen är **deterministisk** och **fail-closed** — allt som inte kan klassificeras hamnar som `MANAGEMENT` och kräver en session eller en token av management-kvalitet. Denna sida förklarar modellen för ingenjörer som underhåller rutter eller designar nya slutpunkter.
+OmniRoute har en ruttmedveten auktoriseringspipeline som portar varje API förfrågan. Klassificering är** deterministisk** och** felstängd** — allt som inte kan klassificeras slutar som `MANAGEMENT` och kräver en session eller management-grade token. Den här sidan förklarar modellen för ingenjörer som underhåller rutter eller designar nya slutpunkter.
 
-![AuthZ-pipeline (3 ruttklasser + policyutvärdering)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Källa: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -190,7 +189,7 @@ Varje ruttklass har en policy i `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — returnerar alltid `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extraherar bärare, validerar via `validateApiKey()`. Går igenom till anonym endast när den effektiva `REQUIRE_API_KEY` funktionsflaggan är inaktiverad. Den effektiva flaggan löses genom `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) så Dashboard-funktionsflaggor och miljövariabler styr `/api/v1/*`, `/api/v1beta/*` och alias konsekvent; resolver misslyckanden stängs. Tillåter förfrågningar om instrumentpanelsessioner på klientens API rutter (inklusive `/api/v1/models`, som används av instrumentpanelens modellkatalog). När Entra ID SSO är aktiverat, hanteras en bärare som strukturellt är en Entra-token (tre base64url-segment, `RS*` alg, `kid`) av SSO -grenen** före** `validateApiKey()` och dess dom är slutgiltig — den faller aldrig igenom API-nyckelns sökväg eller grenen degradera till anonym, så ett avbrott i identitetsleverantören kan inte bli öppen åtkomst. Statiska API nycklar påverkas inte. Se [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — accepterar instrumentpanelsessioner, interna modellsynkroniseringsbegäranden (matchad mot `/api/providers/[name]/(sync-models|models)`), eller hoppar över helt om `isAuthRequired()` returnerar falskt. Returnerar 403 (`AUTH_001`) när en bärartoken är närvarande men ogiltig, 401 annars. Upprätthåller också ruttskyddsnivåerna (LOCAL_ONLY / ALWAYS_PROTECTED) före någon auktoritetsgren — se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY vägar i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (idag: `/api/mcp/`) kan nås från icke-loopback när bärarnyckeln bär `manage` omfattningen; alla andra LOCAL_ONLY -vägar förblir strikt-loopback oavsett omfattning.
+- **`managementPolicy`** (`policies/management.ts`) — accepterar instrumentpanelsessioner, interna modellsynkroniseringsbegäranden (matchad mot `/api/providers/[name]/(sync-models|models)`), eller hoppar över helt om `isAuthRequired()` returnerar falskt. Returnerar 403 (`AUTH_001`) när en bärartoken är närvarande men ogiltig, 401 annars. Upprätthåller också ruttskyddsnivåerna (LOCAL_ONLY / ALWAYS_PROTECTED) före någon auktoritetsgren — se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY vägar i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (idag: `/api/mcp/`) kan nås från icke-loopback när bärartangenten bär `manage`/`admin` omfånget eller det smala `mcp:connect` omfånget (`hasMcpConnectOrManageScope`), eller med en autentiserad instrumentpanelsession; alla andra LOCAL_ONLY vägar förblir strikt-loopback oavsett omfattning.
 
 En framgångsrik policy returnerar `AuthSubject` med `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Nedströmshanterare kan läsa den via `assertAuth(request, "CLIENT_API")` i `src/server/authz/assertAuth.ts` istället för att köra autentiseringslogik igen.
 
@@ -283,33 +282,22 @@ Välj uppsättning efter form, inte efter bekvämlighet. En enskild route ska pl
 
 ## Omfattningar
 
-Tre namnutrymmen. Varje kontrollant läser endast sina egna strängar. Jämförelsen, inklusive varför `manage` misslyckas med `scopeMatches` för `read:compression` och varför en `read` åtkomsttoken inte kan `PATCH /api/keys/{id}`, finns i [Three scope namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Tre namnutrymmen. Varje pjäs läser bara sina egna strängar. Sida vid sida, inklusive varför `manage` misslyckas med `scopeMatches` för `read:compression` och varför en `read` åtkomsttoken inte kan `PATCH /api/keys/{id}`, är [Three scope namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API-nycklar innehåller en `scopes`-array (lagrad som JSON i `api_keys.scopes`, se `src/lib/db/apiKeys.ts`).
+API -nycklar bär en `scopes` array (lagrade som JSON i `api_keys.scopes`, se `src/lib/db/apiKeys.ts`).
 
-### Hanteringsomfattning
+### Ledningens omfattning
 
-- `manage` / `admin` — `hasManageScope`. Bearer-åtkomst till hanterings-API-rutter.
-- `mcp:connect`, `self:usage`, `self:account-quota` och
-  `policy:bypass-provider-quota` är additiva exakta matchningsomfattningar. De ligger
-  utanför `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` öppnar endast
-  `/api/mcp/` non-loopback-utskärningen.
+- `manage` / `admin` — `hasManageScope`. Bäraråtkomst till management API rutter.
+- `mcp:connect`, `self:usage`, `self:account-quota` och `policy:bypass-provider-quota` är additiv exakt matchningsomfång. De sitter utanför `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` öppnar endast `/api/mcp/` non-loopback carve-out.
 
-### MCP-verktygsomfattningar
+### MCP verktygskopor
 
-Katalog och matchningsregler (identisk sträng, eller en beviljad omfattning som slutar med `*`):
-[MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` i `src/shared/constants/mcpScopes.ts` är den ursprungliga typade
-delmängden, inte den fullständiga katalogen. Verkställighet körs i
-`open-sse/mcp-server/scopeEnforcement.ts` efter att `resolveCallerScopeContext()`
-löser omfattningar från MCP-autentiseringsinformation, begärans metadata eller `OMNIROUTE_MCP_SCOPES`.
-Den är avstängd om inte `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Katalog och matchningsregler (identisk sträng, eller ett beviljat omfång som slutar på `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` i `src/shared/constants/mcpScopes.ts` är den ursprungliga underuppsättningen, inte den fullständiga katalogen. Tillämpning körs i `open-sse/mcp-server/scopeEnforcement.ts` efter att `resolveCallerScopeContext()` löser omfång från MCP auth info, begärande metadata eller `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` aktiverar det globalt (standard `false`), men det tillämpas alltid för en HTTP/SSE anropare vars API nyckel saknar `manage`/`admin` (se `shouldForceScopeEnforcement()` i `open-sse/mcp-server/scopeEnforcement.ts`), oavsett flagga.
 
-### Åtkomsttoken-omfattningar
+### Omfattningar för åtkomsttoken
 
-`read` / `write` / `admin` på `oma_live_…` tokens, rankade av `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Denna rankning gäller endast för åtkomsttoken-
-autentiseringsuppgiften. Se [Management Authentication](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` på `oma_live_…` tokens, rankade efter `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Denna ranking gäller endast för åtkomsttoken. Se [Hanteringsautentisering](../guides/MANAGEMENT-AUTH.md).
 
 ## Växla för autentisering krävs
 

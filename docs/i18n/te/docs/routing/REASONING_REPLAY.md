@@ -4,7 +4,7 @@
 
 ---
 
-> **సత్యానికి మూలం:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** చివరిగా నవీకరించబడింది:** 2026-06-28 — v3.8.40
+> **సత్యానికి మూలం:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute థింకింగ్-మోడ్ మోడల్ల ద్వారా ఉత్పత్తి చేయబడిన అసిస్టెంట్ `reasoning_content` క్యాప్చర్ చేస్తుంది మరియు అప్స్ట్రీమ్ ప్రొవైడర్కు అవసరమైనప్పుడు మల్టీ-టర్న్ అభ్యర్థనలపై పారదర్శకంగా రీప్లే చేస్తుంది. ఇది క్లయింట్ యొక్క సంభాషణ చరిత్రలో మునుపటి టర్న్ యొక్క తార్కికం లేనప్పుడు కఠినమైన ప్రొవైడర్లు లేవనెత్తే HTTP 400 ఎర్రర్లను తొలగిస్తుంది.
 
@@ -36,7 +36,7 @@ Turn N+1 (client sends follow-up):
   → upstream sees consistent history → no 400
 ```
 
-క్యాప్చర్ `open-sse/handlers/chatCore.ts` లో జరుగుతుంది (రెండు సైట్లు, రెండు `cacheReasoningFromAssistantMessage` కాల్ సైట్లలో). స్కీమా బలవంతం తర్వాత కానీ పంపడానికి ముందు రీప్లే `open-sse/translator/index.ts` లో జరుగుతుంది.
+క్యాప్చర్ `open-sse/handlers/chatCore.ts` లో జరుగుతుంది (రెండు సైట్లు, రెండు `cacheReasoningFromAssistantMessage` కాల్ సైట్లలో). స్కీమా బలవంతం తర్వాత కానీ పంపే ముందు రీప్లే `open-sse/translator/index.ts` లో జరుగుతుంది.
 
 టూల్-కాల్ ఎంట్రీలు రిక్వెస్ట్ స్కోప్ మరియు టూల్ కాల్ ఐడి యొక్క డైజెస్ట్ అయిన `buildToolCallCacheKey()` క్రింద నిల్వ చేయబడతాయి, కాబట్టి మరొక API కీ లేదా సెషన్ ఉపయోగించే అదే id ఎంట్రీని ఎంచుకోదు. స్కోప్ `buildReasoningCacheScope()` నుండి వస్తుంది : API కీ id, అలాగే అభ్యర్థనలో సెషన్ కీ ఒకటి ఉన్నప్పుడు. `tool_call_id` నిలువు వరుస మరియు డాష్బోర్డ్ ఆ ఎంట్రీల కోసం ఈ డైజెస్ట్ను చూపుతాయి.
 

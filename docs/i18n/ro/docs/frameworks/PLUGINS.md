@@ -92,15 +92,15 @@ Obiectul `ctx` transmis către `register(program, ctx)`:
 
 Pluginurile sunt descoperite din:
 
-1. `~/.omniroute/plugins/<name>/` — instalări locale ale utilizatorului
-2. Variabila de mediu `OMNIROUTE_PLUGIN_PATH` — director personalizat
+1. `~/.omniroute/plugins/node_modules/<name>/` — unde `omniroute plugin install` pune pachete (un npm `--prefix`, nu `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — directoare de pluginuri copiate manual
+3. director personalizat `OMNIROUTE_PLUGIN_PATH` env var —
 
-Ambele sunt **exclusiv pentru CLI**. Mediul de execuție al pluginurilor de pe server (pluginurile marketplace/`plugin.json` care rulează în interiorul proxy-ului) are propriul scaner și propria setare de suprascriere,
-`OMNIROUTE_PLUGINS_DIR` — consultați
-[PLUGIN_MARKETPLACE.md → Directorul pluginurilor](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Setarea uneia nu o afectează pe cealaltă.
+Sunt urmate directoarele cu legături simbolice (ceea ce npm creează pentru `plugin install ./dir`).
 
-Erorile de încărcare sunt interceptate și afișate ca avertismente — un plugin defect nu provoacă niciodată blocarea CLI-ului.
+Ambele sunt** Numai CLI** . Timpul de execuție al pluginului de pe partea serverului (pluginurile marketplace/`plugin.json` care rulează în interiorul proxy-ului) are propriul său scaner cu propria sa suprascriere, `OMNIROUTE_PLUGINS_DIR` — vezi [PLUGIN_MARKETPLACE.md → Plugin directory](./PLUGIN_MARKETPLACE.md#plugin-directory). Setarea unuia nu îl afectează pe celălalt.
+
+Erorile de încărcare sunt surprinse și tipărite ca avertismente — un plugin rupt nu blochează niciodată CLI.
 
 ## Securitate
 

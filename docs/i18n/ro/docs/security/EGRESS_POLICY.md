@@ -67,37 +67,37 @@ Directiva este în mod intenționat **per proxy**, nu globală — diferitele pr
 
 ---
 
-## Cele trei valori
+## Cele Trei Valori
 
-| Valoare | Etichetă UI             | Comportament                                                                                                                                                                                                            |
-| ------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`  | `Automat (stivă duală)` | Sistemul de operare alege familia. Pentru o gazdă proxy specificată printr-un literal IP, familia este intrinsecă literalului; pentru un nume de gazdă, ambele familii sunt eligibile. Aceasta este valoarea implicită. |
-| `ipv4`  | `Doar IPv4`             | Fixează conexiunea la IPv4. Conexiunea este refuzată dacă gazda proxy nu are nicio înregistrare IPv4 (A).                                                                                                               |
-| `ipv6`  | `Doar IPv6`             | Fixează conexiunea la IPv6. Conexiunea este refuzată dacă gazda proxy nu are nicio înregistrare IPv6 (AAAA).                                                                                                            |
+| Valoare | eticheta UI         | Comportament                                                                                                                                                                     |
+| ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`  | `Auto (dual-stack)` | OS alege familia. Pentru o gazdă proxy IP-literal, familia este intrinsecă literalului; pentru un nume de gazdă, ambele familii sunt eligibile. Aceasta este valoarea implicită. |
+| `ipv4`  | `IPv4 only`         | Fixează conexiunea la IPv4. Închiderea eșuează dacă gazda proxy nu are înregistrare IPv4 (A).                                                                                    |
+| `ipv6`  | `IPv6 only`         | Fixează conexiunea la IPv6. Închiderea eșuează dacă gazda proxy nu are înregistrare IPv6 (AAAA).                                                                                 |
 
-Șirurile UI se află în `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+Șirurile UI trăiesc în `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
 ## Cum se configurează
 
-### Panoul de control
+### Bord
 
-Selectorul se află în formularul proxy din fila **Proxy Pool**:
+Selectorul este în forma proxy a** Pool de proxy** fila:
 
-1. Deschideți **Dashboard → Settings → Proxy → Proxy Pool**
+1. Deschide** Tabloul de bord → Setări → Proxy → Pool de proxy**
 2. Adăugați sau editați un proxy
-3. Setați lista derulantă **Familie IP** la `Automat (stivă duală)`, `Doar IPv4` sau `Doar IPv6`
-4. Salvați
+3. Setați** familia IP** meniu derulant la `Auto (dual-stack)`, `IPv4 only` sau `IPv6 only`
+4. Salva
 
 Controlul este redat de `ProxyRegistryManager.tsx` (montat în `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Câmpul `family` face parte din sarcinile utile pentru crearea/actualizarea registrului proxy, este validat de `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) și este gestionat de `POST` / `PATCH /api/v1/management/proxies`:
+Câmpul `family` face parte din încărcările utile create/update din registrul proxy, validat de `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) și gestionat de `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Creează un proxy exclusiv IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Schimbă un proxy existent pentru a utiliza exclusiv IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Același câmp este acceptat și de obiectul de configurare proxy inline utilizat pentru intrările de proxy din amonte (`upstream_proxy_config.family`, consultați [Modelul de date](#data-model)).
+Același câmp este acceptat și de obiectul de configurare proxy inline utilizat pentru intrările de proxy din amonte (`upstream_proxy_config.family`, vezi [Modelul de date](#data-model) ).
 
-Pentru restul API-ului CRUD/de atribuire pentru proxy, consultați [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Pentru restul proxy-ului CRUD/assignment API, vezi [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

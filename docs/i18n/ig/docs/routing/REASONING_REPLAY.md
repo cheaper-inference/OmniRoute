@@ -4,7 +4,7 @@
 
 ---
 
-> **Isi mmalite nke eziokwu:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Emelitere ikpeazụ:** 2026-06-28 — v3.8.40
+> **Isi mmalite nke eziokwu:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute na-ejide `reasoning_content` inyeaka emepụtara site n'ụdị ụdị echiche wee na-emegharị ya n'ụzọ doro anya na arịrịọ ọtụtụ ntụgharị mgbe onye na-eweta elu chọrọ ya. Nke a na-ewepụ njehie HTTP 400 nke ndị na-eweta ọrụ siri ike na-ebuli mgbe mkparịta ụka onye ahịa na-efunahụ echiche ntụgharị mbụ.
 

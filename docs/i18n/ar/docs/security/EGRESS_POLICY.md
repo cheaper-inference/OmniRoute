@@ -69,35 +69,35 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## القيم الثلاث
 
-| القيمة | تسمية واجهة المستخدم  | السلوك                                                                                                                                                                                           |
-| ------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auto` | `تلقائي (مكدس مزدوج)` | يختار نظام التشغيل العائلة. بالنسبة إلى مضيف وكيل مكتوب كعنوان IP حرفي، تكون العائلة متأصلة في القيمة الحرفية؛ أما بالنسبة إلى اسم مضيف، فتكون كلتا العائلتين مؤهلتين. هذه هي القيمة الافتراضية. |
-| `ipv4` | `IPv4 فقط`            | يقيّد الاتصال بـ IPv4. يفشل بشكل مغلق إذا لم يكن لدى مضيف الوكيل سجل IPv4 ‏(A).                                                                                                                  |
-| `ipv6` | `IPv6 فقط`            | يقيّد الاتصال بـ IPv6. يفشل بشكل مغلق إذا لم يكن لدى مضيف الوكيل سجل IPv6 ‏(AAAA).                                                                                                               |
+| قيمة   | تسمية UI            | سلوك                                                                                                                                                |
+| ------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS يختار الأسرة. بالنسبة لمضيف وكيل IP الحرفي، تعتبر العائلة جوهرية بالنسبة للحرفي؛ للحصول على اسم المضيف، كلا العائلتين مؤهلتان. هذا هو الافتراضي. |
+| `ipv4` | `IPv4 only`         | دبابيس الاتصال IPv4. فشل الإغلاق إذا لم يكن لدى مضيف الوكيل سجل IPv4 (A).                                                                           |
+| `ipv6` | `IPv6 only`         | دبابيس الاتصال IPv6. يفشل الإغلاق إذا لم يكن لدى مضيف الوكيل سجل IPv6 (AAAA).                                                                       |
 
-توجد نصوص واجهة المستخدم في `src/i18n/messages/en.json` (`labelFamily`، و`familyAuto`، و`familyIpv4`، و`familyIpv6`، و`familyHint`).
+سلاسل UI تعيش في `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## كيفية إعداده
+## كيفية تكوينه
 
-### لوحة المعلومات
+### لوحة القيادة
 
-يوجد المُحدِّد في نموذج الوكيل ضمن علامة تبويب **مجموعة الوكلاء**:
+المحدد موجود في شكل الوكيل لـ** تجمع الوكيل** فاتورة غير مدفوعة:
 
-1. افتح **لوحة المعلومات → الإعدادات → الوكيل → مجموعة الوكلاء**
-2. أضف وكيلاً أو عدّل وكيلاً موجودًا
-3. اضبط القائمة المنسدلة **عائلة IP** على `تلقائي (مكدس مزدوج)` أو `IPv4 فقط` أو `IPv6 فقط`
-4. احفظ
+1. يفتح** لوحة المعلومات إعدادات → → Proxy → Proxy Pool**
+2. إضافة أو تعديل الوكيل
+3. تعيين** عائلة IP** القائمة المنسدلة إلى `Auto (dual-stack)` أو `IPv4 only` أو `IPv6 only`
+4. يحفظ
 
-يُصيَّر عنصر التحكم بواسطة `ProxyRegistryManager.tsx` (ويُركَّب في `proxy/ProxyPoolTab.tsx`).
+يتم تقديم عنصر التحكم بواسطة `ProxyRegistryManager.tsx` (مثبت في `proxy/ProxyPoolTab.tsx`).
 
-### واجهة API
+### API
 
-يُعد الحقل `family` جزءًا من حمولات إنشاء سجل الوكيل وتحديثه، ويجري التحقق منه بواسطة `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`)، كما تعالجه الطلبات `POST` / `PATCH /api/v1/management/proxies`:
+يعد الحقل `family` جزءًا من حمولات create/update الخاصة بسجل الوكيل، ويتم التحقق من صحتها بواسطة `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ويتم التعامل معها بواسطة `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# إنشاء وكيل يعمل عبر IPv6 فقط
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# تغيير وكيل موجود ليعمل عبر IPv4 فقط
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-يُقبل الحقل نفسه أيضًا في كائن إعداد الوكيل المضمّن المستخدم لإدخالات الوكيل العلوي (`upstream_proxy_config.family`، راجع [نموذج البيانات](#data-model)).
+يتم قبول نفس الحقل أيضًا بواسطة كائن تكوين الوكيل المضمّن المستخدم لإدخالات الوكيل الرئيسي (`upstream_proxy_config.family`، راجع [نموذج البيانات](#data-model) ).
 
-للاطلاع على بقية واجهة API الخاصة بعمليات CRUD وتعيين الوكلاء، راجع [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+بالنسبة لبقية الوكيل CRUD/assignment API، راجع [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

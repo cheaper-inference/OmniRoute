@@ -185,51 +185,49 @@ OmniRouteን ከDocker ምስል የሚያስኬዱ ከሆነ፣ Chromiumን እ
 
 ---
 
-## የጸረ-ቫይረስ የተሳሳቱ ማስጠንቀቂያዎች
+## ጸረ-ቫይረስ የውሸት አዎንታዊ ነገሮች
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG `README.md`ን በ`MD:HttpRequest-inf[Susp]` ምክንያት ማግለያ ውስጥ ያስገባል
+### Avast/AVG የኳራንቲን `README.md` ከ `MD:HttpRequest-inf[Susp]` ጋር
 
-**ይህ የተሳሳተ ማስጠንቀቂያ ነው። ምንም ነገር በቫይረስ አልተበከለም፣ እና ምንም እርምጃ አያስፈልግም።**
+**ይህ የውሸት አዎንታዊ ነው። ምንም የተበከለ ነገር የለም, እና ምንም እርምጃ አያስፈልግም.**
 
-Avast እና AVG ብዙ HTTP ጥያቄዎችን የሚመስሉ አገናኞችን የያዙ ግልጽ-ጽሑፍ/Markdown ፋይሎችን የሚጠቁም ሂዩሪስቲክ ያስኬዳሉ። የOmniRoute `README.md` በnpm ጥቅሉ ውስጥ ተካትቶ ይላካል (በ`package.json` → `files` ውስጥ ተዘርዝሯል)፣ ስለዚህ በዓለም አቀፍ ጭነት ጊዜ በ`node_modules/omniroute/README.md` ላይ ይቀመጣል — እንዲሁም ~15 የ`http://localhost:20128/...` ምሳሌዎችን (የMCP HTTP/SSE የመዳረሻ ነጥቦችን፣ የA2A `.well-known` URLን፣ እና የ`curl` ቅንጥቦችን) ይዟል። ይህ የአገናኞች ጥግግት ሂዩሪስቲኩን ለማስነሳት በቂ ነው።
+አቫስት እና AVG ብዙ HTTP የሚጠይቁ አገናኞችን የያዙ plain-text/Markdown ፋይሎችን የሚያመላክት ሂውሪስቲክ ያካሂዳሉ። OmniRoute's `README.md` በ npm ጥቅል ውስጥ ይጓጓዛል (በ `package.json` → `files` ውስጥ ተዘርዝሯል)፣ ስለዚህ `node_modules/omniroute/README.md` ላይ የሚያርፍ በአለምአቀፍ ጭነት — እና ~ 15 `http://localhost:20128/...` ምሳሌዎችን ይይዛል (የ MCP HTTP/SSE የመጨረሻ ነጥቦች፣ A2A `.well-known` URL እና `curl` ቅንጥቦች)። ያ የአገናኝ ጥግግት ሂዩሪስቲክን ለማደናቀፍ በቂ ነው።
 
-ይህ በቅርቡ ብቻ የጀመረ ከሆነ፦ የፋይሉ ዓይነት አልተለወጠም። README የመዳረሻ ነጥቦች ሰንጠረዡን አስፋፍቷል (MCP HTTP + SSE + A2A ተጨምረዋል) እና ተጨማሪ የ`curl` ምሳሌዎች ተካትተዋል፣ ይህም ከገደቡ እንዲያልፍ አድርጎታል።
+ይህ የጀመረው በቅርብ ጊዜ ከሆነ፡ ፋይሉ በአይነት አልተለወጠም። README የመጨረሻ ነጥብ ሰንጠረዡን አሳደገ (MCP HTTP + SSE + A2A ተጨምሯል) እና ተጨማሪ `curl` ምሳሌዎችን አሳደገ፣ ይህም ከጣራው በላይ ገፋው።
 
-ፋይሉ ምንም ሊፈጸም የሚችል ይዘት የሌለው ንቁ ያልሆነ ሰነድ ነው። ከማግለያው በደህና መመለስ ይችላሉ።
+ፋይሉ ዜሮ ሊተገበር የሚችል ይዘት ያለው የማይሰራ ሰነድ ነው። ከኳራንቲን በደህና ወደነበረበት መመለስ ይችላሉ።
 
-**ማድረግ ያለብዎት፦**
+**ምን ለማድረግ፥**
 
-1. **ማሳወቂያዎቹን ያቁሙ** — የጭነት ማውጫውን በጸረ-ቫይረስዎ ውስጥ ከቅኝት ያስቀሩ (Avast፦ Settings → Exceptions)፣ የዓለም አቀፍ `node_modules` ዱካዎን እና/ወይም የOmniRoute ውሂብ ማውጫን (`~/.omniroute/`) ያክሉ።
-2. **የተሳሳተውን ማስጠንቀቂያ ሪፖርት ያድርጉ** — <https://www.avast.com/false-positive-file-form.php>፣ ማግለያ ውስጥ የገባውን `README.md` በማያያዝ። ችግሩ የአቅራቢው ሂዩሪስቲክ ለጽሑፍ ፋይል ከመጠን በላይ ምላሽ መስጠቱ ስለሆነ፣ ይህ ሁሉንም ሰው የሚጠቅም መፍትሔ ነው።
+1. **ማሳወቂያዎችን አቁም።** — በጸረ-ቫይረስዎ ውስጥ ያለውን የመጫኛ ማውጫ (አቫስት፡ Settings → Exceptions) አግልል፣ የአለምአቀፋዊ `node_modules` መንገድዎን በማከል and/or the OmniRoute data dir (`~/.omniroute/`)።
+2. **የውሸት አወንታዊውን ሪፖርት አድርግ** — <https://www.avast.com/false-positive-file-form.php>, የኳራንቲን `README.md` በማያያዝ. ይህ የጽሑፍ ፋይል ላይ የሻጩ ከፍተኛ ምላሽ መስጠት ስለሆነ ሁሉንም ሰው የሚረዳው ማስተካከያ ነው።
 
-**ይህን በእኛ በኩል ለምን “አናስተካክለውም”፦** ምሳሌዎቹ በሙሉ `http://localhost` ናቸው፣ እና localhost ከራስ-የተፈረሙ ሰርተፊኬቶች ችግር ውጭ `https` መሆን አይችልም። የአንድን አቅራቢ ሂዩሪስቲክ ለማለፍ ሰነዶቹን ማዛባት፣ የቅኝት መሣሪያውን ስህተት ለማርካት ሲባል ሁሉንም አንባቢ ይጎዳል።
+**ለምንድነው ይህንን ከጎናችን "የማናስተካክለው"** ምሳሌዎቹ ሁሉም `http://localhost` ናቸው፣ እና localhost በራስ የተፈረመ-የምስክር ወረቀት ግጭት ከሌለ `https` መሆን አይችልም። የአንዱን አቅራቢ ሂዩሪስቲክ ለማዳን ዶክመንቶችን ማጣመር የስካነር ስህተትን ለማርካት እያንዳንዱን አንባቢ ይጎዳል።
 
-### Kaspersky የDesktop መተግበሪያውን `PDM:Trojan.Win32.Generic` ብሎ ይጠቁማል
+### ካስፐርስኪ የዴስክቶፕ መተግበሪያውን `PDM:Trojan.Win32.Generic` ብሎ ይጠቁማል
 
-**ይህ ከባህሪያዊ ሂዩሪስቲክ የመጣ የተሳሳተ ማስጠንቀቂያ ነው። ምንም ነገር በቫይረስ አልተበከለም።** የKaspersky `PDM:` ቅድመ ቅጥያ፣ ውሳኔው ከሚታወቁ ማልዌሮች ጋር በማዛመድ ሳይሆን ጫኚው _ምን እንደሚያደርግ_ ከሚገመግመው Proactive Defense Module (System Watcher) መምጣቱን ያመለክታል። ሲነሳ Kaspersky መላውን ጭነት “ወደኋላ ይመልሳል” — አስቀድሞ የጻፋቸውን ፋይሎች ይሰርዛል — በዚህም ምክንያት መተግበሪያው የተበላሸ ወይም የጠፋ ይሆናል።
+**ይህ ከባህሪ ሂዩሪስቲክ የውሸት አዎንታዊ ነው። ምንም የተበከለ ነገር የለም።** የ Kaspersky's `PDM:` ቅድመ ቅጥያ ማለት ፍርዱ የሚመጣው ከፕሮአክቲቭ መከላከያ ሞጁል (System Watcher) ሲሆን ይህም ጫኚው _የሚሰራውን ከሚታወቅ ማልዌር ጋር ከማዛመድ ይልቅ ይፈርዳል። ሲቀጣጠል Kaspersky ሙሉውን ጭነት — "ወደ ኋላ ያንከባልልልናል" ቀደም ሲል — የጻፈውን ፋይሎች ይሰርዛል ስለዚህ መተግበሪያው የተሰበረ ወይም ጠፍቷል።
 
-የሚጠቁማቸው ፋይሎች ከDesktop መተግበሪያው ጋር የታሸጉ፣ ይፋ የተደረጉ ክፍት-ምንጭ ጥገኛዎች መደበኛ ክፍሎች ናቸው፤ ለምሳሌ፦
+የሚጠቁማቸው ፋይሎች ከዴስክቶፕ መተግበሪያ ጋር የተጣመሩ ክፍት ምንጭ ጥገኞች የአክሲዮን ክፍሎች ናቸው፣ ለምሳሌ፡-
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` እና
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev)፣ በመተግበሪያ ውስጥ ለአቅራቢ መግቢያ እና በአሳሽ ለሚደገፍ ውይይት የሚያገለግለው የአሳሽ ራስ-ሰር አሠራር ቤተ-መጻሕፍት።
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — በድር-ኩኪ አቅራቢዎች ላይ በአሳሽ አሻራ ለተለየ HTTP የሚያገለግለው በተወሰነ ስሪት የተቆለፈ `wreq-js` ቤተኛ binding (`<arch>` `x64` ወይም `arm64` ነው)።
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` እና `workerProcessEntry.js` — [Playwright](https://playwright.dev) ፣ ለውስጠ-መተግበሪያ አቅራቢ መግቢያ እና በአሳሽ ለሚደገፍ ውይይት የሚያገለግል የአሳሽ አውቶማቲክ ቤተ-መጽሐፍት።
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — የተሰካው `wreq-js` ቤተኛ ማሰሪያ በአሳሽ-አሻራ ለ HTTP በድር ኩኪ አቅራቢዎች (`<arch>` `x64` ወይም `arm64` ነው)።
 
-**ለምን ይነሳል፦** የWindows ጫኚው **ገና በኮድ አልተፈረመም**፣ ስለዚህ ያልተፈረመ NSIS ጫኚ ምንም ዝና የሌለው ሲሆን ባህሪያዊ ሂዩሪስቲኮችም በከፍተኛ ጥብቅነት ይሰራሉ። ይህ ከታሸገ ቤተኛ DLL እና በ`%LOCALAPPDATA%\Programs\OmniRoute` ስር ከሚጻፉ በመቶዎች ከሚቆጠሩ `.js` ፋይሎች (ከNext.js ብቻውን የሚሰራ ግንባታ የመጡ በhash ቅጥያ የተሰየሙ የጥቅል ማውጫዎችን ጨምሮ) ጋር ሲጣመር፣ ሂዩሪስቲኩን ለማስነሳት በቂ ነው። የኮድ ፊርማ ታቅዷል፤ እስኪተገበር ድረስ አዳዲስ ልቀቶች ይህን ሊደግሙ ይችላሉ።
+**ለምን ይቃጠላል:** Windows ጫኚው ነው።** እስካሁን በኮድ አልተፈረመም።** ስለዚህ ያልተፈረመ NSIS ጫኝ ዜሮ ስም አለው እና የባህሪ ሂዩሪስቲክስ በከፍተኛ ጠብ አጫሪነት ይሰራል። ከተጠቃለለ ቤተኛ DLL እና በ `%LOCALAPPDATA%\Programs\OmniRoute` ስር ከተፃፉ በመቶዎች ከሚቆጠሩ `.js` ፋይሎች ጋር (ከ Next.js ራሱን የቻለ ግንባታ በሃሽ ቅጥያ ያላቸው የጥቅል ማውጫዎችን ጨምሮ) ሲጣመር ይህ ሂሪስቲክን ለማደናቀፍ በቂ ነው። ኮድ መፈረም የታቀደ ነው; እስኪያርፍ ድረስ አዲስ የተለቀቁት ይህንን ሊደግሙት ይችላሉ።
 
-**ማድረግ ያለብዎት፦**
+**ምን ለማድረግ፥**
 
-1. **መጀመሪያ ማውረድዎን ያረጋግጡ** (ፋይሉ እንዳልተቀየረ ያረጋግጣል)። እያንዳንዱ ልቀት `latest.yml`ን ያትማል፣ በውስጡ ያለው `sha512` መስክ (base64) የ`OmniRoute.Setup.<version>.exe` ጫኚን ይሸፍናል። በPowerShell፣ ጫኚውን ከያዘው አቃፊ ውስጥ፦
+1. **መጀመሪያ ማውረድዎን ያረጋግጡ** (የተበላሸ ፋይልን ያስወግዳል)። እያንዳንዱ ልቀት `latest.yml` ን ያትማል፣ `sha512` መስክ (base64) `OmniRoute.Setup.<version>.exe` ጫኚውን ይሸፍናል። በ PowerShell ውስጥ፣ ጫኚውን ከያዘው አቃፊ፡-
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   ውጤቱ ከ`latest.yml` → `sha512` ጋር መመሳሰል አለበት። ካልተመሳሰለ ፋይሉን ይሰርዙ እና ከ[GitHub ልቀቶች ገጽ](https://github.com/diegosouzapw/OmniRoute/releases) ብቻ እንደገና ያውርዱ።
-2. **ይመልሱ + ከቅኝት ያስቀሩ** — ወደኋላ የተመለሱትን ንጥሎች ከማግለያው ይመልሱ እና ለ`%LOCALAPPDATA%\Programs\OmniRoute` ከቅኝት ማስቀሪያ ያክሉ (Kaspersky → Settings → Threats and Exclusions)፣ ከዚያ እንደገና ይጫኑ።
-3. **የተሳሳተውን ማስጠንቀቂያ ሪፖርት ያድርጉ** — <https://opentip.kaspersky.com/>። በተጠቃሚዎች የሚቀርቡ የተሳሳተ ማስጠንቀቂያ ሪፖርቶች ወደ የተፈቀዱ ዝርዝር የመጨመሩን ሂደት በእርግጥ ያፋጥናሉ።
+   ውጤቱ `latest.yml` → `sha512` ጋር መመሳሰል አለበት። ካልሆነ ፋይሉን ይሰርዙ እና ከ [GitHub መልቀቂያ ገጽ](https://github.com/cheaper-inference/OmniRoute/releases) ብቻ ያውርዱ።
+2. **የማያካትት + ወደነበረበት መልስ** — ከኳራንታይን ወደ ኋላ የተጠቀለሉትን እቃዎች ወደነበሩበት ይመልሱ እና ለ `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → ዛቻ እና ማግለያዎች) አግላይ ይጨምሩ እና ከዚያ እንደገና ይጫኑ።
+3. **የውሸት አወንታዊውን ሪፖርት አድርግ** — <https://opentip.kaspersky.com/>. በተጠቃሚ የቀረቡ FP ሪፖርቶች የፍቃድ ዝርዝርን ያፋጥኑታል።
 
 ---
 
@@ -839,10 +837,10 @@ omniroute serve --ready-timeout 180000
 
 ---
 
-## አሁንም ተቸግረዋል?
+## አሁንም ተጣብቋል?
 
-- **GitHub ችግሮች**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **አርክቴክቸር**: ለውስጣዊ ዝርዝሮች [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)ን ይመልከቱ
-- **API ማጣቀሻ**: ሁሉንም የመዳረሻ ነጥቦች ለማየት [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)ን ይመልከቱ
-- **የጤና ዳሽቦርድ**: የስርዓቱን ቅጽበታዊ ሁኔታ ለማየት **Dashboard → Health**ን ይፈትሹ
-- **ተርጓሚ**: የቅርጸት ችግሮችን ለማረም **Dashboard → Translator**ን ይጠቀሙ
+- **GitHub ጉዳዮች** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **አርክቴክቸር** ለውስጣዊ ዝርዝሮች [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) ይመልከቱ
+- **API ማጣቀሻ** ለሁሉም የመጨረሻ ነጥቦች [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) ይመልከቱ
+- **የጤና ዳሽቦርድ** : አረጋግጥ** ዳሽቦርድ → ጤና** ለእውነተኛ ጊዜ የስርዓት ሁኔታ
+- **ተርጓሚ** : ተጠቀም** ዳሽቦርድ → ተርጓሚ** የቅርጸት ችግሮችን ለማረም

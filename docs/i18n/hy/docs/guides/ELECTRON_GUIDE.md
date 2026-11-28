@@ -4,9 +4,9 @@
 
 ---
 
-> **Ճշմարտության աղբյուրը.** `electron/` աշխատանքային տարածք** Վերջին թարմացումը՝** 2026-06-28 — v3.8.40
+> **Ճշմարտության աղբյուրը.** `electron/` աշխատանքային տարածք
 
-OmniRoute առաքում է բազմպլատֆորմային աշխատասեղանի հավելված (Windows / macOS / Linux), որը կառուցված է**Electron 41** +** էլեկտրոնաշինարար 26.10** . Սեղանի հավելվածը ստեղծում է Next.js ինքնուրույն սերվերը որպես երեխա պրոցես, մատնանշում է `BrowserWindow` դրա վրա և ավելացնում է համակարգի սկուտեղ, ավտոմատ թարմացնող սարք, IPC կամուրջ և զրոյական կոնֆիգուրացիայի գաղտնի bootstrap:
+OmniRoute առաքում է բազմպլատֆորմային աշխատասեղանի հավելված (Windows / macOS / Linux), որը կառուցված է**Electron 41** +** էլեկտրոնաշինարար 26.10** . Սեղանի հավելվածը ստեղծում է Next.js ինքնուրույն սերվերը որպես երեխա գործընթաց, մատնանշում է `BrowserWindow` դրա վրա և ավելացնում է համակարգի սկուտեղ, ավտոմատ թարմացնող սարք, IPC կամուրջ և զրոյական կոնֆիգուրացիայի գաղտնի բեռնախցիկ:
 
 ## Ճարտարապետություն
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## Ավտոմատ թարմացում
 
-Օգտագործում է `electron-updater` GitHub մատակարարի հետ (`diegosouzapw/OmniRoute`):
+Օգտագործում է `electron-updater` GitHub մատակարարի հետ (`cheaper-inference/OmniRoute`):
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Իրադարձությունները վերահասցեավորվել են մատուցողին `update-status` IPC միջոցով՝ `checking`, `available`, `not-available`, `downloading` ( `percent` ով), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage ստորագրումը կամընտիր է — սահմանված `LINU
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Թողարկումները հրապարակվում են GitHub Releases (`diegosouzapw/OmniRoute`), որտեղ նաև `electron-updater` ստուգում է նոր տարբերակները:
+Թողարկումները հրապարակվում են GitHub Releases-ում (`cheaper-inference/OmniRoute`), որտեղ նաև `electron-updater` ստուգում է նոր տարբերակների առկայությունը:
 
 ## Անսարքությունների վերացում
 

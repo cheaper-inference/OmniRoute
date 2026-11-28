@@ -12,57 +12,53 @@ OmniRoute turi tris skirtingus, bet susijusius atsparumo mechanizmus. Kiekvienas
 
 > **Atsparumo perjungimo env-vs-dashboard pirmenybė.** Pasirenkamas atsparumas perjungiamas iš aplinkos — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — pateikia tik _numatytąjį_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Būlio reikšmė išliko `resilienceSettings` (prietaisų skydelis →** Nustatymai → atsparumas** / `PATCH /api/resilience`, saugomas `key_value`) laimi env reikšmę: normalizavimas (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) išsaugo saugomą loginę reikšmę, kai tik ji egzistuoja. Tokio env var nustatymas į `true` kai prietaisų skydelis jau išsaugojo `false` todėl niekas nekeičia — įjunkite jungiklį** Nustatymai → Atsparumas** (arba išvalykite išsaugotą lauką).
 
-## 1. Tiekėjo grandinės pertraukiklis (circuit breaker)
+## 1. Tiekėjo grandinės pertraukiklis
 
-**Apimtis:** visas tiekėjas (pvz., `glm`, `openai`, `anthropic`).
+**Taikymo sritis:** visas teikėjas (pvz., `glm`, `openai`, `anthropic`).
 
-**Paskirtis:** nutraukti srauto siuntimą tiekėjui, kuris nuolat patiria gedimus paslaugos (upstream) lygmenyje.
+**Paskirtis:** nustokite siųsti srautą tiekėjui, kuris nuolat žlunga upstream/service lygiu.
 
 **Įgyvendinimas:**
 
 - Pagrindinė klasė: `src/shared/utils/circuitBreaker.ts`
-- Integracija: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Būsenos API: `GET /api/monitoring/health`
-- Atstatymo API: `POST /api/resilience/reset`
-- Apvalkalai: `open-sse/services/accountFallback.ts`
-- DB lentelė: `domain_circuit_breakers`
+- Laidai: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Būsena API: `GET /api/monitoring/health`
+- Iš naujo nustatyti API: `POST /api/resilience/reset`
+- Įvyniojimai: `open-sse/services/accountFallback.ts`
+- DB stalas: `domain_circuit_breakers`
 
-**Būsenos:**
+**Valstybės:**
 
-- `CLOSED` — leidžiamas įprastas srautas
-- `DEGRADED` — srautas vis dar leidžiamas, tačiau stebimas padidėjęs tiekėjo gedimų skaičius; grįžtama į `CLOSED` po pakankamo sėkmingų užklausų skaičiaus, po sėkmingo ryšio patikrinimo arba praėjus ilgiausiai paskutinio gedimo rūšies `OPEN` sulaikymo trukmei (jos `cooldownByKind` reikšmei, o jei jos nėra – `resetTimeout`, × `maxBackoffMultiplier`, bet ne mažiau kaip viena atvėsinimo trukmė) be naujo gedimo
-- `OPEN` — tiekėjas laikinai užblokuojamas; kombinuotas maršrutizavimas jį praleidžia
-- `HALF_OPEN` — atstatymo laikotarpis pasibaigė; leidžiama tiriamoji užklausa
+- `CLOSED` — leidžiamas normalus eismas
+- `DEGRADED` — srautas vis dar leidžiamas, tačiau stebimi didesni teikėjo gedimai; grįžta į `CLOSED`, kai pakankamai sėkmingų rezultatų, atlikus galiojantį ryšio testą arba po ilgiausio `OPEN` palaikymo paskutiniam gedimo tipui (jo `cooldownByKind` vertė, kitaip `resetTimeout`, × `maxBackoffMultiplier`, bent vienas atvėsimas) be naujo gedimo
+- `OPEN` — teikėjas laikinai užblokuotas; kombinuotas maršrutas jį praleidžia
+- `HALF_OPEN` — reset skirtasis laikas praėjo; zondo prašymas leidžiamas
 
-**Konfigūruojamos numatytosios reikšmės (`open-sse/config/constants.ts`, rodomos skiltyje Valdymo skydas → Nustatymai → Atsparumas):**
+**Konfigūruojami numatytieji nustatymai (`open-sse/config/constants.ts`, rodomi prietaisų skydelyje → nustatymai → atsparumas):**
 
-| Klasė      | Pablogėjimas (`DEGRADED`) po | Atidarymas (`OPEN`) po | Atstatymo laikotarpis |
-| ---------- | ---------------------------- | ---------------------- | --------------------- |
-| OAuth      | 5 gedimų                     | 8 gedimų               | 60s                   |
-| API raktas | 7 gedimų                     | 12 gedimų              | 30s                   |
-| Vietinė    | išvestinė                    | 2 gedimų               | 15s                   |
+| Klasė      | Degradavo ties | Atidaroma val | Iš naujo nustatyti skirtąjį laiką |
+| ---------- | -------------- | ------------- | --------------------------------- |
+| OAuth      | 5 nesėkmės     | 8 nesėkmės    | 60-ieji                           |
+| API raktas | 7 nesėkmės     | 12 nesėkmių   | 30s                               |
 
-`degradationThreshold` nulemia, kada tiekėjas pereina į `DEGRADED`; `failureThreshold` nulemia, kada grandinė atidaroma ir tiekėjas praleidžiamas. Vietinių tiekėjų profiliai Atsparumo nustatymų puslapyje dar nerodomi.
+`degradationThreshold` valdo, kada teikėjas įveda `DEGRADED`; `failureThreshold` valdo, kada jis atsidaro ir praleidžiamas. `PROVIDER_PROFILES.local` (2 gedimai / 15s) yra apibrėžtas `open-sse/config/constants.ts` bet** dar neprijungta** : `getProviderCategory()` pateikia tik `oauth` arba `apikey`, todėl vietiniai teikėjai naudoja OAuth arba API rakto profilį.
 
-**Aktyvavimo kodai:** tik tiekėjo lygmens būsenų kodai `[408, 500, 502, 503, 504]`. Grandinė NETURI būti aktyvuojama dėl paskyros lygmens klaidų (dauguma 401/403/429 – jos priklauso atvėsinimo arba blokavimo mechanizmams).
+**Kelionės kodai:** tik teikėjo lygio būsenos `[408, 500, 502, 503, 504]`. Atlikite NOT trikdymą paskyros lygio klaidoms (dauguma 401/403/429 — tų, kurios priklauso atšalimui arba blokavimui).
 
-**Tingusis atkūrimas:** pasibaigus `OPEN` laikotarpiui, `getStatus()`, `canExecute()`, `getRetryAfterMs()` atnaujina būseną į `HALF_OPEN`. Tie patys nuskaitymai (ir kitas gedimas) laipsniškai grąžina pasenusią `DEGRADED` būseną atgal į `CLOSED`. Foninis laikmatis nereikalingas.
+**Tingus atsigavimas:** kai baigiasi `OPEN` galiojimo laikas, `getStatus()`, `canExecute()`, `getRetryAfterMs()` atnaujinama būsena į `HALF_OPEN`. Tas pats skaitymas (ir kita nesėkmė) pasenusią `DEGRADED` suskaido atgal į `CLOSED`. Nereikia foninio laikmačio.
 
 ---
 
-### Pasirenkamas globalusis tiekėjų atvėsinimas (laiko lango užtvara)
+### Pasirinkimas visuotinis teikėjo atšalimas (langų vartai)
 
-Ketvirtas, **pasirenkamas** sluoksnis (`PROVIDER_COOLDOWN_ENABLED`, pagal numatymą **išjungtas**) išlaiko tarp užklausų išlikusią gedimus patiriančių tiekėjų atmintį faile
-`open-sse/services/providerCooldownTracker.ts`, į kurią kreipiasi kombinuoto (combo) maršruto tikslų parinkimas, kad viena po kitos ateinančios combo užklausos nebebandytų ką tik sugedusio tiekėjo. Tiekėjo lygmens įrašai paiso `PROVIDER_PROFILES` laiko lango užtvaros:
+Ketvirtasis,** pasirinkti** sluoksnis (`PROVIDER_COOLDOWN_ENABLED`, numatytasis** išjungti** ) išsaugo kryžminių užklausų atmintį apie nesėkmingus teikėjus `open-sse/services/providerCooldownTracker.ts`, nagrinėjant kombinuotą tikslinę skiriamąją gebą, todėl iš eilės pateikiamos kombinuotos užklausos nustoja pakartotinai nukreipti teikėją, kuriam ką tik nepavyko. Teikėjo lygio įrašai gerbia `PROVIDER_PROFILES` lango vartus:
 
-| Profilis   | Aktyvuojama po (`providerFailureThreshold`) | Per (`providerFailureWindowMs`) | Atvėsinimo trukmė (`providerCooldownMs`) |
-| ---------- | ------------------------------------------: | ------------------------------: | ---------------------------------------: |
-| OAuth      |                                        `10` |                         `15min` |                                   `5min` |
-| API raktas |                                        `15` |                         `30min` |                                  `10min` |
+| Profilis   | kelionės po (`providerFailureThreshold`) | viduje (`providerFailureWindowMs`) | vėsina (`providerCooldownMs`) |
+| ---------- | ---------------------------------------: | ---------------------------------: | ----------------------------: |
+| OAuth      |                                     `10` |                            `15min` |                        `5min` |
+| API raktas |                                     `15` |                            `30min` |                       `10min` |
 
-Neviršijus slenksčio, tiekėjas **nėra** laikomas atvėsinamu; sėkminga užklausa išvalo langą. Ryšio lygmens įrašai (`provider:connectionId`) vietoj to išlaiko eksponentinį `minRetryCooldownMs → maxRetryCooldownMs` atsitraukimą. Perrašymai:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Regresijos apsauga: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Teikėjas yra žemiau slenksčio** ne** laikomas vėsinimu; sėkmė išvalo langą. Ryšio lygio įrašai (`provider:connectionId`) išlaiko eksponentinį `minRetryCooldownMs → maxRetryCooldownMs` atsitraukimą. Nepaisoma: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regresijos apsauga: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Ryšio vėsinimas
 
@@ -781,6 +777,21 @@ kaip išeikvota kvota. Sąžiningi apribojimai:
 
 ---
 
+## Kai pats OmniRoute nepasiekiamas
+
+Tiekėjo grandinės pertraukiklis, ryšio aušinimas ir modelio užraktas veikia šliuzo viduje. Jei klientas negali pasiekti šliuzo, jis gauna ryšio klaidą. OmniRoute negali perimti tos nesėkmės. Klientas nusprendžia, ar bandyti dar kartą ir kokį pranešimą rodyti.
+
+OmniRoute šiuo metu neteikia kliento atsarginių dalių ir neapibrėžia jokios politikos. Konfigūruokite bet kokį alternatyvų maršrutą kliente arba priešais šliuzą.
+
+- `GET /api/health` tikrina gyvumą be autentifikavimo.
+- `GET /api/health/ping` patikrina pasirengimą, įskaitant tai, ar duomenų bazė reaguoja.
+- `GET /api/monitoring/health` suteikia autentiškiems skambintojams išsamesnę sveikatos apžvalgą.
+- `omniroute launch <tool>` patikrina `/api/monitoring/health` prieš paleidžiant klientą. Jis gali automatiškai paleisti vietinį šliuzą. Naudojant `--no-start`, nepasiekiamas šliuzas sukelia `GatewayUnreachable` ir išėjimo kodą `69`.
+
+Norėdami atjungti klientą nuo OmniRoute, vadovaukitės [Grąžinti kliento konfigūraciją](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Derinimas
 
 - Svertinis combo atsako `503 all_targets_cooling_down` (`Retry-After` nustatyta, `diagnostics.excluded` išvardija kiekvieną taikinį su `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → telkinys sukonfigūruotas ir prijungtas, tiesiog kiekvienas taikinys atmestas atsparumo laikmačio; įspėjimas `[COMBO] Weighted selection: every target excluded before dispatch — …` nurodo priežastis ir likusias sekundes. `404 no_executable_targets` iš to paties combo reiškia, kad atsparumo laikmatis nedalyvavo (nėra ką vykdyti arba visos paskyros neatlaikė pasiekiamumo patikros). Įgyvendinta `open-sse/services/combo/pinRecovery.ts` naudojant iš `targetResolution.ts` surinktas išimtis.
@@ -792,98 +803,68 @@ kaip išeikvota kvota. Sąžiningi apribojimai:
 
 ---
 
-## Vykdymo būsena — greitoji agento nuoroda
+## Vykdymo laiko būsenos — agento greita nuoroda
 
-> Pažodžiui perkelta iš `AGENTS.md` → „Resilience Runtime State“ (PR #12743), kad agento
-> vadovas neviršytų 40k konteksto biudžeto. Tai sutrumpinta, agentui skirta aukščiau
-> esančių skyrių versija; sunumeruotieji skyriai išlieka pilnuoju šaltiniu.
+> Pažodžiui perkelta iš `AGENTS.md` → „Atsparumo vykdymo būsena“ (PR #12743), todėl agento vadovas neviršija 40 000 kontekstinio biudžeto. Tai sutrumpintas, į agentą nukreiptas aukščiau pateiktų skyrių vaizdas; sunumeruoti skyriai lieka visa nuoroda.
 
-OmniRoute turi tris susijusius, bet skirtingus laikinų gedimų mechanizmus. Derindami
-maršrutų parinkimo elgseną laikykite jų taikymo sritis atskirai. Greitosios apžvalgos
-žemėlapiui žr.
-[3 sluoksnių atsparumo diagramą](../diagrams/exported/resilience-3layers.svg)
-(šaltinis: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)).
+OmniRoute turi tris susijusius, bet skirtingus laikinų gedimų mechanizmus. Derindami maršruto elgesį, jų taikymo sritį laikykite atskirai. Žr. [3 sluoksnių atsparumo diagramą](../diagrams/exported/resilience-3layers.svg) (šaltinis: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ), kad gautumėte trumpą žemėlapį.
 
-### Teikėjo grandinės pertraukiklis
+### Tiekėjo grandinės pertraukiklis
 
-**Apimtis**: visas teikėjas, pvz., `glm`, `openai`, `anthropic`.
+**Taikymo sritis** : visas teikėjas, pvz., `glm`, `openai`, `anthropic`.
 
-**Paskirtis**: nustoti siųsti srautą teikėjui, kuris nuolat patiria gedimus aukštesniojo
-srauto / paslaugos lygyje, kad vienas nesveikas teikėjas nelėtintų kiekvienos užklausos.
+**Tikslas** : nustokite siųsti srautą tiekėjui, kuriam pakartotinai nepavyksta upstream/service lygiu, kad vienas nesveikas teikėjas nesustabdytų kiekvienos užklausos.
 
-**Įgyvendinimas**:
+**Įgyvendinimas** :
 
 - Pagrindinė klasė: `src/shared/utils/circuitBreaker.ts`
-- Pokalbio praleidimo / vykdymo sujungimas: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Vykdymo būsenos API: `src/app/api/monitoring/health/route.ts`
-- Bendrieji apvalkalai: `open-sse/services/accountFallback.ts`
-- Išsaugota būsenų lentelė: `domain_circuit_breakers`
+- Pokalbių gate/execution laidai: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Vykdymo laiko būsena API: `src/app/api/monitoring/health/route.ts`
+- Bendri įvyniojimai: `open-sse/services/accountFallback.ts`
+- Išlikusios būsenos lentelė: `domain_circuit_breakers`
 
-**Būsenos** (4 — `src/shared/utils/circuitBreaker.ts`):
+**valstybėse** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: leidžiamas įprastas srautas.
-- `DEGRADED`: ankstyvojo įspėjimo juosta — gedimai peržengė degradacijos slenkstį, bet dar
-  ne pertraukiklio slenkstį; srautas vis dar teka, suvestinės rodo įspėjimą. Sėkmingas
-  jungties testas arba ramus langas be naujų gedimų grąžina ją į `CLOSED`
-  (langas aprašytas `docs/architecture/RESILIENCE_GUIDE.md`).
-- `OPEN`: teikėjas laikinai užblokuotas; iškvietėjai gauna „provider-circuit-open“ atsakymą
-  arba combo maršrutų parinkimas pereina prie kito taikinio.
-- `HALF_OPEN`: atstatymo laikas baigėsi; leidžiama bandomoji užklausa. Sėkmė uždaro
-  pertraukiklį, nesėkmė vėl jį atidaro.
+- `CLOSED`: leidžiamas įprastas eismas.
+- `DEGRADED`: išankstinio įspėjimo juostos — gedimai peržengė degradacijos slenkstį, bet dar ne pertraukimo slenkstį; eismas vis dar teka, prietaisų skydeliai rodo įspėjimą. Tinkamas ryšio testas arba tylus langas be naujo gedimo grąžina jį į `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` turi langą).
+- `OPEN`: teikėjas laikinai užblokuotas; skambinantieji sulaukia atviros teikėjo grandinės atsakymo arba kombinuoto maršruto parinkimo peršoka į kitą taikinį.
+- `HALF_OPEN`: iš naujo nustatytas laikas baigėsi; leisti pateikti tyrimo užklausą. Sėkmė uždaro pertraukiklį, nesėkmė vėl atidaro.
 
-**Numatytieji** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, naudojama per
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` faile `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` faile `src/sse/handlers/chatHelpers.ts`). Viso teikėjo
-pertraukiklis veikia pagal `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Numatytieji nustatymai** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, suvartojama per `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` in `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). Viso teikėjo pertraukiklis veikia `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profilis   | degraduoja nuo | atsidaro nuo (`circuitBreakerThreshold`) | atstatymas (`circuitBreakerReset`) |
-| ---------- | -------------: | ---------------------------------------: | ---------------------------------: |
-| OAuth      |            `5` |                                      `8` |                              `60s` |
-| API raktas |            `7` |                                     `12` |                              `30s` |
-| Vietinis   |    (išvestinė) |                                      `2` |                              `15s` |
+| Profilis   | degraduoja ties | atsidaro (`circuitBreakerThreshold`) | atstatyti (`circuitBreakerReset`) |
+| ---------- | --------------: | -----------------------------------: | --------------------------------: |
+| OAuth      |             `5` |                                  `8` |                             `60s` |
+| API raktas |             `7` |                                 `12` |                             `30s` |
 
-`PROVIDER_PROFILES` taip pat apibrėžia `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) ir `providerCooldownMs` (5/10/1 min): jie maitina
-**pasirenkamo globalaus teikėjo atvėsimo (Provider Cooldown) lango kontrolę**
-(`PROVIDER_COOLDOWN_ENABLED`, pagal numatymą išjungta) — teikėjo lygio įrašas
-`open-sse/services/providerCooldownTracker.ts` laikomas vėstančiu tik po
-`providerFailureThreshold` gedimų per `providerFailureWindowMs`, o tada vėsta
-`providerCooldownMs` trukmę. Tai NĖRA aktyvaus pertraukiklio slenksčiai — nederinkite jų
-tikėdamiesi pertraukiklio elgsenos. Kiekvieną numatytąją reikšmę galima pakeisti per
-`OMNIROUTE_PROVIDER_BREAKER_*` ir `OMNIROUTE_CIRCUIT_BREAKER_*` aplinkos kintamuosius;
-tiksli vykdymo laiko nuorodų lentelė yra `docs/architecture/RESILIENCE_GUIDE.md`.
+`local` profilis (`2` errors / `15s`) taip pat egzistuoja `PROVIDER_PROFILES`, bet jis nėra prijungtas prie pertraukiklio: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) priima tik `oauth` arba `apikey`, o `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) grąžina vieną iš šių dviejų (neregistruoti teikėjai gauna `apikey`).
 
-Teikėjo pertraukiklį turėtų suaktyvinti tik teikėjo lygio gedimų būsenos:
+`PROVIDER_PROFILES` taip pat apibrėžia `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) ir `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, kur vietinės reikšmės yra inertiškos dėl tos pačios priežasties, kaip nurodyta aukščiau: šios galios** pasirenkamo pasaulinio teikėjo atvėsimo lango vartai** (`PROVIDER_COOLDOWN_ENABLED`, numatytasis išjungtas) — teikėjo lygio įrašas `open-sse/services/providerCooldownTracker.ts` laikomas vėsinimu tik po `providerFailureThreshold` gedimų `providerFailureWindowMs` viduje, o tada vėsinamas `providerCooldownMs`. Jie yra NOT gyvo pertraukiklio slenksčiai — nesuderina jų tikintis pertraukiklio elgesio. Kiekvienas numatytasis nustatymas yra nepaisomas naudojant `OMNIROUTE_PROVIDER_BREAKER_*` ir `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; Vykdymo laiko tikslumo nuorodų lentelė yra `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Tik teikėjo lygio gedimo būsenos turėtų išjungti tiekėjo pertraukiklį:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Neaktyvinkite viso teikėjo pertraukiklio dėl įprastų paskyros / rakto / modelio klaidų,
-kaip kad dauguma `401`, `403` ar `429` atvejų. Jos paprastai priklauso jungties atvėsimo
-arba modelio blokavimo sričiai. Bendrojo API rakto teikėjo `403` turėtų būti atstatoma,
-nebent ji klasifikuojama kaip galutinė teikėjo / paskyros klaida.
+Neišjunkite viso teikėjo pertraukiklio dėl įprastų account/key/model klaidų, tokių kaip dauguma `401`, `403` arba `429` atvejų. Paprastai jie priklauso ryšio vėsinimui arba modelio blokavimui. Bendrojo API rakto teikėjo `403` turėtų būti atkuriamas, nebent jis klasifikuojamas kaip terminalo provider/account klaida.
 
-Pertraukiklis naudoja tingųjį atsistatymą (lazy recovery), o ne foninį laikmatį. Kai `OPEN`
-laikas baigiasi, skaitymai, tokie kaip `getStatus()`, `canExecute()` ir
-`getRetryAfterMs()`, atnaujina būseną į `HALF_OPEN`, todėl suvestinės ir combo
-kandidatų kūrėjai nebeišskiria pasibaigusio providerio amžiams.
+Pertraukiklis naudoja tingų atkūrimą, o ne foninį laikmatį. Pasibaigus `OPEN` galiojimo laikui, skaitymai, pvz. `getStatus()`, `canExecute()` ir `getRetryAfterMs()` atnaujina būseną į `HALF_OPEN`, todėl prietaisų skydeliai ir kombinuoti kūrėjai nenustoja visam laikui išskirti pasibaigusio galiojimo teikėjo.
 
-### Jungties atvėsimas
+### Ryšio vėsinimas
 
-**Apimtis**: viena providerio jungtis/paskyra/raktas.
+**Taikymo sritis** : vienas tiekėjas connection/account/key.
 
-**Paskirtis**: laikinai praleisti vieną netinkamą raktą/paskyrą, tuo pačiu leidžiant
-kitoms to paties providerio jungtims ir toliau aptarnauti užklausas.
+**Tikslas** : laikinai praleisti vieną blogą key/account, o kitiems to paties teikėjo ryšiams toliau teikti užklausas.
 
-**Įgyvendinimas**:
+**Įgyvendinimas** :
 
-- Įrašymo/atnaujinimo kelias: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Paskyrų pasirinkimas/filtravimas: `src/sse/services/auth.ts::getProviderCredentials...`
-- Atvėsimo skaičiavimas: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Write/update kelias: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Sąskaita selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Atvėsinimo skaičiavimas: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Nustatymai: `src/lib/resilience/settings.ts`
 
-Svarbūs providerio jungčių laukai:
+Svarbūs teikėjo ryšių laukai:
 
 ```ts
 rateLimitedUntil;
@@ -894,68 +875,50 @@ errorCode;
 backoffLevel;
 ```
 
-Paskyros pasirinkimo metu jungtis praleidžiama, kol:
+Pasirinkus paskyrą ryšys praleidžiamas, kai:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Atvėsimai taip pat yra tingūs: kai `rateLimitedUntil` yra praeityje, jungtis vėl tampa
-tinkama. Sėkmingai panaudojus, `clearAccountError()` išvalo `testStatus`,
-`rateLimitedUntil`, klaidų laukus ir `backoffLevel`.
+Atvėsimai taip pat yra tingūs: kai `rateLimitedUntil` yra praeityje, ryšys vėl tampa tinkamas. Sėkmingai naudojant, `clearAccountError()` išvalo `testStatus`, `rateLimitedUntil`, klaidų laukus ir `backoffLevel`.
 
-Numatytoji jungties atvėsimo elgsena:
+Numatytasis ryšio aušinimo veiksmas:
 
-- OAuth bazinis atvėsimas: `5s`.
-- API rakto bazinis atvėsimas: `3s`.
-- API rakto `429` atveju, kai įmanoma, pirmenybė turėtų būti teikiama pirminio šaltinio
-  (upstream) pakartotinio bandymo užuominoms (`Retry-After`, reset antraštėms arba
-  analizuojamam reset tekstui).
-- Kartotiniams atstatomiems gedimams naudojamas eksponentinis atidėjimas (exponential
-  backoff):
+- OAuth bazinis aušinimas: `5s`.
+- API rakto bazės vėsinimas: `3s`.
+- API raktas `429` turėtų teikti pirmenybę prieš srovę bandomoms pakartotinėms užuominoms (`Retry-After`, iš naujo nustatyti antraštes arba analizuojamą atstatymo tekstą), kai jie yra.
+- Pasikartojančios atkuriamos gedimai naudoja eksponentinį atsitraukimą:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Apsauga nuo „thundering herd" (minios antplūdžio) neleidžia lygiagretiems gedimams toje
-pačioje jungtyje pakartotinai pratęsti atvėsimo arba dukart padidinti `backoffLevel`.
+Apsauga nuo griaustinio apsaugo, kad dėl tos pačios jungties gedimų tuo pačiu metu pakartotinai pratęsiamas atvėsimas arba dvigubai padidinamas `backoffLevel`.
 
-Galutinės būsenos nėra atvėsimai. `banned`, `expired` (kuri tampa galutine tik po N
-ribotų pakartotinių bandymų per `EXPIRED_RETRY_MAX`) ir `credits_exhausted` skirtos
-likti nepasiekiamos, kol pasikeis kredencialai/nustatymai arba operatorius jas
-atstatys. Nepalikite galutinių būsenų perrašytas laikina atvėsimo būsena.
+Terminalo būsenos nėra atvėsimai. `banned`, `expired` (kuris tampa terminalu tik po N ribotų bandymų per `EXPIRED_RETRY_MAX`) ir `credits_exhausted` turi likti nepasiekiami, kol credentials/settings nepakeis arba operatorius juos nenustatys iš naujo. Neperrašykite terminalų būsenų trumpalaikio vėsinimo būsena.
 
 ### Modelio blokavimas
 
-**Apimtis**: provideris + jungtis + modelis.
+**Taikymo sritis** : teikėjo + ryšio + modelis.
 
-**Paskirtis**: išvengti visos jungties išjungimo, kai tik vienas modelis tai jungčiai
-yra nepasiekiamas arba apribotas kvotos.
+**Tikslas** : venkite išjungti viso ryšio, kai nepasiekiamas tik vienas modelis arba tam ryšiui taikoma kvota.
 
 Pavyzdžiai:
 
-- Provideriai su kvotomis pagal modelį, grąžinantys `429`.
-- Vietiniai provideriai, grąžinantys `404` vienam trūkstamam modeliui.
-- Konkrečiam provideriui būdingi režimo/modelio leidimų gedimai, pavyzdžiui, tam tikri
-  Grok režimai.
+- Pagal modelį kvotos teikėjai grąžina `429`.
+- Vietiniai tiekėjai grąžina `404` už vieną trūkstamą modelį.
+- Konkretaus teikėjo mode/model leidimo triktys, pvz., pasirinkti Grok režimai.
 
-Modelio blokavimas įgyvendintas `open-sse/services/accountFallback.ts` ir leidžia tai
-pačiai jungčiai toliau aptarnauti kitus modelius.
+Modelio blokavimas veikia `open-sse/services/accountFallback.ts` ir leidžia ta pačia jungtimi ir toliau aptarnauti kitus modelius.
 
 ### Derinimo gairės
 
-- Jei visi providerio raktai praleidžiami, patikrinkite tiek providerio pertraukiklio
-  būseną, tiek kiekvienos jungties `rateLimitedUntil`/`testStatus`.
-- Jei provideris po atstatymo lango atrodo visam laikui išskirtas, patikrinkite, ar
-  kodas nuskaito neapdorotą `state`, o ne naudoja `getStatus()`/`canExecute()`.
-- Jei vienas providerio raktas nepavyksta, bet kiti turėtų veikti, teikite pirmenybę
-  jungties atvėsimui, o ne providerio pertraukikliui.
-- Jei nepavyksta tik vienas modelis, teikite pirmenybę modelio blokavimui, o ne
-  jungties atvėsimui.
-- Jei būsena turėtų atsistatyti savaime, ji turėtų turėti būsimą laiko žymą/atstatymo
-  laiką ir skaitymo kelią, kuris atnaujina pasibaigusią būseną. Nuolatinės būsenos
-  reikalauja rankinių kredencialų ar konfigūracijos pakeitimų.
+- Jei visi teikėjo klavišai yra praleisti, patikrinkite tiek teikėjo pertraukiklio būseną, tiek kiekvieno ryšio `rateLimitedUntil`/`testStatus`.
+- Jei po atstatymo lango teikėjas pasirodo visam laikui pašalintas, patikrinkite, ar kodas skaito neapdorotą `state` o ne naudoja `getStatus()`/`canExecute()`.
+- Jei vienas teikėjo raktas sugenda, bet kiti turėtų veikti, pirmenybę teikite ryšio atvėsimui, o ne teikėjo pertraukikliui.
+- Jei sugenda tik vienas modelis, pirmenybę teikite modelio blokavimui, o ne ryšio vėsinimui.
+- Jei būsena turėtų atsistatyti savaime, ji turėtų turėti būsimą timestamp/reset skirtąjį laiką ir skaitymo kelią, kuris atnaujina pasibaigusio galiojimo būseną. Nuolatinėms būsenoms reikia rankiniu būdu pakeisti kredencialus arba konfigūraciją.
 
 ---
 

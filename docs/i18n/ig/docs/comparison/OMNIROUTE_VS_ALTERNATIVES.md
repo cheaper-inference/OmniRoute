@@ -11,7 +11,7 @@ Ntụle ebumnuche vs ndị na-anya ụzọ AI mepere emepe ama ama.
 | Njirimara                                                 |                  OmniRoute 3.8                   |     LiteLLM 1.x      | OpenRouter (SaaS) |     Portkey      |
 | --------------------------------------------------------- | :----------------------------------------------: | :------------------: | :---------------: | :--------------: |
 | **Ndị na-enye ihe**                                       |                     **329**                      |         ~100         |        ~50        |       ~30        |
-| **Free/no-auth katalọgụ ndenye**                          |                     **155**                      |         n/a          |       ngafe       |       n/a        |
+| **Ndị na-enye ohere n'efu**                               |              **50 nwere ohere efu**              |         n/a          |       ngafe       |       n/a        |
 | **Onye na-anabata onwe ya**                               |                        ✅                        |          ✅          |        ❌         |      ⚠ ugwo      |
 | **OAuth katalọgụ ndenye**                                 |                      **23**                      | ele mmadụ anya n'ihu |        ❌         |        ❌        |
 | **combos na-adaghachi onwe ya**                           |                  **22 atụmatụ**                  |    dabere na mkpa    |   dabere n'ọkwa   |       arọ        |
@@ -21,7 +21,7 @@ Ntụle ebumnuche vs ndị na-anya ụzọ AI mepere emepe ama ama.
 | **Ọgbọ multimodal (speech/music/video)**                  |                        ✅                        |          ❌          |       ngafe       |        ❌        |
 | **Ihe nkesa MCP arụnyere n'ime ya**                       |            ✅ 110 ngwaọrụ, 33 scopes             |          ❌          |        ❌         |        ❌        |
 | **A2A protocol**                                          |                     ✅ 6 nka                     |          ❌          |        ❌         |        ❌        |
-| **Ebe nchekwa (FTS5 + vector )**                          |                        ✅                        |          ❌          |        ❌         |        ❌        |
+| **Ebe nchekwa (FTS5 + vector)**                           |                        ✅                        |          ❌          |        ❌         |        ❌        |
 | **Guardrails (PII, injection, ọhụụ)**                     |                        ✅                        | ele mmadụ anya n'ihu |        ❌         |     ✅ ugwo      |
 | **Ngwakọta ndị nnọchite igwe ojii**                       |           Codex, Cursor, Devin, Jules            |          ❌          |        ❌         |        ❌        |
 | **Ihe nbibi sekit maka onye na-eweta ya**                 |             ✅ 3-ala, ume ume mgbake             |         isi          |        ❌         |        ✅        |
@@ -38,9 +38,9 @@ Ntụle ebumnuche vs ndị na-anya ụzọ AI mepere emepe ama ama.
 
 ## Mgbe ịhọrọ OmniRoute
 
-- Ị na-elekọta onwe gị ma chọọ** mkpuchi onye na-eweta kacha** (ndị na-enye 394, ndenye katalọgụ 155 free/no-auth )
+- Ị na-elekọta onwe gị ma chọọ** mkpuchi onye na-eweta kacha** (ndị na-eweta 394, 50 nwere ohere efu)
 - Ị chọrọ a** ihe nkesa MCP arụnyere n'ime ya** (ngwaọrụ LLM, ebe nchekwa, nka ekpughere dị ka ngwaọrụ)
-- Ị chọrọ**A2A protocol** maka usoro ọrụ nke onye nnọchi anya
+- Ị chọrọ**A2A protocol** maka ndị nnọchi anya ọrụ na-arụ ọrụ
 - Ị chọrọ** stealth mkpịsị aka mkpịsị aka** (JA3/JA4) iji zere nchọta site n'elu CAPTCHAs
 - Ị chọrọ** atụmatụ ụlọ ọrụ** (guardrails, evals, audit trail) na-enweghị ụgwọ SaaS
 
@@ -56,12 +56,12 @@ Ntụle ebumnuche vs ndị na-anya ụzọ AI mepere emepe ama ama.
 - Ị dị njikere ịkwụ ụgwọ kwa-token tinyere mgbakwunye ọnụahịa SaaS
 - Ị chọrọ **otu usoro ịkwụ ụgwọ** gafee ndị na-eweta niile
 
-## Mgbe ị ga-ahọrọ Portkey
+## Mgbe ịhọrọ Portkey
 
-- Ị chọrọ **SLA azụmahịa** nwere nkwa oge ọrụ
-- Ị na-ahọrọ **dashboard a na-elekọta** na-enweghị ibu ọrụ arụmọrụ
-- Ị chọrọ **atụmatụ nrubeisi ụlọ ọrụ** dị njikere ozugbo
+- Ị chọrọ a** SLA azụmahịa** na nkwa oge
+- Ị masịrị a** dashboard jisiri ike** na-enweghị ops n'elu
+- Ị chọrọ** nnabata ụlọ ọrụ** atụmatụ si igbe
 
 ---
 
-_Emelitere ikpeazụ: 2026-08-02. Nyefee mmezi site na PR iji mee ka tebụl a nọgide bụrụ nke ziri ezi._
+_Were mmezi site na PR ka idebe tebụl a zie ezi._

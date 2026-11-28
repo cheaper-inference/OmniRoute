@@ -4,11 +4,9 @@
 
 ---
 
-> **แหล่งข้อมูลหลัก:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **อัปเดตล่าสุด:** 2026-09-02 — v3.8.51
-> **กลุ่มผู้อ่าน:** วิศวกรที่ดูแลการผสานรวมแบบซ่อนตัวซึ่งเฉพาะเจาะจงตามผู้ให้บริการ
+> **ที่มาของความจริง:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** ผู้ชม:** วิศวกรที่ดูแลการบูรณาการการลักลอบเฉพาะของผู้ให้บริการ
 
-OmniRoute ผสานรวมกับผู้ให้บริการที่ระบบเอดจ์ตรวจสอบลายนิ้วมือของไคลเอนต์ที่ไม่เป็นทางการอย่างจริงจัง (TLS JA3/JA4, ลำดับส่วนหัว, รูปแบบเนื้อหา JSON, โทเค็นความถูกต้องสมบูรณ์) หน้านี้อธิบายพื้นผิวการซ่อนตัวที่ OmniRoute เปิดให้ใช้งานและตำแหน่งที่นำไปใช้งาน
+OmniRoute ทำงานร่วมกับผู้ให้บริการที่มี Edge คอยสแกนลายนิ้วมือไคลเอนต์ที่ไม่เป็นทางการ (TLS JA3/JA4, การสั่งซื้อส่วนหัว, รูปร่าง JSON, โทเค็นความสมบูรณ์) หน้านี้บันทึกการเปิดเผยพื้นผิวล่องหน OmniRoute และตำแหน่งที่นำไปใช้
 
 ## ประกาศด้านกฎหมายและจริยธรรม
 
@@ -76,65 +74,68 @@ Native Runtime ไม่พร้อมใช้งาน ผู้เรีย�
 
 ---
 
-## ชุดพรางตัว Claude Code
+## ชุดซ่อนรหัส Claude
 
-เมื่อเปิดใช้ `cliCompatMode` OmniRoute จะปรับรูปแบบคำขอ Claude ขาออกให้ไม่สามารถแยกแยะจากทราฟฟิกของ `claude-cli` ได้ โดยมีโมดูลสามตัวทำงานร่วมกัน:
+เมื่อเปิด `cliCompatMode` OmniRoute จะปรับเปลี่ยนคำขอ Claude ขาออกใหม่ ดังนั้นจึงแยกไม่ออกจากการรับส่งข้อมูล `claude-cli` สามโมดูลทำงานร่วมกัน:
 
 ### `claudeCodeFingerprint.ts`
 
-คำนวณลายนิ้วมือ `cc_version` ขนาด 3 อักขระที่ฝังอยู่ในส่วนหัวการเรียกเก็บเงิน:
+คำนวณลายนิ้วมือ 3-char `cc_version` ที่ฝังอยู่ในส่วนหัวการเรียกเก็บเงิน:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (ฮาร์ดโค้ดไว้ และตรงกับไคลเอนต์อย่างเป็นทางการ)
-- อินพุต: อักขระที่ดัชนี 4, 7 และ 20 ของข้อความผู้ใช้แรก + สตริงเวอร์ชัน
-- เอาต์พุต: คำนำหน้าเลขฐานสิบหกขนาด 3 อักขระ
+- `FINGERPRINT_SALT = "59cf53e54c78"` (ฮาร์ดโค้ด ตรงกับไคลเอนต์อย่างเป็นทางการ)
+- อินพุต: ตัวอักษรที่ดัชนี 4, 7, 20 ของข้อความข้อความผู้ใช้ตัวแรก สตริงเวอร์ชัน +
+- เอาต์พุต: คำนำหน้าฐานสิบหก 3 อักขระ
 
 ### `claudeCodeCCH.ts` (แฮชเนื้อหาไคลเอนต์)
 
-การตรวจสอบความถูกต้องสมบูรณ์ฝั่งเซิร์ฟเวอร์ซึ่ง Claude Code CLI อย่างเป็นทางการคำนวณผ่าน Bun/Zig โดย OmniRoute นำมาสร้างใหม่ด้วย `xxhash-wasm`:
+ความสมบูรณ์ฝั่งเซิร์ฟเวอร์ตรวจสอบรหัส Claude อย่างเป็นทางการ CLI คำนวณผ่าน Bun/Zig. OmniRoute ปรับใช้ใหม่ด้วย `xxhash-wasm`:
 
-1. แปลงบอดีเป็นข้อมูลอนุกรมโดยใช้ตัวแทน `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. เลขฐานสิบหกตัวพิมพ์เล็กขนาด 5 อักขระ โดยเติมศูนย์ด้านหน้า
-4. แทนที่ `cch=00000;` ด้วยโทเค็นที่คำนวณได้
+1. ทำให้เนื้อหาเป็นอนุกรมด้วยตัวยึดตำแหน่ง `cch=00000;`
+2. สร้างมุมมองแฮชด้วยการแทนที่ข้อความธรรมดาสองตัว ตามลำดับนี้ (`hashView()`):
+   - ทุกการจับคู่ของ `/"model":"[^"]*"/g` จะกลายเป็น `"model":""` — การแข่งขันจะหยุดที่ `"` แรก ดังนั้นค่าที่มีเครื่องหมายคำพูดแบบ Escape (`"model":"a\"b"`) จะว่างเปล่าจนถึงเครื่องหมายคำพูดนั้นเท่านั้น ดังที่ลูกค้าทำ
+   - ทุกการจับคู่ของ `/"max_tokens":\d+,|,?"max_tokens":\d+/g` จะถูกลบออกเฉพาะค่าตัวเลข — ที่ความลึกเท่าใดก็ได้
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. เลขฐานสิบหกตัวพิมพ์เล็ก 5 อักขระแบบไม่มีเบาะ
+5. แทนที่ `cch=00000;` ด้วยโทเค็นที่คำนวณแล้ว
 
 ค่าคงที่:
 
-- ค่าตั้งต้น: `0x6e52736ac806831e`
+- Seed: `0x4d659218e32a3268` (จับคู่การจับภาพย้อนกลับของ Claude Code 2.1.252 และ 2.1.322)
 - รูปแบบ: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-แทรก Unicode **ตัวเชื่อมความกว้างเป็นศูนย์** (`U+200D`) หลังอักขระแรกของชื่อไคลเอนต์ที่ "ละเอียดอ่อน" เพื่อให้ตัวกรองต้นทางไม่สามารถค้นหาชื่อเหล่านั้นด้วย grep ได้ รายการคำเริ่มต้น:
+แทรก Unicode** ช่างไม้ที่มีความกว้างเป็นศูนย์** (`U+200D`) หลังอักขระตัวแรกของชื่อไคลเอ็นต์ "ละเอียดอ่อน" ดังนั้นตัวกรองอัปสตรีมจึงไม่สามารถ grep ได้ รายการคำเริ่มต้น:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-ใช้กับ: บล็อก `system`, `messages[].content` ทั้งหมด และ `tools[].description` / `tools[].function.description` ผู้ดำเนินการสามารถกำหนดทับได้ผ่าน `setSensitiveWords()`
+นำไปใช้กับ: บล็อก `system`, ทั้งหมด `messages[].content` และ `tools[].description` / `tools[].function.description` โอเปอเรเตอร์เอาชนะได้ผ่าน `setSensitiveWords()`
 
 ### `claudeCodeCompatible.ts` — ผู้ให้บริการ `anthropic-compatible-cc-*`
 
-สำหรับรีเลย์ Anthropic ของบุคคลที่สามซึ่งยอมรับเฉพาะทราฟฟิก "Claude Code จริง":
+สำหรับรีเลย์ Anthropic ของบริษัทอื่นที่ยอมรับเฉพาะการรับส่งข้อมูล "รหัส Claude จริง" เท่านั้น:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- โดยค่าเริ่มต้น `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- ตัวเลือก "Enable redact-thinking beta" ระดับการเชื่อมต่อจะเพิ่ม `redact-thinking-2026-02-12` เมื่อระบบต้นทางที่เข้ากันได้กับ CC ต้องการสตรีมการคิดที่ผ่านการปกปิดโดยเฉพาะ
-- ตัวเลือก "Enable summarized thinking display" ระดับการเชื่อมต่อจะจัดเก็บ `providerSpecificData.requestDefaults.summarizeThinking` และเพิ่ม `display: "summarized"` ลงในคำขอการคิดที่เข้ากันได้กับ CC ซึ่งยังไม่ได้กำหนดโหมดการแสดงผล
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (ตระกูล Opus/Sonnet 4.x)
-- พาธเริ่มต้น: `/v1/messages?beta=true`
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` ตามค่าเริ่มต้น
+- การสลับ "เปิดใช้งานการคิดแบบเบต้า" ต่อการเชื่อมต่อจะเพิ่ม `redact-thinking-2026-02-12` เมื่อต้นทางที่เข้ากันได้กับ CC ต้องใช้สตรีมการคิดแบบแก้ไขโดยเฉพาะ
+- ต่อการเชื่อมต่อ "เปิดใช้งานการแสดงการคิดแบบสรุป" สลับจัดเก็บ `providerSpecificData.requestDefaults.summarizeThinking` และเพิ่ม `display: "summarized"` ไปยัง CC คำขอการคิดที่เข้ากันได้ซึ่งยังไม่ได้ตั้งค่าโหมดการแสดงผล
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` ( ตระกูล Opus/Sonnet 4.x)
+- เส้นทางเริ่มต้น: `/v1/messages?beta=true`
 
-โมดูลที่เกี่ยวข้องในชุดเดียวกัน:
+โมดูลพี่น้องในกลุ่มเดียวกัน:
 
-- `claudeCodeConstraints.ts` — กฎอุณหภูมิ + การควบคุมแคช
-- `claudeCodeToolRemapper.ts` — การแมปชื่อเครื่องมือใหม่
-- `claudeCodeExtraRemap.ts` — การปรับเพย์โหลดเพิ่มเติมให้เป็นมาตรฐาน
+- `claudeCodeConstraints.ts` — อุณหภูมิ กฎการควบคุมแคช +
+- การแมปชื่อเครื่องมือ `claudeCodeToolRemapper.ts` — ใหม่
+- `claudeCodeExtraRemap.ts` — การปรับมาตรฐานเพย์โหลดเพิ่มเติม
 
 ---
 
@@ -148,7 +149,7 @@ aider, continue.dev, copilot, avante, codecompanion
 
 ### ความเสี่ยง ⚠️ : `ANTIGRAVITY_CREDITS=always` (ฮอตสปอตการแบนบัญชี)
 
-เส้นทาง `ANTIGRAVITY_CREDITS=always` (ใช้โดย `open-sse/executors/antigravity.ts`)** ทั้งหมด** ร้องขอผ่าน Antigravity AI Credit Overages (เครดิต Google ที่จ่ายแล้ว) แทนที่จะปล่อยให้โควต้าระดับฟรีของ Google กั้นสิ่งกีดขวาง นี่เป็นเอกสารที่เป็นคุณลักษณะ แต่เป็น** รายงานการละเมิด ToS ที่พบบ่อยที่สุดฉบับเดียวที่เราเห็น** — บัญชี Google Ultra หลายบัญชีถูกแบนด้วย `403 / "service disabled for ToS violation" / insufficient_quota` หลังจากใช้งานด้วย `=always` เป็นเวลาสองสามชั่วโมง
+เส้นทาง `ANTIGRAVITY_CREDITS=always` (ใช้โดย `open-sse/executors/antigravity.ts`)** ทั้งหมด** ร้องขอผ่าน Antigravity AI Credit Overages (เครดิต Google ที่จ่ายแล้ว) แทนที่จะปล่อยให้โควต้าระดับฟรีของ Google กั้นสิ่งกีดขวาง นี่เป็นเอกสารที่เป็นคุณลักษณะ แต่เป็น** รายงานการละเมิดข้อกำหนดในการให้บริการฉบับเดียวที่พบบ่อยที่สุดที่เราเห็น** — บัญชี Google Ultra หลายบัญชีถูกแบนด้วย `403 / "service disabled for ToS violation" / insufficient_quota` หลังจากใช้งานด้วย `=always` เป็นเวลาสองสามชั่วโมง
 
 การบังคับใช้ต้นน้ำเปิดอยู่** ฝั่งของ Google** ไม่ใช่สิ่งใดที่ OmniRoute สามารถป้องกันได้ ชื่อ env var และเอกสารที่มีอยู่ทำให้ดูเหมือนเป็นปุ่มที่ปลอดภัยในการพลิก มันไม่ใช่
 
@@ -194,7 +195,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — อ่าน `process.env.ANTIGRAVITY_CREDITS`
 - ประปาข้อมูลรับรอง `src/lib/oauth/providers/antigravity.ts` —
-- รายงานเหตุการณ์ดั้งเดิม: การสนทนา [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- รายงานเหตุการณ์ดั้งเดิม: การสนทนา [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

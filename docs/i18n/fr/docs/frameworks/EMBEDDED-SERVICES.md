@@ -4,7 +4,7 @@
 
 ---
 
-> **Version:** v3.8.44** Dernière mise à jour :** 2026-10-28** Public:** Ingénieurs ajoutant, maintenant ou déboguant des services embarqués (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Version:** v3.8.44** Public:** Ingénieurs ajoutant, maintenant ou déboguant des services embarqués (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Les services intégrés sont des outils side-car de processus installés localement que OmniRoute installe, supervise et expose en tant que cibles de routage de première classe. Contrairement aux fournisseurs externes (qui sont accessibles sur Internet via les clés API ), les services intégrés s'exécutent sur la même machine que OmniRoute et communiquent via un bouclage.
 
@@ -45,7 +45,7 @@ Tous les huit suivent le même modèle de surveillance :
 - OmniRoute les installe sous `DATA_DIR/services/{name}/` (isolés du propre `package.json` de OmniRoute)
 - OmniRoute les génère et les surveille en tant que processus enfants
 - OmniRoute injecte une clé API éphémère dans l'environnement de l'enfant et la fait tourner sans temps d'arrêt (le cas échéant)
-- Toutes les voies de gestion (`/api/services/*`) sont**LOCAL_ONLY** — accessible uniquement depuis le bouclage (règle stricte n°17)
+- Toutes les voies de gestion (`/api/services/*`) sont**LOCAL_ONLY** — accessible uniquement depuis le bouclage (règle stricte #17)
 
 ### Décisions clés (du plan de conception)
 
@@ -209,7 +209,7 @@ les conditions de concurrence lorsque, par exemple, le démarrage automatique et
 
 ## 4. référence API
 
-Tous les itinéraires sous `/api/services/` sont**LOCAL_ONLY** (bouclage uniquement, règle stricte n°17). Les requêtes sans bouclage reçoivent `403 LOCAL_ONLY` quel que soit le jeton d'authentification.
+Tous les itinéraires sous `/api/services/` sont**LOCAL_ONLY** (bouclage uniquement, règle stricte #17). Les requêtes sans bouclage reçoivent `403 LOCAL_ONLY` quel que soit le jeton d'authentification.
 
 ### 4.1 9Points de terminaison du routeur (11 routes)
 
@@ -232,11 +232,11 @@ Installez 9Router à partir de npm. Crée `DATA_DIR/services/9router/` avec ses 
 | Statut | Description                                                                |
 | ------ | -------------------------------------------------------------------------- |
 | `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                     |
-| `400`  | Corps de la requête non valide (échec de la validation Zod )               |
+| `400`  | Corps de requête invalide (échec de validation Zod )                       |
 | `409`  | Déjà installé (verrou maintenu)                                            |
 | `500`  | l'installation de npm a échoué — voir `message` pour une erreur conviviale |
 
-**Remarques :** Utilise `execFile('npm', [...])` — sans shell, sans interpolation (règle stricte n°13). Les erreurs EACCES apparaissent sous forme de messages conviviaux.
+**Remarques :** Utilise `execFile('npm', [...])` — sans shell, sans interpolation (règle stricte #13). Les erreurs EACCES apparaissent sous forme de messages conviviaux.
 
 ---
 
@@ -555,9 +555,7 @@ Ce proxy :
 - Supprime `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` de la réponse
 - Réécrit les réponses HTML pour injecter `<base href>` et normaliser les chemins absolus (`/foo` → `/dashboard/.../embed/foo`)
 
-Les mises à niveau WebSocket pour le tableau de bord intégré sont gérées par un serveur compagnon sur un port dédié (voir `src/lib/services/embedWsProxy.ts`).
-
-Chaque mise à niveau est autorisée avant l'ouverture du tunnel, avec les mêmes règles que la route d'intégration HTTP : le homologue doit être un bouclage sans en-tête de transfert de proxy inverse, un navigateur `Origin` doit être une origine du tableau de bord (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` étend les valeurs par défaut du bouclage) et l'appelant a besoin d'une session de tableau de bord ou d'une clé API de portée de gestion à moins que la connexion au tableau de bord ne soit désactivée.
+Les mises à niveau WebSocket pour le tableau de bord intégré sont gérées par un serveur compagnon sur un port dédié (voir `src/lib/services/embedWsProxy.ts`). Chaque mise à niveau est autorisée avant l'ouverture du tunnel, avec les mêmes règles que la route d'intégration HTTP : le homologue doit être un bouclage sans en-tête de transfert de proxy inverse, un navigateur `Origin` doit être une origine du tableau de bord (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` étend les valeurs par défaut du bouclage) et l'appelant a besoin d'une session de tableau de bord ou d'une clé API de portée de gestion à moins que la connexion au tableau de bord ne soit désactivée.
 
 **Sécurité:** Les routes proxy intégrées sont classées sous `LOCAL_ONLY_API_PREFIXES` et ne peuvent être atteintes qu'à partir du bouclage. Un attaquant qui obtient un JWT via un tunnel Cloudflare/Ngrok ne peut pas accéder aux services embarqués par proxy.
 
@@ -565,73 +563,55 @@ Chaque mise à niveau est autorisée avant l'ouverture du tunnel, avec les même
 
 ## 5. Sécurité
 
-### Application de LOCAL_ONLY (règle stricte nº 17)
+### application de LOCAL_ONLY (règle stricte #17)
 
-Toutes les routes sous `/api/services/` et `/dashboard/providers/services/*/embed/` sont
-classées LOCAL_ONLY dans `src/server/authz/routeGuard.ts`. La vérification de l’adresse
-de bouclage s’exécute systématiquement avant toute branche d’authentification :
+Tous les itinéraires sous `/api/services/` et `/dashboard/providers/services/*/embed/` sont classés comme LOCAL_ONLY dans `src/server/authz/routeGuard.ts`. La vérification de bouclage s'exécute sans condition avant toute branche d'authentification :
 
 ```
-la requête arrive
+request arrives
   → isLocalOnlyPath(path)?
-      → hors bouclage → 403 LOCAL_ONLY (toujours, avant la vérification d’authentification)
-      → bouclage      → poursuit vers l’authentification normale
+      → non-loopback → 403 LOCAL_ONLY (always, before auth check)
+      → loopback    → fall through to normal auth
 ```
 
-Cela empêche un JWT divulgué (par exemple, via un tunnel) de déclencher `npm install` ou
-le lancement de processus. Consultez `docs/security/ROUTE_GUARD_TIERS.md` pour connaître
-la matrice complète des niveaux.
+Cela empêche une fuite JWT (par exemple, via un tunnel) de déclencher la génération `npm install` ou de processus. Voir `docs/security/ROUTE_GUARD_TIERS.md` pour la matrice de niveau complète.
 
-### Injection de clé API
+### injection de clé API
 
-9Router et Mux nécessitent une clé API/un jeton bearer pour leurs propres points de terminaison HTTP.
-OmniRoute :
+9Router et Mux nécessitent un jeton API key/bearer pour leurs propres points de terminaison HTTP. OmniRoute:
 
-1. Génère une clé via `crypto.randomBytes(32).toString("base64url")` avec un
-   préfixe propre au service (`nr_` pour 9Router, `mx_` pour Mux).
-2. La chiffre au repos à l’aide d’AES-256-GCM (le même algorithme de chiffrement que celui utilisé pour les identifiants des fournisseurs).
-3. La déchiffre et l’injecte comme variable d’environnement au moment du lancement —
-   `NINEROUTER_API_KEY` pour 9Router, `MUX_SERVER_AUTH_TOKEN` pour Mux (jamais comme option CLI,
-   afin que le jeton n’apparaisse jamais dans `ps`/les listes de processus).
-4. Ne renvoie jamais la clé en texte clair dans une réponse HTTP.
+1. Génère une clé via `crypto.randomBytes(32).toString("base64url")` avec un préfixe spécifique au service (`nr_` pour 9Router, `mx_` pour Mux).
+2. Le chiffre au repos à l'aide de AES-256-GCM (même chiffre que celui utilisé pour les informations d'identification du fournisseur).
+3. Le décrypte et l'injecte en tant que variable d'environnement au moment de l'apparition — `NINEROUTER_API_KEY` pour 9Router, `MUX_SERVER_AUTH_TOKEN` pour Mux (jamais d'indicateur CLI, donc le jeton n'apparaît jamais dans les listes `ps`/process).
+4. Ne renvoie jamais la clé en texte brut dans une réponse HTTP.
 
-CLIProxyAPI reçoit une clé dédiée au plan de données, injectée au lancement
-(`needsApiKey: true` — utilisée pour la synchronisation des modèles avec l’adaptateur).
+CLIProxyAPI reçoit une clé de plan de données dédiée injectée lors de l'apparition (`needsApiKey: true` — utilisé pour la synchronisation du modèle avec l'adaptateur).
 
-### Protection contre les SSRF
+### défense SSRF
 
-Le proxy HTTP inverse (`/dashboard/.../embed/[...path]`) est codé en dur pour transmettre
-les requêtes uniquement à `http://127.0.0.1:{port}`. Il ne suit jamais les redirections
-vers des destinations hors bouclage. La bibliothèque `ssrf-req-filter` est utilisée pour
-rejeter toute URL en amont qui se résout en dehors de la plage de bouclage.
+Le proxy inverse HTTP (`/dashboard/.../embed/[...path]`) est codé en dur pour être transmis uniquement à `http://127.0.0.1:{port}`. Il ne suit jamais les redirections vers des destinations sans bouclage. La bibliothèque `ssrf-req-filter` est utilisée pour rejeter tout URL en amont qui se résout en dehors de la plage de bouclage.
 
-### Sécurité du shell (règle stricte nº 13)
+### Sécurité des coques (règle dure #13)
 
-`npm install` est invoqué via `execFile('npm', ['install', pkg, '--prefix', dir])` —
-sans littéraux de gabarit, sans shell et sans interpolation de chemins externes dans la chaîne
-de commande. Les valeurs d’exécution (ports, clés API) sont transmises via l’objet `env`
-du processus enfant.
+`npm install` est invoqué via `execFile('npm', ['install', pkg, '--prefix', dir])` — pas de littéraux de modèle, pas de shell, pas d'interpolation de chemins externes dans la chaîne de commande. Les valeurs d'exécution (ports, clés API ) sont transmises via l'objet `env` de l'enfant.
 
-### Assainissement des erreurs (règle stricte nº 12)
+### Désinfection des erreurs (règle stricte #12)
 
-Toutes les réponses d’erreur provenant de `/api/services/*` passent par `buildErrorBody()` ou
-`sanitizeErrorMessage()`. Les valeurs brutes de `err.stack` et `err.message` ne sont jamais
-renvoyées telles quelles à l’appelant.
+Toutes les réponses d'erreur de `/api/services/*` passent par `buildErrorBody()` ou `sanitizeErrorMessage()`. `err.stack` et `err.message` bruts ne sont jamais renvoyés textuellement à l'appelant.
 
 ---
 
-## 6. Ajout d’un nouveau service intégré
+## 6. Ajout d'un nouveau service intégré
 
-Suivez ces 8 étapes. Consultez les implémentations existantes dans `src/lib/services/installers/`
-et `src/app/api/services/` comme références canoniques.
+Suivez ces 8 étapes. Lisez les implémentations existantes dans `src/lib/services/installers/` et `src/app/api/services/` comme référence canonique.
 
-### Étape 1 — Créer le programme d’installation
+### Étape 1 — Créer le programme d'installation
 
-Créez `src/lib/services/installers/{name}.ts` sur le modèle de `ninerouter.ts` :
+Créer `src/lib/services/installers/{name}.ts` modélisé sur `ninerouter.ts`:
 
 ```typescript
 export const NAME_PACKAGE = "your-npm-package";
-export const NAME_DEFAULT_PORT = 20132; // choisissez un port libre
+export const NAME_DEFAULT_PORT = 20132; // pick a free port
 
 export async function install(version = "latest"): Promise<InstallResult> { ... }
 export async function update(version = "latest"): Promise<InstallResult> { ... }
@@ -641,12 +621,11 @@ export async function getInstalledVersion(): Promise<string | null> { ... }
 export async function getLatestVersion(): Promise<string | null> { ... }
 ```
 
-Utilisez `runNpm(['install', NAME_PACKAGE, '--prefix', dir])` depuis `installers/utils.ts`
-— jamais `execSync` ni d’interpolation shell.
+Utilisez `runNpm(['install', NAME_PACKAGE, '--prefix', dir])` à partir de `installers/utils.ts` — jamais `execSync` ou interpolation shell.
 
-### Étape 2 — Enregistrer dans l’amorçage
+### Étape 2 : — S'inscrire dans bootstrap
 
-Ajoutez une entrée `ServiceEntry` au tableau `SERVICES` dans `src/lib/services/bootstrap.ts` :
+Ajoutez un `ServiceEntry` au tableau `SERVICES` dans `src/lib/services/bootstrap.ts`:
 
 ```typescript
 {
@@ -656,40 +635,23 @@ Ajoutez une entrée `ServiceEntry` au tableau `SERVICES` dans `src/lib/services/
   healthIntervalMs: 5_000,
   stopTimeoutMs: 15_000,
   logsBufferBytes: 5_242_880,
-  needsApiKey: true, // false si aucune clé API n’est nécessaire
+  needsApiKey: true, // false if no API key needed
 }
 ```
 
-Étendez `buildSpawnArgsFactory()` pour prendre en charge `cfg.tool === "myservice"`.
+Étendez `buildSpawnArgsFactory()` pour gérer `cfg.tool === "myservice"`.
 
-#### Contrat extensible de plug-in de fournisseur (Phase 1, nº 7333)
+#### Contrat fournisseur-plugin enfichable (Phase 1, #7333)
 
-`src/lib/services/providerPlugins/` introduit un contrat `ServiceProviderPlugin` qui
-regroupe les champs `ServiceEntry` du fichier `bootstrap.ts` d’un backend et les champs
-du modèle de manifeste de `serviceBackends.ts` dans un seul objet, au lieu d’exprimer
-séparément la structure du même backend dans deux fichiers sans lien. À ce jour, **seul `9router` a
-été migré** — `bootstrap.ts` dérive son entrée `SERVICES[]` de
-`getServiceProviderPlugin("9router")` (`src/lib/services/providerPlugins/registry.ts`),
-en levant une erreur au démarrage si le plug-in venait à manquer. `cliproxy`, `mux` et `bifrost`
-conservent sans modification les littéraux `SERVICES[]` en ligne préexistants.
+`src/lib/services/providerPlugins/` introduit un contrat `ServiceProviderPlugin` qui regroupe les champs `bootstrap.ts` `ServiceEntry` et les champs du modèle de manifeste `serviceBackends.ts` d'un backend dans un seul objet, au lieu que la forme du même backend soit exprimée séparément dans deux fichiers non liés. Au moment d'écrire ces lignes** seul `9router` est migré** — `bootstrap.ts` dérive son entrée `SERVICES[]` de `getServiceProviderPlugin("9router")` (`src/lib/services/providerPlugins/registry.ts`), générant une erreur de démarrage si le plugin est manquant. `cliproxy`, `mux` et `bifrost` restent inchangés sur les littéraux `SERVICES[]` en ligne préexistants.
 
-`open-sse/config/providerPluginManifest.ts` a également reçu une fonction auxiliaire additive
-`createServiceBackendManifestEntry(pluginId, template)` qui construit une entrée
-`ProviderPluginManifestEntry` correctement formée à partir d’une entrée `SERVICE_BACKEND_MANIFEST_TEMPLATE` — elle
-n’est **pas** encore intégrée à un chemin de requête actif (ni `generateProviderPluginManifestFromRegistry()`
-ni `/v1/providers/[provider]/models`) ; cela reste à faire ultérieurement, une fois le contrat
-validé pour un deuxième backend.
+`open-sse/config/providerPluginManifest.ts` a également gagné un assistant `createServiceBackendManifestEntry(pluginId, template)` additif qui construit un `ProviderPluginManifestEntry` bien formé à partir d'une entrée `SERVICE_BACKEND_MANIFEST_TEMPLATE` — c'est** pas** connecté à n'importe quel chemin de requête en direct (ni `generateProviderPluginManifestFromRegistry()` ni `/v1/providers/[provider]/models`); cela reste un suivi une fois le contrat prouvé pour un deuxième backend.
 
-Les éléments suivants sont reportés à des PR ultérieures et suivis dans l’issue nº 7333 : migrer `cliproxyapi` via le
-même registre, généraliser `mux`/`bifrost` dans l’union `ServiceBackendPluginId`,
-intégrer au contrat de plug-in les cas particuliers de routage des exécuteurs (`open-sse/executors/index.ts`,
-`open-sse/handlers/chatCore/executorProxy.ts`) et connecter
-`createServiceBackendManifestEntry()` à un chemin actif du code de manifeste/modèles.
+Différé du suivi PRs, suivi sous le problème #7333: migration `cliproxyapi` via le même registre, généralisation `mux`/`bifrost` dans l'union `ServiceBackendPluginId`, intégration du boîtier spécial de routage de l'exécuteur (`open-sse/executors/index.ts`, `open-sse/handlers/chatCore/executorProxy.ts`) dans le contrat du plugin et câblage `createServiceBackendManifestEntry()` dans un chemin de code manifest/models en direct.
 
-### Étape 3 — Ajouter la migration et les données initiales de la base de données
+### Étape 3 — Ajouter la migration et la graine DB
 
-Assurez-vous que le service dispose d’une ligne dans `version_manager` au moyen d’une migration dans
-`src/lib/db/migrations/`. La ligne doit contenir :
+Assurez-vous que le service dispose d'une ligne dans `version_manager` via une migration dans `src/lib/db/migrations/`. La ligne doit avoir :
 
 ```sql
 INSERT OR IGNORE INTO version_manager (tool, status, auto_start, provider_expose)
@@ -698,61 +660,52 @@ VALUES ('myservice', 'not_installed', 0, 0);
 
 ### Étape 4 — Créer les 7 points de terminaison API
 
-Sous `src/app/api/services/{name}/` :
+Sous `src/app/api/services/{name}/`:
 
 ```
-_lib.ts            fonction auxiliaire getOrInitSupervisor()
-install/route.ts   POST — appelle installer.install()
-start/route.ts     POST — appelle supervisor.start()
-stop/route.ts      POST — appelle supervisor.stop()
-restart/route.ts   POST — appelle supervisor.restart()
-update/route.ts    POST — appelle installer.update()
-status/route.ts    GET  — fusionne l’état en direct et celui de la base de données
-auto-start/route.ts POST — bascule l’indicateur auto_start
+_lib.ts            getOrInitSupervisor() helper
+install/route.ts   POST — calls installer.install()
+start/route.ts     POST — calls supervisor.start()
+stop/route.ts      POST — calls supervisor.stop()
+restart/route.ts   POST — calls supervisor.restart()
+update/route.ts    POST — calls installer.update()
+status/route.ts    GET  — merges live + DB status
+auto-start/route.ts POST — toggles auto_start flag
 ```
 
-La route partagée `GET /api/services/[name]/logs` est déjà câblée — aucune modification
-n’y est nécessaire.
+La route `GET /api/services/[name]/logs` partagée est déjà câblée — aucune modification n'est nécessaire à cet endroit.
 
-Déléguez toutes les réponses d’erreur à `createErrorResponse()` / `buildErrorBody()`.
+Déléguez toutes les réponses d'erreur via `createErrorResponse()` / `buildErrorBody()`.
 
 ### Étape 5 — Ajouter à LOCAL_ONLY_API_PREFIXES
 
-Dans `src/server/authz/routeGuard.ts`, vérifiez que `/api/services/` est déjà répertorié.
-Si vous introduisez un nouveau préfixe (par exemple, `/api/tools/`), ajoutez-le à la fois à
-`LOCAL_ONLY_API_PREFIXES` et, s’il lance des processus, à `SPAWN_CAPABLE_PREFIXES`.
-Ajoutez un test dans `tests/unit/authz/routeGuard.test.ts`.
+Dans `src/server/authz/routeGuard.ts`, vérifiez que `/api/services/` est déjà répertorié. Si vous introduisez un nouveau préfixe (par exemple, `/api/tools/`), ajoutez-le à la fois à `LOCAL_ONLY_API_PREFIXES` et, s'il génère des processus, à `SPAWN_CAPABLE_PREFIXES`. Ajoutez un test dans `tests/unit/authz/routeGuard.test.ts`.
 
-### Étape 6 — Ajouter l’onglet d’interface utilisateur
+### Étape 6 — Ajouter l'onglet UI
 
-Créez `src/app/(dashboard)/dashboard/providers/services/tabs/{Name}ServiceTab.tsx`.
-Réutilisez les composants partagés :
+Créez `src/app/(dashboard)/dashboard/providers/services/tabs/{Name}ServiceTab.tsx`. Réutilisez les composants partagés :
 
-- `ServiceStatusCard` — état en temps réel + badge d’intégrité
+- `ServiceStatusCard` — état en direct badge de santé +
 - `ServiceLifecycleButtons` — Démarrer / Arrêter / Redémarrer / Mettre à jour
-- `ServiceLogsPanel` — suivi des journaux via SSE (se connecte à `/api/services/{name}/logs`)
-- `ApiKeyCard` — affichage + rotation de la clé (si `needsApiKey: true`)
+- `ServiceLogsPanel` — SSE log tail (se connecte à `/api/services/{name}/logs`)
+- La clé `ApiKeyCard` — révèle la rotation de + (si `needsApiKey: true`)
 
-Enregistrez l’onglet dans `ServicesPageShell.tsx`.
+Enregistrez l'onglet dans `ServicesPageShell.tsx`.
 
-### Étape 7 — Ajouter l’entrée de fournisseur (si le service est une cible de routage)
+### Étape 7 — Ajoutez l'entrée du fournisseur (si le service est une cible de routage)
 
-Si le service intégré expose un endpoint `/v1/chat/completions` compatible avec OpenAI :
+Si le service intégré expose un point de terminaison `/v1/chat/completions` compatible OpenAI :
 
 1. Ajoutez une entrée de fournisseur dans `src/shared/constants/providers.ts` avec `isEmbeddedService: true`.
-2. Créez `open-sse/executors/{name}.ts` en étendant `BaseExecutor`. Recherchez à nouveau le port et
-   la clé API pour chaque requête (ne les mettez jamais en cache dans le constructeur). Retournez une
-   réponse `503 service_not_running` lorsque l’état du superviseur n’est pas `"running"`.
-3. Enregistrez les modèles dans `open-sse/config/providerRegistry.ts` avec le préfixe du service
-   (par exemple, `myservice/sub/model`). `modelSync.ts` les maintiendra à jour.
+2. Créez `open-sse/executors/{name}.ts` étendant `BaseExecutor`. Re-rechercher le port et la clé API par requête (ne jamais mettre en cache dans le constructeur). Renvoie une réponse `503 service_not_running` lorsque l'état du superviseur n'est pas `"running"`.
+3. Enregistrez les modèles dans `open-sse/config/providerRegistry.ts` avec le préfixe de service (par exemple, `myservice/sub/model`). `modelSync.ts` les tiendra à jour.
 
 ### Étape 8 — Documenter et tester
 
-1. Mettez à jour `docs/frameworks/EMBEDDED-SERVICES.md` (ce fichier) — ajoutez le service au
-   tableau de la §1 et tout nouvel endpoint à la §4.
-2. Ajoutez des tests unitaires dans `tests/unit/services/` (cycle de vie, programme d’installation, forme de l’API).
-3. Ajoutez un test d’intégration dans `tests/integration/services/` (conditionné par `RUN_SERVICES_INT=1`).
-4. Mettez à jour `docs/openapi.yaml` avec les nouveaux endpoints.
+1. Mettez à jour `docs/frameworks/EMBEDDED-SERVICES.md` (ce fichier) — ajoutez le service au tableau du §1 et tout nouveau point de terminaison au §4.
+2. Ajoutez des tests unitaires dans `tests/unit/services/` (cycle de vie, installateur, forme API ).
+3. Ajoutez un test d'intégration dans `tests/integration/services/` (derrière `RUN_SERVICES_INT=1`).
+4. Mettez à jour `docs/openapi.yaml` avec les nouveaux points de terminaison.
 
 ---
 
@@ -855,63 +808,42 @@ le port par défaut 20128 d’OmniRoute.
 
 ## 8. FAQ
 
-**Q : Puis-je exposer les endpoints des services intégrés à des clients hors loopback ?**
+**Q : Puis-je exposer les points de terminaison des services intégrés à des clients sans bouclage ?**
 
-Non. Le niveau LOCAL_ONLY est intentionnel (règle stricte nº 17). Les routes pouvant invoquer
-`npm install` ou générer des processus `node` ne doivent pas être accessibles depuis du trafic
-hors loopback, car un JWT divulgué via un tunnel (Cloudflare, Ngrok, Tailscale)
-permettrait autrement de générer arbitrairement des processus. Il n’existe aucune dérogation
-pour `/api/services/` — contrairement à `/api/mcp/`, ce chemin est exclu de la liste
-de contournement par la portée de gestion. Consultez `docs/security/ROUTE_GUARD_TIERS.md`.
+Non. Le niveau LOCAL_ONLY est intentionnel (règle stricte #17). Les routes qui peuvent invoquer `npm install` ou générer des processus `node` ne doivent pas être accessibles à partir du trafic non bouclé, car une fuite JWT via un tunnel (Cloudflare, Ngrok, Tailscale) permettrait autrement la génération de processus arbitraires. Il n'y a pas d'exclusion de désinscription pour `/api/services/` — contrairement à `/api/mcp/`, il est exclu de la liste de contournement de la portée de gestion. Voir `docs/security/ROUTE_GUARD_TIERS.md`.
 
 ---
 
-**Q : 9Router et CLIProxyAPI seront-ils disponibles dans les déploiements en production/cloud ?**
+**Q : 9Router et CLIProxyAPI seront-ils disponibles dans les déploiements production/cloud ?**
 
-Oui. Les deux services suivent le même modèle privilégiant l’exécution locale qu’OmniRoute. Ils s’exécutent
-sur la même machine et communiquent via loopback. Ici, « production » désigne le VPS
-ou le serveur local sur lequel OmniRoute est déployé, et non un fournisseur cloud distant.
+Oui. Les deux services suivent le même modèle local que OmniRoute lui-même. Ils fonctionnent sur la même machine et communiquent via bouclage. « Production » désigne ici le VPS ou le serveur local sur lequel OmniRoute est déployé, et non un fournisseur de cloud distant.
 
 ---
 
-**Q : Comment déboguer le superviseur ?**
+**Q : Comment déboguer le superviseur ?**
 
 1. Suivez le flux de journaux SSE : `curl -N http://localhost:20128/api/services/9router/logs`.
-2. Consultez les journaux structurés dans la sortie pino d’OmniRoute, filtrés selon
-   l’espace de noms `service:supervisor`.
-3. Inspectez la ligne de la base de données : `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
-4. Utilisez `GET /api/services/9router/status` pour voir en un seul appel l’état actuel en temps réel, le PID, l’état de santé
-   et `lastError`.
+2. Vérifiez les journaux structurés dans la sortie pino de OmniRoute filtrée par l'espace de noms `service:supervisor`.
+3. Inspectez la ligne DB : `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
+4. Utilisez `GET /api/services/9router/status` pour voir l'état actuel, PID, la santé et `lastError` en un seul appel.
 
 ---
 
-**Q : Le superviseur affiche `health: "degraded"` ou `health: "unknown"`, mais l’état est `"running"`. Est-ce un problème ?**
+**Q : Le superviseur affiche `health: "degraded"` ou `health: "unknown"` mais l'état est `"running"`. Est-ce un problème ?**
 
-`"degraded"` signifie que la sonde de santé a renvoyé une réponse autre que 200. `"unknown"` signifie qu’aucune
-sonde ne s’est encore terminée (course avec la première interrogation). Ces deux états sont transitoires pendant le démarrage.
-Si l’état de santé reste `"degraded"` pendant plus de `healthIntervalMs * 3` ms après
-`"running"`, le service intégré est en cours d’exécution, mais son API HTTP ne répond pas. Vérifiez
-si le port est correct dans la réponse d’état et si le service écoute effectivement
-sur ce port.
+`"degraded"` signifie que la sonde d'intégrité a renvoyé une réponse non-200. `"unknown"` signifie qu'aucune sonde n'est encore terminée (course avec premier sondage). Les deux sont transitoires au démarrage. Si la santé reste `"degraded"` pendant plus de `healthIntervalMs * 3` ms après `"running"`, le service intégré est en cours d'exécution mais son HTTP API ne répond pas. Vérifiez si le port est correct dans la réponse d'état et si le service écoute réellement sur ce port.
 
 ---
 
-**Q : Puis-je modifier la clé API de 9Router sans redémarrage complet ?**
+**Q : Puis-je modifier la clé API du 9Router sans redémarrage complet ?**
 
-Non. La clé API est transmise à 9Router via une variable d’environnement lors du lancement du processus.
-Les variables d’environnement ne peuvent pas être modifiées dans un processus en cours d’exécution. `POST .../rotate-key`
-arrête et redémarre automatiquement le service afin d’appliquer la nouvelle clé. La rotation de la clé
-prend effet dans un délai correspondant au `stopTimeoutMs` du service (15 s par défaut), auquel s’ajoute son temps
-de démarrage.
+Non. La clé API est transmise à 9Router via une variable d'environnement au moment de l'apparition. Les variables d'environnement ne peuvent pas être modifiées dans un processus en cours d'exécution. `POST .../rotate-key` arrête et redémarre automatiquement le service pour appliquer la nouvelle clé. La rotation des clés prend effet dans le `stopTimeoutMs` du service (15 s par défaut) plus son temps de démarrage.
 
 ---
 
-**Q : Quelle est la limite du tampon circulaire et que se passe-t-il lorsqu’il est plein ?**
+**Q : Quelle est la limite de la mémoire tampon en anneau et que se passe-t-il lorsqu'elle est remplie ?**
 
-Chaque service dispose d’un tampon circulaire dédié de 5 Mo. Lorsque le tampon est plein, les lignes
-de journal les plus anciennes sont supprimées pour laisser de la place aux nouvelles. L’événement SSE `snapshot` renvoie
-les lignes les plus récentes dans la limite définie par `tail`. Les journaux ne sont pas conservés sur disque, sauf si
-`logsBufferPath` est défini dans la ligne de la base de données.
+Chaque service dispose d'un tampon en anneau dédié de 5 MB. Lorsque le tampon est plein, les lignes de journal les plus anciennes sont supprimées pour laisser la place aux nouvelles. L'événement SSE `snapshot` renvoie les lignes les plus récentes dans la limite `tail`. Les journaux ne sont pas conservés sur le disque sauf si `logsBufferPath` est défini dans la ligne DB.
 
 ---
 

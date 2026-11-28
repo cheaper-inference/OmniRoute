@@ -14,10 +14,12 @@ Amụma ndị na-eweta obe na-adịghị mma na-enye ohere ruo mbọ atọ nke n
 
 - **Ngwakọta** daa n'etiti ebumnuche ha dịka atụmatụ na ntọala nke combo siri dị.
 - **Id nlereanya efu** (enweghị `provider/` prefix) na ọtụtụ ndị na-enye ọrụ na-eje ozi, na-enweghị ngwakọta nke aha ahụ kpọmkwem, na-ebu ụzọ zigara ndị na-eweta ntinye aka. Ọ bụrụ na mbọ ahụ daa n'ụzọ amụma ahụ daa, a na-ezigara otu arịrịọ ahụ na onye na-eweta ọrụ na-esote nke na-eje ozi id. Nzaghachi na-ebu `x-omniroute-fallback-attempts` yana ọnụọgụ ndị na-enye ndị a nwara tupu nke zara.
-  - Enyere ikike nke ọ bụla ọzọ dị ka a ga-asị na echere ya. Ihe mgbaru ọsọ nke igodo API ma ọ bụ na-anabataghị ka awụsara ya na-enweghị oku na-aga elu, onye ahịa ahụ na-enwetakwa njehie n'ezie, ọ bụghị njụjụ amụma maka ebumnuche ọ na-akpọbeghị.
+  - Enyere ikike nke ọ bụla ọzọ dị ka a ga-asị na echere ya. Ebumnuche nke igodo API ma ọ bụ na-anabataghị ka awụsara ya na-enweghị oku na-aga elu, onye ahịa ahụ na-enwetakwa njehie n'ezie, ọ bụghị njụta iwu maka ebumnuche ọ na-akpọbeghị.
   - Naanị nzaghachi dara ada na-aga n'ihu: ọ nweghị ihe na-aga n'ihu ka ọbịte mbụ agbasachara.
   - Mgbanwe ihe nlere ọdịda mberede na-emetụta naanị mgbe onye ọ bụla na-eweta ụdị a rịọrọ daa.
   - Arịrịọ etinyere na njikọ (`x-omniroute-connection`) na-anọ na ya.
   - Agaghị ebugharị id (`provider/model`) prefixed na onye na-eweta ọzọ.
 
 Steeti sekit bụ `closed`, `open`, na `half_open`. A cooldown na-ahazi ihe nyocha nwere oke; nyocha nke na-aga nke ọma na-emechi sekit ma nyocha dara ada meghee ya.
+
+Ọdịda nke onye na-eweta na-agbaba n'ime ọnụ ụzọ ámá. Hụ [Mgbe OmniRoute n'onwe ya enweghị ike iru](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) maka omume ndị ahịa n'oge ọpụpụ ọnụ ụzọ.

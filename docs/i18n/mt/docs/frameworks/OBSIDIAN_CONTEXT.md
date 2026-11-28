@@ -117,58 +117,48 @@ aċċess; kredenzjali valida tal-ambjent li tissolva għal `env-key` tibqa’ ap
 Ċwievet awtentikati mingħajr konfigurazzjoni Obsidian speċifika għaċ-ċavetta jibqgħu jużaw il-konfigurazzjoni globali bħala alternattiva.
 L-erba’ għodod `obsidian_sync_*` iżommu l-imġiba separata tagħhom għat-token tas-sinkronizzazzjoni.
 
-## Għodod MCP (22)
+## għodda MCP (22)
 
-Definiti f’`open-sse/mcp-server/tools/obsidianTools.ts`. It-token/URL bażi jiġu riżolti
-għal kull sejħa (l-ewwel skont iċ-ċavetta API, imbagħad globalment). Għodod li jaċċessaw is-**server tas-sinkronizzazzjoni**
-ta’ OmniRoute (l-erba’ għodod `obsidian_sync_*`) jeħtieġu wkoll it-token tal-awtentikazzjoni tas-sinkronizzazzjoni kkonfigurat
-fis-settings ta’ OmniRoute.
+Defined in `open-sse/mcp-server/tools/obsidianTools.ts`. Iż token/base-URL jiġu solvuti għal kull sejħa (per-API-key l-ewwel, imbagħad globali). Għodda li laqtu l OmniRoute** server tas-sinkronizzazzjoni** (l-erba' għodod `obsidian_sync_*` ) jirrikjedu wkoll it-token ta' awtorizzazzjoni tas-sinkronizzazzjoni kkonfigurat fis-settings OmniRoute.
 
-### Għodod tal-qari (`read:obsidian`)
+### Aqra għodda (`read:obsidian`)
 
-| Għodda                       | Deskrizzjoni                                                                                                                                 |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Iċċekkja jekk il-Local REST API hijiex aċċessibbli u awtentikata.                                                                            |
-| `obsidian_search_simple`     | Tiftix fit-test sħiħ tal-kontenut tan-noti; jirritorna siltiet bil-mogħdijiet tal-fajls.                                                     |
-| `obsidian_search_structured` | Fittex billi tuża espressjoni JSON Logic (filtri and/or/regex/path).                                                                         |
-| `obsidian_read_note`         | Aqra nota permezz ta’ mogħdija relattiva għall-vault; b’mod fakultattiv intestatura/blokka/frontmatter speċifiċi.                            |
-| `obsidian_list_vault`        | Elenka l-fajls u d-direttorji fil-vault (siġra ta’ entrati).                                                                                 |
-| `obsidian_get_document_map`  | Ikseb l-istruttura tal-intestaturi tan-nota bħala mappa ta’ intestaturi → numri tal-linji.                                                   |
-| `obsidian_get_note_metadata` | Ikseb il-frontmatter, it-tags, il-links, u l-għadd ta’ karattri/kliem mingħajr il-kontenut sħiħ.                                             |
-| `obsidian_get_active_file`   | Ikseb il-mogħdija + il-kontenut tal-fajl attiv bħalissa f’Obsidian.                                                                          |
-| `obsidian_get_periodic_note` | Ikseb in-nota perjodika ta’ kuljum/kull ġimgħa/kull xahar għal data (illum jekk titħalla barra).                                             |
-| `obsidian_get_tags`          | Elenka t-tags kollha tal-vault bil-frekwenzi tagħhom.                                                                                        |
-| `obsidian_list_commands`     | Elenka l-IDs tal-kmandi disponibbli ta’ Obsidian (uża ma’ `obsidian_execute_command`).                                                       |
-| `obsidian_sync_status`       | Status tas-server tas-sinkronizzazzjoni ta’ OmniRoute: jekk hux qed jaħdem, isem il-vault, port, ħin ta’ tħaddim, l-aħħar sinkronizzazzjoni. |
-| `obsidian_sync_conflicts`    | Elenka l-kunflitti tas-sinkronizzazzjoni mhux solvuti (mogħdija, mogħdija tal-kunflitt, ħin tal-identifikazzjoni).                           |
+| Għodda                       | Deskrizzjoni                                                                                          |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Iċċekkja jekk il-Lokali REST API hix aċċessibbli u awtentikata.                                       |
+| `obsidian_search_simple`     | Tfittxija bit-test sħiħ tal-kontenut tan-noti; jirritorna snippets b'mogħdijiet tal-fajls.            |
+| `obsidian_search_structured` | Fittex bl-użu ta' espressjoni loġika JSON (filtri and/or/regex/path ).                                |
+| `obsidian_read_note`         | Aqra nota mill-mogħdija relattiva tal-kaxxa-forti; optionalment heading/block/frontmatter./ifika      |
+| `obsidian_list_vault`        | Lista fajls u direttorji fil-kaxxa-forti (siġra tal-entrati).                                         |
+| `obsidian_get_document_map`  | Ikseb l-istruttura tal-intestatura tan-nota bħala mappa tal-intestaturi → numri tal-linja.            |
+| `obsidian_get_note_metadata` | Ikseb frontmatter, tags, links, char/word għadd mingħajr il-kontenut sħiħ.                            |
+| `obsidian_get_active_file`   | Ikseb il-kontenut + tal-passaġġ tal-fajl attiv bħalissa Obsidian.                                     |
+| `obsidian_get_periodic_note` | Niżżel in-nota perjodika daily/weekly/monthly għal data (illum jekk titħalla barra).                  |
+| `obsidian_get_tags`          | Elenka t-tikketti kollha tal-kaxxa-forti bil-frekwenzi tagħhom.                                       |
+| `obsidian_list_commands`     | Lista disponibbli Obsidian kmand IDs (uża ma `obsidian_execute_command`).                             |
+| `obsidian_sync_status`       | OmniRoute sync server status: running, isem tal-kaxxa-forti, port, uptime, l-aħħar sinkronizzazzjoni. |
+| `obsidian_sync_conflicts`    | Elenka l-kunflitti tas-sinkronizzazzjoni mhux solvuti (mogħdija, mogħdija tal-kunflitt, misjuba-at).  |
 
-### Għodod tal-kitba (`write:obsidian`)
+### Għodda tal-kitba (`write:obsidian`)
 
 | Għodda                           | Deskrizzjoni                                                                                        |
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Oħloq jew issostitwixxi nota b’kontenut Markdown partikolari.                                       |
-| `obsidian_append_note`           | Żid kontenut ma’ nota; b’mod fakultattiv ma’ intestatura/blokka speċifika.                          |
-| `obsidian_patch_note`            | Żid wara/żid qabel/issostitwixxi b’mod preċiż f’intestatura, blokka, jew kamp tal-frontmatter.      |
-| `obsidian_delete_note`           | Ħassar nota b’mod permanenti mill-vault.                                                            |
-| `obsidian_move_note`             | Ċaqlaq jew semmi mill-ġdid nota fil-vault.                                                          |
-| `obsidian_execute_command`       | Eżegwixxi kmand ta’ Obsidian permezz tal-ID tal-kmand tiegħu.                                       |
-| `obsidian_open_file`             | Iftaħ fajl f’Obsidian (joħolqu jekk ma jkunx jeżisti).                                              |
-| `obsidian_sync_trigger`          | Attiva sinkronizzazzjoni bidirezzjonali immedjata tal-vault bejn id-desktop↔il-mobile.              |
-| `obsidian_sync_resolve_conflict` | Issolvi kunflitt tas-sinkronizzazzjoni: żomm `local` (mobile), `remote` (desktop), jew `keep-both`. |
+| `obsidian_write_note`            | Oħloq jew iżżid nota b'kontenut ta' Markdown mogħti.                                                |
+| `obsidian_append_note`           | Ehmeż kontenut ma' nota; għażla għal heading/block. speċifika                                       |
+| `obsidian_patch_note`            | Kirurġikament append/prepend/replace fuq heading, block, jew frontmatter field.                     |
+| `obsidian_delete_note`           | Ħassar b'mod permanenti nota mill-kaxxa-forti.                                                      |
+| `obsidian_move_note`             | Ċaqlaq jew semmi mill-ġdid nota fil-kaxxa-forti.                                                    |
+| `obsidian_execute_command`       | Teżegwixxi kmand Obsidian bil-kmand tiegħu ID.                                                      |
+| `obsidian_open_file`             | Iftaħ fajl Obsidian (joħloqh jekk ma jeżistix).                                                     |
+| `obsidian_sync_trigger`          | Ixpruna sinkronizzazzjoni immedjata tal-kaxxa-forti mobbli tad-desktop ↔ bidirezzjonali.            |
+| `obsidian_sync_resolve_conflict` | Issolvi kunflitt ta' sinkronizzazzjoni: żomm `local` (mobbli), `remote` (desktop), jew `keep-both`. |
 
 > [!NOTE]
-> Il-miri ta’ `obsidian_patch_note` jaċċettaw `targetType` ta’ `heading | block | frontmatter`
-> u `operation` ta’ `append | prepend | replace`, b’`createTargetIfMissing`
-> fakultattiv. L-erba’ għodod `obsidian_sync_*` jikkomunikaw mas-server lokali tas-sinkronizzazzjoni
-> (`http://127.0.0.1:27781` awtomatikament) u jeħtieġu t-token tas-sinkronizzazzjoni.
+> Il-miri `obsidian_patch_note` jaċċettaw `targetType` ta' `heading | block | frontmatter` u `operation` ta' `append | prepend | replace`, `createTargetIfMissing` fakultattiv. L-erba' għodod `obsidian_sync_*` jitkellmu mas-server tas-sinkronizzazzjoni lokali (`http://127.0.0.1:27781` b'mod awtomatiku) u jeħtieġu t-token tas-sinkronizzazzjoni.
 
 ### Ambiti
 
-L-għodod tal-qari jeħtieġu `read:obsidian`; l-għodod tal-kitba jeħtieġu `write:obsidian`. L-infurzar
-huwa identiku għal dak ta’ Notion — jiġi ġestit minn `withScopeEnforcement()` f’
-`open-sse/mcp-server/server.ts`, ikkontrollat minn `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, bl-
-ambiti permessi miksuba minn `OMNIROUTE_MCP_SCOPES` jew mill-kuntest tal-ambitu taċ-ċavetta API. Ara
-[MCP-SERVER.md](./MCP-SERVER.md).
+Read tools jeħtieġu `read:obsidian`; għodod tal-kitba jeħtieġu `write:obsidian`. L-infurzar huwa identiku għal Notion — immaniġġjat minn `withScopeEnforcement()` `open-sse/mcp-server/server.ts`, gated on `OMNIROUTE_MCP_ENFORCE_SCOPES=true` u sfurzat għal min iċempel HTTP/SSE li ċ-ċavetta API tagħhom m'għandhiex `manage`/`admin`, b'ambiti permessi ġejjin minn `OMNIROUTE_MCP_SCOPES` jew mill-kuntest tal-ambitu taċ-ċavetta API. Ara [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Endpoints
 

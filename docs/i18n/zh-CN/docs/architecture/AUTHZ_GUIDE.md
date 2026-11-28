@@ -5,13 +5,12 @@
 ---
 
 > **事实来源：** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **最后更新：** 2026-09-22 — 范围命名空间指向 MCP-SERVER.md
 
-OmniRoute 拥有一个路由感知的授权管道，用于守卫每个 API 请求。分类是**确定性**的且**故障关闭**的——任何无法分类的内容最终都会被归类为 `MANAGEMENT`，并要求会话或管理级别的令牌。本页面为维护路由或设计新端点的工程师解释了该模型。
+OmniRoute有一个路由感知授权管道，可以控制每个API请求。分类是**确定性的**和**故障关闭**—任何无法分类的内容最终都会成为`MANAGEMENT`并需要会话或管理级令牌。本页介绍了工程师维护路线或设计新端点的模型。
 
 ![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
-> 来源：[diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
+> 来源： [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## 两种身份验证模式
 
@@ -152,7 +151,7 @@ Incoming request → src/proxy.ts
        - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-可信内部标头（在`src/server/authz/headers.ts`中定义）是**从传入请求中剥离**分类之前—客户端无法预先填充`x-omniroute-auth-*`来模拟主题。
+可信内部标头（在`src/server/authz/headers.ts`中定义）是**从传入请求中剥离**在分类之前， —客户端无法预先填充`x-omniroute-auth-*`来模拟主题。
 
 ### 保单合同
 
@@ -160,7 +159,7 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) —始终返回`allow({ kind: "anonymous", id: "anonymous" })`。
 - **`clientApiPolicy`** (`policies/clientApi.ts`) —提取 Bearer，通过`validateApiKey()`进行验证。仅当有效`REQUIRE_API_KEY`功能标志被禁用时才会转为匿名。有效标志通过`isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) 解析，因此仪表板功能标志和环境变量一致地管理`/api/v1/*`、 `/api/v1beta/*`和别名；解析器故障无法关闭。允许客户端API路由（包括仪表板模型目录使用的`/api/v1/models`）上的仪表板会话请求。当启用 Entra ID SSO时，结构上是 Entra 令牌的 Bearer（三个 base64url 段、 `RS*` alg、 `kid`）由SSO分支处理**前**`validateApiKey()`及其判决是最终的—它永远不会落入 API 密钥路径或降级为匿名分支，因此身份提供者中断不能成为开放访问。静态API密钥不受影响。参见[Entra ID SSO](../security/ENTRA_SSO.md) 。
-- **`managementPolicy`** (`policies/management.ts`) —接受仪表板会话、内部模型同步请求（与`/api/providers/[name]/(sync-models|models)`匹配），或者如果`isAuthRequired()`返回 false，则完全跳过。当不记名令牌存在但无效时返回 403 (`AUTH_001`)，否则返回 401。还在任何 auth 分支—查看[Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)之前强制执行路由保护层 (LOCAL_ONLY / ALWAYS_PROTECTED)。当 Bearer key 携带`manage`范围时，可以从非环回访问`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`中的LOCAL_ONLY路径（今天： `/api/mcp/`）；无论范围如何，所有其他LOCAL_ONLY路径都保持严格环回。
+- **`managementPolicy`** (`policies/management.ts`) —接受仪表板会话、内部模型同步请求（与`/api/providers/[name]/(sync-models|models)`匹配），或者如果`isAuthRequired()`返回 false，则完全跳过。当不记名令牌存在但无效时返回 403 (`AUTH_001`)，否则返回 401。还在任何 auth 分支—查看[Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)之前强制执行路由保护层 (LOCAL_ONLY / ALWAYS_PROTECTED)。当承载密钥携带`manage`/`admin`范围或窄`mcp:connect`范围 (`hasMcpConnectOrManageScope`) 时，或者使用经过身份验证的仪表板会话时，可以从非环回访问`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`中的LOCAL_ONLY路径（今天： `/api/mcp/`）；无论范围如何，所有其他LOCAL_ONLY路径都保持严格环回。
 
 成功的策略会返回`AuthSubject`和`kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`。下游处理程序可以通过`src/server/authz/assertAuth.ts`中的`assertAuth(request, "CLIENT_API")`读取它，而不是重新运行身份验证逻辑。
 
@@ -251,24 +250,24 @@ export async function POST(request: Request) {
 
 应根据形态而非便利性选择集合。单一路由应放入 `PUBLIC_API_ROUTES_EXACT`（如果仅限 GET，则放入 `PUBLIC_READONLY_CORS_API_ROUTES`）；只有真正的子树才应放入 `PUBLIC_API_ROUTE_PREFIXES`，并且它**必须以 `/` 结尾**。将单一路由放入前缀列表，还会公开所有与其具有相同起始字符的相邻路径——包括以后添加的动态段同级路由（GHSA-74g9-q8f6-793h）。更新 `tests/unit/public-api-routes.test.ts`、`tests/unit/authz/public-route-exact-match.test.ts` 和 `tests/unit/authz/classify.test.ts` 中的单元测试。
 
-## 作用域
+## 范围
 
-三个命名空间。每个检查器只读取自己的字符串。关于 `manage` 为何在 `read:compression` 上 `scopeMatches` 失败，以及 `read` 访问令牌为何不能 `PATCH /api/keys/{id}` 的并排解释，请参阅[三个作用域命名空间](../frameworks/MCP-SERVER.md#three-scope-namespaces)。
+三个命名空间。每个检查器只读取自己的字符串。并行的内容包括为什么`manage`对于`read:compression`无法使用`scopeMatches`以及为什么`read`访问令牌不能`PATCH /api/keys/{id}`，是[三个范围命名空间](../frameworks/MCP-SERVER.md#three-scope-namespaces)。
 
-API 密钥带有一个 `scopes` 数组（以 JSON 格式存储在 `api_keys.scopes` 中，请参阅 `src/lib/db/apiKeys.ts`）。
+API键携带`scopes`数组（在`api_keys.scopes`中存储为JSON ，请参阅`src/lib/db/apiKeys.ts`）。
 
-### 管理作用域
+### 管理范围
 
-- `manage` / `admin` — `hasManageScope`。对管理 API 路由的持有者访问权限。
-- `mcp:connect`、`self:usage`、`self:account-quota` 和 `policy:bypass-provider-quota` 是附加的精确匹配作用域。它们位于 `MANAGEMENT_API_KEY_SCOPES` 之外。`mcp:connect` 仅开放 `/api/mcp/` 非回环的特殊区域。
+- `manage` / `admin` — `hasManageScope`。承载访问管理API路由。
+- `mcp:connect`、 `self:usage`、 `self:account-quota`和`policy:bypass-provider-quota`是附加的精确匹配范围。他们坐在`MANAGEMENT_API_KEY_SCOPES`外面。 `mcp:connect`仅打开`/api/mcp/`非环回剥离。
 
-### MCP 工具作用域
+### MCP工具范围
 
-目录和匹配规则（相同字符串，或以 `*` 结尾的已授予作用域）：[MCP 工具作用域](../frameworks/MCP-SERVER.md#mcp-tool-scopes)。`src/shared/constants/mcpScopes.ts` 中的 `MCP_SCOPE_LIST` 是原始的类型化子集，而非完整的目录。在 `resolveCallerScopeContext()` 从 MCP 认证信息、请求元数据或 `OMNIROUTE_MCP_SCOPES` 解析作用域后，强制执行在 `open-sse/mcp-server/scopeEnforcement.ts` 中运行。除非 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`，否则它保持关闭。
+目录和匹配规则（相同的字符串，或以`*`结尾的授予范围）： [MCP工具范围](../frameworks/MCP-SERVER.md#mcp-tool-scopes)。 `src/shared/constants/mcpScopes.ts`中的`MCP_SCOPE_LIST`是原始类型子集，而不是完整目录。 `resolveCallerScopeContext()`解析MCP身份验证信息、请求元数据或`OMNIROUTE_MCP_SCOPES`的范围后，在`open-sse/mcp-server/scopeEnforcement.ts`中运行强制执行。 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`在全局范围内打开它（默认`false`），但对于API密钥缺少`manage`/`admin` （请参阅`open-sse/mcp-server/scopeEnforcement.ts`中的`shouldForceScopeEnforcement()` ）的HTTP/SSE调用者始终强制执行，无论标志如何。
 
-### 访问令牌作用域
+### 访问令牌范围
 
-在 `oma_live_…` 令牌上的 `read` / `write` / `admin`，按 `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) 排名。此排名仅适用于访问令牌凭据。请参阅[管理认证](../guides/MANAGEMENT-AUTH.md)。
+`oma_live_…`代币上的`read` / `write` / `admin` ，按`scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) 排名。此等级仅适用于访问令牌凭证。请参阅[管理身份验证](../guides/MANAGEMENT-AUTH.md)。
 
 ## 需要身份验证 切换
 

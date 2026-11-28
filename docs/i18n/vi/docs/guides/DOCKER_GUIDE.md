@@ -9,21 +9,22 @@
 ## Mục lục
 
 - [Chạy nhanh](#quick-run)
-- [Sử dụng tệp môi trường](#with-environment-file)
-- [Docker Compose](#docker-compose)
-- [Các profile có sẵn](#available-profiles)
-- [Cấu hình các công cụ CLI trên máy chủ khi OmniRoute chạy trong Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Với tệp môi trường](#with-environment-file)
+- [Docker Soạn](#docker-compose)
+- [Hồ sơ có sẵn](#available-profiles)
+- [Làm cứng container](#container-hardening)
+- [Định cấu hình công cụ CLI của máy chủ khi OmniRoute chạy trong Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
 - [Redis Sidecar](#redis-sidecar)
-- [Compose cho môi trường production](#production-compose)
-- [Các stage của Dockerfile](#dockerfile-stages)
+- [Soạn sản xuất](#production-compose)
+- [Các giai đoạn của Dockerfile](#dockerfile-stages)
 - [Các biến môi trường quan trọng](#critical-environment-variables)
-- [Docker Compose với Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
-- [Các tag image](#image-tags)
-- [Cập nhật dashboard trong Docker](#dashboard-updates-in-docker)
-- [Tính sẵn sàng: SQLite mặc định chỉ hỗ trợ một replica](#availability-default-sqlite-is-single-replica)
-- [Lỗi khu vực của Gemini bên trong Docker](#gemini-regional-errors-inside-docker)
-- [Lưu ý quan trọng](#important-notes)
+- [Docker Soạn với Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Đường hầm nhanh Cloudflare](#cloudflare-quick-tunnel)
+- [Thẻ hình ảnh](#image-tags)
+- [Cập nhật bảng điều khiển trong Docker](#dashboard-updates-in-docker)
+- [Tính khả dụng: SQLite mặc định là bản sao đơn](#availability-default-sqlite-is-single-replica)
+- [lỗi khu vực Gemini bên trong Docker](#gemini-regional-errors-inside-docker)
+- [Ghi chú quan trọng](#important-notes)
 
 ---
 
@@ -89,6 +90,30 @@ OmniRoute cung cấp các profile Compose cho những mô hình triển khai ch�
 | `web`             | `omniroute-web`  | Các nhà cung cấp phiên web cần trình duyệt: `gemini-web`, `claude-web`, `claude-turnstile` (build `runner-web`, bao gồm Chromium)                                  | `docker compose --profile web up -d`         |
 
 > Có thể kết hợp nhiều profile: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Làm cứng container
+
+Các dịch vụ ứng dụng `base`, `web`, `cli` và `host` trong `docker-compose.yml` sử dụng `cap_drop: [ALL]` và tùy chọn bảo mật `no-new-privileges:true`. Hình ảnh chạy với tư cách là người dùng không phải root `node` và lắng nghe trên các cổng cao, vì vậy nó không cần khả năng Linux. Tùy chọn bảo mật ngăn chặn các tiến trình giành được đặc quyền thông qua các tệp nhị phân setuid.
+
+Chỉ cấu hình `cli` mới gắn ổ cắm Docker cho trình cập nhật tự động. Xem [Escape Hatch: định cấu hình CLIs của chính vùng chứa](#escape-hatch-configure-the-containers-own-clis-use-sparingly) để biết các hàm ý bảo mật.
+
+Hệ thống tập tin gốc vẫn có thể ghi theo mặc định. Cấu hình `cli` ghi cấu hình CLI và bộ đệm trong thư mục chính của vùng chứa, cấu hình `web` lưu trữ trạng thái phiên Chrome và thời gian chạy Next.js có thể ghi bộ nhớ đệm bên ngoài `/app/data`.
+
+Để thử hệ thống tệp gốc chỉ đọc với cấu hình `base`, hãy lưu tệp này dưới dạng `docker-compose.override.yml` bên cạnh `docker-compose.yml`. Compose tự động đọc phần ghi đè.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Giá đỡ `/app/data` hiện có vẫn có thể ghi được. Kiểm tra khối lượng công việc của bạn trước khi sử dụng tính năng ghi đè này trong sản xuất vì nó có thể cần ghi vào các đường dẫn khác.
 
 ## Cấu hình các công cụ CLI trên máy chủ khi OmniRoute chạy trong Docker
 
@@ -295,7 +320,7 @@ Hành vi bộ nhớ trong Docker:
 
 ### Thời gian chạy RAM cho các tác nhân mã hóa
 
-Mặc định 1 GiB Docker là sàn dashboard/light-chat, không phải quy mô sản xuất. Phần thân `POST /v1/responses` dài (hàng trăm tin nhắn, hàng chục công cụ) giữ lại nhiều biểu đồ trong bộ nhớ trong quá trình nén. Hai yêu cầu mã thông báo ~ 3 MiB / ~ 750k chồng chéo đã hủy bỏ V8 tại một** 12 GiB** không gian cũ (`FATAL ERROR: Reached heap limit`) và cũng đạt 16 GiB cgroup OOM. Xem [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Mặc định 1 GiB Docker là sàn dashboard/light-chat, không phải quy mô sản xuất. Phần thân `POST /v1/responses` dài (hàng trăm tin nhắn, hàng chục công cụ) giữ lại nhiều biểu đồ trong bộ nhớ trong quá trình nén. Hai yêu cầu mã thông báo ~ 3 MiB / ~ 750k chồng chéo đã hủy bỏ V8 tại một** 12 GiB** không gian cũ (`FATAL ERROR: Reached heap limit`) và cũng đạt 16 GiB cgroup OOM. Xem [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Kích cỡ** cgroup `--memory` phía trên heap** bộ đệm gốc —, SQLite và các trung gian nén nằm bên ngoài V8.
 
@@ -415,7 +440,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy đặt tiêu đề chuyển tiếp tiêu chuẩn cho vùng chứa ngược dòng. OmniRoute sử dụng `NEXT_PUBLIC_BASE_URL` làm nguồn gốc công khai chuẩn cho các lệnh gọi lại OAuth và các liên kết công khai được tạo; Việc ghi bảng điều khiển đã xác thực sử dụng các yêu cầu có cùng nguồn gốc cộng với tính năng bảo vệ CSRF theo phiên. Chỉ bật `OMNIROUTE_TRUST_PROXY` cho các triển khai nâng cao mà bạn cố tình muốn OmniRoute lấy nguồn gốc công khai từ các tiêu đề được chuyển tiếp đáng tin cậy thay vì cấu hình rõ ràng.
+Caddy đặt tiêu đề chuyển tiếp tiêu chuẩn cho vùng chứa ngược dòng. OmniRoute sử dụng `NEXT_PUBLIC_BASE_URL` làm nguồn gốc công khai chuẩn cho lệnh gọi lại OAuth và các liên kết công khai được tạo; Việc ghi bảng thông tin đã xác thực sử dụng các yêu cầu có cùng nguồn gốc cộng với tính năng bảo vệ CSRF theo phiên. Chỉ bật `OMNIROUTE_TRUST_PROXY` cho các triển khai nâng cao khi bạn cố tình muốn OmniRoute lấy nguồn gốc công khai từ các tiêu đề được chuyển tiếp đáng tin cậy thay vì cấu hình rõ ràng.
 
 ## Cloudflare Quick Tunnel
 
@@ -595,9 +620,9 @@ Cổ phiếu Docker / Kubernetes OmniRoute là** một quy trình nút + một n
 | Sẵn sàng        | HTTP `GET /healthz`                                          | Thời gian chờ chặt chẽ coi vòng lặp sự kiện bận như đã chết |
 | Sâu / con người | `/api/monitoring/health`                                     | Hoạt động kubelet tự động                                   |
 
-**Nâng cấp:** mong mỗi phiên sẽ giảm. Hãy rút cạn khách hàng nếu bạn có thể; không có bản cập nhật luân phiên trên SQLite mặc định. Soạn `restart: unless-stopped` cộng với Docker `HEALTHCHECK` cũng sẽ thay thế quy trình duy nhất khi vùng chứa không tốt - cùng bán kính vụ nổ.
+**Nâng cấp:** mong mỗi phiên sẽ giảm. Hãy rút cạn khách hàng nếu bạn có thể; không có bản cập nhật luân phiên trên SQLite mặc định. Soạn `restart: unless-stopped` cộng với Docker `HEALTHCHECK` cũng sẽ thay thế quy trình duy nhất khi vùng chứa không lành mạnh — cùng bán kính vụ nổ.
 
-Các bảng kê khai được tạo sẵn và biểu đồ Helm tồn tại ở `deploy/kubernetes/` và `deploy/helm/omniroute/` — xem [hướng dẫn triển khai Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+Các bảng kê khai được tạo sẵn và biểu đồ Helm có sẵn trong `deploy/kubernetes/` và `deploy/helm/omniroute/` — hãy xem [hướng dẫn triển khai Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
 Đoạn mã Kubernetes cho một** bản sao duy nhất** (Cần phải tạo lại; không nâng `replicas` lên một tệp SQLite ):
 
@@ -626,9 +651,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep cho phép kube bỏ điểm cuối dịch vụ trước SIGTERM vậy** mới** giao thông dừng lại quá trình chết. `/v1/responses` SSE trên chuyến bay được tiêu tốn tới `SHUTDOWN_TIMEOUT_MS` (mặc định là 30 giây) thông qua hợp đồng thuê nhập học hạng nặng (#11015). Các yêu cầu mới vẫn đạt được quy trình sẽ nhận được `503` + `Retry-After: 5`. Khoảng trống điểm cuối trống cho đến khi thay thế sẵn sàng vẫn bị ngừng hoạt động nghiêm trọng — đó là cấu trúc liên kết SQLite, không phải là cấu hình sai thăm dò.
+`preStop` sleep cho phép kube bỏ điểm cuối dịch vụ trước SIGTERM vậy** mới** giao thông dừng lại quá trình chết. `/v1/responses` SSE trên chuyến bay được rút hết tới `SHUTDOWN_TIMEOUT_MS` (mặc định là 30 giây) thông qua hợp đồng thuê nhập học hạng nặng (#11015). Các yêu cầu mới vẫn đạt được quy trình sẽ nhận được `503` + `Retry-After: 5`. Khoảng trống điểm cuối trống cho đến khi thay thế sẵn sàng vẫn là một — ngừng hoạt động cứng, đó là cấu trúc liên kết SQLite, không phải là cấu hình sai thăm dò.
 
-Postgres bên ngoài / HA nhiều người viết là** không** một đường dẫn chứng khoán được ghi lại. Nếu bạn cần HA, hãy giữ một bản sao duy nhất hoặc chạy cấu trúc liên kết mà dự án đã kiểm tra và ghi lại riêng biệt. Công việc Postgres/MySQL tồn tại ở [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Cho đến khi tàu được vận chuyển, cách duy nhất được hỗ trợ để nhân lên** lớn** dung lượng `/v1/responses` là N quy trình độc lập (phần tiếp theo), không phải `replicas > 1` trên một ổ đĩa.
+Postgres bên ngoài / HA nhiều người viết là** không** một đường dẫn chứng khoán được ghi lại. Nếu bạn cần HA, hãy giữ một bản sao duy nhất hoặc chạy cấu trúc liên kết mà dự án đã kiểm tra và ghi lại riêng biệt. Công việc Postgres/MySQL tồn tại trong [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Cho đến khi tàu được vận chuyển, cách duy nhất được hỗ trợ để nhân lên** lớn** dung lượng `/v1/responses` là N quy trình độc lập (phần tiếp theo), không phải `replicas > 1` trên một ổ đĩa.
 
 ## Mở rộng quy mô: N quy trình độc lập
 
@@ -638,25 +663,25 @@ Bản sao của một tài khoản Codex không được sử dụng độc lậ
 
 Phiên bản thụ động đọc lại kết nối khi cần làm mới và chỉ chấp nhận một mã thông báo truy cập khác, chưa hết hạn. Nếu không, việc làm mới sẽ bị vô hiệu hóa mà không hết hạn hoặc hủy kích hoạt kết nối hoặc tính lỗi ngắt làm mới. Lỗi xác thực ngược dòng thực sự vẫn sử dụng tính toán lỗi thông thường, thời gian hồi chiêu theo cấp số nhân và lỗi máy khách thông thường; việc vô hiệu hóa tài khoản vẫn còn vĩnh viễn. Đồng bộ hóa mã thông báo đã xoay vòng của chủ sở hữu trước khi mã thông báo truy cập hết hạn (thời gian làm mới chủ động mặc định là năm phút) hoặc nhập lại tệp xác thực Codex. Nhập thụ động lưu trữ mã thông báo được cung cấp mà không xác thực chúng tại điểm cuối mã thông báo. Làm mới dashboard/API thủ công trả về `409 refresh_disabled`; thông tin đăng nhập OAuth mới không thay đổi. Xem [tài liệu tham khảo môi trường](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Quá trình một nút là** một đống V8** . Hai ~ 3 MiB / ~ 750k-token mã hóa-agent `POST /v1/responses` (RTK + Caveman) chồng chéo hủy bỏ đống đó ở ~ 12 Gi (`FATAL ERROR: Reached heap limit`) và có thể OOM a 16 Gi cgroup. Xem [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Phép đo đó là một** ngân sách bộ nhớ** cảnh báo, không phải là sản phẩm hard-max của hai `/v1/responses` dài đồng thời. Quyền truy cập trò chuyện hạng nặng được kiểm soát bởi ngân sách byte nhập vào có nguồn gốc tự động (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) có kích thước từ cùng mức V8/cgroup trần — ghi đè lên trên (hoặc đặt giới hạn số lượng yêu cầu `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` cũ) trên một quy trình đã có kích thước sẵn sẽ giới thiệu lại việc hủy bỏ. Các cuộc trò chuyện nhỏ, `/healthz`, `/v1/models` và MCP là** không** trong chiếc mũ đó.
+Quá trình một nút là** một đống V8** . Hai ~ 3 MiB / ~ 750k-token mã hóa-agent `POST /v1/responses` (RTK + Caveman) chồng chéo hủy bỏ đống đó ở ~ 12 Gi (`FATAL ERROR: Reached heap limit`) và có thể OOM a 16 Gi cgroup. Xem [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Phép đo đó là một** ngân sách bộ nhớ** cảnh báo, không phải là sản phẩm cứng-max của hai `/v1/responses` dài đồng thời. Quyền truy cập trò chuyện hạng nặng được kiểm soát bởi ngân sách byte nhập vào có nguồn gốc tự động (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) có kích thước từ cùng mức V8/cgroup trần — ghi đè lên trên (hoặc đặt giới hạn số lượng yêu cầu `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` cũ) trên một quy trình đã có kích thước sẵn sẽ giới thiệu lại việc hủy bỏ. Các cuộc trò chuyện nhỏ, `/healthz`, `/v1/models` và MCP là** không** trong chiếc mũ đó.
 
 ### Một quy trình: nhiều hơn hai `/v1/responses` dài
 
-MỘT** khỏe mạnh** quá trình (đống bên dưới `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` mặc định )** có thể** chạy nhiều hơn hai `POST /v1/responses` dài đồng thời khi ngân sách byte trong toàn bộ quy trình (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) vẫn còn chỗ. Các phần bằng hoặc cao hơn `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (mặc định 256 KiB) nhận cùng mức thuê hạng nặng như các yêu cầu nặng về cấu trúc và sử dụng cùng một lối thoát [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Hàng chục máy khách SSE dài đồng thời (người vận hành thường cần 40–50) là một** ngân sách bộ nhớ** câu hỏi — size heap + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — không phải là giới hạn sản phẩm cứng “tối đa 2”. Một đống bị nén vẫn bị loại bỏ với `503` có thể thử lại nên #7849 không quay trở lại.
+MỘT** khỏe mạnh** quá trình (đống bên dưới `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` mặc định )** có thể** chạy nhiều hơn hai `POST /v1/responses` dài đồng thời khi ngân sách byte trong toàn bộ quy trình (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) vẫn còn chỗ. Các nội dung bằng hoặc cao hơn `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (mặc định 256 KiB) nhận cùng mức thuê hạng nặng như các yêu cầu nặng về cấu trúc và sử dụng cùng một lối thoát [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Hàng chục máy khách SSE dài đồng thời (người vận hành thường cần 40–50) là một** ngân sách bộ nhớ** câu hỏi — size heap + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — không phải là giới hạn sản phẩm cứng “tối đa 2”. Một đống bị áp lực vẫn bị loại bỏ với `503` có thể thử lại nên #7849 không quay trở lại.
 
 ĐẾN** nhân đống** (không gian cũ V8 độc lập)** Hôm nay** :
 
-| LÀM                                                                                                                                                                                       | Đừng                                                                         |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Chạy** N containers/pods** , mỗi cái có** sở hữu** `DATA_DIR` / khối lượng                                                                                                                | Đặt `replicas > 1` dựa trên một tệp SQLite                                   |
-| Kích thước khoảng không gian lành mạnh + nặng trên chuyến bay từ ngân sách heap / trên chuyến bay-byte; 1–2 là giá trị mặc định #7849 thận trọng, không phải mức tối đa của sản phẩm cứng | Cung cấp cho một quy trình 8 × RAM và giới hạn số lượng không giới hạn       |
-| Tùy chọn: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` cho** quầy hạn ngạch được chia sẻ**                                                                                        | Hãy coi Redis như SQLite — được chia sẻ thì không phải vậy                   |
-| Sao chép bí mật của nhà cung cấp vào từng phiên bản (hoặc chấp nhận bảng thông tin được phân vùng)                                                                                        | Yêu cầu một bảng thông tin/một nhật ký cuộc gọi trên các phiên bản           |
-| Mặt trước có bất kỳ bộ cân bằng tải nào; dính bằng API key hoặc session là đủ                                                                                                             | Yêu cầu phần mềm trung gian nhận biết kích thước dành riêng cho nhà cung cấp |
+| LÀM                                                                                                                                                                                  | Đừng                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| Chạy** N containers/pods** , mỗi cái có** sở hữu** `DATA_DIR` / khối lượng                                                                                                           | Đặt `replicas > 1` dựa trên một tệp SQLite                                   |
+| Kích thước khoảng không gian lành mạnh + nặng trên chuyến bay từ ngân sách heap / trên chuyến bay-byte; 1–2 là mặc định #7849 thận trọng, không phải là mức tối đa của sản phẩm cứng | Cung cấp cho một quy trình 8 × RAM và giới hạn số lượng không giới hạn       |
+| Tùy chọn: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` cho** quầy hạn ngạch được chia sẻ**                                                                                   | Hãy coi Redis như SQLite — được chia sẻ thì không phải vậy                   |
+| Sao chép bí mật của nhà cung cấp vào từng phiên bản (hoặc chấp nhận bảng thông tin được phân vùng)                                                                                   | Yêu cầu một bảng thông tin/một nhật ký cuộc gọi trên các phiên bản           |
+| Mặt trước có bất kỳ bộ cân bằng tải nào; dính bằng API key hoặc session là đủ                                                                                                        | Yêu cầu phần mềm trung gian nhận biết kích thước dành riêng cho nhà cung cấp |
 
 Mối quan hệ giữa phiên với tài khoản cũng có thể được chia sẻ thông qua Redis: đặt `OMNIROUTE_SESSION_AFFINITY_STORE=redis` và `REDIS_URL` trên mỗi quy trình, với cùng `REDIS_KEY_PREFIX` và cài đặt `sessionAffinityTtlMs` dương. Các ghim phân giải danh tính tài khoản sử dụng đã băm cho kết nối cục bộ đủ điều kiện của từng quy trình, do đó, các tài khoản OAuth có siêu dữ liệu nhận dạng phù hợp không cần phải có kết nối phù hợp IDs. Danh tính tài khoản đã biết được ưu tiên hơn IDs cục bộ mâu thuẫn trong độ phân giải mã pin và trục xuất được bảo vệ; hồ sơ không có danh tính (hoặc người gọi bị trục xuất không có danh tính) vẫn giữ lại phần bảo vệ ID kế thừa. Các tài khoản không có danh tính sử dụng ổn định vẫn yêu cầu IDs khớp. lỗi Redis hoặc cuộc gọi vượt quá 100 ms sẽ quay trở lại SQLite cục bộ. Mỗi cửa hàng ái lực Redis giới hạn các hoạt động nổi bật ở mức 8, bỏ qua Redis ngay lập tức khi đầy và chỉ giải phóng các vị trí khi công việc cơ bản đã giải quyết chứ không phải vào thời hạn của người gọi. Trong thời gian ngừng hoạt động Redis không có sự thật chung nào: mỗi phiên bản quay trở lại mối quan hệ cục bộ của chính nó, các phiên có thể ghim lại một lần cho mỗi phiên bản và các phiên bản có thể khác nhau. Độ dính tái hội tụ thông qua Redis khi nó phục hồi. Giới hạn thời gian chờ đang chờ, không phải EVAL đã gửi, có thể hạ cánh sau khi dự phòng. Việc ghi định tuyến so sánh giá trị chính xác được quan sát bởi quyết định định tuyến, chứ không phải giá trị đọc tại thời điểm đột biến mới; một lần bỏ sót được quan sát hoặc một quan sát dự phòng SQLite được so sánh như một khóa Redis vắng mặt. Các chân lỗi thời được thay thế trong một CAS, do đó, một lệnh muộn không thể thay thế hoặc xóa một chân mới hơn, khác. Redis đọc nguyên tử trả về giá trị và máy chủ còn lại TTL; PTTL dương (hoặc không hết hạn) xác định độ sống, không phải dấu thời gian JSON của người viết hay đồng hồ của người đọc. Ảnh chụp nhanh cục bộ ánh xạ TTL còn lại tới thời hạn cục bộ; các khóa JSON hiện tại vẫn có thể đọc được và các byte thô của chúng được giữ lại cho CAS. Redis là nguồn sự thật duy nhất trong khi nó trả lời. Các cập nhật được chia sẻ đã được xác nhận, chạm và xóa sẽ xóa mục nhập cục bộ, không bao giờ cài đặt hoặc làm mới mục đó. SQLite trên đường dẫn Redis chỉ giữ các quyết định dự phòng của riêng phiên bản này khỏi lỗi Redis, hết thời gian chờ hoặc bão hòa nhập học, giới hạn TTL như trước. Một mã pin cục bộ bị thiếu trong lần ngừng hoạt động sau này sẽ tốn một lượt chọn mới (một lần bỏ sót bộ nhớ đệm nhắc nhở), không phải là một tài khoản sai hoặc bị đuổi. Các bản nâng cấp bị từ chối sẽ trả về nguyên tử người chiến thắng được chia sẻ và TTL còn lại của nó: lựa chọn thông thường kiểm tra lại thời hạn cục bộ được ánh xạ và sử dụng người chiến thắng đủ điều kiện vẫn còn tồn tại, chạm vào việc sử dụng và ghi nhật ký tài khoản đó mà không cần ghi chung. Nếu không có sẵn, lựa chọn sẽ giữ nguyên ứng cử viên cục bộ, giữ nguyên mã pin được chia sẻ và phát ra một thông báo gỡ lỗi. Bị từ chối CAS không viết SQLite; Thay vào đó, lỗi Redis, thời gian chờ hoặc bão hòa nhập học sẽ áp dụng thao tác cục bộ hiện có. Nếu câu trả lời của đột biến đã gửi đến sau khi hết thời gian chờ (được chấp nhận, bị từ chối hoặc có lỗi), thì việc so sánh và xóa giá trị được tuần tự hóa chính xác đồng bộ sẽ chỉ loại bỏ hàng dự phòng hết thời gian chờ giống hệt byte. Không có sự chờ đợi giữa việc so sánh và việc xóa bỏ đó; một lần ghi ngừng hoạt động mới hơn được bảo tồn. Việc trục xuất được bảo vệ sẽ xóa mã pin cục bộ của chính tài khoản không thành công ngay cả khi Redis bị hỏng và xóa lại sau khi đã xác nhận việc trục xuất được chia sẻ. Đang chờ trả lời chia sẻ trước đó không thể khôi phục mã pin cục bộ đã bị loại bỏ vì những thành công được chia sẻ không bao giờ ghi SQLite. Dự phòng ngừng hoạt động sau này có thể ghim lại tài khoản; một bài viết chia sẻ được chấp nhận sau này chỉ tồn tại trong Redis. Redis bỏ lỡ không tham khảo trạng thái dự phòng cục bộ. Khi tắt trình điều khiển, các chân mới được chọn vẫn giữ nguyên hình dạng SQLite JSON bốn trường cũ; chỉ định tuyến Redis mới thêm danh tính tài khoản được băm. Các chân được tìm nạp trước được kiểm tra lại ở ranh giới hết hạn của chúng. Lựa chọn không cho thuê Redis sẽ đọc lại cửa hàng, nhưng việc lập kế hoạch cho thuê đồng bộ vẫn có thể sử dụng mã pin bị loại bỏ giữa tìm nạp trước và lập kế hoạch (một khoảng thời gian nỗ lực tốt nhất được chấp nhận). Một cam kết cho thuê không thể chuyển đổi tài khoản sau một yêu cầu lâu dài: khi bị từ chối, nó chỉ giữ lại ứng viên được yêu cầu cho yêu cầu đó và không ảnh hưởng đến người chiến thắng chung, do đó, thỏa thuận giữa các trường hợp bị ràng buộc trên con đường đó. Phần còn lại của bảng vẫn được áp dụng: điều này không chia sẻ độ kết dính của phiên kết hợp, ghim xoay Codex gốc, ngữ nghĩa tài khoản, khóa, giới hạn chi tiêu, cấu hình hoặc nhật ký cuộc gọi.
 
-Phần cứng: `/v1/responses` dài đồng thời trên mỗi cá thể là một** ngân sách bộ nhớ** câu hỏi (heap + inflight-byte/#10110). `N` `DATA_DIR` s độc lập vẫn nhân lên nhiều đống: máy chủ RAM phải bao gồm `N × cgroup`, chứ không phải “một pod 16 Gi có N = 8.” Không bao giờ `replicas > 1` trên một tệp SQLite.
+Phần cứng: `/v1/responses` dài đồng thời trên mỗi cá thể là một** ngân sách bộ nhớ** câu hỏi (heap + inflight-byte / #10110). `N` `DATA_DIR` s độc lập vẫn nhân lên nhiều đống: máy chủ RAM phải bao gồm `N × cgroup` chứ không phải “một pod 16 Gi với N = 8.” Không bao giờ `replicas > 1` trên một tệp SQLite.
 
 Soạn thảo bản phác thảo (hai đống, hai tập — không phải `deploy.replicas: 2`):
 
@@ -685,55 +710,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Mật độ trong quá trình (nén tách HTTP ) là [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Một cụm logic ở trạng thái bền được chia sẻ là [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Mật độ trong quá trình (nén tách HTTP ) là [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Một cụm logic ở trạng thái bền được chia sẻ là [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Lỗi khu vực của Gemini bên trong Docker
+## lỗi khu vực Gemini bên trong Docker
 
-Google AI Studio / Gemini API có thể trả về HTTP 400 với FAILED_PRECONDITION và
-`User location is not supported for the API use.` Một yêu cầu thành công trên máy chủ
-không chứng minh rằng container sử dụng cùng một tuyến đi ra ngoài. Thứ tự DNS,
-khả năng kết nối IPv4/IPv6, định tuyến VPN và proxy được cấu hình có thể khác nhau. Hãy kiểm tra
-[các khu vực được Google hỗ trợ](https://ai.google.dev/gemini-api/docs/available-regions)
-cũng như tuyến kết nối thực tế; chỉ riêng lỗi này không cho thấy API key không hợp lệ.
+Google AI Studio / Gemini API có thể trả về HTTP 400 với FAILED_PRECONDITION và `User location is not supported for the API use.` Một yêu cầu thành công trên máy chủ không chứng minh được rằng container sử dụng cùng một tuyến đường đi. Thứ tự DNS, kết nối IPv4/IPv6, định tuyến VPN và proxy được định cấu hình có thể khác nhau. Kiểm tra [các khu vực được hỗ trợ của Google](https://ai.google.dev/gemini-api/docs/available-regions) cũng như tuyến kết nối thực tế; riêng lỗi này không xác định được khóa API xấu.
 
 ### Ưu tiên proxy dành riêng cho kết nối
 
-Sử dụng [cấu hình proxy theo từng kết nối](../ops/PROXY_GUIDE.md#4-level-proxy-system) của OmniRoute
-cho kết nối Gemini bị ảnh hưởng, sau đó lặp lại **Kiểm tra kết nối** và một yêu cầu nhỏ
-với cùng model. Điều này giới hạn thay đổi định tuyến trong phạm vi kết nối đó. Hãy xác minh
-rằng container có thể truy cập proxy và kết nối thực sự chọn
-proxy đó. Việc thay đổi tuyến không đảm bảo đáp ứng điều kiện khu vực của dịch vụ thượng nguồn.
+Sử dụng [cấu hình proxy cho mỗi kết nối](../ops/PROXY_GUIDE.md#4-level-proxy-system) của OmniRoute cho kết nối Gemini bị ảnh hưởng, sau đó lặp lại** Kiểm tra kết nối** và một yêu cầu nhỏ với cùng một mô hình. Điều này giúp thay đổi định tuyến nằm trong phạm vi kết nối đó. Xác minh rằng proxy có thể truy cập được từ vùng chứa và kết nối thực sự chọn nó. Việc thay đổi lộ trình không đảm bảo tính đủ điều kiện cho khu vực thượng nguồn.
 
-### So sánh kết nối mạng của máy chủ và container
+### So sánh mạng máy chủ và mạng container
 
-Giữ nguyên key, model và yêu cầu khi so sánh các kết quả đã xác thực; tuyệt đối không
-dán thông tin xác thực, mật khẩu proxy hoặc toàn bộ header ủy quyền vào một issue.
-Trước tiên, hãy kiểm tra các họ địa chỉ mà trình phân giải của hệ điều hành cung cấp bằng cách sử dụng cùng một lệnh
-trên máy chủ và bên trong container:
+Giữ khóa, mô hình và yêu cầu giống hệt nhau khi so sánh kết quả được xác thực; không bao giờ dán thông tin xác thực, mật khẩu proxy hoặc tiêu đề ủy quyền hoàn chỉnh vào một vấn đề. Trước tiên, hãy kiểm tra xem họ địa chỉ nào mà trình phân giải OS cung cấp, sử dụng cùng một lệnh trên máy chủ và bên trong vùng chứa:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Thay `omniroute` bằng service mà bạn chạy (ví dụ: `omniroute-web`). Các
-lệnh này in ra các họ địa chỉ mà không để lộ thông tin xác thực hoặc địa chỉ IP. Giá trị `6`
-được trả về chỉ cho biết có kết quả DNS IPv6: nó **không** chứng minh có một tuyến IPv6 khả dụng hoặc có quyền truy cập API.
-Ở nơi đã cài đặt `curl`, hãy so sánh `curl -4 -I https://generativelanguage.googleapis.com`
-với `curl -6 -I https://generativelanguage.googleapis.com` trong cả hai môi trường.
-Một phản hồi HTTP chứng minh khả năng kết nối cho lần kiểm tra đó, ngay cả khi đó là lỗi
-chưa xác thực; chỉ yêu cầu model đã xác thực mới kiểm tra được điều kiện sử dụng Gemini.
+Thay thế `omniroute` bằng dịch vụ bạn chạy (ví dụ `omniroute-web`). Các lệnh này in họ địa chỉ không có thông tin xác thực hoặc địa chỉ IP. `6` được trả về chỉ hiển thị kết quả IPv6 DNS : nó có** không** chứng minh một tuyến đường IPv6 có thể sử dụng được hoặc khả năng truy cập API. Nơi cài đặt `curl`, so sánh `curl -4 -I https://generativelanguage.googleapis.com` với `curl -6 -I https://generativelanguage.googleapis.com` trong cả hai môi trường. Phản hồi HTTP chứng minh khả năng kết nối cho đầu dò đó, ngay cả khi đó là lỗi chưa được xác thực; chỉ yêu cầu mô hình được xác thực mới kiểm tra tính đủ điều kiện Gemini.
 
-### Phương án thay thế ở cấp máy chủ: IPv6 hoạt động và chính sách trình phân giải
+### Thay thế cấp máy chủ: chính sách IPv6 và trình phân giải đang hoạt động
 
-Người báo cáo [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) đã khôi phục
-quyền truy cập trong môi trường của họ bằng cách bật IPv6 cho container và thay đổi cách
-glibc lựa chọn địa chỉ. Hãy xem đây là một phương án thay thế dành riêng cho từng môi trường. Xác nhận IPv6 trên máy chủ
-đang hoạt động, lưu lượng đi ra ngoài/định tuyến của container và các quy tắc tường lửa trước khi điều chỉnh tùy chọn của trình phân giải.
-Chỉ riêng một địa chỉ ULA riêng tư không chứng minh có kết nối IPv6 công cộng.
+Người báo cáo của [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) đã khôi phục quyền truy cập trong môi trường của họ bằng cách bật IPv6 vùng chứa và thay đổi lựa chọn địa chỉ glibc. Hãy coi đây là một giải pháp thay thế dành riêng cho môi trường. Xác nhận các quy tắc tường IPv6, egress/routing và tường lửa của máy chủ đang hoạt động trước khi điều chỉnh các tùy chọn của trình phân giải. Bản thân địa chỉ ULA riêng không thiết lập kết nối IPv6 công khai.
 
-Đối với các service đã được gắn vào mạng mặc định của Compose, đoạn cấu hình này sẽ bật
-IPv6 trên mạng đó; hãy giữ nguyên phần còn lại của service, các cổng, volume và cấu hình:
+Đối với các dịch vụ đã được gắn vào mạng mặc định của Compose, đoạn này sẽ bật IPv6 trên mạng đó; giữ lại phần còn lại của dịch vụ, cổng, khối lượng và cấu hình của bạn:
 
 ```yaml
 networks:
@@ -741,30 +743,13 @@ networks:
     enable_ipv6: true
 ```
 
-Đối với mạng có tên, hãy bật tính năng này trên mạng mà service thực sự tham gia. Docker có thể
-cấp phát một subnet ULA; chỉ chọn một subnet rõ ràng, không chồng lấn khi mạng của bạn
-yêu cầu điều đó. Xem [kết nối mạng IPv6 của Docker](https://docs.docker.com/engine/daemon/ipv6/)
-và [các tùy chọn mạng của Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Đối với mạng được đặt tên, hãy bật mạng đó trên mạng mà dịch vụ thực sự tham gia. Docker có thể phân bổ một mạng con ULA ; chỉ chọn một mạng con rõ ràng, không chồng chéo khi mạng của bạn yêu cầu. Xem các tùy chọn [mạng Docker IPv6](https://docs.docker.com/engine/daemon/ipv6/) và [Compose network](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Trên một **image dựa trên glibc**, `/etc/gai.conf` có thể thay đổi cách lựa chọn địa chỉ. Dockerfile
-hiện tại của repository sử dụng Debian; các image tùy chỉnh dựa trên musl không dùng chung cơ chế này.
-Điều chỉnh được báo cáo thay đổi nhãn ULA từ `label fc00::/7 6` thành
-`label fc00::/7 1`. Hãy bắt đầu từ bảng chính sách đầy đủ của image và giữ nguyên các mục
-khác: việc thêm một mục `label` hoặc `precedence` sẽ thay thế bảng mặc định đó, vì vậy một file
-chỉ chứa dòng đã thay đổi là không đủ. Tài liệu
-[tham khảo cấu hình glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-mô tả các quy tắc đó. Hãy bind-mount file đã được xem xét ở chế độ chỉ đọc vào `/etc/gai.conf`
-và tạo lại service để áp dụng.
+Trên một** hình ảnh dựa trên glibc** , `/etc/gai.conf` có thể thay đổi lựa chọn địa chỉ. Kho lưu trữ Dockerfile hiện tại sử dụng Debian; hình ảnh dựa trên musl tùy chỉnh không chia sẻ cơ chế này. Điều chỉnh được báo cáo sẽ thay đổi nhãn ULA từ `label fc00::/7 6` thành `label fc00::/7 1`. Bắt đầu từ bảng chính sách hoàn chỉnh của hình ảnh và giữ nguyên các mục nhập khác của nó: việc thêm mục nhập `label` hoặc `precedence` sẽ thay thế bảng mặc định đó, do đó, một tệp chỉ chứa dòng đã thay đổi là không đủ. Tài liệu [tham khảo cấu hình glibc ghi](https://github.com/bminor/glibc/blob/master/posix/gai.conf) lại những ngữ nghĩa đó. Liên kết gắn kết tệp đã xem xét chỉ đọc tại `/etc/gai.conf` và tạo lại dịch vụ để áp dụng nó.
 
-Thay đổi này tác động đến cách hệ điều hành lựa chọn địa chỉ cho **toàn bộ lưu lượng đi ra ngoài trong container đó**.
-Nó không buộc mọi ứng dụng phải chọn IPv6: thứ tự DNS và cách lựa chọn kết nối
-của Node cũng có ảnh hưởng. Cụ thể, `--dns-result-order=ipv4first` ưu tiên IPv4 và
-không phải là giải pháp cho lỗi chỉ xảy ra với IPv4. Xem [thứ tự DNS của Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Điều này thay đổi lựa chọn địa chỉ OS cho** tất cả lưu lượng truy cập đi trong vùng chứa đó** . Nó không buộc mọi ứng dụng phải chọn IPv6: Thứ tự DNS của nút và lựa chọn kết nối cũng quan trọng. Đặc biệt, `--dns-result-order=ipv4first` thích IPv4 và không phải là phương pháp khắc phục lỗi IPv4-only. Xem [Thứ tự nút DNS](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Hãy kiểm tra lại Gemini và các nhà cung cấp khác sau mọi thay đổi ở cấp máy chủ. Để hoàn tác,
-hãy xóa mount `gai.conf` tùy chỉnh, khôi phục cấu hình mạng trước đó và
-tạo lại service/mạng bị ảnh hưởng trong thời gian bảo trì. Việc tạo lại mạng
-có thể làm gián đoạn các container khác đang kết nối với mạng đó; không xóa volume dữ liệu bền vững.
+Kiểm tra lại Gemini và các nhà cung cấp khác của bạn sau bất kỳ thay đổi nào ở cấp độ máy chủ. Để khôi phục, hãy tháo giá đỡ `gai.conf` tùy chỉnh, khôi phục cấu hình mạng trước đó và tạo lại service/network bị ảnh hưởng trong thời gian bảo trì. Việc tạo lại mạng có thể làm gián đoạn các vùng chứa khác gắn liền với nó; không xóa khối lượng dữ liệu liên tục.
 
 ## Lưu ý quan trọng
 

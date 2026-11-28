@@ -4,13 +4,7 @@
 
 ---
 
-> **مستند ماخذ:** `open-sse/utils/errorSanitization.ts`،
-> `open-sse/utils/errorPathRedaction.ts`، اور `open-sse/utils/error.ts` میں موجود عوامی بلڈرز
-> **ٹیسٹس:** `tests/unit/error-message-sanitization.test.ts`،
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **آخری بار اپ ڈیٹ کیا گیا:** 2026-09-02 — v3.8.51
-> **قارئین:** ایرر ریسپانسز (HTTP روٹس، SSE اسٹریمز، ایگزیکیوٹرز، MCP ہینڈلرز) پر کام کرنے والا کوئی بھی انجینئر۔
-> **حیثیت:** کلائنٹ کو ایرر پیغام واپس کرنے والے ہر کوڈ پاتھ کے لیے **لازمی**۔
+> **سچائی کا ماخذ:** `open-sse/utils/errorSanitization.ts`، `open-sse/utils/errorPathRedaction.ts`، اور `open-sse/utils/error.ts` میں پبلک بلڈرز** ٹیسٹ:** `tests/unit/error-message-sanitization.test.ts`، `tests/unit/error-public-boundaries-hardening.test.ts`** سامعین:** کسی بھی انجینئر کو چھونے والی غلطی کے جوابات (HTTP روٹس، SSE اسٹریمز، ایگزیکیوٹرز، MCP ہینڈلرز)۔** حیثیت:****MANDATORY** ہر کوڈ پاتھ کے لیے جو کلائنٹ کو غلطی کا پیغام لوٹاتا ہے۔
 
 ## یہ کیوں موجود ہے
 

@@ -6,12 +6,12 @@
 
 So sánh tính năng khách quan với các bộ định tuyến AI nguồn mở phổ biến.
 
-> **Phương pháp luận** : Các kho lưu trữ công khai đã được kiểm toán 2026-Q2. Các phiên bản như được liệt kê. Gửi bản chỉnh sửa qua PR — chúng tôi muốn điều này chính xác.
+> **Phương pháp luận** : Các kho lưu trữ công khai đã được kiểm toán 2026-Q2. Các phiên bản như được liệt kê. Gửi bản sửa lỗi qua PR — chúng tôi muốn điều này chính xác.
 
 | Tính năng                                            |                  OmniRoute 3.8                  |       LiteLLM 1.x       | OpenRouter (SaaS) |   Khóa cảng    |
 | ---------------------------------------------------- | :---------------------------------------------: | :---------------------: | :---------------: | :------------: |
 | **Nhà cung cấp**                                     |                     **329**                     |          ~100           |        ~50        |      ~30       |
-| **mục danh mục Free/no-auth**                        |                     **155**                     |           n/a           |     sự đi qua     |      n/a       |
+| **Nhà cung cấp có quyền truy cập miễn phí**          |       **50 với quyền truy cập miễn phí**        |           n/a           |     sự đi qua     |      n/a       |
 | **Tự lưu trữ**                                       |                       ✅                        |           ✅            |        ❌         | ⚠ đã trả tiền  |
 | **mục danh mục OAuth**                               |                     **23**                      |        một phần         |        ❌         |       ❌       |
 | **Combo tự động dự phòng**                           |                **22 chiến lược**                | dựa trên mức độ ưu tiên | dựa trên cấp bậc  | có trọng lượng |
@@ -38,7 +38,7 @@ So sánh tính năng khách quan với các bộ định tuyến AI nguồn mở
 
 ## Khi nào nên chọn OmniRoute
 
-- Bạn tự chủ và muốn** phạm vi bảo hiểm tối đa của nhà cung cấp** (394 nhà cung cấp, 155 mục danh mục free/no-auth )
+- Bạn tự chủ và muốn** phạm vi bảo hiểm tối đa của nhà cung cấp** (394 nhà cung cấp, 50 có quyền truy cập miễn phí)
 - Bạn cần một** máy chủ MCP tích hợp** (công cụ LLM, bộ nhớ, kỹ năng được hiển thị dưới dạng công cụ)
 - Bạn cần** giao thức A2A** dành cho quy trình làm việc giữa các đại lý
 - Bạn muốn** dấu vân tay tàng hình** (JA3/JA4) để tránh bị CAPTCHAs ngược dòng phát hiện
@@ -58,10 +58,10 @@ So sánh tính năng khách quan với các bộ định tuyến AI nguồn mở
 
 ## Khi nào nên chọn Portkey
 
-- Bạn cần **SLA thương mại** với cam kết thời gian hoạt động
-- Bạn muốn có **bảng điều khiển được quản lý** mà không phát sinh chi phí vận hành
-- Bạn cần các tính năng **tuân thủ dành cho doanh nghiệp** có sẵn ngay lập tức
+- Bạn cần một** SLA thương mại** với sự đảm bảo về thời gian hoạt động
+- Bạn thích một** trang tổng quan được quản lý** không có chi phí hoạt động
+- Bạn cần** tuân thủ doanh nghiệp** các tính năng vượt trội
 
 ---
 
-_Cập nhật lần cuối: 2026-08-02. Hãy gửi nội dung chỉnh sửa qua PR để duy trì độ chính xác của bảng này._
+_Gửi các chỉnh sửa qua PR để giữ cho bảng này luôn chính xác._

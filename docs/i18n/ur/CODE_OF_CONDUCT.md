@@ -47,15 +47,13 @@
 سرکاری سوشل میڈیا اکاؤنٹ کے ذریعے پوسٹ کرنا، یا کسی آن لائن یا آف لائن تقریب میں
 مقرر کردہ نمائندے کی حیثیت سے کام کرنا شامل ہیں۔
 
-## Enforcement
+## نفاذ
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+بدسلوکی، ہراساں کرنے، یا بصورت دیگر ناقابل قبول رویے کے واقعات کی اطلاع کمیونٹی لیڈروں کو دی جا سکتی ہے جو لاگو کرنے کے ذمہ دار ہیں۔
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+یا دیکھ بھال کرنے والے کو diegosouza.pw@outlook.com پر ای میل کر کے۔ سیکورٹی کے لحاظ سے حساس واقعات کے لیے، [`SECURITY.md`](SECURITY.md) دیکھیں۔ تمام شکایات کا جائزہ لیا جائے گا اور ان کی فوری اور منصفانہ جانچ کی جائے گی۔
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+کمیونٹی کے تمام رہنما کسی بھی واقعے کے رپورٹر کی رازداری اور سلامتی کا احترام کرنے کے پابند ہیں۔
 
 ## نفاذ کے رہنما اصول
 

@@ -21,3 +21,5 @@ Domyślne zasady dotyczące różnych dostawców dopuszczają maksymalnie trzy p
   - Identyfikator z prefiksem (`provider/model`) nigdy nie jest przekierowywany do innego dostawcy.
 
 Stany obwodu to `closed`, `open` i `half_open`. Czas odnowienia planuje ograniczoną sondę; pomyślna sonda zamyka obwód, a nieudana sonda ponownie go otwiera.
+
+Przełączanie awaryjne dostawcy działa wewnątrz bramy. Zobacz [Kiedy sama OmniRoute jest nieosiągalna](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable), aby poznać zachowanie klienta podczas awarii bramy.

@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute 以可完整安装的渐进式 Web 应用形式提供。当您通过任何移动浏览器访问仪表板时——Android（Chrome）或 iOS（Safari）——都可以选择“添加到主屏幕”，无需应用商店即可获得类似原生应用的体验。
+将OmniRoute仪表板安装为渐进式 Web 应用程序，以便从主屏幕或桌面的独立窗口中打开它。安装的应用程序仍然需要连接到OmniRoute服务器以进行导航、仪表板数据和API请求。缓存的静态资产不提供离线网关或离线仪表板。
 
-## 什么是 PWA？
+## 什么是PWA？
 
-渐进式 Web 应用可将 OmniRoute Web 仪表板变成一个外观和使用体验都类似原生移动应用的程序。安装后，它可以：
+渐进式 Web 应用程序使用带有应用程序图标和单独窗口的 Web 仪表板。安装后， OmniRoute：
 
-- 使用专属图标从主屏幕启动
-- 以全屏模式打开——没有浏览器地址栏或标签页界面
-- 通过专用的连接状态页面支持离线使用
-- 缓存静态资源以加快加载速度
-- 同时支持竖屏和横屏方向
+- 从主屏幕或桌面启动
+- 以独立模式打开，没有浏览器常用的地址栏和选项卡
+- 缓存选定的静态资源
+- 支持纵向和横向
 
 ## 安装
 
-### Android（Chrome）
+使用另一台设备上的服务器的HTTPS地址。当服务器运行在同一设备上时， `http://localhost:20128`也满足浏览器可安装性要求。普通的`http://YOUR_IP:20128`地址不满足这些要求。安装菜单和提示取决于浏览器和操作系统。请参阅[MDN的PWA安装要求](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required)。
 
-1. 在 Chrome 中打开 OmniRoute 仪表板：`http://YOUR_IP:20128`
-2. Chrome 会自动显示 **“将 OmniRoute 添加到主屏幕”**横幅，或者：
-   - 点击 **⋮** 菜单（三个点）→ **“添加到主屏幕”**或**“安装应用”**
-3. 确认提示
-4. OmniRoute 将作为独立应用显示在您的主屏幕上
+### 安卓（Chrome）
 
-### iOS（Safari）
+1. 在同一部手机上打开您的OmniRoute HTTPS地址或服务器的`http://localhost:20128` 。
+2. 打开**⋮**菜单并选择**安装应用程序**或者**添加到主屏幕**，如果提供的话。
+3. 确认提示。
+4. 从主屏幕打开OmniRoute 。
 
-1. 在 Safari 中打开 OmniRoute 仪表板：`http://YOUR_IP:20128`
-2. 点击**共享**按钮（带箭头的方框）
-3. 向下滚动并点击**“添加到主屏幕”**
-4. 为其命名（默认为“OmniRoute”），然后点击**添加**
-5. OmniRoute 将使用应用图标显示在您的主屏幕上
+### iOS (Safari)
 
-### 桌面端（Chrome / Edge）
+1. 在 Safari 中打开您的OmniRoute HTTPS地址。
+2. 轻敲**分享**→**添加到主屏幕**。
+3. 确认名称并点击**添加**。
+4. 从主屏幕打开OmniRoute 。
 
-1. 打开 OmniRoute 仪表板
-2. 点击地址栏中的**安装图标**（或 ⋮ →“安装 OmniRoute...”）
-3. 确认提示
-4. OmniRoute 将作为独立窗口打开——没有标签页，也没有地址栏
+### 桌面版（Chrome / Edge）
 
-## 功能
+1. 打开您的OmniRoute仪表板。
+2. 使用浏览器的安装图标或**安装应用程序**菜单条目（如果提供）。
+3. 确认提示在其自己的窗口中打开OmniRoute 。
 
-### 全屏体验
+## 特征
 
-清单配置了 `display: "fullscreen"`，这意味着安装后的应用会使用整个屏幕——没有浏览器界面，也不会与状态栏重叠。这使仪表板真正拥有原生应用般的体验。
+### 独立窗口
 
-### 离线支持
+清单设置`display: "standalone"`和`start_url: "/dashboard"`。安装的应用程序会在应用程序窗口中打开仪表板。浏览器和操作系统控件仍然会出现；清单不请求全屏模式。
 
-OmniRoute 包含一个提供智能缓存功能的服务工作线程（`sw.js`）：
+### 缓存资源和网络要求
 
-| 资源类型                                                                                                                                                                            | 策略               | 行为                                                                         |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------- |
-| **应用外壳**                                                                                                                                                                        | 缓存优先           | 安装时预缓存 `/`、`/offline`、清单和图标                                     |
-| **静态资源**（CSS、JS、图像、字体）                                                                                                                                                 | 网络优先，缓存回退 | 从网络获取最新资源；离线时回退到缓存                                         |
-| **Next.js 软件包**（`/_next/`）                                                                                                                                                     | 网络优先并更新缓存 | 从网络获取并更新缓存；离线时提供缓存版本                                     |
-| **导航请求**                                                                                                                                                                        | 绕过（从不拦截）   | 浏览器负责 HTTP/3→HTTP/2 回退；失效的 QUIC 套接字不得变成 `Response.error()` |
-| **API / 仪表板路由**（`/api/`、`/a2a`、`/dashboard`、客户端 API 别名 `/v1`、`/v1beta`、`/models`、`/chat`、`/responses`、`/codex`，以及 `/callback`、`/login`；匹配时不区分大小写） | 绕过（从不缓存）   | 始终直接访问服务器——绝不会被服务工作线程拦截                                 |
+[Service Worker](../../public/sw.js)缓存选定的同源资源：
 
-### 离线页面
+| 请求或资产                   | 战略     | 行为                                                                                         |
+| ---------------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| 安装时资源                   | 预缓存   | `/`、 `/manifest.webmanifest`、 `/icon-512.png`和`/apple-touch-icon.png`在工作器安装期间缓存 |
+| Next.js静态资产（`/_next/`） | 网络优先 | 成功响应更新缓存；网络错误回退到现有的缓存响应                                               |
+| 其他静态CSS、 JS、图像和字体 | 缓存优先 | 现有的缓存响应被重用；成功的网络响应会在未命中时被缓存                                       |
+| 页面导航                     | 旁路     | 浏览器直接获取页面；不提供离线后备服务                                                       |
+| API、仪表板和身份验证路由    | 旁路     | Worker 不会拦截或缓存这些请求                                                                |
+| 其他非静态请求               | 网络     | 没有缓存查找或存储                                                                           |
 
-当网络不可用且用户导航到新页面时，服务工作线程会提供专用的 `/offline` 页面，该页面：
+排除的路由有`/api`、 `/a2a`、 `/dashboard`、 `/v1`、 `/v1beta`、 `/models`、 `/chat`、 `/responses`、 `/codex`、 `/callback`和`/login`，在路径边界处不区分大小写进行匹配。跨域和非 GET 请求也会绕过工作线程。
 
-- 显示清晰的**“连接问题”**消息
-- 显示实时更新的**在线/离线状态指示器**
-- 提供**“重试连接”**按钮，以便在连接恢复时重新加载
-- 提供指向**状态页面**的链接以进行诊断
+### 连接页面
 
-### 应用图标
+`/offline`页面提供连接消息、 online/offline指示符、**重试连接**按钮和状态页面的链接。这是**未预先缓存**而服务人员则这样做**不是**将失败的导航重定向到它。它的存在不会使新页面无需服务器即可访问。
 
-OmniRoute 提供了针对各个平台优化的图标：
+### 应用程序图标
 
-| 文件                   | 尺寸            | 使用方                     |
-| ---------------------- | --------------- | -------------------------- |
-| `icon-512.png`         | 512×512         | Android 安装提示、启动画面 |
-| `apple-touch-icon.png` | 180×180         | iOS 主屏幕图标             |
-| `icon-192.svg`         | 192×192（矢量） | Android 自适应图标         |
-| `apple-touch-icon.svg` | 180×180（矢量） | Apple 回退图标             |
-| `favicon.svg`          | 矢量            | 浏览器标签页               |
-| `favicon.ico`          | 多尺寸          | 旧版浏览器                 |
+清单宣传了这些PNG图标：
+
+| 文件                   | 尺寸    | 使用                       |
+| ---------------------- | ------- | -------------------------- |
+| `icon-192.png`         | 192×192 | 通用应用程序图标           |
+| `icon-512.png`         | 512×512 | 通用和可屏蔽的应用程序图标 |
+| `apple-touch-icon.png` | 180×180 | 苹果主屏幕图标             |
+
+浏览器为安装目标选择适当的图标。
 
 ### 自动注册
 
-服务工作线程通过根布局中的 `<PwaRegister />` 组件自动注册。无需用户执行任何操作——只要浏览器检测到有效的清单和服务工作线程，该应用即可安装。
+当浏览器支持 Service Worker 时，`PwaRegister`会在生产环境中注册 Worker。开发模式会取消注册工作人员并清除缓存，以避免过时的资产干扰热重载。安装提示仍然由浏览器决定。
 
 ## 技术架构
 
-### Web 应用清单（`manifest.webmanifest`）
+### Web 应用程序清单
 
-由 Next.js 通过 `src/app/manifest.ts` 生成：
+Next.js从[`src/app/manifest.ts`](../../src/app/manifest.ts)生成`/manifest.webmanifest` 。其关键设置为：
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| 环境           | 价值                               |
+| -------------- | ---------------------------------- |
+| `short_name`   | `OmniRoute`                        |
+| `start_url`    | `/dashboard`                       |
+| `scope`        | `/`                                |
+| `display`      | `standalone`                       |
+| `orientation`  | `any`                              |
+| 背景和主题颜色 | `PWA_THEME_COLORS`的默认灯光调色板 |
 
-### Service Worker（`public/sw.js`）
+清单的名称和描述是该源文件中的静态值。安装的清单不会在每次访问时遵循实例名称设置或活动调色板。
 
-一个不依赖任何框架的原生 Service Worker，具有以下功能：
+### 服务人员
 
-- **安装阶段**：预缓存应用外壳（根页面、离线页面、清单和图标）
-- **激活阶段**：清理旧缓存版本并接管所有客户端
-- **获取阶段**：根据请求类型（导航、静态资源、API）进行智能路由
-- **缓存版本控制**：`omniroute-pwa-v3` — 更新时递增此版本号可强制刷新缓存
+[`public/sw.js`](../../public/sw.js)没有 service-worker 框架依赖性：
 
-### 布局元数据（`src/app/layout.tsx`）
+- **安装：**预缓存上面列出的四个资源并激活新的工作线程。
+- **激活：**删除较旧的缓存代并声明客户端。
+- **拿来：**应用上面的静态资产策略和路由排除。
+- **版本控制：**源缓存名称是`omniroute-pwa-v3`；生产版本会标记缓存标识。
+- **通知：**处理传入的`push`事件并在单击通知时聚焦或打开窗口。
 
-根布局提供了符合 PWA 要求所需的全部 meta 标签：
+单独的推送事件处理程序不会建立活动的推送订阅或配置的服务器传递。不要假设仅仅因为安装了PWA就启用了通知。
 
-- 指向 `/manifest.webmanifest` 的 `manifest` 链接
-- 用于 iOS 独立运行模式的 `apple-web-app-capable: true`
-- `apple-web-app-status-bar-style: black-translucent`
-- 用于 Android Chrome 的 `mobile-web-app-capable: yes`
-- `theme-color: #0b0f1a`
-- 用于边到边渲染的 `viewport-fit: cover`
+### 布局元数据和注册
 
-### 组件：`PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx)提供清单链接、Apple 独立元数据、主题颜色和`viewport-fit: cover`。页面标题和 Apple Web 应用程序标题使用实例名称。实时浏览器主题颜色遵循调色板；安装清单使用默认的浅色。
 
-该客户端组件位于 `src/shared/components/PwaRegister.tsx`，其行为如下：
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx)在客户端上运行，并在其URL中向构建ID注册`/sw.js` 。它检测不匹配的缓存生成，并可以重置工作程序并重新加载一次以从旧安装中恢复。注册失败不会阻止仪表板。
 
-1. 在挂载时运行（仅限客户端）
-2. 检查浏览器是否支持 `serviceWorker`
-3. 静默注册 `/sw.js`（错误会被忽略，以避免阻塞应用）
-4. 不渲染任何内容（`return null`）— 这是一个仅执行副作用的组件
+## 与 Termux 一起使用 (Android)
 
-## 与 Termux（Android）配合使用
+1. 在 Termux 中启动OmniRoute ： `npx -y omniroute@latest`。
+2. 在同一部手机上打开 Chrome： `http://localhost:20128`。
+3. 通过浏览器的安装菜单安装PWA 。
+4. 使用仪表板时保持 Termux 服务器运行。
 
-通过 Termux 在 Android 上运行 OmniRoute 时，PWA 可无缝工作：
-
-1. 在 Termux 中启动 OmniRoute：`npx omniroute`
-2. 在同一部手机上打开 Chrome：`http://localhost:20128`
-3. 通过“添加到主屏幕”安装 PWA
-4. PWA 会连接到本地 Termux 服务器 — 所有内容均在设备上运行
-
-这种组合意味着你的 Android 手机既是**服务器**（Termux），也是**客户端**（PWA）— 从而构成一个完整的、自包含的 AI 网关。
+电话托管网关及其仪表板。对远程AI提供者的请求仍然需要网络访问。有关设置和 Android 进程生命周期注意事项，请参阅[Termux 指南](TERMUX_GUIDE.md)。
 
 ## 从其他设备使用
 
-可在任何能够通过浏览器访问 OmniRoute 服务器的设备上安装 PWA：
+在手机、平板电脑或台式机上打开服务器的HTTPS地址，然后按照该浏览器的安装流程进行操作。服务器必须保持可从每个设备访问。有关远程访问选项，请参阅[隧道指南](../ops/TUNNELS_GUIDE.md)。
 
-- **另一部手机/平板电脑**：访问 `http://PHONE_IP:20128` 并安装 PWA
-- **笔记本电脑**：使用 Chrome/Edge 打开，并将其安装为桌面 PWA
-- **带浏览器的智能电视**：以全屏模式访问仪表板
-
-## 自定义
+## 定制化
 
 ### 实例名称
 
-PWA 标题会采用 `Dashboard → Settings` 中的**实例名称**设置。如果将实例重命名为“My AI Gateway”，已安装的 PWA 将显示该名称。
+这**实例名称**设置更改仪表板元数据，包括页面标题和 Apple Web 应用程序标题。生成的清单使用静态名称，因此此设置不能保证重命名已安装的应用程序。
 
-### 自定义网站图标
+### 自定义图标
 
-如果通过 `Dashboard → Settings` 上传自定义网站图标，桌面端的 PWA 图标将使用该自定义图标。移动设备主屏幕图标则使用预先生成的 `icon-512.png` 和 `apple-touch-icon.png` 文件。
+自定义图标会更改浏览器图标。安装清单仍然公布上面的PNG文件；更改图标不会替换那些主屏幕图标。
 
-## 限制
+## 局限性
 
-- **不支持推送通知** — Service Worker 未实现 Push API。通知改由 Electron 应用处理。
-- **不支持后台同步** — 离线操作不会排队等待重放。PWA 主要用作仪表板查看器。
-- **iOS 限制** — iOS 上的 Safari 不支持所有 PWA 功能（例如，需要手动执行安装提示，且后台 Service Worker 功能受限）。
-- **缓存大小** — Service Worker 仅缓存静态资源。来自 `/api/` 路由的大型响应负载不会被缓存。
-- **移动端自定义图标** — 在设置中更改 favicon 不会更新移动设备上的主屏幕图标（这需要重新生成 PWA 图标）。
+- **需要连接服务器：**页面导航、仪表板状态和API请求没有离线回退。
+- **无后台同步：**离线操作不会排队等待重播。
+- **浏览器差异：**安装菜单、窗口呈现和通知支持因平台而异。
+- **无API响应缓存：**工作人员不包括API、仪表板和身份验证路由。
+- **静态安装图标：**更新这些图标需要更改广告资产；浏览器可能会保留已安装的元数据。
 
 ## 文件参考
 
-| 文件                                    | 用途                                                     |
-| --------------------------------------- | -------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Next.js 清单路由（生成 `manifest.webmanifest`）          |
-| `public/sw.js`                          | 包含缓存逻辑的 Service Worker                            |
-| `src/shared/components/PwaRegister.tsx` | 用于注册 Service Worker 的客户端组件                     |
-| `src/app/offline/page.tsx`              | 带有实时状态指示器的离线回退页面                         |
-| `src/app/layout.tsx`                    | 包含 PWA 元数据（apple-web-app、theme-color 等）的根布局 |
-| `public/icon-512.png`                   | 512×512 PNG 图标（Android、启动画面）                    |
-| `public/apple-touch-icon.png`           | 180×180 PNG 图标（iOS 主屏幕）                           |
-| `public/icon-192.svg`                   | 192×192 SVG 图标（Android 自适应图标）                   |
-| `public/apple-touch-icon.svg`           | 180×180 SVG 图标（Apple 回退图标）                       |
+| 文件                                                                                   | 目的                         |
+| -------------------------------------------------------------------------------------- | ---------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | 生成的 Web 应用程序清单      |
+| [public/sw.js](../../public/sw.js)                                                     | 缓存、排除和通知事件处理程序 |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | 生产注册和过时缓存恢复       |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | 连接页面，不是自动离线后备   |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | 页面元数据和视口设置         |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | 共享主题颜色值               |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512应用程序图标        |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 苹果图标           |

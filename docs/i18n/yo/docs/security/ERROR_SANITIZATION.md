@@ -4,13 +4,7 @@
 
 ---
 
-> **Orísun òtítọ́:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, àti àwọn olùkọ́lé gbogbogbòó inú `open-sse/utils/error.ts`
-> **Àwọn ìdánwò:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Ìmúdójúìwọ̀n tó kẹ́yìn:** 2026-09-02 — v3.8.51
-> **Àwọn olùkà:** Ẹlẹ́rọ̀ èyíkéyìí tó bá ń ṣiṣẹ́ lórí àwọn ìdáhùn àṣìṣe (àwọn ipa-ọ̀nà HTTP, àwọn ìṣàn SSE, àwọn olùṣàmúlò, àwọn olùdarí MCP).
-> **Ipò:** **ÀÌGBỌ́DỌ̀MÁṢE** fún gbogbo ipa kóòdù tó ń dá ìfiránṣẹ́ àṣìṣe padà sí oníbàárà.
+> **Orisun otitọ:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, ati awọn ọmọle gbangba ni `open-sse/utils/error.ts`** Awọn idanwo:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Olugbo:** Eyikeyi ẹlẹrọ fọwọkan awọn idahun aṣiṣe (awọn ipa ọna HTTP, awọn ṣiṣan SSE, awọn alaṣẹ, awọn olutọju MCP ).** Ipo:****MANDATORY** fun gbogbo ọna koodu ti o da ifiranṣẹ aṣiṣe pada si alabara kan.
 
 ## Ìdí tí èyí fi wà
 

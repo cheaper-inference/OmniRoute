@@ -4,13 +4,7 @@
 
 ---
 
-> **සත්යයේ මූලාශ්රය:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, සහ `open-sse/utils/error.ts` හි public builders
-> **පරීක්ෂණ:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **අවසන් වරට යාවත්කාලීන කළේ:** 2026-09-02 — v3.8.51
-> **ඉලක්කගත පිරිස:** දෝෂ ප්රතිචාර හසුරුවන ඕනෑම ඉංජිනේරුවෙකු (HTTP routes, SSE streams, executors, MCP handlers).
-> **තත්ත්වය:** සේවාලාභියෙකු වෙත දෝෂ පණිවිඩයක් ආපසු ලබාදෙන සෑම code path එකක් සඳහාම **අනිවාර්යයි**.
+> **සත්‍ය මූලාශ්‍රය:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, සහ `open-sse/utils/error.ts` හි පොදු සාදන්නන්** පරීක්ෂණ:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** ප්‍රේක්ෂක:** ඕනෑම ඉංජිනේරුවෙක් දෝෂ ප්‍රතිචාර ස්පර්ශ කරයි (HTTP මාර්ග, SSE ප්‍රවාහ, ක්‍රියාත්මක කරන්නන්, MCP හසුරුවන්න).** තත්ත්වය:****MANDATORY** සේවාදායකයකුට දෝෂ පණිවිඩයක් ලබා දෙන සෑම කේත මාර්ගයක් සඳහාම.
 
 ## මෙය පවතින්නේ ඇයි
 

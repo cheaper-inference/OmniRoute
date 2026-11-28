@@ -66,40 +66,29 @@ Notion vrati objekt pogreške, token se briše, a poziv ne uspijeva uz status `4
 
 ## MCP alati (6)
 
-Definirani su u `open-sse/mcp-server/tools/notionTools.ts`. Token se dohvaća u trenutku
-poziva putem `getNotionToken()`; ako nije konfiguriran, alat izbacuje pogrešku
-`"Token integracije Notion nije konfiguriran. Postavite ga u Postavke > Izvori konteksta."`
+Definirano u `open-sse/mcp-server/tools/notionTools.ts`. Token se rješava u vrijeme poziva putem `getNotionToken()`; ako nijedan nije konfiguriran, alat izbacuje `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Alat                         | Opseg          | Opis                                                                                                                 |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Pretražuje stranice i baze podataka prema tekstualnom upitu (vraća naslove, ID-ove i URL-ove). Podržava straničenje. |
-| `notion_get_page`            | `read:notion`  | Dohvaća sadržaj i metapodatke stranice prema njezinu ID-u.                                                           |
-| `notion_list_block_children` | `read:notion`  | Navodi sve podređene blokove bloka ili stranice (stablo blokova). Podržava straničenje.                              |
-| `notion_query_database`      | `read:notion`  | Šalje upit bazi podataka uz neobavezne `filter` + `sorts` (format Notion API-ja). Podržava straničenje.              |
-| `notion_get_database`        | `read:notion`  | Dohvaća shemu/metapodatke baze podataka prema ID-u.                                                                  |
-| `notion_append_blocks`       | `write:notion` | Dodaje podređene blokove postojećem bloku ili stranici (najviše 100 blokova po zahtjevu).                            |
+| Alat                         | Opseg          | Opis                                                                                              |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Pretraživanje stranica i baza podataka tekstualnim upitom (vraća naslove, IDs, URLs). Paginirano. |
+| `notion_get_page`            | `read:notion`  | Dobijte sadržaj i metapodatke stranice prema ID.                                                  |
+| `notion_list_block_children` | `read:notion`  | Popis svih potomaka blokova bloka ili stranice (stablo blokova). Paginirano.                      |
+| `notion_query_database`      | `read:notion`  | Upit bazi podataka s izbornim `filter` + `sorts` (Notion API format). Paginirano.                 |
+| `notion_get_database`        | `read:notion`  | Uzmite schema/metadata baze podataka pomoću ID.                                                   |
+| `notion_append_blocks`       | `write:notion` | Dodavanje djece blokova postojećem bloku ili stranici (maksimalno 100 blokova po zahtjevu).       |
 
 ### Ulazni parametri
 
-- `notion_search` — `query` (1–500 znakova), `pageSize` (1–100, zadano 20),
-  `startCursor` (neobavezno).
-- `notion_get_page` — `pageId` (32-znamenkasti heksadecimalni niz ili UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, zadano 50),
-  `startCursor` (neobavezno).
-- `notion_query_database` — `databaseId`, `filter` (neobavezno, format filtra Notion),
-  `sorts` (neobavezni niz), `pageSize` (1–100, zadano 50), `startCursor` (neobavezno).
+- `notion_search` — `query` (1–500 znakova), `pageSize` (1–100, zadano 20), `startCursor` (neobavezno).
+- `notion_get_page` — `pageId` (32-char hex ili UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, zadano 50), `startCursor` (neobavezno).
+- `notion_query_database` — `databaseId`, `filter` (izborno, Notion format filtra), `sorts` (izborno polje), `pageSize` (1–100, zadano 50), `startCursor` (izborno).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (niz objekata blokova),
-  `after` (neobavezni položaj).
+- `notion_append_blocks` — `blockId`, `children` (niz blok objekata), `after` (neobavezna pozicija).
 
 ### Opsezi
 
-Alati za čitanje zahtijevaju `read:notion`, a alat za pisanje zahtijeva `write:notion`.
-Opsege provodi `withScopeEnforcement()` u
-`open-sse/mcp-server/server.ts` samo kada je `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; dopušteni
-opsezi pozivatelja dolaze iz `OMNIROUTE_MCP_SCOPES` (odvojeni zarezima) ili konteksta opsega
-autentificiranog API ključa. Cjelovit model opsega potražite u
-[MCP-SERVER.md](./MCP-SERVER.md).
+Alati za čitanje zahtijevaju `read:notion`, a alati za pisanje `write:notion`. Opsege nameće `withScopeEnforcement()` u `open-sse/mcp-server/server.ts` kada `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, i uvijek za HTTP/SSE pozivatelja čijem API ključu nedostaje `manage`/`admin`; dopušteni opseg pozivatelja dolazi iz konteksta opsega `OMNIROUTE_MCP_SCOPES` (odvojenog zarezom) ili autentificiranog konteksta ključa API. Pogledajte [MCP-SERVER.md](./MCP-SERVER.md) za model punog opsega.
 
 ## Krajnje točke
 

@@ -67,15 +67,15 @@ Agizo limekusudiwa kuwa **kwa kila proksi**, si la kimataifa — proksi tofauti 
 
 ---
 
-## Thamani Tatu
+## Maadili Matatu
 
-| Thamani | Lebo ya UI               | Tabia                                                                                                                                                                                                   |
-| ------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`  | `Otomatiki (dual-stack)` | OS huchagua familia. Kwa seva pangishi ya proksi iliyo anwani halisi ya IP, familia huamuliwa na anwani hiyo; kwa jina la seva pangishi, familia zote mbili zinaweza kutumika. Hii ndiyo chaguo-msingi. |
-| `ipv4`  | `IPv4 pekee`             | Huweka muunganisho kwenye IPv4. Hushindwa kwa usalama ikiwa seva pangishi ya proksi haina rekodi ya IPv4 (A).                                                                                           |
-| `ipv6`  | `IPv6 pekee`             | Huweka muunganisho kwenye IPv6. Hushindwa kwa usalama ikiwa seva pangishi ya proksi haina rekodi ya IPv6 (AAAA).                                                                                        |
+| Thamani | lebo ya UI          | Tabia                                                                                                                                                       |
+| ------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`  | `Auto (dual-stack)` | OS anachagua familia. Kwa seva mbadala ya IP-halisi, familia ni ya asili; kwa jina la mpangishaji, familia zote mbili zinastahiki. Hii ndiyo chaguo-msingi. |
+| `ipv4`  | `IPv4 only`         | Hubandika muunganisho kwa IPv4. Imeshindwa kufungwa ikiwa seva pangishi haina rekodi ya IPv4 (A).                                                           |
+| `ipv6`  | `IPv6 only`         | Hubandika muunganisho kwa IPv6. Imeshindwa kufungwa ikiwa seva pangishi haina rekodi ya IPv6 (AAAA).                                                        |
 
-Vifungu vya UI vipo katika `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+UI strings kuishi katika `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
@@ -83,21 +83,21 @@ Vifungu vya UI vipo katika `src/i18n/messages/en.json` (`labelFamily`, `familyAu
 
 ### Dashibodi
 
-Kiteuzi kipo katika fomu ya proksi kwenye kichupo cha **Kundi la Proksi**:
+Kiteuzi kiko katika umbo la wakala wa** Dimbwi la Wakala** kichupo:
 
-1. Fungua **Dashibodi → Mipangilio → Proksi → Kundi la Proksi**
-2. Ongeza au hariri proksi
-3. Weka menyu kunjuzi ya **Familia ya IP** kuwa `Otomatiki (dual-stack)`, `IPv4 pekee`, au `IPv6 pekee`
+1. Fungua** Dashibodi → Mipangilio → Wakala → Dimbwi la Wakala**
+2. Ongeza au hariri seva mbadala
+3. Weka** familia IP** kushuka kwa `Auto (dual-stack)`, `IPv4 only`, au `IPv6 only`
 4. Hifadhi
 
-Kidhibiti kinaonyeshwa na `ProxyRegistryManager.tsx` (kilichopachikwa katika `proxy/ProxyPoolTab.tsx`).
+Udhibiti hutolewa na `ProxyRegistryManager.tsx` (imewekwa `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Sehemu ya `family` ni sehemu ya mizigo ya ombi la kuunda/kusasisha sajili ya proksi, inayothibitishwa na `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) na kushughulikiwa na `POST` / `PATCH /api/v1/management/proxies`:
+Sehemu ya `family` ni sehemu ya create/update za usajili wa wakala, zilizoidhinishwa na `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) na kushughulikiwa na `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Unda proksi ya IPv6 pekee
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Badilisha proksi iliyopo iwe ya IPv4 pekee
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Sehemu hiyo hiyo pia inakubaliwa na kipengee cha ndani cha usanidi wa proksi kinachotumiwa kwa maingizo ya proksi ya upande wa juu (`upstream_proxy_config.family`, angalia [Muundo wa Data](#data-model)).
+Sehemu hiyo hiyo pia inakubaliwa na kipengee cha usanidi cha proksi ya ndani kinachotumiwa kwa maingizo ya seva mbadala ya juu (`upstream_proxy_config.family`, angalia [Data Model](#data-model) ).
 
-Kwa sehemu nyingine ya API ya CRUD/ugawaji wa proksi, angalia [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Kwa seva mbadala CRUD/assignment API, angalia [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

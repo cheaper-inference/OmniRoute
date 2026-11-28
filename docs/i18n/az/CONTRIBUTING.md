@@ -8,122 +8,107 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## İnkişaf Mühiti
+## İnkişaf Quraşdırma
 
-### İlkin tələblər
+### İlkin şərtlər
 
-- **Node.js** `>=22.22.2 <23`, və ya `>=24.0.0 <27` (tövsiyə olunur: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` və ya `>=24.0.0 <27` (tövsiyə olunur: 24 LTS)
+- **npm** 10 +
 
-> **Node 24 ilə Windows:** cari 24 LTS düzəliş buraxılışından istifadə edin (ən azı 24.20.0).
-> Daha əvvəlki buraxılışlar `--test-force-exit` prosesi bağladıqda uğurlu testlərdən sonra
-> prosesi dayandıra bilər. Node-un [Windows libuv düzəlişi](https://github.com/nodejs/node/pull/61999) bu
-> icra mühiti qəzasını aradan qaldırır; test təsdiqləmələrini və runner-in çıxış yoxlamalarını aktiv saxlayın.
+> **Node 24 ilə Windows :** cari 24 LTS yamaq buraxılışını istifadə edin (ən azı 24.20.0). Əvvəlki buraxılışlar `--test-force-exit` prosesi bağlayanda uğurlu sınaqlardan sonra dayandırıla bilər. Node-un [Windows libuv düzəlişi](https://github.com/nodejs/node/pull/61999) bu iş vaxtı qəzasını həll edir; test təsdiqlərini və qaçışçı çıxış yoxlamalarını aktiv saxlayın.
 
-> **npm v11+ istifadəçiləri (Node 24+):** `npm install` əmrindən sonra native modulların quraşdırıldığını yoxlayın:
-> `node -e "require('better-sqlite3')"`. Əgər `MODULE_NOT_FOUND` xətası ilə uğursuz olarsa,
-> `npm approve-scripts better-sqlite3 && npm install` əmrini icra edin. Baxın:
-> [Problemlərin aradan qaldırılması](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + istifadəçiləri (Node 24 +):** `npm install` dən sonra yerli modulların quraşdırıldığını yoxlayın: `node -e "require('better-sqlite3')"`. Əgər `MODULE_NOT_FOUND` ilə uğursuz olarsa, `npm approve-scripts better-sqlite3 && npm install` işə salın. [Problemlərin aradan qaldırılmasına](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) baxın.
 
 - **Git**
 
-### Klonlama və quraşdırma
+### Klonlayın və Quraşdırın
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Mühit dəyişənləri
+### Ətraf Mühit Dəyişənləri
 
 ```bash
-# Şablondan .env faylınızı yaradın
+# Create your .env from the template
 cp .env.example .env
 
-# Tələb olunan məxfi açarları yaradın
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 İnkişaf üçün əsas dəyişənlər:
 
-| Dəyişən                | İnkişaf üçün standart dəyər | Təsvir                          |
-| ---------------------- | --------------------------- | ------------------------------- |
-| `PORT`                 | `20128`                     | Server portu                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Frontend üçün baza URL-i        |
-| `JWT_SECRET`           | (yuxarıda yaradılır)        | JWT imzalama məxfi açarı        |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | İlk giriş parolu                |
-| `APP_LOG_LEVEL`        | `info`                      | Jurnal təfərrüatlılıq səviyyəsi |
+| Dəyişən                | Defolt İnkişaf           | Təsvir                          |
+| ---------------------- | ------------------------ | ------------------------------- |
+| `PORT`                 | `20128`                  | Server portu                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Frontend üçün əsas URL          |
+| `JWT_SECRET`           | (yuxarıda yaradın)       | JWT imza sirri                  |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | İlk giriş parolu                |
+| `APP_LOG_LEVEL`        | `info`                   | Qeydin təfərrüatlılıq səviyyəsi |
 
-### İdarə panelinin tənzimləmələri
+### İdarə Paneli Parametrləri
 
-İdarə paneli mühit dəyişənləri vasitəsilə də konfiqurasiya oluna bilən funksiyalar üçün UI keçidləri təqdim edir:
+İdarə paneli ətraf mühit dəyişənləri vasitəsilə də konfiqurasiya edilə bilən funksiyalar üçün UI keçidlərini təmin edir:
 
-| Tənzimləmənin yeri       | Keçid                 | Təsvir                                        |
-| ------------------------ | --------------------- | --------------------------------------------- |
-| Tənzimləmələr → Qabaqcıl | Sazlama rejimi        | Sazlama sorğusu jurnallarını aktivləşdir (UI) |
-| Tənzimləmələr → Ümumi    | Yan panelin görünməsi | Yan panel bölmələrini göstər/gizlət           |
+| Yerin qurulması        | Dəyişdirin         | Təsvir                                      |
+| ---------------------- | ------------------ | ------------------------------------------- |
+| Parametrlər → Advanced | Sazlama rejimi     | Sazlama sorğu qeydlərini aktivləşdirin (UI) |
+| Parametrlər → Ümumi    | Yan Panel Görünüşü | Show/hide yan panel bölmələri               |
 
-Bu tənzimləmələr verilənlər bazasında saxlanılır və yenidən başladılmadan sonra qorunur; təyin edildikdə mühit dəyişəni standartlarını üstələyir.
+Bu parametrlər verilənlər bazasında saxlanılır və quraşdırıldıqda env var defoltlarına üstünlük verərək, yenidən başlatmalarda davam edir.
 
-### Lokal olaraq işə salma
+### Yerli olaraq çalışır
 
 ```bash
-# İnkişaf rejimi (hot reload)
+# Development mode (hot reload)
 npm run dev
 
 # Production build
-npm run build    # next build → .build/next/ sonra assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Contributor dəyişiklikləri üçün sürətli yalnız backend/API kompilyasiyası
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Release build (təmiz yenidənqurma + HEAD sentinel — deploy üçün tələb olunur)
-npm run build:release   # rm -rf .build dist və build + dist/BUILD_SHA yazır
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Ümumi port konfiqurasiyası
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Contributor build yalnız kompilyasiya yoxlaması həyata keçirir: standalone
-distribusiyasını yığmır və optional native paketləmə aktivlərini build etmir. Göndərilə bilən paketi
-yoxlamaq lazım olduqda adi production build-dən istifadə edin.
+Töhfəçi quruluşu yalnız tərtib üçün doğrulama həyata keçirir: o, müstəqil paylanmanı yığmır və ya isteğe bağlı yerli qablaşdırma aktivləri yaratmır. Göndərilə bilən paketi təsdiqləmək lazım olduqda adi istehsal quruluşundan istifadə edin.
 
-### Build çıxışının quruluşu
+### Çıxış Layout qurun
 
-| Qovluq    | Məzmun                                                                       | İzlənilir |
-| --------- | ---------------------------------------------------------------------------- | --------- |
-| `src/`    | Tətbiq mənbə kodu (TypeScript / TSX)                                         | Bəli      |
-| `.build/` | Aralıq fayllar — `next build` çıxışı (gitignored, `distDir = .build/next`)   | Xeyr      |
-| `dist/`   | Göndərilə bilən paket — `assembleStandalone` tərəfindən yığılır (gitignored) | Xeyr      |
+| kataloq   | İçindəkilər                                                                       | İzlənib |
+| --------- | --------------------------------------------------------------------------------- | ------- |
+| `src/`    | Tətbiq mənbəyi (TypeScript / TSX)                                                 | Bəli    |
+| `.build/` | Aralıq — `next build` çıxışı (gitignored, `distDir = .build/next`)                | yox     |
+| `dist/`   | Göndərilə bilən — paketi `assembleStandalone` tərəfindən yığılmışdır (gitignored) | yox     |
 
-Build pipeline tək keçiddən ibarətdir:
+Tikinti boru kəməri bir keçiddir:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js çıxışı)
-  └─ assembleStandalone()                 (standalone + static + public + native aktivlərini köçürür)
-       └─ çıxış: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` əlavə olaraq əvvəlcə hər iki qovluğu təmizləyir və
-deploy bütövlüyü göstəricisi kimi `dist/BUILD_SHA` faylına
-`git rev-parse --short HEAD` dəyərini yazır.
+`npm run build:release` əlavə olaraq hər iki qovluğu təmizləyir və `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bütövlük nəzarətçisi kimi yazır.
 
-`npm run build:contributor` yalnız backend üçün build profilindən istifadə edir. Build zamanı
-idarə panelinin UI fayllarını müvəqqəti olaraq stub-larla əvəz edir, API route handler-lərini saxlayır
-və build-dən sonra orijinal faylları bərpa edir. İdarə panelinin UI-sına təsir edən dəyişikliklər və ya
-tam release yoxlaması üçün `npm run build` əmrindən istifadə edin; contributor profili release build-i əvəz etmir.
+`npm run build:contributor` yalnız backend qurma profilindən istifadə edir. O, qurarkən tablosuna UI fayllarını müvəqqəti olaraq ləkələyir, API marşrut idarəçilərini saxlayır və qurulduqdan sonra orijinal faylları bərpa edir. Tablosuna təsir edən dəyişikliklər üçün `npm run build` istifadə edin UI və ya tam buraxılış təsdiqi üçün; ianəçi profili buraxılış quruluşunu əvəz etmir.
 
-> **VPS deploy qeydi:** uzaq image qovluğu `/usr/lib/node_modules/omniroute/app/`
-> dəyişməz qalır. Deploy bacarıqları `dist/` məzmununu həmin qovluğa rsync edir.
-> Yalnız repodaxili build çıxış yolu dəyişib (`app/` → `dist/`).
+> **VPS yerləşdirmə qeydi:** uzaq görüntü qovluğu `/usr/lib/node_modules/omniroute/app/` dəyişməzdir. Yerləşdirmə bacarıqları `dist/` məzmununu ona rsync edir. Yalnız repodaxili qurma çıxış yolu köçürüldü (`app/` → `dist/`).
 
-Standart URL-lər:
+Defolt URLs:
 
-- **İdarə paneli**: `http://localhost:20128/dashboard`
+- **İdarə paneli** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -430,10 +415,10 @@ Daha sonra `dist/` qovluğunu uzaq `app/` qovluğuna rsync edən `/deploy-vps-*-
 
 ---
 
-## Yardım Almaq
+## Yardım əldə etmək
 
-- **Arxitektura**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) sənədinə baxın
-- **API Arayışı**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) sənədinə baxın
-- **Təhlükəsizlik sənədləri**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Əməliyyat sənədləri**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Problemlər**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Memarlıq** : Bax [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API İstinad** : Bax [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Təhlükəsizlik sənədləri** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Əməliyyat sənədləri** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Məsələlər** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

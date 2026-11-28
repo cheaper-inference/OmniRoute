@@ -4,9 +4,9 @@
 
 ---
 
-> **Versiune:** v3.8.44** Ultima actualizare:** 2026-10-28** Public:** Inginerii care adaugă, întrețin sau depanează servicii încorporate (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versiune:** v3.8.44** Public:** Inginerii care adaugă, întrețin sau depanează servicii încorporate (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Serviciile încorporate sunt instrumente secundare de proces instalate local pe care OmniRoute le instalează, le supraveghează și le expune ca ținte de rutare de primă clasă. Spre deosebire de furnizorii externi (la care se ajunge prin internet prin taste API ), serviciile încorporate rulează pe aceeași mașină ca și OmniRoute și comunică prin loopback.
+Serviciile încorporate sunt instrumente secundare de proces instalate local pe care OmniRoute le instalează, le supraveghează și le expune ca ținte de rutare de primă clasă. Spre deosebire de furnizorii externi (la care se ajunge prin internet prin tastele API ), serviciile încorporate rulează pe aceeași mașină ca și OmniRoute și comunică prin loopback.
 
 ---
 
@@ -852,65 +852,44 @@ portul implicit 20128 al OmniRoute.
 
 ---
 
-## 8. Întrebări frecvente
+## 8. FAQ
 
-**Î: Pot expune endpoint-urile serviciilor încorporate clienților non-loopback?**
+**Î: Pot expune punctele finale de servicii încorporate la clienți non-loopback?**
 
-Nu. Nivelul LOCAL_ONLY este intenționat (regula strictă nr. 17). Rutele care pot invoca
-`npm install` sau pot porni procese `node` nu trebuie să fie accesibile traficului
-non-loopback, deoarece un JWT divulgat printr-un tunel (Cloudflare, Ngrok, Tailscale)
-ar permite altfel pornirea arbitrară a proceselor. Nu există nicio excepție opțională
-pentru `/api/services/` — spre deosebire de `/api/mcp/`, acesta este exclus din lista
-de ocolire pentru domeniul de acces manage. Consultați `docs/security/ROUTE_GUARD_TIERS.md`.
+Nu. Nivelul LOCAL_ONLY este intenționat (regulă grea #17). Rutele care pot invoca procese `npm install` sau spawn `node` nu trebuie să fie accesibile din traficul non-loopback, deoarece un JWT scurs printr-un tunel (Cloudflare, Ngrok, Tailscale) ar permite, altfel, generarea arbitrară a procesului. Nu există o excludere pentru `/api/services/` — spre deosebire de `/api/mcp/`, acesta este exclus din lista de ocolire a domeniului de administrare. Vezi `docs/security/ROUTE_GUARD_TIERS.md`.
 
 ---
 
-**Î: Vor fi disponibile 9Router și CLIProxyAPI în implementările de producție/cloud?**
+**Î: Vor fi disponibile 9Router și CLIProxyAPI în implementările production/cloud ?**
 
-Da. Ambele servicii urmează același model local-first ca OmniRoute. Acestea rulează
-pe aceeași mașină și comunică prin loopback. „Producție” înseamnă aici VPS-ul sau
-serverul local pe care este implementat OmniRoute, nu un furnizor cloud la distanță.
+Da. Ambele servicii urmează același model local ca și OmniRoute în sine. Ele rulează pe aceeași mașină și comunică prin loopback. „Producție” înseamnă aici VPS sau serverul local pe care este implementat OmniRoute, nu un furnizor de cloud la distanță.
 
 ---
 
 **Î: Cum depanez supervizorul?**
 
-1. Urmăriți fluxul de jurnale SSE: `curl -N http://localhost:20128/api/services/9router/logs`.
-2. Verificați jurnalele structurate din ieșirea pino a OmniRoute, filtrate după
-   spațiul de nume `service:supervisor`.
-3. Inspectați rândul din baza de date: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
-4. Utilizați `GET /api/services/9router/status` pentru a vedea într-un singur apel starea curentă în timp real, PID-ul, starea de sănătate
-   și `lastError`.
+1. Închideți fluxul de jurnal SSE : `curl -N http://localhost:20128/api/services/9router/logs`.
+2. Verificați jurnalele structurate în ieșirea pino a lui OmniRoute, filtrate de spațiul de nume `service:supervisor`.
+3. Inspectați rândul DB : `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
+4. Utilizați `GET /api/services/9router/status` pentru a vedea starea curentă, PID, sănătate și `lastError` într-un singur apel.
 
 ---
 
-**Î: Supervizorul afișează `health: "degraded"` sau `health: "unknown"`, dar starea este `"running"`. Este o problemă?**
+**Î: Supervizorul arată `health: "degraded"` sau `health: "unknown"`, dar starea este `"running"`. Este o problemă?**
 
-`"degraded"` înseamnă că verificarea stării de sănătate a returnat un răspuns diferit de 200. `"unknown"` înseamnă că nicio
-verificare nu s-a încheiat încă (condiție de cursă cu prima interogare). Ambele sunt tranzitorii în timpul pornirii.
-Dacă starea de sănătate rămâne `"degraded"` mai mult de `healthIntervalMs * 3` ms după
-`"running"`, serviciul încorporat rulează, dar API-ul său HTTP nu răspunde. Verificați
-dacă portul este corect în răspunsul de stare și dacă serviciul ascultă efectiv
-pe acel port.
+`"degraded"` înseamnă că sonda de sănătate a returnat un răspuns non-200. `"unknown"` înseamnă că nicio sondă nu a fost finalizată încă (cursa cu primul sondaj). Ambele sunt tranzitorii în timpul pornirii. Dacă starea de sănătate rămâne `"degraded"` mai mult de `healthIntervalMs * 3` ms după `"running"`, serviciul încorporat rulează, dar HTTP API său nu răspunde. Verificați dacă portul este corect în răspunsul de stare și dacă serviciul ascultă de fapt pe acel port.
 
 ---
 
-**Î: Pot schimba cheia API 9Router fără o repornire completă?**
+**Î: Pot schimba cheia 9Router API fără o repornire completă?**
 
-Nu. Cheia API este transmisă către 9Router printr-o variabilă de mediu în momentul pornirii procesului.
-Variabilele de mediu nu pot fi modificate într-un proces aflat în execuție. `POST .../rotate-key`
-oprește și repornește automat serviciul pentru a aplica noua cheie. Rotația cheii
-intră în vigoare în limita valorii `stopTimeoutMs` a serviciului (implicit 15 s), plus timpul său
-de pornire.
+Nu. Cheia API este transmisă către 9Router printr-o variabilă de mediu la momentul apariției. Variabilele de mediu nu pot fi modificate într-un proces care rulează. `POST .../rotate-key` oprește automat și repornește serviciul pentru a aplica noua cheie. Rotirea tastei are efect în `stopTimeoutMs` al serviciului (implicit 15 s) plus timpul de pornire al acestuia.
 
 ---
 
-**Î: Care este limita bufferului circular și ce se întâmplă când acesta se umple?**
+**Î: Care este limita tamponului inel și ce se întâmplă când se umple?**
 
-Fiecare serviciu are un buffer circular dedicat de 5 MB. Când bufferul este plin, cele mai vechi
-linii de jurnal sunt eliminate pentru a face loc celor noi. Evenimentul SSE `snapshot` returnează
-cele mai recente linii în limita `tail`. Jurnalele nu sunt păstrate pe disc decât dacă
-`logsBufferPath` este setat în rândul din baza de date.
+Fiecare serviciu are un tampon de apel dedicat de 5 MB. Când tamponul este plin, cele mai vechi linii de jurnal sunt evacuate pentru a face loc pentru altele noi. Evenimentul SSE `snapshot` returnează cele mai recente linii în limita `tail`. Jurnalele nu sunt păstrate pe disc decât dacă `logsBufferPath` este setat în rândul DB.
 
 ---
 

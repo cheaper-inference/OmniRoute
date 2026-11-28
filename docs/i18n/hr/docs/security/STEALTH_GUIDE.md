@@ -4,11 +4,9 @@
 
 ---
 
-> **Izvor istine:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Posljednje ažuriranje:** 2026-09-02 — v3.8.51
-> **Publika:** Inženjeri koji održavaju prikrivene integracije specifične za pružatelje usluga.
+> **Izvor istine:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Publika:** Inženjeri koji održavaju skrivene integracije specifične za pružatelja usluga.
 
-OmniRoute se integrira s pružateljima usluga čiji rubni sustavi aktivno utvrđuju otiske neslužbenih klijenata (TLS JA3/JA4, redoslijed zaglavlja, struktura JSON tijela, tokeni integriteta). Ova stranica dokumentira prikrivene površine koje OmniRoute izlaže i mjesta njihove implementacije.
+OmniRoute se integrira s pružateljima čiji rubovi aktivno otiskuju neslužbene klijente (TLS JA3/JA4, redoslijed zaglavlja, JSON oblik tijela, tokeni integriteta). Ova stranica dokumentira skrivene površine OmniRoute izlaže i gdje su implementirane.
 
 ## Pravna i etička napomena
 
@@ -83,65 +81,68 @@ otiska na izričito ovlaštenom stvarnom računu.
 
 ---
 
-## Claude Code prikriveni paket
+## Claude Code Stealth Bundle
 
 Kada je `cliCompatMode` uključen, OmniRoute preoblikuje odlazne Claude zahtjeve tako da ih nije moguće razlikovati od `claude-cli` prometa. Tri modula surađuju:
 
 ### `claudeCodeFingerprint.ts`
 
-Izračunava troznamenkasti `cc_version` otisak ugrađen u zaglavlje za naplatu:
+Izračunava `cc_version` otisak prsta od 3 znaka ugrađen u zaglavlje naplate:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
 - `FINGERPRINT_SALT = "59cf53e54c78"` (tvrdo kodirano; odgovara službenom klijentu)
-- Ulazi: znakovi na indeksima 4, 7 i 20 teksta prve korisničke poruke + niz verzije
-- Izlaz: troznamenkasti heksadekadski prefiks
+- Unosi: znakovi na indeksu 4, 7, 20 prve korisničke poruke, + verzije
+- Izlaz: heksadecimalni prefiks od 3 znaka
 
-### `claudeCodeCCH.ts` (kontrolni sažetak sadržaja klijenta)
+### `claudeCodeCCH.ts` (Hash klijentskog sadržaja)
 
-Provjera integriteta na strani poslužitelja koju službeni Claude Code CLI izračunava putem Bun/Zig. OmniRoute je ponovno implementira s pomoću `xxhash-wasm`:
+Provjera integriteta na strani poslužitelja službeni Claude kod CLI izračunava putem Bun/Zig. OmniRoute reimplements sa `xxhash-wasm`:
 
-1. Serijalizirajte tijelo s rezerviranim mjestom `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Heksadekadska vrijednost od 5 malih znakova, dopunjena nulama
-4. Zamijenite `cch=00000;` izračunatim tokenom
+1. Serializirajte tijelo pomoću `cch=00000;` rezerviranog mjesta
+2. Izgradite raspršeni prikaz s dvije zamjene običnog teksta, ovim redoslijedom (`hashView()`):
+   - svako podudaranje `/"model":"[^"]*"/g` postaje `"model":""` — podudaranje se zaustavlja na prvom `"`, tako da se vrijednost s izbjegnutim navodnikom (`"model":"a\"b"`) prazni samo do tog navodnika, kao što to radi klijent
+   - svako podudaranje `/"max_tokens":\d+,|,?"max_tokens":\d+/g` se uklanja — samo numeričke vrijednosti, na bilo kojoj dubini
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Hex s malim slovima od 5 znakova podstavljen nulama
+5. Zamijenite `cch=00000;` izračunatim tokenom
 
 Konstante:
 
-- Početna vrijednost: `0x6e52736ac806831e`
+- Seed: `0x4d659218e32a3268` (podudara se s hvatanjima povratne petlje Claude koda 2.1.252 i 2.1.322)
 - Uzorak: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Umeće Unicode **spojnik nulte širine** (`U+200D`) nakon prvog znaka „osjetljivih” naziva klijenata kako ih filtri uzlaznog sustava ne bi mogli pronaći naredbom grep. Zadani popis riječi:
+Umeće Unicode** spojnica nulte širine** (`U+200D`) nakon prvog znaka "osjetljivih" imena klijenata tako da ih uzvodni filtri ne mogu grep. Zadani popis riječi:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Primjenjuje se na: blokove `system`, sav `messages[].content` te `tools[].description` / `tools[].function.description`. Operator ga može nadjačati putem `setSensitiveWords()`.
+Primijenjeno na: `system` blokove, sve `messages[].content` i `tools[].description` / `tools[].function.description`. Operator može nadjačati putem `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — pružatelji `anthropic-compatible-cc-*`
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` pružatelji usluga
 
-Za Anthropic posrednike trećih strana koji prihvaćaju samo promet „pravog Claude Codea”:
+Za Anthropic releje treće strane koji prihvaćaju samo promet "stvarnog Claude koda":
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` prema zadanim postavkama
-- Prekidač „Omogući beta-verziju redigiranog razmišljanja” za pojedinu vezu dodaje `redact-thinking-2026-02-12` kada CC Compatible uzlazni sustav izričito zahtijeva redigirane tokove razmišljanja
-- Prekidač „Omogući prikaz sažetog razmišljanja” za pojedinu vezu pohranjuje `providerSpecificData.requestDefaults.summarizeThinking` i dodaje `display: "summarized"` CC Compatible zahtjevima za razmišljanje koji još nemaju postavljen način prikaza
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (obitelj Opus/Sonnet 4.x)
-- Zadana putanja: `/v1/messages?beta=true`
+- Prekidač za svaku vezu "Omogući redact-thinking beta" dodaje `redact-thinking-2026-02-12` kada CC kompatibilan uzvodno zahtijeva posebno redigirane streamove razmišljanja
+- Prekidač "Omogući prikaz sažetog razmišljanja" po vezi pohranjuje `providerSpecificData.requestDefaults.summarizeThinking` i dodaje `display: "summarized"` u CC kompatibilne zahtjeve za razmišljanje koji već nisu postavili način prikaza
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` ( obitelj Opus/Sonnet 4.x)
+- Zadana staza: `/v1/messages?beta=true`
 
-Srodni moduli u istom paketu:
+Sestrinski moduli u istom paketu:
 
-- `claudeCodeConstraints.ts` — pravila temperature + upravljanja predmemorijom
-- `claudeCodeToolRemapper.ts` — ponovno mapiranje naziva alata
-- `claudeCodeExtraRemap.ts` — dodatna normalizacija korisnog sadržaja
+- `claudeCodeConstraints.ts` — temperatura + pravila kontrole predmemorije
+- `claudeCodeToolRemapper.ts` — remapiranje naziva alata
+- `claudeCodeExtraRemap.ts` — normalizacija dodatnog nosivosti
 
 ---
 
@@ -201,7 +202,7 @@ Dodirne točke:
 
 - `open-sse/executors/antigravity.ts` — čita `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — credential vodovod
-- Izvorno izvješće o incidentu: Rasprava [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Izvorno izvješće o incidentu: Rasprava [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

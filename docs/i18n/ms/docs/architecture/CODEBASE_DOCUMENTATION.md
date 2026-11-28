@@ -4,18 +4,11 @@
 
 ---
 
-> **Versi:** v3.8.51
-> **Kemas kini terakhir:** 2026-06-28
-> **Khalayak:** Jurutera yang menyumbang kepada OmniRoute atau membina integrasi di atasnya.
+> **Versi:** v3.8.51** Khalayak:** Jurutera yang menyumbang kepada OmniRoute atau membina integrasi di atasnya.
 >
-> Untuk rajah seni bina peringkat tinggi dan rasional di sebalik setiap subsistem, baca
-> [ARCHITECTURE.md](./ARCHITECTURE.md). Untuk penerangan mendalam tentang setiap subsistem
-> (Auto Combo, pelayan MCP, pelayan A2A, Kemahiran, Memori, Ejen Awan, Ketahanan,
-> Pemampatan dan sebagainya), lihat fail khusus masing-masing dalam direktori `docs/` ini.
+> Untuk gambar rajah seni bina peringkat tinggi dan alasan di sebalik setiap subsistem, baca [ARCHITECTURE.md](./ARCHITECTURE.md). Untuk penyelaman mendalam pada subsistem individu (Auto Combo, pelayan MCP, pelayan A2A, Kemahiran, Memori, Ejen Awan, Ketahanan, Mampatan, dll.) lihat fail khusus mereka dalam direktori `docs/` ini.
 
-Fail ini menerangkan **perkara yang wujud dalam repositori pada masa ini** supaya jurutera baharu
-boleh menavigasi pepohon, memahami pelapisan masa jalan dan mengetahui tempat untuk menambahkan kod
-tanpa mencipta modul baharu.
+Fail ini menerangkan** apa yang ada dalam repositori hari ini** supaya jurutera baharu boleh menavigasi pepohon, memahami lapisan masa jalan dan mengetahui tempat untuk menambah kod tanpa mencipta modul baharu.
 
 ---
 
@@ -566,35 +559,14 @@ Perintah lazim:
 
 ## 8. `scripts/`
 
-Disusun mengikut tujuan ke dalam 6 subfolder.
+Disusun kepada 6 subfolder mengikut tujuan.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, serta pembantu pemantauan PR baca sahaja
-  `ci-discriminate.sh` (mengisih tandatangan semakan gagal bagi sesuatu PR kepada milik sendiri / diwarisi /
-  tidak diketahui berdasarkan PR rujukan atau isu base-red) dan `audit-worktree.sh`
-  (fail kotor, permukaan yang dilindungi, penegasan yang dialih keluar, bilangan
-  penyekatan, baki tsconfig sementara, kepala PR berbanding HEAD setempat — sebelum PR pekerja diterima).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, ditambah dengan pembantu jagaan PR baca sahaja `ci-discriminate.sh` (menyisih PR yang gagal / tidak diketahui dengan rujukan sendiri / tidak diketahui isu merah asas) dan PR (fail kotor, permukaan yang dilindungi, penegasan yang dialih keluar, kiraan penindasan, sisa tmp `audit-worktree.sh`, PR head vs HEAD — tempatan sebelum PR pekerja diterima).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. versi bendera `check-deprecated-versions.mjs` secara eksplisit dikaitkan dengan OmniRoute (3.6.x dan lebih awal). Cek mengabaikan tarikh.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

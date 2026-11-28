@@ -185,92 +185,49 @@ nem tartalmazza ezeket.
 
 ---
 
-## Téves antivírus-riasztások
+## A víruskereső téves pozitívumok
 
 <a name="antivirus-false-positives"></a>
 
-### Az Avast/AVG karanténba helyezi a `README.md` fájlt `MD:HttpRequest-inf[Susp]` jelzéssel
+### Avast/AVG karantén `README.md` a `MD:HttpRequest-inf[Susp]`
 
-**Ez téves riasztás. Semmi sem fertőzött, és nincs szükség semmilyen beavatkozásra.**
+**Ez hamis pozitív eredmény. Semmi sem fertőzött, és nincs szükség intézkedésre.**
 
-Az Avast és az AVG olyan heurisztikát futtat, amely megjelöli a sok, HTTP-kérésnek tűnő
-hivatkozást tartalmazó egyszerű szöveges/Markdown-fájlokat. Az OmniRoute `README.md` fájlja
-az npm-csomag része (szerepel a `package.json` → `files` mezőben), ezért globális telepítéskor
-a `node_modules/omniroute/README.md` helyre kerül — és körülbelül 15
-`http://localhost:20128/...` példát tartalmaz (az MCP HTTP/SSE-végpontokat, az A2A
-`.well-known` URL-jét és `curl`-példákat). Ez a hivatkozássűrűség elegendő a heurisztika
-aktiválásához.
+Avast and AVG run a heuristic that flags plain-text/Markdown files containing many HTTP-request-looking links. OmniRoute's `README.md` ships inside the npm package (it is listed in `package.json` → `files`), so it lands at `node_modules/omniroute/README.md` on a global install — and it contains ~15 `http://localhost:20128/...` examples (the MCP HTTP/SSE endpoints, the A2A `.well-known` URL, and `curl` snippets). That link density is enough to trip the heuristic.
 
-Ha ez csak nemrég kezdődött: a fájl jellege nem változott. A README végponttáblázata
-kibővült (bekerült az MCP HTTP + SSE + A2A), és további `curl`-példák kerültek bele,
-ami átléptette a küszöbértéket.
+Ha ez csak nemrég kezdődött: a fájl természetben nem változott. A README megnövelte a végpontok tábláját (MCP HTTP + SSE + A2A hozzáadásra került) és további `curl` példák, amelyek túllépték a küszöböt.
 
-A fájl pusztán passzív dokumentáció, végrehajtható tartalom nélkül. Biztonságosan
-visszaállíthatja a karanténból.
+A fájl inert dokumentáció nulla végrehajtható tartalommal. Nyugodtan visszaállíthatja a karanténból.
 
-**Teendők:**
+**Mit kell tenni:**
 
-1. **Állítsa le az értesítéseket** — adja hozzá a telepítési könyvtárat az antivírus
-   kivételeihez (Avast: Beállítások → Kivételek), megadva a globális `node_modules`
-   elérési útját és/vagy az OmniRoute adatkönyvtárát (`~/.omniroute/`).
-2. **Jelentse a téves riasztást** — <https://www.avast.com/false-positive-file-form.php>,
-   és csatolja a karanténba helyezett `README.md` fájlt. Ez a megoldás mindenkinek segít,
-   mivel a gyártó heurisztikája reagál túl egy szövegfájlra.
+1. **Állítsa le az értesítéseket** — zárja ki a telepítési könyvtárat a víruskeresőben (Avast: Settings → Exceptions), és adja hozzá a globális `node_modules` elérési utat and/or a OmniRoute adatkönyvtárat (`~/.omniroute/`).
+2. **Jelentse a hamis pozitívat** — <https://www.avast.com/false-positive-file-form.php>, a karanténba helyezett `README.md` csatolása . Ez az a javítás, amely mindenkinek segít, mivel ez a szállító heurisztikus túlreagálása egy szöveges fájlra.
 
-**Miért nem „javítjuk ki” ezt a saját oldalunkon:** az összes példa
-`http://localhost` címet használ, a localhost pedig önaláírt tanúsítványokkal járó
-nehézségek nélkül nem használhat `https` protokollt. A dokumentáció eltorzítása azért,
-hogy elkerüljük egyetlen gyártó heurisztikáját, minden olvasónak hátrányt okozna egy
-ellenőrzőszoftver hibája miatt.
+**Miért nem "javítjuk" ezt a magunk oldaláról:** a példák mindegyike `http://localhost`, és a localhost nem lehet `https` önaláírt tanúsítvány súrlódása nélkül. Ha a dokumentumokat úgy kezelik, hogy elkerüljék az egyik szállító heurisztikáját, az minden olvasónak ártana, ha kielégítené a szkennerhibákat.
 
-### A Kaspersky `PDM:Trojan.Win32.Generic` jelzéssel látja el az asztali alkalmazást
+### A Kaspersky a Desktop alkalmazást `PDM:Trojan.Win32.Generic` ként jelöli meg
 
-**Ez egy viselkedésalapú heurisztika téves riasztása. Semmi sem fertőzött.** A Kaspersky
-`PDM:` előtagja azt jelenti, hogy az ítélet a Proactive Defense Module (System Watcher)
-moduljától származik, amely azt vizsgálja, hogy a telepítő mit _csinál_, ahelyett, hogy
-ismert kártevőkkel vetné össze. Aktiválódásakor a Kaspersky „visszagörgeti” a teljes
-telepítést — törölve a már kiírt fájlokat —, így az alkalmazás sérültté válik vagy eltűnik.
+**Ez hamis pozitív eredmény a viselkedési heurisztika alapján. Semmi sem fertőzött.** A Kaspersky `PDM:` előtagja azt jelenti, hogy az ítélet a proaktív védelmi modulból (Rendszerfigyelő) származik, amely a telepítő _tevékenységét_ ítéli meg, nem pedig az ismert rosszindulatú programokkal. Amikor elindul, a Kaspersky "visszagörgeti" a teljes telepítést — törli azokat a fájlokat, amelyeket már írt — így az alkalmazás tönkremegy vagy hiányzik.
 
-Az általa megjelölt fájlok az asztali alkalmazáshoz mellékelt, deklarált, nyílt forráskódú
-függőségek szabványos részei, például:
+Az általa megjelölt fájlok deklarált, nyílt forráskódú függőségek törzsrészei az asztali alkalmazással, például:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` és
-  `workerProcessEntry.js` — a [Playwright](https://playwright.dev), az alkalmazáson belüli
-  szolgáltatói bejelentkezéshez és a böngészőalapú csevegéshez használt
-  böngészőautomatizálási könyvtár.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — a rögzített `wreq-js` natív kötés, amelyet böngésző-ujjlenyomattal ellátott HTTP-hez
-  használunk a webes sütiket alkalmazó szolgáltatóknál (`<arch>` értéke `x64` vagy
-  `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` és `workerProcessEntry.js` — [Playwright](https://playwright.dev), az alkalmazáson belüli szolgáltatói bejelentkezéshez és a böngésző által támogatott csevegéshez használt böngésző-automatizálási könyvtár.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — a rögzített `wreq-js` natív kötés, amelyet a böngésző ujjlenyomattal ellátott HTTP használnak a web-cookie-szolgáltatóknál (`<arch>` a `x64` vagy `arm64`).
 
-**Miért aktiválódik:** a Windows-telepítő **még nincs kódaláírva**, ezért egy aláíratlan
-NSIS-telepítőnek nincs reputációja, és a viselkedésalapú heurisztikák maximális
-agresszivitással futnak. Egy mellékelt natív DLL-lel és a
-`%LOCALAPPDATA%\Programs\OmniRoute` alá írt több száz `.js` fájllal együtt (beleértve a
-Next.js önálló buildjéből származó, hash-utótaggal ellátott csomagkönyvtárakat) ez elegendő
-a heurisztika aktiválásához. A kódaláírás tervben van; annak bevezetéséig ez az új
-kiadásoknál ismét előfordulhat.
+**Miért tüzel:** a Windows telepítő az** még nincs kóddal aláírva** , tehát az előjel nélküli NSIS telepítőnek nulla a hírneve, és a viselkedési heurisztika maximális agresszió mellett fut. Egy kötegelt natív DLL vel és több száz `%LOCALAPPDATA%\Programs\OmniRoute` alatt írt `.js` fájllal kombinálva (beleértve a Next.js önálló buildjének hash-utótagú csomagkönyvtárait is), ez elegendő a heurisztika kioldásához. Tervezik a kód aláírását; amíg le nem érkezik, az új kiadások ezt megismételhetik.
 
-**Teendők:**
+**Mit kell tenni:**
 
-1. **Először ellenőrizze a letöltést** (ezzel kizárható, hogy a fájlt manipulálták).
-   Minden kiadáshoz tartozik egy `latest.yml`, amelynek `sha512` mezője (base64) az
-   `OmniRoute.Setup.<version>.exe` telepítőre vonatkozik. A PowerShellben, a telepítőt
-   tartalmazó mappából:
+1. **Először ellenőrizze a letöltést** (kizárja a manipulált fájlt). Minden kiadás közzéteszi `latest.yml`, amelynek `sha512` mezője (base64) lefedi a `OmniRoute.Setup.<version>.exe` telepítőjét. PowerShell ben a telepítőt tartalmazó mappából:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   A kimenetnek egyeznie kell a `latest.yml` → `sha512` értékével. Ha nem egyezik,
-   törölje a fájlt, és kizárólag a [GitHub kiadási oldaláról](https://github.com/diegosouzapw/OmniRoute/releases)
-   töltse le újra.
-2. **Állítsa vissza és adja hozzá a kivételekhez** — állítsa vissza a visszagörgetett
-   elemeket a karanténból, és adja hozzá a `%LOCALAPPDATA%\Programs\OmniRoute` helyet a
-   kivételekhez (Kaspersky → Beállítások → Fenyegetések és kivételek), majd telepítse újra.
-3. **Jelentse a téves riasztást** — <https://opentip.kaspersky.com/>. A felhasználók által
-   beküldött tévesriasztás-jelentések valóban felgyorsítják az engedélyezési listára
-   kerülést.
+   A kimenetnek meg kell egyeznie `latest.yml` → `sha512`. Ha nem, törölje a fájlt, és csak a [GitHub kiadások oldaláról](https://github.com/cheaper-inference/OmniRoute/releases) töltse le újra.
+2. **+ kizárásának visszaállítása** — állítsa vissza a visszavont elemeket a karanténból, és adjon hozzá egy kizárást `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions), majd telepítse újra.
+3. **Jelentse a hamis pozitívat** — <https://opentip.kaspersky.com/>. A felhasználók által benyújtott FP jelentések valóban felgyorsítják az engedélyezési listát.
 
 ---
 
@@ -886,10 +843,10 @@ További tünetek:
 
 ---
 
-## Továbbra is elakadt?
+## Még mindig elakadt?
 
-- **GitHub-problémák**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Architektúra**: A belső működés részleteit lásd a [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) dokumentumban
-- **API-referencia**: Az összes végpontot lásd a [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) dokumentumban
-- **Állapot-irányítópult**: A rendszer valós idejű állapotát az **Irányítópult → Állapot** alatt ellenőrizheti
-- **Fordító**: A formázási problémák hibakereséséhez használja az **Irányítópult → Fordító** lehetőséget
+- **GitHub problémák** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Építészet** : Lásd [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) a belső részletekért
+- **API Referencia** : Lásd [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) az összes végpontot
+- **Egészségügyi irányítópult** : Ellenőrizze** Irányítópult → Health** valós idejű rendszerállapotért
+- **Fordító** : Használd** Dashboard → Translator** formátumproblémák elhárításához

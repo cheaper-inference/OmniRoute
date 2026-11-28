@@ -4,9 +4,9 @@
 
 ---
 
-> **Vad bor var: varje spårad toppnivåkatalog och rotfil, med en rad syfte.** Senast uppdaterad: 2026-11-13 (OmniRoute v3.8.54)
+> **Vad bor var: varje spårad toppnivåkatalog och rotfil, med en rad syfte.**
 >
-> Använd den här kartan för att hitta rätt i kodbasen och följ sedan länkarna till de dedikerade dokumenten. Filantal mättes med `git ls-files` på datumet ovan. De förändras med nästan varje release, så behandla dem som storleksordningar.
+> Använd den här kartan för att hitta rätt i kodbasen och följ sedan länkarna till de dedikerade dokumenten. Filantal kommer från `git ls-files` och ändras med nästan varje utgåva. Behandla dem som storleksordningar.
 
 ## Träd på toppnivå
 

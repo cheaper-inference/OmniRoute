@@ -12,6 +12,12 @@ Det neutrala `config/cli-tools-manifest.json` kontraktet deklarerar kanoniskt ID
 
 Avbrotts- och avslutningssignaler vidarebefordras till barnet. Startprogrammet väntar på barnets stängningshändelse innan den tillfälliga konfigurationen tas bort. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` styr respitperioden före tvångsavslut (standard 5000 millisekunder).
 
+`omniroute launch <tool>` (se [LAUNCH.md](./LAUNCH.md) ) följer samma miljöregler och signalvidarebefordran, och lägger till:
+
+- **Gateway autostart.** För ett lokalt mål, när ingen gateway svarar på porten, startar utskjutaren `omniroute serve --headless --no-open` bunden till `127.0.0.1` under en fristående reaper-process. Varje pågående lansering har ett leasingavtal i `DATA_DIR/launch/leases/` (hjärtslag var 15:e s, inaktuellt efter 45 s eller när processen är borta). Reaper stoppar gatewayen som den startade när inget hyresavtal har varit aktivt för viloperioden (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, standard 10000 millisekunder). En gateway som användaren startade används men stoppas aldrig. `--keep-gateway` eller `omniroute gateway keep` förvandlar en startgateway till en normal; `--no-start` återställer det gamla fel-om-ned-beteendet. Endast avlägsna mål undersöks.
+- **Lanseringssessioner.** Varje lansering skapar en kortlivad `olx_` sessionstoken från den överordnade referensen (`POST /api/launch/sessions`), hjärtslag den medan verktyget körs, läser användningssammanfattningen och återkallar den efter att verktyget avslutas. Tokenen är en strikt delmängd av sin överordnade: samma behörigheter, samma eller en smalare katalog, en kortare livslängd och det är inte en inloggningsinformation för instrumentpanelen. Verktyget tar emot sessionstoken, aldrig den överordnade referensen, och förfrågningar är taggade med `launch:<tool>:<sessionId>` om inte `--tag` ges. En gateway utan sessionen API misslyckas med `GatewayTooOld` istället för att falla tillbaka till en unscoped lansering.
+- **Konfiguration per lansering.** Verktygskonfigurationsfiler skrivs till en privat temporär katalog (läge 0700, prefix `omnirouter-`) och tas bort efter att barnet har avslutats. En `SIGKILL` i startprogrammet lämnar katalogen bakom sig; `omniroute launch --cleanup` tar bort sådana kataloger när de är äldre än en dag.
+
 ## Gemini beständig inställning
 
 ```bash

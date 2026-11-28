@@ -49,7 +49,7 @@ Kowace tura tana ba da nata kwafin bayanin a `/openapi.yaml`, wanda ake samarwa 
 
 ---
 
-## Kammala Tattaunawa
+## Kammala Taɗi
 
 ```bash
 POST /v1/chat/completions
@@ -65,35 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### Kanun Kai na Musamman
+### Custom Headers
 
-| Header                   | Direction | Description                                                                                                                                                                                                               |
-| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Buƙata    | Saita zuwa `true` don ƙetare cache                                                                                                                                                                                        |
-| `x-omniroute-no-memory`  | Buƙata    | Saita zuwa `true` don tsallake shigar da memory + skills ga wannan buƙatar (yana kama da no-cache; yana guje wa ƙarin kuɗin token/kudin kowane kira)                                                                      |
-| `X-OmniRoute-Progress`   | Buƙata    | Saita zuwa `true` don abubuwan ci gaba                                                                                                                                                                                    |
-| `X-Session-Id`           | Buƙata    | Maɓallin zaman da ba ya canzawa don daidaita zaman waje                                                                                                                                                                   |
-| `x_session_id`           | Buƙata    | Hakanan ana karɓar sigar da ke amfani da alamar ƙasa (HTTP kai tsaye)                                                                                                                                                     |
-| `X-OmniRoute-Session-Id` | Buƙata    | Alamar zaman/tattaunawar da mai kira ya samar (kuma tana ciyar da memory). Idan tana nan, ana adana ta yadda take a `call_logs.session_tag` don danganta kuɗi bisa zaman (#8249) — ba a taɓa ƙirƙirarta ba idan ba ta nan |
-| `Idempotency-Key`        | Buƙata    | Maɓallin hana maimaitawa (tazarar sakan 5)                                                                                                                                                                                |
-| `X-Request-Id`           | Buƙata    | Madadin maɓallin hana maimaitawa                                                                                                                                                                                          |
-| `x-omniroute-connection` | Buƙata    | Kulle buƙatar samfurin guda zuwa haɗin mai bayarwa guda (asusun) ta ID ɗinsa — duba [Kulle asusu bisa buƙata](#account-pinning-per-request)                                                                               |
-| `X-OmniRoute-Cache`      | Amsa      | `HIT` ko `MISS` (ba mai yawo ba)                                                                                                                                                                                          |
-| `X-OmniRoute-Idempotent` | Amsa      | `true` idan an cire maimaitawa                                                                                                                                                                                            |
-| `X-OmniRoute-Progress`   | Amsa      | `enabled` idan an kunna bin diddigin ci gaba                                                                                                                                                                              |
-| `X-OmniRoute-Session-Id` | Amsa      | Ingantaccen ID ɗin zaman da OmniRoute ya yi amfani da shi                                                                                                                                                                 |
-| `X-OmniRoute-Request-Id` | Amsa      | ID ɗin haɗa dangantakar buƙata (idan an san shi)                                                                                                                                                                          |
-| `X-OmniRoute-Version`    | Amsa      | Sigar ginin OmniRoute (koyaushe tana nan)                                                                                                                                                                                 |
-| `X-OmniRoute-Cost-Saved` | Amsa      | Adadin USD da cache ta guje wa kashewa a kan HIT (hits na cache kawai)                                                                                                                                                    |
-| `X-OmniRoute-Decision`   | Amsa      | Bibiyar routing: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` dabarar haɗin ce, ko `single` don buƙatar da ba ta haɗuwa ba) — koyaushe tana nan a amsoshin kammalawa                                     |
+| Kai                      | Hanyar  | Bayani                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | nema    | Saita zuwa `true` don kewaya cache                                                                                                                                                                                                                                                                                                                                                    |
+| `x-omniroute-no-memory`  | nema    | Saita zuwa `true` don tsallake ƙwaƙwalwar ajiya + basirar allura don wannan buƙatar ( madubi babu cache; yana guje wa kowane kira token/cost sama)                                                                                                                                                                                                                                    |
+| `x-omniroute-no-log`     | nema    | Saita zuwa `true` don ƙetare abubuwan biya request/response daga rajistan ayyukan kira don wannan buƙatar taɗi (duk hanyoyin taɗi-iyali: Ƙarshen Taɗi, Amsoshi, Saƙonni, Kammalawa, Gemini). Tambarin lokaci, samfuri, matsayi, tsawon lokaci da ƙidayar alama har yanzu ana yin rikodi. Haɗa tare da `x-omniroute-no-memory` da `x-omniroute-no-cache` don ficewar abun ciki cikakke |
+| `X-OmniRoute-Progress`   | nema    | Saita zuwa `true` don abubuwan ci gaba                                                                                                                                                                                                                                                                                                                                                |
+| `X-Session-Id`           | nema    | Maɓallin zama mai ɗaki don kusancin zaman waje                                                                                                                                                                                                                                                                                                                                        |
+| `x_session_id`           | nema    | Ƙarƙashin bambance-bambancen kuma an karɓa (kai tsaye HTTP)                                                                                                                                                                                                                                                                                                                           |
+| `X-OmniRoute-Session-Id` | nema    | Tambarin session/conversation wanda aka kawo mai kira (kuma yana ciyar da ƙwaƙwalwar ajiya). Lokacin da akwai, naci gaba da magana zuwa `call_logs.session_tag` don ƙimar kowane lokaci (#8249) — ba a haɗa shi ba lokacin da ba ya nan.                                                                                                                                              |
+| `Idempotency-Key`        | nema    | Maɓallin cirewa (taga 5s)                                                                                                                                                                                                                                                                                                                                                             |
+| `X-Request-Id`           | nema    | Madadin faifan maɓalli                                                                                                                                                                                                                                                                                                                                                                |
+| `x-omniroute-connection` | nema    | Sanya buƙatun samfuri guda ɗaya zuwa haɗin mai bada (asusu) ta id — duba [liƙa asusu akan kowane buƙata](#account-pinning-per-request)                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Cache`      | Martani | `HIT` ko `MISS` (ba yawo)                                                                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Idempotent` | Martani | `true` idan aka cire                                                                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Progress`   | Martani | `enabled` idan aka ci gaba da bin diddigi                                                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Session-Id` | Martani | Zama mai inganci OmniRouteID amfani dashi                                                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Request-Id` | Martani | Nemi id ɗin daidaitawa (lokacin da aka sani)                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Version`    | Martani | sigar ginin OmniRoute (ko da yaushe yana nan)                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Cost-Saved` | Martani | USD cache da aka kaucewa akan HIT (cache hits kawai)                                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Decision`   | Martani | Alamar hanyar hanya: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` shine dabarun haɗin gwiwa, ko `single` don buƙatun da ba na haɗawa ba) — koyaushe yana zuwa yayin amsawa                                                                                                                                                                                           |
 
-> Bayanin Nginx: idan kuna dogara da headers masu amfani da alamar ƙasa (misali `x_session_id`), kunna `underscores_in_headers on;`.
+> Nginx bayanin kula: idan kun dogara da masu buga rubutu (misali `x_session_id`), kunna `underscores_in_headers on;`.
 
-#### Kulle asusu bisa buƙata
+#### Ƙimar asusu ga kowane buƙata
 
-Lokacin da mai bayarwa yake da haɗi da yawa (asusun ko maɓallai), OmniRoute yawanci yana zaɓar ɗaya
-ta hanyar dabararsa ta zaɓar asusu. A maimakon haka, buƙata na iya kulle takamaiman haɗi guda
-ta amfani da header na `x-omniroute-connection`:
+Lokacin da mai bada sabis yana da haɗe-haɗe da yawa (asusu ko maɓallai), OmniRoute yawanci yana zaɓar ɗaya ta dabarun zaɓin asusu. Buƙatun na iya maimakon haɗa takamaiman haɗi ɗaya tare da taken `x-omniroute-connection` :
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,25 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Inda za a sami id.** Buɗe shafin mai samarwa a dashboard
-  (**Dashboard → Providers → <provider>**) sannan ka danna guntun id na `xxxxxxxx…` a kan layin haɗi
-  — hakan zai kwafi cikakken id ɗin haɗin.
-- **Waɗanne buƙatu ne suke mutunta shi.** Buƙatun samfurin guda ɗaya (`provider/model`) a
-  `/v1/chat/completions`, `/v1/messages` da `/v1/responses`. Haɗaɗɗun buƙatu suna yin watsi da taken: kulle
-  asusu ɗaya ga kowane mataki na haɗin ta hanyar haɗin nasa.
-- **Kullen yana da tsauri, ba fifiko ba ne.** Ana amfani da haɗin da aka kulle shi kaɗai. Idan
-  kuskure ya faru a cikin buƙatar, ana yin rikodin lokacin jiran asusun, amma ba a
-  juya zuwa wani asusun ɗan’uwan mai samarwa ɗaya ba.
-- **Lokacin jiran aiki da ƙayyadadden kaso suna sakin kullen.** Yayin da haɗin da aka kulle yake cikin lokacin jiran aiki,
-  ya ƙare ƙayyadadden kaso ko kuma an toshe shi saboda wata manufar ƙayyadadden kaso, buƙatu na gaba suna komawa ga
-  sauran haɗe-haɗen mai samarwar, daidai kamar zirga-zirgar da ba a kulle ba.
-- **Ids da ba a sani ba ko waɗanda aka kashe suna gaza.** Id ɗin da ba ya cikin rumbun haɗe-haɗen mai samarwa mai aiki (an
-  share shi, an kashe shi, ko kuma na wani mai samarwa ne) ba ya barin wani asusu da ya cancanta, don haka buƙatar
-  tana gaza maimakon a tura ta wani wuri ba tare da sanarwa ba.
+- **Inda zan sami id.** Bude shafin mai badawa a cikin dashboard (** Dashboard → Masu bayarwa → <provider>** ) kuma danna gunkin `xxxxxxxx…` id akan layin haɗin — yana kwafi cikakken haɗin id ɗin.
+- **Wanne buƙatun girmama shi.** Buƙatun samfuri ɗaya (`provider/model`) akan `/v1/chat/completions`, `/v1/messages` da `/v1/responses`. Combos suna watsi da taken: saka asusu a kowane mataki na haduwa ta hanyar haɗin matakin maimakon.
+- **Fin ɗin yana da tsauri, ba fifiko ba.** Ana amfani da haɗin da aka liƙa shi kaɗai. Rashin gazawa a cikin buƙatun yana yin rikodin sanyin asusun amma ya aikata** ba** juya zuwa asusun 'yan uwa na mai bayarwa iri ɗaya.
+- **Cooldown da kewayon saki fil.** Yayin da haɗin keɓaɓɓen ke yin sanyi, ƙididdige ƙididdigewa ko katange shi ta hanyar manufar keɓancewa, buƙatun daga baya suna komawa ga sauran hanyoyin haɗin mai samarwa, daidai kamar zirga-zirgar da ba a haɗa ba.
+- **Abubuwan da ba a sani ba ko nakasassu sun kasa.** ID ɗin da ba ya cikin tafkin mai samarwa (share, kashewa, ko mallakar wani mai badawa) ba ya barin asusu da ya cancanta, don haka buƙatar ta gaza maimakon yin tuƙi cikin shiru a wani wuri.
 
-Claude Code yana aika taken al'ada ta `ANTHROPIC_CUSTOM_HEADERS`. Sanya shi a cikin ɓangaren `env`
-na `~/.claude/settings.json`, ko a cikin `.claude/settings.json` na matakin aiki domin kulle wani
-asusu daban ga kowane aiki:
+Lambar Claude tana aika masu kan al'ada ta hanyar `ANTHROPIC_CUSTOM_HEADERS`. Sanya shi a cikin toshe `env` na `~/.claude/settings.json`, ko a cikin matakin-aiki don `.claude/settings.json` wani asusu na daban kowane aikin:
 
 ```jsonc
 {
@@ -133,12 +120,11 @@ asusu daban ga kowane aiki:
 }
 ```
 
-Madogara: `src/sse/handlers/chat.ts` (karanta taken), `src/sse/services/auth.ts` da
-`src/sse/services/sessionAffinityPin.ts` (sakin kullen da binciken abin da ya ɓace daga rumbun).
+Tushen: `src/sse/handlers/chat.ts` (karanta kanun labarai), `src/sse/services/auth.ts` da `src/sse/services/sessionAffinityPin.ts` (sakin fil da abin da ya ɓace-daga tafkin).
 
-> **Taken bayanan farashi:** amsoshin nasara marasa yawo su ma suna ɗauke da saitin bayanan farashi na `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, ƙayyadaddun lambobi 10 bayan goma; `0.0000000000` idan kyauta/ne ba a saka farashi ba), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, da `X-OmniRoute-Fallback-Attempts` (kawai idan > 0), tare da `X-OmniRoute-Request-Id` da `X-OmniRoute-Version`. Ana fitar da waɗannan daga kammalawar hira, `/v1/responses`, `/v1/messages`, **da kuma ƙarshen kafofin watsa labarai** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, da `/v1/moderations` (koyaushe farashi `0`). Ana ƙididdige farashin kafofin watsa labarai bisa ga nau’in bayanan da ake sarrafawa (kowane hoto, kowane daƙiƙa, kowane hali, kowane rukunin bincike) idan ana da farashi, in ba haka ba `0` (fail-open).
+> **Masu kai na telemetry mai tsada:** Amsoshin nasarar da ba su gudana ba suma suna ɗauke da saitin telemetry `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, ƙayyadaddun adadi 10; `0.0000000000` don free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, da `X-OmniRoute-Fallback-Attempts` (sai lokacin > 0), da `X-OmniRoute-Request-Id` da `X-OmniRoute-Version`. Ana fitar da waɗannan ta hanyar kammala taɗi, `/v1/responses`, `/v1/messages`,** da kuma ƙarshen kafofin watsa labarai** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, da `/v1/moderations` (kullum farashin `0`). Ana ƙididdige kuɗin watsa labarai ta kowane hali (kowane-hoto, kowane ɗaki ɗaya, kowane hali, kowane rukunin bincike) lokacin da farashin ke samuwa, in ba haka ba `0` (fail-bude).
 
-> **Ma’anar farashi idan an samu cache:** a kan semantic-cache HIT (`X-OmniRoute-Cache-Hit: true`) ba a kira upstream ba, don haka `X-OmniRoute-Response-Cost` yana zama `0.0000000000` (farashin **ƙari** na bayar da amsar da aka samu). Ana bayar da ainihin/farashin da da an samu daban a cikin `X-OmniRoute-Cost-Saved`. Masu amfani da bayanan lissafin kuɗi su tara `X-OmniRoute-Response-Cost` (hits ba su da farashi); nazarin cache na iya tara `X-OmniRoute-Cost-Saved`.
+> **Ƙididdigar ƙididdigar farashi:** akan cache HIT (`X-OmniRoute-Cache-Hit: true`) ba a yi kira na sama ba, don `X-OmniRoute-Response-Cost` shine `0.0000000000` (da** karuwa** kudin hidimar bugawa). An bayar da rahoton farashin original/would-have-been daban a cikin `X-OmniRoute-Cost-Saved`. Masu amfani da lissafin kuɗi ya kamata su tara `X-OmniRoute-Response-Cost` (buga ba komai); Analytics na cache na iya tara `X-OmniRoute-Cost-Saved`.
 
 ## Leases na Zaman Gudanarwa na Musamman
 
@@ -352,7 +338,7 @@ GET /v1/embeddings
 
 ---
 
-## Samar da Hotuna
+## Halin Hoto
 
 ```bash
 POST /v1/images/generations
@@ -366,38 +352,30 @@ Content-Type: application/json
 }
 ```
 
-Masu samarwa da ake da su sun haɗa da OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (na gida), da ComfyUI (na gida).
+Available providers include OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (local), ComfyUI (local).
 
-`n` yana mayar da hotuna `n` a cikin `data[]`. Masu samarwa waɗanda API ɗinsu na sama ke mayar da hoto guda ɗaya a kowace kira
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) ana yi musu kira daban-daban na sama `n`, tare da aƙalla kira 4 da ke gudana lokaci guda. `seed` da aka kayyade ana ƙara masa lambar kiran (`seed`, `seed + 1`, …), don haka hotunan suna bambanta amma suna ci gaba da kasancewa masu sake samarwa iri ɗaya. An taƙaita `n` zuwa 10. Buƙatar gaba ɗaya tana gazawa idan wani kira ya gaza. Jerin tsarin fan-out yana cikin `SINGLE_IMAGE_FANOUT_FORMATS` a
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` tana mayar da hotuna `n` a cikin `data[]`. Masu ba da wanda API na sama ya dawo da hoto ɗaya a kowane kira (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) sami `n` keɓance kira na sama, a mafi yawan 4 a cikin jirgin. Ana daidaita ƙayyadadden `seed` ta fihirisar kira (`seed`, `seed + 1`,…), don haka hotunan sun bambanta amma suna kasancewa ana iya sake su. `n` yana capped a 10. Buƙatar ta kasa gabaɗaya idan wani kira ya gaza. Jerin tsarin fan-out shine `SINGLE_IMAGE_FANOUT_FORMATS` a cikin `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux yana sake amfani da haɗin maɓallin API da ke akwai kuma yana karɓar prefix na `zenmux/` ko `zm/`:
+Codex GPT Siffofin Hotuna (`codex/gpt-image-*`) suna mayar da PNG kawai: na sama yana amsa `200` tare da PNG bytes koda lokacin da ake buƙatar `jpeg` ko `webp`. An ƙi buƙatu da kowane `output_format` (`webp`, `jpeg`, ...) tare da HTTP 400 maimakon a yi watsi da shi shiru; bar shi ko aika `png`. ba a tura `output_compression`.
 
-- `zenmux/openai/gpt-image-2` yana amfani da OpenAI Images API na ZenMux. Zaɓuɓɓuka sun haɗa da `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, da `response_format`.
-- Sauran masu wallafawa, kamar `zm/meta/muse-image-1.0`, suna amfani da wurin ƙarshen Vertex AI `:predict` na ZenMux. `n` yana komawa zuwa `sampleCount`, `aspect_ratio` zuwa `aspectRatio`, sannan `image_size`
-  (`1K`, `2K`, `4K`) zuwa `sampleImageSize`. `size` na pixel yana samar da yanayin faɗi da tsawo ne kawai,
-  ba ya tabbatar da ainihin girman pixel ba. Matsakaicin faɗi da tsawo, ƙuduri, da adadin da ake tallafawa sun bambanta bisa ga samfurin.
-- `zm/inclusionai/ming-image-0.1-design` yana zaɓar girmansa da kansa. A bar `size`,
-  `aspect_ratio`, da `image_size` ba tare da bayar da su ba; ƙimomin da aka bayar kai tsaye suna mayar da HTTP 400. Ana iya neman PNG, JPEG, da WebP ta amfani da `output_format`.
+ZenMux yana sake amfani da haɗin maɓalli na API na yanzu kuma yana karɓar prefixes `zenmux/` ko `zm/` :
 
-Wannan haɗin yana tallafawa samar da hoto daga rubutu, ba gyaran hoto na tunani ba. Ana daidaita fitowar Vertex zuwa `data[].b64_json`; `response_format: "url"` yana mayar da URL na HTTPS daga sama ko URL ɗin bayanan base64 idan bytes ɗin hoto kawai ake da su. Fitowar da ba ta da komai ko wadda aka tace tana mayar da kuskure maimakon nasarar da ba ta da komai. Samun damar samfurin ya dogara da asusun ZenMux. Duba [Vertex API na ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) da
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+- `zenmux/openai/gpt-image-2` yana amfani da ZenMux's OpenAI Images API. Zaɓuɓɓuka sun haɗa da `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, da `response_format`.
+- Sauran masu bugawa, kamar `zm/meta/muse-image-1.0`, suna amfani da ƙarshen ƙarshen ZenMux's Vertex AI `:predict`. `n` taswira zuwa `sampleCount`, `aspect_ratio` zuwa `aspectRatio`, da `image_size` (`1K`, `2K`, `4K`) zuwa `sampleImageSize`. pixel `size` yana ba da ma'auni kawai, ba garantin girman pixel ba. Matsakaicin tallafi, ƙuduri, da ƙididdigewa sun bambanta ta samfuri.
+- `zm/inclusionai/ming-image-0.1-design` ta zaɓi girmanta. Barin `size`, `aspect_ratio`, da `image_size`; bayyanan dabi'u sun dawo HTTP 400. Za a iya neman PNG, JPEG, da WebP tare da `output_format`.
 
-Haɗin shiga na Microsoft 365 Copilot yana samar da `copilot-m365-web/m365-copilot-image`
-ta kayan aikin hoton da ke cikin Copilot: juya Copilot guda ɗaya a kowane hoto (`n` 1–4), `size` yana jagorantar yanayin tsayuwa ko kwance kawai, kuma ana mayar da hotuna kai tsaye (`b64_json`, ko URL ɗin bayanai ga
-`response_format: "url"`). Duba [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+Wannan haɗin kai yana goyan bayan tsara rubutu-zuwa-hoto, ba gyara-hoto ba. An daidaita fitowar Vertex zuwa `data[].b64_json`; `response_format: "url"` yana dawo da HTTPS URL na sama ko tushen64 data URL lokacin da hotunan hoto kawai ke samuwa. abubuwan Empty/filtered suna dawo da kuskure maimakon nasara mara komai. Samun samfurin ya dogara da asusun ZenMux. Duba [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) da [OpenAI Hotunan API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Alamar sa hannun Microsoft 365 Copilot tana hidimar `copilot-m365-web/m365-copilot-image` ta hanyar ginanniyar kayan aikin hoto na Copilot: juyi Copilot ɗaya kowane hoto (`n` 1–4), `size` tuƙi kawai, kuma hotuna sun dawo cikin layi (`b64_json`, ko URL bayanai don `response_format: "url"`). Duba [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Jera dukkan samfuran hotuna
+# List all image models
 GET /v1/images/generations
 ```
 
 ---
 
-## OCR na Takardu
+## Document OCR
 
 ```bash
 POST /v1/ocr
@@ -413,17 +391,15 @@ Content-Type: application/json
 }
 ```
 
-`model` yana zaɓar mai samar da OCR ta hanyar prefix na `provider/model`; ID na samfurin da ba shi da prefix (misali
-`mistral-ocr-latest`) yana warwarewa zuwa mai samarwar da aka yi masa rajista, kuma idan ba a saka `model` ba, tsoho shi ne
-Mistral (`mistral-ocr-latest`). Masu samarwa da aka yi wa rajista (`open-sse/config/ocrRegistry.ts`):
+`model` zaɓar mai bada OCR ta hanyar prefix `provider/model` ; samfurin id (misali `mistral-ocr-latest`) yana warwarewa ga mai bada sa mai rijista, kuma `model` da aka tsallake ya gaza zuwa Mistral (`mistral-ocr-latest`). Masu ba da rajista (`open-sse/config/ocrRegistry.ts`):
 
-| ID na mai samarwa             | ID na samfurin       | Ƙimar `model`                                          | Bayanan kula                                                                                            |
-| ----------------------------- | -------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (ko `mistral-ocr-latest`) | Aiki kai tsaye — ana mayar da amsa kai tsaye daga kiran sama guda ɗaya.                                 |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`            | Kiran sama na asynchronous (`analyze` + poll) — duba ƙasa.                                              |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                | Aiki kai tsaye, ta ƙarshen abokin hulɗar Vertex AI `openapi/chat/completions` — duba ƙasa don auth/URL. |
+| Id mai bayarwa                | Model id                               | darajar `model`                                             | Bayanan kula                                                                                                                                                                                                |
+| ----------------------------- | -------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                   | `mistral/mistral-ocr-latest` (ko bare `mistral-ocr-latest`) | A daidaita — ana mayar da martani kai tsaye daga kira ɗaya na sama.                                                                                                                                         |
+| `azure-document-intelligence` | `prebuilt-read`                        | `azure-document-intelligence/prebuilt-read`                 | Asynchronous sama (`analyze` + poll) — duba ƙasa.                                                                                                                                                           |
+| `vertex-deepseek-ocr`         | tura kai (babu samfurin ginannen ciki) | `vertex-deepseek-ocr/<your-deployed-model-id>`              | Daidaitawa, ta hanyar Vertex AI Model Lambun DeepSeek-OCR (siffar `openapi/chat/completions` ); Google ya yi ritayar `deepseek-ocr-maas` da aka sarrafa a kan 2026-10-21 (#20423), don haka id ya dawo 400. |
 
-Dukkan masu samarwa ukun suna amsawa da jiki mai tsarin Mistral iri ɗaya:
+Duk masu samarwa guda uku suna amsawa a cikin jiki mai siffar Mistral:
 
 ```json
 {
@@ -433,22 +409,13 @@ Dukkan masu samarwa ukun suna amsawa da jiki mai tsarin Mistral iri ɗaya:
 }
 ```
 
-### Tsarin jiran amsa na Azure Document Intelligence
+### Azure Document Leken asiri ya kwarara
 
-API na `analyze` na Azure Document Intelligence asynchronous ne: buƙatar farko tana mayar da taken
-`Operation-Location` maimakon jiki, kuma dole ne a yi polling don samun sakamakon. Handler ɗin
-(`open-sse/handlers/ocr.ts`) yana yin polling ga wannan URL kowane daƙiƙa na tsawon yunƙuri 30, yana dakatar da aiki nan take (ba ya ci gaba da polling)
-idan amsar polling ba `ok` ba ce ko kuma matsayin ya kasance `"failed"`, sannan yana mayar da `504` idan aikin har yanzu yana gudana bayan an ƙare adadin yunƙurin. Ana daidaita amsar Azure ta ƙarshe
-zuwa tsarin `pages`/`markdown` iri ɗaya da Mistral ke amfani da shi kafin a mayar da ita ga mai kira, don haka lambar abokin ciniki ba ta buƙatar keɓance mai samarwar.
+Azure Document Intelligence's `analyze` API ba daidai ba ne: buƙatun farko na dawo da taken `Operation-Location` maimakon jiki, kuma dole ne a jefar da sakamakon. Mai gudanar da zaɓen (`open-sse/handlers/ocr.ts`) wanda URL kowane daƙiƙa har zuwa ƙoƙarin 30, ya gaza cikin sauri (ba ya ci gaba da jefa ƙuri'a) akan martanin jefa ƙuri'a wanda ba `ok` ba ko matsayin `"failed"`, kuma ya dawo da `504` idan har yanzu aikin yana gudana bayan ƙaddamar da kasafin kuɗin ƙoƙarin ya ƙare. Amsar Azure ta ƙarshe an daidaita ta zuwa sifar `pages`/`markdown` iri ɗaya da Mistral ke amfani da ita kafin a mayar da shi ga mai kira, don haka lambar abokin ciniki baya buƙatar takamaiman yanayin mai samarwa.
 
-### Tabbatarwa da warware ƙarshen Vertex AI DeepSeek OCR
+### Vertex AI DeepSeek OCR auth da ƙudurin ƙarshen ƙarshen
 
-`vertex-deepseek-ocr` yana sake amfani da tabbacin Vertex AI iri ɗaya da OmniRoute ta riga ta tallafa don
-zirga-zirgar chat/hoto (`open-sse/executors/vertex.ts`): API key na haɗin yana kasancewa ko dai takardar shaidar Service Account JSON (ana musanya ta da OAuth access token mai ɗan gajeren lokaci ta hanyar JWT-bearer flow) ko kuma OAuth access token da aka riga aka samar wanda ake amfani da shi yadda yake. Ana gina URL na ƙarshen sama daga generic
-`openapi/chat/completions` na Vertex a matsayin ƙarshen abokin hulɗa, bisa project da region na haɗin — `providerSpecificData.project`/`providerSpecificData.region` da aka bayar kai tsaye koyaushe suna da fifiko;
-in ba haka ba ana samo project daga `project_id` na Service Account JSON, kuma region ɗin tsoho shi ne
-`us-central1`. Ana yin warwarewar duka a cikin `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), sannan `src/app/api/v1/ocr/route.ts` ke amfani da su kafin aikawa zuwa `handleOcr`.
+`vertex-deepseek-ocr` yana sake amfani da wannan Vertex AI ingantacciyar hanyar OmniRoute ta riga tana goyan bayan zirga-zirgar chat/image (`open-sse/executors/vertex.ts`): maɓallin API na haɗin ko dai shaidar JSON Account Account (an musanya da alamar samun damar OAuth na ɗan gajeren lokaci ta hanyar kwararar mai ɗaukar JWT) ko alamar samun damar OAuth da aka riga aka yi amfani da ita. Ƙarshen ƙarshen URL shine ƙarshen abokin haɗin gwiwar `openapi/chat/completions` na Vertex, wanda aka gina daga aikin haɗin gwiwa da yanki — bayyanannen `providerSpecificData.project`/`providerSpecificData.region` koyaushe yana yin nasara; in ba haka ba an samo aikin daga Asusun Sabis na JSON's `project_id` kuma yankin ya gaza zuwa `us-central1`. Duk shawarwarin biyu suna faruwa a cikin `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), ana cinye su ta hanyar `src/app/api/v1/ocr/route.ts` kafin aika zuwa `handleOcr`.
 
 ---
 
@@ -695,98 +662,104 @@ Kwangilolin upstream: [tasirin sauti](https://elevenlabs.io/docs/api-reference/t
 
 ---
 
-## Ƙarshen Haɗin Kai
+## Madaidaitan Ƙarshen Ƙarshen
 
-| Hanya | Hanya                                     | Tsari                                     |
-| ----- | ----------------------------------------- | ----------------------------------------- |
-| POST  | `/v1/chat/completions`                    | OpenAI                                    |
-| POST  | `/v1/messages`                            | Anthropic                                 |
-| POST  | `/v1/responses`                           | OpenAI Responses                          |
-| POST  | `/v1/embeddings`                          | OpenAI                                    |
-| POST  | `/v1/images/generations`                  | OpenAI Images                             |
-| POST  | `/v1/images/edits`                        | OpenAI Images (gyara/cika gibi)           |
-| POST  | `/v1/videos/generations`                  | Samar da bidiyo irin na OpenAI            |
-| POST  | `/v1/music/generations`                   | Samar da kiɗa irin na OpenAI              |
-| POST  | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                        |
-| POST  | `/v1/audio/speech`                        | OpenAI TTS (yana dawo da jikin sauti)     |
-| POST  | `/v1/rerank`                              | Sake jera irin na Cohere/Voyage           |
-| POST  | `/v1/classify`                            | Jina classify (`api.jina.ai`)             |
-| POST  | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)        |
-| POST  | `/v1/moderations`                         | OpenAI Moderations                        |
-| GET   | `/v1/models`                              | OpenAI                                    |
-| POST  | `/v1/models/query`                        | Jerin gajerun samfura da aka tace         |
-| POST  | `/v1/messages/count_tokens`               | Anthropic                                 |
-| GET   | `/v1beta/models`                          | Gemini                                    |
-| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                    |
-| POST  | `/v1/api/chat`                            | Ollama                                    |
-| GET   | `/api/v1/vscode/{token}/`                 | Laƙabin kundin OpenAI                     |
-| GET   | `/api/v1/vscode/{token}/models`           | Laƙabin samfuran OpenAI                   |
-| POST  | `/api/v1/vscode/{token}/chat/completions` | Laƙabin OpenAI mai alamar token           |
-| POST  | `/api/v1/vscode/{token}/responses`        | Laƙabin OpenAI Responses mai alamar token |
-| POST  | `/api/v1/vscode/{token}/api/chat`         | Laƙabin Ollama mai alamar token           |
-| GET   | `/api/v1/vscode/{token}/api/tags`         | Laƙabin alamun Ollama mai alamar token    |
+| Hanya | Hanya                                     | Tsarin                                |
+| ----- | ----------------------------------------- | ------------------------------------- |
+| POST  | `/v1/chat/completions`                    | OpenAI                                |
+| POST  | `/v1/messages`                            | Anthropic                             |
+| POST  | `/v1/responses`                           | OpenAI Responses                      |
+| POST  | `/v1/embeddings`                          | OpenAI                                |
+| POST  | `/v1/images/generations`                  | OpenAI Images                         |
+| POST  | `/v1/images/edits`                        | Hotunan OpenAI (edit/inpaint)         |
+| POST  | `/v1/videos/generations`                  | Bude AI-style na bidiyo tsararru      |
+| POST  | `/v1/music/generations`                   | Ƙarfin kiɗan na Buɗe AI               |
+| POST  | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
+| POST  | `/v1/audio/speech`                        | OpenAI TTS (mai mayar da sautin jiki) |
+| POST  | `/v1/rerank`                              | Cohere/Voyage-style rerank            |
+| POST  | `/v1/classify`                            | Jina classify (`api.jina.ai`)         |
+| POST  | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)    |
+| POST  | `/v1/moderations`                         | OpenAI Moderations                    |
+| POST  | `/v1/systemone`                           | Tsari daya buga yanke shawara         |
+| POST  | `/v1/decisions`                           | OpenAI Hukunce-hukuncen (na asali)    |
+| GET   | `/v1/systemone/models`                    | Kundin tsarin yanke shawara           |
+| GET   | `/v1/models`                              | OpenAI                                |
+| POST  | `/v1/models/query`                        | Tace jerin sunayen samfuri            |
+| POST  | `/v1/messages/count_tokens`               | Anthropic                             |
+| GET   | `/v1beta/models`                          | Gemini                                |
+| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                |
+| POST  | `/v1/api/chat`                            | Ollama                                |
+| GET   | `/api/v1/vscode/{token}/`                 | OpenAI catalog alias                  |
+| GET   | `/api/v1/vscode/{token}/models`           | OpenAI model alias                    |
+| POST  | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenized alias                |
+| POST  | `/api/v1/vscode/{token}/responses`        | OpenAI Responses tokenized alias      |
+| POST  | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenized alias                |
+| GET   | `/api/v1/vscode/{token}/api/tags`         | Ollama tags tokenized alias           |
 
-Dukkan hanyoyin POST suna bin tsari iri ɗaya: `Bearer your-api-key` + jikin JSON da Zod ya tabbatar da ingancinsa (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, da sauransu, duba `src/shared/validation/schemas.ts`). Ana dawo da 4xx idan tsarin bayanai bai yi nasara ba.
+Duk hanyoyin POST suna bin siffa ɗaya: `Bearer your-api-key` + Zod mai inganci JSON jiki (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, da sauransu, duba `src/shared/validation/schemas.ts`). 4xx yana dawowa akan gazawar tsari.
 
-Ga abokan ciniki waɗanda ba za su iya haɗa `Authorization: Bearer ...` ba, OmniRoute yana kuma karɓar maɓallan API a cikin URL ta hanyar ko dai daidaitawar query string (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ko kuma keɓaɓɓun hanyoyin `/api/v1/vscode/{token}/...` da aka bayyana a ƙasa.
+Ga abokan cinikin da ba za su iya haɗa `Authorization: Bearer ...` ba, OmniRoute kuma yana karɓar maɓallan API a cikin URL ta hanyar dacewa da kirtani ta tambaya (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ko ƙaddamar da ƙarshen `/api/v1/vscode/{token}/...` da aka rubuta a ƙasa.
 
 ```bash
-# Sake jera (mai samarwa daga rajistar girgije, ko kumburin mai samarwa mai dacewa da OpenAI a matsayin "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina classify (takardun shaidar Foundation API)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
 # Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Binciken Jina (s.jina.ai; laƙaban masu samarwa: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
 # Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — yana dawo da jikin audio/mpeg (ko tsarin da aka nema)
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS yana buƙatar harshe da murya: `language` yana da tsohowar "en"; idan babu
-# murya ko aka yi amfani da sunan muryar OpenAI na asali (alloy, nova, …), ya zama "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Gyaran hoto (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Samar da bidiyo / kiɗa (ID ɗin samfurin da aka riga aka sa sunan mai samarwa)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Nodes na provider don sake-rarrabawa:** `POST /v1/rerank` yana kuma tura buƙatu zuwa nodes na provider masu jituwa da OpenAI
-> (oMLX, vLLM, Infinity, TEI a bayan gateway, …) waɗanda ake adireshinsu da `<node-prefix>/<model>`. Nodes na loopback
-> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) koyaushe sun cancanci amfani, haka ma sunayen runduna
-> da mai gudanarwa ya jera a cikin `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (misali sunan sabis na Docker/Compose kamar
-> `http://reranker:8080/v1`; ana kiran waɗannan kai tsaye, ba ta `HTTP(S)_PROXY` ko wakilin da aka kulle wa haɗi ba).
-> Nodes da ke kan kowace runduna
-> dabam — kwamfuta a LAN ko abokin Tailscale — suna cancantar amfani ne kawai idan mai gudanarwa ya kunna
-> tutar fasalin `RERANK_REMOTE_PROVIDER_NODES` **kuma** tushen URL na node ya wuce manufar URL na fita ta provider
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Matakin sake-rarrabawa na injin memory yana kiran wannan hanya ta
-> loopback, saboda haka ƙa'ida ɗaya ce ke jagorantar `rerankProviderModel` a saitunan Memory.
+> **Maimaita nodes na mai bada:** `POST /v1/rerank` kuma yana hanyoyi zuwa nodes masu dacewa na OpenAI (oMLX, vLLM, Infinity, TEI a bayan ƙofa,…) da ake magana da shi azaman `<node-prefix>/<model>`. Nodes na madogara (`localhost`, `127.0.0.1`, `172.16.0.0/12`) koyaushe suna cancanta, haka ma sunayen masu masaukin baki da mai aiki ya lissafa a cikin `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (misali sunan sabis na Docker/Compose kamar `http://reranker:8080/v1`; waɗannan ana kiran su kai tsaye, ba ta hanyar `HTTP(S)_PROXY` ko wakili na haɗin gwiwa ba). Nodes akan kowane mai masaukin — akwatin LAN ko Tailscale peer — sun cancanci kawai lokacin da ma'aikaci ya ba da damar alamar fasalin `RERANK_REMOTE_PROVIDER_NODES`** kuma** Tushen kumburin URL ya wuce manufofin URL mai bayarwa (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Matsayin rerank na injin ƙwaƙwalwar ajiyar yana kiran wannan hanya akan madauki, don haka ƙa'idar iri ɗaya ce ke sarrafa `rerankProviderModel` a cikin saitunan ƙwaƙwalwar ajiya.
 >
-> **Siffofin sabar ta gida:** ana kiran node a `<base>/v1/rerank` sannan, idan an sami 404, a `<base>/rerank`
-> (Infinity, TEI). Jikin buƙatar zuwa upstream yana ɗauke da rubutun Cohere/OpenAI duka (`documents`,
-> `return_documents`) da kuma rubutun TEI (`texts`, `return_text`), sannan ana daidaita amsar upstream
-> zuwa ambulaf ɗin Cohere: `[{index, score, text}]` marar kunshin daga TEI, `{results: [{index, score}]}`
-> daga ƙananan gateways, da `{data: [...]}` mai salo irin na Voyage duk suna dawowa ga abokin ciniki a matsayin
-> `{results: [{index, relevance_score, document?}]}`, an jera su bisa maki kuma an taƙaita su zuwa `top_n`.
+> **Siffofin uwar garken gida:** Ana kiran kumburin a `<base>/v1/rerank` kuma, akan 404, a `<base>/rerank` (Infinity, TEI). Jikin da ke sama yana ɗauke da haruffan Cohere/OpenAI (`documents`, `return_documents`) da kuma harafin TEI (`texts`, `return_text`), kuma amsawar sama ta daidaita zuwa ambulaf ɗin Cohere : TEI bare `[{index, score, text}]`, `{results: [{index, score}]}` daga bakin ƙofa, da salon Voyage `{data: [...]}` duk suna dawowa ga abokin ciniki kamar yadda `{results: [{index, relevance_score, document?}]}` da `top_n`.
 
-> **Gano nodes na provider:** samfura a kan node na provider mai jituwa da OpenAI suna bayyana a cikin `GET /v1/models`
-> a ƙarƙashin prefix ɗin node. Layukan da ba su ɗauke da metadata na endpoint ba (abin da aka saba gani a jerin `/v1/models`
-> na gida) suna gadon `apiType` na node, saboda haka samfuran node na `embeddings` suna da
-> `type: "embedding"` kuma samfuran node na `rerank` suna da `type: "rerank"` maimakon su koma chat ta tsohuwa;
-> `supportedEndpoints` da aka bayyana a sarari a kan layin da aka daidaita ko aka ƙara da hannu har yanzu yana da fifiko.
+> **Gano kumburin mai bayarwa:** samfura akan kumburin mai dacewa na OpenAI suna bayyana a cikin `GET /v1/models` ƙarƙashin maƙalar node. Layukan da ba su ɗauke da metadata na ƙarshe ba (na al'ada don jerin `/v1/models` na gida) sun gaji `apiType` na kumburi, don haka ƙirar kumburin `embeddings` sune `type: "embedding"` kuma ƙirar node na `rerank` sune `type: "rerank"` maimakon yin taɗi; `supportedEndpoints` bayyananne akan jeren da aka daidaita ko da hannu har yanzu yana ɗaukar fifiko.
 
-### Hanyoyin Provider na Musamman
+### Rubutun Yanke shawara
+
+Samfuran yanke shawara suna amsa tambayoyin da aka buga tare da madaidaitan yuwuwar maimakon samar da rubutu. Ba su taɓa yin taɗi ba, kuma tsarin waya biyu ba a taɓa fassara su cikin juna ba:
+
+- Tsarin `POST /v1/systemone` — Daya `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter yanke shawara, Cloudflare Ma'aikata AI, local Ollama).
+- `POST /v1/decisions` — ɗan asalin OpenAI shawara `{ model, input, questions: [...] }`, wanda haɗin `openai` yayi aiki. Samfurin shine `openai/gpt-6-luna` (wanda bare `gpt-6-luna` shima yana aiki). Amsoshin suna dawowa cikin tsari na tambaya, ba a taɓa su ba.
+- `GET /v1/systemone/models` — kataloji ɗaya na nau'ikan biyu; kowace jere tana suna `api_format` (`systemone` ko `decisions`). `limit` / `after` shafi na jerin ƙarshe. Kan kai na `X-OmniRoute-Catalog-Status` yana karanta `complete`, `partial` ko `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+A kan `/v1/decisions` jerin izinin ƙira na maɓallin API, nau'in ƙarshen `decisions`, kasafin kuɗi da iyakokin haɗin gwiwa ana duba su kafin a karanta kowace sahihanci. Shaidar ita ce haɗin `openai` da aka adana a cikin iyakar maɓalli (ba za a taɓa maɓallin muhalli ba); tushen haɗin URL ana girmama shi ne kawai lokacin da `http(s)` URL ne ba tare da takaddun shaida, tambaya ko guntun da ba ya nuna wannan OmniRoute. Kiran yana barin ta hanyar sufuri iri ɗaya da aka tsare kamar `decision` auto-router ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): mai ba da tsaro na waje, babu sakewa, babu juyar da kai, 5 s lokacin ƙarewa da 64 KB tawul (mafi girma amsar ita ce 502). Jikunan neman sun iyakance zuwa 4 MiB. Kowane kira yana aika sabon `Idempotency-Key`. Kurakurai suna ɗaukar matsayi na sama kawai, ba a taɓa jikinsa ba, URL, maɓalli ko faɗakarwa.
+
+### Hanyoyi masu sadaukar da kai
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -794,7 +767,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Ana ƙara prefix ɗin provider ta atomatik idan babu shi. Samfuran da ba su dace ba suna dawo da `400`.
+Ana ƙara prefix ɗin mai bayarwa ta atomatik idan ya ɓace. Samfuran da basu dace ba sun dawo `400`.
 
 ---
 

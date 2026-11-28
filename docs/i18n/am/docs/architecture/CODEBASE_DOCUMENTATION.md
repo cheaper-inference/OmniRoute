@@ -4,18 +4,11 @@
 
 ---
 
-> **ስሪት፦** v3.8.51
-> **ለመጨረሻ ጊዜ የተዘመነው፦** 2026-06-28
-> **ታዳሚዎች፦** ለOmniRoute አስተዋጽኦ የሚያደርጉ ወይም በእሱ ላይ ውህደቶችን የሚገነቡ መሐንዲሶች።
+> **ስሪት፡** v3.8.51** ታዳሚዎች፡-** ለ OmniRoute አስተዋፅኦ የሚያደርጉ መሐንዲሶች ወይም ውህደቶችን በላዩ ላይ መገንባት።
 >
-> ከፍተኛ ደረጃ የአርክቴክቸር ንድፎችን እና ከእያንዳንዱ ንዑስ ስርዓት በስተጀርባ ያለውን አመክንዮ ለማንበብ፣
-> [ARCHITECTURE.md](./ARCHITECTURE.md)ን ይመልከቱ። ስለ እያንዳንዱ ንዑስ ስርዓት ጥልቅ መረጃ
-> (Auto Combo፣ MCP አገልጋይ፣ A2A አገልጋይ፣ Skills፣ Memory፣ Cloud Agents፣ Resilience፣
-> Compression፣ ወዘተ) ለማግኘት በዚህ `docs/` ማውጫ ውስጥ ያሉትን ለእያንዳንዳቸው የተዘጋጁ ፋይሎች ይመልከቱ።
+> ለከፍተኛ ደረጃ የስነ-ህንፃ ንድፎች እና ከእያንዳንዱ ንዑስ ስርዓት በስተጀርባ ያለውን ምክንያት, [ARCHITECTURE.md](./ARCHITECTURE.md) ያንብቡ. በግለሰብ ንዑስ ስርዓቶች (ራስ-ኮምቦ፣ MCP አገልጋይ፣ A2A አገልጋይ፣ ችሎታ፣ ማህደረ ትውስታ፣ Cloud Agents፣ Resilience፣ Compression፣ ወዘተ.) ላይ የወሰኑ ፋይሎቻቸውን በዚህ `docs/` ማውጫ ውስጥ ይመልከቱ።
 
-ይህ ፋይል **በአሁኑ ጊዜ በማከማቻው ውስጥ ያለውን** ይገልጻል፤ ይህም አዲስ መሐንዲስ
-የማውጫውን መዋቅር እንዲዳስስ፣ የአሂድ ጊዜ ንብርብሮችን እንዲረዳ እና አዳዲስ ሞጁሎችን
-ሳይፈጥር ኮድ የት መጨመር እንዳለበት እንዲያውቅ ያስችለዋል።
+ይህ ፋይል ይገልፃል።** ዛሬ በማከማቻው ውስጥ ያለው** አዲስ መሐንዲስ ዛፉን ማሰስ እንዲችል፣ የአሂድ ጊዜ መደራረብን እንዲረዳ እና አዲስ ሞጁሎችን ሳይፈጥር ኮድ የት እንደሚጨምር እንዲያውቅ።
 
 ---
 
@@ -566,35 +559,14 @@ bin/
 
 ## 8. `scripts/`
 
-እንደ ዓላማቸው በ6 ንዑስ አቃፊዎች የተደራጁ ናቸው።
+በዓላማ በ6 ንዑስ አቃፊዎች ተደራጅቷል።
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`፣ በተጨማሪም ለንባብ ብቻ የሆኑ የPR ክትትል አጋዥ መሣሪያዎች፦
-  `ci-discriminate.sh` (የአንድን PR ያልተሳኩ ፍተሻዎች ፊርማዎች ከማጣቀሻ PR ወይም ከbase-red ችግር ጋር በማነጻጸር የራሱ / የወረሳቸው /
-  ያልታወቁ ብሎ ይመድባል) እና `audit-worktree.sh`
-  (የተቀየሩ ፋይሎች፣ የተጠበቁ የኮድ ክፍሎች፣ የተወገዱ asserts፣ የማፈኛ ብዛቶች፣ የቀሩ
-  ጊዜያዊ tsconfigs፣ የPR head ከአካባቢያዊ HEAD ጋር — የሠራተኛው PR ተቀባይነት ከማግኘቱ በፊት)።
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, ሲደመር ተነባቢ-ብቻ PR ሞግዚት ረዳቶች `ci-discriminate.sh` (የ PR አለመሳካትን ይለያሉ ወይም ያልታወቀን PR ላይ ይመርምሩ) ቤዝ-ቀይ ጉዳይ) እና `audit-worktree.sh` (ቆሻሻ ፋይሎች፣ የተጠበቁ ንጣፎች፣ የተወገዱ ማረጋገጫዎች፣ የጭቆና ቆጠራዎች፣ የተረፈ tmp tsconfigs፣ PR head vs local HEAD — የሰራተኛ PR ከመቀበሉ በፊት)።
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` ባንዲራ ስሪቶች ለ OmniRoute (3.6.x እና ከዚያ በፊት) በግልጽ ተጠርተዋል። ቼኩ ቀኖችን ችላ ይላል።
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

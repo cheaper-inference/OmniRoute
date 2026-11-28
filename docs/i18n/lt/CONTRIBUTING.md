@@ -13,29 +13,23 @@ aprėptimi ir suderinimo veiksmais.
 
 ---
 
-## Kūrimo aplinka
+## Kūrimo sąranka
 
-### Būtinosios sąlygos
+### Būtinos sąlygos
 
 - **Node.js** `>=22.22.2 <23` arba `>=24.0.0 <27` (rekomenduojama: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows su Node 24:** naudokite dabartinį 24 LTS pataisų leidimą (bent 24.20.0).
-> Ankstesni leidimai gali nutraukti procesą po sėkmingų testų, kai `--test-force-exit` uždaro
-> procesą. Node [Windows libuv pataisa](https://github.com/nodejs/node/pull/61999) išsprendžia
-> šią vykdymo laiko avariją; testų tvirtinimus ir vykdyklės išėjimo patikras palikite įjungtas.
+> **Windows su 24 mazgu:** naudokite dabartinį 24 LTS pataisos leidimą (bent 24.20.0). Ankstesni leidimai gali nutrūkti po sėkmingų bandymų, kai `--test-force-exit` uždaro procesą. Node's [Windows libuv fix](https://github.com/nodejs/node/pull/61999) sprendžia šią vykdymo laiko gedimą; palikite įjungtus bandymo teiginius ir bėgiko išėjimo patikras.
 
-> **npm v11+ naudotojams (Node 24+):** po `npm install` patikrinkite, ar savieji moduliai buvo įdiegti:
-> `node -e "require('better-sqlite3')"`. Jei komanda baigiama klaida `MODULE_NOT_FOUND`,
-> paleiskite `npm approve-scripts better-sqlite3 && npm install`. Žr.
-> [Trikčių šalinimas](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + naudotojai (24 mazgas +):** Po `npm install` patikrinkite, ar buvo įdiegti vietiniai moduliai: `node -e "require('better-sqlite3')"`. Jei nepavyksta su `MODULE_NOT_FOUND`, paleiskite `npm approve-scripts better-sqlite3 && npm install`. Žr. [Trikčių šalinimas](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klonavimas ir diegimas
+### Klonuoti ir įdiegti
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -43,92 +37,83 @@ npm install
 ### Aplinkos kintamieji
 
 ```bash
-# Sukurkite .env failą iš šablono
+# Create your .env from the template
 cp .env.example .env
 
-# Sugeneruokite reikalingas paslaptis
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Pagrindiniai kūrimo aplinkos kintamieji:
+Pagrindiniai plėtros kintamieji:
 
-| Kintamasis             | Numatytoji kūrimo reikšmė | Aprašymas                        |
-| ---------------------- | ------------------------- | -------------------------------- |
-| `PORT`                 | `20128`                   | Serverio prievadas               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | Frontend bazinis URL             |
-| `JWT_SECRET`           | (sugeneruokite aukščiau)  | JWT pasirašymo paslaptis         |
-| `INITIAL_PASSWORD`     | `CHANGEME`                | Pirmojo prisijungimo slaptažodis |
-| `APP_LOG_LEVEL`        | `info`                    | Žurnalo išsamumo lygis           |
+| Kintamasis             | Plėtros numatytoji vertė | Aprašymas                         |
+| ---------------------- | ------------------------ | --------------------------------- |
+| `PORT`                 | `20128`                  | Serverio prievadas                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Bazinė URL priekinei daliai       |
+| `JWT_SECRET`           | (generuoti aukščiau)     | JWT pasirašymo paslaptis          |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Pirmasis prisijungimo slaptažodis |
+| `APP_LOG_LEVEL`        | `info`                   | Žurnalo žodiškumo lygis           |
 
-### Valdymo skydelio nustatymai
+### Prietaisų skydelio nustatymai
 
-Valdymo skydelyje pateikiami funkcijų jungikliai, kuriuos taip pat galima konfigūruoti naudojant aplinkos kintamuosius:
+Prietaisų skydelyje pateikiami funkcijų, kurias taip pat galima konfigūruoti naudojant aplinkos kintamuosius, UI perjungikliai:
 
-| Nustatymo vieta           | Jungiklis                 | Aprašymas                               |
-| ------------------------- | ------------------------- | --------------------------------------- |
-| Nustatymai → Išplėstiniai | Derinimo režimas          | Įjungti derinimo užklausų žurnalus (UI) |
-| Nustatymai → Bendrieji    | Šoninės juostos matomumas | Rodyti / slėpti šoninės juostos skiltis |
+| Vietos nustatymas     | Perjungti                 | Aprašymas                                |
+| --------------------- | ------------------------- | ---------------------------------------- |
+| Nustatymai → Advanced | Derinimo režimas          | Įgalinti derinimo užklausų žurnalus (UI) |
+| Nustatymai → General  | Šoninės juostos matomumas | Show/hide šoninės juostos sekcijos       |
 
-Šie nustatymai saugomi duomenų bazėje ir išlieka po paleidimo iš naujo, kai yra nustatyti, todėl pakeičia numatytąsias aplinkos kintamųjų reikšmes.
+Šie nustatymai saugomi duomenų bazėje ir išlieka paleidžiant iš naujo, o nustačius nepaisydami env var numatytųjų parametrų.
 
-### Paleidimas vietoje
+### Bėgimas vietoje
 
 ```bash
-# Kūrimo režimas (automatinis perkrovimas)
+# Development mode (hot reload)
 npm run dev
 
-# Produkcinis kūrimas
-npm run build    # next build → .build/next/ ir assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Spartus tik backend / API kompiliavimas pagalbininkų pakeitimams
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Leidimo kūrimas (švarus kūrimas + HEAD žymuo — būtina diegimui)
-npm run build:release   # rm -rf .build dist ir build + įrašo dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Dažniausiai naudojama prievado konfigūracija
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Pagalbininkų kūrimas atlieka tik kompiliavimo patikrą: jis nesurinkia autonominio
-platinimo paketo ir nesukuria pasirinktinių savųjų pakavimo išteklių. Kai reikia
-patikrinti paruoštą platinti paketą, naudokite įprastą produkcinį kūrimą.
+Bendraautorio versija atlieka tik kompiliavimo patvirtinimą: ji nesurenka atskiro platinimo ir nekuria pasirenkamų savosios pakuotės išteklių. Naudokite įprastą gamybos versiją, kai reikia patvirtinti siunčiamą paketą.
 
-### Kūrimo išvesties struktūra
+### Sukurkite išvesties išdėstymą
 
-| Katalogas | Turinys                                                                              | Sekamas |
-| --------- | ------------------------------------------------------------------------------------ | ------- |
-| `src/`    | Programos šaltinis (TypeScript / TSX)                                                | Taip    |
-| `.build/` | Tarpiniai failai — `next build` išvestis (`gitignored`, `distDir = .build/next`)     | Ne      |
-| `dist/`   | Paruoštas platinti paketas — surinktas naudojant `assembleStandalone` (`gitignored`) | Ne      |
+| Katalogas | Turinys                                                                | Stebimi |
+| --------- | ---------------------------------------------------------------------- | ------- |
+| `src/`    | Programos šaltinis (TypeScript / TSX)                                  | Taip    |
+| `.build/` | Tarpiniai — `next build` išvestis (gitignore, `distDir = .build/next`) | Nr      |
+| `dist/`   | Siunčiamas — paketas, surinktas `assembleStandalone` (gitignoruotas)   | Nr      |
 
-Kūrimo konvejeris vykdomas vienu etapu:
+Nutiesiamas dujotiekis vienu praėjimu:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js išvestis)
-  └─ assembleStandalone()                 (autonominio paketo + statinių + viešų + savųjų išteklių kopijavimas)
-       └─ išvestis: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` papildomai pirmiausia išvalo abu katalogus ir įrašo
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kaip diegimo vientisumo žymenį.
+`npm run build:release` papildomai pirmiausia išvalo abu katalogus ir įrašo `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kaip diegimo vientisumo kontrolinį.
 
-`npm run build:contributor` naudoja tik backend skirtą kūrimo profilį. Kūrimo metu
-jis laikinai pakeičia valdymo skydelio UI failus, išsaugo API maršrutų apdorotuvus
-ir po kūrimo atkuria pradinius failus. Pakeitimams, kurie turi įtakos valdymo
-skydelio UI, arba visai leidimo patikrai naudokite `npm run build`; pagalbininkų
-profilis nėra leidimo kūrimo pakaitalas.
+`npm run build:contributor` naudoja tik backend kūrimo profilį. Kuriant jis laikinai išjungia prietaisų skydelio UI failus, išlaiko API maršrutų tvarkykles ir atkuria originalius failus po kūrimo. Naudokite `npm run build` pakeitimams, turintiems įtakos prietaisų skydeliui UI, arba visiškam leidimo patvirtinimui; bendraautorio profilis nepakeičia leidimo versijos.
 
-> **VPS diegimo pastaba:** nuotolinis atvaizdo katalogas `/usr/lib/node_modules/omniroute/app/`
-> lieka nepakeistas. Diegimo įgūdžiai į jį per `rsync` sinchronizuoja `dist/` turinį.
-> Pakeistas tik saugykloje esantis kūrimo išvesties kelias (`app/` → `dist/`).
+> **VPS deploy pastaba:** nuotolinio vaizdo katalogas `/usr/lib/node_modules/omniroute/app/` nepakitęs. Diegimo įgūdžiai į jį sinchronizuoja `dist/` turinį. Perkeltas tik in-repo kūrimo išvesties kelias (`app/` → `dist/`).
 
-Numatytieji URL:
+Numatytasis URLs:
 
-- **Valdymo skydelis**: `http://localhost:20128/dashboard`
+- **Prietaisų skydelis** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -437,8 +422,8 @@ Tada naudokite `/deploy-vps-*-cc` įgūdžius, kurie per rsync nukopijuoja `dist
 
 ## Pagalbos gavimas
 
-- **Architektūra**: žr. [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API žinynas**: žr. [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Saugumo dokumentacija**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Eksploatavimo dokumentacija**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Problemos**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Architektūra** : Žiūrėkite [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API nuoroda** : Žr. [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Saugumo dokumentai** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Operacijų dokumentai** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Problemos** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

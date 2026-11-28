@@ -5,31 +5,12 @@
 ---
 
 > **Source de vérité :** `src/lib/memory/` et `src/app/api/memory/`
-> **Dernière mise à jour :** 2026-06-28 — v3.8.40 (désactivée par défaut + rattrapage de la quantification int8)
 
-OmniRoute fournit une mémoire conversationnelle persistante indexée par clé API
-(et éventuellement par identifiant de session). Les souvenirs sont extraits
-automatiquement des réponses du LLM au moyen d’une correspondance légère par
-expressions régulières, puis réinjectés dans les requêtes suivantes sous la
-forme d’un message système initial (ou du premier message utilisateur pour les
-fournisseurs qui refusent le rôle système).
+OmniRoute fournit une mémoire conversationnelle persistante saisie par la clé API (et éventuellement l'identifiant de session). Les mémoires sont extraites automatiquement des réponses LLM via une correspondance de modèle regex légère et réinjectées dans les requêtes ultérieures en tant que message système principal (ou premier message utilisateur pour les fournisseurs qui rejettent le rôle système).
 
-> **La mémoire est DÉSACTIVÉE par défaut (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> vaut désormais `false` (`src/lib/memory/settings.ts`). L’activation de la mémoire
-> injecte jusqu’à `maxTokens` (~2k) de contexte récupéré dans **chaque** requête
-> de chat, ce qui est facturé — un coût inattendu pour les nouvelles installations
-> et pour les clients qui gèrent leur propre contexte. Activez-la explicitement
-> dans **Paramètres → Mémoire** (l’onglet `MemorySkillsTab` affiche un avertissement
-> relatif au coût en jetons lorsque la mémoire est activée). Un client peut exclure
-> une requête spécifique à l’aide de l’en-tête de requête `x-omniroute-no-memory`
-> (`true`/`1`/`yes`) — consultez le tableau des en-têtes de requête dans
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Une requête sans mémoire définit
-> `memoryOwnerId = null`, ce qui désactive **à la fois** l’injection de mémoire et
-> de compétences pour cette requête (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **La mémoire est OFF par défaut (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` est maintenant `false` (`src/lib/memory/settings.ts`). L'activation de la mémoire injecte jusqu'à `maxTokens` (~ 2k) du contexte récupéré dans** chaque** demande de chat, qui est facturée — un coût surprenant pour les nouvelles installations et pour les clients qui gèrent leur propre contexte. Inscrivez-vous explicitement sous** Paramètres → Mémoire** (le `MemorySkillsTab` affiche un avertissement de coût de jeton lorsque la mémoire est activée). Un client peut refuser une seule requête avec l'en-tête de requête `x-omniroute-no-memory` (`true`/`1`/`yes`) — voir le tableau d'en-tête de requête dans [API_REFERENCE.md](../reference/API_REFERENCE.md). Une requête sans mémoire définit `memoryOwnerId = null`, ce qui désactive** les deux** injection de mémoire et de compétences pour cette requête (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-La mémoire est **limitée à chaque clé API**, et non à chaque utilisateur — toutes
-les requêtes authentifiées avec la même clé API partagent le même pool de
-mémoire, avec une limitation supplémentaire facultative par `sessionId`.
+La mémoire est** limité par clé API** , et non par utilisateur — chaque requête authentifiée avec la même clé API partage le même pool de mémoire, avec une portée supplémentaire facultative par `sessionId`.
 
 ## Architecture
 
@@ -716,22 +697,22 @@ Benchmark sur un serveur x86 classique à 4 cœurs (textes d’environ 100 token
 
 ---
 
-## Modèles d’extraction de faits (v3.8.16+)
+## Modèles d'extraction de faits (v3.8.16 +)
 
-Le module `extraction.ts` (`src/lib/memory/extraction.ts`) utilise une **correspondance par expressions régulières** pour extraire des faits structurés des messages de conversation. Comprendre ces modèles vous aide à ajuster la qualité de l’extraction à votre cas d’utilisation.
+Le module `extraction.ts` (`src/lib/memory/extraction.ts`) utilise** correspondance de modèle regex** pour extraire des faits structurés à partir de messages de conversation. Comprendre ces modèles vous aide à ajuster la qualité de l'extraction en fonction de votre cas d'utilisation.
 
 ### Catégories de modèles par défaut
 
-| Catégorie           | Exemple de modèle                                                 | Éléments capturés                        |
-| ------------------- | ----------------------------------------------------------------- | ---------------------------------------- |
-| PREFERENCE_PATTERNS | `"Je préfère <X>"`, `"J’aime <X>"`, `"Je déteste <X>"`            | Préférences de l’utilisateur             |
-| DECISION_PATTERNS   | `"J’utiliserai <X>"`, `"J’ai décidé de <X>"`, `"J’ai choisi <X>"` | Décisions de l’utilisateur (épisodiques) |
-| PATTERN_PATTERNS    | `"D’habitude, je <X>"`, `"Je <X> toujours"`, `"Je ne <X> jamais"` | Modèles comportementaux persistants      |
+| Catégorie           | Exemple de modèle                                           | Captures                                 |
+| ------------------- | ----------------------------------------------------------- | ---------------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Préférences utilisateur                  |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Décisions des utilisateurs (épisodiques) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Modèles de comportement persistants      |
 
 ### Exemples de modèles (simplifiés)
 
 ```ts
-// Extrait de src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -744,35 +725,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Éléments extraits
+### Ce qui est extrait
 
-Lorsqu’un utilisateur dit :
+Lorsqu'un utilisateur dit :
 
-> « Je préfère TypeScript. J’utiliserai Postgres pour ce projet. Je fais toujours un commit avant de pousser. Je n’aime pas Python. »
-> L’extraction produit 4 souvenirs :
+> "Je préfère TypeScript. J'utiliserai Postgres pour ce projet. Je m'engage toujours avant de pousser. Je n'aime pas Python." L'extraction produit 4 mémoires :
 >
-> | Clé                                  | Catégorie  | Type     | Contenu                              |
-> | ------------------------------------ | ---------- | -------- | ------------------------------------ |
-> | `preference:typescript`              | preference | factual  | « TypeScript »                       |
-> | `decision:postgres_for_this_project` | decision   | episodic | « Postgres pour ce projet »          |
-> | `pattern:commit_before_pushing`      | pattern    | factual  | « faire un commit avant de pousser » |
-> | `preference:python`                  | preference | factual  | « Python »                           |
+> | Clé | Catégorie | Type | Contenu | | ------------------------------------ | ---------- | -------- | --------------------------- | | `preference:typescript` | préférence | factuel | "TypeScript" | | `decision:postgres_for_this_project` | décision | épisodique | "Postgres pour ce projet" | | `pattern:commit_before_pushing` modèle | | factuel | "valider avant de pousser" | | | `preference:python` | factuel | "Python" |
 
-### Limites de l’extraction
+### Limites d'extraction
 
-Pour éviter une extraction incontrôlée, les limites suivantes s’appliquent :
+Pour éviter une extraction incontrôlée, les limites suivantes s'appliquent :
 
 | Longueur minimale du contenu | 3 caractères |
 | Longueur maximale du contenu | 500 caractères |
 
 ### Quand désactiver l’extraction
 
-L’extraction s’exécute automatiquement chaque fois que la mémoire est activée ; il n’existe pas d’option distincte permettant d’activer ou de désactiver uniquement l’extraction. Pour la désactiver, désactivez entièrement la mémoire (`enabled: false`
-via `PUT /api/settings/memory`). Envisagez de le faire dans les cas suivants :
+L'extraction s'exécute automatiquement chaque fois que la mémoire est activée ; il n’y a pas de bascule séparée pour l’extraction uniquement. Pour le désactiver, désactivez complètement la mémoire (`enabled: false` via `PUT /api/settings/memory`). Pensez à le faire lorsque :
 
-- Vous traitez un volume élevé de messages et le coût de l’extraction n’est pas négligeable
-- Vos conversations sont principalement temporaires (discussion, débogage) et n’ont aucune valeur à long terme
-- Vous capturez déjà le contexte au moyen de plugins personnalisés
+- Vous avez un volume de messages élevé et le coût d’extraction n’est pas négligeable
+- Vos conversations sont pour la plupart transitoires (chat, débogage) sans valeur à long terme
+- Vous capturez déjà le contexte via des plugins personnalisés
 
 ---
 

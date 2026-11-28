@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute diedarkan sebagai Progressive Web App yang boleh dipasang sepenuhnya. Apabila anda mengakses papan pemuka daripada mana-mana pelayar mudah alih — Android (Chrome) atau iOS (Safari) — anda boleh memilih "Tambah ke Skrin Utama" dan menikmati pengalaman seperti aplikasi natif tanpa memerlukan gedung aplikasi.
+Pasang papan pemuka OmniRoute sebagai Apl Web Progresif untuk membukanya dari skrin utama atau desktop anda dalam tetingkap kendiri. Apl yang dipasang masih memerlukan sambungan ke pelayan OmniRoute anda untuk navigasi, data papan pemuka dan permintaan API. Aset statik dicache tidak menyediakan gerbang luar talian atau papan pemuka luar talian.
 
-## Apakah Itu PWA?
+## Apa itu PWA?
 
-Progressive Web App mengubah papan pemuka web OmniRoute menjadi sesuatu yang kelihatan dan berfungsi seperti aplikasi mudah alih natif. Setelah dipasang, aplikasi ini:
+Apl Web Progresif menggunakan papan pemuka web dengan ikon aplikasi dan tetingkap berasingan. Setelah dipasang, OmniRoute:
 
-- Dilancarkan daripada skrin utama anda dengan ikonnya sendiri
-- Dibuka dalam skrin penuh — tanpa bar alamat pelayar atau UI tab
-- Berfungsi di luar talian dengan halaman kesambungan khusus
-- Menyimpan aset statik dalam cache untuk pemuatan yang lebih pantas
+- Dilancarkan dari skrin utama atau desktop anda
+- Dibuka dalam mod kendiri, tanpa bar alamat dan tab biasa penyemak imbas
+- Cache aset statik yang dipilih
 - Menyokong orientasi potret dan landskap
 
 ## Pemasangan
 
+Gunakan alamat HTTPS untuk pelayan pada peranti lain. Apabila pelayan berjalan pada peranti yang sama, `http://localhost:20128` juga memenuhi keperluan kebolehpasangan penyemak imbas. Alamat `http://YOUR_IP:20128` biasa tidak memenuhi keperluan tersebut. Menu dan gesaan pemasangan bergantung pada penyemak imbas dan sistem pengendalian. Lihat [keperluan pemasangan PWA MDN](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
+
 ### Android (Chrome)
 
-1. Buka papan pemuka OmniRoute dalam Chrome: `http://YOUR_IP:20128`
-2. Chrome akan memaparkan sepanduk **"Tambah OmniRoute ke Skrin utama"** secara automatik, atau:
-   - Ketik menu **⋮** (tiga titik) → **"Tambah ke Skrin utama"** atau **"Pasang aplikasi"**
-3. Sahkan gesaan tersebut
-4. OmniRoute muncul pada skrin utama anda sebagai aplikasi kendiri
+1. Buka alamat OmniRoute HTTPS anda atau `http://localhost:20128` untuk pelayan pada telefon yang sama.
+2. Buka**⋮** menu dan pilih** Pasang apl** atau** Tambahkan pada skrin Utama** , jika ditawarkan.
+3. Sahkan gesaan.
+4. Buka OmniRoute dari skrin utama.
 
 ### iOS (Safari)
 
-1. Buka papan pemuka OmniRoute dalam Safari: `http://YOUR_IP:20128`
-2. Ketik butang **Kongsi** (kotak dengan anak panah)
-3. Tatal ke bawah dan ketik **"Tambah ke Skrin Utama"**
-4. Berikan nama (lalainya ialah "OmniRoute") dan ketik **Tambah**
-5. OmniRoute muncul pada skrin utama anda dengan ikon aplikasi
+1. Buka alamat OmniRoute HTTPS anda dalam Safari.
+2. Ketik** Kongsi** →** Tambahkan pada Skrin Utama** .
+3. Sahkan nama dan ketik** Tambah** .
+4. Buka OmniRoute dari skrin utama.
 
 ### Desktop (Chrome / Edge)
 
-1. Buka papan pemuka OmniRoute
-2. Klik **ikon pemasangan** dalam bar alamat (atau ⋮ → "Pasang OmniRoute...")
-3. Sahkan gesaan tersebut
-4. OmniRoute dibuka sebagai tetingkap kendiri — tanpa tab, tanpa bar alamat
+1. Buka papan pemuka OmniRoute anda.
+2. Gunakan ikon pemasangan penyemak imbas atau** Pasang apl** entri menu, jika ditawarkan.
+3. Sahkan gesaan untuk membuka OmniRoute dalam tetingkapnya sendiri.
 
 ## Ciri-ciri
 
-### Pengalaman Skrin Penuh
+### Tingkap Kendiri
 
-Manifes dikonfigurasikan dengan `display: "fullscreen"`, yang bermaksud aplikasi yang dipasang menggunakan keseluruhan skrin — tanpa elemen pelayar, tanpa tindihan bar status. Ini menjadikan papan pemuka benar-benar terasa seperti aplikasi natif.
+Manifes menetapkan `display: "standalone"` dan `start_url: "/dashboard"`. Apl yang dipasang membuka papan pemuka dalam tetingkap apl. Kawalan penyemak imbas dan sistem pengendalian masih boleh muncul; manifes tidak meminta mod skrin penuh.
 
-### Sokongan Luar Talian
+### Aset Cache dan Keperluan Rangkaian
 
-OmniRoute menyertakan service worker (`sw.js`) yang menyediakan pengurusan cache pintar:
+[Pekerja perkhidmatan](../../public/sw.js) menyimpan sumber asal yang sama yang dipilih:
 
-| Jenis Aset                                                                                                                                                                                                           | Strategi                                   | Tingkah Laku                                                                                                                |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| **Cangkerang aplikasi**                                                                                                                                                                                              | Utamakan cache                             | `/`, `/offline`, manifes dan ikon dipracache semasa pemasangan                                                              |
-| **Aset statik** (CSS, JS, imej, fon)                                                                                                                                                                                 | Utamakan rangkaian dengan sandaran cache   | Mengambil versi terkini daripada rangkaian; menggunakan cache jika di luar talian                                           |
-| **Himpunan Next.js** (`/_next/`)                                                                                                                                                                                     | Utamakan rangkaian dengan kemas kini cache | Mengambil daripada rangkaian dan mengemas kini cache; menyediakan versi cache jika di luar talian                           |
-| **Permintaan navigasi**                                                                                                                                                                                              | Pintas (tidak pernah dipintas)             | Pelayar mengendalikan penggunaan sandaran HTTP/3→HTTP/2; soket QUIC yang tidak aktif tidak boleh menjadi `Response.error()` |
-| **Laluan API / papan pemuka** (`/api/`, `/a2a`, `/dashboard`, alias API klien `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, serta `/callback`, `/login`; dipadankan tanpa mengira huruf besar/kecil) | Pintas (tidak pernah dicache)              | Sentiasa dihantar terus kepada pelayan — tidak pernah dipintas oleh service worker                                          |
+| Permintaan atau aset                    | Strategi             | Tingkah laku                                                                                                |
+| --------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Sumber masa pemasangan                  | Pra-cache            | `/`, `/manifest.webmanifest`, `/icon-512.png` dan `/apple-touch-icon.png` dicache semasa pemasangan pekerja |
+| Next.js aset statik (`/_next/`)         | Rangkaian diutamakan | Respons yang berjaya mengemas kini cache; ralat rangkaian kembali kepada respons cache sedia ada            |
+| CSS statik lain, JS, imej dan fon       | Cache dahulu         | Respons tembolok sedia ada digunakan semula; respons rangkaian yang berjaya dicache pada kesilapan          |
+| Navigasi halaman                        | pintasan             | Penyemak imbas mengambil halaman secara langsung; tiada sandaran luar talian disediakan                     |
+| API, papan pemuka dan laluan pengesahan | pintasan             | Pekerja tidak memintas atau cache permintaan ini                                                            |
+| Permintaan bukan statik lain            | Rangkaian            | Tiada carian cache atau storan                                                                              |
 
-### Halaman Luar Talian
+Laluan yang dikecualikan ialah `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` dan `/login`, dipadankan secara tidak sensitif huruf besar pada sempadan laluan. Permintaan silang asal dan bukan GET juga memintas pekerja.
 
-Apabila rangkaian tidak tersedia dan pengguna menavigasi ke halaman baharu, service worker menyediakan halaman `/offline` khusus yang:
+### Halaman Ketersambungan
 
-- Memaparkan mesej **"Isu Kesambungan"** yang jelas
-- Menunjukkan **penunjuk status dalam talian/luar talian** secara langsung yang dikemas kini dalam masa nyata
-- Menyediakan butang **"Cuba Sambungan Semula"** untuk memuatkan semula apabila kesambungan pulih
-- Memaut ke **Halaman Status** untuk diagnostik
+Halaman `/offline` menyediakan mesej sambungan, penunjuk online/offline, a** Cuba Semula Sambungan** butang dan pautan ke halaman status. Ia adalah** bukan pra-cache** dan pekerja perkhidmatan melakukannya** bukan** ubah hala navigasi yang gagal kepadanya. Kewujudannya tidak menjadikan halaman baharu boleh diakses tanpa pelayan.
 
-### Ikon Aplikasi
+### Ikon Apl
 
-OmniRoute menyediakan ikon yang dioptimumkan untuk setiap platform:
+Manifes mengiklankan ikon PNG ini:
 
-| Fail                   | Saiz             | Digunakan Oleh                            |
-| ---------------------- | ---------------- | ----------------------------------------- |
-| `icon-512.png`         | 512×512          | Gesaan pemasangan Android, skrin percikan |
-| `apple-touch-icon.png` | 180×180          | Ikon skrin utama iOS                      |
-| `icon-192.svg`         | 192×192 (vektor) | Ikon adaptif Android                      |
-| `apple-touch-icon.svg` | 180×180 (vektor) | Sandaran Apple                            |
-| `favicon.svg`          | Vektor           | Tab pelayar                               |
-| `favicon.ico`          | Pelbagai saiz    | Pelayar lama                              |
+| Fail                   | Saiz    | guna                              |
+| ---------------------- | ------- | --------------------------------- |
+| `icon-192.png`         | 192×192 | Ikon apl umum                     |
+| `icon-512.png`         | 512×512 | Ikon apl umum dan boleh bertopeng |
+| `apple-touch-icon.png` | 180×180 | Ikon skrin utama Apple            |
+
+Penyemak imbas memilih ikon yang sesuai untuk sasaran pemasangan.
 
 ### Pendaftaran Automatik
 
-Service worker didaftarkan secara automatik melalui komponen `<PwaRegister />` dalam reka letak akar. Tiada tindakan pengguna diperlukan — aplikasi boleh dipasang sebaik sahaja pelayar mengesan manifes dan service worker yang sah.
+`PwaRegister` mendaftarkan pekerja dalam pengeluaran apabila penyemak imbas menyokong pekerja perkhidmatan. Mod pembangunan menyahdaftar pekerja dan mengosongkan cache untuk mengelakkan aset lapuk mengganggu muat semula panas. Gesaan pemasangan kekal sebagai keputusan penyemak imbas.
 
 ## Seni Bina Teknikal
 
-### Manifes Aplikasi Web (`manifest.webmanifest`)
+### Manifes Apl Web
 
-Dijana oleh Next.js melalui `src/app/manifest.ts`:
+Next.js menjana `/manifest.webmanifest` daripada [`src/app/manifest.ts`](../../src/app/manifest.ts). Tetapan utamanya ialah:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Tetapan                       | Nilai                                          |
+| ----------------------------- | ---------------------------------------------- |
+| `short_name`                  | `OmniRoute`                                    |
+| `start_url`                   | `/dashboard`                                   |
+| `scope`                       | `/`                                            |
+| `display`                     | `standalone`                                   |
+| `orientation`                 | `any`                                          |
+| Warna latar belakang dan tema | Palet cahaya lalai daripada `PWA_THEME_COLORS` |
 
-### Service Worker (`public/sw.js`)
+Nama dan perihalan manifes ialah nilai statik dalam fail sumber tersebut. Manifes yang dipasang tidak mengikut tetapan nama contoh atau palet aktif pada setiap lawatan.
 
-Service worker biasa (tanpa kebergantungan rangka kerja) dengan:
+### Pekerja Perkhidmatan
 
-- **Fasa pemasangan**: Melakukan pracache bagi kerangka aplikasi (akar, halaman luar talian, manifes, ikon)
-- **Fasa pengaktifan**: Membersihkan versi cache lama dan mengambil alih semua klien
-- **Fasa pengambilan**: Penghalaan pintar berdasarkan jenis permintaan (navigasi, aset statik, API)
-- **Pemversian cache**: `omniroute-pwa-v3` — tingkatkan versi ini untuk memaksa cache baharu semasa kemas kini
+[`public/sw.js`](../../public/sw.js) tidak mempunyai pergantungan rangka kerja pekerja perkhidmatan:
 
-### Metadata Tataletak (`src/app/layout.tsx`)
+- **Pasang:** pra-cache empat sumber yang disenaraikan di atas dan mengaktifkan pekerja baharu.
+- **Aktifkan:** mengalih keluar generasi cache yang lebih lama dan menuntut pelanggan.
+- **Ambil:** menggunakan strategi aset statik dan pengecualian laluan di atas.
+- **Versi:** nama cache sumber ialah `omniroute-pwa-v3`; binaan pengeluaran mengecap identiti cache.
+- **Pemberitahuan:** mengendalikan acara `push` masuk dan memfokus atau membuka tetingkap apabila pemberitahuan diklik.
 
-Tataletak akar menyediakan semua tag meta yang diperlukan untuk pematuhan PWA:
+Pengendali acara tolak sahaja tidak mewujudkan langganan tolak aktif atau penghantaran pelayan yang dikonfigurasikan. Jangan anggap pemberitahuan didayakan hanya kerana PWA dipasang.
 
-- Pautan `manifest` ke `/manifest.webmanifest`
-- `apple-web-app-capable: true` untuk mod kendiri iOS
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` untuk Chrome pada Android
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` untuk pemaparan dari tepi ke tepi
+### Metadata dan Pendaftaran Reka Letak
 
-### Komponen: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) menyediakan pautan manifes, metadata kendiri Apple, warna tema dan `viewport-fit: cover`. Tajuk halaman dan tajuk apl web Apple menggunakan nama contoh. Warna tema penyemak imbas langsung mengikut palet; manifes pemasangan menggunakan warna cahaya lalai.
 
-Terletak di `src/shared/components/PwaRegister.tsx`, komponen klien ini:
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) berjalan pada klien dan mendaftarkan `/sw.js` dengan binaan ID dalam URL. Ia mengesan penjanaan cache yang tidak sepadan dan boleh menetapkan semula pekerja dan memuat semula sekali untuk memulihkan daripada pemasangan yang lebih lama. Kegagalan pendaftaran tidak menyekat papan pemuka.
 
-1. Dijalankan semasa pelekapan (sebelah klien sahaja)
-2. Memeriksa sokongan `serviceWorker` dalam pelayar
-3. Mendaftarkan `/sw.js` secara senyap (ralat diabaikan untuk mengelakkan aplikasi daripada disekat)
-4. Tidak memaparkan apa-apa (`return null`) — komponen ini hanya menghasilkan kesan sampingan
+## Gunakan Dengan Termux (Android)
 
-## Penggunaan Dengan Termux (Android)
+1. Mulakan OmniRoute dalam Termux: `npx -y omniroute@latest`.
+2. Buka Chrome pada telefon yang sama: `http://localhost:20128`.
+3. Pasang PWA melalui menu pemasangan pelayar.
+4. Pastikan pelayan Termux berjalan semasa menggunakan papan pemuka.
 
-Apabila menjalankan OmniRoute pada Android melalui Termux, PWA berfungsi dengan lancar:
+Telefon ini mengehoskan kedua-dua pintu masuk dan papan pemukanya. Permintaan kepada pembekal AI jauh masih memerlukan akses rangkaian. Lihat [panduan Termux](TERMUX_GUIDE.md) untuk persediaan dan pertimbangan sepanjang hayat proses Android.
 
-1. Mulakan OmniRoute dalam Termux: `npx omniroute`
-2. Buka Chrome pada telefon yang sama: `http://localhost:20128`
-3. Pasang PWA melalui "Tambah pada Skrin Utama"
-4. PWA bersambung ke pelayan Termux setempat — semuanya dijalankan pada peranti
+## Gunakan Daripada Peranti Lain
 
-Gabungan ini bermakna telefon Android anda ialah **pelayan** (Termux) dan juga **klien** (PWA) — sebuah gerbang AI lengkap dan serba lengkap.
-
-## Penggunaan Dari Peranti Lain
-
-Pasang PWA pada mana-mana peranti yang mempunyai akses pelayar ke pelayan OmniRoute anda:
-
-- **Telefon/tablet lain**: Navigasi ke `http://PHONE_IP:20128` dan pasang PWA
-- **Komputer riba**: Buka Chrome/Edge dan pasangkannya sebagai PWA desktop
-- **TV pintar dengan pelayar**: Akses papan pemuka dalam skrin penuh
+Buka alamat HTTPS pelayan pada telefon, tablet atau desktop, kemudian ikuti aliran pemasangan penyemak imbas tersebut. Pelayan mesti kekal boleh dihubungi dari setiap peranti. Lihat [panduan terowong](../ops/TUNNELS_GUIDE.md) untuk pilihan akses jauh.
 
 ## Penyesuaian
 
-### Nama Instans
+### Nama Contoh
 
-Tajuk PWA mematuhi tetapan **Nama Instans** daripada `Papan Pemuka → Tetapan`. Jika anda menamakan semula instans anda kepada "Gerbang AI Saya", PWA yang dipasang akan memaparkan nama tersebut.
+The** Nama Contoh** tetapan mengubah metadata papan pemuka, termasuk tajuk halaman dan tajuk apl web Apple. Manifes yang dijana menggunakan nama statik, jadi tetapan ini tidak menjamin bahawa apl yang telah dipasang dinamakan semula.
 
 ### Favicon Tersuai
 
-Jika anda memuat naik favicon tersuai melalui `Papan Pemuka → Tetapan`, ikon PWA pada desktop akan mencerminkan ikon tersuai tersebut. Ikon skrin utama mudah alih menggunakan fail `icon-512.png` dan `apple-touch-icon.png` yang telah dibina terlebih dahulu.
+Favicon tersuai menukar favicon penyemak imbas. Manifes pemasangan masih mengiklankan fail PNG di atas; menukar favicon tidak menggantikan ikon skrin utama tersebut.
 
-## Batasan
+## Had
 
-- **Tiada pemberitahuan push** — Service worker tidak melaksanakan Push API. Sebaliknya, pemberitahuan dikendalikan oleh aplikasi Electron.
-- **Tiada penyegerakan latar belakang** — Tindakan luar talian tidak dibariskan untuk dimainkan semula. PWA ini terutamanya berfungsi sebagai pemapar papan pemuka.
-- **Sekatan iOS** — Safari pada iOS tidak menyokong semua ciri PWA (contohnya, gesaan pemasangan perlu dilakukan secara manual dan service worker latar belakang adalah terhad).
-- **Saiz cache** — Service worker hanya menyimpan aset statik dalam cache. Muatan respons yang besar daripada laluan `/api/` tidak pernah disimpan dalam cache.
-- **Ikon tersuai pada peranti mudah alih** — Menukar favicon dalam tetapan tidak mengemas kini ikon skrin utama pada peranti mudah alih (ini memerlukan ikon PWA dijana semula).
+- **Sambungan pelayan diperlukan:** navigasi halaman, keadaan papan pemuka dan permintaan API tidak mempunyai sandaran luar talian.
+- **Tiada penyegerakan latar belakang:** tindakan luar talian tidak beratur untuk dimainkan semula.
+- **Perbezaan penyemak imbas:** menu pemasangan, persembahan tetingkap dan sokongan pemberitahuan berbeza mengikut platform.
+- **Tiada cache respons API :** pekerja tidak termasuk API, papan pemuka dan laluan pengesahan.
+- **Ikon pemasangan statik:** mengemas kini ikon tersebut memerlukan menukar aset yang diiklankan; pelayar mungkin mengekalkan metadata yang dipasang.
 
 ## Rujukan Fail
 
-| Fail                                    | Tujuan                                                                 |
-| --------------------------------------- | ---------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Laluan manifes Next.js (menjana `manifest.webmanifest`)                |
-| `public/sw.js`                          | Service worker dengan logik cache                                      |
-| `src/shared/components/PwaRegister.tsx` | Komponen klien yang mendaftarkan service worker                        |
-| `src/app/offline/page.tsx`              | Halaman sandaran luar talian dengan penunjuk status masa nyata         |
-| `src/app/layout.tsx`                    | Susun atur akar dengan metadata PWA (apple-web-app, theme-color, dll.) |
-| `public/icon-512.png`                   | Ikon PNG 512×512 (Android, skrin percikan)                             |
-| `public/apple-touch-icon.png`           | Ikon PNG 180×180 (skrin utama iOS)                                     |
-| `public/icon-192.svg`                   | Ikon SVG 192×192 (adaptif Android)                                     |
-| `public/apple-touch-icon.svg`           | Ikon SVG 180×180 (sandaran Apple)                                      |
+| Fail                                                                                   | Tujuan                                                       |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Manifes apl web yang dijana                                  |
+| [public/sw.js](../../public/sw.js)                                                     | Caching, pengecualian dan pengendali acara pemberitahuan     |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Pendaftaran pengeluaran dan pemulihan cache basi             |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Halaman ketersambungan, bukan sandaran luar talian automatik |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Metadata halaman dan tetapan viewport                        |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Nilai warna tema yang dikongsi                               |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 ikon aplikasi                                      |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 ikon Apple                                         |

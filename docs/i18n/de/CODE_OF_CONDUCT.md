@@ -55,15 +55,13 @@ Beispiele für die Vertretung unserer Gemeinschaft sind die Nutzung einer offizi
 das Veröffentlichen von Beiträgen über ein offizielles Social-Media-Konto oder das Auftreten als ernannte
 Vertretung bei einer Online- oder Offline-Veranstaltung.
 
-## Enforcement
+## Durchsetzung
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Fälle von missbräuchlichem, belästigendem oder anderweitig inakzeptablem Verhalten können den für die Durchsetzung zuständigen Gemeindevorstehern gemeldet werden, indem eine private Sicherheitsberatung unter eröffnet wird
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+oder per E-Mail an den Betreuer unter diegosouza.pw@outlook.com. Informationen zu sicherheitsrelevanten Vorfällen finden Sie [`SECURITY.md`](SECURITY.md). Alle Beschwerden werden zeitnah und fair geprüft und untersucht.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Alle Gemeindevorsteher sind verpflichtet, die Privatsphäre und Sicherheit des Melders eines Vorfalls zu respektieren.
 
 ## Richtlinien zur Durchsetzung
 

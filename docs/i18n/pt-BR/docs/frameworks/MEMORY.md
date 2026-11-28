@@ -4,30 +4,13 @@
 
 ---
 
-> **Fonte oficial:** `src/lib/memory/` e `src/app/api/memory/`
-> **Última atualização:** 2026-06-28 — v3.8.40 (desativada por padrão + atualização de quantização int8)
+> **Fonte da verdade:** `src/lib/memory/` e `src/app/api/memory/`
 
-O OmniRoute fornece memória conversacional persistente identificada pela chave de API (e
-opcionalmente pelo ID da sessão). As memórias são extraídas automaticamente das respostas do LLM
-por meio de correspondência leve de padrões com expressões regulares e reinseridas nas
-solicitações subsequentes como uma mensagem inicial do sistema (ou como a primeira mensagem do usuário para provedores que
-rejeitam a função de sistema).
+OmniRoute fornece memória conversacional persistente codificada pela chave API (e opcionalmente id de sessão). As memórias são extraídas automaticamente das respostas LLM por meio da correspondência leve de padrões regex e injetadas de volta nas solicitações subsequentes como uma mensagem principal do sistema (ou primeira mensagem do usuário para provedores que rejeitam a função do sistema).
 
-> **A memória está DESATIVADA por padrão (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled` agora é
-> `false` (`src/lib/memory/settings.ts`). A ativação da memória injeta até
-> `maxTokens` (~2k) de contexto recuperado em **todas** as solicitações de chat, o que é
-> cobrado — um custo inesperado para novas instalações e clientes que gerenciam seu
-> próprio contexto. Ative-a explicitamente em **Configurações → Memória** (a
-> `MemorySkillsTab` exibe um aviso sobre o custo de tokens quando a memória está ativada).
-> Um cliente pode desativá-la para uma única solicitação com o cabeçalho de solicitação
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — consulte a tabela de cabeçalhos de solicitação em
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Uma solicitação sem memória define
-> `memoryOwnerId = null`, o que desativa **tanto** a injeção de memória quanto a de habilidades
-> nessa solicitação (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **A memória é OFF por padrão (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` agora é `false` (`src/lib/memory/settings.ts`). A ativação da memória injeta até `maxTokens` (~ 2k) de contexto recuperado em** todo** solicitação de chat, que — um custo surpreendente para novas instalações e para clientes que gerenciam seu próprio contexto. Ative explicitamente em** Configurações memória →** (o `MemorySkillsTab` mostra uma chamada de aviso de custo de token quando a memória está habilitada). Um cliente pode cancelar uma única solicitação com o cabeçalho de solicitação `x-omniroute-no-memory` (`true`/`1`/`yes`) — consulte a tabela de cabeçalho de solicitação em [API_REFERENCE.md](../reference/API_REFERENCE.md). Uma solicitação sem memória define `memoryOwnerId = null`, o que desativa** ambos** injeção de memória e habilidade para essa solicitação (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-A memória tem **escopo por chave de API**, não por usuário — todas as solicitações autenticadas
-com a mesma chave de API compartilham o mesmo conjunto de memórias, com escopo adicional opcional
-por `sessionId`.
+A memória é** com escopo definido por chave API** , não por usuário — cada solicitação autenticada com a mesma chave API compartilha o mesmo conjunto de memória, com escopo adicional opcional por `sessionId`.
 
 ## Arquitetura
 
@@ -338,26 +321,15 @@ e o escopo é `session`, `apiKey` ou `global`. O escopo padrão de
 
 ## Extração de fatos (`extraction.ts`)
 
-A extração é **baseada em expressões regulares**, não em LLM — ela é executada
-no processo com `setImmediate()`, portanto nunca bloqueia o fluxo de resposta:
+A extração é** baseado em regex** , não — baseado em LLM, ele é executado no processo com `setImmediate()`, portanto, nunca bloqueia o fluxo de resposta:
 
-- **Padrões de preferência** → `MemoryType.FACTUAL`
-  (por exemplo, `Eu prefiro …`, `Eu gosto muito de …`, `meu favorito é …`, `Eu odeio …`)
-- **Padrões de decisão** → `MemoryType.EPISODIC`
-  (por exemplo, `Vou usar …`, `Eu escolhi …`, `Optei por …`, `Vou adotar …`)
-- **Padrões comportamentais** → `MemoryType.FACTUAL`
-  (por exemplo, `Eu geralmente …`, `Eu sempre …`, `Eu costumo …`)
+- **Padrões de preferência** → `MemoryType.FACTUAL` (eg `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Padrões de decisão** → `MemoryType.EPISODIC` (eg `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Padrões padrão** → `MemoryType.FACTUAL` (eg `I usually …`, `I always …`, `I tend to …`)
 
-Cada correspondência é sanitizada (`trim`, compactação de espaços em branco,
-limite de 500 caracteres), desduplicada dentro do lote por meio de uma
-`factKey(category, content)` estável e armazenada via `createMemory()` com os
-metadados `{category, extractedAt, source: "llm_response"}`. O texto de entrada
-é limitado a 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — quando é maior, a
-**parte final** do texto é usada para que o conteúdo mais recente do assistente
-sempre seja considerado.
+Cada correspondência é higienizada (`trim`, whitespace-collapse, limitado a 500 caracteres), desduplicada dentro do lote por meio de um `factKey(category, content)` estável e armazenada via `createMemory()` com metadados `{category, extractedAt, source: "llm_response"}`. O texto de entrada é limitado a 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — quando maior, o** cauda** do texto é usado para que o conteúdo mais recente do assistente sempre participe.
 
-`extractFactsFromText(text)` é exportada para testes e retorna os fatos
-estruturados sem armazená-los.
+`extractFactsFromText(text)` é exportado para testes e retorna os fatos estruturados sem armazená-los.
 
 ## Recuperação (`retrieval.ts`)
 

@@ -5,14 +5,10 @@
 ---
 
 > **Sursa adevărului:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Ultima actualizare:** 2026-06-28 — v3.8.40
 
-OmniRoute poate declanșa webhook-uri HTTP la apariția evenimentelor platformei. Folosiți-le pentru integrarea cu
-Slack, PagerDuty, Datadog, servicii interne de alertare sau orice receptor HTTP.
+OmniRoute poate declanșa webhook-uri HTTP la evenimentele platformei. Folosiți-le pentru a vă integra cu Slack, PagerDuty, Datadog, servicii interne de alertă sau orice receptor HTTP.
 
-Dispecerul semnează fiecare livrare cu HMAC-SHA256, reîncearcă în cazul
-erorilor tranzitorii, urmărește starea livrărilor pentru fiecare webhook și dezactivează automat endpoint-urile care
-continuă să eșueze.
+Dispecerul semnează fiecare livrare cu HMAC-SHA256, reîncearcă eșecurile tranzitorii, urmărește starea livrării per webhook și dezactivează automat punctele finale care continuă să eșueze.
 
 ## Evenimente acceptate
 

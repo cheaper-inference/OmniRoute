@@ -12,6 +12,12 @@ Ang neutral na kontrata `config/cli-tools-manifest.json` ay nagdedeklara ng cano
 
 Ang mga signal ng interrupt at termination ay ipinapasa sa bata. Hinihintay ng launcher ang malapit na kaganapan ng bata bago alisin ang pansamantalang configuration. Kinokontrol ng `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` ang palugit bago ang sapilitang pagwawakas (default na 5000 millisecond).
 
+`omniroute launch <tool>` (tingnan [LAUNCH.md](./LAUNCH.md) ) ay sumusunod sa parehong mga panuntunan sa kapaligiran at pagpapasa ng signal, at idinagdag:
+
+- **Awtomatikong pagsisimula ng gateway.** Para sa lokal na target, kapag walang gateway na sumasagot sa port, magsisimula ang launcher `omniroute serve --headless --no-open` na nakatali sa `127.0.0.1` sa ilalim ng isang hiwalay na proseso ng reaper. Ang bawat tumatakbong paglulunsad ay mayroong lease sa `DATA_DIR/launch/leases/` (tibok ng puso tuwing 15 s, lipas pagkatapos ng 45 s o kapag nawala ang proseso nito). Ihihinto ng reaper ang gateway na sinimulan nito kapag walang live na lease para sa idle grace (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, default na 10000 milliseconds). Ang isang gateway na sinimulan ng user ay ginagamit ngunit hindi huminto. ginagawang normal `--keep-gateway` o `omniroute gateway keep` ang isang launcher gateway; ibinabalik ng `--no-start` ang lumang fail-if-down na gawi. Ang mga malalayong target ay sinusuri lamang.
+- **Ilunsad ang mga session.** Bawat paglunsad ay nagbibigay ng panandaliang `olx_` session token mula sa kredensyal ng magulang (`POST /api/launch/sessions`), tumitibok ito ng puso habang tumatakbo ang tool, binabasa ang buod ng paggamit at binabawi ito pagkatapos lumabas ng tool. Ang token ay isang mahigpit na subset ng magulang nito: parehong mga pahintulot, pareho o mas makitid na catalog, mas maikling buhay, at hindi ito kredensyal sa dashboard. Natatanggap ng tool ang token ng session, hindi kailanman ang kredensyal ng magulang, at ang mga kahilingan ay na-tag ng `launch:<tool>:<sessionId>` maliban kung ibinigay ang `--tag`. Ang isang gateway na walang session API ay nabigo sa `GatewayTooOld` sa halip na bumalik sa isang hindi saklaw na paglulunsad.
+- **Bawat paglunsad ng config.** Ang mga file ng config ng tool ay isinulat sa isang pribadong temp na direktoryo (mode 0700, prefix `omnirouter-`) at inalis pagkatapos lumabas ang bata. Ang isang `SIGKILL` ng launcher ay umalis sa direktoryo sa likod; Inaalis `omniroute launch --cleanup` ang mga naturang direktoryo kapag mas matanda na sila sa isang araw.
+
 ## Gemini persistent setup
 
 ```bash

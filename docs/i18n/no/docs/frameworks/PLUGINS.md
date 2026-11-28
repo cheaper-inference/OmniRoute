@@ -90,16 +90,17 @@ export function register(program, ctx) {
 
 ## Oppdagelse
 
-Programtillegg oppdages fra:
+Plugins blir oppdaget fra:
 
-1. `~/.omniroute/plugins/<name>/` — brukerlokale installasjoner
-2. Miljøvariabelen `OMNIROUTE_PLUGIN_PATH` — egendefinert katalog
+1. `~/.omniroute/plugins/node_modules/<name>/` — hvor `omniroute plugin install` plasserer pakker (en npm `--prefix`, ikke `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — håndkopierede plugin-kataloger
+3. `OMNIROUTE_PLUGIN_PATH` env var — tilpasset katalog
 
-Begge gjelder **kun CLI-et**. Kjøremiljøet for programtillegg på serversiden (markedsplassen/`plugin.json`-programtillegg som kjører inne i proxyen) har sin egen skanner med sin egen overstyring, `OMNIROUTE_PLUGINS_DIR` — se
-[PLUGIN_MARKETPLACE.md → Katalog for programtillegg](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Innstilling av den ene påvirker ikke den andre.
+Symlinked kataloger (hva npm lager for `plugin install ./dir`) følges.
 
-Innlastingsfeil fanges opp og skrives ut som advarsler — et defekt programtillegg krasjer aldri CLI-et.
+Begge er** Kun CLI** . Server-side plugin runtime (markedsplassen/`plugin.json` pluginene som kjører inne i proxyen) har sin egen skanner med sin egen overstyring, `OMNIROUTE_PLUGINS_DIR` — se [PLUGIN_MARKETPLACE.md → Plugin katalog](./PLUGIN_MARKETPLACE.md#plugin-directory). Å sette den ene påvirker ikke den andre.
+
+Lastefeil fanges opp og skrives ut som advarsler — en ødelagt plugin krasjer aldri CLI.
 
 ## Sikkerhet
 

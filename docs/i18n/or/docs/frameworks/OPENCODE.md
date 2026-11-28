@@ -4,14 +4,11 @@
 
 ---
 
-> **ସ୍ଥିତି:** ସାଧାରଣ ଭାବେ ଉପଲବ୍ଧ।
-> **ପାଠକବର୍ଗ:** OmniRoute ଡିପ୍ଲୟମେଣ୍ଟ ସହିତ OpenCodeକୁ ସଂଯୋଗ କରୁଥିବା ଅପରେଟରମାନେ।
-> **ପ୍ରାମାଣିକ ଉତ୍ସ (କନଫିଗ୍ ସ୍କିମା):** `src/shared/services/opencodeConfig.ts`
-> **ପ୍ରାମାଣିକ ଉତ୍ସ (npm ପ୍ୟାକେଜ୍):** `@omniroute/opencode-provider/` (ପ୍ରକାଶନଯୋଗ୍ୟ ୱର୍କସ୍ପେସ୍)
+> **ସ୍ଥିତି:** ସାଧାରଣତ available ଉପଲବ୍ଧ।** ଦର୍ଶକ:** ଏକ OmniRoute ନିୟୋଜନରେ OpenCode ତାର କରୁଥିବା ଅପରେଟର୍ସ।** ସତ୍ୟର ଉତ୍ସ (ବିନ୍ୟାସ ସ୍କିମା):** `src/shared/services/opencodeConfig.ts`** Npm ପ୍ୟାକେଜଗୁଡ଼ିକୁ ସୁପାରିଶ କରାଯାଇଛି:** `@omniroute/opencode-plugin/` (OpenCode v1, `omniroute setup opencode` ଦ୍ୱାରା ସ୍ଥାପିତ) ଏବଂ `@omniroute/opencode-plugin-v2/` (OpenCode v2)। ପୁରୁଣା `@omniroute/opencode-provider/` ପ୍ୟାକେଜ୍ ହେଉଛି।** ନାପସନ୍ଦ** (ପଥ 2 ଦେଖନ୍ତୁ)
 
-[OpenCode](https://opencode.ai) ହେଉଛି ଏକ ଏଜେଣ୍ଟିକ୍ CLI/ଡେସ୍କଟପ୍ AI କ୍ଲାଏଣ୍ଟ। ଏହା `~/.config/opencode/opencode.json` (କିମ୍ବା `opencode.jsonc`)ରୁ ଏହାର ପ୍ରଦାତା କ୍ୟାଟାଲଗ୍ ପଢ଼େ ଏବଂ `https://opencode.ai/config.json`ର ସ୍କିମା ଅନୁସରଣ କରେ। OmniRoute ସେହି ପ୍ରଦାତାମାନଙ୍କ ମଧ୍ୟରୁ ଗୋଟିଏ ଭାବେ ନିଜକୁ OpenCode ସମ୍ମୁଖରେ ଉପସ୍ଥାପନ କରେ — ପ୍ରତ୍ୟେକ ଅନୁରୋଧ OmniRouteର ମାନକ OpenAI-ସୁସଙ୍ଗତ `/v1` ପୃଷ୍ଠ ମାଧ୍ୟମରେ ପ୍ରବାହିତ ହୁଏ, ତେଣୁ OpenCode ସ୍ୱୟଂଚାଳିତ ଭାବେ Auto-Combo ରାଉଟିଂ, ସର୍କିଟ୍ ବ୍ରେକର୍, କୀ ନୀତି, ପର୍ଯ୍ୟବେକ୍ଷଣୀୟତା ଇତ୍ୟାଦିର ଲାଭ ପାଏ।
+[OpenCode](https://opencode.ai) ହେଉଛି ଏକ ଏଜେଣ୍ଟିକ୍ CLI/desktop AI କ୍ଲାଏଣ୍ଟ। ଏହା `~/.config/opencode/opencode.json` (କିମ୍ବା `opencode.jsonc`) ରୁ ଏହାର ପ୍ରଦାନକାରୀ କାଟାଲଗ୍ ପ read େ ଏବଂ `https://opencode.ai/config.json` ରେ ସ୍କିମା ଅନୁସରଣ କରେ। OmniRoute ନିଜକୁ OpenCode ରେ ପ୍ରକାଶ କରେ ଯେହେତୁ ସେହି ପ୍ରଦାନକାରୀଙ୍କ ମଧ୍ୟରୁ — ପ୍ରତ୍ୟେକ ଅନୁରୋଧ OmniRoute ର ମାନକ OpenAI- ସୁସଙ୍ଗତ `/v1` ପୃଷ୍ଠ ଦେଇ ପ୍ରବାହିତ ହୁଏ, ତେଣୁ OpenCode ସ୍ୱୟଂଚାଳିତ ଭାବରେ ଅଟୋ-କମ୍ବୋ ରାଉଟିଙ୍ଗ୍, ସର୍କିଟ ବ୍ରେକର୍, ପ୍ରମୁଖ ନୀତି, ପର୍ଯ୍ୟବେକ୍ଷଣ ଇତ୍ୟାଦିରୁ ଉପକୃତ ହୁଏ।
 
-**ଦୁଇଟି ସମର୍ଥିତ ଇଣ୍ଟିଗ୍ରେସନ୍ ପଥ** ଅଛି। ଗୋଟିଏ ବାଛନ୍ତୁ — ଉଭୟ ସମାନ କନଫିଗ୍ ସୃଷ୍ଟି କରନ୍ତି।
+ଏହି ପୃଷ୍ଠା ନିମ୍ନରେ ଦୁଇଟି ଷ୍ଟାଟିକ୍-ବିନ୍ୟାସ ପଥକୁ ଡକ୍ୟୁମେଣ୍ଟ୍ କରେ। ଉଭୟ ସମାନ ବିନ୍ୟାସ ସୃଷ୍ଟି କରନ୍ତି। ଆପଣଙ୍କର ଲାଇଭ୍ କାଟାଲଗ୍ ଅନୁସରଣ କରୁଥିବା ଏକ ମଡେଲ୍ ତାଲିକା ପାଇଁ, ଏହା ବଦଳରେ ପ୍ଲଗଇନ୍ ବ୍ୟବହାର କରନ୍ତୁ: `omniroute setup opencode` `@omniroute/opencode-plugin` (OpenCode v1), ଏବଂ `@omniroute/opencode-plugin-v2` ଟାର୍ଗେଟ୍ OpenCode v2 ( [CLI ସଂଯୋଗ](../guides/CLI-INTEGRATIONS.md) ଏବଂ [OpenCode v2 ପ୍ଲଗଇନ୍ ଗାଇଡ୍](../guides/OPENCODE-V2-PLUGIN.md) ଦେଖନ୍ତୁ)।
 
 ---
 
@@ -54,9 +51,11 @@ omniroute config opencode \
 
 ---
 
-## ପଥ 2 — npm ପ୍ୟାକେଜ୍ `@omniroute/opencode-provider`
+## ପଥ 2 — npm ପ୍ୟାକେଜ୍ `@omniroute/opencode-provider` (ପୁରୁଣା)
 
-Node/TSରୁ କନଫିଗ୍କୁ ସ୍କ୍ରିପ୍ଟ କରୁଥିଲେ ସୁପାରିଶ କରାଯାଏ (CI ପାଇପ୍ଲାଇନ୍, ମନୋରେପୋ, କଷ୍ଟମ୍ ଇନଷ୍ଟଲର୍ ପ୍ରବାହ)।
+> **ନାପସନ୍ଦ** ପ୍ୟାକେଜ୍ ଏକ ଷ୍ଟାଟିକ୍ ମଡେଲ୍ ତାଲିକା ଲେଖେ ଯାହା ତୁମର ଲାଇଭ୍ OmniRoute କାଟାଲଗ୍ ପଛରେ ଥାଏ। ଏହାର README `@omniroute/opencode-plugin` (କିମ୍ବା OpenCode v2 ଉପରେ `@omniroute/opencode-plugin-v2` ) କୁ ସ୍ଥାନାନ୍ତର କରିବାକୁ ପରାମର୍ଶ ଦେଇଥାଏ। ନିମ୍ନରେ ଥିବା API କେବଳ ବିଦ୍ୟମାନ ସ୍କ୍ରିପ୍ଟଗୁଡ଼ିକ ପାଇଁ ରଖାଯାଇଛି।
+
+Node/TS ରୁ କନଫିଗ୍ ସ୍କ୍ରିପ୍ଟ କରିବା ସମୟରେ ବ୍ୟବହୃତ ହୁଏ (CI ପାଇପଲାଇନ, ମୋନୋରପୋସ୍, କଷ୍ଟମ୍ ସଂସ୍ଥାପକ ପ୍ରବାହ)।
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // ଇଚ୍ଛାଧୀନ: OpenCode ସମ୍ମୁଖରେ ଉପସ୍ଥାପିତ ମଡେଲ୍ କ୍ୟାଟାଲଗ୍କୁ ଓଭର୍ରାଇଡ୍ କରନ୍ତୁ
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-ଏକ ବିଦ୍ୟମାନ ଫାଇଲ୍ ସହିତ ଅବିନାଶକ ମର୍ଜ ପାଇଁ, `opencodeConfig.ts`ରୁ `mergeOpenCodeConfigText()`କୁ ପୁନଃନିର୍ମାଣ କରନ୍ତୁ କିମ୍ବା CLI ଜେନେରେଟର୍କୁ କଲ୍ କରନ୍ତୁ।
+ଏକ ବିଦ୍ୟମାନ ଫାଇଲ ବିରୁଦ୍ଧରେ ବିନାଶକାରୀ ମିଶ୍ରଣ ପାଇଁ, `opencodeConfig.ts` ରୁ `mergeOpenCodeConfigText()` ନକଲ କରନ୍ତୁ କିମ୍ବା CLI ଜେନେରେଟରକୁ କଲ୍ କରନ୍ତୁ।
 
-ସମ୍ପୂର୍ଣ୍ଣ API ପାଇଁ [ପ୍ୟାକେଜ୍ README](../../@omniroute/opencode-provider/README.md) ଦେଖନ୍ତୁ।
+ସମ୍ପୂର୍ଣ୍ଣ API ପାଇଁ [README ପ୍ୟାକେଜ୍](../../@omniroute/opencode-provider/README.md) ଦେଖନ୍ତୁ।
 
 ---
 
@@ -155,9 +154,11 @@ export const OMNIROUTE_DEFAULT_OPENCODE_MODELS = [
 
 ---
 
-## ଏହା ମଧ୍ୟ ଦେଖନ୍ତୁ
+## ଏହା ମଧ୍ୟ ଦେଖନ୍ତୁ।
 
-- [API ସନ୍ଦର୍ଭ](../reference/API_REFERENCE.md) — ସମ୍ପୂର୍ଣ୍ଣ OmniRoute REST ପରିସର
-- [Auto-Combo](../routing/AUTO-COMBO.md) — `model: "auto"`ର ଅର୍ଥ କ’ଣ
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [API ରେଫରେନ୍ସ](../reference/API_REFERENCE.md) — ପୂର୍ଣ୍ଣ OmniRoute REST ପୃଷ୍ଠ।
+- `model: "auto"` ର ଅର୍ଥ [ଅଟୋ-କମ୍ବୋ](../routing/AUTO-COMBO.md) —
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (ପରାମର୍ଶିତ)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (ପୁରୁଣା)
 - ଉତ୍ସ: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

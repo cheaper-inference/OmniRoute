@@ -20,25 +20,21 @@ aċċessibbli fil-URL tal-app-server ikkonfigurat**, u dak is-CLI jrid ikun **il
 ## 1. Arkitettura
 
 ```
-┌─ App OmniRoute ──────────────────┐        ┌─ Sidecar codex-app-server ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ token tal-kapaċità)           │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  jimmaniġġja l-OpenAI OAuth waħdu  │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, tiġdid awtom.)│
-        │ jaqsam (volumi compose)            └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → it-token tal-kapaċità WS (it-tnejn jimmuntawh)
-  codex-appserver-home    → ~/.codex (auth.json jinkiteb mid-dashboard,
-                             jinqara mill-codex app-server tas-sidecar)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Is-sidecar jisma’ **biss** fuq in-network intern ta’ compose
-  (`ws://codex-app-server:1456`) wara token tal-kapaċità. Dan **qatt** ma jiġi
-  ppubblikat fuq il-host jew l-internet.
-- Il-Codex CLI huwa inkorporat f’`omniroute:base`, għalhekk ma hija meħtieġa
-  l-ebda installazzjoni ta’ codex fuq il-host jew il-magna tal-utent meta tħaddem
-  is-sidecar.
+- Is-sidecar jisma’** biss** fuq in-netwerk intern tal-kompożizzjoni (`ws://codex-app-server:1456`) wara token tal-kapaċità. Huwa** qatt** ippubblikat lill-host jew lill-internet.
+- Is-sidecar juża `omniroute:cli-no-docker`, mibnija mill-mira `runner-cli-no-docker`, li tinkludi l- Codex CLI.
 
 ## 2. Ħaddmu
 

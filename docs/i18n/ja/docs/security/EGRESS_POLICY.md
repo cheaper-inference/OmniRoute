@@ -67,15 +67,15 @@ PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777)で導入され�
 
 ---
 
-## 3つの値
+## 3つの価値観
 
-| 値     | UIラベル                   | 動作                                                                                                                                                                                       |
-| ------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auto` | `自動（デュアルスタック）` | OSがアドレスファミリーを選択します。プロキシホストがIPリテラルの場合、ファミリーはそのリテラルによって決まります。ホスト名の場合は、両方のファミリーが使用可能です。これがデフォルトです。 |
-| `ipv4` | `IPv4のみ`                 | 接続をIPv4に固定します。プロキシホストにIPv4（A）レコードがない場合は、フェイルクローズします。                                                                                            |
-| `ipv6` | `IPv6のみ`                 | 接続をIPv6に固定します。プロキシホストにIPv6（AAAA）レコードがない場合は、フェイルクローズします。                                                                                         |
+| 価値   | UIラベル            | 行動                                                                                                                                                               |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto` | `Auto (dual-stack)` | OS家族を選びます。 IP リテラル プロキシ ホストの場合、ファミリーはリテラルに固有です。ホスト名については、両方のファミリーが対象となります。これがデフォルトです。 |
+| `ipv4` | `IPv4 only`         | 接続をIPv4に固定します。プロキシ ホストにIPv4 (A) レコードがない場合は、失敗して閉じられます。                                                                     |
+| `ipv6` | `IPv6 only`         | 接続をIPv6に固定します。プロキシ ホストにIPv6 (AAAA) レコードがない場合、失敗して閉じられます。                                                                    |
 
-UI文字列は`src/i18n/messages/en.json`（`labelFamily`、`familyAuto`、`familyIpv4`、`familyIpv6`、`familyHint`）にあります。
+UI文字列は`src/i18n/messages/en.json` (`labelFamily`、 `familyAuto`、 `familyIpv4`、 `familyIpv6`、 `familyHint`) に存在します。
 
 ---
 
@@ -83,21 +83,21 @@ UI文字列は`src/i18n/messages/en.json`（`labelFamily`、`familyAuto`、`fami
 
 ### ダッシュボード
 
-セレクターは、**Proxy Pool**タブのプロキシフォームにあります。
+セレクターは、**プロキシプール**タブ：
 
-1. **Dashboard → Settings → Proxy → Proxy Pool**を開きます
-2. プロキシを追加または編集します
-3. **IPファミリー**ドロップダウンを`自動（デュアルスタック）`、`IPv4のみ`、または`IPv6のみ`に設定します
-4. 保存します
+1. 開ける**ダッシュボード→設定→プロキシ→プロキシ プール**
+2. プロキシを追加または編集する
+3. を設定します。**IPファミリー**`Auto (dual-stack)`、 `IPv4 only`、または`IPv6 only`へのドロップダウン
+4. 保存
 
-このコントロールは`ProxyRegistryManager.tsx`によってレンダリングされます（`proxy/ProxyPoolTab.tsx`にマウントされています）。
+コントロールは`ProxyRegistryManager.tsx` ( `proxy/ProxyPoolTab.tsx`にマウント) によってレンダリングされます。
 
 ### API
 
-`family`フィールドはプロキシレジストリの作成／更新ペイロードに含まれ、`createProxyRegistrySchema` / `updateProxyRegistrySchema`（`src/shared/validation/schemas.ts`）によって検証され、`POST` / `PATCH /api/v1/management/proxies`によって処理されます。
+`family`フィールドはプロキシ レジストリcreate/updateペイロードの一部であり、 `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) によって検証され、 `POST` / `PATCH /api/v1/management/proxies`によって処理されます。
 
 ```bash
-# IPv6専用プロキシを作成
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# 既存のプロキシをIPv4専用に変更
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-同じフィールドは、アップストリームプロキシエントリで使用されるインラインプロキシ設定オブジェクトでも受け付けられます（`upstream_proxy_config.family`。[データモデル](#data-model)を参照）。
+同じフィールドは、上流プロキシ エントリに使用されるインライン プロキシ構成オブジェクトでも受け入れられます (`upstream_proxy_config.family`、[データ モデルを](#data-model)参照)。
 
-プロキシに関するその他のCRUD／割り当てAPIについては、[PROXY_GUIDE.md](../ops/PROXY_GUIDE.md)を参照してください。
+プロキシCRUD/assignment APIの残りの部分については、 [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md)を参照してください。
 
 ---
 

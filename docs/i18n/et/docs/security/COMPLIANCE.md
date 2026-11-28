@@ -4,19 +4,11 @@
 
 ---
 
-> **Tõeallikas:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Viimati uuendatud:** 2026-06-28 — v3.8.40
+> **Tõe allikas:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute salvestab haldustoimingud, autentimissündmused, teenusepakkuja
-mandaatide elutsükli muudatused ja MCP-tööriistade väljakutsed SQLite'il
-põhinevatesse audititabelitesse. Sellel lehel kirjeldatakse, mida logitakse,
-kus andmeid hoitakse, kui kaua neid säilitatakse, kuidas API-võtmed saavad
-logimisest loobuda ja kuidas andmeid pärida.
+OmniRoute salvestab haldustoimingud, autentimissündmused, pakkuja mandaadi elutsükli muudatused ja MCP tööriistade kutsed SQLite'i toega audititabelitesse. Sellelt lehelt leiate teavet selle kohta, mida logitakse, kus see elab, kui kaua neid säilitatakse, kuidas API -klahvid saavad loobuda ja kuidas andmeid pärida.
 
-Teostus asub failides `src/lib/compliance/index.ts` (T-43 — „Vastavuskontrollid”)
-ja `src/lib/compliance/providerAudit.ts`. Auditi kirjutustoimingud ei väljasta
-kunagi erindit: mis tahes tõrke korral neelatakse väljakutse vaikselt alla, et
-auditi logimine ei saaks katkestada peamist päringuvoogu.
+Rakendus töötab `src/lib/compliance/index.ts` (T-43 — "Vastavuse juhtelemendid") ja `src/lib/compliance/providerAudit.ts`. Audit kirjutab mitte kunagi: iga tõrke korral neelatakse kõne vaikselt alla, nii et auditi logimine ei saa peamist päringuvoogu katkestada.
 
 ## Mida logitakse
 
@@ -134,30 +126,33 @@ pärandtabeli `request_detail_logs` ja kohalikud päringuartefaktid asukohas
 Vaikeväärtused on määratletud failis `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## Logimisest loobumine `noLog` abil (API-võtme kohta)
+## `noLog` loobumine ( API -klahvi kohta)
 
-API-võtmeid saab märgistada nii, et nende kaudu tehtud edasisi kutseid ei logita.
-Lipp asub tabelis `api_keys` (`no_log INTEGER DEFAULT 0`) ja see kopeeritakse
-kiireks päringute töötlemiseks mälus asuvasse hulka.
+API klahve saab märgistada, nii et nende allavoolu kõneliiklust ei logita. Lipp asub `api_keys` tabelis (`no_log INTEGER DEFAULT 0`) ja peegeldub mälus olevasse komplekti kuuma tee otsingute jaoks.
 
 ```bash
-# Logimiseta võtme loomine (nõutav on halduse autentimine)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Abifunktsioonid (`src/lib/compliance/index.ts`):
+Abilised (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — lülitab mälus oleva kirje sisse või välja
-- `isNoLog(apiKeyId)` — kontrollitakse päringu töötlemisel; kui kirjet pole, kasutatakse 30 sekundiks
-  vahemällu salvestatud väärtust väljast `api_keys.no_log`
-- `NO_LOG_API_KEY_IDS` (keskkonnamuutuja, komadega eraldatud) — laaditakse käivitamisel eelnevalt mälus
-  asuvasse hulka; kasulik juhul, kui veergu ei saa otse muuta
+- `setNoLog(apiKeyId, true|false)` — lülitab mälusisestuse sisse
+- `isNoLog(apiKeyId)` — kontrollitud päringu teel; langeb tagasi 30 s vahemällu salvestatud lugemisele `api_keys.no_log` st
+- `NO_LOG_API_KEY_IDS` (env, komadega eraldatud) — mis on alglaadimisel eellaaditud mälukomplekti; kasulik, kui te ei saa veergu otse vahetada
 
-`noLog` **ei** mõjuta administratiivseid auditisündmusi (sisselogimine, teenusepakkuja muudatused, MCP-tööriistade kutsed jne) — loobumine
-kehtib ainult päringupõhise liikluse logimisele.
+Haldusauditi sündmused (sisselogimine, pakkuja muudatused, MCP tööriistakutsed jne) on** mitte** `noLog` mõjutab — ainult päringupõhine liikluslogimine on välja lülitatud.
+
+### Taotlusepõhine loobumine (`x-omniroute-no-log`)
+
+Klient saab valida ühe järelduspäringu kasuliku koormuse püsivusest ilma spetsiaalset võtit loomata. Saatke päringule `x-omniroute-no-log: true` (aksepteeritud on ka `1` ja `yes`, tõstutundlik). See kehtib iga vestluspere marsruudi kohta, mis läbib vestluse töötleja: vestluse lõpetamised, vastused, sõnumid, lõpetamised ja Kaksikutega ühilduv tee. Kõnelogi rida kirjutatakse endiselt ajatempli, mudeli, pakkuja, oleku, kestuse ja lubade arvuga, kuid `request_body`, `response_body`, päringu kokkuvõtted ja konveieri artefaktid on välja jäetud.
+
+Päis on ORed koos võtme lipuga: logimata võti jääb päisest olenemata logimata ja päis ei saa logimist uuesti sisse lülitada. Päis eemaldatakse enne päringu ülesvoolu edastamist.
+
+See päis teeb seda** mitte** keelake mälu ekstraheerimine või semantiline vahemälu. Saatke `x-omniroute-no-memory: true` ja `x-omniroute-no-cache: true` koos sellega, kui päringu sisu ei tohi ka nendes alamsüsteemides säilida.
 
 ## REST API
 

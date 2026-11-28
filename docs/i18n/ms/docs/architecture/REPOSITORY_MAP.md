@@ -4,11 +4,11 @@
 
 ---
 
-> **Perkara yang tinggal di mana: setiap direktori peringkat teratas dan fail akar yang dijejaki, dengan tujuan satu baris.** Kemas kini terakhir: 2026-11-13 (OmniRoute v3.8.54)
+> **Perkara yang tinggal di mana: setiap direktori peringkat teratas dan fail akar yang dijejaki, dengan tujuan satu baris.**
 >
-> Gunakan peta ini untuk mencari jalan anda mengelilingi pangkalan kod, kemudian ikuti pautan ke dokumen khusus. Kiraan fail diukur dengan `git ls-files` pada tarikh di atas. Mereka berubah dengan hampir setiap keluaran, jadi anggap mereka sebagai susunan magnitud.
+> Gunakan peta ini untuk mencari jalan anda mengelilingi pangkalan kod, kemudian ikuti pautan ke dokumen khusus. Kiraan fail datang daripada `git ls-files` dan berubah dengan hampir setiap keluaran. Anggap mereka sebagai perintah magnitud.
 
-## Pokok tingkat atas
+## Pokok peringkat atas
 
 ```
 OmniRoute/
@@ -36,7 +36,7 @@ OmniRoute/
 └── (root files — see below)
 ```
 
-Laluan setempat, terjana atau persendirian (semuanya dikenali, tidak pernah dilakukan, tidak diterangkan lebih lanjut):
+Laluan setempat, terjana atau peribadi (semuanya didedahkan, tidak pernah dilakukan, tidak diterangkan lebih lanjut):
 
 ```
 node_modules/            # npm dependencies

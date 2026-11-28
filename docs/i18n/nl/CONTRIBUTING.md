@@ -8,29 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Ontwikkelomgeving instellen
+## Ontwikkeling instellen
 
 ### Vereisten
 
-- **Node.js** `>=22.22.2 <23`, of `>=24.0.0 <27` (aanbevolen: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` of `>=24.0.0 <27` (aanbevolen: 24 LTS)
+- **npm** 10 +
 
-> **Windows met Node 24:** gebruik de huidige 24 LTS-patchrelease (minimaal 24.20.0).
-> Eerdere releases kunnen na geslaagde tests afbreken wanneer `--test-force-exit` het
-> proces sluit. Node's [Windows libuv-fix](https://github.com/nodejs/node/pull/61999) verhelpt
-> deze runtimecrash; laat de testasserties en controles van het runner-afsluiten ingeschakeld.
+> **Windows met knooppunt 24:** gebruik de huidige 24 LTS -patchrelease (minstens 24.20.0). Eerdere releases kunnen na succesvolle tests worden afgebroken wanneer `--test-force-exit` het proces sluit. De [Windows libuv-fix](https://github.com/nodejs/node/pull/61999) van Node verhelpt deze runtime-crash; houd de testbeweringen en runner-exitcontroles ingeschakeld.
 
-> **Gebruikers van npm v11+ (Node 24+):** Controleer na `npm install` of native modules zijn geïnstalleerd:
-> `node -e "require('better-sqlite3')"`. Als dit mislukt met `MODULE_NOT_FOUND`,
-> voer je `npm approve-scripts better-sqlite3 && npm install` uit. Zie
-> [Probleemoplossing](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + gebruikers (knooppunt 24 +):** Controleer na `npm install` of de native modules zijn geïnstalleerd: `node -e "require('better-sqlite3')"`. Als het mislukt met `MODULE_NOT_FOUND`, voer dan `npm approve-scripts better-sqlite3 && npm install` uit. Zie [Problemen oplossen](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
 ### Klonen en installeren
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,88 +32,83 @@ npm install
 ### Omgevingsvariabelen
 
 ```bash
-# Maak je .env aan vanuit de template
+# Create your .env from the template
 cp .env.example .env
 
-# Genereer de vereiste geheimen
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Belangrijke variabelen voor ontwikkeling:
+Belangrijkste variabelen voor ontwikkeling:
 
-| Variabele              | Standaardwaarde voor ontwikkeling | Beschrijving                 |
-| ---------------------- | --------------------------------- | ---------------------------- |
-| `PORT`                 | `20128`                           | Serverpoort                  |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`          | Basis-URL voor frontend      |
-| `JWT_SECRET`           | (hierboven genereren)             | JWT-ondertekeningsgeheim     |
-| `INITIAL_PASSWORD`     | `CHANGEME`                        | Wachtwoord voor eerste login |
-| `APP_LOG_LEVEL`        | `info`                            | Niveau van loguitvoer        |
+| Variabel               | Ontwikkeling standaard   | Beschrijving                            |
+| ---------------------- | ------------------------ | --------------------------------------- |
+| `PORT`                 | `20128`                  | Serverpoort                             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Basis URL voor frontend                 |
+| `JWT_SECRET`           | (hierboven genereren)    | JWT ondertekeningsgeheim                |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Eerste inlogwachtwoord                  |
+| `APP_LOG_LEVEL`        | `info`                   | Niveau van breedsprakigheid registreren |
 
 ### Dashboardinstellingen
 
-Het dashboard biedt UI-schakelaars voor functies die ook via omgevingsvariabelen kunnen worden geconfigureerd:
+Het dashboard biedt UI -schakelaars voor functies die ook kunnen worden geconfigureerd via omgevingsvariabelen:
 
-| Instellingslocatie  | Schakelaar         | Beschrijving                             |
-| ------------------- | ------------------ | ---------------------------------------- |
-| Settings → Advanced | Debug Mode         | Debug-aanvraaglogboeken inschakelen (UI) |
-| Settings → General  | Sidebar Visibility | Zijbalksecties tonen/verbergen           |
+| Locatie instellen          | Schakelaar                   | Beschrijving                                            |
+| -------------------------- | ---------------------------- | ------------------------------------------------------- |
+| Instellingen → Geavanceerd | Foutopsporingsmodus          | Logboeken voor foutopsporingsverzoeken inschakelen (UI) |
+| Instellingen → Algemeen    | Zichtbaarheid van de zijbalk | Show/hide zijbalksecties                                |
 
-Deze instellingen worden in de database opgeslagen en blijven na herstarts behouden. Wanneer ze zijn ingesteld, overschrijven ze de standaardwaarden van omgevingsvariabelen.
+Deze instellingen worden opgeslagen in de database en blijven behouden bij opnieuw opstarten, waarbij de standaardwaarden van env var worden overschreven wanneer deze zijn ingesteld.
 
-### Lokaal uitvoeren
+### Lokaal uitgevoerd
 
 ```bash
-# Ontwikkelingsmodus (hot reload)
+# Development mode (hot reload)
 npm run dev
 
-# Productiebuild
-npm run build    # next build → .build/next/ en vervolgens assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Snelle backend/API-only compilatie voor wijzigingen van bijdragers
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Releasebuild (schone rebuild + HEAD-sentinel — vereist voor deployment)
-npm run build:release   # rm -rf .build dist en build + schrijft dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Veelgebruikte poortconfiguratie
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-De contributor-build voert uitsluitend compilatievalidatie uit: de standalone-distributie wordt niet samengesteld en optionele native packaging-assets worden niet gebouwd. Gebruik de reguliere productiebuild wanneer je de distributie die kan worden uitgeleverd wilt valideren.
+De bijdrager-build voert alleen-compilatie-validatie uit: het stelt de zelfstandige distributie niet samen en bouwt geen optionele systeemeigen verpakkingsactiva. Gebruik de reguliere productiebuild wanneer u de verzendbare bundel moet valideren.
 
-### Indeling van de build-uitvoer
+### Bouw uitvoerlay-out
 
-| Map       | Inhoud                                                                           | Bijgehouden |
-| --------- | -------------------------------------------------------------------------------- | ----------- |
-| `src/`    | Broncode van de applicatie (TypeScript / TSX)                                    | Ja          |
-| `.build/` | Tussenbestanden — uitvoer van `next build` (gitignored, `distDir = .build/next`) | Nee         |
-| `dist/`   | Uitleverbare bundel — samengesteld door `assembleStandalone` (gitignored)        | Nee         |
+| Directory | Inhoud                                                                       | Bijgehouden |
+| --------- | ---------------------------------------------------------------------------- | ----------- |
+| `src/`    | Applicatiebron (TypeScript / TSX)                                            | Ja          |
+| `.build/` | Tussenproducten — `next build` uitvoer (gitignored, `distDir = .build/next`) | Nee         |
+| `dist/`   | Verzendbare bundel — samengesteld door `assembleStandalone` (gitignored)     | Nee         |
 
-De build-pipeline bestaat uit één doorgang:
+De build-pijplijn is een enkele doorgang:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js-uitvoer)
-  └─ assembleStandalone()                 (kopieert standalone + static + public + native assets)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` maakt bovendien eerst beide mappen leeg en schrijft
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) als sentinel voor de integriteit van de deployment.
+`npm run build:release` reinigt bovendien eerst beide mappen en schrijft `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) als een integriteitswachter.
 
-`npm run build:contributor` gebruikt het backend-only-buildprofiel. Tijdens het bouwen worden
-dashboard-UI-bestanden tijdelijk gestubd, blijven API-routehandlers behouden en worden de oorspronkelijke bestanden
-na de build teruggezet. Gebruik `npm run build` voor wijzigingen die gevolgen hebben voor de dashboard-UI of voor volledige releasevalidatie; het contributor-profiel is geen vervanging voor de releasebuild.
+`npm run build:contributor` gebruikt het buildprofiel dat alleen in de backend beschikbaar is. Het stopt tijdelijk UI bestanden op het dashboard tijdens het bouwen, houdt API routehandlers bij en herstelt de originele bestanden na de build. Gebruik `npm run build` voor wijzigingen die van invloed zijn op het dashboard UI of voor volledige releasevalidatie; het bijdragerprofiel is geen vervanging voor de releasebuild.
 
-> **Opmerking over VPS-deployment:** de externe imagemap `/usr/lib/node_modules/omniroute/app/`
-> blijft ongewijzigd. De deploy-skills rsync'en de inhoud van `dist/` hiernaartoe.
-> Alleen het build-uitvoerpad in de repository is gewijzigd (`app/` → `dist/`).
+> **VPS implementatie opmerking:** de externe afbeeldingsmap `/usr/lib/node_modules/omniroute/app/` is ongewijzigd. De implementatievaardigheden synchroniseren de inhoud van `dist/` erin. Alleen het build-uitvoerpad in de repository is verplaatst (`app/` → `dist/`).
 
-Standaard-URL's:
+Standaard URLs:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **Dashboard** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -428,8 +417,8 @@ Gebruik vervolgens de `/deploy-vps-*-cc`-skills, die `dist/` via rsync naar de e
 
 ## Hulp krijgen
 
-- **Architectuur**: Zie [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API-referentie**: Zie [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Beveiligingsdocumentatie**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Beheerdocumentatie**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Problemen**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Architectuur** : Zie [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Referentie** : Zie [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Beveiligingsdocumenten** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops-documenten** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Problemen** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

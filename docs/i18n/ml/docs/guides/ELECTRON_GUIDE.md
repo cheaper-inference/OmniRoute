@@ -4,9 +4,9 @@
 
 ---
 
-> **സത്യത്തിൻ്റെ ഉറവിടം:** `electron/` ജോലിസ്ഥലം** അവസാനം അപ്ഡേറ്റ് ചെയ്തത്:** 2026-06-28 — v3.8.40
+> **സത്യത്തിൻ്റെ ഉറവിടം:** `electron/` ജോലിസ്ഥലം
 
-OmniRoute ഒരു ക്രോസ്-പ്ലാറ്റ്ഫോം ഡെസ്ക്ടോപ്പ് ആപ്പ് (Windows / macOS / Linux) നിർമ്മിച്ചിരിക്കുന്നത്**Electron 41** +** ഇലക്ട്രോൺ ബിൽഡർ 26.10** . ഡെസ്ക്ടോപ്പ് ആപ്പ് Next.js സ്റ്റാൻഡ്എലോൺ സെർവറിനെ ഒരു ചൈൽഡ് പ്രോസസ് ആയി രൂപപ്പെടുത്തുകയും അതിലേക്ക് ഒരു `BrowserWindow` പോയിൻ്റ് ചെയ്യുകയും സിസ്റ്റം ട്രേ, ഓട്ടോ-അപ്ഡേറ്റർ, IPC ബ്രിഡ്ജ്, സീറോ-കോൺഫിഗ് സീക്രട്ട് ബൂട്ട്സ്ട്രാപ്പ് എന്നിവ ചേർക്കുകയും ചെയ്യുന്നു.
+OmniRoute ഒരു ക്രോസ്-പ്ലാറ്റ്ഫോം ഡെസ്ക്ടോപ്പ് ആപ്പ് (Windows / macOS / Linux) നിർമ്മിച്ചിരിക്കുന്നത്**Electron 41** +** ഇലക്ട്രോൺ ബിൽഡർ 26.10** . ഡെസ്ക്ടോപ്പ് ആപ്പ് Next.js സ്റ്റാൻഡ്എലോൺ സെർവറിനെ ഒരു ചൈൽഡ് പ്രോസസ്സ് ആയി രൂപപ്പെടുത്തുകയും അതിലേക്ക് ഒരു `BrowserWindow` പോയിൻ്റ് ചെയ്യുകയും സിസ്റ്റം ട്രേ, ഓട്ടോ-അപ്ഡേറ്റർ, IPC ബ്രിഡ്ജ്, സീറോ-കോൺഫിഗ് സീക്രട്ട് ബൂട്ട്സ്ട്രാപ്പ് എന്നിവ ചേർക്കുകയും ചെയ്യുന്നു.
 
 ## വാസ്തുവിദ്യ
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## സ്വയമേവ അപ്ഡേറ്റ്
 
-GitHub ദാതാവിനൊപ്പം (`diegosouzapw/OmniRoute`) `electron-updater` ഉപയോഗിക്കുന്നു.
+GitHub ദാതാവിനൊപ്പം (`cheaper-inference/OmniRoute`) `electron-updater` ഉപയോഗിക്കുന്നു.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - ഇവൻ്റുകൾ `update-status` IPC വഴി റെൻഡറർക്ക് കൈമാറി: `checking`, `available`, `not-available`, `downloading` ( `percent` ഉള്ളത് ), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage സൈനിംഗ് എന്നത് ഓപ്ഷണൽ ആണ് �
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-റിലീസുകൾ GitHub റിലീസുകളിൽ (`diegosouzapw/OmniRoute`) പ്രസിദ്ധീകരിക്കുന്നു, അവിടെയാണ് `electron-updater` പുതിയ പതിപ്പുകൾക്കായി പരിശോധിക്കുന്നത്.
+റിലീസുകൾ GitHub റിലീസുകളിൽ (`cheaper-inference/OmniRoute`) പ്രസിദ്ധീകരിക്കുന്നു, അവിടെയാണ് `electron-updater` പുതിയ പതിപ്പുകൾക്കായി പരിശോധിക്കുന്നത്.
 
 ## ട്രബിൾഷൂട്ടിംഗ്
 

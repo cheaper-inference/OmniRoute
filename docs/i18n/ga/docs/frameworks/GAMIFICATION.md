@@ -506,27 +506,27 @@ ach amháin nuair atá athrú iarbhír tagtha ar shonraí an chláir ceannairí 
 
 ---
 
-## Comhroinnt Comharthaí
+## Comhroinnt Chomhartha
 
 **Comhad:** `src/lib/gamification/sharing.ts`
 
 ### Mórleabhar Iontrála Dúbailte
 
-Cruthaíonn gach aistriú dhá ró in `token_ledger`:
+Cruthaíonn gach aistriú dhá shraith i `token_ledger`:
 
-| Ró         | `from_key_id` | `to_key_id` | `amount` |
+| Rae        | `from_key_id` | `to_key_id` | `amount` |
 | ---------- | ------------- | ----------- | -------- |
-| Dochar     | seoltóir      | faighteoir  | +méid    |
-| Creidmheas | faighteoir    | seoltóir    | -méid    |
+| Dochar     | seoltóir      | glacadóir   | méid +   |
+| Creidmheas | glacadóir     | seoltóir    | -amount  |
 
-Fan — seo é an coinbhinsiún:
+Fan — is é an coinbhinsiún:
 
-| Ró      | `from_key_id` | `to_key_id` | `amount` | Brí                               |
-| ------- | ------------- | ----------- | -------- | --------------------------------- |
-| Seoladh | seoltóir      | faighteoir  | +méid    | Eis-sreabhadh ón seoltóir         |
-| Fáil    | faighteoir    | seoltóir    | +méid    | Insreabhadh chuig an bhfaighteoir |
+| Rae   | `from_key_id` | `to_key_id` | `amount` | Brí                             |
+| ----- | ------------- | ----------- | -------- | ------------------------------- |
+| Seol  | seoltóir      | glacadóir   | méid +   | Eis-sreabhadh ón seoltóir       |
+| Faigh | glacadóir     | seoltóir    | méid +   | Insreabhadh chuig an nglacadóir |
 
-Ríomhtar an t-iarmhéid mar seo:
+Ríomhtar an t-iarmhéid mar:
 
 ```sql
 SELECT
@@ -548,19 +548,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Bailíochtú**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idéimpitéinseacht**: seiceáil an bhfuil `idempotency_key` sa mhórleabhar cheana féin.
-   Má tá, tabhair an toradh taiscthe ar ais.
-3. **Idirbheart** (idirbheart aonair SQLite):
-   a. Ríomh iarmhéid an tseoltóra.
-   b. Má tá `balance < amount`, cuir deireadh leis (cistí neamhleora).
-   c. Ionsáigh ró seolta (`from=sender,` ar ais.
+1. **Bailíochtaigh** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Neamhláithreacht** : seiceáil an bhfuil `idempotency_key` sa mhórleabhar cheana féin. Má tá, cuir an toradh i dtaisce ar ais.
+3. **Idirbheart** (idirbheart aonair SQLite ): a. Ríomh iarmhéid an tseoltóra. b. Má `balance < amount`, ginmhilleadh (cistí neamhleor). c. Cuir isteach an tsraith seolta (`from=sender, to=receiver, amount`). d. Cuir isteach an tsraith faighte (`from=receiver, to=sender, amount`).
+4. **Teorainn ráta** : seiceáil an ráta aistrithe don seoltóir (uasmhéid 10 transfers/min).
+5. **Imeacht** : imeacht gamification `token_share` a astú le haghaidh meastóireachta suaitheantas XP +.
+6. Fill ar ais `{ success: true, balance: newBalance }`.
 
-### Teorannú Ráta
+### Teorainn Ráta
 
-- Uasmhéid 10 n-aistriú in aghaidh an nóiméid do gach eochair API.
-- Uasmhéid 10,000 comhartha in aghaidh an aistrithe aonair.
-- Uasmhéid 100,000 comhartha aistrithe in aghaidh an lae do gach eochair API.
+- 10 n-aistrithe ar a mhéad in aghaidh an nóiméid in aghaidh na heochrach API.
+- Uasmhéid 10,000 comhartha in aghaidh an aistrithe singil.
+- Uasmhéid 100,000 comhartha aistrithe in aghaidh an lae in aghaidh an eochair API.
 
 ---
 

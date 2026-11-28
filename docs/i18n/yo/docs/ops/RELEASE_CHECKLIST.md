@@ -4,12 +4,9 @@
 
 ---
 
-> **Ìmúdójúìwọ̀n tó kẹ́yìn:** 2026-08-28 — v3.8.51
-> Ìṣàn ìtújáde tí a mú rọrùn, tó ń lo àwọn ọgbọ́n Claude Code fún adaṣiṣẹ́.
+> Ṣiṣan itusilẹ ṣiṣan ti o mu awọn ọgbọn koodu Claude ṣiṣẹ fun adaṣe.
 >
-> **Jẹ́ kí queue/branch wà ní green láàárín àwọn ìtújáde:** wo [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (ẹbí `/green-prs` + `npm run check:release-green` + `/babysit` + nightly). Ṣíṣe èyí
-> lẹ́ẹ̀kọ̀ọ̀kan — pàápàá jù lọ **ṣáájú** àkójọ àyẹ̀wò yìí — ń mú kí PR ìtújáde bẹ̀rẹ̀ ní green.
+> **Jeki queue/branch alawọ ewe laarin awọn idasilẹ:** wo [RELEASE_GREEN.md](./RELEASE_GREEN.md) ( idile `/green-prs` + `npm run check:release-green` + `/babysit` + li oru). Nṣiṣẹ yi lorekore — ati paapa** ṣaaju ki o to** akojọ ayẹwo yii — jẹ ki idasilẹ PR bẹrẹ alawọ ewe.
 
 ## Ní ṣókí
 
@@ -58,9 +55,11 @@ npm run test:e2e           # àṣàyàn ni, ṣùgbọ́n a dábàá rẹ̀
 
 **Iwe-iṣere ti o bajẹ (ko yipada):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` gẹgẹbi ifasilẹ aiyipada (awọn iṣẹju, iyipada); `npm unpublish` nikan inu awọn window 72h/no-dependents ati ki o ko bi akọkọ Gbe. Docker: maṣe tunkọ ẹya kan tag tag — rollback n ṣe atunto `latest` si arosọ ti o dara to kẹhin.
 
-**Docker Hub `latest` (beere lori gbogbo atẹjade SemVer iduroṣinṣin):** iṣan-iṣẹ `docker-publish` gbọdọ tag** mejeeji** `X.Y.Z` ati, nigbati `should-promote-latest.sh` gba eyi ni iduroṣinṣin SemVer ti o ga julọ, `:latest` pẹlu awọn** kanna Daijesti** . Lẹhin iṣẹ naa: Hub `latest` daijesti dọgbadọgba SemVer daijesti tuntun ati gbigbe `last_updated`. Maṣe fi `:latest` silẹ lori kikọ agbalagba lakoko awọn akọsilẹ itusilẹ sọrọ nipa awọn atunṣe ti o wa lori git nikan. Kọ quickstarts lo `:latest`; GitOps yẹ ki o tọju pinning `X.Y.Z`. Wo [awọn ikanni itusilẹ Docker](../guides/DOCKER_GUIDE.md#release-channels) ati #10317.
+**Docker Hub `latest` (beere lori gbogbo atẹjade SemVer iduroṣinṣin):** iṣan-iṣẹ `docker-publish` gbọdọ tag** mejeeji** `X.Y.Z` ati, nigbati `should-promote-latest.sh` gba eyi ni iduroṣinṣin SemVer ti o ga julọ, `:latest` pẹlu awọn** kanna Daijesti** . Lẹhin iṣẹ naa: Hub `latest` daijesti dọgbadọgba SemVer daijesti tuntun ati gbigbe `last_updated`. Maṣe fi `:latest` silẹ lori kikọ agbalagba lakoko awọn akọsilẹ itusilẹ sọrọ nipa awọn atunṣe ti o wa lori git nikan. Kọ quickstarts lo `:latest`; GitOps yẹ ki o tọju pinni `X.Y.Z`. Wo [awọn ikanni itusilẹ Docker](../guides/DOCKER_GUIDE.md#release-channels) ati #10317.
 
-**ibi ipamọ agbari Docker Hub (`cheaperinference/omniroute`):** Docker Hub ko le gbe ibi ipamọ kan laarin awọn aaye orukọ, nitorinaa `diegosouzapw/omniroute` tọju itan-akọọlẹ fifa rẹ ati gbogbo itusilẹ, ati iṣẹ `mirror-org-dockerhub` ti awọn ẹda `docker-publish` ẹya kọọkan ti o tu silẹ (ati `:latest` nigbati igbega) lati `ghcr.io/cheaper-inference/omniroute` si ibi ipamọ agbari. O nilo awọn asiri `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; laisi wọn iṣẹ naa duro alawọ ewe pẹlu ikilọ “Docker Hub org” ikilọ ati pe awọn iforukọsilẹ miiran ṣe atẹjade ni deede. Lati ṣe atẹjade ẹya ti o tu silẹ nibẹ nigbamii, ṣiṣe** Awọn iṣe → Digi Docker aworan si Docker Hub org → Ṣiṣe bisesenlo** pẹlu `version=X.Y.Z` (ati `promote_latest` fun ẹya iduroṣinṣin to ga julọ): o daakọ awọn aworan ti o wa, ko si atunṣe.
+**ibi ipamọ agbari Docker Hub (`cheaperinference/omniroute`):** Docker Hub ko le gbe ibi ipamọ kan laarin awọn aaye orukọ, nitorinaa `diegosouzapw/omniroute` tọju itan-akọọlẹ fifa rẹ ati gbogbo itusilẹ, ati iṣẹ `mirror-org-dockerhub` ti awọn ẹda `docker-publish` ẹya kọọkan ti o tu silẹ (ati `:latest` nigbati igbega) lati `ghcr.io/cheaper-inference/omniroute` si ibi ipamọ agbari. O nilo awọn asiri `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; laisi wọn iṣẹ naa duro alawọ ewe pẹlu ikilọ "Docker Hub org" ikilọ ati pe awọn iforukọsilẹ miiran ṣe atẹjade ni deede. Lati ṣe atẹjade ẹya ti o tu silẹ nibẹ nigbamii, ṣiṣe** Awọn iṣe → Digi Docker aworan si Docker Hub org → Ṣiṣe bisesenlo** pẹlu `version=X.Y.Z` (ati `promote_latest` fun ẹya iduroṣinṣin to ga julọ): o daakọ awọn aworan ti o wa, ko si atunṣe. Akopọ Docker Hub ti ibi ipamọ yẹn ti ṣeto nipasẹ ọwọ: awọn API ti o ṣatunkọ o kọ Awọn ami Wiwọle Wiwọle Ẹgbẹ.
+
+Ṣiṣan iṣẹ-ṣiṣe kanna tun ṣe idaako gbogbo itusilẹ si package GHCR package `ghcr.io/diegosouzapw/omniroute` titi di ọdun 2027-06-30, nitorinaa awọn fifi sori ẹrọ tun pin si rẹ tọju imudojuiwọn; atọka rẹ gbejade "yi lọ si `ghcr.io/cheaper-inference/omniroute`" apejuwe. O nilo aṣiri `GHCR_LEGACY_TOKEN` (àmi iwọle ti ara ẹni Ayebaye ti `diegosouzapw` pẹlu `write:packages`); laisi rẹ pe iṣẹ fo pẹlu ikilọ "Legacy GHCR digi ti o fo".
 
 ## Ọ̀nà-Yíyára Hotfix (àmì `hotfix`)
 
@@ -140,7 +139,7 @@ Ti kio kan ba kuna: ṣatunṣe ọran ti o wa labẹ, maṣe fori pẹlu `--no-
 
 ### Awọn igbimọ ti aṣa
 
-Gbogbo awọn ifasilẹ-itumọ gbọdọ tẹle ọna kika `type(scope): subject`.
+Gbogbo awọn adehun ti o ni idasilẹ gbọdọ tẹle ọna kika `type(scope): subject`.
 
 **Awọn iru to wulo:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
@@ -148,10 +147,10 @@ Gbogbo awọn ifasilẹ-itumọ gbọdọ tẹle ọna kika `type(scope): subjec
 
 Awọn iyipada fifọ: ṣafikun ẹsẹ `BREAKING CHANGE:` tabi `!` lẹhin iwọn (fun apẹẹrẹ `feat(api)!: drop /v0`).
 
-### Iwe aṣẹ
+### Awọn iwe aṣẹ
 
 - [ ] `npm run check:docs-sync` kọja (ṣiṣe-laifọwọyi nipasẹ ifaramọ iṣaaju)
-- [ ] `npm run check:docs-all` kọja (agboorun: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` koja. Imọran rẹ `check:deprecated-versions` awọn ẹya asia ti a sọ ni gbangba si OmniRoute (3.6.x ati ṣaaju) ati foju kọ awọn ọjọ.
 - [ ] `npm run check:env-doc-sync` jade 0 — koodu ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env adehun ti wa ni mule
 - [ ] `npm run check:doc-links` jade kuro ni 0 — ko si awọn itọkasi isamisi inu ti bajẹ lẹhin atunto
 - [ ] `docs/architecture/ARCHITECTURE.md` àyẹwò fun storage/runtime fiseete
@@ -273,11 +272,11 @@ npm run build:release
 
 ### ẹnu-ọna ifilọlẹ gbangba Reda
 
-Ikede Radar naa ni ifaramọ pẹlumọmọ pẹlu `active: false`. Muu ṣiṣẹ jẹ iyipada lọtọ lẹhin gbogbo ohun ti o wa ni isalẹ ti jẹri:
+Ikede Radar naa jẹ ifaramọ pẹlumọmọ pẹlu `active: false`. Muu ṣiṣẹ jẹ iyipada lọtọ lẹhin gbogbo ohun ti o wa ni isalẹ ti jẹri:
 
 - [ ] Gbogbo Radar PRs tolera ti wa ni idapọ ati pe CI itusilẹ jẹ alawọ ewe
 - [ ] Mu ṣiṣẹ ki o mu siga awọn ọna OSS Radar pẹlu `RADAR_ENABLED` ṣi wa ni pipa nipasẹ aiyipada
-- [ ] Ẹfin `GET /planos`, `/termos`, `/privacidade`, ati `/reembolso` lori agbalejo Reda ti a npè ni
+- [ ] Ẹfin `GET /planos`, `/termos`, `/privacidade`, ati `/reembolso` lori agbalejo Radar ti a npè ni
 - [ ] Oṣiṣẹ igbasilẹ identity/contact/address ati atunyẹwo ofin ti o ni ifọwọsi oniwun ni iṣẹ aladani
 - [ ] Ṣiṣayẹwo adikala adaṣe adaṣe ati oju opo wẹẹbu ti o fowo si ni ipo idanwo nikan
 - [ ] Ṣe adaṣe ifijiṣẹ i-meeli ti paroko ọkan pẹlu sender/domain ti a fọwọsi
@@ -399,7 +398,7 @@ Iṣe idagbasoke ijalu jẹ itumọ pẹlu git Plumbing (ko si igi ti n ṣiṣ�
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

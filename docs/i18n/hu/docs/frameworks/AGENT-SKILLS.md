@@ -13,12 +13,12 @@ Az Agent Skills strukturált SKILL.md fájlok, amelyek megtanítják a külső �
 
 ## Áttekintés
 
-A katalógus **45 Agent Skillt** tartalmaz (23 REST API + 21 CLI + 1 konfigurációs munkafolyamat). Minden skill a következőkkel rendelkezik:
+A katalógus tartalmazza** 45 Ügynöki készségek** (23 REST API + 21 CLI + 1 konfigurációs munkafolyamat). Mindegyik készség rendelkezik:
 
-- Egy **kanonikus azonosító** (`omni-auth`, `cli-serve` stb.)
-- Egy **SKILL.md** fájl a `skills/{id}/SKILL.md` helyen, YAML frontmatterrel (`name`, `description`) és részletes markdown-törzzsel
-- Az OpenAPI-specifikációból és a CLI-nyilvántartásból származtatott **REST-végpontok** (API-skillek) vagy **CLI-alparancsok** (CLI-skillek)
-- Egy **nyers GitHub-URL** az élő lekéréshez: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanonikus ID** (`omni-auth`, `cli-serve` stb.)
+- A**SKILL.md** fájl `skills/{id}/SKILL.md` ben YAML frontmatter (`name`, `description`) + rich markdown szöveggel
+- **REST végpontok** (API készségek) ill**CLI alparancsok** (CLI skill ) a OpenAPI spec és CLI nyilvántartásból származik
+- A**GitHub nyers URL** élő letöltéshez: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ A generátor válasza egy `GeneratorReport`:
 
 ---
 
-## Lefedettségi API
+## Lefedettség API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

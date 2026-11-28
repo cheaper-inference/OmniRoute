@@ -63,49 +63,31 @@ Bifrost faqat `external` boʻlib qoladi (unga faqat `BIFROST_BASE_URL` orqali ki
 har bir identifikator uchun alohida shartli tarmoqlarni qattiq kodlash oʻrniga, dvigatel amalda nimalarni bajara olishiga qarab
 filtrlash imkonini beradi.
 
-## A o‘qi — ichki xizmatlar (nazorat qilinadigan jarayon tomoni)
+## Axis A — oʻrnatilgan xizmatlar (nazorat qilinadigan jarayon tomoni)
 
-- **Nazorat qilinadigan jarayonlar reyestri:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (hozirda: `9router`, `cliproxy`).
-- **Hayotiy sikl egasi:** `src/lib/services/ServiceSupervisor.ts` — `start()` quyi
-  jarayonni ishga tushiradi, `waitForHealthy()` orqali tayyorligini kutadi, stdout/stderr oqimlarini halqali buferga
-  yozadi; `stop()` SIGTERM→SIGKILL; barchasi qulf ostida ketma-ket bajariladi.
-- **Holatlar birlashmasi** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error`, shuningdek,
-  ortogonal `HealthState = healthy | unhealthy | unknown`.
-- **Nega alohida jarayon (jarayon ichidagi SDK emas)?** Jarayonlarni izolyatsiyalash har bir
-  sidecar uchun o‘rnatish/ishga tushirish/to‘xtatish/salomatlik/jurnallarni mustaqil boshqarish imkonini beradi va
-  loopback ishga tushirish himoyasini qo‘llashga imkon yaratadi. Jarayon ichidagi adapterni modellashtirish — kelajakdagi ish;
-  bu `native-hot-path` imkoniyat bayrog‘i orqali ifodalanadi.
+- **Nazorat qilinadigan jarayonlar reestri:** `src/lib/services/bootstrap.ts` `SERVICES[]` (bugungi kunda: `9router`, `cliproxy`).
+- **Hayot davri egasi:** `src/lib/services/ServiceSupervisor.ts` — `start()` bolani tug'diradi, `waitForHealthy()` ustidagi darvozalar, stdout/stderr halqa buferiga uradi; `stop()` SIGTERM→SIGKILL; hammasi qulf ostida seriyalashtirilgan.
+- **Davlat ittifoqi** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error`, ortiqcha ortogonal `HealthState = healthy | unhealthy | unknown`.
+- **Nima uchun alohida jarayon (in-proc SDK emas)?** Jarayonni izolyatsiyalash install/start/stop/health/logs har bir yon vagonda mustaqil ravishda boshqarish imkonini beradi va loopback spawn-guard qo'llanilishiga imkon beradi. In-proc adapterini modellashtirish kelajakdagi ish — `native-hot-path` qobiliyati bayrog'i bu erda ifodalanadi.
 
-### Hayotiy sikl marshruti shartnomasi (`/api/services/<tool>/…`)
+### Hayotiy aylanish marshruti shartnomasi (`/api/services/<tool>/…`)
 
-Holat kodlari **atayin holat/amal/marshrutga xos** — bu nomuvofiqlik emas,
-balki shartnomaning o‘zidir:
+Status kodlari** dizayn bo'yicha state/verb/path-specific** — bu shartnoma, nomuvofiqlik emas:
 
-| Chaqiruv                         | Shart                                 | Holat                                |
-| -------------------------------- | ------------------------------------- | ------------------------------------ |
-| `POST .../start`                 | xizmat `not_installed` holatida       | **409** (old shart)                  |
-| `POST .../stop`                  | allaqachon to‘xtatilgan               | **200** (idempotent bo‘sh amal)      |
-| `GET .../status`                 | OK                                    | **200** (`live ?? row ?? "unknown"`) |
-| `POST .../start`                 | ishga tushirish muvaffaqiyatsiz       | **503** (vaqtinchalik)               |
-| `GET .../status`, `.../stop`     | tutilmagan xato                       | **500**                              |
-| `GET /api/services/<x>/logs`     | noma’lum vosita `<x>`                 | **404** `Service '<x>' not found`    |
-| `GET .../status?reveal=key`      | `X-Reveal-Confirm: yes` yo‘q          | **403** (faqat 9router)              |
-| **har qanday** `/api/services/*` | chaqiruvchi loopback/xususiy LAN emas | **403 LOCAL_ONLY**                   |
+| Qo'ng'iroq qiling                | Vaziyat                                       | Status                               |
+| -------------------------------- | --------------------------------------------- | ------------------------------------ |
+| `POST .../start`                 | `not_installed` xizmati                       | **409** (oldingi shart)              |
+| `POST .../stop`                  | allaqachon to'xtagan                          | **200** (idempotent no-op)           |
+| `GET .../status`                 | OK                                            | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`                 | tuxum etishmovchiligi                         | **503** (o'tkinchi)                  |
+| `GET .../status`, `.../stop`     | tushunilmagan xato                            | **500**                              |
+| `GET /api/services/<x>/logs`     | noma'lum vosita `<x>`                         | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`      | yo'qolgan `X-Reveal-Confirm: yes`             | **403** (Faqat 9 router)             |
+| **har qanday** `/api/services/*` | qo'ng'iroq qiluvchi loopback/private-LAN emas | **403 LOCAL_ONLY**                   |
 
-Barcha xato tanalari `createErrorResponse()` orqali quyidagi shaklga keltiriladi →
-`{ error: { message, type }, requestId }`, bunda `type` holatdan kelib chiqadi
-(`500→server_error`, `404→not_found`, `409→conflict`, aks holda `invalid_request`) va
-mashina tomonidan qayta ishlanadigan farqlovchi hisoblanadi. Xabarlar oldindan sanitizatsiya qilinadi
-(`sanitizeErrorMessage()`, 12-qat’iy qoida).
+Barcha xato jismlar `createErrorResponse()` → `{ error: { message, type }, requestId }` tomonidan shakllantiriladi, bu yerda `type` statusdan (`500→server_error`, `404→not_found`, `409→conflict`, boshqa `invalid_request`) olinadi va mashina taʼsir etuvchi diskriminator hisoblanadi. Xabarlar oldindan tozalanadi (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**Loopback himoyasi** `403` holatining eng keng tarqalgan sababidir: `/api/services/`
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) tarkibiga kiradi va
-`src/server/authz/policies/management.ts` loopback yoki xususiy LAN orqali kelmagan har qanday
-chaqiruvchini **autentifikatsiyadan oldin** rad etadi, chunki bu marshrutlar quyi jarayonlarni ishga
-tushiradi (15- va 17-qat’iy qoidalar). Ularga ommaviy tunnel orqali murojaat qilish atayin `403`
-qaytaradi.
+**Orqaga aylanish qo'riqchisi** `403` ning eng keng tarqalgan manbai: `/api/services/` `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) ichida va `src/server/authz/policies/management.ts` har qanday orqaga qaytmaydigan / shaxsiy bo'lmagan LAN qo'ng'iroq qiluvchini rad etadi** avtorizatsiyadan oldin** , chunki bu marshrutlar bola jarayonlarini keltirib chiqaradi (Qattiq qoidalar 15 va 17). Ularga umumiy tunnel orqali yetib borish dizayn bo'yicha `403` hisoblanadi.
 
 ## B o‘qi — relay marshrutlash backendi (jo‘natish tomoni)
 

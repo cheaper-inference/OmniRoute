@@ -49,7 +49,7 @@
 
 ---
 
-## Завершение чата
+## Завершения чата
 
 ```bash
 POST /v1/chat/completions
@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### Пользовательские заголовки
 
-| Header                   | Направление | Описание                                                                                                                                                                                                                                            |
-| ------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Запрос      | Установите значение `true`, чтобы обойти кэш                                                                                                                                                                                                        |
-| `x-omniroute-no-memory`  | Запрос      | Установите значение `true`, чтобы пропустить внедрение памяти и навыков для этого запроса (аналогично no-cache; устраняет накладные расходы на токены и стоимость каждого вызова)                                                                   |
-| `X-OmniRoute-Progress`   | Запрос      | Установите значение `true` для событий прогресса                                                                                                                                                                                                    |
-| `X-Session-Id`           | Запрос      | Ключ закрепления сеанса для привязки внешнего сеанса                                                                                                                                                                                                |
-| `x_session_id`           | Запрос      | Также принимается вариант с подчёркиванием (прямой HTTP)                                                                                                                                                                                            |
-| `X-OmniRoute-Session-Id` | Запрос      | Предоставленный вызывающей стороной тег сеанса/диалога (также передаётся в память). Если указан, сохраняется без изменений в `call_logs.session_tag` для атрибуции стоимости по сеансам (#8249) — при отсутствии никогда не создаётся автоматически |
-| `Idempotency-Key`        | Запрос      | Ключ дедупликации (окно 5 с)                                                                                                                                                                                                                        |
-| `X-Request-Id`           | Запрос      | Альтернативный ключ дедупликации                                                                                                                                                                                                                    |
-| `x-omniroute-connection` | Запрос      | Закрепляет запрос к одной модели за одним подключением провайдера (учётной записью) по его идентификатору — см. [Закрепление учётной записи для запроса](#account-pinning-per-request)                                                              |
-| `X-OmniRoute-Cache`      | Ответ       | `HIT` или `MISS` (для непотоковой передачи)                                                                                                                                                                                                         |
-| `X-OmniRoute-Idempotent` | Ответ       | `true`, если выполнена дедупликация                                                                                                                                                                                                                 |
-| `X-OmniRoute-Progress`   | Ответ       | `enabled`, если отслеживание прогресса включено                                                                                                                                                                                                     |
-| `X-OmniRoute-Session-Id` | Ответ       | Фактически использованный OmniRoute идентификатор сеанса                                                                                                                                                                                            |
-| `X-OmniRoute-Request-Id` | Ответ       | Идентификатор корреляции запроса (если известен)                                                                                                                                                                                                    |
-| `X-OmniRoute-Version`    | Ответ       | Версия сборки OmniRoute (присутствует всегда)                                                                                                                                                                                                       |
-| `X-OmniRoute-Cost-Saved` | Ответ       | Сумма в USD, сэкономленная благодаря кэшу при `HIT` (только для попаданий в кэш)                                                                                                                                                                    |
-| `X-OmniRoute-Decision`   | Ответ       | Трассировка маршрутизации: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` — комбинированная стратегия или `single` для запроса без комбинации) — всегда присутствует в ответах о завершении                                          |
+| Заголовок                | Направление | Описание                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Запрос      | Установите `true` для обхода кеша                                                                                                                                                                                                                                                                                                                                                                                |
+| `x-omniroute-no-memory`  | Запрос      | Установите значение `true`, чтобы пропустить внедрение навыков + в память для этого запроса (отражает отсутствие кэша; позволяет избежать накладных расходов token/cost для каждого вызова)                                                                                                                                                                                                                      |
+| `x-omniroute-no-log`     | Запрос      | Установите значение `true`, чтобы исключить полезные данные request/response из журналов вызовов для этого запроса вывода (все маршруты семейства чата: Завершения чата, Ответы, Сообщения, Завершения, Gemini). Временная метка, модель, статус, продолжительность и количество токенов по-прежнему записываются. Объедините с `x-omniroute-no-memory` и `x-omniroute-no-cache` для полного отказа от контента. |
+| `X-OmniRoute-Progress`   | Запрос      | Установите значение `true` для событий прогресса.                                                                                                                                                                                                                                                                                                                                                                |
+| `X-Session-Id`           | Запрос      | Прикрепленный сеансовый ключ для привязки внешнего сеанса                                                                                                                                                                                                                                                                                                                                                        |
+| `x_session_id`           | Запрос      | Вариант с подчеркиванием также принят (прямое HTTP)                                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Session-Id` | Запрос      | Тег session/conversation, предоставленный вызывающим абонентом (также загружает память). Если присутствует, дословно сохраняется в `call_logs.session_tag` для атрибуции затрат за сеанс (#8249). — никогда не синтезируется, если отсутствует.                                                                                                                                                                  |
+| `Idempotency-Key`        | Запрос      | Ключ дедупликации (окно 5 с)                                                                                                                                                                                                                                                                                                                                                                                     |
+| `X-Request-Id`           | Запрос      | Альтернативный ключ дедупликации                                                                                                                                                                                                                                                                                                                                                                                 |
+| `x-omniroute-connection` | Запрос      | Закрепите одномодельный запрос к одному соединению (учетной записи) провайдера по его идентификатору — см. [Закрепление учетной записи для каждого запроса.](#account-pinning-per-request)                                                                                                                                                                                                                       |
+| `X-OmniRoute-Cache`      | Ответ       | `HIT` или `MISS` (без потоковой передачи)                                                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Idempotent` | Ответ       | `true` при дедупликации                                                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Progress`   | Ответ       | `enabled` если отслеживание прогресса включено                                                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Session-Id` | Ответ       | Эффективный сеанс ID используемый OmniRoute                                                                                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Request-Id` | Ответ       | Идентификатор корреляции запроса (если известен)                                                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Version`    | Ответ       | версия сборки OmniRoute (всегда присутствует)                                                                                                                                                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Cost-Saved` | Ответ       | USD кэш, избегаемый на HIT (только попадания в кэш)                                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Decision`   | Ответ       | Трассировка маршрутизации: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` — комбинированная стратегия или `single` для некомбинированного запроса). — всегда присутствует в ответах на завершение.                                                                                                                                                                                                |
 
-> Примечание для Nginx: если вы используете заголовки с подчёркиваниями (например, `x_session_id`), включите `underscores_in_headers on;`.
+> Примечание Nginx: если вы используете заголовки подчеркивания (например `x_session_id`), включите `underscores_in_headers on;`.
 
-#### Закрепление учётной записи для запроса
+#### Закрепление аккаунта по запросу
 
-Если у провайдера несколько подключений (учётных записей или ключей), OmniRoute обычно выбирает одно из них
-с помощью стратегии выбора учётной записи. Вместо этого запрос может закрепить одно конкретное подключение
-с помощью заголовка `x-omniroute-connection`:
+Если у провайдера есть несколько подключений (учетных записей или ключей), OmniRoute обычно выбирает одно с помощью своей стратегии выбора учетной записи. Вместо этого запрос может закрепить одно конкретное соединение с заголовком `x-omniroute-connection` :
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,26 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Где найти идентификатор.** Откройте страницу провайдера в дашборде
-  (**Dashboard → Providers → <provider>**) и нажмите на чип с идентификатором `xxxxxxxx…` в строке
-  подключения — это скопирует полный идентификатор подключения.
-- **Какие запросы его учитывают.** Запросы к одной модели (`provider/model`) на
-  `/v1/chat/completions`, `/v1/messages` и `/v1/responses`. Комбинации игнорируют этот заголовок:
-  закрепляйте аккаунт для каждого шага комбинации через собственное подключение этого шага.
-- **Закрепление является строгим, а не предпочтительным.** Используется исключительно закреплённое
-  подключение. Сбой внутри запроса фиксирует период ожидания для аккаунта, но **не** переключает запрос
-  на соседний аккаунт того же провайдера.
-- **Период ожидания и исчерпание квоты снимают закрепление.** Пока для закреплённого подключения
-  действует период ожидания, квота исчерпана или подключение заблокировано политикой квот, последующие
-  запросы переключаются на другие подключения провайдера — точно так же, как незакреплённый трафик.
-- **Неизвестные или отключённые идентификаторы приводят к ошибке.** Если идентификатор отсутствует
-  в активном пуле провайдера (подключение удалено, деактивировано или принадлежит другому провайдеру),
-  подходящий аккаунт не находится, поэтому запрос завершается ошибкой вместо незаметной маршрутизации
-  в другое место.
+- **Где найти идентификатор.** Откройте страницу провайдера в личном кабинете (** Панель мониторинга поставщиков → → <provider>** ) и щелкните микросхему идентификатора `xxxxxxxx…` в строке соединения — скопировать полный идентификатор соединения.
+- **Которая просит уважать это.** Запросы одной модели (`provider/model`) на `/v1/chat/completions`, `/v1/messages` и `/v1/responses`. Комбинации игнорируют заголовок: вместо этого прикрепите учетную запись для каждого шага комбинации через собственное соединение шага.
+- **Булавка строгая, а не предпочтения.** Используется исключительно штыревое соединение. Сбой внутри запроса записывает время восстановления учетной записи, но не** нет** перейти на родственную учетную запись того же провайдера.
+- **Время восстановления и квота отпускают булавку.** Пока закрепленное соединение остывает, исчерпает квоту или блокируется политикой квот, последующие запросы возвращаются к другим соединениям провайдера, точно так же, как незакрепленный трафик.
+- **Неизвестные или отключенные идентификаторы не работают.** Идентификатор, которого нет в активном пуле провайдера (удален, деактивирован или принадлежит другому провайдеру), не оставляет подходящей учетной записи, поэтому запрос завершается неудачей вместо того, чтобы автоматически перенаправляться в другое место.
 
-Claude Code передаёт пользовательские заголовки через `ANTHROPIC_CUSTOM_HEADERS`. Добавьте его в блок
-`env` файла `~/.claude/settings.json` или в файл `.claude/settings.json` на уровне проекта, чтобы
-закрепить другой аккаунт для каждого проекта:
+Код Claude отправляет пользовательские заголовки через `ANTHROPIC_CUSTOM_HEADERS`. Поместите его в блок `env` `~/.claude/settings.json` или в `.claude/settings.json` на уровне проекта, чтобы закрепить разные учетные записи для каждого проекта:
 
 ```jsonc
 {
@@ -134,12 +120,11 @@ Claude Code передаёт пользовательские заголовки
 }
 ```
 
-Источник: `src/sse/handlers/chat.ts` (чтение заголовка), `src/sse/services/auth.ts` и
-`src/sse/services/sessionAffinityPin.ts` (снятие закрепления и проверка отсутствия в пуле).
+Источник: `src/sse/handlers/chat.ts` (чтение заголовка), `src/sse/services/auth.ts` и `src/sse/services/sessionAffinityPin.ts` (освобождение контактов и проверка отсутствия из пула).
 
-> **Заголовки телеметрии стоимости:** ответы об успешном выполнении запросов без потоковой передачи также содержат набор заголовков телеметрии стоимости `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, фиксированные 10 знаков после запятой; `0.0000000000` для бесплатных запросов или запросов без указанной стоимости), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` и `X-OmniRoute-Fallback-Attempts` (только если значение > 0), а также `X-OmniRoute-Request-Id` и `X-OmniRoute-Version`. Они добавляются для chat completions, `/v1/responses`, `/v1/messages`, **а также для конечных точек мультимедиа** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` и `/v1/moderations` (стоимость всегда `0`). Стоимость мультимедиа рассчитывается по каждой модальности (за изображение, за секунду, за символ, за единицу поиска), если данные о ценах доступны; в противном случае используется `0` (fail-open).
+> **Заголовки телеметрии стоимости:** Непотоковые ответы об успехе также содержат набор телеметрии стоимости `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, фиксированные 10 десятичных знаков; `0.0000000000` для free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` и `X-OmniRoute-Fallback-Attempts` (только когда > 0), плюс `X-OmniRoute-Request-Id` и `X-OmniRoute-Version`. Они создаются при завершении чата, `/v1/responses`, `/v1/messages`,** и конечные точки мультимедиа** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` и `/v1/moderations` (всегда стоит `0`). Стоимость рекламы рассчитывается по модальности (за изображение, за секунду, за символ, за единицу поиска), если доступна цена, в противном случае `0` (открытие при сбое).
 
-> **Семантика стоимости при попадании в кэш:** при попадании в семантический кэш (`X-OmniRoute-Cache-Hit: true`) вызов вышестоящего сервиса не выполняется, поэтому `X-OmniRoute-Response-Cost` равен `0.0000000000` (это **добавочная** стоимость обработки попадания в кэш). Исходная стоимость или стоимость, которая была бы начислена, указывается отдельно в `X-OmniRoute-Cost-Saved`. Системы, обрабатывающие данные для биллинга, должны суммировать `X-OmniRoute-Response-Cost` (попадания в кэш ничего не стоят); для аналитики кэша можно агрегировать `X-OmniRoute-Cost-Saved`.
+> **Семантика стоимости попадания в кэш:** в семантическом кэше HIT (`X-OmniRoute-Cache-Hit: true`) восходящий вызов не выполняется, поэтому `X-OmniRoute-Response-Cost` это `0.0000000000` (** постепенный** стоимость обслуживания хита). Стоимость original/would-have-been указывается отдельно в `X-OmniRoute-Cost-Saved`. Потребители, выставляющие счета, должны суммировать `X-OmniRoute-Response-Cost` (обращения ничего не стоят); аналитика кэша может агрегировать `X-OmniRoute-Cost-Saved`.
 
 ## Эксклюзивные управляемые лизы сессий
 
@@ -330,51 +315,30 @@ Content-Type: application/json
 }
 ```
 
-Доступны следующие провайдеры: OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (локальный), ComfyUI (локальный).
+Доступные поставщики: OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (локальный), ComfyUI (локальный).
 
-`n` возвращает `n` изображений в `data[]`. Для провайдеров, API которых возвращает одно изображение за вызов
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), выполняется `n` отдельных вызовов upstream API — одновременно
-не более 4. Фиксированное значение `seed` смещается на индекс вызова (`seed`, `seed + 1`, …),
-поэтому изображения отличаются, но остаются воспроизводимыми. Максимальное значение `n` — 10.
-Весь запрос завершается с ошибкой, если завершается ошибкой любой вызов. Список форматов с
-fan-out — `SINGLE_IMAGE_FANOUT_FORMATS` в
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` возвращает изображения `n` в `data[]`. Провайдеры, у которых восходящий API возвращает одно изображение за вызов (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), получают `n` отдельные восходящие вызовы, максимум 4 в процессе. Фиксированный `seed` компенсируется индексом вызова (`seed`, `seed + 1`, …), поэтому изображения различаются, но остаются воспроизводимыми. `n` ограничено значением 10. Запрос в целом завершается неудачей, если какой-либо вызов завершается неудачно. Список форматов разветвления — `SINGLE_IMAGE_FANOUT_FORMATS` в `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux использует существующее подключение с API-ключом и принимает префиксы `zenmux/` или `zm/`:
+Codex GPT Модели изображений (`codex/gpt-image-*`) возвращают только PNG : восходящий поток отвечает `200` байтами PNG, даже когда запрашивается `jpeg` или `webp`. Запрос с любым другим `output_format` (`webp`, `jpeg`, ...) отклоняется с помощью HTTP 400 вместо того, чтобы молча игнорироваться; опустите его или отправьте `png`. `output_compression` не пересылается.
 
-- `zenmux/openai/gpt-image-2` использует API изображений OpenAI от ZenMux. Доступны параметры `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` и `response_format`.
-- Другие издатели, например `zm/meta/muse-image-1.0`, используют конечную точку Vertex AI `:predict`
-  от ZenMux. Параметр `n` преобразуется в `sampleCount`, `aspect_ratio` — в `aspectRatio`, а `image_size`
-  (`1K`, `2K`, `4K`) — в `sampleImageSize`. Параметр `size` в пикселях задаёт только соотношение сторон,
-  но не гарантированные размеры в пикселях. Поддерживаемые соотношения сторон, разрешения и количества
-  изображений зависят от модели.
-- `zm/inclusionai/ming-image-0.1-design` самостоятельно выбирает размеры. Не указывайте `size`,
-  `aspect_ratio` и `image_size`; явное задание этих значений приводит к ошибке HTTP 400. Форматы PNG,
-  JPEG и WebP можно запросить с помощью `output_format`.
+ZenMux повторно использует существующее соединение API-ключа и принимает префиксы `zenmux/` или `zm/` :
 
-Эта интеграция поддерживает генерацию изображений по текстовому описанию, но не редактирование
-эталонных изображений. Вывод Vertex нормализуется в `data[].b64_json`; `response_format: "url"`
-возвращает upstream URL с протоколом HTTPS или URL данных в формате base64, если доступны только
-байты изображения. Пустой или отфильтрованный результат возвращается как ошибка, а не как успешный
-ответ без данных. Доступ к моделям зависит от учётной записи ZenMux.
-См. [Vertex API ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) и
-[API изображений OpenAI](https://docs.zenmux.ai/api/openai/generate-an-image).
+- `zenmux/openai/gpt-image-2` использует изображения ZenMuxOpenAI из API. Возможные варианты: `size`, `quality`, `n`, `output_format`, `output_compression`, `background` и `response_format`.
+- Другие издатели, такие как `zm/meta/muse-image-1.0`, используют конечную точку ZenMux Vertex AI `:predict`. `n` отображается в `sampleCount`, `aspect_ratio` в `aspectRatio`, а `image_size` (`1K`, `2K`, `4K`) в `sampleImageSize`. Пиксель `size` предоставляет только соотношение сторон, но не гарантированные размеры пикселей. Поддерживаемые соотношения, разрешения и значения зависят от модели.
+- `zm/inclusionai/ming-image-0.1-design` выбирает свои собственные размеры. Опустите `size`, `aspect_ratio` и `image_size`; явные значения возвращают HTTP 400. PNG, JPEG и WebP можно запросить с помощью `output_format`.
 
-Подключение для входа в Microsoft 365 Copilot предоставляет `copilot-m365-web/m365-copilot-image`
-через встроенный инструмент изображений Copilot: один раунд Copilot на изображение (`n` от 1 до 4),
-параметр `size` влияет только на ориентацию, а изображения возвращаются непосредственно (`b64_json`
-или URL данных для `response_format: "url"`). См. [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+This integration supports text-to-image generation, not reference-image editing. Vertex output is normalized to `data[].b64_json`; `response_format: "url"` returns an upstream HTTPS URL or a base64 data URL when only image bytes are available. Empty/filtered outputs return an error rather than an empty success. Model access depends on the ZenMux account. See [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) and [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Соединение для входа в Microsoft 365 Copilot обслуживает `copilot-m365-web/m365-copilot-image` через встроенный инструмент обработки изображений Copilot: один поворот Copilot на изображение (`n` 1–4), `size` управляет только ориентацией, а изображения возвращаются в строке (`b64_json` или данные URL для `response_format: "url"`). См. [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Перечислить все модели изображений
+# List all image models
 GET /v1/images/generations
 ```
 
 ---
 
-## OCR документов
+## Документ OCR
 
 ```bash
 POST /v1/ocr
@@ -390,17 +354,15 @@ Content-Type: application/json
 }
 ```
 
-`model` выбирает провайдера OCR с помощью префикса `provider/model`; идентификатор модели без префикса (например,
-`mistral-ocr-latest`) сопоставляется с зарегистрированным провайдером, а если `model` не указан, по умолчанию используется
-Mistral (`mistral-ocr-latest`). Зарегистрированные провайдеры (`open-sse/config/ocrRegistry.ts`):
+`model` выбирает поставщика OCR по префиксу `provider/model` ; пустой идентификатор модели (например, `mistral-ocr-latest`) преобразуется в зарегистрированного поставщика, а пропущенный `model` по умолчанию равен Mistral (`mistral-ocr-latest`). Зарегистрированные провайдеры (`open-sse/config/ocrRegistry.ts`):
 
-| Идентификатор провайдера      | Идентификатор модели | Значение `model`                                                     | Примечания                                                                                                               |
-| ----------------------------- | -------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (или без префикса `mistral-ocr-latest`) | Синхронный — ответ возвращается непосредственно из единственного upstream-вызова.                                        |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                          | Асинхронный upstream (`analyze` + опрос) — см. ниже.                                                                     |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                              | Синхронный, через партнёрский endpoint Vertex AI `openapi/chat/completions` — сведения об аутентификации и URL см. ниже. |
+| Идентификатор поставщика      | Идентификатор модели                                  | значение `model`                                              | Примечания                                                                                                                                                                                                                 |
+| ----------------------------- | ----------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                                  | `mistral/mistral-ocr-latest` (или голый `mistral-ocr-latest`) | Синхронный — ответ возвращается непосредственно из одного восходящего вызова.                                                                                                                                              |
+| `azure-document-intelligence` | `prebuilt-read`                                       | `azure-document-intelligence/prebuilt-read`                   | Асинхронный восходящий поток (опрос `analyze` + ) — см. ниже.                                                                                                                                                              |
+| `vertex-deepseek-ocr`         | самостоятельное развертывание (без встроенной модели) | `vertex-deepseek-ocr/<your-deployed-model-id>`                | Синхронно, через собственную конечную точку Vertex AI Model Garden DeepSeek-OCR (форма `openapi/chat/completions` ); Google удалил управляемый `deepseek-ocr-maas` 21 октября 2026 г. (#20423), так что id возвращает 400. |
 
-Все три провайдера возвращают тело в одном формате Mistral:
+Все три провайдера отвечают в одном корпусе в форме Мистраля:
 
 ```json
 {
@@ -410,20 +372,13 @@ Mistral (`mistral-ocr-latest`). Зарегистрированные прова�
 }
 ```
 
-### Процесс опроса Azure Document Intelligence
+### Поток опроса Azure Document Intelligence
 
-API `analyze` Azure Document Intelligence является асинхронным: исходный запрос возвращает
-заголовок `Operation-Location` вместо тела, а результат необходимо получать опросом. Обработчик
-(`open-sse/handlers/ocr.ts`) опрашивает этот URL каждую секунду, выполняя до 30 попыток, немедленно завершается с ошибкой (и
-не продолжает опрос) при ответе опроса с не-`ok` или статусом `"failed"` и возвращает `504`, если операция всё ещё выполняется после исчерпания лимита попыток. Итоговый ответ Azure
-нормализуется в ту же форму `pages`/`markdown`, которая используется Mistral, прежде чем возвращается вызывающей стороне, поэтому клиентскому коду не требуется отдельно обрабатывать провайдера.
+Azure Document Intelligence's `analyze` API is asynchronous: the initial request returns an `Operation-Location` header instead of a body, and the result must be polled for. The handler (`open-sse/handlers/ocr.ts`) polls that URL every second for up to 30 attempts, fails fast (does not keep polling) on a non-`ok` poll response or a `"failed"` status, and returns `504` if the operation is still running after the attempt budget is exhausted. The final Azure response is normalized into the same `pages`/`markdown` shape used by Mistral before being returned to the caller, so client code does not need to special-case the provider.
 
-### Аутентификация и разрешение endpoint Vertex AI DeepSeek OCR
+### Vertex AI DeepSeek OCR аутентификация и разрешение конечных точек
 
-`vertex-deepseek-ocr` повторно использует ту же аутентификацию Vertex AI, которую OmniRoute уже поддерживает для
-обработки чатов и изображений (`open-sse/executors/vertex.ts`): API-ключ подключения представляет собой либо учётные данные Service Account в формате JSON (обмениваемые на краткоживущий токен доступа OAuth через поток JWT bearer), либо уже выпущенный токен доступа OAuth, используемый как есть. URL upstream endpoint — это универсальный партнёрский endpoint Vertex `openapi/chat/completions`, сформированный на основе проекта и региона подключения: явно заданные `providerSpecificData.project`/`providerSpecificData.region` всегда имеют приоритет; в противном случае проект извлекается из `project_id` JSON Service Account, а регионом по умолчанию является `us-central1`. Оба разрешения выполняются в `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), а затем используются в
-`src/app/api/v1/ocr/route.ts` перед передачей управления в `handleOcr`.
+`vertex-deepseek-ocr` reuses the same Vertex AI authentication OmniRoute already supports for chat/image traffic (`open-sse/executors/vertex.ts`): the connection's API key is either a Service Account JSON credential (exchanged for a short-lived OAuth access token via the JWT-bearer flow) or an already-minted OAuth access token used as-is. The upstream endpoint URL is Vertex's generic `openapi/chat/completions` partner endpoint, built from the connection's project and region — an explicit `providerSpecificData.project`/`providerSpecificData.region` always wins; в противном случае проект является производным от `project_id` учетной записи службы JSON, а регион по умолчанию равен `us-central1`. Оба разрешения происходят в `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), потребляемые `src/app/api/v1/ocr/route.ts` перед отправкой в `handleOcr`.
 
 ---
 
@@ -677,98 +632,104 @@ curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
 
 ---
 
-## Эндпоинты совместимости
+## Конечные точки совместимости
 
-| Method | Path                                      | Format                                   |
-| ------ | ----------------------------------------- | ---------------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                                   |
-| POST   | `/v1/messages`                            | Anthropic                                |
-| POST   | `/v1/responses`                           | OpenAI Responses                         |
-| POST   | `/v1/embeddings`                          | OpenAI                                   |
-| POST   | `/v1/images/generations`                  | OpenAI Images                            |
-| POST   | `/v1/images/edits`                        | OpenAI Images (редактирование/дорисовка) |
-| POST   | `/v1/videos/generations`                  | Генерация видео в стиле OpenAI           |
-| POST   | `/v1/music/generations`                   | Генерация музыки в стиле OpenAI          |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                       |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (возвращает аудиотело)        |
-| POST   | `/v1/rerank`                              | Переранжирование в стиле Cohere/Voyage   |
-| POST   | `/v1/classify`                            | Классификация Jina (`api.jina.ai`)       |
-| POST   | `/v1/segment`                             | Сегментатор Jina (`segment.jina.ai`)     |
-| POST   | `/v1/moderations`                         | OpenAI Moderations                       |
-| GET    | `/v1/models`                              | OpenAI                                   |
-| POST   | `/v1/models/query`                        | Отфильтрованный список моделей           |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                                |
-| GET    | `/v1beta/models`                          | Gemini                                   |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                   |
-| POST   | `/v1/api/chat`                            | Ollama                                   |
-| GET    | `/api/v1/vscode/{token}/`                 | Псевдоним каталога OpenAI                |
-| GET    | `/api/v1/vscode/{token}/models`           | Псевдоним моделей OpenAI                 |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | Псевдоним OpenAI с токеном               |
-| POST   | `/api/v1/vscode/{token}/responses`        | Псевдоним OpenAI Responses с токеном     |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Псевдоним Ollama с токеном               |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Псевдоним тегов Ollama с токеном         |
+| Метод | Путь                                      | Формат                                      |
+| ----- | ----------------------------------------- | ------------------------------------------- |
+| POST  | `/v1/chat/completions`                    | OpenAI                                      |
+| POST  | `/v1/messages`                            | Anthropic                                   |
+| POST  | `/v1/responses`                           | OpenAI Ответы                               |
+| POST  | `/v1/embeddings`                          | OpenAI                                      |
+| POST  | `/v1/images/generations`                  | Изображения по OpenAI                       |
+| POST  | `/v1/images/edits`                        | Изображения OpenAI (edit/inpaint)           |
+| POST  | `/v1/videos/generations`                  | Генерация видео в стиле OpenAI              |
+| POST  | `/v1/music/generations`                   | Генерация музыки в стиле OpenAI             |
+| POST  | `/v1/audio/transcriptions`                | OpenAI Аудио (STT)                          |
+| POST  | `/v1/audio/speech`                        | OpenAI TTS (возвращает тело аудио)          |
+| POST  | `/v1/rerank`                              | Cohere/Voyage-style меняет рейтинг          |
+| POST  | `/v1/classify`                            | Джина классифицировать (`api.jina.ai`)      |
+| POST  | `/v1/segment`                             | Сегментатор Jina (`segment.jina.ai`)        |
+| POST  | `/v1/moderations`                         | OpenAI Модерация                            |
+| POST  | `/v1/systemone`                           | Типичные решения Системы Один               |
+| POST  | `/v1/decisions`                           | OpenAI Решения (родной)                     |
+| GET   | `/v1/systemone/models`                    | Каталог моделей решений                     |
+| GET   | `/v1/models`                              | OpenAI                                      |
+| POST  | `/v1/models/query`                        | Отфильтрованный список моделей              |
+| POST  | `/v1/messages/count_tokens`               | Anthropic                                   |
+| GET   | `/v1beta/models`                          | Gemini                                      |
+| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                      |
+| POST  | `/v1/api/chat`                            | Ollama                                      |
+| GET   | `/api/v1/vscode/{token}/`                 | псевдоним каталога OpenAI                   |
+| GET   | `/api/v1/vscode/{token}/models`           | псевдоним модели OpenAI                     |
+| POST  | `/api/v1/vscode/{token}/chat/completions` | токенизированный псевдоним OpenAI           |
+| POST  | `/api/v1/vscode/{token}/responses`        | Токенизированный псевдоним OpenAI Responses |
+| POST  | `/api/v1/vscode/{token}/api/chat`         | токенизированный псевдоним Ollama           |
+| GET   | `/api/v1/vscode/{token}/api/tags`         | токенизированный псевдоним тегов Ollama     |
 
-Все маршруты POST используют одну и ту же структуру: `Bearer your-api-key` + тело JSON, проверяемое с помощью Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` и т. д.; см. `src/shared/validation/schemas.ts`). При ошибке проверки схемы возвращается ответ 4xx.
+Все маршруты POST имеют одинаковую форму: `Bearer your-api-key` + Тело JSON, проверенное Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` и т. д., см. `src/shared/validation/schemas.ts`). 4xx возвращается при сбое схемы.
 
-Для клиентов, которые не могут добавить `Authorization: Bearer ...`, OmniRoute также принимает API-ключи в URL через параметры строки запроса для совместимости (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) или через специальные эндпоинты `/api/v1/vscode/{token}/...`, описанные ниже.
+Для клиентов, которые не могут подключить `Authorization: Bearer ...`, OmniRoute также принимает ключи API в URL посредством совместимости строк запроса (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) или выделенных конечных точек `/api/v1/vscode/{token}/...` описанных ниже.
 
 ```bash
-# Переранжирование (провайдер из облачного реестра или узел провайдера, совместимый с OpenAI, в формате "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Классификация Jina (учётные данные Foundation API)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Сегментатор Jina
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Поиск Jina (s.jina.ai; псевдонимы провайдера: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Модерация
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — возвращает тело audio/mpeg (или запрошенный формат)
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Для Soniox TTS требуется язык и голос: `language` по умолчанию имеет значение "en"; отсутствующий
-# голос или стандартное имя голоса OpenAI (alloy, nova, …) заменяется на "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Редактирование изображения (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Генерация видео/музыки (идентификатор модели с префиксом провайдера)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Узлы провайдеров rerank:** `POST /v1/rerank` также направляется на совместимые с OpenAI узлы провайдеров
-> (oMLX, vLLM, Infinity, TEI за шлюзом и т. д.), адресуемые как `<node-prefix>/<model>`. Узлы обратной связи
-> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) всегда подходят, как и имена хостов, перечисленные оператором в
-> `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (например, имя сервиса Docker/Compose, такое как
-> `http://reranker:8080/v1`; к ним обращаются напрямую, никогда через `HTTP(S)_PROXY` или закреплённый прокси
-> соединения). Узлы на любых других
-> хостах — в локальной сети или среди узлов Tailscale — подходят только если оператор включает
-> функциональный флаг `RERANK_REMOTE_PROVIDER_NODES` **и** базовый URL узла проходит политику исходящих URL провайдера
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Шаг переранжирования движка памяти вызывает этот маршрут через
-> обратную связь, поэтому это же правило применяется к `rerankProviderModel` в настройках памяти.
+> **Измените ранжирование узлов поставщика:** `POST /v1/rerank` также осуществляет маршрутизацию к узлам провайдера, совместимым с OpenAI (oMLX, vLLM, Infinity, TEI за шлюзом, …), адресуемым как `<node-prefix>/<model>`. Узлы обратной связи (`localhost`, `127.0.0.1`, `172.16.0.0/12`) всегда допускаются, как и имена хостов, которые оператор перечисляет в `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (например, имя службы Docker/Compose такое как `http://reranker:8080/v1`; они вызываются напрямую, а не через `HTTP(S)_PROXY` или закрепленный прокси-сервер соединения). Узлы на любом другом хосте — ящике LAN или Tailscale узле — допускаются только в том случае, если оператор включает флаг функции `RERANK_REMOTE_PROVIDER_NODES`** и** Базовый URL узла передает исходящую политику URL провайдера (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Шаг переранжирования механизма памяти вызывает этот маршрут через петлю, поэтому то же правило управляет `rerankProviderModel` в настройках памяти.
 >
-> **Форматы локального сервера:** к узлу обращаются по адресу `<base>/v1/rerank`, а при ответе 404 — по адресу `<base>/rerank`
-> (Infinity, TEI). Тело запроса к вышестоящему сервису содержит оба варианта написания Cohere/OpenAI (`documents`,
-> `return_documents`) и вариант написания TEI (`texts`, `return_text`), а ответ вышестоящего сервиса
-> нормализуется в оболочку Cohere: необёрнутый массив TEI `[{index, score, text}]`, `{results: [{index, score}]}`
-> от тонких шлюзов и вариант Voyage `{data: [...]}` возвращаются клиенту как
-> `{results: [{index, relevance_score, document?}]}`, отсортированные по оценке и ограниченные значением `top_n`.
+> **Формы локального сервера:** узел вызывается по адресу `<base>/v1/rerank`, а в 404 — по адресу `<base>/rerank` (Бесконечность, TEI). Тело восходящего потока содержит как написание Cohere/OpenAI (`documents`, `return_documents`), так и написание TEI (`texts`, `return_text`), а ответ восходящего потока нормализуется по конверту Cohere : голый `[{index, score, text}]` TEI, `{results: [{index, score}]}` от тонких шлюзов и `{data: [...]}` в стиле Voyage — все они возвращаются клиенту как `{results: [{index, relevance_score, document?}]}`, отсортированные по баллам и ограниченные `top_n`.
 
-> **Обнаружение узлов провайдеров:** модели на совместимом с OpenAI узле провайдера отображаются в `GET /v1/models`
-> с префиксом узла. Строки без метаданных конечной точки (что обычно характерно для локальных списков `/v1/models`)
-> наследуют `apiType` узла, поэтому модели узла `embeddings` имеют значение `type: "embedding"`, а
-> модели узла `rerank` — значение `type: "rerank"`, вместо значения по умолчанию для чата;
-> явное `supportedEndpoints` в синхронизированной или добавленной вручную строке всё же имеет приоритет.
+> **Обнаружение узла-провайдера:** модели на узле поставщика, совместимом с OpenAI, отображаются в `GET /v1/models` под префиксом узла. Строки, которые не содержат метаданных конечной точки (типично для локальных списков `/v1/models` ), наследуют `apiType` узла, поэтому моделями узла `embeddings` являются `type: "embedding"`, а моделями узла `rerank` `type: "rerank"` а не чат по умолчанию; явный `supportedEndpoints` для синхронизированной или добавленной вручную строки по-прежнему имеет приоритет.
 
-### Выделенные маршруты провайдеров
+### Типизированные решения
+
+Модели принятия решений отвечают на напечатанные вопросы с калиброванной вероятностью, а не генерируют текст. Они никогда не являются моделями чата, и два телеграфных формата никогда не переводятся друг в друга:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter решения, Cloudflare Workers AI, local Ollama).
+- `POST /v1/decisions` — OpenAI решения `{ model, input, questions: [...] }`, обслуживаемые соединением `openai`. Модель — `openai/gpt-6-luna` (голый `gpt-6-luna` тоже работает). Ответы возвращаются в порядке вопросов, нетронутыми.
+- `GET /v1/systemone/models` — — один каталог обоих видов; каждая строка называет свой `api_format` (`systemone` или `decisions`). страница `limit` / `after` окончательный список. Заголовок `X-OmniRoute-Catalog-Status` читается как `complete`, `partial` или `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+В `/v1/decisions` перед считыванием каких-либо учетных данных проверяются список разрешенных моделей ключа API, категория конечной точки `decisions`, бюджет и область подключения. Учетные данные — это сохраненное соединение `openai` внутри области действия ключа (никогда не являющееся ключом среды); база соединения URL учитывается только в том случае, если это `http(s)` URL без учетных данных, запроса или фрагмента, который не указывает на этот OmniRoute. Вызов проходит через тот же защищенный транспорт, что и автомаршрутизатор `decision` ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): защита исходящего трафика поставщика, отсутствие повторных попыток и перенаправлений, тайм-аут 5 с и ограничение ответа KB 64 (более крупный ответ — 502). Тело запроса ограничено 4 MiB. Каждый вызов отправляет новый `Idempotency-Key`. Ошибки содержат только статус восходящего потока, но не его тело, URL, ключ или приглашение.
+
+### Выделенные маршруты провайдера
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -776,7 +737,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Префикс провайдера добавляется автоматически, если он отсутствует. Несоответствующие модели возвращают `400`.
+Префикс провайдера добавляется автоматически, если он отсутствует. Несовпадающие модели возвращают `400`.
 
 ---
 

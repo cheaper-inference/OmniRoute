@@ -99,31 +99,31 @@ Per kombination:
 
 ---
 
-## API för hälsokontroll
+## Hälsokontroll API
 
-OmniRoute exponerar **två** HTTP-ytor för hälsokontroll. De är inte utbytbara för orkestreringssystem.
+OmniRoute avslöjar** två** HTTP hälsoytor. De är inte utbytbara för orkestratorer.
 
-| Sökväg                       | Syfte                                                                            | Belastning                             | Använd för                                                                      |
-| ---------------------------- | -------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------- |
-| `GET /healthz`               | Livscykelstatus för liveness/readiness (`ok` / `starting` / `stopping`)          | Försumbar (endast fasflagga)           | Kubernetes **readiness**; mjuk **liveness** om du måste använda HTTP            |
-| `GET /api/monitoring/health` | Djupgående sammanfattning av system och leverantörer (DB, heap, katalogantal, …) | Tung (synkront DB-/övervakningsarbete) | Kontrollpaneler, djupgående blackbox-kontroller, Dockers inbyggda hälsokontroll |
+| Väg                          | Ändamål                                                              | Vikt                                | Använda                                                                |
+| ---------------------------- | -------------------------------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------- |
+| `GET /healthz`               | Livscykel liveness/readiness (`ok` / `starting` / `stopping`)        | Trivial (endast fasflagga)          | Kubernetes** beredskap** ; mjuk** livlighet** om du måste använda HTTP |
+| `GET /api/monitoring/health` | Djup system + -leverantörssammanfattning (DB, heap, katalogantal, …) | Tung (sync DB / övervakningsarbete) | Dashboards, blackbox djupa kontroller, Docker inbyggda hälsokontroll   |
 
-> **Obs!** Leverantörernas hälsomatriser, autopilotproblem, kvotövervakare, tokenhälsa och latensdetaljer utöver `/api/monitoring/health` är tillgängliga via **MCP-verktyget** `observability_snapshot` eller sidorna i **kontrollpanelen** — det finns inga särskilda REST-rutter för dessa.
+> **Notera:** Leverantörshälsomatriser, autopilotproblem, kvotövervakare, tokens hälsa och latensdetaljer utöver `/api/monitoring/health` är tillgängliga via**MCP verktyg** `observability_snapshot` eller** instrumentpanelen** sidor — det finns inga dedikerade REST -rutter för dessa.
 
-Båda rutterna körs i **samma Node-händelseloop** som hanteringen av förfrågningar. En CPU-bunden kodväg (omfattande katalogarbete för `GET /v1/models`, komprimering av långa kontexter/tokenräkning) kan fördröja **alla** HTTP-hanterare, inklusive `/healthz`. Upptagen händelseloop ≠ död process. Åtgärda helst belastningsorsaken; justering av kontroller minskar bara felaktiga omstarter.
+Båda sträckorna går på** samma Node event loop** som förfrågningshantering. En CPU-bunden sökväg (stort `GET /v1/models` -katalogarbete, långkontextkomprimering / tokenräkning) kan fördröja** alla** HTTP hanterare, inklusive `/healthz`. Event-loop upptagen ≠ process död. Föredrar att fixa svinet; sondjustering minskar bara falska dödar.
 
-### Lättviktig kontroll för orkestreringssystem
+### Lättvikts orkestratorprob
 
 ```bash
 GET /healthz
-# eller HEAD /healthz
+# or HEAD /healthz
 ```
 
-- **200** + svaret `ok` när serverns livscykelfas är redo
+- **200** + body `ok` när serverns livscykelfas är klar
 - **503** + `starting` / `stopping` under uppstart eller avstängning
-- Implementering: `src/app/healthz/route.ts` (ingen DB-pingning)
+- Implementering: `src/app/healthz/route.ts` (ingen DB -ping)
 
-### Systemhälsa (djupgående)
+### Systemhälsa (djup)
 
 ```bash
 GET /api/monitoring/health
@@ -153,43 +153,35 @@ Svar:
 }
 ```
 
-#### `credentialHealth`: cache för kontroller kontra SQLite-`test_status`
+#### `credentialHealth`: probe-cache vs SQLite `test_status`
 
-`GET /api/monitoring/health` → `credentialHealth` är **mätvärdet från cachen för kontroller i minnet**,
-inte en livedump av `provider_connections.test_status`. Efter #12532 läser
-förfrågningsvägen endast `getCachedCredentialHealthSummary()`; bakgrundskontroller
-uppdaterar cachen utanför händelseloopen.
+`GET /api/monitoring/health` → `credentialHealth` är den** in-memory probe-cache-mätare** , inte en livedump av `provider_connections.test_status`. Efter #12532 läser sökvägen för begäran endast `getCachedCredentialHealthSummary()` ; bakgrundssonder uppdaterar cachen från händelseslingan.
 
-| Lager                             | Var                                                                   | Vad det innebär                                                                                                                                                                                            |
-| --------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mätvärde från kontrollcache       | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | De senaste resultaten från kontroller av autentiseringsuppgifter som fortfarande finns i processminnet. `source` är alltid `probe-cache`.                                                                  |
-| Detaljer om misslyckad anslutning | `credentialHealth.failedConnections`                                  | Finns **endast när `failed > 0`**. Begränsad lista över cacherader med `status=error` (`connectionId`, `status`, sanerade `lastError` / `lastErrorType`). `failedOmitted` anges när listan har begränsats. |
-| Beständig SQLite-status           | `credentialHealth.staleDbNonOkCount`                                  | Antal **aktiva** (`is_active=1`) anslutningsrader vars beständiga `test_status` är ett känt icke-godkänt värde (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).          |
+| Lager                        | Där                                                                   | Vad det betyder                                                                                                                                                                                                   |
+| ---------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Probe-cache-mätare           | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Resultaten från den senaste referens-hälsoproben finns fortfarande kvar i processminnet. `source` är alltid `probe-cache`.                                                                                        |
+| Misslyckad anslutningsdetalj | `credentialHealth.failedConnections`                                  | Presentera** bara när `failed > 0`** . Avgränsad lista över cache-rader med `status=error` (`connectionId`, `status`, sanerad `lastError` / `lastErrorType`). `failedOmitted` ställs in när listan var begränsad. |
+| SQLite klibbig status        | `credentialHealth.staleDbNonOkCount`                                  | Räkna av** aktiv** (`is_active=1`) anslutningsrader vars kvarstående `test_status` är en känd icke-ok (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                          |
 
-De två lagren kan avsiktligt skilja sig åt:
+De två lagren kan vara oense med avsikt:
 
-- Mätvärdet `failed=0` medan `staleDbNonOkCount>0` — SQLite har fortfarande en beständig
-  `test_status` (exempelvis `expired` eller `credits_exhausted`) som den senaste
-  ögonblicksbilden i kontrollcachen inte räknar som `status=error`.
-- Mätvärdet `failed>0` medan SQLite ser friskt ut — en nyligen utförd kontroll misslyckades och är
-  cachad; DB-raden har inte uppdaterats eller rensades senare.
+- Mät `failed=0` medan `staleDbNonOkCount>0` — SQLite fortfarande har en klibbig `test_status` (till exempel `expired` eller `credits_exhausted`) att den senaste probe-cache-ögonblicksbilden inte räknas som `status=error`.
+- Mät `failed>0` medan SQLite ser frisk ut — en ny sond misslyckades och cachelagras; DB raden har inte uppdaterats eller raderades senare.
 
-Skapa inte larm enbart utifrån `provider_connections.test_status` när denna
-slutpunkt avläses. Använd `failed` + `failedConnections` för aktuella kontrollfel och
-`staleDbNonOkCount` när du behöver antalet beständiga sticky-statusar.
+Varna inte enbart på `provider_connections.test_status` när du skrapar denna slutpunkt. Använd `failed` + `failedConnections` för levande sondfel, och `staleDbNonOkCount` när du behöver den ihållande sticky-status-räkningen.
 
-### Rekommendationer för Kubernetes-kontroller
+### Kubernetes undersöker rekommendationer
 
-OmniRoute är en **enda Node-process** (en händelseloop). Dockers standardkonfiguration för `HEALTHCHECK` använder den lättviktiga `/healthz`. `/api/monitoring/health` är **för tung** för kubelets liveness-intervall.
+OmniRoute är en** enda nodprocess** (en händelseslinga). Aktie Docker `HEALTHCHECK` riktar sig mot lättvikts `/healthz`. `/api/monitoring/health` är** för tung** för kubelets livlighetsintervall.
 
-| Kontroll               | Rekommenderat mål                                                                  | Anmärkningar                                                                                                                                                                                                                                                                                                                                                              |
-| ---------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Uppstart**           | HTTP `GET /healthz` med ett långt `failureThreshold` (eller stort `startPeriod`)   | Kallstart + SQLite-migrering kan ta mer än några sekunder                                                                                                                                                                                                                                                                                                                 |
-| **Beredskap**          | HTTP `GET /healthz`                                                                | Livscykel `ok` / `starting` / `stopping` (200 kontra 503). Fladdrar fortfarande om loopen blockeras av CPU:n. Ett **200-svar som tar flera sekunder är inte hälsosamt** (#10303) — det innebär att händelseloopen inte fick någon exekveringstid innan hanteraren på 3 byte kördes                                                                                        |
-| **Livlighet**          | HTTP `GET /livez`, **eller TCP** på huvudtjänstens port (`PORT`, standard `20128`) | `/livez` kontrollerar endast att processen lever (alltid 200 om hanteraren körs). Den delar fortfarande händelseloopen — upptagen ≠ död, och den upptäcker inte svält i händelseloopen (#10303) bättre än TCP. Föredra **TCP** om HTTP-kontroller får timeout under katalog-/komprimeringsbelastning; döda **inte** podden vid korta stopp i händelseloopen oavsett metod |
-| **Djup hälsokontroll** | `GET /api/monitoring/health` från en extern kontrolltjänst                         | Inte för kubelets `livenessProbe` / täta `readinessProbe`                                                                                                                                                                                                                                                                                                                 |
+| Sond           | Rekommenderat mål                                                                | Anteckningar                                                                                                                                                                                                                                                                                                                                        |
+| -------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Uppstart**   | HTTP `GET /healthz` med en lång `failureThreshold` (eller stor `startPeriod`)    | Kallstart + SQLite migrering kan överstiga några sekunder                                                                                                                                                                                                                                                                                           |
+| **Beredskap**  | HTTP `GET /healthz`                                                              | Livscykel `ok` / `starting` / `stopping` (200 vs 503). Klappar fortfarande om slingan är CPU-blockerad. A** 200 på flera sekunder är inte hälsosamt** (#10303) — det betyder att händelseslingan svältes innan 3-byte-hanteraren körde                                                                                                              |
+| **Livlighet**  | HTTP `GET /livez`,** eller TCP** på huvudtjänstporten (`PORT`, standard `20128`) | `/livez` är endast process-live (alltid 200 om hanteraren körs). Den delar fortfarande händelseslingan — busy ≠ dead, och den upptäcker inte svält i händelseslingor (#10303) bättre än vad TCP gör. Föredra**TCP** om HTTP sonder tar timeout under catalog/compression belastning; do** inte** döda podden på korta event-loop-bås åt båda hållen |
+| **Djup hälsa** | `GET /api/monitoring/health` från en extern checker                              | Inte för kubelet `livenessProbe` / tight `readinessProbe`                                                                                                                                                                                                                                                                                           |
 
-Exempel på utformning (anpassa tröskelvärdena efter din kallstart och komprimeringsbelastning):
+Exempelform (justera tröskelvärdena till din kallstarts- och kompressionsbelastning):
 
 ```yaml
 ports:
@@ -215,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Vid stopp i händelseloopen kan HTTP /livez fortfarande få timeout. TCP är det
-  # konservativa alternativet:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-Rikta **inte** kubelets **livlighetskontroll** mot `/api/monitoring/health`. Den sökvägen utför verkligt databas-/övervakningsarbete och ger falska positiva resultat under belastning.
+**Gör inte det** punkt kubelet** livlighet** på `/api/monitoring/health`. Den vägen fungerar riktigt DB/monitoring och kommer att vara falsk-positiv under belastning.
 
-Relaterat: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (kontroller medan händelseloopen är upptagen), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (katalogprissättning som slukar resurser), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (räkning av komprimeringstoken som slukar resurser).
+Relaterat: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sonder när händelseslingan är upptagen), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (katalogprissättning), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (kompressionstoken-count hog).
 
-### systemd-watchdog (frusen händelseloop)
+### systemd watchdog (fryst händelseloop)
 
-På en systemd-värd meddelar OmniRoute tjänstehanteraren när den är redo och fortsätter att pinga den, så att en server vars händelseloop har fastnat dödas och startas om i stället för att fortsätta köras utan att svara. Pingningarna kommer från serverns egen händelseloop: när den blockeras upphör de, och systemd startar om tjänsten när `WatchdogSec` har passerat utan någon pingning.
+På en systemd-värd säger OmniRoute till servicehanteraren när den är klar och fortsätter att pinga den, så en server vars händelseslinga har fastnat dödas och startas om istället för att vara uppe och tyst. Pingarna kommer från serverns egen händelseslinga: när den blockeras stoppas de och systemd startar om tjänsten när `WatchdogSec` har förflutit utan en.
 
-[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) skriver redan en användarenhet med detta. En enhet som du skriver själv (med standardvärdet `Type=simple`) får ingen watchdog, så lägg till dessa rader i dess `[Service]`-sektion:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) skriver redan en användarenhet med detta. En enhet du skriver själv (standard `Type=simple`) får ingen vakthund, så lägg till dessa rader i dess `[Service]` sektion:
 
 ```ini
 [Service]
@@ -239,12 +231,12 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-Den genererade enheten anger `Restart=on-failure`, så lägg även till den raden — utan den dödar watchdog-funktionen endast den fastnade tjänsten i stället för att starta om den.
+Den genererade enheten ställer in `Restart=on-failure`, så lägg till den raden också — utan den dödar watchdog bara den fastnade tjänsten istället för att starta om den.
 
-- `Type=notify`: tjänsten är ”startad” när servern skickar `READY=1`, inte när processen förgrenas. `TimeoutStartSec` begränsar en långsam start.
-- `NotifyAccess=all`: pingningarna skickas av serverprocessen, som är en underordnad process till övervakaren `omniroute serve`.
-- `WatchdogSec`: pingningar skickas var 60:e sekund, så använd **120 eller mer**. Lägre värden skulle starta om en fungerande server.
-- Kör `omniroute serve` i förgrunden. `--daemon` kopplar bort servern från enhetens cgroup och notify-handskakningen slutförs aldrig.
+- `Type=notify`: tjänsten "startas" när servern skickar `READY=1`, inte när processen splittras. `TimeoutStartSec` begränsar en långsam start.
+- `NotifyAccess=all`: pingarna skickas av serverprocessen, som är ett barn till `omniroute serve` -övervakaren.
+- `WatchdogSec`: ping slocknar var 60:e sekund, så använd** 120 eller mer** . Mindre värden skulle starta om en frisk server.
+- Kör `omniroute serve` i förgrunden. `--daemon` kopplar bort servern från enhetens cgroup och meddelandehandskakningen slutförs aldrig.
 
 Kontrollera att den är aktiv efter en omstart:
 
@@ -252,21 +244,21 @@ Kontrollera att den är aktiv efter en omstart:
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` visar den konfigurerade fördröjningen och `WatchdogTimestamp` flyttas fram varje minut. En omstart som orsakas av watchdog-funktionen registreras som `Result=watchdog`. Om du vill stänga av pingningarna men behålla enheten som den är anger du `OMNIROUTE_DISABLE_SD_NOTIFY=1`; utan en `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows) skickas ingenting.
+`WatchdogUSec` visar den konfigurerade fördröjningen och `WatchdogTimestamp` går framåt varje minut. En omstart orsakad av watchdog registreras som `Result=watchdog`. För att stänga av pingarna medan du behåller enheten som den är, ställ in `OMNIROUTE_DISABLE_SD_NOTIFY=1`; utan en `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows) skickas ingenting.
 
-Watchdog-funktionen kontrollerar endast att händelseloopen fortsätter att köras. En server som är långsam men fortfarande körs startas inte om.
+Vakthunden kontrollerar bara att händelseslingan fortsätter att köras. En server som är långsam men fortfarande vänder startas inte om.
 
-### Valfritt arbete i begäranssökvägen (minne, färdigheter, tokenuppdatering)
+### Valfritt arbete med begäranden (minne, färdigheter, token-uppdatering)
 
-Minnesextrahering, färdighetsinjektion och uppdatering av OAuth-token delar **Nodes huvudsakliga händelseloop** med `/healthz`. De är funktioner som aktiveras och inaktiveras via instrumentpanelen (`memoryEnabled`, `skillsEnabled`), inte en worker-pool. Se [Miljö — kostnad för händelseloopen](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Minnesextraktion, färdighetsinjektion och OAuth token-uppdatering delar på** huvudnodens händelseslinga** med `/healthz`. De är funktioner för att växla instrumentpanelen (`memoryEnabled`, `skillsEnabled`), inte en arbetarpool. Se [Miljö — event-loop kostnad](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
 ### Leverantörshälsa
 
-> **Ingen REST-slutpunkt.** Hälsodata för leverantörer är tillgängliga via MCP-verktyget `observability_snapshot` eller sidan `/dashboard/providers` i instrumentpanelen.
+> **Ingen REST slutpunkt.** Leverantörshälsodata är tillgänglig via MCP -verktyget `observability_snapshot` eller instrumentpanelens `/dashboard/providers` sida.
 
 ### Leverantörsinformation
 
-> **Ingen REST-slutpunkt.** Information per leverantör är tillgänglig via sidan `/dashboard/providers` i instrumentpanelen.
+> **Ingen REST slutpunkt.** Detalj per leverantör är tillgänglig via `/dashboard/providers` sidan för instrumentpanelen.
 
 ---
 

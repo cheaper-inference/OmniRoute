@@ -333,15 +333,12 @@ en cada extremo, menos en el caso de una clave corta y ninguno si tiene 8 caract
 
 `getCloudAgentCredentials(providerId)` en `src/lib/cloudAgent/api.ts`:
 
-1. Carga las conexiones activas de proveedores mediante `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Para cada conexión, prioriza `apiKey` (sin espacios al principio ni al final). Si no está disponible, utiliza `accessToken`.
-3. Devuelve el primer token no vacío encapsulado como `{ apiKey: token }`.
-4. Devuelve `null` si no se encuentra ningún token utilizable; la API responde con `400` y
-   `"No hay credenciales activas configuradas para el proveedor de agentes en la nube: <id>"`.
+1. Carga conexiones de proveedores activas a través de `getProviderConnections({ provider: providerId, isActive: true })`.
+2. Para cada conexión, prefiere `apiKey` (recortada). Vuelve a `accessToken`.
+3. Devuelve el primer token no vacío envuelto como `{ apiKey: token }`.
+4. Devuelve `null` si no se encuentra ningún token utilizable — API responde `400` con `"No active credentials configured for cloud agent provider: <id>"`.
 
-Esto significa que los agentes en la nube reutilizan la misma tabla de conexiones de proveedores que los proveedores
-de LLM normales. Para habilitar Jules, cree una conexión activa con `provider: "jules"`
-y un `apiKey` con un valor asignado.
+Esto significa que los agentes de la nube reutilizan la misma tabla de conexión de proveedores que los proveedores LLM habituales. Para habilitar Jules, cree una conexión activa con `provider: "jules"` y un `apiKey` poblado.
 
 ## Panel de control
 

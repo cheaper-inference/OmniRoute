@@ -15,22 +15,17 @@ pozadinskih sustava provjeravaju se zajedno u
 To što je alat uvršten u katalog ne znači da se može pokrenuti ili konfigurirati.
 Konkretno, 5dive i dalje služi samo za konfiguriranje.
 
-## Podređeno okruženje i životni ciklus
+## Okolina i životni ciklus djeteta
 
-`omniroute run`, `omniroute launch` i `omniroute launch-codex` nasljeđuju
-popis dopuštenih OS/terminalskih kompatibilnosti i ubacuju vjerodajnice
-odabranog cilja.
-Tajne nepovezanih pružatelja usluga i baza podataka prema zadanim se postavkama
-ne nasljeđuju.
-`--inherit-env` izričito vraća potpuno nasljeđivanje okruženja nadređenog procesa;
-koristite ga samo kada odabrani proces treće strane treba primiti te vrijednosti.
-Ovo je filtriranje okruženja, a ne OS sandbox: proces i dalje radi s dozvolama
-datotečnog sustava pozivatelja.
+`omniroute run`, `omniroute launch` i `omniroute launch-codex` nasljeđuju OS/terminal listu dopuštenih kompatibilnosti i ubacuju vjerodajnice odabranog cilja. Nepovezane tajne pružatelja usluga i baze podataka ne nasljeđuju se prema zadanim postavkama. `--inherit-env` eksplicitno vraća potpuno nasljeđivanje nadređenog okruženja; koristite ga samo kada odabrani proces treće strane treba primiti te vrijednosti. Ovo je filtriranje okruženja, a ne OS sandbox: proces se i dalje izvodi s dopuštenjima datotečnog sustava pozivatelja.
 
-Signali prekida i završetka prosljeđuju se podređenom procesu.
-Pokretač čeka događaj zatvaranja podređenog procesa prije uklanjanja privremene konfiguracije.
-`OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` određuje razdoblje čekanja prije prisilnog
-prekida (zadano 5000 milisekundi).
+Signali prekida i prekida prosljeđuju se djetetu. Pokretač čeka događaj zatvaranja djeteta prije nego što ukloni privremenu konfiguraciju. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` kontrolira razdoblje odgode prije prisilnog prekida (zadano 5000 milisekundi).
+
+`omniroute launch <tool>` (vidi [LAUNCH.md](./LAUNCH.md) ) slijedi ista pravila okruženja i prosljeđivanje signala, i dodaje:
+
+- **Automatsko pokretanje pristupnika.** Za lokalni cilj, kada nijedan pristupnik ne odgovori na priključak, pokretač pokreće `omniroute serve --headless --no-open` vezan za `127.0.0.1` pod odvojenim reaper procesom. Svako pokrenuto pokretanje drži lease u `DATA_DIR/launch/leases/` (otkucaj srca svakih 15 s, zastarjelo nakon 45 s ili kada njegov proces nestane). Reaper zaustavlja gateway koji je pokrenuo nakon što nijedan najam nije aktivan za mirovanje (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, zadano 10000 milisekundi). Gateway koji je korisnik pokrenuo koristi se, ali nikada nije zaustavljen. `--keep-gateway` ili `omniroute gateway keep` pretvara gateway pokretača u normalan; `--no-start` vraća staro fail-if-down ponašanje. Sondiraju se samo udaljeni ciljevi.
+- **Pokretanje sesija.** Svako pokretanje iskuje kratkotrajni token `olx_` sesije iz nadređene vjerodajnice (`POST /api/launch/sessions`), otkucava ga dok alat radi, čita sažetak korištenja i opoziva ga nakon što alat izađe. Token je strogi podskup svog roditelja: ista dopuštenja, isti ili uži katalog, kraći vijek trajanja i nije vjerodajnica nadzorne ploče. Alat prima token sesije, nikada nadređenu vjerodajnicu, a zahtjevi su označeni `launch:<tool>:<sessionId>` osim ako nije dan `--tag`. Gateway bez sesije API ne uspijeva sa `GatewayTooOld` umjesto da se vrati na pokretanje bez opsega.
+- **Konfiguracija po pokretanju.** Konfiguracijske datoteke alata zapisuju se u privatni privremeni direktorij (način 0700, prefiks `omnirouter-`) i uklanjaju nakon što dijete izađe. `SIGKILL` pokretača ostavlja direktorij iza sebe; `omniroute launch --cleanup` uklanja takve direktorije nakon što su stariji od jednog dana.
 
 ## Trajno postavljanje Geminija
 

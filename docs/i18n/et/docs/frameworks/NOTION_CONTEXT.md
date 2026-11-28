@@ -62,42 +62,31 @@ Kõik kolm meetodit nõuavad töölaua autentimist (`isAuthenticated`). `POST`-p
 salvestab OmniRoute tokeni ja käivitab kohe ühe tulemusega testotsingu; kui Notion
 tagastab veaobjekti, kustutatakse token ja kutse nurjub olekukoodiga `400`.
 
-## MCP-tööriistad (6)
+## MCP tööriistad (6)
 
-Määratletud failis `open-sse/mcp-server/tools/notionTools.ts`. Token lahendatakse kutse
-ajal funktsiooni `getNotionToken()` kaudu; kui seda pole seadistatud, tagastab tööriist vea
-`"Notioni integratsioonitoken pole seadistatud. Seadistage see jaotises Settings > Context Sources."`
+Määratletud keeles `open-sse/mcp-server/tools/notionTools.ts`. Token lahendatakse kõne ajal `getNotionToken()` kaudu; kui ükski pole konfigureeritud, viskab tööriist `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Tööriist                     | Õigus          | Kirjeldus                                                                                                      |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Otsib tekstipäringu alusel lehti ja andmebaase (tagastab pealkirjad, ID-d ja URL-id). Lehekülgede kaupa.       |
-| `notion_get_page`            | `read:notion`  | Hangib lehe ID alusel selle sisu ja metaandmed.                                                                |
-| `notion_list_block_children` | `read:notion`  | Loetleb kõik ploki või lehe alamplokid (plokipuu). Lehekülgede kaupa.                                          |
-| `notion_query_database`      | `read:notion`  | Teeb andmebaasipäringu valikuliste `filter` + `sorts` parameetritega (Notioni API vorming). Lehekülgede kaupa. |
-| `notion_get_database`        | `read:notion`  | Hangib ID alusel andmebaasi skeemi/metaandmed.                                                                 |
-| `notion_append_blocks`       | `write:notion` | Lisab olemasolevale plokile või lehele alamplokke (kuni 100 plokki päringu kohta).                             |
+| Tööriist                     | Ulatus         | Kirjeldus                                                                                     |
+| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Otsi lehekülgi ja andmebaase tekstipäringu järgi (tagastab pealkirjad, IDs, URLs). Lehtedega. |
+| `notion_get_page`            | `read:notion`  | Hankige lehe sisu ja metaandmed selle ID abil.                                                |
+| `notion_list_block_children` | `read:notion`  | Loetlege kõik ploki või lehe (plokipuu) ploki alamastmed. Lehtedega.                          |
+| `notion_query_database`      | `read:notion`  | Tehke päring andmebaasist valikulise `filter` + `sorts` (Notion API vorminguga). Lehtedega.   |
+| `notion_get_database`        | `read:notion`  | Hankige ID andmebaasi schema/metadata.                                                        |
+| `notion_append_blocks`       | `write:notion` | Lisa olemasolevale plokile või lehele ploki alam (max 100 plokki päringu kohta).              |
 
 ### Sisendparameetrid
 
-- `notion_search` — `query` (1–500 märki), `pageSize` (1–100, vaikimisi 20),
-  `startCursor` (valikuline).
-- `notion_get_page` — `pageId` (32-märgiline kuueteistkümnendarv või UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, vaikimisi 50),
-  `startCursor` (valikuline).
-- `notion_query_database` — `databaseId`, `filter` (valikuline, Notioni filtrivorming),
-  `sorts` (valikuline massiiv), `pageSize` (1–100, vaikimisi 50), `startCursor` (valikuline).
+- `notion_search` — `query` (1–500 tähemärki), `pageSize` (1–100, vaikimisi 20), `startCursor` (valikuline).
+- `notion_get_page` — `pageId` (32 tähemärgiga hex või UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, vaikimisi 50), `startCursor` (valikuline).
+- `notion_query_database` — `databaseId`, `filter` (valikuline, Notion filtrivorming), `sorts` (valikuline massiiv), `pageSize` (1–100, vaikeväärtus 50), `startCursor` (valikuline).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (plokiobjektide massiiv),
-  `after` (valikuline asukoht).
+- `notion_append_blocks` — `blockId`, `children` (plokiobjektide massiiv), `after` (valikuline asukoht).
 
-### Õigused
+### Ulatused
 
-Lugemistööriistad nõuavad õigust `read:notion` ja kirjutamistööriist õigust `write:notion`.
-Õigusi jõustab funktsioon `withScopeEnforcement()` failis
-`open-sse/mcp-server/server.ts` ainult siis, kui `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; kutsuja
-lubatud õigused pärinevad komadega eraldatud muutujast `OMNIROUTE_MCP_SCOPES` või
-autenditud API-võtme õiguste kontekstist. Täielikku õiguste mudelit kirjeldab
-[MCP-SERVER.md](./MCP-SERVER.md).
+Lugemistööriistad nõuavad `read:notion` ja kirjutamistööriist `write:notion`. Ulatused jõustatakse `withScopeEnforcement()` -ga `open-sse/mcp-server/server.ts`, kui `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, ja alati HTTP/SSE helistaja jaoks, kelle API klahvil puudub `manage`/`admin`; helistaja lubatud ulatused pärinevad `OMNIROUTE_MCP_SCOPES` (komadega eraldatud) või autentitud API -võtme ulatuse kontekstist. Vaadake täielikku mudelit [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Lõpp-punktid
 

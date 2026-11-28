@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Tvarkaraštis** — viena `JobRegistry` cron užduotis, `log_export`, pagal numatytuosius nustatymus vykdoma pagal `0 * * * *` (kas valandą,
-  UTC). Registruojama `src/lib/initCloudSync.ts`; galima pakeisti naudojant `OMNIROUTE_LOG_EXPORT_CRON`.
-  Kiekvieno suveikimo metu nuosekliai eksportuojami visų **įjungtų** paskirties vietų laukiantys įrašai.
-- **Žymeklis** — numanomas SQLite `call_logs.rowid`, kiekvienai paskirties vietai išsaugomas
-  `log_export_destinations.cursor_row_id`. `timestamp` sąmoningai nenaudojamas kaip žymeklis: iškvietėjai
-  gali pateikti savo reikšmę, todėl lėta užklausa gali būti įrašyta po greitesnės, pradėtos
-  vėliau, o laiko žymos žymeklis ją praleistų.
-- **Paketavimas** — `batch_size` eilučių vienai užklausai (numatytoji reikšmė 500), `max_rows_per_run` eilučių vienam vykdymui
-  (numatytoji reikšmė 10000), kad didelė susikaupusių įrašų eilė būtų apdorojama per kelis suveikimus, o ne blokuotų vieną.
-- **Pristatymas** — žymeklis pastumiamas tik sėkmingai užbaigus `send()`. Jei paketas nepavyksta,
-  žymeklis lieka ankstesnėje vietoje, todėl per kitą vykdymą tas pačias eilutes bandoma siųsti iš naujo. Užtikrinamas
-  pristatymas bent vieną kartą ir dublikatų šalinimas paskirties vietoje, o ne tikras pristatymas tiksliai vieną kartą: „BigQuery“ kiekvienos
-  eilutės raktu naudoja iškvietimo žurnalo ID ir į jį atsižvelgia pagal geriausių pastangų principą savo dublikatų šalinimo laikotarpiu.
-- **Apsauga nuo persidengimo** — cron suveikimas ir `POST .../run` gali įvykti vienu metu. Paskirties vieta,
-  kurios įrašai jau eksportuojami, praleidžiama, užuot juos eksportavus du kartus (vykdymo rezultate pateikiama `skipped: true`),
-  todėl lygiagretus vykdymas negali pakartotinai išsiųsti paketo ar perkelti žymeklio atgal.
-- **Atkūrimas po išvalymo** — jei `cursor_row_id` tampa didesnis už `MAX(rowid)` (visa lentelė buvo
-  išvalyta, o rowid reikšmės pradėtos skaičiuoti iš naujo), vykdyklė grąžina žymeklį į 0, užuot visam laikui nebemačiusi naujų įrašų.
+- **Tvarkaraštis** — vienas `JobRegistry` cron darbas, `log_export`, pagal nutylėjimą `0 * * * *` (valandinis, UTC). Registruotas `src/lib/initCloudSync.ts`; nepaisoma su `OMNIROUTE_LOG_EXPORT_CRON`. Kiekviena erkė nusausina kiekvieną** įjungta** paskirties vietą, nuosekliai.
+- **Cursor** — SQLite numanomas `call_logs.rowid`, išliko kiekvienai paskirties vietai `log_export_destinations.cursor_row_id`. `timestamp` sąmoningai nėra žymeklis: skambinantieji gali pateikti savo vertę, todėl lėtą užklausą galima parašyti po greitesnės, kuri prasidėjo vėliau, o laiko žymeklis ją praleis.
+- **Pakavimas** — `batch_size` eilučių vienai užklausai (numatytasis 500), `max_rows_per_run` eilučių per paleidimą (numatytasis 10 000), todėl didelis atsilikimas nuteka per kelias žymes, o ne blokuoja vieną.
+- **Pristatymas** — žymeklis juda į priekį tik `send()` išsprendus. Nepavykusi partija palieka žymeklį ten, kur buvo, todėl tos pačios eilutės bandomos iš naujo kitą kartą. Garantija yra bent vieną kartą ir paskirties pusės dubliavimo panaikinimas, o ne tiksliai vieną kartą: BigQuery kiekvieną eilutę įveda pagal skambučių žurnalo ID, kurį ji laikosi maksimaliai išnaudodama savo dedup lange.
+- **Persidengimo apsauga** — cron tick ir `POST .../run` gali šaudyti kartu. Paskirties vieta, kuri jau išleidžiama, yra praleidžiama, o ne du kartus ištuštinama (paleidimo rezultate `skipped: true` ), todėl vienu metu vykstantis paleidimas negali iš naujo išsiųsti paketo arba įrašyti žymeklio atgal.
+- **Išvalymo atkūrimas** — jei `cursor_row_id` atsiduria aukščiau `MAX(rowid)` (visa lentelė buvo išvalyta, o eilutės paleidžiamos iš naujo), bėgikas atsukamas į 0, o ne visam laikui apakinamas.
 
-### Izoliuota vykdyklė ir ribos
+### Izoliuotas bėgikas ir ribos
 
-Kiekvienas paskirties vietos vykdymas „Node“ aplinkoje paleidžia atskirą trumpalaikį antrinį OS procesą (`child_process`
-su IPC, o ne `worker_threads`). Turinio skaitymas, duomenų JSON analizė ir serializavimas, paskirties vietos
-`prepare()` ir tinklo įvesties bei išvesties operacijos vykdomos ten, o ne serverio įvykių cikle.
-Per IPC perduodama tik konfigūracija ir nedideli eigos pranešimai; eksportuojami įrašai niekada negrąžinami
-į serverį. Cron užduotis ir maršrutas „Vykdyti dabar“ išlaiko tą patį viešą rezultatą ir apsaugą nuo persidengimo.
+Kiekviena paskirties vieta, vykdoma mazge, pradeda atskirą trumpalaikį OS antrinį procesą (`child_process` su IPC, o ne `worker_threads`). Turinys nuskaito, naudingoji apkrova JSON parsing/serialization, paskirties `prepare()` ir paskirties tinklas I/O veikia ten, o ne serverio įvykių cikle. Tik konfigūracijos ir nedidelio progreso pranešimai kerta IPC; eksportuoti įrašai niekada negrįžta į serverį. „Cron“ užduotis ir „Vykdyti dabar“ maršrutas išlaiko tą patį viešą rezultatą ir sutapimo apsaugą.
 
-Antrinis procesas atveria serverio nustatytą `DATA_DIR/storage.sqlite` tik skaityti, naudodamas `node:sqlite`,
-su `busy_timeout=5000` ir `query_only=ON`. Jis neimportuoja jokio vienintelio DB egzemplioriaus ir neatlieka
-migracijų, atsarginių kopijų kūrimo ar SQLite atnaujinimų. Trūkstamų ar sugadintų artefaktų apskaita (įskaitant
-sugadinto artefakto UPDATE) lieka tik valdymo skydelio išsamios informacijos apdorojimo kelyje. Abu keliai naudoja bendrą grynąją
-išsamios informacijos nustatymo funkciją; eksportas naudoja asinchroninį failų sistemos skaitymą ir tą pačią nustatymo tvarką: artefaktas → senasis
-įterptasis turinys → senasis turinys diske → nieko. Vykdymo pradžioje užfiksuojamas didžiausias įterpimo rowid,
-kai antrinis procesas atveria skaitytuvą; vėlesni įterpimai laukia kito vykdymo. Tai įterpimo
-riba, o ne ilgalaikė SQLite operacija: laukiant tinklo atsakymų WAL rašymas ir kontrolinių taškų kūrimas nėra blokuojami.
-Ši riba neužfiksuoja esamų eilučių būsenos jų atnaujinimo ar ištrynimo atžvilgiu.
+Vaikas atidaro serverio išspręstą `DATA_DIR/storage.sqlite` tik skaitomą naudodamas `node:sqlite`, su `busy_timeout=5000` ir `query_only=ON`. Jis neimportuoja DB singleton ir neatlieka perkėlimo, atsarginių kopijų ar SQLite atnaujinimų. Missing/corrupt artefaktų buhalterija (įskaitant sugadintą artefaktą UPDATE) lieka tik prietaisų skydelio išsamios informacijos kelyje. Abu kelius dalijasi grynas detalių sprendimas; eksportas naudoja asinchroninį failų sistemos nuskaitymą ir tą patį artefaktą → legacy inline → legacy disk → none rezoliucijos tvarka. Vykdant momentines nuotraukas, kai vaikas atidaro skaitytuvą, didžiausia įterpimo eilutė; vėlesni įdėklai laukia kito paleidimo. Tai yra įterpimo riba, o ne ilgalaikė SQLite operacija: WAL rašikliai ir kontroliniai taškai lieka laisvi tinklo laukimo metu. Updates/deletions esamų eilučių nėra užšaldytos prie šios ribos.
 
-Po kiekvieno priimto paketo antrinis procesas laukia patvirtinimo. Serveris pirmiausia išsaugo
-žymeklį naudodamas `advanceLogExportCursor`, tada siunčia `ack`; iki tol kitas paketas nepradedamas.
-Siuntimo klaida, strigtis ar skirtasis laikas užregistruojami kaip nesėkmė, nepastumiant to paketo žymeklio. Anksčiau
-patvirtinti paketai lieka įrašyti; pakartotinai gali būti išsiųstas daugiausia vienas nepatvirtintas paketas.
-Sėkmė registruojama tik gavus `done` ir antriniam procesui tinkamai baigus darbą. Nesėkmės atveju antrinis procesas nutraukiamas
-signalu SIGTERM, po 500 ms pereinant prie SIGKILL, o vykdyklė laukia proceso uždarymo.
+Po kiekvienos priimtos partijos vaikas laukia patvirtinimo. Serveris pirmiausia išlaiko žymeklį su `advanceLogExportCursor`, tada siunčia `ack`; jokia kita partija neprasideda prieš tai. Siuntimo nesėkmė, strigtis arba skirtasis laikas įrašo nesėkmę neperkėlus šios partijos. Anksčiau pripažintos partijos lieka įsipareigojusios; daugiausia galima pakartotinai išsiųsti vieną nepatvirtintą siuntą. Sėkmė fiksuojama tik po `done` ir švaraus vaiko išėjimo. Gedimai nutraukia vaiko funkciją SIGTERM, po 500 ms didėja iki SIGKILL, o bėgikas laukia proceso uždarymo.
 
-| Aplinkos kintamasis                           | Numatytoji reikšmė | Paskirtis                                         |
-| --------------------------------------------- | ------------------ | ------------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000             | Kiekvienos paskirties vietos vykdymo trukmės riba |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024               | Antrinio proceso V8 old-space srities riba MB     |
+| Aplinkos kintamasis                           | Numatytoji | Tikslas                                                |
+| --------------------------------------------- | ---------- | ------------------------------------------------------ |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000     | Sieninio laikrodžio apribojimas pagal paskirties vietą |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024       | Vaiko V8 senos erdvės apribojimas MB                   |
 
-Jei reikšmės netinkamos, neteigiamos ar ne sveikieji skaičiai, naudojamos numatytosios reikšmės. Dinaminės atminties nuostata nėra bendros
-RSS atminties riba; labai dideli paketai vis tiek gali išeikvoti antrinio proceso atmintį ir saugiai užbaigti vykdymą nesėkme.
-Numatytoji 1024 MB reikšmė palieka atsargą numatytajam 500 eilučių paketui su 512 KiB artefaktais,
-kai įjungtas turinio eksportas, įskaitant „BigQuery“ JSON serializavimą į baitų blokus. Ji neužtikrina, kad
-10000 eilučių paketas su turiniu bus saugus. Išsekus V8 dinaminei atminčiai užregistruojama klaida su aiškiu sprendimu: sumažinti paketo
-dydį arba padidinti `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; žymeklis lieka ties paskutiniu
-patvirtintu paketu. Istoriniam įterptajam ar diske saugomam turiniui šiuolaikinė artefaktų dydžio riba netaikoma.
-Operatoriai turi atskirai numatyti RSS atminties poreikį, ypač konteineriuose su ribota atmintimi.
+Invalid/non-positive/non-integer reikšmės naudoja numatytuosius nustatymus. Krūvos nustatymas nėra bendra RSS riba; labai didelės partijos vis tiek gali išsekti vaiko atmintį ir saugiai nepavykti bėgti. Numatytasis 1024 MB palieka vietos numatytajam 500 eilučių 512 KiB artefaktų paketui su įgalintais korpusais, įskaitant BigQuery baitais suskirstytą JSON serializavimą. Dėl to 10 000 eilučių kėbulų partijos nėra saugios. V8 krūvos išnaudojimas įrašo gedimą, dėl kurio galima imtis veiksmų: sumažinkite partijos dydį arba padidinkite `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; žymeklis lieka prie paskutinės patvirtintos partijos. Šiuolaikinis artefaktų dangtelis neuždengia istorinių inline/disk kūnų. Operatoriai turi skirti RSS biudžetą atskirai, ypač ribotos atminties talpyklose.
 
-Antrinis procesas paveldi tik nustatytas `DATA_DIR`, `NODE_ENV`, aiškiai nurodytą `TZ` (senųjų failų pavadinimų
-vietinio laiko nustatymui), `ELECTRON_RUN_AS_NODE`, jei jis yra, ir šiuos išeinančių ryšių parametrus:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (ir jų formas mažosiomis raidėmis),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Globalus „Undici“ dispečeris naudoja tas pačias serverio tarpinio serverio nustatymo vien iš aplinkos ir vietinių mazgų
-apėjimo taisykles, įskaitant `NO_PROXY`; jis neimportuoja `proxyFetch.ts` ar jo DB / funkcijų vėliavėlių.
-Tarpinio serverio prisijungimo duomenys pašalinami iš persiunčiamos išvesties ir registruojamų klaidų. Paskirties prisijungimo duomenys
-perduodami tik viename pradiniame IPC pranešime, niekada ne per argv ar aplinką; persiunčiama išvestis ir klaidos
-papildomos priešdėliu ir išvalomos. Antrinio proceso vykdymo argumentuose išjungiamas tik `ExperimentalWarning`, kad
-„Node“ įspėjimas apie SQLite nebūtų kartojamas per kiekvieną cron paleidimą; kitų tipų įspėjimai lieka matomi.
+Vaikas paveldi tik išspręstą `DATA_DIR`, `NODE_ENV`, aiškią `TZ` (senas failo pavadinimo vietos laiko skiriamoji geba), `ELECTRON_RUN_AS_NODE`, kai yra, ir šias išeinančias `SSL_CERT_DIR`: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (ir jų mažąsias formas), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS` `SSL_CERT_FILE` Pasaulinis Undici dispečeris dalijasi gryna serverio aplinkos tarpinio serverio skiriamąja geba ir vietinio pagrindinio kompiuterio apėjimo taisyklėmis, įskaitant `NO_PROXY`; jis neimportuoja `proxyFetch.ts` ar jo DB/feature vėliavėlių. Tarpinio serverio kredencialai pašalinami iš persiųstos išvesties ir įrašytų klaidų. Paskirties kredencialai keliauja tik vienu pradžios IPC pranešimu, niekada argv ar aplinkos; output/error persiuntimas yra su priešdėliu ir išvalytas. Tik `ExperimentalWarning` yra išjungtas antriniuose exec argumentuose, kad būtų išvengta mazgo SQLite įspėjimo kartojimo kiekvieną kartą vykdant cron; kiti įspėjimų tipai lieka matomi.
 
-Paskirties modulius turi būti galima importuoti be „Next.js“ ar tik serveriui skirtų priklausomybių. Esamas
-„BigQuery“ įgyvendinimas jau atitinka šį reikalavimą. Prieigos žetonų podėliai išlieka tik antrinio proceso
-vykdymo metu, o ne tarp paleidimų. Palaikoma vykdymo aplinka yra „Node“ (`package.json` engines), tačiau README
-diegimo su „Bun“ skyriuje ir `Dockerfile.bun` taip pat nurodomas su gamybine aplinka suderinamas būdas, naudojantis
-`bun:sqlite` (`src/lib/db/core.ts` / adapterius). Todėl naudojant „Bun“ eksportavimas išlaiko ankstesnį
-vykdymo tame pačiame procese būdą ir vieną kartą pateikia įspėjimą: antrinio proceso dinaminės atminties ir vykdymo laiko ribojimo izoliacija neprieinama. Naudokite
-„Node“, jei reikia įvykių ciklo ir atminties trūkumo (OOM) izoliacijos; čia „Bun“ nelaikomas skirtu tik kūrimui.
+Paskirties moduliai turi būti importuojami be Next.js/server-only priklausomybių. Esamas BigQuery diegimas jau atitinka tą sutartį. Prieigos prieigos raktų talpyklos galioja tik antriniam bėgimui, o ne skersai. Mazgas yra palaikomas vykdymo laikas (`package.json` varikliai). Egzistuoja geriausias nepalaikomas Bun suderinamumo kelias (`bun:sqlite` `src/lib/db/core.ts` / adapteriuose ir `Dockerfile.bun`), todėl eksportavimas neturi nutrūkti. Pagal Bun eksportuojant išlaikomas ankstesnis proceso kelias ir pateikiamas vienkartinis įspėjimas: vaiko heap/timeout izoliacija nepasiekiama. Naudokite mazgą įvykių ciklo ir OOM izoliacijai.
 
-Kai įjungtas `includeBodies`, verčiau rinkitės kelių minučių intervalą, pavyzdžiui,
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, užuot kaupę valandos duomenų turinio eilę.
-Paketų ir eilučių apribojimai vis tiek riboja kiekvieną paleidimą. Procesas paleidžiamas kiekvienai paskirčiai per kiekvieną vykdymą;
-nedidelės paleidimo sąnaudos čia iškeičiamos į serverio įvykių ciklo izoliaciją, o ne į mažesnį bendrą CPU naudojimą.
+Kai `includeBodies` įjungtas, pirmenybę teikite minutės ritmui, pvz., `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` o ne valandinio naudingojo krovinio atsilikimo kaupimui. Paketų ir eilučių ribos vis dar riboja kiekvieną paleidimą. Proceso paleidimas apmokamas pagal paskirties vietą už paleidimą; Tai sumažina serverio įvykių ciklo izoliavimo paleidimo išlaidas, o ne sumažina bendrą CPU naudojimą.
 
-### Duomenų turinys (užklausos ir atsakymai)
+### Naudingi kroviniai (raginimai ir užbaigimai)
 
-Pagal numatytuosius nustatymus eksportuojami tik suvestinės laukai, rodomi žurnalų **sąraše**. Įjungus
-**Eksportuoti užklausas ir atsakymus** (`includeBodies`), papildomai perduodama tai, ką kiekvienam iškvietimui rodo žurnalų **išsamios informacijos**
-sritis:
+Pagal numatytuosius nustatymus eksportuojant yra tik suvestinės laukai žurnalai** sąrašą** rodo. Įsijungia** Eksportuokite raginimus ir atsakymus** (`includeBodies`) papildomai siunčia ką Rąstai** detalė** kiekvienam skambučiui rodoma sritis:
 
-| Laukas                           | Kas jame saugoma                                                                 |
-| -------------------------------- | -------------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Iškvietimo duomenų turinys, kaip jis pateikiamas valdymo skydelyje               |
-| `pipeline_route_decision`        | Kurį tikslą ir modelį parinko maršrutizatorius                                   |
-| `pipeline_client_request`        | Neapdorota užklausa tiksliai tokia, kokią atsiuntė klientas                      |
-| `pipeline_openai_request`        | Užklausa po konvertavimo į vidinį „OpenAI“ formatą                               |
-| `pipeline_provider_request`      | Užklausa, faktiškai išsiųsta teikėjui jo formatu                                 |
-| `pipeline_provider_response`     | Neapdorotas teikėjo atsakymas                                                    |
-| `pipeline_client_response`       | Tai, kas buvo grąžinta iškvietėjui                                               |
-| `pipeline_error`                 | Apdorojimo grandinės klaidos informacija nepavykusio iškvietimo atveju           |
-| `bodies_truncated`               | Teisinga reikšmė, kai bet kuris aukščiau pateiktas laukas pasiekė `maxBodyBytes` |
+| Laukas                           | Kas jame telpa                                                                     |
+| -------------------------------- | ---------------------------------------------------------------------------------- |
+| `request_body` / `response_body` | Skambučių naudingoji apkrova atliekama taip, kaip juos pateikia prietaisų skydelis |
+| `pipeline_route_decision`        | Kurį tikslą ir modelį pasirinko maršrutizatorius                                   |
+| `pipeline_client_request`        | Neapdorota užklausa tiksliai tokia, kokia ją išsiuntė klientas                     |
+| `pipeline_openai_request`        | Po vertimo į vidinę OpenAI formą                                                   |
+| `pipeline_provider_request`      | Kaip iš tikrųjų išsiųsta prieš srovę, teikėjo tarme                                |
+| `pipeline_provider_response`     | Neapdorotas atsakas prieš srovę                                                    |
+| `pipeline_client_response`       | Kas buvo grąžinta skambinančiajam                                                  |
+| `pipeline_error`                 | Dujotiekio lygio klaidos informacija dėl nepavykusio skambučio                     |
+| `bodies_truncated`               | Tiesa, kai bet kuris aukščiau esantis laukas pasiekia `maxBodyBytes`               |
 
-Tai yra užklausų turinys, todėl ši parinktis **pagal numatytuosius nustatymus išjungta** ir sąmoningai pasirenkama kiekvienai paskirčiai atskirai.
-Perduodama tai, kas rodoma valdymo skydelyje, nes eksportavimas ir `getCallLogById` naudoja tą patį išsamios informacijos
-gavimo mechanizmą: duomenų turinys
-jau būna išvalytas nuo asmenį identifikuojančios informacijos ir slaptų duomenų įrašymo metu, o iškvietimas su
-`noLog` API raktu apskritai neišsaugo jokio turinio, todėl nėra ko eksportuoti.
+Tai greitas turinys, taip ir yra** išjungtas pagal numatytuosius nustatymus** ir sąmoningai pasirinkta pagal paskirties vietą. Tai, ką rodo prietaisų skydelis, nes eksportas ir `getCallLogById` dalijasi detalių raiška: naudingi kroviniai jau yra išvalyti iš PII ir slaptai redaguoti juos parašius, o skambinant naudojant `noLog` API raktą naudingos apkrovos nėra išsaugomos, todėl nėra ką eksportuoti.
 
-Kiekvienos eilutės duomenų turinys nuskaitomas iš failų sistemos artefakto, todėl duomenys papildomai įkeliami tik toms paskirtims,
-kurios to paprašė. Jei artefakto nėra arba jis sugadintas, eksportuojama jo suvestinė su null turinio reikšmėmis,
-užuot nutraukus visą paketą ir sustabdžius žymeklio eigą.
+Naudingi kroviniai nuskaitomi kiekvienoje eilutėje iš failų sistemos artefakto, todėl hidratacija vykdoma tik tose paskirties vietose, kurios to paprašė. Trūkstamas arba sugadintas objektas eksportuoja savo suvestinę su nulinėmis naudingosiomis apkrovomis, o ne sugenda paketą ir perkelia žymeklį.
 
-`maxBodyBytes` (numatytoji reikšmė 262144) riboja kiekvieno lauko dydį. Ilgesnis turinys **sutrumpinamas, o ne
-atmetamas** — sutrumpinta užklausa vis tiek atsako į klausimą „ko buvo klausta“ — o eilutė pažymima
-`bodies_truncated`. Srautu dalimis perduodami pokyčiai neeksportuojami; surinktas atsakymas
-jau yra `pipeline_provider_response` ir `pipeline_client_response`.
+`maxBodyBytes` (numatytasis 262144) kiekviename lauke yra didžiosios raidės. Ilgesnės naudingosios apkrovos yra** sutrumpintas, o ne numestas** — nukirptas raginimas vis tiek atsako "ko buvo paklausta" — ir eilutė pažymėta `bodies_truncated`. Srautinio perdavimo gabalas po gabalo deltos neeksportuojamos; surinktas atsakymas jau yra `pipeline_provider_response` ir `pipeline_client_response`.
 
 ---
 

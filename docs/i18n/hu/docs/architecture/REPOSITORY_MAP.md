@@ -4,9 +4,9 @@
 
 ---
 
-> **Mi hol él: minden nyomon követett legfelső szintű könyvtár és gyökérfájl, egysoros céllal.** Utolsó frissítés: 2026-11-13 (OmniRoute v3.8.54)
+> **Mi hol él: minden nyomon követett legfelső szintű könyvtár és gyökérfájl, egysoros céllal.**
 >
-> Használja ezt a térképet a kódbázisban való eligazodáshoz, majd kövesse a dedikált dokumentumokra mutató hivatkozásokat. A fájlszámokat `git ls-files` mértük a fenti napon. Szinte minden kiadásnál változnak, ezért kezeld őket nagyságrendekként.
+> Használja ezt a térképet a kódbázisban való eligazodáshoz, majd kövesse a dedikált dokumentumokra mutató hivatkozásokat. A fájlok száma `git ls-files` tól származik, és szinte minden kiadással változik. Kezelje őket nagyságrendekként.
 
 ## Legfelső szintű fa
 

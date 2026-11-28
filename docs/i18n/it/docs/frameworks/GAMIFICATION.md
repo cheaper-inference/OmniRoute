@@ -503,27 +503,27 @@ solo quando i dati della classifica sono effettivamente cambiati rispetto all'ul
 
 ---
 
-## Condivisione dei token
+## Condivisione di token
 
 **File:** `src/lib/gamification/sharing.ts`
 
-### Registro contabile a partita doppia
+### Registro a doppia entrata
 
 Ogni trasferimento crea due righe in `token_ledger`:
 
-| Riga      | `from_key_id` | `to_key_id`  | `amount` |
-| --------- | ------------- | ------------ | -------- |
-| Addebito  | mittente      | destinatario | +importo |
-| Accredito | destinatario  | mittente     | -importo |
+| Riga     | `from_key_id` | `to_key_id` | `amount` |
+| -------- | ------------- | ----------- | -------- |
+| Addebito | mittente      | ricevitore  | +        |
+| Credito  | ricevitore    | mittente    | -amount  |
 
-Attenzione: la convenzione è:
+Aspetta — la convenzione è:
 
-| Riga      | `from_key_id` | `to_key_id`  | `amount` | Significato                 |
-| --------- | ------------- | ------------ | -------- | --------------------------- |
-| Invio     | mittente      | destinatario | +importo | Uscita dal mittente         |
-| Ricezione | destinatario  | mittente     | +importo | Entrata per il destinatario |
+| Riga     | `from_key_id` | `to_key_id` | `amount` | Senso                  |
+| -------- | ------------- | ----------- | -------- | ---------------------- |
+| Inviare  | mittente      | ricevitore  | +        | Deflusso dal mittente  |
+| Ricevere | ricevitore    | mittente    | +        | Afflusso al ricevitore |
 
-Il saldo viene calcolato come segue:
+Il saldo è calcolato come:
 
 ```sql
 SELECT
@@ -545,15 +545,14 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Validazione**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotenza**: verifica se `idempotency_key` esiste già nel registro.
-   In caso affermativo, restituisce il risultato memorizzato nella cache.
-3. **Transazione** (singola transazione SQLite):
-   a. Calcola il saldo del mittente.
-   b. Se `balance < amount`, interrompe l'operazione (fondi insufficienti).
-   c. Inserisce la riga di invio (`from=sender,`.
+1. **Convalidare** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotenza** : controlla se `idempotency_key` esiste già nel registro. Se sì, restituisce il risultato memorizzato nella cache.
+3. **Transazione** (singola transazione SQLite ): a. Calcola il saldo del mittente. B. Se `balance < amount`, interrompi (fondi insufficienti). C. Inserisci la riga di invio (`from=sender, to=receiver, amount`). D. Inserisci la riga di ricezione (`from=receiver, to=sender, amount`).
+4. **Limite di tariffa** : controlla la velocità di trasferimento per il mittente (max 10 transfers/min).
+5. **Evento** : emette un evento di ludicizzazione `token_share` per la valutazione del badge XP +.
+6. Ritorno `{ success: true, balance: newBalance }`.
 
-### Limitazione della frequenza
+### Limitazione della velocità
 
 - Massimo 10 trasferimenti al minuto per chiave API.
 - Massimo 10.000 token per singolo trasferimento.

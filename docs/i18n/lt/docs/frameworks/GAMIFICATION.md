@@ -508,21 +508,21 @@ kai lyderių lentelės duomenys iš tikrųjų pasikeitė nuo paskutinio išsiunt
 
 **Failas:** `src/lib/gamification/sharing.ts`
 
-### Dvejybinio įrašo apskaita
+### Dvigubo įrašo knyga
 
-Kiekvienas pervedimas sukuria dvi eilutes lentelėje `token_ledger`:
+Kiekvienas perkėlimas sukuria dvi `token_ledger` eilutes:
 
-| Eilutė   | `from_key_id` | `to_key_id` | `amount` |
+| Eilė     | `from_key_id` | `to_key_id` | `amount` |
 | -------- | ------------- | ----------- | -------- |
-| Debetas  | siuntėjas     | gavėjas     | +suma    |
-| Kreditas | gavėjas       | siuntėjas   | -suma    |
+| Debetas  | siuntėjas     | imtuvas     | + suma   |
+| Kreditas | imtuvas       | siuntėjas   | -amount  |
 
-Palaukite — naudojamas toks susitarimas:
+Palaukite — konvencija yra tokia:
 
-| Eilutė    | `from_key_id` | `to_key_id` | `amount` | Reikšmė                   |
-| --------- | ------------- | ----------- | -------- | ------------------------- |
-| Siuntimas | siuntėjas     | gavėjas     | +suma    | Lėšų išėjimas iš siuntėjo |
-| Gavimas   | gavėjas       | siuntėjas   | +suma    | Lėšų įėjimas gavėjui      |
+| Eilė   | `from_key_id` | `to_key_id` | `amount` | Reikšmė                 |
+| ------ | ------------- | ----------- | -------- | ----------------------- |
+| Siųsti | siuntėjas     | imtuvas     | + suma   | Nutekėjimas iš siuntėjo |
+| Gauti  | imtuvas       | siuntėjas   | + suma   | Įėjimas į imtuvą        |
 
 Likutis apskaičiuojamas taip:
 
@@ -535,7 +535,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Pervedimo eiga
+### Perdavimo srautas
 
 ```typescript
 export async function transferTokens(
@@ -546,19 +546,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Patikrinimas**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotentiškumas**: patikrinama, ar `idempotency_key` jau yra apskaitos žurnale.
-   Jei taip, grąžinamas podėlyje išsaugotas rezultatas.
-3. **Operacija** (viena SQLite operacija):
-   a. Apskaičiuojamas siuntėjo likutis.
-   b. Jei `balance < amount`, operacija nutraukiama (nepakanka lėšų).
-   c. Įterpiama siuntimo eilutė (`from=sender,`.
+1. **Patvirtinti** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotencija** : patikrinkite, ar `idempotency_key` jau yra knygoje. Jei taip, grąžinkite talpykloje išsaugotą rezultatą.
+3. **Sandoris** (vienas SQLite sandoris): a. Apskaičiuokite siuntėjo balansą. b. Jei `balance < amount`, nutraukti (nepakanka lėšų). c. Įterpti siuntimo eilutę (`from=sender, to=receiver, amount`). d. Įterpti gavimo eilutę (`from=receiver, to=sender, amount`).
+4. **Kainos riba** : patikrinkite siuntėjo perdavimo greitį (maks. 10 transfers/min).
+5. **Renginys** : išskirkite `token_share` žaidimo renginį, kad įvertintumėte XP + ženklelį.
+6. Grąžinti `{ success: true, balance: newBalance }`.
 
-### Dažnio ribojimas
+### Kainos ribojimas
 
-- Daugiausia 10 pervedimų per minutę vienam API raktui.
-- Daugiausia 10 000 žetonų vienu pervedimu.
-- Daugiausia 100 000 per dieną pervedamų žetonų vienam API raktui.
+- Ne daugiau kaip 10 pervedimų per minutę per API klavišą.
+- Ne daugiau kaip 10 000 žetonų vienam pervedimui.
+- Maksimalus 100 000 žetonų perdavimas per dieną vienam API raktui.
 
 ---
 

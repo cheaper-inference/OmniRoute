@@ -12,6 +12,12 @@ Den nøytrale `config/cli-tools-manifest.json` kontrakten erklærer kanoniske ID
 
 Avbrudds- og avslutningssignaler videresendes til barnet. Starteren venter på barnets lukkehendelse før den fjerner den midlertidige konfigurasjonen. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` kontrollerer utsettelsesperioden før tvungen avslutning (standard 5000 millisekunder).
 
+`omniroute launch <tool>` (se [LAUNCH.md](./LAUNCH.md) ) følger de samme miljøreglene og signalvideresendingen, og legger til:
+
+- **Gateway autostart.** For et lokalt mål, når ingen gateway svarer på porten, starter launcheren `omniroute serve --headless --no-open` bundet til `127.0.0.1` under en løsrevet reaper-prosess. Hver løpende lansering har en leiekontrakt i `DATA_DIR/launch/leases/` (hjerteslag hvert 15. sekund, foreldet etter 45 s eller når prosessen er borte). Reaperen stopper gatewayen den startet når ingen leieavtale har vært aktiv for tomgangsperioden (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, standard 10000 millisekunder). En gateway brukeren startet brukes, men stoppes aldri. `--keep-gateway` eller `omniroute gateway keep` gjør en launcher-gateway til en vanlig; `--no-start` gjenoppretter den gamle feil-hvis-ned-atferden. Fjernmål undersøkes kun.
+- **Lanseringsøkter.** Hver lansering lager et kortvarig `olx_` -sesjonstoken fra overordnet legitimasjon (`POST /api/launch/sessions`), hjerteslag det mens verktøyet kjører, leser brukssammendraget og tilbakekaller det etter at verktøyet avsluttes. Tokenet er et strengt undersett av det overordnede: samme tillatelser, samme eller en smalere katalog, kortere levetid, og det er ikke en dashbordlegitimasjon. Verktøyet mottar økttokenet, aldri den overordnede legitimasjonen, og forespørsler merkes med `launch:<tool>:<sessionId>` med mindre `--tag` er gitt. En gateway uten økten API mislykkes med `GatewayTooOld` i stedet for å falle tilbake til en unscoped lansering.
+- **Per-lansering konfig.** Verktøykonfigurasjonsfiler skrives til en privat midlertidig katalog (modus 0700, prefiks `omnirouter-`) og fjernes etter at barnet går ut. En `SIGKILL` av launcheren forlater katalogen; `omniroute launch --cleanup` fjerner slike kataloger når de er eldre enn en dag.
+
 ## Gemini vedvarende oppsett
 
 ```bash

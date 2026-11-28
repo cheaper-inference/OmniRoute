@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Vsa projektna pravila so v datoteki [`AGENTS.md`](AGENTS.md)** — edinem merodajnem viru za vsakega
-pomočnika AI (arhitektura, konvencije, testiranje, merila kakovosti, potek dela git, 23 strogih pravil,
-spoznanja o PII). Preberite jo v celoti; projektnih pravil ne dodajajte znova sem. Vse spodaj navedeno velja SAMO
-za Claude Code — gre za operativne dopolnitve pravil, ki so že opredeljena v `AGENTS.md`.
+**Vsa pravila projekta so v [`AGENTS.md`](AGENTS.md)** — edini vir resnice za vsakega pomočnika AI ; zgornji uvoz ga že naloži. Tukaj ne dodajajte znova projektnih pravil. Vse spodaj velja ONLY za Claude Koda — operativne izboljšave pravil, že definiranih v `AGENTS.md`.
 
-## Izolacija worktree-jev — posebnosti za Claude Code
+## Izolacija delovnega drevesa — Claude Posebnosti kode
 
-Celoten obvezni protokol za worktree-je (potrditev osnovne veje, kanonična pot
-`.claude/worktrees/`, `cp -al` za node_modules, pravila za razgradnjo) je v
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (povzet v `AGENTS.md` →
-Git Workflow → "Worktree isolation"). Posebnosti za Claude Code:
+- Potrdite osnovno vejo pri operaterju prek `AskUserQuestion` (Hard Rule #19), razen če vam je že povedal.
+- Ustvarite delovno drevo z `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (pristane pod `.claude/worktrees/`, trdo poveže `node_modules` in kopira `.husky/_`), nato pokličite `EnterWorktree` z njegovim `path`. Vedno posredujte osnovo: brez nje skript izbere najvišji `release/*`, ki morda ni tisti, ki ga je potrdil operater. Delovno drevo, ki ga `EnterWorktree` ustvari sam, nima niti trdih povezav niti kavljev, zato v njem ne tečejo vrata pred potrditvijo.
 
-- Z operaterjem potrdite osnovno vejo prek `AskUserQuestion` (Hard Rule #19), razen če vam
-  tega ni že povedal.
-- Po možnosti uporabite vgrajeno orodje `EnterWorktree` — že samo ustvarja worktree-je v
-  `.claude/worktrees/` (kanonična pot). Ustvarite worktree z dokumentiranim ukazom
-  `git worktree add`, nato pokličite `EnterWorktree` z njegovim `path`.
+## Subagenti in git
 
-## Varnost med sejami — posebnosti za Claude Code
+Vsak podagent, ki se dotakne git (agentskega orodja ali skripta poteka dela), dobi dobesedno prepoved `git stash` Hard Rule #22 a v svojem pozivu — zabeležena ponovitev incidenta s shranjevanjem je prišla prek podagenta.
 
-Stroga pravila št. 19/21/22 (v `AGENTS.md`) urejajo vzporedne seje. Operativni opomniki za to
-izvajalno okolje:
+## Načrtovanje artefaktov — superpowers pot preglasi
 
-- **Prepoved `git stash` dobesedno vključite v poziv vsakega podagenta, ki uporablja git**
-  (orodje Agent/skripti Workflow) — podagenti te datoteke ne podedujejo, zabeležena
-  ponovitev incidenta s stash pa se je zgodila prek podagenta.
-- Pred spajanjem ali potiskanjem v kateri koli PR, ki ga niste ustvarili _v tej seji_, zaženite `git worktree list`
-  in ponovno preverite `gh pr view <N> --json state,headRefOid` (strogo pravilo št. 22b).
-- Vsako sejo končajte tako, da je glavna delovna kopija na veji, na kateri se je seja začela.
+Spretnosti velemoči napovedujejo privzete vrednosti pod `docs/superpowers/plans/`, `docs/superpowers/specs/` in `docs/research/`. Prepišite vsakega v njegov ekvivalent `_tasks/` v `AGENTS.md` → "Artefakti načrtovanja in raziskovanja" pred pisanjem in ga potrdite z `git -C _tasks …`, nikoli v glavnem repoju.
 
-## Superpowers/artefakti načrtovanja — preglasitve poti
+## Scratch datoteke — `_artifacts/`, ne `/tmp`
 
-Konvencija `_tasks/` je opredeljena v `AGENTS.md` → »Artefakti načrtovanja in raziskovanja«. Veščine
-superpowers so privzeto nastavljene na poti v `docs/…` — te privzete vrednosti so **preglašene
-tukaj**. Ko veščina superpowers objavi pot, kot je »shranjeno v `docs/superpowers/plans/…`«,
-jo pred zapisovanjem spremenite v ustreznico pod `_tasks/…`:
+Ta projekt preglasi scratchpad seje kabelskega snopa (`/tmp/claude-*/…`). Pisanje začasnih datotek — izvozi, ustvarjeni zip, enkratni vmesni izhodi — v `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: gitignorirana korenska pot `_*`, tako da operater najde in izbriše vse praske na enem mestu. Trajni načrti, specifikacije, raziskave in predaje gredo namesto tega v `_tasks/` (Hard Rule #23).
 
-| Artefakt (veščina)                        | Privzeto (NE uporabljajte) | Namesto tega shranite sem                                     |
-| ----------------------------------------- | -------------------------- | ------------------------------------------------------------- |
-| Načrti (`writing-plans`)                  | `docs/superpowers/plans/`  | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Specifikacije/zasnova (`brainstorming`)   | `docs/superpowers/specs/`  | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Raziskave (`deep-research`, priložnostne) | `docs/research/`           | `_tasks/research/…`                                           |
-| Predaje (`/handoff`)                      | —                          | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Rdeča podlaga
 
-Te artefakte vključite v objavo znotraj repozitorija `_tasks/` (`git -C _tasks …`), nikoli v glavnem repozitoriju.
-
-## Delovne/začasne datoteke — uporabljajte `_artifacts/`, ne `/tmp`
-
-Ta projekt preglasi privzeto začasno delovno mesto seje izvajalnega okolja (`/tmp/claude-*/…`). Začasne/delovne
-datoteke — izvoze, ustvarjene datoteke zip, enkratne vmesne izhode in vse, kar bi
-sicer shranili v `/tmp` — namesto tega zapisujte v `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`.
-
-- `_artifacts/` je korenska pot `_*`: git jo že prezre (`AGENTS.md` → »Korenske poti `_*`«), obstaja
-  samo na disku in se nikoli ne sledi.
-- Razlog: če začasni izhod ostane znotraj projekta (namesto v `/tmp`), ga upravljavec
-  zlahka najde in vse začasno izbriše na enem mestu, namesto da išče po kratkotrajnih
-  imenikih `/tmp`, specifičnih za posamezne seje, ki izginejo ali se kopičijo brez sledenja.
-- Tega **ne** zamenjujte z `_tasks/` (strogo pravilo št. 23, lasten zasebni repozitorij git za trajne
-  načrte/specifikacije/raziskave/predaje) — `_artifacts/` je namenjen samo zavrgljivim delovnim datotekam; ničesar
-  tukaj ni treba ohraniti ali različiciti.
-
-## Zelena osnova pred odpiranjem PR-jev
-
-Pred ustvarjanjem veje ali odpiranjem PR-ja zaženite preverjanje zelene osnove (`AGENTS.md` → Potek dela Git →
-»Preverjanje zelene osnove«; projektne veščine se nanj sklicujejo kot `.agents/skills/_shared/base-green.md`). PR,
-odprt, ko je vrh osnovne veje rdeč, mora v telesu vsebovati `⚠️ base-red inherited: #<issue>`. Za
-odpravo nakopičenega rdečega stanja (vrh osnovne veje + rdeči PR-ji) uporabite veščino `/sweep-reds`.
+Če želite izprazniti nakopičeno rdeče stanje (osnovna konica + rdeče PRs), uporabite spretnost `/sweep-reds`.

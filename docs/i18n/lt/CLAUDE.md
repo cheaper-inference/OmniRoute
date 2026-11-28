@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Visos projekto taisyklės pateiktos faile [`AGENTS.md`](AGENTS.md)** — tai vienintelis tiesos šaltinis kiekvienam DI
-asistentui (architektūra, susitarimai, testavimas, kokybės patikros, git darbo eiga, 23 griežtosios taisyklės,
-su PII susijusios įžvalgos). Perskaitykite jį visą; projekto taisyklių čia iš naujo neįtraukite. Visa toliau
-pateikta informacija taikoma TIK Claude Code — tai `AGENTS.md` jau apibrėžtų taisyklių praktiniai patikslinimai.
+**Visos projekto taisyklės galioja [`AGENTS.md`](AGENTS.md)** — vienintelis tiesos šaltinis kiekvienam AI asistentui; aukščiau esantis importas jau įkelia jį. Nepridėkite čia projekto taisyklių iš naujo. Viskas, kas nurodyta toliau, taikoma ONLY Claude Kodo — operatyviniai taisyklių, jau apibrėžtų `AGENTS.md` patobulinimai.
 
-## Worktree izoliavimas — Claude Code specifika
+## Darbo medžio izoliacija — Claude Kodo specifika
 
-Visas privalomas worktree protokolas (bazinės šakos patvirtinimas, kanoninis `.claude/worktrees/`
-kelias, `cp -al` node_modules, išmontavimo taisyklės) pateiktas
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (apibendrinta `AGENTS.md` →
-Git Workflow → "Worktree isolation"). Claude Code specifiniai punktai:
+- Patvirtinkite pagrindinę šaką su operatoriumi naudodami `AskUserQuestion` (kieta taisyklė #19), nebent jis jums jau pasakė.
+- Sukurkite darbo medį naudodami `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (jis patenka į `.claude/worktrees/`, susieja `node_modules` ir nukopijuoja `.husky/_`), tada iškvieskite `EnterWorktree` naudodami `path`. Visada perduokite bazę: be jos scenarijus pasirenka aukščiausią `release/*`, kuris gali būti ne tas, kurį patvirtino operatorius. Darbo medis, kurį `EnterWorktree` sukuria pats, neturi nei kietųjų grandžių, nei kabliukų, todėl jame neveikia išankstinio įsipareigojimo vartai.
 
-- Patvirtinkite bazinę šaką su operatoriumi naudodami `AskUserQuestion` (Griežtoji taisyklė Nr. 19),
-  nebent jis jau jums ją nurodė.
-- Pirmenybę teikite integruotajam `EnterWorktree` įrankiui — jis jau sukuria worktree katalogus
-  `.claude/worktrees/` kataloge (kanoninis kelias). Sukurkite worktree dokumentuota `git
-worktree add` komanda, tada iškvieskite `EnterWorktree` su atitinkamu `path`.
+## Subagentai ir gitas
 
-## Saugumas tarp sesijų — Claude Code ypatumai
+Kiekvienas antrinis agentas, paliečiantis git (agento įrankis arba darbo eigos scenarijus), gauna griežtą taisyklę #22 a's `git stash` ban pažodžiui savo greitajame — įrašytas atidėjimo incidento pasikartojimas įvyko per antrinį agentą.
 
-Griežtosios taisyklės Nr. 19, Nr. 21 ir Nr. 22 (faile `AGENTS.md`) reglamentuoja lygiagrečias sesijas. Praktiniai priminimai šiai
-vykdymo aplinkai:
+## Planuojant artefaktus — supergalių kelio nepaisoma
 
-- **Kiekvieno su git dirbančio pagalbinio agento užklausoje pažodžiui pakartokite draudimą naudoti `git stash`**
-  (`Agent` įrankis / darbo eigos scenarijai) — pagalbiniai agentai nepaveldi šio failo, o užfiksuotas
-  stash incidento pasikartojimas įvyko būtent per pagalbinį agentą.
-- Prieš sujungdami ar išsiųsdami pakeitimus į bet kurį PR, kurio nesukūrėte _šioje sesijoje_, paleiskite `git worktree list`
-  ir iš naujo patikrinkite `gh pr view <N> --json state,headRefOid` (griežtoji taisyklė Nr. 22b).
-- Kiekvienos sesijos pabaigoje pagrindinę darbinę kopiją palikite toje pačioje šakoje, kurioje ji buvo sesijos pradžioje.
+Supergalių įgūdžiai skelbia numatytuosius nustatymus pagal `docs/superpowers/plans/`, `docs/superpowers/specs/` ir `docs/research/`. Prieš rašydami perrašykite kiekvieną į savo `_tasks/` atitikmenį `AGENTS.md` → "Planavimo ir tyrimo artefaktai" ir įveskite jį naudodami `git -C _tasks …`, niekada pagrindiniame atpirkimo sandoryje.
 
-## Superpowers / planavimo artefaktai — kelių perrašymai
+## Nubraukite failus — `_artifacts/`, o ne `/tmp`
 
-`_tasks/` susitarimas apibrėžtas `AGENTS.md` → „Planavimo ir tyrimų artefaktai“. Su
-superpowers įgūdžiais pateikiamos numatytosios reikšmės, nukreipiančios į `docs/…` — šios numatytosios reikšmės čia yra **perrašomos**.
-Kai superpowers įgūdis paskelbia kelią, pavyzdžiui, „išsaugota į `docs/superpowers/plans/…`“,
-prieš įrašydami pakeiskite jį atitinkamu `_tasks/…` keliu:
+Šis projektas nepaiso diržų seanso bloknoto (`/tmp/claude-*/…`). Rašykite laikinus failus, — eksportus, sugeneruotus ZIP failus, vienkartinius tarpinius išėjimus — iki `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: gitignore root `_*` kelias, todėl operatorius suranda ir ištrina visus įbrėžimus vienoje vietoje. Ilgalaikiai planai, specifikacijos, tyrimai ir perdavimas nukreipiami į `_tasks/` (kieta taisyklė #23).
 
-| Artefaktas (įgūdis)                         | Numatytasis (NENAUDOTI)   | Vietoje jo išsaugoti čia                                      |
-| ------------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Planai (`writing-plans`)                    | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Specifikacijos / dizainas (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Tyrimai (`deep-research`, ad-hoc)           | `docs/research/`          | `_tasks/research/…`                                           |
-| Darbo perdavimai (`/handoff`)               | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Raudona bazė
 
-Komituokite šiuos artefaktus `_tasks/` saugykloje (`git -C _tasks …`), niekada ne pagrindinėje saugykloje.
-
-## Juodraščiai / laikinieji failai — naudokite `_artifacts/`, o ne `/tmp`
-
-Šiame projekte perrašoma vykdymo aplinkos numatytoji sesijos juodraščių vieta (`/tmp/claude-*/…`). Laikinuosius / darbinius
-failus — eksportuotus duomenis, sugeneruotus zip archyvus, vienkartinius tarpinius rezultatus ir viską, ką kitu atveju
-įrašytumėte į `/tmp` — rašykite į `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`.
-
-- `_artifacts/` yra šakninio lygmens `_*` kelias: jo git jau nepaiso (`AGENTS.md` → „Šakninio lygmens `_*` keliai“), jis egzistuoja
-  tik diske ir niekada nėra sekamas.
-- Priežastis: laikant juodraštinius rezultatus projekte (o ne `/tmp`), operatoriui labai paprasta
-  vienoje vietoje rasti ir ištrinti visus laikinuosius failus, užuot jų ieškojus trumpalaikiuose,
-  konkrečioms sesijoms skirtuose `/tmp` kataloguose, kurie išnyksta arba kuriuose kaupiasi nesekami failai.
-- **Nepainiokite** šio katalogo su `_tasks/` (griežtoji taisyklė Nr. 23, atskira privati git saugykla ilgalaikiams
-  planams, specifikacijoms, tyrimams ir darbo perdavimams) — `_artifacts/` skirtas tik vienkartiniams darbiniams failams; nieko
-  iš čia nereikia išsaugoti ar versijuoti.
-
-## Žalia bazė prieš atidarant PR
-
-Prieš sukurdami šaką ar atidarydami PR, atlikite žalios bazės patikrą (`AGENTS.md` → Git darbo eiga →
-„Žalios bazės patikra“; projekto įgūdžiuose ji nurodoma kaip `.agents/skills/_shared/base-green.md`). Jei PR
-atidaromas, kai bazinės šakos viršūnė yra raudona, jo apraše turi būti `⚠️ base-red inherited: #<issue>`. Norėdami
-pašalinti susikaupusią raudoną būseną (bazinės šakos viršūnė + raudoni PR), naudokite `/sweep-reds` įgūdį.
+Norėdami nusausinti susikaupusią raudoną būseną (bazinis galas + red PRs), naudokite `/sweep-reds` įgūdžius.

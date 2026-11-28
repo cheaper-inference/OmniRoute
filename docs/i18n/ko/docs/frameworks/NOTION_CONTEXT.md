@@ -63,43 +63,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute는 토큰을 저장한 후 즉시 결과 1개의 테스트 검색을 실행합니다. Notion이
 오류 객체를 반환하면 토큰이 삭제되고 호출은 `400`으로 실패합니다.
 
-## MCP 도구(6개)
+## MCP 도구 (6)
 
-`open-sse/mcp-server/tools/notionTools.ts`에 정의되어 있습니다. 토큰은 호출 시점에
-`getNotionToken()`을 통해 확인됩니다. 구성된 토큰이 없으면 도구에서
-`"Notion 통합 토큰이 구성되지 않았습니다. 설정 > 컨텍스트 소스에서 설정하십시오."`
-오류가 발생합니다.
+`open-sse/mcp-server/tools/notionTools.ts` 에 정의되어 있습니다. 토큰은 호출 시 `getNotionToken()` 통해 확인됩니다. 아무것도 구성되지 않은 경우 도구는 `"Notion integration token not configured. Set it in Settings > Context Sources."` 발생시킵니다.
 
-| 도구                         | 범위           | 설명                                                                                                 |
-| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | 텍스트 쿼리로 페이지와 데이터베이스를 검색합니다(제목, ID, URL 반환). 페이지네이션됩니다.            |
-| `notion_get_page`            | `read:notion`  | ID로 페이지의 콘텐츠와 메타데이터를 가져옵니다.                                                      |
-| `notion_list_block_children` | `read:notion`  | 블록 또는 페이지의 모든 하위 블록(블록 트리)을 나열합니다. 페이지네이션됩니다.                       |
-| `notion_query_database`      | `read:notion`  | 선택적 `filter` + `sorts`(Notion API 형식)를 사용하여 데이터베이스를 쿼리합니다. 페이지네이션됩니다. |
-| `notion_get_database`        | `read:notion`  | ID로 데이터베이스의 스키마/메타데이터를 가져옵니다.                                                  |
-| `notion_append_blocks`       | `write:notion` | 기존 블록 또는 페이지에 하위 블록을 추가합니다(요청당 최대 100개 블록).                              |
+| 도구                         | 범위           | 설명                                                                                                     |
+| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | 텍스트 쿼리로 페이지와 데이터베이스를 검색합니다(제목, IDs, URLs 반환). 페이지가 매겨졌습니다.           |
+| `notion_get_page`            | `read:notion`  | ID 로 페이지의 콘텐츠와 메타데이터를 가져옵니다.                                                         |
+| `notion_list_block_children` | `read:notion`  | 블록이나 페이지(블록 트리)의 모든 블록 하위 항목을 나열합니다. 페이지가 매겨졌습니다.                    |
+| `notion_query_database`      | `read:notion`  | 선택적 `filter` + `sorts` (Notion API 형식)를 사용하여 데이터베이스를 쿼리합니다. 페이지가 매겨졌습니다. |
+| `notion_get_database`        | `read:notion`  | ID 로 데이터베이스의 schema/metadata 가져옵니다.                                                         |
+| `notion_append_blocks`       | `write:notion` | 기존 블록이나 페이지에 블록 하위 항목을 추가합니다(요청당 최대 100개 블록).                              |
 
 ### 입력 매개변수
 
-- `notion_search` — `query`(1~~500자), `pageSize`(1~~100, 기본값 20),
-  `startCursor`(선택 사항).
-- `notion_get_page` — `pageId`(32자 16진수 또는 UUID).
-- `notion_list_block_children` — `blockId`, `pageSize`(1~100, 기본값 50),
-  `startCursor`(선택 사항).
-- `notion_query_database` — `databaseId`, `filter`(선택 사항, Notion 필터 형식),
-  `sorts`(선택적 배열), `pageSize`(1~100, 기본값 50), `startCursor`(선택 사항).
+- `notion_search` — `query` (1~500자), `pageSize` (1~100, 기본값 20), `startCursor` (선택 사항).
+- `notion_get_page` — `pageId` (32자 16진수 또는 UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, 기본값 50), `startCursor` (선택 사항).
+- `notion_query_database` — `databaseId`, `filter` (선택 사항, Notion 필터 형식), `sorts` (선택 사항 배열), `pageSize` (1–100, 기본값 50), `startCursor` (선택 사항).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children`(블록 객체 배열),
-  `after`(선택적 위치).
+- `notion_append_blocks` — `blockId`, `children` (블록 객체 배열), `after` (선택적 위치).
 
 ### 범위
 
-읽기 도구에는 `read:notion`이 필요하고 쓰기 도구에는 `write:notion`이 필요합니다.
-범위는 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`인 경우에만
-`open-sse/mcp-server/server.ts`의 `withScopeEnforcement()`에 의해 적용됩니다.
-호출자에게 허용되는 범위는 `OMNIROUTE_MCP_SCOPES`(쉼표로 구분) 또는 인증된 API
-키의 범위 컨텍스트에서 가져옵니다. 전체 범위 모델은
-[MCP-SERVER.md](./MCP-SERVER.md)를 참조하십시오.
+읽기 도구에는 `read:notion` 필요하고 쓰기 도구에는 `write:notion` 필요합니다. 범위는 `OMNIROUTE_MCP_ENFORCE_SCOPES=true` 때 `open-sse/mcp-server/server.ts` 의 `withScopeEnforcement()` 에 의해 적용되며 항상 API 키에 `manage`/`admin` 없는 HTTP/SSE 호출자에 대해 적용됩니다. 호출자의 허용 범위는 `OMNIROUTE_MCP_SCOPES` (쉼표로 구분) 또는 인증된 API 키의 범위 컨텍스트에서 나옵니다. 전체 범위 모델은 [MCP-SERVER.md](./MCP-SERVER.md) 참조하세요.
 
 ## 엔드포인트
 

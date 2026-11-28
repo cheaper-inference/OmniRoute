@@ -4,192 +4,157 @@
 
 ---
 
-Az OmniRoute teljes mértékben telepíthető Progressive Web Appként érhető el. Ha bármely mobilböngészőből — Androidon (Chrome) vagy iOS-en (Safari) — megnyitja az irányítópultot, a „Hozzáadás a kezdőképernyőhöz” lehetőséggel alkalmazás-áruház használata nélkül is natív alkalmazásszerű élményben lehet része.
+Telepítse a OmniRoute irányítópultot progresszív webalkalmazásként, hogy megnyissa a kezdőképernyőről vagy az asztalról önálló ablakban. A telepített alkalmazásnak továbbra is csatlakoznia kell OmniRoute kiszolgálóhoz a navigációhoz, az irányítópult-adatokhoz és API kérésekhez. A gyorsítótárazott statikus eszközök nem biztosítanak offline átjárót vagy offline irányítópultot.
 
 ## Mi az a PWA?
 
-A Progressive Web App az OmniRoute webes irányítópultját natív mobilalkalmazáshoz hasonló megjelenésűvé és működésűvé alakítja. A telepítés után:
+A progresszív webalkalmazások a webes irányítópultot használják egy alkalmazásikonnal és egy külön ablakkal. A telepítés után OmniRoute:
 
-- Saját ikonjával indítható a kezdőképernyőről
-- Teljes képernyőn nyílik meg — böngészőcímsor és lapkezelő felület nélkül
-- Külön kapcsolati oldallal offline állapotban is működik
-- A gyorsabb betöltés érdekében gyorsítótárazza a statikus erőforrásokat
-- Az álló és fekvő tájolást egyaránt támogatja
+- Elindul a kezdőképernyőről vagy az asztalról
+- Önálló módban nyílik meg, a böngésző szokásos címsora és lapjai nélkül
+- Gyorsítótárazza a kiválasztott statikus eszközöket
+- Támogatja az álló és fekvő tájolást
 
 ## Telepítés
 
+Használjon HTTPS -címet egy másik eszközön lévő szerverhez. Ha a szerver ugyanazon az eszközön fut, `http://localhost:20128` a böngésző telepíthetőségi követelményeinek is megfelel. Egy egyszerű `http://YOUR_IP:20128` -cím nem felel meg ezeknek a követelményeknek. A telepítési menük és promptok a böngészőtől és az operációs rendszertől függenek. Lásd [MDNPWA telepítési követelményeit](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
+
 ### Android (Chrome)
 
-1. Nyissa meg az OmniRoute irányítópultját a Chrome-ban: `http://YOUR_IP:20128`
-2. A Chrome automatikusan megjeleníti az **„OmniRoute hozzáadása a kezdőképernyőhöz”** szalagcímet, vagy:
-   - Koppintson a **⋮** menüre (három pont) → **„Hozzáadás a kezdőképernyőhöz”** vagy **„Alkalmazás telepítése”**
-3. Erősítse meg a műveletet
-4. Az OmniRoute önálló alkalmazásként jelenik meg a kezdőképernyőn
+1. Nyissa meg OmniRoute HTTPS címet vagy `http://localhost:20128` egy szerverhez ugyanazon a telefonon.
+2. Nyissa meg a**⋮** menüt és válassza ki** Telepítse az alkalmazást** vagy** Hozzáadás a kezdőképernyőhöz** , ha felajánlják.
+3. Erősítse meg a felszólítást.
+4. Nyissa meg OmniRoute a kezdőképernyőről.
 
 ### iOS (Safari)
 
-1. Nyissa meg az OmniRoute irányítópultját a Safariban: `http://YOUR_IP:20128`
-2. Koppintson a **Megosztás** gombra (nyíllal ellátott négyzet)
-3. Görgessen lefelé, majd koppintson a **„Hozzáadás a Főképernyőhöz”** lehetőségre
-4. Adjon neki nevet (alapértelmezés szerint „OmniRoute”), majd koppintson a **Hozzáadás** gombra
-5. Az OmniRoute az alkalmazás ikonjával együtt megjelenik a kezdőképernyőn
+1. Nyissa meg OmniRoute HTTPS címét a Safariban.
+2. Csap** Részesedés** →** Hozzáadás a kezdőképernyőhöz** .
+3. Erősítse meg a nevet, és érintse meg** Hozzáadás** .
+4. Nyissa meg OmniRoute a kezdőképernyőről.
 
-### Asztali számítógép (Chrome / Edge)
+### Asztali (Chrome / Edge)
 
-1. Nyissa meg az OmniRoute irányítópultját
-2. Kattintson a címsorban található **telepítési ikonra** (vagy ⋮ → „OmniRoute telepítése...”)
-3. Erősítse meg a műveletet
-4. Az OmniRoute önálló ablakban nyílik meg — lapok és címsor nélkül
+1. Nyissa meg OmniRoute műszerfalát.
+2. Használja a böngésző telepítési ikonját vagy a** Telepítse az alkalmazást** menübelépés, ha felajánlják.
+3. Erősítse meg a felszólítást OmniRoute megnyitásához a saját ablakában.
 
-## Funkciók
+## Jellemzők
 
-### Teljes képernyős élmény
+### Önálló ablak
 
-A jegyzék `display: "fullscreen"` beállítással rendelkezik, ami azt jelenti, hogy a telepített alkalmazás a teljes képernyőt használja — böngészőfelület és az állapotsávval való átfedés nélkül. Ettől az irányítópult valóban natív alkalmazás hatását kelti.
+A jegyzék `display: "standalone"` és `start_url: "/dashboard"` készletet tartalmaz. A telepített alkalmazás megnyitja az irányítópultot egy alkalmazás ablakban. A böngésző és az operációs rendszer vezérlői továbbra is megjelenhetnek; a jegyzék nem kér teljes képernyős módot.
 
-### Offline támogatás
+### Gyorsítótárazott eszközök és hálózati követelmények
 
-Az OmniRoute intelligens gyorsítótárazást biztosító service workert (`sw.js`) tartalmaz:
+A [szervizmunkás](../../public/sw.js) gyorsítótárazza a kiválasztott azonos eredetű erőforrásokat:
 
-| Erőforrás típusa                                                                                                                                                                                                                 | Stratégia                                     | Működés                                                                                                            |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Alkalmazásváza**                                                                                                                                                                                                               | Elsősorban gyorsítótár                        | A `/`, az `/offline`, a jegyzék és az ikonok előzetesen gyorsítótárba kerülnek a telepítéskor                      |
-| **Statikus erőforrások** (CSS, JS, képek, betűtípusok)                                                                                                                                                                           | Elsősorban hálózat, gyorsítótáras tartalékkal | Friss tartalmat kér le a hálózatról; offline állapotban a gyorsítótárat használja                                  |
-| **Next.js-csomagok** (`/_next/`)                                                                                                                                                                                                 | Elsősorban hálózat, gyorsítótár-frissítéssel  | A hálózatról kér le és frissíti a gyorsítótárat; offline állapotban a gyorsítótárazott verziót szolgálja ki        |
-| **Navigációs kérések**                                                                                                                                                                                                           | Megkerülés (soha nem kerül elfogásra)         | A böngésző kezeli a HTTP/3→HTTP/2 visszaállást; egy inaktív QUIC-foglalat nem válhat `Response.error()` eredménnyé |
-| **API- / irányítópult-útvonalak** (`/api/`, `/a2a`, `/dashboard`, a kliens-API aliasai: `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, továbbá `/callback`, `/login`; kis- és nagybetűtől függetlenül egyeztetve) | Megkerülés (soha nem kerül gyorsítótárba)     | Mindig közvetlenül a kiszolgálóhoz fordul — a service worker soha nem fogja el                                     |
+| Kérelem vagy eszköz                          | Stratégia            | Viselkedés                                                                                                                                   |
+| -------------------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Telepítési idejű erőforrások                 | Előzetes gyorsítótár | `/`, `/manifest.webmanifest`, `/icon-512.png` és `/apple-touch-icon.png` gyorsítótárban vannak a dolgozói telepítés során                    |
+| Next.js statikus eszközök (`/_next/`)        | Hálózat az első      | A sikeres válaszok frissítik a gyorsítótárat; a hálózati hiba egy meglévő gyorsítótárazott válaszra esik vissza                              |
+| Egyéb statikus CSS, JS, képek és betűtípusok | Gyorsítótár először  | Egy meglévő gyorsítótárban lévő válasz újrafelhasználásra kerül; a sikeres hálózati válaszokat a gyorsítótárban tárolják egy kihagyás esetén |
+| Oldalnavigáció                               | Kitérő               | A böngésző közvetlenül letölti az oldalt; nincs offline tartalék szolgáltatás                                                                |
+| API, műszerfal és hitelesítési útvonalak     | Kitérő               | A dolgozó nem fogja el vagy nem tárolja gyorsítótárban ezeket a kéréseket                                                                    |
+| Egyéb nem statikus kérések                   | Hálózat              | Nincs gyorsítótár keresés vagy tárolás                                                                                                       |
 
-### Offline oldal
+A kizárt útvonalak `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` és `/login`, az útvonalhatárokon a kis- és nagybetűk megkülönböztetése nélkül egyeztetve. A kereszt-eredetű és nem GET kérések is megkerülik a dolgozót.
 
-Ha a hálózat nem érhető el, és a felhasználó új oldalra navigál, a service worker egy külön `/offline` oldalt jelenít meg, amely:
+### Kapcsolati oldal
 
-- Egyértelmű **„Kapcsolati probléma”** üzenetet jelenít meg
-- Valós időben frissülő, élő **online/offline állapotjelzőt** mutat
-- Egy **„Kapcsolat újrapróbálása”** gombot biztosít az újratöltéshez, amikor helyreáll a kapcsolat
-- A diagnosztikához az **Állapotoldalra** mutató hivatkozást biztosít
+A `/offline` oldal kapcsolódási üzenetet, online/offline jelzőt, a** Próbálja újra a kapcsolatot** gombot és egy hivatkozást az állapotoldalra. Ez az** nincs előre gyorsítótárban** a szervizes pedig igen** nem** átirányítja rá a sikertelen navigációkat. Létezése nem teszi elérhetővé az új oldalakat a szerver nélkül.
 
 ### Alkalmazásikonok
 
-Az OmniRoute minden platformhoz optimalizált ikonokat biztosít:
+A jegyzék ezeket PNG ikonokat hirdeti:
 
-| Fájl                   | Méret              | Felhasználás                                 |
-| ---------------------- | ------------------ | -------------------------------------------- |
-| `icon-512.png`         | 512×512            | Android telepítési értesítés, indítóképernyő |
-| `apple-touch-icon.png` | 180×180            | iOS-kezdőképernyő ikonja                     |
-| `icon-192.svg`         | 192×192 (vektoros) | Android adaptív ikon                         |
-| `apple-touch-icon.svg` | 180×180 (vektoros) | Apple tartalék ikon                          |
-| `favicon.svg`          | Vektoros           | Böngészőlapok                                |
-| `favicon.ico`          | Többméretes        | Régebbi böngészők                            |
+| Fájl                   | Méret   | Használat                                |
+| ---------------------- | ------- | ---------------------------------------- |
+| `icon-192.png`         | 192×192 | Általános alkalmazás ikonra              |
+| `icon-512.png`         | 512×512 | Általános és maszkolható alkalmazás ikon |
+| `apple-touch-icon.png` | 180×180 | Apple kezdőképernyő ikon                 |
+
+A böngésző kiválasztja a megfelelő ikont a telepítési célhoz.
 
 ### Automatikus regisztráció
 
-A service worker regisztrációja automatikusan, a gyökérszintű elrendezés `<PwaRegister />` komponensén keresztül történik. Nincs szükség felhasználói beavatkozásra — az alkalmazás telepíthetővé válik, amint a böngésző észleli az érvényes jegyzéket és service workert.
+`PwaRegister` regisztrálja a dolgozót a termelésben, ha a böngésző támogatja a szervizmunkásokat. A Fejlesztési mód törli a dolgozók regisztrációját és törli a gyorsítótárakat, hogy elkerülje az elavult eszközök megzavarását a forró újratöltésben. A telepítési utasítások a böngésző döntése marad.
 
-## Technikai architektúra
+## Műszaki építészet
 
-### Webalkalmazás-manifeszt (`manifest.webmanifest`)
+### Web App Manifest
 
-A Next.js generálja a `src/app/manifest.ts` fájlon keresztül:
+Next.js `/manifest.webmanifest` generál [`src/app/manifest.ts`](../../src/app/manifest.ts) ből. Főbb beállításai a következők:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Beállítás             | Érték                                                  |
+| --------------------- | ------------------------------------------------------ |
+| `short_name`          | `OmniRoute`                                            |
+| `start_url`           | `/dashboard`                                           |
+| `scope`               | `/`                                                    |
+| `display`             | `standalone`                                           |
+| `orientation`         | `any`                                                  |
+| Háttér és téma színei | Az alapértelmezett fény paletta `PWA_THEME_COLORS` tól |
 
-### Service Worker (`public/sw.js`)
+A jegyzék neve és leírása statikus értékek a forrásfájlban. A telepített jegyzék nem követi minden látogatáskor a példánynév beállítást vagy az aktív palettát.
 
-Egy egyszerű, keretrendszer-függőségek nélküli service worker, amely a következőket biztosítja:
+### Szervizmunkás
 
-- **Telepítési fázis**: Előre gyorsítótárazza az alkalmazás vázát (gyökérútvonal, offline oldal, manifeszt, ikonok)
-- **Aktiválási fázis**: Törli a gyorsítótár régi verzióit, és átveszi az irányítást az összes kliens felett
-- **Lekérési fázis**: Intelligens útválasztás a kérés típusa alapján (navigáció, statikus erőforrás, API)
-- **Gyorsítótár-verziókezelés**: `omniroute-pwa-v3` — frissítéskor növeld ezt az értéket egy teljesen új gyorsítótár kikényszerítéséhez
+[`public/sw.js`](../../public/sw.js) nincs szervizmunkás-keretrendszer-függősége:
 
-### Elrendezési metaadatok (`src/app/layout.tsx`)
+- **Telepítés:** előre gyorsítótárazza a fent felsorolt négy erőforrást, és aktiválja az új dolgozót.
+- **Aktiválás:** eltávolítja a régebbi gyorsítótár-generációkat és a követelés-klienseket.
+- **Letöltés:** alkalmazza a fenti statikus eszköz stratégiákat és útvonal-kizárásokat.
+- **Verziózás:** a forrás gyorsítótár neve `omniroute-pwa-v3`; a termelési build lebélyegzi a gyorsítótár-identitást.
+- **Értesítések:** kezeli a bejövő `push` eseményeket, és az értesítésre kattintva fókuszál vagy ablakot nyit meg.
 
-A gyökérelrendezés biztosítja a PWA-megfelelőséghez szükséges összes metacímkét:
+A push eseménykezelők önmagukban nem hoznak létre aktív leküldéses előfizetést vagy konfigurált kiszolgálókézbesítést. Ne feltételezze, hogy az értesítések csak azért vannak engedélyezve, mert a PWA telepítve van.
 
-- `manifest` hivatkozás a `/manifest.webmanifest` fájlra
-- `apple-web-app-capable: true` az önálló iOS-módhoz
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` az Android Chrome-hoz
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` a széltől szélig történő megjelenítéshez
+### Elrendezési metaadatok és regisztráció
 
-### Komponens: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) biztosítja a manifest hivatkozást, az Apple önálló metaadatait, a téma színeit és `viewport-fit: cover`. Az oldal címe és az Apple webalkalmazás címe a példány nevét használja. Az élő böngésző téma színe követi a palettát; a telepítési jegyzék az alapértelmezett fényszínt használja.
 
-A `src/shared/components/PwaRegister.tsx` helyen található klienskomponens:
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) a kliensen fut, és `/sw.js` a ID builddel regisztrálja a URL ben. Érzékeli a nem egyező gyorsítótár-generációkat, és alaphelyzetbe tudja állítani a dolgozót, majd egyszer újratölteni, hogy helyreálljon egy régebbi telepítésből. A regisztrációs hiba nem blokkolja az irányítópultot.
 
-1. Csatoláskor fut le (kizárólag kliensoldalon)
-2. Ellenőrzi a `serviceWorker` támogatását a böngészőben
-3. Csendben regisztrálja a `/sw.js` fájlt (a hibákat figyelmen kívül hagyja, hogy ne akadályozza az alkalmazás működését)
-4. Nem jelenít meg semmit (`return null`) — kizárólag mellékhatást végrehajtó komponens
+## Használat a Termux-szal (Android)
 
-## Használat Termuxszal (Android)
+1. Indítsa OmniRoute a Termuxban: `npx -y omniroute@latest`.
+2. Nyissa meg a Chrome-ot ugyanazon a telefonon: `http://localhost:20128`.
+3. Telepítse a PWA a böngésző telepítési menüjéből.
+4. Tartsa futva a Termux szervert az irányítópult használata közben.
 
-Ha az OmniRoute-ot Androidon, Termuxon keresztül futtatod, a PWA zökkenőmentesen működik:
-
-1. Indítsd el az OmniRoute-ot a Termuxban: `npx omniroute`
-2. Nyisd meg a Chrome-ot ugyanazon a telefonon: `http://localhost:20128`
-3. Telepítsd a PWA-t a „Hozzáadás a kezdőképernyőhöz” lehetőséggel
-4. A PWA csatlakozik a helyi Termux-kiszolgálóhoz — minden az eszközön fut
-
-Ez a kombináció azt jelenti, hogy az Android-telefonod egyszerre **kiszolgáló** (Termux) és **kliens** (PWA) — egy teljesen önálló AI-átjáró.
+A telefon az átjárót és a műszerfalat is tartalmazza. A távoli AI szolgáltatókhoz intézett kérésekhez továbbra is hálózati hozzáférésre van szükség. Tekintse meg a [Termux útmutatót](TERMUX_GUIDE.md) a beállítással és az Android-folyamat élettartamával kapcsolatos megfontolásokért.
 
 ## Használat más eszközökről
 
-Telepítsd a PWA-t bármely olyan eszközre, amelynek böngészője hozzáfér az OmniRoute-kiszolgálódhoz:
-
-- **Másik telefon/táblagép**: Nyisd meg a `http://PHONE_IP:20128` címet, és telepítsd a PWA-t
-- **Laptop**: Nyisd meg a Chrome vagy az Edge böngészőt, és telepítsd asztali PWA-ként
-- **Böngészővel rendelkező okostévé**: Nyisd meg az irányítópultot teljes képernyőn
+Nyissa meg a szerver HTTPS -címét telefonon, táblagépen vagy asztali számítógépen, majd kövesse az adott böngésző telepítési folyamatát. A szervernek minden eszközről elérhetőnek kell maradnia. A távoli hozzáférési lehetőségekről lásd az [alagút útmutatót](../ops/TUNNELS_GUIDE.md).
 
 ## Testreszabás
 
 ### Példány neve
 
-A PWA címe figyelembe veszi a `Dashboard → Settings` alatt megadott **példánynevet**. Ha a példányodat „Saját AI-átjáró” névre módosítod, a telepített PWA ezt a nevet jeleníti meg.
+A** Példány neve** A beállítás módosítja az irányítópult metaadatait, beleértve az oldal címét és az Apple webalkalmazás címét. A létrehozott jegyzék statikus nevet használ, így ez a beállítás nem garantálja, hogy egy már telepített alkalmazást átneveznek.
 
-### Egyéni favicon
+### Egyedi Favicon
 
-Ha egyéni favicont töltesz fel a `Dashboard → Settings` alatt, az asztali PWA ikonja az egyéni ikont fogja használni. A mobil kezdőképernyő ikonjai az előre elkészített `icon-512.png` és `apple-touch-icon.png` fájlokat használják.
+Egy egyéni favicon megváltoztatja a böngésző faviconját. A telepítési jegyzék továbbra is hirdeti a PNG fájlokat; a favicon megváltoztatása nem helyettesíti a kezdőképernyő ikonjait.
 
 ## Korlátozások
 
-- **Nincsenek push értesítések** — A service worker nem valósítja meg a Push API-t. Az értesítéseket ehelyett az Electron alkalmazás kezeli.
-- **Nincs háttérbeli szinkronizálás** — Az offline műveletek nem kerülnek várólistára későbbi újrajátszáshoz. A PWA elsősorban irányítópult-megjelenítőként szolgál.
-- **iOS-korlátozások** — Az iOS-en futó Safari nem támogatja a PWA összes funkcióját (például a telepítést manuálisan kell kezdeményezni, a háttérben futó service workerek pedig korlátozottak).
-- **Gyorsítótár mérete** — A service worker csak statikus erőforrásokat gyorsítótáraz. Az `/api/` útvonalakról érkező nagy válaszadatok soha nem kerülnek gyorsítótárba.
-- **Egyéni ikonok mobileszközökön** — A favicon módosítása a beállításokban nem frissíti a kezdőképernyő ikonját mobileszközökön (ehhez újra létre kell hozni a PWA-ikonokat).
+- **Szerver csatlakozás szükséges:** az oldalnavigáció, az irányítópult állapota és API kérések nem rendelkeznek offline tartalékkal.
+- **Nincs háttér szinkronizálás:** az offline műveletek nincsenek lejátszási sorba állítva.
+- **Böngésző különbségek:** a telepítési menük, az ablakbemutatók és az értesítések támogatása platformonként változhat.
+- **Nincs API válaszgyorsítótár:** a dolgozó kizárja API, a műszerfalat és a hitelesítési útvonalakat.
+- **Statikus telepítési ikonok:** az ikonok frissítéséhez meg kell változtatni a hirdetett elemeket; a böngészők megtarthatják a telepített metaadatokat.
 
-## Fájlreferencia
+## Fájlok hivatkozása
 
-| Fájl                                    | Rendeltetés                                                          |
-| --------------------------------------- | -------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Next.js-manifestútvonal (létrehozza a `manifest.webmanifest` fájlt)  |
-| `public/sw.js`                          | Gyorsítótárazási logikát tartalmazó service worker                   |
-| `src/shared/components/PwaRegister.tsx` | A service workert regisztráló klienskomponens                        |
-| `src/app/offline/page.tsx`              | Offline tartalékoldal valós idejű állapotjelzővel                    |
-| `src/app/layout.tsx`                    | Gyökérelrendezés PWA-metaadatokkal (apple-web-app, theme-color stb.) |
-| `public/icon-512.png`                   | 512×512-es PNG-ikon (Android, indítóképernyő)                        |
-| `public/apple-touch-icon.png`           | 180×180-as PNG-ikon (iOS-kezdőképernyő)                              |
-| `public/icon-192.svg`                   | 192×192-es SVG-ikon (Android adaptív ikon)                           |
-| `public/apple-touch-icon.svg`           | 180×180-as SVG-ikon (Apple tartalékikon)                             |
+| Fájl                                                                                   | Cél                                                       |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Létrehozott webalkalmazás-jegyzék                         |
+| [public/sw.js](../../public/sw.js)                                                     | Gyorsítótárazás, kizárások és értesítési eseménykezelők   |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Gyártás regisztráció és elavult gyorsítótár helyreállítás |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Csatlakozási oldal, nem automatikus offline tartalék      |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Oldal metaadatai és nézetablak beállításai                |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Megosztott téma-szín értékek                              |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 alkalmazás ikonja                               |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple ikon                                      |

@@ -466,107 +466,107 @@ codex debug models --bundled       # 번들 모델 카탈로그를 JSON으로 �
 
 ---
 
-## 장시간 실행 작업
+## 장기 실행 작업
 
-두 가지 OmniRoute 기본값이 여러 시간 동안 실행되는 Codex CLI 세션을 눈에 띄지 않게 방해할 수 있습니다. 어느 것도 Codex CLI 설정이 아니며, 둘 다 OmniRoute 측에 있습니다. 계정을 고정하고 유휴 시간 제한을 비활성화하는 업스트림 프록시에서 구성을 마이그레이션하는 사용자는 두 문제를 모두 겪은 뒤 OmniRoute가 “장시간 세션을 유지할 수 없다”고 결론 내리는 경우가 많습니다.
+두 개의 OmniRoute 기본값은 여러 시간 동안 Codex CLI 세션을 자동으로 방해할 수 있습니다. Codex CLI 설정 — 둘 다 OmniRoute 측에 적용되지 않습니다. 계정을 고정하고 유휴 차단을 비활성화하는 업스트림 프록시의 구성을 마이그레이션하는 사용자는 종종 두 가지 모두에 도달하고 OmniRoute "긴 세션을 유지할 수 없다"고 결론을 내립니다.
 
-| 증상                                                                | 가능한 원인                                                | 설정 항목                |
-| ------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------ |
-| 세션이 계속 계정을 전환함 / 턴 사이에 프롬프트 캐시 연속성이 사라짐 | 세션 선호도 TTL이 `0`임(비활성화됨)                        | `sessionAffinityTtlMs`   |
-| 클라이언트에 표시되는 안내 없이 추론 도중 연결이 끊김               | 업스트림 청크가 10분 동안 없어 스트림 유휴 감시기가 작동함 | `STREAM_IDLE_TIMEOUT_MS` |
+| 징후                                                              | 가능한 원인                                                     | 손잡이                   |
+| ----------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------ |
+| 세션이 계속 계정을 전환함/턴 사이에 프롬프트 캐시 연속성이 손실됨 | 세션 선호도 TTL 는 `0` 입니다(비활성화됨)                       | `sessionAffinityTtlMs`   |
+| 클라이언트 측 프롬프트 없이 추론 도중에 연결이 끊어집니다.        | 업스트림 청크 없이 10분 후에 스트림 유휴 감시가 실행되었습니다. | `STREAM_IDLE_TIMEOUT_MS` |
 
-관련 논의: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (장시간 작업 중단), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (선호도가 기본적으로 비활성화된 이유). 추적: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+관련 토론: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (장기 작업 삭제), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (친화도 기본값이 꺼진 이유) 추적: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. 세션 선호도 — 하나의 대화를 하나의 계정에 고정
+### 1. 세션 어피니티 — 하나의 대화를 하나의 계정에 고정
 
-**기본값:** `sessionAffinityTtlMs = 0` (비활성화됨).
+**기본:** `sessionAffinityTtlMs = 0` (비활성화).
 
-**설정 위치**
+**어디서 설정하나요?**
 
-- 대시보드 → **설정 → 라우팅** → **세션 선호도** → **선호도 TTL(초)** (`ComboDefaultsTab`)
-- 또는 **밀리초** 단위의 `sessionAffinityTtlMs`로 설정을 PATCH함(Zod 범위 `0`–`86_400_000`, 즉 최대 24시간)
+- 대시보드 →** 설정 → 라우팅** →** 세션 어피니티** →** 선호도 TTL (초)** (`ComboDefaultsTab`)
+- 또는 `sessionAffinityTtlMs` 사용한 PATCH 설정** 밀리초** (Zod 범위 `0`–`86_400_000`, 즉 최대 24시간)
 
-> #7274에서 Codex 전용이었던 `codexSessionAffinityTtlMs`의 이름이 변경되었습니다. 레거시 키는 여전히 읽기 전용 별칭으로 허용되지만, 새 구성에서는 `sessionAffinityTtlMs`를 사용해야 합니다. 이제 TTL이 `0`보다 크면 선호도가 Codex뿐만 아니라 **모든** 제공자에 적용됩니다. [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → 세션 선호도를 참조하세요.
+> Codex 전용 `codexSessionAffinityTtlMs` 에서 #7274 로 이름이 변경되었습니다. 레거시 키는 여전히 읽기 전용 별칭으로 허용됩니다. 새로운 구성은 `sessionAffinityTtlMs` 사용해야 합니다. 이제 선호도가 적용됩니다.** 어느** 공급자는 TTL `0` 보다 높으면 Codex — 뿐만 아니라 [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → 세션 선호도를 참조하세요.
 
-**0으로 유지할 때 발생하는 문제**
+**0에 머물면 무엇이 깨지는가?**
 
-여러 턴으로 구성된 Codex 대화의 각 턴은 활성 조합 전략에 따라 독립적으로 라우팅되며, **턴마다 다른 계정**에 할당될 수 있습니다. 이로 인해 업스트림 세션 / 프롬프트 캐시 연속성이 깨집니다. OmniRoute는 TTL이 `0`보다 큰 경우에만 Codex 세션 헤더(`x-codex-session-id` / `x-session-id` / `x-omniroute-session`)와 `prompt_cache_key` / `session_id` 같은 본문 필드를 참조합니다(`src/sse/services/auth.ts`의 `extractSessionAffinityKey`).
+Every turn of a multi-turn Codex conversation is routed independently by the active combo strategy and can land on a **different account per turn**. That breaks upstream session / prompt-cache continuity. OmniRoute only consults Codex session headers (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) and body fields such as `prompt_cache_key` / `session_id` when the TTL is greater than `0` (`extractSessionAffinityKey` in `src/sse/services/auth.ts`).
 
-**여러 시간 동안 실행되는 단일 작업에 대한 권장 설정**
+**여러 시간에 걸친 단일 작업에 권장됨**
 
-TTL을 **예상 작업 경과 시간보다 길게** 설정하세요(UI 최대값은 **86400초** = 24시간):
+TTL 를 설정하세요** 작업의 예상 벽시계 길이 이상** (UI 최대값은** 86400초** = 24시간):
 
-| 예상 작업 시간   | 선호도 TTL(UI, 초)       | `sessionAffinityTtlMs` |
-| ---------------- | ------------------------ | ---------------------- |
-| 몇 시간          | `14400` (4시간)          | `14400000`             |
-| 밤새 / 약 12시간 | `43200` (12시간)         | `43200000`             |
-| 하루 종일        | `86400` (24시간, 최대값) | `86400000`             |
+| 예상 작업 길이 | 친화 TTL (UI, 초)      | `sessionAffinityTtlMs` |
+| -------------- | ---------------------- | ---------------------- |
+| 몇 시간        | `14400` (4시간)        | `14400000`             |
+| 하룻밤 / ~ 12h | `43200` (12시간)       | `43200000`             |
+| 하루 종일      | `86400` (24시간, 최대) | `86400000`             |
 
-옵트인은 의도된 동작입니다. 선호도를 비활성화하면 여러 계정 간의 부하 분산에 유리하고, 활성화하면 하나의 장시간 에이전트 세션에서 연속성을 유지하는 데 유리합니다. 이 가이드에서는 기본값을 변경하지 **않습니다**. 장시간 Codex 작업을 실행하는 운영자는 직접 옵트인해야 합니다.
+옵트인은 의도적인 것입니다. 선호도를 비활성화하면 계정 전체의 로드 밸런싱이 유리해집니다. 이를 활성화하면 하나의 긴 에이전트 세션에 대한 연속성이 유리해집니다. 이 가이드는** ~ 아니다** 긴 Codex 작업을 실행하는 기본 — 연산자를 변경하려면 선택해야 합니다.
 
-### 2. 스트림 유휴 시간 제한 — 조용한 추론 턴을 종료하지 않기
+### 2. 스트림 유휴 시간 초과 — 조용한 추론 차례를 죽이지 않습니다.
 
-**기본값:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10분). 설정되지 않은 경우 `REQUEST_TIMEOUT_MS`에서 상속되며, 공유 기준값 역시 600000입니다. [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → 시간 제한을 참조하세요.
+**기본:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10분). 설정되지 않은 경우 `REQUEST_TIMEOUT_MS` 에서 상속됩니다. 공유 기준선도 600000입니다. [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → 시간 초과를 참조하세요.
 
-**기본값에서 발생하는 문제**
+**기본값에서 깨지는 것**
 
-10분 넘게 **실제 업스트림 청크가 하나도 없이** 조용히 유지되는 Codex 추론/도구 턴은 SSE 유휴 감시기(`open-sse/utils/stream.ts`)에 의해 강제로 종료됩니다. 클라이언트에서는 아무 설명 없는 연결 끊김으로 보이는 경우가 많으며, 이는 “알림 없이 자동으로 중지됨”이라는 현상과 일치합니다.
+10분 이상 침묵을 유지하는 Codex 추론/툴 턴** 실제 업스트림 청크 없음** SSE 유휴 워치독(`open-sse/utils/stream.ts`)에 의해 강제 종료됩니다. 클라이언트는 종종 연결 중단 — 일치가 "알림 없이 자동으로 중지됨"을 확인합니다.
 
-중요한 세부 사항: OmniRoute의 합성 SSE **하트비트는 유휴 타이머를 재설정하지 않습니다**. 실제 업스트림 본문 청크만 `lastChunkTime`을 갱신합니다. 여전히 “생각 중”이지만 조용한 모델은 감시기의 관점에서 중단된 업스트림과 동일하게 보입니다.
+중요한 세부 사항: OmniRoute 의 합성 SSE** 하트비트가 재설정되지 않음** 유휴 시계. 실제 업스트림 본문 청크만 `lastChunkTime` 업데이트합니다. 여전히 "생각" 중인 조용한 모델은 감시자의 관점에서 볼 때 정지된 상류 모델과 동일하게 보입니다.
 
-관련된 Undici 본문 비활성 제한: `FETCH_BODY_TIMEOUT_MS`(기본값 역시 동일한 10분 기준이며, `0`으로 설정하면 비활성화됩니다). 스트리밍에서 `FETCH_TIMEOUT_MS`는 연결 설정/첫 번째 헤더 수신까지만 적용됩니다. 스트림이 활성화된 이후의 중단은 `STREAM_IDLE_TIMEOUT_MS`와 `FETCH_BODY_TIMEOUT_MS`에 의해 제어됩니다.
+관련된 Undici 본체 비활성: `FETCH_BODY_TIMEOUT_MS` (또한 기본값은 동일한 10분 기준이며 `0` 이를 비활성화합니다). 스트리밍의 경우 스트림이 활성화되면 `FETCH_TIMEOUT_MS` 연결 설정/첫 번째 헤더 — 만 다루고 정지는 `STREAM_IDLE_TIMEOUT_MS` 및 `FETCH_BODY_TIMEOUT_MS` 에 의해 관리됩니다.
 
-**여러 시간 동안 실행되는 단일 작업에 대한 권장 설정**
+**여러 시간에 걸친 단일 작업에 권장됨**
 
-OmniRoute 프로세스 환경(`.env` / compose / systemd)에서:
+OmniRoute 프로세스 환경(`.env` / compose / systemd):
 
 ```bash
-# 긴 추론 턴을 위해 스트림 유휴 및 본문 비활성 제한을 비활성화
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-또는 예상되는 가장 긴 무응답 간격보다 큰 값으로 설정합니다(단위는 밀리초):
+또는 예상되는 가장 길고 조용한 간격 이상으로 높이십시오(값은 밀리초).
 
 ```bash
-# 예시: 업스트림 청크 사이에 최대 2시간의 무응답 허용
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-이 환경 변수를 변경한 후 OmniRoute를 재시작하세요.
+이러한 환경 변수를 변경한 후 OmniRoute 다시 시작하십시오.
 
-### 구체적인 절차 — 여러 시간 동안 실행되는 Codex 작업
+### 콘크리트 레시피 — 여러 시간 Codex 작업
 
-1. **계정 고정:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200`(12시간) 또는 `86400`(최대 24시간).
-2. OmniRoute 환경에서 **유휴 제한을 늘리거나 비활성화**합니다.
+1. **계정 고정:** 대시보드 → 설정 → 라우팅 → 세션 선호도 → 선호도 TTL = `43200` (12h) 또는 `86400` (최대 24h).
+2. **유휴 컷오프 높이기/비활성화** OmniRoute 환경에서:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. 일반적인 Codex `config.toml`(`wire_api = "responses"`, 올바른 `base_url`, `OMNIROUTE_API_KEY`)을 그대로 사용하세요. 이 두 동작을 제어하는 Codex 측 선호도/유휴 설정은 없습니다.
-4. OmniRoute를 재시작한 후 장시간 Codex 작업을 시작하세요.
+3. 일반적인 Codex `config.toml` (`wire_api = "responses"`, 올바른 `base_url`, `OMNIROUTE_API_KEY`) — 유지하십시오. 이 두 가지 동작에 대한 Codex 측 affinity/idle 손잡이가 없습니다.
+4. OmniRoute 다시 시작한 다음 긴 Codex 작업을 시작합니다.
 
-### 기본값 결정 (#7287)
+### 기본값 결정(#7287)
 
-| 설정                     | 제공 기본값    | 이 가이드에서 변경?                                                                  |
-| ------------------------ | -------------- | ------------------------------------------------------------------------------------ |
-| `sessionAffinityTtlMs`   | `0`(꺼짐)      | **아니요** — 옵트인 상태 유지(부하 분산과 연속성 간의 절충, Discussion #5718 참조)   |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000`(10분) | **아니요** — 일반 트래픽에는 10분 유지. 장시간 Codex 운영자는 값을 늘리거나 비활성화 |
+| 손잡이                   | 배송 기본값     | 이 가이드에서 변경사항이 있나요?                                                                      |
+| ------------------------ | --------------- | ----------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (꺼짐)      | **아니요** — 계속 옵트인 상태로 유지됩니다(로드 밸런싱 대 연속성, 토론 #5718 참조).                   |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10분) | **아니요** — 일반 트래픽의 경우 10분 동안 유지됩니다. 긴 Codex 연산자는 이를 올리거나 비활성화합니다. |
 
-두 기본값 중 하나라도 전역적으로 변경하면 Codex뿐만 아니라 해당 인스턴스의 모든 클라이언트 동작이 바뀝니다. 설정 방법을 문서화하되, 운영자가 명시적으로 다른 결정을 내리기 전까지는 기본값을 그대로 유지하세요.
+전역적으로 기본값을 바꾸면 Codex 뿐만 아니라 인스턴스의 모든 클라이언트에 대한 동작이 변경됩니다. 손잡이를 문서화하십시오. 명시적인 운영자 결정이 달리 명시될 때까지 기본값을 그대로 둡니다.
 
-### 유휴 종료 진단
+### 유휴 절단 진단
 
-유휴 감시기가 작동하면 OmniRoute는 다음과 같은 형식의 로그를 남깁니다.
+유휴 감시가 실행되면 OmniRoute 다음과 같은 형태의 라인을 기록합니다.
 
 ```text
-[STREAM] 유휴 시간 초과: 600000ms 동안 codex에서 데이터가 없음 (모델: cx/gpt-5.5)
+[STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-`Idle timeout: no data from`(또는 코드 `stream_idle_timeout` / 오류 이름 `StreamIdleTimeoutError`)을 grep으로 검색하세요. 공급자 부분에는 해당 요청에 대해 OmniRoute가 사용한 값(`codex`, 다른 공급자 ID 또는 알 수 없는 경우 `provider`)이 표시되므로, 항상 리터럴 문자열 `codex`인 것은 아닙니다.
+`Idle timeout: no data from` 에 대한 Grep(또는 코드 `stream_idle_timeout` / 오류 이름 `StreamIdleTimeoutError`). 공급자 세그먼트는 해당 요청에 사용된 OmniRoute 입니다(`codex`, 다른 공급자 ID 또는 알 수 없는 경우 `provider` ). — 항상 리터럴 문자열 `codex` 는 아닙니다.
 
 ---
 

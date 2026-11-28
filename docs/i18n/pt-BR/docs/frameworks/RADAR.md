@@ -94,52 +94,30 @@ o roteamento nem a seleção de modelos — consulte o opt-in separado abaixo.
 
 ---
 
-## A sincronização de dados é um opt-in SEPARADO — a promessa de privacidade
+## A sincronização de dados é uma opção SEPARATE — a promessa de privacidade
 
-Ativar `RADAR_ENABLED` apenas desbloqueia a interface. A sincronização do feed exige um segundo
-opt-in independente, armazenado em `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migração `136_radar_cache_settings.sql`). `syncRadar()` verifica a flag _e_ o
-opt-in antes de realizar qualquer chamada de rede:
+Ativar `RADAR_ENABLED` apenas desbloqueia o UI. A sincronização do feed requer uma segunda aceitação independente armazenada em `radar_settings.opt_in` (`src/lib/db/radar.ts`, migração `136_radar_cache_settings.sql`). `syncRadar()` verifica o sinalizador _e_ o opt-in antes de fazer qualquer chamada de rede:
 
 ```
-Flag desativada → { status: "disabled" } — nenhuma chamada de rede
-Opt-in falso     → { status: "opt_out" }  — nenhuma chamada de rede
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Quando ambos estão ativados, o fluxo de sincronização é:
+Quando ambos estão ativados, o caminho de sincronização é:
 
-1. `GET <feed base URL>/v1/catalog/latest` com `x-omniroute-radar-schema: 2` e um cabeçalho
-   opcional `Authorization: Bearer <supporter key>` (veja abaixo). Quando o cabeçalho do esquema está ausente,
-   os servidores usam por padrão o artefato de transição v1 assinado separadamente, para que clientes instalados mais antigos
-   continuem recebendo atualizações.
-2. Esse é um fluxo do aplicativo somente para download, mas ainda é uma solicitação HTTPS. A infraestrutura
-   hospedada recebe metadados comuns de conexão, como o IP de origem. Quando uma chave de apoiador
-   está configurada, a sincronização também envia essa chave no cabeçalho Bearer para que o serviço possa determinar
-   o direito de acesso. Na revisão exata do servidor privado identificada no limite de evidências acima,
-   a contabilização das solicitações do feed usa hashes de chaves, uso agregado e um HMAC truncado do IP
-   com rotação diária para análise manual de abusos; essas tabelas não armazenam nem a chave nem o IP em formato bruto.
-   Os logs de acesso da infraestrutura e a caixa de saída criptografada de entrega constituem limites operacionais
-   separados.
-3. O OmniRoute nunca envia prompts, respostas, conversas, credenciais de provedores, tráfego de modelos,
-   tempo de atividade, latência ou a configuração local de provedores ao serviço Radar.
-4. A resposta é verificada, validada e armazenada em cache localmente (consulte
-   [Modelo de segurança](#security-model)). O Radar tem exatamente quatro caminhos de rede no lado do servidor:
-   `syncRadar()` para o catálogo, `syncRadarReferrals()` para indicações e
-   `syncRadarOffers()` / `syncRadarIntel()` para ofertas e Intel exclusivos para apoiadores.
+1. `GET <feed base URL>/v1/catalog/latest` com `x-omniroute-radar-schema: 2` e um cabeçalho `Authorization: Bearer <supporter key>` opcional (veja abaixo). Os servidores assumem como padrão o artefato de transição v1 assinado separadamente quando o cabeçalho do esquema está ausente, portanto, os clientes instalados mais antigos continuam recebendo atualizações.
+2. Este é um fluxo de aplicativo somente para download, mas ainda é uma solicitação HTTPS. A infraestrutura hospedada recebe metadados de conexão comuns, como a fonte IP. Quando uma chave de suporte é configurada, a sincronização também envia essa chave no cabeçalho do portador para que o serviço possa resolver o direito. Na revisão exata do servidor privado identificada no limite de evidência acima, a contabilidade de solicitação de feed usa hashes de chave, uso agregado e um HMAC truncado rotativo diário do IP para revisão manual de abuso; essas tabelas não persistem nem a chave nem o IP na forma bruta. Os logs de acesso à infraestrutura e a caixa de saída de entrega criptografada são limites operacionais separados.
+3. OmniRoute nunca envia prompts, respostas, conversas, credenciais de provedor, tráfego de modelo, tempo de atividade, latência ou configuração do provedor local para o serviço Radar.
+4. A resposta é verificada, validada e armazenada em cache localmente (consulte [Modelo de segurança](#security-model) ). O Radar tem exatamente quatro caminhos de rede no lado do servidor: `syncRadar()` para catálogo, `syncRadarReferrals()` para referências e `syncRadarOffers()` / `syncRadarIntel()` para ofertas somente para apoiadores e Intel.
 
-A **chave de apoiador** é um token Bearer opcional (`radar_settings.supporter_key`)
-que permite ao serviço de feed decidir qual nível fornecer (consulte
-[Níveis](#tiers-community-and-live)). Ela é:
+A verificação do catálogo é executada a cada 24 horas. Quando o feed verificado ainda carrega a versão e o nível em cache, a sincronização mantém a carga útil em cache, renova `fetchedAt` e a próxima verificação ocorre 24 horas depois, em vez de no próximo tick de hora em hora.
 
-- Armazenada **criptografada em repouso** com os mesmos helpers AES-256-GCM `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`) usados para as credenciais dos provedores.
-- Definida por meio de `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) e
-  **nunca retornada integralmente** — a resposta retorna uma forma mascarada (`omr_****abcd`).
-- Alterá-la ou removê-la invalida atomicamente os caches do catálogo, das indicações, das ofertas e do Intel. A
-  próxima sincronização/leitura determina o novo direito de acesso no lado do servidor; salvar uma chave não
-  realiza, por si só, uma solicitação de rede nem consome uma chave de ativação de uso único.
-- Enviada ao serviço de feed como um token Bearer no GET de sincronização — nenhuma outra informação sobre a
-  chave sai do cliente.
+O** chave de apoiador** é um token de portador opcional (`radar_settings.supporter_key`) que permite ao serviço de feed decidir qual camada servir (consulte [Camadas](#tiers-community-and-live) ). Isso é:
+
+- Armazenado** criptografado em repouso** com os mesmos auxiliares AES-256-GCM `encrypt()`/`decrypt()` (`src/lib/db/encryption.ts`) usados para credenciais de provedor.
+- Definir via `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) e** nunca ecoou de volta** — a resposta retorna um formulário mascarado (`omr_****abcd`).
+- Alterá-lo ou limpá-lo invalida atomicamente o catálogo, as referências, as ofertas e os caches Intel. O próximo sync/read resolve o novo direito no lado do servidor; salvar uma chave por si só não faz uma solicitação de rede nem consome uma chave de ativação de uso único.
+- Enviado para o serviço de feed como um token de portador na sincronização GET — nada mais sobre a chave sai do cliente.
 
 ---
 
@@ -296,96 +274,54 @@ destinos HTTP remotos falham de forma segura e deixam a navegação inerte.
 
 ## Modelo de segurança
 
-### Assinatura Ed25519 sobre os bytes exatos
+### Assinatura Ed25519 em bytes exatos
 
-O payload do feed é assinado com Ed25519. `verifyFeedBytes()`
-(`src/lib/radar/verify.ts`) verifica a assinatura sobre os **bytes exatos da resposta**
-recebidos pela rede — o payload nunca é serializado novamente antes da verificação,
-portanto uma recodificação byte a byte não pode invalidar nem contornar silenciosamente
-a verificação da assinatura. Uma falha na verificação (`invalid_signature`) interrompe
-a sincronização antes que o payload seja analisado ou armazenado em cache.
+A carga útil do feed é assinada com Ed25519. `verifyFeedBytes()` (`src/lib/radar/verify.ts`) verifica a assinatura no** bytes de resposta exatos** recebida pela conexão — a carga útil nunca é serializada novamente antes da verificação, portanto, uma recodificação byte por byte não pode invalidar ou ignorar silenciosamente a verificação de assinatura. A falha de verificação (`invalid_signature`) anula a sincronização antes que a carga útil seja analisada ou armazenada em cache.
 
-### Chave pública fixada + rotação
+### Rotação + de chave pública fixada
 
-A chave pública de verificação é fixada em `src/lib/radar/pinnedKeys.ts`
-(`PINNED_FEED_PUBLIC_KEYS`), um array que permite adicionar uma nova chave no início
-antes de uma rotação, enquanto feeds antigos em cache, assinados com uma chave anterior,
-permanecem válidos até serem sincronizados novamente.
+A chave pública de verificação é fixada em `src/lib/radar/pinnedKeys.ts` (`PINNED_FEED_PUBLIC_KEYS`), uma matriz para que uma nova chave possa ser anexada antes de uma rotação, enquanto feeds antigos em cache assinados com uma chave anterior permanecem válidos até serem sincronizados novamente.
 
-### Substituições por variáveis de ambiente compatíveis com forks
+### Substituições de ambiente compatíveis com fork
 
-Duas variáveis de ambiente permitem que forks e instalações auto-hospedadas apontem o
-cliente para seu próprio feed em vez do serviço padrão da OmniRoute — consulte
-[Como auto-hospedar um feed](#how-to-self-host-a-feed) abaixo:
+Dois env vars permitem que forks e auto-hospedadores apontem o cliente para seu próprio feed em vez do serviço OmniRoute padrão — consulte [Como auto-hospedar um feed](#how-to-self-host-a-feed) abaixo:
 
-| Variável            | Finalidade                                                                                                     |
-| ------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `RADAR_FEED_URL`    | Substitui a URL base do feed (padrão: `https://radar.omniroute.online`).                                       |
-| `RADAR_FEED_PUBKEY` | Substitui a chave pública fixada (SPKI DER em base64 ou PEM), trocando o array integrado por esta única chave. |
+| Var                 | Propósito                                                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `RADAR_FEED_URL`    | Substitui a base de feed URL (padrão `https://radar.omniroute.online`).                                          |
+| `RADAR_FEED_PUBKEY` | Substitui a chave pública fixada (base64-DER SPKI ou PEM), substituindo a matriz integrada por esta chave única. |
 
-### Limite mínimo de versão
+### Piso da versão
 
-`syncRadar()` rejeita um feed baixado cuja `version` não seja estritamente mais recente
-que a versão atualmente armazenada em cache (`compareVersions()`, comparação pontuada
-no formato `YYYY.MM.DD.n`) — `{ status: "stale" }`. Isso impede que um endpoint de feed
-comprometido ou configurado incorretamente faça o cliente retroceder para um payload
-mais antigo e assinado de forma diferente.
+`syncRadar()` rejeita um feed baixado cujo `version` não é estritamente mais recente que a versão atualmente em cache (`compareVersions()`, comparação `YYYY.MM.DD.n` pontilhada) — `{ status: "stale" }`. Isso evita que um endpoint de feed comprometido ou mal configurado reverta um cliente para uma carga mais antiga e assinada de forma diferente.
 
 ### Duas datas e por que ambas são mantidas
 
-Um feed em cache contém duas datas distintas, e evitar confundi-las é justamente o motivo
-para manter ambas:
+Um feed em cache carrega duas datas distintas, e confundi-las é o objetivo de manter ambas:
 
-| Campo         | Origem                 | O que informa                        |
-| ------------- | ---------------------- | ------------------------------------ |
-| `generatedAt` | corpo assinado do feed | a idade dos **dados**                |
-| `fetchedAt`   | relógio da instalação  | quando esta instalação os **baixou** |
+| Campo         | Vem de                   | Respostas                               |
+| ------------- | ------------------------ | --------------------------------------- |
+| `generatedAt` | o corpo do feed assinado | quantos anos tem** dados** é            |
+| `fetchedAt`   | relógio desta instalação | quando esta instalação** baixado** isto |
 
-Um feed obtido há poucos minutos pode conter números de semanas atrás, portanto
-`fetchedAt` por si só não permite que um operador determine se a sobreposição é mais
-recente que a linha de base sobre a qual ela se apoia. Ambas são persistidas em
-`radar_feed_cache`, retornadas por `getRadarCatalog().meta` e relatadas separadamente
-por `GET /api/radar/status`. Uma linha armazenada em cache antes da existência da coluna
-`generated_at` (migração 163) é lida como `null` — o desconhecido permanece desconhecido,
-em vez de usar o horário de obtenção. `radar_referrals_cache` mantém seu próprio
-`generated_at` desde a migração 142.
+Um feed obtido minutos atrás pode conter números de semanas atrás, então `fetchedAt` sozinho não pode dizer ao operador se a sobreposição é mais recente do que a linha de base em que se encontra. Ambos são persistentes em `radar_feed_cache`, retornados por `getRadarCatalog().meta` e relatados separadamente por `GET /api/radar/status`. Uma linha armazenada em cache antes da existência da coluna `generated_at` (migração 163) é lida novamente, pois `null` — desconhecido permanece desconhecido em vez de pegar emprestado o tempo de busca. `radar_referrals_cache` manteve seu próprio `generated_at` desde a migração 142.
 
-O limite mínimo de versão acima compara `version`, e não nenhuma das datas.
+A versão acima compara `version`, não qualquer data.
 
-Duas lacunas permanecem, ambas intencionais: o painel ainda exibe apenas `Última obtenção`,
-portanto mostrar ali a data da compilação exige um novo rótulo (e suas 41 entradas de
-localidade); e os caches de ofertas e inteligência não mantêm nenhuma data de compilação,
-embora seus esquemas de feed contenham uma — por isso, `GET /api/radar/status` omite o
-campo para esses dois, em vez de relatar um `null` que seria interpretado como
-"desconhecido".
+Restam duas lacunas, ambas deliberadas: o painel ainda mostra apenas `Last fetched`, portanto, a leitura da data de construção precisa de um novo rótulo (e suas 41 entradas de localidade); e as ofertas e os caches Intel não mantêm nenhuma data de construção, embora seus esquemas de feed carreguem um — `GET /api/radar/status` portanto, omite o campo para esses dois em vez de relatar um `null` que seria lido como "desconhecido".
 
 ### Validação de esquema
 
-Os bytes baixados são analisados e validados em relação a `RadarFeedSchema`
-(`src/lib/radar/feedSchema.ts`, um esquema Zod) **após** a verificação da assinatura.
-Uma incompatibilidade de esquema retorna `{ status: "invalid_schema" }`, e o cache
-permanece intacto. Como medida defensiva, o payload em cache é validado novamente a
-cada leitura (`getRadarCatalog()`) — uma linha de cache corrompida ou editada
-manualmente faz com que o sistema volte à linha de base, em vez de fornecê-la.
+Os bytes baixados são analisados e validados em `RadarFeedSchema` (`src/lib/radar/feedSchema.ts`, um esquema Zod )** depois** verificação de assinatura. Uma incompatibilidade de esquema retorna `{ status: "invalid_schema" }` e o cache permanece intacto. A carga útil em cache é revalidada defensivamente novamente em cada leitura (`getRadarCatalog()`) — uma linha de cache corrompida ou editada manualmente volta à linha de base em vez de ser servida.
 
-### Limite de tamanho da resposta (10 MB)
+### Limite de tamanho de resposta (10 MB)
 
-`syncRadar()` aplica um **limite rígido de 10 MB** ao corpo da resposta do feed — o feed
-assinado é um documento JSON da ordem de KB, portanto qualquer tamanho acima disso
-indica um `RADAR_FEED_URL` mal configurado ou hostil (ou uma origem fornecendo lixo),
-e não um catálogo legítimo. A aplicação ocorre em duas camadas:
+`syncRadar()` impõe um** Tampa rígida de 10 MB** no corpo da resposta do feed — o feed assinado é um documento JSON em escala de KB, portanto, qualquer coisa além disso aponta para um `RADAR_FEED_URL` mal configurado ou hostil (ou um lixo de serviço upstream), e não um catálogo legítimo. A aplicação tem duas camadas:
 
-1. Uma verificação preliminar de `Content-Length` evita completamente a leitura do corpo
-   quando o cabeçalho já declara um valor acima do limite.
-2. Uma verificação do total acumulado durante a leitura do corpo aplica o limite mesmo
-   quando `Content-Length` está ausente ou informa um tamanho menor que o real — o
-   cabeçalho nunca é considerado confiável por si só. A concatenação dos fragmentos
-   acumulados preserva os bytes exatos necessários para a verificação posterior da
-   assinatura Ed25519.
+1. Uma verificação de comprovação `Content-Length` ignora totalmente a leitura do corpo quando o cabeçalho já declara um valor acima do limite.
+2. Uma verificação total em execução durante a leitura do corpo impõe o limite mesmo quando `Content-Length` está ausente ou subestima o tamanho real — o cabeçalho nunca é confiável por si só. A concatenação dos pedaços acumulados preserva os bytes exatos necessários para a verificação posterior da assinatura Ed25519.
 
-Exceder o limite retorna `{ status: "too_large" }` e mantém o cache intacto, seguindo o
-mesmo padrão não destrutivo de todas as outras falhas de sincronização
-(`invalid_signature`, `invalid_schema`, `stale`).
+Exceder o limite retorna `{ status: "too_large" }` e deixa o cache intacto, seguindo o mesmo padrão não destrutivo de qualquer outra falha de sincronização (`invalid_signature`, `invalid_schema`, `stale`).
 
 ---
 
@@ -430,84 +366,45 @@ version, tier }` — esse é o valor exibido pelo dashboard, nunca o campo bruto
 
 ---
 
-## Regras de mesclagem da sobreposição no momento da leitura
+## Regras de mesclagem de sobreposição em tempo de leitura
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) mescla o feed armazenado em cache **sobre** a
-linha de base estática no **momento da leitura**, dentro de `getRadarCatalog()`. O array da linha de base
-(`FREE_MODEL_BUDGETS`) nunca sofre mutação — um `MergedEntry[]` é calculado novamente a cada
-chamada.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) mescla o feed em cache** sobre** a linha de base estática em** tempo de leitura** , dentro de `getRadarCatalog()`. A matriz de linha de base (`FREE_MODEL_BUDGETS`) nunca sofre mutação — um `MergedEntry[]` é calculado novamente em cada chamada.
 
 Quatro regras, em ordem de precedência:
 
-1. **O feed nunca sobrescreve uma substituição local.** Por campo: se o operador tiver
-   personalizado um campo de uma entrada (mapa `localOverrides`, indexado por `provider:modelId`),
-   o valor do feed para esse campo específico é ignorado — o valor do operador prevalece.
-2. **`enabled: false` desabilita a entrada, com proveniência.** Uma entrada do feed que
-   desativa uma entrada define `enabled: false` e `disabledBy: "radar"` no resultado mesclado,
-   para que a UI possa explicar _por que_ uma entrada passou de disponível para desabilitada.
-3. **Uma entrada adicionada pelo usuário e ausente do feed permanece intacta.** Entradas que
-   existem apenas na linha de base (ou foram adicionadas localmente) e não têm uma entrada correspondente no feed
-   são mantidas sem alterações.
-4. **Uma entrada com tombstone nunca é restaurada.** Se o operador tiver excluído explicitamente uma
-   entrada (conjunto `tombstones`), o feed voltar a adicionar esse `provider:modelId` em uma versão
-   posterior não a trará de volta.
+1. **O feed nunca substitui uma substituição local.** Por campo: se o operador personalizou um campo em uma entrada (`localOverrides` map, keyed `provider:modelId`), o valor do feed para esse campo específico é ignorado — o valor do operador vence.
+2. **`enabled: false` desabilita a entrada, com procedência.** Uma entrada de feed que desativa uma entrada define `enabled: false` e `disabledBy: "radar"` no resultado mesclado, para que o UI possa explicar _por que_ uma entrada passou de disponível para desabilitada.
+3. **Uma entrada adicionada pelo usuário que não está presente no feed permanece intacta.** As entradas que existem apenas na linha de base (ou foram adicionadas localmente) e não têm nenhuma entrada de feed correspondente passam inalteradas.
+4. **Uma entrada marcada para exclusão nunca é ressuscitada.** Se o operador excluiu explicitamente uma entrada (`tombstones` set), o feed que adiciona novamente esse `provider:modelId` em uma versão posterior não o traz de volta.
 
-Os campos editáveis e os tombstones são persistidos em
-`radar_local_model_state` (migração `153_radar_local_model_state.sql`). O adaptador público de banco de dados
-(`src/lib/db/radar.ts`) converte essas linhas no mapa `localOverrides` e no conjunto
-`tombstones` usados por `applyFeed()`; em produção, `getRadarCatalog()` carrega esse estado
-depois que as verificações de flag, cache e esquema são aprovadas. Somente `displayName` e `enabled` são
-editáveis pelo operador. A identidade do provedor/modelo, a proveniência do feed, a cota, os recursos, os termos de serviço
-e os dados de configuração não podem ser gravados por meio dessa interface.
+Os campos editáveis e marcas para exclusão são persistidos em `radar_local_model_state` (migração `153_radar_local_model_state.sql`). O adaptador público DB (`src/lib/db/radar.ts`) converte essas linhas no mapa `localOverrides` e no conjunto `tombstones` usado por `applyFeed()`; produção `getRadarCatalog()` carrega esse estado após a passagem do sinalizador, do cache e do esquema. Apenas `displayName` e `enabled` são editáveis pelo operador. A identidade Provider/model, a origem do feed, a cota, os recursos, ToS e os dados de configuração não podem ser gravados por meio dessa superfície.
 
-O dashboard disponibiliza quatro ações locais:
+O painel expõe quatro ações locais:
 
-- **Editar** altera o nome de exibição local e o estado habilitado.
-- **Redefinir alterações locais** limpa ambos os campos editáveis sem alterar um tombstone.
-- **Ocultar** cria um tombstone, para que atualizações posteriores do feed não possam recriar a linha.
-- **Restaurar** remove o tombstone; qualquer substituição salva separadamente permanece em vigor.
+- **Editar** altera o nome de exibição local e o estado ativado.
+- **Redefinir alterações locais** limpa ambos os campos editáveis sem alterar uma marca para exclusão.
+- **Esconder** cria uma marca para exclusão, portanto, atualizações posteriores do feed não poderão recriar a linha.
+- **Restaurar** remove a lápide; qualquer substituição salva separadamente permanece em vigor.
 
-Um `enabled: false` do feed continua sendo a exceção de segurança: ele prevalece sobre um
-`enabled: true` local obsoleto, mantém a entrada mesclada desabilitada e registra `disabledBy: "radar"`.
+Um feed `enabled: false` continua sendo a exceção de segurança: ele vence um local obsoleto `enabled: true`, mantém a entrada mesclada desativada e registra `disabledBy: "radar"`.
 
-As publicações do catálogo usam `schemaVersion: 2`. `contextWindow` e cada um de `tools`, `vision` e
-`thinking` são, de forma independente, `number | null` / `boolean | null`: `null` significa desconhecido, enquanto
-`false` significa que uma fonte oficial do provedor, confirmada pelo D16, declara explicitamente que o recurso está ausente.
-Flags internas de registro/especificação de modelo do OmniRoute nunca são promovidas diretamente a fatos do feed. O cliente
-ainda aceita snapshots v1; como o builder antigo usava `false` como marcador de ausência, `false` na v1 é
-normalizado como desconhecido, enquanto `true` na v1 permanece factual. Versões de esquema desconhecidas falham de forma segura, e o
-último cache válido permanece disponível. Todo modelo v2 com contexto/recurso não nulo deve conter
-um `metadataEvidenceUrls[]` HTTPS que não exija credenciais; caso contrário, a validação do esquema falha e o cache
-não é substituído. A tabela do catálogo renderiza os três estados como `✓`, `✕` e `?`.
+As publicações de catálogo usam `schemaVersion: 2`. `contextWindow` e cada um de `tools`, `vision` e `thinking` são independentemente `number | null` / `boolean | null`: `null` significa desconhecido, enquanto `false` significa que uma fonte oficial do provedor D16-confirmed diz explicitamente que a capacidade está ausente. Sinalizadores OmniRoute registry/model-spec internos nunca são promovidos diretamente para feed de fatos. O cliente ainda aceita snapshots v1; como o construtor antigo usava `false` como espaço reservado de ausência, v1 `false` é normalizado para desconhecido enquanto v1 `true` permanece factual. Versões de esquema desconhecidas falham ao serem fechadas e o último cache válido permanece disponível. Todo modelo v2 com um context/capability não nulo deve carregar um HTTPS `metadataEvidenceUrls[]` sem credenciais; caso contrário, a validação do esquema falhará e o cache não será substituído. A tabela de catálogo renderiza todos os três estados como `✓`, `✕` e `?`.
 
-### Combos guiados e acesso ao MCP
+### Combos guiados e acesso MCP
 
-Valores confirmados de `familyId` permanecem após a sobreposição no momento da leitura e alimentam o módulo puro
-`buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Uma família é sugerida
-somente quando pelo menos dois provedores distintos têm conexões ativas e disponibilizam o ID exato do modelo selecionado.
-Modelos desabilitados, provedores inativos, IDs de modelo ausentes, famílias com um único elemento e correspondências
-ambíguas de alias/prefixo falham de forma segura. As sugestões usam a estratégia `priority` existente, ordenando primeiro o
-maior orçamento mensal recorrente; a UI as cria somente por meio de `POST /api/combos`.
+Os valores `familyId` confirmados sobrevivem à sobreposição de tempo de leitura e acionam o módulo `buildRadarComboSuggestions()` puro (`src/lib/radar/comboSuggestions.ts`). Uma família é sugerida apenas quando pelo menos dois provedores distintos possuem conexões ativas e expõem o modelo exato ID com curadoria. Modelos desativados, provedores inativos, modelo ausente IDs, famílias singleton e correspondências alias/prefix ambíguas falham no fechamento. As sugestões usam a estratégia `priority` existente, solicitando primeiro o maior orçamento mensal recorrente; o UI os cria apenas por meio `POST /api/combos`.
 
-A interface guiada está disponível em `/dashboard/radar/combos`. Ela lê apenas os endpoints locais
-`GET /api/radar/catalog` e `GET /api/combos/builder/options`. Ela nunca aciona a sincronização do Radar,
-lê credenciais de provedores nem grava diretamente no banco de dados de combos.
+O UI guiado mora em `/dashboard/radar/combos`. Ele lê apenas os pontos finais `GET /api/radar/catalog` e `GET /api/combos/builder/options` locais. Ele nunca aciona a sincronização do Radar, lê credenciais do provedor ou grava diretamente no banco de dados combinado.
 
-Os clientes MCP podem ler a mesma projeção local com `omniroute_radar_catalog` (`read:radar`). Os
-filtros opcionais `provider`, `familyId` e `enabledOnly` são avaliados após uma leitura local de
-`GET /api/radar/catalog`. Sua saída fechada inclui metadados do catálogo, além de provedor/modelo,
-nome de exibição, `familyId`, cota, recursos, estado de ativação, origem e `disabledBy`; URLs de configuração,
-etapas, conexões, endereços de e-mail, chaves e dados de indicação nunca são retornados. Essa ferramenta é
-somente leitura e nunca invoca `/api/radar/sync`.
+Os clientes MCP podem ler a mesma projeção local com `omniroute_radar_catalog` (`read:radar`). Os filtros opcionais `provider`, `familyId` e `enabledOnly` são avaliados após uma leitura local `GET /api/radar/catalog`. Sua saída fechada inclui metadados de catálogo mais provider/model, nome de exibição, `familyId`, cota, capacidades, estado habilitado, origem e `disabledBy`; setup URLs, etapas, conexões, endereços de e-mail, chaves e dados de referência nunca são retornados. Esta ferramenta é somente leitura e nunca invoca `/api/radar/sync`. Quando o feed armazenado em cache é anterior ao catálogo instalado, `meta.olderThanRelease` é `true` e a ferramenta retorna modelos do catálogo instalado com substituições locais e marcas de exclusão aplicadas.
 
 ### Marcadores de proveniência
 
-Cada entrada mesclada contém um campo `origin`, que a interface renderiza como um selo:
+Cada entrada mesclada carrega um campo `origin` que o UI renderiza como um emblema:
 
-- `"baseline"` — inalterada em relação ao catálogo estático da versão.
+- `"baseline"` — intocado no catálogo de lançamento estático.
 - `"radar"` — um ou mais campos foram atualizados pelo feed.
-- `"local"` — o operador tem pelo menos uma substituição local nesta entrada (as
-  substituições locais sempre prevalecem sobre o feed conforme a regra 1, independentemente do que o feed informar).
+- `"local"` — o operador tem pelo menos uma substituição local nesta entrada (substituições locais sempre vencem o feed pela regra 1, independentemente do que o feed diz).
 
 ---
 

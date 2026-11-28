@@ -12,6 +12,12 @@ Neutralny kontrakt `config/cli-tools-manifest.json` deklaruje kanoniczny IDs, al
 
 Sygnały przerwania i zakończenia są przekazywane do dziecka. Program uruchamiający czeka na zdarzenie zamknięcia elementu podrzędnego przed usunięciem tymczasowej konfiguracji. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` kontroluje okres karencji przed wymuszonym zakończeniem (domyślnie 5000 milisekund).
 
+`omniroute launch <tool>` (patrz [LAUNCH.md](./LAUNCH.md) ) stosuje się do tych samych zasad dotyczących środowiska i przekazywania sygnału oraz dodaje:
+
+- **Automatyczny start bramy.** W przypadku celu lokalnego, gdy żadna brama nie odpowiada na porcie, program uruchamiający uruchamia `omniroute serve --headless --no-open` powiązane z `127.0.0.1` w ramach odłączonego procesu Reaper. Każde uruchomione uruchomienie posiada dzierżawę w `DATA_DIR/launch/leases/` (bicie serca co 15 s, nieaktualne po 45 s lub po zakończeniu procesu). Reaper zatrzymuje bramę, którą uruchomił, gdy nie było już dzierżawy przez okres bezczynności (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, domyślnie 10000 milisekund). Brama uruchomiona przez użytkownika jest używana, ale nigdy nie jest zatrzymywana. `--keep-gateway` lub `omniroute gateway keep` zamienia bramę programu uruchamiającego w normalną; `--no-start` przywraca stare zachowanie w przypadku awarii. Sondowane są tylko odległe cele.
+- **Uruchom sesje.** Każde uruchomienie powoduje wygenerowanie krótkotrwałego tokena sesji `olx_` z nadrzędnego poświadczenia (`POST /api/launch/sessions`), wykonanie pulsu podczas działania narzędzia, odczytanie podsumowania użycia i unieważnienie go po zamknięciu narzędzia. Token stanowi ścisły podzbiór swojego rodzica: te same uprawnienia, ten sam lub węższy katalog, krótszy okres życia i nie jest to dane uwierzytelniające panelu kontrolnego. Narzędzie otrzymuje token sesji, a nie dane nadrzędne, a żądania są oznaczone tagiem `launch:<tool>:<sessionId>` chyba że podano `--tag`. Brama bez sesji API kończy się niepowodzeniem z `GatewayTooOld` zamiast powrócić do uruchomienia bez zakresu.
+- **Konfiguracja na uruchomienie.** Pliki konfiguracyjne narzędzia są zapisywane w prywatnym katalogu tymczasowym (tryb 0700, przedrostek `omnirouter-`) i usuwane po wyjściu dziecka. `SIGKILL` programu uruchamiającego pozostawia katalog; `omniroute launch --cleanup` usuwa takie katalogi, gdy są starsze niż jeden dzień.
+
 ## Gemini trwała konfiguracja
 
 ```bash

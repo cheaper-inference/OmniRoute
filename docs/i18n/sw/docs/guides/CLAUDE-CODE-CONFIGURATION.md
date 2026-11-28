@@ -51,7 +51,7 @@ Hivi ndivyo Entra ID SSO inavyofanya kazi: `scripts/cli/omniroute-sso.mjs token`
 
 ## Maelezo ya matumizi: vikao na miradi
 
-OmniRoute huweka ombi la kila kitufe cha API ndani** vikao vya wakala** na kumbukumbu ambazo** mradi** kila kikao kilifanya kazi (`agent_sessions` table), kwa hivyo matumizi na gharama zinaweza kuripotiwa kwa kila mshiriki wa timu, kwa kila mradi na kwa kila kipindi.
+OmniRoute huweka ombi la kila kitufe cha API ndani** vikao vya wakala** na kumbukumbu ambazo** mradi** kila kikao kilifanya kazi (`agent_sessions` table), kwa hivyo matumizi na gharama zinaweza kuripotiwa kwa kila mshiriki wa timu, kwa kila mradi na kwa kila kikao.
 
 Ni nini kinachorekodiwa bila usanidi wowote wa mteja:
 
@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) na OpenCode (`x-opencode-session`) zinatamb
 
 Saraka ya kufanya kazi inatofautiana kati ya mashine, kwa hivyo hazina hiyo hiyo inaweza kuonekana chini ya njia tofauti. Tuma mradi kwa uwazi badala yake: Claude Code inaongeza vichwa vyovyote vilivyoorodheshwa katika `ANTHROPIC_CUSTOM_HEADERS` kwa kila ombi la mfano, na OmniRoute inasoma viwili kati yake:
 
-| Kijajuu                    | Thamani                                                                        |
-| -------------------------- | ------------------------------------------------------------------------------ |
-| `x-omniroute-project`      | Jina la mradi, kwa mfano `omniroute`                                           |
-| `x-omniroute-project-repo` | Kidhibiti cha mbali cha kawaida, kwa mfano `github.com/diegosouzapw/OmniRoute` |
+| Kijajuu                    | Thamani                                                                             |
+| -------------------------- | ----------------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Jina la mradi, kwa mfano `omniroute`                                                |
+| `x-omniroute-project-repo` | Kidhibiti cha mbali cha kawaida, kwa mfano `github.com/cheaper-inference/OmniRoute` |
 
 Zote mbili zinasomwa tu kwa maelezo; kamwe hazitumiwi kwa mtoaji huduma za juu.
 
@@ -285,30 +285,22 @@ alama za ziada zinazohitajika. Badilisha kwa kila utekelezaji ukitumia `--remote
 
 ---
 
-## Utatuzi wa matatizo
+## Kutatua matatizo
 
-**Claude Code inapuuza lango** — thibitisha kuwa `ANTHROPIC_BASE_URL` **haina
-`/v1`** na uanzishe upya `claude` (env husomwa mara moja wakati wa kuanza). `omniroute launch`
-hushughulikia hili kwa niaba yako.
+**Claude Code inapuuza lango** — thibitisha `ANTHROPIC_BASE_URL` ina** hapana `/v1`** na anza tena `claude` (env inasomwa mara moja wakati wa kuanza). `omniroute launch` inashughulikia hii kwa ajili yako.
 
-**Kiteuzi cha `/model` ni tupu / hakina modeli za lango** — kinahitaji Claude Code
-v2.1.219+ na `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Ni vitambulisho vya modeli vya `claude*` /
-`anthropic*` pekee vinavyoonekana kwenye kiteuzi; lazimisha modeli nyingine yoyote kwa
-`ANTHROPIC_MODEL=<id>` (hivi ndivyo wasifu hufanya).
+**kichagua `/model` hakina mifano ya lango tupu / inakosa** — inahitaji Msimbo wa Claude v2.1.219 + na `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Ni mfano wa `claude*` / `anthropic*` IDs pekee unaoonekana kwenye kichagua; lazimisha mtindo mwingine wowote na `ANTHROPIC_MODEL=<id>` (hivi ndivyo wasifu hufanya).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code daima hutuma vitambulisho vya modeli **visivyo na kiambishi awali**
-(k.m. `claude-opus-4-8`), kwa hivyo wakati watoa huduma wa Claude Code (`cc/…`) na
-Claude (`claude/…`) wote wameunganishwa, kitambulisho kisicho na kiambishi awali hulingana na njia mbili na
-OmniRoute hukataa kukisia. Rekebisha kwa mojawapo ya njia hizi: bainisha kitambulisho chenye kiambishi awali kwa
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, au washa **Pendelea Claude Code kwa
-modeli za Claude zisizo na viambishi awali** — swichi kwenye ukurasa wa mtoa huduma wa Claude, au
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (imezimwa kwa chaguo-msingi;
-angalia [Mazingira](../reference/ENVIRONMENT.md)) — ambayo huelekeza vitambulisho vya `claude-*`
-visivyo na viambishi awali kwa Claude Code badala yake. Viambishi awali vilivyobainishwa vya watoa huduma hupewa kipaumbele kila wakati.
+**`400 Ambiguous model 'claude-…'`** — Claude Msimbo hutuma kila wakati** isiyo na viambishi awali** mfano IDs (km `claude-opus-4-8`), kwa hivyo wakati watoa huduma wote wawili wa Msimbo Claude (`cc/…`) na Claude (`claude/…`) wameunganishwa kitambulisho tupu kinalingana na njia mbili na OmniRoute inakataa kubahatisha. Irekebishe kwa njia zote mbili: bandika kitambulisho chenye kiambishi awali `ANTHROPIC_MODEL=cc/claude-opus-4-8`, au wezesha** Pendelea Msimbo wa Claude kwa miundo ya Claude isiyo na viambishi** — kugeuza kwenye ukurasa wa mtoa huduma wa Claude, au `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (chaguo-msingi imezimwa; ona [Environment](../reference/ENVIRONMENT.md) ) — ambayo hupitisha `claude-*` IDs hadi Msimbo wa Claude badala yake. Viambishi awali vya mtoa huduma dhahiri hushinda kila wakati.
 
-**Hitilafu za uthibitishaji** — wasifu hauna tokeni. Tumia `omniroute launch --profile`
-(huiingiza) au hamisha `ANTHROPIC_AUTH_TOKEN`.
+**"hali otomatiki ... kipindi hiki hakijatimiza masharti" (maombi ya kiainishaji yanatozwa)** — katika hali otomatiki Msimbo wa Claude huuliza seva kukagua vitendo ndani ya maombi yake ya kielelezo ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Hiyo inahitaji thamani ya `anthropic-beta` `dangerous-tool-use-2026-09-03` na sehemu ya mwili `safeguards` kufikia Anthropic kama jozi, na `safeguard_results` pamoja na IDs ya kutumia zana ya juu ili kurudi bila kubadilika. OmniRoute hufanya hivyo wakati ombi linaelekezwa kwa mtoaji asili `claude` au kwa nodi `anthropic-compatible-*`, iliyotiririshwa au la (kilinda regression: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Malengo mengine hayawezi kurudisha hakiki, kwa hivyo Nambari ya Claude inarudi kwa maombi yake ya kiainishaji na inaonyesha arifa:
 
-**Wasifu hautengani** — kila wasifu ni `CLAUDE_CONFIG_DIR` tofauti;
-thibitisha kuwa `echo $CLAUDE_CONFIG_DIR` ndani ya kipindi inaelekeza kwenye
-`~/.claude/profiles/<name>`.
+- mfano juu ya mtoa huduma zisizo za Anthropic, au combo ambayo inatua moja;
+- nodi ya relay inayoendana na Claude-Code (`anthropic-compatible-cc-*`), ambayo hujenga upya mwili wa ombi na haibebi `safeguards`;
+- OmniRoute ya zamani ambayo inatanguliza beta zilizoorodheshwa, au toleo la Msimbo wa Claude chini ya orodha ya ukurasa Anthropic kwa vipindi vya lango.
+
+Endesha `/status` katika Msimbo wa Claude : the** Seva ya hali ya kiotomatiki** safu mlalo inasoma `Enabled` wakati ukaguzi wa seva unafanya kazi. Iwapo maombi hayo yatatozwa huamuliwa na Anthropic, si OmniRoute.
+
+**Makosa ya uthibitishaji** — wasifu hauna ishara. Tumia `omniroute launch --profile` (unaidunga) au usafirishaji `ANTHROPIC_AUTH_TOKEN`.
+
+**Wasifu haujitenge** — kila wasifu ni `CLAUDE_CONFIG_DIR` tofauti; thibitisha `echo $CLAUDE_CONFIG_DIR` ndani ya sehemu za kikao `~/.claude/profiles/<name>`.

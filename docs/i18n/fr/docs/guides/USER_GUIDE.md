@@ -247,31 +247,39 @@ Modèles : kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ## 🎨 Combos
 
-Vous pouvez réorganiser les cartes de combos directement dans **Tableau de bord → Combos** en faisant glisser la poignée de chaque carte. L’ordre est enregistré dans SQLite et restauré lors du rechargement.
+Vous pouvez réorganiser les cartes combo directement dans** Tableau de bord → Combos** en faisant glisser la poignée sur chaque carte. La commande est stockée dans SQLite et restaurée au rechargement.
 
-### Exemple 1 : Maximiser l’abonnement → Solution de secours économique
+### Trouver un fournisseur, un modèle ou un compte
 
-```
-Tableau de bord → Combos → Créer
+Dans Créer ou Modifier un combo, les sélecteurs étape par étape de fournisseur, de modèle, de compte et de référence de combo incluent un champ de recherche locale. Recherchez par nom affiché, identifiant, alias de fournisseur ou source de modèle, puis cliquez sur un résultat ou utilisez les touches fléchées et Entrée. Plusieurs termes de recherche doivent tous correspondre. Effacer la recherche ou appuyer sur Échap laisse la valeur sélectionnée inchangée.
 
-Nom : premium-coding
-Modèles :
-  1. cc/claude-opus-4-7 (Abonnement principal)
-  2. glm/glm-4.7 (Solution de secours économique, 0,6 $/1M)
-  3. minimax/MiniMax-M2.7 (Solution de repli la moins chère, 0,3 $/1M)
+Le choix automatique du compte reste visible pendant la recherche. Sa liste facultative de restriction de compte comporte un filtre distinct : les comptes sélectionnés en dehors des résultats visibles restent sélectionnés et le décompte les inclut. Les fragments de courrier électronique masqués ne peuvent pas être recherchés lorsque la confidentialité des courriers électroniques est activée. Ajoutez l'étape et enregistrez le combo comme d'habitude ; taper une requête ne sauvegarde ni ne teste rien.
 
-Utilisation dans la CLI : premium-coding
-```
+La même recherche locale est disponible pour les modèles de test de connexion, les modèles CLI par défaut et d'alias personnalisés et les choix de proxy enregistré. Les actions de sauvegarde, d'application et de test existantes restent séparées.
 
-### Exemple 2 : Modèles gratuits uniquement (coût nul)
+### Exemple 1 : Maximiser l'abonnement → Cheap Backup
 
 ```
-Nom : free-combo
-Modèles :
-  1. if/kimi-k2.7-code (accès gratuit indiqué ; des limites du fournisseur peuvent s’appliquer)
-  2. kr/qwen3-coder-next (solution de repli gratuite de Kiro)
+Dashboard → Combos → Create New
 
-Coût : actuellement indiqué à 0 $ ; les conditions et la disponibilité peuvent changer
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### Exemple 2 : Gratuit uniquement (coût nul)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -431,7 +439,7 @@ Lorsque vous n'avez plus besoin OmniRoute, nous fournissons deux scripts rapides
 ### Déploiement VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +521,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -882,8 +890,8 @@ Configurer via** Tableau de bord Paramètres → Routage →** . Le tableau de b
 - `least-used` et `cost-optimized`
 - `auto` — basé sur les scores de tous les candidats
 - `lkgp` (Last Known Good Provider) — épingle le dernier fournisseur réussi, puis revient aux règles
-- `context-optimized` — choisit le modèle avec la plus grande fenêtre de contexte libre
-- `context-relay` — enchaîne des modèles à contexte long pour des tours de suivi
+- `context-optimized` — essaie d'abord le modèle avec la plus grande fenêtre de contexte connue
+- Ordre de priorité `context-relay` — plus un résumé du transfert lorsque la conversation est déplacée vers un autre compte
 
 #### En-tête de session persistante externe
 
@@ -974,7 +982,7 @@ omniroute combo create free-stack \
 
 #### 3. Pipeline multimodal/vision et texte
 
-Associer des modèles de vision spécialisés à une génération de texte à grande vitesse pour des flux de travail impliquant la compréhension d'images et la génération de code.
+Associer des modèles de vision spécialisés avec une génération de texte à grande vitesse pour des flux de travail impliquant la compréhension d'images et la génération de code.
 
 - **Modèle** : Un combo `Priority` qui répertorie en premier les modèles capables de vision et en dernier un modèle text/code à haut débit.
 - **Modèles** :
@@ -1158,7 +1166,7 @@ Configurer l'équilibrage par combo dans** Tableau de bord → Combos → Create
 
 Les valeurs par défaut des combos globaux peuvent être définies dans** Tableau de bord Paramètres → Routage → Paramètres par défaut du combo →** . Les délais d'expiration des cibles combinées héritent par défaut du délai d'expiration de la demande actuelle. Utiliser** Délai d'expiration cible (secondes)** sur les valeurs par défaut des combos ou sur un combo individuel uniquement lorsqu'une limite plus courte par cible devrait déclencher un repli plus rapide.
 
-Les optimisations combo sans latence sont facultatives. Partir** Optimisations sans latence** désactivé pour empêcher ces fonctionnalités de latence de courser aux cibles de secours, d'ignorer les cibles en fonction de l'historique TTFT ou de compresser les demandes de secours ; son activation permet une couverture configurée, des sauts TTFT prédictifs et une compression de repli proactive pour échanger la fidélité routing/request contre une latence de queue plus faible.
+Les optimisations combo sans latence sont facultatives. Partir** Optimisations sans latence** désactivé pour empêcher ces fonctionnalités de latence de courir vers des cibles de secours, d'ignorer des cibles en fonction de l'historique TTFT ou de compresser les demandes de secours ; son activation permet une couverture configurée, des sauts TTFT prédictifs et une compression de repli proactive pour échanger la fidélité routing/request contre une latence de queue plus faible.
 
 Désactiver** Tampon de jeton de raisonnement** lorsque les fournisseurs en amont exigent des limites `max_tokens` / `maxOutputTokens` strictes. Lorsqu'il est activé, le routage combiné ajoute uniquement une marge de modèle de raisonnement pour les modèles avec un plafond de sortie connu et laisse la limite de jetons client inchangée lorsque la valeur tampon sécurisée dépasse ce plafond. Si la limite du client est déjà supérieure à un plafond connu, OmniRoute la limite à ce plafond avant d'envoyer la requête en amont.
 
@@ -1332,32 +1340,34 @@ Consultez [API_REFERENCE.md](../reference/API_REFERENCE.md) pour obtenir le cata
 
 ## 💻 CLI interne
 
-OmniRoute fournit une CLI interne (`omniroute …`) pour la configuration, les diagnostics et le contrôle de l’exécution. Elle est **distincte de la page « Outils CLI » du tableau de bord**, qui configure des CLI tierces (Claude Code, Cursor, Codex, Cline, …) afin qu’elles puissent communiquer avec OmniRoute.
+OmniRoute fournit un CLI interne (`omniroute …`) pour la configuration, les diagnostics et le contrôle d'exécution. C'est** distinct de la page "CLI Tools " dans le tableau de bord** , qui configure CLIs tiers (Claude Code, Cursor, Codex, Cline, …) afin qu'ils puissent parler à OmniRoute.
 
 ```bash
-omniroute setup                    # Assistant interactif (mot de passe, fournisseurs, combinaisons)
-omniroute setup --non-interactive  # Adapté à la CI
-omniroute doctor                   # Diagnostics d’intégrité (répertoire de données, BDD, fournisseurs, ports)
-omniroute providers available      # Répertorie les fournisseurs pris en charge
-omniroute providers list           # Répertorie les connexions configurées
-omniroute providers test <id>      # Teste en direct une connexion à un fournisseur
-omniroute combos list              # Répertorie les combinaisons
-omniroute combos switch <name>     # Définit la combinaison par défaut
-omniroute models                   # Répertorie les modèles disponibles (--json, --search)
-omniroute keys add | list | remove # Gère les clés API depuis le terminal
-omniroute backup                   # Crée un instantané de la configuration et de la BDD
-omniroute restore [<timestamp>]    # Restaure depuis un instantané
-omniroute health                   # État détaillé (disjoncteurs, cache, mémoire)
-omniroute quota                    # Utilisation des quotas des fournisseurs
-omniroute mcp status               # État du serveur MCP
-omniroute a2a status               # État du serveur A2A
-omniroute tunnel list|create|stop  # Tunnels Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Réinitialise le mot de passe administrateur
-omniroute --mcp                    # Démarre le serveur MCP via stdio
-omniroute --port 3000              # Démarre le serveur sur un port personnalisé
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Conseil : associez `omniroute doctor --json` à votre outil de surveillance pour recevoir des alertes en cas de connexions défaillantes aux fournisseurs.
+Astuce : associez `omniroute doctor --json` à votre outil de surveillance pour alerter en cas d'installation locale interrompue. `doctor` ne teste pas les connexions des fournisseurs ; utilisez `omniroute providers test <id>` pour ça.
 
 ---
 

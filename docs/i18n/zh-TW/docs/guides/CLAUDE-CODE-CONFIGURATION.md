@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) 和OpenCode (`x-opencode-session`) 的辨�
 
 機器之間的工作目錄不同，因此相同的儲存庫可以顯示在不同的路徑下。明確傳送項目： Claude程式碼將`ANTHROPIC_CUSTOM_HEADERS`中列出的任何標頭新增至每個模型請求中， OmniRoute讀取其中兩個：
 
-| 標頭                       | 價值                                                |
-| -------------------------- | --------------------------------------------------- |
-| `x-omniroute-project`      | 項目名稱，例如`omniroute`                           |
-| `x-omniroute-project-repo` | 標準化遠程，例如`github.com/diegosouzapw/OmniRoute` |
+| 標頭                       | 價值                                                     |
+| -------------------------- | -------------------------------------------------------- |
+| `x-omniroute-project`      | 項目名稱，例如`omniroute`                                |
+| `x-omniroute-project-repo` | 標準化遠程，例如`github.com/cheaper-inference/OmniRoute` |
 
 兩者都只是為了歸屬而閱讀；它們永遠不會轉發給上游提供者。
 
@@ -96,7 +96,7 @@ x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-`sed`表達式會刪除遠端URL中嵌入的所有憑證、查詢字串和片段，並保留`ANTHROPIC_CUSTOM_HEADERS`中已有的標頭。 IDE擴充功能無需您的 shell 即可啟動Claude程式碼，因此它們的會話會回退到工作目錄。
+`sed`表達式會刪除遠端URL中嵌入的任何憑證、查詢字串和片段，並保留`ANTHROPIC_CUSTOM_HEADERS`中已有的標頭。 IDE擴充功能無需您的 shell 即可啟動Claude程式碼，因此它們的會話會回退到工作目錄。
 
 ---
 
@@ -247,30 +247,22 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL="glm/glm-4.7-flash"
 
 ---
 
-## 疑難排解
+## 故障排除
 
-**Claude Code 忽略閘道** — 確認 `ANTHROPIC_BASE_URL` **不包含
-`/v1`**，並重新啟動 `claude`（環境變數只會在啟動時讀取一次）。`omniroute launch`
-會自動為你處理此事。
+**Claude代碼忽略網關**—確認`ANTHROPIC_BASE_URL`有**沒有`/v1`**並重新啟動`claude` （env在啟動時讀取一次）。 `omniroute launch`為您處理這個問題。
 
-**`/model` 選擇器是空的／缺少閘道模型** — 需要 Claude Code
-v2.1.219+ 以及 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`。選擇器中只會顯示 `claude*`／
-`anthropic*` 模型 ID；若要強制使用任何其他模型，請設定
-`ANTHROPIC_MODEL=<id>`（設定檔正是如此運作）。
+**`/model`選擇器為空/缺少網關模型**—需要Claude代碼 v2.1.219 +和`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`。選擇器中僅出現`claude*` / `anthropic*`型號IDs ；使用`ANTHROPIC_MODEL=<id>`強制任何其他模型（這就是設定檔所做的）。
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code 一律傳送**不帶前綴的**
-模型 ID（例如 `claude-opus-4-8`），因此當 Claude Code（`cc/…`）和
-Claude（`claude/…`）提供者皆已連線時，裸 ID 會符合兩條路由，而
-OmniRoute 會拒絕自行猜測。可使用任一方式修正：透過
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` 鎖定帶前綴的 ID，或啟用 **未加前綴的 Claude 模型優先使用 Claude Code**
-— Claude 提供者頁面上的切換開關，或
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true`（預設關閉；
-請參閱[環境](../reference/ENVIRONMENT.md)）— 這會改為將裸 `claude-*`
-ID 路由至 Claude Code。明確的提供者前綴一律優先。
+**`400 Ambiguous model 'claude-…'`** — Claude代碼總是發送**無前綴**模型IDs （例如`claude-opus-4-8`），因此當Claude代碼（`cc/…`）和Claude （`claude/…`）提供者都連接時，裸 ID 匹配兩條路由，並且OmniRoute拒絕猜測。可以透過以下任一方式修復此問題：使用`ANTHROPIC_MODEL=cc/claude-opus-4-8`固定前綴 id，或啟用**對於無前綴的Claude模型，首選Claude程式碼**— Claude提供者頁面上的開關，或`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` （預設為關閉；請參閱[環境](../reference/ENVIRONMENT.md)） —將裸`claude-*` IDs路由到Claude代碼。顯式提供者前綴總是獲勝。
 
-**驗證錯誤** — 設定檔不包含權杖。請使用 `omniroute launch --profile`
-（會注入權杖）或匯出 `ANTHROPIC_AUTH_TOKEN`。
+**「自動模式......此會話不符合資格」（分類器請求計費）**自動模式下的— Claude程式碼要求伺服器檢查自己的模型請求中的操作（ [Anthropic文件](https://code.claude.com/docs/en/auto-mode-classifier-billing)）。這需要`anthropic-beta`值`dangerous-tool-use-2026-09-03`和`safeguards`主體欄位成對到達Anthropic ，並且`safeguard_results`加上上游工具-使用IDs不變地返回。當請求路由到本機`claude`提供者或`anthropic-compatible-*`節點（無論是否串流）時， OmniRoute都會執行此操作（回歸防護： `tests/integration/claude-auto-mode-classifier-e2e.test.ts`）。其他目標無法返回評論，因此Claude Code 退回到其自己的分類器請求並顯示通知：
 
-**設定檔未隔離** — 每個設定檔都是不同的 `CLAUDE_CONFIG_DIR`；
-請確認工作階段內的 `echo $CLAUDE_CONFIG_DIR` 指向
-`~/.claude/profiles/<name>`。
+- 非人擇提供者的模型，或非人擇提供者的組合；
+- 相容於 Claude-Code 的中繼節點（`anthropic-compatible-cc-*`），重建請求體且不攜帶`safeguards`；
+- 早於列入白名單的測試版的舊版OmniRoute ，或低於Anthropic頁面列出的網關會話版本的Claude程式碼版本。
+
+在Claude中運行`/status`程式碼：**自動模式伺服器**當伺服器的審核處於活動狀態時，行讀取`Enabled` 。這些請求是否計費由Anthropic決定，而不是由OmniRoute決定。
+
+**驗證錯誤**—該設定檔不包含令牌。使用`omniroute launch --profile` （注入它）或導出`ANTHROPIC_AUTH_TOKEN`。
+
+**設定檔不隔離**—每個設定檔都是一個不同的`CLAUDE_CONFIG_DIR`；驗證會話內的`echo $CLAUDE_CONFIG_DIR`指向`~/.claude/profiles/<name>`。

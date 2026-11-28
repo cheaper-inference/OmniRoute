@@ -4,13 +4,7 @@
 
 ---
 
-> **உண்மையின் ஆதாரம்:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, மற்றும் `open-sse/utils/error.ts`-இல் உள்ள பொது builders
-> **சோதனைகள்:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **கடைசியாகப் புதுப்பிக்கப்பட்டது:** 2026-09-02 — v3.8.51
-> **இலக்கு வாசகர்கள்:** பிழைப் பதில்களைக் கையாளும் எந்தவொரு பொறியாளரும் (HTTP routes, SSE streams, executors, MCP handlers).
-> **நிலை:** ஒரு client-க்குப் பிழைச் செய்தியைத் திருப்பி அனுப்பும் ஒவ்வொரு code path-க்கும் **கட்டாயம்**.
+> **உண்மையின் ஆதாரம்:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, மற்றும் `open-sse/utils/error.ts` இல் உள்ள பொது பில்டர்கள்** சோதனைகள்:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** பார்வையாளர்கள்:** எந்தவொரு பொறியாளரும் பிழை மறுமொழிகளைத் தொடுகிறார்கள் (HTTP வழிகள், SSE ஸ்ட்ரீம்கள், செயல்படுத்துபவர்கள், MCP கையாளுபவர்கள்).** நிலை:****MANDATORY** வாடிக்கையாளருக்கு பிழை செய்தியை வழங்கும் ஒவ்வொரு குறியீடு பாதைக்கும்.
 
 ## இது ஏன் உள்ளது
 

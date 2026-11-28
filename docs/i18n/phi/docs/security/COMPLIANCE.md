@@ -5,11 +5,10 @@
 ---
 
 > **Pinagmulan ng katotohanan:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Huling na-update:** 2026-06-28 — v3.8.40
 
-Itinatala ng OmniRoute ang mga administratibong pagkilos, kaganapan sa authentication, pagbabago sa lifecycle ng mga kredensyal ng provider, at mga invocation ng MCP tool sa mga audit table na gumagamit ng SQLite. Tinatalakay ng pahinang ito kung ano ang itinatala, kung saan ito nakaimbak, kung gaano katagal itong pinananatili, kung paano maaaring mag-opt out ang mga API key, at kung paano i-query ang data.
+Itinatala OmniRoute ang mga administratibong pagkilos, mga kaganapan sa pagpapatotoo, mga pagbabago sa lifecycle ng kredensyal ng provider, at mga invocation MCP tool sa mga talahanayan ng audit na sinusuportahan ng SQLite. Sinasaklaw ng page na ito kung ano ang nala-log, kung saan ito nakatira, gaano katagal ito pinananatili, paano maaaring mag-opt out ang mga API key, at kung paano i-query ang data.
 
-Matatagpuan ang implementasyon sa `src/lib/compliance/index.ts` (T-43 — "Mga Kontrol sa Compliance") at `src/lib/compliance/providerAudit.ts`. Hindi kailanman nagta-throw ang mga audit write: kapag may anumang pagkabigo, tahimik na binabalewala ang call upang hindi masira ng audit logging ang pangunahing daloy ng request.
+Ang pagpapatupad ay nabubuhay sa `src/lib/compliance/index.ts` (T-43 — "Mga Kontrol sa Pagsunod") at `src/lib/compliance/providerAudit.ts`. Ang pag-audit ay nagsusulat na hindi kailanman magtapon: sa anumang kabiguan ang tawag ay tahimik na nilalamon kaya ang pag-log ng pag-audit ay hindi maaaring masira ang pangunahing daloy ng kahilingan.
 
 ## Ano ang Naitatala
 
@@ -128,29 +127,31 @@ Ang mga default ay tinukoy sa `src/lib/logEnv.ts`
 
 ## `noLog` Opt-Out (bawat API key)
 
-Maaaring lagyan ng flag ang mga API key upang hindi ma-log ang kanilang downstream call traffic. Ang
-flag ay nasa table na `api_keys` (`no_log INTEGER DEFAULT 0`) at minamirror
-sa isang in-memory set para sa mabilisang lookup.
+Ang mga API key ay maaaring i-flag upang ang kanilang downstream na trapiko ng tawag ay hindi naka-log. Nakatira ang flag sa `api_keys` table (`no_log INTEGER DEFAULT 0`) at naka-mirror sa isang in-memory set para sa mga hot-path lookup.
 
 ```bash
-# Gumawa ng no-log key (kailangan ng management auth)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Mga helper (`src/lib/compliance/index.ts`):
+Mga Katulong (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — i-toggle ang in-memory entry
-- `isNoLog(apiKeyId)` — sinusuri sa request path; bumabalik sa isang 30 s
-  na naka-cache na pagbasa mula sa `api_keys.no_log`
-- `NO_LOG_API_KEY_IDS` (env, pinaghihiwalay ng kuwit) — paunang nilo-load sa in-memory
-  set sa pag-boot; kapaki-pakinabang kapag hindi mo direktang ma-toggle ang column
+- `setNoLog(apiKeyId, true|false)` — i-toggle ang in-memory na entry
+- `isNoLog(apiKeyId)` — na naka-check sa path ng kahilingan; bumabalik sa 30 s na naka-cache na read mula sa `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, comma-separated) — na paunang na-load sa in-memory set sa boot; kapaki-pakinabang kapag hindi mo maaaring direktang i-toggle ang column
 
-Ang mga administratibong audit event (pag-login, mga pagbabago sa provider, mga MCP tool call, atbp.)
-ay **hindi** naaapektuhan ng `noLog` — tanging ang pag-log ng traffic ng bawat request ang
-hindi isinasali.
+Ang mga kaganapan sa administratibong pag-audit (pag-login, mga pagbabago sa provider, mga tawag MCP tool, atbp.) ay** hindi** apektado ng `noLog` — lamang sa bawat kahilingan sa pag-log ng trapiko ang hindi pinasali.
+
+### Bawat kahilingan sa pag-opt out (`x-omniroute-no-log`)
+
+Ang isang kliyente ay maaaring mag-opt ng isang kahilingan sa paghihinuha mula sa pagtitiyaga ng payload nang hindi gumagawa ng nakalaang key. Ipadala `x-omniroute-no-log: true` sa kahilingan (`1` at `yes` ay tinatanggap din, case-insensitive). Nalalapat ito sa bawat ruta ng chat-family na tumatakbo sa tagapangasiwa ng chat: Mga Pagkumpleto ng Chat, Mga Tugon, Mga Mensahe, Mga Pagkumpleto at ang landas na tugma sa Gemini. Ang row ng call-log ay nakasulat pa rin kasama ang timestamp, modelo, provider, status, tagal at mga bilang ng token nito, ngunit inalis `request_body`, `response_body`, mga buod ng kahilingan at pipeline artifact.
+
+Ang header ay ORed na may key na flag: ang isang walang-log na key ay mananatiling walang-log anuman ang header, at ang header ay hindi maaaring muling paganahin ang pag-log para sa isang walang-log na key. Ang header ay tinanggal bago ang kahilingan ay ipasa sa upstream.
+
+Ginagawa ng header na ito** hindi** huwag paganahin ang Memory extraction o ang semantic cache. Magpadala `x-omniroute-no-memory: true` at `x-omniroute-no-cache: true` sa tabi nito kapag ang kahilingan ay hindi dapat magpatuloy sa nilalaman sa mga subsystem na iyon.
 
 ## REST API
 

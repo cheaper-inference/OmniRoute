@@ -8,21 +8,22 @@
 
 ## Cuprins
 
-- [Rulare rapidă](#quick-run)
-- [Cu fișier de mediu](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Executare rapidă](#quick-run)
+- [Cu fișierul de mediu](#with-environment-file)
+- [Docker Compune](#docker-compose)
 - [Profiluri disponibile](#available-profiles)
-- [Configurarea instrumentelor CLI de pe gazdă când OmniRoute rulează în Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Container auxiliar Redis](#redis-sidecar)
-- [Compose pentru producție](#production-compose)
+- [Întărirea recipientului](#container-hardening)
+- [Configurarea instrumentelor gazdă CLI când OmniRoute rulează în Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Sidecar](#redis-sidecar)
+- [Producție Compoziție](#production-compose)
 - [Etapele Dockerfile](#dockerfile-stages)
-- [Variabile de mediu esențiale](#critical-environment-variables)
-- [Docker Compose cu Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Tunel rapid Cloudflare](#cloudflare-quick-tunnel)
+- [Variabile critice de mediu](#critical-environment-variables)
+- [Docker Compune cu Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
 - [Etichete de imagine](#image-tags)
-- [Actualizările panoului de control în Docker](#dashboard-updates-in-docker)
-- [Disponibilitate: configurația SQLite implicită acceptă o singură replică](#availability-default-sqlite-is-single-replica)
-- [Erori regionale Gemini în Docker](#gemini-regional-errors-inside-docker)
+- [Actualizări de tablou de bord în Docker](#dashboard-updates-in-docker)
+- [Disponibilitate: SQLite implicit este o singură copie](#availability-default-sqlite-is-single-replica)
+- [erori regionale Gemini în interiorul Docker](#gemini-regional-errors-inside-docker)
 - [Note importante](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute include profiluri Compose pentru principalele tipuri de implementare. 
 | `web`             | `omniroute-web`  | Furnizori bazați pe sesiuni web care necesită un browser: `gemini-web`, `claude-web`, `claude-turnstile` (construiește `runner-web`, cu Chromium inclus)                 | `docker compose --profile web up -d`         |
 
 > Pot fi combinate mai multe profiluri: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Întărirea recipientului
+
+Serviciile de aplicație `base`, `web`, `cli` și `host` din `docker-compose.yml` folosesc `cap_drop: [ALL]` și opțiunea de securitate `no-new-privileges:true`. Imaginea rulează ca utilizator non-root `node` și ascultă pe porturi înalte, deci nu are nevoie de capabilități Linux. Opțiunea de securitate împiedică procesele să obțină privilegii prin binare setuid.
+
+Doar profilul `cli` montează soclul Docker pentru auto-updater. Consultați [Trapa de evacuare: configurați propriul CLIs al containerului](#escape-hatch-configure-the-containers-own-clis-use-sparingly) pentru implicațiile de securitate.
+
+Sistemul de fișiere rădăcină rămâne inscriptibil în mod implicit. Profilul `cli` scrie configurația CLI și memorează cache în directorul principal al containerului, profilul `web` stochează starea sesiunii Chromium, iar timpul de execuție Next.js poate scrie cache în afara `/app/data`.
+
+Pentru a încerca un sistem de fișiere rădăcină numai pentru citire cu profilul `base`, salvați-l ca `docker-compose.override.yml` lângă `docker-compose.yml`. Compose citește automat anularea.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Suportul `/app/data` existent rămâne inscriptibil. Testați-vă sarcina de lucru înainte de a utiliza această înlocuire în producție, deoarece poate fi necesar să scrie pe alte căi.
 
 ## Configurarea instrumentelor CLI de pe gazdă când OmniRoute rulează în Docker
 
@@ -295,7 +320,7 @@ Comportamentul memoriei în Docker:
 
 ### Runtime RAM pentru agenți de codare
 
-Valoarea implicită de 1 GiB Docker este un etaj dashboard/light-chat, nu o dimensiune de producție. Corpurile `POST /v1/responses` lungi (sute de mesaje, zeci de instrumente) rețin mai multe grafice în memorie în timpul compresiei. Două cereri suprapuse ~ 3 MiB / ~ 750k-token au anulat V8 la un** 12 GiB** vechi-spațiu (`FATAL ERROR: Reached heap limit`) și, de asemenea, a lovit un 16 GiB cgroup OOM. Vezi [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Valoarea implicită de 1 GiB Docker este un etaj dashboard/light-chat, nu o dimensiune de producție. Corpurile `POST /v1/responses` lungi (sute de mesaje, zeci de instrumente) rețin mai multe grafice în memorie în timpul compresiei. Două cereri suprapuse ~ 3 MiB / ~ 750k-token au anulat V8 la un** 12 GiB** vechi-spațiu (`FATAL ERROR: Reached heap limit`) și, de asemenea, a lovit un 16 GiB cgroup OOM. Vezi [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Dimensiune** cgroup `--memory` deasupra mormanului** Bufferele native —, SQLite și intermediarii de compresie se află în afara V8.
 
@@ -415,7 +440,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy setează anteturile de expediere standard pentru containerul din amonte. OmniRoute folosește `NEXT_PUBLIC_BASE_URL` ca origine publică canonică pentru apelurile inverse OAuth și legăturile publice generate; scrierile din tabloul de bord autentificat folosesc cereri de aceeași origine plus protecție CSRF legată de sesiune. Activați `OMNIROUTE_TRUST_PROXY` numai pentru implementări avansate în care doriți în mod intenționat ca OmniRoute să obțină originea publică din antetele redirecționate de încredere în loc de configurația explicită.
+Caddy stabilește anteturile de expediere standard pentru containerul din amonte. OmniRoute folosește `NEXT_PUBLIC_BASE_URL` ca origine publică canonică pentru apelurile inverse OAuth și legăturile publice generate; scrierile din tabloul de bord autentificat folosesc cereri de aceeași origine plus protecție CSRF legată de sesiune. Activați `OMNIROUTE_TRUST_PROXY` numai pentru implementări avansate în care doriți în mod intenționat ca OmniRoute să obțină originea publică din anteturile redirecționate de încredere în loc de configurația explicită.
 
 ## Tunel rapid Cloudflare
 
@@ -591,11 +616,11 @@ Serviciul elimină solicitarea înainte de descărcare, astfel încât o execuț
 
 Stock Docker / Kubernetes OmniRoute este** one Node process + one SQLite writer** . Disponibilitatea ridicată este** nesuportat** pe acea topologie.
 
-| Constrângere                                 | Consecinţă                                                                                                                                                                                                                                                                                                                                                          |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Un singur scriitor                           | Do** nu** rulați mai multe replici împotriva aceluiași fișier SQLite. Asta corupe DB.                                                                                                                                                                                                                                                                               |
-| Recreează / repornește / HEALTHCHECK ucide   | **Întreruperea completă** a SSE în timpul zborului, a sesiunilor de tablou de bord și a stării în memorie. Fiecare client conectat scade. Noile solicitări în timpul ferestrei de punct final goale primesc un proxy invers**`502 Bad Gateway: Unknown error`** , nu OmniRoute JSON — clienții nu pot distinge acest lucru de o defecțiune a furnizorului (#11015). |
-| Aceeași buclă de evenimente ca și `/healthz` | Un catalog ocupat sau un bif de compresie poate întârzia probele; un scurt timeout apoi repornește** numai** replica.                                                                                                                                                                                                                                               |
+| Constrângere                                 | Consecinţă                                                                                                                                                                                                                                                                                                                                                      |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Un singur scriitor                           | Do** nu** rulați mai multe replici împotriva aceluiași fișier SQLite. Asta corupe DB.                                                                                                                                                                                                                                                                           |
+| Recreează / repornește / HEALTHCHECK ucide   | **Întreruperea completă** a SSE în timpul zborului, a sesiunilor de tablou de bord și a stării în memorie. Fiecare client conectat scade. Noile solicitări în timpul ferestrei de punct final goale primesc un proxy invers**`502 Bad Gateway: Unknown error`** , nu OmniRoute JSON Clienții — nu pot distinge acest lucru de o eroare a furnizorului (#11015). |
+| Aceeași buclă de evenimente ca și `/healthz` | Un catalog ocupat sau un bif de compresie poate întârzia probele; un scurt timeout apoi repornește** numai** replica.                                                                                                                                                                                                                                           |
 
 **Matricea sondei** (vezi și [recomandările probei Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -605,7 +630,7 @@ Stock Docker / Kubernetes OmniRoute este** one Node process + one SQLite writer*
 | Pregătire      | HTTP `GET /healthz`                                        | Timeout-uri strânse care tratează bucla de evenimente ocupată ca fiind moartă |
 | Adânc / oameni | `/api/monitoring/health`                                   | Vioație automată a kubeletului                                                |
 
-**Upgrade-uri:** așteptați ca fiecare sesiune să scadă. Scurgeți clienții dacă puteți; nu există nicio actualizare continuă pentru SQLite implicit. Compune `restart: unless-stopped` plus Docker `HEALTHCHECK` va înlocui, de asemenea, singurul proces atunci când containerul este nesănătos - aceeași rază de explozie.
+**Upgrade-uri:** așteptați ca fiecare sesiune să scadă. Scurgeți clienții dacă puteți; nu există nicio actualizare continuă pentru SQLite implicit. Compune `restart: unless-stopped` plus Docker `HEALTHCHECK` va înlocui, de asemenea, singurul proces atunci când containerul este nesănătos — aceeași rază de explozie.
 
 Manifeste gata făcute și o diagramă Helm live în `deploy/kubernetes/` și `deploy/helm/omniroute/` — consultați [ghidul de implementare Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
@@ -636,9 +661,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep permite lui Kube să renunțe la punctele finale ale serviciului înainte de SIGTERM așadar** nou** traficul încetează să lovească procesul de moarte. `/v1/responses` SSE în timpul zborului este scurs până la `SHUTDOWN_TIMEOUT_MS` (implicit 30s) prin contracte de închiriere de admitere grele (#11015). Solicitările noi care ajung încă în proces devin `503` + `Retry-After: 5`. Decalajul Recreează punctul final gol până când înlocuirea este gata rămâne o întrerupere gravă - adică topologia SQLite, nu o config greșită a sondei.
+`preStop` sleep permite lui Kube să renunțe la punctele finale ale serviciului înainte de SIGTERM așadar** nou** traficul încetează să lovească procesul de moarte. `/v1/responses` SSE în timpul zborului este scurs până la `SHUTDOWN_TIMEOUT_MS` (implicit 30 de secunde) prin contracte de închiriere de admitere grele (#11015). Solicitările noi care ajung încă în proces devin `503` + `Retry-After: 5`. Recreează decalajul punctului final gol până când înlocuirea este gata rămâne o întrerupere gravă — care este topologia SQLite, nu o config greșită a sondei.
 
-Postgres extern / multi-writer HA este** nu** o cale de stoc documentată. Dacă aveți nevoie HA, păstrați o singură replică sau rulați o topologie pe care proiectul a testat-o și documentată separat. Lucrarea Postgres/MySQL locuiește în [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Până la livrare, singura modalitate acceptată de a se înmulți** mare** Capacitatea `/v1/responses` este N procese independente (secțiunea următoare), nu `replicas > 1` pe un volum.
+Postgres extern / multi-writer HA este** nu** o cale de stoc documentată. Dacă aveți nevoie HA, păstrați o singură replică sau rulați o topologie pe care proiectul a testat-o și documentată separat. Lucrarea Postgres/MySQL locuiește în [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Până la livrare, singura modalitate acceptată de a se înmulți** mare** Capacitatea `/v1/responses` este N procese independente (secțiunea următoare), nu `replicas > 1` pe un singur volum.
 
 ## Scale-out: N procese independente
 
@@ -648,25 +673,25 @@ Copiile unui cont Codex nu trebuie să consume în mod independent indicativul d
 
 Instanța pasivă recitește conexiunea atunci când este necesară o reîmprospătare și adoptă doar un simbol de acces diferit, neexpirat. În caz contrar, reîmprospătarea este dezactivată fără a expira sau a dezactiva conexiunea sau a număra o eroare a întrerupătorului de reîmprospătare. Eșecurile reale de autentificare din amonte folosesc încă contabilizarea eșecului normal, răcirea exponențială și eroarea normală a clientului; dezactivarea contului rămâne permanentă. Sincronizați jetoanele rotite ale proprietarului înainte ca jetoanele de acces să expire (proiectul implicit de reîmprospătare proactivă este de cinci minute) sau reimportați fișierul de autentificare Codex. Importurile pasive stochează token-urile furnizate fără a le valida la punctul final al token-ului. Reîmprospătarea manuală dashboard/API returnează `409 refresh_disabled`; noile autentificări OAuth sunt neschimbate. Consultați [referința de mediu](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Procesul One Node este** o grămadă V8** . Două suprapuse ~ 3 MiB / ~ 750k-token-coding-agent `POST /v1/responses` (RTK + Caveman) anulează acel heap la ~ 12 Gi (`FATAL ERROR: Reached heap limit`) și pot OOM un cgroup de 16 Gi. Vezi [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Această măsurătoare este a** memorie-buget** avertisment, nu un produs hard-max de două `/v1/responses` lungi simultane. Admiterea de chat grea este blocată de un buget de octeți de asimilare auto-derivat (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimensionat din același plafon V8/cgroup — suprascriind-o în sus (sau setarea limitei de număr de cereri `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` moștenite) pe un proces deja dimensionat reintroduce anularea. Chaturile mici, `/healthz`, `/v1/models`, și MCP sunt** nu** in acel capac.
+Procesul One Node este** o grămadă V8** . Două suprapuse ~ 3 MiB / ~ 750k-token-coding-agent `POST /v1/responses` (RTK + Caveman) anulează acel heap la ~ 12 Gi (`FATAL ERROR: Reached heap limit`) și pot OOM un cgroup de 16 Gi. Vezi [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Această măsurătoare este a** memorie-buget** avertisment, nu este un produs hard-max de două `/v1/responses` lungi simultane. Admiterea de chat grea este blocată de un buget de octeți de asimilare auto-derivat (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimensionat din același plafon V8/cgroup —, suprascriind-o în sus (sau setarea limitei de număr de cereri `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` vechi) pe un proces deja dimensionat reintroduce anularea. Chaturile mici, `/healthz`, `/v1/models` și MCP sunt** nu** in acel capac.
 
 ### Un singur proces: mai mult de două `/v1/responses` lungi
 
-O** sănătos** proces (heap sub `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, implicit `0.75`)** mai** rulați mai mult de două `POST /v1/responses` lungi simultane atunci când bugetul de octeți de zbor la nivelul întregului proces (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) mai are spațiu. Corpurile la sau peste `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (implicit 256 KiB) acceptă aceeași închiriere grea ca și solicitările cu structură grea și folosesc aceeași evadare `tryAcquireHealthyHeadroom` [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Zeci de clienți SSE lungi concurenți (operatorii au adesea nevoie de 40–50) este a** memorie-buget** întrebare — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nu este o limită de produs „max. 2”. O grămadă sub presiune se pierde în continuare cu `503` reîncercat, astfel încât #7849 nu revine.
+O** sănătos** proces (heap sub `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, implicit `0.75`)** mai** rulați mai mult de două `POST /v1/responses` lungi concurente atunci când bugetul de octeți de zbor la nivelul întregului proces (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) mai are spațiu. Corpurile la sau peste `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (implicit 256 KiB) acceptă aceeași închiriere grea ca și cererile cu structură grea și folosesc aceeași evadare [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Zeci de clienți SSE lungi concurenți (operatorii au adesea nevoie de 40–50) este a** memorie-buget** întrebare — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nu este o limită de produs „max. 2”. O grămadă sub presiune se pierde în continuare cu `503` reîncercat, astfel încât #7849 nu se întoarce.
 
 La** înmulți grămezi** (spații vechi V8 independente)** astăzi** :
 
 | Do                                                                                                                                               | Nu                                                                        |
 | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
 | Fugi** N containers/pods** , fiecare cu ei** proprii** `DATA_DIR` / volum                                                                        | Setați `replicas > 1` față de un fișier SQLite                            |
-| Dimensiune grea în zbor + healthy-headroom din bugetul heap/inflight-byte; 1–2 este valoarea implicită conservatoare #7849, nu un produs dur max | Dați unui proces 8 × RAM și o limită de numărare nelimitată               |
+| Dimensiune grea în zbor + healthy-headroom din bugetul heap/inflight-byte; 1–2 este valoarea implicită #7849 conservatoare, nu un produs dur max | Dați unui proces 8 × RAM și o limită de numărare nelimitată               |
 | Opțional: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` pentru** contoare de cote partajate**                                             | Tratați Redis ca SQLite — partajat, nu este                               |
 | Duplicați secretele furnizorului în fiecare instanță (sau acceptați tablouri de bord partiționate)                                               | Așteptați-vă la un tablou de bord/un jurnal de apeluri în toate cazurile  |
 | Față cu orice echilibrator de sarcină; sticky by API key sau session este suficient                                                              | Necesită un middleware specific de vânzător care ține seama de dimensiune |
 
-Afinitatea dintre sesiune și cont poate fi partajată și prin Redis: setați `OMNIROUTE_SESSION_AFFINITY_STORE=redis` și `REDIS_URL` pe fiecare proces, cu același `REDIS_KEY_PREFIX` și o setare `sessionAffinityTtlMs` pozitivă. Pinurile rezolvă identitățile hashing ale conturilor de utilizare la conexiunea locală eligibilă a fiecărui proces, astfel încât conturile OAuth cu metadate de identitate corespunzătoare nu trebuie să aibă conexiunea IDs corespunzătoare. Identitățile de cont cunoscute au prioritate față de IDs local contradictoriu în rezoluția pinului și evacuarea supravegheată; înregistrările fără identitate (sau apelanții evacuați fără identitate) păstrează paza ID moștenită. Conturile fără o identitate stabilă de utilizare necesită în continuare potrivirea IDs. erorile Redis sau apelurile care depășesc 100 ms revin la SQLite local. Fiecare magazin de afinitate Redis limitează operațiunile restante la 8, ocolește Redis imediat când este plin și eliberează sloturi numai atunci când munca de bază se stabilește, nu la termenul limită al apelantului. În timpul unei întreruperi Redis nu există un adevăr comun: fiecare instanță revine la propria sa afinitate locală, sesiunile se pot fixa din nou o dată pe instanță și instanțele pot diverge. Adezivitatea re-converge prin Redis atunci când își revine. Timpul limită de așteptare, nu un EVAL trimis, care poate ateriza după fallback. Scrierile de rutare compară valoarea exactă observată de decizia de rutare, nu o citire proaspătă în timpul mutației; o ratare observată sau o observație de rezervă SQLite se compară ca o cheie Redis absentă. Pinurile învechite sunt înlocuite într-un singur CAS, astfel încât o comandă întârziată nu poate înlocui sau șterge un pin mai nou, diferit. Redis citește atomic returnează valoarea și serverul rămas TTL; PTTL pozitiv (sau fără expirare) determină vitalitatea, nu marcajul de timp JSON al scriitorului sau ceasul cititorului. Instantaneele locale cartografice care rămân TTL la un termen local; cheile JSON existente rămân lizibile și octeții lor bruti sunt păstrați pentru CAS. Redis este singura sursă de adevăr în timp ce răspunde. Suprasările, atingerile și ștergerile partajate confirmate elimină intrarea locală, nu o instalați sau reîmprospătați niciodată. SQLite pe calea Redis deține numai propriile decizii de rezervă ale acestei instanțe de la erori Redis, timeout-uri sau saturație de admitere, limitate de TTL ca înainte. Un PIN local lipsă la o întrerupere ulterioară costă o nouă alegere (o pierdere prompt-cache), nu un cont greșit sau evacuat. Încălțările respinse returnează câștigătorul partajat și TTL său rămas în mod atomic: selecția obișnuită verifică din nou termenul local mapat și folosește un câștigător eligibil încă în viață, atingând utilizarea și înregistrându-se pentru acel cont fără o altă scriere partajată. Dacă nu este disponibil, selecția păstrează candidatul local, lasă pinul partajat neschimbat și emite un mesaj de depanare. CAS respins nu scrie SQLite; Erorile Redis, timeout-urile sau saturația de admitere aplică în schimb operația locală existentă. Dacă răspunsul unei mutații trimise ajunge după expirarea timpului (acceptat, respins sau eroare), o comparare și ștergere a valorii serializate exacte sincrone elimină numai rândul de rezervă de timeout identic pentru octeți. Nu există nicio așteptare între acea comparație și ștergere; se păstrează o scriere de întrerupere mai nouă. Evacuarea supravegheată elimină propriul PIN local al contului eșuat chiar și cu Redis jos și îl curăță din nou după evacuarea partajată confirmată. În așteptarea răspunsurilor partajate anterioare, nu se poate restabili un PIN local evacuat, deoarece succesele partajate nu scriu niciodată SQLite. O întrerupere de rezervă ulterioară poate repune un cont; o scriere partajată acceptată ulterior există numai în Redis. Redis miss nu consultați statul de rezervă local. Cu driverul oprit, pinii nou selectați păstrează forma moștenită SQLite JSON cu patru câmpuri; numai rutarea Redis adaugă identitatea contului hashing. Pinurile preîncărcate sunt verificate din nou la limita lor de expirare. Redis non-lease selection recitește magazinul, dar planificarea sincronă a contractului de închiriere poate folosi totuși un indicator scos între preluare și planificare (o fereastră acceptată pentru cel mai bun efort). O comitere de închiriere nu poate schimba conturile după o revendicare durabilă: la upsert respins, acesta păstrează candidatul revendicat doar pentru acea cerere și îl lasă neatins pe câștigătorul comun, astfel încât acordul între cazuri este limitat pe acea cale. Restul tabelului se aplică în continuare: aceasta nu împărtășește adeziunea sesiunii combinate, pinii nativi Codex turn, semaforele contului, blocările, limitele de cheltuieli, configurația sau jurnalele de apeluri.
+Afinitatea dintre sesiune și cont poate fi partajată și prin Redis: setați `OMNIROUTE_SESSION_AFFINITY_STORE=redis` și `REDIS_URL` pe fiecare proces, cu același `REDIS_KEY_PREFIX` și o setare `sessionAffinityTtlMs` pozitivă. Pinurile rezolvă identitățile hashing ale conturilor de utilizare la conexiunea locală eligibilă a fiecărui proces, astfel încât conturile OAuth cu metadate de identitate corespunzătoare nu trebuie să aibă conexiunea IDs corespunzătoare. Identitățile de cont cunoscute au prioritate față de IDs local contradictoriu în rezoluția pinului și evacuarea supravegheată; înregistrările fără identitate (sau apelanții evacuați fără identitate) păstrează paza ID moștenită. Conturile fără o identitate stabilă de utilizare necesită în continuare potrivirea IDs. erorile Redis sau apelurile care depășesc 100 ms revin la SQLite local. Fiecare magazin de afinitate Redis limitează operațiunile restante la 8, ocolește Redis imediat când este plin și eliberează sloturi numai atunci când munca de bază se stabilește, nu la termenul limită al apelantului. În timpul unei întreruperi Redis nu există un adevăr comun: fiecare instanță revine la propria sa afinitate locală, sesiunile se pot fixa din nou o dată pe instanță și instanțele pot diverge. Adezivitatea re-converge prin Redis atunci când își revine. Timpul limită de așteptare, nu un EVAL trimis, care poate ateriza după fallback. Scrierile de rutare compară valoarea exactă observată de decizia de rutare, nu o citire nouă în timpul mutației; o ratare observată sau o observație de rezervă SQLite se compară ca o cheie Redis absentă. Pinurile învechite sunt înlocuite într-un singur CAS, astfel încât o comandă întârziată nu poate înlocui sau șterge un pin mai nou, diferit. Redis citește atomic returnează valoarea și serverul rămas TTL; PTTL pozitiv (sau fără expirare) determină vitalitatea, nu marcajul de timp JSON al scriitorului sau ceasul cititorului. Mapele instantanee locale care rămân TTL la un termen local; cheile JSON existente rămân lizibile și octeții lor bruti sunt păstrați pentru CAS. Redis este singura sursă de adevăr în timp ce răspunde. Suprasările, atingerile și ștergerile partajate confirmate elimină intrarea locală, nu o instalați sau reîmprospătați niciodată. SQLite pe calea Redis deține numai propriile decizii de rezervă ale acestei instanțe de la erori Redis, timeout-uri sau saturație de admitere, limitate de TTL ca înainte. Un PIN local lipsă la o întrerupere ulterioară costă o nouă alegere (o pierdere prompt-cache), nu un cont greșit sau evacuat. Încălțările respinse returnează câștigătorul partajat și TTL său rămas în mod atomic: selecția obișnuită verifică din nou termenul local mapat și folosește un câștigător eligibil încă în viață, atingând utilizarea și înregistrându-se pentru acel cont fără o altă scriere partajată. Dacă nu este disponibil, selecția păstrează candidatul local, lasă pinul partajat neschimbat și emite un mesaj de depanare. CAS respins nu scrie SQLite; Erorile Redis, timeout-urile sau saturația de admitere aplică în schimb operația locală existentă. Dacă răspunsul unei mutații trimise ajunge după expirarea timpului (acceptat, respins sau eroare), o comparare și ștergere a valorii serializate exacte sincrone elimină numai rândul de rezervă de timeout identic pentru octeți. Nu există nicio așteptare între acea comparație și ștergere; se păstrează o scriere de întrerupere mai nouă. Evacuarea supravegheată elimină propriul PIN local al contului eșuat chiar și cu Redis jos și îl curăță din nou după evacuarea partajată confirmată. În așteptarea răspunsurilor partajate anterioare, nu se poate restabili un PIN local evacuat, deoarece succesele partajate nu scriu niciodată SQLite. O întrerupere de rezervă ulterioară poate repune un cont; o scriere partajată acceptată ulterior există numai în Redis. Redis miss nu consultați statul de rezervă local. Cu driverul oprit, pinii nou selectați păstrează forma moștenită SQLite JSON cu patru câmpuri; numai rutarea Redis adaugă identitatea contului hashing. Pinurile preîncărcate sunt verificate din nou la limita lor de expirare. Redis non-lease selection recitește magazinul, dar planificarea sincronă a contractului de închiriere poate folosi totuși un indicator scos între preluare și planificare (o fereastră acceptată pentru cel mai bun efort). O comitere de închiriere nu poate schimba conturile după o revendicare durabilă: la upsert respins, acesta păstrează candidatul revendicat doar pentru acea cerere și îl lasă neatins pe câștigătorul comun, astfel încât acordul între cazuri este limitat pe acea cale. Restul tabelului se aplică în continuare: aceasta nu împărtășește adeziunea sesiunii combinate, pinii nativi Codex turn, semaforele contului, blocările, limitele de cheltuieli, configurația sau jurnalele de apeluri.
 
-Hardware: `/v1/responses` lung concurent pe o instanță este a** memorie-buget** întrebare (heap + inflight-byte / #10110). `N` independent `DATA_DIR` s înmulțesc în continuare grămezi: gazda RAM trebuie să acopere `N × cgroup`, nu „un pod de 16 Gi cu N = 8”. Nu `replicas > 1` niciodată pe un fișier SQLite.
+Hardware: `/v1/responses` lung concurent pe o instanță este a** memorie-buget** întrebare (heap + inflight-byte / #10110). `N` independent `DATA_DIR` încă mai înmulțește grămezi: gazda RAM trebuie să acopere `N × cgroup`, nu „un pod de 16 Gi cu N = 8”. Nu `replicas > 1` niciodată pe un fișier SQLite.
 
 Compuneți schița (două grămezi, două volume — nu `deploy.replicas: 2`):
 
@@ -695,55 +720,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Densitatea în proces (compresia de pe izolatul HTTP ) este [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Un cluster logic pe starea durabilă partajată este [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Densitatea în proces (compresia izolatului HTTP ) este [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Un cluster logic pe starea durabilă partajată este [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Erori regionale Gemini în Docker
+## erori regionale Gemini în interiorul Docker
 
-Google AI Studio / Gemini API poate returna HTTP 400 cu FAILED_PRECONDITION și
-`User location is not supported for the API use.` O solicitare reușită pe gazdă
-nu demonstrează că acel container utilizează aceeași rută de ieșire. Ordinea DNS,
-conectivitatea IPv4/IPv6, rutarea VPN și proxy-urile configurate pot fi diferite. Verificați
-[regiunile acceptate de Google](https://ai.google.dev/gemini-api/docs/available-regions),
-precum și ruta efectivă a conexiunii; această eroare, de una singură, nu indică o cheie API nevalidă.
+Google AI Studio / Gemini API poate returna HTTP 400 cu FAILED_PRECONDITION și `User location is not supported for the API use.` O solicitare reușită pe gazdă nu dovedește că containerul folosește aceeași rută de ieșire. Ordonarea DNS, conectivitatea IPv4/IPv6, rutarea VPN și proxy-urile configurate pot diferi. Verificați [regiunile acceptate de Google,](https://ai.google.dev/gemini-api/docs/available-regions) precum și ruta reală de conectare; această eroare singură nu identifică o cheie API proastă.
 
 ### Preferați un proxy specific conexiunii
 
-Utilizați [configurarea proxy per conexiune](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-din OmniRoute pentru conexiunea Gemini afectată, apoi repetați **Test Connection** și o solicitare mică
-folosind același model. Astfel, modificarea rutării rămâne limitată la conexiunea respectivă. Verificați
-că proxy-ul este accesibil din container și că acea conexiune chiar îl selectează.
-Schimbarea rutei nu garantează eligibilitatea regională la serviciul din amonte.
+Utilizați [configurația proxy per conexiune](../ops/PROXY_GUIDE.md#4-level-proxy-system) a lui OmniRoute pentru conexiunea Gemini afectată, apoi repetați** Testează conexiunea** si o mica cerere cu acelasi model. Aceasta menține modificarea de rutare în domeniul conexiunii respective. Verificați dacă proxy-ul este accesibil din container și că conexiunea îl selectează cu adevărat. Schimbarea rutei nu garantează eligibilitatea regională în amonte.
 
-### Comparați rețeaua gazdei cu cea a containerului
+### Comparați rețelele de gazdă și container
 
-Păstrați neschimbate cheia, modelul și solicitarea atunci când comparați rezultatele autentificate; nu
-inserați niciodată într-o problemă raportată credențiale, parole de proxy sau antete de autorizare complete.
-Mai întâi, verificați ce familii de adrese oferă resolverul sistemului de operare, utilizând aceeași comandă
-pe gazdă și în interiorul containerului:
+Păstrați cheia, modelul și cererea identice atunci când comparați rezultatele autentificate; nu inserați niciodată acreditări, parole proxy sau anteturi complete de autorizare într-o problemă. Mai întâi inspectați ce familii de adrese oferă rezolutorul OS, folosind aceeași comandă pe gazdă și în interiorul containerului:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Înlocuiți `omniroute` cu serviciul pe care îl rulați (de exemplu, `omniroute-web`). Aceste
-comenzi afișează familiile de adrese fără credențiale sau adrese IP. Valoarea returnată `6`
-indică doar un rezultat DNS IPv6: aceasta **nu** demonstrează existența unei rute IPv6 utilizabile sau accesul la API.
-Acolo unde este instalat `curl`, comparați `curl -4 -I https://generativelanguage.googleapis.com`
-cu `curl -6 -I https://generativelanguage.googleapis.com` în ambele medii.
-Un răspuns HTTP demonstrează conectivitatea pentru acea verificare, chiar dacă este o eroare
-neautentificată; numai solicitarea autentificată către model testează eligibilitatea Gemini.
+Înlocuiți `omniroute` cu serviciul pe care îl executați (de exemplu, `omniroute-web`). Aceste comenzi imprimă familii de adrese fără acreditări sau adrese IP. Un `6` returnat arată doar un rezultat IPv6 DNS : o face** nu** dovediți o rută IPv6 utilizabilă sau un acces API. Unde este instalat `curl`, comparați `curl -4 -I https://generativelanguage.googleapis.com` cu `curl -6 -I https://generativelanguage.googleapis.com` în ambele medii. Un răspuns HTTP dovedește conectivitatea pentru acea sondă, chiar dacă este o eroare neautentificată; doar cererea de model autentificat testeaza eligibilitatea Gemini.
 
-### Alternativă la nivelul gazdei: IPv6 funcțional și politica resolverului
+### Alternativă la nivel de gazdă: IPv6 de lucru și politica de rezolvare
 
-Persoana care a raportat [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) a restabilit
-accesul în mediul său activând IPv6 pentru containere și modificând selecția adreselor în glibc.
-Tratați aceasta ca pe o alternativă specifică mediului. Confirmați că IPv6 funcționează pe gazdă,
-precum și rutarea/ieșirea containerului și regulile firewallului, înainte de a ajusta preferințele resolverului.
-O adresă ULA privată, de una singură, nu confirmă conectivitatea IPv6 publică.
+Reporterul [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) a restabilit accesul în mediul lor activând containerul IPv6 și modificând selecția adresei glibc. Tratați acest lucru ca pe o alternativă specifică mediului. Confirmați regulile gazdei de lucru IPv6, container egress/routing și firewall înainte de a ajusta preferințele rezolutorului. O adresă ULA privată în sine nu stabilește conectivitate IPv6 publică.
 
-Pentru serviciile deja atașate la rețeaua implicită a Compose, acest fragment activează
-IPv6 în rețeaua respectivă; păstrați restul configurației serviciului, porturilor și volumelor:
+Pentru serviciile deja atașate la rețeaua implicită Compose, acest fragment activează IPv6 pe acea rețea; păstrați restul serviciului, porturile, volumele și configurația dvs.:
 
 ```yaml
 networks:
@@ -751,30 +753,13 @@ networks:
     enable_ipv6: true
 ```
 
-Pentru o rețea denumită, activați această opțiune în rețeaua la care se conectează efectiv serviciul. Docker poate
-aloca un subnet ULA; selectați un subnet explicit, fără suprapuneri, numai atunci când rețeaua
-dumneavoastră impune acest lucru. Consultați [rețelele IPv6 Docker](https://docs.docker.com/engine/daemon/ipv6/)
-și [opțiunile de rețea Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Pentru o rețea numită, activați-o în rețeaua la care serviciul se alătură efectiv. Docker poate aloca o subrețea ULA ; selectați o subrețea explicită, care nu se suprapune numai atunci când rețeaua dvs. o cere. Consultați [Docker IPv6 networking](https://docs.docker.com/engine/daemon/ipv6/) și [Compose network options](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Într-o **imagine bazată pe glibc**, `/etc/gai.conf` poate modifica selecția adreselor. Fișierul Dockerfile
-actual al depozitului utilizează Debian; imaginile personalizate bazate pe musl nu folosesc același mecanism.
-Ajustarea raportată schimbă eticheta ULA din `label fc00::/7 6` în
-`label fc00::/7 1`. Porniți de la tabelul complet de politici al imaginii și păstrați celelalte
-intrări ale acestuia: adăugarea unei intrări `label` sau `precedence` înlocuiește tabelul implicit, astfel încât un fișier
-care conține numai linia modificată este insuficient. Documentația
-[de configurare glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-descrie această semantică. Montați fișierul verificat prin bind în modul doar pentru citire la `/etc/gai.conf`
-și recreați serviciul pentru a aplica modificarea.
+Pe a** imagine bazată pe glibc** , `/etc/gai.conf` poate modifica selecția adresei. Actualul depozit Dockerfile folosește Debian; imaginile personalizate bazate pe musl nu au acest mecanism. Ajustarea raportată schimbă eticheta ULA de la `label fc00::/7 6` la `label fc00::/7 1`. Începeți de la tabelul complet de politici al imaginii și păstrați celelalte intrări ale acesteia: adăugarea unei intrări `label` sau `precedence` înlocuiește tabelul implicit, astfel încât un fișier care conține doar linia modificată este insuficient. [Referința de configurare glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) documentează acea semantică. Montați fișierul revizuit numai în citire la `/etc/gai.conf` și recreați serviciul pentru a-l aplica.
 
-Aceasta modifică selecția adreselor la nivelul sistemului de operare pentru **tot traficul de ieșire din containerul respectiv**.
-Nu obligă toate aplicațiile să aleagă IPv6: ordinea DNS și selecția conexiunii în Node
-contează, de asemenea. În special, `--dns-result-order=ipv4first` acordă prioritate IPv4 și
-nu reprezintă o soluție pentru o eroare care apare numai prin IPv4. Consultați [ordinea DNS în Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Aceasta modifică selecția adresei OS pentru** tot traficul de ieșire din acel container** . Nu forțează fiecare aplicație să aleagă IPv6: Ordinea DNS a nodului și selecția conexiunii contează și ele. În special, `--dns-result-order=ipv4first` preferă IPv4 și nu este un remediu pentru o defecțiune IPv4-only. Consultați [comandarea nodului DNS](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Retestați Gemini și ceilalți furnizori după orice modificare la nivelul gazdei. Pentru revenire,
-eliminați montarea personalizată a `gai.conf`, restaurați configurația anterioară a rețelei și
-recreați serviciul/rețeaua afectată în timpul unei ferestre de mentenanță. Recrearea unei rețele
-poate întrerupe celelalte containere atașate acesteia; nu ștergeți volumul de date persistente.
+Retestați Gemini și ceilalți furnizori după orice modificare la nivel de gazdă. Pentru a anula, eliminați suportul `gai.conf` personalizat, restaurați configurația anterioară a rețelei și recreați service/network afectat în timpul unei ferestre de întreținere. Recrearea unei rețele poate întrerupe alte containere atașate acesteia; nu ștergeți volumul de date persistente.
 
 ## Note importante
 

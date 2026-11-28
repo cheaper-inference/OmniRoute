@@ -4,86 +4,63 @@
 
 ---
 
-> **19.11.2026: kolejka scalania Mergify została wycofana** (decyzja właściciela). `.mergify.yml` nie definiuje już kolejki i odrzuca polecenia Mergify, które łączą lub przepisują żądanie ściągnięcia. Wydania PRs są łączone ręcznie w ramach zestawu reguł repozytorium „Wymagaj zielonych bramek w aktywnym wydaniu” (`Gate / CI` + `Gate / Quality`) do momentu uruchomienia omni-queue w trybie na żywo, a następnie poprzez omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Poniższe sekcje Łączenia opisują kolejkę taką, jaka była.
+## Lądowanie na gałęzi uwalniającej
 
-Od wersji 3.8.49 (WS3.2/WS3.4 planu quality/velocity ) domyślną ścieżką scalania przeglądanych PRs do `release/vX.Y.Z` jest** Scal kolejkę scalania** (`.mergify.yml`); the** ręczne połączenie pociągu** poniżej udokumentowano FALLBACK — używane podczas incydentów, zawieszania się wydań lub jeśli plan Mergify Open Source kiedykolwiek się zmieni.
+Omni-kolejka reguluje lądowanie w `release/vX.Y.Z`. Przeczytaj najwyższy poziom `mode` w `config/merge-queue/config.json` w domyślnej gałęzi przed wylądowaniem PR. Zobacz [Omni-kolejka](OMNI_QUEUE.md).
 
-## Domyślna ścieżka: kolejka Mergify
+- **`shadow`** uruchamia weryfikację i pozostawia lądowanie do ręcznego scalania. Nałóż `omni-queue` na zatwierdzony PR w jego końcowej części. Sprawdź uprawnienia za pomocą `npm run queue -- why <PR>`. Poczekaj na werdykt dla tej głowy w `npm run queue -- history --base <branch>`. Kontynuuj `would-land`. Na `culprit-found` lub `would-dequeue` przytrzymaj scalanie i napraw przyczynę.
+- **Wyjątki w cieniu.** Pociąg z zielonym pełnym CI w stosunku do aktualnej końcówki bazy może jechać bez osobnego wyroku w sprawie kolejki. Ten sam wyjątek ma zastosowanie, gdy głowica PR zawiera już aktualną końcówkę podstawy.
+- **`live`** używa etykiety `omni-queue` do wyzwalania lądowania. Sama kolejka ląduje PR. Pozostaw polecenia scalania i kieruj wypychania do kolejki.
 
-1. PR zostaje sprawdzony/otrzymuje zielony status w ramach kampanii i zatwierdzony przez należącą do właściciela bramkę ⭐
-   przed scaleniem (raport + decyzja dla każdej pozycji — zobacz krok 0.75 w `/merge-prs`).
-2. Właściciel (lub sesja działająca na podstawie decyzji właściciela) nadaje etykietę **`queue`**.
-   Etykieta JEST zgodą na scalenie; Mergify jedynie je wykonuje.
-3. Mergify weryfikuje PR-y w kolejce **sekwencyjnie** (pojedynczo) względem szybkich bramek
-   i scala je (squash). Grupowanie + automatyczna bisekcja wymagają płatnego planu Mergify
-   („Cannot use Merge Queue batch” w bezpłatnym planie, #7220), dlatego `.mergify.yml` nie ustawia
-   `batch_size`; grupowanie pozostaje zadaniem ręcznego procesu merge-train opisanego poniżej. PR, którego
-   testy nadal oczekują po upływie `checks_timeout` (240 min = 2× zmierzony p95 dla
-   `quality.yml`), zostaje usunięty z kolejki, zamiast ją blokować.
-4. Po scaleniu ciągły workflow weryfikacji wydania sprawdza nowy najnowszy commit po pushu
-   i otwiera issue wskazujące źródło problemu, jeśli dana kombinacja spowodowała regresję (nigdy nie wykonuje automatycznego revertu).
+Każde lądowanie wymaga zgody właściciela i odpowiednich wymaganych kontroli. Zastosuj `omni-queue` dopiero po autoryzacji lądowania przez właściciela. Ustawione w PRs dotykające chronionych ścieżek również wymagają decyzji właściciela `protected-approved` dla tego PR.
 
-Zabezpieczenia (odzwierciedlają Twarde reguły #21/#22 z `CLAUDE.md`):
+Zestaw reguł „Wymagaj zielonych bram w aktywnym wydaniu” wymaga zielonych `Gate / CI` i `Gate / Quality` na głowie. Nigdy nie używaj `--admin` do ominięcia czerwonej bramy. Uwolnione bloki zamrażające łączą się z zamrożoną gałęzią. Zobacz [Twardą Regułę 21](HARD_RULES_DETAIL.md). Nigdy nie oznaczaj, nie łącz ani nie wysyłaj żądania ściągnięcia, informującego, że działa inna sesja. Zobacz [Twardą Regułę 22](HARD_RULES_DETAIL.md).
 
-- **Aktywne zamrożenie wydania** → NIE nadawaj etykiet PR-om kierowanym do zamrożonej gałęzi; najpierw
-  zmień ich gałąź docelową na aktywną `release/vX+1`.
-- **PR innej sesji będący w toku** → nigdy nie nadawaj mu etykiety; tylko sesja będąca właścicielem dodaje
-  własną pracę do kolejki.
-- Zmiany obejmujące wyłącznie testy oraz PR-y z etykietą `hotfix` już korzystają z ograniczonego CI (zobacz
-  `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); warunki kolejki akceptują dowolny zestaw
-  testów, który faktycznie został uruchomiony (`#check-failure=0` + `#check-pending=0`).
+## Żądanie ściągnięcia pociągu
 
-## Rozwiązanie awaryjne: ręczny merge train
+1. Rozpocznij odgałęzienie pociągu na końcówce podstawy bieżącego zwolnienia. Zintegruj dokładnie zatwierdzone głowy członków, używając zatwierdzeń scalających. Zachowaj historię zatwierdzeń, unikając squasha i rebase.
+2. Otwórz jedno żądanie ściągnięcia dla gałęzi pociągu. Sprawdź, czy PR ma własne pełne CI na bieżącej końcówce podstawy. Przed lądowaniem sprawdź ponownie końcówkę podstawy i zatwierdzone główki prętów. Odśwież pociąg i jego CI, gdy zmieni się zatwierdzony kandydat.
+3. Wyląduj pociągiem PR za pomocą zatwierdzenia scalania w odpowiednim trybie kolejki. W trybie na żywo metoda lądowania `merge-ff` kolejki zachowuje zatwierdzenia scalania. Oryginalne głowy członków stają się dostępne z gałęzi wydania. GitHub oznacza element PRs jako połączony, a zatwierdzenia zachowują swoich autorów.
 
-Używane, gdy kolejka jest niedostępna. Formalizuje praktykę, dzięki której w ciągu jednego dnia
-w cyklu v3.8.47 przetworzono 33 PR-y:
+Publiczny przykład to [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Połączył 18 członków PRs i wylądował z zatwierdzeniem połączenia 24.11.2026.
 
-1. **Zbierz grupę** (~10–30 zrecenzowanych i zatwierdzonych PR-ów). Sprawdź kolizje `linked:`
-   (te same `tap.testFiles`, te same fragmenty CHANGELOG-u) i przetwarzaj je sekwencyjnie.
-2. **Przeprowadź walidację RAZ**: w odizolowanym worktree utworzonym na wierzchołku gałęzi wydania scal lokalnie wszystkie
-   wierzchołki z grupy, a następnie uruchom zestaw równoważny procesowi wydania
-   (`npm run check:release-green`; przed wydaniem dodaj `--with-build`).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatyzuje kroki 1–2 (PR-y powodujące konflikty
-   są usuwane, a merge train jest kontynuowany). Tryb pełny uruchamia `npm run test:unit` — dostrojony
-   do maszyny runner (`--test-concurrency=20`), **a nie** dwa sekwencyjne, 4-rdzeniowe shardy CI,
-   przez które dominująca faza wykorzystywała około 25% maszyny 16-rdzeniowej (naprawiono
-   2026-07-18). `--fast` (opróżnianie dużych merge trainów w ciągu dnia, zatwierdzone przez właściciela 2026-07-18)
-   zachowuje każdą bramkę statyczną oraz vitest, ale uruchamia jedynie pliki node:test zmienione przez
-   PR-y dołączone do merge trainu; PEŁNY zestaw nadal musi zostać uruchomiony co najmniej raz dziennie na
-   skumulowanym wierzchołku (jeden merge train bez `--fast`).
-3. **Zielony status** → scal PR-y po kolei (przed każdym ponownie sprawdzając `state,headRefOid` —
-   PR, którego wierzchołek się zmienił, wraca do recenzji). Udowodnij, że wynikowa różnica każdego scalenia odpowiada
-   wyłącznie zmianom z danego PR-a (bez automatycznego rozwiązywania przez wycofanie zmian: sprawdź `git diff --stat` pod kątem
-   usunięć wykraczających poza zakres).
-4. **Czerwony status** → dziel grupę na połowy (sprawdzając każdą z nich), zamiast ponownie sprawdzać
-   każdy PR osobno; odeślij powodujący problem PR do kolejki recenzji wraz z dowodami.
-5. **Nigdy**: nie scalaj podczas zamrożenia z zamrożoną gałęzią; nie używaj nigdzie `git stash`;
-   nie uruchamiaj ponownie całego CI z nadzieją, że czerwony status zniknie (zasada: czerwony status jest informacją).
+Synchronizacja zwrotna z `main` do następnej gałęzi wydania również następuje poprzez zatwierdzenie scalania. Do późniejszych synchronizacji zwrotnych wymagane jest zachowanie pochodzenia `main`. Zobacz [Izolacja drzewa roboczego](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Poziomy (dlaczego kolejka jest bezpieczna przy użyciu wyłącznie szybkich bramek)
+## Lokalny moduł sprawdzający połączenie-pociąg
 
-- **Dla każdego PR-a** (szybkie bramki quality.yml): testy zależne od wpływu według TIA + pełne testy jednostkowe w 4 shardach +
-  vitest + zestaw lintowania + typecheck + kontrola integralności dokumentacji/CHANGELOG-u.
-- **Dla każdej grupy/wierzchołka** (ciągły release-green): TWARDЕ bramki `--quick` przy każdym wypchnięciu zmian do
-  gałęzi wydania; pełne przebiegi `--with-build --full-ci` 3× dziennie.
-- **Dla każdego wydania** (ci.yml dla PR-a wydania): pełna macierz, w tym E2E ×9,
-  package-artifact + test uruchomieniowy paczki tarball, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Zakres walidacji nie jest mniejszy niż wcześniej — ciężkie testy są po prostu uruchamiane dla każdej grupy/wierzchołka,
-a nie dla każdego PR-a, co eliminuje O(N) rund komunikacji.
+Walidator pobiera głowicę podstawową i PR i łączy je w jednorazowe drzewo robocze. Uruchamia swój zestaw parzystości raz na wynikowym drzewie. Nieudane pobranie nagłówka lub konflikt scalania powoduje wyrzucenie tego PR i skrypt jest kontynuowany z pozostałym PRs.
 
-## Wymagania wstępne świeżego checkoutu dla `merge-train.sh`
+- **`--plan`** drukuje kroki wybranego trybu i kończy pracę bez tworzenia drzewa roboczego lub kontaktowania się z pilotem. Połącz go z `--fast`, aby sprawdzić szybki plan.
+- **`--fast`** uruchamia wspólne bramki statyczne, wybrane zmienione pliki `node:test` w `tests/unit/` i `npm run test:vitest`. Przynajmniej raz dziennie przeprowadzaj pełną lokalną weryfikację zgromadzonego napiwku, gdy używasz trybu szybkiego.
+- **Tryb pełny** dodaje tylko pełne bramki statyczne i uruchamia `npm run test:unit` i `npm run test:vitest`.
 
-Skrypt uruchamia na głównym checkoucie **kontrolę wstępną** kończącą działanie przy pierwszym błędzie (przed jakimikolwiek operacjami
-na worktree), dzięki czemu uszkodzona instalacja nigdy nie może zostać błędnie uznana za czerwony merge train:
+Niesprawna bramka statyczna jest uruchamiana ponownie na nienaruszonej bazie, jeśli dostępna jest sonda bazowa. Skrypt zgłasza odziedziczone awarie i kontynuuje pracę, gdy w bazie pojawi się także każda rozpoznana linia naruszenia, a łączna liczba nie wzrosła.
 
-1. Uruchom `npm ci`, a następnie skrypt postinstall pakietu `bun`, który npm blokuje:
-   `(cd node_modules/bun && node install.js)` — w przeciwnym razie `check:provider-consistency`
-   i `check:known-symbols` (oba używają `bun scripts/…`) zakończą się niepowodzeniem zarówno dla merge trainu, JAK I bazy,
-   bez wskazania naruszenia.
-2. Brak zbędnego `node_modules/node_modules` (zduplikowanego drzewa zależności; React ładuje się dwukrotnie,
-   a zestawy testów interfejsu użytkownika w vitest natychmiast kończą się niepowodzeniem).
-3. `node_modules/.bin/tsc` musi istnieć i być wykonywalny (brakuje go w niepełnej instalacji).
+| Wyjście | Oznaczający                                                                                                                                                                        |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`     | Wydrukowałem plan lub ukończyłem pakiet. Podsumowanie pakietu zawiera listę wszelkich odziedziczonych błędów statycznych i wyrzuconych PRs.                                        |
+| `1`     | Nieprawidłowe argumenty, brak realizacji transakcji Git, nieudana inspekcja wstępna lub brak wejścia na pokład PR.                                                                 |
+| `2`     | Sprawdzenie pakietu nie powiodło się i nie kwalifikowało się jako odziedziczone. Operator może podzielić partię na pół, wyrzucić PR powodującą naruszenie i uruchomić ją ponownie. |
 
-Merge train uruchamia blokujące `npm run check:cycles:ratchet`; samo `npm run check:cycles`
-ma charakter informacyjny (wyświetla SCC i kończy się kodem niezerowym nawet dla prawidłowej bazy).
+Lokalna przepustka dostarcza dowodów diagnostycznych wyłącznie dla dokumentacji właściciela. Każde lądowanie nadal wymaga autoryzacji właściciela, własnych wymaganych kontroli i, jeśli ma to zastosowanie, werdyktu w kolejce cieni.
+
+## Poziomowanie
+
+- **Za PR.** CI i Quality Select sprawdzają w oparciu o zmienione ścieżki. Kod PRs uruchamia szybkie bramki jakości i testy, na które ma to wpływ, z oddzielnymi zadaniami jednostkowymi i Vitest w CI.
+- **Na kandydata z kolejki.** CI i Quality uruchamiają pełny profil wybranego kandydata w jego kolejce nr ref.
+- **Na końcówkę wydania.** Release-Green uruchamia szybkie, twarde bramy na podstawie pchnięć pasujących do filtrów ścieżki. Trzy zaplanowane uruchomienia dziennie korzystają z pełnego cyklu dla gałęzi wydania.
+- **Na wydanie.** Pełna macierz CI obejmuje fragmenty E2E, sprawdzanie poprawności pakietów, dymowanie z archiwum tar i sprawdzanie zasięgu. Zobacz listę [kontrolną wydania](RELEASE_CHECKLIST.md).
+
+## Wymagania wstępne dotyczące świeżej transakcji dla `merge-train.sh`
+
+Inspekcja wstępna jest uruchamiana przed utworzeniem drzew roboczych. Zainstaluj zależności za pomocą `npm ci`. Potwierdź, że `node_modules/.bin/tsc` jest wykonywalny i że nie ma `node_modules/node_modules`. Sprawdź, czy `node_modules/.bin/bun --version` się powiedzie.
+
+Jeśli pominięto instalację poinstalacyjną Bun, uruchom `(cd node_modules/bun && node install.js)`. Do sprawdzania spójności dostawcy i znanych symboli używa się Bun. Walidator uruchamia `npm run check:cycles:ratchet` jako bramkę blokującą. Samodzielne polecenie `npm run check:cycles` ma charakter doradczy.
+
+## Historia
+
+Kolejka scalania Mergify została wycofana 19.11.2026.

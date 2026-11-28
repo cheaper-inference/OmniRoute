@@ -53,7 +53,7 @@ flowchart LR
 Ստուգեք բաց սառեցման համար նախքան ենթադրելը, որ ձեր ուզած ճյուղը միաձուլվող է.
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Միաձուլման մեխանիզմները (սեփականատեր `queue` պիտակը → Mergify) փաստաթղթավորված են [MERGE_TRAIN.md-](./MERGE_TRAIN.md) ում:

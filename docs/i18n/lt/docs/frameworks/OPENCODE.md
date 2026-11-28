@@ -4,14 +4,11 @@
 
 ---
 
-> **Būsena:** Visuotinai prieinama.
-> **Auditorija:** Administratoriai, integruojantys OpenCode su OmniRoute diegimu.
-> **Pagrindinis šaltinis (konfigūracijos schema):** `src/shared/services/opencodeConfig.ts`
-> **Pagrindinis šaltinis (npm paketas):** `@omniroute/opencode-provider/` (publikuojama darbo sritis)
+> **Būsena:** Paprastai prieinama.** Auditorija:** Operatoriai sujungia OpenCode laidus su OmniRoute diegimu.** Tiesos šaltinis (konfigūracijos schema):** `src/shared/services/opencodeConfig.ts`** Rekomenduojami npm paketai:** `@omniroute/opencode-plugin/` (OpenCode v1, įdiegė `omniroute setup opencode`) ir `@omniroute/opencode-plugin-v2/` (OpenCode v2). Senesnė `@omniroute/opencode-provider/` pakuotė yra** pasenęs** (žr. 2 kelią).
 
-[OpenCode](https://opencode.ai) yra agentinis CLI / darbalaukio DI klientas. Teikėjų katalogą jis nuskaito iš `~/.config/opencode/opencode.json` (arba `opencode.jsonc`) ir vadovaujasi schema, esančia adresu `https://opencode.ai/config.json`. OmniRoute pateikia save OpenCode kaip vieną iš šių teikėjų — kiekviena užklausa perduodama per standartinę, su OpenAI suderinamą OmniRoute `/v1` sąsają, todėl OpenCode automatiškai naudojasi Auto-Combo maršruto parinkimu, grandinės išjungikliais, raktų politikomis, stebimumu ir kitomis funkcijomis.
+[OpenCode](https://opencode.ai) yra agentinis CLI/desktop AI klientas. Jis nuskaito savo teikėjo katalogą iš `~/.config/opencode/opencode.json` (arba `opencode.jsonc`) ir laikosi schemos, esančios `https://opencode.ai/config.json`. OmniRoute veikia OpenCode kaip vienas iš tų teikėjų — kiekviena užklausa siunčiama per standartinį OmniRoute su OpenAI suderinamą `/v1` paviršių, todėl OpenCode automatiškai gauna naudos iš automatinio derinimo maršruto parinkimo, grandinės pertraukiklių, pagrindinių taisyklių, stebėjimo ir kt.
 
-Palaikomi **du integravimo būdai**. Pasirinkite vieną — abu sugeneruoja tą pačią konfigūraciją.
+Šiame puslapyje dokumentuojami du toliau pateikti statinės konfigūracijos keliai; abu generuoja tą pačią konfigūraciją. Modelių sąrašui, kuris seka jūsų tiesioginį katalogą, naudokite papildinį: `omniroute setup opencode` įdiegia `@omniroute/opencode-plugin` (OpenCode v1), o `@omniroute/opencode-plugin-v2` taiko OpenCode v2 (žr. [CLI integracijas](../guides/CLI-INTEGRATIONS.md) ir [OpenCode v2 papildinio vadovą](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ Gautas failas (numatytasis modelių katalogas):
 
 ---
 
-## 2 būdas — npm paketas `@omniroute/opencode-provider`
+## 2 kelias — npm paketas `@omniroute/opencode-provider` (nebenaudojamas)
 
-Rekomenduojama, kai konfigūraciją generuojate naudodami Node/TS scenarijus (CI konvejeriuose, monorepozitorijose ar pasirinktiniuose diegimo procesuose).
+> **Nebenaudojama.** Paketas parašo statinį modelių sąrašą, kuris atsilieka nuo jūsų tiesioginio OmniRoute katalogo. Jo README rekomenduoja pereiti prie `@omniroute/opencode-plugin` (arba `@omniroute/opencode-plugin-v2` OpenCode v2). Žemiau esantis API saugomas tik esamiems scenarijams.
+
+Naudojamas scenarijui rašant konfigūraciją iš Node/TS (CI vamzdynai, monorepos, pasirinktiniai diegimo programos srautai).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Pasirinktinai: pakeiskite OpenCode pateikiamą modelių katalogą
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Norėdami neardomuoju būdu sujungti konfigūraciją su esamu failu, atkartokite `mergeOpenCodeConfigText()` iš `opencodeConfig.ts` arba iškvieskite CLI generatorių.
+Jei norite nesunaikinti esamo failo, pakartokite `mergeOpenCodeConfigText()` iš `opencodeConfig.ts` arba iškvieskite CLI generatorių.
 
-Visą API aprašą rasite [paketo README](../../@omniroute/opencode-provider/README.md).
+Visą API rasite [pakete README](../../@omniroute/opencode-provider/README.md).
 
 ---
 
@@ -155,9 +154,11 @@ Anthropic stiliaus klientams, siunčiantiems `x-api-key` + `anthropic-version`, 
 
 ---
 
-## Taip pat žr.
+## Taip pat žr
 
-- [API dokumentacija](../reference/API_REFERENCE.md) — visa OmniRoute REST sąsaja
+- [API nuoroda](../reference/API_REFERENCE.md) — visas OmniRoute REST paviršius
 - [Auto-Combo](../routing/AUTO-COMBO.md) — ką reiškia `model: "auto"`
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (rekomenduojama)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (nebenaudojama)
 - Šaltinis: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

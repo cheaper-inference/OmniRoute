@@ -12,6 +12,12 @@ Il-kuntratt `config/cli-tools-manifest.json` newtrali jiddikjara IDs kanoniku , 
 
 Sinjali ta' interruzzjoni u terminazzjoni jintbagħtu lit-tifel. Il-lanċjar jistenna l-avveniment mill-qrib tat-tifel qabel ma jneħħi l-konfigurazzjoni temporanja. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` jikkontrolla l-perjodu ta 'grazzja qabel it-terminazzjoni sfurzata (default 5000 millisekondi).
 
+`omniroute launch <tool>` (ara [LAUNCH.md](./LAUNCH.md) ) isegwi l-istess regoli ambjentali u twassil tas-sinjali, u żżid:
+
+- **Bieb awto-bidu.** Għal mira lokali, meta l-ebda gateway ma jwieġeb fuq il-port, il-lanċjar jibda `omniroute serve --headless --no-open` marbut ma `127.0.0.1` taħt proċess ta 'reaper detached. Kull tnedija li taħdem għandha kirja `DATA_DIR/launch/leases/` (taħbit tal-qalb kull 15-il s, skadut wara 45 s jew meta l-proċess tiegħu jkun spiċċa). Il-ħsad iwaqqaf il-portal li beda ladarba l-ebda kirja ma tkun ġiet attiva għall-grazzja idle (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, default 10000 millisekondi). Jintuża gateway li beda l-utent iżda qatt ma waqaf. `--keep-gateway` jew `omniroute gateway keep` jibdlu gateway launcher f'waħda normali; `--no-start` jirrestawra l-imġiba l-antika ta’ fail-if-down. Il-miri mill-bogħod jiġu studjati biss.
+- **Sessjonijiet tat-tnedija.** Kull tnedija jdaħħal token ta' sessjoni `olx_` ħajja qasira mill-kredenzjali tal-ġenitur (`POST /api/launch/sessions`), iħabbat il-qalb waqt li l-għodda taħdem, jaqra s-sommarju tal-użu u jirrevokah wara li toħroġ l-għodda. It-token huwa subsett strett tal-ġenitur tiegħu: l-istess permessi, l-istess jew katalogu idjaq, ħajja iqsar, u mhix kredenzjali tad-dashboard. L-għodda tirċievi t-token tas-sessjoni, qatt il-kredenzjali tal-ġenitur, u t-talbiet jiġu mmarkati `launch:<tool>:<sessionId>` sakemm ma jingħatax `--tag`. Gateway mingħajr is-sessjoni API ifalli `GatewayTooOld` minflok ma jaqa' lura għal tnedija mhux skoperta.
+- **Konfigurazzjoni għal kull tnedija.** Il-fajls tal-konfigurazzjoni tal-għodda jinkitbu f'direttorju tat-temp privat (mod 0700, prefiss `omnirouter-`) u jitneħħew wara li t-tifel joħroġ. A `SIGKILL` tal-lanċjar iħalli d-direttorju warajh; `omniroute launch --cleanup` ineħħi direttorji bħal dawn ladarba jkunu eqdem minn ġurnata.
+
 ## Gemini setup persistenti
 
 ```bash

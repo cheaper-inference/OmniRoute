@@ -4,18 +4,11 @@
 
 ---
 
-> **Versija:** v3.8.51
-> **Paskutinį kartą atnaujinta:** 2026-06-28
-> **Auditorija:** inžinieriai, prisidedantys prie „OmniRoute“ kūrimo arba kuriantys jo pagrindu veikiančias integracijas.
+> **Versija:** v3.8.51** Auditorija:** Inžinieriai, prisidedantys prie OmniRoute arba kuriantys integracijas.
 >
-> Aukšto lygio architektūros diagramas ir kiekvieno posistemio pagrindimą rasite
-> faile [ARCHITECTURE.md](./ARCHITECTURE.md). Išsamią informaciją apie atskirus posistemius
-> („Auto Combo“, MCP serverį, A2A serverį, įgūdžius, atmintį, debesijos agentus, atsparumą,
-> glaudinimą ir kt.) rasite jiems skirtuose šio `docs/` katalogo failuose.
+> Norėdami sužinoti aukšto lygio architektūros diagramas ir kiekvieno posistemio motyvus, skaitykite [ARCHITECTURE.md](./ARCHITECTURE.md). Norėdami giliai pasinerti į atskirus posistemius (Auto Combo, MCP serveris, A2A serveris, įgūdžiai, atmintis, debesų agentai, atsparumas, glaudinimas ir kt.), žiūrėkite jiems skirtus failus šiame `docs/` kataloge.
 
-Šiame faile aprašoma, **kas šiuo metu yra saugykloje**, kad naujas inžinierius
-galėtų orientuotis jos struktūroje, suprasti vykdymo aplinkos sluoksnius ir žinotų, kur pridėti kodą,
-nekuriant naujų modulių.
+Šiame faile aprašoma** kas šiandien yra saugykloje** kad naujas inžinierius galėtų naršyti medyje, suprasti vykdymo laiko sluoksniavimą ir žinoti, kur pridėti kodą, neišradęs naujų modulių.
 
 ---
 
@@ -566,35 +559,14 @@ Dažniausiai naudojamos komandos:
 
 ## 8. `scripts/`
 
-Pagal paskirtį suskirstytas į 6 poaplankius.
+Suskirstytas į 6 poaplankius pagal paskirtį.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, taip pat tik skaitymui skirti PR priežiūros pagalbiniai scenarijai:
-  `ci-discriminate.sh` (suskirsto nesėkmingų PR patikrų požymius į nuosavus / paveldėtus /
-  nežinomus, palygindamas su etaloniniu PR arba bazinės šakos klaidos užduotimi) ir `audit-worktree.sh`
-  (nešvarūs failai, apsaugotos sritys, pašalinti patvirtinimai, slopinimų skaičius, likę
-  laikinieji tsconfig failai, PR viršūnė ir vietinė HEAD — prieš priimant vykdytojo PR).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, plius tik skaitomos PR `ci-discriminate.sh` pagalbininkai nepavyko patikrinti parašų į nuosavus / paveldėtus / nežinomus, palyginti su nuoroda PR arba bazinės raudonos spalvos problema) ir `audit-worktree.sh` (nešvarūs failai, apsaugoti paviršiai PR pašalinti tvirtinimai, blokavimo skaičiai, likusios tmp tsconfigs, PR head prieš vietinį HEAD — prieš priimant darbuotojo PR ).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` pažymi versijas, aiškiai priskirtas OmniRoute (3.6.x ir senesnėms). Čekis nepaiso datų.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

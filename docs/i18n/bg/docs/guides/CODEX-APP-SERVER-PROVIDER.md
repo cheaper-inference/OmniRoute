@@ -20,24 +20,21 @@ OmniRoute предоставя **два** начина за използване
 ## 1. Архитектура
 
 ```
-┌─ Приложение OmniRoute ──────────┐        ┌─ Страничен контейнер codex-app-server ┐
-│  CodexAppServerExecutor          │  WS    │  codex app-server                     │
-│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456            │
-│  (+ токен за достъп)             │  JSON  │  --ws-auth capability-token            │
-│                                  │  RPC   │  управлява самостоятелно OpenAI OAuth  │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, автоопресняване) │
-        │ споделя (compose томове)           └────────────────────────────────────────┘
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
+│  CodexAppServerExecutor          │  WS    │  codex app-server                   │
+│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS токенът за достъп (монтиран и от двете)
-  codex-appserver-home    → ~/.codex (auth.json се записва от таблото,
-                             чете се от codex app-server в страничния контейнер)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Страничният контейнер слуша **само** във вътрешната compose мрежа
-  (`ws://codex-app-server:1456`) зад токен за достъп. Той **никога** не се
-  публикува към хоста или интернет.
-- Codex CLI е вграден в `omniroute:base`, така че не е необходимо codex да бъде
-  инсталиран на хоста или на машината на потребителя, когато стартирате страничния контейнер.
+- Колата слуша** само** във вътрешната мрежа за композиране (`ws://codex-app-server:1456`) зад токен за възможност. Така е** никога** публикувани на хост или интернет.
+- Колата използва `omniroute:cli-no-docker`, изградена от целта `runner-cli-no-docker`, която включва Codex CLI.
 
 ## 2. Стартиране
 

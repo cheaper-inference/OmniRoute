@@ -1,4 +1,9 @@
+# Skills Framework (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/SKILLS.md) · 🇪🇹 [am](../../../am/docs/frameworks/SKILLS.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/SKILLS.md) · 🇦🇿 [az](../../../az/docs/frameworks/SKILLS.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/SKILLS.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/SKILLS.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/SKILLS.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/SKILLS.md) · 🇩🇰 [da](../../../da/docs/frameworks/SKILLS.md) · 🇩🇪 [de](../../../de/docs/frameworks/SKILLS.md) · 🇬🇷 [el](../../../el/docs/frameworks/SKILLS.md) · 🇪🇸 [es](../../../es/docs/frameworks/SKILLS.md) · 🇪🇪 [et](../../../et/docs/frameworks/SKILLS.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/SKILLS.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/SKILLS.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/SKILLS.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/SKILLS.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/SKILLS.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/SKILLS.md) · 🇮🇱 [he](../../../he/docs/frameworks/SKILLS.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/SKILLS.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/SKILLS.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/SKILLS.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/SKILLS.md) · 🇮🇩 [id](../../../id/docs/frameworks/SKILLS.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/SKILLS.md) · 🇮🇹 [it](../../../it/docs/frameworks/SKILLS.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/SKILLS.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/SKILLS.md) · 🇰🇭 [km](../../../km/docs/frameworks/SKILLS.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/SKILLS.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/SKILLS.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/SKILLS.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/SKILLS.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/SKILLS.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/SKILLS.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/SKILLS.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/SKILLS.md) · 🇲🇲 [my](../../../my/docs/frameworks/SKILLS.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/SKILLS.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/SKILLS.md) · 🇳🇴 [no](../../../no/docs/frameworks/SKILLS.md) · 🇮🇳 [or](../../../or/docs/frameworks/SKILLS.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/SKILLS.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/SKILLS.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/SKILLS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/SKILLS.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/SKILLS.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/SKILLS.md) · 🇱🇰 [si](../../../si/docs/frameworks/SKILLS.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/SKILLS.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/SKILLS.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/SKILLS.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/SKILLS.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/SKILLS.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/SKILLS.md) · 🇮🇳 [te](../../../te/docs/frameworks/SKILLS.md) · 🇹🇭 [th](../../../th/docs/frameworks/SKILLS.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/SKILLS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/SKILLS.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/SKILLS.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/SKILLS.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/SKILLS.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/SKILLS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/SKILLS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/SKILLS.md)
+
 ---
+
 title: "Framework Skills"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -205,24 +210,24 @@ Schemat jest w dwóch migracjach:
 
 ## REST API
 
-Wszystkie endpointy żyją pod `src/app/api/skills/`. Endpointy zarządzania (`/api/skills`, `/api/skills/[id]`, `/api/skills/install`) wymagają **management auth** przez `requireManagementAuth()`. Przepływy marketplace/install używają lżejszego `isAuthenticated()` (sesja lub klucz API).
+Wszystkie punkty końcowe znajdują się pod `src/app/api/skills/`. Wymagają punkty końcowe zarządzania (`/api/skills`, `/api/skills/[id]`, `/api/skills/install`).** autoryzacja kierownictwa** przez `requireManagementAuth()`. Przepływy marketplace/install korzystają z lżejszego `isAuthenticated()` (klucz sesji lub API ).
 
-| Endpoint | Method | Purpose |
+| Punkt końcowy | Metoda | Zamiar |
 | --------------------------------- | ------ | ------------------------------------------------------------------------ | --- | ------------------------ | -------- | ------------------ |
-| `/api/skills` | GET | List registered skills. Supports `?q=`, `?mode=on                        | off | auto`, `?source=skillsmp | skillssh | local`, pagination |
-| `/api/skills/[id]` | PUT | Update `enabled` or `mode` |
-| `/api/skills/[id]` | DELETE | Unregister by id |
-| `/api/skills/install` | POST | Install a custom skill (handler code + schema) |
-| `/api/skills/marketplace` | GET | Search the SkillsMP catalog (returns popular defaults when `q` is empty) |
-| `/api/skills/marketplace/install` | POST | Install a SkillsMP skill (requires active provider = `skillsmp`) |
-| `/api/skills/skillssh` | GET | Search the skills.sh catalog (`?q=&limit=`, capped at 100) |
-| `/api/skills/skillssh/install` | POST | Install a skills.sh skill (requires active provider = `skillssh`) |
-| `/api/skills/executions` | GET | Paginated execution history (`?apiKeyId=`) |
-| `/api/skills/executions` | POST | Execute a registered skill ad-hoc |
+| `/api/skills` | GET | Lista zarejestrowanych umiejętności. Obsługuje `?q=`, `?mode=on                        | off | auto`, `?source=skillsmp | skillssh | local`, paginację |
+| `/api/skills/[id]` | PUT | Zaktualizuj `enabled` lub `mode` |
+| `/api/skills/[id]` | DELETE | Wyrejestruj się według identyfikatora |
+| `/api/skills/install` | POST | Zainstaluj niestandardową umiejętność (schemat + kodu obsługi) |
+| `/api/skills/marketplace` | GET | Przeszukaj katalog SkillsMP (zwraca popularne wartości domyślne, gdy `q` jest pusty) |
+| `/api/skills/marketplace/install` | POST | Zainstaluj umiejętność SkillsMP (wymaga aktywnego dostawcy = `skillsmp`) |
+| `/api/skills/skillssh` | GET | Przeszukaj katalog skills.sh (`?q=&limit=`, z ograniczeniem do 100) |
+| `/api/skills/skillssh/install` | POST | Zainstaluj umiejętność skills.sh (wymaga aktywnego dostawcy = `skillssh`) |
+| `/api/skills/executions` | GET | Paginowana historia wykonania (`?apiKeyId=`) |
+| `/api/skills/executions` | POST | Wykonaj zarejestrowaną umiejętność ad hoc |
 
-Endpoint `POST /api/skills/executions` zwraca HTTP `503` z `{ error: "Skills execution is disabled..." }`, gdy `settings.skillsEnabled === false` (`executor.ts:42-45`). Operatorzy mogą przełączyć master switch w **Settings → AI**.
+Punkt końcowy `POST /api/skills/executions` zwraca HTTP `503` z `{ error: "Skills execution is disabled..." }`, gdy `settings.skillsEnabled === false` (`executor.ts:42-45`). Operatorzy mogą przełączyć główny wyłącznik** Ustawienia → AI** .
 
-### Example: install a custom skill
+### Przykład: zainstaluj niestandardową umiejętność
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/install \
@@ -241,7 +246,7 @@ curl -X POST http://localhost:20128/api/skills/install \
   }'
 ```
 
-String `handlerCode` to **lookup nazwy handlera** — nie wykonywalny kod. Executor mapuje go przez `skillExecutor.registerHandler(name, fn)` (`executor.ts:25`). Instalacje z marketplace zapisują tekst SKILL.md w tym polu jako dokumentację i kierują wykonanie przez wywołania narzędzi generowane przez model. Arbitrary source od użytkownika nie jest ewaluowany.
+Ciąg `handlerCode` to a** wyszukiwanie nazwy handlera** — nie jest kodem wykonywalnym. Executor mapuje to poprzez `skillExecutor.registerHandler(name, fn)` (`executor.ts:25`). Instalacje z Marketplace przechowują tekst SKILL.md w tym polu jako dokumentację i wyznaczają trasę wykonania poprzez wywołania narzędzi wygenerowanych przez model. Arbitralne źródło dostarczone przez użytkownika nie jest oceniane.
 
 ---
 
@@ -300,11 +305,11 @@ Transport i przypisania scope: [MCP-SERVER.md](./MCP-SERVER.md).
 
 ---
 
-## Execution Lifecycle (v3.8.16+)
+## Cykl życia wykonania (wersja 3.8.16 +)
 
-`SkillExecutor` (`src/lib/skills/executor.ts`) to **singleton**, który zarządza każdym wywołaniem skilla. Zrozumienie jego lifecycle jest krytyczne przy debugowaniu timeoutów, retry i stanu wykonania.
+`SkillExecutor` (`src/lib/skills/executor.ts`) to a** singel** który zarządza każdym wywołaniem umiejętności. Zrozumienie jego cyklu życia ma kluczowe znaczenie dla debugowania przekroczeń limitu czasu, ponownych prób i stanu wykonania.
 
-### The 5-Stage Lifecycle
+### 5-etapowy cykl życia
 
 ```
    execute() called
@@ -330,16 +335,16 @@ Transport i przypisania scope: [MCP-SERVER.md](./MCP-SERVER.md).
    DB row updated with status, output, durationMs
 ```
 
-### Default Configuration
+### Konfiguracja domyślna
 
-| Setting      | Default       | Configurable via                     |
+| Ustawienie   | Domyślny      | Możliwość konfiguracji poprzez       |
 | ------------ | ------------- | ------------------------------------ |
 | `timeout`    | `30000` (30s) | `skillExecutor.setTimeout(ms)`       |
 | `maxRetries` | `3`           | `skillExecutor.setMaxRetries(count)` |
 
-> **Important**: Executor jest singletonem — wywołanie `setTimeout()` wpływa globalnie na wszystkie kolejne invocacje. Timeouty per-skill nie są obecnie wspierane; jeśli potrzebujesz różnych timeoutów per skill, uruchom osobne procesy albo zforkuj executor.
+> **Ważny** : Executor jest singletonem — wywołującym `setTimeout()` który wpływa na wszystkie kolejne wywołania globalnie. Limity czasu dla umiejętności nie są obecnie obsługiwane; jeśli potrzebujesz różnych limitów czasu dla każdej umiejętności, prześlij osobne procesy lub forkuj executor.
 
-### Status Values
+### Wartości stanu
 
 Z `src/lib/skills/types.ts`:
 
@@ -353,9 +358,9 @@ enum SkillStatus {
 }
 ```
 
-> **Note**: Status `TIMEOUT` jest zdefiniowany w enum, ale **nie jest faktycznie zapisywany do DB** przez obecną implementację executora — timeouty pojawiają się jako `ERROR` z komunikatem `"Skill execution timed out"`. Enum statusu jest zarezerwowany na przyszłość.
+> **Notatka** : Status `TIMEOUT` jest zdefiniowany w wyliczeniu, ale jest** w rzeczywistości nie został zapisany w DB** przez bieżącą implementację modułu wykonawczego — limity czasu pojawiają się jako `ERROR` z komunikatem `"Skill execution timed out"`. Wyliczenie statusu jest zarezerwowane do wykorzystania w przyszłości.
 
-### Inspecting Executions
+### Kontrola egzekucji
 
 ```ts
 import { skillExecutor } from "omniroute/skills/executor";
@@ -376,14 +381,11 @@ for (const e of recent) {
 const total = skillExecutor.countExecutions("api-key-id");
 ```
 
-### Retry Behavior
+### Ponów próbę
 
-Ustawienie `maxRetries` jest przechowywane, ale **obecnie nieużywane** przez metodę `execute()` executora — wykonuje tylko jedną próbę. Wartość `maxRetries` jest wystawiona pod przyszłą implementację oraz dla hooków, które chcą ją odczytać.
+Ustawienie `maxRetries` zostało zapisane, ale** obecnie nie używany** metodą `execute()` executora — wykonuje tylko jedną próbę. Wartość `maxRetries` jest udostępniana do przyszłej implementacji i hakom, które chcą ją odczytać.
 
-Na razie retry muszą być zaimplementowane wewnątrz samego handlera skilla. Built-in
-skille są rejestrowane względem executora (np. `registerBuiltinSkills(executor)`
-/ `registerBrowserSkill(executor)` w `src/lib/skills/builtin/`); dowolny handler,
-który zarejestrujesz, może owinąć własną pętlę retry:
+Na razie ponowne próby muszą być realizowane wewnątrz samego modułu obsługi umiejętności. Wbudowane umiejętności są rejestrowane względem executora (np. `registerBuiltinSkills(executor)` / `registerBrowserSkill(executor)` w `src/lib/skills/builtin/`); niezależnie od tego, który program obsługi zarejestrujesz, możesz owinąć własną pętlę ponawiania prób:
 
 ```ts
 // inside a skill handler
@@ -442,13 +444,13 @@ dokumencie; nie ma progu float w stylu `0.6` ani scoringu w `registry.ts`.
 
 ---
 
-## Built-in Skills Catalog
+## Wbudowany katalog umiejętności
 
-OmniRoute dostarcza wyselekcjonowany zestaw wbudowanych skilli w `src/lib/skills/builtin/`. Najczęstsze:
+OmniRoute jest dostarczana z wybranym zestawem wbudowanych umiejętności w `src/lib/skills/builtin/`. Najczęstsze:
 
-### Browser Automation Skill
+### Umiejętność automatyzacji przeglądarki
 
-Skill przeglądarki (`src/lib/skills/builtin/browser.ts`) zapewnia headless browser automation przez Playwright/Puppeteer. **Jest zaimplementowany, ale nie jest w domyślnym katalogu skilli** — aby go użyć, zainstaluj osobno plugin rozszerzenia przeglądarki.
+Umiejętność przeglądarki (`src/lib/skills/builtin/browser.ts`) zapewnia bezgłową automatyzację przeglądarki poprzez Playwright/Puppeteer.** Jest zaimplementowany, ale nie w domyślnym katalogu umiejętności** —, aby z niego skorzystać, zainstaluj osobno wtyczkę rozszerzenia przeglądarki.
 
 ```ts
 // Enable in your config
@@ -461,19 +463,19 @@ const config: SkillConfig = {
 };
 ```
 
-### Other Built-in Categories
+### Inne wbudowane kategorie
 
-| Category  | Skills                                      | Mode   |
-| --------- | ------------------------------------------- | ------ |
-| File I/O  | `file_read`, `file_write`                   | AUTO   |
-| HTTP      | `http_request`                              | AUTO   |
-| Search    | `web_search`                                | AUTO   |
-| Code Exec | `eval_code` (sandboxed JavaScript/Python)   | HYBRID |
-| System    | `execute_command` (sandboxed CLI execution) | MANUAL |
+| Kategoria      | Umiejętności                                           | Tryb   |
+| -------------- | ------------------------------------------------------ | ------ |
+| Plik I/O       | `file_read`, `file_write`                              | AUTO   |
+| HTTP           | `http_request`                                         | AUTO   |
+| Szukaj         | `web_search`                                           | AUTO   |
+| Wykonanie kodu | `eval_code` ( JavaScript/Python w trybie piaskownicy)  | HYBRID |
+| System         | `execute_command` (wykonanie CLI w trybie piaskownicy) | MANUAL |
 
-### Adding a Custom Skill
+### Dodanie umiejętności niestandardowej
 
-Jak dodać własny skill przez system pluginów: [Plugin SDK & Skills Integration](./PLUGIN_SDK.md).
+Zobacz [Integracja wtyczki SDK i umiejętności](./PLUGIN_SDK.md), aby dowiedzieć się, jak dodać niestandardową umiejętność za pośrednictwem systemu wtyczek.
 
 ---
 

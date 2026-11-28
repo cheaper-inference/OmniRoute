@@ -132,30 +132,30 @@ flyctl deploy
 
 ## 5. Mga Kinakailangang Parameter
 
-Inirerekomenda ng proyektong ito na mag-configure ng hindi bababa sa mga sumusunod na parameter sa Fly.io.
+Inirerekomenda ng proyektong ito ang pag-configure ng hindi bababa sa mga sumusunod na parameter sa Fly.io.
 
-### 5.1 Mga Napatunayang Parameter
+### 5.1 Mga Na-verify na Parameter
 
-Ginamit na ang mga parameter na ito sa mga aktuwal na deployment sa kasalukuyang `omniroute` application:
+Ang mga parameter na ito ay ginamit sa mga aktwal na deployment sa kasalukuyang `omniroute` application:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (kinakailangan sa production — ginagamit para sa pagpapatunay ng WebSocket bridge)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (kinakailangan sa produksyon — na ginagamit para sa WebSocket bridge authentication)
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 Tungkol sa `INITIAL_PASSWORD`
 
-Hindi itinatakda ng kasalukuyang proyekto ang `INITIAL_PASSWORD` dahil hindi ito kinakailangan ng deployment na ito.
+Ang kasalukuyang proyekto ay hindi nagtatakda `INITIAL_PASSWORD` dahil ang deployment na ito ay hindi nangangailangan nito.
 
 Kung hindi ito nakatakda:
 
-- Ipapakita ng startup log na ang default na password ay `CHANGEME`
-- Dapat mong baguhin ang password sa pag-log in sa mga setting ng system sa lalong madaling panahon pagkatapos ng deployment
+- Gagawin mo ang password ng dashboard sa onboarding wizard sa unang pagbisita. Kumpletuhin ang hakbang sa password: ang paglaktaw dito ay magpapasara sa pag-log in sa dashboard, na nag-iiwan sa dashboard na bukas sa sinumang makakaabot sa app URL
+- Naaabot ng proxy ni Fly ang app mula sa isang hindi naka-loopback na address, kaya pagkatapos mong isumite ang password ang wizard ay humihingi ng isang beses na bootstrap token, na ipi-print ng app sa log nito sa sandaling iyon: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Kung ang linyang iyon ay nag-scroll palabas ng log, i-restart ang app at isumite muli ang wizard upang mag-print ng bagong token
 
-Kung gusto mong i-initialize ang backend password nang walang manu-manong interbensyon, maaari mo itong idagdag sa ibang pagkakataon:
+Upang itakda na lang ang password nang hindi binabantayan, idagdag ito bago ang unang pagbisita sa dashboard (kapag na-save na ang isang password, babalewalain ang `INITIAL_PASSWORD` ):
 
 - `INITIAL_PASSWORD`
 
@@ -274,9 +274,9 @@ Kung hindi ipinapakita ng pahinang `Secrets` sa console ang mga inaasahang varia
 
 ---
 
-## 9. Mga Susunod na Update at Release
+## 9. Mga Kasunod na Update at Paglabas
 
-Pagkatapos ng mga update sa code, simple lang ang proseso ng release:
+Pagkatapos ng mga pag-update ng code, ang proseso ng paglabas ay diretso:
 
 ```powershell
 git pull
@@ -289,11 +289,11 @@ Kung kailangan mo lang i-update ang mga parameter nang hindi binabago ang code:
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Awtomatikong magsasagawa ang Fly ng rolling update sa mga machine.
+Awtomatikong magsasagawa ang Fly ng rolling update ng mga machine.
 
-### 9.1 Pagsubaybay sa Mga Update ng Upstream Repository Habang Pinananatili ang `fly.toml` ng Iyong Fork
+### 9.1 Pagsubaybay sa Upstream Repository Update Habang Pinapanatili ang `fly.toml` ng Iyong Fork
 
-Kung ang kasalukuyang repository ay isang fork at gusto mong i-sync ang mga update mula sa upstream na `https://github.com/diegosouzapw/OmniRoute`, sundin ang workflow sa ibaba.
+Kung ang kasalukuyang repositoryo ay isang tinidor at gusto mong i-sync ang mga update mula sa upstream `https://github.com/cheaper-inference/OmniRoute`, sundin ang daloy ng trabaho sa ibaba.
 
 Una, i-verify ang iyong mga remote:
 
@@ -301,15 +301,15 @@ Una, i-verify ang iyong mga remote:
 git remote -v
 ```
 
-Dapat ay makita mo ang hindi bababa sa:
+Dapat mong makita ang hindi bababa sa:
 
-- `origin` na nakaturo sa sarili mong fork
-- `upstream` na nakaturo sa orihinal na repository
+- itinuro `origin` ang sarili mong tinidor
+- `upstream` na tumuturo sa orihinal na repositoryo
 
-Kung hindi pa naka-configure ang `upstream`, idagdag ito:
+Kung hindi naka-configure `upstream`, idagdag ito:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Bago mag-sync sa upstream, kunin ang mga pinakabagong commit at tag:
@@ -318,16 +318,16 @@ Bago mag-sync sa upstream, kunin ang mga pinakabagong commit at tag:
 git fetch upstream --tags
 ```
 
-Suriin ang kasalukuyang bersyon at mga upstream tag:
+Suriin ang kasalukuyang bersyon at upstream na mga tag:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Paalala: Ang kasalukuyang bersyon ng proyekto ay `v3.8.0`. Ang mga reperensya sa `v3.4.7` sa ibaba ay pinanatili lamang bilang mga makasaysayang halimbawa. Para sa mga aktuwal na release, gamitin ang `:latest` o ang tag ng kasalukuyang bersyon (hal. `:v3.8.0`).
+> Tandaan: Ang kasalukuyang bersyon ng proyekto ay `v3.8.0`. Ang mga sanggunian `v3.4.7` sa ibaba ay pinananatiling mga makasaysayang halimbawa lamang. Para sa mga aktwal na release, gamitin `:latest` o ang kasalukuyang tag ng bersyon (hal. `:v3.8.0`).
 
-Kung gusto mong i-merge ang pinakabagong upstream na `main` habang sapilitang pinananatili ang `fly.toml` ng iyong fork, sundin ang workflow na ito:
+Kung gusto mong pagsamahin ang pinakabagong upstream `main` habang pilit na pinapanatili ang iyong tinidor `fly.toml`, sundin ang workflow na ito:
 
 ```powershell
 git merge upstream/main
@@ -337,34 +337,34 @@ git commit -m "chore(deploy): keep fork fly.toml"
 git push origin main
 ```
 
-Mga paalala:
+Mga Tala:
 
-- Isi-sync ng `git merge upstream/main` ang pinakabagong code mula sa orihinal na repository
-- Ibabalik ng `git checkout HEAD~1 -- fly.toml` ang sariling `fly.toml` ng iyong fork mula bago ang merge
-- Kung hindi binago ng upstream ang `fly.toml`, walang magiging anumang pagkakaiba dahil sa hakbang na ito
-- Kung binago ng upstream ang `fly.toml`, tinitiyak ng hakbang na ito na hindi mapapatungan ang pangalan ng iyong Fly application, volume mount, region, at iba pang configuration sa deployment na partikular sa fork
+- Sini-sync ng `git merge upstream/main` ang pinakabagong code mula sa orihinal na repositoryo
+- Ipinapanumbalik `git checkout HEAD~1 -- fly.toml` ang sariling `fly.toml` ng iyong tinidor bago ang pagsasama
+- Kung hindi binago ng upstream `fly.toml`, ang hakbang na ito ay hindi magpapakita ng anumang mga pagkakaiba
+- Kung binago ng upstream `fly.toml`, tinitiyak ng hakbang na ito na hindi ma-overwrite ang iyong pangalan ng Fly application, volume mount, rehiyon, at iba pang configuration ng deployment na partikular sa fork.
 
-Kung gusto mong ihanay ito sa isang partikular na release tag (hal. `v3.4.7`), i-verify muna na kasama na ang tag sa `upstream/main`:
+Kung gusto mong ihanay sa isang partikular na tag ng paglabas (hal. `v3.4.7`), i-verify muna na ang tag ay kasama na sa `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Ang matagumpay na resulta ay nangangahulugang naglalaman na ang `upstream/main` ng bersyong iyon; maaari mo na lang i-merge ang `upstream/main`.
+Ang isang matagumpay na pagbabalik ay nangangahulugan na `upstream/main` ay naglalaman na ng bersyong iyon; maaari mo lamang pagsamahin `upstream/main`.
 
-### 9.2 Karaniwang Pagkakasunod-sunod ng Release Pagkatapos Mag-sync sa Upstream
+### 9.2 Karaniwang Pagkakasunud-sunod ng Pagpapalabas Pagkatapos ng Pag-sync Upstream
 
-Pagkatapos mag-sync sa orihinal na repository, sundin ang inirerekomendang pagkakasunod-sunod ng release na ito:
+Pagkatapos mag-sync sa orihinal na repository, sundin ang inirekumendang release order na ito:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Ibalik ang `fly.toml` ng fork
+3. Ibalik ang `fly.toml` ng tinidor
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Ito ang aktuwal na workflow na ginamit nang i-upgrade ang kasalukuyang proyekto sa `v3.4.7` (tumutukoy ang halimbawa sa isang makasaysayang bersyon; ang kasalukuyang aktuwal na bersyon ay `v3.8.0`).
+Ito ang aktwal na daloy ng trabaho na ginamit kapag ina-upgrade ang kasalukuyang proyekto sa `v3.4.7` (ang halimbawa ay tumutukoy sa isang makasaysayang bersyon; ang kasalukuyang aktwal na bersyon ay `v3.8.0`).
 
 ---
 
@@ -420,38 +420,38 @@ Kung `/app/data/...` ang makikita mo sa halip, mali ang configuration ng `DATA_D
 
 ## 12. Mga Karaniwang Isyu
 
-### 12.1 Walang Laman ang Page na `Secrets`
+### 12.1 `Secrets` Pahina ay Walang laman
 
-Karaniwang may dalawang dahilan:
+Kadalasan mayroong dalawang dahilan:
 
-- Hindi mo pa pinapatakbo ang `flyctl secrets set`
+- Hindi ka pa tumatakbo `flyctl secrets set`
 - Ibang application ang tinitingnan mo (hal. `oroute` sa halip na `omniroute`)
 
-### 12.2 Iniuulat ng `flyctl deploy` ang `app not found`
+### 12.2 `flyctl deploy` Mga Ulat `app not found`
 
-Gawin muna ang application:
+Gumawa muna ng application:
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-### 12.3 Hindi Ma-parse ang `fly.toml`
+### 12.3 `fly.toml` Nabigo ang Pag-parse
 
 Suriin ang sumusunod:
 
-- Kung may mga garbled character sa mga comment
-- Kung tama ang quoting at indentation ng TOML
+- Kung may mga gulong character sa mga komento
+- Kung tama ang TOML quoting at indentation
 
-### 12.4 Hindi Nananatili ang Data
+### 12.4 Hindi Nagpapatuloy ang Data
 
-Tiyakin ang sumusunod na dalawa:
+I-verify ang parehong sumusunod:
 
-- Naglalaman ang `fly.toml` ng `destination = '/data'`
-- Nakatakda ang `DATA_DIR` sa `/data`
+- `fly.toml` ay naglalaman `destination = '/data'`
+- nakatakda `DATA_DIR` sa `/data`
 
-### 12.5 Maaari Ba Itong Patakbuhin Nang Walang `INITIAL_PASSWORD`?
+### 12.5 Maaari ba Ito Tumakbo Nang Walang `INITIAL_PASSWORD`?
 
-Oo, maaari itong patakbuhin. Gagamitin nito bilang fallback ang default na password na `CHANGEME`. Inirerekomendang baguhin ang backend password sa lalong madaling panahon sa production.
+Oo. Kapag hindi nakatakda ang `INITIAL_PASSWORD`, gagawin mo ang password ng dashboard sa onboarding wizard sa unang pagbisita (sinasaklaw ng seksyon 5.2 ang isang beses na bootstrap token at ang hakbang ng password).
 
 ---
 

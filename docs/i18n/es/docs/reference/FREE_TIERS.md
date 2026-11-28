@@ -4,10 +4,9 @@
 
 ---
 
-> **Para usuarios**: ¿Buscas una guía sencilla? Consulta la [Guía de niveles gratuitos](../getting-started/FREE-TIERS-GUIDE.md) para obtener instrucciones paso a paso sobre cómo conseguir IA gratuita.
+> **Para usuarios** : ¿Busca una guía sencilla? Consulte la [Guía de niveles gratuitos](../getting-started/FREE-TIERS-GUIDE.md) para obtener instrucciones paso a paso sobre cómo obtener AI gratis.
 
-> **Última investigación:** 2026-06-17 — investigación web por proveedor (documentación oficial + noticias de los últimos 7 días, revisión de 50 agentes con verificación adversarial) que actualiza todas las cuotas de los niveles gratuitos y las condiciones de servicio. **Reauditoría parcial 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — consulta la nota fechada más abajo).
-> **Fuente de referencia (catálogo):** `open-sse/config/freeModelCatalog.ts` (presupuestos por MODELO, con grupos deduplicados). Las cifras de presupuesto de tokens que aparecen a continuación proceden de investigación web en tiempo real y son una **aproximación** — consulta [Metodología y salvedades](#methodology--caveats).
+> **Última auditoría:** 2026-11-23. Cada fila con una cuota, cada oferta retirada y cada puerta de tarjeta se reabrió ese día en la propia página del proveedor (`config/quality/free-catalog-evidence.json`). Aprobaciones anteriores: la investigación por proveedor del 17 de junio de 2026 y la reauditoría parcial del 2 de septiembre de 2026.** Fuente de la verdad (catálogo):** `open-sse/config/freeModelCatalog.ts` (presupuestos por MODELO, grupo desduplicado). Las cifras de presupuesto simbólico que aparecen a continuación provienen de una investigación web en vivo y son una** aproximación** — consulte [Metodología y advertencias](#methodology--caveats).
 
 ## TL;DR — ¿cuánta inferencia libre agrega realmente OmniRoute ?
 
@@ -17,47 +16,136 @@ Estas cifras describen cuentas de terceros independientes y condiciones de elegi
 
 | Métrico                                            | Fichas / mes       | Significado                                                                                                                                                                                                                                                                      |
 | -------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Subvención recurrente documentada (constante)**  | **~ 1.62B**        | nivel libre** quinielas** (catálogo por modelo), cada grupo compartido contado** una vez** . La fuente en vivo detrás `/api/free-tier/summary` y la página de Presupuesto de nivel gratuito del panel.** Utilice este número.**                                                  |
-| **+ primer mes con créditos de registro**          | **~ 2.22B**        | Créditos de registro únicos + constantes (Z.AI 20M, DeepSeek 5M,…), deduplicados por cuenta.** Solo el primer mes** — no se repite.                                                                                                                                              |
+| **Subvención recurrente documentada (constante)**  | **~ 90M**          | nivel libre** quinielas** (catálogo por modelo), cada grupo compartido contado** una vez** . La fuente en vivo detrás `/api/free-tier/summary` y la página de Presupuesto de nivel gratuito del panel.** Utilice este número.**                                                  |
+| **+ primer mes con créditos de registro**          | **~ 153M**         | Créditos de registro únicos + fijos (Z.AI 20M, DeepSeek 5M,…), deduplicados por cuenta.** Solo el primer mes** — no se repite.                                                                                                                                                   |
 | **+ permanentemente gratis, sin límite publicado** | _no-cuantificable_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — acceso recurrente real, rate/concurrency-limited,** no hay límite de tokens para contar** . Listados, nunca sumados (contarlos en `RPM×24/7` es la inflación que rechazamos).             |
 | **impulso de desbloqueo de depósitos +**           | **+~ 24M**         | Una sola vez** $10** La recarga OpenRouter aumenta su fondo gratuito de 50 → a 1000 req/day. Se informa por separado, por lo que nunca infla el número constante.                                                                                                                |
 | **+ detrás de un control de identidad regional**   | **+~ 6M**          | `modelscope` (Alibaba Cloud vinculante + verificación de nombre real de China continental). Cuota recurrente real, expuesta como `gatedRecurringTokens` / `gatedProviders` y en el tablero. Nunca resumido en el titular: +~ 6M detrás de la verificación de identidad regional. |
-| Techo teórico (todos los límites de tipos, 24/7)   | ~ 10B              | Suma del límite de tarifa de cada proveedor extrapolado al uso continuo.** No es una garantía** — no titula esto.                                                                                                                                                                |
 
-**Titular honesto:** _Agregados OmniRoute**~ 1.62 mil millones de tokens gratuitos documentados por mes** (hasta 2,22 mil millones ~ en su primer mes con créditos de registro) en 26 grupos de niveles gratuitos — más una larga cola de proveedores permanentemente gratuitos y sin límite — y RTK La compresión Caveman de + (ahorro de tokens del 15 al 95 %) se extiende aún más.
+**Titular honesto:** _Catálogos OmniRoute**~ 90 millones de tokens gratis** un mes que realmente puedes usar (hasta 153 millones ~ en tu primer mes con créditos de registro), de 12 grupos con una cuota publicada, además de una larga lista de proveedores permanentemente gratuitos y sin límite. La compresión RTK + Caveman (ahorro de tokens del 15% al 95%) va aún más allá.
 
-> **Por qué esto cayó del ~ 1.94B anterior.** La actualización del 17 de junio de 2026 es una corrección de honestidad, no una pérdida: `gemini` ahora está duplicado en el grupo (se infló al contar cada variante de Flash por separado, 462 millones → 60 millones), `cloudflare-ai` se corrigió a su 10k-Neurons/day real (122 millones → 30 millones), `doubao` se reclasificó como un crédito de registro único (no recurrente) y se eliminaron los niveles de cierre (`chutes`/`phind`/`kluster` descontinuado). Parcialmente compensado por `llm7` ( 5M/day → 150M correcto) y nuevos proveedores gratuitos (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Notas históricas. Las figuras siguientes describen el catálogo en ese momento; no son los números de hoy._
 >
-> **Corregido aún más a ~ 1.37B en v3.8.42:** `longcat` fue reclasificado de una subvención recurrente 150M/mo a un crédito de registro único de 10 millones después de que finalizó su vista previa gratuita. La misma regla de honestidad — ningún proveedor fue eliminado por error.
+> **Por qué esto cayó de los 1,94 mil millones anteriores.** La actualización del 17 de junio de 2026 es una corrección de honestidad, no una pérdida: `gemini` ahora está duplicado en el grupo (se infló al contar cada variante de Flash por separado, 462 millones → 60 millones), `cloudflare-ai` se corrigió a su 10k-Neurons/day real (122 millones → 30 millones), `doubao` se reclasificó como un crédito de registro único (no recurrente) y se eliminaron los niveles de cierre (`chutes`/`phind`/`kluster` descontinuado). Parcialmente compensado por `llm7` ( 5M/day → 150M correcto) y nuevos proveedores gratuitos (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Actualizado el 26 de agosto de 2026 después de retirar Felo Web:** Felo Web está excluido mientras su provenance/licensing derivado de GPL permanece en HOLD; la fuente informó 38 claves de grupo en ese momento. El recuento del grupo está activo y controlado por CI (`check:docs-counts` falla en la compilación si los números anteriores se desvían de `computeFreeModelTotals()`).
+> **Corregido aún más a 1,37 mil millones en v3.8.42:** `longcat` fue reclasificado de una subvención recurrente 150M/mo a un crédito de registro único de 10 millones después de que finalizó su vista previa gratuita. Misma regla de honestidad — ningún proveedor fue eliminado por error.
+>
+> **Actualizado el 26 de agosto de 2026 después de retirar Felo Web:** Felo Web está excluido mientras su provenance/licensing derivado de GPL permanece en HOLD; la fuente informó 38 claves de grupo en ese momento.
 >
 > **Reauditado el 2026-09-02 contra las propias páginas de los proveedores.** (fuentes: comentarios `// evidence:` junto a cada entrada reauditada en `open-sse/config/freeModelCatalog.data.ts`): `gemini` y `ollama-cloud` ya no publican una cifra simbólica (Google eliminó la tabla gratuita por modelo el 23 de diciembre de 2025; el plan gratuito de Ollama es "créditos de uso inicial") y ahora figuran como** destapado** , nunca sumado (− 80M); `groq` es cinco** por modelo** Límites de 200.000 TPD (6 millones cada uno, + 15 millones) con tres IDs retirados eliminados; `nara` es un depósito 7M/day (+ 60M, 210M). El 1B de `mistral` es visible solo en la consola de la cuenta. — _Clases de evidencia_ en Metodología.
 >
-> **Actualizado el 2026-11-09 (#19334):** `ollama-cloud` se eliminó del catálogo gratuito después de que Ollama finalizó su nivel gratuito y realizó la transición de todos los modelos de nube a pago por uso.
+> **Actualizado el 2026-11-09 (#19334):** `ollama-cloud` se eliminó del catálogo gratuito después de que Ollama finalizara su nivel gratuito y realizara la transición de todos los modelos de nube a pago por uso.
 >
 > **Corregido el 3 de septiembre de 2026 (#11773):** `cerebras` fue reclasificado de una subvención recurrente 30M/mo (antigua prueba de 1M tokens/day sin tarjeta) a un crédito de registro único de $5 que requiere un método de pago. Misma regla de honestidad que LongCat.
 >
-> **Más xKiro (03/09/2026):** el nuevo grupo `xkiro-free` (150M/mo) agrega una clave de grupo recurrente número 35. Felo Web permanece excluido mientras su provenance/licensing derivado de GPL permanece en HOLD. La fuente ahora informa** 26 claves de piscina recurrentes** y**~ 1.62B estable** — el número activo controlado por CI (`check:docs-counts` falla la compilación si se desvía de `computeFreeModelTotals()`).
+> **Más xKiro (03/09/2026):** el nuevo grupo `xkiro-free` (150M/mo) agrega una clave de grupo recurrente número 35. Felo Web permanece excluido mientras su provenance/licensing derivado de GPL permanece en HOLD. En ese momento, la fuente informó 34 claves de grupo y 1,62 mil millones de tokens por mes (constante).
 
-Más grande** documentado** contribuyentes: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (cinco límites por modelo), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` está excluido — su subvención de 10 millones LongCat-2.0 es un crédito de registro único, controlado por KYC, no un presupuesto mensual recurrente).
+Más grande** documentado** contribuyentes a la cifra real actual: `groq` 24M (4 límites por modelo), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` está excluido — su subvención de 10 millones LongCat-2.0 es un crédito de registro único y controlado por KYC, no un presupuesto mensual recurrente).
 
-> ⚠️ El techo teórico (~ 10B) está inflado por proveedores de límite de tarifa únicamente con** sin límite de token publicado** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`) cuyas cifras serían `RPM/TPM × 24/7 × 30d` — un máximo teórico que ninguna cuenta por sí sola podrá sostener. Ellos son** excluido** del número defendible (que se muestra en la fila "permanentemente libre, sin límite"). Esta es la misma inflación que hace que las reclamaciones multimillonarias de los competidores no sean confiables.
+## Corrección, noviembre de 2026
+
+Hasta este lanzamiento, esta página y README decían 1,620 millones de tokens gratis al mes. Eso estuvo mal. Cuatro grupos tenían el 93% y los cuatro habían cambiado de proveedor, mientras que nuestro catálogo seguía siendo el mismo. La cifra real hoy es ~ 90 millones de tokens gratis al mes. La tabla muestra lo que cambió en cada proveedor junto a lo que hicimos mal.
+
+| Qué cambió en el proveedor (fecha, fuente)                                                                                          | En qué nos equivocamos (qué, desde cuándo)                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Mistral: el modo gratuito ya no incluye el acceso API (docs.mistral.ai, leído el 18-11-2026)                                        | Seguimos contando mil millones de tokens al mes a partir de una lectura de consola del 2026-09-02 y nunca volvimos a verificarlo. |
+| Nara: el plan gratuito no incluye modelos ( `router.bynara.id/api/plans` del proveedor, leído el 18/11/2026)                        | Contamos 210 millones de tokens al mes.                                                                                           |
+| xKiro: 500.000 tokens por día por cuenta (xkiro.com, leído el 18/11/2026)                                                           | 30 modelos IDs que ya no existen se quedaron en el catálogo                                                                       |
+| LLM7: la página de límites desapareció y ninguna página oficial publica una cuota gratuita (23-11-2026)                             | Contamos 150 millones de tokens al mes sin evidencia fechada                                                                      |
+| Groq: un modelo del grupo gratuito fue retirado (2026-09-14)                                                                        | La piscina mantuvo su tamaño anterior.                                                                                            |
+| AgentRouter: el proveedor enumera un crédito de check-in diario de $25 y $50 más para registros por invitación (leer el 23/11/2026) | Hemos incluido un crédito de registro de $200                                                                                     |
+| Predibase: el producto terminó                                                                                                      | Todavía contamos su crédito de registro en el primer mes.                                                                         |
+| (ninguno)                                                                                                                           | 16 proveedores mantuvieron la bandera de oferta gratuita después de que finalizó su oferta                                        |
+| (ninguno)                                                                                                                           | La README prometió una nueva auditoría cada dos semanas. El último antes de este fue el 2026-09-02                                |
+| (ninguno)                                                                                                                           | La verificación de documentos permitió una deriva de 0,05 mil millones y no pudo leer cifras en millones.                         |
+
+Sumar una cuota por fila infla cualquier catálogo, incluido el nuestro. Es por eso que la figura sumada por filas lleva su etiqueta y la real se encuentra justo debajo de ella.
+
+## que cuenta
+
+Una fila cuenta para las figuras libres cuando todo esto se cumple:
+
+- La cuota es recurrente y se publica en la propia página del proveedor, con evidencia fechada al lado de la fila del catálogo.
+- Una cuenta por proveedor. Nada que requiera un pago, una tarjeta, un depósito o un control de identidad (KYC). Una cuota que necesita un número de teléfono, Telegram o Discord para registrarse, aparece aparte, como "con registro social", nunca en la cifra real.
+- Ningún proveedor marcó `tos: "avoid"`, y solo el API oficial del proveedor.
+- Los créditos de registro únicos cuentan solo en la cifra del primer mes y solo cuando no se solicita ninguna tarjeta. Un depósito único que aumenta una cuota es un impulso separado. Las promociones nunca cuentan en la cifra real.
+- Los proveedores de búsqueda, voz y medios se mantienen fuera de los recuentos por tipo de acceso y de cada cifra simbólica. Obtienen sus propios recuentos, en sus propias unidades (resultados, personajes, imágenes), en esta página cuando un recuento los agrega; Estos nunca se suman entre sí ni se convierten en tokens.
+
+Qué significa cada recuento público:
+
+- **Proveedores con acceso gratuito** (50 hoy: 43 con clave API, 6 sin clave, 1 a través de una cuenta de herramienta): proveedores con al menos una fila de catálogo que da acceso gratuito, según cómo se llega a ella.
+- **Filas del catálogo con acceso gratuito.** (214 hoy): una fila por proveedor y modelo.
+- **Pools con cuota publicada** (12 hoy): las cuotas compartidas detrás de la cifra real, cada una contabilizada una vez.
+- **Distintos modelos gratuitos** (185 hoy): las filas agrupadas por modelo ID.
+- **Marcado con una oferta gratuita** (140 + hoy): todos los proveedores cuya entrada de registro incluya `hasFree`, incluidos proveedores de búsqueda, voz y medios, pruebas y créditos de registro.
+
+Cada recuento se cataloga, no se prueba por llamada: dice lo que enumera el catálogo, no que cada ruta responde en este momento.
+
+## como contamos
+
+Del mismo catálogo proceden tres figuras, auditadas el 23-11-2026:
+
+- **La cifra real, ~ 90 millones de tokens gratis al mes.** Cada cuota compartida se cuenta una vez, por lo que cinco modelos detrás de una asignación diaria son una asignación. Esto es lo que realmente puede utilizar una cuenta de cada proveedor. Con créditos de registro únicos, ~ 153 millones en su primer mes.
+- **La gran cifra, ~ 11.3B resumida fila por fila** , ofertas finalizadas incluidas. Así cuentan otros catálogos. Casi todo es historia: el 98,6% de ofertas que ya no existen. Lo imprimimos únicamente con su etiqueta y con la figura real al lado.
+- **El catálogo en vivo, ~ 159M sumado por fila en vivo** : la misma suma fila por fila sin las ofertas finalizadas.
+
+El método fila por fila (`row-sum-v1`) sigue cuatro reglas:
+
+1. Cada fila enumerada se agrega tal como está, sin fusionar las filas que comparten un grupo.
+2. Sólo se agregan las cuotas publicadas en tokens. Una cuota publicada en solicitudes, créditos o neuronas cuenta como cero (`FREE_QUOTA_UNIT` en `open-sse/config/freeModelCatalog.ts`).
+3. Los créditos de registro, los aumentos de depósitos y las filas desactivadas (`enabled: false`) quedan fuera.
+4. La figura grande agrega el libro mayor de ofertas finalizadas (`open-sse/config/freeModelCatalog.retired.data.ts`) en la última cuota de cada fila enumerada. Solo ingresan las filas retiradas desde `RETIRED_LEDGER_SINCE`, y cada fila desaparece 12 meses después de su finalización.
+
+Si la forma de contar fila por fila deja de ser común, o el mantenedor así lo decide, la cifra grande sale de cada página y solo queda la cifra real.
+
+## Eliminado/sin nivel gratuito
+
+Proveedores cuya oferta gratuita finalizó o no pudo ser confirmada. Permanecen en el registro con `hasFree: false` (o se retiran del catálogo gratuito) y nunca cuentan en ninguna cifra gratuita. Esta no es la lista de proveedores eliminados de OmniRoute a pedido (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Proveedor                | Desde      | Por qué                                                                                                                  | Fuente                                                |
+| ------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
+| `mistral`                | 2026-11-23 | El modo gratuito ya no incluye acceso API                                                                                | docs.mistral.ai (límites de uso)                      |
+| `nara`                   | 2026-11-23 | El plan gratuito no incluye modelos.                                                                                     | `router.bynara.id/api/plans`                          |
+| `llm7`                   | 2026-11-23 | Ninguna página oficial publica un cupo gratuito                                                                          | sitio del proveedor                                   |
+| `navy`                   | 2026-11-23 | No se pudo confirmar ningún cupo libre en las páginas oficiales                                                          | api.navy                                              |
+| `bluesminds`             | 2026-11-23 | El uso necesita crédito comprado al proveedor.                                                                           | `api.bluesminds.com/api/status`                       |
+| `arcee-ai`               | 2026-11-23 | Solo precios pagados                                                                                                     | docs.arcee.ai (precios)                               |
+| `huggingface`            | 2026-11-23 | Las cuentas gratuitas deben comprar créditos o actualizar a PRO                                                          | huggingface.co (precios de proveedores de inferencia) |
+| `huggingchat`            | 2026-11-23 | La inferencia de Hugging Face necesita créditos comprados o PRO                                                          | huggingface.co (precios de proveedores de inferencia) |
+| `ainative`               | 2026-11-23 | El plan Hobbyist se paga después de una prueba de 3 días                                                                 | página de precios del proveedor                       |
+| `stepfun`                | 2026-11-23 | Solo precios de pago por uso                                                                                             | página de precios del proveedor                       |
+| `predibase`              | 2026-11-23 | Producto descontinuado                                                                                                   | predibase.com                                         |
+| `poolside`               | 2026-10-31 | Inferencia directa cerrada                                                                                               | plataforma.poolside.ai                                |
+| `amazon-q`               | 2026-05-15 | No hay nuevos registros en la capa gratuita                                                                              | página del proveedor                                  |
+| `chat-oripe`             | 2026-11-23 | El anfitrión API responde HTTP 530                                                                                       | anfitrión API                                         |
+| `naga-ai`                | 2026-11-23 | Duplicado del proveedor Naga.ac                                                                                          | api.naga.ac                                           |
+| `dxnt`                   | 2026-11-23 | El bono de registro existe, pero ningún modelo lo acepta                                                                 | dxnt.com                                              |
+| `ollama-cloud`           | 2026-11-09 | Los modelos en la nube son de pago por token o están cubiertos por planes pagos                                          | ollama.com (#19334)                                   |
+| `chutes`                 | 2026-03    | Nivel gratuito finalizado                                                                                                | página del proveedor                                  |
+| `phind`                  | 2026-01    | Empresa cerrada                                                                                                          | página del proveedor                                  |
+| `kluster`                | 2026-06-09 | Puesta de sol (trasladada a MITO)                                                                                        | página del proveedor                                  |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo libre revocada; La promoción de Nemotron finalizó el 6 de junio de 2026 (nueva verificación el 18 de junio de 2026) | página del proveedor                                  |
+| `aimlapi`                | 2026-06-18 | Nivel gratuito pausado                                                                                                   | página del proveedor                                  |
+| `yi`                     | 2026-06-18 | Yi-Light retirado, pago por uso                                                                                          | página del proveedor                                  |
+| `featherless-ai`         | 2026-06    | No hay nivel gratuito actual                                                                                             | página del proveedor                                  |
+| `chipotle`               | 2026-09-15 | El widget de chat detrás de él responde 404 en cada ruta (#13131, #4037)                                                 | amelia.chipotle.com                                   |
+
+`iflytek` / `sparkdesk` permanecen en la lista con una nota de precaución de ToS: Spark Lite es gratuito, pero ToS restringe el uso de proxy y retransmisión.
 
 ---
 
-## Actualización 2026-06-17 — qué cambió desde el 2026-06-05
+## 2026-06-17 actualizar — qué cambió desde 2026-06-05
 
-Una pasada de investigación web con 50 agentes (documentación oficial + noticias de los últimos 7 días, verificada de forma adversarial) actualizó todo el catálogo. Aspectos destacados:
+Un pase de investigación web de 50 agentes (documentos oficiales + last-7-days news, verificados por el adversario) actualizó todo el catálogo. Reflejos:
 
-- **Eliminados / sin nivel gratuito (2026):** `chutes` (el nivel gratuito terminó en 2026-03), `phind` (la empresa cerró en 2026-01), `kluster` (retirado el 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo gratuito revocado el 2026-05-24, la promoción de Nemotron terminó en 2026-06 — reverificado el 2026-06-18), `aimlapi` (nivel gratuito en pausa — reverificado el 2026-06-18), `yi` (Yi-Light retirado, pago por uso — reverificado el 2026-06-18), `featherless-ai` (sin nivel gratuito actualmente), `chipotle` (la "Pepper AI" de Chipotle — el widget de chat Amelia de `amelia.chipotle.com`, obtenido por ingeniería inversa, con el que el proveedor se comunicaba ahora devuelve 404 en todas las rutas, incluida la raíz; backend desmantelado/trasladado, confirmado el 2026-09-15 — eliminado por completo del catálogo, #13131/#4037). `iflytek` / `sparkdesk` siguen listados pero llevan una nota de precaución sobre los ToS (Spark Lite es gratuito; los ToS restringen el uso como proxy/retransmisión).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` se desactivaron el 2026-06-01 y `2.5 Pro` salió del nivel gratuito (2026-04); el nivel gratuito ahora es **solo de la familia Flash** (2.5/3/3.1/3.5 Flash + Gemma). El catálogo ahora **agrupa** la familia Flash (estaba inflado al contar cada variante por separado: 462M → 60M).
-- **Cifras corregidas:** `cloudflare-ai` 122M → **30M** (10k Neurons/día reales), `doubao` reclasificado como crédito único de registro (no recurrente), `llm7` 4M → **150M** (5M de tokens/día documentados), `together` endpoints "-Free" discontinuados → el crédito de registro de $25 también se eliminó (requiere una compra mínima de $5, sin prueba gratuita), `longcat` Preview terminó + modelos Flash retirados → solo **LongCat-2.0**, reclasificado como crédito único de registro de **10M** de tokens (sujeto a KYC, no recurrente).
-- **La inferencia directa de Poolside llega a su fin (verificado el 2026-10-20):** la [plataforma oficial](https://platform.poolside.ai/) anuncia su cierre el **2026-10-31** y dirige a los usuarios a descargar sus modelos desde Hugging Face para autoalojarlos. El proveedor directo `poolside` lleva esta advertencia. El catálogo gratuito, curado manualmente, no tiene entradas directas de Poolside; sus entradas con nombre Poolside pertenecen a `kilo-gateway`. Este anuncio no establece la disponibilidad de los modelos servidos por Kilo, Cline, NVIDIA u otras puertas de enlace, por lo que esos listados no se retiran por ese motivo.
-- **Nuevos proveedores gratuitos descubiertos:** ⭐ **Kilo Code** (`kilo-gateway` — conjunto rotativo "Auto Free": familia NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 modelos de código gratuitos rotativos, actualizado el 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash permanentemente gratuitos + bono de registro de 20M), y `arcee-ai` Trinity Large Preview.
-- **Nuevos niveles honestos** (ver Metodología): una categoría _permanentemente gratuita pero sin límite_ (acceso recurrente real, sin límite de tokens que contar) y un _impulso por desbloqueo con depósito_ (OpenRouter $10 → +24M/mes), ambos mostrados **por separado** para que nunca inflen la cifra principal.
+- **Eliminado/sin nivel gratuito:** trasladado a [su propia sección](#removed--no-free-tier).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` cerró el 2026-06-01 y `2.5 Pro` abandonó el nivel gratuito (2026-04); el nivel gratuito es ahora** Solo familia Flash** (2.5/3/3.1/3.5 Flash + Gemma). El catálogo ahora** quinielas** la familia Flash (se infló contando cada variante por separado: 462M → 60M).
+- **Números corregidos:** `cloudflare-ai` 122M →** 30M** ( 10k-Neurons/day real), `doubao` reclasificado como crédito de registro único (no recurrente), `llm7` 4M →** 150M** (documentado 5 millones tokens/day), `together` puntos finales "gratuitos" descontinuados → También se eliminó el crédito de registro de $25 (requiere una compra mínima de $5, sin prueba gratuita), `longcat` Vista previa finalizada + Modelos Flash retirados →**LongCat-2.0** únicamente, reclasificado como una sola vez** 10M** Crédito de registro -token (con acceso KYC, no recurrente).
+- **Final de inferencia directa junto a la piscina (verificado 2026-10-20):** la [plataforma oficial](https://platform.poolside.ai/) anuncia cierre el** 2026-10-31** e indica a los usuarios que descarguen sus modelos de Hugging Face para su autohospedaje. El proveedor directo `poolside` lleva esta advertencia. El catálogo gratuito cuidadosamente seleccionado no tiene entradas directas junto a la piscina; sus entradas con nombre Poolside pertenecen a `kilo-gateway`. Este anuncio no establece la disponibilidad de los modelos ofrecidos por Kilo, Cline, NVIDIA u otras puertas de enlace, por lo que esos listados no se retiran por ese motivo.
+- **Nuevos proveedores gratuitos descubiertos:** ⭐** Código kilo** (`kilo-gateway` — conjunto giratorio "Auto Free": NVIDIA Nemotron 3 family, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode zen** (`opencode-zen` — 10 modelos de codificación libre rotativos, actualizado el 20/10/2026), ⭐** Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash bonificación de registro + 20M permanentemente gratuita) y `arcee-ai` Trinity Large Preview.
+- **Nuevos niveles honestos** (ver Metodología): una categoría _permanentemente libre pero sin límite_ (acceso recurrente real, sin límite de token para contar) y un _impulso de desbloqueo de depósitos_ (OpenRouter $10 → +24M/mo), ambos surgieron** por separado** para que nunca inflen el titular.
 
-> La tabla detallada por proveedor que aparece más abajo es la **instantánea del 2026-06-05**; los cambios anteriores la reemplazan. La fuente canónica y actualizada es el catálogo por modelo `open-sse/config/freeModelCatalog.ts`.
+> La tabla detallada por proveedor más abajo es la** 2026-06-05 instantánea** ; los deltas anteriores lo reemplazan. La fuente canónica en vivo es el catálogo por modelo `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -115,7 +203,7 @@ deliberadamente.
 
 ## Metodología y advertencias
 
-- Los números son** estimaciones de límite superior** de los límites de nivel gratuito documentados de cada proveedor a partir de** 2026-06-17** , recopilado mediante investigación web. Los niveles gratuitos cambian constantemente — a verificar antes de confiar en una cifra.
+- Los números son** estimaciones de límite superior** de los límites de nivel gratuito documentados de cada proveedor, verificados por última vez el** 2026-11-23** para cada fila con una cuota. Los niveles gratuitos cambian constantemente — a verificar antes de confiar en una cifra.
 - **Lo que realmente avala una entrada.** Ninguna entrada tiene una calificación de confianza por fila, y API no sirve a ninguno — trata cada cifra anterior como una estimación de la misma calidad no declarada. Dos hechos son diferentes, porque están seleccionados a mano en lugar de inferidos: 44 entradas llevan una parada estricta documentada de forma independiente (39 de ellas las filas xKiro, que comparten una asignación diaria), y 22 entradas llevan una divulgación de entrenamiento rápido. `hardStopGuaranteed` se establece solo cuando los propios términos del proveedor dicen que exceder la asignación gratuita rechaza la solicitud en lugar de comenzar a facturarle silenciosamente, con la fuente en un comentario al lado de la entrada; nunca está predeterminado en `true` y una entrada que nadie ha verificado permanece sin configurar. Por lo tanto, si falta una bandera de parada brusca significa "no establecido", no "se sabe que le facturará".** modo STRICT** (el guardia de enrutamiento `freeAccessPolicy=strict` optativo) solo confía en las entradas que llevan la bandera; todos los demás niveles gratuitos se excluyen como `no-hard-stop` (consulte `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Cuando el guardia filtra un grupo, el registro visible para el operador informa tanto el recuento de exclusión como su participación `no-hard-stop`.
 - `estMonthlyFreeTokens` = tokens mensuales recurrentes únicamente.** Los créditos de registro únicos no se repiten** y cuentan como 0. Los niveles descontinuados también son 0.
 - Límite de token diario → `monthly = daily × 30`. Sólo RPD documenta → `RPD × ~800 output tokens × 30`. Solo RPM/TPM (sin límite diario) →** destapado** (vea abajo).
@@ -130,11 +218,11 @@ deliberadamente.
 
 La mayoría de las cifras de "tokens gratis por mes" en este espacio son sumas de etiquetas por modelo. Lo nuestro no es, a propósito:
 
-- **Cada grupo compartido se cuenta una vez.** El plan gratuito de Mistral es una asignación 1B/month por organización; incluirlo en cinco modelos no lo convierte en 5B. Sumado por modelo, diría nuestro propio catálogo**~ 7.4B** (recalculado el 3 de septiembre de 2026; esta cifra no está controlada por CI — vuelva a medirla cada vez que cambie el catálogo) — el titular dice**~ 1.47B** porque eso es lo que realmente puede gastar una cuenta de cada proveedor.
+- **Cada grupo compartido se cuenta una vez.** Cinco modelos detrás de un subsidio son un subsidio, no cinco. La lectura fila por fila del mismo catálogo y por qué lo imprimimos se encuentra en [Cómo contamos](#how-we-count).
 - **Los límites diarios se convierten, las tasas no.** Un límite tokens/day documentado se convierte en `× 30`; un límite requests/day documentado se convierte en `RPD × ~800 tokens × 30`; un proveedor que solo publica solicitudes por minuto tiene** No** cifra mensual y aparece como _sin tope_, nunca sumada. Multiplicar un tipo límite por 24/7 es la inflación que rechazamos.
 - **Las cuotas detrás de un control de identidad regional se muestran separadas** (`+~6M behind regional identity verification`), porque la mayoría de los lectores no pueden utilizarlos.
 - **Los créditos de registro son solo para el primer mes** y reportado como una segunda cifra, nunca mezclada con el número constante.
-- **La cifra se aplica mediante CI.** `npm run check:docs-counts` vuelve a calcular los totales del catálogo y falla la compilación cuando este archivo, el README o la tarjeta de presupuesto se desvían de ellos.
+- **Lo que hace la verificación de los documentos.** `npm run check:docs-counts` (modo de lanzamiento) vuelve a calcular la cifra real, la cifra del primer mes y las dos sumas fila por fila del catálogo, y falla cuando README, esta página o la Guía de niveles gratuitos imprimen un valor diferente o imprimen la cifra grande sin su etiqueta y la real. La tarjeta presupuestaria se vuelve a elaborar a partir de los mismos hechos en el momento de su publicación.
 
 ---
 
@@ -243,74 +331,74 @@ La mayoría de las cifras de "tokens gratis por mes" en este espacio son sumas d
 
 ---
 
-## Nivel gratuito por proveedor (Bytez/Nous verificado el 15 de octubre de 2026; filas reauditadas el 2 de septiembre de 2026; otros el 17 de junio de 2026)
+## Nivel gratuito por proveedor (catálogo auditado el 23 de noviembre de 2026)
 
-> Regenerado a partir del catálogo por modelo (`open-sse/config/freeModelCatalog.ts`), duplicado en grupo. Ordenado por recurrente constante tokens/mo. `uncapped*` = permanentemente libre pero sin límite de token publicado (rate/concurrency-limited) — acceso real,** no** resumido en el titular. `—` = solo crédito / sin llave / no cuantificable mediante token.
+> Mantenido a mano desde el catálogo por modelo (`open-sse/config/freeModelCatalog.data.ts`); consultado por última vez el 23/11/2026. Ordenado por los tokens mensuales reales de cada grupo (cada grupo compartido contaba una vez). `uncapped*` = permanentemente gratuito pero sin límite de token publicado (rate/concurrency-limited): acceso real,** no** resumido en la cifra real. `not counted` = una cuota recurrente que la cifra real deja fuera (`avoid`, o detrás de un control de identidad regional). Los proveedores cuya oferta finalizó se encuentran en el [nivel Eliminado/sin nivel gratuito](#removed--no-free-tier). `—` = solo crédito / sin llave / no cuantificable con token.
 
-| Proveedor        | tipo libre          | tokens/mo constante | Crédito del primer mes | ToS         | Modelos |
-| ---------------- | ------------------- | ------------------- | ---------------------- | ----------- | ------- |
-| `mistral`        | periódico           | ~ 1.00B             | —                      | precaución  | 5       |
-| `nara`           | periódico           | ~ 210M              | —                      | precaución  | 8       |
-| `llm7`           | periódico           | ~ 150M              | —                      | precaución  | 4       |
-| `xkiro`          | periódico           | ~ 150M              | —                      | precaución  | 39      |
-| `longcat`        | una sola vez        | —                   | 10M                    | precaución  | 1       |
-| `cerebras`       | una sola vez        | —                   | crédito de $5          | precaución  | 2       |
-| `cloudflare-ai`  | periódico           | ~ 30M               | —                      | precaución  | 9       |
-| `groq`           | periódico           | ~ 30M               | —                      | precaución  | 5       |
-| `api-airforce`   | periódico           | ~ 24M               | —                      | precaución  | 7       |
-| `bluesminds`     | periódico           | ~ 7M                | —                      | ambiguo     | 22      |
-| `sambanova`      | periódico           | ~ 6M                | —                      | precaución  | 5       |
-| `arcee-ai`       | periódico           | ~ 5M                | —                      | precaución  | 1       |
-| `bazaarlink`     | periódico           | ~ 4M                | —                      | precaución  | 32      |
-| `openrouter`     | periódico           | ~ 1M                | —                      | precaución  | 1       |
-| `cohere`         | periódico           | ~ 800K              | —                      | precaución  | 6       |
-| `huggingchat`    | periódico           | ~ 500K              | —                      | precaución  | 4       |
-| `morph`          | periódico           | ~ 400K              | —                      | OK          | 2       |
-| `huggingface`    | periódico           | ~ 200K              | —                      | precaución  | 6       |
-| `kiro`           | periódico           | ~ 25K               | —                      | evitar      | 12      |
-| `glm-cn`         | destapado           | destapado\*         | ~ 20M                  | OK          | 4       |
-| `baidu`          | destapado           | destapado\*         | —                      | precaución  | 1       |
-| `gemini`         | destapado           | destapado\*         | —                      | precaución  | 4       |
-| `kilo-gateway`   | destapado           | destapado\*         | —                      | precaución  | 7       |
-| `opencode-zen`   | destapado           | destapado\*         | —                      | precaución  | 10      |
-| `tencent`        | destapado           | destapado\*         | —                      | precaución  | 1       |
-| `vertex`         | crédito de registro | —                   | ~ 300M                 | precaución  | 10      |
-| `agentrouter`    | crédito de registro | —                   | ~ 200M                 | precaución  | 4       |
-| `predibase`      | crédito de registro | —                   | ~ 25M                  | precaución  | 1       |
-| `doubao`         | crédito de registro | —                   | ~ 15M                  | ambiguo     | 1       |
-| `ai21`           | crédito de registro | —                   | ~ 10M                  | evitar      | 2       |
-| `deepseek`       | crédito de registro | —                   | ~ 5M                   | OK          | 2       |
-| `hyperbolic`     | crédito de registro | —                   | ~ 5M                   | OK          | 8       |
-| `nscale`         | crédito de registro | —                   | ~ 5M                   | precaución  | 6       |
-| `bytez`          | crédito (rec.)      | —                   | desconocido            | ambiguo     | 1       |
-| `deepinfra`      | crédito de registro | —                   | ~ 1M                   | precaución  | 22      |
-| `fireworks`      | crédito de registro | —                   | ~ 1M                   | evitar      | 10      |
-| `nebius`         | crédito de registro | —                   | ~ 1M                   | precaución  | 1       |
-| `qoder`          | crédito de registro | —                   | ~ 1M                   | precaución  | 14      |
-| `scaleway`       | crédito de registro | —                   | ~ 1M                   | OK          | 6       |
-| `novita`         | crédito de registro | —                   | ~ 500K                 | precaución  | 1       |
-| `agy`            | sin claves          | —                   | —                      | evitar      | 16      |
-| `baichuan`       | sin claves          | —                   | —                      | ambiguo     | 1       |
-| `blackbox`       | sin claves          | —                   | —                      | evitar      | 6       |
-| `coze`           | sin claves          | —                   | —                      | evitar      | 1       |
-| `duckduckgo-web` | sin claves          | —                   | —                      | evitar      | 6       |
-| `freemodel-dev`  | sin claves          | —                   | —                      | desconocido | 4       |
-| `friendliai`     | sin claves          | —                   | —                      | evitar      | 2       |
-| `iflytek`        | sin claves          | —                   | —                      | evitar      | 1       |
-| `inference-net`  | sin claves          | —                   | —                      | precaución  | 3       |
-| `liquid`         | sin claves          | —                   | —                      | desconocido | 1       |
-| `monsterapi`     | sin claves          | —                   | —                      | ambiguo     | 1       |
-| `muse-spark-web` | sin claves          | —                   | —                      | evitar      | 3       |
-| `nlpcloud`       | sin claves          | —                   | —                      | evitar      | 1       |
-| `nvidia`         | destapado           | destapado\*         | —                      | precaución  | 3       |
-| `pollinations`   | sin claves          | —                   | —                      | precaución  | 31      |
-| `publicai`       | sin claves          | —                   | —                      | precaución  | 3       |
-| `reka`           | sin claves          | —                   | —                      | precaución  | 2       |
-| `sensenova`      | sin claves          | —                   | —                      | precaución  | 1       |
-| `sparkdesk`      | sin claves          | —                   | —                      | precaución  | 1       |
-| `stepfun`        | sin claves          | —                   | —                      | OK          | 1       |
-| `t3-web`         | sin claves          | —                   | —                      | evitar      | 23      |
-| `uncloseai`      | sin claves          | —                   | —                      | precaución  | 3       |
+| Proveedor        | tipo libre          | tokens/mo real                             | Crédito del primer mes | ToS         | Modelos |
+| ---------------- | ------------------- | ------------------------------------------ | ---------------------- | ----------- | ------- |
+| `api-airforce`   | periódico           | ~ 24M                                      | —                      | precaución  | 5       |
+| `groq`           | periódico           | ~ 24M (4 tapas por modelo)                 | —                      | precaución  | 4       |
+| `cloudflare-ai`  | periódico           | ~ 23M                                      | —                      | precaución  | 8       |
+| `xkiro`          | periódico           | ~ 15M                                      | —                      | precaución  | 9       |
+| `bazaarlink`     | periódico           | ~ 1.4M                                     | —                      | precaución  | 1       |
+| `openrouter`     | periódico           | ~ 1.2M                                     | —                      | precaución  | 1       |
+| `cohere`         | periódico           | ~ 800K                                     | —                      | precaución  | 6       |
+| `sambanova`      | periódico           | ~ 480K                                     | —                      | precaución  | 2       |
+| `morph`          | periódico           | ~ 160K                                     | —                      | OK          | 2       |
+| `glm-cn`         | destapado           | destapado\*                                | 20M                    | OK          | 4       |
+| `agnes`          | destapado           | destapado\*                                | —                      | OK          | 3       |
+| `agnes-cn`       | destapado           | destapado\*                                | —                      | OK          | 3       |
+| `aion`           | destapado           | destapado\*                                | —                      | OK          | 4       |
+| `baidu`          | destapado           | destapado\*                                | —                      | precaución  | 1       |
+| `gemini`         | destapado           | destapado\*                                | —                      | precaución  | 4       |
+| `glm`            | destapado           | destapado\*                                | —                      | OK          | 2       |
+| `kilo-gateway`   | destapado           | destapado\*                                | —                      | precaución  | 12      |
+| `nvidia`         | destapado           | destapado\*                                | —                      | precaución  | 3       |
+| `onomeo`         | destapado           | destapado\*                                | —                      | precaución  | 2       |
+| `requesty`       | destapado           | destapado\*                                | —                      | precaución  | 2       |
+| `sealion`        | destapado           | destapado\*                                | —                      | OK          | 5       |
+| `tokenharbor`    | destapado           | destapado\*                                | —                      | precaución  | 2       |
+| `coze`           | periódico           | no contado (`avoid`)                       | —                      | evitar      | 1       |
+| `inference-net`  | periódico           | no contado                                 | —                      | precaución  | 3       |
+| `kiro`           | periódico           | no contado (`avoid`)                       | —                      | evitar      | 7       |
+| `modelscope`     | periódico           | detrás de un control de identidad regional | —                      | precaución  | 2       |
+| `nlpcloud`       | periódico           | no contado (`avoid`)                       | —                      | evitar      | 1       |
+| `reka`           | periódico           | no contado                                 | —                      | precaución  | 2       |
+| `t3-web`         | periódico           | no contado (`avoid`)                       | —                      | evitar      | 23      |
+| `bytez`          | crédito (rec.)      | —                                          | —                      | ambiguo     | 1       |
+| `doubao`         | crédito de registro | —                                          | 15M                    | ambiguo     | 1       |
+| `longcat`        | crédito de registro | —                                          | 10M                    | precaución  | 1       |
+| `deepseek`       | crédito de registro | —                                          | 5M                     | OK          | 2       |
+| `hyperbolic`     | crédito de registro | —                                          | 5M                     | OK          | 8       |
+| `nscale`         | crédito de registro | —                                          | 5M                     | precaución  | 6       |
+| `deepinfra`      | crédito de registro | —                                          | 1M                     | precaución  | 22      |
+| `qoder`          | crédito de registro | —                                          | 1M                     | precaución  | 9       |
+| `scaleway`       | crédito de registro | —                                          | 1M                     | OK          | 6       |
+| `novita`         | crédito de registro | —                                          | 500K                   | precaución  | 1       |
+| `agentrouter`    | crédito de registro | —                                          | —                      | precaución  | 1       |
+| `ai21`           | crédito de registro | —                                          | —                      | evitar      | 2       |
+| `baichuan`       | crédito de registro | —                                          | —                      | ambiguo     | 1       |
+| `cerebras`       | crédito de registro | —                                          | —                      | precaución  | 2       |
+| `fireworks`      | crédito de registro | —                                          | —                      | evitar      | 10      |
+| `freemodel-dev`  | crédito de registro | —                                          | —                      | desconocido | 4       |
+| `monsterapi`     | crédito de registro | —                                          | —                      | ambiguo     | 1       |
+| `nebius`         | crédito de registro | —                                          | —                      | precaución  | 1       |
+| `publicai`       | crédito de registro | —                                          | —                      | precaución  | 3       |
+| `sensenova`      | crédito de registro | —                                          | —                      | precaución  | 1       |
+| `vertex`         | crédito de registro | —                                          | —                      | precaución  | 16      |
+| `agy`            | sin claves          | —                                          | —                      | evitar      | 9       |
+| `aihorde`        | sin claves          | —                                          | —                      | OK          | 3       |
+| `blackbox`       | sin claves          | —                                          | —                      | evitar      | 6       |
+| `duckduckgo-web` | sin claves          | —                                          | —                      | evitar      | 6       |
+| `friendliai`     | sin claves          | —                                          | —                      | evitar      | 2       |
+| `iflytek`        | sin claves          | —                                          | —                      | evitar      | 1       |
+| `liquid`         | sin claves          | —                                          | —                      | desconocido | 1       |
+| `muse-spark-web` | sin claves          | —                                          | —                      | evitar      | 3       |
+| `ovhcloud`       | sin claves          | —                                          | —                      | OK          | 5       |
+| `pollinations`   | sin claves          | —                                          | —                      | precaución  | 24      |
+| `sparkdesk`      | sin claves          | —                                          | —                      | precaución  | 1       |
+| `uncloseai`      | sin claves          | —                                          | —                      | precaución  | 1       |
 
 ---
 

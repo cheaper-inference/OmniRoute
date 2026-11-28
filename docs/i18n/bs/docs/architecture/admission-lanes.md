@@ -4,9 +4,7 @@
 
 ---
 
-# Ulazne trake (#9654) — dva sistema traka, šta svaka kontroliše, gdje svaka izvještava
-
-OmniRoute ima **dva** procesno-lokalna sistema traka sa različitim opsezima. Oni su komplementarni; operateri treba da znaju koji od njih posmatraju.
+OmniRoute has** dva** procesno-lokalni sistemi traka sa različitim obimima. Oni su komplementarni; operateri bi trebali znati koji od njih gledaju.
 
 ## 1. Prihvat na nivou bajtova za cijeli proces (`chatBodyAdmission.ts`)
 

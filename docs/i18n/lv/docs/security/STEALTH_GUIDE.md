@@ -4,11 +4,9 @@
 
 ---
 
-> **Patiesības avots:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Pēdējoreiz atjaunināts:** 2026-09-02 — v3.8.51
-> **Mērķauditorija:** Inženieri, kuri uztur pakalpojumu sniedzējiem specifiskas maskēšanās integrācijas.
+> **Patiesības avots:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Auditorija:** Inženieri, kas uztur pakalpojumu sniedzējam specifiskas slepenas integrācijas.
 
-OmniRoute integrējas ar pakalpojumu sniedzējiem, kuru perifērijas sistēmas aktīvi veido neoficiālo klientu pirkstu nospiedumus (TLS JA3/JA4, galveņu secība, JSON pamatteksta forma, integritātes marķieri). Šajā lapā ir dokumentētas OmniRoute nodrošinātās maskēšanās saskarnes un to ieviešanas vietas.
+OmniRoute integrējas ar pakalpojumu sniedzējiem, kuru malas aktīvi ņem pirkstu nospiedumus no neoficiāliem klientiem (TLS JA3/JA4, galvenes pasūtīšana, JSON ķermeņa forma, integritātes marķieri). Šajā lapā ir dokumentētas OmniRoute atklātās slepenās virsmas un to ieviešanas vieta.
 
 ## Juridisks un ētisks paziņojums
 
@@ -73,65 +71,68 @@ izmantojot nepārprotami autorizētu reālu kontu.
 
 ---
 
-## Claude Code maskēšanās komplekts
+## Claude Code Stealth Bundle
 
-Kad `cliCompatMode` ir ieslēgts, OmniRoute pārveido izejošos Claude pieprasījumus tā, lai tie nebūtu atšķirami no `claude-cli` datplūsmas. Kopā darbojas trīs moduļi:
+Kad `cliCompatMode` ir ieslēgts, OmniRoute pārveido izejošos Claude pieprasījumus, lai tos nevarētu atšķirt no `claude-cli` trafika. Trīs moduļi sadarbojas:
 
 ### `claudeCodeFingerprint.ts`
 
-Aprēķina 3 rakstzīmju `cc_version` digitālnospiedumu, kas iegults norēķinu galvenē:
+Aprēķina 3 rakstzīmju `cc_version` pirksta nospiedumu, kas iegults norēķinu galvenē:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (iekodēts; atbilst oficiālajam klientam)
-- Ievaddati: pirmā lietotāja ziņojuma teksta rakstzīmes ar indeksu 4, 7 un 20 + versijas virkne
-- Izvaddati: 3 rakstzīmju heksadecimāls prefikss
+- `FINGERPRINT_SALT = "59cf53e54c78"` (cietais kods; atbilst oficiālajam klientam)
+- Ievades: rakstzīmes indeksā 4, 7, 20 no pirmā lietotāja ziņojuma teksta + versijas virknes
+- Izvade: 3 zīmju hex prefikss
 
-### `claudeCodeCCH.ts` (klienta satura jaucējvērtība)
+### `claudeCodeCCH.ts` (klienta satura jaukšana)
 
-Servera puses integritātes pārbaude, ko oficiālais Claude Code CLI aprēķina, izmantojot Bun/Zig. OmniRoute to atkārtoti implementē ar `xxhash-wasm`:
+Servera puses integritātes pārbaude oficiālā Claude koda CLI aprēķina, izmantojot Bun/Zig. OmniRoute reimplements ar `xxhash-wasm`:
 
-1. Serializē pamattekstu ar `cch=00000;` vietturi
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Ar nullēm papildināta 5 rakstzīmju heksadecimāla vērtība ar mazajiem burtiem
-4. Aizstāj `cch=00000;` ar aprēķināto marķieri
+1. Serializēt korpusu ar `cch=00000;` vietturi
+2. Izveidojiet jaucējskatu, izmantojot divus vienkārša teksta aizstāšanas veidus šādā secībā (`hashView()`):
+   - katra `/"model":"[^"]*"/g` atbilstība kļūst `"model":""` — atbilstība apstājas pie pirmā `"`, tāpēc vērtība ar atslēgtu pēdiņu (`"model":"a\"b"`) tiek iztukšota tikai līdz šim pēdiņai, kā to dara klients.
+   - katra `/"max_tokens":\d+,|,?"max_tokens":\d+/g` atbilstība tiek noņemta — tikai skaitliskās vērtības jebkurā dziļumā
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Nulle polsterēts 5 rakstzīmju mazie sešstūra burti
+5. Aizstāt `cch=00000;` ar aprēķināto marķieri
 
 Konstantes:
 
-- Sēkla: `0x6e52736ac806831e`
-- Šablons: `/\bcch=([0-9a-f]{5});/`
+- Sēkla: `0x4d659218e32a3268` (atbilst Claude koda 2.1.252 un 2.1.322 cilpas tvērumiem)
+- Raksts: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Ievieto Unicode **nulles platuma savienotāju** (`U+200D`) pēc „sensitīvu” klientu nosaukumu pirmās rakstzīmes, lai augšupstraumes filtri nevarētu tos atrast ar grep. Noklusējuma vārdu saraksts:
+Ievieto unikodu** nulles platuma galdnieks** (`U+200D`) pēc "sensitīvo" klientu nosaukumu pirmās rakstzīmes, tāpēc augšupējie filtri nevar tos atpazīt. Noklusējuma vārdu saraksts:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Tiek lietots: `system` blokiem, visam `messages[].content` saturam un `tools[].description` / `tools[].function.description`. Operators var to mainīt, izmantojot `setSensitiveWords()`.
+Attiecas uz: `system` blokiem, visiem `messages[].content` un `tools[].description` / `tools[].function.description`. Operatora ignorējams, izmantojot `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` nodrošinātāji
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` pakalpojumu sniedzēji
 
-Trešo pušu Anthropic relejiem, kas pieņem tikai „īstu Claude Code” datplūsmu:
+Trešās puses Anthropic relejiem, kas pieņem tikai "īstu Claude koda" trafiku:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` pēc noklusējuma
-- Katram savienojumam paredzētais slēdzis „Iespējot redact-thinking beta versiju” pievieno `redact-thinking-2026-02-12`, ja CC Compatible augšupstraumei ir īpaši nepieciešamas rediģētas domāšanas plūsmas
-- Katram savienojumam paredzētais slēdzis „Iespējot apkopotās domāšanas attēlošanu” saglabā `providerSpecificData.requestDefaults.summarizeThinking` un pievieno `display: "summarized"` CC Compatible domāšanas pieprasījumiem, kuriem vēl nav iestatīts attēlošanas režīms
+- Katram savienojumam paredzētais pārslēgs “Iespējot rediģēšanas domāšanas beta versiju” pievieno `redact-thinking-2026-02-12`, ja CC saderīgam augšpus ir īpaši nepieciešamas rediģētas domāšanas straumes.
+- Katram savienojumam paredzētais pārslēgs "Iespējot apkopoto domāšanas displeju" saglabā `providerSpecificData.requestDefaults.summarizeThinking` un pievieno `display: "summarized"` CC Saderīgi domāšanas pieprasījumi, kuriem vēl nav iestatīts displeja režīms.
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x saime)
 - Noklusējuma ceļš: `/v1/messages?beta=true`
 
-Saistītie moduļi tajā pašā komplektā:
+Māsas moduļi tajā pašā komplektā:
 
-- `claudeCodeConstraints.ts` — temperatūras un kešatmiņas kontroles noteikumi
-- `claudeCodeToolRemapper.ts` — rīku nosaukumu pārkartēšana
-- `claudeCodeExtraRemap.ts` — papildu lietderīgās slodzes normalizēšana
+- `claudeCodeConstraints.ts` — temperatūra + kešatmiņas kontroles noteikumi
+- `claudeCodeToolRemapper.ts` — rīka nosaukuma pārkartošana
+- `claudeCodeExtraRemap.ts` — papildu kravnesības normalizācija
 
 ---
 
@@ -189,9 +190,9 @@ Operatoriem, kuri vēlas izvairīties no iepriekš aprakstītās Antigravity apt
 
 Pieskāriena punkti:
 
-- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`
+- `open-sse/executors/antigravity.ts` — skan `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — akreditācijas santehnika
-- Sākotnējais incidenta ziņojums: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Sākotnējais incidenta ziņojums: Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

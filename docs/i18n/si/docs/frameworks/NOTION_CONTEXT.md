@@ -66,41 +66,29 @@ OmniRoute ටෝකනය සුරකිමින් වහාම ප්රත�
 
 ## MCP මෙවලම් (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` තුළ අර්ථ දක්වා ඇත. ටෝකනය ඇමතුම්
-අවස්ථාවේදී `getNotionToken()` හරහා ලබාගනී; කිසිවක් වින්යාස කර නොමැති නම් මෙවලම
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
-දෝෂය නිකුත් කරයි.
+`open-sse/mcp-server/tools/notionTools.ts` හි අර්ථ දක්වා ඇත. ටෝකනය `getNotionToken()` හරහා ඇමතුම් වේලාවේදී විසඳනු ලැබේ; කිසිවක් වින්‍යාස කර නොමැති නම් මෙවලම `"Notion integration token not configured. Set it in Settings > Context Sources."` විසි කරයි
 
-| මෙවලම                        | විෂය පථය       | විස්තරය                                                                                    |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------ |
-| `notion_search`              | `read:notion`  | පෙළ විමසුමකින් පිටු සහ දත්ත සමුදා සොයයි (මාතෘකා, හැඳුනුම් සහ URLs ලබා දෙයි). පිටුගත කර ඇත. |
-| `notion_get_page`            | `read:notion`  | පිටුවක හැඳුනුම මඟින් එහි අන්තර්ගතය සහ පාරදත්ත ලබාගනී.                                      |
-| `notion_list_block_children` | `read:notion`  | බ්ලොක් එකක හෝ පිටුවක සියලුම අනුබ්ලොක් (බ්ලොක් වෘක්ෂය) ලැයිස්තුගත කරයි. පිටුගත කර ඇත.       |
-| `notion_query_database`      | `read:notion`  | විකල්ප `filter` + `sorts` (Notion API ආකෘතිය) සමඟ දත්ත සමුදායක් විමසයි. පිටුගත කර ඇත.      |
-| `notion_get_database`        | `read:notion`  | හැඳුනුම මඟින් දත්ත සමුදායක යෝජනා ක්රමය/පාරදත්ත ලබාගනී.                                     |
-| `notion_append_blocks`       | `write:notion` | පවතින බ්ලොක් එකකට හෝ පිටුවකට අනුබ්ලොක් එක් කරයි (ඉල්ලීමකට උපරිම බ්ලොක් 100ක්).             |
+| මෙවලම                        | විෂය පථය       | විස්තරය                                                                              |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------ |
+| `notion_search`              | `read:notion`  | පෙළ විමසුම මගින් පිටු සහ දත්ත සමුදායන් සොයන්න (ප්‍රතිලාභ මාතෘකා, IDs, URLs). පිටුවල. |
+| `notion_get_page`            | `read:notion`  | පිටුවක අන්තර්ගතය සහ පාරදත්ත එහි ID මගින් ලබා ගන්න.                                   |
+| `notion_list_block_children` | `read:notion`  | බ්ලොක් හෝ පිටුවක (බ්ලොක් ගස) සියලුම වාරණ දරුවන් ලැයිස්තුගත කරන්න. පිටුවල.            |
+| `notion_query_database`      | `read:notion`  | විකල්ප `filter` + `sorts` (Notion API ආකෘතිය) සහිත දත්ත සමුදායක් විමසන්න. පිටුවල.    |
+| `notion_get_database`        | `read:notion`  | ID මගින් දත්ත සමුදායක schema/metadata ලබා ගන්න.                                      |
+| `notion_append_blocks`       | `write:notion` | දැනට පවතින වාරණයකට හෝ පිටුවකට වාරණ ළමුන් එක් කරන්න (ඉල්ලීමකට උපරිම වාරණ 100).        |
 
-### ආදාන පරාමිති
+### ආදාන පරාමිතීන්
 
-- `notion_search` — `query` (අක්ෂර 1–500), `pageSize` (1–100, පෙරනිමිය 20),
-  `startCursor` (විකල්ප).
-- `notion_get_page` — `pageId` (අක්ෂර 32ක hex හෝ UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, පෙරනිමිය 50),
-  `startCursor` (විකල්ප).
-- `notion_query_database` — `databaseId`, `filter` (විකල්ප, Notion පෙරහන් ආකෘතිය),
-  `sorts` (විකල්ප අරාව), `pageSize` (1–100, පෙරනිමිය 50), `startCursor` (විකල්ප).
+- `notion_search` — `query` (අකුරු 1–500), `pageSize` (1–100, පෙරනිමි 20), `startCursor` (විකල්ප).
+- `notion_get_page` — `pageId` (32-char hex හෝ UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, පෙරනිමි 50), `startCursor` (විකල්ප).
+- `notion_query_database` — `databaseId`, `filter` (විකල්ප, Notion පෙරහන් ආකෘතිය), `sorts` (විකල්ප අරාව), `pageSize` (1–100, පෙරනිමි 50), `startCursor` (විකල්ප).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (බ්ලොක් වස්තු අරාව),
-  `after` (විකල්ප පිහිටීම).
+- `notion_append_blocks` — `blockId`, `children` (බ්ලොක් වස්තු අරාව), `after` (විකල්ප පිහිටීම).
 
-### විෂය පථ
+### විෂය පථයන්
 
-කියවීමේ මෙවලම් සඳහා `read:notion` ද, ලිවීමේ මෙවලම සඳහා `write:notion` ද අවශ්ය වේ.
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` වූ විට පමණක්
-`open-sse/mcp-server/server.ts` තුළ ඇති `withScopeEnforcement()` මඟින් විෂය පථ
-බලාත්මක කරනු ලැබේ; අමතන්නාට අවසර ඇති විෂය පථ `OMNIROUTE_MCP_SCOPES`
-(කොමාවෙන් වෙන් කළ) වෙතින් හෝ සත්යාපිත API යතුරේ විෂය පථ සන්දර්භයෙන් පැමිණේ.
-සම්පූර්ණ විෂය පථ ආකෘතිය සඳහා [MCP-SERVER.md](./MCP-SERVER.md) බලන්න.
+කියවීමේ මෙවලම් සඳහා `read:notion` අවශ්‍ය වන අතර ලිවීමේ මෙවලමට `write:notion` අවශ්‍ය වේ. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` විට `open-sse/mcp-server/server.ts` හි `withScopeEnforcement()` මගින් විෂය පථයන් බලාත්මක කරනු ලබන අතර, සෑම විටම API යතුර `manage`/`admin` නොමැති HTTP/SSE ඇමතුම්කරුවෙකු සඳහා; අමතන්නාගේ අවසර ලත් විෂය පථයන් පැමිණෙන්නේ `OMNIROUTE_MCP_SCOPES` (කොමාවෙන් වෙන් කළ) හෝ සත්‍යාපනය කළ API යතුරේ විෂය පථ සන්දර්භයෙනි. සම්පූර්ණ විෂය පථ ආකෘතිය සඳහා [MCP-SERVER.md](./MCP-SERVER.md) බලන්න.
 
 ## අන්ත ලක්ෂ්ය
 

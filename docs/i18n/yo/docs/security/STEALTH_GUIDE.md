@@ -4,11 +4,9 @@
 
 ---
 
-> **Orísun òtítọ́:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Ìmúdójúìwọ̀n tó kẹ́yìn:** 2026-09-02 — v3.8.51
-> **Àwọn olùkà:** Àwọn onímọ̀ ẹ̀rọ tí ń bójú tó àwọn ìṣọ̀kan àìfarahàn tó jẹ́ ti olùpèsè kan pàtó.
+> **Orisun otitọ:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Olugbo:** Awọn onimọ-ẹrọ n ṣetọju awọn iṣọpọ lilọ ni ifura ti olupese.
 
-OmniRoute ń ṣọ̀kan pẹ̀lú àwọn olùpèsè tí àwọn ẹ̀rọ etí-nẹ́tíwọ́ọ̀kì wọn ń ṣe ìdánimọ̀ ìtẹ̀sí-ọwọ́ àwọn client tí kì í ṣe tiṣẹ́ (TLS JA3/JA4, ètò àwọn header, ìrísí body JSON, àwọn token ìjẹ́rìísí ìpéye). Ojú-ìwé yìí ṣàkọsílẹ̀ àwọn ojú-ọ̀nà àìfarahàn tí OmniRoute pèsè àti ibi tí a ti ṣe ìmúṣẹ wọn.
+OmniRoute ṣepọ pẹlu awọn olupese ti awọn egbegbe wọn ṣiṣẹ ika ika ọwọ awọn alabara ti kii ṣe osise (TLS JA3/JA4, pipaṣẹ akọsori, apẹrẹ ara JSON, awọn ami aiṣedeede). Oju-iwe yii ṣe akosilẹ awọn ipele lilọ ni ifura OmniRoute ṣiṣafihan ati ibi ti wọn ti ṣe imuse.
 
 ## Àkíyèsí Òfin àti Ìwà-Ọmọlúwàbí
 
@@ -73,65 +71,68 @@ kí o tó sọ pé ó bá upstream browser dọ́gba.
 
 ---
 
-## Àkójọpọ̀ Ìfarapamọ́ Claude Code
+## Claude Code ni ifura lapapo
 
-Nígbà tí `cliCompatMode` bá wà ní títàn, OmniRoute máa ń tún àwọn ìbéèrè Claude tó ń jáde ṣe kí wọn má ṣe yàtọ̀ sí ìrìn-àjò `claude-cli`. Àwọn módù mẹ́ta ni wọ́n ń ṣiṣẹ́ pọ̀:
+Nigbati `cliCompatMode` ba wa ni titan, OmniRoute ṣe atunṣe awọn ibeere Claude ti njade ki wọn ko ṣe iyatọ si ijabọ `claude-cli`. Awọn modulu mẹta ṣe ifọwọsowọpọ:
 
 ### `claudeCodeFingerprint.ts`
 
-Ó ń ṣírò àmì ìdánimọ̀ `cc_version` oní-lẹ́tà mẹ́ta tí a fi sínú àkọlé ìdíyelé:
+Ṣe iṣiro itẹka ikawe 3-char `cc_version` ti a fi sinu akọsori ìdíyelé:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (a kọ ọ́ sínú kóòdù; ó bá ti oníbàárà iṣẹ́ ìbílẹ̀ mu)
-- Àwọn ìwọlé: àwọn àkíyèsí ní atọ́ka 4, 7, 20 láti inú ọ̀rọ̀ ìfiránṣẹ́ àkọ́kọ́ ti aṣàmúlò + ọ̀rọ̀ ẹ̀yà
-- Àbájáde: ìṣáájú hex oní-lẹ́tà mẹ́ta
+- `FINGERPRINT_SALT = "59cf53e54c78"` (hardcoded; ibaamu onibara osise)
+- Awọn igbewọle: chars ni atọka 4, 7, 20 ti ifiranṣẹ olumulo akọkọ ti ikede + okun ikede
+- Abajade: 3-char hex ìpele
 
-### `claudeCodeCCH.ts` (Hash Àkóónú Oníbàárà)
+### `claudeCodeCCH.ts` (Hash Akoonu Onibara)
 
-Àyẹ̀wò ìpéye ní ẹ̀gbẹ́ olupin tí Claude Code CLI ìbílẹ̀ ń ṣírò nípasẹ̀ Bun/Zig. OmniRoute tún un ṣe pẹ̀lú `xxhash-wasm`:
+Iduroṣinṣin ẹgbẹ olupin ṣayẹwo awọn iṣiro koodu Claude koodu CLI osise nipasẹ awọn atunṣe Bun/Zig. OmniRoute pẹlu `xxhash-wasm`:
 
-1. Ṣe serialization ara pẹ̀lú àfipamọ́-àyè `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Hex kékeré oní-lẹ́tà márùn-ún tí a fi odo kún níwájú
-4. Rọ́pò `cch=00000;` pẹ̀lú àmì tí a ṣírò
+1. Serialize ara pẹlu `cch=00000;` placeholder
+2. Kọ iwo hash pẹlu awọn rirọpo ọrọ pẹtẹlẹ meji, ni aṣẹ yii (`hashView()`):
+   - gbogbo baramu `/"model":"[^"]*"/g` di `"model":""` — baramu duro ni akọkọ `"`, nitorina iye kan pẹlu agbasọ ti o salọ (`"model":"a\"b"`) jẹ ofo nikan titi di agbasọ yẹn, bi alabara ṣe ṣe.
+   - gbogbo baramu `/"max_tokens":\d+,|,?"max_tokens":\d+/g` ni a yọkuro — nikan awọn iye nomba, ni eyikeyi ijinle
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Zero-padded 5-char smallcase hex
+5. Rọpo `cch=00000;` pẹlu aami iṣiro
 
-Àwọn kọńsítáǹtì:
+Awọn igbagbogbo:
 
-- Seed: `0x6e52736ac806831e`
+- Irugbin: `0x4d659218e32a3268` (bamu loopback yaworan ti Claude Code 2.1.252 ati 2.1.322)
 - Àpẹẹrẹ: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Ó máa ń fi **àsopọ̀ aláìní ìbú** Unicode (`U+200D`) sí ẹ̀yìn àkíyèsí àkọ́kọ́ ti àwọn orúkọ oníbàárà “onífẹ̀ẹ́” kí àwọn àsẹ̀ òkè má bàa lè fi grep wá wọn. Àtòjọ ọ̀rọ̀ àìyípadà:
+Fi Unicode sii** odo-iwọn joiner** (`U+200D`) lẹhin ohun kikọ akọkọ ti awọn orukọ alabara “ifamọ” nitorinaa awọn asẹ oke ko le grep wọn. Akojọ ọrọ aiyipada:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-A lò ó sí: àwọn ìdípọ̀ `system`, gbogbo `messages[].content`, àti `tools[].description` / `tools[].function.description`. Olùdarí lè yí i padà nípasẹ̀ `setSensitiveWords()`.
+Ti a lo si: awọn bulọọki `system`, gbogbo `messages[].content`, ati `tools[].description` / `tools[].function.description`. Oniṣẹ-padanu nipasẹ `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — àwọn olùpèsè `anthropic-compatible-cc-*`
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`
 
-Fún àwọn relay Anthropic ti ẹni-kẹta tí wọ́n gba ìrìn-àjò “Claude Code gidi” nìkan:
+Fun awọn relays Anthropic ẹni-kẹta ti o gba “koodu Claude gidi” ijabọ nikan:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` ní àìyípadà
-- Yíyàn “Jẹ́ kí beta redact-thinking ṣiṣẹ́” fún àsopọ̀ kọ̀ọ̀kan máa ń ṣàfikún `redact-thinking-2026-02-12` nígbà tí upstream CC Compatible kan bá nílò àwọn ṣiṣàn ìrònú tí a ti ṣe àtúnṣe sí ní pàtó
-- Yíyàn “Jẹ́ kí ìfihàn ìrònú tí a ṣe àkótán ṣiṣẹ́” fún àsopọ̀ kọ̀ọ̀kan máa ń tọ́jú `providerSpecificData.requestDefaults.summarizeThinking`, ó sì ń ṣàfikún `display: "summarized"` sí àwọn ìbéèrè ìrònú CC Compatible tí kò tíì ṣètò ìpo ìfihàn
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (ẹbí Opus/Sonnet 4.x)
-- Ọ̀nà àìyípadà: `/v1/messages?beta=true`
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` nipa aiyipada
+- Asopọ-kọọkan “Jeki beta ironupiwada ṣiṣẹ” ṣe afikun `redact-thinking-2026-02-12` nigbati CC Ibamu ni oke ni pataki nilo awọn ṣiṣan ironu tunṣe
+- Asopọ-kọọkan “Jeki ifihan ero akopọ ṣiṣẹ” yipada awọn ile itaja `providerSpecificData.requestDefaults.summarizeThinking` ati ṣafikun `display: "summarized"` si CC Awọn ibeere ironu ibaramu ti ko ṣeto ipo ifihan tẹlẹ
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` ( idile Opus/Sonnet 4.x)
+- Ona aiyipada: `/v1/messages?beta=true`
 
-Àwọn módù alábàákẹ́gbẹ́ inú àkójọpọ̀ kan náà:
+Awọn modulu arabinrin ninu akopọ kanna:
 
-- `claudeCodeConstraints.ts` — àwọn òfin temperature + cache-control
-- `claudeCodeToolRemapper.ts` — àtúnyàn orúkọ irinṣẹ́
-- `claudeCodeExtraRemap.ts` — ìṣọ̀kan àfikún fún payload
+- `claudeCodeConstraints.ts` — otutu + kaṣe-Iṣakoso awọn ofin
+- `claudeCodeToolRemapper.ts` — ọpa-orukọ atunṣe
+- `claudeCodeExtraRemap.ts` — afikun isanwo deede
 
 ---
 
@@ -157,7 +158,7 @@ Imudani ti oke wa ni titan** ẹgbẹ Google** , kii ṣe ohunkohun ti OmniRoute
 
 **Iduro ti a ṣeduro:**
 
-1. Jeki `ANTIGRAVITY_CREDITS=off` aiyipada ayafi ti oniṣẹ gba ni gbangba-kirẹditi isanwo ati eewu imuṣiṣẹ akọọlẹ. `retry` firanṣẹ ibeere deede ni akọkọ ati ki o fun awọn kirẹditi ni pupọ julọ ni ẹẹkan lẹhin ipin ti o yẹ 429; `always` injects kirediti lori akọkọ ìbéèrè.
+1. Jeki `ANTIGRAVITY_CREDITS=off` aiyipada ayafi ti oniṣẹ gba ni gbangba-kirẹditi isanwo ati eewu imuṣiṣẹ akọọlẹ. `retry` fi ibeere deede ranṣẹ ni akọkọ ati ki o fun awọn kirẹditi ni pupọ julọ ni ẹẹkan lẹhin ipin ti o yẹ 429; `always` injects kirediti lori akọkọ ìbéèrè.
 2. **Tan fifuye kọja awọn olupese nipasẹ Auto-Combo** (`model: "auto"` tabi `kr/glm/etc` -combo) dipo ti saturating kan nikan Antigravity iroyin.
 3. **Ṣeto fun-asopọmọra RPM ifilelẹ** ninu oju-iwe satunkọ olupese Antigravity (Dasibodu → Awọn olupese → Antigravity → asopọ → opin oṣuwọn). 30–60 RPM jẹ agbeja oke fun lilo idaduro.
 4. **Lo iduroṣinṣin, nẹtiwọọki oke ti oniṣẹ iṣakoso** ati yago fun pinpin akọọlẹ kan kọja awọn olumulo ti ko ni ibatan tabi awọn ẹru iṣẹ.
@@ -191,7 +192,7 @@ Awọn aaye ifọwọkan:
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — ẹrí Plumbing
-- Iroyin iṣẹlẹ atilẹba: ijiroro [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Iroyin iṣẹlẹ atilẹba: ijiroro [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

@@ -21,24 +21,21 @@ dostępny pod skonfigurowanym adresem URL app-server**, a CLI musi być
 ## 1. Architektura
 
 ```
-┌─ Aplikacja OmniRoute ────────────┐        ┌─ Kontener pomocniczy codex-app-server ┐
-│  CodexAppServerExecutor          │  WS    │  codex app-server                     │
-│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456           │
-│  (+ token dostępu)               │  JSON  │  --ws-auth capability-token           │
-│                                  │  RPC   │  samodzielnie zarządza OAuth OpenAI    │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, autom. odśwież.) │
-        │ współdzieli (woluminy compose)     └────────────────────────────────────────┘
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
+│  CodexAppServerExecutor          │  WS    │  codex app-server                   │
+│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → token dostępu WS (montowany przez oba kontenery)
-  codex-appserver-home    → ~/.codex (auth.json zapisywany przez panel,
-                             odczytywany przez codex app-server w kontenerze pomocniczym)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Kontener pomocniczy nasłuchuje **wyłącznie** w wewnętrznej sieci compose
-  (`ws://codex-app-server:1456`) i jest chroniony tokenem dostępu. **Nigdy** nie
-  jest udostępniany hostowi ani w internecie.
-- Codex CLI jest wbudowany w `omniroute:base`, więc podczas uruchamiania kontenera
-  pomocniczego nie trzeba instalować codex na hoście ani na komputerze użytkownika.
+- Wózek boczny słucha** tylko** w wewnętrznej sieci tworzenia wiadomości (`ws://codex-app-server:1456`) za tokenem możliwości. To jest** nigdy** opublikowane u hosta lub w Internecie.
+- Wózek boczny używa `omniroute:cli-no-docker`, zbudowanego z celu `runner-cli-no-docker`, który zawiera Codex CLI.
 
 ## 2. Uruchomienie
 

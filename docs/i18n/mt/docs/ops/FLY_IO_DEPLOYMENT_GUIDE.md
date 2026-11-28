@@ -132,32 +132,34 @@ flyctl deploy
 
 ## 5. Parametri Meħtieġa
 
-Dan il-proġett jirrakkomanda li tista' tikkonfigura mill-inqas il-parametri li ġejjin fuq Fly.io.
+Dan il-proġett jirrakkomanda li jiġu kkonfigurati mill-inqas il-parametri li ġejjin fuq Fly.io.
 
 ### 5.1 Parametri Verifikati
 
-Dawn il-parametri intużaw fil-ħaddim attwali fuq l-applikazzjoni attwali `omniroute`:
+Dawn il-parametri ntużaw fl-iskjeramenti attwali fuq l-applikazzjoni `omniroute` attwali:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (meħtieġ fil-produzzjoni — jintuża għall-awtentikazzjoni tal-pont WebSocket)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (meħtieġa fil-produzzjoni — użat għall-awtentikazzjoni tal-pont WebSocket )
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 Dwar `INITIAL_PASSWORD`
 
-Il-proġett attwali ma jissettjax `INITIAL_PASSWORD` għaliex dan it-tħaddim ma jeħtiġiex.
+Il-proġett preżenti ma jistabbilixxix `INITIAL_PASSWORD` għax dan l-iskjerament ma jeħtieġx.
 
-Jekk ma jkunx issettjat:
+Jekk ma tkunx issettjata:
 
-- Il-log tal-ħuħ se jindika li l-password default hija `CHANGEME`
-- Għandek ibiddel il-password tal-login fis-settings tas-sistema malajr kemm jista' wara t-tħaddim
+- Inti toħloq il-password tad-dashboard fil-wizard tal-onboarding fl-ewwel żjara. Imla l-pass tal-password: taqbeżha titfi l-login tad-dashboard, li jħalli d-dashboard miftuħ għal kull min jista' jilħaq l-app URL
+- Il-proxy ta' Fly jasal fl-app minn indirizz mhux loopback, għalhekk wara li tissottometti l-password l-wizard jitlob token ta' bootstrap ta' darba, li l-app jistampa fil-log tagħha f'dak il-mument: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Jekk dik il-linja tkun ħarġet 'il barra mir-reġistru, erġa' ibda l-app u erġa' ssottometti l-wizard biex tipprintja token ġdid
 
-Jekk trid tibda l-password backend mingħajr assistenza, tista' iżżidha wara:
+Biex issettja l-password waħedha minflok, żidha qabel l-ewwel żjara tad-dashboard (ladarba password tiġi ssejvjata, `INITIAL_PASSWORD` tiġi injorata):
 
 - `INITIAL_PASSWORD`
+
+---
 
 ## 6. Parametri Rakkomandati
 
@@ -272,45 +274,45 @@ Jekk il-paġna tal-`Secrets` fil-konsol ma tax l-variabli mistennija, iċċekkja
 
 ---
 
-## 9. Aġġornamenti u Ħruġ Sussegwenti
+## 9. Aġġornamenti u Rilaxxi sussegwenti
 
-Wara l-aġġornamenti tal-kodċi, il-proċess tal-ħruġ huwa sempliċi:
+Wara l-aġġornamenti tal-kodiċi, il-proċess ta 'rilaxx huwa sempliċi:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Jekk għandek biss bżonn taġġorna l-parametri mingħajr ma tbiddel il-kodċi:
+Jekk għandek bżonn biss taġġorna l-parametri mingħajr ma tbiddel il-kodiċi:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly se twettaq awtomatikament aġġornament ta' rotta tal-magni.
+Fly awtomatikament iwettaq aġġornament rolling tal-magni.
 
-### 9.1 Traċċar tal-Aġġornamenti tal-Repositorju ta' Linn fuq il-Linja, filwaqt li Jippreserva l-`fly.toml` tal-Fork Tiegħek
+### 9.1 It-traċċar ta' l-Aġġornamenti tar-Repożitorju Upstream Waqt li Preserva `fly.toml` tal-furketta tiegħek
 
-Jekk ir-repositorju attwali huwa fork u trid tissinkronizza aġġornamenti mir-repositorju ta' linn fuq il-linja `https://github.com/diegosouzapw/OmniRoute`, segwi l-workflow hawn taħt.
+Jekk ir-repożitorju attwali huwa furketta u trid tissinkronizza aġġornamenti mill-upstream `https://github.com/cheaper-inference/OmniRoute`, segwi l-fluss tax-xogħol hawn taħt.
 
-L-ewwel, ivverifika r-remotes tiegħek:
+L-ewwel, ivverifika l-remoti tiegħek:
 
 ```powershell
 git remote -v
 ```
 
-Għandek tara tal-inqas:
+Għandek tara mill-inqas:
 
-- `origin` li jindika l-fork tiegħek stess
-- `upstream` li jindika r-repositorju oriġinali
+- `origin` tipponta lejn il-furketta tieghek
+- `upstream` tipponta lejn ir-repożitorju oriġinali
 
-Jekk `upstream` ma huwiex konkfigurat, żidu:
+Jekk `upstream` mhux ikkonfigurat, żidha:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Qabel tissinkronizza mal-upstream, ġib l-aħħar commits u tags:
+Qabel ma tissinkronizza ma' upstream, ġib l-aħħar impenji u tags:
 
 ```powershell
 git fetch upstream --tags
@@ -323,9 +325,9 @@ git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Nota: Il-verżjoni tal-proġett attwali hija `v3.8.0`. Ir-riferenzi għal `v3.4.7` hawn taħt huma miżmuma biss bħala eżempji storiċi. Għall-ħruġ attwali, uża `:latest` jew it-tag tal-verżjoni attwali (pereżempju `:v3.8.0`).
+> Nota: Il-verżjoni attwali tal-proġett hija `v3.8.0`. Ir-referenzi `v3.4.7` hawn taħt jinżammu bħala eżempji storiċi biss. Għal rilaxxi attwali, uża `:latest` jew it-tikketta tal-verżjoni attwali (eż. `:v3.8.0`).
 
-Jekk trid tassimila l-aħħar `main` tal-upstream filwaqt li tżomm b'saħħtu l-`fly.toml` tal-fork tiegħek, segwi dan il-workflow:
+Jekk trid tgħaqqad l-aħħar `main` upstream filwaqt li żżomm bil-qawwa `fly.toml` tal-furketta tiegħek, segwi dan il-fluss tax-xogħol:
 
 ```powershell
 git merge upstream/main
@@ -337,32 +339,32 @@ git push origin main
 
 Noti:
 
-- `git merge upstream/main` tissinkronizza l-aħħar kodċi mir-repositorju oriġinali
-- `git checkout HEAD~1 -- fly.toml` tistad l-`fly.toml` speċifiku tal-fork tiegħek mill-bidu tal-merge
-- Jekk l-upstream ma bediex jibdel l-`fly.toml`, din il-passa ma ġġib l-ebda differenzi
-- Jekk l-upstream beda jibdel l-`fly.toml`, din il-passa tiżgura li l-isem tal-applikazzjoni Fly tiegħek, il-montar tal-volum, ir-reġjun, u l-konfigurazzjoni oħra ta' deployment speċifika għal fork ma jiġux imwarrba
+- `git merge upstream/main` jissinkronizza l-aħħar kodiċi mir-repożitorju oriġinali
+- `git checkout HEAD~1 -- fly.toml` jirrestawra l-furketta tiegħek stess `fly.toml` minn qabel il-merge
+- Jekk upstream ma mmodifikax `fly.toml`, dan il-pass ma jintroduċi ebda differenzi
+- Jekk upstream immodifika `fly.toml`, dan il-pass jiżgura li l-isem tal-applikazzjoni Fly tiegħek, il-muntaġġ tal-volum, ir-reġjun, u konfigurazzjoni oħra tal-iskjerament speċifika għall-furketta ma jinkitbux fuq
 
-Jekk trid tissinkronizza ma' tag ta' ħruġ speċifiku (pereżempju `v3.4.7`), l-ewwel ivverifika li l-tag diġà huwa inkluż f'`upstream/main`:
+Jekk trid tallinja ma' tikketta ta' rilaxx speċifika (eż. `v3.4.7`), l-ewwel ivverifika li t-tikketta hija diġà inkluża `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Ritorn b'suċċess ifisser li `upstream/main` diġà fih dik il-verżjoni; tista' sempliċement tagħmel merge ta' `upstream/main`.
+Ritorn b'suċċess ifisser `upstream/main` diġà fih dik il-verżjoni; inti tista 'sempliċement jingħaqdu `upstream/main`.
 
-### 9.2 Segwenza tal-Ħruġ Standard Wara s-Sinkronizzazzjoni mal-Upstream
+### 9.2 Sekwenza ta' Rilaxx Standard Wara Sinkronizzazzjoni Upstream
 
-Wara s-sinkronizzazzjoni mal-repositorju oriġinali, segwi l-ordni rakkomandata tal-ħruġ:
+Wara li tissinkronizza mar-repożitorju oriġinali, segwi din l-ordni ta' rilaxx rakkomandata:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Irrestawra l-`fly.toml` tal-fork
+3. Irrestawra `fly.toml` tal-furketta
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Dan huwa l-workflow attwali użat meta tiġi upgraded il-verżjoni attwali tal-proġett għal `v3.4.7` (l-eżempju jirreferi għal verżjoni storika; il-verżjoni attwali reali hija `v3.8.0`).
+Dan huwa l-fluss tax-xogħol attwali użat meta taġġorna l-proġett kurrenti għal `v3.4.7` (l-eżempju jirreferi għal verżjoni storika; il-verżjoni attwali attwali hija `v3.8.0`).
 
 ---
 
@@ -416,16 +418,16 @@ Jekk tara `/app/data/...` minflok, `DATA_DIR` ġie kkunfigurat ħażin u għandu
 
 ---
 
-## 12. Problemi Komuni
+## 12. Kwistjonijiet Komuni
 
-### 12.1 Il-Paġna ta' `Secrets` Huwa Vojt
+### 12.1 `Secrets` Page Is Vojta
 
-Normalment hemm żewġ raġunijiet:
+Normalment ikun hemm żewġ raġunijiet:
 
-- Għadek ma għamiltx `flyctl secrets set`
-- Qiegħed tara applikazzjoni differenti (eż. `oroute` minflok `omniroute`)
+- Għadek ma ħadtx `flyctl secrets set`
+- Qed tara applikazzjoni differenti (eż. `oroute` minflok `omniroute`)
 
-### 12.2 `flyctl deploy` Jirrappurta `app not found`
+### 12.2 `flyctl deploy` Rapporti `app not found`
 
 Oħloq l-applikazzjoni l-ewwel:
 
@@ -433,23 +435,23 @@ Oħloq l-applikazzjoni l-ewwel:
 flyctl apps create omniroute
 ```
 
-### 12.3 Il-Parsing ta' `fly.toml` Falla
+### 12.3 `fly.toml` Parsing Fails
 
-Iċċekkja l-li ġejjin:
+Iċċekkja dan li ġej:
 
-- Jekk hemm karattri maqbuqa fil-kummenti
-- Jekk il-qaws u l-in缜entazzjoni tal-TOML huma korretti
+- Jekk hemmx karattri konfużi fil-kummenti
+- Jekk TOML kwotazzjoni u indentazzjoni humiex korretti
 
-### 12.4 Id-Dejta Mhijiex persistenti
+### 12.4 Id-Dejta Mhux Persisti
 
-Verifika t-tnejn li ġejjin:
+Ivverifika t-tnejn li ġejjin:
 
 - `fly.toml` fih `destination = '/data'`
-- `DATA_DIR` huwaisset għal `/data`
+- `DATA_DIR` huwa ssettjat għal `/data`
 
-### 12.5 Tista' Taħdem Mingħajr `INITIAL_PASSWORD`?
+### 12.5 Jista' Jmexxi Minghajr `INITIAL_PASSWORD`?
 
-Iva, tista' taħdem. Se tirrikorri għall-password preferuta `CHANGEME`. Huwa rakkomandat li tibdel il-password tal-backend kemm jista' jkun malajr fil-produzzjoni.
+Iva. `INITIAL_PASSWORD` unset, inti toħloq il-password tad-dashboard fl-onboarding wizard fl-ewwel żjara (it-taqsima 5.2 tkopri t-token tal-bootstrap ta' darba u l-pass tal-password).
 
 ---
 

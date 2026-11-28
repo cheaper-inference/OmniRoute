@@ -4,12 +4,9 @@
 
 ---
 
-> **បានធ្វើបច្ចុប្បន្នភាពចុងក្រោយ៖** 2026-08-28 — v3.8.51
-> លំហូរចេញផ្សាយដែលបានសម្រួល ដោយប្រើប្រាស់ជំនាញ Claude Code សម្រាប់ស្វ័យប្រវត្តិកម្ម។
+> លំហូរចេញយ៉ាងរលូនដែលប្រើជំនាញកូដ Claude សម្រាប់ស្វ័យប្រវត្តិកម្ម។
 >
-> **រក្សាជួរ/សាខាឱ្យមានស្ថានភាពល្អរវាងការចេញផ្សាយនីមួយៗ៖** សូមមើល [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs` family + `npm run check:release-green` + `/babysit` + nightly)។ ការដំណើរការ
-> វាជាប្រចាំ — និងជាពិសេស **មុនពេល** បញ្ជីត្រួតពិនិត្យនេះ — ធ្វើឱ្យ PR ចេញផ្សាយចាប់ផ្តើមក្នុងស្ថានភាពល្អ។
+> **រក្សា queue/branch ពណ៌បៃតងរវាងការចេញផ្សាយ:** មើល [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` គ្រួសារ + `npm run check:release-green` + `/babysit` + យប់). ដំណើរការនេះតាមកាលកំណត់ — និងជាពិសេស** មុន** — បញ្ជីត្រួតពិនិត្យនេះធ្វើឱ្យការចេញផ្សាយ PR ចាប់ផ្តើមពណ៌បៃតង។
 
 ## សង្ខេបខ្លី
 
@@ -58,9 +55,11 @@ npm run test:e2e           # មិនចាំបាច់ ប៉ុន្ត�
 
 **សៀវភៅលេងវត្ថុបុរាណដែលខូច (មិនផ្លាស់ប្តូរ)៖** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` ជាការឆ្លុះបញ្ចាំងលំនាំដើម (នាទី, បញ្ច្រាស); `npm unpublish` តែនៅក្នុងបង្អួច 72h/no-dependents ប៉ុណ្ណោះ ហើយមិនដែលធ្វើចលនាដំបូងឡើយ។ Docker: មិនដែលសរសេរឡើងវិញនូវស្លាកកំណែ — rollback គឺកំពុងចង្អុល `latest` ទៅកាន់ការសង្ខេបដ៏ល្អចុងក្រោយ។
 
-**Docker Hub `latest` (តម្រូវឱ្យមាននៅលើរាល់ការបោះពុម្ពផ្សាយ SemVer មានស្ថិរភាព):** លំហូរការងារ `docker-publish` ត្រូវតែដាក់ស្លាក** ទាំងពីរ** `X.Y.Z` ហើយនៅពេលដែល `should-promote-latest.sh` យល់ព្រម នេះគឺជា SemVer ដែលមានស្ថេរភាពខ្ពស់បំផុត , `:latest` ជាមួយ** សង្ខេបដូចគ្នា។** . បន្ទាប់ពីការងារ៖ Hub `latest` digest ស្មើនឹង SemVer digest ថ្មី ហើយ `last_updated` បានផ្លាស់ប្តូរ។ កុំទុក `:latest` នៅលើ build ចាស់ ខណៈពេលដែលការចេញផ្សាយកំណត់ចំណាំនិយាយអំពីការជួសជុលដែលមាននៅលើ git ប៉ុណ្ណោះ។ សរសេរការចាប់ផ្ដើមរហ័សប្រើ `:latest`; GitOps គួរតែបន្តខ្ទាស់ `X.Y.Z`។ មើល [បណ្តាញចេញផ្សាយ Docker](../guides/DOCKER_GUIDE.md#release-channels) និង #10317។
+**Docker Hub `latest` (តម្រូវឱ្យមាននៅលើរាល់ការបោះពុម្ពផ្សាយ SemVer មានស្ថិរភាព):** លំហូរការងារ `docker-publish` ត្រូវតែដាក់ស្លាក** ទាំងពីរ** `X.Y.Z` ហើយនៅពេលដែល `should-promote-latest.sh` យល់ព្រម នេះគឺជា SemVer ដែលមានស្ថេរភាពខ្ពស់បំផុត `:latest` ជាមួយ** ការសង្ខេបដូចគ្នា។** . បន្ទាប់ពីការងារ៖ Hub `latest` digest ស្មើនឹង SemVer digest ថ្មី ហើយ `last_updated` បានផ្លាស់ប្តូរ។ កុំទុក `:latest` នៅលើ build ចាស់ ខណៈពេលដែលការចេញផ្សាយកំណត់ចំណាំនិយាយអំពីការជួសជុលដែលមាននៅលើ git ប៉ុណ្ណោះ។ សរសេរការចាប់ផ្ដើមរហ័សប្រើ `:latest`; GitOps គួរតែបន្តខ្ទាស់ `X.Y.Z`។ មើល [ប៉ុស្តិ៍ចេញផ្សាយ Docker](../guides/DOCKER_GUIDE.md#release-channels) និង #10317។
 
-**ឃ្លាំងអង្គការ Docker Hub (`cheaperinference/omniroute`):** Docker Hub មិនអាចផ្លាស់ទីឃ្លាំងរវាង namespaces បានទេ ដូច្នេះ `diegosouzapw/omniroute` រក្សាប្រវត្តិទាញរបស់វា និងរាល់ការចេញផ្សាយ ហើយការងារ `mirror-org-dockerhub` របស់ `docker-publish` ចម្លងរាល់កំណែដែលបានចេញផ្សាយ (និង `:latest` នៅពេលដំឡើង) ពី `ghcr.io/cheaper-inference/omniroute` ទៅកាន់ឃ្លាំងអង្គការ។ វាត្រូវការអាថ៌កំបាំង `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; បើគ្មានពួកគេទេ ការងារនៅតែមានពណ៌បៃតងជាមួយនឹងការព្រមាន "Docker Hub org mirror រំលង" ហើយបញ្ជីឈ្មោះផ្សេងទៀតបោះពុម្ពជាធម្មតា។ ដើម្បីបោះពុម្ពកំណែដែលបានចេញផ្សាយនៅទីនោះនៅពេលក្រោយ សូមដំណើរការ** សកម្មភាព → កញ្ចក់ Docker រូបភាពទៅ Docker Hub org → ដំណើរការលំហូរការងារ** ជាមួយ `version=X.Y.Z` (និង `promote_latest` សម្រាប់កំណែដែលមានស្ថេរភាពខ្ពស់បំផុត): វាចម្លងរូបភាពដែលមានស្រាប់ មិនចាំបាច់បង្កើតឡើងវិញទេ។
+**ឃ្លាំងអង្គការ Docker Hub (`cheaperinference/omniroute`):** Docker Hub មិនអាចផ្លាស់ទីឃ្លាំងរវាង namespaces បានទេ ដូច្នេះ `diegosouzapw/omniroute` រក្សាប្រវត្តិទាញរបស់វា និងរាល់ការចេញផ្សាយ ហើយការងារ `mirror-org-dockerhub` របស់ `docker-publish` ចម្លងរាល់កំណែដែលបានចេញផ្សាយ (និង `:latest` នៅពេលផ្សព្វផ្សាយ) ពី `ghcr.io/cheaper-inference/omniroute` ទៅកាន់ឃ្លាំងអង្គការ។ វាត្រូវការអាថ៌កំបាំង `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; បើគ្មានពួកគេទេ ការងារនៅតែបៃតងជាមួយនឹងការព្រមាន "Docker Hub org mirror រំលង" ហើយបញ្ជីឈ្មោះផ្សេងទៀតបោះពុម្ពជាធម្មតា។ ដើម្បីបោះពុម្ពកំណែដែលបានចេញផ្សាយនៅទីនោះនៅពេលក្រោយ សូមដំណើរការ** សកម្មភាព → កញ្ចក់ Docker រូបភាពទៅ Docker Hub org → ដំណើរការលំហូរការងារ** ជាមួយ `version=X.Y.Z` (និង `promote_latest` សម្រាប់កំណែដែលមានស្ថេរភាពខ្ពស់បំផុត): វាចម្លងរូបភាពដែលមានស្រាប់ មិនចាំបាច់បង្កើតឡើងវិញទេ។ ទិដ្ឋភាពទូទៅ Docker Hub របស់ឃ្លាំងត្រូវបានកំណត់ដោយដៃ៖ API ដែលកែសម្រួលវាបដិសេធ Organization Access Tokens ។
+
+ដំណើរការការងារដូចគ្នានេះក៏ចម្លងរាល់ការចេញផ្សាយទៅកាន់កញ្ចប់ GHCR កេរ្តិ៍ដំណែល `ghcr.io/diegosouzapw/omniroute` រហូតដល់ឆ្នាំ 2027-06-30 ដូច្នេះការដំឡើងនៅតែភ្ជាប់ទៅវាបន្តធ្វើបច្ចុប្បន្នភាព។ លិបិក្រមរបស់វាមានការពិពណ៌នា "ផ្លាស់ទីទៅ `ghcr.io/cheaper-inference/omniroute`" ។ វាត្រូវការសម្ងាត់ `GHCR_LEGACY_TOKEN` (និមិត្តសញ្ញាចូលប្រើផ្ទាល់ខ្លួនបុរាណរបស់ `diegosouzapw` ជាមួយ `write:packages`); បើគ្មានវាទេ ការងារនឹងរំលងជាមួយការព្រមាន "legacy GHCR mirror រំលង"។
 
 ## ផ្លូវលឿនសម្រាប់ Hotfix (ស្លាក `hotfix`)
 
@@ -89,7 +88,7 @@ Diff ដែលមានតែ test (ឯកសារទាំងអស់ស្�
 ### ការចេញផ្សាយជាមុន
 
 - [ ] PRs ទាំងអស់ដែលបានកំណត់គោលដៅក្នុងការចេញផ្សាយនេះត្រូវបានបញ្ចូលទៅក្នុង `release/vX.Y.0`
-- [ ] ធាតុ Linear/issue បើកទាំងអស់សម្រាប់កំណែនេះត្រូវបានបិទ ឬត្រូវបានរុញទៅចំណុចសំខាន់បន្ទាប់
+- [ ] ធាតុ Linear/issue ទាំងអស់ដែលបើកសម្រាប់កំណែនេះត្រូវបានបិទ ឬត្រូវបានរុញទៅដំណាក់កាលបន្ទាប់
 - [ ] CI ពណ៌បៃតងនៅលើសាខា `release/vX.Y.0`
 - [ ] មិនមានសញ្ញាសម្គាល់ `TODO(release)` នៅក្នុងលេខកូដ៖ `grep -r "TODO(release)" src/ open-sse/`
 - [ ] រូបភាពមូលដ្ឋាន Docker ទាន់សម័យ (បច្ចុប្បន្ន `node:24.15.0-trixie-slim`)
@@ -100,7 +99,7 @@ Diff ដែលមានតែ test (ឯកសារទាំងអស់ស្�
   - បុក `package.json`, `electron/package.json`
   - បង្កើត `CHANGELOG.md` ឡើងវិញពី git commits ចាប់តាំងពីស្លាកចុងក្រោយ
   - ធ្វើបច្ចុប្បន្នភាពផ្លាកសញ្ញា README.md
-- [ ] ពិនិត្យមើល CHANGELOG.md ដោយដៃ ហើយសម្អាតសារដែលប្រព្រឹត្តប្រសិនបើចាំបាច់
+- [ ] ពិនិត្យមើល CHANGELOG.md ដោយដៃ ហើយសម្អាតសារដែលផ្ញើចេញប្រសិនបើចាំបាច់
 - [ ] ត្រូវប្រាកដថាផ្នែក semver ចុងក្រោយបំផុតនៅក្នុង `CHANGELOG.md` ស្មើនឹងកំណែ `package.json`
 - [ ] រក្សា `## [Unreleased]` ជាផ្នែក changelog ដំបូងសម្រាប់ការងារនាពេលខាងមុខ
 - [ ] ធ្វើបច្ចុប្បន្នភាព `docs/openapi.yaml` → `info.version` ត្រូវតែស្មើនឹងកំណែ `package.json`
@@ -113,7 +112,7 @@ Diff ដែលមានតែ test (ឯកសារទាំងអស់ស្�
 - [ ] `npm run check:cycles:ratchet` — នៅក្នុងពិដាន `metrics.cycles` ដែលកក ( `check:cycles` ទទេចេញ 1 នៅលើវដ្តណាមួយ #15281)
 - [ ] `npm run check:any-budget:t11` — ក្នុងថវិកា
 - [ ] `npm run check:route-validation:t06` — ស្អាត
-- [ ] `npm run check:node-runtime` — បានគាំទ្រម៉ោងរត់ជាន់បានជួប (`>=22.22.2 <23`, `>=24.0.0 <27`, ក្នុងមួយ `SUPPORTED_NODE_RANGE` ក្នុង `src/shared/utils/nodeRuntimeSupport.ts`; តម្រឹមជាមួយ `package.json` `engines`)
+- [ ] `npm run check:node-runtime` — បានគាំទ្រពេលវេលារត់ជាន់បានជួប (`>=22.22.2 <23`, `>=24.0.0 <27`, ក្នុងមួយ `SUPPORTED_NODE_RANGE` ក្នុង `src/shared/utils/nodeRuntimeSupport.ts`; តម្រឹមជាមួយ `package.json` `engines`)
 
 ### ការធ្វើតេស្ត
 
@@ -130,7 +129,7 @@ Diff ដែលមានតែ test (ឯកសារទាំងអស់ស្�
 
 ### Hooks (Husky មានសុពលភាព)
 
-ទំពក់ Husky រស់នៅក្នុង `.husky/` ហើយដំណើរការដោយស្វ័យប្រវត្តិលើប្រតិបត្តិការ git ។
+Husky hooks រស់នៅក្នុង `.husky/` ហើយដំណើរការដោយស្វ័យប្រវត្តិលើប្រតិបត្តិការ git ។
 
 - **ការប្តេជ្ញាចិត្តជាមុន៖** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
 - **ការជំរុញជាមុន៖** ច្រកទ្វារកំណត់រហ័ស — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (ធ្វើឱ្យសកម្ម 2026-06-13) ។ ដោយចេតនាមិនរាប់បញ្ចូល `test:unit` (យឺត; គ្របដណ្តប់ដោយការងារ CI `test-unit` ) ។
@@ -151,7 +150,7 @@ Diff ដែលមានតែ test (ឯកសារទាំងអស់ស្�
 ### ឯកសារ
 
 - [ ] `npm run check:docs-sync` ឆ្លងកាត់ (ដំណើរការដោយស្វ័យប្រវត្តិដោយការប្តេជ្ញាចិត្តជាមុន)
-- [ ] `npm run check:docs-all` ឆ្លងកាត់ (ឆ័ត្រ៖ docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` ឆ្លងកាត់។ ការប្រឹក្សា `check:deprecated-versions` flags កំណែដែលបានកំណត់យ៉ាងច្បាស់ថា OmniRoute (3.6.x និងមុន) ហើយមិនអើពើកាលបរិច្ឆេទ។
 - [ ] `npm run check:env-doc-sync` ចេញ 0 — កូដ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env កិច្ចសន្យានៅដដែល
 - [ ] `npm run check:doc-links` ចេញពី 0 — មិនមានការបំបែកឯកសារយោងខាងក្នុងបន្ទាប់ពីរៀបចំរចនាសម្ព័ន្ធឡើងវិញ
 - [ ] `docs/architecture/ARCHITECTURE.md` បានពិនិត្យឡើងវិញសម្រាប់ storage/runtime drift
@@ -160,13 +159,13 @@ Diff ដែលមានតែ test (ឯកសារទាំងអស់ស្�
 - [ ] ប្រសិនបើមុខងារថ្មីមាន UI: `docs/guides/USER_GUIDE.md` និយាយអំពីវា។
 - [ ] ប្រសិនបើមុខងារថ្មីមាន API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` បានធ្វើបច្ចុប្បន្នភាព
 - [ ] ប្រសិនបើមុខងារថ្មីគឺជាម៉ូឌុល៖ ឧទ្ទិស `docs/<MODULE>.md` មាន
-- [ ] ប្រសិនបើការផ្លាស់ប្តូរផ្លាស់ប្តូរ៖ `docs/guides/TROUBLESHOOTING.md` មានកំណត់ចំណាំការធ្វើចំណាកស្រុក
+- [ ] ប្រសិនបើការផ្លាស់ប្តូរដែលបំបែក៖ `docs/guides/TROUBLESHOOTING.md` មានកំណត់ចំណាំការធ្វើចំណាកស្រុក
 
 ### i18n
 
-- [ ] `npm run i18n:check` ចេញពីស្ថានភាពបកប្រែ 0 — (`.i18n-state.json`) នៅក្នុងការស៊ីសង្វាក់ជាមួយឯកសារប្រភព (មិនមានប្រភពរសាត់ក្នុងរបៀបតឹងរ៉ឹងទេ ការណែនាំអំពីរបៀបព្រមានគឺអាចទទួលយកបានសម្រាប់ការប៉ះឯកសារនៅនាទីចុងក្រោយ ប៉ុន្តែគួរតែជា 0 មុនពេលដាក់ស្លាក)
-- [ ] `npm run i18n:check-ui-coverage` ចេញ 0 — រាល់មូលដ្ឋាន UI នៅ ឬលើសពីជាន់គ្របដណ្តប់ 80%
-- [ ] `npm run i18n:sync-ui:dry` រាយការណ៍ 0 សោដែលបាត់នៅទូទាំងមូលដ្ឋានគោលដៅ 66 (គ្រប់មូលដ្ឋានលើកលែងតែប្រភព `en` )
+- [ ] `npm run i18n:check` ចេញពីស្ថានភាពបកប្រែ 0 — (`.i18n-state.json`) ក្នុងសមកាលកម្មជាមួយឯកសារប្រភព (មិនមានប្រភពរសាត់ក្នុងរបៀបតឹងរ៉ឹងទេ ការណែនាំអំពីរបៀបព្រមានគឺអាចទទួលយកបានសម្រាប់ការប៉ះឯកសារនៅនាទីចុងក្រោយ ប៉ុន្តែគួរតែជា 0 មុនពេលដាក់ស្លាក)
+- [ ] `npm run i18n:check-ui-coverage` ចេញពី 0 — រាល់ទីតាំង UI នៅ ឬលើសពីជាន់គ្របដណ្តប់ 80%
+- [ ] `npm run i18n:sync-ui:dry` រាយការណ៍ 0 កូនសោដែលបាត់នៅទូទាំងមូលដ្ឋានគោលដៅ 66 (គ្រប់មូលដ្ឋានលើកលែងតែប្រភព `en` )
 - [ ] ប្រសិនបើឯកសារប្រភពភាសាអង់គ្លេសបានផ្លាស់ប្តូរ សូមដំណើរការ `npm run i18n:run` (ទាមទារ `OMNIROUTE_TRANSLATION_API_KEY` ក្នុង `.env`) មុនពេលដាក់ស្លាក
 - [ ] ការរួមចំណែកក្នុងការបកប្រែអាចត្រូវបានពន្យាពេលទៅការចេញផ្សាយបន្ទាប់ ប្រសិនបើអនីតិជន (បទនៅក្នុង CHANGELOG)
 
@@ -178,7 +177,7 @@ Diff ដែលមានតែ test (ឯកសារទាំងអស់ស្�
   - [ ] ដាក់លេខបានត្រឹមត្រូវ (គ្មានចន្លោះក្នុងលំដាប់)
 - [ ] សាកល្បងលើការដំឡើងថ្មី៖ លុប `~/.omniroute/omniroute.db` ហើយដំណើរការ `npm run dev`
 - [ ] សាកល្បងលើការដំឡើងដែលមានស្រាប់៖ បម្រុងទុក DB ដំណើរការការធ្វើចំណាកស្រុក ផ្ទៀងផ្ទាត់គ្រោងការណ៍
-- [ ] ឯកសារ WAL (`-wal`, `-shm`) ដោះស្រាយបានត្រឹមត្រូវ ប្រសិនបើការចំណាកស្រុកសរសេរតារាងឡើងវិញ
+- [ ] ឯកសារ WAL (`-wal`, `-shm`) ត្រូវបានដោះស្រាយយ៉ាងត្រឹមត្រូវ ប្រសិនបើការចំណាកស្រុកសរសេរតារាងឡើងវិញ
 
 ### កាតាឡុកអ្នកផ្តល់សេវា (Zod-validated)
 
@@ -399,13 +398,13 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
 ការរត់មិន `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, ខ្ចប់ tarball , ដំណើរការ `npm run check:pack-boot` ( អាថ៌កំបាំងក្លែងក្លាយ , ទិន្នន័យ ephemeral dir ), វេចខ្ចប់ឡើងវិញ និងបរាជ័យ លុះត្រាតែការរំលាយដូចគ្នាបេះបិទ បន្ទាប់មកកត់ត្រា `artifact-identity.json` ( head SHA, base SHA, lockfile ABI, platform , arch, — ) និង `scripts/release/artifact-identity.mjs` បញ្ជាក់ tarball នៅក្នុងការងារដាច់ដោយឡែកមួយ។ ការផ្សព្វផ្សាយការមើលជាមុនមានន័យថាការដំឡើង tarball នោះ៖ កុំបង្កើតឡើងវិញពីប្រភព។
 
-### ការកាត់ (3.9.0, បន្ទាប់ពី GO)
+### ការកាត់ (3.9.0 បន្ទាប់ពី GO)
 
 1. GO កត់ត្រាក្នុង [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` បោះពុម្ព `RESULT: READY`។

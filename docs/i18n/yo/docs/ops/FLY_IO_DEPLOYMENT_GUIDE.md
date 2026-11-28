@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Àwọn Pàràmítà Tí A Nílò
+## 5. Awọn paramita ti a beere
 
-Iṣẹ́ àkànṣe yìí dábàá pé kí a ṣètò ó kéré tán àwọn pàràmítà wọ̀nyí lórí Fly.io.
+Ise agbese yii ṣeduro atunto o kere ju awọn aye atẹle wọnyi lori Fly.io.
 
-### 5.1 Àwọn Pàràmítà Tí A Ti Fìdí Múlẹ̀
+### 5.1 Verified Parameters
 
-A ti lo àwọn pàràmítà wọ̀nyí nínú àwọn ìfilọ́lẹ̀ gangan lórí ohun èlò `omniroute` lọ́wọ́lọ́wọ́:
+A ti lo awọn paramita wọnyi ni awọn imuṣiṣẹ gangan lori ohun elo `omniroute` lọwọlọwọ:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (ó pọndandan ní production — a ń lò ó fún ìfàṣẹsí afárá WebSocket)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (beere fun iṣelọpọ — ti a lo fun ijẹrisi afara WebSocket )
 - `STORAGE_ENCRYPTION_KEY`
 
-### 5.2 Nípa `INITIAL_PASSWORD`
+### 5.2 Nipa `INITIAL_PASSWORD`
 
-Iṣẹ́ àkànṣe lọ́wọ́lọ́wọ́ kò ṣètò `INITIAL_PASSWORD` nítorí pé ìfilọ́lẹ̀ yìí kò nílò rẹ̀.
+Ise agbese lọwọlọwọ ko ṣeto `INITIAL_PASSWORD` nitori imuṣiṣẹ yii ko nilo rẹ.
 
-Tí a kò bá ṣètò rẹ̀:
+Ti ko ba ṣeto:
 
-- Àkọsílẹ̀ ìbẹ̀rẹ̀ yóò fi hàn pé ọ̀rọ̀ aṣínà àìyípadà ni `CHANGEME`
-- Ó yẹ kí o yí ọ̀rọ̀ aṣínà ìwọlé padà nínú àwọn ààtò ètò ní kíákíá lẹ́yìn ìfilọ́lẹ̀
+- O ṣẹda ọrọ igbaniwọle dasibodu ninu oluṣeto lori wiwọ ni ibẹwo akọkọ. Pari igbesẹ ọrọ igbaniwọle: fifo o wa ni pipa iwọle dasibodu, eyiti o jẹ ki dasibodu naa ṣii si ẹnikẹni ti o le de app URL
+- Aṣoju Fly ti de ohun elo lati adirẹsi ti kii ṣe loopback, nitorinaa lẹhin ti o ba fi ọrọ igbaniwọle sii oluṣeto naa beere fun ami-ami bootstrap-akoko kan, eyiti ohun elo naa tẹ si akọọlẹ rẹ ni akoko yẹn: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Ti ila yẹn ba ti yi lọ kuro ninu akọọlẹ, tun bẹrẹ app naa ki o fi oluṣeto naa silẹ lẹẹkansi lati tẹ ami tuntun kan sita.
 
-Tí o bá fẹ́ ṣètò ọ̀rọ̀ aṣínà backend ní ìbẹ̀rẹ̀ láìsí àbójútó, o lè ṣàfikún rẹ̀ nígbà tó bá yá:
+Lati ṣeto ọrọ igbaniwọle laisi abojuto dipo, ṣafikun ṣaaju ibẹwo dasibodu akọkọ (lẹẹkan ti ọrọ igbaniwọle ti wa ni fipamọ, a kọju `INITIAL_PASSWORD` ):
 
 - `INITIAL_PASSWORD`
 
@@ -274,60 +274,60 @@ Tí ojúewé `Secrets` inú console kò bá fi àwọn variable tí a retí hàn
 
 ---
 
-## 9. Àwọn Ìmúdójúìwọ̀n àti Ìtújáde Tó Tẹ̀lé
+## 9. Awọn imudojuiwọn ati awọn idasilẹ ti o tẹle
 
-Lẹ́yìn àwọn ìmúdójúìwọ̀n code, ìlànà ìtújáde rọrùn:
+Lẹhin awọn imudojuiwọn koodu, ilana itusilẹ jẹ taara:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Tí o bá nílò láti ṣe ìmúdójúìwọ̀n àwọn párámítà nìkan láì yí code padà:
+Ti o ba nilo lati ṣe imudojuiwọn awọn paramita nikan laisi iyipada koodu:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly yóò ṣe ìmúdójúìwọ̀n àwọn machine ní ọ̀kọ̀ọ̀kan láìfọwọ́yí.
+Fly yoo ṣe imudojuiwọn yiyi ti awọn ẹrọ laifọwọyi.
 
-### 9.1 Títọ́pa Àwọn Ìmúdójúìwọ̀n Upstream Repository Nígbà Tí O Ń Pa `fly.toml` Ti Fork Rẹ Mọ́
+### 9.1 Titọpa Awọn imudojuiwọn Ibi-ipamọ Ilọsiwaju Lakoko ti o ṣe itọju `fly.toml` orita rẹ
 
-Tí repository lọ́wọ́lọ́wọ́ bá jẹ́ fork tí o sì fẹ́ mú àwọn ìmúdójúìwọ̀n pọ̀ pẹ̀lú upstream `https://github.com/diegosouzapw/OmniRoute`, tẹ̀lé ìṣàn iṣẹ́ tó wà ní ìsàlẹ̀.
+Ti ibi ipamọ lọwọlọwọ ba jẹ orita ati pe o fẹ lati mu awọn imudojuiwọn ṣiṣẹpọ lati oke `https://github.com/cheaper-inference/OmniRoute`, tẹle ṣiṣan iṣẹ ni isalẹ.
 
-Lákọ̀ọ́kọ́, ṣàyẹ̀wò àwọn remote rẹ:
+Ni akọkọ, ṣayẹwo awọn isakoṣo latọna jijin rẹ:
 
 ```powershell
 git remote -v
 ```
 
-Ó yẹ kí o rí ó kéré tán:
+O yẹ ki o wo o kere ju:
 
-- `origin` tó ń tọ́ka sí fork tirẹ
-- `upstream` tó ń tọ́ka sí repository àkọ́kọ́
+- `origin` ntokasi si ara rẹ orita
+- `upstream` ntokasi si ibi ipamọ atilẹba
 
-Tí a kò bá tíì ṣètò `upstream`, ṣàfikún un:
+Ti ko ba tunto `upstream`, fi kun:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Ṣáájú mímú pọ̀ pẹ̀lú upstream, gba àwọn commit àti tag tuntun jù lọ:
+Ṣaaju mimuuṣiṣẹpọ pẹlu oke, mu awọn adehun tuntun ati awọn afi:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Ṣàyẹ̀wò version lọ́wọ́lọ́wọ́ àti àwọn tag upstream:
+Ṣayẹwo ẹya ti isiyi ati awọn aami oke:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Àkíyèsí: Version project lọ́wọ́lọ́wọ́ ni `v3.8.0`. Àwọn ìtọ́kasí `v3.4.7` tó wà ní ìsàlẹ̀ jẹ́ àpẹẹrẹ ìtàn nìkan. Fún àwọn ìtújáde gangan, lo `:latest` tàbí tag version lọ́wọ́lọ́wọ́ (fún àpẹẹrẹ, `:v3.8.0`).
+> Akiyesi: Ẹya iṣẹ akanṣe lọwọlọwọ jẹ `v3.8.0`. Awọn itọkasi `v3.4.7` ni isalẹ wa ni ipamọ bi awọn apẹẹrẹ itan nikan. Fun awọn idasilẹ gangan, lo `:latest` tabi aami ẹya ti isiyi (fun apẹẹrẹ `:v3.8.0`).
 
-Tí o bá fẹ́ merge `main` upstream tuntun jù lọ nígbà tí o ń fi agbára pa `fly.toml` ti fork rẹ mọ́, tẹ̀lé ìṣàn iṣẹ́ yìí:
+Ti o ba fẹ dapọ `main` oke tuntun lakoko ti o tọju `fly.toml` orita rẹ ni agbara, tẹle iṣan-iṣẹ yii:
 
 ```powershell
 git merge upstream/main
@@ -337,34 +337,34 @@ git commit -m "chore(deploy): keep fork fly.toml"
 git push origin main
 ```
 
-Àwọn àkíyèsí:
+Awọn akọsilẹ:
 
-- `git merge upstream/main` ń mú code tuntun jù lọ láti repository àkọ́kọ́ wọ̀pọ̀
-- `git checkout HEAD~1 -- fly.toml` ń mú `fly.toml` tirẹ padà láti ipò rẹ̀ ṣáájú merge
-- Tí upstream kò bá ṣàtúnṣe `fly.toml`, ìgbésẹ̀ yìí kò ní mú ìyàtọ̀ kankan wá
-- Tí upstream bá ṣàtúnṣe `fly.toml`, ìgbésẹ̀ yìí máa rí i dájú pé orúkọ application Fly rẹ, volume mount, region, àti àwọn deployment configuration mìíràn tó jẹ́ pàtó sí fork rẹ kò ní di títúnkọ
+- `git merge upstream/main` mu koodu tuntun ṣiṣẹpọ lati ibi ipamọ atilẹba
+- `git checkout HEAD~1 -- fly.toml` ṣe atunṣe `fly.toml` orita tirẹ lati ṣaju iṣakojọpọ
+- Ti oke ko ba yipada `fly.toml`, igbesẹ yii kii yoo ṣafihan eyikeyi awọn iyatọ
+- If upstream did modify `fly.toml`, igbesẹ yii ṣe idaniloju orukọ ohun elo Fly rẹ, oke iwọn didun, agbegbe, ati iṣeto imuṣiṣẹ imuṣiṣẹ orita miiran ko ni atunkọ
 
-Tí o bá fẹ́ mú un bá tag ìtújáde kan pàtó mu (fún àpẹẹrẹ, `v3.4.7`), kọ́kọ́ ṣàyẹ̀wò pé tag náà ti wà nínú `upstream/main`:
+Ti o ba fẹ lati ṣe deedee pẹlu aami itusilẹ kan pato (fun apẹẹrẹ `v3.4.7`), akọkọ rii daju pe tag ti wa tẹlẹ ninu `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Àbájáde àṣeyọrí túmọ̀ sí pé `upstream/main` ti ní version yẹn; o lè kàn merge `upstream/main`.
+Ipadabọ aṣeyọri tumọ si `upstream/main` tẹlẹ ni ẹya yẹn; o le jiroro dapọ `upstream/main`.
 
-### 9.2 Ọ̀wọ̀ọ̀wọ́ Ìtújáde Bóṣewa Lẹ́yìn Mímú Pọ̀ Pẹ̀lú Upstream
+### 9.2 Standard Tu Ọkọọkan Lẹhin mimuuṣiṣẹpọ Upstream
 
-Lẹ́yìn mímú pọ̀ pẹ̀lú repository àkọ́kọ́, tẹ̀lé ìtòlẹ́sẹẹsẹ ìtújáde tí a dámọ̀ràn yìí:
+Lẹhin mimuuṣiṣẹpọ pẹlu ibi ipamọ atilẹba, tẹle aṣẹ itusilẹ ti a ṣeduro yii:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Mú `fly.toml` ti fork náà padà
+3. Pada `fly.toml` orita naa pada
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Èyí ni ìṣàn iṣẹ́ gangan tí a lò nígbà tí a ń ṣe ìgbéga project lọ́wọ́lọ́wọ́ sí `v3.4.7` (àpẹẹrẹ náà ń tọ́ka sí version ìtàn; version gangan lọ́wọ́lọ́wọ́ ni `v3.8.0`).
+Eyi ni ṣiṣiṣẹsẹhin gangan ti a lo nigbati iṣagbega iṣẹ akanṣe lọwọlọwọ si `v3.4.7` (apẹẹrẹ n tọka si ẹya itan; ẹya gangan lọwọlọwọ jẹ `v3.8.0`).
 
 ---
 
@@ -418,40 +418,40 @@ Tí o bá rí `/app/data/...` dípò rẹ̀, a ti ṣètò `DATA_DIR` lọ́nà 
 
 ---
 
-## 12. Àwọn Ìṣòro Tó Wọ́pọ̀
+## 12. Wọpọ oran
 
-### 12.1 Ojú-ìwé `Secrets` Ṣófo
+### 12.1 `Secrets` Page Se Sofo
 
-Ìdí méjì ló sábà máa ń fà á:
+Awọn idi meji nigbagbogbo wa:
 
-- O kò tíì ṣiṣẹ́ `flyctl secrets set`
-- O ń wo ìṣàfilọ́lẹ̀ mìíràn (fún àpẹẹrẹ, `oroute` dípò `omniroute`)
+- O ko tii ṣiṣe `flyctl secrets set`
+- O n wo ohun elo ti o yatọ (fun apẹẹrẹ `oroute` dipo `omniroute`)
 
-### 12.2 `flyctl deploy` Ṣe Ìròyìn `app not found`
+### 12.2 `flyctl deploy` Iroyin `app not found`
 
-Kọ́kọ́ ṣẹ̀dá ìṣàfilọ́lẹ̀ náà:
+Ṣẹda ohun elo akọkọ:
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-### 12.3 Ṣíṣàyẹ̀wò Gírámà `fly.toml` Kùnà
+### 12.3 `fly.toml` Parsing Ikuna
 
-Ṣàyẹ̀wò àwọn nǹkan wọ̀nyí:
+Ṣayẹwo awọn wọnyi:
 
-- Bóyá àwọn àmì tí ó dàrú wà nínú àwọn àlàyé
-- Bóyá lílo àmì ìsọ àti ìfàsẹ́yìn TOML tọ̀nà
+- Boya awọn ohun kikọ garbled wa ninu awọn asọye
+- Boya TOML agbasọ ati indentation jẹ deede
 
-### 12.4 Dátà Kò Dúró Títí
+### 12.4 Data ko duro
 
-Ṣàrídájú àwọn méjèèjì wọ̀nyí:
+Jẹrisi awọn mejeeji ti atẹle:
 
-- `fly.toml` ní `destination = '/data'`
-- A ṣètò `DATA_DIR` sí `/data`
+- `fly.toml` ni `destination = '/data'` ninu
+- `DATA_DIR` ti ṣeto si `/data`
 
-### 12.5 Ṣé Ó Lè Ṣiṣẹ́ Láìsí `INITIAL_PASSWORD`?
+### 12.5 Njẹ O le Ṣiṣe Laisi `INITIAL_PASSWORD`?
 
-Bẹ́ẹ̀ ni, ó lè ṣiṣẹ́. Yóò padà lo ọ̀rọ̀ aṣínà àiyipada `CHANGEME`. A dábàá pé kí o yí ọ̀rọ̀ aṣínà backend padà ní kété tó bá ṣeé ṣe nínú àyíká production.
+Bẹẹni. Pẹlu `INITIAL_PASSWORD` unset, o ṣẹda ọrọ igbaniwọle dasibodu ninu oluṣeto lori wiwọ ni ibẹwo akọkọ (apakan 5.2 ni wiwa ami ami bata-akoko kan ati igbesẹ ọrọ igbaniwọle).
 
 ---
 

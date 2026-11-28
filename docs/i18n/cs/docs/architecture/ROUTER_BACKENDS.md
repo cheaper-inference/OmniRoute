@@ -41,48 +41,31 @@ Kontrakt `domain/routing/routerBackends.ts` (kód bude začleněn v rámci [#586
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`, `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) umožňují volajícím filtrovat podle toho, co daný engine skutečně umí, namísto pevně zakódovaných větví pro jednotlivé identifikátory.
 
-## Osa A — vestavěné služby (strana spravovaného procesu)
+## Vestavěné služby Axis A — (strana procesu pod dohledem)
 
-- **Registr spravovaných procesů:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (aktuálně: `9router`, `cliproxy`).
-- **Vlastník životního cyklu:** `src/lib/services/ServiceSupervisor.ts` — `start()` spustí
-  podřízený proces, čeká na úspěšné dokončení `waitForHealthy()`, zachytává stdout/stderr do kruhového bufferu;
-  `stop()` provede SIGTERM→SIGKILL; vše je serializováno pomocí zámku.
-- **Sjednocení stavů** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error` a k tomu
-  ortogonální `HealthState = healthy | unhealthy | unknown`.
-- **Proč samostatný proces (a ne SDK běžící uvnitř procesu)?** Izolace procesů umožňuje
-  nezávisle řídit instalaci/spuštění/zastavení/stav/protokoly každého sidecaru a dovoluje
-  použít ochranu spouštění omezenou na loopback. Modelování adaptéru běžícího uvnitř procesu je plánováno do budoucna —
-  právě k jeho vyjádření by sloužil příznak schopnosti `native-hot-path`.
+- **Registr kontrolovaných procesů:** `src/lib/services/bootstrap.ts` `SERVICES[]` (dnes: `9router`, `cliproxy`).
+- **Majitel životního cyklu:** `src/lib/services/ServiceSupervisor.ts` — `start()` vytvoří dítě, brány na `waitForHealthy()`, klepne stdout/stderr do kruhové vyrovnávací paměti; `stop()` SIGTERM→SIGKILL; vše serializováno pod zámkem.
+- **Státní svazek** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error` plus ortogonální `HealthState = healthy | unhealthy | unknown`.
+- **Proč samostatný proces (nikoli in-proc SDK)?** Procesní izolace je to, co dělá install/start/stop/health/logs nezávisle ovladatelný na sajdkáru a umožňuje použít ochranu proti zpětné smyčce. Modelování in-proc adaptéru je budoucí práce — tam, kde by to bylo vyjádřeno, je příznak schopnosti `native-hot-path`.
 
-### Kontrakt tras životního cyklu (`/api/services/<tool>/…`)
+### Smlouva o trase životního cyklu (`/api/services/<tool>/…`)
 
-Stavové kódy jsou **záměrně specifické pro stav/sloveso/cestu** — jde o kontrakt, nikoli
-nekonzistenci:
+Stavové kódy jsou**state/verb/path-specific podle návrhu** — toto je smlouva, ne nekonzistence:
 
-| Volání                          | Podmínka                                    | Stav                                   |
-| ------------------------------- | ------------------------------------------- | -------------------------------------- |
-| `POST .../start`                | služba je `not_installed`                   | **409** (nesplněný předpoklad)         |
-| `POST .../stop`                 | již zastaveno                               | **200** (idempotentní prázdná operace) |
-| `GET .../status`                | v pořádku                                   | **200** (`live ?? row ?? "unknown"`)   |
-| `POST .../start`                | selhání spuštění                            | **503** (přechodné)                    |
-| `GET .../status`, `.../stop`    | nezachycená chyba                           | **500**                                |
-| `GET /api/services/<x>/logs`    | neznámý nástroj `<x>`                       | **404** `Service '<x>' not found`      |
-| `GET .../status?reveal=key`     | chybí `X-Reveal-Confirm: yes`               | **403** (pouze 9router)                |
-| **libovolné** `/api/services/*` | volající není z loopbacku/privátní sítě LAN | **403 LOCAL_ONLY**                     |
+| Volání                       | Stav                             | Postavení                            |
+| ---------------------------- | -------------------------------- | ------------------------------------ |
+| `POST .../start`             | služba `not_installed`           | **409** (předpoklad)                 |
+| `POST .../stop`              | již zastaveno                    | **200** (idempotentní ne-op)         |
+| `GET .../status`             | OK                               | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`             | neúspěch spawn                   | **503** (přechodné)                  |
+| `GET .../status`, `.../stop` | nezachycená chyba                | **500**                              |
+| `GET /api/services/<x>/logs` | neznámý nástroj `<x>`            | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`  | chybí `X-Reveal-Confirm: yes`    | **403** (pouze 9 router)             |
+| **žádný** `/api/services/*`  | volající ne loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-Všechna těla chyb mají strukturu vytvořenou funkcí `createErrorResponse()` →
-`{ error: { message, type }, requestId }`, kde je `type` odvozen od stavu
-(`500→server_error`, `404→not_found`, `409→conflict`, jinak `invalid_request`) a
-slouží jako strojově zpracovatelný rozlišovací údaj. Zprávy jsou předem sanitizovány
-(`sanitizeErrorMessage()`, Tvrdé pravidlo č. 12).
+Všechna chybová těla jsou tvarována `createErrorResponse()` → `{ error: { message, type }, requestId }`, kde `type` je odvozeno od stavu (`500→server_error`, `404→not_found`, `409→conflict`, jinak `invalid_request`) a je strojově ovladatelným diskriminátorem. Zprávy jsou předem dezinfikovány (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**Ochrana loopbacku** je nejčastějším zdrojem odpovědi `403`: `/api/services/` je v
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) a
-`src/server/authz/policies/management.ts` odmítá všechny volající, kteří nejsou z loopbacku / privátní sítě LAN,
-**ještě před ověřením**, protože tyto trasy spouštějí podřízené procesy (Tvrdá pravidla č. 15
-a 17). Přístup k nim prostřednictvím veřejného tunelu končí záměrně stavem `403`.
+**Hlídač zpětné smyčky** je nejběžnějším zdrojem `403`: `/api/services/` je v `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) a `src/server/authz/policies/management.ts` odmítá jakéhokoli volajícího bez zpětné smyčky / bez soukromé sítě LAN** před auth** , protože tyto cesty vytvářejí podřízené procesy (Tvrdá pravidla 15 a 17). Dostat se k nim veřejným tunelem je `403` záměrně.
 
 ## Osa B — backend směrování relay (strana dispatchingu)
 

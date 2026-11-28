@@ -4,30 +4,13 @@
 
 ---
 
-> **Isi mmalite eziokwu:** `src/lib/memory/` na `src/app/api/memory/`
-> **Emelitere ikpeazụ:** 2026-06-28 — v3.8.40 (agbanyụrụ-na-ndabara + mmejuputa quantization int8)
+> **Isi mmalite nke eziokwu:** `src/lib/memory/` na `src/app/api/memory/`
 
-OmniRoute na-enye ebe nchekwa mkparịta ụka na-adịgide adịgide nke a na-eji API key
-amata (yana session id ma ọ bụrụ na achọrọ). A na-ewepụta ncheta na-akpaghị aka site
-na nzaghachi LLM site n'iji regex dị mfe achọ ụkpụrụ, wee tinye ha ọzọ n'arịrịọ
-ndị na-esote dịka ozi system dị n'isi (ma ọ bụ ozi user mbụ maka ndị na-eweta ọrụ
-na-ajụ role system).
+OmniRoute na-enye ebe nchekwa mkparịta ụka na-adịgide adịgide nke igodo API mere (yana id nnọkọ nke nhọrọ). A na-ewepụta ncheta na-akpaghị aka site na nzaghachi LLM site na nha nha regex dị fechaa ma tinyeghachi ya na arịrịọ ndị na-esote dị ka ozi sistemụ na-eduga (ma ọ bụ ozi onye ọrụ mbụ maka ndị na-eweta na-ajụ ọrụ sistemụ).
 
-> **Agbanyụrụ ebe nchekwa na ndabara (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> bụzi `false` (`src/lib/memory/settings.ts`). Ịgbanye ebe nchekwa na-etinye ihe ruru
-> `maxTokens` (~2k) nke context eweghachitere n'ime arịrịọ chat **ọ bụla**, nke a
-> na-akwụ ụgwọ ya — ụgwọ a na-atụghị anya ya maka nrụnye ọhụrụ na maka ndị ahịa
-> na-ejikwa context nke ha. Họrọ ịbanye n'ụzọ doro anya n'okpuru **Settings → Memory**
-> (`MemorySkillsTab` na-egosi ọkwa ịdọ aka ná ntị banyere ụgwọ token mgbe agbanyere
-> ebe nchekwa). Onye ahịa nwere ike wepụ otu arịrịọ site na iji header arịrịọ
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — lee tebụl header arịrịọ dị na
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Arịrịọ na-enweghị ebe nchekwa
-> na-edobe `memoryOwnerId = null`, nke na-agbanyụ ntinye **ma** ebe nchekwa **ma**
-> skill maka arịrịọ ahụ (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Ebe nchekwa bụ OFF na ndabara (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` ugbu a `false` (`src/lib/memory/settings.ts`). Ịkwado ebe nchekwa na-agbanye ruo `maxTokens` (~ 2k) nke ọnọdụ eweghachite n'ime** nke ọ bụla** Arịrịọ nkata, nke a na-akwụ — ọnụ ahịa dị ịtụnanya maka nrụnye ọhụrụ yana maka ndị ahịa na-ejikwa ọnọdụ nke ha. Họrọ n'ụzọ doro anya n'okpuru** Ntọala → Ebe nchekwa** ( `MemorySkillsTab` na-egosi oku ịdọ aka ná ntị ọnụ ọnụ mgbe agbanyere ebe nchekwa). Onye ahịa nwere ike họrọ otu arịrịọ site na isi okwu `x-omniroute-no-memory` (`true`/`1`/`yes`) — hụ tebụl arịrịọ nkụnye eji isi mee na [API_REFERENCE.md](../reference/API_REFERENCE.md). Arịrịọ enweghị ebe nchekwa na-esetịpụ `memoryOwnerId = null`, nke na-ewepụ** ha abụọ** ebe nchekwa na injection nka maka arịrịọ ahụ (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-A na-ekewa ebe nchekwa **n'otu API key**, ọ bụghị n'otu onye ọrụ — arịrịọ ọ bụla
-ejiri otu API key mee nkwenye njirimara na-ekekọrịta otu nchịkọta ebe nchekwa,
-ma enwere ike iji `sessionId` kewaa ya karịa ma ọ bụrụ na achọrọ.
+Ebe nchekwa bụ** scoped kwa igodo API** , ọ bụghị kwa onye ọrụ — arịrịọ ọ bụla ejiri otu igodo API na-ekekọrịta otu ọdọ mmiri ebe nchekwa, yana nhọrọ ọzọ site na `sessionId`.
 
 ## Nhazi usoro
 
@@ -336,27 +319,17 @@ Atụmatụ iweghachite nke `MemoryConfig` bụ otu n'ime `exact`, `semantic`, m
 ebe oke ya bụ otu n'ime `session`, `apiKey`, ma ọ bụ `global`. Oke ndabara sitere na
 `getMemorySettings()` bụ `apiKey`.
 
-## Iwepụta Eziokwu (`extraction.ts`)
+## Mwepụta eziokwu (`extraction.ts`)
 
-Iwepụta ihe a dabere na **regex**, ọ bụghị na LLM — ọ na-arụ n'ime usoro ahụ site na
-`setImmediate()` ka ọ ghara igbochi iyi nzaghachi:
+Mwepụta bụ** regex dabere** , ọ bụghị — dabeere na LLM ọ na-eji `setImmediate()` na-arụ ọrụ ya mere ọ dịghị mgbe ọ na-egbochi iyi nzaghachi:
 
-- **Ụkpụrụ mmasị** → `MemoryType.FACTUAL`
-  (dịka `M na-ahọrọ …`, `Ihe a na-amasị m nke ukwuu bụ …`, `ọkacha mmasị m bụ …`, `Akpọrọ m … asị`)
-- **Ụkpụrụ mkpebi** → `MemoryType.EPISODIC`
-  (dịka `M ga-eji …`, `Ahọrọ m …`, `M họọrọ …`, `M ga-amalite iji …`)
-- **Ụkpụrụ omume** → `MemoryType.FACTUAL`
-  (dịka `M na-emekarị …`, `M na-eme … mgbe niile`, `M na-enwekarị ike …`)
+- **Ụkpụrụ mmasị** → `MemoryType.FACTUAL` (dịka `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Usoro mkpebi** → `MemoryType.EPISODIC` (dịka `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Ụkpụrụ ụkpụrụ** → `MemoryType.FACTUAL` (dịka `I usually …`, `I always …`, `I tend to …`)
 
-A na-ehicha ndakọrịta ọ bụla (`trim`, ijikọ oghere ndị na-eso ibe ha, na ịkwụsị ya na mkpụrụedemede 500),
-na-ewepụkwa oyiri n'ime otu ìgwè ahụ site na `factKey(category, content)` kwụsiri ike, wee
-chekwaa ya site na `createMemory()` ya na metadata
-`{category, extractedAt, source: "llm_response"}`. A na-akwụsị ederede ntinye na
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — mgbe ọ karịrị nke ahụ, a na-eji **ọdụ** ederede ahụ
-ka ọdịnaya onye enyemaka kacha ọhụrụ nwee ike isonye mgbe niile.
+A na-eme ka egwuregwu ọ bụla dị ọcha (`trim`, Whitespace-Collapse, nke etinyere na chars 500), depụtaghachiri ya n'ime batch site na `factKey(category, content)` kwụsiri ike ma chekwaa ya site na `createMemory()` na metadata `{category, extractedAt, source: "llm_response"}`. Edebere ederede ntinye na 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — mgbe ọ dị ogologo, nke** ọdụ** nke ederede na-eji ya mere ọdịnaya enyemaka kacha ọhụrụ na-esonye mgbe niile.
 
-A na-ebupụ `extractFactsFromText(text)` maka ule, ọ na-eweghachikwa eziokwu ndị ahaziri
-n'enweghị ichekwa ha.
+a na-ebupụ `extractFactsFromText(text)` maka ule wee weghachi eziokwu ahaziri echekwa na-echekwaghị ya.
 
 ## Iweghachite (`retrieval.ts`)
 
@@ -703,22 +676,22 @@ Nnwale arụmọrụ na sava x86 nwere isi 4 a na-ahụkarị (ederede ọ bụl
 
 ---
 
-## Usoro Nwepụta Eziokwu (v3.8.16+)
+## Ụkpụrụ Mwepụta Eziokwu (v3.8.16 +)
 
-Modul `extraction.ts` (`src/lib/memory/extraction.ts`) na-eji **ndakọrịta usoro regex** ewepụta eziokwu ahaziri ahazi site na ozi mkparịta ụka. Ịghọta usoro ndị a na-enyere gị aka imezi ogo nwepụta maka ojiji gị.
+Modul `extraction.ts` (`src/lib/memory/extraction.ts`) na-eji** regex ụkpụrụ dakọtara** iwepụta eziokwu ahaziri ahazi na ozi mkparịta ụka. Ịghọta ụkpụrụ ndị a na-enyere gị aka ịhazi ogo mmịpụta maka ihe eji eme ihe gị.
 
-### Otu Usoro Ndabara
+### Otu ụkpụrụ ndabara
 
-| Otu                 | Ọmụmaatụ usoro                                                                 | Ihe ọ na-ejide                 |
-| ------------------- | ------------------------------------------------------------------------------ | ------------------------------ |
-| PREFERENCE_PATTERNS | `"Ihe <X> ka m na-ahọrọ"`, `"Ihe <X> na-amasị m"`, `"Akpọrọ m <X> asị"`        | Mmasị onye ọrụ                 |
-| DECISION_PATTERNS   | `"Aga m eji <X>"`, `"Ekpebiri m ime <X>"`, `"Ahọrọ m <X>"`                     | Mkpebi onye ọrụ (episodic)     |
-| PATTERN_PATTERNS    | `"M na-emekarị <X>"`, `"M na-eme <X> mgbe niile"`, `"Anaghị m eme <X> ma ọlị"` | Usoro omume na-adịgide adịgide |
+| Otu                 | Ụdị ihe atụ                                                 | Na-ejide                        |
+| ------------------- | ----------------------------------------------------------- | ------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Mmasị onye ọrụ                  |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Mkpebi onye ọrụ (episodic)      |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Ụkpụrụ omume na-adịgide adịgide |
 
-### Ọmụmaatụ Usoro (E mere ka ha dị mfe)
+### Ụkpụrụ Ọmụmaatụ (Adị mfe)
 
 ```ts
-// Site na src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -731,36 +704,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Ihe A Na-ewepụta
+### Ihe a na-ewepụta
 
 Mgbe onye ọrụ kwuru:
 
-> "TypeScript ka m na-ahọrọ. Aga m eji Postgres maka ọrụ a. M na-eme commit mgbe niile tupu m emee push. Python anaghị amasị m."
-> Nwepụta ahụ na-emepụta ebe nchekwa 4:
+> "M na-ahọrọ TypeScript. M ga-eji Postgres maka ọrụ a. M na-eme mgbe niile tupu ịkwanye. Achọghị m Python." Mwepụta na-emepụta ncheta 4:
 >
-> | Igodo                                | Otu    | Ụdị      | Ọdịnaya               |
-> | ------------------------------------ | ------ | -------- | --------------------- |
-> | `preference:typescript`              | mmasị  | eziokwu  | "TypeScript"          |
-> | `decision:postgres_for_this_project` | mkpebi | episodic | "Postgres maka ọrụ a" |
-> | `pattern:commit_before_pushing`      | usoro  | eziokwu  | "commit tupu push"    |
-> | `preference:python`                  | mmasị  | eziokwu  | "Python"              |
+> | Igodo | udi | Ụdị | ọdịnaya | | ------------------------------------------------- | ----------- | ----------- | ---------------------- | | `preference:typescript` | mmasị | factual | "TypeScript" | | `decision:postgres_for_this_project` | mkpebi | episodic | maka | Postgres a ụkpụrụ | " `pattern:commit_before_pushing` | a ụkpụrụ zq" | factual | "mee tupu ịkwatu" | | `preference:python` | mmasị | factual | "Python" |
 
-### Oke Nwepụta
+### Oke mmịpụta
 
-Iji gbochie nwepụta na-enweghị njedebe, oke ndị a na-emetụta ya:
+Iji gbochie mmịpụta agbapụ, oke ndị a na-emetụta:
 
-| Ogologo ọdịnaya kacha nta | mkpụrụedemede 3 |
-| Ogologo ọdịnaya kacha ukwuu | mkpụrụedemede 500 |
+| Ogologo ọdịnaya min | 3 agwa |
+| Ogologo ọdịnaya kachasị | 500 chars |
 
-### Mgbe A Ga-agbanyụ Nwepụta
+### Mgbe iji gbanyụọ mmịpụta
 
-Nwepụta na-arụ ọrụ na-akpaghị aka mgbe ọ bụla agbanyere ebe nchekwa; enweghị mgba ọkụ
-dị iche maka naanị nwepụta. Iji gbanyụọ ya, gbanyụọ ebe nchekwa kpamkpam (`enabled: false`
-site na `PUT /api/settings/memory`). Tụlee ime nke a mgbe:
+Mwepụta na-agba ọsọ na-akpaghị aka mgbe ọ bụla akwadoro ebe nchekwa; enweghị mwepu dị iche iche-naanị ntụgharị. Iji gbanyụọ ya, gbanyụọ ebe nchekwa kpamkpam (`enabled: false` via `PUT /api/settings/memory`). Tụlee ime otú ahụ mgbe:
 
-- Ị nwere ọtụtụ ozi, ọnụ ahịa nwepụta ahụ adịghịkwa ntakịrị
-- Mkparịta ụka gị na-abụkarị nke nwa oge (nkata, idozi njehie) na-enweghị uru ogologo oge
-- Ị na-eji plugin omenala echekwa ọnọdụ ugbua
+- Ị nwere olu ozi dị elu yana ọnụ ahịa mmịpụta abụghị obere ihe
+- Mkparịta ụka gị na-adịkarị obere oge (akparịta ụka, nbibi) na-enweghị uru na-adịte aka
+- Ị na-ewere ọnọdụ gburugburu site na plugins omenala
 
 ---
 

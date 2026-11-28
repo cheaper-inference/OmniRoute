@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) és OpenCode (`x-opencode-session`) azonos 
 
 A munkakönyvtár gépenként eltérő, így ugyanaz a lerakat különböző útvonalakon jelenhet meg. Ehelyett kifejezetten küldje el a projektet: Claude Code minden modellkéréshez hozzáadja `ANTHROPIC_CUSTOM_HEADERS` -ben felsorolt fejléceket, OmniRoute pedig kettőt olvas be közülük:
 
-| Fejléc                     | Érték                                                           |
-| -------------------------- | --------------------------------------------------------------- |
-| `x-omniroute-project`      | Projekt neve, pl `omniroute`                                    |
-| `x-omniroute-project-repo` | Normalizált távirányító, pl `github.com/diegosouzapw/OmniRoute` |
+| Fejléc                     | Érték                                                                |
+| -------------------------- | -------------------------------------------------------------------- |
+| `x-omniroute-project`      | Projekt neve, pl `omniroute`                                         |
+| `x-omniroute-project-repo` | Normalizált távirányító, pl `github.com/cheaper-inference/OmniRoute` |
 
 Mindkettő csak forrásmegjelölés céljából olvasható; soha nem továbbítják az upstream szolgáltatóhoz.
 
@@ -249,28 +249,20 @@ további kapcsolókra. Felülbírálás futtatásonként: `--remote` / `--api-ke
 
 ## Hibaelhárítás
 
-**A Claude Code figyelmen kívül hagyja az átjárót** — ellenőrizze, hogy az `ANTHROPIC_BASE_URL` végén **nincs
-`/v1`**, majd indítsa újra a `claude` parancsot (a környezeti változók beolvasása csak egyszer, indításkor történik). Az `omniroute launch`
-ezt automatikusan kezeli.
+**Claude kód figyelmen kívül hagyja az átjárót** — megerősítése, `ANTHROPIC_BASE_URL` rendelkezik** nincs `/v1`** és indítsa újra `claude` (az env-t indításkor egyszer olvassa el). `omniroute launch` intézi ezt helyetted.
 
-**A `/model` választó üres / hiányoznak belőle az átjáró modelljei** — ehhez Claude Code
-v2.1.219+ és `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` szükséges. Csak a `claude*` /
-`anthropic*` modellazonosítók jelennek meg a választóban; bármely más modell használatát az
-`ANTHROPIC_MODEL=<id>` beállítással kényszerítheti ki (a profilok is ezt teszik).
+**`/model` picker üres / hiányzik az átjárómodellek** — szüksége van Claude Code v2.1.219 + és `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Csak `claude*` / `anthropic*` modell IDs jelenik meg a pickerben; minden más modellt erőltessen `ANTHROPIC_MODEL=<id>` vel (a profilok ezt teszik).
 
-**`400 Ambiguous model 'claude-…'`** — a Claude Code mindig **előtag nélküli**
-modellazonosítókat küld (például `claude-opus-4-8`), ezért ha a Claude Code (`cc/…`) és a
-Claude (`claude/…`) szolgáltató is csatlakoztatva van, a puszta azonosító két útvonalra is illeszkedik, és az
-OmniRoute nem próbál találgatni. Kétféleképpen javíthatja: rögzítsen egy előtaggal ellátott azonosítót az
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` beállítással, vagy engedélyezze a **Claude Code előnyben részesítése az
-előtag nélküli Claude-modelleknél** lehetőséget — ez a Claude szolgáltatói oldalán található kapcsoló, illetve az
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` beállítás (alapértelmezés szerint kikapcsolva;
-lásd: [Környezeti változók](../reference/ENVIRONMENT.md)) —, amely az előtag nélküli `claude-*`
-azonosítókat inkább a Claude Code-hoz irányítja. A kifejezetten megadott szolgáltatói előtagok mindig elsőbbséget élveznek.
+**`400 Ambiguous model 'claude-…'`** — Claude A kód mindig elküldi** előtag nélküli** modell IDs (pl. `claude-opus-4-8`), így amikor a Claude Code (`cc/…`) és Claude (`claude/…`) szolgáltatók is összekapcsolódnak, a puszta azonosító két útvonalat egyezik, és OmniRoute nem hajlandó kitalálni. Javítsa meg mindkét módon: rögzítse az előtaggal ellátott azonosítót `ANTHROPIC_MODEL=cc/claude-opus-4-8`-val, vagy engedélyezze** Claude kód előnyben részesítése előtag nélküli Claude modelleknél** — a kapcsoló a Claude szolgáltató oldalán, vagy `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (alapértelmezett kikapcsolva; lásd: [Környezet](../reference/ENVIRONMENT.md) ) — amely a csupasz `claude-*` IDs Claude kódba irányítja. Az explicit szolgáltatói előtagok mindig nyernek.
 
-**Hitelesítési hibák** — a profil nem tartalmaz tokent. Használja az `omniroute launch --profile`
-parancsot (ez beilleszti a tokent), vagy exportálja az `ANTHROPIC_AUTH_TOKEN` változót.
+**„automatikus mód… ez a munkamenet nem alkalmas” (az osztályozó kéréseket számlázzuk)** — automatikus módban Claude Code arra kéri a szervert, hogy vizsgálja felül a saját modellkérésein belüli műveleteket ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Ehhez szükség van a `anthropic-beta` `dangerous-tool-use-2026-09-03` értékre és a `safeguards` testmezőre, hogy elérje Anthropic párként, és `safeguard_results` plusz az upstream tool-use IDs változatlan formában térjen vissza. OmniRoute ezt akkor teszi meg, ha a kérést a natív `claude` szolgáltatóhoz vagy egy `anthropic-compatible-*` csomóponthoz irányítják, akár streamelve, akár nem (regressziós védelem: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Más célpontok nem tudják visszaadni a felülvizsgálatot, ezért Claude Code visszaáll a saját osztályozói kéréseihez, és megjeleníti a figyelmeztetést:
 
-**A profilok nem különülnek el** — minden profilhoz külön `CLAUDE_CONFIG_DIR` tartozik;
-ellenőrizze, hogy a munkameneten belül az `echo $CLAUDE_CONFIG_DIR` kimenete a
-`~/.claude/profiles/<name>` útvonalra mutat-e.
+- egy modell egy nem antropikus szolgáltatón, vagy egy kombó, amely egy ilyenre kerül;
+- egy Claude-Code-kompatibilis közvetítő csomópont (`anthropic-compatible-cc-*`), amely újraépíti a kérés törzsét, és nem hordozza `safeguards`;
+- egy régebbi OmniRoute, amely megelőzi az engedélyezési listán szereplő béta verziókat, vagy egy Claude -kód verzió, amely alatta van a Anthropic oldalon az átjáró-munkamenetekhez.
+
+Futtassa `/status` Claude ben Kód: the** Automatikus módú szerver** sor a `Enabled` olvassa, miközben a kiszolgáló ellenőrzése aktív. Hogy ezeket a kéréseket kiszámlázzák-e, azt Anthropic dönti el, nem a OmniRoute.
+
+**Hitelesítési hibák** — a profil nem tartalmaz tokent. Használja `omniroute launch --profile` (injektálja) vagy exportálja `ANTHROPIC_AUTH_TOKEN`.
+
+**A profilok nem izolálnak** — minden profil különálló `CLAUDE_CONFIG_DIR`; ellenőrizze `echo $CLAUDE_CONFIG_DIR` a `~/.claude/profiles/<name>` szekciópontokon belül.

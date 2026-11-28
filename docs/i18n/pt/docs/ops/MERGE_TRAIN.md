@@ -4,90 +4,63 @@
 
 ---
 
-> **19/11/2026: a fila de fusão do Mergify foi desativada** (decisão do proprietário). `.mergify.yml` já não define uma fila e recusa os comandos Mergify que fundem ou reescrevem um pull request. A versão PRs é fundida manualmente sob o conjunto de regras do repositório "Exigir portões verdes na versão ativa" (`Gate / CI` + `Gate / Quality`) até que a omni-queue seja executada no modo ao vivo, e através da omni-queue depois disso ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). As secções do Mergify abaixo descrevem a fila tal como estava.
+## Aterragem em um branch de lançamento
 
-Desde a v3.8.49 (WS3.2/WS3.4 do plano quality/velocity ), o caminho de fusão padrão para PRs revisto no `release/vX.Y.Z` é o** Mergify fila de fusão** (`.mergify.yml`); o** trem de fusão manual** documentado abaixo está o FALLBACK — utilizado durante incidentes, congelamentos de lançamento ou se o plano Mergify Open Source for alterado.
+A omni-queue rege os desembarques em `release/vX.Y.Z`. Leia o `mode` de nível superior em `config/merge-queue/config.json` na ramificação padrão antes de obter um PR. Consulte [Omni-Queue](OMNI_QUEUE.md).
 
-## Caminho predefinido: a fila do Mergify
+- **`shadow`** executa a validação e deixa a aterragem para uma fusão manual. Aplique `omni-queue` ao PR aprovado na sua cabeça final. Verifique a elegibilidade com `npm run queue -- why <PR>`. Aguarde o veredicto dessa cabeça em `npm run queue -- history --base <branch>`. Prossiga em `would-land`. Em `culprit-found` ou `would-dequeue`, segure a fusão e corrija a causa.
+- **Exceções de sombra.** Um comboio com CI completo verde em relação à ponta base atual pode prosseguir sem um veredicto de fila separado. A mesma exceção se aplica quando a cabeça PR já contém a ponta base atual.
+- **`live`** utiliza o rótulo `omni-queue` para acionar a aterragem. Só a fila chega ao PR. Deixe os comandos de fusão e os envios diretos para a fila.
 
-1. O PR é revisto/validado pelas campanhas e aprovado pela barreira ⭐ de pré-fusão
-   do proprietário (o relatório + a decisão por item — consulte o Passo 0.75 de `/merge-prs`).
-2. O proprietário (ou a sessão que atua com base na decisão do proprietário) aplica a
-   etiqueta **`queue`**. A etiqueta É a aprovação da fusão; o Mergify limita-se a executá-la.
-3. O Mergify valida os PRs em fila **sequencialmente** (um de cada vez) relativamente
-   às verificações rápidas e efetua a fusão (squash). O processamento em lotes + a
-   bisseção automática fazem parte de um nível pago do Mergify ("Cannot use Merge
-   Queue batch" no plano gratuito, #7220), pelo que `.mergify.yml` não define qualquer
-   `batch_size`; o processamento em lotes continua a ser tarefa do comboio de fusão
-   manual abaixo. Um PR cujas verificações ainda estejam pendentes após
-   `checks_timeout` (240 min = 2× o p95 medido de `quality.yml`) é removido da fila,
-   em vez de a bloquear.
-4. Após a fusão, o fluxo de trabalho contínuo de validação da versão valida a nova
-   ponta após o push e abre um issue de atribuição se a combinação tiver introduzido
-   uma regressão (nunca efetua uma reversão automática).
+Cada desembarque requer a autorização do proprietário e as verificações exigidas aplicáveis. Aplicar `omni-queue` apenas após o proprietário ter autorizado a aterragem. PRs em fila que tocam em caminhos protegidos também requerem a decisão `protected-approved` do proprietário para esse PR.
 
-Proteções (refletem as Regras Rígidas #21/#22 de `CLAUDE.md`):
+O conjunto de regras "Exigir portões verdes na libertação ativa" exige `Gate / CI` e `Gate / Quality` verdes na cabeça. Nunca utilize `--admin` para contornar um portão vermelho. Um bloco de congelação de libertação funde-se na ramificação congelada. Ver [Regra Rígida 21](HARD_RULES_DETAIL.md). Nunca rotule, mescle ou envie para um pull request que outra sessão esteja a funcionar. Ver [Regra Rígida 22](HARD_RULES_DETAIL.md).
 
-- **Congelamento da versão ativo** → NÃO aplique etiquetas a PRs destinados ao ramo
-  congelado; redirecione-os primeiro para o `release/vX+1` ativo.
-- **PR em curso de outra sessão** → nunca lhe aplique uma etiqueta; apenas a sessão
-  proprietária coloca o seu próprio trabalho na fila.
-- As alterações apenas a testes e os PRs com a etiqueta `hotfix` já executam CI
-  reduzida (consulte `RELEASE_CHECKLIST.md` → Via Rápida de Hotfix); as condições da
-  fila aceitam qualquer conjunto de verificações que tenha sido efetivamente
-  executado (`#check-failure=0` + `#check-pending=0`).
+## A solicitação de recolha do comboio
 
-## Alternativa: o comboio de integração manual
+1. Inicie um ramal de comboio na extremidade da base de lançamento atual. Integre os chefes de membros aprovados exatos utilizando commits de fusão. Preserve o seu histórico de commits evitando o squash e o rebase.
+2. Abra um pull request para o ramal do comboio. Valide esse PR com o seu próprio CI completo na ponta base atual. Verifique novamente a ponta da base e as cabeças dos membros aprovadas antes de aterrar. Atualize o comboio e o seu CI quando o candidato validado mudar.
+3. Ligue o comboio PR à terra com um commit de fusão no modo de fila aplicável. No modo ao vivo, o método de destino `merge-ff` da fila preserva os commits de fusão. Os bosses dos membros originais tornam-se acessíveis a partir do branch de lançamento. GitHub marca o membro PRs como fundido e os commits mantêm os seus autores.
 
-Utilizado quando a fila não está disponível. Isto formaliza a prática que processou 33 PRs num
-só dia durante o ciclo da v3.8.47:
+Um exemplo público é [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Combinou 18 membros PRs e chegou com um commit de fusão a 24/11/2026.
 
-1. **Prepare o lote** (~10–30 PRs revistos+aprovados). Verifique colisões em `linked:`
-   (os mesmos `tap.testFiles`, os mesmos trechos do CHANGELOG) e processe-os sequencialmente.
-2. **Valide UMA VEZ**: num worktree isolado a partir da ponta da versão, integre localmente todas as
-   cabeças do lote e, em seguida, execute o conjunto equivalente ao da versão
-   (`npm run check:release-green`, adicionando `--with-build` antes de uma versão).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatiza os passos 1–2 (os PRs em conflito
-   são ejetados e o comboio prossegue). O modo completo executa `npm run test:unit` — o
-   executor otimizado para a máquina (`--test-concurrency=20`), **não** os dois shards sequenciais
-   de CI com 4 núcleos, que faziam com que a fase dominante utilizasse apenas ~25% de uma máquina
-   com 16 núcleos (corrigido em 2026-07-18). `--fast` (processamento de megacomboios no mesmo dia,
-   aprovado pelo proprietário em 2026-07-18) mantém todas as barreiras estáticas + vitest, mas executa
-   apenas os ficheiros node:test alterados pelos PRs embarcados; o conjunto COMPLETO tem, ainda assim,
-   de ser executado pelo menos uma vez por dia na ponta acumulada (um comboio sem `--fast`).
-3. **Válido** → integre os PRs sequencialmente (voltando a verificar `state,headRefOid` antes de cada um —
-   um PR cuja cabeça tenha mudado volta a entrar em revisão). Comprove que o diff líquido de cada integração
-   corresponde à alteração do próprio PR (sem reversões por resolução automática: audite `git diff --stat`
-   para detetar eliminações fora do âmbito).
-4. **Com falhas** → divida o lote sucessivamente ao meio (validando cada metade), em vez de voltar a validar
-   um a um; devolva o PR problemático à fila de revisão juntamente com as provas.
-5. **Nunca**: integre no ramo congelado durante um congelamento; utilize `git stash` em qualquer lado;
-   volte a executar indiscriminadamente a CI na esperança de que uma falha desapareça (regra: uma falha é informação).
+Uma sincronização de `main` para o próximo branch de lançamento também chega através de um commit de fusão. Preservar a ancestralidade `main` é necessário para sincronizações posteriores. Consulte [Isolamento da árvore de trabalho](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Níveis (por que motivo a fila é segura apenas com verificações rápidas)
+## O validador de comboio de fusão local
 
-- **Por PR** (verificações rápidas de quality.yml): testes afetados segundo a TIA + conjunto completo de testes
-  unitários em 4 shards + vitest + conjunto de verificações lint + verificação de tipos + integridade da documentação/CHANGELOG.
-- **Por lote/ponta** (validação contínua da versão): barreiras OBRIGATÓRIAS `--quick` em cada push para
-  o ramo da versão; execuções completas com `--with-build --full-ci` 3×/dia.
-- **Por versão** (ci.yml no PR da versão): a matriz completa, incluindo E2E ×9,
-  artefacto de pacote + teste rápido de arranque do tarball, cobertura/limiares progressivos.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Nada é menos validado do que anteriormente — a superfície pesada é simplesmente executada por lote/ponta,
-em vez de por PR, o que elimina as viagens de ida e volta O(N).
+O validador procura os cabeçotes base e PR e combina-os numa árvore de trabalho descartável. Executa o seu conjunto de paridades uma vez na árvore resultante. Uma falha na pesquisa de cabeçalho ou no conflito de fusão ejeta este PR e o script continua com o PRs restante.
 
-## Pré-requisitos de um checkout novo para `merge-train.sh`
+- **`--plan`** imprime os passos do modo selecionado e sai sem criar uma árvore de trabalho ou contactar o telecomando. Combine-o com `--fast` para inspecionar o plano rápido.
+- **`--fast`** executa as portas estáticas comuns, os ficheiros `node:test` alterados selecionados em `tests/unit/` e `npm run test:vitest`. Execute uma validação local completa pelo menos uma vez por dia na gorjeta acumulada ao utilizar o modo rápido.
+- **Modo completo** adiciona as portas estáticas completas e executa `npm run test:unit` e `npm run test:vitest`.
 
-O script executa uma **pré-verificação** com falha imediata no checkout raiz (antes de qualquer trabalho
-no worktree), para que uma instalação danificada nunca possa fazer-se passar por um comboio com falhas:
+Uma porta estática com falha será executada novamente na base intocada se a sonda de base estiver disponível. O script reporta falhas herdadas e continua quando cada linha de violação reconhecida também aparece na base e a contagem total não aumenta.
 
-1. Execute `npm ci` e, em seguida, o postinstall de `bun` que o npm bloqueia:
-   `(cd node_modules/bun && node install.js)` — caso contrário, `check:provider-consistency`
-   e `check:known-symbols` (ambos `bun scripts/…`) falham tanto no comboio COMO na base,
-   sem qualquer linha de violação.
-2. Não pode existir um `node_modules/node_modules` perdido (uma árvore de dependências duplicada; o React é
-   carregado duas vezes e os conjuntos de testes vitest da interface falham imediatamente).
-3. `node_modules/.bin/tsc` tem de estar presente e ser executável (uma instalação parcial não o inclui).
+| Saída | Significado                                                                                                                                                |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`   | Imprimiu o plano ou completou a suite. O resumo do pacote lista quaisquer falhas estáticas herdadas e PRs ejetadas.                                        |
+| `1`   | Argumentos inválidos, nenhuma verificação do Git, falha na simulação ou nenhum PR embebido.                                                                |
+| `2`   | Uma verificação de conjunto falhou e não foi qualificada como herdada. O operador pode dividir o lote ao meio, ejetar o PR incorreto e executar novamente. |
 
-O comboio executa o `npm run check:cycles:ratchet` bloqueante; o simples `npm run check:cycles`
-é informativo (lista os SCCs e termina com um código diferente de zero, mesmo numa base íntegra).
+Um passe local fornece provas de diagnóstico apenas para o dossier do proprietário. Cada aterragem requer ainda a autorização do proprietário, as suas próprias verificações obrigatórias e o veredicto da fila sombra, quando aplicável.
+
+## Camadas
+
+- **Por PR.** CI e Quality selecionam as verificações com base nos caminhos alterados. O código PRs executa portas de qualidade rápida e testes impactados, com unidades separadas e tarefas Vitest em CI.
+- **Por candidato de fila.** CI e Quality executam o perfil completo do candidato composto na sua fila ref.
+- **Por dica de lançamento.** O Release-Green executa portões rápidos e rígidos em pushes que correspondem aos seus filtros de caminho. Três execuções agendadas por dia utilizam a varredura completa para o branch de lançamento.
+- **Por lançamento.** A matriz CI completa inclui fragmentos E2E, validação de pacotes, tarball boot smoke e verificações de cobertura. Consulte a [lista de verificação de lançamento](RELEASE_CHECKLIST.md).
+
+## Pré-requisitos de checkout recente para `merge-train.sh`
+
+A simulação é executada antes de criar árvores de trabalho. Instale dependências com `npm ci`. Confirme se `node_modules/.bin/tsc` é executável e se `node_modules/node_modules` está em falta. Verifique se `node_modules/.bin/bun --version` foi bem-sucedido.
+
+Se a pós-instalação Bun tiver sido ignorada, execute `(cd node_modules/bun && node install.js)`. As verificações de consistência do fornecedor e de símbolos conhecidos utilizam Bun. O validador executa `npm run check:cycles:ratchet` como porta de bloqueio. O comando `npm run check:cycles` independente é consultivo.
+
+## História
+
+A fila de fusão do Mergify foi descontinuada a 19/11/2026.

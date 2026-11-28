@@ -4,12 +4,11 @@
 
 ---
 
-> **Doğruluk kaynağı:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Son güncelleme:** 2026-06-28 — v3.8.40
+> **Gerçeğin kaynağı:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute; yönetim işlemlerini, kimlik doğrulama olaylarını, sağlayıcı kimlik bilgilerinin yaşam döngüsündeki değişiklikleri ve MCP aracı çağrılarını SQLite destekli denetim tablolarına kaydeder. Bu sayfa; nelerin günlüğe kaydedildiğini, verilerin nerede tutulduğunu, ne kadar süreyle saklandığını, API anahtarlarının günlük kaydından nasıl hariç tutulabileceğini ve verilerin nasıl sorgulanacağını açıklar.
+OmniRoute idari eylemleri, kimlik doğrulama olaylarını, sağlayıcı kimlik bilgileri yaşam döngüsü değişikliklerini ve MCP aracı çağrılarını SQLite destekli denetim tablolarına kaydeder. Bu sayfa, nelerin günlüğe kaydedildiğini, nerede yaşadığını, ne kadar süre saklandığını, API anahtarlarının nasıl devre dışı bırakılabileceğini ve verilerin nasıl sorgulanacağını kapsar.
 
-Uygulama `src/lib/compliance/index.ts` (T-43 — "Uyumluluk Denetimleri") ve `src/lib/compliance/providerAudit.ts` içinde yer alır. Denetim yazma işlemleri hiçbir zaman hata fırlatmaz: herhangi bir hata durumunda çağrı sessizce yutulur; böylece denetim günlüğü, ana istek akışını bozamaz.
+Uygulama `src/lib/compliance/index.ts` (T-43 — "Uyumluluk Kontrolleri") ve `src/lib/compliance/providerAudit.ts` bulunmaktadır. Denetim yazmaları hiçbir zaman atılmaz: Herhangi bir başarısızlık durumunda çağrı sessizce yutulur, böylece denetim günlüğü ana istek akışını kesemez.
 
 ## Neler Günlüğe Kaydedilir
 
@@ -118,12 +117,12 @@ Manuel istek geçmişi temizleme işlemi, saklama işleminden ayrıdır. Request
 
 Varsayılanlar `src/lib/logEnv.ts` içinde tanımlanmıştır (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## `noLog` Kaydı Tutmama Seçeneği (API anahtarı başına)
+## `noLog` Devre Dışı Kalma ( API anahtarı başına)
 
-API anahtarları, bunların aşağı akış çağrı trafiğinin günlüğe kaydedilmemesi için işaretlenebilir. Bu işaret `api_keys` tablosunda (`no_log INTEGER DEFAULT 0`) bulunur ve sık kullanılan kod yollarındaki aramalar için bellek içi bir kümeye yansıtılır.
+API anahtarları, aşağı yöndeki çağrı trafiğinin günlüğe kaydedilmemesi için işaretlenebilir. Bayrak, `api_keys` tablosunda (`no_log INTEGER DEFAULT 0`) bulunur ve hızlı yol aramaları için bir bellek içi kümeye yansıtılır.
 
 ```bash
-# Günlük kaydı tutulmayan bir anahtar oluşturun (yönetim kimlik doğrulaması gereklidir)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
@@ -132,11 +131,19 @@ curl -X POST http://localhost:20128/api/keys \
 
 Yardımcılar (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — bellek içi girdiyi etkinleştirir veya devre dışı bırakır
-- `isNoLog(apiKeyId)` — istek yolunda kontrol edilir; sonuç bulunamazsa `api_keys.no_log` üzerinden 30 saniye önbelleğe alınan okumaya geri döner
-- `NO_LOG_API_KEY_IDS` (ortam değişkeni, virgülle ayrılmış) — başlatma sırasında bellek içi kümeye önceden yüklenir; sütunu doğrudan değiştiremediğiniz durumlarda kullanışlıdır
+- `setNoLog(apiKeyId, true|false)` — bellek içi girişi değiştirir
+- istek yolunda `isNoLog(apiKeyId)` — kontrol edildi; `api_keys.no_log` 30 saniyelik önbelleğe alınmış okumaya geri döner
+- `NO_LOG_API_KEY_IDS` (env, virgülle ayrılmış) — önyükleme sırasında bellek içi sete önceden yüklenmiştir; sütunu doğrudan değiştiremediğinizde kullanışlıdır
 
-Yönetimsel denetim olayları (oturum açma, sağlayıcı değişiklikleri, MCP araç çağrıları vb.) `noLog` ayarından **etkilenmez** — yalnızca istek başına trafik günlüğü kaydının tutulmaması sağlanır.
+İdari denetim etkinlikleri (oturum açma, sağlayıcı değişiklikleri, MCP aracı çağrıları vb.)** Olumsuz** `noLog` etkilenir — yalnızca istek başına trafik kaydı devre dışı bırakılır.
+
+### İstek başına devre dışı bırakma (`x-omniroute-no-log`)
+
+Bir müşteri, özel bir anahtar oluşturmadan tek bir çıkarım isteğini yük kalıcılığının dışında bırakabilir. İstek üzerine `x-omniroute-no-log: true` gönderin (`1` ve `yes` de kabul edilir, büyük/küçük harfe duyarlı değildir). Bu, sohbet işleyicisinden geçen tüm sohbet ailesi rotaları için geçerlidir: Sohbet Tamamlamaları, Yanıtlar, Mesajlar, Tamamlamalar ve Gemini uyumlu yol. Çağrı günlüğü satırı hala zaman damgası, modeli, sağlayıcısı, durumu, süresi ve belirteç sayılarıyla birlikte yazılıyor ancak `request_body`, `response_body`, istek özetleri ve ardışık düzen yapıları atlanıyor.
+
+Başlık, anahtar işaretiyle birlikte ORed : günlük tutmayan bir anahtar, başlıktan bağımsız olarak günlük tutmaz olarak kalır ve başlık, günlüğe kaydetmeyen bir anahtar için günlüğe kaydetmeyi yeniden etkinleştiremez. İstek yukarı yönde iletilmeden önce başlık çıkarılır.
+
+Bu başlık bunu yapar** Olumsuz** Bellek çıkartmayı veya anlamsal önbelleği devre dışı bırakın. İsteğin bu alt sistemlerdeki içeriği de sürdürmemesi gerektiğinde `x-omniroute-no-memory: true` ve `x-omniroute-no-cache: true` de yanında gönderin.
 
 ## REST API
 

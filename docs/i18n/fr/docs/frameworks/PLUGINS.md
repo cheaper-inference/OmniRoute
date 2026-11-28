@@ -90,18 +90,17 @@ L’objet `ctx` transmis à `register(program, ctx)` :
 
 ## Découverte
 
-Les plugins sont découverts depuis :
+Les plugins sont découverts à partir de :
 
-1. `~/.omniroute/plugins/<name>/` — installations locales de l’utilisateur
-2. Variable d’environnement `OMNIROUTE_PLUGIN_PATH` — répertoire personnalisé
+1. `~/.omniroute/plugins/node_modules/<name>/` — où `omniroute plugin install` place les packages (un npm `--prefix`, pas `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — répertoires de plugins copiés à la main
+3. `OMNIROUTE_PLUGIN_PATH` env var répertoire personnalisé —
 
-Ces deux mécanismes sont **réservés à la CLI**. L’environnement d’exécution des plugins côté serveur (les plugins de la marketplace/`plugin.json`
-qui s’exécutent dans le proxy) dispose de son propre analyseur et de son propre paramètre de substitution,
-`OMNIROUTE_PLUGINS_DIR` — consultez
-[PLUGIN_MARKETPLACE.md → Répertoire des plugins](./PLUGIN_MARKETPLACE.md#plugin-directory).
-La définition de l’un n’affecte pas l’autre.
+Les répertoires symboliques (ce que npm crée pour `plugin install ./dir`) sont suivis.
 
-Les erreurs de chargement sont interceptées et affichées sous forme d’avertissements — un plugin défectueux ne fait jamais planter la CLI.
+Les deux sont** CLI uniquement** . Le runtime du plugin côté serveur (les plugins Marketplace/`plugin.json` qui s'exécutent à l'intérieur du proxy) a son propre scanner avec son propre remplacement, `OMNIROUTE_PLUGINS_DIR` — voir [PLUGIN_MARKETPLACE.md → Plugin directory](./PLUGIN_MARKETPLACE.md#plugin-directory). La définition de l’un n’affecte pas l’autre.
+
+Les erreurs de chargement sont détectées et imprimées sous forme d'avertissements — un plugin cassé ne plante jamais le CLI.
 
 ## Sécurité
 

@@ -67,15 +67,15 @@ Direktiva ataylab global emas, **har bir proksi uchun alohida** qo‘llanadi —
 
 ---
 
-## Uchta qiymat
+## Uch qadriyat
 
-| Qiymat | UI yorligʻi               | Xatti-harakat                                                                                                                                                               |
-| ------ | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `Avtomatik (ikki stekli)` | OS oilani tanlaydi. IP literalidan iborat proksi xosti uchun oila literalning oʻziga xosdir; xost nomi uchun esa har ikkala oiladan foydalanish mumkin. Bu standart qiymat. |
-| `ipv4` | `Faqat IPv4`              | Ulanishni IPv4 bilan cheklaydi. Agar proksi xostida IPv4 (A) yozuvi boʻlmasa, xavfsiz tarzda ulanishni rad etadi.                                                           |
-| `ipv6` | `Faqat IPv6`              | Ulanishni IPv6 bilan cheklaydi. Agar proksi xostida IPv6 (AAAA) yozuvi boʻlmasa, xavfsiz tarzda ulanishni rad etadi.                                                        |
+| Qiymat | UI yorlig'i         | Xulq-atvor                                                                                                                       |
+| ------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS oilani tanlaydi. IP-literal proksi-xost uchun oila literalga xosdir; xost nomi uchun ikkala oila ham mos keladi. Bu standart. |
+| `ipv4` | `IPv4 only`         | Ulanishni IPv4 bilan bog'laydi. Proksi-serverda IPv4 (A) yozuvi bo'lmasa, yopilmaydi.                                            |
+| `ipv6` | `IPv6 only`         | Ulanishni IPv6 bilan bog'laydi. Proksi-xostda IPv6 (AAAA) yozuvi bo'lmasa, yopilmaydi.                                           |
 
-UI satrlari `src/i18n/messages/en.json` faylida joylashgan (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+UI satrlari `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`) da yashaydi.
 
 ---
 
@@ -83,21 +83,21 @@ UI satrlari `src/i18n/messages/en.json` faylida joylashgan (`labelFamily`, `fami
 
 ### Boshqaruv paneli
 
-Tanlash elementi **Proxy Pool** varagʻidagi proksi formasida joylashgan:
+Selektor proksi-server shaklida** Proksi-server** tab:
 
-1. **Dashboard → Settings → Proxy → Proxy Pool** boʻlimini oching
-2. Proksi qoʻshing yoki mavjudini tahrirlang
-3. **IP oilasi** ochiluvchi roʻyxatini `Avtomatik (ikki stekli)`, `Faqat IPv4` yoki `Faqat IPv6` qiymatiga oʻrnating
-4. Saqlang
+1. Ochiq** Boshqaruv paneli → sozlamalari → Proksi → Proksi hovuzi**
+2. Proksi-server qo'shing yoki tahrirlang
+3. ni o'rnating**IP oilasi** `Auto (dual-stack)`, `IPv4 only` yoki `IPv6 only` ga ochiladigan menyu
+4. Saqlash
 
-Boshqaruv elementi `ProxyRegistryManager.tsx` tomonidan render qilinadi (`proxy/ProxyPoolTab.tsx` ichida ulanadi).
+Boshqaruv `ProxyRegistryManager.tsx` tomonidan amalga oshiriladi ( `proxy/ProxyPoolTab.tsx` da o'rnatilgan).
 
 ### API
 
-`family` maydoni proksi reyestrini yaratish/yangilash yuklamalarining bir qismi boʻlib, `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) orqali tekshiriladi va `POST` / `PATCH /api/v1/management/proxies` tomonidan qayta ishlanadi:
+`family` maydoni `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) tomonidan tasdiqlangan va `POST` / `PATCH /api/v1/management/proxies` tomonidan boshqariladigan proksi-server registrining create/update foydali yuklarining bir qismidir:
 
 ```bash
-# Faqat IPv6 ishlatadigan proksi yaratish
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Mavjud proksini faqat IPv4 ishlatadigan qilib oʻzgartirish
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Xuddi shu maydon yuqori oqim proksi yozuvlari uchun ishlatiladigan ichki proksi konfiguratsiyasi obyekti tomonidan ham qabul qilinadi (`upstream_proxy_config.family`, [Maʼlumotlar modeli](#data-model)ga qarang).
+Xuddi shu maydon yuqori oqim proksi yozuvlari uchun ishlatiladigan inline proksi konfiguratsiya ob'ekti tomonidan ham qabul qilinadi (`upstream_proxy_config.family`, [Ma'lumotlar modeliga](#data-model) qarang).
 
-Proksi CRUD/tayinlash API qismining qolgan tafsilotlari uchun [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md)ga qarang.
+Qolgan proksi CRUD/assignment API uchun [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) ga qarang .
 
 ---
 

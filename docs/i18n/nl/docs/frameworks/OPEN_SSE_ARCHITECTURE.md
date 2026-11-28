@@ -236,19 +236,19 @@ Ondersteunt** 22 routeringsstrategieën** (zie `src/shared/constants/routingStra
 | `context-relay`     | Geef context door aan verschillende doelen                                                    |
 | `fill-first`        | Vul het quotum in voordat u naar de volgende gaat                                             |
 | `p2c`               | Kracht van twee keuzes                                                                        |
-| `random`            | Uniform willekeurig                                                                           |
-| `least-used`        | Kies degene met het minste recente gebruik                                                    |
-| `cost-optimized`    | Goedkoopste gezonde doelwit eerst                                                             |
-| `reset-aware`       | Op de hoogte van de resetvensters van de provider                                             |
-| `reset-window`      | Venstergebaseerde routering opnieuw instellen                                                 |
+| `random`            | Verse shuffle per aanvraag                                                                    |
+| `least-used`        | Kies degene met de minste geregistreerde verzoeken                                            |
+| `cost-optimized`    | Laagste catalogusinvoerprijs eerst                                                            |
+| `reset-aware`       | Overgebleven quota + reset urgentie                                                           |
+| `reset-window`      | Quotumvenster dat het eerst opnieuw wordt ingesteld                                           |
 | `expiry-first`      | Besteed eerst het account waarvan het quotum ongebruikt zou verlopen                          |
 | `headroom`          | De meeste resterende quotaruimte eerst                                                        |
 | `quota-weighted`    | Sla uitgeputte accounts over en gebruik vervolgens de overgebleven quota ÷ tijdens de vlucht  |
-| `strict-random`     | Echt uniform (geen kwaliteitsweging)                                                          |
+| `strict-random`     | Geschud kaartspel: elk doel één keer voordat het wordt herhaald                               |
 | `auto`              | Gebruik 16-factor scoring (`autoCombo/`)                                                      |
 | `lkgp`              | Laatst bekende goede aanbieder eerst                                                          |
-| `context-optimized` | Het beste voor verzoeken met een lange context                                                |
-| `cache-optimized`   | Zet elk herbruikbaar promptvoorvoegsel vast aan hetzelfde account (prompt-cachehits)          |
+| `context-optimized` | Grootste bekende contextvenster eerst                                                         |
+| `cache-optimized`   | Geef de voorkeur aan het account dat waarschijnlijk het promptvoorvoegsel in de cache bevat   |
 | `fusion`            | Uitwaaieren naar een parallel panel en vervolgens synthetiseren via een rechter (`fusion.ts`) |
 | `pipeline`          | Ketenstappen — de uitvoer van elk doel het volgende voedt                                     |
 | `jev`               | Opt-in: TypeSafe Jev geeft toe welke gerangschikte inzendingen lopen; anders uw bestelling    |

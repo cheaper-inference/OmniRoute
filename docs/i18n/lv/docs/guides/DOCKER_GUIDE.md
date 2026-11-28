@@ -8,21 +8,22 @@
 
 ## Satura rādītājs
 
-- [Ātrā palaišana](#quick-run)
+- [Ātrais skrējiens](#quick-run)
 - [Ar vides failu](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Docker Rakstīt](#docker-compose)
 - [Pieejamie profili](#available-profiles)
-- [Resursdatora CLI rīku konfigurēšana, kad OmniRoute darbojas Docker vidē](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Redis blakuskonteiners](#redis-sidecar)
-- [Produkcijas Compose konfigurācija](#production-compose)
+- [Konteinera sacietēšana](#container-hardening)
+- [Resursdatora CLI rīku konfigurēšana, kad OmniRoute darbojas Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis blakusvāģis](#redis-sidecar)
+- [Ražošana Sastādīt](#production-compose)
 - [Dockerfile posmi](#dockerfile-stages)
 - [Kritiskie vides mainīgie](#critical-environment-variables)
-- [Docker Compose ar Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare ātrais tunelis](#cloudflare-quick-tunnel)
-- [Attēlu tagi](#image-tags)
-- [Informācijas paneļa atjauninājumi Docker vidē](#dashboard-updates-in-docker)
-- [Pieejamība: noklusējuma SQLite atbalsta vienu repliku](#availability-default-sqlite-is-single-replica)
-- [Gemini reģionālās kļūdas Docker vidē](#gemini-regional-errors-inside-docker)
+- [Docker komponēt ar Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Ātrais tunelis](#cloudflare-quick-tunnel)
+- [Attēlu atzīmes](#image-tags)
+- [Informācijas paneļa atjauninājumi Docker](#dashboard-updates-in-docker)
+- [Pieejamība: noklusējuma SQLite ir viena kopija](#availability-default-sqlite-is-single-replica)
+- [Gemini reģionālās kļūdas Docker iekšienē](#gemini-regional-errors-inside-docker)
 - [Svarīgas piezīmes](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute ietver Compose profilus galvenajiem izvietošanas variantiem. Izvēlie
 | `web`                | `omniroute-web`  | Tīmekļa sesiju nodrošinātāji, kuriem nepieciešama pārlūkprogramma: `gemini-web`, `claude-web`, `claude-turnstile` (izveido `runner-web`; Chromium ir iekļauts) | `docker compose --profile web up -d`         |
 
 > Var apvienot vairākus profilus: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Konteinera sacietēšana
+
+`base`, `web`, `cli` un `host` lietotņu pakalpojumi pakalpojumā `docker-compose.yml` izmanto `cap_drop: [ALL]` un `no-new-privileges:true` drošības opciju. Attēls darbojas kā lietotājs, kas nav saknes lietotājs `node`, un klausās augstos portos, tāpēc tam nav nepieciešamas Linux iespējas. Drošības opcija neļauj procesiem iegūt privilēģijas, izmantojot setuid bināros failus.
+
+Tikai `cli` profils montē Docker ligzdu automātiskajam atjauninātājam. Skatiet [sadaļu Escape Hatch: konfigurējiet paša konteinera CLIs,](#escape-hatch-configure-the-containers-own-clis-use-sparingly) lai uzzinātu par drošības aspektiem.
+
+Pēc noklusējuma saknes failu sistēma paliek rakstāma. `cli` profils ieraksta CLI konfigurāciju un kešatmiņas konteinera sākuma direktorijā, `web` profils saglabā Chromium sesijas stāvokli, un Next.js izpildlaiks var ierakstīt kešatmiņas ārpus `/app/data`.
+
+Lai izmēģinātu tikai lasāmu saknes failu sistēmu ar `base` profilu, saglabājiet to kā `docker-compose.override.yml` blakus `docker-compose.yml`. Compose nolasa ignorēšanu automātiski.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Esošais `/app/data` stiprinājums paliek rakstāms. Pirms šīs ignorēšanas izmantošanas ražošanā pārbaudiet savu darba slodzi, jo tai var būt nepieciešams rakstīt uz citiem ceļiem.
 
 ## Resursdatora CLI rīku konfigurēšana, kad OmniRoute darbojas Docker vidē
 
@@ -264,7 +289,7 @@ Trīs būves args kontrolē `builder` skatuves izmaksas. Tie ir tikai izveides l
 
 `OMNIROUTE_BUILD_WORKERS` ir tas, kurš jāaudzina par lielu celtnieku, un tas, kuram ir aizdomas, kad ierobežota konstrukcija nomirst** pēc** `✓ Compiled successfully`. Katrs lapas datu darbinieks ir savs process, tāpat arī pats vecākais `next build` ; dzīvā VPS reprodukcija (izdevums #7518) mērīja katra procesa maksimumu RSS pie ~ 4,5 GB neatkarīgi no `NODE_OPTIONS` kaudzes karoga (Turbopack apkopo native/Rust atmiņā ārpus V8 kaudzes). Noklusējuma `2` (→ 1 darbinieks, kopā 2 procesi) izmērs ir paredzēts 16 GB /4 vCPU GitHub mitinātajiem skrējējiem, ko izmanto publicēšanas konveijers. Pie `8` (→ 7 darbinieki) šim skrējējam pietrūka atmiņas, un buildkit neizdevās soli ar `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 darbinieki) joprojām neatbilst, kad katra procesa RSS tika mērīts tieši, nevis secināts. `tests/unit/docker-build-memory-budget.test.ts` veic aritmētiku pret izmērīto skaitli un neizdodas, ja kāda no pogām pārspēj skrējēju.
 
-Turbopack apkopo dzimtajā Rust atmiņā, kas dzīvo** ārpusē** V8 kaudze, tāpēc `OMNIROUTE_BUILD_MEMORY_MB` to nesaista. Uz resursdatora ar atmiņas griestiem OOM slepkava pēc tam SIGKILLed bez kļūdas teksta. — tas vienkārši apstājas `Creating an optimized production build` vidū, kas drīzāk skan kā pakārts, nevis atmiņas trūkums. Tāpēc `Dockerfile` noklusējuma iestatījums ir tīmekļa pakotne (`OMNIROUTE_USE_TURBOPACK=0`), atšķirībā no `npm run dev` / `npm run build`, kur Turbopack ir noklusētais kods: tukšs `docker build .` bez build arg (ko palaiž Railway un citi viena klikšķa saimnieki) nedrīkst klusi nomirt veidotājā ar ierobežotu atmiņu. Publicētie attēli jau skaidri iziet `OMNIROUTE_USE_TURBOPACK=0` `docker-publish.yml`. Būvējam ar daudz RAM izvēlieties Turbopack, lai ātrāk veidotu:
+Turbopack apkopo dzimtajā Rust atmiņā, kas dzīvo** ārpusē** V8 kaudze, tāpēc `OMNIROUTE_BUILD_MEMORY_MB` to nesaista. Uz resursdatora ar atmiņas griestiem OOM slepkava pēc tam SIGKILLed bez kļūdas teksta. — tas vienkārši apstājas `Creating an optimized production build` vidū, kas drīzāk skan kā pakārts, nevis atmiņas trūkums. Tāpēc `Dockerfile` noklusējuma iestatījums ir tīmekļa pakotne (`OMNIROUTE_USE_TURBOPACK=0`), atšķirībā no `npm run dev` / `npm run build`, kur Turbopack ir noklusētais kods: tukšs `docker build .` bez build arg (ko palaiž Railway un citi viena klikšķa saimnieki) nedrīkst klusi nomirt veidotājā ar ierobežotu atmiņu. Publicētie attēli jau skaidri iziet `OMNIROUTE_USE_TURBOPACK=0` `docker-publish.yml`. Veidotājam ar lielu RAM izvēli izvēlieties Turbopack, lai ātrāk veidotu:
 
 ```bash
 docker build --target runner-base \
@@ -295,7 +320,7 @@ Atmiņas uzvedība Docker:
 
 ### Izpildlaika RAM kodēšanas aģentiem
 
-1 GiB Docker noklusējuma vērtība ir dashboard/light-chat grīda, nevis ražošanas apjoms. Garie `POST /v1/responses` korpusi (simtiem ziņojumu, desmitiem rīku) saspiešanas laikā saglabā vairākus atmiņā esošos grafikus. Divi pārklājoši ~ 3 MiB / ~ 750k marķiera pieprasījumi ir pārtraucuši V8** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) un arī trāpīja 16 GiB cgroup OOM. Skatiet [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+1 GiB Docker noklusējuma vērtība ir dashboard/light-chat grīda, nevis ražošanas apjoms. Garie `POST /v1/responses` korpusi (simtiem ziņojumu, desmitiem rīku) saspiešanas laikā saglabā vairākus atmiņā esošos grafikus. Divi pārklājoši ~ 3 MiB / ~ 750k marķiera pieprasījumi ir pārtraucuši V8** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) un arī trāpīja 16 GiB cgroup OOM. Skatiet [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Izmērs** cgroup `--memory` virs kaudzes** — vietējie buferi, SQLite un saspiešanas starpprodukti atrodas ārpus V8.
 
@@ -591,11 +616,11 @@ Pakalpojums pirms attēla lejupielādes dzēš pieprasījumu, lai neveiksmīga i
 
 Stock Docker / Kubernetes OmniRoute ir** viens mezgls process + viens SQLite rakstītājs** . Augsta pieejamība ir** nav atbalstīts** par šo topoloģiju.
 
-| Ierobežojums                                      | Sekas                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vientuļš rakstnieks                               | Dariet** nē** palaist vairākas kopijas pret vienu un to pašu SQLite failu. Tas sabojā DB.                                                                                                                                                                                                                                               |
-| Atkārtoti izveidot / restartēt / HEALTHCHECK kill | **Pilns pārtraukums** SSE lidojuma laikā, informācijas paneļa sesijām un atmiņas stāvokli. Katrs savienotais klients pazūd. Jauni pieprasījumi tukšā beigu punkta logā saņem apgriezto starpniekserveri**`502 Bad Gateway: Unknown error`** , nevis OmniRoute JSON — klienti to nevar atšķirt no pakalpojumu sniedzēja kļūmes (#11015). |
-| Tāda pati notikumu cilpa kā `/healthz`            | Aizņemts katalogs vai saspiešanas ķeksītis var aizkavēt zondes; īss taimauts, pēc tam restartējas** tikai** replika.                                                                                                                                                                                                                    |
+| Ierobežojums                                      | Sekas                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vientuļš rakstnieks                               | Dariet** nē** palaist vairākas kopijas pret vienu un to pašu SQLite failu. Tas sabojā DB.                                                                                                                                                                                                                                             |
+| Atkārtoti izveidot / restartēt / HEALTHCHECK kill | **Pilns pārtraukums** SSE lidojuma laikā, informācijas paneļa sesijām un atmiņas stāvokli. Katrs savienotais klients pazūd. Jauni pieprasījumi tukšā beigu punkta logā saņem reverso starpniekserveri**`502 Bad Gateway: Unknown error`** , nevis OmniRoute JSON — klienti nevar to atšķirt no pakalpojumu sniedzēja kļūmes (#11015). |
+| Tāda pati notikumu cilpa kā `/healthz`            | Aizņemts katalogs vai saspiešanas ķeksītis var aizkavēt zondes; īss taimauts, pēc tam restartējas** tikai** replika.                                                                                                                                                                                                                  |
 
 **Zondes matrica** (skatiet arī [Kubernetes zondes ieteikumus](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -605,9 +630,9 @@ Stock Docker / Kubernetes OmniRoute ir** viens mezgls process + viens SQLite rak
 | Gatavība        | HTTP `GET /healthz`                                              | Īsi noildzes, kas uzskata, ka notikumu cikls aizņemts kā miris |
 | Dziļi / cilvēki | `/api/monitoring/health`                                         | Automatizēts kubelet dzīvīgums                                 |
 
-**Jauninājumi:** sagaidiet, ka katra sesija samazināsies. Ja iespējams, iztukšojiet klientus; noklusējuma SQLite nav mainīga atjauninājuma. Rakstīšana `restart: unless-stopped` plus Docker `HEALTHCHECK` aizstās arī vienīgo procesu, ja konteiners ir neveselīgs — tāds pats sprādziena rādiuss.
+**Jauninājumi:** sagaidiet, ka katra sesija samazināsies. Ja iespējams, iztukšojiet klientus; noklusējuma SQLite nav mainīga atjauninājuma. Rakstīšana `restart: unless-stopped` plus Docker `HEALTHCHECK` aizstās arī vienīgo procesu, ja konteiners ir Neveselīgs — tāds pats sprādziena rādiuss.
 
-Gatavi manifesti un Helm diagramma ir pieejami `deploy/kubernetes/` un `deploy/helm/omniroute/` — skatiet [Kubernetes izvietošanas rokasgrāmatu](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+Gatavus manifestus un Helm diagrammu tiešraidē `deploy/kubernetes/` un `deploy/helm/omniroute/` — skatiet [Kubernetes izvietošanas rokasgrāmatā](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
 Kubernetes fragments a** viena kopija** (Nepieciešama atkārtota izveide; nepalieliniet `replicas` pret vienu SQLite failu):
 
@@ -636,9 +661,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep ļauj kube nomest pakalpojuma galapunktus pirms SIGTERM so** jauns** satiksme pārstāj ietekmēt mirstošo procesu. Lidojuma laikā `/v1/responses` SSE tiek iztukšots līdz `SHUTDOWN_TIMEOUT_MS` (noklusējums 30 s), izmantojot smagsvara ieejas nomas līgumus (#11015). Jauni pieprasījumi, kas joprojām sasniedz procesu, saņem `503` + `Retry-After: 5`. Atkārtoti izveidot tukšā galapunkta atstarpi, līdz nomaiņa ir gatava, joprojām ir smags pārtraukums — tā ir SQLite topoloģija, nevis zondes nepareiza konfigurācija.
+`preStop` sleep ļauj kube nomest pakalpojuma galapunktus pirms SIGTERM so** jauns** satiksme pārstāj ietekmēt mirstošo procesu. Lidojuma laikā `/v1/responses` SSE tiek iztukšots līdz `SHUTDOWN_TIMEOUT_MS` (noklusējums 30 s), izmantojot smagsvara ieejas nomas līgumus (#11015). Jauni pieprasījumi, kas joprojām sasniedz procesu, saņem `503` + `Retry-After: 5`. Atkārtoti izveidot tukšā beigu punkta atstarpi, līdz nomaiņa ir gatava, joprojām ir smags pārtraukums — kas ir SQLite topoloģija, nevis zondes nepareiza konfigurācija.
 
-Ārējais Postgres / vairāku rakstītāju HA ir** nē** dokumentēts akciju ceļš. Ja jums ir nepieciešams HA, saglabājiet vienu kopiju vai palaidiet topoloģiju, ko projekts ir pārbaudījis un dokumentējis atsevišķi. Postgres/MySQL darbs atrodas [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Līdz brīdim, kad tas tiek piegādāts, vienīgais atbalstītais veids, kā pavairot** liels** `/v1/responses` jauda ir N neatkarīgi procesi (nākamā sadaļa), nevis `replicas > 1` vienā sējumā.
+Ārējais Postgres / vairāku rakstītāju HA ir** nē** dokumentēts akciju ceļš. Ja jums ir nepieciešams HA, saglabājiet vienu kopiju vai palaidiet topoloģiju, ko projekts ir pārbaudījis un dokumentējis atsevišķi. Postgres/MySQL darbs dzīvo [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Līdz brīdim, kad tas tiek piegādāts, vienīgais atbalstītais veids, kā pavairot** liels** `/v1/responses` jauda ir N neatkarīgi procesi (nākamā sadaļa), nevis `replicas > 1` vienā sējumā.
 
 ## Mērogošana: N neatkarīgi procesi
 
@@ -648,25 +673,25 @@ Viena Codex konta kopijas nedrīkst neatkarīgi patērēt tā vienreizējās lie
 
 Pasīvā instance atkārtoti nolasa savienojumu, kad ir nepieciešama atsvaidzināšana, un pieņem tikai citu, beztermiņa piekļuves pilnvaru. Pretējā gadījumā atsvaidzināšana tiek atspējota, nepabeidzot vai deaktivizējot savienojumu vai neskaitot atsvaidzināšanas pārtraukuma kļūmi. Reālas augšupējas autentifikācijas kļūmes joprojām izmanto parasto kļūdu uzskaiti, eksponenciālu dzesēšanu un parasto klienta kļūdu; konta deaktivizēšana paliek neatgriezeniska. Sinhronizējiet īpašnieka pagrieztos marķierus, pirms beidzas piekļuves pilnvaras (noklusējuma proaktīvās atsvaidzināšanas iespēja ir piecas minūtes) vai atkārtoti importējiet Codex auth failu. Pasīvais imports saglabā piegādātos marķierus, nepārbaudot tos marķiera galapunktā. Manuālā dashboard/API atsvaidzināšana atgriež `409 refresh_disabled`; jaunie OAuth logins ir nemainīgi. Skatīt [vides atsauci](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-One Node process ir** viena V8 kaudze** . Divi pārklājoši ~ 3 MiB / ~ 750k marķiera kodēšanas aģents `POST /v1/responses` (RTK + Caveman ) pārtrauc šo kaudzi pie ~ 12 Gi (`FATAL ERROR: Reached heap limit`) un var OOM 16 Gi cgrupu. Skatiet [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Šis mērījums ir a** atmiņa-budžets** brīdinājums, nevis produkts hard-max no diviem vienlaikus gariem `/v1/responses`. Liela apjoma tērzēšanas atļauju ierobežo automātiski atvasināts saņemšanas baitu budžets (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), kura lielums ir no tā paša V8/cgroup griestiem — ignorējot to uz augšu (vai iestatot mantoto `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` pieprasījumu skaita ierobežojumu) jau liela izmēra procesā, atkārtoti ievieš pārtraukšanu. Mazie tērzēšana, `/healthz`, `/v1/models` un MCP ir** nē** tajā vāciņā.
+One Node process ir** viena V8 kaudze** . Divi pārklājoši ~ 3 MiB / ~ 750k marķiera kodēšanas aģents `POST /v1/responses` (RTK + Caveman ) pārtrauc šo kaudzi pie ~ 12 Gi (`FATAL ERROR: Reached heap limit`) un var OOM 16 Gi cgrupu. Skatiet [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Šis mērījums ir a** atmiņa-budžets** brīdinājums, nevis produkts hard-max divu vienlaicīgu garu `/v1/responses`. Liela apjoma tērzēšanas atļauju ierobežo automātiski atvasināts saņemšanas baitu budžets (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), kura lielums ir no tā paša V8/cgroup griestiem — ignorējot to uz augšu (vai iestatot mantoto `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` pieprasījumu skaita ierobežojumu) jau apjomīgam procesam, atkārtoti ievieš pārtraukšanu. Mazās tērzēšanas sarunas, `/healthz`, `/v1/models` un MCP ir** nē** tajā vāciņā.
 
 ### Viens process: vairāk nekā divas garas `/v1/responses`
 
-A** vesels** process (kaudze zem `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, noklusējuma `0.75`)** var** palaist vairāk nekā divas vienlaikus garas `POST /v1/responses` ja procesa mēroga lidojuma baitu budžetā (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) vēl ir vietas. Ķermeņi, kuru vērtība ir `OMNIROUTE_CHAT_LARGE_BODY_BYTES` vai augstāka (noklusējuma 256 KiB), tiek izmantota tāda pati smagsvara noma kā struktūras smagajiem pieprasījumiem un izmanto to pašu [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Desmitiem vienlaicīgu garo SSE klientu (operatoriem bieži ir nepieciešami 40–50) ir a** atmiņa-budžets** jautājums — izmēra kaudze + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nav stingrs “maksimālais 2” produktu ierobežojums. Spiediena kaudze joprojām izplūst ar atkārtoti izmēģināmu `503`, tāpēc #7849 neatgriežas.
+A** vesels** process (kaudze zem `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, noklusējuma `0.75`)** var** palaist vairāk nekā divus garus `POST /v1/responses` vienlaikus, ja procesa mēroga lidojuma baitu budžetā (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) vēl ir vietas. Iestādes, kuru vērtība ir `OMNIROUTE_CHAT_LARGE_BODY_BYTES` vai augstāka (noklusējuma 256 KiB), tiek izmantota tāda pati smagsvara noma kā struktūras smagajiem pieprasījumiem un izmanto to pašu [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Desmitiem vienlaicīgu garo SSE klientu (operatoriem bieži ir nepieciešami 40–50) ir a** atmiņa-budžets** jautājums — izmēra kaudzes + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nav stingri “maksimāli 2” produktu ierobežojums. Spiediena kaudze joprojām izplūst ar atkārtoti izmēģināmu `503`, tāpēc #7849 neatgriežas.
 
 Uz** reizināt kaudzes** (neatkarīgas V8 vecās telpas)** šodien** :
 
-| Dariet                                                                                                                                                   | Nedrīkst                                                                |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Skrien** N containers/pods** , katrs ar savu** pašu** `DATA_DIR` / apjoms                                                                                | Iestatiet `replicas > 1` pret vienu SQLite failu                        |
-| Liels lielums lidojuma laikā + veselīgs augstums no kaudzes / lidojuma baitu budžeta; 1–2 ir konservatīvais #7849 noklusējums, nevis cietā produkta maks | Vienam procesam piešķiriet 8 × RAM un neierobežotu skaita ierobežojumu  |
-| Pēc izvēles: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` for** koplietojamo kvotu skaitītāji**                                                  | Uztveriet Redis kā kopīgu SQLite — tas tā nav                           |
-| Dublēt nodrošinātāja noslēpumus katrā instancē (vai pieņemt sadalītus informācijas paneļus)                                                              | Sagaidiet vienu informācijas paneli/vienu zvanu žurnālu visos gadījumos |
-| Priekšpuse ar jebkuru slodzes balansētāju; Pietiek ar sticky by API taustiņu vai sesiju                                                                  | Nepieciešama pārdevējam noteikta izmēra starpprogrammatūra              |
+| Dariet                                                                                                                                                         | Nedrīkst                                                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Skrien** N containers/pods** , katrs ar savu** pašu** `DATA_DIR` / apjoms                                                                                      | Iestatiet `replicas > 1` pret vienu SQLite failu                        |
+| Liels lielums lidojuma laikā + veselīgs augstums no kaudzes / lidojuma baitu budžeta; 1–2 ir konservatīva #7849 noklusējuma vērtība, nevis cietā produkta maks | Vienam procesam piešķiriet 8 × RAM un neierobežotu skaita ierobežojumu  |
+| Pēc izvēles: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` for** koplietojamo kvotu skaitītāji**                                                        | Uztveriet Redis kā kopīgu SQLite — tas tā nav                           |
+| Dublējiet nodrošinātāja noslēpumus katrā instancē (vai akceptējiet sadalītos informācijas paneļus)                                                             | Sagaidiet vienu informācijas paneli/vienu zvanu žurnālu visos gadījumos |
+| Priekšpuse ar jebkuru slodzes balansētāju; pietiek ar sticky by API taustiņu vai sesiju                                                                        | Nepieciešama pārdevējam noteikta izmēra starpprogrammatūra              |
 
-Sesijas un konta radniecību var arī kopīgot, izmantojot Redis: katram procesam iestatiet `OMNIROUTE_SESSION_AFFINITY_STORE=redis` un `REDIS_URL` ar vienādu `REDIS_KEY_PREFIX` un pozitīvu `sessionAffinityTtlMs` iestatījumu. Piespraudes atrisina jauktās lietošanas konta identitātes katra procesa piemērotajam lokālajam savienojumam, tāpēc OAuth kontiem ar atbilstošiem identitātes metadatiem nav jābūt atbilstošam savienojumam IDs. Zināmās konta identitātes ir svarīgākas par pretrunīgo vietējo IDs tapas izšķirtspējā un apsargātā izlikšanā; ieraksti bez identitātes (vai izlikšanas zvanītāji bez identitātes) saglabā mantoto ID aizsargu. Kontiem bez stabilas lietošanas identitātes joprojām ir nepieciešama atbilstība IDs. Redis kļūdas vai zvani, kas pārsniedz 100 ms, tiek atgriezti vietējā SQLite. Katrs Redis affinity veikals nodrošina izcilu darbību maksimālo apjomu 8, Redis apiet uzreiz, kad tas ir pilns, un atbrīvo laika nišas tikai tad, kad tiek atrisināts pamatā esošais darbs, nevis zvanītāja termiņā. Redis darbības pārtraukuma laikā nav kopīgas patiesības: katrs gadījums atgriežas pie savas vietējās radniecības, sesijas var atkārtoti piespraust katrā gadījumā un gadījumi var atšķirties. Lipīgums atkal saplūst caur Redis kad tas atjaunojas. Noildze gaida, nevis nosūtīts EVAL, kas var nokrist pēc atkāpšanās. Maršrutēšanas raksti salīdzina precīzu vērtību, kas novērota maršrutēšanas lēmumā, nevis jaunu mutācijas laika nolasījumu; novērots garām vai SQLite atkāpšanās novērojums tiek salīdzināts ar neesošu Redis taustiņu. Novecojušas tapas tiek aizstātas ar vienu CAS, tāpēc novēlota komanda nevar aizstāt vai izdzēst jaunāku, atšķirīgu tapu. Redis nolasa atomiski atgriež vērtību un atlikušo serveri TTL; pozitīvs PTTL (vai bez derīguma termiņa beigām) nosaka dzīvīgumu, nevis rakstītāja JSON laika zīmogs vai lasītāja pulkstenis. Vietējie momentuzņēmumi kartē atlikušo TTL līdz vietējam termiņam; esošās JSON atslēgas paliek lasāmas, un to neapstrādātie baiti tiek saglabāti CAS. Redis ir vienīgais patiesības avots, kamēr tas sniedz atbildes. Apstiprinātie kopīgotie pārkāpumi, pieskārieni un dzēšana noņem vietējo ierakstu, nekad to neinstalējiet un neatsvaidziniet. SQLite Redis ceļā satur tikai šīs instances atkāpšanās lēmumus no Redis kļūdām, taimautiem vai piesātinājuma ar TTL, kā iepriekš. Trūkst vietējās piespraudes vēlākā pārtraukumā maksā vienu jaunu izvēli (vienu tūlītēju kešatmiņas izlaišanu), nevis nepareizu vai izliktu kontu. Noraidītās izmaiņas atgriež koplietoto uzvarētāju un tā atlikušo TTL atomāri: parastā atlase atkārtoti pārbauda kartēto lokālo termiņu un izmanto joprojām pastāvošu piemērotu uzvarētāju, pieskaroties šī konta lietojumam un reģistrēšanai bez citas koplietotas rakstīšanas. Ja tas nav pieejams, atlase saglabā vietējo kandidātu, koplietojamo spraudni atstāj nemainīgu un izstaro vienu atkļūdošanas ziņojumu. Noraidīts CAS neraksta SQLite; Redis kļūdas, taimauta vai piekļuves piesātinājums tā vietā izmanto esošo vietējo darbību. Ja atbilde uz nosūtīto mutāciju tiek saņemta pēc taimauta (pieņemta, noraidīta vai kļūda), sinhronā precīzā serializētās vērtības salīdzināšanas un dzēšanas funkcija noņem tikai baitam identisku taimauta atkāpšanās rindu. Starp šo salīdzināšanu un dzēšanu nav jāgaida; tiek saglabāts jaunāks pārtraukuma raksts. Apsargāta izlikšana noņem neveiksmīgā konta lokālo spraudni pat tad, ja Redis ir nolaists, un pēc apstiprinātas koplietošanas izlikšanas tas tiek notīrīts vēlreiz. Gaidot iepriekš sniegtās koplietotās atbildes, nevar atjaunot izlikto lokālo spraudni, jo kopīgos panākumos nekad netiek ierakstīts SQLite. Vēlāka pārtraukuma atkāpšanās var atkārtoti izveidot kontu; vēlāk pieņemts koplietots raksts pastāv tikai Redis. Redis miss nav konsultēties ar vietējo atkāpšanās stāvokli. Ja draiveris ir izslēgts, tikko atlasītās tapas saglabā mantoto četru lauku SQLite JSON formu; tikai Redis maršrutēšana pievieno jauktā konta identitāti. Iepriekš iegūtās tapas tiek atkārtoti pārbaudītas to derīguma termiņa beigās. Redis atlase, kas nav saistīta ar nomu, atkārtoti nolasa veikalu, taču sinhronā nomas plānošanā joprojām var izmantot tapu, kas tiek izlikta starp sākotnējo ielādi un plānošanu (pieņemts labākās piepūles logs). Nomas saistības nevar pārslēgt kontus pēc ilgstošas prasības: noraidīšanas gadījumā tā patur tikai pieprasīto kandidātu šim pieprasījumam un neskar koplietoto uzvarētāju, tāpēc vienošanās starp gadījumiem ir ierobežota. Pārējā tabula joprojām ir spēkā: tajā netiek kopīgota kombinētās sesijas stabilitāte, vietējās Codex pagrieziena tapas, konta semafori, bloķēšanas gadījumi, tēriņu ierobežojumi, konfigurācijas vai zvanu žurnāli.
+Sesijas un konta radniecību var arī kopīgot, izmantojot Redis: katram procesam iestatiet `OMNIROUTE_SESSION_AFFINITY_STORE=redis` un `REDIS_URL` ar vienādu `REDIS_KEY_PREFIX` un pozitīvu `sessionAffinityTtlMs` iestatījumu. Piespraudes atrisina jauktās lietošanas konta identitātes katra procesa piemērotajam lokālajam savienojumam, tāpēc OAuth kontiem ar atbilstošiem identitātes metadatiem nav jābūt atbilstošam savienojumam IDs. Zināmās konta identitātes ir svarīgākas par pretrunīgo vietējo IDs tapas izšķirtspējā un apsargātā izlikšanā; ieraksti bez identitātes (vai izlikšanas zvanītāji bez identitātes) saglabā mantoto ID aizsargu. Kontiem bez stabilas lietošanas identitātes joprojām ir nepieciešama atbilstība IDs. Redis kļūdas vai zvani, kas pārsniedz 100 ms, tiek atgriezti vietējā SQLite. Katrs Redis affinity veikals nodrošina izcilu darbību maksimālo apjomu 8, Redis apiet uzreiz, kad tas ir pilns, un atbrīvo laika nišas tikai tad, kad tiek atrisināts pamatā esošais darbs, nevis zvanītāja termiņā. Redis darbības pārtraukuma laikā nav kopīgas patiesības: katrs gadījums atgriežas pie savas vietējās radniecības, sesijas var atkārtoti piespraust katrā gadījumā un gadījumi var atšķirties. Lipīgums atkal saplūst caur Redis kad tas atjaunojas. Noildze gaida, nevis nosūtīts EVAL, kas var nokrist pēc atkāpšanās. Maršrutēšanas raksti salīdzina precīzu vērtību, kas novērota maršrutēšanas lēmumā, nevis jaunu mutācijas laika nolasījumu; novērots garām vai SQLite atkāpšanās novērojums tiek salīdzināts ar neesošu Redis taustiņu. Novecojušas tapas tiek aizstātas ar vienu CAS, tāpēc novēlota komanda nevar aizstāt vai izdzēst jaunāku, atšķirīgu tapu. Redis nolasa atomiski atgriež vērtību un atlikušo serveri TTL; pozitīvs PTTL (vai bez derīguma termiņa beigām) nosaka dzīvīgumu, nevis rakstītāja JSON laika zīmogs vai lasītāja pulkstenis. Vietējie momentuzņēmumi kartē atlikušo TTL līdz vietējam termiņam; esošās JSON atslēgas paliek lasāmas, un to neapstrādātie baiti tiek saglabāti CAS. Redis ir vienīgais patiesības avots, kamēr tas sniedz atbildes. Apstiprinātie kopīgotie pārkāpumi, pieskārieni un dzēšana noņem vietējo ierakstu, nekad to neinstalējiet un neatsvaidziniet. SQLite Redis ceļā satur tikai šīs instances atkāpšanās lēmumus no Redis kļūdām, taimautiem vai piesātinājuma ar TTL, kā iepriekš. Trūkst vietējās piespraudes vēlākā pārtraukumā maksā vienu jaunu izvēli (vienu tūlītēju kešatmiņas izlaišanu), nevis nepareizu vai izliktu kontu. Noraidītās izmaiņas atgriež koplietoto uzvarētāju un tā atlikušo TTL atomāri: parastā atlase atkārtoti pārbauda kartēto lokālo termiņu un izmanto joprojām pastāvošu piemērotu uzvarētāju, pieskaroties šī konta lietojumam un reģistrēšanai bez citas koplietotas rakstīšanas. Ja tas nav pieejams, atlase saglabā vietējo kandidātu, koplietojamo spraudni atstāj nemainīgu un izstaro vienu atkļūdošanas ziņojumu. Noraidīts CAS neraksta SQLite; Redis kļūdas, taimauta vai piekļuves piesātinājuma gadījumā tā vietā tiek piemērota esošā vietējā darbība. Ja atbilde uz nosūtīto mutāciju tiek saņemta pēc taimauta (pieņemta, noraidīta vai kļūda), sinhronā precīzā serializētās vērtības salīdzināšanas un dzēšanas funkcija noņem tikai baitam identisku taimauta atkāpšanās rindu. Starp šo salīdzināšanu un dzēšanu nav jāgaida; tiek saglabāts jaunāks pārtraukuma raksts. Apsargāta izlikšana noņem neveiksmīgā konta lokālo spraudni pat tad, ja Redis ir nolaists, un pēc apstiprinātas koplietošanas izlikšanas tas tiek notīrīts vēlreiz. Ja tiek gaidītas iepriekš sniegtās koplietotās atbildes, nevar atjaunot izlikto lokālo spraudni, jo kopīgos panākumos nekad netiek ierakstīts SQLite. Vēlāka pārtraukuma atkāpšanās var atkārtoti izveidot kontu; vēlāk pieņemts koplietots raksts pastāv tikai Redis. Redis miss nav konsultēties ar vietējo atkāpšanās stāvokli. Kad draiveris ir izslēgts, tikko atlasītās tapas saglabā mantoto četru lauku SQLite JSON formu; tikai Redis maršrutēšana pievieno jauktā konta identitāti. Iepriekš iegūtās tapas tiek atkārtoti pārbaudītas to derīguma termiņa beigās. Redis atlase, kas nav saistīta ar nomu, atkārtoti nolasa veikalu, taču sinhronā nomas plānošanā joprojām var izmantot tapu, kas tiek izlikta starp sākotnējo ielādi un plānošanu (pieņemts labākās piepūles logs). Nomas saistības nevar pārslēgt kontus pēc ilgstošas prasības: noraidīšanas gadījumā tā patur tikai pieprasīto kandidātu šim pieprasījumam un neskar koplietoto uzvarētāju, tāpēc vienošanās starp gadījumiem ir ierobežota. Pārējā tabula joprojām ir spēkā: tajā netiek kopīgota kombinētās sesijas stabilitāte, vietējās Codex pagrieziena tapas, konta semafori, bloķēšanas gadījumi, tēriņu ierobežojumi, konfigurācijas vai zvanu žurnāli.
 
-Aparatūra: vienā instancē vienlaicīga garā `/v1/responses` ir a** atmiņa-budžets** jautājums (heap + inflight-byte / #10110). `N` neatkarīgie `DATA_DIR` s joprojām vairo kaudzes: resursdatoram RAM ir jāaptver `N × cgroup`, nevis "vienam 16 Gi pod ar N = 8". Nekad `replicas > 1` vienā SQLite failā.
+Aparatūra: vienā instancē vienlaicīga garā `/v1/responses` ir a** atmiņa-budžets** jautājums (heap + inflight-byte / #10110). `N` neatkarīgie `DATA_DIR` joprojām vairo kaudzes: resursdatoram RAM ir jāaptver `N × cgroup`, nevis "vienam 16 Gi pod ar N = 8". Nekad `replicas > 1` vienā SQLite failā.
 
 Izveidojiet skici (divas kaudzes, divi sējumi — nevis `deploy.replicas: 2`):
 
@@ -695,57 +720,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Procesa blīvums (saspiešana no HTTP izolāta) ir [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Viena loģiskā kopa koplietojamā ilgstošā stāvoklī ir [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Procesa blīvums ( HTTP izolāta saspiešana) ir [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Viena loģiskā kopa koplietojamā ilgstošā stāvoklī ir [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Gemini reģionālās kļūdas Docker vidē
+## Gemini reģionālās kļūdas Docker iekšienē
 
-Google AI Studio / Gemini API var atgriezt HTTP 400 kļūdu ar FAILED_PRECONDITION un
-`User location is not supported for the API use.` Veiksmīgs pieprasījums resursdatorā
-neapliecina, ka konteiners izmanto to pašu izejošo maršrutu. DNS secība,
-IPv4/IPv6 savienojamība, VPN maršrutēšana un konfigurētie starpniekserveri var atšķirties. Pārbaudiet
-[Google atbalstītos reģionus](https://ai.google.dev/gemini-api/docs/available-regions),
-kā arī faktisko savienojuma maršrutu; šī kļūda pati par sevi nenorāda uz nederīgu API atslēgu.
+Google AI Studio / Gemini API var atgriezt HTTP 400 ar FAILED_PRECONDITION un `User location is not supported for the API use.` Veiksmīgs pieprasījums resursdatorā nepierāda, ka konteiners izmanto to pašu izejošo maršrutu. DNS pasūtīšana, IPv4/IPv6 savienojamība, VPN maršrutēšana un konfigurētie starpniekserveri var atšķirties. Pārbaudiet [Google atbalstītos reģionus](https://ai.google.dev/gemini-api/docs/available-regions), kā arī faktisko savienojuma maršrutu; šī kļūda vien nenorāda sliktu API atslēgu.
 
-### Dodiet priekšroku konkrētam savienojumam paredzētam starpniekserverim
+### Dodiet priekšroku savienojumam raksturīgam starpniekserveram
 
-Ietekmētajam Gemini savienojumam izmantojiet OmniRoute
-[katra savienojuma starpniekservera konfigurāciju](../ops/PROXY_GUIDE.md#4-level-proxy-system),
-pēc tam atkārtojiet **Pārbaudīt savienojumu** un nelielu pieprasījumu
-ar to pašu modeli. Tādējādi maršrutēšanas izmaiņas attiecas tikai uz konkrēto savienojumu. Pārbaudiet,
-vai starpniekserveris ir sasniedzams no konteinera un vai savienojums to patiešām atlasa.
-Maršruta maiņa negarantē, ka augšupējais pakalpojums būs pieejams konkrētajā reģionā.
+Izmantojiet OmniRoute[katra savienojuma starpniekservera konfigurāciju](../ops/PROXY_GUIDE.md#4-level-proxy-system) ietekmētajam Gemini savienojumam, pēc tam atkārtojiet** Pārbaudīt savienojumu** un neliels pieprasījums ar tādu pašu modeli. Tādējādi maršrutēšanas izmaiņas tiek attiecinātas uz šo savienojumu. Pārbaudiet, vai starpniekserveris ir sasniedzams no konteinera un vai savienojums to patiešām atlasa. Maršruta maiņa negarantē augšteces reģionālo atbilstību.
 
-### Salīdziniet resursdatora un konteinera tīkla savienojumus
+### Salīdziniet resursdatora un konteineru tīklus
 
-Salīdzinot autentificētos rezultātus, saglabājiet identisku atslēgu, modeli un pieprasījumu; nekad
-neievietojiet problēmas pieteikumā akreditācijas datus, starpniekservera paroles vai pilnas autorizācijas galvenes.
-Vispirms pārbaudiet, kuras adrešu saimes piedāvā operētājsistēmas atrisinātājs, izmantojot vienu un to pašu komandu
-resursdatorā un konteinerā:
+Salīdzinot autentificētos rezultātus, saglabājiet atslēgu, modeli un pieprasījumu identisku; nekad neielīmējiet akreditācijas datus, starpniekservera paroles vai pilnīgas autorizācijas galvenes. Vispirms pārbaudiet, kuras adrešu saimes piedāvā OS solver, izmantojot to pašu komandu resursdatorā un konteinera iekšpusē:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Aizstājiet `omniroute` ar izmantoto pakalpojumu (piemēram, `omniroute-web`). Šīs
-komandas izvada adrešu saimes bez akreditācijas datiem vai IP adresēm. Atgriezta vērtība `6`
-norāda tikai uz IPv6 DNS rezultātu: tā **neapliecina**, ka ir pieejams izmantojams IPv6 maršruts vai piekļuve API.
-Ja ir instalēts `curl`, abās vidēs salīdziniet
-`curl -4 -I https://generativelanguage.googleapis.com` ar
-`curl -6 -I https://generativelanguage.googleapis.com`.
-HTTP atbilde apliecina savienojamību konkrētajai pārbaudei, pat ja tā ir neautentificēta
-kļūda; Gemini pieejamību pārbauda tikai autentificēts modeļa pieprasījums.
+Aizstājiet `omniroute` ar pakalpojumu, kuru izmantojat (piemēram, `omniroute-web`). Šīs komandas drukā adrešu saimes bez akreditācijas datiem vai IP adresēm. Atgrieztais `6` parāda tikai IPv6 DNS rezultātu: tā ir** nē** pierādīt izmantojamu IPv6 maršrutu vai API piekļuvi. Kur ir instalēts `curl`, salīdziniet `curl -4 -I https://generativelanguage.googleapis.com` ar `curl -6 -I https://generativelanguage.googleapis.com` abās vidēs. HTTP atbilde pierāda savienojamību šai zondei, pat ja tā ir neautentificēta kļūda; tikai autentificēta modeļa pieprasījums pārbauda Gemini piemērotību.
 
-### Resursdatora līmeņa alternatīva: funkcionējošs IPv6 un atrisinātāja politika
+### Resursdatora līmeņa alternatīva: darba IPv6 un atrisinātāja politika
 
-Ziņojuma [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) autors atjaunoja
-piekļuvi savā vidē, iespējojot konteineru IPv6 un mainot glibc adrešu
-atlases politiku. Uzskatiet to par konkrētai videi paredzētu alternatīvu. Pirms atrisinātāja preferenču pielāgošanas
-pārliecinieties, ka resursdatora IPv6 darbojas, konteinera izejošā piekļuve un maršrutēšana ir funkcionāla un ugunsmūra kārtulas ir pareizas.
-Privāta ULA adrese pati par sevi neapliecina publisku IPv6 savienojamību.
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) reportieris atjaunoja piekļuvi viņu vidē, iespējojot konteineru IPv6 un mainot glibc adreses atlasi. Uztveriet to kā videi specifisku alternatīvu. Pirms risinātāja preferenču pielāgošanas apstipriniet strādājošā resursdatora IPv6, konteinera egress/routing un ugunsmūra noteikumus. Privāta ULA adrese pati par sevi nenodrošina publisku IPv6 savienojumu.
 
-Pakalpojumiem, kas jau ir pievienoti Compose noklusējuma tīklam, šis fragments iespējo
-IPv6 attiecīgajā tīklā; saglabājiet pārējo pakalpojuma, portu, sējumu un konfigurācijas saturu:
+Pakalpojumiem, kas jau ir pievienoti Compose noklusējuma tīklam, šis fragments iespējo IPv6 šajā tīklā; saglabāt pārējo pakalpojumu, portus, apjomus un konfigurāciju:
 
 ```yaml
 networks:
@@ -753,30 +753,13 @@ networks:
     enable_ipv6: true
 ```
 
-Nosauktam tīklam iespējojiet to tīklā, kuram pakalpojums faktiski pievienojas. Docker var
-piešķirt ULA apakštīklu; skaidri norādītu apakštīklu, kas nepārklājas ar citiem, izvēlieties tikai tad, ja tas ir nepieciešams jūsu tīklam.
-Skatiet [Docker IPv6 tīkla dokumentāciju](https://docs.docker.com/engine/daemon/ipv6/)
-un [Compose tīkla opcijas](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Nosauktam tīklam iespējojiet to tīklā, kuram pakalpojums faktiski pievienojas. Docker var piešķirt ULA apakštīklu; atlasiet skaidru apakštīklu, kas nepārklājas tikai tad, ja tas ir nepieciešams jūsu tīklam. Skatiet sadaļu [Docker IPv6 tīklošana](https://docs.docker.com/engine/daemon/ipv6/) un [tīkla izveides opcijas](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-**Uz glibc balstītā attēlā** `/etc/gai.conf` var mainīt adrešu atlasi. Pašreizējā
-repositorija Dockerfile izmanto Debian; pielāgotiem attēliem, kuru pamatā ir musl, šis mehānisms nav pieejams.
-Ziņojumā aprakstītā korekcija maina ULA etiķeti no `label fc00::/7 6` uz
-`label fc00::/7 1`. Sāciet ar attēla pilno politikas tabulu un saglabājiet pārējos
-tās ierakstus: pievienojot `label` vai `precedence` ierakstu, tiek aizstāta šī noklusējuma tabula, tāpēc fails,
-kurā ir tikai mainītā rinda, nav pietiekams.
-[glibc konfigurācijas atsaucē](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-ir dokumentēta šī darbība. Piemontējiet pārskatīto failu kā tikai lasāmu pie `/etc/gai.conf`
-un izveidojiet pakalpojumu no jauna, lai piemērotu izmaiņas.
+Uz a** uz glibc balstīts attēls** , `/etc/gai.conf` var mainīt adreses izvēli. Pašreizējā repozitorija Dockerfile izmanto Debian; pielāgotiem musulmaņu attēliem šis mehānisms nav kopīgs. Paziņotā korekcija maina ULA apzīmējumu no `label fc00::/7 6` uz `label fc00::/7 1`. Sāciet no attēla pilnās politikas tabulas un saglabājiet citus tā ierakstus: `label` vai `precedence` ieraksta pievienošana aizstāj šo noklusējuma tabulu, tāpēc nepietiek ar failu, kurā ir tikai mainītā rinda. [Glibc konfigurācijas atsauce](https://github.com/bminor/glibc/blob/master/posix/gai.conf) dokumentē šo semantiku. Saistējiet pārskatīto failu tikai lasāmu vietnē `/etc/gai.conf` un atkārtoti izveidojiet pakalpojumu, lai to lietotu.
 
-Tas maina operētājsistēmas adrešu atlasi **visai izejošajai datplūsmai šajā konteinerā**.
-Tas nepiespiež katru lietojumprogrammu izvēlēties IPv6: nozīme ir arī Node DNS secībai un savienojuma
-atlasei. Konkrēti, `--dns-result-order=ipv4first` dod priekšroku IPv4 un
-nav risinājums kļūmei, kas rodas, izmantojot tikai IPv4. Skatiet [Node DNS secības dokumentāciju](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Tas maina OS adreses atlasi** visa izejošā datplūsma šajā konteinerā** . Tas neliek katrai lietojumprogrammai izvēlēties IPv6: nozīme ir arī mezgla DNS secībai un savienojuma izvēlei. Jo īpaši `--dns-result-order=ipv4first` dod priekšroku IPv4 un nav līdzeklis IPv4-only kļūmes gadījumā. Skatiet [mezglu DNS pasūtīšanu](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Pēc jebkādām resursdatora līmeņa izmaiņām vēlreiz pārbaudiet Gemini un citus pakalpojumu sniedzējus. Lai izmaiņas atsauktu,
-noņemiet pielāgoto `gai.conf` montējumu, atjaunojiet iepriekšējo tīkla konfigurāciju un
-apkopes loga laikā no jauna izveidojiet ietekmēto pakalpojumu/tīklu. Tīkla izveidošana no jauna
-var pārtraukt citu tam pievienoto konteineru darbību; neizdzēsiet pastāvīgo datu sējumu.
+Atkārtoti pārbaudiet Gemini un citus pakalpojumu sniedzējus pēc resursdatora līmeņa izmaiņām. Lai atsauktu atpakaļ, noņemiet pielāgoto `gai.conf` stiprinājumu, atjaunojiet iepriekšējo tīkla konfigurāciju un apkopes loga laikā atkārtoti izveidojiet ietekmēto service/network. Atkārtoti izveidojot tīklu, var tikt pārtraukti citi tam pievienotie konteineri; neizdzēsiet pastāvīgo datu apjomu.
 
 ## Svarīgas piezīmes
 

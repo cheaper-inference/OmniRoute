@@ -11,7 +11,7 @@ Paragun tal-karatteristiċi oġġettivi vs routers AI open-source popolari.
 | Karatteristika                                          |                    OmniRoute 3.8                    |       LiteLLM 1.x        | OpenRouter (SaaS) |   Portkey    |
 | ------------------------------------------------------- | :-------------------------------------------------: | :----------------------: | :---------------: | :----------: |
 | **Fornituri**                                           |                       **329**                       |           ~100           |        ~50        |     ~30      |
-| **Free/no-auth entrati fil-katalgu**                    |                       **155**                       |           n/a            |    passthrough    |     n/a      |
+| **Fornituri b'aċċess b'xejn**                           |               **50 b'aċċess ħieles**                |           n/a            |    passthrough    |     n/a      |
 | **Awto-hostable**                                       |                         ✅                          |            ✅            |        ❌         |  ⚠ mhallsa   |
 | **OAuth entrati fil-katalgu**                           |                       **23**                        |         parzjali         |        ❌         |      ❌      |
 | **Auto-fallback combos**                                |                  **22 strateġija**                  | ibbażat fuq il-prijorità | ibbażat fuq saff  |    peżati    |
@@ -28,9 +28,9 @@ Paragun tal-karatteristiċi oġġettivi vs routers AI open-source popolari.
 | **TLS fingerprint stealth (JA3/JA4)**                   |                     ✅ wreq-js                      |            ❌            |        ❌         |      ❌      |
 | **Qafas ta' evalwazzjoni**                              |                     ✅ built-in                     |            ❌            |        ❌         |  ⚠ mhallsa   |
 | **prokura MITM (interċetta Cursor/Antigravity)**        |                  ✅ cross-platform                  |            ❌            |        ❌         |      ❌      |
-| **CLI bi trej tas-sistema (mhux Electron)**             |                         ✅                          |            ❌            |        n/a        |     n/a      |
+| **CLI bit-trej tas-sistema (mhux Electron)**            |                         ✅                          |            ❌            |        n/a        |     n/a      |
 | **CLI machine-ID auto-auth**                            |                         ✅                          |            ❌            |        n/a        |     n/a      |
-| **Daxxbord**                                            |                     Next.js 16                      |          bażiku          |   proprjetarja    | proprjetarja |
+| **Dashboard**                                           |                     Next.js 16                      |          bażiku          |   proprjetarja    | proprjetarja |
 | **i18n**                                                |                    **67 lokal**                     |            ❌            |        ❌         |      ⚠       |
 | **Ħiliet ta' aġent pubbliku (SKILL.md)**                |                        ✅ 45                        |            ❌            |        ❌         |      ❌      |
 | **Appoġġ tal-mina (Cloudflared, Tailscale, Ngrok)**     |                         ✅                          |            ❌            |        n/a        |     n/a      |
@@ -38,7 +38,7 @@ Paragun tal-karatteristiċi oġġettivi vs routers AI open-source popolari.
 
 ## Meta tagħżel OmniRoute
 
-- Inti tospita lilek innifsek u trid** kopertura massima tal-fornitur** (394 fornitur, 155 entrati fil-katalgu free/no-auth )
+- Inti tospita lilek innifsek u trid** kopertura massima tal-fornitur** (394 fornitur, 50 b'aċċess b'xejn)
 - Għandek bżonn a** server MCP mibni** (għodod LLM, memorja, ħiliet esposti bħala għodda)
 - Għandek bżonn**A2A protokoll** għal flussi tax-xogħol minn aġent għal aġent
 - Trid** stealth tal-marki tas-swaba'** (JA3/JA4) biex tevita skoperta minn upstream CAPTCHAs
@@ -56,12 +56,12 @@ Paragun tal-karatteristiċi oġġettivi vs routers AI open-source popolari.
 - M’għandekx problema tħallas għal kull token bil-marġni miżjud tas-SaaS
 - Għandek bżonn **metodu wieħed ta’ ħlas** għall-fornituri kollha
 
-## Meta għandek tagħżel Portkey
+## Meta tagħżel Portkey
 
-- Għandek bżonn **SLA kummerċjali** b’garanziji ta’ disponibbiltà
-- Tippreferi **dashboard ġestit** mingħajr il-piż operazzjonali
-- Għandek bżonn **karatteristiċi ta’ konformità għall-intrapriżi** lesti biex jintużaw
+- Għandek bżonn a** SLA kummercjali** b'garanziji ta' uptime
+- Inti tippreferi a** dashboard amministrat** mingħajr ops overhead
+- Għandek bżonn** konformità tal-intrapriża** karatteristiċi barra mill-kaxxa
 
 ---
 
-_Aġġornat l-aħħar: 2026-08-02. Ibgħat korrezzjonijiet permezz ta’ PR biex din it-tabella tibqa’ preċiża._
+_Ibgħat korrezzjonijiet permezz ta' PR biex din it-tabella tibqa' preċiża._

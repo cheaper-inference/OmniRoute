@@ -54,15 +54,13 @@ Příklady zastupování naší komunity zahrnují používání oficiální e-m
 zveřejňování příspěvků prostřednictvím oficiálního účtu na sociálních sítích nebo
 působení ve funkci jmenovaného zástupce na online či prezenční akci.
 
-## Enforcement
+## Vynucení
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Případy hrubého, obtěžujícího nebo jinak nepřijatelného chování lze nahlásit vedoucím komunit odpovědným za vymáhání prostřednictvím otevření soukromé bezpečnostní poradny na adrese
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+nebo zasláním e-mailu správci na adresu diegosouza.pw@outlook.com. Informace o incidentech citlivých na zabezpečení naleznete v [`SECURITY.md`](SECURITY.md). Všechny stížnosti budou rychle a spravedlivě přezkoumány a prošetřeny.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Všichni vedoucí komunity jsou povinni respektovat soukromí a bezpečnost oznamovatele jakéhokoli incidentu.
 
 ## Pokyny pro uplatňování pravidel
 

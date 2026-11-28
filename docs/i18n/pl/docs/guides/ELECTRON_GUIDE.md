@@ -4,7 +4,7 @@
 
 ---
 
-> **Źródło prawdy:** obszar roboczy `electron/`** Ostatnia aktualizacja:** 2026-06-28 — v3.8.40
+> **Źródło prawdy:** obszar roboczy `electron/`
 
 OmniRoute dostarcza wbudowaną wieloplatformową aplikację komputerową (Windows / macOS / Linux).**Electron 41** +** konstruktor elektronów 26.10** . Aplikacja komputerowa tworzy samodzielny serwer Next.js jako proces potomny, wskazuje na niego `BrowserWindow` i dodaje tacę systemową, automatyczną aktualizację, most IPC i tajny pasek startowy o zerowej konfiguracji.
 
@@ -198,7 +198,7 @@ Ustaw przez `session.defaultSession.webRequest.onHeadersReceived`. Godne uwagi d
 
 ## Automatyczna aktualizacja
 
-Używa `electron-updater` z dostawcą GitHub (`diegosouzapw/OmniRoute`).
+Używa `electron-updater` z dostawcą GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Zdarzenia przekazywane do modułu renderującego przez `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (z `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefakty lądują w `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Wydania są publikowane w GitHub Releases (`diegosouzapw/OmniRoute`), gdzie `electron-updater` sprawdza również dostępność nowych wersji.
+Wydania są publikowane w GitHub Releases (`cheaper-inference/OmniRoute`), gdzie `electron-updater` sprawdza również dostępność nowych wersji.
 
 ## Rozwiązywanie problemów
 

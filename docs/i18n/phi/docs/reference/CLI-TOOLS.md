@@ -4,8 +4,6 @@
 
 ---
 
-Huling na-update: 2026-08-23
-
 OmniRoute ay sumasama sa tatlong kategorya ng mga tool CLI na nakakalat sa tatlong nakalaang pahina ng dashboard:
 
 | Pahina         | Ruta                    | Konsepto                                                                                      | Bilangin                |

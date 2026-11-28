@@ -69,35 +69,35 @@ A diretiva é intencionalmente definida **por proxy**, e não globalmente — pr
 
 ## Os Três Valores
 
-| Valor  | Rótulo na UI              | Comportamento                                                                                                                                                                                     |
-| ------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `Automático (dual-stack)` | O sistema operacional escolhe a família. Para um host de proxy que seja um IP literal, a família é intrínseca ao literal; para um nome de host, ambas as famílias são elegíveis. Esse é o padrão. |
-| `ipv4` | `Somente IPv4`            | Restringe a conexão ao IPv4. A conexão falha de forma segura se o host do proxy não tiver um registro IPv4 (A).                                                                                   |
-| `ipv6` | `Somente IPv6`            | Restringe a conexão ao IPv6. A conexão falha de forma segura se o host do proxy não tiver um registro IPv6 (AAAA).                                                                                |
+| Valor  | rótulo UI           | Comportamento                                                                                                                                                   |
+| ------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS escolhe a família. Para um host proxy IP-literal, a família é intrínseca ao literal; para um nome de host, ambas as famílias são elegíveis. Este é o padrão. |
+| `ipv4` | `IPv4 only`         | Fixa a conexão em IPv4. Falha no fechamento se o host proxy não tiver nenhum registro IPv4 (A).                                                                 |
+| `ipv6` | `IPv6 only`         | Fixa a conexão em IPv6. Falha no fechamento se o host proxy não tiver nenhum registro IPv6 (AAAA).                                                              |
 
-As strings da UI ficam em `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+As strings UI residem em `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Como Configurar
+## Como configurá-lo
 
 ### Painel
 
-O seletor fica no formulário de proxy da aba **Pool de Proxies**:
+O seletor está na forma de proxy do** Conjunto de proxy** aba:
 
-1. Abra **Painel → Configurações → Proxy → Pool de Proxies**
-2. Adicione ou edite um proxy
-3. Defina o menu suspenso **Família de IP** como `Automático (dual-stack)`, `Somente IPv4` ou `Somente IPv6`
-4. Salve
+1. Abrir** Configurações do painel → Proxy → Conjunto de proxy →**
+2. Adicionar ou editar um proxy
+3. Defina o** família IP** menu suspenso para `Auto (dual-stack)`, `IPv4 only` ou `IPv6 only`
+4. Salvar
 
 O controle é renderizado por `ProxyRegistryManager.tsx` (montado em `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-O campo `family` faz parte dos payloads de criação/atualização do registro de proxies, é validado por `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) e processado por `POST` / `PATCH /api/v1/management/proxies`:
+O campo `family` faz parte das cargas úteis create/update do registro de proxy, validadas por `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) e manipuladas por `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Criar um proxy somente IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Alterar um proxy existente para somente IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-O mesmo campo também é aceito pelo objeto de configuração de proxy inline usado para entradas de proxy upstream (`upstream_proxy_config.family`; consulte [Modelo de Dados](#data-model)).
+O mesmo campo também é aceito pelo objeto de configuração de proxy embutido usado para entradas de proxy upstream (`upstream_proxy_config.family`, consulte [Modelo de dados](#data-model) ).
 
-Para o restante da API de CRUD/atribuição de proxies, consulte [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Para o restante do proxy CRUD/assignment API, consulte [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

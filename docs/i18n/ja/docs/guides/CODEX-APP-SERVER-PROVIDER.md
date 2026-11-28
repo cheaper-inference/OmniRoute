@@ -20,24 +20,21 @@ Codex CLI に到達可能であること**、およびその CLI が**サイン�
 ## 1. アーキテクチャ
 
 ```
-┌─ OmniRoute アプリ ──────────────┐        ┌─ codex-app-server サイドカー ──────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  （+ ケイパビリティトークン）    │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuth を自己管理            │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, 自動更新)     │
-        │ 共有（compose ボリューム）         └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS ケイパビリティトークン（両方がマウント）
-  codex-appserver-home    → ~/.codex（ダッシュボードが auth.json を書き込み、
-                             サイドカーの codex app-server が読み取り）
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- サイドカーは、ケイパビリティトークンで保護された内部 compose ネットワーク
-  （`ws://codex-app-server:1456`）上で**のみ**リッスンします。ホストや
-  インターネットに公開されることは**ありません**。
-- Codex CLI は `omniroute:base` に組み込まれているため、サイドカーを実行する際に
-  ホストやユーザーのマシンへ codex をインストールする必要はありません。
+- サイドカーが聞きます**のみ**機能トークンの背後にある内部構成ネットワーク (`ws://codex-app-server:1456`) 上で。それは**一度もない**ホストまたはインターネットに公開されます。
+- サイドカーは、 Codex CLIを含む`runner-cli-no-docker`ターゲットから構築された`omniroute:cli-no-docker`を使用します。
 
 ## 2. 起動
 

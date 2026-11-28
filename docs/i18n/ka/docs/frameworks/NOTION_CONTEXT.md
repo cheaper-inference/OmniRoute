@@ -64,39 +64,29 @@ OmniRoute ინახავს ტოკენს და დაუყოვნ�
 
 ## MCP ინსტრუმენტები (6)
 
-განსაზღვრულია `open-sse/mcp-server/tools/notionTools.ts`-ში. ტოკენი გამოძახების
-დროს მიიღება `getNotionToken()`-ის მეშვეობით; თუ იგი კონფიგურირებული არ არის, ინსტრუმენტი გამოიტანს შეცდომას
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
+განსაზღვრულია `open-sse/mcp-server/tools/notionTools.ts` ში. ჟეტონი წყდება ზარის დროს `getNotionToken()` საშუალებით; თუ არცერთი არ არის კონფიგურირებული, ინსტრუმენტი აგდებს `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| ინსტრუმენტი                  | წვდომის სფერო  | აღწერა                                                                                                                           |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | გვერდებისა და მონაცემთა ბაზების ძიება ტექსტური მოთხოვნით (აბრუნებს სათაურებს, ID-ებსა და URL-ებს). გვერდებად დაყოფილი.           |
-| `notion_get_page`            | `read:notion`  | გვერდის შიგთავსისა და მეტამონაცემების მიღება მისი ID-ით.                                                                         |
-| `notion_list_block_children` | `read:notion`  | ბლოკის ან გვერდის ყველა შვილობილი ბლოკის სიის მიღება (ბლოკების ხე). გვერდებად დაყოფილი.                                          |
-| `notion_query_database`      | `read:notion`  | მონაცემთა ბაზაში მოთხოვნის შესრულება არასავალდებულო `filter` + `sorts` პარამეტრებით (Notion API-ის ფორმატი). გვერდებად დაყოფილი. |
-| `notion_get_database`        | `read:notion`  | მონაცემთა ბაზის სქემის/მეტამონაცემების მიღება ID-ით.                                                                             |
-| `notion_append_blocks`       | `write:notion` | შვილობილი ბლოკების დამატება არსებულ ბლოკში ან გვერდზე (მაქსიმუმ 100 ბლოკი თითო მოთხოვნაზე).                                      |
+| ხელსაწყო                     | ფარგლები       | აღწერა                                                                                                          |
+| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | მოძებნეთ გვერდები და მონაცემთა ბაზები ტექსტური მოთხოვნის მიხედვით (აბრუნებს სათაურებს, IDs, URLs). ფურცირებული. |
+| `notion_get_page`            | `read:notion`  | მიიღეთ გვერდის შინაარსი და მეტამონაცემები მისი ID მიხედვით.                                                     |
+| `notion_list_block_children` | `read:notion`  | ჩამოთვალეთ ბლოკის ან გვერდის ყველა ბლოკის შვილი (ბლოკის ხე). ფურცირებული.                                       |
+| `notion_query_database`      | `read:notion`  | მოითხოვეთ მონაცემთა ბაზა არასავალდებულო `filter` + `sorts` (Notion API ფორმატით). ფურცირებული.                  |
+| `notion_get_database`        | `read:notion`  | მიიღეთ მონაცემთა ბაზის schema/metadata ID ით.                                                                   |
+| `notion_append_blocks`       | `write:notion` | ბლოკის ბავშვების დამატება არსებულ ბლოკს ან გვერდზე (მაქსიმუმ 100 ბლოკი თითო მოთხოვნაზე).                        |
 
 ### შეყვანის პარამეტრები
 
-- `notion_search` — `query` (1–500 სიმბოლო), `pageSize` (1–100, ნაგულისხმევად 20),
-  `startCursor` (არასავალდებულო).
-- `notion_get_page` — `pageId` (32-სიმბოლოიანი თექვსმეტობითი მნიშვნელობა ან UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ნაგულისხმევად 50),
-  `startCursor` (არასავალდებულო).
-- `notion_query_database` — `databaseId`, `filter` (არასავალდებულო, Notion-ის ფილტრის ფორმატი),
-  `sorts` (არასავალდებულო მასივი), `pageSize` (1–100, ნაგულისხმევად 50), `startCursor` (არასავალდებულო).
+- `notion_search` — `query` (1–500 სიმბოლო), `pageSize` (1–100, ნაგულისხმევი 20), `startCursor` (არასავალდებულო).
+- `notion_get_page` — `pageId` (32-char hex ან UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ნაგულისხმევი 50), `startCursor` (არასავალდებულო).
+- `notion_query_database` — `databaseId`, `filter` (სურვილისამებრ, Notion ფილტრის ფორმატი), `sorts` (სურვილისამებრ მასივი), `pageSize` (1–100, ნაგულისხმევი 50), `startCursor` (სურვილისამებრ).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (ბლოკის ობიექტების მასივი),
-  `after` (არასავალდებულო პოზიცია).
+- `notion_append_blocks` — `blockId`, `children` (ბლოკის ობიექტების მასივი), `after` (სურვილისამებრ პოზიცია).
 
-### წვდომის სფეროები
+### ფარგლები
 
-წაკითხვის ინსტრუმენტებს სჭირდება `read:notion`, ხოლო ჩაწერის ინსტრუმენტს — `write:notion`.
-წვდომის სფეროებს `open-sse/mcp-server/server.ts`-ში არსებული `withScopeEnforcement()` აღასრულებს
-მხოლოდ მაშინ, როცა `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; გამომძახებლისთვის ნებადართული წვდომის სფეროები მიიღება
-`OMNIROUTE_MCP_SCOPES`-იდან (მძიმით გამოყოფილი) ან ავტორიზებული API გასაღების წვდომის სფეროს კონტექსტიდან.
-წვდომის სფეროების სრული მოდელისთვის იხილეთ [MCP-SERVER.md](./MCP-SERVER.md).
+წაკითხვის ხელსაწყოებს სჭირდება `read:notion` და ჩაწერის ხელსაწყოს მოითხოვს `write:notion`. Scopes აძლიერებს `withScopeEnforcement()` `open-sse/mcp-server/server.ts` ში, როდესაც `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, და ყოველთვის HTTP/SSE აბონენტისთვის, რომლის API კლავიშს აკლია `manage`/`admin`; აბონენტის მიერ დაშვებული სკოპი მომდინარეობს `OMNIROUTE_MCP_SCOPES` (მძიმით გამოყოფილი) ან ავთენტიფიცირებული API გასაღების ფარგლების კონტექსტიდან. იხილეთ [MCP-SERVER.md](./MCP-SERVER.md) სრული მოცულობის მოდელისთვის.
 
 ## საბოლოო წერტილები
 

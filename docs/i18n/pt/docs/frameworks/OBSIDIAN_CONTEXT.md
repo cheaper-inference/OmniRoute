@@ -115,58 +115,48 @@ o acesso; continua a ser suportada uma credencial de ambiente válida que seja r
 As chaves autenticadas sem configuração do Obsidian específica por chave mantêm o recurso à configuração global.
 As quatro ferramentas `obsidian_sync_*` mantêm o seu comportamento distinto relativo ao token de sincronização.
 
-## Ferramentas MCP (22)
+## ferramentas MCP (22)
 
-Definidas em `open-sse/mcp-server/tools/obsidianTools.ts`. O token/URL base são resolvidos
-por chamada (primeiro por chave de API e depois globalmente). As ferramentas que acedem ao **servidor de sincronização**
-do OmniRoute (as quatro ferramentas `obsidian_sync_*`) requerem adicionalmente o token de autenticação de sincronização configurado
-nas definições do OmniRoute.
+Definido em `open-sse/mcp-server/tools/obsidianTools.ts`. Os token/base-URL são resolvidos por chamada (primeiro por chave API e depois global). Ferramentas que atingiram o OmniRoute** servidor de sincronização** (as quatro ferramentas `obsidian_sync_*` ) requerem adicionalmente o token de autenticação de sincronização configurado nas definições OmniRoute.
 
 ### Ferramentas de leitura (`read:obsidian`)
 
-| Ferramenta                   | Descrição                                                                                                                       |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Verificar se a API REST local está acessível e autenticada.                                                                     |
-| `obsidian_search_simple`     | Pesquisa de texto integral no conteúdo das notas; devolve excertos com caminhos de ficheiros.                                   |
-| `obsidian_search_structured` | Pesquisar utilizando uma expressão JSON Logic (filtros and/or/regex/path).                                                      |
-| `obsidian_read_note`         | Ler uma nota pelo caminho relativo ao cofre; opcionalmente, um cabeçalho/bloco/frontmatter específico.                          |
-| `obsidian_list_vault`        | Listar ficheiros e diretórios no cofre (árvore de entradas).                                                                    |
-| `obsidian_get_document_map`  | Obter a estrutura de cabeçalhos da nota como um mapa de cabeçalhos → números de linha.                                          |
-| `obsidian_get_note_metadata` | Obter frontmatter, etiquetas, ligações e contagem de caracteres/palavras sem o conteúdo integral.                               |
-| `obsidian_get_active_file`   | Obter o caminho e o conteúdo do ficheiro atualmente ativo no Obsidian.                                                          |
-| `obsidian_get_periodic_note` | Obter a nota periódica diária/semanal/mensal de uma data (hoje, caso seja omitida).                                             |
-| `obsidian_get_tags`          | Listar todas as etiquetas do cofre com as respetivas frequências.                                                               |
-| `obsidian_list_commands`     | Listar os IDs dos comandos disponíveis do Obsidian (utilizar com `obsidian_execute_command`).                                   |
-| `obsidian_sync_status`       | Estado do servidor de sincronização do OmniRoute: em execução, nome do cofre, porta, tempo de atividade e última sincronização. |
-| `obsidian_sync_conflicts`    | Listar conflitos de sincronização não resolvidos (caminho, caminho do conflito e data/hora de deteção).                         |
+| Ferramenta                   | Descrição                                                                                                                    |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Verifique se o REST API local está acessível e autenticado.                                                                  |
+| `obsidian_search_simple`     | Pesquisa de texto integral do conteúdo da nota; devolve trechos com caminhos de ficheiros.                                   |
+| `obsidian_search_structured` | Pesquise utilizando uma expressão lógica JSON (filtros and/or/regex/path ).                                                  |
+| `obsidian_read_note`         | Leia uma nota por caminho relativo ao cofre; opcionalmente um heading/block/frontmatter. específico                          |
+| `obsidian_list_vault`        | Lista ficheiros e diretórios no vault (árvore de entradas).                                                                  |
+| `obsidian_get_document_map`  | Obtenha a estrutura do título da nota como um mapa dos títulos → números de linha.                                           |
+| `obsidian_get_note_metadata` | Obtenha frontmatter, tags, links e contagem char/word sem o conteúdo completo.                                               |
+| `obsidian_get_active_file`   | Obter o conteúdo do caminho + do ficheiro atualmente ativo em Obsidian.                                                      |
+| `obsidian_get_periodic_note` | Obtenha a nota periódica daily/weekly/monthly para uma data (hoje, se for omitida).                                          |
+| `obsidian_get_tags`          | Liste todas as tags do Vault com as suas frequências.                                                                        |
+| `obsidian_list_commands`     | Lista o comando Obsidian disponível IDs (utilizar com `obsidian_execute_command`).                                           |
+| `obsidian_sync_status`       | Estado do servidor de sincronização OmniRoute : em execução, nome do cofre, porta, tempo de atividade, última sincronização. |
+| `obsidian_sync_conflicts`    | Listar conflitos de sincronização não resolvidos (caminho, caminho do conflito, detetado em).                                |
 
-### Ferramentas de escrita (`write:obsidian`)
+### Ferramentas de gravação (`write:obsidian`)
 
-| Ferramenta                       | Descrição                                                                                                        |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Criar ou substituir uma nota com o conteúdo Markdown indicado.                                                   |
-| `obsidian_append_note`           | Acrescentar conteúdo a uma nota; opcionalmente, a um cabeçalho/bloco específico.                                 |
-| `obsidian_patch_note`            | Acrescentar, antepor ou substituir de forma precisa num cabeçalho, bloco ou campo de frontmatter.                |
-| `obsidian_delete_note`           | Eliminar permanentemente uma nota do cofre.                                                                      |
-| `obsidian_move_note`             | Mover ou mudar o nome de uma nota no cofre.                                                                      |
-| `obsidian_execute_command`       | Executar um comando do Obsidian através do respetivo ID.                                                         |
-| `obsidian_open_file`             | Abrir um ficheiro no Obsidian (cria-o caso não exista).                                                          |
-| `obsidian_sync_trigger`          | Acionar uma sincronização bidirecional imediata do cofre entre computador↔dispositivo móvel.                     |
-| `obsidian_sync_resolve_conflict` | Resolver um conflito de sincronização: manter `local` (dispositivo móvel), `remote` (computador) ou `keep-both`. |
+| Ferramenta                       | Descrição                                                                                           |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Crie ou substitua uma nota com determinado conteúdo Markdown.                                       |
+| `obsidian_append_note`           | Anexar conteúdo a uma nota; opcionalmente para um heading/block. específico                         |
+| `obsidian_patch_note`            | Cirurgicamente append/prepend/replace num campo de título, bloco ou frontmatter.                    |
+| `obsidian_delete_note`           | Apague permanentemente uma nota do cofre.                                                           |
+| `obsidian_move_note`             | Mover ou renomear uma nota dentro do cofre.                                                         |
+| `obsidian_execute_command`       | Execute um comando Obsidian pelo seu comando ID.                                                    |
+| `obsidian_open_file`             | Abra um ficheiro no Obsidian (crie-o se não existir).                                               |
+| `obsidian_sync_trigger`          | Acione uma sincronização bidirecional imediata do cofre móvel ↔ para desktop.                       |
+| `obsidian_sync_resolve_conflict` | Resolva um conflito de sincronização: mantenha `local` (mobile), `remote` (desktop) ou `keep-both`. |
 
 > [!NOTE]
-> Os destinos de `obsidian_patch_note` aceitam um `targetType` de `heading | block | frontmatter`
-> e uma `operation` de `append | prepend | replace`, com um
-> `createTargetIfMissing` opcional. As quatro ferramentas `obsidian_sync_*` comunicam com o servidor de sincronização
-> local (`http://127.0.0.1:27781` por predefinição) e requerem o token de sincronização.
+> Os alvos `obsidian_patch_note` aceitam `targetType` de `heading | block | frontmatter` e `operation` de `append | prepend | replace`, com um `createTargetIfMissing` opcional. As quatro ferramentas `obsidian_sync_*` comunicam com o servidor de sincronização local (`http://127.0.0.1:27781` por defeito) e requerem o token de sincronização.
 
-### Âmbitos
+### Escopos
 
-As ferramentas de leitura requerem `read:obsidian`; as ferramentas de escrita requerem `write:obsidian`. A aplicação
-é idêntica à do Notion — gerida por `withScopeEnforcement()` em
-`open-sse/mcp-server/server.ts`, condicionada a `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, com os
-âmbitos permitidos obtidos de `OMNIROUTE_MCP_SCOPES` ou do contexto de âmbito da chave de API. Consulte
-[MCP-SERVER.md](./MCP-SERVER.md).
+As ferramentas de leitura requerem `read:obsidian`; ferramentas de gravação requerem `write:obsidian`. A aplicação é idêntica à Notion — manipulada por `withScopeEnforcement()` em `open-sse/mcp-server/server.ts`, bloqueada em `OMNIROUTE_MCP_ENFORCE_SCOPES=true` e forçada para os chamadores HTTP/SSE cuja chave API não tem `manage`/`admin`, com escopos permitidos provenientes de `OMNIROUTE_MCP_SCOPES` ou do contexto de escopo da chave API. Veja [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Endpoints
 

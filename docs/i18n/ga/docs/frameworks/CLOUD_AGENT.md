@@ -321,19 +321,16 @@ i gconsól an tsoláthraí féin.
 
 Ní chuireann `/api/cloud/auth` `apiKey` / `accessToken` / `refreshToken` neamhfholaithe ar ais riamh. Cuireann sé `hasApiKey`, `hasAccessToken`, `hasRefreshToken` ar ais do na naisc ghníomhacha is féidir leis an eochair a úsáid (ní fheiceann eochair atá srianta le `allowedConnections` ach na naisc sin). I gcás eochair API a bhfuil an scóip `manage` nó `admin` aici, lena n-áirítear an eochair imlonnaithe ó `OMNIROUTE_API_KEY`, cuireann sé réamhamharc folaithe (`maskedApiKey`: suas le 4 charachtar ag gach ceann, níos lú i gcás eochair ghearr, agus ceann ar bith i gcás 8 gcarachtar nó níos lú) agus `projectId` an naisc ar ais freisin. Fágtar an dá réimse ar lár ón bhfreagra i gcás aon eochrach eile.
 
-## Réiteach Dintiúr
+## Rún Dintiúir
 
-`getCloudAgentCredentials(providerId)` in `src/lib/cloudAgent/api.ts`:
+`getCloudAgentCredentials(providerId)` i `src/lib/cloudAgent/api.ts`:
 
-1. Lódálann sé naisc ghníomhacha soláthraí trí `getProviderConnections({ provider: providerId, isActive: true })`.
-2. I gcás gach naisc, tugann sé tús áite do `apiKey` (agus spás bán bainte). Mura bhfuil sé sin ar fáil, úsáideann sé `accessToken`.
-3. Seolann sé an chéad chomhartha neamhfholamh ar ais fillte mar `{ apiKey: token }`.
-4. Seolann sé `null` ar ais mura bhfaightear comhartha inúsáidte — freagraíonn an API le `400` agus
-   `"Níl aon dintiúir ghníomhacha cumraithe do sholáthraí an ghníomhaire néil: <id>"`.
+1. Lódálann sé naisc soláthraithe gníomhacha trí `getProviderConnections({ provider: providerId, isActive: true })`.
+2. I gcás gach nasc, is fearr `apiKey` (bearrtha). Titeann ar ais go `accessToken`.
+3. Filleann sé an chéad chomhartha neamhfholamh fillte mar `{ apiKey: token }`.
+4. Filleann `null` mura bhfaightear comhartha inúsáidte — freagraíonn an API `400` le `"No active credentials configured for cloud agent provider: <id>"`.
 
-Ciallaíonn sé seo go n-athúsáideann Gníomhairí Néil an tábla céanna Naisc Soláthraí agus a úsáideann gnáthsholáthraithe
-LLM. Chun Jules a chumasú, cruthaigh nasc gníomhach le `provider: "jules"`
-agus `apiKey` líonta isteach.
+Ciallaíonn sé seo go n-athúsáideann Gníomhairí Cloud an tábla Ceangail Soláthraí céanna le soláthraithe rialta LLM. Chun Jules a chumasú , cruthaigh nasc gníomhach le `provider: "jules"` agus le `apiKey` daonra .
 
 ## Deais
 

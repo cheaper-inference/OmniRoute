@@ -327,18 +327,16 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks/<id> \
 ਅਤੇ 8 ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ ਅੱਖਰਾਂ ਲਈ ਕੋਈ ਨਹੀਂ) ਅਤੇ ਕਨੈਕਸ਼ਨ ਦਾ `projectId` ਵੀ ਵਾਪਸ ਕਰਦਾ ਹੈ। ਕਿਸੇ ਵੀ
 ਹੋਰ ਕੁੰਜੀ ਲਈ ਦੋਵੇਂ ਫ਼ੀਲਡ ਜਵਾਬ ਵਿੱਚੋਂ ਛੱਡ ਦਿੱਤੇ ਜਾਂਦੇ ਹਨ।
 
-## ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਰਿਜ਼ੋਲਿਊਸ਼ਨ
+## ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਰੈਜ਼ੋਲਿਊਸ਼ਨ
 
-`src/lib/cloudAgent/api.ts` ਵਿੱਚ `getCloudAgentCredentials(providerId)`:
+`src/lib/cloudAgent/api.ts` ਵਿੱਚ `getCloudAgentCredentials(providerId)` :
 
-1. `getProviderConnections({ provider: providerId, isActive: true })` ਰਾਹੀਂ ਸਰਗਰਮ ਪ੍ਰੋਵਾਈਡਰ ਕਨੈਕਸ਼ਨ ਲੋਡ ਕਰਦਾ ਹੈ।
-2. ਹਰ ਕਨੈਕਸ਼ਨ ਲਈ, `apiKey` (ਟ੍ਰਿਮ ਕੀਤੀ ਹੋਈ) ਨੂੰ ਤਰਜੀਹ ਦਿੰਦਾ ਹੈ। ਉਪਲਬਧ ਨਾ ਹੋਣ 'ਤੇ `accessToken` ਵਰਤਦਾ ਹੈ।
-3. ਪਹਿਲਾ ਗੈਰ-ਖਾਲੀ ਟੋਕਨ `{ apiKey: token }` ਵਜੋਂ ਰੈਪ ਕਰਕੇ ਵਾਪਸ ਕਰਦਾ ਹੈ।
-4. ਜੇ ਕੋਈ ਵਰਤੋਂਯੋਗ ਟੋਕਨ ਨਾ ਮਿਲੇ ਤਾਂ `null` ਵਾਪਸ ਕਰਦਾ ਹੈ — API `400` ਨਾਲ
-   `"ਕਲਾਉਡ ਏਜੰਟ ਪ੍ਰੋਵਾਈਡਰ ਲਈ ਕੋਈ ਸਰਗਰਮ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਕੌਂਫਿਗਰ ਨਹੀਂ ਹਨ: <id>"` ਜਵਾਬ ਦਿੰਦਾ ਹੈ।
+1. `getProviderConnections({ provider: providerId, isActive: true })` ਰਾਹੀਂ ਕਿਰਿਆਸ਼ੀਲ ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨ ਲੋਡ ਕਰਦਾ ਹੈ।
+2. ਹਰੇਕ ਕੁਨੈਕਸ਼ਨ ਲਈ, `apiKey` (ਛਾਂਟਿਆ) ਨੂੰ ਤਰਜੀਹ ਦਿੰਦਾ ਹੈ। `accessToken` ਤੇ ਵਾਪਸ ਆਉਂਦਾ ਹੈ।
+3. `{ apiKey: token }` ਵਜੋਂ ਲਪੇਟਿਆ ਪਹਿਲਾ ਗੈਰ-ਖਾਲੀ ਟੋਕਨ ਵਾਪਸ ਕਰਦਾ ਹੈ।
+4. `null` ਵਾਪਸ ਕਰਦਾ ਹੈ ਜੇਕਰ ਕੋਈ ਉਪਯੋਗੀ ਟੋਕਨ — ਨਹੀਂ ਮਿਲਦਾ ਹੈ ਤਾਂ API `"No active credentials configured for cloud agent provider: <id>"` ਨਾਲ `400` ਜਵਾਬ ਦਿੰਦਾ ਹੈ।
 
-ਇਸਦਾ ਮਤਲਬ ਹੈ ਕਿ Cloud Agents ਨਿਯਮਤ LLM ਪ੍ਰੋਵਾਈਡਰਾਂ ਵਾਲੀ ਹੀ Provider Connection ਟੇਬਲ ਦੀ ਮੁੜ ਵਰਤੋਂ ਕਰਦੇ ਹਨ।
-Jules ਨੂੰ ਸਮਰੱਥ ਕਰਨ ਲਈ, `provider: "jules"` ਅਤੇ ਭਰੀ ਹੋਈ `apiKey` ਨਾਲ ਇੱਕ ਸਰਗਰਮ ਕਨੈਕਸ਼ਨ ਬਣਾਓ।
+ਇਸਦਾ ਮਤਲਬ ਹੈ ਕਿ ਕਲਾਉਡ ਏਜੰਟ ਉਸੇ ਪ੍ਰੋਵਾਈਡਰ ਕਨੈਕਸ਼ਨ ਟੇਬਲ ਦੀ ਮੁੜ ਵਰਤੋਂ ਕਰਦੇ ਹਨ ਜਿਵੇਂ ਕਿ ਨਿਯਮਤ LLM ਪ੍ਰਦਾਤਾ। Jules ਯੋਗ ਕਰਨ ਲਈ, `provider: "jules"` ਅਤੇ ਇੱਕ ਆਬਾਦੀ ਵਾਲੇ `apiKey` ਨਾਲ ਇੱਕ ਸਰਗਰਮ ਕੁਨੈਕਸ਼ਨ ਬਣਾਓ।
 
 ## ਡੈਸ਼ਬੋਰਡ
 

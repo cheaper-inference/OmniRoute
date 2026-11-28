@@ -270,150 +270,150 @@ Tämä tapahtuu kerran ensimmäisen päivityksen jälkeisen käynnistyksen yhtey
 
 ---
 
-## 1proxy – ilmaisten välityspalvelinten markkinapaikka
+## 1proxy Ilmainen välityspalvelinmarkkinapaikka
 
-> 🆕 **Tekijä: [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (ongelma [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** Kirjoittaja [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (ongelma [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute integroituu **[1proxy](https://1proxy-api.aitradepulse.com)**-yhteisöalustaan ja tarjoaa pääsyn **satoihin ilmaisiin, validoituihin välityspalvelimiin** eri puolilta maailmaa. Tämä sopii täydellisesti käyttäjille, joilla ei ole omaa välityspalvelininfrastruktuuria.
+OmniRoute integroituu** [1 välityspalvelin](https://1proxy-api.aitradepulse.com)** yhteisön alusta, johon pääsy on mahdollista** satoja ilmaisia, vahvistettuja välityspalvelimia** ympäri maailmaa. Tämä on täydellinen käyttäjille, joilla ei ole omaa välityspalvelininfrastruktuuria.
 
-### Toimintaperiaate
+### Miten se toimii
 
 ```
-┌─────────────┐   Synkronointi  ┌─────────────────┐   Kierto     ┌─────────────────┐
-│  1proxy API │ ──────────────▶ │  proxy_registry  │ ──────────▶ │ Palveluntarjoajan│
-│  (ulkoinen) │  enintään 500   │  source=oneproxy │  laadun      │       API       │
-└─────────────┘ välityspalvelinta└─────────────────┘  perusteella └─────────────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Synkronointi** — OmniRoute hakee validoidut välityspalvelimet 1proxy-rajapinnasta
-2. **Tallennus** — Välityspalvelimet tallennetaan samaan `proxy_registry`-tauluun arvolla `source = 'oneproxy'`
-3. **Suodatus** — Suodata protokollan, maan ja laatupisteiden perusteella
-4. **Kierto** — Valitse paras välityspalvelin käyttämällä laatuun perustuvaa, satunnaista tai peräkkäistä strategiaa
-5. **Automaattinen heikennys** — Epäonnistuneiden välityspalvelinten laatupisteitä alennetaan; raja-arvon alittuessa → merkitään ei-aktiiviseksi
+1. **Synkronoi** — OmniRoute hakee vahvistetut välityspalvelimet 1-välityspalvelimelta API
+2. **Store** — Välityspalvelimet tallennetaan samaan `proxy_registry` taulukkoon `source = 'oneproxy'` kanssa
+3. **Suodattaa** — Suodata protokollan, maan tai laatupisteiden mukaan
+4. **Kiertää** — Valitse paras välityspalvelin käyttämällä laatu-, satunnaisia tai peräkkäisiä strategioita
+5. **Automaattinen hajoaminen** — Epäonnistuneiden välityspalvelinten laatupisteitä alennetaan; kynnyksen alapuolella → merkitty ei-aktiiviseksi
 
 ### Välityspalvelinten synkronointi
 
-**Hallintapaneelin kautta:**
+**Kojelaudan kautta:**
 
-1. Siirry välilehteen **Asetukset → 1proxy**
-2. Napsauta **"Synkronoi nyt"**
-3. Tarkastele tilastoja: välityspalvelinten kokonaismäärä, aktiivisten määrä, keskimääräinen laatu ja maakohtainen jakauma
+1. Siirry osoitteeseen** Asetukset → 1proxy** -välilehti
+2. Napsauta** "Synkronoi nyt"**
+3. Näytä tilastot: välityspalvelimet yhteensä, aktiivisten määrä, keskimääräinen laatu, erittely maittain
 
-**Rajapinnan kautta:**
+**API kautta:**
 
 ```bash
-# Käynnistä synkronointi
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Vastaus:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
 ### Välityspalvelinten suodatus
 
 ```bash
-# Suodata protokollan perusteella
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Suodata maan perusteella
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Suodata laatupisteiden vähimmäisarvon perusteella
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Yhdistä suodattimia
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### Välityspalvelinten laatupisteet
+### Välityspalvelimen laatupisteet
 
-Jokainen 1proxy-välityspalvelin sisältää seuraavat metatiedot:
+Jokaisen 1-välityspalvelimen mukana tulee metatiedot:
 
-| Kenttä          | Kuvaus                                               |
-| --------------- | ---------------------------------------------------- |
-| `qualityScore`  | 1proxyn validoinnin antama arvosana asteikolla 0–100 |
-| `latencyMs`     | Mitattu verkkoviive                                  |
-| `anonymity`     | `transparent`, `anonymous` tai `elite`               |
-| `googleAccess`  | Voiko välityspalvelin käyttää Googlen palveluita     |
-| `countryCode`   | Kaksikirjaiminen ISO-maakoodi                        |
-| `lastValidated` | Viimeisimmän validoinnin aikaleima                   |
+| Ala             | Kuvaus                                          |
+| --------------- | ----------------------------------------------- |
+| `qualityScore`  | 0-100 arvio 1 välityspalvelimen vahvistuksesta  |
+| `latencyMs`     | Mitattu verkon latenssi                         |
+| `anonymity`     | `transparent`, `anonymous` tai `elite`          |
+| `googleAccess`  | Voiko välityspalvelin käyttää Google palveluita |
+| `countryCode`   | Kaksikirjaiminen ISO -maakoodi                  |
+| `lastValidated` | Viimeisimmän vahvistuksen aikaleima             |
 
 Laatupisteitä säädetään dynaamisesti:
 
-- **Epäonnistuneet pyynnöt** alentavat pistemäärää 10 pisteellä
-- **Pistemäärä laskee arvoon ≤10** → välityspalvelin merkitään tilaan `inactive`
-- Ei-aktiiviset välityspalvelimet jätetään kierron ulkopuolelle
+- **Epäonnistuneita pyyntöjä** pienentää pisteitä 10 pisteellä
+- **Pisteet putoavat ≤ 10:een** → välityspalvelin on merkitty `inactive`
+- Ei-aktiiviset välityspalvelimet jätetään kiertämisen ulkopuolelle
 
 ### Kiertostrategiat
 
 ```bash
-# Kierrä laadun perusteella (paras välityspalvelin ensin) — oletus
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Satunnainen kierto
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# Peräkkäinen kierto (kauimmin sitten validoitu ensin)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
 ### Katkaisija
 
-1proxy-synkronoinnissa on sisäänrakennettu katkaisija:
+1-välityspalvelimen synkronoinnissa on sisäänrakennettu katkaisija:
 
-- **5 peräkkäisen synkronointivirheen** jälkeen uudet synkronointiyritykset estetään
-- Nollaa komennolla `resetOneproxyCircuitBreaker()` tai käynnistä palvelin uudelleen
+- Jälkeen** 5 peräkkäistä synkronointivirhettä** , lisäsynkronointiyritykset estetään
+- Nollaa komennolla: `resetOneproxyCircuitBreaker()` tai käynnistä palvelin uudelleen
 - Synkronoinnin tila on saatavilla osoitteessa `GET /api/settings/oneproxy?action=status`
 
-### 1proxy-välityspalvelinten tyhjentäminen
+### 1 välityspalvelimen välityspalvelinten tyhjentäminen
 
 ```bash
-# Poista yksittäinen 1proxy-välityspalvelin
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# Tyhjennä KAIKKI 1proxy-välityspalvelimet (manuaalisia välityspalvelimia ei muuteta)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
 ---
 
-## Havaitsemisen esto ja huomaamattomuus
+## Havaitsemisen esto & Stealth
 
-OmniRoute ei ainoastaan reititä liikennettä välityspalvelimen kautta — se saa liikenteen näyttämään aidolta:
+OmniRoute ei vain ohjaa liikennettä välityspalvelimen — kautta, vaan saa liikenteen näyttämään lailliselta:
 
-### TLS-sormenjäljen väärentäminen
+### TLS Sormenjälkihuijaus
 
-Luo `wreq-js`-paketin avulla selaimen kaltaisia TLS-sormenjälkiä ja ohittaa bottien tunnistusjärjestelmät, jotka merkitsevät muiden kuin selainten TLS-kättelyt epäilyttäviksi.
+Käyttää `wreq-js` luomaan selaimen kaltaisia TLS sormenjälkiä ohittaen bottien tunnistusjärjestelmät, jotka merkitsevät muiden kuin selaimen TLS kättelyjä.
 
-### CLI-sormenjäljen täsmäytys
+### CLI Sormenjälkien täsmäys
 
-**CLI-sormenjäljen valitsin** (`Asetukset → Suojaus`) järjestää HTTP-otsakkeet ja JSON-rungon kentät uudelleen vastaamaan natiivien CLI-binääritiedostojen (Claude Code, Codex jne.) tarkkaa allekirjoitusta. Tämä toimii **välityspalvelimen lisäksi**:
+The**CLI Sormenjälkikytkin** (`Settings → Security`) järjestää HTTP otsikot ja JSON -tekstikentät uudelleen vastaamaan alkuperäisten CLI binäärien (Claude koodi, Codex jne.) tarkkaa allekirjoitusta. Tämä toimii** päälle** välityspalvelin:
 
 ```
-IP-osoitteesi (estetty) → Välityspalvelimen IP (Yhdysvallat) → Palveluntarjoajan API
-                          + TLS-väärennös
-                          + CLI-sormenjälki
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-Saat samanaikaisesti sekä **IP-osoitteen peittämisen** että **pyynnön aitouden**.
+Saat molemmat**IP maskaus** ja** pyytää aitoutta** samanaikaisesti.
 
-### Välityspalvelimen IP-osoitteen säilyttäminen
+### Välityspalvelin IP Säilytys
 
-Hallintapaneelin värikoodatut tunnukset osoittavat aktiivisen välityspalvelintason:
+Kojelaudan värikoodatut merkit osoittavat, mikä välityspalvelintaso on aktiivinen:
 
-| Tunnus | Taso     | Merkitys                                              |
-| ------ | -------- | ----------------------------------------------------- |
-| 🟢     | Globaali | Kaikki liikenne kulkee tämän välityspalvelimen kautta |
-| 🟡     | Tarjoaja | Vain tämän palveluntarjoajan liikenne välitetään      |
-| 🔵     | Yhteys   | Tämä tietty avain/tili käyttää tätä välityspalvelinta |
+| Kunniamerkki | Taso              | Merkitys                                               |
+| ------------ | ----------------- | ------------------------------------------------------ |
+| 🟢           | Maailmanlaajuinen | Kaikki liikenne kulkee tämän välityspalvelimen kautta  |
+| 🟡           | Palveluntarjoaja  | Vain tämän palveluntarjoajan liikenne välitetään       |
+| 🔵           | Yhteys            | Tämä tietty key/account käyttää tätä välityspalvelinta |
 
-Tunnus näyttää tarkistusta varten myös selvitetyn välityspalvelimen IP-osoitteen.
+Merkissä näkyy myös ratkaistu välityspalvelin IP vahvistusta varten.
 
 ---
 
@@ -778,51 +778,28 @@ Käytä `random`
 tasaisesti)
 ```
 
-## Omien välityspalvelimiesi automaattinen poissulkeminen vikatilanteessa
+## Omien välityspalvelinten automaattinen epäonnistumisen poissulkeminen
 
-1proxy-markkinapaikan pooli heikentää jo automaattisesti toimimattomien välityspalvelimien luokitusta (katso
-[Välityspalvelimien laatupisteet](#proxy-quality-scores)). Rekisteriin **itse**
-lisäämillesi välityspalvelimille taustalla toimiva kunnonvalvonnan ajastin
-(`src/lib/proxyHealth/scheduler.ts`) tarjoaa saman toiminnon, joka sulkee toimimattoman
-jäsenen automaattisesti pois ketjusta poistamatta mitään:
+1proxy-markkinapaikan pooli heikentää jo automaattisesti epäonnistuneet välityspalvelimet (katso [Välityspalvelimen laatupisteet](#proxy-quality-scores) ). Välityspalvelimelle** sinä** Rekisteriin lisätty taustaterveysajastin (`src/lib/proxyHealth/scheduler.ts`) tarjoaa saman "sulje pois kuollut jäsen ketjusta automaattisesti" -toiminnon poistamatta mitään:
 
 ```bash
-# .env — poista välityspalvelin pehmeästi käytöstä 3 peräkkäisen epäonnistuneen tarkistuksen jälkeen ja ota se
-# automaattisesti uudelleen käyttöön, kun se alkaa jälleen vastata tarkistuksiin.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Toiminta usean välityspalvelimen ketjussa:
+Kuinka se sopii usean välityspalvelimen ketjuun:
 
-1. Ajastin tarkistaa jokaisen rekisteröidyn välityspalvelimen `PROXY_HEALTH_INTERVAL_MS`-välein
-   (oletusarvo 10 min; vähintään 1 min).
-2. Kun **varmoja** epäonnistumisia on tapahtunut `PROXY_AUTO_REMOVE_AFTER` kertaa peräkkäin (todellinen
-   yhteysvirhe — aikakatkaisua tai tarkistuskohteen omaa 5xx-virhettä ei koskaan lasketa; katso
-   [Välityspalvelimen kunnon tarkistaminen](#proxy-health-checking-v3816)), välityspalvelimen `status`-arvoksi
-   asetetaan `dead`.
-3. `dead` on yksi niistä tiloista, jotka poolin/kierron määrityksessä käytettävä
-   aktiivisten tilojen suodatin sulkee pois. Tämän vuoksi kohdealueen kierto (vuorottelu / satunnainen / pysyvä /
-   viiveeseen perustuva — katso [Kiertostrategian päätöspuu](#rotation-strategy-decision-tree))
-   lakkaa välittömästi osoittamasta kyseistä välityspalvelinta uusille pyynnöille. Tämä ei vaikuta poolin
-   muihin välityspalvelimiin, eikä koko pooli koskaan siirry huomaamatta käyttämään suoraa
-   yhteyttä — katso [4-tasoinen välityspalvelinjärjestelmä](#4-level-proxy-system) ja sen vikatilanteessa
-   yhteyden estävä suojaus.
-4. Ajastin jatkaa `dead`-tilassa olevien välityspalvelimien tarkistamista samalla aikavälillä. Seuraava
-   onnistunut tarkistus vaihtaa `status`-arvon takaisin arvoon `active`, jolloin välityspalvelin palaa kiertoon —
-   sitä ei tarvitse lisätä uudelleen manuaalisesti.
+1. Ajastin tutkii jokaisen rekisteröidyn välityspalvelimen joka `PROXY_HEALTH_INTERVAL_MS` (oletus 10 min; vähintään 1 min).
+2. `PROXY_AUTO_REMOVE_AFTER` n jälkeen peräkkäin** ratkaiseva** epäonnistumisia (todellinen yhteysvirhe — aikakatkaisu tai mittauskohteen oma 5xx ei koskaan laske, katso [Välityspalvelimen kunnon tarkistus](#proxy-health-checking-v3816) ), välityspalvelimen `status` on `dead`.
+3. `dead` on yksi niistä tiloista, jotka pool/rotation -resoluution käyttämä alive-status-suodatin sulkee pois, joten laajuuden kierto (kierto-robin / satunnainen / tahmea / latenssi / istunto — katso [Rotation Strategy Decision Tree](#rotation-strategy-decision-tree) ) lopettaa välittömästi välityspalvelimen luovuttamisen uusille pyynnöille. Tämä ei vaikuta muihin altaan välityspalvelimiin, eikä koko pooli koskaan palaa takaisin suoralle yhteydelle — katso [4-tason välityspalvelinjärjestelmän](#4-level-proxy-system) vikasuljettu suoja.
+4. Ajastin tutkii `dead` välityspalvelimia samalla aikavälillä. Seuraava onnistunut anturi kääntää `status` takaisin `active` ksi ja se palaa kiertoon — manuaalista lisäystä ei vaadita.
 
-Tämä on tarkoituksellisesti **valinnainen ja tietoja poistamaton** toiminto: oletusarvoisesti ajastin vain
-laskee ja kirjaa epäonnistumiset (katso käytäntö C tiedostossa `decision.ts`), eikä `PROXY_AUTO_DISABLE`
-koskaan poista riviä — sitä varten on erillinen ja aggressiivisempi
-`PROXY_AUTO_REMOVE`-asetus. Jos molempien arvoksi on asetettu `true`, `PROXY_AUTO_REMOVE`
-on etusijalla (poistettavaa välityspalvelinta ei kannata poistaa ensin väliaikaisesti käytöstä). Katso
-täydellinen muuttujaluettelo [ympäristömääritysten](../reference/ENVIRONMENT.md) viiteoppaasta.
+Tämä on tarkoituksella** opt-in ja tuhoamaton** : oletusarvoisesti ajastin laskee ja kirjaa vain virheitä (katso käytäntö C kohdassa `decision.ts`), ja `PROXY_AUTO_DISABLE` ei koskaan poista riviä — jota varten erillinen, aggressiivisempi `PROXY_AUTO_REMOVE` lippu on tarkoitettu. Jos molemmat on asetettu arvoon `true`, `PROXY_AUTO_REMOVE` voittaa (poistettavissa olevalla välityspalvelimella ei ole käyttöä pehmeälle poistolle välissä). Katso koko muuttujaluettelo kohdasta [Environment Config](../reference/ENVIRONMENT.md).
 
 ---
 
-> 📖 **Aiheeseen liittyvä dokumentaatio:**
+> 📖** Asiaan liittyvä dokumentaatio:**
 >
-> - [Käyttöopas](../guides/USER_GUIDE.md) — Yleiset asennus- ja määritysohjeet
-> - [API-viiteopas](../reference/API_REFERENCE.md) — Täydellinen API-dokumentaatio
-> - [Ympäristömääritykset](../reference/ENVIRONMENT.md) — Kaikki ympäristömuuttujat
+> - [Käyttöopas](../guides/USER_GUIDE.md) — Yleiset asetukset ja konfigurointi - [API Viite](../reference/API_REFERENCE.md) — Täydellinen API -dokumentaatio - [Environment Config](../reference/ENVIRONMENT.md) — Kaikki ympäristömuuttujat

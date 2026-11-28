@@ -5,11 +5,10 @@
 ---
 
 > **Zdroj pravdy:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Posledná aktualizácia:** 2026-06-28 — v3.8.40
 
-OmniRoute zaznamenáva administratívne akcie, udalosti autentifikácie, zmeny životného cyklu prihlasovacích údajov poskytovateľov a volania nástrojov MCP do auditných tabuliek podporovaných databázou SQLite. Táto stránka opisuje, čo sa zaznamenáva, kde sa údaje nachádzajú, ako dlho sa uchovávajú, ako môžu kľúče API zrušiť účasť na zaznamenávaní a ako údaje vyhľadávať.
+OmniRoute zaznamenáva administratívne akcie, autentifikačné udalosti, zmeny životného cyklu poverení poskytovateľa a vyvolania nástrojov MCP do tabuliek auditu podporovaných SQLite. Táto stránka obsahuje informácie o tom, čo sa zaznamenáva, kde sa nachádza, ako dlho sa uchováva, ako sa môžu kľúče API odhlásiť a ako vyhľadávať údaje.
 
-Implementácia sa nachádza v `src/lib/compliance/index.ts` (T-43 — „Kontrolné mechanizmy súladu“) a `src/lib/compliance/providerAudit.ts`. Zápisy auditu nikdy nevyvolávajú výnimky: pri akomkoľvek zlyhaní sa volanie potichu ignoruje, aby auditné zaznamenávanie nemohlo narušiť hlavný tok požiadavky.
+Implementácia žije v `src/lib/compliance/index.ts` (T-43 — "Kontrola súladu") a `src/lib/compliance/providerAudit.ts`. Zápisy auditu nikdy nevyhadzujú: pri akomkoľvek zlyhaní sa hovor ticho prehltne, takže protokolovanie auditu nemôže prerušiť hlavný tok požiadaviek.
 
 ## Čo sa zaznamenáva
 
@@ -127,31 +126,33 @@ staršie `request_detail_logs` a lokálne artefakty požiadaviek v
 Predvolené hodnoty sú definované v `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## Vyradenie pomocou `noLog` (pre každý kľúč API)
+## `noLog` opt-out (na kľúč API )
 
-Kľúče API možno označiť tak, aby sa ich následná prevádzka volaní nezaznamenávala. Tento
-príznak sa nachádza v tabuľke `api_keys` (`no_log INTEGER DEFAULT 0`) a je zrkadlený
-do množiny v pamäti na rýchle vyhľadávanie.
+kľúče API je možné označiť príznakom, aby sa ich prenos hovorov v smere toku nezaprotokoloval. Príznak žije v tabuľke `api_keys` (`no_log INTEGER DEFAULT 0`) a je zrkadlený do sady v pamäti pre vyhľadávanie hot-path.
 
 ```bash
-# Vytvorenie kľúča bez protokolovania (vyžaduje sa autentifikácia správcu)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Pomocné funkcie (`src/lib/compliance/index.ts`):
+Pomocníci (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — prepína položku v pamäti
-- `isNoLog(apiKeyId)` — kontroluje sa na ceste požiadavky; ako záložný mechanizmus používa načítanie z `api_keys.no_log`
-  ukladané do vyrovnávacej pamäte na 30 s
-- `NO_LOG_API_KEY_IDS` (premenná prostredia, hodnoty oddelené čiarkami) — pri spustení sa predbežne načíta do množiny
-  v pamäti; užitočné, keď stĺpec nemôžete prepínať priamo
+- `setNoLog(apiKeyId, true|false)` — prepína záznam v pamäti
+- `isNoLog(apiKeyId)` — kontrolované na ceste požiadavky; spadne späť na 30 s čítanie vo vyrovnávacej pamäti zo `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, oddelené čiarkou) — predinštalované do sady v pamäti pri zavádzaní systému; užitočné, keď nemôžete prepínať stĺpec priamo
 
-Udalosti administratívneho auditu (prihlásenie, zmeny poskytovateľa, volania nástrojov MCP atď.)
-**nie sú** ovplyvnené nastavením `noLog` — vyradené je iba protokolovanie prevádzky
-jednotlivých požiadaviek.
+Udalosti administratívneho auditu (prihlásenie, zmeny poskytovateľa, volania nástroja MCP atď.) sú** nie** ovplyvnené `noLog` — je odhlásené iba protokolovanie prevádzky na základe požiadavky.
+
+### Odhlásenie na základe žiadosti (`x-omniroute-no-log`)
+
+Klient môže vyňať zo zachovania užitočného zaťaženia jednu požiadavku na odvodenie bez vytvorenia vyhradeného kľúča. Pošlite `x-omniroute-no-log: true` na žiadosť (`1` a `yes` sú tiež akceptované, nerozlišujú sa malé a veľké písmená). Vzťahuje sa na každú rodinnú trasu chatu, ktorá prechádza obslužným nástrojom chatu: Dokončenia chatu, Odpovede, Správy, Dokončenia a cesta kompatibilná s Gemini. Riadok protokolu hovorov je stále zapísaný s jeho časovou pečiatkou, modelom, poskytovateľom, stavom, trvaním a počtom tokenov, ale `request_body`, `response_body`, súhrny požiadaviek a artefakty potrubia sú vynechané.
+
+Hlavička je ORed s príznakom kľúča: kľúč bez protokolu zostane bez protokolu bez ohľadu na hlavičku a hlavička nemôže znova povoliť protokolovanie pre kľúč bez protokolu. Pred odoslaním požiadavky proti prúdu sa hlavička odstráni.
+
+Táto hlavička áno** nie** zakázať extrakciu pamäte alebo sémantickú vyrovnávaciu pamäť. Pošlite `x-omniroute-no-memory: true` a `x-omniroute-no-cache: true` vedľa neho, keď požiadavka nesmie pretrvať obsah ani v týchto podsystémoch.
 
 ## REST API
 

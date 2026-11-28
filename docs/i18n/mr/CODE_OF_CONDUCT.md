@@ -39,15 +39,13 @@
 ही आचारसंहिता समुदायाच्या सर्व जागांमध्ये लागू होते आणि एखादी व्यक्ती सार्वजनिक जागांमध्ये अधिकृतरीत्या समुदायाचे प्रतिनिधित्व करत असतानाही लागू होते.
 आमच्या समुदायाचे प्रतिनिधित्व करण्याच्या उदाहरणांमध्ये अधिकृत ई-मेल पत्ता वापरणे, अधिकृत सोशल मीडिया खात्याद्वारे पोस्ट करणे किंवा ऑनलाइन अथवा ऑफलाइन कार्यक्रमात नियुक्त प्रतिनिधी म्हणून कार्य करणे यांचा समावेश होतो.
 
-## Enforcement
+## अंमलबजावणी
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+येथे खाजगी सुरक्षा सल्लागार उघडून अंमलबजावणीसाठी जबाबदार असलेल्या समुदाय नेत्यांना अपमानास्पद, त्रासदायक किंवा अन्यथा अस्वीकार्य वर्तनाच्या घटनांची नोंद केली जाऊ शकते.
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+किंवा diegosouza.pw@outlook.com वर मेंटेनरला ईमेल करून. सुरक्षा-संवेदनशील घटनांसाठी, [`SECURITY.md`](SECURITY.md) पहा. सर्व तक्रारींचे पुनरावलोकन केले जाईल आणि त्वरित आणि निष्पक्षपणे तपास केला जाईल.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+कोणत्याही घटनेच्या बातमीदाराच्या गोपनीयतेचा आणि सुरक्षिततेचा आदर करणे सर्व समुदायाच्या नेत्यांना बंधनकारक आहे.
 
 ## अंमलबजावणी मार्गदर्शक तत्त्वे
 

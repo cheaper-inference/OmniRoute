@@ -201,24 +201,24 @@ Skema berada dalam dua migrasi:
 
 ---
 
-## API REST
+## REST API
 
-Semua titik akhir berada di bawah `src/app/api/skills/`. Titik akhir pengurusan (`/api/skills`, `/api/skills/[id]`, `/api/skills/install`) memerlukan **pengesahan pengurusan** melalui `requireManagementAuth()`. Aliran marketplace/pemasangan menggunakan `isAuthenticated()` yang lebih ringan (sesi atau kunci API).
+Semua titik akhir hidup di bawah `src/app/api/skills/`. Titik akhir pengurusan (`/api/skills`, `/api/skills/[id]`, `/api/skills/install`) memerlukan** pengesahan pengurusan** melalui `requireManagementAuth()`. Aliran marketplace/install menggunakan `isAuthenticated()` yang lebih ringan (sesi atau kunci API ).
 
 | Titik akhir | Kaedah | Tujuan |
 | --------------------------------- | ------ | ------------------------------------------------------------------------ | --- | ------------------------ | -------- | ------------------ |
-| `/api/skills` | GET | Senaraikan kemahiran berdaftar. Menyokong `?q=`, `?mode=on               | off | auto`, `?source=skillsmp | skillssh | local`, penomboran halaman |
+| `/api/skills` | GET | Senaraikan kemahiran berdaftar. Menyokong `?q=`, `?mode=on                        | off | auto`, `?source=skillsmp | skillssh | local`, penomboran |
 | `/api/skills/[id]` | PUT | Kemas kini `enabled` atau `mode` |
 | `/api/skills/[id]` | DELETE | Nyahdaftar mengikut id |
-| `/api/skills/install` | POST | Pasang kemahiran tersuai (kod pengendali + skema) |
-| `/api/skills/marketplace` | GET | Cari katalog SkillsMP (mengembalikan pilihan popular lalai apabila `q` kosong) |
-| `/api/skills/marketplace/install` | POST | Pasang kemahiran SkillsMP (memerlukan penyedia aktif = `skillsmp`) |
-| `/api/skills/skillssh` | GET | Cari katalog skills.sh (`?q=&limit=`, dihadkan kepada 100) |
-| `/api/skills/skillssh/install` | POST | Pasang kemahiran skills.sh (memerlukan penyedia aktif = `skillssh`) |
-| `/api/skills/executions` | GET | Sejarah pelaksanaan berhalaman (`?apiKeyId=`) |
-| `/api/skills/executions` | POST | Laksanakan kemahiran berdaftar secara ad hoc |
+| `/api/skills/install` | POST | Pasang kemahiran tersuai (kod pengendali skema + ) |
+| `/api/skills/marketplace` | GET | Cari katalog SkillsMP (mengembalikan lalai popular apabila `q` kosong) |
+| `/api/skills/marketplace/install` | POST | Pasang kemahiran SkillsMP (memerlukan pembekal aktif = `skillsmp`) |
+| `/api/skills/skillssh` | GET | Cari katalog skills.sh (`?q=&limit=`, dihadkan pada 100) |
+| `/api/skills/skillssh/install` | POST | Pasang kemahiran skills.sh (memerlukan pembekal aktif = `skillssh`) |
+| `/api/skills/executions` | GET | Sejarah pelaksanaan bernombor (`?apiKeyId=`) |
+| `/api/skills/executions` | POST | Laksanakan kemahiran berdaftar ad-hoc |
 
-Titik akhir `POST /api/skills/executions` mengembalikan HTTP `503` dengan `{ error: "Pelaksanaan kemahiran dinyahdayakan..." }` apabila `settings.skillsEnabled === false` (`executor.ts:42-45`). Pengendali boleh menukar suis induk melalui **Tetapan → AI**.
+Titik akhir `POST /api/skills/executions` mengembalikan HTTP `503` dengan `{ error: "Skills execution is disabled..." }` apabila `settings.skillsEnabled === false` (`executor.ts:42-45`). Operator boleh membalikkan suis induk daripada** Tetapan → AI** .
 
 ### Contoh: pasang kemahiran tersuai
 
@@ -229,7 +229,7 @@ curl -X POST http://localhost:20128/api/skills/install \
   -d '{
     "name": "reverse-text",
     "version": "1.0.0",
-    "description": "Membalikkan rentetan",
+    "description": "Reverses a string",
     "schema": {
       "input":  { "type": "object", "properties": { "text": { "type": "string" } }, "required": ["text"] },
       "output": { "type": "object", "properties": { "reversed": { "type": "string" } } }
@@ -239,7 +239,9 @@ curl -X POST http://localhost:20128/api/skills/install \
   }'
 ```
 
-Rentetan `handlerCode` ialah **carian nama pengendali** — bukan kod boleh laksana. Pelaksana memetakannya melalui `skillExecutor.registerHandler(name, fn)` (`executor.ts:25`). Pemasangan marketplace menyimpan teks SKILL.md dalam medan ini sebagai dokumentasi dan menghalakan pelaksanaan melalui panggilan alat yang dijana model. Sumber sewenang-wenangnya yang dibekalkan pengguna tidak dinilai dengan eval.
+Rentetan `handlerCode` ialah a** carian nama pengendali** — bukan kod boleh laku. Pelaksana memetakannya melalui `skillExecutor.registerHandler(name, fn)` (`executor.ts:25`). Pemasangan Marketplace menyimpan teks SKILL.md dalam medan ini sebagai dokumentasi dan pelaksanaan laluan melalui panggilan alat yang dijana model. Sumber yang dibekalkan pengguna sewenang-wenangnya tidak dinilai.
+
+---
 
 ## Alat MCP
 

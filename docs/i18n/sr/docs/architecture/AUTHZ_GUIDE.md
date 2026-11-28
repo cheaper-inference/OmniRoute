@@ -4,14 +4,13 @@
 
 ---
 
-> **Izvor istine:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Poslednje ažurirano:** 2026-09-22 — prostori imena opsega ukazuju na MCP-SERVER.md
+> **Извор истине:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute ima autorizacionu cevovodnu liniju svesnu ruta koja kontroliše svaki API zahtev. Klasifikacija je **deterministička** i **fail-closed** — sve što se ne može klasifikovati završava kao `MANAGEMENT` i zahteva sesiju ili token menadžerskog nivoa. Ova stranica objašnjava model za inženjere koji održavaju rute ili dizajniraju nove krajnje tačke.
+OmniRoute има цевовод за ауторизацију који је свестан руте који затвара сваки API захтев. Класификација је** детерминистички** и** неуспешно затворено** — све што се не може класификовати завршава као `MANAGEMENT` и захтева сесију или токен нивоа управљања. Ова страница објашњава модел за инжењере који одржавају руте или дизајнирају нове крајње тачке.
 
-![AuthZ cevovodna linija (3 klase ruta + evaluacija politike)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
-> Izvor: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
+> Извор: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## Dva režima autentifikacije
 
@@ -189,7 +188,7 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) — увек враћа `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — издваја носиоца, проверава преко `validateApiKey()`. Прелази на анонимно само када је деактивирана заставица `REQUIRE_API_KEY` функције онемогућена. Ефективна заставица се решава преко `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) тако да заставице карактеристика контролне табле и променљиве окружења доследно управљају `/api/v1/*`, `/api/v1beta/*` и алиасима; неуспех разрешивача затворен. Дозвољава захтеве за сесијом контролне табле на клијентским API рутама (укључујући `/api/v1/models`, који користи каталог модела контролне табле). Када је Ентра ID SSO омогућен, носилац који је структурно Ентра токен (три басе64урл сегмента, `RS*` алг, `kid`) управља SSO грана** пре** `validateApiKey()` и његова пресуда је коначна — никада не пада на путању АПИ кључа или грану деградирања у анонимну, тако да прекид провајдера идентитета не може постати отворен приступ. Статични API кључеви нису погођени. Погледајте [Ентра ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — прихвата сесију контролне табле, интерне захтеве за синхронизацију модела (усклађене са `/api/providers/[name]/(sync-models|models)`) или у потпуности прескаче ако `isAuthRequired()` врати нетачно. Враћа 403 (`AUTH_001`) када је токен носиоца присутан, али неважећи, 401 у супротном. Такође примењује нивое чувања руте (LOCAL_ONLY / ALWAYS_PROTECTED) пре било које гране аутх — види [Нивое чувања руте](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY путањама у `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (данас: `/api/mcp/`) може се приступити из без повратне петље када кључ носиоца носи `manage` опсег; све остале LOCAL_ONLY путање остају стриктне петље без обзира на опсег.
+- **`managementPolicy`** (`policies/management.ts`) — прихвата сесију контролне табле, интерне захтеве за синхронизацију модела (усклађене са `/api/providers/[name]/(sync-models|models)`) или у потпуности прескаче ако `isAuthRequired()` врати нетачно. Враћа 403 (`AUTH_001`) када је токен носиоца присутан, али неважећи, 401 у супротном. Такође примењује нивое чувања руте (LOCAL_ONLY / ALWAYS_PROTECTED) пре било које гране аутх — види [Нивое чувања руте](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY путањама у `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (данас: `/api/mcp/`) може се приступити из без повратне петље када кључ носиоца носи `manage`/`admin` опсег или уски `mcp:connect` опсег (`hasMcpConnectOrManageScope`), или са сесијом контролне табле са аутентификацијом; све остале LOCAL_ONLY путање остају стриктне петље без обзира на опсег.
 
 Успешна политика враћа `AuthSubject` са `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Низводни руковаоци могу да га прочитају преко `assertAuth(request, "CLIENT_API")` у `src/server/authz/assertAuth.ts` уместо да поново покрећу аутх логику.
 
@@ -280,38 +279,24 @@ export async function POST(request: Request) {
 
 Изаберите скуп према облику, а не према погодности. Једна рута иде у `PUBLIC_API_ROUTES_EXACT` (или у `PUBLIC_READONLY_CORS_API_ROUTES` ако је намењена само за GET); само стварно подстабло иде у `PUBLIC_API_ROUTE_PREFIXES` и оно **мора да се завршава са `/`**. Стављање једне руте на листу префикса такође објављује сваку суседну путању која дели њене почетне знакове — укључујући сродне руте са динамичким сегментима које се додају касније (GHSA-74g9-q8f6-793h). Ажурирајте јединичне тестове у `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` и `tests/unit/authz/classify.test.ts`.
 
-## Opsezi
+## Сцопес
 
-Tri imenska prostora. Svaki proveravač čita samo sopstvene stringove. Uporedni prikaz,
-uključujući zašto `manage` ne uspeva `scopeMatches` za `read:compression` i zašto
-`read` pristupni token ne može `PATCH /api/keys/{id}`, nalazi se u
-[Tri imenska prostora opsega](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Три именска простора. Сваки чеккер чита само своје низове. Упоредо, укључујући зашто `manage` не успева `scopeMatches` за `read:compression` и зашто `read` приступни токен не може `PATCH /api/keys/{id}`, је [простор имена три опсега](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API ključevi sadrže niz `scopes` (sačuvan kao JSON u `api_keys.scopes`, pogledajte `src/lib/db/apiKeys.ts`).
+API кључеви носе `scopes` низ (чуван као JSON у `api_keys.scopes`, погледајте `src/lib/db/apiKeys.ts`).
 
-### Opseg upravljanja
+### Обим управљања
 
-- `manage` / `admin` — `hasManageScope`. Pristup upravljačkim API rutama putem Bearer tokena.
-- `mcp:connect`, `self:usage`, `self:account-quota` i
-  `policy:bypass-provider-quota` su aditivni opsezi sa tačnim podudaranjem. Oni se nalaze
-  izvan `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` otvara samo
-  `/api/mcp/` ne-povratni izuzetak.
+- `manage` / `admin` — `hasManageScope`. Приступ носиоцу рутама управљања API.
+- `mcp:connect`, `self:usage`, `self:account-quota` и `policy:bypass-provider-quota` су адитивни опсеги тачног подударања. Они седе испред `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` отвара само `/api/mcp/` изрезивање без петље.
 
-### MCP alatni opsezi
+### MCP опсег алата
 
-Katalog i pravila podudaranja (identičan string, ili dodeljeni opseg koji se završava sa `*`):
-[MCP alatni opsezi](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` u `src/shared/constants/mcpScopes.ts` je originalni tipizirani
-podskup, a ne taj puni katalog. Sprovođenje se vrši u
-`open-sse/mcp-server/scopeEnforcement.ts` nakon što `resolveCallerScopeContext()`
-razreši opsege iz MCP informacija o autentifikaciji, metapodataka zahteva ili `OMNIROUTE_MCP_SCOPES`.
-Ostaje isključeno osim ako `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Каталог и правила подударања (идентичан низ или одобрени опсег који се завршава на `*`): [MCP опсег алата](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` у `src/shared/constants/mcpScopes.ts` је оригинални откуцани подскуп, а не онај пуни каталог. Спровођење се покреће у `open-sse/mcp-server/scopeEnforcement.ts` након што `resolveCallerScopeContext()` разреши опсеге из информација MCP аутх, захтева метаподатака или `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` га укључује глобално (подразумевано `false`), али се увек примењује за HTTP/SSE позиваоца чијем API кључу недостаје `manage`/`admin` (погледајте `shouldForceScopeEnforcement()` у `open-sse/mcp-server/scopeEnforcement.ts`), без обзира на заставу.
 
-### Opsezi pristupnog tokena
+### Опсези токена приступа
 
-`read` / `write` / `admin` na `oma_live_…` tokenima, rangirani po `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Ovaj rang se primenjuje samo na akreditive
-pristupnog tokena. Pogledajte [Autentifikacija upravljanja](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` на `oma_live_…` токенима, рангирани по `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Овај ранг се односи само на акредитиве токена за приступ. Погледајте [Аутентификација управљања](../guides/MANAGEMENT-AUTH.md).
 
 ## Пребацивање захтева за аутентификацију
 

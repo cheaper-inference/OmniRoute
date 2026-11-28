@@ -4,12 +4,9 @@
 
 ---
 
-> **Son güncelleme:** 2026-08-28 — v3.8.51
-> Otomasyon için Claude Code becerilerinden yararlanan, sadeleştirilmiş sürüm akışı.
+> Otomasyon için Claude Code becerilerinden yararlanan kolaylaştırılmış sürüm akışı.
 >
-> **Sürümler arasında kuyruğu/dalı sorunsuz tutun:** bkz. [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs` ailesi + `npm run check:release-green` + `/babysit` + gecelik çalışma). Bunu düzenli olarak
-> ve özellikle bu kontrol listesinden **önce** çalıştırmak, sürüm PR'ının sorunsuz başlamasını sağlar.
+> **Sürümler arasında queue/branch yeşil tutun:** bkz [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` ailesi + `npm run check:release-green` + `/babysit` + her gece). Bunu periyodik olarak — çalıştırmak ve özellikle** önce** bu kontrol listesi — PR sürümünün yeşil renkte başlamasını sağlar.
 
 ## Kısaca
 
@@ -60,7 +57,9 @@ Npm-publish iş akışı artık doğrudan yayınlamıyor: paketlenmiş tarball'�
 
 **Docker Hub `latest` (her kararlı SemVer yayını için gereklidir):** `docker-publish` iş akışı etiketlemelidir** ikisi birden** `X.Y.Z` ve `should-promote-latest.sh` bunun en yüksek kararlı SemVer olduğunu kabul ettiğinde, `:latest` ile** aynı özet** . İşten sonra: Hub `latest` özeti yeni SemVer özetine eşittir ve `last_updated` taşınır. Sürüm notları yalnızca git'te bulunan düzeltmelerden bahsederken `:latest` eski bir yapıda bırakmayın. Hızlı başlangıçlar oluşturmak için `:latest` kullanın; GitOps `X.Y.Z` sabitlemeye devam etmelidir. [Docker sürüm kanallarına](../guides/DOCKER_GUIDE.md#release-channels) ve #10317 bakın.
 
-**Docker Hub organizasyon deposu (`cheaperinference/omniroute`):** Docker Hub, bir depoyu ad alanları arasında taşıyamaz; dolayısıyla `diegosouzapw/omniroute` çekme geçmişini ve her sürümü saklar ve `docker-publish` `mirror-org-dockerhub` işi, yayımlanan her sürümü (ve yükseltildiğinde `:latest` ) `ghcr.io/cheaper-inference/omniroute` kuruluş deposuna kopyalar. `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` sırlarına ihtiyacı var; onlar olmadan iş "Docker Hub org aynası atlandı" uyarısıyla yeşil kalır ve diğer kayıtlar normal şekilde yayınlanır. Yayımlanmış bir sürümü daha sonra orada yayınlamak için şunu çalıştırın:** Eylemler → Docker görüntüsünü Docker Hub org → Run iş akışına yansıtın** `version=X.Y.Z` ile (ve en yüksek kararlı sürüm için `promote_latest` ): mevcut görüntüleri kopyalar, yeniden oluşturma gerekmez.
+**Docker Hub organizasyon deposu (`cheaperinference/omniroute`):** Docker Hub, bir depoyu ad alanları arasında taşıyamaz; dolayısıyla `diegosouzapw/omniroute` çekme geçmişini ve her sürümü saklar ve `docker-publish` `mirror-org-dockerhub` işi, yayımlanan her sürümü (ve yükseltildiğinde `:latest` ) `ghcr.io/cheaper-inference/omniroute` kuruluş deposuna kopyalar. `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` sırlarına ihtiyacı var; onlar olmadan iş "Docker Hub org aynası atlandı" uyarısıyla yeşil kalır ve diğer kayıtlar normal şekilde yayınlanır. Yayımlanmış bir sürümü daha sonra orada yayınlamak için şunu çalıştırın:** Eylemler → Docker görüntüsünü Docker Hub org → Run iş akışına yansıtın** `version=X.Y.Z` ile (ve en yüksek kararlı sürüm için `promote_latest` ): mevcut görüntüleri kopyalar, yeniden oluşturma gerekmez. Bu havuzun Docker Hub'a genel bakışı elle ayarlanır: onu düzenleyen API, Organizasyon Erişim Belirteçlerini reddeder.
+
+Aynı iş akışı, 30.06.2027 tarihine kadar her sürümü eski GHCR paketi `ghcr.io/diegosouzapw/omniroute` kopyalar, böylece buna sabitlenmiş yüklemeler güncellenmeye devam eder; dizini " `ghcr.io/cheaper-inference/omniroute` taşındı" açıklamasını taşır. `GHCR_LEGACY_TOKEN` sırrına ( `diegosouzapw` `write:packages` ile klasik bir kişisel erişim belirteci) ihtiyacı vardır; o olmadan bu iş "Eski GHCR aynası atlandı" uyarısıyla atlanır.
 
 ## Hotfix Hızlı Hattı (`hotfix` etiketi)
 
@@ -151,7 +150,7 @@ Son değişiklikler: kapsamdan sonra `BREAKING CHANGE:` altbilgisini veya `!` ek
 ### Dokümantasyon
 
 - [ ] `npm run check:docs-sync` geçişleri (ön işleme göre otomatik çalıştırma)
-- [ ] `npm run check:docs-all` geçişleri (şemsiye: docs-sync + docs-counts + env-doc-sync + kullanımdan kaldırılmış sürümler + doc-links)
+- [ ] `npm run check:docs-all` geçer. Tavsiye niteliğindeki `check:deprecated-versions` açıkça OmniRoute (3.6.x ve öncesi) atfedilen sürümleri işaretler ve tarihleri göz ardı eder.
 - [ ] `npm run check:env-doc-sync` 0'dan çıkar — kodu ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env sözleşmesi sağlam
 - [ ] `npm run check:doc-links` 0'dan çıkıyor — yeniden yapılanma sonrasında bozuk dahili işaretleme referansı yok
 - [ ] `docs/architecture/ARCHITECTURE.md` storage/runtime drift için incelendi
@@ -228,7 +227,7 @@ NOT `npm run build` ve ardından — dağıtımı için ayrı bir `npm run build
 ### Yapı Doğrulaması
 
 - [ ] `npm run build:release` başarılı olur ve `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` clean — `app.__qa_backup`, `scripts/scratch`, `package-lock.json` veya diğer yerel kalıntı yok
+- [ ] `npm run check:pack-artifact` clean — `app.__qa_backup`, `scripts/scratch`, `package-lock.json` veya başka yerel kalıntı yok
 - [ ] `dist/server.js` derlemeden sonra var
 - [ ] İsteğe bağlı yerel paketlenmiş çalışma zamanı dumanı: `npm run dev:candidate -- build` sonra `npm run dev:candidate -- validate`, paketlenmiş tarball'ı yalıtılmış bir `DATA_DIR` üzerinde başlatır ve `/api/health` + `/v1/models` kontrol eder (bkz. [Katkı Altın Yolu](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
@@ -248,7 +247,7 @@ NOT `npm run build` ve ardından — dağıtımı için ayrı bir `npm run build
 
 ### Dağıt
 
-Dağıtma becerileri hafif rsync akışını kullanır — no `npm pack`, no `npm i -g`:
+Dağıtım becerileri hafif rsync akışını kullanır — no `npm pack`, no `npm i -g`:
 
 - [ ] Hedefle eşleşen konuşlandırma becerisini kullanın:
   - `/deploy-vps-local-cc` — yerel VPS (192.168.0.15)
@@ -399,7 +398,7 @@ Geliştirme yükseltme taahhüdü git plumbing ile oluşturulmuştur (hiçbir ç
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

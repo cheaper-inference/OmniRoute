@@ -4,11 +4,9 @@
 
 ---
 
-> **Autoritativ kilde:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Sist oppdatert:** 2026-09-02 — v3.8.51
-> **Målgruppe:** Utviklere som vedlikeholder leverandørspesifikke stealth-integrasjoner.
+> **Kilde til sannhet:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Publikum:** Ingeniører som vedlikeholder leverandørspesifikke stealth-integrasjoner.
 
-OmniRoute integreres med leverandører hvis grenseinfrastruktur aktivt identifiserer uoffisielle klienter ved hjelp av fingeravtrykk (TLS JA3/JA4, rekkefølge på headere, JSON-strukturen i forespørselskroppen og integritetstokener). Denne siden dokumenterer stealth-grensesnittene OmniRoute eksponerer, og hvor de er implementert.
+OmniRoute integreres med leverandører hvis kanter aktivt fingeravtrykker ikke-offisielle klienter (TLS JA3/JA4, bestilling av topptekst, JSON kroppsform, integritetssymboler). Denne siden dokumenterer stealth-flatene OmniRoute avslører og hvor de er implementert.
 
 ## Juridisk og etisk merknad
 
@@ -77,65 +75,68 @@ før du hevder samsvar med en oppstrømsnettleser.
 
 ---
 
-## Claude Code Stealth-pakke
+## Claude Code Stealth Bundle
 
-Når `cliCompatMode` er aktivert, omformer OmniRoute utgående Claude-forespørsler slik at de ikke kan skilles fra `claude-cli`-trafikk. Tre moduler samarbeider:
+Når `cliCompatMode` er på, omformer OmniRoute utgående Claude forespørsler slik at de ikke kan skilles fra `claude-cli` -trafikk. Tre moduler samarbeider:
 
 ### `claudeCodeFingerprint.ts`
 
-Beregner det 3-tegns `cc_version`-fingeravtrykket som er innebygd i faktureringsheaderen:
+Beregner `cc_version` fingeravtrykket med 3 tegn som er innebygd i faktureringsoverskriften:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (hardkodet; samsvarer med den offisielle klienten)
-- Inndata: tegn på indeks 4, 7 og 20 i teksten i den første brukermeldingen + versjonsstrengen
-- Utdata: 3-tegns heksadesimalt prefiks
+- `FINGERPRINT_SALT = "59cf53e54c78"` (hardkodet; samsvarer med offisiell klient)
+- Inndata: tegn ved indeks 4, 7, 20 av den første brukermeldingen tekst + versjonsstreng
+- Utgang: 3-char hex prefiks
 
 ### `claudeCodeCCH.ts` (Client Content Hash)
 
-Integritetskontroll på serversiden som den offisielle Claude Code CLI-en beregner via Bun/Zig. OmniRoute implementerer den på nytt med `xxhash-wasm`:
+Tjenersidens integritet sjekk den offisielle Claude koden CLI -beregninger via Bun/Zig. OmniRoute implementeringer med `xxhash-wasm`:
 
-1. Serialiser innholdet med plassholderen `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Heksadesimalverdi på 5 tegn med små bokstaver og nullutfylling
-4. Erstatt `cch=00000;` med det beregnede tokenet
+1. Serialiser brødteksten med `cch=00000;` plassholder
+2. Bygg hash-visningen med to ren teksterstatninger, i denne rekkefølgen (`hashView()`):
+   - hver kamp av `/"model":"[^"]*"/g` blir `"model":""` — kampen stopper ved den første `"`, så en verdi med et escaped anførselstegn (`"model":"a\"b"`) tømmes bare opp til det sitatet, slik klienten gjør
+   - hver kamp med `/"max_tokens":\d+,|,?"max_tokens":\d+/g` fjernes kun — numeriske verdier, uansett dybde
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Nullpolstret 5-tegns små sekskantede bokstaver
+5. Erstatt `cch=00000;` med det beregnede tokenet
 
 Konstanter:
 
-- Seed: `0x6e52736ac806831e`
+- Seed: `0x4d659218e32a3268` (tilsvarer loopback-opptak av Claude kode 2.1.252 og 2.1.322)
 - Mønster: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Setter inn en Unicode-**sammenføyer uten bredde** (`U+200D`) etter det første tegnet i «sensitive» klientnavn, slik at oppstrømsfiltre ikke kan finne dem med grep. Standard ordliste:
+Setter inn en Unicode** null bredde snekker** (`U+200D`) etter det første tegnet i "sensitive" klientnavn, slik at oppstrømsfiltre ikke kan gripe dem. Standard ordliste:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Brukes på: `system`-blokker, alt `messages[].content` og `tools[].description` / `tools[].function.description`. Kan overstyres av operatøren via `setSensitiveWords()`.
+Brukt på: `system` blokker, alle `messages[].content`, og `tools[].description` / `tools[].function.description`. Operatør-overstyrbar via `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`-leverandører
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` leverandører
 
-For tredjeparts Anthropic-reléer som bare godtar trafikk fra «ekte Claude Code»:
+For tredjeparts Anthropic -reléer som bare aksepterer "ekte Claude -kode"-trafikk:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` som standard
-- Bryteren «Enable redact-thinking beta» per tilkobling legger til `redact-thinking-2026-02-12` når en CC Compatible-oppstrømstjeneste spesifikt krever redigerte resonneringsstrømmer
-- Bryteren «Enable summarized thinking display» per tilkobling lagrer `providerSpecificData.requestDefaults.summarizeThinking` og legger til `display: "summarized"` i CC Compatible-resonneringsforespørsler som ikke allerede har angitt en visningsmodus
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x-familien)
-- Standardbane: `/v1/messages?beta=true`
+- Per-tilkoblingen "Aktiver redact-thinking beta"-bryteren legger til `redact-thinking-2026-02-12` når en CC -kompatibel oppstrøms spesifikt krever redakterte tenkestrømmer
+- Per-tilkoblingen "Aktiver oppsummert tenkningsvisning"-veksler lagrer `providerSpecificData.requestDefaults.summarizeThinking` og legger til `display: "summarized"` til CC Kompatible tankeforespørsler som ikke allerede har angitt en visningsmodus
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x-familie)
+- Standard bane: `/v1/messages?beta=true`
 
-Beslektede moduler i samme pakke:
+Søstermoduler i samme bunt:
 
-- `claudeCodeConstraints.ts` — regler for temperatur + hurtigbufferkontroll
-- `claudeCodeToolRemapper.ts` — omtilordning av verktøynavn
-- `claudeCodeExtraRemap.ts` — ekstra normalisering av nyttelast
+- `claudeCodeConstraints.ts` — temperatur + cache-kontroll regler
+- `claudeCodeToolRemapper.ts` — verktøynavn remapping
+- `claudeCodeExtraRemap.ts` — normalisering av ekstra nyttelast
 
 ---
 
@@ -165,7 +166,7 @@ Oppstrøms håndhevelse er på**Google side** , ikke noe OmniRoute kan forhindre
 2. **Fordel belastningen på tvers av tilbydere via Auto-Combo** (`model: "auto"` eller `kr/glm/etc` -combo) i stedet for å mette en enkelt Antigravity konto.
 3. **Angi RPM -grenser per tilkobling** i Antigravity leverandørens redigeringsside (Dashboard → Providers → Antigravity → connection → rate limit). 30–60 RPM er en forsvarlig øvre grense for vedvarende bruk.
 4. **Bruk stabil, operatørstyrt oppstrømsnettverk** og unngå å dele én konto på tvers av ikke-relaterte brukere eller arbeidsbelastninger.
-5. **Hvis forbudt** : appell via `support.google.com` → "Gjenopprett Workspace/Account tilgang" med den eksakte `quota_exceeded` / `service disabled` -svarteksten Google sendt. Restaurering er ikke garantert.
+5. **Hvis forbudt** : anke via `support.google.com` → "Gjenopprett Workspace/Account tilgang" med den eksakte `quota_exceeded` / `service disabled` -svarteksten Google sendt. Restaurering er ikke garantert.
 
 Miljøreferansen dokumenterer konto- og forbruksimplikasjonene for hver kredittmodus.
 
@@ -195,7 +196,7 @@ Berøringspunkter:
 
 - `open-sse/executors/antigravity.ts` — leser `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — legitimasjon rørleggerarbeid
-- Original hendelsesrapport: Diskusjon [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Original hendelsesrapport: Diskusjon [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

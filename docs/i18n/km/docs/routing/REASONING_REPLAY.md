@@ -4,7 +4,7 @@
 
 ---
 
-> **ប្រភពនៃការពិត៖** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** ធ្វើបច្ចុប្បន្នភាពចុងក្រោយ៖** 2026-06-28 — v3.8.40
+> **ប្រភពនៃការពិត៖** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute ចាប់យកជំនួយការ `reasoning_content` ដែលផលិតដោយម៉ូដែលរបៀបគិត ហើយចាក់វាឡើងវិញដោយតម្លាភាពលើសំណើពហុវេន នៅពេលដែលអ្នកផ្តល់សេវាចរន្តទាមទារវា។ នេះលុបបំបាត់កំហុស HTTP 400 ដែលអ្នកផ្តល់សេវាតឹងរ៉ឹងលើកឡើង នៅពេលដែលប្រវត្តិការសន្ទនារបស់អតិថិជនបាត់ការវែកញែកនៃវេនមុន។
 
@@ -38,7 +38,7 @@ Turn N+1 (client sends follow-up):
 
 ការចាប់យកកើតឡើងនៅក្នុង `open-sse/handlers/chatCore.ts` (គេហទំព័រពីរ នៅលើគេហទំព័រហៅ `cacheReasoningFromAssistantMessage` ពីរ) ។ ការចាក់ឡើងវិញកើតឡើងនៅក្នុង `open-sse/translator/index.ts` បន្ទាប់ពីការបង្ខិតបង្ខំតាមគ្រោងការណ៍ ប៉ុន្តែមុនពេលបញ្ជូន។
 
-ធាតុហៅឧបករណ៍ត្រូវបានរក្សាទុកនៅក្រោម `buildToolCallCacheKey()` ដែលជាការសង្ខេបនៃវិសាលភាពសំណើ និងលេខសម្គាល់ការហៅឧបករណ៍ ដូច្នេះលេខសម្គាល់ដូចគ្នាដែលប្រើដោយគ្រាប់ចុច API ឬសម័យផ្សេងទៀតមិនជ្រើសរើសធាតុនោះទេ។ វិសាលភាពបានមកពី `buildReasoningCacheScope()`៖ លេខសម្គាល់គ្រាប់ចុច API បូកនឹងគ្រាប់ចុចសម័យ នៅពេលសំណើមានមួយ។ ដូច្នេះជួរឈរ `tool_call_id` និងផ្ទាំងគ្រប់គ្រងបង្ហាញការសង្ខេបនេះសម្រាប់ធាតុទាំងនោះ។
+ធាតុហៅឧបករណ៍ត្រូវបានរក្សាទុកនៅក្រោម `buildToolCallCacheKey()` ដែលជាការសង្ខេបនៃវិសាលភាពសំណើ និងលេខសម្គាល់ការហៅឧបករណ៍ ដូច្នេះលេខសម្គាល់ដូចគ្នាដែលប្រើដោយគ្រាប់ចុច API ឬសម័យផ្សេងទៀតមិនជ្រើសរើសធាតុនោះទេ។ វិសាលភាពបានមកពី `buildReasoningCacheScope()`៖ លេខសម្គាល់គ្រាប់ចុច API បូកនឹងគ្រាប់ចុចសម័យ នៅពេលសំណើមានមួយ។ ដូច្នេះ ជួរឈរ `tool_call_id` និងផ្ទាំងគ្រប់គ្រងបង្ហាញការសង្ខេបនេះសម្រាប់ធាតុទាំងនោះ។
 
 វេនជំនួយការធម្មតា (មិនប្រើឧបករណ៍) ត្រូវបានចុចខុសគ្នា៖ `buildAssistantMessageCacheKey()` សង្ខេបវិសាលភាពនៃវគ្គ បូកនឹងប្រតិចារិកទម្រង់ OpenAI ធម្មតារហូតដល់វេននោះ ពីព្រោះ DeepSeek ទាមទារហេតុផលនៃ _every_ វេនមុន នៅពេលដែល `tools` មានវត្តមាន។ សម្រាប់ Responses-API targets (ឧទាហរណ៍ `opencode-go/deepseek-v4-flash`, routed to `/responses`) តួខាងលើផ្ទុក `input` មិនមែន `messages` ទេ ដូច្នេះ `translateRequest()` (`open-sse/translator/index.ts`) រាយការណ៍ពី pivot transcript ដែលវាបានរំលាយតាមរយៈជម្រើស callback ហើយគេហទំព័រ captures digest transcript ដូចគ្នា។ Responses replay pass ដំណើរការលើ OpenAI pivot សម្រាប់គ្រប់ទម្រង់ប្រភព ដូច្នេះ Anthropic Messages clients (Claude → OpenAI → Responses) ក៏ត្រូវបានចាក់ឡើងវិញផងដែរ។
 

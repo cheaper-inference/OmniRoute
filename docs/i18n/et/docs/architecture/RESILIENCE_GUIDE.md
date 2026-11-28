@@ -12,54 +12,53 @@ OmniRoute on kolm erinevat, kuid omavahel seotud vastupidavusmehhanismi. Igal ne
 
 > **Vastupidavuse lülitite ümbris-vs-armatuurlaua prioriteetsus.** Lubatud vastupidavus lülitab keskkonnast külvatud — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — ainult _vaikeväärtuse_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). `resilienceSettings` (Armatuurlaud →** Seaded → Vastupidavus** / `PATCH /api/resilience`, salvestatud `key_value`) võidab env väärtuse: normaliseerimine (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) säilitab salvestatud tõeväärtuse, kui see on olemas. Sellise env var väärtuseks `true` määramine juurutamisel, kus armatuurlaud on `false` juba salvestatud, ei muuda seetõttu midagi — lülitab lüliti sisse** Seadistused → Vastupidavus** (või tühjendage salvestatud väli).
 
-## 1. Pakkuja katkestaja
+## 1. Pakkuja kaitselüliti
 
-**Ulatus:** kogu teenusepakkuja (nt `glm`, `openai`, `anthropic`).
+**Ulatus:** kogu pakkuja (nt `glm`, `openai`, `anthropic`).
 
-**Eesmärk:** lõpetada liikluse saatmine teenusepakkujale, kes ülaloleva teenuse tasemel korduvalt ebaõnnestub.
+**Eesmärk:** lõpetage liikluse saatmine teenusepakkujale, mis upstream/service tasemel korduvalt ebaõnnestub.
 
-**Implementatsioon:**
+**Rakendamine:**
 
-- Tuumklass: `src/shared/utils/circuitBreaker.ts`
-- Ühendused: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Seisundi API: `GET /api/monitoring/health`
-- Taastamise API: `POST /api/resilience/reset`
-- Mpakid: `open-sse/services/accountFallback.ts`
-- Andmebaasi tabel: `domain_circuit_breakers`
+- Põhiklass: `src/shared/utils/circuitBreaker.ts`
+- Juhtmed: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Olek API: `GET /api/monitoring/health`
+- API lähtestamine: `POST /api/resilience/reset`
+- Ümbrised: `open-sse/services/accountFallback.ts`
+- DB tabel: `domain_circuit_breakers`
 
-**Seisundid:**
+**Osariigid:**
 
-- `CLOSED` — normaalne liiklus lubatud
-- `DEGRADED` — liiklus lubatud, kuid jätkuvaid teenusepakkuja ebaõnnestumisi jälgitakse; seisund taastub `CLOSED`-ks piisavate õnnestumiste, kehtiva ühendustesti või viimase tüüpi ebaõnnestumise kõige pikema `OPEN` hoidmise järel (kasutatud väärtus `cooldownByKind`, muidu `resetTimeout` × `maxBackoffMultiplier`, vähemalt üks jahutuse periood) ilma uue ebaõnnestumiseta
-- `OPEN` — teenusepakkuja ajutiselt blokeeritud; kombineeritud marsruutimine jätab selle vahele
-- `HALF_OPEN` — taastamise aeg möödunud; proovipäring lubatud
+- `CLOSED` — tavaline liiklus lubatud
+- `DEGRADED` — liiklus on endiselt lubatud, kuid teenusepakkuja kõrgendatud tõrkeid jälgitakse; naaseb `CLOSED` -le piisava õnnestumise korral, kehtiva ühenduse testi korral või pärast viimase tõrketüübi pikimat `OPEN` -hoidmist (selle `cooldownByKind` väärtus, muidu `resetTimeout`, × `maxBackoffMultiplier`, vähemalt üks jahtumine) ilma uue veata
+- `OPEN` — pakkuja ajutiselt blokeeritud; kombineeritud marsruutimine jätab selle vahele
+- `HALF_OPEN` — lähtestamise ajalõpp on möödunud; sondi taotlus lubatud
 
-**Konfigureeritavad vaikeväärtused (`open-sse/config/constants.ts`, nähtavad Dashboard → Settings → Resilience) :**
+**Konfigureeritavad vaikeseaded (`open-sse/config/constants.ts`, kuvatakse armatuurlaual → Seaded → Vastupidavus):**
 
-| Klass   | Degradeerub pärast |   Avatakse pärast | Taastamise aeg |
-| ------- | -----------------: | ----------------: | -------------: |
-| OAuth   |   5 ebaõnnestumist |  8 ebaõnnestumist |            60s |
-| API-key |   7 ebaõnnestumist | 12 ebaõnnestumist |            30s |
-| Local   |          tuletatud |  2 ebaõnnestumist |            15s |
+| Klass    | Degradeeritud kell | Avatakse kl       | Lähtesta ajalõpp |
+| -------- | ------------------ | ----------------- | ---------------- |
+| OAuth    | 5 ebaõnnestumist   | 8 ebaõnnestumist  | 60ndad           |
+| API-võti | 7 ebaõnnestumist   | 12 ebaõnnestumist | 30ndad           |
 
-`degradationThreshold` määrab, millal teenusepakkuja läheb seisundisse `DEGRADED`; `failureThreshold` määrab, millal see avaneb ja vahele jäetakse. Kohalikud teenusepakkuja profiilid ei ole veel Resilience'i sätete lehel nähtavad.
+`degradationThreshold` kontrollib, millal pakkuja sisestab `DEGRADED`; `failureThreshold` juhib selle avanemist ja vahelejätmist. `PROVIDER_PROFILES.local` (2 tõrget / 15 s) on määratletud `open-sse/config/constants.ts` but** pole veel ühendatud** : `getProviderCategory()` tagastab ainult `oauth` või `apikey`, seega kasutavad kohalikud pakkujad OAuth või API-võtme profiili.
 
-**Trip-koodid:** ainult teenusepakkuja tasemel olevaid staatusi `[408, 500, 502, 503, 504]`. Ärge käivitage trip'i konto tasemel esinevate vigade korral (enamasti 401/403/429 — need kuuluvad jahutuse või lukustuse alla).
+**Reisi koodid:** ainult pakkuja tasemel olekud `[408, 500, 502, 503, 504]`. Kontotaseme vigade puhul tehke NOT reis (enamik 401/403/429 — neist kuulub jahtumis- või lukustusse).
 
-**Lais taastumine:** kui `OPEN` aeg möödub, siis `getStatus()`, `canExecute()`, `getRetryAfterMs()` värskendavad seisundit `HALF_OPEN`-ks. Sama lugemine (ja järgmine ebaõnnestumine) vähendab vananenud `DEGRADED` seisundi tagasi `CLOSED`-ks. Taustatimerit pole vaja.
+**Laisk taastumine:** kui `OPEN` aegub, `getStatus()`, `canExecute()`, `getRetryAfterMs()` olekut olekusse `HALF_OPEN`. Sama näit (ja järgmine tõrge) lagundab aegunud `DEGRADED` tagasi väärtuseks `CLOSED`. Taustataimerit pole vaja.
 
 ---
 
-### Valikuline globaalne teenusepakkuja jahutamine (akna lukk)
+### Lubage ülemaailmne pakkuja jahutamine (aknavärav)
 
-Neljandaks kihiks on valikulise osalemise kiht (`PROVIDER_COOLDOWN_ENABLED`, vaikeväärtus **off**), mis säilitab päringute vahel mälu ebaõnnestuvate teenusepakkujate kohta faili `open-sse/services/providerCooldownTracker.ts` sees. Seda kasutatakse kombineeritud sihtmärgi määramisel, et järjestikused kombineeritud päringud lõpetaksid äsja ebaõnnestunud teenusepakkuja uuesti läbimarsimise. Teenusepakkuja tasemel kirjed järgivad `PROVIDER_PROFILES` akna luku sätteid:
+Neljas,** opt-in** kiht (`PROVIDER_COOLDOWN_ENABLED`, vaikimisi** välja** ) `open-sse/services/providerCooldownTracker.ts` Pakkuja taseme kirjed austavad `PROVIDER_PROFILES` aknaväravat:
 
-| Profiil | Lülitab pärast (`providerFailureThreshold`) | Akna sees (`providerFailureWindowMs`) | Jahutub ajaks (`providerCooldownMs`) |
-| ------- | ------------------------------------------: | ------------------------------------: | -----------------------------------: |
-| OAuth   |                                        `10` |                               `15min` |                               `5min` |
-| API key |                                        `15` |                               `30min` |                              `10min` |
+| Profiil  | reisid pärast (`providerFailureThreshold`) | sees (`providerFailureWindowMs`) | jahutab (`providerCooldownMs`) |
+| -------- | -----------------------------------------: | -------------------------------: | -----------------------------: |
+| OAuth    |                                       `10` |                          `15min` |                         `5min` |
+| API võti |                                       `15` |                          `30min` |                        `10min` |
 
-Alates sellest künnist ei peeta teenusepakkujat jahutavas olekus; edukas päring tühistab akna. Ühenduse tasemel kirjed (`provider:connectionId`) kasutavad eksponentsiaalset tagasilükkamist `minRetryCooldownMs → maxRetryCooldownMs`. Ülekirjutused: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regresseerimise kontroll: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Allpool künnist on teenusepakkuja** mitte** peetakse jahutamiseks; edu teeb akna puhtaks. Ühenduse taseme kirjed (`provider:connectionId`) hoiavad selle asemel eksponentsiaalset `minRetryCooldownMs → maxRetryCooldownMs` -tagasi. Alistab: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regressioonikaitse: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Ühenduse jahtumine
 
@@ -713,6 +712,21 @@ Ausad piirangud:
 
 ---
 
+## Kui OmniRoute ise on kättesaamatu
+
+Pakkuja kaitselüliti, ühenduse jahtumine ja mudeli lukustus töötavad kõik lüüsis. Kui klient ei saa lüüsiga ühendust, kuvatakse ühenduse tõrketeade. OmniRoute ei saa seda ebaõnnestumist vahele jätta. Klient otsustab, kas proovib uuesti ja millist teadet näidata.
+
+OmniRoute ei paku praegu kliendipoolset tagavara ega määratle selle jaoks poliitikat. Konfigureerige mis tahes alternatiivne marsruut kliendis või lüüsi ees.
+
+- `GET /api/health` kontrollib elavust ilma autentimiseta.
+- `GET /api/health/ping` kontrollib valmisolekut, sealhulgas seda, kas andmebaas reageerib.
+- `GET /api/monitoring/health` annab autentitud helistajatele sügavama ülevaate tervisest.
+- `omniroute launch <tool>` uurib `/api/monitoring/health` d enne kliendi käivitamist. See võib automaatselt käivitada kohaliku lüüsi. `--no-start` korral annab kättesaamatu lüüs tulemuseks `GatewayUnreachable` ja väljumiskoodi `69`.
+
+Kliendi ja OmniRoute ühenduse katkestamiseks järgige [käsku Taasta kliendi konfiguratsioon](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Silumine
 
 - Kaalutud combo vastab `503 all_targets_cooling_down` (`Retry-After` on määratud, `diagnostics.excluded` loetleb kõik sihtmärgid koos `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → pool on seadistatud ja ühendatud, iga sihtmärk on lihtsalt tõrkekindlustaimeri poolt välistatud; hoiatus `[COMBO] Weighted selection: every target excluded before dispatch — …` nimetab põhjused ja järelejäänud sekundid. Sama combo `404 no_executable_targets` tähendab, et ükski tõrkekindlustaimer polnud kaasatud (pole midagi käivitada või iga konto ei läbinud saadavuse kontrolli). Ehitatud failis `open-sse/services/combo/pinRecovery.ts` failis `targetResolution.ts` kogutud välistamiste põhjal.
@@ -724,98 +738,68 @@ Ausad piirangud:
 
 ---
 
-## Käitusaja olek — agendi kiirviide
+## Tööaja oleku — agendi kiirviide
 
-> Tõsteti sõna-sõnalt üle failist `AGENTS.md` → jaotis "Resilience Runtime State" (PR #12743), et agendi
-> juhend jääks alla 40k kontekstieelarve. Tegemist on ülaltoodud jaotiste tihendatud, agendile
-> suunatud vaatega; nummerdatud jaotised jäävad täielikuks viiteks.
+> Teisaldati sõna-sõnalt olekust `AGENTS.md` → "Resilience Runtime State" (PR #12743), nii et agendijuhend jääb 40 000 kontekstieelarve alla. See on ülaltoodud jaotiste koondatud, agendi poole suunatud vaade; nummerdatud jaotised jäävad täielikuks viiteks.
 
-OmniRoute'il on kolm omavahel seotud, kuid eristatavat ajutiste tõrgete mehhanismi. Hoia nende
-ulatused marsruutimiskäitumise silumisel selgelt eraldi. Kiirülevaate saamiseks vaata
-[3-kihilist tõrkekindluse diagrammi](../diagrams/exported/resilience-3layers.svg)
-(lähtefail: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)).
+OmniRoute on kolm omavahel seotud, kuid erinevat ajutise rikke mehhanismi. Marsruutimise käitumise silumisel hoidke nende ulatus eraldi. Vaadake [3-kihilist vastupidavusdiagrammi](../diagrams/exported/resilience-3layers.svg) (allikas: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ), et saada lühidalt kaarti.
 
 ### Pakkuja kaitselüliti
 
-**Ulatus**: terve pakkuja, nt `glm`, `openai`, `anthropic`.
+**Ulatus** : kogu pakkuja, nt `glm`, `openai`, `anthropic`.
 
-**Eesmärk**: lõpetada liikluse saatmine pakkujale, mis ülesvoolu/teenuse tasemel korduvalt
-ebaõnnestub, et üks ebatervislik pakkuja ei aeglustaks iga päringut.
+**Eesmärk** : lõpetage liikluse saatmine teenusepakkujale, mis upstream/service tasemel korduvalt ebaõnnestub, nii et üks ebatervislik pakkuja ei aeglustaks iga päringut.
 
-**Teostus**:
+**Rakendamine** :
 
 - Põhiklass: `src/shared/utils/circuitBreaker.ts`
-- Vestluse värava ja täitmise sidumine: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Käitusaja oleku API: `src/app/api/monitoring/health/route.ts`
-- Jagatud ümbrisefunktsioonid: `open-sse/services/accountFallback.ts`
-- Püsistatud oleku tabel: `domain_circuit_breakers`
+- Chat gate/execution juhtmestik: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Tööaja olek API: `src/app/api/monitoring/health/route.ts`
+- Jagatud ümbrised: `open-sse/services/accountFallback.ts`
+- Püsiva oleku tabel: `domain_circuit_breakers`
 
-**Olekud** (4 — `src/shared/utils/circuitBreaker.ts`):
+**osariigid** (4 — `src/shared/utils/circuitBreaker.ts`):
 
 - `CLOSED`: tavaliiklus on lubatud.
-- `DEGRADED`: varajase hoiatuse tsoon — tõrked ületasid degraderumise läve, kuid mitte veel
-  kaitselüliti läve; liiklus voolab endiselt ja töölauad kuvavad hoiatust. Kehtiv ühenduse test
-  või vaikne periood ilma uute tõrgeteta viib oleku tagasi `CLOSED`-olekusse
-  (aken on kirjeldatud failis `docs/architecture/RESILIENCE_GUIDE.md`).
-- `OPEN`: pakkuja on ajutiselt blokeeritud; kutsujad saavad provider-circuit-open vastuse
-  või combo-marsruutimine lülitub teisele sihtmärgile.
-- `HALF_OPEN`: lähtestamise ajalõpp on möödunud; lubatakse katsepäring. Edu sulgeb
-  kaitselüliti, ebaõnnestumine avab selle uuesti.
+- `DEGRADED`: varajase hoiatusriba — tõrked ületasid lagunemisläve, kuid mitte veel katkestusläve; liiklus liigub endiselt, armatuurlauad näitavad hoiatust. Kehtiv ühenduse test või vaikne aken ilma uue veata tagastab selle `CLOSED` (aken on `docs/architecture/RESILIENCE_GUIDE.md` -l).
+- `OPEN`: teenusepakkuja on ajutiselt blokeeritud; helistajad saavad teenusepakkuja-ahela avatud vastuse või kombineeritud marsruutimine hüppab teisele sihtmärgile.
+- `HALF_OPEN`: lähtestamise ajalõpp on möödas; lubage uurimistaotlus. Edu sulgeb kaitselüliti, ebaõnnestumine avab selle uuesti.
 
-**Vaikeväärtused** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, mida tarbitakse
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` kaudu failis `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` failis `src/sse/handlers/chatHelpers.ts`). Kogu pakkuja
-katkestav kaitselüliti töötab parameetritel `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Vaikimisi** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, tarbitakse `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` kaudu `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). Kogu teenusepakkuja kaitselüliti töötab `circuitBreakerThreshold` / `circuitBreakerReset` kaudu:
 
-| Profiil  | degradeerub | avaneb (`circuitBreakerThreshold`) | lähtestus (`circuitBreakerReset`) |
-| -------- | ----------: | ---------------------------------: | --------------------------------: |
-| OAuth    |         `5` |                                `8` |                             `60s` |
-| API-võti |         `7` |                               `12` |                             `30s` |
-| Kohalik  | (tuletatud) |                                `2` |                             `15s` |
+| Profiil  | degradeerub juures | avaneb kell (`circuitBreakerThreshold`) | lähtesta (`circuitBreakerReset`) |
+| -------- | -----------------: | --------------------------------------: | -------------------------------: |
+| OAuth    |                `5` |                                     `8` |                            `60s` |
+| API võti |                `7` |                                    `12` |                            `30s` |
 
-`PROVIDER_PROFILES` määratleb ka `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) ja `providerCooldownMs` (5/10/1 min): need juhivad
-**valikulise, sisselülitatava globaalse pakkuja jahutuse (Provider Cooldown) aknaväravat**
-(`PROVIDER_COOLDOWN_ENABLED`, vaikimisi välja lülitatud) — pakkujataseme kirjet failis
-`open-sse/services/providerCooldownTracker.ts` loetakse jahutavaks alles pärast
-`providerFailureThreshold` tõrget ajavahemiku `providerFailureWindowMs` jooksul ning seejärel
-jahutub see `providerCooldownMs` aja vältel. Need EI OLE aktiivse kaitselüliti läved — ära
-hääleta neid eelduses, et need mõjutaksid kaitselüliti käitumist. Iga vaikeväärtust saab
-alistada keskkonnamuutujatega `OMNIROUTE_PROVIDER_BREAKER_*` ja
-`OMNIROUTE_CIRCUIT_BREAKER_*`; käitusajal täpne viitetabel asub failis
-`docs/architecture/RESILIENCE_GUIDE.md`.
+`local` profiil (`2` errors / `15s`) on olemas ka `PROVIDER_PROFILES`, kuid see pole kaitselülitisse ühendatud: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) aktsepteerib ainult `oauth` või `apikey` ja `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) tagastab ühe neist kahest (registreerimata pakkujad saavad `apikey`).
 
-Pakkuja kaitselüliti peaksid käivitama ainult pakkujataseme tõrkekoodid:
+`PROVIDER_PROFILES` defineerib ka `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) ja `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, kus kohalikud väärtused on inertsed samal põhjusel nagu ülal: need võimsus** globaalse teenusepakkuja jahtumise lubamise aknavärav** (`PROVIDER_COOLDOWN_ENABLED`, vaikimisi välja lülitatud) — pakkujataseme kirje `open-sse/services/providerCooldownTracker.ts` is loetakse jahutuseks ainult pärast `providerFailureThreshold` tõrkeid `providerFailureWindowMs` ja seejärel jahutatakse `providerCooldownMs`. Need on NOT pingelülitite künnised — ei häälesta neid, oodates kaitselüliti käitumist. Iga vaikeväärtus on `OMNIROUTE_PROVIDER_BREAKER_*` ja `OMNIROUTE_CIRCUIT_BREAKER_*` env vars kaudu alistatav; käitusaja täpsusega viitetabel elab `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Ainult pakkuja taseme rikkeolekud peaksid teenusepakkuja kaitselüliti välja lülitama:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Ära käivita kogu pakkuja kaitselülitit tavaliste konto-, võtme- või mudelivigade puhul,
-nagu enamik `401`-, `403`- või `429`-juhtumeid. Need kuuluvad tavaliselt ühenduse jahutuse
-või mudeli lukustuse valdkonda. Tavaline API-võtme pakkuja `403` peaks olema taastatav,
-välja arvatud juhul, kui see liigitatakse lõplikuks pakkuja- või kontoveaks.
+Ärge lülitage kogu teenusepakkuja kaitselülitit välja tavaliste account/key/model vigade korral, nagu enamik `401`, `403` või `429` juhtumeid. Need kuuluvad tavaliselt ühenduse jahtumisele või mudeli lukustamisele. Üldine API-võtme pakkuja `403` peaks olema taastatav, välja arvatud juhul, kui see on klassifitseeritud terminali provider/account veaks.
 
-Katkesti kasutab laiska taastumist, mitte taustataimerit. Kui olek `OPEN` aegub,
-värskendavad lugemistoimingud nagu `getStatus()`, `canExecute()` ja
-`getRetryAfterMs()` oleku väärtuseks `HALF_OPEN`, nii et armatuurlauad ja
-kombo-kandidaatide koostajad ei välista aegunud pakkujat igavesti.
+Kaitselüliti kasutab laiska taastamist, mitte taustataimerit. Kui `OPEN` aegub, värskendavad sellised lugemised nagu `getStatus()`, `canExecute()` ja `getRetryAfterMs()` olekut olekusse `HALF_OPEN`, nii et armatuurlauad ja kombineeritud koostajad ei välista aegunud pakkujat igaveseks.
 
-### Ühenduse jahutusaeg
+### Ühenduse jahtumine
 
-**Ulatus**: üks pakkuja ühendus/konto/võti.
+**Ulatus** : üks pakkuja connection/account/key.
 
-**Eesmärk**: üks vigane võti/konto ajutiselt vahele jätta, lastes samal ajal sama
-pakkuja teistel ühendustel päringuid edasi teenindada.
+**Eesmärk** : jätke ajutiselt vahele üks halb key/account, võimaldades samal teenusepakkujal teistel ühendustel jätkata päringute teenindamist.
 
-**Teostus**:
+**Rakendamine** :
 
-- Kirjutamis-/uuendamistee: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Konto valik/filtreerimine: `src/sse/services/auth.ts::getProviderCredentials...`
-- Jahutusaja arvutamine: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Write/update tee: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Konto selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Jahutusarvutus: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Seaded: `src/lib/resilience/settings.ts`
 
-Olulised väljad pakkuja ühendustel:
+Olulised väljad pakkuja ühenduste kohta:
 
 ```ts
 rateLimitedUntil;
@@ -826,66 +810,50 @@ errorCode;
 backoffLevel;
 ```
 
-Konto valimisel jäetakse ühendus vahele, kui:
+Konto valimise ajal jäetakse ühendus vahele, kui:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Jahutusajad on samuti laisad: kui `rateLimitedUntil` jääb minevikku, muutub ühendus
-taas kasutuskõlblikuks. Edukal kasutamisel puhastab `clearAccountError()` väljad
-`testStatus`, `rateLimitedUntil`, veaväljad ja `backoffLevel`.
+Ka jahtumised on laisad: kui `rateLimitedUntil` on minevik, muutub ühendus uuesti sobivaks. Eduka kasutamise korral kustutab `clearAccountError()` `testStatus`, `rateLimitedUntil`, veaväljad ja `backoffLevel`.
 
-Ühenduse jahutusaja vaikekäitumine:
+Ühenduse jahtumise vaikekäitumine:
 
-- OAuth põhijahutusaeg: `5s`.
-- API-võtme põhijahutusaeg: `3s`.
-- API-võtme `429` korral tuleks võimalusel eelistada päritud serveri korduskatsevihjeid
-  (`Retry-After`, lähtestamispäised või parsitav lähtestamistekst).
-- Korduvad taastatavad tõrked kasutavad eksponentsiaalset taganemist:
+- OAuth baasjahutus: `5s`.
+- API-klahvi baasjahutus: `3s`.
+- API-võti `429` peaks eelistama ülesvoolu uuesti proovimise vihjeid (`Retry-After`, lähtestamispäised või sõelutav lähtestamistekst), kui need on saadaval.
+- Korduvad taastatavad tõrked kasutavad eksponentsiaalset tagandamist:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Thundering-herd-probleemi ennetav kaitse takistab sama ühenduse samaaegsetel tõrgetel
-jahutusaega korduvalt pikendada või `backoffLevel`-it topelt suurendada.
+Äikesevastane karjakaitse hoiab ära sama ühenduse samaaegsete rikete korduva jahutusaja pikendamise või `backoffLevel` kahekordse suurendamise.
 
-Lõppolekud ei ole jahutusajad. `banned`, `expired` (mis muutub lõppolekuks alles
-pärast N piiratud arvu korduskatseid läbi `EXPIRED_RETRY_MAX`) ja
-`credits_exhausted` on mõeldud jääma kättesaamatuks, kuni mandaati/seadeid muudetakse
-või operaator need lähtestab. Ärge kirjutage lõppolekuid üle ajutise jahutusolekuga.
+Terminali olekud ei ole jahtumised. `banned`, `expired` (mis muutub terminaliks alles pärast N piiratud korduskatset `EXPIRED_RETRY_MAX` kaudu) ja `credits_exhausted` jäävad kättesaamatuks seni, kuni credentials/settings muutub või operaator need lähtestab. Ärge kirjutage terminali olekuid üle mööduva jahtumise olekuga.
 
-### Mudeli blokeerimine
+### Mudeli lukustus
 
-**Ulatus**: pakkuja + ühendus + mudel.
+**Ulatus** : pakkuja + ühenduse + mudel.
 
-**Eesmärk**: vältida kogu ühenduse keelamist juhul, kui ainult üks mudel on selle
-ühenduse jaoks kättesaamatu või kvoodipiiratud.
+**Eesmärk** : vältige kogu ühenduse keelamist, kui ainult üks mudel pole saadaval või selle ühenduse jaoks on kvoot piiratud.
 
 Näited:
 
-- Mudelipõhise kvoodiga pakkujad, kes tagastavad `429`.
-- Kohalikud pakkujad, kes tagastavad ühe puuduva mudeli korral `404`.
-- Pakkujapõhised režiimi/mudeli õigustega seotud tõrked, näiteks valitud Groki režiimid.
+- Mudelipõhise kvoodi pakkujad tagastavad `429`.
+- Kohalikud pakkujad tagastavad ühe puuduva mudeli `404`.
+- Pakkujapõhised mode/model -lubade tõrked, näiteks valitud Grok režiimid.
 
-Mudeli blokeerimise loogika asub failis `open-sse/services/accountFallback.ts` ja
-võimaldab samal ühendusel teisi mudeleid edasi teenindada.
+Mudeli lukustus töötab `open-sse/services/accountFallback.ts` ja võimaldab samal ühendusel jätkata teiste mudelite teenindamist.
 
 ### Silumisjuhised
 
-- Kui kõik pakkuja võtmed jäetakse vahele, uurige nii pakkuja katkesti olekut kui ka
-  iga ühenduse `rateLimitedUntil`/`testStatus` väärtusi.
-- Kui pakkuja tundub pärast lähtestamise akent jäädavalt välistatud, kontrollige, kas
-  kood loeb töötlemata `state` väärtust selle asemel, et kasutada
-  `getStatus()`/`canExecute()`.
-- Kui üks pakkuja võti ebaõnnestub, kuid teised peaksid töötama, eelistage ühenduse
-  jahutusaega pakkuja katkestile.
-- Kui ebaõnnestub ainult üks mudel, eelistage mudeli blokeerimist ühenduse
-  jahutusajale.
-- Kui olek peaks iseenest taastuma, peaks sellel olema tulevane
-  ajatempel/lähtestamise ajalõpp ja lugemistee, mis aegunud olekut värskendab.
-  Püsivad olekud nõuavad mandaadi või konfiguratsiooni käsitsi muutmist.
+- Kui kõik teenusepakkuja võtmed jäetakse vahele, kontrollige nii teenusepakkuja kaitselüliti olekut kui ka iga ühenduse `rateLimitedUntil`/`testStatus`.
+- Kui pakkuja näib pärast lähtestusakent jäädavalt välistatud, kontrollige, kas kood loeb `getStatus()`/`canExecute()` asemel töötlemata `state`.
+- Kui üks teenusepakkuja võti ebaõnnestub, kuid teised peaksid töötama, eelistage ühenduse jahtumist teenusepakkuja kaitselülitile.
+- Kui ainult üks mudel ebaõnnestub, eelistage mudeli lukustamist ühenduse jahutamise asemel.
+- Kui olek peaks ise taastuma, peaks sellel olema tulevane timestamp/reset ajalõpp ja lugemistee, mis värskendab aegunud olekut. Püsivad olekud nõuavad käsitsi mandaadi või konfiguratsiooni muutmist.
 
 ---
 

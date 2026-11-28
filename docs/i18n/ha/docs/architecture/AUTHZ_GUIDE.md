@@ -4,14 +4,13 @@
 
 ---
 
-> **Tushen gaskiya:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **An sabunta ta ƙarshe:** 2026-09-22 — sararin samaniya na iyakoki suna nuni zuwa MCP-SERVER.md
+> **Tushen gaskiya:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, za , `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute yana da tsarin izini mai sanin hanya wanda ke hana kowane buƙatar API. Rarraba yana da **ƙayyadaddun** kuma **mai rufe-kuskure** — duk abin da ba za a iya rarraba shi ba yana ƙarewa a matsayin `MANAGEMENT` kuma yana buƙatar zama ko alamar matakin gudanarwa. Wannan shafin yana bayyana tsarin ga injiniyoyi masu kula da hanyoyi ko masu tsara sabbin wuraren ƙarshe.
+OmniRoute yana da bututun izini mai sane da hanya wanda ke kori kowane buƙatun API. Rabewa shine** ƙaddara** kuma** gaza-rufe** — duk wani abu da ba za a iya rarraba shi ya ƙare a matsayin `MANAGEMENT` kuma yana buƙatar zama ko alamar darajar gudanarwa. Wannan shafin yana bayyana samfurin don injiniyoyi masu kula da hanyoyi ko zayyana sababbin wuraren ƙarshe.
 
-![Tsarin AuthZ (ajiye hanyoyi 3 + kimanta manufofi)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
-> Tushe: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
+> Source: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## Hanyoyin Tabbatarwa Guda Biyu
 
@@ -189,7 +188,7 @@ Kowane ajin hanya yana da manufa a cikin `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — kullum yana dawowa `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — yana fitar da Mai ɗaukar nauyi, yana inganta ta hanyar `validateApiKey()`. Faɗuwa zuwa ga wanda ba a san sunansa ba kawai lokacin da aka kashe ingantaccen tutar fasalin `REQUIRE_API_KEY`. Tuta mai inganci ana warware ta ta hanyar `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) don haka Tutoci Siffofin Dashboard da masu canjin yanayi suna sarrafa `/api/v1/*`, `/api/v1beta/*`, da laƙabi akai-akai; gazawar warwarewa ta kasa rufe. Yana ba da damar buƙatun-zaman dashboard akan hanyoyin API abokin ciniki (ciki har da `/api/v1/models`, ke amfani da kundin ƙirar dashboard). Lokacin da aka kunna Entra ID SSO, reshen SSO ne ke kula da mai ɗaukar kaya wanda shine tsarin Entra token (bangaren tushe64url uku, `RS*` alg, `kid`).** kafin** `validateApiKey()` kuma hukuncinsa shine — na ƙarshe ba zai taɓa shiga hanyar API-key ba ko reshe-zuwa-wanda ba a san shi ba, don haka ƙaddamarwar mai ba da shaida ba zai iya zama buɗe hanyar shiga ba. Maɓallan API na tsaye ba su shafa ba. Duba [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — yana karɓar zaman dashboard, buƙatun ƙirar ƙira na ciki (wanda ya dace da `/api/providers/[name]/(sync-models|models)`), ko kuma ya tsallake gaba ɗaya idan `isAuthRequired()` ya dawo ƙarya. Yana dawo da 403 (`AUTH_001`) lokacin da alamar Mai ɗauka ta kasance amma bata aiki, 401 in ba haka ba. Hakanan yana tilasta matakan tsaro na hanya (LOCAL_ONLY / ALWAYS_PROTECTED) kafin kowane reshe na auth — duba [Tiers Guard Route](../security/ROUTE_GUARD_TIERS.md). hanyoyin LOCAL_ONLY a cikin `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (yau: `/api/mcp/`) ana iya samun dama daga waɗanda ba a dawo da su ba lokacin da maɓalli na Bearer ke ɗauke da iyakar `manage` ; duk sauran hanyoyin LOCAL_ONLY sun kasance masu tsattsauran ra'ayi ba tare da la'akari da iyaka ba.
+- **`managementPolicy`** (`policies/management.ts`) — yana karɓar zaman dashboard, buƙatun ƙirar ƙira na ciki (wanda ya dace da `/api/providers/[name]/(sync-models|models)`), ko kuma ya tsallake gaba ɗaya idan `isAuthRequired()` ya dawo ƙarya. Yana dawo da 403 (`AUTH_001`) lokacin da alamar Mai ɗauka ta kasance amma bata aiki, 401 in ba haka ba. Hakanan yana tilasta matakan tsaro na hanya (LOCAL_ONLY / ALWAYS_PROTECTED) kafin kowane reshe na auth — duba [Tiers Guard Route](../security/ROUTE_GUARD_TIERS.md). Ana iya samun isa ga hanyoyin LOCAL_ONLY a cikin `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (yau: `/api/mcp/`) daga waɗanda ba a dawo da baya ba lokacin da maɓalli mai ɗaukar hoto yana ɗauke da madaidaicin `manage`/`admin` ko kunkuntar `mcp:connect` scope (`hasMcpConnectOrManageScope`), ko tare da ingantaccen zaman dashboard; duk sauran hanyoyin LOCAL_ONLY sun kasance masu tsattsauran ra'ayi ba tare da la'akari da iyaka ba.
 
 Manufar nasara tana mayar da `AuthSubject` da `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Masu kula da ƙasa za su iya karanta ta ta `assertAuth(request, "CLIENT_API")` a cikin `src/server/authz/assertAuth.ts` maimakon sake gudanar da dabaru na gaskiya.
 
@@ -280,32 +279,24 @@ export async function POST(request: Request) {
 
 Zaɓi set bisa ga siffa, ba bisa ga sauƙi ba. Hanya guda tana shiga `PUBLIC_API_ROUTES_EXACT` (ko `PUBLIC_READONLY_CORS_API_ROUTES` idan GET-kawai ce); babban reshen hanyoyi na ainihi ne kawai zai shiga `PUBLIC_API_ROUTE_PREFIXES`, kuma **dole ne ya ƙare da `/`**. Sanya hanya guda a jerin prefix yana kuma wallafa kowace hanya da ke kusa wadda take da haruffan farko iri ɗaya — har da 'yan'uwan dynamic-segment da za a ƙara daga baya (GHSA-74g9-q8f6-793h). Sabunta gwaje-gwajen unit a `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` da `tests/unit/authz/classify.test.ts`.
 
-## Fadukan Aiki
+## Iyaka
 
-Fadukan suna uku. Kowane mai dubawa yana karanta nasa zaren ne kawai. Kwatancen,
-ciki har da dalilin da yasa `manage` ke kasa `scopeMatches` don `read:compression` da kuma dalilin da yasa alamar shiga `read` ba zai iya `PATCH /api/keys/{id}` ba, yana nan a
-[Fadukan suna uku](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Wuraren sunaye guda uku. Kowane mai duba yana karanta nasa kirtani kawai. Gefe-da-gefe, gami da dalilin da yasa `manage` ta kasa `scopeMatches` don `read:compression` da kuma dalilin da yasa alamar samun damar `read` ba za ta iya `PATCH /api/keys/{id}`, shi ne [wuraren sunaye guda uku](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Mabudan API suna ɗauke da jeri na `scopes` (an adana su a matsayin JSON a `api_keys.scopes`, duba `src/lib/db/apiKeys.ts`).
+maɓallan API suna ɗaukar tsararrun `scopes` (an adana su azaman JSON a cikin `api_keys.scopes`, duba `src/lib/db/apiKeys.ts`).
 
-### Fadukan Aiki na Gudanarwa
+### Iyakar gudanarwa
 
-- `manage` / `admin` — `hasManageScope`. Samun damar shiga hanyoyin API na gudanarwa.
-- `mcp:connect`, `self:usage`, `self:account-quota`, da
-  `policy:bypass-provider-quota` fadukan aiki ne masu ƙari, masu daidai-daidai. Suna waje da `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` yana buɗe kawai `/api/mcp/` wanda ba na madauki ba.
+- `manage` / `admin` — `hasManageScope`. Samun dama ga hanyoyin gudanarwa API.
+- `mcp:connect`, `self:usage`, `self:account-quota`, da `policy:bypass-provider-quota` ƙari ne daidai gwargwado. Zaune suke a wajen `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` yana buɗe `/api/mcp/` da ba madauki ba ne kawai.
 
-### Fadukan Aiki na Kayan Aikin MCP
+### MCP kayan aiki scopes
 
-Katalog da ka'idojin daidaitawa (zaren daidai, ko fadukan aiki da aka bayar wanda ya ƙare da `*`):
-[Fadukan Aiki na Kayan Aikin MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` a `src/shared/constants/mcpScopes.ts` shine ainihin ƙaramin saitin da aka rubuta, ba cikakken katalog ɗin ba. Aiwatarwa yana gudana a
-`open-sse/mcp-server/scopeEnforcement.ts` bayan `resolveCallerScopeContext()` ya warware fadukan aiki daga bayanan shiga na MCP, metadata na buƙata, ko `OMNIROUTE_MCP_SCOPES`.
-Yana kashe sai dai idan `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Katalogi da ka'idojin da suka dace (zaɓi iri ɗaya, ko ikon da aka ba shi yana ƙarewa a cikin `*`): [MCP scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` a cikin `src/shared/constants/mcpScopes.ts` shine asalin rubutun da aka buga, ba cikakken littafin ba. Yin aiwatarwa yana gudana a cikin `open-sse/mcp-server/scopeEnforcement.ts` bayan `resolveCallerScopeContext()` ya warware iyakoki daga bayanan MCP auth, buƙatar metadata, ko `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` yana kunna shi a duniya (tsoho `false`), amma koyaushe ana tilasta shi ga mai kiran HTTP/SSE wanda maɓallin API ba shi da `manage`/`admin` (duba `shouldForceScopeEnforcement()` a `open-sse/mcp-server/scopeEnforcement.ts`), ba tare da la'akari da tuta ba.
 
-### Fadukan Aiki na Alamar Shiga
+### Matsakaicin damar shiga
 
-`read` / `write` / `admin` akan alamomin `oma_live_…`, an jera su ta `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Wannan matsayi yana aiki ne kawai ga takardar shaidar alamar shiga. Duba [Tabbatar da Gudanarwa](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` akan alamomin `oma_live_…`, wanda `scopeSatisfies` ya ƙirƙira (`src/lib/accessTokens/scopes.ts`). Wannan matsayi ya shafi shaidar samun damar shiga kawai. Duba [Tabbacin Gudanarwa](../guides/MANAGEMENT-AUTH.md).
 
 ## Auth Bukatar Canji
 

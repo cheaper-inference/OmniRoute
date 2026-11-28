@@ -4,8 +4,6 @@
 
 ---
 
-Emelitere ikpeazụ: 2026-08-23
-
 OmniRoute jikọtara ya na ụdị atọ nke ngwa CLI gbasapụrụ na ibe dashboard atọ raara onwe ya nye:
 
 | Ibe            | Ụzọ                     | Echiche                                                                                       | Gụọ      |

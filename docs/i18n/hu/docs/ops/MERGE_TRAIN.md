@@ -4,74 +4,63 @@
 
 ---
 
-> **2026-11-19: Az összevonási sor megszűnt** (tulajdonos döntése). `.mergify.yml` már nem definiál sort, és visszautasítja az összevonási parancsokat, amelyek összevonják vagy átírják a lekérést. PRs kiadásokat kézzel egyesítik a „Zöld kapuk megkövetelése az aktív kiadáson” (`Gate / CI` + `Gate / Quality`) lerakatszabályzat szerint, amíg az omni-queue élő módban nem fut, majd az omni-queue-n keresztül ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Az alábbi Egyesítés szakaszok leírják a várólista állapotát.
+## Leszállás egy elengedő ágon
 
-A v3.8.49 (a quality/velocity terv WS3.2/WS3.4 ) óta az áttekintett PRs és `release/vX.Y.Z` alapértelmezett egyesítési útvonala a** Egyesítési sor egyesítése** (`.mergify.yml`); a** kézi egyesítés-vonat** Az alábbiakban dokumentált FALLBACK —, amelyet incidensek, kiadások lefagyása esetén használnak, vagy ha a Nyílt forráskódú összevonási terv bármikor megváltozik.
+Az omni-queue szabályozza `release/vX.Y.Z` való leszállást. Olvassa el a legfelső szintű `mode` `config/merge-queue/config.json` -ben az alapértelmezett ágon, mielőtt a PR leállítaná. Lásd: [Omni-Queue](OMNI_QUEUE.md).
 
-## Alapértelmezett elérési út: az Egyesítési sor
+- **`shadow`** lefuttatja az érvényesítést, és a leszállást kézi egyesítésre hagyja. Alkalmazza `omni-queue` a jóváhagyott PR a végső fejénél. Ellenőrizze a jogosultságot `npm run queue -- why <PR>` segítségével. Várd meg az ítéletet annak a fejnek a `npm run queue -- history --base <branch>`. Folytassa a `would-land`. `culprit-found` vagy `would-dequeue` billentyűn tartsa lenyomva az egyesítést, és javítsa ki az okot.
+- **Árnyék kivételek.** A jelenlegi alapcsúcs ellen zöld full CI rendelkező vonat külön soros ítélet nélkül is továbbhaladhat. Ugyanez a kivétel akkor érvényes, ha a PR fej már tartalmazza az aktuális alapcsúcsot.
+- **`live`** a `omni-queue` címkét használja a landolás kiváltására. A PR egyedül a sor hozza létre. Hagyja az egyesítési parancsokat és a leküldéseket a sorba irányítsa.
 
-1. PR reviewed/greened a kampányok által, és a tulajdonos egyesítés előtti ⭐ kapuja jóváhagyta (a + cikkenkénti döntés — jelentését lásd `/merge-prs` 0.75 lépésben).
-2. A tulajdonos (vagy a tulajdonos döntése alapján eljáró ülés) alkalmazza a**`queue`** címke. A címke IS az összevonás jóváhagyása; A Mergify csak azt hajtja végre.
-3. Az Mergify érvényesíti a sorban álló PRs** sorozatosan** (egyszerre) a gyorskapuk és egyesülések (squash) ellen. A kötegelt + automatikus felezése egy fizetett Mergify szint ("A Merge Queue köteg nem használható" az ingyenes csomagban, #7220), így `.mergify.yml` nem állít be `batch_size`; A kötegelés továbbra is az alábbi kézi egyesítési vonat feladata marad. Az a PR, amelynek ellenőrzése még függőben van `checks_timeout` után (240 perc = 2 × a `quality.yml` mért p95-je), a sor leállítása helyett kikerül a sorból.
-4. Az egyesítés után a folyamatos kiadás-zöld munkafolyamat érvényesíti az új tippet leküldéskor, és hozzárendelési problémát nyit meg, ha a kombináció visszafejlődött (soha nem történik automatikus visszaállítás).
+Minden leszálláshoz a tulajdonos engedélye és a szükséges ellenőrzések szükségesek. Csak akkor alkalmazza `omni-queue`, ha a tulajdonos engedélyezte a leszállást. A védett útvonalakat érintő sorban álló PRs esetén a tulajdonos `protected-approved` döntése is szükséges az adott PR.
 
-Védőkorlátok (tükör `CLAUDE.md` Hard Rules #21/#22):
+A "Zöld kapuk megkövetelése az aktív kiadásnál" szabálykészlethez zöld `Gate / CI` és `Gate / Quality` szükséges a fejen. Soha ne használja `--admin` a piros kapu megkerülésére. A kioldó fagyblokkok egyesülnek a fagyott ágba. Lásd [a 21. kemény szabályt](HARD_RULES_DETAIL.md). Soha ne címkézze, egyesítse vagy küldje le lekérésre, hogy egy másik munkamenet működik. Lásd [a 22. kemény szabályt](HARD_RULES_DETAIL.md).
 
-- **Kioldó fagyasztás nyitva** → do NOT címke PRs a befagyott ágra célozva; először újracélozzon az aktív `release/vX+1`.
-- **Egy másik munkamenet repülés közbeni PR** → soha ne címkézze fel; csak a tulajdonos munkamenet állítja sorba a saját munkáját.
-- A csak tesztekhez használható különbségek és `hotfix` -labeled PRs már fut csökkentett CI (lásd `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); a sorfeltételek elfogadják a ténylegesen lefutott ellenőrzési készletet (`#check-failure=0` + `#check-pending=0`).
+## A vonat vontatási kérelme
 
-## Tartalék megoldás: a kézi egyesítési szerelvény
+1. Indítson el egy vonatágat az aktuális kioldó alapcsúcsnál. Integrálja a pontos jóváhagyott tagfejeket egyesítési véglegesítésekkel. Őrizze meg az elkövetési előzményeket azáltal, hogy kerüli a squash-t és a visszaesést.
+2. Nyisson meg egy lehívási kérelmet a vonatághoz. Érvényesítse ezt a PR a saját teljes CI jével az aktuális alapcsúcson. Leszállás előtt ellenőrizze újra az alapcsúcsot és a jóváhagyott tagfejeket. Frissítse a vonatot és annak CI, amikor az érvényesített jelölt megváltozik.
+3. Tegye le a vonatot PR összevonási kötelezettséggel a vonatkozó várakozási módban. Élő módban a sor `merge-ff` landing metódusa megőrzi az egyesítési véglegesítéseket. Az eredeti tagfejek elérhetővé válnak a kioldó ágból. GitHub a PRs tagot egyesítettként jelöli meg, és a véglegesítések megtartják szerzőiket.
 
-A sor elérhetetlensége esetén használandó. Ez foglalja szabályba azt a gyakorlatot, amely a v3.8.47-es
-ciklus során egyetlen nap alatt 33 PR-t dolgozott fel:
+Nyilvános példa a [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). A 18 tagú PRs egyesítette, és 2026-11-24-én egy egyesülési kötelezettségvállalással kötött ki.
 
-1. **Állítsd össze a köteget** (~10–30 ellenőrzött és jóváhagyott PR). Ellenőrizd a `linked:` ütközéseket
-   (azonos `tap.testFiles`, azonos CHANGELOG-részletek), és ezeket sorosan dolgozd fel.
-2. **Ellenőrizd EGYSZER**: a kiadási csúcsról leválasztott, elkülönített worktree-ban egyesítsd helyileg a köteg
-   összes fejét, majd futtasd a kiadással egyenértékű tesztkészletet
-   (`npm run check:release-green`, kiadás előtt kiegészítve a `--with-build` kapcsolóval).
-   A `scripts/release/merge-train.sh <base> <PR#>…` automatizálja az 1–2. lépést (az ütköző
-   PR-ek kiesnek, a szerelvény folytatódik). A teljes mód az `npm run test:unit` parancsot futtatja — a
-   gépre hangolt futtatóval (`--test-concurrency=20`), **nem** a két, egymás után futó, 4 magos CI-szilánkkal,
-   amelyek miatt a domináns fázis egy 16 magos gép kapacitásának csak ~25%-át használta (javítva:
-   2026-07-18). A `--fast` (napközbeni óriásszerelvények feldolgozásához, tulajdonosi jóváhagyás:
-   2026-07-18) megtart minden statikus kaput és a vitestet, de csak a szerelvényre felvett PR-ek által
-   módosított node:test fájlokat futtatja; a TELJES tesztkészletet továbbra is naponta legalább egyszer
-   futtatni kell az összegyűlt csúcson (egy szerelvény a `--fast` nélkül).
-3. **Zöld** → egyesítsd sorban a PR-eket (mindegyik előtt újra ellenőrizve a `state,headRefOid` értékeket —
-   az a PR, amelynek feje elmozdult, visszakerül ellenőrzésre). Bizonyítsd, hogy minden egyesítés nettó diffje
-   kizárólag a PR saját módosítása (nincs automatikus feloldással történő visszaállítás: ellenőrizd a
-   `git diff --stat` kimenetét a hatókörön kívüli törlések kiszűréséhez).
-4. **Piros** → felezd a köteget (mindkét felet külön ellenőrizve) az egyenkénti újraellenőrzés helyett;
-   a hibát okozó PR-t a bizonyítékokkal együtt küldd vissza az ellenőrzési sorba.
-5. **Soha**: ne egyesíts a befagyasztás alatt a befagyasztott ágba; sehol ne használd a `git stash` parancsot;
-   ne futtasd újra válogatás nélkül a CI-t abban bízva, hogy a piros állapot eltűnik (szabály: a piros állapot információ).
+A szinkronizálás `main` ról a következő kiadási ágra szintén egy összevonási véglegesítésen keresztül történik. `main` felmenőinek megőrzése szükséges a későbbi szinkronizáláshoz. Lásd: [Munkafa elkülönítése](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Szintek (miért biztonságos a sor kizárólag gyors kapukkal)
+## A helyi egyesítés-vonat érvényesítő
 
-- **PR-enként** (quality.yml gyors kapuk): TIA által érintett tesztek + teljes, 4 szilánkos egységteszt +
-  vitest + lintelési csomag + típusellenőrzés + dokumentáció/CHANGELOG integritásának ellenőrzése.
-- **Kötegenként/csúcsonként** (folyamatos kiadásizöld-állapot): `--quick` KÖTELEZŐ kapuk a kiadási ágba történő
-  minden push esetén; teljes `--with-build --full-ci` ellenőrzések naponta 3×.
-- **Kiadásonként** (ci.yml a kiadási PR-en): a teljes mátrix, beleértve az E2E ×9-et,
-  a csomag-artefaktumot, a tarball indítási füsttesztjét, valamint a lefedettséget/ratchet-ellenőrzéseket.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Semmit sem ellenőrzünk ritkábban, mint korábban — a nagy erőforrásigényű felület egyszerűen kötegenként/csúcsonként
-fut PR-enként helyett, és ez szünteti meg az O(N) számú oda-vissza kört.
+A validátor lekéri az alapot és PR fejeket, és egy eldobható munkafában egyesíti őket. Egyszer lefuttatja a paritáskészletét a kapott fán. A sikertelen fejlekérés vagy egyesítési ütközés kidobja a PR, és a szkript a fennmaradó PRs vel folytatódik.
 
-## A `merge-train.sh` friss checkoutjára vonatkozó előfeltételek
+- **`--plan`** kinyomtatja a kiválasztott mód lépéseit és kilép anélkül, hogy munkafát hozna létre vagy a távirányítóval kapcsolatba lépne. Kombinálja `--fast` vel a gyors terv ellenőrzéséhez.
+- **`--fast`** futtatja a közös statikus kapukat, a kiválasztott módosított `node:test` fájlokat `tests/unit/` és `npm run test:vitest` alatt. Gyors mód használatakor futtasson legalább naponta egyszer egy teljes helyi ellenőrzést a felhalmozott tippen.
+- **Teljes mód** hozzáadja a csak teljesen statikus kapukat, és futtatja `npm run test:unit` és `npm run test:vitest`.
 
-A szkript egy gyorsan hibára futó **előzetes ellenőrzést** végez a gyökér-checkouton (minden worktree-művelet
-előtt), így egy hibás telepítés soha nem álcázhatja magát piros szerelvénynek:
+A meghibásodott statikus kapu újrafuttatása az érintetlen alapon, ha az alapszonda elérhető. A szkript jelenti az örökölt hibákat, és akkor folytatja, ha minden felismert szabálysértési sor megjelenik az alapon, és a teljes szám nem nőtt.
 
-1. Futtasd az `npm ci` parancsot, majd a `bun` npm által blokkolt postinstallját:
-   `(cd node_modules/bun && node install.js)` — enélkül a `check:provider-consistency`
-   és a `check:known-symbols` (mindkettő `bun scripts/…`) a szerelvényen ÉS a bázison is
-   hibát jelez, szabálysértést jelző sor nélkül.
-2. Nem lehet kóbor `node_modules/node_modules` könyvtár (duplikált függőségi fa; a React kétszer töltődik be,
-   és a felhasználói felületi vitest-tesztkészletek azonnal elbuknak).
-3. A `node_modules/.bin/tsc` fájlnak jelen kell lennie és futtathatónak kell lennie (részleges telepítésből hiányzik).
+| Kijárat | Jelentése                                                                                                                                       |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`     | Kinyomtatta a tervet vagy befejezte a csomagot. A csomag összefoglalója felsorolja az örökölt statikus hibákat és a kidobott PRs.               |
+| `1`     | Érvénytelen argumentumok, nincs Git checkout, sikertelen elővizsgálat, vagy nincs PR beszállás.                                                 |
+| `2`     | Egy csomagellenőrzés sikertelen volt, és nem minősül örököltnek. Az operátor feloszthatja a köteget, kiadhatja a sértő PR, és újra futtathatja. |
 
-A szerelvény a blokkoló `npm run check:cycles:ratchet` parancsot futtatja; a puszta `npm run check:cycles`
-csak tájékoztató jellegű (felsorolja az SCC-ket, és még egészséges bázison is nullától eltérő kóddal lép ki).
+A helyi igazolvány csak a tulajdonos dossziéjához nyújt diagnosztikai bizonyítékot. Minden leszálláshoz továbbra is szükség van a tulajdonos engedélyére, a saját kötelező ellenőrzésekre, és adott esetben a shadow queue ítéletére.
+
+## Szintezés
+
+- **Per PR.** CI és a minőségkiválasztás a megváltozott útvonalak alapján ellenőrzi. A Code PRs gyors minőségi kapukat és hatásteszteket futtat, külön egység és Vitest feladatokkal CI ben.
+- **Soronkénti jelöltenként.** CI és a Quality lefuttatja a teljes profilt az összeállított jelölt számára a ref. sorában.
+- **Kiadási tipp szerint.** A Release-Green gyors, kemény kaput futtat olyan lökések esetén, amelyek megfelelnek az útvonalszűrőinek. Napi három ütemezett futtatás használja a teljes sweepet a kiadási ághoz.
+- **Kiadásonként.** A teljes CI mátrix tartalmazza E2E szilánkokat, a csomag érvényesítését, a tarball rendszerindítási füstöt és a lefedettség ellenőrzését. Lásd a [Kiadási ellenőrzőlistát](RELEASE_CHECKLIST.md).
+
+## Friss kijelentkezés előfeltételei `merge-train.sh`-hoz
+
+Az elővizsgálat lefut a munkafák létrehozása előtt. Függőségek telepítése `npm ci` segítségével. Győződjön meg arról, hogy `node_modules/.bin/tsc` végrehajtható, és a `node_modules/node_modules` hiányzik. Ellenőrizze, hogy `node_modules/.bin/bun --version` sikeres-e.
+
+Ha a Bun utólagos telepítése kimaradt, futtassa `(cd node_modules/bun && node install.js)` parancsot. A szolgáltatói konzisztencia és az ismert szimbólumok ellenőrzése Bun használja. Az érvényesítő `npm run check:cycles:ratchet` blokkoló kapuként futtatja. Az önálló `npm run check:cycles` parancs tanácsadó jellegű.
+
+## Történelem
+
+Az Mergify egyesítési várólista 2026-11-19-én megszűnt.

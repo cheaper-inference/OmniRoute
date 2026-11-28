@@ -4,11 +4,9 @@
 
 ---
 
-> **מקור האמת:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **עודכן לאחרונה:** 2026-09-02 — v3.8.51
-> **קהל יעד:** מהנדסים המתחזקים שילובי הסוואה ייעודיים לספקים.
+> **מקור האמת:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** קהל:** מהנדסים השומרים על שילובי התגנבות ספציפיים לספק.
 
-OmniRoute משתלב עם ספקים ששירותי הקצה שלהם מבצעים באופן פעיל טביעת אצבע ללקוחות שאינם רשמיים (TLS JA3/JA4, סדר כותרות, מבנה גוף JSON, אסימוני שלמות). דף זה מתעד את משטחי ההסוואה ש-OmniRoute חושף ואת המקומות שבהם הם ממומשים.
+OmniRoute משתלב עם ספקים שהקצוות שלהם טביעת אצבע פעילה של לקוחות לא רשמיים (TLS JA3/JA4, הזמנת כותרות, צורת גוף JSON, אסימוני שלמות). דף זה מתעד את משטחי ההתגנבות OmniRoute חושף והיכן הם מיושמים.
 
 ## הודעה משפטית ואתית
 
@@ -76,65 +74,68 @@ OmniRoute משתלב עם ספקים ששירותי הקצה שלהם מבצעי
 
 ---
 
-## חבילת ההסוואה של Claude Code
+## Claude Code Stealth Bundle
 
-כאשר `cliCompatMode` מופעל, OmniRoute מעצב מחדש בקשות Claude יוצאות כך שלא ניתן להבדיל ביניהן לבין תעבורה של `claude-cli`. שלושה מודולים פועלים יחד:
+כאשר `cliCompatMode` פועל, OmniRoute מעצב מחדש בקשות Claude יוצאות כך שלא ניתן להבחין בהן מתעבורת `claude-cli`. שלושה מודולים משתפים פעולה:
 
 ### `claudeCodeFingerprint.ts`
 
-מחשב את טביעת האצבע בת 3 התווים `cc_version`, המוטמעת בכותרת החיוב:
+מחשב את טביעת האצבע של 3-char `cc_version` המוטמעת בכותרת החיוב:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (מקודד מראש; תואם ללקוח הרשמי)
-- קלט: התווים באינדקסים 4, 7 ו-20 בטקסט של הודעת המשתמש הראשונה + מחרוזת הגרסה
-- פלט: קידומת הקסדצימלית בת 3 תווים
+- `FINGERPRINT_SALT = "59cf53e54c78"` (מקודד קשה; מתאים ללקוח הרשמי)
+- כניסות: תווים באינדקס 4, 7, 20 של טקסט הודעת המשתמש הראשונה מחרוזת גרסת +
+- פלט: קידומת 3-char
 
-### `claudeCodeCCH.ts` (גיבוב תוכן לקוח)
+### `claudeCodeCCH.ts` (Hash לתוכן לקוח)
 
-בדיקת תקינות בצד השרת, שממשק שורת הפקודה הרשמי של Claude Code מחשב באמצעות Bun/Zig. OmniRoute מממש אותה מחדש באמצעות `xxhash-wasm`:
+תקינות צד השרת בדוק את קוד Claude הרשמי CLI מחשב באמצעות יישום מחדש Bun/Zig. OmniRoute עם `xxhash-wasm`:
 
-1. המרת גוף הבקשה לסדרה עם מציין המיקום `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. ערך הקסדצימלי באותיות קטנות, בן 5 תווים ומרופד באפסים
-4. החלפת `cch=00000;` באסימון המחושב
+1. סידור גוף עם מציין מיקום `cch=00000;`
+2. בנה את תצוגת ה-hash עם שני החלפות טקסט רגיל, בסדר הזה (`hashView()`):
+   - כל התאמה של `/"model":"[^"]*"/g` הופכת `"model":""` — ההתאמה נעצרת ב- `"` הראשון, כך שערך עם ציטוט בריחה (`"model":"a\"b"`) מרוקן רק עד אותה ציטוט, כפי שעושה הלקוח
+   - כל התאמה של `/"max_tokens":\d+,|,?"max_tokens":\d+/g` מוסרת — רק ערכים מספריים, בכל עומק
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. משושה באותיות קטנות מרופד אפס
+5. החלף `cch=00000;` באסימון המחושב
 
 קבועים:
 
-- ערך התחלתי: `0x6e52736ac806831e`
+- זרע: `0x4d659218e32a3268` (תואם לכידות לולאה של קוד Claude 2.1.252 ו-2.1.322)
 - תבנית: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-מוסיף **תו מחבר ברוחב אפס** של Unicode (`U+200D`) לאחר התו הראשון בשמות לקוח "רגישים", כדי שמסננים במעלה הזרם לא יוכלו לאתר אותם באמצעות grep. רשימת המילים המוגדרת כברירת מחדל:
+מכניס Unicode** מצרף ברוחב אפס** (`U+200D`) אחרי התו הראשון של שמות לקוחות "רגישים", כך שמסננים במעלה הזרם לא יכולים לתפוס אותם. רשימת מילים ברירת מחדל:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-מוחל על: בלוקי `system`, כל `messages[].content`, וכן `tools[].description` / `tools[].function.description`. המפעיל יכול לדרוס את ההגדרה באמצעות `setSensitiveWords()`.
+מוחל על: בלוקים `system`, כולם `messages[].content` ו- `tools[].description` / `tools[].function.description`. ניתן לעקוף מפעיל באמצעות `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — ספקי `anthropic-compatible-cc-*`
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`
 
-עבור ממסרי Anthropic של צד שלישי שמקבלים רק תעבורה של "Claude Code אמיתי":
+עבור ממסרי Anthropic של צד שלישי שמקבלים רק תעבורת "קוד Claude אמיתי":
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- כברירת מחדל, `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- המתג "Enable redact-thinking beta" לכל חיבור מוסיף את `redact-thinking-2026-02-12` כאשר ספק במעלה הזרם התואם ל-CC דורש במפורש זרמי חשיבה מושחרים
-- המתג "Enable summarized thinking display" לכל חיבור שומר את `providerSpecificData.requestDefaults.summarizeThinking` ומוסיף `display: "summarized"` לבקשות חשיבה תואמות CC שלא הוגדר בהן קודם מצב תצוגה
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` כברירת מחדל
+- המתג לכל חיבור "Enable redact-thinking beta" מוסיף `redact-thinking-2026-02-12` כאשר CC תואם במעלה הזרם דורש באופן ספציפי זרמי חשיבה ערוכים
+- הלחצן "אפשר תצוגת חשיבה מסוכמת" לכל חיבור מאחסן `providerSpecificData.requestDefaults.summarizeThinking` ומוסיף `display: "summarized"` ל- CC בקשות חשיבה תואמות שטרם הגדירו מצב תצוגה
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (משפחת Opus/Sonnet 4.x)
-- נתיב ברירת המחדל: `/v1/messages?beta=true`
+- נתיב ברירת מחדל: `/v1/messages?beta=true`
 
-מודולים נלווים באותה חבילה:
+מודולים אחים באותו חבילה:
 
-- `claudeCodeConstraints.ts` — כללי טמפרטורה + בקרת מטמון
-- `claudeCodeToolRemapper.ts` — מיפוי מחדש של שמות כלים
-- `claudeCodeExtraRemap.ts` — נרמול נוסף של מטען הבקשה
+- כללי בקרת מטמון `claudeCodeConstraints.ts` — טמפרטורת +
+- מיפוי מחדש של כלי-שם `claudeCodeToolRemapper.ts` —
+- נורמליזציה של מטען נוסף `claudeCodeExtraRemap.ts` —
 
 ---
 
@@ -148,7 +149,7 @@ aider, continue.dev, copilot, avante, codecompanion
 
 ### סיכון ⚠️ : `ANTIGRAVITY_CREDITS=always` (נקודה חמה לאיסור חשבון)
 
-מסלולי `ANTIGRAVITY_CREDITS=always` (נצרך על ידי `open-sse/executors/antigravity.ts`).** כֹּל** בקש דרך Antigravity AI Credit Overages (זיכוי Google בתשלום) במקום לתת למכסה החופשית של Google לשער דברים. זה מתועד כתכונה, אבל זה כן** דוח הפרת ה-TOS הנפוץ ביותר שאנו רואים** — חשבונות Google Ultra מרובים נאסרו עם `403 / "service disabled for ToS violation" / insufficient_quota` לאחר הפעלתם במשך כמה שעות עם `=always`.
+מסלולי `ANTIGRAVITY_CREDITS=always` (נצרך על ידי `open-sse/executors/antigravity.ts`).** כֹּל** בקש דרך Antigravity AI אשראי יתר (זיכוי Google בתשלום) במקום לתת למכסה החופשית של Google לשער דברים. זה מתועד כתכונה, אבל זה כן** דוח הפרת ה-TOS הנפוץ ביותר שאנו רואים** — חשבונות Google Ultra מרובים נאסרו עם `403 / "service disabled for ToS violation" / insufficient_quota` לאחר הפעלתם במשך כמה שעות עם `=always`.
 
 האכיפה במעלה הזרם מופעלת** הצד של Google** , שום דבר OmniRoute לא יכול למנוע. השם env var והמסמכים הקיימים גורמים לזה להישמע כמו כפתור בטוח להעיף; זה לא.
 
@@ -194,7 +195,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — קורא `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — אישורי אינסטלציה
-- דו"ח אירוע מקורי: דיון [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- דו"ח אירוע מקורי: דיון [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

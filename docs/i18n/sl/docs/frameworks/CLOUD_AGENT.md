@@ -329,19 +329,16 @@ zamaskiran predogled (`maskedApiKey`: do 4 znake na vsakem koncu, manj pri kratk
 nič pri 8 znakih ali manj) in `projectId` povezave. Za vse druge ključe sta obe polji
 izpuščeni iz odziva.
 
-## Razreševanje poverilnic
+## Resolucija poverilnic
 
-`getCloudAgentCredentials(providerId)` v `src/lib/cloudAgent/api.ts`:
+`getCloudAgentCredentials(providerId)` in `src/lib/cloudAgent/api.ts`:
 
-1. Naloži aktivne povezave s ponudniki prek `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Za vsako povezavo prednostno uporabi `apiKey` (brez začetnih in končnih presledkov). Če ta ni na voljo, uporabi `accessToken`.
-3. Vrne prvi neprazen žeton, ovit kot `{ apiKey: token }`.
-4. Vrne `null`, če ne najde nobenega uporabnega žetona — API odgovori s `400` in
-   `"Za ponudnika agenta v oblaku ni konfiguriranih aktivnih poverilnic: <id>"`.
+1. Naloži aktivne povezave ponudnika prek `getProviderConnections({ provider: providerId, isActive: true })`.
+2. Za vsako povezavo daje prednost `apiKey` (prirezan). Pade nazaj na `accessToken`.
+3. Vrne prvi neprazen žeton, zavit kot `{ apiKey: token }`.
+4. Vrne `null`, če ni najden uporabnega žetona — API odgovori `400` z `"No active credentials configured for cloud agent provider: <id>"`.
 
-To pomeni, da agenti v oblaku znova uporabljajo isto tabelo povezav s ponudniki kot običajni
-ponudniki LLM. Če želite omogočiti Jules, ustvarite aktivno povezavo z `provider: "jules"`
-in izpolnjenim poljem `apiKey`.
+To pomeni, da agenti v oblaku ponovno uporabijo isto tabelo povezav ponudnika kot običajni ponudniki LLM. Če želite omogočiti Jules, ustvarite aktivno povezavo z `provider: "jules"` in napolnjenim `apiKey`.
 
 ## Nadzorna plošča
 

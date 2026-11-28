@@ -4,12 +4,9 @@
 
 ---
 
-> **Cập nhật lần cuối:** 2026-08-28 — v3.8.51
-> Quy trình phát hành được tinh gọn, tận dụng các kỹ năng Claude Code để tự động hóa.
+> Luồng phát hành được sắp xếp hợp lý nhằm tận dụng các kỹ năng của Mã Claude để tự động hóa.
 >
-> **Giữ cho hàng đợi/nhánh luôn xanh giữa các lần phát hành:** xem [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (nhóm `/green-prs` + `npm run check:release-green` + `/babysit` + chạy hằng đêm). Việc chạy
-> quy trình này định kỳ — và đặc biệt là **trước** danh sách kiểm tra này — giúp PR phát hành có trạng thái xanh ngay từ đầu.
+> **Giữ queue/branch xanh giữa các lần phát hành:** xem [RELEASE_GREEN.md](./RELEASE_GREEN.md) ( gia đình `/green-prs` + `npm run check:release-green` + `/babysit` + hàng đêm). Chạy — định kỳ này và đặc biệt** trước** danh sách kiểm tra — này làm cho bản phát hành PR bắt đầu có màu xanh lục.
 
 ## Tóm tắt
 
@@ -60,7 +57,9 @@ Quy trình công việc npm-publish không còn xuất bản trực tiếp nữa
 
 **Docker Hub `latest` (bắt buộc trên mỗi lần xuất bản SemVer ổn định):** quy trình làm việc `docker-publish` phải gắn thẻ** cả hai** `X.Y.Z` và khi `should-promote-latest.sh` đồng ý thì đây là SemVer ổn định cao nhất, `:latest` với** cùng một thông báo** . Sau công việc: Thông báo Hub `latest` bằng thông báo SemVer mới và `last_updated` đã được di chuyển. Đừng để `:latest` trên bản dựng cũ hơn trong khi ghi chú phát hành nói về các bản sửa lỗi chỉ tồn tại trên git. Soạn khởi động nhanh sử dụng `:latest`; GitOps nên tiếp tục ghim `X.Y.Z`. Xem [các kênh phát hành Docker](../guides/DOCKER_GUIDE.md#release-channels) và #10317.
 
-**Kho lưu trữ tổ chức Docker Hub (`cheaperinference/omniroute`):** Docker Hub không thể di chuyển kho lưu trữ giữa các không gian tên, vì vậy `diegosouzapw/omniroute` giữ lịch sử kéo và mọi bản phát hành, đồng thời công việc `mirror-org-dockerhub` của `docker-publish` sao chép từng phiên bản đã phát hành (và `:latest` khi được quảng bá) từ `ghcr.io/cheaper-inference/omniroute` sang kho lưu trữ của tổ chức. Nó cần những bí mật `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; không có chúng, công việc vẫn xanh với cảnh báo "Docker Hub org mirror bị bỏ qua" và các cơ quan đăng ký khác xuất bản bình thường. Để xuất bản phiên bản đã phát hành sau đó, hãy chạy** Hành động → Phản chiếu hình ảnh Docker tới Docker Hub org → Quy trình chạy** với `version=X.Y.Z` (và `promote_latest` cho phiên bản ổn định cao nhất): nó sao chép các hình ảnh hiện có, không xây dựng lại.
+**Kho lưu trữ tổ chức Docker Hub (`cheaperinference/omniroute`):** Docker Hub không thể di chuyển kho lưu trữ giữa các không gian tên, vì vậy `diegosouzapw/omniroute` giữ lịch sử kéo và mọi bản phát hành, đồng thời công việc `mirror-org-dockerhub` của `docker-publish` sao chép từng phiên bản đã phát hành (và `:latest` khi được quảng bá) từ `ghcr.io/cheaper-inference/omniroute` sang kho lưu trữ của tổ chức. Nó cần các bí mật `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; không có chúng, công việc vẫn xanh với cảnh báo "Docker Hub org mirror bị bỏ qua" và các cơ quan đăng ký khác xuất bản bình thường. Để xuất bản phiên bản đã phát hành sau đó, hãy chạy** Hành động → Phản chiếu hình ảnh Docker tới Docker Hub org → Quy trình chạy** với `version=X.Y.Z` (và `promote_latest` cho phiên bản ổn định cao nhất): nó sao chép các hình ảnh hiện có, không xây dựng lại. Tổng quan về Docker Hub của kho lưu trữ đó được thiết lập bằng tay: API chỉnh sửa nó sẽ từ chối Mã thông báo truy cập của tổ chức.
+
+Quy trình làm việc tương tự cũng sao chép mọi bản phát hành vào gói GHCR cũ `ghcr.io/diegosouzapw/omniroute` cho đến ngày 30 tháng 6 năm 2027, do đó, các lượt cài đặt vẫn được ghim vào gói đó sẽ tiếp tục cập nhật; chỉ mục của nó mang mô tả "đã chuyển đến `ghcr.io/cheaper-inference/omniroute`". Nó cần bí mật `GHCR_LEGACY_TOKEN` (mã thông báo truy cập cá nhân cổ điển của `diegosouzapw` với `write:packages`); không có nó thì công việc đó sẽ bị bỏ qua với cảnh báo "Đã bỏ qua gương GHCR kế thừa".
 
 ## Luồng Nhanh Hotfix (nhãn `hotfix`)
 
@@ -151,7 +150,7 @@ Những thay đổi mang tính đột phá: thêm chân trang `BREAKING CHANGE:`
 ### Tài liệu
 
 - [ ] thẻ `npm run check:docs-sync` (tự động chạy bằng cách xác nhận trước)
-- [ ] thẻ `npm run check:docs-all` (ô: docs-sync + docs-counts + env-doc-sync + phiên bản không dùng nữa + doc-links)
+- [ ] `npm run check:docs-all` vượt qua. Các phiên bản cờ `check:deprecated-versions` tư vấn của nó được gán rõ ràng cho OmniRoute (3.6.x trở về trước) và bỏ qua ngày tháng.
 - [ ] `npm run check:env-doc-sync` thoát 0 mã — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` hợp đồng env còn nguyên vẹn
 - [ ] `npm run check:doc-links` thoát 0 — không có tham chiếu đánh dấu nội bộ bị hỏng sau khi tái cấu trúc
 - [ ] `docs/architecture/ARCHITECTURE.md` được xem xét cho storage/runtime trôi dạt
@@ -164,7 +163,7 @@ Những thay đổi mang tính đột phá: thêm chân trang `BREAKING CHANGE:`
 
 ### i18n
 
-- [ ] `npm run i18n:check` thoát khỏi trạng thái dịch 0 — (`.i18n-state.json`) đồng bộ với tài liệu nguồn (không có nguồn nào bị trôi trong chế độ nghiêm ngặt; tư vấn về chế độ cảnh báo có thể được chấp nhận đối với các lần chỉnh sửa tài liệu vào phút cuối, nhưng phải bằng 0 trước khi gắn thẻ)
+- [ ] `npm run i18n:check` thoát khỏi trạng thái dịch 0 — (`.i18n-state.json`) đồng bộ với tài liệu nguồn (không có nguồn nào bị trôi ở chế độ nghiêm ngặt; tư vấn về chế độ cảnh báo có thể được chấp nhận đối với các lần chỉnh sửa tài liệu vào phút cuối, nhưng phải bằng 0 trước khi gắn thẻ)
 - [ ] `npm run i18n:check-ui-coverage` thoát 0 — mỗi địa điểm UI bằng hoặc cao hơn mức sàn bao phủ 80%
 - [ ] `npm run i18n:sync-ui:dry` báo cáo 0 khóa bị thiếu trên tất cả 66 ngôn ngữ đích (mọi ngôn ngữ ngoại trừ nguồn `en` )
 - [ ] Nếu tài liệu tiếng Anh nguồn thay đổi, hãy chạy `npm run i18n:run` (yêu cầu `OMNIROUTE_TRANSLATION_API_KEY` trong `.env`) trước khi gắn thẻ
@@ -223,14 +222,14 @@ npm run build:release
   └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-Do NOT chạy `npm run build`, theo sau là một `npm run build:cli` riêng để triển khai — hãy sử dụng `npm run build:release` để xây dựng lại + trọng điểm trong một lệnh.
+Do NOT chạy `npm run build` theo sau là một `npm run build:cli` riêng để triển khai — hãy sử dụng `npm run build:release` để xây dựng lại + trọng điểm trong một lệnh.
 
 ### Xác thực hiện vật
 
 - [ ] `npm run build:release` thành công và `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` clean — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json` hoặc cặn cục bộ khác
+- [ ] `npm run check:pack-artifact` clean — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json` hoặc dư lượng cục bộ khác
 - [ ] `dist/server.js` tồn tại sau khi xây dựng
-- [ ] Khói thời gian chạy đóng gói cục bộ tùy chọn: `npm run dev:candidate -- validate` sau khi `npm run dev:candidate -- build` khởi động tarball được đóng gói trên một `DATA_DIR` bị cô lập và kiểm tra `/api/health` + `/v1/models` (xem [Con đường vàng đóng góp](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
+- [ ] Khói thời gian chạy đóng gói cục bộ tùy chọn: `npm run dev:candidate -- validate` sau `npm run dev:candidate -- build` khởi động tarball được đóng gói trên `DATA_DIR` bị cô lập và kiểm tra `/api/health` + `/v1/models` (xem [Con đường vàng đóng góp](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
 ### Gắn thẻ và phát hành
 
@@ -366,7 +365,7 @@ npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` không thực hiện gì: nó đọc git và `gh` và in toàn bộ chuỗi các điều kiện tiên quyết — (nguồn giải quyết, kho lưu trữ nguồn có lịch sử đầy đủ — một bản sao nông không thể đẩy `stable/v3`, bên nhận từ chối gói ở cha mẹ được ghép đầu tiên, vì vậy hãy cắt từ một bản sao đầy đủ hoặc `git fetch --unshallow origin` trước đó. Thẻ — trước đó tồn tại, `package.json` là phiên bản đích, vấn đề `release-freeze` đang mở, không có vấn đề `Release branch not green` mở nào trên nhánh phát hành hiện có — một nhánh không tồn tại báo cáo `?` không xác định, không bao giờ hàng đợi — màu xanh lá cây đưa ra bản phát hành PRs (G11: `config/merge-queue/config.json` hợp lệ, `bases` của nó quản lý nhánh phát hành, `mode` `live`, nhãn của nó tồn tại), bộ quy tắc `release/*` vẫn chặn việc xóa và ép buộc, và `stable/v3` và `develop` chưa tồn tại), hai bước nhánh mà trình kích hoạt quy trình làm việc không hoạt động và các điều kiện `if:` trở thành đúng (và được kiểm soát bởi một biến kho lưu trữ hoặc được ghim vào kho lưu trữ chuẩn), các thẻ phân phối dự kiến (`latest` → 3.9.0, `next` và `nightly` trống) và khôi phục. Thoát `0` = `RESULT: READY`, `1` = điều kiện tiên quyết chặn không thành công (`✗`), lỗi sử dụng `2` =. `--advisory <id,...>` hạ cấp kiểm tra xuống cảnh báo (`!`) mà không ẩn nó.
+`scripts/release/dry-run-lts-cut.mjs` không thực hiện gì: nó đọc git và `gh` và in toàn bộ chuỗi các điều kiện tiên quyết — (nguồn giải quyết, kho lưu trữ nguồn có lịch sử đầy đủ — một bản sao nông không thể đẩy `stable/v3`, bên nhận từ chối gói ở cha mẹ được ghép đầu tiên, vì vậy hãy cắt từ một bản sao đầy đủ hoặc `git fetch --unshallow origin` trước đó. Thẻ — trước đó tồn tại, `package.json` là phiên bản đích, vấn đề `release-freeze` đang mở, không có vấn đề `Release branch not green` mở nào trên nhánh phát hành hiện tại — một nhánh không tồn tại báo cáo `?` không xác định, không bao giờ hàng đợi — màu xanh lá cây đưa ra bản phát hành PRs (G11: `config/merge-queue/config.json` hợp lệ, `bases` của nó quản lý nhánh phát hành, `mode` `live`, nhãn của nó tồn tại), bộ quy tắc `release/*` vẫn chặn việc xóa và ép buộc, và `stable/v3` và `develop` chưa tồn tại), hai bước nhánh mà trình kích hoạt quy trình làm việc không hoạt động và các điều kiện `if:` trở thành đúng (và được kiểm soát bởi một biến kho lưu trữ hoặc được ghim vào kho lưu trữ chuẩn), các thẻ phân phối dự kiến (`latest` → 3.9.0, `next` và `nightly` trống) và khôi phục. Thoát `0` = `RESULT: READY`, `1` = điều kiện tiên quyết chặn không thành công (`✗`), lỗi sử dụng `2` =. `--advisory <id,...>` hạ cấp kiểm tra xuống cảnh báo (`!`) mà không ẩn nó.
 
 Chạy thử phần cắt thực trong khi bản đóng băng của bản phát hành 3.9.0 vẫn mở — các nhánh được tạo sau thẻ và trước khi Giai đoạn 12c gỡ bỏ phần đóng băng.
 
@@ -391,7 +390,7 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
 
 Cam kết phát triển được xây dựng bằng hệ thống ống nước git (không có cây làm việc nào được chạm vào) và va chạm năm tệp giống như một cam kết mở chu kỳ: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` và `docs/openapi.yaml`. Phần `[4.0.0]` CHANGELOG và các gương i18n của nó được mở vào `develop` sau đó, trước PR đầu tiên của nó. Tập lệnh không bao giờ thay đổi npm dist-tags — diễn tập những tập lệnh đó trên gói đầu.
 
-### tạo phẩm xem trước PR (xây dựng một lần, quảng bá cùng một byte)
+### tạo phẩm xem trước PR (xây dựng một lần, quảng bá các byte giống nhau)
 
 `.github/workflows/preview-artifact.yml` xây dựng một tarball sản xuất từ đầu PR và xác thực bản dựng chính xác đó (#8084 slice (a)). Chỉ PRs cùng một kho lưu trữ; không có gì được công bố
 
@@ -399,7 +398,7 @@ Cam kết phát triển được xây dựng bằng hệ thống ống nước g
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

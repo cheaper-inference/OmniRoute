@@ -4,13 +4,7 @@
 
 ---
 
-> **Nguồn chuẩn:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` và các hàm dựng công khai trong `open-sse/utils/error.ts`
-> **Kiểm thử:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Cập nhật lần cuối:** 2026-09-02 — v3.8.51
-> **Đối tượng:** Mọi kỹ sư xử lý phản hồi lỗi (tuyến HTTP, luồng SSE, trình thực thi, trình xử lý MCP).
-> **Trạng thái:** **BẮT BUỘC** đối với mọi đường dẫn mã trả thông báo lỗi về máy khách.
+> **Nguồn của sự thật:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` và các trình xây dựng công cộng trong `open-sse/utils/error.ts`** Kiểm tra:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Khán giả:** Bất kỳ kỹ sư nào chạm vào phản hồi lỗi (tuyến HTTP, luồng SSE, trình thực thi, trình xử lý MCP ).** Trạng thái:****MANDATORY** đối với mọi đường dẫn mã trả về thông báo lỗi cho máy khách.
 
 ## Lý do tồn tại
 

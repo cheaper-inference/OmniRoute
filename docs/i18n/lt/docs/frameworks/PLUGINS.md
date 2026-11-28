@@ -88,20 +88,19 @@ Objektas `ctx`, perduodamas funkcijai `register(program, ctx)`:
 | `ctx.baseUrl`                | `string`         | Nustatytas bazinis URL                                           |
 | `ctx.apiKey`                 | `string \| null` | API raktas, jei pateiktas                                        |
 
-## Aptikimas
+## Atradimas
 
-Papildiniai aptinkami šiose vietose:
+Papildiniai aptinkami iš:
 
-1. `~/.omniroute/plugins/<name>/` — vietiniai naudotojo diegimai
-2. Aplinkos kintamajame `OMNIROUTE_PLUGIN_PATH` nurodytas pasirinktinis katalogas
+1. `~/.omniroute/plugins/node_modules/<name>/` —, kur `omniroute plugin install` deda paketus (npm `--prefix`, o ne `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — rankiniu būdu nukopijuoti papildinių katalogai
+3. `OMNIROUTE_PLUGIN_PATH` env var — pasirinktinis katalogas
 
-Abi parinktys skirtos **tik CLI**. Serverio papildinių vykdymo aplinka (prekyvietės / `plugin.json`
-papildiniai, vykdomi tarpinio serverio viduje) turi nuosavą skaitytuvą ir savo perrašymo
-kintamąjį `OMNIROUTE_PLUGINS_DIR` — žr.
-[PLUGIN_MARKETPLACE.md → Papildinių katalogas](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Vieno nustatymas neturi įtakos kitam.
+Siekiami susieti katalogai (ką npm sukuria `plugin install ./dir`).
 
-Įkėlimo klaidos yra sugaunamos ir pateikiamos kaip įspėjimai — sugedęs papildinys niekada nesutrikdo CLI veikimo.
+Abu yra** Tik CLI** . Serverio papildinio vykdymo laikas (prekyvietė/`plugin.json` įskiepiai, veikiantys tarpinio serverio viduje) turi savo skaitytuvą su savo nepaisymu, `OMNIROUTE_PLUGINS_DIR` — žr. [PLUGIN_MARKETPLACE.md → įskiepių katalogą](./PLUGIN_MARKETPLACE.md#plugin-directory). Vieno nustatymas neturi įtakos kitam.
+
+Įkėlimo klaidos užfiksuojamos ir išspausdinamos kaip įspėjimai — sugedęs papildinys niekada nesugriauna CLI.
 
 ## Saugumas
 

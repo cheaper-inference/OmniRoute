@@ -119,58 +119,48 @@ tuetaan edelleen. Todennetut avaimet, joilla ei ole avainkohtaista Obsidian-mä�
 käyttävät edelleen yleistä varamääritystä. Neljä `obsidian_sync_*`-työkalua säilyttävät
 erillisen synkronointitunnustoimintansa.
 
-## MCP-työkalut (22)
+## MCP työkalut (22)
 
-Määritelty tiedostossa `open-sse/mcp-server/tools/obsidianTools.ts`. Tunnus/base-URL selvitetään
-kutsukohtaisesti (ensin API-avaimelle määritetty, sitten yleinen). OmniRouten **synkronointipalvelimeen**
-yhteyttä ottavat työkalut (neljä `obsidian_sync_*`-työkalua) edellyttävät lisäksi OmniRouten
-asetuksissa määritettyä synkronoinnin todennustunnusta.
+Määritelty kielellä `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL ratkaistaan puhelua kohden (per-API-avain ensin, sitten globaali). Työkalut, jotka osuivat OmniRoute** synkronointipalvelin** (neljä `obsidian_sync_*` työkalua) vaativat lisäksi OmniRoute -asetuksissa määritetyn synkronointitodennustunnisteen.
 
 ### Lukutyökalut (`read:obsidian`)
 
-| Työkalu                      | Kuvaus                                                                                                                                   |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Tarkista, onko Local REST API saavutettavissa ja todennettu.                                                                             |
-| `obsidian_search_simple`     | Muistiinpanojen sisällön kokotekstihaku; palauttaa katkelmat tiedostopolkuineen.                                                         |
-| `obsidian_search_structured` | Hae JSON Logic -lausekkeella (and/or/regex/path-suodattimet).                                                                            |
-| `obsidian_read_note`         | Lue muistiinpano säilöön suhteutetun polun perusteella; valinnaisesti tietty otsikko, lohko tai frontmatter.                             |
-| `obsidian_list_vault`        | Listaa säilön tiedostot ja hakemistot (merkintäpuuna).                                                                                   |
-| `obsidian_get_document_map`  | Hae muistiinpanon otsikkorakenne karttana, jossa otsikot → rivinumerot.                                                                  |
-| `obsidian_get_note_metadata` | Hae frontmatter, tunnisteet, linkit sekä merkki- ja sanamäärä ilman koko sisältöä.                                                       |
-| `obsidian_get_active_file`   | Hae Obsidianissa parhaillaan aktiivisen tiedoston polku ja sisältö.                                                                      |
-| `obsidian_get_periodic_note` | Hae tietyn päivämäärän päivittäinen, viikoittainen tai kuukausittainen jaksottainen muistiinpano (tänään, jos päivämäärä jätetään pois). |
-| `obsidian_get_tags`          | Listaa kaikki säilön tunnisteet esiintymismäärineen.                                                                                     |
-| `obsidian_list_commands`     | Listaa käytettävissä olevat Obsidian-komentotunnukset (käytettäväksi työkalun `obsidian_execute_command` kanssa).                        |
-| `obsidian_sync_status`       | OmniRouten synkronointipalvelimen tila: käynnissäolo, säilön nimi, portti, käyntiaika ja viimeisin synkronointi.                         |
-| `obsidian_sync_conflicts`    | Listaa ratkaisemattomat synkronointiristiriidat (polku, ristiriitapolku ja havaitsemisaika).                                             |
+| Työkalu                      | Kuvaus                                                                                                         |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Tarkista, onko paikallinen REST API tavoitettavissa ja todennettu.                                             |
+| `obsidian_search_simple`     | Muistiinpanon sisällön kokotekstihaku; palauttaa katkelmia tiedostopoluilla.                                   |
+| `obsidian_search_structured` | Hae käyttämällä JSON Logic-lauseketta (and/or/regex/path -suodattimet).                                        |
+| `obsidian_read_note`         | Lue muistiinpano holvin suhteen polun mukaan; valinnaisesti tietty heading/block/frontmatter.                  |
+| `obsidian_list_vault`        | Listaa tiedostoja ja hakemistoja varastoon (merkintöjen puu).                                                  |
+| `obsidian_get_document_map`  | Hanki muistiinpanon otsikkorakenne otsikoiden → rivinumeroiden karttana.                                       |
+| `obsidian_get_note_metadata` | Hanki frontmatter, tunnisteet, linkit ja char/word -määrä ilman koko sisältöä.                                 |
+| `obsidian_get_active_file`   | Hae tällä hetkellä aktiivisen tiedoston polun + sisältö Obsidian:ssä.                                          |
+| `obsidian_get_periodic_note` | Hanki daily/weekly/monthly -säännöllinen muistiinpano päivämäärää varten (jos jätetään pois tänään).           |
+| `obsidian_get_tags`          | Listaa kaikki holvitunnisteet niiden taajuuksilla.                                                             |
+| `obsidian_list_commands`     | Listaa käytettävissä oleva Obsidian -komento IDs (käytä `obsidian_execute_command` kanssa).                    |
+| `obsidian_sync_status`       | OmniRoute synkronointipalvelimen tila: käynnissä, varaston nimi, portti, käytettävyys, viimeisin synkronointi. |
+| `obsidian_sync_conflicts`    | Listaa ratkaisemattomat synkronointiristiriidat (polku, ristiriitapolku, havaittu-at).                         |
 
 ### Kirjoitustyökalut (`write:obsidian`)
 
-| Työkalu                          | Kuvaus                                                                                              |
-| -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Luo tai korvaa muistiinpano annetulla Markdown-sisällöllä.                                          |
-| `obsidian_append_note`           | Lisää sisältöä muistiinpanon loppuun; valinnaisesti tiettyyn otsikkoon tai lohkoon.                 |
-| `obsidian_patch_note`            | Lisää kirurgisen tarkasti otsikon, lohkon tai frontmatter-kentän loppuun tai alkuun tai korvaa sen. |
-| `obsidian_delete_note`           | Poista muistiinpano pysyvästi säilöstä.                                                             |
-| `obsidian_move_note`             | Siirrä muistiinpano tai nimeä se uudelleen säilön sisällä.                                          |
-| `obsidian_execute_command`       | Suorita Obsidian-komento sen komentotunnuksen perusteella.                                          |
-| `obsidian_open_file`             | Avaa tiedosto Obsidianissa (luo sen, jos sitä ei ole olemassa).                                     |
-| `obsidian_sync_trigger`          | Käynnistä välitön kaksisuuntainen työpöytä↔mobiili-säilösynkronointi.                               |
-| `obsidian_sync_resolve_conflict` | Ratkaise synkronointiristiriita: säilytä `local` (mobiili), `remote` (työpöytä) tai `keep-both`.    |
+| Työkalu                          | Kuvaus                                                                                           |
+| -------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `obsidian_write_note`            | Luo tai korvaa muistiinpano tietyllä Markdown-sisällöllä.                                        |
+| `obsidian_append_note`           | Liitä muistiinpanoon sisältöä; valinnaisesti tiettyyn heading/block.                             |
+| `obsidian_patch_note`            | Kirurgisesti append/prepend/replace otsikon, lohkon tai frontmatter-kentässä.                    |
+| `obsidian_delete_note`           | Poista muistiinpano pysyvästi varastosta.                                                        |
+| `obsidian_move_note`             | Siirrä muistiinpano tai nimeä se uudelleen holvissa.                                             |
+| `obsidian_execute_command`       | Suorita Obsidian -komento sen komennolla ID.                                                     |
+| `obsidian_open_file`             | Avaa tiedosto Obsidian (luo sen, jos sitä ei ole olemassa).                                      |
+| `obsidian_sync_trigger`          | Käynnistä välitön kaksisuuntainen työpöydän ↔ Mobile Vault -synkronointi.                        |
+| `obsidian_sync_resolve_conflict` | Ratkaise synkronointiristiriita: säilytä `local` (mobiili), `remote` (työpöytä) tai `keep-both`. |
 
 > [!NOTE]
-> Työkalun `obsidian_patch_note` kohteiden `targetType` voi olla `heading | block | frontmatter`
-> ja `operation` voi olla `append | prepend | replace`; valinnainen asetus on
-> `createTargetIfMissing`. Neljä `obsidian_sync_*`-työkalua käyttävät paikallista
-> synkronointipalvelinta (oletuksena `http://127.0.0.1:27781`) ja edellyttävät synkronointitunnusta.
+> `obsidian_patch_note` -kohteet hyväksyvät `targetType` n `heading | block | frontmatter` :stä ja `operation` :n `append | prepend | replace` valinnaisen `createTargetIfMissing` kanssa. Neljä `obsidian_sync_*` työkalua keskustelevat paikallisen synkronointipalvelimen kanssa (oletuksena `http://127.0.0.1:27781` ) ja vaativat synkronointitunnuksen.
 
-### Käyttöoikeusalueet
+### Soveltamisalat
 
-Lukutyökalut edellyttävät käyttöoikeusaluetta `read:obsidian`; kirjoitustyökalut edellyttävät käyttöoikeusaluetta `write:obsidian`. Valvonta
-toimii samoin kuin Notionissa — sen käsittelee `withScopeEnforcement()` tiedostossa
-`open-sse/mcp-server/server.ts`, ja se otetaan käyttöön asetuksella `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
-Sallitut käyttöoikeusalueet haetaan muuttujasta `OMNIROUTE_MCP_SCOPES` tai API-avaimen käyttöoikeusaluekontekstista. Katso
-[MCP-SERVER.md](./MCP-SERVER.md).
+Lukutyökalut vaativat `read:obsidian`; kirjoitustyökalut vaativat `write:obsidian`. Täytäntöönpano on identtinen `open-sse/mcp-server/server.ts` `withScopeEnforcement()` käsittelemän Notion — kanssa, portitettu `OMNIROUTE_MCP_ENFORCE_SCOPES=true` lle ja pakotettu päälle HTTP/SSE -soittajille, joiden API -näppäimestä puuttuu `manage`/`admin`, sallituilla laajuuksilla, jotka on peräisin `OMNIROUTE_MCP_SCOPES` tai API -avaimen laajuuskontekstista. Katso [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Päätepisteet
 

@@ -21,3 +21,5 @@ Die standardmäßige anbieterübergreifende Richtlinie erlaubt bis zu drei Provi
   - Eine vorangestellte ID (`provider/model`) wird niemals an einen anderen Anbieter umgeleitet.
 
 Schaltkreiszustände sind `closed`, `open` und `half_open`. Eine Abklingzeit plant eine begrenzte Sonde; Eine erfolgreiche Sonde schließt den Stromkreis und eine fehlgeschlagene Sonde öffnet ihn wieder.
+
+Der Provider-Failover läuft innerhalb des Gateways. Siehe [Wenn OmniRoute selbst aufgrund des Clientverhaltens während eines Gateway-Ausfalls nicht erreichbar ist](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable).

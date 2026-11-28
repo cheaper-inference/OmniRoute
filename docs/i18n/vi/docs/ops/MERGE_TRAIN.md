@@ -4,86 +4,63 @@
 
 ---
 
-> **19-11-2026: hàng đợi hợp nhất Hợp nhất đã ngừng hoạt động** (quyết định của chủ sở hữu). `.mergify.yml` không còn xác định hàng đợi và từ chối các lệnh Hợp nhất hợp nhất hoặc viết lại yêu cầu kéo. Bản phát hành PRs được hợp nhất bằng tay theo bộ quy tắc kho lưu trữ "Yêu cầu cổng xanh trên bản phát hành đang hoạt động" (`Gate / CI` + `Gate / Quality`) cho đến khi hàng đợi omni chạy ở chế độ trực tiếp và sau đó thông qua hàng đợi omni ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Phần Hợp nhất bên dưới mô tả hàng đợi như cũ.
+## Hạ cánh trên một nhánh phát hành
 
-Vì v3.8.49 (WS3.2/WS3.4 của gói quality/velocity ), đường dẫn hợp nhất mặc định cho PRs được xem xét thành `release/vX.Y.Z` là** Hợp nhất hàng đợi hợp nhất** (`.mergify.yml`); cái** hợp nhất thủ công** tài liệu bên dưới là FALLBACK — được sử dụng trong các sự cố, phát hành bị treo hoặc nếu gói Nguồn mở Hợp nhất thay đổi.
+Hàng đợi omni chi phối việc hạ cánh vào `release/vX.Y.Z`. Đọc `mode` cấp cao nhất trong `config/merge-queue/config.json` trên nhánh mặc định trước khi hạ cánh PR. Xem [Hàng đợi Omni](OMNI_QUEUE.md).
 
-## Đường dẫn mặc định: hàng đợi Mergify
+- **`shadow`** chạy xác thực và chuyển sang hợp nhất thủ công. Áp dụng `omni-queue` cho PR đã được phê duyệt ở đầu cuối cùng của nó. Kiểm tra tính đủ điều kiện với `npm run queue -- why <PR>`. Chờ phán quyết cho cái đầu đó ở `npm run queue -- history --base <branch>`. Tiếp tục `would-land`. Trên `culprit-found` hoặc `would-dequeue`, giữ phần hợp nhất và khắc phục nguyên nhân.
+- **Ngoại lệ bóng tối.** Một chuyến tàu với CI đầy đủ màu xanh lá cây so với đầu cơ sở hiện tại có thể tiếp tục mà không cần có phán quyết xếp hàng riêng. Ngoại lệ tương tự được áp dụng khi đầu PR đã chứa đầu cơ sở hiện tại.
+- **`live`** sử dụng nhãn `omni-queue` để kích hoạt hạ cánh. Hàng đợi một mình hạ cánh PR. Để lại các lệnh hợp nhất và đẩy trực tiếp vào hàng đợi.
 
-1. PR được các chiến dịch xem xét/xác nhận đạt yêu cầu và được cổng ⭐ trước khi hợp nhất của chủ sở hữu phê duyệt
-   (báo cáo + quyết định cho từng mục — xem `/merge-prs` Bước 0.75).
-2. Chủ sở hữu (hoặc phiên làm việc thực hiện quyết định của chủ sở hữu) áp dụng nhãn **`queue`**.
-   Nhãn này CHÍNH LÀ phê duyệt hợp nhất; Mergify chỉ thực thi quyết định đó.
-3. Mergify xác thực các PR trong hàng đợi **theo tuần tự** (mỗi lần một PR) dựa trên các cổng kiểm tra nhanh
-   rồi hợp nhất (squash). Xử lý theo lô + tự động chia đôi để xác định lỗi thuộc gói Mergify trả phí
-   ("Cannot use Merge Queue batch" trên gói miễn phí, #7220), vì vậy `.mergify.yml` không đặt
-   `batch_size`; việc xử lý theo lô vẫn là nhiệm vụ của quy trình merge-train thủ công bên dưới. Một PR có
-   các bước kiểm tra vẫn đang chờ sau `checks_timeout` (240 phút = 2× p95 đo được của
-   `quality.yml`) sẽ bị loại khỏi hàng đợi thay vì làm đình trệ hàng đợi.
-4. Sau khi hợp nhất, quy trình làm việc liên tục xác nhận trạng thái sẵn sàng phát hành sẽ kiểm tra đầu nhánh mới khi có push
-   và mở một issue ghi nhận trách nhiệm nếu tổ hợp đó gây hồi quy (không bao giờ tự động revert).
+Mỗi lần hạ cánh đều cần có sự cho phép của chủ sở hữu và các biện pháp kiểm tra bắt buộc hiện hành. Chỉ áp dụng `omni-queue` sau khi chủ sở hữu đã cho phép hạ cánh. Hàng đợi PRs chạm vào các đường dẫn được bảo vệ cũng yêu cầu quyết định `protected-approved` của chủ sở hữu đối với PR đó.
 
-Các biện pháp bảo vệ (phản ánh `CLAUDE.md` Quy tắc Cứng #21/#22):
+Bộ quy tắc "Yêu cầu cổng xanh khi phát hành đang hoạt động" yêu cầu `Gate / CI` và `Gate / Quality` màu xanh lá cây trên đầu. Không bao giờ sử dụng `--admin` để vượt qua cổng màu đỏ. Một khối đóng băng phát hành hợp nhất vào nhánh đóng băng. Xem [Quy tắc cứng 21](HARD_RULES_DETAIL.md). Không bao giờ gắn nhãn, hợp nhất hoặc đẩy vào yêu cầu kéo mà phiên khác đang hoạt động. Xem [Quy tắc cứng 22](HARD_RULES_DETAIL.md).
 
-- **Đang đóng băng bản phát hành** → KHÔNG gắn nhãn cho các PR nhắm đến nhánh bị đóng băng; trước tiên hãy đổi đích sang
-  `release/vX+1` đang hoạt động.
-- **PR đang được xử lý của phiên khác** → không bao giờ gắn nhãn cho PR đó; chỉ phiên sở hữu mới đưa
-  công việc của mình vào hàng đợi.
-- Các diff chỉ liên quan đến kiểm thử và các PR có nhãn `hotfix` đã chạy CI rút gọn (xem
-  `RELEASE_CHECKLIST.md` → Làn Nhanh Hotfix); các điều kiện của hàng đợi chấp nhận bất kỳ
-  tập kiểm tra nào thực sự đã chạy (`#check-failure=0` + `#check-pending=0`).
+## Yêu cầu kéo tàu
 
-## Phương án dự phòng: đoàn tàu hợp nhất thủ công
+1. Bắt đầu một nhánh xe lửa ở đầu cơ sở phát hành hiện tại. Tích hợp chính xác các thành viên đứng đầu đã được phê duyệt bằng cách sử dụng các cam kết hợp nhất. Bảo tồn lịch sử cam kết của họ bằng cách tránh đè bẹp và rebase.
+2. Mở một yêu cầu kéo cho nhánh tàu. Xác thực PR đó bằng CI đầy đủ của chính nó trên mẹo cơ sở hiện tại. Kiểm tra lại đầu đế và các đầu thành viên đã được phê duyệt trước khi hạ cánh. Làm mới tàu và CI của nó khi ứng viên được xác thực thay đổi.
+3. Hạ cánh tàu PR bằng cam kết hợp nhất trong chế độ xếp hàng hiện hành. Trong chế độ trực tiếp, phương thức hạ cánh `merge-ff` của hàng đợi sẽ duy trì các cam kết hợp nhất. Những người đứng đầu thành viên ban đầu có thể truy cập được từ nhánh phát hành. GitHub đánh dấu thành viên PRs là đã hợp nhất và các cam kết giữ lại tác giả của chúng.
 
-Được sử dụng khi hàng đợi không khả dụng. Quy trình này chính thức hóa cách làm đã xử lý xong 33 PR
-trong một ngày ở chu kỳ v3.8.47:
+Một ví dụ công khai là [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Nó kết hợp 18 thành viên PRs và đạt được cam kết hợp nhất vào ngày 24-11-2026.
 
-1. **Tập hợp lô** (~10–30 PR đã được đánh giá+phê duyệt). Kiểm tra các xung đột `linked:`
-   (cùng `tap.testFiles`, cùng các đoạn CHANGELOG) và xử lý tuần tự những PR đó.
-2. **Xác thực MỘT LẦN**: trong một worktree cô lập tách từ đầu nhánh phát hành, hợp nhất cục bộ tất cả
-   các đầu nhánh trong lô, sau đó chạy bộ kiểm thử tương đương phát hành
-   (`npm run check:release-green`, thêm `--with-build` trước khi phát hành).
-   `scripts/release/merge-train.sh <base> <PR#>…` tự động hóa các bước 1–2 (các
-   PR xung đột bị loại ra, đoàn tàu tiếp tục). Chế độ đầy đủ chạy `npm run test:unit` — trình
-   chạy được tinh chỉnh theo máy (`--test-concurrency=20`), **không phải** hai phân đoạn CI 4 lõi
-   tuần tự, vốn khiến giai đoạn chiếm ưu thế chỉ sử dụng khoảng ~25% máy 16 lõi (đã sửa
-   ngày 2026-07-18). `--fast` (dùng để xử lý các đoàn tàu cực lớn trong ngày, được chủ sở hữu phê duyệt ngày 2026-07-18)
-   giữ lại mọi cổng tĩnh + vitest nhưng chỉ chạy các tệp node:test được thay đổi bởi
-   các PR đã lên tàu; bộ kiểm thử ĐẦY ĐỦ vẫn phải chạy ít nhất một lần mỗi ngày trên
-   đầu nhánh tích lũy (một đoàn tàu không dùng `--fast`).
-3. **Xanh** → hợp nhất các PR theo thứ tự (kiểm tra lại `state,headRefOid` trước mỗi PR —
-   PR có đầu nhánh đã thay đổi phải được đánh giá lại). Chứng minh diff ròng của mỗi lần hợp nhất là
-   thay đổi riêng của PR đó (không hoàn tác qua tự động giải quyết xung đột: kiểm tra `git diff --stat` để phát hiện
-   các nội dung bị xóa nằm ngoài phạm vi).
-4. **Đỏ** → chia đôi lô (xác thực từng nửa) thay vì xác thực lại
-   từng PR một; đưa PR gây lỗi trở lại hàng đợi đánh giá kèm theo bằng chứng.
-5. **Không bao giờ**: hợp nhất vào nhánh bị đóng băng trong thời gian đóng băng; dùng `git stash` ở bất kỳ đâu;
-   chạy lại CI hàng loạt với hy vọng trạng thái đỏ sẽ biến mất (quy tắc: trạng thái đỏ là thông tin).
+Quá trình đồng bộ hóa ngược từ `main` sang nhánh phát hành tiếp theo cũng được thực hiện thông qua cam kết hợp nhất. Cần phải bảo tồn tổ tiên `main` cho các lần đồng bộ hóa sau này. Xem [Cách ly Worktree](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Phân tầng (vì sao hàng đợi an toàn khi chỉ dùng các cổng kiểm tra nhanh)
+## Trình xác nhận hợp nhất cục bộ
 
-- **Mỗi PR** (các cổng kiểm tra nhanh trong quality.yml): các kiểm thử chịu tác động theo TIA + bộ kiểm thử đơn vị đầy đủ chia 4 phân đoạn +
-  vitest + nhóm kiểm tra lint + kiểm tra kiểu + tính toàn vẹn của tài liệu/changelog.
-- **Mỗi lô/đầu nhánh** (phát hành xanh liên tục): các cổng CỨNG `--quick` trên mỗi lần push vào
-  nhánh phát hành; các lượt quét đầy đủ `--with-build --full-ci` 3 lần/ngày.
-- **Mỗi bản phát hành** (ci.yml trên PR phát hành): ma trận hoàn chỉnh bao gồm E2E ×9,
-  package-artifact + kiểm thử khởi động nhanh tarball, độ bao phủ/các ngưỡng tăng dần.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Không có nội dung nào được xác thực ít hơn trước — phần kiểm tra nặng chỉ được chạy theo từng lô/đầu nhánh
-thay vì theo từng PR, và chính điều này loại bỏ số vòng trao đổi O(N).
+Trình xác thực tìm nạp phần đầu cơ sở và đầu PR rồi kết hợp chúng trong một cây làm việc dùng một lần. Nó chạy bộ chẵn lẻ một lần trên cây kết quả. Xung đột tìm nạp hoặc hợp nhất phần đầu không thành công sẽ loại bỏ PR đó và tập lệnh tiếp tục với PRs còn lại.
 
-## Điều kiện tiên quyết trên bản checkout mới cho `merge-train.sh`
+- **`--plan`** in các bước và thoát của chế độ đã chọn mà không tạo cây làm việc hoặc liên hệ với điều khiển từ xa. Kết hợp nó với `--fast` để kiểm tra kế hoạch nhanh.
+- **`--fast`** chạy các cổng tĩnh chung, các tệp `node:test` đã thay đổi đã chọn trong `tests/unit/` và `npm run test:vitest`. Chạy xác thực cục bộ đầy đủ ít nhất một lần một ngày trên số tiền boa tích lũy khi sử dụng chế độ nhanh.
+- **Chế độ đầy đủ** thêm các cổng tĩnh chỉ đầy đủ và chạy `npm run test:unit` và `npm run test:vitest`.
 
-Script chạy bước **kiểm tra trước** theo kiểu thất bại nhanh trên bản checkout gốc (trước mọi thao tác với worktree)
-để một bản cài đặt lỗi không bao giờ có thể bị nhầm thành đoàn tàu đỏ:
+Một cổng tĩnh bị lỗi sẽ được chạy lại trên cơ sở nguyên vẹn nếu có sẵn đầu dò cơ sở. Tập lệnh báo cáo các lỗi kế thừa và tiếp tục khi mọi dòng vi phạm được nhận dạng cũng xuất hiện trên cơ sở và tổng số lượng không tăng.
 
-1. Chạy `npm ci`, sau đó chạy postinstall của `bun` mà npm chặn:
-   `(cd node_modules/bun && node install.js)` — nếu không, `check:provider-consistency`
-   và `check:known-symbols` (cả hai đều là `bun scripts/…`) sẽ thất bại trên CẢ đoàn tàu VÀ nhánh cơ sở mà
-   không có dòng báo vi phạm.
-2. Không được có `node_modules/node_modules` dư thừa (một cây phụ thuộc trùng lặp; React được tải hai lần
-   và các bộ kiểm thử UI vitest thất bại ngay lập tức).
-3. `node_modules/.bin/tsc` phải tồn tại và có thể thực thi (bản cài đặt không đầy đủ sẽ thiếu tệp này).
+| Ra  | Nghĩa                                                                                                                               |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `0` | In kế hoạch hoặc hoàn thành bộ phần mềm. Bản tóm tắt bộ phần mềm liệt kê mọi lỗi tĩnh kế thừa và bị loại bỏ PRs.                    |
+| `1` | Đối số không hợp lệ, không kiểm tra Git, kiểm tra trước không thành công hoặc không có PR được đưa lên.                             |
+| `2` | Kiểm tra bộ không thành công và không đủ điều kiện được kế thừa. Người vận hành có thể chia đôi lô, loại bỏ PR vi phạm và chạy lại. |
 
-Đoàn tàu chạy lệnh bắt buộc `npm run check:cycles:ratchet`; `npm run check:cycles`
-đơn thuần chỉ mang tính tư vấn (liệt kê các SCC và thoát với mã khác không ngay cả trên một nhánh cơ sở khỏe mạnh).
+Thẻ địa phương chỉ cung cấp bằng chứng chẩn đoán cho hồ sơ của chủ sở hữu. Mỗi lần hạ cánh vẫn cần có sự cho phép của chủ sở hữu, các bước kiểm tra bắt buộc riêng và phán quyết về hàng đợi trong bóng tối khi áp dụng.
+
+## Xếp tầng
+
+- **Mỗi PR.** kiểm tra chọn CI và Chất lượng dựa trên các đường dẫn đã thay đổi. Mã PRs chạy các cổng chất lượng nhanh và các thử nghiệm tác động, với các công việc đơn vị và Vitest riêng biệt trong CI.
+- **Mỗi ứng viên xếp hàng.** CI và Quality chạy hồ sơ đầy đủ cho ứng viên đã soạn thảo trên hàng đợi của nó.
+- **Mỗi mẹo phát hành.** Release-Green chạy các cổng cứng nhanh chóng trên các lần đẩy phù hợp với bộ lọc đường dẫn của nó. Ba lần chạy theo lịch trình mỗi ngày sử dụng toàn bộ quá trình quét cho nhánh phát hành.
+- **Mỗi lần phát hành.** Ma trận CI đầy đủ bao gồm các phân đoạn E2E, xác thực gói, khói khởi động tarball và kiểm tra phạm vi bảo hiểm. Xem Danh [sách kiểm tra phát hành](RELEASE_CHECKLIST.md).
+
+## Điều kiện tiên quyết khi thanh toán mới cho `merge-train.sh`
+
+Preflight chạy trước khi tạo cây công việc. Cài đặt phụ thuộc với `npm ci`. Xác nhận rằng `node_modules/.bin/tsc` có thể thực thi được và `node_modules/node_modules` không có. Kiểm tra xem `node_modules/.bin/bun --version` có thành công không.
+
+Nếu quá trình cài đặt sau Bun bị bỏ qua, hãy chạy `(cd node_modules/bun && node install.js)`. Tính nhất quán của nhà cung cấp và kiểm tra ký hiệu đã biết sử dụng Bun. Trình xác thực chạy `npm run check:cycles:ratchet` làm cổng chặn. Lệnh `npm run check:cycles` độc lập mang tính tư vấn.
+
+## Lịch sử
+
+Hàng đợi hợp nhất Hợp nhất đã ngừng hoạt động vào ngày 19 tháng 11 năm 2026.

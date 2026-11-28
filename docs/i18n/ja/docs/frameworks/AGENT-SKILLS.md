@@ -13,12 +13,12 @@ Agent Skills は、外部エージェント、MCP クライアント、A2A オ�
 
 ## 概要
 
-このカタログには **45 個の Agent Skills**（REST API 23 個 + CLI 21 個 + 設定ワークフロー 1 個）が含まれています。各スキルには以下があります。
+カタログには以下の内容が含まれています**45 エージェントスキル**(23 REST API + 21 CLI + 1 構成ワークフロー)。各スキルには次のような特徴があります。
 
-- **正規 ID**（`omni-auth`、`cli-serve` など）
-- YAML フロントマター（`name`、`description`）と内容豊富な Markdown 本文を含む、`skills/{id}/SKILL.md` の **SKILL.md** ファイル
-- OpenAPI 仕様と CLI レジストリから派生した **REST エンドポイント**（API スキル）または **CLI サブコマンド**（CLI スキル）
-- ライブ取得用の **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- あ**正規ID** (`omni-auth`、 `cli-serve`など)
+- あ**SKILL.md** YAMLフロントマッター (`name`、 `description`) +リッチ マークダウン ボディを使用した`skills/{id}/SKILL.md`内のファイル
+- **RESTエンドポイント**(APIスキル) または**CLIサブコマンド**(CLIスキル) OpenAPI仕様およびCLIレジストリから派生
+- あ**GitHub生URL**ライブフェッチの場合: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -252,31 +252,31 @@ curl "${BASE}/omni-providers/SKILL.md"
 
 ---
 
-## ジェネレーター
+## ジェネレータ
 
-ジェネレーターは、キュレーションされたカタログ、OpenAPI 仕様、CLI レジストリを読み込み、各エントリの `skills/{id}/SKILL.md` を生成します。
+ジェネレーターは、厳選されたカタログ+ OpenAPI spec + CLIレジストリを読み取り、各エントリの`skills/{id}/SKILL.md`を書き込みます。
 
 ```bash
-# プレビュー（ドライラン、書き込みなし）
+# Preview (dry run, no writes)
 curl -X POST http://localhost:20128/api/agent-skills/generate \
   -H "Authorization: Bearer <admin-key>" \
   -H "Content-Type: application/json" \
   -d '{"dryRun":true}'
 
-# 完全な再生成
+# Full regeneration
 curl -X POST http://localhost:20128/api/agent-skills/generate \
   -H "Authorization: Bearer <admin-key>" \
   -H "Content-Type: application/json" \
   -d '{"dryRun":false,"prune":false}'
 
-# 指定した ID を再生成
+# Regenerate specific IDs
 curl -X POST http://localhost:20128/api/agent-skills/generate \
   -H "Authorization: Bearer <admin-key>" \
   -H "Content-Type: application/json" \
   -d '{"dryRun":false,"onlyIds":["omni-providers","cli-serve"]}'
 ```
 
-ジェネレーターのレスポンスは `GeneratorReport` です。
+ジェネレーターの応答は`GeneratorReport`です。
 
 ```json
 {
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## カバレッジ API
+## 適用範囲API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

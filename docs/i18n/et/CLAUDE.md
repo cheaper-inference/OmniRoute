@@ -6,76 +6,25 @@
 
 @AGENTS.md
 
-**Kõik projekti reeglid asuvad failis [`AGENTS.md`](AGENTS.md)** — see on iga AI-assistendi jaoks
-ainus tõeallikas (arhitektuur, kokkulepped, testimine, kvaliteediväravad, giti töövoog, 23 ranget
-reeglit, isikuandmetega seotud õppetunnid). Loe see täielikult läbi; ära lisa projekti reegleid siia
-uuesti. Kõik alljärgnev kehtib AINULT Claude Code'i kohta — need on failis `AGENTS.md` juba
-määratletud reeglite praktilised täpsustused.
+**Kõik projektireeglid kehtivad [`AGENTS.md`](AGENTS.md)** — on iga AI assistendi ainus tõeallikas; ülaltoodud import laadib selle juba sisse. Ärge lisage siia projekti reegleid uuesti. Kõik allpool olev rakendab ONLY d Claude Kood — juba `AGENTS.md` määratletud reeglite operatsioonilised täpsustused.
 
-## Worktree'i isoleerimine — Claude Code'i eripärad
+## Tööpuu isoleerimine — Claude Koodi eripära
 
-Täielik kohustuslik worktree'i protokoll (baasharu kinnitamine, `.claude/worktrees/` kui
-kanooniline tee, `cp -al` node_modules'i jaoks, eemaldamisreeglid) on failis
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (kokkuvõtlikult `AGENTS.md`-is →
-Git'i töövoog → "Worktree'i isoleerimine"). Claude Code'i-spetsiifilised punktid:
+- Kinnitage põhiharu operaatoriga `AskUserQuestion` (kõva reegel #19) kaudu, kui ta pole teile juba öelnud.
+- Looge tööpuu `scripts/dev/new-worktree.sh <branch> <confirmed-base>` abil (see langeb `.claude/worktrees/` alla, ühendab `node_modules` ja kopeerib `.husky/_`), seejärel kutsuge `EnterWorktree` selle `path` abil. Edastage alati baas: ilma selleta valib skript kõrgeima `release/*`, mis ei pruugi olla see, mille operaator kinnitas. Tööpuul, mille `EnterWorktree` ise loob, pole ei kõvasid lülisid ega konkse, seega ei jookse selles ühtegi eelkohustuse väravat.
 
-- Kinnita baasharu operaatoriga tööriista `AskUserQuestion` kaudu (Range reegel #19), kui ta
-  pole seda juba öelnud.
-- Eelista sisseehitatud `EnterWorktree`-tööriista — see loob worktree'd juba
-  `.claude/worktrees/` alla (kanooniline tee). Loo worktree dokumenteeritud käsuga `git
-worktree add`, seejärel kutsu `EnterWorktree` koos selle `path`-iga.
+## Subagendid ja git
 
-## Seanssidevaheline ohutus — Claude Code'i eripärad
+Iga alamagent, mis puudutab git (agendi tööriist või töövoo skript), saab kõva reegli #22 a `git stash` sõna-sõnalt — Salvestatud intsidendi kordumine tuli alamagendi kaudu.
 
-Ranged reeglid nr 19/21/22 (failis `AGENTS.md`) reguleerivad paralleelseid seansse. Praktilised
-meeldetuletused selle töökeskkonna jaoks:
+## Artefaktide planeerimine — supervõimete tee alistab
 
-- **Korda `git stash` keeldu sõna-sõnalt iga giti puudutava alamagendi viibas**
-  (tööriist Agent / Workflow-skriptid) — alamagendid ei päri seda faili ning registreeritud
-  stash-intsidendi kordumine toimus alamagendi kaudu.
-- Enne sellise PR-i ühendamist või push'imist, mida sa _selle seansi jooksul_ ei loonud, käivita
-  `git worktree list` ja kontrolli uuesti käsuga `gh pr view <N> --json state,headRefOid`
-  (range reegel nr 22b).
-- Lõpeta iga seanss nii, et põhiväljavõte asub harus, kus see seansi alguses oli.
+Supervõimete oskused teatavad vaikeväärtustest `docs/superpowers/plans/`, `docs/superpowers/specs/` ja `docs/research/` all. Enne kirjutamist kirjutage igaüks oma `_tasks/` ekvivalendiks jaotises `AGENTS.md` → "Planning & Research Artifacts" ja kinnitage see `git -C _tasks …`, mitte kunagi põhirepos.
 
-## Superpowers / planeerimisartefaktid — asukohtade ülekirjutused
+## Kraapimisfailid — `_artifacts/`, mitte `/tmp`
 
-Kokkulepe `_tasks/` on määratletud failis `AGENTS.md` → „Planeerimis- ja uurimisartefaktid“.
-Superpowersi oskuste vaikeväärtused osutavad asukohtadele `docs/…` — need vaikeväärtused on
-**siin üle kirjutatud**. Kui mõni Superpowersi oskus teatab asukohast, näiteks „salvestatud
-asukohta `docs/superpowers/plans/…`“, asenda see enne kirjutamist vastava `_tasks/…` asukohaga:
+See projekt alistab rakmete seansi märkmiku (`/tmp/claude-*/…`). Kirjutage ajutised failid — ekspordid, loodud ZIP-failid, ühekordsed vaheväljundid — kuni `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: gitignoositud juur- `_*` tee, nii et operaator leiab ja kustutab kõik kriimud ühest kohast. Kestvad plaanid, spetsifikatsioonid, uuringud ja üleandmised lähevad selle asemel `_tasks/` (Hard Rule #23).
 
-| Artefakt (oskus)                              | Vaikeasukoht (ÄRA kasuta) | Salvesta selle asemel siia                                    |
-| --------------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Plaanid (`writing-plans`)                     | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Spetsifikatsioonid / disain (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Uurimistöö (`deep-research`, ühekordne)       | `docs/research/`          | `_tasks/research/…`                                           |
-| Üleandmised (`/handoff`)                      | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Punane alus
 
-Commit'i need artefaktid repositooriumis `_tasks/` (`git -C _tasks …`), mitte kunagi
-põhirepositooriumis.
-
-## Mustand- ja ajutised failid — kasuta `_artifacts/`, mitte `/tmp`
-
-See projekt kirjutab üle töökeskkonna seansi mustandiala vaikeasukoha (`/tmp/claude-*/…`).
-Kirjuta ajutised/tööfailid — ekspordid, genereeritud zip-failid, ühekordsed vahetulemused ja kõik,
-mille muidu paigutaksid kataloogi `/tmp` — selle asemel asukohta
-`/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`.
-
-- `_artifacts/` on juurtaseme `_*` asukoht: git juba ignoreerib seda (`AGENTS.md` → „Juurtaseme
-  `_*` asukohad“), see eksisteerib ainult kettal ja seda ei jälgita kunagi.
-- Põhjus: mustandväljundi hoidmine projektis (mitte kataloogis `/tmp`) võimaldab operaatoril
-  hõlpsasti leida ja kustutada kõik ajutise ühest kohast, selle asemel et otsida seda mööduvatest
-  seansipõhistest `/tmp` kataloogidest, mis kaovad või kuhu kuhjuvad jälgimata failid.
-- Ära aja seda segamini asukohaga `_tasks/` (range reegel nr 23, selle enda privaatne
-  git-repositoorium püsivate plaanide/spetsifikatsioonide/uurimistööde/üleandmiste jaoks) —
-  `_artifacts/` on mõeldud ainult ühekordsetele tööfailidele; miski siin ei pea säilima ega olema
-  versioonitud.
-
-## Roheline baasharu enne PR-ide avamist
-
-Enne haru loomist või PR-i avamist käivita baasharu rohelisuse kontroll (`AGENTS.md` → Giti
-töövoog → „Baasharu rohelisuse kontroll“; projekti oskused viitavad sellele kui
-`.agents/skills/_shared/base-green.md`). Kui PR avatakse ajal, mil baasharu tipp on punane, peab
-selle kirjeldus sisaldama teksti `⚠️ base-red inherited: #<issue>`. Kuhjunud punase oleku
-(baasharu tipp + punased PR-id) kõrvaldamiseks kasuta oskust `/sweep-reds`.
+Kogunenud punase oleku (alusots + red PRs) tühjendamiseks kasutage `/sweep-reds` oskust.

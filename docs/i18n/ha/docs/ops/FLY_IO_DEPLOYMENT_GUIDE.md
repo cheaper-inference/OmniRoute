@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Sigogin da Ake Buƙata
+## 5. Abubuwan da ake buƙata
 
-Wannan aikin yana ba da shawarar saita aƙalla sigogi masu zuwa a Fly.io.
+Wannan aikin yana ba da shawarar daidaitawa aƙalla sigogi masu zuwa akan Fly.io.
 
-### 5.1 Sigogin da Aka Tabbatar
+### 5.1 Ingantattun Ma'auni
 
-An yi amfani da waɗannan sigogi a ainihin turawa a kan manhajar `omniroute` ta yanzu:
+An yi amfani da waɗannan sigogi a ainihin turawa akan aikace-aikacen `omniroute` na yanzu:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (ana buƙatarsa a yanayin samarwa — ana amfani da shi don tantance sahihancin gadar WebSocket)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (an buƙata a samarwa — da ake amfani da shi don tabbatar da gadar WebSocket )
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 Game da `INITIAL_PASSWORD`
 
-Aikin na yanzu bai saita `INITIAL_PASSWORD` ba saboda wannan turawar ba ta buƙatarsa.
+Aikin na yanzu bai saita `INITIAL_PASSWORD` ba saboda wannan turawa baya buƙatar sa.
 
 Idan ba a saita shi ba:
 
-- Bayanan log na farawa za su nuna cewa tsohuwar kalmar sirri ita ce `CHANGEME`
-- Ya kamata ka canza kalmar sirrin shiga a saitunan tsarin da wuri-wuri bayan turawa
+- Kuna ƙirƙiri kalmar wucewar dashboard a cikin mayen hawan hawan a ziyarar farko. Cika matakin kalmar sirri: tsallake shi yana kashe shiga dashboard, wanda ke barin dashboard ɗin a buɗe ga duk wanda zai iya isa URL app.
+- Wakilin Fly yana isa app daga adireshin da ba na dawowa ba, don haka bayan ka ƙaddamar da kalmar wucewa sai mayen ya nemi alamar bootstrap na lokaci ɗaya, wanda app ɗin ke bugawa zuwa log ɗinsa a wannan lokacin: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Idan layin ya gungura daga log ɗin, sake kunna app ɗin kuma sake ƙaddamar da mayen don buga sabon alamar.
 
-Idan kana son fara saita kalmar sirrin backend ba tare da sa hannun mai amfani ba, za ka iya ƙara ta daga baya:
+Don saita kalmar wucewa ba tare da kulawa ba, ƙara shi kafin ziyarar dashboard ta farko (da zarar an adana kalmar sirri, ana watsi da `INITIAL_PASSWORD` ):
 
 - `INITIAL_PASSWORD`
 
@@ -274,60 +274,60 @@ Idan shafin `Secrets` da ke cikin na'ura mai sarrafawa bai nuna canje-canjen da 
 
 ---
 
-## 9. Sabuntawa da Fitarwa na Gaba
+## 9. Sabuntawa da Sabuntawa na gaba
 
-Bayan sabunta lambar, tsarin fitarwa yana da sauƙi:
+Bayan sabunta lambar, tsarin sakin yana da sauƙi:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Idan kawai kana buƙatar sabunta saituna ba tare da canza lamba ba:
+Idan kawai kuna buƙatar sabunta sigogi ba tare da canza lamba ba:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly zai gudanar da sabuntawar injuna a jere ta atomatik.
+Fly zai aiwatar da sabuntawar injuna ta atomatik.
 
-### 9.1 Bibiyar Sabuntawar Ma'ajiyar Asali Yayin Kiyaye `fly.toml` na Fork ɗinka
+### 9.1 Bibiyar Sabunta Ma'ajiyar Ma'ajiyar Sama Yayin Kiyaye `fly.toml` na cokali mai yatsu
 
-Idan ma'ajiyar yanzu fork ce kuma kana son daidaita sabuntawa daga ma'ajiyar asali ta `https://github.com/diegosouzapw/OmniRoute`, bi tsarin aikin da ke ƙasa.
+Idan ma'ajin na yanzu cokali mai yatsa ne kuma kuna son daidaita sabuntawa daga `https://github.com/cheaper-inference/OmniRoute` na sama, bi tsarin aikin da ke ƙasa.
 
-Da farko, tabbatar da ma'ajiyoyin nesa naka:
+Da farko, tabbatar da abubuwan nesa na ku:
 
 ```powershell
 git remote -v
 ```
 
-Ya kamata ka ga aƙalla:
+Ya kamata ku gani aƙalla:
 
-- `origin` yana nuna fork naka
-- `upstream` yana nuna ma'ajiyar asali
+- `origin` tana nuna cokali mai yatsa
+- `upstream` tana nuni ga ainihin ma'ajiyar
 
 Idan ba a saita `upstream` ba, ƙara shi:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Kafin daidaitawa da upstream, ɗauko sabbin commits da tags:
+Kafin yin aiki tare da na sama, ɗebo sabbin ayyuka da alamun:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Duba sigar yanzu da tags na upstream:
+Duba sigar ta yanzu da alamun sama:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Lura: Sigar aikin yanzu ita ce `v3.8.0`. An bar ambaton `v3.4.7` da ke ƙasa a matsayin misalan tarihi kawai. Don fitowar ainihi, yi amfani da `:latest` ko tag na sigar yanzu (misali `:v3.8.0`).
+> Lura: Sigar aikin yanzu shine `v3.8.0`. Nassoshi `v3.4.7` da ke ƙasa an kiyaye su azaman misalan tarihi kawai. Don ainihin sakewa, yi amfani da `:latest` ko alamar sigar yanzu (misali `:v3.8.0`).
 
-Idan kana son haɗa sabon `main` na upstream yayin da kake tilasta kiyaye `fly.toml` na fork ɗinka, bi wannan tsarin aikin:
+Idan kuna son haɗa sabuwar `main` ta sama yayin da take kiyaye `fly.toml` cokali mai yatsu da ƙarfi, bi wannan aikin:
 
 ```powershell
 git merge upstream/main
@@ -339,32 +339,32 @@ git push origin main
 
 Bayanan kula:
 
-- `git merge upstream/main` yana daidaita sabuwar lamba daga ma'ajiyar asali
-- `git checkout HEAD~1 -- fly.toml` yana dawo da `fly.toml` na fork ɗinka daga yanayin da yake kafin haɗawar
-- Idan upstream bai gyara `fly.toml` ba, wannan matakin ba zai haifar da wani bambanci ba
-- Idan upstream ya gyara `fly.toml`, wannan matakin yana tabbatar da cewa sunan manhajar Fly, haɗin volume, region, da sauran saitunan tura manhaja na musamman ga fork ɗinka ba za a goge su ba
+- `git merge upstream/main` yana daidaita sabuwar lamba daga ainihin ma'ajiya
+- `git checkout HEAD~1 -- fly.toml` tana mayar da cokali mai yatsu naka `fly.toml` daga gaban haɗuwa
+- Idan na sama bai canza `fly.toml` ba, wannan matakin ba zai gabatar da kowane bambance-bambance ba
+- Idan na sama ya canza `fly.toml`, wannan matakin yana tabbatar da sunan aikace-aikacen Fly ɗinku, Dutsen ƙara, yanki, da sauran ƙayyadaddun ƙayyadaddun ƙayyadaddun jigilar cokali mai yatsa ba a sake rubutawa ba.
 
-Idan kana son daidaitawa da takamaiman tag na fitarwa (misali `v3.4.7`), da farko tabbatar cewa an riga an haɗa tag ɗin cikin `upstream/main`:
+Idan kuna son daidaitawa tare da takamaiman alamar sakin (misali `v3.4.7`), da farko tabbatar da cewa an riga an haɗa alamar a cikin `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Samun sakamako mai nasara yana nufin cewa `upstream/main` ya riga ya ƙunshi wannan sigar; kawai za ka iya haɗa `upstream/main`.
+Komawar nasara tana nufin `upstream/main` ta riga ta ƙunshi wannan sigar; za ku iya haɗa `upstream/main` kawai.
 
-### 9.2 Daidaitaccen Jerin Fitarwa Bayan Daidaitawa da Upstream
+### 9.2 Daidaitaccen Tsarin Saki Bayan Aiki tare na Sama
 
-Bayan daidaitawa da ma'ajiyar asali, bi wannan jerin fitarwa da aka ba da shawara:
+Bayan daidaitawa tare da ainihin ma'ajiyar, bi wannan shawarar saki da aka ba da shawarar:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Dawo da `fly.toml` na fork
+3. Mayar da cokali mai yatsa `fly.toml`
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Wannan shi ne ainihin tsarin aikin da aka yi amfani da shi lokacin haɓaka aikin yanzu zuwa `v3.4.7` (misalin yana nuni da wata sigar tarihi; ainihin sigar yanzu ita ce `v3.8.0`).
+Wannan shine ainihin aikin da ake amfani dashi lokacin haɓaka aikin na yanzu zuwa `v3.4.7` (misali yana nufin sigar tarihi; ainihin sigar yanzu shine `v3.8.0`).
 
 ---
 
@@ -418,40 +418,40 @@ Idan ka ga `/app/data/...` a maimakon haka, an saita `DATA_DIR` ba daidai ba kum
 
 ---
 
-## 12. Matsalolin da Aka Fi Fuskanta
+## 12. Batutuwan gama gari
 
-### 12.1 Shafin `Secrets` Babu Komai
+### 12.1 `Secrets` Shafi Babu komai
 
-Yawanci akwai dalilai biyu:
+Yawancin dalilai guda biyu ne:
 
-- Har yanzu ba ka gudanar da `flyctl secrets set` ba
-- Kana duba wata manhaja daban (misali `oroute` maimakon `omniroute`)
+- Har yanzu ba ka gudu `flyctl secrets set` ba
+- Kuna kallon wani aikace-aikacen daban (misali `oroute` maimakon `omniroute`)
 
-### 12.2 `flyctl deploy` Yana Ba da Rahoton `app not found`
+### 12.2 `flyctl deploy` Rahotanni `app not found`
 
-Da farko, ƙirƙiri manhajar:
+Ƙirƙiri aikace-aikacen farko:
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-### 12.3 Tantancewar `fly.toml` Ta Gagara
+### 12.3 `fly.toml` Fassara Fassara
 
-Bincika waɗannan:
+Duba waɗannan abubuwan:
 
-- Ko akwai haruffan da suka lalace a cikin sharhi
-- Ko alamomin ambato da tsarin shigar da layi na TOML daidai ne
+- Ko akwai haruffan garbled a cikin sharhi
+- Ko ambaton TOML da indentation daidai ne
 
-### 12.4 Ba a Adana Bayanai na Dindindin
+### 12.4 Data ba ya dawwama
 
-Tabbatar da waɗannan biyun:
+Tabbatar da abubuwa biyu masu zuwa:
 
 - `fly.toml` ya ƙunshi `destination = '/data'`
-- An saita `DATA_DIR` zuwa `/data`
+- an saita `DATA_DIR` zuwa `/data`
 
-### 12.5 Zai Iya Aiki Ba Tare da `INITIAL_PASSWORD` Ba?
+### 12.5 Zai iya Gudu Ba tare da `INITIAL_PASSWORD` ba?
 
-Eh, zai iya aiki. Zai koma amfani da kalmar sirri ta tsohuwa `CHANGEME`. Ana ba da shawarar canza kalmar sirrin backend da wuri-wuri a yanayin samarwa.
+Ee. Tare da unset `INITIAL_PASSWORD`, kun ƙirƙiri kalmar sirrin dashboard a cikin mayen hawan hawan a ziyarar farko (sashe na 5.2 ya ƙunshi alamar bootstrap na lokaci ɗaya da matakin kalmar sirri).
 
 ---
 

@@ -64,40 +64,29 @@ OmniRoute-ը պահպանում է թոքենը և անմիջապես կատար
 
 ## MCP գործիքներ (6)
 
-Սահմանված են `open-sse/mcp-server/tools/notionTools.ts`-ում։ Թոքենը որոշվում է կանչի
-պահին՝ `getNotionToken()`-ի միջոցով։ Եթե որևէ թոքեն կարգավորված չէ, գործիքը նետում է
-`"Notion-ի ինտեգրման թոքենը կարգավորված չէ։ Սահմանեք այն Settings > Context Sources բաժնում։"`
+Սահմանված է `open-sse/mcp-server/tools/notionTools.ts` ում: Նշանը լուծվում է զանգի ժամանակ `getNotionToken()` միջոցով; եթե ոչ մեկը կազմաձևված չէ, գործիքը նետում է `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Գործիք                       | Շրջանակ        | Նկարագրություն                                                                                                    |
-| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Որոնում է էջեր և տվյալների բազաներ՝ տեքստային հարցմամբ (վերադարձնում է վերնագրեր, ID-ներ, URL-ներ)։ Էջավորված է։  |
-| `notion_get_page`            | `read:notion`  | Ստանում է էջի բովանդակությունն ու մետատվյալները՝ ըստ դրա ID-ի։                                                    |
-| `notion_list_block_children` | `read:notion`  | Ցուցադրում է բլոկի կամ էջի բոլոր ենթաբլոկները (բլոկների ծառը)։ Էջավորված է։                                       |
-| `notion_query_database`      | `read:notion`  | Հարցում է կատարում տվյալների բազայում՝ կամընտիր `filter` + `sorts` պարամետրերով (Notion API ձևաչափ)։ Էջավորված է։ |
-| `notion_get_database`        | `read:notion`  | Ստանում է տվյալների բազայի սխեման/մետատվյալները՝ ըստ ID-ի։                                                        |
-| `notion_append_blocks`       | `write:notion` | Բլոկի կամ էջի վերջում ավելացնում է ենթաբլոկներ (առավելագույնը 100 բլոկ՝ մեկ հարցման համար)։                       |
+| Գործիք                       | Շրջանակ        | Նկարագրություն                                                                                               |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------ |
+| `notion_search`              | `read:notion`  | Որոնեք էջերը և տվյալների բազաները տեքստային հարցման միջոցով (վերադարձնում է վերնագրեր, IDs, URLs): Էջագրված։ |
+| `notion_get_page`            | `read:notion`  | Ստացեք էջի բովանդակությունը և մետատվյալները՝ ըստ ID ի:                                                       |
+| `notion_list_block_children` | `read:notion`  | Թվարկեք բլոկի կամ էջի բոլոր բլոկի երեխաները (բլոկի ծառը): Էջագրված։                                          |
+| `notion_query_database`      | `read:notion`  | Հարցրեք տվյալների բազա կամընտիր `filter` + `sorts` (Notion API ձևաչափով): Էջագրված։                          |
+| `notion_get_database`        | `read:notion`  | Ստացեք տվյալների բազայի schema/metadata ID ով:                                                               |
+| `notion_append_blocks`       | `write:notion` | Կցեք երեխաների բլոկը գոյություն ունեցող բլոկին կամ էջին (առավելագույնը 100 բլոկ յուրաքանչյուր հարցում):      |
 
-### Մուտքային պարամետրեր
+### Ներածման պարամետրեր
 
-- `notion_search` — `query` (1–500 նիշ), `pageSize` (1–100, լռելյայն՝ 20),
-  `startCursor` (կամընտիր)։
-- `notion_get_page` — `pageId` (32 նիշանոց տասնվեցական արժեք կամ UUID)։
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, լռելյայն՝ 50),
-  `startCursor` (կամընտիր)։
-- `notion_query_database` — `databaseId`, `filter` (կամընտիր, Notion-ի զտիչի ձևաչափ),
-  `sorts` (կամընտիր զանգված), `pageSize` (1–100, լռելյայն՝ 50), `startCursor` (կամընտիր)։
-- `notion_get_database` — `databaseId`։
-- `notion_append_blocks` — `blockId`, `children` (բլոկների օբյեկտների զանգված),
-  `after` (կամընտիր դիրք)։
+- `notion_search` — `query` (1–500 նիշ), `pageSize` (1–100, լռելյայն 20), `startCursor` (ըստ ցանկության)։
+- `notion_get_page` — `pageId` (32-char hex կամ UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, լռելյայն 50), `startCursor` (ըստ ցանկության):
+- `notion_query_database` — `databaseId`, `filter` (ըստ ցանկության, Notion ֆիլտրի ձևաչափ), `sorts` (ըստ ցանկության զանգված), `pageSize` (1–100, լռելյայն 50), `startCursor` (ըստ ցանկության):
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`, `children` (բլոկի օբյեկտների զանգված), `after` (ընտրովի դիրք):
 
-### Հասանելիության շրջանակներ
+### Շրջանակներ
 
-Կարդալու գործիքները պահանջում են `read:notion`, իսկ գրելու գործիքը՝ `write:notion`։
-Հասանելիության շրջանակները պարտադրվում են `withScopeEnforcement()`-ի միջոցով՝
-`open-sse/mcp-server/server.ts`-ում, միայն երբ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` է։ Կանչողի
-թույլատրված շրջանակները վերցվում են `OMNIROUTE_MCP_SCOPES`-ից (ստորակետերով բաժանված) կամ
-նույնականացված API բանալու շրջանակների համատեքստից։ Հասանելիության շրջանակների ամբողջական մոդելի համար
-տես [MCP-SERVER.md](./MCP-SERVER.md)։
+Կարդալու գործիքները պահանջում են `read:notion`, իսկ գրելու գործիքը՝ `write:notion`: Շրջանակները կիրառվում են `withScopeEnforcement()` ով `open-sse/mcp-server/server.ts` ում, երբ `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, և միշտ HTTP/SSE զանգահարողի համար, որի API ստեղնը զուրկ է `manage`/`admin`; Զանգահարողի թույլատրելի շրջանակները գալիս են `OMNIROUTE_MCP_SCOPES` ից (ստորակետով առանձնացված) կամ վավերացված API ստեղնի շրջանակի համատեքստից: Ամբողջ շրջանակի մոդելի համար տե՛ս [MCP-SERVER.md](./MCP-SERVER.md) :
 
 ## Վերջնակետեր
 

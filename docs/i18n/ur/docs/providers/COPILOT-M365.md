@@ -168,9 +168,9 @@ Microsoft 365 فراہم کنندگان میں** کنکشن شامل کریں۔*
 
 ## حوالہ جات
 
-- مسئلہ: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- مباحثہ: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- مسئلہ: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- بحث: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - ماخذ: `src/shared/constants/providers/web-cookie.ts` (فراہم کنندہ کی تعریف)
 - HAR درآمد: `src/shared/utils/m365HarImport.ts`
-- Credential فیلڈز: `src/shared/providers/webSessionCredentials.ts`
-- Tier modal: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- اسنادی فیلڈز: `src/shared/providers/webSessionCredentials.ts`
+- ٹائر موڈل: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

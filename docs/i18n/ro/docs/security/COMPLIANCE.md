@@ -4,12 +4,11 @@
 
 ---
 
-> **Sursa de referință:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Ultima actualizare:** 2026-06-28 — v3.8.40
+> **Sursa adevărului:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute înregistrează acțiunile administrative, evenimentele de autentificare, modificările ciclului de viață al credențialelor furnizorilor și invocările instrumentelor MCP în tabele de audit susținute de SQLite. Această pagină prezintă ce se înregistrează, unde sunt stocate datele, cât timp sunt păstrate, cum pot cheile API să dezactiveze înregistrarea și cum pot fi interogate datele.
+OmniRoute înregistrează acțiunile administrative, evenimentele de autentificare, modificările ciclului de viață al acreditărilor furnizorului și invocările instrumentului MCP în tabelele de audit susținute de SQLite. Această pagină acoperă ce se înregistrează, unde locuiește, cât timp este păstrată, cum pot renunța cheile API și cum se interoghează datele.
 
-Implementarea se află în `src/lib/compliance/index.ts` (T-43 — „Controale de conformitate”) și `src/lib/compliance/providerAudit.ts`. Operațiunile de scriere în jurnalul de audit nu generează niciodată excepții: în cazul oricărei erori, apelul este ignorat în mod silențios, astfel încât jurnalizarea de audit să nu poată întrerupe fluxul principal al cererii.
+Implementarea se află în `src/lib/compliance/index.ts` (T-43 — „Controale de conformitate”) și `src/lib/compliance/providerAudit.ts`. Scrierile de audit nu se aruncă niciodată: la orice eșec, apelul este înghițit în tăcere, astfel încât jurnalul de audit nu poate întrerupe fluxul principal de solicitare.
 
 ## Ce se înregistrează
 
@@ -127,31 +126,33 @@ vechiul tabel `request_detail_logs` și artefactele locale ale solicitărilor di
 Valorile implicite sunt definite în `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## Dezactivarea jurnalizării prin `noLog` (pentru fiecare cheie API)
+## Renunțare `noLog` (pe cheie API )
 
-Cheile API pot fi marcate astfel încât traficul apelurilor lor ulterioare să nu fie jurnalizat. Indicatorul
-se află în tabelul `api_keys` (`no_log INTEGER DEFAULT 0`) și este oglindit
-într-un set din memorie pentru căutări rapide pe traseul critic.
+Tastele API pot fi marcate astfel încât traficul lor de apeluri din aval să nu fie înregistrat. Steagul locuiește pe tabelul `api_keys` (`no_log INTEGER DEFAULT 0`) și este reflectat într-un set în memorie pentru căutări hot-path.
 
 ```bash
-# Creați o cheie fără jurnalizare (este necesară autentificarea pentru administrare)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Funcții auxiliare (`src/lib/compliance/index.ts`):
+Ajutoare (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — activează sau dezactivează intrarea din memorie
-- `isNoLog(apiKeyId)` — verificată pe traseul solicitării; în caz contrar, utilizează o citire
-  din `api_keys.no_log` memorată în cache timp de 30 s
-- `NO_LOG_API_KEY_IDS` (variabilă de mediu, valori separate prin virgulă) — preîncărcate în setul din memorie
-  la pornire; utilă atunci când nu puteți modifica direct coloana
+- `setNoLog(apiKeyId, true|false)` — comută intrarea în memorie
+- `isNoLog(apiKeyId)` — verificat pe calea cererii; cade înapoi la o citire în cache de 30 de secunde din `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, separat prin virgulă) — preîncărcat în setul de memorie la pornire; util atunci când nu puteți comuta direct coloana
 
-Evenimentele administrative de audit (autentificări, modificări ale furnizorilor, apeluri ale instrumentelor MCP etc.)
-**nu** sunt afectate de `noLog` — opțiunea dezactivează numai jurnalizarea traficului
-pentru fiecare solicitare.
+Evenimentele de audit administrativ (autentificare, modificări ale furnizorului, apeluri la instrumentul MCP etc.) sunt** nu** afectat de `noLog` — numai înregistrarea traficului la cerere este renunțată.
+
+### Renunțare la cerere (`x-omniroute-no-log`)
+
+Un client poate opta pentru o singură cerere de inferență din persistența sarcinii utile fără a crea o cheie dedicată. Trimiteți `x-omniroute-no-log: true` la cerere (`1` și `yes` sunt, de asemenea, acceptate, fără distincție între majuscule și minuscule). Se aplică oricărei rute ale familiei de chat care trece prin gestionarea chatului: Terminări de chat, Răspunsuri, Mesaje, Terminări și calea compatibilă cu Gemini. Rândul de jurnal de apeluri este încă scris cu marcajul de timp, modelul, furnizorul, starea, durata și numărul de simboluri, dar `request_body`, `response_body`, rezumatele solicitărilor și artefactele pipeline sunt omise.
+
+Antetul este ORed cu indicatorul cheie: o cheie fără jurnal rămâne fără jurnal, indiferent de antet, iar antetul nu poate reactiva înregistrarea pentru o cheie fără jurnal. Antetul este eliminat înainte ca cererea să fie transmisă în amonte.
+
+Acest antet face** nu** dezactivați extragerea memoriei sau cache-ul semantic. Trimiteți `x-omniroute-no-memory: true` și `x-omniroute-no-cache: true` alături de el atunci când cererea nu trebuie să persiste conținut nici în acele subsisteme.
 
 ## API REST
 

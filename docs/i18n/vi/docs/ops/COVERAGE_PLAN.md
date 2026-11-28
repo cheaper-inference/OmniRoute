@@ -151,30 +151,30 @@ Các chủ đề cho Giai đoạn 6-7:
 - [ ] Thêm các bài kiểm thử hồi quy cho mọi lỗi trong mã sản phẩm chưa được bao phủ đã sửa trong quá trình hướng tới 90%
 - [ ] Chỉ nâng ngưỡng độ bao phủ trong CI sau khi đường cơ sở cục bộ ổn định trong ít nhất hai lần chạy liên tiếp
 
-## Chính sách ratchet
+## Chính sách bánh cóc
 
-Chỉ cập nhật các ngưỡng của `npm run test:coverage` sau khi dự án thực sự vượt qua cột mốc tiếp theo với một khoảng đệm an toàn.
+Chỉ cập nhật ngưỡng `npm run test:coverage` sau khi dự án thực sự vượt qua cột mốc tiếp theo với vùng đệm thoải mái.
 
-**Ngưỡng hiện tại:** `npm run test:coverage` áp dụng ngưỡng **60 câu lệnh / 60 dòng / 60 hàm / 60 nhánh** (chỉ số này đã được thiết lập lại trong Quality-Gates Fase 6A.1 — mức cơ sở 82.58% trước đó bị thổi phồng vì tính cả các tệp kiểm thử và loại trừ `open-sse`). Lệnh `test:coverage:legacy` duy trì chỉ số 50/50/50 cũ để so sánh lịch sử.
+**Cổng hiện tại:** `npm run test:coverage` thực thi** 60 câu lệnh/60 dòng/60 chức năng/60 nhánh** (số liệu đã được tính lại trong Quality-Gates Fase 6A.1 — đường cơ sở 82,58% trước đó đã bị tăng cao vì nó tính các tệp thử nghiệm và loại trừ `open-sse`). Lệnh `test:coverage:legacy` giữ nguyên số liệu 50/50/50 cũ để so sánh lịch sử.
 
-Để kiểm tra ngưỡng tùy trường hợp dựa trên báo cáo mới nhất, hãy sử dụng:
+Để kiểm tra ngưỡng đặc biệt đối với báo cáo mới nhất, hãy sử dụng:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Trình tự ratchet được đề xuất (thứ tự là `câu lệnh-dòng / nhánh / hàm`):
+Trình tự bánh cóc được đề xuất (thứ tự là `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- ngưỡng hiện tại (75/70/75)
+5. 75/70/72 <-- cổng hiện tại (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Mục tiêu ratchet tiếp theo là `80/75/78` sau khi độ bao phủ nhánh duy trì trên 78% trong hai lần chạy liên tiếp.
+Mục tiêu bánh cóc tiếp theo là `80/75/78` khi phạm vi bao phủ của nhánh giữ trên 78% trong hai lần chạy liên tiếp.
 
 ## Khoảng trống đã biết
 

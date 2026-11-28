@@ -13,12 +13,12 @@ Agent Skills წარმოადგენს სტრუქტურირე
 
 ## მიმოხილვა
 
-კატალოგი შეიცავს **45 Agent Skills-ს** (23 REST API + 21 CLI + 1 კონფიგურაციის სამუშაო პროცესი). თითოეულ უნარს აქვს:
+კატალოგი შეიცავს** 45 აგენტის უნარები** (23 REST API + 21 CLI + 1 კონფიგურაციის სამუშაო პროცესი). თითოეულ უნარს აქვს:
 
-- **კანონიკური ID** (`omni-auth`, `cli-serve` და ა.შ.)
-- **SKILL.md** ფაილი `skills/{id}/SKILL.md`-ში, YAML frontmatter-ით (`name`, `description`) + შინაარსობრივად მდიდარი markdown ტექსტით
-- OpenAPI სპეციფიკაციიდან და CLI რეესტრიდან მიღებული **REST საბოლოო წერტილები** (API უნარები) ან **CLI ქვეკომანდები** (CLI უნარები)
-- რეალურ დროში მიღებისთვის განკუთვნილი **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ა** კანონიკური ID** (`omni-auth`, `cli-serve` და ა.შ.)
+- ა**SKILL.md** ფაილი `skills/{id}/SKILL.md` ში YAML frontmatter-ით (`name`, `description`) + rich markdown body
+- **REST ბოლო წერტილები** (API უნარები) ან**CLI ქვებრძანებები** (CLI უნარები) მიღებული OpenAPI spec და CLI რეესტრიდან
+- ა**GitHub ნედლი URL** ცოცხალი მისაღებად: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## დაფარვის API
+## გაშუქება API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

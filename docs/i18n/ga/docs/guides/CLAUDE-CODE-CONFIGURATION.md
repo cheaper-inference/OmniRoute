@@ -51,7 +51,7 @@ Socraíonn `omniroute launch` iad seo go léir duit: réitíonn sé an bonn URL 
 
 ## Sannadh úsáide: seisiúin agus tionscadail
 
-Déanann OmniRoute iarratais gach eochair API a ghrúpáil isteach** seisiúin gníomhaire** agus taifid a** tionscadal** oibríodh ar gach seisiún ( tábla `agent_sessions` ), ionas gur féidir úsáid agus costas a thuairisciú in aghaidh an bhaill foirne, in aghaidh an tionscadail agus in aghaidh an tseisiúin.
+Déanann OmniRoute iarratais gach eochair API a ghrúpáil isteach** seisiúin gníomhaire** agus taifid a** tionscadal** oibríodh ar gach seisiún ( tábla `agent_sessions` ), ionas gur féidir úsáid agus costas a thuairisciú in aghaidh gach ball foirne, in aghaidh an tionscadail agus in aghaidh an tseisiúin.
 
 Cad atá taifeadta gan aon socrú cliant:
 
@@ -68,14 +68,14 @@ Aithnítear Codex (`<environment_context><cwd>`) agus OpenCode (`x-opencode-sess
 
 Tá difríocht idir an t-eolaire oibre idir meaisíní, agus mar sin is féidir an stór céanna a thaispeáint faoi chosáin éagsúla. Seol an tionscadal go sainráite ina ionad sin: cuireann Claude Code aon cheanntásca atá liostaithe in `ANTHROPIC_CUSTOM_HEADERS` le gach iarratas samhail, agus léann OmniRoute dhá cheann acu:
 
-| Ceanntásc                  | Luach                                                           |
-| -------------------------- | --------------------------------------------------------------- |
-| `x-omniroute-project`      | Ainm an tionscadail, m.sh. `omniroute`                          |
-| `x-omniroute-project-repo` | cianrialtán normalaithe, eg `github.com/diegosouzapw/OmniRoute` |
+| Ceanntásc                  | Luach                                                                |
+| -------------------------- | -------------------------------------------------------------------- |
+| `x-omniroute-project`      | Ainm an tionscadail, m.sh. `omniroute`                               |
+| `x-omniroute-project-repo` | cianrialtán normalaithe, eg `github.com/cheaper-inference/OmniRoute` |
 
 Ní léitear an dá rud ach le haghaidh sannadh; ní chuirtear ar aghaidh chuig an soláthraí réamhtheachtacha iad choíche.
 
-Léitear `ANTHROPIC_CUSTOM_HEADERS` uair amháin ag am tosaithe, agus stórálann comhaid socruithe luachanna litriúla, mar sin ríomh é nuair a sheolann Cód Claude. Cuir é seo le `~/.zshrc` nó `~/.bashrc` agus coinnigh ag tosú `claude` ón bhfillteán tionscadail:
+léitear `ANTHROPIC_CUSTOM_HEADERS` uair amháin ag am tosaithe, agus stórálann comhaid socruithe luachanna litriúla, mar sin ríomh é nuair a sheolann Cód Claude. Cuir é seo le `~/.zshrc` nó `~/.bashrc` agus coinnigh ag tosú `claude` ón bhfillteán tionscadail:
 
 ```bash
 claude() {
@@ -96,7 +96,7 @@ x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-Stiallaíonn slonn `sed` aon dintiúir, teaghrán fiosrúcháin agus blúire atá leabaithe sa chian- URL, agus coimeádtar ceanntásca atá in `ANTHROPIC_CUSTOM_HEADERS` cheana féin. Seolann síntí IDE Cód Claude gan do bhlaosc, mar sin titeann a gcuid seisiúin ar ais chuig an eolaire oibre.
+Stiallaíonn slonn `sed` aon dintiúir, teaghrán fiosrúcháin agus blúire atá leabaithe sa chianrialtán URL, agus coimeádtar ceanntásca atá in `ANTHROPIC_CUSTOM_HEADERS` cheana féin. Seolann síntí IDE Cód Claude gan do bhlaosc, mar sin titeann a gcuid seisiúin ar ais chuig an eolaire oibre.
 
 ---
 
@@ -265,28 +265,20 @@ bratacha breise. Sáraigh é do gach glao ar leith le `--remote` / `--api-key`.
 
 ## Fabhtcheartú
 
-**Déanann Claude Code neamhaird den gheata** — deimhnigh nach bhfuil **`/v1`**
-in `ANTHROPIC_BASE_URL` agus atosaigh `claude` (ní léitear env ach uair amháin ag an tosú). Láimhseálann `omniroute launch`
-é seo duit.
+**Déanann Claude Cód neamhaird ar an geata** — dearbhú go bhfuil `ANTHROPIC_BASE_URL`** níl `/v1`** agus atosú `claude` (léitear env uair amháin ag am tosaithe). Láimhseálann `omniroute launch` seo duit.
 
-**Tá roghnóir `/model` folamh / tá samhlacha geata ar iarraidh** — teastaíonn Claude Code
-v2.1.219+ agus `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Ní bhíonn ach aitheantais samhlacha `claude*` /
-`anthropic*` le feiceáil sa roghnóir; cuir iallach ar aon samhail eile le
-`ANTHROPIC_MODEL=<id>` (seo a dhéanann próifílí).
+**Tá `/model` roghnóir samhlacha geata folamh / in easnamh** Tá gá — Cód Claude v2.1.219 + agus `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Níl ach múnla `claude*` / `anthropic*` IDs le feiceáil sa roghnóir; bhfeidhm aon mhúnla eile le `ANTHROPIC_MODEL=<id>` (is é seo a dhéanann próifílí).
 
-**`400 Ambiguous model 'claude-…'`** — seolann Claude Code aitheantais samhlacha **gan réimír**
-i gcónaí (m.sh. `claude-opus-4-8`), mar sin nuair atá soláthraí Claude Code (`cc/…`) agus
-soláthraí Claude (`claude/…`) araon nasctha, meaitseálann an t-aitheantas lom dhá bhealach agus
-diúltaíonn OmniRoute tomhas a dhéanamh. Is féidir é a réiteach ar cheachtar bealach: pionnaigh aitheantas a bhfuil réimír air le
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, nó cumasaigh **Tabhair Tosaíocht do Claude Code le haghaidh
-samhlacha Claude gan réimír** — an scorán ar leathanach an tsoláthraí Claude, nó
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (díchumasaithe de réir réamhshocraithe;
-féach [Timpeallacht](../reference/ENVIRONMENT.md)) — rud a threoraíonn aitheantais loma `claude-*`
-chuig Claude Code ina ionad sin. Bíonn an bua i gcónaí ag réimíreanna follasacha soláthraí.
+**`400 Ambiguous model 'claude-…'`** cuireann — Claude Cód i gcónaí** gan réamhshocrú** samhail IDs (m.sh. `claude-opus-4-8`), mar sin nuair a bhíonn an dá an Chód Claude (`cc/…`) agus Claude (`claude/…`) soláthraithe atá nasctha le chéile an id lom dhá bhealach agus OmniRoute dhiúltaíonn a buille faoi thuairim. Déan é a shocrú ach an oiread: pin id réamhshocrú le `ANTHROPIC_MODEL=cc/claude-opus-4-8`, nó cumasaigh** Is fearr le Cód Claude do mhúnlaí Claude neamhréamhshocraithe** — an scoránaigh ar leathanach an tsoláthraí Claude, nó `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (réamhshocraithe; féach [Comhshaol](../reference/ENVIRONMENT.md) ) — cé na bealaí arbh fhéidir `claude-*` IDs go Cód Claude ina ionad sin. Bíonn bua i gcónaí ag réimíreanna soláthróra follasach.
 
-**Earráidí fíordheimhnithe** — níl aon chomhartha sa phróifíl. Úsáid `omniroute launch --profile`
-(insteallann sé é) nó easpórtáil `ANTHROPIC_AUTH_TOKEN`.
+**"mód uathoibríoch ... níl an seisiún seo incháilithe" (iarrataí aicmitheora bille)** — in auto mode Iarrann Claude Code ar an bhfreastalaí athbhreithniú a dhéanamh ar ghníomhartha taobh istigh dá iarratais samhail féin ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Ní mór sin an luach `anthropic-beta` `dangerous-tool-use-2026-09-03` agus an réimse comhlacht `safeguards` chun Anthropic a bhaint amach mar phéire, agus `safeguard_results` móide an IDs úsáid uirlisí réamhtheachtacha chun teacht ar ais gan athrú. Déanann OmniRoute é seo nuair a chuirtear an t-iarratas chuig an soláthraí `claude` dúchais nó chuig nód `anthropic-compatible-*`, sruthaithe nó nach ea (garda aischéimnithí: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Ní féidir le spriocanna eile an t-athbhreithniú a sheoladh ar ais, mar sin titeann Cód Claude siar ar a iarrataí aicmitheora féin agus taispeánann sé an fógra:
 
-**Ní dhéanann próifílí aonrú** — is `CLAUDE_CONFIG_DIR` ar leith é gach próifíl;
-deimhnigh go bhfuil `echo $CLAUDE_CONFIG_DIR` taobh istigh den seisiún dírithe ar
-`~/.claude/profiles/<name>`.
+- samhail ar sholáthraí neamh-Antraipeach, nó teaglama a thuirlingíonn ar cheann amháin;
+- nód sealaíochta atá comhoiriúnach le Cód Claude (`anthropic-compatible-cc-*`), a atógann an comhlacht iarratais agus nach n-iompraíonn `safeguards`;
+- OmniRoute níos sine a thagann roimh na béiteanna ceadaithe, nó leagan Cód Claude faoin gceann a liostaíonn an leathanach Anthropic do sheisiúin gheata.
+
+Rith `/status` i Claude Cód: an** Mod freastalaí uathoibríoch** Léann row `Enabled` agus léirmheas an fhreastalaí gníomhach. Is é Anthropic a chinnfidh cé acu an ngearrtar bille ar na hiarratais sin agus ní le OmniRoute.
+
+**Earráidí an údair** — níl aon chomhartha ag an bpróifíl. Úsáid `omniroute launch --profile` (instealladh é) nó easpórtáil `ANTHROPIC_AUTH_TOKEN`.
+
+**Ní leithlisítear próifílí** — is `CLAUDE_CONFIG_DIR` ar leith é gach próifíl; fíoraigh `echo $CLAUDE_CONFIG_DIR` taobh istigh de na pointí seisiúin ag `~/.claude/profiles/<name>`.

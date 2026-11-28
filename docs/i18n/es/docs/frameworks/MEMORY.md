@@ -4,30 +4,13 @@
 
 ---
 
-> **Fuente de referencia:** `src/lib/memory/` y `src/app/api/memory/`
-> **Última actualización:** 2026-06-28 — v3.8.40 (desactivada de forma predeterminada + puesta al día de la cuantización int8)
+> **Fuente de la verdad:** `src/lib/memory/` y `src/app/api/memory/`
 
-OmniRoute proporciona memoria conversacional persistente asociada a una clave de API (y
-opcionalmente a un id de sesión). Los recuerdos se extraen automáticamente de las respuestas del LLM
-mediante una correspondencia ligera de patrones con expresiones regulares y se vuelven a insertar en las
-solicitudes posteriores como mensaje inicial del sistema (o como primer mensaje del usuario para los proveedores que
-rechazan el rol de sistema).
+OmniRoute proporciona memoria conversacional persistente codificada por la clave API (y opcionalmente la identificación de sesión). Los recuerdos se extraen automáticamente de las respuestas LLM mediante una coincidencia ligera de patrones de expresiones regulares y se vuelven a inyectar en solicitudes posteriores como un mensaje principal del sistema (o primer mensaje de usuario para los proveedores que rechazan la función del sistema).
 
-> **La memoria está DESACTIVADA de forma predeterminada (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> ahora es `false` (`src/lib/memory/settings.ts`). Habilitar la memoria inserta hasta
-> `maxTokens` (~2k) de contexto recuperado en **cada** solicitud de chat, lo que
-> se factura; esto supone un coste inesperado para las instalaciones nuevas y para los clientes que administran su
-> propio contexto. Actívela explícitamente en **Configuración → Memoria** (la
-> pestaña `MemorySkillsTab` muestra un aviso sobre el coste en tokens cuando la memoria está habilitada).
-> Un cliente puede excluir una solicitud individual mediante el encabezado de solicitud
-> `x-omniroute-no-memory` (`true`/`1`/`yes`); consulte la tabla de encabezados de solicitud en
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Una solicitud sin memoria establece
-> `memoryOwnerId = null`, lo que deshabilita **tanto** la inserción de memoria como la de habilidades para
-> esa solicitud (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **La memoria es OFF de forma predeterminada (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` ahora es `false` (`src/lib/memory/settings.ts`). Al habilitar la memoria se inyecta hasta `maxTokens` (~ 2k) de contexto recuperado en** cada** solicitud de chat, que se factura — un costo sorprendente para nuevas instalaciones y para clientes que administran su propio contexto. Opte por participar explícitamente en** Configuración de memoria →** (el `MemorySkillsTab` muestra una advertencia de costo del token cuando la memoria está habilitada). Un cliente puede optar por no recibir una sola solicitud con el encabezado de solicitud `x-omniroute-no-memory` (`true`/`1`/`yes`) — consulte la tabla de encabezados de solicitud en [API_REFERENCE.md](../reference/API_REFERENCE.md). Una solicitud sin memoria establece `memoryOwnerId = null`, lo que desactiva** ambos** Inyección de memoria y habilidad para esa solicitud (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-La memoria está **restringida por clave de API**, no por usuario: cada solicitud autenticada
-con la misma clave de API comparte el mismo conjunto de memoria, con una restricción adicional opcional
-por `sessionId`.
+La memoria es** alcance por clave API** , no por usuario — cada solicitud autenticada con la misma clave API comparte el mismo grupo de memoria, con un alcance adicional opcional por parte de `sessionId`.
 
 ## Arquitectura
 
@@ -301,27 +284,17 @@ La estrategia de recuperación de `MemoryConfig` es una de `exact`, `semantic` o
 y el ámbito es uno de `session`, `apiKey` o `global`. El ámbito predeterminado de
 `getMemorySettings()` es `apiKey`.
 
-## Extracción de datos (`extraction.ts`)
+## Extracción de hechos (`extraction.ts`)
 
-La extracción está **basada en expresiones regulares**, no en un LLM; se ejecuta dentro del proceso con
-`setImmediate()`, por lo que nunca bloquea el flujo de respuesta:
+La extracción es** basado en expresiones regulares** , no es — basado en LLM, se ejecuta en proceso con `setImmediate()` por lo que nunca bloquea el flujo de respuesta:
 
-- **Patrones de preferencias** → `MemoryType.FACTUAL`
-  (p. ej., `Prefiero …`, `Me gusta mucho …`, `mi favorito es …`, `Odio …`)
-- **Patrones de decisiones** → `MemoryType.EPISODIC`
-  (p. ej., `Usaré …`, `Elegí …`, `Me decidí por …`, `Voy a adoptar …`)
-- **Patrones de comportamiento** → `MemoryType.FACTUAL`
-  (p. ej., `Normalmente …`, `Siempre …`, `Suelo …`)
+- **Patrones de preferencia** → `MemoryType.FACTUAL` (por ejemplo, `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Patrones de decisión** → `MemoryType.EPISODIC` (por ejemplo, `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Patrones de patrones** → `MemoryType.FACTUAL` (por ejemplo, `I usually …`, `I always …`, `I tend to …`)
 
-Cada coincidencia se sanea (`trim`, reducción de espacios en blanco, límite de 500 caracteres),
-se deduplica dentro del lote mediante un `factKey(category, content)` estable y
-se almacena mediante `createMemory()` con los metadatos
-`{category, extractedAt, source: "llm_response"}`. El texto de entrada está limitado a
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`); cuando es más largo, se utiliza la **parte final** del texto
-para que siempre se tenga en cuenta el contenido más reciente del asistente.
+Cada coincidencia se desinfecta (`trim`, whitespace-collapse, con un límite de 500 caracteres), se deduplica dentro del lote a través de un `factKey(category, content)` estable y se almacena a través de `createMemory()` con metadatos `{category, extractedAt, source: "llm_response"}`. El texto de entrada tiene un límite de 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — cuando es más largo, el** cola** del texto se utiliza para que siempre participe el contenido más reciente del asistente.
 
-`extractFactsFromText(text)` se exporta para las pruebas y devuelve los datos estructurados
-sin almacenarlos.
+`extractFactsFromText(text)` se exporta para pruebas y devuelve los hechos estructurados sin almacenarlos.
 
 ## Recuperación (`retrieval.ts`)
 
@@ -680,22 +653,22 @@ Benchmark en un servidor x86 típico de 4 núcleos (textos de ~100 tokens cada u
 
 ---
 
-## Patrones de extracción de hechos (v3.8.16+)
+## Patrones de extracción de hechos (v3.8.16 +)
 
-El módulo `extraction.ts` (`src/lib/memory/extraction.ts`) utiliza **coincidencia de patrones mediante expresiones regulares** para extraer hechos estructurados de los mensajes de las conversaciones. Comprender estos patrones le ayudará a ajustar la calidad de la extracción para su caso de uso.
+El módulo `extraction.ts` (`src/lib/memory/extraction.ts`) utiliza** coincidencia de patrones de expresiones regulares** para extraer hechos estructurados de mensajes de conversación. Comprender estos patrones le ayudará a ajustar la calidad de extracción para su caso de uso.
 
 ### Categorías de patrones predeterminadas
 
-| Categoría           | Patrón de ejemplo                                   | Captura                                 |
-| ------------------- | --------------------------------------------------- | --------------------------------------- |
-| PREFERENCE_PATTERNS | `"Prefiero <X>"`, `"Me gusta <X>"`, `"Odio <X>"`    | Preferencias del usuario                |
-| DECISION_PATTERNS   | `"Usaré <X>"`, `"Decidí <X>"`, `"Elegí <X>"`        | Decisiones del usuario (episódicas)     |
-| PATTERN_PATTERNS    | `"Normalmente <X>"`, `"Siempre <X>"`, `"Nunca <X>"` | Patrones de comportamiento persistentes |
+| Categoría           | Patrón de ejemplo                                           | Capturas                                |
+| ------------------- | ----------------------------------------------------------- | --------------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Preferencias de usuario                 |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Decisiones del usuario (episódicas)     |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Patrones de comportamiento persistentes |
 
 ### Patrones de ejemplo (simplificados)
 
 ```ts
-// De src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -708,34 +681,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Qué se extrae
+### Lo que se extrae
 
 Cuando un usuario dice:
 
-> "Prefiero TypeScript. Usaré Postgres para este proyecto. Siempre hago commit antes de hacer push. No me gusta Python."
-> La extracción produce 4 recuerdos:
+> "Prefiero TypeScript. Usaré Postgres para este proyecto. Siempre me comprometo antes de presionar. No me gusta Python". La extracción produce 4 recuerdos:
 >
-> | Clave                                | Categoría  | Tipo     | Contenido                          |
-> | ------------------------------------ | ---------- | -------- | ---------------------------------- |
-> | `preference:typescript`              | preference | factual  | "TypeScript"                       |
-> | `decision:postgres_for_this_project` | decision   | episodic | "Postgres para este proyecto"      |
-> | `pattern:commit_before_pushing`      | pattern    | factual  | "hacer commit antes de hacer push" |
-> | `preference:python`                  | preference | factual  | "Python"                           |
+> | Clave | Categoría | Tipo | Contenido | | ------------------------------------ | ---------- | -------- | --------------------------- | | `preference:typescript` | preferencia | factual | "TypeScript" | | `decision:postgres_for_this_project` | decisión | episódica | "Postgres para este proyecto" | | `pattern:commit_before_pushing` | patrón | factual | "comprometerse antes de presionar" | | `preference:python` | preferencia | factual | "Python" |
 
 ### Límites de extracción
 
-Para evitar una extracción descontrolada, se aplican los siguientes límites:
+Para evitar una extracción desbocada, se aplican los siguientes límites:
 
 | Longitud mínima del contenido | 3 caracteres |
 | Longitud máxima del contenido | 500 caracteres |
 
-### Cuándo desactivar la extracción
+### Cuándo deshabilitar la extracción
 
-La extracción se ejecuta automáticamente siempre que la memoria esté activada; no existe un interruptor independiente exclusivo para la extracción. Para desactivarla, desactive la memoria por completo (`enabled: false` mediante `PUT /api/settings/memory`). Considere hacerlo cuando:
+La extracción se ejecuta automáticamente siempre que la memoria está habilitada; no hay una opción de solo extracción separada. Para desactivarlo, desactive la memoria por completo (`enabled: false` vía `PUT /api/settings/memory`). Considere hacerlo cuando:
 
-- Tenga un gran volumen de mensajes y el coste de extracción no sea trivial
-- Sus conversaciones sean principalmente transitorias (chat, depuración) y no tengan valor a largo plazo
-- Ya esté capturando el contexto mediante plugins personalizados
+- Tiene un gran volumen de mensajes y el costo de extracción no es trivial
+- Tus conversaciones son en su mayoría transitorias (chat, depuración) sin valor a largo plazo.
+- Ya estás capturando contexto a través de complementos personalizados
 
 ---
 

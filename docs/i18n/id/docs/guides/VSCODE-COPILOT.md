@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** menampilkan setiap model yang disediakan OmniRoute Anda di pemilih model
-_native_ GitHub Copilot Chat. Tanpa sidebar kedua, tanpa antarmuka chat terpisah — mode agen Copilot, pemanggilan alat,
-server MCP, dan instruksi khusus semuanya tetap berfungsi, hanya saja dijalankan pada model yang Anda pilih.
+**OmniCopilot** menambahkan model obrolan OmniRoute dan kombo Anda ke pemilih model Obrolan Copilot asli. Gunakan alur kerja obrolan dan agen editor yang ada, dengan pemanggilan alat dan visi bila didukung oleh model yang dipilih.
 
-|                      |                                                                                                                                                 |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Instal (VS Code)** | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Instal (fork)**    | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Sumber / isu**     | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Persyaratan**      | VS Code 1.104+                                                                                                                                  |
+|                       |                                                                                                                                            |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Instal (Kode VS )** | [Pasar → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                         |
+| **Instal (Buka VSX)** | [Membuka VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — memerlukan penyedia model bahasa dan obrolan APIs yang kompatibel |
+| **Sumber / masalah**  | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                                         |
+| **Memerlukan**        | VS Kode 1.104 + (1.122 + untuk menggunakannya tanpa masuk GitHub atau paket Copilot )                                                      |
+| **Rilis saat ini**    | OmniCopilot v1.5.1 di kedua toko (dirilis 24-11-2026)                                                                                      |
 
-> **Tidak memerlukan langganan Copilot.** Sejak VS Code 1.122, penyedia model bahasa dapat berfungsi
-> tanpa perlu masuk ke GitHub dan tanpa paket Copilot apa pun. Pelengkapan inline dan
-> fitur berbasis embedding tetap berada di luar API penyedia dan masih memerlukan Copilot.
+Simpan snapshot aktif** 25-11-2026 (01:43 UTC)** , rilis saat ini:** 52.081 pemasangan Marketplace** Dan** 20.989 Buka unduhan VSX** . Ini adalah metrik toko yang berbeda, bukan jumlah pengguna gabungan. Sumber: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) dan [Buka VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Ketersediaan VSX terbuka tidak dengan sendirinya menciptakan kompatibilitas dengan setiap editor yang menggunakan registri tersebut. Periksa obrolan editor dan dukungan API model bahasa.
+
+> **Tidak diperlukan langganan Copilot untuk obrolan BYOK di Kode VS 1.122 +.** Microsoft mendukung obrolan, alat, dan MCP tanpa masuk GitHub saat penyedia dikonfigurasi. Pada Kode VS 1.104–1.121 ekstensi masih berfungsi, tetapi Kode VS memerlukan paket Copilot yang masuk. Saran sebaris dan fitur berbasis penyematan tetap berada di luar penyedia API dan masih memerlukan Copilot; admin Copilot Business/Enterprise dapat menonaktifkan penyedia model pihak ketiga berdasarkan kebijakan; sebuah fork menampilkan model hanya jika ia mengimplementasikan penyedia obrolan API. Penggunaan penyedia hulu masih dapat dikenakan biaya. Lihat [catatan rilis Kode VS 1.122](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) dan [panduan model bahasa](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
-## Penyiapan
+## Pengaturan
 
 1. **Jalankan OmniRoute** — `npm install -g omniroute && omniroute` (dasbor di `http://localhost:20128`).
-2. **Instal ekstensi** — cari "OmniRoute" di tampilan Extensions.
-3. **Pilih model** — Copilot Chat → pemilih model → **Manage Models…** → **OmniRoute**, lalu centang
-   model yang Anda inginkan.
+2. **Instal ekstensi** — cari "OmniRoute" di tampilan Ekstensi.
+3. **Menghubungkan** — pertahankan `http://localhost:20128` default atau setel URL dan kunci API server Anda**OmniRoute: Kelola Koneksi** .
+4. **Pilih model** — Copilot Obrolan → pemilih model →** Kelola Model…** →**OmniRoute** , lalu centang yang Anda inginkan.
 
-Tidak ada yang perlu dikonfigurasi ketika OmniRoute berjalan pada port default. Untuk instans jarak jauh, buka
-**ikon OmniRoute di Activity Bar** (atau jalankan `OmniRoute: Manage Connection`) dan atur:
+Untuk pengaturan koneksi, buka** ikon OmniRoute di Bilah Aktivitas** (atau jalankan `OmniRoute: Manage Connection`) dan atur:
 
-- **URL server** — root server, misalnya `http://192.168.0.15:20128`. Sufiks `/v1`
-  ditambahkan oleh ekstensi; jangan sertakan sufiks tersebut.
-- **Kunci API** — hanya ketika server menetapkan `REQUIRE_API_KEY`. Disimpan di keychain OS melalui VS
-  Code SecretStorage, tidak pernah di `settings.json`.
+- **Server URL** — root server, misalnya `http://omniroute.example.com:20128`. Akhiran `/v1` ditambahkan dengan ekstensi; jangan sertakan itu.
+- **kunci API** — diperlukan ketika kebijakan otentikasi inferensi server memerlukannya. Disimpan melalui Kode VS SecretStorage, tidak pernah di `settings.json`; kunci khusus ruang kerja tersedia. Gunakan kunci resmi untuk model yang ingin Anda ekspos.
+
+Ekstensi ini juga menyediakan indikator koneksi, penyegaran model, konteks model dan metadata harga (termasuk kombo), penalaran yang dialirkan dengan a** Upaya berpikir** menu pada Kode VS 1.120 +, indikator batas harian bilah status dan panel penggunaan (OmniRoute 3.8.50 +), konfigurasi CLI dan tab dasbor opsional. Model dan kebijakan server yang dipilih menentukan kemampuan yang dapat Anda gunakan.
 
 ---
 
@@ -119,26 +119,25 @@ Lihat [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) dan isu
 
 ---
 
-## Mengonfigurasi alat lain dari dalam VS Code
+## Mengonfigurasi alat Anda yang lain dari dalam Kode VS
 
-**`OmniRoute: Configure Coding CLI`** menjalankan CLI `omniroute` untuk membuat profil siap pakai
-bagi Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo, dan Roo — konfigurasi yang sama seperti yang dijelaskan dalam
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). Kunci API diteruskan ke CLI melalui variabel lingkungan
-`OMNIROUTE_API_KEY`, tidak pernah melalui baris perintah.
+**`OmniRoute: Configure Coding CLI`** menggerakkan `omniroute` CLI untuk menulis profil siap pakai untuk 16 alat: Codex CLI, Claude Code, Cline, Lanjutkan, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed, WhyCodes dan 5dive. Ekstensi ini memanggil perintah `setup-*` di terminal terintegrasi; instal versi OmniRoute CLI yang menyertakan perintah yang dipilih. Lihat [panduan integrasi CLI](CLI-INTEGRATIONS.md) untuk file dan tandai yang digunakan setiap resep dan [registri alat ekstensi](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+Kunci API diserahkan ke CLI melalui `OMNIROUTE_API_KEY`, tidak pernah pada baris perintah. Resep pengaturan dapat mempertahankan kredensial dalam konfigurasi alat target. Saat berbagi kunci khusus ruang kerja dengan konfigurasi tingkat pengguna alat, ekstensi akan meminta konfirmasi terlebih dahulu.
 
 ---
 
 ## Pemecahan masalah
 
-| Gejala                                                   | Penyebab / perbaikan                                                                                                                                                                                                                                                                     |
-| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tidak ada model OmniRoute di pemilih                     | Server tidak dapat dijangkau. Titik pada bilah status berubah menjadi abu-abu; jalankan `OmniRoute: Check Connection`. Penemuan model sengaja dilakukan tanpa notifikasi dan tidak menambahkan model apa pun alih-alih menampilkan perintah interaktif.                                  |
-| Setiap model muncul dua kali                             | Anda menggunakan OmniCopilot versi sebelum 1.0.1 — lakukan pembaruan. Ekstensi kini meminta `?prefix=alias`.                                                                                                                                                                             |
-| Model gambar/audio yang sebelumnya tercantum kini hilang | Disengaja sejak 1.0.1 — model tersebut memang tidak pernah dapat menjawab permintaan obrolan.                                                                                                                                                                                            |
-| Panel tidak ada di Bilah Aktivitas                       | VS Code memindahkan kontainer tampilan tambahan ke menu luapan **"…"** di bagian bawah Bilah Aktivitas, dan kontainer yang disembunyikan melalui klik kanan akan tetap tersembunyi. Klik kanan Bilah Aktivitas → centang **OmniRoute**, atau buka dengan `OmniRoute: Manage Connection`. |
-| Dasbor terbuka di browser meskipun dalam mode `editor`   | Server tidak **dibuat** dengan `DASHBOARD_ALLOW_EMBED=vscode` (lihat di atas) — mengaturnya saat startup pada instalasi siap pakai tidak berpengaruh. Peralihan ke browser eksternal memang disengaja.                                                                                   |
-| Daftar model tidak mutakhir setelah mengubah penyedia    | `OmniRoute: Refresh Models`, atau tautan ↻ di panel.                                                                                                                                                                                                                                     |
+| Gejala                                                      | Penyebab / perbaikan                                                                                                                                                                                                                                                        |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tidak ada model OmniRoute di pemilih                        | Server tidak dapat dijangkau. Titik pada bilah status berubah menjadi abu-abu; jalankan `OmniRoute: Check Connection`. Discovery tidak bersuara karena desainnya dan tidak memberikan kontribusi model apa pun, melainkan dorongan.                                         |
+| Setiap model muncul dua kali                                | Anda menggunakan pembaruan OmniCopilot yang lebih lama dari 1.0.1 —. Ekstensi sekarang meminta `?prefix=alias`.                                                                                                                                                             |
+| Model image/audio dulunya terdaftar dan hilang              | Disengaja sejak 1.0.1 — tidak pernah bisa menjawab permintaan chat.                                                                                                                                                                                                         |
+| Panel hilang dari Bilah Aktivitas                           | Kode VS memindahkan wadah tampilan tambahan ke dalam** "..."** meluap di bagian bawah Bilah Aktivitas, dan wadah yang disembunyikan melalui klik kanan tetap tersembunyi. Klik kanan centang Activity Bar →**OmniRoute** , atau buka dengan `OmniRoute: Manage Connection`. |
+| Dasbor terbuka di browser meskipun dalam mode `editor`      | Servernya tidak** dibuat** dengan `DASHBOARD_ALLOW_EMBED=vscode` (lihat di atas) — mengaturnya saat startup pada instalasi bawaan tidak menghasilkan apa-apa. Penggantian ini disengaja.                                                                                    |
+| Daftar model sudah basi setelah berganti penyedia           | `OmniRoute: Refresh Models`, atau tautan ↻ di panel.                                                                                                                                                                                                                        |
+| Panel bertuliskan _Online (model diblokir)_, pemilih kosong | Server menolak kunci tersebut. Simpan kunci kanan dengan** Simpan & Uji** . Jika kuncinya diperbaiki di server (diaktifkan, atau diberi akses ke model), ekstensi tidak menyadarinya dengan sendirinya: jalankan `OmniRoute: Refresh Models` atau buka panel OmniRoute.     |
 
 ---
 

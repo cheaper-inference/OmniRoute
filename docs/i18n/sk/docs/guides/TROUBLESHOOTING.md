@@ -185,86 +185,49 @@ neobsahuje.
 
 ---
 
-## Falošné poplachy antivírusov
+## Falošné pozitíva antivírusu
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG umiestňuje `README.md` do karantény s hlásením `MD:HttpRequest-inf[Susp]`
+### Avast/AVG karanténa `README.md` so `MD:HttpRequest-inf[Susp]`
 
-**Ide o falošný poplach. Nič nie je infikované a nie je potrebný žiadny zásah.**
+**Toto je falošne pozitívne. Nič nie je infikované a nevyžaduje sa žiadna akcia.**
 
-Avast a AVG používajú heuristiku, ktorá označuje textové súbory a súbory Markdown obsahujúce veľa
-odkazov pripomínajúcich HTTP požiadavky. Súbor `README.md` projektu OmniRoute je súčasťou balíka npm (je
-uvedený v `package.json` → `files`), takže pri globálnej inštalácii sa uloží do
-`node_modules/omniroute/README.md` — a obsahuje približne 15 príkladov
-`http://localhost:20128/...` (koncové body MCP HTTP/SSE, adresu URL A2A `.well-known`
-a ukážky príkazov `curl`). Táto hustota odkazov stačí na aktivovanie heuristiky.
+Avast a AVG spúšťajú heuristiku, ktorá označuje súbory plain-text/Markdown obsahujúce veľa odkazov, ktoré vyzerajú ako žiadosť HTTP. OmniRoute `README.md` sa dodáva v balíku npm (je uvedený v `package.json` → `files`), takže pri globálnej inštalácii — pristane na `node_modules/omniroute/README.md` a obsahuje príklady ~ 15 `http://localhost:20128/...` (koncové body MCP HTTP/SSE, úryvky A2A `.well-known` URL a `curl` ). Táto hustota odkazov je dostatočná na to, aby sa heuristika prerušila.
 
-Ak sa to začalo diať až nedávno: typ súboru ani jeho povaha sa nezmenili. V súbore README
-sa rozšírila tabuľka koncových bodov (boli pridané MCP HTTP + SSE + A2A) a pribudli ďalšie
-príklady `curl`, čím súbor prekročil prahovú hodnotu.
+Ak sa to začalo len nedávno: súbor sa v naturáliách nezmenil. README rozšírila svoju tabuľku koncových bodov (boli pridané MCP HTTP + SSE + A2A ) a ďalšie príklady `curl`, čo ho posunulo za hranicu.
 
-Súbor je neaktívna dokumentácia bez akéhokoľvek spustiteľného obsahu. Môžete ho bezpečne
-obnoviť z karantény.
+Súbor je inertná dokumentácia s nulovým spustiteľným obsahom. Môžete ho bezpečne obnoviť z karantény.
 
 **Čo robiť:**
 
-1. **Zastavte upozornenia** — pridajte inštalačný adresár medzi výnimky antivírusu
-   (Avast: Nastavenia → Výnimky), pričom pridajte cestu ku globálnemu adresáru
-   `node_modules` a/alebo dátový adresár OmniRoute (`~/.omniroute/`).
-2. **Nahláste falošný poplach** — <https://www.avast.com/false-positive-file-form.php>
-   a priložte súbor `README.md` z karantény. Toto riešenie pomôže všetkým, pretože ide
-   o neprimeranú reakciu heuristiky dodávateľa na textový súbor.
+1. **Zastavte upozornenia** — vylúčte inštalačný adresár vo vašom antivíruse (Avast: Nastavenia → Exceptions), pridajte svoju globálnu cestu `node_modules` and/or OmniRoute data dir (`~/.omniroute/`).
+2. **Nahláste falošne pozitívny výsledok** — <https://www.avast.com/false-positive-file-form.php>, čím sa pripojí `README.md` v karanténe . Toto je oprava, ktorá pomáha všetkým, pretože ide o prehnanú heuristickú reakciu dodávateľa na textový súbor.
 
-**Prečo to „neopravujeme“ na našej strane:** všetky príklady používajú `http://localhost`
-a localhost nemôže používať `https` bez komplikácií so samopodpísanými certifikátmi.
-Znehodnotenie dokumentácie s cieľom obísť heuristiku jedného dodávateľa by uškodilo všetkým
-čitateľom len preto, aby sa vyhovelo chybe skenera.
+**Prečo to „neopravíme“ na našej strane:** všetky príklady sú `http://localhost` a localhost nemôže byť `https` bez sporu s vlastným podpisom. Manglovanie dokumentov, aby sa vyhli heuristike jedného dodávateľa, by každého čitateľa poškodilo, keby uspokojil chybu skenera.
 
-### Kaspersky označuje desktopovú aplikáciu ako `PDM:Trojan.Win32.Generic`
+### Kaspersky označí aplikáciu Desktop ako `PDM:Trojan.Win32.Generic`
 
-**Ide o falošný poplach behaviorálnej heuristiky. Nič nie je infikované.** Predpona
-`PDM:` produktu Kaspersky znamená, že verdikt pochádza z modulu Proactive Defense Module
-(System Watcher), ktorý posudzuje, čo inštalátor _robí_, namiesto porovnávania so známym
-malvérom. Keď sa aktivuje, Kaspersky „vráti späť“ celú inštaláciu — odstráni súbory, ktoré
-už zapísal — takže aplikácia zostane poškodená alebo bude chýbať.
+**Toto je falošne pozitívny výsledok behaviorálnej heuristiky. Nič nie je infikované.** Predpona `PDM:` od spoločnosti Kaspersky znamená, že verdikt pochádza z modulu Proactive Defense Module (System Watcher), ktorý posudzuje, čo inštalátor _robí_, a nie porovnávanie so známym malvérom. Keď sa spustí, Kaspersky „vráti späť“ celú inštaláciu — odstránením súborov, ktoré už napísali — takže aplikácia skončí poškodená alebo chýba.
 
-Označené súbory sú štandardnými súčasťami deklarovaných open-source závislostí pribalených
-k desktopovej aplikácii, napríklad:
+Súbory, ktoré označí, sú súčasťou deklarovaných závislostí s otvoreným zdrojom, ktoré sú súčasťou aplikácie pre stolné počítače, napríklad:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` a
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), knižnica na automatizáciu
-  prehliadača používaná na prihlasovanie k poskytovateľom v aplikácii a chat využívajúci
-  prehliadač.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — pripnutá natívna väzba `wreq-js` používaná na HTTP komunikáciu s odtlačkom prehliadača
-  pri poskytovateľoch používajúcich webové súbory cookie (`<arch>` je `x64` alebo `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` a `workerProcessEntry.js` — [Playwright](https://playwright.dev), knižnica na automatizáciu prehliadača používaná na prihlásenie poskytovateľa v aplikácii a chat podporovaný prehliadačom.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — pripnutá natívna väzba `wreq-js` používaná pre HTTP s odtlačkami prstov prehliadača u poskytovateľov webových súborov cookie (`<arch>` je `x64` alebo `arm64`).
 
-**Prečo sa aktivuje:** inštalátor pre Windows **zatiaľ nie je podpísaný kódom**, takže
-nepodpísaný inštalátor NSIS nemá žiadnu reputáciu a behaviorálne heuristiky pracujú
-s maximálnou agresivitou. V kombinácii s pribalenou natívnou knižnicou DLL a stovkami
-súborov `.js` zapisovaných do `%LOCALAPPDATA%\Programs\OmniRoute` (vrátane adresárov
-balíkov s príponami hashov zo samostatného zostavenia Next.js) to stačí na aktivovanie
-heuristiky. Podpisovanie kódu je naplánované; dovtedy sa tento problém môže opakovať
-pri nových vydaniach.
+**Prečo to strieľa:** inštalačný program Windows je** ešte nie je podpísaný kódom** , takže nepodpísaný inštalátor NSIS má nulovú reputáciu a behaviorálna heuristika beží pri maximálnej agresivite. V kombinácii s pribaleným natívnym DLL a stovkami súborov `.js` napísanými pod `%LOCALAPPDATA%\Programs\OmniRoute` (vrátane adresárov balíkov s príponou hash zo samostatnej zostavy Next.js ) to stačí na spustenie heuristiky. Plánuje sa podpisovanie kódu; kým nepristane, nové vydania to môžu opakovať.
 
 **Čo robiť:**
 
-1. **Najskôr overte stiahnutý súbor** (tým vylúčite, že bol pozmenený). Každé vydanie
-   zverejňuje súbor `latest.yml`, ktorého pole `sha512` (base64) sa vzťahuje na inštalátor
-   `OmniRoute.Setup.<version>.exe`. V PowerShelli spustite v priečinku obsahujúcom inštalátor:
+1. **Najprv overte stiahnutie** (vylučuje sfalšovaný súbor). Každé vydanie publikuje `latest.yml`, ktorého pole `sha512` (base64) pokrýva inštalačný program `OmniRoute.Setup.<version>.exe`. V PowerShell z priečinka obsahujúceho inštalačný program:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Výstup sa musí zhodovať s hodnotou `latest.yml` → `sha512`. Ak sa nezhoduje, súbor
-   odstráňte a znova ho stiahnite výhradne zo [stránky vydaní na GitHube](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Obnovte + pridajte výnimku** — obnovte z karantény položky odstránené pri vrátení zmien
-   a pridajte výnimku pre `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Nastavenia →
-   Hrozby a výnimky), potom aplikáciu znova nainštalujte.
-3. **Nahláste falošný poplach** — <https://opentip.kaspersky.com/>. Hlásenia falošných
-   poplachov od používateľov skutočne urýchľujú pridanie do zoznamu povolených položiek.
+   Výstup musí zodpovedať `latest.yml` → `sha512`. Ak sa tak nestane, odstráňte súbor a znova ho stiahnite iba zo [stránky vydaní GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Obnoviť + vylúčiť** — obnoví vrátené položky z karantény a pridá vylúčenie pre `%LOCALAPPDATA%\Programs\OmniRoute` (Nastavenia Kaspersky → → Hrozby a vylúčenia), potom preinštalujte.
+3. **Nahláste falošne pozitívny výsledok** — <https://opentip.kaspersky.com/>. Hlásenia FP odoslané používateľmi skutočne zrýchľujú zaradenie do zoznamu povolených.
 
 ---
 
@@ -875,10 +838,10 @@ Diagnostická matica pre nástroje kompresie CCR (`ccr`) a `session-dedup`. Úpl
 
 ---
 
-## Stále máte problémy?
+## Stále zaseknutý?
 
-- **Problémy na GitHube**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Architektúra**: Interné podrobnosti nájdete v dokumente [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
-- **Referenčná príručka API**: Všetky koncové body nájdete v dokumente [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
-- **Panel stavu**: Aktuálny stav systému skontrolujte v časti **Dashboard → Health**
-- **Prekladač**: Na ladenie problémov s formátom použite časť **Dashboard → Translator**
+- **Problémy GitHub** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Architektúra** : Interné podrobnosti nájdete [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
+- **API Referencia** : Pozrite si [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) pre všetky koncové body
+- **Informačný panel zdravia** : Skontrolujte** Dashboard → Health** pre stav systému v reálnom čase
+- **Prekladateľ** : Použite** Prekladač palubnej dosky →** na ladenie problémov s formátom

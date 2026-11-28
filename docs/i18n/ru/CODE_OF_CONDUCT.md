@@ -48,15 +48,13 @@
 публикацию материалов через официальную учётную запись в социальных сетях или выполнение функций назначенного
 представителя на онлайн- или офлайн-мероприятии.
 
-## Enforcement
+## Правоприменение
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+О случаях оскорбительного, преследующего или иного неприемлемого поведения можно сообщить лидерам сообщества, ответственным за обеспечение исполнения, открыв частную консультацию по безопасности по адресу:
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+или отправив письмо сопровождающему по адресу diegosouza.pw@outlook.com. Информацию об инцидентах, связанных с безопасностью, см. [`SECURITY.md`](SECURITY.md). Все жалобы будут рассмотрены и расследованы оперативно и справедливо.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Все лидеры сообщества обязаны уважать конфиденциальность и безопасность репортера о любом инциденте.
 
 ## Руководство по применению мер
 

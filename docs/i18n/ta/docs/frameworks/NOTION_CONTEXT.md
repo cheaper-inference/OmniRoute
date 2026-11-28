@@ -63,41 +63,29 @@ OmniRoute டோக்கனைச் சேமித்து உடனடி�
 
 ## MCP கருவிகள் (6)
 
-`open-sse/mcp-server/tools/notionTools.ts`-இல் வரையறுக்கப்பட்டுள்ளன. அழைப்பு நேரத்தில்
-`getNotionToken()` வழியாக டோக்கன் பெறப்படுகிறது; எதுவும் உள்ளமைக்கப்படவில்லை என்றால் கருவி
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
-என்று பிழை எழுப்பும்.
+`open-sse/mcp-server/tools/notionTools.ts` இல் வரையறுக்கப்பட்டுள்ளது. டோக்கன் `getNotionToken()` வழியாக அழைப்பு நேரத்தில் தீர்க்கப்படுகிறது; எதுவும் கட்டமைக்கப்படவில்லை என்றால், கருவி `"Notion integration token not configured. Set it in Settings > Context Sources."` ஐ வீசுகிறது
 
-| கருவி                        | Scope          | விளக்கம்                                                                                                                     |
-| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | உரை வினவல் மூலம் பக்கங்களையும் தரவுத்தளங்களையும் தேடுகிறது (தலைப்புகள், ID-கள், URL-களைத் திருப்பும்). பக்கப் பிரிப்புடையது. |
-| `notion_get_page`            | `read:notion`  | ஒரு பக்கத்தின் ID மூலம் அதன் உள்ளடக்கத்தையும் metadata-வையும் பெறுகிறது.                                                     |
-| `notion_list_block_children` | `read:notion`  | ஒரு block அல்லது பக்கத்தின் அனைத்து துணை block-களையும் (block மரத்தை) பட்டியலிடுகிறது. பக்கப் பிரிப்புடையது.                 |
-| `notion_query_database`      | `read:notion`  | விருப்பத்திற்குரிய `filter` + `sorts` உடன் (Notion API வடிவம்) தரவுத்தளத்தை வினவுகிறது. பக்கப் பிரிப்புடையது.                |
-| `notion_get_database`        | `read:notion`  | ID மூலம் ஒரு தரவுத்தளத்தின் schema/metadata-வைப் பெறுகிறது.                                                                  |
-| `notion_append_blocks`       | `write:notion` | ஏற்கனவே உள்ள block அல்லது பக்கத்தில் துணை block-களைச் சேர்க்கிறது (ஒரு கோரிக்கைக்கு அதிகபட்சம் 100 block-கள்).               |
+| கருவி                        | நோக்கம்        | விளக்கம்                                                                                                           |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `notion_search`              | `read:notion`  | உரை வினவல் மூலம் பக்கங்கள் மற்றும் தரவுத்தளங்களைத் தேடுங்கள் (தலைப்புகளைத் தருகிறது, IDs, URLs). பக்கவாட்டு.       |
+| `notion_get_page`            | `read:notion`  | பக்கத்தின் உள்ளடக்கம் மற்றும் மெட்டாடேட்டாவை அதன் ID மூலம் பெறவும்.                                                |
+| `notion_list_block_children` | `read:notion`  | ஒரு தொகுதி அல்லது பக்கத்தின் அனைத்து தொகுதி குழந்தைகளையும் பட்டியலிடுங்கள் (தொகுதி மரம்). பக்கவாட்டு.              |
+| `notion_query_database`      | `read:notion`  | விருப்பமான `filter` + `sorts` (Notion API வடிவம்) கொண்ட தரவுத்தளத்தை வினவவும். பக்கவாட்டு.                         |
+| `notion_get_database`        | `read:notion`  | ID மூலம் தரவுத்தளத்தின் schema/metadata பெறவும்.                                                                   |
+| `notion_append_blocks`       | `write:notion` | ஏற்கனவே உள்ள தொகுதி அல்லது பக்கத்தில் பிளாக் குழந்தைகளைச் சேர்க்கவும் (ஒரு கோரிக்கைக்கு அதிகபட்சம் 100 தொகுதிகள்). |
 
 ### உள்ளீட்டு அளவுருக்கள்
 
-- `notion_search` — `query` (1–500 எழுத்துகள்), `pageSize` (1–100, இயல்புநிலை 20),
-  `startCursor` (விருப்பத்திற்குரியது).
-- `notion_get_page` — `pageId` (32-எழுத்து hex அல்லது UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, இயல்புநிலை 50),
-  `startCursor` (விருப்பத்திற்குரியது).
-- `notion_query_database` — `databaseId`, `filter` (விருப்பத்திற்குரியது, Notion வடிப்பான் வடிவம்),
-  `sorts` (விருப்பத்திற்குரிய array), `pageSize` (1–100, இயல்புநிலை 50), `startCursor` (விருப்பத்திற்குரியது).
+- `notion_search` — `query` (1–500 எழுத்துகள்), `pageSize` (1–100, இயல்புநிலை 20), `startCursor` (விரும்பினால்).
+- `notion_get_page` — `pageId` (32-char hex அல்லது UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, இயல்புநிலை 50), `startCursor` (விரும்பினால்).
+- `notion_query_database` — `databaseId`, `filter` (விரும்பினால், Notion வடிகட்டி வடிவம்), `sorts` (விரும்பினால் வரிசை), `pageSize` (1–100, இயல்புநிலை 50), `startCursor` (விரும்பினால்).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (block பொருட்களின் array),
-  `after` (விருப்பத்திற்குரிய நிலை).
+- `notion_append_blocks` — `blockId`, `children` (தொகுதி பொருள்களின் வரிசை), `after` (விருப்ப நிலை).
 
-### Scope-கள்
+### நோக்கங்கள்
 
-படிப்புக் கருவிகளுக்கு `read:notion` தேவை; எழுதும் கருவிக்கு `write:notion` தேவை.
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` ஆக இருக்கும்போது மட்டுமே
-`open-sse/mcp-server/server.ts`-இல் உள்ள `withScopeEnforcement()` மூலம் scope-கள் அமல்படுத்தப்படுகின்றன;
-அழைப்பவருக்கு அனுமதிக்கப்பட்ட scope-கள் `OMNIROUTE_MCP_SCOPES`-இலிருந்து (காற்புள்ளியால் பிரிக்கப்பட்டவை) அல்லது
-அங்கீகரிக்கப்பட்ட API key-இன் scope சூழலிலிருந்து பெறப்படுகின்றன. முழுமையான scope மாதிரிக்கு
-[MCP-SERVER.md](./MCP-SERVER.md)-ஐப் பார்க்கவும்.
+படிக்கும் கருவிகளுக்கு `read:notion` தேவைப்படுகிறது மற்றும் எழுதும் கருவிக்கு `write:notion` தேவைப்படுகிறது. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` போது `open-sse/mcp-server/server.ts` இல் `withScopeEnforcement()` ஆல் ஸ்கோப்கள் செயல்படுத்தப்படும், மேலும் எப்போதும் API விசையில் `manage`/`admin` இல்லாத HTTP/SSE அழைப்பாளருக்கு; அழைப்பவரின் அனுமதிக்கப்பட்ட ஸ்கோப்கள் `OMNIROUTE_MCP_SCOPES` (காற்புள்ளியால் பிரிக்கப்பட்டவை) அல்லது அங்கீகரிக்கப்பட்ட API விசையின் ஸ்கோப் சூழலில் இருந்து வருகின்றன. முழு நோக்கம் மாதிரிக்கு [MCP-SERVER.md](./MCP-SERVER.md) பார்க்கவும்.
 
 ## இறுதிப்புள்ளிகள்
 

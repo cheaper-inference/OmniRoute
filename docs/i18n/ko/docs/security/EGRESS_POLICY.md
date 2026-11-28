@@ -67,37 +67,37 @@ PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777)에서 도입되�
 
 ---
 
-## 세 가지 값
+## 세 가지 가치
 
-| 값     | UI 레이블         | 동작                                                                                                                                                                    |
-| ------ | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `자동(듀얼 스택)` | OS가 주소 패밀리를 선택합니다. 프록시 호스트가 IP 리터럴이면 패밀리는 해당 리터럴에 내재되어 있으며, 호스트 이름이면 두 패밀리를 모두 사용할 수 있습니다. 기본값입니다. |
-| `ipv4` | `IPv4 전용`       | 연결을 IPv4로 고정합니다. 프록시 호스트에 IPv4(A) 레코드가 없으면 연결에 실패합니다.                                                                                    |
-| `ipv6` | `IPv6 전용`       | 연결을 IPv6로 고정합니다. 프록시 호스트에 IPv6(AAAA) 레코드가 없으면 연결에 실패합니다.                                                                                 |
+| 값     | UI 라벨             | 행동                                                                                                                                                       |
+| ------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS 가족을 선택합니다. IP 리터럴 프록시 호스트의 경우 제품군은 리터럴에 내재되어 있습니다. 호스트 이름의 경우 두 가족 모두 적격합니다. 이것이 기본값입니다. |
+| `ipv4` | `IPv4 only`         | IPv4 에 대한 연결을 고정합니다. 프록시 호스트에 IPv4 (A) 레코드가 없으면 실패하여 닫힙니다.                                                                |
+| `ipv6` | `IPv6 only`         | IPv6 에 대한 연결을 고정합니다. 프록시 호스트에 IPv6 (AAAA) 레코드가 없으면 실패하여 닫힙니다.                                                             |
 
-UI 문자열은 `src/i18n/messages/en.json`의 `labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`에 있습니다.
+UI 문자열은 `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`)에 있습니다.
 
 ---
 
 ## 구성 방법
 
-### 대시보드
+### 계기반
 
-선택기는 **프록시 풀** 탭의 프록시 양식에 있습니다.
+선택자는 다음의 프록시 형식입니다.** 프록시 풀** 꼬리표:
 
-1. **대시보드 → 설정 → 프록시 → 프록시 풀**을 엽니다.
-2. 프록시를 추가하거나 편집합니다.
-3. **IP 패밀리** 드롭다운을 `자동(듀얼 스택)`, `IPv4 전용` 또는 `IPv6 전용`으로 설정합니다.
-4. 저장합니다.
+1. 열려 있는** 대시보드 → 설정 → 프록시 → 프록시 풀**
+2. 프록시 추가 또는 편집
+3. 설정**IP 가족** `Auto (dual-stack)`, `IPv4 only` 또는 `IPv6 only` 드롭다운
+4. 구하다
 
-이 컨트롤은 `ProxyRegistryManager.tsx`에서 렌더링됩니다(`proxy/ProxyPoolTab.tsx`에 마운트됨).
+컨트롤은 `ProxyRegistryManager.tsx` ( `proxy/ProxyPoolTab.tsx` 에 마운트됨)에 의해 렌더링됩니다.
 
 ### API
 
-`family` 필드는 프록시 레지스트리 생성/업데이트 페이로드의 일부이며, `createProxyRegistrySchema` / `updateProxyRegistrySchema`(`src/shared/validation/schemas.ts`)에 의해 검증되고 `POST` / `PATCH /api/v1/management/proxies`에서 처리됩니다.
+`family` 필드는 `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`)로 검증되고 `POST` / `PATCH /api/v1/management/proxies` 로 처리되는 프록시 레지스트리 create/update 페이로드의 일부입니다.
 
 ```bash
-# IPv6 전용 프록시 생성
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,7 +108,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# 기존 프록시를 IPv4 전용으로 변경
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
@@ -116,7 +116,7 @@ curl -X PATCH http://localhost:20128/api/v1/management/proxies \
 
 동일한 필드는 업스트림 프록시 항목에 사용되는 인라인 프록시 구성 객체에서도 허용됩니다(`upstream_proxy_config.family`, [데이터 모델](#data-model) 참조).
 
-나머지 프록시 CRUD/할당 API에 대해서는 [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md)를 참조하세요.
+나머지 프록시 CRUD/assignment API 에 대해서는 [PROXY_GUIDE.md 를](../ops/PROXY_GUIDE.md) 참조하세요.
 
 ---
 

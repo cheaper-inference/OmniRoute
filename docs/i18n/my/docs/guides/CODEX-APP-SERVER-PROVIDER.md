@@ -18,27 +18,24 @@ session ပြန်လည်ပေးပို့မှုဆိုင်ရာ
 
 ---
 
-## 1. တည်ဆောက်ပုံ
+## 1. ဗိသုကာ
 
 ```
-┌─ OmniRoute အက်ပ် ────────────────┐        ┌─ codex-app-server sidecar ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ လုပ်ဆောင်နိုင်ခွင့် တိုကင်)      │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuth ကို ကိုယ်တိုင်စီမံသည်     │
-└──────────────────────────────────┘        │  (~/.codex/auth.json၊ အလိုအလျောက်တိုး) │
-        │ မျှဝေသည် (compose volumes)          └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS လုပ်ဆောင်နိုင်ခွင့် တိုကင် (နှစ်ဖက်စလုံးက mount လုပ်သည်)
-  codex-appserver-home    → ~/.codex (dashboard က auth.json ကို ရေးသားပြီး
-                             sidecar ၏ codex app-server က ဖတ်သည်)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidecar သည် လုပ်ဆောင်နိုင်ခွင့် တိုကင်ဖြင့် ကာကွယ်ထားသည့် အတွင်းပိုင်း compose
-  network (`ws://codex-app-server:1456`) ပေါ်တွင်သာ စောင့်ဆိုင်းသည်။ ၎င်းကို host
-  သို့မဟုတ် အင်တာနက်သို့ **မည်သည့်အခါမျှ** ဖွင့်မပေးပါ။
-- Codex CLI ကို `omniroute:base` အတွင်း ကြိုတင်ထည့်သွင်းထားသောကြောင့် sidecar ကို
-  အသုံးပြုသည့်အခါ host သို့မဟုတ် အသုံးပြုသူ၏ စက်တွင် codex ထည့်သွင်းရန် မလိုအပ်ပါ။
+- ဘေးကားက နားထောင်တယ်။** သာ** စွမ်းရည်တိုကင်နောက်ကွယ်ရှိ အတွင်းရေးဖွဲ့ကွန်ရက် (`ws://codex-app-server:1456`) တွင်။ ၎င်းသည်** ဘယ်တော့မှ** လက်ခံသူ သို့မဟုတ် အင်တာနက်သို့ ထုတ်ဝေသည်။
+- ဘေးတွဲကားသည် Codex CLI ပါ၀င်သည့် `runner-cli-no-docker` ပစ်မှတ်မှတည်ဆောက်ထားသော `omniroute:cli-no-docker` အသုံးပြုသည်။
 
 ## 2. စတင်အသုံးပြုခြင်း
 

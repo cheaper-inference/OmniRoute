@@ -4,7 +4,7 @@
 
 ---
 
-> **Patiesības avots:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Pēdējo reizi atjaunināts:** 2026-06-28 — v3.8.40
+> **Patiesības avots:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute tver asistentu `reasoning_content`, ko ražo domāšanas režīma modeļi, un pārskatāmi atskaņo to pēc vairāku apgriezienu pieprasījumiem, kad to pieprasa augšējais pakalpojumu sniedzējs. Tādējādi tiek novērstas HTTP 400 kļūdas, ko stingrie pakalpojumu sniedzēji rada, ja klienta sarunu vēsturē trūkst iepriekšējās kārtas argumentācijas.
 

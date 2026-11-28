@@ -4,24 +4,13 @@
 
 ---
 
-> **신뢰할 수 있는 원본:** `src/lib/memory/` 및 `src/app/api/memory/`
-> **마지막 업데이트:** 2026-06-28 — v3.8.40 (기본 비활성화 + int8 양자화 보완)
+> **진실의 출처:** `src/lib/memory/` 와 `src/app/api/memory/`
 
-OmniRoute는 API 키(및 선택적으로 세션 ID)를 기준으로 구분되는 영구 대화 메모리를 제공합니다. 메모리는 경량 정규식 패턴 매칭을 통해 LLM 응답에서 자동으로 추출되며, 이후 요청에 선행 시스템 메시지로 다시 주입됩니다(시스템 역할을 거부하는 제공자의 경우 첫 번째 사용자 메시지로 주입).
+OmniRoute API 키(및 선택적으로 세션 ID)로 입력되는 지속적인 대화형 메모리를 제공합니다. 경량 정규식 패턴 일치를 통해 LLM 응답에서 메모리가 자동으로 추출되고 선행 시스템 메시지(또는 시스템 역할을 거부하는 공급자의 첫 번째 사용자 메시지)로 후속 요청에 다시 삽입됩니다.
 
-> **메모리는 기본적으로 비활성화되어 있습니다(v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`는
-> 이제 `false`입니다(`src/lib/memory/settings.ts`). 메모리를 활성화하면 검색된 컨텍스트를 최대
-> `maxTokens`(~2k)까지 **모든** 채팅 요청에 주입하며, 이에 대한 비용이
-> 청구됩니다. 이는 신규 설치 및 자체 컨텍스트를 관리하는 클라이언트에
-> 예상치 못한 비용이 될 수 있습니다. **Settings → Memory**에서 명시적으로 활성화하세요(
-> 메모리가 활성화되면 `MemorySkillsTab`에 토큰 비용 경고 안내가 표시됩니다).
-> 클라이언트는 `x-omniroute-no-memory` 요청 헤더
-> (`true`/`1`/`yes`)를 사용하여 단일 요청에서 메모리를 제외할 수 있습니다. 자세한 내용은
-> [API_REFERENCE.md](../reference/API_REFERENCE.md)의 요청 헤더 표를 참조하세요. 메모리를 사용하지 않는 요청은
-> `memoryOwnerId = null`로 설정되며, 해당 요청에서 메모리와 스킬 주입을 **모두** 비활성화합니다
-> (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **메모리는 기본적으로 OFF 입니다(v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` 이제 `false` (`src/lib/memory/settings.ts`)입니다. 메모리를 활성화하면 검색된 컨텍스트 중 최대 `maxTokens` (~ 2k)가** 모든** — 로 청구되는 채팅 요청은 신규 설치 및 자체 컨텍스트를 관리하는 클라이언트에 대해 놀라운 비용입니다. 아래에서 명시적으로 선택하세요.** 설정 → 메모리** ( `MemorySkillsTab` 는 메모리가 활성화되면 토큰 비용 경고 콜아웃을 표시합니다). 클라이언트는 `x-omniroute-no-memory` 요청 헤더(`true`/`1`/`yes`)를 사용하여 단일 요청을 선택 해제할 수 있습니다. — [API_REFERENCE.md](../reference/API_REFERENCE.md) 의 요청 헤더 테이블을 참조하세요. 메모리 없음 요청은 `memoryOwnerId = null` 설정하여 비활성화합니다.** 둘 다** 해당 요청에 대한 메모리 및 스킬 주입(`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`)
 
-메모리는 사용자별이 아니라 **API 키별로 범위가 지정됩니다**. 동일한 API 키로 인증된 모든 요청은 같은 메모리 풀을 공유하며, 선택적으로 `sessionId`를 통해 범위를 더 세분화할 수 있습니다.
+기억은** API 키별로 범위가 지정됨** , 사용자 — 기준이 아닌 동일한 API 키로 인증된 모든 요청은 동일한 메모리 풀을 공유하며 선택적으로 `sessionId` 에 의한 추가 범위 지정이 가능합니다.
 
 ## 아키텍처
 
@@ -296,27 +285,17 @@ RRF는 이질적인 검색 시스템 간에 점수를 정규화할 필요 없이
 범위는 `session`, `apiKey`, `global` 중 하나입니다. `getMemorySettings()`의
 기본 범위는 `apiKey`입니다.
 
-## 사실 추출 (`extraction.ts`)
+## 사실 추출(`extraction.ts`)
 
-추출은 LLM 기반이 아니라 **정규식 기반**이며, 응답 스트림을 차단하지 않도록
-`setImmediate()`를 사용해 프로세스 내에서 실행됩니다.
+추출은** 정규식 기반** , LLM 기반 — 아니라 `setImmediate()` 와 함께 프로세스 내에서 실행되므로 응답 스트림을 차단하지 않습니다.
 
-- **선호도 패턴** → `MemoryType.FACTUAL`
-  (예: `나는 …을 선호한다`, `나는 …을 정말 좋아한다`, `내가 가장 좋아하는 것은 …이다`, `나는 …을 싫어한다`)
-- **결정 패턴** → `MemoryType.EPISODIC`
-  (예: `나는 …을 사용할 것이다`, `나는 …을 선택했다`, `나는 …을 택했다`, `나는 …을 도입할 것이다`)
-- **행동 패턴** → `MemoryType.FACTUAL`
-  (예: `나는 보통 …한다`, `나는 항상 …한다`, `나는 …하는 경향이 있다`)
+- **선호 패턴** → `MemoryType.FACTUAL` (예: `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **결정 패턴** → `MemoryType.EPISODIC` (예: `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **패턴 패턴** → `MemoryType.FACTUAL` (예: `I usually …`, `I always …`, `I tend to …`)
 
-각 일치 항목은 정제되고(`trim`, 공백 축약, 최대 500자 제한),
-안정적인 `factKey(category, content)`를 통해 배치 내에서 중복이 제거된 후,
-메타데이터 `{category, extractedAt, source: "llm_response"}`와 함께
-`createMemory()`를 통해 저장됩니다. 입력 텍스트는 64 KiB
-(`MAX_EXTRACTION_TEXT_LENGTH`)로 제한되며, 이보다 길면 가장 최근의 어시스턴트
-콘텐츠가 항상 포함되도록 텍스트의 **끝부분**을 사용합니다.
+각 일치 항목은 삭제되고(`trim`, 공백 축소, 최대 500자로 제한) 안정적인 `factKey(category, content)` 통해 배치 내에서 중복 제거되며 메타데이터 `{category, extractedAt, source: "llm_response"}` 와 함께 `createMemory()` 통해 저장됩니다. 입력 텍스트가 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — 로 제한됩니다.** 꼬리** 텍스트가 사용되므로 항상 최신 보조 콘텐츠가 참여합니다.
 
-`extractFactsFromText(text)`는 테스트용으로 내보내지며, 저장하지 않고 구조화된
-사실을 반환합니다.
+`extractFactsFromText(text)` 는 테스트를 위해 내보내지며 구조화된 사실을 저장하지 않고 반환합니다.
 
 ## 검색 (`retrieval.ts`)
 
@@ -659,22 +638,22 @@ MEMORY_EMBEDDING_CACHE_TTL_MS=300000               # TTL(5분)
 
 ---
 
-## 사실 추출 패턴 (v3.8.16+)
+## 사실 추출 패턴(v3.8.16 +)
 
-`extraction.ts` 모듈(`src/lib/memory/extraction.ts`)은 **정규식 패턴 매칭**을 사용하여 대화 메시지에서 구조화된 사실을 추출합니다. 이러한 패턴을 이해하면 사용 사례에 맞게 추출 품질을 조정하는 데 도움이 됩니다.
+`extraction.ts` 모듈(`src/lib/memory/extraction.ts`)은 다음을 사용합니다.** 정규식 패턴 일치** 대화 메시지에서 구조화된 사실을 추출합니다. 이러한 패턴을 이해하면 사용 사례에 맞게 추출 품질을 조정하는 데 도움이 됩니다.
 
 ### 기본 패턴 카테고리
 
-| 카테고리            | 패턴 예시                                                                          | 캡처하는 내용       |
-| ------------------- | ---------------------------------------------------------------------------------- | ------------------- |
-| PREFERENCE_PATTERNS | `"나는 <X>를 선호한다"`, `"나는 <X>를 좋아한다"`, `"나는 <X>가 싫다"`              | 사용자 선호도       |
-| DECISION_PATTERNS   | `"나는 <X>를 사용할 것이다"`, `"나는 <X>하기로 결정했다"`, `"나는 <X>를 선택했다"` | 사용자 결정(일화적) |
-| PATTERN_PATTERNS    | `"나는 보통 <X>한다"`, `"나는 항상 <X>한다"`, `"나는 절대 <X>하지 않는다"`         | 지속적인 행동 패턴  |
+| 범주                | 예제 패턴                                                   | 캡처                  |
+| ------------------- | ----------------------------------------------------------- | --------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | 사용자 환경설정       |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | 사용자 결정(에피소드) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | 지속적인 행동 패턴    |
 
-### 패턴 예시(단순화됨)
+### 예제 패턴(단순화)
 
 ```ts
-// src/lib/memory/extraction.ts에서 가져옴
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -691,30 +670,24 @@ const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\
 
 사용자가 다음과 같이 말하는 경우:
 
-> "나는 TypeScript를 선호한다. 이 프로젝트에는 Postgres를 사용할 것이다. 나는 항상 푸시하기 전에 커밋한다. 나는 Python을 좋아하지 않는다."
-> 추출 결과로 4개의 메모리가 생성됩니다:
+> "저는 TypeScript 선호합니다. 이 프로젝트에는 Postgres 사용하겠습니다. 저는 항상 푸시하기 전에 커밋합니다. 저는 Python을 좋아하지 않습니다." 추출은 4개의 메모리를 생성합니다.
 >
-> | 키                                   | 카테고리   | 유형     | 내용                     |
-> | ------------------------------------ | ---------- | -------- | ------------------------ |
-> | `preference:typescript`              | preference | factual  | "TypeScript"             |
-> | `decision:postgres_for_this_project` | decision   | episodic | "이 프로젝트용 Postgres" |
-> | `pattern:commit_before_pushing`      | pattern    | factual  | "푸시하기 전에 커밋"     |
-> | `preference:python`                  | preference | factual  | "Python"                 |
+> | Key | Category | Type | Content | | ------------------------------------ | ---------- | -------- | --------------------------- | | `preference:typescript` | preference | factual | "TypeScript" | | `decision:postgres_for_this_project` | decision | episodic | "Postgres for this project" | | `pattern:commit_before_pushing` | pattern | factual | "commit before pushing" | | `preference:python` | preference | factual | "Python" |
 
-### 추출 제한
+### 추출 한계
 
-과도한 추출을 방지하기 위해 다음 제한이 적용됩니다:
+폭주 추출을 방지하기 위해 다음 제한이 적용됩니다.
 
 | 최소 콘텐츠 길이 | 3자 |
 | 최대 콘텐츠 길이 | 500자 |
 
 ### 추출을 비활성화해야 하는 경우
 
-메모리가 활성화될 때마다 추출이 자동으로 실행되며, 추출만을 위한 별도의 토글은 없습니다. 추출을 끄려면 `PUT /api/settings/memory`를 통해 메모리를 완전히 비활성화(`enabled: false`)하세요. 다음과 같은 경우 비활성화를 고려하세요:
+메모리가 활성화될 때마다 추출이 자동으로 실행됩니다. 별도의 추출 전용 토글은 없습니다. 이를 끄려면 메모리를 완전히 비활성화하십시오(`enabled: false` 를 통해 `PUT /api/settings/memory`). 다음과 같은 경우 그렇게 하는 것을 고려하십시오:
 
-- 메시지 양이 많고 추출 비용을 무시하기 어려운 경우
-- 대화가 대부분 일시적이며(채팅, 디버깅) 장기적인 가치가 없는 경우
-- 이미 사용자 정의 플러그인을 통해 컨텍스트를 캡처하고 있는 경우
+- 메시지 양이 많고 추출 비용이 적지 않습니다.
+- 대화는 대부분 일시적(채팅, 디버깅)이며 장기적인 가치가 없습니다.
+- 이미 사용자 정의 플러그인을 통해 컨텍스트를 캡처하고 있습니다.
 
 ---
 

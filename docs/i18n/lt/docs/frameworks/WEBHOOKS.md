@@ -5,14 +5,10 @@
 ---
 
 > **Tiesos šaltinis:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Paskutinį kartą atnaujinta:** 2026-06-28 — v3.8.40
 
-„OmniRoute“ gali siųsti HTTP žiniatinklio kablius įvykus platformos įvykiams. Naudokite juos integracijoms su
-„Slack“, „PagerDuty“, „Datadog“, vidinėmis įspėjimų tarnybomis ar bet kuriuo HTTP imtuvu.
+OmniRoute gali suaktyvinti HTTP žiniatinklio kabliukus platformos įvykiuose. Naudokite juos integruodami su Slack, PagerDuty, Datadog, vidinėmis įspėjimo tarnybomis ar bet kokiu HTTP imtuvu.
 
-Dispečeris kiekvieną pristatymą pasirašo naudodamas HMAC-SHA256, pakartotinai bando įvykus laikinosioms
-triktims, stebi kiekvieno žiniatinklio kablio pristatymo būklę ir automatiškai išjungia galinius taškus, kuriems
-nuolat nepavyksta pristatyti duomenų.
+Dispečeris kiekvieną pristatymą pasirašo su HMAC-SHA256, bando dar kartą dėl trumpalaikių gedimų, stebi pristatymo būseną pagal žiniatinklio kabliuką ir automatiškai išjungia galutinius taškus, kurie nuolat sugenda.
 
 ## Palaikomi įvykiai
 

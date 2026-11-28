@@ -21,24 +21,21 @@ app-server URL मा पहुँचयोग्य Codex CLI** आवश्य
 ## 1. वास्तुकला
 
 ```
-┌─ OmniRoute एप ───────────────────┐        ┌─ codex-app-server साइडकार ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ क्षमता टोकन)                 │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuth आफैं व्यवस्थापन गर्छ │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, स्वतः नवीकरण)│
-        │ साझा हुन्छ (compose volumes)       └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS क्षमता टोकन (दुवैले यसलाई माउन्ट गर्छन्)
-  codex-appserver-home    → ~/.codex (ड्यासबोर्डद्वारा लेखिएको auth.json,
-                             साइडकारको codex app-server द्वारा पढिने)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- साइडकारले क्षमता टोकनद्वारा सुरक्षित आन्तरिक compose नेटवर्कमा
-  (`ws://codex-app-server:1456`) **मात्र** सुन्छ। यसलाई होस्ट वा इन्टरनेटमा
-  **कहिल्यै** प्रकाशित गरिँदैन।
-- Codex CLI लाई `omniroute:base` भित्रै समावेश गरिएको छ, त्यसैले साइडकार चलाउँदा
-  होस्ट वा प्रयोगकर्ताको मेसिनमा codex इन्स्टल गर्नुपर्दैन।
+- साइडकार सुन्छ** मात्र** आन्तरिक रचना नेटवर्कमा (`ws://codex-app-server:1456`) क्षमता टोकन पछाडि। यो छ** कहिल्यै** होस्ट वा इन्टरनेटमा प्रकाशित।
+- साइडकारले `omniroute:cli-no-docker` प्रयोग गर्दछ, `runner-cli-no-docker` लक्ष्यबाट निर्मित, जसमा Codex CLI समावेश छ।
 
 ## 2. यसलाई सुरु गर्नुहोस्
 

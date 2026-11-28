@@ -4,14 +4,12 @@
 
 ---
 
-ለመጨረሻ ጊዜ የዘመነው፡ 2026-08-23
-
 OmniRoute በሶስት የልዩ ዳሽቦርድ ገፆች ላይ ከተሰራጩ የሶስት ምድቦች CLI መሳሪያዎች ጋር ያዋህዳል
 
 | ገጽ           | መንገድ                    | ጽንሰ-ሐሳብ                                                               | መቁጠር       |
 | ------------ | ----------------------- | --------------------------------------------------------------------- | ---------- |
 | **CLI ኮድ's** | `/dashboard/cli-code`   | በ OmniRoute ላይ የጠቆሙት የኮድ ማድረጊያ መሳሪያዎች (ደንበኛ → CLI → OmniRoute → አቅራቢ) | 26         |
-| **CLI ወኪሎች** | `/dashboard/cli-agents` | በ OmniRoute (ተመሳሳይ ፍሰት፣ ሰፊ ወሰን) የሚጠቁሟቸው ራስ ወዳድ ወኪሎች                   | 11         |
+| **CLI ወኪሎች** | `/dashboard/cli-agents` | በ OmniRoute (ተመሳሳይ ፍሰት፣ ሰፋ ያለ ስፋት) የሚጠቁሙ ራስ ወዳድ ወኪሎች                  | 11         |
 | **ACP ወኪሎች** | `/dashboard/acp-agents` | CLIs stdio/ACP OmniRoute እንደ ጀርባ የሚፈልቅ (የተገላቢጦሽ ፍሰት)                  | መዝገብ ይመልከቱ |
 
 የቆዩ መንገዶች በ 308 አቅጣጫ አቅጣጫ ይቀየራሉ `/dashboard/cli-tools` → `/dashboard/cli-code`፣ `/dashboard/agents` → `/dashboard/acp-agents`።
@@ -228,7 +226,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/grok-build-settings`   | Grok ገንባ (~/.grok/config.toml, `[model.omniroute]`)               |
 | `POST /api/cli-tools/qwen-settings`         | Qwen ኮድ (`~/.qwen/settings.json` + የተወሰነ `.env` ቁልፍ)              |
 
-ሁሉም መንገዶች `sanitizeErrorMessage()` ለስህተት ምላሾች ይጠቀማሉ (ሃርድ ህግ ቁጥር 12)።
+ሁሉም መንገዶች `sanitizeErrorMessage()` ለስህተት ምላሾች (Hard Rule #12) ይጠቀማሉ።
 
 ---
 

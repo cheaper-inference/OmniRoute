@@ -4,26 +4,13 @@
 
 ---
 
-> **Sumber acuan:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`,
-> `scanner.ts`, `loader.ts`), `src/app/api/plugins/`, dan
-> `src/app/(dashboard)/dashboard/plugins/`
-> **Terakhir diperbarui:** 2026-06-28 — v3.8.40
+> **Sumber kebenaran:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`, `scanner.ts`, `loader.ts`), `src/app/api/plugins/`, dan `src/app/(dashboard)/dashboard/plugins/`
 
-OmniRoute menyediakan sistem plugin bergaya WordPress. Plugin merupakan direktori
-mandiri — masing-masing dengan manifes `plugin.json` dan sebuah file entri — yang terhubung
-ke pipeline permintaan (`onRequest` / `onResponse` / `onError`) serta ke
-peristiwa siklus hidup (`onInstall` / `onActivate` / `onDeactivate` / `onUninstall`).
+OmniRoute mengirimkan sistem plugin bergaya WordPress. Plugin adalah direktori mandiri — yang masing-masing berisi manifes `plugin.json` dan file entri — yang menghubungkan ke saluran permintaan (`onRequest` / `onResponse` / `onError`) dan ke peristiwa siklus hidup (`onInstall` / `onActivate` / `onDeactivate` / `onUninstall`).
 
-**Marketplace Plugin** merupakan lapisan penemuan di atas sistem tersebut. Lapisan ini
-menyediakan katalog plugin yang dapat dipasang dan ditelusuri. Secara default, katalog
-tersebut berupa registri seed bawaan berukuran kecil; operator dapat mengarahkannya ke URL
-registri jarak jauh khusus. Dalam hal ini, pengambilan data diperkuat dengan perlindungan SSRF
-yang melakukan resolusi DNS (lihat [Keamanan](#security)).
+Itu** Pasar Plugin** adalah lapisan penemuan di atas sistem itu. Ini memperlihatkan katalog plugin yang dapat diinstal yang dapat dijelajahi. Secara default, katalog adalah registri benih kecil yang ada di dalamnya; operator dapat mengarahkannya ke registri jarak jauh khusus URL, dalam hal ini pengambilan diperkuat oleh penjaga SSRF yang menyelesaikan DNS (lihat [Keamanan](#security) ).
 
-Setiap rute plugin **hanya dapat diakses melalui loopback** (Tingkat 1 — `LOCAL_ONLY`): plugin memuat
-dan mengeksekusi kode dalam proses anak, sehingga rute tersebut tidak dapat dijangkau dari
-origin non-loopback, terlepas dari autentikasi. Lihat
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
+Setiap rute plugin adalah** hanya loopback** (Tingkat 1 — `LOCAL_ONLY`): plugin memuat dan mengeksekusi kode dalam proses anak, sehingga rute tidak dapat dijangkau dari asal non-loopback terlepas dari autentikasinya. Lihat [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
 ## Bagaimana Ini Cocok Together
 
@@ -83,18 +70,19 @@ menggunakan daftar seed.
 
 Semua titik akhir memerlukan autentikasi manajemen (`requireManagementAuth`)** Dan** adalah — `/api/plugins` dan `/api/plugins/` khusus loopback yang terdaftar di `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Titik akhir                      | Metode | Keterangan                                                  |
-| -------------------------------- | ------ | ----------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Daftar plugin yang diinstal (filter `?status=` opsional)    |
-| `/api/plugins`                   | POST   | Instal plugin dari direktori sumber plugin                  |
-| `/api/plugins/scan`              | POST   | Pindai direktori plugin dan daftarkan plugin baru           |
-| `/api/plugins/marketplace`       | GET    | Daftar entri katalog pasar                                  |
-| `/api/plugins/[name]`            | GET    | Dapatkan detail plugin yang diinstal                        |
-| `/api/plugins/[name]`            | DELETE | Copot pemasangan plugin                                     |
-| `/api/plugins/[name]/activate`   | POST   | Aktifkan (muat kait register + )                            |
-| `/api/plugins/[name]/deactivate` | POST   | Nonaktifkan (api `onDeactivate`, batalkan pendaftaran kait) |
-| `/api/plugins/[name]/config`     | GET    | Dapatkan skema konfigurasi plugin config +                  |
-| `/api/plugins/[name]/config`     | PUT    | Perbarui konfigurasi plugin (divalidasi berdasarkan skema)  |
+| Titik akhir                        | Metode | Keterangan                                                  |
+| ---------------------------------- | ------ | ----------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Daftar plugin yang diinstal (filter `?status=` opsional)    |
+| `/api/plugins`                     | POST   | Instal plugin dari direktori sumber plugin                  |
+| `/api/plugins/scan`                | POST   | Pindai direktori plugin dan daftarkan plugin baru           |
+| `/api/plugins/marketplace`         | GET    | Daftar entri katalog pasar                                  |
+| `/api/plugins/marketplace/install` | POST   | Instal plugin pasar berdasarkan nama                        |
+| `/api/plugins/[name]`              | GET    | Dapatkan detail plugin yang diinstal                        |
+| `/api/plugins/[name]`              | DELETE | Copot pemasangan plugin                                     |
+| `/api/plugins/[name]/activate`     | POST   | Aktifkan (muat kait register + )                            |
+| `/api/plugins/[name]/deactivate`   | POST   | Nonaktifkan (api `onDeactivate`, batalkan pendaftaran kait) |
+| `/api/plugins/[name]/config`       | GET    | Dapatkan skema konfigurasi plugin config +                  |
+| `/api/plugins/[name]/config`       | PUT    | Perbarui konfigurasi plugin (divalidasi berdasarkan skema)  |
 
 Filter `GET /api/plugins` `status` menerima salah satu dari `installed` / `active` / `inactive` / `error`. Nilai yang tidak valid akan mengembalikan `400`.
 
@@ -114,9 +102,9 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` harus berupa** mutlak** jalur ke direktori** di dalam direktori sumber plugin** : `plugin-sources` di sebelah root plugin, jadi `~/.omniroute/plugin-sources/` secara default, atau `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` ketika variabel tersebut disetel (`getPluginSourcesDir()` di `src/lib/plugins/installSource.ts`). Salin atau kloning plugin di sana terlebih dahulu. Penginstalan ditolak dengan `400` ketika jalur berisi `..` atau byte nol, terletak di luar direktori tersebut, diselesaikan di luarnya melalui symlink, berisi symlink yang targetnya berada di luarnya, atau ketika direktori tidak ada. Direktori sumber harus berisi `plugin.json` yang valid (atau merupakan induk dari salah satunya). Jika berhasil, responsnya adalah `201` dengan baris plugin yang diinstal.
+The `path` must be an **absolute** path to a directory **inside the plugin sources directory**: `plugin-sources` next to the plugin root, so `~/.omniroute/plugin-sources/` by default, or `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` when that variable is set (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Copy or clone the plugin there first. The install is refused with `400` when the path contains `..` or a null byte, lies outside that directory, resolves outside it through a symlink, contains a symlink whose target is outside it, or when the directory does not exist. The source directory must contain a valid `plugin.json` (or be a parent of one). On success the response is `201` with the installed plugin row.
 
-Berbeda dengan rute plugin lainnya, rute plugin ini memerlukan kredensial manajemen (sesi dasbor atau kunci API cakupan pengelolaan) bahkan ketika proses masuk dinonaktifkan (`requireLogin=false`): memasang kode tidak pernah merupakan tindakan anonim.
+Berbeda dengan rute plugin lainnya, rute plugin ini memerlukan kredensial manajemen (sesi dasbor atau kunci API cakupan pengelolaan) bahkan ketika login dinonaktifkan (`requireLogin=false`): memasang kode tidak pernah merupakan tindakan anonim. Hal yang sama berlaku untuk `POST /api/plugins/marketplace/install` (tubuh `{ "name": "<plugin>" }`).
 
 ### Jelajahi pasar
 
@@ -134,7 +122,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` memvalidasi setiap nilai yang diberikan terhadap `configSchema` plugin (dideklarasikan dalam manifes): bidang `number` menghormati `min`/`max`, bidang `select` harus cocok dengan `enum` yang dideklarasikan. Kunci yang tidak ada dalam skema diperbolehkan masuk.
+`PUT .../config` memvalidasi isi terhadap `configSchema` plugin (dideklarasikan dalam manifes) dengan `validatePluginConfig()` dari `src/lib/plugins/manifest.ts`: setiap kunci harus dideklarasikan dalam skema, nilai harus cocok dengan tipe yang dideklarasikan, bidang `number` menghormati `min`/`max`, dan bidang `select` harus cocok dengan `enum` yang dideklarasikan. Pelanggaran apa pun akan mengembalikan `400` dan tidak ada yang disimpan. Sebuah plugin yang menyatakan tidak ada `configSchema` tidak memiliki kunci yang dapat dikonfigurasi, sehingga permintaan ditolak dengan `400` ("Plugin tidak mendeklarasikan kunci yang dapat dikonfigurasi").
 
 ## Konfigurasi
 
@@ -214,7 +202,7 @@ URL yang gagal pada kedua lapisan tidak membatalkan permintaan — pasar secara 
 
 ### Isolasi eksekusi plugin
 
-> **Plugin tidak di-sandbox.** Anak tersebut adalah proses Node.js biasa yang berjalan sebagai pengguna OmniRoute, tanpa konteks VM dan tanpa tanda izin Node.js, sehingga kode plugin dapat membaca dan menulis file apa pun yang dapat dilakukan pengguna, menjalankan program, dan menjangkau jaringan. `requires.permissions` hanya memutuskan variabel lingkungan mana yang diterima anak; izin lainnya tidak diterapkan. Instal hanya plugin yang Anda percayai. Batas proses di bawah ini berisi crash dan hang; itu bukan batas keamanan.
+> **Plugin tidak dimasukkan ke dalam sandbox secara default.** Anak tersebut adalah proses Node.js biasa yang berjalan sebagai pengguna OmniRoute, tanpa konteks VM dan tanpa tanda izin Node.js, sehingga kode plugin dapat membaca dan menulis file apa pun yang dapat dilakukan pengguna, menjalankan program, dan menjangkau jaringan. `requires.permissions` hanya memutuskan variabel lingkungan mana yang diterima anak; izin lainnya tidak diterapkan. Tanda fitur `PLUGIN_PERMISSION_MODEL_ENABLED` keikutsertaan (dinonaktifkan secara default) menjalankan setiap plugin di bawah model izin Node.js yang dibuat dari izin tersebut, kecuali `network`, yang tidak dapat dibatasi oleh Node.js (lihat [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Instal hanya plugin yang Anda percayai. Batas proses di bawah ini berisi crash dan hang; itu bukan batas keamanan.
 
 - **Isolasi proses** — `loadPlugin()` (`src/lib/plugins/loader.ts`) memunculkan setiap plugin dalam proses anak Node.js yang terpisah dan berkomunikasi melalui IPC. Panggilan hook memiliki batas waktu dengan eskalasi `SIGTERM` → `SIGKILL`.
 - **Daftar yang diizinkan** — anak hanya menerima serangkaian variabel lingkungan yang diizinkan; kumpulan yang lebih luas hanya diberikan ketika manifes meminta izin `env`.

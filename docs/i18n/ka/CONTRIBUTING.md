@@ -13,28 +13,23 @@ UI/UX-ის, i18n-ის, CLI-ის, მონაცემთა ბაზი�
 
 ---
 
-## განვითარების გარემოს მომზადება
+## განვითარების დაყენება
 
 ### წინაპირობები
 
-- **Node.js** `>=22.22.2 <23`, ან `>=24.0.0 <27` (რეკომენდებულია: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`, ან `>=24.0.0 <27` (რეკომენდირებულია: 24 LTS)
+- **npm** 10 +
 
-> **Windows Node 24-ით:** გამოიყენეთ მიმდინარე 24 LTS-ის პატჩ-რელიზი (მინიმუმ 24.20.0).
-> ადრინდელმა რელიზებმა შეიძლება წარმატებით დასრულებული ტესტების შემდეგ პროცესი შეწყვიტონ, როდესაც `--test-force-exit` პროცესს ხურავს. Node-ის [Windows libuv-ის შესწორება](https://github.com/nodejs/node/pull/61999) აგვარებს
-> ამ runtime-ის ავარიას; დატოვეთ ტესტის ასერტები და runner-ის გასვლის შემოწმებები ჩართული.
+> **Windows კვანძით 24:** გამოიყენეთ მიმდინარე 24 LTS პაჩის გამოშვება (მინიმუმ 24.20.0). ადრინდელი გამოშვებები შეიძლება შეწყდეს წარმატებული ტესტების შემდეგ, როდესაც `--test-force-exit` დახურავს პროცესს. Node's [Windows libuv fix](https://github.com/nodejs/node/pull/61999) მიმართავს ამ გაშვების ავარიას; ჩართოთ ტესტის მტკიცებები და მორბენალი გასვლის შემოწმებები.
 
-> **npm v11+ მომხმარებლები (Node 24+):** `npm install`-ის შემდეგ გადაამოწმეთ, რომ native მოდულები დაინსტალირდა:
-> `node -e "require('better-sqlite3')"`. თუ შესრულება დასრულდა `MODULE_NOT_FOUND`-ით,
-> გაუშვით `npm approve-scripts better-sqlite3 && npm install`. იხილეთ
-> [პრობლემების აღმოფხვრა](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + მომხმარებლები (Node 24 +):** `npm install` შემდეგ შეამოწმეთ, რომ დაინსტალირებულია მშობლიური მოდულები: `node -e "require('better-sqlite3')"`. თუ ის ვერ ხერხდება `MODULE_NOT_FOUND` ით, გაუშვით `npm approve-scripts better-sqlite3 && npm install`. იხილეთ [პრობლემების მოგვარება](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
-- **Git**
+- **გიტ**
 
 ### კლონირება და ინსტალაცია
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -42,86 +37,83 @@ npm install
 ### გარემოს ცვლადები
 
 ```bash
-# შექმენით თქვენი .env შაბლონიდან
+# Create your .env from the template
 cp .env.example .env
 
-# საჭირო საიდუმლოებების გენერირება
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-განვითარებისთვის საჭირო ძირითადი ცვლადები:
+განვითარების ძირითადი ცვლადები:
 
-| ცვლადი                 | განვითარების ნაგულისხმევი მნიშვნელობა | აღწერა                      |
-| ---------------------- | ------------------------------------- | --------------------------- |
-| `PORT`                 | `20128`                               | სერვერის პორტი              |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`              | frontend-ის საბაზისო URL    |
-| `JWT_SECRET`           | (generate above)                      | JWT-ის ხელმოწერის საიდუმლო  |
-| `INITIAL_PASSWORD`     | `CHANGEME`                            | პირველი შესვლის პაროლი      |
-| `APP_LOG_LEVEL`        | `info`                                | ლოგირების დეტალიზაციის დონე |
+| ცვლადი                 | განვითარების ნაგულისხმევი | აღწერა                     |
+| ---------------------- | ------------------------- | -------------------------- |
+| `PORT`                 | `20128`                   | სერვერის პორტი             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | ბაზა URL for frontend      |
+| `JWT_SECRET`           | (ზემოთ გენერირება)        | JWT ხელმოწერის საიდუმლო    |
+| `INITIAL_PASSWORD`     | `CHANGEME`                | პირველი შესვლის პაროლი     |
+| `APP_LOG_LEVEL`        | `info`                    | ჟურნალის სიტყვიერების დონე |
 
-### Dashboard-ის პარამეტრები
+### დაფის პარამეტრები
 
-Dashboard უზრუნველყოფს UI-ის გადამრთველებს იმ ფუნქციებისთვის, რომელთა კონფიგურაციაც გარემოს ცვლადების მეშვეობით არის შესაძლებელი:
+დაფა უზრუნველყოფს UI გადამრთველებს ფუნქციებისთვის, რომელთა კონფიგურაცია ასევე შესაძლებელია გარემოს ცვლადების საშუალებით:
 
-| პარამეტრის მდებარეობა | გადამრთველი        | აღწერა                                |
-| --------------------- | ------------------ | ------------------------------------- |
-| Settings → Advanced   | Debug Mode         | debug მოთხოვნების ლოგების ჩართვა (UI) |
-| Settings → General    | Sidebar Visibility | sidebar-ის სექციების ჩვენება/დამალვა  |
+| მდებარეობის დაყენება       | გადართვა                 | აღწერა                                   |
+| -------------------------- | ------------------------ | ---------------------------------------- |
+| პარამეტრები → გაფართოებული | გამართვის რეჟიმი         | გამართვის მოთხოვნის ჟურნალის ჩართვა (UI) |
+| პარამეტრები → ზოგადი       | გვერდითი ზოლის ხილვადობა | Show/hide გვერდითი ზოლის სექციები        |
 
-ეს პარამეტრები ინახება მონაცემთა ბაზაში და შენარჩუნდება გადატვირთვების შემდეგაც; დაყენების შემთხვევაში ისინი უპირატესობას ანიჭებს env var-ის ნაგულისხმევ მნიშვნელობებს.
+ეს პარამეტრები ინახება მონაცემთა ბაზაში და შენარჩუნებულია გადატვირთვის დროს, არღვევს env var ნაგულისხმევს, როდესაც დაყენებულია.
 
-### ლოკალურად გაშვება
+### ლოკალურად სირბილი
 
 ```bash
-# განვითარების რეჟიმი (ცხელი გადატვირთვა)
+# Development mode (hot reload)
 npm run dev
 
-# Production-ის build
-npm run build    # next build → .build/next/ შემდეგ assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# სწრაფი backend/API-only კომპილაცია კონტრიბუტორის ცვლილებებისთვის
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Release-ის build (გასუფთავებული rebuild + HEAD sentinel — საჭიროა deploy-ისთვის)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# პორტის კონფიგურაციის გავრცელებული მაგალითი
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-კონტრიბუტორის build ახორციელებს მხოლოდ კომპილაციის ვალიდაციას: ის არ აწყობს standalone დისტრიბუციას და არ აგებს optional native packaging-ის აქტივებს. გამოიყენეთ production-ის ჩვეულებრივი build, როდესაც საჭიროა deploy-ისთვის გამზადებული bundle-ის ვალიდაცია.
+კონტრიბუტორი build ასრულებს მხოლოდ კომპილაციის ვალიდაციას: ის არ აწყობს დამოუკიდებელ დისტრიბუციას ან არ აშენებს არასავალდებულო მშობლიური შეფუთვის აქტივებს. გამოიყენეთ რეგულარული წარმოების კონსტრუქცია, როდესაც გჭირდებათ გადაზიდვის პაკეტის დადასტურება.
 
-### Build-ის შედეგის განლაგება
+### შექმენით გამომავალი განლაგება
 
-| დირექტორია | შიგთავსი                                                                               | კონტროლდება ვერსიებში |
-| ---------- | -------------------------------------------------------------------------------------- | --------------------- |
-| `src/`     | აპლიკაციის წყარო (TypeScript / TSX)                                                    | დიახ                  |
-| `.build/`  | შუალედური ფაილები — `next build`-ის შედეგი (gitignored, `distDir = .build/next`)       | არა                   |
-| `dist/`    | deploy-ისთვის გამზადებული bundle — აწყობილია `assembleStandalone`-ის მიერ (gitignored) | არა                   |
+| დირექტორია | შინაარსი                                                                  | ადევნებდა თვალყურს |
+| ---------- | ------------------------------------------------------------------------- | ------------------ |
+| `src/`     | აპლიკაციის წყარო (TypeScript / TSX)                                       | დიახ               |
+| `.build/`  | შუალედური — `next build` გამომავალი (gitignored, `distDir = .build/next`) | არა                |
+| `dist/`    | გადაზიდვის პაკეტი — აწყობილი `assembleStandalone` ით (იგნორირებული)       | არა                |
 
-Build-ის pipeline ერთ გავლას მოიცავს:
+სამშენებლო მილსადენი არის ერთი გადასასვლელი:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js-ის შედეგი)
-  └─ assembleStandalone()                 (standalone + static + public + native assets-ის კოპირება)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` დამატებით ჯერ ასუფთავებს ორივე დირექტორიას და წერს
-`dist/BUILD_SHA`-ს (= `git rev-parse --short HEAD`) deploy-ის მთლიანობის sentinel-ის სახით.
+`npm run build:release` დამატებით ასუფთავებს ორივე დირექტორიას ჯერ და წერს `dist/BUILD_SHA` (= `git rev-parse --short HEAD`), როგორც განლაგების მთლიანობის სენტინელი.
 
-`npm run build:contributor` იყენებს backend-only build პროფილს. ის build-ის მიმდინარეობისას დროებით ქმნის dashboard-ის UI ფაილების stub-ებს, ინარჩუნებს API route handler-ებს და build-ის დასრულების შემდეგ აღადგენს თავდაპირველ ფაილებს. გამოიყენეთ `npm run build` dashboard-ის UI-ზე მოქმედი ცვლილებებისთვის ან სრული release-ის ვალიდაციისთვის; contributor პროფილი release build-ის შემცვლელი არ არის.
+`npm run build:contributor` იყენებს მხოლოდ backend-ის აშენების პროფილს. ის დროებით აჩერებს დაფის UI ფაილებს მშენებლობის დროს, ინახავს API მარშრუტის დამმუშავებლებს და აღადგენს ორიგინალ ფაილებს აშენების შემდეგ. გამოიყენეთ `npm run build` ცვლილებებისთვის, რომლებიც გავლენას ახდენენ დაფის UI ან სრული გამოშვების ვალიდაციისთვის; კონტრიბუტორის პროფილი არ არის გამოშვების შემცვლელი.
 
-> **VPS deploy-ის შენიშვნა:** დისტანციური image-ის დირექტორია `/usr/lib/node_modules/omniroute/app/`
-> უცვლელი რჩება. deploy-ის skills მასში `dist/`-ის შიგთავსს rsync-ით აკოპირებს.
-> შეიცვალა მხოლოდ რეპოზიტორიის build-ის შედეგის გზა (`app/` → `dist/`).
+> **VPS განლაგების შენიშვნა:** დისტანციური სურათების დირექტორია `/usr/lib/node_modules/omniroute/app/` უცვლელია. განლაგების უნარები რსინქრონებს მასში `dist/` ის შინაარსს. გადაადგილებულია მხოლოდ რეპოში ჩაშენებული გამომავალი გზა (`app/` → `dist/`).
 
-ნაგულისხმევი URL-ები:
+ნაგულისხმევი URLs:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **დაფა** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -425,8 +417,8 @@ VPS-ზე განთავსებისთვის გამოიყე�
 
 ## დახმარების მიღება
 
-- **არქიტექტურა**: იხილეთ [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API-ის ცნობარი**: იხილეთ [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **უსაფრთხოების დოკუმენტაცია**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **ოპერაციების დოკუმენტაცია**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **პრობლემები**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **არქიტექტურა** : იხილე [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API მითითება** : იხილეთ [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **უსაფრთხოების დოკუმენტები** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **ოპერაციული დოკუმენტები** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **საკითხები** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

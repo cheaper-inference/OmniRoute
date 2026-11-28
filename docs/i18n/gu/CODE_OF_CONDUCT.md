@@ -42,15 +42,13 @@
 સત્તાવાર સોશિયલ મીડિયા એકાઉન્ટ દ્વારા પોસ્ટ કરવું, અથવા ઑનલાઇન કે ઑફલાઇન કાર્યક્રમમાં નિયુક્ત
 પ્રતિનિધિ તરીકે કાર્ય કરવું શામેલ છે.
 
-## Enforcement
+## અમલીકરણ
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+અપમાનજનક, પજવણી અથવા અન્યથા અસ્વીકાર્ય વર્તણૂકના કિસ્સાઓ અહીં ખાનગી સુરક્ષા સલાહકાર ખોલીને અમલીકરણ માટે જવાબદાર સમુદાયના નેતાઓને જાણ કરવામાં આવી શકે છે.
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+અથવા જાળવણીકારને diegosouza.pw@outlook.com પર ઈમેલ કરીને. સુરક્ષા-સંવેદનશીલ ઘટનાઓ માટે, [`SECURITY.md`](SECURITY.md) જુઓ. તમામ ફરિયાદોની સમીક્ષા કરવામાં આવશે અને તાત્કાલિક અને ન્યાયી રીતે તપાસ કરવામાં આવશે.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+તમામ સમુદાયના નેતાઓ કોઈપણ ઘટનાના રિપોર્ટરની ગોપનીયતા અને સુરક્ષાને માન આપવા માટે બંધાયેલા છે.
 
 ## અમલીકરણ માર્ગદર્શિકા
 

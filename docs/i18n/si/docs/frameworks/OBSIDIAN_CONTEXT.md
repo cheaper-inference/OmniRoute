@@ -115,54 +115,46 @@ key id එකක් ඇති විට, `getObsidianConfigForApiKey()` එම �
 
 ## MCP මෙවලම් (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts` තුළ අර්ථ දක්වා ඇත. ටෝකනය/මූලික-URL එක සෑම ඇමතුමක් සඳහාම විසඳනු ලැබේ
-(පළමුව API යතුරකට අදාළ එක, ඉන්පසු ගෝලීය එක). OmniRoute **සමමුහුර්ත සේවාදායකය** වෙත ළඟා වන මෙවලම්
-(`obsidian_sync_*` මෙවලම් හතර) සඳහා අමතරව OmniRoute සැකසුම් තුළ වින්යාස කර ඇති සමමුහුර්ත සත්යාපන ටෝකනය අවශ්ය වේ.
+`open-sse/mcp-server/tools/obsidianTools.ts` හි අර්ථ දක්වා ඇත. token/base-URL එක් ඇමතුමකට විසඳනු ලැබේ (එක්-ඒපීඅයි-යතුර පළමුව, පසුව ගෝලීය). OmniRoute වලට පහර දෙන මෙවලම්** සමමුහුර්ත සේවාදායකය** ( `obsidian_sync_*` මෙවලම් හතර) අතිරේකව OmniRoute සැකසුම් තුළ වින්‍යාස කර ඇති සමමුහුර්ත සත්‍යාපන ටෝකනය අවශ්‍ය වේ.
 
-### කියවීමේ මෙවලම් (`read:obsidian`)
+### මෙවලම් කියවන්න (`read:obsidian`)
 
-| මෙවලම                        | විස්තරය                                                                                                  |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Local REST API වෙත ළඟා විය හැකිද සහ එය සත්යාපනය කර ඇත්දැයි පරීක්ෂා කරයි.                                 |
-| `obsidian_search_simple`     | සටහන් අන්තර්ගතයේ පූර්ණ-පෙළ සෙවීමක් සිදු කරයි; ගොනු මාර්ග සමඟ උපුටන ආපසු ලබා දෙයි.                        |
-| `obsidian_search_structured` | JSON Logic ප්රකාශනයක් භාවිතයෙන් සොයයි (and/or/regex/path පෙරහන්).                                        |
-| `obsidian_read_note`         | vault-සාපේක්ෂ මාර්ගයකින් සටහනක් කියවයි; විකල්ප ලෙස නිශ්චිත heading/block/frontmatter එකක් කියවයි.        |
-| `obsidian_list_vault`        | vault එකේ ගොනු සහ නාමාවලි ලැයිස්තුගත කරයි (ඇතුළත් කිරීම්වල රුක් ව්යුහයක්).                               |
-| `obsidian_get_document_map`  | සටහනේ ශීර්ෂ ව්යුහය ශීර්ෂ → පේළි අංක සිතියමක් ලෙස ලබා ගනී.                                                |
-| `obsidian_get_note_metadata` | සම්පූර්ණ අන්තර්ගතය නොමැතිව frontmatter, ටැග්, සබැඳි සහ අක්ෂර/වචන ගණන ලබා ගනී.                            |
-| `obsidian_get_active_file`   | Obsidian තුළ දැනට සක්රිය ගොනුවේ මාර්ගය + අන්තර්ගතය ලබා ගනී.                                              |
-| `obsidian_get_periodic_note` | දිනයක් සඳහා දෛනික/සතිපතා/මාසික ආවර්තිත සටහන ලබා ගනී (සඳහන් නොකළහොත් අද දිනය).                            |
-| `obsidian_get_tags`          | සියලුම vault ටැග් ඒවායේ සංඛ්යාත සමඟ ලැයිස්තුගත කරයි.                                                     |
-| `obsidian_list_commands`     | පවතින Obsidian විධාන ID ලැයිස්තුගත කරයි (`obsidian_execute_command` සමඟ භාවිත කරන්න).                    |
-| `obsidian_sync_status`       | OmniRoute සමමුහුර්ත සේවාදායකයේ තත්ත්වය: ක්රියාත්මක තත්ත්වය, vault නම, port, uptime, අවසන් සමමුහුර්තකරණය. |
-| `obsidian_sync_conflicts`    | නොවිසඳුණු සමමුහුර්ත ගැටුම් ලැයිස්තුගත කරයි (මාර්ගය, ගැටුම් මාර්ගය, හඳුනාගත් වේලාව).                      |
+| මෙවලම                        | විස්තරය                                                                                              |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | දේශීය REST API වෙත ළඟා විය හැකි සහ සත්‍යාපනය කර ඇත්දැයි පරීක්ෂා කරන්න.                               |
+| `obsidian_search_simple`     | සටහන් අන්තර්ගතයේ සම්පූර්ණ පෙළ සෙවීම; ගොනු මාර්ග සමඟ කොටස් ආපසු ලබා දෙයි.                             |
+| `obsidian_search_structured` | JSON තාර්කික ප්‍රකාශනයක් (and/or/regex/path පෙරහන්) භාවිතයෙන් සොයන්න.                                |
+| `obsidian_read_note`         | සුරක්ෂිතාගාරය-සාපේක්ෂ මාර්ගයෙන් සටහනක් කියවන්න; විකල්ප වශයෙන් නිශ්චිත heading/block/frontmatter.     |
+| `obsidian_list_vault`        | සුරක්ෂිතාගාරයේ ඇති ගොනු සහ නාමාවලි ලැයිස්තුගත කරන්න (ඇතුල්වීම් ගස).                                  |
+| `obsidian_get_document_map`  | සටහනේ ශීර්ෂ ව්‍යුහය ශීර්ෂ → රේඛා අංකවල සිතියමක් ලෙස ලබා ගන්න.                                        |
+| `obsidian_get_note_metadata` | සම්පූර්ණ අන්තර්ගතයෙන් තොරව ඉදිරිපස, ටැග්, සබැඳි, char/word ගණන ලබා ගන්න.                             |
+| `obsidian_get_active_file`   | Obsidian හි දැනට සක්‍රිය ගොනුවේ + අන්තර්ගතය ලබා ගන්න.                                                |
+| `obsidian_get_periodic_note` | දිනයක් සඳහා daily/weekly/monthly ආවර්තිතා සටහන ලබා ගන්න (අද ඉවත් කර ඇත්නම්).                         |
+| `obsidian_get_tags`          | සියලුම වෝල්ට් ටැග් ඒවායේ සංඛ්‍යාත සමඟ ලැයිස්තුගත කරන්න.                                              |
+| `obsidian_list_commands`     | පවතින Obsidian විධාන IDs ලැයිස්තුගත කරන්න ( `obsidian_execute_command` සමඟ භාවිතා කරන්න).            |
+| `obsidian_sync_status`       | OmniRoute සමමුහුර්ත සේවාදායක තත්ත්වය: ධාවනය, සුරක්ෂිතාගාරයේ නම, වරාය, අතිකාල, අවසන් සමමුහුර්ත කිරීම. |
+| `obsidian_sync_conflicts`    | නොවිසඳුණු සමමුහුර්ත ගැටුම් ලැයිස්තුගත කරන්න (මාර්ගය, ගැටුම් මාර්ගය, අනාවරණය කරගත්-දී).               |
 
 ### ලිවීමේ මෙවලම් (`write:obsidian`)
 
-| මෙවලම                            | විස්තරය                                                                                                       |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | ලබා දී ඇති Markdown අන්තර්ගතය සමඟ සටහනක් සාදයි හෝ උඩින් ලියයි.                                                |
-| `obsidian_append_note`           | සටහනකට අන්තර්ගතය එක් කරයි; විකල්ප ලෙස නිශ්චිත heading/block එකකට එක් කරයි.                                    |
-| `obsidian_patch_note`            | heading, block, හෝ frontmatter ක්ෂේත්රයකට නිශ්චිතව අගට එක් කිරීම/මුලට එක් කිරීම/ප්රතිස්ථාපනය කිරීම සිදු කරයි. |
-| `obsidian_delete_note`           | vault එකෙන් සටහනක් ස්ථිරව මකා දමයි.                                                                           |
-| `obsidian_move_note`             | vault එක තුළ සටහනක් ගෙන යයි හෝ එහි නම වෙනස් කරයි.                                                             |
-| `obsidian_execute_command`       | Obsidian විධානයක් එහි විධාන ID මඟින් ක්රියාත්මක කරයි.                                                         |
-| `obsidian_open_file`             | Obsidian තුළ ගොනුවක් විවෘත කරයි (එය නොපවතී නම් සාදයි).                                                        |
-| `obsidian_sync_trigger`          | ක්ෂණික ද්විදිශාත්මක desktop↔mobile vault සමමුහුර්තකරණයක් ක්රියාත්මක කරයි.                                     |
-| `obsidian_sync_resolve_conflict` | සමමුහුර්ත ගැටුමක් විසඳයි: `local` (mobile), `remote` (desktop), හෝ `keep-both` තබා ගනී.                       |
+| මෙවලම                            | විස්තරය                                                                                   |
+| -------------------------------- | ----------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | ලබා දී ඇති Markdown අන්තර්ගතය සමඟ සටහනක් සාදන්න හෝ උඩින් ලියන්න.                          |
+| `obsidian_append_note`           | සටහනකට අන්තර්ගතය එක් කරන්න; විකල්ප වශයෙන් නිශ්චිත heading/block. වෙත                      |
+| `obsidian_patch_note`            | ශීර්ෂකය, වාරණ, හෝ ප්‍රධාන ක්ෂේත්‍රයකදී ශල්‍යකර්මයක් append/prepend/replace.               |
+| `obsidian_delete_note`           | සුරක්ෂිතාගාරයෙන් සටහනක් ස්ථිරවම මකන්න.                                                    |
+| `obsidian_move_note`             | සුරක්ෂිතාගාරය තුළ සටහනක් ගෙනයන්න හෝ නැවත නම් කරන්න.                                       |
+| `obsidian_execute_command`       | Obsidian විධානයක් එහි ID විධානය මඟින් ක්‍රියාත්මක කරන්න.                                  |
+| `obsidian_open_file`             | Obsidian හි ගොනුවක් විවෘත කරන්න (එය නොපවතියි නම් එය නිර්මාණය කරයි).                       |
+| `obsidian_sync_trigger`          | ක්ෂණික ද්විපාර්ශ්වික ඩෙස්ක්ටොප්↔ ජංගම සුරක්ෂිතාගාරය සමමුහුර්ත කිරීම ක්‍රියාරම්භ කරන්න.    |
+| `obsidian_sync_resolve_conflict` | සමමුහුර්ත ගැටුමක් විසඳන්න: `local` (ජංගම), `remote` (ඩෙස්ක්ටොප්) හෝ `keep-both` තබා ගන්න. |
 
 > [!NOTE]
-> `obsidian_patch_note` ඉලක්ක සඳහා `heading | block | frontmatter` යන `targetType`
-> සහ `append | prepend | replace` යන `operation`, විකල්ප
-> `createTargetIfMissing` එකක් සමඟ පිළිගනී. `obsidian_sync_*` මෙවලම් හතර දේශීය සමමුහුර්ත
-> සේවාදායකය සමඟ සන්නිවේදනය කරයි (පෙරනිමියෙන් `http://127.0.0.1:27781`) සහ සමමුහුර්ත ටෝකනය අවශ්ය වේ.
+> `obsidian_patch_note` ඉලක්ක විකල්ප `createTargetIfMissing` සමඟ `heading | block | frontmatter` හි `targetType` සහ `append | prepend | replace` හි `operation` පිළිගනී. `obsidian_sync_*` මෙවලම් හතර දේශීය සමමුහුර්ත සේවාදායකයට කතා කරයි (පෙරනිමියෙන්`http://127.0.0.1:27781` ) සහ සමමුහුර්ත ටෝකනය අවශ්‍ය වේ.
 
-### විෂය පථ
+### විෂය පථයන්
 
-කියවීමේ මෙවලම් සඳහා `read:obsidian` අවශ්ය වේ; ලිවීමේ මෙවලම් සඳහා `write:obsidian` අවශ්ය වේ. බලාත්මක කිරීම
-Notion සමඟ සමාන වේ — `open-sse/mcp-server/server.ts` තුළ `withScopeEnforcement()` මඟින් හසුරුවනු ලබන අතර,
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` මත පදනම්ව සක්රිය කර, අවසර ලත් විෂය පථ `OMNIROUTE_MCP_SCOPES` හෝ API යතුරේ විෂය පථ සන්දර්භයෙන් ලබා ගනී. බලන්න
-[MCP-SERVER.md](./MCP-SERVER.md).
+කියවීමේ මෙවලම් සඳහා `read:obsidian` අවශ්‍ය වේ; ලිවීමේ මෙවලම් සඳහා `write:obsidian` අවශ්‍ය වේ. බලාත්මක කිරීම `open-sse/mcp-server/server.ts` හි `withScopeEnforcement()` විසින් හසුරුවන Notion — ට සමාන වේ, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` මත ගේට්ටු කර ඇති අතර API යතුරේ `manage`/`admin` නොමැති HTTP/SSE ඇමතුම්කරුවන් සඳහා `OMNIROUTE_MCP_SCOPES` හෝ API යතුරේ විෂය පථය සන්දර්භය වෙතින් ලබා ගත් අවසර ලත් විෂය පථයන් සමඟ බල කෙරේ. [MCP-SERVER.md](./MCP-SERVER.md) බලන්න.
 
 ## අන්ත ලක්ෂ්ය
 

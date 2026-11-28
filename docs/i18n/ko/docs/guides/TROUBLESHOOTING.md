@@ -178,74 +178,49 @@ npx playwright install chromium
 
 ---
 
-## 백신 오탐
+## 바이러스 백신 오탐지
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG가 `README.md`를 `MD:HttpRequest-inf[Susp]`로 격리하는 문제
+### Avast/AVG 격리 `README.md` 와 `MD:HttpRequest-inf[Susp]`
 
-**이는 오탐입니다. 어떤 파일도 감염되지 않았으며 별도의 조치가 필요하지 않습니다.**
+**이는 거짓 긍정입니다. 아무것도 감염되지 않았으며 조치가 필요하지 않습니다.**
 
-Avast와 AVG는 HTTP 요청처럼 보이는 링크가 많이 포함된 일반 텍스트/Markdown 파일을 탐지하는 휴리스틱을 실행합니다. OmniRoute의 `README.md`는 npm 패키지에 포함되어 배포되므로(`package.json` → `files`에 나열됨), 전역 설치 시 `node_modules/omniroute/README.md`에 저장됩니다. 이 파일에는 약 15개의 `http://localhost:20128/...` 예시(MCP HTTP/SSE 엔드포인트, A2A `.well-known` URL 및 `curl` 예시)가 포함되어 있습니다. 이러한 링크 밀도만으로도 휴리스틱이 작동할 수 있습니다.
+Avast와 AVG HTTP 요청으로 보이는 링크가 많이 포함된 plain-text/Markdown 파일에 플래그를 지정하는 경험적 방법을 실행합니다. OmniRoute 의 `README.md` 는 npm 패키지( `package.json` → `files` 에 나열되어 있음) 내에 포함되어 있으므로 — 전역 설치 시 `node_modules/omniroute/README.md` 에 위치하며 ~ 15 `http://localhost:20128/...` 예제( MCP HTTP/SSE 엔드포인트, A2A `.well-known` URL 및 `curl` 스니펫)를 포함합니다. 해당 링크 밀도는 휴리스틱을 실행하기에 충분합니다.
 
-이 문제가 최근에야 발생하기 시작했다면, 파일의 성격이 바뀐 것은 아닙니다. README의 엔드포인트 표에 MCP HTTP + SSE + A2A가 추가되고 `curl` 예시가 늘어나면서 탐지 임계값을 넘게 된 것입니다.
+최근에 시작된 경우: 파일의 종류가 변경되지 않았습니다. README 는 엔드포인트 테이블(MCP HTTP + SSE + A2A 추가됨)과 더 많은 `curl` 예제를 늘려 임계값을 넘어섰습니다.
 
-이 파일은 실행 가능한 콘텐츠가 전혀 없는 단순 문서입니다. 격리된 파일을 안전하게 복원할 수 있습니다.
+파일은 실행 가능한 콘텐츠가 전혀 없는 비활성 문서입니다. 격리에서 안전하게 복원할 수 있습니다.
 
-**조치 방법:**
+**해야 할 일:**
 
-1. **알림 중지** — 백신 프로그램에서 설치 디렉터리를 제외 항목으로 추가합니다
-   (Avast: 설정 → 예외). 전역 `node_modules` 경로 및/또는 OmniRoute 데이터 디렉터리
-   (`~/.omniroute/`)를 추가하세요.
-2. **오탐 신고** — <https://www.avast.com/false-positive-file-form.php>에서
-   격리된 `README.md`를 첨부해 신고하세요. 텍스트 파일에 과도하게 반응하는 공급업체의
-   휴리스틱이 원인이므로, 이 방법이 모든 사용자에게 도움이 되는 근본적인 해결책입니다.
+1. **알림 중지** — 바이러스 백신(Avast: 설정 → 예외)에서 설치 디렉터리를 제외하고 전역 `node_modules` 경로 and/or OmniRoute 데이터 디렉터리(`~/.omniroute/`)에 추가합니다.
+2. **오탐지 신고** — <https://www.avast.com/false-positive-file-form.php>, 격리된 `README.md` 첨부. 이는 텍스트 파일에 대한 공급업체의 경험적 과잉 반응이므로 모든 사람에게 도움이 되는 수정 사항입니다.
 
-**이 문제를 프로젝트 측에서 "수정"하지 않는 이유:** 모든 예시는 `http://localhost`를 사용하며,
-localhost에서 `https`를 사용하려면 자체 서명 인증서로 인한 불편이 발생합니다. 특정 공급업체의
-휴리스틱을 피하기 위해 문서를 변형한다면, 스캐너 버그에 맞추려고 모든 독자의 사용성을 해치게 됩니다.
+**우리 측에서 이 문제를 "수정"하지 않는 이유:** 예는 모두 `http://localhost` 이며, 자체 서명 인증서 마찰 없이는 localhost가 `https` 될 수 없습니다. 한 공급업체의 경험적 방법을 피하기 위해 문서를 조작하는 것은 스캐너 버그를 만족시키기 위해 모든 독자에게 해를 끼칠 수 있습니다.
 
-### Kaspersky가 데스크톱 앱을 `PDM:Trojan.Win32.Generic`으로 탐지하는 문제
+### Kaspersky는 데스크톱 앱을 `PDM:Trojan.Win32.Generic` 로 표시합니다.
 
-**이는 동작 기반 휴리스틱으로 인한 오탐입니다. 어떤 파일도 감염되지 않았습니다.** Kaspersky의
-`PDM:` 접두사는 알려진 악성코드와 일치하는지 확인한 결과가 아니라, 설치 프로그램이 _수행하는 작업_을
-판단하는 Proactive Defense Module(System Watcher)에서 나온 판정임을 의미합니다. 이 탐지가 발생하면
-Kaspersky는 전체 설치를 "롤백"하여 이미 작성된 파일까지 삭제하므로, 앱이 손상되거나 사라지게 됩니다.
+**이는 행동 휴리스틱의 잘못된 긍정입니다. 아무것도 감염되지 않았습니다.** Kaspersky의 `PDM:` 접두어는 사전 방어 모듈(시스템 감시자)에서 판정이 내려진다는 의미입니다. 이 모듈은 알려진 악성 코드와 비교하는 대신 설치 프로그램이 _하는 일_을 판단합니다. 실행되면 Kaspersky는 전체 설치 — "롤백"하여 이미 — 작성한 파일을 삭제하므로 앱이 손상되거나 누락됩니다.
 
-탐지되는 파일은 데스크톱 앱에 번들로 포함된, 명시된 오픈 소스 의존성의 표준 구성 요소입니다. 예를 들면 다음과 같습니다.
+플래그가 지정된 파일은 데스크톱 앱과 함께 번들로 제공되는 선언된 오픈 소스 종속성의 기본 부분입니다. 예를 들면 다음과 같습니다.
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` 및
-  `workerProcessEntry.js` — 앱 내 공급자 로그인과 브라우저 기반 채팅에 사용되는 브라우저 자동화
-  라이브러리인 [Playwright](https://playwright.dev).
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — 웹 쿠키 공급자에서 브라우저 지문을 적용한 HTTP 통신에 사용되는 고정 버전의 `wreq-js`
-  네이티브 바인딩(`<arch>`는 `x64` 또는 `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` 및 `workerProcessEntry.js` — [Playwright](https://playwright.dev), 인앱 제공자 로그인 및 브라우저 지원 채팅에 사용되는 브라우저 자동화 라이브러리입니다.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — 웹 쿠키 공급자의 브라우저 지문 HTTP 에 사용되는 고정된 `wreq-js` 기본 바인딩입니다(`<arch>` 는 `x64` 또는 `arm64` 입니다).
 
-**탐지되는 이유:** Windows 설치 프로그램이 **아직 코드 서명되지 않았기 때문에**, 서명되지 않은 NSIS
-설치 프로그램은 평판이 전혀 없으며 동작 기반 휴리스틱이 최대 수준으로 엄격하게 작동합니다. 여기에
-번들로 포함된 네이티브 DLL과 `%LOCALAPPDATA%\Programs\OmniRoute` 아래에 작성되는 수백 개의
-`.js` 파일(Next.js 독립 실행형 빌드에서 생성되는 해시 접미사 패키지 디렉터리 포함)이 결합되면
-휴리스틱이 작동하기에 충분합니다. 코드 서명은 예정되어 있으며, 적용되기 전까지는 새 릴리스에서도
-이 문제가 반복될 수 있습니다.
+**왜 발생합니까?** Windows 설치 프로그램은** 아직 코드 서명되지 않음** , 따라서 서명되지 않은 NSIS 설치 프로그램은 평판이 전혀 없으며 행동 경험적 접근이 최대 공격으로 실행됩니다. 번들로 제공되는 네이티브 DLL 및 `%LOCALAPPDATA%\Programs\OmniRoute` 아래에 작성된 수백 개의 `.js` 파일( Next.js 독립 실행형 빌드의 해시 접미사 패키지 디렉터리 포함)과 결합하면 경험적 접근을 시도하기에 충분합니다. 코드 서명이 계획되어 있습니다. 출시될 때까지 새 릴리스에서는 이를 반복할 수 있습니다.
 
-**조치 방법:**
+**해야 할 일:**
 
-1. **먼저 다운로드 파일을 검증하세요**(파일 변조 가능성을 배제할 수 있습니다). 모든 릴리스에는
-   `OmniRoute.Setup.<version>.exe` 설치 프로그램을 대상으로 하는 base64 형식의 `sha512`
-   필드가 포함된 `latest.yml`이 게시됩니다. PowerShell에서 설치 프로그램이 있는 폴더로 이동한 후
-   다음을 실행하세요.
+1. **먼저 다운로드를 확인하세요** (무단 변경된 파일은 제외). 모든 릴리스에서는 `sha512` 필드(base64)가 `OmniRoute.Setup.<version>.exe` 설치 프로그램을 다루는 `latest.yml` 게시합니다. PowerShell 의 설치 프로그램이 포함된 폴더에서:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   출력값은 `latest.yml` → `sha512`와 일치해야 합니다. 일치하지 않으면 파일을 삭제하고
-   [GitHub 릴리스 페이지](https://github.com/diegosouzapw/OmniRoute/releases)에서만 다시 다운로드하세요.
-2. **복원 + 제외 설정** — 롤백되어 격리된 항목을 복원하고
-   `%LOCALAPPDATA%\Programs\OmniRoute`를 제외 항목으로 추가한 다음
-   (Kaspersky → 설정 → 위협 및 제외) 다시 설치하세요.
-3. **오탐 신고** — <https://opentip.kaspersky.com/>에서 신고하세요. 사용자가 제출한 오탐
-   신고는 실제로 허용 목록 등록 속도를 높이는 데 도움이 됩니다.
+   출력은 `latest.yml` → `sha512` 와 일치해야 합니다. 그렇지 않은 경우 파일을 삭제하고 [GitHub 릴리스 페이지](https://github.com/cheaper-inference/OmniRoute/releases) 에서만 다시 다운로드하십시오.
+2. **+ 제외 복원** — 격리에서 롤백된 항목을 복원하고 `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → 설정 → 위협 및 제외)에 대한 제외를 추가한 다음 다시 설치합니다.
+3. **오탐지 신고** — <https://opentip.kaspersky.com/>. 사용자가 제출한 FP 보고서는 실제로 허용 목록 작성 속도를 높입니다.
 
 ---
 
@@ -858,10 +833,10 @@ omniroute serve --ready-timeout 180000
 
 ---
 
-## 여전히 해결되지 않나요?
+## 아직도 막혔나요?
 
-- **GitHub 이슈**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **아키텍처**: 내부 세부 정보는 [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)를 참조하세요
-- **API 레퍼런스**: 모든 엔드포인트는 [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)를 참조하세요
-- **상태 대시보드**: 실시간 시스템 상태는 **Dashboard → Health**에서 확인하세요
-- **변환기**: 형식 문제를 디버깅하려면 **Dashboard → Translator**를 사용하세요
+- **GitHub 문제** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **건축학** : 내부 세부정보는 [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) 참조하세요.
+- **API 참조** : 모든 엔드포인트에 대해서는 [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) 참조하세요.
+- **건강 대시보드** : 확인하다** 대시보드 → 건강** 실시간 시스템 상태
+- **역자** : 사용** 대시보드 → 번역기** 형식 문제를 디버깅하려면

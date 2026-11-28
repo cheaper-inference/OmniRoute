@@ -4,9 +4,9 @@
 
 ---
 
-> **உண்மையின் ஆதாரம்:** `electron/` பணியிடம்** கடைசியாக புதுப்பிக்கப்பட்டது:** 2026-06-28 — v3.8.40
+> **உண்மையின் ஆதாரம்:** `electron/` பணியிடம்
 
-OmniRoute ஒரு குறுக்கு-தளம் டெஸ்க்டாப் பயன்பாட்டை (Windows / macOS / Linux) உருவாக்குகிறது**Electron 41** +** எலக்ட்ரான்-பில்டர் 26.10** . டெஸ்க்டாப் பயன்பாடு, Next.js ஸ்டாண்டலோன் சர்வரை ஒரு குழந்தை செயல்முறையாக உருவாக்குகிறது, அதில் ஒரு `BrowserWindow` சுட்டிக்காட்டுகிறது, மேலும் கணினி தட்டு, ஆட்டோ-அப்டேட்டர், IPC பிரிட்ஜ் மற்றும் ஜீரோ-கான்ஃபிக் ரகசிய பூட்ஸ்ட்ராப் ஆகியவற்றைச் சேர்க்கிறது.
+OmniRoute ஒரு குறுக்கு-தளம் டெஸ்க்டாப் பயன்பாட்டை (Windows / macOS / Linux) உருவாக்கியது**Electron 41** +** எலக்ட்ரான்-பில்டர் 26.10** . டெஸ்க்டாப் பயன்பாடானது, Next.js ஸ்டாண்டலோன் சர்வரை ஒரு குழந்தை செயல்முறையாக உருவாக்குகிறது, அதில் ஒரு `BrowserWindow` சுட்டிக்காட்டுகிறது, மேலும் கணினி தட்டு, தானியங்கு புதுப்பிப்பு, IPC பிரிட்ஜ் மற்றும் பூஜ்ஜிய-கட்டமைப்பு ரகசிய பூட்ஸ்ட்ராப் ஆகியவற்றைச் சேர்க்கிறது.
 
 ## கட்டிடக்கலை
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## தானாக புதுப்பித்தல்
 
-GitHub வழங்குநருடன் (`diegosouzapw/OmniRoute`) `electron-updater` பயன்படுத்துகிறது.
+GitHub வழங்குநருடன் (`cheaper-inference/OmniRoute`) `electron-updater` பயன்படுத்துகிறது.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC வழியாக ரெண்டரருக்கு அனுப்பப்பட்ட நிகழ்வுகள்: `checking`, `available`, `not-available`, `downloading` ( `percent` உடன்), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage கையொப்பமிடுதல் விருப்பத்�
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-வெளியீடுகள் GitHub வெளியீடுகளில் வெளியிடப்படுகின்றன (`diegosouzapw/OmniRoute`), இது `electron-updater` புதிய பதிப்புகளை சரிபார்க்கிறது.
+வெளியீடுகள் GitHub வெளியீடுகளில் வெளியிடப்படுகின்றன (`cheaper-inference/OmniRoute`), இது `electron-updater` புதிய பதிப்புகளை சரிபார்க்கிறது.
 
 ## சரிசெய்தல்
 

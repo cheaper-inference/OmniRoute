@@ -4,8 +4,6 @@
 
 ---
 
-Ultimo aggiornamento: 23-08-2026
-
 OmniRoute si integra con tre categorie di strumenti CLI distribuiti su tre pagine dashboard dedicate:
 
 | Pagina         | Itinerario              | Concetto                                                                          | Contare       |
@@ -235,7 +233,7 @@ I nuovi strumenti con `configType: "custom"` hanno impostazioni dedicate percors
 | `POST /api/cli-tools/grok-build-settings`   | Grok Costruisci (~/.grok/config.toml, `[model.omniroute]`)                    |
 | `POST /api/cli-tools/qwen-settings`         | Codice Qwen (tasto `~/.qwen/settings.json` dedicato + `.env` )                |
 
-Tutti i percorsi utilizzano `sanitizeErrorMessage()` per le risposte agli errori (regola dura n. 12).
+Tutti i percorsi utilizzano `sanitizeErrorMessage()` per le risposte agli errori (regola dura #12).
 
 ---
 

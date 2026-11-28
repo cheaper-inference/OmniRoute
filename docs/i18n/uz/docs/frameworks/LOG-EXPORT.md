@@ -13,7 +13,7 @@ konveyer reyestrga asoslangan, shu sababli yangi manzillarni qoʻshish mumkin.
 
 ---
 
-## 1. Ishlash tartibi
+## 1. U qanday ishlaydi
 
 ```
 server (decrypt + validate config, reconcile cursor)
@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Jadval** — bitta `JobRegistry` cron vazifasi, `log_export`, standart qiymati `0 * * * *` (har soatda,
-  UTC). `src/lib/initCloudSync.ts` faylida roʻyxatdan oʻtkaziladi; uni `OMNIROUTE_LOG_EXPORT_CRON` orqali oʻzgartirish mumkin.
-  Har bir ishga tushishda barcha **yoqilgan** manzillar navbatma-navbat qayta ishlanadi.
-- **Kursor** — SQLiteʼning yashirin `call_logs.rowid` qiymati; har bir manzil uchun
-  `log_export_destinations.cursor_row_id` da saqlanadi. `timestamp` ataylab kursor sifatida ishlatilmaydi: chaqiruvchilar
-  oʻz qiymatini berishi mumkin, shuning uchun sekin soʻrov undan keyin boshlangan tezroq soʻrovdan soʻng yozilishi
-  mumkin va vaqt belgisi asosidagi kursor uni oʻtkazib yuboradi.
-- **Paketlash** — har bir soʻrov uchun `batch_size` ta satr (standart qiymat 500), har bir ishga tushirish uchun `max_rows_per_run` ta satr
-  (standart qiymat 10000); shu tariqa katta navbat bitta ishga tushirishni band qilib qoʻyish oʻrniga bir necha ishga tushirish davomida qayta ishlanadi.
-- **Yetkazib berish** — kursor faqat `send()` muvaffaqiyatli yakunlangandan soʻng oldinga siljiydi. Paket bajarilmasa,
-  kursor oʻz joyida qoladi va keyingi ishga tushirishda shu satrlar qayta yuboriladi. Kafolat —
-  kamida bir marta yetkazib berish va manzil tomonida takrorlarni olib tashlash; haqiqiy aynan bir marta yetkazib berish emas: BigQuery har bir
-  satr uchun chaqiruv jurnali identifikatorini kalit sifatida ishlatadi va oʻzining takrorlarni aniqlash vaqt oraligʻida uni imkon qadar hisobga oladi.
-- **Ustma-ust bajarilishdan himoya** — cron ishga tushishi va `POST .../run` bir vaqtda yuz berishi mumkin. Allaqachon
-  qayta ishlanayotgan manzil ikki marta qayta ishlanish oʻrniga oʻtkazib yuboriladi (ishga tushirish natijasida `skipped: true`),
-  shu sababli parallel ishga tushirish paketni qayta yubora yoki kursorni orqaga yoza olmaydi.
-- **Tozalashdan keyin tiklanish** — agar `cursor_row_id` qiymati `MAX(rowid)` dan katta boʻlib qolsa (butun jadval
-  tozalangan va rowid qiymatlari qaytadan boshlangan boʻlsa), bajaruvchi yangi yozuvlarni doimiy ravishda koʻrmay qolish oʻrniga kursorni 0 ga qaytaradi.
+- **Jadval** — one `JobRegistry` cron job, `log_export`, sukut bo'yicha `0 * * * *` (soatlik, UTC). `src/lib/initCloudSync.ts` da ro'yxatdan o'tgan; `OMNIROUTE_LOG_EXPORT_CRON` bilan bekor qilish mumkin. Har bir Shomil har biri oqib chiqadi** yoqilgan** maqsad, ketma-ket.
+- **Cursor** — SQLite ning yashirin `call_logs.rowid`, `log_export_destinations.cursor_row_id` ichida har bir maqsad uchun davom etdi. `timestamp` ataylab kursor emas: qo'ng'iroq qiluvchilar o'z qiymatini berishi mumkin, shuning uchun sekin so'rov keyinroq boshlangan tezroq so'rovdan keyin yozilishi mumkin va vaqt belgisi kursori uni o'tkazib yuboradi.
+- **Partiya** — `batch_size` satrlar har bir so'rov (standart 500), har bir ishga `max_rows_per_run` satrlar (standart 10000), shuning uchun katta qoldiq bitta blokirovka qilish o'rniga bir nechta belgidan o'tadi.
+- **Yetkazib berish** — kursor `send()` hal qilingandan keyingina oldinga siljiydi. Muvaffaqiyatsiz to'plam kursorni bo'lgan joyda qoldiradi, shuning uchun keyingi ishga tushirishda bir xil qatorlar qayta tiklanadi. Kafolat kamida bir marta va maqsad tomonini takrorlashdan iborat bo'lib, aynan bir marta haqiqiy emas: BigQuery har bir qatorni qo'ng'iroqlar jurnali identifikatori bo'yicha klavishlar qiladi, u o'zining shaxsiy deupatsiya oynasida eng yaxshi kuchga ega bo'ladi.
+- **Qoplama himoyasi** — the cron tick va `POST .../run` birga otish mumkin. Drenaj qilinayotgan maqsad ikki marta drenajlangandan ko'ra o'tkazib yuboriladi (ishlash natijasida `skipped: true` ), shuning uchun bir vaqtning o'zida ishga tushirish to'plamni qayta yubora olmaydi yoki kursorni orqaga yoza olmaydi.
+- **Qayta tiklashni tozalash** — agar `cursor_row_id` `MAX(rowid)` dan yuqori bo'lsa (butun jadval tozalandi va qatorlar qayta ishga tushirildi), yuguruvchi doimiy ravishda ko'r bo'lib qolmasdan, 0 ga qaytaradi.
 
-### Izolyatsiyalangan bajaruvchi va cheklovlar
+### Izolyatsiya qilingan yuguruvchi va chegaralar
 
-Node muhitida har bir manzil uchun ishga tushirish alohida, qisqa muddatli OT farzand jarayonini boshlaydi (IPC bilan `child_process`,
-`worker_threads` emas). Tana mazmunini oʻqish, foydali yuk JSONʼini tahlil qilish/serializatsiyalash, manzilning
-`prepare()` amali va manzil bilan tarmoq kiritish/chiqarish operatsiyalari serverning hodisalar siklida emas, shu jarayonda bajariladi.
-IPC orqali faqat konfiguratsiya va kichik bajarilish holati xabarlari uzatiladi; eksport qilingan yozuvlar
-serverga hech qachon qaytmaydi. Cron vazifasi va Hozir ishga tushirish marshruti oʻsha ochiq natija formatini va ustma-ust bajarilishdan himoyani saqlab qoladi.
+Tugunda ishga tushirilgan har bir maqsad alohida, qisqa muddatli OS bola jarayonini boshlaydi (`child_process` bilan IPC emas, `worker_threads` bilan). Tana o‘qishlari, foydali yuk JSON parsing/serialization, destination `prepare()` va destination network I/O hammasi server voqealari siklida emas, balki u yerda ishlaydi. Faqat konfiguratsiya va kichik taraqqiyot xabarlari IPC kesib o'tadi; eksport qilingan yozuvlar hech qachon serverga qaytmaydi. Cron ishi va Run Now marshruti bir xil umumiy natijani va bir-biriga o'xshash himoyani saqlaydi.
 
-Farzand jarayon server aniqlagan `DATA_DIR/storage.sqlite` faylini `node:sqlite` yordamida faqat oʻqish rejimida,
-`busy_timeout=5000` va `query_only=ON` bilan ochadi. U maʼlumotlar bazasining yagona nusxasini import qilmaydi hamda
-migratsiyalar, zaxira nusxalash yoki SQLite yangilanishlarini bajarmaydi. Yoʻqolgan/buzilgan artefaktlarni hisobga olish (jumladan,
-buzilgan artefakt uchun UPDATE) faqat boshqaruv panelining tafsilotlar yoʻlida qoladi. Ikkala yoʻl ham sof
-tafsilot aniqlagichidan foydalanadi; eksport asinxron fayl tizimi oʻqishlaridan va bir xil artefakt → eski
-ichki maʼlumot → eski disk maʼlumoti → mavjud emas aniqlash tartibidan foydalanadi. Farzand jarayon oʻquvchisini ochganida ishga tushirish eng katta kiritish rowid
-qiymatini qayd etadi; keyingi kiritishlar navbatdagi ishga tushirishni kutadi. Bu uzoq davom etuvchi SQLite tranzaksiyasi emas,
-balki kiritish chegarasidir: tarmoqni kutish vaqtida WAL yozuvchilari va nazorat nuqtalari erkin ishlashda davom etadi.
-Mavjud satrlarni yangilash/oʻchirish bu chegara bilan muzlatilmaydi.
+Bola serverning hal qilingan `DATA_DIR/storage.sqlite` -ni faqat o'qish uchun `node:sqlite` yordamida `busy_timeout=5000` va `query_only=ON` bilan ochadi. U hech qanday DB singletonni import qilmaydi va hech qanday migratsiya, zaxira yoki SQLite yangilanishlarini amalga oshirmaydi. Missing/corrupt artefakt buxgalteriya hisobi (jumladan, buzilgan artefakt UPDATE) faqat asboblar paneli tafsilotlari yo'lida qoladi. Ikkala yo'l ham sof tafsilotlarni hal qiluvchi bilan bo'lishadi; eksport asinxron fayl tizimi o'qishlari va bir xil artefakt → legacy inline → legacy disk → none resolution orderidan foydalanadi. Bola o'z o'quvchini ochganda, ishga tushirish snapshotlari maksimal kiritish qatorini ko'rsatadi; keyingi qo'shimchalar keyingi ishga tushirishni kutadi. Bu uzoq muddatli SQLite tranzaksiyasi emas, balki kiritish chegarasi: WAL yozuvchilari va nazorat punktlari tarmoq kutishlari vaqtida bepul qoladi. Mavjud qatorlarning Updates/deletions bu chegara bilan muzlatilmaydi.
 
-Har bir qabul qilingan paketdan soʻng farzand jarayon tasdiqni kutadi. Server avval
-`advanceLogExportCursor` orqali kursorni saqlaydi, soʻng `ack` yuboradi; undan oldin keyingi paket boshlanmaydi.
-Yuborishdagi xato, qulash yoki kutish muddati tugashi shu paket uchun kursorni oldinga siljitmasdan xatolikni qayd etadi. Avval
-tasdiqlangan paketlar saqlanganicha qoladi; koʻpi bilan bitta tasdiqlanmagan paket qayta yuborilishi mumkin.
-Muvaffaqiyat faqat `done` va farzand jarayonning xatosiz yakunlanishidan keyin qayd etiladi. Xatolik yuz bersa, farzand jarayon
-SIGTERM bilan toʻxtatiladi, 500 ms dan keyin esa SIGKILL qoʻllanadi va bajaruvchi jarayonning yopilishini kutadi.
+Har bir qabul qilingan partiyadan so'ng, bola tasdiqlashni kutadi. Server avval kursorni `advanceLogExportCursor` bilan davom ettiradi, keyin `ack` yuboradi; undan oldin keyingi partiya boshlanmaydi. Yuborish xatosi, ishdan chiqish yoki kutish vaqti tugashi, bu to'plamni oldinga siljitmasdan, muvaffaqiyatsizlikni qayd qiladi. Ilgari tan olingan partiyalar sodiq qoladi; ko'pi bilan bir tan olinmagan to'plam qayta yuborilishi mumkin. Muvaffaqiyat faqat `done` va toza bola chiqqandan keyin qayd etiladi. Muvaffaqiyatsizliklar bolani SIGTERM bilan tugatadi, 500 ms dan keyin SIGKILL ga ko'tariladi va yuguruvchi jarayonning yopilishini kutadi.
 
-| Muhit oʻzgaruvchisi                           | Standart qiymat | Maqsad                                              |
-| --------------------------------------------- | --------------- | --------------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000          | Har bir manzil uchun haqiqiy oʻtgan vaqt chegarasi  |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024            | Farzand jarayon V8 old-space chegarasi, MB hisobida |
+| Atrof-muhit o'zgaruvchanligi                  | Standart | Maqsad                               |
+| --------------------------------------------- | -------- | ------------------------------------ |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Devor soati chegarasi                |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Child V8 eski boʻsh joy chegarasi MB |
 
-Yaroqsiz/musbat boʻlmagan/butun son boʻlmagan qiymatlar oʻrniga standart qiymatlar ishlatiladi. Uyum sozlamasi umumiy
-RSS chegarasi emas; juda katta paketlar baribir farzand jarayon xotirasini tugatishi va ishga tushirishni xavfsiz tarzda muvaffaqiyatsiz yakunlashi mumkin.
-Standart 1024 MB qiymat tana mazmuni yoqilgan holatda 512 KiB artefaktlardan iborat standart 500 satrli paket uchun,
-jumladan BigQueryʼning bayt boʻlaklariga ajratilgan JSON serializatsiyasi uchun qoʻshimcha joy qoldiradi. Bu
-tana mazmuni bor 10000 satrli paketni xavfsiz qilmaydi. V8 uyum xotirasi tugaganda, yechim koʻrsatilgan xatolik qayd etiladi: paket
-hajmini kamaytiring yoki `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` qiymatini oshiring; kursor oxirgi
-tasdiqlangan paketda qoladi. Eski ichki/disk tana mazmuniga zamonaviy artefakt chegarasi tatbiq etilmaydi.
-Operatorlar, ayniqsa xotirasi cheklangan konteynerlarda, RSS uchun alohida resurs ajratishi kerak.
+Invalid/non-positive/non-integer qiymatlari standart qiymatlardan foydalanadi. Uyum sozlamalari umumiy RSS chegarasi emas; juda katta partiyalar hali ham bolalar xotirasini charchatishi va xavfsiz ishga tushishi mumkin. 1024 MB sukut bo‘yicha tanalar yoqilgan 512 KiB artefaktning standart 500 qatorli to‘plami, jumladan, BigQuery bayt-bo‘lakli JSON serializatsiyasi uchun bo‘sh joy qoldiradi. Bu 10000 qatorli tanalar partiyasini xavfsiz qilmaydi. V8 yig'indisi ishlamay qolgan nosozlikni qayd etadi: partiya hajmini pasaytiring yoki `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` ko'taring; kursor oxirgi tasdiqlangan to'plamda qoladi. Tarixiy inline/disk jismlari zamonaviy artefakt qopqog'i bilan qoplanmagan. Operatorlar RSS alohida-alohida byudjetlashtirishlari kerak, ayniqsa xotira cheklangan konteynerlar ichida.
 
-Farzand jarayon faqat aniqlangan `DATA_DIR`, `NODE_ENV`, aniq berilgan `TZ` (eski fayl nomlari uchun
-mahalliy vaqtni aniqlash), mavjud boʻlsa `ELECTRON_RUN_AS_NODE` hamda quyidagi tashqi ulanish parametrlarini meros qilib oladi:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (va ularning kichik harfli shakllari),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Global Undici dispetcheri serverning faqat muhitga asoslangan proksini aniqlash va mahalliy hostlar uchun
-proksini chetlab oʻtish qoidalaridan, jumladan `NO_PROXY` dan foydalanadi; u `proxyFetch.ts` yoki uning MB/funksiya bayroqlarini import qilmaydi.
-Proksi hisob maʼlumotlari uzatiladigan chiqish va qayd etilgan xatolardan yashiriladi. Qabul qiluvchi manzilning hisob maʼlumotlari
-faqat bitta boshlangʻich IPC xabarida uzatiladi, argv yoki muhit orqali hech qachon uzatilmaydi; chiqish/xatolarni uzatishda
-prefiks qoʻshiladi va maʼlumotlar tozalanadi. Har bir cron ishga tushishida Nodeʼning SQLite ogohlantirishi
-takrorlanmasligi uchun farzand jarayonni ishga tushirish argumentlarida faqat `ExperimentalWarning` oʻchiriladi; boshqa ogohlantirish turlari koʻrinishda qoladi.
+Bola faqat hal qilingan `DATA_DIR`, `NODE_ENV`, aniq `TZ` (eski fayl nomi mahalliy vaqt rezolyutsiyasi), mavjud boʻlganda `ELECTRON_RUN_AS_NODE` va quyidagi chiquvchi maʼlumotlarni meros qilib oladi: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (va ularning kichik `SSL_CERT_DIR` shakllari), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS` `SSL_CERT_FILE` Global Undici dispetcheri serverning sof muhit-proksi ruxsati va mahalliy xostni chetlab o'tish qoidalarini, shu jumladan `NO_PROXY` ni baham ko'radi; u `proxyFetch.ts` yoki uning DB/feature bayroqlarini import qilmaydi. Proksi-server hisob ma'lumotlari uzatilgan chiqish va qayd etilgan xatolardan o'zgartiriladi. Belgilangan manzil ma'lumotlari faqat bitta boshlang'ich IPC xabarida sayohat qiladi, hech qachon argv yoki muhit; output/error forwarding prefiksli va sanitarizatsiya qilingan. Tugunning har bir cron ishga tushirilishini ogohlantiruvchi SQLite takrorlanmasligi uchun bola ijro argumentlarida faqat `ExperimentalWarning` o'chirib qo'yilgan; boshqa ogohlantirish turlari ko'rinadigan bo'lib qoladi.
 
-Qabul qiluvchi manzil modullarini Next.js/faqat serverga moʻljallangan bogʻliqliklarsiz import qilish mumkin boʻlishi kerak. Mavjud
-BigQuery amalga oshirilishi bu talabga allaqachon javob beradi. Kirish tokenlari keshi faqat farzand jarayon
-ishlashi davomida saqlanadi, ishga tushirishlar orasida saqlanmaydi. Node qoʻllab-quvvatlanadigan bajarish muhitidir (`package.json` engines), ammo READMEʼning Bun
-oʻrnatish boʻlimi va `Dockerfile.bun` ham `bun:sqlite` (`src/lib/db/core.ts` / adapterlar) orqali
-ishlab chiqarish muhiti uchun moslik yoʻlini taklif qiladi. Shu sababli Bun ostida eksportlar avvalgi
-jarayon ichidagi yoʻlni saqlab qoladi va bir martalik ogohlantirish chiqaradi: farzand jarayonning heap/vaqt cheklovi izolyatsiyasi mavjud emas. Hodisalar
-sikli va OOM izolyatsiyasi uchun Nodeʼdan foydalaning; bu yerda Bun faqat dasturlash uchun moʻljallangan deb hisoblanmaydi.
+Belgilangan modullar Next.js/server-only bog'liqligisiz import qilinadigan bo'lishi kerak. Mavjud BigQuery ilovasi allaqachon ushbu shartnomaga javob beradi. Kirish-token keshlari faqat bolalar yugurish uchun davom etadi, ular bo'ylab emas. Tugun - qo'llab-quvvatlanadigan ish vaqti (`package.json` dvigatellari). Eng yaxshi harakat, qo'llab-quvvatlanmaydigan Bun moslik yo'li mavjud ( `src/lib/db/core.ts` / adapterlarda `bun:sqlite` va `Dockerfile.bun`), shuning uchun eksportlar uning ostida buzilmasligi kerak. Bun ostida eksportlar oldingi jarayondagi yoʻlni saqlab qoladi va bir martalik ogohlantirish chiqaradi: bola heap/timeout izolyatsiyasi mavjud emas. Hodisa-loop va OOM izolyatsiyasi uchun Node-dan foydalaning.
 
-`includeBodies` yoqilganda, bir soatlik foydali yuk navbatini toʻplash oʻrniga
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` kabi daqiqa darajasidagi davriylikni tanlang.
-Paket va qator cheklovlari har bir ishga tushirishni hamon chegaralaydi. Jarayonni ishga tushirish xarajati har bir manzil uchun har bir ishga tushirishda yuzaga keladi;
-bu umumiy CPU sarfini kamaytirish emas, balki server hodisalar sikli izolyatsiyasi evaziga kichik ishga tushirish xarajatini qabul qilishdir.
+`includeBodies` yoqilgan boʻlsa, soatlik foydali yukni toʻplashdan koʻra, `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` kabi daqiqali kadansni afzal koʻring. To'plam va qator chegaralari hali ham har bir yugurishni bog'laydi. Jarayonni ishga tushirish har bir maqsad uchun to'lanadi; bu server voqea-loop izolyatsiyasi uchun kichik boshlang'ich narxini sotadi, umumiy CPU foydalanishni kamaytirmaydi.
 
-### Foydali yuklar (promptlar va yakuniy javoblar)
+### Foydali yuklar (so'rovlar va to'ldirishlar)
 
-Odatiy holatda eksport faqat Jurnallar **roʻyxati** koʻrsatadigan qisqacha maydonlarni oʻz ichiga oladi.
-**Promptlar va javoblarni eksport qilish** (`includeBodies`) yoqilsa, Jurnallarning **tafsilotlar**
-panelida har bir chaqiruv uchun koʻrsatiladigan maʼlumotlar ham yuboriladi:
+Sukut bo'yicha eksport faqat Jurnallar jamlama maydonlarini olib yuradi** ro'yxati** ko'rsatadi. Yoqilmoqda** Ko'rsatmalar va javoblarni eksport qiling** (`includeBodies`) qo'shimcha ravishda Jurnallarni jo'natadi** tafsilot** panel har bir qo'ng'iroq uchun ko'rsatiladi:
 
-| Maydon                           | Unda nima saqlanadi                                                         |
-| -------------------------------- | --------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Boshqaruv panelida aks ettirilgan chaqiruv yuklari                          |
-| `pipeline_route_decision`        | Marshrutizator tanlagan maqsad va model                                     |
-| `pipeline_client_request`        | Mijoz yuborgan holatdagi oʻzgartirilmagan soʻrov                            |
-| `pipeline_openai_request`        | Ichki OpenAI shakliga oʻgirilgandan keyingi holat                           |
-| `pipeline_provider_request`      | Provayder formatida yuqori oqimga amalda yuborilgan holat                   |
-| `pipeline_provider_response`     | Yuqori oqimdan kelgan oʻzgartirilmagan javob                                |
-| `pipeline_client_response`       | Chaqiruvchiga qaytarilgan maʼlumot                                          |
-| `pipeline_error`                 | Muvaffaqiyatsiz chaqiruv uchun konveyer darajasidagi xato tafsilotlari      |
-| `bodies_truncated`               | Yuqoridagi istalgan maydon `maxBodyBytes` chegarasiga yetganda True boʻladi |
+| Maydon                           | U nimani ushlab turadi                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| `request_body` / `response_body` | Qo'ng'iroq yuklaydi, chunki asboblar paneli ularni ko'rsatadi                  |
+| `pipeline_route_decision`        | Router qaysi maqsad va modelni tanladi                                         |
+| `pipeline_client_request`        | Xom so'rov xuddi mijoz yuborganidek                                            |
+| `pipeline_openai_request`        | Ichki OpenAI shakliga tarjima qilingandan keyin                                |
+| `pipeline_provider_request`      | Aslida yuqori oqimga yuborilganidek, provayder lahjasida                       |
+| `pipeline_provider_response`     | Yuqori oqimning xom javobi                                                     |
+| `pipeline_client_response`       | Qo'ng'iroq qiluvchiga nima qaytarildi                                          |
+| `pipeline_error`                 | Muvaffaqiyatsiz qo‘ng‘iroq uchun quvur liniyasi darajasidagi xato tafsilotlari |
+| `bodies_truncated`               | Yuqoridagi istalgan maydon `maxBodyBytes` tegsa to'g'ri                        |
 
-Bu prompt mazmuni boʻlgani uchun u **odatiy holatda oʻchirilgan** va ataylab har bir manzil uchun alohida tanlanadi.
-Boshqaruv panelida koʻrsatilgan maʼlumot yuboriladi, chunki eksport va `getCallLogById` tafsilotlarni
-aniqlash mexanizmidan birgalikda foydalanadi: foydali yuklar
-yozilayotganda shaxsni aniqlashga imkon beruvchi maʼlumotlardan tozalanadi va maxfiy maʼlumotlar yashiriladi;
-`noLog` API kaliti bilan qilingan chaqiruv esa umuman foydali yuk saqlamaydi, shuning uchun eksport qilinadigan hech narsa boʻlmaydi.
+Bu tezkor kontent, shuning uchun ham shunday** sukut bo'yicha o'chirilgan** va ataylab har bir maqsadni tanlash. Qaysi kemalar asboblar panelida ko'rsatiladi, chunki eksport va `getCallLogById` batafsil o'lchamlarini taqsimlaydi: foydali yuklar allaqachon PII-sanitatsiya qilingan va ular yozilganda maxfiy tahrirlangan va `noLog` API kaliti bilan qilingan qo'ng'iroq umuman yukni saqlamaydi, shuning uchun eksport qilinadigan hech narsa yo'q.
 
-Foydali yuklar fayl tizimidagi artefaktdan har bir qator uchun alohida oʻqiladi, shu sababli maʼlumotlarni toʻldirish faqat
-buni soʻragan manzillar uchun bajariladi. Artefakt mavjud boʻlmasa yoki buzilgan boʻlsa, paketni muvaffaqiyatsiz yakunlab, kursorni toʻxtatib qoʻyish oʻrniga,
-uning qisqacha maʼlumotlari null foydali yuklar bilan eksport qilinadi.
+Foydali yuklar fayl tizimi artefaktidan har bir satrda o'qiladi, shuning uchun hidratsiya faqat uni so'ragan manzillar uchun ishlaydi. Yo'qolgan yoki buzilgan artefakt o'z xulosasini to'plamda ishlamay qolish va kursorni bog'lash o'rniga null foydali yuklar bilan eksport qiladi.
 
-`maxBodyBytes` (standart qiymati 262144) har bir maydon hajmini cheklaydi. Uzunroq foydali yuklar **tashlab yuborilmaydi,
-balki qisqartiriladi** — qisqartirilgan prompt ham «nima soʻralgan edi» degan savolga javob beradi — va qatorga
-`bodies_truncated` belgisi qoʻyiladi. Oqim orqali boʻlakma-boʻlak uzatilgan oʻzgarishlar eksport qilinmaydi; yigʻilgan javob
-allaqachon `pipeline_provider_response` va `pipeline_client_response` ichida mavjud.
+`maxBodyBytes` (standart 262144) har bir maydonni qamrab oladi. Uzunroq foydali yuklar** tushirilgandan ko'ra kesilgan** — kesilgan so'rov hali ham "nima so'ralgan" — javob beradi va qator `bodies_truncated` bilan belgilanadi. Oqimli parcha-parcha deltalar eksport qilinmaydi; yig'ilgan javob allaqachon `pipeline_provider_response` va `pipeline_client_response`.
 
 ---
 

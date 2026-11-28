@@ -12,6 +12,12 @@ Kontrak `config/cli-tools-manifest.json` neutral mengisytiharkan IDs berkanun, a
 
 Isyarat gangguan dan penamatan diteruskan kepada kanak-kanak. Pelancar menunggu acara tertutup kanak-kanak sebelum mengalih keluar konfigurasi sementara. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` mengawal tempoh tangguh sebelum penamatan paksa (lalai 5000 milisaat).
 
+`omniroute launch <tool>` (lihat [LAUNCH.md](./LAUNCH.md) ) mengikut peraturan persekitaran dan pemajuan isyarat yang sama, dan menambah:
+
+- **Automula gateway.** Untuk sasaran setempat, apabila tiada get laluan menjawab pada port, pelancar memulakan `omniroute serve --headless --no-open` terikat kepada `127.0.0.1` di bawah proses reaper yang terpisah. Setiap pelancaran berjalan memegang pajakan dalam `DATA_DIR/launch/leases/` (degupan jantung setiap 15 saat, basi selepas 45 saat atau apabila prosesnya hilang). Reaper menghentikan pintu masuk yang dimulakan apabila tiada pajakan telah disiarkan secara langsung untuk rahmat terbiar (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, lalai 10000 milisaat). Gerbang yang dimulakan pengguna digunakan tetapi tidak pernah berhenti. `--keep-gateway` atau `omniroute gateway keep` menukar gerbang pelancar menjadi gerbang biasa; `--no-start` memulihkan gelagat gagal-jika-down lama. Sasaran jauh disiasat sahaja.
+- **Sesi pelancaran.** Setiap pelancaran menghasilkan token sesi `olx_` jangka pendek daripada bukti kelayakan induk (`POST /api/launch/sessions`), berdegup jantung semasa alat berjalan, membaca ringkasan penggunaan dan membatalkannya selepas alat keluar. Token ialah subset ketat induknya: kebenaran yang sama, katalog yang sama atau lebih sempit, hayat yang lebih pendek dan ia bukan bukti kelayakan papan pemuka. Alat ini menerima token sesi, bukan bukti kelayakan ibu bapa, dan permintaan ditandakan `launch:<tool>:<sessionId>` melainkan `--tag` diberikan. Gerbang tanpa sesi API gagal dengan `GatewayTooOld` dan bukannya kembali kepada pelancaran tanpa skop.
+- **Konfigurasi setiap pelancaran.** Fail konfigurasi alat ditulis ke direktori temp peribadi (mod 0700, awalan `omnirouter-`) dan dialih keluar selepas anak itu keluar. `SIGKILL` pelancar meninggalkan direktori di belakang; `omniroute launch --cleanup` mengalih keluar direktori tersebut setelah lebih lama daripada sehari.
+
 ## persediaan berterusan Gemini
 
 ```bash

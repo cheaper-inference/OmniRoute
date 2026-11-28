@@ -506,21 +506,21 @@ iba vtedy, keď sa údaje rebríčka od posledného odoslania skutočne zmenili.
 
 **Súbor:** `src/lib/gamification/sharing.ts`
 
-### Podvojné účtovníctvo
+### Podvojná účtovná kniha
 
-Každý prevod vytvorí dva riadky v tabuľke `token_ledger`:
+Každý prenos vytvorí dva riadky v `token_ledger`:
 
-| Riadok | `from_key_id` | `to_key_id` | `amount` |
-| ------ | ------------- | ----------- | -------- |
-| Debet  | odosielateľ   | príjemca    | +suma    |
-| Kredit | príjemca      | odosielateľ | -suma    |
+| riadok  | `from_key_id` | `to_key_id`  | `amount` |
+| ------- | ------------- | ------------ | -------- |
+| Debetná | odosielateľa  | prijímač     | suma +   |
+| Kredit  | prijímač      | odosielateľa | -amount  |
 
-Počkať — konvencia je:
+Počkajte — konvencia je:
 
-| Riadok    | `from_key_id` | `to_key_id` | `amount` | Význam                    |
-| --------- | ------------- | ----------- | -------- | ------------------------- |
-| Odoslanie | odosielateľ   | príjemca    | +suma    | Odtok od odosielateľa     |
-| Prijatie  | príjemca      | odosielateľ | +suma    | Príjem na strane príjemcu |
+| riadok  | `from_key_id` | `to_key_id`  | `amount` | Význam                |
+| ------- | ------------- | ------------ | -------- | --------------------- |
+| Odoslať | odosielateľa  | prijímač     | suma +   | Odtok od odosielateľa |
+| Prijať  | prijímač      | odosielateľa | suma +   | Prítok do prijímača   |
 
 Zostatok sa vypočíta takto:
 
@@ -533,7 +533,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Priebeh prevodu
+### Prenosový tok
 
 ```typescript
 export async function transferTokens(
@@ -544,19 +544,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Overenie**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotencia**: skontrolujte, či už `idempotency_key` existuje v účtovnej knihe.
-   Ak áno, vráťte výsledok z vyrovnávacej pamäte.
-3. **Transakcia** (jedna transakcia SQLite):
-   a. Vypočítajte zostatok odosielateľa.
-   b. Ak `balance < amount`, operáciu prerušte (nedostatok prostriedkov).
-   c. Vložte riadok odoslania (`from=sender,`.
+1. **Overiť** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotencia** : skontrolujte, či `idempotency_key` už existuje v účtovnej knihe. Ak áno, vráťte výsledok z vyrovnávacej pamäte.
+3. **Transakcia** (jednorazová transakcia SQLite ): a. Vypočítajte zostatok odosielateľa. b. Ak `balance < amount`, prerušte (nedostatok finančných prostriedkov). c. Vložte riadok odoslania (`from=sender, to=receiver, amount`). d. Vložte riadok prijatia (`from=receiver, to=sender, amount`).
+4. **Limit sadzby** : skontrolujte prenosovú rýchlosť pre odosielateľa (max. 10 transfers/min).
+5. **Udalosť** : vygenerovať udalosť gamifikácie `token_share` na vyhodnotenie odznaku XP +.
+6. Návrat `{ success: true, balance: newBalance }`.
 
-### Obmedzenie frekvencie
+### Obmedzenie sadzieb
 
-- Maximálne 10 prevodov za minútu na jeden kľúč API.
-- Maximálne 10 000 tokenov v jednom prevode.
-- Maximálne 100 000 prevedených tokenov za deň na jeden kľúč API.
+- Maximálne 10 prenosov za minútu na kľúč API.
+- Maximálne 10 000 tokenov na jeden prevod.
+- Maximálne 100 000 tokenov prenesených za deň na kľúč API.
 
 ---
 

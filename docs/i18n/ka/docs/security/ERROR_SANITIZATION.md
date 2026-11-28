@@ -4,13 +4,7 @@
 
 ---
 
-> **სიმართლის წყარო:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` და საჯარო შემქმნელები ფაილში `open-sse/utils/error.ts`
-> **ტესტები:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **ბოლო განახლება:** 2026-09-02 — v3.8.51
-> **აუდიტორია:** ყველა ინჟინერი, რომელიც შეცდომის პასუხებთან მუშაობს (HTTP მარშრუტები, SSE ნაკადები, შემსრულებლები, MCP დამმუშავებლები).
-> **სტატუსი:** **სავალდებულოა** კოდის ყველა გზისთვის, რომელიც კლიენტს შეცდომის შეტყობინებას უბრუნებს.
+> **სიმართლის წყარო:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` და საზოგადოებრივი მშენებლები `open-sse/utils/error.ts` ში** ტესტები:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** აუდიტორია:** ნებისმიერი ინჟინერი, რომელიც ეხება შეცდომის პასუხებს (HTTP მარშრუტები, SSE ნაკადები, შემსრულებლები, MCP დამმუშავებლები).** სტატუსი:****MANDATORY** კოდის ყველა გზაზე, რომელიც უბრუნებს შეცდომის შეტყობინებას კლიენტს.
 
 ## რატომ არსებობს ეს
 

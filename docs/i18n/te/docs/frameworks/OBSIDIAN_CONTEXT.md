@@ -121,53 +121,46 @@ WebDAV ప్రమాణీకరణ ప్రతి-IP వైఫల్యం �
 
 ## MCP సాధనాలు (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts`లో నిర్వచించబడ్డాయి. token/base-URL ప్రతి కాల్కు పరిష్కరించబడతాయి (మొదట ప్రతి API కీకి సంబంధించినవి, ఆపై గ్లోబల్). OmniRoute **sync server**ను యాక్సెస్ చేసే సాధనాలకు (నాలుగు `obsidian_sync_*` సాధనాలు) అదనంగా OmniRoute సెట్టింగ్లలో కాన్ఫిగర్ చేసిన sync auth token అవసరం.
+`open-sse/mcp-server/tools/obsidianTools.ts` లో నిర్వచించబడింది. token/base-URL ప్రతి కాల్కి పరిష్కరించబడుతుంది (మొదట ప్రతి API-కీ, తర్వాత గ్లోబల్). OmniRoute ని కొట్టే సాధనాలు** సమకాలీకరణ సర్వర్** (నాలుగు `obsidian_sync_*` సాధనాలు) అదనంగా OmniRoute సెట్టింగ్లలో కాన్ఫిగర్ చేయబడిన సమకాలీకరణ ప్రమాణ టోకెన్ అవసరం.
 
-### రీడ్ సాధనాలు (`read:obsidian`)
+### రీడ్ టూల్స్ (`read:obsidian`)
 
-| సాధనం                        | వివరణ                                                                                                     |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Local REST API అందుబాటులో ఉందో మరియు ప్రమాణీకరించబడిందో తనిఖీ చేస్తుంది.                                  |
-| `obsidian_search_simple`     | నోట్ కంటెంట్లో పూర్తి-టెక్స్ట్ శోధన; ఫైల్ పాత్లతో కూడిన స్నిపెట్లను అందిస్తుంది.                          |
-| `obsidian_search_structured` | JSON Logic ఎక్స్ప్రెషన్ను (and/or/regex/path ఫిల్టర్లు) ఉపయోగించి శోధిస్తుంది.                            |
-| `obsidian_read_note`         | vault-relative path ద్వారా నోట్ను చదువుతుంది; ఐచ్ఛికంగా నిర్దిష్ట heading/block/frontmatterను చదువుతుంది. |
-| `obsidian_list_vault`        | vaultలోని ఫైల్లు మరియు డైరెక్టరీలను (ఎంట్రీల ట్రీగా) జాబితా చేస్తుంది.                                    |
-| `obsidian_get_document_map`  | నోట్ heading నిర్మాణాన్ని headings → line numbers మ్యాప్గా పొందుతుంది.                                    |
-| `obsidian_get_note_metadata` | పూర్తి కంటెంట్ లేకుండా frontmatter, ట్యాగ్లు, లింక్లు, అక్షర/పదాల సంఖ్యను పొందుతుంది.                     |
-| `obsidian_get_active_file`   | Obsidianలో ప్రస్తుతం యాక్టివ్గా ఉన్న ఫైల్ path + contentను పొందుతుంది.                                    |
-| `obsidian_get_periodic_note` | ఒక తేదీకి సంబంధించిన రోజువారీ/వారపు/నెలవారీ periodic noteను పొందుతుంది (వదిలివేస్తే నేటిది).              |
-| `obsidian_get_tags`          | అన్ని vault ట్యాగ్లను వాటి పునరావృత సంఖ్యలతో జాబితా చేస్తుంది.                                            |
-| `obsidian_list_commands`     | అందుబాటులో ఉన్న Obsidian command IDలను జాబితా చేస్తుంది (`obsidian_execute_command`తో ఉపయోగించండి).       |
-| `obsidian_sync_status`       | OmniRoute sync server స్థితి: రన్ అవుతోందా, vault పేరు, port, uptime, చివరి sync.                         |
-| `obsidian_sync_conflicts`    | పరిష్కరించని sync conflictsను (path, conflict path, గుర్తించిన సమయం) జాబితా చేస్తుంది.                    |
+| సాధనం                        | వివరణ                                                                                           |
+| ---------------------------- | ----------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | స్థానిక REST API అందుబాటులో ఉందో లేదో తనిఖీ చేయండి మరియు ప్రామాణీకరించబడింది.                   |
+| `obsidian_search_simple`     | గమనిక కంటెంట్ యొక్క పూర్తి-వచన శోధన; ఫైల్ పాత్లతో స్నిప్పెట్లను అందిస్తుంది.                    |
+| `obsidian_search_structured` | JSON లాజిక్ ఎక్స్ప్రెషన్ (and/or/regex/path ఫిల్టర్లు) ఉపయోగించి శోధించండి.                     |
+| `obsidian_read_note`         | వాల్ట్-సంబంధిత మార్గం ద్వారా గమనికను చదవండి; ఐచ్ఛికంగా ఒక నిర్దిష్ట heading/block/frontmatter.  |
+| `obsidian_list_vault`        | వాల్ట్లో ఫైల్లు మరియు డైరెక్టరీలను జాబితా చేయండి (ట్రీ ఆఫ్ ఎంట్రీలు).                           |
+| `obsidian_get_document_map`  | → లైన్ నంబర్ల హెడ్డింగ్ల మ్యాప్గా గమనిక యొక్క శీర్షిక నిర్మాణాన్ని పొందండి.                     |
+| `obsidian_get_note_metadata` | పూర్తి కంటెంట్ లేకుండా ఫ్రంట్మాటర్, ట్యాగ్లు, లింక్లు, char/word కౌంట్ను పొందండి.               |
+| `obsidian_get_active_file`   | Obsidian లో ప్రస్తుతం క్రియాశీలంగా ఉన్న ఫైల్ యొక్క పాత్ + కంటెంట్ను పొందండి.                    |
+| `obsidian_get_periodic_note` | తేదీ కోసం daily/weekly/monthly ఆవర్తన గమనికను పొందండి (ఈరోజు విస్మరించబడితే).                   |
+| `obsidian_get_tags`          | అన్ని వాల్ట్ ట్యాగ్లను వాటి ఫ్రీక్వెన్సీలతో జాబితా చేయండి.                                      |
+| `obsidian_list_commands`     | అందుబాటులో ఉన్న Obsidian కమాండ్ IDs ( `obsidian_execute_command` తో ఉపయోగించండి) జాబితా చేయండి. |
+| `obsidian_sync_status`       | OmniRoute సమకాలీకరణ సర్వర్ స్థితి: రన్నింగ్, వాల్ట్ పేరు, పోర్ట్, సమయ సమయం, చివరి సమకాలీకరణ.    |
+| `obsidian_sync_conflicts`    | పరిష్కరించని సమకాలీకరణ వైరుధ్యాలను జాబితా చేయండి (మార్గం, సంఘర్షణ మార్గం, కనుగొనబడినది).        |
 
-### రైట్ సాధనాలు (`write:obsidian`)
+### వ్రాత సాధనాలు (`write:obsidian`)
 
-| సాధనం                            | వివరణ                                                                                              |
-| -------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | ఇచ్చిన Markdown కంటెంట్తో నోట్ను సృష్టిస్తుంది లేదా ఓవర్రైట్ చేస్తుంది.                            |
-| `obsidian_append_note`           | నోట్కు కంటెంట్ను జోడిస్తుంది; ఐచ్ఛికంగా నిర్దిష్ట heading/blockకు జోడిస్తుంది.                     |
-| `obsidian_patch_note`            | heading, block లేదా frontmatter field వద్ద ఖచ్చితంగా append/prepend/replace చేస్తుంది.             |
-| `obsidian_delete_note`           | vault నుండి నోట్ను శాశ్వతంగా తొలగిస్తుంది.                                                         |
-| `obsidian_move_note`             | vaultలో నోట్ను తరలిస్తుంది లేదా పేరు మారుస్తుంది.                                                  |
-| `obsidian_execute_command`       | Obsidian commandను దాని command ID ద్వారా అమలు చేస్తుంది.                                          |
-| `obsidian_open_file`             | Obsidianలో ఫైల్ను తెరుస్తుంది (అది లేకపోతే సృష్టిస్తుంది).                                         |
-| `obsidian_sync_trigger`          | తక్షణ ద్విదిశాత్మక desktop↔mobile vault syncను ట్రిగ్గర్ చేస్తుంది.                                |
-| `obsidian_sync_resolve_conflict` | sync conflictను పరిష్కరిస్తుంది: `local` (mobile), `remote` (desktop), లేదా `keep-both` ఉంచుతుంది. |
+| సాధనం                            | వివరణ                                                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `obsidian_write_note`            | ఇచ్చిన మార్క్డౌన్ కంటెంట్తో గమనికను సృష్టించండి లేదా ఓవర్రైట్ చేయండి.                                  |
+| `obsidian_append_note`           | గమనికకు కంటెంట్ను జోడించు; ఐచ్ఛికంగా నిర్దిష్ట heading/block. కి                                       |
+| `obsidian_patch_note`            | హెడ్డింగ్, బ్లాక్ లేదా ఫ్రంట్మాటర్ ఫీల్డ్ వద్ద శస్త్రచికిత్స ద్వారా append/prepend/replace.            |
+| `obsidian_delete_note`           | ఖజానా నుండి గమనికను శాశ్వతంగా తొలగించండి.                                                              |
+| `obsidian_move_note`             | వాల్ట్లో నోట్ని తరలించండి లేదా పేరు మార్చండి.                                                          |
+| `obsidian_execute_command`       | Obsidian ఆదేశాన్ని దాని కమాండ్ ID ద్వారా అమలు చేయండి.                                                  |
+| `obsidian_open_file`             | Obsidian లో ఫైల్ను తెరవండి (అది లేనట్లయితే దానిని సృష్టిస్తుంది).                                      |
+| `obsidian_sync_trigger`          | తక్షణ ద్వి దిశాత్మక డెస్క్టాప్↔ మొబైల్ వాల్ట్ సమకాలీకరణను ట్రిగ్గర్ చేయండి.                            |
+| `obsidian_sync_resolve_conflict` | సమకాలీకరణ వైరుధ్యాన్ని పరిష్కరించండి: `local` (మొబైల్), `remote` (డెస్క్టాప్) లేదా `keep-both` ఉంచండి. |
 
 > [!NOTE]
-> `obsidian_patch_note` targets, `heading | block | frontmatter`లో ఒకదాన్ని `targetType`గా,
-> అలాగే `append | prepend | replace`లో ఒకదాన్ని `operation`గా, ఐచ్ఛిక
-> `createTargetIfMissing`తో అంగీకరిస్తాయి. నాలుగు `obsidian_sync_*` సాధనాలు స్థానిక sync
-> serverతో (డిఫాల్ట్గా `http://127.0.0.1:27781`) కమ్యూనికేట్ చేస్తాయి మరియు వాటికి sync token అవసరం.
+> `obsidian_patch_note` లక్ష్యాలు ఐచ్ఛిక `createTargetIfMissing` తో `heading | block | frontmatter` యొక్క `targetType` మరియు `append | prepend | replace` యొక్క `operation` అంగీకరిస్తాయి. నాలుగు `obsidian_sync_*` సాధనాలు స్థానిక సమకాలీకరణ సర్వర్తో మాట్లాడతాయి (డిఫాల్ట్గా`http://127.0.0.1:27781` ) మరియు సమకాలీకరణ టోకెన్ అవసరం.
 
-### స్కోప్లు
+### పరిధులు
 
-రీడ్ సాధనాలకు `read:obsidian` అవసరం; రైట్ సాధనాలకు `write:obsidian` అవసరం. అమలు విధానం
-Notionతో సమానంగా ఉంటుంది — ఇది `open-sse/mcp-server/server.ts`లోని
-`withScopeEnforcement()` ద్వారా నిర్వహించబడుతుంది, `OMNIROUTE_MCP_ENFORCE_SCOPES=true`పై
-గేట్ చేయబడుతుంది, అలాగే అనుమతించబడిన స్కోప్లు `OMNIROUTE_MCP_SCOPES` లేదా API కీ scope context
-నుండి తీసుకోబడతాయి. [MCP-SERVER.md](./MCP-SERVER.md) చూడండి.
+రీడ్ టూల్స్కు `read:obsidian` అవసరం; వ్రాసే సాధనాలకు `write:obsidian` అవసరం. ఎన్ఫోర్స్మెంట్ అనేది `open-sse/mcp-server/server.ts` లో `withScopeEnforcement()` ద్వారా నిర్వహించబడే Notion — కి ఒకేలా ఉంటుంది, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` లో గేట్ చేయబడింది మరియు API కీ `manage`/`admin` లేని HTTP/SSE కాలర్ల కోసం బలవంతంగా ఆన్ చేయబడుతుంది, `OMNIROUTE_MCP_SCOPES` లేదా API కీ యొక్క స్కోప్ సందర్భం నుండి పొందిన అనుమతించబడిన స్కోప్లతో. [MCP-SERVER.md](./MCP-SERVER.md) చూడండి.
 
 ## ఎండ్పాయింట్లు
 

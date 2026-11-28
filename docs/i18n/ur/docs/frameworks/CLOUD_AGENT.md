@@ -328,20 +328,16 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks/<id> \
 کلید کے لیے اس سے کم، اور 8 یا اس سے کم حروف کے لیے کوئی نہیں) اور کنکشن کا `projectId` بھی۔
 کسی بھی دوسری کلید کے لیے دونوں فیلڈز ریسپانس میں شامل نہیں کیے جاتے۔
 
-## اسناد کا تعین
+## اسناد کی قرارداد
 
-`src/lib/cloudAgent/api.ts` میں `getCloudAgentCredentials(providerId)`:
+`getCloudAgentCredentials(providerId)` میں `src/lib/cloudAgent/api.ts`:
 
-1. `getProviderConnections({ provider: providerId, isActive: true })` کے ذریعے فعال پرووائیڈر کنکشنز لوڈ کرتا ہے۔
-2. ہر کنکشن کے لیے `apiKey` (اضافی خالی جگہیں ہٹا کر) کو ترجیح دیتا ہے۔ موجود نہ ہونے پر `accessToken` استعمال کرتا ہے۔
-3. پہلے غیر خالی ٹوکن کو `{ apiKey: token }` کی شکل میں لپیٹ کر واپس کرتا ہے۔
-4. اگر کوئی قابلِ استعمال ٹوکن نہ ملے تو `null` واپس کرتا ہے — API درج ذیل پیغام کے ساتھ
-   `400` جواب دیتا ہے:
-   `"کلاؤڈ ایجنٹ پرووائیڈر کے لیے کوئی فعال اسناد ترتیب نہیں دی گئیں: <id>"`۔
+1. `getProviderConnections({ provider: providerId, isActive: true })` کے ذریعے فعال فراہم کنندہ کنکشن لوڈ کرتا ہے۔
+2. ہر کنکشن کے لیے، `apiKey` (تراشی ہوئی) کو ترجیح دیتا ہے۔ واپس `accessToken` پر آتا ہے۔
+3. `{ apiKey: token }` کے بطور لپیٹا پہلا غیر خالی ٹوکن لوٹاتا ہے۔
+4. `null` لوٹاتا ہے اگر کوئی قابل استعمال ٹوکن — نہیں ملتا ہے تو API `"No active credentials configured for cloud agent provider: <id>"` کے ساتھ `400` جواب دیتا ہے۔
 
-اس کا مطلب ہے کہ Cloud Agents بھی وہی Provider Connection ٹیبل دوبارہ استعمال کرتے ہیں جو باقاعدہ LLM
-پرووائیڈرز استعمال کرتے ہیں۔ Jules کو فعال کرنے کے لیے `provider: "jules"`
-اور پُر شدہ `apiKey` کے ساتھ ایک فعال کنکشن بنائیں۔
+اس کا مطلب ہے کہ کلاؤڈ ایجنٹ اسی پرووائیڈر کنکشن ٹیبل کو ریگولر LLM فراہم کنندگان کی طرح دوبارہ استعمال کرتے ہیں۔ Jules فعال کرنے کے لیے، `provider: "jules"` اور آبادی والے `apiKey` کے ساتھ ایک فعال کنکشن بنائیں۔
 
 ## ڈیش بورڈ
 

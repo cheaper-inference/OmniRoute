@@ -4,12 +4,9 @@
 
 ---
 
-> **最后更新：** 2026-08-28 — v3.8.51
-> 使用 Claude Code 技能实现自动化，从而简化发布流程。
+> 简化的发布流程，利用Claude代码技能实现自动化。
 >
-> **在两次发布之间保持队列/分支为绿色：**请参阅 [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> （`/green-prs` 系列 + `npm run check:release-green` + `/babysit` + nightly）。定期运行
-> 这些流程——尤其是在执行此检查清单**之前**——可确保发布 PR 从绿色状态开始。
+> **在版本之间保持queue/branch绿色：**请参阅[RELEASE_GREEN.md](./RELEASE_GREEN.md) （`/green-prs`系列+ `npm run check:release-green` + `/babysit` +每晚）。定期运行—特别是**前**此清单—使发布PR开始绿色。
 
 ## 概要
 
@@ -60,7 +57,9 @@ npm-publish 工作流程不再直接发布：它启动打包的 tarball (`check:
 
 **Docker Hub `latest` （每个稳定的SemVer发布都需要）：** `docker-publish`工作流程必须标记**两个都**`X.Y.Z`和，当`should-promote-latest.sh`同意时，这是最高稳定的SemVer， `:latest`与**相同的摘要**。作业完成后：Hub `latest`摘要等于新的SemVer摘要，并且`last_updated`已移动。当发行说明谈论仅存在于 git 上的修复时，不要将`:latest`保留在较旧的版本上。使用`:latest`编写快速入门； GitOps应该继续固定`X.Y.Z`。参见[Docker发布渠道](../guides/DOCKER_GUIDE.md#release-channels)和#10317。
 
-**Docker Hub组织存储库（`cheaperinference/omniroute`）：** Docker Hub 无法在命名空间之间移动存储库，因此`diegosouzapw/omniroute`保留其拉取历史记录和每个版本，并且`docker-publish`的`mirror-org-dockerhub`作业将每个发布版本（以及升级时的`:latest` ）从`ghcr.io/cheaper-inference/omniroute`到组织存储库。它需要`DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN`秘密；如果没有它们，作业将保持绿色，并显示“Docker Hub org 镜像已跳过”警告，并且其他注册表正常发布。要稍后在那里发布发布版本，请运行**操作→将Docker映像镜像到Docker Hub org →运行工作流程**使用`version=X.Y.Z` （和`promote_latest`表示最高稳定版本）：它复制现有映像，无需重建。
+**Docker Hub组织存储库（`cheaperinference/omniroute`）：** Docker Hub 无法在命名空间之间移动存储库，因此`diegosouzapw/omniroute`保留其拉取历史记录和每个版本，并且`docker-publish`的`mirror-org-dockerhub`作业将每个发布版本（以及升级时的`:latest` ）从`ghcr.io/cheaper-inference/omniroute`到组织存储库。它需要`DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN`秘密；如果没有它们，作业将保持绿色，并显示“Docker Hub org 镜像已跳过”警告，并且其他注册表正常发布。要稍后在那里发布发布版本，请运行**操作→将Docker映像镜像到Docker Hub org →运行工作流程**使用`version=X.Y.Z` （和`promote_latest`为最高稳定版本）：它复制现有映像，无需重建。该存储库的Docker中心概述是手动设置的：编辑它的API拒绝组织访问令牌。
+
+相同的工作流程还将每个版本复制到旧版GHCR包`ghcr.io/diegosouzapw/omniroute`直到 2027 年 6 月 30 日，因此安装仍然固定在它不断更新；其索引带有“移至`ghcr.io/cheaper-inference/omniroute`”的描述。它需要`GHCR_LEGACY_TOKEN`秘密（ `diegosouzapw`和`write:packages`的经典个人访问令牌）；如果没有它，该作业将跳过并显示“Legacy GHCR ”警告。
 
 ## 热修复快速通道（标签 `hotfix`）
 
@@ -88,7 +87,7 @@ npm-publish 工作流程不再直接发布：它启动打包的 tarball (`check:
 
 ### 预发布
 
-- [ ] 所有针对此版本的PRs都合并到`release/vX.Y.0`
+- [ ] 所有针对此版本的PRs均合并到`release/vX.Y.0`
 - [ ] 此版本的所有开放Linear/issue项目均已关闭或推送到下一个里程碑
 - [ ] `release/vX.Y.0`分支上的CI绿色
 - [ ] 代码中没有`TODO(release)`标记： `grep -r "TODO(release)" src/ open-sse/`
@@ -151,7 +150,7 @@ Husky hooks 存在于`.husky/`中并在 git 操作上自动运行。
 ### 文档
 
 - [ ] `npm run check:docs-sync`通过（通过预提交自动运行）
-- [ ] `npm run check:docs-all`通过（总括：docs-sync + docs-counts + env-doc-sync +弃用版本+ doc-links）
+- [ ] `npm run check:docs-all`通过。其咨询`check:deprecated-versions`标记明确归因于OmniRoute （3.6.x 及更早版本）并忽略日期。
 - [ ] `npm run check:env-doc-sync`退出 0 —代码↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env 合约完好无损
 - [ ] `npm run check:doc-links`退出 0 —重组后没有损坏的内部 Markdown 引用
 - [ ] `docs/architecture/ARCHITECTURE.md`审查了storage/runtime漂移
@@ -164,7 +163,7 @@ Husky hooks 存在于`.husky/`中并在 git 操作上自动运行。
 
 ### 国际化
 
-- [ ] `npm run i18n:check`退出 0 —翻译状态（`.i18n-state.json`），与源文档同步（严格模式下没有漂移源；警告模式建议对于最后一刻的文档修饰是可以接受的，但在标记之前应该为 0）
+- [ ] `npm run i18n:check`退出 0 —翻译状态 (`.i18n-state.json`) 与源文档同步（严格模式下没有漂移源；警告模式建议对于最后一刻的文档修饰是可以接受的，但在标记之前应该为 0）
 - [ ] `npm run i18n:check-ui-coverage`在每个UI区域设置等于或高于 80% 覆盖下限时退出 0 —
 - [ ] `npm run i18n:sync-ui:dry`在所有 66 个目标语言环境中报告 0 个缺失键（除`en`源之外的每个语言环境）
 - [ ] 如果源英文文档发生更改，请在标记之前运行`npm run i18n:run` （需要`.env`中的`OMNIROUTE_TRANSLATION_API_KEY` ）
@@ -393,17 +392,17 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
 
 ### PR预览神器（构建一次，提升相同字节）
 
-`.github/workflows/preview-artifact.yml`从PR头构建一个生产 tarball 并验证确切的构建（#8084 slice (a)）。仅限同一存储库PRs ；没有任何内容被发布。
+`.github/workflows/preview-artifact.yml`从PR头构建一个生产 tarball 并验证该确切构建（#8084 slice (a)）。仅限同一存储库PRs ；没有任何内容被发布。
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-运行操作`npm ci`、 `npm run build:release`、 `npm run check:pack-artifact`，打包 tarball，运行`npm run check:pack-boot` （假秘密，临时数据目录），重新打包并失败，除非摘要相同，然后记录`artifact-identity.json` （头SHA，基础SHA，锁定文件哈希，平台，arch，节点ABI，捆绑器，构建策略— `scripts/release/artifact-identity.mjs`）并在单独的作业中证明 tarball 。推广预览意味着安装该 tarball：永远不要从源重建。
+运行操作`npm ci`、 `npm run build:release`、 `npm run check:pack-artifact`，打包 tarball，运行`npm run check:pack-boot` （假秘密，临时数据目录），重新打包并失败，除非摘要相同，然后记录`artifact-identity.json` （头SHA，基础SHA，锁定文件哈希，平台，arch，节点ABI，捆绑器，构建策略— `scripts/release/artifact-identity.mjs`）并在单独的作业中证明 tarball 。推广预览意味着安装该 tarball：永远不要从源代码重建。
 
 ### 剪切（3.9.0， GO之后）
 
@@ -418,7 +417,7 @@ npm install -g ./omniroute-*.tgz                          # preview install
 4. 在第一个PR登陆之前保护`stable/v3`和`develop` （规则集+合并队列）。
 5. 休眠工作流程根据分支存在而打开： `forward-port.yml` （推送到`stable/v3`）、 `validate-stable-pr.yml` （PRs到`stable/v3`）和`nightly-v4-build.yml` （构建`develop`）。在上线之前，设置`secrets.FORWARD_PORT_TOKEN`存储库机密（以便CI在转发端口PRs上运行）；每晚发布将保持关闭状态，直到所有者将存储库变量`vars.NIGHTLY_PUBLISH`设置为`true`并且 npm Trusted Publishing 接受`nightly-v4-build.yml`。通道分辨率为`scripts/release/dist-tag.mjs`，与`npm-publish.yml`使用的解析器相同。
 6. 验证通道： `npm view omniroute dist-tags --json`显示`latest` = 3.9.0，并且在 v4 发布之前没有`next` / `nightly` 。
-7. 如果需要的话回滚： `git push origin --delete refs/heads/stable/v3 refs/heads/develop`和`npm dist-tag add omniroute@3.8.59 latest`。
+7. 如果需要，回滚： `git push origin --delete refs/heads/stable/v3 refs/heads/develop`和`npm dist-tag add omniroute@3.8.59 latest`。
 
 ---
 

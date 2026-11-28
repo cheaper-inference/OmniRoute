@@ -4,9 +4,9 @@
 
 ---
 
-> **ਸੰਸਕਰਣ:** v3.8.44** ਆਖਰੀ ਵਾਰ ਅੱਪਡੇਟ ਕੀਤਾ:** 2026-10-28** ਦਰਸ਼ਕ:** ਇੰਜਨੀਅਰ ਏਮਬੈਡਡ ਸੇਵਾਵਾਂ (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box) ਨੂੰ ਜੋੜਦੇ, ਸੰਭਾਲਦੇ ਜਾਂ ਡੀਬੱਗ ਕਰਦੇ ਹਨ।
+> **ਸੰਸਕਰਣ:** v3.8.44** ਦਰਸ਼ਕ:** ਇੰਜਨੀਅਰ ਏਮਬੈਡਡ ਸੇਵਾਵਾਂ (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box) ਨੂੰ ਜੋੜਦੇ, ਸੰਭਾਲਦੇ ਜਾਂ ਡੀਬੱਗ ਕਰਦੇ ਹਨ।
 
-ਏਮਬੈਡਡ ਸੇਵਾਵਾਂ ਸਥਾਨਕ ਤੌਰ 'ਤੇ ਸਥਾਪਿਤ ਪ੍ਰਕਿਰਿਆ ਸਾਈਡਕਾਰ ਟੂਲ ਹਨ ਜੋ OmniRoute ਪਹਿਲੀ-ਸ਼੍ਰੇਣੀ ਦੇ ਰੂਟਿੰਗ ਟੀਚਿਆਂ ਦੇ ਤੌਰ 'ਤੇ ਸਥਾਪਿਤ, ਨਿਗਰਾਨੀ, ਅਤੇ ਉਜਾਗਰ ਕਰਦੀਆਂ ਹਨ। ਬਾਹਰੀ ਪ੍ਰਦਾਤਾਵਾਂ ਦੇ ਉਲਟ (ਜੋ API ਕੁੰਜੀਆਂ ਰਾਹੀਂ ਇੰਟਰਨੈਟ ਤੇ ਪਹੁੰਚਦੇ ਹਨ), ਏਮਬੈਡਡ ਸੇਵਾਵਾਂ OmniRoute ਵਾਂਗ ਹੀ ਮਸ਼ੀਨ 'ਤੇ ਚਲਦੀਆਂ ਹਨ ਅਤੇ ਲੂਪਬੈਕ 'ਤੇ ਸੰਚਾਰ ਕਰਦੀਆਂ ਹਨ।
+ਏਮਬੈਡਡ ਸੇਵਾਵਾਂ ਸਥਾਨਕ ਤੌਰ 'ਤੇ ਸਥਾਪਿਤ ਪ੍ਰਕਿਰਿਆ ਸਾਈਡਕਾਰ ਟੂਲ ਹਨ ਜੋ OmniRoute ਪਹਿਲੀ-ਸ਼੍ਰੇਣੀ ਦੇ ਰੂਟਿੰਗ ਟੀਚਿਆਂ ਦੇ ਰੂਪ ਵਿੱਚ ਸਥਾਪਿਤ, ਨਿਗਰਾਨੀ ਅਤੇ ਪਰਦਾਫਾਸ਼ ਕਰਦੀਆਂ ਹਨ। ਬਾਹਰੀ ਪ੍ਰਦਾਤਾਵਾਂ ਦੇ ਉਲਟ (ਜੋ API ਕੁੰਜੀਆਂ ਰਾਹੀਂ ਇੰਟਰਨੈਟ ਤੇ ਪਹੁੰਚਦੇ ਹਨ), ਏਮਬੈਡਡ ਸੇਵਾਵਾਂ OmniRoute ਵਾਂਗ ਹੀ ਮਸ਼ੀਨ 'ਤੇ ਚਲਦੀਆਂ ਹਨ ਅਤੇ ਲੂਪਬੈਕ 'ਤੇ ਸੰਚਾਰ ਕਰਦੀਆਂ ਹਨ।
 
 ---
 
@@ -137,23 +137,23 @@
 
 ### ਮੁੱਖ ਸਰੋਤ ਫਾਈਲਾਂ
 
-| ਫਾਈਲ                                        | ਭੂਮਿਕਾ                                        |
-| ------------------------------------------- | --------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | ਕੋਰ ਕਲਾਸ: ਜੀਵਨ ਚੱਕਰ, ਲਾਕ, ਸਿਹਤ, ਰਿੰਗ ਬਫਰ      |
-| `src/lib/services/bootstrap.ts`             | ਪ੍ਰਕਿਰਿਆ-ਪੱਧਰ ਦੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਅਤੇ ਆਟੋ-ਸਟਾਰਟ    |
-| `src/lib/services/registry.ts`              | ਸਿੰਗਲਟਨ ਨਕਸ਼ਾ `tool → supervisor`             |
-| `src/lib/services/apiKey.ts`                | ਕੁੰਜੀ ਪੀੜ੍ਹੀ, AES-256-GCM ਏਨਕ੍ਰਿਪਸ਼ਨ 'ਤੇ-ਆਰਾਮ |
-| `src/lib/services/modelSync.ts`             | ਪੀਰੀਅਡਿਕ ਮਾਡਲ ਸਿੰਕ (5 ਮਿੰਟ) + ਆਨ-ਡਿਮਾਂਡ       |
-| `src/lib/services/ringBuffer.ts`            | SSE ਸਬਸਕ੍ਰਾਈਬ ਦੇ ਨਾਲ 5 MB ਸਰਕੂਲਰ ਲੌਗ ਬਫਰ      |
-| `src/lib/services/healthCheck.ts`           | HTTP ਸਿਹਤ ਜਾਂਚ (ਸੰਰਚਨਾਯੋਗ ਅੰਤਰਾਲ)             |
-| `src/lib/services/installers/ninerouter.ts` | 9 ਰਾਊਟਰ ਲਈ npm install/update/uninstall       |
-| `src/lib/services/installers/cliproxy.ts`   | CLIProxyAPI ਲਈ npm install/update/uninstall   |
-| `src/lib/services/installers/mux.ts`        | Mux ਲਈ npm install/update/uninstall           |
-| `src/lib/services/installers/openwa.ts`     | ਓਪਨ-ਵਾ ਲਈ npm install/update/uninstall        |
-| `src/lib/services/installers/llmlingua.ts`  | LLMLingua ਲਈ npm install/update/uninstall     |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` ਸਹਾਇਕ                 |
-| `src/app/api/services/[name]/logs/route.ts` | ਸ਼ੇਅਰਡ SSE ਲੌਗਸ ਐਂਡਪੁਆਇੰਟ                     |
-| `open-sse/executors/ninerouter.ts`          | ਪ੍ਰੋਵਾਈਡਰ ਐਗਜ਼ੀਕਿਊਟਰ (ਲੇਅਰ 4)                 |
+| ਫਾਈਲ                                        | ਭੂਮਿਕਾ                                       |
+| ------------------------------------------- | -------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | ਕੋਰ ਕਲਾਸ: ਜੀਵਨ ਚੱਕਰ, ਲਾਕ, ਸਿਹਤ, ਰਿੰਗ ਬਫਰ     |
+| `src/lib/services/bootstrap.ts`             | ਪ੍ਰਕਿਰਿਆ-ਪੱਧਰ ਦੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਅਤੇ ਆਟੋ-ਸਟਾਰਟ   |
+| `src/lib/services/registry.ts`              | ਸਿੰਗਲਟਨ ਨਕਸ਼ਾ `tool → supervisor`            |
+| `src/lib/services/apiKey.ts`                | ਕੁੰਜੀ ਪੀੜ੍ਹੀ, AES-256-GCM ਏਨਕ੍ਰਿਪਸ਼ਨ ਤੇ ਆਰਾਮ |
+| `src/lib/services/modelSync.ts`             | ਪੀਰੀਅਡਿਕ ਮਾਡਲ ਸਿੰਕ (5 ਮਿੰਟ) + ਆਨ-ਡਿਮਾਂਡ      |
+| `src/lib/services/ringBuffer.ts`            | SSE ਸਬਸਕ੍ਰਾਈਬ ਦੇ ਨਾਲ 5 MB ਸਰਕੂਲਰ ਲੌਗ ਬਫਰ     |
+| `src/lib/services/healthCheck.ts`           | HTTP ਹੈਲਥ ਪੜਤਾਲ (ਸੰਰਚਨਾਯੋਗ ਅੰਤਰਾਲ)           |
+| `src/lib/services/installers/ninerouter.ts` | 9 ਰਾਊਟਰ ਲਈ npm install/update/uninstall      |
+| `src/lib/services/installers/cliproxy.ts`   | CLIProxyAPI ਲਈ npm install/update/uninstall  |
+| `src/lib/services/installers/mux.ts`        | Mux ਲਈ npm install/update/uninstall          |
+| `src/lib/services/installers/openwa.ts`     | ਓਪਨ-ਵਾ ਲਈ npm install/update/uninstall       |
+| `src/lib/services/installers/llmlingua.ts`  | LLMLingua ਲਈ npm install/update/uninstall    |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` ਸਹਾਇਕ                |
+| `src/app/api/services/[name]/logs/route.ts` | ਸ਼ੇਅਰਡ SSE ਲੌਗਸ ਐਂਡਪੁਆਇੰਟ                    |
+| `open-sse/executors/ninerouter.ts`          | ਪ੍ਰੋਵਾਈਡਰ ਐਗਜ਼ੀਕਿਊਟਰ (ਲੇਅਰ 4)                |
 
 ---
 

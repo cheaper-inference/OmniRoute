@@ -11,14 +11,14 @@ Agent Skills 是結構化的 SKILL.md 檔案，用於教導外部代理、MCP �
 
 ---
 
-## 概覽
+## 概述
 
-此目錄包含 **45 個 Agent Skills**（23 個 REST API + 21 個 CLI + 1 個設定工作流程）。每個技能均包含：
+目錄包含**45 特工技能**（23 REST API + 21 CLI + 1 配置工作流程）。每個技能有：
 
-- 一個**標準 ID**（`omni-auth`、`cli-serve` 等）
-- 位於 `skills/{id}/SKILL.md` 的 **SKILL.md** 檔案，其中包含 YAML frontmatter（`name`、`description`）+ 豐富的 markdown 內容
-- 衍生自 OpenAPI 規格與 CLI 登錄檔的 **REST 端點**（API 技能）或 **CLI 子命令**（CLI 技能）
-- 用於即時擷取的 **GitHub 原始內容 URL**：`https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- 一個**規範ID** （`omni-auth`、 `cli-serve`等）
+- 一個**SKILL.md** `skills/{id}/SKILL.md`中的文件，帶有YAML frontmatter (`name`, `description`) +豐富的 Markdown 主體
+- **REST端點**（API技能）或**CLI指令**（CLI技能）源自OpenAPI規格和CLI註冊表
+- 一個**GitHub原始URL**對於即時取得： `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -252,31 +252,31 @@ curl "${BASE}/omni-providers/SKILL.md"
 
 ---
 
-## 產生器
+## 發電機
 
-產生器會讀取精心整理的目錄、OpenAPI 規格與 CLI 登錄檔，並為每個項目寫入 `skills/{id}/SKILL.md`：
+生成器讀取策劃目錄+ OpenAPI spec + CLI註冊表並為每個條目寫入`skills/{id}/SKILL.md` ：
 
 ```bash
-# 預覽（試執行，不寫入）
+# Preview (dry run, no writes)
 curl -X POST http://localhost:20128/api/agent-skills/generate \
   -H "Authorization: Bearer <admin-key>" \
   -H "Content-Type: application/json" \
   -d '{"dryRun":true}'
 
-# 完整重新產生
+# Full regeneration
 curl -X POST http://localhost:20128/api/agent-skills/generate \
   -H "Authorization: Bearer <admin-key>" \
   -H "Content-Type: application/json" \
   -d '{"dryRun":false,"prune":false}'
 
-# 重新產生指定 ID
+# Regenerate specific IDs
 curl -X POST http://localhost:20128/api/agent-skills/generate \
   -H "Authorization: Bearer <admin-key>" \
   -H "Content-Type: application/json" \
   -d '{"dryRun":false,"onlyIds":["omni-providers","cli-serve"]}'
 ```
 
-產生器的回應為 `GeneratorReport`：
+生成器回應是`GeneratorReport`：
 
 ```json
 {
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## 涵蓋範圍 API
+## 覆蓋範圍API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -122,50 +122,46 @@ o‘zining alohida sinxronlash tokeni xatti-harakatini saqlab qoladi.
 
 ## MCP vositalari (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts` faylida belgilangan. Token/asosiy URL har bir chaqiruv uchun aniqlanadi (avval API kalitiga xos, keyin global). OmniRoute **sinxronlash serveri**ga murojaat qiladigan vositalar (toʻrtta `obsidian_sync_*` vositasi) qoʻshimcha ravishda OmniRoute sozlamalarida konfiguratsiya qilingan sinxronlash autentifikatsiya tokenini talab qiladi.
+`open-sse/mcp-server/tools/obsidianTools.ts` belgilangan. token/base-URL har bir qo'ng'iroq uchun hal qilinadi (birinchi API kalitiga, keyin global). OmniRoute ga tegadigan asboblar** sinxronlash serveri** (to'rtta `obsidian_sync_*` vositasi) qo'shimcha ravishda OmniRoute sozlamalarida sozlangan sinxronlashtirish auth tokenini talab qiladi.
 
-### Oʻqish vositalari (`read:obsidian`)
+### O'qish vositalari (`read:obsidian`)
 
-| Vosita                       | Tavsif                                                                                                             |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `obsidian_check_status`      | Local REST API bilan bogʻlanish va autentifikatsiya holatini tekshiradi.                                           |
-| `obsidian_search_simple`     | Qaydlar mazmuni boʻylab toʻliq matnli qidiruv; fayl yoʻllari bilan parchalarni qaytaradi.                          |
-| `obsidian_search_structured` | JSON Logic ifodasi (and/or/regex/path filtrlari) yordamida qidiradi.                                               |
-| `obsidian_read_note`         | Omborga nisbatan yoʻl orqali qaydni oʻqiydi; ixtiyoriy ravishda muayyan sarlavha/blok/frontmatter qismini oʻqiydi. |
-| `obsidian_list_vault`        | Ombordagi fayllar va kataloglarni roʻyxatlaydi (elementlar daraxti).                                               |
-| `obsidian_get_document_map`  | Qaydning sarlavhalar tuzilmasini sarlavhalar → qator raqamlari xaritasi sifatida oladi.                            |
-| `obsidian_get_note_metadata` | Toʻliq mazmunsiz frontmatter, teglar, havolalar, belgilar/soʻzlar sonini oladi.                                    |
-| `obsidian_get_active_file`   | Obsidianʼda hozirda faol boʻlgan faylning yoʻli va mazmunini oladi.                                                |
-| `obsidian_get_periodic_note` | Sana uchun kunlik/haftalik/oylik davriy qaydni oladi (koʻrsatilmasa, bugungi sana).                                |
-| `obsidian_get_tags`          | Ombordagi barcha teglarni ularning takrorlanish soni bilan roʻyxatlaydi.                                           |
-| `obsidian_list_commands`     | Mavjud Obsidian buyruq IDʼlarini roʻyxatlaydi (`obsidian_execute_command` bilan ishlatish uchun).                  |
-| `obsidian_sync_status`       | OmniRoute sinxronlash serveri holati: ishlashi, ombor nomi, port, ishlash vaqti, oxirgi sinxronlash.               |
-| `obsidian_sync_conflicts`    | Hal qilinmagan sinxronlash ziddiyatlarini roʻyxatlaydi (yoʻl, ziddiyat yoʻli, aniqlangan vaqt).                    |
+| Asbob                        | Tavsif                                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Local REST API kirish va autentifikatsiya qilinganligini tekshiring.                                    |
+| `obsidian_search_simple`     | Eslatma mazmunini to'liq matnli qidirish; fayl yo'llari bilan parchalarni qaytaradi.                    |
+| `obsidian_search_structured` | JSON Mantiqiy ifodasi (and/or/regex/path filtrlari) yordamida qidiring.                                 |
+| `obsidian_read_note`         | Eslatmani nisbiy yo'l bilan o'qing; ixtiyoriy ravishda ma'lum bir heading/block/frontmatter.            |
+| `obsidian_list_vault`        | Kassadagi fayllar va kataloglarni ro'yxatlash (yozuvlar daraxti).                                       |
+| `obsidian_get_document_map`  | Eslatmaning sarlavha tuzilishini → qator raqamlari sarlavhalari xaritasi sifatida oling.                |
+| `obsidian_get_note_metadata` | To'liq tarkibsiz frontmatter, teglar, havolalar, char/word hisobini oling.                              |
+| `obsidian_get_active_file`   | Obsidian-da hozirda faol bo'lgan faylning yo'li + mazmunini oling.                                      |
+| `obsidian_get_periodic_note` | Sana uchun daily/weekly/monthly davriy eslatmasini oling (agar o'tkazib yuborilgan bo'lsa, bugun).      |
+| `obsidian_get_tags`          | Barcha ombor teglarini ularning chastotalari bilan ro'yxatlang.                                         |
+| `obsidian_list_commands`     | Mavjud Obsidian buyrug'i IDs ro'yxati ( `obsidian_execute_command` bilan foydalaning).                  |
+| `obsidian_sync_status`       | OmniRoute sinxronlash serverining holati: ishlayotgan, ombor nomi, port, ish vaqti, oxirgi sinxronlash. |
+| `obsidian_sync_conflicts`    | Yechilmagan sinxronlash mojarolarini (yo'l, ziddiyat yo'li, aniqlangan) ro'yxati.                       |
 
 ### Yozish vositalari (`write:obsidian`)
 
-| Vosita                           | Tavsif                                                                                                          |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Berilgan Markdown mazmuni bilan qayd yaratadi yoki mavjud qayd ustiga yozadi.                                   |
-| `obsidian_append_note`           | Qaydga mazmun qoʻshadi; ixtiyoriy ravishda muayyan sarlavha/blokka.                                             |
-| `obsidian_patch_note`            | Sarlavha, blok yoki frontmatter maydoniga aniq tarzda qoʻshadi/boshiga qoʻshadi/almashtiradi.                   |
-| `obsidian_delete_note`           | Qaydni ombordan butunlay oʻchiradi.                                                                             |
-| `obsidian_move_note`             | Qaydni ombor ichida koʻchiradi yoki nomini oʻzgartiradi.                                                        |
-| `obsidian_execute_command`       | Obsidian buyrugʻini uning buyruq IDʼsi orqali bajaradi.                                                         |
-| `obsidian_open_file`             | Faylni Obsidianʼda ochadi (agar mavjud boʻlmasa, uni yaratadi).                                                 |
-| `obsidian_sync_trigger`          | Darhol ikki yoʻnalishli ish stoli↔mobil ombor sinxronlashini ishga tushiradi.                                   |
-| `obsidian_sync_resolve_conflict` | Sinxronlash ziddiyatini hal qiladi: `local` (mobil), `remote` (ish stoli) yoki `keep-both` variantini saqlaydi. |
+| Asbob                            | Tavsif                                                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `obsidian_write_note`            | Belgilangan Markdown mazmuni bilan eslatma yarating yoki uning ustiga yozing.                          |
+| `obsidian_append_note`           | Qaydga tarkib qo'shish; ixtiyoriy ravishda ma'lum bir heading/block.                                   |
+| `obsidian_patch_note`            | Sarlavha, blok yoki old sohada jarrohlik yo'li bilan append/prepend/replace.                           |
+| `obsidian_delete_note`           | Eslatmani ombordan butunlay o'chirib tashlang.                                                         |
+| `obsidian_move_note`             | Eslatmani ombor ichida ko'chiring yoki nomini o'zgartiring.                                            |
+| `obsidian_execute_command`       | Obsidian buyrug'ini ID buyrug'i bilan bajaring.                                                        |
+| `obsidian_open_file`             | Obsidian -da faylni oching (agar u mavjud bo'lmasa, uni yaratadi).                                     |
+| `obsidian_sync_trigger`          | Darhol ikki tomonlama ish stoli ↔ mobil kassasini sinxronlashni ishga tushiring.                       |
+| `obsidian_sync_resolve_conflict` | Sinxronizatsiya mojarosini hal qiling: `local` (mobil), `remote` (ish stoli) yoki `keep-both` saqlang. |
 
 > [!NOTE]
-> `obsidian_patch_note` maqsadlari `heading | block | frontmatter` qiymatli `targetType`
-> va `append | prepend | replace` qiymatli `operation` parametrlarini, shuningdek,
-> ixtiyoriy `createTargetIfMissing` parametrini qabul qiladi. Toʻrtta `obsidian_sync_*`
-> vositasi mahalliy sinxronlash serveri bilan (`http://127.0.0.1:27781` standart holatda)
-> aloqa qiladi va sinxronlash tokenini talab qiladi.
+> `obsidian_patch_note` maqsadlari ixtiyoriy `createTargetIfMissing` bilan `heading | block | frontmatter` ning `targetType` va `append | prepend | replace` ning `operation` qabul qiladi. To'rtta `obsidian_sync_*` vositalari mahalliy sinxronlash serveri bilan gaplashadi (sukut bo'yicha `http://127.0.0.1:27781` ) va sinxronlash tokenini talab qiladi.
 
-### Ruxsat doiralari
+### Qo'llash sohalari
 
-Oʻqish vositalari `read:obsidian`, yozish vositalari esa `write:obsidian` ruxsatini talab qiladi. Majburiy tekshiruv Notion bilan bir xil — `open-sse/mcp-server/server.ts` faylidagi `withScopeEnforcement()` orqali amalga oshiriladi, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` bilan faollashtiriladi va ruxsat etilgan doiralar `OMNIROUTE_MCP_SCOPES` yoki API kalitining doira kontekstidan olinadi. [MCP-SERVER.md](./MCP-SERVER.md) fayliga qarang.
+O'qish vositalari `read:obsidian` talab qiladi; yozish vositalari `write:obsidian` talab qiladi. Majburlash `open-sse/mcp-server/server.ts` da `withScopeEnforcement()` tomonidan boshqariladigan Notion — bilan bir xil bo‘lib, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ga o‘rnatilgan va API kalitida `manage`/`admin` bo‘lmagan HTTP/SSE qo‘ng‘iroq qiluvchilar uchun majburiy yoqilgan, ruxsat etilgan doiralar `OMNIROUTE_MCP_SCOPES` yoki API kaliti doirasi kontekstidan olingan. [MCP-SERVER.md](./MCP-SERVER.md) qarang.
 
 ## Endpointlar
 

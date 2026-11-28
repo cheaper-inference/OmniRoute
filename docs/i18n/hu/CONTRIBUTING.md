@@ -8,32 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Fejlesztői beállítás
+## Fejlesztési beállítások
 
 ### Előfeltételek
 
-- **Node.js** `>=22.22.2 <23`, vagy `>=24.0.0 <27` (ajánlott: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` vagy `>=24.0.0 <27` (ajánlott: 24 LTS)
+- **npm** 10 +
 
-> **Windows Node 24-gyel:** használja a jelenlegi 24 LTS javítókiadását (legalább 24.20.0).
-> A korábbi kiadások sikeres tesztek után is leállhatnak, amikor a `--test-force-exit` bezárja a
-> folyamatot. A Node [Windows libuv-javítása](https://github.com/nodejs/node/pull/61999) kezeli
-> ezt a futásidejű összeomlást; hagyja engedélyezve a teszt-ellenőrzéseket és a futtató kilépési
-> ellenőrzéseit.
+> **Windows 24-es csomóponttal:** használja a jelenlegi 24 LTS patch kiadást (legalább 24.20.0). A korábbi kiadások megszakadhatnak a sikeres tesztek után, amikor `--test-force-exit` lezárja a folyamatot. A Node [Windows libuv javítása](https://github.com/nodejs/node/pull/61999) kezeli ezt a futásidejű összeomlást; tartsa engedélyezve a teszt állításokat és a futók kilépési ellenőrzését.
 
-> **npm v11+ felhasználók (Node 24+):** Az `npm install` után ellenőrizze, hogy a natív modulok
-> telepítve lettek-e:
-> `node -e "require('better-sqlite3')"`. Ha a parancs `MODULE_NOT_FOUND` hibával sikertelen,
-> futtassa a `npm approve-scripts better-sqlite3 && npm install` parancsot. Lásd a
-> [Hibaelhárítás](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)
-> oldalt.
+> **npm v11 + felhasználók (24. csomópont +):** `npm install` után ellenőrizze, hogy a natív modulok telepítve vannak: `node -e "require('better-sqlite3')"`. Ha `MODULE_NOT_FOUND` nem sikerül, futtassa `npm approve-scripts better-sqlite3 && npm install`. Lásd: [Hibaelhárítás](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
 ### Klónozás és telepítés
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -41,94 +32,83 @@ npm install
 ### Környezeti változók
 
 ```bash
-# Hozza létre a .env fájlt a sablonból
+# Create your .env from the template
 cp .env.example .env
 
-# Generálja a szükséges titkos kulcsokat
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-A fejlesztéshez fontos változók:
+A fejlesztés legfontosabb változói:
 
-| Változó                | Alapértelmezett fejlesztési érték | Leírás                           |
-| ---------------------- | --------------------------------- | -------------------------------- |
-| `PORT`                 | `20128`                           | A szerver portja                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`          | A frontend alap-URL-je           |
-| `JWT_SECRET`           | (a fentiek szerint generálandó)   | A JWT-aláírás titkos kulcsa      |
-| `INITIAL_PASSWORD`     | `CHANGEME`                        | Az első bejelentkezési jelszó    |
-| `APP_LOG_LEVEL`        | `info`                            | A naplózás részletességi szintje |
+| Változó                | Alapértelmezett fejlesztés | Leírás                     |
+| ---------------------- | -------------------------- | -------------------------- |
+| `PORT`                 | `20128`                    | Szerver port               |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Alap URL a frontendhez     |
+| `JWT_SECRET`           | (generálja fent)           | JWT aláírási titok         |
+| `INITIAL_PASSWORD`     | `CHANGEME`                 | Első bejelentkezési jelszó |
+| `APP_LOG_LEVEL`        | `info`                     | Napló bőbeszédűségi szint  |
 
 ### Irányítópult beállításai
 
-Az irányítópult felhasználói felületi kapcsolókat biztosít az olyan funkciókhoz, amelyek
-környezeti változókon keresztül is beállíthatók:
+Az irányítópult UI kapcsolókat biztosít a környezeti változókkal is konfigurálható funkciókhoz:
 
-| Beállítás helye     | Kapcsoló           | Leírás                                           |
-| ------------------- | ------------------ | ------------------------------------------------ |
-| Settings → Advanced | Debug Mode         | Hibakeresési kérésnaplók engedélyezése (UI)      |
-| Settings → General  | Sidebar Visibility | Az oldalsáv szakaszainak megjelenítése/elrejtése |
+| Hely beállítása         | Váltás               | Leírás                                      |
+| ----------------------- | -------------------- | ------------------------------------------- |
+| Beállítások → Speciális | Hibakeresési mód     | Hibakeresési kérésnaplók engedélyezése (UI) |
+| Beállítások → Általános | Oldalsáv láthatósága | Show/hide oldalsáv szakaszok                |
 
-Ezek a beállítások az adatbázisban tárolódnak, és újraindítások között is megmaradnak,
-ha be vannak állítva, felülírva a környezeti változók alapértelmezett értékeit.
+Ezeket a beállításokat a rendszer az adatbázisban tárolja, és az újraindítások során is megmarad, felülírva az env var alapértelmezett beállításait.
 
-### Helyi futtatás
+### Helyi futás
 
 ```bash
-# Fejlesztési mód (gyors újratöltés)
+# Development mode (hot reload)
 npm run dev
 
-# Éles build
-npm run build    # next build → .build/next/ majd assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Gyors, csak backend/API fordítás a közreműködői módosításokhoz
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Kiadási build (tiszta újrafordítás + HEAD-jelző — telepítéshez kötelező)
-npm run build:release   # rm -rf .build dist && build + létrehozza a dist/BUILD_SHA fájlt
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Gyakori portbeállítás
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-A közreműködői build csak fordítási ellenőrzést hajt végre: nem állítja össze az önálló
-disztribúciót, és nem építi fel az opcionális natív csomagolási eszközöket. Használja a
-hagyományos éles buildet, amikor a telepíthető csomagot szeretné ellenőrizni.
+A közreműködői build csak fordítási ellenőrzést hajt végre: nem állítja össze az önálló terjesztést, és nem épít fel opcionális natív csomagolási eszközöket. Használja a normál éles buildet, ha ellenőriznie kell a szállítható csomagot.
 
-### A build kimenetének felépítése
+### Kimeneti elrendezés létrehozása
 
-| Könyvtár  | Tartalom                                                                      | Követett |
-| --------- | ----------------------------------------------------------------------------- | -------- |
-| `src/`    | Az alkalmazás forráskódja (TypeScript / TSX)                                  | Igen     |
-| `.build/` | Köztes fájlok — a `next build` kimenete (gitignored, `distDir = .build/next`) | Nem      |
-| `dist/`   | Telepíthető csomag — az `assembleStandalone` állítja össze (gitignored)       | Nem      |
+| Címtár    | Tartalom                                                                      | Lánctalpas |
+| --------- | ----------------------------------------------------------------------------- | ---------- |
+| `src/`    | Alkalmazás forrása (TypeScript / TSX)                                         | Igen       |
+| `.build/` | Köztes — `next build` kimenet (gitignored, `distDir = .build/next`)           | Nem        |
+| `dist/`   | `assembleStandalone` által összeállított, szállítható — csomag (gitignorálva) | Nem        |
 
-A buildfolyamat egyetlen lépésből áll:
+Az építési folyamat egyetlen lépésben történik:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js kimenet)
-  └─ assembleStandalone()                 (az önálló csomagot + statikus + nyilvános + natív eszközöket másolja)
-       └─ kimenet: dist/                  (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-Az `npm run build:release` ezenfelül először törli mindkét könyvtár tartalmát, majd létrehozza a
-`dist/BUILD_SHA` fájlt (= `git rev-parse --short HEAD`) telepítési integritási jelzőként.
+`npm run build:release` emellett először mindkét könyvtárat megtisztítja, és `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kiírja telepítési integritás-őrzőként.
 
-Az `npm run build:contributor` a csak backendhez használható buildprofilt alkalmazza. A build
-során ideiglenesen helyettesíti az irányítópult felhasználói felületének fájljait, megtartja
-az API-útvonalak kezelőit, majd a build után visszaállítja az eredeti fájlokat. Az
-irányítópult felhasználói felületét érintő módosításokhoz vagy a teljes kiadási ellenőrzéshez
-használja az `npm run build` parancsot; a közreműködői profil nem helyettesíti a kiadási buildet.
+`npm run build:contributor` csak a háttérben használható felépítési profilt használja. Ideiglenesen leállítja az irányítópult UI fájljait építés közben, megtartja API útvonalkezelőket, és visszaállítja az eredeti fájlokat a felépítés után. Használja `npm run build` az irányítópultot érintő UI módosításokhoz vagy a teljes kiadás érvényesítéséhez; a közreműködői profil nem helyettesíti a kiadás buildjét.
 
-> **VPS-telepítési megjegyzés:** a távoli `/usr/lib/node_modules/omniroute/app/` képfájl-könyvtár
-> változatlan marad. A telepítési készségek a `dist/` tartalmát rsync segítségével másolják bele.
-> Csak a repozitóriumon belüli buildkimenet útvonala változott (`app/` → `dist/`).
+> **VPS telepítési megjegyzés:** a távoli képfájl `/usr/lib/node_modules/omniroute/app/` könyvtára változatlan. Az üzembe helyezési képességek rsinkronizálják a `dist/` tartalmát. Csak az in-repo build kimeneti útvonala mozgott (`app/` → `dist/`).
 
-Alapértelmezett URL-ek:
+Alapértelmezett URLs:
 
-- **Irányítópult**: `http://localhost:20128/dashboard`
+- **Műszerfal** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -436,10 +416,10 @@ Ezután használja a `/deploy-vps-*-cc` készségeket, amelyek az rsync segíts�
 
 ---
 
-## Segítségkérés
+## Segítség kérése
 
-- **Architektúra**: Lásd: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API-referencia**: Lásd: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Biztonsági dokumentáció**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Üzemeltetési dokumentáció**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Hibajegyek**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Építészet** : Lásd [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Referencia** : Lásd [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Biztonsági dokumentumok** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops dokumentumok** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Kérdések** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

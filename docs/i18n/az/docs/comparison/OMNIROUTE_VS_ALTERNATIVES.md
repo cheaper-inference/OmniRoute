@@ -11,7 +11,7 @@ Məşhur açıq mənbəli AI marşrutlaşdırıcıları ilə obyektiv xüsusiyy�
 | Xüsusiyyət                                               |                  OmniRoute 3.8                  |     LiteLLM 1.x     | OpenRouter (SaaS) |   Portkey   |
 | -------------------------------------------------------- | :---------------------------------------------: | :-----------------: | :---------------: | :---------: |
 | **Provayderlər**                                         |                     **329**                     |        ~100         |        ~50        |     ~30     |
-| **Free/no-auth kataloq girişləri**                       |                     **155**                     |         n/a         |       keçid       |     n/a     |
+| **Pulsuz çıxışı olan provayderlər**                      |             **50 pulsuz giriş ilə**             |         n/a         |       keçid       |     n/a     |
 | **Özünə ev sahibi**                                      |                       ✅                        |         ✅          |        ❌         | ⚠ ödənilib  |
 | **OAuth kataloq girişləri**                              |                     **23**                      |       qismən        |        ❌         |     ❌      |
 | **Avtomatik geri dönən kombinlər**                       |                **22 strategiya**                | prioritet əsaslıdır |     səviyyəli     |   çəkili    |
@@ -38,7 +38,7 @@ Məşhur açıq mənbəli AI marşrutlaşdırıcıları ilə obyektiv xüsusiyy�
 
 ## Nə vaxt OmniRoute seçmək lazımdır
 
-- Özünüzə ev sahibliyi edirsiniz və istəyirsiniz** provayderin maksimum əhatə dairəsi** (394 provayder, 155 free/no-auth kataloq girişi)
+- Özünüzə ev sahibliyi edirsiniz və istəyirsiniz** provayderin maksimum əhatə dairəsi** (394 provayder, 50 pulsuz giriş ilə)
 - Sizə lazımdır** quraşdırılmış MCP serveri** (LLM alətləri, yaddaş, alətlər kimi ifşa olunan bacarıqlar)
 - Sizə lazımdır**A2A protokolu** agentdən agentə iş axınları üçün
 - İstəyirsən** barmaq izi gizliliyi** (JA3/JA4) yuxarı CAPTCHAs tərəfindən aşkarlanmamaq üçün
@@ -56,12 +56,12 @@ Məşhur açıq mənbəli AI marşrutlaşdırıcıları ilə obyektiv xüsusiyy�
 - SaaS əlavəsi ilə hər token üçün ödəniş etmək sizin üçün uyğundur
 - Bütün provayderlər üzrə **vahid ödəniş üsuluna** ehtiyacınız var
 
-## Portkey-ni nə zaman seçməli
+## Portkeyi nə vaxt seçmək lazımdır
 
-- Əlçatanlıq zəmanətləri olan **kommersiya SLA-sına** ehtiyacınız var
-- Əməliyyat yükü olmadan **idarə olunan idarəetmə panelinə** üstünlük verirsiniz
-- Hazır şəkildə təqdim olunan **korporativ uyğunluq** funksiyalarına ehtiyacınız var
+- Sizə lazımdır** kommersiya SLA** iş vaxtı zəmanətləri ilə
+- Siz a** idarə olunan panel** əməliyyatlar olmadan
+- Sizə lazımdır** müəssisənin uyğunluğu** qutudan kənar xüsusiyyətlər
 
 ---
 
-_Son yenilənmə: 2026-08-02. Bu cədvəlin dəqiqliyini qorumaq üçün düzəlişləri PR vasitəsilə göndərin._
+_Bu cədvəli dəqiq saxlamaq üçün PR vasitəsilə düzəlişlər göndərin._

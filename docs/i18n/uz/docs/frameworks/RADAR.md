@@ -95,54 +95,30 @@ tanlovini o‘zgartirmaydi — quyidagi alohida rozilikka qarang.
 
 ---
 
-## Maʼlumotlarni sinxronlash — ALOHIDA rozilik: maxfiylik vaʼdasi
+## Ma'lumotlarni sinxronlash - bu maxfiylik va'dasi bo'yicha SEPARATE - — kirish
 
-`RADAR_ENABLED` ni yoqish faqat foydalanuvchi interfeysini ochadi. Tasmani sinxronlash uchun
-`radar_settings.opt_in` ichida saqlanadigan ikkinchi, mustaqil rozilik talab qilinadi (`src/lib/db/radar.ts`,
-`136_radar_cache_settings.sql` migratsiyasi). `syncRadar()` har qanday tarmoq chaqiruvidan oldin
-bayroqni _ham_, rozilikni _ham_ tekshiradi:
+`RADAR_ENABLED` yoqish faqat UI qulfini ochadi. Tasmani sinxronlash uchun `radar_settings.opt_in` (`src/lib/db/radar.ts`, migratsiya `136_radar_cache_settings.sql`) da saqlanadigan ikkinchi mustaqil kirish talab qilinadi. `syncRadar()` har qanday tarmoq qo'ng'irog'ini amalga oshirishdan oldin bayroqni _va kirishni tekshiradi:
 
 ```
-Bayroq o‘chiq   → { status: "disabled" }   — tarmoq chaqiruvi yo‘q
-Rozilik false   → { status: "opt_out" }    — tarmoq chaqiruvi yo‘q
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Ikkalasi ham yoqilganida sinxronlash jarayoni quyidagicha kechadi:
+Ikkalasi ham yoqilgan bo'lsa, sinxronlash yo'li:
 
-1. `x-omniroute-radar-schema: 2` va ixtiyoriy `Authorization: Bearer <supporter key>` sarlavhasi
-   bilan `GET <feed base URL>/v1/catalog/latest` so‘rovi yuboriladi (quyiga qarang). Sxema sarlavhasi
-   mavjud bo‘lmasa, serverlar standart ravishda alohida imzolangan v1 o‘tish artefaktini taqdim etadi,
-   shuning uchun avval o‘rnatilgan eski mijozlar yangilanishlarni olishda davom etadi.
-2. Bu faqat yuklab olishga mo‘ljallangan ilova jarayoni, ammo baribir HTTPS so‘rovidir. Xost qilingan
-   infratuzilma manba IP manzili kabi odatiy ulanish metamaʼlumotlarini oladi. Qo‘llab-quvvatlovchi
-   kaliti sozlangan bo‘lsa, sinxronlash ushbu kalitni Bearer sarlavhasida ham yuboradi, shunda xizmat
-   huquq darajasini aniqlay oladi. Yuqoridagi dalillar chegarasida ko‘rsatilgan xususiy serverning aynan
-   o‘sha reviziyasida tasma so‘rovlarini hisobga olish uchun kalit xeshlari, umumlashtirilgan foydalanish
-   maʼlumotlari va suiisteʼmol holatlarini qo‘lda tekshirish uchun IP manzilning har kuni almashtiriladigan,
-   qisqartirilgan HMAC qiymati ishlatiladi; ushbu jadvallarda kalit ham, IP manzil ham xom shaklda
-   saqlanmaydi. Infratuzilmaga kirish jurnallari va shifrlangan yetkazib berish chiquvchi navbati alohida
-   operatsion chegaralardir.
-3. OmniRoute hech qachon Radar xizmatiga promptlar, javoblar, suhbatlar, provayder hisob maʼlumotlari,
-   model trafigi, ishlash vaqti, kechikish yoki mahalliy provayder konfiguratsiyasini yubormaydi.
-4. Javob tekshiriladi, validatsiya qilinadi va mahalliy keshga saqlanadi (
-   [Xavfsizlik modeli](#security-model) bo‘limiga qarang). Radar’da server tomonidagi aynan to‘rtta
-   tarmoq yo‘li mavjud: katalog uchun `syncRadar()`, tavsiyalar uchun `syncRadarReferrals()` hamda
-   faqat qo‘llab-quvvatlovchilar uchun takliflar va Intel uchun `syncRadarOffers()` / `syncRadarIntel()`.
+1. `x-omniroute-radar-schema: 2` va ixtiyoriy `Authorization: Bearer <supporter key>` sarlavhasi bilan `GET <feed base URL>/v1/catalog/latest` (pastga qarang). Sxema sarlavhasi mavjud bo'lmaganda serverlar alohida imzolangan v1 o'tish artefaktiga sukut bo'ladi, shuning uchun eski o'rnatilgan mijozlar yangilanishlarni olishda davom etadi.
+2. Bu faqat yuklab olinadigan ilovalar oqimi, lekin u hali ham HTTPS so'rovidir. Joylashtirilgan infratuzilma IP manbasi kabi oddiy ulanish metama'lumotlarini oladi. Qo'llab-quvvatlovchi kalit sozlanganda, sinxronlash ham ushbu kalitni Bearer sarlavhasiga yuboradi, shunda xizmat huquqni hal qilishi mumkin. Yuqoridagi dalillar chegarasida aniqlangan xususiy serverni qayta ko'rib chiqishda, tasma so'rovi hisobi asosiy xeshlardan, umumiy foydalanishdan va qo'lda suiiste'mollikni tekshirish uchun IP ning kunlik aylanma kesilgan HMAC foydalanadi; bu jadvallar xom shaklda kalit ham, IP ham saqlanib qolmaydi. Infratuzilmaga kirish jurnallari va shifrlangan etkazib berish qutisi alohida operatsion chegaralardir.
+3. OmniRoute hech qachon Radar xizmatiga takliflar, javoblar, suhbatlar, provayder hisob ma'lumotlari, model trafigini, ish vaqti, kechikish yoki mahalliy provayder konfiguratsiyasini yubormaydi.
+4. Javob mahalliy sifatida tekshiriladi, tasdiqlanadi va keshlanadi ( [Xavfsizlik modeliga](#security-model) qarang). Radarda toʻrtta server tomonidagi tarmoq yoʻllari mavjud: katalog uchun `syncRadar()`, tavsiyalar uchun `syncRadarReferrals()` va faqat qoʻllab-quvvatlovchilar uchun takliflar va Intel uchun `syncRadarOffers()` / `syncRadarIntel()`.
 
-**Qo‘llab-quvvatlovchi kaliti** — tasma xizmatiga qaysi darajani taqdim etishni aniqlash imkonini beruvchi
-ixtiyoriy Bearer tokeni (`radar_settings.supporter_key`) (
-[Darajalar](#tiers-community-and-live) bo‘limiga qarang). U:
+Katalog tekshiruvi har 24 soatda amalga oshiriladi. Tasdiqlangan tasma hali ham keshlangan versiya va darajaga ega bo'lsa, sinxronlash keshlangan foydali yukni saqlaydi, `fetchedAt` yangilaydi va keyingi tekshirish keyingi soatlik belgi o'rniga 24 soatdan keyin keladi.
 
-- Provayder hisob maʼlumotlari uchun ishlatiladigan ayni AES-256-GCM `encrypt()`/`decrypt()`
-  yordamchilari (`src/lib/db/encryption.ts`) bilan **diskda shifrlangan holda** saqlanadi.
-- `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) orqali o‘rnatiladi va
-  **hech qachon javobda to‘liq qaytarilmaydi** — javob niqoblangan shaklni (`omr_****abcd`) qaytaradi.
-- Uni o‘zgartirish yoki tozalash katalog, tavsiyalar, takliflar va Intel keshlarini atomar tarzda
-  yaroqsiz qiladi. Keyingi sinxronlash yoki o‘qish amali yangi huquq darajasini server tomonida
-  aniqlaydi; kalitni saqlashning o‘zi tarmoq so‘rovini yubormaydi yoki bir martalik faollashtirish
-  kalitini sarflamaydi.
-- Sinxronlashdagi GET so‘rovida tasma xizmatiga Bearer tokeni sifatida yuboriladi — kalit haqidagi
-  boshqa hech qanday maʼlumot mijozdan tashqariga chiqmaydi.
+The** qo'llab-quvvatlovchi kaliti** bu tasma xizmatiga qaysi darajaga xizmat koʻrsatishni hal qilish imkonini beruvchi ixtiyoriy Tashuvchi tokeni (`radar_settings.supporter_key`) (qarang: [Tiers](#tiers-community-and-live) ). Bu:
+
+- Saqlangan** dam olishda shifrlangan** provayder hisob ma'lumotlari uchun ishlatiladigan bir xil AES-256-GCM `encrypt()`/`decrypt()` yordamchilari (`src/lib/db/encryption.ts`) bilan.
+- `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) va orqali o'rnating** hech qachon ortga qaytmagan** — javob niqoblangan shaklni qaytaradi (`omr_****abcd`).
+- Uni o'zgartirish yoki tozalash katalog, tavsiyalar, takliflar va Intel keshlarini atomik ravishda bekor qiladi. Keyingi sync/read server tomonidagi yangi huquqni hal qiladi; kalitni saqlashning o'zi tarmoq so'rovini amalga oshirmaydi yoki bir martalik faollashtirish kalitini iste'mol qilmaydi.
+- Sinxronizatsiya GET — -da Tasdiqchi tokeni sifatida tasma xizmatiga yuborilgan kalit haqida boshqa hech narsa mijozni tark etmaydi.
 
 ---
 
@@ -308,101 +284,54 @@ masofaviy HTTP manzillar xavfsiz tarzda rad etiladi hamda navigatsiya faolsiz qo
 
 ## Xavfsizlik modeli
 
-### Aniq baytlar ustidan Ed25519 imzosi
+### Ed25519 imzosi aniq baytlar orqali
 
-Feed foydali yuklamasi Ed25519 bilan imzolanadi. `verifyFeedBytes()`
-(`src/lib/radar/verify.ts`) imzoni tarmoq orqali olingan **aynan o‘sha javob baytlari**
-ustidan tekshiradi — tekshiruvdan oldin foydali yuklama hech qachon qayta
-serializatsiya qilinmaydi, shu sababli baytma-bayt qayta kodlash imzo tekshiruvini
-sezdirmasdan bekor qila yoki chetlab o‘ta olmaydi. Tekshiruv muvaffaqiyatsiz tugasa
-(`invalid_signature`), foydali yuklama tahlil qilinishi yoki keshga saqlanishidan oldin
-sinxronlash bekor qilinadi.
+Tasmaning foydali yuki Ed25519 bilan imzolangan. `verifyFeedBytes()` (`src/lib/radar/verify.ts`) ustidagi imzoni tekshiradi** aniq javob baytlari** — tel orqali qabul qilinganda, foydali yuk tekshirishdan oldin hech qachon qayta seriyalashtirilmaydi, shuning uchun bayt uchun baytni qayta kodlash ovozsiz ravishda bekor qila olmaydi yoki imzo tekshiruvini chetlab o'tolmaydi. Tasdiqlash xatosi (`invalid_signature`) foydali yukni tahlil qilish yoki keshlashdan oldin sinxronlashni bekor qiladi.
 
-### Biriktirilgan ochiq kalit + rotatsiya
+### Qattiqlangan ochiq kalit + aylanishi
 
-Tekshiruvchi ochiq kalit `src/lib/radar/pinnedKeys.ts` faylida
-(`PINNED_FEED_PUBLIC_KEYS`) biriktirilgan; u massiv ko‘rinishida bo‘lib, rotatsiya
-oldidan yangi kalitni boshiga qo‘shish imkonini beradi, avvalgi kalit bilan imzolangan
-eski keshlangan feedlar esa qayta sinxronlanguncha haqiqiyligicha qoladi.
+Tekshiruvchi ochiq kalit `src/lib/radar/pinnedKeys.ts` (`PINNED_FEED_PUBLIC_KEYS`) qatoriga qadalgan, bu massivda yangi kalitni aylanish oldidan qo‘shish mumkin, oldingi kalit bilan imzolangan eski keshlangan tasmalar esa qayta sinxronlanmaguncha amal qiladi.
 
-### Forklar uchun qulay env qayta belgilashlari
+### Vilkalar uchun qulay env bekor qiladi
 
-Ikki env o‘zgaruvchisi forklar va mustaqil xost qiluvchilarga mijozni standart
-OmniRoute xizmati o‘rniga o‘z feediga yo‘naltirish imkonini beradi — quyidagi
-[Feedni mustaqil xost qilish](#how-to-self-host-a-feed) bo‘limiga qarang:
+Ikkita env varianti vilkalar va oʻz-oʻzini xostinglarga mijozni standart OmniRoute xizmati oʻrniga oʻz tasmasiga yoʻnaltirish imkonini beradi — quyida [tasmani qanday oʻz-oʻziga xost qilish boʻlimiga](#how-to-self-host-a-feed) qarang:
 
-| O‘zgaruvchi         | Maqsad                                                                                                                         |
+| Var                 | Maqsad                                                                                                                         |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `RADAR_FEED_URL`    | Feed asosiy URL manzilini qayta belgilaydi (standart: `https://radar.omniroute.online`).                                       |
-| `RADAR_FEED_PUBKEY` | Biriktirilgan ochiq kalitni qayta belgilaydi (base64-DER SPKI yoki PEM), ichki massivni ushbu yagona kalit bilan almashtiradi. |
+| `RADAR_FEED_URL`    | URL tasma bazasini bekor qiladi (birlamchi `https://radar.omniroute.online`).                                                  |
+| `RADAR_FEED_PUBKEY` | Oʻrnatilgan massivni ushbu yagona kalit bilan almashtirib, mahkamlangan ochiq kalitni (base64-DER SPKI yoki PEM) bekor qiladi. |
 
-### Versiyaning quyi chegarasi
+### Versiya qavat
 
-`syncRadar()` yuklab olingan feedning `version` qiymati hozirda keshlangan versiyadan
-qat’iy ravishda yangiroq bo‘lmasa, uni rad etadi (`compareVersions()`, nuqtalar bilan
-ajratilgan `YYYY.MM.DD.n` taqqoslash) — `{ status: "stale" }`. Bu buzib kirilgan yoki
-noto‘g‘ri sozlangan feed endpointining mijozni eskiroq, boshqacha imzolangan foydali
-yuklamaga qaytarishiga yo‘l qo‘ymaydi.
+`syncRadar()` `version` keshlangan versiyadan (`compareVersions()`, nuqtali `YYYY.MM.DD.n` solishtirish) — `{ status: "stale" }` mutlaqo yangi bo‘lmagan yuklab olingan tasmani rad etadi. Bu buzilgan yoki noto‘g‘ri sozlangan tasma so‘nggi nuqtasi mijozni eski, boshqacha imzolangan foydali yukga qaytarishning oldini oladi.
 
-### Ikki sana va nega ikkalasi ham saqlanadi
+### Ikkita sana va nima uchun ikkalasi ham saqlanadi
 
-Keshlangan feed ikki xil sanani o‘z ichiga oladi va ularni adashtirib yubormaslik
-uchun aynan ikkalasi ham saqlanadi:
+Keshlangan tasma ikkita aniq sanani o'z ichiga oladi va ularni chalkashtirib yuborish ikkalasini ham saqlashning butun nuqtasidir:
 
-| Maydon        | Qayerdan olinadi       | Nimani ko‘rsatadi                             |
-| ------------- | ---------------------- | --------------------------------------------- |
-| `generatedAt` | imzolangan feed tanasi | **ma’lumotlar** qanchalik eski ekanini        |
-| `fetchedAt`   | ushbu o‘rnatma soati   | ushbu o‘rnatma uni qachon **yuklab olganini** |
+| Maydon        | dan keladi              | Javoblar                                 |
+| ------------- | ----------------------- | ---------------------------------------- |
+| `generatedAt` | imzolangan tasma organi | necha yoshda** ma'lumotlar** hisoblanadi |
+| `fetchedAt`   | bu o'rnatish soati      | bu o'rnatilganda** yuklab olingan** bu   |
 
-Bir necha daqiqa oldin olingan feed bir necha haftalik ma’lumotlarni o‘z ichiga olishi
-mumkin, shuning uchun faqat `fetchedAt` operatorga ustki qatlam uning ostidagi bazaviy
-ma’lumotlardan yangiroq yoki yo‘qligini bildira olmaydi. Ikkalasi ham
-`radar_feed_cache` ichida saqlanadi, `getRadarCatalog().meta` orqali qaytariladi va
-`GET /api/radar/status` tomonidan alohida ko‘rsatiladi. `generated_at` ustuni mavjud
-bo‘lishidan oldin (163-migratsiya) keshlangan qator o‘qilganda `null` qaytaradi —
-noma’lum qiymat olish vaqtini o‘zlashtirish o‘rniga noma’lumligicha qoladi.
-`radar_referrals_cache` esa 142-migratsiyadan beri o‘zining `generated_at` qiymatini
-saqlab keladi.
+Bir necha daqiqa oldin olingan tasma bir necha haftalik raqamlarni ko'rsatishi mumkin, shuning uchun `fetchedAt` o'zi operatorga ustki qatlam o'rnatilgan asosiy chiziqdan yangiroq ekanligini ayta olmaydi. Ikkalasi ham `radar_feed_cache` da saqlanadi , `getRadarCatalog().meta` tomonidan qaytariladi va `GET /api/radar/status` tomonidan alohida xabar qilinadi. `generated_at` ustuni mavjud bo'lgunga qadar keshlangan satr (migratsiya 163) `null` — noma'lumligi sababli o'qish vaqtini olishdan ko'ra noma'lum bo'lib qoladi. `radar_referrals_cache` 142 migratsiyadan beri o'z `generated_at` saqlab qoldi.
 
-Yuqoridagi versiyaning quyi chegarasi sanalardan birini emas, `version` qiymatini
-taqqoslaydi.
+Yuqoridagi versiya qavati ikkala sanani emas, balki `version` taqqoslaydi.
 
-Ataylab qoldirilgan ikkita bo‘shliq mavjud: boshqaruv paneli hanuz faqat `Oxirgi
-olingan vaqt`ni ko‘rsatadi, shu sababli u yerda yaratish sanasini ko‘rsatish uchun yangi
-yorliq (va uning 41 ta lokalizatsiya yozuvi) kerak bo‘ladi; takliflar va tahliliy
-ma’lumotlar keshlari esa o‘z feed sxemalarida yaratish sanasi mavjud bo‘lsa-da, uni
-umuman saqlamaydi — shu sababli `GET
-/api/radar/status` bu ikki holat uchun `null` qiymatini ko‘rsatish o‘rniga maydonni
-tushirib qoldiradi, aks holda u «noma’lum» deb talqin qilinishi mumkin edi.
+Ikki boʻshliq qolmoqda, ikkalasi ham ataylab qilingan: asboblar panelida hali ham faqat `Last fetched` koʻrsatilgan, shuning uchun u yerda tuzilgan sanani oʻqish uchun yangi yorliq kerak (va uning 41 ta mahalliy yozuvlari); va takliflar va intel keshlari hech qanday tuzilish sanasini saqlamaydi, garchi ularning tasma sxemalarida bitta — `GET /api/radar/status` bo‘lsa, shuning uchun “noma’lum” deb o‘qiladigan `null` haqida xabar berish o‘rniga bu ikkisi uchun maydonni o‘tkazib yuboradi.
 
 ### Sxemani tekshirish
 
-Yuklab olingan baytlar imzo tekshirilganidan **keyin** `RadarFeedSchema`
-(`src/lib/radar/feedSchema.ts`, Zod sxemasi) asosida tahlil qilinadi va tekshiriladi.
-Sxema mos kelmasa, `{ status: "invalid_schema" }` qaytariladi va kesh o‘zgarishsiz
-qoldiriladi. Keshlangan foydali yuklama har bir o‘qishda (`getRadarCatalog()`) himoya
-maqsadida yana tekshiriladi — buzilgan yoki qo‘lda tahrirlangan kesh qatori taqdim
-etilish o‘rniga bazaviy ma’lumotlarga qaytadi.
+Yuklab olingan baytlar tahlil qilinadi va `RadarFeedSchema` (`src/lib/radar/feedSchema.ts`, Zod sxemasi) ga nisbatan tasdiqlanadi.** keyin** imzoni tekshirish. Sxema nomuvofiqligi `{ status: "invalid_schema" }` qaytaradi va keshga tegmasdan qoladi. Keshlangan foydali yuk har bir o'qishda (`getRadarCatalog()`) qayta tekshiriladi — buzilgan yoki qo'lda tahrirlangan kesh qatori xizmat ko'rsatishdan ko'ra asosiy chiziqqa tushadi.
 
-### Javob hajmi cheklovi (10 MB)
+### Javob hajmi chegarasi (10 MB)
 
-`syncRadar()` feed javobi tanasiga **10 MB qat’iy cheklov** qo‘llaydi — imzolangan
-feed KB miqyosidagi JSON hujjatidir, shuning uchun bundan kattaroq hajm qonuniy
-katalogni emas, noto‘g‘ri sozlangan yoki zararli `RADAR_FEED_URL`ni (yoki keraksiz
-ma’lumot uzatayotgan yuqori oqim manbasini) anglatadi. Cheklov ikki qatlamda
-qo‘llanadi:
+`syncRadar()` majburlaydi a** 10 MB qattiq qopqoq** tasma javob tanasi — da imzolangan tasma KB oʻlchamli JSON hujjatidir, shuning uchun undan oʻtgan har qanday narsa qonuniy katalog emas, notoʻgʻri sozlangan yoki dushman `RADAR_FEED_URL` (yoki yuqori oqimga xizmat koʻrsatuvchi axlat)ga ishora qiladi. Amalga oshirish ikki bosqichli:
 
-1. `Content-Length` bo‘yicha dastlabki tekshiruv, sarlavhada ko‘rsatilgan qiymat
-   cheklovdan oshib ketgan bo‘lsa, javob tanasini o‘qishni butunlay o‘tkazib yuboradi.
-2. Javob tanasini o‘qish vaqtida yig‘indi hajmni kuzatish tekshiruvi, hatto
-   `Content-Length` mavjud bo‘lmasa yoki haqiqiy hajmni kamaytirib ko‘rsatsa ham,
-   cheklovni ta’minlaydi — sarlavhaning o‘ziga hech qachon to‘liq ishonilmaydi.
-   Yig‘ilgan bo‘laklarni birlashtirish keyingi Ed25519 imzo tekshiruvi uchun zarur
-   bo‘lgan aniq baytlarni saqlab qoladi.
+1. Agar sarlavha allaqachon qopqoq ustidagi qiymatni e'lon qilgan bo'lsa, `Content-Length` parvozdan oldingi tekshiruvi tanani to'liq o'qishni o'tkazib yuboradi.
+2. Tanani o'qiyotganda bajariladigan jami tekshirish, hatto `Content-Length` bo'lmasa yoki — haqiqiy hajmini kamaytirsa ham, sarlavhaga hech qachon ishonib bo'lmaydi. Yig'ilgan qismlarni birlashtirish Ed25519 imzo tekshiruvi uchun zarur bo'lgan aniq baytlarni saqlab qoladi.
 
-Cheklovdan oshish `{ status: "too_large" }` qiymatini qaytaradi va keshni o‘zgarishsiz
-qoldiradi; bu boshqa barcha sinxronlash xatolaridagi (`invalid_signature`,
-`invalid_schema`, `stale`) kabi buzmaydigan yondashuvga amal qiladi.
+Qopqoqdan oshib ketish `{ status: "too_large" }` qaytaradi va boshqa sinxronlash xatosi (`invalid_signature`, `invalid_schema`, `stale`) kabi buzilmaydigan naqshga rioya qilgan holda keshni ham tegmasdan qoldiradi.
 
 ---
 
@@ -430,58 +359,45 @@ version, tier }` sifatida qaytariladi — boshqaruv paneli xom tana maydonini em
 
 ---
 
-## O‘qish vaqtidagi ustma-ust birlashtirish qoidalari
+## O'qish vaqtini birlashtirish qoidalari
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) keshlangan feed’ni `getRadarCatalog()` ichida **o‘qish vaqtida** statik bazaviy holat **ustiga** birlashtiradi. Bazaviy massiv
-(`FREE_MODEL_BUDGETS`) hech qachon o‘zgartirilmaydi — har bir chaqiruvda yangi `MergedEntry[]` hisoblanadi.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) keshlangan tasmani birlashtiradi** tugadi** da statik asosiy chiziq** o'qish vaqti** , `getRadarCatalog()` ichida. Asosiy qator (`FREE_MODEL_BUDGETS`) hech qachon mutatsiyaga uchramaydi — a `MergedEntry[]` har bir chaqiruvda yangi hisoblab chiqiladi.
 
-Ustuvorlik tartibidagi to‘rtta qoida:
+To'rtta qoida, ustunlik tartibida:
 
-1. **Feed hech qachon mahalliy bekor qilishni ustidan yozmaydi.** Har bir maydon bo‘yicha: agar operator yozuvdagi biror maydonni moslashtirgan bo‘lsa (`provider:modelId` kalitli `localOverrides` xaritasi), feed’ning aynan shu maydon uchun qiymati o‘tkazib yuboriladi — operator qiymati ustun keladi.
-2. **`enabled: false` yozuvni o‘chiradi va kelib chiqishini saqlaydi.** Yozuvni o‘chiradigan feed yozuvi birlashtirilgan natijada `enabled: false` va `disabledBy: "radar"` qiymatlarini o‘rnatadi, shunda UI yozuv nima sababdan mavjud holatdan o‘chirilgan holatga o‘tganini tushuntira oladi.
-3. **Feed’da mavjud bo‘lmagan foydalanuvchi qo‘shgan yozuv o‘zgartirilmasdan saqlanadi.** Faqat bazaviy holatda mavjud bo‘lgan (yoki mahalliy ravishda qo‘shilgan) va feed’da mos yozuvi bo‘lmagan yozuvlar o‘zgarishsiz o‘tadi.
-4. **Tombstone bilan belgilangan yozuv hech qachon qayta tiklanmaydi.** Agar operator yozuvni aniq o‘chirgan bo‘lsa (`tombstones` to‘plami), feed keyingi versiyada o‘sha `provider:modelId` qiymatini qayta qo‘shsa ham, u qayta tiklanmaydi.
+1. **Tasma hech qachon mahalliy bekor qilishning ustiga yozmaydi.** Har bir maydon: agar operator yozuvdagi maydonni sozlagan bo'lsa (`localOverrides` xaritasi, kalitli `provider:modelId`), ushbu maxsus maydon uchun tasma qiymati o'tkazib yuboriladi — operatorning qiymati yutadi.
+2. **`enabled: false` kelib chiqishi bilan kirishni o'chiradi.** Yozuvni o‘chirib qo‘yuvchi tasma yozuvi birlashtirilgan natijada `enabled: false` va `disabledBy: "radar"` ni o‘rnatadi, shuning uchun UI yozuv mavjuddan o‘chirilgan holatga o‘tganini tushuntirishi mumkin.
+3. **Tasmada mavjud bo'lmagan foydalanuvchi qo'shgan yozuv tegmasdan saqlanib qoladi.** Faqat asosiy satrda mavjud boʻlgan (yoki mahalliy sifatida qoʻshilgan) va tegishli tasma yozuvi boʻlmagan yozuvlar oʻzgarishsiz oʻtadi.
+4. **Qabr toshli yozuv hech qachon tirilmaydi.** Agar operator yozuvni (`tombstones` to'plami) aniq o'chirib tashlagan bo'lsa, keyingi versiyada ushbu `provider:modelId` qayta qo'shadigan tasma uni qaytarib bermaydi.
 
-Tahrirlanadigan maydonlar va tombstone’lar
-`radar_local_model_state` ichida saqlanadi (`153_radar_local_model_state.sql` migratsiyasi). Ochiq DB adapteri (`src/lib/db/radar.ts`) ushbu qatorlarni `applyFeed()` ishlatadigan `localOverrides` xaritasi va `tombstones` to‘plamiga aylantiradi; ishlab chiqarishdagi `getRadarCatalog()` ushbu holatni flag, kesh va sxema tekshiruvlaridan o‘tgandan keyin yuklaydi. Faqat `displayName` va `enabled` operator tomonidan tahrirlanadi. Provayder/model identifikatsiyasi, feed kelib chiqishi, kvota, imkoniyatlar, ToS va sozlash ma’lumotlarini ushbu interfeys orqali yozib bo‘lmaydi.
+Tahrirlanadigan maydonlar va qabr toshlari `radar_local_model_state` (migratsiya `153_radar_local_model_state.sql`) da saqlanadi. Umumiy DB adapteri (`src/lib/db/radar.ts`) ushbu qatorlarni `applyFeed()` tomonidan ishlatiladigan `localOverrides` xaritasi va `tombstones` to'plamiga aylantiradi; bayroq, kesh va sxema shlyuzlari o'tgandan keyin ko'rsatilgan ishlab chiqarish `getRadarCatalog()` yuklari. Faqat `displayName` va `enabled` operator tomonidan tahrirlanadi. Provider/model identifikatori, ozuqa manbasi, kvota, imkoniyatlar, ToS va sozlash maʼlumotlarini bu sirt orqali yozib boʻlmaydi.
 
-Boshqaruv paneli to‘rtta mahalliy amalni taqdim etadi:
+Boshqaruv paneli to'rtta mahalliy harakatni ko'rsatadi:
 
-- **Tahrirlash** mahalliy ko‘rsatiladigan nom va yoqilganlik holatini o‘zgartiradi.
-- **Mahalliy o‘zgarishlarni tiklash** tombstone’ni o‘zgartirmasdan ikkala tahrirlanadigan maydonni tozalaydi.
-- **Yashirish** tombstone yaratadi, shuning uchun keyingi feed yangilanishlari qatorni qayta yarata olmaydi.
-- **Qayta tiklash** tombstone’ni olib tashlaydi; alohida saqlangan har qanday bekor qilish o‘z kuchida qoladi.
+- **Tahrirlash** mahalliy displey nomini va yoqilgan holatni o'zgartiradi.
+- **Mahalliy o'zgarishlarni tiklash** qabr toshini o'zgartirmasdan ikkala tahrirlanadigan maydonni tozalaydi.
+- **Yashirish** qabr toshini yaratadi, shuning uchun keyingi tasma yangilanishlari qatorni qayta yarata olmaydi.
+- **Qayta tiklash** qabr toshini olib tashlaydi; har qanday alohida saqlangan bekor qilish amalda qoladi.
 
-Feed’dagi `enabled: false` xavfsizlik istisnosi bo‘lib qoladi: u eskirgan mahalliy `enabled: true` qiymatidan ustun keladi, birlashtirilgan yozuvni o‘chirilgan holda saqlaydi va `disabledBy: "radar"` qiymatini qayd etadi.
+Tasma `enabled: false` xavfsizlikdan istisno bo'lib qoladi: u eskirgan mahalliy `enabled: true` ustidan g'alaba qozonadi, birlashtirilgan yozuvni o'chirib qo'yadi va `disabledBy: "radar"` yozib oladi.
 
-Katalog nashrlari `schemaVersion: 2` dan foydalanadi. `contextWindow` hamda `tools`, `vision` va
-`thinking` maydonlarining har biri mustaqil ravishda `number | null` / `boolean | null` bo‘ladi: `null` noma’lumligini anglatadi, `false` esa D16 tomonidan tasdiqlangan rasmiy provayder manbasi imkoniyat mavjud emasligini aniq bildirishini anglatadi.
-Ichki OmniRoute reyestri/model spetsifikatsiyasi flaglari hech qachon to‘g‘ridan-to‘g‘ri feed faktlariga aylantirilmaydi. Mijoz hali ham v1 snapshot’larini qabul qiladi; eski builder yo‘qlik o‘rinbosari sifatida `false` qiymatidan foydalangani sababli, v1’dagi `false` noma’lum qiymatga normallashtiriladi, v1’dagi `true` esa fakt sifatida qoladi. Noma’lum sxema versiyalari yopiq tarzda rad etiladi va oxirgi haqiqiy kesh mavjud bo‘lib qoladi. Null bo‘lmagan kontekst/imkoniyatga ega har bir v2 modeli hisob ma’lumotlarini talab qilmaydigan HTTPS `metadataEvidenceUrls[]` qiymatini o‘z ichiga olishi shart; aks holda sxema tekshiruvi muvaffaqiyatsiz tugaydi va kesh almashtirilmaydi. Katalog jadvali uchala holatni ham `✓`, `✕` va `?` ko‘rinishida aks ettiradi.
+Katalog nashrlari `schemaVersion: 2` foydalanadi. `contextWindow` va `tools`, `vision` va `thinking` ning har biri mustaqil ravishda `number | null` / `boolean | null`: `null` noma'lum degan ma'noni anglatadi, `false` esa D16-confirmed rasmiy provayder manbasi qobiliyat yo'qligini aniq aytadi. Ichki OmniRoute registry/model-spec bayroqlari hech qachon to'g'ridan-to'g'ri faktlarga targ'ib qilinmaydi. Mijoz hali ham v1 suratlarini qabul qiladi; eski quruvchi `false` yoʻqlik oʻrnini bosuvchi sifatida ishlatganligi sababli, v1 `false` nomaʼlumga normallashtiriladi, v1 `true` esa fakt boʻlib qoladi. Noma'lum sxema versiyalari yopilmadi va oxirgi joriy kesh mavjud bo'lib qoladi. Null bo'lmagan context/capability ega har bir v2 modelida hisob ma'lumotlari bo'lmagan HTTPS `metadataEvidenceUrls[]` bo'lishi kerak; aks holda sxemani tekshirish muvaffaqiyatsiz tugadi va kesh almashtirilmaydi. Katalog jadvali barcha uch holatni `✓`, `✕` va `?` sifatida ko'rsatadi.
 
-### Yo‘naltirilgan kombinatsiyalar va MCP’dan foydalanish
+### Boshqaruvli kombinatsiyalar va MCP kirish
 
-Tasdiqlangan `familyId` qiymatlari o‘qish vaqtidagi ustma-ust birlashtirishdan keyin saqlanib qoladi va sof
-`buildRadarComboSuggestions()` modulini (`src/lib/radar/comboSuggestions.ts`) boshqaradi. Oila faqat kamida ikkita alohida provayder faol ulanishga ega bo‘lsa va aynan mos, saralangan model ID’sini taqdim etsa tavsiya qilinadi. O‘chirilgan modellar, nofaol provayderlar, yetishmayotgan model ID’lari, bitta a’zoli oilalar hamda noaniq alias/prefiks mosliklari yopiq tarzda rad etiladi. Tavsiyalar mavjud `priority` strategiyasidan foydalanib, eng katta takrorlanuvchi oylik budjetni birinchi o‘ringa qo‘yadi; UI ularni faqat `POST /api/combos` orqali yaratadi.
+Tasdiqlangan `familyId` qiymatlari o'qish vaqti qoplamasidan omon qoladi va sof `buildRadarComboSuggestions()` modulini (`src/lib/radar/comboSuggestions.ts`) boshqaradi. Oila faqat kamida ikkita alohida provayder faol ulanishga ega bo'lsa va ID aniq tanlangan modelni ko'rsatsa tavsiya etiladi. O'chirilgan modellar, nofaol provayderlar, etishmayotgan model IDs, singleton oilalar va noaniq alias/prefix mosliklari yopilmadi. Takliflar mavjud `priority` strategiyasidan foydalanadi, birinchi navbatda eng katta takrorlanuvchi oylik byudjetni buyurtma qiladi; UI ularni faqat `POST /api/combos` orqali yaratadi.
 
-Yoʻnaltirilgan UI `/dashboard/radar/combos` manzilida joylashgan. U faqat mahalliy
-`GET /api/radar/catalog` va `GET /api/combos/builder/options` endpointlarini oʻqiydi. U hech qachon Radar sinxronlashini ishga tushirmaydi,
-provayder hisob maʼlumotlarini oʻqimaydi yoki bevosita combo maʼlumotlar bazasiga yozmaydi.
+Boshqariladigan UI `/dashboard/radar/combos` yashaydi. U faqat mahalliy `GET /api/radar/catalog` va `GET /api/combos/builder/options` so'nggi nuqtalarini o'qiydi. U hech qachon Radar sinxronlashni ishga tushirmaydi, provayder hisob ma'lumotlarini o'qiydi yoki to'g'ridan-to'g'ri kombinatsiyalangan ma'lumotlar bazasiga yozmaydi.
 
-MCP mijozlari xuddi shu mahalliy proyeksiyani `omniroute_radar_catalog` (`read:radar`) orqali oʻqishi mumkin. Ixtiyoriy
-`provider`, `familyId` va `enabledOnly` filtrlari bitta mahalliy
-`GET /api/radar/catalog` soʻrovi oʻqilgandan keyin qoʻllanadi. Uning yopiq chiqishi katalog metamaʼlumotlari bilan birga provayder/model,
-koʻrsatiladigan nom, `familyId`, kvota, imkoniyatlar, yoqilganlik holati, kelib chiqish manbasi va `disabledBy` maydonlarini oʻz ichiga oladi; sozlash URL manzillari,
-qadamlar, ulanishlar, e-pochta manzillari, kalitlar va yoʻnaltiruvchi maʼlumotlar hech qachon qaytarilmaydi. Bu vosita
-faqat oʻqish uchun moʻljallangan va hech qachon `/api/radar/sync` endpointini chaqirmaydi.
+MCP mijozlari `omniroute_radar_catalog` (`read:radar`) bilan bir xil mahalliy proyeksiyani o‘qishlari mumkin. Ixtiyoriy `provider`, `familyId` va `enabledOnly` filtrlari bitta mahalliy `GET /api/radar/catalog` o‘qigandan so‘ng baholanadi. Uning yopiq chiqishi katalog metadata plus provider/model, displey nomi, `familyId`, kvota, imkoniyatlar, yoqilgan holat, kelib chiqishi va `disabledBy` o'z ichiga oladi; o'rnatish URLs, qadamlar, ulanishlar, elektron pochta manzillari, kalitlar va havola ma'lumotlari hech qachon qaytarilmaydi. Ushbu vosita faqat o'qish uchun mo'ljallangan va hech qachon `/api/radar/sync` chaqirmaydi. Keshlangan tasma o'rnatilgan katalogdan oldin bo'lsa, `meta.olderThanRelease` `true` bo'ladi va asbob mahalliy bekor qilish va qabr toshlari qo'llanilgan holda o'rnatilgan katalogdan modellarni qaytaradi.
 
 ### Kelib chiqish belgilari
 
-Har bir birlashtirilgan yozuvda UI nishon sifatida koʻrsatadigan `origin` maydoni mavjud:
+Har bir birlashtirilgan yozuv `origin` maydoniga ega bo'lib, UI nishon sifatida ko'rsatadi:
 
-- `"baseline"` — statik reliz katalogidan oʻzgartirilmagan.
-- `"radar"` — bir yoki bir nechta maydon tasmadan yangilangan.
-- `"local"` — operator ushbu yozuvda kamida bitta mahalliy qayta belgilashga ega (tasmaning nima deyishidan qatʼi nazar, 1-qoidaga muvofiq mahalliy
-  qayta belgilashlar har doim tasma ustidan ustun keladi).
+- `"baseline"` — statik nashrlar katalogidan tegmagan.
+- `"radar"` — bir yoki bir nechta maydonlar tasma tomonidan yangilandi.
+- `"local"` — operatorda bu yozuvda kamida bitta mahalliy bekor qilish mavjud (mahalliy bekor qilishlar tasmada nima deyilganidan qatʼi nazar, har doim 1-qoida boʻyicha tasma ustidan gʻalaba qozonadi).
 
 ---
 

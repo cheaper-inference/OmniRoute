@@ -94,52 +94,30 @@ ir-routing jew l-għażla tal-mudell — ara l-opt-in separat hawn taħt.
 
 ---
 
-## Is-sinkronizzazzjoni tad-data hija opt-in SEPARAT — il-wegħda tal-privatezza
+## Is-sinkronizzazzjoni tad-dejta hija SEPARATE opt-in — il-wegħda tal-privatezza
 
-Meta `RADAR_ENABLED` jinxtegħel, tinfetaħ biss l-UI. Is-sinkronizzazzjoni tal-feed teħtieġ opt-in ieħor,
-indipendenti, maħżun f’`radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migrazzjoni `136_radar_cache_settings.sql`). `syncRadar()` jiċċekkja l-flag _u_ l-opt-in
-qabel ma jagħmel kwalunkwe sejħa tan-network:
+Li tixgħel `RADAR_ENABLED` jinfetaħ biss iż- UI. Is-sinkronizzazzjoni tal-għalf teħtieġ it-tieni opt-in indipendenti maħżuna `radar_settings.opt_in` (`src/lib/db/radar.ts`, migrazzjoni `136_radar_cache_settings.sql`). `syncRadar()` jiċċekkja l-bandiera _u_ l-opt-in qabel ma tagħmel xi sejħa tan-netwerk:
 
 ```
-Flag mitfi     → { status: "disabled" }   — l-ebda sejħa tan-network
-Opt-in falz    → { status: "opt_out" }    — l-ebda sejħa tan-network
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Meta t-tnejn ikunu mixgħula, il-fluss tas-sinkronizzazzjoni jkun:
+Meta t-tnejn ikunu mixgħula, il-mogħdija tas-sinkronizzazzjoni hija:
 
-1. `GET <feed base URL>/v1/catalog/latest` b’`x-omniroute-radar-schema: 2` u header fakultattiv
-   `Authorization: Bearer <supporter key>` (ara hawn taħt). B’mod awtomatiku, meta l-header tal-iskema jkun assenti,
-   is-servers jużaw l-artefatt ta’ tranżizzjoni v1 iffirmat separatament, sabiex klijenti installati eqdem ikomplu
-   jirċievu aġġornamenti.
-2. Dan huwa fluss tal-applikazzjoni li jniżżel biss, iżda xorta waħda huwa rikjesta HTTPS. L-infrastruttura
-   ospitata tirċievi metadata normali tal-konnessjoni, bħall-IP tas-sors. Meta tkun ikkonfigurata ċavetta ta’ sostenitur,
-   is-sinkronizzazzjoni tibgħat ukoll dik iċ-ċavetta fil-header Bearer sabiex is-servizz ikun jista’ jiddetermina
-   l-intitolament. Fir-reviżjoni eżatta tas-server privat identifikata fil-konfini tal-evidenza msemmija hawn fuq,
-   il-kontabbiltà tar-rikjesti tal-feed tuża hashes taċ-ċwievet, użu aggregat, u HMAC maqtugħ tal-IP
-   li jinbidel kuljum għal rieżami manwali tal-abbuż; dawk it-tabelli ma jippersistu la ċ-ċavetta u lanqas l-IP fil-forma mhux ipproċessata tagħhom.
-   Ir-reġistri tal-aċċess tal-infrastruttura u l-outbox encrypted tal-konsenja huma konfini operazzjonali
-   separati.
-3. OmniRoute qatt ma jibgħat prompts, risposti, konverżazzjonijiet, kredenzjali tal-fornituri, traffiku tal-mudelli,
-   uptime, latenza, jew il-konfigurazzjoni lokali tal-fornituri lis-servizz Radar.
-4. Ir-risposta tiġi vverifikata, validata, u maħżuna lokalment fil-cache (ara
-   [Mudell tas-sigurtà](#security-model)). Radar għandu eżattament erba’ mogħdijiet tan-network fuq in-naħa tas-server:
-   `syncRadar()` għall-katalgu, `syncRadarReferrals()` għar-referrals, u
-   `syncRadarOffers()` / `syncRadarIntel()` għall-offerti u l-Intel esklussivi għas-sostenituri.
+1. `GET <feed base URL>/v1/catalog/latest` `x-omniroute-radar-schema: 2` u header `Authorization: Bearer <supporter key>` fakultattiv (ara hawn taħt). Is-servers default għall-artifact tat-tranżizzjoni v1 iffirmat separatament meta l-header tal-iskema tkun assenti, għalhekk klijenti installati anzjani jibqgħu jirċievu aġġornamenti.
+2. Dan huwa fluss ta' applikazzjoni li jitniżżel biss, iżda xorta hija talba HTTPS. L-infrastruttura ospitata tirċievi metadejta ta' konnessjoni ordinarja bħas-sors IP. Meta ċavetta ta' sostenitur tkun ikkonfigurata, is-sinkronizzazzjoni tibgħat ukoll dik iċ-ċavetta fl-intestatura Bearer sabiex is-servizz ikun jista' jsolvi l-intitolament. Fir-reviżjoni eżatta tas-server privat identifikata fil-konfini tal-evidenza hawn fuq, il-kontabilità tat-talba tal-għalf tuża hashes ewlenin, użu aggregat, u HMAC maqtugħin li jdur kuljum tal- IP għal reviżjoni manwali tal-abbuż; dawk it-tabelli jippersistu la ċ-ċavetta u lanqas iż- IP f'forma mhux maħduma. Ir-reġistri tal-aċċess għall-infrastruttura u l-outbox tal-kunsinna kriptat huma konfini operattivi separati.
+3. OmniRoute qatt ma jibgħat prompts, tweġibiet, konversazzjonijiet, kredenzjali tal-fornitur, mudell tat-traffiku, uptime, latency, jew il-konfigurazzjoni tal-fornitur lokali lis-servizz tar-Radar.
+4. Ir-rispons huwa vverifikat, ivvalidat, u cached lokalment (ara [Mudell tas-Sigurtà](#security-model) ). Ir-radar għandu eżattament erba' mogħdijiet tan-netwerk fuq in-naħa tas-server: `syncRadar()` għall-katalgu, `syncRadarReferrals()` għar-riferimenti, u `syncRadarOffers()` / `syncRadarIntel()` għal offerti għall-partitarji biss u Intel.
 
-Iċ-**ċavetta ta’ sostenitur** hija token Bearer fakultattiv (`radar_settings.supporter_key`)
-li jippermetti lis-servizz tal-feed jiddeċiedi liema livell jipprovdi (ara
-[Livelli](#tiers-community-and-live)). Din:
+Il-kontroll tal-katalgu jibda kull 24 siegħa. Meta l-għalf ivverifikat ikun għadu jġorr il-verżjoni u l-livell fil-cache, is-sinkronizzazzjoni żżomm it-tagħbija tal-cache, iġedded `fetchedAt`, u l-kontroll li jmiss jiġi 24 siegħa wara minflok fuq il-marka ta' kull siegħa li jmiss.
 
-- Tinħażen **encrypted waqt il-ħażna** bl-istess helpers AES-256-GCM `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`) użati għall-kredenzjali tal-fornituri.
-- Tiġi ssettjata permezz ta’ `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) u
-  **qatt ma tintbagħat lura** — ir-risposta tirritorna forma moħbija (`omr_****abcd`).
-- Meta tinbidel jew titneħħa, il-caches tal-katalgu, tar-referrals, tal-offerti, u tal-Intel jiġu invalidati atomikament. Is-sinkronizzazzjoni
-  jew il-qari li jmiss jiddetermina l-intitolament il-ġdid fuq in-naħa tas-server; is-salvataġġ ta’ ċavetta fih innifsu ma jagħmilx
-  rikjesta tan-network u ma jikkonsmax ċavetta ta’ attivazzjoni li tintuża darba biss.
-- Tintbagħat lis-servizz tal-feed bħala token Bearer fuq il-GET tas-sinkronizzazzjoni — l-ebda informazzjoni oħra dwar
-  iċ-ċavetta ma titlaq mill-klijent.
+Il-** ċavetta tal-partitarju** huwa token tal-Bearer fakultattiv (`radar_settings.supporter_key`) li jħalli lis-servizz tal-għalf jiddeċiedi liema saff għandu jservi (ara [Tiers](#tiers-community-and-live) ). Huwa:
+
+- Maħżuna** encrypted waqt il-mistrieħ** bl-istess AES-256-GCM `encrypt()`/`decrypt()` helpers (`src/lib/db/encryption.ts`) użati għall-kredenzjali tal-fornitur.
+- Issettja permezz ta `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) u** qatt eku lura** — ir-rispons jirritorna forma mgħottija (`omr_****abcd`).
+- It-tibdil jew l-ikklerjar atomikament jinvalida l-katalgu, ir-referenzi, l-offerti u l-caches Intel. sync/read li jmiss issolvi n-naħa tas-server tal-intitolament il-ġdid; l-iffrankar ta 'ċavetta ma jagħmilx hu stess talba ta' netwerk jew jikkonsma ċavetta ta 'attivazzjoni ta' użu wieħed.
+- Mibgħut lis-servizz tal-għalf bħala token Bearer fuq is-sinkronizzazzjoni GET — xejn aktar dwar iċ-ċavetta qatt tħalli lill-klijent.
 
 ---
 
@@ -426,84 +404,45 @@ version, tier }` — dan huwa l-valur li juri d-dashboard, qatt il-qasam mhux ip
 
 ---
 
-## Regoli tal-inkorporazzjoni tal-overlay fil-ħin tal-qari
+## Regoli ta' amalgamazzjoni ta' overlay fil-ħin tal-qari
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) jinkorpora l-feed fil-cache **fuq** il-
-linja bażi statika fil-**ħin tal-qari**, ġewwa `getRadarCatalog()`. L-array tal-linja bażi
-(`FREE_MODEL_BUDGETS`) qatt ma jinbidel — `MergedEntry[]` jiġi kkalkolat mill-ġdid ma’ kull
-sejħa.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) jgħaqqad l-għalf fil-cache** fuq** il-linja bażi statika fi** ħin tal-qari** , ġewwa `getRadarCatalog()`. L-array tal-linja bażi (`FREE_MODEL_BUDGETS`) qatt ma tiġi mutata — a `MergedEntry[]` tiġi kkalkulata ġdida fuq kull sejħa.
 
-Erba’ regoli, skont l-ordni tal-preċedenza:
+Erba' regoli, f'ordni ta' preċedenza:
 
-1. **Il-feed qatt ma jissostitwixxi override lokali.** Għal kull qasam: jekk l-operatur
-   ikun ippersonalizza qasam f’entrata (il-map `localOverrides`, bil-key `provider:modelId`),
-   il-valur tal-feed għal dak il-qasam speċifiku jinqabeż — jipprevali l-valur tal-operatur.
-2. **`enabled: false` jiddiżattiva l-entrata, bil-provenjenza.** Entrata fil-feed li titfi
-   entrata tissettja `enabled: false` u `disabledBy: "radar"` fir-riżultat inkorporat,
-   sabiex l-UI tkun tista’ tispjega _għaliex_ entrata għaddiet minn disponibbli għal diżattivata.
-3. **Entrata miżjuda mill-utent li mhix preżenti fil-feed tibqa’ intatta.** Entrati li
-   jeżistu biss fil-linja bażi (jew li ġew miżjuda lokalment) u ma għandhom l-ebda entrata korrispondenti fil-feed
-   jgħaddu mingħajr bidliet.
-4. **Entrata mmarkata bħala mħassra qatt ma terġa’ titqajjem.** Jekk l-operatur ikun ħassar b’mod espliċitu
-   entrata (is-set `tombstones`), iż-żieda mill-ġdid ta’ dak il-`provider:modelId` mill-feed f’verżjoni
-   sussegwenti ma ġġibhiex lura.
+1. **Feed qatt ma jissostitwixxi override lokali.** Per-field: jekk l-operatur ikun personalizzat qasam fuq entrata (`localOverrides` map, keyed `provider:modelId`), il-valur tal-għalf għal dak il-qasam speċifiku jinqabeż — il-valur tal-operatur jirbaħ.
+2. **`enabled: false` tiddiżattiva d-dħul, bil-provenjenza.** Daħla ta' għalf li titfi entrata tissettja `enabled: false` u `disabledBy: "radar"` fuq ir-riżultat magħqud, sabiex iż- UI jista' jispjega _għaliex_ dħul marret minn disponibbli għal diżattivat.
+3. **Daħla miżjuda mill-utent li ma tkunx preżenti fl-għalf tibqa' bla mittiefsa.** L-entrati li jeżistu biss fil-linja bażi (jew ġew miżjuda lokalment) u li m'għandhom l-ebda dħul ta' għalf korrispondenti jgħaddu mhux mibdula.
+4. **Daħla lapida qatt ma tiġi rxoxtata.** Jekk l-operatur ħassar espliċitament entrata (`tombstones` set ), l-għalf reġgħet iżid dak `provider:modelId` f'verżjoni aktar tard ma jġibhiex lura.
 
-L-oqsma editjabbli u t-tombstones jinżammu b’mod persistenti f’
-`radar_local_model_state` (il-migrazzjoni `153_radar_local_model_state.sql`). L-adapter pubbliku tad-DB
-(`src/lib/db/radar.ts`) jikkonverti dawk ir-ringieli fil-map `localOverrides` u fis-set
-`tombstones` użati minn `applyFeed()`; fil-produzzjoni, `getRadarCatalog()` jgħabbi dak l-istat
-wara li jgħaddu l-kontrolli tal-flag, tal-cache, u tal-iskema. `displayName` u `enabled` biss jistgħu
-jiġu editjati mill-operatur. L-identità tal-fornitur/tal-mudell, il-provenjenza tal-feed, il-kwota, il-kapaċitajiet, it-ToS,
-u d-data tas-setup ma jistgħux jinkitbu minn din l-interfaċċa.
+L-għelieqi u l-lapidi editjabbli huma persistenti `radar_local_model_state` (migrazzjoni `153_radar_local_model_state.sql`). L-adapter DB pubbliku (`src/lib/db/radar.ts`) jikkonverti dawk ir-ringieli fil-mappa `localOverrides` u s-sett `tombstones` użat minn `applyFeed()`; produzzjoni `getRadarCatalog()` tagħbijiet dak l-istat wara l-bandiera, cache, u xtiebi schema jgħaddu. `displayName` u `enabled` biss huma editjabbli mill-operatur. L-identità Provider/model, il-provenjenza tal-għalf, il-kwota, il-kapaċitajiet, ToS, u d-dejta tas-setup ma jistgħux jinkitbu minn dan il-wiċċ.
 
-Id-dashboard jipprovdi erba’ azzjonijiet lokali:
+Id-dashboard jesponi erba' azzjonijiet lokali:
 
-- **Editja** jibdel l-isem lokali għall-wiri u l-istat attivat.
-- **Irrisettja l-bidliet lokali** ineħħi ż-żewġ oqsma editjabbli mingħajr ma jibdel tombstone.
-- **Aħbi** joħloq tombstone, sabiex aġġornamenti sussegwenti tal-feed ma jkunux jistgħu jerġgħu joħolqu r-ringiela.
-- **Irrestawra** jneħħi t-tombstone; kwalunkwe override issejvjat separatament jibqa’ fis-seħħ.
+- **Editja** jibdel l-isem tal-wiri lokali u l-istat attivat.
+- **Irrisettja l-bidliet lokali** tnaddaf iż-żewġ oqsma editjabbli mingħajr ma tbiddel lapida.
+- **Aħbi** joħloq lapida, għalhekk aġġornamenti tal-għalf aktar tard ma jistgħux jirrikreaw ir-ringiela.
+- **Irrestawra** tneħħi l-lapida; kwalunkwe override salvat separatament jibqa' fis-seħħ.
 
-`enabled: false` mill-feed jibqa’ l-eċċezzjoni ta’ sikurezza: jipprevali fuq
-`enabled: true` lokali skadut, iżomm l-entrata inkorporata diżattivata, u jirreġistra `disabledBy: "radar"`.
+Feed `enabled: false` tibqa' l-eċċezzjoni tas-sigurtà: tirbaħ fuq `enabled: true` lokali skadut , iżżomm id-dħul magħqud diżattivat, u tirreġistra `disabledBy: "radar"`.
 
-Il-pubblikazzjonijiet tal-katalgu jużaw `schemaVersion: 2`. `contextWindow` u kull wieħed minn `tools`, `vision`, u
-`thinking` huma indipendentement `number | null` / `boolean | null`: `null` ifisser mhux magħruf, filwaqt li
-`false` jfisser li sors uffiċjali tal-fornitur ikkonfermat minn D16 jgħid b’mod espliċitu li l-kapaċità hija nieqsa.
-Il-flags interni tar-reġistru/tal-ispeċifikazzjoni tal-mudell ta’ OmniRoute qatt ma jiġu promossi direttament għal fatti tal-feed. Il-klijent
-xorta jaċċetta snapshots v1; minħabba li l-builder l-antik kien juża `false` bħala placeholder għal nuqqas, `false` f’v1 jiġi
-normalizzat għal mhux magħruf filwaqt li `true` f’v1 jibqa’ fattwali. Verżjonijiet mhux magħrufa tal-iskema jfallu b’mod sigur u l-
-aħħar cache validu jibqa’ disponibbli. Kull mudell v2 b’kuntest/kapaċità mhux null għandu jġorr
-`metadataEvidenceUrls[]` HTTPS mingħajr kredenzjali; inkella l-validazzjoni tal-iskema tfalli u l-cache
-ma jiġix sostitwit. It-tabella tal-katalgu turi t-tliet stati kollha bħala `✓`, `✕`, u `?`.
+Il-pubblikazzjonijiet tal-katalogu jużaw `schemaVersion: 2`. `contextWindow` u kull wieħed minn `tools`, `vision`, u `thinking` huma indipendentement `number | null` / `boolean | null`: `null` tfisser mhux magħruf, filwaqt li `false` tfisser sors uffiċjali tal-fornitur D16-confirmed espliċitament jgħid li l-kapaċità hija assenti. Il-bnadar interni OmniRoute registry/model-spec qatt ma jiġu promossi direttament għall-għalf tal-fatti. Il-klijent għadu jaċċetta snapshots v1; minħabba li l-bennej l-antik uża `false` bħala placeholder ta' assenza, v1 `false` huwa normalizzat għal mhux magħruf filwaqt li v1 `true` jibqa' fattwali. Verżjonijiet ta' skema mhux magħrufa jfallu jingħalqu u l-aħħar cache valida tibqa' disponibbli. Kull mudell v2 context/capability mhux null għandu jġorr HTTPS `metadataEvidenceUrls[]` mingħajr kredenzjali ; inkella l-validazzjoni tal-iskema tfalli u l-cache ma tiġix sostitwita. It-tabella tal-katalgu tirrendi t-tliet stati kollha bħala `✓`, `✕`, u `?`.
 
-### Kombinazzjonijiet iggwidati u aċċess għall-MCP
+### Combos ggwidati u aċċess MCP
 
-Il-valuri kkonfermati ta’ `familyId` jibqgħu preżenti fl-overlay fil-ħin tal-qari u jħaddmu l-modulu pur
-`buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Familja tiġi ssuġġerita
-biss meta mill-inqas żewġ fornituri distinti jkollhom konnessjonijiet attivi u jipprovdu l-ID eżatt tal-mudell ikkurat.
-Mudelli diżattivati, fornituri inattivi, IDs tal-mudelli neqsin, familji b’membru wieħed, u
-tqabbil ambigwu ta’ alias/prefiss ifallu b’mod sigur. Is-suġġerimenti jużaw l-istrateġija eżistenti `priority`, billi jordnaw
-l-akbar baġit rikorrenti ta’ kull xahar l-ewwel; l-UI toħloqhom biss permezz ta’ `POST /api/combos`.
+Il-valuri `familyId` kkonfermati jgħixu l-overlay tal-ħin tal-qari u jmexxu l-modulu `buildRadarComboSuggestions()` pur (`src/lib/radar/comboSuggestions.ts`). Familja hija ssuġġerita biss meta mill-inqas żewġ fornituri distinti jkollhom konnessjonijiet attivi u jesponu l-mudell kurat eżatt ID. Mudelli b'diżabilità, fornituri inattivi, mudell IDs nieqes, familji singleton, u logħbiet alias/prefix ambigwi ma jingħalqu. Suġġerimenti jużaw l-istrateġija eżistenti `priority`, tordna l-akbar baġit ta 'kull xahar rikorrenti l-ewwel; UI johloqhom biss permezz `POST /api/combos`.
 
-L-UI ggwidata tinsab f’`/dashboard/radar/combos`. Hija taqra biss l-endpoints lokali
-`GET /api/radar/catalog` u `GET /api/combos/builder/options`. Qatt ma tiskatta sinkronizzazzjoni tar-Radar,
-ma taqrax il-kredenzjali tal-fornitur, u ma tiktebx direttament fid-database tal-combos.
+Iz- UI ggwidata toqghod iz- `/dashboard/radar/combos`. Taqra biss l-endpoints lokali `GET /api/radar/catalog` u `GET /api/combos/builder/options`. Qatt ma jqanqal is-sinkronizzazzjoni tar-Radar, jaqra l-kredenzjali tal-fornitur, jew jikteb direttament fid-database combo.
 
-Il-klijenti MCP jistgħu jaqraw l-istess projezzjoni lokali permezz ta’ `omniroute_radar_catalog` (`read:radar`). Il-filtri
-fakultattivi `provider`, `familyId`, u `enabledOnly` jiġu evalwati wara qari lokali wieħed ta’
-`GET /api/radar/catalog`. L-output magħluq tiegħu jinkludi l-metadata tal-katalgu flimkien mal-fornitur/mudell,
-l-isem għall-wiri, `familyId`, il-kwota, il-kapaċitajiet, l-istat ta’ attivazzjoni, l-oriġini, u `disabledBy`; l-URLs tal-konfigurazzjoni,
-il-passi, il-konnessjonijiet, l-indirizzi tal-posta elettronika, iċ-ċwievet, u d-data ta’ riferiment qatt ma jiġu rritornati. Din l-għodda
-hija għall-qari biss u qatt ma tinvoka `/api/radar/sync`.
+klijenti MCP jistgħu jaqraw l-istess projezzjoni lokali ma `omniroute_radar_catalog` (`read:radar`). Il-filtri fakultattivi `provider`, `familyId`, u `enabledOnly` huma evalwati wara qari `GET /api/radar/catalog` lokali wieħed. L-output magħluq tiegħu jinkludi metadejta tal-katalgu flimkien ma provider/model, isem tal-wiri, `familyId`, kwota, kapaċitajiet, stat attivat, oriġini, u `disabledBy`; setup URLs, passi, konnessjonijiet, indirizzi tal-posta elettronika, ċwievet, u data ta 'riferiment qatt ma jintbagħtu lura. Din l-għodda hija ta' qari biss u qatt ma tinvoka `/api/radar/sync`. Meta l-għalf fil-cache jkun qabel il-katalgu installat, `meta.olderThanRelease` huwa `true` u l-għodda tirritorna mudelli mill-katalgu installat b'overrides lokali u tombstones applikati.
 
-### Markaturi tal-provenjenza
+### Markers ta' provenjenza
 
-Kull entrata magħquda għandha field `origin` li l-UI tirrendi bħala badge:
+Kull entrata magħquda ġġorr qasam `origin` li UI jirrendi bħala badge:
 
-- `"baseline"` — mhux mibdula mill-katalgu statiku tar-rilaxx.
-- `"radar"` — field wieħed jew aktar ġew aġġornati mill-feed.
-- `"local"` — l-operatur għandu mill-inqas override lokali wieħed fuq din l-entrata (l-overrides
-  lokali dejjem jieħdu preċedenza fuq il-feed skont ir-regola 1, irrispettivament minn dak li jgħid il-feed).
+- `"baseline"` — mhux mittiefsa mill-katalgu tar-rilaxx statiku.
+- `"radar"` — qasam wieħed jew aktar ġew aggornati mill-għalf.
+- `"local"` — l-operatur għandu mill-inqas override lokali wieħed fuq din l-entrata (l-overrides lokali dejjem jirbħu fuq l-għalf għal kull regola 1, irrispettivament minn dak li jgħid l-għalf).
 
 ---
 

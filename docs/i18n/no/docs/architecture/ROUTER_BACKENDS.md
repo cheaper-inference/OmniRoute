@@ -62,48 +62,31 @@ er Bifrost kun `external` (utelukkende tilgjengelig via `BIFROST_BASE_URL`).
 `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) gjør det mulig for kallere
 å filtrere etter hva en motor faktisk kan gjøre, i stedet for å hardkode forgreninger per ID.
 
-## Akse A — innebygde tjenester (siden for overvåkede prosesser)
+## Axis A — innebygde tjenester (overvåket prosessside)
 
-- **Register over overvåkede prosesser:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (i dag: `9router`, `cliproxy`).
-- **Livssykluseier:** `src/lib/services/ServiceSupervisor.ts` — `start()` starter
-  underprosessen, venter på `waitForHealthy()`, og leder stdout/stderr inn i en ringbuffer;
-  `stop()` bruker SIGTERM→SIGKILL; alt serialiseres under en lås.
-- **Tilstandsunion** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error`, pluss en
-  ortogonal `HealthState = healthy | unhealthy | unknown`.
-- **Hvorfor en separat prosess (ikke en SDK i samme prosess)?** Prosessisolasjon er det som gjør
-  installasjon/start/stopp/helse/logger uavhengig kontrollerbare for hver sidecar og lar
-  loopback-vernet for prosessoppstart gjelde. Modellering av en adapter i samme prosess er fremtidig arbeid —
-  kapabilitetsflagget `native-hot-path` er der dette vil bli uttrykt.
+- **Register over overvåkede prosesser:** `src/lib/services/bootstrap.ts` `SERVICES[]` (i dag: `9router`, `cliproxy`).
+- **Livssykluseier:** `src/lib/services/ServiceSupervisor.ts` — `start()` skaper barnet, porter på `waitForHealthy()`, trykker stdout/stderr inn i en ringbuffer; `stop()` SIGTERM→SIGKILL; alt serialisert under en lås.
+- **Statsforbund** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error`, pluss en ortogonal `HealthState = healthy | unhealthy | unknown`.
+- **Hvorfor en egen prosess (ikke en in-proc SDK)?** Prosessisolering er det som gjør install/start/stop/health/logs uavhengig kontrollerbar per sidevogn og lar loopback spawn-guard gjelde. Å modellere en in-proc-adapter er fremtidig arbeid — `native-hot-path` -evneflagget er der det vil bli uttrykt.
 
-### Kontrakt for livssyklusruter (`/api/services/<tool>/…`)
+### Livssyklusrutekontrakt (`/api/services/<tool>/…`)
 
-Statuskodene er **tilstands-/verb-/banespesifikke med hensikt** — dette er kontrakten, ikke
-inkonsistens:
+Statuskoder er**state/verb/path-specific av design** — dette er kontrakten, ikke inkonsekvens:
 
-| Kall                         | Betingelse                           | Status                               |
-| ---------------------------- | ------------------------------------ | ------------------------------------ |
-| `POST .../start`             | tjenesten er `not_installed`         | **409** (forhåndsbetingelse)         |
-| `POST .../stop`              | allerede stoppet                     | **200** (idempotent ingen operasjon) |
-| `GET .../status`             | OK                                   | **200** (`live ?? row ?? "unknown"`) |
-| `POST .../start`             | feil ved prosessoppstart             | **503** (midlertidig)                |
-| `GET .../status`, `.../stop` | ufanget feil                         | **500**                              |
-| `GET /api/services/<x>/logs` | ukjent verktøy `<x>`                 | **404** `Service '<x>' not found`    |
-| `GET .../status?reveal=key`  | mangler `X-Reveal-Confirm: yes`      | **403** (kun 9router)                |
-| **alle** `/api/services/*`   | kalleren er ikke loopback/privat LAN | **403 LOCAL_ONLY**                   |
+| Ringe                        | Betingelse                          | Status                               |
+| ---------------------------- | ----------------------------------- | ------------------------------------ |
+| `POST .../start`             | tjeneste `not_installed`            | **409** (forutsetning)               |
+| `POST .../stop`              | allerede stoppet                    | **200** (idempotent no-op)           |
+| `GET .../status`             | OK                                  | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`             | gytefeil                            | **503** (forbigående)                |
+| `GET .../status`, `.../stop` | uoppdaget feil                      | **500**                              |
+| `GET /api/services/<x>/logs` | ukjent verktøy `<x>`                | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`  | mangler `X-Reveal-Confirm: yes`     | **403** (kun 9-ruter)                |
+| **noen** `/api/services/*`   | innringer ikke loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-Alle feiltekster formes av `createErrorResponse()` →
-`{ error: { message, type }, requestId }`, der `type` avledes fra statusen
-(`500→server_error`, `404→not_found`, `409→conflict`, ellers `invalid_request`) og er
-den maskinbehandlebare diskriminatoren. Meldinger forhåndssaniteres
-(`sanitizeErrorMessage()`, streng regel nr. 12).
+Alle feillegemer er formet av `createErrorResponse()` → `{ error: { message, type }, requestId }`, der `type` er utledet fra statusen (`500→server_error`, `404→not_found`, `409→conflict`, else `invalid_request`) og er den maskin-handlingsbare diskriminatoren. Meldinger er forhåndssanert (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**Loopback-vernet** er den vanligste kilden til en `403`: `/api/services/` finnes i
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`), og
-`src/server/authz/policies/management.ts` avviser alle kallere som ikke bruker loopback eller
-privat LAN, **før autentisering**, fordi disse rutene starter underprosesser (strenge regler 15
-og 17). Å nå dem gjennom en offentlig tunnel gir `403` med hensikt.
+**Loopback-beskyttelsen** er den vanligste kilden til en `403`: `/api/services/` er i `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) og `src/server/authz/policies/management.ts` avviser enhver ikke-loopback/ikke-privat LAN-anroper** før aut** , fordi disse rutene skaper underordnede prosesser (harde regler 15 og 17). Å nå dem gjennom en offentlig tunnel er `403` av design.
 
 ## Akse B — rutingsbackend for relé (distribusjonssiden)
 

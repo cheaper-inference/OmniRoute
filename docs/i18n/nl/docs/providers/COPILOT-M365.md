@@ -168,9 +168,9 @@ Zorg ervoor dat `copilot-m365-web` is ingeschakeld** Dashboard → aanbieders** 
 
 ## Referenties
 
-- Issue: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Discussie: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Probleem: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Discussie: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Bron: `src/shared/constants/providers/web-cookie.ts` (providerdefinitie)
-- HAR-import: `src/shared/utils/m365HarImport.ts`
-- Referentievelden: `src/shared/providers/webSessionCredentials.ts`
-- Abonnementsniveaumodal: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- HAR importeren: `src/shared/utils/m365HarImport.ts`
+- Inloggegevensvelden: `src/shared/providers/webSessionCredentials.ts`
+- Niveau modaal: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

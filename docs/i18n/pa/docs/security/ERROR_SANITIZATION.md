@@ -4,13 +4,7 @@
 
 ---
 
-> **ਸੱਚਾਈ ਦਾ ਸਰੋਤ:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, ਅਤੇ `open-sse/utils/error.ts` ਵਿੱਚ ਮੌਜੂਦ ਜਨਤਕ ਬਿਲਡਰ
-> **ਟੈਸਟ:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **ਆਖਰੀ ਅੱਪਡੇਟ:** 2026-09-02 — v3.8.51
-> **ਦਰਸ਼ਕ:** ਗਲਤੀ ਜਵਾਬਾਂ (HTTP ਰੂਟਾਂ, SSE ਸਟ੍ਰੀਮਾਂ, ਐਗਜ਼ਿਕਿਊਟਰਾਂ, MCP ਹੈਂਡਲਰਾਂ) ਨਾਲ ਕੰਮ ਕਰਨ ਵਾਲਾ ਕੋਈ ਵੀ ਇੰਜੀਨੀਅਰ।
-> **ਸਥਿਤੀ:** ਕਲਾਇੰਟ ਨੂੰ ਗਲਤੀ ਸੁਨੇਹਾ ਵਾਪਸ ਕਰਨ ਵਾਲੇ ਹਰੇਕ ਕੋਡ ਪਾਥ ਲਈ **ਲਾਜ਼ਮੀ**।
+> **ਸੱਚ ਦਾ ਸਰੋਤ:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, ਅਤੇ `open-sse/utils/error.ts` ਵਿੱਚ ਜਨਤਕ ਬਿਲਡਰ** ਟੈਸਟ:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** ਦਰਸ਼ਕ:** ਕੋਈ ਵੀ ਇੰਜੀਨੀਅਰ ਛੂਹਣ ਵਾਲੀ ਗਲਤੀ ਜਵਾਬ (HTTP ਰੂਟ, SSE ਸਟ੍ਰੀਮ, ਐਗਜ਼ੀਕਿਊਟਰ, MCP ਹੈਂਡਲਰ)।** ਸਥਿਤੀ:****MANDATORY** ਹਰੇਕ ਕੋਡ ਮਾਰਗ ਲਈ ਜੋ ਇੱਕ ਕਲਾਇੰਟ ਨੂੰ ਇੱਕ ਗਲਤੀ ਸੁਨੇਹਾ ਦਿੰਦਾ ਹੈ।
 
 ## ਇਹ ਕਿਉਂ ਮੌਜੂਦ ਹੈ
 

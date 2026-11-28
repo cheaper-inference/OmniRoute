@@ -151,30 +151,30 @@ Teme za fazi 6–7:
 - [ ] Dodajte regresijske teste za vsako nepokrito produkcijsko napako, odpravljeno med prizadevanjem za dosego 90 %
 - [ ] Prag pokritosti v CI zvišajte šele, ko je lokalno izhodiščno stanje stabilno vsaj pri dveh zaporednih izvajanjih
 
-## Politika postopnega zviševanja pragov
+## Ratchet politika
 
-Pragove za `npm run test:coverage` posodobite šele, ko projekt dejansko preseže naslednji mejnik z zadostno rezervo.
+Posodobite pragove `npm run test:coverage` šele potem, ko projekt dejansko preseže naslednji mejnik z udobnim medpomnilnikom.
 
-**Trenutni prag:** `npm run test:coverage` zahteva **60 stavkov / 60 vrstic / 60 funkcij / 60 vej** (metrika je bila ponovno določena v Quality-Gates Fase 6A.1 — prejšnja izhodiščna vrednost 82,58 % je bila napihnjena, ker je vključevala testne datoteke in izključevala `open-sse`). Ukaz `test:coverage:legacy` ohranja staro metriko 50/50/50 za zgodovinsko primerjavo.
+**Trenutna vrata:** `npm run test:coverage` uveljavlja** 60 stavkov / 60 vrstic / 60 funkcij / 60 vej** (metrika je bila ponovno osnovana v Fazi 6A.1 — Quality-Gates, prejšnja osnovna vrednost 82,58 % je bila napihnjena, ker je štela testne datoteke in izključila `open-sse`). Ukaz `test:coverage:legacy` ohrani staro metriko 50/50/50 za zgodovinsko primerjavo.
 
-Za sprotno preverjanje pragov glede na najnovejše poročilo uporabite:
+Za ad hoc preverjanja praga glede na najnovejše poročilo uporabite:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Priporočeno zaporedje zviševanja pragov (vrstni red je `stavki-vrstice / veje / funkcije`):
+Priporočeno zaporedje zaskokov (vrstni red je `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- trenutni prag (75/70/75)
+5. 75/70/72 <-- tokovna vrata (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Naslednji ciljni prag je `80/75/78`, ko pokritost vej v dveh zaporednih izvajanjih ostane nad 78 %.
+Naslednji zaskočni cilj je `80/75/78`, ko pokritost veje zdrži nad 78 % v dveh zaporednih zagonih.
 
 ## Znana vrzel
 

@@ -21,24 +21,21 @@ CLI должен быть **выполнен вход**.
 ## 1. Архитектура
 
 ```
-┌─ Приложение OmniRoute ──────────┐        ┌─ Сайдкар codex-app-server ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ токен возможностей)          │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  самостоятельно управляет OAuth     │
-└──────────────────────────────────┘        │  OpenAI (~/.codex/auth.json,        │
-        │ общий доступ (тома compose)       │  автоматическое обновление)         │
-        ▼                                   └─────────────────────────────────────┘
-  codex-appserver-token   → токен возможностей WS (монтируется в оба контейнера)
-  codex-appserver-home    → ~/.codex (auth.json записывается панелью управления
-                             и читается codex app-server в сайдкаре)
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
+        ▼
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Сайдкар прослушивает **только** внутреннюю сеть compose
-  (`ws://codex-app-server:1456`) и защищён токеном возможностей. Он **никогда**
-  не публикуется на хосте или в интернете.
-- Codex CLI встроен в `omniroute:base`, поэтому при запуске сайдкара устанавливать
-  codex на хосте или компьютере пользователя не требуется.
+- Коляска слушает** только** во внутренней сети создания (`ws://codex-app-server:1456`) за токеном возможности. Это** никогда** опубликовано на хосте или в Интернете.
+- Sidecar использует `omniroute:cli-no-docker`, созданный на основе цели `runner-cli-no-docker`, которая включает Codex CLI.
 
 ## 2. Запуск
 

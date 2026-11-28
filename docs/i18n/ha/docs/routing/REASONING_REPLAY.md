@@ -4,7 +4,7 @@
 
 ---
 
-> **Tushen gaskiya:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** An sabunta ta ƙarshe:** 2026-06-28 — v3.8.40
+> **Tushen gaskiya:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute yana ɗaukar mataimakiyar `reasoning_content` wanda aka samar ta hanyar ƙirar yanayin tunani kuma yana sake kunna shi a bayyane akan buƙatun juyi da yawa lokacin da mai samarwa na sama ya buƙaci shi. Wannan yana kawar da kurakuran HTTP 400 waɗanda tsauraran masu samarwa ke ɗagawa lokacin da tarihin tattaunawar abokin ciniki ya ɓace tunanin farko.
 

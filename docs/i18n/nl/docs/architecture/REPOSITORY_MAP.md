@@ -4,9 +4,9 @@
 
 ---
 
-> **Wat leeft waar: elke bijgehouden map op het hoogste niveau en rootbestand, met een doel van één regel.** Laatst bijgewerkt: 13-11-2026 (OmniRoute v3.8.54)
+> **Wat leeft waar: elke bijgehouden map op het hoogste niveau en rootbestand, met een doel van één regel.**
 >
-> Gebruik deze kaart om uw weg te vinden in de codebase en volg vervolgens de links naar de speciale documenten. Op bovenstaande datum zijn de dossieraantallen gemeten met `git ls-files`. Ze veranderen bij bijna elke release, dus behandel ze als ordes van grootte.
+> Gebruik deze kaart om uw weg te vinden in de codebase en volg vervolgens de links naar de speciale documenten. Bestandsaantallen zijn afkomstig van `git ls-files` en veranderen bij vrijwel elke release. Behandel ze als ordes van grootte.
 
 ## Boom op het hoogste niveau
 

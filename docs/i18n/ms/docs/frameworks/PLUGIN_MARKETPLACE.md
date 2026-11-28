@@ -4,26 +4,13 @@
 
 ---
 
-> **Sumber rujukan utama:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`,
-> `scanner.ts`, `loader.ts`), `src/app/api/plugins/`, dan
-> `src/app/(dashboard)/dashboard/plugins/`
-> **Kemas kini terakhir:** 2026-06-28 — v3.8.40
+> **Sumber kebenaran:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`, `scanner.ts`, `loader.ts`), `src/app/api/plugins/` dan `src/app/(dashboard)/dashboard/plugins/`
 
-OmniRoute disertakan dengan sistem pemalam ala WordPress. Pemalam ialah direktori
-serba lengkap — setiap satunya mempunyai manifes `plugin.json` dan fail titik masuk — yang mencangkuk
-ke dalam talian paip permintaan (`onRequest` / `onResponse` / `onError`) dan ke dalam
-peristiwa kitaran hayat (`onInstall` / `onActivate` / `onDeactivate` / `onUninstall`).
+OmniRoute menghantar sistem pemalam gaya WordPress. Pemalam ialah direktori serba lengkap — setiap satu dengan manifes `plugin.json` dan fail masukan — yang menghubungkan ke saluran paip permintaan (`onRequest` / `onResponse` / `onError`) dan ke dalam peristiwa kitaran hayat (`onInstall` / `onActivate` / `onDeactivate` / `onUninstall`).
 
-**Pasaran Pemalam** ialah lapisan penemuan di atas sistem tersebut. Ia
-menyediakan katalog pemalam boleh pasang yang boleh dilayari. Secara lalai, katalog tersebut ialah
-daftar benih terbina dalam yang kecil; pengendali boleh menghalakannya kepada URL daftar
-jauh tersuai. Dalam hal ini, pengambilan diperkukuh oleh pengawal SSRF yang
-menyelesaikan DNS (lihat [Keselamatan](#security)).
+The** Pasaran Plugin** ialah lapisan penemuan di atas sistem itu. Ia mendedahkan katalog pemalam boleh dipasang yang boleh disemak imbas. Secara lalai katalog ialah pendaftaran benih terbina dalam yang kecil; pengendali boleh menghalakannya pada URL pendaftaran jauh tersuai, dalam hal ini pengambilan itu dikeraskan oleh pengawal SSRF yang menyelesaikan DNS (lihat [Keselamatan](#security) ).
 
-Setiap laluan pemalam adalah **gelung balik sahaja** (Tahap 1 — `LOCAL_ONLY`): pemalam memuatkan
-dan melaksanakan kod dalam proses anak, maka laluan tersebut tidak boleh dicapai daripada
-asal bukan gelung balik tanpa mengira pengesahan. Lihat
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
+Setiap laluan pemalam adalah** loopback sahaja** (Tier 1 — `LOCAL_ONLY`): pemalam memuatkan dan melaksanakan kod dalam proses anak, jadi laluan tidak boleh dicapai dari asal bukan gelung tanpa mengira pengesahan. Lihat [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
 ## Bagaimana Ia Sesuai dengan Together
 
@@ -82,18 +69,19 @@ dikenali, `listMarketplacePlugins()` merekodkan amaran dan kembali menggunakan s
 
 Semua titik akhir memerlukan pengesahan pengurusan (`requireManagementAuth`)** dan** ialah — `/api/plugins` gelung balik sahaja dan `/api/plugins/` disenaraikan dalam `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Titik akhir                      | Kaedah | Penerangan                                                    |
-| -------------------------------- | ------ | ------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Senaraikan pemalam yang dipasang (penapis `?status=` pilihan) |
-| `/api/plugins`                   | POST   | Pasang pemalam daripada direktori sumber pemalam              |
-| `/api/plugins/scan`              | POST   | Imbas direktori pemalam dan daftar pemalam baharu             |
-| `/api/plugins/marketplace`       | GET    | Senaraikan entri katalog pasaran                              |
-| `/api/plugins/[name]`            | GET    | Dapatkan butiran pemalam yang dipasang                        |
-| `/api/plugins/[name]`            | DELETE | Nyahpasang pemalam                                            |
-| `/api/plugins/[name]/activate`   | POST   | Aktifkan (muat cangkuk daftar + )                             |
-| `/api/plugins/[name]/deactivate` | POST   | Nyahaktifkan (api `onDeactivate`, nyahdaftar cangkuk)         |
-| `/api/plugins/[name]/config`     | GET    | Dapatkan skema konfigurasi + konfigurasi pemalam              |
-| `/api/plugins/[name]/config`     | PUT    | Kemas kini konfigurasi pemalam (disahkan terhadap skema)      |
+| Titik akhir                        | Kaedah | Penerangan                                                    |
+| ---------------------------------- | ------ | ------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Senaraikan pemalam yang dipasang (penapis `?status=` pilihan) |
+| `/api/plugins`                     | POST   | Pasang pemalam daripada direktori sumber pemalam              |
+| `/api/plugins/scan`                | POST   | Imbas direktori pemalam dan daftar pemalam baharu             |
+| `/api/plugins/marketplace`         | GET    | Senaraikan entri katalog pasaran                              |
+| `/api/plugins/marketplace/install` | POST   | Pasang pemalam pasaran mengikut nama                          |
+| `/api/plugins/[name]`              | GET    | Dapatkan butiran pemalam yang dipasang                        |
+| `/api/plugins/[name]`              | DELETE | Nyahpasang pemalam                                            |
+| `/api/plugins/[name]/activate`     | POST   | Aktifkan (muat cangkuk daftar + )                             |
+| `/api/plugins/[name]/deactivate`   | POST   | Nyahaktifkan (api `onDeactivate`, nyahdaftar cangkuk)         |
+| `/api/plugins/[name]/config`       | GET    | Dapatkan skema konfigurasi + konfigurasi pemalam              |
+| `/api/plugins/[name]/config`       | PUT    | Kemas kini konfigurasi pemalam (disahkan terhadap skema)      |
 
 Penapis `GET /api/plugins` `status` menerima salah satu daripada `installed` / `active` / `inactive` / `error`. Nilai tidak sah mengembalikan `400`.
 
@@ -115,7 +103,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` mestilah an** mutlak** laluan ke direktori** di dalam direktori sumber pemalam** : `plugin-sources` di sebelah akar pemalam, jadi `~/.omniroute/plugin-sources/` secara lalai, atau `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` apabila pembolehubah itu ditetapkan (`getPluginSourcesDir()` dalam `src/lib/plugins/installSource.ts`). Salin atau klon pemalam di sana dahulu. Pemasangan ditolak dengan `400` apabila laluan mengandungi `..` atau bait nol, terletak di luar direktori itu, menyelesaikannya di luarnya melalui pautan sym, mengandungi pautan sym yang sasarannya berada di luarnya, atau apabila direktori itu tidak wujud. Direktori sumber mesti mengandungi `plugin.json` yang sah (atau menjadi induk kepada satu). Apabila berjaya, respons adalah `201` dengan baris pemalam yang dipasang.
 
-Tidak seperti laluan pemalam yang lain, laluan ini memerlukan bukti kelayakan pengurusan (sesi papan pemuka atau kekunci API skop pengurusan) walaupun semasa log masuk dilumpuhkan (`requireLogin=false`): memasang kod bukanlah tindakan tanpa nama.
+Tidak seperti laluan pemalam yang lain, laluan ini memerlukan bukti kelayakan pengurusan (sesi papan pemuka atau kekunci API skop pengurusan) walaupun semasa log masuk dilumpuhkan (`requireLogin=false`): memasang kod bukanlah tindakan tanpa nama. Perkara yang sama berlaku untuk `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Semak imbas pasaran
 
@@ -133,7 +121,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` mengesahkan setiap nilai yang diberikan terhadap `configSchema` pemalam (diisytiharkan dalam manifes): medan `number` menghormati `min`/`max`, medan `select` mesti sepadan dengan `enum` yang diisytiharkan. Kunci yang tidak terdapat dalam skema dibenarkan melalui.
+`PUT .../config` mengesahkan kandungan terhadap `configSchema` pemalam (diisytiharkan dalam manifes) dengan `validatePluginConfig()` daripada `src/lib/plugins/manifest.ts`: setiap kunci mesti diisytiharkan dalam skema, nilai mesti sepadan dengan jenis yang diisytiharkan, medan `number` menghormati `min`/`max`, dan medan `select` mesti sepadan dengan `enum` yang diisytiharkan. Sebarang pelanggaran mengembalikan `400` dan tiada apa-apa yang disimpan. Pemalam yang mengisytiharkan tiada `configSchema` tidak mempunyai kunci boleh dikonfigurasikan, jadi permintaan itu ditolak dengan `400` ("Pemalam tidak mengisytiharkan sebarang kunci boleh dikonfigurasikan").
 
 ## Konfigurasi
 
@@ -219,12 +207,12 @@ URL yang gagal dalam mana-mana lapisan tidak membatalkan permintaan — pasaran 
 
 ### Pengasingan pelaksanaan pemalam
 
-> **Pemalam tidak dikotak pasir.** Kanak-kanak adalah proses Node.js biasa yang berjalan sebagai pengguna OmniRoute, tanpa konteks VM dan tiada bendera kebenaran Node.js, jadi kod pemalam boleh membaca dan menulis mana-mana fail yang pengguna boleh, menjalankan program dan mencapai rangkaian. `requires.permissions` hanya memutuskan pembolehubah persekitaran mana yang diterima oleh kanak-kanak; kebenaran lain tidak dikuatkuasakan. Pasang hanya pemalam yang anda percayai. Sempadan proses di bawah mengandungi ranap dan hang; ia bukan sempadan keselamatan.
+> **Pemalam tidak dikotak pasir secara lalai.** Kanak-kanak adalah proses Node.js biasa yang berjalan sebagai pengguna OmniRoute, tanpa konteks VM dan tiada bendera kebenaran Node.js, jadi kod pemalam boleh membaca dan menulis mana-mana fail yang pengguna boleh, menjalankan program dan mencapai rangkaian. `requires.permissions` hanya memutuskan pembolehubah persekitaran mana yang diterima oleh kanak-kanak; kebenaran lain tidak dikuatkuasakan. Bendera ciri `PLUGIN_PERMISSION_MODEL_ENABLED` ikut serta (dimatikan secara lalai) menjalankan setiap pemalam di bawah model kebenaran Node.js yang dibina daripada kebenaran tersebut, kecuali `network`, yang tidak boleh disekat oleh Node.js (lihat [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Pasang hanya pemalam yang anda percayai. Sempadan proses di bawah mengandungi ranap dan hang; ia bukan sempadan keselamatan.
 
 - **Pengasingan proses** — `loadPlugin()` (`src/lib/plugins/loader.ts`) menghasilkan setiap pemalam dalam proses anak Node.js yang berasingan dan berkomunikasi melalui IPC. Panggilan cangkuk mempunyai tamat masa dengan peningkatan `SIGTERM` → `SIGKILL`.
 - **Senarai dibenarkan env** — kanak-kanak hanya menerima satu set pembolehubah persekitaran yang dibenarkan; set yang lebih luas hanya diberikan apabila manifes meminta kebenaran `env`.
 - **Pasang pembendungan sumber** — `POST /api/plugins` hanya membaca daripada direktori sumber pemalam (lihat "Pasang daripada laluan setempat"): laluan itu dikanonikalkan dengan `realpath`, mesti kekal di dalam direktori itu dengan ketat dan pokok sumber yang membawa pautan sym yang terlepas daripadanya ditolak sebelum apa-apa disalin.
-- **Pembendungan laluan** — install/upgrade/uninstall menegaskan bahawa direktori pemalam dan `manifest.main` menyelesaikannya** dalam** akar pemalam terurus sebelum sebarang salinan atau pemadaman rekursif (menjaga daripada laluan DB yang diganggu dan traversal `../` dalam `manifest.main`). Pengaktifan menyelesaikan pautan sym melalui `realpath` dan enggan memuatkan titik masuk yang terlepas daripada direktori pemalam.
+- **Pembendungan laluan** — install/upgrade/uninstall menegaskan bahawa direktori pemalam dan `manifest.main` diselesaikan** dalam** akar pemalam terurus sebelum sebarang salinan atau pemadaman rekursif (menjaga daripada laluan DB yang diganggu dan traversal `../` dalam `manifest.main`). Pengaktifan menyelesaikan pautan sym melalui `realpath` dan enggan memuatkan titik masuk yang terlepas daripada direktori pemalam.
 - **Pin integriti pilihan** — manifes boleh mengisytiharkan medan `integrity` (`sha256-<base64>`, SRI format). Apabila ada, pemuat mengesahkan cincangan fail masukan pada masa muat dan enggan mengaktifkan apabila tidak sepadan. Ia adalah pengesanan gangguan ikut serta,** bukan** sempadan keselamatan: ia tidak mengehadkan perkara yang boleh dilakukan oleh pemalam yang dimuatkan.
 - **Tiada bukti kelayakan pelanggan dalam cangkuk** — konteks yang dihantar kepada `onRequest`, `onResponse` dan `onError` mempunyai pengepala `authorization`, `x-api-key`, `proxy-authorization` dan `cookie` dialih keluar dan rekod kunci API tidak membawa nilai kunci (`redactPluginContext()` dalam `src/lib/plugins/hooks.ts`).
 

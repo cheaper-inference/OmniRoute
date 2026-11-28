@@ -4,16 +4,11 @@
 
 ---
 
-> **අනුවාදය:** v3.8.51
-> **අවසන් වරට යාවත්කාලීන කළේ:** 2026-06-28
-> **ඉලක්කගත පාඨකයින්:** OmniRoute සඳහා දායක වන හෝ එය මත පදනම්ව ඒකාබද්ධකරණයන් ගොඩනඟන ඉංජිනේරුවන්.
+> **අනුවාදය:** v3.8.51** ප්‍රේක්ෂක:** OmniRoute සඳහා දායක වන ඉංජිනේරුවන් හෝ එය මත ඒකාබද්ධතා ගොඩනැගීම.
 >
-> ඉහළ මට්ටමේ ගෘහනිර්මාණ රූපසටහන් සහ එක් එක් උපපද්ධතිය පිටුපස ඇති තාර්කික පදනම සඳහා,
-> [ARCHITECTURE.md](./ARCHITECTURE.md) කියවන්න. තනි උපපද්ධති
-> (Auto Combo, MCP සේවාදායකය, A2A සේවාදායකය, Skills, Memory, Cloud Agents, Resilience,
-> Compression, ආදිය) පිළිබඳ ගැඹුරු විස්තර සඳහා මෙම `docs/` නාමාවලියෙහි ඒවාට වෙන් වූ ගොනු බලන්න.
+> ඉහළ මට්ටමේ ගෘහ නිර්මාණ රූප සටහන් සහ එක් එක් උප පද්ධතිය පිටුපස ඇති තර්ක සඳහා, [ARCHITECTURE.md](./ARCHITECTURE.md) කියවන්න. තනි උප පද්ධතිවල ගැඹුරු කිමිදුම් සඳහා (Auto Combo, MCP server, A2A server, Skills, Memory, Cloud Agents, Resilience, Compression, etc.) මෙම `docs/` නාමාවලියෙහි ඔවුන්ගේ කැප වූ ගොනු බලන්න.
 
-නව ඉංජිනේරුවෙකුට ගොනු වෘක්ෂය තුළ සැරිසැරීමට, ධාවනකාල ස්තරීකරණය අවබෝධ කරගැනීමට සහ නව මොඩියුල නිර්මාණය නොකර කේතය එක් කළ යුත්තේ කොතැනටදැයි දැනගැනීමට හැකි වන පරිදි, මෙම ගොනුව **අද වන විට ගබඩාව තුළ පවතින දේ** විස්තර කරයි.
+මෙම ගොනුව විස්තර කරයි** අද ගබඩාවේ පවතින දේ** නව ඉංජිනේරුවෙකුට ගසෙහි සැරිසැරීමට, ධාවන කාල ස්ථර තේරුම් ගැනීමට සහ නව මොඩියුල සොයා නොගෙන කේතය එක් කළ හැකි ස්ථානය දැන ගැනීමට හැකි වනු ඇත.
 
 ---
 
@@ -564,35 +559,14 @@ bin/
 
 ## 8. `scripts/`
 
-අරමුණ අනුව උපෆෝල්ඩර 6කට සංවිධානය කර ඇත.
+අරමුණ අනුව උප ෆෝල්ඩර 6 කට සංවිධානය කර ඇත.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, සහ කියවීමට පමණක් ඇති PR අධීක්ෂණ සහායක
-  `ci-discriminate.sh` (යොමු PR එකකට හෝ base-red ගැටලුවට සාපේක්ෂව PR එකක අසාර්ථක පරීක්ෂණවල අත්සන් තමන්ගේ / උරුම වූ /
-  නොදන්නා ලෙස වර්ග කරයි) සහ `audit-worktree.sh`
-  (වෙනස්කම් සහිත ගොනු, ආරක්ෂිත පෘෂ්ඨ, ඉවත් කළ asserts, මර්දන ගණන්, ඉතිරිව ඇති
-  තාවකාලික tsconfigs, PR head සහ දේශීය HEAD අතර සැසඳීම — සේවකයකුගේ PR එක පිළිගැනීමට පෙර).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, plus the read-only helpers `ci-discriminate.sh` PR හෝ මූලික රතු PR එරෙහිව තමන්ගේම/උරුමිත/නොදන්නා PR කිරීමට අසමත් වීම-පරීක්ෂා කිරීම සහ `audit-worktree.sh` (අපිරිසිදු ලිපිගොනු, ආරක්ෂිත පෘෂ්ඨ, ඉවත් කළ ප්‍රකාශයන්, මර්දන ගණන්, ඉතිරි tmp tsconfigs, PR head vs local HEAD PR — පිළිගැනීමට පෙර).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` කොඩි අනුවාද පැහැදිලිවම OmniRoute වෙත ආරෝපණය කර ඇත (3.6.x සහ ඊට පෙර). චෙක්පත දින නොසලකා හරියි.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

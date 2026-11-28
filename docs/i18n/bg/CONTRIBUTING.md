@@ -10,27 +10,21 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ## Настройка на разработката
 
-### Предварителни изисквания
+### Предпоставки
 
-- **Node.js** `>=22.22.2 <23` или `>=24.0.0 <27` (препоръчва се: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` или `>=24.0.0 <27` (препоръчително: 24 LTS)
+- **npm** 10 +
 
-> **Windows с Node 24:** използвайте текущата 24 LTS коригираща версия (поне 24.20.0).
-> По-ранните версии могат да прекратят изпълнението след успешно приключили тестове, когато `--test-force-exit` затвори
-> процеса. [Корекцията на Windows libuv](https://github.com/nodejs/node/pull/61999) отстранява
-> този срив по време на изпълнение; оставете проверките на твърденията в тестовете и проверките за изход на изпълнителя активирани.
+> **Windows с възел 24:** използвайте текущата версия на корекцията 24 LTS (поне 24.20.0). По-ранните версии могат да прекъснат след успешни тестове, когато `--test-force-exit` затвори процеса. [Корекцията на Windows libuv](https://github.com/nodejs/node/pull/61999) на Node адресира този срив по време на изпълнение; поддържайте тестовите твърдения и проверките за излизане от бегача активирани.
 
-> **Потребители на npm v11+ (Node 24+):** След `npm install` проверете дали са инсталирани нативните модули:
-> `node -e "require('better-sqlite3')"`. Ако командата завърши с грешка `MODULE_NOT_FOUND`,
-> изпълнете `npm approve-scripts better-sqlite3 && npm install`. Вижте
-> [Отстраняване на неизправности](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + потребители (възел 24 +):** След `npm install` проверете дали собствените модули са инсталирани: `node -e "require('better-sqlite3')"`. Ако не успее с `MODULE_NOT_FOUND`, стартирайте `npm approve-scripts better-sqlite3 && npm install`. Вижте [Отстраняване на неизправности](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
 ### Клониране и инсталиране
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,66 +32,66 @@ npm install
 ### Променливи на средата
 
 ```bash
-# Създайте своя .env от шаблона
+# Create your .env from the template
 cp .env.example .env
 
-# Генерирайте необходимите секрети
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Основни променливи за разработка:
+Ключови променливи за развитие:
 
-| Променлива             | Стойност по подразбиране за разработка | Описание                           |
-| ---------------------- | -------------------------------------- | ---------------------------------- |
-| `PORT`                 | `20128`                                | Порт на сървъра                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`               | Базов URL адрес за frontend        |
-| `JWT_SECRET`           | (генерирайте по-горе)                  | Секретен ключ за подписване на JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`                             | Парола за първото влизане          |
-| `APP_LOG_LEVEL`        | `info`                                 | Ниво на подробност на журналите    |
+| Променлива             | Разработка по подразбиране | Описание                                   |
+| ---------------------- | -------------------------- | ------------------------------------------ |
+| `PORT`                 | `20128`                    | Сървърен порт                              |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Основен URL за интерфейс                   |
+| `JWT_SECRET`           | (генерирай по-горе)        | тайна за подписване на JWT                 |
+| `INITIAL_PASSWORD`     | `CHANGEME`                 | Първа парола за влизане                    |
+| `APP_LOG_LEVEL`        | `info`                     | Ниво на подробност на регистрационния файл |
 
-### Настройки на таблото
+### Настройки на таблото за управление
 
-Таблото предоставя превключватели в потребителския интерфейс за функции, които могат да бъдат конфигурирани и чрез променливи на средата:
+Таблото за управление предоставя UI превключватели за функции, които също могат да бъдат конфигурирани чрез променливи на средата:
 
-| Местоположение на настройката | Превключвател      | Описание                                                         |
-| ----------------------------- | ------------------ | ---------------------------------------------------------------- |
-| Settings → Advanced           | Debug Mode         | Активиране на журналите за заявки за отстраняване на грешки (UI) |
-| Settings → General            | Sidebar Visibility | Показване/скриване на секциите на страничната лента              |
+| Задаване на местоположение | Превключване                    | Описание                                                                          |
+| -------------------------- | ------------------------------- | --------------------------------------------------------------------------------- |
+| Настройки → Разширени      | Режим за отстраняване на грешки | Активиране на регистрационните файлове на заявките за отстраняване на грешки (UI) |
+| Настройки → Общи           | Видимост на страничната лента   | секции на страничната лента Show/hide                                             |
 
-Тези настройки се съхраняват в базата данни и се запазват между рестартиранията, като заменят стойностите по подразбиране на променливите на средата, когато са зададени.
+Тези настройки се съхраняват в базата данни и се запазват при рестартиране, като заменят настройките по подразбиране env var, когато са зададени.
 
-### Локално изпълнение
+### Работи локално
 
 ```bash
-# Режим за разработка (автоматично презареждане)
+# Development mode (hot reload)
 npm run dev
 
-# Компилация за продукционна среда
+# Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Бърза компилация само на backend/API за промени от сътрудници
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Компилация за издаване (чиста повторна компилация + HEAD маркер — необходима за внедряване)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Обичайна конфигурация на порта
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Компилацията за сътрудници извършва само проверка чрез компилация: тя не събира самостоятелната дистрибуция и не компилира незадължителните нативни пакетиращи ресурси. Използвайте стандартната продукционна компилация, когато трябва да проверите пакета, готов за доставка.
+Компилацията на сътрудника извършва валидиране само за компилиране: тя не асемблира самостоятелната дистрибуция или не изгражда незадължителни собствени опаковъчни активи. Използвайте обичайната производствена компилация, когато трябва да потвърдите пакета, който може да бъде изпратен.
 
-### Структура на изхода от компилацията
+### Изграждане на изходно оформление
 
-| Директория | Съдържание                                                                     | Проследява се |
-| ---------- | ------------------------------------------------------------------------------ | ------------- |
-| `src/`     | Изходен код на приложението (TypeScript / TSX)                                 | Да            |
-| `.build/`  | Междинни файлове — изход от `next build` (gitignored, `distDir = .build/next`) | Не            |
-| `dist/`    | Пакет, готов за доставка — събран от `assembleStandalone` (gitignored)         | Не            |
+| Справочник | Съдържание                                                                   | Проследен |
+| ---------- | ---------------------------------------------------------------------------- | --------- |
+| `src/`     | Източник на приложение (TypeScript / TSX)                                    | да        |
+| `.build/`  | Междинни продукти — `next build` изход (gitignored, `distDir = .build/next`) | не        |
+| `dist/`    | Подлежащ на доставка пакет — сглобен от `assembleStandalone` (gitignored)    | не        |
 
-Конвейерът за компилация преминава на един етап:
+Конвейерът за изграждане е с едно преминаване:
 
 ```
 npm run build
@@ -106,18 +100,15 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` допълнително изчиства и двете директории и записва
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) като маркер за целостност при внедряване.
+`npm run build:release` допълнително първо почиства и двете директории и записва `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) като страж за цялост на разгръщане.
 
-`npm run build:contributor` използва профила за компилация само на backend. Той временно заменя файловете на потребителския интерфейс на таблото с временни файлове по време на компилацията, запазва обработващите API маршрути и възстановява оригиналните файлове след компилацията. Използвайте `npm run build` за промени, които засягат потребителския интерфейс на таблото, или за пълна проверка преди издаване; профилът за сътрудници не е заместител на компилацията за издаване.
+`npm run build:contributor` използва профил за компилация само за бекенда. Той временно заглушава UI файловете на таблото за управление, докато компилира, запазва манипулаторите API маршрути и възстановява оригиналните файлове след компилацията. Използвайте `npm run build` за промени, които засягат таблото за управление UI или за пълно валидиране на версията; профилът на сътрудник не е заместител на компилацията на изданието.
 
-> **Бележка за внедряване във VPS:** отдалечената директория с образа `/usr/lib/node_modules/omniroute/app/`
-> остава непроменена. Уменията за внедряване синхронизират съдържанието на `dist/` в нея.
-> Преместен е само пътят до изхода от компилацията в хранилището (`app/` → `dist/`).
+> **бележка за внедряване VPS :** отдалечената директория с изображения `/usr/lib/node_modules/omniroute/app/` е непроменена. Уменията за разгръщане rsync съдържанието на `dist/` в него. Преместен е само изходният път на компилация в репо (`app/` → `dist/`).
 
-URL адреси по подразбиране:
+URLs по подразбиране:
 
-- **Табло**: `http://localhost:20128/dashboard`
+- **Табло за управление** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -426,8 +417,8 @@ docs/
 
 ## Получаване на помощ
 
-- **Архитектура**: Вижте [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Справочник за API**: Вижте [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Документация за сигурността**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Документация за операциите**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Проблеми**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Архитектура** : Вижте [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **справка API** : Вижте [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Документи за сигурност** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Оперативни документи** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Проблеми** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

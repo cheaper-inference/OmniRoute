@@ -4,25 +4,13 @@
 
 ---
 
-> **Doğruluk kaynağı:** `src/lib/memory/` ve `src/app/api/memory/`
-> **Son güncelleme:** 2026-06-28 — v3.8.40 (varsayılan olarak kapalı + int8 niceleme telafisi)
+> **Gerçeğin kaynağı:** `src/lib/memory/` ve `src/app/api/memory/`
 
-OmniRoute, API anahtarına (ve isteğe bağlı olarak oturum kimliğine) göre belirlenen kalıcı konuşma belleği sağlar. Anılar, hafif regex kalıp eşleştirmesi aracılığıyla LLM yanıtlarından otomatik olarak çıkarılır ve sonraki isteklere başta yer alan bir sistem mesajı olarak (veya sistem rolünü reddeden sağlayıcılarda ilk kullanıcı mesajı olarak) yeniden eklenir.
+OmniRoute API anahtarıyla (ve isteğe bağlı olarak oturum kimliğiyle) anahtarlanan kalıcı konuşma belleği sağlar. Anılar, hafif normal ifade modeli eşleştirme yoluyla LLM yanıtlarından otomatik olarak çıkarılır ve öncü bir sistem mesajı (veya sistem rolünü reddeden sağlayıcılar için ilk kullanıcı mesajı) olarak sonraki isteklere geri enjekte edilir.
 
-> **Bellek varsayılan olarak KAPALIDIR (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> artık `false` değerindedir (`src/lib/memory/settings.ts`). Belleğin etkinleştirilmesi,
-> alınan bağlamın `maxTokens` değerine kadar olan kısmını (~2k) **her** sohbet
-> isteğine ekler ve bunun için ücret alınır — bu, yeni kurulumlar ve kendi
-> bağlamlarını yöneten istemciler açısından beklenmedik bir maliyettir. **Ayarlar → Bellek**
-> altında açıkça etkinleştirin (`MemorySkillsTab`, bellek etkinleştirildiğinde
-> belirgin bir token maliyeti uyarısı gösterir). İstemci, `x-omniroute-no-memory`
-> istek üstbilgisini (`true`/`1`/`yes`) kullanarak tek bir isteği kapsam dışında
-> bırakabilir — [API_REFERENCE.md](../reference/API_REFERENCE.md) içindeki istek üstbilgisi
-> tablosuna bakın. Belleksiz bir istek `memoryOwnerId = null` olarak ayarlanır;
-> bu da söz konusu istek için **hem** bellek hem de beceri eklemeyi devre dışı
-> bırakır (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Bellek varsayılan olarak OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` artık `false` (`src/lib/memory/settings.ts`). Belleğin etkinleştirilmesi, alınan içeriğin `maxTokens` (~ 2k) kadarını enjekte eder** Her** yeni yüklemeler ve kendi bağlamlarını yöneten istemciler için şaşırtıcı bir maliyetle — sohbet isteği. altında açıkça etkinleştirin** Ayarlar → Belleği** (bellek etkinleştirildiğinde `MemorySkillsTab` belirteç maliyeti uyarısını gösterir). Bir istemci, `x-omniroute-no-memory` istek başlığı (`true`/`1`/`yes`) ile tek bir isteği devre dışı bırakabilir; — [API_REFERENCE](../reference/API_REFERENCE.md) dosyasındaki istek başlığı tablosuna bakın. Belleksiz bir istek `memoryOwnerId = null` öğesini ayarlar ve bu da devre dışı bırakılır** ikisi birden** bu istek için hafıza ve beceri enjeksiyonu (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Bellek kullanıcı başına değil, **API anahtarı başına kapsamlandırılır** — aynı API anahtarıyla kimliği doğrulanan her istek aynı bellek havuzunu paylaşır ve isteğe bağlı olarak `sessionId` ile kapsam daha da daraltılabilir.
+Bellek:** API anahtarı başına kapsamlı** , kullanıcı başına — değil, aynı API anahtarıyla kimliği doğrulanan her istek aynı bellek havuzunu paylaşır ve isteğe bağlı olarak `sessionId` tarafından daha fazla kapsam belirlenir.
 
 ## Mimari
 
@@ -558,14 +546,9 @@ Aktarım ve kapsam ayrıntıları için [MCP-SERVER.md](./MCP-SERVER.md) belgesi
 Bellek ve Qdrant ayarları, eski/genel ayarlar yüzeyi için ayrıca
 `/dashboard/settings → Memory & Skills` (`MemorySkillsTab.tsx`) altında bulunur.
 
-## Önbelleğe Alma
+## Önbelleğe alma
 
-`src/lib/memory/store.ts`, `getMemory(id)` okumaları için işlem içi LRU benzeri
-bir önbellek (`MEMORY_CACHE_TTL = 1 dk`, `MEMORY_MAX_CACHE_SIZE = 500`, en eski
-%20'lik bölümün çıkarılmasıyla) ve ayrıca kendi kapsamlı önbelleğini kullanmak
-isteyen çağıranlar tarafından kullanılan `get`/`set`/`invalidate` yöntemlerine
-sahip genel bir anahtar/değer `memoryCache` katmanı (`src/lib/memory/cache.ts`)
-tutar (1.000 girdili LRU, varsayılan TTL 5 dk).
+`src/lib/memory/store.ts` `getMemory(id)` okumaları için işlem içi bir LRU-ish önbelleği (`MEMORY_CACHE_TTL = 1 min`, `MEMORY_MAX_CACHE_SIZE = 500`, %20 en eski tahliye ile) ve ayrıca kendi kapsamlı önbelleklerini (1 000 girişli LRU, varsayılan TTL 5 dakika) isteyen arayanlar tarafından kullanılan `get`/`set`/`invalidate` yöntemleriyle genel bir key/value `memoryCache` katmanını (`src/lib/memory/cache.ts`) tutar.
 
 ## Gizlilik ve Yaşam Döngüsü
 

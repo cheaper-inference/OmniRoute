@@ -88,20 +88,19 @@ Objekt `ctx` koji se prosljeđuje funkciji `register(program, ctx)`:
 | `ctx.baseUrl`                | `string`         | Razriješeni osnovni URL                                        |
 | `ctx.apiKey`                 | `string \| null` | API ključ, ako je naveden                                      |
 
-## Otkrivanje
+## Otkriće
 
 Dodaci se otkrivaju iz:
 
-1. `~/.omniroute/plugins/<name>/` — lokalne korisničke instalacije
-2. varijable okruženja `OMNIROUTE_PLUGIN_PATH` — prilagođeni direktorij
+1. `~/.omniroute/plugins/node_modules/<name>/` — gdje `omniroute plugin install` stavlja pakete (npm `--prefix`, ne `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — ručno kopirani imenici dodataka
+3. `OMNIROUTE_PLUGIN_PATH` env var — prilagođeni imenik
 
-Oboje je namijenjeno **samo CLI-ju**. Izvršno okruženje za dodatke na strani poslužitelja (marketplace/`plugin.json`
-dodaci koji se izvršavaju unutar proxyja) ima vlastiti skener s vlastitim nadjačavanjem,
-`OMNIROUTE_PLUGINS_DIR` — pogledajte
-[PLUGIN_MARKETPLACE.md → Direktorij dodataka](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Postavljanje jednoga ne utječe na drugo.
+Simbolički povezani direktoriji (ono što npm stvara za `plugin install ./dir`) se prate.
 
-Pogreške pri učitavanju hvataju se i ispisuju kao upozorenja — neispravan dodatak nikada ne ruši CLI.
+Oba su** Samo CLI** . Vrijeme izvođenja dodatka na strani poslužitelja (tržište/`plugin.json` dodaci koji se pokreću unutar proxyja) ima vlastiti skener s vlastitim nadjačavanjem, `OMNIROUTE_PLUGINS_DIR` — pogledajte [PLUGIN_MARKETPLACE.md → direktorij dodataka](./PLUGIN_MARKETPLACE.md#plugin-directory). Postavljanje jednog ne utječe na drugo.
+
+Pogreške pri učitavanju se hvataju i ispisuju kao upozorenja — pokvareni dodatak nikada ne ruši CLI.
 
 ## Sigurnost
 

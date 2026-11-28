@@ -4,11 +4,9 @@
 
 ---
 
-> **ਸੱਚ ਦਾ ਸਰੋਤ:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **ਆਖਰੀ ਅੱਪਡੇਟ:** 2026-09-02 — v3.8.51
-> **ਪਾਠਕ ਵਰਗ:** ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਸਟੀਲਥ ਏਕੀਕਰਣਾਂ ਦੀ ਸੰਭਾਲ ਕਰਨ ਵਾਲੇ ਇੰਜੀਨੀਅਰ।
+> **ਸੱਚ ਦਾ ਸਰੋਤ:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** ਦਰਸ਼ਕ:** ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਸਟੀਲਥ ਏਕੀਕਰਣ ਨੂੰ ਕਾਇਮ ਰੱਖਣ ਵਾਲੇ ਇੰਜੀਨੀਅਰ।
 
-OmniRoute ਉਹਨਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਨਾਲ ਏਕੀਕ੍ਰਿਤ ਹੁੰਦਾ ਹੈ ਜਿਨ੍ਹਾਂ ਦੇ ਐਜ ਗੈਰ-ਅਧਿਕਾਰਤ ਕਲਾਇੰਟਾਂ ਦੀ ਸਰਗਰਮੀ ਨਾਲ ਫਿੰਗਰਪ੍ਰਿੰਟਿੰਗ ਕਰਦੇ ਹਨ (TLS JA3/JA4, ਹੈਡਰ ਕ੍ਰਮ, JSON ਬਾਡੀ ਆਕਾਰ, ਇੰਟੀਗ੍ਰਿਟੀ ਟੋਕਨ)। ਇਹ ਪੰਨਾ ਉਹਨਾਂ ਸਟੀਲਥ ਸਤਹਾਂ ਦਾ ਦਸਤਾਵੇਜ਼ੀਕਰਨ ਕਰਦਾ ਹੈ ਜੋ OmniRoute ਉਪਲਬਧ ਕਰਵਾਉਂਦਾ ਹੈ ਅਤੇ ਦੱਸਦਾ ਹੈ ਕਿ ਉਹ ਕਿੱਥੇ ਲਾਗੂ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।
+OmniRoute ਉਹਨਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਨਾਲ ਏਕੀਕ੍ਰਿਤ ਹੈ ਜਿਨ੍ਹਾਂ ਦੇ ਕਿਨਾਰੇ ਸਰਗਰਮੀ ਨਾਲ ਗੈਰ-ਸਰਕਾਰੀ ਕਲਾਇੰਟਸ ਫਿੰਗਰਪ੍ਰਿੰਟ ਕਰਦੇ ਹਨ (TLS JA3/JA4, ਹੈਡਰ ਆਰਡਰਿੰਗ, JSON ਬਾਡੀ ਸ਼ੇਪ, ਇਕਸਾਰਤਾ ਟੋਕਨ)। ਇਹ ਪੰਨਾ ਦਸਤਾਵੇਜ਼ੀ ਤੌਰ ' OmniRoute ਸਟੀਲਥ ਸਤਹਾਂ ਦਾ ਖੁਲਾਸਾ ਕਰਦਾ ਹੈ ਅਤੇ ਉਹ ਕਿੱਥੇ ਲਾਗੂ ਹੁੰਦੇ ਹਨ।
 
 ## ਕਾਨੂੰਨੀ ਅਤੇ ਨੈਤਿਕ ਸੂਚਨਾ
 
@@ -83,65 +81,68 @@ OmniRoute ਉਹਨਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਨਾਲ ਏਕੀਕ�
 
 ---
 
-## Claude Code ਸਟੀਲਥ ਬੰਡਲ
+## Claude ਕੋਡ ਸਟੀਲਥ ਬੰਡਲ
 
-ਜਦੋਂ `cliCompatMode` ਚਾਲੂ ਹੁੰਦਾ ਹੈ, ਤਾਂ OmniRoute ਬਾਹਰ ਜਾਣ ਵਾਲੀਆਂ Claude ਬੇਨਤੀਆਂ ਨੂੰ ਇਸ ਤਰ੍ਹਾਂ ਮੁੜ-ਆਕਾਰ ਦਿੰਦਾ ਹੈ ਕਿ ਉਹ `claude-cli` ਟ੍ਰੈਫਿਕ ਤੋਂ ਵੱਖਰੀਆਂ ਨਹੀਂ ਲੱਗਦੀਆਂ। ਤਿੰਨ ਮੋਡੀਊਲ ਮਿਲ ਕੇ ਕੰਮ ਕਰਦੇ ਹਨ:
+ਜਦੋਂ `cliCompatMode` ਚਾਲੂ ਹੁੰਦਾ ਹੈ, OmniRoute ਬਾਹਰ ਜਾਣ ਵਾਲੀਆਂ Claude ਬੇਨਤੀਆਂ ਨੂੰ ਮੁੜ ਆਕਾਰ ਦਿੰਦਾ ਹੈ ਤਾਂ ਜੋ ਉਹ `claude-cli` ਟ੍ਰੈਫਿਕ ਤੋਂ ਵੱਖਰੀਆਂ ਨਾ ਹੋਣ। ਤਿੰਨ ਮੋਡੀਊਲ ਸਹਿਯੋਗ ਕਰਦੇ ਹਨ:
 
 ### `claudeCodeFingerprint.ts`
 
-ਬਿਲਿੰਗ ਹੈਡਰ ਵਿੱਚ ਸ਼ਾਮਲ 3-ਅੱਖਰੀ `cc_version` ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਗਣਨਾ ਕਰਦਾ ਹੈ:
+ਬਿਲਿੰਗ ਸਿਰਲੇਖ ਵਿੱਚ ਏਮਬੇਡ ਕੀਤੇ 3-char `cc_version` ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਗਣਨਾ ਕਰਦਾ ਹੈ:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (ਹਾਰਡਕੋਡ ਕੀਤਾ ਹੋਇਆ; ਅਧਿਕਾਰਤ ਕਲਾਇੰਟ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ)
-- ਇਨਪੁੱਟ: ਪਹਿਲੇ ਯੂਜ਼ਰ ਸੁਨੇਹੇ ਦੇ ਟੈਕਸਟ ਦੇ ਇੰਡੈਕਸ 4, 7, 20 ਉੱਤੇ ਮੌਜੂਦ ਅੱਖਰ + ਵਰਜ਼ਨ ਸਟਰਿੰਗ
-- ਆਉਟਪੁੱਟ: 3-ਅੱਖਰੀ hex ਪ੍ਰੀਫਿਕਸ
+- `FINGERPRINT_SALT = "59cf53e54c78"` (ਹਾਰਡਕੋਡਡ; ਅਧਿਕਾਰਤ ਕਲਾਇੰਟ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ)
+- ਇਨਪੁਟਸ: ਪਹਿਲੇ ਉਪਭੋਗਤਾ ਸੰਦੇਸ਼ ਟੈਕਸਟ + ਸੰਸਕਰਣ ਸਤਰ ਦੇ ਸੂਚਕਾਂਕ 4, 7, 20 'ਤੇ ਅੱਖਰ
+- ਆਉਟਪੁੱਟ: 3-ਚਾਰ ਹੈਕਸ ਪ੍ਰੀਫਿਕਸ
 
 ### `claudeCodeCCH.ts` (ਕਲਾਇੰਟ ਸਮੱਗਰੀ ਹੈਸ਼)
 
-ਸਰਵਰ-ਸਾਈਡ ਅਖੰਡਤਾ ਜਾਂਚ, ਜਿਸ ਦੀ ਗਣਨਾ ਅਧਿਕਾਰਤ Claude Code CLI ਵੱਲੋਂ Bun/Zig ਰਾਹੀਂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। OmniRoute ਇਸਨੂੰ `xxhash-wasm` ਨਾਲ ਮੁੜ ਲਾਗੂ ਕਰਦਾ ਹੈ:
+ਸਰਵਰ-ਸਾਈਡ ਇਕਸਾਰਤਾ `xxhash-wasm` ਨਾਲ Bun/Zig. OmniRoute ਰੀਇਮਪਲਮੈਂਟਸ ਦੁਆਰਾ ਅਧਿਕਾਰਤ Claude ਕੋਡ CLI ਕੰਪਿਊਟਸ ਦੀ ਜਾਂਚ ਕਰੋ:
 
-1. ਬਾਡੀ ਨੂੰ `cch=00000;` ਪਲੇਸਹੋਲਡਰ ਨਾਲ ਸੀਰੀਅਲਾਈਜ਼ ਕਰੋ
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. ਸਿਫ਼ਰ ਨਾਲ ਪੈਡ ਕੀਤਾ 5-ਅੱਖਰੀ lowercase hex
-4. `cch=00000;` ਨੂੰ ਗਣਨਾ ਕੀਤੇ ਟੋਕਨ ਨਾਲ ਬਦਲੋ
+1. `cch=00000;` ਪਲੇਸਹੋਲਡਰ ਨਾਲ ਬਾਡੀ ਨੂੰ ਸੀਰੀਅਲਾਈਜ਼ ਕਰੋ
+2. ਇਸ ਕ੍ਰਮ (`hashView()`):
+   - `/"model":"[^"]*"/g` ਦਾ ਹਰ ਮੈਚ `"model":""` — ਬਣ ਜਾਂਦਾ ਹੈ, ਮੈਚ ਪਹਿਲੇ `"`'ਤੇ ਰੁਕ ਜਾਂਦਾ ਹੈ, ਇਸਲਈ ਇੱਕ ਐਸਕੇਪਡ ਕੋਟ (`"model":"a\"b"`) ਵਾਲਾ ਮੁੱਲ ਸਿਰਫ਼ ਉਸ ਹਵਾਲੇ ਤੱਕ ਹੀ ਖਾਲੀ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਜਿਵੇਂ ਕਿ ਕਲਾਇੰਟ ਕਰਦਾ ਹੈ।
+   - `/"max_tokens":\d+,|,?"max_tokens":\d+/g` ਦੇ ਹਰ ਮੈਚ ਨੂੰ ਕਿਸੇ ਵੀ ਡੂੰਘਾਈ 'ਤੇ — ਸਿਰਫ਼ ਸੰਖਿਆਤਮਕ ਮੁੱਲਾਂ ਲਈ ਹਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. ਜ਼ੀਰੋ-ਪੈਡਡ 5-ਚਾਰ ਛੋਟੇ ਅੱਖਰਾਂ ਵਾਲਾ ਹੈਕਸ
+5. `cch=00000;` ਕੰਪਿਊਟ ਕੀਤੇ ਟੋਕਨ ਨਾਲ ਬਦਲੋ
 
 ਸਥਿਰਾਂਕ:
 
-- ਸੀਡ: `0x6e52736ac806831e`
+- ਬੀਜ: `0x4d659218e32a3268` ( Claude ਕੋਡ 2.1.252 ਅਤੇ 2.1.322 ਦੇ ਲੂਪਬੈਕ ਕੈਪਚਰ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ)
 - ਪੈਟਰਨ: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-"ਸੰਵੇਦਨਸ਼ੀਲ" ਕਲਾਇੰਟ ਨਾਵਾਂ ਦੇ ਪਹਿਲੇ ਅੱਖਰ ਤੋਂ ਬਾਅਦ ਇੱਕ Unicode **ਜ਼ੀਰੋ-ਵਿਡਥ ਜੌਇਨਰ** (`U+200D`) ਸ਼ਾਮਲ ਕਰਦਾ ਹੈ, ਤਾਂ ਜੋ ਅੱਪਸਟ੍ਰੀਮ ਫਿਲਟਰ ਉਨ੍ਹਾਂ ਨੂੰ grep ਨਾ ਕਰ ਸਕਣ। ਮੂਲ ਸ਼ਬਦ-ਸੂਚੀ:
+ਇੱਕ ਯੂਨੀਕੋਡ ਸ਼ਾਮਲ ਕਰਦਾ ਹੈ** ਜ਼ੀਰੋ-ਚੌੜਾਈ ਜੋੜਨ ਵਾਲਾ** (`U+200D`) "ਸੰਵੇਦਨਸ਼ੀਲ" ਕਲਾਇੰਟ ਨਾਮਾਂ ਦੇ ਪਹਿਲੇ ਅੱਖਰ ਤੋਂ ਬਾਅਦ, ਇਸ ਲਈ ਅੱਪਸਟ੍ਰੀਮ ਫਿਲਟਰ ਉਹਨਾਂ ਨੂੰ ਗ੍ਰੈਪ ਨਹੀਂ ਕਰ ਸਕਦੇ ਹਨ। ਮੂਲ ਸ਼ਬਦ ਸੂਚੀ:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-ਇਨ੍ਹਾਂ ਉੱਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ: `system` ਬਲਾਕ, ਸਾਰੀ `messages[].content`, ਅਤੇ `tools[].description` / `tools[].function.description`। ਓਪਰੇਟਰ ਵੱਲੋਂ `setSensitiveWords()` ਰਾਹੀਂ ਬਦਲਿਆ ਜਾ ਸਕਦਾ ਹੈ।
+ਇਸ 'ਤੇ ਲਾਗੂ ਕੀਤਾ ਗਿਆ: `system` ਬਲਾਕ, ਸਾਰੇ `messages[].content`, ਅਤੇ `tools[].description` / `tools[].function.description`। `setSensitiveWords()` ਦੁਆਰਾ ਓਪਰੇਟਰ-ਓਵਰਰੀਡੇਬਲ।
 
 ### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` ਪ੍ਰਦਾਤਾ
 
-ਤੀਜੀ-ਧਿਰ ਦੇ ਉਨ੍ਹਾਂ Anthropic ਰੀਲੇਆਂ ਲਈ, ਜੋ ਕੇਵਲ "ਅਸਲੀ Claude Code" ਟ੍ਰੈਫਿਕ ਸਵੀਕਾਰਦੇ ਹਨ:
+ਤੀਜੀ-ਧਿਰ ਦੇ Anthropic ਰੀਲੇਅ ਲਈ ਜੋ ਸਿਰਫ "ਅਸਲ Claude ਕੋਡ" ਟ੍ਰੈਫਿਕ ਨੂੰ ਸਵੀਕਾਰ ਕਰਦੇ ਹਨ:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- ਮੂਲ ਰੂਪ ਵਿੱਚ `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- ਪ੍ਰਤੀ-ਕਨੈਕਸ਼ਨ "Redact-thinking beta ਸਮਰੱਥ ਕਰੋ" ਟੌਗਲ `redact-thinking-2026-02-12` ਨੂੰ ਉਦੋਂ ਸ਼ਾਮਲ ਕਰਦਾ ਹੈ, ਜਦੋਂ ਕਿਸੇ CC Compatible ਅੱਪਸਟ੍ਰੀਮ ਨੂੰ ਖ਼ਾਸ ਤੌਰ 'ਤੇ ਰੀਡੈਕਟ ਕੀਤੀਆਂ ਥਿੰਕਿੰਗ ਸਟ੍ਰੀਮਾਂ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ
-- ਪ੍ਰਤੀ-ਕਨੈਕਸ਼ਨ "ਸੰਖੇਪ ਥਿੰਕਿੰਗ ਡਿਸਪਲੇ ਸਮਰੱਥ ਕਰੋ" ਟੌਗਲ `providerSpecificData.requestDefaults.summarizeThinking` ਨੂੰ ਸਟੋਰ ਕਰਦਾ ਹੈ ਅਤੇ ਉਨ੍ਹਾਂ CC Compatible ਥਿੰਕਿੰਗ ਬੇਨਤੀਆਂ ਵਿੱਚ `display: "summarized"` ਸ਼ਾਮਲ ਕਰਦਾ ਹੈ, ਜਿਨ੍ਹਾਂ ਨੇ ਪਹਿਲਾਂ ਹੀ ਕੋਈ ਡਿਸਪਲੇ ਮੋਡ ਸੈੱਟ ਨਹੀਂ ਕੀਤਾ
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` ਮੂਲ ਰੂਪ ਵਿੱਚ
+- ਪ੍ਰਤੀ-ਕੁਨੈਕਸ਼ਨ "ਰੀਡੈਕਟ-ਸੋਚ ਬੀਟਾ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ" ਟੌਗਲ `redact-thinking-2026-02-12` ਜੋੜਦਾ ਹੈ ਜਦੋਂ ਇੱਕ CC ਅਨੁਕੂਲ ਅੱਪਸਟ੍ਰੀਮ ਨੂੰ ਵਿਸ਼ੇਸ਼ ਤੌਰ 'ਤੇ ਰੀਡੈਕਟ ਕੀਤੀ ਸੋਚ ਸਟ੍ਰੀਮ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ
+- ਪ੍ਰਤੀ-ਕੁਨੈਕਸ਼ਨ "ਸੰਖੇਪ ਸੋਚ ਡਿਸਪਲੇਅ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ" `providerSpecificData.requestDefaults.summarizeThinking` ਨੂੰ ਸਟੋਰ ਕਰਦਾ ਹੈ ਅਤੇ `display: "summarized"` ਨੂੰ CC ਅਨੁਕੂਲ ਸੋਚ ਬੇਨਤੀਆਂ ਵਿੱਚ ਜੋੜਦਾ ਹੈ ਜਿਨ੍ਹਾਂ ਨੇ ਪਹਿਲਾਂ ਹੀ ਇੱਕ ਡਿਸਪਲੇ ਮੋਡ ਸੈਟ ਨਹੀਂ ਕੀਤਾ ਹੈ
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x ਪਰਿਵਾਰ)
-- ਮੂਲ ਪਾਥ: `/v1/messages?beta=true`
+- ਡਿਫੌਲਟ ਮਾਰਗ: `/v1/messages?beta=true`
 
-ਇਸੇ ਬੰਡਲ ਵਿੱਚ ਸਹਿਯੋਗੀ ਮੋਡੀਊਲ:
+ਇੱਕੋ ਬੰਡਲ ਵਿੱਚ ਭੈਣ ਮਾਡਿਊਲ:
 
-- `claudeCodeConstraints.ts` — ਤਾਪਮਾਨ + ਕੈਸ਼-ਕੰਟਰੋਲ ਨਿਯਮ
+- `claudeCodeConstraints.ts` — ਤਾਪਮਾਨ + ਕੈਸ਼-ਨਿਯੰਤਰਣ ਨਿਯਮ
 - `claudeCodeToolRemapper.ts` — ਟੂਲ-ਨਾਮ ਰੀਮੈਪਿੰਗ
-- `claudeCodeExtraRemap.ts` — ਵਾਧੂ ਪੇਲੋਡ ਨਾਰਮਲਾਈਜ਼ੇਸ਼ਨ
+- `claudeCodeExtraRemap.ts` — ਵਾਧੂ ਪੇਲੋਡ ਸਧਾਰਣਕਰਨ
 
 ---
 
@@ -161,7 +162,7 @@ Antigravity ਬੇਨਤੀ ਕਰਦਾ ਹੈ ਕਿ ਕਾਲਰ ਟੈਕਸ
 
 **ਇਹ ਦੁਰਵਿਵਹਾਰ ਖੋਜ ਨੂੰ ਸਿਰਫ਼-ਮੁਫ਼ਤ-ਟੀਅਰ ਵਰਤੋਂ ਨਾਲੋਂ ਵਧੇਰੇ ਹਮਲਾਵਰ ਢੰਗ ਨਾਲ ਕਿਉਂ ਖਿੱਚਦਾ ਹੈ:**
 
-- ਇੱਕ ਸਿੰਗਲ Google ਖਾਤੇ 'ਤੇ ਨਿਰੰਤਰ ਸਵੈਚਲਿਤ ਖਰਚ ਫ੍ਰੀ-ਟੀਅਰ ਹਿੱਟ-ਕੋਟਾ-ਅਤੇ-ਸਟਾਪਾਂ ਨਾਲੋਂ ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਫਲੈਗ ਕਰਦਾ ਹੈ।
+- ਇੱਕ ਸਿੰਗਲ Google ਖਾਤੇ 'ਤੇ ਨਿਰੰਤਰ ਸਵੈਚਾਲਿਤ ਖਰਚ ਫ੍ਰੀ-ਟੀਅਰ ਹਿੱਟ-ਕੋਟਾ-ਅਤੇ-ਸਟਾਪਾਂ ਨਾਲੋਂ ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਫਲੈਗ ਕਰਦਾ ਹੈ।
 - ਕ੍ਰੈਡਿਟ ਓਵਰਏਜ ਦੀ ਕੋਈ ਦਰ ਸੀਲਿੰਗ ਨਹੀਂ ਹੈ, ਇਸਲਈ ਇੱਕ ਗਲਤ ਸੰਰਚਨਾ ਕੀਤਾ ਗਿਆ ਕਲਾਇੰਟ ਮਿੰਟਾਂ ਵਿੱਚ ਕਈ ਸੌ USD ਦੁਆਰਾ ਬਰਨ ਕਰ ਸਕਦਾ ਹੈ ਅਤੇ API- ਕੁੰਜੀ ਰੀਸੇਲ ਜਾਂ ਬੋਟ ਟ੍ਰੈਫਿਕ ਵਰਗਾ ਦਿਖਾਈ ਦਿੰਦਾ ਹੈ।
 - ਇੱਕੋ ਬਾਹਰੀ IP ਤੋਂ ਸਮਾਨਾਂਤਰ ਤੌਰ 'ਤੇ ਓਵਰਏਜ ਕ੍ਰੈਡਿਟ ਨੂੰ ਮਾਰਨ ਵਾਲੇ ਕਈ OmniRoute ਉਪਭੋਗਤਾ ਸਿਗਨਲ ਨੂੰ ਮਿਸ਼ਰਤ ਕਰਦੇ ਹਨ।
 
@@ -188,7 +189,7 @@ Please submit an appeal to continue using this product.
 
 **Gemini ਮਾਡਲਾਂ ਲਈ ਅਧਿਕਾਰਤ API ਇੰਟਰਫੇਸ।** Google ਆਪਣੇ APIs ਰਾਹੀਂ Gemini ਨੂੰ ਪ੍ਰੋਗਰਾਮੇਟਿਕ ਪਹੁੰਚ ਦੀ ਪੇਸ਼ਕਸ਼ ਕਰਦਾ ਹੈ, ਜਿਸ ਨੂੰ OmniRoute ਆਮ API-ਕੁੰਜੀ ਪ੍ਰਦਾਤਾਵਾਂ ਵਜੋਂ ਸਮਰਥਨ ਕਰਦਾ ਹੈ:
 
-| ਪ੍ਰਦਾਨਕ ਆਈ.ਡੀ | ਡੈਸ਼ਬੋਰਡ ਨਾਮ              | ਪ੍ਰਮਾਣ-ਪੱਤਰ                                                             |
+| ਪ੍ਰਦਾਨਕ ਆਈ.ਡੀ | ਡੈਸ਼ਬੋਰਡ ਦਾ ਨਾਮ           | ਪ੍ਰਮਾਣ-ਪੱਤਰ                                                             |
 | ------------- | ------------------------- | ----------------------------------------------------------------------- |
 | `gemini`      | Gemini (Google AI ਸਟੂਡੀਓ) | Google AI ਸਟੂਡੀਓ ਤੋਂGemini API ਕੁੰਜੀ (ਮੁਫ਼ਤ ਟੀਅਰ ਉਪਲਬਧ)                 |
 | `vertex`      | ਵਰਟੇਕਸ AI                 | ਸੇਵਾ ਖਾਤਾ JSON, OAuth ਐਕਸੈਸ ਟੋਕਨ ਜਾਂ ਵਰਟੇਕਸ ਐਕਸਪ੍ਰੈਸ API ਕੁੰਜੀ (Gemini) |
@@ -201,7 +202,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` ਪੜ੍ਹਦਾ ਹੈ
 - `src/lib/oauth/providers/antigravity.ts` — ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਪਲੰਬਿੰਗ
-- ਅਸਲ ਘਟਨਾ ਦੀ ਰਿਪੋਰਟ: ਚਰਚਾ [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- ਅਸਲ ਘਟਨਾ ਦੀ ਰਿਪੋਰਟ: ਚਰਚਾ [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

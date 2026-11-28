@@ -119,55 +119,48 @@ environment identity ሊወርስ አይችልም። Placeholder IDs ብቻቸ�
 የተረጋገጡ keys የራሳቸው per-key Obsidian config ከሌላቸው global fallbackን ይጠቀማሉ።
 አራቱ `obsidian_sync_*` tools የተለየውን sync-token behavior እንደያዙ ይቀጥላሉ።
 
-## MCP መሣሪያዎች (22)
+## MCP መሳሪያዎች (22)
 
-በ`open-sse/mcp-server/tools/obsidianTools.ts` ውስጥ ተገልጸዋል። token/base-URL ለእያንዳንዱ ጥሪ ይወሰናሉ (መጀመሪያ የየ-API-key፣ ከዚያም ዓለም አቀፍ)። የOmniRoute **sync server**ን የሚጠቀሙ መሣሪያዎች
-(አራቱ `obsidian_sync_*` መሣሪያዎች) በተጨማሪ በOmniRoute ቅንብሮች ውስጥ የተዋቀረውን የsync ማረጋገጫ token ይፈልጋሉ።
+በ `open-sse/mcp-server/tools/obsidianTools.ts` ይገለጻል። token/base-URL በጥሪ (በኤፒአይ-ቁልፍ መጀመሪያ፣ ከዚያም አለምአቀፍ) ይፈታል። OmniRoute የመታ መሳሪያዎች** የማመሳሰል አገልጋይ** (አራቱ `obsidian_sync_*` መሳሪያዎች) በተጨማሪም በ OmniRoute ቅንብሮች ውስጥ የተዋቀረው የማመሳሰል ማረጋገጫ ቶከንን ይፈልጋሉ።
 
-### የማንበቢያ መሣሪያዎች (`read:obsidian`)
+### የንባብ መሳሪያዎች (`read:obsidian`)
 
-| መሣሪያ                         | መግለጫ                                                                              |
-| ---------------------------- | --------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Local REST API ተደራሽ እና የተረጋገጠ መሆኑን ያረጋግጣል።                                        |
-| `obsidian_search_simple`     | በማስታወሻ ይዘት ውስጥ የሙሉ ጽሑፍ ፍለጋ ያደርጋል፤ ከፋይል ዱካዎች ጋር ቅንጭቦችን ይመልሳል።                      |
-| `obsidian_search_structured` | የJSON Logic አገላለጽን (and/or/regex/path ማጣሪያዎች) በመጠቀም ይፈልጋል።                        |
-| `obsidian_read_note`         | ማስታወሻን በvault-relative path ያነባል፤ እንደ አማራጭም የተወሰነ heading/block/frontmatter ያነባል። |
-| `obsidian_list_vault`        | በvault ውስጥ ያሉ ፋይሎችን እና ማውጫዎችን (የግቤቶች ዛፍ) ይዘረዝራል።                                  |
-| `obsidian_get_document_map`  | የማስታወሻውን የርዕስ አወቃቀር እንደ headings → line numbers ካርታ ያገኛል።                         |
-| `obsidian_get_note_metadata` | ሙሉ ይዘቱን ሳያካትት frontmatter፣ tags፣ links እና የቁምፊ/ቃላት ብዛትን ያገኛል።                     |
-| `obsidian_get_active_file`   | በአሁኑ ጊዜ በObsidian ውስጥ ንቁ የሆነውን ፋይል path + content ያገኛል።                           |
-| `obsidian_get_periodic_note` | ለአንድ ቀን ዕለታዊ/ሳምንታዊ/ወርሃዊ ወቅታዊ ማስታወሻን ያገኛል (ካልተገለጸ ዛሬ)።                             |
-| `obsidian_get_tags`          | ሁሉንም የvault tags ከድግግሞሻቸው ጋር ይዘረዝራል።                                              |
-| `obsidian_list_commands`     | የሚገኙ የObsidian command IDsን ይዘረዝራል (ከ`obsidian_execute_command` ጋር ይጠቀሙ)።         |
-| `obsidian_sync_status`       | የOmniRoute sync server ሁኔታ፦ እየሄደ መሆኑ፣ የvault ስም፣ port፣ uptime፣ የመጨረሻ sync።        |
-| `obsidian_sync_conflicts`    | ያልተፈቱ sync ግጭቶችን (path፣ conflict path፣ detected-at) ይዘረዝራል።                       |
+| መሳሪያ                         | መግለጫ                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------- |
+| `obsidian_check_status`      | የአካባቢው REST API ሊደረስበት የሚችል እና የተረጋገጠ መሆኑን ያረጋግጡ።                         |
+| `obsidian_search_simple`     | የማስታወሻ ይዘት ሙሉ-ጽሑፍ ፍለጋ; ቅንጥቦችን ከፋይል መንገዶች ጋር ይመልሳል።                        |
+| `obsidian_search_structured` | የ JSON ሎጂክ አገላለጽ (and/or/regex/path ማጣሪያዎች) በመጠቀም ይፈልጉ።                   |
+| `obsidian_read_note`         | በቮልት-አንጻራዊ መንገድ ማስታወሻ ያንብቡ; እንደ አማራጭ አንድ የተወሰነ heading/block/frontmatter. |
+| `obsidian_list_vault`        | በመያዣው ውስጥ (የመግቢያ ዛፍ) ውስጥ ፋይሎችን እና ማውጫዎችን ይዘርዝሩ።                           |
+| `obsidian_get_document_map`  | የማስታወሻውን ርዕስ መዋቅር እንደ → መስመር ቁጥሮች እንደ ካርታ ያግኙ።                            |
+| `obsidian_get_note_metadata` | ያለ ሙሉ ይዘት የፊት ጉዳይ፣ መለያዎች፣ ማገናኛዎች፣ char/word ቆጠራን ያግኙ።                     |
+| `obsidian_get_active_file`   | በአሁኑ ጊዜ በ Obsidian ውስጥ ያለውን ፋይል + ይዘትን ያግኙ።                               |
+| `obsidian_get_periodic_note` | ለአንድ ቀን የ daily/weekly/monthly ወቅታዊ ማስታወሻ ያግኙ (ዛሬ ከተተወ)።                  |
+| `obsidian_get_tags`          | ሁሉንም የቮልት መለያዎችን በድግግሞሾቻቸው ይዘርዝሩ።                                         |
+| `obsidian_list_commands`     | ዝርዝር Obsidian ትዕዛዝ IDs (ከ `obsidian_execute_command` ጋር ተጠቀም)።            |
+| `obsidian_sync_status`       | OmniRoute የማመሳሰል የአገልጋይ ሁኔታ፡ ሩጫ፣ የቮልት ስም፣ ወደብ፣ የሰአት ሰዓት፣ የመጨረሻ አመሳስል።     |
+| `obsidian_sync_conflicts`    | ያልተፈቱ የማመሳሰል ግጭቶችን ይዘርዝሩ (መንገድ፣ የግጭት መንገድ፣ የተገኘው-በ)።                      |
 
-### የመጻፊያ መሣሪያዎች (`write:obsidian`)
+### መሳሪያዎችን ይፃፉ (`write:obsidian`)
 
-| መሣሪያ                             | መግለጫ                                                                         |
-| -------------------------------- | ---------------------------------------------------------------------------- |
-| `obsidian_write_note`            | በተሰጠ Markdown ይዘት ማስታወሻን ይፈጥራል ወይም በላዩ ላይ ደርቦ ይጽፋል።                          |
-| `obsidian_append_note`           | ይዘትን ወደ ማስታወሻ ያክላል፤ እንደ አማራጭም ወደ ተወሰነ heading/block ያክላል።                    |
-| `obsidian_patch_note`            | በheading፣ block ወይም frontmatter field ላይ በትክክል append/prepend/replace ያደርጋል። |
-| `obsidian_delete_note`           | ማስታወሻን ከvault እስከመጨረሻው ይሰርዛል።                                                |
-| `obsidian_move_note`             | ማስታወሻን በvault ውስጥ ያንቀሳቅሳል ወይም ስሙን ይቀይራል።                                     |
-| `obsidian_execute_command`       | የObsidian commandን በcommand ID ያስፈጽማል።                                       |
-| `obsidian_open_file`             | ፋይልን በObsidian ውስጥ ይከፍታል (ከሌለ ይፈጥረዋል)።                                       |
-| `obsidian_sync_trigger`          | አፋጣኝ ባለሁለት አቅጣጫ desktop↔mobile vault sync ያስጀምራል።                            |
-| `obsidian_sync_resolve_conflict` | የsync ግጭትን ይፈታል፦ `local` (mobile)፣ `remote` (desktop) ወይም `keep-both`ን ያቆያል። |
+| መሳሪያ                             | መግለጫ                                                                  |
+| -------------------------------- | --------------------------------------------------------------------- |
+| `obsidian_write_note`            | በተሰጠው Markdown ይዘት ማስታወሻ ይፍጠሩ ወይም ይፃፉ።                                |
+| `obsidian_append_note`           | ይዘትን በማስታወሻ ላይ አክል; እንደ አማራጭ ወደ አንድ የተወሰነ heading/block.              |
+| `obsidian_patch_note`            | በቀዶ append/prepend/replace ርዕስ፣ ብሎክ ወይም የፊት ጉዳይ መስክ ላይ።               |
+| `obsidian_delete_note`           | ከካዝናው ላይ ማስታወሻን እስከመጨረሻው ሰርዝ።                                         |
+| `obsidian_move_note`             | በመደርደሪያው ውስጥ ያለ ማስታወሻ ይውሰዱ ወይም እንደገና ይሰይሙ።                            |
+| `obsidian_execute_command`       | Obsidian ትዕዛዝ በእሱ ትዕዛዝ ያስፈጽሙ ID.                                      |
+| `obsidian_open_file`             | በ Obsidian ውስጥ ፋይል ይክፈቱ (ከሌለው ይፈጥራል)።                                 |
+| `obsidian_sync_trigger`          | ወዲያውኑ ባለሁለት አቅጣጫ ያለው ዴስክቶፕ ↔ የሞባይል ቮልት ማመሳሰልን ያስነሱ።                   |
+| `obsidian_sync_resolve_conflict` | የማመሳሰል ግጭትን ይፍቱ `local` (ሞባይል)፣ `remote` (ዴስክቶፕ) ወይም `keep-both` አቆይ። |
 
 > [!NOTE]
-> የ`obsidian_patch_note` targets `targetType` እንደ `heading | block | frontmatter`
-> እና `operation` እንደ `append | prepend | replace` ይቀበላሉ፤
-> `createTargetIfMissing` ደግሞ አማራጭ ነው። አራቱ `obsidian_sync_*` መሣሪያዎች ከአካባቢያዊው sync
-> server (`http://127.0.0.1:27781` በነባሪ) ጋር ይገናኛሉ፣ እና sync token ይፈልጋሉ።
+> `obsidian_patch_note` ኢላማዎች `heading | block | frontmatter` `createTargetIfMissing` ጋር `targetType` እና `operation` `append | prepend | replace`። አራቱ `obsidian_sync_*` መሳሪያዎች ከአካባቢው የማመሳሰል አገልጋይ ጋር ይነጋገራሉ (`http://127.0.0.1:27781` በነባሪ) እና የማመሳሰል ማስመሰያ ያስፈልጋቸዋል።
 
 ### ወሰኖች
 
-የማንበቢያ መሣሪያዎች `read:obsidian`ን፣ የመጻፊያ መሣሪያዎች ደግሞ `write:obsidian`ን ይፈልጋሉ። ማስፈጸሙ
-ከNotion ጋር ተመሳሳይ ነው — በ`open-sse/mcp-server/server.ts` ውስጥ በ`withScopeEnforcement()` ይከናወናል፣
-በ`OMNIROUTE_MCP_ENFORCE_SCOPES=true` ይቆጣጠራል፣ የተፈቀዱ ወሰኖችም ከ`OMNIROUTE_MCP_SCOPES` ወይም ከAPI key scope context ይመጣሉ።
-[MCP-SERVER.md](./MCP-SERVER.md)ን ይመልከቱ።
+የንባብ መሳሪያዎች `read:obsidian` ያስፈልጋቸዋል; የመጻፍ መሳሪያዎች `write:obsidian` ያስፈልጋቸዋል . ማስፈጸሚያ `open-sse/mcp-server/server.ts` `withScopeEnforcement()` ከሚስተናገደው Notion — ጋር ተመሳሳይ ነው፣ በ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ላይ የተከለለ እና API ቁልፍ `manage`/`admin` ለሌለው ለ HTTP/SSE ደዋዮች የሚገደድ፣ ከ `OMNIROUTE_MCP_SCOPES` ወይም ከ API ቁልፍ ወሰን አውድ የተገኘ ነው። [MCP-SERVER.md](./MCP-SERVER.md) ይመልከቱ.
 
 ## መጨረሻ ነጥቦች
 

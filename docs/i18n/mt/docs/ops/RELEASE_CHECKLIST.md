@@ -4,12 +4,9 @@
 
 ---
 
-> **Aġġornat l-aħħar:** 2026-08-28 — v3.8.51
-> Fluss ta’ rilaxx issimplifikat li juża l-ħiliet ta’ Claude Code għall-awtomazzjoni.
+> Fluss ta' rilaxx issimplifikat li jisfrutta l-ħiliet Claude Code għall-awtomazzjoni.
 >
-> **Żomm il-kju/fergħa f’qagħda tajba bejn ir-rilaxxi:** ara [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (il-familja `/green-prs` + `npm run check:release-green` + `/babysit` + l-eżekuzzjoni ta’ billejl). It-tħaddim
-> perjodiku ta’ dan — u speċjalment **qabel** din il-lista ta’ kontroll — jiżgura li l-PR tar-rilaxx jibda f’qagħda tajba.
+> **Żomm queue/branch ħadra bejn ir-rilaxxi:** ara [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` family + `npm run check:release-green` + `/babysit` + filgħaxija). Running dan perjodikament — u speċjalment** qabel** din il-lista ta' kontroll — tagħmel ir-rilaxx PR jibda aħdar.
 
 ## Fil-qosor
 
@@ -58,9 +55,11 @@ Il-fluss tax-xogħol npm-publish m'għadux jippubblika direttament: ibott it-tar
 
 **Ktieb tal-logħob tal-artifact miksur (mhux mibdul):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` bħala r-rifless default (minuti, riversibbli); `npm unpublish` biss ġewwa t-tieqa 72h/no-dependents u qatt bħala l-ewwel mossa. Docker: qatt ma terġa' tikteb tikketta tal-verżjoni — rollback qed jirripunta `latest` għall-aħħar diġest tajjeb.
 
-**Docker Hub `latest` (meħtieġa fuq kull pubblikazzjoni stabbli SemVer ):** il-fluss tax-xogħol `docker-publish` għandu jittikketta** it-tnejn** `X.Y.Z` u, meta `should-promote-latest.sh` jaqbel dan huwa l-ogħla SemVer stabbli, `:latest` mal-** istess diġestiva** . Wara l-impjieg: Hub `latest` digest huwa ugwali għall-ġdid SemVer digest u `last_updated` imċaqlaq. Tħallix `:latest` fuq build eqdem filwaqt li n-noti tar-rilaxx jitkellmu dwar soluzzjonijiet li jeżistu biss fuq git. Compose quickstarts uża `:latest`; GitOps ghandek ikomplu pinning `X.Y.Z`. Ara [Docker release channels](../guides/DOCKER_GUIDE.md#release-channels) u #10317.
+**Docker Hub `latest` (meħtieġa fuq kull pubblikazzjoni stabbli SemVer ):** il-fluss tax-xogħol `docker-publish` għandu jittikketta** it-tnejn** `X.Y.Z` u, meta `should-promote-latest.sh` jaqbel dan huwa l-ogħla SemVer stabbli, `:latest` mal-** istess diġestiva** . Wara l-impjieg: Hub `latest` digest huwa ugwali għall-ġdid SemVer digest u `last_updated` imċaqlaq. Tħallix `:latest` fuq build eqdem filwaqt li n-noti ta' rilaxx jitkellmu dwar soluzzjonijiet li jeżistu biss fuq git. Compose quickstarts uża `:latest`; GitOps ghandek ikomplu pinning `X.Y.Z`. Ara [Docker release channels](../guides/DOCKER_GUIDE.md#release-channels) u #10317.
 
-**Repożitorju tal-organizzazzjoni Docker Hub (`cheaperinference/omniroute`):** Docker Hub ma jistax imexxi repożitorju bejn namespaces, għalhekk `diegosouzapw/omniroute` iżomm l-istorja tal-ġibda tiegħu u kull rilaxx, u l-biċċa xogħol `mirror-org-dockerhub` ta ' `docker-publish` tikkopja kull verżjoni rilaxxata (u `:latest` meta promossa) minn `ghcr.io/cheaper-inference/omniroute` għar-repożitorju tal-organizzazzjoni. Jeħtieġ is-sigrieti `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; mingħajrhom ix-xogħol jibqa' aħdar bi twissija "Docker Hub org mirror skipped" u r-reġistri l-oħra jippubblikaw b'mod normali. Biex tippubblika verżjoni rilaxxata hemm aktar tard, run** Azzjonijiet → Mirror Docker image lill- Docker Hub org → Run workflow** `version=X.Y.Z` (u `promote_latest` għall-ogħla verżjoni stabbli): tikkopja l-immaġini eżistenti, l-ebda rebuild.
+**Repożitorju tal-organizzazzjoni Docker Hub (`cheaperinference/omniroute`):** Docker Hub ma jistax imexxi repożitorju bejn namespaces, għalhekk `diegosouzapw/omniroute` iżomm l-istorja tal-ġibda tiegħu u kull rilaxx, u l-biċċa xogħol `mirror-org-dockerhub` ta ' `docker-publish` tikkopja kull verżjoni rilaxxata (u `:latest` meta promossa) minn `ghcr.io/cheaper-inference/omniroute` għar-repożitorju tal-organizzazzjoni. Jeħtieġ is-sigrieti `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; mingħajrhom ix-xogħol jibqa' aħdar bi twissija "Docker Hub org mirror skipped" u r-reġistri l-oħra jippubblikaw b'mod normali. Biex tippubblika verżjoni rilaxxata hemm aktar tard, run** Azzjonijiet → Mirror Docker image lill- Docker Hub org → Run workflow** `version=X.Y.Z` (u `promote_latest` għall-ogħla verżjoni stabbli): tikkopja l-immaġini eżistenti, l-ebda rebuild. Il-ħarsa ġenerali Docker Hub ta' dak ir-repożitorju hija stabbilita bl-idejn: iż- API li jeditjaha tirrifjuta t-Tokens tal-Aċċess tal-Organizzazzjoni.
+
+L-istess fluss tax-xogħol tikkopja wkoll kull rilaxx fil-pakkett GHCR `ghcr.io/diegosouzapw/omniroute` -legat sal-2027-06-30, għalhekk l-installazzjonijiet għadhom ippinjati miegħu jibqgħu jaġġornaw; l-indiċi tiegħu jġorr deskrizzjoni "mċaqlaq għal `ghcr.io/cheaper-inference/omniroute`". Jeħtieġ is-sigriet `GHCR_LEGACY_TOKEN` (token ta 'aċċess personali klassiku ta' `diegosouzapw` `write:packages`); mingħajrha dak ix-xogħol skips bi twissija "Legacy GHCR mirror skipped".
 
 ## Korsija Rapida għall-Hotfix (tikketta `hotfix`)
 
@@ -151,7 +150,7 @@ Breaking changes: żid `BREAKING CHANGE:` footer jew `!` wara l-ambitu (eż. `fe
 ### Dokumentazzjoni
 
 - [ ] `npm run check:docs-sync` passes (immexxija awtomatikament minn pre-commit)
-- [ ] `npm run check:docs-all` passes (umbrella: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` tghaddi. Is `check:deprecated-versions` konsultattiv tiegħu jimmarka verżjonijiet attribwiti b'mod espliċitu lil OmniRoute (3.6.x u preċedenti) u jinjora d-dati.
 - [ ] `npm run check:env-doc-sync` exits 0 — code ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env kuntratt huwa intatt
 - [ ] `npm run check:doc-links` exits 0 — ebda referenzi interni mkissra ta' markdown wara ristrutturar
 - [ ] `docs/architecture/ARCHITECTURE.md` riveduta ghal storage/runtime drift
@@ -178,7 +177,7 @@ Breaking changes: żid `BREAKING CHANGE:` footer jew `!` wara l-ambitu (eż. `fe
   - [ ] Innumerati b'mod korrett (l-ebda vojt fis-sekwenza)
 - [ ] Test fuq installazzjoni ġdida: ħassar `~/.omniroute/omniroute.db` u ħaddem `npm run dev`
 - [ ] Test fuq installazzjoni eżistenti: backup DB, run migrazzjoni, verifika schema
-- [ ] fajls WAL (`-wal`, `-shm`) jiġu ttrattati b'mod korrett jekk il-migrazzjoni tikteb mill-ġdid it-tabelli
+- [ ] Fajls WAL (`-wal`, `-shm`) jiġu ttrattati b'mod korrett jekk il-migrazzjoni tikteb mill-ġdid it-tabelli
 
 ### Katalgu tal-Fornitur (validat biż-Zod)
 
@@ -265,7 +264,7 @@ Iskjera ħiliet uża l-fluss rsync ħafif — no `npm pack`, no `npm i -g`:
 ### Wara r-rilaxx
 
 - [ ] Mexxi `/capture-release-evidences-cc` (ħila tal-Kodiċi Claude )
-  - Jaqbad WebP screenshots/recordings ta karatteristiċi ġodda
+  - Jiġbor WebP screenshots/recordings ta karatteristiċi ġodda
   - Jehmeż biex jirrilaxxa noti / blog post
 - [ ] Aġġorna GitHub Diskussjonijiet / Discord b'avviż ta' rilaxx
 - [ ] Miftuħ għall-verżjoni li jmiss
@@ -276,15 +275,15 @@ Iskjera ħiliet uża l-fluss rsync ħafif — no `npm pack`, no `npm i -g`:
 It-tħabbira tar-Radar hija intenzjonalment kommessa ma `active: false`. L-attivazzjoni hija bidla separata wara li kull oġġett hawn taħt jiġi evidenzjat:
 
 - [ ] Kollha stacked Radar PRs huma magħquda u r-rilaxx-ponta CI huwa aħdar
-- [ ] Uża u tpejjep ir-rotot tar-Radar OSS `RADAR_ENABLED` għadu mitfi b'mod awtomatiku
+- [ ] Użu u duħħan ir-rotot tar-Radar OSS `RADAR_ENABLED` għadu mitfi b'mod awtomatiku
 - [ ] Duħħan `GET /planos`, `/termos`, `/privacidade`, u `/reembolso` fuq l - host tar - Radar imsemmi
 - [ ] Record operator identity/contact/address u reviżjoni legali approvata mis-sid fis-servizz privat
 - [ ] Exercise Stripe Checkout u l-webhook iffirmat fil-modalità tat-test biss
-- [ ] Eżerċizzju konsenja waħda ta' email transazzjonali kriptat biż sender/domain approvata
+- [ ] Eżerċizzju ta' konsenja waħda ta' email transazzjonali kodifikata biż- sender/domain approvata
 - [ ] Ipprova r-restawr tal-backup u ġirja waħda ta' riċerka sorveljata u b'limitu tal-baġit
 - [ ] Approva l-politika ta’ reviżjoni BRL/PIX qabel ma taċċetta evidenza ta’ donazzjoni
 - [ ] Ippermetti l-Checkout pubbliku biss wara l-gradi preċedenti, imbagħad attiva l- `news.json` ID il-ġdid
-- [ ] Ivverifika li l-banner tad-Dar juża kopja lokalizzata u ID ġdida terġa' titfaċċa wara li ID anzjani jiġi mkeċċi
+- [ ] Ivverifika li l-banner tad-Dar juża kopja lokalizzata u ID ġdida terġa' titfaċċa wara li ID antik jiġi mkeċċi
 
 ## Test rapidu tas-Servizzi Inkorporati (v3.8.4+)
 
@@ -399,7 +398,7 @@ Il-bump commit tal-iżvilupp huwa mibni bil-plumbing git (l-ebda siġra tax-xog�
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
@@ -409,7 +408,7 @@ Il-ġirja tagħmel `npm ci`, `npm run build:release`, `npm run check:pack-artifa
 
 1. GO recorded in [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` prints `RESULT: READY`.
-3. Oħloq il-fergħat fuq `origin` bl-idejn bil-kmandi l-prints dry-run — l-iskrittura tirrifjuta li timbotta għal `origin`. Biex tuża mill-ġdid impenn ta 'żvilupp rivedut, mexxi l-prova `--execute` fuq il-ponta 3.9.0 mal-furketta tiegħek l-ewwel; jistampa kemm SHAs, u l-istess commits jistgħu jiġu mbuttati:
+3. Oħloq il-fergħat fuq `origin` bl-idejn bil-kmandi l-prints dry-run — l-iskrittura tirrifjuta li timbotta għal `origin`. Biex terġa' tuża kommit ta' żvilupp rivedut, agħmel il-prova `--execute` fuq il-ponta 3.9.0 mal-furketta tiegħek l-ewwel; jistampa kemm SHAs, u l-istess commits jistgħu jiġu mbuttati:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop

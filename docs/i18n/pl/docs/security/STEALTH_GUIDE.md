@@ -4,11 +4,9 @@
 
 ---
 
-> **Źródło prawdy:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Ostatnia aktualizacja:** 2026-09-02 — v3.8.51
-> **Odbiorcy:** Inżynierowie utrzymujący integracje maskujące specyficzne dla dostawców.
+> **Źródło prawdy:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Publiczność:** Inżynierowie utrzymujący integracje typu stealth specyficzne dla dostawcy.
 
-OmniRoute integruje się z dostawcami, których systemy brzegowe aktywnie identyfikują nieoficjalnych klientów na podstawie ich odcisków (TLS JA3/JA4, kolejność nagłówków, struktura treści JSON, tokeny integralności). Ta strona opisuje mechanizmy maskowania udostępniane przez OmniRoute oraz miejsca ich implementacji.
+OmniRoute integruje się z dostawcami, których brzegi aktywnie pobierają odciski palców od nieoficjalnych klientów (TLS JA3/JA4, porządkowanie nagłówków, kształt ciała JSON, tokeny integralności). Ta strona dokumentuje ukryte powierzchnie ujawniane OmniRoute i miejsca ich implementacji.
 
 ## Uwaga prawna i etyczna
 
@@ -72,64 +70,67 @@ od lokalnych testów kontraktowych. Przed stwierdzeniem zgodności z przeglądar
 
 ---
 
-## Pakiet maskowania Claude Code
+## Pakiet Stealth Code Claude
 
-Gdy opcja `cliCompatMode` jest włączona, OmniRoute przekształca wychodzące żądania Claude tak, aby były nieodróżnialne od ruchu `claude-cli`. Współpracują przy tym trzy moduły:
+Kiedy `cliCompatMode` jest włączone, OmniRoute zmienia kształt wychodzących żądań Claude, tak aby były nie do odróżnienia od ruchu `claude-cli`. Współpracują trzy moduły:
 
 ### `claudeCodeFingerprint.ts`
 
-Oblicza 3-znakowy odcisk `cc_version` osadzony w nagłówku rozliczeniowym:
+Oblicza 3-znakowy odcisk palca `cc_version` osadzony w nagłówku rozliczeniowym:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (zakodowany na stałe; zgodny z oficjalnym klientem)
-- Dane wejściowe: znaki o indeksach 4, 7 i 20 z tekstu pierwszej wiadomości użytkownika oraz ciąg wersji
+- `FINGERPRINT_SALT = "59cf53e54c78"` (zakodowany na stałe; pasuje do oficjalnego klienta)
+- Dane wejściowe: znaki o indeksach 4, 7, 20 tekstu pierwszej wiadomości użytkownika + ciąg znaków wersji
 - Dane wyjściowe: 3-znakowy prefiks szesnastkowy
 
-### `claudeCodeCCH.ts` (skrót zawartości klienta)
+### `claudeCodeCCH.ts` (hasz zawartości klienta)
 
-Kontrola integralności po stronie serwera, którą oficjalny interfejs CLI Claude Code oblicza za pomocą Bun/Zig. OmniRoute implementuje ją ponownie przy użyciu `xxhash-wasm`:
+Sprawdź integralność po stronie serwera, oficjalny kod Claude oblicza CLI poprzez Bun/Zig. OmniRoute reimplementowane za pomocą `xxhash-wasm`:
 
-1. Serializacja treści z symbolem zastępczym `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. 5-znakowa wartość szesnastkowa zapisana małymi literami i uzupełniona zerami
-4. Zastąpienie `cch=00000;` obliczonym tokenem
+1. Serializuj treść za pomocą symbolu zastępczego `cch=00000;`
+2. Zbuduj widok skrótu z dwoma zamianami zwykłego tekstu w tej kolejności (`hashView()`):
+   - każde dopasowanie `/"model":"[^"]*"/g` staje się `"model":""` — dopasowanie kończy się na pierwszym `"`, więc wartość z cudzysłowem (`"model":"a\"b"`) jest opróżniana tylko do tego cytatu, tak jak robi to klient
+   - każde dopasowanie `/"max_tokens":\d+,|,?"max_tokens":\d+/g` jest usuwane. — tylko wartości numeryczne, na dowolnej głębokości
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Dopełniany zerami 5-znakowy hex z małymi literami
+5. Zastąp `cch=00000;` obliczonym tokenem
 
 Stałe:
 
-- Ziarno: `0x6e52736ac806831e`
-- Wzorzec: `/\bcch=([0-9a-f]{5});/`
+- Seed: `0x4d659218e32a3268` (pasuje do przechwytywania pętli zwrotnej kodu Claude 2.1.252 i 2.1.322)
+- Wzór: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Wstawia unikatowy znak Unicode **łącznik zerowej szerokości** (`U+200D`) po pierwszym znaku „wrażliwych” nazw klientów, aby filtry nadrzędne nie mogły ich wyszukać za pomocą grep. Domyślna lista słów:
+Wstawia kod Unicode** łącznik o zerowej szerokości** (`U+200D`) po pierwszym znaku „wrażliwych” nazw klientów, więc filtry nadrzędne nie mogą ich grepować. Domyślna lista słów:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Stosowane do: bloków `system`, całej zawartości `messages[].content` oraz `tools[].description` / `tools[].function.description`. Operator może nadpisać ustawienie za pomocą `setSensitiveWords()`.
+Dotyczy: bloków `system`, wszystkich `messages[].content` i `tools[].description` / `tools[].function.description`. Możliwość przesłonięcia operatora przez `setSensitiveWords()`.
 
 ### `claudeCodeCompatible.ts` — dostawcy `anthropic-compatible-cc-*`
 
-Dla zewnętrznych przekaźników Anthropic, które akceptują wyłącznie „rzeczywisty ruch Claude Code”:
+W przypadku przekaźników Anthropic innych firm, które akceptują tylko ruch „prawdziwego kodu Claude ”:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- Domyślnie `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- Przełącznik „Włącz wersję beta redagowania procesu myślowego” dla poszczególnych połączeń dodaje `redact-thinking-2026-02-12`, gdy nadrzędne połączenie zgodne z CC wymaga strumieni z redagowanym procesem myślowym
-- Przełącznik „Włącz wyświetlanie podsumowanego procesu myślowego” dla poszczególnych połączeń zapisuje `providerSpecificData.requestDefaults.summarizeThinking` i dodaje `display: "summarized"` do żądań procesu myślowego zgodnych z CC, w których nie ustawiono jeszcze trybu wyświetlania
+- domyślnie `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
+- Przełącznik „Włącz myślenie redagujące w wersji beta” dla każdego połączenia dodaje `redact-thinking-2026-02-12` gdy źródło danych zgodne z CC szczególnie wymaga zredagowanych strumieni myślowych
+- Przełącznik „Włącz wyświetlanie podsumowania myślenia” dla każdego połączenia przechowuje `providerSpecificData.requestDefaults.summarizeThinking` i dodaje `display: "summarized"` do CC Zgodne żądania myślenia, które nie ustawiły jeszcze trybu wyświetlania
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (rodzina Opus/Sonnet 4.x)
 - Domyślna ścieżka: `/v1/messages?beta=true`
 
-Moduły towarzyszące w tym samym pakiecie:
+Moduły siostrzane w tym samym pakiecie:
 
-- `claudeCodeConstraints.ts` — reguły temperatury i kontroli pamięci podręcznej
-- `claudeCodeToolRemapper.ts` — ponowne mapowanie nazw narzędzi
+- `claudeCodeConstraints.ts` — temperatura + reguły kontroli pamięci podręcznej
+- `claudeCodeToolRemapper.ts` — ponowne mapowanie nazwy narzędzia
 - `claudeCodeExtraRemap.ts` — dodatkowa normalizacja ładunku
 
 ---
@@ -148,7 +149,7 @@ trasy `ANTIGRAVITY_CREDITS=always` (zużywane przez `open-sse/executors/antigrav
 
 Egzekwowanie uprawnień nadrzędnych jest włączone** stronie Google** , nie jest niczym, czemu OmniRoute może zapobiec. Nazwa env var i istniejące dokumenty sprawiają, że brzmi to jak bezpieczne pokrętło do przekręcenia; tak nie jest.
 
-**Dlaczego powoduje to bardziej agresywne wykrywanie nadużyć niż korzystanie wyłącznie z poziomu bezpłatnego:**
+**Dlaczego powoduje to bardziej agresywne wykrywanie nadużyć niż użycie wyłącznie bezpłatnego poziomu:**
 
 - Utrzymujące się automatyczne wydatki na pojedynczym koncie Google są oznaczane inaczej niż w przypadku bezpłatnego poziomu liczby trafień i zatrzymań.
 - Nadwyżki kredytów nie mają górnego limitu stawek, więc źle skonfigurowany klient może przepalić kilkaset USD w ciągu kilku minut i wyglądać jak odsprzedaż klucza API lub ruch botów.
@@ -156,7 +157,7 @@ Egzekwowanie uprawnień nadrzędnych jest włączone** stronie Google** , nie je
 
 **Zalecana postawa:**
 
-1. Zachowaj domyślne `ANTIGRAVITY_CREDITS=off` chyba że operator wyraźnie zaakceptuje ryzyko związane z opłaconym kredytem i egzekucją konta. `retry` najpierw wysyła normalne żądanie i dodaje kredyty maksymalnie raz po osiągnięciu kwalifikującego się limitu 429; `always` dodaje kredyty na pierwsze żądanie.
+1. Zachowaj domyślną wartość `ANTIGRAVITY_CREDITS=off` chyba że operator wyraźnie zaakceptuje ryzyko związane z opłaconym kredytem i egzekucją konta. `retry` najpierw wysyła normalne żądanie i dodaje kredyty maksymalnie raz po osiągnięciu kwalifikującego się limitu 429; `always` dodaje kredyty na pierwsze żądanie.
 2. **Rozłóż obciążenie pomiędzy dostawcami za pomocą funkcji Auto-Combo** (`model: "auto"` lub `kr/glm/etc` -combo) zamiast nasycać pojedyncze konto Antigravity.
 3. **Ustaw limity RPM na połączenie** na stronie edycji dostawcy Antigravity (Dashboard → Providers → Antigravity → połączenie → limit szybkości). 30–60 RPM to możliwa do obrony górna granica przy długotrwałym użytkowaniu.
 4. **Korzystaj ze stabilnej, kontrolowanej przez operatora sieci nadrzędnej** i unikaj udostępniania jednego konta niepowiązanym użytkownikom lub obciążeniom.
@@ -190,7 +191,7 @@ Punkty dotykowe:
 
 - `open-sse/executors/antigravity.ts` — czyta `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — poświadczenie hydrauliki
-- Oryginalny raport z incydentu: Dyskusja [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Oryginalny raport z incydentu: Dyskusja [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

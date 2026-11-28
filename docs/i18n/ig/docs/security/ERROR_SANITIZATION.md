@@ -4,13 +4,7 @@
 
 ---
 
-> **Isi mmalite eziokwu:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, na ndị nrụpụta ọhaneze dị na `open-sse/utils/error.ts`
-> **Nnwale:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Emelitere ikpeazụ:** 2026-09-02 — v3.8.51
-> **Ndị e zubere maka ya:** Injinia ọ bụla na-emetụta nzaghachi njehie (ụzọ HTTP, iyi SSE, ndị mmebe ọrụ, ndị njikwa MCP).
-> **Ọnọdụ:** **Ọ BỤRỤRỤ IWU** maka ụzọ koodu ọ bụla na-eweghachiri onye ahịa ozi njehie.
+> **Isi mmalite nke eziokwu:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, na ndị na-ewu ụlọ na `open-sse/utils/error.ts`** Nnwale:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Ndị na-ege ntị:** Injinia ọ bụla metụrụ nzaghachi njehie metụrụ aka (ụzọ HTTP, iyi SSE, ndị mmebe, ndị njikwa MCP ).** Ọnọdụ:****MANDATORY** maka ụzọ koodu ọ bụla na-eweghachi onye ahịa ozi njehie.
 
 ## Ihe mere nke a ji dị
 

@@ -8,9 +8,15 @@ Adehun `config/cli-tools-manifest.json` didoju ṣalaye IDs canonical, awọn in
 
 ## Ayika ọmọde ati igbesi aye
 
-`omniroute run`, `omniroute launch` ati `omniroute launch-codex` jogun akojọ iyọọda ibaramu OS/terminal ati ki o lọsi awọn iwe-ẹri ibi-afẹde ti o yan. Olupese ti ko ni ibatan ati awọn aṣiri aaye data ko ni jogun nipasẹ aiyipada. `--inherit-env` ṣe atunṣe ni kikun ogún ayika ti obi; lo nikan nigbati ilana ẹni-kẹta ti o yan yẹ ki o gba awọn iye wọnyẹn. Eyi jẹ sisẹ ayika, kii ṣe apoti iyanrin OS kan: ilana naa tun nṣiṣẹ pẹlu awọn igbanilaaye eto faili olupe.
+`omniroute run`, `omniroute launch` ati `omniroute launch-codex` jogun akojọ iyọọda ibaramu OS/terminal ati ki o lọsi awọn iwe-ẹri ibi-afẹde ti o yan. Olupese ti ko ni ibatan ati awọn aṣiri ibi ipamọ data ko ni jogun nipasẹ aiyipada. `--inherit-env` ṣe atunṣe ni kikun ogún ayika ti obi; lo nikan nigbati ilana ẹni-kẹta ti o yan yẹ ki o gba awọn iye wọnyẹn. Eyi jẹ sisẹ ayika, kii ṣe apoti iyanrin OS kan: ilana naa tun nṣiṣẹ pẹlu awọn igbanilaaye eto faili olupe.
 
 Idilọwọ ati awọn ifihan agbara ifopinsi ti wa ni dari si omo. Ifilọlẹ n duro de iṣẹlẹ isunmọ ọmọde ṣaaju yiyọ iṣeto igba diẹ kuro. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` n ṣakoso akoko oore-ọfẹ ṣaaju ifopinsi ifipabanilopo (aiyipada 5000 milliseconds).
+
+`omniroute launch <tool>` (wo [LAUNCH.md](./LAUNCH.md) ) tẹle awọn ofin ayika kanna ati fifiranšẹ ifihan agbara, o si ṣe afikun:
+
+- **Ibẹrẹ Gateway laifọwọyi.** Fun ibi-afẹde agbegbe kan, nigbati ko ba si awọn idahun ẹnu-ọna lori ibudo, ifilọlẹ bẹrẹ `omniroute serve --headless --no-open` ti a dè si `127.0.0.1` labẹ ilana ikore ti o ya sọtọ. Ifilọlẹ ti nṣiṣẹ kọọkan ni o ni iyalo ni `DATA_DIR/launch/leases/` (ẹru ọkan ni gbogbo iṣẹju 15, stale lẹhin 45 s tabi nigbati ilana rẹ ba lọ). Olukore duro ni ẹnu-ọna ti o bẹrẹ ni kete ti ko si iyalo ti o wa laaye fun oore-ọfẹ ti ko ṣiṣẹ (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, aiyipada 10000 milliseconds). Ẹnu-ọna ti olumulo bẹrẹ jẹ lilo ṣugbọn ko duro. `--keep-gateway` tabi `omniroute gateway keep` yi ẹnu-ọna ifilọlẹ kan si ọkan deede; `--no-start` mu pada atijọ ikuna-ti o ba ti-isalẹ ihuwasi. Awọn ibi-afẹde latọna jijin jẹ iwadii nikan.
+- **Awọn akoko ifilọlẹ.** Gbogbo ifilọlẹ mints ami igba kukuru `olx_` igba diẹ lati iwe eri obi (`POST /api/launch/sessions`), ọkan yoo lu nigba ti ohun elo nṣiṣẹ, ka akopọ lilo ati fagilee lẹhin ijade ọpa. Aami naa jẹ ipin ti o muna ti obi rẹ: awọn igbanilaaye kanna, kanna tabi katalogi dín, igbesi aye kukuru, ati pe kii ṣe iwe eri dasibodu kan. Ọpa naa gba aami igba, kii ṣe iwe-ẹri obi, ati pe awọn ibeere ni aami `launch:<tool>:<sessionId>` ayafi ti o ba fun `--tag`. Ẹnu-ọna laisi igba API kuna pẹlu `GatewayTooOld` dipo ja bo pada si ifilọlẹ ti ko ni iwọn.
+- **Fun-ifilole konfigi.** Awọn faili atunto irinṣẹ jẹ kikọ si itọsọna igba otutu ikọkọ (ipo 0700, prefix `omnirouter-`) ati yọkuro lẹhin ti ọmọ ba jade. A `SIGKILL` ti awọn nkan jiju fi awọn liana sile; `omniroute launch --cleanup` yọ iru awọn ilana kuro ni kete ti wọn ti dagba ju ọjọ kan lọ.
 
 ## Gemini jubẹẹlo setup
 

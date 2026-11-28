@@ -12,54 +12,53 @@ OmniRoute ir trīs atšķirīgi, bet saistīti noturības mehānismi. Katram no 
 
 > **Env-vs-informācijas paneļa prioritāte elastības pārslēgšanai.** Izvēles noturība pārslēdz no vides — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — tikai nodrošina _noklusējuma_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Būla vērtība saglabājās `resilienceSettings` (dashboard →** Iestatījumi → Resilience** / `PATCH /api/resilience`, saglabāts `key_value`) pārspēj env vērtību: normalizācija (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) saglabā saglabāto Būla vērtību, kad vien tāda pastāv. Šāda env var iestatīšana uz `true` izvietošanai, kurā informācijas panelis jau ir saglabāts `false` tāpēc nekas nemainās. — pārslēdz slēdzi** Iestatījumi → Resilience** (vai notīriet saglabāto lauku).
 
-## 1. Pakalpojumu sniedzēja ķēdes pārtraucējs
+## 1. Nodrošinātājs Circuit Breaker
 
-**Tvērums:** viss pakalpojumu sniedzējs (piem., `glm`, `openai`, `anthropic`).
+**Darbības joma:** viss pakalpojumu sniedzējs (piemēram, `glm`, `openai`, `anthropic`).
 
-**Mērķis:** pārtraukt sūtīt trafiku pakalpojumu sniedzējam, kas atkārtoti cieš neveiksmes augšplūsmas/pakalpojuma līmenī.
+**Mērķis:** pārtraukt datplūsmas sūtīšanu pakalpojumu sniedzējam, kurš atkārtoti nedarbojas upstream/service līmenī.
 
-**Realizācija:**
+**Īstenošana:**
 
-- Galvenā klase: `src/shared/utils/circuitBreaker.ts`
-- Sasaiste: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Statusa API: `GET /api/monitoring/health`
-- Atiestatīšanas API: `POST /api/resilience/reset`
-- Apvalki: `open-sse/services/accountFallback.ts`
+- Pamatklase: `src/shared/utils/circuitBreaker.ts`
+- Elektroinstalācija: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Statuss API: `GET /api/monitoring/health`
+- Atiestatīt API: `POST /api/resilience/reset`
+- Iesaiņojumi: `open-sse/services/accountFallback.ts`
 - DB tabula: `domain_circuit_breakers`
 
-**Stāvokļi:**
+**Valstis:**
 
-- `CLOSED` — parastais trafiks ir atļauts
-- `DEGRADED` — trafiks joprojām ir atļauts, taču tiek izsekots paaugstināts pakalpojumu sniedzēja kļūmu skaits; atgriežas stāvoklī `CLOSED` pēc pietiekama veiksmīgu izsaukumu skaita, pēc veiksmīga savienojuma testa vai pēc ilgākās `OPEN` noturēšanas pēdējam kļūmes veidam (tā `cooldownByKind` vērtība, citādi `resetTimeout`, × `maxBackoffMultiplier`, vismaz viena dzesēšana) bez jaunas kļūmes
-- `OPEN` — pakalpojumu sniedzējs īslaicīgi bloķēts; combo maršrutēšana to izlaiž
-- `HALF_OPEN` — atiestatīšanas noilgums beidzies; atļauts pārbaudes pieprasījums
+- `CLOSED` — normāla satiksme atļauta
+- `DEGRADED` — trafika joprojām ir atļauta, taču tiek izsekotas paaugstinātas pakalpojumu sniedzēja kļūmes; atgriežas pie `CLOSED`, ja ir pietiekami daudz panākumu, derīga savienojuma pārbaudes laikā vai pēc ilgākās `OPEN` aizturēšanas pēdējam kļūmes veidam (tā `cooldownByKind` vērtība, citādi `resetTimeout`, × `maxBackoffMultiplier`, vismaz viena atdzišana) bez jaunas kļūmes.
+- `OPEN` — nodrošinātājs īslaicīgi bloķēts; kombinētā maršrutēšana to izlaiž
+- `HALF_OPEN` — atiestatīšanas taimauts pagājis; zondes pieprasījums ir atļauts
 
-**Konfigurējamās noklusējuma vērtības (`open-sse/config/constants.ts`, pieejamas sadaļā Informācijas panelis → Iestatījumi → Noturība):**
+**Konfigurējami noklusējuma iestatījumi (`open-sse/config/constants.ts`, redzami informācijas panelī → iestatījumi → elastīgums):**
 
-| Klase   | Degradējas pie | Atveras pie | Atiestatīšanas noilgums |
-| ------- | -------------- | ----------- | ----------------------- |
-| OAuth   | 5 kļūmes       | 8 kļūmes    | 60s                     |
-| API-key | 7 kļūmes       | 12 kļūmes   | 30s                     |
-| Local   | atvasināts     | 2 kļūmes    | 15s                     |
+| Klase       | Degradēts plkst | Tiek atvērts plkst | Atiestatīt taimautu |
+| ----------- | --------------- | ------------------ | ------------------- |
+| OAuth       | 5 neveiksmes    | 8 neveiksmes       | 60. gadi            |
+| API atslēga | 7 neveiksmes    | 12 neveiksmes      | 30. gadi            |
 
-`degradationThreshold` nosaka, kad pakalpojumu sniedzējs nonāk stāvoklī `DEGRADED`; `failureThreshold` nosaka, kad tas atveras un tiek izlaists. Lokālie pakalpojumu sniedzēju profili vēl nav pieejami Noturības iestatījumu lapā.
+`degradationThreshold` kontrolē, kad pakalpojumu sniedzējs ievada `DEGRADED`; `failureThreshold` kontrolē, kad tas tiek atvērts un tiek izlaists. `PROVIDER_PROFILES.local` (2 atteices / 15s) ir definēts `open-sse/config/constants.ts` but** vēl nav pieslēgts** : `getProviderCategory()` atgriež tikai `oauth` vai `apikey`, tāpēc vietējie pakalpojumu sniedzēji izmanto OAuth vai API atslēgas profilu.
 
-**Nostrādāšanas kodi:** tikai pakalpojumu sniedzēja līmeņa statusi `[408, 500, 502, 503, 504]`. Konta līmeņa kļūmēm NENOSTRĀDĀ (lielākā daļa 401/403/429 — tās pieder dzesēšanas vai bloķēšanas mehānismiem).
+**Brauciena kodi:** tikai pakalpojumu sniedzēja līmeņa statusi `[408, 500, 502, 503, 504]`. Veiciet NOT izbraukšanu konta līmeņa kļūdām (lielākā daļa 401/403/429 — no tām attiecas uz atdzišanu vai bloķēšanu).
 
-**Slinkā atkopšana:** kad `OPEN` termiņš beidzas, `getStatus()`, `canExecute()`, `getRetryAfterMs()` atsvaidzina stāvokli uz `HALF_OPEN`. Tie paši lasījumi (un nākamā kļūme) novecojušu `DEGRADED` pakāpeniski atgriež atpakaļ uz `CLOSED`. Fona taimeris nav nepieciešams.
+**Slinka atveseļošanās:** kad `OPEN` beidzas, `getStatus()`, `canExecute()`, `getRetryAfterMs()` atsvaidzina stāvokli uz `HALF_OPEN`. Tas pats nolasījums (un nākamā kļūme) samazina novecojušo `DEGRADED` atpakaļ uz `CLOSED`. Nav nepieciešams fona taimeris.
 
 ---
 
-### Pēc izvēles ieslēdzama globālā pakalpojumu sniedzēja dzesēšana (laika loga slēdzis)
+### Izvēlēties globālo pakalpojumu sniedzēja dzesēšanu (logu vārti)
 
-Ceturtais, **pēc izvēles ieslēdzams** slānis (`PROVIDER_COOLDOWN_ENABLED`, noklusējumā **izslēgts**) uztur atmiņu, kas saglabājas starp pieprasījumiem, par pakalpojumu sniedzējiem, kas cieš neveiksmes, failā `open-sse/services/providerCooldownTracker.ts`; to izmanto combo mērķu izšķirtspēja, lai secīgi combo pieprasījumi vairs neatkārtoti vērstos pie pakalpojumu sniedzēja, kas tikko cieta neveiksmi. Pakalpojumu sniedzēja līmeņa ieraksti ievēro `PROVIDER_PROFILES` laika loga slēdzi:
+Ceturtā,** pieteikšanās** slānis (`PROVIDER_COOLDOWN_ENABLED`, noklusējuma** izslēgts** ) saglabā savstarpējo pieprasījumu atmiņu par neveiksmīgiem pakalpojumu sniedzējiem pakalpojumā `open-sse/services/providerCooldownTracker.ts`, kas tiek izskatīts, izmantojot kombinēto mērķa izšķirtspēju, tāpēc secīgi kombinētie pieprasījumi pārtrauc atkārtotu pakalpojumu sniedzēju, kurš tikko neizdevās, pārsūtīšanu. Pakalpojumu sniedzēja līmeņa ieraksti ievēro `PROVIDER_PROFILES` loga vārtus:
 
-| Profils | nostrādā pēc (`providerFailureThreshold`) | laika logā (`providerFailureWindowMs`) | dzesējas (`providerCooldownMs`) |
-| ------- | ----------------------------------------: | -------------------------------------: | ------------------------------: |
-| OAuth   |                                      `10` |                                `15min` |                          `5min` |
-| API key |                                      `15` |                                `30min` |                         `10min` |
+| Profils     | braucieni pēc (`providerFailureThreshold`) | iekšpuse (`providerFailureWindowMs`) | atdzesē (`providerCooldownMs`) |
+| ----------- | -----------------------------------------: | -----------------------------------: | -----------------------------: |
+| OAuth       |                                       `10` |                              `15min` |                         `5min` |
+| API atslēga |                                       `15` |                              `30min` |                        `10min` |
 
-Zem sliekšņa pakalpojumu sniedzējs **netiek** uzskatīts par dzesējamu; veiksmīgs pieprasījums notīra logu. Savienojuma līmeņa ieraksti (`provider:connectionId`) tā vietā patur eksponenciālo `minRetryCooldownMs → maxRetryCooldownMs` atkapšanos. Noklusējumu pārrakstīšana: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Aizsargs pret regresiju: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Zem sliekšņa atrodas pakalpojumu sniedzējs** nē** uzskatīta par dzesēšanu; veiksme attīra logu. Savienojuma līmeņa ieraksti (`provider:connectionId`) tā vietā saglabā eksponenciālo `minRetryCooldownMs → maxRetryCooldownMs` atkāpšanos. Ignorē: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regresijas aizsargs: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Savienojuma dzesēšana
 
@@ -730,6 +729,21 @@ kvota. Godīgi ierobežojumi:
 
 ---
 
+## Kad pats OmniRoute ir nesasniedzams
+
+Pakalpojumu sniedzēja ķēdes pārtraucējs, savienojuma dzesēšana un modeļa bloķēšana darbojas vārtejā. Ja klients nevar sasniegt vārteju, tas saņem savienojuma kļūdu. OmniRoute nevar pārtvert šo neveiksmi. Klients izlemj, vai mēģināt vēlreiz un kādu ziņojumu parādīt.
+
+OmniRoute pašlaik nenodrošina klienta puses atkāpšanos un nenosaka tam nekādu politiku. Konfigurējiet jebkuru alternatīvu maršrutu klientā vai vārtejas priekšā.
+
+- `GET /api/health` pārbauda dzīvīgumu bez autentifikācijas.
+- `GET /api/health/ping` pārbauda gatavību, tostarp, vai datu bāze reaģē.
+- `GET /api/monitoring/health` sniedz autentificētiem zvanītājiem dziļāku veselības pārskatu.
+- `omniroute launch <tool>` zondē `/api/monitoring/health` pirms klienta palaišanas. Tas var automātiski palaist vietējo vārteju. Izmantojot `--no-start`, nesasniedzama vārteja rada `GatewayUnreachable` un izejas kodu `69`.
+
+Lai atvienotu klientu no OmniRoute, izpildiet [Atjaunot klienta konfigurāciju](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Atkļūdošana
 
 - Svērtā kombinācija atbild ar `503 all_targets_cooling_down` (iestatīts `Retry-After`, `diagnostics.excluded` uzskaita katru mērķi ar `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → baseins ir konfigurēts un savienots, katrs mērķis vienkārši ir izslēgts ar noturības taimeri; brīdinājums `[COMBO] Weighted selection: every target excluded before dispatch — …` norāda iemeslus un atlikušās sekundes. `404 no_executable_targets` no tās pašas kombinācijas nozīmē, ka neviens noturības taimeris nav bijis iesaistīts (nav ko palaist vai arī neviena konta pieejamības pārbaude neizdevās). Iebūvēts `open-sse/services/combo/pinRecovery.ts`, pamatojoties uz izslēgšanām, kas savāktas `targetResolution.ts`.
@@ -741,94 +755,68 @@ kvota. Godīgi ierobežojumi:
 
 ---
 
-## Izpildlaika stāvoklis — ātra atsauce aģentam
+## Izpildlaika stāvokļa — aģenta ātrā uzziņa
 
-> Pārvietots bez izmaiņām no `AGENTS.md` → "Resilience Runtime State" (PR #12743), lai
-> aģenta ceļvedis nepārsniegtu 40k konteksta budžetu. Tas ir iepriekšējo sadaļu saīsināts,
-> aģentam vērsts skatījums; numurētās sadaļas paliek pilnā atsauce.
+> Pārcelts burtiski no `AGENTS.md` → “Resilience Runtime State” (PR #12743), tāpēc aģenta rokasgrāmata paliek zem 40 000 konteksta budžeta. Tas ir iepriekš minēto sadaļu saīsināts skats, kas vērsts uz aģentu; numurētās sadaļas joprojām ir pilna atsauce.
 
-OmniRoute ir trīs savstarpēji saistīti, bet atšķirīgi pagaidu kļūmju mehānismi. Atkļūdojot
-maršrutēšanas uzvedību, turiet to darbības jomas atsevišķi. Skatiet
-[3 slāņu noturības diagrammu](../diagrams/exported/resilience-3layers.svg)
-(avots: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)),
-lai ātri gūtu pārskatu.
+OmniRoute ir trīs saistīti, bet atšķirīgi pagaidu atteices mehānismi. Atkļūdojot maršrutēšanas darbību, atstājiet to darbības jomu atsevišķi. Skatiet [trīs slāņu noturības diagrammu](../diagrams/exported/resilience-3layers.svg) (avots: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ), lai iegūtu īsu karti.
 
-### Sniedzēja ķēdes pārtraucējs
+### Pakalpojumu sniedzēja ķēdes pārtraucējs
 
-**Darbības joma**: viss sniedzējs, piem., `glm`, `openai`, `anthropic`.
+**Darbības joma** : viss pakalpojumu sniedzējs, piemēram, `glm`, `openai`, `anthropic`.
 
-**Mērķis**: pārtraukt sūtīt trafiku uz sniedzēju, kas atkārtoti neizdodas
-augšupgājuma/pakalpojuma līmenī, lai viens nedarbīgs sniedzējs nepalēninātu katru pieprasījumu.
+**Mērķis** : pārtrauciet datplūsmas sūtīšanu pakalpojumu sniedzējam, kurš atkārtoti nedarbojas upstream/service līmenī, lai viens neveselīgs pakalpojumu sniedzējs nepalēninātu katru pieprasījumu.
 
-**Implementācija**:
+**Īstenošana** :
 
-- Galvenā klase: `src/shared/utils/circuitBreaker.ts`
-- Čata vārtejas/izpildes pieslēgums: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Izpildlaika statusa API: `src/app/api/monitoring/health/route.ts`
-- Koplietotie apvalki: `open-sse/services/accountFallback.ts`
-- Saglabātā stāvokļa tabula: `domain_circuit_breakers`
+- Pamatklase: `src/shared/utils/circuitBreaker.ts`
+- Tērzēšanas gate/execution elektroinstalācija: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Izpildlaika statuss API: `src/app/api/monitoring/health/route.ts`
+- Kopīgie iesaiņojumi: `open-sse/services/accountFallback.ts`
+- Pastāvīgā stāvokļa tabula: `domain_circuit_breakers`
 
-**Stāvokļi** (4 — `src/shared/utils/circuitBreaker.ts`):
+**valstis** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: parastais trafiks ir atļauts.
-- `DEGRADED`: agrīnās brīdināšanas josla — kļūmes pārsniegušas degradācijas slieksni, bet vēl
-  ne pārtraucēja slieksni; trafiks joprojām plūst, informācijas paneļi rāda brīdinājumu. Derīga
-  savienojuma pārbaude vai klusais logs bez jaunām kļūmēm to atgriež uz `CLOSED`
-  (logu skatiet `docs/architecture/RESILIENCE_GUIDE.md`).
-- `OPEN`: sniedzējs ir uz laiku bloķēts; izsaucēji saņem atbildi par atvērtu sniedzēja
-  ķēdi vai kombinētā maršrutēšana pāriet uz citu mērķi.
-- `HALF_OPEN`: atiestatīšanas noilgums ir pagājis; atļauts zondes pieprasījums. Veiksme aizver
-  pārtraucēju, neveiksme to atkal atver.
+- `CLOSED`: ir atļauta parasta satiksme.
+- `DEGRADED`: agrīnās brīdināšanas joslas — kļūmes ir pārkāpušas degradācijas slieksni, bet vēl ne pārtraukšanas slieksni; satiksme joprojām plūst, informācijas paneļi parāda brīdinājumu. Derīgs savienojuma tests vai kluss logs bez jaunas kļūmes atgriež to uz `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` ir logs).
+- `OPEN`: pakalpojumu sniedzējs ir īslaicīgi bloķēts; zvanītāji saņem pakalpojumu sniedzēja ķēdes atvērtu atbildi vai kombinēto maršrutēšanu izlaiž uz citu mērķi.
+- `HALF_OPEN`: ir pagājis atiestatīšanas taimauts; atļaut izmeklēšanas pieprasījumu. Veiksme aizver lauzēju, neveiksme to atkal atver.
 
-**Noklusējumi** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, tiek izmantoti caur
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` failā `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` failā `src/sse/handlers/chatHelpers.ts`). Visa sniedzēja
-pārtraucējs darbojas ar `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Noklusējumi** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, patērēts, izmantojot `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` in `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). Visa nodrošinātāja slēdzis darbojas ar `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profils     | degradējas pie | atveras pie (`circuitBreakerThreshold`) | atiestate (`circuitBreakerReset`) |
-| ----------- | -------------: | --------------------------------------: | --------------------------------: |
-| OAuth       |            `5` |                                     `8` |                             `60s` |
-| API atslēga |            `7` |                                    `12` |                             `30s` |
-| Lokālais    |   (atvasināts) |                                     `2` |                             `15s` |
+| Profils     | degradējas plkst | atveras plkst. (`circuitBreakerThreshold`) | atiestatīt (`circuitBreakerReset`) |
+| ----------- | ---------------: | -----------------------------------------: | ---------------------------------: |
+| OAuth       |              `5` |                                        `8` |                              `60s` |
+| API atslēga |              `7` |                                       `12` |                              `30s` |
 
-`PROVIDER_PROFILES` definē arī `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) un `providerCooldownMs` (5/10/1 min): tie darbina
-**pieslēdzamās globālās sniedzēja dzesēšanas (Provider Cooldown) loga slieksni**
-(`PROVIDER_COOLDOWN_ENABLED`, pēc noklusējuma izslēgts) — ieraksts sniedzēja līmenī
-`open-sse/services/providerCooldownTracker.ts` tiek uzskatīts par dzesēšanu tikai pēc
-`providerFailureThreshold` kļūmēm `providerFailureWindowMs` laikā, un pēc tam tas dzesē
-`providerCooldownMs`. Tie NAV aktīvā pārtraucēja sliekšņi — neregulējiet tos, gaidot
-pārtraucēja uzvedību. Katru noklusējumu var pārdefinēt ar
-`OMNIROUTE_PROVIDER_BREAKER_*` un `OMNIROUTE_CIRCUIT_BREAKER_*` vides mainīgajiem;
-izpildlaikā precīzā atsauces tabula atrodas `docs/architecture/RESILIENCE_GUIDE.md`.
+`local` profils (`2` fails / `15s`) pastāv arī `PROVIDER_PROFILES`, taču tas nav pievienots slēdzim: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) pieņem tikai `oauth` vai `apikey`, un `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) atgriež vienu no šiem diviem (nereģistrētie pakalpojumu sniedzēji saņem `apikey`).
 
-Tikai sniedzēja līmeņa kļūmju statusiem vajadzētu aktivizēt sniedzēja pārtraucēju:
+`PROVIDER_PROFILES` definē arī `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) un `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, kur vietējās vērtības ir inertas tā paša iemesla dēļ, kā minēts iepriekš: šīs jaudas** logu vārti no izvēles globālās nodrošinātāja dzesēšanas** (`PROVIDER_COOLDOWN_ENABLED`, noklusējuma izslēgts) — nodrošinātāja līmeņa ieraksts `open-sse/services/providerCooldownTracker.ts` tiek uzskatīts par dzesēšanu tikai pēc `providerFailureThreshold` kļūmēm `providerFailureWindowMs` iekšienē, un pēc tam atdziest `providerCooldownMs`. Tie ir NOT tiešā slēdža sliekšņi — nenoregulē tos, sagaidot pārtraucēja uzvedību. Katru noklusējuma vērtību var ignorēt, izmantojot `OMNIROUTE_PROVIDER_BREAKER_*` un `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; izpildlaika precīzās atsauces tabula dzīvo `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Tikai nodrošinātāja līmeņa kļūmes statusiem ir jāatspējo nodrošinātāja slēdzis:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Neaktivizējiet visa sniedzēja pārtraucēju parastu konta/atslēgas/modeļa kļūmju dēļ, piemēram,
-lielākajā daļā `401`, `403` vai `429` gadījumu. Tās parasti pieder savienojuma dzesēšanas
-vai modeļa bloķēšanas jomai. Vispārīgam API atslēgas sniedzējam `403` vajadzētu būt
-atjaunojamam, ja vien tas nav klasificēts kā termināla sniedzēja/konta kļūme.
+Neizslēdziet visa nodrošinātāja slēdzi parastu account/key/model kļūdu gadījumā, piemēram, vairumā `401`, `403` vai `429` gadījumu. Tie parasti attiecas uz savienojuma dzesēšanu vai modeļa bloķēšanu. Vispārējam API atslēgas nodrošinātājam `403` jābūt atkopjamam, ja vien tas nav klasificēts kā termināla provider/account kļūda.
 
-Pārtraucējs izmanto slinko atjaunošanos, nevis fona taimeri. Kad `OPEN` termiņš beidzas, tādi nolasījumi kā `getStatus()`, `canExecute()` un `getRetryAfterMs()` atsvaidzina stāvokli uz `HALF_OPEN`, tāpēc informācijas paneļi un kombināciju kandidātu veidotāji neturpina uz mūžu izslēgt pakalpojumu sniedzēju, kura termiņš beidzies.
+Pārslēdzējs izmanto slinku atkopšanu, nevis fona taimeri. Kad beidzas `OPEN` derīguma termiņš, tādi nolasījumi kā `getStatus()`, `canExecute()` un `getRetryAfterMs()` atsvaidzina statusu uz `HALF_OPEN`, tāpēc informācijas paneļi un kombinētie izstrādātāju kandidāti uz visiem laikiem neizslēdz pakalpojumu sniedzēju, kuram beidzies derīguma termiņš.
 
 ### Savienojuma dzesēšana
 
-**Apjoms**: viens pakalpojumu sniedzēja savienojums/konts/atslēga.
+**Darbības joma** : viens pakalpojumu sniedzējs connection/account/key.
 
-**Mērķis**: īslaicīgi izlaist vienu problēmisku atslēgu/kontu, vienlaikus ļaujot citiem tā paša pakalpojumu sniedzēja savienojumiem turpināt apkalpot pieprasījumus.
+**Mērķis** : īslaicīgi izlaidiet vienu sliktu key/account vienlaikus ļaujot citiem tā paša pakalpojumu sniedzēja savienojumiem turpināt pieprasījumu apkalpošanu.
 
-**Implementācija**:
+**Īstenošana** :
 
-- Rakstīšanas/atjaunināšanas ceļš: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Kontu atlase/filtrēšana: `src/sse/services/auth.ts::getProviderCredentials...`
-- Dzesēšanas aprēķins: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Write/update ceļš: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Konts selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Atdzesēšanas aprēķins: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Iestatījumi: `src/lib/resilience/settings.ts`
 
-Svarīgi lauki pakalpojumu sniedzēja savienojumiem:
+Svarīgi lauki par pakalpojumu sniedzēja savienojumiem:
 
 ```ts
 rateLimitedUntil;
@@ -839,50 +827,50 @@ errorCode;
 backoffLevel;
 ```
 
-Kontu atlases laikā savienojums tiek izlaists, kamēr:
+Konta atlases laikā savienojums tiek izlaists, kamēr:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Dzesēšana arī ir slinka: kad `rateLimitedUntil` ir pagātnē, savienojums atkal kļūst izmantojams. Pēc veiksmīgas izmantošanas `clearAccountError()` notīra `testStatus`, `rateLimitedUntil`, kļūdu laukus un `backoffLevel`.
+Atdzesēšana ir arī slinka: kad `rateLimitedUntil` ir pagātnē, savienojums atkal kļūst piemērots. Veiksmīgas lietošanas gadījumā `clearAccountError()` notīra `testStatus`, `rateLimitedUntil`, kļūdu laukus un `backoffLevel`.
 
-Noklusējuma savienojuma dzesēšanas uzvedība:
+Noklusējuma savienojuma dzesēšanas darbība:
 
-- OAuth pamata dzesēšana: `5s`.
-- API atslēgas pamata dzesēšana: `3s`.
-- API atslēgas `429` gadījumā, ja pieejamas, priekšroka jādod augšupējā avota atkārtota mēģinājuma norādēm (`Retry-After`, atiestatīšanas galvenēm vai parsējamam atiestatīšanas tekstam).
-- Atkārtotām atkopjamām kļūmēm tiek izmantota eksponenciāla atkāpšanās:
+- OAuth bāzes dzesēšana: `5s`.
+- API atslēgas bāzes dzesēšana: `3s`.
+- API atslēgas `429` ir jādod priekšroka augšupējiem ieteikumiem par atkārtotu mēģinājumu (`Retry-After`, atiestatāmas galvenes vai parsējams atiestatīšanas teksts), ja tie ir pieejami.
+- Atkārtotas atkopjamas kļūmes izmanto eksponenciālu atkāpšanos:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Aizsardzība pret thundering herd efektu neļauj vienlaicīgām kļūmēm vienā un tajā pašā savienojumā atkārtoti pagarināt dzesēšanu vai divkārši palielināt `backoffLevel`.
+Pretpērkona ganāmpulka aizsargs neļauj vienlaicīgām kļūmēm tajā pašā savienojumā atkārtoti pagarināt dzesēšanas laiku vai dubultot `backoffLevel`.
 
-Terminālie stāvokļi nav dzesēšana. `banned`, `expired` (kas kļūst termināls tikai pēc N ierobežotiem atkārtotiem mēģinājumiem, izmantojot `EXPIRED_RETRY_MAX`) un `credits_exhausted` ir paredzēti palikt nepieejami, līdz mainās akreditācijas dati/iestatījumi vai operators tos atiestata. Nepārrakstiet terminālos stāvokļus ar pārejošu dzesēšanas stāvokli.
+Termināļa stāvokļi nav atdzišana. `banned`, `expired` (kas kļūst par termināli tikai pēc N ierobežotiem atkārtojumiem, izmantojot `EXPIRED_RETRY_MAX`) un `credits_exhausted` ir paredzēti, lai paliktu nepieejami, līdz credentials/settings mainīsies vai operators tos atiestatīs. Nepārrakstīt termināļa stāvokļus ar pārejošu dzesēšanas stāvokli.
 
 ### Modeļa bloķēšana
 
-**Apjoms**: pakalpojumu sniedzējs + savienojums + modelis.
+**Darbības joma** : pakalpojumu sniedzēja + savienojuma + modelis.
 
-**Mērķis**: izvairīties no visa savienojuma atspējošanas, ja konkrētajā savienojumā nav pieejams vai kvotas ierobežots tikai viens modelis.
+**Mērķis** : izvairieties no visa savienojuma atspējošanas, ja šim savienojumam nav pieejams vai ir ierobežots tikai viens modelis.
 
 Piemēri:
 
-- Pakalpojumu sniedzēji ar kvotām pa modeļiem, kas atgriež `429`.
-- Lokālie pakalpojumu sniedzēji, kas vienam trūkstošam modelim atgriež `404`.
-- Pakalpojumu sniedzējam specifiskas režīma/modeļa atļauju kļūmes, piemēram, izvēlētie Grok režīmi.
+- Katra modeļa kvotu nodrošinātāji atgriež `429`.
+- Vietējie pakalpojumu sniedzēji atgriež `404` par vienu trūkstošo modeli.
+- Pakalpojumu sniedzēja mode/model atļauju kļūmes, piemēram, atlasītie Grok režīmi.
 
-Modeļa bloķēšanas loģika atrodas `open-sse/services/accountFallback.ts`, un tā ļauj tam pašam savienojumam turpināt apkalpot citus modeļus.
+Modeļa bloķēšana darbojas `open-sse/services/accountFallback.ts` un ļauj tam pašam savienojumam turpināt apkalpot citus modeļus.
 
-### Atkļūdošanas vadlīnijas
+### Atkļūdošanas norādījumi
 
 - Ja visas pakalpojumu sniedzēja atslēgas tiek izlaistas, pārbaudiet gan pakalpojumu sniedzēja pārtraucēja stāvokli, gan katra savienojuma `rateLimitedUntil`/`testStatus`.
-- Ja pēc atiestatīšanas loga pakalpojumu sniedzējs šķiet pastāvīgi izslēgts, pārbaudiet, vai kods nolasa jēlo `state`, nevis izmanto `getStatus()`/`canExecute()`.
-- Ja viena pakalpojumu sniedzēja atslēga nedarbojas, bet pārējām vajadzētu strādāt, izvēlieties savienojuma dzesēšanu, nevis pakalpojumu sniedzēja pārtraucēju.
-- Ja nedarbojas tikai viens modelis, izvēlieties modeļa bloķēšanu, nevis savienojuma dzesēšanu.
-- Ja stāvoklim vajadzētu pašatjaunoties, tam jābūt nākotnes laika zīmogam/atiestatīšanas noilgumam un lasīšanas ceļam, kas atsvaidzina beigušos stāvokli. Pastāvīgie statusi prasa manuālas akreditācijas datu vai konfigurācijas izmaiņas.
+- Ja pēc atiestatīšanas loga pakalpojumu sniedzējs ir neatgriezeniski izslēgts, pārbaudiet, vai kods nolasa neapstrādātu `state` nevis izmanto `getStatus()`/`canExecute()`.
+- Ja viena pakalpojumu sniedzēja atslēga neizdodas, bet citām vajadzētu darboties, dodiet priekšroku savienojuma atdzišanai, nevis pakalpojumu sniedzēja slēdzim.
+- Ja nedarbojas tikai viens modelis, dodiet priekšroku modeļa bloķēšanai, nevis savienojuma dzesēšanai.
+- Ja stāvoklim ir jāatjaunojas, tam ir jābūt timestamp/reset noildzei nākotnē un lasīšanas ceļam, kas atsvaidzina stāvokli, kuram beidzies derīguma termiņš. Pastāvīgajiem statusiem ir nepieciešamas manuālas akreditācijas datu vai konfigurācijas izmaiņas.
 
 ---
 

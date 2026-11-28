@@ -4,32 +4,13 @@
 
 ---
 
-> **Verbindliche Quelle:** `src/lib/memory/` und `src/app/api/memory/`
-> **Zuletzt aktualisiert:** 2026-06-28 — v3.8.40 (standardmäßig deaktiviert + Nachholung der int8-Quantisierung)
+> **Quelle der Wahrheit:** `src/lib/memory/` und `src/app/api/memory/`
 
-OmniRoute bietet einen dauerhaften Konversationsspeicher, der nach API-Schlüssel
-(und optional nach Sitzungs-ID) getrennt ist. Erinnerungen werden mittels
-leichtgewichtiger Regex-Mustererkennung automatisch aus LLM-Antworten extrahiert
-und als vorangestellte Systemnachricht wieder in nachfolgende Anfragen eingefügt
-(oder als erste Benutzernachricht bei Anbietern, die die Systemrolle ablehnen).
+OmniRoute stellt einen dauerhaften Konversationsspeicher bereit, der durch API Schlüssel (und optional durch die Sitzungs-ID) verschlüsselt wird. Speicher werden automatisch aus LLM -Antworten über einen einfachen Regex-Mustervergleich extrahiert und als führende Systemnachricht (oder erste Benutzernachricht für Anbieter, die die Systemrolle ablehnen) wieder in nachfolgende Anforderungen eingefügt.
 
-> **Der Speicher ist standardmäßig DEAKTIVIERT (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> ist jetzt `false` (`src/lib/memory/settings.ts`). Durch Aktivieren des Speichers
-> werden bis zu `maxTokens` (~2k) an abgerufenem Kontext in **jede** Chat-Anfrage
-> eingefügt, was abgerechnet wird — unerwartete Kosten für neue Installationen und
-> für Clients, die ihren eigenen Kontext verwalten. Aktivieren Sie die Funktion
-> explizit unter **Einstellungen → Speicher** (der `MemorySkillsTab` zeigt bei
-> aktiviertem Speicher einen Warnhinweis zu Token-Kosten an). Ein Client kann den
-> Speicher für eine einzelne Anfrage über den Anfrage-Header
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) deaktivieren — siehe die
-> Anfrage-Header-Tabelle in [API_REFERENCE.md](../reference/API_REFERENCE.md).
-> Eine Anfrage ohne Speicher setzt `memoryOwnerId = null`, wodurch für diese
-> Anfrage **sowohl** die Speicher- als auch die Skill-Injektion deaktiviert wird
-> (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Der Speicher ist standardmäßig OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` ist jetzt `false` (`src/lib/memory/settings.ts`). Durch die Aktivierung des Speichers werden bis zu `maxTokens` (~ 2k) des abgerufenen Kontexts eingefügt** jeder** Chat-Anfrage, für die bei Neuinstallationen und für Clients, die ihren eigenen Kontext verwalten, überraschende Kosten — Rechnung gestellt werden. Melden Sie sich explizit unter an** Einstellungen → Speicher** (Der `MemorySkillsTab` zeigt eine Warnung zu den Tokenkosten an, wenn der Speicher aktiviert ist.) Ein Client kann eine einzelne Anfrage mit dem `x-omniroute-no-memory` -Anfrage-Header (`true`/`1`/`yes`) ablehnen. Siehe — die Anfrage-Header-Tabelle in [API_REFERENCE](../reference/API_REFERENCE.md) Eine No-Memory-Anfrage setzt `memoryOwnerId = null`, was die Funktion deaktiviert** beide** Speicher- und Fähigkeitsinjektion für diese Anfrage (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Der Speicher ist **pro API-Schlüssel abgegrenzt**, nicht pro Benutzer — jede
-Anfrage, die mit demselben API-Schlüssel authentifiziert wird, verwendet
-denselben Speicherpool, mit optionaler weiterer Abgrenzung über `sessionId`.
+Erinnerung ist** Gültigkeitsbereich pro API -Schlüssel** , nicht pro Benutzer — Jede mit demselben API Schlüssel authentifizierte Anforderung teilt sich denselben Speicherpool, mit optionaler weiterer Festlegung des Gültigkeitsbereichs durch `sessionId`.
 
 ## Architektur
 
@@ -739,22 +720,22 @@ Benchmark auf einem typischen x86-Server mit 4 Kernen (Texte mit jeweils ~100 To
 
 ---
 
-## Muster zur Faktenextraktion (v3.8.16+)
+## Faktenextraktionsmuster (v3.8.16 +)
 
-Das Modul `extraction.ts` (`src/lib/memory/extraction.ts`) verwendet **Musterabgleich mit regulären Ausdrücken**, um strukturierte Fakten aus Konversationsnachrichten zu extrahieren. Das Verständnis dieser Muster hilft Ihnen, die Extraktionsqualität für Ihren Anwendungsfall zu optimieren.
+Das `extraction.ts` Modul (`src/lib/memory/extraction.ts`) verwendet** Regex-Mustervergleich** um strukturierte Fakten aus Konversationsnachrichten zu extrahieren. Wenn Sie diese Muster verstehen, können Sie die Extraktionsqualität für Ihren Anwendungsfall optimieren.
 
-### Standardmäßige Musterkategorien
+### Standardmusterkategorien
 
-| Kategorie           | Beispielmuster                                                                  | Erfasst                             |
-| ------------------- | ------------------------------------------------------------------------------- | ----------------------------------- |
-| PREFERENCE_PATTERNS | `"Ich bevorzuge <X>"`, `"Ich mag <X>"`, `"Ich hasse <X>"`                       | Benutzerpräferenzen                 |
-| DECISION_PATTERNS   | `"Ich werde <X> verwenden"`, `"Ich habe mich für <X> entschieden"`              | Benutzerentscheidungen (episodisch) |
-| PATTERN_PATTERNS    | `"Ich mache normalerweise <X>"`, `"Ich mache immer <X>"`, `"Ich mache nie <X>"` | Dauerhafte Verhaltensmuster         |
+| Kategorie           | Beispielmuster                                              | Aufnahmen                           |
+| ------------------- | ----------------------------------------------------------- | ----------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Benutzereinstellungen               |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Benutzerentscheidungen (episodisch) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Anhaltende Verhaltensmuster         |
 
 ### Beispielmuster (vereinfacht)
 
 ```ts
-// Aus src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -769,33 +750,25 @@ const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\
 
 ### Was extrahiert wird
 
-Wenn ein Benutzer Folgendes sagt:
+Wenn ein Benutzer sagt:
 
-> „Ich bevorzuge TypeScript. Ich werde Postgres für dieses Projekt verwenden. Ich committe immer vor dem Pushen. Ich mag Python nicht.“
-> Die Extraktion erzeugt 4 Erinnerungen:
+> „Ich bevorzuge TypeScript. Ich verwende Postgres für dieses Projekt. Ich führe immer einen Commit durch, bevor ich pushe. Ich mag Python nicht.“ Die Extraktion erzeugt 4 Erinnerungen:
 >
-> | Schlüssel                            | Kategorie    | Typ        | Inhalt                        |
-> | ------------------------------------ | ------------ | ---------- | ----------------------------- |
-> | `preference:typescript`              | Präferenz    | faktisch   | "TypeScript"                  |
-> | `decision:postgres_for_this_project` | Entscheidung | episodisch | "Postgres für dieses Projekt" |
-> | `pattern:commit_before_pushing`      | Muster       | faktisch   | "vor dem Pushen committen"    |
-> | `preference:python`                  | Präferenz    | faktisch   | "Python"                      |
+> | Schlüssel | Kategorie | Typ | Inhalt | | ------------------------------------ | ------------------------ | -------- | ------------- | | | `preference:typescript` | sachlich | "TypeScript" | | `decision:postgres_for_this_project` | Entscheidung | episodisch | "Postgres für dieses Projekt" | | `pattern:commit_before_pushing` | Muster | sachlich | „Festschreiben vor dem Pushen“ | | `preference:python` | Präferenz | sachlich | „Python“ |
 
 ### Extraktionsgrenzen
 
-Um eine unkontrollierte Extraktion zu verhindern, gelten die folgenden Grenzen:
+Um eine außer Kontrolle geratene Extraktion zu verhindern, gelten die folgenden Grenzwerte:
 
 | Mindestlänge des Inhalts | 3 Zeichen |
-| Maximallänge des Inhalts | 500 Zeichen |
+| Maximale Inhaltslänge | 500 Zeichen |
 
 ### Wann die Extraktion deaktiviert werden sollte
 
-Die Extraktion wird automatisch ausgeführt, sobald der Speicher aktiviert ist; es gibt keinen separaten
-Schalter nur für die Extraktion. Um sie zu deaktivieren, deaktivieren Sie den Speicher vollständig (`enabled: false`
-über `PUT /api/settings/memory`). Dies kann in folgenden Fällen sinnvoll sein:
+Die Extraktion wird automatisch ausgeführt, wenn der Speicher aktiviert ist. Es gibt keinen separaten Umschalter nur für die Extraktion. Um es auszuschalten, deaktivieren Sie den Speicher vollständig (`enabled: false` über `PUT /api/settings/memory`). Erwägen Sie dies, wenn:
 
 - Sie haben ein hohes Nachrichtenvolumen und die Extraktionskosten sind nicht unerheblich
-- Ihre Konversationen sind überwiegend temporär (Chat, Debugging) und haben keinen langfristigen Wert
+- Ihre Gespräche sind meist vorübergehender Natur (Chat, Debugging) und haben keinen langfristigen Wert
 - Sie erfassen den Kontext bereits über benutzerdefinierte Plugins
 
 ---

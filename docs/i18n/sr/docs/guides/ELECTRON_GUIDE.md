@@ -4,9 +4,9 @@
 
 ---
 
-> **Извор истине:** `electron/` радни простор** Последње ажурирано:** 2026-06-28 — в3.8.40
+> **Извор истине:** `electron/` радни простор
 
-OmniRoute испоручује десктоп апликацију за више платформи (Windows / macOS / Linux) изграђену на**Electron 41** +** градитељ електрона 26.10** . Апликација за десктоп рачунаре покреће Next.js самостални сервер као подређени процес, усмерава `BrowserWindow` на њега и додаје системску палету, аутоматско ажурирање, IPC бридге и тајни стартер са нултом конфигурацијом.
+OmniRoute испоручује десктоп апликацију за више платформи (Windows / macOS / Linux) изграђену на**Electron 41** +** градитељ електрона 26.10** . Апликација за десктоп рачунаре покреће самостални сервер Next.js као подређени процес, усмерава `BrowserWindow` на њега и додаје системску палету, аутоматско ажурирање, IPC бридге и тајни стартер са нултом конфигурацијом.
 
 ## Архитектура
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## Аутоматско ажурирање
 
-Користи `electron-updater` са GitHub провајдером (`diegosouzapw/OmniRoute`).
+Користи `electron-updater` са GitHub провајдером (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Догађаји се прослеђују рендереру преко `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (са `percent`), `downloaded`, `error`
@@ -263,7 +263,7 @@ npm run electron:build:win
 
 ### Linux
 
-AppImage потписивање је опционо — сет `LINUX_GPG_KEY` ако потписивање.
+AppImage потписивање је опционо — сет `LINUX_GPG_KEY` ако потписује.
 
 ## Дистрибуција
 
@@ -273,7 +273,7 @@ AppImage потписивање је опционо — сет `LINUX_GPG_KEY` �
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Издања се објављују у GitHub издањима (`diegosouzapw/OmniRoute`), где `electron-updater` проверава да ли постоје нове верзије.
+Издања се објављују у GitHub издањима (`cheaper-inference/OmniRoute`), где `electron-updater` такође проверава да ли постоје нове верзије.
 
 ## Решавање проблема
 

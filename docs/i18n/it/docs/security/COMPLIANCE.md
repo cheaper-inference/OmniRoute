@@ -4,12 +4,11 @@
 
 ---
 
-> **Fonte autorevole:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Ultimo aggiornamento:** 2026-06-28 — v3.8.40
+> **Fonte della verità:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute registra le azioni amministrative, gli eventi di autenticazione, le modifiche al ciclo di vita delle credenziali dei provider e le invocazioni degli strumenti MCP in tabelle di audit basate su SQLite. Questa pagina descrive cosa viene registrato, dove risiedono i dati, per quanto tempo vengono conservati, come le chiavi API possono disattivare la registrazione e come interrogare i dati.
+OmniRoute registra le azioni amministrative, gli eventi di autenticazione, le modifiche al ciclo di vita delle credenziali del provider e le invocazioni dello strumento MCP nelle tabelle di controllo supportate da SQLite. Questa pagina illustra cosa viene registrato, dove risiede, per quanto tempo viene conservato, come le chiavi API possono disattivarsi e come eseguire query sui dati.
 
-L'implementazione si trova in `src/lib/compliance/index.ts` (T-43 — "Controlli di conformità") e `src/lib/compliance/providerAudit.ts`. Le scritture di audit non generano mai eccezioni: in caso di errore, la chiamata viene ignorata silenziosamente, in modo che la registrazione di audit non possa interrompere il flusso della richiesta principale.
+L'implementazione risiede in `src/lib/compliance/index.ts` (T-43 — "Controlli di conformità") e `src/lib/compliance/providerAudit.ts`. Le scritture di controllo non generano mai errori: in caso di errore la chiamata viene assorbita silenziosamente in modo che la registrazione di controllo non possa interrompere il flusso di richieste principale.
 
 ## Cosa viene registrato
 
@@ -129,31 +128,33 @@ la tabella legacy `request_detail_logs` e gli artefatti locali delle richieste i
 I valori predefiniti sono definiti in `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## Esclusione `noLog` (per chiave API)
+## `noLog` Disattivazione (per chiave API )
 
-Le chiavi API possono essere contrassegnate in modo che il traffico delle chiamate a valle non venga registrato. Il
-flag risiede nella tabella `api_keys` (`no_log INTEGER DEFAULT 0`) e viene replicato
-in un set in memoria per le ricerche nel percorso critico.
+Le chiavi API possono essere contrassegnate in modo che il traffico delle chiamate downstream non venga registrato. Il flag risiede sulla tabella `api_keys` (`no_log INTEGER DEFAULT 0`) e viene rispecchiato in un set in memoria per le ricerche sui percorsi attivi.
 
 ```bash
-# Crea una chiave senza registrazione (autenticazione di gestione richiesta)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Funzioni di supporto (`src/lib/compliance/index.ts`):
+Aiutanti (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — abilita o disabilita la voce in memoria
-- `isNoLog(apiKeyId)` — controllato nel percorso della richiesta; in alternativa esegue una lettura
-  da `api_keys.no_log` con cache di 30 s
-- `NO_LOG_API_KEY_IDS` (variabile di ambiente, separata da virgole) — precaricata nel set in memoria
-  all'avvio; utile quando non è possibile modificare direttamente la colonna
+- `setNoLog(apiKeyId, true|false)` — attiva/disattiva la voce in memoria
+- `isNoLog(apiKeyId)` — controllato sul percorso della richiesta; ritorna a una lettura memorizzata nella cache di 30 s da `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, separato da virgole) — precaricato nel set in memoria all'avvio; utile quando non è possibile alternare direttamente la colonna
 
-Gli eventi di audit amministrativi (accesso, modifiche ai provider, chiamate agli strumenti MCP, ecc.)
-**non** sono interessati da `noLog`: l'esclusione riguarda solo la registrazione del traffico
-per richiesta.
+Gli eventi di controllo amministrativo (accesso, modifiche del fornitore, chiamate allo strumento MCP, ecc.) lo sono** non** interessato da `noLog` — solo la registrazione del traffico per richiesta viene disattivata.
+
+### Disattivazione per richiesta (`x-omniroute-no-log`)
+
+Un client può escludere una singola richiesta di inferenza dalla persistenza del payload senza creare una chiave dedicata. Invia `x-omniroute-no-log: true` sulla richiesta (sono accettati anche `1` e `yes`, senza distinzione tra maiuscole e minuscole). Si applica a ogni percorso della famiglia di chat che attraversa il gestore della chat: Completamenti chat, Risposte, Messaggi, Completamenti e percorso compatibile con Gemini. La riga del registro delle chiamate viene ancora scritta con timestamp, modello, provider, stato, durata e conteggi dei token, ma `request_body`, `response_body`, riepiloghi delle richieste e artefatti della pipeline vengono omessi.
+
+L'intestazione è ORed con il flag di chiave: una chiave no-log rimane no-log indipendentemente dall'intestazione e l'intestazione non può riabilitare la registrazione per una chiave no-log. L'intestazione viene rimossa prima che la richiesta venga inoltrata a monte.
+
+Questa intestazione lo fa** non** disabilitare l'estrazione della memoria o la cache semantica. Invia `x-omniroute-no-memory: true` e `x-omniroute-no-cache: true` insieme ad esso quando la richiesta non deve persistere il contenuto neanche in quei sottosistemi.
 
 ## API REST
 

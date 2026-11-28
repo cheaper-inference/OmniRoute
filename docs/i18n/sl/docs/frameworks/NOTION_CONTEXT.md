@@ -64,42 +64,31 @@ Vsi trije načini zahtevajo preverjanje pristnosti na nadzorni plošči (`isAuth
 Pri `POST` OmniRoute shrani žeton in takoj izvede preizkusno iskanje z enim rezultatom;
 če Notion vrne objekt napake, se žeton izbriše, klic pa ne uspe s kodo `400`.
 
-## Orodja MCP (6)
+## orodja MCP (6)
 
-Določena so v `open-sse/mcp-server/tools/notionTools.ts`. Žeton se ob klicu pridobi
-prek `getNotionToken()`; če ni konfiguriran, orodje sproži izjemo
-`"Integracijski žeton Notion ni konfiguriran. Nastavite ga v Nastavitve > Viri konteksta."`
+Definirano v `open-sse/mcp-server/tools/notionTools.ts`. Žeton je razrešen v času klica prek `getNotionToken()`; če nobena ni konfigurirana, orodje vrže `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Orodje                       | Obseg          | Opis                                                                                                    |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Iskanje strani in podatkovnih zbirk po besedilni poizvedbi (vrne naslove, ID-je in URL-je). Ostranjeno. |
-| `notion_get_page`            | `read:notion`  | Pridobivanje vsebine in metapodatkov strani na podlagi njenega ID-ja.                                   |
-| `notion_list_block_children` | `read:notion`  | Seznam vseh podrejenih blokov bloka ali strani (drevo blokov). Ostranjeno.                              |
-| `notion_query_database`      | `read:notion`  | Poizvedovanje po podatkovni zbirki z izbirnima `filter` + `sorts` (oblika API-ja Notion). Ostranjeno.   |
-| `notion_get_database`        | `read:notion`  | Pridobivanje sheme/metapodatkov podatkovne zbirke na podlagi ID-ja.                                     |
-| `notion_append_blocks`       | `write:notion` | Dodajanje podrejenih blokov obstoječemu bloku ali strani (največ 100 blokov na zahtevo).                |
+| Orodje                       | Področje uporabe | Opis                                                                                                  |
+| ---------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`    | Iskanje po straneh in zbirkah podatkov z besedilno poizvedbo (vrne naslove, IDs, URLs). Paginirano.   |
+| `notion_get_page`            | `read:notion`    | Pridobite vsebino in metapodatke strani z njenim ID.                                                  |
+| `notion_list_block_children` | `read:notion`    | Seznam vseh podrejenih blokov bloka ali strani (drevo blokov). Paginirano.                            |
+| `notion_query_database`      | `read:notion`    | Izvedite poizvedbo po zbirki podatkov z izbirnim `filter` + `sorts` (format Notion API ). Paginirano. |
+| `notion_get_database`        | `read:notion`    | Pridobite schema/metadata baze podatkov z ID.                                                         |
+| `notion_append_blocks`       | `write:notion`   | Dodajte podrejene bloke obstoječemu bloku ali strani (največ 100 blokov na zahtevo).                  |
 
 ### Vhodni parametri
 
-- `notion_search` — `query` (1–500 znakov), `pageSize` (1–100, privzeto 20),
-  `startCursor` (izbirno).
-- `notion_get_page` — `pageId` (32-mestno šestnajstiško število ali UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, privzeto 50),
-  `startCursor` (izbirno).
-- `notion_query_database` — `databaseId`, `filter` (izbirno, oblika filtra Notion),
-  `sorts` (izbirna matrika), `pageSize` (1–100, privzeto 50), `startCursor` (izbirno).
+- `notion_search` — `query` (1–500 znakov), `pageSize` (1–100, privzeto 20), `startCursor` (izbirno).
+- `notion_get_page` — `pageId` (32-char hex ali UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, privzeto 50), `startCursor` (neobvezno).
+- `notion_query_database` — `databaseId`, `filter` (izbirno, format filtra Notion ), `sorts` (izbirno polje), `pageSize` (1–100, privzeto 50), `startCursor` (izbirno).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (matrika objektov blokov),
-  `after` (izbirni položaj).
+- `notion_append_blocks` — `blockId`, `children` (matrika blokovnih objektov), `after` (izbirni položaj).
 
-### Obsegi
+### Območja
 
-Orodja za branje zahtevajo `read:notion`, orodje za pisanje pa zahteva `write:notion`.
-Obsege uveljavlja `withScopeEnforcement()` v
-`open-sse/mcp-server/server.ts` samo, ko je `OMNIROUTE_MCP_ENFORCE_SCOPES=true`;
-dovoljeni obsegi klicatelja izvirajo iz `OMNIROUTE_MCP_SCOPES` (ločeni z vejicami) ali
-konteksta obsega overjenega ključa API. Celoten model obsegov je opisan v
-[MCP-SERVER.md](./MCP-SERVER.md).
+Orodja za branje zahtevajo `read:notion`, orodje za pisanje pa `write:notion`. Območja uveljavlja `withScopeEnforcement()` v `open-sse/mcp-server/server.ts`, ko `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, in vedno za klicatelja HTTP/SSE, katerega ključ API nima `manage`/`admin`; dovoljeni obsegi klicatelja izvirajo iz konteksta obsega `OMNIROUTE_MCP_SCOPES` (ločeno z vejicami) ali overjenega konteksta obsega ključa API. Glejte [MCP-SERVER.md](./MCP-SERVER.md) za model celotnega obsega.
 
 ## Končne točke
 

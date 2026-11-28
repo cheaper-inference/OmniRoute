@@ -4,30 +4,13 @@
 
 ---
 
-> **Sandhedskilde:** `src/lib/memory/` og `src/app/api/memory/`
-> **Senest opdateret:** 2026-06-28 — v3.8.40 (deaktiveret som standard + efterbehandling med int8-kvantisering)
+> **Sandhedens kilde:** `src/lib/memory/` og `src/app/api/memory/`
 
-OmniRoute leverer vedvarende samtalehukommelse, der er knyttet til API-nøglen (og
-eventuelt sessions-id'et). Hukommelser udtrækkes automatisk fra LLM-svar
-via letvægtsmønstergenkendelse med regulære udtryk og indsættes igen i efterfølgende
-anmodninger som en indledende systemmeddelelse (eller den første brugermeddelelse for udbydere, der
-afviser systemrollen).
+OmniRoute giver vedvarende samtalehukommelse tastet af API -tasten (og eventuelt sessions-id). Hukommelser udtrækkes automatisk fra LLM -svar via letvægts-regex-mønstermatchning og injiceres tilbage i efterfølgende anmodninger som en ledende systemmeddelelse (eller første brugermeddelelse for udbydere, der afviser systemrollen).
 
-> **Hukommelse er DEAKTIVERET som standard (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled` er
-> nu `false` (`src/lib/memory/settings.ts`). Aktivering af hukommelse indsætter op til
-> `maxTokens` (~2k) af den hentede kontekst i **hver** chatanmodning, hvilket
-> faktureres — en overraskende omkostning for nye installationer og for klienter, der administrerer deres
-> egen kontekst. Tilmeld dig eksplicit under **Indstillinger → Hukommelse** (
-> `MemorySkillsTab` viser en advarsel om tokenomkostninger, når hukommelse er aktiveret).
-> En klient kan fravælge det for en enkelt anmodning med anmodningsheaderen
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — se tabellen over anmodningsheadere i
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). En anmodning uden hukommelse indstiller
-> `memoryOwnerId = null`, hvilket deaktiverer **både** indsættelse af hukommelse og færdigheder for
-> den pågældende anmodning (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Hukommelse er OFF som standard (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` er nu `false` (`src/lib/memory/settings.ts`). Aktivering af hukommelse injicerer op til `maxTokens` (~ 2k) hentet kontekst ind i** hver** chatanmodning, som faktureres — en overraskende omkostning for nye installationer og for klienter, der styrer deres egen kontekst. Tilmeld dig udtrykkeligt under** Indstillinger → Hukommelse** ( `MemorySkillsTab` viser en token-cost-advarselsudlysning, når hukommelsen er aktiveret). En klient kan fravælge en enkelt anmodning med `x-omniroute-no-memory` request header (`true`/`1`/`yes`) — se request-header tabellen i [API_REFERENCE.md](../reference/API_REFERENCE.md). En no-memory-anmodning sætter `memoryOwnerId = null`, som deaktiverer** begge** hukommelse og færdighedsindsprøjtning for den anmodning (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Hukommelse er **afgrænset pr. API-nøgle**, ikke pr. bruger — alle anmodninger, der godkendes
-med den samme API-nøgle, deler den samme hukommelsespulje, med mulighed for yderligere
-afgrænsning via `sessionId`.
+Hukommelse er** omfang pr. API nøgle** , ikke pr. bruger — hver anmodning, der er godkendt med den samme API nøgle, deler den samme hukommelsespulje, med valgfri yderligere scoping af `sessionId`.
 
 ## Arkitektur
 
@@ -333,27 +316,17 @@ Hentningsstrategien for `MemoryConfig` er enten `exact`, `semantic` eller `hybri
 og omfanget er enten `session`, `apiKey` eller `global`. Standardomfanget fra
 `getMemorySettings()` er `apiKey`.
 
-## Udtrækning af fakta (`extraction.ts`)
+## Faktaudtræk (`extraction.ts`)
 
-Udtrækningen er **regex-baseret**, ikke LLM-baseret — den kører i processen med
-`setImmediate()`, så den aldrig blokerer svarstrømmen:
+Udvinding er** regex-baseret** , ikke LLM-baseret — den kører i proces med `setImmediate()`, så den blokerer aldrig for svarstrømmen:
 
-- **Præferencemønstre** → `MemoryType.FACTUAL`
-  (f.eks. `Jeg foretrækker …`, `Jeg kan virkelig godt lide …`, `min favorit er …`, `Jeg hader …`)
-- **Beslutningsmønstre** → `MemoryType.EPISODIC`
-  (f.eks. `Jeg vil bruge …`, `Jeg valgte …`, `Jeg endte med …`, `Jeg vil tage … i brug`)
-- **Adfærdsmønstre** → `MemoryType.FACTUAL`
-  (f.eks. `Jeg plejer …`, `Jeg gør altid …`, `Jeg har tendens til …`)
+- **Præferencemønstre** → `MemoryType.FACTUAL` (f.eks. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Beslutningsmønstre** → `MemoryType.EPISODIC` (f.eks. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Mønster mønstre** → `MemoryType.FACTUAL` (f.eks. `I usually …`, `I always …`, `I tend to …`)
 
-Hvert match renses (`trim`, sammenfoldning af mellemrum, begrænset til 500 tegn),
-deduplikeres inden for batchen via en stabil `factKey(category, content)` og
-gemmes via `createMemory()` med metadataene
-`{category, extractedAt, source: "llm_response"}`. Inputteksten er begrænset til
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — når den er længere, anvendes tekstens
-**slutning**, så assistentens seneste indhold altid medtages.
+Hver kamp renses (`trim`, whitespace-collapse, begrænset til 500 tegn), deduplikeres i batchen via en stabil `factKey(category, content)` og lagres via `createMemory()` med metadata `{category, extractedAt, source: "llm_response"}`. Inputtekst er begrænset til 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) —, når den er længere** hale** af teksten bruges, så det seneste assistentindhold altid deltager.
 
-`extractFactsFromText(text)` eksporteres til test og returnerer de strukturerede
-fakta uden at gemme dem.
+`extractFactsFromText(text)` eksporteres til test og returnerer de strukturerede fakta uden at gemme dem.
 
 ## Hentning (`retrieval.ts`)
 
@@ -533,43 +506,36 @@ Se [MCP-SERVER.md](./MCP-SERVER.md) for oplysninger om transport og omfang.
 
 ## Dashboard (Memory Studio)
 
-`src/app/(dashboard)/dashboard/memory/page.tsx` er nu et **Studio med 3 faner**:
+`src/app/(dashboard)/dashboard/memory/page.tsx` er nu en** Studio med 3 faner** :
 
-### Fane: Hukommelser
+### Fane: Erindringer
 
-- Konceptkort (sammenklappelig forklaring af "Sådan fungerer det").
-- Liste, søgning og sideinddeling i realtid (debounce på 300 ms).
-- Typefilter (`factual` / `episodic` / `procedural` / `semantic` / alle).
-- Modal til tilføjelse af hukommelse (nøgle, indhold, type).
-- Integreret redigering (blyantsknap → `PUT /api/memory/[id]`).
-- Sletning pr. række (med bekræftelsesdialog).
-- JSON-eksport af den aktuelle side; JSON-import via filvælger.
-- Statistikkort: `totalEntries`, `tokensUsed`, `hitRate`.
-- Knappen "Komprimer gamle" → `POST /api/memory/summarize` (en prøvekørsel viser først
-  antallet af kandidater og beder derefter om bekræftelse).
-- En grøn/rød statusprik styret af `GET /api/memory/health`.
+- Konceptkort (sammenklappelig "Sådan virker det"-forklaring).
+- Realtidsliste, søgning og paginering (afbounced 300 ms).
+- Indtast filter (`factual` / `episodic` / `procedural` / `semantic` / all).
+- Add-memory modal (nøgle, indhold, type).
+- Inline redigering (blyantsknap → `PUT /api/memory/[id]`).
+- Slet pr. række (med bekræftelsesdialog).
+- JSON eksport af den aktuelle side; JSON import via filvælger.
+- Statiske kort: `totalEntries`, `tokensUsed`, `hitRate`.
+- "Kompakt gammel" knap → `POST /api/memory/summarize` (tørkørsel viser først kandidatantal, derefter bekræfter).
+- En green/red sundhedsprik drevet af `GET /api/memory/health`.
 
 ### Fane: Legeplads
 
-- Forespørgselsfelt + strategivælger (Eksakt / Semantisk / Hybrid) + tokenbudget.
-- "Simuler" → `POST /api/memory/retrieve-preview` — viser rangerede resultater med
-  `score`, `tier`, `tokens`, `vecScore`, `ftsScore`.
-- Opløsningspanel, der viser, hvilken indlejringskilde / hvilket vektorlager der blev brugt, og
-  om der skete et fallback.
+- Forespørgselsinput + -strategivælger (Eksakt / Semantisk / Hybrid) + -tokenbudget.
+- "Simuler" → `POST /api/memory/retrieve-preview` — viser rangerede resultater med `score`, `tier`, `tokens`, `vecScore`, `ftsScore`.
+- Opløsningspanel, der viser, hvilken indlejringskilde/vektorlager, der blev brugt, og om der opstod en fallback.
 
 ### Fane: Motor
 
-- Statuspanel for motoren (chip til nøgleordsbaseret FTS5, chip til indlejring, chip til vektorlager,
-  chip til Qdrant-status, chip til omrangering).
-- Knappen "Genindeksér nu" → `POST /api/memory/reindex`.
-- Vælger til indlejringskilde (automatisk / ekstern / statisk / transformere + til/fra-indstillinger).
-- Qdrant-konfigurationskort (aktivering, vært/port/samling/nøgle, test af forbindelse,
-  test af semantisk søgning, oprydning).
-- Konfigurationskort til omrangering (aktivering, valg af udbyder/model).
+- Motorstatuspanel (søgeord FTS5 chip, indlejringschip, vektorlagerchip, Qdrant -sundhedschip, omrangeringschip).
+- "Reindex Now"-knap → `POST /api/memory/reindex`.
+- Indlejring af kildevælger (automatisk / fjernbetjening / statisk / transformere + skifter).
+- Qdrant config-kort (aktiver toggle, host/port/collection/key, testforbindelse, semantisk søgetest, oprydning).
+- Genranger konfigurationskortet (aktiver skifte, provider/model -vælger).
 
-Indstillinger for hukommelse og Qdrant findes også under
-`/dashboard/settings → Hukommelse og færdigheder` (`MemorySkillsTab.tsx`) som
-den ældre/globale indstillingsflade.
+Hukommelses- og Qdrant -indstillinger lever også under `/dashboard/settings → Memory & Skills` (`MemorySkillsTab.tsx`) for legacy/global -indstillingsoverfladen.
 
 ## Cachelagring
 
@@ -707,22 +673,22 @@ Benchmark på en typisk x86-server med 4 kerner (tekster på ~100 tokens hver):
 
 ---
 
-## Mønstre for faktaudtrækning (v3.8.16+)
+## Fact Extraction Patterns (v3.8.16 +)
 
-Modulet `extraction.ts` (`src/lib/memory/extraction.ts`) bruger **matchning med regulære udtryk** til at udtrække strukturerede fakta fra samtalebeskeder. En forståelse af disse mønstre hjælper dig med at finjustere kvaliteten af udtrækningen til dit anvendelsestilfælde.
+`extraction.ts` modulet (`src/lib/memory/extraction.ts`) bruger** matchning af regex-mønster** at udtrække strukturerede fakta fra samtalebeskeder. Forståelse af disse mønstre hjælper dig med at justere ekstraktionskvaliteten til din brug.
 
-### Standardkategorier for mønstre
+### Standard mønsterkategorier
 
-| Kategori            | Eksempel på mønster                                                  | Indfanger                       |
-| ------------------- | -------------------------------------------------------------------- | ------------------------------- |
-| PREFERENCE_PATTERNS | `"Jeg foretrækker <X>"`, `"Jeg kan lide <X>"`, `"Jeg hader <X>"`     | Brugerpræferencer               |
-| DECISION_PATTERNS   | `"Jeg vil bruge <X>"`, `"Jeg besluttede at <X>"`, `"Jeg valgte <X>"` | Brugerbeslutninger (episodiske) |
-| PATTERN_PATTERNS    | `"Jeg plejer at <X>"`, `"Jeg gør altid <X>"`, `"Jeg gør aldrig <X>"` | Vedvarende adfærdsmønstre       |
+| Kategori            | Eksempel mønster                                            | Fanger                         |
+| ------------------- | ----------------------------------------------------------- | ------------------------------ |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Brugerpræferencer              |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Brugerbeslutninger (episodisk) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Vedvarende adfærdsmønstre      |
 
-### Eksempler på mønstre (forenklet)
+### Eksempelmønstre (forenklet)
 
 ```ts
-// Fra src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -735,36 +701,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Hvad der udtrækkes
+### Hvad bliver udvundet
 
 Når en bruger siger:
 
-> "Jeg foretrækker TypeScript. Jeg vil bruge Postgres til dette projekt. Jeg committer altid, før jeg pusher. Jeg kan ikke lide Python."
-> Udtrækningen producerer 4 hukommelseselementer:
+> "Jeg foretrækker TypeScript. Jeg vil bruge Postgres til dette projekt. Jeg forpligter mig altid, før jeg skubber. Jeg kan ikke lide Python." Ekstraktion producerer 4 minder:
 >
-> | Nøgle                                | Kategori   | Type     | Indhold                      |
-> | ------------------------------------ | ---------- | -------- | ---------------------------- |
-> | `preference:typescript`              | preference | factual  | "TypeScript"                 |
-> | `decision:postgres_for_this_project` | decision   | episodic | "Postgres til dette projekt" |
-> | `pattern:commit_before_pushing`      | pattern    | factual  | "commit før pushing"         |
-> | `preference:python`                  | preference | factual  | "Python"                     |
+> | Nøgle | Kategori | Type | Indhold | | ------------------------------------ | ---------- | -------- | ---------------------------------- | | `preference:typescript` | præference | faktuel | "TypeScript" | | `decision:postgres_for_this_project` | beslutning | episodisk | `pattern:commit_before_pushing` | Postgres dette projekt " | " | faktuel | | forpligte før du skubber" | | `preference:python` | præference | faktuel | "Python" |
 
-### Grænser for udtrækning
+### Ekstraktionsgrænser
 
-For at forhindre ukontrolleret udtrækning gælder følgende grænser:
+For at forhindre løbsk udvinding gælder følgende grænser:
 
-| Min. indholdslængde | 3 tegn |
-| Maks. indholdslængde | 500 tegn |
+| Minimum indholdslængde | 3 tegn |
+| Max indholdslængde | 500 tegn |
 
-### Hvornår udtrækning bør deaktiveres
+### Hvornår skal udtrækning deaktiveres
 
-Udtrækning kører automatisk, når hukommelse er aktiveret; der findes ikke en separat
-kontakt kun til udtrækning. Hvis du vil slå den fra, skal du deaktivere hukommelse helt (`enabled: false`
-via `PUT /api/settings/memory`). Overvej at gøre det, når:
+Ekstraktion kører automatisk, når hukommelsen er aktiveret; der er ingen separat udtræk-kun-omskifter. For at slå det fra, deaktiver hukommelsen helt (`enabled: false` via `PUT /api/settings/memory`). Overvej at gøre det, når:
 
-- Du har en stor beskedmængde, og omkostningen ved udtrækning ikke er ubetydelig
-- Dine samtaler primært er midlertidige (chat, fejlfinding) uden langsigtet værdi
-- Du allerede indsamler kontekst via brugerdefinerede plugins
+- Du har høj beskedvolumen, og udvindingsomkostningerne er ikke-trivielle
+- Dine samtaler er for det meste forbigående (chat, fejlretning) uden langsigtet værdi
+- Du fanger allerede kontekst via brugerdefinerede plugins
 
 ---
 

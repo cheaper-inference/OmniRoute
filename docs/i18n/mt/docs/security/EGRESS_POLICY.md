@@ -69,35 +69,35 @@ Id-direttiva hija intenzjonalment **għal kull proxy**, mhux globali — proxies
 
 ## It-Tliet Valuri
 
-| Valur  | Tikketta tal-UI           | Imġiba                                                                                                                                                                                                           |
-| ------ | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `Awtomatiku (dual-stack)` | L-OS jagħżel il-familja. Għal host tal-proxy speċifikat bħala indirizz IP litterali, il-familja hija intrinsika għal dak l-indirizz; għal hostname, iż-żewġ familji huma eliġibbli. Dan huwa l-valur predefinit. |
-| `ipv4` | `IPv4 biss`               | Jillimita l-konnessjoni għal IPv4. Jirrifjuta l-konnessjoni jekk il-host tal-proxy ma jkollux rekord IPv4 (A).                                                                                                   |
-| `ipv6` | `IPv6 biss`               | Jillimita l-konnessjoni għal IPv6. Jirrifjuta l-konnessjoni jekk il-host tal-proxy ma jkollux rekord IPv6 (AAAA).                                                                                                |
+| Valur  | UI label            | Imġieba                                                                                                                                                                 |
+| ------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS jagħżel il-familja. Għal host proxy IP-litterali, il-familja hija intrinsika għal-litterali; għal hostname, iż-żewġ familji huma eliġibbli. Din hija l-inadempjenza. |
+| `ipv4` | `IPv4 only`         | Pins il-konnessjoni ma IPv4. Jfalli jingħalaq jekk l-host proxy m'għandux rekord IPv4 (A).                                                                              |
+| `ipv6` | `IPv6 only`         | Pins il-konnessjoni ma IPv6. Jfalli jingħalaq jekk l-host proxy m'għandux rekord IPv6 (AAAA).                                                                           |
 
-Is-strings tal-UI jinsabu f’`src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+strings UI jgħixu fi `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Kif Tikkonfigurah
+## Kif tikkonfiguraha
 
 ### Dashboard
 
-Is-selettur jinsab fil-formola tal-proxy fit-tab **Proxy Pool**:
+Is-selettur huwa fil-forma ta' prokura tal-** Pool ta' Prokura** tab:
 
-1. Iftaħ **Dashboard → Settings → Proxy → Proxy Pool**
-2. Żid jew editja proxy
-3. Issettja l-lista dropdown **IP family** għal `Awtomatiku (dual-stack)`, `IPv4 biss`, jew `IPv6 biss`
-4. Issejvja
+1. Miftuħa** Dashboard → Settings → Proxy → Proxy Pool**
+2. Żid jew editja prokura
+3. Issettja l-**IP familja** dropdown għal `Auto (dual-stack)`, `IPv4 only`, jew `IPv6 only`
+4. Ħlief
 
-Il-kontroll jiġi rrendjat minn `ProxyRegistryManager.tsx` (immuntat f’`proxy/ProxyPoolTab.tsx`).
+Il-kontroll huwa mogħti minn `ProxyRegistryManager.tsx` (immuntat `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Il-field `family` huwa parti mill-payloads għall-ħolqien/aġġornament tar-reġistru tal-proxy, ivvalidat minn `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) u pproċessat minn `POST` / `PATCH /api/v1/management/proxies`:
+Il-qasam `family` huwa parti mir-reġistru tal-prokura create/update payloads, ivvalidat minn `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) u mmaniġġjat minn `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Oħloq proxy għal IPv6 biss
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Ibdel proxy eżistenti għal IPv4 biss
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-L-istess field huwa aċċettat ukoll mill-oġġett inline tal-konfigurazzjoni tal-proxy użat għall-entrati tal-upstream proxy (`upstream_proxy_config.family`, ara [Mudell tad-Data](#data-model)).
+L-istess qasam huwa aċċettat ukoll mill-oġġett tal-konfigurazzjoni tal-prokura inline użat għall-entrati upstream-proxy (`upstream_proxy_config.family`, ara [Mudell tad-Dejta](#data-model) ).
 
-Għall-bqija tal-API tal-CRUD/assenjazzjoni tal-proxy, ara [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Għall-bqija tal-prokura CRUD/assignment API, ara [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

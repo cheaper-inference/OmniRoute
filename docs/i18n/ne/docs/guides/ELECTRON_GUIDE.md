@@ -4,9 +4,9 @@
 
 ---
 
-> **सत्यको स्रोत:** `electron/` कार्यक्षेत्र** पछिल्लो अपडेट:** 2026-06-28 — v3.8.40
+> **सत्यको स्रोत:** `electron/` कार्यक्षेत्र
 
-OmniRoute ले क्रस-प्लेटफर्म डेस्कटप एप (Windows / macOS / Linux) मा निर्मित**Electron 41** +** इलेक्ट्रोन-बिल्डर 26.10** । डेस्कटप एपले Next.js स्ट्यान्डअलोन सर्भरलाई चाइल्ड प्रक्रियाको रूपमा फैलाउँछ, यसमा `BrowserWindow` पोइन्ट गर्छ, र प्रणाली ट्रे, अटो-अपडेटर, IPC ब्रिज, र शून्य-कन्फिग गोप्य बुटस्ट्र्याप थप्छ।
+OmniRoute ले क्रस-प्लेटफर्म डेस्कटप एप (Windows / macOS / Linux) मा निर्मित**Electron 41** +** इलेक्ट्रोन-बिल्डर 26.10** । डेस्कटप एपले Next.js स्ट्यान्डअलोन सर्भरलाई चाइल्ड प्रक्रियाको रूपमा फैलाउँछ, यसमा `BrowserWindow` औंल्याउँछ, र प्रणाली ट्रे, अटो-अपडेटर, IPC ब्रिज, र शून्य-कन्फिग गोप्य बुटस्ट्र्याप थप्छ।
 
 ## वास्तुकला
 
@@ -196,9 +196,9 @@ spawn(process.execPath, [serverScript], {
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
 - देव मोडले `'unsafe-eval'` लाई `script-src` मा मात्र थप्छ
 
-## स्वत: अद्यावधिक
+## स्वतः अपडेट गर्नुहोस्
 
-GitHub प्रदायक (`diegosouzapw/OmniRoute`) सँग `electron-updater` प्रयोग गर्दछ।
+GitHub प्रदायक (`cheaper-inference/OmniRoute`) सँग `electron-updater` प्रयोग गर्दछ।
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - घटनाहरू `update-status` IPC मार्फत रेन्डररलाई फर्वार्ड गरियो: `checking`, `available`, `not-available`, `downloading` ( `percent` सँग), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage हस्ताक्षर वैकल्पिक — सेट `LIN
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-विज्ञप्तिहरू GitHub रिलीजहरू (`diegosouzapw/OmniRoute`) मा प्रकाशित हुन्छन्, जहाँ पनि `electron-updater` नयाँ संस्करणहरूको लागि जाँच गर्दछ।
+विज्ञप्तिहरू GitHub रिलीजहरू (`cheaper-inference/OmniRoute`) मा प्रकाशित हुन्छन्, जहाँ पनि `electron-updater` नयाँ संस्करणहरूको लागि जाँच गर्दछ।
 
 ## समस्या निवारण
 

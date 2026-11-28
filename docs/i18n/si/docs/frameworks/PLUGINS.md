@@ -90,18 +90,17 @@ export function register(program, ctx) {
 
 ## සොයාගැනීම
 
-Plugins පහත ස්ථානවලින් සොයාගනු ලැබේ:
+ප්ලගීන සොයා ගනු ලබන්නේ:
 
-1. `~/.omniroute/plugins/<name>/` — පරිශීලකයාට දේශීය ස්ථාපන
-2. `OMNIROUTE_PLUGIN_PATH` env var — අභිරුචි directory එක
+1. `~/.omniroute/plugins/node_modules/<name>/` — එහිදී `omniroute plugin install` පැකේජ තබන (npm `--prefix`, `npm -g` නොවේ)
+2. `~/.omniroute/plugins/<name>/` — අතින් පිටපත් කරන ලද ප්ලගින නාමාවලි
+3. `OMNIROUTE_PLUGIN_PATH` env var — අභිරුචි නාමාවලිය
 
-මේ දෙකම **CLI සඳහා පමණි**. Server-side plugin runtime එකට (proxy එක තුළ ධාවනය වන marketplace/`plugin.json`
-plugins) තමන්ගේම override එකක් සහිත තමන්ගේම scanner එකක් ඇත,
-`OMNIROUTE_PLUGINS_DIR` — බලන්න
-[PLUGIN_MARKETPLACE.md → Plugin directory](./PLUGIN_MARKETPLACE.md#plugin-directory).
-එකක් සැකසීම අනෙකට බලපාන්නේ නැත.
+Symlinked නාමාවලි ( `plugin install ./dir` සඳහා npm නිර්මාණය කරන දේ) අනුගමනය කරනු ලැබේ.
 
-පූරණ දෝෂ හසුකර warnings ලෙස මුද්රණය කරනු ලැබේ — දෝෂ සහිත plugin එකක් කිසිවිටෙකත් CLI එක බිඳවැටීමට හේතු නොවේ.
+දෙකම වේ** CLI-පමණක්** . සේවාදායක පැත්තේ ප්ලගින ධාවන කාලය (ප්‍රොක්සි තුළ ක්‍රියාත්මක වන වෙළඳපල/`plugin.json` ප්ලගීන) එහිම ප්‍රතික්‍ෂේපයක් සහිත ස්වකීය ස්කෑනරයක් ඇත, `OMNIROUTE_PLUGINS_DIR` — [PLUGIN_MARKETPLACE.md → ප්ලගින නාමාවලිය](./PLUGIN_MARKETPLACE.md#plugin-directory) බලන්න. එකක් සැකසීම අනෙකට බලපාන්නේ නැත.
+
+පැටවීමේ දෝෂ හසු වී අනතුරු ඇඟවීම් ලෙස මුද්‍රණය කෙරේ — කැඩුණු ප්ලගිනයක් කිසි විටෙකත් CLI බිඳ වැටෙන්නේ නැත.
 
 ## ආරක්ෂාව
 

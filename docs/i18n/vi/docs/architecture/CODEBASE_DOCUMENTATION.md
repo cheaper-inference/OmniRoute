@@ -4,18 +4,11 @@
 
 ---
 
-> **Phiên bản:** v3.8.51
-> **Cập nhật lần cuối:** 2026-06-28
-> **Đối tượng:** Các kỹ sư đóng góp cho OmniRoute hoặc xây dựng tích hợp trên nền tảng này.
+> **Phiên bản:** v3.8.51** Khán giả:** Các kỹ sư đóng góp cho OmniRoute hoặc xây dựng các giải pháp tích hợp trên đó.
 >
-> Để xem các sơ đồ kiến trúc tổng quan và lý do thiết kế của từng hệ thống con, hãy đọc
-> [ARCHITECTURE.md](./ARCHITECTURE.md). Để tìm hiểu chuyên sâu về từng hệ thống con
-> (Auto Combo, máy chủ MCP, máy chủ A2A, Skills, Memory, Cloud Agents, Resilience,
-> Compression, v.v.), hãy xem các tệp chuyên biệt tương ứng trong thư mục `docs/` này.
+> Để biết sơ đồ kiến trúc cấp cao và lý do đằng sau mỗi hệ thống con, hãy đọc [ARCHITECTURE.md](./ARCHITECTURE.md). Để tìm hiểu sâu về các hệ thống con riêng lẻ (Auto Combo, máy chủ MCP, máy chủ A2A, Kỹ năng, Bộ nhớ, Tác nhân đám mây, Khả năng phục hồi, Nén, v.v.), hãy xem các tệp chuyên dụng của chúng trong thư mục `docs/` này.
 
-Tệp này mô tả **những gì hiện có trong kho mã nguồn** để một kỹ sư mới
-có thể tìm hiểu cây thư mục, hiểu cách phân tầng runtime và biết vị trí cần thêm mã
-mà không phải tạo ra các mô-đun mới.
+Tập tin này mô tả** những gì tồn tại trong kho ngày hôm nay** để kỹ sư mới có thể điều hướng cây, hiểu cách phân lớp thời gian chạy và biết nơi cần thêm mã mà không cần phải phát minh ra các mô-đun mới.
 
 ---
 
@@ -681,35 +674,12 @@ Các lệnh thường dùng:
 
 Được tổ chức thành 6 thư mục con theo mục đích.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, cùng với các công cụ hỗ trợ chỉ đọc để giám sát PR:
-  `ci-discriminate.sh` (phân loại các dấu hiệu kiểm tra thất bại của một PR thành
-  do chính PR gây ra / kế thừa / chưa xác định bằng cách đối chiếu với một PR tham chiếu
-  hoặc issue về trạng thái lỗi của nhánh cơ sở) và `audit-worktree.sh`
-  (các tệp chưa được commit, các bề mặt được bảo vệ, các assert đã bị xóa, số lượng
-  chỉ thị bỏ qua, các tsconfig tạm còn sót lại, HEAD của PR so với HEAD cục bộ —
-  trước khi PR của một worker được chấp nhận).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, cộng với những người trợ giúp trông trẻ PR chỉ đọc `ci-discriminate.sh` (sắp xếp các chữ ký kiểm tra lỗi của PR thành của riêng/được kế thừa/không xác định đối với một PR tham chiếu hoặc vấn đề màu đỏ cơ bản) và `audit-worktree.sh` (tệp bẩn, bề mặt được bảo vệ, xác nhận đã xóa, số lượng ngăn chặn, tmp tsconfig còn sót lại, đầu PR so với HEAD — cục bộ trước khi PR của công nhân được chấp nhận).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. các phiên bản cờ `check-deprecated-versions.mjs` được gán rõ ràng cho OmniRoute (3.6.x trở về trước). Việc kiểm tra bỏ qua ngày tháng.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

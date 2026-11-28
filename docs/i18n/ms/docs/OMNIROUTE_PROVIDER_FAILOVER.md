@@ -20,4 +20,6 @@ Dasar rentas pembekal lalai membenarkan sehingga tiga percubaan penyedia, mencub
   - Permintaan yang disematkan pada sambungan (`x-omniroute-connection`) kekal padanya.
   - Id awalan (`provider/model`) tidak sekali-kali dihalakan semula ke pembekal lain.
 
-Keadaan litar ialah `closed`, `open` dan `half_open`. Cooldown menjadualkan probe terhad; probe yang berjaya menutup litar dan probe yang gagal membukanya semula.
+Keadaan litar ialah `closed`, `open` dan `half_open`. Cooldown menjadualkan siasatan terhad; probe yang berjaya menutup litar dan probe yang gagal membukanya semula.
+
+Failover pembekal berjalan di dalam gerbang. Lihat [Apabila OmniRoute sendiri tidak dapat dihubungi](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) untuk tingkah laku pelanggan semasa gangguan get laluan.

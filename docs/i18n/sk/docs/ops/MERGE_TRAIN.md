@@ -4,80 +4,63 @@
 
 ---
 
-> **2026-11-19: Zlučovací front Mergify je vyradený** (rozhodnutie vlastníka). `.mergify.yml` už nedefinuje front a odmieta príkazy Mergify, ktoré spájajú alebo prepisujú požiadavku na stiahnutie. Vydania PRs sú zlúčené ručne pod sadou pravidiel úložiska "Vyžadovať zelené brány pri aktívnom vydaní" (`Gate / CI` + `Gate / Quality`), kým omni-queue beží v živom režime, a potom cez omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Sekcie Zlúčiť nižšie popisujú front tak, ako bol.
+## Pristátie na uvoľňovacej vetve
 
-Od verzie 3.8.49 (WS3.2/WS3.4 plánu quality/velocity ) je predvolená cesta zlúčenia pre preskúmané PRs do `release/vX.Y.Z`** Zlúčiť zlučovací front** (`.mergify.yml`); a** manuálny zlučovací vlak** nižšie je zdokumentovaný FALLBACK — používaný počas incidentov, zamrznutí vydania alebo ak sa niekedy zmení plán Mergify Open Source.
+Všestranný rad riadi pristátia do `release/vX.Y.Z`. Pred pristátím PR si prečítajte `mode` najvyššej úrovne v `config/merge-queue/config.json` na predvolenej vetve. Pozrite si [Omni-Queue](OMNI_QUEUE.md).
 
-## Predvolená cesta: front Mergify
+- **`shadow`** spustí validáciu a ponechá pristátie na manuálne zlúčenie. Aplikujte `omni-queue` na schválený PR na jeho poslednej hlave. Skontrolujte oprávnenosť pomocou `npm run queue -- why <PR>`. Počkajte na verdikt pre tú hlavu v `npm run queue -- history --base <branch>`. Pokračujte ďalej `would-land`. Na `culprit-found` alebo `would-dequeue` podržte zlúčenie a opravte príčinu.
+- **Tieňové výnimky.** Vlak so zelenou plnou CI proti aktuálnemu základnému tipu môže pokračovať bez samostatného verdiktu v rade. Rovnaká výnimka platí, keď hlava PR už obsahuje aktuálny základný hrot.
+- **`live`** používa označenie `omni-queue` na spustenie pristátia. Samotný front pristane PR. Nechajte príkazy na zlúčenie a priame tlačenie do frontu.
 
-1. PR je reviewed/greened v kampaniach a schválený vlastníkovou bránou ⭐ pred zlúčením (rozhodnutie + pre jednotlivé položky — pozri `/merge-prs` krok 0.75).
-2. Vlastník (alebo relácia konajúca na základe rozhodnutia vlastníka) aplikuje**`queue`** štítok. Označenie IS schválenie zlúčenia; Mergify ho iba vykoná.
-3. Mergify overí PRs vo fronte** sériovo** (po jednom) proti rýchlym bránam a zlučovaniu (squash). Dávkovanie automatickej bisekcie + je platená úroveň Mergify („Nedá sa použiť dávka zlučovacieho frontu“ v bezplatnom pláne, #7220), takže `.mergify.yml` nenastavuje žiadne `batch_size`; dávkovanie zostáva úlohou manuálneho zlučovacieho vlaku nižšie. PR, ktorého kontroly stále čakajú po `checks_timeout` (240 min = 2 × namerané p95 `quality.yml`), sa vyradí z frontu namiesto zastavenia frontu.
-4. Po zlúčení priebežný pracovný postup so zeleným uvoľňovaním overí nový tip pri push a otvorí problém s pripisovaním, ak dôjde k regresii kombinácie (nikdy sa nevráti automaticky).
+Každé pristátie si vyžaduje povolenie majiteľa a príslušné požadované kontroly. Použite `omni-queue` až potom, čo majiteľ povolil pristátie. PRs zaradené do frontu, ktoré sa dotýka chránených ciest, tiež vyžaduje rozhodnutie vlastníka `protected-approved` pre daný PR.
 
-Zábradlia (zrkadlo `CLAUDE.md` Hard Rules #21/#22):
+Sada pravidiel „Vyžadovať zelené brány pri aktívnom vydaní“ vyžaduje zelené `Gate / CI` a `Gate / Quality` na hlave. Nikdy nepoužívajte `--admin` na obídenie červenej brány. Bloky zmrazenia uvoľnenia sa zlúčia do zmrazenej vetvy. Pozri [tvrdé pravidlo 21](HARD_RULES_DETAIL.md). Nikdy neoznačujte, nezlučujte ani netlačte na požiadavku na stiahnutie, že funguje iná relácia. Pozri [tvrdé pravidlo 22](HARD_RULES_DETAIL.md).
 
-- **Uvoľnite mrazničku otvorte** → do NOT štítok PRs zameraný na zmrazenú vetvu; najprv znova zacielite na aktívny `release/vX+1`.
-- **Ďalšia relácia PR počas letu** → to nikdy neoznačte; iba vlastniaca relácia zaraďuje svoju vlastnú prácu do frontu.
-- Rozdiely iba pri testoch a `hotfix` -labeled PRs už bežia znížené CI (pozri `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); podmienky frontu akceptujú akúkoľvek kontrolnú množinu skutočne spustenú (`#check-failure=0` + `#check-pending=0`).
+## Požiadavka na ťahanie vlaku
 
-## Záložný postup: manuálny merge-train
+1. Začnite vetvu vlaku na aktuálnom základnom tipe vydania. Integrujte presne schválené hlavy členov pomocou zlučovacích potvrdení. Zachovajte ich históriu odovzdania tým, že sa vyhnete squashu a rebase.
+2. Otvorte jednu požiadavku na stiahnutie pre vlakovú vetvu. Overte, že PR s jeho vlastným úplným CI na aktuálnom základnom tipe. Pred pristátím znova skontrolujte špičku základne a schválené hlavy členov. Obnovte vlak a jeho CI keď sa overený kandidát zmení.
+3. Pristavte vlak PR pomocou zlučovacieho potvrdenia v príslušnom režime frontu. V živom režime metóda pristátia `merge-ff` vo fronte zachováva odovzdania zlúčenia. Hlavy pôvodných členov budú dosiahnuteľné z uvoľňovacej vetvy. GitHub označí člena PRs ako zlúčeného a commity si ponechajú svojich autorov.
 
-Používa sa, keď front nie je dostupný. Formalizuje postup, ktorý počas cyklu v3.8.47
-spracoval 33 PR za jediný deň:
+Verejným príkladom je [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Kombinovalo 18 členov PRs a pristálo so zlúčením 24. 11. 2026.
 
-1. **Zostavte dávku** (~10–30 skontrolovaných a schválených PR). Skontrolujte kolízie
-   `linked:` (rovnaké `tap.testFiles`, rovnaké úseky CHANGELOG) a spracujte ich sériovo.
-2. **Overte RAZ**: v izolovanom worktree vytvorenom z vrcholu vydávacej vetvy lokálne
-   zlúčte všetky hlavy dávky a potom spustite sadu ekvivalentnú vydaniu
-   (`npm run check:release-green`; pred vydaním pridajte `--with-build`).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatizuje kroky 1–2 (konfliktné
-   PR sa vyradia a vlak pokračuje). Úplný režim spúšťa `npm run test:unit` — spúšťač
-   optimalizovaný pre daný stroj (`--test-concurrency=20`), **nie** dva sekvenčné
-   4-jadrové CI shardy, ktoré dominantnú fázu obmedzovali približne na 25 % výkonu
-   16-jadrového stroja (opravené 2026-07-18). `--fast` (vnútrodenné spracovanie
-   veľkých merge-trainov, schválené vlastníkom 2026-07-18) zachováva každú statickú
-   kontrolnú bránu + vitest, ale spúšťa iba súbory node:test zmenené zaradenými PR;
-   ÚPLNÁ sada sa stále musí spustiť aspoň raz denne nad nahromadeným vrcholom
-   (jeden vlak bez `--fast`).
-3. **Úspešné** → zlúčte PR postupne (pred každým znova skontrolujte `state,headRefOid` —
-   PR, ktorého hlava sa zmenila, sa vracia na kontrolu). Preukážte, že výsledný rozdiel
-   každého zlúčenia predstavuje vlastnú zmenu daného PR (žiadne reverty pri automatickom
-   riešení konfliktov: skontrolujte `git diff --stat`, či neobsahuje odstránenia mimo rozsahu).
-4. **Neúspešné** → rozdeľte dávku na polovice (a overte každú polovicu) namiesto
-   opakovaného overovania po jednom; problematický PR vráťte spolu s dôkazmi do frontu
-   na kontrolu.
-5. **Nikdy**: nezlučujte počas zmrazenia do zmrazenej vetvy; nikde nepoužívajte
-   `git stash`; nespúšťajte opakovane celé CI v nádeji, že neúspech zmizne
-   (pravidlo: neúspech je informácia).
+Spätná synchronizácia zo `main` do ďalšej vetvy vydania sa tiež uskutoční prostredníctvom odovzdania zlúčenia. Pre neskoršie spätné synchronizácie je potrebné zachovať pôvod `main`. Pozrite si [časť Izolácia pracovného stromu](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Úrovne (prečo je front bezpečný iba s rýchlymi kontrolnými bránami)
+## Lokálny validátor spojenia vlakov
 
-- **Pre každý PR** (rýchle kontrolné brány quality.yml): testy ovplyvnené podľa TIA +
-  úplné jednotkové testy v 4 shardoch + vitest + sada lint kontrol + typecheck +
-  integrita dokumentácie/changelogu.
-- **Pre každú dávku/vrchol** (priebežné overovanie vydania): TVRDÉ kontrolné brány
-  `--quick` pri každom odoslaní zmien do vydávacej vetvy; úplné priechody
-  `--with-build --full-ci` 3× denne.
-- **Pre každé vydanie** (ci.yml na vydávacom PR): úplná matica vrátane E2E ×9,
-  package-artifact + overenie spustenia z tarballu, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Nič sa neoveruje menej než predtým — náročná časť sa iba spúšťa pre každú dávku/vrchol
-namiesto každého PR, čím sa odstraňujú O(N) spiatočné cykly.
+Validátor získa základňu a hlavy PR a skombinuje ich do jednorazového pracovného stromu. Vo výslednom strome raz spustí svoju paritnú sadu. Neúspešné načítanie hlavy alebo konflikt zlučovania vysunie PR a skript pokračuje so zvyšným PRs.
 
-## Predpoklady čistého checkoutu pre `merge-train.sh`
+- **`--plan`** vytlačí kroky zvoleného režimu a ukončí sa bez vytvorenia pracovného stromu alebo kontaktovania diaľkového ovládača. Skombinujte ho so `--fast` a skontrolujte rýchly plán.
+- **`--fast`** spustí bežné statické brány, vybraté zmenené súbory `node:test` pod `tests/unit/` a `npm run test:vitest`. Pri použití rýchleho režimu spustite úplné lokálne overenie aspoň raz denne na nahromadenom hrote.
+- **Plný režim** pridá iba úplné statické brány a spustí `npm run test:unit` a `npm run test:vitest`.
 
-Skript spúšťa na koreňovom checkoute **predbežnú kontrolu**, ktorá pri prvom zlyhaní
-skončí (pred akoukoľvek prácou s worktree), takže poškodená inštalácia sa nikdy nemôže
-javiť ako neúspešný vlak:
+Zlyhajúca statická brána sa znova spustí na nedotknutej základni, ak je k dispozícii základná sonda. Skript hlási zdedené zlyhania a pokračuje, keď sa každý rozpoznaný priestupkový riadok objaví aj na základni a celkový počet sa nezvýšil.
 
-1. `npm ci`, potom spustite postinstall pre `bun`, ktorý npm blokuje:
-   `(cd node_modules/bun && node install.js)` — inak `check:provider-consistency`
-   a `check:known-symbols` (oba používajú `bun scripts/…`) zlyhajú vo vlaku AJ na
-   základnej vetve bez riadka s porušením.
-2. Žiadny nadbytočný `node_modules/node_modules` (duplicitný strom závislostí; React
-   sa načíta dvakrát a UI sady vitest okamžite zlyhajú).
-3. `node_modules/.bin/tsc` musí byť prítomný a spustiteľný (pri čiastočnej inštalácii chýba).
+| VÝCHOD | Význam                                                                                                                                        |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`    | Vytlačil plán alebo dokončil apartmán. Súhrn balíka uvádza všetky zdedené statické zlyhania a vysunuté PRs.                                   |
+| `1`    | Neplatné argumenty, žiadna platba v systéme Git, neúspešná kontrola pred výstupom alebo nalodenie PR.                                         |
+| `2`    | Kontrola balíka zlyhala a nekvalifikovala sa ako zdedené. Operátor môže dávku rozdeliť na polovicu, vysunúť problematické PR a spustiť znova. |
 
-Vlak spúšťa blokujúci `npm run check:cycles:ratchet`; samotný `npm run check:cycles`
-je iba informatívny (vypíše SCC a skončí s nenulovým kódom aj na zdravej základnej vetve).
+Miestny preukaz poskytuje diagnostický dôkaz len pre dokumentáciu vlastníka. Každé pristátie si stále vyžaduje autorizáciu vlastníka, svoje vlastné požadované kontroly a prípadne verdikt tieňovej fronty.
+
+## Tiering
+
+- **Za PR.** CI a kontroly kvality vyberú na základe zmenených ciest. Kód PRs spúšťa rýchle brány kvality a nárazové testy so samostatnou jednotkou a úlohami Vitest v CI.
+- **Kandidát do poradia.** CI a Quality spustia úplný profil pre zloženého kandidáta na jeho fronte ref.
+- **Za tip na uvoľnenie.** Release-Green spúšťa rýchle tvrdé brány na tlaky, ktoré zodpovedajú jej cestným filtrom. Tri naplánované spustenia za deň využívajú úplné zametanie pre vetvu vydania.
+- **Za vydanie.** Úplná matica CI obsahuje zlomky E2E, overenie balíka, dym z tarballovej obuvi a kontroly pokrytia. Pozrite si [Kontrolný zoznam vydania](RELEASE_CHECKLIST.md).
+
+## Predpoklady novej pokladne pre `merge-train.sh`
+
+Pred vytvorením pracovných stromov sa spustí predbežná kontrola. Nainštalujte závislosti pomocou `npm ci`. Potvrďte, že `node_modules/.bin/tsc` je spustiteľný a že `node_modules/node_modules` chýba. Skontrolujte, či je `node_modules/.bin/bun --version` úspešný.
+
+Ak bola postinštalácia Bun preskočená, spustite `(cd node_modules/bun && node install.js)`. Kontroly konzistencie poskytovateľa a známych symbolov používajú Bun. Validátor spustí `npm run check:cycles:ratchet` ako blokovaciu bránu. Samostatný príkaz `npm run check:cycles` je odporúčaný.
+
+## História
+
+Zlučovací front Mergify bol zrušený 2026-11-19.

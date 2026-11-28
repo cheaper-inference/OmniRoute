@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** lisab kõik OmniRoute’i pakutavad mudelid GitHub Copilot Chati _natiivsesse_
-mudelivalikusse. Ei mingit teist külgriba ega eraldi vestlusliidest — Copiloti agendirežiim,
-tööriistakutsed, MCP-serverid ja kohandatud juhised töötavad edasi, kuid kasutavad teie valitud mudelit.
+**OmniCopilot** lisab teie OmniRoute vestlusmudelid ja kombod natiivsesse Copilot vestluse mudelivalijasse. Kasutage redaktori olemasolevaid vestluse ja agendi töövooge koos tööriistade kutsumise ja visiooniga, kui valitud mudel seda toetab.
 
-|                            |                                                                                                                                                 |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Installimine (VS Code)** | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Installimine (harud)**   | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Lähtekood / vead**       | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Nõuded**                 | VS Code 1.104+                                                                                                                                  |
+|                          |                                                                                                                               |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Install (VS kood)**    | [Turg → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)             |
+| **Install (ava VSX)**    | [Avatud VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — nõuab ühilduvat keelemudeli pakkujat ja vestlust APIs |
+| **Allikas / probleemid** | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                            |
+| **Nõuab**                | VS kood 1.104 + (1.122 +, et seda kasutada ilma GitHub sisselogimise või Copilot plaanita)                                    |
+| **Praegune väljalase**   | OmniCopilot v1.5.1 mõlemas poes (välja antud 2026-11-24)                                                                      |
 
-> **Copiloti tellimust pole vaja.** Alates VS Code 1.122-st töötab keelemudeli pakkuja
-> ilma GitHubi sisselogimise ja Copiloti paketita. Reasisesed kooditäiendused ja
-> manustel põhinevad funktsioonid ei kuulu pakkuja API-sse ning vajavad endiselt Copilotit.
+Salvesta hetktõmmis** 2026-11-25 (01:43 UTC)** , praegune väljalase:** 52 081 Marketplace'i installi** ja** 20 989 avatud VSX allalaadimist** . Need on erinevad poemõõdikud, mitte kombineeritud kasutajate arv. Allikad: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) ja [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Avatud VSX saadavus ei loo iseenesest ühilduvust kõigi seda registrit kasutavate redaktoritega. Kontrollige toimetaja vestluse ja keelemudeli API tuge.
+
+> **BYOK vestluse jaoks VS koodiga 1.122 +Copilot tellimust pole vaja.** Microsoft toetab vestlust, tööriistu ja MCP ilma GitHub -sisselogimiseta, kui pakkuja on konfigureeritud. VS koodi 1.104–1.121 puhul laiendus töötab endiselt, kuid VS kood nõuab sisselogitud Copilot plaani. Tekstisisesed soovitused ja manustamispõhised funktsioonid jäävad pakkuja API välja ja nõuavad endiselt Copilot; Copilot Business/Enterprise administraatorid saavad poliitika alusel keelata kolmanda osapoole mudelipakkujad; kahvel näitab mudeleid ainult siis, kui see rakendab vestluse pakkuja API. Ülevalpoolne teenusepakkuja kasutamine võib siiski hõlmata tasusid. Vaadake [VS Code 1.122 väljalaskemärkmeid](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) ja [keelemudeli juhendit](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
 ## Seadistamine
 
-1. **Käivitage OmniRoute** — `npm install -g omniroute && omniroute` (juhtpaneel aadressil `http://localhost:20128`).
-2. **Installige laiendus** — otsige laienduste vaates fraasi „OmniRoute“.
-3. **Valige mudel** — Copilot Chat → mudelivalik → **Halda mudeleid…** → **OmniRoute**, seejärel märkige
-   soovitud mudelid.
+1. **Jookse OmniRoute** — `npm install -g omniroute && omniroute` ( `http://localhost:20128` armatuurlaud).
+2. **Installige laiendus** — otsige "OmniRoute" laienduste vaates.
+3. **Ühendage** — säilita `http://localhost:20128` vaikeväärtus või määra oma serveri URL ja API võtmed**OmniRoute: halda ühendust** .
+4. **Valige mudel** — Copilot Vestlus → mudelivalija →** Halda mudeleid…** →**OmniRoute** , seejärel märkige, mida soovite.
 
-Kui OmniRoute töötab vaikepordil, pole midagi vaja seadistada. Kaugserveri korral avage
-**OmniRoute’i ikoon tegevusribal** (või käivitage `OmniRoute: Manage Connection`) ja määrake:
+Ühendusseadete vaatamiseks avage**OmniRoute ikooni tegevusribal** (või käivitage `OmniRoute: Manage Connection`) ja määrake:
 
-- **Serveri URL** — serveri juuraadress, nt `http://192.168.0.15:20128`. Järelliite `/v1` lisab
-  laiendus; ärge seda lisage.
-- **API-võti** — ainult juhul, kui serveris on määratud `REQUIRE_API_KEY`. See talletatakse VS
-  Code SecretStorage’i kaudu operatsioonisüsteemi võtmehoidlasse, mitte kunagi faili `settings.json`.
+- **Server URL** — serveri juur, nt `http://omniroute.example.com:20128`. `/v1` järelliide on lisatud laiendiga; ära lisa seda.
+- **API võti** — on nõutav, kui serveri järelduste autentimispoliitika seda nõuab. Salvestatud VS -koodi kaudu SecretStorage, mitte kunagi `settings.json`; saadaval on tööruumipõhised võtmed. Kasutage nende mudelite jaoks volitatud võtit, mida soovite eksponeerida.
+
+Laiendus pakub ka ühenduse indikaatorit, mudeli värskendust, mudeli konteksti ja hinnakujunduse metaandmeid (kaasa arvatud kombinatsioonid), voogesitatud põhjendusi koos** Mõtlemispingutus** VS koodi 1.120 + menüü, olekuriba päevalimiidi indikaator ja kasutuspaneel (OmniRoute 3.8.50 +), CLI konfiguratsioon ja valikuline armatuurlaua vahekaart. Valitud mudel ja serveripoliitika määravad kasutatavad võimalused.
 
 ---
 
@@ -112,23 +112,25 @@ Vaadake faili [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ja probleemi
 
 ---
 
-## Muude tööriistade seadistamine VS Code'is
+## Muude tööriistade konfigureerimine VS koodi seest
 
-**`OmniRoute: Configure Coding CLI`** kasutab `omniroute` CLI-d, et luua kasutusvalmis profiilid tööriistadele Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo ja Roo — need on samad konfiguratsioonid, mida kirjeldatakse failis
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). API-võti edastatakse CLI-le keskkonnamuutuja `OMNIROUTE_API_KEY` kaudu, mitte kunagi käsureal.
+**`OmniRoute: Configure Coding CLI`** juhib `omniroute` CLI kirjutama kasutusvalmis profiile 16 tööriista jaoks: Codex CLI, Claude Code, Cline, Zed, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, , WhyCodes Laiendus kutsub integreeritud terminalis välja `setup-*` käske; installige OmniRoute CLI versioon, mis sisaldab valitud käsku. Vaadake [CLI integreerimisjuhendit](CLI-INTEGRATIONS.md) iga retsepti kasutatavate failide ja lippude ning [laienduse tööriistaregistri](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts) kohta.
+
+API klahv antakse CLI le `OMNIROUTE_API_KEY` kaudu, mitte kunagi käsureal. Seadistusretseptid võivad sihttööriista konfiguratsioonis mandaate säilitada. Tööruumipõhise võtme jagamisel tööriista kasutajataseme konfiguratsiooniga küsib laiendus esmalt kinnitust.
 
 ---
 
-## Tõrkeotsing
+## Veaotsing
 
-| Sümptom                                                  | Põhjus / lahendus                                                                                                                                                                                                                                                 |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mudelivalijas pole OmniRoute'i mudeleid                  | Server pole kättesaadav. Olekuriba punkt muutub halliks; käivitage `OmniRoute: Check Connection`. Tuvastamine on taotluslikult vaikne ja viiba kuvamise asemel ei lisa ühtegi mudelit.                                                                            |
-| Iga mudel kuvatakse kaks korda                           | Kasutate OmniCopiloti versiooni, mis on vanem kui 1.0.1 — värskendage seda. Laiendus saadab nüüd päringu `?prefix=alias`.                                                                                                                                         |
-| Varem kuvatud pildi-/helimudel on kadunud                | Alates versioonist 1.0.1 on see taotluslik — selline mudel ei saanud vestluspäringule kunagi vastata.                                                                                                                                                             |
-| Paan puudub tegevusribalt                                | VS Code teisaldab täiendavad vaatekonteinerid tegevusriba allosas asuvasse **„…“** ületäitemenüüsse ning paremklõpsuga peidetud konteiner jääb peidetuks. Paremklõpsake tegevusribal → märkige **OmniRoute** või avage see käsuga `OmniRoute: Manage Connection`. |
-| Juhtpaneel avaneb brauseris vaatamata režiimile `editor` | Serverit ei **kompileeritud** muutujaga `DASHBOARD_ALLOW_EMBED=vscode` (vt eespool) — selle määramine eelkompileeritud paigalduse käivitamisel ei muuda midagi. Varuvariandi kasutamine on taotluslik.                                                            |
-| Mudelite loend on pärast pakkujate muutmist aegunud      | Käivitage `OmniRoute: Refresh Models` või klõpsake paanil linki ↻.                                                                                                                                                                                                |
+| Sümptom                                                     | Põhjus / paranda                                                                                                                                                                                                                                                    |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Korjajas pole OmniRoute mudeleid                            | Serveriga ei saa ühendust. Olekuriba punkt muutub halliks; jookse `OmniRoute: Check Connection`. Discovery on disainilt vaikne ega aita kaasa pigem mudelitele kui õhutamisele.                                                                                     |
+| Iga mudel ilmub kaks korda                                  | Kasutate OmniCopilot versiooni, mis on vanem kui 1.0.1 —. Laiendus nõuab nüüd `?prefix=alias`.                                                                                                                                                                      |
+| Varem oli nimekirjas image/audio mudel, mis on kadunud      | Tahtlik, kuna versioonist 1.0.1 — ei suutnud see kunagi vestlustaotlusele vastata.                                                                                                                                                                                  |
+| Paneel puudub tegevusribalt                                 | VS Code teisaldab täiendavad vaatekonteinerid** "…"** ületäitumine tegevusriba allosas ja paremklõpsuga peidetud konteiner jääb peidetuks. Paremklõpsake tegevusriba → linnukest**OmniRoute** või avage see nupuga `OmniRoute: Manage Connection`.                  |
+| Armatuurlaud avaneb brauseris vaatamata `editor` -režiimile | Serverit ei olnud** ehitatud** `DASHBOARD_ALLOW_EMBED=vscode` (vt eespool) — selle käivitamisel eelehitatud installi puhul ei tee midagi. Tagandamine on tahtlik.                                                                                                   |
+| Mudelite loend on pärast pakkuja vahetamist aegunud         | `OmniRoute: Refresh Models` või paneeli ↻ link.                                                                                                                                                                                                                     |
+| Paneel ütleb _Võrgus (mudelid blokeeritud)_, valija tühi    | Server lükkab võtme tagasi. Salvestage õige võti nupuga** Salvesta ja testi** . Kui võti oli hoopis serveris fikseeritud (lubatud või mudelitele juurdepääs antud), ei märka laiendus iseenesest: käivitage `OmniRoute: Refresh Models` või avage OmniRoute paneel. |
 
 ---
 

@@ -68,12 +68,12 @@ Codex (`<environment_context><cwd>`) a OpenCode (`x-opencode-session`) jsou rozp
 
 Pracovní adresář se mezi počítači liší, takže stejné úložiště se může zobrazovat pod různými cestami. Místo toho pošlete projekt explicitně: Claude Code přidá všechna záhlaví uvedená v `ANTHROPIC_CUSTOM_HEADERS` ke každému požadavku modelu a OmniRoute přečte dvě z nich:
 
-| Záhlaví                    | Hodnota                                                                  |
-| -------------------------- | ------------------------------------------------------------------------ |
-| `x-omniroute-project`      | Název projektu, např. `omniroute`                                        |
-| `x-omniroute-project-repo` | Normalizované dálkové ovládání, např `github.com/diegosouzapw/OmniRoute` |
+| Záhlaví                    | Hodnota                                                                       |
+| -------------------------- | ----------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Název projektu, např. `omniroute`                                             |
+| `x-omniroute-project-repo` | Normalizované dálkové ovládání, např `github.com/cheaper-inference/OmniRoute` |
 
-Oba jsou pouze čteny za účelem přiřazení; nikdy nejsou předávány upstream poskytovateli.
+Oba jsou pouze čteny za účelem přiřazení; nikdy nejsou předány poskytovateli upstream.
 
 `ANTHROPIC_CUSTOM_HEADERS` se čte jednou při spuštění a soubory nastavení ukládají doslovné hodnoty, takže je vypočítejte při spuštění kódu Claude. Přidejte to do `~/.zshrc` nebo `~/.bashrc` a pokračujte ve spouštění `claude` ze složky projektu:
 
@@ -283,30 +283,22 @@ potřeba žádné další příznaky. Pro jednotlivá spuštění lze toto nasta
 
 ---
 
-## Řešení problémů
+## Odstraňování problémů
 
-**Claude Code ignoruje bránu** — ověřte, že `ANTHROPIC_BASE_URL` **neobsahuje
-`/v1`**, a restartujte `claude` (proměnné prostředí se načítají pouze jednou při spuštění). Příkaz `omniroute launch`
-se o to postará za vás.
+**Claude kód ignoruje bránu** — potvrdit `ANTHROPIC_BASE_URL` má** žádné `/v1`** a restartujte `claude` (env se načte jednou při spuštění). `omniroute launch` to vyřeší za vás.
 
-**Výběr `/model` je prázdný / chybí modely brány** — je vyžadován Claude Code
-v2.1.219+ a `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Ve výběru se zobrazují pouze ID modelů `claude*` /
-`anthropic*`; jakýkoli jiný model vynuťte pomocí
-`ANTHROPIC_MODEL=<id>` (právě to dělají profily).
+**`/model` picker je prázdný / chybí modely brány** — potřebuje kód Claude v2.1.219 + a `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Ve výběru se objeví pouze model `claude*` / `anthropic*` IDs ; vynutit jakýkoli jiný model pomocí `ANTHROPIC_MODEL=<id>` (toto dělají profily).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code vždy odesílá **ID modelů bez předpony**
-(např. `claude-opus-4-8`), takže pokud jsou připojeni jak poskytovatel Claude Code (`cc/…`), tak
-Claude (`claude/…`), odpovídá samotné ID dvěma trasám a
-OmniRoute odmítne hádat. Opravit to lze dvěma způsoby: nastavte ID s předponou pomocí
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, nebo povolte možnost **Upřednostňovat Claude Code pro
-modely Claude bez předpony** — přepínačem na stránce poskytovatele Claude nebo pomocí
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (ve výchozím nastavení vypnuto;
-viz [Prostředí](../reference/ENVIRONMENT.md)) — čímž se ID `claude-*` bez předpony
-nasměrují do Claude Code. Explicitní předpony poskytovatelů mají vždy přednost.
+**`400 Ambiguous model 'claude-…'`** — Claude Kód se vždy odešle** bez předpony** model IDs (např. `claude-opus-4-8`), takže když jsou oba poskytovatelé Claude Code (`cc/…`) a Claude (`claude/…`) připojeni, holé id odpovídá dvěma trasám a OmniRoute odmítá uhodnout. Opravte to oběma způsoby: připněte id s předponou pomocí `ANTHROPIC_MODEL=cc/claude-opus-4-8` nebo povolte** U modelů Claude bez předpony preferujte kód Claude** — přepínač na stránce poskytovatele Claude nebo `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (výchozí vypnuto; viz [Prostředí](../reference/ENVIRONMENT.md) ) — které místo toho směruje holé `claude-*` IDs do kódu Claude. Explicitní předpony poskytovatelů vždy vyhrávají.
 
-**Chyby ověřování** — profil neobsahuje žádný token. Použijte `omniroute launch --profile`
-(token vloží) nebo exportujte `ANTHROPIC_AUTH_TOKEN`.
+**"automatický režim… tato relace není způsobilá" (požadavky klasifikátoru účtovány)** — v automatickém režimu Claude Code žádá server, aby zkontroloval akce v rámci jeho vlastních požadavků na model ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). To potřebuje hodnotu `anthropic-beta` `dangerous-tool-use-2026-09-03` a pole těla `safeguards` k dosažení Anthropic jako páru a `safeguard_results` plus nástroj IDs proti proudu, aby se vrátil beze změny. OmniRoute to dělá, když je požadavek směrován do nativního poskytovatele `claude` nebo do uzlu `anthropic-compatible-*`, streamovaný nebo ne (ochrana regrese: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Jiné cíle nemohou vrátit recenzi, takže Claude Code se vrátí ke svým vlastním požadavkům klasifikátoru a zobrazí upozornění:
 
-**Profily nejsou izolované** — každý profil představuje samostatný adresář `CLAUDE_CONFIG_DIR`;
-ověřte, že `echo $CLAUDE_CONFIG_DIR` uvnitř relace odkazuje na
-`~/.claude/profiles/<name>`.
+- model na neantropickém poskytovateli nebo kombo, které přistane na jednom;
+- přenosový uzel kompatibilní s Claude-Code (`anthropic-compatible-cc-*`), který znovu sestaví tělo požadavku a nenese `safeguards`;
+- starší OmniRoute, který je starší než beta verze na seznamu povolených, nebo verze kódu Claude pod tou, kterou stránka Anthropic uvádí pro relace brány.
+
+Spusťte `/status` v kódu Claude : the** Server v automatickém režimu** řádek čte `Enabled` zatímco kontrola serveru je aktivní. O tom, zda jsou tyto požadavky účtovány, rozhoduje Anthropic, nikoli OmniRoute.
+
+**Chyby ověření** — profil neobsahuje žádný token. Použijte `omniroute launch --profile` (vloží jej) nebo exportujte `ANTHROPIC_AUTH_TOKEN`.
+
+**Profily neizolují** — každý profil je odlišný `CLAUDE_CONFIG_DIR`; ověřte `echo $CLAUDE_CONFIG_DIR` uvnitř bodů relace na `~/.claude/profiles/<name>`.

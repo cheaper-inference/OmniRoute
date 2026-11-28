@@ -12,6 +12,12 @@ Mkataba wa `config/cli-tools-manifest.json` usioegemea upande wowote unatangaza 
 
 Ishara za kukatiza na kusitisha hutumwa kwa mtoto. Kizindua husubiri tukio la karibu la mtoto kabla ya kuondoa usanidi wa muda. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` hudhibiti muda wa matumizi bila kulazimishwa kusitisha (chaguo-msingi milisekunde 5000).
 
+`omniroute launch <tool>` (tazama [LAUNCH.md](./LAUNCH.md) ) hufuata sheria zilezile za mazingira na usambazaji wa ishara, na kuongeza:
+
+- **Lango la kuanza kiotomatiki.** Kwa lengo la ndani, wakati hakuna majibu ya lango kwenye bandari, kizindua kinaanza `omniroute serve --headless --no-open` inayofungamana na `127.0.0.1` chini ya mchakato wa kuvuna uliojitenga. Kila uzinduzi unaoendeshwa huwa na ukodishaji katika `DATA_DIR/launch/leases/` (mapigo ya moyo kila baada ya sekunde 15, yamechakaa baada ya 45 s au wakati mchakato wake umekwenda). Mvunaji husimamisha lango ambalo lilianza mara tu hakuna kukodisha imekuwa moja kwa moja kwa neema isiyo na kazi (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, milisekunde 10000 chaguo-msingi). Lango ambalo mtumiaji alianzisha linatumika lakini halijasimamishwa. `--keep-gateway` au `omniroute gateway keep` hugeuza lango la kizindua kuwa la kawaida; `--no-start` inarejesha tabia ya zamani ya kutofaulu. Malengo ya mbali yanachunguzwa pekee.
+- **Anzisha vipindi.** Kila uzinduzi huweka tokeni ya kipindi cha `olx_` ya muda mfupi kutoka kwa kitambulisho cha mzazi (`POST /api/launch/sessions`), huipiga wakati zana inafanya kazi, husoma muhtasari wa matumizi na kuubatilisha baada ya zana kuondoka. Tokeni ni sehemu ndogo ya mzazi wake: ruhusa sawa, katalogi sawa au finyu, maisha mafupi, na si kitambulisho cha dashibodi. Chombo hupokea tokeni ya kikao, kamwe si kitambulisho cha mzazi, na maombi yanatambulishwa `launch:<tool>:<sessionId>` isipokuwa `--tag` imetolewa. Lango lisilo na API la kikao hushindwa na `GatewayTooOld` badala ya kurudi kwenye uzinduzi ambao haujapimwa.
+- **Mipangilio ya kila uzinduzi.** Faili za usanidi wa zana huandikwa kwa saraka ya hali ya kibinafsi (modi 0700, kiambishi awali `omnirouter-`) na kuondolewa baada ya mtoto kuondoka. `SIGKILL` ya kizindua huacha saraka nyuma; `omniroute launch --cleanup` huondoa saraka kama hizo pindi zinapozeeka zaidi ya siku.
+
 ## Gemini usanidi unaoendelea
 
 ```bash

@@ -4,7 +4,7 @@
 
 ---
 
-> **Wersja:** v3.8.44** Ostatnia aktualizacja:** 28.10.2026** Publiczność:** Inżynierowie dodają, utrzymują lub debugują usługi wbudowane (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Wersja:** v3.8.44** Publiczność:** Inżynierowie dodają, utrzymują lub debugują usługi wbudowane (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Usługi wbudowane to instalowane lokalnie narzędzia poboczne procesów, które OmniRoute instaluje, nadzoruje i udostępnia jako pierwszorzędne cele routingu. W przeciwieństwie do dostawców zewnętrznych (do których można dotrzeć przez Internet za pomocą kluczy API ), usługi wbudowane działają na tej samej maszynie co OmniRoute i komunikują się za pomocą pętli zwrotnej.
 
@@ -29,23 +29,23 @@ Usługi wbudowane to instalowane lokalnie narzędzia poboczne procesów, które 
 
 Osiem usług jest wbudowanych:
 
-| Praca           | pakiet npm                         | Domyślny port | Zamiar                                                                                                                                                                                                                                                                                                                             |
-| --------------- | ---------------------------------- | :-----------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Routera**    | `9router`                          |     20130     | router AI, którego OmniRoute może używać jako poddostawcy. Modele wystawione jako `9router/{sub}/{model}`                                                                                                                                                                                                                          |
-| **CLIProxyAPI** | wersja binarna GitHub (`cliproxy`) |     8317      | Lokalny adapter proxy dla przepływów uwierzytelniania Anthropic CLI. Zapewnia routing awaryjny po wygaśnięciu tokenów OAuth                                                                                                                                                                                                        |
-| **Mux**         | `mux` (bezgłowy `mux server`)      |     8322      | Lokalny demon orkiestracji agentów (coder/mux). Tylko zarządzany cykl życia — a nie cel routingu (bez proxy LLM ).                                                                                                                                                                                                                 |
-| **Bifrost**     | `@maximhq/bifrost`                 |     8080      | Przejdź do backendu przekaźnika bramy AI. Podczas pracy, automatycznie wybierany przez trasę przekaźnika (`/v1/relay/`)                                                                                                                                                                                                            |
-| **Dario**       | `@askalf/dario`                    |     3456      | Serwer proxy subskrypcji Claude — alternative/failover do CLIProxyAPI dla ruchu w kształcie kodu Claude; wstrzyknięty klucz staje się `DARIO_ADMIN_TOKEN` bramkującym jego płaszczyznę kontrolną `/admin/*` OAuth                                                                                                                  |
-| **otwarte-wa**  | `@open-wa/wa-automate`             |     8323      | WhatsApp Automatyzacja sieci (bezgłowy Chromium przez Puppeteer). Tylko zarządzany cykl życia — a nie cel routingu.                                                                                                                                                                                                                |
-| **LLMLingua**   | `@atjsh/llmlingua-2`               |     20135     | Sidecar z szybką kompresją — real LLMLingua-2 ONNX model (port JS/TS algorytmu Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` wysyła do niego `/compress` przez HTTP, powracając do zaplecza wątku roboczego w procesie, gdy wózek boczny nie działa. Tylko — zarządzane cyklem życia, a nie cel routingu. |
-| **śpiewak**     | wersja binarna GitHub (`singbox`)  |     20140     | TPROXY sidecar wspierający przechwytywanie przezroczystego proxy `applyTproxy()`(`src/mitm/tproxy/setup.ts`). Instalator pobiera przypiętą wersję zweryfikowaną sumą kontrolną. Tylko zarządzany cykl życia — a nie cel routingu (bez proxy LLM )                                                                                  |
+| Praca           | pakiet npm                         | Domyślny port | Zamiar                                                                                                                                                                                                                                                                                                                          |
+| --------------- | ---------------------------------- | :-----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Routera**    | `9router`                          |     20130     | router AI, którego OmniRoute może używać jako poddostawcy. Modele wystawione jako `9router/{sub}/{model}`                                                                                                                                                                                                                       |
+| **CLIProxyAPI** | wersja binarna GitHub (`cliproxy`) |     8317      | Lokalny adapter proxy dla przepływów uwierzytelniania Anthropic CLI. Zapewnia routing awaryjny po wygaśnięciu tokenów OAuth                                                                                                                                                                                                     |
+| **Mux**         | `mux` (bezgłowy `mux server`)      |     8322      | Lokalny demon orkiestracji agentów (coder/mux). Tylko zarządzany cykl życia — a nie cel routingu (bez proxy LLM ).                                                                                                                                                                                                              |
+| **Bifrost**     | `@maximhq/bifrost`                 |     8080      | Przejdź do backendu przekaźnika bramy AI. Podczas pracy, automatycznie wybierany przez trasę przekaźnika (`/v1/relay/`)                                                                                                                                                                                                         |
+| **Dario**       | `@askalf/dario`                    |     3456      | Serwer proxy subskrypcji Claude — alternative/failover do CLIProxyAPI dla ruchu w kształcie kodu Claude; wstrzyknięty klucz staje się `DARIO_ADMIN_TOKEN` bramkującym jego płaszczyznę kontrolną `/admin/*` OAuth                                                                                                               |
+| **otwarte-wa**  | `@open-wa/wa-automate`             |     8323      | WhatsApp Automatyzacja sieci (bezgłowy Chromium przez Puppeteer). Tylko zarządzany cykl życia — a nie cel routingu.                                                                                                                                                                                                             |
+| **LLMLingua**   | `@atjsh/llmlingua-2`               |     20135     | Sidecar z szybką kompresją — real LLMLingua-2 ONNX model (port JS/TS algorytmu Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` wysyła do niego `/compress` przez HTTP, powracając do zaplecza wątku roboczego w procesie, gdy wózek boczny nie działa. Tylko zarządzany cykl życia — a nie cel routingu. |
+| **śpiewak**     | wersja binarna GitHub (`singbox`)  |     20140     | TPROXY sidecar wspierający przechwytywanie przezroczystego proxy `applyTproxy()`(`src/mitm/tproxy/setup.ts`). Instalator pobiera przypiętą wersję zweryfikowaną sumą kontrolną. Tylko zarządzany cykl życia — a nie cel routingu (bez proxy LLM )                                                                               |
 
 Cała ósemka kieruje się tym samym modelem nadzoru:
 
 - OmniRoute instaluje je w `DATA_DIR/services/{name}/` (odizolowane od własnego `package.json` OmniRoute)
 - OmniRoute tworzy je i monitoruje jako procesy potomne
 - OmniRoute wprowadza efemeryczny klucz API do środowiska dziecka i obraca go bez przestojów (w stosownych przypadkach)
-- Wszystkie trasy zarządzania (`/api/services/*`) są**LOCAL_ONLY** — dostępne tylko z pętli zwrotnej (twarda zasada nr 17)
+- Wszystkie trasy zarządzania (`/api/services/*`) są**LOCAL_ONLY** — dostępne tylko z pętli zwrotnej (twarda reguła #17)
 
 ### Kluczowe decyzje (z planu projektu)
 
@@ -209,7 +209,7 @@ race condition, gdy np. auto-start i przycisk UI odpalą się jednocześnie.
 
 ## 4. odniesienie API
 
-Wszystkie trasy pod `/api/services/` są**LOCAL_ONLY** (tylko pętla zwrotna, twarda zasada nr 17). Żądania inne niż sprzężenie zwrotne otrzymują `403 LOCAL_ONLY` niezależnie od tokenu uwierzytelniania.
+Wszystkie trasy pod `/api/services/` są**LOCAL_ONLY** (tylko pętla zwrotna, twarda zasada #17). Żądania inne niż sprzężenie zwrotne otrzymują `403 LOCAL_ONLY` niezależnie od tokenu uwierzytelniania.
 
 ### 4.1 9 punktów końcowych routera (11 tras)
 
@@ -236,7 +236,7 @@ Zainstaluj 9Router z npm. Tworzy `DATA_DIR/services/9router/` z własnym `packag
 | `409`  | Już instaluję (blokada przytrzymana)                                                     |
 | `500`  | instalacja npm nie powiodła się — zobacz `message`, aby zapoznać się z przyjaznym błędem |
 
-**Uwagi:** Używa `execFile('npm', [...])` — bez powłoki, bez interpolacji (twarda zasada nr 13). błędy EACCES są wyświetlane jako przyjazne komunikaty.
+**Uwagi:** Używa `execFile('npm', [...])` — bez powłoki, bez interpolacji (twarda zasada #13). błędy EACCES są wyświetlane jako przyjazne komunikaty.
 
 ---
 
@@ -535,7 +535,7 @@ sing-box ma taki sam kształt punktu końcowego jak Mux — bez trasy `rotate-ke
 | `POST` | `/api/services/singbox/auto-restart-adopted` | Przełącz automatyczne ponowne uruchomienie przyjętego (wcześniej istniejącego) procesu |
 | `GET`  | `/api/services/singbox/logs`                 | ogon dziennika SSE (poprzez współdzieloną trasę dynamiczną `[name]/logs` )             |
 
-**okablowanie TPROXY :** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) zapisuje `config.json` i uruchamia nadzorcę, zanim `applyTproxy()` zainstaluje reguły zapory TPROXY. Jeśli brakuje nadzorcy lub nie uda mu się dotrzeć `running`, loguje się teraz na poziomie błędu (zamiast po cichu przełknąć niepowodzenie), aby operator mógł stwierdzić, że reguły TPROXY zostały zastosowane bez działającego słuchacza za nim.
+**okablowanie TPROXY :** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) zapisuje `config.json` i uruchamia nadzorcę, zanim `applyTproxy()` zainstaluje reguły zapory TPROXY. Jeśli brakuje nadzorcy lub nie uda mu się dotrzeć `running`, loguje się teraz na poziomie błędu (zamiast po cichu przełykać niepowodzenie), aby operator mógł stwierdzić, że reguły TPROXY zostały zastosowane bez działającego słuchacza za nim.
 
 ---
 
@@ -555,9 +555,7 @@ To proxy:
 - Usuwa `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` z odpowiedzi
 - Przepisuje odpowiedzi HTML, aby wstrzyknąć `<base href>` i normalizować ścieżki bezwzględne (`/foo` → `/dashboard/.../embed/foo`)
 
-aktualizacje WebSocket dla wbudowanego dashboardu są obsługiwane przez serwer towarzyszący na dedykowanym porcie (zobacz `src/lib/services/embedWsProxy.ts`).
-
-Każde uaktualnienie jest autoryzowane przed otwarciem tunelu, zgodnie z tymi samymi zasadami, co trasa osadzania HTTP : peer musi być sprzężony zwrotnie bez nagłówka przekazywania zwrotnego proxy, przeglądarka `Origin` musi być początkiem pulpitu nawigacyjnego (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` rozszerzają domyślne ustawienia pętli zwrotnej), a wywołujący potrzebuje sesji pulpitu nawigacyjnego lub klucza API o zakresie zarządzania, chyba że logowanie do pulpitu nawigacyjnego jest wyłączone.
+aktualizacje WebSocket dla wbudowanego dashboardu są obsługiwane przez serwer towarzyszący na dedykowanym porcie (zobacz `src/lib/services/embedWsProxy.ts`). Każde uaktualnienie jest autoryzowane przed otwarciem tunelu, zgodnie z tymi samymi zasadami, co trasa osadzania HTTP : peer musi być sprzężony zwrotnie bez nagłówka przekazywania zwrotnego proxy, `Origin` przeglądarki musi być początkiem pulpitu nawigacyjnego (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` rozszerzają domyślne ustawienia pętli zwrotnej), a wywołujący potrzebuje sesji pulpitu nawigacyjnego lub klucza API o zakresie zarządzania, chyba że logowanie do pulpitu nawigacyjnego jest wyłączone.
 
 **Bezpieczeństwo:** Osadzone trasy proxy są klasyfikowane w `LOCAL_ONLY_API_PREFIXES` i można do nich dotrzeć tylko za pomocą pętli zwrotnej. Osoba atakująca, która uzyska JWT poprzez tunel Cloudflare/Ngrok nie może skorzystać z serwera proxy do usług wbudowanych.
 
@@ -565,11 +563,9 @@ Każde uaktualnienie jest autoryzowane przed otwarciem tunelu, zgodnie z tymi sa
 
 ## 5. Bezpieczeństwo
 
-### Egzekwowanie LOCAL_ONLY (hard rule #17)
+### egzekwowanie LOCAL_ONLY (twarda zasada #17)
 
-Wszystkie trasy pod `/api/services/` i `/dashboard/providers/services/*/embed/` są
-sklasyfikowane jako LOCAL_ONLY w `src/server/authz/routeGuard.ts`. Sprawdzenie loopback
-działa bezwarunkowo przed jakąkolwiek gałęzią auth:
+Wszystkie trasy w `/api/services/` i `/dashboard/providers/services/*/embed/` są klasyfikowane jako LOCAL_ONLY w `src/server/authz/routeGuard.ts`. Sprawdzanie pętli zwrotnej jest uruchamiane bezwarunkowo przed dowolną gałęzią uwierzytelniania:
 
 ```
 request arrives
@@ -578,43 +574,30 @@ request arrives
       → loopback    → fall through to normal auth
 ```
 
-To zapobiega temu, by wyciekły JWT (np. przez tunel) wywołał `npm install` lub
-spawn procesów. Pełna macierz tierów: `docs/security/ROUTE_GUARD_TIERS.md`.
+Zapobiega to uruchomieniu `npm install` lub spawnowaniu procesów przez wyciekające JWT (np. przez tunel). Zobacz `docs/security/ROUTE_GUARD_TIERS.md`, aby zapoznać się z macierzą pełnego poziomu.
 
-### Wstrzykiwanie klucza API
+### zastrzyk klucza API
 
-9Router i Mux wymagają klucza API / tokenu bearer dla własnych endpointów HTTP.
-OmniRoute:
+9Router i Mux wymagają tokena API key/bearer dla własnych punktów końcowych HTTP. OmniRoute:
 
-1. Generuje klucz przez `crypto.randomBytes(32).toString("base64url")` z
-   prefiksem specyficznym dla usługi (`nr_` dla 9Router, `mx_` dla Mux).
-2. Szyfruje go at-rest AES-256-GCM (ten sam cipher co credentials providerów).
-3. Deszyfruje i wstrzykuje jako zmienną środowiskową przy spawn —
-   `NINEROUTER_API_KEY` dla 9Router, `MUX_SERVER_AUTH_TOKEN` dla Mux (nigdy flaga CLI,
-   więc token nie pojawia się w `ps`/listach procesów).
-4. Nigdy nie zwraca plaintext klucza w żadnej odpowiedzi HTTP.
+1. Generuje klucz poprzez `crypto.randomBytes(32).toString("base64url")` z prefiksem specyficznym dla usługi (`nr_` dla 9Router, `mx_` dla Mux).
+2. Szyfruje go w stanie spoczynku przy użyciu AES-256-GCM (ten sam szyfr, który jest używany do poświadczeń dostawcy).
+3. Odszyfrowuje i wstrzykuje go jako zmienną środowiskową w czasie odradzania. — `NINEROUTER_API_KEY` dla 9Router, `MUX_SERVER_AUTH_TOKEN` dla Mux (nigdy nie jest to flaga CLI, więc token nigdy nie pojawia się na listach `ps`/process).
+4. Nigdy nie zwraca klucza w postaci zwykłego tekstu w żadnej odpowiedzi HTTP.
 
-CLIProxyAPI nie wymaga wstrzykniętego klucza (uwierzytelnia się przez istniejącą
-konfigurację CLI hosta).
+CLIProxyAPI otrzymuje dedykowany klucz płaszczyzny danych wstrzykiwany podczas spawnowania (`needsApiKey: true` — używany do synchronizacji modelu z adapterem).
 
-### Obrona SSRF
+### obrona SSRF
 
-Reverse HTTP proxy (`/dashboard/.../embed/[...path]`) jest na sztywno ustawiony, by forwardować
-tylko do `http://127.0.0.1:{port}`. Nigdy nie podąża za redirectami poza
-loopback. Biblioteka `ssrf-req-filter` odrzuca każdy upstream URL, który
-resolvuje poza zakres loopback.
+Odwrotne proxy HTTP (`/dashboard/.../embed/[...path]`) jest zakodowane na stałe tak, aby przekazywało tylko do `http://127.0.0.1:{port}`. Nigdy nie podąża za przekierowaniami do miejsc docelowych bez sprzężenia zwrotnego. Biblioteka `ssrf-req-filter` służy do odrzucania wszelkich nadrzędnych URL, które są rozpoznawane poza zakresem pętli zwrotnej.
 
-### Bezpieczeństwo shella (hard rule #13)
+### Bezpieczeństwo powłoki (twarda zasada #13)
 
-`npm install` jest wywoływane przez `execFile('npm', ['install', pkg, '--prefix', dir])` —
-bez template literal, bez shella, bez interpolacji zewnętrznych ścieżek w string
-komend. Wartości runtime (porty, klucze API) są przekazywane przez obiekt `env` potomka.
+`npm install` jest wywoływane poprzez `execFile('npm', ['install', pkg, '--prefix', dir])` — bez literałów szablonowych, bez powłoki, bez interpolacji ścieżek zewnętrznych do ciągu poleceń. Wartości wykonawcze (porty, klucze API ) są przekazywane przez obiekt `env` dziecka.
 
-### Sanityzacja błędów (hard rule #12)
+### Oczyszczanie błędów (twarda zasada #12)
 
-Wszystkie odpowiedzi błędów z `/api/services/*` przechodzą przez `buildErrorBody()` lub
-`sanitizeErrorMessage()`. Surowe `err.stack` i `err.message` nigdy nie wracają
-verbatim do callera.
+Wszystkie odpowiedzi na błędy z `/api/services/*` przechodzą przez `buildErrorBody()` lub `sanitizeErrorMessage()`. Surowe `err.stack` i `err.message` nigdy nie są zwracane dosłownie do osoby wywołującej.
 
 ---
 

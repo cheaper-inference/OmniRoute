@@ -4,12 +4,9 @@
 
 ---
 
-> **Posljednje ažuriranje:** 2026-08-28 — v3.8.51
-> Pojednostavljen tijek izdanja koji koristi vještine alata Claude Code za automatizaciju.
+> Pojednostavljen tijek izdanja koji koristi vještine Claude koda za automatizaciju.
 >
-> **Održavajte red čekanja/granu zelenima između izdanja:** pogledajte [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (obitelj `/green-prs` + `npm run check:release-green` + `/babysit` + noćno pokretanje). Povremeno pokretanje
-> ovoga — a osobito **prije** ovog kontrolnog popisa — omogućuje da PR izdanja započne zelen.
+> **Držite queue/branch zelenu između izdanja:** vidi [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` obitelj + `npm run check:release-green` + `/babysit` + noću). Pokretanje ovog povremeno — i posebno** prije** ovaj kontrolni popis — čini da izdanje PR počinje zeleno.
 
 ## Ukratko
 
@@ -58,9 +55,11 @@ Tijek rada npm-publish više ne objavljuje izravno: pokreće zapakirani tarball 
 
 **Knjiga slomljenog artefakta (nepromijenjeno):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` kao zadani refleks (minute, reverzibilan); `npm unpublish` samo unutar 72h/no-dependents prozora i nikad kao prvi potez. Docker: nikada ne prepisivati oznaku verzije — vraćanje je ponovno usmjeravanje `latest` na posljednji dobar sažetak.
 
-**Docker Hub `latest` (potreban za svaku stabilnu SemVer objavu):** tijek rada `docker-publish` mora označiti** oba** `X.Y.Z` i, kada se `should-promote-latest.sh` složi ovo je najviši stabilni SemVer, `:latest` s** isti sažetak** . Nakon posla: Hub `latest` digest jednak je novom SemVer digestu i `last_updated` premješten. Ne ostavljajte `:latest` na starijoj verziji dok bilješke o izdanju govore o popravcima koji postoje samo na git-u. Sastavite brzi početak korištenja `:latest`; GitOps bi trebao nastaviti pričvršćivati `X.Y.Z`. Pogledajte [Docker kanale izdanja](../guides/DOCKER_GUIDE.md#release-channels) i #10317.
+**Docker Hub `latest` (potrebno na svakoj stabilnoj SemVer objavi):** tijek rada `docker-publish` mora označiti** oba** `X.Y.Z` i, kada se `should-promote-latest.sh` složi ovo je najviši stabilni SemVer, `:latest` s** isti sažetak** . Nakon posla: Hub `latest` digest jednak je novom SemVer digestu i `last_updated` premješten. Ne ostavljajte `:latest` na starijoj verziji dok bilješke o izdanju govore o popravcima koji postoje samo na git-u. Sastavi brzi početak korištenja `:latest`; GitOps bi trebao nastaviti pričvršćivati `X.Y.Z`. Pogledajte [Docker kanale izdanja](../guides/DOCKER_GUIDE.md#release-channels) i #10317.
 
-**repozitorij organizacije Docker Hub (`cheaperinference/omniroute`):** Docker Hub ne može premještati repozitorij između prostora imena, tako da `diegosouzapw/omniroute` čuva svoju povijest povlačenja i svako izdanje, a `mirror-org-dockerhub` posao `docker-publish` a kopira svaku izdanu verziju (i `:latest` kada je promaknut) iz `ghcr.io/cheaper-inference/omniroute` u repozitorij organizacije. Treba `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` tajne; bez njih posao ostaje zelen s upozorenjem "Docker Hub org mirror skipped" i ostali registri objavljuju normalno. Da biste tamo kasnije objavili izdanu verziju, pokrenite** Akcije → Zrcaljenje Docker slike na Docker Hub org → Run workflow** sa `version=X.Y.Z` (i `promote_latest` za najvišu stabilnu verziju): kopira postojeće slike, bez ponovne izgradnje.
+**repozitorij organizacije Docker Hub (`cheaperinference/omniroute`):** Docker Hub ne može premještati repozitorij između prostora imena, tako da `diegosouzapw/omniroute` čuva svoju povijest povlačenja i svako izdanje, a `mirror-org-dockerhub` posao `docker-publish` a kopira svaku izdanu verziju (i `:latest` kada je promaknut) iz `ghcr.io/cheaper-inference/omniroute` u repozitorij organizacije. Treba `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` tajne; bez njih posao ostaje zelen s upozorenjem "Docker Hub org mirror skipped" i ostali registri objavljuju normalno. Da biste tamo kasnije objavili izdanu verziju, pokrenite** Akcije → Zrcaljenje Docker slike na Docker Hub org → Run workflow** sa `version=X.Y.Z` (i `promote_latest` za najvišu stabilnu verziju): kopira postojeće slike, bez ponovne izgradnje. Pregled Docker čvorišta tog repozitorija postavljen je ručno: API koji ga uređuje odbija tokene za pristup organizaciji.
+
+Isti tijek rada također kopira svako izdanje u naslijeđeni GHCR paket `ghcr.io/diegosouzapw/omniroute` do 2027-06-30, tako da se instalacije koje su još uvijek prikvačene na njega stalno ažuriraju; njegov indeks nosi opis "premješteno u `ghcr.io/cheaper-inference/omniroute`". Treba `GHCR_LEGACY_TOKEN` tajnu (klasični osobni pristupni token `diegosouzapw` sa `write:packages`); bez njega taj posao preskače s upozorenjem "Legacy GHCR mirror skipped".
 
 ## Ubrzana staza za hitne ispravke (oznaka `hotfix`)
 
@@ -151,12 +150,12 @@ Prijelomne promjene: dodajte `BREAKING CHANGE:` podnožje ili `!` nakon opsega (
 ### Dokumentacija
 
 - [ ] `npm run check:docs-sync` prolazi (automatsko pokretanje po prethodnom preuzimanju)
-- [ ] `npm run check:docs-all` prolazi (kišobran: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` prolazi. Njegov savjetodavni `check:deprecated-versions` označava verzije koje su eksplicitno pripisane OmniRoute (3.6.x i starije) i zanemaruje datume.
 - [ ] `npm run check:env-doc-sync` izlazi 0 — kod ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ugovor je netaknut
 - [ ] `npm run check:doc-links` izlazi 0 — nema pokvarenih internih referenci smanjenja nakon restrukturiranja
 - [ ] `docs/architecture/ARCHITECTURE.md` pregledan za storage/runtime drift
 - [ ] `docs/guides/TROUBLESHOOTING.md` pregledan za env var i operativni drift
-- [ ] Ako se `.env.example` promijenio: `docs/reference/ENVIRONMENT.md` ažuriran
+- [ ] Ako se `.env.example` promijenio: `docs/reference/ENVIRONMENT.md` je ažuriran
 - [ ] Ako nova značajka ima UI: `docs/guides/USER_GUIDE.md` to spominje
 - [ ] Ako nova značajka ima API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml`
 - [ ] Ako je nova značajka modul: namjenski `docs/<MODULE>.md` postoji
@@ -170,13 +169,13 @@ Prijelomne promjene: dodajte `BREAKING CHANGE:` podnožje ili `!` nakon opsega (
 - [ ] Ako su se izvorni engleski dokumenti promijenili, pokrenite `npm run i18n:run` (zahtijeva `OMNIROUTE_TRANSLATION_API_KEY` u `.env`) prije označavanja
 - [ ] Doprinosi prijevoda mogu se odgoditi za sljedeće izdanje ako su manji (trag u CHANGELOG)
 
-### Migracije baze podataka
+### Migracije baza podataka
 
 - [ ] Ako `src/lib/db/migrations/` ima nove datoteke:
   - [ ] Svaka migracija je idempotentna (`CREATE TABLE IF NOT EXISTS`, itd.)
   - [ ] Migracije umotane u transakcije
   - [ ] Ispravno numerirano (bez praznina u nizu)
-- [ ] Testirajte svježu instalaciju: izbrišite `~/.omniroute/omniroute.db` i pokrenite `npm run dev`
+- [ ] Testirajte novu instalaciju: izbrišite `~/.omniroute/omniroute.db` i pokrenite `npm run dev`
 - [ ] Testirajte postojeću instalaciju: napravite sigurnosnu kopiju DB, pokrenite migraciju, provjerite shemu
 - [ ] WAL datoteke (`-wal`, `-shm`) s kojima se ispravno rukuje ako migracija prepisuje tablice
 
@@ -366,7 +365,7 @@ npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ne izvršava ništa: čita git i `gh` i ispisuje cijeli slijed — preduvjeta (izvor rješava, izvorno spremište ima punu povijest — plitki klon ne može gurnuti `stable/v3`, strana koja prima odbacuje paket na prvom presađenom roditelju, tako da izrezuje iz punog klona ili `git fetch --unshallow origin` postoji prva — prethodna oznaka, `package.json` je ciljna verzija, problem `release-freeze` je otvoren, nema otvorenih `Release branch not green` problem na postojećoj grani izdanja — grana koja ne postoji javlja `?` nepoznato, nikad zeleno — omni-queue postavlja izdanje PRs (G11: `config/merge-queue/config.json` valjan, njegov `bases` upravlja granom izdanja, `mode` `live`, njegova oznaka postoji), `release/*` skup pravila i dalje blokira brisanje i prisilno guranje, a `stable/v3` i `develop` još ne postoje), dva koraka grane, koji okidači neaktivnog tijeka rada i `if:` uvjeti postaju istiniti (i koji ostaju ograničeni varijablom repozitorija ili prikvačeni na kanonsko spremište), očekivane dist-oznake (`latest` → 3.9.0, `next` i `nightly` prazni) i vraćanje. Izlaz `0` = `RESULT: READY`, `1` = preduvjet blokiranja nije uspio (`✗`), `2` = greška korištenja. `--advisory <id,...>` smanjuje provjeru na upozorenje (`!`) bez skrivanja.
+`scripts/release/dry-run-lts-cut.mjs` ne izvršava ništa: čita git i `gh` i ispisuje cijeli niz — preduvjeta (izvor rješava, izvorno spremište ima punu povijest — plitki klon ne može gurnuti `stable/v3`, strana koja prima odbacuje paket na prvom presađenom roditelju, tako da izrezuje iz punog klona ili `git fetch --unshallow origin` postoji prva — prethodna oznaka, `package.json` je ciljna verzija, problem `release-freeze` je otvoren, nema otvaranja `Release branch not green` problem na postojećoj grani izdanja — grana koja ne postoji javlja `?` nepoznato, nikad zeleno — omni-queue postavlja izdanje PRs (G11: `config/merge-queue/config.json` valjan, njegov `bases` upravlja granom izdanja, `mode` `live`, njegova oznaka postoji), `release/*` skup pravila i dalje blokira brisanje i prisilno guranje, a `stable/v3` i `develop` još ne postoje), dva koraka grane, koji okidači neaktivnog tijeka rada i `if:` uvjeti postaju istiniti (i koji ostaju ograničeni varijablom repozitorija ili prikvačeni na kanonsko spremište), očekivane dist-oznake (`latest` → 3.9.0, `next` i `nightly` prazni) i vraćanje. Izlaz `0` = `RESULT: READY`, `1` = preduvjet blokiranja nije uspio (`✗`), `2` = pogreška upotrebe. `--advisory <id,...>` degradira provjeru na upozorenje (`!`) bez skrivanja.
 
 Pokrenite provjeru stvarnog rezanja dok je zamrzavanje izdanja 3.9.0 još uvijek otvoreno — grane se stvaraju nakon oznake i prije nego što faza 12c ukine zamrzavanje.
 
@@ -399,17 +398,17 @@ Development bump commit izgrađen je s git plumbingom (nije dotaknuto radno stab
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Izvođenje radi `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakira tarball, pokreće `npm run check:pack-boot` (lažne tajne, efemerni direktorij podataka), ponovno pakira i ne uspije osim ako sažetak nije identičan, zatim bilježi `artifact-identity.json` (glava SHA, baza SHA, hash datoteke zaključavanja, platforma, luk, čvor ABI, skupljač, politika izgradnje — `scripts/release/artifact-identity.mjs`) i potvrđuje tarball u zasebnom poslu. Promicanje pregleda znači instaliranje tog tarballa: nikada ne iznova izgrađujte iz izvora.
+Izvođenje radi `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakira tarball, pokreće `npm run check:pack-boot` (lažne tajne, efemerni direktorij podataka), ponovno pakira i ne uspije osim ako sažetak nije identičan, zatim bilježi `artifact-identity.json` (glava SHA, baza SHA, hash datoteke zaključavanja, platforma, luk, čvor ABI, skupljač, politika izgradnje — `scripts/release/artifact-identity.mjs`) i potvrđuje tarball u zasebnom poslu. Promicanje pregleda znači instalaciju tog tarballa: nikada ne iznova izgrađujte iz izvora.
 
 ### Rez (3.9.0, nakon GO)
 
 1. GO zabilježeno u [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` ispisuje `RESULT: READY`.
-3. Ručno izradite grane na `origin` s naredbama koje ispisuje — skripta odbija gurnuti u `origin`. Da biste ponovno upotrijebili pregledani razvojni kommit, prvo pokrenite `--execute` probu na vrhu 3.9.0 nasuprot vašem forku; ispisuje oba SHAs, a iste obveze se mogu gurnuti:
+3. Ručno izradite grane na `origin` s naredbama koje ispisuje — skripta odbija gurnuti u `origin`. Da biste ponovno upotrijebili pregledani razvojni obvezu, prvo pokrenite `--execute` probu na vrhu 3.9.0 protiv vaše vilice; ispisuje oba SHAs, a iste obveze se mogu gurnuti:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop

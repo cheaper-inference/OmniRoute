@@ -62,42 +62,31 @@ Všetky tri metódy vyžadujú autentifikáciu ovládacieho panela (`isAuthentic
 OmniRoute uloží token a okamžite spustí testovacie vyhľadávanie s 1 výsledkom; ak Notion
 vráti objekt chyby, token sa vymaže a volanie zlyhá so stavom `400`.
 
-## Nástroje MCP (6)
+## nástroje MCP (6)
 
-Definované v `open-sse/mcp-server/tools/notionTools.ts`. Token sa načítava pri volaní
-prostredníctvom `getNotionToken()`; ak nie je žiadny nakonfigurovaný, nástroj vyvolá chybu
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
+Definované v `open-sse/mcp-server/tools/notionTools.ts`. Token je vyriešený v čase hovoru cez `getNotionToken()`; ak nie je nakonfigurovaný žiadny, nástroj vyvolá `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Nástroj                      | Rozsah         | Opis                                                                                                |
-| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Vyhľadáva stránky a databázy podľa textového dopytu (vracia názvy, ID a URL). Stránkované.          |
-| `notion_get_page`            | `read:notion`  | Získa obsah a metadáta stránky podľa jej ID.                                                        |
-| `notion_list_block_children` | `read:notion`  | Vypíše všetky podradené bloky bloku alebo stránky (strom blokov). Stránkované.                      |
-| `notion_query_database`      | `read:notion`  | Vyhľadáva v databáze s voliteľnými parametrami `filter` + `sorts` (formát API Notion). Stránkované. |
-| `notion_get_database`        | `read:notion`  | Získa schému/metadáta databázy podľa ID.                                                            |
-| `notion_append_blocks`       | `write:notion` | Pridá podradené bloky do existujúceho bloku alebo stránky (najviac 100 blokov na požiadavku).       |
+| Nástroj                      | Rozsah         | Popis                                                                                          |
+| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Vyhľadávať stránky a databázy podľa textového dopytu (vracia nadpisy, IDs, URLs). Stránkované. |
+| `notion_get_page`            | `read:notion`  | Získajte obsah a metadáta stránky podľa jej ID.                                                |
+| `notion_list_block_children` | `read:notion`  | Uveďte zoznam všetkých potomkov bloku alebo stránky (strom blokov). Stránkované.               |
+| `notion_query_database`      | `read:notion`  | Dopytujte databázu pomocou voliteľného `filter` + `sorts` (formát Notion API ). Stránkované.   |
+| `notion_get_database`        | `read:notion`  | Získajte schema/metadata databázy pomocou ID.                                                  |
+| `notion_append_blocks`       | `write:notion` | Pripojiť deti bloku k existujúcemu bloku alebo stránke (maximálne 100 blokov na požiadavku).   |
 
 ### Vstupné parametre
 
-- `notion_search` — `query` (1–500 znakov), `pageSize` (1–100, predvolene 20),
-  `startCursor` (voliteľné).
-- `notion_get_page` — `pageId` (32-znaková hexadecimálna hodnota alebo UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, predvolene 50),
-  `startCursor` (voliteľné).
-- `notion_query_database` — `databaseId`, `filter` (voliteľné, formát filtra Notion),
-  `sorts` (voliteľné pole), `pageSize` (1–100, predvolene 50), `startCursor` (voliteľné).
+- `notion_search` — `query` (1–500 znakov), `pageSize` (1–100, predvolená hodnota 20), `startCursor` (voliteľné).
+- `notion_get_page` — `pageId` (32-znakový hex alebo UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, predvolená hodnota 50), `startCursor` (voliteľné).
+- `notion_query_database` — `databaseId`, `filter` (voliteľné, formát filtra Notion ), `sorts` (voliteľné pole), `pageSize` (1–100, predvolená hodnota 50), `startCursor` (voliteľné).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (pole objektov blokov),
-  `after` (voliteľná pozícia).
+- `notion_append_blocks` — `blockId`, `children` (pole blokových objektov), `after` (voliteľná poloha).
 
 ### Rozsahy
 
-Nástroje na čítanie vyžadujú `read:notion` a nástroj na zápis vyžaduje `write:notion`.
-Rozsahy vynucuje `withScopeEnforcement()` v
-`open-sse/mcp-server/server.ts` iba vtedy, keď `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; povolené
-rozsahy volajúceho pochádzajú z `OMNIROUTE_MCP_SCOPES` (oddelené čiarkami) alebo z kontextu
-rozsahov autentifikovaného kľúča API. Úplný model rozsahov nájdete v
-[MCP-SERVER.md](./MCP-SERVER.md).
+Nástroje na čítanie vyžadujú `read:notion` a nástroj na zápis vyžaduje `write:notion`. Rozsahy sú vynútené pomocou `withScopeEnforcement()` v `open-sse/mcp-server/server.ts`, keď `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, a vždy pre volajúceho HTTP/SSE ktorého kľúč API nemá `manage`/`admin`; povolené rozsahy volajúceho pochádzajú z kontextu rozsahu `OMNIROUTE_MCP_SCOPES` (oddelené čiarkou) alebo overeného kľúča API. Pozrite si [MCP-SERVER.md](./MCP-SERVER.md) pre model v plnom rozsahu.
 
 ## Koncové body
 

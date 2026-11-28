@@ -4,9 +4,9 @@
 
 ---
 
-> **Zdroj pravdy:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Posledná aktualizácia:** 2026-06-28 — v3.8.40
+> **Zdroj pravdy:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
-OmniRoute zachytáva pomocnú `reasoning_content` produkovanú modelmi v režime myslenia a transparentne ju prehráva pri viacnásobných požiadavkách, keď to poskytovateľ upstream vyžaduje. To eliminuje chyby HTTP 400, ktoré prísni poskytovatelia upozorňujú, keď v histórii konverzácie klienta chýba zdôvodnenie predchádzajúceho kola.
+OmniRoute zachytáva pomocnú `reasoning_content` produkovanú modelmi v režime myslenia a transparentne ju prehráva pri viacnásobných požiadavkách, keď si to poskytovateľ upstream vyžaduje. To eliminuje chyby HTTP 400, ktoré prísni poskytovatelia upozorňujú, keď v histórii konverzácie klienta chýba zdôvodnenie predchádzajúceho kola.
 
 ## Prečo toto existuje
 

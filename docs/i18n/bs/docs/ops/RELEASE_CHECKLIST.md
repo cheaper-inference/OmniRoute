@@ -4,12 +4,9 @@
 
 ---
 
-> **Posljednje ažuriranje:** 2026-08-28 — v3.8.51
-> Pojednostavljen tok izdanja koji koristi vještine Claude Codea za automatizaciju.
+> Pojednostavljeni tok izdanja koji koristi Claude Code vještine za automatizaciju.
 >
-> **Održavajte red čekanja/granu zelenom između izdanja:** pogledajte [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs` porodica + `npm run check:release-green` + `/babysit` + noćno pokretanje). Periodično pokretanje
-> ovoga — a naročito **prije** ove kontrolne liste — osigurava da PR izdanja započne zeleno.
+> **Neka queue/branch ostane zelena između izdanja:** vidi [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` porodica + `npm run check:release-green` + `/babysit` + noću). Pokretanje ovog povremeno — i posebno** prije** ova kontrolna lista — čini izdanje PR zeleno.
 
 ## Ukratko
 
@@ -52,15 +49,17 @@ Radni tok npm-publish više se ne objavljuje direktno: pokreće upakovani tarbal
 3. `npm stage approve <id>` — 2FA prompt IS za objavljivanje. `npm stage reject <id>` odbacuje.
 4. Mreža nakon objavljivanja: verifikator nakon objavljivanja (WS1.4 plana v3.8.49) instalira objavljenu verziju iz javnog registra u čist kontejner i pokreće je.
 
-**Hitna pomoć:** `workflow_dispatch` sa `publish_mode=direct` vraća naslijeđeni trenutni `npm publish` (koristite samo ako se sama inscenacija ne ponaša loše; zapišite zašto).
+**Hitan rezervni slučaj:** `workflow_dispatch` sa `publish_mode=direct` vraća naslijeđeni trenutni `npm publish` (koristite samo ako se sama inscenacija ne ponaša loše; zapišite zašto).
 
 **Jednokratno kaljenje (vlasnik, npmjs.com):** konfigurirajte Pouzdanog izdavača za `omniroute` u načinu rada samo na pozornici tako da procureli dugovječni token ne može `npm publish` direktno s bilo kojeg mjesta gdje — CI može samo postaviti; samo vlasnička 2FA izdanja.
 
 **Knjiga slomljenih artefakata (nepromijenjena):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` kao podrazumevani refleks (minuti, reverzibilni); `npm unpublish` samo unutar 72h/no-dependents prozora i nikada kao prvi potez. Docker: nikad ne prepisivati oznaku verzije — rollback je ponovno usmjeravanje `latest` na posljednji dobar sažetak.
 
-**Docker Hub `latest` (potrebno pri svakom stabilnom SemVer objavljivanju):** `docker-publish` radni tok mora označiti** oboje** `X.Y.Z` i, kada se `should-promote-latest.sh` slaže ovo je najviša stabilna SemVer, `:latest` sa** isti digest** . Nakon posla: Hub `latest` digest jednak je novom SemVer digest i `last_updated` premješten. Ne ostavljajte `:latest` na starijoj verziji dok bilješke o izdanju govore o popravkama koje postoje samo na git-u. Sastavljanje brzih početaka koristite `:latest`; GitOps bi trebao nastaviti zakačiti `X.Y.Z`. Pogledajte [kanale izdanja Docker](../guides/DOCKER_GUIDE.md#release-channels) i #10317.
+**Docker Hub `latest` (potrebno pri svakom stabilnom SemVer objavljivanju):** `docker-publish` radni tok mora označiti** oboje** `X.Y.Z` i, kada se `should-promote-latest.sh` slaže ovo je najviša stabilna SemVer, `:latest` sa** isti digest** . Nakon posla: Hub `latest` digest jednak je novom SemVer digest i `last_updated` premješten. Ne ostavljajte `:latest` na starijoj verziji dok bilješke o izdanju govore o popravkama koje postoje samo na git-u. Sastavljanje brzih početaka koristite `:latest`; GitOps bi trebao nastaviti zakačiti `X.Y.Z`. Pogledajte [Docker kanale izdanja](../guides/DOCKER_GUIDE.md#release-channels) i #10317.
 
-**Organizacijsko spremište Docker Hub (`cheaperinference/omniroute`):** Docker Hub ne može premještati spremište između imenskih prostora, tako da `diegosouzapw/omniroute` čuva svoju povijest povlačenja i svako izdanje, a `mirror-org-dockerhub` posao `docker-publish` a kopira svaku objavljenu verziju (i `:latest` kada se promovira) iz `ghcr.io/cheaper-inference/omniroute` u spremište organizacije. Potrebne su `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` tajne; bez njih posao ostaje zelen sa upozorenjem "Docker Hub org ogledalo preskočeno" i drugi registri se objavljuju normalno. Da biste kasnije tamo objavili objavljenu verziju, pokrenite** Radnje → Preslikavanje Docker slike u Docker Hub org → Pokreni radni tok** sa `version=X.Y.Z` (i `promote_latest` za najvišu stabilnu verziju): kopira postojeće slike, bez rekonstrukcije.
+**Organizacijsko spremište Docker Hub (`cheaperinference/omniroute`):** Docker Hub ne može premještati spremište između prostora imena, tako da `diegosouzapw/omniroute` čuva svoju povijest povlačenja i svako izdanje, a `mirror-org-dockerhub` posao `docker-publish` kopira svaku objavljenu verziju (i `:latest` kada se promovira) iz `ghcr.io/cheaper-inference/omniroute` u spremište organizacije. Potrebne su tajne `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; bez njih posao ostaje zelen sa upozorenjem "Docker Hub org ogledalo preskočeno" i drugi registri se objavljuju normalno. Da biste kasnije tamo objavili objavljenu verziju, pokrenite** Radnje → Preslikavanje Docker slike u Docker Hub org → Pokreni radni tok** sa `version=X.Y.Z` (i `promote_latest` za najvišu stabilnu verziju): kopira postojeće slike, bez rekonstrukcije. Docker Hub pregled tog spremišta je postavljen ručno: API koji ga uređuje odbija tokene za pristup organizaciji.
+
+Isti tok rada također kopira svako izdanje u naslijeđeni GHCR paket `ghcr.io/diegosouzapw/omniroute` do 30.06.2027, tako da se instalacije koje su još uvijek zakačene za njega nastavljaju ažurirati; njegov indeks nosi opis "premješteno u `ghcr.io/cheaper-inference/omniroute`". Potrebna mu je tajna `GHCR_LEGACY_TOKEN` (klasični lični token za pristup `diegosouzapw` sa `write:packages`); bez toga taj posao preskače sa upozorenjem "Legacy GHCR mirror preskočen".
 
 ## Ubrzana traka za hitne ispravke (oznaka `hotfix`)
 
@@ -121,7 +120,7 @@ matricu, bez ikakve oznake.
 - [ ] `npm run test:vitest` — pass (MCP server, autoCombo, cache)
 - [ ] `npm run test:coverage` — kapija 60/60/60/60 zadovoljan (statements/lines/functions/branches)
 - [ ] `npm run test:integration` — pass (ako se promijeni, dodirnite DB / rukovaoce)
-- [ ] `npm run test:combo:matrix` — pass (matrica kombinirane strategije: deterministički dokazuje odluke o odabiru svih 22 javne strategije usmjeravanja; pokreće se kada se dodirne kombinirano usmjeravanje, rezolucija strategije ili rezervna logika)
+- [ ] `npm run test:combo:matrix` — pass (matrica kombinirane strategije: deterministički dokazuje odluke o odabiru svih 22 javne strategije usmjeravanja; pokreće se kada se dodirne kombinirano rutiranje, rezolucija strategije ili rezervna logika)
 - [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (zatvoreni pravi uzvodni dim; izvori DB snimak samo za čitanje iz VPS `root@192.168.0.15`; pogađa stvarne provajdere, košta kredite; nikad ne radi u CI; čisto preskače bez kapije)
 - [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS live dim: 7 HTTP scenarija protiv živog `.15` servera preko običnog čvora ESM; zahtijeva `ssh root@192.168.0.15`; creates/deletes samo `__live_test__*` kombinacije; pogađa prave provajdere; nikad ne radi u CI)
 - [ ] `npm run test:e2e` — pass (UI promjene)
@@ -151,10 +150,10 @@ Prelomne promjene: dodajte `BREAKING CHANGE:` podnožje ili `!` nakon opsega (np
 ### Dokumentacija
 
 - [ ] `npm run check:docs-sync` prolazi (automatsko pokretanje pre-urezivanja)
-- [ ] `npm run check:docs-all` prolazi (kišobran: docs-sync + docs-counts + env-doc-sync + zastarjele verzije + doc-links)
+- [ ] `npm run check:docs-all` prolazi. Njegov savjetodavni `check:deprecated-versions` označava verzije eksplicitno pripisane OmniRoute (3.6.x i ranije) i zanemaruje datume.
 - [ ] `npm run check:env-doc-sync` izlazi 0 — kod ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ugovor je netaknut
 - [ ] `npm run check:doc-links` izlazi 0 — nema prekinutih internih referenci smanjenja nakon restrukturiranja
-- [ ] `docs/architecture/ARCHITECTURE.md` recenzirana za storage/runtime drift
+- [ ] `docs/architecture/ARCHITECTURE.md` recenzirano za storage/runtime drift
 - [ ] `docs/guides/TROUBLESHOOTING.md` pregledan za env var i operativni drift
 - [ ] Ako je `.env.example` promijenjen: `docs/reference/ENVIRONMENT.md` ažuriran
 - [ ] Ako nova karakteristika ima UI: `docs/guides/USER_GUIDE.md` to spominje
@@ -177,7 +176,7 @@ Prelomne promjene: dodajte `BREAKING CHANGE:` podnožje ili `!` nakon opsega (np
   - [ ] Migracije umotane u transakcije
   - [ ] Pravilno numerisano (bez praznina u nizu)
 - [ ] Testirajte na novoj instalaciji: izbrišite `~/.omniroute/omniroute.db` i pokrenite `npm run dev`
-- [ ] Testirajte na postojećoj instalaciji: backup DB, pokrenite migraciju, provjerite shemu
+- [ ] Testirajte postojeću instalaciju: backup DB, pokrenite migraciju, provjerite shemu
 - [ ] WAL fajlovi (`-wal`, `-shm`) ispravno obrađeni ako migracija prepisuje tablice
 
 ### Katalog dobavljača (potvrđen Zod)
@@ -399,7 +398,7 @@ Urezivanje bump-a za razvoj je izgrađeno pomoću git-a (nijedno radno stablo se
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

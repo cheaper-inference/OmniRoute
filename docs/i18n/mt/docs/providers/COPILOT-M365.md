@@ -168,9 +168,9 @@ Aċċerta li `copilot-m365-web` huwa attivat in** Dashboard → Fornituri** . Il
 
 ## Referenzi
 
-- Kwistjoni: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Diskussjoni: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Ħarġa: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Diskussjoni: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Sors: `src/shared/constants/providers/web-cookie.ts` (definizzjoni tal-fornitur)
-- Importazzjoni HAR: `src/shared/utils/m365HarImport.ts`
+- HAR importazzjoni: `src/shared/utils/m365HarImport.ts`
 - Oqsma tal-kredenzjali: `src/shared/providers/webSessionCredentials.ts`
-- Modal tal-livell: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Tier modal: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

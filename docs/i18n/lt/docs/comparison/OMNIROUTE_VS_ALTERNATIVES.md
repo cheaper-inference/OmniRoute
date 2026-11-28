@@ -6,12 +6,12 @@
 
 Objektyvus funkcijų palyginimas su populiariais atvirojo kodo AI maršrutizatoriais.
 
-> **Metodika** : Viešieji atpirkimo sandoriai, audituoti 2026–2 ketv. Versijos, kaip nurodyta. Pateikite pataisymus per PR — norime, kad tai būtų tikslu.
+> **Metodika** : Viešieji atpirkimo sandoriai, audituoti 2026–2 ketv. Versijos, kaip nurodyta. Pateikite pataisymus per PR — norime, kad tai būtų tiksli.
 
 | Funkcija                                                        |                  OmniRoute 3.8                  |   LiteLLM 1.x    | OpenRouter (SaaS) |     Portkey      |
 | --------------------------------------------------------------- | :---------------------------------------------: | :--------------: | :---------------: | :--------------: |
 | **Teikėjai**                                                    |                     **329**                     |       ~100       |        ~50        |       ~30        |
-| **Free/no-auth katalogo įrašai**                                |                     **155**                     |       n/a        |   praeinamumas    |       n/a        |
+| **Teikėjai, turintys nemokamą prieigą**                         |           **50 su nemokama prieiga**            |       n/a        |   praeinamumas    |       n/a        |
 | **Savarankiškas šeimininkas**                                   |                       ✅                        |        ✅        |        ❌         |    ⚠ sumokėjo    |
 | **OAuth katalogo įrašai**                                       |                     **23**                      |     dalinis      |        ❌         |        ❌        |
 | **Automatinės atsarginės kombinacijos**                         |               **22 strategijos**                | pagal prioritetą |     pakopinis     |    svertinis     |
@@ -38,7 +38,7 @@ Objektyvus funkcijų palyginimas su populiariais atvirojo kodo AI maršrutizator
 
 ## Kada rinktis OmniRoute
 
-- Savarankiškai priimate ir norite** maksimali teikėjo aprėptis** (394 teikėjas, 155 free/no-auth katalogo įrašai)
+- Savarankiškai priimate ir norite** maksimali teikėjo aprėptis** (394 teikėjai, 50 su nemokama prieiga)
 - Jums reikia a** įmontuotas MCP serveris** (LLM įrankiai, atmintis, įgūdžiai rodomi kaip įrankiai)
 - Tau reikia**A2A protokolas** tarp agentų darbo eigoms
 - Tu nori** pirštų atspaudų slėpimas** (JA3/JA4), kad būtų išvengta aptikimo prieš srovę CAPTCHAs
@@ -56,12 +56,12 @@ Objektyvus funkcijų palyginimas su populiariais atvirojo kodo AI maršrutizator
 - Jums tinka mokėti už kiekvieną žetoną su SaaS antkainiu
 - Jums reikia **vieno mokėjimo būdo** visiems teikėjams
 
-## Kada rinktis Portkey
+## Kada pasirinkti „Portkey“.
 
-- Jums reikia **komercinio SLA** su pasiekiamumo garantijomis
-- Pageidaujate **valdomo valdymo skydelio** be eksploatavimo priežiūros naštos
-- Jums reikia iš karto paruoštų **įmonių atitikties reikalavimams** funkcijų
+- Jums reikia a** komercinis SLA** su veikimo laiko garantijomis
+- Jums labiau patinka a** valdoma prietaisų skydelis** be operacijų virš galvos
+- Tau reikia** įmonės atitiktį** funkcijos iš dėžutės
 
 ---
 
-_Paskutinį kartą atnaujinta: 2026-08-02. Kad ši lentelė išliktų tiksli, pataisymus pateikite per PR._
+_Pateikite pataisymus per PR, kad ši lentelė būtų tiksli._

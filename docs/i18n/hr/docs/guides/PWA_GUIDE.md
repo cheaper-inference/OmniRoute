@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute se isporučuje kao potpuno instalirljiva progresivna web-aplikacija. Kada nadzornoj ploči pristupite iz bilo kojeg mobilnog preglednika — Android (Chrome) ili iOS (Safari) — možete odabrati opciju „Dodaj na početni zaslon” i dobiti iskustvo nalik izvornoj aplikaciji bez potrebe za trgovinom aplikacija.
+Instalirajte nadzornu ploču OmniRoute kao progresivnu web-aplikaciju da biste je otvorili s početnog zaslona ili radne površine u samostalnom prozoru. Instalirana aplikacija i dalje treba vezu s vašim OmniRoute poslužiteljem za navigaciju, podatke nadzorne ploče i API zahtjeve. Predmemorirana statička sredstva ne pružaju izvanmrežni pristupnik ili izvanmrežnu nadzornu ploču.
 
 ## Što je PWA?
 
-Progresivna web-aplikacija pretvara web-nadzornu ploču OmniRoute u nešto što izgleda i ponaša se poput izvorne mobilne aplikacije. Nakon instalacije:
+Progresivna web-aplikacija koristi web-kontrolnu ploču s ikonom aplikacije i zasebnim prozorom. Jednom instaliran, OmniRoute:
 
-- Pokreće se s početnog zaslona putem vlastite ikone
-- Otvara se preko cijelog zaslona — bez adresne trake preglednika ili sučelja kartica
-- Radi izvan mreže uz namjensku stranicu za povezivost
-- Predmemorira statičke resurse radi bržeg učitavanja
-- Podržava okomitu i vodoravnu orijentaciju
+- Pokreće se s početnog zaslona ili radne površine
+- Otvara se u samostalnom načinu rada, bez uobičajene adresne trake i kartica preglednika
+- Sprema odabrana statička sredstva u predmemoriju
+- Podržava portretnu i pejzažnu orijentaciju
 
-## Instalacija
+## Montaža
+
+Koristite HTTPS adresu za poslužitelj na drugom uređaju. Kada poslužitelj radi na istom uređaju, `http://localhost:20128` također ispunjava zahtjeve za instalaciju preglednika. Obična `http://YOUR_IP:20128` adresa ne ispunjava te zahtjeve. Instalacijski izbornici i upute ovise o pregledniku i operativnom sustavu. Pogledajte [MDN-ove PWA instalacijske zahtjeve](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
 
 ### Android (Chrome)
 
-1. Otvorite nadzornu ploču OmniRoute u pregledniku Chrome: `http://YOUR_IP:20128`
-2. Chrome će automatski prikazati natpis **„Dodaj OmniRoute na početni zaslon”** ili:
-   - Dodirnite izbornik **⋮** (tri točke) → **„Dodaj na početni zaslon”** ili **„Instaliraj aplikaciju”**
-3. Potvrdite upit
-4. OmniRoute će se pojaviti na početnom zaslonu kao samostalna aplikacija
+1. Otvorite svoju OmniRoute HTTPS adresu ili `http://localhost:20128` za poslužitelj na istom telefonu.
+2. Otvorite**⋮** izbornik i odaberite** Instalirajte aplikaciju** ili** Dodaj na početni zaslon** , ako se nudi.
+3. Potvrdite upit.
+4. Otvorite OmniRoute s početnog zaslona.
 
-### iOS (Safari)
+### iOS (safari)
 
-1. Otvorite nadzornu ploču OmniRoute u pregledniku Safari: `http://YOUR_IP:20128`
-2. Dodirnite gumb **Dijeli** (okvir sa strelicom)
-3. Pomaknite se prema dolje i dodirnite **„Dodaj na početni zaslon”**
-4. Dodijelite joj naziv (zadano je „OmniRoute”) i dodirnite **Dodaj**
-5. OmniRoute će se pojaviti na početnom zaslonu s ikonom aplikacije
+1. Otvorite svoju OmniRoute HTTPS adresu u Safariju.
+2. Dodirnite** Udio** →** Dodaj na početni zaslon** .
+3. Potvrdite naziv i dodirnite** Dodati** .
+4. Otvorite OmniRoute s početnog zaslona.
 
-### Stolno računalo (Chrome / Edge)
+### Radna površina (Chrome/Edge)
 
-1. Otvorite nadzornu ploču OmniRoute
-2. Kliknite **ikonu za instalaciju** u adresnoj traci (ili ⋮ → „Instaliraj OmniRoute...”)
-3. Potvrdite upit
-4. OmniRoute će se otvoriti kao samostalan prozor — bez kartica i adresne trake
+1. Otvorite svoju OmniRoute nadzornu ploču.
+2. Koristite ikonu za instalaciju preglednika ili** Instalirajte aplikaciju** unos u izbornik, ako je ponuđen.
+3. Potvrdite upit za otvaranje OmniRoute u vlastitom prozoru.
 
 ## Značajke
 
-### Prikaz preko cijelog zaslona
+### Samostalni prozor
 
-Manifest je konfiguriran s `display: "fullscreen"`, što znači da instalirana aplikacija koristi cijeli zaslon — bez sučelja preglednika i bez preklapanja statusne trake. Zbog toga nadzorna ploča djeluje kao prava izvorna aplikacija.
+Manifest postavlja `display: "standalone"` i `start_url: "/dashboard"`. Instalirana aplikacija otvara nadzornu ploču u prozoru aplikacije. Kontrole preglednika i operativnog sustava i dalje se mogu pojaviti; manifest ne zahtijeva način rada preko cijelog zaslona.
 
-### Podrška za izvanmrežni rad
+### Predmemorirana sredstva i mrežni zahtjevi
 
-OmniRoute uključuje servisnog radnika (`sw.js`) koji omogućuje inteligentno predmemoriranje:
+[Uslužni radnik](../../public/sw.js) predmemorira odabrane resurse istog porijekla:
 
-| Vrsta resursa                                                                                                                                                                                                                            | Strategija                                 | Ponašanje                                                                                                      |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| **Ljuska aplikacije**                                                                                                                                                                                                                    | Najprije predmemorija                      | `/`, `/offline`, manifest i ikone unaprijed se predmemoriraju tijekom instalacije                              |
-| **Statički resursi** (CSS, JS, slike, fontovi)                                                                                                                                                                                           | Najprije mreža, uz rezervnu predmemoriju   | Dohvaća svježe podatke s mreže; ako nema veze, koristi predmemoriju                                            |
-| **Next.js paketi** (`/_next/`)                                                                                                                                                                                                           | Najprije mreža, uz ažuriranje predmemorije | Dohvaća s mreže i ažurira predmemoriju; ako nema veze, poslužuje predmemoriranu verziju                        |
-| **Navigacijski zahtjevi**                                                                                                                                                                                                                | Zaobilaženje (nikada se ne presreću)       | Preglednik upravlja prijelazom s HTTP/3 na HTTP/2; neaktivna QUIC utičnica ne smije postati `Response.error()` |
-| **API / rute nadzorne ploče** (`/api/`, `/a2a`, `/dashboard`, aliasi klijentskog API-ja `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, kao i `/callback`, `/login`; uspoređuju se bez razlikovanja velikih i malih slova) | Zaobilaženje (nikada se ne predmemoriraju) | Uvijek idu izravno poslužitelju — servisni radnik ih nikada ne presreće                                        |
+| Zahtjev ili sredstvo                                 | Strategija            | Ponašanje                                                                                                                      |
+| ---------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Resursi za vrijeme instalacije                       | Predmemorija          | `/`, `/manifest.webmanifest`, `/icon-512.png` i `/apple-touch-icon.png` pohranjuju se u predmemoriju tijekom radne instalacije |
+| Next.js statička sredstva (`/_next/`)                | Mreža na prvom mjestu | Uspješni odgovori ažuriraju predmemoriju; mrežna pogreška vraća se na postojeći odgovor u predmemoriji                         |
+| Ostali statički CSS, JS, slike i fontovi             | Najprije predmemorija | Ponovno se koristi postojeći predmemorirani odgovor; uspješni mrežni odgovori spremaju se u predmemoriju na promašaj           |
+| Navigacija po stranici                               | Zaobići               | Preglednik izravno dohvaća stranicu; ne poslužuje se izvanmrežna zamjena                                                       |
+| API, nadzorna ploča i rute za provjeru autentičnosti | Zaobići               | Radnik ne presreće niti sprema ove zahtjeve u predmemoriju                                                                     |
+| Ostali nestatički zahtjevi                           | Mreža                 | Nema traženja predmemorije ili pohrane                                                                                         |
 
-### Stranica za izvanmrežni rad
+Isključene rute su `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` i `/login`, sparene bez obzira na velika i mala slova na granicama staze. Cross-origin i non-GET zahtjevi također zaobilaze radnika.
 
-Kada mreža nije dostupna, a korisnik prijeđe na novu stranicu, servisni radnik poslužuje namjensku stranicu `/offline` koja:
+### Stranica za povezivanje
 
-- Prikazuje jasnu poruku **„Problem s povezivošću”**
-- Prikazuje pokazatelj **mrežnog/izvanmrežnog stanja** koji se ažurira u stvarnom vremenu
-- Nudi gumb **„Ponovno pokušaj povezivanje”** za ponovno učitavanje nakon povratka veze
-- Sadrži poveznicu na **stranicu statusa** radi dijagnostike
+Stranica `/offline` pruža poruku o povezivanju, indikator online/offline, a** Ponovno pokušaj povezivanje** gumb i poveznicu na stranicu statusa. jeste** nije unaprijed predmemorirano** a uslužni radnik radi** ne** preusmjeriti neuspjele navigacije na njega. Njegovo postojanje ne čini nove stranice dostupnima bez poslužitelja.
 
-### Ikone aplikacije
+### Ikone aplikacija
 
-OmniRoute pruža ikone optimizirane za svaku platformu:
+Manifest reklamira ove PNG ikone:
 
-| Datoteka               | Veličina            | Upotrebljava se za                           |
-| ---------------------- | ------------------- | -------------------------------------------- |
-| `icon-512.png`         | 512×512             | Androidov upit za instalaciju, uvodni zaslon |
-| `apple-touch-icon.png` | 180×180             | Ikonu na početnom zaslonu sustava iOS        |
-| `icon-192.svg`         | 192×192 (vektorski) | Androidovu prilagodljivu ikonu               |
-| `apple-touch-icon.svg` | 180×180 (vektorski) | Zamjensku Appleovu ikonu                     |
-| `favicon.svg`          | Vektorska           | Kartice preglednika                          |
-| `favicon.ico`          | Više veličina       | Starije preglednike                          |
+| File                   | Veličina | Koristiti                                    |
+| ---------------------- | -------- | -------------------------------------------- |
+| `icon-192.png`         | 192×192  | Opća ikona aplikacije                        |
+| `icon-512.png`         | 512×512  | Opća ikona aplikacije koja se može maskirati |
+| `apple-touch-icon.png` | 180×180  | Apple ikona početnog zaslona                 |
+
+Preglednik odabire odgovarajuću ikonu za cilj instalacije.
 
 ### Automatska registracija
 
-Servisni radnik automatski se registrira putem komponente `<PwaRegister />` u korijenskom rasporedu. Korisnik ne mora ništa poduzeti — aplikacija se može instalirati čim preglednik otkrije valjani manifest i servisnog radnika.
+`PwaRegister` registrira radnika u proizvodnji kada preglednik podržava servisne radnike. Razvojni način poništava registraciju radnika i briše predmemorije kako bi se izbjeglo da zastarjela sredstva ometaju vruće ponovno učitavanje. Upiti za instalaciju ostaju odluka preglednika.
 
 ## Tehnička arhitektura
 
-### Manifest web-aplikacije (`manifest.webmanifest`)
+### Manifest web aplikacije
 
-Generira ga Next.js putem datoteke `src/app/manifest.ts`:
+Next.js generira `/manifest.webmanifest` iz [`src/app/manifest.ts`](../../src/app/manifest.ts). Njegove ključne postavke su:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Postavka             | Vrijednost                                     |
+| -------------------- | ---------------------------------------------- |
+| `short_name`         | `OmniRoute`                                    |
+| `start_url`          | `/dashboard`                                   |
+| `scope`              | `/`                                            |
+| `display`            | `standalone`                                   |
+| `orientation`        | `any`                                          |
+| Boje pozadine i teme | Zadana svjetlosna paleta iz `PWA_THEME_COLORS` |
 
-### Service Worker (`public/sw.js`)
+Naziv i opis manifesta statične su vrijednosti u toj izvornoj datoteci. Instalirani manifest ne prati postavku naziva instance ili aktivnu paletu pri svakom posjetu.
 
-Standardni service worker (bez ovisnosti o frameworku) sa sljedećim značajkama:
+### Uslužni radnik
 
-- **Faza instalacije**: Unaprijed sprema aplikacijsku ljusku u predmemoriju (korijensku stranicu, izvanmrežnu stranicu, manifest i ikone)
-- **Faza aktivacije**: Uklanja stare verzije predmemorije i preuzima kontrolu nad svim klijentima
-- **Faza dohvaćanja**: Inteligentno usmjeravanje na temelju vrste zahtjeva (navigacija, statički resurs, API)
-- **Verzioniranje predmemorije**: `omniroute-pwa-v3` — povećajte ovu verziju kako biste pri ažuriranju prisilno stvorili novu predmemoriju
+[`public/sw.js`](../../public/sw.js) nema ovisnost o okviru servisnog radnika:
 
-### Metapodaci rasporeda (`src/app/layout.tsx`)
+- **Instalirati:** unaprijed sprema četiri gore navedena resursa i aktivira novog radnika.
+- **Aktivirati:** uklanja starije generacije predmemorije i potražuje klijente.
+- **Dohvati:** primjenjuje gore navedene strategije statične imovine i izuzimanja rute.
+- **Verzija:** ime izvorne predmemorije je `omniroute-pwa-v3`; proizvodna verzija označava identitet predmemorije.
+- **Obavijesti:** obrađuje dolazne `push` događaje i fokusira ili otvara prozor kada se klikne obavijest.
 
-Korijenski raspored pruža sve meta oznake potrebne za usklađenost s PWA standardom:
+Rukovatelji push događajima sami po sebi ne uspostavljaju aktivnu push pretplatu ili isporuku konfiguriranog poslužitelja. Nemojte pretpostavljati da su obavijesti omogućene samo zato što je PWA instaliran.
 
-- Veza `manifest` na `/manifest.webmanifest`
-- `apple-web-app-capable: true` za samostalni način rada na iOS-u
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` za Chrome na Androidu
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` za prikaz od ruba do ruba
+### Metapodaci izgleda i registracija
 
-### Komponenta: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) pruža vezu manifesta, Appleove samostalne metapodatke, boje teme i `viewport-fit: cover`. Naslov stranice i naslov Apple web-aplikacije koriste naziv instance. Boja teme preglednika uživo slijedi paletu; instalacijski manifest koristi zadanu boju svjetla.
 
-Smještena u `src/shared/components/PwaRegister.tsx`, ova klijentska komponenta:
-
-1. Pokreće se pri montiranju (samo na klijentskoj strani)
-2. Provjerava podržava li preglednik `serviceWorker`
-3. Tiho registrira `/sw.js` (pogreške se zanemaruju kako ne bi blokirale aplikaciju)
-4. Ne prikazuje ništa (`return null`) — riječ je o komponenti koja služi isključivo za popratni učinak
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) radi na klijentu i registrira `/sw.js` s međugradnjom ID u svom URL. Otkriva neusklađene generacije predmemorije i može resetirati radnu datoteku i ponovno učitati jednom za oporavak od starije instalacije. Neuspjeh registracije ne blokira nadzornu ploču.
 
 ## Upotreba s Termuxom (Android)
 
-Kada OmniRoute pokrećete na Androidu putem Termuxa, PWA radi bez poteškoća:
+1. Pokrenite OmniRoute u Termuxu: `npx -y omniroute@latest`.
+2. Otvorite Chrome na istom telefonu: `http://localhost:20128`.
+3. Instalirajte PWA putem instalacijskog izbornika preglednika.
+4. Neka Termux poslužitelj radi dok koristite nadzornu ploču.
 
-1. Pokrenite OmniRoute u Termuxu: `npx omniroute`
-2. Otvorite Chrome na istom telefonu: `http://localhost:20128`
-3. Instalirajte PWA putem opcije „Dodaj na početni zaslon”
-4. PWA se povezuje s lokalnim Termux poslužiteljem — sve se izvršava na uređaju
-
-Ova kombinacija znači da je vaš Android telefon istodobno i **poslužitelj** (Termux) i **klijent** (PWA) — potpuno samostalan AI pristupnik.
+Telefon ugošćuje i pristupnik i nadzornu ploču. Zahtjevi udaljenim AI pružateljima i dalje trebaju pristup mreži. Pogledajte [Termux vodič](TERMUX_GUIDE.md) za razmatranja postavljanja i životnog vijeka Android procesa.
 
 ## Upotreba s drugih uređaja
 
-Instalirajte PWA na bilo kojem uređaju čiji preglednik ima pristup vašem OmniRoute poslužitelju:
-
-- **Drugi telefon/tablet**: Otvorite `http://PHONE_IP:20128` i instalirajte PWA
-- **Prijenosno računalo**: Otvorite Chrome/Edge i instalirajte ga kao PWA za stolna računala
-- **Pametni televizor s preglednikom**: Pristupite nadzornoj ploči preko cijelog zaslona
+Otvorite HTTPS adresu poslužitelja na telefonu, tabletu ili stolnom računalu, zatim slijedite tijek instalacije tog preglednika. Poslužitelj mora ostati dostupan sa svakog uređaja. Pogledajte [vodič za tunel](../ops/TUNNELS_GUIDE.md) za mogućnosti daljinskog pristupa.
 
 ## Prilagodba
 
 ### Naziv instance
 
-Naslov PWA-a poštuje postavku **Naziv instance** iz `Nadzorna ploča → Postavke`. Ako svoju instancu preimenujete u „Moj AI pristupnik”, instalirani PWA prikazivat će taj naziv.
+The** Naziv instance** postavka mijenja metapodatke nadzorne ploče, uključujući naslov stranice i naslov Apple web-aplikacije. Generirani manifest koristi statički naziv, tako da ova postavka ne jamči da će već instalirana aplikacija biti preimenovana.
 
-### Prilagođena ikona favicon
+### Prilagođeni Favicon
 
-Ako prenesete prilagođenu ikonu favicon putem `Nadzorna ploča → Postavke`, ikona PWA-a na stolnom računalu odražavat će prilagođenu ikonu. Ikone na početnom zaslonu mobilnog uređaja koriste unaprijed izrađene datoteke `icon-512.png` i `apple-touch-icon.png`.
+Prilagođeni favicon mijenja favicon preglednika. Instalacijski manifest još uvijek reklamira PNG datoteke iznad; promjena favicona ne zamjenjuje one ikone početnog zaslona.
 
 ## Ograničenja
 
-- **Nema push obavijesti** — Service worker ne implementira Push API. Umjesto toga, obavijestima upravlja Electron aplikacija.
-- **Nema pozadinske sinkronizacije** — Izvanmrežne radnje ne stavljaju se u red čekanja za ponovno izvršavanje. PWA je prvenstveno namijenjena za pregled nadzorne ploče.
-- **Ograničenja iOS-a** — Safari na iOS-u ne podržava sve PWA značajke (npr. upute za instalaciju pokreću se ručno, a pozadinski service workeri imaju ograničenja).
-- **Veličina predmemorije** — Service worker predmemorira samo statičke resurse. Veliki odgovori s ruta `/api/` nikada se ne predmemoriraju.
-- **Prilagođene ikone na mobilnim uređajima** — Promjena favikone u postavkama ne ažurira ikonu na početnom zaslonu mobilnog uređaja (za to je potrebno ponovno generirati PWA ikone).
+- **Potrebna veza s poslužiteljem:** navigacija stranicom, stanje nadzorne ploče i API zahtjevi nemaju offline zamjenu.
+- **Nema sinkronizacije u pozadini:** izvanmrežne radnje nisu u redu čekanja za ponovnu reprodukciju.
+- **Razlike u pregledniku:** instalacijski izbornici, prezentacija prozora i podrška za obavijesti razlikuju se ovisno o platformi.
+- **Nema predmemorije API odgovora:** radnik isključuje API, nadzornu ploču i autentifikacijske rute.
+- **Statičke ikone instalacije:** ažuriranje tih ikona zahtijeva promjenu oglašenih sredstava; preglednici mogu zadržati instalirane metapodatke.
 
-## Pregled datoteka
+## Referenca datoteka
 
-| Datoteka                                | Namjena                                                                  |
-| --------------------------------------- | ------------------------------------------------------------------------ |
-| `src/app/manifest.ts`                   | Ruta manifesta za Next.js (generira `manifest.webmanifest`)              |
-| `public/sw.js`                          | Service worker s logikom predmemoriranja                                 |
-| `src/shared/components/PwaRegister.tsx` | Klijentska komponenta koja registrira service worker                     |
-| `src/app/offline/page.tsx`              | Rezervna izvanmrežna stranica s pokazateljem statusa uživo               |
-| `src/app/layout.tsx`                    | Korijenski raspored s PWA metapodacima (apple-web-app, theme-color itd.) |
-| `public/icon-512.png`                   | PNG ikona veličine 512×512 (Android, početni zaslon)                     |
-| `public/apple-touch-icon.png`           | PNG ikona veličine 180×180 (početni zaslon iOS-a)                        |
-| `public/icon-192.svg`                   | SVG ikona veličine 192×192 (prilagodljiva ikona za Android)              |
-| `public/apple-touch-icon.svg`           | SVG ikona veličine 180×180 (rezervna ikona za Apple)                     |
+| File                                                                                   | Svrha                                                        |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Generirani manifest web-aplikacije                           |
+| [public/sw.js](../../public/sw.js)                                                     | Predmemorija, izuzeci i rukovatelji događajima obavijesti    |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Registracija proizvodnje i oporavak od ustajale predmemorije |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Stranica za povezivanje, a ne automatski izvanmrežni povrat  |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Metapodaci stranice i postavke prikaza                       |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Zajedničke vrijednosti boja teme                             |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 ikona aplikacije                                   |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Ikona Apple                                        |

@@ -469,105 +469,105 @@ Laistigh de sheisiún idirghníomhach:
 
 ## Tascanna fadtréimhseacha
 
-Is féidir le dhá réamhshocrú OmniRoute loitiméireacht chiúin a dhéanamh ar sheisiúin Codex CLI a mhaireann roinnt uaireanta. Ní socrú Codex CLI ceachtar acu — tá an dá cheann ar thaobh OmniRoute. Is minic a bhuaileann úsáideoirí atá ag aistriú cumraíochta ó sheachfhreastalaithe réamhtheachtacha a phionnálann cuntais agus a dhíchumasaíonn teorainneacha díomhaointis leis an dá cheann, agus tagann siad ar an tátal nach féidir le OmniRoute “seisiún fada a choinneáil ar bun.”
+Is féidir le dhá mhainneachtain OmniRoute seisiúin Codex CLI -uair an chloig a sabotage go ciúin. Níl an dá shuíomh Codex CLI — ar an taobh OmniRoute ach an oiread. Is minic a bhuaileann úsáideoirí a aistríonn cumraíocht ó sheachvótálaithe in aghaidh an tsrutha a phionna cuntais agus a dhíchumasaíonn gearrthacha díomhaoin an dá cheann agus a thugann i gcrích OmniRoute “ní féidir leo seisiún fada a chothú.”
 
-| Siomptóm                                                                                      | Cúis dhóchúil                                                                                  | Rialtán                  |
-| --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------ |
-| Coinníonn an seisiún air ag athrú cuntas / cailltear leanúnachas taisce na leid idir sealanna | Is é `0` TTL chleamhnas an tseisiúin (díchumasaithe)                                           | `sessionAffinityTtlMs`   |
-| Teipeann ar an gceangal i lár réasúnaithe gan aon leid don chliant                            | Gníomhachtaíodh faireoir díomhaointis an tsrutha tar éis 10 nóiméad gan smután réamhtheachtach | `STREAM_IDLE_TIMEOUT_MS` |
+| Siomptóim                                                                              | Cúis dócha                                                                            | cnag                     |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------ |
+| Coinníonn an seisiún cuntais a aistriú / cailltear leanúnachas taisce pras idir casadh | Cleamhnas an tseisiúin TTL is `0` (míchumas)                                          | `sessionAffinityTtlMs`   |
+| Faigheann nasc bás i lár an réasúnaithe agus níl aon leid ar fáil don chliaint         | Sruthán faire díomhaoin fired tar éis 10 nóiméad gan aon smután in aghaidh an tsrutha | `STREAM_IDLE_TIMEOUT_MS` |
 
-Plé gaolmhar: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (teipeanna ar thascanna fada), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (an fáth a bhfuil cleamhnas múchta de réir réamhshocraithe). Rianú: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Pléanna gaolmhara: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (titeann tasc fada), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (cén fáth a mainneachtainí cleamhnas). Rianú: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Cleamhnas seisiúin — pionnáil comhrá amháin le cuntas amháin
+### 1. Cleamhnas an tseisiúin — pin comhrá amháin le cuntas amháin
 
-**Réamhshocrú:** `sessionAffinityTtlMs = 0` (díchumasaithe).
+**Réamhshocrú:** `sessionAffinityTtlMs = 0` (faoi mhíchumas).
 
-**Cá háit lena shocrú**
+**Cá háit a socrófar é**
 
-- Deais → **Socruithe → Ródú** → **Cleamhnas seisiúin** → **TTL cleamhnais (soicindí)** (`ComboDefaultsTab`)
-- Nó déan PATCH ar na socruithe le `sessionAffinityTtlMs` i **milleasoicindí** (raon Zod `0`–`86_400_000`, i.e. suas le 24 uair an chloig)
+- Deais →** Socruithe → Ródú** →** Cleamhnas seisiúin** →** cleamhnas TTL (soicindí)** (`ComboDefaultsTab`)
+- Nó socruithe PATCH le `sessionAffinityTtlMs` isteach** milleasoicind** ( raon Zod `0`–`86_400_000`, ie suas le 24 uair an chloig)
 
-> Athainmníodh é in #7274 ón `codexSessionAffinityTtlMs` a bhain le Codex amháin. Glactar leis an eochair oidhreachta fós mar ailias inléite amháin; ba cheart do chumraíochtaí nua `sessionAffinityTtlMs` a úsáid. Baineann cleamhnas anois le **soláthraí ar bith** a luaithe a bhíonn an TTL os cionn `0`, ní le Codex amháin — féach [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Cleamhnas seisiúin.
+> Athainmnithe in #7274 ón Codex-amháin `codexSessionAffinityTtlMs`. Glactar leis an eochair oidhreachta fós mar ailias inléite amháin; ba cheart do chumraíochtaí nua `sessionAffinityTtlMs` a úsáid . Baineann cleamhnas anois le** ar bith** soláthraí nuair a bhíonn an TTL thuas `0`, ní hamháin Codex — féach cleamhnas Seisiún [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) →.
 
 **Cad a bhriseann nuair a fhanann sé ag 0**
 
-Ródaítear gach seal i gcomhrá Codex ilseal go neamhspleách de réir na straitéise teaglaim gníomhaí agus féadfaidh sé teacht i dtír ar **chuntas difriúil in aghaidh an tseala**. Briseann sé sin leanúnachas seisiúin / taisce leide an chórais réamhtheachtaigh. Ní théann OmniRoute i gcomhairle le ceanntásca seisiúin Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) ná le réimsí coirp amhail `prompt_cache_key` / `session_id` ach amháin nuair atá an TTL níos mó ná `0` (`extractSessionAffinityKey` in `src/sse/services/auth.ts`).
+Déanann an straitéis gníomhach teaglama gach cas de chomhrá Codex il-uaine a stiúradh go neamhspleách agus is féidir teacht i dtír ar a** cuntas difriúil in aghaidh an uain** . Briseann sé sin leanúnachas seisiún in aghaidh an tsrutha / pras-taisce. Ní théann OmniRoute i gcomhairle ach le ceanntásca seisiúin Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) agus réimsí coirp mar `prompt_cache_key` / `session_id` nuair is mó an TTL ná `0` (`extractSessionAffinityKey` in `src/sse/services/auth.ts`).
 
-**Molta do thasc aonair a mhaireann roinnt uaireanta**
+**Molta le haghaidh tasc amháin il-uair an chloig**
 
-Socraigh an TTL **os cionn fhad ionchasach an taisc de réir an chloig bhalla** (is é **86400 soicind** = 24 uair an chloig uasmhéid an chomhéadain úsáideora):
+Socraigh an TTL** os cionn an fhad a bhfuiltear ag súil leis ón mballa don tasc** (Tá UI max** 86400 soicind** = 24 uair):
 
-| Fad ionchasach an taisc | TTL cleamhnais (comhéadan úsáideora, soicindí) | `sessionAffinityTtlMs` |
-| ----------------------- | ---------------------------------------------- | ---------------------- |
-| Cúpla uair an chloig    | `14400` (4h)                                   | `14400000`             |
-| Thar oíche / ~12h       | `43200` (12h)                                  | `43200000`             |
-| Lá iomlán               | `86400` (24h, uasmhéid)                        | `86400000`             |
+| Fad taisc ionchais   | Cleamhnas TTL (UI, soicind) | `sessionAffinityTtlMs` |
+| -------------------- | --------------------------- | ---------------------- |
+| Cúpla uair an chloig | `14400` (4h)                | `14400000`             |
+| Thar oíche / ~ 12h   | `43200` (12 uair)           | `43200000`             |
+| Lá iomlán            | `86400` (24h, uasmhéid)     | `86400000`             |
 
-Tá an rogha isteach d'aon ghnó: má dhíchumasaítear cleamhnas, tugtar tús áite do chothromú ualaigh thar chuntais; má chumasaítear é, tugtar tús áite do leanúnachas i seisiún fada gníomhaire amháin. Ní athraíonn an treoir seo an réamhshocrú — ní mór d'oibreoirí a ritheann tascanna fada Codex roghnú isteach.
+Tá rogha an diúltaithe d’aon ghnó: b’fhearr leis an gcleamhnas a dhíchumasú ualach-chothromú trasna cuntas; rud a chumasaíonn sé i bhfabhar leanúnachais ar feadh seisiún fada gníomhairí amháin. Déanann an treoir seo** nach bhfuil** athraigh an réamhshocraithe — ní mór d'oibreoirí atá ag rith tascanna fada Codex tarraingt isteach.
 
-### 2. Teorainn ama dhíomhaointis srutha — ná maraigh sealanna ciúine réasúnaithe
+### 2. Sruth am istigh díomhaoin — ná maraíonn casadh réasúnaíochta ciúine
 
-**Réamhshocrú:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 nóiméad). Faigheann sé a luach le hoidhreacht ó `REQUEST_TIMEOUT_MS` nuair nach bhfuil sé socraithe; is é 600000 an bhunlíne chomhroinnte freisin. Féach [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Teorainneacha ama.
+**Réamhshocrú:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 nóiméad). Faigheann sé oidhreacht ó `REQUEST_TIMEOUT_MS` nuair nach bhfuil sé socraithe; is é an bunlíne roinnte freisin 600000. Féach [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**Cad a bhriseann leis an réamhshocrú**
+**Cad a bhriseann ag an réamhshocraithe**
 
-Dúnann faireoir díomhaointis SSE (`open-sse/utils/stream.ts`) go héigeantach seal réasúnaíochta / uirlise Codex a fhanann ciúin ar feadh níos mó ná 10 nóiméad gan **aon fhíorchnapán réamhtheachtach**. Is minic nach bhfeiceann an cliant ach titim lom sa nasc — rud a mheaitseálann “stopadh go huathoibríoch gan aon fhógra.”
+Casadh réasúnaíochta / uirlis Codex a fhanann ina thost ar feadh níos mó ná 10 nóiméad le** gan smután in aghaidh srutha fíor** atá dúnta i bhfeidhm ag an faire díomhaoin SSE (`open-sse/utils/stream.ts`). Is minic a fheiceann an cliant titim nasc lom — a mheaitseáil “stoptha go huathoibríoch gan aon fhógra.”
 
-Sonra ríthábhachtach: **ní athshocraíonn** buille croí sintéiseach SSE OmniRoute an clog díomhaointis. Ní nuashonraítear `lastChunkTime` ach le fíorchnapán coirp réamhtheachtach. Ó thaobh an fhaireora de, tá samhail chiúin atá fós “ag smaoineamh” do-aitheanta ó fhoinse réamhtheachtach atá stoptha.
+Sonraí criticiúla: OmniRoute's sintéiseach SSE** ní athshocraíonn buille croí** an clog díomhaoin. Ní dhéantar ach smután coirp in aghaidh an tsrutha a nuashonrú `lastChunkTime`. Breathnaíonn samhail chiúin atá fós ag “smaoineamh” mar an gcéanna le samhail in aghaidh an tsrutha stoptha ó thaobh an faireora de.
 
-Neamhghníomhaíocht ghaolmhar i gcorp Undici: `FETCH_BODY_TIMEOUT_MS` (is é an bhunlíne chéanna 10 nóiméad an réamhshocrú freisin; díchumasaíonn `0` é). Maidir le sruthú, ní chumhdaíonn `FETCH_TIMEOUT_MS` ach socrú an naisc / na chéad cheanntásca — a luaithe a bhíonn an sruth gníomhach, rialaítear stopanna le `STREAM_IDLE_TIMEOUT_MS` agus `FETCH_BODY_TIMEOUT_MS`.
+Neamhghníomhaíocht choirp ghaolmhar Undici: `FETCH_BODY_TIMEOUT_MS` (mainneachtainí ag an mbonnlíne céanna 10 nóiméad freisin; díchumasaíonn `0` é). Maidir le sruthú, ní chlúdaíonn `FETCH_TIMEOUT_MS` ach socrú naisc / na chéad cheanntásca — nuair a bhíonn an sruth gníomhach, tá stallaí á rialú ag `STREAM_IDLE_TIMEOUT_MS` agus `FETCH_BODY_TIMEOUT_MS`.
 
-**Molta do thasc aonair iluaire**
+**Molta le haghaidh tasc amháin il-uair an chloig**
 
-I dtimpeallacht phróisis OmniRoute (`.env` / compose / systemd):
+I dtimpeallacht an phróisis OmniRoute (`.env` / compose / systemd):
 
 ```bash
-# Díchumasaigh teorainneacha díomhaointis srutha agus neamhghníomhaíochta coirp le haghaidh sealanna fada réasúnaíochta
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Nó ardaigh iad os cionn na bearna ciúine is faide a bhfuil súil agat léi (is milleasoicindí iad na luachanna):
+Nó ardaigh iad os cionn na bearna chiúin is faide a mbeifeá ag súil leis (is iad na luachanna milleasoicindí):
 
 ```bash
-# Sampla: ceadaigh suas le 2 uair an chloig de chiúnas idir cnapaí réamhtheachtacha
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Atosaigh OmniRoute tar éis na hathróga timpeallachta seo a athrú.
+Atosaigh OmniRoute tar éis na vars env seo a athrú.
 
-### Oideas nithiúil — tasc iluaire Codex
+### Oideas coincréite — tasc il-uair an chloig Codex
 
-1. **Pionnáil an cuntas:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12u) nó `86400` (uasmhéid 24u).
-2. **Ardaigh / díchumasaigh teorainneacha díomhaointis** i dtimpeallacht OmniRoute:
+1. **PIN an cuntas:** Socruithe Deais → → Ródú → Seisiún cleamhnas → Cleamhnas TTL = `43200` (12h) nó `86400` (24h max).
+2. **Ardaigh / díchumasaigh gearrthacha díomhaoin** i dtimpeallacht OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Coinnigh an gnáth-`config.toml` Codex (`wire_api = "responses"`, an `base_url` ceart, `OMNIROUTE_API_KEY`) — níl aon socruithe cleamhnais/díomhaointis ar thaobh Codex ann don dá iompraíocht seo.
+3. Coinnigh an gnáth Codex `config.toml` (`wire_api = "responses"`, ceart `base_url`, `OMNIROUTE_API_KEY`) — níl aon chnapanna Codex-side affinity/idle ann don dá iompar seo.
 4. Atosaigh OmniRoute, ansin cuir tús leis an tasc fada Codex.
 
-### Cinneadh maidir le réamhshocruithe (#7287)
+### Cinneadh réamhshocraithe (#7287)
 
-| Rialtán                  | Réamhshocrú seolta | Athrú sa treoir seo?                                                                                      |
-| ------------------------ | ------------------ | --------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (as)           | **Níl** — fanann sé roghnach (cothromú ualaigh vs leanúnachas; féach Discussion #5718)                    |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 nóim) | **Níl** — fanann sé ag 10 nóiméad do thrácht ginearálta; ardaíonn nó díchumasaíonn oibreoirí fada Codex é |
+| cnag                     | Réamhshocrú loinge | Athrú sa treoir seo?                                                                                         |
+| ------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `sessionAffinityTtlMs`   | `0` (as)           | **Níl** fanann — rogha an diúltaithe (cothromú ualach vs leanúnachas; féach Plé #5718)                       |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 nóim) | **Níl** fanann — 10 nóiméad le haghaidh tráchta ginearálta; ardaíonn nó díchumasaíonn oibreoirí Codex fada é |
 
-D’athródh aisiompú ceachtar réamhshocraithe go domhanda an iompraíocht do gach cliant ar ásc, ní do Codex amháin. Déan na rialtáin a dhoiciméadú; fág na réamhshocruithe mar atá go dtí go gcinnfidh oibreoir a mhalairt go sainráite.
+D'athrófaí iompar do gach cliant mar shampla, ní hamháin Codex. Déan na snaidhmeanna a dhoiciméadú; fágtar na mainneachtainí ina n-aonar go dtí go ndeirtear a mhalairt i gcinneadh sainráite ón oibreoir.
 
-### Diagnóisiú ciorruithe díomhaointis
+### Ag diagnóisíodh ciorruithe díomhaoin
 
-Nuair a ghníomhaíonn an faireoir díomhaointis, logálann OmniRoute líne den chruth seo:
+Nuair a lasann an faire díomhaoin, logálann OmniRoute líne atá múnlaithe mar:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Cuardaigh le grep le haghaidh `Idle timeout: no data from` (nó an cód `stream_idle_timeout` / ainm na hearráide `StreamIdleTimeoutError`). Is é deighleog an tsoláthraí cibé rud a d’úsáid OmniRoute don iarratas sin (`codex`, aitheantas soláthraí eile, nó `provider` mura bhfuil sé ar eolas) — ní hé an teaghrán litriúil `codex` é i gcónaí.
+Grep le haghaidh `Idle timeout: no data from` (nó an cód `stream_idle_timeout` / ainm earráide `StreamIdleTimeoutError`). Is é an deighleog soláthraí cibé OmniRoute a úsáidtear don iarratas sin (`codex`, id soláthraí eile, nó `provider` más rud é nach eol) — ní i gcónaí an teaghrán litriúil `codex`.
 
 ---
 

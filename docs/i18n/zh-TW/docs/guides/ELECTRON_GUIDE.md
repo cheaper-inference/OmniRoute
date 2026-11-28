@@ -4,7 +4,7 @@
 
 ---
 
-> **事實來源：** `electron/`工作區**最後更新：** 2026-06-28 — v3.8.40
+> **事實來源：** `electron/`工作區
 
 OmniRoute提供了一個跨平台桌面應用程式 (Windows / macOS / Linux)**Electron 41** +**電子建構器 26.10** 。桌面應用程式將Next.js獨立伺服器作為子進程生成，將`BrowserWindow`指向它，並添加系統托盤、自動更新程式、 IPC橋和零配置秘密引導程式。
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## 自動更新
 
-`electron-updater`與GitHub提供者 (`diegosouzapw/OmniRoute`) 結合使用。
+`electron-updater`與GitHub提供者 (`cheaper-inference/OmniRoute`) 結合使用。
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - 透過`update-status` IPC轉發到渲染器的事件： `checking`、 `available`、 `not-available`、 `downloading` （使用`percent`）、 `downloaded`、 `error`
@@ -240,7 +240,7 @@ npm run electron:smoke:packaged
 
 ## 程式碼簽名
 
-`electron/package.json`確實**不是**直接電匯簽章憑證。透過環境變數將它們傳遞給`electron-builder`：
+`electron/package.json`確實**不是**wire signing credentials directly. Pass them via env vars to `electron-builder`:
 
 ### macOS
 
@@ -273,7 +273,7 @@ AppImage簽名是可選的—如果簽章則設定`LINUX_GPG_KEY` 。
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-版本發佈到GitHub版本 (`diegosouzapw/OmniRoute`)，這也是`electron-updater`檢查新版本的地方。
+版本發佈到GitHub版本 (`cheaper-inference/OmniRoute`)，這也是`electron-updater`檢查新版本的地方。
 
 ## 故障排除
 

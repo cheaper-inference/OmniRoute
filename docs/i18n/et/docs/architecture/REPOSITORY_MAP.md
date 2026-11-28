@@ -4,9 +4,9 @@
 
 ---
 
-> **Mis kus elab: iga jälgitav tippkataloog ja juurfail üherealise eesmärgiga.** Viimati värskendatud: 2026-11-13 (OmniRoute v3.8.54)
+> **Mis kus elab: iga jälgitav tippkataloog ja juurfail üherealise eesmärgiga.**
 >
-> Kasutage seda kaarti koodibaasis orienteerumiseks, seejärel järgige spetsiaalsete dokumentide linke. Failide arvu mõõdeti ülaltoodud kuupäeval `git ls-files`. Need muutuvad peaaegu iga väljalaskega, seega käsitlege neid suurusjärkudena.
+> Kasutage seda kaarti koodibaasis orienteerumiseks, seejärel järgige spetsiaalsete dokumentide linke. Failide arv pärineb `git ls-files` ja muutub peaaegu iga väljalasega. Käsitle neid suurusjärkudena.
 
 ## Tipptasemel puu
 
@@ -36,7 +36,7 @@ OmniRoute/
 └── (root files — see below)
 ```
 
-Kohalikud, loodud või privaatsed teed (kõiki eiratud, kunagi sidumata, täpsemalt kirjeldamata):
+Kohalikud, loodud või privaatsed teed (kõiki eiratud, mitte kunagi sidumata, täpsemalt kirjeldamata):
 
 ```
 node_modules/            # npm dependencies

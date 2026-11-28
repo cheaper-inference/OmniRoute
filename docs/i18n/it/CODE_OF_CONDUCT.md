@@ -54,15 +54,13 @@ Esempi di rappresentanza della nostra comunità includono l'utilizzo di un indir
 la pubblicazione tramite un account ufficiale sui social media o l'operare in qualità di
 rappresentante designato durante un evento online o in presenza.
 
-## Enforcement
+## Applicazione
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Casi di comportamento offensivo, molesto o altrimenti inaccettabile possono essere segnalati ai leader della comunità responsabili dell'applicazione aprendo un avviso di sicurezza privato all'indirizzo
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+o inviando un'e-mail al manutentore all'indirizzo diegosouza.pw@outlook.com. Per gli incidenti sensibili alla sicurezza, vedere [`SECURITY.md`](SECURITY.md). Tutti i reclami saranno esaminati e indagati tempestivamente ed equamente.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Tutti i leader della comunità sono obbligati a rispettare la privacy e la sicurezza di chi segnala qualsiasi incidente.
 
 ## Linee guida per l'applicazione
 

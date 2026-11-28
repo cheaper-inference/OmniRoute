@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | URL پایهٔ نهاییشده                                         |
 | `ctx.apiKey`                 | `string \| null` | کلید API، در صورت ارائه                                    |
 
-## کشف افزونهها
+## کشف
 
-افزونهها از مکانهای زیر کشف میشوند:
+پلاگین ها از:
 
-1. `~/.omniroute/plugins/<name>/` — نصبهای محلی کاربر
-2. متغیر محیطی `OMNIROUTE_PLUGIN_PATH` — پوشهٔ سفارشی
+1. `~/.omniroute/plugins/node_modules/<name>/` — جایی که `omniroute plugin install` بسته ها را قرار می دهد (npm `--prefix`، نه `npm -g`)
+2. دایرکتوری پلاگین `~/.omniroute/plugins/<name>/` — دست کپی شده
+3. دایرکتوری سفارشی `OMNIROUTE_PLUGIN_PATH` env var —
 
-هر دو **فقط مختص CLI** هستند. محیط اجرای افزونه در سمت سرور (افزونههای marketplace/`plugin.json`
-که درون پراکسی اجرا میشوند) اسکنر مستقل خود را با مقدار جایگزین مخصوص خود،
-`OMNIROUTE_PLUGINS_DIR`، دارد — به
-[PLUGIN_MARKETPLACE.md ← پوشهٔ افزونه](./PLUGIN_MARKETPLACE.md#plugin-directory)
-مراجعه کنید. تنظیم یکی بر دیگری تأثیری ندارد.
+دایرکتوری های Symlink (آنچه npm برای `plugin install ./dir` ایجاد می کند) دنبال می شوند.
 
-خطاهای بارگذاری مدیریت شده و بهصورت هشدار نمایش داده میشوند — یک افزونهٔ خراب هرگز باعث از کار افتادن CLI نمیشود.
+هر دو هستند** فقط CLI** . زمان اجرا پلاگین سمت سرور (بازار/افزونههای `plugin.json` که در داخل پروکسی اجرا میشوند) دارای اسکنر خاص خود با جایگزینی خاص خود است، `OMNIROUTE_PLUGINS_DIR` — [دایرکتوری افزونه PLUGIN_MARKETPLACE.md → را](./PLUGIN_MARKETPLACE.md#plugin-directory) ببینید. تنظیم یکی تاثیری روی دیگری ندارد.
+
+خطاهای بارگیری به عنوان اخطار — داده می شوند و چاپ می CLI.
 
 ## امنیت
 

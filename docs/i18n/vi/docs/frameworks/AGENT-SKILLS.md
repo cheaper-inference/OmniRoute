@@ -13,12 +13,12 @@ Agent Skills là các tệp SKILL.md có cấu trúc, hướng dẫn các tác t
 
 ## Tổng quan
 
-Danh mục chứa **45 Agent Skills** (23 REST API + 21 CLI + 1 quy trình cấu hình). Mỗi skill có:
+Danh mục chứa** 45 kỹ năng đặc vụ** (Quy trình cấu hình 23 REST API + 21 CLI + 1). Mỗi kỹ năng có:
 
-- Một **ID chuẩn** (`omni-auth`, `cli-serve`, v.v.)
-- Một tệp **SKILL.md** trong `skills/{id}/SKILL.md` với phần mở đầu YAML (`name`, `description`) + nội dung markdown phong phú
-- Các **endpoint REST** (skill API) hoặc **lệnh con CLI** (skill CLI) được lấy từ đặc tả OpenAPI và registry CLI
-- Một **URL raw trên GitHub** để truy xuất trực tiếp: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- MỘT** ID kinh điển** (`omni-auth`, `cli-serve`, v.v.)
+- MỘT**SKILL.md** tập tin trong `skills/{id}/SKILL.md` với YAML frontmatter (`name`, `description`) + nội dung đánh dấu phong phú
+- **điểm cuối REST** (kỹ năng API ) hoặc** lệnh con CLI** ( kỹ năng CLI ) bắt nguồn từ thông số OpenAPI và đăng ký CLI
+- MỘT**GitHub thô URL** để tìm nạp trực tiếp: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Phản hồi của trình tạo là một `GeneratorReport`:
 
 ---
 
-## API về độ bao phủ
+## Bảo hiểm API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -4,9 +4,9 @@
 
 ---
 
-> **O que reside onde: cada diretório de nível superior rastreado e arquivo raiz, com uma finalidade de uma linha.** Última atualização: 13/11/2026 (OmniRoute v3.8.54)
+> **O que reside onde: cada diretório de nível superior rastreado e arquivo raiz, com uma finalidade de uma linha.**
 >
-> Use este mapa para se orientar na base de código e siga os links para os documentos dedicados. As contagens de arquivos foram medidas com `git ls-files` na data acima. Eles mudam a cada lançamento, portanto, trate-os como ordens de magnitude.
+> Use este mapa para se orientar na base de código e siga os links para os documentos dedicados. As contagens de arquivos vêm do `git ls-files` e mudam com quase todas as versões. Trate-os como ordens de magnitude.
 
 ## Árvore de nível superior
 

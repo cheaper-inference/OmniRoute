@@ -13,12 +13,12 @@ Agent Skills so strukturirane datoteke SKILL.md, ki zunanje agente, odjemalce MC
 
 ## Pregled
 
-Katalog vsebuje **45 Agent Skills** (23 za REST API + 21 za CLI + 1 potek dela za konfiguracijo). Vsaka veščina ima:
+Katalog vsebuje** 45 Veščine agenta** (23 REST API + 21 CLI + 1 konfiguracijski potek dela). Vsaka veščina ima:
 
-- **Kanonični ID** (`omni-auth`, `cli-serve` itd.)
-- Datoteko **SKILL.md** v `skills/{id}/SKILL.md` z uvodnimi metapodatki YAML (`name`, `description`) in obsežno vsebino markdown
-- **Končne točke REST** (veščine API) ali **podukaze CLI** (veščine CLI), izpeljane iz specifikacije OpenAPI in registra CLI
-- **Neobdelani URL GitHub** za sprotno pridobivanje: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanonična ID** (`omni-auth`, `cli-serve` itd.)
+- A**SKILL.md** datoteka v `skills/{id}/SKILL.md` z YAML frontmatter (`name`, `description`) + rich markdown body
+- **končne točke REST** (API spretnosti) oz** podukazi CLI** (CLI spretnosti), ki izhaja iz registra OpenAPI spec in CLI
+- A**GitHub surov URL** za prenos v živo: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Odziv generatorja je `GeneratorReport`:
 
 ---
 
-## API za pokritost
+## Pokritost API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

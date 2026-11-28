@@ -203,24 +203,24 @@ enum SkillStatus {
 
 ## REST API
 
-ሁሉም የመዳረሻ ነጥቦች በ`src/app/api/skills/` ስር ይገኛሉ። የአስተዳደር መዳረሻ ነጥቦች (`/api/skills`፣ `/api/skills/[id]`፣ `/api/skills/install`) በ`requireManagementAuth()` በኩል **የአስተዳደር ማረጋገጫ** ይፈልጋሉ። የገበያ/ጭነት ፍሰቶቹ ቀለል ያለውን `isAuthenticated()` (ክፍለ ጊዜ ወይም API ቁልፍ) ይጠቀማሉ።
+ሁሉም የመጨረሻ ነጥቦች በ `src/app/api/skills/` ስር ይኖራሉ። የአስተዳደር የመጨረሻ ነጥቦች (`/api/skills`, `/api/skills/[id]`, `/api/skills/install`) ያስፈልጋቸዋል** አስተዳደር auth** በ `requireManagementAuth()` በኩል . የ marketplace/install ፍሰቶች ቀለሉ `isAuthenticated()` (ክፍለ ጊዜ ወይም API ቁልፍ) ይጠቀማሉ።
 
-| የመዳረሻ ነጥብ | ሜተድ | ዓላማ |
+| የመጨረሻ ነጥብ | ዘዴ | ዓላማ |
 | --------------------------------- | ------ | ------------------------------------------------------------------------ | --- | ------------------------ | -------- | ------------------ |
-| `/api/skills` | GET | የተመዘገቡ ክህሎቶችን ዘርዝር። `?q=`፣ `?mode=onን                        | off | auto`፣ `?source=skillsmp | skillssh | local`፣ ገጽ ከፈላ |
-| `/api/skills/[id]` | PUT | `enabled` ወይም `mode`ን አዘምን |
-| `/api/skills/[id]` | DELETE | በመታወቂያ ምዝገባውን ሰርዝ |
-| `/api/skills/install` | POST | ብጁ ክህሎት ጫን (የማስተናገጃ ኮድ + ስኪማ) |
-| `/api/skills/marketplace` | GET | የSkillsMP ካታሎግን ፈልግ (`q` ባዶ ሲሆን ታዋቂ ነባሪዎችን ይመልሳል) |
-| `/api/skills/marketplace/install` | POST | የSkillsMP ክህሎት ጫን (ንቁ አቅራቢ = `skillsmp` መሆን ያስፈልጋል) |
-| `/api/skills/skillssh` | GET | የskills.sh ካታሎግን ፈልግ (`?q=&limit=`፣ ከፍተኛው 100) |
-| `/api/skills/skillssh/install` | POST | የskills.sh ክህሎት ጫን (ንቁ አቅራቢ = `skillssh` መሆን ያስፈልጋል) |
-| `/api/skills/executions` | GET | በገጽ የተከፋፈለ የአፈጻጸም ታሪክ (`?apiKeyId=`) |
-| `/api/skills/executions` | POST | የተመዘገበ ክህሎትን እንደ አስፈላጊነቱ አስፈጽም |
+| `/api/skills` | GET | የተመዘገቡ ክህሎቶችን ይዘርዝሩ. `?q=`, `?mode=on                        | off | auto`, `?source=skillsmp | skillssh | local`, pagination ይደግፋል |
+| `/api/skills/[id]` | PUT | `enabled` ወይም `mode` ያዘምኑ |
+| `/api/skills/[id]` | DELETE | በመታወቂያ መመዝገብ ውጣ |
+| `/api/skills/install` | POST | ብጁ ክህሎት ጫን (አስተዳዳሪ ኮድ + schema) |
+| `/api/skills/marketplace` | GET | የ SkillsMP ካታሎግ ፈልግ ( `q` ባዶ ሲሆን ታዋቂ ነባሪዎችን ይመልሳል) |
+| `/api/skills/marketplace/install` | POST | የ SkillsMP ችሎታን ጫን (ገቢር አቅራቢ = `skillsmp` ያስፈልገዋል) |
+| `/api/skills/skillssh` | GET | የ skills.sh ካታሎግ ፈልግ (`?q=&limit=`፣ በ 100 ተሸፍኗል) |
+| `/api/skills/skillssh/install` | POST | የ skills.sh ችሎታን ጫን (ገቢር አቅራቢ = `skillssh` ያስፈልገዋል) |
+| `/api/skills/executions` | GET | የተለጠፈ የአፈጻጸም ታሪክ (`?apiKeyId=`) |
+| `/api/skills/executions` | POST | የተመዘገበ ክህሎት ማስታወቂያ ያስፈጽሙ |
 
-`settings.skillsEnabled === false` ሲሆን፣ `POST /api/skills/executions` መዳረሻ ነጥቡ HTTP `503`ን ከ`{ error: "Skills execution is disabled..." }` ጋር ይመልሳል (`executor.ts:42-45`)። ኦፕሬተሮች ዋናውን መቀየሪያ ከ**ቅንብሮች → AI** ማብራት ይችላሉ።
+`POST /api/skills/executions` የመጨረሻ ነጥብ `settings.skillsEnabled === false` (`executor.ts:42-45`) በሚሆንበት ጊዜ HTTP `503` በ `{ error: "Skills execution is disabled..." }` ይመልሳል። ኦፕሬተሮች የማስተር ማብሪያ / ማጥፊያውን ከ መገልበጥ ይችላሉ።** ቅንብሮች → AI** .
 
-### ምሳሌ፦ ብጁ ክህሎት መጫን
+### ምሳሌ፡ ብጁ ክህሎት ጫን
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/install \
@@ -239,7 +239,7 @@ curl -X POST http://localhost:20128/api/skills/install \
   }'
 ```
 
-የ`handlerCode` ሕብረቁምፊ **የማስተናገጃ ስም ፍለጋ** ነው — ሊፈጸም የሚችል ኮድ አይደለም። አስፈጻሚው `skillExecutor.registerHandler(name, fn)` (`executor.ts:25`)ን በመጠቀም ያዛምደዋል። የገበያ ጭነቶች የSKILL.md ጽሑፍን እንደ ሰነድ በዚህ መስክ ያከማቻሉ፣ እና አፈጻጸሙን በሞዴል በተፈጠሩ የመሣሪያ ጥሪዎች በኩል ያስተላልፋሉ። በተጠቃሚ የቀረበ የዘፈቀደ ምንጭ eval አይደረግም።
+የ `handlerCode` ሕብረቁምፊ ሀ** ተቆጣጣሪ ስም ፍለጋ** — ሊተገበር የማይችል ኮድ። ፈጻሚው ካርታውን በ `skillExecutor.registerHandler(name, fn)` (`executor.ts:25`) በኩል ያደርገዋል። የገበያ ቦታ ጭነቶች በዚህ መስክ የ SKILL.md ጽሁፍን እንደ ሰነድነት እና በሞዴል በመነጩ የመሳሪያ ጥሪዎች በኩል ያከማቻሉ። በዘፈቀደ በተጠቃሚ የቀረበ ምንጭ አልተሰረዘም።
 
 ---
 

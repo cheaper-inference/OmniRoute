@@ -12,6 +12,12 @@ Neutraalne `config/cli-tools-manifest.json` leping deklareerib kanoonilist IDs, 
 
 Katkestus- ja lõpetamissignaalid edastatakse lapsele. Käivitaja ootab enne ajutise konfiguratsiooni eemaldamist lapse sulgemissündmust. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` juhib ajapikendusperioodi enne sundlõpetamist (vaikimisi 5000 millisekundit).
 
+`omniroute launch <tool>` (vt [LAUNCH.md](./LAUNCH.md) ) järgib samu keskkonnareegleid ja signaali edastamist ning lisab:
+
+- **Gateway automaatne käivitamine.** Kohaliku sihtmärgi puhul, kui pordis ükski lüüs ei vasta, käivitab kanderakett `omniroute serve --headless --no-open` mis on seotud `127.0.0.1` -ga eraldatud niitmisprotsessi käigus. Igal jooksval käivitamisel on `DATA_DIR/launch/leases/` liising (südamelöök iga 15 sekundi järel, aegunud 45 sekundi järel või kui selle protsess on lõppenud). Niiduk peatab lüüsi, mille ta käivitas, kui tühikäigul pole veel rendilepingut kehtinud (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, vaikimisi 10 000 millisekundit). Kasutatakse lüüsi, mille kasutaja käivitas, kuid seda ei peatata kunagi. `--keep-gateway` või `omniroute gateway keep` muudab käivituslüüsi tavaliseks; `--no-start` taastab vana tõrke-kui-alla käitumise. Kaugsihtmärke uuritakse ainult.
+- **Käivitage seansid.** Iga käivitamine loob lühiajalise `olx_` seansi märgi emamandaadist (`POST /api/launch/sessions`), lööb selle tööriista töötamise ajal, loeb kasutuskokkuvõtte ja tühistab selle pärast tööriista väljumist. Märk on selle ülemüksuse range alamhulk: samad õigused, sama või kitsam kataloog, lühem kasutusiga ja see ei ole armatuurlaua mandaat. Tööriist võtab vastu seansimärgi, mitte kunagi ülemmandaadi, ja taotlused märgistatakse `launch:<tool>:<sessionId>` kui `--tag` pole antud. Lüüs ilma seansi API ebaõnnestub koos `GatewayTooOld` selle asemel, et minna tagasi ulatuseta käivitamisele.
+- **Käivitamise kohane konfiguratsioon.** Tööriista konfiguratsioonifailid kirjutatakse privaatsesse ajutisse kataloogi (režiim 0700, eesliide `omnirouter-`) ja eemaldatakse pärast lapse väljumist. Käiviti `SIGKILL` jätab kataloogi maha; `omniroute launch --cleanup` eemaldab sellised kataloogid, kui need on vanemad kui päev.
+
 ## Gemini püsiv seadistus
 
 ```bash

@@ -4,12 +4,11 @@
 
 ---
 
-> **Doğruluk kaynağı:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Son güncelleme:** 2026-06-28 — v3.8.40
+> **Gerçeğin kaynağı:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-OmniRoute, platform olaylarında HTTP webhook'larını tetikleyebilir. Bunları Slack, PagerDuty, Datadog, dahili uyarı hizmetleri veya herhangi bir HTTP alıcısıyla entegrasyon sağlamak için kullanın.
+OmniRoute platform etkinliklerinde HTTP web kancalarını etkinleştirebilir. Bunları Slack, PagerDuty, Datadog, dahili uyarı hizmetleri veya herhangi bir HTTP alıcısıyla entegre etmek için kullanın.
 
-Dağıtıcı, her teslimatı HMAC-SHA256 ile imzalar, geçici hatalarda yeniden dener, her webhook için teslimat durumunu izler ve sürekli başarısız olan uç noktaları otomatik olarak devre dışı bırakır.
+Dağıtıcı her teslimatı HMAC-SHA256 ile imzalar, geçici arızaları yeniden dener, web kancası başına teslimat durumunu izler ve sürekli başarısız olan uç noktaları otomatik olarak devre dışı bırakır.
 
 ## Desteklenen Etkinlikler
 

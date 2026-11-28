@@ -168,9 +168,9 @@ OmniRoute сканирует HAR на предмет Chathub WebSocket URL, из
 
 ## Ссылки
 
-- Проблема: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Обсуждение: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Исходный код: `src/shared/constants/providers/web-cookie.ts` (определение провайдера)
-- Импорт HAR: `src/shared/utils/m365HarImport.ts`
+- Проблема: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Обсуждение: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Источник: `src/shared/constants/providers/web-cookie.ts` (определение поставщика)
+- импорт HAR : `src/shared/utils/m365HarImport.ts`
 - Поля учетных данных: `src/shared/providers/webSessionCredentials.ts`
-- Модальное окно тарифа: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Модальное окно уровня: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

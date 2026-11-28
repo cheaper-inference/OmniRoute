@@ -4,34 +4,37 @@
 
 ---
 
-**OmniCopilot** በOmniRoute የሚቀርብልዎትን እያንዳንዱን ሞዴል በGitHub Copilot Chat _ነባር_ የሞዴል መምረጫ ውስጥ ያስገባል። ሁለተኛ የጎን አሞሌ ወይም የተለየ የውይይት UI የለም — የCopilot ወኪል ሁነታ፣ የመሳሪያ ጥሪ፣
-MCP ሰርቨሮች እና ብጁ መመሪያዎች ሁሉ መስራታቸውን ይቀጥላሉ፤ ልዩነቱ እርስዎ በመረጡት ሞዴል ላይ መስራታቸው ብቻ ነው።
+**OmniCopilot** የእርስዎን OmniRoute ውይይት ሞዴሎች እና ጥንብሮች ወደ ቤተኛ Copilot Chat ሞዴል መራጭ ያክላል። በተመረጠው ሞዴል ሲደገፍ ከመሳሪያ ጥሪ እና እይታ ጋር ያለውን የአርታዒውን የውይይት እና የወኪል የስራ ፍሰቶችን ይጠቀሙ።
 
-|                  |                                                                                                                                                 |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **ጫን (VS Code)** | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **ጫን (forks)**   | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **ምንጭ / ችግሮች**   | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **የሚያስፈልገው**     | VS Code 1.104+                                                                                                                                  |
+|                   |                                                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **ጫን (VS ኮድ)**    | [የገበያ ቦታ → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) |
+| **ጫን ( VSX ክፈት)** | [VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — ክፈት ተኳሃኝ የቋንቋ-ሞዴል አቅራቢ እና APIs ቻት ይፈልጋል             |
+| **ምንጭ / ጉዳዮች**    | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                   |
+| **ይጠይቃል**         | VS ኮድ 1.104 + (1.122 + ያለ GitHub መግቢያ ወይም Copilot እቅድ ለመጠቀም)                                                         |
+| **የአሁኑ ልቀት**      | OmniCopilot v1.5.1 በሁለቱም መደብሮች (የተለቀቀው 2026-11-24)                                                                   |
 
-> **የCopilot ደንበኝነት ምዝገባ አያስፈልግም።** ከVS Code 1.122 ጀምሮ የቋንቋ-ሞዴል አቅራቢ ያለGitHub መግቢያ እና ያለማንኛውም የCopilot ዕቅድ ይሰራል። በመስመር ውስጥ የሚቀርቡ ማጠናቀቂያዎች እና
-> በembeddings ላይ የተመሰረቱ ባህሪያት ከአቅራቢው API ውጭ ስለሆኑ አሁንም Copilot ያስፈልጋቸዋል።
+ቅጽበታዊ ገጽ እይታን ያከማቹ** 2026-11-25 (01:43 UTC)** አሁን የተለቀቀው** 52,081 የገበያ ቦታ ተጭኗል** እና** 20,989 VSX ውርዶችን ክፈት** . እነዚህ የተለያዩ የመደብር መለኪያዎች እንጂ የተዋሃዱ የተጠቃሚ ብዛት አይደሉም። ምንጮች [፡ የገበያ ቦታ](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) እና [ክፍት VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+ክፍት VSX መገኘት በራሱ ያንን መዝገብ በመጠቀም ከእያንዳንዱ አርታኢ ጋር ተኳሃኝነትን አያመጣም። የአርታዒውን ውይይት እና የቋንቋ ሞዴል API ድጋፍን ያረጋግጡ።
+
+> **በ VS ኮድ 1.122 + ውስጥ ለ BYOK ውይይት ምንም Copilot ምዝገባ አያስፈልግም።** Microsoft አቅራቢው ሲዋቀር ያለ GitHub መግባት ያለ ውይይት፣ መሳሪያዎች እና MCP ይደግፋል። በ VS ኮድ 1.104–1.121 ቅጥያው አሁንም ይሰራል፣ ነገር ግን VS ኮድ በመለያ የገባ Copilot ዕቅድ ያስፈልገዋል። የመስመር ላይ ጥቆማዎች እና በመክተት ላይ የተመሰረቱ ባህሪያት ከአቅራቢው API ውጭ ይቆያሉ እና አሁንም Copilot ያስፈልጋቸዋል; Copilot Business/Enterprise አስተዳዳሪዎች የሶስተኛ ወገን ሞዴል አቅራቢዎችን በፖሊሲ ማሰናከል ይችላሉ፤ አንድ ሹካ ሞዴሎቹን የሚያሳየው የቻት-አቅራቢውን API ተግባራዊ ካደረገ ብቻ ነው። የላይ አቅራቢዎች አጠቃቀም አሁንም ክፍያዎችን ሊጠይቅ ይችላል። የ [VS ኮድ 1.122 የመልቀቂያ ማስታወሻዎችን](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) እና [የቋንቋ-ሞዴል መመሪያን](https://code.visualstudio.com/docs/agent-customization/language-models) ይመልከቱ።
 
 ---
 
 ## ማዋቀር
 
-1. **OmniRouteን ያስኪዱ** — `npm install -g omniroute && omniroute` (ዳሽቦርዱ `http://localhost:20128` ላይ ነው)።
-2. **ቅጥያውን ይጫኑ** — በExtensions እይታ ውስጥ "OmniRoute" ብለው ይፈልጉ።
-3. **ሞዴል ይምረጡ** — Copilot Chat → የሞዴል መምረጫ → **ሞዴሎችን ያስተዳድሩ…** → **OmniRoute**፣ ከዚያ የሚፈልጉትን ምልክት ያድርጉበት።
+1. **OmniRoute** — `npm install -g omniroute && omniroute` (ዳሽቦርድ በ `http://localhost:20128` ላይ)።
+2. **ቅጥያውን ይጫኑ** — ፍለጋ "OmniRoute" በቅጥያዎች እይታ።
+3. **ተገናኝ** — ነባሪውን `http://localhost:20128` አቆይ ወይም የአንተን አገልጋይ URL እና API ቁልፍን አስቀምጥ**OmniRoute: ግንኙነትን አስተዳድር** .
+4. **ሞዴል ይምረጡ** — Copilot ውይይት → ሞዴል መራጭ →** ሞዴሎችን አስተዳድር…** →**OmniRoute** , ከዚያ የሚፈልጉትን ምልክት ያድርጉ.
 
-OmniRoute በነባሪው ወደብ ላይ ሲሰራ የሚዋቀር ነገር የለም። ለርቀት ምሳሌ፣
-**በActivity Bar ውስጥ ያለውን የOmniRoute አዶ ይክፈቱ** (ወይም `OmniRoute: Manage Connection`ን ያስኪዱ) እና የሚከተሉትን ያዋቅሩ፦
+ለግንኙነት ቅንጅቶች፣ ን ይክፈቱ**OmniRoute አዶ በእንቅስቃሴ አሞሌ ውስጥ** (ወይም `OmniRoute: Manage Connection` አሂድ) እና አዘጋጅ፡-
 
-- **የሰርቨር URL** — የሰርቨሩ ስር፣ ለምሳሌ `http://192.168.0.15:20128`። የ`/v1` ቅጥያ
-  በቅጥያው በራስ-ሰር ይጨመራል፤ እርስዎ አያካትቱት።
-- **የAPI ቁልፍ** — ሰርቨሩ `REQUIRE_API_KEY`ን ሲያዘጋጅ ብቻ። በVS
-  Code SecretStorage በኩል በስርዓተ ክወናው የቁልፍ ማከማቻ ውስጥ ይቀመጣል፤ በ`settings.json` ውስጥ ፈጽሞ አይቀመጥም።
+- **አገልጋይ URL** — የአገልጋይ ሥር፣ ለምሳሌ `http://omniroute.example.com:20128`. የ `/v1` ቅጥያ በቅጥያው ተጨምሯል; አታካትት.
+- **API ቁልፍ** የአገልጋዩ የማረጋገጫ ፖሊሲ አንድ ሲፈልግ — ያስፈልጋል። በ VS ኮድ SecretStorage በኩል ተከማችቷል ፣ በጭራሽ በ `settings.json` ውስጥ; የስራ ቦታ-ተኮር ቁልፎች ይገኛሉ። ሊያጋልጡዋቸው ለሚፈልጓቸው ሞዴሎች የተፈቀደ ቁልፍ ይጠቀሙ።
+
+ቅጥያው የግንኙነት አመልካች፣ የሞዴል እድሳት፣ የሞዴል አውድ እና የዋጋ ዲበ ዳታ (ኮምቦዎች ተካትተዋል)፣ የዥረት አመክንዮ ከ** የማሰብ ጥረት** ምናሌ በ VS ኮድ 1.120 +፣ የሁኔታ-ባር ዕለታዊ ገደብ አመልካች እና የአጠቃቀም ፓነል (OmniRoute 3.8.50 +)፣ CLI ውቅር እና አማራጭ ዳሽቦርድ ትር። የተመረጠው ሞዴል እና የአገልጋይ ፖሊሲ ሊጠቀሙባቸው የሚችሉትን ችሎታዎች ይወስናሉ።
 
 ---
 
@@ -109,25 +112,25 @@ npm start
 
 ---
 
-## ሌሎች toolsዎን ከVS Code ውስጥ ማዋቀር
+## ሌሎች መሳሪያዎችዎን ከ VS ኮድ ውስጥ በማዋቀር ላይ
 
-**`OmniRoute: Configure Coding CLI`** ለCodex CLI፣ Claude Code፣ Cline፣ Continue፣ Cursor፣ Aider፣ OpenCode፣ Goose፣ Crush፣ Qwen Code፣
-Kilo እና Roo ዝግጁ-ለአጠቃቀም profiles እንዲጽፍ `omniroute` CLIን ያንቀሳቅሳል — እነዚህም በ
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md) የተገለጹት ተመሳሳይ configs ናቸው። API keyው ለCLIው በ
-`OMNIROUTE_API_KEY` environment variable በኩል ይሰጣል፤ በcommand line ላይ ፈጽሞ አይሰጥም።
+**`OmniRoute: Configure Coding CLI`** ለ16 መሳሪያዎች ለአገልግሎት ዝግጁ የሆኑ መገለጫዎችን ለመጻፍ `omniroute` CLI ያንቀሳቅሳል Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed, WhyCodes እና 5dive. ቅጥያው በተቀናጀው ተርሚናል ውስጥ `setup-*` ትዕዛዞችን ይጠይቃል። የተመረጠውን ትዕዛዝ የሚያካትት የ OmniRoute CLI ስሪት ይጫኑ. እያንዳንዱ የምግብ አሰራር የሚጠቀምባቸውን ፋይሎች እና ባንዲራዎች እና [የቅጥያውን መሳሪያ መዝገብ](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts) ለማግኘት የ [CLI ውህደት መመሪያን](CLI-INTEGRATIONS.md) ይመልከቱ።
+
+API ቁልፉ በ `OMNIROUTE_API_KEY` በኩል ለ CLI ተሰጥቷል እንጂ በትእዛዝ መስመር ላይ የለም። የማዋቀር የምግብ አዘገጃጀቶች በታለመው መሣሪያ ውቅር ውስጥ ምስክርነቶችን ሊቀጥሉ ይችላሉ። የስራ ቦታ-ተኮር ቁልፍን ከመሳሪያው የተጠቃሚ ደረጃ ውቅር ጋር ሲያጋሩ፣ ቅጥያው መጀመሪያ ማረጋገጫ ይጠይቃል።
 
 ---
 
-## ችግር መፍታት
+## መላ መፈለግ
 
-| ምልክት                                            | ምክንያት / መፍትሔ                                                                                                                                                                                                                       |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| በpicker ውስጥ የOmniRoute models አይታዩም             | Serverውን ማግኘት አልተቻለም። የstatus-bar ነጥቡ ግራጫ ይሆናል፤ `OmniRoute: Check Connection`ን ያሂዱ። Discovery ሆን ተብሎ ያለማሳወቂያ ይከናወናል፣ እና ጥያቄ ከማቅረብ ይልቅ ምንም models አያክልም።                                                                            |
-| እያንዳንዱ model ሁለት ጊዜ ይታያል                        | ከ1.0.1 በፊት የሆነ OmniCopilot እየተጠቀሙ ነው — update ያድርጉ። extensionው አሁን `?prefix=alias`ን ይጠይቃል።                                                                                                                                         |
-| ቀደም ሲል የነበረ image/audio model ከዝርዝሩ ጠፍቷል        | ከ1.0.1 ጀምሮ ሆን ተብሎ የተደረገ ነው — የchat requestን ፈጽሞ መመለስ አይችልም ነበር።                                                                                                                                                                    |
-| Panel ከActivity Bar ጠፍቷል                        | VS Code ተጨማሪ view containersን በActivity Bar ግርጌ ወዳለው **"…"** overflow ያንቀሳቅሳል፣ እና በright-click የተደበቀ container እንደተደበቀ ይቆያል። Activity Barን right-click ያድርጉ → **OmniRoute**ን ምልክት ያድርጉ፣ ወይም በ`OmniRoute: Manage Connection` ይክፈቱት። |
-| `editor` mode ቢሆንም Dashboard በbrowser ውስጥ ይከፈታል | Serverው በ`DASHBOARD_ALLOW_EMBED=vscode` **አልተገነባም** (ከላይ ይመልከቱ) — ቀድሞ በተገነባ install ላይ በstartup ጊዜ ማዘጋጀት ምንም አይቀይርም። fallbackው ሆን ተብሎ የተደረገ ነው።                                                                                    |
-| providersን ከቀየሩ በኋላ የModels ዝርዝሩ አልታደሰም         | `OmniRoute: Refresh Models`፣ ወይም በpanel ውስጥ ያለው ↻ link።                                                                                                                                                                            |
+| ምልክት                                      | ምክንያት/ማስተካከል                                                                                                                                                                                         |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| በቃሚው ውስጥ ምንም OmniRoute ሞዴሎች የሉም           | አገልጋይ የማይደረስበት። የሁኔታ-አሞሌ ነጥብ ግራጫ ይሄዳል; ሩጫ `OmniRoute: Check Connection`. ግኝቱ በንድፍ ጸጥ ይላል እና ከመጠየቅ ይልቅ ምንም አይነት ሞዴሎችን አያደርግም።                                                                         |
+| እያንዳንዱ ሞዴል ሁለት ጊዜ ይታያል                    | ከ1.0.1 — በላይ በሆነ OmniCopilot ላይ ነዎት። ቅጥያው አሁን `?prefix=alias` ይጠይቃል።                                                                                                                                 |
+| image/audio ሞዴል ቀደም ሲል ተዘርዝሯል እና ጠፍቷል     | ሆን ተብሎ ከ1.0.1 — ጀምሮ የውይይት ጥያቄን በጭራሽ መመለስ አይችልም።                                                                                                                                                      |
+| ፓነል ከእንቅስቃሴ አሞሌ ጠፍቷል                      | VS ኮድ ተጨማሪ የእይታ መያዣዎችን ወደ ውስጥ ያንቀሳቅሳል** "..."** የተግባር አሞሌ ግርጌ ላይ ሞልቶ ይፈስሳል፣ እና በቀኝ ጠቅታ የተደበቀ መያዣ ተደብቆ ይቆያል። የእንቅስቃሴ አሞሌ → ምልክትን በቀኝ ጠቅ ያድርጉ**OmniRoute** ወይም በ `OmniRoute: Manage Connection` ይክፈቱት። |
+| ዳሽቦርድ በ `editor` ሁነታ ቢሆንም በአሳሹ ውስጥ ይከፈታል። | አገልጋዩ አልነበረም** ተገንብቷል** በ `DASHBOARD_ALLOW_EMBED=vscode` (ከላይ ያለውን ይመልከቱ) — ጅምር ላይ አስቀድሞ በተሰራ መጫኛ ላይ ማዋቀር ምንም አይሰራም። ውድቀት ሆን ተብሎ ነው።                                                                 |
+| አቅራቢዎችን ከቀየሩ በኋላ የሞዴሎች ዝርዝር የቆየ ነው።       | `OmniRoute: Refresh Models`, ወይም በፓነል ውስጥ ያለው የ ↻ አገናኝ.                                                                                                                                              |
+| ፓነል _በመስመር ላይ (ሞዴሎች ታግደዋል)_፣ መራጭ ባዶ ይላል።  | አገልጋዩ ቁልፉን ውድቅ ያደርጋል። ትክክለኛውን ቁልፍ በ ጋር አስቀምጥ** አስቀምጥ እና ሞክር** . በምትኩ ቁልፉ በአገልጋዩ ላይ ተስተካክሎ ከሆነ (ከነቃ ወይም ወደ ሞዴሎቹ መዳረሻ ከተሰጠ) ቅጥያው በራሱ አያስተውልም `OmniRoute: Refresh Models` ያሂዱ ወይም OmniRoute ፓኔሉን ይክፈቱ።  |
 
 ---
 

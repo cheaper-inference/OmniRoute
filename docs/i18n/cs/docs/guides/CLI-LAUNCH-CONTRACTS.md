@@ -12,6 +12,12 @@ Neutrální smlouva `config/cli-tools-manifest.json` deklaruje kanonické IDs, a
 
 Signály přerušení a ukončení jsou předány dítěti. Spouštěč čeká na událost close dítěte, než odstraní dočasnou konfiguraci. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` řídí dobu odkladu před vynuceným ukončením (výchozí 5000 milisekund).
 
+`omniroute launch <tool>` (viz [LAUNCH.md](./LAUNCH.md) ) se řídí stejnými pravidly prostředí a předáváním signálu a dodává:
+
+- **Automatické spuštění brány.** U místního cíle, když na portu neodpovídá žádná brána, spustí spouštěč `omniroute serve --headless --no-open` navázaný na `127.0.0.1` v rámci procesu odděleného reaperu. Každé spuštěné spuštění má pronájem v `DATA_DIR/launch/leases/` (tep každých 15 s, zastaralý po 45 s nebo když proces skončí). Reaper zastaví bránu, kterou spustil, jakmile není aktivní žádný pronájem po dobu nečinnosti (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, výchozí 10 000 milisekund). Brána, kterou uživatel spustil, je použita, ale nikdy nebyla zastavena. `--keep-gateway` nebo `omniroute gateway keep` změní spouštěcí bránu na normální; `--no-start` obnovuje staré chování při selhání. Prověřují se pouze vzdálené cíle.
+- **Spustit relace.** Každé spuštění vyrazí krátkodobý token relace `olx_` z nadřazeného pověření (`POST /api/launch/sessions`), aktivuje jej, když je nástroj spuštěn, přečte souhrn použití a po ukončení nástroje jej odvolá. Token je striktní podmnožinou svého rodiče: stejná oprávnění, stejný nebo užší katalog, kratší životnost a není to pověření řídicího panelu. Nástroj obdrží token relace, nikdy nadřazené pověření, a požadavky jsou označeny `launch:<tool>:<sessionId>` pokud není zadáno `--tag`. Brána bez relace API selže s `GatewayTooOld` místo toho, aby se vrátila ke spuštění bez rozsahu.
+- **Konfigurace podle spuštění.** Konfigurační soubory nástroje se zapisují do soukromého dočasného adresáře (režim 0700, předpona `omnirouter-`) a po ukončení podřízeného prvku se odstraní. `SIGKILL` spouštěče opustí adresář; `omniroute launch --cleanup` odstraní takové adresáře, jakmile jsou starší než jeden den.
+
 ## Gemini trvalé nastavení
 
 ```bash

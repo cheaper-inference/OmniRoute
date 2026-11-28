@@ -4,12 +4,9 @@
 
 ---
 
-> **Zuletzt aktualisiert:** 2026-08-28 — v3.8.51
-> Optimierter Release-Ablauf, der Claude Code Skills zur Automatisierung nutzt.
+> Optimierter Release-Ablauf, der Claude -Code-Kenntnisse für die Automatisierung nutzt.
 >
-> **Queue/Branch zwischen Releases grün halten:** siehe [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs`-Familie + `npm run check:release-green` + `/babysit` + nächtlicher Lauf). Wird dies
-> regelmäßig — und insbesondere **vor** dieser Checkliste — ausgeführt, startet der Release-PR grün.
+> **Halten Sie die queue/branch zwischen den Veröffentlichungen grün:** siehe [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` Familie + `npm run check:release-green` + `/babysit` + nightly). Führen Sie dies regelmäßig — und insbesondere aus** vor** Diese Checkliste — sorgt dafür, dass das Release PR grün startet.
 
 ## Kurzfassung
 
@@ -37,7 +34,7 @@ npm run test:e2e           # optional, aber empfohlen
 
 ## npm Trusted Publishing (Standard seit v3.8.51) — auf Anfrage bereitgestellt, direkt als Fallback
 
-`npm-publish.yml` veröffentlicht über** npm Trusted Publishing (OIDC)** Standardmäßig: Der `stage-npm` Job (von Github gehostet) tauscht das ID-Token von GitHub gegen einen kurzlebigen NPM-Anmeldedatensatz für diesen Lauf aus — Kein langlebiger NPM-Token in den Repository-Geheimnissen, keine 2FA-Eingabeaufforderung, Herkunft angehängt. Das ist die Umgehung der NPM-Sanktionen, da Token, die 2FA überspringen, zurückgezogen werden; Es stellt den vollautomatischen Ablauf wieder her, den das Projekt bis Version 3.8.48 hatte, und behält dabei die WS1-Garantie bei (ein durchgesickertes Token kann nicht alleine veröffentlicht werden, — es gibt kein Token).
+`npm-publish.yml` veröffentlicht über** npm Trusted Publishing (OIDC)** Standardmäßig: Der `stage-npm` Job (von Github gehostet) tauscht das ID-Token von GitHub gegen einen kurzlebigen NPM-Anmeldedatensatz für diesen Lauf aus — Kein langlebiger NPM-Token in den Repository-Geheimnissen, keine 2FA-Eingabeaufforderung, Herkunft angehängt. Das ist die Umgehung der NPM-Sanktionen, da Token, die 2FA überspringen, zurückgezogen werden; Es stellt den vollautomatischen Ablauf wieder her, den das Projekt bis Version 3.8.48 hatte, und behält dabei die WS1-Garantie bei (ein durchgesickertes Token kann nicht allein veröffentlicht werden, — es gibt kein Token).
 
 **Einmalige Einrichtung (Inhaber):** npmjs.com → -Paket `omniroute` → -Einstellungen → _Trusted Publisher_ → GitHub: Eigentümer `diegosouzapw`, Repo `OmniRoute`, Workflow `npm-publish.yml` (Umgebung: keine). Bis dies der Fall ist, schlägt der automatische Schritt mit `ENEEDAUTH` fehl: erneutes Versenden mit `publish_mode=staged` (unten) oder `direct`.
 
@@ -60,7 +57,9 @@ Der npm-publish-Workflow veröffentlicht nicht mehr direkt: Er startet den gepac
 
 **Docker Hub `latest` (erforderlich bei jeder stabilen SemVer Veröffentlichung):** Der `docker-publish` Workflow muss taggen** beide** `X.Y.Z` und, wenn `should-promote-latest.sh` zustimmt, ist dies der höchste stabile SemVer, `:latest` mit dem** gleiche Zusammenfassung** . Nach dem Job: Der Hub `latest` -Digest entspricht dem neuen SemVer -Digest und `last_updated` wird verschoben. Belassen Sie `:latest` nicht auf einem älteren Build, während in den Versionshinweisen Korrekturen erwähnt werden, die nur auf Git vorhanden sind. Verfassen Sie Schnellstarts mit `:latest`; GitOps sollte `X.Y.Z` weiterhin pinnen. Siehe [Docker Release-Kanäle](../guides/DOCKER_GUIDE.md#release-channels) und #10317.
 
-**Docker Hub-Organisations-Repository (`cheaperinference/omniroute`):** Docker Hub kann ein Repository nicht zwischen Namespaces verschieben, daher behält `diegosouzapw/omniroute` seinen Pull-Verlauf und jede Veröffentlichung bei, und der `mirror-org-dockerhub` Job von `docker-publish` kopiert jede veröffentlichte Version (und `:latest` wenn sie hochgestuft wird) von `ghcr.io/cheaper-inference/omniroute` in das Organisations-Repository. Es benötigt die `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` -Geheimnisse; Ohne sie bleibt der Job grün mit der Warnung „Docker Hub org Mirror übersprungen“ und die anderen Registrys veröffentlichen normal. Um dort später eine freigegebene Version zu veröffentlichen, führen Sie Folgendes aus:** Aktionen → Docker Image in den Docker Hub org → Run-Workflow spiegeln** mit `version=X.Y.Z` (und `promote_latest` für die höchste stabile Version): Es kopiert die vorhandenen Images, kein Neuaufbau.
+**Docker Hub-Organisations-Repository (`cheaperinference/omniroute`):** Docker Hub kann ein Repository nicht zwischen Namespaces verschieben, daher behält `diegosouzapw/omniroute` seinen Pull-Verlauf und jede Veröffentlichung bei, und der `mirror-org-dockerhub` Job von `docker-publish` kopiert jede veröffentlichte Version (und `:latest` wenn sie hochgestuft wird) von `ghcr.io/cheaper-inference/omniroute` in das Organisations-Repository. Es benötigt die `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` -Geheimnisse; Ohne sie bleibt der Job grün mit der Warnung „Docker Hub org Mirror übersprungen“ und die anderen Registrys veröffentlichen normal. Um dort später eine freigegebene Version zu veröffentlichen, führen Sie Folgendes aus:** Aktionen → Docker Image in den Docker Hub org → Run-Workflow spiegeln** mit `version=X.Y.Z` (und `promote_latest` für die höchste stabile Version): Es kopiert die vorhandenen Images, kein Neuaufbau. Die Docker Hub-Übersicht dieses Repositorys wird von Hand festgelegt: Der API, der sie bearbeitet, lehnt Organisationszugriffstoken ab.
+
+Der gleiche Workflow kopiert auch jede Version bis zum 30.06.2027 in das alte GHCR Paket `ghcr.io/diegosouzapw/omniroute`, sodass Installationen, die noch daran angeheftet sind, weiterhin aktualisiert werden. Sein Index trägt die Beschreibung „nach `ghcr.io/cheaper-inference/omniroute` verschoben“. Es benötigt das `GHCR_LEGACY_TOKEN` Geheimnis (ein klassisches persönliches Zugriffstoken von `diegosouzapw` mit `write:packages`); Ohne diese Funktion wird der Job mit der Warnung „Legacy GHCR Mirror übersprungen“ übersprungen.
 
 ## Hotfix-Schnellspur (Label `hotfix`)
 
@@ -151,7 +150,7 @@ Wichtige Änderungen: `BREAKING CHANGE:` Fußzeile oder `!` nach dem Bereich hin
 ### Dokumentation
 
 - [ ] `npm run check:docs-sync` besteht (automatische Ausführung durch Pre-Commit)
-- [ ] `npm run check:docs-all` besteht (Umbrella: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` geht vorbei. Die Empfehlung `check:deprecated-versions` markiert Versionen, die explizit OmniRoute zugeschrieben werden (3.6.x und früher) und ignoriert Datumsangaben.
 - [ ] `npm run check:env-doc-sync` beendet 0 — Code ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env-Vertrag ist intakt
 - [ ] `npm run check:doc-links` beendet 0 — keine defekten internen Markdown-Referenzen nach der Umstrukturierung
 - [ ] `docs/architecture/ARCHITECTURE.md` auf storage/runtime Drift überprüft
@@ -164,7 +163,7 @@ Wichtige Änderungen: `BREAKING CHANGE:` Fußzeile oder `!` nach dem Bereich hin
 
 ### i18n
 
-- [ ] `npm run i18n:check` verlässt 0 — -Übersetzungsstatus (`.i18n-state.json`) in Synchronisierung mit Quelldokumenten (keine verschobenen Quellen im strikten Modus; Warnungsmodus-Hinweis ist für Dokumentkorrekturen in letzter Minute akzeptabel, sollte aber vor dem Markieren 0 sein)
+- [ ] `npm run i18n:check` beendet 0 — Übersetzungsstatus (`.i18n-state.json`) in Synchronisierung mit Quelldokumenten (keine verschobenen Quellen im strikten Modus; Warnungsmodus-Hinweis ist für Dokumentkorrekturen in letzter Minute akzeptabel, sollte aber vor dem Markieren 0 sein)
 - [ ] `npm run i18n:check-ui-coverage` beendet 0 — jedes UI Gebietsschema bei oder über der 80 %-Abdeckungsuntergrenze
 - [ ] `npm run i18n:sync-ui:dry` meldet 0 fehlende Schlüssel in allen 66 Zielgebietsschemas (jedes Gebietsschema außer der `en` Quelle).
 - [ ] Wenn sich die englischen Quelldokumente geändert haben, führen Sie vor dem Taggen `npm run i18n:run` aus (erfordert `OMNIROUTE_TRANSLATION_API_KEY` in `.env`).
@@ -399,7 +398,7 @@ Der Develop-Bump-Commit wird mit Git-Plumbing erstellt (kein Arbeitsbaum wird be
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

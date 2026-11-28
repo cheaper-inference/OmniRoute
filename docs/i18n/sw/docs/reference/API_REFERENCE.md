@@ -49,7 +49,7 @@ Kila usambazaji hutoa nakala yake ya vipimo kwenye `/openapi.yaml`, inayozalishw
 
 ---
 
-## Kukamilisha Mazungumzo
+## Kukamilika kwa Gumzo
 
 ```bash
 POST /v1/chat/completions
@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### Vichwa Maalum
 
-| Header                   | Direction | Description                                                                                                                                                                                                                           |
-| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Ombi      | Weka kuwa `true` ili kupita akiba                                                                                                                                                                                                     |
-| `x-omniroute-no-memory`  | Ombi      | Weka kuwa `true` ili kuruka uingizaji wa kumbukumbu + ujuzi kwa ombi hili (huakisi no-cache; huepuka gharama ya tokeni/gharama kwa kila mwito)                                                                                        |
-| `X-OmniRoute-Progress`   | Ombi      | Weka kuwa `true` kwa matukio ya maendeleo                                                                                                                                                                                             |
-| `X-Session-Id`           | Ombi      | Ufunguo wa kikao unaodumu kwa uhusiano wa kikao wa nje                                                                                                                                                                                |
-| `x_session_id`           | Ombi      | Toleo lenye alama ya chini pia linakubaliwa (HTTP ya moja kwa moja)                                                                                                                                                                   |
-| `X-OmniRoute-Session-Id` | Ombi      | Lebo ya kikao/mazungumzo iliyotolewa na mwitaji (pia huingizwa kwenye kumbukumbu). Ikiwepo, huhifadhiwa kama ilivyo kwenye `call_logs.session_tag` kwa uhusishaji wa gharama kwa kila kikao (#8249) — haitengenezwi kamwe ikiwa haipo |
-| `Idempotency-Key`        | Ombi      | Ufunguo wa kuondoa nakala (dirisha la sekunde 5)                                                                                                                                                                                      |
-| `X-Request-Id`           | Ombi      | Ufunguo mbadala wa kuondoa nakala                                                                                                                                                                                                     |
-| `x-omniroute-connection` | Ombi      | Funga ombi la modeli moja kwenye muunganisho mmoja wa mtoa huduma (akaunti) kwa kutumia kitambulisho chake — tazama [Kufunga akaunti kwa kila ombi](#account-pinning-per-request)                                                     |
-| `X-OmniRoute-Cache`      | Jibu      | `HIT` au `MISS` (isiyo ya kutiririsha)                                                                                                                                                                                                |
-| `X-OmniRoute-Idempotent` | Jibu      | `true` ikiwa nakala zimeondolewa                                                                                                                                                                                                      |
-| `X-OmniRoute-Progress`   | Jibu      | `enabled` ikiwa ufuatiliaji wa maendeleo umewezeshwa                                                                                                                                                                                  |
-| `X-OmniRoute-Session-Id` | Jibu      | Kitambulisho halisi cha kikao kilichotumiwa na OmniRoute                                                                                                                                                                              |
-| `X-OmniRoute-Request-Id` | Jibu      | Kitambulisho cha kuhusianisha ombi (kinapojulikana)                                                                                                                                                                                   |
-| `X-OmniRoute-Version`    | Jibu      | Toleo la muundo wa OmniRoute (huwepo kila wakati)                                                                                                                                                                                     |
-| `X-OmniRoute-Cost-Saved` | Jibu      | USD ambayo akiba imeepusha kwenye HIT (mipigo ya akiba pekee)                                                                                                                                                                         |
-| `X-OmniRoute-Decision`   | Jibu      | Ufuatiliaji wa uelekezaji: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` ni mkakati mchanganyiko, au `single` kwa ombi lisilo mchanganyiko) — huwepo kila wakati kwenye majibu ya ukamilishaji                        |
+| Kijajuu                  | Mwelekeo | Maelezo                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Ombi     | Weka `true` ili kukwepa akiba                                                                                                                                                                                                                                                                                                                                               |
+| `x-omniroute-no-memory`  | Ombi     | Weka kuwa `true` ili kuruka ujuzi wa + kumbukumbu kwa ombi hili (vioo hakuna kache; huepuka token/cost ya simu kwa kila simu)                                                                                                                                                                                                                                               |
+| `x-omniroute-no-log`     | Ombi     | Weka kuwa `true` ili kuacha mizigo ya request/response kutoka kwa kumbukumbu za simu kwa ombi hili la makisio (njia zote za gumzo la familia: Kukamilika kwa Gumzo, Majibu, Ujumbe, Kamilisho, Gemini). Muhuri wa saa, muundo, hali, muda na hesabu za tokeni bado zinarekodiwa. Changanya na `x-omniroute-no-memory` na `x-omniroute-no-cache` kwa chaguo kamili la kutoka |
+| `X-OmniRoute-Progress`   | Ombi     | Weka `true` kwa matukio ya maendeleo                                                                                                                                                                                                                                                                                                                                        |
+| `X-Session-Id`           | Ombi     | Kitufe cha kunata cha kipindi cha ushirika wa nje wa kipindi                                                                                                                                                                                                                                                                                                                |
+| `x_session_id`           | Ombi     | Lahaja ya underscore pia imekubaliwa (direct HTTP)                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Session-Id` | Ombi     | Lebo ya session/conversation inayotolewa na mpigaji (pia inalisha kumbukumbu). Inapokuwapo, neno neno moja hadi `call_logs.session_tag` liliendelea kwa kila kikao cha maelezo ya gharama (#8249) — haikusanisishwa wakati haipo.                                                                                                                                           |
+| `Idempotency-Key`        | Ombi     | Kitufe cha Dedup (dirisha la 5s)                                                                                                                                                                                                                                                                                                                                            |
+| `X-Request-Id`           | Ombi     | Kitufe mbadala cha kuweka                                                                                                                                                                                                                                                                                                                                                   |
+| `x-omniroute-connection` | Ombi     | Bandika ombi la muundo mmoja kwa muunganisho wa mtoa huduma mmoja (akaunti) kwa kitambulisho chake — angalia [ubandikaji wa Akaunti kwa kila ombi](#account-pinning-per-request)                                                                                                                                                                                            |
+| `X-OmniRoute-Cache`      | Jibu     | `HIT` au `MISS` (isiyo ya kutiririsha)                                                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Idempotent` | Jibu     | `true` ikiwa imetolewa                                                                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Progress`   | Jibu     | `enabled` ikiwa ufuatiliaji wa maendeleo umeendelea                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Session-Id` | Jibu     | Kipindi kinachofaa ID kinachotumiwa na OmniRoute                                                                                                                                                                                                                                                                                                                            |
+| `X-OmniRoute-Request-Id` | Jibu     | Omba kitambulisho cha uunganisho (inapojulikana)                                                                                                                                                                                                                                                                                                                            |
+| `X-OmniRoute-Version`    | Jibu     | toleo la OmniRoute kujenga (lipo kila wakati)                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Cost-Saved` | Jibu     | USD kache iliepukwa kwenye HIT (cache hits pekee)                                                                                                                                                                                                                                                                                                                           |
+| `X-OmniRoute-Decision`   | Jibu     | Ufuatiliaji wa uelekezaji: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` ni mkakati wa kuchanganya, au `single` kwa ombi lisilo la kuchana) — huwapo kila wakati wakati majibu yakikamilika.                                                                                                                                                                |
 
-> Dokezo la Nginx: ikiwa unategemea vichwa vyenye alama za chini (kwa mfano `x_session_id`), wezesha `underscores_in_headers on;`.
+> Kumbuka ya Nginx: ikiwa unategemea vichwa vya chini (kwa mfano `x_session_id`), wezesha `underscores_in_headers on;`.
 
-#### Kufunga akaunti kwa kila ombi
+#### Ubandikaji wa akaunti kwa kila ombi
 
-Mtoa huduma anapokuwa na miunganisho kadhaa (akaunti au funguo), OmniRoute kwa kawaida huchagua mmoja
-kupitia mkakati wake wa uteuzi wa akaunti. Badala yake, ombi linaweza kufunga muunganisho mmoja mahususi
-kwa kutumia kichwa cha `x-omniroute-connection`:
+Wakati mtoa huduma ana miunganisho kadhaa (akaunti au funguo), OmniRoute kwa kawaida huchagua moja kupitia mkakati wake wa kuchagua akaunti. Ombi linaweza kubandika muunganisho mmoja maalum na kichwa cha `x-omniroute-connection` :
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,25 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Mahali pa kupata id.** Fungua ukurasa wa mtoa huduma kwenye dashibodi
-  (**Dashboard → Providers → <provider>**) na ubofye chipu ya id ya `xxxxxxxx…` kwenye safu ya muunganisho
-  — hii inanakili id kamili ya muunganisho.
-- **Ni maombi yapi yanayoixtii.** Maombi ya modeli moja (`provider/model`) kwenye
-  `/v1/chat/completions`, `/v1/messages` na `/v1/responses`. Michanganyiko hupuuza kichwa hiki: bandika
-  akaunti moja kwa kila hatua ya mchanganyiko kupitia muunganisho wake wenyewe.
-- **Kubandika ni sharti, si upendeleo.** Muunganisho uliobandikwa hutumiwa pekee. Hitilafu
-  ndani ya ombi huweka akaunti katika kipindi cha kusubiri, lakini **haibadilishi** kwenda kwenye
-  akaunti nyingine ya mtoa huduma huyo.
-- **Kipindi cha kusubiri na kiwango huondoa ubandikaji.** Muunganisho uliobandikwa unapokuwa katika kipindi
-  cha kusubiri, umeishiwa kiwango au umezuiwa na sera ya kiwango, maombi yanayofuata hurudi kwenye
-  miunganisho mingine ya mtoa huduma, sawa kabisa na trafiki isiyobandikwa.
-- **Vitambulisho visivyojulikana au vilivyozimwa hushindikana.** Id ambayo haipo kwenye kundi amilifu la mtoa huduma
-  (imefutwa, imezimwa, au ni ya mtoa huduma mwingine) huacha hakuna akaunti inayostahiki, kwa hiyo ombi
-  hushindikana badala ya kuelekezwa mahali pengine kimyakimya.
+- **Mahali pa kupata kitambulisho.** Fungua ukurasa wa mtoa huduma kwenye dashibodi (** Dashibodi → Watoa huduma → <provider>** ) na ubofye chipu ya kitambulisho cha `xxxxxxxx…` kwenye safu ya unganisho — inakili kitambulisho kamili cha unganisho.
+- **Ambayo maombi yaheshimu.** Maombi ya muundo mmoja (`provider/model`) kwenye `/v1/chat/completions`, `/v1/messages` na `/v1/responses`. Mchanganyiko hupuuza kichwa: bandika akaunti kwa kila hatua ya mseto kupitia muunganisho wa hatua yenyewe badala yake.
+- **Pini ni kali, sio upendeleo.** Muunganisho uliobandikwa hutumiwa pekee. Kutofaulu ndani ya ombi hurekodi hali ya kupoa kwa akaunti lakini kunafanya hivyo** sivyo** zungusha hadi akaunti ya ndugu ya mtoa huduma sawa.
+- **Cooldown na upendeleo kutolewa pin.** Wakati muunganisho uliobandikwa unapunguza kasi, umeisha kiasi au umezuiwa na sera ya kiasi, maombi ya baadaye yanarejeshwa kwa miunganisho mingine ya mtoa huduma, kama vile trafiki ambayo haijabandikwa.
+- **Vitambulisho visivyojulikana au vilivyozimwa havikufaulu.** Kitambulisho ambacho hakipo kwenye hifadhi inayotumika ya mtoa huduma (kilichofutwa, kimezimwa, au mali ya mtoa huduma mwingine) hakiachi akaunti yoyote inayostahiki, kwa hivyo ombi litashindikana badala ya kuelekeza kimyakimya mahali pengine.
 
-Claude Code hutuma vichwa maalum kupitia `ANTHROPIC_CUSTOM_HEADERS`. Weka kwenye sehemu ya `env`
-ya `~/.claude/settings.json`, au kwenye `.claude/settings.json` ya kiwango cha mradi ili kubandika akaunti
-tofauti kwa kila mradi:
+Claude Code hutuma vichwa maalum kupitia `ANTHROPIC_CUSTOM_HEADERS`. Iweke kwenye kizuizi `env` cha `~/.claude/settings.json`, au katika kiwango cha mradi `.claude/settings.json` ili kubandika akaunti tofauti kwa kila mradi:
 
 ```jsonc
 {
@@ -133,12 +120,11 @@ tofauti kwa kila mradi:
 }
 ```
 
-Chanzo: `src/sse/handlers/chat.ts` (usomaji wa kichwa), `src/sse/services/auth.ts` na
-`src/sse/services/sessionAffinityPin.ts` (kuondoa ubandikaji na ukaguzi wa kutokuwepo kwenye kundi).
+Chanzo: `src/sse/handlers/chat.ts` (kichwa kilisomwa), `src/sse/services/auth.ts` na `src/sse/services/sessionAffinityPin.ts` (kutolewa kwa pini na ukaguzi wa kukosa kutoka kwa bwawa).
 
-> **Vichwa vya data ya gharama:** majibu ya mafanikio yasiyotiririshwa pia hubeba seti ya data ya gharama ya `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, desimali 10 zisizobadilika; `0.0000000000` kwa bila malipo/isiyowekewa bei), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, na `X-OmniRoute-Fallback-Attempts` (huwekwa tu ikiwa > 0), pamoja na `X-OmniRoute-Request-Id` na `X-OmniRoute-Version`. Hivi hutolewa na chat completions, `/v1/responses`, `/v1/messages`, **na vituo vya mwisho vya media** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, na `/v1/moderations` (gharama huwa `0` kila wakati). Gharama ya media huhesabiwa kwa kila aina ya media (kwa kila picha, kwa kila sekunde, kwa kila herufi, kwa kila kipimo cha utafutaji) bei inapopatikana, la sivyo huwa `0` (mfumo unaendelea kufanya kazi hata bila bei).
+> **Gharama ya vichwa vya telemetry:** majibu ya mafanikio yasiyo ya kutiririsha pia yana seti ya `X-OmniRoute-*` ya gharama ya telemetry — `X-OmniRoute-Response-Cost` (USD, desimali 10 zisizohamishika; `0.0000000000` kwa free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, na `X-OmniRoute-Fallback-Attempts` ( > 0) `X-OmniRoute-Version` `X-OmniRoute-Request-Id` Haya yanatolewa na kukamilika kwa mazungumzo, `/v1/responses`, `/v1/messages`,** na miisho ya vyombo vya habari** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, na `/v1/moderations` ( kila mara hugharimu `0`). Gharama ya media inakokotolewa kwa kila mtindo (kwa kila picha, kwa sekunde, kwa kila herufi, kwa kitengo cha utafutaji) wakati bei inapatikana, vinginevyo `0` (kushindwa kufunguliwa).
 
-> **Maana ya gharama ya kugonga kache:** kwenye HIT ya kache ya kisemantiki (`X-OmniRoute-Cache-Hit: true`) hakuna mwito wa upstream unaofanywa, kwa hiyo `X-OmniRoute-Response-Cost` huwa `0.0000000000` (gharama **ya ziada** ya kuhudumia hit hiyo). Gharama ya awali/ambayo ingekuwapo huripotiwa kando kwenye `X-OmniRoute-Cost-Saved`. Watumiaji wa data ya malipo wanapaswa kujumlisha `X-OmniRoute-Response-Cost` (hits hazina gharama); uchanganuzi wa kache unaweza kujumlisha `X-OmniRoute-Cost-Saved`.
+> **Semantiki za gharama zilizopigwa kache:** kwenye kache ya semantic HIT (`X-OmniRoute-Cache-Hit: true`) hakuna simu ya juu ya mkondo inayopigwa, kwa hivyo `X-OmniRoute-Response-Cost` ni `0.0000000000` (** ya kuongezeka** gharama ya kutumikia hit). Gharama ya original/would-have-been imeripotiwa tofauti katika `X-OmniRoute-Cost-Saved`. Watumiaji wa bili wanapaswa kujumlisha `X-OmniRoute-Response-Cost` (vipigo havigharimu chochote); uchanganuzi wa akiba unaweza kujumlisha `X-OmniRoute-Cost-Saved`.
 
 ## Ukodishaji wa Kipekee wa Leases za Vipindi Zinazosimamiwa
 
@@ -323,7 +309,7 @@ GET /v1/embeddings
 
 ---
 
-## Uzalishaji wa Picha
+## Kizazi cha Picha
 
 ```bash
 POST /v1/images/generations
@@ -337,43 +323,30 @@ Content-Type: application/json
 }
 ```
 
-Watoa huduma wanaopatikana ni pamoja na OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (ya ndani), ComfyUI (ya ndani).
+Watoa huduma wanaopatikana ni pamoja na OpenAI (GPT Picha 2), xAI (Grok Picha), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (ya ndani), ComfyUI (ya ndani).
 
-`n` hurejesha picha `n` katika `data[]`. Watoa huduma ambao API yao ya upstream hurejesha picha moja kwa kila mwito
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) hupokea miito tofauti `n` ya upstream, huku kukiwa na miito isiyozidi 4 kwa wakati mmoja. `seed` isiyobadilika huongezwa kwa faharasa ya mwito (`seed`, `seed + 1`, …), hivyo picha hutofautiana lakini hubaki zinazoweza kuzalishwa tena. `n` ina kikomo cha 10. Ombi lote hushindikana ikiwa mwito wowote utashindwa. Orodha ya miundo ya fan-out iko katika
-`SINGLE_IMAGE_FANOUT_FORMATS` ndani ya
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` inarudisha picha `n` katika `data[]`. Watoa huduma ambao API yao ya juu hurejesha picha moja kwa kila simu (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) hupokea simu `n` tofauti za juu, zisizozidi 4 kwa ndege. `seed` isiyobadilika inarekebishwa na faharisi ya simu (`seed`, `seed + 1`, …), kwa hivyo picha hutofautiana lakini hukaa na uwezo wa kujirudia. `n` imewekwa katika 10. Ombi halitafaulu kwa ujumla ikiwa simu yoyote itashindwa. Orodha ya umbizo la fan-out ni `SINGLE_IMAGE_FANOUT_FORMATS` katika `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux hutumia tena muunganisho uliopo wa API-key na hukubali viambishi awali vya
-`zenmux/` au `zm/`:
+Codex GPT Miundo ya picha (`codex/gpt-image-*`) inarudisha PNG pekee: mkondo wa juu hujibu `200` na baiti PNG hata `jpeg` au `webp` inapoombwa. Ombi na `output_format` nyingine yoyote (`webp`, `jpeg`, ...) linakataliwa kwa HTTP 400 badala ya kupuuzwa kimya kimya; iache au tuma `png`. `output_compression` haijasambazwa.
 
-- `zenmux/openai/gpt-image-2` hutumia API ya OpenAI Images ya ZenMux. Chaguo ni pamoja na `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, na `response_format`.
-- Wachapishaji wengine, kama vile `zm/meta/muse-image-1.0`, hutumia endpoint ya Vertex AI `:predict` ya ZenMux. `n` huwekwa kwenye `sampleCount`, `aspect_ratio` kwenye `aspectRatio`, na `image_size`
-  (`1K`, `2K`, `4K`) kwenye `sampleImageSize`. `size` ya pikseli hutoa tu uwiano wa
-  vipimo, wala si vipimo vya pikseli vinavyohakikishwa. Uwiano unaotumika, maazimio, na idadi hutofautiana kulingana na modeli.
-- `zm/inclusionai/ming-image-0.1-design` huchagua vipimo vyake yenyewe. Acha `size`,
-  `aspect_ratio`, na `image_size` bila kuwekwa; thamani zilizoainishwa wazi hurejesha HTTP 400. PNG, JPEG, na WebP
-  zinaweza kuombwa kwa kutumia `output_format`.
+ZenMux hutumia tena muunganisho uliopo wa ufunguo wa API na inakubali viambishi awali vya `zenmux/` au `zm/` :
 
-Muunganisho huu unaunga mkono uundaji wa picha kutoka kwa maandishi, si uhariri wa picha za marejeo. Matokeo ya Vertex husawazishwa kuwa `data[].b64_json`; `response_format: "url"` hurejesha URL ya upstream ya HTTPS au URL ya data ya base64 wakati baiti za picha pekee ndizo zinapatikana. Matokeo yaliyo tupu/yaliyichujwa
-hurejesha hitilafu badala ya mafanikio yasiyo na data. Ufikiaji wa modeli hutegemea akaunti ya ZenMux.
-Tazama [API ya Vertex ya ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) na
-[API ya OpenAI Images](https://docs.zenmux.ai/api/openai/generate-an-image).
+- `zenmux/openai/gpt-image-2` hutumia Picha za ZenMuxOpenAI API Chaguo ni pamoja na `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, na `response_format`.
+- Wachapishaji wengine, kama vile `zm/meta/muse-image-1.0`, hutumia sehemu ya mwisho ya ZenMux ya Vertex AI `:predict`. `n` ramani hadi `sampleCount`, `aspect_ratio` hadi `aspectRatio`, na `image_size` (`1K`, `2K`, `4K`) hadi `sampleImageSize`. `size` ya pikseli hutoa uwiano wa kipengele pekee, si vipimo vya pikseli vilivyohakikishwa. Uwiano unaotumika, maazimio na hesabu hutofautiana kulingana na muundo.
+- `zm/inclusionai/ming-image-0.1-design` huchagua vipimo vyake. Acha `size`, `aspect_ratio`, na `image_size`; thamani zilizo wazi zinarudisha HTTP 400. PNG, JPEG, na WebP zinaweza kuombwa kwa kutumia `output_format`.
 
-Muunganisho wa kuingia wa Microsoft 365 Copilot hutumia `copilot-m365-web/m365-copilot-image`
-kupitia zana ya picha iliyojengwa ndani ya Copilot: zamu moja ya Copilot kwa kila picha (`n` 1–4), `size` ikielekeza mwelekeo pekee, na picha zikirejeshwa zikiwa ndani ya jibu (`b64_json`, au URL ya data kwa
-`response_format: "url"`). Tazama [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+This integration supports text-to-image generation, not reference-image editing. Vertex output is normalized to `data[].b64_json`; `response_format: "url"` returns an upstream HTTPS URL or a base64 data URL when only image bytes are available. Empty/filtered outputs return an error rather than an empty success. Model access depends on the ZenMux account. See [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) and [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Muunganisho wa kuingia Microsoft 365 Copilot hutumikia `copilot-m365-web/m365-copilot-image` kupitia zana ya picha iliyojengewa ndani ya Copilot: zamu ya Copilot moja kwa kila picha (`n` 1–4), `size` inayoongoza mwelekeo pekee, na picha zinazorejeshwa ndani ya mstari (`b64_json`, au data URL kwa `response_format: "url"`). Tazama [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Orodhesha miundo yote ya picha
+# List all image models
 GET /v1/images/generations
 ```
 
 ---
 
-## OCR ya Hati
+## Hati OCR
 
 ```bash
 POST /v1/ocr
@@ -389,16 +362,15 @@ Content-Type: application/json
 }
 ```
 
-`model` huchagua mtoa huduma wa OCR kupitia kiambishi awali cha `provider/model`; kitambulisho cha modeli kisicho na kiambishi awali (kwa mfano
-`mistral-ocr-latest`) hutatuliwa kwa mtoa huduma wake aliyesajiliwa, na `model` isipoainishwa hutumia Mistral kwa chaguo-msingi (`mistral-ocr-latest`). Watoa huduma waliosajiliwa (`open-sse/config/ocrRegistry.ts`):
+`model` huchagua mtoaji wa OCR kupitia kiambishi awali `provider/model` ; kitambulisho cha kielelezo tupu (km `mistral-ocr-latest`) hutatuliwa kwa mtoaji wake aliyesajiliwa, na chaguo-msingi za `model` zilizoachwa kuwa Mistral (`mistral-ocr-latest`). Watoa huduma waliosajiliwa (`open-sse/config/ocrRegistry.ts`):
 
-| Kitambulisho cha mtoa huduma  | Kitambulisho cha modeli | Thamani ya `model`                                     | Maelezo                                                                                                                    |
-| ----------------------------- | ----------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest`    | `mistral/mistral-ocr-latest` (au `mistral-ocr-latest`) | Sawazisha — jibu hurejeshwa moja kwa moja kutoka kwa ombi moja la upstream.                                                |
-| `azure-document-intelligence` | `prebuilt-read`         | `azure-document-intelligence/prebuilt-read`            | Upstream isiyosawazisha (`analyze` + poll) — tazama hapa chini.                                                            |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`     | `vertex-deepseek-ocr/deepseek-ocr-maas`                | Sawazisha, kupitia endpoint ya mshirika ya Vertex AI `openapi/chat/completions` — tazama hapa chini kwa uthibitishaji/URL. |
+| Kitambulisho cha mtoa huduma  | Kitambulisho cha mfano                           | thamani `model`                                             | Vidokezo                                                                                                                                                                                                                                    |
+| ----------------------------- | ------------------------------------------------ | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                             | `mistral/mistral-ocr-latest` (au `mistral-ocr-latest` wazi) | Synchronous — jibu linarejeshwa moja kwa moja kutoka kwa simu moja ya juu ya mkondo.                                                                                                                                                        |
+| `azure-document-intelligence` | `prebuilt-read`                                  | `azure-document-intelligence/prebuilt-read`                 | Asynchronous juu ya mkondo ( kura ya `analyze` + ) — tazama hapa chini.                                                                                                                                                                     |
+| `vertex-deepseek-ocr`         | imejituma (hakuna kielelezo kilichojengwa ndani) | `vertex-deepseek-ocr/<your-deployed-model-id>`              | Sawazisha, kupitia sehemu yako ya mwisho ya Vertex AI Model Garden DeepSeek-OCR ( umbo la `openapi/chat/completions` ); Google ilistaafu `deepseek-ocr-maas` iliyosimamiwa mnamo 2026-10-21 (#20423), ili kitambulisho hicho kirudishe 400. |
 
-Watoa huduma wote watatu hujibu kwa mwili wenye muundo wa Mistral:
+Watoa huduma wote watatu hujibu katika mwili sawa wa umbo la Mistral:
 
 ```json
 {
@@ -408,17 +380,13 @@ Watoa huduma wote watatu hujibu kwa mwili wenye muundo wa Mistral:
 }
 ```
 
-### Mtiririko wa polling wa Azure Document Intelligence
+### Mtiririko wa kura ya Azure Document Intelligence
 
-API ya `analyze` ya Azure Document Intelligence haisawazishi: ombi la awali hurejesha kichwa cha `Operation-Location` badala ya mwili, na ni lazima matokeo yafuatiliwe kwa polling. Handler
-(`open-sse/handlers/ocr.ts`) hufanya polling ya URL hiyo kila sekunde kwa hadi majaribio 30, hushindwa mara moja (haiendelei kufanya polling) ikiwa jibu la polling si `ok` au hali ni `"failed"`, na hurejesha `504` ikiwa operesheni bado inaendelea baada ya bajeti ya majaribio kuisha. Jibu la mwisho la Azure hubadilishwa kuwa muundo uleule wa `pages`/`markdown` unaotumiwa na Mistral kabla ya kurejeshwa kwa mwitaji, kwa hiyo msimbo wa mteja hauhitaji kushughulikia mtoa huduma huyo kwa namna maalum.
+`analyze` API ya Azure Document Intelligence hailingani: ombi la awali hurejesha kichwa cha `Operation-Location` badala ya mwili, na matokeo yake lazima yapigiwe kura. Msimamizi (`open-sse/handlers/ocr.ts`) kura ambazo URL kila sekunde kwa hadi majaribio 30, hushindwa haraka (haendelezi upigaji kura) kwenye jibu lisilo la `ok` au hali ya `"failed"`, na hurejesha `504` ikiwa operesheni bado inaendelea baada ya bajeti ya jaribio kukamilika. Majibu ya mwisho ya Azure yanarekebishwa katika umbo lile lile la `pages`/`markdown` linalotumiwa na Mistral kabla ya kurejeshwa kwa mpigaji simu, kwa hivyo msimbo wa mteja hauhitaji kuweka msimbo maalum kwa mtoa huduma.
 
-### Uthibitishaji na utatuzi wa endpoint wa Vertex AI DeepSeek OCR
+### Vertex AI DeepSeek OCR auth na azimio la mwisho
 
-`vertex-deepseek-ocr` hutumia tena uthibitishaji huohuo wa Vertex AI ambao OmniRoute tayari huunga mkono kwa trafiki ya gumzo/picha
-(`open-sse/executors/vertex.ts`): API key ya muunganisho ni kitambulisho cha JSON cha Service Account (hubadilishwa kuwa tokeni ya muda mfupi ya ufikiaji ya OAuth kupitia mtiririko wa JWT-bearer) au tokeni ya ufikiaji ya OAuth iliyotengenezwa tayari ambayo hutumiwa jinsi ilivyo. URL ya endpoint ya upstream ni endpoint ya jumla ya mshirika ya Vertex ya `openapi/chat/completions`, inayoundwa kutokana na mradi na eneo la muunganisho — `providerSpecificData.project`/`providerSpecificData.region` iliyoainishwa wazi huwa na kipaumbele kila mara; vinginevyo mradi hutolewa kutoka `project_id` ya JSON ya Service Account na eneo huwa `us-central1` kwa chaguo-msingi. Utatuzi wote hufanyika katika `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), na hutumiwa na
-`src/app/api/v1/ocr/route.ts` kabla ya kutuma ombi kwa `handleOcr`.
+`vertex-deepseek-ocr` hutumia tena uthibitishaji ule ule wa Vertex AI OmniRoute tayari unaauni kwa trafiki chat/image (`open-sse/executors/vertex.ts`): kitufe cha API cha muunganisho ni kitambulisho cha JSON cha Akaunti ya Huduma (kinabadilishwa kwa tokeni ya ufikiaji OAuth ya muda mfupi kupitia mtiririko wa mtoaji wa JWT) au ufikiaji uliowekwa tayari OAuth. Mwisho wa mkondo URL ni mwisho wa mshirika wa `openapi/chat/completions` wa Vertex, uliojengwa kutoka kwa mradi wa muunganisho na eneo — `providerSpecificData.project`/`providerSpecificData.region` dhahiri hushinda kila wakati; vinginevyo mradi unatokana na Akaunti ya Huduma JSON's `project_id` na kanda chaguomsingi kuwa `us-central1`. Maazimio yote mawili hutokea `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), yanayotumiwa na `src/app/api/v1/ocr/route.ts` kabla ya kutumwa kwa `handleOcr`.
 
 ---
 
@@ -651,97 +619,104 @@ Mikataba ya juu: [athari za sauti](https://elevenlabs.io/docs/api-reference/text
 
 ---
 
-## Vituo vya Mwisho vya Utangamano
+## Vipimo vya Utangamano
 
-| Mbinu | Njia                                      | Muundo                                   |
-| ----- | ----------------------------------------- | ---------------------------------------- |
-| POST  | `/v1/chat/completions`                    | OpenAI                                   |
-| POST  | `/v1/messages`                            | Anthropic                                |
-| POST  | `/v1/responses`                           | Majibu ya OpenAI                         |
-| POST  | `/v1/embeddings`                          | OpenAI                                   |
-| POST  | `/v1/images/generations`                  | Picha za OpenAI                          |
-| POST  | `/v1/images/edits`                        | Picha za OpenAI (hariri/inpaint)         |
-| POST  | `/v1/videos/generations`                  | Uzalishaji wa video wa mtindo wa OpenAI  |
-| POST  | `/v1/music/generations`                   | Uzalishaji wa muziki wa mtindo wa OpenAI |
-| POST  | `/v1/audio/transcriptions`                | Sauti ya OpenAI (STT)                    |
-| POST  | `/v1/audio/speech`                        | OpenAI TTS (hurejesha mwili wa sauti)    |
-| POST  | `/v1/rerank`                              | Upangaji upya wa mtindo wa Cohere/Voyage |
-| POST  | `/v1/classify`                            | Uainishaji wa Jina (`api.jina.ai`)       |
-| POST  | `/v1/segment`                             | Kigawanya cha Jina (`segment.jina.ai`)   |
-| POST  | `/v1/moderations`                         | Usimamizi wa OpenAI                      |
-| GET   | `/v1/models`                              | OpenAI                                   |
-| POST  | `/v1/models/query`                        | Orodha fupi ya miundo iliyochujwa        |
-| POST  | `/v1/messages/count_tokens`               | Anthropic                                |
-| GET   | `/v1beta/models`                          | Gemini                                   |
-| POST  | `/v1beta/models/{...path}`                | generateContent ya Gemini                |
-| POST  | `/v1/api/chat`                            | Ollama                                   |
-| GET   | `/api/v1/vscode/{token}/`                 | Lakabu ya katalogi ya OpenAI             |
-| GET   | `/api/v1/vscode/{token}/models`           | Lakabu ya miundo ya OpenAI               |
-| POST  | `/api/v1/vscode/{token}/chat/completions` | Lakabu yenye tokeni ya OpenAI            |
-| POST  | `/api/v1/vscode/{token}/responses`        | Lakabu yenye tokeni ya Majibu ya OpenAI  |
-| POST  | `/api/v1/vscode/{token}/api/chat`         | Lakabu yenye tokeni ya Ollama            |
-| GET   | `/api/v1/vscode/{token}/api/tags`         | Lakabu yenye tokeni ya lebo za Ollama    |
+| Mbinu | Njia                                      | Umbizo                                  |
+| ----- | ----------------------------------------- | --------------------------------------- |
+| POST  | `/v1/chat/completions`                    | OpenAI                                  |
+| POST  | `/v1/messages`                            | Anthropic                               |
+| POST  | `/v1/responses`                           | OpenAI Majibu                           |
+| POST  | `/v1/embeddings`                          | OpenAI                                  |
+| POST  | `/v1/images/generations`                  | OpenAI Picha                            |
+| POST  | `/v1/images/edits`                        | Picha OpenAI (edit/inpaint)             |
+| POST  | `/v1/videos/generations`                  | Uzalishaji wa video wa mtindo wa OpenAI |
+| POST  | `/v1/music/generations`                   | Kizazi cha muziki cha mtindo wa OpenAI  |
+| POST  | `/v1/audio/transcriptions`                | OpenAI Sauti (STT)                      |
+| POST  | `/v1/audio/speech`                        | OpenAI TTS (hurejesha mwili wa sauti)   |
+| POST  | `/v1/rerank`                              | Cohere/Voyage-style renk                |
+| POST  | `/v1/classify`                            | Jina ainisha (`api.jina.ai`)            |
+| POST  | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)      |
+| POST  | `/v1/moderations`                         | OpenAI Ukadiriaji                       |
+| POST  | `/v1/systemone`                           | Maamuzi ya Mfumo wa Kwanza              |
+| POST  | `/v1/decisions`                           | OpenAI maamuzi (asili)                  |
+| GET   | `/v1/systemone/models`                    | Katalogi ya mfano wa uamuzi             |
+| GET   | `/v1/models`                              | OpenAI                                  |
+| POST  | `/v1/models/query`                        | Orodha fupi ya muundo iliyochujwa       |
+| POST  | `/v1/messages/count_tokens`               | Anthropic                               |
+| GET   | `/v1beta/models`                          | Gemini                                  |
+| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                  |
+| POST  | `/v1/api/chat`                            | Ollama                                  |
+| GET   | `/api/v1/vscode/{token}/`                 | OpenAI katalogi lakabu                  |
+| GET   | `/api/v1/vscode/{token}/models`           | OpenAI mifano pak                       |
+| POST  | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenized lakabu                 |
+| POST  | `/api/v1/vscode/{token}/responses`        | OpenAI Majibu yenye jina lakshi         |
+| POST  | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenized lakabu                 |
+| GET   | `/api/v1/vscode/{token}/api/tags`         | Ollama tagi lakabu zilizowekwa alama    |
 
-Njia zote za POST hufuata muundo uleule: `Bearer your-api-key` + mwili wa JSON uliothibitishwa na Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, n.k.; tazama `src/shared/validation/schemas.ts`). 4xx hurejeshwa iwapo schema itashindwa.
+Njia zote POST hufuata umbo sawa: `Bearer your-api-key` + Zod-iliyothibitishwa JSON mwili (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, nk, angalia `src/shared/validation/schemas.ts`). 4xx inarejeshwa kwa kushindwa kwa schema.
 
-Kwa wateja wasioweza kuambatisha `Authorization: Bearer ...`, OmniRoute pia hukubali funguo za API kwenye URL kupitia uoanifu wa query string (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) au vituo maalum vya `/api/v1/vscode/{token}/...` vilivyoandikwa hapa chini.
+Kwa wateja ambao hawawezi kuambatisha `Authorization: Bearer ...`, OmniRoute pia inakubali vitufe API katika URL kupitia ama uoanifu wa query-string (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) au miisho ya `/api/v1/vscode/{token}/...` iliyowekwa hapa chini.
 
 ```bash
-# Upangaji upya (mtoa huduma wa sajili ya wingu, au nodi ya mtoa huduma inayoendana na OpenAI kama "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Uainishaji wa Jina (vitambulisho vya API ya Foundation)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Kigawanya cha Jina
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Utafutaji wa Jina (s.jina.ai; lakabu za watoa huduma: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Usimamizi
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — hurejesha mwili wa audio/mpeg (au umbizo lililoombwa)
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS inahitaji lugha na sauti: `language` huwa na chaguo-msingi la "en"; sauti
-# isiyokuwepo au jina la sauti la kawaida la OpenAI (alloy, nova, …) huwa "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Kuhariri picha (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Uzalishaji wa video / muziki (kitambulisho cha modeli kilicho na kiambishi cha mtoa huduma)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Nodi za mtoa huduma za kupanga upya:** `POST /v1/rerank` pia huelekeza kwenye nodi za mtoa huduma zinazoendana na OpenAI
-> (oMLX, vLLM, Infinity, TEI iliyo nyuma ya lango, …) zinazotajwa kama `<node-prefix>/<model>`. Nodi za
-> loopback (`localhost`, `127.0.0.1`, `172.16.0.0/12`) huwa zinastahiki kila wakati, na vivyo hivyo majina ya wapangishaji ambayo
-> mwendeshaji anaorodhesha katika `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (kwa mfano, jina la huduma ya Docker/Compose kama
-> `http://reranker:8080/v1`; hizi huitwa moja kwa moja, kamwe kupitia `HTTP(S)_PROXY` au proksi iliyobandikwa ya
-> muunganisho). Nodi zilizo kwenye wapangishaji wengine wowote — kompyuta ya LAN au rika la Tailscale — zinastahiki
-> tu mwendeshaji anapowezesha alama ya kipengele cha `RERANK_REMOTE_PROVIDER_NODES` **na** URL ya msingi ya nodi inapita
-> sera ya URL za mtoa huduma za kutoka (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Hatua ya kupanga upya ya injini ya kumbukumbu huita njia hii kupitia loopback, kwa hiyo kanuni hiyo hiyo hutawala
-> `rerankProviderModel` katika mipangilio ya Memory.
+> **Weka upya nodi za watoa huduma:** `POST /v1/rerank` pia huelekeza kwa nodi za watoa huduma zinazolingana na OpenAI (oMLX, vLLM, Infinity, TEI nyuma ya lango, ...) zinazoshughulikiwa kama `<node-prefix>/<model>`. Nodi za Loopback (`localhost`, `127.0.0.1`, `172.16.0.0/12`) hustahiki kila wakati, na vile vile majina ya wapangishi ambayo opereta huorodhesha katika `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (km jina la huduma Docker/Compose kama vile `http://reranker:8080/v1`; haya huitwa moja kwa moja, kamwe kupitia `HTTP(S)_PROXY` au seva mbadala ya muunganisho iliyobandikwa). Nodi kwenye seva pangishi nyingine yoyote — a LAN box au Tailscale peer — zinastahiki tu wakati opereta atawasha kipengele cha bendera `RERANK_REMOTE_PROVIDER_NODES`** na** msingi wa nodi URL hupitisha sera ya URL zinazotoka kwa mtoaji (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Hatua ya kurekebisha injini ya kumbukumbu huita njia hii juu ya kurudi nyuma, kwa hivyo sheria hiyo hiyo inatawala `rerankProviderModel` katika mipangilio ya Kumbukumbu.
 >
-> **Miundo ya seva za ndani:** nodi huitwa kwenye `<base>/v1/rerank` na, ikiwa kuna 404, kwenye `<base>/rerank`
-> (Infinity, TEI). Mwili wa ombi la upstream hubeba tahajia zote mbili za Cohere/OpenAI (`documents`,
-> `return_documents`) na tahajia ya TEI (`texts`, `return_text`), na jibu la upstream
-> husawazishwa kuwa bahasha ya Cohere: TEI yenye `[{index, score, text}]` pekee, `{results: [{index, score}]}`
-> kutoka kwa malango membamba, na `{data: [...]}` ya mtindo wa Voyage zote humrudia mteja kama
-> `{results: [{index, relevance_score, document?}]}`, zikiwa zimepangwa kwa alama na kuwekwa kikomo cha `top_n`.
+> **Maumbo ya seva ya ndani:** nodi inaitwa `<base>/v1/rerank` na, mnamo 404, kwa `<base>/rerank` (Infinity, TEI). Sehemu ya juu ya mkondo hubeba tahajia Cohere/OpenAI (`documents`, `return_documents`) na tahajia TEI (`texts`, `return_text`), na jibu la juu la mkondo linarekebishwa kwa bahasha Cohere : TEI's bare `[{index, score, text}]`, `{results: [{index, score}]}` kutoka lango nyembamba, na Voyage-style back to `{data: [...]}` na mpangilio wa `{results: [{index, relevance_score, document?}]}` kwa mteja. `top_n`.
 
-> **Ugunduzi wa nodi za mtoa huduma:** miundo kwenye nodi ya mtoa huduma inayoendana na OpenAI huonekana katika `GET /v1/models`
-> chini ya kiambishi cha nodi. Safu ambazo hazina metadata ya endpoint (jambo la kawaida katika orodha za ndani za `/v1/models`)
-> hurithi `apiType` ya nodi, kwa hiyo miundo ya nodi ya `embeddings` huwa na `type: "embedding"` na
-> miundo ya nodi ya `rerank` huwa na `type: "rerank"` badala ya kuwekwa chaguomsingi kuwa chat; `supportedEndpoints` ya wazi
-> kwenye safu iliyosawazishwa au iliyoongezwa mwenyewe bado huwa na kipaumbele.
+> **Ugunduzi wa nodi za mtoaji:** mifano kwenye nodi ya mtoaji inayoendana na OpenAI inaonekana katika `GET /v1/models` chini ya kiambishi awali cha nodi. Safu mlalo ambazo hazina metadata ya mwisho (kawaida kwa uorodheshaji wa `/v1/models` wa ndani) hurithi nodi ya `apiType`, kwa hivyo miundo ya nodi `embeddings` ni `type: "embedding"` na miundo ya nodi ya `rerank` ni `type: "rerank"` badala ya kughairi kupiga gumzo; `supportedEndpoints` dhahiri kwenye safu mlalo iliyosawazishwa au iliyoongezwa kwa mikono bado inachukua nafasi ya kwanza.
 
-### Njia Maalum za Watoa Huduma
+### Maamuzi yaliyoandikwa
+
+Miundo ya maamuzi hujibu maswali yaliyochapwa na uwezekano uliorekebishwa badala ya kutoa maandishi. Kamwe sio mifano ya gumzo, na fomati mbili za waya hazitafsiriwi kwa kila mmoja:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, maamuzi OpenRouter, Cloudflare Workers AI, local Ollama).
+- `POST /v1/decisions` — asili OpenAI Maamuzi `{ model, input, questions: [...] }`, inayotolewa na muunganisho wa `openai`. Mfano ni `openai/gpt-6-luna` ( `gpt-6-luna` tupu pia inafanya kazi). Majibu yanarudi kwa mpangilio wa maswali, bila kuguswa.
+- `GET /v1/systemone/models` — katalogi moja ya aina zote mbili; kila safu hutaja `api_format` yake (`systemone` au `decisions`). `limit` / `after` ukurasa wa orodha ya mwisho. Kichwa cha `X-OmniRoute-Catalog-Status` kinasomeka `complete`, `partial` au `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+Kwenye `/v1/decisions` orodha ya ruhusu ya ufunguo wa API, kategoria ya mwisho `decisions`, bajeti na upeo wa muunganisho huangaliwa kabla ya kitambulisho chochote kusomwa. Kitambulisho ni muunganisho wa `openai` uliohifadhiwa ndani ya wigo wa ufunguo (kamwe ufunguo wa mazingira); msingi wa uunganisho URL huheshimiwa tu ikiwa ni `http(s)` URL bila vitambulisho, swali au kipande ambacho hakielekezi OmniRoute hii. Simu huondoka kupitia usafiri uliolindwa sawa na kipanga njia otomatiki `decision` ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): ulinzi wa nje wa mtoaji, hakuna majaribio tena, hakuna uelekezaji kwingine, kuisha kwa sekunde 5 na kikomo cha jibu cha KB 64 (jibu kubwa zaidi ni 502). Miili ya ombi ina mipaka ya MiB 4 . Kila simu hutuma `Idempotency-Key` mpya. Hitilafu hubeba hali ya juu tu, sio mwili wake, URL, ufunguo au kidokezo.
+
+### Njia za Watoaji wakfu
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -749,7 +724,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Kiambishi cha mtoa huduma huongezwa kiotomatiki ikiwa kinakosekana. Miundo isiyolingana hurejesha `400`.
+Kiambishi awali cha mtoa huduma huongezwa kiotomatiki ikiwa hakipo. Miundo isiyolingana inarudi `400`.
 
 ---
 

@@ -4,86 +4,63 @@
 
 ---
 
-> **2026-11-19: foleni ya kuunganisha ya Mergify imesimamishwa** (uamuzi wa mmiliki). `.mergify.yml` haifafanui tena foleni na inakataa amri za Mergify zinazounganisha au kuandika upya ombi la kuvuta. Toleo la PRs huunganishwa kwa mkono chini ya mpangilio wa kanuni wa hazina "Inahitaji milango ya kijani kwenye toleo amilifu" (`Gate / CI` + `Gate / Quality`) hadi omni-foleni iendeshe katika hali ya moja kwa moja, na kupitia omni-foleni baada ya hapo ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Sehemu za Mergify hapa chini zinaelezea foleni jinsi ilivyokuwa.
+## Kutua kwenye tawi la kutolewa
 
-Kwa kuwa v3.8.49 (WS3.2/WS3.4 ya mpango wa quality/velocity ) njia chaguo-msingi ya kuunganisha kwa PRs iliyopitiwa hadi `release/vX.Y.Z` ni** Unganisha foleni ya kuunganisha** (`.mergify.yml`); ya** mwongozo wa kuunganisha-treni** iliyoorodheshwa hapa chini ni FALLBACK — inayotumiwa wakati wa matukio, kutolewa kusimamishwa, au ikiwa mpango wa Mergify Open Source utabadilika.
+Foleni ya kila kitu inasimamia kutua kwenye `release/vX.Y.Z`. Soma `mode` ya kiwango cha juu katika `config/merge-queue/config.json` kwenye tawi chaguo-msingi kabla ya kutua PR. Angalia [Omni-Queue](OMNI_QUEUE.md).
 
-## Njia chaguo-msingi: foleni ya Mergify
+- **`shadow`** huendesha uthibitishaji na kuacha kutua kwa muunganisho wa mwongozo. Omba `omni-queue` kwa PR iliyoidhinishwa kwenye kichwa chake cha mwisho. Angalia kustahiki kwa `npm run queue -- why <PR>`. Subiri uamuzi wa kichwa hicho katika `npm run queue -- history --base <branch>`. Endelea na `would-land`. Kwenye `culprit-found` au `would-dequeue`, shikilia unganisho na urekebishe sababu.
+- **Vighairi vya kivuli.** Treni iliyo na CI ya kijani kibichi dhidi ya ncha ya msingi ya sasa inaweza kuendelea bila uamuzi tofauti wa foleni. Isipokuwa sawa inatumika wakati kichwa cha PR tayari kina ncha ya msingi ya sasa.
+- **`live`** hutumia lebo `omni-queue` kusababisha kutua. Foleni pekee ndiyo inatua PR. Acha amri za kuunganisha na misukumo ya moja kwa moja kwenye foleni.
 
-1. PR hukaguliwa/huidhinishwa na kampeni na kuidhinishwa na lango la ⭐ la kabla ya kuunganisha
-   la mmiliki (ripoti + uamuzi wa kila kipengee — tazama `/merge-prs` Hatua ya 0.75).
-2. Mmiliki (au kikao kinachotekeleza uamuzi wa mmiliki) huweka lebo ya **`queue`**.
-   Lebo hiyo NDIYO idhini ya kuunganisha; Mergify huitekeleza tu.
-3. Mergify huthibitisha PR zilizo kwenye foleni **kwa mfululizo** (moja baada ya nyingine) dhidi ya malango ya haraka
-   na kuziunganisha (squash). Ujumuishaji wa mafungu + ugawaji wa kiotomatiki ni kiwango cha kulipia cha Mergify
-   ("Cannot use Merge Queue batch" kwenye mpango wa bila malipo, #7220), kwa hivyo `.mergify.yml` haiweki
-   `batch_size`; ujumuishaji wa mafungu unasalia kuwa jukumu la treni ya kuunganisha ya mkono iliyo hapa chini. PR ambayo
-   ukaguzi wake bado unasubiri baada ya `checks_timeout` (dakika 240 = mara 2 ya p95 iliyopimwa ya
-   `quality.yml`) huondolewa kwenye foleni badala ya kuzuia foleni.
-4. Baada ya kuunganisha, mtiririko endelevu wa kazi wa release-green huthibitisha ncha mpya wakati wa push
-   na hufungua suala la kuhusisha chanzo ikiwa mchanganyiko huo ulisababisha hitilafu mpya (kamwe haurejeshi kiotomatiki).
+Kila kutua kunahitaji idhini ya mmiliki na ukaguzi unaohitajika. Omba `omni-queue` tu baada ya mmiliki kuidhinisha kutua. PRs zilizowekwa kwenye foleni zinazogusa njia zilizolindwa pia zinahitaji uamuzi `protected-approved` wa mmiliki kwa PR hiyo.
 
-Vizuizi vya usalama (vinaakisi `CLAUDE.md` Kanuni Kali #21/#22):
+Kanuni ya "Inahitaji milango ya kijani kwenye toleo linalotumika" inahitaji `Gate / CI` ya kijani na `Gate / Quality` kichwani. Usiwahi kutumia `--admin` kukwepa lango jekundu. Vitalu vya kugandisha kutolewa huunganishwa kwenye tawi lililogandishwa. Tazama [Kanuni Ngumu ya 21](HARD_RULES_DETAIL.md). Usiweke lebo, kuunganisha au kusukuma kwa ombi la kuvuta ambalo kipindi kingine kinafanya kazi. Tazama [Kanuni Ngumu ya 22](HARD_RULES_DETAIL.md).
 
-- **Kusitishwa kwa toleo kumeanza** → USIWEKE lebo kwenye PR zinazolenga tawi lililositishwa; elekeza upya kwenye
-  `release/vX+1` inayotumika kwanza.
-- **PR inayoendelea ya kikao kingine** → usiiwekee lebo kamwe; ni kikao kinachoimiliki pekee kinachoweka
-  kazi yake kwenye foleni.
-- Tofauti za majaribio pekee na PR zilizo na lebo ya `hotfix` tayari huendesha CI iliyopunguzwa (tazama
-  `RELEASE_CHECKLIST.md` → Njia ya Haraka ya Hotfix); masharti ya foleni hukubali seti yoyote ya
-  ukaguzi iliyotekelezwa (`#check-failure=0` + `#check-pending=0`).
+## Ombi la kuvuta treni
 
-## Njia mbadala: treni ya uunganishaji ya mikono
+1. Anzisha tawi la treni kwenye kidokezo cha msingi cha toleo la sasa. Jumuisha wakuu wa wanachama walioidhinishwa kwa kutumia ahadi za kuunganisha. Hifadhi historia yao ya kujitolea kwa kuzuia boga na kuacha tena.
+2. Fungua ombi moja la kuvuta kwa tawi la treni. Thibitisha PR hiyo kwa CI yake kamili kwenye ncha ya msingi ya sasa. Angalia tena kidokezo cha msingi na vichwa vya wanachama walioidhinishwa kabla ya kutua. Onyesha upya treni na CI yake wakati mgombeaji aliyeidhinishwa anabadilika.
+3. Shika treni PR na ahadi ya kuunganisha chini ya hali ya foleni inayotumika. Katika hali ya moja kwa moja, njia ya kutua `merge-ff` ya foleni huhifadhi ahadi za kuunganisha. Vichwa vya wanachama asili vinaweza kufikiwa kutoka kwa tawi la toleo. GitHub inaweka alama kwa mwanachama PRs kama kuunganishwa na ahadi huhifadhi waandishi wao.
 
-Hutumika wakati foleni haipatikani. Hii inarasimisha utaratibu uliokamilisha PR 33 kwa
-siku moja wakati wa mzunguko wa v3.8.47:
+Mfano wa umma ni [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Ilijumuisha PRs wanachama 18 na ikatua na ahadi ya kuunganisha mnamo 2026-11-24.
 
-1. **Kusanya kundi** (takriban PR 10–30 zilizokaguliwa+kuidhinishwa). Kagua migongano ya `linked:`
-   (`tap.testFiles` zinazofanana, sehemu zilezile za CHANGELOG) na uchakate hizo kwa mfuatano.
-2. **Hakiki MARA MOJA**: katika worktree iliyotengwa kutoka kwenye ncha ya toleo, unganisha vichwa vyote
-   vya kundi ndani ya mazingira ya karibu, kisha uendeshe mkusanyiko sawa na wa toleo
-   (`npm run check:release-green`, ongeza `--with-build` kabla ya toleo).
-   `scripts/release/merge-train.sh <base> <PR#>…` hujiendeshea hatua za 1–2 (PR zinazogongana
-   huondolewa, treni huendelea). Hali kamili huendesha `npm run test:unit` — kiendesha
-   kilichoboreshwa kwa mashine (`--test-concurrency=20`), **si** vipande viwili vya CI vya core 4
-   vinavyoendeshwa kwa mfuatano, ambavyo vilifanya awamu kuu itumie takriban 25% ya mashine ya core 16 (ilirekebishwa
-   2026-07-18). `--fast` (ukamilishaji wa treni kubwa ndani ya siku, ulioidhinishwa na mmiliki 2026-07-18)
-   hudumisha kila kizuizi tuli + vitest lakini huendesha tu faili za node:test zilizobadilishwa na
-   PR zilizoingia kwenye treni; mkusanyiko KAMILI lazima bado uendeshwe angalau mara moja kwa siku kwenye
-   ncha iliyokusanywa (treni moja bila `--fast`).
-3. **Kijani** → unganisha PR kwa mfuatano (ukikagua upya `state,headRefOid` kabla ya kila moja —
-   PR ambayo kichwa chake kimehamishwa hurudi kwenye ukaguzi). Thibitisha kwamba tofauti halisi ya kila uunganishaji ni
-   mabadiliko ya PR yenyewe (hakuna urejeshaji wa auto-resolve: kagua `git diff --stat` ili kutambua
-   ufutaji ulio nje ya wigo).
-4. **Nyekundu** → gawanya kundi katika nusu (hakiki kila nusu) badala ya kuhakiki upya
-   moja baada ya nyingine; rudisha PR inayosababisha tatizo kwenye foleni ya ukaguzi pamoja na ushahidi.
-5. **Kamwe**: usiunganishe kwenye tawi lililositishwa wakati wa kusitishwa kwa toleo; usitumie `git stash` popote;
-   usirudie CI kwa ujumla ukitumaini hali nyekundu itaondoka (kanuni: hali nyekundu ni taarifa).
+Usawazishaji kutoka `main` hadi tawi linalofuata la kutolewa pia hutua kupitia ahadi ya kuunganisha. Kuhifadhi asili `main` inahitajika kwa usawazishaji wa baadaye. Tazama [Kutengwa kwa Mti wa Kazi](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Ngazi (kwa nini foleni ni salama kwa kutumia fast-gates pekee)
+## Kithibitishaji cha ndani cha treni ya kuunganisha
 
-- **Kwa kila PR** (fast-gates za quality.yml): majaribio yaliyoathiriwa na TIA + vitengo kamili vya shard 4 +
-  vitest + mkusanyiko wa lint + typecheck + uadilifu wa docs/changelog.
-- **Kwa kila kundi/ncha** (release-green endelevu): vizuizi IMARA vya `--quick` kwa kila push kwenye
-  tawi la toleo; ukaguzi kamili wa `--with-build --full-ci` mara 3 kwa siku.
-- **Kwa kila toleo** (ci.yml kwenye PR ya toleo): matrix kamili ikijumuisha E2E ×9,
-  package-artifact + tarball boot-smoke, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Hakuna kinachohakikiwa kwa kiwango kidogo kuliko awali — sehemu nzito huendeshwa tu kwa kila kundi/ncha
-badala ya kwa kila PR, jambo linaloondoa safari za O(N).
+Kithibitishaji huchukua msingi na vichwa PR na kuvichanganya kwenye mti wa kazi unaoweza kutumika. Inaendesha safu yake ya usawa mara moja kwenye mti unaotokana. Uchoraji wa kichwa ulioshindwa au uunganisho wa mzozo huondoa PR na hati inaendelea na PRs iliyosalia.
 
-## Mahitaji ya awali ya checkout mpya kwa `merge-train.sh`
+- **`--plan`** huchapisha hatua za hali iliyochaguliwa na kutoka bila kuunda mti wa kazi au kuwasiliana na kidhibiti cha mbali. Ichanganye na `--fast` ili kukagua mpango wa haraka.
+- **`--fast`** inaendesha malango tuli ya kawaida, faili zilizochaguliwa zilibadilisha `node:test` chini ya `tests/unit/`, na `npm run test:vitest`. Tekeleza uthibitishaji kamili wa ndani angalau mara moja kwa siku kwenye kidokezo kilichokusanywa unapotumia hali ya haraka.
+- **Hali kamili** huongeza milango tuli kamili pekee na inaendesha `npm run test:unit` na `npm run test:vitest`.
 
-Script huendesha **preflight** inayositisha mara moja inaposhindwa kwenye checkout ya msingi (kabla ya kazi yoyote ya worktree)
-ili usakinishaji ulioharibika usiweze kamwe kujifanya treni nyekundu:
+Lango tuli lisilofanikiwa linarudishwa kwenye msingi ambao haujaguswa ikiwa uchunguzi wa msingi unapatikana. Hati huripoti hitilafu zilizorithiwa na inaendelea wakati kila mstari wa ukiukaji unaotambuliwa pia unaonekana kwenye msingi na hesabu ya jumla haijaongezeka.
 
-1. `npm ci`, kisha endesha postinstall ya `bun` ambayo npm huzuia:
-   `(cd node_modules/bun && node install.js)` — vinginevyo `check:provider-consistency`
-   na `check:known-symbols` (zote mbili ni `bun scripts/…`) hushindwa kwenye treni NA kwenye msingi bila
-   mstari wa ukiukaji.
-2. Kusiwe na `node_modules/node_modules` isiyotarajiwa (mti wa utegemezi uliojirudia; React hupakiwa mara mbili
-   na mikusanyiko ya UI ya vitest hushindwa papo hapo).
-3. `node_modules/.bin/tsc` iwepo na iweze kutekelezwa (usakinishaji usiokamilika hauna faili hiyo).
+| Utgång | Maana                                                                                                                                                 |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`    | Kuchapishwa mpango au kukamilisha Suite. Muhtasari wa kitengo huorodhesha mapungufu yoyote tuliyorithi na kutolewa PRs.                               |
+| `1`    | Hoja batili, hakuna malipo ya Git, safari ya ndege ilishindwa, au hakuna PR iliyopakiwa.                                                              |
+| `2`    | Ukaguzi wa vyumba haukufaulu na haukufaulu kama kurithiwa. Opereta anaweza kugawanya kundi hilo mara mbili, kuondoa PR iliyoudhi, na kutekeleza tena. |
 
-Treni huendesha `npm run check:cycles:ratchet` inayozuia; `npm run check:cycles`
-pekee ni ya ushauri (huorodhesha SCC na hutoka na hali isiyo sifuri hata kwenye msingi wenye afya).
+Pasi ya ndani hutoa ushahidi wa uchunguzi kwa hati ya mmiliki pekee. Kila kutua bado kunahitaji uidhinishaji wa mmiliki, ukaguzi wake unaohitajika, na uamuzi wa foleni ya kivuli inapohitajika.
+
+## Tiering
+
+- **Kwa PR.** CI na Ubora huchagua hundi kulingana na njia zilizobadilishwa. Msimbo PRs huendesha milango ya ubora wa haraka na majaribio yaliyoathiriwa, na kitengo tofauti na kazi za Vitest katika CI.
+- **Kwa mgombea wa foleni.** CI na Ubora huendesha wasifu kamili wa mgombeaji aliyetungwa kwenye rejeleo lake la foleni.
+- **Kwa kidokezo cha kutolewa.** Release-Green huendesha milango migumu ya haraka kwenye misukumo inayolingana na vichujio vyake vya njia. Mikimbio mitatu iliyoratibiwa kwa siku hutumia kufagia kamili kwa tawi la kutolewa.
+- **Kwa kutolewa.** Matrix kamili CI inajumuisha shadi za E2E, uthibitishaji wa kifurushi, moshi wa buti ya tarball, na ukaguzi wa chanjo. Tazama [Orodha hakiki ya Toleo](RELEASE_CHECKLIST.md).
+
+## Masharti ya kulipia upya kwa `merge-train.sh`
+
+Preflight huendesha kabla ya kuunda miti ya kazi. Sakinisha vitegemezi na `npm ci`. Thibitisha kuwa `node_modules/.bin/tsc` inaweza kutekelezwa na kwamba `node_modules/node_modules` haipo. Angalia kuwa `node_modules/.bin/bun --version` imefanikiwa.
+
+Ikiwa usakinishaji wa Bun ulirukwa, endesha `(cd node_modules/bun && node install.js)`. Uthabiti wa mtoa huduma na ukaguzi wa alama unaojulikana hutumia Bun. Kithibitishaji huendesha `npm run check:cycles:ratchet` kama lango la kuzuia. Amri ya `npm run check:cycles` inayojitegemea ni ya ushauri.
+
+## Historia
+
+Foleni ya kuunganisha ya Mergify ilistaafu mnamo 2026-11-19.

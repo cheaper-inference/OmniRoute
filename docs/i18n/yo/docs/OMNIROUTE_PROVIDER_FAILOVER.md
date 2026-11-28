@@ -21,3 +21,5 @@ Ilana olupese alailewu gba laaye si awọn igbiyanju olupese mẹta, tun ṣe aw
   - id (`provider/model`) ti a ti sọ tẹlẹ ko jẹ tun ọna si olupese miiran.
 
 Awọn ipinlẹ ayika jẹ `closed`, `open`, ati `half_open`. A cooldown iṣeto a didi ibere; iwadii aṣeyọri tilekun iyika naa ati pe iwadii ti o kuna yoo tun ṣii.
+
+Olupese failover nṣiṣẹ inu ẹnu-ọna. Wo [Nigba ti OmniRoute funrararẹ ko le de ọdọ](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) fun ihuwasi alabara lakoko ijade ẹnu-ọna kan.

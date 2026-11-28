@@ -166,11 +166,11 @@ Microsoft ஒன்றைத் திரும்பப் பெறும்�
 
 `copilot-m365-web` இயக்கப்பட்டிருப்பதை உறுதிசெய்யவும்** டாஷ்போர்டு → வழங்குநர்கள்** . வழங்குநர் சில அடுக்குகளில் முன்னிருப்பாக மறைக்கப்படலாம்.
 
-## மேற்கோள்கள்
+## குறிப்புகள்
 
-- சிக்கல்: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- கலந்துரையாடல்: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- மூலம்: `src/shared/constants/providers/web-cookie.ts` (வழங்குநர் வரையறை)
+- வெளியீடு: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- கலந்துரையாடல்: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- ஆதாரம்: `src/shared/constants/providers/web-cookie.ts` (வழங்குபவர் வரையறை)
 - HAR இறக்குமதி: `src/shared/utils/m365HarImport.ts`
-- நற்சான்றுப் புலங்கள்: `src/shared/providers/webSessionCredentials.ts`
-- அடுக்கு சாளரம்: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- நற்சான்றிதழ் புலங்கள்: `src/shared/providers/webSessionCredentials.ts`
+- அடுக்கு மாதிரி: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

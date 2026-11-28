@@ -13,12 +13,12 @@ Agent Skills jsou strukturované soubory SKILL.md, které učí externí agenty,
 
 ## Přehled
 
-Katalog obsahuje **45 Agent Skills** (23 pro REST API + 21 pro CLI + 1 konfigurační pracovní postup). Každá dovednost má:
+Katalog obsahuje** 45 Dovednosti agentů** (23 REST API + 21 CLI + 1 konfigurační pracovní postup). Každá dovednost má:
 
-- **Kanonické ID** (`omni-auth`, `cli-serve` atd.)
-- Soubor **SKILL.md** v `skills/{id}/SKILL.md` s YAML frontmatterem (`name`, `description`) + obsáhlým tělem ve formátu markdown
-- **Koncové body REST** (dovednosti API) nebo **dílčí příkazy CLI** (dovednosti CLI) odvozené ze specifikace OpenAPI a registru CLI
-- **Nezpracovanou adresu URL GitHubu** pro načtení aktuální verze: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanonická ID** (`omni-auth`, `cli-serve` atd.)
+- A**SKILL.md** soubor ve `skills/{id}/SKILL.md` se YAML frontmatter (`name`, `description`) + bohaté tělo markdown
+- **REST koncové body** (API dovednosti) nebo** dílčí příkazy CLI** (CLI skills) odvozené z registru OpenAPI spec a CLI
+- A**GitHub surový URL** pro živé aportování: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Odpovědí generátoru je objekt `GeneratorReport`:
 
 ---
 
-## API pokrytí
+## Pokrytí API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

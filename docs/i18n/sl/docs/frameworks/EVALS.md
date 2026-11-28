@@ -175,16 +175,13 @@ Primeri se izvajajo **zaporedno**. Trenutno ni zastavice za sočasno izvajanje.
 
 ## Nadzorna plošča
 
-Uporabniški vmesnik je na voljo na `Nadzorna plošča → Uporaba → Evalvacije`
-(`src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx`). Tam lahko:
+UI živi na `Dashboard → Usage → Evals` (`src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx`). Od tam lahko:
 
-- Brskate po vgrajenih in lastnih zbirkah s predogledom posameznih primerov.
-- Ustvarjate, urejate in brišete lastne zbirke z graditeljem primerov.
-- Izberete cilj (privzete nastavitve zbirke / model / kombinacijo), po želji drugi
-  `compareTarget` in ključ API ter nato ročno zaženete izvajanje.
-- Pregledujete zgodovino izvajanj, uspeh ali neuspeh posameznega primera, zakasnitev in zajete izhode.
-- Ogledate si tekoči pregled rezultatov, združen po najnovejšem izvajanju za vsak
-  obseg `(suite, target)`.
+- Brskajte po vgrajenih in prilagojenih paketih s predogledom od primera do primera.
+- paketi Create/edit/delete po meri z graditeljem primerov.
+- Izberite cilj (privzete nastavitve paketa/model/kombinacija), po želji drugi `compareTarget`, po želji ključ API, nato zaženite na zahtevo.
+- Preglejte zgodovino izvajanja, pass/fail za vsak primer, zakasnitev in zajete rezultate.
+- Oglejte si tekoči kazalnik, združen v zadnjem zagonu na obseg `(suite, target)`.
 
 ## Povezava z RFC-jem za samodejno ocenjevanje
 

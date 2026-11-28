@@ -4,11 +4,9 @@
 
 ---
 
-> **ប្រភពសេចក្ដីពិត:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **បានធ្វើបច្ចុប្បន្នភាពចុងក្រោយ:** 2026-09-02 — v3.8.51
-> **អ្នកអានគោលដៅ:** វិស្វករដែលថែទាំការរួមបញ្ចូលបែបលាក់ស្នាមដែលជាក់លាក់តាមអ្នកផ្ដល់សេវា។
+> **ប្រភពនៃការពិត៖** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** ទស្សនិកជន៖** វិស្វកររក្សាការរួមបញ្ចូលបំបាំងកាយជាក់លាក់របស់អ្នកផ្តល់សេវា។
 
-OmniRoute រួមបញ្ចូលជាមួយអ្នកផ្ដល់សេវាដែលប្រព័ន្ធគែមរបស់ពួកគេធ្វើការកំណត់ស្នាមសម្គាល់លើកម្មវិធីអតិថិជនមិនផ្លូវការយ៉ាងសកម្ម (TLS JA3/JA4, លំដាប់បឋមកថា, រចនាសម្ព័ន្ធ JSON body, integrity tokens)។ ទំព័រនេះពិពណ៌នាអំពីផ្ទៃបច្ចេកទេសលាក់ស្នាមដែល OmniRoute ផ្ដល់ឱ្យ និងទីតាំងអនុវត្តរបស់វា។
+OmniRoute រួមបញ្ចូលជាមួយអ្នកផ្តល់សេវាដែលមានគែមយ៉ាងសកម្ម អតិថិជនមិនមែនផ្លូវការ (TLS JA3/JA4, លំដាប់បឋមកថា , រូបរាងរាងកាយ JSON, និមិត្តសញ្ញាសុចរិតភាព) ។ ទំព័រនេះកត់ត្រាផ្ទៃបំបាំងកាយ OmniRoute លាតត្រដាង និងកន្លែងដែលពួកវាត្រូវបានអនុវត្ត។
 
 ## សេចក្ដីជូនដំណឹងផ្នែកច្បាប់ និងក្រមសីលធម៌
 
@@ -74,65 +72,68 @@ web-cookie ឯកទេសទាំងប្រាំខាងក្រោម។
 
 ---
 
-## កញ្ចប់បំបាំងខ្លួន Claude Code
+## Claude Code Stealth Bundle
 
-នៅពេលបើក `cliCompatMode` OmniRoute កែទម្រង់សំណើ Claude ដែលផ្ញើចេញ ដើម្បីឱ្យពួកវាមិនអាចបែងចែកបានពីចរាចរណ៍ `claude-cli`។ ម៉ូឌុលចំនួនបីសហការគ្នា៖
+នៅពេលដែល `cliCompatMode` បើក OmniRoute ផ្លាស់ប្តូរសំណើ Claude ចេញ ដូច្នេះពួកវាមិនអាចបែងចែកពីចរាចរណ៍ `claude-cli` បានទេ។ ម៉ូឌុលបីសហការគ្នា៖
 
 ### `claudeCodeFingerprint.ts`
 
-គណនា fingerprint `cc_version` ប្រវែង 3 តួអក្សរ ដែលបានបង្កប់ក្នុង billing header៖
+គណនាស្នាមម្រាមដៃ 3-char `cc_version` ដែលបានបង្កប់នៅក្នុងបឋមកថាវិក្កយបត្រ៖
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (កំណត់ថេរក្នុងកូដ; ត្រូវគ្នានឹង client ផ្លូវការ)
-- ទិន្នន័យបញ្ចូល៖ តួអក្សរនៅ index 4, 7, 20 នៃអត្ថបទសារដំបូងរបស់អ្នកប្រើ + version string
-- លទ្ធផល៖ hex prefix ប្រវែង 3 តួអក្សរ
+- `FINGERPRINT_SALT = "59cf53e54c78"` (កូដរឹង ផ្គូផ្គងអតិថិជនផ្លូវការ)
+- ធាតុបញ្ចូល៖ តួអក្សរនៅលិបិក្រម 4, 7, 20 នៃសាររបស់អ្នកប្រើដំបូង ខ្សែអក្សរកំណែ +
+- លទ្ធផល៖ បុព្វបទ 3-char hex
 
-### `claudeCodeCCH.ts` (Client Content Hash)
+### `claudeCodeCCH.ts` (Hash មាតិកាអតិថិជន)
 
-ការត្រួតពិនិត្យភាពត្រឹមត្រូវនៅផ្នែក server ដែល Claude Code CLI ផ្លូវការគណនាតាមរយៈ Bun/Zig។ OmniRoute អនុវត្តវាឡើងវិញដោយប្រើ `xxhash-wasm`៖
+ភាពត្រឹមត្រូវខាងម៉ាស៊ីនមេ ពិនិត្យមើលកូដ Claude ផ្លូវការ CLI computes តាមរយៈ Bun/Zig. OmniRoute reimplements with `xxhash-wasm`:
 
-1. បម្លែង body ទៅជាទម្រង់សៀរៀល ដោយប្រើ placeholder `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. hex ជាអក្សរតូចប្រវែង 5 តួអក្សរ ដែលបំពេញសូន្យពីខាងមុខ
-4. ជំនួស `cch=00000;` ដោយ token ដែលបានគណនា
+1. តម្រៀបរាងកាយដោយប្រើកន្លែងដាក់ `cch=00000;`
+2. បង្កើតទិដ្ឋភាព hash ជាមួយនឹងការជំនួសអត្ថបទធម្មតាពីរនៅក្នុងលំដាប់នេះ (`hashView()`):
+   - រាល់ការប្រកួតរបស់ `/"model":"[^"]*"/g` ក្លាយជា `"model":""` — ការប្រកួតឈប់នៅ `"` ដំបូង ដូច្នេះតម្លៃដែលមានសម្រង់គេចចេញ (`"model":"a\"b"`) ត្រូវបានទទេរហូតដល់សម្រង់នោះ ដូចដែលអតិថិជនធ្វើ
+   - រាល់ការផ្គូផ្គង `/"max_tokens":\d+,|,?"max_tokens":\d+/g` ត្រូវបានដកចេញ — ត្រឹមតែតម្លៃលេខ នៅជម្រៅណាមួយ។
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Zero-padded 5-char អក្សរតូច hex
+5. ជំនួស `cch=00000;` ជាមួយសញ្ញាសម្ងាត់ដែលបានគណនា
 
 ថេរ៖
 
-- Seed៖ `0x6e52736ac806831e`
-- Pattern៖ `/\bcch=([0-9a-f]{5});/`
+- គ្រាប់ពូជ៖ `0x4d659218e32a3268` (ផ្គូផ្គងការចាប់យករង្វិលជុំនៃ Claude លេខកូដ 2.1.252 និង 2.1.322)
+- លំនាំ៖ `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-បញ្ចូល Unicode **zero-width joiner** (`U+200D`) បន្ទាប់ពីតួអក្សរដំបូងនៃឈ្មោះ client ដែល "រសើប" ដើម្បីឱ្យ filter ខាង upstream មិនអាចស្វែងរកពួកវាដោយ grep បាន។ បញ្ជីពាក្យលំនាំដើម៖
+បញ្ចូលយូនីកូដ** ឧបករណ៍ភ្ជាប់ទទឹងសូន្យ** (`U+200D`) បន្ទាប់ពីតួអក្សរទីមួយនៃឈ្មោះអតិថិជន "រសើប" ដូច្នេះតម្រងចរន្តមិនអាច grep ពួកវាបានទេ។ បញ្ជីពាក្យលំនាំដើម៖
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-អនុវត្តចំពោះ៖ block `system`, `messages[].content` ទាំងអស់ និង `tools[].description` / `tools[].function.description`។ Operator អាចកំណត់ជំនួសបានតាមរយៈ `setSensitiveWords()`។
+អនុវត្តចំពោះ៖ ប្លុក `system`, `messages[].content` ទាំងអស់ និង `tools[].description` / `tools[].function.description`។ ប្រតិបត្តិករអាចបដិសេធបានតាមរយៈ `setSensitiveWords()`។
 
-### `claudeCodeCompatible.ts` — provider `anthropic-compatible-cc-*`
+### អ្នកផ្តល់សេវា`claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`
 
-សម្រាប់ relay Anthropic របស់ភាគីទីបី ដែលទទួលយកតែចរាចរណ៍ "Claude Code ពិតប្រាកដ"៖
+សម្រាប់ការបញ្ជូនត Anthropic ភាគីទីបីដែលទទួលយកតែចរាចរណ៍ "កូដ Claude ពិតប្រាកដ"៖
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- តាមលំនាំដើម `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- ជម្រើសបិទបើក "Enable redact-thinking beta" សម្រាប់ connection នីមួយៗ នឹងបន្ថែម `redact-thinking-2026-02-12` នៅពេល upstream ដែល CC Compatible ត្រូវការជាក់លាក់នូវ thinking stream ដែលបានលាក់ព័ត៌មាន
-- ជម្រើសបិទបើក "Enable summarized thinking display" សម្រាប់ connection នីមួយៗ រក្សាទុក `providerSpecificData.requestDefaults.summarizeThinking` និងបន្ថែម `display: "summarized"` ទៅក្នុងសំណើ thinking របស់ CC Compatible ដែលមិនទាន់បានកំណត់ display mode
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` តាមលំនាំដើម
+- បិទ/បើក "បើកដំណើរការ redact-thinking beta" ក្នុងមួយការតភ្ជាប់បន្ថែម `redact-thinking-2026-02-12` នៅពេលដែល CC Compatible upstream ជាពិសេសទាមទារស្ទ្រីមការគិតឡើងវិញ
+- បិទ/បើក "ការបង្ហាញការគិតសង្ខេប" ក្នុងមួយការតភ្ជាប់រក្សាទុក `providerSpecificData.requestDefaults.summarizeThinking` និងបន្ថែម `display: "summarized"` ទៅ CC សំណើការគិតដែលត្រូវគ្នាដែលមិនបានកំណត់របៀបបង្ហាញ
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (គ្រួសារ Opus/Sonnet 4.x)
-- path លំនាំដើម៖ `/v1/messages?beta=true`
+- ផ្លូវលំនាំដើម៖ `/v1/messages?beta=true`
 
-ម៉ូឌុលពាក់ព័ន្ធក្នុងកញ្ចប់ដូចគ្នា៖
+ម៉ូឌុលបងស្រីនៅក្នុងបាច់ដូចគ្នា៖
 
-- `claudeCodeConstraints.ts` — ច្បាប់ temperature + cache-control
-- `claudeCodeToolRemapper.ts` — ការផ្គូផ្គងឈ្មោះ tool ឡើងវិញ
-- `claudeCodeExtraRemap.ts` — ការធ្វើ normalization បន្ថែមលើ payload
+- `claudeCodeConstraints.ts` — សីតុណ្ហភាព + ក្បួនគ្រប់គ្រងឃ្លាំងសម្ងាត់
+- ការគូសផែនទីឈ្មោះឧបករណ៍`claudeCodeToolRemapper.ts` —
+- `claudeCodeExtraRemap.ts` — ការធ្វើឱ្យធម្មតានៃបន្ទុកបន្ថែម
 
 ---
 
@@ -153,7 +154,7 @@ Antigravity ស្នើសុំរក្សាអត្ថបទអ្នក�
 **ហេតុអ្វីបានជាវាទាក់ទាញការរកឃើញការរំលោភបំពានខ្លាំងជាងការប្រើប្រាស់តែកម្រិតឥតគិតថ្លៃ៖**
 
 - ការចំណាយដោយស្វ័យប្រវត្តិប្រកបដោយនិរន្តរភាពលើទង់គណនី Google តែមួយខុសពីការចុចកម្រិតឥតគិតថ្លៃ-កូតា-និងឈប់។
-- ការលើសឥណទានមិនមានកម្រិតអត្រាការប្រាក់ទេ ដូច្នេះអតិថិជនដែលបានកំណត់រចនាសម្ព័ន្ធមិនត្រឹមត្រូវអាចឆេះបានជាច្រើនរយ USD ក្នុងរយៈពេលប៉ុន្មាននាទី ហើយមើលទៅដូចជាការលក់បន្ត API-key ឬចរាចររូបយន្ត។
+- ការលើសឥណទានមិនមានកម្រិតអត្រាការប្រាក់ទេ ដូច្នេះអតិថិជនដែលបានកំណត់រចនាសម្ព័ន្ធមិនត្រឹមត្រូវអាចដុតបំផ្លាញជាច្រើនរយ USD ក្នុងរយៈពេលប៉ុន្មាននាទី ហើយមើលទៅដូចជាការលក់បន្ត API-key ឬចរាចររូបយន្ត។
 - អ្នកប្រើប្រាស់ OmniRoute ជាច្រើនដែលចុចក្រេឌីតហួសកម្រិតស្របគ្នាពី IP ខាងក្រៅដូចគ្នាផ្សំសញ្ញា។
 
 **ឥរិយាបថដែលបានណែនាំ៖**
@@ -192,7 +193,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — អាន `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — បរិក្ខារទទួលស្គាល់
-- របាយការណ៍ដើមហេតុ៖ ការពិភាក្សា [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- របាយការណ៍ដើមហេតុ៖ ការពិភាក្សា [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

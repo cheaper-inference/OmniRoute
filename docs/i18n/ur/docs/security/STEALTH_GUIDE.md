@@ -4,11 +4,9 @@
 
 ---
 
-> **حتمی ماخذ:** `open-sse/utils/tlsClient.ts`، `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`، `open-sse/config/cliFingerprints.ts`، `src/mitm/`
-> **آخری تازہ کاری:** 2026-09-02 — v3.8.51
-> **مخاطب:** فراہم کنندہ کے لیے مخصوص اسٹیلتھ انٹیگریشنز کی دیکھ بھال کرنے والے انجینئرز۔
+> **سچائی کا ماخذ:** `open-sse/utils/tlsClient.ts`، `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`، `open-sse/config/cliFingerprints.ts`، `src/mitm/`** سامعین:** انجینئرز فراہم کنندہ کے مخصوص اسٹیلتھ انضمام کو برقرار رکھتے ہیں۔
 
-OmniRoute ایسے فراہم کنندگان کے ساتھ انٹیگریٹ ہوتا ہے جن کے ایج سسٹمز غیر سرکاری کلائنٹس کی فعال طور پر فنگرپرنٹنگ کرتے ہیں (TLS JA3/JA4، ہیڈر کی ترتیب، JSON باڈی کی ساخت، انٹیگریٹی ٹوکنز)۔ یہ صفحہ OmniRoute کی فراہم کردہ اسٹیلتھ سطحوں اور ان کے نفاذ کے مقامات کو دستاویزی شکل دیتا ہے۔
+OmniRoute ان فراہم کنندگان کے ساتھ ضم ہوتا ہے جن کے کنارے فعال طور پر غیر سرکاری کلائنٹس کو فنگر پرنٹ کرتے ہیں (TLS JA3/JA4، ہیڈر آرڈرنگ، JSON باڈی شیپ، انٹیگریٹی ٹوکن)۔ یہ صفحہ اسٹیلتھ سطحوں کی دستاویز کرتا ہے OmniRoute ظاہر کرتی ہے اور وہ کہاں لاگو ہوتی ہیں۔
 
 ## قانونی اور اخلاقی نوٹس
 
@@ -83,65 +81,68 @@ OmniRoute ایسے فراہم کنندگان کے ساتھ انٹیگریٹ ہو
 
 ---
 
-## Claude Code اسٹیلتھ بنڈل
+## Claude کوڈ اسٹیلتھ بنڈل
 
-جب `cliCompatMode` فعال ہو، تو OmniRoute باہر جانے والی Claude درخواستوں کو اس طرح ڈھالتا ہے کہ وہ `claude-cli` ٹریفک سے ناقابلِ امتیاز ہوں۔ تین ماڈیول باہمی تعاون کرتے ہیں:
+جب `cliCompatMode` آن ہوتا ہے، OmniRoute باہر جانے والی Claude درخواستوں کو دوبارہ شکل دیتا ہے تاکہ وہ `claude-cli` ٹریفک سے الگ نہ ہوں۔ تین ماڈیول تعاون کرتے ہیں:
 
 ### `claudeCodeFingerprint.ts`
 
-بلنگ ہیڈر میں شامل 3-حرفی `cc_version` فنگرپرنٹ کا حساب لگاتا ہے:
+بلنگ ہیڈر میں سرایت شدہ 3-char `cc_version` فنگر پرنٹ کی گنتی کرتا ہے:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (ہارڈ کوڈ شدہ؛ آفیشل کلائنٹ سے مطابقت رکھتا ہے)
-- اِن پٹس: پہلے صارف کے پیغام کے متن میں انڈیکس 4، 7، 20 پر موجود حروف + ورژن اسٹرنگ
-- آؤٹ پٹ: 3-حرفی ہیکس سابقہ
+- `FINGERPRINT_SALT = "59cf53e54c78"` (ہارڈ کوڈ؛ آفیشل کلائنٹ سے میل کھاتا ہے)
+- ان پٹ: پہلے صارف پیغام ٹیکسٹ + ورژن سٹرنگ کے انڈیکس 4، 7، 20 پر حروف
+- آؤٹ پٹ: 3-char ہیکس کا سابقہ
 
-### `claudeCodeCCH.ts` (کلائنٹ مواد ہیش)
+### `claudeCodeCCH.ts` (کلائنٹ کا مواد ہیش)
 
-سرور سائیڈ سالمیت کی جانچ، جسے آفیشل Claude Code CLI، Bun/Zig کے ذریعے شمار کرتا ہے۔ OmniRoute اسے `xxhash-wasm` کے ساتھ دوبارہ نافذ کرتا ہے:
+سرور کی طرف سے سالمیت `xxhash-wasm` کے ساتھ Bun/Zig. OmniRoute reimplements کے ذریعے سرکاری Claude کوڈ CLI کمپیوٹ کو چیک کریں:
 
-1. باڈی کو `cch=00000;` پلیس ہولڈر کے ساتھ سیریلائز کریں
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. صفر سے پیڈ کردہ 5-حرفی چھوٹے حروف والا ہیکس
-4. `cch=00000;` کو شمار کردہ ٹوکن سے تبدیل کریں
+1. `cch=00000;` پلیس ہولڈر کے ساتھ باڈی کو سیریلائز کریں۔
+2. اس ترتیب میں دو سادہ متن کی تبدیلی کے ساتھ ہیش ویو بنائیں (`hashView()`):
+   - `/"model":"[^"]*"/g` کا ہر میچ `"model":""` — بن جاتا ہے میچ پہلے `"` پر رک جاتا ہے، لہذا ایک فرار شدہ اقتباس (`"model":"a\"b"`) والی قدر صرف اس اقتباس تک خالی کی جاتی ہے، جیسا کہ کلائنٹ کرتا ہے۔
+   - `/"max_tokens":\d+,|,?"max_tokens":\d+/g` کے ہر میچ کو کسی بھی گہرائی میں — صرف عددی اقدار سے ہٹا دیا جاتا ہے۔
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. زیرو پیڈڈ 5-char لوئر کیس ہیکس
+5. `cch=00000;` حسابی ٹوکن سے تبدیل کریں۔
 
-مستقل قدریں:
+مستقل:
 
-- سیڈ: `0x6e52736ac806831e`
+- بیج: `0x4d659218e32a3268` ( Claude کوڈ 2.1.252 اور 2.1.322 کے لوپ بیک کیپچرز سے میل کھاتا ہے)
 - پیٹرن: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-"حساس" کلائنٹ ناموں کے پہلے حرف کے بعد ایک یونیکوڈ **صفر چوڑائی جوائنر** (`U+200D`) داخل کرتا ہے، تاکہ اپ اسٹریم فلٹرز انہیں grep نہ کر سکیں۔ ڈیفالٹ الفاظ کی فہرست:
+یونیکوڈ داخل کرتا ہے۔** صفر چوڑائی جوڑنے والا** (`U+200D`) "حساس" کلائنٹ کے ناموں کے پہلے حرف کے بعد اس لیے اپ اسٹریم فلٹرز ان کو گرپ نہیں کرسکتے ہیں۔ پہلے سے طے شدہ الفاظ کی فہرست:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-اس پر لاگو ہوتا ہے: `system` بلاکس، تمام `messages[].content`، اور `tools[].description` / `tools[].function.description`۔ آپریٹر اسے `setSensitiveWords()` کے ذریعے تبدیل کر سکتا ہے۔
+اس پر لاگو: `system` بلاکس، تمام `messages[].content`، اور `tools[].description` / `tools[].function.description`۔ `setSensitiveWords()` کے ذریعے آپریٹر اوور رائیڈ ایبل۔
 
-### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` فراہم کنندگان
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` فراہم کرنے والے
 
-فریقِ ثالث کے ان Anthropic ریلے کے لیے جو صرف "حقیقی Claude Code" ٹریفک قبول کرتے ہیں:
+فریق ثالث کے Anthropic ریلے کے لیے جو صرف "اصلی Claude کوڈ" ٹریفک کو قبول کرتے ہیں:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- ڈیفالٹ طور پر `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- فی کنکشن "Enable redact-thinking beta" ٹوگل، جب کسی CC Compatible اپ اسٹریم کو خاص طور پر مخفی کردہ تھنکنگ اسٹریمز درکار ہوں، تو `redact-thinking-2026-02-12` شامل کرتا ہے
-- فی کنکشن "Enable summarized thinking display" ٹوگل `providerSpecificData.requestDefaults.summarizeThinking` محفوظ کرتا ہے اور ان CC Compatible تھنکنگ درخواستوں میں `display: "summarized"` شامل کرتا ہے جن میں پہلے سے ڈسپلے موڈ مقرر نہیں کیا گیا
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` بطور ڈیفالٹ
+- فی کنکشن "ریڈیکٹ-تھنکنگ بیٹا کو فعال کریں" ٹوگل `redact-thinking-2026-02-12` شامل کرتا ہے جب CC مطابقت پذیر اپ اسٹریم کو خاص طور پر redacted سوچ کے سلسلے کی ضرورت ہوتی ہے۔
+- فی کنکشن "اختصاری سوچ ڈسپلے کو فعال کریں" ٹوگل اسٹورز `providerSpecificData.requestDefaults.summarizeThinking` اور `display: "summarized"` کو CC میں شامل کرتا ہے ہم آہنگ سوچ کی درخواستیں جنہوں نے پہلے سے ڈسپلے موڈ سیٹ نہیں کیا تھا۔
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x خاندان)
-- ڈیفالٹ پاتھ: `/v1/messages?beta=true`
+- طے شدہ راستہ: `/v1/messages?beta=true`
 
-اسی بنڈل میں موجود متعلقہ ماڈیولز:
+ایک ہی بنڈل میں بہن ماڈیول:
 
-- `claudeCodeConstraints.ts` — درجۂ حرارت + کیش کنٹرول کے قواعد
-- `claudeCodeToolRemapper.ts` — ٹول ناموں کی دوبارہ میپنگ
-- `claudeCodeExtraRemap.ts` — اضافی پے لوڈ کی معمول کاری
+- `claudeCodeConstraints.ts` — درجہ حرارت + کیشے کنٹرول کے قواعد
+- `claudeCodeToolRemapper.ts` — ٹول نام کی ری میپنگ
+- `claudeCodeExtraRemap.ts` — اضافی پے لوڈ نارملائزیشن
 
 ---
 
@@ -201,7 +202,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` پڑھتا ہے۔
 - `src/lib/oauth/providers/antigravity.ts` — سندی پلمبنگ
-- اصل واقعہ رپورٹ: بحث [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- اصل واقعہ رپورٹ: بحث [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

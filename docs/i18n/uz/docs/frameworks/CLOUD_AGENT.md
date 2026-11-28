@@ -336,19 +336,16 @@ shu ulanishlarni koʻradi). `manage` yoki `admin` doirasiga ega API kaliti, juml
 qiymatini ham qaytaradi. Boshqa barcha kalitlar uchun ikkala maydon ham javobga
 kiritilmaydi.
 
-## Hisob maʼlumotlarini aniqlash
+## Hisob ma'lumotlari qarori
 
-`src/lib/cloudAgent/api.ts` ichidagi `getCloudAgentCredentials(providerId)`:
+`src/lib/cloudAgent/api.ts` `getCloudAgentCredentials(providerId)` :
 
 1. `getProviderConnections({ provider: providerId, isActive: true })` orqali faol provayder ulanishlarini yuklaydi.
-2. Har bir ulanish uchun avval `apiKey` (boʻsh joylari olib tashlangan) qiymatini tanlaydi. U mavjud boʻlmasa, `accessToken` qiymatidan foydalanadi.
-3. Birinchi boʻsh boʻlmagan tokenni `{ apiKey: token }` ko‘rinishida qaytaradi.
-4. Foydalanish mumkin boʻlgan token topilmasa, `null` qaytaradi — API `400` holat kodi bilan
-   `"Bulut agenti provayderi uchun faol hisob maʼlumotlari sozlanmagan: <id>"` xabarini qaytaradi.
+2. Har bir ulanish uchun `apiKey` (kesilgan) ni afzal ko'radi. `accessToken` ga qaytadi.
+3. `{ apiKey: token }` sifatida oʻralgan birinchi boʻsh boʻlmagan tokenni qaytaradi.
+4. Agar foydalanish mumkin bo'lgan token topilmasa, `null` qaytaradi — API `400` `"No active credentials configured for cloud agent provider: <id>"` bilan javob beradi.
 
-Bu Cloud Agent'lar oddiy LLM provayderlari bilan bir xil Provider Connection jadvalidan
-foydalanishini anglatadi. Jules'ni yoqish uchun `provider: "jules"` va toʻldirilgan
-`apiKey` qiymatiga ega faol ulanish yarating.
+Bu shuni anglatadiki, Cloud agentlari oddiy LLM provayderlari kabi bir xil Provayderga ulanish jadvalini qayta ishlatadi. Jules yoqish uchun `provider: "jules"` va to'ldirilgan `apiKey` bilan faol ulanishni yarating.
 
 ## Boshqaruv paneli
 

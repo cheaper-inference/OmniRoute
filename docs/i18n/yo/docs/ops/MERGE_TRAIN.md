@@ -4,86 +4,63 @@
 
 ---
 
-> **2026-11-19: ti isinyi Mergify àkópọ ti fẹyìntì** (ipinnu eni). `.mergify.yml` ko ṣe alaye ti isinyi mọ ati kọ awọn aṣẹ Mergify ti o dapọ tabi tunkọ ibeere fa. Tu PRs ti wa ni dapọ nipa ọwọ labẹ awọn ibi ipamọ awọn ofinet "Beere alawọ ewe ibode lori awọn ti nṣiṣe lọwọ Tu" (`Gate / CI` + `Gate / Quality`) titi omni-isinyi gbalaye ni ifiwe mode, ati nipasẹ omni-isinyi lẹhin ti ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Awọn apakan Mergify ni isalẹ ṣe apejuwe isinyi bi o ti jẹ.
+## Ibalẹ lori a Tu eka
 
-Niwọn igba ti v3.8.49 (WS3.2/WS3.4 ti ero quality/velocity ) ọna idapọ aiyipada fun PRs atunyẹwo sinu `release/vX.Y.Z` ni** Ṣafikun isinyi akojọpọ** (`.mergify.yml`); awọn** Afowoyi dapọ-reluwe** ti a ṣe akọsilẹ ni isalẹ ni FALLBACK — ti a lo lakoko awọn iṣẹlẹ, awọn didi idasilẹ, tabi ti ero Orisun Ṣiṣii Mergify ba yipada lailai.
+Omni-queue ṣe akoso awọn ibalẹ sinu `release/vX.Y.Z`. Ka `mode` ipele-oke ni `config/merge-queue/config.json` lori ẹka aiyipada ṣaaju ibalẹ PR. Wo [Omni-Queue](OMNI_QUEUE.md).
 
-## Ọ̀nà àìyípadà: ìlà Mergify
+- **`shadow`** nṣiṣẹ afọwọsi ati ki o fi oju ibalẹ si a ọwọ àkópọ. Waye `omni-queue` si PR ti a fọwọsi ni ori ipari rẹ. Ṣayẹwo yiyẹ ni pẹlu `npm run queue -- why <PR>`. Duro fun idajo fun ori ni `npm run queue -- history --base <branch>`. Tẹsiwaju `would-land`. Lori `culprit-found` tabi `would-dequeue`, di irẹpọ naa mu ki o tun idi naa ṣe.
+- **Awọn imukuro ojiji.** Ọkọ oju-irin pẹlu CI alawọ ewe ni kikun lodi si imọran ipilẹ lọwọlọwọ le tẹsiwaju laisi idajọ isinyi lọtọ. Iyatọ kanna kan nigbati ori PR ti ni imọran ipilẹ lọwọlọwọ.
+- **`live`** nlo aami `omni-queue` lati ṣe okunfa ibalẹ. Awọn ti isinyi nikan ni awọn ilẹ PR. Fi awọn aṣẹ apapọ silẹ ati awọn titari taara si isinyi.
 
-1. Àwọn ìpolongo ṣe àyẹ̀wò PR, wọ́n sì jẹ́rìí pé ó kọjá; lẹ́yìn náà, ẹnu-ọ̀nà ⭐
-   ṣáájú ìdapọ̀ ti olùní fọwọ́ sí i (ìròyìn náà + ìpinnu lórí ohun kọ̀ọ̀kan — wo `/merge-prs` Ìgbésẹ̀ 0.75).
-2. Olùní (tàbí ìpàdé tó ń ṣiṣẹ́ lórí ìpinnu olùní) fi àmì **`queue`**
-   sí i. Àmì náà NI ìfọwọ́sí ìdapọ̀; Mergify kàn ń mú un ṣẹ.
-3. Mergify ń fìdí àwọn PR tó wà ní ìlà múlẹ̀ **lọ́kọ̀ọ̀kan** (ọ̀kan lẹ́ẹ̀kan) pẹ̀lú àwọn ẹnu-ọ̀nà yíyára,
-   ó sì ń darapọ̀ wọn (squash). Ṣíṣe ní àkójọpọ̀ + bisection aládàáṣiṣẹ́ jẹ́ ìpele Mergify tí a ń sanwó fún
-   ("Cannot use Merge Queue batch" lórí ètò ọ̀fẹ́, #7220), nítorí náà `.mergify.yml` kò ṣètò
-   `batch_size` kankan; ṣíṣe ní àkójọpọ̀ ṣì jẹ́ iṣẹ́ merge-train afọwọ́ṣe tó wà nísàlẹ̀. PR tí
-   àwọn àyẹ̀wò rẹ̀ ṣì ń dúró lẹ́yìn `checks_timeout` (240 min = 2× p95 tí a wọ̀n fún
-   `quality.yml`) ni a máa yọ kúrò ní ìlà dípò kí ó dí ìlà náà dúró.
-4. Lẹ́yìn ìdapọ̀, ìṣàn-iṣẹ́ continuous release-green máa ń fìdí tip tuntun múlẹ̀ nígbà push,
-   ó sì máa ń ṣí issue ìtọ́kasí-orísun tí àkójọpọ̀ náà bá fà á padà sẹ́yìn (kì í ṣe auto-revert láé).
+Gbogbo ibalẹ nilo aṣẹ eni ati awọn sọwedowo ti o nilo. Waye `omni-queue` nikan lẹhin ti oniwun ti fun ni aṣẹ ibalẹ. Queued PRs fọwọkan awọn ọna aabo tun nilo ipinnu `protected-approved` oniwun fun PR yẹn.
 
-Àwọn ìlànà ààbò (tó ṣe àfihàn àwọn Òfin Gíga `CLAUDE.md` #21/#22):
+Awọn “Beere awọn ẹnu-ọna alawọ ewe lori itusilẹ lọwọ” awọn ofinet nilo `Gate / CI` alawọ ewe ati `Gate / Quality` lori ori. Maṣe lo `--admin` lati fori ẹnu-ọna pupa kan. Itusilẹ didi awọn bulọọki dapọ si ẹka tio tutunini. Wo [Ofin Lile 21](HARD_RULES_DETAIL.md). Maṣe ṣe aami, dapọ tabi Titari si ibeere fifa kan pe igba miiran n ṣiṣẹ. Wo [Ofin Lile 22](HARD_RULES_DETAIL.md).
 
-- **Ìdádúró release wà ní ṣiṣi** → má ṣe fi àmì sí àwọn PR tó ń dojú kọ branch tí a ti dá dúró; kọ́kọ́
-  yí ibi-afẹ́ wọn padà sí `release/vX+1` tó ń ṣiṣẹ́.
-- **PR ìpàdé mìíràn tó ṣì ń lọ lọ́wọ́** → má ṣe fi àmì sí i láé; ìpàdé tó ni í nìkan ló lè fi
-  iṣẹ́ tirẹ̀ sínú ìlà.
-- Àwọn diff ti ìdánwò-nìkan àti àwọn PR tó ní àmì `hotfix` ti ń ṣiṣẹ́ CI tí a dín kù tẹ́lẹ̀ (wo
-  `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); àwọn ipò ìlà náà máa ń gba èyíkéyìí
-  nínú àkójọpọ̀ àyẹ̀wò tó ṣiṣẹ́ ní ti gidi (`#check-failure=0` + `#check-pending=0`).
+## Reluwe fa ìbéèrè
 
-## Ọ̀nà àfẹ́yìntì: ọkọ̀-ìdarapọ̀ afọwọ́ṣe
+1. Bẹrẹ ẹka ọkọ oju irin ni imọran ipilẹ itusilẹ lọwọlọwọ. Ṣepọ awọn olori ọmọ ẹgbẹ ti a fọwọsi gangan ni lilo awọn ifarapọ idapọ. Ṣetọju itan-akọọlẹ ifaramo wọn nipa yago fun elegede ati atunbere.
+2. Ṣii ibeere fifa ọkan fun ẹka ọkọ oju irin. Fidi PR yẹn pẹlu CI kikun tirẹ lori imọran ipilẹ lọwọlọwọ. Tun ṣayẹwo imọran ipilẹ ati awọn olori ọmọ ẹgbẹ ti a fọwọsi ṣaaju ibalẹ. Sọ ọkọ oju irin naa ati CI rẹ nigbati oludije ti a fọwọsi ba yipada.
+3. Gbe PR reluwe lọ pẹlu ifarapọ kan labẹ ipo isinyi to wulo. Ni ipo ifiwe, ọna ibalẹ `merge-ff` ti isinyi ṣe itọju awọn iṣẹ idapọ. Awọn olori ọmọ ẹgbẹ atilẹba ti o le de ọdọ lati ẹka itusilẹ. GitHub ṣe samisi ọmọ ẹgbẹ PRs bi a ti dapọ ati pe awọn iṣẹ ṣe idaduro awọn onkọwe wọn.
 
-A máa ń lò ó nígbà tí ìlà kò bá sí. Èyí sọ ọ̀nà ìṣe tó mú kí PR 33 parí
-ní ọjọ́ kan ṣoṣo lákòókò ìyípo v3.8.47 di ìlànà:
+Apeere ti gbogbo eniyan ni [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). O darapọ PRs ọmọ ẹgbẹ 18 o si balẹ pẹlu ifarapọ kan ni 2026-11-24.
 
-1. **Kó batch náà jọ** (~10–30 PR tí a ti ṣàyẹ̀wò+tí a sì ti fọwọ́ sí). Ṣàyẹ̀wò ìkọlù `linked:`
-   (`tap.testFiles` kan náà, àwọn hunk CHANGELOG kan náà), kí o sì tò wọ́n láti ṣiṣẹ́ lọ́kọ̀ọ̀kan.
-2. **Fìdí rẹ̀ múlẹ̀ LẸ́Ẹ̀KAN ṢOṢO**: nínú worktree àdádó láti tip ìtújáde, darapọ̀ gbogbo
-   head batch ní agbègbè ẹrọ náà, lẹ́yìn náà ṣiṣẹ́ suite tó dọ́gba pẹ̀lú ti ìtújáde
-   (`npm run check:release-green`, fi `--with-build` kún un ṣáájú ìtújáde).
-   `scripts/release/merge-train.sh <base> <PR#>…` ń ṣe àwọn ìgbésẹ̀ 1–2 láìfọwọ́ṣe (àwọn
-   PR tó ní ìkọlù máa jáde, ọkọ̀ náà á sì tẹ̀síwájú). Full mode ń ṣiṣẹ́ `npm run test:unit` — runner
-   tí a ti ṣètò fún box (`--test-concurrency=20`), **kì í ṣe** CI shard 4-core méjì tó ń ṣiṣẹ́
-   lẹ́sẹẹsẹ, èyí tó mú kí ipele tó tóbi jù lọ lo nǹkan bí ~25% ti box 16-core kan (a tún un ṣe
-   2026-07-18). `--fast` (fún píparí mega-train láàárín ọjọ́, olówó fọwọ́ sí i 2026-07-18)
-   pa gbogbo static gate + vitest mọ́ ṣùgbọ́n ó ń ṣiṣẹ́ kìkì àwọn fáìlì node:test tí àwọn
-   PR tó wọ ọkọ̀ yí padà; FULL suite ṣì gbọ́dọ̀ ṣiṣẹ́ ó kéré tán lẹ́ẹ̀kan lójúmọ́ lórí
-   tip tí a ti kójọ (ọkọ̀ kan láìsí `--fast`).
-3. **Àwọ̀ ewé** → darapọ̀ àwọn PR náà lẹ́sẹẹsẹ (máa tún `state,headRefOid` yẹ̀wò ṣáájú ọ̀kọ̀ọ̀kan —
-   PR tí head rẹ̀ ti yí padà gbọ́dọ̀ padà sínú àyẹ̀wò). Ṣe ẹ̀rí pé net diff ti ìdarapọ̀ kọ̀ọ̀kan jẹ́
-   àyípadà PR náà fúnra rẹ̀ (má ṣe auto-resolve àwọn revert: ṣàyẹ̀wò `git diff --stat` fún
-   àwọn ìparẹ́ tí kò sí láàárín ààlà iṣẹ́).
-4. **Pupa** → pín batch náà sí ìdajì (fìdí ìdajì kọ̀ọ̀kan múlẹ̀) dípò ṣíṣe ìfìdímúlẹ̀-àtúnsẹ
-   lọ́kọ̀ọ̀kan; da PR tó fa ìṣòro padà sí ìlà àyẹ̀wò pẹ̀lú ẹ̀rí náà.
-5. **Má ṣe láéláé**: darapọ̀ sínú branch tí a dá dúró nígbà ìdádúró; lo `git stash` níbikíbi;
-   tún CI ṣiṣẹ́ láìyan títí kan ní ìrètí pé pupa yóò pòórá (òfin: pupa jẹ́ ìsọfúnni).
+Amuṣiṣẹpọ-pada lati `main` si ẹka itusilẹ t’okan tun gbele nipasẹ ifarapọ kan. Titọju idile `main` nilo fun awọn amuṣiṣẹpọ nigbamii. Wo [Iyasọtọ Worktree](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Pípín sí àwọn ipele (ìdí tí ìlà fi ní ààbò pẹ̀lú fast-gates nìkan)
+## Olufọwọsi iṣọpọ-ọkọ oju-irin agbegbe
 
-- **Fún PR kọ̀ọ̀kan** (àwọn fast-gates quality.yml): àwọn ìdánwò tí TIA ní ipa lórí + full unit 4-shard +
-  vitest + lint bag + typecheck + ìdúróṣinṣin docs/changelog.
-- **Fún batch/tip kọ̀ọ̀kan** (continuous release-green): àwọn HARD gate `--quick` lórí gbogbo push sí
-  branch ìtújáde; àwọn ìṣàyẹ̀wò kíkún `--with-build --full-ci` ní ìgbà 3×/ọjọ́.
-- **Fún ìtújáde kọ̀ọ̀kan** (ci.yml lórí PR ìtújáde): matrix kíkún pẹ̀lú E2E ×9,
-  package-artifact + tarball boot-smoke, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Kò sí ohun tí a fìdí rẹ̀ múlẹ̀ díẹ̀ ju tẹ́lẹ̀ lọ — surface tó wuwo kàn ń ṣiṣẹ́ fún batch/tip kọ̀ọ̀kan
-dípò fún PR kọ̀ọ̀kan, èyí sì ni ohun tó mú àwọn ìrìn-àjò padà-bọ̀ O(N) kúrò.
+Olufọwọsi mu ipilẹ ati awọn olori PR ṣajọpọ wọn sinu igi iṣẹ isọnu. O gbalaye awọn oniwe-parity suite lẹẹkan lori Abajade igi. Ija ori ti o kuna tabi dapọ rogbodiyan jade pe PR ati iwe afọwọkọ naa tẹsiwaju pẹlu PRs to ku.
 
-## Àwọn ohun àkọ́kọ́ tí fresh checkout nílò fún `merge-train.sh`
+- **`--plan`** tẹjade awọn igbesẹ ipo ti o yan ati jade laisi ṣiṣẹda igi iṣẹ tabi kan si isakoṣo latọna jijin. Darapọ pẹlu `--fast` lati ṣayẹwo ero iyara naa.
+- **`--fast`** nṣiṣẹ awọn ẹnu-ọna aimi ti o wọpọ, awọn faili `node:test` ti a ti yan labẹ `tests/unit/`, ati `npm run test:vitest`. Ṣiṣe afọwọsi agbegbe ni kikun ni o kere ju lẹẹkan lojoojumọ lori aaye ikojọpọ nigba lilo ipo iyara.
+- **Ipo ni kikun** ṣe afikun awọn ẹnu-ọna aimi ni kikun ati ṣiṣe `npm run test:unit` ati `npm run test:vitest`.
 
-Script náà ń ṣiṣẹ́ **preflight** fail-fast lórí root checkout (ṣáájú iṣẹ́ worktree
-èyíkéyìí) kí install tó bàjẹ́ má bàa lè fara hàn bí ọkọ̀ pupa:
+Ẹnu-ọna aimi ti o kuna ni a tun ṣiṣẹ lori ipilẹ ti a ko fi ọwọ kan ti iwadii ipilẹ ba wa. Iwe afọwọkọ naa ṣe ijabọ awọn ikuna ti jogun ati tẹsiwaju nigbati gbogbo laini irufin ti a mọ tun han lori ipilẹ ati kika lapapọ ko ti dagba.
 
-1. `npm ci`, lẹ́yìn náà ṣiṣẹ́ postinstall `bun` tí npm dí lọ́wọ́:
-   `(cd node_modules/bun && node install.js)` — bí bẹ́ẹ̀ kọ́, `check:provider-consistency`
-   àti `check:known-symbols` (méjèèjì jẹ́ `bun scripts/…`) yóò kùnà lórí ọkọ̀ náà ÀTI base láìsí
-   ìlà violation.
-2. Kò gbọ́dọ̀ sí `node_modules/node_modules` aláìnílé (igi dependency àdáwòkọ; React á load lẹ́ẹ̀mejì
-   àwọn suite UI vitest á sì kùnà lẹ́sẹ̀kẹsẹ̀).
-3. `node_modules/.bin/tsc` gbọ́dọ̀ wà, kí ó sì ṣeé ṣiṣẹ́ (install tí kò pé kò ní í).
+| Jade | Itumo                                                                                                     |
+| ---- | --------------------------------------------------------------------------------------------------------- |
+| `0`  | Tejede ètò tabi pari suite. Akopọ suite ṣe atokọ eyikeyi awọn ikuna aimi ti a jogun ati PRs ti a yọ jade. |
+| `1`  | Awọn ariyanjiyan ti ko tọ, ko si isanwo Git, iṣaju iṣaaju ti kuna, tabi ko si PR ti o wọ.                 |
+| `2`  | Ayẹwo suite kuna ati pe ko ṣe deede bi jogun. Oṣiṣẹ le pin ipin naa, yọ PR ti o ṣẹ, ati tun bẹrẹ.         |
 
-Ọkọ̀ náà ń ṣiṣẹ́ `npm run check:cycles:ratchet` tó ń dí ọ̀nà; `npm run check:cycles`
-lásán jẹ́ ìmọ̀ràn (ó ń to àwọn SCC jáde, ó sì ń jáde pẹ̀lú non-zero àní lórí base tó ní ìlera).
+Iwe-iwọle agbegbe kan n pese ẹri iwadii aisan fun iwe-ipamọ oniwun nikan. Ibalẹ kọọkan tun nilo aṣẹ oniwun, awọn sọwedowo ti o nilo tirẹ, ati idajọ isinyi ojiji nigbati o ba wulo.
+
+## Tiering
+
+- **Fun PR.** CI ati Didara yan awọn sọwedowo ti o da lori awọn ọna ti o yipada. Koodu PRs ṣiṣe awọn ẹnu-ọna didara iyara ati awọn idanwo ti o ni ipa, pẹlu ẹyọkan lọtọ ati awọn iṣẹ Vitest ni CI.
+- **Fun ti isinyi oludije.** CI ati Didara ṣiṣe profaili ni kikun fun oludije ti o ni akopọ lori atunṣe isinyi rẹ.
+- **Fun sample itusilẹ.** Tu-Green nṣiṣẹ awọn ẹnu-bode lile ni iyara lori awọn titari ti o baamu awọn asẹ ọna rẹ. Awọn ṣiṣe eto mẹta fun ọjọ kan lo gbigba ni kikun fun ẹka itusilẹ.
+- **Fun idasilẹ.** Matrix CI ni kikun pẹlu awọn shards E2E, afọwọsi package, ẹfin bata bata bọọlu, ati awọn sọwedowo agbegbe. Wo Akojọ [Ayẹwo Tu silẹ](RELEASE_CHECKLIST.md).
+
+## Awọn ohun pataki iṣayẹwo-ṣayẹwo fun `merge-train.sh`
+
+Ikọju iṣaju n ṣiṣẹ ṣaaju ṣiṣẹda awọn igi iṣẹ. Fi awọn igbẹkẹle sori ẹrọ pẹlu `npm ci`. Jẹrisi pe `node_modules/.bin/tsc` jẹ ṣiṣe ati pe `node_modules/node_modules` ko si. Ṣayẹwo pe `node_modules/.bin/bun --version` ṣaṣeyọri.
+
+Ti Bun postinstall ti fo, ṣiṣe `(cd node_modules/bun && node install.js)`. Aitasera olupese ati awọn sọwedowo aami-mọ lo Bun. Olufọwọsi nṣiṣẹ `npm run check:cycles:ratchet` bi ẹnu-ọna ìdènà. Aṣẹ `npm run check:cycles` imurasilẹ jẹ imọran.
+
+## Itan
+
+Ti isinyi akojọpọ Mergify ti fẹyìntì ni 2026-11-19.

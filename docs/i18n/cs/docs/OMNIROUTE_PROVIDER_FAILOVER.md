@@ -21,3 +21,5 @@ Výchozí zásada mezi poskytovateli umožňuje až tři pokusy poskytovatelů, 
   - Předpona id (`provider/model`) není nikdy přesměrována k jinému poskytovateli.
 
 Stavy obvodu jsou `closed`, `open` a `half_open`. Cooldown naplánuje ohraničenou sondu; úspěšná sonda uzavře obvod a neúspěšná sonda jej znovu otevře.
+
+Přepnutí při selhání poskytovatele běží uvnitř brány. Chování klienta během výpadku brány najdete [v části Když je samotný OmniRoute nedostupný](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable).

@@ -48,7 +48,7 @@ Kai leidimas suderinamas, atidaroma žymeklio problema, pažymėta `release-free
 Prieš darydami prielaidą, kad norimą šaką galima sujungti, patikrinkite, ar nėra užšalimo:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Sujungimo mechanika (savininko `queue` etiketė → Mergify) yra dokumentuota [MERGE_TRAIN.md](./MERGE_TRAIN.md).

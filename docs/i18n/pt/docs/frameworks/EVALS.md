@@ -4,24 +4,17 @@
 
 ---
 
-> **Fonte fidedigna:** `src/lib/evals/`, `src/lib/db/evals.ts`, `src/app/api/evals/`
-> **Última atualização:** 2026-06-28 — v3.8.40
+> **Fonte da verdade:** `src/lib/evals/`, `src/lib/db/evals.ts`, `src/app/api/evals/`
 
-O OmniRoute inclui uma framework de avaliação genérica que pode utilizar para efetuar testes comparativos de configurações de encaminhamento, fornecedores/modelos individuais ou conjuntos de testes "golden set" incluídos.
-Utilize-a para verificar alterações ao encaminhamento, validar novos fornecedores e controlar lançamentos antes de os promover para tráfego de produção.
+OmniRoute fornece uma estrutura de avaliação genérica que pode utilizar para avaliar configurações de encaminhamento, providers/models único ou conjuntos de "conjunto dourado" agrupados. Utilize-o para verificar alterações de encaminhamento, validar novos fornecedores e libertar lançamentos antes de os promover para o tráfego de produção.
 
-A framework é implementada como:
+A estrutura é implementada como:
 
-- Um executor puro (`src/lib/evals/evalRunner.ts`) que regista em memória
-  conjuntos de testes integrados, avalia os resultados face aos critérios esperados e agrega
-  grelhas de pontuação.
-- Uma camada de persistência (`src/lib/db/evals.ts`) para conjuntos de testes personalizados (definidos pelo utilizador)
-  e execuções históricas em SQLite.
-- Uma camada de orquestração (`src/lib/evals/runtime.ts`) que executa cada caso
-  ao encaminhar chamadas reais para `POST /v1/chat/completions`, regista a latência
-  e os resultados e persiste a execução.
-- Endpoints REST em `/api/evals/*` (apenas com autenticação de gestão).
-- Uma área no painel em `Dashboard → Utilização → Avaliações` (`EvalsTab.tsx`).
+- Um executor puro (`src/lib/evals/evalRunner.ts`) que regista conjuntos integrados na memória, avalia as saídas em relação aos critérios esperados e agrega scorecards.
+- Uma camada de persistência (`src/lib/db/evals.ts`) para conjuntos personalizados (definidos pelo utilizador) e execuções históricas em SQLite.
+- Uma camada de orquestração (`src/lib/evals/runtime.ts`) que executa cada caso despachando chamadas reais para `POST /v1/chat/completions`, captura a latência e as saídas e persiste a execução.
+- Terminais REST em `/api/evals/*` (apenas gestão-auth).
+- Uma superfície de painel em `Dashboard → Usage → Evals` (`EvalsTab.tsx`).
 
 ## Conceitos
 

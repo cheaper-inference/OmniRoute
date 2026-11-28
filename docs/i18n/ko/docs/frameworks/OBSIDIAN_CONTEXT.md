@@ -113,57 +113,48 @@ ID가 없는 호출자는 `Obsidian API token not configured`를 받으며, 볼�
 키별 Obsidian 구성이 없는 인증된 키는 전역 폴백을 유지합니다. 네 개의
 `obsidian_sync_*` 도구는 별도의 동기화 토큰 동작을 유지합니다.
 
-## MCP 도구 (22개)
+## MCP 도구 (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts`에 정의되어 있습니다. 토큰/base-URL은
-호출별로 확인됩니다(API 키별 설정을 먼저 확인한 다음 전역 설정 확인). OmniRoute **동기화 서버**에
-접근하는 도구(4개의 `obsidian_sync_*` 도구)는 OmniRoute 설정에 구성된 동기화 인증 토큰도
-추가로 필요합니다.
+`open-sse/mcp-server/tools/obsidianTools.ts` 에 정의되어 있습니다. token/base-URL 는 호출별로 해결됩니다(API 키별 먼저, 그 다음 전역). OmniRoute 에 적합한 도구** 동기화 서버** (4개의 `obsidian_sync_*` 도구)에는 OmniRoute 설정에 구성된 동기화 인증 토큰이 추가로 필요합니다.
 
-### 읽기 도구 (`read:obsidian`)
+### 읽기 도구(`read:obsidian`)
 
-| 도구                         | 설명                                                                                             |
-| ---------------------------- | ------------------------------------------------------------------------------------------------ |
-| `obsidian_check_status`      | Local REST API에 연결할 수 있고 인증되었는지 확인합니다.                                         |
-| `obsidian_search_simple`     | 노트 콘텐츠를 전체 텍스트 검색하며, 파일 경로가 포함된 스니펫을 반환합니다.                      |
-| `obsidian_search_structured` | JSON Logic 표현식(and/or/regex/path 필터)을 사용하여 검색합니다.                                 |
-| `obsidian_read_note`         | 볼트 기준 상대 경로로 노트를 읽으며, 선택적으로 특정 제목/블록/frontmatter를 지정할 수 있습니다. |
-| `obsidian_list_vault`        | 볼트의 파일과 디렉터리를 나열합니다(항목 트리).                                                  |
-| `obsidian_get_document_map`  | 노트의 제목 구조를 제목 → 줄 번호 맵으로 가져옵니다.                                             |
-| `obsidian_get_note_metadata` | 전체 콘텐츠 없이 frontmatter, 태그, 링크, 문자/단어 수를 가져옵니다.                             |
-| `obsidian_get_active_file`   | Obsidian에서 현재 활성화된 파일의 경로와 콘텐츠를 가져옵니다.                                    |
-| `obsidian_get_periodic_note` | 특정 날짜의 일간/주간/월간 정기 노트를 가져옵니다(생략하면 오늘).                                |
-| `obsidian_get_tags`          | 모든 볼트 태그와 각 태그의 사용 빈도를 나열합니다.                                               |
-| `obsidian_list_commands`     | 사용 가능한 Obsidian 명령 ID를 나열합니다(`obsidian_execute_command`와 함께 사용).               |
-| `obsidian_sync_status`       | OmniRoute 동기화 서버 상태: 실행 여부, 볼트 이름, 포트, 가동 시간, 마지막 동기화.                |
-| `obsidian_sync_conflicts`    | 해결되지 않은 동기화 충돌을 나열합니다(경로, 충돌 경로, 감지 시각).                              |
+| 도구                         | 설명                                                                                   |
+| ---------------------------- | -------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | 로컬 REST API 연결 가능하고 인증되었는지 확인하세요.                                   |
+| `obsidian_search_simple`     | 노트 내용의 전체 텍스트 검색 파일 경로가 포함된 조각을 반환합니다.                     |
+| `obsidian_search_structured` | JSON 논리 표현식(and/or/regex/path 필터)을 사용하여 검색합니다.                        |
+| `obsidian_read_note`         | 볼트 상대 경로로 메모를 읽습니다. 선택적으로 특정 heading/block/frontmatter.           |
+| `obsidian_list_vault`        | Vault에 있는 파일 및 디렉터리를 나열합니다(항목 트리).                                 |
+| `obsidian_get_document_map`  | 메모의 제목 구조를 제목 → 행 번호의 맵으로 가져옵니다.                                 |
+| `obsidian_get_note_metadata` | 전체 콘텐츠 없이 머리말, 태그, 링크, char/word 카운트를 가져옵니다.                    |
+| `obsidian_get_active_file`   | Obsidian 에서 현재 활성 파일의 경로 + 내용을 가져옵니다.                               |
+| `obsidian_get_periodic_note` | 날짜에 대한 daily/weekly/monthly 정기 메모를 가져옵니다(생략된 경우 오늘).             |
+| `obsidian_get_tags`          | 모든 볼트 태그를 빈도와 함께 나열합니다.                                               |
+| `obsidian_list_commands`     | 사용 가능한 Obsidian 명령 IDs 를 나열합니다( `obsidian_execute_command` 와 함께 사용). |
+| `obsidian_sync_status`       | OmniRoute 동기화 서버 상태: 실행 중, 볼트 이름, 포트, 가동 시간, 마지막 동기화.        |
+| `obsidian_sync_conflicts`    | 해결되지 않은 동기화 충돌(경로, 충돌 경로, 감지 위치)을 나열합니다.                    |
 
-### 쓰기 도구 (`write:obsidian`)
+### 쓰기 도구(`write:obsidian`)
 
 | 도구                             | 설명                                                                                 |
 | -------------------------------- | ------------------------------------------------------------------------------------ |
-| `obsidian_write_note`            | 지정된 Markdown 콘텐츠로 노트를 생성하거나 덮어씁니다.                               |
-| `obsidian_append_note`           | 노트에 콘텐츠를 추가하며, 선택적으로 특정 제목/블록에 추가할 수 있습니다.            |
-| `obsidian_patch_note`            | 제목, 블록 또는 frontmatter 필드에 정밀하게 추가/앞에 추가/교체합니다.               |
-| `obsidian_delete_note`           | 볼트에서 노트를 영구적으로 삭제합니다.                                               |
-| `obsidian_move_note`             | 볼트 내에서 노트를 이동하거나 이름을 변경합니다.                                     |
-| `obsidian_execute_command`       | Obsidian 명령 ID로 명령을 실행합니다.                                                |
-| `obsidian_open_file`             | Obsidian에서 파일을 엽니다(존재하지 않으면 생성).                                    |
-| `obsidian_sync_trigger`          | 데스크톱↔모바일 볼트의 즉각적인 양방향 동기화를 트리거합니다.                        |
-| `obsidian_sync_resolve_conflict` | 동기화 충돌을 해결합니다: `local`(모바일), `remote`(데스크톱) 또는 `keep-both` 유지. |
+| `obsidian_write_note`            | 주어진 마크다운 콘텐츠로 노트를 생성하거나 덮어씁니다.                               |
+| `obsidian_append_note`           | 메모에 내용을 추가합니다. 선택적으로 특정 heading/block. 에                          |
+| `obsidian_patch_note`            | 제목, 블록 또는 머리말 필드에서 수술적으로 append/prepend/replace 수행합니다.        |
+| `obsidian_delete_note`           | 볼트에서 메모를 영구적으로 삭제합니다.                                               |
+| `obsidian_move_note`             | 볼트 내에서 메모를 이동하거나 이름을 바꿉니다.                                       |
+| `obsidian_execute_command`       | ID 명령으로 Obsidian 명령을 실행합니다.                                              |
+| `obsidian_open_file`             | Obsidian 에서 파일을 엽니다(존재하지 않는 경우 생성).                                |
+| `obsidian_sync_trigger`          | 즉각적인 양방향 데스크톱 ↔ 모바일 볼트 동기화를 트리거합니다.                        |
+| `obsidian_sync_resolve_conflict` | 동기화 충돌 해결: `local` (모바일), `remote` (데스크톱) 또는 `keep-both` 유지하세요. |
 
 > [!NOTE]
-> `obsidian_patch_note` 대상은 `heading | block | frontmatter` 중 하나를 `targetType`으로,
-> `append | prepend | replace` 중 하나를 `operation`으로 사용하며, 선택적으로
-> `createTargetIfMissing`를 사용할 수 있습니다. 4개의 `obsidian_sync_*` 도구는 로컬 동기화
-> 서버(기본값: `http://127.0.0.1:27781`)와 통신하며 동기화 토큰이 필요합니다.
+> `obsidian_patch_note` 대상은 `heading | block | frontmatter` 의 `targetType` 및 `append | prepend | replace` 의 `operation` 선택적으로 허용하며 `createTargetIfMissing` 허용합니다. 4개의 `obsidian_sync_*` 도구는 로컬 동기화 서버(기본적으로 `http://127.0.0.1:27781` )와 통신하며 동기화 토큰이 필요합니다.
 
 ### 범위
 
-읽기 도구에는 `read:obsidian`이 필요하고, 쓰기 도구에는 `write:obsidian`이 필요합니다. 적용 방식은
-Notion과 동일합니다. 즉, `open-sse/mcp-server/server.ts`의 `withScopeEnforcement()`에서 처리되며,
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true`일 때 활성화되고, 허용된 범위는 `OMNIROUTE_MCP_SCOPES` 또는
-API 키의 범위 컨텍스트에서 가져옵니다. [MCP-SERVER.md](./MCP-SERVER.md)를 참조하세요.
+읽기 도구에는 `read:obsidian` 필요합니다. 쓰기 도구에는 `write:obsidian` 필요합니다. 적용은 `open-sse/mcp-server/server.ts` 에서 `withScopeEnforcement()` 처리하는 Notion — 와 동일하며, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` 에서 게이트되고 API 키에 `manage`/`admin` 없는 HTTP/SSE 호출자에 대해 강제 적용되며 허용 범위는 `OMNIROUTE_MCP_SCOPES` 또는 API 키의 범위 컨텍스트에서 제공됩니다. [MCP-SERVER.md](./MCP-SERVER.md) 참조하세요.
 
 ## 엔드포인트
 

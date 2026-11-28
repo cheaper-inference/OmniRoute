@@ -4,214 +4,213 @@
 
 ---
 
-> **Fil-qosor**: Uża l-kontijiet tiegħek stess ma’ fornituri eliġibbli. OmniRoute jgħaqqad il-konnessjonijiet li tikkonfigura; ma jipprovdix il-baġit aggregat ta’ tokens reklamat. L-aċċess bla ħlas jista’ jirrikjedi reġistrazzjoni, API key, approvazzjoni, jew metodu ta’ ħlas. Il-limiti, il-politiki tal-privatezza, u t-termini tal-fornituri jibqgħu japplikaw.
+> **TL;DR** : Ġib il-kontijiet tal-fornitur eliġibbli tiegħek stess. OmniRoute jgħaqqad il-konnessjonijiet li tikkonfigura; ma joħroġx il-baġit tat-token aggregat reklamat. Aċċess b'xejn jista 'jeħtieġ reġistrazzjoni, ċavetta API, approvazzjoni, jew metodu ta' ħlas. Limiti tal-fornitur, politiki tal-privatezza, u termini għadhom japplikaw.
 
 ---
 
-## X’Inhuma l-Livelli Bla Ħlas?
+## X'inhuma l-Livelli Ħieles?
 
-Ħafna fornituri tal-IA joffru xi forma ta’ **aċċess bla ħlas**. Skont il-fornitur, dan jista’
-jfisser endpoint mingħajr awtentikazzjoni, kwota rikorrenti, aċċess bla limitu iżda b’limitu fuq ir-rata, għotja mar-reġistrazzjoni,
-approvazzjoni manwali, jew promozzjoni temporanja. Xi għażliet jeħtieġu kont, API key,
-karta ta’ kreditu, KYC, jew aċċettazzjoni ta’ termini speċifiċi għall-fornitur.
+Ħafna fornituri AI joffru xi forma ta** aċċess liberu** . Skont il-fornitur, dan jista' jfisser endpoint mingħajr awtorizzazzjoni, kwota rikorrenti, aċċess bla limiti b'rata limitata, għotja ta' reġistrazzjoni, approvazzjoni manwali jew promozzjoni temporanja. Xi għażliet jeħtieġu kont, ċavetta API, karta ta 'kreditu, KYC, jew aċċettazzjoni ta' termini speċifiċi għall-fornitur.
 
-OmniRoute **jiġbor flimkien** il-konnessjonijiet ikkonfigurati f’endpoint wieħed. Xorta trid tirreġistra separatament ma’ kull fornitur li jeħtieġ kont. Qabbad dawk il-kontijiet u uża `model: "auto"` biex tidderieġi t-talbiet fost id-destinazzjonijiet eliġibbli. Installazzjoni ġdida tista’ ma jkollha ebda destinazzjoni eliġibbli li ma teħtieġx ċavetta; l-installazzjoni ta’ OmniRoute waħedha ma tiggarantix tweġiba ta’ chat b’suċċess.
+OmniRoute** aggregati** konnessjonijiet konfigurati f'endpoint wieħed. Inti xorta tiffirma separatament għal kull fornitur li jeħtieġ kont. Qabbad dawk il-kontijiet u uża `model: "auto"` biex tirrota fost il-miri eliġibbli. Installazzjoni ġdida jista' jkollha l-ebda mira eliġibbli mingħajr ċavetta; L-installazzjoni OmniRoute waħedha ma tiggarantixxix rispons ta' chat b'suċċess.
 
 ---
 
-## Fornituri Rappreżentattivi b’Aċċess Bla Ħlas
+## Fornituri Rappreżentanti ta' Aċċess Ħieles
 
-### Aċċess Rikorrenti, Mingħajr Ċavetta, jew Bla Limitu Massimu
+### Aċċess Rikorrenti, Mingħajr Ċavetta, jew Mhux Limitat
 
-Dawn il-fornituri għandhom mezz ta’ aċċess bla ħlas rikorrenti, mingħajr ċavetta, jew bla limitu massimu fil-katalgu awditjat. “Bla limitu massimu” tfisser li ma hemm ebda limitu ppubblikat għat-tokens; xorta jistgħu japplikaw limiti fuq ir-rata, il-konkorrenza, il-kont, ir-reġjun, u l-politiki:
+Dawn il-fornituri għandhom mogħdija ta' aċċess ħieles rikorrenti, mingħajr ċavetta jew bla limitu fil-katalgu awditjat. “Mhux limitu” tfisser l-ebda token cap ippubblikat; limiti tar-rata, tal-konkorrenza, tal-kont, reġjonali u tal-politika xorta jistgħu japplikaw:
 
-| Fornitur          | Mudelli                                                                                          | Kwota                                                                                                                                                             | Kif Tikkonnettja                                                                                  |
-| ----------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, u oħrajn                                            | Il-katalgu awditjat jistma ġabra kondiviża ta’ 25K token fix-xahar                                                                                                | Fluss OAuth/tal-kont; it-ToS huma mmarkati bħala `avoid` fil-katalgu                              |
-| **Pollinations**  | Is-sett attwali ta’ mudelli mingħajr ċavetta; xi mudelli preċedenti twaqqfu jew jeħtieġu ċavetta | Mingħajr ċavetta; ebda limitu ppubblikat għat-tokens                                                                                                              | Ebda kredenzjali tal-fornitur għall-mudelli mingħajr ċavetta                                      |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, u aktar                             | Ċavetta API bla ħlas (ebda limitu tar-rata, ebda karta); **kull talba tiġi rreġistrata** għar-riċerka (tista’ tagħżel li ma tipparteċipax fuq logfare.ai/consent) | Ċavetta immedjata fuq logfare.ai/register; ToS/privatezza fuq logfare.ai/tos u logfare.ai/privacy |
-| **Cloudflare AI** | Il-katalgu ta’ Workers AI                                                                        | Il-ġabra awditjata hija stmata għal ~30M token fix-xahar abbażi tal-unitajiet ta’ użu ppubblikati                                                                 | Kont ta’ Cloudflare u kredenzjali tal-API                                                         |
-| **Gemini**        | Il-familja Gemini Flash                                                                          | Limiti varjabbli tar-rata skont il-proġett/mudell; l-ebda allokazzjoni fissa ta’ tokens fix-xahar ma hija inkluża fit-titlu ewlieni                               | Ċavetta API ta’ Google AI Studio; iċċekkja l-limiti attivi tal-proġett                            |
-| **Groq**          | Mudelli Llama, GPT-OSS, u Qwen                                                                   | Il-ġabra awditjata hija stmata għal ~15M token fix-xahar                                                                                                          | Ċavetta API ta’ Groq; japplikaw limiti tar-rata                                                   |
+| Fornitur              | Mudelli                                                                                              | Kwota                                                                                                                                  | Kif Tqabbad                                                                            |
+| --------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Kiro AI**           | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, u oħrajn                                                | Il-katalgu awditjat jistma ġabra ta' kull xahar kondiviża ta' 25K token                                                                | OAuth/account flow; ToS immarka `avoid` fil-katalgu                                    |
+| **Pollinazzjonijiet** | Sett kurrenti tal-mudell bla ċavetta; xi mudelli preċedenti ma jitkomplewx jew huma meħtieġa ċavetta | Bla ċavetta; ebda token cap ippubblikat                                                                                                | L-ebda kredenzjali tal-fornitur għall-mudelli bla ċavetta                              |
+| **Logfare**           | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, u aktar                                 | Ċavetta API b'xejn (l-ebda limiti tar-rata, l-ebda karta);** kull talba hija illoggjata** għar-riċerka (opt out at logfare.ai/consent) | Instant key at logfare.ai/register; ToS/privacy fi logfare.ai/tos u logfare.ai/privacy |
+| **Cloudflare AI**     | Ħaddiema AI katalgu                                                                                  | Stimi tal-grupp awditjat ~ 23M tokens/month minn unitajiet tal-użu ppubblikati (katalgu awditjat 2026-11-23)                           | kont Cloudflare u kredenzjali API                                                      |
+| **Gemini**            | Gemini Familja Flash                                                                                 | Limiti tar-rata project/model varjabbli; l-ebda għotja fissa fix-xahar ta' token ma hija inkluża fit-titlu                             | Google AI Studio API key; iċċekkja l-limiti attivi tal-proġett                         |
+| **Groq**              | Llama, GPT-OSS, u Qwen                                                                               | Stimi tal-grupp awditjat ~ 24M tokens/month (4 limiti għal kull mudell, katalogu awditjat 2026-11-23)                                  | Groq API key; limiti tar-rata japplikaw                                                |
 
-### Għotjiet mar-Reġistrazzjoni u Krediti Speċifiċi għall-Fornitur
+### Għotjiet ta' Signup u Krediti Speċifiċi għall-Fornitur
 
-Dawn il-fornituri joffru għotjiet mar-reġistrazzjoni jew krediti promozzjonali, soġġetti għar-regoli ta’ eliġibbiltà tagħhom. Kif ivverifikat fl-2026-10-08, [l-ipprezzar ta’ Cerebras](https://www.cerebras.ai/pricing) jeħtieġ metodu ta’ ħlas għal kreditu ta’ darba ta’ $5 li jiskadi wara 30 jum; mhuwiex kwota rikorrenti ta’ tokens. [Il-limiti tar-rata ta’ Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) ivarjaw skont il-proġett, il-mudell, u l-livell, għalhekk ma jiġux ikkonvertiti f’allokazzjoni garantita ta’ tokens fix-xahar.
+Dawn il-fornituri joffru għotjiet ta' reġistrazzjoni jew krediti promozzjonali, soġġetti għar-regoli ta' eliġibilità tagħhom. Kif ivverifikat fl-2026-10-08, [l-ipprezzar Cerebras](https://www.cerebras.ai/pricing) jeħtieġ metodu ta' ħlas għal kreditu ta' $5 ta' darba li jiskadi wara 30 jum; mhix kwota token rikorrenti. [Il-limiti tar-rata Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) ivarjaw skont il-proġett, il-mudell u l-livell, u għalhekk ma jiġux konvertiti f’għotja ta’ token garantita ta’ kull xahar.
 
-| Fornitur      | Krediti Bla Ħlas                                                                           | Mudelli                          | Kif Tiksibhom                                                             |
-| ------------- | ------------------------------------------------------------------------------------------ | -------------------------------- | ------------------------------------------------------------------------- |
-| **Cerebras**  | Kreditu promozzjonali ta’ darba ta’ $5; jiskadi wara 30 jum                                | Il-katalgu attwali tal-inferenza | Kont u metodu ta’ ħlas validu                                             |
-| **DeepSeek**  | 5M token bla ħlas                                                                          | DeepSeek V4                      | Irreġistra fuq platform.deepseek.com                                      |
-| **LongCat**   | Għotja ta’ darba ta’ 10M token                                                             | LongCat 2.0                      | Ċavetta API + KYC; ħlas skont l-użu wara l-għotja                         |
-| **Vertex AI** | Kreditu ta’ $300 mar-reġistrazzjoni, irrappreżentat bħala ~300M token fil-mudell tal-baġit | Mudelli Gemini u ta’ sħab        | Kont ta’ Google Cloud; japplikaw regoli dwar il-kontijiet u l-eliġibbiltà |
+| Fornitur      | Krediti Ħieles                                                                            | Mudelli                    | Kif tikseb                                                                |
+| ------------- | ----------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------- |
+| **Cerebras**  | Kreditu promozzjonali ta' $5 ta' darba; jiskadi wara 30 jum                               | Katalgu inferenza kurrenti | Kont u metodu ta' ħlas validu                                             |
+| **DeepSeek**  | 5M tokens b'xejn                                                                          | DeepSeek V4                | Irreġistra fuq platform.deepseek.com                                      |
+| **LongCat**   | Għotja ta' darba ta' 10M token                                                            | LongCat 2.0                | API key + KYC; pay-as-you-go wara l-għotja                                |
+| **Vertex AI** | Kreditu ta 'reġistrazzjoni ta' $300 rappreżentat bħala tokens ~ 300M fil-mudell tal-baġit | Gemini u mudelli msieħba   | Google Cloud account; japplikaw ir-regoli tal-kontijiet u tal-eliġibilità |
 
-### Aċċess Limitat Ieħor
+### Aċċess Limitat ieħor
 
-Dawn il-fornituri għandhom **livelli bla ħlas** b’limiti speċifiċi:
+Dawn il-fornituri għandhom** saffi b'xejn** b'limiti speċifiċi:
 
-| Fornitur                   | Limitu Bla Ħlas                                                                                      | Mudelli                              | L-Aħjar Għal |
-| -------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------ |
-| **GitHub Models**          | Il-ġabra kondiviża awditjata hija stmata għal ~18M token fix-xahar                                   | Evalwazzjoni wiesgħa ta’ mudelli     |
-| **Hugging Face**           | Ġabra rikorrenti żgħira ta’ kull xahar                                                               | Esperimenti u varjetà ta’ mudelli    |
-| **OpenRouter free models** | Ġabra kondiviża b’limitu fuq it-talbiet; żieda fakultattiva ta’ darba żżid l-allokazzjoni rikorrenti | Katalgu wiesa’ ta’ riżerva           |
-| **AI Horde**               | Kapaċità komunitarja mingħajr ċavetta; id-disponibbiltà tvarja                                       | Inferenza distribwita opportunistika |
-
----
-
-## Kif Tgħaqqad il-Livelli Bla Ħlas
-
-Il-vantaġġ ta’ OmniRoute huwa li **jgħaqqad diversi livelli bla ħlas**. Minflok tiddependi fuq fornitur wieħed, tqabbad diversi fornituri bla ħlas u tħalli lil OmniRoute jagħżel awtomatikament l-aħjar wieħed għal kull talba.
-
-### Eżempju: Kopertura Usa’ tal-Livelli Bla Ħlas
-
-Qabbad diversi fornituri biex tnaqqas id-dipendenza fuq kwota waħda:
-
-1. **Gemini** — kwota rikorrenti permezz taċ-ċavetta tal-API
-2. **Groq** — kwota rikorrenti permezz taċ-ċavetta tal-API
-3. **Pollinations** — aċċess mingħajr ċavetta, b’limitu fuq ir-rata
-4. **LongCat** — għotja ta’ darba mar-reġistrazzjoni (teħtieġ KYC)
-
-Imbagħad uża `model: "auto"` u OmniRoute:
-
-- L-ewwel jipprova l-konnessjoni eliġibbli bl-ogħla klassifikazzjoni
-- Jekk il-kwota jew il-kontroll tas-saħħa tagħha jfallu → jipprova l-fornitur ikkonfigurat li jmiss
-- Jekk il-fornitur mingħajr ċavetta ma jkunx disponibbli → ikompli bil-miri li jifdal
-- Jekk l-ebda konnessjoni eliġibbli ma tirnexxi → jirritorna żball; il-krediti tar-reġistrazzjoni jistgħu jintużaw biss sakemm ikunu validi u disponibbli
-
-**Riżultat**: kopertura usa’ tal-livelli bla ħlas b’alternattiva awtomatika — mhux garanzija ta’ kapaċità bla limitu.
+| Fornitur                      | Limitu Ħieles                                                                                  | Mudelli                          | Aħjar Għal |
+| ----------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------- | ---------- |
+| **GitHub Mudelli**            | Awditjati shared pool estimi ~ 18M tokens/month                                                | Evalwazzjoni wiesgħa tal-mudell  |
+| **Wiċċ tgħanniq**             | Grupp żgħir ta' kull xahar rikorrenti                                                          | Esperimenti u varjetà ta 'mudell |
+| **OpenRouter mudelli b'xejn** | Pool limitat għal talba kondiviża; it-top-up ta' darba fakultattiv iżid l-allowance rikorrenti | Katalgu ta' riżerva wiesa'       |
+| **AI Horde**                  | Kapaċità tal-komunità mingħajr ċavetta; disponibbiltà tvarja                                   | Inferenza mqassma opportunistika |
 
 ---
 
-## Kif Tikkonnettja Fornituri Bla Ħlas
+## Kif Munzell Livelli Ħieles
+
+The magic of OmniRoute is** stivar saffi ħielsa** . Minflok ma tiddependi fuq fornitur wieħed, tikkonnettja fornituri multipli b'xejn u tħalli OmniRoute jagħżel awtomatikament l-aħjar wieħed għal kull talba.
+
+### Eżempju: Kopertura Wiesgħa tal-Livell Ħieles
+
+Qabbad diversi fornituri biex tnaqqas id-dipendenza fuq kwalunkwe kwota waħda:
+
+1. **Gemini** — kwota rikorrenti API-key
+2. **Groq** — kwota rikorrenti API-key
+3. **Pollinazzjonijiet** — bla ċavetta, aċċess limitat b'rata
+4. **LongCat** Għotja ta' reġistrazzjoni ta' darba — (jeħtieġ KYC)
+
+Imbagħad uża `model: "auto"` u OmniRoute se:
+
+- Ipprova l-ewwel konnessjoni eliġibbli fl-ogħla livell
+- Jekk il-kwota jew il-kontroll tas-saħħa tiegħu jfallu → ipprova l-fornitur konfigurat li jmiss
+- Jekk il-fornitur bla ċavetta ma jkunx disponibbli → kompli permezz tal-miri li fadal
+- Jekk l-ebda konnessjoni eliġibbli ma tirnexxi → lura żball; il-krediti ta' reġistrazzjoni jistgħu jintużaw biss meta jkunu validi u disponibbli
+
+**Riżultat** : kopertura usa' b'livell ħieles b'riżerva awtomatiku — mhux garanzija ta' kapaċità illimitata.
+
+---
+
+## Kif Tqabbad Fornituri Ħieles
 
 ### Pass 1: Iftaħ id-Dashboard
 
-Mur fuq `http://localhost:20128` fil-brawżer tiegħek.
+Mur `http://localhost:20128` fil-browser tiegħek.
 
-### Pass 2: Mur fuq Providers
+### Pass 2: Mur għand Fornituri
 
-Ikklikkja **Providers** fil-sidebar.
+Ikklikkja** Fornituri** fil-sidebar.
 
-### Pass 3: Ikklikkja Add Provider
+### Pass 3: Ikklikkja Żid Fornitur
 
-Ikklikkja l-buttuna **+ Add Provider**.
+Ikklikkja l-**+ Żid Provider** buttuna.
 
-### Pass 4: Agħżel Fornitur Bla Ħlas
+### Pass 4: Agħżel Fornitur Ħieles
 
-Ibbrawżja l-katalgu u eżamina l-metadata attwali ta’ kull fornitur dwar `hasFree`, l-awtentikazzjoni, il-kwota, il-privatezza,
-u t-ToS. Il-kard tal-fornitur u r-
-[Referenza tal-Pjani Bla Ħlas](../reference/FREE_TIERS.md) jiddistingwu bejn riżorsi rikorrenti,
-aċċess bla limitu/bla ċavetta, krediti mar-reġistrazzjoni, entrati li twaqqfu, u sorsi b’riskju ogħla.
+Ibbrawżja l-katalgu u spezzjona `hasFree`, l-awth, il-kwota, il-privatezza u l-metadata ToS attwali ta’ kull fornitur. Il-karta tal-fornitur u r- [Referenza tal-Livelli Ħieles](../reference/FREE_TIERS.md) jiddistingwu pools rikorrenti, aċċess uncapped/keyless, krediti ta’ reġistrazzjoni, entrati li ma tkomplewx, u sorsi ta’ riskju ogħla.
 
 ### Pass 5: Ikklikkja Connect
 
-Għal fornitur `NOAUTH`, OmniRoute ma jitlobx kredenzjali tas-servizz upstream. Dan ma jiggarantixxix li s-servizz upstream jaċċetta klijenti ta’ partijiet terzi jew li għandu kapaċità disponibbli. Fornituri OAuth u dawk b’API key għandhom jiġu kkonnettjati permezz tal-proċess dokumentat tal-kont tagħhom. Il-klijent tiegħek xorta juża l-API key ta’ OmniRoute murija f’**Dashboard → Endpoints** meta l-awtentikazzjoni tar-router tkun attivata.
+Għal fornitur `NOAUTH`, OmniRoute ma jitlobx kredenzjali upstream. Dan ma jiggarantixxix li l-upstream jaċċetta klijenti ta' partijiet terzi jew ikollu kapaċità disponibbli. Il-fornituri OAuth u API-key għandhom ikunu konnessi permezz tal-fluss tal-kont dokumentat tagħhom. Il-klijent tiegħek għadu juża ċavetta OmniRoute API maħluqa fi** Dashboard → API Keys** (jintwera darba biss, fil-ħolqien) meta l-awtentikazzjoni tar-router tkun attivata.
 
 ### Pass 6: Irrepeti
 
-Ikkonnettja diversi fornituri li t-termini u l-mudell tal-privatezza tagħhom jaqblu mal-każ tal-użu tiegħek.
+Qabbad diversi fornituri li t-termini u l-mudell tal-privatezza tagħhom jaqblu mal-każ tal-użu tiegħek.
 
 ---
 
-## Kif Taqra l-Katalgu B'mod Korrett
+## Ġej Minn dsh "Il-Mudell Ħieles Tagħna"
 
-- `NOAUTH` tfisser li OmniRoute ma titolbokx kredenzjali ta' fornitur; ma
-  tiggarantixxix disponibbiltà kontinwa, privatezza, jew kapaċità bla limitu.
-- `hasFree` hija metadata għall-iskoperta. Tista' tirrappreżenta kwota rikorrenti, aċċess mingħajr ċavetta,
-  kreditu mar-reġistrazzjoni, programm ta' approvazzjoni, jew promozzjoni.
-- `recurring-uncapped` tfisser li ma kien disponibbli l-ebda limitu ppubblikat ta' tokens; xorta japplikaw il-limiti tar-rata u
-  tal-konkorrenza.
-- `one-time-initial` ma terġax tiġġedded wara li tintuża l-għotja tar-reġistrazzjoni.
-- Il-fornituri b'`tos: avoid` huma esklużi mir-routing awtomatiku b'mod awtomatiku (`excludeTosAvoid`). Il-konnessjoni ta' kont ma taqbiżx dan il-filtru. Kwalunkwe eċċezzjoni minn operatur għandha ssir wara rieżami tat-termini tal-fornitur u tar-riskju tal-kont.
-- L-entrati mmarkati `discontinued` jibqgħu bħala evidenza storika u ma għandhomx jiġu ppreżentati bħala
-  attwalment bla ħlas.
+Il-plugin [dsh-our-free-mudell](https://github.com/Ebony-Vinyl/dsh-our-free-model) għall-ospitant tal-aġent dsh jilħaq żewġ upstreams. OmniRoute diġà għandu fornitur għal kull wieħed, iżda wieħed biss minnhom huwa passaġġ ħieles OmniRoute:
+
+| Korsija tal-plugin | Upstream                                    | OmniRoute provider          | Free in OmniRoute? | Kif tikkonnettja                                                                      |
+| ------------------ | ------------------------------------------- | --------------------------- | ------------------ | ------------------------------------------------------------------------------------- |
+| Kilo kanal         | Kilo AI gateway (`api.kilo.ai/api/gateway`) | `kilo-gateway` (alias `kg`) | Iva                | API key fakultattiva: ħalliha vojta biex tuża l-pool b'xejn tal-gateway               |
+| Korsija ħielsa     | OpenCode Zen (`opencode.ai`)                | `opencode-zen`              | Nru                | Iċ-ċavetta OpenCode API tiegħek stess minn [opencode.ai/zen](https://opencode.ai/zen) |
+
+**Kilo.** Ċempel il-pool b'xejn bħala `kilo-gateway/<model>` jew `kg/<model>`, pereżempju `kg/kilo-auto/free` (l-awto-router b'xejn ta' Kilo) jew wieħed mill-mudelli `:free` tal-gateway. Is-sett ħieles idur; `kilo-gateway` jgħaddi minn mudelli ids li mhumiex fil-lista integrata ta' OmniRoute, għalhekk mudell li jelenka l-portal illum jista' jissejjaħ qabel ma l-katalgu jinkludih. Il-karti tal-mudell b'xejn ta' Kilo jgħidu li l-prompts jistgħu jiġu illoggjati mill-fornitur upstream u użati biex itejbu s-servizzi tiegħu, għalhekk ma tibgħatx data sensittiva.
+
+**OpenCode.** Il-korsija ħielsa tal-plugin hija l-offerta mingħajr ċavetta ta' OpenCode. OmniRoute ma jipprovdix dik l-offerta bħala aċċess bla ħlas:
+
+- Il-fornitur OpenCode bla ċavetta ta'OmniRoute tneħħa fuq talba tal-operatur ta' OpenCode(ara [Fornituri Mneħħija](../reference/REMOVED_PROVIDERS.md) ).
+- [Id-dokumentazzjoni tal-endpoint](https://opencode.ai/v2/docs/console/models/#endpoints) ta'OpenCode torbot l-offerti taċ-chat b'xejn tagħha mal-klijent ta' OpenCode stess, u għalhekk OmniRoute ma jgħoddx jew badge minnhom bħala ħielsa.
+
+L-ids tal-mudell li juri l-plugin, bħal `deepseek-v4.1-flash-free`, `mimo-v2.6-flash-free` u `nemotron-3.5-lightning-free`, jinsabu fil-katalgu `opencode-zen`. Qabbad `opencode-zen` maċ-ċavetta OpenCode tiegħek stess biex tużahom taħt it-termini tal-kont OpenCode tiegħek.
+
+**Il-port lokali tal-plugin.** Il-plugin jista’ jesponi l-mudelli tiegħu fuq port lokali kompatibbli ma’ OpenAI (default `18899`). Kwalunkwe endpoint bħal dan jista 'jiġi miżjud bħala [fornitur kompatibbli mal-OpenAI tad-dwana](../guides/USER_GUIDE.md#custom-openai-compatible-providers), iżda OmniRoute ma jinstallax, jibda jew jaġġorna l-plugin, u l-plugin jiddeċiedi liema upstream jaqdi kull talba. Ir-restrizzjonijiet OpenCode hawn fuq japplikaw għall-offerta ta' OpenCode ikun liema klijent jibgħat it-talba.
 
 ---
 
-## Kif OmniRoute Jittejjeb il-Livelli Bla Ħlas
+## Qari tal-Katalgu B'mod Korrett
 
-### 1. Alternattiva Awtomatika
+- `NOAUTH` ifisser li OmniRoute ma jitlobx kredenzjali tal-fornitur; ma jiggarantixxix uptime, privatezza, jew kapaċità illimitata.
+- `hasFree` hija metadata ta' skoperta. Jista' jirrappreżenta kwota rikorrenti, aċċess bla ċavetta, kreditu ta' reġistrazzjoni, programm ta' approvazzjoni jew promozzjoni.
+- `recurring-uncapped` tfisser l-ebda limitu token ippubblikat ma kien disponibbli; limiti tar-rata u tal-konkorrenza għadhom japplikaw.
+- `one-time-initial` ma tirrepetix wara li l-għotja tas-signup tiġi kkunsmata.
+- Il-fornituri `tos: avoid` huma esklużi mir-rotot awtomatiku b’mod awtomatiku (`excludeTosAvoid`). Il-konnessjoni ta' kont ma tevitax dan il-filtru. Kwalunkwe tneħħija ta' operatur għandha ssegwi reviżjoni tat-termini tal-fornitur u tar-riskju tal-kont.
+- L-entrati mmarkati `discontinued` jibqgħu evidenza storika u m’għandhomx jiġu ppreżentati bħala ħielsa bħalissa.
 
-Jekk fornitur bla ħlas ikun okkupat jew mhux disponibbli, OmniRoute awtomatikament jipprova lil dak li jmiss. M’għandek bżonn tagħmel xejn.
+---
+
+## Kif OmniRoute Jagħmel Tiers Ħieles Aħjar
+
+### 1. Fallback awtomatiku
+
+Jekk fornitur wieħed b'xejn ikun okkupat jew imniżżel, OmniRoute awtomatikament jipprova dak li jmiss. M'għandek bżonn tagħmel xejn.
 
 ### 2. Rotot Intelliġenti
 
-OmniRoute jagħżel l-**aħjar fornitur bla ħlas** għal kull talba abbażi ta’:
+OmniRoute jagħżel il** l-aħjar fornitur b'xejn** għal kull talba bbażata fuq:
 
-- Veloċità — Liema fornitur huwa l-aktar veloċi bħalissa?
+- Veloċità — Liema fornitur huwa l-aktar mgħaġġel bħalissa?
 - Kwalità — Liema fornitur huwa l-aħjar għal dan il-kompitu?
-- Kapaċità — Liema fornitur fadallu kwota?
+- Kapaċità — Liema fornitur fadal kwota?
 
-### 3. Iffrankar tat-Tokens
+### 3. Iffrankar tat-Token
 
-Il-pipeline tal-kompressjoni ta’ OmniRoute jista’ jnaqqas it-tokens eliġibbli tal-prompt u tal-output tal-għodod. L-
-iffrankar effettiv jiddependi mill-kontenut, mill-engines magħżula, mill-kontabbiltà tal-fornitur, u mis-settings
-tal-fedeltà; il-kompressjoni ma timmultiplikax kull kwota tal-fornitur b’ammont fiss.
+Il-pipeline tal-kompressjoni ta 'OmniRoute jista' jnaqqas it-tokens eliġibbli fil-pront u l-output tal-għodda. L-iffrankar attwali jiddependi fuq il-kontenut, il-magni magħżula, il-kontabilità tal-fornitur, u l-issettjar tal-fedeltà; il-kompressjoni ma timmultiplikax kull kwota tal-fornitur b'ammont fiss.
 
-### 4. Appoġġ għal Diversi Kontijiet
+### 4. Appoġġ Multi-Kont
 
-Jekk it-termini tal-fornitur jippermettu diversi kontijiet jew kredenzjali, OmniRoute jista’ jittratta kull
-konnessjoni bħala kandidat separat għar-rotot. Toħloqx kontijiet addizzjonali biex tevita
-l-kwota jew il-politika tal-aċċess ta’ fornitur.
+Jekk it-termini tal-fornitur jippermettu kontijiet jew kredenzjali multipli, OmniRoute jista' jittratta kull konnessjoni bħala kandidat ta' rotta separat. Toħloqx kontijiet żejda biex tevadi l-kwota jew il-politika ta’ aċċess ta’ fornitur.
 
 ---
 
-## Kalkolu tal-Livell Bla Ħlas
+## Matematika tal-Livell Ħieles
 
-Il-katalgu attiv, bid-duplikati tal-pools eliminati, bħalissa jirrapporta:
+Il-katalgu ħaj, deduplikat mill-pool bħalissa jirrapporta:
 
-| Metrika                                     |  Valur attwali awditjat | Interpretazzjoni                                                                        |
-| ------------------------------------------- | ----------------------: | --------------------------------------------------------------------------------------- |
-| Għotja rikorrenti kkwantifikata             | **~1.62B tokens/xahar** | Il-pools kondiviżi jingħaddu darba; il-fornituri mingħajr limitu huma esklużi mis-somma |
-| L-ewwel xahar b’għotjiet ta’ reġistrazzjoni |       **~2.22B tokens** | It-total rikorrenti flimkien ma’ krediti ta’ darba u rikorrenti                         |
+| Metriku                                     |           Valur kurrenti awditjat | Interpretazzjoni                                                         |
+| ------------------------------------------- | --------------------------------: | ------------------------------------------------------------------------ |
+| Għotja kwantifikata rikorrenti              |     **~ 90M b'xejn tokens/month** | Pools maqsuma magħduda darba; jeskludi fornituri mhux limitati mis-somma |
+| L-ewwel xahar b'għotjiet ta' reġistrazzjoni | **~ 153M fl-ewwel xahar tieghek** | Total rikorrenti flimkien ma' krediti ta' darba u rikorrenti             |
 
-Dawn huma stimi għall-katalgu kollu mifruxa fuq kontijiet eliġibbli separati, mhux kwota pprovduta minn OmniRoute jew tbassir għal installazzjoni ġdida. Il-kapaċità li tista’ tuża tiddependi mill-fornituri li tqabbad u mill-kundizzjonijiet attwali tagħhom. Il-valuri jiġu kkalkolati minn `open-sse/config/freeModelCatalog.ts`; ara r-
-[Referenza tal-Livelli Bla Ħlas](../reference/FREE_TIERS.md) għad-deduplikazzjoni tal-pools, il-markaturi tat-ToS,
-l-entrati li twaqqfu, u l-metodoloġija tal-krediti ta’ reġistrazzjoni.
+Dawn huma stimi mal-katalgu kollu fuq kontijiet eliġibbli separati, mhux allowance fornuta minn OmniRoute jew tbassir għal installazzjoni ġdida. Il-kapaċità użabbli tiegħek tiddependi fuq il-fornituri li tikkonnettja u l-kundizzjonijiet attwali tagħhom. Il-valuri huma kkalkulati minn `open-sse/config/freeModelCatalog.ts`; ara r [-Referenza tal-Livelli Ħieles](../reference/FREE_TIERS.md) għad-deduplikazzjoni tal-pool, bnadar ToS, entrati li ma tkomplewx, u metodoloġija ta' reġistrazzjoni ta' kreditu.
 
 ---
 
 ## Mistoqsijiet Komuni
 
-### "Dan verament bla ħlas?"
+### "Dan huwa verament b'xejn?"
 
-Il-katalgu jirreġistra t-termini ppubblikati mill-fornituri u r-riċerka tal-proġett, iżda l-offerti jistgħu jinbidlu.
-Ivverifika l-prezzijiet, il-kwota, il-politika tal-privatezza u l-eliġibbiltà attwali tal-fornitur qabel l-użu.
+Il-katalgu jirreġistra termini ppubblikati mill-fornitur u riċerka tal-proġett, iżda l-offerti jistgħu jinbidlu. Ivverifika l-prezz kurrenti, il-kwota, il-politika tal-privatezza u l-eliġibilità tal-fornitur qabel l-użu.
 
-### "Il-livell bla ħlas se jispiċċa?"
+### "Se jispiċċaw il-livell ħieles?"
 
-Kull fornitur jista’ jimponi limitu fuq ir-rata, jibdel il-mudelli, jissospendi l-aċċess jew jieqaf jopera. Aktar minn
-konnessjoni waħda ttejjeb il-kopertura alternattiva, iżda ma tiggarantixxi rotta bla ħlas disponibbli.
+Kull fornitur jista' jillimita r-rata, ibiddel il-mudelli, jissospendi l-aċċess, jew imur offline. Konnessjonijiet multipli jtejbu l-kopertura ta’ riżerva iżda ma jiggarantixxux rotta b’xejn disponibbli.
 
-### "Nista’ nuża fornituri bla ħlas fil-produzzjoni?"
+### "Nista 'nuża fornituri b'xejn għall-produzzjoni?"
 
-Biss jekk l-SLA, l-immaniġġjar tad-data, il-limiti u t-termini tal-fornitur jissodisfaw ir-rekwiżiti
-tal-produzzjoni tiegħek. Il-volumi tax-xogħol kritiċi għandu jkollhom alternattiva mmonitorjata u kuntrattwalment xierqa.
+Biss jekk iż SLA tal-fornitur, l-immaniġġjar tad-dejta, il-limiti u t-termini jissodisfaw ir-rekwiżiti tal-produzzjoni tiegħek. Il-piżijiet ta' xogħol kritiċi għandhom ikunu mmonitorjati, riżerva xierqa kuntrattwalment.
 
-### "X’inhi l-kundizzjoni moħbija?"
+### "X'inhi l-qabda?"
 
-Il-kompromessi jistgħu jinkludu limiti stretti, listi ta’ stennija, KYC, verifika b’karta ta’ kreditu, taħriġ fuq
-il-prompts, privatezza aktar dgħajfa, nuqqas ta’ SLA, tibdil frekwenti fil-mudelli, restrizzjonijiet ġeografiċi, użu żejjed bi ħlas jew
-riskju marbut mal-politika tal-kont. OmniRoute juri l-metadata disponibbli; int tagħżel x’tattiva.
+Il-kompromessi jistgħu jinkludu limiti stretti, listi ta' stennija, KYC, verifika ta' karta ta' kreditu, taħriġ fuq prompts, privatezza aktar dgħajfa, ebda SLA, ċaqliq ta' mudell, restrizzjonijiet ġeografiċi, ħlas żejjed jew riskju tal-politika tal-kont. OmniRoute jiffaċċa l-metadata disponibbli; inti tagħżel dak li tippermetti.
 
-### "Kif nista’ nikseb aktar kwota bla ħlas?"
+### "Kif nista 'nikseb aktar kwota b'xejn?"
 
-1. Qabbad aktar fornituri bla ħlas
-2. Attiva magni tal-kompressjoni xierqa u kejjel l-iffrankar għall-volum tax-xogħol tiegħek
-3. Uża `auto/cheap` biex tagħti prijorità lill-fornituri bla ħlas/irħas
-4. Żid fornituri jew kredenzjali permessi oħra mingħajr ma tikser it-termini tal-fornitur
+1. Qabbad aktar fornituri b'xejn
+2. Ippermetti magni tal-kompressjoni xierqa u kejjel l-iffrankar għall-ammont tax-xogħol tiegħek
+3. Uża `auto/cheap` biex tagħti prijorità lill-fornituri free/cheap
+4. Żid fornituri jew kredenzjali permessi addizzjonali mingħajr ma tikser it-termini tal-fornitur
 
-### "Il-fornituri bla ħlas għandhom kwalità agħar?"
+### "Il-fornituri b'xejn għandhom kwalità agħar?"
 
-Mhux neċessarjament. Xi fornituri joffru l-istess familji ta’ mudelli disponibbli permezz ta’ rotot
-bi ħlas, iżda l-limiti, il-latenza, il-privatezza, l-affidabbiltà u l-verżjonijiet tal-mudelli jistgħu jvarjaw. Uża l-
-paġna tal-Klassifikazzjonijiet tal-Fornituri Bla Ħlas bħala indikatur tal-kwalità u vverifika l-mudell li fil-fatt qed jiġi pprovdut.
+Mhux bilfors. Xi fornituri jesponu l-istess familji mudell disponibbli permezz ta 'rotot imħallsa, iżda limiti, latency, privatezza, affidabilità, u verżjonijiet tal-mudelli jistgħu jvarjaw. Uża l-paġna tal-Klassifikazzjonijiet tal-Fornituri Ħieles bħala sinjal ta' kwalità u vverifika l-mudell attwali moqdi.
 
 ---
 
-## X'Imiss?
+## X'hemm Li jmiss?
 
-- **[Gwida għall-Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Ħalli lil OmniRoute jagħżel l-aħjar AI għalik
+- **[Gwida Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Ħalli OmniRoute jagħżel l-aħjar AI għalik
 - **[Gwida għall-Fornituri](./PROVIDERS-GUIDE.md)** — Qabbad aktar fornituri
-- **[Soluzzjoni tal-Problemi](../guides/TROUBLESHOOTING.md)** — Irranġa problemi komuni
-- **[Referenza għal-Livelli Bla Ħlas](../reference/FREE_TIERS.md)** — Lista sħiħa tal-livelli bla ħlas
+- **[Issolvi l-problemi](../guides/TROUBLESHOOTING.md)** — Waħħal kwistjonijiet komuni
+- **[Referenza tal-Livelli Ħieles](../reference/FREE_TIERS.md)** — Lista sħiħa ta' livelli b'xejn

@@ -13,12 +13,12 @@ Agent Skills — tashqi agentlar, MCP mijozlari va A2A orkestratorlariga OmniRou
 
 ## Umumiy koʻrinish
 
-Katalogda **45 ta Agent Skill** mavjud (23 ta REST API + 21 ta CLI + 1 ta konfiguratsiya ish jarayoni). Har bir skill quyidagilarga ega:
+Katalog o'z ichiga oladi** 45 Agent mahorati** (23 REST API + 21 CLI + 1 konfiguratsiya ish jarayoni). Har bir mahorat bor:
 
-- **Kanonik ID** (`omni-auth`, `cli-serve` va hokazo)
-- `skills/{id}/SKILL.md` ichidagi YAML frontmatter (`name`, `description`) + batafsil markdown mazmuniga ega **SKILL.md** fayli
-- OpenAPI spetsifikatsiyasi va CLI reyestridan olingan **REST endpointlari** (API skill’lari) yoki **CLI quyi buyruqlari** (CLI skill’lari)
-- Jonli yuklab olish uchun **GitHub raw URL manzili**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanonik ID** (`omni-auth`, `cli-serve` va boshqalar)
+- A**SKILL.md** `skills/{id}/SKILL.md` ichida YAML frontmatter (`name`, `description`) + rich markdown body bilan fayl
+- **REST oxirgi nuqtalari** (API ko'nikmalari) yoki**CLI pastki buyruqlari** (CLI malakalari) OpenAPI spec va CLI registridan olingan
+- A**GitHub xom URL** jonli yuklash uchun: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Generator javobi `GeneratorReport` hisoblanadi:
 
 ---
 
-## Qamrov API’si
+## API qamrovi
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

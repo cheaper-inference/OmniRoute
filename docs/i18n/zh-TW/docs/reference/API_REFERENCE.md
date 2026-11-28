@@ -67,31 +67,32 @@ Content-Type: application/json
 
 ### 自訂標頭
 
-| Header                   | Direction | Description                                                                                                                                                   |
-| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Request   | 設為 `true` 以略過快取                                                                                                                                        |
-| `x-omniroute-no-memory`  | Request   | 設為 `true` 以略過此請求的記憶 + 技能注入（與 no-cache 相同；避免每次呼叫的權杖／成本額外負擔）                                                               |
-| `X-OmniRoute-Progress`   | Request   | 設為 `true` 以啟用進度事件                                                                                                                                    |
-| `X-Session-Id`           | Request   | 用於外部工作階段親和性的黏著工作階段金鑰                                                                                                                      |
-| `x_session_id`           | Request   | 也接受底線變體（直接 HTTP）                                                                                                                                   |
-| `X-OmniRoute-Session-Id` | Request   | 呼叫端提供的工作階段／對話標籤（也會饋送至記憶體）。提供時，會原樣持久化至 `call_logs.session_tag`，用於每個工作階段的成本歸屬（#8249）— 未提供時絕不自動產生 |
-| `Idempotency-Key`        | Request   | 去重金鑰（5 秒視窗）                                                                                                                                          |
-| `X-Request-Id`           | Request   | 替代去重金鑰                                                                                                                                                  |
-| `x-omniroute-connection` | Request   | 依其 ID 將單一模型請求固定至一個提供者連線（帳戶）— 請參閱[每個請求的帳戶固定](#account-pinning-per-request)                                                  |
-| `X-OmniRoute-Cache`      | Response  | `HIT` 或 `MISS`（非串流）                                                                                                                                     |
-| `X-OmniRoute-Idempotent` | Response  | 若已去重則為 `true`                                                                                                                                           |
-| `X-OmniRoute-Progress`   | Response  | 若已啟用進度追蹤則為 `enabled`                                                                                                                                |
-| `X-OmniRoute-Session-Id` | Response  | OmniRoute 使用的有效工作階段 ID                                                                                                                               |
-| `X-OmniRoute-Request-Id` | Response  | 請求關聯 ID（若已知）                                                                                                                                         |
-| `X-OmniRoute-Version`    | Response  | OmniRoute 建置版本（始終存在）                                                                                                                                |
-| `X-OmniRoute-Cost-Saved` | Response  | 快取在命中時避免的美元成本（僅限快取命中）                                                                                                                    |
-| `X-OmniRoute-Decision`   | Response  | 路由追蹤：`strategy=<name>; provider=<alias>; latency_ms=<n>`（`<name>` 是組合策略；對於非組合請求則為 `single`）— 完成回應中始終存在                         |
+| 標頭                     | 方向 | 描述                                                                                                                                                                                                                                                   |
+| ------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `X-OmniRoute-No-Cache`   | 要求 | 設定為`true`以繞過快取                                                                                                                                                                                                                                 |
+| `x-omniroute-no-memory`  | 要求 | Set to `true` to skip memory + skills injection for this request (mirrors no-cache; avoids the per-call token/cost overhead)                                                                                                                           |
+| `x-omniroute-no-log`     | 要求 | 設定為`true`省略此推理請求的呼叫日誌中的request/response有效負載（所有聊天系列路由：聊天完成、回應、訊息、完成、 Gemini）。時間戳、模型、狀態、持續時間和令牌計數仍被記錄。与`x-omniroute-no-memory`和`x-omniroute-no-cache`结合使用以选择退出完整内容 |
+| `X-OmniRoute-Progress`   | 要求 | 設定為`true`表示進度事件                                                                                                                                                                                                                               |
+| `X-Session-Id`           | 要求 | 用於外部會話關聯的黏性會話金鑰                                                                                                                                                                                                                         |
+| `x_session_id`           | 要求 | 也接受下劃線變體（直接HTTP）                                                                                                                                                                                                                           |
+| `X-OmniRoute-Session-Id` | 要求 | Caller-supplied session/conversation tag (also feeds memory). When present, persisted verbatim to `call_logs.session_tag` for per-session cost attribution (#8249) — never synthesized when absent                                                     |
+| `Idempotency-Key`        | 要求 | 重複資料刪除金鑰（5 秒視窗）                                                                                                                                                                                                                           |
+| `X-Request-Id`           | 要求 | 替代重複資料刪除金鑰                                                                                                                                                                                                                                   |
+| `x-omniroute-connection` | 要求 | Pin a single-model request to one provider connection (account) by its id — see [Account pinning per request](#account-pinning-per-request)                                                                                                            |
+| `X-OmniRoute-Cache`      | 回覆 | `HIT`或`MISS` （非串流）                                                                                                                                                                                                                               |
+| `X-OmniRoute-Idempotent` | 回覆 | `true`如果已進行重複資料刪除                                                                                                                                                                                                                           |
+| `X-OmniRoute-Progress`   | 回覆 | `enabled`如果進度追蹤開啟                                                                                                                                                                                                                              |
+| `X-OmniRoute-Session-Id` | 回覆 | OmniRoute使用的有效會話ID                                                                                                                                                                                                                              |
+| `X-OmniRoute-Request-Id` | 回覆 | 請求相關 ID（已知時）                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Version`    | 回覆 | OmniRoute建置版本（始終存在）                                                                                                                                                                                                                          |
+| `X-OmniRoute-Cost-Saved` | 回覆 | USD在HIT上避免的快取（僅快取命中）                                                                                                                                                                                                                     |
+| `X-OmniRoute-Decision`   | 回覆 | 路由追蹤： `strategy=<name>; provider=<alias>; latency_ms=<n>` （`<name>`是組合策略，或`single`表示非組合請求） —總是出現在完成回應中                                                                                                                  |
 
-> Nginx 注意事項：如果依賴底線標頭（例如 `x_session_id`），請啟用 `underscores_in_headers on;`。
+> Nginx 注意：如果您依賴底線標頭（例如`x_session_id`），請啟用`underscores_in_headers on;`。
 
-#### 每個請求的帳戶固定
+#### 根據請求固定帳戶
 
-當提供者有多個連線（帳戶或金鑰）時，OmniRoute 通常會透過其帳戶選擇策略來選取其中一個。請求也可以改用 `x-omniroute-connection` 標頭固定至特定連線：
+當提供者有多個連線（帳戶或金鑰）時， OmniRoute通常會透過其帳戶選擇策略選擇一個。請求可以使用`x-omniroute-connection`標頭固定一個特定連線：
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -101,16 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **在哪裡尋找 id。** 在儀表板中開啟提供者頁面
-  （**Dashboard → Providers → <provider>**），然後點擊連線列上的 `xxxxxxxx…` id 晶片 — 系統會複製完整的連線 id。
-- **哪些請求會遵循它。** `/v1/chat/completions`、`/v1/messages` 和
-  `/v1/responses` 上的單一模型請求（`provider/model`）。組合請求會忽略此標頭：請透過每個組合步驟自己的連線，為該步驟固定指定帳戶。
-- **固定指定是嚴格限制，而非偏好設定。** 系統只會使用固定的連線。請求內部發生失敗時，會記錄該帳戶的冷卻狀態，但**不會**切換至同一提供者的其他帳戶。
-- **冷卻和配額會解除固定指定。** 當固定的連線正在冷卻、配額已耗盡，或遭配額政策封鎖時，後續請求會改用提供者的其他連線，行為與未固定指定的流量完全相同。
-- **未知或已停用的 id 會導致失敗。** 不在提供者有效連線池中的 id（已刪除、已停用，或屬於其他提供者）會使請求沒有可用帳戶，因此請求會失敗，而不是默默地改路由至其他位置。
+- **Where to find the id.** Open the provider page in the dashboard (**Dashboard → Providers → <provider>**) and click the `xxxxxxxx…` id chip on a connection row — it copies the full connection id.
+- **這要求尊重它。** `/v1/chat/completions`、 `/v1/messages`和`/v1/responses`上的單一模型請求 (`provider/model`)。組合忽略標題：而是透過步驟自己的連線固定每個組合步驟的帳戶。
+- **引腳是嚴格的，不是偏好。**專門使用銷釘連接。請求內的失敗會記錄帳戶的冷卻時間，但不會**不是**輪調到同一提供者的同級帳戶。
+- **冷卻時間和配額釋放引腳。**當固定連接正在冷卻、配額耗盡或被配額策略阻止時，稍後的請求將回落到提供者的其他連接，就像未固定的流量一樣。
+- **未知或停用的 ID 失敗。**不在提供者活動池中的 ID（已刪除、已停用或屬於其他提供者）不會留下符合條件的帳戶，因此請求會失敗，而不是默默地路由到其他地方。
 
-Claude Code 會透過 `ANTHROPIC_CUSTOM_HEADERS` 傳送自訂標頭。請將它放在
-`~/.claude/settings.json` 的 `env` 區塊中，或放在專案層級的 `.claude/settings.json` 中，以便為每個專案固定指定不同的帳戶：
+Claude代碼透過`ANTHROPIC_CUSTOM_HEADERS`發送自訂標頭。將其放在`~/.claude/settings.json`的`env`區塊中，或放在專案級`.claude/settings.json`中以固定每個專案的不同帳戶：
 
 ```jsonc
 {
@@ -122,12 +120,11 @@ Claude Code 會透過 `ANTHROPIC_CUSTOM_HEADERS` 傳送自訂標頭。請將它�
 }
 ```
 
-來源：`src/sse/handlers/chat.ts`（讀取標頭）、`src/sse/services/auth.ts` 和
-`src/sse/services/sessionAffinityPin.ts`（固定指定的解除與從連線池中缺失的檢查）。
+來源： `src/sse/handlers/chat.ts` （標頭讀取）、 `src/sse/services/auth.ts`和`src/sse/services/sessionAffinityPin.ts` （引腳釋放和池中缺失檢查）。
 
-> **成本遙測標頭：** 非串流成功回應也會攜帶 `X-OmniRoute-*` 成本遙測集合 — `X-OmniRoute-Response-Cost`（USD，固定 10 位小數；免費／未定價時為 `0.0000000000`）、`X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`、`X-OmniRoute-Model`、`X-OmniRoute-Provider`、`X-OmniRoute-Latency-Ms`、`X-OmniRoute-Cache-Hit` 和 `X-OmniRoute-Fallback-Attempts`（僅在大於 0 時提供），以及 `X-OmniRoute-Request-Id` 和 `X-OmniRoute-Version`。這些標頭會由聊天完成、`/v1/responses`、`/v1/messages` **以及媒體端點**提供 — `/v1/embeddings`、`/v1/images/generations`、`/v1/audio/speech`、`/v1/audio/transcriptions`、`/v1/rerank`、`/v1/videos/generations`、`/v1/music/generations` 和 `/v1/moderations`（成本一律為 `0`）。媒體成本會在定價可用時依各種模態計算（每張影像、每秒、每個字元、每個搜尋單位），否則為 `0`（失敗開放）。
+> **成本遙測標頭：**非流式成功回應還攜帶`X-OmniRoute-*`成本`X-OmniRoute-Request-Id`集— `X-OmniRoute-Response-Cost` （USD，固定 10 位小數； `0.0000000000`表示free/unpriced）、 `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`、 `X-OmniRoute-Model`、 `X-OmniRoute-Provider`、 `X-OmniRoute-Latency-Ms`、 `X-OmniRoute-Cache-Hit`和`X-OmniRoute-Fallback-Attempts` （僅當> 0 時`X-OmniRoute-Version`，這些是由聊天完成`/v1/responses`、 `/v1/messages`發出的，**和媒體端點**— `/v1/embeddings`、 `/v1/images/generations`、 `/v1/audio/speech`、 `/v1/audio/transcriptions`、 `/v1/rerank`、 `/v1/videos/generations`、 `/v1/music/generations`和`/v1/moderations` （總是花費`0`）。當定價可用時，媒體成本按模式（每圖像、每秒、每字元、每搜尋單元）計算，否則為`0` （失敗開放）。
 
-> **快取命中成本語意：** 在語意快取命中（`X-OmniRoute-Cache-Hit: true`）時，不會發出上游呼叫，因此 `X-OmniRoute-Response-Cost` 為 `0.0000000000`（提供此次命中的**增量**成本）。原始／原本可能產生的成本會另外記錄在 `X-OmniRoute-Cost-Saved` 中。計費消費者應加總 `X-OmniRoute-Response-Cost`（命中不產生成本）；快取分析則可以彙總 `X-OmniRoute-Cost-Saved`。
+> **快取命中成本語意：**在語意快取HIT (`X-OmniRoute-Cache-Hit: true`) 上，沒有進行上游呼叫，因此`X-OmniRoute-Response-Cost`是`0.0000000000` （**增量式**提供命中的成本）。 original/would-have-been成本在`X-OmniRoute-Cost-Saved`中單獨報告。計費消費者應匯總`X-OmniRoute-Response-Cost` （點擊次數無需任何費用）；快取分析可以聚合`X-OmniRoute-Cost-Saved`。
 
 ## 專屬受管理工作階段租約
 
@@ -353,46 +350,30 @@ Content-Type: application/json
 }
 ```
 
-可用的提供者包括 OpenAI（GPT Image 2）、xAI（Grok Image）、Together AI（FLUX）、Fireworks AI、Nebius（FLUX）、Hyperbolic、NanoBanana、**OpenRouter**、**ZenMux**、SD WebUI（本機）、ComfyUI（本機）。
+可用的提供者包括OpenAI (GPT Image 2)、 xAI (Grok Image)、 Together AI (FLUX)、 Fireworks AI、 Nebius (FLUX)、Hyperbolic、 NanoBanana、**OpenRouter** ,**ZenMux** , SD WebUI (local), ComfyUI (local).
 
-`n` 會在 `data[]` 中傳回 `n` 張影像。上游 API 每次呼叫只傳回一張影像的提供者
-（Black Forest Labs、Stability AI、Leonardo、Ideogram、Haiper、Hyperbolic、Magnific/Freepik、
-NVIDIA NIM、Cloudflare Workers AI）會分別進行 `n` 次上游呼叫，同時最多執行 4 次。固定的
-`seed` 會依呼叫索引偏移（`seed`、`seed + 1`、…），因此影像會有所不同，但仍可重現。
-`n` 的上限為 10。如果任何一次呼叫失敗，整個請求就會失敗。扇出格式清單位於
-`open-sse/handlers/imageGeneration/fanOut.ts` 中的 `SINGLE_IMAGE_FANOUT_FORMATS`。
+`n`在`data[]`中返回`n`图像。上游API每次调用返回一张图像的提供者（Black Forest Labs、Stability AI、Leonardo、Ideogram、Haiper、Hyperbolic、 Magnific/Freepik、 NVIDIA NIM、 Cloudflare Workers AI）获得`n`单独的上游调用，最多 4 个正在运行。固定的`seed`透過呼叫索引（`seed`、 `seed + 1`等）進行偏移，因此影像有所不同，但保持可再現。 `n`上限為 10。如果任何呼叫失敗，則請求整體失敗。扇出格式列表是`open-sse/handlers/imageGeneration/fanOut.ts`中的`SINGLE_IMAGE_FANOUT_FORMATS` 。
 
-ZenMux 會重複使用現有的 API 金鑰連線，並接受 `zenmux/` 或 `zm/` 前綴：
+Codex GPT影像模型 (`codex/gpt-image-*`) 只回傳PNG ：即使請求`jpeg`或`webp` ，上游也會用PNG位元組回答`200` 。使用任何其他`output_format` （`webp`、 `jpeg`等）的請求都會被HTTP 400 拒絕，而不是被默默忽略；省略它或發送`png`。 `output_compression`不轉發。
 
-- `zenmux/openai/gpt-image-2` 使用 ZenMux 的 OpenAI Images API。選項包括 `size`、
-  `quality`、`n`、`output_format`、`output_compression`、`background` 和 `response_format`。
-- 其他發布者（例如 `zm/meta/muse-image-1.0`）使用 ZenMux 的 Vertex AI `:predict`
-  端點。`n` 對應至 `sampleCount`，`aspect_ratio` 對應至 `aspectRatio`，而 `image_size`
-  （`1K`、`2K`、`4K`）對應至 `sampleImageSize`。像素 `size` 僅提供外觀比例，
-  不保證像素尺寸。支援的比例、解析度和數量會因模型而異。
-- `zm/inclusionai/ming-image-0.1-design` 會自行選擇尺寸。請省略 `size`、
-  `aspect_ratio` 和 `image_size`；明確指定這些值會傳回 HTTP 400。透過
-  `output_format` 可要求 PNG、JPEG 和 WebP。
+ZenMux重複使用現有的 API 金鑰連接並接受`zenmux/`或`zm/`前綴：
 
-此整合支援文字轉影像生成，不支援參考影像編輯。Vertex 輸出會正規化為
-`data[].b64_json`；`response_format: "url"` 會傳回上游 HTTPS URL，或在只有影像位元組
-可用時傳回 base64 資料 URL。空的／經篩選的輸出會傳回錯誤，而不是空白的成功回應。
-模型存取權取決於 ZenMux 帳戶。請參閱 [ZenMux 的 Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) 和
-[OpenAI 影像 API](https://docs.zenmux.ai/api/openai/generate-an-image)。
+- `zenmux/openai/gpt-image-2`使用ZenMux的OpenAI图像API。選項包括`size`、 `quality`、 `n`、 `output_format`、 `output_compression`、 `background`和`response_format`。
+- 其他發布者（例如`zm/meta/muse-image-1.0`）使用ZenMux的 Vertex AI `:predict`端點。 `n`映射到`sampleCount`， `aspect_ratio`到`aspectRatio`， `image_size` (`1K`, `2K`, `4K`) 映射到`sampleImageSize`。像素`size`僅提供長寬比，不保證像素尺寸。支援的比率、解析度和計數因型號而異。
+- `zm/inclusionai/ming-image-0.1-design`选择自己的维度。省略`size`、 `aspect_ratio`和`image_size`；明確值回傳HTTP 400。可以使用`output_format`请求PNG、 JPEG和WebP 。
 
-Microsoft 365 Copilot 登入連線會透過 Copilot 內建的影像工具提供
-`copilot-m365-web/m365-copilot-image`：每張影像進行一次 Copilot 回合（`n` 為 1–4），
-`size` 僅用於引導方向，影像會以內嵌方式傳回（`b64_json`，或在
-`response_format: "url"` 時傳回資料 URL）。請參閱 [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation)。
+This integration supports text-to-image generation, not reference-image editing. Vertex output is normalized to `data[].b64_json`; `response_format: "url"` returns an upstream HTTPS URL or a base64 data URL when only image bytes are available. Empty/filtered outputs return an error rather than an empty success. Model access depends on the ZenMux account. See [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) and [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Microsoft 365 Copilot登录连接通过Copilot的内置图像工具为`copilot-m365-web/m365-copilot-image`提供服务：每个图像旋转一圈Copilot (`n` 1–4)， `size`仅控制方向，并且内联返回图像（`b64_json`或`response_format: "url"`的数据URL ）。參見[Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) 。
 
 ```bash
-# 列出所有影像模型
+# List all image models
 GET /v1/images/generations
 ```
 
 ---
 
-## 文件 OCR
+## 文件OCR
 
 ```bash
 POST /v1/ocr
@@ -408,17 +389,15 @@ Content-Type: application/json
 }
 ```
 
-`model` 會透過 `provider/model` 前綴選取 OCR 提供者；單獨的模型 ID（例如
-`mistral-ocr-latest`）會解析至其已註冊的提供者，而省略 `model` 時預設使用
-Mistral（`mistral-ocr-latest`）。已註冊的提供者（`open-sse/config/ocrRegistry.ts`）：
+`model`透過`provider/model`前綴選擇OCR提供者；裸模型 ID（例如`mistral-ocr-latest`）解析為其註冊的提供程序，省略的`model`預設為Mistral (`mistral-ocr-latest`)。註冊提供者（`open-sse/config/ocrRegistry.ts`）：
 
-| 提供者 ID                     | 模型 ID              | `model` 值                                                    | 備註                                                                                    |
-| ----------------------------- | -------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest`（或單獨的 `mistral-ocr-latest`） | 同步——回應會直接從單次上游呼叫返回。                                                    |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                   | 非同步上游（`analyze` + 輪詢）——請參閱下文。                                            |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                       | 同步，透過 Vertex AI 的 `openapi/chat/completions` 合作夥伴端點——驗證／URL 請參閱下文。 |
+| 提供者 ID                     | 型號編號               | `model`值                                                 | 筆記                                                                                                                                                                                     |
+| ----------------------------- | ---------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`   | `mistral/mistral-ocr-latest` （或裸`mistral-ocr-latest`） | 同步—回應直接從單一上游呼叫返回。                                                                                                                                                        |
+| `azure-document-intelligence` | `prebuilt-read`        | `azure-document-intelligence/prebuilt-read`               | 非同步上游（`analyze` + poll） —見下文。                                                                                                                                                 |
+| `vertex-deepseek-ocr`         | 自行部署（無內建模型） | `vertex-deepseek-ocr/<your-deployed-model-id>`            | 同步，透過您自己的 Vertex AI Model Garden DeepSeek-OCR 端點（`openapi/chat/completions`形狀）； Google於 2026 年 10 月 21 日 (#20423) 退役了託管`deepseek-ocr-maas` ，因此 id 返回 400。 |
 
-三個提供者都會以相同的 Mistral 結構回應：
+所有三個提供者都在同一個米斯特拉爾形狀的身體中做出回應：
 
 ```json
 {
@@ -428,26 +407,13 @@ Mistral（`mistral-ocr-latest`）。已註冊的提供者（`open-sse/config/ocr
 }
 ```
 
-### Azure Document Intelligence 輪詢流程
+### Azure 文件智慧投票流程
 
-Azure Document Intelligence 的 `analyze` API 是非同步的：初始請求會返回
-`Operation-Location` 標頭，而非本文，且必須輪詢結果。處理常式
-（`open-sse/handlers/ocr.ts`）每秒輪詢該 URL，最多嘗試 30 次；如果輪詢回應不是
-`ok` 或狀態為 `"failed"`，則會立即失敗（不會繼續輪詢）；如果在嘗試次數用盡後操作仍在執行，
-則返回 `504`。最終的 Azure 回應會先正規化為與 Mistral 相同的
-`pages`/`markdown` 結構，再返回給呼叫端，因此用戶端程式碼不需要針對提供者進行特殊處理。
+Azure 文件智慧的`analyze` API是非同步的：初始請求返回`Operation-Location`標頭而不是正文，並且必須輪詢結果。處理程序 (`open-sse/handlers/ocr.ts`) 每秒輪詢URL最多 30 次嘗試，在非`ok`輪詢回應或`"failed"`狀態上快速失敗（不繼續輪詢），如果在嘗試預算耗儘後操作仍在運行，則返回`504` 。最終的 Azure 回應在傳回給呼叫方之前會被標準化為Mistral使用的相同`pages`/`markdown`形狀，因此用戶端程式碼不需要對提供者進行特殊處理。
 
-### Vertex AI DeepSeek OCR 驗證與端點解析
+### Vertex AI DeepSeek OCR驗證與端點解析
 
-`vertex-deepseek-ocr` 會重複使用 OmniRoute 已支援的相同 Vertex AI 驗證機制來處理
-聊天／圖像流量（`open-sse/executors/vertex.ts`）：連線的 API 金鑰可以是服務帳戶 JSON
-憑證（透過 JWT bearer 流程交換為短期 OAuth 存取權杖），也可以是已簽發且直接使用的 OAuth
-存取權杖。上游端點 URL 是 Vertex 的一般
-`openapi/chat/completions` 合作夥伴端點，根據連線的專案和區域建立——明確指定的
-`providerSpecificData.project`／`providerSpecificData.region` 一律優先；否則會從服務帳戶
-JSON 的 `project_id` 推導專案，而區域預設為 `us-central1`。這兩種解析都發生在
-`open-sse/handlers/ocr.ts`（`resolveVertexOcrAccessToken`、`resolveVertexOcrBaseUrl`），
-並由 `src/app/api/v1/ocr/route.ts` 在分派至 `handleOcr` 前使用。
+`vertex-deepseek-ocr`重用OmniRoute已支援chat/image流量 (`open-sse/executors/vertex.ts`) 的相同 Vertex AI驗證：連接的API金鑰是服務帳戶JSON憑證（透過 JWT 承載流交換為短期OAuth存取權杖）或按原樣使用的已鑄造OAuth存取權杖。上游端點URL是 Vertex 的通用`openapi/chat/completions`合作夥伴端點，從連接的項目和區域—構建，顯式`providerSpecificData.project`/`providerSpecificData.region`始終獲勝；否則，該項目源自服務帳戶JSON的`project_id` ，並且區域預設為`us-central1`。兩個解析都發生在`open-sse/handlers/ocr.ts` （`resolveVertexOcrAccessToken`、 `resolveVertexOcrBaseUrl`）中，在分派到`handleOcr`之前由`src/app/api/v1/ocr/route.ts`消耗。
 
 ---
 
@@ -675,95 +641,102 @@ curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
 
 ## 相容性端點
 
-| 方法 | 路徑                                      | 格式                             |
-| ---- | ----------------------------------------- | -------------------------------- |
-| POST | `/v1/chat/completions`                    | OpenAI                           |
-| POST | `/v1/messages`                            | Anthropic                        |
-| POST | `/v1/responses`                           | OpenAI Responses                 |
-| POST | `/v1/embeddings`                          | OpenAI                           |
-| POST | `/v1/images/generations`                  | OpenAI Images                    |
-| POST | `/v1/images/edits`                        | OpenAI Images（編輯／修補）      |
-| POST | `/v1/videos/generations`                  | OpenAI 風格的影片生成            |
-| POST | `/v1/music/generations`                   | OpenAI 風格的音樂生成            |
-| POST | `/v1/audio/transcriptions`                | OpenAI Audio（STT）              |
-| POST | `/v1/audio/speech`                        | OpenAI TTS（回傳音訊內容）       |
-| POST | `/v1/rerank`                              | Cohere／Voyage 風格的重新排序    |
-| POST | `/v1/classify`                            | Jina 分類（`api.jina.ai`）       |
-| POST | `/v1/segment`                             | Jina 分段器（`segment.jina.ai`） |
-| POST | `/v1/moderations`                         | OpenAI Moderations               |
-| GET  | `/v1/models`                              | OpenAI                           |
-| POST | `/v1/models/query`                        | 篩選後的模型短名單               |
-| POST | `/v1/messages/count_tokens`               | Anthropic                        |
-| GET  | `/v1beta/models`                          | Gemini                           |
-| POST | `/v1beta/models/{...path}`                | Gemini generateContent           |
-| POST | `/v1/api/chat`                            | Ollama                           |
-| GET  | `/api/v1/vscode/{token}/`                 | OpenAI 目錄別名                  |
-| GET  | `/api/v1/vscode/{token}/models`           | OpenAI 模型別名                  |
-| POST | `/api/v1/vscode/{token}/chat/completions` | OpenAI 權杖化別名                |
-| POST | `/api/v1/vscode/{token}/responses`        | OpenAI Responses 權杖化別名      |
-| POST | `/api/v1/vscode/{token}/api/chat`         | Ollama 權杖化別名                |
-| GET  | `/api/v1/vscode/{token}/api/tags`         | Ollama 標籤權杖化別名            |
+| 方法 | 小路                                      | 格式                           |
+| ---- | ----------------------------------------- | ------------------------------ |
+| POST | `/v1/chat/completions`                    | OpenAI                         |
+| POST | `/v1/messages`                            | Anthropic                      |
+| POST | `/v1/responses`                           | OpenAI回應                     |
+| POST | `/v1/embeddings`                          | OpenAI                         |
+| POST | `/v1/images/generations`                  | OpenAI圖片                     |
+| POST | `/v1/images/edits`                        | OpenAI圖片 (edit/inpaint)      |
+| POST | `/v1/videos/generations`                  | OpenAI 風格的影片生成          |
+| POST | `/v1/music/generations`                   | OpenAI 風格的音樂生成          |
+| POST | `/v1/audio/transcriptions`                | OpenAI音訊 (STT)               |
+| POST | `/v1/audio/speech`                        | OpenAI TTS （返回音訊主體）    |
+| POST | `/v1/rerank`                              | Cohere/Voyage-style重新排名    |
+| POST | `/v1/classify`                            | 吉納分類 (`api.jina.ai`)       |
+| POST | `/v1/segment`                             | 吉娜分段器 (`segment.jina.ai`) |
+| POST | `/v1/moderations`                         | OpenAI審核                     |
+| POST | `/v1/systemone`                           | 系統一型決策                   |
+| POST | `/v1/decisions`                           | OpenAI決策（母語）             |
+| GET  | `/v1/systemone/models`                    | 決策模型目錄                   |
+| GET  | `/v1/models`                              | OpenAI                         |
+| POST | `/v1/models/query`                        | 篩選後的模型候選名單           |
+| POST | `/v1/messages/count_tokens`               | Anthropic                      |
+| GET  | `/v1beta/models`                          | Gemini                         |
+| POST | `/v1beta/models/{...path}`                | Gemini generateContent         |
+| POST | `/v1/api/chat`                            | Ollama                         |
+| GET  | `/api/v1/vscode/{token}/`                 | OpenAI目錄別名                 |
+| GET  | `/api/v1/vscode/{token}/models`           | OpenAI模型別名                 |
+| POST | `/api/v1/vscode/{token}/chat/completions` | OpenAI標記化別名               |
+| POST | `/api/v1/vscode/{token}/responses`        | OpenAI回應標記化別名           |
+| POST | `/api/v1/vscode/{token}/api/chat`         | Ollama標記化別名               |
+| GET  | `/api/v1/vscode/{token}/api/tags`         | Ollama標籤標記化別名           |
 
-所有 POST 路由都遵循相同的格式：`Bearer your-api-key` + 經 Zod 驗證的 JSON 主體（`v1RerankSchema`、`v1ModerationSchema`、`v1AudioSpeechSchema` 等，請參閱 `src/shared/validation/schemas.ts`）。結構描述驗證失敗時會回傳 4xx。
+所有POST路由都遵循相同的形状： `Bearer your-api-key` + Zod 验证的JSON主体（`v1RerankSchema`、 `v1ModerationSchema`、 `v1AudioSpeechSchema`等，请参阅`src/shared/validation/schemas.ts`）。架構失敗時傳回 4xx。
 
-對於無法附加 `Authorization: Bearer ...` 的用戶端，OmniRoute 也接受透過 URL 傳遞的 API 金鑰，方式包括查詢字串相容性（`?token=...`、`?apiKey=...`、`?api_key=...`、`?key=...`），或使用下方所述的專用 `/api/v1/vscode/{token}/...` 端點。
+對於無法附加`Authorization: Bearer ...`客戶端， OmniRoute也透過查詢字串相容性（`?token=...`、 `?apiKey=...`、 `?api_key=...`、 `?key=...`）或下面記錄的專用`/api/v1/vscode/{token}/...`端點接受URL中的API金鑰。
 
 ```bash
-# 重新排序（雲端註冊表提供者，或以 "<prefix>/<model>" 表示的 OpenAI 相容提供者節點）
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina 分類（Foundation API 憑證）
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina 分段器
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina 搜尋（s.jina.ai；提供者別名：jina-search、jina-ai、jina）
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# 審核
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — 回傳 audio/mpeg（或要求的格式）內容
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS 需要語言和語音：`language` 預設為 "en"；缺少
-# 語音，或使用 OpenAI 預設語音名稱（alloy、nova、…）時，會變成 "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# 圖片編輯（multipart）
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# 影片／音樂生成（以提供者為前綴的模型 ID）
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **重新排序提供者節點：** `POST /v1/rerank` 也會路由至 OpenAI 相容的提供者節點
-> (oMLX、vLLM、Infinity、閘道後的 TEI，……)，其位址格式為 `<node-prefix>/<model>`。迴路
-> 節點 (`localhost`、`127.0.0.1`、`172.16.0.0/12`) 一律符合資格，操作者在
-> `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` 中列出的主機名稱也同樣符合資格 (例如 Docker/Compose 服務名稱，
-> 如 `http://reranker:8080/v1`；這些節點會直接呼叫，絕不透過 `HTTP(S)_PROXY` 或連線固定的
-> Proxy)。位於任何其他主機上的節點 — LAN 電腦或 Tailscale 對等節點 — 只有在操作者啟用
-> `RERANK_REMOTE_PROVIDER_NODES` 功能旗標，**且**節點的基礎 URL 通過提供者對外連線 URL 政策
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) 時才符合資格。
-> 記憶體引擎的重新排序步驟會透過迴路呼叫此路由，因此相同規則也適用於記憶體設定中的
-> `rerankProviderModel`。
+> **重新排列提供者節點：** `POST /v1/rerank`也路由到與 OpenAI 相容的提供者節點（oMLX、 vLLM、 Infinity、閘道後面的TEI等），位址為`<node-prefix>/<model>`。環回節點（`localhost`、 `127.0.0.1`、 `172.16.0.0/12`）始終符合條件，運營商在`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`中列出的主機名稱也是如此（例如Docker/Compose服務名稱，如`http://reranker:8080/v1`；這些是直接呼叫的，從不透過`HTTP(S)_PROXY`或連接的固定代理）。只有當操作員啟用`RERANK_REMOTE_PROVIDER_NODES`功能標誌時，任何其他主機— 、 LAN盒或Tailscale對等—上的節點才符合資格**和**節點的基礎URL傳遞提供者出站URL策略 (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`)。記憶體引擎的重新排序步驟透過環回呼叫此路由，因此相同的規則控制記憶體設定中的`rerankProviderModel` 。
 >
-> **本機伺服器形式：** 節點會呼叫 `<base>/v1/rerank`，若回應 404，則呼叫 `<base>/rerank`
-> (Infinity、TEI)。上游主體同時包含 Cohere/OpenAI 拼法 (`documents`、
-> `return_documents`) 和 TEI 拼法 (`texts`、`return_text`)，而上游回應會正規化為 Cohere
-> 封裝格式：TEI 的裸 `[{index, score, text}]`、精簡閘道傳回的 `{results: [{index, score}]}`
-> 以及 Voyage 風格的 `{data: [...]}`，都會以
-> `{results: [{index, relevance_score, document?}]}` 的形式傳回用戶端，按分數排序並限制為 `top_n`。
+> **本機伺服器形狀：**該節點在`<base>/v1/rerank`處呼叫，並且在 404 上在`<base>/rerank` （Infinity， TEI）處呼叫。上游主體同時攜帶Cohere/OpenAI拼字（`documents`、 `return_documents`）和TEI拼字（`texts`、 `return_text`），並且上游回應被標準化為Cohere信封： TEI的裸`[{index, score, text}]`、來自瘦網關的`{results: [{index, score}]}`和 Voyage 風格的`{data: [...]}`都作為`{results: [{index, relevance_score, document?}]}`返回到客戶端，按分數上限並以上限為`top_n`。
 
-> **提供者節點探索：** OpenAI 相容提供者節點上的模型會以節點前綴顯示於 `GET /v1/models`
-> 中。未帶有端點中繼資料的列 (本機 `/v1/models` 清單通常如此) 會繼承節點的
-> `apiType`，因此 `embeddings` 節點的模型其 `type: "embedding"`，而 `rerank` 節點的模型其
-> `type: "rerank"`，不會預設為聊天；同步或手動新增的列若明確指定
-> `supportedEndpoints`，仍優先採用該值。
+> **提供者節點發現：** OpenAI 相容的提供者節點上的模型出現在`GET /v1/models`中的節點前綴下。不攜帶端點元資料的行（典型的本地`/v1/models`列表）繼承節點的`apiType`，因此`embeddings`節點的模型是`type: "embedding"` ， `rerank`節點的模型是`type: "rerank"`而不是預設為 chat ；同步或手動新增的行上的明確`supportedEndpoints`仍然優先。
 
-### 專用提供者路由
+### 類型化決策
+
+決策模型以校準的機率回答鍵入的問題，而不是產生文字。它們從來都不是聊天模型，兩種有線格式永遠不會相互轉換：
+
+- `POST /v1/systemone` —系統一`{ model, state, questions: { <id>: … } }` （TypeSafe Jev、 OpenRouter決策、 Cloudflare Workers AI、local Ollama）。
+- `POST /v1/decisions` —本機OpenAI決策`{ model, input, questions: [...] }`，由`openai`連接提供服務。模型是`openai/gpt-6-luna` （裸`gpt-6-luna`也可以）。答案按問題順序返回，未受影響。
+- `GET /v1/systemone/models` —兩種目錄之一；每行命名其`api_format` （`systemone`或`decisions`）。 `limit` / `after`頁面最終列表。 `X-OmniRoute-Catalog-Status`標頭讀取`complete`、 `partial`或`unavailable` (503)。
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+在`/v1/decisions`上，在讀取任何憑證之前，會檢查API金鑰的模型白名單、 `decisions`端點類別、預算和連接範圍。憑證是密鑰範圍內儲存的`openai`連接（不是環境密鑰）；只有當連接基礎URL是沒有指向此OmniRoute憑證、查詢或片段的`http(s)` URL時，才會受到尊重。通話透過與`decision`自動路由器 ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ) 相同的受保護傳輸離開：提供者出站保護、無重試、無重定向、5 秒超時和 64 KB應答上限（更大的答案是 502）。請求正文限制為 4 MiB。每次呼叫都會發送一個新的`Idempotency-Key`。錯誤僅攜帶上游狀態，而不攜帶其正文、 URL、鍵或提示。
+
+### 專用提供者路線
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -771,7 +744,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-如果缺少提供者前綴，系統會自動新增。模型不相符時會回傳 `400`。
+如果缺少提供者前綴，則會自動新增。不匹配的模型回傳`400`。
 
 ---
 
@@ -1722,10 +1695,10 @@ GET /api/telemetry/summary
 ## 預算
 
 ```bash
-# 取得所有 API 金鑰的預算狀態
+# Get budget status for all API keys
 GET /api/usage/budget
 
-# 設定或更新預算
+# Set or update a budget
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1739,7 +1712,7 @@ Content-Type: application/json
 }
 ```
 
-> **結構描述備註** (`setBudgetSchema`)：`apiKeyId` 為必填；`dailyLimitUsd`、`weeklyLimitUsd` 或 `monthlyLimitUsd` 中至少有一個必須大於零。選填欄位：`warningThreshold`（0–1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。舊版 `{keyId, limit, period}` 格式會傳回 `400 Bad Request`。
+> **Schema notes** (`setBudgetSchema`): `apiKeyId`為必填項； `dailyLimitUsd`、 `weeklyLimitUsd`或`monthlyLimitUsd`中至少之一必須大於零。可選欄位： `warningThreshold` (0–1)、 `resetInterval` (`daily` | `weekly` | `monthly`)、 `resetTime` (`HH:MM`)。旧版`{keyId, limit, period}`形状返回`400 Bad Request`。
 
 ## 權杖限制
 

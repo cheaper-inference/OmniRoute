@@ -4,11 +4,9 @@
 
 ---
 
-> **Ճշմարտության աղբյուր՝** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Վերջին թարմացումը՝** 2026-09-02 — v3.8.51
-> **Թիրախային լսարան՝** մատակարարներին հատուկ քողարկված ինտեգրումները սպասարկող ինժեներներ։
+> **Ճշմարտության աղբյուրը.** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Հանդիսատես.** Ինժեներներ, որոնք պահպանում են մատակարարներին հատուկ գաղտնի ինտեգրումներ:
 
-OmniRoute-ը ինտեգրվում է այն մատակարարների հետ, որոնց եզրային համակարգերն ակտիվորեն մատնահետքում են ոչ պաշտոնական հաճախորդներին (TLS JA3/JA4, վերնագրերի հերթականություն, JSON մարմնի կառուցվածք, ամբողջականության թոքեններ)։ Այս էջը նկարագրում է OmniRoute-ի տրամադրած քողարկման մակերեսները և դրանց իրականացման վայրերը։
+OmniRoute ինտեգրվում է պրովայդերների հետ, որոնց եզրերը ակտիվորեն մատնահետք են տալիս ոչ պաշտոնական հաճախորդներին (TLS JA3/JA4, վերնագրերի պատվիրում, JSON մարմնի ձև, ամբողջականության նշաններ): Այս էջը փաստում է OmniRoute բացահայտած գաղտագողի մակերեսները և որտեղ են դրանք իրականացվում:
 
 ## Իրավական և էթիկական ծանուցում
 
@@ -74,65 +72,68 @@ OmniRoute-ը ինտեգրվում է այն մատակարարների հետ, �
 
 ---
 
-## Claude Code-ի քողարկման փաթեթ
+## Claude Code Stealth փաթեթ
 
-Երբ `cliCompatMode`-ը միացված է, OmniRoute-ը վերաձևավորում է ելքային Claude հարցումները, որպեսզի դրանք չտարբերվեն `claude-cli` թրաֆիկից։ Համագործակցում են երեք մոդուլներ․
+Երբ `cliCompatMode` միացված է, OmniRoute փոխում է ելքային Claude հարցումները, որպեսզի դրանք չտարբերվեն `claude-cli` տրաֆիկից: Երեք մոդուլներ համագործակցում են.
 
 ### `claudeCodeFingerprint.ts`
 
-Հաշվում է վճարումների վերնագրում ներդրված 3-նիշանոց `cc_version` մատնահետքը․
+Հաշվում է 3-char `cc_version` մատնահետքը, որը ներկառուցված է վճարումների վերնագրում.
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (կոշտ կոդավորված է, համապատասխանում է պաշտոնական հաճախորդին)
-- Մուտքային տվյալներ՝ օգտատիրոջ առաջին հաղորդագրության տեքստի 4, 7 և 20 ինդեքսներում գտնվող նիշերը + տարբերակի տողը
-- Ելքային տվյալ՝ 3-նիշանոց տասնվեցական նախածանց
+- `FINGERPRINT_SALT = "59cf53e54c78"` (կոշտ կոդավորված; համապատասխանում է պաշտոնական հաճախորդին)
+- Մուտքագրումներ՝ նիշերը 4, 7, 20 առաջին օգտատիրոջ հաղորդագրության տեքստի + տարբերակի տողի վրա
+- Արդյունք՝ 3 նիշ վեցանկյուն նախածանց
 
-### `claudeCodeCCH.ts` (Հաճախորդի բովանդակության հեշ)
+### `claudeCodeCCH.ts` (Հաճախորդի բովանդակության հաշ)
 
-Սերվերային ամբողջականության ստուգում, որը պաշտոնական Claude Code CLI-ն հաշվարկում է Bun/Zig-ի միջոցով։ OmniRoute-ը դա վերաիրականացնում է `xxhash-wasm`-ով․
+Սերվերի կողմից ամբողջականության ստուգում Claude պաշտոնական ծածկագիրը CLI հաշվարկում է Bun/Zig. OmniRoute reimplements-ի միջոցով `xxhash-wasm`:
 
-1. Սերիականացնել մարմինը՝ օգտագործելով `cch=00000;` տեղապահը
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Ձախից զրոներով լրացված, փոքրատառ 5-նիշանոց տասնվեցական արժեք
-4. Փոխարինել `cch=00000;`-ը հաշվարկված թոքենով
+1. Շարքայինացնել մարմինը `cch=00000;` տեղապահով
+2. Կառուցեք հեշի տեսքը երկու պարզ տեքստի փոխարինմամբ՝ այս հերթականությամբ (`hashView()`):
+   - `/"model":"[^"]*"/g` ի յուրաքանչյուր համընկնում դառնում է `"model":""` — համընկնումն դադարում է առաջին `"` ում, ուստի չակերտով (`"model":"a\"b"`) արժեքը դատարկվում է միայն մինչև այդ չակերտը, ինչպես դա անում է հաճախորդը:
+   - `/"max_tokens":\d+,|,?"max_tokens":\d+/g` ի յուրաքանչյուր համընկնում հանվում է — միայն թվային արժեքները, ցանկացած խորության վրա
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Զրոյական լիցքավորված 5 նիշ փոքրատառ վեցանկյուն
+5. Փոխարինեք `cch=00000;` հաշվարկված նշանով
 
-Հաստատուններ․
+հաստատուններ:
 
-- Սերմ՝ `0x6e52736ac806831e`
+- Սերմը՝ `0x4d659218e32a3268` (համընկնում է Claude կոդի 2.1.252 և 2.1.322 կոդի հետադարձ կապի հետքերով)
 - Կաղապար՝ `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-«Զգայուն» հաճախորդների անունների առաջին նիշից հետո տեղադրում է Unicode-ի **զրոյական լայնությամբ միացնող** (`U+200D`), որպեսզի վերին հոսքի զտիչները չկարողանան դրանք գտնել grep-ով։ Լռելյայն բառացանկը՝
+Տեղադրում է Յունիկոդ** զրոյական լայնությամբ հյուս** (`U+200D`) հաճախորդի «զգայուն» անունների առաջին նիշից հետո, այնպես որ հոսանքին հակառակ ֆիլտրերը չեն կարող ընկալել դրանք: Կանխադրված բառերի ցանկ.
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Կիրառվում է՝ `system` բլոկների, բոլոր `messages[].content`-ների և `tools[].description` / `tools[].function.description`-ների նկատմամբ։ Օպերատորը կարող է վերասահմանել `setSensitiveWords()`-ի միջոցով։
+Կիրառվում է `system` բլոկներին, բոլոր `messages[].content` և `tools[].description` / `tools[].function.description`: Օպերատոր-գերակայելի է `setSensitiveWords()` միջոցով:
 
 ### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` մատակարարներ
 
-Երրորդ կողմի Anthropic ռելեների համար, որոնք ընդունում են միայն «իրական Claude Code» թրաֆիկ․
+Երրորդ կողմի Anthropic ռելեների համար, որոնք ընդունում են միայն «իրական Claude Code» տրաֆիկը.
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- Լռելյայն՝ `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- Յուրաքանչյուր կապի «Միացնել redact-thinking բետան» փոխարկիչն ավելացնում է `redact-thinking-2026-02-12`, երբ CC Compatible վերին հոսքը հատուկ պահանջում է խմբագրված մտածողության հոսքեր
-- Յուրաքանչյուր կապի «Միացնել ամփոփ մտածողության ցուցադրումը» փոխարկիչը պահպանում է `providerSpecificData.requestDefaults.summarizeThinking`-ը և ավելացնում `display: "summarized"` այն CC Compatible մտածողության հարցումներին, որոնցում ցուցադրման ռեժիմն արդեն սահմանված չէ
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` լռելյայն
+- «Enable redact-thinking beta» անջատիչը մեկ կապի համար ավելացնում է `redact-thinking-2026-02-12`, երբ CC Համատեղելի հոսանքին հակառակ հատուկ պահանջում է խմբագրված մտածողության հոսքեր
+- Մեկ կապի «Միացնել ամփոփված մտածողության ցուցադրումը» անջատիչը պահում է `providerSpecificData.requestDefaults.summarizeThinking` և ավելացնում `display: "summarized"` CC Համատեղելի մտածողության հարցումներ, որոնք դեռ ցուցադրման ռեժիմ չեն սահմանել:
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x ընտանիք)
-- Լռելյայն ուղի՝ `/v1/messages?beta=true`
+- Կանխադրված ուղին՝ `/v1/messages?beta=true`
 
-Նույն փաթեթի հարակից մոդուլները․
+Քույր մոդուլները նույն փաթեթում.
 
-- `claudeCodeConstraints.ts` — ջերմաստիճանի + cache-control-ի կանոններ
-- `claudeCodeToolRemapper.ts` — գործիքների անունների վերաքարտեզագրում
-- `claudeCodeExtraRemap.ts` — լրացուցիչ օգտակար բեռի նորմալացում
+- `claudeCodeConstraints.ts` — ջերմաստիճան + քեշի վերահսկման կանոններ
+- `claudeCodeToolRemapper.ts` — գործիք-անվան վերափոխում
+- `claudeCodeExtraRemap.ts` — լրացուցիչ ծանրաբեռնվածության նորմալացում
 
 ---
 
@@ -158,11 +159,11 @@ Antigravity հարցումները պահպանում են զանգահարող�
 
 **Առաջարկվող կեցվածքը.**
 
-1. Պահպանեք լռելյայն `ANTIGRAVITY_CREDITS=off` քանի դեռ օպերատորը բացահայտորեն չի ընդունում վճարովի վարկի և հաշիվների կատարման ռիսկը: `retry` սկզբում ուղարկում է սովորական հարցումը և ներարկում է կրեդիտներ առավելագույնը մեկ անգամ՝ համապատասխան քվոտայից հետո՝ 429; `always` վարկեր է ներարկում առաջին իսկ խնդրանքով:
+1. Պահպանեք լռելյայն `ANTIGRAVITY_CREDITS=off` քանի դեռ օպերատորը բացահայտորեն չի ընդունում վճարովի վարկի և հաշիվների կատարման ռիսկը: `retry` սկզբում ուղարկում է սովորական հարցումը և ներարկում է վարկեր առավելագույնը մեկ անգամ՝ համապատասխան քվոտայից հետո՝ 429; `always` վարկեր է ներարկում առաջին իսկ խնդրանքով:
 2. **Տարածեք բեռը մատակարարների վրա Auto-Combo-ի միջոցով** (`model: "auto"` կամ `kr/glm/etc` -combo) մեկ Antigravity հաշիվը հագեցնելու փոխարեն։
 3. **Սահմանեք RPM ի մեկ կապի սահմանները** Antigravity մատակարարի խմբագրման էջում (Dashboard → Providers → Antigravity → կապի → տոկոսադրույքի սահմանաչափ): 30–60 RPM ը պաշտպանելի վերին սահման է՝ կայուն օգտագործման համար:
 4. **Օգտագործեք կայուն, օպերատորի կողմից վերահսկվող վերին հոսքի ցանց** և խուսափեք մեկ հաշիվ կիսելուց ոչ կապակցված օգտատերերի կամ աշխատանքային ծանրաբեռնվածության հետ:
-5. **Եթե արգելվի** Բողոքարկում `support.google.com` → միջոցով «Վերականգնել Workspace/Account մուտքը»՝ Google `quota_exceeded` / `service disabled` պատասխանի ճշգրիտ մարմինը: Վերականգնումը երաշխավորված չէ։
+5. **Եթե արգելվի** Բողոքարկում `support.google.com` → միջոցով «Վերականգնել Workspace/Account մուտքը» Google `quota_exceeded` / `service disabled` պատասխանի ճշգրիտ մարմնի միջոցով: Վերականգնումը երաշխավորված չէ։
 
 Շրջակա միջավայրի տեղեկանքը փաստաթղթերում է յուրաքանչյուր վարկային ռեժիմի հաշվի և ծախսերի հետևանքները:
 
@@ -192,7 +193,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — կարդում է `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — հավատարմագրային սանտեխնիկա
-- Միջադեպի սկզբնական զեկույց. Քննարկում [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Միջադեպի սկզբնական զեկույց. Քննարկում [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

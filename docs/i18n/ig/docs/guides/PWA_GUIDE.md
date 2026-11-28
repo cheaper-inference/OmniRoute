@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute na-abịa dịka Progressive Web App a pụrụ ịwụnye n'ụzọ zuru ezu. Mgbe ị si na ihe nchọgharị mkpanaka ọ bụla — Android (Chrome) ma ọ bụ iOS (Safari) — banye na dashboard ahụ, ị nwere ike ịhọrọ **"Tinye na Ihuenyo Mbụ"** wee nweta ahụmịhe yiri nke ngwa e wuru maka ngwaọrụ ahụ n'achọghị ụlọ ahịa ngwa.
+Wụnye dashboard OmniRoute dị ka ngwa Weebụ na-aga n'ihu iji mepee ya site na ihuenyo ụlọ ma ọ bụ desktọpụ gị na mpio kwụ ọtọ. Ngwa arụnyere ka chọrọ njikọ na sava OmniRoute gị maka igodo, data dashboard na arịrịọ API. Ngwongwo echekwabara anaghị enye ọnụ ụzọ anọghị n'ịntanetị ma ọ bụ dashboard na-anọghị n'ịntanetị.
 
-## Gịnị Bụ PWA?
+## Kedu ihe bụ PWA?
 
-Progressive Web App na-agbanwe dashboard weebụ OmniRoute ka ọ bụrụ ihe yiri ma na-arụ ọrụ dịka ngwa mkpanaka e wuru maka ngwaọrụ ahụ. Ozugbo awụnyere ya, ọ:
+Ngwa Weebụ na-aga n'ihu na-eji dashboard webụ nwere akara ngwa yana mpio dị iche. Ozugbo arụnyere, OmniRoute:
 
-- Na-amalite site na ihuenyo mbụ gị site na akara ngosi nke ya
-- Na-emepe n'ihuenyo zuru ezu — enweghị ogwe adreesị ihe nchọgharị ma ọ bụ UI taabụ
-- Na-arụ ọrụ mgbe enweghị njikọ site na ibe njikọta pụrụ iche
-- Na-echekwa akụ static na cache ka nbudata wee dị ngwa
-- Na-akwado nhazi ihuenyo portrait na landscape
+- Na-amalite site na ihuenyo ụlọ ma ọ bụ desktọpụ gị
+- Na-emepe na ọnọdụ kwụ ọtọ, na-enweghị akara adreesị na taabụ ihe nchọgharị ahụ na-emebu
+- Ihe nchekwa akụ kwụ ọtọ ahọpụtara
+- Na-akwado nghazi eserese na odida obodo
 
 ## Nwụnye
 
+Jiri adreesị HTTPS maka ihe nkesa na ngwaọrụ ọzọ. Mgbe ihe nkesa na-agba n'otu ngwaọrụ ahụ, `http://localhost:20128` na-emezukwa ihe achọrọ nrụnye ihe nchọgharị. Adreesị `http://YOUR_IP:20128` dị larịị anaghị emezu ihe ndị ahụ a chọrọ. Nrụnye menu na mkpali na-adabere na ihe nchọgharị na sistemụ arụmọrụ. Hụ [chọrọ nrụnye MDN's PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
+
 ### Android (Chrome)
 
-1. Mepee dashboard OmniRoute na Chrome: `http://YOUR_IP:20128`
-2. Chrome ga-egosi ọkọlọtọ **"Tinye OmniRoute na Ihuenyo Mbụ"** na-akpaghị aka, ma ọ bụ:
-   - Pịa menu **⋮** (ntụpọ atọ) → **"Tinye na Ihuenyo Mbụ"** ma ọ bụ **"Wụnye ngwa"**
-3. Kwenye na arịrịọ ahụ
-4. OmniRoute ga-apụta na ihuenyo mbụ gị dịka ngwa kwụụrụ onwe ya
+1. Mepee adreesị HTTPS OmniRoute, ma ọ bụ `http://localhost:20128` maka sava n'otu ekwentị.
+2. Mepee**⋮** menu wee họrọ** Wụnye ngwa** ma ọ bụ** Tinye na Ihuenyo mbu** , ọ bụrụ na enyere ya.
+3. Kwenye ngwa ngwa.
+4. Mepee OmniRoute site na ihuenyo ụlọ.
 
 ### iOS (Safari)
 
-1. Mepee dashboard OmniRoute na Safari: `http://YOUR_IP:20128`
-2. Pịa bọtịnụ **Kekọrịta** (igbe nwere akụ)
-3. Pịgharịa gaa n'okpuru wee pịa **"Tinye na Ihuenyo Mbụ"**
-4. Nye ya aha (aha ndabara bụ "OmniRoute") wee pịa **Tinye**
-5. OmniRoute ga-apụta na ihuenyo mbụ gị yana akara ngosi ngwa ahụ
+1. Mepee adreesị OmniRoute HTTPS gị na Safari.
+2. Kpatụ** Kekọrịta** →** Tinye na ihuenyo ụlọ** .
+3. Kwenye aha ahụ wee pịa** Tinye** .
+4. Mepee OmniRoute site na ihuenyo ụlọ.
 
 ### Desktọpụ (Chrome / Edge)
 
-1. Mepee dashboard OmniRoute
-2. Pịa **akara ngosi nwụnye** dị na ogwe adreesị (ma ọ bụ ⋮ → "Wụnye OmniRoute...")
-3. Kwenye na arịrịọ ahụ
-4. OmniRoute ga-emeghe dịka windo kwụụrụ onwe ya — enweghị taabụ, enweghị ogwe adreesị
+1. Mepee dashboard OmniRoute gị.
+2. Jiri akara nrụnye ihe nchọgharị ma ọ bụ** Wụnye ngwa** ntinye menu, ọ bụrụ na enyere ya.
+3. Kwado ngwa ngwa imepe OmniRoute na mpio nke ya.
 
-## Njirimara
+## Atụmatụ
 
-### Ahụmịhe Ihuenyo Zuru Ezu
+### Ohere kwụ ọtọ
 
-A haziri manifest ahụ na `display: "fullscreen"`, nke pụtara na ngwa awụnyere na-eji ihuenyo dum — enweghị UI ihe nchọgharị, enweghịkwa ndakọrịta n'elu ogwe ọnọdụ. Nke a na-eme ka dashboard ahụ dị ka ngwa e wuru n'ezie maka ngwaọrụ ahụ.
+Ngosipụta ahụ setịpụrụ `display: "standalone"` na `start_url: "/dashboard"`. Ngwa arụnyere na-emepe dashboard na mpio ngwa. Njikwa ihe nchọgharị na sistemụ arụmọrụ ka nwere ike ịpụta; ihe ngosi anaghị arịọ ọnọdụ ihuenyo zuru oke.
 
-### Nkwado Mgbe Enweghị Njikọ
+### Akụrụngwa echekwara na ihe netwọk chọrọ
 
-OmniRoute nwere service worker (`sw.js`) nke na-enye nchekwa cache nwere ọgụgụ isi:
+[Onye ọrụ](../../public/sw.js) ahụ na-echekwa akụrụngwa ndị ahọpụtara:
 
-| Ụdị Akụ                                                                                                                                                                                                                                | Atụmatụ                                | Omume                                                                                                       |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **App Shell**                                                                                                                                                                                                                          | Cache-first                            | A na-echekwa `/`, `/offline`, manifest, na akara ngosi na cache tupu oge eruo mgbe a na-arụnye ya           |
-| **Akụ static** (CSS, JS, onyonyo, mkpụrụedemede)                                                                                                                                                                                       | Network-first with cache fallback      | Ọ na-eweta nke ọhụrụ site na netwọkụ; ọ na-eji nke dị na cache ma ọ bụrụ na enweghị njikọ                   |
-| **Ngwugwu Next.js** (`/_next/`)                                                                                                                                                                                                        | Network-first with cache update        | Ọ na-eweta site na netwọkụ ma na-emelite cache; ọ na-enye ụdị echekwara ma ọ bụrụ na enweghị njikọ          |
-| **Arịrịọ ngagharị**                                                                                                                                                                                                                    | Bypass (anaghị egbochi ya mgbe ọ bụla) | Ihe nchọgharị na-ahụ maka nlọghachi HTTP/3→HTTP/2; socket QUIC nwụrụ anwụ ekwesịghị ịghọ `Response.error()` |
-| **Ụzọ API / dashboard** (`/api/`, `/a2a`, `/dashboard`, aha ọzọ client-API `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, tinyekwa `/callback`, `/login`; a na-atụnyere ha n’agbanyeghị mkpụrụedemede ukwu ma ọ bụ nta) | Bypass (anaghị echekwa ya na cache)    | Ọ na-aga ozugbo na sava mgbe niile — service worker anaghị egbochi ya mgbe ọ bụla                           |
+| Arịrịọ ma ọ bụ ihe onwunwe                       | Atụmatụ        | Omume                                                                                                     |
+| ------------------------------------------------ | -------------- | --------------------------------------------------------------------------------------------------------- |
+| Ngwa ntinye-oge                                  | Tupu nchekwa   | `/`, `/manifest.webmanifest`, `/icon-512.png` na `/apple-touch-icon.png` na-echekwa n'oge nrụnye onye ọrụ |
+| Next.js static (`/_next/`)                       | Netwọk-nke mbụ | Ọzịza ndị na-aga nke ọma na-emelite cache; Njehie netwọkụ na-adaghachi na nzaghachi echekwara dị adị      |
+| CSS static ndị ọzọ, JS, onyonyo na mkpụrụedemede | Cache-nke mbụ  | A na-ejigharị nzaghachi echekwabara dị adị; A na-echekwa nzaghachi netwọkụ na-aga nke ọma na ọgbaghara    |
+| Ntugharị ibe                                     | Gafefe         | Ihe nchọgharị ahụ na-ewepụta ibe ahụ ozugbo; ọnweghị ndaghachi na-anọghị n'ịntanetị anaghị arụ ọrụ        |
+| API, dashboard na ụzọ nyocha                     | Gafefe         | Onye ọrụ anaghị egbochi ma ọ bụ chekwaa arịrịọ ndị a                                                      |
+| Arịrịọ ndị ọzọ na-abụghị static                  | Netwọk         | Enweghị nleba anya ma ọ bụ nchekwa                                                                        |
 
-### Ibe Enweghị Njikọ
+Ụzọ ndị ewepụrụ bụ `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` na `/login`, dabara na ikpe-enweghị mmetụta na oke ụzọ. Arịrịọ nke sitere na mba ofesi na nke na-abụghị GET gabigakwara onye ọrụ ahụ.
 
-Mgbe netwọkụ adịghị ma onye ọrụ agaa na ibe ọhụrụ, service worker na-enye ibe `/offline` pụrụ iche nke:
+### Ibe Njikọta
 
-- Na-egosi ozi **"Nsogbu Njikọta"** doro anya
-- Na-egosi **akara ọnọdụ online/offline** dị ndụ nke na-emelite ozugbo
-- Na-enye bọtịnụ **"Nwaa Njikọ Ọzọ"** iji budata ibe ahụ ọzọ mgbe njikọta lọtara
-- Na-ejikọ na **Ibe Ọnọdụ** maka nyocha nsogbu
+Ibe `/offline` na-enye ozi njikọta, ihe ngosi online/offline, a** Nwaa Njikọ** bọtịnụ na njikọ na ibe ọnọdụ. Ọ bụ** echekwaghị ya mbụ** na onye ọrụ na-eme ya** ọ bụghị** redirect navigation dara na ya. Ịdị adị ya anaghị eme ka ibe ọhụrụ nweta na-enweghị ihe nkesa.
 
-### Akara Ngosi Ngwa
+### Akara ngosi ngwa
 
-OmniRoute na-enye akara ngosi ahaziri maka ikpo okwu ọ bụla:
+Ihe ngosi ahụ na-akpọsa akara PNG ndị a:
 
-| Faịlụ                  | Nha              | Ndị Na-eji Ya                          |
-| ---------------------- | ---------------- | -------------------------------------- |
-| `icon-512.png`         | 512×512          | Arịrịọ nwụnye Android, ihuenyo mmalite |
-| `apple-touch-icon.png` | 180×180          | Akara ngosi ihuenyo mbụ iOS            |
-| `icon-192.svg`         | 192×192 (vector) | Akara ngosi adaptive Android           |
-| `apple-touch-icon.svg` | 180×180 (vector) | Nhọrọ ndabere Apple                    |
-| `favicon.svg`          | Vector           | Taabụ ihe nchọgharị                    |
-| `favicon.ico`          | Multi-size       | Ihe nchọgharị ochie                    |
+| Faịlụ                  | Nha     | Jiri                                |
+| ---------------------- | ------- | ----------------------------------- |
+| `icon-192.png`         | 192×192 | Akara ngosi ngwa izugbe             |
+| `icon-512.png`         | 512×512 | Akara ngosi mkpokọta na ihe mkpuchi |
+| `apple-touch-icon.png` | 180×180 | Apple home screen icon              |
 
-### Ndebanye Aha Akpaghị Aka
+Ihe nchọgharị ahụ na-ahọrọ akara ngosi kwesịrị ekwesị maka ebumnuche nwụnye.
 
-A na-edebanye service worker ahụ na-akpaghị aka site na kọmpọnentị `<PwaRegister />` dị na root layout. Achọghị ihe onye ọrụ ga-eme — ngwa ahụ ga-abụ nke a pụrụ ịwụnye ozugbo ihe nchọgharị chọpụtara manifest na service worker ziri ezi.
+### Ndebanye aha akpaaka
 
-## Nhazi Nka na Ụzụ
+`PwaRegister` na-edebanye aha onye ọrụ na mmepụta mgbe ihe nchọgharị na-akwado ndị ọrụ ọrụ. Ụdị mmepe na-ewepụ ndị ọrụ aha ma na-ekpochapụ cache iji zere akụ adịchaghị na-egbochi ibugharị ọkụ. Wụnye kpaliri ka bụ mkpebi ihe nchọgharị.
 
-### Web App Manifest (`manifest.webmanifest`)
+## Nka na ụzụ Architecture
 
-Next.js na-emepụta ya site na `src/app/manifest.ts`:
+### Ngwa Weebụ pụtara
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+Next.js na-emepụta `/manifest.webmanifest` site na [`src/app/manifest.ts`](../../src/app/manifest.ts). Ntọala igodo ya bụ:
 
-### Service Worker (`public/sw.js`)
+| Ịtọ ntọala              | Uru                                             |
+| ----------------------- | ----------------------------------------------- |
+| `short_name`            | `OmniRoute`                                     |
+| `start_url`             | `/dashboard`                                    |
+| `scope`                 | `/`                                             |
+| `display`               | `standalone`                                    |
+| `orientation`           | `any`                                           |
+| Agba ndabere na isiokwu | Paleti ọkụ ndabara sitere na `PWA_THEME_COLORS` |
 
-Service worker nkịtị (nke na-adabereghị na framework ọ bụla) nwere:
+Aha ngosipụta na nkọwapụta bụ ụkpụrụ kwụ ọtọ na faịlụ isi mmalite ahụ. Ngosipụta arụnyere anaghị eso ntọala-aha ma ọ bụ palette nọ n'ọrụ na nleta ọ bụla.
 
-- **Oge nrụnye**: Na-etinye app shell (root, ibe offline, manifest, na akara ngosi) na cache tupu oge eruo
-- **Oge mmalite ọrụ**: Na-ehichapụ ụdị cache ochie ma na-ejikọta ndị ahịa niile
-- **Oge fetch**: Nhọrọ ụzọ nwere ọgụgụ isi dabere n'ụdị arịrịọ (ngagharị, akụ static, API)
-- **Ịnye cache ụdị**: `omniroute-pwa-v3` — bulie nke a iji manye cache ọhụrụ mgbe emelitere ya
+### Onye ọrụ ọrụ
 
-### Metadata nke Layout (`src/app/layout.tsx`)
+[`public/sw.js`](../../public/sw.js) enweghị ndabere usoro nke onye ọrụ:
 
-Root layout na-enye meta tag niile achọrọ maka nrubeisi PWA:
+- **Wụnye:** tupu-echekwa akụrụngwa anọ edepụtara n'elu wee mee ka onye ọrụ ọhụrụ rụọ ọrụ.
+- **Mee ọrụ:** na-ewepụ ọgbọ cache ochie ma na-azọrọ ndị ahịa.
+- **Weta:** na-etinye atụmatụ static-akpa na mwepu ụzọ n'elu.
+- **Ụdị nsụgharị:** aha cache isi mmalite bụ `omniroute-pwa-v3`; mmepụta ihe na-ewu stampụ cache njirimara.
+- **Amamọkwa:** na-ejikwa mmemme `push` na-abata ma lekwasị anya ma ọ bụ mepee windo mgbe emetụla ọkwa.
 
-- Njikọ `manifest` gaa na `/manifest.webmanifest`
-- `apple-web-app-capable: true` maka ọnọdụ standalone nke iOS
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` maka Android Chrome
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` maka ngosipụta site n'otu nsọtụ ruo nsọtụ ọzọ
+Naanị ndị na-ahụ maka mmemme anaghị ewepụta ndenye ntinye aka na-arụ ọrụ ma ọ bụ nnyefe nkesa ahaziri. Echela na agbanyere ọkwa naanị n'ihi na etinyere PWA.
 
-### Akụkụ: `PwaRegister`
+### Metadata okirikiri nhọrọ ukwuu na ndebanye aha
 
-Dị na `src/shared/components/PwaRegister.tsx`, akụkụ client a:
+[`src/app/layout.tsx`](../../src/app/layout.tsx) na-enye njikọ ngosi, Apple standalone metadata, agba isiokwu na `viewport-fit: cover`. Aha ibe na aha web-app Apple na-eji aha ihe atụ. Agba isiokwu ihe nchọgharị dị ndụ na-esote palette; ihe ngosi wụnye na-eji agba ọkụ ndabara.
 
-1. Na-arụ ọrụ mgbe e tinyere ya (naanị n'akụkụ client)
-2. Na-enyocha ma browser ahụ ọ na-akwado `serviceWorker`
-3. Na-edebanye `/sw.js` n'enweghị ngosi (a na-eleghara njehie anya ka ha ghara igbochi app ahụ)
-4. Anaghị egosipụta ihe ọ bụla (`return null`) — ọ bụ akụkụ na-arụ naanị side effect
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) na-agba ọsọ na onye ahịa wee deba aha `/sw.js` site na iji wuo ID na URL ya. Ọ na-achọpụta ọgbọ nchekwa nchekwa na-adakọghị ọnụ ma nwee ike ịtọgharịa onye ọrụ wee bugharịa otu ugboro ka ọ gbakee na nrụnye ochie. Ọdịda ndebanye aha anaghị egbochi dashboard.
 
-## Iji Ya na Termux (Android)
+## Jiri Termux (Android) mee ihe
 
-Mgbe a na-eji Termux agba OmniRoute na Android, PWA ahụ na-arụ ọrụ nke ọma n'enweghị nsogbu:
+1. Malite OmniRoute na Termux: `npx -y omniroute@latest`.
+2. Mepee Chrome n'otu ekwentị ahụ: `http://localhost:20128`.
+3. Wụnye PWA site na menu nrụnye ihe nchọgharị.
+4. Debe ihe nkesa Termux ka ị na-eji dashboard.
 
-1. Malite OmniRoute na Termux: `npx omniroute`
-2. Mepee Chrome n'otu ekwentị ahụ: `http://localhost:20128`
-3. Wụnye PWA site na "Tinye na Ihuenyo Mbụ"
-4. PWA ahụ na-ejikọta na sava Termux dị na ngwaọrụ ahụ — ihe niile na-arụ n'ime ngwaọrụ ahụ
+Ekwentị na-akwado ma ọnụ ụzọ ámá na dashboard ya. Arịrịọ ndị na-eweta AI dịpụrụ adịpụ ka chọrọ ịnweta netwọkụ. Hụ [ntuziaka Termux](TERMUX_GUIDE.md) maka ntọlite na atụmatụ usoro-oge ndụ gam akporo.
 
-Ngwakọta a pụtara na ekwentị Android gị bụ ma **sava** (Termux) ma **client** (PWA) — ọnụ ụzọ AI zuru ezu nke na-arụ ọrụ n'onwe ya.
+## Jiri Site na Ngwaọrụ ndị ọzọ
 
-## Iji Ya Site na Ngwaọrụ Ndị Ọzọ
+Mepee adreesị HTTPS nke nkesa na ekwentị, mbadamba ma ọ bụ desktọpụ, wee soro usoro ntinye ihe nchọgharị ahụ. Ihe nkesa ahụ ga-anọgiderịrị na-enweta ya site na ngwaọrụ ọ bụla. Hụ [ntuziaka ọwara](../ops/TUNNELS_GUIDE.md) maka nhọrọ ohere ime ime.
 
-Wụnye PWA na ngwaọrụ ọ bụla nke browser ya nwere ike ịbanye na sava OmniRoute gị:
+## Nhazi
 
-- **Ekwentị/mbadamba ọzọ**: Gaa na `http://PHONE_IP:20128` ma wụnye PWA
-- **Laptọọpụ**: Mepee Chrome/Edge ma wụnye ya dị ka PWA desktọọpụ
-- **Smart TV nwere browser**: Mepee dashboard ahụ n'ihuenyo zuru ezu
+### Aha ihe atụ
 
-## Nhazi nke Onwe
+Nke** Aha ihe atụ** ntọala na-agbanwe metadata dashboard, gụnyere aha ibe yana aha web-app Apple. Ngosipụta ahụ ewepụtara na-eji aha kwụ ọtọ, yabụ ntọala a anaghị ekwe nkwa na akpọgharịrị ngwa arụnyerela aha.
 
-### Aha Instance
+### Favicon omenala
 
-Aha PWA na-agbaso ntọala **Aha Instance** dị na `Dashboard → Settings`. Ọ bụrụ na ị gbanwee aha instance gị ka ọ bụrụ "Ọnụ Ụzọ AI M", PWA arụnyere ga-egosi aha ahụ.
+Favicon omenala na-agbanwe favicon ihe nchọgharị. Ihe ngosi wụnye ka na-akpọsa faịlụ PNG dị n'elu; ịgbanwe favicon anaghị edochi akara ngosi ihuenyo ụlọ ndị ahụ.
 
-### Favicon Ahaziri Ahazi
+## Oke
 
-Ọ bụrụ na i bulite favicon ahaziri ahazi site na `Dashboard → Settings`, akara ngosi PWA na desktọọpụ ga-egosipụta akara ngosi ahụ. Akara ngosi ihuenyo mbụ nke ngwaọrụ mkpanaka na-eji faịlụ `icon-512.png` na `apple-touch-icon.png` arụpụtara tupu oge eruo.
+- **Achọrọ njikọ sava:** Ntugharị ibe, steeti dashboard na arịrịọ API enweghị ndaghachi azụ na ntanetị.
+- **Enweghị mmekọrịta ndabere:** Emeghị ihe na-adịghị n'ịntanetị maka ịmegharị.
+- **Ndịiche ihe nchọgharị:** menu nrụnye, ihe ngosi mpio na nkwado ngosi dị iche iche site na ikpo okwu.
+- **Enweghị cache nzaghachi API :** onye ọrụ na-ewepu API, dashboard na ụzọ nyocha.
+- **Akara ngosi nkwụnye kwụ ọtọ:** imelite akara ngosi ndị ahụ chọrọ ịgbanwe akụ a kpọsara; ihe nchọgharị nwere ike idowe metadata arụnyere.
 
-## Mmachi
+## Ntuziaka faịlụ
 
-- **Enweghị ọkwa push** — Service worker anaghị emejuputa Push API. Kama nke ahụ, ngwa Electron na-ahụ maka ọkwa.
-- **Enweghị mmekọrịta n’azụ** — Anaghị edobe omume ndị e mere mgbe enweghị njikọ n’ahịrị ka e mee ha ọzọ. Ebumnuche bụ isi nke PWA bụ igosi dashboard.
-- **Mmachi iOS** — Safari na iOS anaghị akwado njirimara PWA niile (dịka ọmụmaatụ, a ga-eji aka mee arịrịọ nrụnye, ma service worker ndị na-arụ ọrụ n’azụ nwere mmachi).
-- **Ogo cache** — Service worker na-echekwa naanị akụrụngwa static na cache. Anaghị echekwa nnukwu response payload sitere na route `/api/` na cache.
-- **Akara ngosi ahaziri iche na ekwentị** — Ịgbanwe favicon na ntọala anaghị emelite akara ngosi home screen na ekwentị (nke a chọrọ imepụta akara ngosi PWA ọzọ).
-
-## Ntụaka Faịlụ
-
-| Faịlụ                                   | Ebumnuche                                                         |
-| --------------------------------------- | ----------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Route manifest Next.js (na-emepụta `manifest.webmanifest`)        |
-| `public/sw.js`                          | Service worker nwere usoro cache                                  |
-| `src/shared/components/PwaRegister.tsx` | Client component nke na-edebanye service worker                   |
-| `src/app/offline/page.tsx`              | Ihu fallback offline nwere ihe ngosi status dị ndụ                |
-| `src/app/layout.tsx`                    | Root layout nwere metadata PWA (apple-web-app, theme-color, wdg.) |
-| `public/icon-512.png`                   | Akara ngosi PNG 512×512 (Android, splash screen)                  |
-| `public/apple-touch-icon.png`           | Akara ngosi PNG 180×180 (iOS home screen)                         |
-| `public/icon-192.svg`                   | Akara ngosi SVG 192×192 (Android adaptive)                        |
-| `public/apple-touch-icon.svg`           | Akara ngosi SVG 180×180 (Apple fallback)                          |
+| Faịlụ                                                                                  | Ebumnuche                                                    |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Ngosipụta ngwa weebụ emepụtara                               |
+| [public/sw.js](../../public/sw.js)                                                     | Caching, mwepu yana ndị njikwa mmemme ngosi                  |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Ndebanye aha mmepụta yana mgbake cache                       |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Ibe njikọ, ọ bụghị ọdịda na-anọghị n'ịntanetị na-akpaghị aka |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | metadata ibe na ntọala nlele                                 |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Ụkpụrụ agba gburugburu ekekọrịtara                           |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 akara ngosi ngwa                                   |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple akara ngosi                                  |

@@ -8,29 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Налаштування середовища розробки
+## Налаштування розробки
 
-### Передумови
+### передумови
 
 - **Node.js** `>=22.22.2 <23` або `>=24.0.0 <27` (рекомендовано: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows із Node 24:** використовуйте поточний випуск виправлень 24 LTS (щонайменше 24.20.0).
-> Попередні випуски можуть аварійно завершуватися після успішного проходження тестів, коли `--test-force-exit` закриває
-> процес. [Виправлення libuv для Windows](https://github.com/nodejs/node/pull/61999) у Node усуває
-> цей збій під час виконання; не вимикайте перевірки тестових тверджень і завершення засобу запуску тестів.
+> **Windows з вузлом 24:** використовуйте поточний випуск патча 24 LTS (принаймні 24.20.0). Попередні випуски можуть перериватися після успішних тестів, коли `--test-force-exit` закриває процес. [Виправлення Node Windows libuv](https://github.com/nodejs/node/pull/61999) усуває цей збій під час виконання; увімкніть тестові твердження та перевірки виходу з програми.
 
-> **Користувачам npm v11+ (Node 24+):** після `npm install` переконайтеся, що нативні модулі встановлено:
-> `node -e "require('better-sqlite3')"`. Якщо команда завершується помилкою `MODULE_NOT_FOUND`,
-> виконайте `npm approve-scripts better-sqlite3 && npm install`. Див.
-> [Усунення несправностей](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Користувачі npm v11 + (вузол 24 +):** Після `npm install` перевірте, чи встановлено власні модулі: `node -e "require('better-sqlite3')"`. Якщо це не вдається з `MODULE_NOT_FOUND`, запустіть `npm approve-scripts better-sqlite3 && npm install`. Див. [Усунення несправностей](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Клонування та встановлення
+### Клонувати та встановити
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,91 +32,83 @@ npm install
 ### Змінні середовища
 
 ```bash
-# Створіть файл .env із шаблону
+# Create your .env from the template
 cp .env.example .env
 
-# Згенеруйте необхідні секрети
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Основні змінні для розробки:
+Ключові змінні для розвитку:
 
-| Змінна                 | Значення за замовчуванням для розробки | Опис                            |
-| ---------------------- | -------------------------------------- | ------------------------------- |
-| `PORT`                 | `20128`                                | Порт сервера                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`               | Базова URL-адреса фронтенду     |
-| `JWT_SECRET`           | (згенеруйте вище)                      | Секрет для підписування JWT     |
-| `INITIAL_PASSWORD`     | `CHANGEME`                             | Пароль для першого входу        |
-| `APP_LOG_LEVEL`        | `info`                                 | Рівень деталізації журналювання |
+| змінна                 | Розробка за замовчуванням | опис                       |
+| ---------------------- | ------------------------- | -------------------------- |
+| `PORT`                 | `20128`                   | Порт сервера               |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | База URL для інтерфейсу    |
+| `JWT_SECRET`           | (згенерувати вище)        | секрет підпису JWT         |
+| `INITIAL_PASSWORD`     | `CHANGEME`                | Перший пароль для входу    |
+| `APP_LOG_LEVEL`        | `info`                    | Рівень докладності журналу |
 
-### Налаштування панелі керування
+### Налаштування інформаційної панелі
 
-Панель керування містить перемикачі інтерфейсу для функцій, які також можна налаштувати за допомогою змінних середовища:
+Інформаційна панель містить перемикачі UI для функцій, які також можна налаштувати за допомогою змінних середовища:
 
-| Розташування налаштування | Перемикач               | Опис                                        |
-| ------------------------- | ----------------------- | ------------------------------------------- |
-| Налаштування → Розширені  | Режим налагодження      | Увімкнути журнали запитів налагодження (UI) |
-| Налаштування → Загальні   | Видимість бічної панелі | Показати/приховати розділи бічної панелі    |
+| Налаштування місцезнаходження | Перемикач               | опис                                        |
+| ----------------------------- | ----------------------- | ------------------------------------------- |
+| Налаштування → Advanced       | Режим налагодження      | Увімкнути журнали запитів налагодження (UI) |
+| Налаштування → Загальні       | Видимість бічної панелі | розділи бічної панелі Show/hide             |
 
-Ці налаштування зберігаються в базі даних і залишаються чинними після перезапусків, перевизначаючи встановлені значення змінних середовища за замовчуванням.
+Ці параметри зберігаються в базі даних і зберігаються під час перезапусків, замінюючи значення за замовчуванням env var, якщо встановлено.
 
-### Локальний запуск
+### Запуск локально
 
 ```bash
-# Режим розробки (гаряче перезавантаження)
+# Development mode (hot reload)
 npm run dev
 
-# Продакшн-збірка
-npm run build    # next build → .build/next/ потім assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Швидка компіляція лише бекенду/API для змін від учасників
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Релізна збірка (чиста повторна збірка + маркер HEAD — обов’язково для розгортання)
-npm run build:release   # rm -rf .build dist && збірка + запис dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Типове налаштування порту
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Збірка для учасників виконує лише перевірку компіляції: вона не створює автономний
-дистрибутив і не збирає необов’язкові нативні ресурси пакування. Використовуйте звичайну продакшн-збірку, коли
-потрібно перевірити готовий до постачання пакет.
+Збірка учасника виконує перевірку лише для компіляції: вона не збирає окремий дистрибутив і не збирає додаткові власні ресурси пакування. Використовуйте звичайну виробничу збірку, коли вам потрібно перевірити комплект для доставки.
 
-### Структура результатів збірки
+### Побудувати вихідний макет
 
-| Каталог   | Вміст                                                                              | Відстежується |
-| --------- | ---------------------------------------------------------------------------------- | ------------- |
-| `src/`    | Вихідний код застосунку (TypeScript / TSX)                                         | Так           |
-| `.build/` | Проміжні файли — результат `next build` (ігнорується Git, `distDir = .build/next`) | Ні            |
-| `dist/`   | Готовий до постачання пакет — створений `assembleStandalone` (ігнорується Git)     | Ні            |
+| Довідник  | Зміст                                                                     | Відстежується |
+| --------- | ------------------------------------------------------------------------- | ------------- |
+| `src/`    | Джерело програми (TypeScript / TSX)                                       | так           |
+| `.build/` | Проміжні — `next build` вихід (gitignored, `distDir = .build/next`)       | немає         |
+| `dist/`   | Пакет — який можна відправити, зібраний `assembleStandalone` (gitignored) | немає         |
 
 Конвеєр збірки виконується за один прохід:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (результат Next.js)
-  └─ assembleStandalone()                 (копіює автономний пакет + статичні + публічні + нативні ресурси)
-       └─ результат: dist/                (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` додатково спочатку очищує обидва каталоги та записує
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) як контрольний маркер цілісності розгортання.
+`npm run build:release` додатково спочатку очищає обидва каталоги та записує `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) як контроль цілісності розгортання.
 
-`npm run build:contributor` використовує профіль збірки лише бекенду. Під час збірки він тимчасово замінює
-файли UI панелі керування заглушками, зберігає обробники маршрутів API та відновлює оригінальні файли
-після збірки. Використовуйте `npm run build` для змін, що впливають на UI панелі керування, або для повної
-перевірки релізу; профіль для учасників не замінює релізну збірку.
+`npm run build:contributor` використовує профіль збірки лише для серверної частини. Він тимчасово закриває файли UI панелі інструментів під час збирання, зберігає обробники маршрутів API і відновлює вихідні файли після збирання. Використовуйте `npm run build` для змін, які впливають на інформаційну панель UI, або для повної перевірки випуску; профіль учасника не є заміною збірки випуску.
 
-> **Примітка щодо розгортання на VPS:** віддалений каталог образу `/usr/lib/node_modules/omniroute/app/`
-> не змінився. Засоби розгортання синхронізують вміст `dist/` із ним за допомогою rsync.
-> Змінився лише шлях результатів збірки в репозиторії (`app/` → `dist/`).
+> **примітка щодо розгортання VPS :** віддалений каталог зображень `/usr/lib/node_modules/omniroute/app/` не змінено. Навички розгортання rsync вміст `dist/` у нього. Переміщено лише вихідний шлях збірки в сховищі (`app/` → `dist/`).
 
-URL-адреси за замовчуванням:
+Типовий URLs:
 
-- **Панель керування**: `http://localhost:20128/dashboard`
+- **Приладова панель** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -426,8 +412,8 @@ docs/
 
 ## Отримання допомоги
 
-- **Архітектура**: див. [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Довідник API**: див. [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Документація з безпеки**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Документація з експлуатації**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Проблеми**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Архітектура** : див [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **Довідник API** : див [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Документи безпеки** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Операційна документація** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Питання** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

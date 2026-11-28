@@ -4,7 +4,7 @@
 
 ---
 
-> **Verze:** v3.8.44** Poslední aktualizace:** 2026-10-28** Publikum:** Inženýři přidávají, udržují nebo ladí vestavěné služby (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Verze:** v3.8.44** Publikum:** Inženýři přidávají, udržují nebo ladí vestavěné služby (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Embedded služby jsou lokálně instalované nástroje pro vedlejší procesy, které OmniRoute instaluje, dohlíží a odhaluje je jako prvotřídní směrovací cíle. Na rozdíl od externích poskytovatelů (kteří jsou osloveni přes internet pomocí klíčů API ) běží vestavěné služby na stejném počítači jako OmniRoute a komunikují přes smyčku.
 
@@ -210,7 +210,7 @@ v uživatelském rozhraní aktivují současně.
 
 ## 4. odkaz API
 
-Všechny trasy pod `/api/services/` jsou**LOCAL_ONLY** (pouze zpětná smyčka, pevné pravidlo č. 17). Požadavky bez zpětné smyčky obdrží `403 LOCAL_ONLY` bez ohledu na token ověření.
+Všechny trasy pod `/api/services/` jsou**LOCAL_ONLY** (pouze zpětná smyčka, tvrdé pravidlo #17). Požadavky bez zpětné smyčky obdrží `403 LOCAL_ONLY` bez ohledu na token ověření.
 
 ### 4.1 9Koncové body směrovače (11 tras)
 
@@ -237,7 +237,7 @@ Nainstalujte 9Router z npm. Vytvoří `DATA_DIR/services/9router/` s vlastním `
 | `409`     | Již se instaluje (zámek držen)                                  |
 | `500`     | Instalace npm se nezdařila — viz `message` pro přátelskou chybu |
 
-**Poznámky:** Používá `execFile('npm', [...])` — bez shellu, bez interpolace (tvrdé pravidlo č. 13). chyby EACCES se zobrazí jako přátelské zprávy.
+**Poznámky:** Používá `execFile('npm', [...])` — bez shellu, bez interpolace (tvrdé pravidlo #13). chyby EACCES se zobrazí jako přátelské zprávy.
 
 ---
 
@@ -514,7 +514,7 @@ LLMLingua je prompt-compression sidecar wrapping `@atjsh/llmlingua-2` (skutečn�
 | `POST` | `/api/services/llmlingua/auto-restart-adopted` | Přepnout automatické restartování přijaté (již existující) instance      |
 | `GET`  | `/api/services/llmlingua/logs`                 | SSE log tail (prostřednictvím sdílené dynamické trasy `[name]/logs` )    |
 
-**Smlouva o postranním vozíku:** serverový skript odkryje `GET /health` (okamžité — nečeká na modelu) a `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). Model se líně načte při prvním volání `/compress`.
+**Smlouva o postranním vozíku:** serverový skript odkryje `GET /health` (okamžité — nečeká na modelu) a `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). Model se načte líně při prvním volání `/compress`.
 
 **Kompresní kabeláž:** `open-sse/services/compression/engines/llmlingua/index.ts` `httpSidecarBackend` volá `LLMLINGUA_BASE_URL` (výchozí `http://127.0.0.1:20135`) a přijímá odpověď postranního vozíku pouze tehdy, když je přísně kratší než vstup; jakékoli selhání (neběží, vypršel časový limit, odezva bez operace) se vrátí zpět k backendu pracovního vlákna v procesu (`./worker.ts`).
 
@@ -556,84 +556,63 @@ Tento proxy:
 - Z odpovědi odebere `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
 - Přepíše odpovědi HTML pro vložení `<base href>` a normalizuje absolutní cesty (`/foo` → `/dashboard/.../embed/foo`)
 
-Upgrady WebSocket pro embedded dashboard jsou řešeny doprovodným serverem na vyhrazeném portu (viz `src/lib/services/embedWsProxy.ts`).
+Upgrady WebSocket pro embedded dashboard jsou řešeny doprovodným serverem na vyhrazeném portu (viz `src/lib/services/embedWsProxy.ts`). Každá aktualizace je autorizována před otevřením tunelu se stejnými pravidly jako HTTP embed route: peer musí mít zpětnou smyčku bez hlavičky pro předávání zpětného proxy, `Origin` prohlížeče musí být původem řídicího panelu (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` rozšiřují výchozí nastavení zpětné smyčky) a volající potřebuje relaci řídicího panelu nebo klíč API v rozsahu správy, pokud není zakázáno přihlášení k řídicímu panelu.
 
-Každá aktualizace je autorizována před otevřením tunelu se stejnými pravidly jako HTTP embed route: peer musí mít zpětnou smyčku bez hlavičky pro předávání zpětného proxy, `Origin` prohlížeče musí být původem řídicího panelu (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` rozšiřují výchozí nastavení zpětné smyčky) a volající potřebuje relaci řídicího panelu nebo klíč API v rozsahu správy, pokud není zakázáno přihlášení k řídicímu panelu.
-
-**Zabezpečení:** Vložené proxy trasy jsou klasifikovány pod `LOCAL_ONLY_API_PREFIXES` a lze se k nim dostat pouze ze zpětné smyčky. Útočník, který získá JWT prostřednictvím tunelu Cloudflare/Ngrok nemůže proxy do embedded služeb.
+**Zabezpečení:** Vložené proxy trasy jsou klasifikovány pod `LOCAL_ONLY_API_PREFIXES` a lze je získat pouze ze zpětné smyčky. Útočník, který získá JWT prostřednictvím tunelu Cloudflare/Ngrok nemůže proxy do embedded služeb.
 
 ---
 
-## 5. Zabezpečení
+## 5. Bezpečnost
 
-### Vynucení LOCAL_ONLY (pevné pravidlo č. 17)
+### prosazování LOCAL_ONLY (tvrdé pravidlo #17)
 
-Všechny trasy pod `/api/services/` a `/dashboard/providers/services/*/embed/` jsou
-v souboru `src/server/authz/routeGuard.ts` klasifikovány jako LOCAL_ONLY. Kontrola
-loopback rozhraní probíhá bezpodmínečně před jakoukoli větví ověřování:
+Všechny cesty pod `/api/services/` a `/dashboard/providers/services/*/embed/` jsou klasifikovány jako LOCAL_ONLY v `src/server/authz/routeGuard.ts`. Kontrola zpětné smyčky probíhá bezpodmínečně před jakoukoli auth větví:
 
 ```
-přijde požadavek
+request arrives
   → isLocalOnlyPath(path)?
-      → mimo loopback → 403 LOCAL_ONLY (vždy, před kontrolou ověření)
-      → loopback      → pokračování ke standardnímu ověření
+      → non-loopback → 403 LOCAL_ONLY (always, before auth check)
+      → loopback    → fall through to normal auth
 ```
 
-Tím se zabrání tomu, aby uniklý JWT (např. prostřednictvím tunelu) spustil
-`npm install` nebo vytvoření procesu. Úplnou matici úrovní najdete v
-`docs/security/ROUTE_GUARD_TIERS.md`.
+To zabrání úniku JWT (např. přes tunel) ve spuštění `npm install` nebo spawnování procesu. Viz `docs/security/ROUTE_GUARD_TIERS.md` pro úplnou matici vrstev.
 
-### Vkládání API klíče
+### vstřikování klíče API
 
-9Router a Mux vyžadují pro své vlastní HTTP endpointy API klíč / bearer token.
-OmniRoute:
+9Router a Mux vyžadují token API key/bearer pro své vlastní koncové body HTTP. OmniRoute:
 
-1. Vygeneruje klíč pomocí `crypto.randomBytes(32).toString("base64url")` s prefixem
-   specifickým pro službu (`nr_` pro 9Router, `mx_` pro Mux).
-2. Zašifruje jej při uložení pomocí AES-256-GCM (stejné šifry, která se používá pro
-   přihlašovací údaje poskytovatelů).
-3. Při spuštění jej dešifruje a vloží jako proměnnou prostředí —
-   `NINEROUTER_API_KEY` pro 9Router, `MUX_SERVER_AUTH_TOKEN` pro Mux (nikdy jako
-   příznak CLI, takže se token nikdy nezobrazí ve výpisu `ps` ani v seznamech procesů).
-4. Nikdy nevrací klíč v podobě prostého textu v žádné HTTP odpovědi.
+1. Vygeneruje klíč přes `crypto.randomBytes(32).toString("base64url")` s předponou specifickou pro službu (`nr_` pro 9Router, `mx_` pro Mux).
+2. Zašifruje jej v klidu pomocí AES-256-GCM (stejná šifra jako pro přihlašovací údaje poskytovatele).
+3. Dešifruje a vloží ji jako proměnnou prostředí v době spawnování — `NINEROUTER_API_KEY` pro 9Router, `MUX_SERVER_AUTH_TOKEN` pro Mux (nikdy příznak CLI, takže token se nikdy neobjeví ve výpisech `ps`/process).
+4. Nikdy nevrací klíč prostého textu v žádné odpovědi HTTP.
 
-CLIProxyAPI obdrží při spuštění vyhrazený klíč datové vrstvy
-(`needsApiKey: true` — používá se k synchronizaci modelů s adaptérem).
+CLIProxyAPI přijímá vyhrazený klíč datové roviny vložený při spawn (`needsApiKey: true` — používaný pro synchronizaci modelu s adaptérem).
 
-### Ochrana proti SSRF
+### obrana SSRF
 
-Reverzní HTTP proxy (`/dashboard/.../embed/[...path]`) je napevno nastavena tak, aby
-předávala požadavky pouze na `http://127.0.0.1:{port}`. Nikdy nenásleduje přesměrování
-do cílů mimo loopback. Knihovna `ssrf-req-filter` se používá k odmítnutí jakékoli
-upstream URL, která se přeloží na adresu mimo rozsah loopback.
+Reverzní HTTP proxy (`/dashboard/.../embed/[...path]`) je napevno zakódován pro předávání pouze `http://127.0.0.1:{port}`. Nikdy nenásleduje přesměrování do destinací bez zpětné smyčky. Knihovna `ssrf-req-filter` se používá k odmítnutí jakéhokoli upstream URL, který se vyřeší mimo rozsah zpětné smyčky.
 
-### Bezpečnost shellu (pevné pravidlo č. 13)
+### Bezpečnost pláště (tvrdé pravidlo #13)
 
-`npm install` se spouští pomocí `execFile('npm', ['install', pkg, '--prefix', dir])` —
-bez šablonových literálů, bez shellu a bez interpolace externích cest do řetězce
-příkazu. Běhové hodnoty (porty, API klíče) se předávají prostřednictvím objektu
-`env` podřízeného procesu.
+`npm install` se vyvolává přes `execFile('npm', ['install', pkg, '--prefix', dir])` — žádné šablonové literály, žádný shell, žádná interpolace externích cest do příkazového řetězce. Runtime hodnoty (porty, klíče API ) jsou předávány přes objekt `env` potomka.
 
-### Sanitizace chyb (pevné pravidlo č. 12)
+### Sanitace chyb (tvrdé pravidlo #12)
 
-Všechny chybové odpovědi z `/api/services/*` procházejí přes `buildErrorBody()` nebo
-`sanitizeErrorMessage()`. Nezpracované hodnoty `err.stack` a `err.message` se
-volajícímu nikdy nevracejí doslovně.
+Všechny chybové reakce od `/api/services/*` procházejí `buildErrorBody()` nebo `sanitizeErrorMessage()`. Nezpracované `err.stack` a `err.message` nejsou volajícímu nikdy vráceny doslovně.
 
 ---
 
-## 6. Přidání nové vestavěné služby
+## 6. Přidání nové integrované služby
 
-Postupujte podle těchto 8 kroků. Za kanonickou referenci považujte existující
-implementace v `src/lib/services/installers/` a `src/app/api/services/`.
+Postupujte podle těchto 8 kroků. Přečtěte si existující implementace v `src/lib/services/installers/` a `src/app/api/services/` jako kanonickou referenci.
 
-### Krok 1 — Vytvoření instalačního modulu
+### Krok 1 — Vytvořte instalační program
 
-Vytvořte `src/lib/services/installers/{name}.ts` podle vzoru `ninerouter.ts`:
+Vytvořte `src/lib/services/installers/{name}.ts` po vzoru `ninerouter.ts`:
 
 ```typescript
 export const NAME_PACKAGE = "your-npm-package";
-export const NAME_DEFAULT_PORT = 20132; // vyberte volný port
+export const NAME_DEFAULT_PORT = 20132; // pick a free port
 
 export async function install(version = "latest"): Promise<InstallResult> { ... }
 export async function update(version = "latest"): Promise<InstallResult> { ... }
@@ -643,13 +622,11 @@ export async function getInstalledVersion(): Promise<string | null> { ... }
 export async function getLatestVersion(): Promise<string | null> { ... }
 ```
 
-Použijte `runNpm(['install', NAME_PACKAGE, '--prefix', dir])` z
-`installers/utils.ts` — nikdy nepoužívejte `execSync` ani interpolaci shellu.
+Použijte `runNpm(['install', NAME_PACKAGE, '--prefix', dir])` z `installers/utils.ts` — nikdy `execSync` nebo interpolaci shellu.
 
-### Krok 2 — Registrace v bootstrapu
+### Krok 2 — Zaregistrujte se v bootstrapu
 
-Přidejte položku `ServiceEntry` do pole `SERVICES` v
-`src/lib/services/bootstrap.ts`:
+Přidejte `ServiceEntry` do pole `SERVICES` v `src/lib/services/bootstrap.ts`:
 
 ```typescript
 {
@@ -659,107 +636,77 @@ Přidejte položku `ServiceEntry` do pole `SERVICES` v
   healthIntervalMs: 5_000,
   stopTimeoutMs: 15_000,
   logsBufferBytes: 5_242_880,
-  needsApiKey: true, // false, pokud není potřeba API klíč
+  needsApiKey: true, // false if no API key needed
 }
 ```
 
-Rozšiřte `buildSpawnArgsFactory()` tak, aby zpracovávala
-`cfg.tool === "myservice"`.
+Rozšířením `buildSpawnArgsFactory()` zvládnete `cfg.tool === "myservice"`.
 
-#### Rozšiřitelný kontrakt pluginu poskytovatele (fáze 1, č. 7333)
+#### Smlouva o zásuvném poskytovateli a pluginu (fáze 1, #7333)
 
-`src/lib/services/providerPlugins/` zavádí kontrakt `ServiceProviderPlugin`, který
-sdružuje pole `ServiceEntry` ze souboru `bootstrap.ts` daného backendu a pole šablony
-manifestu ze souboru `serviceBackends.ts` do jednoho objektu namísto toho, aby byla
-podoba stejného backendu definována odděleně ve dvou nesouvisejících souborech. V době
-psaní tohoto textu je **migrován pouze `9router`** — `bootstrap.ts` odvozuje svou
-položku `SERVICES[]` z `getServiceProviderPlugin("9router")`
-(`src/lib/services/providerPlugins/registry.ts`) a při případné absenci pluginu
-vyvolá chybu při spuštění. `cliproxy`, `mux` a `bifrost` zůstávají beze změny
-u dříve existujících inline literálů `SERVICES[]`.
+`src/lib/services/providerPlugins/` zavádí kontrakt `ServiceProviderPlugin`, který sbalí pole `bootstrap.ts` `ServiceEntry` backendu a pole šablony manifestu `serviceBackends.ts` do jednoho objektu, místo aby stejný tvar backendu byl vyjádřen odděleně ve dvou nesouvisejících souborech. Od tohoto psaní** pouze `9router` je migrováno** — `bootstrap.ts` odvozuje svůj záznam `SERVICES[]` ze `getServiceProviderPlugin("9router")` (`src/lib/services/providerPlugins/registry.ts`), což způsobí chybu při spuštění, pokud plugin někdy chybí. `cliproxy`, `mux` a `bifrost` zůstávají na již existujících vložených literálech `SERVICES[]` beze změny.
 
-Soubor `open-sse/config/providerPluginManifest.ts` také získal doplňkovou pomocnou
-funkci `createServiceBackendManifestEntry(pluginId, template)`, která vytváří správně
-formovanou položku `ProviderPluginManifestEntry` z položky
-`SERVICE_BACKEND_MANIFEST_TEMPLATE` — zatím **není** zapojena do žádné aktivní cesty
-požadavku (ani `generateProviderPluginManifestFromRegistry()`, ani
-`/v1/providers/[provider]/models`); to zůstává následným krokem poté, co bude kontrakt
-ověřen pro druhý backend.
+`open-sse/config/providerPluginManifest.ts` také získal aditivního pomocníka `createServiceBackendManifestEntry(pluginId, template)`, který staví dobře vytvořený `ProviderPluginManifestEntry` ze vstupu `SERVICE_BACKEND_MANIFEST_TEMPLATE` — to je** ne** zapojeno do jakékoli cesty živého požadavku (ani `generateProviderPluginManifestFromRegistry()` ani `/v1/providers/[provider]/models`); to zůstane v návaznosti, jakmile se prokáže smlouva na druhý backend.
 
-Do následných PR, sledovaných v rámci issue č. 7333, bylo odloženo: migrace
-`cliproxyapi` prostřednictvím stejného registru, zobecnění `mux`/`bifrost` do sjednocení
-`ServiceBackendPluginId`, začlenění zvláštního zpracování směrování executorů
-(`open-sse/executors/index.ts`, `open-sse/handlers/chatCore/executorProxy.ts`) do
-kontraktu pluginu a zapojení `createServiceBackendManifestEntry()` do aktivní cesty
-kódu manifestu/modelů.
+Odloženo na navazující PRs, sledované pod vydáním #7333: migrace `cliproxyapi` přes stejný registr, zobecnění `mux`/`bifrost` do sjednocení `ServiceBackendPluginId`, vložení speciálního pouzdra exekutor-routing (`open-sse/executors/index.ts`, `open-sse/handlers/chatCore/executorProxy.ts`) do smlouvy o pluginu a zapojení `createServiceBackendManifestEntry()` do živé cesty kódu manifest/models.
 
-### Krok 3 — Přidání migrace a počátečních dat databáze
+### Krok 3 — Přidejte migraci a DB seed
 
-Pomocí migrace v `src/lib/db/migrations/` zajistěte, aby služba měla řádek
-v tabulce `version_manager`. Řádek by měl obsahovat:
+Ujistěte se, že služba má řádek v `version_manager` prostřednictvím migrace v `src/lib/db/migrations/`. Řádek by měl mít:
 
 ```sql
 INSERT OR IGNORE INTO version_manager (tool, status, auto_start, provider_expose)
 VALUES ('myservice', 'not_installed', 0, 0);
 ```
 
-### Krok 4 — Vytvoření 7 API endpointů
+### Krok 4 — Vytvořte 7 koncových bodů API
 
 Pod `src/app/api/services/{name}/`:
 
 ```
-_lib.ts            pomocná funkce getOrInitSupervisor()
-install/route.ts   POST — volá installer.install()
-start/route.ts     POST — volá supervisor.start()
-stop/route.ts      POST — volá supervisor.stop()
-restart/route.ts   POST — volá supervisor.restart()
-update/route.ts    POST — volá installer.update()
-status/route.ts    GET  — slučuje aktuální stav se stavem z DB
-auto-start/route.ts POST — přepíná příznak auto_start
+_lib.ts            getOrInitSupervisor() helper
+install/route.ts   POST — calls installer.install()
+start/route.ts     POST — calls supervisor.start()
+stop/route.ts      POST — calls supervisor.stop()
+restart/route.ts   POST — calls supervisor.restart()
+update/route.ts    POST — calls installer.update()
+status/route.ts    GET  — merges live + DB status
+auto-start/route.ts POST — toggles auto_start flag
 ```
 
-Sdílená trasa `GET /api/services/[name]/logs` je již zapojena — nejsou v ní potřeba
-žádné změny.
+Sdílená trasa `GET /api/services/[name]/logs` je již propojena kabelem — nejsou zde potřeba žádné změny.
 
-Všechny chybové odpovědi delegujte prostřednictvím `createErrorResponse()` / `buildErrorBody()`.
+Delegujte všechny chybové reakce prostřednictvím `createErrorResponse()` / `buildErrorBody()`.
 
-### Krok 5 — Přidání do LOCAL_ONLY_API_PREFIXES
+### Krok 5 — Přidat do LOCAL_ONLY_API_PREFIXES
 
-V souboru `src/server/authz/routeGuard.ts` ověřte, že je již uvedena cesta `/api/services/`.
-Pokud zavedete nový prefix (např. `/api/tools/`), přidejte jej do
-`LOCAL_ONLY_API_PREFIXES` a pokud spouští procesy, také do `SPAWN_CAPABLE_PREFIXES`.
-Přidejte test do `tests/unit/authz/routeGuard.test.ts`.
+V `src/server/authz/routeGuard.ts` ověřte, že `/api/services/` je již uveden. Pokud zavedete novou předponu (např. `/api/tools/`), přidejte ji jak do `LOCAL_ONLY_API_PREFIXES`, tak i do `SPAWN_CAPABLE_PREFIXES`, pokud vytváří procesy. Přidejte test v `tests/unit/authz/routeGuard.test.ts`.
 
-### Krok 6 — Přidání karty uživatelského rozhraní
+### Krok 6 — Přidejte kartu UI
 
-Vytvořte `src/app/(dashboard)/dashboard/providers/services/tabs/{Name}ServiceTab.tsx`.
-Znovu použijte sdílené komponenty:
+Vytvořit `src/app/(dashboard)/dashboard/providers/services/tabs/{Name}ServiceTab.tsx`. Znovu použít sdílené komponenty:
 
-- `ServiceStatusCard` — aktuální stav + indikátor stavu služby
-- `ServiceLifecycleButtons` — Spustit / Zastavit / Restartovat / Aktualizovat
-- `ServiceLogsPanel` — průběžný výpis protokolů přes SSE (připojuje se k `/api/services/{name}/logs`)
-- `ApiKeyCard` — zobrazení + obměna klíče (pokud platí `needsApiKey: true`)
+- `ServiceStatusCard` — živý stav + zdravotní odznak
+- `ServiceLifecycleButtons` — Start / Stop / Restart / Update
+- `ServiceLogsPanel` — SSE log tail (připojuje se k `/api/services/{name}/logs`)
+- Klávesa `ApiKeyCard` — odhalí otočení + (pokud `needsApiKey: true`)
 
 Zaregistrujte kartu v `ServicesPageShell.tsx`.
 
-### Krok 7 — Přidání položky poskytovatele (pokud je služba cílem směrování)
+### Krok 7 — Přidejte záznam poskytovatele (pokud je služba cílem směrování)
 
-Pokud vestavěná služba zpřístupňuje koncový bod `/v1/chat/completions` kompatibilní s OpenAI:
+Pokud vestavěná služba odhaluje koncový bod `/v1/chat/completions` kompatibilní s OpenAI:
 
-1. Přidejte položku poskytovatele do `src/shared/constants/providers.ts` s nastavením `isEmbeddedService: true`.
-2. Vytvořte `open-sse/executors/{name}.ts` rozšiřující `BaseExecutor`. Pro každý požadavek znovu zjistěte port a
-   klíč API (nikdy je neukládejte do mezipaměti v konstruktoru). Pokud stav správce služby není `"running"`, vraťte
-   odpověď `503 service_not_running`.
-3. Zaregistrujte modely v `open-sse/config/providerRegistry.ts` s prefixem služby
-   (např. `myservice/sub/model`). `modelSync.ts` je bude průběžně aktualizovat.
+1. Přidejte záznam poskytovatele do `src/shared/constants/providers.ts` pomocí `isEmbeddedService: true`.
+2. Vytvořte `open-sse/executors/{name}.ts` rozšiřující `BaseExecutor`. Znovu vyhledat port a klíč API na požadavek (nikdy se v konstruktoru neukládá do mezipaměti). Vraťte odpověď `503 service_not_running` když stav supervizora není `"running"`.
+3. Registrujte modely v `open-sse/config/providerRegistry.ts` s předponou služby (např. `myservice/sub/model`). `modelSync.ts` je bude aktualizovat.
 
-### Krok 8 — Dokumentace a testování
+### Krok 8 — Dokument a test
 
-1. Aktualizujte `docs/frameworks/EMBEDDED-SERVICES.md` (tento soubor) — přidejte službu do
-   tabulky v §1 a všechny nové koncové body do §4.
-2. Přidejte jednotkové testy do `tests/unit/services/` (životní cyklus, instalační program, struktura API).
-3. Přidejte integrační test do `tests/integration/services/` (aktivovaný pomocí `RUN_SERVICES_INT=1`).
-4. Aktualizujte `docs/openapi.yaml` o nové koncové body.
+1. Aktualizovat `docs/frameworks/EMBEDDED-SERVICES.md` (tento soubor) — přidat službu do tabulky v §1 a případné nové koncové body do §4.
+2. Přidejte testy jednotek v `tests/unit/services/` (životní cyklus, instalační program, tvar API ).
+3. Přidejte test integrace do `tests/integration/services/` (za `RUN_SERVICES_INT=1`).
+4. Aktualizujte `docs/openapi.yaml` pomocí nových koncových bodů.
 
 ---
 
@@ -860,66 +807,44 @@ s výchozím portem 20128 služby OmniRoute.
 
 ---
 
-## 8. Často kladené otázky
+## 8. FAQ
 
-**Otázka: Mohu zpřístupnit koncové body integrovaných služeb klientům mimo loopback?**
+**Otázka: Mohu vystavit koncové body vestavěných služeb klientům bez zpětné smyčky?**
 
-Ne. Úroveň LOCAL_ONLY je záměrná (pevné pravidlo č. 17). Trasy, které mohou spustit
-`npm install` nebo vytvářet procesy `node`, nesmějí být dostupné pro provoz
-mimo loopback, protože JWT uniklý prostřednictvím tunelu (Cloudflare, Ngrok, Tailscale)
-by jinak umožnil libovolné spouštění procesů. Pro
-`/api/services/` neexistuje žádná výjimka — na rozdíl od `/api/mcp/` je tato trasa
-vyloučena ze seznamu výjimek pro obcházení rozsahu manage.
-Viz `docs/security/ROUTE_GUARD_TIERS.md`.
+Ne. Úroveň LOCAL_ONLY je záměrná (tvrdé pravidlo #17). Cesty, které mohou vyvolat procesy `npm install` nebo spawn `node` nesmí být dosažitelné z provozu bez zpětné smyčky, protože únik JWT přes tunel (Cloudflare, Ngrok, Tailscale) by jinak umožnil spawnování libovolného procesu. Na rozdíl od `/api/mcp/` neexistuje žádné vyjmutí z výjimek pro `/api/services/` —, je vyloučeno ze seznamu vynechání rozsahu správy. Viz `docs/security/ROUTE_GUARD_TIERS.md`.
 
 ---
 
-**Otázka: Budou 9Router a CLIProxyAPI dostupné v produkčních/cloudových nasazeních?**
+**Otázka: Budou 9Router a CLIProxyAPI dostupné v nasazeních production/cloud ?**
 
-Ano. Obě služby používají stejný model local-first jako samotný OmniRoute. Běží
-na stejném počítači a komunikují přes loopback. „Produkční“ zde označuje VPS
-nebo místní server, na kterém je OmniRoute nasazen, nikoli vzdáleného poskytovatele cloudu.
+Ano. Obě služby se řídí stejným modelem local-first jako samotná OmniRoute. Běží na stejném stroji a komunikují přes smyčku. „Produkce“ zde znamená VPS nebo místní server, kde je OmniRoute nasazen, nikoli vzdálený poskytovatel cloudu.
 
 ---
 
-**Otázka: Jak mohu ladit supervisor?**
+**Otázka: Jak odladím supervizora?**
 
-1. Sledujte výpis protokolu SSE: `curl -N http://localhost:20128/api/services/9router/logs`.
-2. Zkontrolujte strukturované protokoly ve výstupu pino systému OmniRoute filtrované podle
-   jmenného prostoru `service:supervisor`.
-3. Prozkoumejte řádek databáze: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
-4. Pomocí `GET /api/services/9router/status` zobrazte v jediném volání aktuální živý stav, PID, stav funkčnosti
-   a `lastError`.
+1. Tail stream log SSE : `curl -N http://localhost:20128/api/services/9router/logs`.
+2. Zkontrolujte strukturované protokoly ve výstupu pino OmniRoute filtrovaném podle jmenného prostoru `service:supervisor`.
+3. Zkontrolujte řádek DB : `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
+4. Použijte `GET /api/services/9router/status` k zobrazení aktuálního živého stavu, PID, zdraví a `lastError` v jednom hovoru.
 
 ---
 
-**Otázka: Supervisor zobrazuje `health: "degraded"` nebo `health: "unknown"`, ale stav je `"running"`. Je to problém?**
+**Otázka: Vedoucí ukazuje `health: "degraded"` nebo `health: "unknown"`, ale stav je `"running"`. je to problém?**
 
-`"degraded"` znamená, že sonda stavu funkčnosti vrátila odpověď jinou než 200. `"unknown"` znamená, že zatím
-nebyla dokončena žádná kontrola (souběh s prvním dotazováním). Oba stavy jsou během spouštění
-přechodné. Pokud stav funkčnosti zůstane `"degraded"` déle než `healthIntervalMs * 3` ms po dosažení stavu
-`"running"`, integrovaná služba běží, ale její HTTP API neodpovídá. Zkontrolujte,
-zda je ve stavové odpovědi uveden správný port a zda služba na tomto portu skutečně
-naslouchá.
+`"degraded"` znamená, že sonda stavu vrátila odpověď non-200. `"unknown"` znamená, že ještě nebyla dokončena žádná sonda (závod s prvním hlasováním). Oba jsou během spouštění přechodné. Pokud stav zůstane `"degraded"` déle než `healthIntervalMs * 3` ms po `"running"`, vestavěná služba běží, ale její HTTP API nereaguje. Zkontrolujte, zda je port ve stavové odpovědi správný a zda služba na tomto portu skutečně naslouchá.
 
 ---
 
-**Otázka: Mohu změnit klíč API služby 9Router bez úplného restartu?**
+**Otázka: Mohu změnit klíč 9Router API bez úplného restartu?**
 
-Ne. Klíč API se předává službě 9Router prostřednictvím proměnné prostředí při spuštění procesu.
-Proměnné prostředí nelze v běžícím procesu změnit. `POST .../rotate-key`
-automaticky službu zastaví a restartuje, aby se nový klíč použil. Rotace klíče
-se projeví během hodnoty `stopTimeoutMs` služby (výchozí hodnota je 15 s) plus doby jejího
-spuštění.
+Ne. Klíč API je předán 9Routeru prostřednictvím proměnné prostředí v době spawnování. Proměnné prostředí nelze v běžícím procesu měnit. `POST .../rotate-key` automaticky zastaví a restartuje službu, aby se použil nový klíč. Střídání klíčů se projeví v rámci `stopTimeoutMs` služby (výchozí 15 s) plus její čas spuštění.
 
 ---
 
-**Otázka: Jaký je limit kruhové vyrovnávací paměti a co se stane po jejím zaplnění?**
+**Otázka: Jaký je limit kruhové vyrovnávací paměti a co se stane, když se zaplní?**
 
-Každá služba má vyhrazenou kruhovou vyrovnávací paměť o velikosti 5 MB. Když se vyrovnávací paměť zaplní, nejstarší
-řádky protokolu se odstraní, aby se uvolnilo místo pro nové. Událost SSE `snapshot` vrací
-nejnovější řádky v rámci limitu `tail`. Protokoly se neukládají na disk, pokud
-není v řádku databáze nastavena hodnota `logsBufferPath`.
+Každá služba má vyhrazenou 5 MB ring buffer. Když je vyrovnávací paměť plná, nejstarší řádky protokolu jsou vyřazeny, aby se uvolnilo místo pro nové. Událost SSE `snapshot` vrátí nejnovější řádky v rámci limitu `tail`. Protokoly se neukládají na disk, pokud není v řádku DB nastaveno `logsBufferPath`.
 
 ---
 

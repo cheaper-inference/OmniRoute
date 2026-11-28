@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute leveres som en fuldt installerbar Progressive Web App. Når du åbner kontrolpanelet fra en mobilbrowser — Android (Chrome) eller iOS (Safari) — kan du vælge "Føj til startskærm" og få en oplevelse som i en indbygget app uden at skulle bruge en appbutik.
+Installer OmniRoute dashboardet som en progressiv webapp for at åbne det fra din startskærm eller skrivebord i et selvstændigt vindue. Den installerede app skal stadig have forbindelse til din OmniRoute server til navigation, dashboard-data og API anmodninger. Cachelagrede statiske aktiver giver ikke en offline-gateway eller et offline-dashboard.
 
 ## Hvad er en PWA?
 
-En Progressive Web App omdanner OmniRoutes webbaserede kontrolpanel til noget, der ser ud og fungerer som en indbygget mobilapp. Når den er installeret:
+En progressiv webapp bruger webdashboardet med et appikon og et separat vindue. Når det er installeret, OmniRoute:
 
-- Startes den fra din startskærm med sit eget ikon
-- Åbnes den i fuldskærm — uden browserens adresselinje eller fanebrugerflade
-- Fungerer den offline med en dedikeret forbindelsesside
-- Cachelagrer den statiske ressourcer, så de indlæses hurtigere
-- Understøtter den både stående og liggende skærmretning
+- Starter fra din startskærm eller skrivebord
+- Åbner i selvstændig tilstand uden browserens sædvanlige adresselinje og faner
+- Cacher udvalgte statiske aktiver
+- Understøtter portræt- og landskabsretninger
 
 ## Installation
 
+Brug en HTTPS adresse til en server på en anden enhed. Når serveren kører på den samme enhed, opfylder `http://localhost:20128` også kravene til browserinstallation. En almindelig `http://YOUR_IP:20128` adresse opfylder ikke disse krav. Installationsmenuer og -prompter afhænger af browseren og operativsystemet. Se [MDN's PWA installationskrav](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
+
 ### Android (Chrome)
 
-1. Åbn OmniRoute-kontrolpanelet i Chrome: `http://YOUR_IP:20128`
-2. Chrome viser automatisk banneret **"Føj OmniRoute til startskærmen"**, eller:
-   - Tryk på menuen **⋮** (tre prikker) → **"Føj til startskærm"** eller **"Installer app"**
-3. Bekræft dialogboksen
-4. OmniRoute vises på din startskærm som en selvstændig app
+1. Åbn din OmniRoute HTTPS adresse, eller `http://localhost:20128` for en server på den samme telefon.
+2. Åbn**⋮** menu og vælg** Installer app** eller** Føj til startskærmen** , hvis det tilbydes.
+3. Bekræft prompten.
+4. Åbn OmniRoute fra startskærmen.
 
 ### iOS (Safari)
 
-1. Åbn OmniRoute-kontrolpanelet i Safari: `http://YOUR_IP:20128`
-2. Tryk på knappen **Del** (firkant med pil)
-3. Rul ned, og tryk på **"Føj til hjemmeskærm"**
-4. Giv den et navn (standarden er "OmniRoute"), og tryk på **Tilføj**
-5. OmniRoute vises på din startskærm med appikonet
+1. Åbn din OmniRoute HTTPS adresse i Safari.
+2. Tryk på** Dele** →** Føj til startskærmen** .
+3. Bekræft navnet, og tryk på** Tilføje** .
+4. Åbn OmniRoute fra startskærmen.
 
-### Computer (Chrome / Edge)
+### Desktop (Chrome / Edge)
 
-1. Åbn OmniRoute-kontrolpanelet
-2. Klik på **installationsikonet** i adresselinjen (eller ⋮ → "Installer OmniRoute...")
-3. Bekræft dialogboksen
-4. OmniRoute åbnes som et selvstændigt vindue — uden faner og adresselinje
+1. Åbn dit OmniRoute dashboard.
+2. Brug browserens installationsikon eller** Installer app** menuindgang, hvis det tilbydes.
+3. Bekræft prompten for at åbne OmniRoute i sit eget vindue.
 
 ## Funktioner
 
-### Fuldskærmsoplevelse
+### Enkeltstående vindue
 
-Manifestet er konfigureret med `display: "fullscreen"`, hvilket betyder, at den installerede app bruger hele skærmen — uden browsergrænseflade og uden overlapning med statuslinjen. Det får kontrolpanelet til at føles som en ægte indbygget app.
+Manifestet sætter `display: "standalone"` og `start_url: "/dashboard"`. Den installerede app åbner dashboardet i et appvindue. Browser- og operativsystemkontroller kan stadig vises; manifestet anmoder ikke om fuldskærmstilstand.
 
-### Offlineunderstøttelse
+### Cachelagrede aktiver og netværkskrav
 
-OmniRoute indeholder en service worker (`sw.js`), der leverer intelligent cachelagring:
+[Serviceworkeren](../../public/sw.js) cacher valgte ressourcer med samme oprindelse:
 
-| Ressourcetype                                                                                                                                                                                                             | Strategi                            | Funktionsmåde                                                                                               |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Appskal**                                                                                                                                                                                                               | Cache først                         | `/`, `/offline`, manifestet og ikoner cachelagres på forhånd ved installation                               |
-| **Statiske ressourcer** (CSS, JS, billeder, skrifttyper)                                                                                                                                                                  | Netværk først med cache som reserve | Henter nye versioner fra netværket; bruger cachen som reserve i offlinetilstand                             |
-| **Next.js-bundter** (`/_next/`)                                                                                                                                                                                           | Netværk først med cacheopdatering   | Henter fra netværket og opdaterer cachen; leverer den cachelagrede version offline                          |
-| **Navigationsanmodninger**                                                                                                                                                                                                | Omgås (opfanges aldrig)             | Browseren håndterer HTTP/3→HTTP/2-reserveløsningen; en død QUIC-socket må ikke blive til `Response.error()` |
-| **API-/kontrolpanelruter** (`/api/`, `/a2a`, `/dashboard`, klient-API-aliasserne `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex` samt `/callback`, `/login`; matches uden forskel på store og små bogstaver) | Omgås (cachelagres aldrig)          | Går altid direkte til serveren — opfanges aldrig af service workeren                                        |
+| Anmodning eller aktiv                           | Strategi      | Opførsel                                                                                                        |
+| ----------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------- |
+| Installationstidsressourcer                     | Pre-cache     | `/`, `/manifest.webmanifest`, `/icon-512.png` og `/apple-touch-icon.png` cachelagres under arbejderinstallation |
+| Next.js statiske aktiver (`/_next/`)            | Netværk først | Vellykkede svar opdaterer cachen; en netværksfejl falder tilbage til et eksisterende cachelagret svar           |
+| Andre statiske CSS, JS, billeder og skrifttyper | Cache-først   | Et eksisterende cachelagret svar genbruges; vellykkede netværkssvar cachelagres på en miss                      |
+| Sidenavigation                                  | Bypass        | Browseren henter siden direkte; der vises ingen offline reserve                                                 |
+| API, dashboard og autentificeringsruter         | Bypass        | Arbejderen opsnapper eller cacherer ikke disse anmodninger                                                      |
+| Andre ikke-statiske anmodninger                 | Netværk       | Ingen cacheopslag eller lagring                                                                                 |
 
-### Offlineside
+De udelukkede ruter er `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` og `/login`, matchet ufølsomt over for store og små bogstaver ved stigrænser. Cross-origin og non-GET-anmodninger omgår også arbejderen.
 
-Når netværket ikke er tilgængeligt, og en bruger navigerer til en ny side, leverer service workeren en dedikeret `/offline`-side, som:
+### Forbindelsesside
 
-- Viser en tydelig meddelelse om **"Forbindelsesproblem"**
-- Viser en dynamisk **online-/offlinestatusindikator**, der opdateres i realtid
-- Indeholder knappen **"Prøv forbindelsen igen"**, som genindlæser siden, når forbindelsen er genoprettet
-- Indeholder et link til **statussiden** til diagnosticering
+`/offline` siden giver en forbindelsesmeddelelse, en online/offline indikator, en** Prøv at oprette forbindelse igen** knap og et link til statussiden. Det er det** ikke pre-cachet** og det gør servicemedarbejderen** ikke** omdirigere mislykkede navigationer til den. Dens eksistens gør ikke nye sider tilgængelige uden serveren.
 
-### Appikoner
+### App ikoner
 
-OmniRoute leverer ikoner, der er optimeret til hver platform:
+Manifestet annoncerer disse PNG ikoner:
 
-| Fil                    | Størrelse        | Bruges af                               |
-| ---------------------- | ---------------- | --------------------------------------- |
-| `icon-512.png`         | 512×512          | Android-installationsdialog, startskærm |
-| `apple-touch-icon.png` | 180×180          | iOS-startskærmsikon                     |
-| `icon-192.svg`         | 192×192 (vektor) | Adaptivt Android-ikon                   |
-| `apple-touch-icon.svg` | 180×180 (vektor) | Apple-reserveløsning                    |
-| `favicon.svg`          | Vektor           | Browserfaner                            |
-| `favicon.ico`          | Flere størrelser | Ældre browsere                          |
+| Fil                    | Størrelse | Bruge                           |
+| ---------------------- | --------- | ------------------------------- |
+| `icon-192.png`         | 192×192   | Generelt app-ikon               |
+| `icon-512.png`         | 512×512   | Generelt og maskerbart app-ikon |
+| `apple-touch-icon.png` | 180×180   | Apples startskærmikon           |
+
+Browseren vælger det relevante ikon til installationsmålet.
 
 ### Automatisk registrering
 
-Service workeren registreres automatisk via komponenten `<PwaRegister />` i rodlayoutet. Der kræves ingen handling fra brugeren — appen kan installeres, så snart browseren registrerer det gyldige manifest og den gyldige service worker.
+`PwaRegister` registrerer arbejderen i produktion, når browseren understøtter servicearbejdere. Udviklingstilstand afregistrerer arbejdere og rydder caches for at undgå, at uaktuelle aktiver forstyrrer hot reload. Installationsmeddelelser forbliver en browserbeslutning.
 
 ## Teknisk arkitektur
 
-### Webappmanifest (`manifest.webmanifest`)
+### Web App Manifest
 
-Genereret af Next.js via `src/app/manifest.ts`:
+Next.js genererer `/manifest.webmanifest` fra [`src/app/manifest.ts`](../../src/app/manifest.ts). Dens nøgleindstillinger er:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Indstilling              | Værdi                                       |
+| ------------------------ | ------------------------------------------- |
+| `short_name`             | `OmniRoute`                                 |
+| `start_url`              | `/dashboard`                                |
+| `scope`                  | `/`                                         |
+| `display`                | `standalone`                                |
+| `orientation`            | `any`                                       |
+| Baggrunds- og temafarver | Standard lyspaletten fra `PWA_THEME_COLORS` |
 
-### Service worker (`public/sw.js`)
+Manifestets navn og beskrivelse er statiske værdier i den kildefil. Det installerede manifest følger ikke indstillingen for instansnavn eller den aktive palet ved hvert besøg.
 
-En almindelig service worker (uden frameworkafhængigheder) med:
+### Servicemedarbejder
 
-- **Installationsfase**: Forhåndscacher appskallen (roden, offlinesiden, manifestet og ikonerne)
-- **Aktiveringsfase**: Rydder op i gamle cacheversioner og overtager alle klienter
-- **Hentningsfase**: Intelligent routing baseret på anmodningstypen (navigation, statisk ressource, API)
-- **Cacheversionsstyring**: `omniroute-pwa-v3` — øg denne for at gennemtvinge en ny cache ved opdatering
+[`public/sw.js`](../../public/sw.js) har ingen service-worker-rammeafhængighed:
 
-### Layoutmetadata (`src/app/layout.tsx`)
+- **Installere:** pre-cacherer de fire ressourcer angivet ovenfor og aktiverer den nye arbejder.
+- **Aktiver:** fjerner ældre cachegenerationer og gør krav på klienter.
+- **Hent:** anvender de statiske aktiver-strategier og ruteekskluderinger ovenfor.
+- **Versionering:** kildecachenavnet er `omniroute-pwa-v3`; produktionsopbygningen stempler cachens identitet.
+- **Notifikationer:** håndterer indgående `push` -begivenheder og fokuserer eller åbner et vindue, når der klikkes på en notifikation.
 
-Rodlayoutet indeholder alle de metatags, der kræves for PWA-kompatibilitet:
+Push-hændelseshandlere alene etablerer ikke et aktivt push-abonnement eller konfigureret serverlevering. Antag ikke, at meddelelser er aktiveret, blot fordi PWA er installeret.
 
-- `manifest`-link til `/manifest.webmanifest`
-- `apple-web-app-capable: true` til selvstændig tilstand på iOS
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` til Chrome på Android
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` til gengivelse fra kant til kant
+### Layout Metadata og registrering
 
-### Komponent: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) leverer manifestlinket, selvstændige Apple-metadata, temafarver og `viewport-fit: cover`. Sidetitlen og Apple-webapp-titlen bruger instansnavnet. Livebrowserens temafarve følger paletten; installationsmanifestet bruger standardlysfarven.
 
-Denne klientkomponent findes i `src/shared/components/PwaRegister.tsx` og:
-
-1. Kører ved montering (kun på klientsiden)
-2. Kontrollerer, om browseren understøtter `serviceWorker`
-3. Registrerer `/sw.js` lydløst (fejl ignoreres for at undgå at blokere appen)
-4. Renderer intet (`return null`) — det er en komponent, der udelukkende har en sideeffekt
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) kører på klienten og registrerer `/sw.js` med build ID i sin URL. Den registrerer uoverensstemmende cachegenerationer og kan nulstille arbejderen og genindlæse én gang for at gendanne fra en ældre installation. Registreringsfejl blokerer ikke dashboardet.
 
 ## Brug med Termux (Android)
 
-Når OmniRoute kører på Android via Termux, fungerer PWA'en problemfrit:
+1. Start OmniRoute i Termux: `npx -y omniroute@latest`.
+2. Åbn Chrome på den samme telefon: `http://localhost:20128`.
+3. Installer PWA gennem browserens installationsmenu.
+4. Hold Termux-serveren kørende, mens du bruger dashboardet.
 
-1. Start OmniRoute i Termux: `npx omniroute`
-2. Åbn Chrome på den samme telefon: `http://localhost:20128`
-3. Installer PWA'en via "Føj til startskærmen"
-4. PWA'en opretter forbindelse til den lokale Termux-server — alt kører på enheden
-
-Denne kombination betyder, at din Android-telefon både er **serveren** (Termux) og **klienten** (PWA) — en komplet, selvstændig AI-gateway.
+Telefonen er vært for både gatewayen og dens dashboard. Anmodninger til eksterne AI udbydere har stadig brug for netværksadgang. Se [Termux-vejledningen](TERMUX_GUIDE.md) for opsætning og overvejelser om Android-proceslevetid.
 
 ## Brug fra andre enheder
 
-Installer PWA'en på enhver enhed, der har browseradgang til din OmniRoute-server:
-
-- **En anden telefon/tablet**: Gå til `http://PHONE_IP:20128`, og installer PWA'en
-- **Bærbar computer**: Åbn Chrome/Edge, og installer den som en desktop-PWA
-- **Smart-tv med browser**: Tilgå dashboardet i fuldskærmstilstand
+Åbn serverens HTTPS adresse på en telefon, tablet eller desktop, og følg derefter browserens installationsforløb. Serveren skal forblive tilgængelig fra hver enhed. Se [tunnelguiden](../ops/TUNNELS_GUIDE.md) for fjernadgangsmuligheder.
 
 ## Tilpasning
 
-### Instansnavn
+### Forekomstnavn
 
-PWA-titlen følger indstillingen **Instansnavn** under `Dashboard → Indstillinger`. Hvis du omdøber din instans til "Min AI-gateway", viser den installerede PWA dette navn.
+De** Forekomstnavn** indstilling ændrer dashboard-metadata, herunder sidetitlen og Apple-webapp-titel. Det genererede manifest bruger et statisk navn, så denne indstilling garanterer ikke, at en allerede installeret app omdøbes.
 
 ### Brugerdefineret favicon
 
-Hvis du uploader et brugerdefineret favicon via `Dashboard → Indstillinger`, afspejler PWA-ikonet på desktop det brugerdefinerede ikon. Ikoner på mobilenheders startskærm bruger de forhåndsgenererede filer `icon-512.png` og `apple-touch-icon.png`.
+Et brugerdefineret favicon ændrer browserens favicon. Installationsmanifestet annoncerer stadig PNG filerne ovenfor; ændring af favicon erstatter ikke disse hjemmeskærmsikoner.
 
 ## Begrænsninger
 
-- **Ingen push-notifikationer** — Service workeren implementerer ikke Push API'en. Notifikationer håndteres i stedet af Electron-appen.
-- **Ingen baggrundssynkronisering** — Offlinehandlinger sættes ikke i kø til senere afvikling. PWA'en er primært beregnet til visning af dashboards.
-- **iOS-begrænsninger** — Safari på iOS understøtter ikke alle PWA-funktioner (f.eks. skal installation startes manuelt, og service workers i baggrunden er begrænsede).
-- **Cachestørrelse** — Service workeren cacher kun statiske aktiver. Store svarpayloads fra `/api/`-ruter caches aldrig.
-- **Tilpassede ikoner på mobilenheder** — Ændring af faviconet i indstillingerne opdaterer ikke ikonet på startskærmen på mobilenheder (dette kræver, at PWA-ikonerne genereres igen).
+- **Serverforbindelse påkrævet:** sidenavigation, dashboard-tilstand og API -anmodninger har ikke en offline fallback.
+- **Ingen baggrundssynkronisering:** offline handlinger er ikke i kø til genafspilning.
+- **Browserforskelle:** installationsmenuer, vinduespræsentation og meddelelsesunderstøttelse varierer fra platform til platform.
+- **Ingen API -svarcache:** arbejderen udelukker API, dashboard og godkendelsesruter.
+- **Statiske installationsikoner:** opdatering af disse ikoner kræver ændring af de annoncerede aktiver; browsere kan beholde installerede metadata.
 
-## Filoversigt
+## Filreference
 
-| Fil                                     | Formål                                                       |
-| --------------------------------------- | ------------------------------------------------------------ |
-| `src/app/manifest.ts`                   | Next.js-manifestrute (genererer `manifest.webmanifest`)      |
-| `public/sw.js`                          | Service worker med cachelogik                                |
-| `src/shared/components/PwaRegister.tsx` | Klientkomponent, der registrerer service workeren            |
-| `src/app/offline/page.tsx`              | Offline-reserveside med live-statusindikator                 |
-| `src/app/layout.tsx`                    | Rodlayout med PWA-metadata (apple-web-app, theme-color osv.) |
-| `public/icon-512.png`                   | 512×512 PNG-ikon (Android, splashskærm)                      |
-| `public/apple-touch-icon.png`           | 180×180 PNG-ikon (iOS-startskærm)                            |
-| `public/icon-192.svg`                   | 192×192 SVG-ikon (Android, adaptivt)                         |
-| `public/apple-touch-icon.svg`           | 180×180 SVG-ikon (Apple-reserveikon)                         |
+| Fil                                                                                    | Formål                                                    |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Genereret webapp-manifest                                 |
+| [public/sw.js](../../public/sw.js)                                                     | Caching, ekskluderinger og meddelelseshændelsesbehandlere |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Produktionsregistrering og stale-cache-gendannelse        |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Forbindelsesside, ikke en automatisk offline fallback     |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Indstillinger for sidemetadata og viewport                |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Delte temafarveværdier                                    |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 app-ikon                                        |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple-ikon                                      |

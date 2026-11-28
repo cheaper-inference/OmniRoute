@@ -409,7 +409,7 @@ region  = "us-east-1"
 
 ---
 
-## Pelbagai pelayan
+## Berbilang pelayan
 
 ```toml
 [model_providers.omniroute-main]
@@ -469,138 +469,126 @@ Dalam sesi interaktif:
 
 ---
 
-## Tugas jangka panjang
+## Tugasan yang berpanjangan
 
-Dua tetapan lalai OmniRoute boleh menjejaskan sesi Codex CLI berbilang jam secara senyap. Kedua-duanya bukan tetapan Codex CLI — kedua-duanya berada pada bahagian OmniRoute. Pengguna yang memindahkan konfigurasi daripada proksi huluan yang menetapkan akaun dan menyahaktifkan had masa melahu sering menghadapi kedua-dua masalah ini lalu membuat kesimpulan bahawa OmniRoute “tidak dapat mengekalkan sesi yang panjang.”
+Dua lalai OmniRoute boleh mensabotaj CLI Codex berbilang jam secara senyap. Begitu juga penetapan Codex CLI — kedua-duanya hidup di sebelah OmniRoute. Pengguna yang memindahkan konfigurasi daripada proksi huluan yang menyematkan akaun dan melumpuhkan pemotongan terbiar sering memukul kedua-duanya dan membuat kesimpulan OmniRoute "tidak dapat mengekalkan sesi yang panjang."
 
-| Gejala                                                                            | Punca berkemungkinan                                                   | Tetapan                  |
-| --------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------ |
-| Sesi terus bertukar akaun / kesinambungan cache gesaan hilang antara giliran      | TTL afiniti sesi ialah `0` (dinyahaktifkan)                            | `sessionAffinityTtlMs`   |
-| Sambungan terputus ketika penaakulan tanpa gesaan yang kelihatan pada pihak klien | Pemantau melahu strim dicetuskan selepas 10 minit tanpa cebisan huluan | `STREAM_IDLE_TIMEOUT_MS` |
+| simptom                                                                        | Kemungkinan punca                                                   | Tombol                   |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------- | ------------------------ |
+| Sesi terus menukar akaun / kesinambungan cache segera hilang antara giliran    | Perkaitan sesi TTL ialah `0` (dilumpuhkan)                          | `sessionAffinityTtlMs`   |
+| Sambungan terputus pada pertengahan sebab tanpa gesaan yang dihadapi pelanggan | Pengawas terbiar strim dipecat selepas 10 minit tanpa bahagian hulu | `STREAM_IDLE_TIMEOUT_MS` |
 
-Perbincangan berkaitan: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (tugas panjang terputus), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (sebab afiniti dinyahaktifkan secara lalai). Penjejakan: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Perbincangan berkaitan: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (tugas lama digugurkan), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (mengapa perkaitan dimatikan). Penjejakan: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Afiniti sesi — tetapkan satu perbualan kepada satu akaun
+### 1. Perkaitan sesi — pin satu perbualan pada satu akaun
 
-**Lalai:** `sessionAffinityTtlMs = 0` (dinyahaktifkan).
+**Lalai:** `sessionAffinityTtlMs = 0` (kurang upaya).
 
-**Tempat untuk menetapkannya**
+**Di mana untuk menetapkannya**
 
-- Papan pemuka → **Tetapan → Penghalaan** → **Afiniti sesi** → **TTL afiniti (saat)** (`ComboDefaultsTab`)
-- Atau PATCH tetapan dengan `sessionAffinityTtlMs` dalam **milisaat** (julat Zod `0`–`86_400_000`, iaitu sehingga 24 jam)
+- Papan pemuka →** Tetapan → Penghalaan** →** Perkaitan sesi** →** TTL perkaitan (saat)** (`ComboDefaultsTab`)
+- Atau tetapan PATCH dengan `sessionAffinityTtlMs` masuk** milisaat** ( julat Zod `0`–`86_400_000`, iaitu sehingga 24 jam)
 
-> Dinamakan semula dalam #7274 daripada `codexSessionAffinityTtlMs` yang khusus untuk Codex. Kekunci legasi masih diterima sebagai alias baca sahaja; konfigurasi baharu harus menggunakan `sessionAffinityTtlMs`. Afiniti kini digunakan untuk **mana-mana** penyedia apabila TTL melebihi `0`, bukan hanya Codex — lihat [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Afiniti sesi.
+> Dinamakan semula dalam #7274 daripada `codexSessionAffinityTtlMs` Codex sahaja . Kunci warisan masih diterima sebagai alias baca sahaja; konfigurasi baharu harus menggunakan `sessionAffinityTtlMs`. Perkaitan kini terpakai kepada** mana-mana** pembekal apabila TTL berada di atas `0`, bukan sahaja Codex — lihat [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Perkaitan Sesi.
 
-**Perkara yang terjejas apabila nilainya kekal pada 0**
+**Apa yang pecah apabila ia kekal pada 0**
 
-Setiap giliran dalam perbualan Codex berbilang giliran dihalakan secara berasingan oleh strategi kombo yang aktif dan boleh dihantar kepada **akaun yang berbeza bagi setiap giliran**. Hal ini menjejaskan kesinambungan sesi / cache gesaan huluan. OmniRoute hanya merujuk pengepala sesi Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) dan medan isi seperti `prompt_cache_key` / `session_id` apabila TTL lebih besar daripada `0` (`extractSessionAffinityKey` dalam `src/sse/services/auth.ts`).
+Setiap pusingan perbualan Codex berbilang pusingan dihalakan secara bebas oleh strategi kombo aktif dan boleh mendarat di a** akaun berbeza setiap giliran** . Itu memutuskan sesi huluan / kesinambungan cache segera. OmniRoute hanya merujuk pengepala sesi Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) dan medan isi seperti `prompt_cache_key` / `session_id` apabila TTL lebih besar daripada `0` (`extractSessionAffinityKey` dalam `src/sse/services/auth.ts`).
 
-**Disyorkan untuk satu tugas berbilang jam**
+**Disyorkan untuk tugasan tunggal berbilang jam**
 
-Tetapkan TTL **melebihi tempoh masa sebenar tugas yang dijangkakan** (maksimum UI ialah **86400 saat** = 24 jam):
+Tetapkan TTL** melebihi jangkaan panjang jam dinding tugasan** (UI maks ialah** 86400 saat** = 24 jam):
 
-| Tempoh tugas yang dijangkakan | TTL afiniti (UI, saat)  | `sessionAffinityTtlMs` |
-| ----------------------------- | ----------------------- | ---------------------- |
-| Beberapa jam                  | `14400` (4j)            | `14400000`             |
-| Semalaman / ~12j              | `43200` (12j)           | `43200000`             |
-| Sehari penuh                  | `86400` (24j, maksimum) | `86400000`             |
+| Panjang tugas yang dijangkakan | Perkaitan TTL (UI, saat) | `sessionAffinityTtlMs` |
+| ------------------------------ | ------------------------ | ---------------------- |
+| Beberapa jam                   | `14400` (4j)             | `14400000`             |
+| Bermalam / ~ 12j               | `43200` (12j)            | `43200000`             |
+| Hari penuh                     | `86400` (24j, maksimum)  | `86400000`             |
 
-Penyertaan secara pilihan adalah disengajakan: menyahaktifkan afiniti mengutamakan pengimbangan beban merentas akaun; mengaktifkannya mengutamakan kesinambungan bagi satu sesi ejen yang panjang. Panduan ini **tidak** mengubah tetapan lalai — pengendali yang menjalankan tugas Codex yang panjang mesti mengaktifkannya sendiri.
+Ikut serta adalah disengajakan: melumpuhkan perkaitan memihak kepada pengimbangan beban merentas akaun; membolehkannya menyokong kesinambungan untuk satu sesi ejen yang panjang. Panduan ini tidak** bukan** tukar pengendali — lalai yang menjalankan tugas Codex yang panjang mesti ikut serta.
 
-### 2. Tamat masa melahu strim — jangan hentikan giliran penaakulan yang senyap
+### 2. Strim tamat masa terbiar — jangan bunuh pusingan penaakulan senyap
 
-**Lalai:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minit). Nilai ini diwarisi daripada `REQUEST_TIMEOUT_MS` apabila tidak ditetapkan; garis dasar bersama juga ialah 600000. Lihat [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Tamat masa.
+**Lalai:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minit). Ia mewarisi daripada `REQUEST_TIMEOUT_MS` apabila tidak ditetapkan; garis dasar yang dikongsi juga ialah 600000. Lihat Tamat Masa [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) →.
 
-**Perkara yang terjejas pada tetapan lalai**
+**Perkara yang rosak pada lalai**
 
-Giliran penaakulan / alat Codex yang kekal senyap selama lebih daripada 10 minit dengan **tiada ketulan huluan sebenar** akan ditutup secara paksa oleh pemantau melahu SSE (`open-sse/utils/stream.ts`). Klien selalunya hanya melihat sambungan terputus tanpa sebarang mesej — sepadan dengan keadaan “berhenti secara automatik tanpa sebarang pemberitahuan.”
+A Codex penaakulan / giliran alat yang kekal senyap selama lebih daripada 10 minit dengan** tiada bahagian hulu yang sebenar** ditutup secara paksa oleh pengawas terbiar SSE (`open-sse/utils/stream.ts`). Pelanggan sering melihat sambungan kosong padanan — jatuh "dihentikan secara automatik tanpa sebarang pemberitahuan."
 
-Butiran penting: **degupan jantung SSE** sintetik OmniRoute tidak menetapkan semula jam melahu. Hanya ketulan isi huluan sebenar yang mengemas kini `lastChunkTime`. Model senyap yang masih “berfikir” kelihatan sama seperti huluan yang tersekat dari sudut pandangan pemantau.
+Butiran kritikal: SSE sintetik OmniRoute** degupan jantung tidak ditetapkan semula** jam terbiar. Hanya ketulan badan hulu sebenar mengemas kini `lastChunkTime`. Model senyap yang masih "berfikir" kelihatan sama dengan hulu yang terhenti dari sudut pandangan pengawas.
 
-Ketidakaktifan isi Undici yang berkaitan: `FETCH_BODY_TIMEOUT_MS` (juga menggunakan garis dasar 10 minit yang sama secara lalai; `0` menyahaktifkannya). Untuk penstriman, `FETCH_TIMEOUT_MS` hanya meliputi persediaan sambungan / pengepala pertama — selepas strim aktif, keadaan tersekat dikawal oleh `STREAM_IDLE_TIMEOUT_MS` dan `FETCH_BODY_TIMEOUT_MS`.
+Ketidakaktifan badan Undici yang berkaitan: `FETCH_BODY_TIMEOUT_MS` (juga lalai kepada garis dasar 10 minit yang sama; `0` melumpuhkannya). Untuk penstriman, `FETCH_TIMEOUT_MS` hanya meliputi persediaan sambungan / pengepala pertama — setelah strim aktif, gerai ditadbir oleh `STREAM_IDLE_TIMEOUT_MS` dan `FETCH_BODY_TIMEOUT_MS`.
 
-**Disyorkan untuk satu tugasan berbilang jam**
+**Disyorkan untuk tugasan tunggal berbilang jam**
 
 Dalam persekitaran proses OmniRoute (`.env` / compose / systemd):
 
 ```bash
-# Nyahaktifkan had masa melahu strim + ketidakaktifan isi untuk giliran penaakulan yang panjang
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Atau tingkatkan nilainya melebihi tempoh senyap terpanjang yang anda jangkakan (nilai dalam milisaat):
+Atau tingkatkannya di atas jurang senyap terpanjang yang anda jangkakan (nilai ialah milisaat):
 
 ```bash
-# Contoh: benarkan sehingga 2 jam senyap antara ketulan huluan
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Mulakan semula OmniRoute selepas mengubah pemboleh ubah persekitaran ini.
+Mulakan semula OmniRoute selepas menukar env vars ini.
 
-### Resipi khusus — tugasan Codex berbilang jam
+### Resipi konkrit — multi-hour Codex task
 
-1. **Tetapkan akaun:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12j) atau `86400` (maksimum 24j).
-2. **Tingkatkan / nyahaktifkan had masa melahu** dalam persekitaran OmniRoute:
+1. **Pin the account:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12h) or `86400` (24h max).
+2. **Naikkan / lumpuhkan potongan terbiar** dalam persekitaran OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Kekalkan `config.toml` Codex yang biasa (`wire_api = "responses"`, `base_url` yang betul, `OMNIROUTE_API_KEY`) — tiada tetapan afiniti/melahu pada pihak Codex untuk kedua-dua tingkah laku ini.
-4. Mulakan semula OmniRoute, kemudian mulakan tugasan Codex yang panjang itu.
+3. Kekalkan Codex `config.toml` biasa (`wire_api = "responses"`, betul `base_url`, `OMNIROUTE_API_KEY`) — tiada tombol affinity/idle sisi Codex wujud untuk kedua-dua gelagat ini.
+4. Mulakan semula OmniRoute, kemudian mulakan tugas Codex yang panjang.
 
-### Keputusan nilai lalai (#7287)
+### Keputusan lalai (#7287)
 
-| Tetapan                  | Nilai lalai       | Diubah dalam panduan ini?                                                                                            |
-| ------------------------ | ----------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (dimatikan)   | **Tidak** — kekal sebagai pilihan ikut serta (pengimbangan beban berbanding kesinambungan; lihat Perbincangan #5718) |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min) | **Tidak** — kekal 10 minit untuk trafik umum; pengendali Codex menaikkan atau menyahaktifkannya                      |
+| Tombol                   | Kapal lalai       | Perubahan dalam panduan ini?                                                                           |
+| ------------------------ | ----------------- | ------------------------------------------------------------------------------------------------------ |
+| `sessionAffinityTtlMs`   | `0` (mati)        | **Tidak** — kekal ikut serta (pengimbangan beban vs kesinambungan; lihat Perbincangan #5718)           |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min) | **Tidak** — kekal 10 minit untuk lalu lintas umum; pengendali Codex lama menaikkan atau melumpuhkannya |
 
-Mengubah mana-mana nilai lalai secara global akan mengubah tingkah laku untuk setiap klien sesuatu tika, bukan Codex sahaja. Dokumentasikan tetapan tersebut; biarkan nilai lalai tidak berubah sehingga terdapat keputusan jelas daripada pengendali yang menyatakan sebaliknya.
+Membalikkan sama ada lalai secara global akan mengubah gelagat untuk setiap pelanggan contoh, bukan sahaja Codex. Dokumenkan tombol; biarkan lalai sehingga keputusan pengendali yang jelas menyatakan sebaliknya.
 
-### Mendiagnosis pemotongan akibat melahu
+### Mendiagnosis pemotongan terbiar
 
-Apabila pemantau melahu dicetuskan, OmniRoute merekodkan baris berbentuk seperti:
+Apabila pengawas terbiar menembak, OmniRoute mencatatkan garisan berbentuk seperti:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Gunakan grep untuk `Idle timeout: no data from` (atau kod `stream_idle_timeout` / nama ralat `StreamIdleTimeoutError`). Segmen penyedia ialah apa-apa yang digunakan OmniRoute untuk permintaan tersebut (`codex`, id penyedia lain, atau `provider` jika tidak diketahui) — ia tidak semestinya rentetan literal `codex`.
+Grep untuk `Idle timeout: no data from` (atau kod `stream_idle_timeout` / nama ralat `StreamIdleTimeoutError`). Segmen penyedia ialah apa sahaja OmniRoute yang digunakan untuk permintaan itu (`codex`, id pembekal lain atau `provider` jika tidak diketahui) — ia tidak selalunya rentetan literal `codex`.
 
 ---
 
-## Penyelesaian Masalah
+## Menyelesaikan masalah
 
-**`Error: wire_api = "chat" tidak lagi disokong`**
-Alih keluar `wire_api = "chat"` daripada konfigurasi anda. Tetapkan `wire_api = "responses"` atau abaikan medan tersebut (lalai kepada `"responses"` sejak v0.138).
+**`Error: wire_api = "chat" is no longer supported`** Alih keluar `wire_api = "chat"` daripada konfigurasi anda. Tetapkan `wire_api = "responses"` atau tinggalkan medan (lalai kepada `"responses"` sejak v0.138).
 
-**`Error: model tidak ditemukan`**
-Sahkan bahawa model tersebut wujud dalam OmniRoute dengan awalan yang betul. Gunakan `omniroute models list` atau buka `/dashboard/providers/<provider>`.
+**`Error: model not found`** Sahkan model wujud dalam OmniRoute dengan awalan yang betul. Gunakan `omniroute models list` atau buka `/dashboard/providers/<provider>`.
 
-**`Ralat pengesahan`**
-Pastikan `OMNIROUTE_API_KEY` telah dieksport: `echo $OMNIROUTE_API_KEY`.
+**`Authentication error`** Sahkan `OMNIROUTE_API_KEY` dieksport: `echo $OMNIROUTE_API_KEY`.
 
-**`ERROR: Pemboleh ubah persekitaran tiada: OMNIROUTE_API_KEY`**
-Codex mengesahkan bahawa pemboleh ubah persekitaran tersebut wujud sebelum membuat permintaan pertama. Eksport
-kunci sebenar untuk pelayan yang dilindungi, atau ruang letak yang tidak kosong seperti
-`OMNIROUTE_API_KEY=local` apabila tika OmniRoute **setempat** anda tidak
-memerlukan pengesahan. Mulakan semula shell jika anda menambahkannya pada `~/.bashrc` atau `~/.zshrc`.
+**`ERROR: Missing environment variable: OMNIROUTE_API_KEY`** Codex mengesahkan bahawa env var wujud sebelum membuat permintaan pertama. Eksport kunci sebenar untuk pelayan yang dilindungi atau pemegang tempat tidak kosong seperti `OMNIROUTE_API_KEY=local` apabila anda** tempatan** contoh OmniRoute tidak memerlukan pengesahan. Mulakan semula shell jika anda menambahkannya pada `~/.bashrc` atau `~/.zshrc`.
 
-**`Sambungan ditolak`**
-Sahkan bahawa OmniRoute sedang berjalan dan hos/port `base_url` adalah betul untuk rangkaian anda (setempat berbanding Tailscale berbanding VPS).
+**`Connection refused`** Sahkan OmniRoute sedang berjalan dan `base_url` host/port adalah betul untuk rangkaian anda (local vs Tailscale vs VPS).
 
-**Sesi ranap apabila menghampiri had konteks**
-Tetapkan `model_context_window` dan `model_auto_compact_token_limit` secara eksplisit. Lihat jadual tetingkap konteks di atas.
+**Sesi ranap berhampiran had konteks** Tetapkan `model_context_window` dan `model_auto_compact_token_limit` secara eksplisit. Lihat jadual tetingkap konteks di atas.
 
-**Pemadatan dicetuskan terlalu lewat**
-Turunkan `model_auto_compact_token_limit` kepada 80–85% daripada tetingkap. Jangan sekali-kali menetapkannya melebihi 90%.
+**Pemadatan api terlalu lewat** Turunkan `model_auto_compact_token_limit` kepada 80–85% daripada tingkap. Jangan sekali-kali tetapkan melebihi 90%.
 
-**Profil tidak dimuatkan (`-p <name>` diabaikan secara senyap)**
-Pastikan fail tersebut wujud di `~/.codex/<name>.config.toml` (tanpa awalan `profile-`). Jalankan `ls ~/.codex/*.config.toml`.
+**Profil tidak dimuatkan (`-p <name>` diabaikan secara senyap)** Sahkan fail wujud di `~/.codex/<name>.config.toml` (tiada awalan `profile-` ). Jalankan `ls ~/.codex/*.config.toml`.
 
-**Tugas Codex yang panjang terputus semasa berjalan / bertukar akaun antara giliran**
-Lihat [Tugas yang berjalan lama](#long-running-tasks). Dayakan afiniti sesi (TTL melebihi tempoh tugas) dan tingkatkan atau nyahdayakan `STREAM_IDLE_TIMEOUT_MS` / `FETCH_BODY_TIMEOUT_MS`. Gunakan grep pada log OmniRoute untuk `Idle timeout: no data from`.
+**Tugas Codex yang panjang jatuh pada pertengahan larian / menukar akaun antara giliran** Lihat [Tugasan yang berjalan lama](#long-running-tasks). Dayakan perkaitan sesi (TTL di atas panjang tugasan) dan naikkan atau lumpuhkan `STREAM_IDLE_TIMEOUT_MS` / `FETCH_BODY_TIMEOUT_MS`. Grep OmniRoute log untuk `Idle timeout: no data from`.

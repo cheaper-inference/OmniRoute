@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute toʻliq oʻrnatiladigan progressiv veb-ilova sifatida taqdim etiladi. Boshqaruv paneliga istalgan mobil brauzer — Android (Chrome) yoki iOS (Safari) — orqali kirganingizda, uni "Bosh ekranga qoʻshish" va ilovalar doʻkonisiz mahalliy ilovaga oʻxshash tajribaga ega boʻlishingiz mumkin.
+OmniRoute boshqaruv panelini Progressive Web App sifatida oʻrnatib, uni bosh ekran yoki ish stoli orqali mustaqil oynada ochish mumkin. O'rnatilgan ilova hali ham navigatsiya, boshqaruv paneli ma'lumotlari va API so'rovlari uchun OmniRoute serveringizga ulanishga muhtoj. Keshlangan statik aktivlar oflayn shlyuz yoki oflayn boshqaruv panelini ta'minlamaydi.
 
 ## PWA nima?
 
-Progressiv veb-ilova OmniRoute veb-boshqaruv panelini mahalliy mobil ilova kabi koʻrinadigan va ishlaydigan ilovaga aylantiradi. Oʻrnatilgandan soʻng u:
+Progressive Web App ilova belgisi va alohida oynaga ega veb-boshqaruv panelidan foydalanadi. O'rnatilgandan so'ng, OmniRoute:
 
-- Bosh ekrandan oʻz belgisi orqali ishga tushadi
-- Toʻliq ekran rejimida ochiladi — brauzerning manzil satri yoki varaqlar interfeysi boʻlmaydi
-- Maxsus ulanish sahifasi yordamida oflayn rejimda ishlaydi
-- Tezroq yuklanish uchun statik resurslarni keshlaydi
-- Ham portret, ham albom yoʻnalishlarini qoʻllab-quvvatlaydi
+- Bosh ekran yoki ish stolingizdan ishga tushadi
+- Brauzerning odatiy manzil satri va yorliqlarisiz mustaqil rejimda ochiladi
+- Tanlangan statik aktivlarni keshlaydi
+- Portret va landshaft yo'nalishlarini qo'llab-quvvatlaydi
 
-## Oʻrnatish
+## O'rnatish
+
+Boshqa qurilmadagi server uchun HTTPS manzilidan foydalaning. Agar server bir xil qurilmada ishlayotgan bo'lsa, `http://localhost:20128` brauzerni o'rnatish talablariga ham javob beradi. Oddiy `http://YOUR_IP:20128` manzili bu talablarga javob bermaydi. O'rnatish menyulari va ko'rsatmalari brauzer va operatsion tizimga bog'liq. [MDN ning PWA o'rnatish talablariga](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required) qarang.
 
 ### Android (Chrome)
 
-1. OmniRoute boshqaruv panelini Chrome brauzerida oching: `http://YOUR_IP:20128`
-2. Chrome avtomatik ravishda **"OmniRouteʼni bosh ekranga qoʻshish"** bannerini koʻrsatadi yoki:
-   - **⋮** menyusini (uchta nuqta) bosing → **"Bosh ekranga qoʻshish"** yoki **"Ilovani oʻrnatish"**
-3. Soʻrovni tasdiqlang
-4. OmniRoute bosh ekraningizda mustaqil ilova sifatida paydo boʻladi
+1. OmniRoute HTTPS manzilingizni oching yoki xuddi shu telefondagi server uchun `http://localhost:20128`.
+2. ni oching**⋮** menyu va tanlang** Ilovani o'rnating** yoki** Asosiy ekranga qo‘shish** , agar taklif qilinsa.
+3. Taklifni tasdiqlang.
+4. Bosh ekrandan OmniRoute oching.
 
 ### iOS (Safari)
 
-1. OmniRoute boshqaruv panelini Safari brauzerida oching: `http://YOUR_IP:20128`
-2. **Ulashish** tugmasini (oʻqli quti) bosing
-3. Pastga aylantiring va **"Bosh ekranga qoʻshish"** tugmasini bosing
-4. Unga nom bering (standart nomi "OmniRoute") va **Qoʻshish** tugmasini bosing
-5. OmniRoute ilova belgisi bilan bosh ekraningizda paydo boʻladi
+1. Safari-da OmniRoute HTTPS manzilingizni oching.
+2. ga teging** Ulashish** →** Asosiy ekranga qo'shish** .
+3. Ismni tasdiqlang va ustiga bosing** Qo'shish** .
+4. Bosh ekrandan OmniRoute oching.
 
 ### Ish stoli (Chrome / Edge)
 
-1. OmniRoute boshqaruv panelini oching
-2. Manzil satridagi **oʻrnatish belgisini** bosing (yoki ⋮ → "OmniRouteʼni oʻrnatish...")
-3. Soʻrovni tasdiqlang
-4. OmniRoute mustaqil oynada ochiladi — varaqlar ham, manzil satri ham boʻlmaydi
+1. OmniRoute boshqaruv panelini oching.
+2. Brauzerning o'rnatish belgisidan foydalaning yoki** Ilovani o'rnating** agar taklif qilinsa, menyuga kirish.
+3. OmniRoute o'z oynasida ochish so'rovini tasdiqlang.
 
-## Imkoniyatlar
+## Xususiyatlari
 
-### Toʻliq ekran tajribasi
+### Mustaqil oyna
 
-Manifest `display: "fullscreen"` parametri bilan sozlangan, yaʼni oʻrnatilgan ilova butun ekrandan foydalanadi — brauzer interfeysi boʻlmaydi va holat satri ustma-ust tushmaydi. Bu boshqaruv paneliga haqiqiy mahalliy ilova koʻrinishi va hissini beradi.
+Manifest to'plamlari `display: "standalone"` va `start_url: "/dashboard"`. O'rnatilgan dastur asboblar panelini ilova oynasida ochadi. Brauzer va operatsion tizim boshqaruvlari hali ham paydo bo'lishi mumkin; manifest to'liq ekran rejimini talab qilmaydi.
 
-### Oflayn rejimni qoʻllab-quvvatlash
+### Keshlangan aktivlar va tarmoq talablari
 
-OmniRoute aqlli keshlashni taʼminlaydigan xizmat ishchisini (`sw.js`) oʻz ichiga oladi:
+[Xizmat ko'rsatuvchi xodim](../../public/sw.js) tanlangan bir xil manbalarni keshlaydi:
 
-| Resurs turi                                                                                                                                                                                                                                      | Strategiya                                | Xatti-harakat                                                                                                                     |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Ilova qobigʻi**                                                                                                                                                                                                                                | Avval kesh                                | `/`, `/offline`, manifest va belgilar oʻrnatish vaqtida oldindan keshlanadi                                                       |
-| **Statik resurslar** (CSS, JS, tasvirlar, shriftlar)                                                                                                                                                                                             | Keshga qaytish bilan avval tarmoq         | Tarmoqdan yangi nusxani oladi; oflayn boʻlsa, keshdagi nusxadan foydalanadi                                                       |
-| **Next.js toʻplamlari** (`/_next/`)                                                                                                                                                                                                              | Keshni yangilash bilan avval tarmoq       | Tarmoqdan oladi va keshni yangilaydi; oflayn boʻlsa, keshlangan versiyani taqdim etadi                                            |
-| **Navigatsiya soʻrovlari**                                                                                                                                                                                                                       | Chetlab oʻtish (hech qachon ushlanmaydi)  | HTTP/3→HTTP/2 zaxira mexanizmini brauzer boshqaradi; ishlamay qolgan QUIC soketi `Response.error()` natijasiga aylanmasligi kerak |
-| **API / boshqaruv paneli marshrutlari** (`/api/`, `/a2a`, `/dashboard`, mijoz API taxalluslari `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, shuningdek `/callback`, `/login`; katta-kichik harflarga qaramasdan solishtiriladi) | Chetlab oʻtish (hech qachon keshlanmaydi) | Har doim toʻgʻridan-toʻgʻri serverga yuboriladi — xizmat ishchisi uni hech qachon ushlamaydi                                      |
+| So'rov yoki aktiv                                     | Strategiya        | Xulq-atvor                                                                                                   |
+| ----------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| O'rnatish vaqti resurslari                            | Oldindan kesh     | `/`, `/manifest.webmanifest`, `/icon-512.png` va `/apple-touch-icon.png` ishchi o'rnatish vaqtida keshlanadi |
+| Next.js statik aktivlari (`/_next/`)                  | Tarmoq - birinchi | Muvaffaqiyatli javoblar keshni yangilaydi; tarmoq xatosi mavjud keshlangan javobga qaytadi                   |
+| Boshqa statik CSS, JS, tasvirlar va shriftlar         | Kesh - birinchi   | Mavjud keshlangan javob qayta ishlatiladi; muvaffaqiyatli tarmoq javoblari o'tkazib yuborilganda keshlanadi  |
+| Sahifani navigatsiya qilish                           | Aylanib o'tish    | Brauzer to'g'ridan-to'g'ri sahifani oladi; hech qanday oflayn zaxira xizmat ko'rsatilmaydi                   |
+| API, asboblar paneli va autentifikatsiya marshrutlari | Aylanib o'tish    | Ishchi ushbu so'rovlarni ushlab turmaydi yoki keshlashmaydi                                                  |
+| Boshqa statik bo'lmagan so'rovlar                     | Tarmoq            | Keshni qidirish yoki saqlash yo'q                                                                            |
 
-### Oflayn sahifa
+Cheklangan marshrutlar `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` va `/login` boʻlib, yoʻl chegaralarida katta-kichik harflar bilan mos keladi. O'zaro kelib chiqish va GET bo'lmagan so'rovlar ham ishchini chetlab o'tadi.
 
-Tarmoq mavjud boʻlmaganda va foydalanuvchi yangi sahifaga oʻtganda, xizmat ishchisi maxsus `/offline` sahifasini taqdim etadi. Bu sahifa:
+### Ulanish sahifasi
 
-- Tushunarli **"Ulanish muammosi"** xabarini koʻrsatadi
-- Real vaqtda yangilanadigan jonli **onlayn/oflayn holat indikatorini** koʻrsatadi
-- Ulanish tiklanganda sahifani qayta yuklash uchun **"Ulanishni qayta tekshirish"** tugmasini taqdim etadi
-- Diagnostika uchun **Holat sahifasi**ga havola beradi
+`/offline` sahifasi ulanish xabari, online/offline indikatori, a** Ulanishni qaytadan urinish** tugmasi va holat sahifasiga havola. Bu** oldindan keshlanmagan** va xizmat ko'rsatuvchi xodim qiladi** emas** muvaffaqiyatsiz navigatsiyalarni unga yo'naltirish. Uning mavjudligi serversiz yangi sahifalarga kirish imkonini bermaydi.
 
-### Ilova belgilari
+### Ilova piktogrammalari
 
-OmniRoute har bir platforma uchun optimallashtirilgan belgilarni taqdim etadi:
+Manifestda ushbu PNG piktogrammalari reklama qilinadi:
 
-| Fayl                   | Oʻlcham            | Qayerda ishlatiladi                           |
-| ---------------------- | ------------------ | --------------------------------------------- |
-| `icon-512.png`         | 512×512            | Android oʻrnatish soʻrovi, boshlangʻich ekran |
-| `apple-touch-icon.png` | 180×180            | iOS bosh ekran belgisi                        |
-| `icon-192.svg`         | 192×192 (vektor)   | Android moslashuvchan belgisi                 |
-| `apple-touch-icon.svg` | 180×180 (vektor)   | Apple zaxira belgisi                          |
-| `favicon.svg`          | Vektor             | Brauzer varaqlari                             |
-| `favicon.ico`          | Bir nechta oʻlcham | Eski brauzerlar                               |
+| Fayl                   | Hajmi   | Foydalanish                            |
+| ---------------------- | ------- | -------------------------------------- |
+| `icon-192.png`         | 192×192 | Umumiy ilova belgisi                   |
+| `icon-512.png`         | 512×512 | Umumiy va maskalanadigan ilova belgisi |
+| `apple-touch-icon.png` | 180×180 | Apple bosh ekrani belgisi              |
 
-### Avtomatik roʻyxatdan oʻtkazish
+Brauzer o'rnatish maqsadi uchun mos belgini tanlaydi.
 
-Xizmat ishchisi ildiz maketidagi `<PwaRegister />` komponenti orqali avtomatik ravishda roʻyxatdan oʻtkaziladi. Foydalanuvchidan hech qanday amal talab qilinmaydi — brauzer yaroqli manifest va xizmat ishchisini aniqlashi bilanoq ilovani oʻrnatish mumkin boʻladi.
+### Avtomatik ro'yxatdan o'tish
+
+Brauzer xizmat ko'rsatuvchi ishchilarni qo'llab-quvvatlasa,`PwaRegister` ishchini ishlab chiqarishda ro'yxatdan o'tkazadi. Rivojlanish rejimi ishchilarni registrdan chiqaradi va eskirgan aktivlar issiq qayta yuklashga xalaqit bermasligi uchun keshlarni tozalaydi. O'rnatish ko'rsatmalari brauzer qarori bo'lib qoladi.
 
 ## Texnik arxitektura
 
-### Veb-ilova manifesti (`manifest.webmanifest`)
+### Veb-ilova manifest
 
-Next.js tomonidan `src/app/manifest.ts` orqali yaratiladi:
+Next.js [`src/app/manifest.ts`](../../src/app/manifest.ts) dan `/manifest.webmanifest` hosil qiladi. Uning asosiy sozlamalari:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Sozlama               | Qiymat                                              |
+| --------------------- | --------------------------------------------------- |
+| `short_name`          | `OmniRoute`                                         |
+| `start_url`           | `/dashboard`                                        |
+| `scope`               | `/`                                                 |
+| `display`             | `standalone`                                        |
+| `orientation`         | `any`                                               |
+| Fon va mavzu ranglari | `PWA_THEME_COLORS` dan standart yorug'lik palitrasi |
 
-### Service Worker (`public/sw.js`)
+Manifest nomi va tavsifi ushbu manba faylidagi statik qiymatlardir. O'rnatilgan manifest har tashrifda misol nomi sozlamalariga yoki faol palitraga amal qilmaydi.
 
-Hech qanday freymvorkka bogʻliq boʻlmagan oddiy service worker quyidagilarni taqdim etadi:
+### Xizmat ko'rsatuvchi xodim
 
-- **Oʻrnatish bosqichi**: Ilova qobigʻini (asosiy sahifa, oflayn sahifa, manifest va ikonkalar) oldindan keshga saqlaydi
-- **Faollashtirish bosqichi**: Eski kesh versiyalarini tozalaydi va barcha klientlarni boshqaruvga oladi
-- **Soʻrovlarni qabul qilish bosqichi**: Soʻrov turiga (navigatsiya, statik resurs, API) asoslangan aqlli yoʻnaltirish
-- **Keshni versiyalash**: `omniroute-pwa-v3` — yangilanishda yangi keshni majburan yaratish uchun ushbu versiyani oshiring
+[`public/sw.js`](../../public/sw.js) xizmat ko'rsatish ishchi tizimiga bog'liqligi yo'q:
 
-### Maket metamaʼlumotlari (`src/app/layout.tsx`)
+- **O'rnatish:** yuqorida sanab o'tilgan to'rtta manbani oldindan keshlaydi va yangi ishchini faollashtiradi.
+- **Faollashtirish:** eski kesh avlodlarini olib tashlaydi va mijozlarga da'vo qiladi.
+- **Yuklab olish:** yuqoridagi statik aktiv strategiyalari va marshrut istisnolarini qo‘llaydi.
+- **Versiyalash:** manba kesh nomi `omniroute-pwa-v3`; ishlab chiqarish qurilishi kesh identifikatorini muhrlaydi.
+- **Bildirishnomalar:** kiruvchi `push` hodisalarini boshqaradi va bildirishnoma bosilganda fokuslaydi yoki oynani ochadi.
 
-Ildiz maket PWA talablariga muvofiqlik uchun zarur boʻlgan barcha meta teglarni taqdim etadi:
+Faqatgina push-hodisalar ishlovchilari faol push obunasini yoki sozlangan server yetkazib berishni o'rnatmaydi. Bildirishnomalar faqat PWA o'rnatilganligi sababli yoqilgan deb o'ylamang.
 
-- `/manifest.webmanifest` uchun `manifest` havolasi
-- iOS mustaqil rejimi uchun `apple-web-app-capable: true`
-- `apple-web-app-status-bar-style: black-translucent`
-- Android Chrome uchun `mobile-web-app-capable: yes`
-- `theme-color: #0b0f1a`
-- Ekran chetidan chetigacha tasvirlash uchun `viewport-fit: cover`
+### Layout metama'lumotlari va ro'yxatga olish
 
-### Komponent: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) manifest havolasini, Apple mustaqil metama'lumotlarini, mavzu ranglarini va `viewport-fit: cover` taqdim etadi. Sahifa sarlavhasi va Apple veb-ilovasi sarlavhasi misol nomidan foydalanadi. Brauzer mavzusining jonli rangi palitraga mos keladi; o'rnatish manifestida standart ochiq rang ishlatiladi.
 
-`src/shared/components/PwaRegister.tsx` manzilida joylashgan ushbu klient komponenti:
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) mijozda ishlaydi va `/sw.js` o'zining URL da ID qurish bilan ro'yxatdan o'tkazadi. U mos kelmaydigan kesh avlodlarini aniqlaydi va ishchini qayta o'rnatishi va eski o'rnatishdan tiklash uchun bir marta qayta yuklashi mumkin. Ro'yxatdan o'tishning buzilishi asboblar panelini bloklamaydi.
 
-1. Biriktirilganda ishga tushadi (faqat klient tomonida)
-2. Brauzerda `serviceWorker` qoʻllab-quvvatlanishini tekshiradi
-3. `/sw.js` faylini bildirishsiz roʻyxatdan oʻtkazadi (ilovani bloklamaslik uchun xatolar eʼtiborsiz qoldiriladi)
-4. Hech narsa tasvirlamaydi (`return null`) — bu faqat yon taʼsirlarni bajaruvchi komponent
+## Termux bilan foydalanish (Android)
 
-## Termux (Android) bilan foydalanish
+1. Termux-da OmniRoute boshlang: `npx -y omniroute@latest`.
+2. Xuddi shu telefonda Chrome-ni oching: `http://localhost:20128`.
+3. Brauzerning o'rnatish menyusi orqali PWA o'rnating.
+4. Boshqaruv panelidan foydalanganda Termux serverini ishlayotgan holda saqlang.
 
-OmniRoute Android qurilmasida Termux orqali ishga tushirilganda, PWA muammosiz ishlaydi:
+Telefonda shlyuz va uning boshqaruv paneli mavjud. Masofaviy AI provayderlariga so'rovlar hali ham tarmoqqa kirishga muhtoj. Sozlash va Android jarayonining amal qilish muddati bo‘yicha mulohazalar uchun [Termux qo‘llanmasiga](TERMUX_GUIDE.md) qarang.
 
-1. OmniRouteʼni Termuxʼda ishga tushiring: `npx omniroute`
-2. Shu telefonning oʻzida Chromeʼni oching: `http://localhost:20128`
-3. PWAʼni "Bosh ekranga qoʻshish" orqali oʻrnating
-4. PWA mahalliy Termux serveriga ulanadi — barcha jarayonlar qurilmaning oʻzida bajariladi
+## Boshqa qurilmalardan foydalaning
 
-Bu kombinatsiya Android telefoningiz bir vaqtning oʻzida ham **server** (Termux), ham **klient** (PWA) boʻlishini anglatadi — bu toʻliq mustaqil AI shlyuzidir.
-
-## Boshqa qurilmalardan foydalanish
-
-PWAʼni OmniRoute serveringizga brauzer orqali kira oladigan istalgan qurilmaga oʻrnating:
-
-- **Boshqa telefon/planshet**: `http://PHONE_IP:20128` manziliga oʻting va PWAʼni oʻrnating
-- **Noutbuk**: Chrome/Edgeʼni oching va uni ish stoli PWAʼsi sifatida oʻrnating
-- **Brauzerli Smart TV**: Boshqaruv panelidan toʻliq ekran rejimida foydalaning
+Telefon, planshet yoki ish stolida serverning HTTPS manzilini oching, so'ngra brauzerni o'rnatish jarayoniga rioya qiling. Serverga har bir qurilmadan kirish mumkin bo'lishi kerak. Masofaviy kirish imkoniyatlari uchun [tunnel qo'llanmasiga](../ops/TUNNELS_GUIDE.md) qarang.
 
 ## Moslashtirish
 
-### Instansiya nomi
+### Namuna nomi
 
-PWA sarlavhasi `Dashboard → Settings` sahifasidagi **Instance Name** sozlamasini hisobga oladi. Agar instansiyangiz nomini "My AI Gateway" deb oʻzgartirsangiz, oʻrnatilgan PWA aynan shu nomni koʻrsatadi.
+The** Namuna nomi** sozlama boshqaruv paneli metamaʼlumotlarini, jumladan sahifa sarlavhasi va Apple veb-ilovasi sarlavhasini oʻzgartiradi. Yaratilgan manifest statik nomdan foydalanadi, shuning uchun bu sozlama allaqachon oʻrnatilgan ilova nomini oʻzgartirishga kafolat bermaydi.
 
-### Maxsus favikon
+### Maxsus Favikon
 
-Agar `Dashboard → Settings` orqali maxsus favikon yuklasangiz, ish stolidagi PWA ikonkasi maxsus ikonkani aks ettiradi. Mobil qurilmalarning bosh ekranidagi ikonkalar oldindan yaratilgan `icon-512.png` va `apple-touch-icon.png` fayllaridan foydalanadi.
+Maxsus favikon brauzer favikonini o'zgartiradi. O'rnatish manifestida hali ham yuqoridagi PNG fayllari reklama qilinadi; favikonni o'zgartirish uy ekranidagi piktogrammalarni almashtirmaydi.
 
 ## Cheklovlar
 
-- **Push-bildirishnomalar yoʻq** — Service worker Push APIʼni qoʻllamaydi. Buning oʻrniga bildirishnomalar Electron ilovasi tomonidan boshqariladi.
-- **Fon sinxronizatsiyasi yoʻq** — Oflayn amallar keyinchalik qayta bajarish uchun navbatga qoʻyilmaydi. PWA asosan boshqaruv panelini koʻrish uchun moʻljallangan.
-- **iOS cheklovlari** — iOSʼdagi Safari barcha PWA imkoniyatlarini qoʻllab-quvvatlamaydi (masalan, oʻrnatish takliflari qoʻlda amalga oshiriladi va fonda ishlovchi service workerʼlar cheklangan).
-- **Kesh hajmi** — Service worker faqat statik resurslarni keshlaydi. `/api/` yoʻnalishlaridan keladigan katta javob maʼlumotlari hech qachon keshlanmaydi.
-- **Mobil qurilmalardagi maxsus ikonalar** — Sozlamalarda favikonni oʻzgartirish mobil qurilmalardagi bosh ekran ikonasini yangilamaydi (buning uchun PWA ikonalarini qayta yaratish talab etiladi).
+- **Server ulanishi talab qilinadi:** sahifa navigatsiyasi, asboblar paneli holati va API so‘rovlarida oflayn zaxira yo‘q.
+- **Fon sinxronizatsiyasi yo'q:** oflayn harakatlar takrorlash uchun navbatga qo'yilmaydi.
+- **Brauzer farqlari:** o'rnatish menyulari, oyna taqdimoti va bildirishnomalarni qo'llab-quvvatlash platformaga qarab farq qiladi.
+- **API javob keshi yo'q:** ishchi API, asboblar paneli va autentifikatsiya marshrutlarini istisno qiladi.
+- **Statik o'rnatish piktogrammalari:** ushbu piktogrammalarni yangilash reklama qilingan aktivlarni o'zgartirishni talab qiladi; brauzerlar o'rnatilgan metama'lumotlarni saqlab qolishi mumkin.
 
-## Fayllar maʼlumotnomasi
+## Fayllar uchun havola
 
-| Fayl                                    | Maqsadi                                                                           |
-| --------------------------------------- | --------------------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Next.js manifest yoʻnalishi (`manifest.webmanifest` faylini yaratadi)             |
-| `public/sw.js`                          | Keshlash mantiqiga ega service worker                                             |
-| `src/shared/components/PwaRegister.tsx` | Service workerʼni roʻyxatdan oʻtkazuvchi mijoz komponenti                         |
-| `src/app/offline/page.tsx`              | Jonli holat indikatori mavjud oflayn zaxira sahifasi                              |
-| `src/app/layout.tsx`                    | PWA metamaʼlumotlariga ega ildiz maketi (apple-web-app, theme-color va boshqalar) |
-| `public/icon-512.png`                   | 512×512 PNG ikona (Android, boshlangʻich ekran)                                   |
-| `public/apple-touch-icon.png`           | 180×180 PNG ikona (iOS bosh ekrani)                                               |
-| `public/icon-192.svg`                   | 192×192 SVG ikona (Android moslashuvchan ikonasi)                                 |
-| `public/apple-touch-icon.svg`           | 180×180 SVG ikona (Apple zaxira ikonasi)                                          |
+| Fayl                                                                                   | Maqsad                                                               |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Yaratilgan veb-ilova manifest                                        |
+| [public/sw.js](../../public/sw.js)                                                     | Keshlash, istisnolar va bildirishnoma hodisalari ishlov beruvchilari |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Ishlab chiqarishni ro'yxatga olish va eskirgan keshni tiklash        |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Avtomatik oflayn zaxira emas, ulanish sahifasi                       |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Sahifa metamaʼlumotlari va koʻrish oynasi sozlamalari                |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Birgalikda mavzu-rang qiymatlari                                     |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 ilova belgisi                                              |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple belgisi                                              |

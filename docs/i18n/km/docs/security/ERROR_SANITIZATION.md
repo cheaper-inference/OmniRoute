@@ -4,13 +4,7 @@
 
 ---
 
-> **ប្រភពសេចក្តីពិត:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` និង public builders នៅក្នុង `open-sse/utils/error.ts`
-> **ការធ្វើតេស្ត:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **បានធ្វើបច្ចុប្បន្នភាពចុងក្រោយ:** 2026-09-02 — v3.8.51
-> **អ្នកអានគោលដៅ:** វិស្វករណាមួយដែលកែប្រែការឆ្លើយតបកំហុស (HTTP routes, SSE streams, executors, MCP handlers)។
-> **ស្ថានភាព:** **ចាំបាច់** សម្រាប់គ្រប់ code path ដែលបញ្ជូនសារកំហុសត្រឡប់ទៅ client។
+> **ប្រភពនៃការពិត៖** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, និងអ្នកសាងសង់សាធារណៈនៅក្នុង `open-sse/utils/error.ts`** ការធ្វើតេស្ត៖** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** ទស្សនិកជន៖** វិស្វករណាមួយប៉ះការឆ្លើយតបកំហុស (ផ្លូវ HTTP, ស្ទ្រីម SSE, អ្នកប្រតិបត្តិ, អ្នកដោះស្រាយ MCP ) ។** ស្ថានភាព៖****MANDATORY** សម្រាប់រាល់ផ្លូវកូដដែលបញ្ជូនសារកំហុសទៅកាន់អតិថិជន។
 
 ## ហេតុអ្វីបានជាវាមាន
 

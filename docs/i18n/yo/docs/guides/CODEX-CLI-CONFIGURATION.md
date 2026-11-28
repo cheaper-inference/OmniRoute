@@ -398,7 +398,7 @@ region  = "us-east-1"
 
 ---
 
-## Àwọn olupin púpọ̀
+## Awọn olupin pupọ
 
 ```toml
 [model_providers.omniroute-main]
@@ -458,107 +458,107 @@ Nínú session ìbánisọ̀rọ̀:
 
 ---
 
-## Àwọn iṣẹ́ tó ń gba àkókò pípẹ́
+## Awọn iṣẹ ṣiṣe pipẹ
 
-Àwọn àtòlẹ́sẹẹsẹ àìyípadà OmniRoute méjì lè ba àwọn session Codex CLI tó ń gba ọ̀pọ̀ wákàtí jẹ́ láìsí ìkìlọ̀. Kò sí èyíkéyìí nínú wọn tó jẹ́ ètò Codex CLI — àwọn méjèèjì wà ní ẹ̀gbẹ́ OmniRoute. Àwọn olùlò tó ń ṣí config kan láti àwọn proxy upstream tí wọ́n di account mọ́lẹ̀ tí wọ́n sì pa àwọn ìgéwọ̀n àkókò àìṣiṣẹ́ lè sábà dojú kọ àwọn méjèèjì, kí wọ́n sì parí èrò sí pé OmniRoute “kò lè mú session gígùn dúró.”
+Awọn aiyipada OmniRoute meji le ṣe ipalọlọ ipalọlọ awọn akoko Codex CLI pupọ-wakati. Bẹni ko si eto Codex CLI kan — mejeeji n gbe ni ẹgbẹ OmniRoute. Awọn olumulo ti n ṣikiri atunto kan lati awọn aṣoju ti oke ti awọn akọọlẹ pin ati mu awọn gige gige ṣiṣẹ nigbagbogbo kọlu mejeeji ati pari OmniRoute “ko le ṣeduro igba pipẹ.”
 
-| Àmì àìsàn                                                                   | Ohun tó ṣeé ṣe kó fà á                                           | Knob                     |
-| --------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------ |
-| Session ń yí account padà / ìtẹ̀síwájú prompt-cache ń sọnù láàárín àwọn turn | TTL ìbámu session jẹ́ `0` (a ti mú un má ṣiṣẹ́)                    | `sessionAffinityTtlMs`   |
-| Ìsopọ̀ kú láàárín ìrònú láìsí prompt kankan tó dé ọ̀dọ̀ client                 | Alábojútó àìṣiṣẹ́ stream ṣiṣẹ́ lẹ́yìn ìṣẹ́jú 10 láìsí chunk upstream | `STREAM_IDLE_TIMEOUT_MS` |
+| Aisan                                                                               | O ṣeeṣe fa                                                          | Knob                     |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------ |
+| Ikoni ntọju iyipada awọn iroyin / itesiwaju kaṣe-kiakia ti sọnu laarin awọn iyipada | Ibaṣepọ igba TTL jẹ `0` (alaabo)                                    | `sessionAffinityTtlMs`   |
+| Asopọ ku aarin-idi pẹlu ko si onibara-ti nkọju si tọ                                | Abojuto ṣiṣan ṣiṣan ṣiṣẹ lẹhin awọn iṣẹju mẹwa 10 laisi ipin ti oke | `STREAM_IDLE_TIMEOUT_MS` |
 
-Àwọn ìjíròrò tó jẹmọ́: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (àwọn iṣẹ́ gígùn ń jábọ̀), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (ìdí tí affinity fi jẹ́ pípa ní àìyípadà). Ìtọ́pa: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Awọn ijiroro ti o jọmọ: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (iṣẹ-ṣiṣe gigun ju silẹ), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (kilode ti awọn aseku ijora kuro). Ipasẹ: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Ìbámu session — di ìjíròrò kan mọ́ account kan
+### 1. Igba ijora — pin ibaraẹnisọrọ kan si akọọlẹ kan
 
-**Àìyípadà:** `sessionAffinityTtlMs = 0` (a ti mú un má ṣiṣẹ́).
+**Aiyipada:** `sessionAffinityTtlMs = 0` (alaabo).
 
-**Ibi tí a ti lè ṣètò rẹ̀**
+**Nibo ni lati ṣeto**
 
-- Dashboard → **Settings → Routing** → **Session affinity** → **Affinity TTL (seconds)** (`ComboDefaultsTab`)
-- Tàbí ṣe PATCH sí àwọn settings pẹ̀lú `sessionAffinityTtlMs` ní **milliseconds** (ààyè Zod `0`–`86_400_000`, ìyẹn ni pé ó tó wákàtí 24)
+- Dasibodu →** Eto → afisona** →** Ibaṣepọ igba** →** Affinity TTL (aaya)** (`ComboDefaultsTab`)
+- Tabi awọn eto PATCH pẹlu `sessionAffinityTtlMs` ni** millise seconds** (Zod ibiti `0`–`86_400_000`, ie to wakati 24)
 
-> A tún orúkọ rẹ̀ sọ ní #7274 láti inú `codexSessionAffinityTtlMs` tó jẹ́ ti Codex nìkan. A ṣì gba key àtijọ́ gẹ́gẹ́ bí alias kíkà-nìkan; àwọn config tuntun gbọ́dọ̀ lo `sessionAffinityTtlMs`. Ní báyìí, affinity kan **èyíkéyìí** provider nígbà tí TTL bá ga ju `0` lọ, kì í ṣe Codex nìkan — wo [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Ìbámu session.
+> Fun lorukọmii ni #7274 lati Codex-nikan `codexSessionAffinityTtlMs`. Bọtini ohun-ini jẹ ṣi gba bi inagijẹ kika-nikan; awọn atunto tuntun yẹ ki o lo `sessionAffinityTtlMs`. Affinity bayi kan si** eyikeyi** Olupese ni kete ti TTL ba wa loke `0`, kii ṣe Codex — nikan wo [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Ibaṣepọ Ikoni.
 
-**Ohun tó máa bàjẹ́ tí ó bá dúró sí 0**
+**Kini adehun nigbati o duro ni 0**
 
-A máa route turn kọ̀ọ̀kan nínú ìjíròrò Codex onírúurú turn lọ́tọ̀ọ̀tọ̀ nípasẹ̀ ọ̀nà combo tó ń ṣiṣẹ́, ó sì lè dé orí **account tó yàtọ̀ fún turn kọ̀ọ̀kan**. Ìyẹn ń ba ìtẹ̀síwájú session / prompt-cache upstream jẹ́. OmniRoute máa ń wo àwọn header session Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) àti àwọn ààyè body bíi `prompt_cache_key` / `session_id` nìkan nígbà tí TTL bá ga ju `0` lọ (`extractSessionAffinityKey` nínú `src/sse/services/auth.ts`).
+Gbogbo iyipada ti ibaraẹnisọrọ Codex olona-pupọ jẹ ipalọlọ ni ominira nipasẹ ilana konbo ti nṣiṣe lọwọ ati pe o le de lori a** o yatọ si iroyin fun Tan** . Iyẹn fọ igba oke / itesiwaju kaṣe-kiakia. OmniRoute nikan ṣe imọran awọn akọle igba Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) ati awọn aaye ara gẹgẹbi `prompt_cache_key` / `session_id` nigbati TTL ba tobi ju `0` (`extractSessionAffinityKey` ni `src/sse/services/auth.ts`).
 
-**Àbá fún iṣẹ́ ẹyọ kan tó ń gba ọ̀pọ̀ wákàtí**
+**Ti ṣe iṣeduro fun iṣẹ-ṣiṣe-wakati-pupọ kan**
 
-Ṣètò TTL sí iye tó **ga ju gígùn àkókò gidi tí a retí pé iṣẹ́ náà máa gba** (iye tó pọ̀jù ní UI jẹ́ **86400 seconds** = wákàtí 24):
+Ṣeto TTL** loke awọn reti odi-aago ipari ti awọn iṣẹ-ṣiṣe** (UI max jẹ** 86400 aaya** = 24 wakati):
 
-| Gígùn iṣẹ́ tí a retí | Affinity TTL (UI, seconds) | `sessionAffinityTtlMs` |
-| ------------------- | -------------------------- | ---------------------- |
-| Wákàtí díẹ̀          | `14400` (4h)               | `14400000`             |
-| Mọ́júmọ́jú / ~12h     | `43200` (12h)              | `43200000`             |
-| Ọjọ́ kan gbáko       | `86400` (24h, iye tó pọ̀jù) | `86400000`             |
+| O ti ṣe yẹ ipari iṣẹ-ṣiṣe | Affinity TTL (UI, aaya)     | `sessionAffinityTtlMs` |
+| ------------------------- | --------------------------- | ---------------------- |
+| Awọn wakati diẹ           | `14400` (4h)                | `14400000`             |
+| Moju / ~ 12h              | `43200` (12h)               | `43200000`             |
+| Ni kikun ọjọ              | `86400` (wakati 24, o pọju) | `86400000`             |
 
-Yíyan láti darapọ̀ jẹ́ ìpinnu amúmúṣẹ: mímú affinity má ṣiṣẹ́ ń ṣe ànfààní fífi ẹrù pín káàkiri àwọn account; mímú un ṣiṣẹ́ ń ṣe ànfààní ìtẹ̀síwájú fún session agent gígùn kan. Ìtọ́sọ́nà yìí **kò** yí àìyípadà padà — àwọn olùṣàkóso tó ń ṣiṣẹ́ àwọn iṣẹ́ Codex gígùn gbọ́dọ̀ yàn láti mú un ṣiṣẹ́.
+Jade-inu ti wa ni moomo: disabling ijora ojurere fifuye-iwontunwonsi kọja awọn iroyin; jẹ ki o ṣe ojurere itesiwaju fun igba aṣoju gigun kan. Itọsọna yii ṣe** kii ṣe** yi awọn oniṣẹ — aiyipada ti nṣiṣẹ awọn iṣẹ-ṣiṣe Codex gigun gbọdọ jade.
 
-### 2. Àkókò ìparí àìṣiṣẹ́ stream — má ṣe pa àwọn turn ìrònú tó dákẹ́
+### 2. Sisan laišišẹ aago — maṣe pa awọn iyipada ti o dakẹ
 
-**Àìyípadà:** `STREAM_IDLE_TIMEOUT_MS = 600000` (ìṣẹ́jú 10). Ó máa jogún láti `REQUEST_TIMEOUT_MS` tí a kò bá ṣètò rẹ̀; ìpìlẹ̀ tí wọ́n pín náà tún jẹ́ 600000. Wo [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Àwọn àkókò ìparí.
+**Aiyipada:** `STREAM_IDLE_TIMEOUT_MS = 600000` (iṣẹju 10). O jogun lati `REQUEST_TIMEOUT_MS` nigba ti a ko ṣeto; ipilẹ ti o pin jẹ tun 600000. Wo [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**Ohun tó máa bàjẹ́ ní àìyípadà**
+**Kini fi opin si ni aiyipada**
 
-Ìgbà ìrònú / lílo irinṣẹ́ Codex kan tí ó dákẹ́ fún ju ìṣẹ́jú 10 lọ láìsí **ẹyọ dátà gidi láti upstream** ni SSE idle watchdog (`open-sse/utils/stream.ts`) máa ń fi tipátipá pa. Ní ọ̀pọ̀ ìgbà, client máa ń rí bí asopọ̀ ṣe já lásán — èyí bá “ó dá dúró fúnra rẹ̀ láìsí ìfitónilétí kankan” mu.
+Titan ero Codex / ọpa ti o dakẹ fun diẹ ẹ sii ju iṣẹju mẹwa 10 pẹlu** ko si gidi soke chunk** ti fi agbara mu-pipade nipasẹ SSE laišišẹ watchdog (`open-sse/utils/stream.ts`). Onibara nigbagbogbo rii asopọ igboro ju — ibaamu “duro laifọwọyi laisi iwifunni eyikeyi.”
 
-Àlàyé pàtàkì: SSE **heartbeat àfọwọ́ṣe ti OmniRoute kì í tún** aago àìṣiṣẹ́ bẹ̀rẹ̀. Ẹyọ body gidi láti upstream nìkan ló ń ṣe àfikún `lastChunkTime`. Model tí ó dákẹ́ ṣùgbọ́n tí ó ṣì ń “ronú” dà bí upstream tí ó dúró pátápátá lójú watchdog.
+Awọn alaye pataki: OmniRoute's sintetiki SSE** heartbeat ko tunto** aago laišišẹ. Nikan kan gidi oke chunk awọn imudojuiwọn `lastChunkTime`. Awoṣe idakẹjẹ ti o tun jẹ “ero” dabi aami si oke ti o da duro lati oju wiwo oluṣọ.
 
-Àìṣiṣẹ́ body Undici tó ní í ṣe pẹ̀lú èyí: `FETCH_BODY_TIMEOUT_MS` (ó tún máa ń lo ìpìlẹ̀ ìṣẹ́jú 10 kan náà gẹ́gẹ́ bí default; `0` máa ń pa á). Fún streaming, `FETCH_TIMEOUT_MS` kàn ń bo ìṣètò asopọ̀ / headers àkọ́kọ́ — lẹ́yìn tí stream bá ti ń ṣiṣẹ́, `STREAM_IDLE_TIMEOUT_MS` àti `FETCH_BODY_TIMEOUT_MS` ni wọ́n ń ṣàkóso àwọn ìdúró.
+Aiṣiṣẹ ara Undici ti o jọmọ: `FETCH_BODY_TIMEOUT_MS` (tun ṣe aifọwọyi si ipilẹ iṣẹju 10 kanna; `0` mu u ṣiṣẹ). Fun ṣiṣanwọle, `FETCH_TIMEOUT_MS` nikan ni wiwa iṣeto asopọ / awọn akọle akọkọ — ni kete ti ṣiṣan naa ba ṣiṣẹ, awọn ibùso jẹ iṣakoso nipasẹ `STREAM_IDLE_TIMEOUT_MS` ati `FETCH_BODY_TIMEOUT_MS`.
 
-**Ohun tí a dábàá fún iṣẹ́ ẹyọ kan tó lè gba ọ̀pọ̀ wákàtí**
+**Ti ṣe iṣeduro fun iṣẹ-ṣiṣe-wakati-pupọ kan**
 
-Nínú environment process OmniRoute (`.env` / compose / systemd):
+Ni agbegbe ilana OmniRoute (`.env` / ṣajọ / systemd):
 
 ```bash
-# Pa àwọn ìdíwọ́ àìṣiṣẹ́ stream àti body fún àwọn ìgbà ìrònú gígùn
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Tàbí gbé wọn ga ju àkókò ìdákẹ́jẹ tó gùn jù lọ tí o ń retí lọ (milliseconds ni àwọn iye náà):
+Tabi gbe wọn ga ju aafo idakẹjẹ ti o gunjulo ti o nireti (awọn iye jẹ milliseconds):
 
 ```bash
-# Àpẹẹrẹ: gba ìdákẹ́jẹ tó tó wákàtí 2 láàárín àwọn ẹyọ upstream láàyè
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Tún OmniRoute bẹ̀rẹ̀ lẹ́yìn títún àwọn env vars wọ̀nyí ṣe.
+Tun OmniRoute bẹrẹ lẹhin iyipada awọn env vars wọnyi.
 
-### Ìlànà tó ṣe pàtó — iṣẹ́ Codex tó gba ọ̀pọ̀ wákàtí
+### Nja ohunelo — olona-wakati Codex iṣẹ-ṣiṣe
 
-1. **So account náà mọ́ ibi kan:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12h) tàbí `86400` (24h max).
-2. **Gbé àwọn ìdíwọ́ àìṣiṣẹ́ ga / pa wọ́n** nínú environment OmniRoute:
+1. **Pin akọọlẹ naa:** Dasibodu → Eto → Ipa ọna → Ikoni ijora → Affinity TTL = `43200` (12h) tabi `86400` (24h max).
+2. **Mu / mu awọn gige ti ko ṣiṣẹ ṣiṣẹ** ni ayika OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Pa `config.toml` Codex tí a sábà máa ń lò mọ́ (`wire_api = "responses"`, `base_url` tó tọ́, `OMNIROUTE_API_KEY`) — kò sí àwọn àṣàyàn affinity/idle ní ẹ̀gbẹ́ Codex fún àwọn ìhùwàsí méjèèjì wọ̀nyí.
-4. Tún OmniRoute bẹ̀rẹ̀, lẹ́yìn náà bẹ̀rẹ̀ iṣẹ́ Codex gígùn náà.
+3. Jeki awọn deede Codex `config.toml` (`wire_api = "responses"`, ti o tọ `base_url`, `OMNIROUTE_API_KEY`) — ko si Codex-ẹgbẹ affinity/idle knobs tẹlẹ fun awọn wọnyi awọn iwa meji.
+4. Tun OmniRoute bẹrẹ, lẹhinna bẹrẹ iṣẹ-ṣiṣe Codex gigun naa.
 
-### Ìpinnu àwọn default (#7287)
+### Ipinnu awọn aṣiṣe (#7287)
 
-| Àṣàyàn                   | Default tí a pín ká | Ṣé a yí i padà nínú ìtọ́sọ́nà yìí?                                                                        |
-| ------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (off)           | **Rárá** — ó ṣì jẹ́ opt-in (load-balancing vs continuity; wo Discussion #5718)                           |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)   | **Rárá** — ó ṣì jẹ́ ìṣẹ́jú 10 fún traffic gbogbogbòò; àwọn olùṣàkóso Codex gígùn máa ń gbé e ga tàbí pa á |
+| Knob                     | Aiyipada ọkọ        | Ṣe iyipada ninu itọsọna yii?                                                                  |
+| ------------------------ | ------------------- | --------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (pa)            | **Rara** — maa wa ijade (iwọntunwọnsi fifuye vs itesiwaju; wo ijiroro #5718)                  |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (iṣẹju 10) | **Rara** — ku iṣẹju mẹwa 10 fun ijabọ gbogbogbo; awọn oniṣẹ Codex gun gbe soke tabi mu u ṣiṣẹ |
 
-Yíyí èyíkéyìí nínú àwọn default náà padà ní gbogbo ètò yóò yí ìhùwàsí padà fún gbogbo client instance kan, kì í ṣe Codex nìkan. Ṣàkọsílẹ̀ àwọn àṣàyàn náà; fi àwọn default náà sílẹ̀ bí wọ́n ṣe wà títí ìpinnu olùṣàkóso tó ṣe kedere yóò fi sọ ohun mìíràn.
+Yipada boya aiyipada ni agbaye yoo yi ihuwasi pada fun gbogbo alabara ti apẹẹrẹ, kii ṣe Codex nikan. Ṣe iwe awọn bọtini; fi awọn aṣiṣe silẹ nikan titi ipinnu oniṣẹ ti o fojuhan sọ bibẹẹkọ.
 
-### Ṣíṣàyẹ̀wò àwọn ìdáwọ́ àìṣiṣẹ́
+### Ṣiṣayẹwo awọn gige laišišẹ
 
-Nígbà tí idle watchdog bá ṣiṣẹ́, OmniRoute máa ń kọ line kan tó rí báyìí sínú log:
+Nigbati oluṣọ ti ko ṣiṣẹ ba ina, OmniRoute ṣe igbasilẹ laini kan ti o dabi:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Lo grep láti wá `Idle timeout: no data from` (tàbí code `stream_idle_timeout` / orúkọ error `StreamIdleTimeoutError`). Apá provider náà ni ohunkóhun tí OmniRoute lò fún request yẹn (`codex`, provider id mìíràn, tàbí `provider` bí a kò bá mọ̀ ọ́) — kì í ṣe string `codex` gangan ní gbogbo ìgbà.
+Grep fun `Idle timeout: no data from` (tabi koodu `stream_idle_timeout` / orukọ aṣiṣe `StreamIdleTimeoutError`). Apa ti olupese jẹ ohunkohun ti OmniRoute ti a lo fun ibeere yẹn (`codex`, id olupese miiran, tabi `provider` ti a ko ba mọ) — kii ṣe nigbagbogbo okun gangan `codex`.
 
 ---
 

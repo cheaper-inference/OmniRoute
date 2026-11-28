@@ -185,51 +185,49 @@ npx playwright install chromium
 
 ---
 
-## 防毒軟體誤判
+## 防毒誤報
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG 以 `MD:HttpRequest-inf[Susp]` 隔離 `README.md`
+### Avast/AVG檢疫`README.md`與`MD:HttpRequest-inf[Susp]`
 
-**這是誤判。沒有任何檔案受到感染，也不需要採取任何動作。**
+**這是誤報。沒有任何內容被感染，並且無需採取任何操作。**
 
-Avast 和 AVG 會執行一項啟發式檢測，將包含大量看似 HTTP 請求連結的純文字/Markdown 檔案標記出來。OmniRoute 的 `README.md` 包含在 npm 套件中（它列於 `package.json` → `files`），因此進行全域安裝時，該檔案會位於 `node_modules/omniroute/README.md`，而且其中包含約 15 個 `http://localhost:20128/...` 範例（MCP HTTP/SSE 端點、A2A `.well-known` URL，以及 `curl` 程式碼片段）。如此高的連結密度足以觸發該啟發式檢測。
+Avast 和AVG運行啟發式方法，標記包含許多 HTTP 請求連結的plain-text/Markdown檔案。 OmniRoute的`README.md`包含在 npm 套件中（它在`package.json` → `files`中列出），因此它在全域安裝—時位於`node_modules/omniroute/README.md`處，並且包含~ 15 個`http://localhost:20128/...`範例（ MCP HTTP/SSE端點、 A2A `.well-known` URL和`curl`片段）。此鏈結密度足以觸發啟發式。
 
-如果這個問題最近才開始出現：檔案的性質並未改變。README 擴充了端點表格（新增了 MCP HTTP + SSE + A2A）以及更多 `curl` 範例，使其超過了觸發門檻。
+如果這只是最近才開始：文件沒有實質變化。 README擴大了其端點表（添加了MCP HTTP + SSE + A2A ）和更多`curl`範例，這將其推過了閾值。
 
-此檔案只是靜態文件，完全不含任何可執行內容。您可以放心地將它從隔離區還原。
+該文件是惰性文件，可執行內容為零。您可以安全地將其從隔離區復原。
 
-**處理方式：**
+**怎麼辦：**
 
-1. **停止通知** — 在防毒軟體中排除安裝目錄（Avast：設定 → 例外），加入您的全域 `node_modules` 路徑及/或 OmniRoute 資料目錄（`~/.omniroute/`）。
-2. **回報誤判** — <https://www.avast.com/false-positive-file-form.php>，並附上遭隔離的 `README.md`。這才是對所有人都有幫助的解決方式，因為問題在於提供者的啟發式檢測對文字檔反應過度。
+1. **停止通知**—排除防毒軟體中的安裝目錄（Avast：設定→例外），新增全域`node_modules`路徑and/or OmniRoute資料目錄 (`~/.omniroute/`)。
+2. **報告誤報**— <https://www.avast.com/false-positive-file-form.php>，附加隔離的`README.md`。這是對每個人都有幫助的修復，因為這是提供者對文字檔案的啟發式反應過度。
 
-**為什麼我們不從自身這一側「修正」問題：**所有範例都是 `http://localhost`，而 localhost 若沒有自簽憑證所帶來的麻煩，就無法使用 `https`。為了規避單一提供者的啟發式檢測而竄改文件，等於為了迎合掃描器的錯誤而損害所有讀者的使用體驗。
+**為什麼我們不「解決」這個問題：**這些範例都是`http://localhost`，如果沒有自簽章憑證摩擦， localhost 就不能是`https` 。為了躲避某個提供者的啟發而修改文件會傷害每個讀者以滿足掃描器錯誤。
 
-### Kaspersky 將桌面應用程式標記為 `PDM:Trojan.Win32.Generic`
+### 卡巴斯基將桌面應用程式標記為`PDM:Trojan.Win32.Generic`
 
-**這是行為啟發式檢測造成的誤判。沒有任何檔案受到感染。** Kaspersky 的 `PDM:` 前綴表示判定來自其主動防禦模組（System Watcher）；該模組會根據安裝程式的實際_行為_進行判斷，而非比對已知惡意軟體。觸發時，Kaspersky 會「復原」整個安裝程序，刪除它先前已寫入的檔案，因此最終會導致應用程式損壞或遺失。
+**這是行為啟發法的誤報。什麼都沒有被感染。**卡巴斯基的`PDM:`前綴意味著判決來自其主動防禦模組（系統觀察器），該模組判斷安裝程式的行為，而不是將其與已知的惡意軟體進行匹配。當它啟動時，卡巴斯基「回滾」整個安裝—刪除它已經寫入—文件，因此應用程式最終會損壞或遺失。
 
-它標記的檔案是桌面應用程式所封裝、已宣告之開放原始碼相依套件的標準組成部分，例如：
+它標記的檔案是與桌面應用程式捆綁在一起的聲明的開源依賴項的庫存部分，例如：
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` 和
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev)，用於應用程式內提供者登入和瀏覽器支援聊天功能的瀏覽器自動化程式庫。
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — 固定版本的 `wreq-js` 原生繫結，用於在採用網頁 Cookie 的提供者上執行帶有瀏覽器指紋的 HTTP 請求（`<arch>` 為 `x64` 或 `arm64`）。
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js`和`workerProcessEntry.js` — [Playwright](https://playwright.dev) ，用於應用內部提供者登入和瀏覽器支援的聊天的瀏覽器自動化庫。
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` —固定的`wreq-js`本機綁定，用於 Web cookie 提供者上的瀏覽器指紋HTTP （`<arch>`是`x64`或`arm64`）。
 
-**觸發原因：**Windows 安裝程式**尚未經過程式碼簽署**，因此未簽署的 NSIS 安裝程式信譽為零，行為啟發式檢測會以最高強度執行。再加上封裝的原生 DLL，以及寫入 `%LOCALAPPDATA%\Programs\OmniRoute` 下的數百個 `.js` 檔案（包括 Next.js 獨立建置所產生、名稱帶有雜湊值後綴的套件目錄），這些因素已足以觸發啟發式檢測。我們已規劃進行程式碼簽署；在完成之前，新版本仍可能重複發生此問題。
+**為什麼會火：** Windows安裝程式是**尚未進行程式碼簽名**，因此未簽署的NSIS安裝程式的聲譽為零，且行為啟發法以最大攻擊性運作。結合捆綁的本機DLL和在`%LOCALAPPDATA%\Programs\OmniRoute`下編寫的數百個`.js`檔案（包括來自Next.js獨立建構的雜湊後綴的套件目錄），這足以觸發啟發式。已計劃進行程式碼簽名；在它落地之前，新版本可能會重複這一點。
 
-**處理方式：**
+**怎麼辦：**
 
-1. **先驗證您下載的檔案**（排除檔案遭竄改的可能性）。每個版本都會發布 `latest.yml`，其中的 `sha512` 欄位（base64）涵蓋 `OmniRoute.Setup.<version>.exe` 安裝程式。在 PowerShell 中，於包含安裝程式的資料夾執行：
+1. **首先驗證您的下載**（排除文件被竄改的情況）。每個版本都會發布`latest.yml`，其`sha512`欄位（base64）涵蓋`OmniRoute.Setup.<version>.exe`安裝程式。在PowerShell中，從包含安裝程式的資料夾：
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   輸出必須與 `latest.yml` → `sha512` 相符。如果不相符，請刪除該檔案，並僅從 [GitHub 發行頁面](https://github.com/diegosouzapw/OmniRoute/releases)重新下載。
-2. **還原 + 排除** — 從隔離區還原遭復原的項目，並為 `%LOCALAPPDATA%\Programs\OmniRoute` 新增排除項目（Kaspersky → 設定 → 威脅與排除項目），然後重新安裝。
-3. **回報誤判** — <https://opentip.kaspersky.com/>。使用者提交的誤判回報確實能加快加入允許清單的速度。
+   輸出必須匹配`latest.yml` → `sha512`。如果沒有，請刪除該檔案並僅從[GitHub發布頁面](https://github.com/cheaper-inference/OmniRoute/releases)重新下載。
+2. **恢復+排除**—從隔離區恢復回滾的項目並加入`%LOCALAPPDATA%\Programs\OmniRoute`的排除項（Kaspersky →設定→威脅和排除項），然後重新安裝。
+3. **報告誤報**— <https://opentip.kaspersky.com/>。用戶提交的FP報告真正加快了白名單的速度。
 
 ---
 
@@ -832,10 +830,10 @@ omniroute serve --ready-timeout 180000
 
 ---
 
-## 仍然卡住？
+## 還卡住了嗎？
 
-- **GitHub Issues**：[github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **架構**：如需內部詳細資訊，請參閱 [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
-- **API 參考文件**：如需所有端點的資訊，請參閱 [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
-- **健康狀態儀表板**：前往 **Dashboard → Health** 查看即時系統狀態
-- **轉譯器**：使用 **Dashboard → Translator** 偵錯格式問題
+- **GitHub問題**： [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **建築學**：內部詳情請見[`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
+- **API參考**: See [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) for all endpoints
+- **健康儀表板**： 查看**儀表板→健康**即時系統狀態
+- **翻譯者**： 使用**儀表板→翻譯器**調試格式問題

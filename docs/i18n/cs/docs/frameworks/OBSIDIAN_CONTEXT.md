@@ -114,58 +114,48 @@ který se přeloží na `env-key`. Ověřené klíče bez vlastní konfigurace O
 globální konfiguraci jako záložní. Čtyři nástroje `obsidian_sync_*` si zachovávají své samostatné
 chování pro synchronizační tokeny.
 
-## Nástroje MCP (22)
+## nástroje MCP (22)
 
-Definovány v `open-sse/mcp-server/tools/obsidianTools.ts`. Token a základní URL se určují
-pro každé volání (nejprve podle API klíče, poté globálně). Nástroje, které komunikují se **synchronizačním serverem**
-OmniRoute (čtyři nástroje `obsidian_sync_*`), navíc vyžadují ověřovací token synchronizace nakonfigurovaný
-v nastavení OmniRoute.
+Definováno v `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL jsou vyřešeny na volání (nejprve pro klíč API, potom globální). Nástroje, které zasáhly OmniRoute** synchronizační server** (čtyři nástroje `obsidian_sync_*` ) navíc vyžadují synchronizační auth token nakonfigurovaný v nastavení OmniRoute.
 
-### Nástroje pro čtení (`read:obsidian`)
+### Číst nástroje (`read:obsidian`)
 
 | Nástroj                      | Popis                                                                                                        |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `obsidian_check_status`      | Ověří, zda je místní REST API dostupné a ověřené.                                                            |
-| `obsidian_search_simple`     | Fulltextové vyhledávání v obsahu poznámek; vrací úryvky s cestami k souborům.                                |
-| `obsidian_search_structured` | Vyhledávání pomocí výrazu JSON Logic (filtry and/or/regex/path).                                             |
-| `obsidian_read_note`         | Načte poznámku podle cesty relativní k trezoru; volitelně konkrétní nadpis/blok/frontmatter.                 |
-| `obsidian_list_vault`        | Vypíše soubory a adresáře v trezoru (strom položek).                                                         |
-| `obsidian_get_document_map`  | Získá strukturu nadpisů poznámky jako mapu nadpisů → čísel řádků.                                            |
-| `obsidian_get_note_metadata` | Získá frontmatter, značky, odkazy a počet znaků/slov bez úplného obsahu.                                     |
-| `obsidian_get_active_file`   | Získá cestu a obsah souboru, který je právě aktivní v Obsidianu.                                             |
-| `obsidian_get_periodic_note` | Získá denní/týdenní/měsíční periodickou poznámku pro dané datum (při vynechání pro dnešek).                  |
-| `obsidian_get_tags`          | Vypíše všechny značky v trezoru s četností jejich výskytu.                                                   |
-| `obsidian_list_commands`     | Vypíše dostupná ID příkazů Obsidianu (pro použití s `obsidian_execute_command`).                             |
-| `obsidian_sync_status`       | Stav synchronizačního serveru OmniRoute: spuštěn, název trezoru, port, doba provozu, poslední synchronizace. |
-| `obsidian_sync_conflicts`    | Vypíše nevyřešené konflikty synchronizace (cesta, cesta ke konfliktu, čas zjištění).                         |
+| `obsidian_check_status`      | Zkontrolujte, zda je místní REST API dosažitelné a ověřené.                                                  |
+| `obsidian_search_simple`     | Fulltextové vyhledávání obsahu poznámky; vrátí úryvky s cestami k souboru.                                   |
+| `obsidian_search_structured` | Hledejte pomocí logického výrazu JSON (filtry and/or/regex/path ).                                           |
+| `obsidian_read_note`         | Číst poznámku relativní cestou k trezoru; volitelně konkrétní heading/block/frontmatter.                     |
+| `obsidian_list_vault`        | Seznam souborů a adresářů v úložišti (strom záznamů).                                                        |
+| `obsidian_get_document_map`  | Získejte strukturu nadpisu poznámky jako mapu nadpisů → čísel řádků.                                         |
+| `obsidian_get_note_metadata` | Získejte frontmatter, tagy, odkazy, počet char/word bez úplného obsahu.                                      |
+| `obsidian_get_active_file`   | Získejte cestu + obsahu aktuálně aktivního souboru v Obsidian.                                               |
+| `obsidian_get_periodic_note` | Získejte pravidelnou poznámku daily/weekly/monthly pro datum (dnes, pokud ji vynecháte).                     |
+| `obsidian_get_tags`          | Vypište všechny značky vaultu s jejich frekvencemi.                                                          |
+| `obsidian_list_commands`     | Seznam dostupných příkazů Obsidian IDs (použijte se `obsidian_execute_command`).                             |
+| `obsidian_sync_status`       | Stav synchronizačního serveru OmniRoute : spuštěn, název vaultu, port, doba provozu, poslední synchronizace. |
+| `obsidian_sync_conflicts`    | Vypsat nevyřešené konflikty synchronizace (cesta, cesta ke konfliktu, zjištěno-at).                          |
 
 ### Nástroje pro zápis (`write:obsidian`)
 
-| Nástroj                          | Popis                                                                                         |
-| -------------------------------- | --------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Vytvoří nebo přepíše poznámku zadaným obsahem Markdown.                                       |
-| `obsidian_append_note`           | Připojí obsah k poznámce; volitelně ke konkrétnímu nadpisu/bloku.                             |
-| `obsidian_patch_note`            | Přesně připojí, vloží před nebo nahradí obsah u nadpisu, bloku či pole frontmatteru.          |
-| `obsidian_delete_note`           | Trvale odstraní poznámku z trezoru.                                                           |
-| `obsidian_move_note`             | Přesune nebo přejmenuje poznámku v rámci trezoru.                                             |
-| `obsidian_execute_command`       | Spustí příkaz Obsidianu podle jeho ID.                                                        |
-| `obsidian_open_file`             | Otevře soubor v Obsidianu (pokud neexistuje, vytvoří jej).                                    |
-| `obsidian_sync_trigger`          | Spustí okamžitou obousměrnou synchronizaci trezoru mezi počítačem a mobilním zařízením.       |
-| `obsidian_sync_resolve_conflict` | Vyřeší konflikt synchronizace: zachovat `local` (mobil), `remote` (počítač) nebo `keep-both`. |
+| Nástroj                          | Popis                                                                                                     |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Vytvořte nebo přepište poznámku daným obsahem Markdown.                                                   |
+| `obsidian_append_note`           | Připojit obsah k poznámce; volitelně ke konkrétnímu heading/block.                                        |
+| `obsidian_patch_note`            | Chirurgicky append/prepend/replace na záhlaví, blok nebo pole frontmatter.                                |
+| `obsidian_delete_note`           | Trvale odstranit poznámku z trezoru.                                                                      |
+| `obsidian_move_note`             | Přesunout nebo přejmenovat poznámku v úložišti.                                                           |
+| `obsidian_execute_command`       | Spusťte příkaz Obsidian jeho příkazem ID.                                                                 |
+| `obsidian_open_file`             | Otevřete soubor v Obsidian (vytvoří jej, pokud neexistuje).                                               |
+| `obsidian_sync_trigger`          | Spusťte okamžitou obousměrnou synchronizaci mobilního trezoru ↔ pro stolní počítače.                      |
+| `obsidian_sync_resolve_conflict` | Vyřešte konflikt synchronizace: ponechte `local` (mobilní zařízení), `remote` (počítač) nebo `keep-both`. |
 
 > [!NOTE]
-> Cíle nástroje `obsidian_patch_note` přijímají `targetType` s hodnotou `heading | block | frontmatter`
-> a `operation` s hodnotou `append | prepend | replace`, spolu s volitelným parametrem
-> `createTargetIfMissing`. Čtyři nástroje `obsidian_sync_*` komunikují s místním synchronizačním
-> serverem (ve výchozím nastavení `http://127.0.0.1:27781`) a vyžadují synchronizační token.
+> Cíle `obsidian_patch_note` přijímají `targetType` `heading | block | frontmatter` a `operation` `append | prepend | replace`, s volitelným `createTargetIfMissing`. Čtyři nástroje `obsidian_sync_*` komunikují s místním synchronizačním serverem (ve výchozím nastavení `http://127.0.0.1:27781` ) a vyžadují synchronizační token.
 
-### Rozsahy oprávnění
+### Rozsahy
 
-Nástroje pro čtení vyžadují `read:obsidian`; nástroje pro zápis vyžadují `write:obsidian`. Vynucování
-je stejné jako u Notionu — zajišťuje jej `withScopeEnforcement()` v souboru
-`open-sse/mcp-server/server.ts`, je podmíněno hodnotou `OMNIROUTE_MCP_ENFORCE_SCOPES=true` a
-povolené rozsahy se načítají z `OMNIROUTE_MCP_SCOPES` nebo z kontextu rozsahů API klíče. Viz
-[MCP-SERVER.md](./MCP-SERVER.md).
+Čtecí nástroje vyžadují `read:obsidian`; nástroje pro zápis vyžadují `write:obsidian`. Vynucení je totožné se Notion — které zpracovává `withScopeEnforcement()` v `open-sse/mcp-server/server.ts`, je hradlováno na `OMNIROUTE_MCP_ENFORCE_SCOPES=true` a vynuceno pro volající HTTP/SSE jejichž klíč API postrádá `manage`/`admin`, přičemž povolené rozsahy pocházejí z kontextu rozsahu `OMNIROUTE_MCP_SCOPES` nebo klíče API. Viz [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Koncové body
 

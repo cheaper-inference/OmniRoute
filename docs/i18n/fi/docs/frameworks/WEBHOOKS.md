@@ -5,14 +5,10 @@
 ---
 
 > **Totuuden lähde:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Päivitetty viimeksi:** 2026-06-28 — v3.8.40
 
-OmniRoute voi lähettää HTTP-webhookeja alustan tapahtumien yhteydessä. Niiden avulla voit integroida
-Slackin, PagerDutyn, Datadogin, sisäisiä hälytyspalveluita tai minkä tahansa HTTP-vastaanottimen.
+OmniRoute voi käynnistää HTTP webhookeja alustatapahtumissa. Käytä niitä integroidaksesi Slack:n, PagerDuty, Datadogin, sisäisten hälytyspalvelujen tai minkä tahansa HTTP vastaanottimen kanssa.
 
-Välityskomponentti allekirjoittaa jokaisen toimituksen HMAC-SHA256:lla, yrittää toimitusta uudelleen tilapäisten
-virheiden yhteydessä, seuraa toimitusten toimivuutta webhook-kohtaisesti ja poistaa automaattisesti käytöstä
-toistuvasti epäonnistuvat päätepisteet.
+Välittäjä allekirjoittaa jokaisen toimituksen HMAC-SHA256:lla, yrittää uudelleen ohimenevien vikojen yhteydessä, seuraa toimituksen tilaa webhook-kohtaisesti ja poistaa automaattisesti käytöstä päätepisteet, jotka epäonnistuvat jatkuvasti.
 
 ## Tuetut tapahtumat
 

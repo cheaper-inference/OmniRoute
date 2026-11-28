@@ -62,42 +62,31 @@ Visām trim metodēm ir nepieciešama informācijas paneļa autentifikācija (`i
 OmniRoute saglabā pilnvaras marķieri un nekavējoties izpilda testa meklēšanu ar 1 rezultātu; ja Notion
 atgriež kļūdas objektu, pilnvaras marķieris tiek notīrīts un izsaukums neizdodas ar `400`.
 
-## MCP rīki (6)
+## MCP instrumenti (6)
 
-Definēti failā `open-sse/mcp-server/tools/notionTools.ts`. Pilnvaras marķieris izsaukuma
-laikā tiek iegūts, izmantojot `getNotionToken()`; ja tas nav konfigurēts, rīks izmet kļūdu
-`"Notion integrācijas pilnvaras marķieris nav konfigurēts. Iestatiet to sadaļā Iestatījumi > Konteksta avoti."`
+Definēts `open-sse/mcp-server/tools/notionTools.ts`. Tokens tiek atrisināts zvana laikā, izmantojot `getNotionToken()`; ja neviens nav konfigurēts, rīks izmet `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Rīks                         | Tvērums        | Apraksts                                                                                        |
-| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Meklē lapas un datubāzes pēc teksta vaicājuma (atgriež nosaukumus, ID un URL). Ar lapošanu.     |
-| `notion_get_page`            | `read:notion`  | Iegūst lapas saturu un metadatus pēc tās ID.                                                    |
-| `notion_list_block_children` | `read:notion`  | Uzskaita visus bloka vai lapas pakārtotos blokus (bloku koku). Ar lapošanu.                     |
-| `notion_query_database`      | `read:notion`  | Vaicā datubāzi ar neobligātiem `filter` + `sorts` (Notion API formātā). Ar lapošanu.            |
-| `notion_get_database`        | `read:notion`  | Iegūst datubāzes shēmu/metadatus pēc ID.                                                        |
-| `notion_append_blocks`       | `write:notion` | Pievieno pakārtotus blokus esošam blokam vai lapai (ne vairāk kā 100 bloku vienā pieprasījumā). |
+| Rīks                         | Darbības joma  | Apraksts                                                                                      |
+| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Meklējiet lapas un datubāzes pēc teksta vaicājuma (atgriež virsrakstus, IDs, URLs). Lappuses. |
+| `notion_get_page`            | `read:notion`  | Iegūstiet lapas saturu un metadatus, izmantojot tās ID.                                       |
+| `notion_list_block_children` | `read:notion`  | Norādiet visus bloka vai lapas bloka atvasinājumus (bloka koku). Lappuses.                    |
+| `notion_query_database`      | `read:notion`  | Pieprasiet datu bāzi, izmantojot izvēles `filter` + `sorts` (Notion API formāts). Lappuses.   |
+| `notion_get_database`        | `read:notion`  | Iegūstiet datu bāzes schema/metadata, izmantojot ID.                                          |
+| `notion_append_blocks`       | `write:notion` | Pievienot bloku atvasinājumus esošam blokam vai lapai (maks. 100 bloki vienā pieprasījumā).   |
 
 ### Ievades parametri
 
-- `notion_search` — `query` (1–500 rakstzīmes), `pageSize` (1–100, noklusējums 20),
-  `startCursor` (neobligāts).
-- `notion_get_page` — `pageId` (32 rakstzīmju heksadecimāla vērtība vai UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, noklusējums 50),
-  `startCursor` (neobligāts).
-- `notion_query_database` — `databaseId`, `filter` (neobligāts, Notion filtra formāts),
-  `sorts` (neobligāts masīvs), `pageSize` (1–100, noklusējums 50), `startCursor` (neobligāts).
+- `notion_search` — `query` (1–500 rakstzīmes), `pageSize` (1–100, noklusējuma 20), `startCursor` (neobligāti).
+- `notion_get_page` — `pageId` (32 rakstzīmju hex vai UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, noklusējuma 50), `startCursor` (neobligāti).
+- `notion_query_database` — `databaseId`, `filter` (pēc izvēles, Notion filtra formāts), `sorts` (neobligāts masīvs), `pageSize` (1–100, noklusējuma 50), `startCursor` (neobligāti).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (bloku objektu masīvs),
-  `after` (neobligāta pozīcija).
+- `notion_append_blocks` — `blockId`, `children` (bloku objektu masīvs), `after` (izvēles pozīcija).
 
-### Tvērumi
+### Darbības jomas
 
-Lasīšanas rīkiem ir nepieciešams `read:notion`, bet rakstīšanas rīkam — `write:notion`.
-Tvērumus izpilda `withScopeEnforcement()` failā
-`open-sse/mcp-server/server.ts` tikai tad, ja `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; izsaucējam
-atļautie tvērumi tiek iegūti no `OMNIROUTE_MCP_SCOPES` (atdalīti ar komatiem) vai
-autentificētās API atslēgas tvērumu konteksta. Pilnu tvērumu modeli skatiet failā
-[MCP-SERVER.md](./MCP-SERVER.md).
+Lasīšanas rīkiem ir nepieciešams `read:notion` un rakstīšanas rīkam `write:notion`. Darbības jomas tiek īstenotas ar `withScopeEnforcement()` `open-sse/mcp-server/server.ts`, kad `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, un vienmēr HTTP/SSE zvanītājam, kura API taustiņā trūkst `manage`/`admin`; zvanītāja atļautie tvērumi nāk no `OMNIROUTE_MCP_SCOPES` (atdalīti ar komatu) vai autentificētās API atslēgas tvēruma konteksta. Skatiet [MCP-SERVER.md](./MCP-SERVER.md), lai iegūtu pilnu modeli.
 
 ## Galapunkti
 

@@ -4,15 +4,13 @@
 
 ---
 
-Última atualização: 23/08/2026
-
 OmniRoute integra-se com três categorias de ferramentas CLI espalhadas por três páginas de painel dedicadas:
 
 | Página          | Rota                    | Conceito                                                                                    | Contagem     |
 | --------------- | ----------------------- | ------------------------------------------------------------------------------------------- | ------------ |
 | **Código CLI**  | `/dashboard/cli-code`   | Ferramentas de codificação que aponta para OmniRoute (Cliente → CLI → OmniRoute → Provider) | 26           |
 | **Agentes CLI** | `/dashboard/cli-agents` | Agentes autónomos que aponta para OmniRoute (mesmo fluxo, âmbito mais alargado)             | 11           |
-| **Agentes ACP** | `/dashboard/acp-agents` | CLIs que o OmniRoute gera como backend via stdio/ACP (fluxo inverso)                        | veja registo |
+| **Agentes ACP** | `/dashboard/acp-agents` | CLIs que OmniRoute gera como back-end através do stdio/ACP (fluxo inverso)                  | veja registo |
 
 Redireccionamento de rotas legadas através de 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
@@ -235,7 +233,7 @@ As novas ferramentas com `configType: "custom"` possuem configurações dedicada
 | `POST /api/cli-tools/grok-build-settings`   | Compilação Grok (~/.grok/config.toml, `[model.omniroute]`)                  |
 | `POST /api/cli-tools/qwen-settings`         | Código Qwen (chave `.env` dedicada + `~/.qwen/settings.json` )              |
 
-Todas as rotas utilizam `sanitizeErrorMessage()` para respostas de erro (Regra Rígida nº 12).
+Todas as rotas utilizam `sanitizeErrorMessage()` para respostas de erro (regra rígida #12).
 
 ---
 

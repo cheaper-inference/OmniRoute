@@ -330,19 +330,16 @@ také maskovaný náhled (`maskedApiKey`: až 4 znaky na každém konci, méně 
 žádné u klíče s 8 nebo méně znaky) a `projectId` připojení. Obě pole jsou u všech ostatních
 klíčů z odpovědi vynechána.
 
-## Vyhledání přihlašovacích údajů
+## Rozlišení pověření
 
 `getCloudAgentCredentials(providerId)` v `src/lib/cloudAgent/api.ts`:
 
-1. Načte aktivní připojení poskytovatele pomocí `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Pro každé připojení upřednostní `apiKey` (bez okolních mezer). Pokud není k dispozici, použije `accessToken`.
+1. Načte aktivní připojení poskytovatele přes `getProviderConnections({ provider: providerId, isActive: true })`.
+2. Pro každé připojení preferuje `apiKey` (oříznuté). Spadá zpět na `accessToken`.
 3. Vrátí první neprázdný token zabalený jako `{ apiKey: token }`.
-4. Pokud není nalezen žádný použitelný token, vrátí `null` — API odpoví stavem `400` a zprávou
-   `"Pro poskytovatele cloudového agenta nejsou nakonfigurovány žádné aktivní přihlašovací údaje: <id>"`.
+4. Vrátí `null` pokud není nalezen žádný použitelný token — API odpoví `400` pomocí `"No active credentials configured for cloud agent provider: <id>"`.
 
-To znamená, že cloudoví agenti znovu používají stejnou tabulku připojení poskytovatelů jako běžní
-poskytovatelé LLM. Chcete-li povolit Jules, vytvořte aktivní připojení s `provider: "jules"`
-a vyplněným `apiKey`.
+To znamená, že cloudoví agenti znovu používají stejnou tabulku připojení poskytovatele jako běžní poskytovatelé LLM. Chcete-li povolit Jules, vytvořte aktivní připojení s `provider: "jules"` a naplněným `apiKey`.
 
 ## Řídicí panel
 

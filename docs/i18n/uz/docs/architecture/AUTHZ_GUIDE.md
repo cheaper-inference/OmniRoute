@@ -5,11 +5,10 @@
 ---
 
 > **Haqiqat manbai:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Oxirgi yangilangan sana:** 2026-09-22 — koʻlam nomfazo (scope namespaces) MCP-SERVER.md ga ishora qiladi
 
-OmniRoute har bir API soʻrovini boshqaradigan marshrutni biluvchi avtorizatsiya quvuriga ega. Tasniflash **deterministik** va **fail-closed** (xato boʻlsa yopiladi) — tasniflanmaydigan har qanday narsa `MANAGEMENT` sifatida yakunlanadi va sessiya yoki boshqaruv darajasidagi token talab qiladi. Ushbu sahifa marshrutlarni saqlovchi yoki yangi yakuniy nuqtalarni loyihalashtiruvchi muhandislar uchun modelni tushuntiradi.
+OmniRoute har bir API so'rovini amalga oshiradigan marshrutdan xabardor avtorizatsiya quvuriga ega. Tasniflash** deterministik** va** muvaffaqiyatsiz yopiq** — tasniflab bo'lmaydigan har qanday narsa `MANAGEMENT` sifatida tugaydi va sessiya yoki boshqaruv darajasidagi tokenni talab qiladi. Ushbu sahifada marshrutlarni ta'minlaydigan yoki yangi so'nggi nuqtalarni loyihalashtirgan muhandislar uchun model tushuntiriladi.
 
-![AuthZ quvuri (3 ta marshrut sinfi + siyosatni baholash)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Manba: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -177,9 +176,9 @@ Har bir marshrut sinfida `src/server/authz/policies/` siyosati mavjud:
 
 - **`publicPolicy`** (`policies/public.ts`) — har doim `allow({ kind: "anonymous", id: "anonymous" })` qaytaradi.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearerni chiqaradi, `validateApiKey()` orqali tasdiqlaydi. Faqat samarali `REQUIRE_API_KEY` funksiyasi bayrog'i o'chirilganda anonimga tushadi. Samarali bayroq `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) orqali hal qilinadi, shuning uchun asboblar paneli funksiyasi Bayroqlar va muhit oʻzgaruvchilari `/api/v1/*`, `/api/v1beta/*` va taxalluslarni doimiy ravishda boshqaradi; hal qiluvchi nosozliklar yopilmadi. Mijoz API marshrutlari boʻyicha asboblar paneli-sessiya soʻrovlariga ruxsat beradi (jumladan, asboblar paneli modellari katalogi tomonidan ishlatiladigan `/api/v1/models`). Entra ID SSO yoqilganda, tizimli ravishda Entra tokeni (uchta base64url segmenti, `RS*` alg, `kid`) bo‘lgan Tashuvchi SSO filiali tomonidan boshqariladi.** oldin** `validateApiKey()` va uning hukmi yakuniy — bo'lib, u hech qachon API-kalit yo'liga yoki degradatsiyadan anonimga o'tishga tushmaydi, shuning uchun identifikatsiya provayderining uzilishi ochiq kirishga aylanmaydi. Statik API kalitlari ta'sir qilmaydi. [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — asboblar paneli seansini, ichki model-sinxronizatsiya so‘rovlarini qabul qiladi ( `/api/providers/[name]/(sync-models|models)` ga mos keladi) yoki `isAuthRequired()` noto‘g‘ri qiymatini qaytarsa, butunlay o‘tkazib yuboradi. Bearer tokeni mavjud boʻlsa, lekin yaroqsiz boʻlsa, 403 (`AUTH_001`) ni qaytaradi, aks holda 401. Shuningdek, marshrutni qo'riqlash sathlarini (LOCAL_ONLY / ALWAYS_PROTECTED) har qanday [autentifikatsiya](../security/ROUTE_GUARD_TIERS.md) bo'limi — qarang. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (bugungi kunda: `/api/mcp/`) dagi LOCAL_ONLY yo'llariga Bearer kaliti `manage` skopini olib yurganida, orqaga qaytmagan holda kirish mumkin; boshqa barcha LOCAL_ONLY yo'llari qamrovdan qat'i nazar, qat'iy orqaga qaytish bo'lib qoladi.
+- **`managementPolicy`** (`policies/management.ts`) — asboblar paneli seansini, ichki model-sinxronizatsiya so‘rovlarini qabul qiladi ( `/api/providers/[name]/(sync-models|models)` ga mos keladi) yoki `isAuthRequired()` noto‘g‘ri qiymatini qaytarsa, butunlay o‘tkazib yuboradi. Bearer tokeni mavjud boʻlsa, lekin yaroqsiz boʻlsa, 403 (`AUTH_001`) ni qaytaradi, aks holda 401. Shuningdek, marshrutni qo'riqlash sathlarini (LOCAL_ONLY / ALWAYS_PROTECTED) har qanday [autentifikatsiya](../security/ROUTE_GUARD_TIERS.md) bo'limi — qarang. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (bugungi kunda: `/api/mcp/`) dagi LOCAL_ONLY yoʻllariga “Bearer” tugmasi `manage`/`admin` doirasini yoki tor `mcp:connect` doirasini (`hasMcpConnectOrManageScope`) yoki autentifikatsiya qilingan asboblar paneli seansi bilan tashilganda, orqaga qaytish boʻlmagandan kirish mumkin; boshqa barcha LOCAL_ONLY yo'llari qamrovdan qat'i nazar, qat'iy orqaga qaytish bo'lib qoladi.
 
-Muvaffaqiyatli siyosat `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` bilan qaytaradi. Pastki oqim ishlovchilari autentifikatsiya mantiqini qayta ishga tushirish o'rniga `src/server/authz/assertAuth.ts` -da `assertAuth(request, "CLIENT_API")` orqali o'qishlari mumkin.
+Muvaffaqiyatli siyosat `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` bilan `AuthSubject` qaytaradi. Pastki oqim ishlovchilari autentifikatsiya mantiqini qayta ishga tushirish o'rniga `src/server/authz/assertAuth.ts` -da `assertAuth(request, "CLIENT_API")` orqali o'qishlari mumkin.
 
 ## Jamoat yo'llari ro'yxati
 
@@ -268,24 +267,24 @@ export async function POST(request: Request) {
 
 Toʻplamni qulaylikka qarab emas, shakliga qarab tanlang. Bitta marshrut `PUBLIC_API_ROUTES_EXACT` ga (yoki faqat GET uchun `PUBLIC_READONLY_CORS_API_ROUTES` ga) qoʻshiladi; faqat haqiqiy quyi daraxt `PUBLIC_API_ROUTE_PREFIXES` ga qoʻshiladi va u **`/` bilan tugashi shart**. Bitta marshrutni prefikslar roʻyxatiga kiritish uning boshlangʻich belgilariga ega barcha yondosh yoʻllarni, jumladan keyinchalik qoʻshilgan dinamik segmentli qardosh yoʻllarni ham ommaviy qiladi (GHSA-74g9-q8f6-793h). `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` va `tests/unit/authz/classify.test.ts` fayllaridagi birlik testlarini yangilang.
 
-## Doiralar
+## Qo'llash sohalari
 
-Uchta nom maydoni. Har bir tekshiruvchi faqat o'zining satrlarini o'qiydi. Yonma-yon taqqoslash, jumladan, nima uchun `manage` `read:compression` uchun `scopeMatches`ni bajara olmasligi va nima uchun `read` kirish tokeni `PATCH /api/keys/{id}`ni bajara olmasligi [Uchta nom maydoni](../frameworks/MCP-SERVER.md#three-scope-namespaces)da keltirilgan.
+Uchta nom maydoni. Har bir tekshiruvchi faqat o'z satrlarini o'qiydi. Yonma-yon, shu jumladan, nima uchun `manage` `read:compression` uchun `scopeMatches` ishlamay qolishi va `read` kirish tokeni nima uchun `PATCH /api/keys/{id}` amalga oshira olmasligi [uch soha nomlari](../frameworks/MCP-SERVER.md#three-scope-namespaces) maydonidir.
 
-API kalitlari `scopes` massivini o'z ichiga oladi (`api_keys.scopes`da JSON sifatida saqlanadi, qarang `src/lib/db/apiKeys.ts`).
+API tugmalari `scopes` massivini olib yuradi ( `api_keys.scopes` da JSON sifatida saqlanadi, `src/lib/db/apiKeys.ts` qarang).
 
 ### Boshqaruv doirasi
 
-- `manage` / `admin` — `hasManageScope`. Boshqaruv API marshrutlariga tashuvchi orqali kirish.
-- `mcp:connect`, `self:usage`, `self:account-quota` va `policy:bypass-provider-quota` qo'shimcha aniq mos keladigan doiralardir. Ular `MANAGEMENT_API_KEY_SCOPES`dan tashqarida joylashgan. `mcp:connect` faqat `/api/mcp/` non-loopback ajratmasini ochadi.
+- `manage` / `admin` — `hasManageScope`. Boshqaruv API marshrutlariga egalik huquqi.
+- `mcp:connect`, `self:usage`, `self:account-quota` va `policy:bypass-provider-quota` qo‘shimchali aniq moslik doiralaridir. Ular `MANAGEMENT_API_KEY_SCOPES` tashqarisida o'tirishadi. `mcp:connect` faqat `/api/mcp/` teskari bo'lmagan o'ymani ochadi.
 
-### MCP asbob doiralari
+### MCP asboblar doiralari
 
-Katalog va mos kelish qoidalari (bir xil satr yoki `*` bilan tugaydigan berilgan doira): [MCP asbob doiralari](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts`dagi `MCP_SCOPE_LIST` to'liq katalog emas, balki asl terilgan kichik to'plamdir. Ijro etish `open-sse/mcp-server/scopeEnforcement.ts`da `resolveCallerScopeContext()` MCP autentifikatsiya ma'lumotlari, so'rov metama'lumotlari yoki `OMNIROUTE_MCP_SCOPES`dan doiralarni hal qilgandan so'ng amalga oshiriladi. U `OMNIROUTE_MCP_ENFORCE_SCOPES=true` bo'lmaguncha o'chirilgan holatda qoladi.
+Katalog va mos keladigan qoidalar (bir xil qator yoki `*` bilan tugaydigan ruxsat etilgan qamrov): [MCP asbob doiralari](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` dagi `MCP_SCOPE_LIST` to‘liq katalog emas, balki asl kiritilgan kichik to‘plamdir. `resolveCallerScopeContext()` MCP autentifikatsiya maʼlumotlari, soʻrov metamaʼlumotlari yoki `OMNIROUTE_MCP_SCOPES` dan qamrovlarni hal qilgandan soʻng, `open-sse/mcp-server/scopeEnforcement.ts` da amalga oshiriladi. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` uni global miqyosda yoqadi (standart `false`), lekin u bayroqdan qat'i nazar, API kalitida `manage`/`admin` bo'lmagan HTTP/SSE qo'ng'iroq qiluvchisi uchun har doim qo'llaniladi ( `open-sse/mcp-server/scopeEnforcement.ts` da `shouldForceScopeEnforcement()` qarang).
 
-### Kirish tokeni doiralari
+### Kirish-token doiralari
 
-`oma_live_…` tokenlarida `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) bo'yicha tartiblangan. Bu daraja faqat kirish tokeni hisob ma'lumotlariga tegishli. Qarang [Boshqaruv autentifikatsiyasi](../guides/MANAGEMENT-AUTH.md).
+`oma_live_…` tokenlarida `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) boʻyicha tartiblangan. Bu daraja faqat kirish tokeni hisob ma'lumotlariga tegishli. [Boshqaruv autentifikatsiyasiga](../guides/MANAGEMENT-AUTH.md) qarang.
 
 ## Mualliflik huquqini oʻzgartirish zarur
 

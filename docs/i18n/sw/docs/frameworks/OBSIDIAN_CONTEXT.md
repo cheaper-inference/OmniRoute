@@ -112,58 +112,48 @@ ufikiaji; kitambulisho halali cha mazingira kinachotambuliwa kama `env-key` bado
 Funguo zilizothibitishwa bila usanidi wa Obsidian wa kila ufunguo huendelea kutumia usanidi wa jumla kama mbadala.
 Zana nne za `obsidian_sync_*` hudumisha tabia yake tofauti ya tokeni ya ulandanishaji.
 
-## Zana za MCP (22)
+## zana MCP (22)
 
-Zimefafanuliwa katika `open-sse/mcp-server/tools/obsidianTools.ts`. Tokeni/URL-msingi hutatuliwa
-kwa kila mwito (ya ufunguo wa API kwanza, kisha ya jumla). Zana zinazofikia **seva ya usawazishaji**
-ya OmniRoute (zana nne za `obsidian_sync_*`) pia zinahitaji tokeni ya uthibitishaji wa usawazishaji iliyosanidiwa
-katika mipangilio ya OmniRoute.
+Imefafanuliwa katika `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL hutatuliwa kwa kila simu (per-API-key kwanza, kisha ya kimataifa). Zana ambazo ziligonga OmniRoute** kusawazisha seva** (zana nne `obsidian_sync_*` ) pia zinahitaji tokeni ya upatanishi ya uthibitishaji iliyosanidiwa katika mipangilio OmniRoute.
 
 ### Zana za kusoma (`read:obsidian`)
 
-| Zana                         | Maelezo                                                                                                                     |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Angalia kama Local REST API inaweza kufikiwa na imethibitishwa.                                                             |
-| `obsidian_search_simple`     | Utafutaji wa maandishi yote katika maudhui ya madokezo; hurejesha vijisehemu pamoja na njia za faili.                       |
-| `obsidian_search_structured` | Tafuta kwa kutumia usemi wa JSON Logic (vichujio vya and/or/regex/path).                                                    |
-| `obsidian_read_note`         | Soma dokezo kwa njia inayohusiana na vault; kwa hiari kichwa/sehemu/frontmatter mahususi.                                   |
-| `obsidian_list_vault`        | Orodhesha faili na saraka katika vault (mti wa vipengee).                                                                   |
-| `obsidian_get_document_map`  | Pata muundo wa vichwa wa dokezo kama ramani ya vichwa → nambari za mistari.                                                 |
-| `obsidian_get_note_metadata` | Pata frontmatter, lebo, viungo, na idadi ya herufi/maneno bila maudhui kamili.                                              |
-| `obsidian_get_active_file`   | Pata njia + maudhui ya faili inayotumika kwa sasa katika Obsidian.                                                          |
-| `obsidian_get_periodic_note` | Pata dokezo la mara kwa mara la kila siku/kila wiki/kila mwezi kwa tarehe fulani (leo ikiwa imeachwa).                      |
-| `obsidian_get_tags`          | Orodhesha lebo zote za vault pamoja na masafa yake.                                                                         |
-| `obsidian_list_commands`     | Orodhesha vitambulisho vya amri vya Obsidian vinavyopatikana (tumia pamoja na `obsidian_execute_command`).                  |
-| `obsidian_sync_status`       | Hali ya seva ya usawazishaji ya OmniRoute: inaendeshwa, jina la vault, porti, muda wa kufanya kazi, usawazishaji wa mwisho. |
-| `obsidian_sync_conflicts`    | Orodhesha migongano ya usawazishaji ambayo haijatatuliwa (njia, njia ya mgongano, muda wa kugunduliwa).                     |
+| Zana                         | Maelezo                                                                                                          |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Angalia kama REST API ya Ndani inaweza kufikiwa na kuthibitishwa.                                                |
+| `obsidian_search_simple`     | Utafutaji kamili wa maandishi ya maandishi; inarudisha vijisehemu vilivyo na njia za faili.                      |
+| `obsidian_search_structured` | Tafuta kwa kutumia JSON Mantiki usemi ( vichujio vya and/or/regex/path ).                                        |
+| `obsidian_read_note`         | Soma dokezo kwa njia inayohusiana na vault; kwa hiari heading/block/frontmatter. maalum                          |
+| `obsidian_list_vault`        | Orodhesha faili na saraka kwenye vault (mti wa maingizo).                                                        |
+| `obsidian_get_document_map`  | Pata muundo wa kichwa cha dokezo kama ramani ya vichwa vya nambari za mstari →.                                  |
+| `obsidian_get_note_metadata` | Pata mada ya mbele, lebo, viungo, idadi char/word bila maudhui kamili.                                           |
+| `obsidian_get_active_file`   | Pata njia + yaliyomo kwenye faili inayotumika sasa katika Obsidian.                                              |
+| `obsidian_get_periodic_note` | Pata noti ya mara kwa mara ya daily/weekly/monthly ya tarehe (leo ikiwa imeachwa).                               |
+| `obsidian_get_tags`          | Orodhesha lebo zote za kuba na masafa yao.                                                                       |
+| `obsidian_list_commands`     | Orodhesha Obsidian amri IDs (tumia na `obsidian_execute_command`).                                               |
+| `obsidian_sync_status`       | OmniRoute hali ya seva ya kusawazisha: kukimbia, jina la vault, mlango, wakati wa ziada, usawazishaji wa mwisho. |
+| `obsidian_sync_conflicts`    | Orodhesha migogoro ya usawazishaji ambayo haijasuluhishwa (njia, njia ya migogoro, imegunduliwa).                |
 
 ### Zana za kuandika (`write:obsidian`)
 
-| Zana                             | Maelezo                                                                                             |
-| -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Unda au andika upya dokezo kwa maudhui yaliyotolewa ya Markdown.                                    |
-| `obsidian_append_note`           | Ongeza maudhui kwenye dokezo; kwa hiari kwenye kichwa/sehemu mahususi.                              |
-| `obsidian_patch_note`            | Ongeza mwishoni/ongeza mwanzoni/badilisha kwa usahihi kwenye kichwa, sehemu, au uga wa frontmatter. |
-| `obsidian_delete_note`           | Futa dokezo kabisa kutoka kwenye vault.                                                             |
-| `obsidian_move_note`             | Hamisha au badilisha jina la dokezo ndani ya vault.                                                 |
-| `obsidian_execute_command`       | Tekeleza amri ya Obsidian kwa kitambulisho chake cha amri.                                          |
-| `obsidian_open_file`             | Fungua faili katika Obsidian (huiunda ikiwa haipo).                                                 |
-| `obsidian_sync_trigger`          | Anzisha usawazishaji wa pande mbili wa vault wa desktop↔simu mara moja.                             |
-| `obsidian_sync_resolve_conflict` | Tatua mgongano wa usawazishaji: hifadhi `local` (simu), `remote` (desktop), au `keep-both`.         |
+| Zana                             | Maelezo                                                                                         |
+| -------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Unda au ubadilishe dokezo ukitumia yaliyomo kwenye Markdown.                                    |
+| `obsidian_append_note`           | Ongeza maudhui kwenye dokezo; kwa hiari kwa heading/block. maalum                               |
+| `obsidian_patch_note`            | append/prepend/replace kwa upasuaji kwenye sehemu ya kichwa, kizuizi, au mada ya mbele.         |
+| `obsidian_delete_note`           | Futa kabisa dokezo kutoka kwa kuba.                                                             |
+| `obsidian_move_note`             | Sogeza au ubadilishe jina la noti ndani ya kuba.                                                |
+| `obsidian_execute_command`       | Tekeleza Obsidian amri kwa amri yake ID.                                                        |
+| `obsidian_open_file`             | Fungua faili katika Obsidian (huiunda ikiwa haipo).                                             |
+| `obsidian_sync_trigger`          | Anzisha ulandanishi wa mara moja wa eneo-kazi linaloelekeza pande mbili ↔ vault ya rununu.      |
+| `obsidian_sync_resolve_conflict` | Tatua mzozo wa ulandanishi: weka `local` (simu ya mkononi), `remote` (desktop), au `keep-both`. |
 
 > [!NOTE]
-> Malengo ya `obsidian_patch_note` yanakubali `targetType` ya `heading | block | frontmatter`
-> na `operation` ya `append | prepend | replace`, pamoja na `createTargetIfMissing`
-> ya hiari. Zana nne za `obsidian_sync_*` huwasiliana na seva ya usawazishaji ya ndani
-> (`http://127.0.0.1:27781` kwa chaguo-msingi) na zinahitaji tokeni ya usawazishaji.
+> malengo `obsidian_patch_note` yanakubali `targetType` ya `heading | block | frontmatter` na `operation` ya `append | prepend | replace`, kwa `createTargetIfMissing` ya hiari. Zana nne za `obsidian_sync_*` huzungumza na seva ya kusawazisha ya ndani (`http://127.0.0.1:27781` kwa chaguo-msingi) na kuhitaji tokeni ya kusawazisha.
 
-### Wigo
+### Mawanda
 
-Zana za kusoma zinahitaji `read:obsidian`; zana za kuandika zinahitaji `write:obsidian`. Utekelezaji
-unafanana na wa Notion — hushughulikiwa na `withScopeEnforcement()` katika
-`open-sse/mcp-server/server.ts`, ukiwezeshwa na `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, huku
-wigo unaoruhusiwa ukitolewa kutoka `OMNIROUTE_MCP_SCOPES` au muktadha wa wigo wa ufunguo wa API. Tazama
-[MCP-SERVER.md](./MCP-SERVER.md).
+Zana za kusoma zinahitaji `read:obsidian`; zana za kuandika zinahitaji `write:obsidian`. Utekelezaji ni sawa na Notion — inayoshughulikiwa na `withScopeEnforcement()` katika `open-sse/mcp-server/server.ts`, iliyowekwa kwenye `OMNIROUTE_MCP_ENFORCE_SCOPES=true` na kulazimishwa kwa wapiga HTTP/SSE ambao ufunguo wao API hauna `manage`/`admin`, na mawanda yanayoruhusiwa yakitoka kwa `OMNIROUTE_MCP_SCOPES` au muktadha wa upeo wa kitufe cha API. Angalia [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Vituo vya mwisho
 

@@ -90,18 +90,17 @@ Kipengee cha `ctx` kinachopitishwa kwa `register(program, ctx)`:
 
 ## Ugunduzi
 
-Programu-jalizi hugunduliwa kutoka:
+Plugins hugunduliwa kutoka:
 
-1. `~/.omniroute/plugins/<name>/` — usakinishaji wa ndani wa mtumiaji
-2. Kigezo cha mazingira cha `OMNIROUTE_PLUGIN_PATH` — saraka maalum
+1. `~/.omniroute/plugins/node_modules/<name>/` — ambapo `omniroute plugin install` huweka vifurushi ( npm `--prefix`, sio `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — saraka za programu-jalizi zilizonakiliwa kwa mkono
+3. `OMNIROUTE_PLUGIN_PATH` env var — saraka maalum
 
-Zote mbili ni za **CLI pekee**. Mazingira ya uendeshaji ya programu-jalizi upande wa seva (programu-jalizi za soko/`plugin.json`
-zinazoendeshwa ndani ya proksi) yana kichanganuzi chake chenye ubatilishaji wake,
-`OMNIROUTE_PLUGINS_DIR` — angalia
-[PLUGIN_MARKETPLACE.md → Saraka ya programu-jalizi](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Kuweka moja hakuathiri nyingine.
+Saraka zilizounganishwa (kile npm huunda `plugin install ./dir`) hufuatwa.
 
-Hitilafu za upakiaji hunaswa na kuchapishwa kama maonyo — programu-jalizi iliyoharibika haiwezi kamwe kusababisha CLI kuacha kufanya kazi.
+Wote wawili ni** CLI pekee** . Muda wa programu-jalizi wa upande wa seva (soko/ programu-jalizi za `plugin.json` zinazofanya kazi ndani ya seva mbadala) ina kichanganuzi chake chenye ubatilishaji wake, `OMNIROUTE_PLUGINS_DIR` — tazama [PLUGIN_MARKETPLACE.md → saraka ya programu-jalizi](./PLUGIN_MARKETPLACE.md#plugin-directory). Kuweka moja hakuathiri nyingine.
+
+Hitilafu za upakiaji zimenaswa na kuchapishwa kama maonyo — programu-jalizi iliyovunjika kamwe haivunji CLI.
 
 ## Usalama
 

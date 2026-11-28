@@ -168,9 +168,9 @@ Veenduge, et `copilot-m365-web` oleks sisse lülitatud** Armatuurlaud → pakkuj
 
 ## Viited
 
-- Probleem: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Arutelu: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Lähtekood: `src/shared/constants/providers/web-cookie.ts` (pakkuja definitsioon)
-- HAR-i import: `src/shared/utils/m365HarImport.ts`
+- Probleem: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Arutelu: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Allikas: `src/shared/constants/providers/web-cookie.ts` (pakkuja definitsioon)
+- HAR import: `src/shared/utils/m365HarImport.ts`
 - Mandaadiväljad: `src/shared/providers/webSessionCredentials.ts`
-- Teenusetaseme modaaldialoog: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Modaalaste: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

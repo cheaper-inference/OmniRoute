@@ -5,11 +5,10 @@
 ---
 
 > **Zdroj pravdy:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Posledná aktualizácia:** 2026-06-28 — v3.8.40
 
-OmniRoute môže pri udalostiach platformy odosielať webhooky HTTP. Použite ich na integráciu so službami Slack, PagerDuty, Datadog, internými službami upozornení alebo ľubovoľným prijímačom HTTP.
+OmniRoute môže spúšťať webhooky HTTP na udalostiach platformy. Použite ich na integráciu so Slack, PagerDuty, Datadog, internými výstražnými službami alebo akýmkoľvek prijímačom HTTP.
 
-Dispečer podpisuje každé doručenie pomocou HMAC-SHA256, opakuje pokusy pri dočasných zlyhaniach, sleduje stav doručovania jednotlivých webhookov a automaticky deaktivuje koncové body, ktoré opakovane zlyhávajú.
+Dispečer podpíše každú dodávku pomocou HMAC-SHA256, zopakuje prechodné zlyhania, sleduje stav doručenia podľa webhooku a automaticky deaktivuje koncové body, ktoré stále zlyhávajú.
 
 ## Podporované udalosti
 

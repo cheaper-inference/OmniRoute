@@ -53,7 +53,7 @@ flowchart LR
 원하는 분기가 병합 가능하다고 가정하기 전에 공개 동결을 확인하세요.
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 병합 메커니즘(소유자 `queue` 레이블 → Mergify)은 [MERGE_TRAIN.md](./MERGE_TRAIN.md) 에 문서화되어 있습니다.

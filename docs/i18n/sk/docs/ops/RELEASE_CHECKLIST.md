@@ -4,12 +4,9 @@
 
 ---
 
-> **Posledná aktualizácia:** 2026-08-28 — v3.8.51
-> Zjednodušený proces vydávania, ktorý využíva zručnosti Claude Code na automatizáciu.
+> Zjednodušený tok uvoľňovania, ktorý využíva zručnosti Claude Code pre automatizáciu.
 >
-> **Udržiavajte frontu/vetvu zelenú medzi vydaniami:** pozrite si [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (rodina `/green-prs` + `npm run check:release-green` + `/babysit` + nočné spúšťanie). Pravidelné
-> spúšťanie — a najmä **pred** týmto kontrolným zoznamom — zabezpečí, že PR vydania začne zelený.
+> **Medzi vydaniami ponechajte queue/branch zelenú:** pozri [RELEASE_GREEN.md](./RELEASE_GREEN.md) ( rodina `/green-prs` + `npm run check:release-green` + `/babysit` + za noc). Spustenie tohto pravidelne — a najmä** predtým** tento kontrolný zoznam — robí spustenie PR zeleným.
 
 ## V skratke
 
@@ -60,7 +57,9 @@ Pracovný postup npm-publish už nezverejňuje priamo: spustí zbalený tarball 
 
 **Docker Hub `latest` (vyžaduje sa pri každom stabilnom zverejnení SemVer ):** pracovný postup `docker-publish` musí označiť** oboje** `X.Y.Z` a keď `should-promote-latest.sh` súhlasí, toto je najvyššia stabilná SemVer, `:latest` s** rovnaký digest** . Po vykonaní úlohy: Hub `latest` digest sa rovná novému SemVer digest a `last_updated` presunutý. Nenechávajte `:latest` na staršej zostave, kým poznámky k vydaniu hovoria o opravách, ktoré existujú iba na git. Rýchle spustenie vytvárania použite `:latest`; GitOps by mal naďalej pripínať `X.Y.Z`. Pozrite si [kanály vydania Docker](../guides/DOCKER_GUIDE.md#release-channels) a #10317.
 
-**Úložisko organizácie Docker Hub (`cheaperinference/omniroute`):** Docker Hub nemôže presúvať úložisko medzi mennými priestormi, takže `diegosouzapw/omniroute` uchováva svoju históriu sťahovania a každé vydanie a úloha `mirror-org-dockerhub` `docker-publish` skopíruje každú vydanú verziu (a `:latest` pri povýšení) zo `ghcr.io/cheaper-inference/omniroute` do organizačného úložiska. Potrebuje tajomstvá `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; bez nich zostane úloha zelená s upozornením „Docker Hub org mirror skipped“ a ostatné registre sa zverejnia normálne. Ak chcete neskôr zverejniť vydanú verziu, spustite** Akcie → Zrkadliť obrázok Docker do Docker Hub org → Spustiť pracovný postup** s `version=X.Y.Z` (a `promote_latest` pre najvyššiu stabilnú verziu): skopíruje existujúce obrázky, bez prestavby.
+**Úložisko organizácie Docker Hub (`cheaperinference/omniroute`):** Docker Hub nemôže presúvať úložisko medzi mennými priestormi, takže `diegosouzapw/omniroute` uchováva svoju históriu sťahovania a každé vydanie a úloha `mirror-org-dockerhub` `docker-publish` skopíruje každú vydanú verziu (a `:latest` pri povýšení) zo `ghcr.io/cheaper-inference/omniroute` do organizačného úložiska. Potrebuje tajomstvá `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; bez nich zostane úloha zelená s upozornením „Docker Hub org mirror skipped“ a ostatné registre sa zverejnia normálne. Ak chcete neskôr zverejniť vydanú verziu, spustite** Akcie → Zrkadliť obrázok Docker do Docker Hub org → Spustiť pracovný postup** s `version=X.Y.Z` (a `promote_latest` pre najvyššiu stabilnú verziu): skopíruje existujúce obrázky, bez prestavby. Prehľad Docker centra tohto úložiska je nastavený ručne: API ktorý ho upravuje, odmieta prístupové tokeny organizácie.
+
+Rovnaký pracovný postup tiež skopíruje každé vydanie do staršieho balíka GHCR `ghcr.io/diegosouzapw/omniroute` do 30. 6. 2027, takže inštalácie, ktoré sú k nemu stále pripojené, sa neustále aktualizujú; jeho index nesie popis "presunuté do `ghcr.io/cheaper-inference/omniroute`". Potrebuje tajomstvo `GHCR_LEGACY_TOKEN` (klasický osobný prístupový token `diegosouzapw` s `write:packages`); bez toho táto úloha preskočí s upozornením „Preskočené zrkadlo GHCR “.
 
 ## Zrýchlený režim pre hotfixy (štítok `hotfix`)
 
@@ -136,7 +135,7 @@ Husky hooks žijú v `.husky/` a spúšťajú sa automaticky pri operáciách gi
 - **predtlačenie:** rýchle deterministické brány — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktivované 2026-06-13). Zámerne vylučuje `test:unit` (pomalé; pokryté úlohou CI `test-unit` ).
   - Pred stlačením uvoľňovacích vetiev spustite `npm run test:unit` manuálne.
 
-Ak háčik zlyhá: opravte základný problém, neobíďte ho pomocou `--no-verify`.
+Ak hák zlyhá: opravte základný problém, neobíďte ho pomocou `--no-verify`.
 
 ### Konvenčné záväzky
 
@@ -151,7 +150,7 @@ Prerušenie zmien: pridajte pätu `BREAKING CHANGE:` alebo `!` za rozsah (napr. 
 ### Dokumentácia
 
 - [ ] `npm run check:docs-sync` passy (automatické spustenie predbežným potvrdením)
-- [ ] `npm run check:docs-all` passy (dáždnik: docs-sync + docs-counts + env-doc-sync + zastarané verzie + doc-links)
+- [ ] `npm run check:docs-all` prechádza. Jeho poradný znak `check:deprecated-versions` označuje verzie explicitne priradené k OmniRoute (3.6.xa staršie) a ignoruje dátumy.
 - [ ] `npm run check:env-doc-sync` výstupy 0 — kód ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env zmluva je nedotknutá
 - [ ] `npm run check:doc-links` končí 0 — žiadne nefunkčné interné referencie znižovania po reštrukturalizácii
 - [ ] `docs/architecture/ARCHITECTURE.md` recenzované na storage/runtime drift
@@ -223,14 +222,14 @@ npm run build:release
   └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-NOT spustite `npm run build` nasledované samostatným `npm run build:cli` na nasadenie — použite `npm run build:release`, ktoré vykoná čisté prebudovanie + sentinelu v jednom príkaze.
+Spustite NOT `npm run build` nasledované samostatným `npm run build:cli` na nasadenie — použite `npm run build:release` ktoré vykoná čisté prebudovanie + sentinelu v jednom príkaze.
 
 ### Overenie artefaktov
 
 - [ ] `npm run build:release` uspeje a `dist/BUILD_SHA` == `git rev-parse --short HEAD`
 - [ ] `npm run check:pack-artifact` clean — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, alebo iné lokálne zvyšky
 - [ ] `dist/server.js` existuje po zostavení
-- [ ] Voliteľné miestne zabalené-runtime dym: `npm run dev:candidate -- validate` potom, čo `npm run dev:candidate -- build` spustí zbalený tarball na izolovanom `DATA_DIR` a skontroluje `/api/health` + `/v1/models` (pozri [Príspevok Zlatá cesta](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
+- [ ] Voliteľné miestne zabalené-runtime dym: `npm run dev:candidate -- validate` potom, čo `npm run dev:candidate -- build` spustí zbalený tarball na izolovanom `DATA_DIR` a skontroluje `/api/health` + `/v1/models` (pozri [Príspevok Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
 ### Označenie a uvoľnenie
 
@@ -399,7 +398,7 @@ Vyvinutie bump commit je vytvorené pomocou git inštalatérstva (nedotkne sa ž
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

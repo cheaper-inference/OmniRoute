@@ -506,27 +506,27 @@ küldés óta.
 
 ---
 
-## Tokenek megosztása
+## Token megosztás
 
 **Fájl:** `src/lib/gamification/sharing.ts`
 
-### Kettős könyvelésű főkönyv
+### Kettős könyvelés
 
-Minden átutalás két sort hoz létre a `token_ledger` táblában:
+Minden átvitel két sort hoz létre `token_ledger`:
 
 | Sor      | `from_key_id` | `to_key_id` | `amount` |
 | -------- | ------------- | ----------- | -------- |
-| Terhelés | küldő         | fogadó      | +összeg  |
-| Jóváírás | fogadó        | küldő       | -összeg  |
+| Terhelés | feladó        | vevő        | + összeg |
+| Hitel    | vevő          | feladó      | -amount  |
 
-Várjunk — a konvenció a következő:
+Várj — az egyezmény a következő:
 
-| Sor     | `from_key_id` | `to_key_id` | `amount` | Jelentés              |
-| ------- | ------------- | ----------- | -------- | --------------------- |
-| Küldés  | küldő         | fogadó      | +összeg  | Kiáramlás a küldőtől  |
-| Fogadás | fogadó        | küldő       | +összeg  | Beáramlás a fogadóhoz |
+| Sor    | `from_key_id` | `to_key_id` | `amount` | Jelentése             |
+| ------ | ------------- | ----------- | -------- | --------------------- |
+| Elküld | feladó        | vevő        | + összeg | Kiáramlás a feladótól |
+| Kap    | vevő          | feladó      | + összeg | Beáramlás a vevőhöz   |
 
-Az egyenleg kiszámítása:
+Az egyenleg kiszámítása a következőképpen történik:
 
 ```sql
 SELECT
@@ -537,7 +537,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Az átutalás folyamata
+### Átviteli folyamat
 
 ```typescript
 export async function transferTokens(
@@ -548,19 +548,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Ellenőrzés**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotencia**: ellenőrizni kell, hogy az `idempotency_key` már létezik-e a főkönyvben.
-   Ha igen, a gyorsítótárazott eredményt kell visszaadni.
-3. **Tranzakció** (egyetlen SQLite-tranzakció):
-   a. A küldő egyenlegének kiszámítása.
-   b. Ha `balance < amount`, megszakítás (nincs elegendő fedezet).
-   c. A küldési sor beszúrása (`from=sender,` érték visszaadása.
+1. **Érvényesít** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotencia** : ellenőrizze, hogy `idempotency_key` létezik-e már a főkönyvben. Ha igen, adja vissza a gyorsítótárazott eredményt.
+3. **Tranzakció** (egyetlen SQLite tranzakció): a. Számítsa ki a feladó egyenlegét. b. Ha `balance < amount`, szakítsa meg (nincs elegendő forrás). c. Küldési sor beszúrása (`from=sender, to=receiver, amount`). d. Fogadási sor beszúrása (`from=receiver, to=sender, amount`).
+4. **Díjkorlát** : ellenőrizze a feladó átviteli sebességét (max 10 transfers/min).
+5. **Esemény** : `token_share` gamification esemény kibocsátása XP + jelvény kiértékeléséhez.
+6. Vissza `{ success: true, balance: newBalance }`.
 
-### Sebességkorlátozás
+### Rate Limiting
 
-- API-kulcsonként percenként legfeljebb 10 átutalás.
-- Egyetlen átutalással legfeljebb 10 000 token küldhető.
-- API-kulcsonként naponta legfeljebb 100 000 token utalható át.
+- Max 10 átvitel percenként API billentyűnként.
+- Maximum 10 000 token egyetlen átutalással.
+- Maximum 100 000 token átvitele naponta API kulcsonként.
 
 ---
 

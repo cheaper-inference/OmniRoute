@@ -4,8 +4,6 @@
 
 ---
 
-Kemas kini terakhir: 2026-08-23
-
 OmniRoute menyepadukan dengan tiga kategori alat CLI yang tersebar di tiga halaman papan pemuka khusus:
 
 | Halaman      | Laluan                  | Konsep                                                                                   | Kira              |

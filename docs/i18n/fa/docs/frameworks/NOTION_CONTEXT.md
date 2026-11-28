@@ -62,43 +62,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute توکن را ذخیره میکند و بلافاصله یک جستوجوی آزمایشی با ۱ نتیجه اجرا میکند؛ اگر Notion
 یک شیء خطا بازگرداند، توکن پاک میشود و فراخوانی با `400` شکست میخورد.
 
-## ابزارهای MCP (۶)
+## ابزار MCP (6)
 
-در `open-sse/mcp-server/tools/notionTools.ts` تعریف شدهاند. توکن هنگام فراخوانی
-از طریق `getNotionToken()` دریافت میشود؛ اگر توکنی پیکربندی نشده باشد، ابزار خطای
-`"توکن یکپارچهسازی Notion پیکربندی نشده است. آن را در Settings > Context Sources تنظیم کنید."`
-را ایجاد میکند.
+در `open-sse/mcp-server/tools/notionTools.ts` تعریف شده است. رمز در زمان تماس از طریق `getNotionToken()` حل می شود. اگر هیچ یک پیکربندی نشده باشد، ابزار `"Notion integration token not configured. Set it in Settings > Context Sources."` را پرتاب می کند
 
-| ابزار                        | محدوده دسترسی  | توضیحات                                                                                             |
-| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | جستوجوی صفحات و پایگاههای داده با کوئری متنی (عنوانها، شناسهها و URLها را برمیگرداند). صفحهبندیشده. |
-| `notion_get_page`            | `read:notion`  | دریافت محتوا و فراداده یک صفحه بر اساس شناسه آن.                                                    |
-| `notion_list_block_children` | `read:notion`  | فهرستکردن تمام بلوکهای فرزند یک بلوک یا صفحه (درخت بلوک). صفحهبندیشده.                              |
-| `notion_query_database`      | `read:notion`  | کوئری یک پایگاه داده با `filter` و `sorts` اختیاری (قالب API نُوشن). صفحهبندیشده.                   |
-| `notion_get_database`        | `read:notion`  | دریافت طرحواره/فراداده یک پایگاه داده بر اساس شناسه.                                                |
-| `notion_append_blocks`       | `write:notion` | افزودن بلوکهای فرزند به یک بلوک یا صفحه موجود (حداکثر ۱۰۰ بلوک در هر درخواست).                      |
+| ابزار                        | دامنه          | توضیحات                                                                                                        |
+| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | صفحات و پایگاه های داده را بر اساس پرس و جوی متنی جستجو کنید (عناوین، IDs، URLs را برمی گرداند). صفحه بندی شده |
+| `notion_get_page`            | `read:notion`  | محتوا و ابرداده یک صفحه را با ID آن دریافت کنید.                                                               |
+| `notion_list_block_children` | `read:notion`  | تمام فرزندان بلوک یک بلوک یا صفحه (درخت بلوک) را فهرست کنید. صفحه بندی شده                                     |
+| `notion_query_database`      | `read:notion`  | پرس و جو از پایگاه داده با `filter` + `sorts` اختیاری (قالب Notion API ). صفحه بندی شده                        |
+| `notion_get_database`        | `read:notion`  | schema/metadata یک پایگاه داده را توسط ID دریافت کنید.                                                         |
+| `notion_append_blocks`       | `write:notion` | فرزندان بلوک را به یک بلوک یا صفحه موجود اضافه کنید (حداکثر 100 بلوک در هر درخواست).                           |
 
 ### پارامترهای ورودی
 
-- `notion_search` — `query` (۱ تا ۵۰۰ نویسه)، `pageSize` (۱ تا ۱۰۰، پیشفرض ۲۰)،
-  `startCursor` (اختیاری).
-- `notion_get_page` — `pageId` (هگز ۳۲ نویسهای یا UUID).
-- `notion_list_block_children` — `blockId`، `pageSize` (۱ تا ۱۰۰، پیشفرض ۵۰)،
-  `startCursor` (اختیاری).
-- `notion_query_database` — `databaseId`، `filter` (اختیاری، با قالب فیلتر Notion)،
-  `sorts` (آرایه اختیاری)، `pageSize` (۱ تا ۱۰۰، پیشفرض ۵۰)، `startCursor` (اختیاری).
+- `notion_search` — `query` (1-500 کاراکتر)، `pageSize` (1-100، پیشفرض 20)، `startCursor` (اختیاری).
+- `notion_get_page` — `pageId` (32 char hex یا UUID).
+- `notion_list_block_children` — `blockId`، `pageSize` (1-100، پیشفرض 50)، `startCursor` (اختیاری).
+- `notion_query_database` — `databaseId`، `filter` (اختیاری، قالب فیلتر Notion )، `sorts` (آرایه اختیاری)، `pageSize` (1-100، 50 پیشفرض)، `startCursor` (اختیاری).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`، `children` (آرایهای از اشیای بلوک)،
-  `after` (موقعیت اختیاری).
+- `notion_append_blocks` — `blockId`، `children` (آرایه از اشیاء بلوک)، `after` (موقعیت اختیاری).
 
-### محدودههای دسترسی
+### محدوده ها
 
-ابزارهای خواندن به `read:notion` و ابزار نوشتن به `write:notion` نیاز دارند.
-محدودههای دسترسی توسط `withScopeEnforcement()` در
-`open-sse/mcp-server/server.ts` تنها زمانی اعمال میشوند که `OMNIROUTE_MCP_ENFORCE_SCOPES=true` باشد؛
-محدودههای مجاز فراخواننده از `OMNIROUTE_MCP_SCOPES` (جداشده با ویرگول) یا زمینه محدوده دسترسی
-کلید API احرازهویتشده گرفته میشوند. برای مشاهده مدل کامل محدوده دسترسی به
-[MCP-SERVER.md](./MCP-SERVER.md) مراجعه کنید.
+ابزار خواندن به `read:notion` و ابزار نوشتن به `write:notion` نیاز دارد. دامنه ها توسط `withScopeEnforcement()` در `open-sse/mcp-server/server.ts` هنگام `OMNIROUTE_MCP_ENFORCE_SCOPES=true` و همیشه برای تماس گیرنده HTTP/SSE که کلید API فاقد `manage`/`admin` است اعمال می شود. دامنههای مجاز تماسگیرنده از `OMNIROUTE_MCP_SCOPES` (جدا شده با کاما) یا زمینه scope کلید API تأیید شده میآیند. برای مشاهده مدل کامل [MCP-SERVER.md](./MCP-SERVER.md) مراجعه کنید.
 
 ## نقاط پایانی
 

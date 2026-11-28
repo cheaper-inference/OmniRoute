@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### Pasirinktinės antraštės
 
-| Antraštė                 | Kryptis   | Aprašas                                                                                                                                                                                                                         |
-| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Užklausa  | Nustatykite `true`, kad būtų apeita talpykla                                                                                                                                                                                    |
-| `x-omniroute-no-memory`  | Užklausa  | Nustatykite `true`, kad šiai užklausai būtų praleistas atminties ir įgūdžių įterpimas (atspindi no-cache veikimą; išvengiama kiekvieno iškvietimo žetonų ir sąnaudų papildomos naštos)                                          |
-| `X-OmniRoute-Progress`   | Užklausa  | Nustatykite `true`, kad būtų įjungti eigos įvykiai                                                                                                                                                                              |
-| `X-Session-Id`           | Užklausa  | Pastovus seanso raktas išorinei seanso sąsajai                                                                                                                                                                                  |
-| `x_session_id`           | Užklausa  | Taip pat priimamas variantas su pabraukimu (tiesioginiam HTTP)                                                                                                                                                                  |
-| `X-OmniRoute-Session-Id` | Užklausa  | Iškvietėjo pateikta seanso / pokalbio žyma (taip pat perduodama į atmintį). Jei yra, išsaugoma pažodžiui lauke `call_logs.session_tag`, kad būtų galima priskirti sąnaudas pagal seansą (#8249) — jei nėra, niekada nesukuriama |
-| `Idempotency-Key`        | Užklausa  | Dublikatų šalinimo raktas (5 s langas)                                                                                                                                                                                          |
-| `X-Request-Id`           | Užklausa  | Alternatyvus dublikatų šalinimo raktas                                                                                                                                                                                          |
-| `x-omniroute-connection` | Užklausa  | Prisega vieno modelio užklausą prie vieno teikėjo ryšio (paskyros) pagal jo ID — žr. [Paskyros prisegimas pagal užklausą](#account-pinning-per-request)                                                                         |
-| `X-OmniRoute-Cache`      | Atsakymas | `HIT` arba `MISS` (ne srautinio perdavimo atveju)                                                                                                                                                                               |
-| `X-OmniRoute-Idempotent` | Atsakymas | `true`, jei dublikatas pašalintas                                                                                                                                                                                               |
-| `X-OmniRoute-Progress`   | Atsakymas | `enabled`, jei įjungtas eigos stebėjimas                                                                                                                                                                                        |
-| `X-OmniRoute-Session-Id` | Atsakymas | „OmniRoute“ naudojamas faktinis seanso ID                                                                                                                                                                                       |
-| `X-OmniRoute-Request-Id` | Atsakymas | Užklausos susiejimo ID (kai žinomas)                                                                                                                                                                                            |
-| `X-OmniRoute-Version`    | Atsakymas | „OmniRoute“ komponavimo versija (visada pateikiama)                                                                                                                                                                             |
-| `X-OmniRoute-Cost-Saved` | Atsakymas | USD suma, kurios išvengta naudojant talpyklą įvykus `HIT` (tik talpyklos įvykiams)                                                                                                                                              |
-| `X-OmniRoute-Decision`   | Atsakymas | Maršrutizavimo sekimas: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` yra kombinuota strategija arba `single`, jei užklausa nėra kombinuota) — visada pateikiama užbaigimo atsakymuose                          |
+| Antraštė                 | Kryptis   | Aprašymas                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Prašymas  | Norėdami apeiti talpyklą, nustatykite į `true`                                                                                                                                                                                                                                                                                                                                          |
+| `x-omniroute-no-memory`  | Prašymas  | Nustatykite į `true` kad praleistumėte atminties + įgūdžių įvedimą šiai užklausai (atspindi be talpyklos; išvengiama token/cost per skambutį papildomų išlaidų)                                                                                                                                                                                                                         |
+| `x-omniroute-no-log`     | Prašymas  | Nustatykite į `true` kad šios išvados užklausos skambučių žurnaluose nebūtų request/response naudingų apkrovų (visi pokalbių šeimos maršrutai: pokalbių užbaigimai, atsakymai, pranešimai, užbaigimai, Gemini). Laiko žyma, modelis, būsena, trukmė ir žetonų skaičius vis dar įrašomi. Sujunkite su `x-omniroute-no-memory` ir `x-omniroute-no-cache`, kad atsisakytumėte viso turinio |
+| `X-OmniRoute-Progress`   | Prašymas  | Pažangos įvykiams nustatykite į `true`                                                                                                                                                                                                                                                                                                                                                  |
+| `X-Session-Id`           | Prašymas  | Lipnus seanso raktas, skirtas išoriniam seanso ryšiui                                                                                                                                                                                                                                                                                                                                   |
+| `x_session_id`           | Prašymas  | Taip pat priimtas pabraukimo variantas (tiesioginis HTTP)                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Session-Id` | Prašymas  | Skambintojo teikiama session/conversation žyma (taip pat maitina atmintį). Kai yra, išliko pažodžiui į `call_logs.session_tag` kad būtų priskirtas mokestis vienam seansui (#8249) — niekada nesintezuojamas, kai nėra                                                                                                                                                                  |
+| `Idempotency-Key`        | Prašymas  | Dedup raktas (5s langas)                                                                                                                                                                                                                                                                                                                                                                |
+| `X-Request-Id`           | Prašymas  | Alternatyvus dedup raktas                                                                                                                                                                                                                                                                                                                                                               |
+| `x-omniroute-connection` | Prašymas  | Prisekite vieno modelio užklausą prie vieno teikėjo ryšio (paskyros) pagal jo ID — žr. [Paskyros prisegimas pagal užklausą](#account-pinning-per-request)                                                                                                                                                                                                                               |
+| `X-OmniRoute-Cache`      | Atsakymas | `HIT` arba `MISS` (ne srautinis)                                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Idempotent` | Atsakymas | `true` jei dedublikatas                                                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Progress`   | Atsakymas | `enabled` jei pažangos stebėjimas įjungtas                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Session-Id` | Atsakymas | Efektyvus seansas ID naudojamas OmniRoute                                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Request-Id` | Atsakymas | Prašyti koreliacijos ID (kai žinomas)                                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Version`    | Atsakymas | OmniRoute build versija (visada yra)                                                                                                                                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Cost-Saved` | Atsakymas | USD išvengta talpyklos HIT (tik talpyklos įvykiai)                                                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Decision`   | Atsakymas | Maršruto sekimas: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` yra kombinuota strategija arba `single` ne kombinuotai užklausai) — visada pateikiamas užbaigus atsakymus                                                                                                                                                                                               |
 
-> „Nginx“ pastaba: jei naudojate antraštes su pabraukimais (pavyzdžiui, `x_session_id`), įjunkite `underscores_in_headers on;`.
+> Nginx pastaba: jei pasikliaujate pabraukimo antraštėmis (pvz. `x_session_id`), įjunkite `underscores_in_headers on;`.
 
 #### Paskyros prisegimas pagal užklausą
 
-Kai teikėjas turi kelis ryšius (paskyras arba raktus), „OmniRoute“ paprastai pasirenka vieną
-naudodamas savo paskyros pasirinkimo strategiją. Vietoj to užklausa gali būti prisegta prie vieno konkretaus ryšio
-naudojant antraštę `x-omniroute-connection`:
+Kai paslaugų teikėjas turi kelis ryšius (paskyras ar raktus), OmniRoute paprastai pasirenka vieną, naudodamasis paskyros pasirinkimo strategija. Užklausa gali prisegti vieną konkretų ryšį su `x-omniroute-connection` antrašte:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,24 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Kur rasti ID.** Atidarykite teikėjo puslapį valdymo skydelyje
-  (**Dashboard → Providers → <provider>**) ir spustelėkite `xxxxxxxx…` ID žymą ryšio
-  eilutėje — taip nukopijuojamas visas ryšio ID.
-- **Kurios užklausos jo paiso.** Vieno modelio užklausos (`provider/model`) į
-  `/v1/chat/completions`, `/v1/messages` ir `/v1/responses`. Kombinuotos užklausos antraštės nepaiso:
-  kiekvienam kombinacijos žingsniui paskirkite paskyrą per jo paties ryšį.
-- **Prisegimas yra griežtas, o ne pageidavimas.** Prisegtas ryšys naudojamas išskirtinai. Užklausos
-  metu įvykusi klaida užregistruoja paskyros atvėsimo laikotarpį, bet **neperjungia** į gretimą to paties teikėjo paskyrą.
-- **Atvėsimo laikotarpis ir kvota atšaukia prisegimą.** Kol prisegtas ryšys yra atvėsimo laikotarpyje,
-  išeikvota kvota arba užblokuotas kvotos strategijos, vėlesnės užklausos grįžta prie kitų teikėjo ryšių,
-  lygiai taip pat kaip srautas be prisegimo.
-- **Nežinomi arba išjungti ID sukelia klaidą.** ID, kurio nėra aktyviame teikėjo telkinyje (ištrintas,
-  deaktyvuotas arba priklausantis kitam teikėjui), nepalieka tinkamos paskyros, todėl užklausa nepavyksta,
-  užuot tyliai nukreipta kitur.
+- **Kur rasti ID.** Prietaisų skydelyje atidarykite teikėjo puslapį (** Prietaisų skydelis → Teikėjai → <provider>** ) ir spustelėkite `xxxxxxxx…` id lustą ryšio eilutėje — jis nukopijuos visą ryšio ID.
+- **Kurie prašymai jį gerbia.** Vieno modelio užklausos (`provider/model`) `/v1/chat/completions`, `/v1/messages` ir `/v1/responses`. Kombinacijos nepaiso antraštės: vietoj to prisekite paskyrą kiekvienam kombinuotam veiksmui per paties veiksmo ryšį.
+- **Smeigtukas griežtas, o ne pirmenybė.** Prisegta jungtis naudojama išskirtinai. Gedimas užklausoje įrašo paskyros atvėsimą, bet tai daroma** ne** pasukti į to paties teikėjo brolio paskyrą.
+- **Atvėsinimas ir kvota atlaisvinkite smeigtuką.** Kol prisegtas ryšys vėsta, išnaudotas arba blokuojamas dėl kvotos politikos, vėlesnės užklausos grįžta į kitus teikėjo ryšius, lygiai taip pat, kaip ir neprisegtas srautas.
+- **Nežinomi arba išjungti ID nepavyksta.** ID, kurio nėra aktyviame teikėjo telkinyje (ištrintas, išjungtas arba priklauso kitam teikėjui), nepalieka tinkamos paskyros, todėl užklausa nepavyksta, o ne tyliai nukreipiama kitur.
 
-Claude Code siunčia pasirinktines antraštes per `ANTHROPIC_CUSTOM_HEADERS`. Įrašykite ją į `env` bloką
-`~/.claude/settings.json` faile arba projekto lygio `.claude/settings.json` faile, kad kiekvienam projektui
-galėtumėte prisegti skirtingą paskyrą:
+Claude kodas siunčia pasirinktines antraštes per `ANTHROPIC_CUSTOM_HEADERS`. Įdėkite jį į `env` bloką `~/.claude/settings.json` arba į projekto lygio `.claude/settings.json`, kad kiekvienam projektui prisegtumėte kitą paskyrą:
 
 ```jsonc
 {
@@ -132,12 +120,11 @@ galėtumėte prisegti skirtingą paskyrą:
 }
 ```
 
-Šaltinis: `src/sse/handlers/chat.ts` (antraštės nuskaitymas), `src/sse/services/auth.ts` ir
-`src/sse/services/sessionAffinityPin.ts` (prisegimo atšaukimas ir patikra, ar nėra telkinyje).
+Šaltinis: `src/sse/handlers/chat.ts` (skaitoma antraštė), `src/sse/services/auth.ts` ir `src/sse/services/sessionAffinityPin.ts` (smeigtuko atlaisvinimas ir trūkumo iš baseino patikrinimas).
 
-> **Sąnaudų telemetrijos antraštės:** sėkminguose atsakymuose be srautinio perdavimo taip pat pateikiamas `X-OmniRoute-*` sąnaudų telemetrijos rinkinys — `X-OmniRoute-Response-Cost` (USD, tiksliai 10 skaitmenų po kablelio; `0.0000000000`, jei nemokama arba kaina nenustatyta), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` ir `X-OmniRoute-Fallback-Attempts` (tik kai reikšmė > 0), taip pat `X-OmniRoute-Request-Id` ir `X-OmniRoute-Version`. Jie pateikiami pokalbių užbaigimo, `/v1/responses`, `/v1/messages` **ir medijos galinių punktų** atsakymuose — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` ir `/v1/moderations` (visada su `0` sąnaudomis). Medijos sąnaudos apskaičiuojamos pagal modalumą (vienai nuotraukai, sekundei, simboliui, paieškos vienetui), kai kainodara pasiekiama; kitu atveju reikšmė yra `0` (fail-open).
+> **Kainų telemetrijos antraštės:** ne srautinio perdavimo sėkminguose atsakymuose taip pat yra `X-OmniRoute-*` mokesčių ir telemetrijos rinkinys — `X-OmniRoute-Response-Cost` (USD, fiksuota 10 dešimtųjų; `0.0000000000` free/unpriced), `X-OmniRoute-Tokens-In` > `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, `X-OmniRoute-Version` `X-OmniRoute-Request-Id` `X-OmniRoute-Fallback-Attempts` Juos skleidžia pokalbių užbaigimai, `/v1/responses`, `/v1/messages`,** ir žiniasklaidos galutiniai taškai** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` ir `/v1/moderations` (visada kainuoja `0`). Medijos kaina skaičiuojama pagal modalumą (už vaizdą, sekundę, simbolį, paieškos vienetą), kai galima nustatyti kainodarą, kitu atveju `0` (neatsitikimas).
 
-> **Talpyklos pataikymo sąnaudų semantika:** semantinės talpyklos pataikymo atveju (`X-OmniRoute-Cache-Hit: true`) iškvietimas į aukštesnį lygį neatliekamas, todėl `X-OmniRoute-Response-Cost` yra `0.0000000000` (**prieauginės** pataikymo aptarnavimo sąnaudos). Pradinės / būtų buvusios sąnaudos atskirai pateikiamos `X-OmniRoute-Cost-Saved`. Atsiskaitymo vartotojai turėtų sumuoti `X-OmniRoute-Response-Cost` (pataikymai nieko nekainuoja); talpyklos analizė gali agreguoti `X-OmniRoute-Cost-Saved`.
+> **Talpyklos įvykių kainos semantika:** semantinėje talpykloje HIT (`X-OmniRoute-Cache-Hit: true`) nėra iškviečiamas prieš srovę, todėl `X-OmniRoute-Response-Cost` yra `0.0000000000` (** laipsniškas** smūgio pateikimo kaina). original/would-have-been kaina nurodoma atskirai `X-OmniRoute-Cost-Saved`. Atsiskaitantys vartotojai turėtų sumuoti `X-OmniRoute-Response-Cost` (hitai nieko nekainuoja); talpyklos analizė gali sukaupti `X-OmniRoute-Cost-Saved`.
 
 ## Išskirtinės valdomos sesijos nuomos
 
@@ -369,6 +356,8 @@ Galimi tiekėjai: OpenAI (GPT 2 vaizdas ), xAI (Grok vaizdas ), Together AI (FLU
 
 `n` grąžina `n` vaizdus `data[]`. Teikėjai, kurių API prieš srovę grąžina vieną vaizdą vienam skambučiui (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), gauna `n` atskirus skambučius prieš srovę, daugiausia 4 skrydžio metu. Fiksuotas `seed` yra kompensuojamas skambučio indeksu (`seed`, `seed + 1`, …), todėl vaizdai skiriasi, bet išlieka atkuriami. `n` yra 10. Jei nepavyksta skambučio, visa užklausa nepavyksta. Fan-out formatų sąrašas yra `SINGLE_IMAGE_FANOUT_FORMATS` `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Vaizdo modeliai (`codex/gpt-image-*`) pateikia tik PNG : prieš srovę atsako `200` su PNG baitais, net kai prašoma `jpeg` arba `webp`. Prašymas su bet kuriuo kitu `output_format` (`webp`, `jpeg`, ...) atmetamas naudojant HTTP 400, užuot tyliai ignoruojamas; praleisti arba išsiųsti `png`. `output_compression` nepersiunčiamas.
+
 ZenMux pakartotinai naudoja esamą API rakto ryšį ir priima `zenmux/` arba `zm/` priešdėlius:
 
 - `zenmux/openai/gpt-image-2` naudoja ZenMuxOpenAI vaizdus API. Parinktys apima `size`, `quality`, `n`, `output_format`, `output_compression`, `background` ir `response_format`.
@@ -386,7 +375,7 @@ GET /v1/images/generations
 
 ---
 
-## Dokumentų OCR
+## Dokumentas OCR
 
 ```bash
 POST /v1/ocr
@@ -402,18 +391,15 @@ Content-Type: application/json
 }
 ```
 
-`model` pasirenka OCR teikėją naudodamas `provider/model` prefiksą; modelio ID be prefikso (pvz.,
-`mistral-ocr-latest`) susiejamas su registruotu teikėju, o nenurodžius `model`, pagal numatytuosius
-nustatymus naudojamas Mistral (`mistral-ocr-latest`). Registruoti teikėjai
-(`open-sse/config/ocrRegistry.ts`):
+`model` pasirenka OCR teikėją per `provider/model` priešdėlį; pliko modelio ID (pvz., `mistral-ocr-latest`) perduodamas registruotajam teikėjui, o praleistas `model` pagal nutylėjimą yra Mistral (`mistral-ocr-latest`). Registruoti tiekėjai (`open-sse/config/ocrRegistry.ts`):
 
-| Teikėjo ID                    | Modelio ID           | `model` reikšmė                                          | Pastabos                                                                                                                                 |
-| ----------------------------- | -------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (arba `mistral-ocr-latest`) | Sinchroninis – atsakymas grąžinamas tiesiai iš vienintelio pirminės API iškvietimo.                                                      |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`              | Asinchroninis pirminės API procesas (`analyze` + apklausa) – žr. toliau.                                                                 |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                  | Sinchroninis, per Vertex AI `openapi/chat/completions` partnerio galinį tašką – informacija apie autentifikavimą ir URL pateikta toliau. |
+| Teikėjo ID                    | Modelio ID                                    | `model` vertė                                                   | Pastabos                                                                                                                                                                                           |
+| ----------------------------- | --------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                          | `mistral/mistral-ocr-latest` (arba plikas `mistral-ocr-latest`) | Sinchroninis — atsakymas grąžinamas tiesiai iš vieno skambučio prieš srovę.                                                                                                                        |
+| `azure-document-intelligence` | `prebuilt-read`                               | `azure-document-intelligence/prebuilt-read`                     | Asinchroninis prieš srovę (`analyze` + apklausa) — žr. toliau.                                                                                                                                     |
+| `vertex-deepseek-ocr`         | savarankiškai įdiegtas (be įmontuoto modelio) | `vertex-deepseek-ocr/<your-deployed-model-id>`                  | Sinchroninis, per savo Vertex AI Model Garden DeepSeek-OCR galinį tašką (`openapi/chat/completions` forma); Google pašalino valdomą `deepseek-ocr-maas` 2026-10-21 (#20423), todėl ID grąžina 400. |
 
-Visi trys teikėjai atsako tuo pačiu į Mistral panašiu turiniu:
+Visi trys teikėjai atsako tame pačiame Mistral formos korpuse:
 
 ```json
 {
@@ -423,29 +409,13 @@ Visi trys teikėjai atsako tuo pačiu į Mistral panašiu turiniu:
 }
 ```
 
-### Azure Document Intelligence apklausos eiga
+### Azure Document Intelligence apklausos srautas
 
-Azure Document Intelligence `analyze` API yra asinchroninė: pradinė užklausa grąžina
-`Operation-Location` antraštę, o ne turinį, todėl rezultatą reikia apklausti. Apdorojimo programa
-(`open-sse/handlers/ocr.ts`) apklausia tą URL kas sekundę, atlikdama ne daugiau kaip 30 bandymų,
-nedelsdama nutraukia procesą (nebetęsia apklausos), jei apklausos atsakas nėra `ok` arba būsena yra
-`"failed"`, ir grąžina `504`, jei pasibaigus bandymams operacija vis dar vykdoma. Galutinis Azure
-atsakas normalizuojamas į tokią pačią `pages`/`markdown` struktūrą, kurią naudoja Mistral, prieš
-grąžinant jį iškvietėjui, todėl kliento kodui nereikia specialiai apdoroti teikėjo.
+Azure Document Intelligence `analyze` API yra asinchroninis: pradinė užklausa pateikia `Operation-Location` antraštę, o ne turinį, o rezultatas turi būti apklaustas. Valdiklis (`open-sse/handlers/ocr.ts`) apklausia, kad URL kas sekundę iki 30 bandymų, greitai nepavyksta (neatlieka apklausos) ne `ok` apklausos atsakymo arba `"failed"` būsenos atveju ir grąžina `504`, jei operacija vis dar vykdoma išnaudojus bandymo biudžetą. Galutinis „Azure“ atsakymas normalizuojamas į tą pačią `pages`/`markdown` formą, kurią naudoja Mistral, prieš grąžinant jį skambinančiajam, todėl kliento kodui nereikia skirti specialių teikėjo raidžių.
 
-### Vertex AI DeepSeek OCR autentifikavimas ir galinio taško nustatymas
+### Vertex AI DeepSeek OCR autentifikavimas ir galutinio taško skiriamoji geba
 
-`vertex-deepseek-ocr` pakartotinai naudoja tą patį Vertex AI autentifikavimą, kurį OmniRoute jau
-palaiko pokalbių ir vaizdų srautams (`open-sse/executors/vertex.ts`): ryšio API raktas yra
-arba Service Account JSON kredencialas (naudojant JWT nešėjo srautu iškeičiamas į trumpalaikį OAuth
-prieigos žetoną), arba jau sugeneruotas OAuth prieigos žetonas, naudojamas toks, koks yra. Pirminės
-API galinio taško URL yra bendrasis Vertex `openapi/chat/completions` partnerio galinis taškas,
-sukuriamas pagal ryšio projektą ir regioną – aiškiai nurodyti
-`providerSpecificData.project`/`providerSpecificData.region` visada turi pirmenybę;
-kitu atveju projektas nustatomas iš Service Account JSON `project_id`, o regionas pagal numatytuosius
-nustatymus yra `us-central1`. Abi reikšmės nustatomos faile `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), o prieš perduodant apdorojimą
-`handleOcr`, jos naudojamos faile `src/app/api/v1/ocr/route.ts`.
+`vertex-deepseek-ocr` pakartotinai naudoja tą patį Vertex AI autentifikavimą. OmniRoute jau palaiko chat/image srautą (`open-sse/executors/vertex.ts`): ryšio API raktas yra arba Service Account JSON kredencialas (keičiamas į trumpalaikį OAuth prieigos raktą per JWT nešiklio srautą), arba jau sukurtas OAuth raktas, naudojamas as-is. Prieš srovę esantis galutinis taškas URL yra bendras Vertex `openapi/chat/completions` partnerio galinis taškas, sukurtas iš ryšio projekto ir regiono — aiškus `providerSpecificData.project`/`providerSpecificData.region` visada laimi; kitu atveju projektas gaunamas iš paslaugos paskyros JSON `project_id`, o regionas pagal nutylėjimą yra `us-central1`. Abi skiriamosios gebos yra `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), sunaudojamos `src/app/api/v1/ocr/route.ts` prieš išsiunčiant į `handleOcr`.
 
 ---
 
@@ -687,98 +657,104 @@ Išorinės sistemos sutartys: [garso efektai](https://elevenlabs.io/docs/api-ref
 
 ---
 
-## Suderinamumo galiniai punktai
+## Suderinamumo galutiniai taškai
 
-| Metodas | Kelias                                    | Formatą                                       |
-| ------- | ----------------------------------------- | --------------------------------------------- |
-| POST    | `/v1/chat/completions`                    | OpenAI                                        |
-| POST    | `/v1/messages`                            | Anthropic                                     |
-| POST    | `/v1/responses`                           | OpenAI Responses                              |
-| POST    | `/v1/embeddings`                          | OpenAI                                        |
-| POST    | `/v1/images/generations`                  | OpenAI Images                                 |
-| POST    | `/v1/images/edits`                        | OpenAI Images (redagavimas / įterpimas)       |
-| POST    | `/v1/videos/generations`                  | OpenAI stiliaus vaizdo įrašų generavimas      |
-| POST    | `/v1/music/generations`                   | OpenAI stiliaus muzikos generavimas           |
-| POST    | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                            |
-| POST    | `/v1/audio/speech`                        | OpenAI TTS (grąžina garso turinį)             |
-| POST    | `/v1/rerank`                              | Cohere/Voyage stiliaus perrikiavimas          |
-| POST    | `/v1/classify`                            | Jina klasifikavimas (`api.jina.ai`)           |
-| POST    | `/v1/segment`                             | Jina segmentavimo įrankis (`segment.jina.ai`) |
-| POST    | `/v1/moderations`                         | OpenAI moderavimas                            |
-| GET     | `/v1/models`                              | OpenAI                                        |
-| POST    | `/v1/models/query`                        | Filtruotas trumpasis modelių sąrašas          |
-| POST    | `/v1/messages/count_tokens`               | Anthropic                                     |
-| GET     | `/v1beta/models`                          | Gemini                                        |
-| POST    | `/v1beta/models/{...path}`                | Gemini generateContent                        |
-| POST    | `/v1/api/chat`                            | Ollama                                        |
-| GET     | `/api/v1/vscode/{token}/`                 | OpenAI katalogo pseudonimas                   |
-| GET     | `/api/v1/vscode/{token}/models`           | OpenAI modelių pseudonimas                    |
-| POST    | `/api/v1/vscode/{token}/chat/completions` | OpenAI pseudonimas su žetonu                  |
-| POST    | `/api/v1/vscode/{token}/responses`        | OpenAI Responses pseudonimas su žetonu        |
-| POST    | `/api/v1/vscode/{token}/api/chat`         | Ollama pseudonimas su žetonu                  |
-| GET     | `/api/v1/vscode/{token}/api/tags`         | Ollama žymų pseudonimas su žetonu             |
+| Metodas | Kelias                                    | Formatas                                 |
+| ------- | ----------------------------------------- | ---------------------------------------- |
+| POST    | `/v1/chat/completions`                    | OpenAI                                   |
+| POST    | `/v1/messages`                            | Anthropic                                |
+| POST    | `/v1/responses`                           | OpenAI atsakymai                         |
+| POST    | `/v1/embeddings`                          | OpenAI                                   |
+| POST    | `/v1/images/generations`                  | OpenAI vaizdai                           |
+| POST    | `/v1/images/edits`                        | OpenAI vaizdai (edit/inpaint)            |
+| POST    | `/v1/videos/generations`                  | OpenAI stiliaus vaizdo įrašų generavimas |
+| POST    | `/v1/music/generations`                   | OpenAI stiliaus muzikos karta            |
+| POST    | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                       |
+| POST    | `/v1/audio/speech`                        | OpenAI TTS (grąžina garso korpusą)       |
+| POST    | `/v1/rerank`                              | Cohere/Voyage-style rerank               |
+| POST    | `/v1/classify`                            | Jina klasifikuoti (`api.jina.ai`)        |
+| POST    | `/v1/segment`                             | Jina segmentuotoja (`segment.jina.ai`)   |
+| POST    | `/v1/moderations`                         | OpenAI Moderacijos                       |
+| POST    | `/v1/systemone`                           | „System One“ tipo sprendimai             |
+| POST    | `/v1/decisions`                           | OpenAI sprendimai (gimtoji)              |
+| GET     | `/v1/systemone/models`                    | Sprendimų modelių katalogas              |
+| GET     | `/v1/models`                              | OpenAI                                   |
+| POST    | `/v1/models/query`                        | Filtruotų modelių sąrašas                |
+| POST    | `/v1/messages/count_tokens`               | Anthropic                                |
+| GET     | `/v1beta/models`                          | Gemini                                   |
+| POST    | `/v1beta/models/{...path}`                | Gemini generateContent                   |
+| POST    | `/v1/api/chat`                            | Ollama                                   |
+| GET     | `/api/v1/vscode/{token}/`                 | OpenAI katalogo slapyvardis              |
+| GET     | `/api/v1/vscode/{token}/models`           | OpenAI modelių slapyvardis               |
+| POST    | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenizuotas slapyvardis          |
+| POST    | `/api/v1/vscode/{token}/responses`        | OpenAI Atsakymų tokenizuotas slapyvardis |
+| POST    | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenizuotas slapyvardis          |
+| GET     | `/api/v1/vscode/{token}/api/tags`         | Ollama žymės tokenizuotas slapyvardis    |
 
-Visi POST maršrutai naudoja tą pačią struktūrą: `Bearer your-api-key` + Zod patvirtintas JSON turinys (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` ir kt.; žr. `src/shared/validation/schemas.ts`). Jei schema neatitinka, grąžinamas 4xx atsakas.
+Visi POST maršrutai yra vienodos formos: `Bearer your-api-key` + Zod patvirtintas JSON kūnas (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` ir kt., žr. `src/shared/validation/schemas.ts`). 4xx grąžinamas sugedus schemai.
 
-Klientams, kurie negali pridėti `Authorization: Bearer ...`, OmniRoute taip pat priima API raktus URL adrese per užklausos eilutės suderinamumą (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) arba per specialius `/api/v1/vscode/{token}/...` galinius punktus, aprašytus toliau.
+Klientams, kurie negali pridėti `Authorization: Bearer ...`, OmniRoute taip pat priima API raktus URL per užklausos eilutės suderinamumą (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) arba toliau aprašytus specialius `/api/v1/vscode/{token}/...` galinius taškus.
 
 ```bash
-# Perrikiavimas (debesijos registro teikėjas arba su OpenAI suderinamas teikėjo mazgas kaip "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina klasifikavimas (Foundation API kredencialai)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina segmentavimo įrankis
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina paieška (s.jina.ai; teikėjų pseudonimai: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderavimas
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — grąžina audio/mpeg (arba nurodyto formato) turinį
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS reikia kalbos ir balso: `language` numatytoji reikšmė yra "en"; jei nenurodytas
-# balsas arba naudojamas OpenAI standartinio balso pavadinimas (alloy, nova, …), pasirenkama "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Vaizdo redagavimas (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Vaizdo įrašų / muzikos generavimas (su teikėjo prefiksu nurodytas modelio ID)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Perrikiavimo teikėjo mazgai:** `POST /v1/rerank` taip pat nukreipia į su OpenAI suderinamus teikėjo mazgus
-> (oMLX, vLLM, Infinity, TEI už šliuzo, …), nurodomus kaip `<node-prefix>/<model>`. Grįžtamojo ryšio
-> mazgai (`localhost`, `127.0.0.1`, `172.16.0.0/12`) visada tinkami, taip pat ir pagrindiniai kompiuteriai, kuriuos
-> operatorius nurodo `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (pvz., Docker/Compose paslaugos pavadinimas, toks
-> kaip `http://reranker:8080/v1`; į juos kreipiamasi tiesiogiai, niekada per `HTTP(S)_PROXY` ar
-> prisijungimo prisegtą tarpinį serverį). Mazgai bet kuriame kitame
-> pagrindiniame kompiuteryje — LAN kompiuteryje ar Tailscale lygiarūšio tinkle esančiame kompiuteryje — tinkami
-> tik tada, kai operatorius įjungia `RERANK_REMOTE_PROVIDER_NODES` funkcijos vėliavėlę **ir** mazgo bazinis URL
-> atitinka teikėjo išeinančių URL politiką (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` /
-> `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Atminties modulio perrikiavimo veiksmas iškviečia šį maršrutą per
-> grįžtamąjį ryšį, todėl ta pati taisyklė taikoma `rerankProviderModel` atminties nustatymuose.
+> **Pakeisti teikėjo mazgų reitingą:** `POST /v1/rerank` taip pat nukreipia į su OpenAI suderinamus teikėjo mazgus (oMLX, vLLM, Infinity , TEI už šliuzo ir kt.), adresuotus `<node-prefix>/<model>`. Atgaliniai mazgai (`localhost`, `127.0.0.1`, `172.16.0.0/12`) visada tinkami, taip pat prieglobos pavadinimai, kuriuos operatorius išvardija `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (pvz., Docker/Compose paslaugos pavadinimas, pvz. `http://reranker:8080/v1`; jie iškviečiami tiesiogiai, niekada per `HTTP(S)_PROXY` arba ryšio prisegtą tarpinį serverį). Bet kurio kito pagrindinio kompiuterio — a LAN dėžutė arba Tailscale peer — mazgai tinka tik tada, kai operatorius įgalina `RERANK_REMOTE_PROVIDER_NODES` funkcijos vėliavėlę** ir** mazgo bazinė URL perduoda teikėjo išeinančio URL politiką (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Atminties variklio pertvarkymo veiksmas iškviečia šį maršrutą per kilpą, todėl ta pati taisyklė taikoma `rerankProviderModel` atminties nustatymuose.
 >
-> **Vietinio serverio formos:** į mazgą kreipiamasi adresu `<base>/v1/rerank`, o gavus 404 — adresu `<base>/rerank`
-> (Infinity, TEI). Užklausos turinyje siunčiami ir Cohere/OpenAI pavadinimai (`documents`,
-> `return_documents`), ir TEI pavadinimai (`texts`, `return_text`), o teikėjo atsakymas
-> normalizuojamas į Cohere voką: TEI neapgaubtas `[{index, score, text}]`, `{results: [{index, score}]}`
-> iš plonų šliuzų ir Voyage formato `{data: [...]}` klientui grąžinami kaip
-> `{results: [{index, relevance_score, document?}]}`, surikiuoti pagal balą ir apriboti iki `top_n`.
+> **Vietinio serverio formos:** mazgas vadinamas `<base>/v1/rerank`, o 404 - `<base>/rerank` (begalybė, TEI). Prieš srovę esančiame korpuse yra ir Cohere/OpenAI rašyba (`documents`, `return_documents`), ir TEI rašyba (`texts`, `return_text`), o atsakas prieš srovę normalizuojamas pagal Cohere apvalkalą: TEI tuščias `[{index, score, text}]`, `{results: [{index, score}]}` iš plono kliento šliuzo ir grįžtamojo į kliento `{results: [{index, relevance_score, document?}]}` `{data: [...]}` surūšiuota pagal balą ir nustatyta `top_n`.
 
-> **Teikėjo mazgų aptikimas:** modeliai OpenAI suderinamame teikėjo mazge pateikiami `GET /v1/models`
-> atsakyme su mazgo prefiksu. Įrašai, kuriuose nėra galinio taško metaduomenų (tai būdinga vietiniams `/v1/models` sąrašams),
-> paveldi mazgo `apiType`, todėl `embeddings` mazgo modelių `type: "embedding"`, o
-> `rerank` mazgo modelių `type: "rerank"` reikšmė nenustatoma kaip numatytoji pokalbių reikšmė; aiškiai
-> nurodytas `supportedEndpoints` sinchronizuotoje arba rankiniu būdu pridėtoje eilutėje vis tiek turi pirmenybę.
+> **Tiekėjo mazgo atradimas:** modeliai su OpenAI suderinamame teikėjo mazge rodomi `GET /v1/models` po mazgo priešdėliu. Eilutės, kuriose nėra galutinio taško metaduomenų (būdinga vietiniams `/v1/models` sąrašams), paveldi mazgo `apiType`, todėl `embeddings` mazgo modeliai yra `type: "embedding"`, o `rerank` mazgo modeliai yra `type: "rerank"` o ne numatytuosius pokalbius; Aiškus `supportedEndpoints` sinchronizuotoje arba rankiniu būdu pridėtoje eilutėje vis tiek turi pirmenybę.
 
-### Dedikuoti teikėjų maršrutai
+### Įvesti sprendimai
+
+Sprendimų modeliai atsako į įvestus klausimus su kalibruotomis tikimybėmis, o ne generuoja tekstą. Jie niekada nėra pokalbių modeliai, o du laidų formatai niekada neverčiami vienas į kitą:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter sprendimai, Cloudflare Darbuotojai AI, vietinis Ollama).
+- `POST /v1/decisions` — vietinis OpenAI Sprendimai `{ model, input, questions: [...] }`, aptarnaujamas `openai` ryšiu. Modelis yra `openai/gpt-6-luna` (veikia ir plikas `gpt-6-luna` ). Atsakymai grįžta klausiama tvarka, nepaliesti.
+- `GET /v1/systemone/models` — vienas abiejų tipų katalogas; kiekviena eilutė įvardija savo `api_format` (`systemone` arba `decisions`). `limit` / `after` puslapį galutiniame sąraše. `X-OmniRoute-Catalog-Status` antraštė skaito `complete`, `partial` arba `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions` API rakto modelio leidžiamajame sąraše prieš nuskaitant bet kokius kredencialus patikrinama `decisions` galutinio taško kategorija, biudžetas ir ryšio apimtis. Kredencialas yra saugomas `openai` ryšys rakto srityje (niekada nėra aplinkos raktas); ryšio bazė URL yra gerbiama tik tada, kai tai yra `http(s)` URL be kredencialų, užklausos ar fragmento, kuris nenurodo į šį OmniRoute. Skambutis išeina per tą patį apsaugotą transportą kaip ir `decision` automatinis maršruto parinktuvas ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): tiekėjo išeinančioji apsauga, jokių bandymų, jokių peradresavimų, 5 s skirtasis laikas ir 64 KB atsakymo riba (didesnis atsakymas yra 502). Užklausos organai yra apriboti iki 4 MiB. Kiekvienas skambutis siunčia naują `Idempotency-Key`. Klaidos nurodo tik būseną prieš srovę, o ne jos turinį, URL, raktą ar raginimą.
+
+### Dedikuotų paslaugų teikėjų maršrutai
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -786,7 +762,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Jei teikėjo prefikso trūksta, jis pridedamas automatiškai. Jei modelis nesutampa, grąžinama `400`.
+Teikėjo priešdėlis pridedamas automatiškai, jei jo nėra. Neatitinkantys modeliai grąžina `400`.
 
 ---
 

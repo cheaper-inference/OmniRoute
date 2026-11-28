@@ -4,11 +4,9 @@
 
 ---
 
-> **Sursa adevărului:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Ultima actualizare:** 2026-09-02 — v3.8.51
-> **Public-țintă:** Ingineri care întrețin integrări invizibile specifice furnizorilor.
+> **Sursa adevărului:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Public:** Ingineri care mențin integrări ascunse specifice furnizorului.
 
-OmniRoute se integrează cu furnizori ale căror infrastructuri de margine identifică activ clienții neoficiali prin amprentare (TLS JA3/JA4, ordinea antetelor, structura corpului JSON, tokenuri de integritate). Această pagină documentează suprafețele de disimulare expuse de OmniRoute și locurile în care sunt implementate.
+OmniRoute se integrează cu furnizorii ale căror margini detectează activ clienții neoficiali (TLS JA3/JA4, comanda antet, forma corpului JSON, jetoane de integritate). Această pagină documentează suprafețele ascunse pe care le expune OmniRoute și unde sunt implementate.
 
 ## Notificare juridică și etică
 
@@ -73,65 +71,68 @@ de testele locale de contract. Validați modificările amprentei folosind un con
 
 ---
 
-## Pachetul Stealth Claude Code
+## Claude Code Stealth Bundle
 
-Când `cliCompatMode` este activat, OmniRoute remodelează cererile Claude trimise astfel încât acestea să nu poată fi deosebite de traficul `claude-cli`. Trei module colaborează:
+Când `cliCompatMode` este activat, OmniRoute remodelează solicitările Claude de ieșire, astfel încât acestea să nu se distingă de traficul `claude-cli`. Trei module colaborează:
 
 ### `claudeCodeFingerprint.ts`
 
-Calculează amprenta `cc_version` de 3 caractere încorporată în antetul de facturare:
+Calculează amprenta digitală `cc_version` de 3 caractere încorporată în antetul de facturare:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (codificat direct; corespunde clientului oficial)
-- Intrări: caracterele de la indicii 4, 7 și 20 din textul primului mesaj al utilizatorului + șirul versiunii
-- Ieșire: prefix hexazecimal de 3 caractere
+- `FINGERPRINT_SALT = "59cf53e54c78"` (codat; se potrivește cu clientul oficial)
+- Intrări: caractere la indexul 4, 7, 20 al primului text mesaj utilizator șir versiune +
+- Ieșire: prefix hexadecimal de 3 caractere
 
-### `claudeCodeCCH.ts` (Hashul conținutului clientului)
+### `claudeCodeCCH.ts` (Client Content Hash)
 
-Verificare a integrității pe server, calculată de CLI-ul oficial Claude Code prin Bun/Zig. OmniRoute o reimplementează cu `xxhash-wasm`:
+Verificați integritatea serverului codul oficial Claude CLI calculează prin reimplementări Bun/Zig. OmniRoute cu `xxhash-wasm`:
 
-1. Serializează corpul cu substituentul `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Valoare hexazecimală cu litere mici, de 5 caractere, completată cu zerouri
-4. Înlocuiește `cch=00000;` cu tokenul calculat
+1. Serializați corpul cu substituent `cch=00000;`
+2. Construiți vizualizarea hash cu două înlocuiri de text simplu, în această ordine (`hashView()`):
+   - fiecare potrivire a lui `/"model":"[^"]*"/g` devine `"model":""` — potrivirea se oprește la primul `"`, deci o valoare cu un citat escape (`"model":"a\"b"`) este golită doar până la acel citat, așa cum face clientul
+   - fiecare potrivire de `/"max_tokens":\d+,|,?"max_tokens":\d+/g` este eliminată — numai valori numerice, la orice adâncime
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Hex minuscule de 5 caractere cu zero-căptușit
+5. Înlocuiți `cch=00000;` cu simbolul calculat
 
-Constante:
+constante:
 
-- Seed: `0x6e52736ac806831e`
-- Șablon: `/\bcch=([0-9a-f]{5});/`
+- Seed: `0x4d659218e32a3268` (se potrivește cu capturile loopback ale codului Claude 2.1.252 și 2.1.322)
+- Model: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Inserează un caracter Unicode **zero-width joiner** (`U+200D`) după primul caracter al numelor de clienți „sensibile”, astfel încât filtrele din amonte să nu le poată găsi prin grep. Lista implicită de cuvinte:
+Inserează un Unicode** tamplar cu latime zero** (`U+200D`) după primul caracter al numelor de clienți „sensibile”, astfel încât filtrele din amonte nu le pot grep. Lista de cuvinte implicită:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Se aplică pentru: blocurile `system`, întregul conținut `messages[].content` și `tools[].description` / `tools[].function.description`. Poate fi suprascris de operator prin `setSensitiveWords()`.
+Se aplică la: blocuri `system`, toate `messages[].content` și `tools[].description` / `tools[].function.description`. Operator poate fi anulat prin `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — furnizori `anthropic-compatible-cc-*`
+### furnizorii `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`
 
-Pentru relee Anthropic terțe care acceptă numai trafic „Claude Code autentic”:
+Pentru releele Anthropic terțe care acceptă numai trafic „cod Claude real”:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` în mod implicit
-- Comutatorul per conexiune „Activează versiunea beta redact-thinking” adaugă `redact-thinking-2026-02-12` când un serviciu CC Compatible din amonte necesită în mod explicit fluxuri de raționament redactate
-- Comutatorul per conexiune „Activează afișarea raționamentului rezumat” stochează `providerSpecificData.requestDefaults.summarizeThinking` și adaugă `display: "summarized"` la cererile de raționament CC Compatible care nu au setat deja un mod de afișare
+- Comutatorul „Activați beta de gândire redactată” pe conexiune adaugă `redact-thinking-2026-02-12` atunci când un flux compatibil CC în amonte necesită în mod specific fluxuri de gândire redactate
+- Comutatorul „Activați afișarea de gândire rezumată” pe conexiune stochează `providerSpecificData.requestDefaults.summarizeThinking` și adaugă `display: "summarized"` la CC Solicitări de gândire compatibile care nu au setat deja un mod de afișare
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (familia Opus/Sonnet 4.x)
-- Cale implicită: `/v1/messages?beta=true`
+- Calea implicită: `/v1/messages?beta=true`
 
-Module asociate din același pachet:
+Module surori din același pachet:
 
-- `claudeCodeConstraints.ts` — reguli pentru temperatură + controlul memoriei cache
-- `claudeCodeToolRemapper.ts` — remaparea numelor instrumentelor
-- `claudeCodeExtraRemap.ts` — normalizarea suplimentară a sarcinii utile
+- `claudeCodeConstraints.ts` — temperature + reguli de control al memoriei cache
+- `claudeCodeToolRemapper.ts` — remaparea numelui instrumentului
+- `claudeCodeExtraRemap.ts` — normalizare suplimentară a sarcinii utile
 
 ---
 
@@ -145,19 +146,19 @@ solicitările Antigravity păstrează textul apelantului octet pentru octet. Omn
 
 ### ⚠️ Risc: `ANTIGRAVITY_CREDITS=always` (hot spot pentru interzicerea contului)
 
-`ANTIGRAVITY_CREDITS=always` (consumat de `open-sse/executors/antigravity.ts`) rute** fiecare** solicitați prin Antigravity AI Credit Overages (credite Google plătite) în loc să lăsați Google’s free-tier cote gate. Acest lucru este documentat ca o caracteristică, dar este** cel mai frecvent raport de încălcare a ToS pe care îl vedem** — mai multe conturi Google Ultra au fost interzise cu `403 / "service disabled for ToS violation" / insufficient_quota` după ce au rulat câteva ore cu `=always`.
+`ANTIGRAVITY_CREDITS=always` (consumat de `open-sse/executors/antigravity.ts`) rute** fiecare** Solicitați prin Antigravity AI Credit Overages (credite Google plătite) în loc să lăsați Google de nivel liber cota lucruri. Acest lucru este documentat ca o caracteristică, dar este** cel mai frecvent raport de încălcare a ToS pe care îl vedem** — mai multe conturi Google Ultra au fost interzise cu `403 / "service disabled for ToS violation" / insufficient_quota` după ce au rulat câteva ore cu `=always`.
 
 Executarea în amonte este activată** partea lui Google** , nimic nu poate împiedica OmniRoute. Numele env var și documentele existente îl fac să sune ca un buton sigur de răsturnat; nu este.
 
 **De ce acest lucru atrage detectarea abuzurilor mai agresiv decât utilizarea exclusivă a nivelului gratuit:**
 
 - Cheltuielile automate susținute pentru un singur cont Google sunt semnate diferit față de accesările-cotă-și-opririle de nivel gratuit.
-- Depășirile de credit nu au un plafon de rată, așa că un client greșit configurat poate arde câteva sute USD în câteva minute și poate arăta ca revânzarea cheii API sau trafic bot.
+- Depășirile de credit nu au plafon de rată, așa că un client greșit configurat poate arde câteva sute USD în câteva minute și poate arăta ca revânzarea cheii API sau trafic bot.
 - Mai mulți utilizatori OmniRoute care obțin credite pentru depășire în paralel de la același IP extern compun semnalul.
 
 **Postura recomandata:**
 
-1. Păstrați `ANTIGRAVITY_CREDITS=off` implicită, cu excepția cazului în care operatorul acceptă în mod explicit riscul de credit plătit și de executare a contului. `retry` trimite mai întâi cererea normală și injectează credite cel mult o dată după o cotă eligibilă 429; `always` injectează credite la prima solicitare.
+1. Păstrați `ANTIGRAVITY_CREDITS=off` implicit, cu excepția cazului în care operatorul acceptă în mod explicit riscul de credit plătit și de executare a contului. `retry` trimite mai întâi cererea normală și injectează credite cel mult o dată după o cotă eligibilă 429; `always` injectează credite la prima solicitare.
 2. **Răspândește sarcina între furnizori prin Auto-Combo** (`model: "auto"` sau `kr/glm/etc` -combo) în loc să saturi un singur cont Antigravity.
 3. **Setați limitele RPM per conexiune** în pagina de editare a furnizorului Antigravity (Tabloul de bord → Providers → Antigravity → connection → rate limit). 30–60 RPM este o limită superioară defensabilă pentru utilizare susținută.
 4. **Utilizați o rețea în amonte stabilă, controlată de operator** și evitați partajarea unui cont între utilizatori sau sarcini de lucru care nu au legătură.
@@ -176,7 +177,7 @@ Please submit an appeal to continue using this product.
 
 Ambii furnizori se autentifică cu sesiunea Antigravity product OAuth, ceea ce este cazul în care notificarea de risc a tabloului de bord („Acest furnizor folosește produsul tău oficial session/OAuth, care nu este autorizat pentru utilizare proxy/router ”) avertizează înainte de adăugarea unei conexiuni. Niciuna dintre recomandările de mai sus nu face această utilizare autorizată; ele reduc doar cât trafic transportă un cont.
 
-**Interfete API autorizate pentru modelele Gemini.** Google oferă acces programatic la Gemini prin APIs, pe care OmniRoute îl acceptă ca furnizori obișnuiți de chei API:
+**Interfețe autorizate API pentru modelele Gemini.** Google oferă acces programatic la Gemini prin APIs, pe care OmniRoute îl acceptă ca furnizori obișnuiți de chei API:
 
 | ID furnizor | Numele tabloului de bord  | Acreditare                                                                        |
 | ----------- | ------------------------- | --------------------------------------------------------------------------------- |
@@ -191,7 +192,7 @@ Puncte de atingere:
 
 - `open-sse/executors/antigravity.ts` — citește `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — acreditare instalatii sanitare
-- Raportul original al incidentului: Discuție [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Raportul original al incidentului: Discuție [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

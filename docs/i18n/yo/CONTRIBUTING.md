@@ -13,122 +13,107 @@ UI/UX, i18n, CLI, ibi ìpamọ́ dátà, àti ìkọ́/ìmúṣiṣẹ́ pọ̀ 
 
 ---
 
-## Ìṣètò Ìdàgbàsókè
+## Eto idagbasoke
 
-### Àwọn Ohun Tí A Nílò Ṣáájú
+### Awọn ibeere pataki
 
-- **Node.js** `>=22.22.2 <23`, tàbí `>=24.0.0 <27` (èyí tí a ṣeduro: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`, tabi `>=24.0.0 <27` (a ṣe iṣeduro: 24 LTS)
+- **npm** 10 +
 
-> **Windows pẹ̀lú Node 24:** lo patch release 24 LTS tó wà lọ́wọ́lọ́wọ́ (ó kéré tán 24.20.0).
-> Àwọn release àtijọ́ lè dáwọ́ dúró lẹ́yìn àwọn ìdánwò aṣeyọrí nígbà tí `--test-force-exit` bá ti pa
-> ìlànà náà. Node [Windows libuv fix](https://github.com/nodejs/node/pull/61999) ṣàtúnṣe
-> ìṣòro ìparun runtime yìí; jẹ́ kí àwọn ìdánwò assertions àti àwọn àyẹ̀wò ìjáde runner ṣiṣẹ́.
+> **Windows pẹlu Node 24:** lo itusilẹ alemo 24 LTS lọwọlọwọ (o kere ju 24.20.0). Awọn idasilẹ iṣaaju le ṣe iṣẹyun lẹhin awọn idanwo aṣeyọri nigbati `--test-force-exit` tilekun ilana naa. Node's [Windows libuv fix](https://github.com/nodejs/node/pull/61999) adirẹsi jamba asiko asiko yi; pa awọn idaniloju idanwo ati awọn sọwedowo ijade olusare ṣiṣẹ.
 
-> **Àwọn olumulo npm v11+ (Node 24+):** Lẹ́yìn `npm install`, ṣàyẹ̀wò pé a ti fi àwọn native modules sílò:
-> `node -e "require('better-sqlite3')"`. Tí ó bá kùnà pẹ̀lú `MODULE_NOT_FOUND`,
-> ṣiṣẹ́ `npm approve-scripts better-sqlite3 && npm install`. Wo
-> [Ìtúnṣe Àwọn Ìṣòro](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + awọn olumulo (Node 24 +):** Lẹhin `npm install`, ṣayẹwo awọn modulu abinibi ti fi sii: `node -e "require('better-sqlite3')"`. Ti o ba kuna pẹlu `MODULE_NOT_FOUND`, ṣiṣe `npm approve-scripts better-sqlite3 && npm install`. Wo [Laasigbotitusita](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Kíkọ́ Àfọ̀mọ́ & Fífì Sílò
+### Clone & Fi sori ẹrọ
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Àwọn Àyípadà Ayíká
+### Awọn iyipada Ayika
 
 ```bash
-# Ṣẹ̀dá .env rẹ láti inú àpẹẹrẹ
+# Create your .env from the template
 cp .env.example .env
 
-# Ṣẹ̀dá àwọn àṣírí tó nílò
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Àwọn àyípadà pàtàkì fún ìdàgbàsókè:
+Awọn oniyipada bọtini fun idagbasoke:
 
-| Àyípadà                | Àìpẹ́wọ̀n Ìdàgbàsókè       | Àpèjúwe                |
-| ---------------------- | ------------------------ | ---------------------- |
-| `PORT`                 | `20128`                  | Pọ́ọ̀tì server           |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL ìpilẹ̀ fún frontend |
-| `JWT_SECRET`           | (ṣẹ̀dá lókè)              | Àṣírí ìfọwọ́sí JWT      |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Ọ̀rọ̀ aṣínà ìwọlé àkọ́kọ́  |
-| `APP_LOG_LEVEL`        | `info`                   | Ipele ìwúwo log        |
+| Ayípadà                | Aiyipada idagbasoke      | Apejuwe              |
+| ---------------------- | ------------------------ | -------------------- |
+| `PORT`                 | `20128`                  | Ibudo olupin         |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Ipilẹ URL fun iwaju  |
+| `JWT_SECRET`           | (ti ipilẹṣẹ loke)        | JWT wíwọlé ìkọkọ     |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Ọrọ igbaniwọle akọkọ |
+| `APP_LOG_LEVEL`        | `info`                   | Wọle ipele ọrọ sisọ  |
 
-### Àwọn Ètò Dashboard
+### Awọn Eto Dasibodu
 
-Dashboard pèsè àwọn toggle UI fún àwọn àfidámọ́ tí a tún lè ṣètò pẹ̀lú àwọn àyípadà ayíká:
+Dasibodu naa n pese awọn iyipada UI fun awọn ẹya ti o tun le tunto nipasẹ awọn oniyipada ayika:
 
-| Ibi Ètò             | Toggle             | Àpèjúwe                               |
-| ------------------- | ------------------ | ------------------------------------- |
-| Settings → Advanced | Debug Mode         | Mú kí àwọn log ìbéèrè debug ṣiṣẹ́ (UI) |
-| Settings → General  | Sidebar Visibility | Fi àwọn apá sidebar hàn/tẹ́ wọn pamọ́   |
+| Eto Ipo                  | Yipada        | Apejuwe                               |
+| ------------------------ | ------------- | ------------------------------------- |
+| Eto → To ti ni ilọsiwaju | Ipo yokokoro  | Mu awọn iwe ibeere yokokoro ṣiṣẹ (UI) |
+| Eto → Gbogbogbo          | Sidebar Hihan | Show/hide legbe ruju                  |
 
-A máa ń tọ́jú àwọn ètò wọ̀nyí sínú database, wọ́n sì máa ń bá a lọ lẹ́yìn àwọn ìbẹ̀rẹ̀pẹ̀yà, wọ́n ń borí àwọn àìpẹ́wọ̀n env var nígbà tí a bá ṣètò wọn.
+Awọn eto wọnyi wa ni ipamọ sinu ibi ipamọ data ati tẹsiwaju kọja awọn atunbẹrẹ, ti o bori awọn aiyipada env var nigbati o ba ṣeto.
 
-### Ṣíṣe Ní Agbègbè
+### Nṣiṣẹ Agbegbe
 
 ```bash
-# Ipo ìdàgbàsókè (hot reload)
+# Development mode (hot reload)
 npm run dev
 
-# Ìkọ́lé production
+# Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Ìkójọ backend/API-only kíákíá fún àwọn ìyípadà olùkópa
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Ìkọ́lé release (ìkọ́lé tuntun tó mọ́ + HEAD sentinel — ó ṣe pàtàkì fún deploy)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Àṣètò ọ̀pọ̀n tó wọ́pọ̀
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Ìkọ́lé olùkópa ń ṣe ìmúdájú compile-only: kò kó distribution standalone jọ
-tàbí kọ́ àwọn ohun-ìní packaging native àṣàyàn. Lo ìkọ́lé production déédéé nígbà tí
-o bá nílò láti fìdí bundle tí a lè fi ránṣẹ́ múlẹ̀.
+Kọ olùkópa ṣe ìfọwọ́sowọ́pọ̀ àkójọ-nikan: ko ṣajọ pinpin imurasilẹ tabi kọ awọn ohun-ini iṣakojọpọ abinibi yiyan. Lo iṣelọpọ iṣelọpọ deede nigbati o nilo lati fọwọsi lapapo gbigbe.
 
-### Ìṣètò Ìjáde Ìkọ́lé
+### Kọ Output Layout
 
-| Directory | Àwọn Ohun Tó Wà Níbẹ̀                                                         | Tí A Tọ́pa |
-| --------- | ---------------------------------------------------------------------------- | --------- |
-| `src/`    | Kóòdù orísun ohun èlò (TypeScript / TSX)                                     | Béèni     |
-| `.build/` | Àwọn ohun àárín — àbájáde `next build` (gitignored, `distDir = .build/next`) | Rárá      |
-| `dist/`   | Bundle tí a lè fi ránṣẹ́ — `assembleStandalone` ló kó jọ (gitignored)         | Rárá      |
+| Itọsọna   | Awọn akoonu                                                                | Tọpinpin |
+| --------- | -------------------------------------------------------------------------- | -------- |
+| `src/`    | Orisun ohun elo (TypeScript / TSX)                                         | Bẹẹni    |
+| `.build/` | Agbedemeji — `next build` igbejade (gitignored, `distDir = .build/next`)   | Rara     |
+| `dist/`   | Apo — ti o le gbejade ti a ṣajọpọ nipasẹ `assembleStandalone` (gitignored) | Rara     |
 
-Pipeline ìkọ́lé jẹ́ ìgbésẹ̀ kan ṣoṣo:
+Opo opo gigun ti epo jẹ iwe-iwọle kan:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Àbájáde Next.js)
-  └─ assembleStandalone()                 (kọ́ standalone + static + public + native assets sí ibi míì)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` tún máa ń fọ àwọn directory méjèèjì mọ́kọ́kọ́, ó sì ń kọ
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) gẹ́gẹ́ bí sentinel ìdúróṣinṣin deploy.
+`npm run build:release` ni afikun nu awọn ilana mejeeji mọ ni akọkọ ati kọ `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bi sentinel iduroṣinṣin.
 
-`npm run build:contributor` máa ń lo profaili ìkọ́lé backend-only. Ó máa ń rọ́pò
-àwọn fáìlì UI dashboard pẹ̀lú stub fún àkókò ìkọ́lé, ó ń pa àwọn olùmúṣẹ̀
-API route mọ́, ó sì máa ń dá àwọn fáìlì àkọ́kọ́ padà lẹ́yìn ìkọ́lé. Lo `npm run build`
-fún àwọn ìyípadà tó kan UI dashboard tàbí fún ìmúdájú release ní kíkún; profaili
-olùkópa kì í ṣe àfidípò fún ìkọ́lé release.
+`npm run build:contributor` nlo profaili kikọ lẹhin-nikan. O di awọn faili UI dasibodu fun igba diẹ lakoko ti o nkọ, tọju awọn olutọju ọna API, ati mu pada awọn faili atilẹba pada lẹhin kikọ. Lo `npm run build` fun awọn ayipada ti o kan dasibodu UI tabi fun afọwọsi ni kikun; profaili olùkópa ni ko kan rirọpo fun awọn Tu Kọ.
 
-> **Àkíyèsí deploy VPS:** directory image latọ̀nà `/usr/lib/node_modules/omniroute/app/`
-> kò yí padà. Àwọn ọgbọ́n deploy máa ń rsync àwọn ohun tó wà nínú `dist/` sínú rẹ̀.
-> Ọ̀nà àbájáde ìkọ́lé inú repository nìkan ló yí padà (`app/` → `dist/`).
+> **VPS gbe akọsilẹ:** ilana aworan latọna jijin `/usr/lib/node_modules/omniroute/app/` ko yipada. Awọn ọgbọn imuṣiṣẹ rsync awọn akoonu ti `dist/` sinu rẹ. Nikan ọna iṣelọpọ inu-repo ti a gbe (`app/` → `dist/`).
 
-Àwọn URL àìpẹ́wọ̀n:
+URLs aiyipada:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **Dasibodu** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -435,10 +420,10 @@ Lẹ́yìn náà, lo àwọn skill `/deploy-vps-*-cc` tí ó máa ń lo rsync l�
 
 ---
 
-## Bí A Ṣe Lè Rí Ìrànlọ́wọ́
+## Gbigba Iranlọwọ
 
-- **Ìṣètò Àwòrán Ẹ̀rọ**: Wo [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Ìtọ́kasí API**: Wo [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Àwọn àkọsílẹ̀ ààbò**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Àwọn àkọsílẹ̀ iṣẹ́ ìṣàkóso**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Àwọn ìṣòro**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Faaji** : Wo [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Reference** : Wo [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Awọn iwe aṣẹ aabo** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops awọn iwe aṣẹ** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Awọn ọrọ** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

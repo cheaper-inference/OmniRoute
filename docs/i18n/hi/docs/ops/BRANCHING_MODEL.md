@@ -52,7 +52,7 @@ flowchart LR
 यह मानने से पहले कि आप जो शाखा चाहते हैं वह विलय योग्य है, ओपन फ़्रीज़ की जाँच करें:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 मर्ज मैकेनिक्स (मालिक `queue` लेबल → Mergify) को [MERGE_TRAIN.md](./MERGE_TRAIN.md) में प्रलेखित किया गया है।

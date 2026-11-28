@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute được cung cấp dưới dạng Progressive Web App có thể cài đặt hoàn chỉnh. Khi truy cập bảng điều khiển từ bất kỳ trình duyệt di động nào — Android (Chrome) hoặc iOS (Safari) — bạn có thể chọn "Thêm vào màn hình chính" để có trải nghiệm tương tự ứng dụng gốc mà không cần thông qua cửa hàng ứng dụng.
+Cài đặt bảng điều khiển OmniRoute dưới dạng Ứng dụng web lũy tiến để mở nó từ màn hình chính hoặc màn hình nền của bạn trong một cửa sổ độc lập. Ứng dụng đã cài đặt vẫn cần kết nối với máy chủ OmniRoute của bạn để điều hướng, dữ liệu bảng điều khiển và các yêu cầu API. Nội dung tĩnh được lưu trong bộ nhớ đệm không cung cấp cổng ngoại tuyến hoặc bảng điều khiển ngoại tuyến.
 
 ## PWA là gì?
 
-Progressive Web App biến bảng điều khiển web của OmniRoute thành một ứng dụng có giao diện và trải nghiệm giống như ứng dụng di động gốc. Sau khi được cài đặt, ứng dụng sẽ:
+Ứng dụng web lũy tiến sử dụng bảng điều khiển web có biểu tượng ứng dụng và một cửa sổ riêng. Sau khi cài đặt, OmniRoute:
 
-- Khởi chạy từ màn hình chính với biểu tượng riêng
-- Mở ở chế độ toàn màn hình — không có thanh địa chỉ hoặc giao diện tab của trình duyệt
-- Hoạt động ngoại tuyến với một trang kết nối chuyên dụng
-- Lưu các tài nguyên tĩnh vào bộ nhớ đệm để tải nhanh hơn
-- Hỗ trợ cả hướng màn hình dọc và ngang
+- Khởi chạy từ màn hình chính hoặc máy tính để bàn của bạn
+- Mở ở chế độ độc lập, không có thanh địa chỉ và tab thông thường của trình duyệt
+- Lưu trữ nội dung tĩnh đã chọn
+- Hỗ trợ định hướng dọc và ngang
 
 ## Cài đặt
 
+Sử dụng địa chỉ HTTPS cho máy chủ trên thiết bị khác. Khi máy chủ chạy trên cùng một thiết bị, `http://localhost:20128` cũng đáp ứng các yêu cầu về khả năng cài đặt của trình duyệt. Địa chỉ `http://YOUR_IP:20128` đơn giản không đáp ứng được các yêu cầu đó. Menu cài đặt và lời nhắc tùy thuộc vào trình duyệt và hệ điều hành. Xem [các yêu cầu cài đặt PWA của MDN](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
+
 ### Android (Chrome)
 
-1. Mở bảng điều khiển OmniRoute trong Chrome: `http://YOUR_IP:20128`
-2. Chrome sẽ tự động hiển thị biểu ngữ **"Thêm OmniRoute vào Màn hình chính"**, hoặc:
-   - Nhấn vào menu **⋮** (ba dấu chấm) → **"Thêm vào Màn hình chính"** hoặc **"Cài đặt ứng dụng"**
-3. Xác nhận lời nhắc
-4. OmniRoute xuất hiện trên màn hình chính dưới dạng một ứng dụng độc lập
+1. Mở địa chỉ OmniRoute HTTPS của bạn hoặc `http://localhost:20128` cho máy chủ trên cùng một điện thoại.
+2. Mở**⋮** thực đơn và chọn** Cài đặt ứng dụng** hoặc** Thêm vào màn hình chính** , nếu được cung cấp.
+3. Xác nhận lời nhắc.
+4. Mở OmniRoute từ màn hình chính.
 
 ### iOS (Safari)
 
-1. Mở bảng điều khiển OmniRoute trong Safari: `http://YOUR_IP:20128`
-2. Nhấn vào nút **Chia sẻ** (hộp có mũi tên)
-3. Cuộn xuống và nhấn vào **"Thêm vào Màn hình chính"**
-4. Đặt tên cho ứng dụng (mặc định là "OmniRoute") và nhấn **Thêm**
-5. OmniRoute xuất hiện trên màn hình chính với biểu tượng ứng dụng
+1. Mở địa chỉ OmniRoute HTTPS của bạn trong Safari.
+2. Vỗ nhẹ** Chia sẻ** →** Thêm vào màn hình chính** .
+3. Xác nhận tên và nhấn** Thêm vào** .
+4. Mở OmniRoute từ màn hình chính.
 
 ### Máy tính để bàn (Chrome / Edge)
 
-1. Mở bảng điều khiển OmniRoute
-2. Nhấp vào **biểu tượng cài đặt** trên thanh địa chỉ (hoặc ⋮ → "Cài đặt OmniRoute...")
-3. Xác nhận lời nhắc
-4. OmniRoute mở dưới dạng một cửa sổ độc lập — không có tab, không có thanh địa chỉ
+1. Mở bảng điều khiển OmniRoute của bạn.
+2. Sử dụng biểu tượng cài đặt của trình duyệt hoặc** Cài đặt ứng dụng** mục menu, nếu được cung cấp.
+3. Xác nhận lời nhắc mở OmniRoute trong cửa sổ riêng của nó.
 
-## Tính năng
+## Đặc trưng
 
-### Trải nghiệm toàn màn hình
+### Cửa sổ độc lập
 
-Tệp manifest được cấu hình với `display: "fullscreen"`, nghĩa là ứng dụng đã cài đặt sẽ sử dụng toàn bộ màn hình — không có giao diện trình duyệt và không chồng lấn lên thanh trạng thái. Điều này mang lại cho bảng điều khiển cảm giác thực sự giống ứng dụng gốc.
+Tệp kê khai đặt `display: "standalone"` và `start_url: "/dashboard"`. Ứng dụng đã cài đặt sẽ mở bảng thông tin trong cửa sổ ứng dụng. Các điều khiển của trình duyệt và hệ điều hành vẫn có thể xuất hiện; tệp kê khai không yêu cầu chế độ toàn màn hình.
 
-### Hỗ trợ ngoại tuyến
+### Nội dung được lưu trong bộ nhớ đệm và yêu cầu mạng
 
-OmniRoute bao gồm một service worker (`sw.js`) cung cấp cơ chế lưu vào bộ nhớ đệm thông minh:
+[Nhân viên dịch vụ](../../public/sw.js) lưu trữ các tài nguyên có cùng nguồn gốc đã chọn:
 
-| Loại tài nguyên                                                                                                                                                                                                                        | Chiến lược                                     | Hành vi                                                                                                                    |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **Khung ứng dụng**                                                                                                                                                                                                                     | Ưu tiên bộ nhớ đệm                             | `/`, `/offline`, manifest và các biểu tượng được lưu sẵn vào bộ nhớ đệm khi cài đặt                                        |
-| **Tài nguyên tĩnh** (CSS, JS, hình ảnh, phông chữ)                                                                                                                                                                                     | Ưu tiên mạng, dự phòng bằng bộ nhớ đệm         | Tải bản mới từ mạng; chuyển sang bộ nhớ đệm nếu ngoại tuyến                                                                |
-| **Các gói Next.js** (`/_next/`)                                                                                                                                                                                                        | Ưu tiên mạng và cập nhật bộ nhớ đệm            | Tải từ mạng và cập nhật bộ nhớ đệm; cung cấp phiên bản đã lưu nếu ngoại tuyến                                              |
-| **Yêu cầu điều hướng**                                                                                                                                                                                                                 | Bỏ qua (không bao giờ bị chặn)                 | Trình duyệt xử lý việc chuyển đổi dự phòng HTTP/3→HTTP/2; socket QUIC ngắt kết nối không được trở thành `Response.error()` |
-| **API / các tuyến bảng điều khiển** (`/api/`, `/a2a`, `/dashboard`, các alias của client API `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, cùng với `/callback`, `/login`; so khớp không phân biệt chữ hoa chữ thường) | Bỏ qua (không bao giờ được lưu vào bộ nhớ đệm) | Luôn truy cập trực tiếp vào máy chủ — service worker không bao giờ chặn                                                    |
+| Yêu cầu hoặc tài sản                       | Chiến lược          | Hành vi                                                                                                                                |
+| ------------------------------------------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Tài nguyên lúc cài đặt                     | Bộ đệm trước        | `/`, `/manifest.webmanifest`, `/icon-512.png` và `/apple-touch-icon.png` được lưu vào bộ nhớ đệm trong quá trình cài đặt của nhân viên |
+| tài sản tĩnh Next.js (`/_next/`)           | Mạng đầu tiên       | Phản hồi thành công cập nhật bộ đệm; lỗi mạng quay lại phản hồi đã được lưu trong bộ nhớ đệm hiện có                                   |
+| CSS tĩnh khác, JS, hình ảnh và phông chữ   | Bộ nhớ đệm đầu tiên | Phản hồi đã lưu trong bộ nhớ đệm hiện có sẽ được sử dụng lại; phản hồi mạng thành công được lưu trữ trong bộ nhớ đệm                   |
+| Điều hướng trang                           | Đường vòng          | Trình duyệt tìm nạp trang trực tiếp; không có dự phòng ngoại tuyến nào được phân phát                                                  |
+| API, bảng điều khiển và các tuyến xác thực | Đường vòng          | Worker không chặn hoặc lưu vào bộ nhớ đệm những yêu cầu này                                                                            |
+| Các yêu cầu không tĩnh khác                | Mạng                | Không có tra cứu hoặc lưu trữ bộ đệm                                                                                                   |
 
-### Trang ngoại tuyến
+Các tuyến đường bị loại trừ là `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` và `/login`, khớp với phân biệt chữ hoa chữ thường ở ranh giới đường dẫn. Các yêu cầu có nguồn gốc chéo và không GET cũng bỏ qua nhân viên.
 
-Khi mạng không khả dụng và người dùng điều hướng đến một trang mới, service worker sẽ cung cấp trang `/offline` chuyên dụng:
+### Trang kết nối
 
-- Hiển thị thông báo rõ ràng **"Sự cố kết nối"**
-- Hiển thị **chỉ báo trạng thái trực tuyến/ngoại tuyến** theo thời gian thực
-- Cung cấp nút **"Thử kết nối lại"** để tải lại khi kết nối được khôi phục
-- Liên kết đến **Trang trạng thái** để chẩn đoán
+Trang `/offline` cung cấp thông báo kết nối, chỉ báo online/offline,** Thử lại kết nối** nút và một liên kết đến trang trạng thái. Đó là** không được lưu trước vào bộ nhớ đệm** và nhân viên phục vụ làm** không** chuyển hướng điều hướng thất bại đến nó. Sự tồn tại của nó không làm cho các trang mới có thể truy cập được mà không cần máy chủ.
 
 ### Biểu tượng ứng dụng
 
-OmniRoute cung cấp các biểu tượng được tối ưu hóa cho từng nền tảng:
+Tệp kê khai quảng cáo các biểu tượng PNG này:
 
-| Tệp                    | Kích thước       | Được sử dụng bởi                             |
-| ---------------------- | ---------------- | -------------------------------------------- |
-| `icon-512.png`         | 512×512          | Lời nhắc cài đặt Android, màn hình khởi động |
-| `apple-touch-icon.png` | 180×180          | Biểu tượng trên màn hình chính của iOS       |
-| `icon-192.svg`         | 192×192 (vector) | Biểu tượng thích ứng của Android             |
-| `apple-touch-icon.svg` | 180×180 (vector) | Phương án dự phòng cho Apple                 |
-| `favicon.svg`          | Vector           | Các tab trình duyệt                          |
-| `favicon.ico`          | Nhiều kích thước | Các trình duyệt cũ                           |
+| Tài liệu               | Kích cỡ | Sử dụng                                      |
+| ---------------------- | ------- | -------------------------------------------- |
+| `icon-192.png`         | 192×192 | Biểu tượng ứng dụng chung                    |
+| `icon-512.png`         | 512×512 | Biểu tượng ứng dụng chung và có thể che được |
+| `apple-touch-icon.png` | 180×180 | Biểu tượng màn hình chính của Apple          |
+
+Trình duyệt chọn biểu tượng thích hợp cho mục tiêu cài đặt.
 
 ### Đăng ký tự động
 
-Service worker được đăng ký tự động thông qua thành phần `<PwaRegister />` trong bố cục gốc. Người dùng không cần thực hiện bất kỳ thao tác nào — ứng dụng có thể được cài đặt ngay khi trình duyệt phát hiện manifest và service worker hợp lệ.
+`PwaRegister` đăng ký nhân viên sản xuất khi trình duyệt hỗ trợ nhân viên dịch vụ. Chế độ phát triển hủy đăng ký công nhân và xóa bộ nhớ đệm để tránh tài sản cũ cản trở quá trình tải lại nóng. Lời nhắc cài đặt vẫn là quyết định của trình duyệt.
 
 ## Kiến trúc kỹ thuật
 
-### Web App Manifest (`manifest.webmanifest`)
+### Bản kê khai ứng dụng web
 
-Được Next.js tạo thông qua `src/app/manifest.ts`:
+Next.js tạo `/manifest.webmanifest` từ [`src/app/manifest.ts`](../../src/app/manifest.ts). Các cài đặt chính của nó là:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Cài đặt           | Giá trị                                      |
+| ----------------- | -------------------------------------------- |
+| `short_name`      | `OmniRoute`                                  |
+| `start_url`       | `/dashboard`                                 |
+| `scope`           | `/`                                          |
+| `display`         | `standalone`                                 |
+| `orientation`     | `any`                                        |
+| Màu nền và chủ đề | Bảng màu sáng mặc định từ `PWA_THEME_COLORS` |
 
-### Service Worker (`public/sw.js`)
+Tên và mô tả của tệp kê khai là các giá trị tĩnh trong tệp nguồn đó. Tệp kê khai đã cài đặt không tuân theo cài đặt tên phiên bản hoặc bảng màu hoạt động trong mỗi lần truy cập.
 
-Một service worker thuần túy (không phụ thuộc framework) với:
+### Nhân viên phục vụ
 
-- **Giai đoạn cài đặt**: Lưu trước app shell vào bộ nhớ đệm (trang gốc, trang ngoại tuyến, manifest, biểu tượng)
-- **Giai đoạn kích hoạt**: Dọn dẹp các phiên bản bộ nhớ đệm cũ và tiếp quản tất cả client
-- **Giai đoạn tìm nạp**: Định tuyến thông minh dựa trên loại yêu cầu (điều hướng, tài nguyên tĩnh, API)
-- **Đánh phiên bản bộ nhớ đệm**: `omniroute-pwa-v3` — tăng giá trị này để buộc tạo bộ nhớ đệm mới khi cập nhật
+[`public/sw.js`](../../public/sw.js) không có sự phụ thuộc vào khung công nhân dịch vụ:
 
-### Metadata của layout (`src/app/layout.tsx`)
+- **Cài đặt:** lưu trước bốn tài nguyên được liệt kê ở trên và kích hoạt nhân viên mới.
+- **Kích hoạt:** loại bỏ các thế hệ bộ đệm cũ hơn và yêu cầu khách hàng.
+- **Tìm về:** áp dụng các chiến lược nội dung tĩnh và loại trừ tuyến đường ở trên.
+- **Phiên bản:** tên bộ đệm nguồn là `omniroute-pwa-v3`; bản dựng sản xuất đóng dấu nhận dạng bộ đệm.
+- **Thông báo:** xử lý các sự kiện `push` đến và tập trung hoặc mở một cửa sổ khi nhấp vào thông báo.
 
-Layout gốc cung cấp tất cả các thẻ meta cần thiết để tuân thủ PWA:
+Chỉ riêng trình xử lý sự kiện đẩy không thiết lập đăng ký đẩy hoạt động hoặc phân phối máy chủ được định cấu hình. Đừng cho rằng thông báo được bật chỉ vì PWA đã được cài đặt.
 
-- Liên kết `manifest` đến `/manifest.webmanifest`
-- `apple-web-app-capable: true` cho chế độ độc lập trên iOS
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` cho Chrome trên Android
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` để hiển thị tràn viền
+### Siêu dữ liệu bố cục và đăng ký
 
-### Component: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) cung cấp liên kết tệp kê khai, siêu dữ liệu độc lập của Apple, màu chủ đề và `viewport-fit: cover`. Tiêu đề trang và tiêu đề ứng dụng web của Apple sử dụng tên phiên bản. Màu chủ đề trình duyệt trực tiếp tuân theo bảng màu; bảng kê khai cài đặt sử dụng màu sáng mặc định.
 
-Nằm tại `src/shared/components/PwaRegister.tsx`, client component này:
-
-1. Chạy khi được mount (chỉ ở phía client)
-2. Kiểm tra trình duyệt có hỗ trợ `serviceWorker` hay không
-3. Đăng ký `/sw.js` một cách âm thầm (các lỗi được bỏ qua để tránh chặn ứng dụng)
-4. Không render nội dung nào (`return null`) — đây là component chỉ dùng để tạo hiệu ứng phụ
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) chạy trên máy khách và đăng ký `/sw.js` với bản dựng ID trong URL của nó. Nó phát hiện các thế hệ bộ đệm không khớp và có thể đặt lại trình chạy và tải lại một lần để khôi phục từ bản cài đặt cũ hơn. Lỗi đăng ký không chặn bảng điều khiển.
 
 ## Sử dụng với Termux (Android)
 
-Khi chạy OmniRoute trên Android thông qua Termux, PWA hoạt động liền mạch:
+1. Bắt đầu OmniRoute trong Termux: `npx -y omniroute@latest`.
+2. Mở Chrome trên cùng một điện thoại: `http://localhost:20128`.
+3. Cài đặt PWA thông qua menu cài đặt của trình duyệt.
+4. Giữ máy chủ Termux chạy trong khi sử dụng bảng điều khiển.
 
-1. Khởi động OmniRoute trong Termux: `npx omniroute`
-2. Mở Chrome trên cùng điện thoại: `http://localhost:20128`
-3. Cài đặt PWA thông qua "Thêm vào màn hình chính"
-4. PWA kết nối với máy chủ Termux cục bộ — mọi thứ đều chạy trên thiết bị
-
-Sự kết hợp này có nghĩa là điện thoại Android của bạn vừa là **máy chủ** (Termux), vừa là **client** (PWA) — một cổng AI hoàn chỉnh và khép kín.
+Điện thoại lưu trữ cả cổng và bảng điều khiển của nó. Yêu cầu tới các nhà cung cấp AI từ xa vẫn cần truy cập mạng. Xem [hướng dẫn Termux](TERMUX_GUIDE.md) để biết cách thiết lập và cân nhắc trong suốt vòng đời của quy trình Android.
 
 ## Sử dụng từ các thiết bị khác
 
-Cài đặt PWA trên bất kỳ thiết bị nào có thể truy cập máy chủ OmniRoute của bạn bằng trình duyệt:
-
-- **Điện thoại/máy tính bảng khác**: Truy cập `http://PHONE_IP:20128` và cài đặt PWA
-- **Máy tính xách tay**: Mở Chrome/Edge và cài đặt ứng dụng dưới dạng PWA dành cho máy tính
-- **Smart TV có trình duyệt**: Truy cập bảng điều khiển ở chế độ toàn màn hình
+Mở địa chỉ HTTPS của máy chủ trên điện thoại, máy tính bảng hoặc máy tính để bàn, sau đó thực hiện theo quy trình cài đặt của trình duyệt đó. Máy chủ phải luôn có thể truy cập được từ mỗi thiết bị. Xem [hướng dẫn đường hầm](../ops/TUNNELS_GUIDE.md) để biết các tùy chọn truy cập từ xa.
 
 ## Tùy chỉnh
 
 ### Tên phiên bản
 
-Tiêu đề PWA tuân theo cài đặt **Tên phiên bản** trong `Dashboard → Settings`. Nếu đổi tên phiên bản thành "Cổng AI của tôi", PWA đã cài đặt sẽ hiển thị tên đó.
+các** Tên phiên bản** cài đặt thay đổi siêu dữ liệu của trang tổng quan, bao gồm tiêu đề trang và tiêu đề ứng dụng web của Apple. Tệp kê khai được tạo sử dụng tên tĩnh nên cài đặt này không đảm bảo rằng ứng dụng đã cài đặt sẽ được đổi tên.
 
-### Favicon tùy chỉnh
+### Biểu tượng yêu thích tùy chỉnh
 
-Nếu tải lên favicon tùy chỉnh thông qua `Dashboard → Settings`, biểu tượng PWA trên máy tính sẽ phản ánh biểu tượng tùy chỉnh đó. Các biểu tượng trên màn hình chính của thiết bị di động sử dụng các tệp `icon-512.png` và `apple-touch-icon.png` được tạo sẵn.
+Favicon tùy chỉnh sẽ thay đổi favicon của trình duyệt. Tệp kê khai cài đặt vẫn quảng cáo các tệp PNG ở trên; việc thay đổi favicon không thay thế các biểu tượng trên màn hình chính đó.
 
 ## Hạn chế
 
-- **Không có thông báo đẩy** — Service worker không triển khai Push API. Thay vào đó, các thông báo được xử lý bởi ứng dụng Electron.
-- **Không đồng bộ trong nền** — Các thao tác ngoại tuyến không được đưa vào hàng đợi để thực hiện lại. PWA chủ yếu được dùng để xem bảng điều khiển.
-- **Hạn chế trên iOS** — Safari trên iOS không hỗ trợ đầy đủ mọi tính năng của PWA (ví dụ: người dùng phải cài đặt thủ công và service worker chạy nền bị hạn chế).
-- **Kích thước bộ nhớ đệm** — Service worker chỉ lưu các tài nguyên tĩnh vào bộ nhớ đệm. Các tải trọng phản hồi lớn từ những tuyến `/api/` không bao giờ được lưu vào bộ nhớ đệm.
-- **Biểu tượng tùy chỉnh trên thiết bị di động** — Việc thay đổi favicon trong phần cài đặt không cập nhật biểu tượng trên màn hình chính của thiết bị di động (điều này yêu cầu tạo lại các biểu tượng PWA).
+- **Yêu cầu kết nối máy chủ:** điều hướng trang, trạng thái trang tổng quan và các yêu cầu API không có dự phòng ngoại tuyến.
+- **Không đồng bộ hóa nền:** hành động ngoại tuyến không được xếp hàng để phát lại.
+- **Sự khác biệt của trình duyệt:** menu cài đặt, trình bày cửa sổ và hỗ trợ thông báo khác nhau tùy theo nền tảng.
+- **Không có bộ đệm phản hồi API :** nhân viên loại trừ các tuyến API, bảng điều khiển và xác thực.
+- **Biểu tượng cài đặt tĩnh:** việc cập nhật các biểu tượng đó yêu cầu thay đổi nội dung được quảng cáo; trình duyệt có thể giữ lại siêu dữ liệu đã cài đặt.
 
-## Tham chiếu tệp
+## Tài liệu tham khảo tập tin
 
-| Tệp                                     | Mục đích                                                              |
-| --------------------------------------- | --------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Tuyến manifest của Next.js (tạo `manifest.webmanifest`)               |
-| `public/sw.js`                          | Service worker với logic lưu vào bộ nhớ đệm                           |
-| `src/shared/components/PwaRegister.tsx` | Thành phần phía máy khách đăng ký service worker                      |
-| `src/app/offline/page.tsx`              | Trang dự phòng ngoại tuyến với chỉ báo trạng thái theo thời gian thực |
-| `src/app/layout.tsx`                    | Bố cục gốc với siêu dữ liệu PWA (apple-web-app, theme-color, v.v.)    |
-| `public/icon-512.png`                   | Biểu tượng PNG 512×512 (Android, màn hình khởi động)                  |
-| `public/apple-touch-icon.png`           | Biểu tượng PNG 180×180 (màn hình chính iOS)                           |
-| `public/icon-192.svg`                   | Biểu tượng SVG 192×192 (biểu tượng thích ứng trên Android)            |
-| `public/apple-touch-icon.svg`           | Biểu tượng SVG 180×180 (biểu tượng dự phòng cho Apple)                |
+| Tài liệu                                                                               | Mục đích                                                        |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Đã tạo bảng kê khai ứng dụng web                                |
+| [public/sw.js](../../public/sw.js)                                                     | Bộ nhớ đệm, loại trừ và xử lý sự kiện thông báo                 |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Đăng ký sản xuất và khôi phục bộ đệm cũ                         |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Trang kết nối, không phải là trang dự phòng ngoại tuyến tự động |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Cài đặt chế độ xem và siêu dữ liệu trang                        |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Giá trị màu chủ đề được chia sẻ                                 |
+| [public/icon-512.png](../../public/icon-512.png)                                       | Biểu tượng ứng dụng 512 × 512                                   |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 biểu tượng quả táo                                    |

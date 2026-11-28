@@ -13,12 +13,12 @@ Agent Skills منظم SKILL.md فائلیں ہیں جو بیرونی ایجنٹ�
 
 ## جائزہ
 
-کیٹلاگ میں **45 Agent Skills** شامل ہیں (23 REST API + 21 CLI + 1 کنفیگریشن ورک فلو)۔ ہر اسکل میں یہ چیزیں ہوتی ہیں:
+کیٹلاگ پر مشتمل ہے۔** 45 ایجنٹ کی مہارتیں** (23 REST API + 21 CLI + 1 کنفیگریشن ورک فلو)۔ ہر ایک مہارت ہے:
 
-- ایک **کینونیکل ID** (`omni-auth`، `cli-serve`، وغیرہ)
-- `skills/{id}/SKILL.md` میں ایک **SKILL.md** فائل، جس میں YAML فرنٹ میٹر (`name`، `description`) + تفصیلی مارک ڈاؤن باڈی ہوتی ہے
-- OpenAPI اسپیک اور CLI رجسٹری سے اخذ کردہ **REST اینڈ پوائنٹس** (API اسکلز) یا **CLI ذیلی کمانڈز** (CLI اسکلز)
-- براہِ راست حاصل کرنے کے لیے ایک **GitHub خام URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- اے** کیننیکل ID** (`omni-auth`، `cli-serve`، وغیرہ)
+- اے**SKILL.md** `skills/{id}/SKILL.md` میں فائل YAML فرنٹ میٹر (`name`, `description`) + امیر مارک ڈاؤن باڈی کے ساتھ
+- **REST اختتامی نکات** (API مہارت) یا**CLI ذیلی کمانڈز** (CLI مہارت) OpenAPI spec اور CLI رجسٹری سے ماخوذ
+- اے**GitHub خام URL** لائیو بازیافت کے لیے: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 

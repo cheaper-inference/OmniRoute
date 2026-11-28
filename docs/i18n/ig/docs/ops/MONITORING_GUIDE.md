@@ -99,37 +99,37 @@ Maka combo ọ bụla:
 
 ---
 
-## API Nlele Ahụike
+## API ahụike
 
-OmniRoute na-ewepụta ụzọ HTTP **abụọ** maka nlele ahụike. A pụghị iji ha dochie ibe ha n’ime ndị nhazi ọrụ.
+OmniRoute na-ekpughe** abuo** HTTP ahụike elu. Ha anaghị agbanwe agbanwe maka ndị na-akụ egwú.
 
-| Ụzọ                          | Ebumnuche                                                                   | Ibu                            | Jiri ya maka                                                             |
-| ---------------------------- | --------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------ |
-| `GET /healthz`               | Ịdị ndụ/njikere nke usoro ndụ (`ok` / `starting` / `stopping`)              | Pere mpe (naanị akara usoro)   | **readiness** Kubernetes; **liveness** dị nro ma ọ bụrụ na ị ga-eji HTTP |
-| `GET /api/monitoring/health` | Nchịkọta miri emi nke sistemụ + ndị na-eweta (DB, heap, ọnụọgụ katalọgụ, …) | Dị arọ (ọrụ DB / nlekota sync) | Dashboard, nlele miri emi blackbox, healthcheck arụnyere n’ime Docker    |
+| Ụzọ                          | Ebumnuche                                                               | Ibu                                        | Jiri maka                                                        |
+| ---------------------------- | ----------------------------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------- |
+| `GET /healthz`               | liveness/readiness ndụ ndụ (`ok` / `starting` / `stopping`)             | Ihe na-adịghị mkpa (naanị ọkọlọtọ n'usoro) | Kubernetes** njikere** ; nro** ịdị ndụ** ọ bụrụ na ị ga-eji HTTP |
+| `GET /api/monitoring/health` | Nchịkọta ndị na-eweta usoro + miri emi (DB, ikpo, ọnụ ọgụgụ katalọgụ,…) | Eru (mmekọrịta DB / ọrụ nlekota oru)       | Dashboards, igbe igbe igbe ojii, nlele ahụike arụnyere Docker    |
 
-> **Rịba ama:** Matriks ahụike ndị na-eweta, nsogbu autopilot, ndị nlekota quota, ahụike token, na nkọwa latency karịrị `/api/monitoring/health` dị site na **ngwaọrụ MCP** `observability_snapshot` ma ọ bụ ibe **dashboard** — enweghị ụzọ REST pụrụ iche maka ha.
+> **Mara:** Matrices ahụike ndị na-enye, okwu autopilot, ihe nleba anya oke, ahụike token, na nkọwa latency gafere `/api/monitoring/health` dị site na**MCP ngwá ọrụ** `observability_snapshot` ma ọ bụ** dashboard** ibe — enweghị ụzọ REST raara onwe ya nye maka ndị ahụ.
 
-Ụzọ abụọ ahụ na-agba n’otu **Node event loop** ahụ njikwa arịrịọ na-eji. Ụzọ ọrụ CPU ji ike (ọrụ katalọgụ buru ibu nke `GET /v1/models`, mkpakọ long-context / ịgụ token) nwere ike igbu oge nye ndị njikwa HTTP **niile**, gụnyere `/healthz`. Event-loop nọ n’ọrụ ≠ process anwụọla. Ka mma idozi ọrụ na-eribiga akụrụngwa ókè; ịhazigharị probe na-ebelata naanị nkwụsị ndị na-ezighi ezi.
+Both routes run on the **same Node event loop** as request handling. A CPU-bound path (large `GET /v1/models` catalog work, long-context compression / token counting) can delay **all** HTTP handlers, including `/healthz`. Event-loop busy ≠ process dead. Prefer fixing the hog; probe tuning only reduces false kills.
 
-### Probe dị mfe maka onye nhazi ọrụ
+### Nyocha onye na-akụ egwu dị fechaa
 
 ```bash
 GET /healthz
-# ma ọ bụ HEAD /healthz
+# or HEAD /healthz
 ```
 
-- **200** + body `ok` mgbe usoro ndụ server dị njikere
-- **503** + `starting` / `stopping` n’oge mmalite ma ọ bụ nkwụsị
-- Mmejuputa: `src/app/healthz/route.ts` (enweghị ping DB)
+- **200** + body `ok` mgbe usoro ndụ okirikiri ihe nkesa dị njikere
+- **503** + `starting` / `stopping` n'oge buut ma ọ bụ mechie
+- Mmejuputa: `src/app/healthz/route.ts` (enweghị DB ping)
 
-### Ahụike Sistemụ (miri emi)
+### Ahụike Sistemu (miri)
 
 ```bash
 GET /api/monitoring/health
 ```
 
-Nzaghachi:
+Azịza ya:
 
 ```json
 {
@@ -153,43 +153,35 @@ Nzaghachi:
 }
 ```
 
-#### `credentialHealth`: probe-cache megide SQLite `test_status`
+#### `credentialHealth`: nyocha-cache vs SQLite `test_status`
 
-`GET /api/monitoring/health` → `credentialHealth` bụ **ihe nlele probe-cache dị na ebe nchekwa
-ime**, ọ bụghị mwụpụ ozugbo nke `provider_connections.test_status`. Mgbe #12532 gasịrị,
-ụzọ arịrịọ ahụ na-agụ naanị `getCachedCredentialHealthSummary()`; probe ndabere
-na-emegharị cache ahụ n’èzí event loop.
+`GET /api/monitoring/health` → `credentialHealth` bu ya** n'ime ebe nchekwa nyocha-cache nlele** , ọ bụghị ihe mkpofu `provider_connections.test_status` dị ndụ. Mgbe #12532 ụzọ arịrịọ na-agụ `getCachedCredentialHealthSummary()` naanị; Nyocha ndabere na-eme ka cache ahụ dị ọhụrụ na akaghị mmemme.
 
-| Oyi akwa              | Ebe                                                                   | Ihe ọ pụtara                                                                                                                                                                                                                    |
-| --------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ihe nlele probe-cache | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Nsonaazụ probe ikpeazụ nke ahụike credential ka dị na ebe nchekwa process. `source` bụ `probe-cache` mgbe niile.                                                                                                                |
-| Nkọwa njikọ dara      | `credentialHealth.failedConnections`                                  | Ọ na-adị **naanị mgbe `failed > 0`**. Ndepụta nwere oke nke ahịrị cache nwere `status=error` (`connectionId`, `status`, `lastError` / `lastErrorType` e sachara). A na-edobe `failedOmitted` mgbe e tinyere oke na ndepụta ahụ. |
-| Ọnọdụ sticky SQLite   | `credentialHealth.staleDbNonOkCount`                                  | Ọnụọgụ ahịrị njikọ **na-arụ ọrụ** (`is_active=1`) nke `test_status` echekwara ha bụ non-ok a maara (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                                           |
+| oyi akwa              | Ebee                                                                  | Ihe ọ pụtara                                                                                                                                                                                             |
+| --------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nyocha-cache nlele    | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Nsonaazụ nyocha ahụike nzere ikpeazụ ka nwere na ebe nchekwa usoro. `source` na-abụ `probe-cache` mgbe niile.                                                                                            |
+| Nkọwa njikọ adaghị    | `credentialHealth.failedConnections`                                  | Dị ugbu a** naanị mgbe `failed > 0`** . Ndepụta ahịrị cache ejiri `status=error` (`connectionId`, `status`, sanitized `lastError` / `lastErrorType`). edobere `failedOmitted` mgbe etinyere ndepụta ahụ. |
+| SQLite nnyapade ọnọdụ | `credentialHealth.staleDbNonOkCount`                                  | Ọnụọgụ nke** arụ ọrụ** (`is_active=1`) ahịrị njikọ nke `test_status` nọgidere na-abụ nke a ma ama na-adịghị mma (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).       |
 
-Oyi akwa abụọ ahụ nwere ike ịgaghị ekwekọ n’ebumnuche:
+N'ọkwa abụọ ahụ nwere ike ekwenyeghị na ebumnuche:
 
-- Ihe nlele `failed=0` ebe `staleDbNonOkCount>0` — SQLite ka nwere
-  `test_status` sticky (dịka ọmụmaatụ `expired` ma ọ bụ `credits_exhausted`) nke snapshot
-  probe-cache kacha ọhụrụ anaghị agụ dịka `status=error`.
-- Ihe nlele `failed>0` ebe SQLite yiri ka ọ dị mma — probe ọhụrụ dara ma
-  echekwara ya na cache; emelitebeghị ahịrị DB ahụ, ma ọ bụ e mechara hichapụ ya.
+- Gauge `failed=0` mgbe `staleDbNonOkCount>0` — SQLite ka nwere `test_status` nnyapade (dịka ọmụmaatụ `expired` ma ọ bụ `credits_exhausted`) na foto cache kacha ọhụrụ anaghị agụta dị ka `status=error`.
+- Gauge `failed>0` mgbe SQLite na-adị mma — nyocha na-adịbeghị anya dara ma echekwara ya; emelitebeghị ahịrị DB, ma ọ bụ emechaa kpochapụ ya.
 
-Ezipụla mkpu dabere naanị na `provider_connections.test_status` mgbe ị na-anakọta data site na
-endpoint a. Jiri `failed` + `failedConnections` maka ọdịda probe ozugbo, yana
-`staleDbNonOkCount` mgbe ịchọrọ ọnụọgụ sticky-status echekwara.
+Anọla na-amụ anya naanị na `provider_connections.test_status` mgbe ị na-ehichapụ ebe njedebe a. Jiri `failed` + `failedConnections` maka ọdịda nyocha dị ndụ, wee `staleDbNonOkCount` mgbe ịchọrọ ọnụọgụ nnyapade na-adịgide adịgide.
 
-### Ntụnye probe Kubernetes
+### Ndụmọdụ nyocha Kubernetes
 
-OmniRoute bụ **otu Node process** (otu event loop). Docker `HEALTHCHECK` ndabara na-elekwasị anya na `/healthz` dị mfe. `/api/monitoring/health` **dị oke arọ** maka oge liveness nke kubelet.
+OmniRoute bu a** otu Node usoro** (otu ihe omume loop). Akụrụngwa Docker `HEALTHCHECK` lekwasịrị anya `/healthz` dị fechaa. `/api/monitoring/health` bu** oke arọ** maka kubelet liveness etiti oge.
 
-| Nnyocha             | Ebumnuche akwadoro                                                                       | Nkọwa                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Mmalite**         | HTTP `GET /healthz` nwere `failureThreshold` dị ogologo (ma ọ bụ `startPeriod` buru ibu) | Mmalite oyi + mbugharị SQLite nwere ike ịgafe sekọnd ole na ole                                                                                                                                                                                                                                                                                                                                          |
-| **Njikere**         | HTTP `GET /healthz`                                                                      | Ọnọdụ ndụ `ok` / `starting` / `stopping` (200 megide 503). Ọ ka nwere ike ịgbanwegharị ma ọ bụrụ na CPU gbochiri loop ahụ. **200 nke na-ewe ọtụtụ sekọnd abụghị ọnọdụ ahụike** (#10303) — ọ pụtara na event loop enweghị oge ọrụ tupu handler nke byte 3 ahụ arụ ọrụ                                                                                                                                     |
-| **Ịdị ndụ**         | HTTP `GET /livez`, **ma ọ bụ TCP** na port ọrụ bụ isi (`PORT`, ndabara `20128`)          | `/livez` na-egosi naanị na process dị ndụ (ọ na-abụ 200 mgbe niile ma ọ bụrụ na handler arụ ọrụ). Ọ ka na-eji otu event loop ahụ — ịdị na-arụsi ọrụ ike ≠ ịnwụ anwụ, ọ naghị achọpụtakwa enweghị oge ọrụ nke event loop (#10303) karịa ka TCP si eme. Họrọ **TCP** ma ọ bụrụ na nyocha HTTP na-agwụ oge n'okpuru ibu katalọgụ/mkpọkọta; **egbula** pod n'ihi nkwụsị event loop dị mkpirikpi n'ụzọ ọ bụla |
-| **Ahụike miri emi** | `GET /api/monitoring/health` sitere na onye nyocha mpụga                                 | Ọ bụghị maka `livenessProbe` nke kubelet / `readinessProbe` nwere oge dị mkpirikpi                                                                                                                                                                                                                                                                                                                       |
+| Nyocha               | Ebumnuche akwadoro                                                                  | Ihe ndetu                                                                                                                                                                                                                                                                                                                                                        |
+| -------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Malite**           | HTTP `GET /healthz` nwere ogologo `failureThreshold` (ma ọ bụ nnukwu `startPeriod`) | Mbugharị oyi + SQLite nwere ike gafere sekọnd ole na ole                                                                                                                                                                                                                                                                                                         |
+| **Njikere**          | HTTP `GET /healthz`                                                                 | Ndụ okirikiri `ok` / `starting` / `stopping` (200 vs 503). Ọ ka na-akụ ma ọ bụrụ na egbochiri CPU. A** 200 n'ime otutu sekọnd adịghị mma** (#10303) — ọ pụtara na agụụ agụọ loop mmemme tupu onye njikwa 3-byte agba ọsọ                                                                                                                                         |
+| **Ịdị ndụ**          | HTTP `GET /livez`,** ma ọ bụ TCP** n'ọdụ ụgbọ mmiri isi (`PORT`, `20128` ndabara)   | `/livez` bụ usoro-dị ndụ naanị (mgbe niile 200 ma ọ bụrụ na onye njikwa na-agba ọsọ). Ọ ka na-ekekọrịta ihe omume loop — busy ≠ nwụrụ anwụ, ọ naghị achọpụta agụụ mmemme-loop (#10303) karịa TCP na-eme. Mmasị**TCP** ọ bụrụ na HTTP na-enyocha oge n'okpuru ibu catalog/compression ; mee** ọ bụghị** gbuo pọd ahụ n'ụlọ ahịa mkpirisi mmemme-loop n'ụzọ ọ bụla |
+| **Ahụ ike dị omimi** | `GET /api/monitoring/health` sitere na nlele mpụga                                  | Ọ bụghị maka kubelet `livenessProbe` / siri ike `readinessProbe`                                                                                                                                                                                                                                                                                                 |
 
-Ọmụmaatụ nhazi (gbanwee oke ndị a ka ha kwekọọ na ibu mmalite oyi na mkpọkọta gị):
+Ụdị ihe atụ (mezie ọnụ ụzọ na ibu mmalite oyi na mkpakọ):
 
 ```yaml
 ports:
@@ -215,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Mgbe event loop kwụsịrị, HTTP /livez ka nwere ike ịgwụ oge. TCP bụ
-  # ụzọ ọzọ na-akpachapụ anya:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-**Atụnyela** **liveness** nke kubelet aka na `/api/monitoring/health`. Path ahụ na-arụ ezigbo ọrụ DB/nlekota ma nwee ike igosi nsogbu na-ezighi ezi mgbe ibu dị ukwuu.
+**Emela** isi kubelet** ịdị ndụ** na `/api/monitoring/health`. Ụzọ ahụ na-arụ ọrụ n'ezie DB/monitoring na ọ ga-abụ ụgha-ezi n'okpuru ibu.
 
-Ihe ndị metụtara ya: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (nyocha mgbe event loop na-arụsi ọrụ ike), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (ọrụ ọnụahịa katalọgụ na-ejide akụrụngwa), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (ọrụ ịgụ token nke mkpọkọta na-ejide akụrụngwa).
+njikọ: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (nyocha mgbe loop ihe omume na-arụsi ọrụ ike), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (katalọgụ ọnụahịa hog), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (mkpakọ mkpakọ-count hog).
 
-### watchdog nke systemd (event loop jụrụ akpụ)
+### systemd watchdog (loop mmemme oyi kpọnwụrụ)
 
-Na host systemd, OmniRoute na-agwa onye njikwa service mgbe ọ dị njikere ma na-aga n'ihu izigara ya ping, ka e wee gbuo ma malitegharịa server nke event loop ya rapaara kama ịhapụ ya ka ọ na-arụ ọrụ ma gbachi nkịtị. Ping ndị ahụ na-esite na event loop nke server n'onwe ya: mgbe ọ gbochiri, ha na-akwụsị, systemd wee malitegharịa service ahụ ozugbo `WatchdogSec` gafere na-enwetaghị nke ọ bụla.
+Na onye na-elekọta sistemu, OmniRoute na-agwa onye njikwa ọrụ mgbe ọ dị njikere ma na-aga n'ihu na-atụgharị ya, yabụ na ihe nkesa nke ihe omume ya rapaara na-egbu ma malitegharịa kama ịnọrọ jụụ. pings na-abịa site na akaghị ihe omume nke sava: mgbe ọ na-egbochi, ha na-akwụsị, na systemd malitegharịa ọrụ ahụ ozugbo `WatchdogSec` gafere na-enweghị otu.
 
-[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) edeela unit onye ọrụ nwere nke a. Unit ị dere n'onwe gị (`Type=simple` bụ ndabara) anaghị enweta watchdog, ya mere tinye ahịrị ndị a na ngalaba `[Service]` ya:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) edeela otu onye ọrụ na nke a. Otu ị na-ede onwe gị (nke ndabara `Type=simple`) enweghị onye nche, yabụ tinye ahịrị ndị a na ngalaba `[Service]` ya:
 
 ```ini
 [Service]
@@ -239,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-Unit e mepụtara na-etinye `Restart=on-failure`, ya mere tinyekwa ahịrị ahụ — ma ọ bụghị ya, watchdog ga-egbu naanị service ahụ rapaara kama ịmalitegharị ya.
+Ngalaba emepụtara na-ahazi `Restart=on-failure`, yabụ tinye ahịrị ahụ yana — na-enweghị ya onye nche na-egbu naanị ọrụ rapaara kama ịmalitegharị ya.
 
-- `Type=notify`: a na-ewere service ahụ dị ka nke “malitere” mgbe server zigara `READY=1`, ọ bụghị mgbe process mepụtara fork. `TimeoutStartSec` na-etinye oke na mmalite dị nwayọ.
-- `NotifyAccess=all`: process nke server na-eziga ping ndị ahụ, nke bụ child nke supervisor `omniroute serve`.
-- `WatchdogSec`: a na-ezipụ ping kwa sekọnd 60, ya mere jiri **120 ma ọ bụ karịa**. Uru ndị pere mpe ga-amalitegharị server dị mma.
-- Gbaa `omniroute serve` n'ihu. `--daemon` na-ekewapụ server ahụ na cgroup nke unit ahụ, handshake notify agaghịkwa agwụcha.
+- `Type=notify`: a na-amalite "ọrụ" mgbe ihe nkesa na-eziga `READY=1`, ọ bụghị mgbe usoro ndụdụ. `TimeoutStartSec` na-egbochi mmalite nwayọ.
+- `NotifyAccess=all`: A na-eziga pings site na usoro ihe nkesa, nke bụ nwa nke onye nlekọta `omniroute serve`.
+- `WatchdogSec`: pings na-apụ kwa sekọnd 60, yabụ jiri** 120 ma ọ bụ karịa** . Obere ụkpụrụ ga-amaliteghachi sava dị mma.
+- Gbaa `omniroute serve` n'ihu. `--daemon` na-ewepụ ihe nkesa ahụ na otu unit ahụ na aka aka ngosi agaghị emecha.
 
-Lelee na ọ na-arụ ọrụ mgbe emechara restart:
+Lelee na ọ na-arụ ọrụ ka ịmalitegharịa:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` na-egosi oge nchere ahaziri, `WatchdogTimestamp` na-agakwa n'ihu kwa nkeji. A na-edekọ restart watchdog kpatara dị ka `Result=watchdog`. Iji gbanyụọ ping ndị ahụ ma hapụ unit ahụ otu ọ dị, tọọ `OMNIROUTE_DISABLE_SD_NOTIFY=1`; ma ọ bụrụ na enweghị `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows), ọ dịghị ihe a ga-eziga.
+`WatchdogUSec` na-egosi igbu oge ahaziri na `WatchdogTimestamp` na-aga n'ihu kwa nkeji. Edekọgharịrị mmalite nke ndị nche kpatara dị ka `Result=watchdog`. Iji gbanyụọ pings mgbe ị na-edobe unit ka ọ dị, tọọ `OMNIROUTE_DISABLE_SD_NOTIFY=1`; na-enweghị `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows) ọ dịghị ihe ezipụ.
 
-Watchdog na-enyocha naanị na event loop ka na-aga n'ihu ịrụ ọrụ. A gaghị amalitegharị server dị nwayọ ma ka na-aga n'ihu ịrụ ọrụ.
+Ndị nche na-enyocha naanị na loop mmemme na-aga n'ihu. Ihe nkesa na-adịghị ngwa ngwa mana ka na-atụgharị anaghị amalitegharị.
 
-### Ọrụ request-path nhọrọ (ebe nchekwa, nkà, imelite token)
+### Nhọrọ nhọrọ-ọrụ ụzọ (ncheta, nka, nweta ume ọhụrụ)
 
-Mwepụta ebe nchekwa, ntinye nka, na mmelite token OAuth na-eji **isi event loop nke Node** ahụ `/healthz` na-eji. Ha bụ atụmatụ ndị a na-agbanye ma ọ bụ gbanyụọ na dashboard (`memoryEnabled`, `skillsEnabled`), ọ bụghị worker pool. Lee [Environment — ọnụ ahịa event-loop](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Mwepụta ebe nchekwa, ntụtụ nka na ume ọhụrụ OAuth na-ekekọrịta** isi Node omume loop** ya na `/healthz`. Ha bụ njirimara dashboard-toggle (`memoryEnabled`, `skillsEnabled`), ọ bụghị ọdọ mmiri ndị ọrụ. Lee [Environment — mmemme-loop efu](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
-### Ọnọdụ Ahụike Provider
+### Ahụike Onye na-enye
 
-> **Enweghị REST endpoint.** Data gbasara ọnọdụ ahụike provider dị site na ngwa MCP `observability_snapshot` ma ọ bụ ibe dashboard `/dashboard/providers`.
+> **REST njedebe njedebe.** data ahụike onye na-eweta dị site na ngwa MCP `observability_snapshot` ma ọ bụ ibe `/dashboard/providers` dashboard.
 
-### Nkọwa Provider
+### Nkọwa ndị na-eweta
 
-> **Enweghị REST endpoint.** Nkọwa nke provider ọ bụla dị site na ibe dashboard `/dashboard/providers`.
+> **REST njedebe njedebe.** Nkọwa onye ọ bụla dị site na ibe dashboard `/dashboard/providers`.
 
 ---
 

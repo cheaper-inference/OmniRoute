@@ -203,24 +203,24 @@ enum SkillStatus {
 
 ## REST API
 
-ਸਾਰੇ ਐਂਡਪੌਇੰਟ `src/app/api/skills/` ਦੇ ਅਧੀਨ ਹਨ। ਮੈਨੇਜਮੈਂਟ ਐਂਡਪੌਇੰਟਾਂ (`/api/skills`, `/api/skills/[id]`, `/api/skills/install`) ਲਈ `requireManagementAuth()` ਰਾਹੀਂ **ਮੈਨੇਜਮੈਂਟ ਪ੍ਰਮਾਣੀਕਰਨ** ਲੋੜੀਂਦਾ ਹੈ। ਮਾਰਕੀਟਪਲੇਸ/ਇੰਸਟਾਲ ਫ਼ਲੋ ਹਲਕੇ `isAuthenticated()` (ਸੈਸ਼ਨ ਜਾਂ API ਕੁੰਜੀ) ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ।
+ਸਾਰੇ ਅੰਤ ਬਿੰਦੂ `src/app/api/skills/` ਦੇ ਅਧੀਨ ਰਹਿੰਦੇ ਹਨ। ਪ੍ਰਬੰਧਨ ਅੰਤ ਬਿੰਦੂ (`/api/skills`, `/api/skills/[id]`, `/api/skills/install`) ਦੀ ਲੋੜ ਹੈ** ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣਿਕਤਾ** `requireManagementAuth()` ਦੁਆਰਾ. marketplace/install ਵਹਾਅ ਹਲਕੇ `isAuthenticated()` (ਸੈਸ਼ਨ ਜਾਂ API ਕੁੰਜੀ) ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ।
 
-| ਐਂਡਪੌਇੰਟ | ਢੰਗ | ਉਦੇਸ਼ |
+| ਅੰਤ ਬਿੰਦੂ | ਵਿਧੀ | ਮਕਸਦ |
 | --------------------------------- | ------ | ------------------------------------------------------------------------ | --- | ------------------------ | -------- | ------------------ |
-| `/api/skills` | GET | ਰਜਿਸਟਰ ਕੀਤੀਆਂ ਸਕਿੱਲਾਂ ਦੀ ਸੂਚੀ। `?q=`, `?mode=on                        | off | auto`, `?source=skillsmp | skillssh | local`, ਪੇਜੀਨੇਸ਼ਨ ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ |
+| `/api/skills` | GET | ਰਜਿਸਟਰਡ ਹੁਨਰਾਂ ਦੀ ਸੂਚੀ ਬਣਾਓ। `?q=`, `?mode=on                        | off | auto`, `?source=skillsmp | skillssh | local`, ਪੰਨਾਬੰਦੀ ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ |
 | `/api/skills/[id]` | PUT | `enabled` ਜਾਂ `mode` ਨੂੰ ਅੱਪਡੇਟ ਕਰੋ |
-| `/api/skills/[id]` | DELETE | id ਰਾਹੀਂ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਹਟਾਓ |
-| `/api/skills/install` | POST | ਇੱਕ ਕਸਟਮ ਸਕਿੱਲ ਇੰਸਟਾਲ ਕਰੋ (ਹੈਂਡਲਰ ਕੋਡ + ਸਕੀਮਾ) |
-| `/api/skills/marketplace` | GET | SkillsMP ਕੈਟਾਲਾਗ ਵਿੱਚ ਖੋਜ ਕਰੋ (`q` ਖਾਲੀ ਹੋਣ ਉੱਤੇ ਪ੍ਰਸਿੱਧ ਡਿਫਾਲਟ ਵਾਪਸ ਕਰਦਾ ਹੈ) |
-| `/api/skills/marketplace/install` | POST | ਇੱਕ SkillsMP ਸਕਿੱਲ ਇੰਸਟਾਲ ਕਰੋ (ਸਰਗਰਮ ਪ੍ਰਦਾਤਾ = `skillsmp` ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ) |
-| `/api/skills/skillssh` | GET | skills.sh ਕੈਟਾਲਾਗ ਵਿੱਚ ਖੋਜ ਕਰੋ (`?q=&limit=`, ਵੱਧ ਤੋਂ ਵੱਧ 100) |
-| `/api/skills/skillssh/install` | POST | ਇੱਕ skills.sh ਸਕਿੱਲ ਇੰਸਟਾਲ ਕਰੋ (ਸਰਗਰਮ ਪ੍ਰਦਾਤਾ = `skillssh` ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ) |
-| `/api/skills/executions` | GET | ਪੇਜੀਨੇਟ ਕੀਤਾ ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਇਤਿਹਾਸ (`?apiKeyId=`) |
-| `/api/skills/executions` | POST | ਇੱਕ ਰਜਿਸਟਰ ਕੀਤੀ ਸਕਿੱਲ ਨੂੰ ਐਡ-ਹੌਕ ਢੰਗ ਨਾਲ ਚਲਾਓ |
+| `/api/skills/[id]` | DELETE | ਆਈਡੀ ਦੁਆਰਾ ਅਨਰਜਿਸਟਰ ਕਰੋ |
+| `/api/skills/install` | POST | ਇੱਕ ਕਸਟਮ ਹੁਨਰ ਸਥਾਪਤ ਕਰੋ (ਹੈਂਡਲਰ ਕੋਡ + ਸਕੀਮਾ) |
+| `/api/skills/marketplace` | GET | SkillsMP ਕੈਟਾਲਾਗ ਖੋਜੋ (ਜਦੋਂ `q` ਖਾਲੀ ਹੋਵੇ ਤਾਂ ਪ੍ਰਸਿੱਧ ਡਿਫੌਲਟ ਵਾਪਸ ਕਰਦਾ ਹੈ) |
+| `/api/skills/marketplace/install` | POST | ਇੱਕ SkillsMP ਹੁਨਰ ਸਥਾਪਤ ਕਰੋ (ਸਰਗਰਮ ਪ੍ਰਦਾਤਾ = `skillsmp` ਦੀ ਲੋੜ ਹੈ) |
+| `/api/skills/skillssh` | GET | skills.sh ਕੈਟਾਲਾਗ (`?q=&limit=`, 100 'ਤੇ ਕੈਪਡ) ਖੋਜੋ |
+| `/api/skills/skillssh/install` | POST | ਇੱਕ skills.sh ਹੁਨਰ ਸਥਾਪਤ ਕਰੋ (ਸਰਗਰਮ ਪ੍ਰਦਾਤਾ = `skillssh` ਦੀ ਲੋੜ ਹੈ) |
+| `/api/skills/executions` | GET | ਪੰਨਾਬੱਧ ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਇਤਿਹਾਸ (`?apiKeyId=`) |
+| `/api/skills/executions` | POST | ਇੱਕ ਰਜਿਸਟਰਡ ਹੁਨਰ ਐਡ-ਹਾਕ ਚਲਾਓ |
 
-ਜਦੋਂ `settings.skillsEnabled === false` ਹੁੰਦਾ ਹੈ, ਤਾਂ `POST /api/skills/executions` ਐਂਡਪੌਇੰਟ HTTP `503` ਦੇ ਨਾਲ `{ error: "ਸਕਿੱਲ ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਅਸਮਰੱਥ ਹੈ..." }` ਵਾਪਸ ਕਰਦਾ ਹੈ (`executor.ts:42-45`)। ਓਪਰੇਟਰ **ਸੈਟਿੰਗਾਂ → AI** ਤੋਂ ਮਾਸਟਰ ਸਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹਨ।
+`POST /api/skills/executions` ਅੰਤਮ ਬਿੰਦੂ `{ error: "Skills execution is disabled..." }` ਨਾਲ HTTP `503` ਵਾਪਸ ਕਰਦਾ ਹੈ ਜਦੋਂ `settings.skillsEnabled === false` (`executor.ts:42-45`) ਹੁੰਦਾ ਹੈ। ਓਪਰੇਟਰ ਮਾਸਟਰ ਸਵਿੱਚ ਤੋਂ ਫਲਿੱਪ ਕਰ ਸਕਦੇ ਹਨ** ਸੈਟਿੰਗਾਂ → AI** .
 
-### ਉਦਾਹਰਨ: ਇੱਕ ਕਸਟਮ ਸਕਿੱਲ ਇੰਸਟਾਲ ਕਰੋ
+### ਉਦਾਹਰਨ: ਇੱਕ ਕਸਟਮ ਹੁਨਰ ਸਥਾਪਤ ਕਰੋ
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/install \
@@ -229,7 +229,7 @@ curl -X POST http://localhost:20128/api/skills/install \
   -d '{
     "name": "reverse-text",
     "version": "1.0.0",
-    "description": "ਇੱਕ ਸਟ੍ਰਿੰਗ ਨੂੰ ਉਲਟਾਉਂਦਾ ਹੈ",
+    "description": "Reverses a string",
     "schema": {
       "input":  { "type": "object", "properties": { "text": { "type": "string" } }, "required": ["text"] },
       "output": { "type": "object", "properties": { "reversed": { "type": "string" } } }
@@ -239,7 +239,7 @@ curl -X POST http://localhost:20128/api/skills/install \
   }'
 ```
 
-`handlerCode` ਸਟ੍ਰਿੰਗ ਇੱਕ **ਹੈਂਡਲਰ ਨਾਮ ਲੁੱਕਅੱਪ** ਹੈ — ਚਲਾਇਆ ਜਾ ਸਕਣ ਵਾਲਾ ਕੋਡ ਨਹੀਂ। ਐਗਜ਼ੀਕਿਊਟਰ ਇਸਨੂੰ `skillExecutor.registerHandler(name, fn)` (`executor.ts:25`) ਰਾਹੀਂ ਮੈਪ ਕਰਦਾ ਹੈ। ਮਾਰਕੀਟਪਲੇਸ ਇੰਸਟਾਲ ਇਸ ਫ਼ੀਲਡ ਵਿੱਚ SKILL.md ਟੈਕਸਟ ਨੂੰ ਦਸਤਾਵੇਜ਼ੀਕਰਨ ਵਜੋਂ ਸਟੋਰ ਕਰਦੇ ਹਨ ਅਤੇ ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਨੂੰ ਮਾਡਲ ਦੁਆਰਾ ਤਿਆਰ ਕੀਤੀਆਂ ਟੂਲ ਕਾਲਾਂ ਰਾਹੀਂ ਰੂਟ ਕਰਦੇ ਹਨ। ਯੂਜ਼ਰ ਵੱਲੋਂ ਦਿੱਤੇ ਕਿਸੇ ਵੀ ਮਨਮਾਨੇ ਸੋਰਸ ਨੂੰ eval ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ।
+`handlerCode` ਸਤਰ a ਹੈ** ਹੈਂਡਲਰ ਨਾਮ ਖੋਜ** — ਚੱਲਣਯੋਗ ਕੋਡ ਨਹੀਂ ਹੈ। ਐਗਜ਼ੀਕਿਊਟਰ ਇਸ ਨੂੰ `skillExecutor.registerHandler(name, fn)` (`executor.ts:25`) ਰਾਹੀਂ ਮੈਪ ਕਰਦਾ ਹੈ। ਮਾਰਕਿਟਪਲੇਸ ਇੰਸਟੌਲ SKILL.md ਟੈਕਸਟ ਨੂੰ ਇਸ ਖੇਤਰ ਵਿੱਚ ਦਸਤਾਵੇਜ਼ੀ ਅਤੇ ਮਾਡਲ ਦੁਆਰਾ ਤਿਆਰ ਕੀਤੇ ਟੂਲ ਕਾਲਾਂ ਦੁਆਰਾ ਰੂਟ ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਵਜੋਂ ਸਟੋਰ ਕਰਦਾ ਹੈ। ਆਪਹੁਦਰੇ ਉਪਭੋਗਤਾ ਦੁਆਰਾ ਸਪਲਾਈ ਕੀਤੇ ਸਰੋਤ ਦਾ ਮੁਲਾਂਕਣ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਹੈ।
 
 ---
 

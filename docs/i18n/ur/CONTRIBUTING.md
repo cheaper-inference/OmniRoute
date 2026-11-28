@@ -8,119 +8,107 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## ڈیولپمنٹ سیٹ اپ
+## ترقیاتی سیٹ اپ
 
-### پیشگی تقاضے
+### شرطیں
 
 - **Node.js** `>=22.22.2 <23`، یا `>=24.0.0 <27` (تجویز کردہ: 24 LTS)
-- **npm** 10+
+- **این پی ایم** 10 +
 
-> **Node 24 کے ساتھ Windows:** موجودہ 24 LTS پیچ ریلیز (کم از کم 24.20.0) استعمال کریں۔
-> اس سے پہلے کی ریلیزز `--test-force-exit` کے ذریعے عمل ختم ہونے پر کامیاب ٹیسٹس کے بعد ختم ہو سکتی ہیں۔
-> Node کا [Windows libuv حل](https://github.com/nodejs/node/pull/61999) اس رن ٹائم کریش کو حل کرتا ہے؛
-> ٹیسٹ assertions اور رنر کے exit checks فعال رکھیں۔
+> **نوڈ 24 کے ساتھ Windows :** موجودہ 24 LTS پیچ ریلیز (کم از کم 24.20.0) استعمال کریں۔ ابتدائی ریلیزز کامیاب ٹیسٹوں کے بعد اسقاط ہو سکتی ہیں جب `--test-force-exit` عمل کو بند کر دیتا ہے۔ نوڈ کا [Windows libuv](https://github.com/nodejs/node/pull/61999) اس رن ٹائم حادثے کا پتہ دیتا ہے۔ ٹیسٹ کے دعوے اور رنر ایگزٹ چیک کو فعال رکھیں۔
 
-> **npm v11+ صارفین (Node 24+):** `npm install` کے بعد تصدیق کریں کہ native modules انسٹال ہو گئے ہیں:
-> `node -e "require('better-sqlite3')"`۔ اگر یہ `MODULE_NOT_FOUND` کے ساتھ ناکام ہو،
-> تو `npm approve-scripts better-sqlite3 && npm install` چلائیں۔ [مسائل کے حل](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) دیکھیں۔
+> **npm v11 + صارفین (Node 24 +):** `npm install` کے بعد، تصدیق کریں کہ مقامی ماڈیولز انسٹال ہوئے تھے: `node -e "require('better-sqlite3')"`۔ اگر یہ `MODULE_NOT_FOUND` کے ساتھ ناکام ہو جاتا ہے تو `npm approve-scripts better-sqlite3 && npm install` چلائیں۔ [ٹربل شوٹنگ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) دیکھیں۔
 
-- **Git**
+- **گٹ**
 
-### کلون اور انسٹالیشن
+### کلون اور انسٹال کریں۔
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### ماحول کے متغیرات
+### ماحولیاتی متغیرات
 
 ```bash
-# اپنے ٹیمپلیٹ سے .env بنائیں
+# Create your .env from the template
 cp .env.example .env
 
-# مطلوبہ secrets تیار کریں
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ڈیولپمنٹ کے لیے اہم متغیرات:
+ترقی کے لیے کلیدی متغیرات:
 
-| متغیر                  | ڈیولپمنٹ ڈیفالٹ          | وضاحت                   |
-| ---------------------- | ------------------------ | ----------------------- |
-| `PORT`                 | `20128`                  | سرور پورٹ               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | فرنٹ اینڈ کا بنیادی URL |
-| `JWT_SECRET`           | (اوپر تیار کریں)         | JWT signing secret      |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | پہلی لاگ اِن کا پاس ورڈ |
-| `APP_LOG_LEVEL`        | `info`                   | لاگ کی تفصیل کی سطح     |
+| متغیر                  | ترقیاتی ڈیفالٹ           | تفصیل                    |
+| ---------------------- | ------------------------ | ------------------------ |
+| `PORT`                 | `20128`                  | سرور پورٹ                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | فرنٹ اینڈ کے لیے بیس URL |
+| `JWT_SECRET`           | (اوپر پیدا کریں)         | JWT دستخط کرنے کا راز    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | پہلے لاگ ان پاس ورڈ      |
+| `APP_LOG_LEVEL`        | `info`                   | لفظی سطح پر لاگ ان کریں۔ |
 
 ### ڈیش بورڈ کی ترتیبات
 
-ڈیش بورڈ ان خصوصیات کے لیے UI ٹوگلز فراہم کرتا ہے جنہیں ماحول کے متغیرات کے ذریعے بھی ترتیب دیا جا سکتا ہے:
+ڈیش بورڈ ان خصوصیات کے لیے UI ٹوگلز فراہم کرتا ہے جنہیں ماحولیاتی متغیرات کے ذریعے بھی ترتیب دیا جا سکتا ہے:
 
-| ترتیبات کا مقام     | ٹوگل               | وضاحت                            |
-| ------------------- | ------------------ | -------------------------------- |
-| Settings → Advanced | Debug Mode         | ڈیبگ ریکوئسٹ لاگز فعال کریں (UI) |
-| Settings → General  | Sidebar Visibility | سائڈبار کے حصے دکھائیں/چھپائیں   |
+| مقام کی ترتیب          | ٹوگل کریں۔       | تفصیل                              |
+| ---------------------- | ---------------- | ---------------------------------- |
+| ترتیبات → اعلی درجے کی | ڈیبگ موڈ         | ڈیبگ ریکوسٹ لاگز کو فعال کریں (UI) |
+| ترتیبات → جنرل         | سائڈبار کی مرئیت | Show/hide سائڈبار سیکشنز           |
 
-یہ ترتیبات ڈیٹابیس میں محفوظ ہوتی ہیں اور ری اسٹارٹس کے بعد بھی برقرار رہتی ہیں، اور سیٹ کیے جانے پر env var defaults کو اوور رائڈ کرتی ہیں۔
+یہ ترتیبات ڈیٹا بیس میں محفوظ ہیں اور دوبارہ شروع ہونے پر برقرار رہتی ہیں، سیٹ ہونے پر env var ڈیفالٹس کو اوور رائیڈ کرتے ہیں۔
 
-### مقامی طور پر چلانا
+### مقامی طور پر چل رہا ہے۔
 
 ```bash
-# ڈیولپمنٹ موڈ (hot reload)
+# Development mode (hot reload)
 npm run dev
 
-# پروڈکشن بلڈ
-npm run build    # next build → .build/next/ پھر assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# contributors کی تبدیلیوں کے لیے تیز backend/API-only compile
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# ریلیز بلڈ (صاف rebuild + HEAD sentinel — deploy کے لیے ضروری)
-npm run build:release   # rm -rf .build dist پھر build + dist/BUILD_SHA لکھتا ہے
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# عام پورٹ کی ترتیب
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Contributor build صرف compile-only validation انجام دیتا ہے: یہ standalone distribution کو assemble نہیں کرتا اور optional native packaging assets بھی build نہیں کرتا۔ جب آپ کو shippable bundle کی توثیق کرنی ہو تو معمول کا production build استعمال کریں۔
+کنٹریبیوٹر بلڈ صرف کمپائل کی توثیق کرتا ہے: یہ اسٹینڈ اسٹون ڈسٹری بیوشن کو اکٹھا نہیں کرتا یا اختیاری مقامی پیکیجنگ اثاثے نہیں بناتا۔ جب آپ کو بھیجنے کے قابل بنڈل کی توثیق کرنے کی ضرورت ہو تو باقاعدہ پروڈکشن بلڈ استعمال کریں۔
 
-### بلڈ آؤٹ پٹ کا لے آؤٹ
+### آؤٹ پٹ لے آؤٹ بنائیں
 
-| ڈائریکٹری | مواد                                                                               | ٹریک شدہ |
-| --------- | ---------------------------------------------------------------------------------- | -------- |
-| `src/`    | ایپلیکیشن کا source (TypeScript / TSX)                                             | ہاں      |
-| `.build/` | درمیانی فائلیں — `next build` کا output (gitignored, `distDir = .build/next`)      | نہیں     |
-| `dist/`   | Shippable bundle — `assembleStandalone` کے ذریعے assemble کیا جاتا ہے (gitignored) | نہیں     |
+| ڈائرکٹری  | مشمولات                                                                          | ٹریک کیا گیا۔ |
+| --------- | -------------------------------------------------------------------------------- | ------------- |
+| `src/`    | درخواست کا ذریعہ (TypeScript / TSX)                                              | جی ہاں        |
+| `.build/` | انٹرمیڈیٹس — `next build` آؤٹ پٹ (gitignored, `distDir = .build/next`)           | نہیں          |
+| `dist/`   | بھیجنے کے قابل بنڈل — جو `assembleStandalone` کے ذریعے جمع کیا گیا ہے (gitigned) | نہیں          |
 
-بلڈ پائپ لائن ایک ہی مرحلے میں مکمل ہوتی ہے:
+تعمیراتی پائپ لائن ایک واحد پاس ہے:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js output)
-  └─ assembleStandalone()                 (standalone + static + public + native assets کاپی کرتا ہے)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` اضافی طور پر پہلے دونوں ڈائریکٹریز کو صاف کرتا ہے اور
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) کو deploy integrity sentinel کے طور پر لکھتا ہے۔
+`npm run build:release` اس کے علاوہ پہلے دونوں ڈائریکٹریوں کو صاف کرتا ہے اور `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) کو بطور ڈیپلائی انٹیگریٹی سینٹینل لکھتا ہے۔
 
-`npm run build:contributor` backend-only build profile استعمال کرتا ہے۔ یہ build کے دوران
-dashboard UI فائلوں کو عارضی طور پر stub کرتا ہے، API route handlers برقرار رکھتا ہے، اور
-build کے بعد اصل فائلیں بحال کر دیتا ہے۔ ایسی تبدیلیوں کے لیے `npm run build` استعمال کریں
-جو dashboard UI کو متاثر کرتی ہوں، یا مکمل release validation کے لیے؛ contributor profile
-release build کا متبادل نہیں ہے۔
+`npm run build:contributor` بیک اینڈ اونلی بلڈ پروفائل استعمال کرتا ہے۔ یہ عمارت کے دوران ڈیش بورڈ UI فائلوں کو عارضی طور پر اسٹب کرتا ہے، API روٹ ہینڈلرز کو رکھتا ہے، اور تعمیر کے بعد اصل فائلوں کو بحال کرتا ہے۔ ڈیش بورڈ UI متاثر کرنے والی تبدیلیوں یا مکمل ریلیز کی توثیق کے لیے `npm run build` استعمال کریں۔ شراکت دار پروفائل ریلیز کی تعمیر کا متبادل نہیں ہے۔
 
-> **VPS deploy نوٹ:** remote image directory `/usr/lib/node_modules/omniroute/app/`
-> میں کوئی تبدیلی نہیں کی جاتی۔ deploy skills، `dist/` کے مواد کو اس میں rsync کرتی ہیں۔
-> صرف in-repo build output path تبدیل ہوا ہے (`app/` → `dist/`)۔
+> **VPS تعیناتی نوٹ:** ریموٹ امیج ڈائرکٹری `/usr/lib/node_modules/omniroute/app/` میں کوئی تبدیلی نہیں ہے۔ تعیناتی کی مہارتیں اس میں `dist/` کے مواد کو rsync کرتی ہیں۔ صرف ان ریپو بلڈ آؤٹ پٹ پاتھ منتقل ہوا (`app/` → `dist/`)۔
 
 ڈیفالٹ URLs:
 
-- **ڈیش بورڈ**: `http://localhost:20128/dashboard`
+- **ڈیش بورڈ** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -428,8 +416,8 @@ VPS پر ڈیپلائمنٹ کے لیے، `npm run build` کے بجائے `npm r
 
 ## مدد حاصل کرنا
 
-- **آرکیٹیکچر**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) دیکھیں
-- **API حوالہ**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) دیکھیں
-- **سیکیورٹی دستاویزات**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md)، [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md)، [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md)، [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **آپریشنز دستاویزات**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **مسائل**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **فن تعمیر** : [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) دیکھیں
+- **API حوالہ** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) دیکھیں
+- **سیکیورٹی دستاویزات** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **آپریشن دستاویزات** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **مسائل** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

@@ -4,9 +4,9 @@
 
 ---
 
-> **Abin da ke rayuwa a inda: kowane babban fayil na babban matakin sa ido da tushen fayil, tare da manufar layi ɗaya.** An sabunta ta ƙarshe: 2026-11-13 (OmniRoute v3.8.54)
+> **Abin da ke rayuwa a inda: kowane babban fayil na babban matakin sa ido da tushen fayil, tare da manufar layi ɗaya.**
 >
-> Yi amfani da wannan taswirar don nemo hanyarku a kusa da codebase, sannan ku bi hanyoyin haɗin kai zuwa takaddun kwazo. An auna kididdigar fayil da `git ls-files` a ranar da ke sama. Suna canzawa tare da kusan kowane saki, don haka ɗaukar su azaman umarni na girma.
+> Yi amfani da wannan taswirar don nemo hanyar ku a kusa da codebase, sannan ku bi hanyoyin haɗin kai zuwa takaddun kwazo. Lissafin fayil ya fito daga `git ls-files` kuma yana canzawa tare da kusan kowane saki. Kula da su azaman umarni na girma.
 
 ## Itace babba
 

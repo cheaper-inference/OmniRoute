@@ -48,7 +48,7 @@ Při odsouhlasení vydání se otevře problém se značkou označený `release-
 Před předpokladem, že požadovaná větev je slučitelná, zkontrolujte, zda nedošlo k otevřenému zmrazení:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mechanika sloučení (vlastník `queue` label → Mergify) je dokumentována v [MERGE_TRAIN.md](./MERGE_TRAIN.md).

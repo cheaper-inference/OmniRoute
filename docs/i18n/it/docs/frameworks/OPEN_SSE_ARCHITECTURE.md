@@ -236,19 +236,19 @@ Supporta** 22 strategie di routing** (vedi `src/shared/constants/routingStrategi
 | `context-relay`     | Distribuire il contesto tra gli obiettivi                                                               |
 | `fill-first`        | Riempi la quota prima di passare a quella successiva                                                    |
 | `p2c`               | Potenza di due scelte                                                                                   |
-| `random`            | Casuale uniforme                                                                                        |
-| `least-used`        | Scegli quello con il minor numero di usi recenti                                                        |
-| `cost-optimized`    | Prima l'obiettivo sano più economico                                                                    |
-| `reset-aware`       | Consapevole delle finestre di ripristino del provider                                                   |
-| `reset-window`      | Reimposta il routing basato su finestre                                                                 |
+| `random`            | Mescolamento fresco per richiesta                                                                       |
+| `least-used`        | Scegli quello con il minor numero di richieste registrate                                               |
+| `cost-optimized`    | Prima il prezzo di ingresso del catalogo più basso                                                      |
+| `reset-aware`       | Quota rimanente + reimpostare l'urgenza                                                                 |
+| `reset-window`      | Finestra di quota che si reimposta per prima                                                            |
 | `expiry-first`      | Spendi per primo l'account la cui quota scadrebbe inutilizzata                                          |
 | `headroom`          | Per prima cosa, la maggior parte del margine di quota rimanente                                         |
 | `quota-weighted`    | Salta gli account esauriti, quindi preleva dalla quota rimanente ÷ del carico in volo                   |
-| `strict-random`     | Veramente uniforme (nessuna ponderazione della qualità)                                                 |
+| `strict-random`     | Mazzo mescolato: ogni bersaglio una volta prima si ripete                                               |
 | `auto`              | Utilizza il punteggio a 16 fattori (`autoCombo/`)                                                       |
 | `lkgp`              | Prima l'ultimo buon fornitore conosciuto                                                                |
-| `context-optimized` | Ideale per richieste con contesto lungo                                                                 |
-| `cache-optimized`   | Aggiungi ogni prefisso prompt riutilizzabile allo stesso account (riscontri nella cache dei prompt)     |
+| `context-optimized` | Prima la finestra di contesto più grande conosciuta                                                     |
+| `cache-optimized`   | Preferire l'account che probabilmente conterrà il prefisso del prompt nella cache                       |
 | `fusion`            | Distribuire su un pannello in parallelo, quindi sintetizzare tramite un giudice (`fusion.ts`)           |
 | `pipeline`          | Concatenare i passaggi — L'output di ciascun target alimenta quello successivo                          |
 | `jev`               | Partecipazione: TypeSafe Jev ammette quali voci classificate vengono eseguite; altrimenti il tuo ordine |

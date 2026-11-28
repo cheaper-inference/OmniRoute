@@ -6,266 +6,228 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute-ի վահանակ" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Անվճար AI դարպաս
+# OmniRoute — Ազատ AI դարպասը
 
-**Ստեղծող՝ [Diego Souza](https://github.com/diegosouzapw)**
+**Ստեղծվել է [Դիեգո Սոուզայի](https://github.com/diegosouzapw) կողմից**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Երբեք մի՛ դադարեք կոդավորել։ Յուրաքանչյուր AI գործիք → 394 մատակարար — 150+ անվճար — մեկ վերջնակետի միջոցով։ Claude Code, Codex, Cursor, Cline, Copilot և Antigravity՝ անվճար Claude / GPT / Gemini-ի միջոցով՝ ավտոմատ փոխարինմամբ։ RTK + Caveman շերտավորված սեղմումը խնայում է թոքենների 15–95%-ը (միջինը՝ ~89%) — այլևս երբեք սահմանափակումների չեք բախվի։ 394 AI մատակարար · 150+ անվճար մակարդակ · ~1.62B անվճար թոքեն/ամիս · երթուղավորման 22 ռազմավարություն · սկսեք $0-ից։"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 394 providers — 140+ with a free offer — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 394 AI providers · 140+ with a free offer · free tokens a month: ~11.3B as others count · ~90M real · 22 routing strategies · $0 to start."/>
 
 </div>
 
+<a id="free-tokens"></a>
 <div align="center">
 
-## 💰 ~1.62B թոքեն / ամիս՝ երրորդ կողմի անվճար մակարդակների միջոցով
+## Անվճար խորհրդանիշներ ամսական՝ ~ 11.3B, քանի որ մյուսները հաշվում են · ~ 90M Real
 
 </div>
 
-> **Օգտագործեք ձեր սեփական մատակարարի հաշիվները։** Սա առանձին իրավասու երրորդ կողմի անվճար մակարդակների համախառն գնահատական է, ոչ թե OmniRoute-ի կողմից տրամադրվող թոքենների փաթեթ։ Գրանցվեք, անհրաժեշտության դեպքում ստացեք հավատարմագրերը և միացրեք այն մատակարարներին, որոնց կարող եք օգտագործել․ յուրաքանչյուր մատակարար ինքն է վերահսկում իր սահմանաչափերը, հասանելիությունն ու պայմանները։
+> **~ 11.3B անվճար խորհրդանիշներ / ամիս**<br/> <sub> հաշվել է այնպես, ինչպես հաշվում են այլ կատալոգները. յուրաքանչյուր տող ավելացված է, ավարտված առաջարկները ներառում են </sub>
 >
-> Անվճար մակարդակները ձեռքով համադրելը դժվար է՝ տասնյակ SDK-ներ, տասնյակ արագության սահմանաչափեր և ոչ մի պատկերացում այն մասին, թե իրականում որքան ունեք։ OmniRoute-ը կատալոգավորում է **465 անվճար մակարդակի գրառում՝ 34 կրկնվող pool բանալիների շրջանակում** և հաշվարկում է թոքենների ամփոփ ցուցանիշը **հրապարակված դրական ամսական բյուջե ունեցող 17 pool-երից, ինչպես նաև Groq-ի՝ յուրաքանչյուր մոդելի համար նախատեսված հինգ սահմանաչափերից**՝ կրկնօրինակելով ըստ ընդհանուր pool-ի։ Քվոտաները, որոնք հասանելի են դառնում միայն տարածաշրջանային ինքնության ստուգումից հետո (այսօր՝ ModelScope), ցուցադրվում են առանձին՝ +~6M տարածաշրջանային ինքնության հաստատումից հետո, և երբեք չեն գումարվում ամփոփ ցուցանիշին։ Արդյունքը շարունակում է տեսանելի մնալ վահանակում (`/dashboard/free-tiers`)։
-
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute-ի անվճար մակարդակի բյուջեի քարտ․ ամսական ~1.62B անվճար թոքեն՝ կայուն կերպով, իսկ գրանցման կրեդիտներով առաջին ամսում՝ մինչև ~2.22B, 34 փաստագրված կրկնվող pool բանալիներից, որոնք ընդգրկում են մեկ endpoint-ի հետևում գտնվող 465 կատալոգավորված անվճար մակարդակի գրառումներ։ Pool-երի dedupe-ով ազնիվ հաշվարկ՝ յուրաքանչյուր ընդհանուր pool-ը հաշվված է մեկ անգամ, ներառյալ հրապարակված դրական ամսական թոքենների բյուջե ունեցող 17 կրկնվող pool-երը և Groq-ի՝ յուրաքանչյուր մոդելի համար նախատեսված հինգ սահմանաչափերը․ պայմանների ռիսկերի կատալոգում 12 մատակարար նշված է որպես խուսափելի, ուստի որոշումը ձերն է։ Բյուջեի սանդղակը ներառում է Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (յուրաքանչյուր մոդելի համար նախատեսված հինգ սահմանաչափ) և ավելի փոքր pool-եր, ինչպես նաև առաջին ամսվա գրանցման կրեդիտները և մշտապես անվճար՝ առանց թոքենների սահմանաչափի մատակարարները, որոնք ցուցադրվում են առանձին, որպեսզի երբեք չուռճացնեն ամփոփ ցուցանիշը։ /dashboard/free-tiers-ում ցուցադրվում են օգտագործված և մնացած քանակները իրական ժամանակում։"/>
-
-> Կենդանի `/dashboard/free-tiers` էջի անիմացված ամփոփում։ Ամբողջական մեթոդաբանությունը (pool-երի dedupe, կրեդիտների մակարդակներ, մատակարարների պայմաններ)՝ **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**։
+> **~ 90M իրական այսօր**<br/> <sub> յուրաքանչյուր ընդհանուր քվոտա հաշվվել է մեկ անգամ՝ ինչ կարող եք իրականում օգտագործել </sub>
 >
-> <sub>Այս թվերը վերաաուդիտվում են յուրաքանչյուր երկու շաբաթը մեկ՝ կենդանի կատալոգի հիման վրա, և **փոփոխվում են երկու ուղղությամբ**․ մատակարարը դադարեցնում է անվճար մակարդակը, և թիվը նվազում է․ հայտնվում է նորը, և այն աճում է։ Մենք հրապարակում ենք այն, ինչ իրականում հաշվարկում է կատալոգը՝ երբեք չկլորացնելով դեպի վեր՝ լավագույն հնարավոր սցենարի համար։</sub>
+> **Այստեղ ամեն ինչ անվճար է: Առանց վճարման պատի:**<br/> ★ [Ձեզ դուր է գալիս: Աստղ մեզ GitHub ում](https://github.com/cheaper-inference/OmniRoute)
+
+Այլ կատալոգները գանձում են US ից տարեկան 19 դոլարից մինչև US 49 դոլար՝ կենդանի տվյալների ողջ կյանքի ընթացքում հասանելիության համար: Այստեղ ամեն ինչ անվճար է։ <sub> Գները ստուգվել են 2026-11-18:</sub>
+
+<sub>Կատալոգը վերջին անգամ ստուգվել է 2026-11-23: [Ինչպես ենք մենք հաշվել →](docs/reference/FREE_TIERS.md#how-we-count)</sub>
+
+> **Բերեք ձեր սեփական մատակարարի հաշիվները:** Սրանք երրորդ կողմի անվճար մակարդակներ են, այլ ոչ թե OmniRoute ի խորհրդանշական դրամաշնորհ: Գրանցվեք, ստացեք հավատարմագրեր, որտեղ մատակարարը խնդրում է դրանք, և միացրեք դրանք, որոնք կարող եք օգտագործել: Յուրաքանչյուր մատակարար սահմանում է իր սահմանները, հասանելիությունը և պայմանները:
+>
+> Ազատ շերտերը ձեռքով հավաքելը նշանակում է տասնյակ SDKs, տասնյակ տոկոսադրույքների սահմանափակումներ և հստակ պատկերացում չունեք, թե ինչ եք մնացել: OmniRoute պահում է կատալոգի 214 տող՝ ազատ մուտքով և հաշվարկում է իրական թիվը 12 լողավազանից՝ հրապարակված քվոտայով, յուրաքանչյուր ընդհանուր լողավազան հաշվված է մեկ անգամ: Քվոտաները, որոնք բացվում են միայն տարածաշրջանային ինքնության ստուգումից հետո (այսօր, ModelScope) ցուցադրվում են առանձին, +~ 6M հետ տարածաշրջանային ինքնության ստուգումից և երբեք չեն ավելացվում իրական թվին: Այն, ինչ մնացել է, հայտնվում է վահանակի վրա (`/dashboard/free-tiers`):
+
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card. Free tokens a month: ~11.3B as others count · ~90M real. Up to ~153M in your first month with one-time signup credits. 12 pools with a published quota and 214 catalog rows with free access behind one endpoint, catalog audited 2026-11-23. The bar shows where the real figure comes from, one segment per pool. Signup credits and free providers without a token cap are listed apart and never added to it. Live used and remaining tokens on /dashboard/free-tiers."/>
+
+> կենդանի `/dashboard/free-tiers` էջի անիմացիոն ամփոփում։ Ինչպես է յուրաքանչյուր ցուցանիշը հաշվարկվում.** [docs/reference/FREE_TIERS.md#ինչպես-մենք-հաշվում ենք](docs/reference/FREE_TIERS.md#how-we-count)** .
+>
+> <sub> կատալոգը վերջին անգամ ստուգվել է 2026-11-23-ին: Թվերը շարժվում են երկու ուղղությամբ: Պրովայդերը ավարտում է անվճար մակարդակը, և իրական թիվը նվազում է: Նորը վայրէջք է կատարում, և այն բարձրանում է: Մենք հրապարակում ենք այն, ինչ հաշվարկում է կատալոգը, երբեք կլորացված լավագույն դեպքը:</sub>
 
 <br/>
 
 <div align="center">
 
-<h3>
+### Միացեք համայնքին
 
-⭐ Աստղ դրեք պահոցին, եթե OMNIROUTE-ն օգնեց ձեզ խնայել գումար և հեշտացնել ձեր աշխատանքը։
+**👋 Հետևեք — ի սպասարկողին, նախ ստացեք նոր մատակարարներ, թողարկումներ և խորհուրդներ.**
 
-</h3>
+[![Հետևեք Դիեգոյին LinkedIn ում](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c) ](https://www.linkedin.com/in/diegosouzapw/) [![Հետևեք @diegosouzapw-ին GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c) ](https://github.com/diegosouzapw)
 
-[![Աստղեր](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Աստղերի պատմության վարկանիշ](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
-[![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![Կայք](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c) ](https://omniroute.online)
 
-### 💬 Միացեք համայնքին
+**Հարցեր, մատակարարի խորհուրդներ, ճանապարհային քարտեզ և աջակցություն → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Պաշտոնական ալիք](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [պորտալ](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
-**👋 Հետևեք սպասարկողին՝ առաջինը ստանալու նոր մատակարարների, թողարկումների և խորհուրդների մասին տեղեկությունները․**
-
-[![Հետևել Diego-ին LinkedIn-ում](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c)](https://www.linkedin.com/in/diegosouzapw/)
-[![Հետևել @diegosouzapw-ին GitHub-ում](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw)
-
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Կայք](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)](https://omniroute.online)
-
-**Հարցեր, մատակարարների վերաբերյալ խորհուրդներ, զարգացման ճանապարհային քարտեզ և աջակցություն → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Պաշտոնական ալիք](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Պորտալ](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
-
-<br/>
-
-## 📈 Gateway-ը շարունակում է աճել
-
-<div align="center">
-
-|                                   |               v3.8.50                | **v3.8.51** |      `v3.8.55+`       |
-| --------------------------------- | :----------------------------------: | :---------: | :-------------------: |
-| 🌐 Մատակարարներ                   |                 352                  |   **358**   |          394          |
-| 🧠 Չաթի մոդելների եզակի ID-ներ    |                 1320                 |  **1374**   |         1491          |
-| 🖼️ Մոդալությունների կամուրջ       | 🆕 տեսողություն + աուդիո + տեսանյութ |      ✓      |           ✓           |
-| 📡 Radar-ի անվճար կատալոգ         |     🆕 միանալու հնարավորություն      |      ✓      |           ✓           |
-| ⚖️ Քվոտան հաշվի առնող պլանավորում |            🆕 Quota-Share            |      ✓      |           ✓           |
-| 📊 Քվոտայի հեռաչափում             |               🆕 ուղիղ               |      ✓      |           ✓           |
-| 🧰 Headless ռեժիմ                 |                  —                   |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS-ի rail ենթակառուցվածք      |                  —                   |      —      | 🆕 թողարկման ալիքներ  |
-| 🔎 Մոդելների հայտնաբերման API     |                  —                   |      —      | 🆕 `/v1/models/query` |
-
-**→ [Ճանապարհային քարտեզ](ROADMAP.md) — rail-ով դեպի `v3.9.0 LTS`**
+[![Աստղեր](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c) ](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Աստղային պատմության դասակարգում](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark) ](https://www.star-history.com/cheaper-inference/omniroute) [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute) ](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 </div>
 
 <br/>
 
-## 🧩 Հասանելի է
+## Դարպասը շարունակում է աճել
 
-[![npm տարբերակը](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM ամսական](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
-![Լիցենզիա՝ MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker-ի ներբեռնումներ](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron-ի ներբեռնումներ](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+<img src="./docs/diagrams/readme-lts-rail.svg" width="100%" alt="The OmniRoute release rail. Prepare window: v3.8.50 to v3.8.53 (registry, decomposition, headless mode) and v3.8.54 (release infrastructure, last prepare release). Validate window, fixes, docs, translations and provider updates only: v3.8.55 characterization tests and boundaries, v3.8.56 canary and performance baseline, v3.8.57 security and compliance sweep, v3.8.58 dry run of the 3.9.0 cut, v3.8.59 final freeze and GO/NO-GO. Then v3.9.0 LTS: the stable/v3 line, with v4 opening on develop. There is no v3.8.60."/>
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Սկսել</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Արագ մեկնարկ</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Տեղադրում</a></td>
-    <td align="center"><a href="#first-run">🆓 Միացնել մատակարար</a></td>
+    <td align="center" width="25%"><b>394</b><br/><sub>մատակարարներ</sub></td>
+    <td align="center" width="25%"><b>1,539</b><br/><sub>եզակի չաթ մոդել IDs</sub></td>
+    <td align="center" width="25%"><b>140+</b><br/><sub>մատակարարները դրոշակված են անվճար առաջարկով</sub></td>
+    <td align="center" width="25%"><b>22</b><br/><sub>հանրային երթուղային ռազմավարություններ</sub></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Սովորել</b></td>
-    <td align="center"><a href="#-the-promise">💥 Խոստումը</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Ինչու OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Ինչով է առանձնանում</a></td>
-  </tr>
-  <tr>
-    <td align="right"><b>⚙️ Հնարավորություններ</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Կոմբոներ</a></td>
-    <td align="center"><a href="#-394-ai-providers--153-catalog-marked-free">🌐 Մատակարարներ</a></td>
-    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI և MCP</a></td>
-  </tr>
-  <tr>
-    <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Սեղմում</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Որտեղ է աշխատում</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Գաղտնի</a></td>
-  </tr>
-  <tr>
-    <td align="right"><b>👀 Տեսնել</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 Գործողության մեջ</a></td>
-    <td align="center"><a href="#-whats-new">✨ Ինչ նորություն կա</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Համատեղելի CLI-ներ</a></td>
-  </tr>
-  <tr>
-    <td align="right"><b>💚 Աջակցել</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Աջակցել / Նվիրաբերել</a></td>
-    <td align="center"><a href="#-community--help">💬 Համայնք</a></td>
-    <td align="center"><a href="#-sponsors">💖 Հովանավորներ</a></td>
-  </tr>
-  <tr>
-    <td align="right"><b>📦 Նախագիծ</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Տեխնոլոգիական փաթեթ</a></td>
-    <td align="center"><a href="#-documentation">📖 Փաստաթղթեր</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 Մասնակիցներ</a></td>
+    <td colspan="4" align="center"><sub>Զրույցների քանակը չափված է v3.8.54-ում (17 նոյեմբերի 2026 թ.). 1539 IDs 3186 provider/model զույգերի միջև: Անվճար առաջարկի պիտակը հետևում է ստորև բերված կատալոգի աուդիտին:</sub></td>
   </tr>
 </table>
 
-</div>
+Մատակարարի և մոդելի ընդհանուր գումարները v3.8.55-ից մինչև v3.8.59 չափվում են, երբ յուրաքանչյուր թողարկումը կտրվում է: Թիրախներ չկան.
+
+<p align="center"><b><a href="ROADMAP.md">Ճանապարհային քարտեզ</a></b> · <a href="docs/ops/RELEASE_STRATEGY.md">Ազատման ռազմավարություն</a> · <a href="docs/ops/LTS_GO_NO_GO.md">LTS GO/NO-GO ստուգաթերթ</a> · <a href="SECURITY.md#lts-support-window-v39x">LTS աջակցության պատուհան</a></p>
+
+<br/>
+
+## Հասանելի է
 
 <div align="center">
-  <b>🌐 67 լեզվով</b>
+
+[![npm տարբերակ](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) [![npm ներլցումներ ամսական](https://img.shields.io/npm/dm/omniroute?label=npm%2Fmonth&color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) [![Վերջին թողարկում](https://img.shields.io/github/v/release/cheaper-inference/OmniRoute?label=latest%20release&logo=github&color=20211c) ](https://github.com/cheaper-inference/OmniRoute/releases/latest) [![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/cheaperinference/omniroute) [![Docker pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Թողարկեք ակտիվների ներլցումներ](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=release%20asset%20downloads&logo=github&color=47848F) []( MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)https://github.com/cheaper-inference/OmniRoute/releases(LICENSE) :
+
+</div>
+
+Այս README ի յուրաքանչյուր հատված՝ խմբավորված ըստ այն, ինչ դուք ցանկանում եք անել:
+
+| Նպատակ                       | Բաժիններ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Սկսել**                    | [Տեղադրեք, միացեք, առաջին հարցումը](#install-connect-a-provider-then-route-through-one-endpoint) · [Արագ մեկնարկ](#quick-start) · [Տեղադրման ավելի շատ մեթոդներ](#more-install-methods--docker-source-pnpm-arch) · [Ազատ մակարդակի նշանային բյուջե](#free-tokens) · [Լեզուներ](#languages)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **Հասկանալ**                 | [The Promise](#the-promise) · [Ինչու OmniRoute?](#why-omniroute) · [Ինչն է առանձնացնում OmniRoute](#what-sets-omniroute-apart) · [Դարպասը շարունակում է աճել](#the-gateway-keeps-growing) · [Ինչ նորություն կա](#whats-new)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **Երթուղի**                  | [Combos](#combos-the-flagship) · [Zero-config `auto`](#zero-config-just-use-auto) · [22 երթուղային ռազմավարություն](#or-build-your-own-22-routing-strategies) · [Ճկունության շերտեր](#resilience-is-built-in-3-independent-layers) · [OmniRoute Ռադար](#omniroute-radar)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **Մատակարարներ և գործիքներ** | [AI մատակարարներ](#ai-providers) · [Յուրաքանչյուր հիմնական լաբորատորիա](#every-major-lab--through-one-endpoint) · [Անվճար ամեն օր կամ ամիս](#free-every-day-or-month) · [Փորձարկումներ և գրանցման վարկեր](#trial-and-signup-credits) · [Համատեղելի CLIs և կոդավորման գործակալներ](#compatible-clis--coding-agents)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **Գործարկել այն**            | [Որտեղ աշխատում է OmniRoute](#where-omniroute-runs) · [OmniCopilot VS կոդի համար](#omnicopilot-omniroute-inside-vs-codes-native-copilot-chat) · [OmniRouteTray macOS համար](#omniroutetray-omniroute-in-the-macos-menu-bar) · [Մասնավոր և տեղական առաջինը](#private--local-first)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **CLI և արձանագրություններ** | [Ամբողջական CLI, MCP և A2A](#full-cli-mcp-and-a2a) · [CLI](#a-real-cli-not-just-start) · [Հեռակա ռեժիմ](#remote-mode-the-cli-on-your-laptop-omniroute-on-a-server) · [Միացնել գործակալին](#connect-an-agent)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **Պահպանեք նշանները**        | [Կոմպրեսիոն ակնարկ](#save-1595-tokens--automatically) · [Ինչպես է այն աշխատում](#how-it-works--pipeline-architecture--savings-math) · [12-շարժիչից բաղկացած կույտ](#the-12-engine-stack) · [Ելքի ոճեր և յուրաքանչյուր հարցման կառավարում](#beyond-the-engines--output-styles-the-adaptive-dial--per-request-control)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Տեսեք**                    | [OmniRoute գործողության մեջ](#omniroute-in-action) · [Վիդեո ուղեցույցներ](#video-guides)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **Հղում**                    | [Տեխնիկական փաթեթ](#tech-stack) · [Փաստաթղթեր](#documentation) · [Նոր օգտատերեր](#if-you-are-new-to-omniroute) · [Օպերատորներ](#if-you-are-deploying-or-operating-a-server) · [Փաստաթղթեր ուղղորդում](#if-you-want-to-control-how-requests-are-routed) · [Ծախսեր և չափաբաժիններ](#if-you-want-to-track-spend-and-quota) · [Մատակարարի ուղեցույցներ](#if-you-are-connecting-a-specific-provider) · [Նշաններ և համատեքստ](#if-you-want-to-save-tokens-or-add-context) · [Կոդավորման գործիքներ և CLI](#if-you-use-a-coding-tool-or-the-omniroute-cli) · [API](#if-you-are-building-against-the-api) · [Ընդլայնումներ և երթևեկություն](#if-you-want-to-extend-omniroute-or-watch-its-traffic) · [Վերին հոսքի վստահված անձեր](#if-you-route-upstream-traffic-through-proxies) · [Անվտանգության վերանայում](#if-you-are-reviewing-security) · [Կոդ](#if-you-want-to-understand-the-code) · [Ներդրումներ](#if-you-want-to-contribute) · [Ակտիվների նշումներ](#if-you-are-looking-for-asset-notes) |
+| **Համայնք**                  | [Համայնք և օգնություն](#community--help) · [Միացեք համայնքին](#join-the-community) · [Լավագույն ներդրողներ](#top-contributors) · [Միաձուլված ձգտման հարցումներով](#external-contributors-by-merged-pull-requests) · [GitHub-ի կողմից վերագրվող պարտավորություններ](#github-attributed-commits) · [Բոլոր ներդրողներ](#1200-contributors) · [Ինչպե՞ս նպաստել](#how-to-contribute) · [Նոր տարբերակի թողարկում](#releasing-a-new-version) · [Աստղեր](#stars) · [StarMapper](#starmapper)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Աջակցություն և վարկեր**    | [Աջակցություն OmniRoute](#support-omniroute) · [Հովանավորներ](#sponsors) · [Բաց կոդով ընկերներ](#supported-by-our-open-source-friends) · [Լիցենզիա](#license)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **Երախտագիտություն**         | [Ընդհանուր ակնարկ](#acknowledgments) · [Տոհմ և դարպաս](#lineage--gateway) · [Կոմպրեսիոն շարժիչներ](#context--token-compression--engines) · [Կոմպակտ ձևաչափեր և կոդերի իմացության գործիքներ](#compact-formats-token-research--code-aware-tooling) · [Հիշողություն և RAG](#memory--rag) · [Երթևեկության ստուգում և MITM](#traffic-inspection-mitm--transparent-proxy) · [Մոդելային տվյալներ, դիտելիություն և UI](#model-data-observability--ui) · [Անվտանգություն](#security) · [Լրացուցիչ գործիքներ](#complementary-tools)                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+
+<a id="languages"></a>
+
+<div align="center">
+  <b>🌐 67 լեզուներով</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Անգլերեն (en)" title="Անգլերեն (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Պորտուգալերեն — Բրազիլիա (pt-BR)" title="Պորտուգալերեն — Բրազիլիա (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Պորտուգալերեն (pt)" title="Պորտուգալերեն (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Իսպաներեն (es)" title="Իսպաներեն (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Ֆրանսերեն (fr)" title="Ֆրանսերեն (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Իտալերեն (it)" title="Իտալերեն (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Գերմաներեն (de)" title="Գերմաներեն (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Հոլանդերեն (nl)" title="Հոլանդերեն (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Ռուսերեն (ru)" title="Ռուսերեն (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Ուկրաիներեն (uk-UA)" title="Ուկրաիներեն (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Լեհերեն (pl)" title="Լեհերեն (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Չեխերեն (cs)" title="Չեխերեն (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Սլովակերեն (sk)" title="Սլովակերեն (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Ռումիներեն (ro)" title="Ռումիներեն (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Հունգարերեն (hu)" title="Հունգարերեն (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Բուլղարերեն (bg)" title="Բուլղարերեն (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Դանիերեն (da)" title="Դանիերեն (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Ֆիններեն (fi)" title="Ֆիններեն (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Նորվեգերեն (no)" title="Նորվեգերեն (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Շվեդերեն (sv)" title="Շվեդերեն (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="Չինարեն — պարզեցված (zh-CN)" title="Չինարեն — պարզեցված (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="Չինարեն — ավանդական (zh-TW)" title="Չինարեն — ավանդական (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="Ճապոներեն (ja)" title="Ճապոներեն (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="Կորեերեն (ko)" title="Կորեերեն (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Թայերեն (th)" title="Թայերեն (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Վիետնամերեն (vi)" title="Վիետնամերեն (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Ինդոնեզերեն (id)" title="Ինդոնեզերեն (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Մալայերեն (ms)" title="Մալայերեն (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Ֆիլիպիներեն (phi)" title="Ֆիլիպիներեն (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Հինդի (hi)" title="Հինդի (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Գուջարաթի (gu)" title="Գուջարաթի (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Մարաթի (mr)" title="Մարաթի (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Թամիլերեն (ta)" title="Թամիլերեն (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Տելուգու (te)" title="Տելուգու (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Բենգալերեն (bn)" title="Բենգալերեն (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Ուրդու (ur)" title="Ուրդու (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Պարսկերեն (fa)" title="Պարսկերեն (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Արաբերեն (ar)" title="Արաբերեն (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Եբրայերեն (he)" title="Եբրայերեն (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Թուրքերեն (tr)" title="Թուրքերեն (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Ադրբեջաներեն (az)" title="Ադրբեջաներեն (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Սուահիլի (sw)" title="Սուահիլի (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Հունարեն (el)" title="Հունարեն (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Խորվաթերեն (hr)" title="Խորվաթերեն (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Սերբերեն (sr)" title="Սերբերեն (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Լիտվերեն (lt)" title="Լիտվերեն (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Էստոներեն (et)" title="Էստոներեն (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Լատվիերեն (lv)" title="Լատվիերեն (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Սլովեներեն (sl)" title="Սլովեներեն (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Մալթերեն (mt)" title="Մալթերեն (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Իռլանդերեն (ga)" title="Իռլանդերեն (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Կաննադա (kn)" title="Կաննադա (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Մալայալամ (ml)" title="Մալայալամ (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Օդիա (or)" title="Օդիա (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Փենջաբերեն (pa)" title="Փենջաբերեն (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Նեպալերեն (ne)" title="Նեպալերեն (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Սինհալերեն (si)" title="Սինհալերեն (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Բիրմայերեն (my)" title="Բիրմայերեն (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Քմերերեն (km)" title="Քմերերեն (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Հաուսա (ha)" title="Հաուսա (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Յորուբա (yo)" title="Յորուբա (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Իգբո (ig)" title="Իգբո (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Ամհարերեն (am)" title="Ամհարերեն (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Ուզբեկերեն (uz)" title="Ուզբեկերեն (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Վրացերեն (ka)" title="Վրացերեն (ka)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
   <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Բոսնիերեն (bs)" title="Բոսնիերեն (bs)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
 </div>
 
 <br/>
 <br/>
-
-<div align="center">
 
 <a id="first-run"></a>
 
-## 🆓 Տեղադրեք, միացրեք մատակարար, ապա ուղղորդեք մեկ վերջնակետի միջոցով
+## Տեղադրեք, միացրեք մատակարարին, ապա անցեք մեկ վերջնական կետով
 
-</div>
-
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Երեք քայլ՝ տեղադրեք և գործարկեք OmniRoute-ը, միացրեք համապատասխան մատակարար՝ ձեր սեփական հաշվով կամ API բանալիով, ապա ուղղեք ձեր գործիքը դեպի localhost:20128/v1՝ օգտագործելով OmniRoute API բանալի և auto մոդել։ Ուղղորդումը կախված է հասանելի համապատասխան միացումներից և մատակարարի սահմանափակումներից։"/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Four steps to use OmniRoute. Install with npm install -g omniroute, run omniroute, connect a provider and create an API key in the dashboard, then call http://localhost:20128/v1 with model auto."/>
 
 ```bash
-# Մատակարարին միացնելուց հետո Dashboard → Endpoints բաժնից պատճենեք ձեր OmniRoute բանալին՝
+# After connecting a provider, create your OmniRoute key in Dashboard → API Keys:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto`-ին անհրաժեշտ է համապատասխան երթուղի։ Նոր տեղադրումը կարող է չունենալ առանց բանալու համապատասխան թիրախներ, իսկ առանց բանալու մատակարարը կարող է մերժել երրորդ կողմի հաճախորդներին։ `tos: avoid` նշումով մատակարարները, ներառյալ Kiro-ն, լռելյայն բացառված են ավտոմատ ուղղորդումից․ հաշիվ միացնելը չի չեղարկում այդ կարգավորումը։ Մատակարար ընտրելուց առաջ տեսեք [Անվճար մակարդակների ուղեցույցը](docs/getting-started/FREE-TIERS-GUIDE.md)։</sub>
+<sub>`auto` անհրաժեշտ է համապատասխան երթուղի: Թարմ տեղադրումը չի կարող ունենալ առանց բանալիի համապատասխան թիրախներ, և առանց բանալի մատակարարը կարող է մերժել երրորդ կողմի հաճախորդներին: Պրովայդերները, որոնք նշված են `tos: avoid`, ներառյալ Kiro, լռելյայնորեն բացառված են ավտոմատ երթուղուցից; հաշիվը միացնելը չի անտեսում այդ կարգավորումը: Տե՛ս [Անվճար մակարդակների ուղեցույցը՝](docs/getting-started/FREE-TIERS-GUIDE.md) նախքան մատակարար ընտրելը:</sub>
 
-<sub>📦 Python-ի, Node.js-ի, PHP-ի և **cURL**-ի համար պատճենելու և տեղադրելու արագ մեկնարկի սկրիպտներ → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>Պատճենեք-տեղադրեք արագ մեկնարկի սկրիպտները** Python, Node.js, PHP և cURL** ՝ [`examples/quickstart/`](examples/quickstart/). Քայլ առ քայլ տարբերակ. [Արագ մեկնարկ](#quick-start) :</sub>
 
 <br/>
 
-<div align="center">
+<br/>
 
-# 💥 Խոստումը
+# Խոստումը
 
-</div>
-
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Խոստումը — մեկ վերջնակետ և 394 մատակարար։ Ավտոմատ պահուստային անցումը պահպանում է ուղղորդումը, քանի դեռ հասանելի է մեկ այլ առողջ թիրախ։ Վեց հիմնասյուն՝ կայուն պահուստային անցում 394 մատակարարների միջև · համապատասխան աշխատանքային ծանրաբեռնվածությունների դեպքում մինչև 95% խնայողություն թոքենների վրա · սկսելու համար $0՝ 150+ անվճար մակարդակներով և 40 պարբերական/առանց բանալու՝ միշտ անվճար մատակարարներով · 39 CLI/agent ինտեգրում մեկ կարգավորման միջոցով · OpenAI, Claude, Gemini և Responses API-ի համատեղելիություն /v1-ում · արտադրական կառավարում, ներառյալ շղթայի անջատիչներ, TLS գաղտագողի ռեժիմ, MCP-ի 110 գործիք, A2A, հիշողություն, պաշտպանական սահմանափակումներ, գնահատումներ և 56,000+ ստատիկ թեստային հայտարարություններ՝ 7,800+ վերահսկվող թեստային ֆայլերում։"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 394 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 394 providers · up to 95% token savings on eligible workloads · $0 to start with 140+ providers with a free offer and 40 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 65,000+ static test declarations across 9,500+ tracked test files."/>
 
 <br/>
 <br/>
 
-<div align="center">
+# Ինչու OmniRoute?
 
-# 🤔 Ինչո՞ւ OmniRoute-ը
-
-</div>
-
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Ինչո՞ւ OmniRoute-ը — դադարեք կառավարել 10 վահանակ, չաշխատող API բանալիներ և անակնկալ հաշիվներ։ Տասը ամենօրյա խնդիրներ և դրանց լուծումները՝ չօգտագործված ժամկետանց քվոտա → առավելագույնս օգտագործեք բաժանորդագրությունները · ծրագրավորման ընթացքում սահմանաչափերի հասնել → 4 մակարդակի ավտոմատ պահուստային անցում (Subscription → API → Cheap → Free) · գործիքների ելքերը սպառում են թոքենները → RTK + Caveman սեղմում (15–95%) · թանկ API-ներ → ծախսերի համար օպտիմիզացված ուղղորդում · յուրաքանչյուր գործիք ունի իր կարգավորումը → մեկ վերջնակետ, մեկ վահանակ · AI-ն արգելափակված է → 3 մակարդակի պրոքսի + TLS գաղտագողի ռեժիմ · չաշխատող բանալիներ → 3-շերտ կայունություն (շղթայի անջատիչներ, բանալու սառեցում, մոդելի արգելափակում) · թիմը կիսում է մեկ բաժանորդագրություն → բանալիների խմբեր՝ արդար բաշխվող քվոտաներով · հարցումները անցնում են որևէ մեկի ամպային ծառայությամբ → տեղայինը՝ առաջին տեղում՝ AES-256-GCM-ով կոդավորված բանալիներով · ծախսերի տեսանելիություն չկա → իրական ժամանակի վերլուծություն (օգտագործում, քվոտա, խնայողություն, p95 ուշացում)։"/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Why OmniRoute — stop juggling 10 dashboards, dead API keys and surprise bills. Ten daily pains vs fixes: quota expiring unused → maximize subscriptions; rate limits mid-coding → 4-tier auto-fallback (Subscription → API → Cheap → Free); tool outputs burning tokens → RTK + Caveman compression (15–95%); expensive APIs → cost-optimized routing that tries lower input-token prices first; every tool its own setup → one endpoint, one dashboard; AI blocked → 3-level proxy + TLS stealth; dead keys → 3-layer resilience (circuit breakers, key cooldown, model lockout); team sharing one subscription → key pools with fair-share quotas; prompts through someone's cloud → local-first with AES-256-GCM encrypted keys; no spend visibility → live analytics (usage, quota, savings, p95 latency)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute-ի հարցման հոսքը՝ ձեր IDE-ն կամ CLI-ն (Claude Code, Cursor, Cline…) կանչում է մեկ տեղային վերջնակետ (http://localhost:20128/v1), իսկ OmniRoute Smart Router-ը (RTK + Caveman սեղմում, 22 ուղղորդման ռազմավարություն, շղթայի անջատիչներ, TLS գաղտագողի ռեժիմ, MCP, A2A, պաշտպանական սահմանափակումներ) կարող է անցնել 4 մատակարարի մակարդակներով, քանի դեռ կա համապատասխան և առողջ թիրախ — 1-ին մակարդակ՝ Subscription, 2-րդ մակարդակ՝ API Key, 3-րդ մակարդակ՝ Cheap և 4-րդ մակարդակ՝ Free։"/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute request flow: your IDE or CLI (Claude Code, Cursor, Cline…) calls one local endpoint (http://localhost:20128/v1); the OmniRoute Smart Router (RTK + Caveman compression, 22 routing strategies, circuit breakers, TLS stealth, MCP, A2A, guardrails) can fall back across 4 provider tiers while an eligible healthy target remains — Tier 1 Subscription, Tier 2 API Key, Tier 3 Cheap and Tier 4 Free."/>
 
 </div>
 
@@ -273,7 +235,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 <div align="center">
 
-## 🤝 Աջակցվում է մեր բաց կոդով ընկերների կողմից
+## Աջակցվում է մեր բաց կոդով ընկերների կողմից
 
 </div>
 
@@ -283,7 +245,7 @@ curl http://localhost:20128/v1/chat/completions \
   </a>
 </p>
 
-> **Ցանկանու՞մ եք միանալ որպես բաց կոդով ընկեր:** Սրանք այն ընկերություններն են, որոնք աջակցում են բաց կոդին և օգնում են OmniRoute-ին շարունակել աշխատել, և մենք հրապարակայնորեն նշում ենք, թե ուր է գնում նրանց տված յուրաքանչյուր թոքենը: Կապ հաստատեք՝ [diegosouza.pw@outlook.com](mailto:diegosouza.pw@outlook.com)
+> **Ցանկանու՞մ եք միանալ որպես բաց կոդով ընկեր:** Սրանք այն ընկերություններն են, որոնք աջակցում են բաց կոդով և օգնում են OmniRoute շարժվել —, և մենք հրապարակայնորեն ասում ենք, թե ուր է գնում նրանց կողմից մեզ տրված յուրաքանչյուր նշան: Դիմեք՝ [diegosouza.pw@outlook.com](mailto:diegosouza.pw@outlook.com)
 
 <table>
   <tr>
@@ -295,38 +257,38 @@ curl http://localhost:20128/v1/chat/completions \
         </picture>
       </a>
       <br/><b>Kimi</b><br/><sub>Moonshot AI</sub><br/><br/>
-      <img src="https://img.shields.io/badge/Founding_Friend-1783FF?style=flat-square" alt="Հիմնադիր բաց կոդով ընկեր"/>
+      <img src="https://img.shields.io/badge/Founding_Friend-1783FF?style=flat-square" alt="Founding Open Source Friend"/>
     </td>
     <td>
-      Շնորհակալություն <b>Kimi (Moonshot AI)</b>-ին՝ մեր հիմնադիր բաց կոդով ընկերոջը, այս նախագծին աջակցելու համար: Kimi-ն AI լաբորատորիան է, որը ստեղծել է բաց քաշով K2 և K3 մոդելների ընտանիքները. <b>Kimi K3</b>-ն ապահովում է 1M-թոքեն համատեքստային պատուհան, բնիկ տեսողություն և առաջնակարգ կոդավորում փակ մոդելների գների մի մասով, և աշխատում է Claude Code-ի, Codex-ի և OmniRoute-ի կողմից սպասարկվող յուրաքանչյուր կոդավորման գործիքի հետ:
+      Շնորհակալություն <b>Kimi (Moonshot AI)</b>՝ մեր հիմնադիր բաց կոդով ընկերոջը, այս նախագծին աջակցելու համար: Kimi AI լաբորատորիան է բաց քաշով K2 և K3 մոդելների ընտանիքների ետևում — <b>Kimi K3 </b> ապահովում է 1M-նշան համատեքստի պատուհան, բնիկ տեսլական և սահմանային մակարդակի կոդավորում փակ մոդելի գներով, և աշխատում է առանց տուփի Claude Code-ի, Codex և OmniRoute կոդավորման յուրաքանչյուր գործիքի հետ:
       <br/><br/>
-      <b>Ինչ է ապահովում Kimi-ի աջակցությունը.</b> Kimi-ի API վարկերը սնուցում են OmniRoute-ի AI-ով վավերացված թողարկման խողովակաշարը՝ <i>Kimi K3-ով սնուցվող միաձուլման վավերացման</i> փուլը, որը վերանայում է յուրաքանչյուր քաշման հարցում մինչև դրա առաքումը, գումարած ամենօրյա ֆունկցիոնալության մշակումը: Առաջին կարգի Kimi աջակցությունն ապահովվում է երկու ուղղություններով՝ ուղղակի <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">Kimi API</a> (<code>kimi-k3</code>) և <a href="https://www.kimi.ai/code?aff=omniroute">Kimi Code կոդավորման պլան</a> (OAuth և API բանալի): OmniRoute-ն նաև առաջին բրազիլական բաց կոդով նախագիծն է Kimi-ի աջակցության ծրագրում: <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute"><b>Ստացեք Kimi API բանալի 15% լրացուցիչ վարկերով →</b></a>
+      <b>Ինչ է Kimi ի աջակցության լիազորությունները.</b> Kimi ի API վերագրում է ուժը OmniRoute ի AI-ով վավերացված թողարկման խողովակաշարը — the <i>միաձուլման վավերացում՝ Kimi K3-ի կողմից</i> փուլ, որը վերանայում է ձգման յուրաքանչյուր հարցումը, նախքան այն կուղարկվի — գումարած ամենօրյա գործառույթների մշակումը: Առաջին կարգի Kimi աջակցող նավերը երկու ռելսերի վրա՝ ուղիղ <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">Kimi API</a> (<code>kimi-k3</code>) եւ ի <a href="https://www.kimi.ai/code?aff=omniroute">Kimi Code կոդավորման պլան</a> (OAuth և API բանալի): OmniRoute նաև առաջին բրազիլական բաց կոդով նախագիծն է Kimi ի աջակցության ծրագրում: <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute"><b>Ստացեք Kimi API բանալի 15% հավելյալ բոնուսներով →</b></a>
     </td>
   </tr>
   <tr>
     <td align="center" width="150">
       <a href="https://cheaperinference.com/?utm_source=omniroute">
-        <img src="./public/providers/cli-generic.svg" width="64" alt="Ավելի էժան ինֆերենցիա"/>
+        <img src="./public/providers/cli-generic.svg" width="64" alt="Cheaper Inference"/>
       </a>
-      <br/><b>Ավելի էժան ինֆերենցիա</b><br/><sub>cheaperinference.com</sub><br/><br/>
-      <img src="https://img.shields.io/badge/Open_Source_Friend-31f889?style=flat-square&labelColor=04170d" alt="Բաց կոդով ընկեր"/>
+      <br/><b>Ավելի էժան եզրակացություն</b><br/><sub>cheaperinference.com</sub><br/><br/>
+      <img src="https://img.shields.io/badge/Open_Source_Friend-31f889?style=flat-square&labelColor=04170d" alt="Open Source Friend"/>
     </td>
     <td>
-      Շնորհակալություն <b>Cheaper Inference</b>-ին՝ OmniRoute-ի բաց կոդով ընկերոջը, այս նախագծին աջակցելու համար: Cheaper Inference-ը ծախսերով դասակարգված դարպաս է, որը վերավաճառում է 42 առաջնակարգ մոդելներ՝ Claude, GPT-5.x, Gemini, Kimi K3, GLM, DeepSeek, Grok և MiniMax՝ մեկ OpenAI-ի հետ համատեղելի վերջնակետի հետևում, յուրաքանչյուր հարցում ուղղելով ամենաէժան համապատասխան մատակարարին՝ երբեք չգանձելով մոդել ստեղծողի ցուցակային գնից բարձր:
+      Շնորհակալություն <b> Cheaper Inference </b> ին, OmniRoute բաց կոդով ընկերոջը, այս նախագծին աջակցելու համար: Cheaper Inference-ը արժեքով դասակարգված դարպաս է, որը վերավաճառում է 42 սահմանային մոդելներ — Claude, GPT-5.x, Gemini, Kimi K3, GLM, DeepSeek, Grok և MiniMax — մեկ OpenAI-ի հետ համատեղելի վերջնակետի ետևում՝ ուղղորդելով յուրաքանչյուր հարցում դեպի ամենաէժան իրավասու մոդելների գների ցուցակը:
       <br/><br/>
-      <b>Առաջին կարգի աջակցություն OmniRoute-ում.</b> Զրույցի ավարտներ, բնիկ <code>/v1/responses</code> վերջնակետ, տեսողություն, գործիքների կանչում և 3 պատկերային մոդել (<code>grok-imagine</code>, <code>nano-banana-pro</code>, <code>nano-banana-2</code>, հասանելի որպես <code>cheaperinference/&lt;model&gt;</code>): <a href="https://cheaperinference.com/?utm_source=omniroute"><b>Ստացեք API բանալի →</b></a>
+      <b>Առաջին կարգի աջակցություն OmniRoute ում.</b> Զրույցի ավարտը, բնիկ <code>/v1/responses</code> վերջնակետը, տեսլականը, գործիքի կանչը և 3 պատկերի մոդելներ (<code>grok-imagine</code>, <code>nano-banana-pro</code>, <code>nano-banana-2</code>, հասանելի որպես <code>cheaperinference/&lt;model&gt;</code>): <a href="https://cheaperinference.com/?utm_source=omniroute"><b>Ստացեք API բանալի →</b></a>
     </td>
   </tr>
 </table>
 
-<sub><code>aff=omniroute</code> պիտակով հղումները գործընկերային հղումներ են: Դրանք ֆինանսավորում են նախագիծը առանց ձեզ համար լրացուցիչ ծախսերի:</sub>
+<sub><code>aff=omniroute</code> հատկորոշված հղումները գործընկեր հղումներ են: Նրանք ֆինանսավորում են նախագիծը ձեզ համար առանց լրացուցիչ ծախսերի:</sub>
 
 <br/>
 
 <details open>
-<summary><sub><b>🎟️ Աֆիլիատների պրոմո</b> — անվճար գրանցման կտրոններ մատակարարներից, որոնց մենք չենք հովանավորում (սեղմեք՝ ընդլայնելու համար)</sub></summary>
+<summary><sub><b>🎟️ Affiliates Promo</b> — անվճար գրանցման կտրոններ մատակարարներից, որոնք մենք չենք հովանավորում (սեղմեք ընդլայնելու համար)</sub></summary>
 
-<sub><i>Այս բաժինը միայն ուղղորդման/կտրոնների կոդերի համար է: Հովանավորվող գործընկերությունները գտնվում են վերևում՝ <b>🤝 Աջակցվում է մեր բաց կոդով ընկերների կողմից</b> բաժնում: OmniRoute-ը չունի հովանավորություն կամ գործընկերություն այստեղ նշված մատակարարների հետ. սրանք հանրային կտրոններ են, որոնք յուրաքանչյուրը կարող է օգտագործել:</i></sub>
+<sub><i>Այս բաժինը նախատեսված է միայն referral/coupon կոդերի համար: Հովանավորվող գործընկերություններն ապրում են <b>🤝 Աջակցվում է մեր բաց կոդով ընկերների կողմից</b> վերևում: OmniRoute հովանավորություն կամ համագործակցություն չունի այստեղ թվարկված պրովայդերների հետ — սրանք հանրային կտրոններ են, որոնցից յուրաքանչյուրը կարող է օգտագործել:</i></sub>
 
 <table>
   <tr>
@@ -337,216 +299,158 @@ curl http://localhost:20128/v1/chat/completions \
       <br/><sub><b>AgentRouter</b></sub><br/><sub>agentrouter.org</sub>
     </td>
     <td>
-      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — աֆիլիատի գրանցում · <b>$100 անվճար վարկեր</b> գրանցվելիս (անվճար սերվեր, ակնկալեք ավելի բարձր ուշացում՝ լավագույնը թեստավորման համար, ոչ արտադրության): Առաջին կարգի աջակցություն OmniRoute-ում <b>v3.8.50</b>-ից սկսած. Զրույցի ավարտներ, Anthropic-ի հետ համատեղելի մետաղալարային ձևաչափ և OpenAI-ի հետ համատեղելի ուղի: Հասանելի մոդելները ներառում են <code>claude-opus-4-8</code>, <code>claude-opus-5</code>, <code>gpt-5.6-sol</code> և այլն: <b><a href="https://agentrouter.org/register?aff=70LM">Ստացեք ձեր $100 →</a></b></sub>
+      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — Ուղղորդման հղում (պաշտոնական կայք. <a href="https://agentrouter.org">agentrouter.org</a>) · <b>օրական $25 գրանցման վարկ</b>, իսկ հրավիրատոմսի կոդով գրանցումները կստանան $50 ավել (ստուգված է 2026-11-23; անվճար սերվեր, ակնկալեք ավելի բարձր ուշացում — լավագույն փորձարկման համար, ոչ թե արտադրության): Առաջին կարգի աջակցություն OmniRoute ում սկսած <b>v3.8.50</b>Զրույցի ավարտը, Anthropic-ի հետ համատեղելի հաղորդալարի ձևաչափը և OpenAI-ի հետ համատեղելի ուղին: Նրա հանրային մոդելների ցանկը ներկայումս ցույց է տալիս <code>gpt-6.1-sol</code> և <code>gpt-5.6-sol</code>: <b><a href="https://agentrouter.org/register?aff=70LM">Գրանցվեք →</a></b></sub>
       <br/><br/>
-      <sub>⚠️ <i>Աֆիլիատի հղում — OmniRoute-ը չունի հովանավորություն կամ գործընկերություն այս մատակարարի հետ:</i></sub>
+      <sub>⚠️ <i>Affiliate link — OmniRoute չունի հովանավորություն կամ համագործակցություն այս մատակարարի հետ:</i></sub>
     </td>
   </tr>
 </table>
 
-<sub>Գիտե՞ք մեկ այլ մատակարարի, որն ունի առատաձեռն անվճար գրանցման կտրոն, որը օգուտ է բերում OmniRoute-ի օգտատերերին: Բացեք խնդիր, և մենք այն կավելացնենք այստեղ:</sub>
+<sub>Գիտե՞ք մեկ այլ մատակարարի, որն ունի առատաձեռն անվճար գրանցման կտրոն, որն օգուտ է բերում OmniRoute օգտվողներին: Բացեք խնդիր, և մենք այն կավելացնենք այստեղ:</sub>
 
 </details>
 
 <br/>
 
-<div align="center">
+## Կոմբոներ՝ դրոշակակիր
 
-## 🎯 Կոմբոներ — առաջատար հնարավորությունը
+1. **Սկսեք `auto` ով:** Տեղադրեք մոդելը ձեր OpenAI-ի հետ համատեղելի հաճախորդի մեջ: OmniRoute ստեղծում է վիրտուալ կոմբո միացված պրովայդերներից և ուղիղ եթերում գնահատում է թեկնածուներին:
+2. **Պահպանեք կոմբինացիա՝ ավելի շատ վերահսկողության համար:** Ընտրեք անուն, թիրախային ցուցակ և ռազմավարություն, ապա օգտագործեք այդ անունը որպես մոդել: Ռազմավարությունը սահմանում է, թե որ թիրախն է առաջինը գնում, և ինչպես են փորձվում մնացածները:
 
-</div>
+Համակցված երթուղիներն ավտոմատ կերպով անցնում են մոդելների միջով: Քվոտայի սպառման, մատակարարի ձախողման կամ մոդելի արգելափակման դեպքում այն փորձում է հաջորդ իրավասու, առողջ թիրախը:
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="22 կոմբոների երթուղավորման ռազմավարություններից 18-ի անիմացված օրինակներ — յուրաքանչյուր ռազմավարության համար մեկ սալիկ՝ priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline։ cache-optimized, quota-weighted, expiry-first և jev ռազմավարությունները անիմացված չեն․ ստորև բերված աղյուսակը նկարագրում է բոլոր 22-ը։"/>
+### Zero-config. պարզապես օգտագործեք `auto`
 
-> **Կոմբոն** մոդելների շղթա է, որի միջով OmniRoute-ը **ավտոմատ կերպով** երթուղավորում է հարցումները։ Եթե քվոտան սպառվի, մատակարարը ձախողվի կամ ծախսերը կտրուկ աճեն, կոմբոն կարող է անցնել հաջորդ համապատասխան, առողջ մոդելին։ 🛡️
+```bash
+curl http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <your-omniroute-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "auto", "messages": [{"role": "user", "content": "Hello"}]}'
+```
 
-### ⚡ Առանց կարգավորման — պարզապես օգտագործեք `auto`
+Տարբերակները կարգավորում են կշիռները: Վերջին հայտնի-լավ երթուղիչը մնում է վերջին հաջողակ մատակարարի հետ, մինչև այն ձախողվի, այնուհետև նորից գնահատվում է: `auto/fast` և `auto/cheap` արտահայտում են նախապատվությունները՝ չերաշխավորելով ամենաարագ կամ ամենաէժան մոդելը:
 
-Կոմբո ստեղծելու կարիք չկա։ Ձեր մոդելը սահմանեք `auto` (կամ տարբերակներից մեկը), և OmniRoute-ը միացված մատակարարներից կստեղծի վիրտուալ կոմբո՝ գնահատելով դրանք իրական ժամանակում․
+| Մոդել ID            | Վարքագիծ                                                                                                                                                                                                                                                                                          |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto`              | Հավասարակշռված լռելյայն կշիռներ:                                                                                                                                                                                                                                                                  |
+| `auto/fast`         | Նպաստում է ցածր հետաձգմանը և մատակարարի առողջությանը:                                                                                                                                                                                                                                             |
+| `auto/cheap`        | Նպաստում է կատալոգի ցածր գներին:                                                                                                                                                                                                                                                                  |
+| `auto/coding`       | Որակի առաջին կշիռները կոդի ստեղծման համար:                                                                                                                                                                                                                                                        |
+| `auto/smart`        | Որակի առաջին կշիռները 10% ուսումնասիրությամբ (կանխադրված 5%):                                                                                                                                                                                                                                     |
+| `auto/lkgp`         | Բացահայտ վերջին հայտնի-լավ երթուղում նույն կշիռներով, ինչ `auto`:                                                                                                                                                                                                                                 |
+| `auto/subscription` | Օգտագործում է միայն ուղիղ վավերացված պլանի չափաբաժինը: Վերադարձնում է HTTP 503-ը, երբ ոչ մեկը հասանելի չէ, և խուսափում է հետադարձ վճարումից:                                                                                                                                                      |
+| `auto/thrifty`      | Պլանավորեք → առանց բանալի → անվճար → էժան → պրեմիում: Կարող է հասնել վճարված մոդելների և վերադառնա պլանին, երբ քվոտան և սառեցումը թույլ տան:                                                                                                                                                      |
+| `auto/offline`      | Հավանություն է տալիս քվոտային և տոկոսադրույքի սահմանաչափին: Հարցումները դեռ գնում են ձեր մատակարարներին:                                                                                                                                                                                          |
+| `auto/chaos`        | Զուգահեռաբար մեկ մատակարարի մեկ մոդել, մինչև հինգը լռելյայն կամ տասը, երբ կազմաձևված է: Մեկ մոդելի վերընթաց զանգ: Վերադարձնում է ամենաբարձր վարկանիշային պատասխանը կամ վահանակի վերջին հաջող պատասխանը, եթե վերին մոդելը ձախողվի: Օգտագործեք `fusion` դատավորի հետ պատասխանները սինթեզելու համար: |
 
-<table>
-  <tr><th align="left">Մոդելի ID</th><th align="left">Ինչի համար է օպտիմիզացված</th></tr>
-  <tr><td align="left" nowrap><code>auto</code></td><td align="left">🎯 Հավասարակշռված լռելյայն տարբերակ (LKGP — մնում է ձեր վերջին լավ մատակարարի վրա)</td></tr>
-  <tr><td align="left" nowrap><code>auto/coding</code></td><td align="left">🧑💻 Կոդի գեներացման համար որակին առաջնահերթություն տվող կշիռներ</td></tr>
-  <tr><td align="left" nowrap><code>auto/fast</code></td><td align="left">⚡ Սկզբում՝ ամենացածր ուշացումով տարբերակը</td></tr>
-  <tr><td align="left" nowrap><code>auto/cheap</code></td><td align="left">💰 Սկզբում՝ յուրաքանչյուր թոքենի համար ամենաէժան տարբերակը</td></tr>
-  <tr><td align="left" nowrap><code>auto/subscription</code></td><td align="left">🎟️ Միայն այն բաժանորդագրության քվոտան, որի համար արդեն վճարում եք — ձախողման դեպքում դադարեցնում է աշխատանքը և երբեք չի անցնում վճարովի պահուստային տարբերակի (<a href="./docs/routing/SUBSCRIPTION_LADDER.md">ուղեցույց</a>)</td></tr>
-  <tr><td align="left" nowrap><code>auto/thrifty</code></td><td align="left">🪜 Սկզբում՝ պլանի քվոտան, ապա մեկ քայլով՝ ամենաէժան վճարովի տարբերակները — քվոտայի վերականգնումից հետո վերադառնում է պլանին (<a href="./docs/routing/SUBSCRIPTION_LADDER.md">ուղեցույց</a>)</td></tr>
-  <tr><td align="left" nowrap><code>auto/offline</code></td><td align="left">🔋 Սկզբում՝ ամենամեծ քվոտայի / հաճախականության սահմանաչափի պահուստով տարբերակը</td></tr>
-  <tr><td align="left" nowrap><code>auto/smart</code></td><td align="left">🔭 Որակին առաջնահերթություն + 10% փորձարկում՝ ավելի լավ մոդելներ հայտնաբերելու համար</td></tr>
-  <tr><td align="left" nowrap><code>auto/lkgp</code></td><td align="left">📌 Վերջին հայտնի լավ մատակարարի վրա մնալու բացահայտ կարգավորում</td></tr>
-  <tr><td align="left" nowrap><code>auto/chaos</code></td><td align="left">🧪 Զուգահեռ ուղարկում մոդելների վահանակին (լռելյայն՝ մեկ մոդել յուրաքանչյուր մատակարարից, ընդհանուր՝ 5), վերադարձնում է մեկ պատասխան․ յուրաքանչյուր վահանակի մոդելի համար կատարվում է մեկ վերին հոսքի կանչ, սա խափանումների ներարկում չէ</td></tr>
-</table>
+Կատեգորիայի և կամընտիր մակարդակի օրինակները ներառում են `auto/coding:fast`, `auto/coding:free`, `auto/reasoning:pro` և `auto/vision`: Եթե ոչ մի կապակցված թեկնածու չի համընկնում, հարցումը վերադարձնում է HTTP 503, իսկ լողավազանը մնում է նեղ: [Auto-Combo ուղեցույց](./docs/routing/AUTO-COMBO.md) · [Բաժանորդագրություն-առաջին երթուղի](./docs/routing/SUBSCRIPTION_LADDER.md)
 
-##
+### Կամ ստեղծեք ձեր սեփականը՝ 22 երթուղային ռազմավարություն
 
-### 🔀 Կամ ստեղծեք ձերը — երթուղավորման 22 ռազմավարություն
+```bash
+omniroute combo create my-pool --strategy fill-first \
+  --models "provider-a/model-1,provider-b/model-2"
+```
 
-Բոլոր **22** ռազմավարությունները — համադրեք և միացրեք ըստ կոմբոյի յուրաքանչյուր քայլի․
+CLI ընդունում է 22 ռազմավարություններից 15-ը: Վահանակի վահանակը և API կոմպոզիցիաներն ընդունում են բոլոր 22-ը:
 
-<table>
-  <tr>
-    <th>#</th>
-    <th align="left">Ռազմավարություն</th>
-    <th align="left">Ինչ է անում</th>
-  </tr>
-  <tr>
-    <td align="center">1</td>
-    <td nowrap><code>priority</code></td>
-    <td>Առաջին թիրախի դասավորված ցանկ — սպառել յուրաքանչյուրն ամբողջությամբ՝ հաջորդին անցնելուց առաջ 🥇</td>
-  </tr>
-  <tr>
-    <td align="center">2</td>
-    <td nowrap><code>fill-first</code></td>
-    <td>Լիովին լրացնել յուրաքանչյուր թիրախի քվոտան՝ առաջ անցնելուց առաջ</td>
-  </tr>
-  <tr>
-    <td align="center">3</td>
-    <td nowrap><code>weighted</code></td>
-    <td>Կշռված պատահական ընտրություն՝ ըստ յուրաքանչյուր թիրախի կշռի</td>
-  </tr>
-  <tr>
-    <td align="center">4</td>
-    <td nowrap><code>round-robin</code></td>
-    <td>Հերթականությամբ շրջել թիրախների միջով</td>
-  </tr>
-  <tr>
-    <td align="center">5</td>
-    <td nowrap><code>p2c</code></td>
-    <td>Երկու ընտրության պատահական հզորության բեռնաբաշխում</td>
-  </tr>
-  <tr>
-    <td align="center">6</td>
-    <td nowrap><code>least-used</code></td>
-    <td>Ընտրել ընթացիկ ամենացածր բեռնվածությամբ թիրախը</td>
-  </tr>
-  <tr>
-    <td align="center">7</td>
-    <td nowrap><code>random</code></td>
-    <td>Միատեսակ պատահական ընտրություն (կրկնությունների հեռացմամբ)</td>
-  </tr>
-  <tr>
-    <td align="center">8</td>
-    <td nowrap><code>strict-random</code></td>
-    <td>Պատահական ընտրություն՝ առանց կրկնությունների հեռացման 🎲</td>
-  </tr>
-  <tr>
-    <td align="center">9</td>
-    <td nowrap><code>cost-optimized</code></td>
-    <td>Նվազագույնի հասցնել յուրաքանչյուր հարցման արժեքը՝ ըստ կատալոգի արդիական գների 💸</td>
-  </tr>
-  <tr>
-    <td align="center">10</td>
-    <td nowrap><code>headroom</code></td>
-    <td>Ընտրել մնացած ամենամեծ քվոտայով թիրախը</td>
-  </tr>
-  <tr>
-    <td align="center">11</td>
-    <td nowrap><code>quota-weighted</code></td>
-    <td>Բաց թողնել սպառված հաշիվները, ապա ընտրել մնացած քվոտային ÷ ընթացիկ բեռնվածությանը համամասնորեն — առկա խոսակցությունները մնում են ամրակցված ⚖️</td>
-  </tr>
-  <tr>
-    <td align="center">12</td>
-    <td nowrap><code>reset-window</code></td>
-    <td>Նախապատվությունը տալ այն թիրախին, որի քվոտայի պատուհանը շուտ է վերակայվում</td>
-  </tr>
-  <tr>
-    <td align="center">13</td>
-    <td nowrap><code>reset-aware</code></td>
-    <td>Դասավորել ըստ քվոտայի վերակայման ժամանակի — նախ կարճ պատուհանները 📊</td>
-  </tr>
-  <tr>
-    <td align="center">14</td>
-    <td nowrap><code>context-relay</code></td>
-    <td>Երկար խոսակցությունների համար փոխանցել համատեքստը թիրախների միջև 🧠</td>
-  </tr>
-  <tr>
-    <td align="center">15</td>
-    <td nowrap><code>context-optimized</code></td>
-    <td>Ընտրել ընթացիկ համատեքստի չափին լավագույնս համապատասխանող տարբերակը</td>
-  </tr>
-  <tr>
-    <td align="center">16</td>
-    <td nowrap><code>cache-optimized</code></td>
-    <td>Յուրաքանչյուր կրկնակի օգտագործման ենթակա հուշման նախածանց ամրակցել նույն հաշվին — առավելագույնի հասցնել հուշումների քեշի համընկնումները 🎯</td>
-  </tr>
-  <tr>
-    <td align="center">17</td>
-    <td nowrap><code>lkgp</code></td>
-    <td>Վերջին հայտնի հաջող ուղի — ամրակցվում է վերջին հաջող մատակարարին, ապա անցնում կանոնների վրա հիմնված պահուստային տարբերակին</td>
-  </tr>
-  <tr>
-    <td align="center">18</td>
-    <td nowrap><code>auto</code></td>
-    <td>Յուրաքանչյուր միացման 16 գործոնով արդիական գնահատում 🤖</td>
-  </tr>
-  <tr>
-    <td align="center">19</td>
-    <td nowrap><code>fusion</code></td>
-    <td>Ուղարկել հարցումը մոդելների խմբին + դատավորը համադրում է մեկ պատասխան 🧬</td>
-  </tr>
-  <tr>
-    <td align="center">20</td>
-    <td nowrap><code>pipeline</code></td>
-    <td>Շղթայել քայլերը — յուրաքանչյուր թիրախի ելքը փոխանցվում է հաջորդին 🔗</td>
-  </tr>
-  <tr>
-    <td align="center">21</td>
-    <td nowrap><code>expiry-first</code></td>
-    <td>Օգտագործել այն հաշվի քվոտան, որը առաջինը կսպառվեր չօգտագործված մնալու դեպքում — ամենամեծ մնացորդ ունեցող և ամենամոտ վերակայմամբ հաշիվը հաղթում է ⏳</td>
-  </tr>
-  <tr>
-    <td align="center">22</td>
-    <td nowrap><code>jev</code></td>
-    <td>Ձեր դասավորված ցանկը․ TypeSafe Jev-ն ընտրում է, թե որ գրառումներն աշխատեն յուրաքանչյուր հարցման համար՝ անհրաժեշտության դեպքում վերադառնալով ձեր դասավորությանը (միացման դրոշակ) ⚖️</td>
-  </tr>
-</table>
+| Ռազմավարություն     | Վարքագիծ                                                                                                                                                                                                                                                      |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto`              | Դասակարգման թեկնածուները ապրում են 16 գործոն Auto-Combo ռմբարկուի հետ:                                                                                                                                                                                        |
+| `cache-optimized`   | Նախընտրեք այն հաշիվը, որը հավանաբար կպահի հուշման նախածանցը քեշում:                                                                                                                                                                                           |
+| `context-optimized` | Նախ փորձեք ամենամեծ հայտնի համատեքստի պատուհանը:                                                                                                                                                                                                              |
+| `context-relay`     | Պահպանեք ձեր պատվերը և փոխանցեք զրույցի ամփոփագիր հաշիվները փոխելու ժամանակ:                                                                                                                                                                                  |
+| `cost-optimized`    | Դասավորել ըստ կատալոգի մուտքագրման նշանի գնի, վերջին անհայտները: Հարցման վերջնական արժեքը կարող է տարբեր լինել:                                                                                                                                               |
+| `expiry-first`      | Ծախսեք քվոտան, որը, հավանաբար, կսպառվի, ժամում ամենաբարձր մնացորդը մինչև սկզբում վերակայումը:                                                                                                                                                                 |
+| `fill-first`        | Մնացեք առաջին հասանելի թիրախի վրա, մինչև այն սպառվի կամ ձախողվի, ապա շարժվեք:                                                                                                                                                                                 |
+| `fusion`            | Զուգահեռաբար հարցում կատարեք և դատավորին թողեք մեկ պատասխան սինթեզել:                                                                                                                                                                                         |
+| `headroom`          | Ընտրեք առավելագույն ազատ հզորությունը 5-ժամյա և շաբաթական պատուհանների համար:                                                                                                                                                                                 |
+| `jev`               | TypeSafe Jev-ն ընտրում է, թե որ գրառումներն են առաջադրվում ձեր վարկանիշային ցուցակում: Միացրեք `COMBO_JEV_STRATEGY_ENABLED` յուրաքանչյուր հարցումով քաղվածք ուղարկելու և TypeSafe վճարովի զանգերից օգտվելու համար: Եթե այն անջատված է, ձեր պատվերը գործում է: |
+| `least-used`        | Ընտրեք թիրախը, որն ունի ամենաքիչ գրանցված հարցումները այս համակցությամբ:                                                                                                                                                                                      |
+| `lkgp`              | Նախ փորձեք վերջին հաջողակ մատակարարին, հակառակ դեպքում պահեք ձեր պատվերը:                                                                                                                                                                                     |
+| `p2c`               | Ընտրեք երկու թիրախ և ընտրեք ըստ հաջողության մակարդակի և հետաձգման:                                                                                                                                                                                            |
+| `pipeline`          | Յուրաքանչյուր քայլի արդյունքը հաջորդականությամբ փոխանցեք հաջորդ թիրախին և վերադարձրեք միայն վերջնական պատասխանը:                                                                                                                                              |
+| `priority`          | Փորձեք ձեր պատվերի թիրախները: Նստաշրջանի կպչունությունը պահպանում է այն:                                                                                                                                                                                      |
+| `quota-weighted`    | Բաց թողեք սպառված հաշիվները և խաղարկեք մնացորդային քվոտայով և թռիչքի ընթացքում բեռնվածությամբ:                                                                                                                                                                |
+| `random`            | Խառնել յուրաքանչյուր խնդրանքի համար: Նույն առաջին թիրախը կարող է կրկնվել:                                                                                                                                                                                     |
+| `reset-aware`       | Վաստակեք մնացած քվոտան և ժամանակը զրոյացնելու համար աշխատաշրջաններում և շաբաթական պատուհաններում:                                                                                                                                                             |
+| `reset-window`      | Փորձեք այն հաշիվը, որի քվոտայի պատուհանը շուտով կվերականգնվի:                                                                                                                                                                                                 |
+| `round-robin`       | Պտտել հերթականությամբ՝ լռելյայնորեն երեք հաջողություն յուրաքանչյուր թիրախի համար:                                                                                                                                                                             |
+| `strict-random`     | Գործեք խառնված տախտակամածից, որպեսզի յուրաքանչյուր թիրախ տանի մեկ անգամ, մինչև կրկնելը:                                                                                                                                                                       |
+| `weighted`          | Նկարեք առաջին թիրախը ըստ քաշի, իսկ մնացածը պահեք որպես հետին պլան: Պառակտումը վիճակագրական է. Օգտագործեք `round-robin` խիստ ռոտացիայի համար:                                                                                                                  |
 
-<sub>Auto-Combo շարժիչը յուրաքանչյուր թեկնածուի գնահատում է **16 գործոնով** (առողջություն, քվոտա, արժեք, ուշացում, առաջադրանքին համապատասխանություն, որակ, աշխատաշրջանի հասանելիություն…) — տես [`docs/routing/AUTO-COMBO.md`](docs/routing/AUTO-COMBO.md)։</sub>
+Քվոտայի ռազմավարություններն օգտագործում են կենդանի տվյալներ, որտեղ մատակարարները հաղորդում են այդ մասին, ներառյալ 5-ժամյա և շաբաթական բաժանորդագրության պատուհանները: `fusion` և `pipeline` կատարում են մի քանի զանգեր հոսանքին հակառակ մեկ խնդրանքով:
 
-##
+16 գործոնով գնահատողն օգտագործում է քվոտա, առողջություն, ծախսեր, ուշացում, առաջադրանքների համապատասխանություն, կայունություն, մակարդակի առաջնահերթություն, մակարդակի հարաբերակցություն, առանձնահատկությունների համընկնում, համատեքստի հարաբերակցություն, քեշի մերձեցում, նիստի հասանելիություն, վերակայման պատուհանի հարաբերակցություն, կապի խտություն, որակ և հուսալիություն: Քաշերը տարբերվում են ըստ պրոֆիլի: Քեշի մերձեցումը, վերակայման պատուհանի հարաբերակցությունը և հուսալիությունը լռելյայն զրոյական քաշ ունեն: [Վարկանիշային գործոններ](./docs/routing/AUTO-COMBO.md#how-it-works-persisted-auto-combos)
 
-### 🧱 Դիմակայունությունը ներկառուցված է (3 անկախ շերտ)
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animated grid showing how all 22 public OmniRoute combo routing strategies select, order, or chain targets."/>
 
-<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="OmniRoute-ի դիմակայունություն — ինքնավերականգնվող 3 անկախ շերտ՝ յուրաքանչյուր խափանման համար համապատասխան շերտով։ Շերտ 1՝ մատակարարի circuit breaker (ամբողջ մատակարարը). գործարկվում է միայն 408/5xx սխալների դեպքում, շեմերը՝ OAuth 8× / API-key 12× / local 2×, վերակայվում է 60 վրկ/30 վրկ/15 վրկ անց՝ անցնելով HALF-OPEN փորձարկման վիճակի, վերականգնումը կատարվում է ծույլ եղանակով. OPEN վիճակում combo-ն վերահասցեավորում է հարցումը հաջորդ մատակարարին։ Շերտ 2՝ միացման cooldown (մեկ բանալի/հաշիվ). բազային արժեքը՝ OAuth 5 վրկ / API-key 3 վրկ, էքսպոնենցիալ ×2 հետաձգում՝ միաժամանակյա հարցումների կուտակումը կանխող պաշտպանությամբ, 429-ը հարգում է Retry-After-ը, հաջողությունը մաքրում է սխալների ամբողջ վիճակը. մեկ սառեցված բանալին բաց է թողնվում, մինչդեռ հարակից բանալիները շարունակում են սպասարկել։ Շերտ 3՝ մոդելի lockout (մեկ մոդել). յուրաքանչյուր մոդելի 429, local 404 կամ ռեժիմի մերժումները արգելափակում են միայն տվյալ մոդելը — երբեք ամբողջ միացումը։ Վերջնական վիճակները (արգելափակված, ժամկետանց, վարկերը սպառված) նախատեսված են օպերատորի համար, ոչ թե cooldown-ների։"/>
+`strategy: "auto"` հետ պահպանված կոմբոյում `config.routerStrategy` ընտրում է `rules`, `score`, `cost` (`eco`), `latency` (`fast`), `sla-aware` (`sla`), `lkgp`, `nadir` կամ `decision`: [Ավտոմատ երթուղիչի ռազմավարություններ](./docs/routing/AUTO-COMBO.md#auto-router-strategies)
 
-<sub>📖 [Auto-Combo շարժիչ](docs/routing/AUTO-COMBO.md) · [Դիմակայունության ուղեցույց](docs/architecture/RESILIENCE_GUIDE.md)</sub>
+<img src="./docs/diagrams/auto-router-strategies.svg" width="100%" alt="Eight auto router strategies with example picks and aliases grouped. Nadir and decision fall back to rules when their deciders are unavailable."/>
+
+### Ճկունությունը ներկառուցված է՝ 3 անկախ շերտերով
+
+Խափանումները լուծվում են երեք շրջանակով, ուստի մեկ վատ մոդելը չի ջնջում իր հաշիվը, և մեկ վատ հաշիվը չի ջնջում իր մատակարարին:
+
+<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="OmniRoute resilience: 3 independent self-healing layers, the right layer for the right failure. Layer 1, provider circuit breaker (whole provider): trips only on 408/500/502/503/504, opens after 8 failures for OAuth providers or 12 for API-key providers, resets after 60s or 30s into a HALF-OPEN probe, lazy recovery; while OPEN the combo reroutes to the next provider. Layer 2, connection cooldown (one key or account): base 5s OAuth or 3s API-key, exponential backoff with an anti-thundering-herd guard, success clears the error state; one cooling key is skipped while sibling keys keep serving. Layer 3, model lockout (one model): per-model 429, 404 or access denials lock just that model, never the whole connection. Terminal states (banned, expired, credits exhausted) wait for the operator; they are not cooldowns."/>
+
+#### Եթե ամբողջ պրովայդերն անջատված է
+
+Այն** մատակարարի անջատիչ** բացվում է 8 (OAuth) կամ 12 (API ստեղն) ձախողումից հետո՝ 408, 500, 502, 503 կամ 504 կարգավիճակով: Կոմբինատները բաց են թողնում այդ մատակարարը, քանի դեռ այն բաց է: 60 վրկ կամ 30 վրկ հետո մեկ զոնդային հարցումը որոշում է, թե արդյոք այն փակվում է:
+
+#### Եթե մեկ բանալին կամ հաշիվը սահմանափակված է տոկոսադրույքով
+
+Այն** կապի սառեցում** նստարանները միայն այդ միացումն են՝ 5 վրկ-ից (OAuth) կամ 3 վրկ (API ստեղն) էքսպոնենցիալ հետընթացով: Նույն մատակարարի այլ բանալիներ շարունակում են ծառայել:
+
+#### Եթե մեկ մոդելը մերժվի
+
+Այն** մոդելի արգելափակում** արգելափակում է միայն այդ մոդելը այդ կապի վրա յուրաքանչյուր մոդելի 429, 404 կամ մուտքի մերժումից հետո: Նույն կապով այլ մոդելներ շարունակում են ծառայել:
+
+Արգելված, ժամկետանց և առանց վարկի կապերը տերմինալային վիճակներ են, այլ ոչ թե սառեցում. նրանք սպասում են, որ դուք շտկեք դրանք:
+
+<sub>[Auto-Combo շարժիչ](docs/routing/AUTO-COMBO.md) · [Ճկունության ուղեցույց](docs/architecture/RESILIENCE_GUIDE.md)</sub>
 
 <br/>
 
-<div align="center">
+## Ինչն է առանձնացնում OmniRoute
 
-## 🏆 Ինչով է OmniRoute-ն առանձնանում
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 394 providers, 140+ providers with a free offer, 22 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
-</div>
-
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ինչով է OmniRoute-ն առանձնանում — հնարավորությունների թվագրված համեմատական պատկերը՝ 9router-ի, OpenRouter-ի, CLIProxyAPI-ի և LiteLLM-ի հետ՝ 13 հնարավորությունների համատեքստում։ OmniRoute՝ 394 մատակարար, ներկառուցված 150+ անվճար մակարդակ, երթուղավորման 22 ռազմավարություն, թոքենների սեղմում՝ 12 շարժիչով, ներկառուցված MCP սերվեր՝ 110 գործիքով, A2A գործակալների արձանագրություն, մշտական հիշողություն, պաշտպանիչ սահմանափակումներ, ամպային գործակալներ, TLS մատնահետքի քողարկում, Desktop/Termux/PWA և i18n UI-ի 67 տեղայնացման լեզու։ OmniRoute-ն արտոնագրված է MIT լիցենզիայով և կարող է տեղակայվել սեփական ենթակառուցվածքում։ Մրցակիցների հնարավորություններն ու քանակները կարող են փոխվել․ տեսեք կից մեթոդաբանությունը։"/>
-
-<sub>📊 Ամբողջական մեթոդաբանություն և յուրաքանչյուր հնարավորության մանրամասներ՝ 9router-ի, OpenRouter-ի, CLIProxyAPI-ի և LiteLLM-ի համեմատությամբ → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
+<sub>📊 Ամբողջական մեթոդաբանություն &amp; յուրաքանչյուր հատկանիշի մանրամասն ընդդեմ 9 երթուղիչի, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
 <br/>
 
-## 💚 Աջակցեք OmniRoute-ին
+<a id="-support-omniroute"></a>
+<a id="support"></a>
 
-OmniRoute-ը տարածվում է MIT արտոնագրով և բաց կերպով սպասարկվում է։ Եթե այն խնայում է ձեր ժամանակը կամ գումարը, ահա թե ինչպես կարող եք օգնել, որ այն անկախ մնա․ ընտրեք ձեզ հարմար տարբերակը։ Հովանավորությունը երբեք չի ազդում երթուղավորման առաջնահերթության վրա․ այն ապահովում է տեսանելիություն, ոչ թե վարկանիշ։
+## Աջակցեք OmniRoute
+
+OmniRoute ն MIT-ի արտոնագրված է և պահպանվում է բաց տարածքում: Եթե դա խնայում է ձեզ ժամանակ կամ գումար, սրանք այն ուղիներն են, որոնք կօգնեն պահպանել այն անկախ: Հովանավորությունը երբեք չի ազդում երթուղիների վրա. այն ձեռք է բերում տեսանելիություն, ոչ թե վարկանիշ:
 
 <table>
-  <tr><td nowrap>⭐ <b>Աստղ տվեք պահոցին</b></td><td>Անվճար է և իսկապես օգնում է տեսանելիությանը</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Աստղ տվեք OmniRoute-ին</a></td></tr>
-  <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Միանվագ կամ ամսական · հարթակի միջնորդավճար՝ զրո</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
-  <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Արագ միանվագ նվիրատվություն՝ առանց նվիրատուի գրանցման</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
-  <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Փոքր, ոչ պաշտոնական աջակցության ժեստ</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
-  <tr><td nowrap>🖐 <b>Liberapay</b></td><td>Պարբերական · ոչ առևտրային · բաց կոդով</td><td><a href="https://liberapay.com/diegosouzapw">liberapay.com/diegosouzapw</a></td></tr>
-  <tr><td nowrap>🇧🇷 <b>PIX</b> (Բրազիլիա)</td><td>Ակնթարթային, առանց վճարների</td><td>բանալին և QR-ը՝ ստորև</td></tr>
-  <tr><td nowrap>₿ <b>Կրիպտոարժույթ</b></td><td>BTC · ETH · USDT-TRC20 · USDC-Solana</td><td>հասցեները՝ ստորև</td></tr>
+  <tr><th align="left">Մեթոդ</th><th align="left">Լավագույնը համար</th><th align="left">Հղում</th></tr>
+  <tr><td nowrap><b>Աստղանշեք ռեպո</b></td><td>Անվճար, և դա օգնում է տեսանելիությանը</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Աստղ OmniRoute</a></td></tr>
+  <tr><td nowrap><b>GitHub Հովանավորներ</b></td><td>Մեկանգամյա կամ ամսական: Անձնական հաշիվներից հովանավորությունների համար հարթակի վճար չկա</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
+  <tr><td nowrap><b>Կո-ֆի</b></td><td>Արագ միանվագ հուշում, առանց գրանցման դոնորի համար</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
+  <tr><td nowrap><b>Գնիր ինձ սուրճ</b></td><td>Փոքր, ոչ պաշտոնական ժեստ</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
+  <tr><td nowrap><b>Լիբերապայ</b></td><td>Կրկնվող, շահույթ չհետապնդող կազմակերպության կողմից</td><td><a href="https://liberapay.com/diegosouzapw">liberapay.com/diegosouzapw</a></td></tr>
+  <tr><td nowrap><b>Բաց կոլեկտիվ</b><br/><sub>ընկերություններ, հաշիվ-ապրանքագրեր</sub></td><td>Շուտով կբացվի. կոլեկտիվը սպասում է հարկաբյուջետային կազմակերպության հաստատմանը և դեռ չի ընդունում ներդրումները</td><td><a href="https://opencollective.com/omniroute">opencollective.com/omniroute</a></td></tr>
+  <tr><td nowrap><b>PIX</b> (Բրազիլիա)</td><td>Ակնթարթային, առանց վճարների</td><td>Ստորև բերված բանալին և QR</td></tr>
+  <tr><td nowrap><b>Կրիպտո</b></td><td>BTC, ETH, USDT-TRC20, USDC-Solana (Monero շուտով)</td><td>Հասցեները ստորև</td></tr>
 </table>
 
-**🇧🇷 PIX** — ակնթարթային, առանց վճարների (Բրազիլիա)
+### Հովանավորություն որպես ընկերություն
 
-<img src="docs/assets/pix-qr.png" width="140" align="right" alt="OmniRoute-ի PIX QR կոդը"/>
+Ընկերություններն այսօր կարող են հովանավորել GitHub կազմակերպության հաշվից GitHub Sponsors-ի միջոցով, որն առաջարկում է կազմակերպությունների համար հաշիվ-ապրանքագրեր: [Open Collective էջը](https://opencollective.com/omniroute) ստեղծվել է այն ընկերությունների համար, որոնք կարիք ունեն հաշիվ-ապրանքագրերի և հանրային հաշվառման, բայց այն բացվում է միայն այն բանից հետո, երբ հարկաբյուջետային կազմակերպիչը հաստատում է այն: Հարկային վերաբերմունքը կախված կլինի այդ հյուրընկալողից և ձեր երկրից: OmniRoute չի խոստանում, որ ներդրումը ենթակա է հարկային նվազեցման:
 
-Բանալի (պատահական)՝ `5d865059-bc44-483a-962d-43ceb80126eb`
+### PIX (Բրազիլիա)
 
-Pix պատճենելու և տեղադրելու կոդը՝
+<img src="docs/assets/pix-qr.png" width="140" align="right" alt="OmniRoute PIX QR code"/>
+
+Բանալի (պատահական): `5d865059-bc44-483a-962d-43ceb80126eb`
+
+Pix copia-e-cola:
 
 ```
 00020101021126580014br.gov.bcb.pix01365d865059-bc44-483a-962d-43ceb80126eb5204000053039865802BR5922OMNIROUTE CONTRIBUICAO6006BRASIL62070503***630475DD
@@ -554,160 +458,236 @@ Pix պատճենելու և տեղադրելու կոդը՝
 
 <br clear="right"/>
 
-<details>
-<summary><b>₿ Կրիպտոարժույթ</b> — BTC · ETH · USDT-TRC20 · USDC-Solana (սեղմեք՝ բացելու համար)</summary>
+### Կրիպտո
 
 <table>
-  <tr><td nowrap><b>₿ BTC</b></td><td nowrap>Bitcoin (SegWit)</td><td><code>bc1qh00smz004sy85wyl28v77tenkt3ckl6eaep7fd</code></td></tr>
-  <tr><td nowrap><b>Ξ ETH</b></td><td nowrap>Ethereum (ERC20)</td><td><code>0x64Cf6B68A6Ff34288e89172950a2d00102337a84</code></td></tr>
-  <tr><td nowrap><b>₮ USDT</b></td><td nowrap>Tron (TRC20)</td><td><code>TKAF41JpuQrHbKTnsQa9svJE2T192Hvsc2</code></td></tr>
-  <tr><td nowrap><b>$ USDC</b></td><td nowrap>Solana</td><td><code>2emNNZzVVWQc3FQ2wk9M6qXUQmW8AKdjjL174fXR28Tu</code></td></tr>
+  <tr><th align="left">Մետաղադրամ</th><th align="left">Ցանց</th><th align="left"><img width="2000" height="0" alt=""> Հասցե</th></tr>
+  <tr><td nowrap><b>BTC</b></td><td nowrap>Bitcoin (SegWit)</td><td><code>bc1qh00smz004sy85wyl28v77tenkt3ckl6eaep7fd</code></td></tr>
+  <tr><td nowrap><b>ETH</b></td><td nowrap>Ethereum (ERC20)</td><td><code>0x64Cf6B68A6Ff34288e89172950a2d00102337a84</code></td></tr>
+  <tr><td nowrap><b>USDT</b></td><td nowrap>Tron (TRC20)</td><td><code>TKAF41JpuQrHbKTnsQa9svJE2T192Hvsc2</code></td></tr>
+  <tr><td nowrap><b>USDC</b></td><td nowrap>Սոլանա</td><td><code>2emNNZzVVWQc3FQ2wk9M6qXUQmW8AKdjjL174fXR28Tu</code></td></tr>
+  <tr><td nowrap><b>XMR</b></td><td nowrap>Մոներո</td><td>Հասցեն շուտով</td></tr>
 </table>
 
-<sub>⚠️ Յուրաքանչյուր արժույթ ուղարկեք միայն նշված ցանցով․ սխալ ցանցով ուղարկելու դեպքում միջոցները կարող են կորսվել։</sub>
+> [!IMPORTANT]
+> Ուղարկեք յուրաքանչյուր մետաղադրամ միայն ցուցադրված ցանցում: Սխալ ցանցով փոխանցումը կարող է կորցնել միջոցները:
 
-</details>
-
-🐛 Սխա՞լ եք գտել կամ կարծիք ունե՞ք։ Բացեք [քննարկում](https://github.com/diegosouzapw/OmniRoute/discussions)։
-
-<br/>
-
-<p><strong>Նշումներ մշակողների համար․</strong> Մշակողների հարմարության համար նախագիծը npm install/postinstall-ի ընթացքում կարող է ստեղծել տեղային <code>.env</code> ֆայլ։ Այս ֆայլը միտումնավոր անտեսվում է <code>.gitignore</code>-ի միջոցով (տես <code>.gitignore</code>) և երբեք չպետք է ներառվի commit-ում․ եթե այն պատահաբար ներառվել է, փոխարինեք բացահայտված բոլոր գաղտնիքները և հեռացրեք ֆայլը պատմությունից։ Տեղային միջավայրի ֆայլերի և գաղտնիքների կառավարման վերաբերյալ ուղեցույցը տեսեք <a href="docs/DEVELOPER-ENVIRONMENT.md">docs/DEVELOPER-ENVIRONMENT.md</a>-ում։</p>
-
-## 📡 OmniRoute Radar
-
-Անվճար մակարդակի հիմնական ցուցանիշը շարունակում է մնալ **~1.62B տոկեն/ամիս**՝ համաձայն վերևում ներկայացված, ընդհանուր պաշարների կրկնօրինակումներից մաքրված կատալոգի։ Մատակարարների՝ գրանցման համար տրամադրվող ժամանակավոր կրեդիտները կարող են առաջին ամսվա ծավալն առանձին բարձրացնել մինչև **~2.22B**։ Radar-ը կամընտիր, ստորագրված կատալոգային վերադիր է նրանց համար, ովքեր ցանկանում են OmniRoute-ի թողարկումների միջև ընկած ժամանակահատվածում ավելի թարմ տեղեկություններ ստանալ անվճար մոդելների հասանելիության մասին․ համայնքային կատալոգը և առկա բոլոր անվճար գործառույթները շարունակում են մնալ անվճար։
-
-Աջակիցները կարող են ստանալ ընթացիկ կատալոգը և օգտվել մատակարարների լրացուցիչ հնարավորություններից։ Դրա առանձին, փոփոխական առավելագույն սահմանաչափը **մոտավորապես առավելագույնը 3B տոկեն/ամիս է**՝ կախված մատակարարների հասանելիությունից։ Այդ սահմանաչափը երաշխիք չէ․ մատակարարները ցանկացած պահի կարող են փոխել քվոտաները, իրավասության չափանիշները, մոդելները կամ տարածաշրջանները։
-
-Radar-ի օգտագործումը կամընտիր է, և այն աշխատում է միայն GET հարցումներով։ OmniRoute-ի հաճախորդը չի վերբեռնում հուշումները, թրաֆիկը, մատակարարների կազմաձևումները, օգտագործման հեռաչափությունը կամ հայտարարությունները փակելու տեղային վիճակը։ Իրավասության չափանիշների և ընթացիկ կատալոգի մասին տեղեկացեք **[radar.omniroute.online/planos](https://radar.omniroute.online/planos)** հասցեում։
+Գտե՞լ եք վրիպակ, թե՞ կարծիք ունեք: Բացեք [քննարկում](https://github.com/cheaper-inference/OmniRoute/discussions) :
 
 <br/>
 
-<div align="center">
+<p><strong>Մշակողի նշումներ.</strong> Նախագիծը կարող է ստեղծել տեղական <code>.env</code> ֆայլ npm install/postinstall ի ընթացքում՝ մշակողի հարմարության համար: Այս ֆայլը միտումնավոր անտեսվում է <code>.gitignore</code> միջոցով և երբեք չպետք է կատարվի: Եթե այն կատարվել է պատահաբար, պտտեք ցանկացած բացահայտված գաղտնիք և հեռացրեք ֆայլը պատմությունից: Տես <a href="docs/DEVELOPER-ENVIRONMENT.md">docs/DEVELOPER-ENVIRONMENT.md</a> տեղական միջավայրի ֆայլերի և գաղտնիքների կառավարման վերաբերյալ ուղեցույցի համար:</p>
 
-## ✨ Նորություններ
+## OmniRoute Ռադար
 
-</div>
+Ռադարը վերը նշված ազատ մակարդակի կատալոգի կենդանի, ստորագրված պատճենն է, և այն անվճար է բոլորի համար: Չկա paywall և սպասման ժամանակահատված: Այն ընտրվում է և միայն GET-ի համար: OmniRoute հաճախորդը ոչինչ չի ուղարկում Ռադարին՝ ոչ մի հուշում, երթևեկություն, մատակարարի կոնֆիգուրացիա կամ օգտագործման հեռաչափություն:
 
-> Վերջին կարևոր փոփոխությունները՝ **v3.8.20 → v3.8.55**։ Ամբողջական պատմությունը՝ [`CHANGELOG.md`](CHANGELOG.md)։
+Վերոնշյալ համարները գալիս են այս թողարկումով առաքված կատալոգից: Ռադարը կարող է ավելի նոր տվյալներ ցույց տալ թողարկումների միջև: Ամեն շաբաթ ավելացվում են նոր անվճար առաջարկներ և առաջխաղացումներ: Դիտեք իրական թվի աճը Ռադարի վրա:
 
-- **⚖️ `quota-weighted` երթուղավորում** — 20-րդ կոմբինացիոն ռազմավարությունը բաց է թողնում սպառված հաշիվները, այնուհետև մնացածների միջև ընտրություն է կատարում՝ չօգտագործված քվոտա ÷ ընթացիկ հարցումների բեռ հարաբերակցությամբ՝ պահպանելով առկա խոսակցությունների կապակցվածությունը։ → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 Headless ռեժիմ** — `omniroute serve --headless` (կամ `OMNIROUTE_HEADLESS=1`) գործարկում է միայն `/v1/*` պրոքսի շարժիչը՝ անջատելով վահանակը և միայն վահանակին վերաբերող ենթահամակարգերը։ → [Headless Mode](docs/guides/HEADLESS.md)
-- **🔎 Մոդելների հայտնաբերում** — `/v1/models`-ը զտում է ըստ հնարավորության, համատեքստի, տեսակի և տեքստի, իսկ `POST /v1/models/query`-ը վերադարձնում է կարճ, դետերմինիստական ընտրված ցանկ՝ յուրաքանչյուր բանալիի համար նույն տեսանելիությամբ։ → [API Reference](docs/reference/API_REFERENCE.md)
-- **🔑 Բանալիի մակարդակով երթուղավորման կառավարում** — `forcedModel`-ով API բանալին կապեք մեկ մոդելի կամ կոմբինացիայի հետ և ատոմային եղանակով ավելացրեք կամ հեռացրեք բանալու մոդելներն ու կոմբինացիաները (`/api/keys/{id}/access`)։ → [API Reference](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ PII-ի ավելի մանրամասն կառավարում** — ըստ տեսակի ընտրություն, մինչև 20 վավերացված անհատական քողարկման ձևանմուշ և ըստ տեսակի հայտնաբերման հաշվիչներ․ հենց քողարկումը շարունակում է մնալ կամընտիր։ → [Guardrails](docs/security/GUARDRAILS.md)
-- **🌍 67 լեզու** — վահանակ, փաստաթղթերի հայելիներ և CLI, իսկ `npm run i18n:add-locale`-ը մեկ հրամանով լեզու է ավելացնում ամենուր։ → [i18n Guide](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — մուտքային A2A պատվիրակում ձեր գործակալների ցանցին, Conductor-ի հմտությունները Agent Card-ում և Faro push-to-talk ձայնային զրույցով վահանակի վահանակ։ → [A2A Server](docs/frameworks/A2A-SERVER.md)
-- **🛂 Հարմարվող ընդունում և գերբեռնվածության պաշտպանություն** — ծանրակշիռ զրույցի հարցումները հերթագրվում են՝ 503 սխալ վերադարձնելու փոխարեն, իսկ յուրաքանչյուր կապի համար կիրառվում են RPM-ի ատոմային շարժական վարձակալություններ։ → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ `/v1/models`-ի կանոնական դասավորություն** — յուրաքանչյուր պրովայդերի համար մեկ անընդհատ, պրովայդերներով խմբավորված բլոկ (կոմբինացիաները՝ առաջինը), որը կայուն է կատալոգի յուրաքանչյուր աղբյուրում։ → [API Reference](docs/reference/API_REFERENCE.md)
-- **🗜️ Սեղմման ամրապնդում** — լռելյայն միացված ընդարձակման պաշտպանիչ մեխանիզմ, Caveman փաթեթներ DE / FR / JA + չինարենի (wényán) համար, RTK զտիչներ Gradle-ի և .NET-ի համար։ → [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Հաստատագրված սակագնի ազնիվ արժեք** — բաժանորդային / coding-plan պրովայդերների արժեքը արժեքների վերլուծությունում ցուցադրվում է **$0**, իսկ բյուջեն, քվոտան և երթուղավորումը շարունակում են կատարել գնահատումներ։ → [API Reference](docs/reference/API_REFERENCE.md)
-- **⚖️ Quota-Share երթուղավորում** — ընդհանուր հաշվի քվոտան արդարացիորեն բաժանում է ընդհանուր բանալիների միջև՝ ռեսուրսներն արդյունավետ օգտագործելով, այնպես որ չօգտագործվող բաժինները տրամադրվում են այլոց։ → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 CLI/գործակալի կարգավորում մեկ հրամանով** — 15 գրանցված `setup-*` հրաման, `omniroute run`-ը գործարկում է 7 CLI (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI), իսկ `omniroute configure`-ը աջակցում է 11 թիրախի՝ ինտերակտիվ պրովայդեր+մոդել ընտրիչով և յուրաքանչյուր համատեքստի նախընտրելիներով։ → [CLI Integrations](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Հեռակա ռեժիմ** — կառավարեք հեռակա OmniRoute-ը սահմանափակված նշաններով (`connect` / `contexts` / `tokens`) և `antigravity` OAuth օգնականով՝ VPS տեղադրումների համար։ → [Remote Mode](docs/guides/REMOTE-MODE.md)
-- **🧭 Ավելի խելացի ավտոմատ երթուղավորում** — `auto/<category>:<tier>` կոմբինացիաներ, **Fusion** (մոդելների վահանակ + դատավոր), առաջադրանքին համապատասխան երթուղավորում, յուրաքանչյուր հարցման համար մոդելի / ռեժիմի / USD բյուջեի վերասահմանումներ։ → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Միացվող սեղմում** — 12 համակցվող շարժիչ + Compression Studios՝ LLMLingua-2, երկաստիճան Ultra, omniglyph, յուրաքանչյուր քայլի fidelity gate, GCF v3.2, քաշելով վերադասավորվող խմբագրիչ։ → [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ Թափանցիկ MITM վերծանում (TPROXY)** — գրանցող CLI-ներ, որոնք անտեսում են պրոքսիի միջավայրի փոփոխականները, ինչպես նաև յուրաքանչյուր SNI-ի համար CA + trust-store տեղադրիչ։ → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Արժեքի հեռաչափություն ամենուր** — `X-OmniRoute-*` արժեքի/օգտագործման վերնագրեր յուրաքանչյուր վերջնակետում, քեշի ՀԻԹ-ի խնայողությունների վերնագիր, յուրաքանչյուր բանալիի համար USD ծախսի քվոտաներ։ → [API Reference](docs/reference/API_REFERENCE.md)
-- **🧠 Ձեր կողմից կառավարվող հիշողություն** — լռելյայն անջատված, կամընտիր int8 վեկտորների քվանտավորում + տիպավորված մարում, յուրաքանչյուր հարցման համար `x-omniroute-no-memory`։ → [Memory](docs/frameworks/MEMORY.md)
-- **🛡️ Անվտանգություն** — prompt-injection-ի պաշտպանիչ մեխանիզմ յուրաքանչյուր LLM երթուղու համար (red-team փաթեթ), կամընտիր credential-masking պաշտպանիչ մեխանիզմ (երկու ուղղություններով քողարկում է արտահոսած API բանալիները/գաղտնիքները), DuckDuckGo-ի անվճար վեբ որոնում՝ որպես վերջին միջոց, և վահանակի համար կամընտիր OIDC մուտքի սահմանափակում (գաղտնաբառով մուտքը միշտ հասանելի է մնում)։ → [Guardrails](docs/security/GUARDRAILS.md)
-- **🖼️ Նոր վերջնակետեր** — `/v1/ocr` (Mistral OCR) և `/v1/audio/translations` (Whisper-ի ոճով) լրացնում են մեդիայի հնարավորությունների շարքը։ → [API Reference](docs/reference/API_REFERENCE.md)
-- **🎨 Պատկերների / տեսանյութերի / աուդիոյի ստեղծում** — մեդիայի համար մեկ API՝ xAI Grok Imagine և Novita AI տեսանյութ, ComfyUI, Magnific, Adobe Firefly, Segmind, ինչպես նաև ElevenLabs-ի նման խոսքի պրովայդերներ։ → [API Reference](docs/reference/API_REFERENCE.md)
-- **🌍 Տեղակայում և գործարկում** — հակադարձ պրոքսիի `basePath`, զննարկչի լեզվի ավտոմատ հայտնաբերում, յուրաքանչյուր բանալիի սարքի հետևում, root-less MITM վստահություն, zh-TW տեղայնացում։ → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Ավելի շատ պրովայդերներ և գործակալներ** — ամպային գործակալներ (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI)՝ զննարկչով + OAuth մուտքով, Ollama-ի առաջին կարգի քարտ, Claude Opus 5 և Sonnet 5, Kimi-ի պաշտոնական գործընկերություն (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… և թարմացված **394 պրովայդերի կատալոգ**։ → [Providers](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 Երթուղավորման թափանցիկություն** — յուրաքանչյուր պատասխան պարունակում է `X-OmniRoute-Decision` վերնագիր, որը նշում է այն ռազմավարությունը/պրովայդերը/ուշացումը, որով սպասարկվել է հարցումը, նոր `cache-optimized` կոմբինացիոն ռազմավարությունը և Auto-Combo-ի `cacheAffinity` գործակիցը կրկնվող հարցումները վերադարձնում են քեշավորված նախածանցը պահող կապին, իսկ միայն կարդալու համար նախատեսված `/v1/auto-combo/{channel}/candidates` վերջնակետը բացահայտում է `auto/*` ալիքի ընթացիկ թեկնածուների հավաքածուն։ → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ Տեղական արտադրողականություն և ենթակառուցվածք** — մեկ սեղմումով տեղական Redis, Cloudflare Workers / Deno Deploy relay տեղակայիչներ, Bifrost և Mux՝ վերահսկվող ներկառուցված ծառայությունների տեսքով։ → [Ներկառուցված ծառայություններ](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Նաև ներառված է** — պլագինների ֆրեյմվորք և marketplace, Omni/Agent/GitHub հմտությունների ֆրեյմվորքեր, Obsidian vault-ի ինտեգրում (22 MCP գործիք), OpenAI-ի հետ համատեղելի Batch և Files API-ներ, սեմանտիկ պատասխանների քեշ, առաջատարների աղյուսակներով գեյմիֆիկացում, ACP գործակալների հայտնաբերում (15 ներկառուցված գործակալ), գրանցամատյանների պլանավորված արտահանում BigQuery, `auto/chaos` զուգահեռ բազմամոդելային fan-out, Telegram բոտի կամուրջ, հավելվածում ներկառուցված տարբերակների կառավարիչ և LMArena-ELO-ի անվճար մատակարարների վարկանիշներ։ → [Փաստաթղթեր](docs/README.md)
+**[OmniRoute Ռադար →](docs/frameworks/RADAR.md)**
 
 <br/>
 
-<div align="center">
+## Ինչ նորություն կա
 
-## 🤖 Համատեղելի CLI-ներ և Ծրագրավորման Գործակալներ
+<a id="v3854"></a>
 
-> Մեկ կարգավորում — `http://localhost:20128/v1` — և **բոլոր** AI IDE-ները կամ CLI-ները աշխատում են անվճար և մատչելի մոդելներով։
+### v3.8.54 (2026-11-17)
 
-<div align="center">
+Վերջին թողարկումը: [Թողարկման նշումներ](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.54).
+
+- **Հաշվի ուղղում.** Նշեք ավտոմատ համակցված հաշիվները Նախընտրելի, Նորմալ, Պահուստավորված կամ Բացառված: Միացնել եղբոր կամ եղբոր հաշվի ձախողումը, երբ նախընտրածը դանդաղ է արձագանքում: [Auto-Combo](docs/routing/AUTO-COMBO.md#account-preferences-for-saved-auto-combos) · [PR #19259](https://github.com/cheaper-inference/OmniRoute/pull/19259)
+- **Նոր համակցված ռազմավարություններ.** `expiry-first` առաջնահերթություն է տալիս ժամկետի ավարտին մոտ գտնվող քվոտային: `jev` օգտագործում է System One-ը թիրախ և դրա հետադարձ կապերը ընտրելու համար: [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **Կոմբոներ ըստ վերջնակետի:** Սահմանեք առանձին թիրախներ և ռազմավարություններ զրույցի, որոնման և առբերման, ներկառուցումների, վերաորակավորման, պատկերների, տեսանյութերի, երաժշտության, OCR և աուդիո համար: [PR #18731](https://github.com/cheaper-inference/OmniRoute/pull/18731)
+- **Գործակալական խողովակաշարեր.** Գործիքի կրկնվող պտույտները անփոփոխ արդյունքներով կամ հաջորդական ձախողումներով վերադարձնում են վերահսկողությունը պլանավորողին: [PR #19318](https://github.com/cheaper-inference/OmniRoute/pull/19318)
+- **API ստեղնաշարի կառավարում:** Խնայեք բազմակի օգտագործման կանոնները՝ առանց գաղտնիքների և սահմանեք 5-ժամյա ծախսերի սահմանաչափեր յուրաքանչյուր բանալիով: [Հիմնական ձևանմուշներ](docs/guides/KEY-TEMPLATES.md) · [PR #18362](https://github.com/cheaper-inference/OmniRoute/pull/18362)
+- **Մատակարարի մուտք:** Օգտագործեք Sign in ChatGPT ով հանրային պատասխանների համար API կամ մուտք գործեք Microsoft 365 Copilot աշխատանքային կամ դպրոցական հաշիվով: [PR #15201](https://github.com/cheaper-inference/OmniRoute/pull/15201) · [Microsoft 365 Copilot](docs/providers/COPILOT-M365.md)
+- **Նոր մատակարարներ.** Replicate-ն ավելացնում է զրույցը՝ Cerebrium-ի, Hetzner Inference-ի և Grokified-ի նոր միակցիչների հետ մեկտեղ: [PR #19206](https://github.com/cheaper-inference/OmniRoute/pull/19206)
+
+<a id="v3853"></a>
+
+### v3.8.53 (2026-11-06)
+
+Վերանախագծված վահանակ, թիմային ծախսերի կենտրոններ, Entra ID API մուտքի համար, երկու գործոնով վահանակի մուտք և Kubernetes մանիֆեստներ: [Թողարկման նշումներ](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.53).
+
+<a id="v3852"></a>
+
+### v3.8.52 (2026-10-19)
+
+Անգլուխ ռեժիմ, մոդելի հայտնաբերման զտիչներ, մեկ բանալին մոդելի ամրացում, Nadir երթուղիչ և LLMLingua սեղմման կողային սայլ: [Թողարկման նշումներ](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.52).
+
+<a id="v3851"></a>
+
+### v3.8.51 (2026-09-30)
+
+Բաժանորդագրության առաջին երթուղին, `quota-weighted` ռազմավարությունը, նվագախմբի վահանակը, ընդլայնված լեզվական աջակցությունը և OpenCode v2 հավելվածը: [Թողարկման նշումներ](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.51).
+
+<a id="v3850"></a>
+
+### v3.8.50 (2026-08-26)
+
+Modality Bridge-ը, ռադարի կատալոգը, OmniConductor նավատորմի պատվիրակությունը և աշխատասեղանի հավելվածը աշխատող սերվերին միացնելու աջակցություն: [Թողարկման նշումներ](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.50).
+
+Տես [CHANGELOG.md](CHANGELOG.md) բոլոր փոփոխությունների համար, իսկ [ROADMAP.md](ROADMAP.md) պլանավորված աշխատանքի համար:
+
+<br/>
+
+## Համատեղելի CLIs և կոդավորման գործակալներ
+
+Վահանակի կատալոգի ցուցակները** 39 ինտեգրում** (28 կոդավորման գործիք և 11 գործակալ): CLI մանիֆեստն ավելացնում է Gemini CLI, որը գործարկվում է `omniroute run` ով և չորս գործիքներ, որոնք կարող են հայտնաբերել միայն: Նրանցից բոլորից,** 8** գործարկել `omniroute run` ով,** 12** կարող է կարգավորվել `omniroute configure` ով և** 16** ունեն հատուկ `setup-*` հրաման: Ընտրեք այն ճանապարհը, որը համապատասխանում է ձեր ուզածին:
+
+### Եթե ցանկանում եք գործարկել գործիք մեկ հրամանով
+
+`omniroute run` գործիքը սկսում է OmniRoute ի URL և բանալին իր միջավայրում: Ոչինչ գրված չէ սկավառակի վրա:
+
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
-  </tr>
-  <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
-  </tr>
-  <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
-  </tr>
-  <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" height="40" alt="Claude Code"/><br/><sub><b>Claude ծածկագիր</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" height="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub></a></td>
+    <td align="center" width="96"><img src="./public/providers/gemini.svg" width="40" height="40" alt="Gemini CLI"/><br/><sub><b>Gemini CLI</b></sub></td>
+    <td align="center" width="96"><a href="https://qwenlm.github.io/qwen-code-docs/en/users/configuration/model-providers/"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qwen-color.svg" width="40" height="40" alt="Qwen Code"/><br/><sub><b>Qwen ծածկագիր</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/anomalyco/opencode"><img src="./docs/assets/cli-icons/opencode-tile.svg" width="40" height="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub></a></td>
+    <td align="center" width="96"><a href="https://aider.chat/docs/config/options.html"><img src="./docs/assets/cli-icons/aider-tile.svg" width="40" height="40" alt="Aider"/><br/><sub><b>Աիդեր</b></sub></a></td>
+    <td align="center" width="96"><a href="https://block.github.io/goose/"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" height="40" alt="Goose"/></picture><br/><sub><b>Սագ</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/whycorporation/whycodes"><img src="./docs/assets/cli-icons/whycodes-tile.svg" width="40" height="40" alt="WhyCodes"/><br/><sub><b>WhyCodes</b></sub></a></td>
   </tr>
 </table>
-</div>
-
-<div align="center">
-<b>＋ աշխատում է նաև</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>ցանկացած OpenAI-համատեղելի գործիքի հետ</b>
-</div>
-
-<sub>📖 Յուրաքանչյուր գործիքի համար առանձին կարգավորում բոլոր 39 գործիքների համար (28 CLI Code-ի + 11 CLI Agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode հավելում → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
-
-</div>
-
-<br/>
-
-**Մեկ հրամանով գործարկեք ցանկացած աջակցվող CLI OmniRoute-ի միջոցով** — առանց կոնֆիգուրացիոն ֆայլերի գրելու,
-հավաստագրերը ներարկվում են յուրաքանչյուր գործընթացի համար, Qwen/Gemini ստանում են մեկանգամյա մեկուսացված home:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
-omniroute run codex    --model glm/glm-5.2             # OpenAI Codex CLI
+omniroute run codex    --model glm/glm-5.2             # Codex CLI
 omniroute run aider    --model glm/glm-5.2 -- --message "reply OK"
 omniroute run goose    --model glm/glm-5.2
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
+omniroute setup-whycodes && omniroute run whycodes --model glm/glm-5.2
 
-# Կամ ընտրեք provider+model ինտերակտիվ կերպով և գրեք գործիքի սեփական կոնֆիգը.
-omniroute configure codex          # նաև՝ claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Or pick provider and model interactively and write the tool's own config:
+omniroute configure codex   # also: claude opencode qwen aider goose gemini whycodes cline continue kilo 5dive
 ```
 
-Յուրաքանչյուր հրաման հարգում է ակտիվ հեռավոր կոնտեքստը (`omniroute connect <host>`), `--dry-run`
-նախադիտում է ճշգրիտ միջավայրը/արգումենտները առանց գործարկելու, իսկ `--api-key-env NAME` գաղտնիքները պահում է
-ձեր shell-ի պատմությունից դուրս։ → [CLI ինտեգրացիաներ](docs/guides/CLI-INTEGRATIONS.md)
+Յուրաքանչյուր հրաման հարգում է ակտիվ հեռավոր համատեքստը (`omniroute connect <host>`): `--dry-run` տպում է ճշգրիտ env և args՝ առանց որևէ բան գործարկելու, իսկ `--api-key-env NAME` բանալին հեռու է պահում ձեր shell պատմությունից: Qwen կոդը և Gemini CLI աշխատում են ժամանակավոր տանը, որը ջնջվում է ելքի ժամանակ: WhyCodes իր մատակարարը կարդում է միայն `config.toml` ից, այնպես որ գործարկեք `setup-whycodes` մեկ անգամ `run whycodes` առաջ: → [CLI Ինտեգրումներ](docs/guides/CLI-INTEGRATIONS.md)
 
-<br/>
+### Եթե ցանկանում եք OmniRoute գրի գործիքի կոնֆիգուրացիա
+
+`omniroute configure <tool>` թույլ է տալիս ընտրել մատակարար և մոդել, այնուհետև գրում է գործիքի սեփական կազմաձևման ֆայլը: Գործարկման բոլոր ութ թիրախները աջակցում են դրան, գումարած ստորև ներկայացված չորս գործիքները: Փոխարենը ևս չորս գործիքներ ունեն հատուկ `setup-*` հրաման:
+
+<table>
+  <tr>
+    <td align="center" width="96"><a href="https://docs.cline.bot/"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" height="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.continue.dev/"><img src="./public/providers/continue.svg" width="40" height="40" alt="Continue"/><br/><sub><b>Շարունակեք</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/Kilo-Org/kilocode"><img src="./docs/assets/cli-icons/kilo-tile.svg" width="40" height="40" alt="Kilo Code"/><br/><sub><b>Կիլոյի կոդը</b></sub></a></td>
+    <td align="center" width="96"><a href="https://5dive.ai"><img src="./docs/assets/cli-icons/5dive-tile.svg" width="40" height="40" alt="5dive"/><br/><sub><b>5 սուզվել</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.cursor.com/settings/models"><img src="./public/providers/cursor.svg" width="40" height="40" alt="Cursor"/><br/><sub><b>Cursor</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.roocode.com/"><img src="./public/providers/roocode.svg" width="40" height="40" alt="Roo Code"/><br/><sub><b>Roo Code</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/charmbracelet/crush"><img src="./docs/assets/cli-icons/crush-tile.svg" width="40" height="40" alt="Crush"/><br/><sub><b>Ջախջախել</b></sub></a></td>
+    <td align="center" width="96"><a href="https://zed.dev/docs/ai/llm-providers#openai-api-compatible"><img src="./public/providers/zed-hosted.svg" width="40" height="40" alt="Zed"/><br/><sub><b>Zed</b></sub></a></td>
+  </tr>
+</table>
+
+| <img width="2000" height="0" alt=""> գործիք                                                      | Հրաման                         | Այն, ինչ գրում է                              |
+| ------------------------------------------------------------------------------------------------ | ------------------------------ | --------------------------------------------- |
+| [Claude ծածկագիր](https://github.com/anthropics/claude-code)                                     | `omniroute configure claude`   | ~/.claude/settings.json                       |
+| [Codex CLI](https://github.com/openai/codex)                                                     | `omniroute configure codex`    | ~/.codex/config.toml                          |
+| Gemini CLI                                                                                       | `omniroute configure gemini`   | ~/.gemini/settings.json                       |
+| [Qwen ծածկագիր](https://qwenlm.github.io/qwen-code-docs/en/users/configuration/model-providers/) | `omniroute configure qwen`     | ~/.qwen/settings.json                         |
+| [OpenCode](https://github.com/anomalyco/opencode)                                                | `omniroute configure opencode` | ~/.config/opencode/opencode.json              |
+| [Աիդեր](https://aider.chat/docs/config/options.html)                                             | `omniroute configure aider`    | ~/.aider.conf.yml                             |
+| [Սագ](https://block.github.io/goose/)                                                            | `omniroute configure goose`    | ~/.config/goose/config.yaml                   |
+| [WhyCodes](https://github.com/whycorporation/whycodes)                                           | `omniroute configure whycodes` | ~/.whycodes/config.toml                       |
+| [Cline](https://docs.cline.bot/)                                                                 | `omniroute configure cline`    | ~/.cline/data/globalState.json                |
+| [Շարունակեք](https://docs.continue.dev/)                                                         | `omniroute configure continue` | ~/.continue/config.yaml                       |
+| [Կիլոյի կոդը](https://github.com/Kilo-Org/kilocode)                                              | `omniroute configure kilo`     | ~/.local/share/kilo/auth.json                 |
+| [5 սուզվել](https://5dive.ai)                                                                    | `omniroute configure 5dive`    | 5 dive auth պրոֆիլը                           |
+| [Cursor](https://docs.cursor.com/settings/models)                                                | `omniroute setup-cursor`       | Ոչինչ; տպում է Cursor կարգավորումների քայլերը |
+| [Roo Code](https://docs.roocode.com/)                                                            | `omniroute setup-roo`          | Roo ներմուծել JSON և autoImport ցուցիչ        |
+| [Ջախջախել](https://github.com/charmbracelet/crush)                                               | `omniroute setup-crush`        | ~/.config/crush/crush.json                    |
+| [Zed](https://zed.dev/docs/ai/llm-providers#openai-api-compatible)                               | `omniroute setup-zed`          | Zed settings.json                             |
+
+### Եթե ձեր գործիքը վերցնում է միայն բազային URL
+
+Կատալոգի այս գրառումները վահանակում ունեն յուրաքանչյուր գործիքի ուղեցույց: Գործիքի OpenAI- կամ Anthropic-ի հետ համատեղելի URL հիմքը դրեք `http://localhost:20128/v1` և օգտագործեք OmniRoute API ստեղնը: Նրանցից երեքը (Factory Droid, Cursor Agent CLI և Warp AI) միայն մասամբ են աջակցում մաքսային բազայի URL :
+
+<table>
+  <tr>
+    <td align="center" width="96"><a href="https://github.com/Hmbown/CodeWhale"><img src="./docs/assets/cli-icons/codewhale-tile.svg" width="40" height="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/hunterbown/deepseek-tui"><img src="./public/providers/deepseek.svg" width="40" height="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub></a></td>
+    <td align="center" width="96"><img src="./public/providers/factory.svg" width="40" height="40" alt="Factory Droid"/><br/><sub><b>Գործարանային Droid</b></sub></td>
+    <td align="center" width="96"><a href="https://github.com/antinomyhq/forge"><img src="./docs/assets/cli-icons/forge-tile.svg" width="40" height="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub></a></td>
+    <td align="center" width="96"><a href="https://x.ai/cli"><img src="./public/providers/grok.svg" width="40" height="40" alt="Grok Build"/><br/><sub><b>Grok Կառուցել</b></sub></a></td>
+  </tr>
+  <tr>
+    <td align="center" width="96"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" height="40" alt="Hermes Agent"/></picture><br/><sub><b>Hermes գործակալ</b></sub></td>
+    <td align="center" width="96"><a href="https://github.com/1jehuang/jcode"><img src="./docs/assets/cli-icons/jcode-tile.svg" width="40" height="40" alt="jcode"/><br/><sub><b>jcode</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.letta.com"><img src="./docs/assets/cli-icons/letta-tile.svg" width="40" height="40" alt="Letta CLI"/><br/><sub><b>Letta CLI</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/can1357/oh-my-pi"><img src="./docs/assets/cli-icons/omp-tile.svg" width="40" height="40" alt="Oh My Pi"/><br/><sub><b>Oh My Pi</b></sub></a></td>
+    <td align="center" width="96"><img src="./public/providers/openclaw.svg" width="40" height="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub></td>
+  </tr>
+  <tr>
+    <td align="center" width="96"><a href="https://github.com/badlogic/pi"><img src="./docs/assets/cli-icons/pi-tile.svg" width="40" height="40" alt="Pi"/><br/><sub><b>Պի</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/PrimeIntellect-ai/prime-agent"><img src="./docs/assets/cli-icons/prime-agent-tile.svg" width="40" height="40" alt="Prime Agent"/><br/><sub><b>Վարչապետ գործակալ</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/leonardcser/smelt"><img src="./docs/assets/cli-icons/smelt-tile.svg" width="40" height="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/asheshgoplani/agent-deck"><img src="./docs/assets/cli-icons/agent-deck-tile.svg" width="40" height="40" alt="Agent Deck"/><br/><sub><b>Գործակալ տախտակամած</b></sub></a></td>
+    <td align="center" width="96"><a href="https://code.visualstudio.com/docs/copilot/overview"><img src="./public/providers/copilot.svg" width="40" height="40" alt="GitHub Copilot"/><br/><sub><b>GitHub Copilot</b></sub></a></td>
+  </tr>
+  <tr>
+    <td align="center" width="96"><a href="https://docs.cursor.com/advanced/api"><img src="./public/providers/cursor.svg" width="40" height="40" alt="Cursor Agent CLI"/><br/><sub><b>Cursor Գործակալ CLI</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.openinterpreter.com/"><img src="./docs/assets/cli-icons/interpreter-tile.svg" width="40" height="40" alt="Open Interpreter"/><br/><sub><b>Բացեք թարգմանիչը</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/Gitlawb/openclaude"><img src="./docs/assets/cli-icons/openclaude-tile.svg" width="40" height="40" alt="OpenClaude"/><br/><sub><b>OpenClaude</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.warp.dev/"><img src="./docs/assets/cli-icons/warp-tile.svg" width="40" height="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub></a></td>
+    <td align="center" width="96"><img src="./public/providers/cli-generic.svg" width="40" height="40" alt="Custom CLI"/><br/><sub><b>Պատվերով CLI</b></sub></td>
+  </tr>
+</table>
+
+```bash
+export OPENAI_BASE_URL=http://localhost:20128/v1
+export OPENAI_API_KEY=<your OmniRoute API key>
+```
+
+### Եթե ձեր գործիքը չունի բազային URL կարգավորում, կամ միայն հայտնաբերված է
+
+Այս գործիքները չեն ընդունում հատուկ հիմք URL: ZCode միանում է իր տեղական հավելվածի սերվերի, Antigravity և Kiro միջոցով OmniRoute ի MITM թիրախների միջոցով, և Hermes-ն ունի միայն ուղեցույցի մուտքագրում (օգտագործեք Hermes Agent-ը բազային URL-ի տեղադրման համար): Amp, Devin CLI, Qoder CLI և Windsurf հայտնաբերված են ձեր մեքենայի վրա, բայց կատալոգում չկան:
+
+<table>
+  <tr>
+    <td align="center" width="96"><a href="https://zcode.z.ai"><img src="./public/providers/zhipu.svg" width="40" height="40" alt="ZCode"/><br/><sub><b>ZCode</b></sub></a></td>
+    <td align="center" width="96"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" height="40" alt="Hermes"/></picture><br/><sub><b>Հերմես</b></sub></td>
+    <td align="center" width="96"><img src="./docs/assets/cli-icons/antigravity-tile.svg" width="40" height="40" alt="Antigravity"/><br/><sub><b>Antigravity</b></sub></td>
+    <td align="center" width="96"><img src="./public/providers/kiro.svg" width="40" height="40" alt="Kiro"/><br/><sub><b>Kiro</b></sub></td>
+    <td align="center" width="96"><img src="./docs/assets/cli-icons/amp-tile.svg" width="40" height="40" alt="Amp"/><br/><sub><b>ուժեղացուցիչ</b></sub></td>
+    <td align="center" width="96"><img src="./docs/assets/cli-icons/devin-tile.svg" width="40" height="40" alt="Devin CLI"/><br/><sub><b>Devin CLI</b></sub></td>
+    <td align="center" width="96"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="40" height="40" alt="Qoder CLI"/><br/><sub><b>Qoder CLI</b></sub></td>
+    <td align="center" width="96"><img src="./public/providers/windsurf.svg" width="40" height="40" alt="Windsurf"/><br/><sub><b>Windsurf</b></sub></td>
+  </tr>
+</table>
+
+### Հաղորդվում է նաև, որ աշխատում է
+
+deyin.ai-ն և Zoo Code-ը չկա կատալոգում կամ CLI մանիֆեստում: Կարգավորեք դրանք որպես ընդհանուր OpenAI-ի հետ համատեղելի հաճախորդներ:
+
+<table>
+  <tr>
+    <td align="center" width="96"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" height="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./docs/assets/cli-icons/zoo-code-tile.svg" width="40" height="40" alt="Zoo Code"/><br/><sub><b>Կենդանաբանական այգու կոդը</b></sub></a></td>
+  </tr>
+</table>
+
+<sub>Մոխրագույն տեքստային սալիկները նշում են այն գործիքները, որոնց պատկերակը չի պահվում այս պահոցում. դրանք տեղապահներ են, ոչ թե նախագծերի լոգոները: Մեկ գործիքի տեղադրում → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · OpenCode փաթեթներ՝ [`@omniroute/opencode-plugin`](https://www.npmjs.com/package/@omniroute/opencode-plugin) (OpenCode v1, տեղադրված `omniroute setup opencode` կողմից) և [`@omniroute/opencode-plugin-v2`](https://www.npmjs.com/package/@omniroute/opencode-plugin-v2) (OpenCode v2): Ավելի հին `@omniroute/opencode-provider` հնացած է։</sub>
+
+<a id="ai-providers"></a>
+
+## 394 AI մատակարարներ, 50 անվճար մուտքով
+
+Յուրաքանչյուր թիվ տարբեր կերպ է հաշվում: Դրանցից ոչ մեկը մյուսին չի ավելացվում:
+
+<img src="./docs/diagrams/provider-numbers.svg" width="100%" alt="What each number counts. 394 registered providers. 140+ flagged with a free offer. 50 with free access: 43 with an API key, 6 without a key, 1 through a tool account and 0 through a web chat. 214 catalog rows with free access, 185 distinct free models, 40 recurring or keyless providers, and 12 pools with a published quota. Free tokens a month: ~11.3B as others count · ~90M real. The first figure adds up every row, including ended offers. The real figure counts each shared quota once."/>
+
+<sub>Զրույցի կատալոգ. ստատիկ մոդելների ցուցակներ 250 մատակարարներից, 3,186 provider/model զույգ, 1,539 հստակ հում մոդել IDs:</sub>
+
+### Յուրաքանչյուր հիմնական լաբորատոր — մեկ վերջնակետով
 
 <div align="center">
-
-## 🌐 394 AI մատակարար — 153-ը նշված են կատալոգում որպես անվճար
-
-</div>
-
-> **394 գրանցված մատակարար** կանոնական զրուցային, մեդիա, որոնման, տեղային, ամպային գործակալի և համակարգային հավաքածուներում, որոնցից **153-ն ունեն `hasFree: true` հայտնաբերման մետատվյալ**։ Զրուցային մոդելների ռեեստրը ներառում է **239 մատակարար / 3,059 տարբեր մատակարար-մոդել զույգ / 1,475 չմշակված մոդելի ID**․ առանձին անվճար բյուջեի կատալոգն ունի **465 յուրաքանչյուր մոդելի համար տող**, **34 պարբերաբար վերականգնվող փաթեթ** և **40 պարբերաբար վերականգնվող/բանալի չպահանջող՝ ընդմիշտ անվճար մատակարար**։ Սրանք նախագծմամբ տարբեր հայտարարիչներ են․ սահմանումները և փաթեթների կրկնությունների հեռացմամբ հաշվարկները ներկայացված են [Մատակարարների տեղեկատուում](docs/reference/PROVIDER_REFERENCE.md) և [Անվճար մակարդակներ](docs/reference/FREE_TIERS.md) բաժնում։
-
-<div align="center">
-
-### 🏢 Բոլոր խոշոր լաբորատորիաները՝ մեկ endpoint-ի միջոցով
 
 <table>
   <tr>
@@ -727,7 +707,7 @@ omniroute configure codex          # նաև՝ claude opencode qwen aider goose g
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cohere-color.svg" width="40" alt="Cohere"/><br/><sub>Cohere</sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/perplexity-color.svg" width="40" alt="Perplexity"/><br/><sub>Perplexity</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/perplexity-color.svg" width="40" alt="Perplexity"/><br/><sub>Տարակուսանք</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/huggingface-color.svg" width="40" alt="Hugging Face"/><br/><sub>HuggingFace</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/together-color.svg" width="40" alt="Together"/><br/><sub>Together</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/fireworks-color.svg" width="40" alt="Fireworks"/><br/><sub>Fireworks</sub><br/><sub>                           </sub></td>
@@ -736,216 +716,265 @@ omniroute configure codex          # նաև՝ claude opencode qwen aider goose g
   </tr>
 </table>
 
-<sub>…և ևս 350-ից ավելին․ յուրաքանչյուր պատկերակ հասանելի է վահանակի մատակարարների կատալոգից։ 📖 [Մատակարարների տեղեկատու](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>Ցուցադրված են 394 գրանցված պրովայդերներից 18-ը: Տեսեք դրանք բոլորը [Մատակարարի հղումում](docs/reference/PROVIDER_REFERENCE.md) :</sub>
 
-<br/>
+</div>
 
-### 🆓 Ընդմիշտ անվճար — $0, քարտ պետք չէ
+### Անվճար ամեն օր կամ ամիս
+
+Այս մատակարարներն առաջարկում են կրկնվող կամ առանց բանալի անվճար մուտք:
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Թոքենների սահմանափակում չկա</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Ավտոմատ երթուղիչ, Tencent Hy3<br/>Մշտապես անվճար</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Մշտապես անվճար</sub></td>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Անվճար մակարդակ</sub></td>
-    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Մշտապես անվճար</sub></td>
-    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Մշտապես անվճար</sub></td>
+    <td align="center" width="150"><img src="./docs/assets/provider-icons/kilo-gateway-tile.svg" width="42" alt="Kilo Gateway"/><br/><b>Kilo Gateway</b><br/><sub>Կրկնվող<br/>Kilo Auto Free, Tencent Hy3<br/>12 անվճար մոդել, առանց հրապարակված նշանային գլխարկի</sub></td>
+    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Հայց</b><br/><sub>Կրկնվող<br/>GPT-OSS 120B, Nemotron 3 Nano 30B<br/>Մոտ 200 requests/day</sub></td>
+    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Զ AI GLM</b><br/><sub>Կրկնվող<br/>GLM-4.7-Flash, GLM-4.5-Flash<br/>Հրապարակված նշանային գլխարկ չկա</sub></td>
+    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>Կրկնվող<br/>ERNIE 4.0 8K<br/>Հրապարակված նշանային գլխարկ չկա</sub></td>
+    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Փոշոտումներ</b><br/><sub>Առանց բանալի<br/>24 մոդել, առանց բանալի<br/>Անանուն մուտքը լավագույն ջանքերն է</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare Workers AI"/><br/><b>Cloudflare Բանվորներ AI</b><br/><sub>Ամենօրյա<br/>9 մոդել<br/>10K Neurons/day</sub></td>
   </tr>
   <tr>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>Անսահմանափակ ԱՆՎՃԱՐ</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Բանալին անհրաժեշտ չէ</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ մոդել<br/>10K նեյրոն/օր</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>Մոտ 40 RPM անվճար</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Միանվագ $5 վարկ, քարտը պարտադիր է</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free մոդելներ<br/>+$10 → ավելի բարձր RPM</sub></td>
+    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>Կրկնվող<br/>Gemma 4 31B, Nemotron 3.5 Super<br/>Մոտ 40 RPM</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>Ամենօրյա<br/><code>:free</code> մոդելներ<br/>Մեկանգամյա 10 դոլար լիցքավորումը բարձրացնում է շեմը մինչև 1000 requests/day</sub></td>
+    <td align="center" width="150"><img src="./public/providers/gemini.svg" width="42" alt="Gemini"/><br/><b>Gemini</b><br/><sub>Կրկնվող<br/>Gemini 2.5 Flash, Gemini 3 Flash նախադիտում<br/>Սահմանափակ դրույքաչափով, առանց հրապարակված նշանի սահմանաչափի</sub></td>
+    <td align="center" width="150"><img src="./public/providers/groq.svg" width="42" alt="Groq"/><br/><b>Groq</b><br/><sub>Ամենօրյա<br/>GPT-OSS 120B, GPT-OSS 20B<br/>Ամենօրյա գլխարկ յուրաքանչյուր մոդելի համար</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cohere.svg" width="42" alt="Cohere"/><br/><b>Cohere</b><br/><sub>Ամսական<br/>Հրամանիր ընտանիք<br/>Մոտ 800K tokens/month</sub></td>
+    <td align="center" width="150"><img src="./public/providers/morph.svg" width="42" alt="Morph"/><br/><b>Մորֆ</b><br/><sub>Ամսական<br/>morph-v3-large, morph-v3-fast<br/>200 requests/month</sub></td>
   </tr>
 </table>
 
-📖 Ամբողջական մեքենայաընթեռնելի կատալոգ → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+### Փորձնական և գրանցման վարկեր
 
-<br/>
-</div>
-
-<div align="center">
-
-## 🖥️ Որտեղ է աշխատում OmniRoute-ը — ամենուր
-
-</div>
-
-> Նույն հավելվածը, ձեր սարքը, ձեր կանոնները։ Գլոբալ npm տեղադրումից մինչև **ձեր հեռախոսը**՝ Termux-ի միջոցով։
+Այս փորձարկումները և գրանցման վարկերը միանգամյա առաջարկներ են, որոնք սպառվում են կամ ավարտվում են:
 
 <table>
-  <tr><th align="left">Հարթակ</th><th align="left">Տեղադրում</th><th align="left">Հատկանիշներ</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (գլոբալ)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Մեկ հրաման, ցանկացած ՕՀ</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (գլոբալ)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Նույն ռեեստրի tarball-ը, ավելի արագ տեղադրում</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Բազմաճարտարապետական <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>Սեղանադիր (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Բնիկ պատուհան + համակարգային տրեյ — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>Մենյուի գոտի (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Վերահսկում և ինքնաշխատ թարմացնում է սերվերը — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>բնիկ <code>arm64</code></td><td align="left">Raspberry Pi, ARM սերվերներ, Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Աշխատում է <b>ձեր հեռախոսում</b>, 24/7, առանց root-ի</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Ավելացնել հիմնական էկրանին"</td><td align="left">Ամբողջ էկրանով, անցանց, տեղադրելի դիտարկիչից</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode պլագին</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">OpenCode-ի բնիկ ինտեգրում</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>տեղադրեք <b>OmniCopilot</b> ընդլայնումը</td><td align="left">OmniRoute-ի յուրաքանչյուր մոդելը բնիկ Copilot Chat-ի ընտրիչում — stable և Insiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>Սկզբնաղբյուրից</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Փոփոխեք, ներդրում կատարեք</td></tr>
+  <tr>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS 120B<br/>Միանվագ $5 վարկ, վավեր 30 օր: Պահանջվում է քարտ:</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder"/><br/><b>Qoder</b><br/><sub>Qwen3.8-Max-Preview, Kimi-K3<br/>Գրանցման վարկեր 9 մոդելների վրա</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>$0 մոդելներ թվարկված SiliconFlow ի կողմից<br/>$1 վարկ, գումարած $0 մոդել՝ ինքնությունը հաստատելուց հետո</sub></td>
+    <td align="center" width="150"><img src="./public/providers/deepseek.svg" width="42" alt="DeepSeek"/><br/><b>DeepSeek</b><br/><sub>DeepSeek V4 Pro, V4 Flash<br/>5M ժետոն գրանցման ժամանակ, առանց քարտի</sub></td>
+    <td align="center" width="150"><img src="./public/providers/fireworks.svg" width="42" alt="Fireworks"/><br/><b>Fireworks</b><br/><sub>DeepSeek V4, GLM 5.1<br/>$1 սկզբնական վարկ</sub></td>
+    <td align="center" width="150"><img src="./public/providers/hyperbolic.svg" width="42" alt="Hyperbolic"/><br/><b>Հիպերբոլիկ</b><br/><sub>QwQ 32B, DeepSeek R1<br/>$1–5 փորձնական վարկ</sub></td>
+  </tr>
 </table>
 
-<sub>📖 [Docker-ի ուղեցույց](docs/guides/DOCKER_GUIDE.md) · [Սեղանադիր](electron/README.md) · [Մենյուի գոտու տրեյ](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+Մատակարարի սահմանաչափերը և իրավասության փոփոխությունը. նախքան քվոտայի վրա հույս դնելը ստուգեք մատակարարին: Ամբողջական կատալոգ → [Մատակարարի Տեղեկանք](docs/reference/PROVIDER_REFERENCE.md) · Սահմանափակումներ, լողավազաններ և բյուջեի մաթեմատիկական → [Անվճար մակարդակներ](docs/reference/FREE_TIERS.md) · Ուղիղ օգտագործում → <code>/dashboard/free-tiers</code>
 
-<br/>
+## Որտեղ OmniRoute վազում
 
-<div align="center">
+> Մեկ սերվեր, բազմաթիվ տներ՝ գլոբալ npm տեղադրում, կոնտեյներ, աշխատասեղանի հավելված, macOS ցանկի տող կամ Android հեռախոս: Այնուհետև հաճախորդները միանում են դրան զննարկիչից, VS Code-ից կամ OpenCode:
 
-### 🧩 Նորություն․ OmniRoute-ը VS Code-ի բնիկ Copilot Chat-ում
+<p align="center">
+  <a href="https://www.npmjs.com/package/omniroute"><img src="https://img.shields.io/npm/dm/omniroute?logo=npm&label=npm%20downloads" alt="npm downloads per month"/></a>
+  <a href="https://hub.docker.com/r/diegosouzapw/omniroute"><img src="https://img.shields.io/docker/pulls/diegosouzapw/omniroute?logo=docker&label=docker%20pulls" alt="Docker pulls of diegosouzapw/omniroute"/></a>
+  <a href="https://github.com/cheaper-inference/OmniRoute/releases"><img src="https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?logo=github&label=release%20asset%20downloads" alt="GitHub release asset downloads"/></a>
+  <a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"><img src="https://img.shields.io/open-vsx/v/diegosouzapw/omnicopilot?label=OmniCopilot%20on%20Open%20VSX" alt="OmniCopilot version on Open VSX"/></a>
+  <a href="https://github.com/zoispag/omniroute-tray/releases"><img src="https://img.shields.io/github/downloads/zoispag/omniroute-tray/total?logo=apple&label=OmniRouteTray%20downloads" alt="OmniRouteTray DMG downloads"/></a>
+</p>
 
-</div>
-
-> Ոչ մի նոր կողագոտի, ոչ մի նոր չաթի միջերես — OmniRoute-ի կողմից սպասարկվող յուրաքանչյուր մոդել հայտնվում է հենց
-> **Copilot Chat-ի մոդելների ընտրիչում, որն արդեն օգտագործում եք**։ VS Code 1.122-ից սկսած՝ պրովայդերի մոդելներն աշխատում են
-> առանց GitHub մուտք գործելու կամ Copilot-ի բաժանորդագրության — գործակալի ռեժիմ, գործիքների կանչում և տեսլական՝
-> անվճար։
-
-Տեղադրեք **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** ընդլայնումը, այն ուղղեք
-ձեր OmniRoute սերվերին (կանխադրված է `localhost:20128`), ապա բացեք Copilot Chat → մոդելների ընտրիչ
-→ **Կառավարել մոդելները…** → **OmniRoute**։
+### Գործարկեք սերվերը
 
 <table>
-  <tr><th align="left">Խանութ</th><th align="left">Հղում</th><th align="left">Աշխատում է</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Տեղադրել →</a></td><td align="left">VS Code — stable և Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Տեղադրել →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left">Հարթակ</th><th align="left">Տեղադրեք</th><th align="left">Նշումներ</th></tr>
+  <tr><td align="left" nowrap><b>npm (Node.js)</b></td><td align="left" nowrap><code>npm install -g omniroute</code> → <code>omniroute</code></td><td align="left">Windows, macOS եւ Linux. Node.js <code>&gt;=22.22.2 &lt;23</code> կամ <code>&gt;=24 &lt;27</code></td></tr>
+  <tr><td align="left" nowrap><b>Docker</b></td><td align="left"><code>docker run -d -p 20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest</code></td><td align="left"><code>linux/amd64</code> եւ <code>linux/arm64</code>. Ավելի վաղ պատկերները և <code>next</code> ալիքը մնում են <code>diegosouzapw/omniroute</code> ում</td></tr>
+  <tr><td align="left" nowrap><b>Պոդման</b></td><td align="left" nowrap><code>podman compose</code> կամ Quadlet</td><td align="left">Պատրաստի միավորներ <a href="contrib/podman/README.md"><code>contrib/podman</code></a></td></tr>
+  <tr><td align="left" nowrap><b>Անգլուխ սերվեր / VPS</b></td><td align="left" nowrap><code>omniroute serve --headless</code></td><td align="left">Միայն API, վահանակն անջատված է: Կարծրացված Կազմեք փաթեթը <a href="contrib/vps/README.md"><code>contrib/vps</code></a></td></tr>
+  <tr><td align="left" nowrap><b>Սեղանի հավելված (Electron)</b></td><td align="left" nowrap><a href="https://github.com/cheaper-inference/OmniRoute/releases/latest">Ներբեռնեք թողարկումներից</a></td><td align="left">Windows <code>.exe</code>, macOS <code>.dmg</code> (Intel և Apple Silicon), Linux <code>.AppImage</code> և <code>.deb</code> (x64 և arm64)</td></tr>
+  <tr><td align="left" nowrap><b>Համակարգային սկուտեղ CLI ից</b></td><td align="left" nowrap><code>omniroute serve --tray</code></td><td align="left">macOS, Windows եւ գրաֆիկական Linux. Սկուտեղի ընտրացանկը բացում է վահանակը և գրանցվում, անջատում է ավտոմատ մեկնարկը և դադարեցնում սերվերը</td></tr>
+  <tr><td align="left" nowrap><b>macOS մենյուի բար (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Համայնքի հավելված: Վերահսկում և ավտոմատ կերպով թարմացնում է սերվերը: Apple Silicon, macOS 13 +. <a href="#omniroutetray">Մանրամասները ստորև</a></td></tr>
+  <tr><td align="left" nowrap><b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs python build-essential git</code><br/><code>npx -y omniroute@latest</code></td><td align="left">Ոչ մի արմատ: Անհրաժեշտ է Node 22.x կամ 24.x + և ստեղծել գործիքներ բնիկ մոդուլների համար: Անջատեք մարտկոցի օպտիմիզացումը՝ այն աշխատեցնելու համար</td></tr>
+  <tr><td align="left" nowrap><b>Աղբյուրից</b></td><td align="left" nowrap><code>npm install &amp;&amp; npm run dev</code></td><td align="left">Կոտրել այն և նպաստել</td></tr>
 </table>
 
-Խմբագրիչի ներսից բացեք **Ընդլայնումներ** տեսքը, որոնեք **"OmniRoute"**, սեղմեք **Տեղադրել**
-— երկու խանութներում էլ աշխատում է նույն կերպ։ Սկզբնաղբյուրը, խնդիրները և հրապարակման ուղեցույցը հասանելի են
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)-ում։
+> [!NOTE]
+> **Node.js աջակցվող գործարկման ժամանակն է:** Լավագույն ջանքերի համատեղելիության ուղին թույլ է տալիս `bun install -g omniroute` սկսել `bun:sqlite` ից՝ առանց աջակցության նույն երաշխիքի:
 
-<sub>📖 [VS Code Copilot Chat-ի ուղեցույց](docs/guides/VSCODE-COPILOT.md) — կարգավորում, ինչ է ցուցադրում ընտրիչը, վահանակը ներդիրում, խնդիրների լուծում</sub>
+### Միացեք գործող սերվերին
+
+<table>
+  <tr><th align="left">Հաճախորդ</th><th align="left">Ինչպես</th><th align="left">Նշումներ</th></tr>
+  <tr><td align="left" nowrap><b>Բրաուզեր / PWA</b></td><td align="left" nowrap>Բացեք կառավարման վահանակը → «Ավելացնել հիմնական էկրանին» / «Տեղադրել հավելվածը»</td><td align="left">Android, iOS և desktop Chrome/Edge. Աշխատում է ամբողջ էկրանով և պահում ստատիկ ակտիվները; սերվերը պետք է հասանելի մնա երթուղավորման համար</td></tr>
+  <tr><td align="left" nowrap><b>VS Code Copilot Զրուցարան</b></td><td align="left" nowrap>Տեղադրեք <b>OmniCopilot</b> երկարաձգում</td><td align="left">OmniRoute մոդելները հայրենի Copilot Զրույցի ընտրիչում: <a href="#omnicopilot">Մանրամասները ստորև</a></td></tr>
+  <tr><td align="left" nowrap><b>OpenCode</b></td><td align="left" nowrap><code>omniroute config opencode</code> կամ <code>@omniroute/opencode-provider</code></td><td align="left">Գրում է OpenCode մատակարարի կազմաձևը ձեր դարպասի համար</td></tr>
+</table>
+
+### Բաշխման լուսանկար — 16 նոյեմբերի 2026 թ
+
+| Չափել                                      |     հաշվել | Շրջանակ                                                                                       |
+| ------------------------------------------ | ---------: | --------------------------------------------------------------------------------------------- |
+| npm ներլցումներ, վերջին 30 օր              |   371,000+ | `omniroute`, 17 հոկտեմբերի - 15 նոյեմբերի 2026 թ                                              |
+| npm ներլցումներ առաջին հրապարակումից ի վեր | 1,450,000+ | `omniroute`, 14 փետրվարի - 15 նոյեմբերի 2026 թ                                                |
+| Docker pulls, պատմական պատկեր              | 1,900,000+ | `diegosouzapw/omniroute` 2026 թվականի փետրվարից                                               |
+| Docker pulls, կազմակերպության պատկեր       |        143 | `cheaperinference/omniroute`, պաշտոնական պատկերը 2026 թվականի նոյեմբերի 16-ից                 |
+| Սեղանի տեղադրիչի ներլցումներ               |   201,000+ | Թողարկեք `.exe`, `.dmg`, `.AppImage` կամ `.deb` վերջացող ակտիվները, 283 թողարկում             |
+| GitHub բոլոր ակտիվների ներբեռնումները      |   574,000+ | Տեղադրողներ և թարմացումների մանիֆեստներ, սկզբնաղբյուրների արխիվներ, SBOMs և կամընտիր փաթեթներ |
+| OmniCopilot, VS Code Marketplace           |    49,000+ | Marketplace `install` վիճակագրություն                                                         |
+| OmniCopilot, Բաց VSX                       |    18,900+ | Բաց VSX `downloadCount`                                                                       |
+| OmniRouteTray DMG ներլցումներ              |     1,600+ | Բոլոր `zoispag/omniroute-tray` թողարկումները                                                  |
+
+<sub>Ներբեռնումները, տեղադրումները և ձգումները եզակի օգտվողներ չեն, և յուրաքանչյուր տող պահպանում է իր շրջանակը, ուստի տողերը չեն ավելացվում միասին: Աղբյուրներ՝ npm ներբեռնումներ API, Docker Hub API, GitHub Releases API, Visual Studio Marketplace պատկերասրահ API, Open VSX API: Վերևի կրծքանշանները թարմացվում են ուղիղ եթերում:</sub>
+
+<sub>Ուղեցույցներ՝ [Docker](docs/guides/DOCKER_GUIDE.md) · [Անգլուխ ռեժիմ](docs/guides/HEADLESS.md) · [աշխատասեղան](docs/guides/ELECTRON_GUIDE.md) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md) · [մենյու-բար սկուտեղ](https://github.com/zoispag/omniroute-tray)</sub>
 
 <br/>
 
-<div align="center">
+<a id="omnicopilot"></a>
 
-### 🎩 Նորություն․ OmniRouteTray — ձեր դարպասը՝ մենյուի գոտում
+### OmniCopilot. OmniRoute VS օրենսգրքի բնիկ Copilot զրույցի ներսում
 
-</div>
+> Ոչ մի նոր կողագոտ և ոչ մի նոր զրույց UI: Զրույցի յուրաքանչյուր մոդել, որը ծառայում է ձեր OmniRoute, հայտնվում է դրանում**Copilot Զրույցի մոդելի ընտրիչ, որն արդեն օգտագործում եք** , և Copilot ի գործակալի ռեժիմը, գործիքի զանգը, MCP սերվերները և հատուկ հրահանգները շարունակում են աշխատել ձեր ընտրած մոդելի վրա:
 
-> `omniroute serve`-ն ամենալավն է աշխատում, երբ միշտ միացված է։ **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> դա վերածում է macOS-ի համար նախատեսված «կարգավորիր և մոռացիր» մենյուի գոտու հավելվածի․ այն գործարկում է սերվերը, պահում է այն միացված
-> վերագործարկումներից հետո, թարմացնում է տեղում և ձեր ընթացիկ թոքենի բյուջեն հասանելի է դարձնում մեկ սեղմումով — **ոչ
-> մի բաց թողնված տերմինալի պատուհան, ոչ էլ `npm install -g omniroute`-ի խնամքի անհրաժեշտություն։**
-
-Կառուցված է [Tauri v2](https://v2.tauri.app/)-ով (Rust-ի միջուկ, որի չափը կլորացման սխալի չափ է), այն ներառում է
-իր ստորագրված Node 24 runtime-ը և կառավարում է հավելվածին պատկանող OmniRoute-ի տեղադրումը, այնպես որ երբեք չի հակասում ձեր
-գլոբալ `node`/`bun`-ին։ Այն **օգտագործում է ձեր առկա `~/.omniroute/` կոնֆիգուրացիան և տվյալների բազան** — այսինքն՝
-դա նույն OmniRoute-ն է, որն արդեն օգտագործում եք, պարզապես գլխարկով։ 🎩
+Տեղադրեք**OmniCopilot** , գործարկեք ձեր OmniRoute սերվերը (ընդլայնումը կանխադրված է `http://localhost:20128`), այնուհետև բացեք Copilot Chat → model picker →** Կառավարեք մոդելները…** →**OmniRoute** և նշեք ձեր ուզած մոդելները: Խմբագրում կարող եք նաև բացել** Ընդլայնումներ** դիտել, որոնել** «OmniRoute»** և սեղմեք** Տեղադրեք** .
 
 <table>
-  <tr><th align="left">Ինչ է անում</th><th align="left">Ինչպես</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>Վերահսկում է սերվերը</b></td><td align="left">Գործարկում է <code>omniroute serve</code>-ը, իսկ արդեն աշխատող օրինակը կրկնօրինակելու փոխարեն միանում է դրան</td></tr>
-  <tr><td align="left" nowrap>📊 <b>Օգտագործման տվյալները՝ մեկ հայացքով</b></td><td align="left">Մատակարարների քվոտաների գծապատկերներ, Claude-ի նստաշրջանների/շաբաթական սահմանաչափեր՝ վերակայման հետհաշվարկով, 30-օրյա ծախսերի բաշխում</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>Ինքնաթարմացում՝ տեղում</b></td><td align="left">Փուլային տեղադրում, ատոմային փոխարինում, ձախողման դեպքում հետադարձ վերականգնում — միշտ վերջին թողարկման վրա</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>Մեկնարկ մուտք գործելիս</b></td><td align="left">Մուտք գործելիս կամընտիր գործարկում, միայն համակարգի տողի պատկերակ, առանց dock-ի պատկերակի</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>Ախտորոշում և մատյաններ</b></td><td align="left">Մեկ սեղմումով ախտորոշում և սերվերի մատյանների հասանելիություն</td></tr>
+  <tr><th align="left">Խանութ</th><th align="left">Տեղադրեք</th><th align="left">Խմբագիրներ</th><th align="right">Պատկեր, 16 նոյեմբերի 2026թ</th></tr>
+  <tr><td align="left" nowrap><b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">diegosouzapw.omnicopilot</a></td><td align="left">VS Code կայուն և Insiders</td><td align="right">49,000 + տեղադրում</td></tr>
+  <tr><td align="left" nowrap><b>Բացեք VSX ռեեստրը</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">diegosouzapw/omnicopilot</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro</td><td align="right">18,900 + ներլցումներ</td></tr>
+</table>
+
+<sub>Ընթացիկ թողարկումը երկու խանութներում. <b>1.5.0</b> (1.4.0 և 1.5.0 առաքվել են 2026 թվականի նոյեմբերի 15-ին): Marketplace-ի տեղադրումները և Open VSX ներբեռնումները տարբեր չափումներ են և չեն գումարվում միասին: Fork-ը պետք է ներդրի VS Code-ի chat-provader API, որպեսզի մոդելները հայտնվեն:</sub>
+
+<table>
+  <tr><th align="left">Հնարավորություն</th><th align="left">Ինչ եք ստանում</th></tr>
+  <tr><td align="left" nowrap><b>Գործակալի ռեժիմ և գործիքի զանգ</b></td><td align="left">Աշխատում է VS Code-ի մայրենի լեզվի մոդելի մատակարար API վրա, ուստի Copilot ի գործակալի ռեժիմը, գործիքները, MCP սերվերները և հրահանգները գործում են անփոփոխ: MCP գործիքների անունները ավելի քան 64 նիշերի վրա կրճատվում են և վերականգնվում</td></tr>
+  <tr><td align="left" nowrap><b>Տեսիլք</b></td><td align="left">OmniRoute կատալոգում դրոշակված որպես տեսողության հնարավորություն ունեցող մոդելները ընդունում են պատկերների կցորդները չաթում</td></tr>
+  <tr><td align="left" nowrap><b>Հոսքային պատճառաբանություն</b></td><td align="left">Մտածող մոդելները ցույց են տալիս իրենց հիմնավորումը պատասխանի վերևում, երբ այն հոսում է: On VS Code 1.120 +, ա <b>Մտածողության ջանք</b> մենյու ուղարկում <code>reasoning_effort</code></td></tr>
+  <tr><td align="left" nowrap><b>Գները և կոմպոզիցիաները ընտրիչում</b></td><td align="left">Յուրաքանչյուր մոդել ցույց է տալիս իր գինը և համատեքստի պատուհանը: OmniRoute կոմբինատները հայտնվում են որպես մոդելներ՝ իրենց ռազմավարությամբ և քայլերով</td></tr>
+  <tr><td align="left" nowrap><b>Միացում և օգտագործում</b></td><td align="left">Կարգավիճակի գծի կետ, օրական սահմանաչափի տոկոս և Գործունեության գծի վահանակ՝ ձեր բանալու ծախսերով և մատակարարի քվոտաներով (պահանջվում է OmniRoute սերվեր՝ 3.8.50 կամ ավելի նոր տարբերակում)</td></tr>
+  <tr><td align="left" nowrap><b>Բանալիները պահվում են անվտանգ</b></td><td align="left">API բանալին VS կոդում SecretStorage (OS keychain), կապված այն սերվերի հետ, որի համար պահվել է: Ընտրովի բանալի յուրաքանչյուր աշխատանքային տարածքի համար</td></tr>
+  <tr><td align="left" nowrap><b>Կոդավորում CLIs</b></td><td align="left"><code>OmniRoute: Configure Coding CLI</code> գրում է OmniRoute պրոֆիլներ Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode և այլնի համար</td></tr>
+  <tr><td align="left" nowrap><b>Վահանակը՝ ներդիրում</b></td><td align="left">Բացում է OmniRoute վահանակը խմբագրի ներդիրում, երբ սերվերը կառուցվել է <code>DASHBOARD_ALLOW_EMBED=vscode</code> ով; հակառակ դեպքում այն վերադառնում է դիտարկիչին</td></tr>
+  <tr><td align="left" nowrap><b>42 լեզու</b></td><td align="left">UI ընդլայնումը հետևում է ձեր VS Code ցուցադրման լեզվին</td></tr>
+</table>
+
+> [!NOTE]
+> **Պահանջներ.** OmniCopilot կարիք ունի**VS Կոդ 1.104 +** . Սկսած**VS Կոդ 1.122** , մատակարարի մոդելներն աշխատում են առանց GitHub մուտքի կամ Copilot պլանի; Ավելի հին տարբերակներին անհրաժեշտ է նաև մուտքագրված Copilot պլան: Ներկառուցված լրացումները և ներկառուցման վրա հիմնված գործառույթները մնում են մատակարար API ից դուրս և դեռ պետք է GitHub Copilot: Copilot Business/Enterprise ում ադմինիստրատորները կարող են անջատել երրորդ կողմի մոդելների մատակարարները: Վերին հոսքի օգտագործումը հետևում է յուրաքանչյուր մատակարարի սեփական գնին և քվոտաներին:
+
+<sub>Աղբյուր, թողարկումներ և թողարկումներ՝ [cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT). Կարգավորում, ընտրողների քանակ, վահանակի ներդիր և անսարքությունների վերացում. [VS Code Copilot Զրույցի ուղեցույց](docs/guides/VSCODE-COPILOT.md) :</sub>
+
+<br/>
+
+<a id="omniroutetray"></a>
+
+### OmniRouteTray: OmniRoute macOS ցանկի տողում
+
+> **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)** պահում է `omniroute serve` աշխատեցնել մենյուի տողից. այն գործարկում է սերվերը, այն կենդանի է պահում վերաբեռնման ընթացքում և թարմացնում այն տեղում, առանց տերմինալի բացված: Կառուցված [Tauri v2-](https://v2.tauri.app/) ով, այն առաքում է իր ստորագրված Node 24 գործարկման ժամանակը և հավելվածին պատկանող OmniRoute տեղադրումը և կիսում է ձեր առկա `~/.omniroute/` կազմաձևն ու տվյալների բազան:
+
+<table>
+  <tr><th align="left">Առանձնահատկություն</th><th align="left">Ինչ է դա անում</th></tr>
+  <tr><td align="left" nowrap><b>Սերվերի վերահսկողություն</b></td><td align="left">Ձվադրում է <code>omniroute serve</code> կամ ընդունում է արդեն գործարկվող օրինակ. մեկ սեղմումով վերագործարկում</td></tr>
+  <tr><td align="left" nowrap><b>Դարպասի առողջություն</b></td><td align="left">Ակտիվ մատակարարներ, p95 ուշացում, արագ քեշի արագություն և բաց անջատիչներ մեկ կարգավիճակի տողում</td></tr>
+  <tr><td align="left" nowrap><b>Քվոտաներ</b></td><td align="left">Մատակարարի քվոտայի գծերը և Claude session/weekly սահմանաչափերը վերականգնված հետհաշվարկներով՝ ցուցադրված որպես % ձախ կամ % օգտագործված; թաքցնել այն հաշիվները, որոնք ձեզ հարկավոր չեն</td></tr>
+  <tr><td align="left" nowrap><b>Արժեքը և միտումը</b></td><td align="left">Ծախսեք այսօր, երեկ, 1D, 7D կամ 30D, դոլարով կամ ժետոններով, գումարած 30-օրյա օգտագործման կայծ</td></tr>
+  <tr><td align="left" nowrap><b>Ավտոմատ թարմացում</b></td><td align="left">Տեղադրում է OmniRoute նոր թողարկումները տեղում՝ փուլային տեղադրում, ատոմային փոխանակում, հետադարձ ձախողման դեպքում: Նշում է նաև ավելի նոր սկուտեղի թողարկումը</td></tr>
+  <tr><td align="left" nowrap><b>Բժիշկ, տեղեկամատյաններ, վահանակ</b></td><td align="left">Մեկ սեղմումով ախտորոշում, սերվերի տեղեկամատյանները և վահանակը պորտի հղումից</td></tr>
+  <tr><td align="left" nowrap><b>Միայն սկուտեղի համար, սկսեք մուտքից</b></td><td align="left">Նավամատույցի պատկերակ չկա; հետևում է ակտիվ տարածությանը, ներառյալ ամբողջական էկրանով հավելվածները. կամընտիր գործարկում մուտքի ժամանակ</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>Նախընտրո՞ւմ եք ներբեռնումը։ Ներբեռնեք վերջին <code>.dmg</code>-ը
-<a href="https://github.com/zoispag/omniroute-tray/releases">Թողարկումներ</a> բաժնից։ Աղբյուրը, խնդիրները և կառուցման
-փաստաթղթերը հասանելի են <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>-ում։
-<br/>💛 Համայնքային նախագիծ՝ <a href="https://github.com/zoispag">@zoispag</a>-ի կողմից — OmniRoute-ի պաշտոնական թողարկումը չէ։</sub>
+<sub>Apple Silicon, macOS 13 Ventura կամ ավելի նոր: Վերջին թողարկումը <b>v0.1.22</b>; <b>1600 + DMG ներլցումներ</b> 2026 թվականի նոյեմբերի 16-ի թողարկումներում: Նախընտրո՞ւմ եք ներբեռնել: Ստացեք <code>.dmg</code> ից <a href="https://github.com/zoispag/omniroute-tray/releases">Թողարկումներ</a>; build-ը ժամանակավոր ստորագրված է, այնպես որ գործարկեք <code>xattr -dr com.apple.quarantine /Applications/OmniRouteTray.app</code> մեկ անգամ (Homebrew-ն դա անում է ձեզ համար):<br/>Համայնքային նախագիծ՝ կողմից <a href="https://github.com/zoispag">@zoispag</a> (MIT), ոչ պաշտոնական OmniRoute թողարկում:</sub>
 
 <br/>
 
-<div align="center">
+## Մասնավոր և տեղական-Առաջին
 
-## 🔒 Մասնավոր և տեղայինն առաջնահերթ
+<img src="./docs/diagrams/privacy-local.svg" width="100%" alt="Private and local-first — OmniRoute's gateway and control plane run on your machine. Prompts are sent to the upstream provider selected for each request; OmniRoute adds no hosted prompt-processing hop and telemetry is disabled by default. Credentials are encrypted at rest with AES-256-GCM; controls include API-key scoping, IP filtering, rate limits, prompt-injection guards, upstream-header scrubbing, opt-in PII redaction, sanitized errors and a local SQLite audit trail. OmniRoute is MIT-licensed and self-hostable."/>
 
-</div>
-
-<img src="./docs/diagrams/privacy-local.svg" width="100%" alt="Մասնավոր և տեղայինն առաջնահերթ — OmniRoute-ի անցուղին և կառավարման հարթությունն աշխատում են ձեր համակարգչում։ Հարցումներն ուղարկվում են յուրաքանչյուր հարցման համար ընտրված վերին մակարդակի մատակարարին․ OmniRoute-ը չի ավելացնում հարցումների մշակման հոսթինգով միջանկյալ հանգույց, իսկ հեռաչափությունը լռելյայն անջատված է։ Հաշվառման տվյալները հանգստի վիճակում գաղտնագրվում են AES-256-GCM-ով․ պաշտպանության միջոցները ներառում են API բանալիների տեսանելիության սահմանափակում, IP զտում, հաճախականության սահմանաչափեր, հուշումների ներարկման դեմ պաշտպանություն, վերին մակարդակի վերնագրերի մաքրում, անձնական նույնականացվող տվյալների ըստ ցանկության քողարկում, մաքրված սխալներ և տեղային SQLite աուդիտի մատյան։ OmniRoute-ը տարածվում է MIT արտոնագրով և կարող է ինքնուրույն հոսթինգ իրականացվել։"/>
-
-<sub>📖 [Լիազորում](docs/architecture/AUTHZ_GUIDE.md) · [Պաշտպանիչ սահմանափակումներ](docs/security/GUARDRAILS.md) · [Համապատասխանություն](docs/security/COMPLIANCE.md)</sub>
+<sub>📖 [Թույլտվություն](docs/architecture/AUTHZ_GUIDE.md) · [Պաշտպանական պատյաններ](docs/security/GUARDRAILS.md) · [Համապատասխանություն](docs/security/COMPLIANCE.md)</sub>
 
 <br/>
 
-<div align="center">
+<a id="-full-cli--a2a--mcp"></a>
+<a id="cli-protocols"></a>
 
-## 🔌 Ամբողջական CLI + A2A և MCP
+## Full CLI, MCP և A2A
 
-</div>
+> OmniRoute ուղարկում է հրամանի տող հաճախորդը** 91 վերին մակարդակի հրամաններ և հրամանների խմբեր** (754 հրամաններ, որոնք հաշվում են ենթահրամանները), ան**MCP սերվեր 110 գործիքներով և 33 շրջանակներով** , և ան**A2A գործակալ 6 հմտություններով** . Սցենարները, տերմինալները և AI գործակալները կարող են գործարկել նույն դարպասը:
 
-> Սերվերից բացի, OmniRoute-ը **լիարժեք հրամանի տողի կառավարման վահանակ է**՝ **80+ հրամաններով**, ինչպես նաև բաց գործակալական արձանագրություններով, որոնց միջոցով AI գործակալը կարող է այն կառավարել **ինքնուրույն**։
-
-### ⌨️ Իրական CLI (ոչ միայն `start`)
-
-```bash
-omniroute               # սպասարկել gateway-ը + dashboard-ը (պորտ 20128)
-omniroute chat          # ինտերակտիվ TUI զրույցի հաճախորդ (slash՝ /model /combo /skill /memory)
-omniroute setup         # առաջին գործարկման ուղղորդվող վարպետ
-omniroute doctor        # ախտորոշել մատակարարները, պորտերը, native կախվածությունները
-```
-
-### 🛰️ Հեռավար ռեժիմ — գործարկեք CLI-ն այստեղ, իսկ OmniRoute-ը՝ VPS-ում
-
-OmniRoute-ը սերվերի՞ վրա է։ Կառավարեք այն ձեր նոութբուքից՝ օգտագործելով **նույն CLI-ն**։ Մուտք գործեք մեկ անգամ
-սահմանափակված հասանելիության տոկենով․ դրանից հետո յուրաքանչյուր հրաման ուղղված կլինի հեռավոր համակարգին։
+### Իսկական CLI, ոչ միայն `start`
 
 ```bash
-omniroute connect 192.168.0.15            # գաղտնաբառ → սահմանափակված տոկեն, պահպանվում է որպես կոնտեքստ
-omniroute models                         # ← գործարկվում է ՀԵՌԱՎՈՐ սերվերի դեմ
-omniroute configure codex                 # ← ընտրում է հեռավոր մոդել, գրում է տեղական Codex պրոֆիլ
-omniroute tokens create --name ci --scope read   # ստեղծում է ավելի սահմանափակ տոկեններ այլ մեքենաների համար
-omniroute contexts use default            # ← վերադառնում է տեղական սերվերին
+omniroute                 # start the gateway and dashboard (port 20128)
+omniroute setup           # guided first-run wizard
+omniroute repl            # interactive chat in the terminal (/model /combo /skill /memory)
+omniroute chat "hello"    # one-shot prompt; also reads --file or --stdin
+omniroute doctor          # check config, database, ports, Node runtime and native deps
 ```
 
-Տոկենների շրջանակներն են՝ `read` / `write` / `admin`, իսկ գործընթացներ ստեղծող երթուղիները հասանելի են միայն loopback-ի միջոցով։
-<sub>📖 [Հեռավար ռեժիմ](docs/guides/REMOTE-MODE.md)</sub>
+Համաշխարհային `--output table|json|jsonl|csv` դրոշը նույն հրամաններն է դարձնում սկրիպտներից և CI ից:
+
+### Հեռակա ռեժիմ. CLI ձեր նոութբուքի վրա, OmniRoute սերվերի վրա
+
+Մուտք գործեք մեկ անգամ հեռավոր սերվեր: CLI կը փրկէ որպէս ա** համատեքստ** , և ավելի ուշ հրամանները գործարկվում են այդ սերվերի դեմ, մինչև չվերադառնաք:
+
+```bash
+omniroute connect omniroute.example.com          # asks for the password, saves a scoped token as a context
+omniroute models                                 # runs against the remote server
+omniroute configure codex                        # picks a remote model, writes a local Codex profile
+omniroute tokens create --name ci --scope read   # mint a narrower token for another machine
+omniroute contexts use default                   # switch back to the local server
+```
+
+| Նշանների շրջանակը | <img width="2000" height="0" alt=""> Ինչ թույլ է տալիս                            |
+| ----------------- | --------------------------------------------------------------------------------- |
+| `read`            | Ցուցակել և ստուգել՝ մոդելներ, կարգավիճակ, տեղեկամատյաններ, օգտագործում            |
+| `write`           | `read` plus-ի կազմաձևումը և կիրառումը. հաճախորդի կարգավորում, ստեղներ, կազմաձևում |
+| `admin`           | `write` plus կառավարել՝ նշաններ, մատակարարներ, ծառայություններ, քաղաքականություն  |
+
+Մերկ հյուրընկալողը ստանում է `http://` և պորտ 20128; անցնել ամբողջական `https://` URL երբ սերվերը նստում է TLS հետևում: Երթուղիները, որոնք կարող են առաջացնել գործընթացներ, մնում են միայն «loopback»՝ անկախ նրանից, թե ինչ նշան է:
+<sub>[Հեռակառավարման ռեժիմի ուղեցույց](docs/guides/REMOTE-MODE.md)</sub>
 
 <div align="left">
 
-<img src="./docs/diagrams/cli-terminal.svg" width="50%" alt="OmniRoute CLI-ի ցուցադրվող անիմացիոն տերմինալային ցուցադրություն — omniroute providers list, omniroute combo list և omniroute health — հերթագայելով վերին մակարդակի 89 հրամանների ամբողջ մակերեսով՝ providers · oauth · keys · combo · nodes · models · cache · compression · cost · usage · quota · health · resilience · telemetry · logs · audit · mcp · a2a · cloud · memory · skills · eval · tunnel · backup · sync · webhooks · policy · pricing · translator · simulate …"/>
+<img src="./docs/diagrams/cli-terminal.svg" width="50%" alt="Animated terminal demo of the OmniRoute CLI running omniroute providers list, omniroute combo list and omniroute health with sample data, over a ticker of the 91 top-level commands and groups: providers, oauth, keys, combo, nodes, models, cache, compression, cost, usage, quota, health, resilience, telemetry, logs, audit, mcp, a2a, cloud, memory, skills, eval, doctor, repl, tunnel, backup, sync, webhooks, policy, pricing, translator, simulate and more."/>
 
 </div>
 
-### 🤝 Միացրեք գործակալ — և այն ինքնուրույն կկառավարի OmniRoute-ը
+### Միացրեք գործակալ
 
-OmniRoute-ը հասանելի դարձրեք **MCP**-ի, **A2A**-ի, **REST API**-ի, **webhooks**-ի կամ **հեռավոր CLI**-ի միջոցով․ ցանկացած ընդունակ գործակալ (կամ ձեր սեփական կոդը) ստանում է ամբողջ gateway-ի բանալիները՝ երթուղավորում, մատակարարներ, կոմբոներ, քեշ, սեղմում, հիշողություն՝ ինքնուրույն կառավարմամբ։ Ստորև ներկայացված HTTP վերջնակետերը սպասարկվում են `http://localhost:20128` հասցեով։
+Գործակալը կամ ձեր սեփական ծածկագիրը կարող է վարել երթուղիներ, պրովայդերներ, կոմբոներ, քեշ, սեղմում և հիշողություն այս միջերեսներից որևէ մեկի միջոցով: HTTP ուղիները սպասարկվում են դարպասի կողմից, լռելյայնորեն `http://localhost:20128` ում:
 
-<table>
-  <tr><th align="left">Ինտերֆեյս</th><th align="left">Վերջնակետ / հրաման</th><th align="left">Օգտագործեք դրա համար</th></tr>
-  <tr><td align="left" nowrap>🧰 <b>MCP (stdio)</b></td><td align="left" nowrap><code>omniroute --mcp</code></td><td align="left">Միացրեք Claude Desktop-ին, Cursor-ին կամ ցանկացած MCP հաճախորդի</td></tr>
-  <tr><td align="left" nowrap>🌊 <b>MCP (HTTP)</b></td><td align="left" nowrap><code>/api/mcp/stream</code></td><td align="left">Հեռավոր MCP — <b>110 գործիք</b>, 33 շրջանակ (կիրառումն ըստ ցանկության), ամբողջական աուդիտի հետք</td></tr>
-  <tr><td align="left" nowrap>📡 <b>MCP (SSE)</b></td><td align="left" nowrap><code>/api/mcp/sse</code></td><td align="left">Հոսքային MCP տրանսպորտ</td></tr>
-  <tr><td align="left" nowrap>🤝 <b>A2A</b></td><td align="left" nowrap><code>/.well-known/agent.json</code></td><td align="left">Գործակալից գործակալ, <b>JSON-RPC 2.0</b> + SSE, 6 հմտություն</td></tr>
-  <tr><td align="left" nowrap>🌐 <b>REST API</b></td><td align="left" nowrap><code>/v1/*</code></td><td align="left">OpenAI-ի հետ համատեղելի — զրույց, embedding-ներ, պատկերներ, աուդիո, OCR</td></tr>
-  <tr><td align="left" nowrap>🔔 <b>Webhooks</b></td><td align="left" nowrap><code>/api/webhooks</code></td><td align="left">Հարցումների / քվոտաների իրադարձությունները ուղարկեք Slack, Discord, Telegram կամ ցանկացած URL</td></tr>
-  <tr><td align="left" nowrap>🛰️ <b>Հեռավոր CLI</b></td><td align="left" nowrap><code>omniroute connect <host></code></td><td align="left">Կառավարեք հեռավոր օրինակ՝ սահմանափակված հասանելիության տոկեններով</td></tr>
-</table>
+| Ինտերֆեյս                     | Վերջնակետ կամ հրաման       | Օգտագործեք այն                                                                                   |
+| ----------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------ |
+| MCP over stdio                | `omniroute --mcp`          | Claude Desktop, Cursor և այլ տեղական MCP հաճախորդներ                                             |
+| MCP ավելի քան Streamable HTTP | `/api/mcp/stream`          | Հեռակա MCP հաճախորդներ. 110 գործիք, 33 շրջանակ, աուդիտի գրանցամատյանում գրված յուրաքանչյուր զանգ |
+| MCP SSE                       | `/api/mcp/sse`             | Հաճախորդներ, որոնք դեռ օգտվում են SSE տրանսպորտից                                                |
+| A2A հայտնագործություն         | `/.well-known/agent.json`  | Գործակալի քարտ. ասում է այլ գործակալներին, թե ինչ կարող է անել OmniRoute                         |
+| A2A կատարումը                 | `POST /a2a`                | JSON-RPC 2.0 առաջադրանքներ՝ համաժամանակյա կամ հեռարձակված SSE միջոցով, 6 հմտություններով         |
+| REST API                      | `/v1/*`                    | OpenAI-ի հետ համատեղելի զրույց, պատասխաններ, ներկառուցումներ, պատկերներ, աուդիո և OCR            |
+| Վեբկեռիկներ                   | `/api/webhooks`            | Իրադարձություններ Slack, Discord, Telegram կամ HMAC ստորագրությամբ ցանկացած URL համար            |
+| Հեռավոր CLI                   | `omniroute connect <host>` | Քշեք հեռավոր օրինակ՝ ընդգրկված մուտքի նշաններով                                                  |
+
+A2A վեց հմտություններն են՝ `smart-routing`, `quota-management`, `provider-discovery`, `cost-analysis`, `health-report` և `list-capabilities`:
+
+**Նախքան միանալը.**
+
+- **MCP over HTTP սկսվում է անջատված:** Միացրեք այն `omniroute mcp enable --transport streamable-http` ով կամ վահանակի Վերջնակետերի էջից: Միանգամից ակտիվ է մեկ HTTP տրանսպորտ՝ `streamable-http` սպասարկում է `/api/mcp/stream`, `sse` սպասարկում է `/api/mcp/sse`:
+- **A2A սկսվում է անջատված:** Միացրեք այն վահանակի Վերջնակետերի էջում: `POST /a2a` այնուհետև հետևում է նույն API ստեղնի կանոններին, ինչ `/v1`:
+- **Remote MCP անհրաժեշտ է համապատասխան բանալի:** `/api/mcp/*` լռելյայն պատասխանում է միայն loopback: Մեկ այլ հոսթից ուղարկեք բանալի `manage` ով կամ `admin` (բոլոր գործիքներով) կամ `mcp:connect` ով գումարած ձեզ անհրաժեշտ գործիքների շրջանակները: Առանց `manage`/`admin` ստեղների համար գործիքների շրջանակները միշտ գործում են:
 
 ```bash
-# Claude Code-ին տրամադրեք OmniRoute-ի գործիքների ամբողջական փաթեթը MCP-ի միջոցով.
+# Give Claude Code the OmniRoute toolset over MCP:
 omniroute mcp enable --transport streamable-http
 claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
   --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
-<sub>📖 [MCP սերվեր](docs/frameworks/MCP-SERVER.md) · [A2A սերվեր](docs/frameworks/A2A-SERVER.md) · [Գործակալական արձանագրություններ](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>
+<sub>[MCP Server](docs/frameworks/MCP-SERVER.md) · [A2A Server](docs/frameworks/A2A-SERVER.md) · [Գործակալի արձանագրություններ](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md) · [Webhooks](docs/frameworks/WEBHOOKS.md) · [Երթուղու պահպանության մակարդակներ](docs/security/ROUTE_GUARD_TIERS.md)</sub>
 
 <br/>
 
-<div align="center">
+## Ավտոմատ կերպով խնայեք 15–95% նշաններ —
 
-## 🗜️ Խնայեք նշանների 15–95%-ը — ավտոմատ կերպով
+### Ինչպես է այն աշխատում — խողովակաշար, ճարտարապետություն և խնայողական մաթեմատիկա
 
-</div>
+<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute compression pipeline: an illustrative 10,000-token client request passes through 12 composable engines — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra and OmniGlyph — and can reach the provider at about 1,080 tokens in the documented stacked example. Structured content is protected by preservation guards and per-step fidelity gates; explicit lossy or experimental modes may transform eligible content."/>
 
-### 📖 Ինչպես է այն աշխատում — pipeline-ը, ճարտարապետությունը և խնայողությունների հաշվարկը
-
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute-ի compression pipeline-ը. պատկերավոր 10,000 նշանանոց client request-ն անցնում է 12 համակցելի engine-ներով՝ Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra և OmniGlyph, և փաստագրված stacked օրինակում կարող է provider-ին հասնել մոտ 1,080 նշանով։ Structured content-ը պաշտպանվում է preservation guard-ներով և յուրաքանչյուր քայլի fidelity gate-երով. բացահայտ lossy կամ experimental mode-երը կարող են փոխակերպել համապատասխան content-ը։"/>
-
-Լռելյայն stacked combo-ն գործարկում է `RTK → Caveman`։ Երբ երկուսն էլ գործում են նույն tool/context payload-ի վրա, խնայողությունները կուտակվում են.
+Կանխադրված կուտակված կոմբոն աշխատում է `RTK → Caveman`: Երբ երկուսն էլ գործում են նույն tool/context ծանրաբեռնվածության վրա, խնայողական բաղադրությունը.
 
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
@@ -953,135 +982,169 @@ average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
 range    = 78.4 – 94.6%
 ```
 
-Code block-երը, URL-ները, JSON-ը և structured data-ն **միշտ պաշտպանված են** preservation engine-ի կողմից։
+Կոդի բլոկները, URLs, JSON և կառուցվածքային տվյալներն են** միշտ պաշտպանված** պահպանման շարժիչով:
 
-> **Ինչո՞ւ օգտագործել շատ նշաններ, երբ քիչ նշանները բավական են։** Յուրաքանչյուր request թափանցիկ կերպով անցնում է OmniRoute-ի compression pipeline-ով՝ **առանց client-ի փոփոխությունների**։ Այժմ այն **12 համակցելի engine-ների stack է**, որոնք գործարկվում են հերթականությամբ և կարող են տարբեր կերպ համակցվել յուրաքանչյուր routing combo-ի համար՝ հիմնվելով [RTK](https://github.com/rtk-ai/rtk)-ի, [Caveman](https://github.com/JuliusBrussee/caveman)-ի (⭐ 90K+), [LLMLingua-2](https://github.com/microsoft/LLMLingua)-ի և [Troglodita](https://github.com/leninejunior/troglodita)-ի (PT-BR) գաղափարների վրա։
+> **Ինչու՞ օգտագործել շատ նշաններ, երբ քչերն են անում այդ հնարքը:** Յուրաքանչյուր հարցում անցնում է OmniRoute ի սեղմման խողովակաշարով** թափանցիկ** — հաճախորդը չի փոխվում: Հիմա ա** 12 բաղադրելի շարժիչների բուրգ** որոնք աշխատում են կարգով և խառնվում և համընկնում են յուրաքանչյուր երթուղային համակցված — վրա՝ հիմնվելով [RTK](https://github.com/rtk-ai/rtk), [Caveman-ի](https://github.com/JuliusBrussee/caveman) (⭐ 90K +), [LLMLingua-2](https://github.com/microsoft/LLMLingua) և [Troglodita-ի](https://github.com/leninejunior/troglodita) (PT-BR) գաղափարների վրա:
 
-### 🧱 12-engine-անոց stack-ը
+### 12-շարժիչի կույտ
 
-Engine-ները գործարկվում են pipeline-ի հերթականությամբ. յուրաքանչյուրը կարող է առանձին միացվել/անջատվել և կարգավորվել յուրաքանչյուր combo-ի համար.
-
-<table>
-  <tr><th align="center">#</th><th align="left">Engine</th><th align="left">Ինչ է անում</th></tr>
-  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">Հեռացնում է turn-երի միջև կրկնվող content-ը (content-addressed, cross-turn)</td></tr>
-  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">Մեծ block-երը պահում է retrieve marker-ների հետևում՝ ըստ պահանջի ստանալու համար</td></tr>
-  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">Whitespace-ի և image-URL-ների կրճատում (latency-light baseline)</td></tr>
-  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">Tool-result-ի խելացի filtering, dedup և truncation (command-aware)</td></tr>
-  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">Lossless-first JSON և սահմանափակված diagnostic compression shell/patch/search/build output-ների համար (Responses API)</td></tr>
-  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">JSON array-ների lossless tabular compaction (~30%)՝ vendored <b>GCF</b> codec-ի միջոցով</td></tr>
-  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">Sentence-ների extractive scoring՝ վերջին user query-ի համեմատ</td></tr>
-  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">Prose-ի rule-based compression (~65–75% output-ի վրա)</td></tr>
-  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">Ամփոփում և հին turn-երի progressive aging</td></tr>
-  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">ML semantic pruning MobileBERT ONNX-ի միջոցով — code-safe, async</td></tr>
-  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">Heuristic token pruning՝ optional small-model (SLM) tier-ով</td></tr>
-  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">Experimental context-as-image encoding՝ direct Anthropic wire-ի վրա չափված Claude Fable 5-ի համար. GPT 5.6 transformers-ը մնում են fail-closed՝ provider receipt-երի առկախ լինելու պատճառով։ Compression profile-ների չորս տարբերակ (aggressive՝ լռելյայն, balanced, coding-safe, passthrough) (ամենաագրեսիվը՝ opt-in)</td></tr>
-</table>
-
-Code block-երը, URL-ները և structured data-ն **միշտ պահպանվում են** byte-perfect ձևով։ **Մեկ սեղմումով preset-ները** համակցում են engine-ները.
+Շարժիչները աշխատում են խողովակաշարի կարգով; յուրաքանչյուրը կարող է ինքնուրույն փոխակերպվել և կարգավորելի յուրաքանչյուր կոմբինատի համար.
 
 <table>
-  <tr><th align="left">Mode</th><th align="left">Խնայողություն</th><th align="left">Լավագույն կիրառություն</th></tr>
-  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">Միշտ միացված անվտանգ լռելյայն տարբերակ</td></tr>
-  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">Ամենօրյա coding</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50%</td><td align="left">Երկար, tool-երով հարուստ session-ներ</td></tr>
-  <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">Առավելագույն խնայողություն</td></tr>
-  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">Shell/test/build/git output</td></tr>
-  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">Խառը prompt-եր + tool log-եր</td></tr>
+  <tr><th align="center">#</th><th align="left">Շարժիչ</th><th align="left">Ինչ է դա անում</th></tr>
+  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Նիստը-Dedup</b></td><td align="left">Նվազեցնում է բովանդակությունը, որը կրկնվում է շրջադարձերի ընթացքում (բովանդակության հասցեով, խաչաձև շրջադարձով)</td></tr>
+  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">Արխիվացնում է մեծ բլոկներ առբերման մարկերների հետևում, որոնք բերվում են ըստ պահանջի</td></tr>
+  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">Whitespace + image-URL կրճատում (latency-light baseline)</td></tr>
+  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">Խելացի գործիքների արդյունքների զտում, ջնջում և կրճատում (հրամանների տեղյակ)</td></tr>
+  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Պատասխանների գործիքի ելք</b></td><td align="left">Անկորուստ առաջին JSON + սահմանափակված ախտորոշիչ սեղմում shell/patch/search/build ելքերի համար (Responses API)</td></tr>
+  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Գլխասենյակ</b></td><td align="left">JSON զանգվածների անկորուստ աղյուսակային խտացում (~ 30%) վաճառողի միջոցով <b>GCF</b> կոդեկ</td></tr>
+  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Համապատասխանություն</b></td><td align="left">Քաղվածքային նախադասության գնահատում վերջին օգտվողի հարցմանը</td></tr>
+  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Քարանձավային մարդ</b></td><td align="left">Կանոնների վրա հիմնված արձակի սեղմում (~ 65–75% արդյունքի վրա)</td></tr>
+  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Ագրեսիվ</b></td><td align="left">Ամփոփում + հին շրջադարձերի առաջադեմ ծերացումը</td></tr>
+  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">ML իմաստային էտում MobileBERT ONNX — կոդով անվտանգ, համաժամանակյա</td></tr>
+  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ուլտրա</b></td><td align="left">Էվրիստիկ նշանային էտում ընտրովի փոքր մոդելի (SLM) մակարդակով</td></tr>
+  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">Փորձարարական համատեքստի կոդավորում՝ չափված Claude Fable 5-ի համար ուղղակի Anthropic մետաղալարով; GPT 5.6 տրանսֆորմատորները մնում են ձախողման պատճառով՝ սպասող մատակարարի անդորրագրերը: Չորս սեղմման պրոֆիլներ (ագրեսիվ լռելյայն, հավասարակշռված, կոդավորման համար անվտանգ, անցում) (առավել ագրեսիվ, միացնել)</td></tr>
 </table>
 
-**Իրական օրինակ — Standard mode.**
+Կոդի բլոկները, URLs և կառուցվածքային տվյալներն են** միշտ պահպանված** բայթ-կատարյալ:** Մեկ սեղմումով նախադրյալներ** միավորել շարժիչները.
 
-> **Մինչև (69 նշան).** _«Ձեր React component-ի վերառաջարկման հավանական պատճառն այն է, որ յուրաքանչյուր render cycle-ի ժամանակ նոր object reference եք ստեղծում։ Երբ inline object-ը որպես prop եք փոխանցում, React-ի shallow comparison-ը այն ամեն անգամ տեսնում է որպես տարբեր object, ինչի հետևանքով տեղի է ունենում վերառաջարկում։ Խորհուրդ կտամ օգտագործել useMemo՝ object-ը memoize անելու համար»։_
->
-> **Հետո (19 նշան).** _«Յուրաքանչյուր render-ի ժամանակ նոր object ref։ Inline object prop = նոր ref = re-render։ Փաթեթավորեք useMemo-ում»։_
->
-> **Նույն պատասխանը։ 72% ավելի քիչ նշաններ։ Ճշգրտության կորուստ՝ զրո։** ✅
+<table>
+  <tr><th align="left">Ռեժիմ</th><th align="left">Խնայողություններ</th><th align="left"><img width="2000" height="0" alt=""> Լավագույնը համար</th></tr>
+  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">Միշտ միացված անվտանգ լռելյայն</td></tr>
+  <tr><td align="left" nowrap>🪨 <b>Ստանդարտ (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">Ամենօրյա կոդավորում</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Ագրեսիվ</b></td><td align="left" nowrap>~50%</td><td align="left">Գործիքներով ծանր նստաշրջաններ</td></tr>
+  <tr><td align="left" nowrap>🔥 <b>Ուլտրա</b></td><td align="left" nowrap>~75%</td><td align="left">Առավելագույն խնայողություններ</td></tr>
+  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">Shell/test/build/git ելք</td></tr>
+  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">Խառը հուշում է + գործիքի տեղեկամատյանները</td></tr>
+</table>
 
-**PT-BR օրինակ — [Troglodita](https://github.com/leninejunior/troglodita) mode։**
+**Իրական օրինակ — Ստանդարտ ռեժիմ.**
 
-> **Antes (42 tokens):** _"Խնդիրն այն է, որ բաղադրիչը կրկին render է արվում, քանի որ render-ի յուրաքանչյուր ցիկլում օբյեկտի նոր հղում է ստեղծվում։ Ես խորհուրդ կտայի օգտագործել useMemo։"_
+> **Նախքան (69 նշան):** _ «Ձեր React բաղադրիչը վերաարտադրվելու պատճառն այն է, որ դուք ստեղծում եք նոր օբյեկտի հղում յուրաքանչյուր արտապատկերման ցիկլի վրա: Երբ դուք փոխանցում եք ներկառուցված օբյեկտը որպես հենարան, React ի մակերեսային համեմատությունն ամեն անգամ այն տեսնում է որպես այլ օբյեկտ, ինչը առաջացնում է վերարտադրում: Ես խորհուրդ կտայի օգտագործել useMemo օբյեկտը հիշելու համար»:_
 >
-> **Depois (12 tokens):** _"Կրկնակի render․ նոր հղում յուրաքանչյուր ցիկլում (inline օբյեկտը վերստեղծվում է)։ Օգտագործել `useMemo`։"_
+> **Հետո (19 նշան):** _"Նոր օբյեկտը վերաբերվում է յուրաքանչյուր արտապատկերմանը: Ներդիր օբյեկտի աջակցում = նոր ref = վերարտադրում: Փաթաթում useMemo:"_
 >
-> **Նույն պատասխանն է։ ~70% պակաս token-ներ։ Տեխնիկական ճշգրտությունն ամբողջությամբ պահպանված է։** ✅
+> **Նույն պատասխանը. 72% ավելի քիչ նշաններ: Ճշգրտության զրոյական կորուստ:** ✅
+
+**PT-BR օրինակ — [Troglodita](https://github.com/leninejunior/troglodita) ռեժիմ.**
+
+> **Անտես (42 նշան):** _"O problema é que o componente está re-renderizando porque uma nova referência de objeto está sendo criada em cada ciclo de renderização. Eu recomendaria usar useMemo."_
+>
+> **Depois (12 նշան):** _"Վերարտադրել. ref nova cada ciclo (objeto inline recriado). Usar `useMemo`."_
+>
+> **Mesma reposta. ~ 70% menos նշաններ. Precisão técnica intacta.** ✅
 
 <br/>
 
-### 🎚️ Շարժիչներից այն կողմ — ելքի ոճեր, հարմարվող կարգավորիչը և յուրաքանչյուր հարցման կառավարումը
+### Շարժիչների — ելքային ոճերից բացի՝ հարմարվողական հավաքիչ և յուրաքանչյուր հարցման կառավարում
 
-Վերոնշյալ 12 շարժիչները կրճատում են այն, ինչ **մտնում է** համակարգ։ Եվս երեք շերտ ձևավորում է **ինչպես**, **երբ** և ինչ է **դուրս գալիս**․
+Ձևավորեք պատասխանը, թիրախավորեք մոդելի համատեքստի պատուհանը կամ ընտրեք սեղմման պլան յուրաքանչյուր հարցման համար:
 
-- **🪄 Ելքի ոճեր** _(ելքի առանցքի ուղղորդում)_ — ներարկում են դետերմինիստական, cache-ին անվտանգ՝ պատասխանը ձևավորող հրահանգներ․ կարող են համակցվել, և յուրաքանչյուրն ունի `lite` / `full` / `ultra` ինտենսիվություն։ Ոճ ավելացնելը ռեեստրի մեկ տողանոց գրառում է․
-  - **Հակիրճ արձակ** — հեռացնել ավելորդ բառերը / հոդերը / վերապահումները, բայց տեխնիկական բովանդակությունը պահել ճշգրիտ։
-  - **Ավելի քիչ կոդ** — «ծույլ ավագ ծրագրավորողի» YAGNI․ ամենափոքր աշխատող փոփոխությունը՝ առանց չպահանջված ենթակառուցվածքի։
-  - **Ponytail (ծույլ ավագ ծրագրավորող)** — բարձրանալ YAGNI-ի սանդուղքով, ուղղել արմատական պատճառը, կատարել ամենափոքր աշխատող diff-ը։
-  - **Ես ADHD ունեմ (գործողությունն առաջինը)** — հաջորդ գործողությունն առաջատար է, քայլերը համարակալված են, կա մեկ կոնկրետ հաջորդ քայլ, առանց նախաբանի։
-  - **Հակիրճ CJK (文言)** — դասական չինարենի ծայրահեղ հակիրճ ոճ (`zh` locale-ով սահմանափակված)։
-- **🎯 Հարմարվող կոնտեքստի բյուջե** _(կարգավորիչը)_ — մեկ միացված/անջատված token-ի շեմի փոխարեն աստիճանաբար ակտիվացնում է ամենաէժան և ամենաքիչ կորուստ ունեցող շարժիչները՝ միայն այնքան, որքան անհրաժեշտ է **մոդելի կոնտեքստի պատուհանում տեղավորվելու** համար։ Քաղաքականություն՝ `reserve-output` (կանխադրված, մոդելին համապատասխան) · `percentage` · `absolute`։ Ռեժիմ՝ `floor` (երաշխավորում է տեղավորվելը) · `replace-autotrigger` (ձեր բացահայտ ընտրությունն ունի առաջնահերթություն) · `off` (ժառանգական շեմ)։
-- **🎛️ Որտեղ է որոշվում սեղմումը** _(առաջնահերթություն՝ բարձրից ցածր)_ — յուրաքանչյուր հարցման `x-omniroute-compression` header › routing-combo override › ակտիվ անվանված profile › adaptive / auto-trigger › panel default › off։ Կիրառված պլանը վերադարձվում է `X-OmniRoute-Compression: <mode>; source=<source>` response header-ում։
+#### Արդյունքների ոճերը
 
-Միացրեք token-ի շեմով ավտոմատ գործարկումը, ակտիվացրեք հարմարվող կարգավորիչը, ամրակցեք անվանված profile, սահմանեք մեկանգամյա կարգավորում յուրաքանչյուր հարցման համար կամ pipeline նշանակեք routing combo-ի համար՝ կախված նրանից, թե որն է համապատասխանում աշխատանքային ծանրաբեռնվածությանը։ Ընտրովի օֆլայն **eval harness**-ը (`npm run eval:compression`) գնահատում է հավատարմությունն ու խնայողությունները ամրակցված կորպուսի վրա՝ նախքան փոփոխությունը հրապարակելը։
+| Ոճ                                    | <img width="2000" height="0" alt=""> Ինչ է դա անում                                               |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Կտրուկ արձակ                          | Կտրում է լցոնիչը և հեջավորումը՝ պահպանելով տեխնիկական մանրամասները:                               |
+| Ավելի քիչ կոդ                         | Խնդրում է ամենափոքր աշխատանքային փոփոխությունը և վերօգտագործում առկա կոդը:                        |
+| Ձիու պոչ (ծույլ ավագ մշակ)            | Ստուգում է, թե ինչ կարելի է նորից օգտագործել կամ հեռացնել, և խնդրում է արմատական պատճառի ուղղում: |
+| Ես ունեմ ADHD (գործողություն առաջինը) | Առաջնորդում է գործողությամբ, համարակալում է քայլերը և ավարտվում մեկ կոնկրետ հաջորդ քայլով:        |
+| Terse CJK (文言)                      | Օգտագործում է հակիրճ դասական չինարեն: Հասանելի է `zh` համար:                                      |
 
-📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
+Յուրաքանչյուր ոճ ունի `lite`, `full` և `ultra` ինտենսիվություններ: Ավելացրեք ոճ՝ մուտքագրելով ելքային ոճի ռեեստրում:
+
+#### Հարմարվողական համատեքստի բյուջե
+
+| Կարգավորում      | Ընտրանքներ                                                                                                                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Քաղաքականություն | `reserve-output` (կանխադրված) պատասխանի համար տեղ է հատկացնում և անվտանգության մարժան: `percentage` օգտագործում է համատեքստի պատուհանի մասնաբաժինը: `absolute` սահմանում է ֆիքսված նշանային թիրախ:           |
+| Ռեժիմ            | `floor` կարող է մեծացնել ընտրված պլանը՝ համատեքստի պատուհանին համապատասխանելու համար: `replace-autotrigger` օգտագործում է բյուջեն ավտոմատ ընդլայնման համար: `off` պահպանում է նշանի շեմի ավտոմատ գործարկիչը: |
+
+#### Որտեղ է որոշվում սեղմումը
+
+| Պատվիրել | <img width="2000" height="0" alt=""> Աղբյուր                |
+| -------- | ----------------------------------------------------------- |
+| 1        | Ճանաչված `x-omniroute-compression` հարցման վերնագիր         |
+| 2        | Երթուղային կոմբինատի անտեսում                               |
+| 3        | Ակտիվ անունով պրոֆիլ                                        |
+| 4        | Հարմարվող համատեքստի բյուջե կամ նշան-շեմի ավտոմատ գործարկիչ |
+| 5        | Կոմպրեսիոն վահանակի լռելյայն                                |
+| 6        | Անջատված է, երբ որևէ ծրագիր չի գործում                      |
+
+Համաշխարհային սեղմման անջատիչը առաջնահերթություն է ստանում այս աղյուսակից: `X-OmniRoute-Compression` պատասխանի վերնագիրը հայտնում է `<mode>; source=<source>`:
+
+[Կոմպրեսիոն ուղեցույց](docs/compression/COMPRESSION_GUIDE.md) · [RTK սեղմում](docs/compression/RTK_COMPRESSION.md) · [Կոմպրեսիոն շարժիչներ](docs/compression/COMPRESSION_ENGINES.md)
+
+Ընտրելու արժեքավոր զրահը (`npm run eval:compression`) համեմատում է պատասխանի հավատարմությունը և նշանի խնայողությունները ֆիքսված կորպուսի վրա:
 
 <br/>
 
-<div align="center">
+<a id="quick-start"></a>
 
-# ⚡ Արագ մեկնարկ
+# Արագ մեկնարկ
 
-</div>
+<img src="./docs/diagrams/quick-start-steps.svg" width="100%" alt="OmniRoute Quick Start in six steps. Check with node --version for Node.js 22.22.2 or later in 22.x, or 24.x, 25.x or 26.x. Run npm install -g omniroute, then omniroute. Open the dashboard at http://localhost:20128, set a password and connect a provider. In API Keys, create an OmniRoute key and save it when shown. Send a POST to /v1/chat/completions with model auto. GET /v1/models lists what your key can reach. Run omniroute configure codex or omniroute run claude --model auto to connect your coding tool.">
 
-**1) Տեղադրել և գործարկել**
+<sub>Node.js միջակայքը <code>engines.node</code> in <a href="package.json">package.json</a>. Առանց վահանակի գաղտնաբառի դուք չեք կարող պրովայդերներ ավելացնել տեղադրման ընթացքում: Գործիքի տեղադրում ձեռքով. <a href="docs/guides/CLI-INTEGRATIONS.md">CLI ինտեգրումներ</a>.</sub>
+
+**Առաջին խնդրանքը**
 
 ```bash
-npm install -g omniroute
-omniroute
+curl http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-> 💡 Տեսնո՞ւմ եք `npm warn ERESOLVE` կամ peer-dep նախազգուշացումներ։ [Դրանք անվնաս են](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)։
-> **Օգտագործո՞ւմ եք npm 11 կամ ավելի ուշ տարբերակ։** npm-ը կարող է արգելափակել package lifecycle scripts-ը, եթե դրանք թույլատրված չեն։ OmniRoute-ի `postinstall`-ը (`node scripts/build/postinstall.mjs`) անհրաժեշտ է native runtime ֆայլերը պատրաստելու համար։ Globally տեղադրելիս թույլատրեք npm-ի նախազգուշացման մեջ նշված փաթեթները։ OmniRoute 3.8.55-ի հաղորդած փաթեթների հավաքածուի համար՝
->
-> ```bash
-> npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
-> ```
->
-> Այս allowlist-ը հետագա global տեղադրումների համար կրկին օգտագործելու նպատակով այն մեկ անգամ կարգավորեք, ապա սովորական եղանակով տեղադրեք․
->
-> ```bash
-> npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
-> npm install -g omniroute
-> ```
->
-> Կախվածությունների ցանկը կարող է փոխվել թողարկումների միջև․ եթե npm-ը հաղորդում է այլ ցանկ, օգտագործեք այդ նախազգուշացման մեջ նշված փաթեթների անունները։ Փաթեթ թույլատրելը թույլ է տալիս գործարկել դրա տեղադրման script-երը։
-> **Օգտագործո՞ւմ եք Gemini Web կամ web-cookie-ների մեկ այլ provider։** npm package-ը ներառում է
-> Playwright-ը, բայց ոչ դրա Chromium binary-ն։ Առաջին web-provider հարցումը կատարելուց առաջ դիտեք
-> [Playwright Chromium setup](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium)
-> նշումը։
+**Ստուգեք, թե որ մոդելներին կարող է հասնել ձեր բանալին**
 
-Dashboard-ը՝ `http://localhost:20128` · API-ն՝ `http://localhost:20128/v1`։
+```bash
+curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_OMNIROUTE_KEY"
+```
 
-**2) Միացրեք համապատասխան provider՝ օգտագործելով ձեր սեփական հաշիվը**
-
-Dashboard → **Providers** → ընտրեք provider, որի ընթացիկ պայմաններն ու quota-ն համապատասխանում են ձեր օգտագործման սցենարին → ավելացրեք դրա API key-ն կամ անցեք հաշվի ստեղծման/միացման գործընթացը։ Անվճար tier-երը կարող են պահանջել գրանցում, հաստատում կամ վճարման եղանակ։ Ուսումնասիրեք [Free Tiers Guide](docs/getting-started/FREE-TIERS-GUIDE.md)-ը․ keyless հասանելիությունը երաշխավորված չէ, իսկ `tos: avoid` նշումով provider-ները լռելյայն բացառված են `auto`-ից։
-
-**3) Ուղղեք ձեր կոդավորման գործիքը**
+**Գործիքի մեխանիկական կարգավորումներ**
 
 ```txt
 Base URL: http://localhost:20128/v1
-API Key:  [copy from Dashboard → Endpoints]
+API Key:  [the key from Dashboard → API Keys]
 Model:    auto            (routes among eligible connections — or choose provider/model)
 ```
 
-**4) Ստուգեք, որ այն աշխատում է**
+> [!IMPORTANT]
+> **Ընտրելով մատակարար.** Ընտրեք մեկը, որի ներկայիս պայմանները և չափաբաժինը համապատասխանում են ձեր օգտագործման գործին: Անվճար մակարդակները կարող են պահանջել գրանցում, հաստատում կամ վճարման եղանակ: Վերանայեք [անվճար մակարդակների ուղեցույցը](docs/getting-started/FREE-TIERS-GUIDE.md) ; առանց բանալի հասանելիությունը երաշխավորված չէ, և `tos: avoid` նշված մատակարարները լռելյայնորեն բացառված են `auto` ից:
 
-```bash
-curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
-```
+> [!TIP]
+> **Տեղադրեք նախազգուշացումները:** `npm warn ERESOLVE` և հասակակիցներից կախվածության նախազգուշացումներն [անվնաս են](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated) :
+>
+> **npm 11 կամ ավելի ուշ** կարող է արգելափակել փաթեթի կյանքի ցիկլի սկրիպտները, եթե դրանք թույլատրված չեն: OmniRoute ի `postinstall` (`node scripts/build/postinstall.mjs`) պահանջվում է իր սկզբնական գործարկման ֆայլերը պատրաստելու համար: Թույլատրել npm-ի նախազգուշացման մեջ նշված փաթեթները գլոբալ տեղադրման ժամանակ: OmniRoute 3.8.55-ի կողմից ներկայացված փաթեթի համար.
+>
+> `bash npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute `
+>
+> Ապագա գլոբալ տեղադրումների համար այս թույլտվությունների ցանկը նորից օգտագործելու համար կարգավորեք այն մեկ անգամ, այնուհետև տեղադրեք սովորաբար՝
+>
+> `bash npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user npm install -g omniroute `
+>
+> Կախվածության ցանկը կարող է փոխվել թողարկումների միջև. եթե npm-ը հաղորդում է այլ ցուցակ, օգտագործեք այդ նախազգուշացման փաթեթների անունները: Փաթեթին թույլատրելը թույլ է տալիս գործարկել դրա տեղադրման սկրիպտները:
+>
+> **Gemini Web և այլ վեբ-քուքի մատակարարներ:** npm փաթեթը ներառում է Playwright, բայց ոչ իր Chromium երկուականը: Նախքան վեբ-մատակարարի առաջին հարցումը կատարելը, տես [Playwright Chromium-ի կարգավորումների](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium) նշումը:
 
-Դուք պետք է տեսնեք ձեր միացված մոդելների ցանկը։ 🎉 Վերջ․ սկսեք կոդավորել, իսկ OmniRoute-ը ձեր փոխարեն ավտոմատ ուղղորդում և fallback է կատարում։
+<table>
+  <tr>
+    <td valign="top" width="50%">
+      <b>Տեղադրման այլ մեթոդներ</b><br/>
+      Docker, աղբյուր, pnpm, Arch Linux և աշխատասեղանի հավելված:<br/>
+      <sub><a href="docs/guides/SETUP_GUIDE.md#install-methods">Կարգավորման ուղեցույց → Տեղադրման մեթոդներ</a> · <a href="docs/guides/DOCKER_GUIDE.md">Docker ուղեցույց</a></sub>
+    </td>
+    <td valign="top" width="50%">
+      <b>Ինչ-որ բան չի աշխատում:</b><br/>
+      <code>omniroute doctor</code> ստուգում է տվյալների բազան և սերվերի առողջության վերջնական կետը:<br/>
+      <sub><a href="docs/guides/TROUBLESHOOTING.md">Անսարքությունների վերացում</a></sub>
+    </td>
+  </tr>
+</table>
 
-Եթե ձեր client-ը չի կարող custom headers ուղարկել, OmniRoute-ը նաև տրամադրում է tokenized compatibility aliases․
+**Հաճախորդներ, որոնք չեն կարող ուղարկել հատուկ վերնագրեր**
+
+OmniRoute նաև բացահայտում է համատեղելիության նշաններ.
 
 ```txt
 OpenAI catalog:   http://localhost:20128/vscode/YOUR_KEY/
@@ -1092,11 +1155,13 @@ Ollama chat:      http://localhost:20128/vscode/YOUR_KEY/api/chat
 Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 ```
 
-Օգտագործեք դրանք միայն այն client-ների համար, որոնք չեն կարող կցել `Authorization: Bearer ...`։ Header auth-ը շարունակում է մնալ նախընտրելի ռեժիմը։
+Օգտագործեք դրանք միայն այն հաճախորդների համար, ովքեր չեն կարող կցել `Authorization: Bearer ...`: Վերնագրի վավերացումը մնում է նախընտրելի ռեժիմ:
 
 <br/>
 
-## 📦 Տեղադրման այլ մեթոդներ — Docker, սկզբնաղբյուր, pnpm, Arch
+<br/>
+
+## Տեղադրման ավելի շատ մեթոդներ — Docker, source, pnpm, Arch
 
 **🐳 Docker**
 
@@ -1105,13 +1170,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
-`:latest`-ը հետևում է ամենաբարձր **հրապարակված** կայուն SemVer-ին։ Այն չի հետևում git-ի `main`-ին։ GitOps-ի համար ամրագրեք `:X.Y.Z`-ը։ Տեսեք [Docker-ի թողարկումների ալիքները](docs/guides/DOCKER_GUIDE.md#release-channels)։ Պատկերը ամրագրում է **`OMNIROUTE_MEMORY_MB=1024`**։ Դա բավարար է վահանակի և թեթև չաթի համար։ **Կոդավորման գործակալներին** (`POST /v1/responses`՝ Claude Code-ից, Codex-ից, Grok-ից, …) անհրաժեշտ է V8-ի շատ ավելի մեծ heap, հակառակ դեպքում գործընթացը `FATAL ERROR`-ով դադարեցնում է աշխատանքը՝ երկու իրար վրա համընկնող երկար կոնտեքստների դեպքում մոտավորապես ~12 GiB-ի հասնելուց հետո։ Կոնտեյների չափը սահմանեք heap-ից ավելի մեծ (native բուֆերները գտնվում են V8-ից դուրս)․
+`:latest` հետևում է ամենաբարձրին** հրապարակված** կայուն SemVer. Այն չի հետևում git `main`: Pin `:X.Y.Z` համար GitOps. Տես [Docker Release Channels](docs/guides/DOCKER_GUIDE.md#release-channels).Պատկերի կապում**`OMNIROUTE_MEMORY_MB=1024`** . Դա բավական է վահանակի և թեթև զրույցի համար։** Կոդավորման գործակալներ** (`POST /v1/responses` Claude Code-ից, Codex, Grok, …) անհրաժեշտ է շատ ավելի մեծ V8 կույտ կամ գործընթաց `FATAL ERROR` s ~ 12 GiB երկու համընկնող երկար համատեքստերում: Տարան չափեք կույտի վերևում (տեղական բուֆերները գտնվում են V8-ից դուրս).
 
-| Աշխատաբեռ                            | Heap (`-e OMNIROUTE_MEMORY_MB`)  | Կոնտեյներ (`--memory`) |
-| ------------------------------------ | -------------------------------- | ---------------------- |
-| Վահանակ / թեթև չաթ                   | `1024` (պատկերի լռելյայն արժեքը) | ≥2 g                   |
-| Մեկ կոդավորման գործակալ              | `8192`                           | ≥10 g                  |
-| Երկու զուգահեռ երկար `/v1/responses` | `10240`–`12288`                  | ≥12–16 g               |
+| <img width="2000" height="0" alt=""> Աշխատանքային ծանրաբեռնվածություն | Կույտ (`-e OMNIROUTE_MEMORY_MB`) | Բեռնարկղ (`--memory`) |
+| --------------------------------------------------------------------- | -------------------------------- | --------------------- |
+| Վահանակ / թեթև զրույց                                                 | `1024` (պատկերի լռելյայն)        | ≥ 2 գ                 |
+| Մեկ կոդավորման գործակալ                                               | `8192`                           | ≥ 10 գ                |
+| Երկու միաժամանակյա երկար `/v1/responses`                              | `10240`–`12288`                  | ≥ 12–16 գ             |
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -1119,29 +1184,25 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
-Ամբողջական աղյուսակը՝ [Docker-ի ուղեցույց — runtime RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents)։
+Ամբողջական աղյուսակ. [Docker ուղեցույց — գործարկման ժամանակ RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
 
-> **Docker-ի նախնական թողարկումների ալիք՝** `diegosouzapw/omniroute:next` և
-> `diegosouzapw/omniroute:next-web` հետևում են ընթացիկ լռելյայն `release/v*`
-> ճյուղին։ Այս փոփոխական թեգերը նախատեսված են միայն չթողարկված ուղղումների
-> փորձարկման համար և **չեն աջակցվում արտադրական միջավայրում**։ Տեսեք
-> [Docker-ի թողարկումների ալիքները](docs/guides/DOCKER_GUIDE.md#release-channels)։
+> **Նախնական թողարկում Docker ալիք.** `diegosouzapw/omniroute:next` և `diegosouzapw/omniroute:next-web` հետևում են ընթացիկ լռելյայն `release/v*` ճյուղին: Այս փոփոխական պիտակները նախատեսված են միայն չհրապարակված շտկումներ փորձարկելու համար և են** չի ապահովվում արտադրության համար** . Տես [Docker Release Channels](docs/guides/DOCKER_GUIDE.md#release-channels).
 
 **🥟 Bun**
 
-Ստանդարտ `bun install`-ը և գլոբալ տեղադրումը (`bun install -g omniroute`) աջակցվում են Bun runtime-ի հայտնաբերման միջոցով․
+Ստանդարտ `bun install` և գլոբալ տեղադրումը (`bun install -g omniroute`) աջակցվում են Bun գործարկման ժամանակի հայտնաբերման միջոցով.
 
-- **Ներկառուցված `bun:sqlite`**․ OmniRoute-ն օգտագործում է Bun-ի ներկառուցված `bun:sqlite` դրայվերը Bun-ի ներքո աշխատելիս՝ Node.js-ի դեպքում անցնելով `better-sqlite3`-ի կամ `sql.js`-ի։
-- **Webpack bundler-ի ավտոմատ ընտրություն մշակման ժամանակ**․ Մշակման միջավայրը (`bun run dev`) ավտոմատ հայտնաբերում է Bun-ը և անջատում Turbopack-ը՝ դրա փոխարեն օգտագործելով Webpack՝ native V8 binding-ների անհամատեղելիություններից խուսափելու համար։ Արտադրական build-երը (`bun run build`) հետևում են `OMNIROUTE_USE_TURBOPACK`-ին ճիշտ այնպես, ինչպես Node-ի դեպքում․ լռելյայն՝ Turbopack, իսկ `OMNIROUTE_USE_TURBOPACK=0`՝ Webpack-ով build անելու համար (`Dockerfile.bun`-ը դա հասանելի է դարձնում որպես `--build-arg`)։
-- **Bun-ի համար նախատեսված Dockerfile**․ Բազմափուլ `Dockerfile.bun` native Bun արտադրական տեղակայումների համար (`docker build -f Dockerfile.bun -t omniroute:bun .`)։
+- **Ներկառուցված `bun:sqlite`** OmniRoute օգտագործում է Bun ի ներկառուցված `bun:sqlite` դրայվերը, երբ աշխատում է Bun տակ, Node.js կամ `sql.js` վրա վերադառնալով `better-sqlite3` :
+- **Վեբ փաթեթի փաթեթի ավտոմատ ընտրություն ծրագրում** Զարգացումը (`bun run dev`) ավտոմատ կերպով հայտնաբերում է Bun և անջատում է Turbopack ՝ հօգուտ Webpack-ի՝ կանխելու բնիկ V8 պարտադիր անհամատեղելիությունները: Արտադրական կառուցումները (`bun run build`) հետևում են `OMNIROUTE_USE_TURBOPACK` ճիշտ այնպես, ինչպես Node-ում. Turbopack լռելյայնորեն, `OMNIROUTE_USE_TURBOPACK=0` ՝ Webpack-ով կառուցելու համար (`Dockerfile.bun` այն ներկայացնում է որպես `--build-arg`):
+- **Նվիրված Bun Dockerfile** Բազմաստիճան `Dockerfile.bun` տեղական Bun արտադրության տեղակայման համար (`docker build -f Dockerfile.bun -t omniroute:bun .`):
 
 ```bash
-# Տեղադրել և գործարկել Bun-ով
+# Install and run with Bun
 bun install
 bun run dev
 ```
 
-**🛠️ Սկզբնաղբյուրից**
+**🛠️ Աղբյուրից**
 
 ```bash
 cp .env.example .env && npm install
@@ -1160,394 +1221,729 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 yay -S omniroute-bin && systemctl --user enable --now omniroute.service
 ```
 
-**🔧 Nix (Flake)**
+**🔧 Nix (Փաթիլ)**
 
 ```bash
-# Nix flakes-ի օգտագործմամբ
+# Using Nix flakes
 nix develop
 npm run dev
 
-# Կամ devbox-ի օգտագործմամբ
+# Or using devbox
 devbox run npm run dev
 ```
 
-📖 [Docker-ի ուղեցույց](docs/guides/DOCKER_GUIDE.md) — Compose-ի պրոֆիլներ, Caddy HTTPS, Cloudflare թունելներ։
+📖 [Docker Ուղեցույց](docs/guides/DOCKER_GUIDE.md) — Կազմել պրոֆիլներ, Caddy HTTPS, Cloudflare թունելներ:
 
 **🦭 Podman**
 
 ```bash
-# 1. Պատրաստել bind-mounted տվյալների գրացուցակը
+# 1. Prepare the bind-mounted data directory
 mkdir -p data
 
-# 2. Միայն Linux + տեղային rootless Podman (երբեք՝ հեռակա Podman Machine-ի հաճախորդ չէ).
+# 2. Linux + local rootless Podman only (never a remote Podman Machine client):
 podman unshare chown 1000:1000 ./data
 
-# 3. Սահմանել runtime-ի հուշումը, կառուցել տեղային Compose պատկերը և գործարկել
+# 3. Set the runtime hint, build the local Compose image, and start
 echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
-macOS-ում կամ Windows-ում Podman-ն օգտագործում է հեռակա Podman Machine․ բաց թողեք
-`podman unshare`-ը և հետևեք [տոպոլոգիային հատուկ տվյալների գրացուցակի ուղեցույցին](contrib/podman/README.md#data-directory-permissions-by-topology)։
+macOS ում կամ Windows Podman-ն օգտագործում է հեռակառավարվող Podman Machine. բաց թողեք `podman unshare` և հետևեք [տոպոլոգիայի հատուկ տվյալների գրացուցակի ուղեցույցին](contrib/podman/README.md#data-directory-permissions-by-topology) :
 
-📖 [Podman-ի ուղեցույց](contrib/podman/README.md) — Compose-ի build-եր, Podman Machine և
-Linux/systemd Quadlet-ի կարգավորում։
+📖 [Podman Guide](contrib/podman/README.md) — Կազմել կառուցումներ, Podman Machine և Linux/systemd Quadlet-ի կարգավորում:
 
-**⚡ Ավելի արագ / թեթև տեղադրում (բաց թողնել native build-ը)**
+**⚡ Ավելի արագ / ավելի թեթև տեղադրում (բաց թողնել բնօրինակը)**
 
-Native SQLite շարժիչը (`better-sqlite3`) **կամընտրական** կախվածություն է, ուստի գլոբալ
-տեղադրումը երբեք չի արգելափակվում սկզբնաղբյուրից կոմպիլյացիայի պատճառով․ այն օգտագործում է
-նախապես կառուցված binary, երբ այն համապատասխանում է ձեր հարթակին/Node-ին, իսկ հակառակ դեպքում
-թափանցիկ կերպով անցնում է pure-JS շարժիչի (`node:sqlite`՝ Node 22+-ում, հակառակ դեպքում՝
-ներկառուցված `sql.js` WASM-ի) — build-ի գործիքներ չեն պահանջվում։
+Հայրենի SQLite շարժիչը (`better-sqlite3`) է ան** ընտրովի** կախվածությունը, այնպես որ գլոբալ տեղադրումը երբեք չի արգելափակում աղբյուրից կոմպիլյացիան. այն օգտագործում է նախապես կառուցված երկուական, երբ մեկը համապատասխանում է ձեր platform/Node, և հակառակ դեպքում թափանցիկ կերպով վերադառնում է մաքուր JS շարժիչին (`node:sqlite` հանգույց 22 + ում, հակառակ դեպքում՝ միավորված `sql.js` WASM) — կառուցման գործիքներ չեն պահանջվում:
 
-Post-install-ի **native warm-up**-ն ամբողջությամբ բաց թողնելու համար (CI, headless կամ դանդաղ
-մեքենաներում)։ Նշում․ սա բաց է թողնում միայն native SQLite-ի warm-up քայլը (`scripts/postinstall.mjs`)․
-binary-copy/repair hook-ը (`scripts/build/postinstall.mjs`) շարունակում է աշխատել սովորական կերպով․
+Հետտեղադրումը բաց թողնելու համար** հայրենի տաքացում** ամբողջությամբ (CI, անգլուխ կամ դանդաղ մեքենաներ): Նշում. սա բաց է թողնում միայն SQLite ի տաքացման քայլը (`scripts/postinstall.mjs`); binary-copy/repair կեռիկը (`scripts/build/postinstall.mjs`) դեռ նորմալ աշխատում է.
 
 ```bash
-OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ը նույնպես բաց է թողնում այն
+OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 also skips it
 ```
 
-Ամենաարագ տեղադրումների համար նախընտրեք **pnpm**-ը (content-addressed store + hard links — տես վերևում)։
-Առանց վահանակի, headless runtime-ի համար օգտագործեք Docker-ի `base` պրոֆիլը (վերևում) կամ
-[Termux-ի ուղեցույցը](docs/guides/TERMUX_GUIDE.md)։ CLI-ն և վեբ վահանակը սպասարկվում են նույն
-գործընթացի կողմից՝ մեկ պորտով, ուստի այսօր առանձին CLI-only փաթեթ չկա։
+Նախընտրում են ամենաարագ տեղադրումները** pnpm** (բովանդակության հասցեով խանութի + կոշտ հղումները — տես վերևում): Առանց վահանակի, առանց գլխի գործարկման ժամանակ օգտագործեք Docker `base` պրոֆիլը (վերևում) կամ [Termux ուղեցույցը](docs/guides/TERMUX_GUIDE.md) : CLI և վեբ վահանակը սպասարկվում են միևնույն գործընթացով մեկ նավահանգստում, ուստի այսօր չկա առանձին CLI փաթեթ:
 
 <br/>
 
-<div align="center">
+# OmniRoute գործողության մեջ
 
-# 🎬 OmniRoute-ը գործողության մեջ
+## Վիդեո ուղեցույցներ
 
-</div>
+Համայնքի ստեղծողները հազարավոր տեսանյութեր են հրապարակել OmniRoute մասին: Օգտագործեք ցանկը, որը համապատասխանում է ձեզ անհրաժեշտին:
 
-## 📹 Տեսաուղեցույցներ
+### Եթե ցանկանում եք դիտել, թե ինչ-որ մեկին այն կարգավորել է
 
-<div align="center">
-
-<sub>Վահանակի պատկերը՝ 2026-10-18-ի դրությամբ · Չմշակված կատալոգ՝ YT 1.352 | TT 334 | IG 290 · Թարմություն (օրերով)՝ YT 5 | TT 48 | IG 49</sub>
+Վերջին շրջագայություններ. Յուրաքանչյուր հղում ստուգվել է YouTube ի oEmbed վերջնակետի համեմատ 2026-11-16-ին:
 
 <table>
   <tr>
-    <td align="center" width="320">
-      <a href="https://www.instagram.com/reel/Da8ZthUPK98/">
-        <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nick_saraev&font=montserrat&bold=true" alt="Instagram Reel — nick_saraev" width="300"/>
-      </a><br/>
-      <b>🎬 #1 — Instagram</b><br/>
-      <sub>nick_saraev — 3,042,474 դիտում</sub>
-    </td>
-    <td align="center" width="320">
-      <a href="https://www.instagram.com/reel/Dbp7wv_CIO0/">
-        <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nnapier7&font=montserrat&bold=true" alt="Instagram Reel — nnapier7" width="300"/>
-      </a><br/>
-      <b>🎬 #2 — Instagram</b><br/>
-      <sub>nnapier7 — 1,454,535 դիտում</sub>
-    </td>
-    <td align="center" width="320">
-      <a href="https://www.youtube.com/watch?v=NJ0TQ-pyMDY">
-        <img src="https://img.youtube.com/vi/NJ0TQ-pyMDY/maxresdefault.jpg" alt="YouTube — Amidia AI & Tech" width="300"/>
-      </a><br/>
-      <b>🎬 #3 — YouTube</b><br/>
-      <sub>Amidia AI & Tech — 794,974 դիտում</sub>
-    </td>
-    <td align="center" width="320">
-      <a href="https://www.instagram.com/reel/DaSs65mMrHk/">
-        <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+theopenstack&font=montserrat&bold=true" alt="Instagram Reel — theopenstack" width="300"/>
-      </a><br/>
-      <b>🎬 #4 — Instagram</b><br/>
-      <sub>theopenstack — 692,419 դիտում</sub>
-    </td>
-    <td align="center" width="320">
-      <a href="https://www.tiktok.com/@migue.baena/video/7670919268216622358">
-        <img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+migue.baena&font=montserrat&bold=true" alt="TikTok — migue.baena" width="300"/>
-      </a><br/>
-      <b>🎬 #5 — TikTok</b><br/>
-      <sub>migue.baena — 685,788 դիտում</sub>
-    </td>
+    <td valign="top" width="33%"><a href="https://www.youtube.com/watch?v=1GWGCjrgppI"><img src="https://i.ytimg.com/vi/1GWGCjrgppI/hqdefault.jpg" alt="YouTube — Remigiusz Zalewski" width="100%"/></a><br/><sub>Remigiusz Zalewski · 2026-11-04</sub></td>
+    <td valign="top" width="33%"><a href="https://www.youtube.com/watch?v=Ib-boTvKCIY"><img src="https://i.ytimg.com/vi/Ib-boTvKCIY/hqdefault.jpg" alt="YouTube — Abi" width="100%"/></a><br/><sub>Աբի · 2026-10-23</sub></td>
+    <td valign="top" width="33%"><a href="https://www.youtube.com/watch?v=z5VAMUixQBc"><img src="https://i.ytimg.com/vi/z5VAMUixQBc/hqdefault.jpg" alt="YouTube — Mostafa-JoOo" width="100%"/></a><br/><sub>Mostafa-JoOo · 2026-11-05</sub></td>
   </tr>
 </table>
 
-</div>
+| Ստեղծող                                                          | Այն, ինչ ծածկում է                                                     | Հրատարակվել է | Դիտումներ՝ snapshot-ում |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------- | ----------------------: |
+| [Ռեմիգիուշ Զալևսկի](https://www.youtube.com/watch?v=1GWGCjrgppI) | Տեղադրեք և կարգավորեք OmniRoute անվճար LLM APIs ով Claude Code-ի համար | 2026-11-04    |                  55,951 |
+| [Աբի](https://www.youtube.com/watch?v=Ib-boTvKCIY)               | Միացրեք Claude, GPT և Gemini OmniRoute                                 | 2026-10-23    |                   1,873 |
+| [Մոստաֆա-ՋոՕո](https://www.youtube.com/watch?v=z5VAMUixQBc)      | Գործարկել Hermes Agent-ը OmniRoute միջոցով (արաբերեն)                  | 2026-11-05    |                  12,711 |
 
-**Ամբողջական վարկանիշ (ապակրկնօրինակված կանոնական URL-ներ, `v > 0`, առավելագույն հասանելիություն).**
+### Եթե ցանկանում եք ամենաշատ դիտված տեսանյութերը
 
-| #1                                                                                     | #2                                                                                  | #3                                                                                      | #4                                                                                    | #5                                                                                                  |
-| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| [nick_saraev — Instagram](https://www.instagram.com/reel/Da8ZthUPK98/) — **3,042,474** | [nnapier7 — Instagram](https://www.instagram.com/reel/Dbp7wv_CIO0/) — **1,454,535** | [Amidia AI & Tech — YouTube](https://www.youtube.com/watch?v=NJ0TQ-pyMDY) — **794,974** | [theopenstack — Instagram](https://www.instagram.com/reel/DaSs65mMrHk/) — **692,419** | [migue.baena — TikTok](https://www.tiktok.com/@migue.baena/video/7670919268216622358) — **685,788** |
+<table>
+  <tr>
+    <td align="center" width="20%"><a href="https://www.instagram.com/reel/Da8ZthUPK98/"><img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nick_saraev&font=montserrat&bold=true" alt="Instagram — nick_saraev" width="160"/></a><br/><sub>#1 · nick_saraev</sub></td>
+    <td align="center" width="20%"><a href="https://www.instagram.com/reel/Dbp7wv_CIO0/"><img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nnapier7&font=montserrat&bold=true" alt="Instagram — nnapier7" width="160"/></a><br/><sub>#2 · nnapier7</sub></td>
+    <td align="center" width="20%"><a href="https://www.youtube.com/watch?v=NJ0TQ-pyMDY"><img src="https://i.ytimg.com/vi/NJ0TQ-pyMDY/hqdefault.jpg" alt="YouTube — Amidia AI & Tech" width="160"/></a><br/><sub>#3 · Amidia AI & Tech</sub></td>
+    <td align="center" width="20%"><a href="https://www.youtube.com/watch?v=l3WLKr56gQQ"><img src="https://i.ytimg.com/vi/l3WLKr56gQQ/hqdefault.jpg" alt="YouTube — Umair Alam Chaudhry" width="160"/></a><br/><sub>#4 · Umair Alam Chaudhry</sub></td>
+    <td align="center" width="20%"><a href="https://www.instagram.com/reel/DaSs65mMrHk/"><img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+theopenstack&font=montserrat&bold=true" alt="Instagram — theopenstack" width="160"/></a><br/><sub>#5 · theopenstack</sub></td>
+  </tr>
+  <tr>
+    <td align="center" width="20%"><a href="https://www.tiktok.com/@migue.baena/video/7670919268216622358"><img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+migue.baena&font=montserrat&bold=true" alt="TikTok — migue.baena" width="160"/></a><br/><sub>#6 · migue.baena</sub></td>
+    <td align="center" width="20%"><a href="https://www.tiktok.com/@milesreevesai/video/7667980059189366019"><img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+milesreevesai&font=montserrat&bold=true" alt="TikTok — milesreevesai" width="160"/></a><br/><sub>#7 · milesreevesai</sub></td>
+    <td align="center" width="20%"><a href="https://www.tiktok.com/@nikothetech/video/7671890769665477918"><img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+nikothetech&font=montserrat&bold=true" alt="TikTok — nikothetech" width="160"/></a><br/><sub>#8 · nikothetech</sub></td>
+    <td align="center" width="20%"><a href="https://www.youtube.com/watch?v=QucgvbO5gsM"><img src="https://i.ytimg.com/vi/QucgvbO5gsM/hqdefault.jpg" alt="YouTube — Vaibhav Sisinty" width="160"/></a><br/><sub>#9 · Vaibhav Sisinty</sub></td>
+    <td align="center" width="20%"><a href="https://www.youtube.com/shorts/fZIBK_4fKq8"><img src="https://i.ytimg.com/vi/fZIBK_4fKq8/hqdefault.jpg" alt="YouTube Shorts — Nick Automates" width="160"/></a><br/><sub>#10 · Nick Automates</sub></td>
+  </tr>
+</table>
 
-| #6                                                                                                      | #7                                                                                                  | #8                                                                                     | #9                                                                                        | #10                                                                                 |
-| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| [milesreevesai — TikTok](https://www.tiktok.com/@milesreevesai/video/7667980059189366019) — **620,400** | [nikothetech — TikTok](https://www.tiktok.com/@nikothetech/video/7671890769665477918) — **610,803** | [Vaibhav Sisinty — YouTube](https://www.youtube.com/watch?v=QucgvbO5gsM) — **509,281** | [buildwithai.club — Instagram](https://www.instagram.com/reel/DbIt9AjK7-U/) — **347,652** | [nivedan.ai — Instagram](https://www.instagram.com/reel/DbIrCksJiqq/) — **331,973** |
+|   # | <img width="2000" height="0" alt=""> Ստեղծող                                     | Հարթակ         | Հրատարակվել է | Հայտնի տեսակետներ |
+| --: | -------------------------------------------------------------------------------- | -------------- | ------------- | ----------------: |
+|   1 | [nick_saraev](https://www.instagram.com/reel/Da8ZthUPK98/)                       | Instagram      | 2026-07-18    |         3,042,474 |
+|   2 | [nnapier7](https://www.instagram.com/reel/Dbp7wv_CIO0/)                          | Instagram      | 2026-08-05    |         1,454,535 |
+|   3 | [Amidia AI & Tech](https://www.youtube.com/watch?v=NJ0TQ-pyMDY)                  | YouTube        | 2026-08-21    |         1,073,166 |
+|   4 | [Ումայր Ալամ Չոդրի](https://www.youtube.com/watch?v=l3WLKr56gQQ)                 | YouTube        | 2026-07-26    |           785,126 |
+|   5 | [theopenstack](https://www.instagram.com/reel/DaSs65mMrHk/)                      | Instagram      | 2026-07-02    |           692,419 |
+|   6 | [migue.baena](https://www.tiktok.com/@migue.baena/video/7670919268216622358)     | TikTok         | 2026-08-06    |           685,788 |
+|   7 | [milesreevesai](https://www.tiktok.com/@milesreevesai/video/7667980059189366019) | TikTok         | 2026-07-29    |           620,400 |
+|   8 | [nikothetech](https://www.tiktok.com/@nikothetech/video/7671890769665477918)     | TikTok         | 2026-08-09    |           610,803 |
+|   9 | [Վայբհավ Սիսինթի](https://www.youtube.com/watch?v=QucgvbO5gsM)                   | YouTube        | 2026-07-22    |           547,609 |
+|  10 | [Նիկ Ավտոմատիս](https://www.youtube.com/shorts/fZIBK_4fKq8)                      | YouTube շորտեր | 2026-07-18    |           426,596 |
 
-Կանոնական չափանիշները՝ 2026-10-18-ի դրությամբ. **1.976 եզակի տեսանյութ** · **20.220.289 հայտնի դիտում** (`v > 0`) · **1.210 ալիք/պրոֆիլ՝ ըստ հարթակի**։ Չմշակված վահանակը պարունակում է 1.976 տող (YouTube 1.352 = 740 երկար տեսանյութ + 612 Shorts · TikTok 334 · Instagram 290)։ Կանոնական URL-ով նորմալացումից հետո կրկնօրինակներ չեն մնացել. յուրաքանչյուր տեսանյութի համար պահպանվել է դիտումների ամենամեծ քանակը։ YouTube-ի տվյալների հավաքումը սառեցված է 2026-10-13-ից (API-ի քվոտան սպառվել է 14-ից մինչև 18/10), իսկ TikTok/Instagram-ինը՝ 2026-09-02-ից (տվյալների հավաքման կրեդիտներ չկան)։ 76 տեսանյութի դիտումների քանակը դեռևս բացակայում է։
+Ստեղծողի վերնագրերն ու ենթագրերն իրենցն են: Ոմանք խոստանում են ավելին, քան OmniRoute երաշխիքները. մատակարարի քվոտաներն ու պայմանները որոշում են, թե իրականում ինչ եք ստանում:
 
-> 🎬 **Տեսանյութ պատրաստե՞լ եք OmniRoute-ի մասին։** Բացեք [խնդիր](https://github.com/diegosouzapw/OmniRoute/issues/new) կամ [քննարկում](https://github.com/diegosouzapw/OmniRoute/discussions)՝ ավելացնելով հղումը. մենք այն կներկայացնենք այստեղ։
+### Եթե ուզում եք թվերը
+
+| <img width="2000" height="0" alt=""> հարթակ | Տեսանյութեր | Հայտնի տեսակետներ |
+| ------------------------------------------- | ----------: | ----------------: |
+| YouTube երկարաձև                            |         928 |        10,340,464 |
+| YouTube շորտեր                              |         774 |         2,793,933 |
+| Instagram                                   |         290 |         8,054,601 |
+| TikTok                                      |         334 |         3,515,835 |
+| **Ընդամենը**                                |   **2,326** |    **24,704,833** |
+
+2026-11-16-ի լուսանկար.** 2326 եզակի տեսանյութ** (YouTube 1,702 = 928 երկարաձև + 774 շորտեր · TikTok 334 · Instagram 290),** 24,704,833 հայտնի դիտում** ,** 1395 ալիք և պրոֆիլներ** . Կրկնօրինակները միաձուլվում են կանոնական URL կողմից՝ պահպանելով ամենաբարձր թիվը; 79 տեսանյութ դեռ չունի դիտումների քանակ և չի հաշվվում։ YouTube հավաքվում է մինչև 2026-11-15 հրապարակված տեսանյութերը; TikTok և Instagram-ի հավաքածուն սառեցվել է 2026-09-02-ից, ուստի նրանց հաշվարկներն ավելի հին են:
+
+### Եթե տեսանյութ եք պատրաստել
+
+**Տեսանյութ եք պատրաստել OmniRoute մասին:** Բացեք [հարց](https://github.com/cheaper-inference/OmniRoute/issues/new) կամ [քննարկում](https://github.com/cheaper-inference/OmniRoute/discussions) հղումով, և մենք այն կավելացնենք այստեղ:
+
+<br/>
 
 <br/>
 
 <div align="center">
 
-# 📧 Համայնք և օգնություն
+# Համայնք և օգնություն
 
-> Ամեն ինչ մեկ վայրում՝ հետևեք նախագծի սպասարկողին, զրուցեք համայնքի հետ կամ բացեք խնդիր։
+> Ամեն ինչ մեկ տեղում — հետևում է սպասարկողին, զրուցում համայնքի հետ կամ բացում խնդիր:
 
-| Ալիք                                                  | Որտեղ / ինչպես                                                                                                                 |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| 💼 **LinkedIn** — հետևեք սպասարկողին                  | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                                      |
-| 🐙 **GitHub** — հետևեք թողարկումներին և խորհուրդներին | [@diegosouzapw](https://github.com/diegosouzapw)                                                                               |
-| 💬 **Discord**                                        | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                                         |
-| ✈️ **Telegram**                                       | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                                         |
-| 🟢 **WhatsApp — 🌍 Գլոբալ**                           | [միանալ խմբին](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                                                |
-| 🟢 **WhatsApp — 🇧🇷 Բրազիլիա**                         | [միանալ խմբին](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                |
-| 🌍 **Կայք**                                           | [omniroute.online](https://omniroute.online)                                                                                   |
-| 🌍 **🌍StHub OmniRoute համայնք (անվճար)**             | [StHub հարթակ](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                          |
-| 📦 **Սկզբնական կոդ**                                  | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                 |
-| 🐛 **Հաղորդել սխալի մասին**                           | [բացել խնդիր](https://github.com/diegosouzapw/OmniRoute/issues) — կցեք `npm run system-info` հրամանի արդյունքը                 |
-| 🤝 **Ներդրում կատարել**                               | [CONTRIBUTING.md](CONTRIBUTING.md) · [Ճյուղավորման և թողարկման մոդել](docs/ops/BRANCHING_MODEL.md) · ընտրեք `good first issue` |
-| 💚 **Աջակցել նախագծին**                               | [Աջակցության եղանակներ ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                   |
+| Ալիք                                                 | Որտեղ / ինչպես                                                                                                               |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| 💼**LinkedIn** — հետևեք սպասարկողին                  | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                                    |
+| 🐙**GitHub** — հետևեք թողարկումներին և խորհուրդներին | [@diegosouzapw](https://github.com/diegosouzapw)                                                                             |
+| 💬 **Discord**                                       | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                                       |
+| ✈️ **Telegram**                                      | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                                       |
+| 🟢**WhatsApp — 🌍 Գլոբալ**                           | [միանալ խմբին](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                                              |
+| 🟢**WhatsApp — 🇧🇷 Brasil**                           | [մուտքագրել ոչ մի խումբ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                    |
+| 🌍** Կայք**                                          | [omniroute.online](https://omniroute.online)                                                                                 |
+| 🌍**🌍StHub OmniRoute համայնք (անվճար)**             | [պորտալի կոճղ](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                        |
+| 📦** Աղբյուրի կոդը**                                 | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                     |
+| 🐛** Հաղորդել սխալի մասին**                          | [բացել խնդիր](https://github.com/cheaper-inference/OmniRoute/issues) — կցել `npm run system-info` ելք                        |
+| 🤝** Նպաստել**                                       | [CONTRIBUTING.md](CONTRIBUTING.md) · [Մասնաճյուղ և թողարկում մոդել](docs/ops/BRANCHING_MODEL.md) · ընտրել `good first issue` |
+| 💚** Աջակցեք նախագծին**                              | [↑ աջակցության ուղիներ](#-support-omniroute) · [GitHub Հովանավորներ](https://github.com/sponsors/diegosouzapw)               |
 
 </div>
 
 ---
 
 <br/>
-<div align="center">
+<br/>
 
-## 🛠️ Տեխնոլոգիական փաթեթ
+## Tech Stack
 
-</div>
+Ինչով է կառուցված OmniRoute, ինչպես հայտարարված է [`package.json`](package.json) ում `release/v3.8.55` ում:
 
 <table>
   <tr><th align="left">Շերտ</th><th align="left">Տեխնոլոգիա</th></tr>
-  <tr><td nowrap><b>Կատարման միջավայր</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Լեզու</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b>՝ <code>src/</code> և <code>open-sse/</code> պանակներում (միջուկում զրո <code>any</code>՝ սկսած v2.0-ից)</td></tr>
-  <tr><td nowrap><b>Ֆրեյմվորք</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Տվյալների բազա</b></td><td>better-sqlite3 (SQLite, WAL մատյանավորում) + LowDB (JSON ժառանգական) — 147 դոմենային մոդուլ, 252 միգրացիա</td></tr>
-  <tr><td nowrap><b>Հիշողություն</b></td><td>SQLite FTS5 ամբողջական տեքստային որոնում + int8-քվանտավորված վեկտորային ներդրումներ, տիպավորված մարում</td></tr>
-  <tr><td nowrap><b>Սխեմաներ</b></td><td>Zod 4 — MCP գործիքների I/O վավերացում + API պայմանագրեր</td></tr>
-  <tr><td nowrap><b>Արձանագրություններ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Հոսքային փոխանցում</b></td><td>Սերվերի կողմից ուղարկվող իրադարձություններ (SSE) + WebSocket կամուրջ (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Սեղմում</b></td><td>12 շարժիչից բաղկացած խողովակաշար — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Նույնականացում &amp; անվտանգություն</b></td><td>OAuth 2.0 (PKCE) + JWT + API բանալիներ + MCP սահմանափակված նույնականացում · AES-256-GCM՝ պահպանված տվյալների համար · DOMPurify</td></tr>
-  <tr><td nowrap><b>Գաղտագողիություն</b></td><td>wreq-js — JA3 / JA4 TLS մատնահետքի նմանակում, 3 մակարդակի պրոքսի</td></tr>
-  <tr><td nowrap><b>Կայունություն</b></td><td>Շղթայի անջատիչ, էքսպոնենցիալ հետաձգում, միաժամանակյա հարցումների կուտակման կանխարգելում, ավտոմատ համակցված ինքնավերականգնում</td></tr>
-  <tr><td nowrap><b>Մատյանավորում</b></td><td>pino — կառուցվածքային JSON մատյաններ՝ հարցման համատեքստով</td></tr>
-  <tr><td nowrap><b>Թեստավորում</b></td><td>Node.js թեստերի գործարկիչ + Vitest — <b>60,000+ ստատիկ թեստերի հայտարարություններ</b>՝ 8,400+ հետագծվող թեստային ֆայլերում (միավորային, ինտեգրացիոն, E2E, անվտանգության, էկոհամակարգի)</td></tr>
-  <tr><td nowrap><b>Հարթակներ</b></td><td>Սեղանադիր (Electron) · Android (Termux) · PWA (ցանկացած զննարկիչ)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — թողարկման ժամանակ npm-ի ավտոմատ հրապարակում + Docker Hub</td></tr>
+  <tr><td nowrap><b>Runtime</b></td><td>Node.js <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code> (22.x 22.22.2-ից և 24.x-ից մինչև 26.x): Bun 1.4.2-ը ամրացված է միայն մի քանի build scripts գործարկելու և լավագույն ջանքերի համատեղելիության ուղին գործարկելու համար; դա աջակցվող գործարկման ժամանակ չէ</td></tr>
+  <tr><td nowrap><b>Լեզու</b></td><td>TypeScript 6 հավելվածի և հոսքային շարժիչի համար (<code>src/</code> և <code>open-sse/</code>); <code>omniroute</code> CLI <code>bin/</code> ում ES-մոդուլ է JavaScript</td></tr>
+  <tr><td nowrap><b>Շրջանակ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4, վաճառվող Keak CI UI Kit-ով (<code>packages/ui-kit</code>)</td></tr>
+  <tr><td nowrap><b>Տվյալների բազա</b></td><td>SQLite WAL ամսագրով better-sqlite3 միջոցով, վարորդի հետադարձ շղթայով — 178 մոդուլ <code>src/lib/db/</code> ում, 252 միգրացիա</td></tr>
+  <tr><td nowrap><b>Հիշողություն</b></td><td>SQLite FTS5 ամբողջական տեքստի որոնում + int8-quantized վեկտորային ներկառուցումներ տպագրված քայքայմամբ; ընտրովի Qdrant</td></tr>
+  <tr><td nowrap><b>Սխեմաներ</b></td><td>Zod 4 — API պայմանագրեր և MCP գործիք input/output վավերացում</td></tr>
+  <tr><td nowrap><b>Արձանագրություններ</b></td><td>MCP (stdio / SSE / Streamable HTTP, 110 գործիք) + A2A v0.3 (JSON-RPC 2.0 + SSE) A2A v1.0 հաճախորդի համատեղելիությամբ</td></tr>
+  <tr><td nowrap><b>Սթրիմինգ</b></td><td>Սերվերի կողմից ուղարկված իրադարձություններ (SSE) + WebSocket կամուրջ (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Սեղմում</b></td><td>15 ներկառուցված շարժիչներ, ներառյալ RTK, Caveman, LLMLingua-2 (ONNX, TinyBERT լռելյայն), headroom և OmniGlyph</td></tr>
+  <tr><td nowrap><b>Auth &amp; անվտանգություն</b></td><td>OAuth 2.0 (PKCE) + JWT + API ստեղներ + MCP սահմանաչափով վավերացում · կամընտիր Entra ID, OIDC և TOTP մուտք · AES-256-GCM հանգստի վիճակում · DOMPurify</td></tr>
+  <tr><td nowrap><b>Գաղտնիություն</b></td><td>wreq-js — JA3 / JA4 TLS մատնահետքի նմանակում, 3 մակարդակի վստահված անձ</td></tr>
+  <tr><td nowrap><b>Ճկունություն</b></td><td>Մատակարարի անջատիչ, կապի սառեցում, մոդելի կողպում, էքսպոնենցիալ հետադարձ անջատում, հարմարվողական ընդունում</td></tr>
+  <tr><td nowrap><b>անտառահատումներ</b></td><td>pino — կառուցված JSON տեղեկամատյաններ հարցման համատեքստով</td></tr>
+  <tr><td nowrap><b>Փորձարկում</b></td><td>Node.js test runner + Vitest + Playwright — 9,500 + թեստային ֆայլեր <code>tests/</code> ի ներքո (միավոր, ինտեգրում, E2E, անվտանգություն, էկոհամակարգ)</td></tr>
+  <tr><td nowrap><b>Հարթակներ</b></td><td>npm (Windows / macOS / Linux) · Docker (linux/amd64, linux/arm64) · Kubernetes (Pustomize + Helm) · Desktop (Electron) · Android (Termux) · PWA</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — npm-ը հրապարակում է Trusted Publishing (OIDC) և Docker Hub-ի պատկերները թողարկման պահին</td></tr>
   <tr><td nowrap><b>Հղումներ</b></td><td><a href="https://omniroute.online">Կայք</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
-<div align="center">
+<br/>
+
+## Փաստաթղթեր
+
+Թարգմանություններից դուրս [`docs/`](docs/) ի յուրաքանչյուր Markdown ֆայլը կցված է ստորև, գումարած փաստաթղթերը, որոնք ապրում են պահեստի այլ վայրերում (նպաստող ուղեցույց, փոփոխության մատյան, փաթեթ READMEs, OpenAPI ֆայլ): Որոնելի ինդեքսը [`docs/README.md`](docs/README.md) է: 66 լեզուներով թարգմանությունները [`docs/i18n/`](docs/i18n/README.md) ով են:
+
+| Եթե դուք…                                                            | <img width="2000" height="0" alt=""> Նախ կարդացեք           | Այնուհետեւ թերթեք                  |
+| -------------------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------------- |
+| նոր են OmniRoute ում                                                 | [Փաստաթղթերի ինդեքս](docs/README.md)                        | [13 փաստաթուղթ](#docs-start)       |
+| տեղադրում կամ գործարկում են սերվեր                                   | [Docker ուղեցույց](docs/guides/DOCKER_GUIDE.md)             | [24 փաստաթուղթ](#docs-deploy)      |
+| ցանկանում եք վերահսկել, թե ինչպես են հարցումները ուղղորդվում         | [Ավտո-համակցված շարժիչ](docs/routing/AUTO-COMBO.md)         | [20 փաստաթուղթ](#docs-routing)     |
+| ցանկանում եք հետևել ծախսերին և քվոտային                              | [Ծախսերի և ծախսերի հետևում](docs/guides/COST_TRACKING.md)   | [10 փաստաթուղթ](#docs-usage)       |
+| միացնում են կոնկրետ մատակարարին                                      | [Մատակարարի տեղեկանք](docs/reference/PROVIDER_REFERENCE.md) | [33 փաստաթուղթ](#docs-providers)   |
+| ցանկանում եք պահպանել նշաններ կամ ավելացնել համատեքստ                | [Սեղմման ուղեցույց](docs/compression/COMPRESSION_GUIDE.md)  | [11 փաստաթուղթ](#docs-compression) |
+| օգտագործեք կոդավորման գործիք կամ omniroute CLI                       | [CLI ինտեգրումներ](docs/guides/CLI-INTEGRATIONS.md)         | [17 փաստաթուղթ](#docs-cli)         |
+| կառուցում են ընդդեմ API                                              | [API Հղում](docs/reference/API_REFERENCE.md)                | [17 փաստաթուղթ](#docs-api)         |
+| ցանկանում եք երկարացնել OmniRoute կամ դիտել դրա երթեւեկությունը      | [Plugin Marketplace](docs/frameworks/PLUGIN_MARKETPLACE.md) | [16 փաստաթուղթ](#docs-extend)      |
+| երթուղի դեպի հոսանքին հակառակ երթևեկությունը վստահված անձանց միջոցով | [Վստահված անձի ուղեցույց](docs/ops/PROXY_GUIDE.md)          | [6 փաստաթուղթ](#docs-network)      |
+| վերանայում են անվտանգությունը                                        | [Անվտանգության քաղաքականություն](SECURITY.md)               | [17 փաստաթուղթ](#docs-security)    |
+| ուզում եմ հասկանալ կոդը                                              | [Ճարտարապետություն](docs/architecture/ARCHITECTURE.md)      | [10 փաստաթուղթ](#docs-internals)   |
+| ցանկանում է նպաստել                                                  | [Նպաստելով](CONTRIBUTING.md)                                | [25 փաստաթուղթ](#docs-project)     |
+| փնտրում են ակտիվների նշումներ                                        | [Դրոշի պատկերակներ](docs/assets/flags/README.md)            | [1 փաստաթուղթ](#docs-records)      |
+
+<a id="docs-start"></a>
+
+### Եթե դուք նոր եք OmniRoute ում
+
+Տեղադրեք, միացրեք առաջին մատակարարին և սովորեք վահանակը: Թեմա:** Սկսում ենք** .
+
+| Փաստաթուղթ                                                                | <img width="2000" height="0" alt=""> Ինչ է այն պատասխանում                                   | Ֆայլ                                       |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| [Փաստաթղթերի ինդեքս](docs/README.md)                                      | Ամբողջ փաստաթղթերի հավաքածուի նավարկելի ինդեքս՝ խմբավորված ըստ մտադրության                   | `docs/README.md`                           |
+| [Արագ մեկնարկի ուղեցույց](docs/getting-started/QUICK-START.md)            | Տեղադրեք, միացրեք իրավասու մատակարարին և ուղղեք ձեր IDE OmniRoute վրա                        | `docs/getting-started/QUICK-START.md`      |
+| [Մատակարարների ուղեցույց](docs/getting-started/PROVIDERS-GUIDE.md)        | Ինչ է մատակարարը և ինչպես միացնել AI մոդելները OmniRoute ին                                  | `docs/getting-started/PROVIDERS-GUIDE.md`  |
+| [Անվճար մակարդակների ուղեցույց](docs/getting-started/FREE-TIERS-GUIDE.md) | Ինչպես է աշխատում մատակարարի անվճար մուտքը և ինչպես համատեղել այն պատասխանատու կերպով        | `docs/getting-started/FREE-TIERS-GUIDE.md` |
+| [Auto-Combo ուղեցույց](docs/getting-started/AUTO-COMBO-GUIDE.md)          | Սկսնակ ներածություն OmniRoute թույլ տալով ընտրել մոդելը յուրաքանչյուր խնդրանքով              | `docs/getting-started/AUTO-COMBO-GUIDE.md` |
+| [Վեբ թխուկների մատակարարներ](docs/getting-started/WEB-COOKIE-GUIDE.md)    | Օգտագործեք AI ծառայությունը ձեր բրաուզերի առկա աշխատաշրջանի միջոցով API ստեղնի փոխարեն       | `docs/getting-started/WEB-COOKIE-GUIDE.md` |
+| [Self Host ուղեցույց](docs/getting-started/SELF_HOST_GUIDE.md)            | Հինգ րոպեանոց ինքնակառավարման տեղակայում Docker Compose-ով                                   | `docs/getting-started/SELF_HOST_GUIDE.md`  |
+| [Օգտագործողի ուղեցույց](docs/guides/USER_GUIDE.md)                        | Մատակարարներ, կոմբինացիաներ, CLI ինտեգրում և տեղակայում                                      | `docs/guides/USER_GUIDE.md`                |
+| [Կարգավորման ուղեցույց](docs/guides/SETUP_GUIDE.md)                       | Տեղադրման յուրաքանչյուր մեթոդ, CLI գործիքի կազմաձևում, MCP/A2A կարգավորում և ժամանակի լարում | `docs/guides/SETUP_GUIDE.md`               |
+| [Հատկանիշների պատկերասրահ](docs/guides/FEATURES.md)                       | Վիզուալ շրջագայություն վահանակի յուրաքանչյուր հատվածով                                       | `docs/guides/FEATURES.md`                  |
+| [Շերտեր](docs/guides/TIERS.md)                                            | Ինչպես են մատակարարները խմբավորվում երեք տնտեսական մակարդակներում երթուղավորման համար        | `docs/guides/TIERS.md`                     |
+| [Անսարքությունների վերացում](docs/guides/TROUBLESHOOTING.md)              | Ընդհանուր խնդիրներ և դրանց ուղղումներ, ներառյալ տեղադրման նախազգուշացումները                 | `docs/guides/TROUBLESHOOTING.md`           |
+| [Տեղահանման ուղեցույց](docs/guides/UNINSTALL.md)                          | Մաքուր հեռացում տեղադրման յուրաքանչյուր եղանակի համար                                        | `docs/guides/UNINSTALL.md`                 |
+
+<a id="docs-deploy"></a>
+
+### Եթե դուք սերվեր եք տեղադրում կամ շահագործում
+
+Գործարկեք OmniRoute նոութբուքի, VPS, կոնտեյների հարթակի կամ հեռախոսի վրա և կարգավորեք այն: Թեմա:** Տեղադրեք, տեղակայեք և կազմաձևեք** .
+
+| <img width="2000" height="0" alt=""> փաստաթուղթ                         | Ինչ է այն պատասխանում                                                                | Ֆայլ                                      |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------- |
+| [Docker ուղեցույց](docs/guides/DOCKER_GUIDE.md)                         | Docker run, Կազմել պրոֆիլներ, Caddy HTTPS, թունելներ և պատկերների պիտակներ           | `docs/guides/DOCKER_GUIDE.md`             |
+| [Պոդման ուղեցույց](contrib/podman/README.md)                            | Podman կոմպոզիցիան և Quadlet համակարգային ինտեգրումը, նշում է SELinux                | `contrib/podman/README.md`                |
+| [Անգլուխ Linux VPS կապոց](contrib/vps/README.md)                        | Գործարկեք հրապարակված սերվերի պատկերը Linux VPS ում առանց աշխատասեղանի               | `contrib/vps/README.md`                   |
+| [Windows օգնականներ](contrib/windows/README.md)                         | Կրկնակի սեղմեք սկրիպտների վրա՝ OmniRoute գործարկելու Windows աղբյուրի վճարումից      | `contrib/windows/README.md`               |
+| [VM տեղակայում](docs/ops/VM_DEPLOYMENT_GUIDE.md)                        | VM + nginx + Cloudflare տեղակայում, վերջից մինչև վերջ                                | `docs/ops/VM_DEPLOYMENT_GUIDE.md`         |
+| [Fly.io տեղակայում](docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md)                | Տեղադրեք Fly.io-ում՝ մշտական պահեստով                                                | `docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md`     |
+| [Kubernetes տեղակայում](docs/ops/KUBERNETES_DEPLOYMENT_GUIDE.md)        | Անհատականացրեք ծածկույթները k3s-ի և k8s-ի համար, գումարած Helm աղյուսակը             | `docs/ops/KUBERNETES_DEPLOYMENT_GUIDE.md` |
+| [Անգլուխ ռեժիմ](docs/guides/HEADLESS.md)                                | Գործարկեք միայն `/v1/*` վստահված անձը առանց վահանակի                                 | `docs/guides/HEADLESS.md`                 |
+| [Electron աշխատասեղանի ուղեցույց](docs/guides/ELECTRON_GUIDE.md)        | Desktop հավելված Windows, macOS և Linux համար                                        | `docs/guides/ELECTRON_GUIDE.md`           |
+| [Electron հավելվածի աղբյուրը](electron/README.md)                       | Ինչպես է կառուցվում և փաթեթավորվում աշխատասեղանի փաթաթումը                           | `electron/README.md`                      |
+| [Termux ուղեցույց](docs/guides/TERMUX_GUIDE.md)                         | Գործարկեք OmniRoute որպես անգլուխ սերվեր Android-ում                                 | `docs/guides/TERMUX_GUIDE.md`             |
+| [PWA ուղեցույց](docs/guides/PWA_GUIDE.md)                               | Տեղադրեք վահանակը որպես առաջադեմ վեբ հավելված                                        | `docs/guides/PWA_GUIDE.md`                |
+| [Տեղական Ollama + Docker](docs/guides/LOCAL_OLLAMA_DOCKER.md)           | OmniRoute Docker ում Ollama ով աշխատում է հյուրընկալողի վրա                          | `docs/guides/LOCAL_OLLAMA_DOCKER.md`      |
+| [Docker Model Runner](docs/guides/DOCKER_MODEL_RUNNER.md)               | Օգտագործեք Docker Model Runner-ը որպես տեղական մատակարար                             | `docs/guides/DOCKER_MODEL_RUNNER.md`      |
+| [Բրաուզերի մուտքի կոնտեյներ](docker/vnc-browser/README.md)              | Մեկուսացված զննարկիչ այն մատակարարների համար, որոնց անհրաժեշտ է ինտերակտիվ վեբ մուտք | `docker/vnc-browser/README.md`            |
+| [Հեռավոր ռեժիմ](docs/guides/REMOTE-MODE.md)                             | Հեռավոր OmniRoute վարեք ձեր նոութբուք CLI ից՝ ընդգրկված նշաններով                    | `docs/guides/REMOTE-MODE.md`              |
+| [Թունելների ուղեցույց](docs/ops/TUNNELS_GUIDE.md)                       | Բացահայտեք տեղական սերվերը հրապարակայնորեն թունելների միջոցով                        | `docs/ops/TUNNELS_GUIDE.md`               |
+| [Redis Արտադրության կոնֆիգուրացիա](docs/ops/REDIS_PRODUCTION_CONFIG.md) | Ընտրովի Redis քեշերի, հարաբերակցության և բազմաբնույթ կարգաբերումների համար           | `docs/ops/REDIS_PRODUCTION_CONFIG.md`     |
+| [Տվյալների բազայի ուղեցույց](docs/ops/DATABASE_GUIDE.md)                | Սխեման, միգրացիաներ և տվյալների բազայի գործողություններ                              | `docs/ops/DATABASE_GUIDE.md`              |
+| [SQLite Runtime](docs/ops/SQLITE_RUNTIME.md)                            | Ինչպես է SQLite դրայվերը լուծվում գործարկման ժամանակ                                 | `docs/ops/SQLITE_RUNTIME.md`              |
+| [Շրջակա միջավայրի փոփոխականներ](docs/reference/ENVIRONMENT.md)          | Յուրաքանչյուր `.env` փոփոխական և դրա լռելյայն                                        | `docs/reference/ENVIRONMENT.md`           |
+| [Խաղարկային դրոշներ](docs/reference/FEATURE_FLAGS.md)                   | Runtime toggles և ինչպես փոխել դրանք                                                 | `docs/reference/FEATURE_FLAGS.md`         |
+| [Կառավարման վավերացում](docs/guides/MANAGEMENT-AUTH.md)                 | Չորս հավատարմագրային ընտանիքները, որոնք կարող են թույլատրել կառավարման երթուղիները   | `docs/guides/MANAGEMENT-AUTH.md`          |
+| [i18n ուղեցույց](docs/guides/I18N.md)                                   | 67 լեզուների աջակցություն, թարգմանչական աշխատանք և RTL                               | `docs/guides/I18N.md`                     |
+
+<a id="docs-routing"></a>
+
+### Եթե ցանկանում եք վերահսկել, թե ինչպես են ուղարկվում հարցումները
+
+Կոմբոներ, ռազմավարություններ, հետադարձ կապեր և ճկունության երեք մեխանիզմներ: Թեմա:** Ուղղորդում, կոմբինացիաներ և ճկունություն** .
+
+| <img width="2000" height="0" alt=""> փաստաթուղթ                                   | Ինչ է այն պատասխանում                                                                       | Ֆայլ                                            |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| [Ավտո-համակցված շարժիչ](docs/routing/AUTO-COMBO.md)                               | Գնահատման գործոններ, ռազմավարություններ, ռեժիմների փաթեթներ և ինքնաբուժում                  | `docs/routing/AUTO-COMBO.md`                    |
+| [Բաժանորդագրություն՝ առաջին երթուղին](docs/routing/SUBSCRIPTION_LADDER.md)        | Նախընտրեք պլանում ներառված կապերը վճարովիներից առաջ                                         | `docs/routing/SUBSCRIPTION_LADDER.md`           |
+| [STRICT_ZERO_COST](docs/routing/STRICT_ZERO_COST.md)                              | Հրաժարվեք ցանկացած թիրախից, որը ստուգելիորեն ազատ չէ                                        | `docs/routing/STRICT_ZERO_COST.md`              |
+| [Քվոտայի փոխանակման շարժիչ](docs/routing/QUOTA_SHARE.md)                          | Բաժանեք ընդհանուր հաշվի ժամանակի վրա հիմնված քվոտան ստեղների վրա                            | `docs/routing/QUOTA_SHARE.md`                   |
+| [API-բանալին կապի նախապատվություն](docs/routing/API_KEY_CONNECTION_PREFERENCE.md) | Ուղարկեք յուրաքանչյուր նախագիծ դեպի իր հիմնական հաշիվը հետադարձ կապով                       | `docs/routing/API_KEY_CONNECTION_PREFERENCE.md` |
+| [Մոդելի բացահայտման allow/deny ցուցակ](docs/routing/MODEL_EXPOSURE_LIST.md)       | Նշեք, թե որ մոդելներն է գովազդում `/v1/models`                                              | `docs/routing/MODEL_EXPOSURE_LIST.md`           |
+| [Մոդելային հետախուզություն](docs/routing/MODEL_INTELLIGENCE.md)                   | Բազմության աղբյուրներից ստացված ELO որակի ազդանշան, որն օգտագործվում է երթուղղման միջոցով   | `docs/routing/MODEL_INTELLIGENCE.md`            |
+| [Պատճառաբանություն Երթուղիավորում](docs/routing/REASONING_ROUTING.md)             | Կարգավորում է այդ երթուղին՝ հիմնավորելով կարիքները                                          | `docs/routing/REASONING_ROUTING.md`             |
+| [Պատճառաբանություն Replay](docs/routing/REASONING_REPLAY.md)                      | Վերարտադրել հիմնավորման բովանդակությունը մատակարարներին, որոնք պահանջում են այն հաջորդաբար  | `docs/routing/REASONING_REPLAY.md`              |
+| [Դետերմինիստական երթուղի](docs/routing/DETERMINISTIC_ROUTING.md)                  | Դետերմինիստական ռազմավարություններ ինքնակառավարվող մուտքի համար                             | `docs/routing/DETERMINISTIC_ROUTING.md`         |
+| [Self-hosted OpenAI մուտք](docs/routing/SELF_HOSTED_OPENAI_ENTRY.md)              | Ուղղեք `/v1/chat/completions` ձեր սեփական OpenAI-ի հետ համատեղելի սերվերներին               | `docs/routing/SELF_HOSTED_OPENAI_ENTRY.md`      |
+| [Վավեր դատարկ շրջադարձեր](docs/routing/EMPTY_TURNS.md)                            | Պահպանվում է, թե ինչպես է օգնականը շրջվում առանց տեսանելի տեքստի                            | `docs/routing/EMPTY_TURNS.md`                   |
+| [Քաոսի ռեժիմ](docs/guides/CHAOS-MODE.md)                                          | Ուղարկեք մեկ առաջադրանք միանգամից մի քանի մատակարարների                                     | `docs/guides/CHAOS-MODE.md`                     |
+| [Մտածող բյուջե](docs/guides/THINKING_BUDGET.md)                                   | Վերագրեք հաճախորդի մտածողության և հիմնավորման պարամետրերը մատակարարների ճանապարհին          | `docs/guides/THINKING_BUDGET.md`                |
+| [Ճկունության ուղեցույց](docs/architecture/RESILIENCE_GUIDE.md)                    | Անջատիչ, կապի սառեցում և մոդելի արգելափակում                                                | `docs/architecture/RESILIENCE_GUIDE.md`         |
+| [Հարմարվողական երթուղի](docs/architecture/ADAPTIVE_ROUTING.md)                    | Երթուղային իրադարձություններ, որակյալ հետադարձ կապ և բացատրելիություն                       | `docs/architecture/ADAPTIVE_ROUTING.md`         |
+| [Ընդունման ուղիներ](docs/architecture/admission-lanes.md)                         | Երկու գծային համակարգեր, յուրաքանչյուրը ինչ դարպասներ և որտեղ են դրանք հաղորդում            | `docs/architecture/admission-lanes.md`          |
+| [Երթուղային քաղաքականություն](docs/OMNIROUTE_ROUTING_POLICY.md)                   | Հերթականությունը, որով կիրառվում են տեղաբաշխման, առողջության, քվոտայի և հետաձգման կանոնները | `docs/OMNIROUTE_ROUTING_POLICY.md`              |
+| [Մատակարարի ձախողում](docs/OMNIROUTE_PROVIDER_FAILOVER.md)                        | Ինչպե՞ս են դասակարգվում ձախողումները՝ նախքան կրկնվող որոշումները                            | `docs/OMNIROUTE_PROVIDER_FAILOVER.md`           |
+| [Հատկացում Handoff](docs/OMNIROUTE_ALLOCATION_HANDOFF.md)                         | Հատկացում ընդդեմ մատակարարի քվոտայի                                                         | `docs/OMNIROUTE_ALLOCATION_HANDOFF.md`          |
+
+<a id="docs-usage"></a>
+
+### Եթե ցանկանում եք հետևել ծախսերին և քվոտային
+
+Ծախսերի գնահատում, քվոտաների հետևում, թիմային բյուջեներ և անվճար մակարդակի տվյալներ: Թեմա:** Օգտագործումը, քվոտան և արժեքը** .
+
+| <img width="2000" height="0" alt=""> փաստաթուղթ                                  | Ինչ է այն պատասխանում                                                                | Ֆայլ                                       |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------ |
+| [Ծախսերի և ծախսերի հետևում](docs/guides/COST_TRACKING.md)                        | Ինչպես է հայտի արժեքը գնահատվում, գրանցվում և զեկուցվում                             | `docs/guides/COST_TRACKING.md`             |
+| [Օգտագործում, քվոտա և ծախսեր](docs/guides/USAGE_QUOTA_GUIDE.md)                  | Օգտագործման վերլուծություն, քվոտա քարտեր և մեկ բանալիով սահմանաչափեր                 | `docs/guides/USAGE_QUOTA_GUIDE.md`         |
+| [Թիմային ծախսերի կենտրոններ](docs/guides/TEAM_COST_CENTERS.md)                   | Խմբավորել բանալիները մեկ վճարային սեփականատիրոջ ներքո՝ ընդհանուր բյուջեներով         | `docs/guides/TEAM_COST_CENTERS.md`         |
+| [Հիմնական ձևանմուշներ](docs/guides/KEY-TEMPLATES.md)                             | API ի ստեղնաշարի կարգավորումների բազմակի օգտագործման, գաղտնի պատկերներ               | `docs/guides/KEY-TEMPLATES.md`             |
+| [Քեշավորված մուտքագրման հաշվետվություն](docs/ops/CACHED_INPUT_REPORTING.md)      | Ինչպես են ցուցադրվում քեշի ընթերցման նշանները վերլուծություններում                   | `docs/ops/CACHED_INPUT_REPORTING.md`       |
+| [Քվոտա հեռաչափություն](docs/OMNIROUTE_QUOTA_TELEMETRY.md)                        | Մատակարարի քվոտային հեռաչափություն ընդդեմ հաշվապահության                             | `docs/OMNIROUTE_QUOTA_TELEMETRY.md`        |
+| [Անվճար մակարդակներ և անվճար խորհրդանշական բյուջե](docs/reference/FREE_TIERS.md) | 12 լողավազան՝ հրապարակված քվոտայով և 214 կատալոգային շարք՝ անվճար մուտքով            | `docs/reference/FREE_TIERS.md`             |
+| [Անվճար մատակարարների վարկանիշներ](docs/guides/FREE_PROVIDER_RANKINGS.md)        | Arena ELO վարկանիշը և իրական երթևեկության հուսալիությունը անվճար մատակարարների համար | `docs/guides/FREE_PROVIDER_RANKINGS.md`    |
+| [Մոնիտորինգ և դիտարկելիություն](docs/ops/MONITORING_GUIDE.md)                    | Առողջության վերջնական կետեր, չափումներ և տեղեկամատյաններ                             | `docs/ops/MONITORING_GUIDE.md`             |
+| [Մոնիտորինգ և ծախսերի նավարկություն](docs/architecture/MONITORING_SECTIONS.md)   | Մոնիտորինգի և ծախսերի էջերի կառուցվածքը                                              | `docs/architecture/MONITORING_SECTIONS.md` |
+
+<a id="docs-providers"></a>
+
+### Եթե դուք կապում եք կոնկրետ մատակարարի
+
+Մատակարարների կատալոգ և ուղեցույցներ հատուկ կարգավորումներով մատակարարների համար: Թեմա:** Մատակարարներ** .
+
+| <img width="2000" height="0" alt=""> փաստաթուղթ                               | Ինչ է այն պատասխանում                                                                | Ֆայլ                                               |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| [Մատակարարի տեղեկանք](docs/reference/PROVIDER_REFERENCE.md)                   | Յուրաքանչյուր գրանցված մատակարարի կատալոգ                                            | `docs/reference/PROVIDER_REFERENCE.md`             |
+| [Հեռացված մատակարարները](docs/reference/REMOVED_PROVIDERS.md)                 | Պրովայդերները հեռացվել են իրենց օպերատորի խնդրանքով                                  | `docs/reference/REMOVED_PROVIDERS.md`              |
+| [Մատակարարի Plugin Manifest](docs/reference/PROVIDER_PLUGIN_MANIFEST.md)      | JSON-անվտանգ մատակարարի կարողության դրսևորում                                        | `docs/reference/PROVIDER_PLUGIN_MANIFEST.md`       |
+| [Claude ծածկագիր (OAuth)](docs/providers/CLAUDE_CODE.md)                      | Ծառայել Claude մոդելները Claude Code հաշվի միջոցով                                   | `docs/providers/CLAUDE_CODE.md`                    |
+| [Claude Code setup token](docs/providers/CLAUDE_CODE_SETUP_TOKEN.md)          | Միացեք `claude setup-token` նշանով                                                   | `docs/providers/CLAUDE_CODE_SETUP_TOKEN.md`        |
+| [Claude Web](docs/providers/CLAUDE_WEB.md)                                    | OpenAI ֆորմատի հարցումներ վավերացված claude.ai նիստի միջոցով                         | `docs/providers/CLAUDE_WEB.md`                     |
+| [ChatGPT Web (Codex)](docs/providers/CHATGPT_WEB.md)                          | Bridge Codex Responses-ը շրջվում է ChatGPT Web-ի միջոցով                             | `docs/providers/CHATGPT_WEB.md`                    |
+| [ChatGPT Վեբ համառ CDP պրոֆիլ](docs/guides/CHATGPT-WEB-PERSISTENT-CDP.md)     | Կրկին օգտագործեք մշտական Chrome DevTools պրոֆիլը                                     | `docs/guides/CHATGPT-WEB-PERSISTENT-CDP.md`        |
+| [Codex App-Server մատակարար](docs/guides/CODEX-APP-SERVER-PROVIDER.md)        | OpenAI Codex ն OmniRoute միջոցով օգտագործելու երկու եղանակ                           | `docs/guides/CODEX-APP-SERVER-PROVIDER.md`         |
+| [GitHub Copilot](docs/providers/GITHUB-COPILOT.md)                            | Փորձարարական Copilot մատակարարը և նրա քաղաքականության նախազգուշացումները             | `docs/providers/GITHUB-COPILOT.md`                 |
+| [Microsoft 365 Copilot](docs/providers/COPILOT-M365.md)                       | OpenAI ֆորմատի հարցումներ Microsoft 365 Copilot միջոցով                              | `docs/providers/COPILOT-M365.md`                   |
+| [Cursor API բանալի եւ CLI](docs/providers/CURSOR-API-KEY-AND-CLI.md)          | Տեղադրեք Cursor OmniRoute հետևում առանց IDE նիստի                                    | `docs/providers/CURSOR-API-KEY-AND-CLI.md`         |
+| [Cursor ի Docker](docs/providers/CURSOR-DOCKER.md)                            | Cursor մատակարարի կարգավորում, երբ OmniRoute աշխատում է կոնտեյներով                  | `docs/providers/CURSOR-DOCKER.md`                  |
+| [Cursor պատկերի ստեղծում](docs/providers/CURSOR_IMAGE.md)                     | Cursor պլանի պատկերներ `/v1/images/generations` ում                                  | `docs/providers/CURSOR_IMAGE.md`                   |
+| [Zed ի Docker](docs/providers/ZED-DOCKER.md)                                  | Zed հաշվի ներմուծում, երբ OmniRoute աշխատում է կոնտեյներով                           | `docs/providers/ZED-DOCKER.md`                     |
+| [Antigravity միացում](docs/guides/ANTIGRAVITY-ONBOARDING.md)                  | Միացրեք Google One AI (Antigravity) հաշիվները                                        | `docs/guides/ANTIGRAVITY-ONBOARDING.md`            |
+| [Kiro տեղադրում](docs/guides/KIRO_SETUP.md)                                   | Ավելացրեք Kiro (AWS հյուրընկալված կոդավորման օգնական) հաշիվներ                       | `docs/guides/KIRO_SETUP.md`                        |
+| [AgentRouter](docs/providers/AGENTROUTER.md)                                  | Տեղադրեք AgentRouter Anthropic-ի հետ համատեղելի ռելեը                                | `docs/providers/AGENTROUTER.md`                    |
+| [Alibaba և Qwen ընտանիքներ](docs/providers/ALIBABA-QWEN-PROVIDER-FAMILIES.md) | Ինչպես են բաժանվում Alibaba և Qwen մատակարարների ընտանիքները                         | `docs/providers/ALIBABA-QWEN-PROVIDER-FAMILIES.md` |
+| [ChatPlayground](docs/providers/CHATPLAYGROUND.md)                            | Երթուղի անցեք ChatPlayground ի Azure, LMSYS և Perplexity վերջնակետերով               | `docs/providers/CHATPLAYGROUND.md`                 |
+| [Դևերի երթուղի](docs/providers/DEMON_ROUTE.md)                                | Արտաքին հյուրընկալված OpenAI-ի հետ համատեղելի դարպաս                                 | `docs/providers/DEMON_ROUTE.md`                    |
+| [MiniMax ծածկագիր](docs/providers/MINIMAX_CODE.md)                            | Երթուղային զրույցը կառավարվող MiniMax բաժանորդագրության դարպասի միջոցով              | `docs/providers/MINIMAX_CODE.md`                   |
+| [Replicate և Cerebrium](docs/providers/REPLICATE-CEREBRIUM.md)                | Զրույցի մատակարարներն ավելացվել են Free-LLM գրացուցակից                              | `docs/providers/REPLICATE-CEREBRIUM.md`            |
+| [Grok Կառուցեք OAuth մեդիա](docs/providers/grok-cli-media.md)                 | Պատկերներ, տեսանյութ և խոսք Grok Build կապի միջոցով                                  | `docs/providers/grok-cli-media.md`                 |
+| [Grok պատկերի ստեղծում](docs/guides/GROK_IMAGES.md)                           | Grok պատկերներ `/v1/images/generations` ում                                          | `docs/guides/GROK_IMAGES.md`                       |
+| [ZCode պատկերի մուտքագրում](docs/ops/ZCODE_IMAGES.md)                         | Մայրենի պատկերի բլոկներ ZCode կատարողի համար                                         | `docs/ops/ZCODE_IMAGES.md`                         |
+| [Devin Claude կամուրջ](docs/DEVIN_CLAUDE_BRIDGE.md)                           | Գործարկեք իրական Claude Code գործարկման ժամանակը OmniRoute ի Anthropic վերջնակետով   | `docs/DEVIN_CLAUDE_BRIDGE.md`                      |
+| [ֆալ հայրենի APIs](docs/integrations/FAL_NATIVE.md)                           | Ընդունել fal multimodal մոդելը APIs                                                  | `docs/integrations/FAL_NATIVE.md`                  |
+| [Պատվերով JSON API հանգույցներ](docs/guides/CUSTOM_JSON_API.md)               | Միացրեք JSON վերջնակետերը, որոնք չեն խոսում OpenAI ձևաչափով                          | `docs/guides/CUSTOM_JSON_API.md`                   |
+| [Ներմուծեք մատակարարներ CSV ից կամ JSON ից](docs/providers/CSV-IMPORT.md)     | Ստեղծեք բազմաթիվ API-ստեղնային կապեր մեկ ֆայլից                                      | `docs/providers/CSV-IMPORT.md`                     |
+| [Browser Session Sync-ի ընդլայնում](docs/guides/SESSION-SYNC-EXTENSION.md)    | Պահպանեք վեբ-մատակարարի նիստերը համաժամեցված                                         | `docs/guides/SESSION-SYNC-EXTENSION.md`            |
+| [Session Sync-ի ընդլայնման աղբյուրը](contrib/session-sync/README.md)          | Chrome-ի ընդլայնում և շրջադարձային կամուրջ, որը համաժամացնում է նստաշրջանի թխուկները | `contrib/session-sync/README.md`                   |
+| [Վավերացրեք հատուկ մոդելը](docs/guides/MODEL-VALIDATION.md)                   | `omniroute models test-add` նախքան մոդել ավելացնելը                                  | `docs/guides/MODEL-VALIDATION.md`                  |
+
+<a id="docs-compression"></a>
+
+### Եթե ցանկանում եք պահպանել նշաններ կամ ավելացնել համատեքստ
+
+Արագ սեղմման շարժիչներ, համատեքստի աղբյուրներ և մշտական հիշողություն: Թեմա:** Սեղմում, համատեքստ և հիշողություն** .
+
+| <img width="2000" height="0" alt=""> փաստաթուղթ                                 | Ինչ է այն պատասխանում                                                       | Ֆայլ                                             |
+| ------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------ |
+| [Սեղմման ուղեցույց](docs/compression/COMPRESSION_GUIDE.md)                      | Ռեժիմները, ձգանները և ակտիվ սեղմման խողովակաշարը                            | `docs/compression/COMPRESSION_GUIDE.md`          |
+| [Կոմպրեսիոն շարժիչներ](docs/compression/COMPRESSION_ENGINES.md)                 | Շարժիչի պայմանագրեր, կուտակված խողովակաշարեր և dashboard/API/MCP մակերեսներ | `docs/compression/COMPRESSION_ENGINES.md`        |
+| [RTK Սեղմում](docs/compression/RTK_COMPRESSION.md)                              | Հրամանի ելքային սեղմում, զտիչներ և չմշակված արդյունքի վերականգնում          | `docs/compression/RTK_COMPRESSION.md`            |
+| [Սեղմման կանոնների ձևաչափ](docs/compression/COMPRESSION_RULES_FORMAT.md)        | JSON կանոնների փաթեթի սխեմաներ Caveman-ի և RTK համար                        | `docs/compression/COMPRESSION_RULES_FORMAT.md`   |
+| [Կոմպրեսիոն լեզուների փաթեթներ](docs/compression/COMPRESSION_LANGUAGE_PACKS.md) | Լեզվի հայտնաբերում և Caveman կանոնների փաթեթի հեղինակում                    | `docs/compression/COMPRESSION_LANGUAGE_PACKS.md` |
+| [Ընդլայնվող սեղմում](docs/compression/EXTENDING_COMPRESSION.md)                 | Խողովակաշարին ավելացրեք ձեր սեփական շարժիչը կամ քայլը                       | `docs/compression/EXTENDING_COMPRESSION.md`      |
+| [Պատվիրակված համատեքստի խմբագրում](docs/compression/CONTEXT_EDITING.md)         | Միայն Claude-ի համատեքստի կառավարումը պատվիրված է Anthropic ին              | `docs/compression/CONTEXT_EDITING.md`            |
+| [Հիշողություն](docs/frameworks/MEMORY.md)                                       | Մշտական խոսակցական հիշողություն FTS5 և վեկտորների հետ                       | `docs/frameworks/MEMORY.md`                      |
+| [Տեղական կորպուսի համատեքստ](docs/frameworks/LOCAL_CORPUS_CONTEXT.md)           | Բացահայտեք տեքստային ֆայլերի մեկ հաստատված գրացուցակը որպես համատեքստ       | `docs/frameworks/LOCAL_CORPUS_CONTEXT.md`        |
+| [Notion համատեքստ](docs/frameworks/NOTION_CONTEXT.md)                           | Օգտագործեք Notion աշխատանքային տարածքը որպես համատեքստի աղբյուր             | `docs/frameworks/NOTION_CONTEXT.md`              |
+| [Obsidian համատեքստ](docs/frameworks/OBSIDIAN_CONTEXT.md)                       | Օգտագործեք Obsidian պահոցը որպես համատեքստի աղբյուր                         | `docs/frameworks/OBSIDIAN_CONTEXT.md`            |
+
+<a id="docs-cli"></a>
+
+### Եթե օգտագործում եք կոդավորման գործիք կամ omniroute CLI
+
+Կազմաձևեք CLIs և խմբագրիչների կոդավորումը և օգտագործեք `omniroute` հրամանը: Թեմա:**CLI գործիքներ և կոդավորման գործակալներ** .
+
+| <img width="2000" height="0" alt=""> փաստաթուղթ                            | Ինչ է այն պատասխանում                                               | Ֆայլ                                          |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------- |
+| [CLI ինտեգրումներ](docs/guides/CLI-INTEGRATIONS.md)                        | `setup-*`, `configure` և `run` յուրաքանչյուր աջակցվող գործիքի համար | `docs/guides/CLI-INTEGRATIONS.md`             |
+| [CLI Tools հղում](docs/reference/CLI-TOOLS.md)                             | Մեկ գործիքի տեղադրման նշումներ CLIs և խմբագիրների կոդավորման համար  | `docs/reference/CLI-TOOLS.md`                 |
+| [Claude կոդի կազմաձևում](docs/guides/CLAUDE-CODE-CONFIGURATION.md)         | Տեղադրեք Claude կոդը տեղական կամ հեռավոր OmniRoute ում              | `docs/guides/CLAUDE-CODE-CONFIGURATION.md`    |
+| [Codex CLI կոնֆիգուրացիա](docs/guides/CODEX-CLI-CONFIGURATION.md)          | Օգտագործեք Codex CLI ն OmniRoute հետ որպես դրա հետնամաս             | `docs/guides/CODEX-CLI-CONFIGURATION.md`      |
+| [OpenCode ինտեգրում](docs/frameworks/OPENCODE.md)                          | Ինչպես է OpenCode կարդում OmniRoute ի կատալոգը                      | `docs/frameworks/OPENCODE.md`                 |
+| [OpenCode v2 plugin](docs/guides/OPENCODE-V2-PLUGIN.md)                    | Տեղադրեք և կարգավորեք `@omniroute/opencode-plugin-v2`               | `docs/guides/OPENCODE-V2-PLUGIN.md`           |
+| [opencode-plugin-v2 փաթեթ](@omniroute/opencode-plugin-v2/README.md)        | Փաթեթ README OpenCode v2 հավելվածի համար                            | `@omniroute/opencode-plugin-v2/README.md`     |
+| [opencode-plugin փաթեթ](@omniroute/opencode-plugin/README.md)              | Փաթեթ README OpenCode v1 հավելվածի համար                            | `@omniroute/opencode-plugin/README.md`        |
+| [opencode-provider փաթեթ](@omniroute/opencode-provider/README.md)          | Legacy config գեներատոր OpenCode համար                              | `@omniroute/opencode-provider/README.md`      |
+| [OpenCode նիստի ինքնությունը](docs/reference/OPENCODE-SESSION-IDENTITY.md) | Ինչպես են OpenCode խոսակցությունների ID-ները պահվում հերթափոխով     | `docs/reference/OPENCODE-SESSION-IDENTITY.md` |
+| [VS Code Copilot Զրուցարան (OmniCopilot)](docs/guides/VSCODE-COPILOT.md)   | OmniRoute մոդելները VS Code-ի բնիկ Copilot Զրույցի ընտրիչում        | `docs/guides/VSCODE-COPILOT.md`               |
+| [CLI ուղեկից](docs/guides/CLI-COMPANION.md)                                | CLI կառավարման վահանակի միայն պատճենման համար                       | `docs/guides/CLI-COMPANION.md`                |
+| [CLI մոդելի կատալոգ](docs/guides/CLI-MANUAL-MODELS.md)                     | Կարդացեք կատալոգը և կառավարեք ձեռքով մոդելի մետատվյալները CLI ից    | `docs/guides/CLI-MANUAL-MODELS.md`            |
+| [CLI գործարկման պայմանագրեր](docs/guides/CLI-LAUNCH-CONTRACTS.md)          | Համօգտագործվող մանիֆեստ CLI id-ների, գործարկման և կազմաձևման համար  | `docs/guides/CLI-LAUNCH-CONTRACTS.md`         |
+| [CLI ծխի թեստեր](docs/guides/CLI-SMOKE-TESTS.md)                           | Տեղադրված կոդավորման CLIs ի մեկուսացված զրահ                        | `docs/guides/CLI-SMOKE-TESTS.md`              |
+| [CLI կոնֆիգուրացիայի նախադիտումներ](docs/security/CLI-CONFIGURATION.md)    | Ինչպես են թույլատրվում կազմաձևման նախադիտումները և գրությունները    | `docs/security/CLI-CONFIGURATION.md`          |
+| [CLI machine-ID նշան](docs/security/CLI_TOKEN.md)                          | Ինչպես է CLI հրամանները նույնականացնում տեղական կառավարման API ին   | `docs/security/CLI_TOKEN.md`                  |
+
+<a id="docs-api"></a>
+
+### Եթե դուք կառուցում եք API դեմ
+
+HTTP API, OpenAPI, MCP, A2A, ACP և ամպային գործակալներ: Թեմա:**APIs և գործակալի արձանագրությունները** .
+
+| <img width="2000" height="0" alt=""> փաստաթուղթ                                     | Ինչ է այն պատասխանում                                                   | Ֆայլ                                       |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------ |
+| [API Հղում](docs/reference/API_REFERENCE.md)                                        | Հանրային `/v1` մակերեսը և ամենաշատ օգտագործվող կառավարման վերջնակետերը  | `docs/reference/API_REFERENCE.md`          |
+| [OpenAPI սպեցիֆ](docs/openapi.yaml)                                                 | Մեքենայով ընթեռնելի OpenAPI 3.1 ճշգրտում                                | `docs/openapi.yaml`                        |
+| [OpenAI համատեղելիություն](docs/reference/OPENAI_COMPATIBILITY.md)                  | OpenAI-ի ձևավորված հաճախորդը API ում `/v1` ում                          | `docs/reference/OPENAI_COMPATIBILITY.md`   |
+| [Ներդրումների գրքույկ](docs/reference/EMBEDDINGS.md)                                | Օպերատորի նշումներ `POST /v1/embeddings` համար                          | `docs/reference/EMBEDDINGS.md`             |
+| [Արագ մեկնարկի կոդի օրինակներ](examples/quickstart/README.md)                       | Copy-paste Python, Node.js, PHP և cURL սկրիպտներ                        | `examples/quickstart/README.md`            |
+| [Ռելե հետին պլանի ռազմավարություն](docs/reference/RELAY_BACKEND_STRATEGY.md)        | Երեք ռելե ռեժիմներ `/api/v1/relay/chat/completions` համար               | `docs/reference/RELAY_BACKEND_STRATEGY.md` |
+| [Ռելեի անսարքությունների վերացում](docs/reference/RELAY_TROUBLESHOOTING.md)         | Vercel, Deno և Cloudflare ռելեի խնդիրներ                                | `docs/reference/RELAY_TROUBLESHOOTING.md`  |
+| [MCP սերվերի ուղեցույց](docs/frameworks/MCP-SERVER.md)                              | Տեղադրում, տեղափոխում և 110 գործիքի տեղեկանք                            | `docs/frameworks/MCP-SERVER.md`            |
+| [MCP Սերվեր README](open-sse/mcp-server/README.md)                                  | 110 MCP գործիքներ, IDE կոնֆիգուրացիաներ, Python/TS/Go հաճախորդներ       | `open-sse/mcp-server/README.md`            |
+| [MarkItDown MCP](docs/integrations/MARKITDOWN_MCP.md)                               | Document-to-Markdown MCP սերվերի ինտեգրում                              | `docs/integrations/MARKITDOWN_MCP.md`      |
+| [Ինտեգրումների ինդեքս](docs/integrations/README.md)                                 | Արտաքին ծառայություններ և գործիքներ, որոնք ինտեգրվում են OmniRoute      | `docs/integrations/README.md`              |
+| [A2A սերվերի ուղեցույց](docs/frameworks/A2A-SERVER.md)                              | Գործակալի քարտ, առաջադրանքներ, հմտություններ և հոսք                     | `docs/frameworks/A2A-SERVER.md`            |
+| [A2A Սերվեր README](src/lib/a2a/README.md)                                          | JSON-RPC 2.0 արձանագրություն, հմտություններ և առաջադրանքների կառավարում | `src/lib/a2a/README.md`                    |
+| [Գործակալի արձանագրությունների ուղեցույց](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md) | Երբ օգտագործել A2A, ACP կամ ամպային գործակալները                        | `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` |
+| [ACP](docs/frameworks/ACP.md)                                                       | Agent Client Protocol ռեեստր և CLI գործարկիչներ                         | `docs/frameworks/ACP.md`                   |
+| [Ամպային գործակալներ](docs/frameworks/CLOUD_AGENT.md)                               | Կազմակերպել Codex Cloud, Cursor, Devin և Jules                          | `docs/frameworks/CLOUD_AGENT.md`           |
+| [AgentBridge](docs/frameworks/AGENTBRIDGE.md)                                       | Փոխեք IDE գործակալի HTTPS տրաֆիկը OmniRoute միջոցով                     | `docs/frameworks/AGENTBRIDGE.md`           |
+
+<a id="docs-extend"></a>
+
+### Եթե ցանկանում եք երկարացնել OmniRoute կամ դիտել դրա երթևեկությունը
+
+Փլագիններ, հմտություններ, ներկառուցված ծառայություններ, վեբ-կեռիկներ, արտահանումներ և ստուդիաներ: Թեմա:** Ընդլայնել և դիտարկել** .
+
+| <img width="2000" height="0" alt=""> փաստաթուղթ                        | Ինչ է այն պատասխանում                                                    | Ֆայլ                                     |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------- |
+| [Plugin Marketplace](docs/frameworks/PLUGIN_MARKETPLACE.md)            | Ինքնամփոփ սերվերի պլագիններ և ինչպես դրանք տեղադրել                      | `docs/frameworks/PLUGIN_MARKETPLACE.md`  |
+| [CLI Plugin համակարգ](docs/frameworks/PLUGINS.md)                      | Ընդլայնել `omniroute` CLI `omniroute-cmd-*` հավելվածներով                | `docs/frameworks/PLUGINS.md`             |
+| [Plugin SDK](docs/frameworks/PLUGIN_SDK.md)                            | Plugin API հղում                                                         | `docs/frameworks/PLUGIN_SDK.md`          |
+| [Langfuse հավելվածի օրինակ](examples/plugins/langfuse/README.md)       | Թողարկեք Langfuse հետքեր յուրաքանչյուր ուղղորդված ավարտի համար           | `examples/plugins/langfuse/README.md`    |
+| [Հմտությունների շրջանակ](docs/frameworks/SKILLS.md)                    | Մոդելների և օպերատորների համար բազմակի օգտագործման հնարավորություններ    | `docs/frameworks/SKILLS.md`              |
+| [Գործակալների հմտությունների կատալոգ](docs/frameworks/AGENT-SKILLS.md) | SKILL.md ֆայլեր, որոնք գործակալներին սովորեցնում են օգտագործել OmniRoute | `docs/frameworks/AGENT-SKILLS.md`        |
+| [Ներկառուցված ծառայություններ](docs/frameworks/EMBEDDED-SERVICES.md)   | Sidecar գործիքներ, որոնք OmniRoute տեղադրում և վերահսկում է              | `docs/frameworks/EMBEDDED-SERVICES.md`   |
+| [Երթուղիչի հետնամասեր](docs/architecture/ROUTER_BACKENDS.md)           | Պայմանագիր մայրենիի, Bifrost-ի, CLIProxy և այլ backend-ների համար        | `docs/architecture/ROUTER_BACKENDS.md`   |
+| [Վեբկեռիկներ](docs/frameworks/WEBHOOKS.md)                             | HTTP webhooks հարթակի իրադարձությունների վրա                             | `docs/frameworks/WEBHOOKS.md`            |
+| [Տեղեկամատյանների արտահանում](docs/frameworks/LOG-EXPORT.md)           | Զանգերի տեղեկամատյանների շարունակական արտահանում վերլուծական խանութներ   | `docs/frameworks/LOG-EXPORT.md`          |
+| [Էվալս](docs/frameworks/EVALS.md)                                      | Հենանիշային երթուղի և մոդելի որակ                                        | `docs/frameworks/EVALS.md`               |
+| [Ճանապարհային տեսուչ](docs/frameworks/TRAFFIC_INSPECTOR.md)            | LLM-ին ծանոթ HTTPS տրաֆիկի կարգաբերիչ                                    | `docs/frameworks/TRAFFIC_INSPECTOR.md`   |
+| [Խաղահրապարակ ստուդիա](docs/frameworks/PLAYGROUND_STUDIO.md)           | Վահանակի խաղահրապարակ                                                    | `docs/frameworks/PLAYGROUND_STUDIO.md`   |
+| [Search Tools Studio](docs/frameworks/SEARCH_TOOLS_STUDIO.md)          | Վեբ որոնում և առբերում մատակարարներին մեկ ստուդիայում                    | `docs/frameworks/SEARCH_TOOLS_STUDIO.md` |
+| [Ռադար](docs/frameworks/RADAR.md)                                      | Ընտրեք ստորագրված անվճար մոդելի կատալոգի ծածկույթ                        | `docs/frameworks/RADAR.md`               |
+| [Գեյմիֆիկացում](docs/frameworks/GAMIFICATION.md)                       | Տեղական XP, շերտեր և առաջատարների աղյուսակներ                            | `docs/frameworks/GAMIFICATION.md`        |
+
+<a id="docs-network"></a>
+
+### Եթե դուք ուղղորդում եք հոսանքին հակառակ երթևեկությունը վստահված անձանց միջոցով
+
+Արտագնա վստահված անձինք, վստահված անձանց լողավազաններ և արտահոսքի վերահսկում: Թեմա:** Վստահված անձինք և ցանցը** .
+
+| <img width="2000" height="0" alt=""> փաստաթուղթ                              | Ինչ է այն պատասխանում                                                      | Ֆայլ                                 |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------ |
+| [Վստահված անձի ուղեցույց](docs/ops/PROXY_GUIDE.md)                           | HTTP, HTTPS և SOCKS5 վստահված անձինք վերին հոսքի երթևեկության համար        | `docs/ops/PROXY_GUIDE.md`            |
+| [Անվանված մեծամասնական պրոքսի ներմուծում](docs/ops/PROXY_BULK_IMPORT.md)     | Միանգամից տեղադրեք բազմաթիվ անուններով վստահված անձինք                     | `docs/ops/PROXY_BULK_IMPORT.md`      |
+| [Վստահված անձի ծանրաբեռնվածության տրաֆիկ](docs/ops/PROXY_PAYLOAD_TRAFFIC.md) | Յուրաքանչյուր վստահված անձի վերբեռնման և ներբեռնման բեռնաթափման հաշվիչները | `docs/ops/PROXY_PAYLOAD_TRAFFIC.md`  |
+| [Տեղական պրոքսի-միջուկի կոնֆիգուրացիա](docs/routing/PROXY_CORE_CONFIG.md)    | Բաժանորդագրությունից ստեղծեք տեղական հիմնական կազմաձև                      | `docs/routing/PROXY_CORE_CONFIG.md`  |
+| [Անվճար վստահված անձինք API](docs/reference/FREE_PROXIES_API.md)             | Համադրված անվճար վստահված անձի լողավազանը և դրա API                        | `docs/reference/FREE_PROXIES_API.md` |
+| [Egress IP ընտանեկան քաղաքականություն](docs/security/EGRESS_POLICY.md)       | Ստիպել IPv4 կամ IPv6 մեկ վստահված անձի համար                               | `docs/security/EGRESS_POLICY.md`     |
+
+<a id="docs-security"></a>
+
+### Եթե վերանայում եք անվտանգությունը
+
+Նույնականացում, պահակաձողեր, կարծրացում և մատակարարման շղթա: Թեմա:** Անվտանգություն և համապատասխանություն** .
+
+| <img width="2000" height="0" alt=""> փաստաթուղթ                        | Ինչ է այն պատասխանում                                                     | Ֆայլ                                      |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------- |
+| [Անվտանգության քաղաքականություն](SECURITY.md)                          | Խոցելիության մասին հաշվետվություն և աջակցվող տարբերակներ                  | `SECURITY.md`                             |
+| [Պահակներ](docs/security/GUARDRAILS.md)                                | PII, արագ ներարկման և մոդալության պահակակետեր                             | `docs/security/GUARDRAILS.md`             |
+| [Եզրակացություն auth կեցվածք](docs/security/INFERENCE_AUTH_POSTURE.md) | Ինչպես են `/v1/models` և եզրակացության վերջնակետերը փակված                | `docs/security/INFERENCE_AUTH_POSTURE.md` |
+| [Թույլտվության ուղեցույց](docs/architecture/AUTHZ_GUIDE.md)            | Երթուղու տեղյակ, ձախողման պատճառով փակ թույլտվության խողովակաշար          | `docs/architecture/AUTHZ_GUIDE.md`        |
+| [Երթուղու պահակային շերտեր](docs/security/ROUTE_GUARD_TIERS.md)        | Կառավարման երթուղիների պաշտպանության երեք մակարդակները                    | `docs/security/ROUTE_GUARD_TIERS.md`      |
+| [Էնտրա ID SSO](docs/security/ENTRA_SSO.md)                             | Microsoft Entra ID նշաններ հաճախորդի API համար                            | `docs/security/ENTRA_SSO.md`              |
+| [CORS](docs/security/CORS.md)                                          | Որ բրաուզերի ծագումը կարող է կարդալ պատասխանները                          | `docs/security/CORS.md`                   |
+| [Համապատասխանություն և աուդիտ](docs/security/COMPLIANCE.md)            | Աուդիտորական գրառումներ վարչական և մատակարարների գործողությունների համար  | `docs/security/COMPLIANCE.md`             |
+| [Գաղտագողի ուղեցույց](docs/security/STEALTH_GUIDE.md)                  | TLS և վերնագրի մատնահետքերի մշակում                                       | `docs/security/STEALTH_GUIDE.md`          |
+| [MITM TPROXY decrypt](docs/security/MITM-TPROXY-DECRYPT.md)            | Թափանցիկ նկարում CLIs համար, որն անտեսում է վստահված անձի կարգավորումները | `docs/security/MITM-TPROXY-DECRYPT.md`    |
+| [Արգելքի հայտնաբերում](docs/security/BAN_DETECTION.md)                 | Հայտնաբերեք հաշվի արգելքները վերին հոսքի սխալներից                        | `docs/security/BAN_DETECTION.md`          |
+| [AgentRouter WAF](docs/security/AGENTROUTER_WAF.md)                    | Հիմնաբառի վրա հիմնված բովանդակության զտիչ գործակալի վերին հոսքի վրա       | `docs/security/AGENTROUTER_WAF.md`        |
+| [Սխալ ախտահանում](docs/security/ERROR_SANITIZATION.md)                 | Պահպանեք բուրգի հետքերը պատասխաններից                                     | `docs/security/ERROR_SANITIZATION.md`     |
+| [Հանրային հավատարմագրերը](docs/security/PUBLIC_CREDS.md)               | Ինչպես են ներառված հանրային OAuth արժեքները                               | `docs/security/PUBLIC_CREDS.md`           |
+| [Մատակարարման շղթա](docs/security/SUPPLY_CHAIN.md)                     | Ծագման և ամբողջականության դարպասներ npm-ի և Docker համար                  | `docs/security/SUPPLY_CHAIN.md`           |
+| [Socket.dev-ի բացահայտումները](docs/security/SOCKET_DEV_FINDINGS.md)   | Պահպանողի ատեստավորում մատակարարման շղթայի գտածոների համար                | `docs/security/SOCKET_DEV_FINDINGS.md`    |
+| [LTS անվտանգության բազային](docs/security/LTS_SECURITY_BASELINE.md)    | Անվտանգության նախապատրաստում v3.9.x LTS գծի համար                         | `docs/security/LTS_SECURITY_BASELINE.md`  |
+
+<a id="docs-internals"></a>
+
+### Եթե ցանկանում եք հասկանալ կոդը
+
+Ինչպես է համակարգը հավաքվել և ինչպես փոխել այն: Թեմա:** Ճարտարապետություն և ինտերիեր** .
+
+| <img width="2000" height="0" alt=""> փաստաթուղթ                                 | Ինչ է այն պատասխանում                                                | Ֆայլ                                                |
+| ------------------------------------------------------------------------------- | -------------------------------------------------------------------- | --------------------------------------------------- |
+| [Ճարտարապետություն](docs/architecture/ARCHITECTURE.md)                          | Համակարգի ճարտարապետություն, տվյալների հոսք և ներքին կառուցվածք      | `docs/architecture/ARCHITECTURE.md`                 |
+| [Codebase Փաստաթղթեր](docs/architecture/CODEBASE_DOCUMENTATION.md)              | Պահոցում եղածի շրջայց                                                | `docs/architecture/CODEBASE_DOCUMENTATION.md`       |
+| [Պահեստի քարտեզ](docs/architecture/REPOSITORY_MAP.md)                           | Որտեղ է ապրում կոդի յուրաքանչյուր մասը                               | `docs/architecture/REPOSITORY_MAP.md`               |
+| [բաց հարավային ճարտարապետություն](docs/frameworks/OPEN_SSE_ARCHITECTURE.md)     | Հոսքային շարժիչի աշխատանքային տարածք                                 | `docs/frameworks/OPEN_SSE_ARCHITECTURE.md`          |
+| [Փոփոխությունների սցենարներ](docs/architecture/MODIFICATION_SCENARIOS.md)       | Ընդհանուր փոփոխությունների քայլ առ քայլ բաղադրատոմսեր                | `docs/architecture/MODIFICATION_SCENARIOS.md`       |
+| [Դիզայնի համակարգ](docs/architecture/DESIGN_SYSTEM.md)                          | Տեսողական ինքնությունը և վաճառվող UI հավաքածուն                      | `docs/architecture/DESIGN_SYSTEM.md`                |
+| [Համառության սահմանը ADR](docs/architecture/persistence-backend-boundary.md)    | Խցանվող համառություն `src/lib/db/` հետևում                           | `docs/architecture/persistence-backend-boundary.md` |
+| [Կլաստերային որոշումներ](docs/architecture/cluster-decisions.md)                | Առաջարկ կամընտիր կողային ապարատի պրոֆիլների համար                    | `docs/architecture/cluster-decisions.md`            |
+| [OmniRoute ընդդեմ այլընտրանքների](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md) | Առանձնահատկությունների համեմատություն այլ բաց կոդով երթուղիչների հետ | `docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`      |
+| [Դիագրամներ](docs/diagrams/README.md)                                           | Mermaid աղբյուրները եւ արտահանվող SVGs                               | `docs/diagrams/README.md`                           |
+
+<a id="docs-project"></a>
+
+### Եթե ցանկանում եք նպաստել
+
+Ինչպես է աշխատանքը մտնում նախագծում և ինչպես են կրճատվում թողարկումները: Թեմա:** Ներդրումներ, որակ և թողարկումներ** .
+
+| <img width="2000" height="0" alt=""> փաստաթուղթ                                  | Ինչ է այն պատասխանում                                                  | Ֆայլ                                             |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------ |
+| [Նպաստելով](CONTRIBUTING.md)                                                     | Զարգացման կարգավորում և ուղեցույցներ                                   | `CONTRIBUTING.md`                                |
+| [Վարքագծի կանոններ](CODE_OF_CONDUCT.md)                                          | Աջակցողի դաշնագիր                                                      | `CODE_OF_CONDUCT.md`                             |
+| [Փոփոխությունների օրագիր](CHANGELOG.md)                                          | Յուրաքանչյուր տարբերակի թողարկման պատմություն                          | `CHANGELOG.md`                                   |
+| [Ճանապարհային քարտեզ](ROADMAP.md)                                                | Պլանավորված կարևոր կետեր մինչև v3.9.0 LTS և ավելին                     | `ROADMAP.md`                                     |
+| [Մշակողի միջավայր](docs/DEVELOPER-ENVIRONMENT.md)                                | Տեղական `.env` վարքագիծը և գաղտնիքները զարգացման ընթացքում             | `docs/DEVELOPER-ENVIRONMENT.md`                  |
+| [Ավանդի ոսկե ճանապարհ](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)                     | PR ի զարգացման ամենափոքր հուսալի օղակը                                 | `docs/ops/CONTRIBUTION_GOLDEN_PATH.md`           |
+| [Մասնաճյուղի և թողարկման մոդել](docs/ops/BRANCHING_MODEL.md)                     | Որտեղ PRs թիրախ և ինչ են նշանակում `main` և tags                       | `docs/ops/BRANCHING_MODEL.md`                    |
+| [Աշխատանքային ծառի մեկուսացում](docs/ops/WORKTREE_ISOLATION.md)                  | Մեկ աշխատանքային ծառ և ճյուղ յուրաքանչյուր առաջադրանքի համար           | `docs/ops/WORKTREE_ISOLATION.md`                 |
+| [Դժվար կանոններ](docs/ops/HARD_RULES_DETAIL.md)                                  | Ամբողջական տեքստը և նախագծի կոշտ կանոնների հիմնավորումը                | `docs/ops/HARD_RULES_DETAIL.md`                  |
+| [Մասնաճյուղի պաշտպանություն հիմնականի համար](docs/ops/BRANCH_PROTECTION_MAIN.md) | Պահանջվող պաշտպանության պարամետրերը                                    | `docs/ops/BRANCH_PROTECTION_MAIN.md`             |
+| [Omni հերթ](docs/ops/OMNI_QUEUE.md)                                              | Նախագծի սեփական միաձուլման հերթ                                        | `docs/ops/OMNI_QUEUE.md`                         |
+| [Միավորել գնացքների ուղեցույցը](docs/ops/MERGE_TRAIN.md)                         | Միաձուլման հերթի և ձեռքով միաձուլման-գնացքի ընթացակարգը                | `docs/ops/MERGE_TRAIN.md`                        |
+| [Ռելեների ինտեգրման հերթ](docs/ops/RELAY_INTEGRATION_QUEUE.md)                   | Նախապես կազմված ինտեգրումների համար հերթի կանոնը                       | `docs/ops/RELAY_INTEGRATION_QUEUE.md`            |
+| [Որակյալ դարպասներ](docs/architecture/QUALITY_GATES.md)                          | Յուրաքանչյուր CI որակի դարպաս                                          | `docs/architecture/QUALITY_GATES.md`             |
+| [Որակի դարպասի խաղագիրք](docs/ops/QUALITY_GATE_PLAYBOOK.md)                      | Դարպասի համակարգի գնահատման և կրկնօրինակման ուղեցույց                  | `docs/ops/QUALITY_GATE_PLAYBOOK.md`              |
+| [Որակի ապացույցների պայմանագիր](docs/architecture/QUALITY_EVIDENCE_CONTRACT.md)  | Թողարկման-ընդունման հաշվետվության տարբերակված ձևաչափը                  | `docs/architecture/QUALITY_EVIDENCE_CONTRACT.md` |
+| [Ծածկույթի պլան](docs/ops/COVERAGE_PLAN.md)                                      | Փորձարկման ծածկույթի ռազմավարություն                                   | `docs/ops/COVERAGE_PLAN.md`                      |
+| [Կառուցեք նախազգուշացումներ](docs/ops/BUILD_WARNINGS.md)                         | Կառուցման ակնկալվող նախազգուշացումներ և Bun անսարքությունների վերացում | `docs/ops/BUILD_WARNINGS.md`                     |
+| [Թողարկման ստուգաթերթ](docs/ops/RELEASE_CHECKLIST.md)                            | Նախնական թողարկումը վավերացման քայլեր                                  | `docs/ops/RELEASE_CHECKLIST.md`                  |
+| [Թողարկում-Կանաչ](docs/ops/RELEASE_GREEN.md)                                     | Պահպանեք հերթը և բաց թողեք ճյուղը կանաչ                                | `docs/ops/RELEASE_GREEN.md`                      |
+| [Ազատման ռազմավարություն](docs/ops/RELEASE_STRATEGY.md)                          | LTS երկաթուղի, ալիքներ և պիտակներ                                      | `docs/ops/RELEASE_STRATEGY.md`                   |
+| [3.9.0 LTS GO/NO-GO](docs/ops/LTS_GO_NO_GO.md)                                   | Պահպանողի որոշումների ստուգաթերթը v3.8.59-ի վերջում                    | `docs/ops/LTS_GO_NO_GO.md`                       |
+| [Կատարման ելակետ](docs/ops/PERF_BASELINE.md)                                     | LTS երկաթուղու վերարտադրելի կատարողականի ելակետ                        | `docs/ops/PERF_BASELINE.md`                      |
+| [Հոմոլոգացիոն փաթեթ](docs/ops/HOMOLOGATION.md)                                   | Իրական միջավայրի E2E վավերացում                                        | `docs/ops/HOMOLOGATION.md`                       |
+| [Runner տուփի գործառնություններ](docs/ops/RUNNER_BOX.md)                         | Self-houred CI runner գործողություններ                                 | `docs/ops/RUNNER_BOX.md`                         |
+
+<a id="docs-records"></a>
+
+### Եթե փնտրում եք ակտիվների նշումներ
+
+Նշումներ `docs/` ում պահվող պատկերային ակտիվների մասին: Թեմա:** Աշխատանքային գրառումներ** .
+
+| Փաստաթուղթ                                       | <img width="2000" height="0" alt=""> Ինչ է այն պատասխանում | Ֆայլ                          |
+| ------------------------------------------------ | ---------------------------------------------------------- | ----------------------------- |
+| [Դրոշի պատկերակներ](docs/assets/flags/README.md) | Երկրի դրոշներ, որոնք օգտագործվում են լեզվի ընտրողի կողմից  | `docs/assets/flags/README.md` |
 
 <br/>
 
-## 📖 Փաստաթղթեր
-
-</div>
-
-### 📘 Սկսում ենք
-
-<table>
-  <tr><th align="left">Փաստաթուղթ</th><th align="left">Նկարագրություն</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Օգտագործողի ուղեցույց</a></b></td><td>Պրովայդերներ, համակցություններ, CLI ինտեգրում, տեղակայում</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Կարգավորման ուղեցույց</a></b></td><td>Տեղադրման ամբողջական եղանակներ, CLI գործիքների կարգավորումներ, պրոտոկոլի կարգավորում, ժամանակի ընդհատման կարգավորում</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI գործիքների ուղեցույց</a></b></td><td>Յուրաքանչյուր գործիքի կարգավորում Claude Code-ի, Codex-ի, Cursor-ի, Cline-ի, OpenClaw-ի, Kilo-ի, Copilot-ի համար</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Հեռակա ռեժիմ</a></b></td><td>Ձեր նոութբուքի CLI-ի միջոցով հեռակա OmniRoute-ը (VPS) կառավարում սահմանափակ հասանելիության թոքենների միջոցով</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code-ի կարգավորում</a></b></td><td>Claude Code-ը միացնել OmniRoute-ին (տեղական/հեռակա)՝ <code>launch</code>-ի և յուրաքանչյուր մոդելի պրոֆիլների միջոցով</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">Արագ մեկնարկ</a></b></td><td>Տեղադրում 3 քայլով → միացում → կարգավորում</td></tr>
-</table>
-
-### 🔧 Գործարկում և տեղակայում
-
-<table>
-  <tr><th align="left">Փաստաթուղթ</th><th align="left">Նկարագրություն</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker-ի ուղեցույց</a></b></td><td>Docker-ի գործարկում, Compose պրոֆիլներ, Caddy HTTPS, թունելներ, image թեգեր</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Podman-ի ուղեցույց</a></b></td><td>Quadlet systemd ինտեգրում, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM-ի տեղակայում</a></b></td><td>Ամբողջական ուղեցույց՝ VM + nginx + Cloudflare կարգավորում</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io-ի տեղակայում</a></b></td><td>Տեղակայում Fly.io-ում՝ մշտական պահեստավորմամբ</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux-ի ուղեցույց</a></b></td><td>OmniRoute-ի գործարկում Android-ում՝ Termux-ի միջոցով</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-ի ուղեցույց</a></b></td><td>Progressive Web App-ի տեղադրում, քեշավորում, ճարտարապետություն</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Ապատեղադրման ուղեցույց</a></b></td><td>Մաքուր հեռացում տեղադրման բոլոր եղանակների համար</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Շրջակա միջավայրի կարգավորում</a></b></td><td>Ամբողջական <code>.env</code> փոփոխականներ և հղումներ</td></tr>
-</table>
-
-### 🧠 Հնարավորություններ և ճարտարապետություն
-
-<table>
-  <tr><th align="left">Փաստաթուղթ</th><th align="left">Նկարագրություն</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Ճարտարապետություն</a></b></td><td>Համակարգի ճարտարապետություն, տվյալների հոսք և ներքին կառուցվածք</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Սեղմման ուղեցույց</a></b></td><td>7 տարբերակով խողովակաշար՝ off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK սեղմում</a></b></td><td>Հրամանների ելքի սեղմում, զտիչներ, վստահություն, վավերացում, հում ելքի վերականգնում</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Սեղմման շարժիչներ</a></b></td><td>Caveman, RTK, stacked խողովակաշարեր, dashboard/API/MCP միջերեսներ</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Սեղմման կանոնների ձևաչափ</a></b></td><td>JSON կանոնների փաթեթների սխեմաներ Caveman և RTK զտիչների համար</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Սեղմման լեզվային փաթեթներ</a></b></td><td>Լեզվի հայտնաբերում և Caveman կանոնների փաթեթների հեղինակավորում</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Կայունության ուղեցույց</a></b></td><td>Շղթայի անջատիչներ, հովացման ժամանակահատվածներ, հերթ, զանգվածային միաժամանակյա հարցումների կանխում, TLS-ի խաբում</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo շարժիչ</a></b></td><td>Գնահատում 16 գործոնով, ռեժիմների փաթեթներ, ինքնավերականգնում</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Պրոքսիի ուղեցույց</a></b></td><td>Պրոքսիի 3 մակարդակի համակարգ, 1proxy շուկա, ռեեստրի CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Անվճար մակարդակներ</a></b></td><td>Համախմբված տեղեկատու՝ 34 փաստագրված պարբերական հավաքածու / անվճար մակարդակի 465 կատալոգավորված գրառում</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Հնարավորությունների պատկերասրահ</a></b></td><td>Տեսողական dashboard-ի շրջայց՝ սքրինշոթներով</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Կոդային բազայի փաստաթղթեր</a></b></td><td>Կոդային բազայի ուղեցույց՝ սկսնակների համար</td></tr>
-</table>
-
-### 🤖 Պրոտոկոլներ և API-ներ
-
-<table>
-  <tr><th align="left">Փաստաթուղթ</th><th align="left">Նկարագրություն</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API-ի տեղեկատու</a></b></td><td>Բոլոր endpoint-ները՝ օրինակներով</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI-ի սպեցիֆիկացիա</a></b></td><td>OpenAPI 3.0-ի սպեցիֆիկացիա</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP սերվեր</a></b></td><td>110 MCP գործիք, IDE-ի կարգավորումներ, Python/TS/Go հաճախորդներ</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP սերվերի ուղեցույց</a></b></td><td>MCP-ի տեղադրում, տրանսպորտներ և գործիքների տեղեկատու</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A սերվեր</a></b></td><td>JSON-RPC 2.0 պրոտոկոլ, հմտություններ, հոսքային փոխանցում, առաջադրանքների կառավարում</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A սերվերի ուղեցույց</a></b></td><td>A2A գործակալի քարտ, առաջադրանքներ, հմտություններ և հոսքային փոխանցում</td></tr>
-</table>
-
-### 📋 Նախագիծ և որակ
-
-<table>
-  <tr><th align="left">Փաստաթուղթ</th><th align="left">Նկարագրություն</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Ներդրում</a></b></td><td>Մշակման կարգավորում և ուղեցույցներ</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Ճյուղավորման և թողարկումների մոդել</a></b></td><td>Որտեղ են ուղղվում PR-ները (<code>release/*</code>), և ինչ են նշանակում <code>main</code>-ը և թեգերը</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">Փոփոխությունների մատյան</a></b></td><td>Թողարկումների ամբողջական պատմությունն ըստ տարբերակների</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">Անվտանգության քաղաքականություն</a></b></td><td>Խոցելիությունների հաղորդում և անվտանգության գործելակերպեր</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n ուղեցույց</a></b></td><td>67 լեզվի աջակցություն, թարգմանության աշխատանքային գործընթաց, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Թողարկման ստուգաթերթ</a></b></td><td>Թողարկումից առաջ վավերացման քայլեր</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Ծածկույթի պլան</a></b></td><td>8,400+ վերահսկվող թեստային ֆայլերում առկա 60,000+ ստատիկ թեստային հայտարարությունների թեստային ծածկույթի ռազմավարություն</td></tr>
-</table>
-
 <br/>
 
 <div align="center">
 
-# ⭐ Գլխավոր ներդրողներ
+# Լավագույն ներդրողներ
 
-> OmniRoute-ը ձևավորվում է կրքոտ բաց կոդով համայնքի կողմից։ Այս մարդիկ կատարել են բացառիկ ներդրումներ, որոնք անմիջականորեն ազդում են նախագծի որակի, կայունության և հասանելիության վրա։ **Շնորհակալություն։**
+> OmniRoute ձևավորվել է կրքոտ բաց կոդով համայնքի կողմից: Այս անհատները բացառիկ ներդրումներ են կատարել, որոնք ուղղակիորեն ազդում են ծրագրի որակի, կայունության և հասանելիության վրա:** Շնորհակալություն։**
 
-### Արտաքին ներդրողներն ըստ միավորված pull request-ների
+### Արտաքին ներդրողներ՝ միաձուլված ձգման հարցումներով
 
 <table>
-  <tr><th align="center">Դասակարգ</th><th align="left">Ներդրող</th><th align="center">Միավորված PR-ներ</th><th align="right">~Փոփոխված տողեր</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><th align="center">կոչում</th><th align="left">Աջակցող</th><th align="center">Միաձուլված PRs</th><th align="right">~ Փոխված տողեր</th></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">429</td><td align="right">25,379,104</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">345</td><td align="right">13,590,900</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>պակոկարտոններ</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
   <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">201</td><td align="right">3,583,349</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>օյի77</b></a></td><td align="center">191</td><td align="right">412,053</td></tr>
   <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
-  <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
-  <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
-  <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
-  <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
-  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
-  <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
+  <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>ինքն իրեն</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
+  <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">125</td><td align="right">500,381</td></tr>
+  <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>հերյարսա</b></a></td><td align="center">89</td><td align="right">231,099</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">87</td><td align="right">2,850,688</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">75</td><td align="right">153,717</td></tr>
+  <tr><td align="center">13</td><td align="left"><a href="https://github.com/serenity-X"><b>հանգստություն-X</b></a></td><td align="center">69</td><td align="right">27,510</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/Bl0ck154"><b>Bl0ck154</b></a></td><td align="center">49</td><td align="right">11,872</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">49</td><td align="right">812,132</td></tr>
+  <tr><td align="center">20</td><td align="left"><a href="https://github.com/rqzbeh"><b>րկզբեհ</b></a></td><td align="center">47</td><td align="right">152,462</td></tr>
 </table>
 
-<sub>Տվյալների հաշվառումն իրականացվել է 2026-11-03 03:01:19 UTC-ին՝ <code>release/v3.8.53</code> ընթացիկ տարբերակի <code>05bc048d6c</code> թարմացմամբ։ Էջավորված GitHub GraphQL հաշվառումը ներառում է 9,947 միավորված PR՝ 4,130-ը՝ պահոցի սեփականատիրոջ, 240-ը՝ Dependabot-ի, 6-ը՝ այլ բոտերի/հավելվածների, իսկ <b>5,571 արտաքին PR՝ 883 տարբեր ներդրողներից</b>։ «Փոփոխված տողերը» GitHub-ի ավելացումների և ջնջումների հանրագումարն է և ներառում է գեներացված ֆայլերը, lockfile-ները, կատալոգները, թարգմանություններն ու փաստաթղթերը․ սա փոփոխությունների ծավալն է, ոչ թե հեղինակած LOC-ը։ 53 PR հաղորդում է 500,000 տողից ավելի GitHub diff-երի մասին (օրինակ՝ #13399-ը, որը մեկ մատակարարի ավելացում է, ցուցակում ունի 2,347 փոփոխված ֆայլ), ինչը մեծացնում է վերևում ներկայացված մի քանի ընդհանուր թվերը։ Հավասար արդյունքները դասակարգված են միասին։</sub>
+<sub>Մարդահամարն անցկացվել է 2026-11-16 15:55:12 UTC <code>release/v3.8.54</code> ում և ստուգվել է հետագա միաձուլումների համար 2026-11-17 00:12 UTC ին: Էջավորված GitHub GraphQL մարդահամարը պարունակում է 10,685 միավորված PRs՝ 4,399 պահեստարանի սեփականատիրոջ կողմից, 249՝ Dependabot-ի կողմից, 6՝ այլ bots/apps կողմից, և <b>6031 արտաքին PRs 922 տարբեր ներդրողներից</b>. «Փոփոխված տողերը» GitHub լրացումներ են + ջնջումներ, որոնք կարդացվում են 2026-11-17-ին՝ այս աղյուսակում հաշվված յուրաքանչյուր PR համար և ներառում է ստեղծված ֆայլեր, կողպեքի ֆայլեր, կատալոգներ, թարգմանություններ և փաստաթղթեր. դա churn է, հեղինակային չէ LOC. Այս աղյուսակի 2,716 PRs ից 46-ը GitHub տարբերվում է 500,000 տողից բարձր (օրինակ #13399, մեկ մատակարարի հավելումը, ցուցակում է 2,347 փոխված ֆայլ), ինչը ուռճացնում է վերևում գտնվող մի քանի ընդհանուր գումարներ: Կապերը դասակարգվում են միասին:</sub>
 
-### GitHub-ին վերագրված կոմիտներ
+### GitHub-ին վերագրվող պարտավորություններ
 
 <table>
   <tr>
     <td align="center" width="160">
       <a href="https://github.com/maxmad64bis">
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
-        <b>Dizzle</b>
+        <b>Գլխապտույտ</b>
       </a><br/>
-      <sub>🥇 418 GitHub-ին վերագրված քոմիթ</sub>
+      <sub>🥇 429 GitHub-ին վերագրվող պարտավորություններ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
-        <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
-        <b>Bob.Hou</b>
+        <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Minxi Hou"/><br/>
+        <b>Մինսի Հոու</b>
       </a><br/>
-      <sub>🥈 294 GitHub-ին վերագրված քոմիթ</sub>
+      <sub>🥈 345 GitHub-ին վերագրվող պարտավորություններ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
-        <b>Paijo</b>
+        <b>Պայխո</b>
       </a><br/>
-      <sub>🥉 229 GitHub-ին վերագրված քոմիթ</sub>
+      <sub>🥉 230 GitHub-ին վերագրվող պարտավորություններ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+        <b>Պակո Քարտոնես</b>
       </a><br/>
-      <sub>🏅 222 GitHub-ին վերագրված քոմիթ</sub>
+      <sub>🏅 222 GitHub-ին վերագրվող պարտավորություններ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 202 GitHub-ին վերագրված քոմիթ</sub>
+      <sub>🏅 202 GitHub-ին վերագրվող պարտավորություններ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
+        <b>Յան Լեոն</b>
       </a><br/>
-      <sub>🏅 134 GitHub-ին վերագրված քոմիթ</sub>
+      <sub>🏅 137 GitHub-ին վերագրվող պարտավորություններ</sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
-        <b>Ravi Tharuma</b>
+        <b>Ռավի Թարումա</b>
       </a><br/>
-      <sub>🏅 126 GitHub-ին վերագրված քոմիթ</sub>
+      <sub>🏅 128 GitHub-ին վերագրվող պարտավորություններ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
-        <b>Markus Hartung</b>
+        <b>Մարկուս Հարթունգ</b>
       </a><br/>
-      <sub>🏅 115 GitHub-ին վերագրված քոմիթ</sub>
+      <sub>🏅 117 GitHub-ին վերագրվող պարտավորություններ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
-        <b>Randi</b>
+        <b>Ռանդին</b>
       </a><br/>
-      <sub>🏅 108 GitHub-ին վերագրված քոմիթ</sub>
+      <sub>🏅 108 GitHub-ին վերագրվող պարտավորություններ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/xiaoyaner0201">
+        <img src="https://github.com/xiaoyaner0201.png" width="40" style="border-radius:50%" alt="小妍儿"/><br/>
+        <b>小妍儿</b>
+      </a><br/>
+      <sub>🏅 75 GitHub-ին վերագրվող պարտավորություններ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
-        <b>Chris</b>
+        <b>Քրիս</b>
       </a><br/>
-      <sub>🏅 70 GitHub-ին վերագրված քոմիթ</sub>
+      <sub>🏅 70 GitHub-ին վերագրվող պարտավորություններ</sub>
     </td>
+    <td align="center" width="160">
+      <a href="https://github.com/serenity-X">
+        <img src="https://github.com/serenity-X.png" width="40" style="border-radius:50%" alt="serenity"/><br/>
+        <b>հանգստություն</b>
+      </a><br/>
+      <sub>🏅 69 GitHub-ին վերագրվող պարտավորություններ</sub>
+    </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/jonlwheat2-gif">
         <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
         <b>WebPerson</b>
       </a><br/>
-      <sub>🏅 68 GitHub-ին վերագրված քոմիթ</sub>
+      <sub>🏅 68 GitHub-ին վերագրվող պարտավորություններ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
-        <b>Koosha Paridehpour</b>
+        <b>Քուշա Փարիդեհփուր</b>
       </a><br/>
-      <sub>🏅 68 GitHub-ին վերագրված քոմիթ</sub>
+      <sub>🏅 68 GitHub-ին վերագրվող պարտավորություններ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/zen0bit">
+        <img src="https://github.com/zen0bit.png" width="40" style="border-radius:50%" alt="zenobit"/><br/>
+        <b>զենոբիթ</b>
+      </a><br/>
+      <sub>🏅 62 GitHub-ին վերագրվող պարտավորություններ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/xz-dev">
+        <img src="https://github.com/xz-dev.png" width="40" style="border-radius:50%" alt="Xiangzhe"/><br/>
+        <b>Սյանչժե</b>
+      </a><br/>
+      <sub>🏅 51 GitHub-ին վերագրվող պարտավորություններ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/woodsonl">
+        <img src="https://github.com/woodsonl.png" width="40" style="border-radius:50%" alt="Lance Woodson"/><br/>
+        <b>Լենս Վուդսոն</b>
+      </a><br/>
+      <sub>🏅 49 GitHub-ին վերագրվող պարտավորություններ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/Bl0ck154">
+        <img src="https://github.com/Bl0ck154.png" width="40" style="border-radius:50%" alt="Bl0ck"/><br/>
+        <b>Bl0ck</b>
+      </a><br/>
+      <sub>🏅 49 GitHub-ին վերագրվող պարտավորություններ</sub>
     </td>
   </tr>
 </table>
 
-<sub>Վերաստուգվել է 2026-11-03 02:09:16 UTC-ին․ GitHub-ին վերագրված քոմիթները հաղորդվել են պահոցի Contributors API-ի կողմից՝ <code>release/v3.8.53</code> լռելյայն ճյուղի համար։ API-ն վերադարձրել է 903 ինքնություն (429 օգտատեր, 2 բոտ, 472 անանուն ինքնություն)․ այս աղյուսակը չի ներառում maintainer-ին, բոտերին և անանուն ինքնությունները և պահպանում է մրցակցության հավասար արդյունքները։ Այն տարբերվում է թե՛ վերևում ներկայացված միավորված PR-ների վարկանիշից, թե՛ ներքևում ներկայացված Git մետատվյալների հաշվառումից։</sub>
+<sub>Վերստուգվել է 2026-11-17 00:12:50 UTC. GitHub-ին վերագրվող պարտավորություններ, որոնք զեկուցվել են շտեմարանի Contributors API ի կողմից <code>release/v3.8.54</code> լռելյայն ճյուղի համար: API վերադարձրեց 944 ինքնություն (430 օգտվող, 2 բոտ, 512 անանուն); այս աղյուսակը բացառում է սպասարկողին, բոտերին և անանուն ինքնությունները և պահպանում է մրցակցային կապերը: Այն տարբերվում է ինչպես վերը նշված միավորված PR վարկանիշից, այնպես էլ ստորև ներկայացված Git-մետատվյալների մարդահամարից:</sub>
 
-> 🙏 Այս ներդրողների հնարավորությունները, սխալների շտկումները և ենթակառուցվածքի բարելավումները **առանցքային դեր ունեն** OmniRoute-ը հուսալի և հարուստ հնարավորություններով դարձնելու գործում։ Յուրաքանչյուր pull request, յուրաքանչյուր թեստային դեպք և յուրաքանչյուր i18n թարգմանության ֆայլ կարևոր է։ Բաց կոդով ծրագրաշարը ստեղծվում է նրանց նման մարդկանց կողմից։
+> 🙏 Այս ներդրողների առանձնահատկությունները, վրիպակների շտկումը և ենթակառուցվածքի բարելավումները a** հիմնական մասը** այն, ինչը OmniRoute դարձնում է հուսալի և հարուստ: Յուրաքանչյուր ձգման հարցում, յուրաքանչյուր փորձարկման դեպք և յուրաքանչյուր i18n թարգմանության ֆայլ կարևոր է: Բաց կոդերը կառուցված է նրանց նման մարդկանց կողմից:
 
 </div>
 
@@ -1555,25 +1951,18 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ը նույնպե
 
 <br/>
 
-## 💖 Հովանավորներ
+## Հովանավորներ
 
 <div align="center">
 
-Սրտանց շնորհակալություն այն մարդկանց, ովքեր սեփական միջոցներով ֆինանսավորում են OmniRoute-ը․ յուրաքանչյուր ներդրում օգնում է նախագծին մնալ անվճար, անկախ և շարունակել զարգանալ։
+Սրտանց շնորհակալություն այն մարդկանց, ովքեր OmniRoute ֆինանսավորում են իրենց գրպանից — յուրաքանչյուր ներդրում նախագիծն ազատ, անկախ և շարժուն է պահում:
 
 <table>
   <tr>
     <td align="center" width="160">
-      <a href="https://github.com/drewbitt">
-        <img src="https://github.com/drewbitt.png?size=140" width="72" style="border-radius:50%" alt="Andrew"/><br/>
-        <b>Andrew</b>
-      </a><br/>
-      <sub>💛 Ակտիվ ամսական հովանավոր</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/psylligent">
         <img src="https://github.com/psylligent.png?size=140" width="72" style="border-radius:50%" alt="Vlad I"/><br/>
-        <b>Vlad I</b>
+        <b>Վլադ Ի</b>
       </a><br/>
       <sub>💛 Ակտիվ ամսական հովանավոր</sub>
     </td>
@@ -1585,71 +1974,97 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ը նույնպե
       <sub>💛 Ակտիվ ամսական հովանավոր</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/Guilsc">
-        <img src="https://github.com/Guilsc.png?size=140" width="72" style="border-radius:50%" alt="Guilherme Costa"/><br/>
-        <b>Guilherme Costa</b>
+      <a href="https://github.com/lak-is-law">
+        <img src="https://github.com/lak-is-law.png?size=140" width="72" style="border-radius:50%" alt="Lakshya Agarwal"/><br/>
+        <b>Լակշյա Ագարվալ</b>
       </a><br/>
       <sub>💛 Ակտիվ մեկանգամյա հովանավոր</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/rafacpti23">
+        <img src="https://github.com/rafacpti23.png?size=140" width="72" style="border-radius:50%" alt="Rafa Martins"/><br/>
+        <b>Ռաֆա Մարտինս</b>
+      </a><br/>
+      <sub>💛 Ակտիվ մեկանգամյա հովանավոր</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/drewbitt">
+        <img src="https://github.com/drewbitt.png?size=140" width="72" style="border-radius:50%" alt="Andrew"/><br/>
+        <b>Էնդրյու</b>
+      </a><br/>
+      <sub>💛 Անցյալ ամսական աջակից</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://github.com/Guilsc">
+        <img src="https://github.com/Guilsc.png?size=140" width="72" style="border-radius:50%" alt="Guilherme Costa"/><br/>
+        <b>Գիլհերմե Կոստա</b>
+      </a><br/>
+      <sub>💛 Անցյալ միանգամյա աջակից</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/TheVingance">
         <img src="https://github.com/TheVingance.png?size=140" width="72" style="border-radius:50%" alt="Henrique Triches Iurkiv"/><br/>
-        <b>Henrique Iurkiv</b>
+        <b>Հենրիկե Իուրկիվ</b>
       </a><br/>
-      <sub>💛 Ակտիվ մեկանգամյա հովանավոր</sub>
+      <sub>💛 Անցյալ միանգամյա աջակից</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/somesh-ghaturle">
         <img src="https://github.com/somesh-ghaturle.png?size=140" width="72" style="border-radius:50%" alt="Somesh Ghaturle"/><br/>
-        <b>Somesh Ghaturle</b>
+        <b>Սոմեշ Ղաթուրլե</b>
       </a><br/>
-      <sub>💛 Ակտիվ մեկանգամյա հովանավոր</sub>
+      <sub>💛 Անցյալ միանգամյա աջակից</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/Kolonie-AI">
         <img src="https://github.com/Kolonie-AI.png?size=140" width="72" style="border-radius:50%" alt="Kolonie AI"/><br/>
         <b>Kolonie AI</b>
       </a><br/>
-      <sub>💛 Նախկին մեկանգամյա աջակից</sub>
+      <sub>💛 Անցյալ միանգամյա աջակից</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/igormorais123">
         <img src="https://github.com/igormorais123.png?size=140" width="72" style="border-radius:50%" alt="Professor Igor Morais Vasconcelos"/><br/>
-        <b>Prof. Igor Morais</b>
+        <b>Պրոֆեսոր Իգոր Մորաիս</b>
       </a><br/>
-      <sub>💛 Նախկին մեկանգամյա աջակից</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/PixmaNts">
-        <img src="https://github.com/PixmaNts.png?size=140" width="72" style="border-radius:50%" alt="Pixma"/><br/>
-        <b>Pixma</b>
-      </a><br/>
-      <sub>💛 Նախկին մեկանգամյա աջակից</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png?size=140" width="72" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
-      </a><br/>
-      <sub>💛 Նախկին մեկանգամյա աջակից</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/longtao77">
-        <img src="https://github.com/longtao77.png?size=140" width="72" style="border-radius:50%" alt="longtao"/><br/>
-        <b>longtao</b>
-      </a><br/>
-      <sub>💛 Նախկին մեկանգամյա աջակից</sub>
+      <sub>💛 Անցյալ միանգամյա աջակից</sub>
     </td>
   </tr>
 </table>
 
-<sub>… և ուրիշներ, ովքեր նախընտրում են անանուն մնալ 💛</sub>
+<table>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://github.com/PixmaNts">
+        <img src="https://github.com/PixmaNts.png?size=140" width="72" style="border-radius:50%" alt="Pixma"/><br/>
+        <b>Պիքսմա</b>
+      </a><br/>
+      <sub>💛 Անցյալ միանգամյա աջակից</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png?size=140" width="72" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Պակո Քարտոնես</b>
+      </a><br/>
+      <sub>💛 Անցյալ միանգամյա աջակից</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/longtao77">
+        <img src="https://github.com/longtao77.png?size=140" width="72" style="border-radius:50%" alt="longtao"/><br/>
+        <b>երկարատո</b>
+      </a><br/>
+      <sub>💛 Անցյալ միանգամյա աջակից</sub>
+    </td>
+  </tr>
+</table>
 
-<sub>GitHub Sponsors-ի հանրային տվյալները վերավավերացվել են 2026-10-18-ին՝ GitHub Sponsors GraphQL API-ի միջոցով․ ընդհանուր 14 հովանավորությունից 11-ը հանրային են (6-ը՝ ակտիվ, 5-ը՝ նախկին)։ GitHub-ի <code>isActive</code> կարգավիճակն է որոշում վերևում նշված ակտիվ պիտակները․ նախկին հանրային մեկանգամյա աջակիցներին շարունակում ենք շնորհակալություն հայտնել, իսկ մասնավոր հովանավորները մնում են անանուն։ Ko-fi-ի, Buy Me a Coffee-ի, Liberapay-ի, PIX-ի և կրիպտոարժույթով նվիրատվությունները նշված չեն, քանի որ դրանց համար հովանավորության հանրային գրառում չկա։</sub>
+<sub>… և մյուսները, ովքեր նախընտրում են մնալ մասնավոր 💛</sub>
 
-<b><a href="https://github.com/sponsors/diegosouzapw">💖 Դարձեք հովանավոր →</a></b> — յուրաքանչյուր դոլար օգնում է OmniRoute-ին մնալ անվճար և անկախ։
+<sub>Հանրային GitHub հովանավորները վերավավերացվել են 2026-11-17 GitHub հովանավորների միջոցով GraphQL API. 13 հանրային հովանավորություն (4 ակտիվ, 9 անցյալ) ընդհանուր 17-ից: GitHub ի <code>isActive</code> կարգավիճակը որոշում է վերը նշված ակտիվ պիտակները. Անցյալ հանրային միանվագ աջակիցները մնում են շնորհակալություն, իսկ մասնավոր հովանավորները մնում են անանուն: Ko-fi, Buy Me a Coffee, Liberapay, PIX և կրիպտո նվիրատվությունները նշված չեն, քանի որ դրանք չունեն հանրային հովանավորի գրառում:</sub>
+
+<b><a href="https://github.com/sponsors/diegosouzapw">💖 Դարձեք հովանավոր →</a></b> — յուրաքանչյուր դոլարը OmniRoute ազատ և անկախ է պահում:
 
 </div>
 
@@ -1657,29 +2072,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ը նույնպե
 
 <div align="center">
 
-## 👥 1,000+ ներդրողներ
+## 1200 + Աջակիցներ
 
 </div>
 
-[![Ներդրողներ](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Աջակիցներ](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1317&columns=20&anon=1) ](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
-<sub>Ստուգվել է 2026-11-02-ին՝ live <code>release/v3.8.53</code> թելում՝ <code>1c7135e0fb</code> (7,972 commit)․ <b>1,074 նորմալացված մարդկային Git նույնականացումներ</b> — 759-ը հանդես են գալիս որպես commit-ի հեղինակներ (ներառյալ maintainer-ը), իսկ 315-ը՝ միայն բացահայտ <code>Co-authored-by</code> trailer-ներում։ Մարդահամարը կիրառում է <code>.mailmap</code>-ը, համեմատում է էլեկտրոնային փոստի հասցեները՝ առանց մեծատառերի և փոքրատառերի տարբերակման, թվային և սովորական GitHub noreply հասցեները միավորում է միայն այն դեպքում, երբ դրանք կոդավորում են նույն handle-ը, բացառում է bot/agent/service/placeholder 29 նույնականացումներ և սովորական էլեկտրոնային փոստի հասցեները չի միավորում միայն այն պատճառով, որ դրանց ցուցադրվող անունները համընկնում են։ 2026-08-24-ի աուդիտը հրապարակել էր 639, իսկ այդ աուդիտի բազային <code>ac02c5b42f</code>-ի վրա այս մեթոդի կրկնակի կիրառումը տալիս է 619, ուստի աճը պայմանավորված է նոր ներդրողներով, ոչ թե ավելի մեղմ մեթոդով։</sub>
+<sub>Աուդիտ անցկացվել է 2026-11-17 <code>release/v3.8.54</code> commit <code>a9539085bd</code> ում (13,520 պարտավորություններ, ամբողջական պատմություն). <b>1317 նորմալացված մարդկային Git ինքնություն</b> — 943-ը հայտնվում է որպես commit հեղինակներ (ներառյալ պահպանողը), իսկ 374-ը միայն բացահայտ <code>Co-authored-by</code> թրեյլերում: Մարդահամարը կիրառվում է <code>.mailmap</code>, համեմատում է էլ. փոստի հասցեները մեծատառերով, միանում է թվային և պարզ GitHub noreply հասցեներին միայն այն դեպքում, երբ դրանք կոդավորում են նույն բռնիչը, բացառում է 138 bot/agent/service/placeholder նույնականությունը և թրեյլերի արժեքները, որոնք էլփոստի հասցեներ չեն, և չի միացնում սովորական էլ. Նախորդ ցուցանիշը (1,074 <code>1c7135e0fb</code> ում) չափվել է պատմության վրա, որը պարունակում է այդ հանձնառության 12,041 պարտավորություններից միայն 7,972-ը. <code>1c7135e0fb</code> ի ամբողջական պատմության վրա վերագործարկված այս մեթոդը տալիս է 1235, ուստի այդ ժամանակից ի վեր աճը գալիս է նոր ներդրողներից, այլ ոչ թե ավելի թույլ մեթոդից: Վերևի պատկերը վերցված է GitHub Contributors API ից (944 ինքնություն) և ցույց է տալիս ավելի քիչ դեմքեր, քան Git մարդահամարը:</sub>
 
-### Ինչպես ներդրում կատարել
+### Ինչպես նպաստել
 
-1. Fork արեք repository-ն
-2. Ստեղծեք branch **ակտիվ** `release/vX.Y.Z` tip-ից (ոչ թե `main`-ից) — տես [Branching & Release Model](docs/ops/BRANCHING_MODEL.md)
-3. Ստեղծեք ձեր feature branch-ը (`git checkout -b feat/amazing-feature`)
-4. Commit արեք ձեր փոփոխությունները (`git commit -m 'feat: add amazing feature'`)
-5. Push արեք branch-ը (`git push origin feat/amazing-feature`)
-6. Բացեք Pull Request՝ **base = այդ `release/vX.Y.Z` branch-ը**
+1. Պատառաքաղել պահեստը
+2. Մասնաճյուղ -ից** ակտիվ** `release/vX.Y.Z` հուշում (ոչ `main`) — տես [Մասնաճյուղի և թողարկման մոդել](docs/ops/BRANCHING_MODEL.md)
+3. Ստեղծեք ձեր առանձնահատկությունների մասնաճյուղը (`git checkout -b feat/amazing-feature`)
+4. Կատարեք ձեր փոփոխությունները (`git commit -m 'feat: add amazing feature'`)
+5. Հրել դեպի ճյուղ (`git push origin feat/amazing-feature`)
+6. Բացեք ձգման հարցումը** հիմք = որ `release/vX.Y.Z` ճյուղ**
 
-Մանրամասն ուղեցույցների համար տես [CONTRIBUTING.md](CONTRIBUTING.md)։
+Մանրամասն ուղեցույցների համար տես [CONTRIBUTING.md](CONTRIBUTING.md) :
 
 ### Նոր տարբերակի թողարկում
 
 ```bash
-# Ստեղծել թողարկում — npm publish-ը կատարվում է ավտոմատ կերպով
+# Create a release — npm publish happens automatically
 VERSION=x.y.z
 gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 ```
@@ -1688,155 +2103,153 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 <div align="center">
 
-## 📊 Աստղեր
+## Աստղեր
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Աստղերի պատմության գծապատկեր" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left" />
  </picture>
 </a>
+
+</div>
 
 <br/>
 
 <div align="center">
 
-## 🌍 Աստղային Քարտեզագիր
+## StarMapper
 
 <a href="https://starmapper.bruniaux.com/diegosouzapw/omniroute">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://starmapper.bruniaux.com/api/map-image/diegosouzapw/omniroute?theme=dark" />
     <source media="(prefers-color-scheme: light)" srcset="https://starmapper.bruniaux.com/api/map-image/diegosouzapw/omniroute?theme=light" />
-    <img alt="Աստղային Քարտեզագիր" src="https://starmapper.bruniaux.com/api/map-image/diegosouzapw/omniroute" />
+    <img alt="StarMapper" src="https://starmapper.bruniaux.com/api/map-image/diegosouzapw/omniroute" />
   </picture>
 </a>
 </div>
 
 <br/>
 
-<div align="center">
+## Երախտագիտություն
 
-## 🙏 Երախտագիտություն
+OmniRoute կանգնած է հսկաների ուսերին: Այն սկսվեց որպես պատառաքաղ** [9 երթուղիչ](https://github.com/decolua/9router)** և Go նախագծի TypeScript նավահանգիստը** [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — և այնտեղից ստորև բերված յուրաքանչյուր ենթահամակարգ ոգեշնչված էր բաց կոդով նախագծով, որն առաջինն այնտեղ էր: Յուրաքանչյուրը բետոնե կտոր էր ձևավորում OmniRoute. Սա մեր շնորհակալությունն է նրանց բոլորին: 🙏
 
-</div>
+> ⭐ աստղերի թվերը ստուգված են GitHub ի REST API ից 2026 թվականի նոյեմբերի 16-ին — go աստղ տուր այս նախագծերին: Հաշվարկները ճշգրիտ թվագրված նկար են և, բնականաբար, կփոխվեն: GrokBridge վերադարձրեց HTTP 404 այդ օրը; դրա վերագրումը պահպանվում է.
 
-OmniRoute-ը ստեղծվել է հսկաների ուսերին։ Այն սկսվել է որպես **[9router](https://github.com/decolua/9router)**-ի fork և Go նախագծի՝ **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)**-ի TypeScript տեղափոխում, իսկ դրանից հետո ստորև նշված յուրաքանչյուր ենթահամակարգ ոգեշնչվել է բաց կոդով նախագծից, որն առաջինն էր հասել այդ արդյունքին։ Դրանցից յուրաքանչյուրը ձևավորել է OmniRoute-ի մի կոնկրետ բաղադրիչ։ Սա մեր շնորհակալությունն է բոլորին։ 🙏
-
-> ⭐ աստղերի քանակը ստուգվել է GitHub-ի REST API-ի միջոցով 2026 թվականի նոյեմբերի 3-ին — այցելեք և աստղ դրեք այս նախագծերին։ Քանակները տվյալ ամսաթվի ճշգրիտ snapshot-ն են և բնականաբար կփոխվեն։
-
-### 🧬 Ծագումնաբանություն և gateway
+### Տոհմ և դարպաս
 
 <table>
-  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է այն ոգեշնչել OmniRoute-ին</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>Սկզբնական նախագիծը, որի վրա կառուցված է այս fork-ը — այստեղ ընդլայնված է բազմամոդալ API-ներով և ամբողջական TypeScript վերաշարադրումով։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>Go-ի իրականացումը, որը ոգեշնչել է այս JavaScript / TypeScript տեղափոխումը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>AI gateway-ը, որի հրապարակային գնագոյացման dataset-ը ապահովում է մեր ծախսերի հաշվառման համաժամացումը, իսկ provider-ի նորմալացման մոդելը տեղեկացրել է մեր երթուղավորմանը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>MIT source-ը հարմարեցվել է vendored ChatGPT Web → Codex Responses bridge-ում, ներառյալ browser-session-ի, response-framing-ի, usage-ի և web-search-ի adapter-ները։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>Նախշերը տեղափոխվել են stream recovery-ի, no-thinking alias-ների, fallback web search-ի, sliding-window սահմանաչափերի, log redaction-ի և hardened launcher flow-երի մեջ։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Cursor Composer-ի tool-choice-ի, output-constraint-ի և tool-commit-ի նախշերը հարմարեցվել են native Cursor executor-ում։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Fresh-login-ի և refresh-token-ի պտտման նախշերը տեղափոխվել են Codex OAuth-ի վերավավերացման մեջ։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Claude Code-ի հետ համատեղելի transform-ի լռելյայն արժեքները և billing-header-ի վարքագիծը ընդհանրացվել են OmniRoute-ի config-driven bridge-ում։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Դրա Grok-ի model mapping-ները, fake-TypeError Statsig generator-ը, request-ի և device-ի լռելյայն արժեքները, ինչպես նաև NDJSON response processor-ը էականորեն հարմարեցվել են OmniRoute-ի Grok Web executor-ում։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>grok2api-merged-ի հիմքում ընկած հիմնական transitive code source-ը․ դրա model-ի, header-ի, payload-ի, Statsig-ի և processor-ի իրականացումները պահպանվել են Grok Web-ի ծագումնաբանության մեջ։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>Grok-ի payload-ի և device-ի լռելյայն արժեքների, Statsig generator-ի և <code>result.response</code> processor-ի հիմքում ընկած MIT source-ը, որը փոխանցվել է TQZHR-ի և grok2api-merged-ի միջոցով։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>grok2api-merged-ի կողմից որպես իր proxy-pool շերտի transitive source նշված նախագիծը․ OmniRoute-ը պահպանում է այդ ծագումնաբանության նշումը, սակայն իր սահմանափակված Grok Web executor-ում չի պնդում proxy-pool-ի տեղափոխում։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>Դրա cookie-authenticated Grok proxy-ն և <code>result.response.token</code>-ի streaming pattern-ը տեղեկացրել են OmniRoute-ի Grok Web transport-ին։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Դրա Grok Web-ի սկզբնական իրականացումը ուսումնասիրվել է HTTP/browser upstream-ի նախագծման համար․ դրա direct HTTP path-ը բխում է GrokProxy-ից, ուստի անկախ code port չի ներկայացվում։</td></tr>
+  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է դա ոգեշնչել OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9 երթուղիչ</a></b></td><td align="center">32,509</td><td>Այս պատառաքաղի սկզբնական նախագիծը կառուցված է — վրա, որը երկարաձգվել է այստեղ բազմամոդալ APIs ով և ամբողջական TypeScript վերաշարադրմամբ:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">58,717</td><td>Go-ի իրականացումը, որը ոգեշնչեց այս JavaScript / TypeScript նավահանգիստը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">63,346</td><td>AI դարպասը, որի հանրային գնագոյացման տվյալների բազան ապահովում է մեր ծախսերի հետագծման համաժամացումը, և որի մատակարարի նորմալացման մոդելը տեղեկացրեց մեր երթուղին:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,747</td><td>MIT աղբյուրը հարմարեցվել է վաճառվող ChatGPT Web → Codex Responses կամուրջին, ներառյալ դիտարկիչի նիստը, պատասխանի շրջանակը, օգտագործման և վեբ որոնման ադապտերները:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">70,769</td><td>Հոսքերի վերականգնման մեջ տեղափոխված ձևանմուշներ, անհասկանալի փոխանուններ, հետադարձ վեբ որոնում, լոգարիթմական պատուհանների սահմանափակումներ, մատյանների խմբագրում և գործարկիչի խստացված հոսքեր:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">կոմպոզիտոր-ապի</a></b></td><td align="center">350</td><td>Cursor Կոմպոզիտորի գործիքի ընտրության, ելքային սահմանափակման և գործիքի կատարման օրինաչափությունները հարմարեցված են բնիկ Cursor կատարողին:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">565</td><td>Թարմ մուտքի և թարմացման նշանի պտտման նախշերը տեղափոխվեցին Codex OAuth վերահաստատման մեջ:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">563</td><td>Claude Code-ի հետ համատեղելի փոխակերպման լռելյայն կարգավորումները և վճարումների վերնագրի վարքագիծը ընդհանրացվել են OmniRoute ի կազմաձևման վրա հիմնված կամուրջի մեջ:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Դրա Grok մոդելի քարտեզագրումները, կեղծ-TypeError Statsig գեներատորը, հարցումների և սարքի լռելյայնները և NDJSON արձագանքման պրոցեսորը նյութականորեն հարմարեցվել են OmniRoute ի Grok վեբ կատարողին:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">703</td><td>Հիմնական անցումային ծածկագրի աղբյուրը grok2api-merged հետևում; դրա մոդելը, վերնագիրը, ծանրաբեռնվածությունը, Statsig-ը և պրոցեսորը պահպանված են Grok վեբ տոհմում:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,902</td><td>Grok օգտակար բեռնվածքի և սարքի լռելյայնների հիմքում ընկած MIT աղբյուրը, Statsig գեներատորը և <code>result.response</code> պրոցեսորը, որն իրականացվում է TQZHR և grok2api-merged միջոցով:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>Անցումային աղբյուր, որը վերագրվում է grok2api-merged կողմից իր վստահված ավազանի շերտի համար. OmniRoute պահպանում է այդ տոհմային ծանուցումը, բայց չի պահանջում proxy-pool միացք իր սահմանափակված Grok վեբ կատարողում:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">53</td><td>Դրա cookie-ով վավերացված Grok վստահված անձը և <code>result.response.token</code> հոսքային օրինաչափությունը տեղեկացրեցին OmniRoute ի Grok վեբ տրանսպորտին:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">—</td><td>Բնօրինակ Grok վեբ իրականացումը խորհրդակցել է իր HTTP/browser վերին հոսքի դիզայնի վրա. դրա ուղղակի HTTP ուղին բխում է GrokProxy ից, ուստի ոչ մի անկախ կոդային պորտ չի պահանջվում:</td></tr>
 </table>
 
-### 🗜️ Կոնտեքստի և token-ի սեղմում — շարժիչներ
+### Համատեքստային և նշանային սեղմման — շարժիչներ
 
 <table>
-  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է այն ոգեշնչել OmniRoute-ին</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>Վիրուսային «ինչո՞ւ օգտագործել շատ token, երբ քիչ token-ն էլ գործը կատարում է» նախագիծը․ դրա քարանձավամարդու խոսքի փիլիսոփայությունը հիմք է դարձել մեր ստանդարտ սեղմման ռեժիմի և լցոնիչների/խտացման ավելի քան 30 կանոնների համար։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>Հրամանների ելքի բարձր արտադրողականությամբ սեղմումը ոգեշնչել է մեր RTK շարժիչը, JSON ֆիլտրերի DSL-ը, չմշակված ելքի վերականգնումը և RTK → Caveman շղթայված pipeline-ը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>Հետադարձելի կոնտեքստի սեղմումը (SmartCrusher) ոգեշնչել է մեր <code>headroom</code> շարժիչը և <code>ccr</code> վերականգնման նշիչի օրինաչափությունը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Prompt-ի սեղմման հետազոտությունը (LLMLingua / LLMLingua-2) ոգեշնչել է մեր ասինքրոն, կոդի համար անվտանգ, ձախողման դեպքում բաց թողնող <code>llmlingua</code> շարժիչը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>JS/ONNX պորտը (MobileBERT / XLM-RoBERTa), որն օգտագործվում է որպես մեր LLMLingua շարժիչի worker thread-ի backend։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>PT-BR token-ների սեղմումը հզորացնում է մեր pt-BR լեզվային փաթեթը․ կրկնաբանության կրճատում և լցոնիչների հեռացում՝ հարմարեցված բրազիլական պորտուգալերենի քերականությանը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>Վիրուսային «ծույլ ավագ ծրագրավորողի» YAGNI-coder հմտությունը ոգեշնչել է մեր <b>less-code</b> Output Style-ը․ ամենափոքր աշխատող փոփոխության ուղղորդում, որը կրճատում է _գեներացված_ կոդը (ելքի առանցքի քույրը Caveman-ի սեղմ խոսքին)։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>Դրա գործողությունն առաջնահերթ համարող, ADHD-ին հարմար պատասխանների ոճը հարմարեցվել է OmniRoute-ի հակիրճ ելքի ոճում՝ հինգ լեզուներով։</td></tr>
+  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է դա ոգեշնչել OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Քարանձավային մարդ</a></b></td><td align="center">120,680</td><td>Վիրուսային «ինչու օգտագործել շատ նշաններ, երբ քչերն են խաբում» նախագիծը — իր քարանձավային խոսող փիլիսոփայությունը հզորացնում է մեր ստանդարտ սեղմման ռեժիմը և 30 + filler/condensation կանոնները:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">86,744</td><td>Բարձր կատարողականության հրամանի ելքային սեղմումը — ոգեշնչեց մեր RTK շարժիչը, JSON զտիչ DSL, չմշակված արտադրանքի վերականգնումը և կուտակված RTK → Caveman խողովակաշարը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">գլխի սենյակ</a></b></td><td align="center">79,813</td><td>Հետադարձելի համատեքստի սեղմում (SmartCrusher) — ոգեշնչեց մեր <code>headroom</code> շարժիչը և <code>ccr</code> առբերման-մարկերի օրինակը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,823</td><td>Արագ սեղմման հետազոտությունը (LLMLingua / LLMLingua-2) — ոգեշնչեց մեր async, ծածկագրով անվտանգ, ձախողման պատճառով բաց <code>llmlingua</code> շարժիչը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>JS/ONNX նավահանգիստը (MobileBERT / XLM-RoBERTa) օգտագործվում է որպես մեր LLMLingua շարժիչի աշխատանքային թելերի հիմք:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Տրոգլոդիտա</a></b></td><td align="center">51</td><td>PT-BR նշանի սեղմումը — հզորացնում է մեր pt-BR լեզվական փաթեթը. պլեոնազմի կրճատում և լցանյութի հեռացում, որը հարմարեցված է բրազիլա-պորտուգալերեն քերականության համար:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ձիու պոչ</a></b></td><td align="center">191,931</td><td>Վիրուսային «ծույլ ավագ մշակ» YAGNI-coder skill — ոգեշնչեց մեր <b>պակաս-կոդ</b> Արդյունքների ոճ. ամենափոքր փոփոխվող ղեկը, որը կտրում է _գեներացված_ կոդը (ելքային առանցքի եղբայրը Caveman-ի համառոտ արձակին):</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">61,370</td><td>Դրա առաջին գործողությունների, ADHD-ի համար հարմար արձագանքման ոճը հարմարեցվել է OmniRoute ի հակիրճ ելքային ոճին հինգ լեզուներով:</td></tr>
 </table>
 
-### 🧩 Կոմպակտ ձևաչափեր, token-ների հետազոտություն և կոդը հաշվի առնող գործիքներ
+### Կոմպակտ ձևաչափեր, նշանների հետազոտություն և կոդերի իրազեկ գործիքակազմ
 
 <table>
-  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է այն ոգեշնչել OmniRoute-ին</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Token-Oriented Object Notation-ը՝ դրա սյունակային, վերնագիր-գումարած-տողեր մոդելով, ձևավորել է մեր աղյուսակային խտացման փուլը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>Դրա կոմպակտ գրաֆային ձևաչափը և ընդհանուր պրոֆիլի դիզայնը տեղեկություն են տվել OmniRoute-ի աղյուսակային խտացման և Headroom կոդեկի ձևաչափի նախագծմանը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>MIT TypeScript-ի իրականացումը անմիջականորեն ներառվել և ընդլայնվել է որպես Headroom-ի ընդհանուր պրոֆիլի կոդեկ։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Brotli/SQLite քեշը և ըստ սեսիայի կոնտեքստի տարբերությունը ոգեշնչել են մեր <code>session-dedup</code> շարժիչը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Bash-ի ելքի խտացումը և MCP պրոֆիլները ոգեշնչել են մեր սեղմման դադարեցման կարգապահությունը և MCP գործիքների մանիֆեստի կրճատումը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Բովանդակությանը համապատասխան, ըստ ֆայլի տեսակի ելքի սեղմումը՝ ձախողումների դեպքում դադարեցմամբ, հաստատել է մեր ըստ տեսակի dispatch-ը և նվազագույն շահույթի դեպքում բաց թողնելը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>«Գտնել ուրվական token-ները»․ դրա offload-ի և վերականգնվող handle-ի օրինաչափությունը տեղեկություն է տվել մեր CCR offload-ի մոտեցմանը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>Սեսիաների գրաֆի և տարբեր turn-երի միջև տողերի deduplication-ի նախագիծը տեղեկություն է տվել մեր session-dedup-ի նախագծմանը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust-ի սյունակային JSON-ը, բովանդակության հասցեավորմամբ retrieve-ը և հաղորդագրությունների միջև deduplication-ը հաստատել են մեր <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> շարժիչների նախագծումը և քեշի համար կայուն «սեղմված ձևը դիրքից անկախ է» ինվարիանտը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>MCP գործիքների սխեմայի/նկարագրության սեղմումը տեղեկություն է տվել մեր MCP գործիքների մանիֆեստի կարդինալության կրճատմանը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Aider-ի ոճով repo-map-ի դասակարգումը տեղեկություն է տվել մեր repo-map-ի / retrieval-ի դասակարգման ուսումնասիրությանը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>MCP-ի միջոցով shell-ի ելքի դեկլարատիվ կրճատումը հաստատել է մեր Bash-ի ելքի դեկլարատիվ խտացումը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>TypeScript Compiler API-ի գործիքակազմը ոգեշնչել է մեր parser-ի վրա հիմնված մեկնաբանությունների հեռացումը, որը պահպանում է string, template և regex լիտերալները։</td></tr>
+  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է դա ոգեշնչել OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,634</td><td>Token-oriented Object Notation — դրա սյունաձև, վերնագիր գումարած տողերի մոդելը ձևավորեց մեր աղյուսակային սեղմման փուլը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Գրաֆիկի կոմպակտ ձևաչափ</a></b></td><td align="center">62</td><td>Դրա կոմպակտ գրաֆիկի ձևաչափը և ընդհանուր պրոֆիլի դիզայնը տեղեկացրեցին OmniRoute ի աղյուսակային սեղմման և Headroom կոդեկի ձևաչափի մասին:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">5</td><td>MIT TypeScript իրականացումն ուղղակիորեն վաճառվել և ընդլայնվել է որպես Headroom ընդհանուր պրոֆիլի կոդեկ:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">585</td><td>Brotli/SQLite cache + յուրաքանչյուր նստաշրջանի համատեքստ-դելտա — ոգեշնչեց մեր <code>session-dedup</code> շարժիչը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">նշան-փրկիչ</a></b></td><td align="center">1,222</td><td>Bash-ելքային խտացման + MCP պրոֆիլները — ոգեշնչեցին մեր սեղմման փրկության կարգապահությունը և MCP գործիքի դրսևորման կրճատումը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">նշան-խնայարար</a></b></td><td align="center">166</td><td>Բովանդակության մասին տեղեկացված, յուրաքանչյուր ֆայլի տիպի ելքային սեղմումը ձախողման մասին գիտելիքով փրկարարական — հաստատեց մեր յուրաքանչյուր տեսակի առաքումը և նվազագույն շահույթի բաց թողումը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">նշան-օպտիմիզատոր</a></b></td><td align="center">2,998</td><td>«Գտեք ուրվականների նշանները» — իր բեռնաթափման + վերականգնվող-բռնակի օրինակը տեղեկացրեց մեր CCR բեռնաթափման մտածողության մասին:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">35</td><td>Sesion-graph + խաչաձև շրջադարձային գծի գծապատկեր, որը տեղեկացրեց մեր նիստի անջատման դիզայնը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust columnar-JSON + բովանդակության հասցեով առբերել + խաչաձև հաղորդագրություն dedup — վավերացրել է մեր <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> շարժիչի դիզայնը և քեշի կայուն «սեղմված ձևը դիրքից անկախ է» անփոփոխ:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">143</td><td>MCP tool-schema/description սեղմումը — տեղեկացրեց մեր MCP գործիքի դրսևորման կարդինալության կրճատմանը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">219</td><td>Aider-ի ոճով ռեպո-քարտեզների վարկանիշային — տեղեկացրեց մեր ռեպո-քարտեզի / որոնման վարկանիշային հետազոտության մասին:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Դեկլարատիվ կեղևի ելքի կրճատումը MCP — նկատմամբ հաստատեց մեր հռչակագրային bash-ելքի խտացումը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ց-մորֆ</a></b></td><td align="center">6,229</td><td>TypeScript Compiler API Toolkit — ոգեշնչեց մեր վերլուծիչի վրա հիմնված մեկնաբանությունների հեռացումը, որը պահպանում է տողերի, ձևանմուշների և ռեգեքսի բառացիները:</td></tr>
 </table>
 
-### 🧠 Հիշողություն և RAG
+### Հիշողություն & RAG
 
 <table>
-  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է այն ոգեշնչել OmniRoute-ին</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>Համընդհանուր հիշողության շերտ — դրա proxy-as-write/read-boundary մոդելը ձևավորեց մեր հիշողության ճարտարապետությունը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>Վիճակային գործակալներ՝ աստիճանակարգված հիշողությամբ — ոգեշնչեց մեր Context Control & Recovery (CCR) աստիճանակարգված մոդելը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>16 կրկնվող RAG/LLM ձախողման ռեժիմների ProblemMap դասակարգումը — մեր անսարքությունների վերացման ուղեցույցի ընդհանուր բառապաշարը։</td></tr>
+  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է դա ոգեշնչել OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">69,065</td><td>Հիշողության համընդհանուր շերտը — դրա proxy-as-write/read-boundary մոդելը ձևավորեց մեր հիշողության ճարտարապետությունը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Լետտա (MemGPT)</a></b></td><td align="center">25,463</td><td>Պետական գործակալները շերտավոր հիշողությամբ — ոգեշնչեցին մեր Համատեքստի վերահսկման և վերականգնման (CCR) մակարդակով մոդելը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,805</td><td>16 կրկնվող RAG/LLM ձախողման ռեժիմների ProblemMap տաքսոնոմիան — ընդհանուր բառապաշարը մեր անսարքությունների վերացման ուղեցույցում:</td></tr>
 </table>
 
-### 🛰️ Երթևեկության ստուգում, MITM և թափանցիկ պրոքսի
+### Երթևեկության ստուգում, MITM և թափանցիկ վստահված անձ
 
 <table>
-  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է այն ոգեշնչել OmniRoute-ին</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>Կոդավորման օգնական ↔ LLM երթևեկության MITM ընդհատումն ու վերլուծությունը ձևավորեցին Traffic Inspector-ի վաղ պահանջները։ Նախկինում ստացված չորս մոդուլները — SSE միավորում, խոսակցության նորմալացում, գաղտնիքների քողարկում և վերնագրերի մաքրում — փոխարինվել են հանրային արձանագրության ստանդարտների վրա հիմնված անկախ, clean-room իրականացումներով։ Host passthrough-ի երկու մակերեսները (<code>passthrough.ts</code> և <code>_internal/bypass.cjs</code>) մնում են OmniRoute-ի ներքին իրականացումներ, որոնք դասակարգված են ինքնուրույն․ դրանք չեն վերագրվել այդ փոխարինման շրջանակում։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>Թափանցիկ՝ ըստ գործընթացի պրոքսի երթուղավորում — ոգեշնչեց խափանումներից անվտանգ MITM անջատումը, socket-ի անգործության ժամանակավրեպերը, <code>/proc</code> գործընթացների վերագրումը և TPROXY որսումը։</td></tr>
+  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է դա ոգեշնչել OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">83</td><td>MITM interception/analysis կոդավորման օգնական ↔ LLM երթևեկը տեղեկացրեց Ճանապարհային տեսուչի վաղ պահանջներին: Նախկինում ստացված չորս մոդուլներ — SSE միաձուլումը, խոսակցության նորմալացումը, գաղտնի քողարկումը և վերնագրի մաքրումը — փոխարինվել են մաքուր սենյակում անկախ իրականացումներով՝ հիմնված հանրային արձանագրության ստանդարտների վրա: Երկու հյուրընկալող-անցնող մակերեսները (<code>passthrough.ts</code> և <code>_internal/bypass.cjs</code>) մնում են OmniRoute-ի ներքին իրականացումները, որոնք դասակարգված են անկախ. դրանք չեն վերաշարադրվել որպես այդ փոխարինման մաս:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">7,138</td><td>Թափանցիկ յուրաքանչյուր գործընթացի պրոքսի երթուղի — ոգեշնչեց մեր խափանումներից անվտանգ MITM անջատումը, վարդակների անգործության ժամանակի անջատումները, <code>/proc</code> գործընթացի վերագրումը և TPROXY գրավումը:</td></tr>
 </table>
 
-### 📚 Մոդելների տվյալներ, դիտարկելիություն և UI
+### Մոդելի տվյալներ, դիտելիություն և UI
 
 <table>
-  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է այն ոգեշնչել OmniRoute-ին</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>AI մոդելների բնութագրերի, գների և հնարավորությունների բաց տվյալների բազա — բնիկ կերպով համաժամեցվում է մեր մոդելների կատալոգում։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>Հանգույցների վրա հիմնված գրաֆների գրադարանը, որն ապահովում է մեր իրական ժամանակի Compression Studio-ն և Combo/Routing Studio-ն։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>LangGraph Studio-ի կենդանի աշխատանքային հոսքի գրաֆի տեսապատկերումը ոգեշնչեց մեր Studios-ի իրական ժամանակի cascade տեսքը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>Դրա trace → span → generation դիտարկելիության մոդելը ձևավորեց մեր Compression Studio-ի waterfall-ը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Istio service-mesh-ի դիտարկելիություն — ոգեշնչեց մեր circuit-breaker կրծքանշանները և սխալների եզրերի տեսապատկերումները Routing/Combo Studio-ում։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>AI/LLM ապրանքանիշերի լոգոտիպեր, որոնք ցուցադրում են մատակարարների պատկերակները մեր վահանակում։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>Տրամադրում է MIT լիցենզիայով SVG դրոշները, որոնք օգտագործվում են README-ի լեզվի ընտրիչի կողմից։</td></tr>
+  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է դա ոգեշնչել OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,657</td><td>AI մոդելի տեխնիկական բնութագրերի, գնագոյացման և — հնարավորությունների տվյալների բազան համաժամեցված է մեր մոդելների կատալոգում:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">39,037</td><td>Հանգույցների վրա հիմնված գրաֆիկական գրադարանը սնուցում է իրական ժամանակի մեր Compression Studio-ն և Combo/Routing Studio-ն:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">45,027</td><td>LangGraph Studio-ի աշխատանքային հոսքի գրաֆիկական պատկերացումն ոգեշնչեց մեր ստուդիաների իրական ժամանակի կասկադային տեսքը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Լանգֆուզ</a></b></td><td align="center">37,494</td><td>Դրա հետքի → span → սերնդի դիտարկելիության մոդելը ձևավորեց մեր Compression Studio ջրվեժը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Քիալի</a></b></td><td align="center">3,649</td><td>Istio ծառայության ցանցի դիտելիությունը — ոգեշնչել է մեր անջատիչի կրծքանշանները և սխալ եզրային վիզուալները Routing/Combo ստուդիայում:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">բլիթ-սրբապատկերներ</a></b></td><td align="center">2,705</td><td>AI/LLM ապրանքանիշի լոգոները, որոնք մատուցում են մատակարարի պատկերակները մեր վահանակում:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">դրոշ-պատկերակներ</a></b></td><td align="center">12,532</td><td>Տրամադրում է MIT-ի արտոնագրված SVG դրոշները, որոնք օգտագործվում են README լեզվի ընտրողի կողմից:</td></tr>
 </table>
 
-### 🛡️ Անվտանգություն
+### Անվտանգություն
 
 <table>
-  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է այն ոգեշնչել OmniRoute-ին</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>Անվտանգության տեսանկյունից լռելյայն անվտանգ գրադարանների ընտրված ցանկ, որն ուղղորդում է մեր անվտանգության ընտրությունները (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink)։</td></tr>
+  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է դա ոգեշնչել OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">724</td><td>Անվտանգ ըստ լռելյայն գրադարանների ընտրված ցանկ, որն առաջնորդում է մեր անվտանգության ընտրությունները (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink):</td></tr>
 </table>
 
-### 🧭 Լրացուցիչ գործիքներ
+### Լրացուցիչ գործիքներ
 
 <table>
-  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է այն ոգեշնչել OmniRoute-ին</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>Ոգեշնչեց հարցումների կրկնօրինակազերծումը, արտակարգ իրավիճակների համար զրոյական արժեքով պահուստային տարբերակը, Auto-Combo-ի միացվող ռազմավարությունները և բազմալեզու մտադրությունների դասակարգումը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>Դրա՝ հաշիվներին տեղյակ մոդելների վերաքարտեզավորումը, գործարկվող ֆայլերի ուղիների վավերացումը և պլանի պիտակների վարքագիծը տեղեկություն տվեցին OmniRoute-ի Antigravity runtime-ին։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>Դրա՝ քվոտայի վերակայման հետհաշվարկի կոմպակտ ձևաչափը ոգեշնչեց OmniRoute-ում մատակարարի սահմանաչափի համապատասխան ցուցադրումը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>Դրա ACP ինտեգրումները ոգեշնչեցին OmniRoute-ի կողմից տեղադրված CLI գործակալների ավտոմատ հայտնաբերումը։</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Բացահայտեց Grok Build-ի քվոտայի մակերեսը․ OmniRoute-ն այնուհետև ինքնուրույն ստուգեց և ուղղեց գործող wire ձևաչափը։</td></tr>
+  <tr><th align="left">Նախագիծ</th><th align="center">⭐</th><th align="left">Ինչպես է դա ոգեշնչել OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,666</td><td>Ոգեշնչված հարցումների կրկնօրինակում, արտակարգ իրավիճակների զրոյական արժեքի հետադարձ վերադարձ, խցանվող Auto-Combo ռազմավարություններ և բազմալեզու մտադրության դասակարգում:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Հակագրավիտացիա-մենեջեր</a></b></td><td align="center">33,173</td><td>Դրա հաշվին իրազեկ մոդելի վերաքարտեզավորումը, գործարկվող ուղու վավերացումը և պլան-պիտակի վարքագիծը տեղեկացրեց OmniRoute ի Antigravity գործարկման ժամանակը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>Դրա կոմպակտ քվոտա-վերակայման հետհաշվարկի ձևաչափը ոգեշնչեց համապատասխան մատակարարի սահմանաչափ ցուցադրումը OmniRoute ում:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">34,320</td><td>Դրա ACP ինտեգրումները ոգեշնչեցին OmniRoute ի տեղադրված CLI գործակալների ավտոմատ հայտնաբերումը:</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">23,182</td><td>Որոշել է Grok Build քվոտայի մակերեսը; OmniRoute այնուհետև ինքնուրույն ստուգեց և ուղղեց ուղիղ հեռարձակման ձևաչափը:</td></tr>
 </table>
 
-## 📄 Լիցենզիա
+## Լիցենզիա
 
-MIT լիցենզիա - մանրամասների համար տես [LICENSE](LICENSE)։
+MIT լիցենզիա - տես [LICENSE](LICENSE) մանրամասների համար:
 
 ---
 
 <div align="center">
 
-**[⬆ Վերադառնալ վերև](#-omniroute)** · Ստեղծված է ❤️-ով՝ բաց կոդով AI համայնքի համար։
+**[⬆ Վերադառնալ սկիզբ](#omniroute--the-free-ai-gateway)** · Կառուցվել է ❤️ ով բաց կոդով AI համայնքի համար:
 
-<sub>Ստեղծող՝ <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT լիցենզիա · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Ստեղծվել է <a href="https://github.com/diegosouzapw">Դիեգո Սոուզա</a> · OmniRoute v3.8.55 · Node ≥ 22.22.2 · MIT լիցենզիա · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions-ը միացված է համայնքի հարցուպատասխանի համար -->
+<!-- GitHub Discussions enabled for community Q&A -->

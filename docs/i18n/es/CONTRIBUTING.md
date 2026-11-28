@@ -12,25 +12,19 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Requisitos previos
 
-- **Node.js** `>=22.22.2 <23`, o `>=24.0.0 <27` (recomendado: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` o `>=24.0.0 <27` (recomendado: 24 LTS)
+- **npm** 10 +
 
-> **Windows con Node 24:** usa la versión de parche actual de 24 LTS (al menos 24.20.0).
-> Las versiones anteriores pueden abortar después de pruebas exitosas cuando `--test-force-exit` cierra el
-> proceso. La [corrección de Windows para libuv de Node](https://github.com/nodejs/node/pull/61999) soluciona
-> este bloqueo del tiempo de ejecución; mantén habilitadas las aserciones de prueba y las comprobaciones de salida del ejecutor.
+> **Windows con el nodo 24:** utilice la versión actual del parche 24 LTS (al menos 24.20.0). Las versiones anteriores pueden cancelarse después de pruebas exitosas cuando `--test-force-exit` cierra el proceso. [La solución Windows libuv](https://github.com/nodejs/node/pull/61999) de Node soluciona este problema de ejecución; mantenga habilitadas las afirmaciones de prueba y las comprobaciones de salida del corredor.
 
-> **Usuarios de npm v11+ (Node 24+):** Después de `npm install`, verifica que se instalaron los módulos nativos:
-> `node -e "require('better-sqlite3')"`. Si falla con `MODULE_NOT_FOUND`,
-> ejecuta `npm approve-scripts better-sqlite3 && npm install`. Consulta
-> [Solución de problemas](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Usuarios de npm v11 + (Nodo 24 +):** Después de `npm install`, verifique que se hayan instalado los módulos nativos: `node -e "require('better-sqlite3')"`. Si falla con `MODULE_NOT_FOUND`, ejecute `npm approve-scripts better-sqlite3 && npm install`. Consulte [Solución de problemas](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
-- **Git**
+- **git**
 
 ### Clonar e instalar
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,91 +32,83 @@ npm install
 ### Variables de entorno
 
 ```bash
-# Crea tu .env a partir de la plantilla
+# Create your .env from the template
 cp .env.example .env
 
-# Genera los secretos necesarios
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Variables clave para el desarrollo:
+Variables claves para el desarrollo:
 
-| Variable               | Valor predeterminado de desarrollo | Descripción                  |
-| ---------------------- | ---------------------------------- | ---------------------------- |
-| `PORT`                 | `20128`                            | Puerto del servidor          |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | URL base del frontend        |
-| `JWT_SECRET`           | (genera arriba)                    | Secreto de firma de JWT      |
-| `INITIAL_PASSWORD`     | `CHANGEME`                         | Contraseña del primer inicio |
-| `APP_LOG_LEVEL`        | `info`                             | Nivel de detalle de los logs |
+| Variable               | Predeterminado de desarrollo | Descripción                            |
+| ---------------------- | ---------------------------- | -------------------------------------- |
+| `PORT`                 | `20128`                      | Puerto del servidor                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Base URL para frontend                 |
+| `JWT_SECRET`           | (generar arriba)             | secreto de firma de JWT                |
+| `INITIAL_PASSWORD`     | `CHANGEME`                   | Primera contraseña de inicio de sesión |
+| `APP_LOG_LEVEL`        | `info`                       | Nivel de detalle del registro          |
 
 ### Configuración del panel
 
-El panel proporciona interruptores de UI para funciones que también pueden configurarse mediante variables de entorno:
+El panel proporciona alternancias UI para funciones que también se pueden configurar mediante variables de entorno:
 
-| Ubicación de la configuración | Interruptor                     | Descripción                                      |
-| ----------------------------- | ------------------------------- | ------------------------------------------------ |
-| Settings → Advanced           | Modo de depuración              | Habilitar logs de solicitudes de depuración (UI) |
-| Settings → General            | Visibilidad de la barra lateral | Mostrar/ocultar secciones de la barra lateral    |
+| Configuración de ubicación | Palanca                         | Descripción                                           |
+| -------------------------- | ------------------------------- | ----------------------------------------------------- |
+| Configuración → Avanzada   | Modo de depuración              | Habilitar registros de solicitudes de depuración (UI) |
+| Configuración → General    | Visibilidad de la barra lateral | secciones de la barra lateral Show/hide               |
 
-Esta configuración se almacena en la base de datos y persiste entre reinicios, sustituyendo los valores predeterminados de las variables de entorno cuando se establece.
+Estas configuraciones se almacenan en la base de datos y persisten durante los reinicios, anulando los valores predeterminados de env var cuando se configuran.
 
-### Ejecución local
+### Ejecutando localmente
 
 ```bash
-# Modo de desarrollo (recarga en caliente)
+# Development mode (hot reload)
 npm run dev
 
-# Compilación de producción
-npm run build    # next build → .build/next/ y luego assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Compilación rápida únicamente del backend/API para cambios de colaboradores
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Compilación de lanzamiento (recompilación limpia + sentinel HEAD — requerida para el despliegue)
-npm run build:release   # rm -rf .build dist y luego build + escribe dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Configuración de puerto habitual
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-La compilación para colaboradores realiza una validación únicamente de compilación: no ensambla la
-distribución independiente ni compila recursos opcionales de empaquetado nativo. Usa la compilación de producción
-normal cuando necesites validar el paquete listo para distribuir.
+La compilación del colaborador realiza una validación de solo compilación: no ensambla la distribución independiente ni crea activos de empaquetado nativos opcionales. Utilice la versión de producción normal cuando necesite validar el paquete que se puede enviar.
 
-### Diseño de la salida de compilación
+### Crear diseño de salida
 
-| Directorio | Contenido                                                                             | Seguimiento |
-| ---------- | ------------------------------------------------------------------------------------- | ----------- |
-| `src/`     | Código fuente de la aplicación (TypeScript / TSX)                                     | Sí          |
-| `.build/`  | Intermedios: salida de `next build` (ignorado por git, `distDir = .build/next`)       | No          |
-| `dist/`    | Paquete listo para distribuir: ensamblado por `assembleStandalone` (ignorado por git) | No          |
+| Directorio | Contenido                                                              | Seguimiento |
+| ---------- | ---------------------------------------------------------------------- | ----------- |
+| `src/`     | Fuente de la aplicación (TypeScript / TSX)                             | Sí          |
+| `.build/`  | Salida intermedia — `next build` (gitignored, `distDir = .build/next`) | No          |
+| `dist/`    | Paquete enviable — ensamblado por `assembleStandalone` (gitignored)    | No          |
 
-El flujo de compilación es de una sola pasada:
+El proceso de construcción es de un solo paso:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (salida de Next.js)
-  └─ assembleStandalone()                 (copia standalone + static + public + recursos nativos)
-       └─ salida: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` además limpia ambos directorios primero y escribe
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) como indicador de integridad del despliegue.
+`npm run build:release` además limpia primero ambos directorios y escribe `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) como centinela de integridad de implementación.
 
-`npm run build:contributor` utiliza el perfil de compilación exclusivo del backend. Sustituye temporalmente los
-archivos de la UI del panel mientras compila, conserva los controladores de rutas de la API y restaura los archivos
-originales después de la compilación. Usa `npm run build` para cambios que afecten a la UI del panel o para una
-validación completa del lanzamiento; el perfil para colaboradores no sustituye a la compilación de lanzamiento.
+`npm run build:contributor` usa el perfil de compilación solo de backend. Bloquea temporalmente los archivos UI del panel durante la compilación, mantiene los controladores de ruta API y restaura los archivos originales después de la compilación. Utilice `npm run build` para cambios que afecten al panel UI o para la validación completa de la versión; El perfil de colaborador no reemplaza la versión de lanzamiento.
 
-> **Nota sobre el despliegue en VPS:** el directorio de imágenes remoto `/usr/lib/node_modules/omniroute/app/`
-> no cambia. Las herramientas de despliegue sincronizan mediante rsync el contenido de `dist/` en él.
-> Solo cambió la ruta de salida de compilación dentro del repositorio (`app/` → `dist/`).
+> **Nota de implementación VPS :** el directorio de imágenes remotas `/usr/lib/node_modules/omniroute/app/` no se modifica. Las habilidades de implementación sincronizan el contenido de `dist/` en él. Solo se movió la ruta de salida de la compilación en el repositorio (`app/` → `dist/`).
 
-URLs predeterminadas:
+URLs predeterminado:
 
-- **Panel**: `http://localhost:20128/dashboard`
+- **Panel** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -428,10 +414,10 @@ Después, usa las habilidades `/deploy-vps-*-cc`, que sincronizan `dist/` median
 
 ---
 
-## Cómo obtener ayuda
+## Obtener ayuda
 
-- **Arquitectura**: Consulta [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Referencia de la API**: Consulta [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Documentación de seguridad**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Documentación de operaciones**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Incidencias**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Arquitectura** : Ver [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **Referencia API** : Ver [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Documentos de seguridad** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Documentos de operaciones** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Asuntos** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

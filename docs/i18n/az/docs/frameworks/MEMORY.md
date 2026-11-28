@@ -4,25 +4,13 @@
 
 ---
 
-> **Əsas mənbə:** `src/lib/memory/` və `src/app/api/memory/`
-> **Son yenilənmə:** 2026-06-28 — v3.8.40 (standart olaraq deaktiv + int8 kvantlaşdırma uyğunlaşdırması)
+> **Həqiqətin mənbəyi:** `src/lib/memory/` və `src/app/api/memory/`
 
-OmniRoute API açarına (və istəyə bağlı olaraq sessiya identifikatoruna) əsaslanan davamlı söhbət yaddaşı təmin edir. Yaddaş qeydləri yüngül regex nümunə uyğunlaşdırması vasitəsilə LLM cavablarından avtomatik çıxarılır və sonrakı sorğulara başlanğıc sistem mesajı kimi (və ya sistem rolunu qəbul etməyən provayderlər üçün ilk istifadəçi mesajı kimi) yenidən əlavə edilir.
+OmniRoute API düyməsi (və isteğe bağlı olaraq sessiya id) ilə əsaslanan davamlı danışıq yaddaşını təmin edir. Yaddaşlar yüngül regex nümunəsi uyğunluğu vasitəsilə LLM cavablarından avtomatik olaraq çıxarılır və aparıcı sistem mesajı (və ya sistem rolunu rədd edən provayderlər üçün ilk istifadəçi mesajı) kimi sonrakı sorğulara yenidən daxil edilir.
 
-> **Yaddaş standart olaraq DEAKTİVDİR (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> artıq `false` dəyərindədir (`src/lib/memory/settings.ts`). Yaddaşın aktivləşdirilməsi
-> əldə edilmiş kontekstdən `maxTokens` həddinədək (~2k) məlumatı **hər bir** söhbət
-> sorğusuna əlavə edir və bunun üçün ödəniş tutulur — bu, yeni quraşdırmalar və öz
-> kontekstini idarə edən müştərilər üçün gözlənilməz xərc ola bilər. **Settings → Memory**
-> bölməsində bunu açıq şəkildə aktivləşdirin (yaddaş aktiv olduqda `MemorySkillsTab`
-> token xərci barədə xəbərdarlıq bloku göstərir). Müştəri `x-omniroute-no-memory`
-> sorğu başlığından (`true`/`1`/`yes`) istifadə edərək yaddaşı ayrıca bir sorğu üçün
-> deaktiv edə bilər — [API_REFERENCE.md](../reference/API_REFERENCE.md) sənədindəki
-> sorğu başlıqları cədvəlinə baxın. Yaddaşsız sorğu `memoryOwnerId = null` təyin edir
-> və bununla həmin sorğu üçün **həm** yaddaş, **həm də** bacarıq əlavə edilməsini
-> deaktiv edir (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Yaddaş defolt olaraq OFF dır (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` indi `false` (`src/lib/memory/settings.ts`) olur. Yaddaşın `maxTokens` (~ 2k)-ə qədər əldə edilmiş kontekstini daxil etməsinin aktivləşdirilməsi** hər** yeni quraşdırmalar və öz kontekstini idarə edən müştərilər üçün təəccüblü bir qiymətə — söhbət sorğusu. Aşağıda açıq şəkildə daxil olun** Parametrlər → Yaddaş** (yaddaş aktivləşdirildikdə `MemorySkillsTab` mö'cüzə dəyəri ilə bağlı xəbərdarlıq işarəsini göstərir). Müştəri `x-omniroute-no-memory` sorğu başlığı (`true`/`1`/`yes`) ilə tək sorğudan imtina edə bilər — [API_REFERENCE.md](../reference/API_REFERENCE.md) -də sorğu başlığı cədvəlinə baxın. Yaddaşsız sorğu `memoryOwnerId = null` təyin edir, bu da onu söndürür** hər ikisi** həmin sorğu üçün yaddaş və bacarıq inyeksiyası (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Yaddaş istifadəçiyə görə deyil, **hər API açarı üzrə əhatələnir** — eyni API açarı ilə autentifikasiya edilmiş hər sorğu eyni yaddaş hovuzunu paylaşır və `sessionId` vasitəsilə istəyə bağlı əlavə əhatələndirmə mümkündür.
+Yaddaşdır** API açarı üçün əhatə dairəsi** , hər bir istifadəçi üçün deyil — eyni API açarı ilə təsdiqlənmiş hər sorğu eyni yaddaş hovuzunu paylaşır, əlavə olaraq `sessionId` ilə əhatə dairəsi.
 
 ## Arxitektura
 
@@ -307,27 +295,17 @@ Hər ikisində standart olaraq **deaktivdir** — açıq şəkildə aktivləşdi
 əhatə dairəsi isə `session`, `apiKey` və ya `global` variantlarından biridir.
 `getMemorySettings()` tərəfindən qaytarılan standart əhatə dairəsi `apiKey`-dir.
 
-## Faktların Çıxarılması (`extraction.ts`)
+## Faktların çıxarılması (`extraction.ts`)
 
-Çıxarılma LLM-əsaslı deyil, **requlyar ifadə əsaslıdır** — proses daxilində
-`setImmediate()` ilə icra olunur, buna görə cavab axınını heç vaxt bloklamır:
+Çıxarışdır** regex əsaslıdır** , LLM əsaslı — deyil, `setImmediate()` ilə prosesdə işləyir, buna görə də cavab axınını heç vaxt blok etmir:
 
-- **Üstünlük nümunələri** → `MemoryType.FACTUAL`
-  (məsələn, `Mən … üstün tuturam`, `Mən … çox xoşlayıram`, `ən sevdiyim …-dır`, `Mən … nifrət edirəm`)
-- **Qərar nümunələri** → `MemoryType.EPISODIC`
-  (məsələn, `Mən … istifadə edəcəyəm`, `Mən … seçdim`, `Mən … qərar verdim`, `Mən … qəbul edəcəyəm`)
-- **Davranış nümunələri** → `MemoryType.FACTUAL`
-  (məsələn, `Mən adətən …`, `Mən həmişə …`, `Mən … meylliyəm`)
+- **Üstünlük nümunələri** → `MemoryType.FACTUAL` (məsələn, `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Qərar nümunələri** → `MemoryType.EPISODIC` (məsələn, `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Naxış nümunələri** → `MemoryType.FACTUAL` (məsələn, `I usually …`, `I always …`, `I tend to …`)
 
-Hər uyğunluq təmizlənir (`trim`, boşluqların birləşdirilməsi, maksimum 500 simvol),
-sabit `factKey(category, content)` vasitəsilə paket daxilində dublikatlardan
-təmizlənir və `{category, extractedAt, source: "llm_response"}` metadatası ilə
-`createMemory()` vasitəsilə saxlanılır. Daxil edilən mətn 64 KiB
-(`MAX_EXTRACTION_TEXT_LENGTH`) ilə məhdudlaşdırılır — daha uzun olduqda, ən son
-assistent məzmununun həmişə iştirak etməsi üçün mətnin **son hissəsi** istifadə olunur.
+Hər uyğunluq dezinfeksiya edilir (`trim`, boşluq-daralma, 500 simvolla məhdudlaşır), sabit `factKey(category, content)` vasitəsilə toplu daxilində təkmilləşdirilir və metadata `{category, extractedAt, source: "llm_response"}` ilə `createMemory()` vasitəsilə saxlanılır. Daxiletmə mətni daha uzun olduqda 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — ilə məhdudlaşdırılır,** quyruq** mətnin ən son köməkçi məzmunu həmişə iştirak etdiyi üçün istifadə olunur.
 
-`extractFactsFromText(text)` testlər üçün ixrac edilir və faktları saxlamadan
-strukturlaşdırılmış formada qaytarır.
+`extractFactsFromText(text)` testlər üçün ixrac edilir və strukturlaşdırılmış faktları saxlamadan qaytarır.
 
 ## Əldəetmə (`retrieval.ts`)
 
@@ -535,11 +513,7 @@ yerləşir.
 
 ## Keşləmə
 
-`src/lib/memory/store.ts`, `getMemory(id)` oxumaları üçün prosesdaxili LRU-oxşar keş
-(`MEMORY_CACHE_TTL = 1 dəq`, `MEMORY_MAX_CACHE_SIZE = 500`, ən köhnə qeydlərin 20 %-nin
-çıxarılması ilə), həmçinin öz əhatə dairəsinə malik keş istəyən çağırıcılar tərəfindən istifadə olunan
-`get`/`set`/`invalidate` metodlarına malik ümumi açar/dəyər `memoryCache` qatını
-(`src/lib/memory/cache.ts`) saxlayır (1 000 qeyddən ibarət LRU, standart TTL 5 dəq).
+`src/lib/memory/store.ts` `getMemory(id)` oxunuşları üçün prosesdə olan LRU-ish keşini (`MEMORY_CACHE_TTL = 1 min`, `MEMORY_MAX_CACHE_SIZE = 500`, 20% ən köhnə çıxarılma ilə) və üstəgəl öz əhatəli keşini istəyən zəng edənlərin istifadə etdiyi `get`/`set`/`invalidate` metodları ilə ümumi key/value `memoryCache` qatını (`src/lib/memory/cache.ts`) saxlayır ( LRU, 5 TTL ).
 
 ## Məxfilik və Həyat Dövrü
 
@@ -668,22 +642,22 @@ Tipik 4 nüvəli x86 serverində performans testi (hər mətn ~100 token):
 
 ---
 
-## Faktların Çıxarılması Nümunələri (v3.8.16+)
+## Fakt Çıxarış Nümunələri (v3.8.16 +)
 
-`extraction.ts` modulu (`src/lib/memory/extraction.ts`) söhbət mesajlarından strukturlaşdırılmış faktları çıxarmaq üçün **müntəzəm ifadə nümunələrinin uyğunlaşdırılmasından** istifadə edir. Bu nümunələri anlamaq istifadə ssenariniz üçün çıxarılma keyfiyyətini tənzimləməyə kömək edir.
+`extraction.ts` modulu (`src/lib/memory/extraction.ts`) istifadə edir** regex nümunəsi uyğunluğu** söhbət mesajlarından strukturlaşdırılmış faktları çıxarmaq üçün. Bu nümunələri başa düşmək istifadə halınız üçün çıxarma keyfiyyətini tənzimləməyə kömək edir.
 
-### Standart Nümunə Kateqoriyaları
+### Defolt Nümunə Kateqoriyaları
 
-| Kateqoriya          | Nümunə ifadə                                                                               | Çıxarılan məlumat               |
-| ------------------- | ------------------------------------------------------------------------------------------ | ------------------------------- |
-| PREFERENCE_PATTERNS | `"Mən <X>-ə üstünlük verirəm"`, `"Mən <X>-i sevirəm"`, `"Mən <X>-ə nifrət edirəm"`         | İstifadəçi seçimləri            |
-| DECISION_PATTERNS   | `"Mən <X>-dən istifadə edəcəyəm"`, `"Mən <X> etmək qərarına gəldim"`, `"Mən <X>-i seçdim"` | İstifadəçi qərarları (epizodik) |
-| PATTERN_PATTERNS    | `"Mən adətən <X> edirəm"`, `"Mən həmişə <X> edirəm"`, `"Mən heç vaxt <X> etmirəm"`         | Davamlı davranış nümunələri     |
+| Kateqoriya          | Nümunə nümunəsi                                             | Tular                           |
+| ------------------- | ----------------------------------------------------------- | ------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | İstifadəçi seçimləri            |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | İstifadəçi qərarları (epizodik) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Davamlı davranış nümunələri     |
 
-### Nümunə İfadələr (Sadələşdirilmiş)
+### Nümunə Nümunələr (Sadələşdirilmiş)
 
 ```ts
-// src/lib/memory/extraction.ts faylından
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -696,35 +670,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Nələr Çıxarılır
+### Nə çıxarılır
 
-İstifadəçi belə dedikdə:
+İstifadəçi dedikdə:
 
-> "Mən TypeScript-ə üstünlük verirəm. Bu layihə üçün Postgres-dən istifadə edəcəyəm. Mən həmişə göndərmədən əvvəl commit edirəm. Python-u sevmirəm."
-> Çıxarılma nəticəsində 4 yaddaş qeydi yaradılır:
+> "Mən TypeScript üstünlük verirəm. Bu layihə üçün Postgres istifadə edəcəyəm. Mən həmişə itələməzdən əvvəl öhdəlik götürürəm. Python-u sevmirəm." Ekstraksiya 4 yaddaş yaradır:
 >
-> | Açar                                 | Kateqoriya | Növ      | Məzmun                     |
-> | ------------------------------------ | ---------- | -------- | -------------------------- |
-> | `preference:typescript`              | seçim      | faktiki  | "TypeScript"               |
-> | `decision:postgres_for_this_project` | qərar      | epizodik | "Bu layihə üçün Postgres"  |
-> | `pattern:commit_before_pushing`      | nümunə     | faktiki  | "göndərmədən əvvəl commit" |
-> | `preference:python`                  | seçim      | faktiki  | "Python"                   |
+> | Açar | Kateqoriya | Növ | Məzmun | | ------------------------------------ | ---------- | -------- | --------------------------- | | `preference:typescript` | | | `decision:postgres_for_this_project` | "TypeScript" | " | | | bu layihə üçün Postgres " | | `pattern:commit_before_pushing` | nümunəsi | faktual | "itələmədən əvvəl törət" | | `preference:python` | üstünlük | faktiki | "Python" |
 
-### Çıxarılma Məhdudiyyətləri
+### Ekstraksiya Limitləri
 
-Nəzarətsiz çıxarılmanın qarşısını almaq üçün aşağıdakı məhdudiyyətlər tətbiq olunur:
+Qaçaq hasilatın qarşısını almaq üçün aşağıdakı məhdudiyyətlər tətbiq olunur:
 
-| Minimum məzmun uzunluğu | 3 simvol |
+| Min məzmun uzunluğu | 3 simvol |
 | Maksimum məzmun uzunluğu | 500 simvol |
 
-### Çıxarılmanı Nə Zaman Deaktiv Etmək Lazımdır
+### Ekstraksiyanı nə vaxt söndürmək lazımdır
 
-Yaddaş aktiv olduqda çıxarılma avtomatik olaraq işə salınır; yalnız çıxarılma üçün ayrıca keçid yoxdur. Onu söndürmək üçün yaddaşı tamamilə deaktiv edin (`enabled: false`
-dəyərini `PUT /api/settings/memory` vasitəsilə təyin edin). Aşağıdakı hallarda bunu etməyi nəzərdən keçirin:
+Yaddaş aktiv olduqda çıxarma avtomatik olaraq işləyir; ayrıca çıxarış üçün keçid yoxdur. Onu söndürmək üçün yaddaşı tamamilə söndürün (`enabled: false` via `PUT /api/settings/memory`). Bunu edərkən düşünün:
 
-- Mesaj həcminiz yüksəkdirsə və çıxarılma xərci əhəmiyyətlidirsə
-- Söhbətləriniz əsasən müvəqqətidirsə (çat, sazlama) və uzunmüddətli dəyəri yoxdursa
-- Konteksti artıq xüsusi plaginlər vasitəsilə toplayırsınızsa
+- Sizdə yüksək mesaj həcmi var və çıxarış dəyəri qeyri-ciddidir
+- Söhbətləriniz uzunmüddətli dəyəri olmayan əsasən keçicidir (söhbət, sazlama).
+- Siz artıq fərdi plaginlər vasitəsilə konteksti çəkirsiniz
 
 ---
 

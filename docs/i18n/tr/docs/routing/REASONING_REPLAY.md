@@ -4,7 +4,7 @@
 
 ---
 
-> **Gerçeğin kaynağı:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Son güncelleme:** 2026-06-28 — v3.8.40
+> **Gerçeğin kaynağı:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute düşünme modu modelleri tarafından üretilen yardımcı `reasoning_content` yakalar ve yukarı akış sağlayıcısı ihtiyaç duyduğunda bunu çok dönüşlü isteklerde şeffaf bir şekilde yeniden oynatır. Bu, bir müşterinin konuşma geçmişinde önceki sıranın gerekçesi eksik olduğunda katı sağlayıcıların ortaya çıkardığı HTTP 400 hatalarını ortadan kaldırır.
 

@@ -53,15 +53,13 @@ Kabilang sa mga halimbawa ng pagkatawan sa aming komunidad ang paggamit ng opisy
 pagpo-post gamit ang opisyal na social media account, o pagkilos bilang itinalagang
 kinatawan sa isang online o offline na kaganapan.
 
-## Enforcement
+## Pagpapatupad
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Ang mga pagkakataon ng mapang-abuso, panliligalig, o kung hindi man ay hindi katanggap-tanggap na pag-uugali ay maaaring iulat sa mga pinuno ng komunidad na responsable para sa pagpapatupad sa pamamagitan ng pagbubukas ng pribadong advisory sa seguridad sa
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+o sa pamamagitan ng pag-email sa maintainer sa diegosouza.pw@outlook.com. Para sa mga insidenteng sensitibo sa seguridad, tingnan [`SECURITY.md`](SECURITY.md). Lahat ng reklamo ay susuriin at iimbestigahan kaagad at patas.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Ang lahat ng mga pinuno ng komunidad ay obligadong igalang ang privacy at seguridad ng reporter ng anumang insidente.
 
 ## Mga Alituntunin sa Pagpapatupad
 

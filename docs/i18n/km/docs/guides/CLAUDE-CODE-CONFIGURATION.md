@@ -57,7 +57,7 @@ OmniRoute ដាក់សំណើរបស់កូនសោ API នីមួ�
 
 | វាល     | ប្រភព                                                                                                                                              |
 | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| សម័យ    | បឋមកថា`x-claude-code-session-id` (តម្លៃដូចគ្នានឹង `metadata.user_id.session_id`) មានស្ថេរភាពក្នុងមួយវគ្គ                                           |
+| វគ្គ    | បឋមកថា`x-claude-code-session-id` (តម្លៃដូចគ្នានឹង `metadata.user_id.session_id`) មានស្ថេរភាពក្នុងមួយវគ្គ                                           |
 | គម្រោង  | លេខកូដ `Primary working directory:` បន្ទាត់ Claude ផ្ញើនៅក្នុងសារបរិស្ថានរបស់វា; ថតឯកសារ worktree ក្រោម `.claude/worktrees/` ដោះស្រាយទៅឈ្មោះឃ្លាំង |
 | សាខា    | `Current branch:` ពីស្ថានភាព git Claude លេខកូដផ្ញើជាមួយសារដំបូង                                                                                    |
 | អតិថិជន | `user-agent` (`claude-cli/<version>`)                                                                                                              |
@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) និង OpenCode (`x-opencode-session`) �
 
 ថតការងារខុសគ្នារវាងម៉ាស៊ីន ដូច្នេះឃ្លាំងដូចគ្នាអាចបង្ហាញនៅក្រោមផ្លូវផ្សេងគ្នា។ ផ្ញើគម្រោងយ៉ាងច្បាស់លាស់ជំនួសវិញ៖ Claude Code បន្ថែមបឋមកថាដែលបានរាយក្នុង `ANTHROPIC_CUSTOM_HEADERS` ទៅនឹងរាល់សំណើគំរូ ហើយ OmniRoute អានពីរក្នុងចំណោមពួកគេ៖
 
-| បឋមកថា                     | តម្លៃ                                                      |
-| -------------------------- | ---------------------------------------------------------- |
-| `x-omniroute-project`      | ឈ្មោះគម្រោង ឧទាហរណ៍ `omniroute`                            |
-| `x-omniroute-project-repo` | ពីចម្ងាយធម្មតា ឧទាហរណ៍ `github.com/diegosouzapw/OmniRoute` |
+| បឋមកថា                     | តម្លៃ                                                           |
+| -------------------------- | --------------------------------------------------------------- |
+| `x-omniroute-project`      | ឈ្មោះគម្រោង ឧទាហរណ៍ `omniroute`                                 |
+| `x-omniroute-project-repo` | ពីចម្ងាយធម្មតា ឧទាហរណ៍ `github.com/cheaper-inference/OmniRoute` |
 
 ទាំងពីរត្រូវបានអានសម្រាប់តែគុណលក្ខណៈ; ពួកគេមិនត្រូវបានបញ្ជូនបន្តទៅអ្នកផ្តល់ចរន្តទឹកឡើយ។
 
@@ -285,28 +285,20 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL="glm/glm-4.7-flash"
 
 ## ការដោះស្រាយបញ្ហា
 
-**Claude Code មិនអើពើ gateway** — សូមបញ្ជាក់ថា `ANTHROPIC_BASE_URL` **មិនមាន
-`/v1`** ហើយចាប់ផ្តើម `claude` ឡើងវិញ (env ត្រូវបានអានតែម្តងប៉ុណ្ណោះនៅពេលចាប់ផ្តើម)។ `omniroute launch`
-ដោះស្រាយកិច្ចការនេះឱ្យអ្នក។
+**Claude Code មិនអើពើច្រកផ្លូវ** — បញ្ជាក់ `ANTHROPIC_BASE_URL` មាន** គ្មាន `/v1`** ហើយចាប់ផ្តើម `claude` ឡើងវិញ (env ត្រូវបានអានម្តងនៅពេលចាប់ផ្តើម) ។ `omniroute launch` ដោះស្រាយវាសម្រាប់អ្នក។
 
-**ឧបករណ៍ជ្រើសរើស `/model` ទទេ / មិនមានម៉ូដែល gateway** — ត្រូវការ Claude Code
-v2.1.219+ និង `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`។ មានតែ model IDs ដែលជា `claude*` /
-`anthropic*` ប៉ុណ្ណោះដែលបង្ហាញក្នុងឧបករណ៍ជ្រើសរើស; បង្ខំឱ្យប្រើម៉ូដែលផ្សេងទៀតដោយប្រើ
-`ANTHROPIC_MODEL=<id>` (នេះជាអ្វីដែល profiles ធ្វើ)។
+**`/model` picker គឺទទេ/បាត់ម៉ូដែលច្រកផ្លូវ** — ត្រូវការ Claude Code v2.1.219 + និង `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`។ មានតែគំរូ `claude*` / `anthropic*` IDs ប៉ុណ្ណោះដែលបង្ហាញនៅក្នុងកម្មវិធីជ្រើសរើស។ បង្ខំម៉ូដែលផ្សេងទៀតជាមួយ `ANTHROPIC_MODEL=<id>` (នេះជាអ្វីដែលទម្រង់ធ្វើ) ។
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code តែងតែផ្ញើ model IDs ដែល **គ្មានបុព្វបទ**
-(ឧ. `claude-opus-4-8`) ដូច្នេះនៅពេលអ្នកផ្តល់សេវា Claude Code (`cc/…`) និង
-Claude (`claude/…`) ទាំងពីរត្រូវបានភ្ជាប់ bare id នឹងត្រូវគ្នានឹង routes ពីរ ហើយ
-OmniRoute បដិសេធមិនធ្វើការសន្មត។ ដោះស្រាយតាមវិធីណាមួយ៖ កំណត់ភ្ជាប់ id ដែលមានបុព្វបទដោយប្រើ
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` ឬបើក **ផ្តល់អាទិភាពដល់ Claude Code សម្រាប់
-ម៉ូដែល Claude ដែលគ្មានបុព្វបទ** — toggle នៅលើទំព័រអ្នកផ្តល់សេវា Claude ឬ
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (បិទតាមលំនាំដើម;
-សូមមើល [បរិស្ថាន](../reference/ENVIRONMENT.md)) — ដែលបញ្ជូន IDs ប្រភេទ bare `claude-*`
-ទៅ Claude Code ជំនួសវិញ។ បុព្វបទអ្នកផ្តល់សេវាដែលបានបញ្ជាក់ច្បាស់លាស់តែងតែមានអាទិភាព។
+**`400 Ambiguous model 'claude-…'`** — Claude លេខកូដតែងតែផ្ញើ** មិនបានកំណត់ទុកជាមុន** គំរូ IDs (ឧ. `claude-opus-4-8`) ដូច្នេះនៅពេលដែលអ្នកផ្តល់សេវា Claude Code (`cc/…`) និង Claude (`claude/…`) ត្រូវបានភ្ជាប់ លេខសម្គាល់ទទេត្រូវគ្នានឹងផ្លូវពីរ ហើយ OmniRoute បដិសេធមិនស្មាន។ ជួសជុលវាតាមវិធីណាមួយ៖ ខ្ទាស់លេខសម្គាល់បុព្វបទជាមួយ `ANTHROPIC_MODEL=cc/claude-opus-4-8` ឬបើក** ចូលចិត្តកូដ Claude សម្រាប់ម៉ូដែល Claude ដែលមិនបានកំណត់ជាមុន** — បិទបើកនៅលើទំព័រអ្នកផ្តល់ Claude ឬ `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (បិទលំនាំដើម សូមមើល [បរិស្ថាន](../reference/ENVIRONMENT.md) ) — ដែលបញ្ជូន `claude-*` IDs ទទេទៅកាន់ Claude Code ជំនួសវិញ។ បុព្វបទអ្នកផ្តល់សេវាច្បាស់លាស់តែងតែឈ្នះ។
 
-**កំហុសផ្ទៀងផ្ទាត់អត្តសញ្ញាណ** — profile មិនផ្ទុក token ទេ។ ប្រើ `omniroute launch --profile`
-(បញ្ចូលវា) ឬ export `ANTHROPIC_AUTH_TOKEN`។
+**"របៀបស្វ័យប្រវត្តិ ... វគ្គនេះមិនមានសិទ្ធិទេ" (សំណើអ្នកចាត់ថ្នាក់ត្រូវបានចេញវិក្កយបត្រ)** — ក្នុងរបៀបស្វ័យប្រវត្តិ Claude Code ស្នើឱ្យម៉ាស៊ីនមេពិនិត្យមើលសកម្មភាពនៅក្នុងសំណើគំរូផ្ទាល់ខ្លួន ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) )។ នោះត្រូវការតម្លៃ `anthropic-beta` `dangerous-tool-use-2026-09-03` និងវាលតួ `safeguards` ដើម្បីឈានដល់ Anthropic ជាគូ ហើយ `safeguard_results` បូកនឹងឧបករណ៍ខាងលើប្រើ IDs ដើម្បីត្រលប់មកវិញមិនផ្លាស់ប្តូរ។ OmniRoute ធ្វើដូចនេះនៅពេលដែលសំណើត្រូវបានបញ្ជូនទៅកាន់អ្នកផ្តល់សេវា `claude` ដើម ឬទៅកាន់ថ្នាំង `anthropic-compatible-*` ចាក់ឬអត់ (ការការពារតំរែតំរង់៖ `tests/integration/claude-auto-mode-classifier-e2e.test.ts`) ។ គោលដៅផ្សេងទៀតមិនអាចត្រឡប់ការពិនិត្យឡើងវិញបានទេ ដូច្នេះកូដ Claude ត្រឡប់ទៅសំណើអ្នកចាត់ថ្នាក់របស់វាវិញ ហើយបង្ហាញការជូនដំណឹង៖
 
-**Profiles មិនដាច់ដោយឡែកពីគ្នា** — profile នីមួយៗមាន `CLAUDE_CONFIG_DIR` ខុសគ្នា;
-ផ្ទៀងផ្ទាត់ថា `echo $CLAUDE_CONFIG_DIR` នៅក្នុង session ចង្អុលទៅ
-`~/.claude/profiles/<name>`។
+- គំរូនៅលើអ្នកផ្តល់សេវាដែលមិនមែនជា Anthropic ឬបន្សំដែលចុះចតនៅលើមួយ;
+- ថ្នាំងបញ្ជូនតដែលឆបគ្នាជាមួយ Claude-Code (`anthropic-compatible-cc-*`) ដែលបង្កើតតួសំណើឡើងវិញ និងមិនផ្ទុក `safeguards`;
+- OmniRoute ចាស់ដែលកំណត់ទុកជាមុននូវបេតាដែលបានចុះបញ្ជីអនុញ្ញាត ឬកំណែកូដ Claude ខាងក្រោមបញ្ជីទំព័រ Anthropic សម្រាប់វគ្គច្រកចេញចូល។
+
+រត់ `/status` ក្នុង Claude Code: the** ម៉ាស៊ីនមេរបៀបស្វ័យប្រវត្តិ** ជួរដេកអាន `Enabled` ខណៈពេលដែលការពិនិត្យរបស់ម៉ាស៊ីនមេសកម្ម។ ថាតើសំណើទាំងនោះត្រូវបានចេញវិក្កយបត្រត្រូវបានសម្រេចដោយ Anthropic មិនមែនដោយ OmniRoute ទេ។
+
+**កំហុសក្នុងការផ្ទៀងផ្ទាត់** — ទម្រង់មិនមានសញ្ញាសម្ងាត់។ ប្រើ `omniroute launch --profile` (ចាក់វា) ឬនាំចេញ `ANTHROPIC_AUTH_TOKEN`។
+
+**កម្រងព័ត៌មានមិននៅដាច់ដោយឡែកទេ។** — ទម្រង់នីមួយៗគឺជា `CLAUDE_CONFIG_DIR` ដាច់ដោយឡែក។ ផ្ទៀងផ្ទាត់ `echo $CLAUDE_CONFIG_DIR` នៅខាងក្នុងចំណុចសម័យនៅ `~/.claude/profiles/<name>`។

@@ -4,12 +4,9 @@
 
 ---
 
-> **Čia pateikti visi sekami aukščiausio lygio katalogai ir šakniniai failai, o jų paskirtis aprašyta viena eilute.**
-> Atnaujinta 2026-11-13 (OmniRoute v3.8.54)
+> **Kas kur gyvena: kiekvienas stebimas aukščiausio lygio katalogas ir šakninis failas, kurio paskirtis yra viena eilutė.**
 >
-> Šis žemėlapis padės susiorientuoti kodo bazėje. Išsamesnius aprašymus rasite atitinkamose nuorodose.
-> Failų skaičius tą dieną nustatytas naudojant `git ls-files`. Jis keičiasi beveik su kiekvienu
-> leidimu, todėl pateikti skaičiai nurodo apytikslį mastą.
+> Naudokite šį žemėlapį, kad surastumėte kelią kodų bazėje, tada sekite nuorodas į specialius dokumentus. Failų skaičius gaunamas iš `git ls-files` ir keičiasi beveik kiekvieną kartą. Laikykite juos kaip dydžio eilėmis.
 
 ## Aukščiausio lygio medis
 

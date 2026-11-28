@@ -4,15 +4,11 @@
 
 ---
 
-> **Isi mmalite eziokwu:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Emelitere ikpeazụ:** 2026-06-28 — v3.8.40
+> **Isi mmalite nke eziokwu:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-OmniRoute nwere ike izipu HTTP webhooks mgbe ihe omume dị n'elu ikpo okwu mere. Jiri ha jikọta ya na
-Slack, PagerDuty, Datadog, ọrụ ịdọ aka ná ntị dị n'ime, ma ọ bụ ihe nnata HTTP ọ bụla.
+OmniRoute nwere ike gbaa HTTP webhooks na mmemme ikpo okwu. Jiri ha jikọọ na Slack, PagerDuty, Datadog, ọrụ ịdọ aka na ntị ime, ma ọ bụ onye nnata HTTP ọ bụla.
 
-Dispatcher ahụ na-eji HMAC-SHA256 abịanye aka na nnyefe ọ bụla, na-anwale ọzọ mgbe
-ọdịda nwa oge mere, na-enyocha ọnọdụ nnyefe nke webhook ọ bụla, ma na-agbanyụ endpoints
-na-akụ afọ n'ala ugboro ugboro na-akpaghị aka.
+Onye na-ezipụ na-edebanye aha nnyefe ọ bụla na HMAC-SHA256, na-emegharị na ọdịda na-adịru nwa oge, na-akwado ahụike nnyefe kwa webhook, na akpaaka na-ewepụ njedebe njedebe na-aga n'ihu na-ada.
 
 ## Ihe omume akwadoro
 

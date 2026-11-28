@@ -4,13 +4,7 @@
 
 ---
 
-> **Chanzo cha ukweli:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, na wajenzi wa umma katika `open-sse/utils/error.ts`
-> **Majaribio:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Ilisasishwa mara ya mwisho:** 2026-09-02 — v3.8.51
-> **Hadhira:** Mhandisi yeyote anayeshughulikia majibu ya hitilafu (njia za HTTP, mitiririko ya SSE, vitekelezaji, vishughulikiaji vya MCP).
-> **Hali:** **LAZIMA** kwa kila njia ya msimbo inayorudisha ujumbe wa hitilafu kwa mteja.
+> **Chanzo cha ukweli:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, na wajenzi wa umma katika `open-sse/utils/error.ts`** Majaribio:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Hadhira:** Mhandisi yeyote anayegusa majibu ya makosa (njia za HTTP, mitiririko SSE, watekelezaji, vidhibiti MCP ).** Hali:****MANDATORY** kwa kila njia ya nambari inayorudisha ujumbe wa makosa kwa mteja.
 
 ## Kwa nini hii ipo
 

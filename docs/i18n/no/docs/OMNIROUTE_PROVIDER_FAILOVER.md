@@ -21,3 +21,5 @@ Standard policy på tvers av leverandører tillater opptil tre leverandørforsø
   - En prefiks-id (`provider/model`) blir aldri omdirigert til en annen leverandør.
 
 Kretstilstander er `closed`, `open` og `half_open`. En nedkjøling planlegger en avgrenset sonde; en vellykket sonde lukker kretsen og en mislykket sonde åpner den på nytt.
+
+Provider failover kjører inne i gatewayen. Se [Når OmniRoute selv er utilgjengelig](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) for klientadferd under et gatewaybrudd.

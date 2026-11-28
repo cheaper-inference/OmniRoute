@@ -53,7 +53,7 @@ flowchart LR
 ពិនិត្យមើលការបង្កកបើកចំហ មុនពេលសន្មតថាសាខាដែលអ្នកចង់បានអាចបញ្ចូលគ្នាបាន៖
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 មេកានិចបញ្ចូលគ្នា (ម្ចាស់ `queue` label → Mergify) ត្រូវបានចងក្រងជាឯកសារ [MERGE_TRAIN.md](./MERGE_TRAIN.md).

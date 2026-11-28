@@ -4,7 +4,7 @@
 
 ---
 
-> **Bersyon:** v3.8.44** Huling na-update:** 2026-10-28** Madla:** Mga inhinyero na nagdaragdag, nagpapanatili, o nagde-debug ng mga naka-embed na serbisyo (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Bersyon:** v3.8.44** Madla:** Mga inhinyero na nagdaragdag, nagpapanatili, o nagde-debug ng mga naka-embed na serbisyo (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Ang mga naka-embed na serbisyo ay lokal na naka-install na mga tool sa proseso ng sidecar na ini-install, pinangangasiwaan, at inilalantad ng OmniRoute bilang mga target sa pagruruta sa unang klase. Hindi tulad ng mga external na provider (na naaabot sa internet sa pamamagitan ng mga API key), ang mga naka-embed na serbisyo ay tumatakbo sa parehong machine bilang OmniRoute at nakikipag-usap sa loopback.
 

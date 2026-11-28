@@ -99,37 +99,37 @@ Pre každú kombináciu:
 
 ---
 
-## API kontroly stavu
+## Kontrola zdravotného stavu API
 
-OmniRoute poskytuje **dve** rozhrania HTTP na kontrolu stavu. Pre orchestrátory nie sú vzájomne zameniteľné.
+OmniRoute vystavuje** dve** HTTP zdravotné povrchy. Pre orchestrátorov nie sú zameniteľné.
 
-| Cesta                        | Účel                                                                    | Náročnosť                                    | Použitie                                                                      |
-| ---------------------------- | ----------------------------------------------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------------- |
-| `GET /healthz`               | Životnosť/pripravenosť životného cyklu (`ok` / `starting` / `stopping`) | Minimálna (iba príznak fázy)                 | Kubernetes **readiness**; mierna kontrola **liveness**, ak musíte použiť HTTP |
-| `GET /api/monitoring/health` | Hĺbkový súhrn systému + poskytovateľov (DB, halda, počty v katalógu, …) | Vysoká (synchrónna práca s DB/monitorovaním) | Informačné panely, hĺbkové blackbox kontroly, vstavaná kontrola stavu Dockeru |
+| Cesta                        | Účel                                                                   | Hmotnosť                                        | Použiť pre                                                             |
+| ---------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------- |
+| `GET /healthz`               | Životný cyklus liveness/readiness (`ok` / `starting` / `stopping`)     | Triviálne (iba fázový príznak)                  | Kubernetes** pripravenosť** ; mäkké** živosť** ak musíte použiť HTTP   |
+| `GET /api/monitoring/health` | Hlboký súhrn poskytovateľa + systému (DB, halda, počet katalógov, ...) | Ťažký (synchronizácia DB / monitorovacia práca) | Dashboardy, hĺbkové kontroly blackboxu, vstavaná kontrola stavu Docker |
 
-> **Poznámka:** Matice stavu poskytovateľov, problémy autopilota, monitory kvót, stav tokenov a podrobnosti o latencii nad rámec `/api/monitoring/health` sú dostupné prostredníctvom **nástroja MCP** `observability_snapshot` alebo stránok **informačného panela** — neexistujú pre ne žiadne vyhradené trasy REST.
+> **Poznámka:** Matice zdravia poskytovateľa, problémy s autopilotom, monitory kvót, zdravie tokenov a podrobnosti o latencii nad rámec `/api/monitoring/health` sú dostupné prostredníctvom** nástroj MCP** `observability_snapshot` alebo the** prístrojová doska** stránky — pre nich neexistujú žiadne vyhradené trasy REST.
 
-Obe trasy bežia v **rovnakej slučke udalostí Node** ako spracovanie požiadaviek. Cesta náročná na CPU (rozsiahle spracovanie katalógu `GET /v1/models`, kompresia dlhého kontextu/počítanie tokenov) môže oneskoriť **všetky** obslužné rutiny HTTP vrátane `/healthz`. Zaneprázdnená slučka udalostí ≠ nefunkčný proces. Uprednostnite odstránenie príčiny vyťaženia; ladenie sond iba znižuje počet falošných ukončení.
+Obe trasy vedú po** rovnaká slučka udalostí uzla** ako vybavenie žiadosti. Cesta viazaná na CPU (veľká práca s katalógom `GET /v1/models`, kompresia dlhého kontextu / počítanie tokenov) môže oneskoriť** všetky** obslužné programy HTTP vrátane `/healthz`. Proces ≠ zaneprázdnený slučkou udalostí je mŕtvy. Uprednostňujte upevnenie prasa; ladenie sondy iba znižuje falošné zabitia.
 
-### Odľahčená sonda orchestrátora
+### Ľahká orchestračná sonda
 
 ```bash
 GET /healthz
-# alebo HEAD /healthz
+# or HEAD /healthz
 ```
 
-- **200** + telo `ok`, keď je fáza životného cyklu servera pripravená
-- **503** + `starting` / `stopping` počas spúšťania alebo vypínania
-- Implementácia: `src/app/healthz/route.ts` (bez kontroly dostupnosti DB)
+- **200** + body `ok` keď je fáza životného cyklu servera pripravená
+- **503** + `starting` / `stopping` počas zavádzania alebo vypínania
+- Implementácia: `src/app/healthz/route.ts` (žiadny DB ping)
 
-### Stav systému (hĺbkový)
+### Zdravie systému (hlboké)
 
 ```bash
 GET /api/monitoring/health
 ```
 
-Odpoveď:
+odpoveď:
 
 ```json
 {
@@ -153,43 +153,35 @@ Odpoveď:
 }
 ```
 
-#### `credentialHealth`: vyrovnávacia pamäť sondy vs. `test_status` v SQLite
+#### `credentialHealth`: probe-cache vs SQLite `test_status`
 
-`GET /api/monitoring/health` → `credentialHealth` je **ukazovateľ vyrovnávacej pamäte sondy v pamäti**,
-nie živý výpis `provider_connections.test_status`. Po #12532 cesta
-požiadavky číta iba `getCachedCredentialHealthSummary()`; sondy na pozadí
-obnovujú vyrovnávaciu pamäť mimo slučky udalostí.
+`GET /api/monitoring/health` → `credentialHealth` je** in-memory probe-cache gauge** , nie živý výpis `provider_connections.test_status`. Po #12532 cesta požiadavky číta iba `getCachedCredentialHealthSummary()` ; sondy pozadia obnovujú vyrovnávaciu pamäť mimo slučky udalostí.
 
-| Vrstva                               | Kde                                                                   | Čo to znamená                                                                                                                                                                                                                     |
-| ------------------------------------ | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ukazovateľ vyrovnávacej pamäte sondy | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Posledné výsledky sondy stavu prihlasovacích údajov, ktoré sú stále uložené v pamäti procesu. `source` je vždy `probe-cache`.                                                                                                     |
-| Podrobnosti zlyhaného pripojenia     | `credentialHealth.failedConnections`                                  | Prítomné **iba vtedy, keď `failed > 0`**. Obmedzený zoznam riadkov vyrovnávacej pamäte so `status=error` (`connectionId`, `status`, sanitizované `lastError` / `lastErrorType`). Pri skrátení zoznamu sa nastaví `failedOmitted`. |
-| Trvalý stav SQLite                   | `credentialHealth.staleDbNonOkCount`                                  | Počet **aktívnych** (`is_active=1`) riadkov pripojení, ktorých uložený `test_status` je známy nevyhovujúci stav (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                                |
+| Vrstva                           | Kde                                                                   | Čo to znamená                                                                                                                                                                                                                        |
+| -------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Meradlo medzipamäte sondy        | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | V pamäti procesu sú stále uložené posledné výsledky sondy zdravia. `source` je vždy `probe-cache`.                                                                                                                                   |
+| Podrobnosti o zlyhaní pripojenia | `credentialHealth.failedConnections`                                  | Súčasnosť** len ked `failed > 0`** . Ohraničený zoznam riadkov vyrovnávacej pamäte so `status=error` (`connectionId`, `status`, sanitizované `lastError` / `lastErrorType`). `failedOmitted` je nastavené, keď bol zoznam obmedzený. |
+| SQLite lepkavý stav              | `credentialHealth.staleDbNonOkCount`                                  | Počet** aktívny** (`is_active=1`) spojovacie riadky, ktorých pretrvávajúce `test_status` je známe nesprávne (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                                       |
 
-Tieto dve vrstvy sa môžu zámerne nezhodovať:
+Tieto dve vrstvy sa môžu zámerne nezhodnúť:
 
-- Ukazovateľ `failed=0`, zatiaľ čo `staleDbNonOkCount>0` — SQLite stále obsahuje trvalý
-  `test_status` (napríklad `expired` alebo `credits_exhausted`), ktorý najnovšia
-  snímka vyrovnávacej pamäte sondy nepočíta ako `status=error`.
-- Ukazovateľ `failed>0`, zatiaľ čo SQLite vyzerá v poriadku — nedávna sonda zlyhala a jej výsledok je
-  uložený vo vyrovnávacej pamäti; riadok DB ešte nebol aktualizovaný alebo bol neskôr vymazaný.
+- Gauge `failed=0` zatiaľ čo `staleDbNonOkCount>0` — SQLite má stále lepkavé `test_status` (napríklad `expired` alebo `credits_exhausted`), ktoré sa najnovšia snímka medzipamäte sondy nepočíta ako `status=error`.
+- Meranie `failed>0` zatiaľ čo SQLite vyzerá zdravo — nedávna sonda zlyhala a je uložená vo vyrovnávacej pamäti; riadok DB nebol aktualizovaný alebo bol neskôr vymazaný.
 
-Pri získavaní údajov z tohto koncového bodu nevytvárajte upozornenia výhradne na základe
-`provider_connections.test_status`. Pre aktuálne zlyhania sond používajte `failed` + `failedConnections`
-a `staleDbNonOkCount`, keď potrebujete počet uložených trvalých stavov.
+Pri zoškrabovaní tohto koncového bodu neupozorňujte iba na `provider_connections.test_status`. Použite `failed` + `failedConnections` pre zlyhania aktívnej sondy a `staleDbNonOkCount` keď potrebujete počet trvalých nehybných stavov.
 
-### Odporúčania pre sondy Kubernetes
+### Odporúčania sondy Kubernetes
 
-OmniRoute je **jeden proces Node** (jedna slučka udalostí). Predvolený Docker `HEALTHCHECK` používa odľahčenú trasu `/healthz`. `/api/monitoring/health` je pre intervaly kontroly životnosti kubeletu **príliš náročná**.
+OmniRoute je a** proces jedného uzla** (jedna slučka udalostí). Sklad Docker `HEALTHCHECK` ciele ľahké `/healthz`. `/api/monitoring/health` je** príliš ťažké** pre intervaly živosti kubelet.
 
-| Sonda                      | Odporúčaný cieľ                                                                       | Poznámky                                                                                                                                                                                                                                                                                                                                                                                |
-| -------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Spustenie**              | HTTP `GET /healthz` s vysokou hodnotou `failureThreshold` (alebo dlhým `startPeriod`) | Studený štart + migrácia SQLite môžu trvať dlhšie než niekoľko sekúnd                                                                                                                                                                                                                                                                                                                   |
-| **Pripravenosť**           | HTTP `GET /healthz`                                                                   | Životný cyklus `ok` / `starting` / `stopping` (200 vs 503). Stav stále kolíše, ak je slučka blokovaná CPU. **Odpoveď 200 po niekoľkých sekundách neznamená zdravý stav** (#10303) — znamená to, že slučka udalostí bola vyhladovaná ešte pred spustením 3-bajtovej obsluhy                                                                                                              |
-| **Živosť**                 | HTTP `GET /livez` **alebo TCP** na hlavnom porte služby (`PORT`, predvolene `20128`)  | `/livez` kontroluje iba to, či proces žije (vždy 200, ak sa obsluha spustí). Stále však používa tú istú slučku udalostí — zaneprázdnený ≠ mŕtvy a vyhladovanie slučky udalostí (#10303) nezistí o nič lepšie než TCP. Uprednostnite **TCP**, ak HTTP sondy vypršia pri zaťažení katalógu/kompresie; v žiadnom prípade **nereštartujte** pod pri krátkych pozastaveniach slučky udalostí |
-| **Hĺbková kontrola stavu** | `GET /api/monitoring/health` z externého kontrolného systému                          | Nie je určené pre `livenessProbe` kubeletu ani pre častú `readinessProbe`                                                                                                                                                                                                                                                                                                               |
+| Sonda              | Odporúčaný cieľ                                                                          | Poznámky                                                                                                                                                                                                                                                                                                                                     |
+| ------------------ | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Spustenie**      | HTTP `GET /healthz` s dlhým `failureThreshold` (alebo veľkým `startPeriod`)              | Studený štart migrácie + SQLite môže presiahnuť niekoľko sekúnd                                                                                                                                                                                                                                                                              |
+| **Pripravenosť**   | HTTP `GET /healthz`                                                                      | Životný cyklus `ok` / `starting` / `stopping` (200 vs 503). Stále klapky, ak je slučka zablokovaná CPU. A** 200 za niekoľko sekúnd nie je zdravé** (#10303) — znamená, že slučka udalostí bola vyhladovaná pred spustením 3-bajtovej obsluhy                                                                                                 |
+| **Živosť**         | HTTP `GET /livez`,** alebo TCP** na hlavnom servisnom porte (`PORT`, predvolený `20128`) | `/livez` je aktívny iba proces (vždy 200, ak je handler spustený). Stále zdieľa slučku udalostí — busy ≠ dead a nezisťuje hladovanie slučky udalostí (#10303) o nič lepšie ako TCP. Radšej**TCP** ak uplynie časový limit sond HTTP pri zaťažení catalog/compression ; robiť** nie** zabite modul na krátkej slučke udalostí v oboch smeroch |
+| **Hlboké zdravie** | `GET /api/monitoring/health` z externého kontrolóra                                      | Nie pre kubelet `livenessProbe` / tesné `readinessProbe`                                                                                                                                                                                                                                                                                     |
 
-Príklad konfigurácie (upravte prahové hodnoty podľa zaťaženia pri studenom štarte a kompresii):
+Príklad tvaru (prispôsobte prahové hodnoty svojmu studenému štartu a zaťaženiu kompresiou):
 
 ```yaml
 ports:
@@ -215,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Pri pozastavení slučky udalostí môže vypršať aj časový limit HTTP /livez.
-  # Konzervatívnou alternatívou je TCP:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-**Nenastavujte** kontrolu **životnosti** kubeletu na `/api/monitoring/health`. Táto cesta vykonáva skutočné databázové/monitorovacie operácie a pri zaťažení bude hlásiť falošne pozitívne výsledky.
+**nie** bodový kubelet** živosť** pri `/api/monitoring/health`. Táto cesta skutočne funguje DB/monitoring a pri zaťažení bude falošne pozitívna.
 
-Súvisiace: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sondy pri zaneprázdnenej slučke udalostí), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (náročné spracovanie cien katalógu), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (náročné počítanie tokenov pri kompresii).
+Súvisiace: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sondy, kým je slučka udalostí zaneprázdnená), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (katalógové oceňovanie), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (svinstvo na počítanie kompresných tokenov).
 
-### Watchdog systemd (zamrznutá slučka udalostí)
+### systemd watchdog (zamrznutá slučka udalostí)
 
-Na hostiteľovi so systémom systemd oznamuje OmniRoute správcovi služieb, kedy je pripravený, a naďalej mu pravidelne posiela signály, takže server so zaseknutou slučkou udalostí bude ukončený a reštartovaný namiesto toho, aby zostal spustený bez odozvy. Signály sa odosielajú z vlastnej slučky udalostí servera: keď sa zablokuje, odosielanie sa zastaví a systemd reštartuje službu, keď uplynie `WatchdogSec` bez prijatia signálu.
+Na hostiteľovi systemd OmniRoute informuje manažéra služieb, keď je pripravený, a pokračuje v pingovaní, takže server, ktorého slučka udalostí je zaseknutá, sa zabije a reštartuje namiesto toho, aby zostal v tichosti. Pingy pochádzajú z vlastnej slučky udalostí servera: keď sa blokuje, zastavia sa a systemd reštartuje službu, keď `WatchdogSec` uplynie bez jedného.
 
-Príkaz [`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) už vytvára používateľskú jednotku s touto konfiguráciou. Vlastnoručne vytvorená jednotka (s predvolenou hodnotou `Type=simple`) nemá watchdog, preto do jej sekcie `[Service]` pridajte tieto riadky:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) už s týmto píše užívateľskú jednotku. Jednotka, ktorú napíšete sami (predvolené `Type=simple`), nemá žiadneho strážneho psa, takže do jej sekcie `[Service]` pridajte tieto riadky:
 
 ```ini
 [Service]
@@ -239,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-Vygenerovaná jednotka nastavuje `Restart=on-failure`, preto pridajte aj tento riadok — bez neho watchdog zaseknutú službu iba ukončí namiesto jej reštartovania.
+Vygenerovaná jednotka nastaví `Restart=on-failure`, takže pridajte aj tento riadok — bez toho strážny pes iba zabije zaseknutú službu namiesto toho, aby ju reštartoval.
 
-- `Type=notify`: služba sa považuje za „spustenú“, keď server odošle `READY=1`, nie keď proces vykoná fork. `TimeoutStartSec` obmedzuje čas pomalého spustenia.
-- `NotifyAccess=all`: signály odosiela proces servera, ktorý je potomkom dohľadového procesu `omniroute serve`.
-- `WatchdogSec`: signály sa odosielajú každých 60 sekúnd, preto použite hodnotu **120 alebo vyššiu**. Nižšie hodnoty by reštartovali zdravý server.
-- Spúšťajte `omniroute serve` v popredí. `--daemon` odpojí server od cgroup jednotky a oznamovací handshake sa nikdy nedokončí.
+- `Type=notify`: služba sa „spustí“, keď server odošle `READY=1`, nie keď sa proces rozdelí. `TimeoutStartSec` ohraničuje pomalý štart.
+- `NotifyAccess=all`: pingy odosiela serverový proces, ktorý je potomkom supervízora `omniroute serve`.
+- `WatchdogSec`: pingy odchádzajú každých 60 sekúnd, tak ich použite** 120 alebo viac** . Menšie hodnoty by reštartovali zdravý server.
+- Spustite `omniroute serve` v popredí. `--daemon` odpojí server od cgroup jednotky a oznamovanie handshake sa nikdy nedokončí.
 
-Po reštarte skontrolujte, či je aktívny:
+Skontrolujte, či je po reštarte aktívny:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` zobrazuje nakonfigurovaný interval a `WatchdogTimestamp` sa každú minútu posúva dopredu. Reštart spôsobený watchdogom sa zaznamená ako `Result=watchdog`. Ak chcete odosielanie signálov vypnúť bez zmeny jednotky, nastavte `OMNIROUTE_DISABLE_SD_NOTIFY=1`; bez premennej `NOTIFY_SOCKET` (terminál, Docker, Electron, Windows) sa nič neodosiela.
+`WatchdogUSec` zobrazuje nakonfigurované oneskorenie a `WatchdogTimestamp` sa posúva dopredu každú minútu. Reštart spôsobený watchdogom sa zaznamená ako `Result=watchdog`. Ak chcete vypnúť pingy a ponechať jednotku tak, ako je, nastavte `OMNIROUTE_DISABLE_SD_NOTIFY=1`; bez `NOTIFY_SOCKET` (terminál, Docker, Electron, Windows) sa nič neodošle.
 
-Watchdog kontroluje iba to, či slučka udalostí naďalej beží. Server, ktorý je pomalý, ale stále spracúva udalosti, sa nereštartuje.
+Strážny pes iba kontroluje, či slučka udalostí stále beží. Server, ktorý je pomalý, ale stále sa otáča, sa nereštartuje.
 
-### Voliteľné operácie v ceste požiadavky (pamäť, zručnosti, obnovenie tokenu)
+### Voliteľná práca na ceste žiadosti (pamäť, zručnosti, obnovenie tokenu)
 
-Extrakcia pamäte, vkladanie zručností a obnovovanie OAuth tokenov zdieľajú **hlavnú slučku udalostí Node** s `/healthz`. Sú to funkcie prepínateľné na ovládacom paneli (`memoryEnabled`, `skillsEnabled`), nie fond pracovných procesov. Pozrite si [Prostredie — náklady slučky udalostí](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Extrakcia pamäte, injekcia zručností a obnovenie tokenov OAuth zdieľajú** slučka udalostí hlavného uzla** so `/healthz`. Sú to funkcie prepínania na dashboarde (`memoryEnabled`, `skillsEnabled`), nie sú to fond pracovníkov. Pozrite si [časť Environment — Event-Loop cost](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
-### Stav poskytovateľov
+### Zdravie poskytovateľa
 
-> **Žiadny REST koncový bod.** Údaje o stave poskytovateľov sú dostupné prostredníctvom nástroja MCP `observability_snapshot` alebo stránky `/dashboard/providers` na ovládacom paneli.
+> **Žiadny koncový bod REST.** Údaje o stave poskytovateľa sú dostupné prostredníctvom nástroja MCP `observability_snapshot` alebo stránky `/dashboard/providers` dashboardu.
 
-### Podrobnosti o poskytovateľovi
+### Podrobnosti poskytovateľa
 
-> **Žiadny REST koncový bod.** Podrobnosti o jednotlivých poskytovateľoch sú dostupné prostredníctvom stránky `/dashboard/providers` na ovládacom paneli.
+> **Žiadny koncový bod REST.** Podrobnosti o jednotlivých poskytovateľoch sú k dispozícii na stránke `/dashboard/providers` dashboardu.
 
 ---
 

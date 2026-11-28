@@ -49,7 +49,7 @@ Kukin käyttöönotto tarjoaa oman kopionsa määrityksestä osoitteessa `/opena
 
 ---
 
-## Chat Completions
+## Chatin valmistuminen
 
 ```bash
 POST /v1/chat/completions
@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### Mukautetut otsikot
 
-| Header                   | Suunta  | Kuvaus                                                                                                                                                                                                                                                           |
-| ------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Pyyntö  | Aseta arvoksi `true`, jos haluat ohittaa välimuistin                                                                                                                                                                                                             |
-| `x-omniroute-no-memory`  | Pyyntö  | Aseta arvoksi `true`, jos haluat ohittaa muistin + taitojen injektoinnin tässä pyynnössä (peilaa no-cache-asetusta; välttää kutsukohtaisen tokenien/kustannusten yleiskulun)                                                                                     |
-| `X-OmniRoute-Progress`   | Pyyntö  | Aseta arvoksi `true`, jos haluat etenemistapahtumia                                                                                                                                                                                                              |
-| `X-Session-Id`           | Pyyntö  | Kiinteän istunnon avain ulkoista istuntoaffiniteettia varten                                                                                                                                                                                                     |
-| `x_session_id`           | Pyyntö  | Alaviivaversio hyväksytään myös (suora HTTP)                                                                                                                                                                                                                     |
-| `X-OmniRoute-Session-Id` | Pyyntö  | Kutsujan toimittama istunto-/keskustelutunniste (syötetään myös muistiin). Kun se on annettu, tallennetaan sellaisenaan kohteeseen `call_logs.session_tag` istuntokohtaista kustannusten kohdistusta varten (#8249) — sitä ei koskaan muodosteta, jos se puuttuu |
-| `Idempotency-Key`        | Pyyntö  | Kaksoiskappaleiden poistamisen avain (5 sekunnin ikkuna)                                                                                                                                                                                                         |
-| `X-Request-Id`           | Pyyntö  | Vaihtoehtoinen kaksoiskappaleiden poistamisen avain                                                                                                                                                                                                              |
-| `x-omniroute-connection` | Pyyntö  | Kiinnitä yhden mallin pyyntö yhteen palveluntarjoajan yhteyteen (tiliin) sen tunnisteella — katso [Tilin kiinnittäminen pyyntöä kohden](#account-pinning-per-request)                                                                                            |
-| `X-OmniRoute-Cache`      | Vastaus | `HIT` tai `MISS` (ei-suoratoistava)                                                                                                                                                                                                                              |
-| `X-OmniRoute-Idempotent` | Vastaus | `true`, jos kaksoiskappale poistettiin                                                                                                                                                                                                                           |
-| `X-OmniRoute-Progress`   | Vastaus | `enabled`, jos etenemisen seuranta on käytössä                                                                                                                                                                                                                   |
-| `X-OmniRoute-Session-Id` | Vastaus | OmniRouten käyttämä tehokas istuntotunnus                                                                                                                                                                                                                        |
-| `X-OmniRoute-Request-Id` | Vastaus | Pyynnön korrelaatiotunnus (kun tiedossa)                                                                                                                                                                                                                         |
-| `X-OmniRoute-Version`    | Vastaus | OmniRoute-koontiversio (aina mukana)                                                                                                                                                                                                                             |
-| `X-OmniRoute-Cost-Saved` | Vastaus | Välimuistin HIT-tapauksessa säästämä USD-määrä (vain välimuistin osumat)                                                                                                                                                                                         |
-| `X-OmniRoute-Decision`   | Vastaus | Reitityksen jäljitys: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` on yhdistelmästrategia tai `single` muussa kuin yhdistelmäpyynnössä) — aina mukana valmistumisvastauksissa                                                                   |
+| Otsikko                  | Suunta  | Kuvaus                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Pyytää  | Aseta `true` ohittaaksesi välimuistin                                                                                                                                                                                                                                                                                                                                                       |
+| `x-omniroute-no-memory`  | Pyytää  | Aseta arvoksi `true` jos haluat ohittaa muistin + -taitojen lisäämisen tälle pyynnölle (peilaa ilman välimuistia; välttää puhelukohtaisen token/cost ylimäärän)                                                                                                                                                                                                                             |
+| `x-omniroute-no-log`     | Pyytää  | Aseta arvoksi `true` jos haluat jättää request/response -hyötykuormat pois tämän päättelypyynnön puhelulokeista (kaikki chat-perhereitit: Chat Completions, Responses, Messages, Completions, Gemini). Aikaleima, malli, tila, kesto ja merkkimäärät tallennetaan edelleen. Yhdistä `x-omniroute-no-memory` ja `x-omniroute-no-cache` kanssa, jos haluat poistaa sisällön kokonaan käytöstä |
+| `X-OmniRoute-Progress`   | Pyytää  | Aseta `true` edistymistapahtumia varten                                                                                                                                                                                                                                                                                                                                                     |
+| `X-Session-Id`           | Pyytää  | Kiinnittyvä istuntoavain ulkoisen istunnon affiniteettiin                                                                                                                                                                                                                                                                                                                                   |
+| `x_session_id`           | Pyytää  | Myös alaviivamuunnos hyväksytään (suora HTTP)                                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Session-Id` | Pyytää  | Soittajan toimittama session/conversation -tunniste (syöttää myös muistia). Kun se on olemassa, säilyi sanatarkasti `call_logs.session_tag` hen istuntokohtaisten kustannusten määrittämistä varten (#8249) — ei koskaan syntetisoitu poissa ollessa                                                                                                                                        |
+| `Idempotency-Key`        | Pyytää  | Dedup-avain (5 sekunnin ikkuna)                                                                                                                                                                                                                                                                                                                                                             |
+| `X-Request-Id`           | Pyytää  | Vaihtoehtoinen dedup-avain                                                                                                                                                                                                                                                                                                                                                                  |
+| `x-omniroute-connection` | Pyytää  | Kiinnitä yhden mallin pyyntö yhden palveluntarjoajan yhteyteen (tiliin) sen tunnuksella — katso [Tilin kiinnitys pyyntöä kohti](#account-pinning-per-request)                                                                                                                                                                                                                               |
+| `X-OmniRoute-Cache`      | Vastaus | `HIT` tai `MISS` (ei suoratoistoa)                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Idempotent` | Vastaus | `true`, jos kopioidaan                                                                                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Progress`   | Vastaus | `enabled` jos edistymisen seuranta päällä                                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Session-Id` | Vastaus | OmniRoute:n käyttämä tehokas istunto ID                                                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Request-Id` | Vastaus | Pyydä korrelaatiotunnusta (jos tiedossa)                                                                                                                                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Version`    | Vastaus | OmniRoute build -versio (aina läsnä)                                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Cost-Saved` | Vastaus | USD vältetty välimuisti HIT ssä (vain välimuistin osumat)                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Decision`   | Vastaus | Reititysjälki: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` on yhdistelmästrategia tai `single` ei-yhdistelmäpyynnölle) — on aina läsnä valmistumisvastauksissa                                                                                                                                                                                                            |
 
-> Nginx-huomautus: jos käytät alaviivallisia otsakkeita (esimerkiksi `x_session_id`), ota käyttöön `underscores_in_headers on;`.
+> Nginx-huomautus: jos luotat alaviiva-otsikoihin (esimerkiksi `x_session_id`), ota `underscores_in_headers on;` käyttöön.
 
-#### Tilin kiinnittäminen pyyntöä kohden
+#### Tilin kiinnitys pyynnön mukaan
 
-Kun palveluntarjoajalla on useita yhteyksiä (tilejä tai avaimia), OmniRoute valitsee normaalisti yhden
-tilinvalintastrategiansa avulla. Pyyntö voi sen sijaan kiinnittää tietyn yhteyden
-otsakkeella `x-omniroute-connection`:
+Kun palveluntarjoajalla on useita yhteyksiä (tilejä tai avaimia), OmniRoute valitsee tavallisesti yhden tilinvalintastrategiallaan. Pyyntö voi sen sijaan kiinnittää yhden tietyn yhteyden `x-omniroute-connection` otsikon kanssa:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,26 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Mistä tunniste löytyy.** Avaa palveluntarjoajan sivu hallintapaneelissa
-  (**Dashboard → Providers → <provider>**) ja napsauta yhteysrivin `xxxxxxxx…`-tunnistepainiketta —
-  se kopioi koko yhteyden tunnisteen.
-- **Mitkä pyynnöt käyttävät sitä.** Yhden mallin pyynnöt (`provider/model`) osoitteissa
-  `/v1/chat/completions`, `/v1/messages` ja `/v1/responses`. Yhdistelmät ohittavat otsakkeen: kiinnitä
-  tili kunkin yhdistelmävaiheen osalta erikseen vaiheen oman yhteyden kautta.
-- **Kiinnitys on ehdoton, ei vain toive.** Kiinnitettyä yhteyttä käytetään yksinomaan. Pyynnön
-  sisäinen virhe merkitsee tilille jäähdytysajan, mutta ei siirrä pyyntöä saman palveluntarjoajan
-  toiseen tiliin.
-- **Jäähdytys ja kiintiö vapauttavat kiinnityksen.** Kun kiinnitetty yhteys on jäähdytystilassa,
-  kiintiö on käytetty loppuun tai kiintiökäytäntö estää käytön, myöhemmät pyynnöt siirtyvät
-  palveluntarjoajan muihin yhteyksiin täsmälleen kuten kiinnittämätön liikenne.
-- **Tuntemattomat tai käytöstä poistetut tunnisteet aiheuttavat virheen.** Tunniste, joka ei kuulu
-  palveluntarjoajan aktiiviseen joukkoon (poistettu, deaktivoitu tai toiselle palveluntarjoajalle
-  kuuluva), ei jätä yhtään kelvollista tiliä, joten pyyntö epäonnistuu sen sijaan, että se
-  reititettäisiin huomaamatta muualle.
+- **Mistä tunnuksen löytää.** Avaa palveluntarjoajasivu kojelaudassa (** Kojelauta → Providers → <provider>** ) ja napsauta `xxxxxxxx…` id -sirua yhteysrivillä — se kopioi koko yhteystunnuksen.
+- **Mitkä pyynnöt kunnioittavat sitä.** Yhden mallin pyynnöt (`provider/model`) `/v1/chat/completions` ssä, `/v1/messages` ja `/v1/responses`. Yhdistelmät ohittavat otsikon: kiinnitä tili yhdistelmävaihetta kohti sen sijaan vaiheen oman yhteyden kautta.
+- **Pinta on tiukka, ei mieltymys.** Kiinnitettyä yhteyttä käytetään yksinomaan. Pyynnön sisällä oleva virhe tallentaa tilin jäähtymisen, mutta tekee sen** ei** vaihtaa saman palveluntarjoajan sisarustilille.
+- **Jäähdytys ja kiintiö vapauta merkki.** Kun kiinnitetty yhteys on jäähtymässä, kiintiö loppunut tai kiintiökäytännön estänyt, myöhemmät pyynnöt palautuvat palveluntarjoajan muille yhteyksille aivan kuten kiinnittämätön liikenne.
+- **Tuntemattomat tai käytöstä poistetut tunnukset epäonnistuvat.** Tunnus, joka ei ole palveluntarjoajan aktiivisessa poolissa (poistettu, poistettu käytöstä tai kuuluu toiselle palveluntarjoajalle), ei jätä kelvollista tiliä, joten pyyntö epäonnistuu sen sijaan, että se reitittäisi hiljaa muualle.
 
-Claude Code lähettää mukautetut otsakkeet muuttujan `ANTHROPIC_CUSTOM_HEADERS` kautta. Lisää se
-tiedoston `~/.claude/settings.json` `env`-lohkoon tai projektikohtaiseen
-`.claude/settings.json`-tiedostoon, jos haluat kiinnittää eri tilin kullekin projektille:
+Claude Code lähettää mukautetut otsikot `ANTHROPIC_CUSTOM_HEADERS` kautta. Aseta se `env` n `~/.claude/settings.json`-lohkoon tai projektitason `.claude/settings.json` kiinnittääksesi eri tilin projektia kohti:
 
 ```jsonc
 {
@@ -134,29 +120,11 @@ tiedoston `~/.claude/settings.json` `env`-lohkoon tai projektikohtaiseen
 }
 ```
 
-Lähde: `src/sse/handlers/chat.ts` (otsakkeen luku), `src/sse/services/auth.ts` ja
-`src/sse/services/sessionAffinityPin.ts` (kiinnityksen vapautus ja joukosta puuttumisen tarkistus).
+Lähde: `src/sse/handlers/chat.ts` (otsikon lukeminen), `src/sse/services/auth.ts` ja `src/sse/services/sessionAffinityPin.ts` (nastan vapautus ja puuttuvan altaan tarkistus).
 
-> **Kustannusten telemetriaotsakkeet:** suoratoistamattomat onnistuneet vastaukset sisältävät myös
-> `X-OmniRoute-*`-kustannustelemetrian — `X-OmniRoute-Response-Cost` (USD, aina 10 desimaalia;
-> maksuttomille tai hinnoittelemattomille `0.0000000000`), `X-OmniRoute-Tokens-In` /
-> `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`,
-> `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` ja `X-OmniRoute-Fallback-Attempts`
-> (vain kun arvo on > 0) sekä `X-OmniRoute-Request-Id` ja `X-OmniRoute-Version`. Nämä tuotetaan
-> chat completion -pyynnöissä, osoitteessa `/v1/responses`, osoitteessa `/v1/messages` **ja
-> media-rajapinnoissa** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`,
-> `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` ja
-> `/v1/moderations` (aina kustannuksella `0`). Median kustannus lasketaan modaliteetin mukaan
-> (kuvaa, sekuntia, merkkiä tai hakuyksikköä kohti), kun hinnoittelu on saatavilla; muussa
-> tapauksessa arvo on `0` (fail-open).
+> **Kustannustelemetrian otsikot:** Ei-suoratoiston onnistumisvastaukset sisältävät myös `X-OmniRoute-*` kustannustelemetriajoukon — `X-OmniRoute-Response-Cost` (USD, kiinteä 10 desimaaleja; `0.0000000000` free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, ja `X-OmniRoute-Fallback-Attempts` 0 ja > ), `X-OmniRoute-Version` `X-OmniRoute-Request-Id` Näitä lähettävät keskustelun päättymiset, `/v1/responses`, `/v1/messages`,** ja median päätepisteet** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` ja `/v1/moderations` (maksaa aina `0`). Mediakustannukset lasketaan modaliteettikohtaisesti (kuva, sekunti, merkki, hakuyksikköä kohti), kun hinnoittelu on saatavilla, muussa tapauksessa `0` (fail-open).
 
-> **Välimuistiosuman kustannussemantiikka:** semanttisen välimuistin osuman
-> (`X-OmniRoute-Cache-Hit: true`) yhteydessä ylävirran kutsua ei tehdä, joten
-> `X-OmniRoute-Response-Cost` on `0.0000000000` (osuman palvelemisen **lisäkustannus**).
-> Alkuperäinen kustannus tai kustannus, joka olisi muuten syntynyt, ilmoitetaan erikseen
-> otsakkeessa `X-OmniRoute-Cost-Saved`. Laskutuksesta vastaavien kuluttajien tulee laskea yhteen
-> `X-OmniRoute-Response-Cost` (osumat eivät maksa mitään); välimuistianalytiikka voi koostaa
-> arvon `X-OmniRoute-Cost-Saved` perusteella.
+> **Välimuistin osuman kustannussemantiikka:** semanttisessa välimuistissa HIT (`X-OmniRoute-Cache-Hit: true`) ylävirran puhelua ei tehdä, joten `X-OmniRoute-Response-Cost` on `0.0000000000` (** inkrementaalinen** osuman toimituskulut). original/would-have-been kustannus ilmoitetaan erikseen `X-OmniRoute-Cost-Saved` ssä. Laskutuskuluttajien tulisi summa `X-OmniRoute-Response-Cost` (osumat eivät maksa mitään); välimuistin analytiikka voi yhdistää `X-OmniRoute-Cost-Saved`.
 
 ## Eksklusiiviset hallitut istuntovaraukset
 
@@ -376,6 +344,8 @@ Saatavilla olevat palveluntarjoajat ovat OpenAI (GPT Image 2 ), xAI (Grok Image 
 
 `n` palauttaa `n` kuvat `data[]` muodossa. Palveluntarjoajat, joiden ylävirran API palauttaa yhden kuvan puhelua kohden (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), saavat `n` erilliset ylävirran puhelut, enintään 4 lennon aikana. Kiinteä `seed` korvataan kutsuindeksillä (`seed`, `seed + 1`, …), joten kuvat eroavat toisistaan, mutta pysyvät toistettavissa. `n` yläraja on 10. Pyyntö epäonnistuu kokonaisuudessaan, jos jokin puhelu epäonnistuu. Fan-out-muotojen luettelo on `SINGLE_IMAGE_FANOUT_FORMATS` muodossa `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Kuvamallit (`codex/gpt-image-*`) palauttavat vain PNG :n: ylävirta vastaa `200` PNG -tavuilla, vaikka `jpeg` tai `webp` pyydetään. Pyyntö jollakin muulla `output_format` llä (`webp`, `jpeg`, ...) hylätään HTTP 400:lla sen sijaan, että se jätettäisiin hiljaa huomiotta; jätä se pois tai lähetä `png`. `output_compression` ei välitetä eteenpäin.
+
 ZenMux käyttää uudelleen olemassa olevaa API-avainyhteyttä ja hyväksyy `zenmux/` tai `zm/` -etuliitteet:
 
 - `zenmux/openai/gpt-image-2` käyttää ZenMux:n OpenAI -kuvia API. Vaihtoehtoja ovat `size`, `quality`, `n`, `output_format`, `output_compression`, `background` ja `response_format`.
@@ -393,7 +363,7 @@ GET /v1/images/generations
 
 ---
 
-## Asiakirjojen OCR
+## Asiakirja OCR
 
 ```bash
 POST /v1/ocr
@@ -409,17 +379,15 @@ Content-Type: application/json
 }
 ```
 
-`model` valitsee OCR-palveluntarjoajan `provider/model`-etuliitteen avulla; pelkkä mallin tunniste (esim.
-`mistral-ocr-latest`) ratkaistaan rekisteröidylle palveluntarjoajalleen, ja puuttuva `model` käyttää oletuksena
-Mistralia (`mistral-ocr-latest`). Rekisteröidyt palveluntarjoajat (`open-sse/config/ocrRegistry.ts`):
+`model` valitsee OCR palveluntarjoajan `provider/model` etuliitteellä; paljas mallitunnus (esim. `mistral-ocr-latest`) ratkaisee sen rekisteröidyn palveluntarjoajan, ja pois jätetty `model` on oletuksena Mistral (`mistral-ocr-latest`). Rekisteröidyt palveluntarjoajat (`open-sse/config/ocrRegistry.ts`):
 
-| Palveluntarjoajan tunnus      | Mallin tunnus        | `model`-arvo                                                   | Huomautukset                                                                                                                              |
-| ----------------------------- | -------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (tai pelkkä `mistral-ocr-latest`) | Synkroninen — vastaus palautetaan suoraan yhdestä upstream-kutsusta.                                                                      |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                    | Asynkroninen upstream (`analyze` + poll) — katso alta.                                                                                    |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                        | Synkroninen Vertex AI:n `openapi/chat/completions` -kumppanipäätepisteen kautta — katso alta todennusta ja URL-osoitetta koskevat tiedot. |
+| Palveluntarjoajan tunnus      | Mallin tunnus                                | `model` arvo                                                   | Huomautuksia                                                                                                                                                                                                         |
+| ----------------------------- | -------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                         | `mistral/mistral-ocr-latest` (tai paljas `mistral-ocr-latest`) | Synkroninen — vastaus palautetaan suoraan yhdestä ylävirran puhelusta.                                                                                                                                               |
+| `azure-document-intelligence` | `prebuilt-read`                              | `azure-document-intelligence/prebuilt-read`                    | Asynkroninen ylävirtaan (`analyze` + poll) — katso alla.                                                                                                                                                             |
+| `vertex-deepseek-ocr`         | itsekäyttöinen (ei sisäänrakennettua mallia) | `vertex-deepseek-ocr/<your-deployed-model-id>`                 | Synkroninen, oman Vertex AI Model Garden DeepSeek-OCR -päätepisteesi kautta (`openapi/chat/completions` muoto); Google poisti hallitun `deepseek-ocr-maas` käytöstä 21.10.2026 (#20423), joten tunnus palauttaa 400. |
 
-Kaikki kolme palveluntarjoajaa vastaavat samanmuotoisella Mistral-rungolla:
+Kaikki kolme palveluntarjoajaa vastaavat samassa Mistral-muotoisessa rungossa:
 
 ```json
 {
@@ -429,28 +397,13 @@ Kaikki kolme palveluntarjoajaa vastaavat samanmuotoisella Mistral-rungolla:
 }
 ```
 
-### Azure Document Intelligencen kyselyvaihe
+### Azure Document Intelligence -kyselyn kulku
 
-Azure Document Intelligencen `analyze`-sovellusliittymä on asynkroninen: alkuperäinen pyyntö palauttaa
-`Operation-Location`-otsakkeen rungon sijaan, ja tulosta on kyseltävä. Käsittelijä
-(`open-sse/handlers/ocr.ts`) kysyy kyseisestä URL-osoitteesta sekunnin välein enintään 30 yrityksen ajan, lopettaa heti
-(eikä jatka kyselyä), jos kyselyn vastaus ei ole `ok` tai tila on `"failed"`, ja palauttaa `504`-virheen, jos
-toiminto on edelleen käynnissä yritysrajan täytyttyä. Lopullinen Azure-vastaus normalisoidaan samaan
-Mistralin käyttämään `pages`/`markdown`-muotoon ennen sen palauttamista kutsujalle, joten asiakaskoodissa
-palveluntarjoajaa ei tarvitse käsitellä erikseen.
+Azure Document Intelligencen `analyze` API on asynkroninen: alkuperäinen pyyntö palauttaa `Operation-Location` otsikon rungon sijaan, ja tulos on pollattava. Käsittelijä (`open-sse/handlers/ocr.ts`) pollaa URL joka sekunti jopa 30 yrityksen ajan, epäonnistuu nopeasti (ei jatka kyselyä) ei `ok` -kyselyvastauksessa tai `"failed"` tilassa ja palauttaa `504`, jos toiminto on edelleen käynnissä yritysbudjetin loppumisen jälkeen. Lopullinen Azure-vastaus normalisoidaan samaan `pages`/`markdown` -muotoon, jota Mistral käyttää, ennen kuin se palautetaan soittajalle, joten asiakaskoodin ei tarvitse merkitä palveluntarjoajaa erityistapauksissa.
 
-### Vertex AI DeepSeek OCR:n todennus ja päätepisteen ratkaiseminen
+### Vertex AI DeepSeek OCR todennus ja päätepisteen resoluutio
 
-`vertex-deepseek-ocr` käyttää samaa Vertex AI -todennusta, jota OmniRoute tukee jo
-chat- ja kuvapyyntöihin (`open-sse/executors/vertex.ts`): yhteyden API-avain on joko
-Service Account JSON -tunnistetieto (joka vaihdetaan lyhytikäiseen OAuth-käyttöoikeustunnukseen JWT-bearer-
-kulun kautta) tai valmiiksi luotu OAuth-käyttöoikeustunnus, jota käytetään sellaisenaan. Upstream-päätepisteen URL on Vertexin
-yleinen `openapi/chat/completions` -kumppanipäätepiste, joka muodostetaan yhteyden projektin ja
-alueen perusteella — eksplisiittiset `providerSpecificData.project`/`providerSpecificData.region`-arvot ovat aina etusijalla;
-muussa tapauksessa projekti johdetaan Service Account JSON -tunnistetiedon `project_id`-kentästä ja alueen
-oletusarvo on `us-central1`. Molemmat ratkaisut tehdään tiedostossa `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), ja niitä käytetään tiedostossa
-`src/app/api/v1/ocr/route.ts` ennen lähettämistä kohteeseen `handleOcr`.
+`vertex-deepseek-ocr` käyttää uudelleen samaa Vertexin AI -todennusta, OmniRoute jo tukee chat/image liikenteelle (`open-sse/executors/vertex.ts`): yhteyden API avain on joko palvelutilin JSON valtuutus (vaihdettu lyhytaikaiseen OAuth käyttövaltuuttaan JWT-siirtotievirran kautta) tai jo tehty OAuth -käyttötunnus. Ylävirran päätepiste URL on Vertexin yleinen `openapi/chat/completions` -kumppanipäätepiste, joka on rakennettu yhteyden projektista ja alueesta — eksplisiittinen `providerSpecificData.project`/`providerSpecificData.region` voittaa aina; muussa tapauksessa projekti johdetaan palvelutilin JSON:sta `project_id` ja alueen oletusarvo on `us-central1`. Molemmat resoluutiot tapahtuvat `open-sse/handlers/ocr.ts` ssä (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), jonka `src/app/api/v1/ocr/route.ts` kuluttaa ennen lähettämistä `handleOcr`:hen.
 
 ---
 
@@ -697,98 +650,104 @@ Ylemmän palvelun sopimukset: [äänitehosteet](https://elevenlabs.io/docs/api-r
 
 ---
 
-## Yhteensopivuusrajapinnat
+## Yhteensopivuuden päätepisteet
 
-| Menetelmä | Polku                                     | Muoto                                         |
-| --------- | ----------------------------------------- | --------------------------------------------- |
-| POST      | `/v1/chat/completions`                    | OpenAI                                        |
-| POST      | `/v1/messages`                            | Anthropic                                     |
-| POST      | `/v1/responses`                           | OpenAI Responses                              |
-| POST      | `/v1/embeddings`                          | OpenAI                                        |
-| POST      | `/v1/images/generations`                  | OpenAI Images                                 |
-| POST      | `/v1/images/edits`                        | OpenAI Images (muokkaus/inpaint)              |
-| POST      | `/v1/videos/generations`                  | OpenAI-tyylinen videon generointi             |
-| POST      | `/v1/music/generations`                   | OpenAI-tyylinen musiikin generointi           |
-| POST      | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                            |
-| POST      | `/v1/audio/speech`                        | OpenAI TTS (palauttaa äänisisällön)           |
-| POST      | `/v1/rerank`                              | Cohere/Voyage-tyylinen uudelleenjärjestäminen |
-| POST      | `/v1/classify`                            | Jina-luokittelu (`api.jina.ai`)               |
-| POST      | `/v1/segment`                             | Jina-segmentoija (`segment.jina.ai`)          |
-| POST      | `/v1/moderations`                         | OpenAI Moderations                            |
-| GET       | `/v1/models`                              | OpenAI                                        |
-| POST      | `/v1/models/query`                        | Suodatettu mallien esivalinta                 |
-| POST      | `/v1/messages/count_tokens`               | Anthropic                                     |
-| GET       | `/v1beta/models`                          | Gemini                                        |
-| POST      | `/v1beta/models/{...path}`                | Gemini generateContent                        |
-| POST      | `/v1/api/chat`                            | Ollama                                        |
-| GET       | `/api/v1/vscode/{token}/`                 | OpenAI-luettelon alias                        |
-| GET       | `/api/v1/vscode/{token}/models`           | OpenAI-mallien alias                          |
-| POST      | `/api/v1/vscode/{token}/chat/completions` | OpenAI-tunnisteistettu alias                  |
-| POST      | `/api/v1/vscode/{token}/responses`        | OpenAI Responses -tunnisteistettu alias       |
-| POST      | `/api/v1/vscode/{token}/api/chat`         | Ollama-tunnisteistettu alias                  |
-| GET       | `/api/v1/vscode/{token}/api/tags`         | Ollama-tunnisteistetut tunnisteet             |
+| Menetelmä | Polku                                     | Muoto                                |
+| --------- | ----------------------------------------- | ------------------------------------ |
+| POST      | `/v1/chat/completions`                    | OpenAI                               |
+| POST      | `/v1/messages`                            | Anthropic                            |
+| POST      | `/v1/responses`                           | OpenAI vastaukset                    |
+| POST      | `/v1/embeddings`                          | OpenAI                               |
+| POST      | `/v1/images/generations`                  | OpenAI kuvat                         |
+| POST      | `/v1/images/edits`                        | OpenAI kuvat (edit/inpaint)          |
+| POST      | `/v1/videos/generations`                  | OpenAI-tyylinen videosukupolvi       |
+| POST      | `/v1/music/generations`                   | OpenAI-tyylisen musiikin sukupolvi   |
+| POST      | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                   |
+| POST      | `/v1/audio/speech`                        | OpenAI TTS (palauttaa äänirungon)    |
+| POST      | `/v1/rerank`                              | Cohere/Voyage-style rerank           |
+| POST      | `/v1/classify`                            | Jina luokittele (`api.jina.ai`)      |
+| POST      | `/v1/segment`                             | Jina segmentoija (`segment.jina.ai`) |
+| POST      | `/v1/moderations`                         | OpenAI Moderations                   |
+| POST      | `/v1/systemone`                           | System One -tyyppiset päätökset      |
+| POST      | `/v1/decisions`                           | OpenAI -päätökset (natiivi)          |
+| GET       | `/v1/systemone/models`                    | Päätösmalliluettelo                  |
+| GET       | `/v1/models`                              | OpenAI                               |
+| POST      | `/v1/models/query`                        | Suodatettu malliluettelo             |
+| POST      | `/v1/messages/count_tokens`               | Anthropic                            |
+| GET       | `/v1beta/models`                          | Gemini                               |
+| POST      | `/v1beta/models/{...path}`                | Gemini generateContent               |
+| POST      | `/v1/api/chat`                            | Ollama                               |
+| GET       | `/api/v1/vscode/{token}/`                 | OpenAI katalogin alias               |
+| GET       | `/api/v1/vscode/{token}/models`           | OpenAI mallien alias                 |
+| POST      | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenoitu alias               |
+| POST      | `/api/v1/vscode/{token}/responses`        | OpenAI Responses tokenized alias     |
+| POST      | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenoitu alias               |
+| GET       | `/api/v1/vscode/{token}/api/tags`         | Ollama tags tokenized alias          |
 
-Kaikki POST-reitit noudattavat samaa muotoa: `Bearer your-api-key` + Zodilla validoitu JSON-runko (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` jne.; katso `src/shared/validation/schemas.ts`). Kaavion epäonnistuessa palautetaan 4xx-vastaus.
+Kaikki POST reitit noudattavat samaa muotoa: `Bearer your-api-key` + Zod-validoitu JSON runko (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` jne., katso `src/shared/validation/schemas.ts`). 4xx palautetaan skeeman epäonnistuessa.
 
-Asiakkaille, jotka eivät voi liittää `Authorization: Bearer ...` -otsaketta, OmniRoute hyväksyy API-avaimet URL-osoitteessa joko kyselymerkkijonon yhteensopivuuden kautta (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) tai erillisten `/api/v1/vscode/{token}/...`-päätepisteiden kautta, jotka dokumentoidaan alla.
+Asiakkaille, jotka eivät voi liittää `Authorization: Bearer ...`, OmniRoute hyväksyy myös API avaimet URL ssä joko kyselymerkkijonoyhteensopivuuden (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) tai alla dokumentoitujen `/api/v1/vscode/{token}/...` päätepisteiden kautta.
 
 ```bash
-# Uudelleenjärjestäminen (pilvirekisterin tarjoaja tai OpenAI-yhteensopiva tarjoajasolmu muodossa "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina-luokittelu (Foundation API -tunnistetiedot)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina-segmentoija
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina-haku (s.jina.ai; tarjoaja-aliakset: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderointi
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — palauttaa audio/mpeg- (tai pyydetyn muodon) sisällön
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS edellyttää kieltä ja ääntä: `language` käyttää oletusarvoisesti arvoa "en"; puuttuva
-# ääni tai OpenAI:n vakiokielen nimi (alloy, nova, …) muunnetaan arvoksi "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Kuvan muokkaus (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Videon/musiikin generointi (tarjoajalla etuliitetty mallin tunnus)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Rerank-palveluntarjoajan solmut:** `POST /v1/rerank` reitittää pyynnöt myös OpenAI-yhteensopiviin palveluntarjoajan solmuihin
-> (oMLX, vLLM, Infinity, yhdyskäytävän takana oleva TEI, …), joihin viitataan muodossa `<node-prefix>/<model>`. Silmukkaliitäntäsolmut
-> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) ovat aina kelvollisia, samoin kuin isäntänimet, jotka
-> operaattori luettelee muuttujassa `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (esimerkiksi Docker/Compose-palvelun nimi,
-> kuten `http://reranker:8080/v1`; näihin muodostetaan yhteys suoraan, ei koskaan `HTTP(S)_PROXY`-muuttujan tai
-> yhteyden kiinnitetyn välityspalvelimen kautta). Muussa
-> isännässä olevat solmut — lähiverkon kone tai Tailscale-vertaisjäsen — ovat kelvollisia vain, kun operaattori ottaa käyttöön
-> `RERANK_REMOTE_PROVIDER_NODES`-ominaisuuslipun **ja** solmun perus-URL-osoite läpäisee palveluntarjoajan
-> lähtevien URL-osoitteiden käytännön (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Muistimoottorin rerank-vaihe kutsuu tätä reittiä
-> silmukkaliitännän kautta, joten sama sääntö koskee `rerankProviderModel`-asetusta Muistin asetuksissa.
+> **Järjestä palveluntarjoajan solmut uudelleen:** `POST /v1/rerank` reitittää myös OpenAI-yhteensopiviin palveluntarjoajan solmuihin (oMLX, vLLM, Infinity, TEI yhdyskäytävän takana jne.), jotka on osoitettu nimellä `<node-prefix>/<model>`. Loopback-solmut (`localhost`, `127.0.0.1`, `172.16.0.0/12`) ovat aina kelvollisia, samoin kuin isäntänimet, jotka operaattori listaa `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` ssä (esim Docker/Compose -palvelun nimi, kuten `http://reranker:8080/v1`; niitä kutsutaan suoraan, ei koskaan `HTTP(S)_PROXY` tai yhteyden kiinnitetyn välityspalvelimen kautta). Minkä tahansa muun isäntäkoneen — LAN box tai Tailscale peer — ovat kelvollisia vain, kun operaattori ottaa käyttöön `RERANK_REMOTE_PROVIDER_NODES` -ominaisuuslipun** ja** solmun perus- URL läpäisee toimittajan lähtevän URL -käytännön (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Muistimoottorin uudelleensijoitusvaihe kutsuu tätä reittiä silmukan kautta, joten sama sääntö koskee `rerankProviderModel` muistiasetuksissa.
 >
-> **Paikallisen palvelimen muodot:** solmua kutsutaan osoitteessa `<base>/v1/rerank` ja 404-virheen yhteydessä osoitteessa `<base>/rerank`
-> (Infinity, TEI). Ylävirtaan lähetettävä runko sisältää sekä Cohere/OpenAI-muodon (`documents`,
-> `return_documents`) että TEI-muodon (`texts`, `return_text`), ja ylävirran vastaus
-> normalisoidaan Cohere-kuoreksi: TEI:n paljas `[{index, score, text}]`, ohuiden yhdyskäytävien `{results: [{index, score}]}`
-> ja Voyagen kaltainen `{data: [...]}` palautetaan kaikki asiakkaalle muodossa
-> `{results: [{index, relevance_score, document?}]}`, pisteiden mukaan lajiteltuina ja `top_n`-arvon rajoittamina.
+> **Paikallisten palvelinten muodot:** solmua kutsutaan kohdassa `<base>/v1/rerank` ja 404:ssä `<base>/rerank` ssä (Infinity, TEI). Ylävirran rungossa on sekä Cohere/OpenAI -oikeinkirjoitus (`documents`, `return_documents`) että TEI oikeinkirjoitus (`texts`, `return_text`), ja ylävirran vastaus normalisoituu Cohere kirjekuoreen: TEI:n paljas `[{index, score, text}]`, `{results: [{index, score}]}` alkaen ohuesta asiakasyhdyskäytävästä ja Vozqn-tyylin kautta `{results: [{index, relevance_score, document?}]}` `{data: [...]}` lajiteltu pistemäärän mukaan ja jonka yläraja on `top_n`.
 
-> **Palveluntarjoajan solmujen etsintä:** OpenAI-yhteensopivan palveluntarjoajan solmun mallit näkyvät osoitteessa `GET /v1/models`
-> solmun etuliitteen alla. Rivit, jotka eivät sisällä päätepisteiden metatietoja (tyypillistä paikallisissa `/v1/models`-luetteloissa),
-> perivät solmun `apiType`-arvon, joten `embeddings`-solmun mallit ovat `type: "embedding"` ja
-> `rerank`-solmun mallit ovat `type: "rerank"` chat-tyypin oletusarvon sijaan; synkronoidun tai manuaalisesti lisätyn rivin eksplisiittinen
-> `supportedEndpoints` on silti ensisijainen.
+> **Palveluntarjoajan solmuhaku:** OpenAI-yhteensopivan toimittajasolmun mallit näkyvät `GET /v1/models` kirjaimella solmun etuliitteellä. Rivit, jotka eivät sisällä päätepisteen metatietoja (tyypillistä paikallisille `/v1/models` -listauksille), perivät solmun `apiType`:n, joten `embeddings` solmun mallit ovat `type: "embedding"` ja `rerank` -solmun mallit ovat `type: "rerank"` sen sijaan, että ne jättäisivät oletuksena keskusteluun. täsmällinen `supportedEndpoints` synkronoidulla tai manuaalisesti lisätyllä rivillä on edelleen etusijalla.
 
-### Palveluntarjoajakohtaiset reitit
+### Kirjoitetut päätökset
+
+Päätösmallit vastaavat kirjoitettuihin kysymyksiin kalibroiduilla todennäköisyyksillä tekstin luomisen sijaan. Ne eivät koskaan ole chat-malleja, eikä kahta lankamuotoa koskaan käännetä toisilleen:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter päätökset, Cloudflare Workers AI, paikallinen Ollama).
+- `POST /v1/decisions` — natiivi OpenAI Päätökset `{ model, input, questions: [...] }`, palvelee `openai` yhteys. Malli on `openai/gpt-6-luna` (paljas `gpt-6-luna` toimii myös). Vastaukset tulevat takaisin kysymysjärjestyksessä, koskemattomina.
+- `GET /v1/systemone/models` — yksi luettelo molemmista; jokainen rivi nimeää sen `api_format` (`systemone` tai `decisions`). `limit` / `after` sivu lopullinen luettelo. `X-OmniRoute-Catalog-Status` otsikko lukee `complete`, `partial` tai `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions` ssa API -avaimen mallin sallittujen luettelossa `decisions` -päätepisteluokka, budjetti ja yhteyden laajuus tarkistetaan ennen valtuustietojen lukemista. Tunniste on tallennettu `openai` yhteys avaimen soveltamisalaan (ei koskaan ympäristöavain); yhteyspohjaa URL kunnioitetaan vain, kun se on `http(s)` URL ilman valtuustietoja, kyselyä tai fragmenttia, joka ei osoita tähän OmniRoute. Puhelu lähtee saman suojatun liikenteen kautta kuin `decision` -automaattireititin ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): palveluntarjoajan lähtevä vartija, ei uudelleenyrityksiä, ei uudelleenohjauksia, 5 sekunnin aikakatkaisu ja 64 KB vastausraja (suurempi vastaus on 502). Pyyntöjen enimmäismäärä on 4 MiB. Jokainen puhelu lähettää uuden `Idempotency-Key`. Virheillä on vain ylävirran tila, ei koskaan sen runko, URL, avain tai kehote.
+
+### Palveluntarjoajan reitit
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -796,7 +755,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Palveluntarjoajan etuliite lisätään automaattisesti, jos se puuttuu. Yhteensopimattomat mallit palauttavat `400`-virheen.
+Palveluntarjoajan etuliite lisätään automaattisesti, jos se puuttuu. Yhteensopimattomat mallit palauttavat `400`.
 
 ---
 

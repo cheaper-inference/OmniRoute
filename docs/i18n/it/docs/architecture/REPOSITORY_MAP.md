@@ -4,9 +4,9 @@
 
 ---
 
-> **Cosa vive dove: ogni directory di livello superiore e file root monitorati, con uno scopo di una riga.** Ultimo aggiornamento: 2026-11-13 (OmniRoute v3.8.54)
+> **Cosa vive dove: ogni directory di livello superiore e file root monitorati, con uno scopo di una riga.**
 >
-> Utilizza questa mappa per orientarti nel codebase, quindi segui i collegamenti ai documenti dedicati. I conteggi dei file sono stati misurati con `git ls-files` nella data sopra indicata. Cambiano con quasi ogni versione, quindi trattali come ordini di grandezza.
+> Utilizza questa mappa per orientarti nel codebase, quindi segui i collegamenti ai documenti dedicati. I conteggi dei file provengono da `git ls-files` e cambiano con quasi ogni versione. Trattateli come ordini di grandezza.
 
 ## Albero di primo livello
 

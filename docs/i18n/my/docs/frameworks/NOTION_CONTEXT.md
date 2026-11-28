@@ -58,41 +58,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 Method သုံးခုစလုံးသည် dashboard authentication (`isAuthenticated`) လိုအပ်သည်။ `POST` ပြုလုပ်ချိန်တွင်
 OmniRoute သည် token ကို သိမ်းဆည်းပြီး ရလဒ် ၁ ခုပါ စမ်းသပ်ရှာဖွေမှုကို ချက်ချင်း လုပ်ဆောင်သည်။ Notion က error object တစ်ခု ပြန်ပေးပါက token ကို ရှင်းလင်းပြီး call သည် `400` ဖြင့် မအောင်မြင်ပါ။
 
-## MCP tool များ (၆ ခု)
+## MCP ကိရိယာ (၆) ခု၊
 
-`open-sse/mcp-server/tools/notionTools.ts` တွင် သတ်မှတ်ထားသည်။ Token ကို call
-ပြုလုပ်ချိန်တွင် `getNotionToken()` မှတစ်ဆင့် ရယူသည်။ စီစဉ်သတ်မှတ်ထားခြင်း မရှိပါက tool က
-`"Notion integration token not configured. Set it in Settings > Context Sources."` ကို throw လုပ်သည်။
+`open-sse/mcp-server/tools/notionTools.ts` တွင်သတ်မှတ်ထားသည်။ တိုကင်ကို `getNotionToken()` မှတစ်ဆင့် ခေါ်ဆိုချိန်၌ ဖြေရှင်းသည်။ တစ်ခုမှ configured မလုပ်ပါက tool သည် `"Notion integration token not configured. Set it in Settings > Context Sources."` ပစ်သည်။
 
-| Tool                         | Scope          | ဖော်ပြချက်                                                                                                                             |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | စာသား query ဖြင့် page များနှင့် database များကို ရှာဖွေသည် (ခေါင်းစဉ်များ၊ ID များနှင့် URL များကို ပြန်ပေးသည်)။ Pagination ပါဝင်သည်။ |
-| `notion_get_page`            | `read:notion`  | ID ဖြင့် page တစ်ခု၏ အကြောင်းအရာနှင့် metadata ကို ရယူသည်။                                                                             |
-| `notion_list_block_children` | `read:notion`  | Block သို့မဟုတ် page တစ်ခု၏ block child အားလုံး (block tree) ကို စာရင်းပြုစုသည်။ Pagination ပါဝင်သည်။                                  |
-| `notion_query_database`      | `read:notion`  | ရွေးချယ်နိုင်သော `filter` + `sorts` (Notion API format) ဖြင့် database တစ်ခုကို query လုပ်သည်။ Pagination ပါဝင်သည်။                    |
-| `notion_get_database`        | `read:notion`  | ID ဖြင့် database တစ်ခု၏ schema/metadata ကို ရယူသည်။                                                                                   |
-| `notion_append_blocks`       | `write:notion` | ရှိပြီးသား block သို့မဟုတ် page တစ်ခုသို့ block child များ ထပ်ဖြည့်သည် (request တစ်ခုလျှင် အများဆုံး block ၁၀၀)။                       |
+| ကိရိယာ                       | အတိုင်းအတာ     | ဖော်ပြချက်                                                                                                                |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | စာသားမေးမြန်းမှုဖြင့် စာမျက်နှာများနှင့် ဒေတာဘေ့စ်များကို ရှာဖွေပါ (ခေါင်းစဉ်များ၊ IDs၊ URLs) ကို ပြန်ပေးသည်။ တွဲထားသည်။  |
+| `notion_get_page`            | `read:notion`  | ၎င်း၏ ID ဖြင့် စာမျက်နှာတစ်ခု၏ အကြောင်းအရာနှင့် မက်တာဒေတာကို ရယူပါ။                                                       |
+| `notion_list_block_children` | `read:notion`  | ဘလော့တစ်ခု သို့မဟုတ် စာမျက်နှာတစ်ခု၏ ဘလောက်ကလေးများအားလုံးကို စာရင်းပြုစုပါ။ တွဲထားသည်။                                   |
+| `notion_query_database`      | `read:notion`  | ရွေးချယ်နိုင်သော `filter` + `sorts` (Notion API ဖော်မတ်) ဖြင့် ဒေတာဘေ့စ်ကို မေးမြန်းပါ။ တွဲထားသည်။                        |
+| `notion_get_database`        | `read:notion`  | ID ဖြင့် ဒေတာဘေ့စ်တစ်ခု၏ schema/metadata ရယူပါ။                                                                           |
+| `notion_append_blocks`       | `write:notion` | ဘလောက်ကလေးများကို ရှိပြီးသားဘလောက် သို့မဟုတ် စာမျက်နှာတစ်ခုသို့ ပေါင်းထည့်ပါ (တောင်းဆိုမှုတစ်ခုလျှင် အများဆုံး 100 တုံး)။ |
 
-### Input parameter များ
+### ထည့်သွင်းမှုဘောင်များ
 
-- `notion_search` — `query` (စာလုံးရေ ၁–၅၀၀), `pageSize` (၁–၁၀၀၊ မူလတန်ဖိုး ၂၀),
-  `startCursor` (ရွေးချယ်နိုင်သည်)။
-- `notion_get_page` — `pageId` (စာလုံးရေ ၃၂ လုံးရှိသော hex သို့မဟုတ် UUID)။
-- `notion_list_block_children` — `blockId`, `pageSize` (၁–၁၀၀၊ မူလတန်ဖိုး ၅၀),
-  `startCursor` (ရွေးချယ်နိုင်သည်)။
-- `notion_query_database` — `databaseId`, `filter` (ရွေးချယ်နိုင်သည်၊ Notion filter format),
-  `sorts` (ရွေးချယ်နိုင်သော array), `pageSize` (၁–၁၀၀၊ မူလတန်ဖိုး ၅၀), `startCursor` (ရွေးချယ်နိုင်သည်)။
-- `notion_get_database` — `databaseId`။
-- `notion_append_blocks` — `blockId`, `children` (block object များ၏ array),
-  `after` (ရွေးချယ်နိုင်သော နေရာ)။
+- `notion_search` — `query` (1–500 chars), `pageSize` (1–100, ပုံသေ 20), `startCursor` (ချန်လှပ်ထားနိုင်သည်)။
+- `notion_get_page` — `pageId` (32-char hex သို့မဟုတ် UUID)။
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100၊ မူရင်း 50), `startCursor` (ချန်လှပ်ထားနိုင်သည်)။
+- `notion_query_database` — `databaseId`, `filter` (ချန်လှပ်ထားနိုင်သော၊ Notion စစ်ထုတ်မှုဖော်မတ်)၊ `sorts` (ချန်လှပ်ထားသည့် ခင်းကျင်း)၊ `pageSize` (1–100၊ ပုံသေ 50)၊ `startCursor` (ချန်လှပ်ထားနိုင်သည်)။
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`, `children` (ပိတ်ဆို့အရာဝတ္ထုများ၏ အခင်းအကျင်း), `after` (ချန်လှပ်ထားသည့် အနေအထား)။
 
-### Scope များ
+### နယ်ပယ်များ
 
-ဖတ်ရှုရေး tool များသည် `read:notion` လိုအပ်ပြီး ရေးသားရေး tool သည် `write:notion` လိုအပ်သည်။
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` ဖြစ်သည့်အခါမှသာ
-`open-sse/mcp-server/server.ts` ရှိ `withScopeEnforcement()` က scope များကို မဖြစ်မနေ လိုက်နာစေသည်။ Call ပြုလုပ်သူ၏ ခွင့်ပြုထားသော scope များကို `OMNIROUTE_MCP_SCOPES` (ကော်မာဖြင့် ပိုင်းခြားထားသည်) သို့မဟုတ်
-authentication ပြုလုပ်ထားသော API key ၏ scope context မှ ရယူသည်။ Scope model အပြည့်အစုံအတွက်
-[MCP-SERVER.md](./MCP-SERVER.md) ကို ကြည့်ပါ။
+read tools သည် `read:notion` လိုအပ်ပြီး write tool သည် `write:notion` လိုအပ်သည်။ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` တွင် `withScopeEnforcement()` ဖြင့် နယ်ပယ်များကို `open-sse/mcp-server/server.ts` တွင် ပြဌာန်းထားပြီး API `manage` `admin` HTTP/SSE ခေါ်ဆိုသူအတွက် အမြဲတမ်း ခေါ်ဆိုသူ၏ ခွင့်ပြုထားသော နယ်ပယ်များသည် `OMNIROUTE_MCP_SCOPES` (ကော်မာ-ခြားထားသည်) သို့မဟုတ် စစ်မှန်ကြောင်း အတည်ပြုထားသော API သော့၏ နယ်ပယ်အကြောင်းအရာမှ လာပါသည်။ နယ်ပယ်အပြည့်အစုံမော်ဒယ်အတွက် [MCP-SERVER.md](./MCP-SERVER.md) ကြည့်ပါ။
 
 ## Endpoints
 

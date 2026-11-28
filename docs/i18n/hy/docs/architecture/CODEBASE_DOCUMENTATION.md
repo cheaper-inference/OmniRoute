@@ -4,18 +4,11 @@
 
 ---
 
-> **Տարբերակ՝** v3.8.51
-> **Վերջին թարմացումը՝** 2026-06-28
-> **Լսարան՝** ինժեներներ, որոնք ներդրում են կատարում OmniRoute-ում կամ դրա հիման վրա ինտեգրումներ են կառուցում։
+> **Տարբերակ:** v3.8.51** Հանդիսատես.** Ինժեներներ, որոնք նպաստում են OmniRoute կամ դրա վերևում ինտեգրում են ստեղծում:
 >
-> Բարձր մակարդակի ճարտարապետական գծապատկերների և յուրաքանչյուր ենթահամակարգի հիմքում ընկած հիմնավորումների համար կարդացեք
-> [ARCHITECTURE.md](./ARCHITECTURE.md)։ Առանձին ենթահամակարգերի մանրամասն նկարագրությունների համար
-> (Auto Combo, MCP սերվեր, A2A սերվեր, Skills, Memory, Cloud Agents, Resilience,
-> Compression և այլն) տե՛ս այս `docs/` գրացուցակում դրանց նվիրված ֆայլերը։
+> Բարձր մակարդակի ճարտարապետության դիագրամների և յուրաքանչյուր ենթահամակարգի հիմքում ընկած պատճառաբանության համար կարդացեք [ARCHITECTURE.md](./ARCHITECTURE.md) ։ Առանձին ենթահամակարգերում խորը սուզումների համար (Auto Combo, MCP սերվեր, A2A սերվեր, Skills, Memory, Cloud Agents, Resilience, Compression և այլն) տեսեք դրանց նվիրված ֆայլերը այս `docs/` գրացուցակում:
 
-Այս ֆայլը նկարագրում է **այն, ինչ այսօր առկա է շտեմարանում**, որպեսզի նոր ինժեները
-կարողանա կողմնորոշվել ծառում, հասկանալ կատարման ժամանակի շերտավորումը և իմանալ՝ որտեղ ավելացնել կոդը՝
-առանց նոր մոդուլներ հորինելու։
+Այս ֆայլը նկարագրում է** ինչ կա այսօր պահոցում** որպեսզի նոր ինժեները կարողանա նավարկել ծառի վրա, հասկանալ գործարկման ժամանակի շերտավորումը և իմանալ, թե որտեղ ավելացնել կոդ՝ առանց նոր մոդուլներ հորինելու:
 
 ---
 
@@ -566,35 +559,14 @@ bin/
 
 ## 8. `scripts/`
 
-Ըստ նշանակության կազմակերպված է 6 ենթապանակների մեջ։
+Կազմակերպված է 6 ենթաթղթապանակներով՝ ըստ նպատակի:
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`։
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, ինչպես նաև PR-ների վերահսկման՝ միայն կարդալու համար նախատեսված օժանդակ գործիքները՝
-  `ci-discriminate.sh` (PR-ի ձախողված ստուգումների ստորագրությունները դասակարգում է որպես սեփական / ժառանգված /
-  անհայտ՝ համեմատելով հղումային PR-ի կամ բազային ճյուղի չանցնող ստուգումների խնդրի հետ) և `audit-worktree.sh`
-  (փոփոխված ֆայլեր, պաշտպանված հատվածներ, հեռացված assert-ներ, ճնշումների քանակներ, մնացորդային
-  ժամանակավոր tsconfig-ներ, PR-ի head-ն ընդդեմ տեղային HEAD-ի՝ նախքան աշխատողի PR-ն ընդունելը)։
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`։
-- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`։
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`։
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`։
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, գումարած միայն կարդալու համար PR դայակի օգնականները `ci-discriminate.sh` (տեսակավորում է PR ի անհայտ տեղեկանքը անսարքության մեջ // PR բազային-կարմիր խնդիրը) և `audit-worktree.sh` (կեղտոտ ֆայլեր, պաշտպանված մակերեսներ, հեռացված պնդումներ, ճնշումների քանակ, մնացորդներ tmp tsconfigs, PR head ընդդեմ տեղական HEAD — նախքան աշխատողի PR ընդունումը):
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` նշում է OmniRoute ին բացահայտ վերագրվող տարբերակները (3.6.x և ավելի վաղ): Չեկը անտեսում է ամսաթվերը:
+- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

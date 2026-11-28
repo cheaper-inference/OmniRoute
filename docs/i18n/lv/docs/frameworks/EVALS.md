@@ -183,16 +183,13 @@ Gadījumi tiek izpildīti **secīgi**. Pašlaik nav paralēlas izpildes karoga.
 
 ## Informācijas panelis
 
-Lietotāja saskarne atrodas sadaļā `Informācijas panelis → Lietojums → Novērtējumi`
-(`src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx`). Tajā varat:
+UI dzīvo `Dashboard → Usage → Evals` (`src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx`). No turienes jūs varat:
 
-- Pārlūkot iebūvētos un pielāgotos komplektus, priekšskatot katru gadījumu.
-- Izveidot, rediģēt un dzēst pielāgotus komplektus, izmantojot gadījumu veidotāju.
-- Izvēlēties mērķi (komplekta noklusējumi / modelis / kombinācija), pēc izvēles otru
-  `compareTarget` un API atslēgu, un pēc tam palaist izpildi pēc pieprasījuma.
-- Pārskatīt izpilžu vēsturi, katra gadījuma sekmīgo/nesekmīgo rezultātu, latentumu un reģistrētās izvades.
-- Skatīt mainīgo rezultātu kopsavilkumu, kas apkopots no jaunākās izpildes katrā
-  `(suite, target)` tvērumā.
+- Pārlūkojiet iebūvētos un pielāgotos komplektus, izmantojot katra gadījuma priekšskatījumu.
+- Create/edit/delete pielāgoti komplekti ar korpusa veidotāju.
+- Izvēlieties mērķi (komplekta noklusējuma iestatījumi/modelis/kombinācija), pēc izvēles otru `compareTarget`, pēc izvēles API taustiņu un pēc tam palaidiet pēc pieprasījuma.
+- Pārbaudiet palaišanas vēsturi, katra gadījuma pass/fail, latentumu un uzņemtās izvades.
+- Skatiet slīdošo rādītāju karti, kas apkopota par jaunāko `(suite, target)` darbības jomu.
 
 ## Saistība ar automātiskās novērtēšanas RFC
 

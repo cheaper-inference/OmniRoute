@@ -64,39 +64,29 @@ OmniRoute ਟੋਕਨ ਸੰਭਾਲਦਾ ਹੈ ਅਤੇ ਤੁਰੰਤ 1-
 
 ## MCP ਟੂਲ (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` ਵਿੱਚ ਪਰਿਭਾਸ਼ਿਤ ਹਨ। ਟੋਕਨ ਨੂੰ ਕਾਲ ਦੇ
-ਸਮੇਂ `getNotionToken()` ਰਾਹੀਂ ਰਿਜ਼ਾਲਵ ਕੀਤਾ ਜਾਂਦਾ ਹੈ; ਜੇ ਕੋਈ ਟੋਕਨ ਕੌਂਫਿਗਰ ਨਹੀਂ ਹੈ, ਤਾਂ ਟੂਲ
-`"Notion integration token not configured. Set it in Settings > Context Sources."` ਗਲਤੀ ਸੁੱਟਦਾ ਹੈ।
+`open-sse/mcp-server/tools/notionTools.ts` ਵਿੱਚ ਪਰਿਭਾਸ਼ਿਤ ਟੋਕਨ ਨੂੰ ਕਾਲ ਦੇ ਸਮੇਂ `getNotionToken()` ਰਾਹੀਂ ਹੱਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ; ਜੇਕਰ ਕੋਈ ਵੀ ਸੰਰਚਿਤ ਨਹੀਂ ਹੈ ਤਾਂ ਟੂਲ `"Notion integration token not configured. Set it in Settings > Context Sources."` ਸੁੱਟਦਾ ਹੈ
 
-| ਟੂਲ                          | ਸਕੋਪ           | ਵੇਰਵਾ                                                                                                 |
-| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | ਟੈਕਸਟ ਕਵੇਰੀ ਰਾਹੀਂ ਪੇਜਾਂ ਅਤੇ ਡੇਟਾਬੇਸਾਂ ਦੀ ਖੋਜ ਕਰੋ (ਸਿਰਲੇਖ, IDs, URLs ਵਾਪਸ ਕਰਦਾ ਹੈ)। ਪੇਜੀਨੇਟ ਕੀਤਾ ਹੋਇਆ। |
-| `notion_get_page`            | `read:notion`  | ਕਿਸੇ ਪੇਜ ਦੀ ID ਰਾਹੀਂ ਉਸਦੀ ਸਮੱਗਰੀ ਅਤੇ ਮੈਟਾਡਾਟਾ ਪ੍ਰਾਪਤ ਕਰੋ।                                             |
-| `notion_list_block_children` | `read:notion`  | ਕਿਸੇ ਬਲਾਕ ਜਾਂ ਪੇਜ ਦੇ ਸਾਰੇ ਚਾਈਲਡ ਬਲਾਕਾਂ ਦੀ ਸੂਚੀ ਪ੍ਰਾਪਤ ਕਰੋ (ਬਲਾਕ ਟ੍ਰੀ)। ਪੇਜੀਨੇਟ ਕੀਤਾ ਹੋਇਆ।             |
-| `notion_query_database`      | `read:notion`  | ਵਿਕਲਪਿਕ `filter` + `sorts` (Notion API ਫਾਰਮੈਟ) ਨਾਲ ਡੇਟਾਬੇਸ ਨੂੰ ਕਵੇਰੀ ਕਰੋ। ਪੇਜੀਨੇਟ ਕੀਤਾ ਹੋਇਆ।          |
-| `notion_get_database`        | `read:notion`  | ID ਰਾਹੀਂ ਡੇਟਾਬੇਸ ਦਾ ਸਕੀਮਾ/ਮੈਟਾਡਾਟਾ ਪ੍ਰਾਪਤ ਕਰੋ।                                                        |
-| `notion_append_blocks`       | `write:notion` | ਕਿਸੇ ਮੌਜੂਦਾ ਬਲਾਕ ਜਾਂ ਪੇਜ ਵਿੱਚ ਚਾਈਲਡ ਬਲਾਕ ਜੋੜੋ (ਪ੍ਰਤੀ ਬੇਨਤੀ ਵੱਧ ਤੋਂ ਵੱਧ 100 ਬਲਾਕ)।                     |
+| ਟੂਲ                          | ਸਕੋਪ           | ਵਰਣਨ                                                                                             |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
+| `notion_search`              | `read:notion`  | ਟੈਕਸਟ ਪੁੱਛਗਿੱਛ ਦੁਆਰਾ ਪੰਨਿਆਂ ਅਤੇ ਡੇਟਾਬੇਸ ਦੀ ਖੋਜ ਕਰੋ (ਰਿਟਰਨ ਸਿਰਲੇਖ, IDs, URLs)। ਪੰਨਾਬੱਧ ਕੀਤਾ।      |
+| `notion_get_page`            | `read:notion`  | ਇਸ ਦੇ ID ਦੁਆਰਾ ਇੱਕ ਪੰਨੇ ਦੀ ਸਮੱਗਰੀ ਅਤੇ ਮੈਟਾਡੇਟਾ ਪ੍ਰਾਪਤ ਕਰੋ।                                       |
+| `notion_list_block_children` | `read:notion`  | ਬਲਾਕ ਜਾਂ ਪੰਨੇ (ਬਲਾਕ ਟ੍ਰੀ) ਦੇ ਸਾਰੇ ਬਲਾਕ ਬੱਚਿਆਂ ਦੀ ਸੂਚੀ ਬਣਾਓ। ਪੰਨਾਬੱਧ ਕੀਤਾ।                        |
+| `notion_query_database`      | `read:notion`  | ਵਿਕਲਪਿਕ `filter` + `sorts` (Notion API ਫਾਰਮੈਟ) ਦੇ ਨਾਲ ਇੱਕ ਡੇਟਾਬੇਸ ਦੀ ਪੁੱਛਗਿੱਛ ਕਰੋ। ਪੰਨਾਬੱਧ ਕੀਤਾ। |
+| `notion_get_database`        | `read:notion`  | ID ਦੁਆਰਾ ਇੱਕ ਡੇਟਾਬੇਸ ਦਾ schema/metadata ਪ੍ਰਾਪਤ ਕਰੋ।                                              |
+| `notion_append_blocks`       | `write:notion` | ਬਲਾਕ ਬੱਚਿਆਂ ਨੂੰ ਮੌਜੂਦਾ ਬਲਾਕ ਜਾਂ ਪੰਨੇ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ (ਪ੍ਰਤੀ ਬੇਨਤੀ ਅਧਿਕਤਮ 100 ਬਲਾਕ)।               |
 
-### ਇਨਪੁੱਟ ਪੈਰਾਮੀਟਰ
+### ਇਨਪੁਟ ਪੈਰਾਮੀਟਰ
 
-- `notion_search` — `query` (1–500 ਅੱਖਰ), `pageSize` (1–100, ਡਿਫਾਲਟ 20),
-  `startCursor` (ਵਿਕਲਪਿਕ)।
-- `notion_get_page` — `pageId` (32-ਅੱਖਰੀ ਹੈਕਸ ਜਾਂ UUID)।
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ਡਿਫਾਲਟ 50),
-  `startCursor` (ਵਿਕਲਪਿਕ)।
-- `notion_query_database` — `databaseId`, `filter` (ਵਿਕਲਪਿਕ, Notion ਫਿਲਟਰ ਫਾਰਮੈਟ),
-  `sorts` (ਵਿਕਲਪਿਕ ਐਰੇ), `pageSize` (1–100, ਡਿਫਾਲਟ 50), `startCursor` (ਵਿਕਲਪਿਕ)।
-- `notion_get_database` — `databaseId`।
-- `notion_append_blocks` — `blockId`, `children` (ਬਲਾਕ ਆਬਜੈਕਟਾਂ ਦੀ ਐਰੇ),
-  `after` (ਵਿਕਲਪਿਕ ਸਥਿਤੀ)।
+- `notion_search` — `query` (1–500 ਅੱਖਰ), `pageSize` (1–100, ਡਿਫੌਲਟ 20), `startCursor` (ਵਿਕਲਪਿਕ)।
+- `notion_get_page` — `pageId` (32-char hex ਜਾਂ UUID)।
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ਡਿਫੌਲਟ 50), `startCursor` (ਵਿਕਲਪਿਕ)।
+- `notion_query_database` — `databaseId`, `filter` (ਵਿਕਲਪਿਕ, Notion ਫਿਲਟਰ ਫਾਰਮੈਟ), `sorts` (ਵਿਕਲਪਿਕ ਐਰੇ), `pageSize` (1–100, ਡਿਫੌਲਟ 50), `startCursor` (ਵਿਕਲਪਿਕ)।
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`, `children` (ਬਲਾਕ ਵਸਤੂਆਂ ਦੀ ਐਰੇ), `after` (ਵਿਕਲਪਿਕ ਸਥਿਤੀ)।
 
-### ਸਕੋਪ
+### ਦਾਇਰੇ
 
-ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲਾਂ ਲਈ `read:notion` ਅਤੇ ਲਿਖਣ ਵਾਲੇ ਟੂਲ ਲਈ `write:notion` ਲੋੜੀਂਦਾ ਹੈ।
-ਸਕੋਪਾਂ ਨੂੰ `open-sse/mcp-server/server.ts` ਵਿੱਚ `withScopeEnforcement()` ਵੱਲੋਂ
-ਕੇਵਲ ਉਦੋਂ ਲਾਗੂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਜਦੋਂ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ਹੋਵੇ; ਕਾਲਰ ਦੇ ਮਨਜ਼ੂਰਸ਼ੁਦਾ
-ਸਕੋਪ `OMNIROUTE_MCP_SCOPES` (ਕੌਮਿਆਂ ਨਾਲ ਵੱਖ ਕੀਤੇ) ਜਾਂ ਪ੍ਰਮਾਣਿਤ API ਕੁੰਜੀ ਦੇ ਸਕੋਪ
-ਸੰਦਰਭ ਤੋਂ ਆਉਂਦੇ ਹਨ। ਪੂਰੇ ਸਕੋਪ ਮਾਡਲ ਲਈ [MCP-SERVER.md](./MCP-SERVER.md) ਵੇਖੋ।
+ਰੀਡ ਟੂਲ ਲਈ `read:notion` ਲੋੜ ਹੁੰਦੀ ਹੈ ਅਤੇ ਲਿਖਣ ਵਾਲੇ ਟੂਲ ਲਈ `write:notion` ਲੋੜ ਹੁੰਦੀ ਹੈ। ਸਕੋਪਾਂ ਨੂੰ `open-sse/mcp-server/server.ts` ਵਿੱਚ `withScopeEnforcement()` ਦੁਆਰਾ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ਦੁਆਰਾ ਲਾਗੂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਅਤੇ ਹਮੇਸ਼ਾਂ ਇੱਕ HTTP/SSE ਕਾਲਰ ਲਈ ਜਿਸਦੀ API ਕੁੰਜੀ ਵਿੱਚ `manage`/`admin` ਘਾਟ ਹੁੰਦੀ ਹੈ; ਕਾਲਰ ਦੇ ਮਨਜ਼ੂਰ ਕੀਤੇ ਸਕੋਪ `OMNIROUTE_MCP_SCOPES` (ਕਾਮਾ ਨਾਲ ਵੱਖ ਕੀਤੇ) ਜਾਂ ਪ੍ਰਮਾਣਿਤ API ਕੁੰਜੀ ਦੇ ਸਕੋਪ ਸੰਦਰਭ ਤੋਂ ਆਉਂਦੇ ਹਨ। ਪੂਰੇ ਸਕੋਪ ਮਾਡਲ ਲਈ [MCP-SERVER.md](./MCP-SERVER.md) ਦੇਖੋ।
 
 ## ਐਂਡਪੌਇੰਟ
 

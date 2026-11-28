@@ -67,44 +67,31 @@ It-tliet metodi kollha jeħtieġu awtentikazzjoni tad-dashboard (`isAuthenticate
 wieħed; jekk Notion jirritorna oġġett ta’ żball, it-token jitneħħa u s-sejħa tfalli
 b’`400`.
 
-## Għodod MCP (6)
+## għodda MCP (6)
 
-Iddefiniti f’`open-sse/mcp-server/tools/notionTools.ts`. It-token jiġi riżolt fil-ħin
-tas-sejħa permezz ta’ `getNotionToken()`; jekk l-ebda wieħed ma jkun ikkonfigurat,
-l-għodda tarmi
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
+Defined in `open-sse/mcp-server/tools/notionTools.ts`. It-token jiġi solvut fil-ħin tas-sejħa permezz ta `getNotionToken()`; jekk xejn ma jkun ikkonfigurat l-għodda tarmi `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
 | Għodda                       | Ambitu         | Deskrizzjoni                                                                                      |
 | ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Fittex paġni u databases permezz ta’ query testwali (jirritorna titli, IDs, URLs). Paġinat.       |
-| `notion_get_page`            | `read:notion`  | Ikseb il-kontenut u l-metadata ta’ paġna permezz tal-ID tagħha.                                   |
-| `notion_list_block_children` | `read:notion`  | Elenka l-blokki wlied kollha ta’ blokka jew paġna (is-siġra tal-blokki). Paġinat.                 |
-| `notion_query_database`      | `read:notion`  | Agħmel query fuq database b’`filter` + `sorts` fakultattivi (format tal-API ta’ Notion). Paġinat. |
-| `notion_get_database`        | `read:notion`  | Ikseb l-iskema/metadata ta’ database permezz tal-ID.                                              |
-| `notion_append_blocks`       | `write:notion` | Żid blokki wlied ma’ blokka jew paġna eżistenti (massimu ta’ 100 blokka għal kull talba).         |
+| `notion_search`              | `read:notion`  | Fittex paġni u databases skont it-test (jirritorna titoli, IDs, URLs). Paġnati.                   |
+| `notion_get_page`            | `read:notion`  | Ikseb il-kontenut u l-metadata ta' paġna minn ID tagħha.                                          |
+| `notion_list_block_children` | `read:notion`  | Elenka t-tfal kollha tal-blokk ta' blokka jew paġna (is-siġra tal-blokk). Paġnati.                |
+| `notion_query_database`      | `read:notion`  | Mistoqsija database `sorts` `filter` + fakultattiv ( format Notion API ). Paġnati.                |
+| `notion_get_database`        | `read:notion`  | Ikseb schema/metadata ta' database minn ID.                                                       |
+| `notion_append_blocks`       | `write:notion` | Waħħal it-tfal tal-blokk ma' blokka jew paġna eżistenti (massimu ta' 100 blokka għal kull talba). |
 
-### Parametri tal-input
+### Parametri tad-dħul
 
-- `notion_search` — `query` (1–500 karattru), `pageSize` (1–100, valur predefinit 20),
-  `startCursor` (fakultattiv).
-- `notion_get_page` — `pageId` (hex jew UUID ta’ 32 karattru).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, valur predefinit 50),
-  `startCursor` (fakultattiv).
-- `notion_query_database` — `databaseId`, `filter` (fakultattiv, format tal-filtru ta’
-  Notion), `sorts` (array fakultattiv), `pageSize` (1–100, valur predefinit 50),
-  `startCursor` (fakultattiv).
+- `notion_search` — `query` (1–500 karattri), `pageSize` (1–100, default 20), `startCursor` (mhux obbligatorju).
+- `notion_get_page` — `pageId` (32-char hex jew UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, default 50), `startCursor` (mhux obbligatorju).
+- `notion_query_database` — `databaseId`, `filter` (mhux obbligatorju, format tal-filtru Notion ), `sorts` (matriċi fakultattiva), `pageSize` (1–100, default 50), `startCursor` (mhux obbligatorju).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (array ta’ oġġetti ta’ blokki),
-  `after` (pożizzjoni fakultattiva).
+- `notion_append_blocks` — `blockId`, `children` (matriċi ta’ oġġetti tal-blokk), `after` (pożizzjoni fakultattiva).
 
 ### Ambiti
 
-L-għodod tal-qari jeħtieġu `read:notion` u l-għodda tal-kitba teħtieġ `write:notion`.
-L-ambiti jiġu infurzati minn `withScopeEnforcement()` f’
-`open-sse/mcp-server/server.ts` biss meta `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; l-ambiti
-permessi għal min jagħmel is-sejħa jiġu minn `OMNIROUTE_MCP_SCOPES` (separati
-b’virgoli) jew mill-kuntest tal-ambitu taċ-ċavetta API awtentikata. Ara
-[MCP-SERVER.md](./MCP-SERVER.md) għall-mudell sħiħ tal-ambiti.
+L-għodod tal-qari jeħtieġu `read:notion` u l-għodda tal-kitba teħtieġ `write:notion`. L-iskopijiet huma infurzati minn `withScopeEnforcement()` `open-sse/mcp-server/server.ts` meta `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, u dejjem għal min iċempel HTTP/SSE li ċ-ċavetta API tiegħu m'għandhiex `manage`/`admin`; l-ambiti permessi ta' min iċempel jiġu minn `OMNIROUTE_MCP_SCOPES` (separati b'virgola) jew mill-kuntest tal-ambitu taċ-ċavetta API awtentikata. Ara [MCP-SERVER.md](./MCP-SERVER.md) għall-mudell tal-ambitu sħiħ.
 
 ## Endpoints
 

@@ -123,53 +123,46 @@ qoruyur.
 
 ## MCP alətləri (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts` faylında müəyyən edilib. Token/baza URL-i hər çağırış üçün müəyyənləşdirilir (əvvəlcə API açarına aid olan, sonra qlobal). OmniRoute **sinxronizasiya serverinə** müraciət edən alətlər (dörd `obsidian_sync_*` aləti) əlavə olaraq OmniRoute parametrlərində konfiqurasiya edilmiş sinxronizasiya autentifikasiya tokenini tələb edir.
+`open-sse/mcp-server/tools/obsidianTools.ts` ilə müəyyən edilmişdir. token/base-URL hər zəng üzrə həll edilir (əvvəlcə hər bir API açarı, sonra qlobal). OmniRoute yə çatan alətlər** sinxronizasiya serveri** (dörd `obsidian_sync_*` aləti) əlavə olaraq OmniRoute parametrlərində konfiqurasiya edilmiş sinxronizasiya auth tokenini tələb edir.
 
-### Oxuma alətləri (`read:obsidian`)
+### Oxu alətləri (`read:obsidian`)
 
-| Alət                         | Təsvir                                                                                                              |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Local REST API-nin əlçatan və autentifikasiya edilmiş olub-olmadığını yoxlayır.                                     |
-| `obsidian_search_simple`     | Qeyd məzmununda tam mətn axtarışı aparır; fayl yolları ilə birlikdə fraqmentləri qaytarır.                          |
-| `obsidian_search_structured` | JSON Logic ifadəsindən istifadə edərək axtarış aparır (and/or/regex/path filtrləri).                                |
-| `obsidian_read_note`         | Anbara nəzərən nisbi yol ilə qeydi oxuyur; istəyə görə konkret başlığı/bloku/frontmatter-i oxuyur.                  |
-| `obsidian_list_vault`        | Anbardakı fayl və qovluqları siyahıya alır (elementlər ağacı).                                                      |
-| `obsidian_get_document_map`  | Qeydin başlıq strukturunu başlıqlar → sətir nömrələri xəritəsi kimi əldə edir.                                      |
-| `obsidian_get_note_metadata` | Tam məzmun olmadan frontmatter-i, teqləri, keçidləri, simvol/söz sayını əldə edir.                                  |
-| `obsidian_get_active_file`   | Hazırda Obsidian-da aktiv olan faylın yolunu və məzmununu əldə edir.                                                |
-| `obsidian_get_periodic_note` | Verilmiş tarix üçün gündəlik/həftəlik/aylıq dövri qeydi əldə edir (buraxılarsa, bu gün).                            |
-| `obsidian_get_tags`          | Bütün anbar teqlərini istifadə tezlikləri ilə birlikdə siyahıya alır.                                               |
-| `obsidian_list_commands`     | Mövcud Obsidian əmr ID-lərini siyahıya alır (`obsidian_execute_command` ilə istifadə üçün).                         |
-| `obsidian_sync_status`       | OmniRoute sinxronizasiya serverinin statusu: işləmə vəziyyəti, anbar adı, port, işləmə müddəti, son sinxronizasiya. |
-| `obsidian_sync_conflicts`    | Həll olunmamış sinxronizasiya münaqişələrini siyahıya alır (yol, münaqişə yolu, aşkarlanma vaxtı).                  |
+| Alət                         | Təsvir                                                                                                    |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Yerli REST API əlçatan olub-olmadığını və doğruluğunu yoxlayın.                                           |
+| `obsidian_search_simple`     | Qeyd məzmununun tam mətn axtarışı; fayl yolları olan fraqmentləri qaytarır.                               |
+| `obsidian_search_structured` | JSON Məntiq ifadəsindən istifadə edərək axtarış edin (and/or/regex/path filtrləri).                       |
+| `obsidian_read_note`         | Tonoz-nisbi yolla qeydi oxuyun; isteğe bağlı olaraq xüsusi bir heading/block/frontmatter.                 |
+| `obsidian_list_vault`        | Kassadakı faylları və qovluqları sadalayın (girişlər ağacı).                                              |
+| `obsidian_get_document_map`  | Qeydin başlıq strukturunu → sətir nömrələrinin başlıqlarının xəritəsi kimi əldə edin.                     |
+| `obsidian_get_note_metadata` | Tam məzmun olmadan frontmatter, teqlər, keçidlər, char/word sayı əldə edin.                               |
+| `obsidian_get_active_file`   | Obsidian-də hazırda aktiv olan faylın yolunun + məzmununu əldə edin.                                      |
+| `obsidian_get_periodic_note` | Tarix üçün daily/weekly/monthly dövri qeydini əldə edin (buraxılmayıbsa, bu gün).                         |
+| `obsidian_get_tags`          | Bütün kassa teqlərini tezlikləri ilə sadalayın.                                                           |
+| `obsidian_list_commands`     | Mövcud Obsidian komanda IDs siyahısı ( `obsidian_execute_command` ilə istifadə edin).                     |
+| `obsidian_sync_status`       | OmniRoute sync server statusu: çalışır, kassa adı, port, iş vaxtı, son sinxronizasiya.                    |
+| `obsidian_sync_conflicts`    | Həll edilməmiş sinxronizasiya konfliktlərinin siyahısını sadalayın (yol, münaqişə yolu, aşkar olunduqda). |
 
-### Yazma alətləri (`write:obsidian`)
+### Yazı alətləri (`write:obsidian`)
 
-| Alət                             | Təsvir                                                                                                                           |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Verilmiş Markdown məzmunu ilə qeyd yaradır və ya mövcud qeydin üzərinə yazır.                                                    |
-| `obsidian_append_note`           | Qeydə məzmun əlavə edir; istəyə görə konkret başlığa/bloka.                                                                      |
-| `obsidian_patch_note`            | Başlıq, blok və ya frontmatter sahəsində dəqiq şəkildə sona/əvvələ əlavə edir və ya əvəzləyir.                                   |
-| `obsidian_delete_note`           | Qeydi anbardan birdəfəlik silir.                                                                                                 |
-| `obsidian_move_note`             | Anbar daxilində qeydi köçürür və ya adını dəyişir.                                                                               |
-| `obsidian_execute_command`       | Obsidian əmrini onun əmr ID-si ilə icra edir.                                                                                    |
-| `obsidian_open_file`             | Obsidian-da faylı açır (mövcud deyilsə, yaradır).                                                                                |
-| `obsidian_sync_trigger`          | Dərhal ikitərəfli masaüstü↔mobil anbar sinxronizasiyasını başladır.                                                              |
-| `obsidian_sync_resolve_conflict` | Sinxronizasiya münaqişəsini həll edir: `local` (mobil), `remote` (masaüstü) saxlayır və ya `keep-both` ilə hər ikisini saxlayır. |
+| Alət                             | Təsvir                                                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Verilmiş Markdown məzmunu ilə qeyd yaradın və ya üzərinə yazın.                                         |
+| `obsidian_append_note`           | Qeydə məzmun əlavə edin; isteğe bağlı olaraq xüsusi heading/block.                                      |
+| `obsidian_patch_note`            | Başlıq, blok və ya ön maddə sahəsində cərrahi olaraq append/prepend/replace.                            |
+| `obsidian_delete_note`           | Anbardan qeydi həmişəlik silin.                                                                         |
+| `obsidian_move_note`             | Anbarda qeydi köçürün və ya adını dəyişin.                                                              |
+| `obsidian_execute_command`       | ID əmri ilə Obsidian əmrini yerinə yetirin.                                                             |
+| `obsidian_open_file`             | Obsidian -da faylı açın (əgər mövcud deyilsə onu yaradır).                                              |
+| `obsidian_sync_trigger`          | Dərhal iki istiqamətli iş masası ↔ mobil kassa sinxronizasiyasını işə salın.                            |
+| `obsidian_sync_resolve_conflict` | Sinxronizasiya münaqişəsini həll edin: `local` (mobil), `remote` (masaüstü) və ya `keep-both` saxlayın. |
 
 > [!NOTE]
-> `obsidian_patch_note` hədəfləri `heading | block | frontmatter` `targetType`-ını
-> və `append | prepend | replace` `operation`-ını, həmçinin istəyə bağlı
-> `createTargetIfMissing` parametrini qəbul edir. Dörd `obsidian_sync_*` aləti yerli sinxronizasiya
-> serveri ilə əlaqə saxlayır (standart olaraq `http://127.0.0.1:27781`) və sinxronizasiya tokenini tələb edir.
+> `obsidian_patch_note` hədəfləri isteğe bağlı `createTargetIfMissing` ilə `targetType` `heading | block | frontmatter` və `operation` `append | prepend | replace` qəbul edir. Dörd `obsidian_sync_*` aləti yerli sinxronizasiya serveri ilə danışır (defolt olaraq `http://127.0.0.1:27781` ) və sinxronizasiya nişanı tələb edir.
 
 ### Əhatə dairələri
 
-Oxuma alətləri `read:obsidian`, yazma alətləri isə `write:obsidian` tələb edir. Tətbiqetmə
-Notion ilə eynidir — `open-sse/mcp-server/server.ts` faylındakı `withScopeEnforcement()`
-tərəfindən idarə olunur, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ilə aktivləşdirilir və icazə verilən
-əhatə dairələri `OMNIROUTE_MCP_SCOPES` dəyişənindən və ya API açarının əhatə dairəsi kontekstindən əldə edilir. Baxın:
-[MCP-SERVER.md](./MCP-SERVER.md).
+Oxu alətləri `read:obsidian` tələb edir; yazma alətləri `write:obsidian` tələb edir. Tətbiqetmə `open-sse/mcp-server/server.ts`-də `withScopeEnforcement()` tərəfindən idarə olunan Notion — ilə eynidir, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` də qapalıdır və API açarında `manage`/`admin` olmayan HTTP/SSE zəng edənlər üçün məcburi aktivləşdirilir, icazə verilən əhatə dairələri `OMNIROUTE_MCP_SCOPES` və ya API açarının əhatə dairəsi kontekstindən qaynaqlanır. [MCP-SERVER.md](./MCP-SERVER.md) baxın.
 
 ## Son nöqtələr
 

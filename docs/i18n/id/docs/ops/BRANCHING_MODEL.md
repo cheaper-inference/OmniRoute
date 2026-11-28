@@ -47,13 +47,13 @@ biasanya perlu ditargetkan ulang sebelum digabungkan.
 Ketika rilis sedang direkonsiliasi, masalah penanda berlabel `release-freeze` dibuka. Itu** tidak menghentikan pembangunan** :
 
 - `release/vX.Y.Z` yang dibekukan adalah milik kapten pelepas kapal itu.
-- `release/vX+1` siklus berikutnya dipotong dari ujung yang beku sehingga kontributor terus melakukan pekerjaan pendaratan.
+- `release/vX+1` siklus berikutnya dipotong dari ujung yang beku sehingga kontributor tetap melakukan pekerjaan pendaratan.
 - Buka PRs yang masih menargetkan cabang yang dibekukan** ditargetkan ulang** ke cabang `release/v*` aktif (tertinggi).
 
 Periksa apakah ada pembekuan terbuka sebelum mengasumsikan cabang yang Anda inginkan dapat digabungkan:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mekanisme penggabungan (pemilik `queue` label → Mergify) didokumentasikan dalam [MERGE_TRAIN.md](./MERGE_TRAIN.md).

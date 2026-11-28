@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute tarnitakse täielikult installitava progressiivse veebirakendusena. Kui avate töölaua mis tahes mobiilibrauseris — Androidis (Chrome) või iOS-is (Safari) — saate valida „Lisa avakuvale“ ja kasutada omarakendusega sarnanevat kasutuskogemust ilma rakendustepoeta.
+Installige OmniRoute armatuurlaud progressiivse veebirakendusena, et avada see avaekraanilt või töölaualt eraldi aknas. Installitud rakendus vajab navigeerimiseks, armatuurlaua andmete ja API päringute jaoks siiski ühendust teie OmniRoute serveriga. Vahemällu salvestatud staatilised varad ei paku võrguühenduseta lüüsi ega võrguühenduseta armatuurlauda.
 
 ## Mis on PWA?
 
-Progressiivne veebirakendus muudab OmniRoute'i veebitöölaua rakenduseks, mis näeb välja ja toimib nagu omarakendus. Pärast installimist:
+Progressiivne veebirakendus kasutab veebi armatuurlauda rakenduse ikooni ja eraldi aknaga. Pärast installimist OmniRoute:
 
-- Käivitub see avakuvalt oma ikooniga
-- Avaneb see täisekraanil — ilma brauseri aadressiriba või vahelehtede kasutajaliideseta
-- Töötab see võrguühenduseta spetsiaalse ühenduvuslehe abil
-- Salvestab staatilised ressursid kiiremaks laadimiseks vahemällu
-- Toetab nii püst- kui ka rõhtpaigutust
+- Käivitub teie avaekraanilt või töölaualt
+- Avaneb eraldiseisvas režiimis, ilma brauseri tavapärase aadressiriba ja vahekaartideta
+- Vahemällu salvestab valitud staatilised varad
+- Toetab portree- ja rõhtpaigutust
 
-## Installimine
+## Paigaldamine
+
+Kasutage teises seadmes oleva serveri jaoks HTTPS -aadressi. Kui server töötab samas seadmes, vastab `http://localhost:20128` ka brauseri installitavuse nõuetele. Lihtne `http://YOUR_IP:20128` -aadress ei vasta neile nõuetele. Installimismenüüd ja -viibad sõltuvad brauserist ja operatsioonisüsteemist. Vaadake [MDNPWA paigaldusnõudeid](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
 
 ### Android (Chrome)
 
-1. Avage OmniRoute'i töölaud Chrome'is: `http://YOUR_IP:20128`
-2. Chrome kuvab automaatselt bänneri **„Lisa OmniRoute avakuvale“** või tehke järgmist:
-   - Puudutage menüüd **⋮** (kolm punkti) → **„Lisa avakuvale“** või **„Installi rakendus“**
-3. Kinnitage viip
-4. OmniRoute ilmub teie avakuvale eraldiseisva rakendusena
+1. Avage oma OmniRoute HTTPS aadress või `http://localhost:20128` sama telefoni serveri jaoks.
+2. Avage**⋮** menüü ja valige** Installige rakendus** või** Lisa avakuvale** , kui pakutakse.
+3. Kinnitage viip.
+4. Avage OmniRoute avakuval.
 
 ### iOS (Safari)
 
-1. Avage OmniRoute'i töölaud Safaris: `http://YOUR_IP:20128`
-2. Puudutage nuppu **Jaga** (noolega kast)
-3. Kerige alla ja puudutage valikut **„Lisa avakuvale“**
-4. Pange sellele nimi (vaikimisi „OmniRoute“) ja puudutage nuppu **Lisa**
-5. OmniRoute ilmub teie avakuvale rakenduse ikooniga
+1. Avage Safaris oma OmniRoute HTTPS aadress.
+2. Puudutage** Jaga** →** Lisa avakuvale** .
+3. Kinnitage nimi ja puudutage** Lisa** .
+4. Avage OmniRoute avakuval.
 
-### Lauaarvuti (Chrome / Edge)
+### Töölaud (Chrome / Edge)
 
-1. Avage OmniRoute'i töölaud
-2. Klõpsake aadressiribal **installimisikooni** (või ⋮ → „Installi OmniRoute...“)
-3. Kinnitage viip
-4. OmniRoute avaneb eraldiseisvas aknas — ilma vahelehtede ja aadressiribata
+1. Avage oma OmniRoute armatuurlaud.
+2. Kasutage brauseri installiikooni või** Installige rakendus** menüükirje, kui seda pakutakse.
+3. Kinnitage viip OmniRoute avamiseks oma aknas.
 
-## Funktsioonid
+## Omadused
 
-### Täisekraanikogemus
+### Iseseisev aken
 
-Manifest on konfigureeritud sättega `display: "fullscreen"`, mis tähendab, et installitud rakendus kasutab kogu ekraani — ilma brauseri kasutajaliidese ja olekuribaga kattumiseta. See muudab töölaua kasutuskogemuse tõeliselt omarakenduse sarnaseks.
+Manifest seab `display: "standalone"` ja `start_url: "/dashboard"`. Installitud rakendus avab armatuurlaua rakenduse aknas. Brauseri ja operatsioonisüsteemi juhtnupud võivad endiselt ilmuda; manifest ei nõua täisekraanirežiimi.
 
-### Võrguühenduseta kasutamise tugi
+### Vahemällu salvestatud varad ja võrgunõuded
 
-OmniRoute sisaldab service worker'it (`sw.js`), mis pakub nutikat vahemällu salvestamist:
+[Teenindustöötaja](../../public/sw.js) salvestab vahemällu valitud sama päritoluga ressursid:
 
-| Ressursi tüüp                                                                                                                                                                                            | Strateegia                                      | Käitumine                                                                                                          |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Rakenduse kest**                                                                                                                                                                                       | Esmalt vahemälu                                 | `/`, `/offline`, manifest ja ikoonid salvestatakse installimisel eelnevalt vahemällu                               |
-| **Staatilised ressursid** (CSS, JS, pildid, fondid)                                                                                                                                                      | Esmalt võrk, varuvariandina vahemälu            | Hangib värske versiooni võrgust; võrguühenduseta olekus kasutab vahemälu                                           |
-| **Next.js-i paketid** (`/_next/`)                                                                                                                                                                        | Esmalt võrk koos vahemälu uuendamisega          | Hangib võrgust ja uuendab vahemälu; võrguühenduseta olekus edastab vahemällu salvestatud versiooni                 |
-| **Navigeerimispäringud**                                                                                                                                                                                 | Möödajuhtimine (ei püüta kunagi kinni)          | Brauser haldab HTTP/3→HTTP/2 varumehhanismi; mittetoimiv QUIC-sokkel ei tohi muutuda väärtuseks `Response.error()` |
-| **API / töölaua marsruudid** (`/api/`, `/a2a`, `/dashboard`, kliendi API aliased `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, lisaks `/callback`, `/login`; võrreldakse tõstutundetult) | Möödajuhtimine (ei salvestata kunagi vahemällu) | Läheb alati otse serverisse — service worker ei püüa seda kunagi kinni                                             |
+| Taotlus või vara                           | strateegia      | Käitumine                                                                                                                        |
+| ------------------------------------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Installimisaja ressursid                   | Eelvahemälu     | `/`, `/manifest.webmanifest`, `/icon-512.png` ja `/apple-touch-icon.png` salvestatakse töötaja installimise ajal vahemällu       |
+| Next.js staatilised varad (`/_next/`)      | Võrk enne       | Edukad vastused värskendavad vahemälu; võrgutõrge langeb tagasi olemasolevale vahemällu salvestatud vastusele                    |
+| Muud staatilised CSS, JS, pildid ja fondid | Esmalt vahemälu | Olemasolevat vahemällu salvestatud vastust kasutatakse uuesti; edukad võrguvastused salvestatakse vahelejäämise korral vahemällu |
+| Leheküljel navigeerimine                   | Möödasõit       | Brauser tõmbab lehe otse; võrguühenduseta tagavara ei pakuta                                                                     |
+| API, armatuurlaud ja autentimismarsruudid  | Möödasõit       | Töötaja ei peata ega salvesta neid taotlusi vahemällu                                                                            |
+| Muud mittestaatilised taotlused            | Võrk            | Ei mingit vahemälu otsingut ega salvestusruumi                                                                                   |
 
-### Võrguühenduseta leht
+Välistatud marsruudid on `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` ja `/login`, mis on tee piiridel tõstutundlikult sobitatud. Ristpäritolu ja mitte-GET-päringud lähevad samuti töötajast mööda.
 
-Kui võrguühendus pole saadaval ja kasutaja liigub uuele lehele, kuvab service worker spetsiaalse `/offline` lehe, mis:
+### Ühenduvusleht
 
-- Kuvab selge teate **„Ühenduvusprobleem“**
-- Näitab reaalajas uuenevat **võrgus / võrguühenduseta oleku indikaatorit**
-- Pakub nuppu **„Proovi uuesti ühendust luua“**, et ühenduse taastumisel leht uuesti laadida
-- Sisaldab diagnostikaks linki **olekulehele**
+`/offline` lehel on ühenduvussõnum, online/offline indikaator, a** Proovige ühendust uuesti** nuppu ja linki olekulehele. On küll** pole eelnevalt vahemällu salvestatud** ja teenindaja teeb** mitte** suunata ebaõnnestunud navigatsioonid sellele ümber. Selle olemasolu ei muuda uusi lehti ilma serverita juurdepääsetavaks.
 
-### Rakenduse ikoonid
+### Rakenduste ikoonid
 
-OmniRoute pakub iga platvormi jaoks optimeeritud ikoone:
+Manifest reklaamib neid PNG ikoone:
 
-| Fail                   | Suurus           | Kasutuskoht                            |
-| ---------------------- | ---------------- | -------------------------------------- |
-| `icon-512.png`         | 512×512          | Androidi installimisviip, käivituskuva |
-| `apple-touch-icon.png` | 180×180          | iOS-i avakuva ikoon                    |
-| `icon-192.svg`         | 192×192 (vektor) | Androidi kohanduv ikoon                |
-| `apple-touch-icon.svg` | 180×180 (vektor) | Apple'i varuvariant                    |
-| `favicon.svg`          | Vektor           | Brauseri vahelehed                     |
-| `favicon.ico`          | Mitu suurust     | Vanemad brauserid                      |
+| Fail                   | Suurus  | Kasutage                              |
+| ---------------------- | ------- | ------------------------------------- |
+| `icon-192.png`         | 192×192 | Üldine rakenduse ikoon                |
+| `icon-512.png`         | 512×512 | Üldine ja maskeeritav rakenduse ikoon |
+| `apple-touch-icon.png` | 180×180 | Apple'i avakuva ikoon                 |
+
+Brauser valib installi sihtmärgi jaoks sobiva ikooni.
 
 ### Automaatne registreerimine
 
-Service worker registreeritakse automaatselt juurpaigutuse komponendi `<PwaRegister />` kaudu. Kasutaja ei pea midagi tegema — rakendus muutub installitavaks kohe, kui brauser tuvastab kehtiva manifesti ja service worker'i.
+`PwaRegister` registreerib töötaja tootmises, kui brauser toetab teenindustöötajaid. Arendusrežiim tühistab töötajate registreerimise ja tühjendab vahemälu, et vältida aegunud varade segamist kuuma uuesti laadimise ajal. Installimisviibad jäävad brauseri otsuseks.
 
 ## Tehniline arhitektuur
 
-### Veebirakenduse manifest (`manifest.webmanifest`)
+### Veebirakenduse manifest
 
-Loodud Next.js-i poolt faili `src/app/manifest.ts` kaudu:
+Next.js genereerib `/manifest.webmanifest` -st [`src/app/manifest.ts`](../../src/app/manifest.ts). Selle peamised seaded on järgmised:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Seadistamine           | Väärtus                                   |
+| ---------------------- | ----------------------------------------- |
+| `short_name`           | `OmniRoute`                               |
+| `start_url`            | `/dashboard`                              |
+| `scope`                | `/`                                       |
+| `display`              | `standalone`                              |
+| `orientation`          | `any`                                     |
+| Tausta ja teema värvid | Vaikimisi `PWA_THEME_COLORS` valguspalett |
 
-### Teenusetöötaja (`public/sw.js`)
+Manifesti nimi ja kirjeldus on selle lähtefaili staatilised väärtused. Installitud manifest ei järgi igal külastusel eksemplari nime sätet ega aktiivset paletti.
 
-Tavaline teenusetöötaja (ilma raamistikusõltuvusteta), millel on:
+### Teenindustöötaja
 
-- **Installimisetapp**: Salvestab rakenduse kesta (juurlehe, võrguühenduseta lehe, manifesti ja ikoonid) eelnevalt vahemällu
-- **Aktiveerimisetapp**: Eemaldab vanad vahemäluversioonid ja võtab kõik kliendid enda kontrolli alla
-- **Päringuetapp**: Nutikas marsruutimine päringu tüübi alusel (navigeerimine, staatiline ressurss, API)
-- **Vahemälu versioonihaldus**: `omniroute-pwa-v3` — suurendage seda versiooni, et sundida värskendamisel uue vahemälu loomist
+[`public/sw.js`](../../public/sw.js) puudub teenindustöötaja raamistiku sõltuvus:
 
-### Paigutuse metaandmed (`src/app/layout.tsx`)
+- **Installige:** eelmällu salvestab neli ülaltoodud ressurssi ja aktiveerib uue töötaja.
+- **Aktiveeri:** eemaldab vanemad vahemälu põlvkonnad ja nõudekliendid.
+- **Tõmba:** rakendab ülaltoodud staatilise vara strateegiaid ja marsruudi välistusi.
+- **Versioonide koostamine:** allika vahemälu nimi on `omniroute-pwa-v3`; tootmisjärg paneb vahemälu identiteedi templi.
+- **Märguanded:** käsitleb sissetulevaid `push` sündmusi ja fokusseerib või avab akna, kui teatisel klõpsate.
 
-Juurpaigutus sisaldab kõiki PWA nõuetele vastavuseks vajalikke metasilte:
+Tõukesündmuste töötlejad üksi ei loo aktiivset tõuketellimust ega konfigureeritud serveri edastamist. Ärge eeldage, et märguanded on lubatud ainult seetõttu, et PWA on installitud.
 
-- `manifest`-link aadressile `/manifest.webmanifest`
-- `apple-web-app-capable: true` iOS-i eraldiseisva režiimi jaoks
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` Androidi Chrome'i jaoks
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` servast servani renderdamiseks
+### Paigutuse metaandmed ja registreerimine
 
-### Komponent: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) pakub manifesti linki, Apple'i eraldiseisvaid metaandmeid, teemavärve ja `viewport-fit: cover`. Lehe pealkiri ja Apple'i veebirakenduse pealkiri kasutavad eksemplari nime. Reaalajas brauseri teema värv järgib paletti; installi manifest kasutab valguse vaikevärvi.
 
-See failis `src/shared/components/PwaRegister.tsx` asuv kliendikomponent:
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) töötab kliendil ja registreerib `/sw.js` koos ID oma URL. See tuvastab mittevastavad vahemälu põlvkonnad ja saab töötaja lähtestada ja korra uuesti laadida, et vanemast installist taastuda. Registreerimise tõrge ei blokeeri armatuurlauda.
 
-1. Käivitub komponendi ühendamisel (ainult kliendipoolel)
-2. Kontrollib brauseris `serviceWorker`-i toe olemasolu
-3. Registreerib `/sw.js`-i vaikselt (vead jäetakse tähelepanuta, et vältida rakenduse blokeerimist)
-4. Ei renderda midagi (`return null`) — see komponent on mõeldud ainult kõrvalmõju tekitamiseks
+## Kasuta koos Termuxiga (Android)
 
-## Kasutamine Termuxiga (Android)
+1. Käivitage OmniRoute Termuxis: `npx -y omniroute@latest`.
+2. Avage Chrome samas telefonis: `http://localhost:20128`.
+3. Installige PWA brauseri installimenüü kaudu.
+4. Hoidke Termuxi server armatuurlaua kasutamise ajal töös.
 
-OmniRoute'i käitamisel Androidis Termuxi kaudu töötab PWA sujuvalt:
+Telefonis on nii lüüs kui ka selle armatuurlaud. Kaug- AI teenusepakkujate päringud vajavad endiselt juurdepääsu võrgule. Seadistamise ja Androidi protsessi eluea kaalutluste kohta vaadake [Termuxi juhendit](TERMUX_GUIDE.md).
 
-1. Käivitage OmniRoute Termuxis: `npx omniroute`
-2. Avage samas telefonis Chrome: `http://localhost:20128`
-3. Installige PWA valiku „Lisa avakuvale” kaudu
-4. PWA loob ühenduse kohaliku Termuxi serveriga — kõik töötab seadmes
+## Kasutage teistest seadmetest
 
-See kombinatsioon tähendab, et teie Androidi telefon on korraga nii **server** (Termux) kui ka **klient** (PWA) — täielikult iseseisev tehisintellekti lüüs.
-
-## Kasutamine teistest seadmetest
-
-Installige PWA mis tahes seadmesse, mille brauseril on juurdepääs teie OmniRoute'i serverile:
-
-- **Teine telefon/tahvelarvuti**: Minge aadressile `http://PHONE_IP:20128` ja installige PWA
-- **Sülearvuti**: Avage Chrome/Edge ja installige see töölaua-PWA-na
-- **Brauseriga nutiteler**: Avage juhtpaneel täisekraanirežiimis
+Avage telefonis, tahvelarvutis või lauaarvutis serveri HTTPS -aadress, seejärel järgige selle brauseri installiprotsessi. Server peab jääma igast seadmest kättesaadavaks. Kaugjuurdepääsu valikute kohta vaadake [tunneli juhendit](../ops/TUNNELS_GUIDE.md).
 
 ## Kohandamine
 
 ### Eksemplari nimi
 
-PWA pealkiri arvestab jaotises `Dashboard → Settings` määratud seadet **Eksemplari nimi**. Kui nimetate oma eksemplari ümber nimeks „Minu tehisintellekti lüüs”, kuvatakse installitud PWA-l see nimi.
+The** Eksemplari nimi** seade muudab armatuurlaua metaandmeid, sealhulgas lehe pealkirja ja Apple'i veebirakenduse pealkirja. Loodud manifest kasutab staatilist nime, seega ei garanteeri see seade juba installitud rakenduse ümbernimetamist.
 
-### Kohandatud favicon
+### Kohandatud Favicon
 
-Kui laadite jaotise `Dashboard → Settings` kaudu üles kohandatud faviconi, kasutab töölaua PWA teie kohandatud ikooni. Mobiilseadme avakuva ikoonid kasutavad eelnevalt loodud faile `icon-512.png` ja `apple-touch-icon.png`.
+Kohandatud favicon muudab brauseri lemmikikooni. Installi manifest reklaamib endiselt ülalolevaid PNG faile; faviconi muutmine ei asenda neid avaekraani ikoone.
 
 ## Piirangud
 
-- **Tõukemärguanded puuduvad** — Service worker ei rakenda Push API-t. Märguandeid haldab selle asemel Electroni rakendus.
-- **Taustal sünkroonimine puudub** — Võrguühenduseta tehtud toiminguid ei panda hilisemaks taasesitamiseks järjekorda. PWA on mõeldud peamiselt töölaua vaatamiseks.
-- **iOS-i piirangud** — Safari iOS-is ei toeta kõiki PWA funktsioone (nt installimisviibad on käsitsi käivitatavad ja taustal töötavad service worker'id on piiratud).
-- **Vahemälu suurus** — Service worker salvestab vahemällu ainult staatilised ressursid. Marsruutide `/api/` suuri vastuseandmeid ei salvestata kunagi vahemällu.
-- **Kohandatud ikoonid mobiilseadmetes** — Faviconi muutmine seadetes ei uuenda mobiilseadme avakuva ikooni (selleks tuleb PWA ikoonid uuesti genereerida).
+- **Nõutav serveriühendus:** lehe navigeerimisel, armatuurlaua olekul ja API taotlustel pole võrguühenduseta varuvarianti.
+- **Taustal sünkroonimine puudub:** võrguühenduseta toiminguid ei esitata kordusjärjekorda.
+- **Brauseri erinevused:** installimenüüd, aknaesitlus ja teavituste tugi erinevad platvormi lõikes.
+- **API vastuse vahemälu puudub:** töötaja välistab API, armatuurlaua ja autentimismarsruudid.
+- **Staatilise installi ikoonid:** nende ikoonide värskendamine nõuab reklaamitud varade muutmist; brauserid võivad säilitada installitud metaandmeid.
 
-## Failide ülevaade
+## Failide viide
 
-| Fail                                    | Otstarve                                                               |
-| --------------------------------------- | ---------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Next.js-i manifesti marsruut (genereerib faili `manifest.webmanifest`) |
-| `public/sw.js`                          | Vahemällu salvestamise loogikaga service worker                        |
-| `src/shared/components/PwaRegister.tsx` | Kliendikomponent, mis registreerib service worker'i                    |
-| `src/app/offline/page.tsx`              | Võrguühenduseta režiimi varuleht koos reaalajas olekunäidikuga         |
-| `src/app/layout.tsx`                    | PWA metaandmetega juurpaigutus (apple-web-app, theme-color jne)        |
-| `public/icon-512.png`                   | 512×512 PNG-ikoon (Android, käivituskuva)                              |
-| `public/apple-touch-icon.png`           | 180×180 PNG-ikoon (iOS-i avakuva)                                      |
-| `public/icon-192.svg`                   | 192×192 SVG-ikoon (Androidi kohanduv ikoon)                            |
-| `public/apple-touch-icon.svg`           | 180×180 SVG-ikoon (Apple'i varuikoon)                                  |
+| Fail                                                                                   | Eesmärk                                                             |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Loodud veebirakenduse manifest                                      |
+| [public/sw.js](../../public/sw.js)                                                     | Vahemällu salvestamine, välistamised ja teavitussündmuste töötlejad |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Tootmise registreerimine ja aegunud vahemälu taastamine             |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Ühenduvusleht, mitte automaatne võrguühenduseta tagavara            |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Lehe metaandmete ja vaateava seaded                                 |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Jagatud teema-värvi väärtused                                       |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 rakenduse ikoon                                           |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple'i ikoon                                             |

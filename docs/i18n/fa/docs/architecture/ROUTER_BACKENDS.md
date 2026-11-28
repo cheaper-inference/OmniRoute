@@ -64,48 +64,31 @@ Bifrost فقط `external` است (و صرفاً از طریق `BIFROST_BASE_URL`
 اجازه میدهد بر اساس توانایی واقعی هر موتور فیلتر کنند، نه اینکه برای هر شناسه
 شاخههای سختکدشده تعریف کنند.
 
-## محور A — سرویسهای تعبیهشده (سمت فرایند تحت نظارت)
+## خدمات تعبیه شده — Axis A (سمت فرآیند نظارت شده)
 
-- **رجیستری فرایندهای تحت نظارت:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (در حال حاضر: `9router`، `cliproxy`).
-- **مالک چرخهٔ حیات:** `src/lib/services/ServiceSupervisor.ts` — متد `start()` فرایند
-  فرزند را ایجاد میکند، ادامهٔ کار را به موفقیت `waitForHealthy()` مشروط میکند و stdout/stderr را در یک بافر حلقوی ثبت میکند؛
-  `stop()` از SIGTERM→SIGKILL استفاده میکند؛ همهٔ عملیات زیر یک قفل بهصورت سریالی اجرا میشوند.
-- **نوع اجتماع وضعیتها** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error`، بهعلاوهٔ یک
-  `HealthState = healthy | unhealthy | unknown` مستقل از آن.
-- **چرا یک فرایند جداگانه (و نه یک SDK درونفرایندی)؟** جداسازی فرایند همان چیزی است که
-  امکان کنترل مستقل نصب/شروع/توقف/سلامت/لاگها را برای هر سایدکار فراهم میکند و اجازه میدهد
-  محافظ ایجاد فرایند روی loopback اعمال شود. مدلسازی یک آداپتور درونفرایندی جزو کارهای آینده است —
-  پرچم قابلیت `native-hot-path` محل بیان چنین قابلیتی خواهد بود.
+- **ثبت فرآیندهای تحت نظارت:** `src/lib/services/bootstrap.ts` `SERVICES[]` (امروز: `9router`, `cliproxy`).
+- **صاحب چرخه حیات:** `src/lib/services/ServiceSupervisor.ts` — `start()` بچه را تخم ریزی می کند، روی `waitForHealthy()` دروازه می زند، stdout/stderr به یک بافر حلقه می زند. `stop()` SIGTERM→SIGKILL; همه زیر یک قفل سریال شده اند.
+- **اتحادیه ایالتی** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error` به اضافه `HealthState = healthy | unhealthy | unknown` متعامد .
+- **چرا یک فرآیند جداگانه (نه یک SDK درون پروک)؟** جداسازی فرآیند چیزی است که install/start/stop/health/logs بهطور مستقل در هر چرخ کناری قابل کنترل میکند و اجازه میدهد بازدارنده تخمریزی حلقهای اعمال شود. مدل سازی یک آداپتور in-proc کار آینده است — پرچم قابلیت `native-hot-path` جایی است که بیان می شود.
 
-### قرارداد مسیر چرخهٔ حیات (`/api/services/<tool>/…`)
+### قرارداد مسیر چرخه حیات (`/api/services/<tool>/…`)
 
-کدهای وضعیت **عامدانه مختص وضعیت/فعل/مسیر هستند** — این یک قرارداد است، نه
-ناسازگاری:
+کدهای وضعیت هستند**state/verb/path-specific بر اساس طراحی** — این قرارداد است، نه تناقض:
 
-| فراخوانی                     | شرط                                       | وضعیت                                |
-| ---------------------------- | ----------------------------------------- | ------------------------------------ |
-| `POST .../start`             | سرویس در وضعیت `not_installed`            | **409** (پیششرط)                     |
-| `POST .../stop`              | از قبل متوقف شده است                      | **200** (عملیات بدون اثرِ تکرارپذیر) |
-| `GET .../status`             | موفق                                      | **200** (`live ?? row ?? "unknown"`) |
-| `POST .../start`             | شکست در ایجاد فرایند                      | **503** (موقتی)                      |
-| `GET .../status`, `.../stop` | خطای مدیریتنشده                           | **500**                              |
-| `GET /api/services/<x>/logs` | ابزار ناشناختهٔ `<x>`                     | **404** `Service '<x>' not found`    |
-| `GET .../status?reveal=key`  | نبود `X-Reveal-Confirm: yes`              | **403** (فقط 9router)                |
-| **هر** `/api/services/*`     | فراخواننده خارج از loopback/LAN خصوصی است | **403 LOCAL_ONLY**                   |
+| تماس بگیرید                  | وضعیت                               | وضعیت                                |
+| ---------------------------- | ----------------------------------- | ------------------------------------ |
+| `POST .../start`             | سرویس `not_installed`               | **409** (پیش شرط)                    |
+| `POST .../stop`              | قبلا متوقف شده است                  | **200** (بدون کارکرد ناتوان)         |
+| `GET .../status`             | OK                                  | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`             | شکست تخم ریزی                       | **503** (گذرا)                       |
+| `GET .../status`, `.../stop` | خطای کشف نشده                       | **500**                              |
+| `GET /api/services/<x>/logs` | ابزار ناشناخته `<x>`                | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`  | از دست رفته `X-Reveal-Confirm: yes` | **403** (فقط 9 روتر)                 |
+| **هر** `/api/services/*`     | تماس گیرنده نه loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-ساختار بدنهٔ همهٔ خطاها توسط `createErrorResponse()` تعیین میشود →
-`{ error: { message, type }, requestId }`، که در آن `type` از کد وضعیت مشتق میشود
-(`500→server_error`، `404→not_found`، `409→conflict`، و در غیر این صورت `invalid_request`) و
-تمایزدهندهای قابل استفاده توسط ماشین است. پیامها از قبل پاکسازی میشوند
-(`sanitizeErrorMessage()`، قانون سختگیرانهٔ شمارهٔ 12).
+تمام بدنههای خطا توسط `createErrorResponse()` → `{ error: { message, type }, requestId }` شکل میگیرند، جایی که `type` از وضعیت (`500→server_error`، `404→not_found`، `409→conflict`، other `invalid_request`) مشتق میشود و متمایزکننده قابل عمل ماشینی است. پیامها از قبل ضدعفونی شدهاند (`sanitizeErrorMessage()`، قانون سخت #12).
 
-**محافظ loopback** رایجترین منبع یک `403` است: `/api/services/` در
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) قرار دارد و
-`src/server/authz/policies/management.ts` هر فراخوانندهٔ غیر-loopback / خارج از LAN خصوصی را
-**پیش از احراز هویت** رد میکند، زیرا این مسیرها فرایندهای فرزند ایجاد میکنند (قوانین سختگیرانهٔ 15
-و 17). دسترسی به آنها از طریق یک تونل عمومی طبق طراحی منجر به `403` میشود.
+**محافظ حلقه ای** رایج ترین منبع `403` است: `/api/services/` در `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) است و `src/server/authz/policies/management.ts` هر تماس گیرنده غیر حلقه ای / غیر خصوصی LAN را رد می کند.** قبل از auth** ، زیرا این مسیرها فرآیندهای فرزند را ایجاد می کنند (قوانین سخت 15 و 17). رسیدن به آنها از طریق یک تونل عمومی از نظر طراحی `403` است.
 
 ## محور B — بکاند مسیریابی رله (سمت توزیع)
 

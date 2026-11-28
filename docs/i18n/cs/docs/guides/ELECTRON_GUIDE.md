@@ -4,7 +4,7 @@
 
 ---
 
-> **Zdroj pravdy:** pracovní prostor `electron/`** Poslední aktualizace:** 2026-06-28 — v3.8.40
+> **Zdroj pravdy:** pracovní prostor `electron/`
 
 OmniRoute dodává desktopovou aplikaci pro různé platformy (Windows / macOS / Linux) postavenou na**Electron 41** +** elektron-builder 26.10** . Desktopová aplikace vytvoří samostatný server Next.js jako podřízený proces, ukáže na něj `BrowserWindow` a přidá systémovou lištu, automatickou aktualizaci, most IPC a tajný bootstrap s nulovou konfigurací.
 
@@ -92,7 +92,7 @@ scripts/
     └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-`main.js` i `preload.js` jsou**CommonJS `.js` soubory** , ne TypeScript. Typy na straně vykreslovače žijí v `electron/types.d.ts`.
+`main.js` i `preload.js` jsou**CommonJS `.js` soubory** , ne TypeScript. Typy na straně vykreslovacího modulu žijí v `electron/types.d.ts`.
 
 ## IPC most (`preload.js`)
 
@@ -198,7 +198,7 @@ Nastavit přes `session.defaultSession.webRequest.onHeadersReceived`. Pozoruhodn
 
 ## Automatická aktualizace
 
-Používá `electron-updater` s poskytovatelem GitHub (`diegosouzapw/OmniRoute`).
+Používá `electron-updater` s poskytovatelem GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Události předávané do vykreslovače prostřednictvím `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (se `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefakty přistávají v `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Vydání jsou publikována do GitHub Releases (`diegosouzapw/OmniRoute`), kde také `electron-updater` kontroluje nové verze.
+Vydání jsou publikována do GitHub Releases (`cheaper-inference/OmniRoute`), kde také `electron-updater` kontroluje nové verze.
 
 ## Odstraňování problémů
 

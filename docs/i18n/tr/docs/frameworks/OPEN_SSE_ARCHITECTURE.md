@@ -236,19 +236,19 @@ Destekler** 22 yönlendirme stratejisi** (bkz. `src/shared/constants/routingStra
 | `context-relay`     | Hedefler arasında bağlamı dağıtın                                                                      |
 | `fill-first`        | Bir sonraki aşamaya geçmeden önce kotayı doldurun                                                      |
 | `p2c`               | İki seçeneğin gücü                                                                                     |
-| `random`            | Üniforma rastgele                                                                                      |
-| `least-used`        | Son zamanlarda en az kullanıma sahip olanı seçin                                                       |
-| `cost-optimized`    | Önce en ucuz sağlıklı hedef                                                                            |
-| `reset-aware`       | Sağlayıcı sıfırlama pencerelerinin farkında                                                            |
-| `reset-window`      | Pencere tabanlı yönlendirmeyi sıfırla                                                                  |
+| `random`            | Talep üzerine taze karıştırma                                                                          |
+| `least-used`        | En az kayıtlı talebe sahip olanı seçin                                                                 |
+| `cost-optimized`    | Önce en düşük katalog giriş fiyatı                                                                     |
+| `reset-aware`       | Kalan kota + sıfırlama aciliyeti                                                                       |
+| `reset-window`      | En kısa sürede ilk önce sıfırlanan kota penceresi                                                      |
 | `expiry-first`      | İlk önce kotası kullanılmadan dolacak hesabı harcayın                                                  |
 | `headroom`          | Kalan kota payının büyük kısmı ilk sırada                                                              |
 | `quota-weighted`    | Tükenen hesapları atlayın ve uçuş sırasında kalan ÷ kotasına göre çekim yapın                          |
-| `strict-random`     | Gerçekten tekdüze (kalite ağırlığı yok)                                                                |
+| `strict-random`     | Karıştırılmış deste: her hedef tekrarlanmadan önce bir kez                                             |
 | `auto`              | 16 faktörlü puanlamayı kullanın (`autoCombo/`)                                                         |
 | `lkgp`              | En son bilinen iyi sağlayıcı ilk sırada                                                                |
-| `context-optimized` | Uzun içerikli istekler için en iyisi                                                                   |
-| `cache-optimized`   | Her yeniden kullanılabilir bilgi istemi önekini aynı hesaba sabitleyin (istem önbellek isabetleri)     |
+| `context-optimized` | Bilinen en büyük bağlam penceresi ilk sırada                                                           |
+| `cache-optimized`   | İstem ön ekini önbellekte tutabilecek hesabı tercih edin                                               |
 | `fusion`            | Paralel olarak bir panele yayın, ardından bir jüri (`fusion.ts`) aracılığıyla sentezleyin              |
 | `pipeline`          | Zincir adımları — her hedefin çıktısı bir sonrakini besler                                             |
 | `jev`               | Katılma: TypeSafe Jev, hangi sıralamalı girişlerin çalıştığını kabul ediyor; aksi takdirde siparişiniz |
@@ -257,7 +257,7 @@ Destekler** 22 yönlendirme stratejisi** (bkz. `src/shared/constants/routingStra
 
 **soyut uygulayıcı** her uygulayıcı sınıfının genişletildiği (doğrudan veya `DefaultExecutor` ve diğer alt sınıflar aracılığıyla). Şunları içerir:
 
-- `buildUrl()` — varsayılan URL yapısı (özel için alt sınıflar geçersiz kılınır)
+- `buildUrl()` — varsayılan URL yapısı (özel için alt sınıfların geçersiz kılınması)
 - `buildHeaders()` — varsayılan üstbilgileri (kimlik doğrulama, içerik türü)
 - `transformRequest()` — varsayılan olarak doğrudan geçiş
 - `execute()` — retry/backoff/breaker ile ana HTTP döngüsü

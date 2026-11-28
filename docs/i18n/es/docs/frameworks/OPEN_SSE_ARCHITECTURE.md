@@ -236,19 +236,19 @@ Soportes** 22 estrategias de enrutamiento** (ver `src/shared/constants/routingSt
 | `context-relay`     | Transmitir contexto entre objetivos                                                       |
 | `fill-first`        | Llene la cuota antes de pasar al siguiente                                                |
 | `p2c`               | El poder de dos opciones                                                                  |
-| `random`            | Aleatorio uniforme                                                                        |
-| `least-used`        | Elija el que tenga menos usos recientes                                                   |
-| `cost-optimized`    | El objetivo saludable más barato primero                                                  |
-| `reset-aware`       | Consciente de las ventanas de reinicio del proveedor                                      |
-| `reset-window`      | Restablecer el enrutamiento basado en ventanas                                            |
+| `random`            | Nueva reproducción aleatoria por solicitud                                                |
+| `least-used`        | Elija el que tenga menos solicitudes registradas                                          |
+| `cost-optimized`    | El precio de entrada de catálogo más bajo primero                                         |
+| `reset-aware`       | Urgencia de reinicio de cuota sobrante +                                                  |
+| `reset-window`      | Ventana de cuota que se reinicia primero                                                  |
 | `expiry-first`      | Gaste primero la cuenta cuya cuota expiraría sin usarse                                   |
 | `headroom`          | La mayor parte del margen de cuota restante primero                                       |
 | `quota-weighted`    | Omita las cuentas agotadas y luego retire la cuota sobrante ÷ carga en vuelo              |
-| `strict-random`     | Verdaderamente uniforme (sin ponderación de calidad)                                      |
+| `strict-random`     | Mazo barajado: cada objetivo se repite una vez antes                                      |
 | `auto`              | Utilice puntuación de 16 factores (`autoCombo/`)                                          |
 | `lkgp`              | Primero el último buen proveedor conocido                                                 |
-| `context-optimized` | Lo mejor para solicitudes de contexto largo                                               |
-| `cache-optimized`   | Anclar cada prefijo de aviso reutilizable a la misma cuenta (accesos de caché de avisos)  |
+| `context-optimized` | Primero la ventana de contexto más grande conocida                                        |
+| `cache-optimized`   | Prefiere la cuenta que probablemente contenga el prefijo del mensaje en caché             |
 | `fusion`            | Distribuyase en un panel en paralelo y luego sintetice a través de un juez (`fusion.ts`). |
 | `pipeline`          | Pasos de cadena — la salida de cada objetivo alimenta al siguiente                        |
 | `jev`               | Suscripción: TypeSafe Jev admite qué entradas clasificadas se publican; más tu pedido     |

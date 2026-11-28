@@ -151,30 +151,30 @@ Isiokwu maka Usoro 6-7:
 - [ ] Tinye ule regression maka bug production ọ bụla a doziri n'oge mbọ iru 90%
 - [ ] Bulie ọnụ ụzọ mkpuchi na CI naanị mgbe ntọala mpaghara kwụsiri ike opekata mpe n'ime mmegharị abụọ sochiri ibe ha
 
-## Iwu ratchet
+## Amụma Ratchet
 
-Melite oke ndị `npm run test:coverage` naanị mgbe ọrụ ahụ gafere ihe mgbaru ọsọ na-esote n’ezie ma nwee ohere nchekwa zuru oke.
+Melite ọnụ ụzọ `npm run test:coverage` naanị ka ọrụ a gafechara n'ụzọ dị ịrịba ama na-esote yana ihe nchekwa dị mma.
 
-**Oke dị ugbu a:** `npm run test:coverage` na-amanye **60 nkwupụta / 60 ahịrị / 60 ọrụ / 60 alaka** (e dozigharịrị ntọala metrik ahụ na Quality-Gates Agba 6A.1 — ntọala 82.58% nke mbụ dị elu karịa ka o kwesịrị ịdị n’ihi na ọ gụnyere faịlụ nnwale ma wepụ `open-sse`). Iwu `test:coverage:legacy` na-edobe metrik ochie nke 50/50/50 maka ntụnyere akụkọ ihe mere eme.
+**Ọnụ ụzọ dị ugbu a:** `npm run test:coverage` na-amanye** Nkwupụta 60 / ahịrị 60 / ọrụ 60 / alaka 60** (E megharịrị metric ahụ na Quality-Gates Fase 6A.1 — nke mbụ 82.58% baseline butere n'ihi na ọ gụrụ faịlụ ule wee wepụ `open-sse`). Iwu `test:coverage:legacy` na-echekwa metric 50/50/50 ochie maka ntụnyere akụkọ ihe mere eme.
 
-Maka nyocha oke a na-eme ozugbo megide akụkọ kacha ọhụrụ, jiri:
+Maka nyocha ọnụ ụzọ ad-hoc megide akụkọ ọhụrụ, jiri:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Usoro ratchet akwadoro (usoro ya bụ `nkwupụta-ahịrị / alaka / ọrụ`):
+Usoro ratchet akwadoro (ịtụ bụ `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- oke dị ugbu a (75/70/75)
+5. 75/70/72 <-- ọnụ ụzọ ámá (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Ihe mgbaru ọsọ ratchet na-esote bụ `80/75/78` ozugbo mkpuchi alaka nọgidere karịa 78% n’ime ọsọ abụọ sochiri ibe ha.
+Ebumnuche ratchet na-esote bụ `80/75/78` ozugbo mkpuchi alaka ụlọ ọrụ na-ejide karịa 78% maka ọsọ abụọ na-esochi.
 
 ## Oghere a maara
 

@@ -49,7 +49,7 @@ Deployment တစ်ခုစီသည် build ပြုလုပ်စဉ် `
 
 ---
 
-## Chat Completions
+## စကားပြောခန်းများ
 
 ```bash
 POST /v1/chat/completions
@@ -65,33 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### စိတ်ကြိုက် Headers
+### စိတ်ကြိုက် ခေါင်းစီးများ
 
-| Header                   | Direction     | Description                                                                                                                                                                                                                                                           |
-| ------------------------ | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | တောင်းဆိုချက် | Cache ကိုကျော်လွှားရန် `true` သို့ သတ်မှတ်ပါ                                                                                                                                                                                                                          |
-| `x-omniroute-no-memory`  | တောင်းဆိုချက် | ဤတောင်းဆိုချက်အတွက် memory + skills injection ကို ကျော်ရန် `true` သို့ သတ်မှတ်ပါ (no-cache နှင့် တူညီပြီး ခေါ်ဆိုမှုတစ်ကြိမ်ချင်းစီအလိုက် token/cost overhead ကို ရှောင်ရှားပေးသည်)                                                                                   |
-| `X-OmniRoute-Progress`   | တောင်းဆိုချက် | တိုးတက်မှုဖြစ်ရပ်များအတွက် `true` သို့ သတ်မှတ်ပါ                                                                                                                                                                                                                      |
-| `X-Session-Id`           | တောင်းဆိုချက် | ပြင်ပ session affinity အတွက် ကပ်လျက်အသုံးပြုမည့် session key                                                                                                                                                                                                          |
-| `x_session_id`           | တောင်းဆိုချက် | Underscore ပါသော မူကွဲကိုလည်း လက်ခံသည် (တိုက်ရိုက် HTTP)                                                                                                                                                                                                              |
-| `X-OmniRoute-Session-Id` | တောင်းဆိုချက် | ခေါ်ဆိုသူက ပေးသည့် session/conversation tag (memory သို့လည်း ထည့်သွင်းပေးသည်)။ ရှိပါက session တစ်ခုချင်းစီအလိုက် ကုန်ကျစရိတ်ခွဲခြမ်းသတ်မှတ်ရန် `call_logs.session_tag` သို့ မူရင်းအတိုင်း သိမ်းဆည်းသည် (#8249) — မရှိပါက မည်သည့်အရာကိုမျှ အလိုအလျောက်ဖန်တီးမည်မဟုတ်ပါ |
-| `Idempotency-Key`        | တောင်းဆိုချက် | ထပ်နေသောတောင်းဆိုချက်များကို ဖယ်ရှားရန် key (5s ကြာချိန်)                                                                                                                                                                                                             |
-| `X-Request-Id`           | တောင်းဆိုချက် | အခြား dedup key                                                                                                                                                                                                                                                       |
-| `x-omniroute-connection` | တောင်းဆိုချက် | single-model တောင်းဆိုချက်တစ်ခုကို provider connection (account) တစ်ခုတည်းသို့ ၎င်း၏ id ဖြင့် ချိတ်ထားရန် — [တောင်းဆိုချက်တစ်ခုချင်းစီအလိုက် Account pinning](#account-pinning-per-request) ကို ကြည့်ပါ                                                               |
-| `X-OmniRoute-Cache`      | တုံ့ပြန်ချက်  | `HIT` သို့မဟုတ် `MISS` (streaming မဟုတ်သော)                                                                                                                                                                                                                           |
-| `X-OmniRoute-Idempotent` | တုံ့ပြန်ချက်  | deduplicate ပြုလုပ်ထားပါက `true`                                                                                                                                                                                                                                      |
-| `X-OmniRoute-Progress`   | တုံ့ပြန်ချက်  | progress tracking ဖွင့်ထားပါက `enabled`                                                                                                                                                                                                                               |
-| `X-OmniRoute-Session-Id` | တုံ့ပြန်ချက်  | OmniRoute က အသုံးပြုသည့် အကျိုးသက်ရောက်သော session ID                                                                                                                                                                                                                 |
-| `X-OmniRoute-Request-Id` | တုံ့ပြန်ချက်  | တောင်းဆိုချက်ဆက်စပ်မှု id (သိရှိပါက)                                                                                                                                                                                                                                  |
-| `X-OmniRoute-Version`    | တုံ့ပြန်ချက်  | OmniRoute build version (အမြဲရှိသည်)                                                                                                                                                                                                                                  |
-| `X-OmniRoute-Cost-Saved` | တုံ့ပြန်ချက်  | cache က HIT ဖြစ်သောအခါ ရှောင်ရှားပေးခဲ့သည့် USD ပမာဏ (cache hits များအတွက်သာ)                                                                                                                                                                                         |
-| `X-OmniRoute-Decision`   | တုံ့ပြန်ချက်  | Routing trace: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` သည် combo strategy ဖြစ်ပြီး combo မဟုတ်သော တောင်းဆိုချက်အတွက် `single` ဖြစ်သည်) — ပြီးဆုံးမှုတုံ့ပြန်ချက်များတွင် အမြဲရှိသည်                                                             |
+| ခေါင်းစီး                | ဦးတည်ချက်       | ဖော်ပြချက်                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | တောင်းဆိုခြင်း။ | cache ကိုကျော်ဖြတ်ရန် `true` သို့သတ်မှတ်ပါ။                                                                                                                                                                                                                                                                                                                                                                                   |
+| `x-omniroute-no-memory`  | တောင်းဆိုခြင်း။ | ဤတောင်းဆိုချက်အတွက် မမ်မိုရီ + ကျွမ်းကျင်မှုထိုးခြင်းကို ကျော်ရန် `true` သို့ သတ်မှတ်ပါ (မှန်ချပ်များမပါသော၊ ခေါ်ဆိုမှုတိုင်း token/cost အပေါ်မှ ရှောင်ရှားသည်)                                                                                                                                                                                                                                                               |
+| `x-omniroute-no-log`     | တောင်းဆိုခြင်း။ | ဤအနုမာနတောင်းဆိုချက်အတွက် ခေါ်ဆိုမှုမှတ်တမ်းများမှ request/response ပေးချေမှုများကို ဖယ်ထုတ်ရန် `true` (ချတ်-မိသားစုလမ်းကြောင်းများ- ချတ်ပြီးစီးမှုများ၊ တုံ့ပြန်မှုများ၊ မက်ဆေ့ချ်များ၊ ပြီးစီးမှုများ၊ Gemini)။ အချိန်တံဆိပ်၊ မော်ဒယ်၊ အခြေအနေ၊ ကြာချိန်နှင့် တိုကင်နံပါတ်များကို မှတ်တမ်းတင်ထားဆဲဖြစ်သည်။ အကြောင်းအရာအပြည့်အစုံကို ဖယ်ထုတ်ရန်အတွက် `x-omniroute-no-memory` နှင့် `x-omniroute-no-cache` နှင့် ပေါင်းစပ်ပါ။ |
+| `X-OmniRoute-Progress`   | တောင်းဆိုခြင်း။ | တိုးတက်မှုဖြစ်ရပ်များအတွက် `true` သို့သတ်မှတ်ပါ။                                                                                                                                                                                                                                                                                                                                                                              |
+| `X-Session-Id`           | တောင်းဆိုခြင်း။ | ပြင်ပစက်ရှင်ဆက်စပ်မှုအတွက် ကပ်စေးသောစက်ရှင်ခလုတ်                                                                                                                                                                                                                                                                                                                                                                              |
+| `x_session_id`           | တောင်းဆိုခြင်း။ | အောက်တန်းကျသော မူကွဲကိုလည်း လက်ခံသည် (တိုက်ရိုက် HTTP)                                                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Session-Id` | တောင်းဆိုခြင်း။ | ခေါ်ဆိုသူ-ပေးသော session/conversation tag (မှတ်ဉာဏ်ကိုလည်း ကျွေးသည်)။ လက်ရှိအချိန်တွင်၊ စက်ရှင်တစ်ခုစီအတွက် ကုန်ကျစရိတ်ထည့်တွက်ခြင်း (#8249) `call_logs.session_tag` အတွက် မည်သည့်အခါမျှ ပေါင်းစပ်မှု မရှိသည့်အခါ —                                                                                                                                                                                                           |
+| `Idempotency-Key`        | တောင်းဆိုခြင်း။ | ဖျက်ရန်သော့ (5s ဝင်းဒိုး)                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `X-Request-Id`           | တောင်းဆိုခြင်း။ | အစားထိုး ခလုတ်                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `x-omniroute-connection` | တောင်းဆိုခြင်း။ | [တောင်းဆိုချက်တစ်ခုအတွက်](#account-pinning-per-request) ပံ့ပိုးသူချိတ်ဆက်မှု (အကောင့်တစ်ခု) သို့ မော်ဒယ်တစ်ခုတည်း တောင်းဆိုချက်တစ်ခုကို ၎င်း၏ ID — ဖြင့် ပင်ထိုးပါ။                                                                                                                                                                                                                                                           |
+| `X-OmniRoute-Cache`      | တုံ့ပြန်မှု     | `HIT` သို့မဟုတ် `MISS` (စီးကြောင်းမဟုတ်သော)                                                                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Idempotent` | တုံ့ပြန်မှု     | ပွားနေပါက `true`                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Progress`   | တုံ့ပြန်မှု     | `enabled` တွင်တိုးတက်မှုခြေရာခံလျှင်                                                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Session-Id` | တုံ့ပြန်မှု     | OmniRoute မှအသုံးပြုသော ထိရောက်သော စက်ရှင် ID                                                                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Request-Id` | တုံ့ပြန်မှု     | ဆက်စပ် ID ကို တောင်းဆိုပါ (သိသောအခါ)                                                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Version`    | တုံ့ပြန်မှု     | OmniRoute build version (အမြဲရှိနေသည်)                                                                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Cost-Saved` | တုံ့ပြန်မှု     | HIT တွင် ရှောင်ရှားထားသောUSD ကက်ရှ် (cache hits only)                                                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Decision`   | တုံ့ပြန်မှု     | လမ်းပြခြင်း ခြေရာကောက်- `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` သည် ပေါင်းစပ်ဗျူဟာဖြစ်သည်၊ သို့မဟုတ် ပေါင်းစပ်မဟုတ်သော တောင်းဆိုချက်တစ်ခုအတွက် `single` ) — ပြီးမြောက်သည့်တုံ့ပြန်မှုများတွင် အမြဲရှိနေသည်                                                                                                                                                                                              |
 
-> Nginx မှတ်ချက် — underscore ပါသော header များ (ဥပမာ `x_session_id`) ကို အသုံးပြုပါက `underscores_in_headers on;` ကို ဖွင့်ထားပါ။
+> Nginx မှတ်ချက်- သင်သည် အောက်တန်းကျသော ခေါင်းစီးများ (ဥပမာ `x_session_id`) ကို အားကိုးပါက `underscores_in_headers on;` ကိုဖွင့်ပါ။
 
-#### တောင်းဆိုချက်တစ်ခုချင်းစီအလိုက် Account pinning
+#### တောင်းဆိုမှုတစ်ခုအတွက် အကောင့်ကို ပင်ထိုးခြင်း။
 
-Provider တစ်ခုတွင် connection (account သို့မဟုတ် key) များစွာရှိပါက OmniRoute သည် ပုံမှန်အားဖြင့် ၎င်း၏ account-selection strategy မှတစ်ဆင့် တစ်ခုကို ရွေးချယ်သည်။ ထိုအစား တောင်းဆိုချက်တစ်ခုသည် `x-omniroute-connection` header ဖြင့် သီးခြား connection တစ်ခုကို pin ပြုလုပ်နိုင်သည် —
+ဝန်ဆောင်မှုပေးသူတစ်ဦးတွင် ချိတ်ဆက်မှုများစွာ (အကောင့်များ သို့မဟုတ် သော့များ) ရှိသောအခါ၊ OmniRoute ၎င်း၏အကောင့်ရွေးချယ်မှုဗျူဟာမှတစ်ဆင့် တစ်ခုအား ပုံမှန်အားဖြင့် ရွေးချယ်သည်။ တောင်းဆိုချက်တစ်ခုသည် `x-omniroute-connection` ခေါင်းစီးနှင့် သီးခြားချိတ်ဆက်မှုတစ်ခုကို ပင်ထိုးနိုင်သည်-
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -101,28 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **id ကို ဘယ်မှာရှာရမလဲ။** ဒက်ရှ်ဘုတ်ရှိ ပံ့ပိုးသူစာမျက်နှာကို ဖွင့်ပါ
-  (**ဒက်ရှ်ဘုတ် → ပံ့ပိုးသူများ → <provider>**)၊ ထို့နောက် ချိတ်ဆက်မှုအတန်းရှိ `xxxxxxxx…` id ချစ်ပ်ကို
-  နှိပ်ပါ — ၎င်းက ချိတ်ဆက်မှု id အပြည့်အစုံကို ကူးယူပေးပါမည်။
-- **မည်သည့် request များက ၎င်းကို လိုက်နာသနည်း။** `/v1/chat/completions`၊
-  `/v1/messages` နှင့် `/v1/responses` ပေါ်ရှိ မော်ဒယ်တစ်ခုတည်းအသုံးပြုသော request များ
-  (`provider/model`) ဖြစ်သည်။ Combo များက header ကို လျစ်လျူရှုသည် — combo အဆင့်တစ်ခုချင်းစီအတွက်
-  ထိုအဆင့်၏ကိုယ်ပိုင် connection မှတစ်ဆင့် account တစ်ခုကို သတ်မှတ်ပါ။
-- **Pin သည် preference မဟုတ်ဘဲ တိကျစွာ သတ်မှတ်ထားခြင်းဖြစ်သည်။** Pin လုပ်ထားသော connection ကိုသာ
-  သီးသန့်အသုံးပြုသည်။ Request အတွင်း အမှားတစ်ခုဖြစ်ပါက account ၏ cooldown ကို မှတ်တမ်းတင်သော်လည်း
-  တူညီသော provider ၏ အခြား account သို့ ပြောင်းလဲအသုံးမပြုပါ။
-- **Cooldown နှင့် quota ကြောင့် pin ကို ဖြေလျှော့ပေးသည်။** Pin လုပ်ထားသော connection သည် cooldown
-  ဖြစ်နေချိန်၊ quota ကုန်ဆုံးနေချိန် သို့မဟုတ် quota policy ကြောင့် ပိတ်ပင်ခံထားရချိန်တွင် နောက်ပိုင်း
-  request များသည် provider ၏ အခြား connection များသို့ ပြန်လည်လမ်းကြောင်းပြောင်းသွားမည်ဖြစ်ပြီး၊
-  pin မလုပ်ထားသော traffic နှင့် အတိအကျတူညီသည်။
-- **မသိရှိသော သို့မဟုတ် ပိတ်ထားသော id များသည် အမှားဖြစ်စေသည်။** Provider ၏ active pool ထဲတွင်
-  မရှိသော id (ဖျက်ထားခြင်း၊ deactivate လုပ်ထားခြင်း သို့မဟုတ် အခြား provider တစ်ခုနှင့် သက်ဆိုင်ခြင်း)
-  ဖြစ်ပါက အသုံးပြုနိုင်သော account မရှိတော့သဖြင့် request သည် အခြားနေရာသို့ တိတ်တဆိတ်
-  လမ်းကြောင်းမပြောင်းဘဲ အမှားဖြင့် ပျက်ကွက်မည်ဖြစ်သည်။
+- **ID ကိုဘယ်မှာရှာရမလဲ။** ဒက်ရှ်ဘုတ်တွင် ဝန်ဆောင်မှုပေးသူ စာမျက်နှာကို ဖွင့်ပါ (** ဒက်ရှ်ဘုတ် → ဝန်ဆောင်မှုပေးသူများ → <provider>** ) ချိတ်ဆက်မှုအတန်းတစ်ခုရှိ `xxxxxxxx…` id ချစ်ပ်ကို နှိပ်ပြီး — ၎င်းသည် ချိတ်ဆက်မှု ID အပြည့်အစုံကို မိတ္တူကူးသည်။
+- **ရိုသေစွာတောင်းဆိုအပ်သော။** `/v1/chat/completions`၊ `/v1/messages` နှင့် `/v1/responses` တွင် မော်ဒယ်တစ်ခုတည်း တောင်းဆိုချက်များ (`provider/model`) Combos သည် ခေါင်းစီးကို လျစ်လျူရှုသည်- ၎င်းအစား ခြေလှမ်း၏ကိုယ်ပိုင်ချိတ်ဆက်မှုမှတစ်ဆင့် ပေါင်းစပ်အဆင့်တစ်ခုစီတွင် အကောင့်တစ်ခုကို တွဲထိုးပါ။
+- **ပင်နံပါတ်သည် တင်းကျပ်သည်၊ စိတ်ကြိုက်မဟုတ်ပေ။** ပင်ထိုးထားသော ချိတ်ဆက်မှုကို သီးသန့်အသုံးပြုသည်။ တောင်းဆိုချက်အတွင်းမှ ပျက်ကွက်မှုတစ်ခုသည် အကောင့်၏ cooldown ကို မှတ်တမ်းတင်ထားသော်လည်း ထိုသို့လုပ်ဆောင်သည်။** မဟုတ်ဘူး** ဝန်ဆောင်မှုပေးသူ၏ ပေါက်ဖော်အကောင့်သို့ လှည့်ပါ။
+- **Cooldown နှင့် quota သည် pin ကိုထုတ်လွှတ်သည်။** ပင်ချိတ်ထားသည့် ချိတ်ဆက်မှုသည် အေးသွားသည်၊ ခွဲတမ်းကုန်သွားသည် သို့မဟုတ် ခွဲတမ်းမူဝါဒဖြင့် ပိတ်ဆို့နေချိန်တွင်၊ နောက်ပိုင်းတွင် တောင်းဆိုချက်များသည် ပင်မတပ်ထားသော ယာဉ်ကြောအသွားအလာကဲ့သို့ အတိအကျပင် ဝန်ဆောင်မှုပေးသူ၏ အခြားချိတ်ဆက်မှုများထံ ပြန်လည်ရောက်ရှိသွားပါသည်။
+- **အမည်မသိ သို့မဟုတ် ပိတ်ထားသော အိုင်ဒီများ မအောင်မြင်ပါ။** ဝန်ဆောင်မှုပေးသူ၏ အသက်ဝင်နေသော အိုင်ဒီ (ဖျက်လိုက်၊ ပိတ်လိုက်၊ သို့မဟုတ် အခြားဝန်ဆောင်မှုပေးသူနှင့် သက်ဆိုင်သည်) သည် အရည်အချင်းပြည့်မီသော အကောင့်မှ မထွက်သောကြောင့် တောင်းဆိုချက်သည် အခြားနေရာသို့ တိတ်တဆိတ် လမ်းကြောင်းပြောင်းမည့်အစား မအောင်မြင်ပါ။
 
-Claude Code သည် custom headers များကို `ANTHROPIC_CUSTOM_HEADERS` မှတစ်ဆင့် ပေးပို့သည်။ ၎င်းကို
-`~/.claude/settings.json` ၏ `env` block ထဲတွင် ထည့်ပါ၊ သို့မဟုတ် project တစ်ခုချင်းစီအတွက်
-မတူညီသော account ကို pin လုပ်ရန် project-level `.claude/settings.json` ထဲတွင် ထည့်ပါ။
+Claude Code သည် `ANTHROPIC_CUSTOM_HEADERS` မှတဆင့် စိတ်ကြိုက်ခေါင်းစီးများကို ပေးပို့သည်။ ၎င်းကို `~/.claude/settings.json`၏ `env` ဘလောက်တွင်ထည့်ပါ၊ သို့မဟုတ် ပရောဂျက်တစ်ခုအတွက် မတူညီသောအကောင့်တစ်ခုကို ပင်ထိုးရန် ပရောဂျက်အဆင့် `.claude/settings.json` တွင်ထည့်ပါ-
 
 ```jsonc
 {
@@ -134,29 +120,11 @@ Claude Code သည် custom headers များကို `ANTHROPIC_CUSTOM_HEA
 }
 ```
 
-ရင်းမြစ်: `src/sse/handlers/chat.ts` (header ဖတ်ရှုခြင်း)၊ `src/sse/services/auth.ts` နှင့်
-`src/sse/services/sessionAffinityPin.ts` (pin ဖြေလျှော့ခြင်းနှင့် pool ထဲမှ ပျောက်ဆုံးနေမှု စစ်ဆေးခြင်း)။
+အရင်းအမြစ်- `src/sse/handlers/chat.ts` (ခေါင်းစီးဖတ်ခြင်း)၊ `src/sse/services/auth.ts` နှင့် `src/sse/services/sessionAffinityPin.ts` (ပင်ထိုးထုတ်လွှတ်မှုနှင့် ပျောက်ဆုံးနေသည့်-ရေကူးကန်စစ်ဆေးချက်)။
 
-> **ကုန်ကျစရိတ် telemetry headers:** streaming မဟုတ်သော အောင်မြင်သည့် response များတွင်လည်း
-> `X-OmniRoute-*` ကုန်ကျစရိတ် telemetry အစု ပါဝင်သည် — `X-OmniRoute-Response-Cost` (USD၊
-> ဒဿမ 10 နေရာအထိ ပုံသေ; အခမဲ့/စျေးနှုန်းမသတ်မှတ်ထားပါက `0.0000000000`)၊
-> `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`၊ `X-OmniRoute-Model`၊
-> `X-OmniRoute-Provider`၊ `X-OmniRoute-Latency-Ms`၊ `X-OmniRoute-Cache-Hit` နှင့်
-> `X-OmniRoute-Fallback-Attempts` (`> 0` ဖြစ်သည့်အခါမှသာ)၊ ထို့အပြင်
-> `X-OmniRoute-Request-Id` နှင့် `X-OmniRoute-Version` တို့ ဖြစ်သည်။ ၎င်းတို့ကို chat completions၊
-> `/v1/responses`၊ `/v1/messages` နှင့် **media endpoints** များ — `/v1/embeddings`၊
-> `/v1/images/generations`၊ `/v1/audio/speech`၊ `/v1/audio/transcriptions`၊ `/v1/rerank`၊
-> `/v1/videos/generations`၊ `/v1/music/generations` နှင့် `/v1/moderations` (အမြဲတမ်း ကုန်ကျစရိတ်
-> `0`) — အားလုံးတွင် ထုတ်ပေးသည်။ Media ကုန်ကျစရိတ်ကို စျေးနှုန်းရရှိပါက modality တစ်ခုချင်းစီအလိုက်
-> (ပုံတစ်ပုံလျှင်၊ စက္ကန့်တစ်စက္ကန့်လျှင်၊ အက္ခရာတစ်လုံးလျှင်၊ search-unit တစ်ခုလျှင်) တွက်ချက်ပြီး၊
-> မရရှိပါက `0` (fail-open) ဖြစ်သည်။
+> **ကုန်ကျစရိတ် တယ်လီမီတာ ခေါင်းစီးများ-** ထုတ်လွှင့်ခြင်းမဟုတ်သော အောင်မြင်မှုတုံ့ပြန်ချက်များသည်လည်း `X-OmniRoute-*` ကုန်ကျစရိတ်-တယ်လီမီတာသတ်မှတ် — `X-OmniRoute-Response-Cost` (USD၊ ပုံသေ 10 ဒဿမ; `0.0000000000` အတွက် free/unpriced) ၊ `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`၊ `X-OmniRoute-Model`၊ `X-OmniRoute-Provider`၊ `X-OmniRoute-Latency-Ms`၊ `X-OmniRoute-Cache-Hit` နှင့် `X-OmniRoute-Fallback-Attempts` ( > 0 တွင်သာ) နှင့် `X-OmniRoute-Request-Id` `X-OmniRoute-Version` ပါရှိသည်။ ဤအရာများကို ချတ်ပြီးစီးမှုများ၊ `/v1/responses`၊ `/v1/messages`၊** မီဒီယာ အဆုံးအဖြတ်များ** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, and `/v1/moderations` (အမြဲတမ်း `0`)။ စျေးနှုန်းရရှိနိုင်သောအခါတွင် မီဒီယာကုန်ကျစရိတ်ကို ပုံစံအလိုက် (ပုံတစ်ပုံ၊ တစ်စက္ကန့်၊ ဇာတ်ကောင်တစ်ခုစီ၊ ရှာဖွေမှုယူနစ်တစ်ခုစီ)၊ မဟုတ်ပါက `0` (fail-open) ဖြင့် တွက်ချက်ပါသည်။
 
-> **Cache-hit ကုန်ကျစရိတ် အဓိပ္ပာယ်ဖွင့်ဆိုချက်:** semantic-cache HIT (`X-OmniRoute-Cache-Hit: true`)
-> ဖြစ်သည့်အခါ upstream call ပြုလုပ်ခြင်း မရှိသဖြင့် `X-OmniRoute-Response-Cost` သည်
-> `0.0000000000` (hit ကို ဝန်ဆောင်မှုပေးရန် လိုအပ်သော **incremental** ကုန်ကျစရိတ်) ဖြစ်သည်။
-> မူလကုန်ကျစရိတ်/ဖြစ်လာနိုင်သည့်ကုန်ကျစရိတ်ကို `X-OmniRoute-Cost-Saved` တွင် သီးခြားဖော်ပြသည်။
-> Billing consumer များသည် `X-OmniRoute-Response-Cost` ကို စုစုပေါင်းတွက်သင့်သည် (hit များသည်
-> ကုန်ကျစရိတ်မရှိပါ); cache analytics သည် `X-OmniRoute-Cost-Saved` ကို စုစည်းနိုင်သည်။
+> **ကက်ရှ်-ထိမှန်သော ကုန်ကျစရိတ် ဝေါဟာရများ-** semantic-cache HIT (`X-OmniRoute-Cache-Hit: true`) တွင် အထက်စီးကြောင်းခေါ်ဆိုမှု မပြုလုပ်ပါ၊ ထို့ကြောင့် `X-OmniRoute-Response-Cost` သည် `0.0000000000` (the** တိုးမြင့်လာသည်။** hit ဝန်ဆောင်မှုကုန်ကျစရိတ်။) original/would-have-been ကုန်ကျစရိတ်ကို `X-OmniRoute-Cost-Saved` တွင် သီးခြားစီ အစီရင်ခံပါသည်။ ငွေတောင်းခံခြင်း သုံးစွဲသူများသည် `X-OmniRoute-Response-Cost` ပေါင်းသင့်သည် ( hits သည် ဘာမှမကုန်ကျပါ ) ။ cache ခွဲခြမ်းစိတ်ဖြာချက်သည် `X-OmniRoute-Cost-Saved` စုစည်းနိုင်သည်။
 
 ## သီးသန့် စီမံထားသော Session Lease များ
 
@@ -372,6 +340,8 @@ Content-Type: application/json
 
 `n` `n` ပုံများကို `data[]` တွင် ပြန်ပေးသည်။ ခေါ်ဆိုမှုတစ်ခုလျှင် API အထက်ပိုင်းတွင် တစ်ပုံတစ်ပုံပြန်ပေးသည့် ဝန်ဆောင်မှုပေးသူများသည် (Black Forest Labs၊ Stability AI၊ Leonardo၊ Ideogram၊ Haiper၊ Hyperbolic၊ Magnific/Freepik၊ NVIDIA NIM၊ Cloudflare Workers AI) `n` သီးခြားအထက်ရေခေါ်ဆိုမှုများ၊ ပျံသန်းမှုတွင် အများဆုံး 4 ခု ရရှိသည်။ ပုံသေ `seed` ခေါ်ဆိုမှုအညွှန်း (`seed`, `seed + 1`, … ) ဖြင့် နှိမ်ထားသောကြောင့် ပုံများသည် ကွဲပြားသော်လည်း မျိုးပွားနိုင်သည်။ `n` 10 တွင် ကန့်သတ်ထားသည်။ ခေါ်ဆိုမှု ပျက်ကွက်ပါက တောင်းဆိုချက်တစ်ခုလုံး ပျက်ကွက်သည်။ fan-out ဖော်မတ်များစာရင်းသည် `open-sse/handlers/imageGeneration/fanOut.ts` တွင် `SINGLE_IMAGE_FANOUT_FORMATS` ဖြစ်သည်။
 
+Codex GPT ရုပ်ပုံမော်ဒယ်များ (`codex/gpt-image-*`) သည် PNG သာ ပြန်ပေးသည်- `jpeg` သို့မဟုတ် `webp` တောင်းဆိုထားသော်လည်း အထက်ပိုင်းအဖြေများသည် `200` နှင့် PNG bytes များဖြစ်သည်။ အခြား `output_format` (`webp`, `jpeg`, ... ) နှင့် တောင်းဆိုချက်ကို တိတ်တဆိတ် လျစ်လျူမရှုဘဲ HTTP 400 ဖြင့် ပယ်ချသည်။ ချန်လှပ်ပါ သို့မဟုတ် `png` ပေးပို့ပါ။ `output_compression` ထပ်ဆင့်မပို့ပါ။
+
 ZenMux ရှိပြီးသား API-ကီးချိတ်ဆက်မှုကို ပြန်လည်အသုံးပြုပြီး `zenmux/` သို့မဟုတ် `zm/` ရှေ့ဆက်များကို လက်ခံသည်-
 
 - `zenmux/openai/gpt-image-2` ZenMux၏ OpenAI Images API အသုံးပြုသည်။ ရွေးချယ်စရာများတွင် `size`၊ `quality`၊ `n`၊ `output_format`၊ `output_compression`၊ `background` နှင့် `response_format` တို့ ပါဝင်သည်။
@@ -405,17 +375,15 @@ Content-Type: application/json
 }
 ```
 
-`model` သည် `provider/model` prefix မှတစ်ဆင့် OCR provider ကို ရွေးချယ်သည်။ သီးခြား model id တစ်ခု (ဥပမာ
-`mistral-ocr-latest`) ကို ၎င်း၏ မှတ်ပုံတင်ထားသော provider သို့ ဖြေရှင်းပေးပြီး `model` ကို ချန်လှပ်ထားပါက
-Mistral (`mistral-ocr-latest`) ကို default အဖြစ် အသုံးပြုသည်။ မှတ်ပုံတင်ထားသော provider များ (`open-sse/config/ocrRegistry.ts`) —
+`model` `provider/model` ရှေ့ဆက်မှတစ်ဆင့် OCR ဝန်ဆောင်မှုပေးသူကို ရွေးသည်။ ဗလာမော်ဒယ် id (ဥပမာ `mistral-ocr-latest`) သည် ၎င်း၏ မှတ်ပုံတင်ထားသော ဝန်ဆောင်မှုပေးသူကို ဖြေရှင်းပေးသည်၊ ချန်လှပ်ထားသော `model` သည် Mistral (`mistral-ocr-latest`) သို့ ပြောင်းလဲသည်။ မှတ်ပုံတင်ထားသော ဝန်ဆောင်မှုပေးသူများ (`open-sse/config/ocrRegistry.ts`):
 
-| Provider id                   | Model id             | `model` value                                               | Notes                                                                                                                               |
-| ----------------------------- | -------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (or bare `mistral-ocr-latest`) | Synchronous — တစ်ခုတည်းသော upstream ခေါ်ဆိုမှုမှ response ကို တိုက်ရိုက် ပြန်ပေးသည်။                                                |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                 | Asynchronous upstream (`analyze` + poll) — အောက်တွင် ကြည့်ပါ။                                                                       |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                     | Vertex AI ၏ `openapi/chat/completions` partner endpoint မှတစ်ဆင့် synchronous ဖြစ်သည် — authentication/URL အတွက် အောက်တွင် ကြည့်ပါ။ |
+| ပံ့ပိုးသူ ID                  | မော်ဒယ် ID                                           | `model` တန်ဖိုး                                                   | မှတ်စုများ                                                                                                                                                                                                                                           |
+| ----------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                                 | `mistral/mistral-ocr-latest` (သို့မဟုတ် `mistral-ocr-latest` ဗလာ) | — ကို တစ်ခုတည်းသော အထက်စီးကြောင်းခေါ်ဆိုမှုမှ တိုက်ရိုက်ပြန်ပို့ပေးပါသည်။                                                                                                                                                                            |
+| `azure-document-intelligence` | `prebuilt-read`                                      | `azure-document-intelligence/prebuilt-read`                       | Asynchronous upstream (`analyze` + poll) — အောက်တွင်ကြည့်ပါ။                                                                                                                                                                                         |
+| `vertex-deepseek-ocr`         | ကိုယ်တိုင်ဖြန့်ကျက်ထားသော ( built-in မော်ဒယ်မရှိပါ ) | `vertex-deepseek-ocr/<your-deployed-model-id>`                    | သင်၏ကိုယ်ပိုင် Vertex AI မော်ဒယ် Garden DeepSeek-OCR အဆုံးမှတ် (`openapi/chat/completions` ပုံသဏ္ဍာန်) မှတဆင့် Synchronous Google 2026-10-21 (#20423) တွင် စီမံခန့်ခွဲထားသော `deepseek-ocr-maas` အနားပေးလိုက်သောကြောင့် id သည် 400 သို့ ပြန်သွားသည်။ |
 
-Provider သုံးခုလုံးသည် Mistral ပုံစံတူ body တစ်ခုတည်းဖြင့် response ပြန်ပေးသည် —
+ဝန်ဆောင်မှုပေးသူ သုံးဦးစလုံးသည် တူညီသော Mistral ပုံစံကိုယ်ထည်ဖြင့် တုံ့ပြန်သည်-
 
 ```json
 {
@@ -425,21 +393,13 @@ Provider သုံးခုလုံးသည် Mistral ပုံစံတူ b
 }
 ```
 
-### Azure Document Intelligence poll လုပ်ဆောင်စီးကြောင်း
+### Azure Document Intelligence စစ်တမ်း စီးဆင်းမှု
 
-Azure Document Intelligence ၏ `analyze` API သည် asynchronous ဖြစ်သည်။ ကနဦး request သည် body အစား
-`Operation-Location` header ကို ပြန်ပေးပြီး result ကို poll လုပ်ရသည်။ Handler
-(`open-sse/handlers/ocr.ts`) သည် အဆိုပါ URL ကို တစ်စက္ကန့်ခြားစီ၊ အများဆုံး ၃၀ ကြိမ်အထိ poll လုပ်သည်။ `ok` မဟုတ်သော poll response သို့မဟုတ် `"failed"` status ရရှိပါက ချက်ချင်း မအောင်မြင်ကြောင်း သတ်မှတ်ပြီး (ဆက်လက် poll မလုပ်တော့ဘဲ)၊ ကြိုးစားခွင့်အရေအတွက် ကုန်ဆုံးပြီးနောက် operation သည် ဆက်လက်လုပ်ဆောင်နေဆဲဖြစ်ပါက `504` ကို ပြန်ပေးသည်။ နောက်ဆုံး Azure response ကို ပြန်လည်ပေးပို့ခြင်းမပြုမီ Mistral အသုံးပြုသည့် `pages`/`markdown` ပုံစံတူအဖြစ် ပြောင်းလဲထားသဖြင့် client code အနေဖြင့် provider အလိုက် သီးခြားစီ ကိုင်တွယ်ရန် မလိုအပ်ပါ။
+Azure Document Intelligence ၏ `analyze` API သည် တစ်ပြိုင်နက်တည်းဖြစ်သည်- ကနဦးတောင်းဆိုချက်သည် စာကိုယ်အစား `Operation-Location` ခေါင်းစီးကို ပြန်ပေးမည်ဖြစ်ပြီး ရလဒ်အတွက် ကောက်ယူရမည်ဖြစ်သည်။ ကိုင်တွယ်သူ (`open-sse/handlers/ocr.ts`) သည် အကြိမ် 30 အထိ စက္ကန့်တိုင်း URL စစ်တမ်းကို`ok` မဟုတ်သော စစ်တမ်းတုံ့ပြန်မှု သို့မဟုတ် `"failed"` အခြေအနေတွင် လျင်မြန်စွာ ပျက်ကွက်ပြီး ကြိုးပမ်းမှုဘတ်ဂျက်ကုန်သွားပြီးနောက် လုပ်ဆောင်ဆဲဖြစ်ပါက `504` သို့ ပြန်ပို့ပေးသည်။ နောက်ဆုံး Azure တုံ့ပြန်မှုသည် ခေါ်ဆိုသူထံ ပြန်မပို့မီ Mistral အသုံးပြုသည့် `pages`/`markdown` ပုံသဏ္ဍာန်အဖြစ် ပုံမှန်ပြုလုပ်ထားသောကြောင့် သုံးစွဲသူကုဒ်သည် ဝန်ဆောင်မှုပေးသူကို အထူးပြုရန်မလိုအပ်ပါ။
 
-### Vertex AI DeepSeek OCR authentication နှင့် endpoint ဖြေရှင်းခြင်း
+### Vertex AI DeepSeek OCR auth and endpoint resolution
 
-`vertex-deepseek-ocr` သည် chat/image traffic အတွက် OmniRoute က ထောက်ပံ့ပြီးသား Vertex AI authentication ကို ပြန်လည်အသုံးပြုသည်
-(`open-sse/executors/vertex.ts`)။ Connection ၏ API key သည် Service Account JSON credential ဖြစ်ပြီး JWT-bearer
-flow မှတစ်ဆင့် သက်တမ်းတို OAuth access token အဖြစ် လဲလှယ်အသုံးပြုနိုင်သည် သို့မဟုတ် ရှိပြီးသား OAuth access token ဖြစ်ပါက မပြောင်းလဲဘဲ အသုံးပြုသည်။ Upstream endpoint URL သည် Vertex ၏ ယေဘုယျ
-`openapi/chat/completions` partner endpoint ဖြစ်ပြီး connection ၏ project နှင့် region မှ တည်ဆောက်သည်။ `providerSpecificData.project`/`providerSpecificData.region` ကို တိတိကျကျ သတ်မှတ်ထားပါက အမြဲဦးစားပေးပြီး၊ မသတ်မှတ်ထားပါက project ကို Service Account JSON ၏ `project_id` မှ ရယူကာ region ကို `us-central1` အဖြစ် default သတ်မှတ်သည်။ ဖြေရှင်းမှုနှစ်ခုလုံးကို
-`open-sse/handlers/ocr.ts` ရှိ
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) မှ လုပ်ဆောင်ပြီး၊ `handleOcr` သို့ dispatch မလုပ်မီ
-`src/app/api/v1/ocr/route.ts` က အသုံးပြုသည်။
+`vertex-deepseek-ocr` သည် တူညီသော Vertex AI အထောက်အထားစိစစ်ခြင်း OmniRoute chat/image အသွားအလာအတွက် ပံ့ပိုးပေးထားပြီးဖြစ်သည် (`open-sse/executors/vertex.ts`) : ချိတ်ဆက်မှု၏ API သော့သည် ဝန်ဆောင်မှုအကောင့် JSON အထောက်အထား (JWT-bearer flow မှတဆင့် ခဏတာ OAuth ဝင်ရောက်မှုတိုကင်အတွက် လဲလှယ်ထားသည်) သို့မဟုတ် mined ပြီးသား OAuth သုံးစွဲခွင့်တိုကင်ကို as-is အဖြစ်အသုံးပြုသည်။ ရေစီးကြောင်းအဆုံးမှတ် URL သည် Vertex ၏ ယေဘူယျ `openapi/chat/completions` ပါတနာ အဆုံးမှတ်ဖြစ်ပြီး၊ ချိတ်ဆက်မှု၏ ပရောဂျက်နှင့် ဒေသ — တို့မှ တည်ဆောက်ထားသော တိကျပြတ်သားသော `providerSpecificData.project`/`providerSpecificData.region` အမြဲတမ်းအနိုင်ရသည်။ သို့မဟုတ်ပါက ပရောဂျက်သည် ဝန်ဆောင်မှုအကောင့် JSON၏ `project_id` မှ ဆင်းသက်လာပြီး ဒေသသည် `us-central1` သို့ ပုံသေဖြစ်သည်။ ကြည်လင်ပြတ်သားမှု နှစ်ခုစလုံးသည် `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) ဖြင့် `src/app/api/v1/ocr/route.ts` သို့ မပေးပို့မီ `handleOcr` မှ စားသုံးသည် ။
 
 ---
 
@@ -654,46 +614,49 @@ Upstream contract များ - [အသံအကျိုးသက်ရော�
 
 ---
 
-## လိုက်ဖက်ညီသော Endpoint များ
+## လိုက်ဖက်ညီမှု အဆုံးမှတ်များ
 
-| Method | Path                                      | Format                                |
-| ------ | ----------------------------------------- | ------------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                                |
-| POST   | `/v1/messages`                            | Anthropic                             |
-| POST   | `/v1/responses`                           | OpenAI Responses                      |
-| POST   | `/v1/embeddings`                          | OpenAI                                |
-| POST   | `/v1/images/generations`                  | OpenAI Images                         |
-| POST   | `/v1/images/edits`                        | OpenAI Images (တည်းဖြတ်ခြင်း/inpaint) |
-| POST   | `/v1/videos/generations`                  | OpenAI-style ဗီဒီယိုဖန်တီးခြင်း       |
-| POST   | `/v1/music/generations`                   | OpenAI-style သီချင်းဖန်တီးခြင်း       |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (အသံ body ပြန်ပေးသည်)      |
-| POST   | `/v1/rerank`                              | Cohere/Voyage-style အဆင့်ပြန်စီခြင်း  |
-| POST   | `/v1/classify`                            | Jina classify (`api.jina.ai`)         |
-| POST   | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)    |
-| POST   | `/v1/moderations`                         | OpenAI Moderations                    |
-| GET    | `/v1/models`                              | OpenAI                                |
-| POST   | `/v1/models/query`                        | စစ်ထုတ်ထားသော မော်ဒယ်စာရင်းတို        |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                             |
-| GET    | `/v1beta/models`                          | Gemini                                |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                |
-| POST   | `/v1/api/chat`                            | Ollama                                |
-| GET    | `/api/v1/vscode/{token}/`                 | OpenAI catalog alias                  |
-| GET    | `/api/v1/vscode/{token}/models`           | OpenAI models alias                   |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenized alias                |
-| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responses tokenized alias      |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenized alias                |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama tags tokenized alias           |
+| နည်းလမ်း | မဂ်                                       | ပုံစံ                                       |
+| -------- | ----------------------------------------- | ------------------------------------------- |
+| POST     | `/v1/chat/completions`                    | OpenAI                                      |
+| POST     | `/v1/messages`                            | Anthropic                                   |
+| POST     | `/v1/responses`                           | OpenAI တုံ့ပြန်မှုများ                      |
+| POST     | `/v1/embeddings`                          | OpenAI                                      |
+| POST     | `/v1/images/generations`                  | OpenAI ရုပ်ပုံများ                          |
+| POST     | `/v1/images/edits`                        | OpenAI ပုံများ (edit/inpaint)               |
+| POST     | `/v1/videos/generations`                  | OpenAI စတိုင် ဗီဒီယို မျိုးဆက်              |
+| POST     | `/v1/music/generations`                   | OpenAI စတိုင်ဂီတမျိုးဆက်                    |
+| POST     | `/v1/audio/transcriptions`                | OpenAI အသံ (STT)                            |
+| POST     | `/v1/audio/speech`                        | OpenAI TTS (အသံကိုယ်ထည်ကို ပြန်ပေးသည်)      |
+| POST     | `/v1/rerank`                              | Cohere/Voyage-style အသစ်ပြန်လုပ်ပါ။         |
+| POST     | `/v1/classify`                            | Jina အမျိုးအစားခွဲ`api.jina.ai`             |
+| POST     | `/v1/segment`                             | Jina အပိုင်းခွဲ (`segment.jina.ai`)         |
+| POST     | `/v1/moderations`                         | OpenAI ထိန်းညှိမှုများ                      |
+| POST     | `/v1/systemone`                           | System One ရိုက်ပြီး ဆုံးဖြတ်သည်။           |
+| POST     | `/v1/decisions`                           | OpenAI ဆုံးဖြတ်ချက်များ (ဇာတိ)              |
+| GET      | `/v1/systemone/models`                    | ဆုံးဖြတ်ချက်-မော်ဒယ်ကတ်တလောက်               |
+| GET      | `/v1/models`                              | OpenAI                                      |
+| POST     | `/v1/models/query`                        | စစ်ထုတ်ထားသော မော်ဒယ် ဆန်ခါတင်စာရင်း        |
+| POST     | `/v1/messages/count_tokens`               | Anthropic                                   |
+| GET      | `/v1beta/models`                          | Gemini                                      |
+| POST     | `/v1beta/models/{...path}`                | Gemini generateContent                      |
+| POST     | `/v1/api/chat`                            | Ollama                                      |
+| GET      | `/api/v1/vscode/{token}/`                 | OpenAI catalog alias                        |
+| GET      | `/api/v1/vscode/{token}/models`           | OpenAI မော်ဒယ်များ alias                    |
+| POST     | `/api/v1/vscode/{token}/chat/completions` | OpenAI တိုကင်အမည်များ                       |
+| POST     | `/api/v1/vscode/{token}/responses`        | OpenAI တုံ့ပြန်မှုများ                      |
+| POST     | `/api/v1/vscode/{token}/api/chat`         | Ollama တိုကင်အမည်များ                       |
+| GET      | `/api/v1/vscode/{token}/api/tags`         | Ollama တဂ်များသည် တိုကင်ယူထားသော အမည်တူများ |
 
-POST route အားလုံးသည် တူညီသောပုံစံကို လိုက်နာသည်: `Bearer your-api-key` + Zod ဖြင့် validation ပြုလုပ်ထားသော JSON body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` စသည်တို့၊ `src/shared/validation/schemas.ts` တွင်ကြည့်ပါ)။ Schema validation မအောင်မြင်ပါက 4xx ကို ပြန်ပေးသည်။
+POST လမ်းကြောင်းအားလုံးသည် တူညီသောပုံသဏ္ဍာန်အတိုင်း လုပ်ဆောင်သည်- `Bearer your-api-key` + Zod-validated JSON body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, etc., `src/shared/validation/schemas.ts` ကိုကြည့်ပါ )။ 4xx ကို schema ချို့ယွင်းမှုကြောင့် ပြန်ပေးသည်။
 
-`Authorization: Bearer ...` ကို ထည့်ပေး၍မရသော client များအတွက် OmniRoute သည် အောက်တွင်မှတ်တမ်းတင်ထားသော query-string compatibility (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) သို့မဟုတ် သီးသန့် `/api/v1/vscode/{token}/...` endpoint များမှတစ်ဆင့် URL အတွင်း API key များကိုလည်း လက်ခံသည်။
+`Authorization: Bearer ...` ပူးတွဲ၍မရသော ဖောက်သည်များအတွက် OmniRoute URL ရှိ API သော့များကို query-string compatibility (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) သို့မဟုတ် အောက်တွင်ဖော်ပြထားသော သီးသန့် `/api/v1/vscode/{token}/...` အဆုံးမှတ်များမှတဆင့် လက်ခံပါသည်။
 
 ```bash
-# Rerank (cloud registry provider သို့မဟုတ် "<prefix>/<model>" အဖြစ် OpenAI-compatible provider node)
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina classify (Foundation API အထောက်အထားများ)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
 # Jina segmenter
@@ -705,31 +668,50 @@ POST /v1/search      { "query": "...", "provider": "jina-search" }
 # Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg (သို့မဟုတ် တောင်းဆိုထားသော format) body ကို ပြန်ပေးသည်
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS တွင် ဘာသာစကားနှင့် အသံတစ်ခု လိုအပ်သည်: `language` သည် ပုံမှန်အားဖြင့် "en" ဖြစ်ပြီး၊ မရှိသော
-# voice သို့မဟုတ် OpenAI ၏ မူရင်း voice အမည် (alloy, nova, …) ကို "Adrian" အဖြစ် သတ်မှတ်သည်
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
 # Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# ဗီဒီယို / သီချင်းဖန်တီးခြင်း (provider အမည်ရှေ့ဆက်ပါသော model id)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Rerank ပံ့ပိုးသူ node များ:** `POST /v1/rerank` သည် `<node-prefix>/<model>` အဖြစ် သတ်မှတ်ထားသော OpenAI-compatible ပံ့ပိုးသူ node များ (oMLX၊ vLLM၊ Infinity၊ gateway နောက်က TEI၊ …) သို့လည်း လမ်းကြောင်းပြောင်းပေးသည်။
-> Loopback node များ (`localhost`, `127.0.0.1`, `172.16.0.0/12`) သည် အမြဲတမ်း အသုံးပြုခွင့်ရှိပြီး၊ `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` တွင် operator က စာရင်းသွင်းထားသော hostname များလည်း အလားတူ အသုံးပြုခွင့်ရှိသည် (ဥပမာ `http://reranker:8080/v1` ကဲ့သို့သော Docker/Compose service name များ၊ ၎င်းတို့ကို တိုက်ရိုက်ခေါ်ဆိုပြီး `HTTP(S)_PROXY` သို့မဟုတ် connection ၏ pinned proxy မှတစ်ဆင့် မခေါ်ဆိုပါ)။ အခြား host တစ်ခုခု — LAN box သို့မဟုတ် Tailscale peer — ပေါ်ရှိ node များသည် operator က `RERANK_REMOTE_PROVIDER_NODES` feature flag ကို ဖွင့်ထားပြီး node ၏ base URL သည် provider outbound URL policy (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) ကို ဖြတ်သန်းနိုင်မှသာ အသုံးပြုခွင့်ရှိသည်။
-> Memory engine ၏ rerank အဆင့်သည် ဤ route ကို loopback မှတစ်ဆင့် ခေါ်ဆိုသောကြောင့် Memory settings ထဲရှိ `rerankProviderModel` ကိုလည်း တူညီသော စည်းမျဉ်းက ထိန်းချုပ်သည်။
+> **Rerank provider nodes:** `POST /v1/rerank` also routes to OpenAI-compatible provider nodes (oMLX, vLLM, Infinity, TEI behind a gateway, …) addressed as `<node-prefix>/<model>`. Loopback nodes (`localhost`, `127.0.0.1`, `172.16.0.0/12`) are always eligible, and so are hostnames the operator lists in `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (e.g. a Docker/Compose service name such as `http://reranker:8080/v1`; these are called directly, never through `HTTP(S)_PROXY` or a connection's pinned proxy). Nodes on any other host — a LAN box or Tailscale peer — are eligible only when the operator enables the `RERANK_REMOTE_PROVIDER_NODES` feature flag **and** the node's base URL passes the provider outbound URL policy (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). The memory engine's rerank step calls this route over loopback, so the same rule governs `rerankProviderModel` in the Memory settings.
 >
-> **Local server ပုံစံများ:** node ကို `<base>/v1/rerank` တွင် ခေါ်ဆိုပြီး 404 ရရှိပါက `<base>/rerank` တွင် ထပ်မံခေါ်ဆိုသည် (Infinity၊ TEI)။ Upstream body တွင် Cohere/OpenAI ရေးသားပုံ (`documents`, `return_documents`) နှင့် TEI ရေးသားပုံ (`texts`, `return_text`) နှစ်မျိုးလုံး ပါဝင်ပြီး upstream response ကို Cohere envelope အဖြစ် စံပြုပြောင်းလဲပေးသည်။ TEI ၏ ရိုးရိုး `[{index, score, text}]`၊ thin gateway များမှ `{results: [{index, score}]}` နှင့် Voyage ပုံစံ `{data: [...]}` တို့အားလုံးကို client ထံ `{results: [{index, relevance_score, document?}]}` အဖြစ် ပြန်လည်ပေးပို့ပြီး score အလိုက် စီကာ `top_n` အရေအတွက်အထိသာ ကန့်သတ်ပေးသည်။
+> **ဒေသတွင်း ဆာဗာပုံစံများ-** node ကို `<base>/v1/rerank` နှင့် 404 တွင် `<base>/rerank` (Infinity, TEI) ဟုခေါ်သည်။ အထက်ပိုင်းကိုယ်ထည်သည် Cohere/OpenAI စာလုံးပေါင်း (`documents`, `return_documents`) နှင့် TEI စာလုံးပေါင်း (`texts`, `return_text`) နှစ်မျိုးလုံးကို သယ်ဆောင်ထားပြီး အထက်ပိုင်းတုံ့ပြန်မှုသည် Cohere စာအိတ်သို့ ပုံမှန်ဖြစ်စေသည်- TEI's bare `[{index, score, text}]`, `{results: [{index, score}]}` ပါးလွှာသောတံခါးပေါက်များမှ `{results: [{index, relevance_score, document?}]}` နှင့် Voyage-style `{data: [...]}` အားလုံးကို `top_n` တွင် sorped ဖြင့် ပြန်ပို့ပေးပါသည်။
 
-> **Provider-node ရှာဖွေမှု:** OpenAI-compatible provider node ပေါ်ရှိ model များသည် node prefix အောက်ရှိ `GET /v1/models` တွင် ပေါ်လာသည်။
-> Endpoint metadata မပါသော row များ (ပုံမှန် local `/v1/models` စာရင်းများတွင် တွေ့ရသည့်ပုံစံ) သည် node ၏ `apiType` ကို အမွေဆက်ခံသည်။ ထို့ကြောင့် `embeddings` node ၏ model များသည် `type: "embedding"` ဖြစ်ပြီး `rerank` node ၏ model များသည် chat အဖြစ် default မသတ်မှတ်ဘဲ `type: "rerank"` ဖြစ်သည်။ သို့သော် sync လုပ်ထားသော သို့မဟုတ် ကိုယ်တိုင်ထည့်သွင်းထားသော row တွင် `supportedEndpoints` ကို အတိအလင်း သတ်မှတ်ထားပါက ၎င်းသည် ဦးစားပေးအကျိုးသက်ရောက်မှု ရှိနေဆဲဖြစ်သည်။
+> **ပံ့ပိုးသူ-node ရှာဖွေမှု-** OpenAI-သဟဇာတဖြစ်သော ဝန်ဆောင်မှုပေးသူ node ပေါ်ရှိ မော်ဒယ်များသည် node ရှေ့ဆက်အောက်တွင် `GET /v1/models` တွင် ပေါ်နေပါသည်။ အဆုံးမှတ် မက်တာဒေတာ (ဒေသခံ `/v1/models` စာရင်းများအတွက် ပုံမှန်) မပါသော အတန်းများသည် node ၏ `apiType` အမွေဆက်ခံသည်၊ ထို့ကြောင့် `embeddings` node ၏ မော်ဒယ်များသည် `type: "embedding"` ဖြစ်ပြီး `rerank` node ၏ မော်ဒယ်များသည် ချတ်လုပ်မည့်အစား `type: "rerank"` ဖြစ်သည်။ စင့်ခ်လုပ်ထားသော သို့မဟုတ် ကိုယ်တိုင်ထည့်သွင်းထားသောအတန်းရှိ တိကျပြတ်သားသော `supportedEndpoints` ဦးစားပေးနေဆဲဖြစ်သည်။
 
-### သီးသန့် Provider Route များ
+### ရိုက်ထားသော ဆုံးဖြတ်ချက်များ
+
+ဆုံးဖြတ်ချက်မော်ဒယ်များသည် စာသားထုတ်ခြင်းအစား ချိန်ညှိထားသော ဖြစ်နိုင်ခြေရှိသည့် မေးခွန်းများကို ဖြေဆိုသည်။ ၎င်းတို့သည် ချတ်မော်ဒယ်များမဟုတ်ပါ၊ ဝိုင်ယာဖော်မတ်နှစ်ခုကို တစ်ခုနှင့်တစ်ခုသို့ ဘယ်သောအခါမှ ဘာသာပြန်မည်မဟုတ်ပါ။
+
+- `POST /v1/systemone` — စနစ် One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev၊ OpenRouter ဆုံးဖြတ်ချက်များ၊ Cloudflare အလုပ်သမား AI၊ local Ollama)။
+- `POST /v1/decisions` — ဇာတိ OpenAI ဆုံးဖြတ်ချက်များ `{ model, input, questions: [...] }`၊ `openai` ချိတ်ဆက်မှုဖြင့် ဆောင်ရွက်သည်။ မော်ဒယ်သည် `openai/gpt-6-luna` ( `gpt-6-luna` သည်လည်း အလုပ်ဖြစ်သည်)။ အဖြေများသည် မေးခွန်းအစီအစဥ်အတိုင်း ပြန်၍မထိမခိုက်၊
+- `GET /v1/systemone/models` — နှစ်မျိုးလုံး၏ ကတ်တလောက်တစ်ခု၊ အတန်းတစ်ခုစီသည် ၎င်း၏ `api_format` (`systemone` သို့မဟုတ် `decisions`) ဟု အမည်ပေးသည်။ `limit` / `after` စာမျက်နှာ နောက်ဆုံးစာရင်း။ `X-OmniRoute-Catalog-Status` ခေါင်းစီးသည် `complete`၊ `partial` သို့မဟုတ် `unavailable` (503) ကိုဖတ်သည်။
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions` တွင် API သော့၏ပုံစံခွင့်ပြုစာရင်းတွင်၊ အထောက်အထားတစ်စုံတစ်ရာမဖတ်မီ `decisions` အဆုံးမှတ်အမျိုးအစား၊ ဘတ်ဂျက်နှင့် ချိတ်ဆက်မှုနယ်ပယ်ကို စစ်ဆေးမည်ဖြစ်သည်။ အထောက်အထားသည် သော့၏နယ်ပယ်အတွင်း သိမ်းဆည်းထားသော `openai` ချိတ်ဆက်မှု (ပတ်ဝန်းကျင်သော့မဟုတ်ပါ)၊ ချိတ်ဆက်မှုအခြေခံ URL ဤ OmniRoute တွင် ညွှန်ပြခြင်းမရှိသော အထောက်အထားများ၊ မေးမြန်းမှု သို့မဟုတ် အပိုင်းအစများမပါဘဲ `http(s)` URL ဖြစ်မှသာ ဂုဏ်ပြုပါသည်။ ခေါ်ဆိုမှုသည် `decision` အလိုအလျောက်ရောက်တာ ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ) : ဝန်ဆောင်မှုပေးသူအပြင်ဘက်အစောင့်၊ ပြန်မစမ်းရ၊ ပြန်ညွှန်းခြင်းမရှိ၊ 5 s အချိန်ကုန်သွားခြင်းနှင့် 64 KB အဖြေထုပ် (ပိုကြီးသောအဖြေသည် 502) ကဲ့သို့ စောင့်ကြပ်ထားသော သယ်ယူပို့ဆောင်ရေးမှတဆင့် ထွက်ခွာသွားပါသည်။ တောင်းဆိုချက်ကောင်များကို 4 MiB ကန့်သတ်ထားသည်။ ခေါ်ဆိုမှုတိုင်းသည် `Idempotency-Key` အသစ်တစ်ခု ပို့ပေးသည်။ အမှားများသည် အထက်ပိုင်းအခြေအနေကိုသာ သယ်ဆောင်သည်၊ ၎င်း၏ကိုယ်ထည်၊ URL၊ သော့ သို့မဟုတ် အချက်ပြမှုတို့ကို ဘယ်တော့မှ မသယ်ဆောင်ပါ။
+
+### သီးသန့်ပံ့ပိုးပေးသည့် လမ်းကြောင်းများ
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -737,7 +719,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Provider prefix မပါရှိပါက အလိုအလျောက် ထည့်သွင်းပေးသည်။ ကိုက်ညီမှုမရှိသော model များသည် `400` ပြန်ပေးသည်။
+ပျောက်နေပါက ပံ့ပိုးပေးသူ၏ရှေ့ဆက်သည် အလိုအလျောက်ထည့်ပါသည်။ မကိုက်ညီသော မော်ဒယ်များသည် `400` ပြန်ပေးသည်။
 
 ---
 

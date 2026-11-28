@@ -4,9 +4,9 @@
 
 ---
 
-> **Qu'est-ce qui se trouve où : chaque répertoire de niveau supérieur et fichier racine suivis, avec un objectif sur une seule ligne.** Dernière mise à jour : 2026-11-13 (OmniRoute v3.8.54)
+> **Qu'est-ce qui se trouve où : chaque répertoire de niveau supérieur et fichier racine suivis, avec un objectif sur une seule ligne.**
 >
-> Utilisez cette carte pour vous repérer dans la base de code, puis suivez les liens vers les documents dédiés. Le nombre de fichiers a été mesuré avec `git ls-files` à la date ci-dessus. Ils changent à chaque version, alors traitez-les comme des ordres de grandeur.
+> Utilisez cette carte pour vous repérer dans la base de code, puis suivez les liens vers les documents dédiés. Le nombre de fichiers provient de `git ls-files` et change avec presque chaque version. Traitez-les comme des ordres de grandeur.
 
 ## Arbre de niveau supérieur
 

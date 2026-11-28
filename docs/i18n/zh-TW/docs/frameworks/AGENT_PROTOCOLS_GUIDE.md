@@ -182,15 +182,15 @@ DELETE /api/v1/agents/tasks/[id]
 
 ## 整合範例
 
-### 探索 OmniRoute 的 A2A 功能
+### 探索OmniRoute的A2A功能
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-傳回包含全部 6 項技能、傳輸方式及版本資訊的 Agent Card。
+傳回包含所有 6 種技能、運送方式和版本的特務卡。
 
-### 將 OmniRoute 作為 A2A 代理程式呼叫
+### 致電OmniRoute作為A2A代理
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -206,14 +206,14 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
-### 透過 ACP 列出已安裝的 CLI 代理程式
+### 透過ACP列出已安裝的CLI代理
 
 ```bash
 curl http://localhost:20128/api/acp/agents \
   -H "Authorization: Bearer <api-key>"
 ```
 
-### 新增自訂 CLI 代理程式
+### 新增自訂CLI代理
 
 ```bash
 curl -X POST http://localhost:20128/api/acp/agents \
@@ -229,7 +229,7 @@ curl -X POST http://localhost:20128/api/acp/agents \
   }'
 ```
 
-### 提交 Cloud Agent 任務
+### 提交雲端代理任務
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/agents/tasks \

@@ -4,14 +4,11 @@
 
 ---
 
-> **სტატუსი:** საყოველთაოდ ხელმისაწვდომია.
-> **აუდიტორია:** ოპერატორები, რომლებიც OpenCode-ს OmniRoute-ის განთავსებასთან აკავშირებენ.
-> **ჭეშმარიტების წყარო (კონფიგურაციის სქემა):** `src/shared/services/opencodeConfig.ts`
-> **ჭეშმარიტების წყარო (npm პაკეტი):** `@omniroute/opencode-provider/` (გამოსაქვეყნებელი სამუშაო სივრცე)
+> **სტატუსი:** ზოგადად ხელმისაწვდომია.** აუდიტორია:** ოპერატორები აკავშირებენ OpenCode OmniRoute განლაგებას.** სიმართლის წყარო (კონფიგურაციის სქემა):** `src/shared/services/opencodeConfig.ts`** რეკომენდებული npm პაკეტები:** `@omniroute/opencode-plugin/` (OpenCode v1, დაინსტალირებული `omniroute setup opencode` მიერ) და `@omniroute/opencode-plugin-v2/` (OpenCode v2). ძველი `@omniroute/opencode-provider/` პაკეტი არის** მოძველებული** (იხ. გზა 2).
 
-[OpenCode](https://opencode.ai) არის აგენტური CLI/დესკტოპ AI-კლიენტი. ის პროვაიდერების კატალოგს კითხულობს `~/.config/opencode/opencode.json`-დან (ან `opencode.jsonc`-დან) და მიჰყვება სქემას მისამართზე `https://opencode.ai/config.json`. OmniRoute საკუთარ თავს OpenCode-ს ერთ-ერთ ასეთ პროვაიდერად წარუდგენს — თითოეული მოთხოვნა OmniRoute-ის სტანდარტულ, OpenAI-თან თავსებად `/v1` ზედაპირზე გადის, ამიტომ OpenCode ავტომატურად სარგებლობს Auto-Combo მარშრუტიზაციით, ავარიული გამთიშველებით, გასაღებების პოლიტიკებით, დაკვირვებადობით და ა.შ.
+[OpenCode](https://opencode.ai) არის აგენტური CLI/desktop AI კლიენტი. ის კითხულობს თავისი პროვაიდერის კატალოგს `~/.config/opencode/opencode.json` დან (ან `opencode.jsonc`) და მიჰყვება სქემას `https://opencode.ai/config.json` ზე. OmniRoute ექვემდებარება OpenCode, როგორც ერთ-ერთი იმ პროვაიდერს — ყველა მოთხოვნა მიედინება OmniRoute ის სტანდარტულ OpenAI-თან თავსებადი `/v1` ზედაპირზე, ამიტომ OpenCode ავტომატურად სარგებლობს Auto-Combo მარშრუტირებით, ამომრთველებით, ძირითადი წესებით, დაკვირვებადობით და ა.შ.
 
-მხარდაჭერილია **ინტეგრაციის ორი გზა**. აირჩიეთ ერთ-ერთი — ორივე ერთსა და იმავე კონფიგურაციას ქმნის.
+ეს გვერდი ადასტურებს ქვემოთ მოცემულ ორ სტატიკური კონფიგურაციის ბილიკს; ორივე ქმნის ერთსა და იმავე კონფიგურაციას. მოდელების სიისთვის, რომელიც მიჰყვება თქვენს ცოცხალ კატალოგს, ამის ნაცვლად გამოიყენეთ დანამატი: `omniroute setup opencode` აყენებს `@omniroute/opencode-plugin` (OpenCode v1) და `@omniroute/opencode-plugin-v2` მიზნად ისახავს OpenCode v2 (იხ. [CLI ინტეგრაციები](../guides/CLI-INTEGRATIONS.md) და [OpenCode v2 დანამატის სახელმძღვანელო](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ omniroute config opencode \
 
 ---
 
-## გზა 2 — npm პაკეტი `@omniroute/opencode-provider`
+## ბილიკი 2 — npm პაკეტი `@omniroute/opencode-provider` (მოძველებულია)
 
-რეკომენდებულია, როდესაც კონფიგურაციას Node/TS-იდან სკრიპტით ქმნით (CI კონვეიერები, მონორეპოზიტორიები, ინსტალატორის მორგებული პროცესები).
+> **მოძველებულია.** პაკეტი წერს სტატიკური მოდელების სიას, რომელიც მოძრაობს თქვენი ცოცხალი OmniRoute კატალოგის უკან. მისი README გირჩევთ მიგრაციას `@omniroute/opencode-plugin` ზე (ან `@omniroute/opencode-plugin-v2` ზე OpenCode v2-ზე). ქვემოთ მოცემული API ინახება მხოლოდ არსებული სკრიპტებისთვის.
+
+გამოიყენება Node/TS დან კონფიგურაციის სკრიპტირებისას (CI მილსადენები, მონორეპოები, პერსონალური ინსტალერის ნაკადები).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // არასავალდებულო: OpenCode-ისთვის ხელმისაწვდომი მოდელების კატალოგის გადაფარვა
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-არსებულ ფაილთან არადესტრუქციული შერწყმისთვის გაიმეორეთ `mergeOpenCodeConfigText()` ფუნქცია `opencodeConfig.ts`-დან ან გამოიძახეთ CLI გენერატორი.
+არსებული ფაილის წინააღმდეგ არადესტრუქციული შერწყმისთვის, გაიმეორეთ `mergeOpenCodeConfigText()` `opencodeConfig.ts` დან ან დარეკეთ CLI გენერატორს.
 
-სრული API-ის სანახავად იხილეთ [პაკეტის README](../../@omniroute/opencode-provider/README.md).
+იხილეთ [პაკეტი README](../../@omniroute/opencode-provider/README.md) სრული API სთვის.
 
 ---
 
@@ -155,9 +154,11 @@ Anthropic-ის სტილის კლიენტებისთვის, 
 
 ---
 
-## აგრეთვე იხილეთ
+## აგრეთვე
 
-- [API-ის ცნობარი](../reference/API_REFERENCE.md) — OmniRoute REST-ის სრული ინტერფეისი
+- [API მითითება](../reference/API_REFERENCE.md) — სრული OmniRoute REST ზედაპირი
 - [Auto-Combo](../routing/AUTO-COMBO.md) — რას ნიშნავს `model: "auto"`
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (რეკომენდირებულია)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (მოძველებული)
 - წყარო: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

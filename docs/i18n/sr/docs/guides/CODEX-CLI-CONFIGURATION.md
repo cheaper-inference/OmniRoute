@@ -471,136 +471,124 @@ codex debug models --bundled       # приказује уграђени кат�
 
 ## Дуготрајни задаци
 
-Две подразумеване вредности OmniRoute-а могу неприметно да угрозе вишесатне Codex CLI сесије. Ниједна од њих није Codex CLI подешавање — обе се налазе на страни OmniRoute-а. Корисници који преносе конфигурацију са посредничких сервера узводног система, који везују налоге и онемогућавају прекиде због неактивности, често наиђу на оба проблема и закључе да OmniRoute „не може да одржи дугу сесију“.
+Два OmniRoute подразумевана подешавања могу тихо да саботирају вишесатне Codex CLI сесије. Нити Codex — CLI живи на OmniRoute страни. Корисници који мигрирају конфигурацију са узводних проксија који прикачу налоге и онемогућавају искључења у мировању често погађају оба и закључују да OmniRoute „не може да издржи дугу сесију“.
 
-| Симптом                                                                       | Вероватан узрок                                                                    | Поставка                 |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------ |
-| Сесија стално мења налоге / континуитет кеша упита се губи између интеракција | TTL афинитета сесије је `0` (онемогућен)                                           | `sessionAffinityTtlMs`   |
-| Веза се прекида усред закључивања без упита видљивог клијенту                 | Надзор неактивног тока се активирао након 10 минута без сегмента са узводне стране | `STREAM_IDLE_TIMEOUT_MS` |
+| Симптом                                                                        | Вероватно узрок                                                                   | Кноб                     |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- | ------------------------ |
+| Сесија наставља да мења налоге / континуитет промпт-кеша се губи између окрета | Афинитет сесије TTL је `0` (онемогућено)                                          | `sessionAffinityTtlMs`   |
+| Веза умире усред расуђивања без промпта окренутог клијенту                     | Контролер стрима у стању мировања је покренут после 10 минута без претходног дела | `STREAM_IDLE_TIMEOUT_MS` |
 
-Повезане дискусије: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (прекиди дугих задатака), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (зашто је афинитет подразумевано искључен). Праћење: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Повезане дискусије: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (дуги пад задатака), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (зашто је афинитет подразумевано искључен). Праћење: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Афинитет сесије — вежите један разговор за један налог
+### 1. Афинитет сесије — закачи једну конверзацију на један налог
 
 **Подразумевано:** `sessionAffinityTtlMs = 0` (онемогућено).
 
-**Где се подешава**
+**Где га поставити**
 
-- Контролна табла → **Подешавања → Усмеравање** → **Афинитет сесије** → **TTL афинитета (секунде)** (`ComboDefaultsTab`)
-- Или PATCH-ом ажурирајте подешавања помоћу `sessionAffinityTtlMs` у **милисекундама** (Zod опсег `0`–`86_400_000`, односно до 24 сата)
+- Дасхбоард →** Подешавања → Роутинг** →** Афинитет сесије** →** Афинитет TTL (секунде)** (`ComboDefaultsTab`)
+- Или PATCH подешавања са `sessionAffinityTtlMs` ин** милисекунди** (Zod опсег `0`–`86_400_000`, тј. до 24 сата)
 
-> Преименовано у #7274 из `codexSessionAffinityTtlMs`, који је био намењен само Codex-у. Стари кључ је и даље прихваћен као псеудоним само за читање; нове конфигурације треба да користе `sessionAffinityTtlMs`. Афинитет се сада примењује на **сваког** добављача када је TTL већи од `0`, а не само на Codex — погледајте [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Афинитет сесије.
+> Преименовано у #7274 из зкб-а само `codexSessionAffinityTtlMs`. Застарели кључ се и даље прихвата као псеудоним само за читање; нове конфигурације треба да користе `sessionAffinityTtlMs`. Афинитет се сада односи на** било који** провајдер када је TTL изнад `0`, не само Codex — види [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Афинитет сесије.
 
-**Шта престаје да ради када вредност остане 0**
+**Шта се поквари када остане на 0**
 
-Свака интеракција у Codex разговору са више интеракција усмерава се независно, у складу са активном комбинованом стратегијом, и свака може завршити на **другом налогу**. То нарушава континуитет сесије / кеша упита на узводној страни. OmniRoute узима у обзир Codex заглавља сесије (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) и поља тела као што су `prompt_cache_key` / `session_id` само када је TTL већи од `0` (`extractSessionAffinityKey` у `src/sse/services/auth.ts`).
+Сваки заокрет вишеструког Codex разговора је независно рутиран активном комбинованом стратегијом и може доћи на** различит рачун по окрету** . То прекида континуитет узводне сесије / промпт-кеша. OmniRoute консултује само Codex заглавља сесије (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) и поља тела као што су `prompt_cache_key` / `session_id` када је TTL већи од `0` (`extractSessionAffinityKey` у `src/sse/services/auth.ts`).
 
-**Препорука за један вишесатни задатак**
+**Препоручује се за вишечасовни појединачни задатак**
 
-Подесите TTL **изнад очекиваног стварног трајања задатка** (максимум у корисничком интерфејсу је **86400 секунди** = 24 сата):
+Поставите TTL** изнад очекиване дужине задатка на зидном сату** (UI мак је** 86400 секунди** = 24 сата):
 
-| Очекивано трајање задатка | TTL афинитета (интерфејс, секунде) | `sessionAffinityTtlMs` |
-| ------------------------- | ---------------------------------- | ---------------------- |
-| Неколико сати             | `14400` (4 ч)                      | `14400000`             |
-| Преко ноћи / ~12 ч        | `43200` (12 ч)                     | `43200000`             |
-| Цео дан                   | `86400` (24 ч, максимум)           | `86400000`             |
+| Очекивана дужина задатка | Афинитет TTL (UI, секунде) | `sessionAffinityTtlMs` |
+| ------------------------ | -------------------------- | ---------------------- |
+| Неколико сати            | `14400` (4х)               | `14400000`             |
+| Ноћење / ~ 12х           | `43200` (12х)              | `43200000`             |
+| Цео дан                  | `86400` (24х, максимум)    | `86400000`             |
 
-Изричито укључивање је намерно: онемогућавање афинитета даје предност расподели оптерећења између налога; омогућавање афинитета даје предност континуитету једне дуге сесије агента. Овај водич **не** мења подразумевану вредност — оператери који покрећу дуге Codex задатке морају сами да је укључе.
+Омогућавање је намерно: онемогућавање афинитета фаворизује балансирање оптерећења на свим налозима; омогућавајући да фаворизује континуитет за једну дугу сесију агента. Овај водич ради** не** промените подразумеване — операторе који извршавају дуге Codex задатке морају да се укључе.
 
-### 2. Временско ограничење неактивног тока — не прекидајте тихе интеракције закључивања
+### 2. Стреам идле тимеоут — не убија тихо резоновање претвара
 
-**Подразумевано:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 минута). Ако није подешено, наслеђује вредност од `REQUEST_TIMEOUT_MS`; заједничка основна вредност је такође 600000. Погледајте [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Временска ограничења.
+**Подразумевано:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 минута). Наслеђује од `REQUEST_TIMEOUT_MS` када није подешен; заједничка основна линија је такође 600000. Погледајте [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → ограничења.
 
-**Шта престаје да ради са подразумеваном вредношћу**
+**Шта се квари по подразумеваној вредности**
 
-Codex reasoning / tool korak koji ostane tih duže od 10 minuta bez **ijednog stvarnog upstream segmenta** prinudno zatvara SSE idle watchdog (`open-sse/utils/stream.ts`). Klijent često vidi samo prekid veze — što odgovara opisu „automatski je zaustavljeno bez ikakvog obaveštenja“.
+Codex образложење/окретање алата које остаје нечујно више од 10 минута са** нема правог узводног комада** је принудно затворен од стране SSE идле ватцхдог-а (`open-sse/utils/stream.ts`). Клијент често види да је гола веза испуштена — која одговара „аутоматски заустављена без икаквог обавештења“.
 
-Ključni detalj: OmniRoute-ov sintetički SSE **heartbeat ne resetuje** idle sat. Samo stvarni segment upstream tela ažurira `lastChunkTime`. Tih model koji još uvek „razmišlja“ iz perspektive watchdog-a izgleda isto kao zaustavljen upstream.
+Критични детаљ: OmniRoute синтетички SSE** откуцаји срца се не ресетују** неактивни сат. Само прави горњи део тела ажурира `lastChunkTime`. Тихи модел који још увек „размишља” изгледа идентично заустављеном узводно са тачке гледишта пса чувара.
 
-Povezana neaktivnost Undici tela: `FETCH_BODY_TIMEOUT_MS` (takođe podrazumevano koristi istu osnovnu vrednost od 10 minuta; `0` je onemogućava). Za strimovanje, `FETCH_TIMEOUT_MS` pokriva samo uspostavljanje veze / prva zaglavlja — kada strim postane aktivan, zastoji su kontrolisani parametrima `STREAM_IDLE_TIMEOUT_MS` i `FETCH_BODY_TIMEOUT_MS`.
+Повезана неактивност тела Ундици: `FETCH_BODY_TIMEOUT_MS` (такође подразумевано подразумева исту основну линију од 10 минута; `0` је онемогућава). За стримовање, `FETCH_TIMEOUT_MS` покрива само подешавање везе / прва заглавља — када је ток активан, застојима управљају `STREAM_IDLE_TIMEOUT_MS` и `FETCH_BODY_TIMEOUT_MS`.
 
-**Preporučeno za pojedinačni zadatak koji traje više sati**
+**Препоручује се за вишечасовни појединачни задатак**
 
-U okruženju OmniRoute procesa (`.env` / compose / systemd):
+У OmniRoute процесном окружењу (`.env` / цомпосе / системд):
 
 ```bash
-# Onemogućite ograničenja neaktivnosti strima i tela za duge korake rezonovanja
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Ili ih povećajte iznad najdužeg očekivanog perioda tišine (vrednosti su u milisekundama):
+Или их подигните изнад најдуже тихе празнине коју очекујете (вредности су милисекунде):
 
 ```bash
-# Primer: dozvolite do 2 sata tišine između upstream segmenata
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Ponovo pokrenite OmniRoute nakon izmene ovih promenljivih okruženja.
+Поново покрените OmniRoute након промене ових енв варс.
 
-### Konkretno uputstvo — višesatni Codex zadatak
+### Конкретан рецепт — вишесатни Codex задатак
 
-1. **Vežite nalog:** Kontrolna tabla → Podešavanja → Usmeravanje → Afinitet sesije → TTL afiniteta = `43200` (12h) ili `86400` (maksimalno 24h).
-2. **Povećajte / onemogućite idle ograničenja** u OmniRoute okruženju:
+1. **Закачите налог:** Контролна табла → Подешавања → Рутирање → Сродност сесије → Афинитет TTL = `43200` (12 х) или `86400` (макс. 24 х).
+2. **Подигните / онемогућите прекиде у мировању** у окружењу OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Zadržite uobičajeni Codex `config.toml` (`wire_api = "responses"`, ispravan `base_url`, `OMNIROUTE_API_KEY`) — u Codex-u ne postoje podešavanja za afinitet/neaktivnost koja kontrolišu ova dva ponašanja.
-4. Ponovo pokrenite OmniRoute, a zatim pokrenite dugi Codex zadatak.
+3. Задржите уобичајени Codex `config.toml` (`wire_api = "responses"`, исправан `base_url`, `OMNIROUTE_API_KEY`) — не постоје affinity/idle дугмад на страни Цодека за ова два понашања.
+4. Поново покрените OmniRoute, а затим покрените дуг Codex задатак.
 
-### Odluka o podrazumevanim vrednostima (#7287)
+### Подразумевана одлука (#7287)
 
-| Parametar                | Podrazumevana vrednost | Promeniti u ovom vodiču?                                                                                     |
-| ------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `sessionAffinityTtlMs`   | `0` (isključeno)       | **Ne** — ostaje opciono (balansiranje opterećenja naspram kontinuiteta; pogledajte Diskusiju #5718)          |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)      | **Ne** — ostaje 10 minuta za opšti saobraćaj; operateri dugih Codex zadataka ga povećavaju ili onemogućavaju |
+| Кноб                     | Испорука подразумевано | Промена у овом водичу?                                                                            |
+| ------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (искључено)        | **бр** — остаје укључен (балансирање оптерећења наспрам континуитета; погледајте дискусију #5718) |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 мин)      | **бр** — остаје 10 минута за општи саобраћај; лонг Codex оператори га подижу или онемогућавају    |
 
-Globalna promena bilo koje od ovih podrazumevanih vrednosti promenila bi ponašanje za svakog klijenta instance, a ne samo za Codex. Dokumentujte parametre; ostavite podrazumevane vrednosti nepromenjene dok eksplicitna odluka operatera ne odredi drugačije.
+Глобално окретање било које подразумеване вредности променило би понашање за сваког клијента инстанце, не само Codex. Документујте дугмад; оставите подразумеване вредности на миру све док експлицитна одлука оператера не каже другачије.
 
-### Dijagnostikovanje prekida zbog neaktivnosti
+### Дијагностиковање прекида у празном ходу
 
-Kada se idle watchdog aktivira, OmniRoute beleži red ovog oblika:
+Када се неактивни чувар активира, OmniRoute бележи линију у облику:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Pretražite logove za `Idle timeout: no data from` (ili kod `stream_idle_timeout` / naziv greške `StreamIdleTimeoutError`). Segment pružaoca je vrednost koju je OmniRoute koristio za taj zahtev (`codex`, ID drugog pružaoca ili `provider` ako je nepoznat) — to nije uvek doslovno niska `codex`.
+Греп за `Idle timeout: no data from` (или код `stream_idle_timeout` / име грешке `StreamIdleTimeoutError`). Сегмент добављача је било који OmniRoute који се користи за тај захтев (`codex`, ид другог добављача или `provider` ако је непознат) — то није увек литерални стринг `codex`.
 
 ---
 
 ## Решавање проблема
 
-**`Error: wire_api = "chat" више није подржан`**
-Уклоните `wire_api = "chat"` из конфигурације. Подесите `wire_api = "responses"` или изоставите поље (подразумевана вредност је `"responses"` од верзије v0.138).
+**`Error: wire_api = "chat" is no longer supported`** Уклоните `wire_api = "chat"` из ваше конфигурације. Поставите `wire_api = "responses"` или изоставите поље (подразумевано је `"responses"` од в0.138).
 
-**`Error: модел није пронађен`**
-Проверите да ли модел постоји у OmniRoute-у са исправним префиксом. Користите `omniroute models list` или отворите `/dashboard/providers/<provider>`.
+**`Error: model not found`** Проверите да ли модел постоји у OmniRoute са исправним префиксом. Користите `omniroute models list` или отворите `/dashboard/providers/<provider>`.
 
-**`Грешка при аутентификацији`**
-Проверите да ли је `OMNIROUTE_API_KEY` извезен: `echo $OMNIROUTE_API_KEY`.
+**`Authentication error`** Потврдите да је `OMNIROUTE_API_KEY` извезен: `echo $OMNIROUTE_API_KEY`.
 
-**`ERROR: Недостаје променљива окружења: OMNIROUTE_API_KEY`**
-Codex проверава да ли променљива окружења постоји пре слања првог захтева. Извезите
-стварни кључ за заштићене сервере или непразну заменску вредност, као што је
-`OMNIROUTE_API_KEY=local`, када ваша **локална** OmniRoute инстанца не захтева
-аутентификацију. Поново покрените љуску ако сте је додали у `~/.bashrc` или `~/.zshrc`.
+**`ERROR: Missing environment variable: OMNIROUTE_API_KEY`** Codex потврђује да енв вар постоји пре него што направи први захтев. Извезите прави кључ за заштићене сервере или непразан чувар места као што је `OMNIROUTE_API_KEY=local` када ваш** локални** OmniRoute инстанца не захтева аутх. Поново покрените љуску ако сте је додали у `~/.bashrc` или `~/.zshrc`.
 
-**`Веза је одбијена`**
-Проверите да ли је OmniRoute покренут и да ли су хост/порт у `base_url` исправни за вашу мрежу (локална мрежа, Tailscale или VPS).
+**`Connection refused`** Проверите да ли је OmniRoute покренут и да је `base_url` host/port исправан за вашу мрежу (локални вс Tailscale вс VPS).
 
-**Сесија престаје са радом близу ограничења контекста**
-Експлицитно подесите `model_context_window` и `model_auto_compact_token_limit`. Погледајте горњу табелу прозора контекста.
+**Сесија пада близу ограничења контекста** Експлицитно поставите `model_context_window` и `model_auto_compact_token_limit`. Погледајте табелу контекстног прозора изнад.
 
-**Сажимање се покреће прекасно**
-Смањите `model_auto_compact_token_limit` на 80–85% прозора. Никада га не постављајте изнад 90%.
+**Збијање пали прекасно** Спустите `model_auto_compact_token_limit` на 80–85% прозора. Никада не постављајте изнад 90%.
 
-**Профил се не учитава (`-p <name>` се неприметно игнорише)**
-Проверите да ли датотека постоји на путањи `~/.codex/<name>.config.toml` (без префикса `profile-`). Покрените `ls ~/.codex/*.config.toml`.
+**Профил се не учитава (`-p <name>` тихо игнорисан)** Потврдите да датотека постоји на `~/.codex/<name>.config.toml` (без `profile-` префикса). Покрени `ls ~/.codex/*.config.toml`.
 
-**Дуготрајни Codex задатак се прекида током извршавања / налози се мењају између корака**
-Погледајте [Дуготрајни задаци](#long-running-tasks). Омогућите афинитет сесије (TTL дужи од трајања задатка) и повећајте или онемогућите `STREAM_IDLE_TIMEOUT_MS` / `FETCH_BODY_TIMEOUT_MS`. Претражите OmniRoute евиденције помоћу grep-а за `Idle timeout: no data from`.
+**Дуги Codex задатак пада у току трчања / мења налоге између окрета** Погледајте [Дуготрајни задаци](#long-running-tasks). Омогућите афинитет сесије (TTL изнад дужине задатка) и подигните или онемогућите `STREAM_IDLE_TIMEOUT_MS` / `FETCH_BODY_TIMEOUT_MS`. Греп OmniRoute евиденције за `Idle timeout: no data from`.

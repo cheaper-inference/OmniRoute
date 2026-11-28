@@ -111,58 +111,48 @@ enweghị ike iketa njirimara environment nke sava ahụ. ID placeholder naanị
 Key ndị ekwenyere na-enweghị nhazi Obsidian nke key ahụ ka na-eji fallback zuru ụwa ọnụ.
 Ngwaọrụ anọ `obsidian_sync_*` na-edobe akparamàgwà sync-token ha dị iche.
 
-## Ngwaọrụ MCP (22)
+## ngwá ọrụ MCP (22)
 
-A kọwara ha na `open-sse/mcp-server/tools/obsidianTools.ts`. A na-ekpebi token/base-URL
-maka oku ọ bụla (nke API-key buru ụzọ, emesịa nke zuru ụwa ọnụ). Ngwaọrụ ndị na-akpọ sava **sync**
-nke OmniRoute (ngwaọrụ `obsidian_sync_*` anọ ahụ) chọkwara token nkwenye sync ahaziri
-na ntọala OmniRoute.
+Akọwapụtara na `open-sse/mcp-server/tools/obsidianTools.ts`. A na-edozi token/base-URL kwa oku (ọkwa API-igodo mbụ, emesia zuru ụwa ọnụ). Ngwa ndị kụrụ OmniRoute** ihe nkesa mmekọrịta** (ngwaọrụ `obsidian_sync_*` anọ ahụ) chọkwara sync auth token ahaziri na ntọala OmniRoute.
 
-### Ngwaọrụ ọgụgụ (`read:obsidian`)
+### Ngwa agụ (`read:obsidian`)
 
-| Ngwaọrụ                      | Nkọwa                                                                                                     |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Lelee ma Local REST API dị njikere ma enyochala ikike ya.                                                 |
-| `obsidian_search_simple`     | Chọọ ederede zuru ezu n'ime ọdịnaya ndetu; ọ na-eweghachi iberibe ederede tinyere ụzọ faịlụ.              |
-| `obsidian_search_structured` | Jiri nkwupụta JSON Logic chọọ ihe (ihe nzacha and/or/regex/path).                                         |
-| `obsidian_read_note`         | Gụọ ndetu site n'ụzọ ya metụtara vault; ma ọ bụrụ na achọrọ, naanị heading/block/frontmatter akọwapụtara. |
-| `obsidian_list_vault`        | Depụta faịlụ na ndekọ dị na vault (osisi ndenye).                                                         |
-| `obsidian_get_document_map`  | Nweta nhazi heading nke ndetu dịka maapụ headings → nọmba ahịrị.                                          |
-| `obsidian_get_note_metadata` | Nweta frontmatter, tags, njikọ, na ọnụọgụ mkpụrụedemede/okwu n'enweghị ọdịnaya zuru ezu.                  |
-| `obsidian_get_active_file`   | Nweta ụzọ + ọdịnaya faịlụ na-arụ ọrụ ugbu a na Obsidian.                                                  |
-| `obsidian_get_periodic_note` | Nweta ndetu oge niile nke ụbọchị/izu/ọnwa maka otu ụbọchị (taa ma ọ bụrụ na akọwaghị ya).                 |
-| `obsidian_get_tags`          | Depụta tags niile dị na vault tinyere ugboro ole ha pụtara.                                               |
-| `obsidian_list_commands`     | Depụta ID iwu Obsidian ndị dị (jiri ya na `obsidian_execute_command`).                                    |
-| `obsidian_sync_status`       | Ọnọdụ sava sync OmniRoute: ma ọ na-arụ ọrụ, aha vault, port, uptime, na sync ikpeazụ.                     |
-| `obsidian_sync_conflicts`    | Depụta esemokwu sync ndị a na-edozibeghị (ụzọ, ụzọ esemokwu, oge-achọpụtara).                             |
+| Ngwá ọrụ                     | Nkọwa                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| `obsidian_check_status`      | Lelee ma REST API Mpaghara enwere ike iru ma bụrụ eziokwu.                                       |
+| `obsidian_search_simple`     | Nchọ ederede zuru oke nke ọdịnaya ndetu; jiri ụzọ faịlụ weghachi snippets.                       |
+| `obsidian_search_structured` | Chọọ site na iji okwu mgbagha JSON (nzacha and/or/regex/path ).                                  |
+| `obsidian_read_note`         | Gụọ ndetu site n'ụzọ vault- ikwu; Nhọrọ otu heading/block/frontmatter.                           |
+| `obsidian_list_vault`        | Depụta faịlụ na akwụkwọ ndekọ aha na vault (osisi ntinye).                                       |
+| `obsidian_get_document_map`  | Nweta nhazi isiokwu nke ndetu dị ka maapụ isiokwu → akara nọmba.                                 |
+| `obsidian_get_note_metadata` | Nweta ihu okwu, mkpado, njikọ, ọnụ ọgụgụ char/word na-enweghị ọdịnaya zuru oke.                  |
+| `obsidian_get_active_file`   | Nweta ọdịnaya + nke faịlụ na-arụ ọrụ ugbu a na Obsidian.                                         |
+| `obsidian_get_periodic_note` | Nweta ndetu oge daily/weekly/monthly maka otu ụbọchị (taa ma ọ bụrụ na ewepụrụ ya).              |
+| `obsidian_get_tags`          | Jiri ugboro ha depụta mkpado vault niile.                                                        |
+| `obsidian_list_commands`     | Ndepụta iwu Obsidian dị IDs (jiri na `obsidian_execute_command`).                                |
+| `obsidian_sync_status`       | Ọkwa nkesa OmniRoute mmekọrịta: ịgba ọsọ, aha vault, ọdụ ụgbọ mmiri, oge ọrụ, mmekọrịta ikpeazụ. |
+| `obsidian_sync_conflicts`    | Depụta esemokwu mmekọrịta anaghị edozi (ụzọ, ụzọ esemokwu, achọpụtara-na).                       |
 
-### Ngwaọrụ odide (`write:obsidian`)
+### Dee ngwaọrụ (`write:obsidian`)
 
-| Ngwaọrụ                          | Nkọwa                                                                                                    |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Mepụta ma ọ bụ dochie ndetu site n'ọdịnaya Markdown enyere.                                              |
-| `obsidian_append_note`           | Tinye ọdịnaya na ngwụcha ndetu; ma ọ bụrụ na achọrọ, n'okpuru heading/block akọwapụtara.                 |
-| `obsidian_patch_note`            | Jiri nlezianya tinye na ngwụcha/mmalite ma ọ bụ dochie ihe na heading, block, ma ọ bụ ogige frontmatter. |
-| `obsidian_delete_note`           | Hichapụ ndetu kpamkpam na vault.                                                                         |
-| `obsidian_move_note`             | Bugharịa ma ọ bụ nye ndetu aha ọhụrụ n'ime vault.                                                        |
-| `obsidian_execute_command`       | Mee iwu Obsidian site na command ID ya.                                                                  |
-| `obsidian_open_file`             | Mepee faịlụ na Obsidian (ọ na-emepụta ya ma ọ bụrụ na ọ dịghị).                                          |
-| `obsidian_sync_trigger`          | Kpalite sync vault desktọpụ↔ekwentị nke ụzọ abụọ ozugbo.                                                 |
-| `obsidian_sync_resolve_conflict` | Dozie esemokwu sync: debe `local` (ekwentị), `remote` (desktọpụ), ma ọ bụ `keep-both`.                   |
+| Ngwá ọrụ                         | Nkọwa                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Mepụta ma ọ bụ degharịa ndetu site na iji ọdịnaya Markdown enyere.                          |
+| `obsidian_append_note`           | Tinye ọdịnaya na ndetu; Nhọrọ na otu heading/block.                                         |
+| `obsidian_patch_note`            | Ịwa ahụ append/prepend/replace n'isi, ngọngọ, ma ọ bụ n'ihu ihe.                            |
+| `obsidian_delete_note`           | Hichapụ ndetu n'ọkwa ahụ ruo mgbe ebighị ebi.                                               |
+| `obsidian_move_note`             | Bugharịa ma ọ bụ nyegharịa ndetu aha n'ime oghere.                                          |
+| `obsidian_execute_command`       | Mezue iwu Obsidian site n'iwu ya ID.                                                        |
+| `obsidian_open_file`             | Mepee faịlụ na Obsidian (na-emepụta ya ma ọ bụrụ na ọ dịghị).                               |
+| `obsidian_sync_trigger`          | Kpalite mmekọrịta n'otu n'otu desktọpụ ↔ mobile vault ozugbo.                               |
+| `obsidian_sync_resolve_conflict` | Kpebie esemokwu mmekọrịta: dobe `local` (mobile), `remote` (desktọpụ), ma ọ bụ `keep-both`. |
 
 > [!NOTE]
-> Ebe `obsidian_patch_note` na-elekwasị anya na-anabata `targetType` nke `heading | block | frontmatter`
-> na `operation` nke `append | prepend | replace`, tinyere
-> `createTargetIfMissing` nke bụ nhọrọ. Ngwaọrụ `obsidian_sync_*` anọ ahụ na-ekwurịta okwu na sava sync
-> mpaghara (`http://127.0.0.1:27781` na ndabara) ma chọọ token sync.
+> ebumnuche `obsidian_patch_note` nabata `targetType` nke `heading | block | frontmatter` na `operation` nke `append | prepend | replace`, jiri `createTargetIfMissing` nhọrọ . Ngwa `obsidian_sync_*` anọ ahụ na-agwa ihe nkesa mmekọrịta mpaghara (`http://127.0.0.1:27781` na ndabara) wee chọọ akara mmekọrịta.
 
-### Oke ikike
+### Oke
 
-Ngwaọrụ ọgụgụ chọrọ `read:obsidian`; ngwaọrụ odide chọrọ `write:obsidian`. Mmanye iwu a
-bụ otu ihe ahụ dị na Notion — `withScopeEnforcement()` na-ahụ maka ya n'ime
-`open-sse/mcp-server/server.ts`, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` na-achịkwa ya, ebe
-a na-enweta oke ikike ndị anabatara site na `OMNIROUTE_MCP_SCOPES` ma ọ bụ ọnọdụ oke ikike nke API key. Lee
-[MCP-SERVER.md](./MCP-SERVER.md).
+Gụọ ngwaọrụ chọrọ `read:obsidian`; dee ngwaọrụ chọrọ `write:obsidian`. Mmanye bụ otu Notion — nke `withScopeEnforcement()` na-edozi na `open-sse/mcp-server/server.ts`, na-agbado na `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ma na-amanye maka ndị na-akpọ HTTP/SSE ndị igodo API enweghị `manage`/`admin`, nwere oghere ndị ekwenyere sitere na `OMNIROUTE_MCP_SCOPES` ma ọ bụ mpaghara igodo API. Lee [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Ebe njedebe
 

@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | समाधान गरिएको आधार URL                                  |
 | `ctx.apiKey`                 | `string \| null` | उपलब्ध गराइएको भए API कुञ्जी                            |
 
-## खोज
+## आविष्कार
 
-प्लगइनहरू निम्न स्थानहरूबाट खोजिन्छन्:
+प्लगइनहरू बाट पत्ता लगाइन्छ:
 
-1. `~/.omniroute/plugins/<name>/` — प्रयोगकर्ता-स्थानीय स्थापनाहरू
-2. `OMNIROUTE_PLUGIN_PATH` env var — आफूअनुकूल डाइरेक्टरी
+1. `~/.omniroute/plugins/node_modules/<name>/` — जहाँ `omniroute plugin install` प्याकेजहरू राख्छ (एक npm `--prefix`, `npm -g` होइन)
+2. `~/.omniroute/plugins/<name>/` — ह्यान्ड-कपी गरिएको प्लगइन डाइरेक्टरीहरू
+3. `OMNIROUTE_PLUGIN_PATH` env var — कस्टम डाइरेक्टरी
 
-दुवै **CLI-only** हुन्। सर्भर-साइड प्लगइन रनटाइम (प्रोक्सीभित्र चल्ने marketplace/`plugin.json`
-प्लगइनहरू) सँग आफ्नै ओभरराइडसहितको छुट्टै स्क्यानर छ,
-`OMNIROUTE_PLUGINS_DIR` — हेर्नुहोस्
-[PLUGIN_MARKETPLACE.md → प्लगइन डाइरेक्टरी](./PLUGIN_MARKETPLACE.md#plugin-directory)।
-एउटा सेट गर्दा अर्कोलाई असर गर्दैन।
+सिमलिङ्क गरिएका डाइरेक्टरीहरू (npm ले `plugin install ./dir` का लागि के सिर्जना गर्छ) पछ्याइन्छ।
 
-लोडिङ त्रुटिहरू समातिन्छन् र चेतावनीका रूपमा प्रिन्ट गरिन्छन् — बिग्रिएको प्लगइनले कहिल्यै CLI क्र्यास गर्दैन।
+दुबै हो** CLI-मात्र** । सर्भर-साइड प्लगइन रनटाइम (प्रोक्सी भित्र चल्ने मार्केटप्लेस/`plugin.json` प्लगइनहरू) सँग आफ्नै ओभरराइडको साथ आफ्नै स्क्यानर छ, `OMNIROUTE_PLUGINS_DIR` — हेर्नुहोस् [PLUGIN_MARKETPLACE.md → प्लगइन डाइरेक्टरी](./PLUGIN_MARKETPLACE.md#plugin-directory) । एउटा सेटिङले अर्कोलाई असर गर्दैन।
+
+लोडिङ त्रुटिहरू समातिन्छ र चेतावनीको रूपमा छापिन्छ — टुटेको प्लगइनले CLI लाई कहिल्यै क्र्यास गर्दैन।
 
 ## सुरक्षा
 

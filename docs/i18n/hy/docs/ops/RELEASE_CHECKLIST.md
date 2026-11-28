@@ -4,12 +4,9 @@
 
 ---
 
-> **Վերջին թարմացումը՝** 2026-08-28 — v3.8.51
-> Թողարկման պարզեցված հոսք, որն ավտոմատացման համար օգտագործում է Claude Code-ի հմտությունները։
+> Հեշտացված թողարկման հոսք, որն օգտագործում է Claude Code-ի հմտությունները ավտոմատացման համար:
 >
-> **Թողարկումների միջև հերթը/ճյուղը պահեք կանաչ վիճակում՝** տե՛ս [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs` ընտանիք + `npm run check:release-green` + `/babysit` + գիշերային գործարկում)։ Սա պարբերաբար, և հատկապես՝
-> այս ստուգաթերթից **առաջ**, գործարկելը թույլ է տալիս թողարկման PR-ը սկսել կանաչ վիճակում։
+> **Պահպանեք queue/branch կանաչը թողարկումների միջև.** տե՛ս [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` family + `npm run check:release-green` + `/babysit` + nightly). Վազում այս պարբերաբար — եւ հատկապես** առաջ** այս ստուգաթերթը — դարձնում է PR թողարկումը սկսել կանաչ:
 
 ## Կարճ տարբերակ
 
@@ -37,7 +34,7 @@ npm run test:e2e           # ընտրովի է, բայց խորհուրդ է տ�
 
 ## npm Trusted Publishing (կանխադրված է v3.8.51-ից) — բեմադրվել է խնդրանքով, ուղղակի որպես հետադարձ
 
-`npm-publish.yml` հրապարակում է միջոցով** npm Trusted Publishing (OIDC)** լռելյայնորեն. `stage-npm` աշխատանքը (github-հոսթինգ) փոխանակում է GitHub ի id-token-ը կարճատև npm հավատարմագրով այդ գործարկման համար — ոչ երկարատև npm նշան պահոցի գաղտնիքներում, ոչ 2FA հուշում, կցված ծագում: Դա շրջանցող npm պատժամիջոցներն են, երբ այն նշանները, որոնք բաց թողնում են 2FA-ն, հեռացվում են. այն վերականգնում է լիովին ավտոմատ հոսքը, որն ուներ նախագիծը մինչև v3.8.48՝ պահպանելով WS1.3 երաշխիքը (արտահոսած նշանը չի կարող միայնակ հրապարակել — չկա նշան):
+`npm-publish.yml` հրապարակում է միջոցով** npm Trusted Publishing (OIDC)** լռելյայնորեն. `stage-npm` աշխատանքը (github-հոսթինգ) փոխանակում է GitHub ի id-token-ը կարճատև npm հավատարմագրով այդ գործարկման համար — ոչ երկարատև npm նշան պահոցի գաղտնիքներում, ոչ 2FA հուշում, կցված ծագում: Դա շրջանցող npm պատժամիջոցներն են, երբ 2FA-ն շրջանցող նշանները հեռացվում են. այն վերականգնում է լիովին ավտոմատ հոսքը, որն ուներ նախագիծը մինչև v3.8.48՝ պահպանելով WS1.3 երաշխիքը (արտահոսած նշանը չի կարող միայնակ հրապարակել — չկա նշան):
 
 **Միանգամյա կարգավորում (սեփականատեր).** npmjs.com → փաթեթ `omniroute` → Կարգավորումներ → _Trusted Publisher_ → GitHub. սեփականատեր `diegosouzapw`, repo `OmniRoute`, աշխատանքային հոսք `npm-publish.yml` (միջավայր՝ ոչ մեկը): Քանի դեռ դա գոյություն չունի, ավտոմատ քայլը ձախողվում է `ENEEDAUTH` ով. նորից ուղարկել `publish_mode=staged` ով (ներքևում) կամ `direct`:
 
@@ -56,11 +53,13 @@ npm-publish աշխատանքային հոսքն այլևս ուղղակիորե�
 
 **Միանգամյա կարծրացում (սեփականատեր, npmjs.com):** կարգավորեք Trusted Publisher-ը `omniroute` համար միայն փուլային ռեժիմում, որպեսզի արտահոսած երկարատև նշանը չկարողանա `npm publish` ուղղակիորեն ցանկացած վայրից, որտեղ — CI կարող է միայն բեմադրել. միայն սեփականատիրոջ 2FA թողարկումները:
 
-**Կոտրված արտեֆակտ խաղագիրք (անփոփոխ).** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` որպես լռելյայն ռեֆլեքս (րոպե, շրջելի); `npm unpublish` միայն 72h/no-dependents պատուհանի ներսում և երբեք որպես առաջին քայլ: Docker. երբեք մի վերագրիր տարբերակի պիտակը — հետադարձը վերահղում է `latest` մինչև վերջին լավ ամփոփումը:
+**Կոտրված արտեֆակտ խաղագիրք (անփոփոխ).** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` որպես լռելյայն ռեֆլեքս (րոպե, շրջելի); `npm unpublish` միայն 72h/no-dependents պատուհանի ներսում և երբեք որպես առաջին քայլ: Docker. երբեք մի վերաշարադրիր տարբերակի պիտակը — հետադարձը `latest` ին վերադարձնում է վերջին լավ ամփոփումը:
 
 **Docker Hub `latest` (պահանջվում է յուրաքանչյուր կայուն SemVer հրապարակման համար).** `docker-publish` աշխատանքային հոսքը պետք է հատկորոշվի** երկուսն էլ** `X.Y.Z` եւ, երբ `should-promote-latest.sh` համաձայնում է սա ամենաբարձր կայուն SemVer, `:latest` հետ** նույն մարսողությունը** . Աշխատանքից հետո. Hub `latest` digest-ը հավասար է նոր SemVer digest-ին և `last_updated` տեղափոխվածին: Մի թողեք `:latest` ավելի հին նախագծում, մինչդեռ թողարկման նշումները խոսում են շտկումների մասին, որոնք գոյություն ունեն միայն git-ում: Կազմեք արագ մեկնարկներ, օգտագործեք `:latest`; GitOps պետք է շարունակի կապել `X.Y.Z`: Տես [Docker թողարկման ալիքները](../guides/DOCKER_GUIDE.md#release-channels) և #10317:
 
-**Docker Hub կազմակերպության պահոց (`cheaperinference/omniroute`):** Docker Hub-ը չի կարող պահեստը տեղափոխել անվանատարածքների միջև, ուստի `diegosouzapw/omniroute` պահպանում է իր ձգման պատմությունը և յուրաքանչյուր թողարկում, իսկ `docker-publish` ի `mirror-org-dockerhub` աշխատանքը պատճենում է յուրաքանչյուր թողարկված տարբերակը (և `:latest`, երբ առաջխաղացվում է) `ghcr.io/cheaper-inference/omniroute` ից կազմակերպության պահեստ: Դրան անհրաժեշտ են `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` գաղտնիքները; առանց դրանց աշխատանքը մնում է կանաչ՝ «Docker Hub org mirror-ը բաց է թողնվել» նախազգուշացումով, իսկ մյուս գրանցամատյանները սովորաբար հրապարակվում են: Ավելի ուշ այնտեղ թողարկված տարբերակը հրապարակելու համար գործարկեք** Գործողություններ → Հայելի Docker պատկերը Docker Hub org → Գործարկել աշխատանքային հոսքը** `version=X.Y.Z` ով (և `promote_latest` ամենաբարձր կայուն տարբերակի համար). այն պատճենում է առկա պատկերները, առանց վերակառուցման:
+**Docker Hub կազմակերպության պահոց (`cheaperinference/omniroute`):** Docker Hub-ը չի կարող պահեստը տեղափոխել անվանատարածքների միջև, ուստի `diegosouzapw/omniroute` պահպանում է իր ձգման պատմությունը և յուրաքանչյուր թողարկում, իսկ `docker-publish` ի `mirror-org-dockerhub` աշխատանքը պատճենում է յուրաքանչյուր թողարկված տարբերակը (և `:latest`, երբ առաջխաղացվում է) `ghcr.io/cheaper-inference/omniroute` ից կազմակերպության պահեստ: Դրան անհրաժեշտ են `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` գաղտնիքները; առանց դրանց աշխատանքը մնում է կանաչ՝ «Docker Hub org mirror-ը բաց է թողնվել» նախազգուշացումով, իսկ մյուս գրանցամատյանները սովորաբար հրապարակվում են: Ավելի ուշ այնտեղ թողարկված տարբերակը հրապարակելու համար գործարկեք** Գործողություններ → Հայելի Docker պատկերը Docker Hub org → Գործարկել աշխատանքային հոսքը** `version=X.Y.Z` ով (և `promote_latest` ամենաբարձր կայուն տարբերակի համար). այն պատճենում է առկա պատկերները, առանց վերակառուցման: Այդ պահեստի Docker Hub-ի ակնարկը սահմանվում է ձեռքով. API, որոնք այն խմբագրում են, մերժում են Կազմակերպության մուտքի նշանները:
+
+The same workflow also copies every release to the legacy GHCR package `ghcr.io/diegosouzapw/omniroute` until 2027-06-30, so installs still pinned to it keep updating; its index carries a "moved to `ghcr.io/cheaper-inference/omniroute`" description. It needs the `GHCR_LEGACY_TOKEN` secret (a classic personal access token of `diegosouzapw` with `write:packages`); without it that job skips with a "Legacy GHCR mirror skipped" warning.
 
 ## Թեժ շտկումների արագ ուղի (պիտակ՝ `hotfix`)
 
@@ -151,7 +150,7 @@ unit շարդեր, integration, vitest, lint/typecheck, docs-sync, `check:pack-a
 ### Փաստաթղթեր
 
 - [ ] `npm run check:docs-sync` փոխանցումներ (ավտոմատ վազում նախնական կատարմամբ)
-- [ ] `npm run check:docs-all` անցնում (հովանոց. docs-sync + docs-counts + env-doc-sync + հնացած-տարբերակներ + doc-links)
+- [ ] `npm run check:docs-all` անցնում. Դրա խորհրդատվական `check:deprecated-versions` նշում է OmniRoute ին բացահայտ վերագրված տարբերակները (3.6.x և ավելի վաղ) և անտեսում է ամսաթվերը:
 - [ ] `npm run check:env-doc-sync` դուրս է գալիս 0 — կոդը ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env պայմանագիրը անփոփոխ է
 - [ ] `npm run check:doc-links` դուրս է գալիս 0 — ոչ մի կոտրված ներքին նշագրման հղումներ վերակառուցումից հետո
 - [ ] `docs/architecture/ARCHITECTURE.md` վերանայվել է storage/runtime դրեյֆի համար
@@ -389,7 +388,7 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Development bump commit-ը կառուցված է git plumbing-ով (աշխատող ծառ չի դիպչում) և բախվում է նույն հինգ ֆայլերին, ինչ ցիկլային բաց կոմիտը՝ `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` և `docs/openapi.yaml`: `[4.0.0]` CHANGELOG հատվածը և նրա i18n հայելիները բացվում են `develop` վրա այնուհետև՝ առաջին PR ից առաջ: Սցենարը երբեք չի փոխվում npm dist-tags — rehearse of a scratch փաթեթի վրա:
+Development bump commit-ը կառուցված է git plumbing-ով (աշխատող ծառ չի դիպչում) և բախվում է նույն հինգ ֆայլերին, ինչ ցիկլային բաց կոմիտը՝ `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` և `docs/openapi.yaml`: `[4.0.0]` CHANGELOG հատվածը և նրա i18n հայելիները բացվում են `develop` վրա այնուհետև՝ նրա առաջին PR առաջ: Սցենարը երբեք չի փոխվում npm dist-tags — rehearse of a scratch փաթեթի վրա:
 
 ### PR նախադիտման արտեֆակտ (կառուցել մեկ անգամ, խթանել նույն բայթերը)
 
@@ -399,7 +398,7 @@ Development bump commit-ը կառուցված է git plumbing-ով (աշխատո
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

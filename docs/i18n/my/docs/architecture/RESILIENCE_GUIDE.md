@@ -12,54 +12,53 @@ OmniRoute တွင် ကွဲပြားသော်လည်း ဆက်�
 
 > **ခံနိုင်ရည်ရှိမှု toggles အတွက် Env-vs-dashboard ဦးစားပေး။** ရွေးချယ်မှုတွင် ခံနိုင်ရည်ရှိမှုသည် ပတ်ဝန်းကျင်မှ ဆင်းသက်လာသော — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`) ကိုသာ ထောက်ပံ့ပေးသည်။ ဘူလီယန်သည် `resilienceSettings` တွင် ဆက်ရှိနေသည် (ဒက်ရှ်ဘုတ် →** ဆက်တင်များ → ခံနိုင်ရည်အား** / `PATCH /api/resilience`၊ `key_value` တွင်သိမ်းထားသော ) သည် env တန်ဖိုးထက် အနိုင်ရသည်- normalization (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) သည် တစ်ခုရှိသည့်အခါတိုင်း boolean ကို သိမ်းဆည်းသည်။ ဒက်ရှ်ဘုတ်မှ `false` သိမ်းဆည်းပြီးသော ဖြန့်ကျက်မှုတစ်ခုတွင် ထိုသို့သော env var ကို `true` ကို သတ်မှတ်ခြင်း ၊ ထို့ကြောင့် — toggle ကိုလှန်၍ ဘာမှမပြောင်းလဲပါ။** ဆက်တင်များ → ခံနိုင်ရည်အား** အစား (သို့မဟုတ် သိမ်းဆည်းထားသော အကွက်) ကို ရှင်းလင်းပါ။
 
-## 1. Provider Circuit Breaker
+## 1. ပံ့ပိုးသူ Circuit Breaker
 
-**အကျယ်အဝန်း (Scope):** provider တစ်ခုလုံး (ဥပမာ `glm`, `openai`, `anthropic`)။
+**နယ်ပယ်-** ပံ့ပိုးသူတစ်ခုလုံး (ဥပမာ၊ `glm`၊ `openai`၊ `anthropic`)။
 
-**ရည်ရွယ်ချက်:** upstream/service အဆင့်တွင် ထပ်ခါတလဲလဲ ပျက်ကွက်နေသည့် provider ဆီသို့ traffic ပေးပို့ခြင်းကို ရပ်တန့်ရန်။
+**ရည်ရွယ်ချက်-** upstream/service အဆင့်တွင် အကြိမ်ကြိမ် ကျရှုံးနေသော ဝန်ဆောင်မှုပေးသူထံ အသွားအလာ ပို့ခြင်းကို ရပ်ပါ။
 
-**အကောင်အထည်ဖော်မှု:**
+**အကောင်အထည်ဖော်ခြင်း-**
 
-- အဓိက class: `src/shared/utils/circuitBreaker.ts`
-- ချိတ်ဆက်မှု (Wiring): `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- အခြေခံလူတန်းစား- `src/shared/utils/circuitBreaker.ts`
+- ဝါယာကြိုး- `src/sse/handlers/chatHelpers.ts`၊ `src/sse/handlers/chat.ts`
 - အခြေအနေ API: `GET /api/monitoring/health`
-- ပြန်လည်သတ်မှတ်ရေး API: `POST /api/resilience/reset`
-- Wrapper များ: `open-sse/services/accountFallback.ts`
-- DB ဇယား: `domain_circuit_breakers`
+- API: `POST /api/resilience/reset` ပြန်လည်သတ်မှတ်ပါ။
+- အထုပ်များ- `open-sse/services/accountFallback.ts`
+- DB ဇယား- `domain_circuit_breakers`
 
-**အခြေအနေများ:**
+**ပြည်နယ်များ-**
 
-- `CLOSED` — ပုံမှန် traffic ကို ခွင့်ပြုထားသည်
-- `DEGRADED` — traffic ကို ဆက်လက်ခွင့်ပြုထားသော်လည်း တိုးပွားလာသော provider ပျက်ကွက်မှုများကို ခြေရာခံနေသည်; အောင်မြင်မှု အလုံအလောက်ရရှိသောအခါ၊ connection test မှန်ကန်သောအခါ၊ သို့မဟုတ် နောက်ဆုံး ပျက်ကွက်မှုအမျိုးအစားအတွက် အရှည်ဆုံး `OPEN` ဆုပ်ကိုင်ချိန် (၎င်း၏ `cooldownByKind` တန်ဖိုး၊ မရှိပါက `resetTimeout`၊ × `maxBackoffMultiplier`၊ အနည်းဆုံး cooldown တစ်ခု) ကြာပြီးနောက် ပျက်ကွက်မှုအသစ် မရှိဘဲ `CLOSED` သို့ ပြန်ရောက်သည်
-- `OPEN` — provider ကို ခေတ္တပိတ်ဆို့ထားသည်; combo routing က ၎င်းကို ကျော်သွားသည်
-- `HALF_OPEN` — reset timeout ကုန်ဆုံးသွားပြီး; probe request ကို ခွင့်ပြုထားသည်
+- `CLOSED` — ပုံမှန်အသွားအလာခွင့်ပြုသည်။
+- `DEGRADED` — အသွားအလာကို ခွင့်ပြုထားဆဲဖြစ်သော်လည်း ဝန်ဆောင်မှုပေးသူ မအောင်မြင်မှုများကို ခြေရာခံနေပါသည်။ လုံလောက်သော `CLOSED` ၊ တရားဝင်ချိတ်ဆက်မှုစမ်းသပ်မှုတွင်၊ သို့မဟုတ် နောက်ဆုံးကျရှုံးမှုအမျိုးအစားအတွက် အကြာဆုံး `OPEN` ကိုင်ထားပြီးနောက် (၎င်း၏ `cooldownByKind` တန်ဖိုး၊ အခြား `resetTimeout`၊ × `maxBackoffMultiplier`၊ အနည်းဆုံး cooldown တစ်ခု) အသစ်မအောင်မြင်ဘဲ၊
+- `OPEN` — ဝန်ဆောင်မှုပေးသူကို ယာယီပိတ်ဆို့ထားသည်။ combo routing သည် ၎င်းကို ကျော်သွားသည်။
+- `HALF_OPEN` — ပြန်လည်သတ်မှတ်ချိန်လွန်သွားသည်; စုံစမ်းစစ်ဆေးရန် တောင်းဆိုမှုကို ခွင့်ပြုထားသည်။
 
-**စိတ်ကြိုက်သတ်မှတ်နိုင်သော default တန်ဖိုးများ (`open-sse/config/constants.ts`၊ Dashboard → Settings → Resilience တွင် ဖော်ပြထားသည်):**
+**ပြင်ဆင်နိုင်သော ပုံသေများ (`open-sse/config/constants.ts`၊ Dashboard → ဆက်တင်များ → Resilience တွင်ဖော်ပြထားသည် )**
 
-| အမျိုးအစား | Degraded ဖြစ်မှတ် | Open ဖြစ်မှတ်     | Reset timeout |
-| ---------- | ----------------- | ----------------- | ------------- |
-| OAuth      | ပျက်ကွက်မှု 5 ခု  | ပျက်ကွက်မှု 8 ခု  | 60s           |
-| API-key    | ပျက်ကွက်မှု 7 ခု  | ပျက်ကွက်မှု 12 ခု | 30s           |
-| Local      | တွက်ချက်ထားသော    | ပျက်ကွက်မှု 2 ခု  | 15s           |
+| အတန်း    | ယုတ်ညံ့သော အချိန်တွင်၊ | တွင်ဖွင့်သည်။            | အချိန်လွန်မှုကို ပြန်လည်သတ်မှတ်ပါ။ |
+| -------- | ---------------------- | ------------------------ | ---------------------------------- |
+| OAuth    | 5 ရှုံးနိမ့်           | 8 ကျရှုံးတယ်။            | 60s                                |
+| API သော့ | 7 ရှုံးနိမ့်           | 12 ကြိမ်အောင်မြင်ခဲ့သည်။ | 30s                                |
 
-`degradationThreshold` က provider တစ်ခု `DEGRADED` သို့ ဘယ်အချိန်ဝင်ရောက်မည်ကို ထိန်းချုပ်ပေးသည်; `failureThreshold` က ၎င်း ဘယ်အချိန် open ဖြစ်ပြီး ကျော်သတ်ခံရမည်ကို ထိန်းချုပ်သည်။ Local provider profile များကို Resilience settings စာမျက်နှာတွင် မဖော်ပြရသေးပါ။
+ဝန်ဆောင်မှုပေးသူတစ်ဦးသည် `DEGRADED` သို့ဝင်ရောက်သည့်အခါ`degradationThreshold` ထိန်းချုပ်သည်။ `failureThreshold` ၎င်းကိုဖွင့်ပြီး ကျော်သွားသည့်အခါ ထိန်းချုပ်သည်။ `PROVIDER_PROFILES.local` (2 ကျရှုံးမှု / 15s) ကို `open-sse/config/constants.ts` တွင် သတ်မှတ်သည်။** ကြိုးမတပ်ရသေးဘူး။** : `getProviderCategory()` `oauth` သို့မဟုတ် `apikey` သာ ပြန်ပေးသည်၊ ထို့ကြောင့် ပြည်တွင်းဝန်ဆောင်မှုပေးသူများသည် OAuth သို့မဟုတ် API-ကီးပရိုဖိုင်ကို အသုံးပြုသည်။
 
-**Trip ကုဒ်များ:** provider-အဆင့် status `[408, 500, 502, 503, 504]` များသာ။ account-အဆင့် error များအတွက် trip မလုပ်ပါနှင့် (401/403/429 အများစု — ၎င်းတို့သည် cooldown သို့မဟုတ် lockout နှင့် သက်ဆိုင်သည်)။
+**ခရီးစဉ်ကုဒ်များ** ဝန်ဆောင်မှုပေးသူအဆင့် အခြေအနေများ `[408, 500, 502, 503, 504]` သာ။ အကောင့်အဆင့် အမှားများအတွက် NOT ခရီးကို လုပ်ဆောင်ပါ ( 401/403/429 — အများစုသည် cooldown သို့မဟုတ် လော့ခ်ချခြင်းမှ သက်ဆိုင်သည်)။
 
-**Lazy recovery:** `OPEN` သက်တမ်းကုန်သောအခါ `getStatus()`၊ `canExecute()`၊ `getRetryAfterMs()` များ အခြေအနေကို `HALF_OPEN` သို့ ပြန်လည်အသစ်ပြုပေးသည်။ ထိုဖတ်ရှုမှုများပင်လျှင် (နှင့် နောက်ထပ်ပျက်ကွက်မှု) က ရှေးကျနေသော `DEGRADED` ကို `CLOSED` သို့ ပြန်လည်လျှော့ချပေးသည်။ နောက်ခံ timer မလိုအပ်ပါ။
+**ပျင်းရိခြင်း ပြန်လည်ရယူခြင်း-** `OPEN` သက်တမ်းကုန်သောအခါ၊ `getStatus()`၊ `canExecute()`၊ `getRetryAfterMs()` `HALF_OPEN` သို့ refresh state ဖြစ်သည်။ တူညီသောဖတ်ခြင်း (နှင့်နောက်ထပ်ကျရှုံးမှု) သည် stale `DEGRADED` ကို `CLOSED` သို့ပြန်သွားစေသည်။ နောက်ခံ timer မလိုအပ်ပါ။
 
 ---
 
-### ရွေးချယ်ဖွင့်နိုင်သော (opt-in) global Provider Cooldown (window gate)
+### ကမ္ဘာလုံးဆိုင်ရာပံ့ပိုးပေးသူ Cooldown (ဝင်းဒိုးတံခါး) ကိုရွေးချယ်ပါ
 
-စတုတ္ထမြောက် **opt-in** အလွှာ (`PROVIDER_COOLDOWN_ENABLED`၊ default မှာ **ပိတ်**) သည် `open-sse/services/providerCooldownTracker.ts` တွင် ပျက်ကွက်နေသော provider များ၏ cross-request မှတ်ဉာဏ်ကို သိမ်းထားပြီး၊ combo target resolution က ၎င်းကို ရည်ညွှန်းသုံးစွဲသဖြင့် အဆက်တိုက်လာလာသော combo request များ မကြာသေးမီက ပျက်ကွက်ခဲ့သော provider ကို ထပ်မံရှာဖွေခြင်းမှ ရပ်တန့်စေသည်။ Provider-အဆင့် entry များသည် `PROVIDER_PROFILES` window gate ကို လိုက်နာသည်:
+စတုတ္ထ၊** ရွေးချယ်ဝင်ရောက်ပါ။** အလွှာ (`PROVIDER_COOLDOWN_ENABLED`၊ မူရင်း** off** ) `open-sse/services/providerCooldownTracker.ts` တွင် ကျရှုံးနေသော ဝန်ဆောင်မှုပေးသူများ၏ အပြန်အလှန်တောင်းဆိုမှုမှတ်ဉာဏ်ကို ပေါင်းစပ်ပစ်မှတ်ဖြေရှင်းချက်ဖြင့် တိုင်ပင်ထားသောကြောင့် ဆက်တိုက်မအောင်မြင်သော ဝန်ဆောင်မှုပေးသူအား ပြန်လည်လမ်းလျှောက်ခြင်းကို ရပ်တန့်စေသည်။ ဝန်ဆောင်မှုပေးသူအဆင့် ထည့်သွင်းချက်များသည် `PROVIDER_PROFILES` ပြတင်းပေါက်တံခါးကို ဂုဏ်ပြုသည်-
 
-| Profile | trip ဖြစ်စေသော ပျက်ကွက်မှုအရေအတွက် (`providerFailureThreshold`) | ဤကာလအတွင်း (`providerFailureWindowMs`) | cooldown ကြာချိန် (`providerCooldownMs`) |
-| ------- | --------------------------------------------------------------: | -------------------------------------: | ---------------------------------------: |
-| OAuth   |                                                            `10` |                                `15min` |                                   `5min` |
-| API key |                                                            `15` |                                `30min` |                                  `10min` |
+| ကိုယ်ရေးအကျဉ်း | (`providerFailureThreshold`) ပြီးနောက် ခရီးများ | အတွင်း (`providerFailureWindowMs`) | (`providerCooldownMs`) အတွက် အေးသည် |
+| -------------- | ----------------------------------------------: | ---------------------------------: | ----------------------------------: |
+| OAuth          |                                            `10` |                            `15min` |                              `5min` |
+| API သော့       |                                            `15` |                            `30min` |                             `10min` |
 
-threshold အောက်တွင် provider ကို cooldown အဖြစ်အတွက် **မ** မှတ်ယူပါ; အောင်မြင်မှုတစ်ခုက window ကို ရှင်းလင်းပစ်သည်။ Connection-အဆင့် entry များ (`provider:connectionId`) က အဲဒီအစား exponential `minRetryCooldownMs → maxRetryCooldownMs` backoff ကို ဆက်လက်အသုံးပြုသည်။ Override များ: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`။ Regression ကာကွယ်စစ်ဆေးမှု: `tests/unit/provider-cooldown-window-gate.test.ts`။
+ဝန်ဆောင်မှုပေးသူသည် သတ်မှတ်ဘောင်အောက်တွင်ရှိသည်။** မဟုတ်ဘူး** အအေးဟုယူဆသည်; အောင်မြင်မှုတစ်ခုသည် ပြတင်းပေါက်ကို ရှင်းလင်းစေသည်။ ချိတ်ဆက်မှုအဆင့် ထည့်သွင်းမှုများ (`provider:connectionId`) သည် ယင်းအစား exponential `minRetryCooldownMs → maxRetryCooldownMs` backoff ကို ထားရှိပါ။ အစားထိုးခြင်းများ- `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. ဆုတ်ယုတ်မှုကာကွယ်မှု- `tests/unit/provider-cooldown-window-gate.test.ts`။
 
 ## 2. ချိတ်ဆက်မှု Cooldown
 
@@ -751,6 +750,21 @@ IP family တစ်ခုလုံးကို ဆက်လက် cool down ပ�
 
 ---
 
+## OmniRoute ကိုယ်တိုင်က လက်လှမ်းမမီတဲ့အခါ
+
+ဝန်ဆောင်မှုပေးသော circuit breaker၊ connection cooldown နှင့် model lockout များအားလုံးသည် gateway အတွင်းတွင် လုပ်ဆောင်ပါသည်။ အကယ်၍ client သည် gateway သို့မရောက်ရှိနိုင်ပါက ၎င်းသည် ချိတ်ဆက်မှုအမှားအယွင်းတစ်ခုဖြစ်လာသည်။ OmniRoute ထိုပျက်ကွက်မှုကို တားဆီး၍မရပါ။ ဖောက်သည်သည် ပြန်ကြိုးစားရန်ရှိမရှိနှင့် မည်သည့်မက်ဆေ့ချ်ကို ပြသရန် ဆုံးဖြတ်သည်။
+
+OmniRoute လောလောဆယ်တွင် client-side fallback ကို မပေးဘဲ ၎င်းအတွက် မူဝါဒကို မသတ်မှတ်ပါ။ ကလိုင်းယင့်တွင် သို့မဟုတ် ဂိတ်ဝ၏ရှေ့တွင် မည်သည့်အလှည့်ကျလမ်းကြောင်းကိုမဆို စီစဉ်သတ်မှတ်ပါ။
+
+- `GET /api/health` စစ်မှန်ကြောင်းအထောက်အထားမရှိဘဲ အသက်ရှင်မှုကို စစ်ဆေးသည်။
+- ဒေတာဘေ့စ်က တုံ့ပြန်မှုရှိမရှိအပါအဝင်`GET /api/health/ping` သည် အဆင်သင့်စစ်ဆေးသည်။
+- `GET /api/monitoring/health` စစ်မှန်သော ခေါ်ဆိုသူများအား ပိုမိုနက်ရှိုင်းသော ကျန်းမာရေး ခြုံငုံသုံးသပ်ချက် ပေးသည်။
+- ကလိုင်းယင့်မစတင်မီ`omniroute launch <tool>` စုံစမ်းစစ်ဆေးပါ `/api/monitoring/health` ၎င်းသည် ဒေသတွင်း တံခါးပေါက်ကို အလိုအလျောက် စတင်နိုင်သည်။ `--no-start` ဖြင့်၊ လက်လှမ်းမမီနိုင်သော gateway တစ်ခုသည် `GatewayUnreachable` နှင့် exit code `69` တွင် ရလဒ်ထွက်သည်။
+
+ကလိုင်းယင့်တစ်ဦးကို OmniRoute မှ ချိတ်ဆက်မှုဖြတ်ရန်၊ [Revert client configuration ကို](../guides/UNINSTALL.md#revert-client-configuration) လိုက်နာပါ။
+
+---
+
 ## အမှားရှာဖွေခြင်း
 
 - Weighted combo သည် `503 all_targets_cooling_down` ကို ပြန်ပေးသည် (`Retry-After` သတ်မှတ်ထားပြီး၊ `diagnostics.excluded` က target တိုင်းကို `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable` ဖြင့် စာရင်းပြသည်) → pool သည် configure လုပ်ပြီး ချိတ်ဆက်ပြီးဖြစ်ကာ၊ target တိုင်းကို resilience timer တစ်ခုခုကသာ ဖယ်ထုတ်ထားခြင်းဖြစ်သည်; `[COMBO] Weighted selection: every target excluded before dispatch — …` warning သည် အကြောင်းရင်းများနှင့် ကျန်ရှိနေသော seconds များကို ဖော်ပြသည်။ Combo တစ်ခုတည်းမှ လာသော `404 no_executable_targets` ဆိုလျှင် resilience timer ဘာမှ ပါဝင်ခြင်းမရှိဟု ဆိုလိုသည် (လည်ပတ်စရာအရာ မရှိခြင်း၊ သို့မဟုတ် account တိုင်းသည် availability probe ကို မအောင်မြင်ခြင်း)။ `targetResolution.ts` တွင် စုဆောင်းထားသော exclusions များကို အခြေခံ၍ `open-sse/services/combo/pinRecovery.ts` တွင် တည်ဆောက်ထားသည်။
@@ -762,101 +776,68 @@ IP family တစ်ခုလုံးကို ဆက်လက် cool down ပ�
 
 ---
 
-## Runtime အခြေအနေ — agent အမြန် ရည်ညွှန်း
+## Runtime အခြေအနေ — အေးဂျင့် အမြန်ကိုးကား
 
-> agent လမ်းညွှန်သည် 40k context budget အောက်တွင် ဆက်လက်ရှိနေစေရန်
-> `AGENTS.md` → "Resilience Runtime State" (PR #12743) မှ verbatim အတိုင်း ရွှေ့ပြောင်းထားခြင်း ဖြစ်သည်။
-> ၎င်းသည် အပေါ်ရှိ ကဏ္ဍများ၏ အကျဉ်းချုပ်၊ agent-facing ရှုထောင့်ဖြစ်ပြီး;
-> နံပါတ်ရှိသော ကဏ္ဍများမှာ အပြည့်အစုံ ရည်ညွှန်းချက်အဖြစ် ဆက်လက်တည်ရှိသည်။
+> `AGENTS.md` → "Resilience Runtime State" (PR #12743) မှ verbatim ကို ရွှေ့ထားသောကြောင့် အေးဂျင့်လမ်းညွှန်သည် 40k ဆက်စပ်ဘတ်ဂျက်အောက်တွင် ရှိနေပါသည်။ ၎င်းသည် အထက်ဖော်ပြပါ ကဏ္ဍများ၏ ပေါင်းစည်းထားသော အေးဂျင့်မျက်နှာစာ မြင်ကွင်းဖြစ်သည်။ နံပါတ်တပ်ထားသော အပိုင်းများသည် ကိုးကားချက်အပြည့်အစုံ ကျန်ရှိနေပါသည်။
 
-OmniRoute တွင် ဆက်စပ်သော်လည်း ကွဲပြားသော temporary-failure ယန္တရား သုံးခု ရှိသည်။ routing
-အပြုအမူကို debug လုပ်သည့်အခါ ၎င်းတို့၏ scope ကို သပ်သပ်စီ ခွဲထားပါ။
-တစ်ချက်ကြည့်လျှင် မြင်နိုင်သော မြေပုံတစ်ခုအတွက်
-[3-အလွှာ resilience diagram](../diagrams/exported/resilience-3layers.svg)
-(source: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-ကို ကြည့်ပါ။
+OmniRoute တွင် ဆက်စပ်သော်လည်း ထူးခြားသော ယာယီ-ပျက်ကွက်မှု ယန္တရား သုံးခုရှိသည်။ အမှားရှာလမ်းကြောင်း အပြုအမူကို အမှားရှာသည့်အခါ ၎င်းတို့၏ နယ်ပယ်ကို သီးခြားထားပါ။ တစ်ချက်ကြည့်လိုက်လျှင် မြေပုံအတွက် [3-layer resilience diagram](../diagrams/exported/resilience-3layers.svg) (source: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) ကို ကြည့်ပါ။
 
-### Provider Circuit Breaker
+### ပံ့ပိုးသူ Circuit Breaker
 
-**အကျယ်အဝန်း**: provider တစ်ခုလုံး၊ ဥပမာ `glm`, `openai`, `anthropic`။
+**အတိုင်းအတာ** : ဝန်ဆောင်မှုတစ်ခုလုံး၊ ဥပမာ `glm`၊ `openai`၊ `anthropic`။
 
-**ရည်ရွယ်ချက်**: upstream/service အဆင့်တွင် ထပ်ခါထပ်ခါ ပျက်ကွက်နေသော provider သို့ traffic ပေးပို့ခြင်းကို
-ရပ်တန့်စေရန်၊ ထိုသို့ဖြင့် ကျန်းမာရေးမကောင်းသော provider တစ်ခုတည်းက တောင်းဆိုမှုတိုင်းကို
-နှေးကွေးစေမည် မဟုတ်ပေ။
+**ရည်ရွယ်ချက်** : upstream/service အဆင့်တွင် ထပ်ခါတလဲလဲ ကျရှုံးနေသော ဝန်ဆောင်မှုပေးသူထံ အသွားအလာ ပို့ခြင်းကို ရပ်ပါ၊ ထို့ကြောင့် ကျန်းမာရေးနှင့် မညီညွတ်သော ဝန်ဆောင်မှုပေးသူတစ်ဦးသည် တောင်းဆိုမှုတိုင်းကို နှေးကွေးစေမည်မဟုတ်ပါ။
 
-**အကောင်အထည်ဖော်မှု**:
+**အကောင်အထည်ဖော်ခြင်း။** :
 
-- အဓိက class: `src/shared/utils/circuitBreaker.ts`
-- Chat gate/execution ချိတ်ဆက်မှု: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Runtime status API: `src/app/api/monitoring/health/route.ts`
-- မျှဝေအသုံးပြုသော wrappers: `open-sse/services/accountFallback.ts`
-- သိမ်းဆည်းထားသော state ဇယား: `domain_circuit_breakers`
+- အခြေခံလူတန်းစား- `src/shared/utils/circuitBreaker.ts`
+- ချတ် gate/execution ဝိုင်ယာကြိုးများ- `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Runtime အခြေအနေ API: `src/app/api/monitoring/health/route.ts`
+- မျှဝေထားသောထုပ်ပိုးများ- `open-sse/services/accountFallback.ts`
+- တည်ဆဲအခြေအနေဇယား- `domain_circuit_breakers`
 
-**အခြေအနေများ** (4 — `src/shared/utils/circuitBreaker.ts`):
+**တိတ်** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: ပုံမှန် traffic ကို ခွင့်ပြုထားသည်။
-- `DEGRADED`: အစောပိုင်း သတိပေးချက် အပိုင်း — ပျက်ကွက်မှုများသည် degradation threshold ကို
-  ကျော်သွားသော်လည်း breaker threshold ကို မကျော်ရသေးပါ; traffic ဆက်လက်စီးဆင်းနေပြီး၊
-  dashboards များတွင် သတိပေးချက်ကို ပြသသည်။ မှန်ကန်သော connection test တစ်ခု သို့မဟုတ်
-  ပျက်ကွက်မှုအသစ်မရှိသော တည်ငြိမ်သော window တစ်ခုက ၎င်းကို `CLOSED` သို့ ပြန်လည်ရောက်ရှိစေသည်
-  (window ကို `docs/architecture/RESILIENCE_GUIDE.md` တွင် ဖော်ပြထားသည်)။
-- `OPEN`: provider ကို ခေတ္တ ပိတ်ဆို့ထားသည်; callers များသည် provider-circuit-open
-  တုံ့ပြန်ချက်ကို ရရှိမည်ဖြစ်ပြီး၊ သို့မဟုတ် combo routing သည် အခြား target တစ်ခုသို့ ကျော်သွားမည်ဖြစ်သည်။
-- `HALF_OPEN`: reset timeout ကုန်ဆုံးသွားပြီ ဖြစ်သည်; probe request တစ်ခုကို ခွင့်ပြုပါ။
-  အောင်မြင်ပါက breaker ပိတ်သွားပြီး၊ ပျက်ကွက်ပါက ပြန်ဖွင့်သွားမည်ဖြစ်သည်။
+- `CLOSED`: ပုံမှန်အသွားအလာကို ခွင့်ပြုထားသည်။
+- `DEGRADED`: အစောပိုင်းသတိပေးထားသည့်တီးဝိုင်း — ကျရှုံးမှုများသည် ပျက်စီးခြင်းအဆင့်ကို ကျော်လွန်သွားသော်လည်း breaker threshold မရောက်သေးပါ။ ယာဉ်အသွားအလာ စီးဆင်းဆဲ၊ ဒက်ရှ်ဘုတ်များက သတိပေးချက်ကို ပြသသည်။ မှန်ကန်သောချိတ်ဆက်မှုစမ်းသပ်မှု သို့မဟုတ် ပျက်ကွက်မှုအသစ်မရှိသော တိတ်ဆိတ်သောဝင်းဒိုးသည် ၎င်းအား `CLOSED` သို့ ပြန်ပို့ပေးသည် (`docs/architecture/RESILIENCE_GUIDE.md` တွင် ဝင်းဒိုးပါရှိသည်)။
+- `OPEN`: ဝန်ဆောင်မှုပေးသူကို ယာယီပိတ်ဆို့ထားသည်။ ခေါ်ဆိုသူများသည် ပံ့ပိုးပေးသူ-ဆားကစ်ဖွင့်ထားသော တုံ့ပြန်မှု သို့မဟုတ် ပေါင်းစပ်လမ်းကြောင်းကို အခြားပစ်မှတ်သို့ ကျော်သွားခြင်းဖြစ်သည်။
+- `HALF_OPEN`: ပြန်လည်သတ်မှတ်ရန် အချိန်ကုန်သွားပြီ။ စုံစမ်းစစ်ဆေးရန် တောင်းဆိုမှုကို ခွင့်ပြုပါ။ အောင်မြင်မှုသည် ဘရိတ်ကိုပိတ်လိုက်သည်၊ ကျရှုံးမှုက ၎င်းကိုပြန်ဖွင့်သည်။
 
-**ပုံသေတန်ဖိုးများ** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`,
-`src/lib/resilience/settings.ts` ရှိ `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` မှတစ်ဆင့်
-အသုံးပြုသည် → `src/sse/handlers/chatHelpers.ts` ရှိ `getCircuitBreaker(provider, …)`)။
-Provider တစ်ခုလုံး breaker သည် `circuitBreakerThreshold` / `circuitBreakerReset` ပေါ်တွင်
-လည်ပတ်သည်:
+**ပုံသေ** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`၊ `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` မှတဆင့် `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` တွင် `src/sse/handlers/chatHelpers.ts`) ။ ဝန်ဆောင်မှုပေးသူ ဖြတ်ပိုင်းတခုလုံးသည် `circuitBreakerThreshold` / `circuitBreakerReset` ပေါ်တွင် အလုပ်လုပ်သည် ။
 
-| Profile |    degrade အဆင့် | open အဆင့် (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
-| ------- | ---------------: | -------------------------------------: | ----------------------------: |
-| OAuth   |              `5` |                                    `8` |                         `60s` |
-| API key |              `7` |                                   `12` |                         `30s` |
-| Local   | (ဆင်းသက်တွက်ထား) |                                    `2` |                         `15s` |
+| ကိုယ်ရေးအကျဉ်း | မှာ ကျဆင်းပါတယ်။ | (`circuitBreakerThreshold`) တွင်ဖွင့်သည် | ပြန်လည်သတ်မှတ်ခြင်း (`circuitBreakerReset`) |
+| -------------- | ---------------: | ---------------------------------------: | ------------------------------------------: |
+| OAuth          |              `5` |                                      `8` |                                       `60s` |
+| API သော့       |              `7` |                                     `12` |                                       `30s` |
 
-`PROVIDER_PROFILES` သည် `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 မိနစ်) နှင့် `providerCooldownMs` (5/10/1 မိနစ်) ကိုလည်း
-သတ်မှတ်ပေးသည်: ၎င်းတို့သည် **opt-in global Provider Cooldown ၏ window gate** ကို
-မောင်းနှင်စေသည် (`PROVIDER_COOLDOWN_ENABLED`, ပုံသေအဖြစ် ပိတ်ထား) —
-`open-sse/services/providerCooldownTracker.ts` ရှိ provider-level entry တစ်ခုသည်
-`providerFailureWindowMs` အတွင်း `providerFailureThreshold` ကြိမ် ပျက်ကွက်ပြီးနောက်သာ
-cooldown အဖြစ် ရေတွက်ခံရပြီး၊ ထို့နောက် `providerCooldownMs` ကြာအောင် cooldown ဖြစ်သည်။
-၎င်းတို့သည် လက်ရှိ breaker ၏ thresholds များ **မဟုတ်ပါ** — breaker အပြုအမူကို
-မျှော်လင့်ပြီး ၎င်းတို့ကို မညှိနှိုင်းပါနှင့်။ ပုံသေတန်ဖိုးတိုင်းကို
-`OMNIROUTE_PROVIDER_BREAKER_*` နှင့် `OMNIROUTE_CIRCUIT_BREAKER_*` env vars များမှတစ်ဆင့်
-override လုပ်နိုင်ပြီး; runtime-အတိုင်း တိကျသော ရည်ညွှန်းဇယားသည်
-`docs/architecture/RESILIENCE_GUIDE.md` တွင် ရှိသည်။
+`local` ပရိုဖိုင် (`2` ကျရှုံးမှုများ / `15s`) သည် `PROVIDER_PROFILES` တွင်လည်း ရှိနေသည်၊ သို့သော် ၎င်းသည် breaker သို့ ကြိုးမတပ်ပါ- `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) သည် `oauth` သို့မဟုတ် `apikey` သာ လက်ခံပြီး `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) သည် ထိုနှစ်ခုအနက်မှ တစ်ခုကို ပြန်ပေးသည် (မှတ်ပုံတင်မထားသော ဝန်ဆောင်မှုပေးသူသည် `apikey` ဖြစ်သည်)။
 
-Provider-level ပျက်ကွက်မှု statuses များသာ provider breaker ကို trip လုပ်သင့်သည်:
+`PROVIDER_PROFILES` `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min ) နှင့် `providerCooldownMs` (5/10/1 min ) — OAuth/API key/local၊ အထက်တွင်ကဲ့သို့ တူညီသော အကြောင်းပြချက်ကြောင့် ဒေသတန်ဖိုးများ အားနည်းနေသဖြင့် ၎င်းတို့သည် စွမ်းအားကို ပေးပါသည်။** ကမ္ဘာလုံးဆိုင်ရာ ပံ့ပိုးပေးသူ Cooldown ရွေးချယ်မှု၏ ပြတင်းပေါက်တံခါး** (`PROVIDER_COOLDOWN_ENABLED`, default off ) — `open-sse/services/providerCooldownTracker.ts` တွင် ပံ့ပိုးပေးသူအဆင့် ဝင်ရောက်မှုကို `providerFailureWindowMs` အတွင်းရှိ `providerFailureThreshold` ကျရှုံးပြီးနောက် အအေးခံခြင်းအဖြစ်သာ ရေတွက်သည်၊ ထို့နောက် `providerCooldownMs` အတွက် အေးသွားသည် ။ ၎င်းတို့သည် NOT သည် live breaker ၏ thresholds — breaker အပြုအမူကို မျှော်လင့်ထား၍ ၎င်းတို့အား ချိန်ညှိခြင်းမပြုပါ။ ပုံသေတိုင်းသည် `OMNIROUTE_PROVIDER_BREAKER_*` နှင့် `OMNIROUTE_CIRCUIT_BREAKER_*` env vars များမှတဆင့် ကျော်လွှားနိုင်သည်; runtime-တိကျသောရည်ညွှန်းဇယားသည် `docs/architecture/RESILIENCE_GUIDE.md` တွင်နေထိုင်သည်။
+
+ဝန်ဆောင်မှုပေးသူအဆင့် ချို့ယွင်းချက်အခြေအနေများကသာ ဝန်ဆောင်မှုပေးသူ ဖြတ်ပိုင်းသို့ သွားသင့်သည်-
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-ပုံမှန် account/key/model အမှားများ (ဥပမာ `401`, `403`, သို့မဟုတ် `429` cases အများစု) အတွက်
-provider တစ်ခုလုံး breaker ကို trip မလုပ်ပါနှင့်။ ၎င်းတို့သည် ပုံမှန်အားဖြင့် connection
-cooldown သို့မဟုတ် model lockout ၏ ကဏ္ဍဖြစ်သည်။ Generic API-key provider `403` တစ်ခုသည်
-terminal provider/account error အဖြစ် ခွဲခြားသတ်မှတ်ခံရခြင်း မရှိပါက ပြန်လည်ကောင်းမွန်နိုင်သင့်သည်။
+`401`၊ `403`၊ သို့မဟုတ် `429` အများစုကဲ့သို့သော ပုံမှန် account/key/model အမှားများအတွက် ဝန်ဆောင်မှုပေးသူ ဘရိတ်ကာတစ်ခုလုံးကို မလည်ပတ်ပါနှင့်။ ၎င်းတို့သည် ချိတ်ဆက်မှု cooldown သို့မဟုတ် မော်ဒယ်လော့ခ်ချခြင်းမှ သက်ဆိုင်ပါသည်။ terminal provider/account အမှားတစ်ခုအဖြစ် မခွဲခြားထားပါက ယေဘူယျ API-သော့ဝန်ဆောင်မှုပေးသူ `403` ပြန်လည်ရယူနိုင်သင့်သည်။
 
-Breaker သည် background timer မဟုတ်ဘဲ lazy recovery ကို အသုံးပြုသည်။ `OPEN` သက်တမ်းကုန်သွားသောအခါ၊ `getStatus()`၊ `canExecute()` နှင့် `getRetryAfterMs()` ကဲ့သို့သော read များက state ကို `HALF_OPEN` သို့ ပြန်လည်သစ်စေသောကြောင့်၊ dashboard များနှင့် combo candidate builder များသည် သက်တမ်းကုန်သွားသော provider ကို အဆုံးအဖြတ် ချန်လှပ်ထားခြင်း မရှိတော့ပါ။
+breaker သည် ပျင်းရိသော ပြန်လည်ရယူခြင်းကို အသုံးပြုသည်၊ နောက်ခံအချိန်တိုင်းကိရိယာကို အသုံးပြုသည်။ `OPEN` သက်တမ်းကုန်သွားသောအခါ၊ `getStatus()`၊ `canExecute()`၊ နှင့် `getRetryAfterMs()` ကဲ့သို့သော ဖတ်ရှုမှုများကို `HALF_OPEN` သို့ ပြန်လည်စတင်စေသည်၊ ထို့ကြောင့် ဒက်ရှ်ဘုတ်များနှင့် ပေါင်းစပ်တည်ဆောက်သူများသည် သက်တမ်းကုန်နေသောဝန်ဆောင်မှုပေးသူအား ထာဝရမပါဝင်တော့ပါ။
 
-### Connection Cooldown
+### ချိတ်ဆက်မှု Cooldown
 
-**အကျုံးဝင်ပိုင်နက်**: provider connection/account/key တစ်ခု။
+**အတိုင်းအတာ** : one provider connection/account/key.
 
-**ရည်ရွယ်ချက်**: တူညီသော provider ၏ အခြား connection များ ဆက်လက် request များ ဝန်ဆောင်မှုပေးနေစဉ်၊ ညံ့ဖျင်းနေသော key/account တစ်ခုကို ခေတ္တကျော်လွှားရန်။
+**ရည်ရွယ်ချက်** : တူညီသောဝန်ဆောင်မှုပေးသူ၏ တောင်းဆိုမှုများကို ဆက်လက်ထမ်းဆောင်ရန် အခြားချိတ်ဆက်မှုများကို ခွင့်ပြုနေစဉ် မကောင်းတဲ့ key/account တစ်ခုကို ခေတ္တကျော်လိုက်ပါ။
 
-**အကောင်အထည်ဖော်ပုံ**:
+**အကောင်အထည်ဖော်ခြင်း။** :
 
-- ရေးသား/အပ်ဒိတ်လုပ်ရန် လမ်းကြောင်း: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Account ရွေးချယ်မှု/စစ်ထုတ်မှု: `src/sse/services/auth.ts::getProviderCredentials...`
-- Cooldown တွက်ချက်မှု: `open-sse/services/accountFallback.ts::checkFallbackError()`
-- ဆက်တင်များ: `src/lib/resilience/settings.ts`
+- Write/update လမ်းကြောင်း: `src/sse/services/auth.ts::markAccountUnavailable()`
+- အကောင့် selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Cooldown တွက်ချက်မှု- `open-sse/services/accountFallback.ts::checkFallbackError()`
+- ဆက်တင်များ- `src/lib/resilience/settings.ts`
 
-Provider connection များပေါ်ရှိ အရေးကြီးသော field များ:
+ဝန်ဆောင်မှုပေးသူချိတ်ဆက်မှုများတွင် အရေးကြီးသောအကွက်များ-
 
 ```ts
 rateLimitedUntil;
@@ -867,50 +848,50 @@ errorCode;
 backoffLevel;
 ```
 
-Account ရွေးချယ်စဉ်တွင်၊ အောက်ပါအခြေအနေဖြစ်နေချိန် connection တစ်ခုကို ကျော်လွှားပါသည်:
+အကောင့်ရွေးချယ်နေစဉ်အတွင်း၊ ချိတ်ဆက်မှုကို ကျော်သွားသည်-
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Cooldown များသည်လည်း lazy ဖြစ်သည်: `rateLimitedUntil` သည် အတိတ်ကာလသို့ ရောက်သွားသောအခါ connection သည် ပြန်လည်အသုံးပြုနိုင်အဆင့်သို့ ရောက်ရှိသွားသည်။ အောင်မြင်စွာအသုံးပြုပြီးနောက် `clearAccountError()` က `testStatus`၊ `rateLimitedUntil`၊ error field များနှင့် `backoffLevel` ကို ရှင်းလင်းပေးသည်။
+Cooldowns များသည်လည်း ပျင်းရိသည်- `rateLimitedUntil` သည် အတိတ်တွင်ရှိသောအခါ၊ ချိတ်ဆက်မှုသည် အရည်အချင်းပြည့်မီလာပြန်သည်။ အောင်မြင်သောအသုံးပြုမှုတွင်၊ `clearAccountError()` `testStatus`၊ `rateLimitedUntil`၊ အမှားအယွင်းအကွက်များနှင့် `backoffLevel` ကို ရှင်းလင်းသည်။
 
-မူရင်းသတ်မှတ်ထားသော connection cooldown အပြုအမူ:
+ပုံသေချိတ်ဆက်မှု အအေးပေးစနစ်-
 
 - OAuth အခြေခံ cooldown: `5s`။
-- API-key အခြေခံ cooldown: `3s`။
-- API-key `429` အတွက် ရရှိနိုင်သောအခါ upstream retry အကြံပြုချက်များ (`Retry-After`၊ reset header များ သို့မဟုတ် parse လုပ်နိုင်သော reset စာသား) ကို ဦးစားပေးသင့်သည်။
-- ထပ်ခါတလဲလဲဖြစ်သော ပြန်လည်ကုစားနိုင်သော ချို့ယွင်းချက်များသည် exponential backoff ကို အသုံးပြုသည်:
+- API-ကီးအခြေခံ အအေးခံစနစ်- `3s`
+- API-key `429` အထက်စီးကြောင်းပြန်စမ်းခြင်း အရိပ်အမြွက်များ (`Retry-After`၊ ခေါင်းစီးများကို ပြန်လည်သတ်မှတ်ခြင်း သို့မဟုတ် ခွဲခြမ်းစိတ်ဖြာနိုင်သော ပြန်လည်သတ်မှတ်နိုင်သော စာသား) ကို နှစ်သက်သင့်သည်။
+- ထပ်ခါတလဲလဲ ပြန်လည်ရယူနိုင်သော မအောင်မြင်မှုများသည် exponential backoff ကို အသုံးပြုသည်-
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Anti-thundering-herd guard သည် တူညီသော connection ပေါ်တွင် တပြိုင်နက်တည်း ဖြစ်ပေါ်သော ချို့ယွင်းချက်များမှ cooldown ကို ထပ်ခါတလဲလဲ တိုးချဲ့ခြင်း သို့မဟုတ် `backoffLevel` ကို နှစ်ဆတိုးခြင်းမှ တားဆီးပေးသည်။
+မိုးကြိုးပစ်ခြင်း-နွားအစောင့်အကြပ်သည် တူညီသောချိတ်ဆက်မှုတွင် တစ်ပြိုင်နက်တည်း ချို့ယွင်းချက်များကို ထပ်ခါတလဲလဲ ချဲ့ထွင်ခြင်း သို့မဟုတ် `backoffLevel` နှစ်ဆတိုးခြင်းမှ ကာကွယ်ပေးသည်။
 
-Terminal state များသည် cooldown များ မဟုတ်ပါ။ `banned`၊ `expired` (`EXPIRED_RETRY_MAX` မှတဆင့် ကန့်သတ်ထားသော retry N ကြိမ်ပြီးမှသာ terminal ဖြစ်သွားသည်) နှင့် `credits_exhausted` တို့သည် credentials/settings ပြောင်းလဲမှု သို့မဟုတ် operator ၏ ပြန်လည်သတ်မှတ်မှု မရှိမချင်း မရရှိနိုင်ဘဲ ဆက်လက်နေထိုင်ရန် ရည်ရွယ်ထားသည်။ Terminal state များကို ခေတ္တ cooldown state ဖြင့် အစားထိုးရေးသားခြင်း မပြုပါနှင့်။
+Terminal state များသည် cooldown များမဟုတ်ပါ။ `banned`, `expired` ( `EXPIRED_RETRY_MAX` မှတဆင့် N bounded ပြန်စမ်းပြီးနောက်မှသာ terminal ဖြစ်လာသည်) နှင့် `credits_exhausted` credentials/settings ပြောင်းလဲခြင်း သို့မဟုတ် အော်ပရေတာမှ ၎င်းတို့ကို ပြန်လည်သတ်မှတ်သည်အထိ မရရှိနိုင်စေရန် ရည်ရွယ်ပါသည်။ ယာယီအအေးခံအခြေအနေဖြင့် terminal state များကို မရေးပါနှင့်။
 
-### Model Lockout
+### မော်ဒယ်လော့ခ်ချခြင်း။
 
-**အကျုံးဝင်ပိုင်နက်**: provider + connection + မော်ဒယ်။
+**အတိုင်းအတာ** : ပံ့ပိုးသူ + ချိတ်ဆက်မှု + မော်ဒယ်။
 
-**ရည်ရွယ်ချက်**: ၎င်း connection အတွက် မော်ဒယ်တစ်ခုတည်းသာ မရရှိနိုင်ခြင်း သို့မဟုတ် quota ကန့်သတ်ခံရခြင်း ဖြစ်စဉ်၊ connection တစ်ခုလုံးကို ပိတ်ထားခြင်းမှ ရှောင်ကြဉ်ရန်။
+**ရည်ရွယ်ချက်** : မော်ဒယ်တစ်ခုသာ မရရှိနိုင်ပါ သို့မဟုတ် ထိုချိတ်ဆက်မှုအတွက် ခွဲတမ်းကန့်သတ်ထားသည့်အခါ ချိတ်ဆက်မှုတစ်ခုလုံးကို ပိတ်ခြင်းမှ ရှောင်ကြဉ်ပါ။
 
-ဥပမာများ:
+ဥပမာများ-
 
-- `429` ပြန်ပေးသော မော်ဒယ်လိုက် quota provider များ။
-- ပျောက်ဆုံးနေသော မော်ဒယ်တစ်ခုအတွက် `404` ပြန်ပေးသော local provider များ။
-- ရွေးချယ်ထားသော Grok mode များကဲ့သို့သော provider သီးခြား mode/model ခွင့်ပြုချက် ချို့ယွင်းမှုများ။
+- `429` ပြန်လာသော မော်ဒယ်အလိုက် ခွဲတမ်းပေးသူများ။
+- ပျောက်ဆုံးနေသောမော်ဒယ်တစ်ခုအတွက် `404` ပြည်တွင်းပံ့ပိုးပေးသူများ။
+- ရွေးချယ်ထားသော Grok မုဒ်များကဲ့သို့သော ဝန်ဆောင်မှုပေးသူ-သတ်သတ်မှတ်မှတ် mode/model ခွင့်ပြုချက် ပျက်ကွက်မှုများ။
 
-Model lockout သည် `open-sse/services/accountFallback.ts` တွင် တည်ရှိပြီး၊ တူညီသော connection မှ အခြားမော်ဒယ်များကို ဆက်လက်ဝန်ဆောင်မှုပေးနိုင်စေသည်။
+မော်ဒယ်လော့ခ်ချမှုသည် `open-sse/services/accountFallback.ts` တွင်နေထိုင်ပြီး တူညီသောချိတ်ဆက်မှုသည် အခြားမော်ဒယ်များကို ဆက်လက်လုပ်ဆောင်နိုင်စေပါသည်။
 
-### Debugging လမ်းညွှန်ချက်များ
+### အမှားရှာပြင်ခြင်းလမ်းညွှန်
 
-- Provider တစ်ခု၏ key အားလုံး ကျော်လွှားခံနေရပါက၊ provider breaker state နှင့် connection တစ်ခုချင်းစီ၏ `rateLimitedUntil`/`testStatus` နှစ်ခုလုံးကို စစ်ဆေးပါ။
-- Reset window ပြီးနောက် provider တစ်ခုကို အမြဲတမ်း ချန်လှပ်ထားသကဲ့သို့ တွေ့ရပါက၊ code သည် `getStatus()`/`canExecute()` ကို အသုံးမပြုဘဲ raw `state` ကို ဖတ်နေသည်ရှိမရှိ စစ်ဆေးပါ။
-- Provider key တစ်ခု ချို့ယွင်းသော်လည်း အခြားသော key များ အလုပ်လုပ်သင့်ပါက၊ provider breaker ထက် connection cooldown ကို ဦးစားပေးပါ။
-- မော်ဒယ်တစ်ခုတည်းသာ ချို့ယွင်းပါက၊ connection cooldown ထက် model lockout ကို ဦးစားပေးပါ။
-- State တစ်ခု ကိုယ်တိုင်ပြန်လည်ကောင်းမွန်သင့်ပါက၊ ၎င်းတွင် အနာဂတ် timestamp/reset timeout နှင့် သက်တမ်းကုန်သွားသော state ကို ပြန်လည်သစ်စေသော read path ရှိသင့်သည်။ အမြဲတမ်း status များအတွက်မှာ manual credential သို့မဟုတ် config ပြောင်းလဲမှုများ လိုအပ်သည်။
+- ဝန်ဆောင်မှုပေးသူအတွက် သော့များအားလုံးကို ကျော်သွားပါက၊ ဝန်ဆောင်မှုပေးသူ ဖြတ်ပိုင်းအခြေအနေနှင့် ချိတ်ဆက်မှုတစ်ခုစီ၏ `rateLimitedUntil`/`testStatus` နှစ်ခုလုံးကို စစ်ဆေးပါ။
+- ပြန်လည်သတ်မှတ်သည့်ဝင်းဒိုးပြီးနောက် ဝန်ဆောင်မှုပေးသူတစ်ဦးမှ အပြီးအပိုင်ဖယ်ထုတ်ခံရပါက၊ `getStatus()`/`canExecute()` သုံးမည့်အစား ကုဒ်သည် `state` အကြမ်းဖတ်ခြင်းရှိမရှိ စစ်ဆေးပါ။
+- ဝန်ဆောင်မှုပေးသူသော့တစ်ခုက မအောင်မြင်သော်လည်း အခြားသူများ အလုပ်ဖြစ်ပါက၊ ဝန်ဆောင်မှုပေးသူ breaker ထက် ချိတ်ဆက်မှု cooldown ကို ပိုနှစ်သက်သည်။
+- မော်ဒယ်တစ်ခုတည်းသာ အဆင်မပြေပါက၊ ချိတ်ဆက်မှုအေးသွားခြင်းထက် မော်ဒယ်လော့ခ်ချခြင်းကို ပိုနှစ်သက်သည်။
+- အခြေအနေတစ်ခုသည် မိမိကိုယ်မိမိ ပြန်လည်ကောင်းမွန်လာပါက၊ ၎င်းတွင် သက်တမ်းကုန်ဆုံးသွားသော အခြေအနေအား ပြန်လည်ဆန်းသစ်စေမည့် အနာဂတ် timestamp/reset နှင့် ဖတ်ရှုလမ်းကြောင်းတစ်ခု ရှိသင့်သည်။ အမြဲတမ်းအခြေအနေများသည် လူကိုယ်တိုင် အထောက်အထား သို့မဟုတ် ပြင်ဆင်သတ်မှတ်ပြောင်းလဲမှုများ လိုအပ်သည်။
 
 ---
 

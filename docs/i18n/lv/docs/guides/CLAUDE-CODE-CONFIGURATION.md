@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) un OpenCode (`x-opencode-session`) tiek atp
 
 Darba direktorijs dažādās mašīnās atšķiras, tāpēc viena un tā pati krātuve var tikt parādīta dažādos ceļos. Tā vietā skaidri nosūtiet projektu: Claude kods katram modeļa pieprasījumam pievieno visas `ANTHROPIC_CUSTOM_HEADERS` norādītās galvenes, un OmniRoute nolasa divas no tām:
 
-| Virsraksts                 | Vērtība                                                                    |
-| -------------------------- | -------------------------------------------------------------------------- |
-| `x-omniroute-project`      | Projekta nosaukums, piemēram `omniroute`                                   |
-| `x-omniroute-project-repo` | Normalizēta tālvadības pults, piemēram `github.com/diegosouzapw/OmniRoute` |
+| Virsraksts                 | Vērtība                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Projekta nosaukums, piemēram `omniroute`                                        |
+| `x-omniroute-project-repo` | Normalizēta tālvadības pults, piemēram `github.com/cheaper-inference/OmniRoute` |
 
 Abi tiek lasīti tikai attiecinājumam; tie nekad netiek pārsūtīti augšupējam pakalpojumu sniedzējam.
 
@@ -287,28 +287,20 @@ papildu karodziņi nav nepieciešami. Atsevišķā izsaukumā to var pārrakstī
 
 ## Problēmu novēršana
 
-**Claude Code ignorē vārteju** — pārliecinieties, ka `ANTHROPIC_BASE_URL` **nesatur
-`/v1`**, un restartējiet `claude` (vide tiek nolasīta vienreiz palaišanas laikā). `omniroute launch`
-to izdara jūsu vietā.
+**Claude kods ignorē vārteju** — apstiprina, `ANTHROPIC_BASE_URL` ir** nav `/v1`** un restartējiet `claude` (env tiek nolasīts vienreiz startēšanas laikā). `omniroute launch` to nokārto jūsu vietā.
 
-**`/model` atlasītājs ir tukšs / tajā trūkst vārtejas modeļu** — nepieciešams Claude Code
-v2.1.219+ un `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Atlasītājā tiek rādīti tikai `claude*` /
-`anthropic*` modeļu ID; jebkuru citu modeli norādiet piespiedu kārtā ar
-`ANTHROPIC_MODEL=<id>` (tieši tā darbojas profili).
+**`/model` picker ir tukšs / trūkst vārtejas modeļu** — ir nepieciešams Claude kods v2.1.219 + un `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. atlasītājā parādās tikai `claude*` / `anthropic*` modelis IDs ; piespiediet jebkuru citu modeli ar `ANTHROPIC_MODEL=<id>` (tā dara profili).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code vienmēr nosūta modeļu ID **bez prefiksa**
-(piemēram, `claude-opus-4-8`), tādēļ, ja ir savienoti gan Claude Code (`cc/…`), gan
-Claude (`claude/…`) nodrošinātāji, ID bez prefiksa atbilst diviem maršrutiem un
-OmniRoute atsakās minēt. To var novērst divējādi: fiksējiet ID ar prefiksu, izmantojot
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, vai iespējojiet **Dot priekšroku Claude Code
-Claude modeļiem bez prefiksa** — ar slēdzi Claude nodrošinātāja lapā vai
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (pēc noklusējuma izslēgts;
-skatiet [Vide](../reference/ENVIRONMENT.md)) — tādējādi `claude-*` ID bez prefiksa
-tiks novirzīti uz Claude Code. Skaidri norādītiem nodrošinātāju prefiksiem vienmēr ir priekšroka.
+**`400 Ambiguous model 'claude-…'`** — Claude Kods vienmēr tiek nosūtīts** bez prefiksa** modelis IDs (piemēram, `claude-opus-4-8`), tāpēc, kad ir savienoti gan Claude Code (`cc/…`), gan Claude (`claude/…`) nodrošinātāji, tukšais id atbilst diviem maršrutiem, un OmniRoute atsakās uzminēt. Labojiet to jebkurā veidā: piespraudiet id ar prefiksu ar `ANTHROPIC_MODEL=cc/claude-opus-4-8` vai iespējojiet** Dodiet priekšroku Claude kodam Claude modeļiem bez prefiksa** — slēdzi Claude nodrošinātāja lapā vai `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (noklusējums izslēgts; skatiet [Vide](../reference/ENVIRONMENT.md) ) — kas maršrutē tukšo `claude-*` IDs uz Claude kodu. Vienmēr uzvar skaidri norādīti pakalpojumu sniedzēja prefiksi.
 
-**Autentifikācijas kļūdas** — profilā nav pilnvaras. Izmantojiet `omniroute launch --profile`
-(tā tiek ievadīta automātiski) vai eksportējiet `ANTHROPIC_AUTH_TOKEN`.
+**"automātiskais režīms … šī sesija nav piemērota" (maksājums par klasifikatora pieprasījumiem)** — automātiskajā režīmā Claude kods pieprasa serverim pārskatīt darbības tā modeļa pieprasījumos ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Tam ir nepieciešama `anthropic-beta` vērtība `dangerous-tool-use-2026-09-03` un `safeguards` korpusa lauks, lai sasniegtu Anthropic kā pāri, un `safeguard_results` plus augšpuses rīku lietošanas IDs lai atgrieztos nemainītā veidā. OmniRoute to dara, ja pieprasījums tiek maršrutēts uz vietējo `claude` nodrošinātāju vai `anthropic-compatible-*` mezglu, straumēts vai ne (regresijas aizsargs: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Citi mērķi nevar atgriezt pārskatīšanu, tāpēc Claude Code atgriežas pie saviem klasifikatora pieprasījumiem un parāda paziņojumu:
 
-**Profili netiek izolēti** — katram profilam ir atsevišķs `CLAUDE_CONFIG_DIR`;
-pārbaudiet, vai sesijā `echo $CLAUDE_CONFIG_DIR` norāda uz
-`~/.claude/profiles/<name>`.
+- modelis uz pakalpojumu sniedzēja, kas nav antropisks, vai kombinācija, kas tiek izmantota vienā;
+- ar Kloda kodu saderīgs releja mezgls (`anthropic-compatible-cc-*`), kas atjauno pieprasījuma pamattekstu un nenes `safeguards`;
+- vecāka OmniRoute, kas ir vecāka par atļauto beta versiju, vai Claude koda versija, kas ir zemāka par Anthropic lapā norādīto vārtejas sesijām.
+
+Palaidiet `/status` programmā Claude Code: the** Automātiskā režīma serveris** rinda skan `Enabled` kamēr servera pārskatīšana ir aktīva. To, vai šie pieprasījumi tiek iekasēti, izlemj Anthropic, nevis OmniRoute.
+
+**Autentifikācijas kļūdas** — profilam nav marķiera. Izmantojiet `omniroute launch --profile` (injicē to) vai eksportējiet `ANTHROPIC_AUTH_TOKEN`.
+
+**Profili neizolē** — katrs profils ir atšķirīgs `CLAUDE_CONFIG_DIR`; pārbaudiet `echo $CLAUDE_CONFIG_DIR` sesijas punktos `~/.claude/profiles/<name>`.

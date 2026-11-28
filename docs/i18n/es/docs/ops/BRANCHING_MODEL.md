@@ -41,14 +41,14 @@ contra `main` deben redirigirse antes de integrarlos.
 
 Cuando se concilia una versión, se abre una emisión de marcador denominada `release-freeze`. Eso** no detiene el desarrollo** :
 
-- El `release/vX.Y.Z` congelado pertenece al capitán liberado de ese barco.
+- El `release/vX.Y.Z` congelado pertenece al capitán de liberación de ese barco.
 - El `release/vX+1` del siguiente ciclo se corta de la punta congelada para que los contribuyentes sigan trabajando.
 - Abrir PRs que todavía apunta a la rama congelada debe ser** reorientado** a la rama `release/v*` activa (más alta).
 
 Verifique si hay una congelación abierta antes de asumir que la rama que desea se puede fusionar:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 La mecánica de fusión (propietario `queue` etiqueta → Mergify) está documentada en [MERGE_TRAIN.md](./MERGE_TRAIN.md).

@@ -4,9 +4,9 @@
 
 ---
 
-> **Versie:** v3.8.44** Laatst bijgewerkt:** 28-10-2026** Publiek:** Ingenieurs die embedded services toevoegen, onderhouden of debuggen (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versie:** v3.8.44** Publiek:** Ingenieurs die embedded services toevoegen, onderhouden of debuggen (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Ingebedde services zijn lokaal geïnstalleerde hulpprogramma's voor processen die OmniRoute installeert, controleert en openbaar maakt als eersteklas routeringsdoelen. In tegenstelling tot externe providers (die via het internet worden bereikt via API sleutels), draaien embedded services op dezelfde machine als OmniRoute en communiceren ze via loopback.
+Ingebedde services zijn lokaal geïnstalleerde hulpprogramma's voor processen die OmniRoute installeert, controleert en openbaar maakt als eersteklas routeringsdoelen. In tegenstelling tot externe providers (die via internet via API sleutels worden bereikt), draaien embedded services op dezelfde machine als OmniRoute en communiceren ze via loopback.
 
 ---
 

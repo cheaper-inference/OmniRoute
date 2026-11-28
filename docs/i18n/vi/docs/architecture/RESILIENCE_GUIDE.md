@@ -22,57 +22,53 @@ OmniRoute có ba cơ chế phục hồi riêng biệt nhưng có liên quan vớ
 > dashboard đã lưu `false` sẽ không thay đổi gì — hãy bật công tắc trong **Cài đặt → Khả năng phục hồi**
 > (hoặc xóa trường đã lưu) thay thế.
 
-## 1. Circuit Breaker cấp Provider
+## 1. Bộ ngắt mạch của nhà cung cấp
 
-**Phạm vi:** toàn bộ provider (ví dụ: `glm`, `openai`, `anthropic`).
+**phạm vi:** toàn bộ nhà cung cấp (ví dụ: `glm`, `openai`, `anthropic`).
 
-**Mục đích:** ngừng gửi lưu lượng đến một provider đang liên tục gặp lỗi ở tầng upstream/dịch vụ.
+**Mục đích:** ngừng gửi lưu lượng truy cập đến nhà cung cấp liên tục bị lỗi ở cấp độ upstream/service.
 
-**Triển khai:**
+**Thực hiện:**
 
-- Lớp lõi: `src/shared/utils/circuitBreaker.ts`
-- Kết nối: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API trạng thái: `GET /api/monitoring/health`
-- API đặt lại: `POST /api/resilience/reset`
-- Các wrapper: `open-sse/services/accountFallback.ts`
-- Bảng DB: `domain_circuit_breakers`
+- Lớp cốt lõi: `src/shared/utils/circuitBreaker.ts`
+- Đấu dây: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Trạng thái API: `GET /api/monitoring/health`
+- Đặt lại API: `POST /api/resilience/reset`
+- Trình bao bọc: `open-sse/services/accountFallback.ts`
+- bảng DB : `domain_circuit_breakers`
 
-**Các trạng thái:**
+**Kỳ:**
 
-- `CLOSED` — cho phép lưu lượng bình thường
-- `DEGRADED` — lưu lượng vẫn được cho phép, nhưng các lỗi provider gia tăng đang được theo dõi; quay về `CLOSED` khi đạt đủ số lần thành công, khi có một lần kiểm tra kết nối hợp lệ, hoặc sau khoảng thời gian giữ `OPEN` dài nhất cho loại lỗi gần nhất (giá trị `cooldownByKind` của nó, nếu không có thì `resetTimeout`, × `maxBackoffMultiplier`, tối thiểu một chu kỳ cooldown) mà không phát sinh lỗi mới
-- `OPEN` — provider tạm thời bị chặn; combo routing sẽ bỏ qua nó
-- `HALF_OPEN` — thời gian reset timeout đã trôi qua; cho phép request thăm dò
+- `CLOSED` — cho phép lưu lượng truy cập bình thường
+- Lưu lượng truy cập `DEGRADED` — vẫn được cho phép, nhưng lỗi của nhà cung cấp nâng cao đang được theo dõi; trở về `CLOSED` khi đủ thành công, trong kiểm tra kết nối hợp lệ hoặc sau lần giữ `OPEN` lâu nhất cho loại lỗi cuối cùng (giá trị `cooldownByKind` của nó, nếu không thì `resetTimeout`, × `maxBackoffMultiplier`, ít nhất một lần hồi chiêu) mà không có lỗi mới
+- nhà cung cấp `OPEN` — tạm thời bị chặn; định tuyến kết hợp bỏ qua nó
+- `HALF_OPEN` — đã hết thời gian chờ thiết lập lại; cho phép yêu cầu thăm dò
 
-**Các giá trị mặc định có thể cấu hình (`open-sse/config/constants.ts`, được hiển thị trong Dashboard → Settings → Resilience):**
+**Các giá trị mặc định có thể định cấu hình (`open-sse/config/constants.ts`, được hiển thị trong Bảng điều khiển → Cài đặt → Khả năng phục hồi):**
 
-| Loại    | Vào DEGRADED tại | Mở (OPEN) tại | Reset timeout |
-| ------- | ---------------- | ------------- | ------------- |
-| OAuth   | 5 lần lỗi        | 8 lần lỗi     | 60s           |
-| API-key | 7 lần lỗi        | 12 lần lỗi    | 30s           |
-| Local   | suy ra           | 2 lần lỗi     | 15s           |
+| Lớp học  | Bị xuống cấp ở | Mở cửa lúc      | Đặt lại thời gian chờ |
+| -------- | -------------- | --------------- | --------------------- |
+| OAuth    | 5 lần thất bại | 8 lần thất bại  | thập niên 60          |
+| Khóa API | 7 lần thất bại | 12 lần thất bại | 30 tuổi               |
 
-`degradationThreshold` kiểm soát thời điểm một provider chuyển sang `DEGRADED`; `failureThreshold` kiểm soát thời điểm nó mở và bị bỏ qua. Các profile provider local chưa được hiển thị trên trang cài đặt Resilience.
+`degradationThreshold` kiểm soát khi nhà cung cấp nhập `DEGRADED`; `failureThreshold` kiểm soát thời điểm nó mở và bị bỏ qua. `PROVIDER_PROFILES.local` (2 lỗi/15 giây) được xác định trong `open-sse/config/constants.ts` nhưng** chưa có dây** : `getProviderCategory()` chỉ trả về `oauth` hoặc `apikey`, vì vậy các nhà cung cấp địa phương sử dụng cấu hình khóa OAuth hoặc API.
 
-**Mã kích hoạt (trip):** chỉ các mã trạng thái cấp provider `[408, 500, 502, 503, 504]`. KHÔNG kích hoạt cho các lỗi cấp tài khoản (phần lớn 401/403/429 — những lỗi đó thuộc về cooldown hoặc lockout).
+**Mã chuyến đi:** chỉ các trạng thái cấp nhà cung cấp `[408, 500, 502, 503, 504]`. Thực hiện NOT trip đối với các lỗi cấp tài khoản (hầu hết 401/403/429 — thuộc về thời gian hồi chiêu hoặc khóa).
 
-**Phục hồi lười (lazy recovery):** khi `OPEN` hết hạn, `getStatus()`, `canExecute()`, `getRetryAfterMs()` sẽ làm mới trạng thái thành `HALF_OPEN`. Chính các lần đọc đó (và lỗi tiếp theo) cũng làm suy giảm một trạng thái `DEGRADED` đã cũ về `CLOSED`. Không cần bộ đếm thời gian chạy nền.
+**Phục hồi lười biếng:** khi `OPEN` hết hạn, `getStatus()`, `canExecute()`, `getRetryAfterMs()` làm mới trạng thái thành `HALF_OPEN`. Các lần đọc tương tự (và lần thất bại tiếp theo) sẽ phân hủy `DEGRADED` cũ trở lại `CLOSED`. Không cần hẹn giờ nền.
 
 ---
 
-### Provider Cooldown toàn cục theo chế độ tùy chọn (window gate)
+### Chọn tham gia Thời gian hồi chiêu của nhà cung cấp toàn cầu (cổng cửa sổ)
 
-Một lớp thứ tư, **tùy chọn bật** (`PROVIDER_COOLDOWN_ENABLED`, mặc định **tắt**) lưu giữ bộ nhớ xuyên suốt các request về những provider đang gặp lỗi trong
-`open-sse/services/providerCooldownTracker.ts`, được tham chiếu bởi quá trình phân giải mục tiêu combo để các request combo liên tiếp ngừng đi lại qua một provider vừa mới lỗi. Các mục cấp provider tuân theo window gate của `PROVIDER_PROFILES`:
+Thứ tư,** chọn tham gia** lớp (`PROVIDER_COOLDOWN_ENABLED`, mặc định** tắt** ) lưu giữ bộ nhớ yêu cầu chéo của các nhà cung cấp không thành công trong `open-sse/services/providerCooldownTracker.ts`, được tư vấn bằng độ phân giải mục tiêu kết hợp để các yêu cầu kết hợp liên tiếp dừng việc gửi lại nhà cung cấp vừa thất bại. Các mục cấp nhà cung cấp tôn trọng cổng cửa sổ `PROVIDER_PROFILES` :
 
-| Profile | kích hoạt sau (`providerFailureThreshold`) | trong khoảng (`providerFailureWindowMs`) | cooldown trong (`providerCooldownMs`) |
-| ------- | -----------------------------------------: | ---------------------------------------: | ------------------------------------: |
-| OAuth   |                                       `10` |                                  `15min` |                                `5min` |
-| API key |                                       `15` |                                  `30min` |                               `10min` |
+| Hồ sơ    | chuyến đi sau (`providerFailureThreshold`) | bên trong (`providerFailureWindowMs`) | nguội đi cho (`providerCooldownMs`) |
+| -------- | -----------------------------------------: | ------------------------------------: | ----------------------------------: |
+| OAuth    |                                       `10` |                               `15min` |                              `5min` |
+| phím API |                                       `15` |                               `30min` |                             `10min` |
 
-Dưới ngưỡng này, provider **không** được coi là đang trong trạng thái cooldown; một lần thành công sẽ xóa cửa sổ. Các mục cấp kết nối (`provider:connectionId`) vẫn giữ backoff theo hàm mũ `minRetryCooldownMs → maxRetryCooldownMs`. Ghi đè:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Kiểm thử bảo vệ hồi quy: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Dưới ngưỡng mà nhà cung cấp** không** được coi là làm mát; một thành công sẽ xóa cửa sổ. Thay vào đó, các mục cấp độ kết nối (`provider:connectionId`) giữ lại mức dự phòng `minRetryCooldownMs → maxRetryCooldownMs` theo cấp số nhân. Ghi đè: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Bảo vệ hồi quy: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Thời gian hồi kết nối
 
@@ -839,6 +835,21 @@ cooldown cho nhóm IP. Các giới hạn thực tế:
 
 ---
 
+## Khi bản thân OmniRoute không thể truy cập được
+
+Bộ ngắt mạch của nhà cung cấp, thời gian hồi chiêu kết nối và khóa mô hình đều chạy bên trong cổng. Nếu máy khách không thể truy cập vào cổng, nó sẽ gặp lỗi kết nối. OmniRoute không thể chặn được thất bại đó. Máy khách quyết định có thử lại hay không và hiển thị thông báo nào.
+
+OmniRoute hiện không cung cấp dự phòng phía máy khách và không xác định chính sách nào cho nó. Định cấu hình bất kỳ tuyến đường thay thế nào trong máy khách hoặc phía trước cổng.
+
+- `GET /api/health` kiểm tra tính sống động mà không cần xác thực.
+- `GET /api/health/ping` kiểm tra tính sẵn sàng, bao gồm cả việc cơ sở dữ liệu có phản hồi hay không.
+- `GET /api/monitoring/health` cung cấp cho người gọi được xác thực cái nhìn tổng quan hơn về sức khỏe.
+- `omniroute launch <tool>` thăm dò `/api/monitoring/health` trước khi khởi động máy khách. Nó có thể tự động khởi động một cổng cục bộ. Với `--no-start`, một cổng không thể truy cập sẽ dẫn đến `GatewayUnreachable` và mã thoát `69`.
+
+Để ngắt kết nối máy khách khỏi OmniRoute, hãy làm theo [Hoàn nguyên cấu hình máy khách](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Gỡ lỗi
 
 - Combo weighted trả về `503 all_targets_cooling_down` (`Retry-After` được thiết lập, `diagnostics.excluded` liệt kê mọi target với `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → pool đã được cấu hình và kết nối, chỉ là mọi target đều đang bị loại trừ bởi một bộ đếm thời gian resilience; cảnh báo `[COMBO] Weighted selection: every target excluded before dispatch — …` nêu rõ các lý do và số giây còn lại. Một lỗi `404 no_executable_targets` từ cùng combo đó nghĩa là không có bộ đếm thời gian resilience nào liên quan (không có gì để chạy, hoặc mọi tài khoản đều không vượt qua được bài kiểm tra khả dụng). Được xây dựng trong `open-sse/services/combo/pinRecovery.ts` từ các loại trừ thu thập được trong `targetResolution.ts`.
@@ -850,94 +861,68 @@ cooldown cho nhóm IP. Các giới hạn thực tế:
 
 ---
 
-## Trạng thái runtime — tham khảo nhanh dành cho agent
+## Tham khảo nhanh về trạng thái thời gian chạy của đại lý —
 
-> Được chuyển nguyên văn từ `AGENTS.md` → "Resilience Runtime State" (PR #12743) để hướng
-> dẫn dành cho agent nằm trong ngân sách context 40k. Đây là phiên bản rút gọn, hướng tới
-> agent, của các phần bên trên; các phần được đánh số vẫn là tài liệu tham khảo đầy đủ.
+> Đã chuyển nguyên văn từ `AGENTS.md` → "Trạng thái thời gian chạy khả năng phục hồi" (PR #12743) để hướng dẫn đại lý vẫn ở trong ngân sách ngữ cảnh 40k. Đó là cái nhìn cô đọng, hướng về tác nhân của các phần trên; các phần được đánh số vẫn là tài liệu tham khảo đầy đủ.
 
-OmniRoute có ba cơ chế xử lý lỗi tạm thời liên quan nhưng khác biệt nhau. Hãy giữ
-phạm vi của chúng tách biệt khi gỡ lỗi hành vi định tuyến. Xem
-[sơ đồ resilience 3 lớp](../diagrams/exported/resilience-3layers.svg)
-(nguồn: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-để có bản đồ tổng quan nhanh.
+OmniRoute có ba cơ chế lỗi tạm thời có liên quan nhưng khác biệt. Giữ phạm vi của chúng riêng biệt khi gỡ lỗi hành vi định tuyến. Xem [sơ đồ khả năng phục hồi 3 lớp](../diagrams/exported/resilience-3layers.svg) (nguồn: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) để có bản đồ tổng quát.
 
-### Circuit Breaker cấp provider
+### Bộ ngắt mạch của nhà cung cấp
 
-**Phạm vi**: toàn bộ provider, ví dụ `glm`, `openai`, `anthropic`.
+**Phạm vi** : toàn bộ nhà cung cấp, ví dụ `glm`, `openai`, `anthropic`.
 
-**Mục đích**: ngừng gửi traffic tới một provider liên tục lỗi ở tầng
-upstream/dịch vụ, để một provider không khỏe mạnh không làm chậm mọi request.
+**Mục đích** : dừng gửi lưu lượng truy cập đến một nhà cung cấp liên tục bị lỗi ở cấp độ upstream/service, để một nhà cung cấp không tốt sẽ không làm chậm mọi yêu cầu.
 
-**Triển khai**:
+**Thực hiện** :
 
 - Lớp cốt lõi: `src/shared/utils/circuitBreaker.ts`
-- Kết nối gate/thực thi chat: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API trạng thái runtime: `src/app/api/monitoring/health/route.ts`
-- Các wrapper dùng chung: `open-sse/services/accountFallback.ts`
-- Bảng trạng thái được lưu trữ: `domain_circuit_breakers`
+- Trò chuyện gate/execution nối dây: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Trạng thái thời gian chạy API: `src/app/api/monitoring/health/route.ts`
+- Trình bao bọc được chia sẻ: `open-sse/services/accountFallback.ts`
+- Bảng trạng thái bền vững: `domain_circuit_breakers`
 
-**Các trạng thái** (4 — `src/shared/utils/circuitBreaker.ts`):
+**tiểu bang** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: traffic bình thường được phép.
-- `DEGRADED`: vùng cảnh báo sớm — số lỗi đã vượt ngưỡng suy giảm nhưng chưa
-  chạm ngưỡng breaker; traffic vẫn chạy, dashboard hiển thị cảnh báo. Một bài kiểm tra
-  kết nối hợp lệ hoặc một cửa sổ yên tĩnh không có lỗi mới sẽ đưa nó về `CLOSED`
-  (`docs/architecture/RESILIENCE_GUIDE.md` có thông tin về cửa sổ này).
-- `OPEN`: provider tạm thời bị chặn; caller nhận phản hồi provider-circuit-open
-  hoặc định tuyến combo bỏ qua sang target khác.
-- `HALF_OPEN`: timeout reset đã trôi qua; cho phép một request thăm dò. Thành công thì
-  đóng breaker, thất bại thì mở lại.
+- `CLOSED`: cho phép lưu lượng truy cập bình thường.
+- `DEGRADED`: lỗi — của dải cảnh báo sớm đã vượt qua ngưỡng xuống cấp nhưng chưa đến ngưỡng ngắt; giao thông vẫn lưu thông, bảng điều khiển hiển thị cảnh báo. Kiểm tra kết nối hợp lệ hoặc một cửa sổ yên tĩnh không có lỗi mới sẽ trả về `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` có cửa sổ).
+- `OPEN`: nhà cung cấp tạm thời bị chặn; người gọi nhận được phản hồi mở mạch của nhà cung cấp hoặc chuyển hướng định tuyến kết hợp sang mục tiêu khác.
+- `HALF_OPEN`: hết thời gian thiết lập lại; cho phép yêu cầu thăm dò. Thành công đóng cầu dao lại, thất bại lại mở nó ra.
 
-**Mặc định** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, được sử dụng qua
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` trong `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` trong `src/sse/handlers/chatHelpers.ts`). Breaker cấp
-toàn provider chạy dựa trên `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Mặc định** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, được tiêu thụ qua `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` trong `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` trong `src/sse/handlers/chatHelpers.ts`). Bộ ngắt toàn bộ nhà cung cấp chạy trên `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profile | suy giảm tại | mở tại (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
-| ------- | -----------: | ---------------------------------: | ----------------------------: |
-| OAuth   |          `5` |                                `8` |                         `60s` |
-| API key |          `7` |                               `12` |                         `30s` |
-| Local   |     (suy ra) |                                `2` |                         `15s` |
+| Hồ sơ    | xuống cấp ở | mở tại (`circuitBreakerThreshold`) | đặt lại (`circuitBreakerReset`) |
+| -------- | ----------: | ---------------------------------: | ------------------------------: |
+| OAuth    |         `5` |                                `8` |                           `60s` |
+| phím API |         `7` |                               `12` |                           `30s` |
 
-`PROVIDER_PROFILES` cũng định nghĩa `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 phút) và `providerCooldownMs` (5/10/1 phút): chúng vận hành
-**cổng cửa sổ của tính năng Provider Cooldown toàn cục dạng opt-in** (`PROVIDER_COOLDOWN_ENABLED`, mặc định
-tắt) — một mục cấp provider trong `open-sse/services/providerCooldownTracker.ts` chỉ được tính
-là đang cooldown sau `providerFailureThreshold` lần lỗi trong `providerFailureWindowMs`, và sau đó
-cooldown trong `providerCooldownMs`. Chúng KHÔNG phải là ngưỡng của breaker đang hoạt động
-— đừng tinh chỉnh chúng với kỳ vọng thay đổi hành vi breaker. Mọi giá trị mặc định
-đều có thể ghi đè qua các biến môi trường
-`OMNIROUTE_PROVIDER_BREAKER_*` và `OMNIROUTE_CIRCUIT_BREAKER_*`; bảng
-tham khảo chính xác theo runtime nằm trong `docs/architecture/RESILIENCE_GUIDE.md`.
+Cấu hình `local` (`2` thất bại / `15s`) cũng tồn tại trong `PROVIDER_PROFILES`, nhưng nó không được kết nối với bộ ngắt: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) chỉ chấp nhận `oauth` hoặc `apikey` và `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) trả về một trong hai (nhà cung cấp chưa đăng ký nhận được `apikey`).
 
-Chỉ các trạng thái lỗi cấp provider mới được kích hoạt breaker của provider:
+`PROVIDER_PROFILES` cũng định nghĩa `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) và `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, trong đó các giá trị cục bộ trơ vì lý do tương tự như trên: những giá trị này cung cấp năng lượng cho** cổng cửa sổ của thời gian hồi chiêu Nhà cung cấp toàn cầu chọn tham gia** (`PROVIDER_COOLDOWN_ENABLED`, tắt mặc định) — một mục nhập cấp nhà cung cấp trong `open-sse/services/providerCooldownTracker.ts` chỉ được tính là làm mát sau khi `providerFailureThreshold` gặp lỗi bên trong `providerFailureWindowMs` và sau đó làm mát cho `providerCooldownMs`. Chúng là NOT ngưỡng của bộ ngắt trực tiếp — không điều chỉnh chúng theo hành vi của bộ ngắt trực tiếp. Mọi giá trị mặc định đều có thể được ghi đè thông qua các vars `OMNIROUTE_PROVIDER_BREAKER_*` và `OMNIROUTE_CIRCUIT_BREAKER_*` env; bảng tham chiếu chính xác về thời gian chạy nằm trong `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Chỉ các trạng thái lỗi ở cấp nhà cung cấp mới có thể ngắt bộ ngắt nhà cung cấp:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Không kích hoạt breaker cấp toàn provider cho các lỗi tài khoản/key/model thông thường
-như đa số trường hợp `401`, `403`, hoặc `429`. Những lỗi đó thường thuộc về
-connection cooldown hoặc model lockout. Một lỗi `403` của provider API key thông thường
-nên có thể phục hồi trừ khi nó được phân loại là lỗi provider/tài khoản dứt điểm.
+Không ngắt toàn bộ bộ ngắt của nhà cung cấp đối với các lỗi account/key/model thông thường như hầu hết các trường hợp `401`, `403` hoặc `429`. Chúng thường thuộc về thời gian hồi chiêu kết nối hoặc khóa mô hình. Nhà cung cấp khóa API chung `403` phải có thể phục hồi được trừ khi nó được phân loại là lỗi provider/account đầu cuối.
 
-Bộ ngắt mạch (breaker) sử dụng cơ chế khôi phục lười (lazy recovery), không dùng bộ đếm thời gian chạy nền. Khi trạng thái `OPEN` hết hạn, các lượt đọc như `getStatus()`, `canExecute()`, và `getRetryAfterMs()` sẽ làm mới trạng thái thành `HALF_OPEN`, nhờ đó các dashboard và trình xây dựng ứng viên combo không tiếp tục loại trừ vĩnh viễn một provider đã hết hạn.
+Bộ ngắt sử dụng tính năng phục hồi lười biếng, không phải bộ đếm thời gian nền. Khi `OPEN` hết hạn, các lần đọc như `getStatus()`, `canExecute()` và `getRetryAfterMs()` sẽ làm mới trạng thái thành `HALF_OPEN`, do đó, bảng điều khiển và trình tạo kết hợp ứng viên sẽ không tiếp tục loại trừ nhà cung cấp đã hết hạn mãi mãi.
 
-### Thời gian chờ kết nối (Connection Cooldown)
+### Thời gian hồi chiêu kết nối
 
-**Phạm vi**: một kết nối/tài khoản/khóa của provider.
+**Phạm vi** : một nhà cung cấp connection/account/key.
 
-**Mục đích**: tạm thời bỏ qua một khóa/tài khoản bị lỗi trong khi vẫn cho phép các kết nối khác của cùng provider tiếp tục phục vụ yêu cầu.
+**Mục đích** : tạm thời bỏ qua một key/account xấu trong khi cho phép các kết nối khác của cùng một nhà cung cấp tiếp tục phân phát yêu cầu.
 
-**Triển khai**:
+**Thực hiện** :
 
-- Đường ghi/cập nhật: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Lựa chọn/lọc tài khoản: `src/sse/services/auth.ts::getProviderCredentials...`
-- Tính toán thời gian chờ: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- đường dẫn Write/update : `src/sse/services/auth.ts::markAccountUnavailable()`
+- Tài khoản selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Tính toán thời gian hồi chiêu: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Cài đặt: `src/lib/resilience/settings.ts`
 
-Các trường quan trọng trên kết nối provider:
+Các trường quan trọng trên kết nối nhà cung cấp:
 
 ```ts
 rateLimitedUntil;
@@ -948,50 +933,50 @@ errorCode;
 backoffLevel;
 ```
 
-Trong quá trình lựa chọn tài khoản, một kết nối sẽ bị bỏ qua khi:
+Trong quá trình chọn tài khoản, kết nối bị bỏ qua trong khi:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Thời gian chờ cũng hoạt động theo cơ chế lười: khi `rateLimitedUntil` đã ở trong quá khứ, kết nối sẽ đủ điều kiện trở lại. Khi sử dụng thành công, `clearAccountError()` sẽ xóa `testStatus`, `rateLimitedUntil`, các trường lỗi, và `backoffLevel`.
+Thời gian hồi chiêu cũng rất lười: khi `rateLimitedUntil` ở trong quá khứ, kết nối sẽ đủ điều kiện trở lại. Khi sử dụng thành công, `clearAccountError()` sẽ xóa `testStatus`, `rateLimitedUntil`, các trường lỗi và `backoffLevel`.
 
-Hành vi mặc định của thời gian chờ kết nối:
+Hành vi hồi chiêu kết nối mặc định:
 
-- Thời gian chờ cơ bản của OAuth: `5s`.
-- Thời gian chờ cơ bản của API-key: `3s`.
-- Lỗi `429` của API-key nên ưu tiên các gợi ý thử lại từ phía upstream (`Retry-After`, các header reset, hoặc văn bản reset có thể phân tích được) khi có sẵn.
-- Các lỗi có thể khôi phục lặp lại sẽ dùng backoff lũy thừa:
+- Thời gian hồi chiêu cơ bản của OAuth : `5s`.
+- Thời gian hồi chiêu cơ sở của khóa API: `3s`.
+- Khóa API `429` nên ưu tiên gợi ý thử lại ngược dòng (`Retry-After`, đặt lại tiêu đề hoặc văn bản đặt lại có thể phân tích cú pháp) khi có sẵn.
+- Các lỗi có thể phục hồi lặp đi lặp lại sử dụng thời gian chờ theo cấp số nhân:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Cơ chế chống hiệu ứng bầy đàn (thundering herd) ngăn các lỗi đồng thời trên cùng một kết nối kéo dài thời gian chờ nhiều lần hoặc tăng `backoffLevel` hai lần.
+Bộ phận bảo vệ chống sấm sét ngăn chặn các lỗi đồng thời trên cùng một kết nối liên tục kéo dài thời gian hồi chiêu hoặc `backoffLevel` tăng gấp đôi.
 
-Các trạng thái cuối (terminal) không phải là thời gian chờ. `banned`, `expired` (chỉ trở thành terminal sau N lần thử lại có giới hạn thông qua `EXPIRED_RETRY_MAX`), và `credits_exhausted` được thiết kế để duy trì trạng thái không khả dụng cho đến khi thông tin xác thực/cài đặt thay đổi hoặc có người vận hành đặt lại chúng. Không ghi đè trạng thái terminal bằng trạng thái cooldown tạm thời.
+Trạng thái cuối không phải là thời gian hồi chiêu. `banned`, `expired` (chỉ trở thành thiết bị đầu cuối sau khi N lần thử lại giới hạn thông qua `EXPIRED_RETRY_MAX`) và `credits_exhausted` dự định sẽ không khả dụng cho đến khi credentials/settings thay đổi hoặc người vận hành đặt lại chúng. Không ghi đè trạng thái đầu cuối bằng trạng thái hồi chiêu tạm thời.
 
-### Khóa model (Model Lockout)
+### Khóa mẫu
 
-**Phạm vi**: provider + kết nối + model.
+**Phạm vi** : nhà cung cấp mô hình + kết nối +.
 
-**Mục đích**: tránh vô hiệu hóa toàn bộ một kết nối khi chỉ có một model không khả dụng hoặc bị giới hạn quota cho kết nối đó.
+**Mục đích** : tránh vô hiệu hóa toàn bộ kết nối khi chỉ có một kiểu máy không khả dụng hoặc bị giới hạn hạn ngạch cho kết nối đó.
 
 Ví dụ:
 
-- Các provider áp quota theo từng model trả về `429`.
-- Các provider cục bộ trả về `404` cho một model bị thiếu.
-- Các lỗi quyền theo chế độ/model riêng của provider, chẳng hạn như các chế độ Grok được chọn.
+- Nhà cung cấp hạn ngạch cho mỗi mô hình trả về `429`.
+- Các nhà cung cấp địa phương trả lại `404` cho một mô hình bị thiếu.
+- Lỗi cấp phép mode/model dành riêng cho nhà cung cấp, chẳng hạn như các chế độ Grok đã chọn.
 
-Khóa model nằm trong `open-sse/services/accountFallback.ts` và cho phép cùng một kết nối tiếp tục phục vụ các model khác.
+Khóa mô hình tồn tại trong `open-sse/services/accountFallback.ts` và cho phép kết nối tương tự tiếp tục phục vụ các mô hình khác.
 
 ### Hướng dẫn gỡ lỗi
 
-- Nếu tất cả các khóa của một provider đều bị bỏ qua, hãy kiểm tra cả trạng thái breaker của provider và `rateLimitedUntil`/`testStatus` của từng kết nối.
-- Nếu một provider có vẻ bị loại trừ vĩnh viễn sau cửa sổ reset, hãy kiểm tra xem mã nguồn có đang đọc `state` thô thay vì dùng `getStatus()`/`canExecute()` hay không.
-- Nếu một khóa của provider bị lỗi nhưng các khóa khác vẫn hoạt động, hãy ưu tiên dùng connection cooldown thay vì provider breaker.
-- Nếu chỉ một model bị lỗi, hãy ưu tiên dùng model lockout thay vì connection cooldown.
-- Nếu một trạng thái cần tự khôi phục, nó phải có một dấu thời gian trong tương lai/timeout reset và một đường đọc làm mới trạng thái đã hết hạn. Các trạng thái vĩnh viễn đòi hỏi thay đổi thủ công về thông tin xác thực hoặc cấu hình.
+- Nếu tất cả các khóa của một nhà cung cấp bị bỏ qua, hãy kiểm tra cả trạng thái ngắt của nhà cung cấp và `rateLimitedUntil`/`testStatus` của mỗi kết nối.
+- Nếu nhà cung cấp bị loại trừ vĩnh viễn sau khoảng thời gian đặt lại, hãy kiểm tra xem mã có đang đọc `state` thô thay vì sử dụng `getStatus()`/`canExecute()` hay không.
+- Nếu một khóa nhà cung cấp bị lỗi nhưng các khóa khác vẫn hoạt động, hãy ưu tiên thời gian chờ kết nối hơn là ngắt kết nối.
+- Nếu chỉ có một mô hình bị lỗi, hãy ưu tiên khóa mô hình hơn là thời gian chờ kết nối.
+- Nếu một trạng thái tự phục hồi thì trạng thái đó sẽ có thời gian chờ timestamp/reset trong tương lai và đường dẫn đọc làm mới trạng thái đã hết hạn. Trạng thái cố định yêu cầu thay đổi thông tin xác thực hoặc cấu hình thủ công.
 
 ---
 

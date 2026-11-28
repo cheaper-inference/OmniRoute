@@ -13,131 +13,66 @@
 
 ---
 
-## 1. 運作方式
+## 1. 運作原理
 
 ```
-伺服器（解密並驗證設定、協調游標）
-  → 啟動 IPC → 隔離的 exportChild 作業系統程序
-    → 唯讀 storage.sqlite → 共用的呼叫日誌查詢／對應
-      → 非同步構件載入 → 目的地 prepare()/send()
-        → 批次 IPC → 伺服器保存游標 → 確認 IPC
-          → 下一批次；完成 IPC → 伺服器記錄成功
+server (decrypt + validate config, reconcile cursor)
+  → start IPC → isolated exportChild OS process
+    → read-only storage.sqlite → shared call-log query/mapping
+      → async artifact hydration → destination prepare()/send()
+        → batch IPC → server persists cursor → ack IPC
+          → next batch; done IPC → server records success
 ```
 
-- **排程** — 一個 `JobRegistry` cron 工作，名稱為 `log_export`，預設為 `0 * * * *`（每小時，
-  UTC）。在 `src/lib/initCloudSync.ts` 中註冊；可透過 `OMNIROUTE_LOG_EXPORT_CRON` 覆寫。
-  每次觸發時，會依序處理每個**已啟用**目的地的待匯出資料。
-- **游標** — 使用 SQLite 隱含的 `call_logs.rowid`，並針對每個目的地保存在
-  `log_export_destinations.cursor_row_id` 中。刻意不使用 `timestamp` 作為游標：呼叫端
-  可能提供自己的值，因此較慢的請求可能在較晚開始但較快完成的請求之後才寫入，
-  而以時間戳記為游標便會略過它。
-- **批次處理** — 每個請求處理 `batch_size` 筆資料列（預設為 500），每次執行處理 `max_rows_per_run` 筆資料列
-  （預設為 10000），讓大量積壓資料能分散至多次觸發處理，而非阻塞單次執行。
-- **傳遞** — 只有在 `send()` 成功完成後，游標才會向前推進。批次失敗時，
-  游標會維持原位，因此下次執行時會重試相同的資料列。其保證為
-  至少一次傳遞加上目的地端去重，而非真正的恰好一次傳遞：BigQuery 使用呼叫日誌 ID 作為每個
-  資料列的索引鍵，並在自身的去重時間窗內盡力遵循此索引鍵。
-- **重疊防護** — cron 觸發與 `POST .../run` 可能同時發生。若某個目的地
-  已在處理待匯出資料，便會略過，而不會重複處理（執行結果中為 `skipped: true`），
-  因此並行執行不會重新傳送批次，也不會將游標寫回較早的位置。
-- **清除後復原** — 如果 `cursor_row_id` 最終高於 `MAX(rowid)`（整個資料表已
-  清除且 rowid 重新起算），執行器會將游標重設為 0，而非永久無法讀取新資料。
+- **行程**—一個`JobRegistry` cron 作業`log_export`，預設為`0 * * * *` （每小時， UTC）。已在`src/lib/initCloudSync.ts`註冊；可使用`OMNIROUTE_LOG_EXPORT_CRON`覆蓋。每一次蜱蟲都會耗盡**已啟用**目的地，依序。
+- **Cursor** — SQLite的隱式`call_logs.rowid`，在`log_export_destinations.cursor_row_id`中的每個目標上持續存在。 `timestamp`故意不是遊標：呼叫者可以提供自己的值，因此可以在稍後啟動的較快請求之後寫入較慢的請求，並且時間戳遊標會跳過它。
+- **食材**— `batch_size`每個請求行數（預設 500）， `max_rows_per_run`每次運行行數（預設 10000），因此大量積壓會在幾個週期內耗盡，而不是阻塞一個週期。
+- **送貨**—遊標僅在`send()`解析後前進。失敗的批次處理會將遊標留在原來的位置，因此在下次運行時會重試相同的行。保證是至少一次加上目標端重複資料刪除，而不是真正的精確一次： BigQuery透過呼叫日誌 ID 來對每一行進行鍵控，它在自己的重複資料刪除視窗中盡最大努力遵守該 ID。
+- **重疊防護**— cron tick 和`POST .../run`可以一起觸發。已耗盡的目標將被跳過，而不是耗盡兩次（運行結果中的`skipped: true` ），因此並發運行無法重新發送批次或向後寫入遊標。
+- **吹掃恢復**—如果`cursor_row_id`最終高於`MAX(rowid)` （整個表被清除並且 rowids 重新啟動），則跑步者將倒回到 0 而不是永久失明。
 
-### 隔離執行器與限制
+### 孤立的跑步者和限制
 
-在 Node 上，每個目的地的執行都會啟動一個獨立、短暫存續的作業系統子程序（使用具備 IPC 的 `child_process`，
-而非 `worker_threads`）。主體讀取、負載 JSON 解析／序列化、目的地
-`prepare()` 與目的地網路 I/O 都在其中執行，而非在伺服器的事件迴圈上執行。
-只有設定與小型進度訊息會透過 IPC 傳遞；匯出的記錄絕不會回傳至
-伺服器。cron 工作與「立即執行」路由維持相同的公開結果與重疊防護。
+Every destination run on Node starts a separate, short-lived OS child process (`child_process` with IPC, not `worker_threads`). Body reads, payload JSON parsing/serialization, destination `prepare()` and destination network I/O all run there, not on the server's event loop. Only configuration and small progress messages cross IPC; exported records never return to the server. The cron job and Run now route keep the same public result and overlap guard.
 
-子程序會使用 `node:sqlite`，以唯讀方式開啟伺服器解析出的 `DATA_DIR/storage.sqlite`，
-並設定 `busy_timeout=5000` 與 `query_only=ON`。它不會匯入任何資料庫單例，也不會執行
-遷移、備份或 SQLite 更新。遺失／損毀構件的簿記處理（包括
-損毀構件的 UPDATE）仍僅限於儀表板詳細資料路徑。兩條路徑共用一個純函式
-詳細資料解析器；匯出使用非同步檔案系統讀取，並採用相同的構件 → 舊版
-內嵌 → 舊版磁碟 → 無的解析順序。子程序開啟讀取器時，每次執行會擷取當下最大插入 rowid
-的快照；之後插入的資料會等到下次執行才處理。這是插入
-邊界，而非長時間存續的 SQLite 交易：在等待網路期間，WAL 寫入器與檢查點仍可自由運作。
-此邊界不會凍結現有資料列的更新／刪除。
+子进程使用`node:sqlite`、 `busy_timeout=5000`和`query_only=ON`以只读方式打开服务器解析的`DATA_DIR/storage.sqlite` 。它不导入DB单例，也不执行迁移、备份或SQLite更新。 Missing/corrupt工件簿記（包括損壞的工件UPDATE）僅保留在儀表板詳細資料路徑中。兩條路徑共享一個純細節解析器；導出使用非同步檔案系統讀取和相同的工件→傳統內聯→傳統磁碟→無解析順序。当子进程打开其读取器时，运行会快照最大插入 rowid；稍后插入等待下一次运行。这是一个插入边界，而不是一个长期存在的SQLite事务： WAL编写器和检查点在网络等待期间保持空闲。現有行的Updates/deletions不會被此邊界凍結。
 
-每個批次獲接受後，子程序會等待確認。伺服器會先透過 `advanceLogExportCursor`
-保存游標，接著傳送 `ack`；在此之前不會開始下一個批次。
-傳送失敗、當機或逾時時，會記錄失敗，且不會推進該批次的游標。先前
-已確認的批次仍維持提交狀態；最多只有那一個尚未確認的批次可能重新傳送。
-只有收到 `done` 且子程序正常結束後，才會記錄成功。發生失敗時，會使用 SIGTERM 終止子程序，
-並在 500 ms 後升級為 SIGKILL，執行器則會等待程序關閉。
+在每個接受的批次之後，孩子都會等待確認。伺服器首先使用`advanceLogExportCursor`持久化遊標，然後發送`ack`；在此之前沒有下一批開始。傳送失敗、崩潰或逾時會記錄失敗，但不會推進該批次。先前確認的批次保持承諾狀態；最多可以重新發送一個未確認的批次。只有在`done`和乾淨的子退出之後才會記錄成功。失敗會透過SIGTERM終止子進程，並在 500 毫秒後升級為SIGKILL ，並且執行程式等待進程關閉。
 
-| 環境變數                                      | 預設值 | 用途                                |
-| --------------------------------------------- | ------ | ----------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | 每個目的地的實際經過時間上限        |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | 子程序 V8 老生代空間上限，單位為 MB |
+| 環境變數                                      | 預設   | 目的                 |
+| --------------------------------------------- | ------ | -------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | 每個目的地的掛鐘限制 |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | MB中子 V8 舊空間限制 |
 
-無效、非正數或非整數的值會使用預設值。堆積設定並非總
-RSS 上限；非常大的批次仍可能耗盡子程序記憶體，並使執行安全地失敗。
-1024 MB 的預設值為啟用主體、使用 512 KiB 構件的預設 500 筆資料列批次
-保留了餘裕，其中包含 BigQuery 依位元組分塊的 JSON 序列化所需空間。這並不代表
-含有主體的 10000 筆資料列批次就能安全執行。V8 堆積耗盡時會記錄可採取行動的失敗資訊：降低批次
-大小或提高 `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`；游標會停留在最後一個
-已確認的批次。歷史內嵌／磁碟主體不受現代構件大小上限約束。
-操作人員必須另外規劃 RSS 預算，尤其是在記憶體受限的容器內。
+Invalid/non-positive/non-integer值使用預設值。堆設定不是總RSS限制；非常大的批次仍然會耗盡子記憶體並使運行安全失敗。 1024 MB預設值為啟用主體的預設 500 行批次 512 KiB工件留出了空間，包括BigQuery的位元組分塊JSON序列化。它並不能使 10000 行主體批次安全。 V8 堆耗盡記錄了一個可操作的故障：降低批量大小或提高`OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`；遊標停留在最後確認的批次上。歷史上的inline/disk屍體並沒有被現代神器上限所覆蓋。操作員必須單獨預算RSS ，尤其是在記憶體有限的容器內。
 
-子程序僅繼承解析後的 `DATA_DIR`、`NODE_ENV`、明確設定的 `TZ`（用於舊版檔名的
-本地時間解析）、存在時的 `ELECTRON_RUN_AS_NODE`，以及下列對外連線輸入：
-`HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`、`NO_PROXY`（及其小寫形式）、
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`、`NODE_EXTRA_CA_CERTS`、`SSL_CERT_FILE`、`SSL_CERT_DIR`。
-全域 Undici dispatcher 與伺服器共用僅依環境變數進行的代理解析及本機主機
-略過規則，包括 `NO_PROXY`；它不會匯入 `proxyFetch.ts` 或其資料庫／功能旗標。
-代理認證資訊會從轉送的輸出與記錄的錯誤中遮蔽。目的地認證資訊
-僅透過一則啟動 IPC 訊息傳遞，絕不透過 argv 或環境變數傳遞；轉送的輸出／錯誤會
-加上前綴並經過清理。子程序的執行引數僅停用 `ExperimentalWarning`，以免
-每次 cron 執行都重複顯示 Node 的 SQLite 警告；其他類型的警告仍會顯示。
+The child inherits only the resolved `DATA_DIR`, `NODE_ENV`, explicit `TZ` (legacy filename local-time resolution), `ELECTRON_RUN_AS_NODE` when present, and the following outbound inputs: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (and their lowercase forms), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. A global Undici dispatcher shares the server's pure environment-proxy resolution and local-host bypass rules, including `NO_PROXY`; it does not import `proxyFetch.ts` or its DB/feature flags. Proxy credentials are redacted from forwarded output and recorded errors. Destination credentials travel only in one start IPC message, never argv or environment; output/error forwarding is prefixed and sanitized. Only `ExperimentalWarning` is disabled in child exec arguments to avoid repeating Node's SQLite warning each cron run; other warning types remain visible.
 
-目的地模組必須能在不依賴 Next.js／僅限伺服器端相依套件的情況下匯入。現有的
-BigQuery 實作已符合此契約。存取權杖快取僅在該次子程序
-執行期間有效，不會跨次執行保留。Node 是受支援的執行階段（`package.json` engines），但 README 的 Bun
-安裝章節與 `Dockerfile.bun` 也宣告提供使用
-`bun:sqlite`（`src/lib/db/core.ts`／介接器）的正式環境相容途徑。因此，在 Bun 下，匯出作業會保留先前的
-處理程序內執行途徑，並發出一次性警告：無法使用子程序堆積記憶體／逾時隔離。請使用
-Node 以獲得事件迴圈與 OOM 隔離；此處並未將 Bun 視為僅供開發使用。
+目標模組必須可匯入而無需Next.js/server-only相依性。現有的BigQuery實作已經滿足該合約。存取令牌快取僅適用於子運行，而不適用於跨運行。 Node 是受支援的執行時間（`package.json`引擎）。存在盡力而為、不受支援的Bun相容性路徑（ `src/lib/db/core.ts` / 適配器中的`bun:sqlite`和`Dockerfile.bun`），因此導出不得在其下中斷。在Bun下，匯出保留先前的進程內路徑並發出一次性警告：子heap/timeout隔離不可用。使用 Node 進行事件循環和OOM隔離。
 
-啟用 `includeBodies` 時，建議採用分鐘級排程，例如
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`，而非累積每小時的酬載待處理量。
-每次執行仍受批次與資料列限制約束。每個目的地的每次執行都會產生處理程序啟動成本；
-這是以少量啟動成本換取伺服器事件迴圈隔離，而非降低總 CPU 使用量。
+啟用`includeBodies`時，喜歡像`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`這樣的分鐘節奏，而不是累積每小時的有效負載積壓。批次和行數限制仍然限制每次運行。流程啟動按每次運行的目的地付費；這會以少量的啟動成本換取伺服器事件循環隔離，但不會減少CPU總使用量。
 
-### 酬載（提示與補全）
+### 有效負載（提示和完成）
 
-預設情況下，匯出僅包含記錄**清單**所顯示的摘要欄位。啟用
-**匯出提示與回應**（`includeBodies`）後，還會傳送記錄**詳細資料**
-窗格中每次呼叫所顯示的內容：
+預設情況下，匯出僅包含日誌中的總計字段**清單**顯示。正在開啟**匯出提示和回應**(`includeBodies`) 也提供了日誌**細節**每個呼叫的窗格顯示：
 
-| 欄位                             | 內容                                      |
-| -------------------------------- | ----------------------------------------- |
-| `request_body` / `response_body` | 儀表板呈現的呼叫酬載                      |
-| `pipeline_route_decision`        | 路由器選擇的目標與模型                    |
-| `pipeline_client_request`        | 與用戶端傳送內容完全相同的原始請求        |
-| `pipeline_openai_request`        | 轉換為內部 OpenAI 格式後的請求            |
-| `pipeline_provider_request`      | 實際傳送至上游、採用提供者格式的請求      |
-| `pipeline_provider_response`     | 原始上游回應                              |
-| `pipeline_client_response`       | 傳回給呼叫端的內容                        |
-| `pipeline_error`                 | 呼叫失敗時的管線層級錯誤詳細資訊          |
-| `bodies_truncated`               | 上述任一欄位達到 `maxBodyBytes` 時為 True |
+| 場地                             | 它包含什麼                                   |
+| -------------------------------- | -------------------------------------------- |
+| `request_body` / `response_body` | 儀表板呈現時的呼叫有效負載                   |
+| `pipeline_route_decision`        | 路由器選擇了哪個目標和型號                   |
+| `pipeline_client_request`        | 與客戶端發送的原始請求完全相同               |
+| `pipeline_openai_request`        | 翻譯成內部OpenAI形狀後                       |
+| `pipeline_provider_request`      | 正如實際發送到上游的那樣，以提供者方言的形式 |
+| `pipeline_provider_response`     | 原始上游回應                                 |
+| `pipeline_client_response`       | 返還給呼叫者的內容是什麼                     |
+| `pipeline_error`                 | 失敗呼叫的管道級錯誤詳細信息                 |
+| `bodies_truncated`               | 當上面的任何字段命中`maxBodyBytes`時為真     |
 
-這些屬於提示內容，因此**預設關閉**，並刻意設計為依目的地個別選擇。
-傳送的內容就是儀表板顯示的內容，因為匯出與 `getCallLogById` 共用詳細資料
-解析邏輯：酬載在
-寫入時就已完成個人識別資訊（PII）清理與機密資訊遮蔽，而使用
-`noLog` API 金鑰進行的呼叫完全不會儲存酬載，因此沒有可匯出的內容。
+這是提示內容，所以是**預設關閉**並刻意根據目的地進行選擇。所發送的是儀表板顯示的內容，因為導出和`getCallLogById`共享詳細解析：有效負載在寫入時已經經過 PII 清理和秘密編輯，並且使用`noLog` API密鑰進行的呼叫根本不存儲任何有效負載，因此沒有任何內容可以導出。
 
-酬載會逐列從檔案系統產物讀取，因此只有要求包含酬載的目的地
-才會執行資料填入。若產物遺失或損毀，仍會匯出摘要，但酬載為 null，而不會
-導致整個批次失敗並使游標停滯。
+有效負載是從檔案系統工件中按行讀取的，因此水合僅針對需要它的目的地運行。遺失或損壞的工件會以空負載匯出其摘要，而不是使批次失敗並擱淺遊標。
 
-`maxBodyBytes`（預設為 262144）限制每個欄位的大小。較長的酬載會**截斷而非
-捨棄** — 經截斷的提示仍可回答「提出了什麼要求」— 且該資料列會以
-`bodies_truncated` 標記。不會匯出串流逐區塊的增量資料；組合後的回應
-已包含在 `pipeline_provider_response` 與 `pipeline_client_response` 中。
+`maxBodyBytes` （預設 262144）限制每個欄位。更長的有效載荷是**被截斷而不是被丟棄**—被剪輯的提示仍然回答「所問的內容」 —並且該行被標記為`bodies_truncated`。串流傳輸的逐塊增量不會導出；組裝的回應已在`pipeline_provider_response`和`pipeline_client_response`中。
 
 ---
 

@@ -42,23 +42,23 @@ flowchart LR
 `main`, günlük entegrasyon dalı değildir. `main` hedef alınarak açılan PR'ların
 genellikle birleştirilmeden önce başka bir dalı hedefleyecek şekilde değiştirilmesi gerekir.
 
-## Dondurmayı serbest bırakma (paralel döngüler)
+## Dondurmayı serbest bırak (paralel döngüler)
 
 Bir yayın mutabakatı yapılırken `release-freeze` etiketli bir işaretleyici sorunu açılır. O** gelişimi durdurmaz** :
 
-- Dondurulan `release/vX.Y.Z` o geminin tahliye kaptanına ait.
+- Dondurulmuş `release/vX.Y.Z` o geminin tahliye kaptanına ait.
 - Bir sonraki döngünün `release/vX+1` donmuş uçtan kesilir, böylece katkıda bulunanlar iniş çalışmalarına devam eder.
 - Hala donmuş dalı hedef alan açık PRs olmalıdır** yeniden hedeflenmiş** aktif (en yüksek) `release/v*` dalına.
 
 İstediğiniz dalın birleştirilebilir olduğunu varsaymadan önce açık donma olup olmadığını kontrol edin:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Birleştirme mekaniği ( `queue` etiketi → Mergify'ın sahibi) [MERGE_TRAIN.md](./MERGE_TRAIN.md) dosyasında belgelenmiştir.
 
-> **2026-11-19: Birleştirme birleştirme sırası kullanımdan kaldırıldı** (sahibin kararı). `.mergify.yml` artık bir kuyruk tanımlamıyor ve bir çekme isteğini birleştiren veya yeniden yazan Birleştir komutlarını reddediyor. PRs sürümü, omni-queue canlı modda çalışana kadar ve bundan sonra omni-queue aracılığıyla ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) "Aktif sürümde yeşil kapılar gerektir" (`Gate / CI` + `Gate / Quality`) depo kural seti altında elle birleştirilir. `queue` etiketi artık hiçbir şeyi birleştirmemektedir.
+> **2026-11-19: Birleştirme birleştirme sırası kullanımdan kaldırıldı** (sahibin kararı). `.mergify.yml` artık bir kuyruk tanımlamıyor ve bir çekme isteğini birleştiren veya yeniden yazan Birleştir komutlarını reddediyor. PRs sürümü, omni-queue canlı modda çalışana kadar ve bundan sonra omni-queue aracılığıyla ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) "Aktif sürümde yeşil kapılar gerektir" (`Gate / CI` + `Gate / Quality`) depo kural seti altında elle birleştirilir. `queue` etiketi artık hiçbir şeyi birleştirmiyor.
 
 ## Neden hem dal hem de etiket var?
 

@@ -49,7 +49,7 @@ OpenAI-সামঞ্জস্যপূর্ণ প্রোটোকল এ�
 
 ---
 
-## চ্যাট কমপ্লিশন
+## চ্যাট সমাপ্তি
 
 ```bash
 POST /v1/chat/completions
@@ -67,31 +67,32 @@ Content-Type: application/json
 
 ### কাস্টম হেডার
 
-| Header                   | Direction    | Description                                                                                                                                                                                                       |
-| ------------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | অনুরোধ       | ক্যাশে এড়িয়ে যেতে `true` সেট করুন                                                                                                                                                                               |
-| `x-omniroute-no-memory`  | অনুরোধ       | এই অনুরোধের জন্য মেমরি + স্কিল ইনজেকশন এড়িয়ে যেতে `true` সেট করুন (no-cache-এর অনুরূপ; প্রতি-কল টোকেন/খরচের ওভারহেড এড়ায়)                                                                                     |
-| `X-OmniRoute-Progress`   | অনুরোধ       | অগ্রগতি ইভেন্টের জন্য `true` সেট করুন                                                                                                                                                                             |
-| `X-Session-Id`           | অনুরোধ       | বাহ্যিক সেশন অ্যাফিনিটির জন্য স্টিকি সেশন কী                                                                                                                                                                      |
-| `x_session_id`           | অনুরোধ       | আন্ডারস্কোর ভ্যারিয়েন্টও গ্রহণযোগ্য (সরাসরি HTTP)                                                                                                                                                                |
-| `X-OmniRoute-Session-Id` | অনুরোধ       | কলার-প্রদত্ত সেশন/কনভারসেশন ট্যাগ (মেমরিতেও পাঠানো হয়)। উপস্থিত থাকলে, প্রতি-সেশন খরচ অ্যাট্রিবিউশনের জন্য `call_logs.session_tag`-এ অপরিবর্তিতভাবে সংরক্ষিত হয় (#8249) — অনুপস্থিত থাকলে কখনও সংশ্লেষিত হয় না |
-| `Idempotency-Key`        | অনুরোধ       | ডিডুপ কী (৫ সেকেন্ডের উইন্ডো)                                                                                                                                                                                     |
-| `X-Request-Id`           | অনুরোধ       | বিকল্প ডিডুপ কী                                                                                                                                                                                                   |
-| `x-omniroute-connection` | অনুরোধ       | একটি সিঙ্গেল-মডেল অনুরোধকে একটি নির্দিষ্ট প্রোভাইডার কানেকশনে (অ্যাকাউন্টে) এর আইডি ব্যবহার করে পিন করুন — দেখুন [প্রতি অনুরোধে অ্যাকাউন্ট পিন করা](#account-pinning-per-request)                                 |
-| `X-OmniRoute-Cache`      | প্রতিক্রিয়া | `HIT` অথবা `MISS` (নন-স্ট্রিমিং)                                                                                                                                                                                  |
-| `X-OmniRoute-Idempotent` | প্রতিক্রিয়া | ডিডুপ্লিকেট করা হলে `true`                                                                                                                                                                                        |
-| `X-OmniRoute-Progress`   | প্রতিক্রিয়া | অগ্রগতি ট্র্যাকিং চালু থাকলে `enabled`                                                                                                                                                                            |
-| `X-OmniRoute-Session-Id` | প্রতিক্রিয়া | OmniRoute ব্যবহার করা কার্যকর সেশন আইডি                                                                                                                                                                           |
-| `X-OmniRoute-Request-Id` | প্রতিক্রিয়া | অনুরোধের কোরিলেশন আইডি (যখন জানা থাকে)                                                                                                                                                                            |
-| `X-OmniRoute-Version`    | প্রতিক্রিয়া | OmniRoute বিল্ড ভার্সন (সর্বদা উপস্থিত)                                                                                                                                                                           |
-| `X-OmniRoute-Cost-Saved` | প্রতিক্রিয়া | একটি HIT-এ ক্যাশে যে USD খরচ এড়ানো হয়েছে (শুধু ক্যাশে হিটের ক্ষেত্রে)                                                                                                                                           |
-| `X-OmniRoute-Decision`   | প্রতিক্রিয়া | রাউটিং ট্রেস: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` হলো কম্বো স্ট্র্যাটেজি, অথবা নন-কম্বো অনুরোধের জন্য `single`) — সম্পূর্ণ হওয়া প্রতিক্রিয়ায় সর্বদা উপস্থিত                          |
+| হেডার                    | দিকনির্দেশনা | বর্ণনা                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | অনুরোধ       | ক্যাশে বাইপাস করতে `true` এ সেট করুন                                                                                                                                                                                                                                                                                                                          |
+| `x-omniroute-no-memory`  | অনুরোধ       | এই অনুরোধের জন্য মেমরি + দক্ষতা ইনজেকশন এড়িয়ে যেতে `true` এ সেট করুন (মিরর নো-ক্যাশে; প্রতি-কল token/cost ওভারহেড এড়িয়ে যায়)                                                                                                                                                                                                                             |
+| `x-omniroute-no-log`     | অনুরোধ       | এই অনুমান অনুরোধের জন্য কল লগ থেকে request/response পেলোডগুলি বাদ দিতে `true` তে সেট করুন (সমস্ত চ্যাট-ফ্যামিলি রুট: চ্যাট সমাপ্তি, প্রতিক্রিয়া, বার্তা, সমাপ্তি, Gemini)। টাইমস্ট্যাম্প, মডেল, স্থিতি, সময়কাল এবং টোকেন গণনা এখনও রেকর্ড করা হয়। সম্পূর্ণ বিষয়বস্তু অপ্ট-আউটের জন্য `x-omniroute-no-memory` এবং `x-omniroute-no-cache` সাথে একত্রিত করুন |
+| `X-OmniRoute-Progress`   | অনুরোধ       | অগ্রগতি ইভেন্টের জন্য `true` সেট করুন                                                                                                                                                                                                                                                                                                                         |
+| `X-Session-Id`           | অনুরোধ       | বাহ্যিক সেশন অ্যাফিনিটির জন্য স্টিকি সেশন কী                                                                                                                                                                                                                                                                                                                  |
+| `x_session_id`           | অনুরোধ       | আন্ডারস্কোর ভেরিয়েন্টও গৃহীত হয়েছে (সরাসরি HTTP)                                                                                                                                                                                                                                                                                                            |
+| `X-OmniRoute-Session-Id` | অনুরোধ       | কলার সরবরাহ করা session/conversation ট্যাগ (এছাড়াও মেমরি ফিড করে)। উপস্থিত থাকাকালীন, প্রতি-সেশন খরচ অ্যাট্রিবিউশন (#8249) `call_logs.session_tag` অনুপস্থিত থাকাকালীন সংশ্লেষিত — না।                                                                                                                                                                       |
+| `Idempotency-Key`        | অনুরোধ       | Dedup কী (5s উইন্ডো)                                                                                                                                                                                                                                                                                                                                          |
+| `X-Request-Id`           | অনুরোধ       | বিকল্প ডিডআপ কী                                                                                                                                                                                                                                                                                                                                               |
+| `x-omniroute-connection` | অনুরোধ       | একটি প্রদানকারী সংযোগে (অ্যাকাউন্ট) একটি একক-মডেল অনুরোধ পিন করুন তার আইডি — দ্বারা [প্রতি অনুরোধে অ্যাকাউন্ট পিন করা](#account-pinning-per-request) দেখুন                                                                                                                                                                                                    |
+| `X-OmniRoute-Cache`      | প্রতিক্রিয়া | `HIT` বা `MISS` (নন-স্ট্রিমিং)                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Idempotent` | প্রতিক্রিয়া | `true` যদি অনুলিপি করা হয়                                                                                                                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Progress`   | প্রতিক্রিয়া | `enabled` যদি অগ্রগতি ট্র্যাকিং চালু থাকে                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Session-Id` | প্রতিক্রিয়া | OmniRoute দ্বারা ব্যবহৃত কার্যকরী সেশন ID                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Request-Id` | প্রতিক্রিয়া | রিকোয়েস্ট কোরিলেশন আইডি (যখন জানা যায়)                                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Version`    | প্রতিক্রিয়া | OmniRoute বিল্ড সংস্করণ (সর্বদা উপস্থিত)                                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Cost-Saved` | প্রতিক্রিয়া | USD ক্যাশে একটি HIT এ এড়িয়ে যাওয়া (শুধুমাত্র ক্যাশে হিট)                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Decision`   | প্রতিক্রিয়া | রাউটিং ট্রেস: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` হল কম্বো কৌশল, বা একটি নন-কম্বো অনুরোধের জন্য `single` ) — সর্বদা সমাপ্তির প্রতিক্রিয়াগুলিতে উপস্থিত থাকে                                                                                                                                                                        |
 
-> Nginx নোট: আপনি যদি আন্ডারস্কোরযুক্ত হেডার ব্যবহার করেন (উদাহরণস্বরূপ `x_session_id`), তাহলে `underscores_in_headers on;` সক্রিয় করুন।
+> Nginx নোট: আপনি যদি আন্ডারস্কোর হেডারের উপর নির্ভর করেন (উদাহরণস্বরূপ `x_session_id`), `underscores_in_headers on;` সক্ষম করুন।
 
-#### প্রতি অনুরোধে অ্যাকাউন্ট পিন করা
+#### অনুরোধ প্রতি অ্যাকাউন্ট পিনিং
 
-যখন কোনো প্রোভাইডারের একাধিক কানেকশন (অ্যাকাউন্ট বা কী) থাকে, তখন OmniRoute সাধারণত তার অ্যাকাউন্ট-নির্বাচন কৌশলের মাধ্যমে একটি নির্বাচন করে। একটি অনুরোধের ক্ষেত্রে এর পরিবর্তে `x-omniroute-connection` হেডার ব্যবহার করে একটি নির্দিষ্ট কানেকশন পিন করা যায়:
+যখন একটি প্রদানকারীর একাধিক সংযোগ থাকে (অ্যাকাউন্ট বা কী), OmniRoute সাধারণত তার অ্যাকাউন্ট-নির্বাচন কৌশলের মাধ্যমে একটি বাছাই করে। একটি অনুরোধ পরিবর্তে `x-omniroute-connection` হেডারের সাথে একটি নির্দিষ্ট সংযোগ পিন করতে পারে:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -101,25 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **আইডিটি কোথায় পাবেন।** ড্যাশবোর্ডে প্রোভাইডার পেজ খুলুন
-  (**Dashboard → Providers → <provider>**) এবং একটি কানেকশন
-  সারির `xxxxxxxx…` আইডি চিপে ক্লিক করুন — এতে সম্পূর্ণ কানেকশন আইডি কপি হবে।
-- **কোন অনুরোধগুলো এটি মানে।** `/v1/chat/completions`, `/v1/messages` এবং `/v1/responses`-এ
-  সিঙ্গেল-মডেল অনুরোধ (`provider/model`)। কম্বোগুলো এই হেডার উপেক্ষা করে: প্রতিটি কম্বো
-  ধাপের নিজস্ব কানেকশনের মাধ্যমে সেই ধাপের জন্য একটি অ্যাকাউন্ট পিন করুন।
-- **পিনটি কঠোর, কোনো পছন্দ নয়।** পিন করা কানেকশনটি একচেটিয়াভাবে ব্যবহৃত হয়। অনুরোধের
-  ভেতরে কোনো ব্যর্থতা ঘটলে অ্যাকাউন্টটির কুলডাউন রেকর্ড হয়, তবে একই প্রোভাইডারের
-  অন্য কোনো সহোদর অ্যাকাউন্টে রোটেট করা হয় না।
-- **কুলডাউন ও কোটা পিনটি ছেড়ে দেয়।** পিন করা কানেকশনটি কুলডাউনে থাকা অবস্থায়,
-  কোটা শেষ হয়ে গেলে বা কোটা নীতির কারণে ব্লক হলে, পরবর্তী অনুরোধগুলো প্রোভাইডারের
-  অন্যান্য কানেকশনে ফলব্যাক করে, ঠিক আনপিন করা ট্র্যাফিকের মতো।
-- **অজানা বা নিষ্ক্রিয় আইডি ব্যর্থ হয়।** কোনো আইডি প্রোভাইডারের সক্রিয় পুলে না থাকলে
-  (মুছে ফেলা, নিষ্ক্রিয় করা, অথবা অন্য কোনো প্রোভাইডারের অন্তর্ভুক্ত হলে) কোনো যোগ্য
-  অ্যাকাউন্ট থাকে না, তাই অনুরোধটি ব্যর্থ হয় এবং নীরবে অন্য কোথাও রাউট করা হয় না।
+- **আইডি কোথায় পাবেন।** ড্যাশবোর্ডে প্রদানকারী পৃষ্ঠা খুলুন (** ড্যাশবোর্ড → প্রদানকারী → <provider>** ) এবং একটি সংযোগ সারিতে `xxxxxxxx…` আইডি চিপে ক্লিক করুন — এটি সম্পূর্ণ সংযোগ আইডি অনুলিপি করে।
+- **যা অনুরোধ এটি সম্মান.** `/v1/chat/completions`, `/v1/messages` এবং `/v1/responses` এ একক-মডেল অনুরোধ (`provider/model`)। কম্বোস হেডারকে উপেক্ষা করে: পরিবর্তে ধাপের নিজস্ব সংযোগের মাধ্যমে প্রতি কম্বো ধাপে একটি অ্যাকাউন্ট পিন করুন।
+- **পিনটি কঠোর, পছন্দ নয়।** পিন করা সংযোগ একচেটিয়াভাবে ব্যবহৃত হয়। অনুরোধের ভিতরে একটি ব্যর্থতা অ্যাকাউন্টের কুলডাউন রেকর্ড করে কিন্তু করে** না** একই প্রদানকারীর ভাইবোন অ্যাকাউন্টে ঘোরান।
+- **কুলডাউন এবং কোটা পিন মুক্তি.** যখন পিন করা সংযোগটি শীতল হচ্ছে, কোটা-নিঃশেষিত বা একটি কোটা নীতি দ্বারা অবরুদ্ধ, পরে অনুরোধগুলি প্রদানকারীর অন্যান্য সংযোগগুলিতে ফিরে আসে, ঠিক আনপিন করা ট্র্যাফিকের মতো।
+- **অজানা বা অক্ষম আইডি ব্যর্থ.** একটি আইডি যেটি প্রদানকারীর সক্রিয় পুলে নেই (মুছে ফেলা, নিষ্ক্রিয় করা বা অন্য প্রদানকারীর অন্তর্গত) কোনো যোগ্য অ্যাকাউন্ট ছেড়ে যায় না, তাই অনুরোধটি অন্য কোথাও নীরবে রুট করার পরিবর্তে ব্যর্থ হয়।
 
-Claude Code `ANTHROPIC_CUSTOM_HEADERS`-এর মাধ্যমে কাস্টম হেডার পাঠায়। এটি `env` ব্লকে
-`~/.claude/settings.json`-এ রাখুন, অথবা প্রতি প্রজেক্টে আলাদা অ্যাকাউন্ট পিন করতে
-প্রজেক্ট-লেভেলের `.claude/settings.json`-এ রাখুন:
+Claude কোড `ANTHROPIC_CUSTOM_HEADERS` এর মাধ্যমে কাস্টম হেডার পাঠায়। এটিকে `~/.claude/settings.json` এর `env` ব্লকে রাখুন, অথবা প্রকল্প-স্তরের `.claude/settings.json` এ প্রতি প্রকল্পে একটি ভিন্ন অ্যাকাউন্ট পিন করুন:
 
 ```jsonc
 {
@@ -131,12 +120,11 @@ Claude Code `ANTHROPIC_CUSTOM_HEADERS`-এর মাধ্যমে কাস্
 }
 ```
 
-উৎস: `src/sse/handlers/chat.ts` (হেডার পড়া), `src/sse/services/auth.ts` এবং
-`src/sse/services/sessionAffinityPin.ts` (পিন ছেড়ে দেওয়া এবং পুলে অনুপস্থিতির যাচাই)।
+উৎস: `src/sse/handlers/chat.ts` (হেডার রিড), `src/sse/services/auth.ts` এবং `src/sse/services/sessionAffinityPin.ts` (পিন রিলিজ এবং পুল থেকে অনুপস্থিত চেক)।
 
-> **খরচ টেলিমেট্রি হেডার:** নন-স্ট্রিমিং সফল প্রতিক্রিয়াগুলোতেও `X-OmniRoute-*` খরচ-টেলিমেট্রি সেট থাকে — `X-OmniRoute-Response-Cost` (USD, নির্দিষ্ট 10 দশমিক ঘর; বিনামূল্যের/মূল্য-নির্ধারিত নয় এমন ক্ষেত্রে `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, এবং `X-OmniRoute-Fallback-Attempts` (শুধুমাত্র > 0 হলে), পাশাপাশি `X-OmniRoute-Request-Id` এবং `X-OmniRoute-Version`। এগুলো chat completions, `/v1/responses`, `/v1/messages`, **এবং মিডিয়া এন্ডপয়েন্টগুলোতে** নির্গত হয় — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, এবং `/v1/moderations` (সর্বদা খরচ `0`)। মূল্য নির্ধারণ উপলভ্য থাকলে মিডিয়ার খরচ প্রতি মোডালিটি অনুযায়ী (প্রতি-ছবি, প্রতি-সেকেন্ড, প্রতি-অক্ষর, প্রতি সার্চ-ইউনিট) গণনা করা হয়; অন্যথায় `0` (fail-open)।
+> **খরচ টেলিমেট্রি হেডার:** নন-স্ট্রিমিং সাফল্যের প্রতিক্রিয়াগুলিও `X-OmniRoute-*` খরচ-টেলিমেট্রি সেট — `X-OmniRoute-Response-Cost` (USD, স্থির 10 দশমিক; `0.0000000000` এর জন্য free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, এবং `X-OmniRoute-Fallback-Attempts` ( > ) এবং `X-OmniRoute-Version` প্লাস `X-OmniRoute-Request-Id` এগুলি চ্যাট সমাপ্তির দ্বারা নির্গত হয়, `/v1/responses`, `/v1/messages`,** এবং মিডিয়া শেষ পয়েন্ট** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, এবং `/v1/moderations` (সর্বদা `0` খরচ হয়)। যখন মূল্য উপলব্ধ থাকে তখন মিডিয়া খরচ প্রতি মোডালিটি (প্রতি-চিত্র, প্রতি-সেকেন্ড, প্রতি-অক্ষর, প্রতি অনুসন্ধান-ইউনিট) গণনা করা হয়, অন্যথায় `0` (ফেল-ওপেন)।
 
-> **ক্যাশ-হিটের খরচের অর্থ:** সেমান্টিক-ক্যাশ HIT-এ (`X-OmniRoute-Cache-Hit: true`) কোনো আপস্ট্রিম কল করা হয় না, তাই `X-OmniRoute-Response-Cost` হয় `0.0000000000` (হিট পরিবেশনের **ক্রমবর্ধমান** খরচ)। মূল/হওয়ার কথা ছিল এমন খরচ আলাদাভাবে `X-OmniRoute-Cost-Saved`-এ জানানো হয়। বিলিং ভোক্তাদের `X-OmniRoute-Response-Cost` যোগ করা উচিত (হিটের কোনো খরচ নেই); ক্যাশ অ্যানালিটিক্স `X-OmniRoute-Cost-Saved` একত্র করতে পারে।
+> **ক্যাশে-হিট খরচ শব্দার্থবিদ্যা:** একটি শব্দার্থক-ক্যাশে HIT (`X-OmniRoute-Cache-Hit: true`) কোন আপস্ট্রিম কল করা হয় না, তাই `X-OmniRoute-Response-Cost` হল `0.0000000000` (** বৃদ্ধিমূলক** হিট পরিবেশনের খরচ)। original/would-have-been খরচ আলাদাভাবে `X-OmniRoute-Cost-Saved` এ রিপোর্ট করা হয়েছে। বিলিং ভোক্তাদের `X-OmniRoute-Response-Cost` যোগ করা উচিত (হিটের জন্য কিছুই লাগে না); ক্যাশে বিশ্লেষণ `X-OmniRoute-Cost-Saved` একত্রিত করতে পারে।
 
 ## একচেটিয়া ম্যানেজড সেশন লিজ
 
@@ -377,6 +365,8 @@ Content-Type: application/json
 
 `n` `data[]` এ `n` ছবি ফেরত দেয়। যেসব প্রদানকারীর আপস্ট্রিম API প্রতি কলে একটি ছবি ফেরত দেয় (ব্ল্যাক ফরেস্ট ল্যাবস, স্ট্যাবিলিটি AI, লিওনার্দো, আইডিওগ্রাম, হাইপার, হাইপারবোলিক, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) তারা `n` আলাদা আপস্ট্রিম কল পান, ফ্লাইটে সর্বাধিক 4টি। একটি স্থির `seed` কল সূচক (`seed`, `seed + 1`, …) দ্বারা অফসেট করা হয়, তাই চিত্রগুলি পৃথক হলেও পুনরুত্পাদনযোগ্য থাকে। `n` 10 এ ক্যাপ করা হয়েছে। কোনো কল ব্যর্থ হলে অনুরোধটি সম্পূর্ণরূপে ব্যর্থ হয়। ফ্যান-আউট ফরম্যাটের তালিকা হল `open-sse/handlers/imageGeneration/fanOut.ts` এ `SINGLE_IMAGE_FANOUT_FORMATS` ।
 
+Codex GPT ইমেজ মডেল (`codex/gpt-image-*`) শুধুমাত্র PNG ফেরত দেয়: `jpeg` বা `webp` অনুরোধ করা হলেও আপস্ট্রিম PNG বাইট দিয়ে `200` উত্তর দেয়। অন্য কোন `output_format` (`webp`, `jpeg`, ...) এর সাথে একটি অনুরোধ নীরবে উপেক্ষা করার পরিবর্তে HTTP 400 দিয়ে প্রত্যাখ্যান করা হয়; এটা বাদ দিন অথবা `png` পাঠান। `output_compression` ফরোয়ার্ড করা হয় না।
+
 ZenMux বিদ্যমান API-কী সংযোগ পুনরায় ব্যবহার করে এবং `zenmux/` বা `zm/` উপসর্গ গ্রহণ করে:
 
 - `zenmux/openai/gpt-image-2` ZenMux এর OpenAI ছবি API ব্যবহার করে। বিকল্পগুলির মধ্যে রয়েছে `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, এবং `response_format` ৷
@@ -394,7 +384,7 @@ GET /v1/images/generations
 
 ---
 
-## Document OCR
+## নথি OCR
 
 ```bash
 POST /v1/ocr
@@ -410,17 +400,15 @@ Content-Type: application/json
 }
 ```
 
-`model` একটি `provider/model` prefix-এর মাধ্যমে OCR provider নির্বাচন করে; bare model id (যেমন
-`mistral-ocr-latest`) তার নিবন্ধিত provider-এ resolve হয়, এবং `model` বাদ দিলে
-Mistral (`mistral-ocr-latest`) default হিসেবে ব্যবহৃত হয়। নিবন্ধিত providerগুলো (`open-sse/config/ocrRegistry.ts`):
+`model` একটি `provider/model` উপসর্গের মাধ্যমে OCR প্রদানকারী নির্বাচন করে; একটি বেয়ার মডেল আইডি (যেমন `mistral-ocr-latest`) তার নিবন্ধিত প্রদানকারীর কাছে সমাধান করে, এবং একটি বাদ দেওয়া `model` ডিফল্ট Mistral (`mistral-ocr-latest`) এ। নিবন্ধিত প্রদানকারী (`open-sse/config/ocrRegistry.ts`):
 
-| Provider id                   | Model id             | `model` value                                               | Notes                                                                                                           |
-| ----------------------------- | -------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (or bare `mistral-ocr-latest`) | Synchronous — response সরাসরি একক upstream call থেকে ফেরত আসে।                                                  |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                 | Asynchronous upstream (`analyze` + poll) — নিচে দেখুন।                                                          |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                     | Synchronous, Vertex AI-এর `openapi/chat/completions` partner endpoint-এর মাধ্যমে — auth/URL-এর জন্য নিচে দেখুন। |
+| প্রদানকারী আইডি               | মডেল আইডি                                 | `model` মান                                                   | নোট                                                                                                                                                                                                                           |
+| ----------------------------- | ----------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                      | `mistral/mistral-ocr-latest` (বা বেয়ার `mistral-ocr-latest`) | সিঙ্ক্রোনাস — একক আপস্ট্রিম কল থেকে সরাসরি প্রতিক্রিয়া ফেরত দেওয়া হয়।                                                                                                                                                      |
+| `azure-document-intelligence` | `prebuilt-read`                           | `azure-document-intelligence/prebuilt-read`                   | অ্যাসিঙ্ক্রোনাস আপস্ট্রিম (`analyze` + পোল) — নীচে দেখুন।                                                                                                                                                                     |
+| `vertex-deepseek-ocr`         | স্ব-নিয়োজিত (কোন অন্তর্নির্মিত মডেল নেই) | `vertex-deepseek-ocr/<your-deployed-model-id>`                | সিঙ্ক্রোনাস, আপনার নিজস্ব ভার্টেক্স AI মডেল গার্ডেন ডিপসিক-ওসিআর এন্ডপয়েন্টের মাধ্যমে (`openapi/chat/completions` আকৃতি); Google 2026-10-21 (#20423) এ পরিচালিত `deepseek-ocr-maas` অবসর নিয়েছে, যাতে আইডি 400 রিটার্ন করে। |
 
-তিনটি provider-ই একই Mistral-shaped body-তে response দেয়:
+তিনটি প্রদানকারী একই মিস্ট্রাল-আকৃতির শরীরে প্রতিক্রিয়া জানায়:
 
 ```json
 {
@@ -430,27 +418,13 @@ Mistral (`mistral-ocr-latest`) default হিসেবে ব্যবহৃত 
 }
 ```
 
-### Azure Document Intelligence poll flow
+### Azure ডকুমেন্ট ইন্টেলিজেন্স পোল প্রবাহ
 
-Azure Document Intelligence-এর `analyze` API asynchronous: initial request body-এর পরিবর্তে
-একটি `Operation-Location` header ফেরত দেয়, এবং ফলাফল poll করতে হয়। Handler
-(`open-sse/handlers/ocr.ts`) প্রতি সেকেন্ডে সর্বাধিক ৩০টি attempt পর্যন্ত ওই URL poll করে; non-`ok` poll response বা
-`"failed"` status পেলে দ্রুত ব্যর্থ হয় (poll চালিয়ে যায় না), এবং attempt-এর সীমা শেষ হওয়ার পরেও operation চলমান থাকলে
-`504` ফেরত দেয়। চূড়ান্ত Azure response caller-এর কাছে ফেরত দেওয়ার আগে Mistral-এ ব্যবহৃত একই
-`pages`/`markdown` shape-এ normalize করা হয়, তাই client code-এ provider-ভেদে আলাদা handling প্রয়োজন হয় না।
+Azure ডকুমেন্ট ইন্টেলিজেন্সের `analyze` API অ্যাসিঙ্ক্রোনাস: প্রাথমিক অনুরোধ একটি বডির পরিবর্তে একটি `Operation-Location` হেডার প্রদান করে এবং ফলাফলের জন্য পোল করা আবশ্যক। হ্যান্ডলার (`open-sse/handlers/ocr.ts`) যে পোল প্রতি সেকেন্ডে 30 বার পর্যন্ত URL, একটি নন-`ok` পোল রেসপন্স বা `"failed"` স্ট্যাটাসে দ্রুত ব্যর্থ হয় (পোলিং রাখে না), এবং প্রচেষ্টার বাজেট ফুরিয়ে যাওয়ার পরেও অপারেশন চলতে থাকলে `504` ফেরত দেয়। চূড়ান্ত Azure প্রতিক্রিয়াটি কলারের কাছে ফেরত দেওয়ার আগে Mistral দ্বারা ব্যবহৃত একই `pages`/`markdown` আকারে স্বাভাবিক করা হয়, তাই ক্লায়েন্ট কোড প্রদানকারীর বিশেষ ক্ষেত্রে প্রয়োজন হয় না।
 
-### Vertex AI DeepSeek OCR auth এবং endpoint resolution
+### Vertex AI DeepSeek OCR auth এবং endpoint রেজোলিউশন
 
-`vertex-deepseek-ocr` chat/image traffic-এর জন্য OmniRoute ইতিমধ্যে যে একই Vertex AI authentication সমর্থন করে,
-তা পুনর্ব্যবহার করে (`open-sse/executors/vertex.ts`): connection-এর API key হয় একটি
-Service Account JSON credential (JWT-bearer flow-এর মাধ্যমে স্বল্পমেয়াদি OAuth access token-এ exchange করা হয়), অথবা
-আগেই তৈরি করা OAuth access token, যা অপরিবর্তিতভাবে ব্যবহার করা হয়। Upstream endpoint URL হলো Vertex-এর
-generic `openapi/chat/completions` partner endpoint, যা connection-এর project এবং region থেকে তৈরি হয় — একটি explicit
-`providerSpecificData.project`/`providerSpecificData.region` সবসময় অগ্রাধিকার পায়;
-অন্যথায় project Service Account JSON-এর `project_id` থেকে নির্ধারিত হয় এবং region-এর default হলো
-`us-central1`। উভয় resolution `open-sse/handlers/ocr.ts`-এ
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) সম্পন্ন হয়, এবং
-`src/app/api/v1/ocr/route.ts`-এ `handleOcr`-এ dispatch করার আগে সেগুলো ব্যবহার করা হয়।
+`vertex-deepseek-ocr` একই Vertex AI প্রমাণীকরণ OmniRoute ইতিমধ্যে chat/image ট্র্যাফিকের জন্য সমর্থন করে (`open-sse/executors/vertex.ts`): সংযোগের API কীটি হয় একটি পরিষেবা অ্যাকাউন্ট JSON শংসাপত্র (JWT-ধারক প্রবাহের মাধ্যমে একটি স্বল্পকালীন OAuth অ্যাক্সেস টোকেনের জন্য বিনিময় করা হয়েছে) অথবা ইতিমধ্যেই অ্যাক্সেস করার জন্য একটি OAuth হিসাবে ব্যবহার করা হয়েছে। আপস্ট্রিম এন্ডপয়েন্ট URL হল Vertex-এর জেনেরিক `openapi/chat/completions` পার্টনার এন্ডপয়েন্ট, সংযোগের প্রকল্প এবং অঞ্চল — থেকে নির্মিত একটি স্পষ্ট `providerSpecificData.project`/`providerSpecificData.region` সবসময় জয়ী হয়; অন্যথায় প্রকল্পটি সার্ভিস অ্যাকাউন্ট JSON এর `project_id` থেকে নেওয়া হয় এবং অঞ্চলটি `us-central1` তে ডিফল্ট হয়। উভয় রেজোলিউশন `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) তে ঘটে, `handleOcr` এ পাঠানোর আগে `src/app/api/v1/ocr/route.ts` দ্বারা সেবন করা হয়।
 
 ---
 
@@ -696,100 +670,104 @@ Upstream contract: [sound effects](https://elevenlabs.io/docs/api-reference/text
 
 ---
 
-## সামঞ্জস্যতা এন্ডপয়েন্ট
+## সামঞ্জস্যের শেষ পয়েন্ট
 
-| Method | Path                                      | Format                                |
-| ------ | ----------------------------------------- | ------------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                                |
-| POST   | `/v1/messages`                            | Anthropic                             |
-| POST   | `/v1/responses`                           | OpenAI Responses                      |
-| POST   | `/v1/embeddings`                          | OpenAI                                |
-| POST   | `/v1/images/generations`                  | OpenAI Images                         |
-| POST   | `/v1/images/edits`                        | OpenAI Images (সম্পাদনা/ইনপেইন্ট)     |
-| POST   | `/v1/videos/generations`                  | OpenAI-ধাঁচের ভিডিও জেনারেশন          |
-| POST   | `/v1/music/generations`                   | OpenAI-ধাঁচের মিউজিক জেনারেশন         |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (অডিও বডি ফেরত দেয়)       |
-| POST   | `/v1/rerank`                              | Cohere/Voyage-ধাঁচের রির্যাঙ্ক        |
-| POST   | `/v1/classify`                            | Jina ক্লাসিফাই (`api.jina.ai`)        |
-| POST   | `/v1/segment`                             | Jina সেগমেন্টার (`segment.jina.ai`)   |
-| POST   | `/v1/moderations`                         | OpenAI Moderations                    |
-| GET    | `/v1/models`                              | OpenAI                                |
-| POST   | `/v1/models/query`                        | ফিল্টার করা মডেলের সংক্ষিপ্ত তালিকা   |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                             |
-| GET    | `/v1beta/models`                          | Gemini                                |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                |
-| POST   | `/v1/api/chat`                            | Ollama                                |
-| GET    | `/api/v1/vscode/{token}/`                 | OpenAI ক্যাটালগ অ্যালিয়াস            |
-| GET    | `/api/v1/vscode/{token}/models`           | OpenAI মডেল অ্যালিয়াস                |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI টোকেনাইজড অ্যালিয়াস           |
-| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responses টোকেনাইজড অ্যালিয়াস |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama টোকেনাইজড অ্যালিয়াস           |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama ট্যাগ টোকেনাইজড অ্যালিয়াস     |
+| পদ্ধতি | পথ                                        | বিন্যাস                              |
+| ------ | ----------------------------------------- | ------------------------------------ |
+| POST   | `/v1/chat/completions`                    | OpenAI                               |
+| POST   | `/v1/messages`                            | Anthropic                            |
+| POST   | `/v1/responses`                           | OpenAI প্রতিক্রিয়া                  |
+| POST   | `/v1/embeddings`                          | OpenAI                               |
+| POST   | `/v1/images/generations`                  | OpenAI ছবি                           |
+| POST   | `/v1/images/edits`                        | OpenAI ছবি (edit/inpaint)            |
+| POST   | `/v1/videos/generations`                  | OpenAI-শৈলী ভিডিও প্রজন্ম            |
+| POST   | `/v1/music/generations`                   | OpenAI-শৈলী সঙ্গীত প্রজন্ম           |
+| POST   | `/v1/audio/transcriptions`                | OpenAI অডিও (STT)                    |
+| POST   | `/v1/audio/speech`                        | OpenAI TTS (অডিও বডি ফেরত দেয়)      |
+| POST   | `/v1/rerank`                              | Cohere/Voyage-style rerank           |
+| POST   | `/v1/classify`                            | জিনা শ্রেণীবদ্ধ করুন (`api.jina.ai`) |
+| POST   | `/v1/segment`                             | জিনা সেগমেন্টার (`segment.jina.ai`)  |
+| POST   | `/v1/moderations`                         | OpenAI সংযম                          |
+| POST   | `/v1/systemone`                           | সিস্টেম ওয়ান টাইপ করা সিদ্ধান্ত     |
+| POST   | `/v1/decisions`                           | OpenAI সিদ্ধান্ত (দেশীয়)            |
+| GET    | `/v1/systemone/models`                    | সিদ্ধান্ত-মডেল ক্যাটালগ              |
+| GET    | `/v1/models`                              | OpenAI                               |
+| POST   | `/v1/models/query`                        | ফিল্টার করা মডেল শর্টলিস্ট           |
+| POST   | `/v1/messages/count_tokens`               | Anthropic                            |
+| GET    | `/v1beta/models`                          | Gemini                               |
+| POST   | `/v1beta/models/{...path}`                | Gemini generateContent               |
+| POST   | `/v1/api/chat`                            | Ollama                               |
+| GET    | `/api/v1/vscode/{token}/`                 | OpenAI ক্যাটালগ উপনাম                |
+| GET    | `/api/v1/vscode/{token}/models`           | OpenAI মডেল ওরফে                     |
+| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI টোকেনাইজড উপনাম               |
+| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI প্রতিক্রিয়া টোকেনাইজড উপনাম  |
+| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama টোকেনাইজড উপনাম               |
+| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama ট্যাগ টোকেনাইজড উপনাম         |
 
-সমস্ত POST রুট একই কাঠামো অনুসরণ করে: `Bearer your-api-key` + Zod-ভ্যালিডেট করা JSON বডি (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` ইত্যাদি, `src/shared/validation/schemas.ts` দেখুন)। স্কিমা ব্যর্থ হলে 4xx ফেরত দেওয়া হয়।
+সমস্ত POST রুট একই আকৃতি অনুসরণ করে: `Bearer your-api-key` + Zod-প্রমাণিত JSON বডি (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, ইত্যাদি, `src/shared/validation/schemas.ts` দেখুন)। স্কিমা ব্যর্থ হলে 4xx ফেরত দেওয়া হয়।
 
-যেসব ক্লায়েন্ট `Authorization: Bearer ...` সংযুক্ত করতে পারে না, তাদের জন্য OmniRoute URL-এ API key গ্রহণ করে—হয় ক্যোয়ারি-স্ট্রিং সামঞ্জস্যতা (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ব্যবহার করে, অথবা নিচে নথিভুক্ত নির্দিষ্ট `/api/v1/vscode/{token}/...` এন্ডপয়েন্টগুলোর মাধ্যমে।
+যে সকল ক্লায়েন্ট `Authorization: Bearer ...` সংযুক্ত করতে পারে না তাদের জন্য, OmniRoute URL এ API কীগুলিকে কোয়েরি-স্ট্রিং সামঞ্জস্য (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) বা নীচে নথিভুক্ত ডেডিকেটেড `/api/v1/vscode/{token}/...` শেষ পয়েন্টগুলির মাধ্যমেও গ্রহণ করে৷
 
 ```bash
-# রির্যাঙ্ক (ক্লাউড রেজিস্ট্রি প্রোভাইডার, অথবা "<prefix>/<model>" হিসেবে একটি OpenAI-সামঞ্জস্যপূর্ণ প্রোভাইডার নোড)
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina ক্লাসিফাই (Foundation API শংসাপত্র)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina সেগমেন্টার
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina সার্চ (s.jina.ai; প্রোভাইডার অ্যালিয়াস: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# মডারেশন
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg (অথবা অনুরোধ করা ফরম্যাটের) বডি ফেরত দেয়
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS-এর জন্য একটি ভাষা এবং একটি ভয়েস প্রয়োজন: `language` ডিফল্ট হিসেবে "en" ব্যবহার করে; অনুপস্থিত
-# `voice` অথবা OpenAI-এর স্টক ভয়েসের নাম (alloy, nova, …) "Adrian"-এ পরিণত হয়
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# ইমেজ সম্পাদনা (মাল্টিপার্ট)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# ভিডিও / মিউজিক জেনারেশন (প্রোভাইডার-প্রিফিক্সযুক্ত মডেল আইডি)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **রির্যাঙ্ক প্রদানকারী নোড:** `POST /v1/rerank` এখন OpenAI-সামঞ্জস্যপূর্ণ প্রদানকারী নোডগুলিতেও রাউট করে
-> (oMLX, vLLM, Infinity, গেটওয়ের পেছনে থাকা TEI, …), যেগুলিকে `<node-prefix>/<model>` হিসেবে
-> উল্লেখ করা হয়। লুপব্যাক নোড (`localhost`, `127.0.0.1`, `172.16.0.0/12`) সবসময়ই
-> উপযুক্ত, এবং অপারেটর `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`-এ তালিকাভুক্ত হোস্টনেমগুলিও
-> উপযুক্ত (যেমন `http://reranker:8080/v1`-এর মতো কোনো Docker/Compose সার্ভিসের নাম; এগুলিতে
-> সরাসরি কল করা হয়, কখনোই `HTTP(S)_PROXY` বা কোনো সংযোগের নির্ধারিত প্রক্সির মাধ্যমে নয়)। অন্য
-> কোনো হোস্টের নোড — কোনো LAN কম্পিউটার বা Tailscale পিয়ার — কেবল তখনই উপযুক্ত, যখন অপারেটর
-> `RERANK_REMOTE_PROVIDER_NODES` ফিচার ফ্ল্যাগ সক্রিয় করেন **এবং** নোডের বেস URL প্রদানকারী
-> আউটবাউন্ড URL নীতিমালা (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) পূরণ করে।
-> মেমরি ইঞ্জিনের রির্যাঙ্ক ধাপটি লুপব্যাকের মাধ্যমে এই রুটে কল করে, তাই Memory সেটিংসের
-> `rerankProviderModel`-এর ক্ষেত্রেও একই নিয়ম প্রযোজ্য।
+> **প্রদানকারীর নোডগুলি পুনরায় র‍্যাঙ্ক করুন:** `POST /v1/rerank` ওপেনএআই-সামঞ্জস্যপূর্ণ প্রদানকারী নোডগুলিতেও রুট করে (oMLX, vLLM, Infinity, TEI একটি গেটওয়ের পিছনে, …) `<node-prefix>/<model>` হিসাবে সম্বোধন করা হয়। লুপব্যাক নোডগুলি (`localhost`, `127.0.0.1`, `172.16.0.0/12`) সর্বদা যোগ্য, এবং তাই হোস্টনামগুলিও `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` তে অপারেটর তালিকাভুক্ত করে (যেমন একটি Docker/Compose পরিষেবার নাম যেমন `http://reranker:8080/v1`; এগুলি সরাসরি বলা হয়, কখনও `HTTP(S)_PROXY` বা সংযোগের পিন করা প্রক্সির মাধ্যমে নয়)। অন্য কোনো হোস্ট — a LAN বক্স বা Tailscale পিয়ার — এর নোড শুধুমাত্র তখনই যোগ্য হয় যখন অপারেটর `RERANK_REMOTE_PROVIDER_NODES` বৈশিষ্ট্য পতাকা সক্ষম করে** এবং** নোডের বেস URL প্রদানকারীর আউটবাউন্ড URL নীতি (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) পাস করে। মেমরি ইঞ্জিনের রির্যাঙ্ক স্টেপ এই রুটটিকে লুপব্যাক বলে, তাই একই নিয়ম মেমরি সেটিংসে `rerankProviderModel` নিয়ন্ত্রণ করে।
 >
-> **স্থানীয় সার্ভারের বিন্যাস:** নোডটিকে `<base>/v1/rerank`-এ এবং 404 পেলে `<base>/rerank`-এ
-> (Infinity, TEI) কল করা হয়। আপস্ট্রিম বডিতে Cohere/OpenAI বানান (`documents`,
-> `return_documents`) এবং TEI বানান (`texts`, `return_text`) — উভয়ই থাকে, এবং আপস্ট্রিমের
-> রেসপন্সকে Cohere এনভেলপে স্বাভাবিকীকরণ করা হয়: TEI-এর সরাসরি `[{index, score, text}]`,
-> পাতলা গেটওয়েগুলোর `{results: [{index, score}]}`, এবং Voyage-ধাঁচের `{data: [...]}` — সবই
-> ক্লায়েন্টের কাছে `{results: [{index, relevance_score, document?}]}` হিসেবে ফিরে আসে,
-> স্কোর অনুযায়ী সাজানো এবং `top_n`-এ সীমাবদ্ধ।
->
-> **প্রদানকারী-নোড আবিষ্কার:** OpenAI-সামঞ্জস্যপূর্ণ প্রদানকারী নোডের মডেলগুলো `GET /v1/models`-এ
-> নোড প্রিফিক্সের অধীনে দেখা যায়। যেসব রোতে কোনো এন্ডপয়েন্ট মেটাডেটা নেই (স্থানীয় `/v1/models`
-> তালিকার ক্ষেত্রে সাধারণত এমন হয়), সেগুলো নোডের `apiType` উত্তরাধিকার সূত্রে পায়। ফলে
-> একটি `embeddings` নোডের মডেলগুলোর `type: "embedding"` এবং একটি `rerank` নোডের মডেলগুলোর
-> `type: "rerank"` হয়, ডিফল্টভাবে chat-এ পরিণত হয় না; তবে সিঙ্ক করা বা ম্যানুয়ালি যোগ করা
-> কোনো রোতে স্পষ্ট `supportedEndpoints` থাকলে সেটিই অগ্রাধিকার পায়।
+> **স্থানীয় সার্ভার আকার:** নোডটিকে `<base>/v1/rerank` এবং 404-এ `<base>/rerank` (ইনফিনিটি, TEI) বলা হয়। আপস্ট্রিম বডি Cohere/OpenAI বানান (`documents`, `return_documents`) এবং TEI বানান (`texts`, `return_text`) উভয়ই বহন করে এবং আপস্ট্রিম প্রতিক্রিয়া Cohere খামে স্বাভাবিক করা হয়: TEI এর বেয়ার `[{index, score, text}]`, `{results: [{index, score}]}` `{data: [...]}` এবং backzqn `{results: [{index, relevance_score, document?}]}` স্টাইল , স্কোর অনুসারে সাজানো এবং `top_n` এ ক্যাপ করা হয়েছে।
 
-### নিবেদিত প্রদানকারী রুট
+> **প্রদানকারী-নোড আবিষ্কার:** একটি OpenAI- সামঞ্জস্যপূর্ণ প্রদানকারী নোডের মডেল `GET /v1/models` তে নোড উপসর্গের অধীনে প্রদর্শিত হয়। যে সারিগুলি কোন এন্ডপয়েন্ট মেটাডেটা বহন করে না (স্থানীয় `/v1/models` তালিকার জন্য সাধারণত) নোডের `apiType` উত্তরাধিকারী হয়, তাই একটি `embeddings` নোডের মডেলগুলি `type: "embedding"` হয় এবং একটি `rerank` নোডের মডেলগুলি চ্যাট করতে ডিফল্ট না হয়ে `type: "rerank"` হয়; একটি সিঙ্ক করা বা ম্যানুয়ালি যোগ করা সারিতে একটি স্পষ্ট `supportedEndpoints` এখনও অগ্রাধিকার নেয়।
+
+### টাইপ করা সিদ্ধান্ত
+
+সিদ্ধান্তের মডেলগুলি পাঠ্য তৈরি করার পরিবর্তে ক্যালিব্রেটেড সম্ভাব্যতার সাথে টাইপ করা প্রশ্নের উত্তর দেয়। তারা কখনই চ্যাট মডেল নয়, এবং দুটি তারের ফর্ম্যাট একে অপরের মধ্যে অনুবাদ করা হয় না:
+
+- `POST /v1/systemone` — সিস্টেম ওয়ান `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter সিদ্ধান্ত, Cloudflare কর্মী AI, স্থানীয় Ollama)।
+- `POST /v1/decisions` — নেটিভ OpenAI সিদ্ধান্ত `{ model, input, questions: [...] }`, একটি `openai` সংযোগ দ্বারা পরিবেশিত। মডেলটি `openai/gpt-6-luna` (বেয়ার `gpt-6-luna` ও কাজ করে)। উত্তর প্রশ্ন ক্রমে ফিরে আসে, অস্পৃশ্য।
+- `GET /v1/systemone/models` — উভয় ধরণের একটি ক্যাটালগ; প্রতিটি সারি তার `api_format` (`systemone` বা `decisions`) নাম দেয়। `limit` / `after` পৃষ্ঠা চূড়ান্ত তালিকা। `X-OmniRoute-Catalog-Status` হেডার `complete`, `partial` বা `unavailable` (503) পড়ে।
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions` তে API কী-এর মডেল অনুমোদিত তালিকা, `decisions` এন্ডপয়েন্ট ক্যাটাগরি, বাজেট এবং কানেকশন স্কোপ কোনো প্রমাণপত্র পড়ার আগে চেক করা হয়। শংসাপত্র হল কী এর স্কোপের ভিতরে সংরক্ষিত `openai` সংযোগ (কখনও পরিবেশ কী নয়); একটি সংযোগ বেস URL শুধুমাত্র তখনই সম্মানিত হয় যখন এটি একটি `http(s)` URL হয় শংসাপত্র, প্রশ্ন বা খণ্ড যা এই OmniRoute এ নির্দেশ করে না। কলটি `decision` অটো-রাউটার ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): প্রদানকারীর আউটবাউন্ড গার্ড, কোন পুনঃপ্রচার নেই, কোন পুনঃনির্দেশ নেই, একটি 5 সেকেন্ড টাইমআউট এবং একটি 64 KB উত্তর ক্যাপ (একটি বড় উত্তর হল 502)। অনুরোধ সংস্থাগুলি 4 MiB এর মধ্যে সীমাবদ্ধ। প্রতিটি কল একটি নতুন `Idempotency-Key` পাঠায়। ত্রুটিগুলি শুধুমাত্র আপস্ট্রিম স্ট্যাটাস বহন করে, এর বডি, URL, কী বা প্রম্পট নয়।
+
+### উত্সর্গীকৃত প্রদানকারী রুট
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -797,7 +775,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-অনুপস্থিত থাকলে প্রদানকারী প্রিফিক্স স্বয়ংক্রিয়ভাবে যোগ করা হয়। মডেল না মিললে `400` ফেরত দেওয়া হয়।
+অনুপস্থিত থাকলে প্রদানকারী উপসর্গটি স্বয়ংক্রিয়ভাবে যোগ করা হয়। অমিল মডেল `400` ফেরত দেয়।
 
 ---
 

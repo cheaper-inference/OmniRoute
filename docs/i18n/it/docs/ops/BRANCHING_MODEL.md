@@ -48,7 +48,7 @@ Quando una versione viene riconciliata, viene aperta una questione marcatore den
 Verificare la presenza di un blocco aperto prima di presumere che il ramo desiderato sia unificabile:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 I meccanismi di unione (proprietario `queue` etichetta → Mergify) sono documentati in [MERGE_TRAIN.md](./MERGE_TRAIN.md).

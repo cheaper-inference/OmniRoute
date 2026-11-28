@@ -62,42 +62,31 @@ Method ទាំងបីតម្រូវឱ្យមានការផ្ទ�
 OmniRoute រក្សាទុក token ហើយដំណើរការការស្វែងរកសាកល្បងចំនួន 1 លទ្ធផលភ្លាមៗ; ប្រសិនបើ Notion
 ត្រឡប់ error object វិញ token នឹងត្រូវបានសម្អាត ហើយ call នឹងបរាជ័យជាមួយ `400`។
 
-## ឧបករណ៍ MCP (6)
+## ឧបករណ៍MCP (6)
 
-ត្រូវបានកំណត់ក្នុង `open-sse/mcp-server/tools/notionTools.ts`។ Token ត្រូវបានស្វែងរកនៅពេល call
-តាមរយៈ `getNotionToken()`; ប្រសិនបើមិនមានការកំណត់រចនាសម្ព័ន្ធទេ ឧបករណ៍នឹងបោះកំហុស
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
+កំណត់ក្នុង `open-sse/mcp-server/tools/notionTools.ts`។ សញ្ញាសម្ងាត់ត្រូវបានដោះស្រាយនៅពេលហៅតាមរយៈ `getNotionToken()`; ប្រសិនបើមិនមានការកំណត់រចនាសម្ព័ន្ធ ឧបករណ៍បោះ `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| ឧបករណ៍                       | Scope          | សេចក្ដីពិពណ៌នា                                                                               |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | ស្វែងរកទំព័រ និង database តាម text query (ត្រឡប់ title, ID និង URL)។ មាន pagination។         |
-| `notion_get_page`            | `read:notion`  | ទាញយកមាតិកា និង metadata របស់ទំព័រតាម ID របស់វា។                                             |
-| `notion_list_block_children` | `read:notion`  | រាយ block children ទាំងអស់របស់ block ឬទំព័រ (មែកធាង block)។ មាន pagination។                  |
-| `notion_query_database`      | `read:notion`  | Query database ជាមួយ `filter` + `sorts` ជាជម្រើស (ទម្រង់ Notion API)។ មាន pagination។        |
-| `notion_get_database`        | `read:notion`  | ទាញយក schema/metadata របស់ database តាម ID។                                                  |
-| `notion_append_blocks`       | `write:notion` | បន្ថែម block children ទៅកាន់ block ឬទំព័រដែលមានស្រាប់ (អតិបរមា 100 block ក្នុង request មួយ)។ |
+| ឧបករណ៍                       | វិសាលភាព       | ការពិពណ៌នា                                                                                 |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------ |
+| `notion_search`              | `read:notion`  | ស្វែងរកទំព័រ និងមូលដ្ឋានទិន្នន័យដោយសំណួរអត្ថបទ (ត្រឡប់ចំណងជើង IDs, URLs) ។ បានបិទភ្ជាប់។   |
+| `notion_get_page`            | `read:notion`  | ទទួលបានមាតិកា និងទិន្នន័យមេតានៃទំព័រដោយ ID របស់វា។                                         |
+| `notion_list_block_children` | `read:notion`  | រាយបញ្ជីកូនប្លុកទាំងអស់នៃប្លុក ឬទំព័រ (មែកធាងប្លុក)។ បានបិទភ្ជាប់។                         |
+| `notion_query_database`      | `read:notion`  | ស្វែងរកមូលដ្ឋានទិន្នន័យដែលមានជម្រើស `filter` + `sorts` (Notion API format) ។ បានបិទភ្ជាប់។ |
+| `notion_get_database`        | `read:notion`  | ទទួលបាន schema/metadata នៃមូលដ្ឋានទិន្នន័យដោយ ID។                                          |
+| `notion_append_blocks`       | `write:notion` | បន្ថែមប្លុកកុមារទៅប្លុកឬទំព័រដែលមានស្រាប់ (អតិបរមា 100 ប្លុកក្នុងមួយសំណើ)។                 |
 
-### Parameter បញ្ចូល
+### ប៉ារ៉ាម៉ែត្របញ្ចូល
 
-- `notion_search` — `query` (1–500 តួអក្សរ), `pageSize` (1–100, លំនាំដើម 20),
-  `startCursor` (ជាជម្រើស)។
-- `notion_get_page` — `pageId` (hex 32 តួអក្សរ ឬ UUID)។
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, លំនាំដើម 50),
-  `startCursor` (ជាជម្រើស)។
-- `notion_query_database` — `databaseId`, `filter` (ជាជម្រើស, ទម្រង់ filter របស់ Notion),
-  `sorts` (array ជាជម្រើស), `pageSize` (1–100, លំនាំដើម 50), `startCursor` (ជាជម្រើស)។
-- `notion_get_database` — `databaseId`។
-- `notion_append_blocks` — `blockId`, `children` (array នៃ block object),
-  `after` (ទីតាំងជាជម្រើស)។
+- `notion_search` — `query` (1–500 តួអក្សរ), `pageSize` (1–100, លំនាំដើម 20), `startCursor` (ស្រេចចិត្ត)។
+- `notion_get_page` — `pageId` (32-char hex ឬ UUID) ។
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, លំនាំដើម 50), `startCursor` (ស្រេចចិត្ត)។
+- `notion_query_database` — `databaseId`, `filter` (ជាជម្រើស ទម្រង់តម្រង Notion ), `sorts` (អារេស្រេចចិត្ត), `pageSize` (1–100, លំនាំដើម 50), `startCursor` (ស្រេចចិត្ត)។
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`, `children` (អារេនៃវត្ថុប្លុក), `after` (ទីតាំងស្រេចចិត្ត) ។
 
-### Scope
+### វិសាលភាព
 
-ឧបករណ៍អានតម្រូវឱ្យមាន `read:notion` ហើយឧបករណ៍សរសេរតម្រូវឱ្យមាន `write:notion`។
-Scope ត្រូវបានអនុវត្តដោយ `withScopeEnforcement()` ក្នុង
-`open-sse/mcp-server/server.ts` តែនៅពេល `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ប៉ុណ្ណោះ;
-scope ដែល caller ត្រូវបានអនុញ្ញាត មកពី `OMNIROUTE_MCP_SCOPES` (បំបែកដោយសញ្ញាក្បៀស) ឬ
-scope context របស់ API key ដែលបានផ្ទៀងផ្ទាត់។ សូមមើល [MCP-SERVER.md](./MCP-SERVER.md) សម្រាប់
-គំរូ scope ពេញលេញ។
+ឧបករណ៍អានត្រូវការ `read:notion` ហើយឧបករណ៍សរសេរទាមទារ `write:notion`។ វិសាលភាពត្រូវបានអនុវត្តដោយ `withScopeEnforcement()` ក្នុង `open-sse/mcp-server/server.ts` នៅពេល `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ហើយតែងតែសម្រាប់អ្នកហៅ HTTP/SSE ដែលកូនសោ API ខ្វះ `manage`/`admin`; វិសាលភាពដែលអនុញ្ញាតរបស់អ្នកហៅចេញមកពី `OMNIROUTE_MCP_SCOPES` (បំបែកដោយសញ្ញាក្បៀស) ឬបរិបទវិសាលភាពរបស់គ្រាប់ចុច API ដែលបានផ្ទៀងផ្ទាត់។ សូមមើល [MCP-SERVER.md](./MCP-SERVER.md) សម្រាប់គំរូវិសាលភាពពេញលេញ។
 
 ## ចំណុចបញ្ចប់
 

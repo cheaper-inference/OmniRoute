@@ -62,16 +62,16 @@ Ihe edere na-enweghị nhazi onye ahịa ọ bụla:
 | Alaka       | `Current branch:` sitere na ọnọdụ git Claude Koodu na-eziga na ozi mbụ                                                                                      |
 | Onye ahịa   | `user-agent` (`claude-cli/<version>`)                                                                                                                       |
 
-Codex (`<environment_context><cwd>`) na OpenCode (`x-opencode-session`) ka a na-amata otu ụzọ ahụ. Igodo nwere** enweghị ndekọ** enyere aka idowe naanị id nnọkọ yana ubi ọrụ enyere nkụnye eji isi mee; ọ dịghị ihe a na-agụ site na ngwa ngwa (ụzọ, alaka ụlọ ọrụ) echekwara.
+Codex (`<environment_context><cwd>`) na OpenCode (`x-opencode-session`) ka a na-amata otu ụzọ ahụ. Igodo nwere** enweghị ndekọ** enyere gị aka idowe naanị id nnọkọ yana ubi ọrụ enyere nkụnye eji isi mee; ọ dịghị ihe a na-agụ site na ngwa ngwa (ụzọ, alaka) echekwara.
 
 ### Ịkpọ aha ọrụ ahụ n'ụzọ doro anya (atụ aro)
 
-Akwụkwọ ndekọ na-arụ ọrụ dị iche n'etiti igwe, ya mere otu ebe nchekwa ahụ nwere ike igosi n'okpuru ụzọ dị iche iche. Zipu oru ngo a nke oma kama: koodu Claude na-agbakwunye nkụnye eji isi mee ọ bụla edepụtara na `ANTHROPIC_CUSTOM_HEADERS` na arịrịọ ụdị ọ bụla, OmniRoute wee gụọ abụọ n'ime ha:
+Akwụkwọ ndekọ aha dị iche n'etiti igwe, yabụ otu ebe nchekwa ahụ nwere ike igosi n'okpuru ụzọ dị iche iche. Zipu oru ngo a nke oma kama: koodu Claude na-agbakwunye nkụnye eji isi mee ọ bụla edepụtara na `ANTHROPIC_CUSTOM_HEADERS` na arịrịọ ụdị ọ bụla, OmniRoute wee gụọ abụọ n'ime ha:
 
-| nkụnye eji isi mee         | Uru                                                                |
-| -------------------------- | ------------------------------------------------------------------ |
-| `x-omniroute-project`      | Aha ọrụ, dịka `omniroute`                                          |
-| `x-omniroute-project-repo` | Ebe dịpụrụ adịpụ nke ọma, dịka `github.com/diegosouzapw/OmniRoute` |
+| nkụnye eji isi mee         | Uru                                                                     |
+| -------------------------- | ----------------------------------------------------------------------- |
+| `x-omniroute-project`      | Aha ọrụ, dịka `omniroute`                                               |
+| `x-omniroute-project-repo` | Ebe dịpụrụ adịpụ nke ọma, dịka `github.com/cheaper-inference/OmniRoute` |
 
 A na-agụ ha abụọ naanị maka njirimara; A naghị ebugharị ha na ndị na-eweta elu.
 
@@ -96,7 +96,7 @@ x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-Okwu `sed` na-ewepụ nzere ọ bụla, eriri ajụjụ na iberibe agbakwunyere na URL dịpụrụ adịpụ, na nkụnye eji isi mee ugbua na `ANTHROPIC_CUSTOM_HEADERS` ka edobere. IDE extensions na-ewepụta koodu Claude na-enweghị shei gị, yabụ nnọkọ ha daa azụ na ndekọ ọrụ.
+Okwu `sed` na-ewepụ nzere ọ bụla, eriri ajụjụ na iberibe agbakwunyere na URL dịpụrụ adịpụ, na nkụnye eji isi mee ugbua na `ANTHROPIC_CUSTOM_HEADERS` ka edobere. Mgbatị IDE na-ewepụta koodu Claude na-enweghị shei gị, yabụ nnọkọ ha daa azụ na ndekọ ọrụ.
 
 ---
 
@@ -284,30 +284,22 @@ flags ndị ọzọ achọrọ. Jiri `--remote` / `--api-key` dochie ya maka otu
 
 ---
 
-## Nchọpụta na idozi nsogbu
+## Nchọpụta nsogbu
 
-**Claude Code na-eleghara gateway anya** — gosi na `ANTHROPIC_BASE_URL` enweghị
-`/v1` ma malitegharịa `claude` (a na-agụ env naanị otu ugboro mgbe ọ na-amalite). `omniroute launch`
-na-ahụ maka nke a n'ọnọdụ gị.
+**Claude Code na-eleghara ọnụ ụzọ ámá anya** — kwadoro `ANTHROPIC_BASE_URL` nwere** enweghị `/v1`** ma malitegharịa `claude` (a na-agụ env otu ugboro na mmalite). `omniroute launch` na-edozi nke a maka gị.
 
-**Ihe nhọpụta `/model` tọgbọ chakoo / model gateway adịghị** — ọ chọrọ Claude Code
-v2.1.219+ na `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Naanị ID model `claude*` /
-`anthropic*` na-apụta n'ihe nhọpụta ahụ; jiri
-`ANTHROPIC_MODEL=<id>` manye model ọ bụla ọzọ (nke a bụ ihe profaịlụ na-eme).
+**`/model` picker bụ ihe efu / efu ụdị ọnụ ụzọ ámá** — chọrọ Claude Koodu v2.1.219 + na `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Naanị `claude*` / `anthropic*` ụdị IDs pụtara na onye nhọpụta; ịmanye ụdị ọ bụla ọzọ na `ANTHROPIC_MODEL=<id>` (nke a bụ ihe profaịlụ na-eme).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code na-eziga ID model **na-enweghị prefix**
-mgbe niile (dịka `claude-opus-4-8`), ya mere mgbe ejikọtara ma ndị na-eweta Claude Code (`cc/…`) na
-Claude (`claude/…`), id na-enweghị prefix ga-adaba na route abụọ, OmniRoute
-agaghịkwa achọ ịkọ nkọ. Dozie ya n'otu n'ime ụzọ abụọ: jiri
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` họrọ id nwere prefix kpọmkwem, ma ọ bụ gbanye **Họrọ Claude Code karịa
-maka model Claude ndị na-enweghị prefix** — toggle dị na peeji onye na-eweta Claude, ma ọ bụ
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (agbanyụghị ya na ndabara;
-lee [Environment](../reference/ENVIRONMENT.md)) — nke na-eziga ID `claude-*` na-enweghị prefix
-na Claude Code kama. Prefix onye na-eweta e depụtara kpọmkwem na-emeri mgbe niile.
+**`400 Ambiguous model 'claude-…'`** — Claude Koodu na-eziga mgbe niile** enweghị prefix** ụdị IDs (dịka `claude-opus-4-8`), yabụ mgbe ejiri koodu Claude (`cc/…`) na Claude (`claude/…`) ndị na-enye ya jikọọ, id iferi dabara n'ụzọ abụọ ma OmniRoute jụrụ ịkọ nkọ. Dozie ya n'ụzọ ọ bụla: tuo id prefixed na `ANTHROPIC_MODEL=cc/claude-opus-4-8`, ma ọ bụ mee ya** Hụrụ koodu Claude maka ụdị Claude enweghị prefixed** — ngbanwe na ibe Claude na-eweta, ma ọ bụ `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (ndabere; lee [Environment](../reference/ENVIRONMENT.md) ) — nke na-aga `claude-*` IDs na-enweghị ohere gaa na koodu Claude kama. Ihe nrịbama ndị na-eweta ihe na-emeri mgbe niile.
 
-**Njehie auth** — profaịlụ ahụ enweghị token. Jiri `omniroute launch --profile`
-(ọ na-etinye ya) ma ọ bụ export `ANTHROPIC_AUTH_TOKEN`.
+**"Ụdị akpaaka… nnọkọ a erughị eru" (a na-arịọ arịrịọ classifier)** — n'ụdị akpaaka Claude Koodu na-arịọ ihe nkesa ka ọ nyochaa omume n'ime arịrịọ ụdị nke ya ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Nke ahụ chọrọ uru `anthropic-beta` `dangerous-tool-use-2026-09-03` na ogige ahụ `safeguards` iru Anthropic dị ka ụzọ abụọ, yana `safeguard_results` gbakwunyere ngwá ọrụ elu-eji IDs ka ọ bịaghachi na-agbanweghị agbanwe. OmniRoute na-eme nke a mgbe a na-ebugharị arịrịọ ahụ n'aka onye na-eweta `claude` nwa afọ ma ọ bụ n'ọnụ `anthropic-compatible-*`, na-asọgharị ma ọ bụ na-adịghị (nchebe regression: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Ebumnuche ndị ọzọ enweghị ike iweghachi nyocha ahụ, yabụ koodu Claude daa azụ na arịrịọ nkewa nke ya wee gosi ọkwa ahụ:
 
-**Profaịlụ anaghị ekewapụ onwe ha** — profaịlụ ọ bụla nwere `CLAUDE_CONFIG_DIR` pụrụ iche;
-jiri `echo $CLAUDE_CONFIG_DIR` nyochaa n'ime session ahụ na ọ na-arụtụ aka na
-`~/.claude/profiles/<name>`.
+- ihe nlereanya na onye na-enye ndị na-abụghị Anthropic, ma ọ bụ ngwakọta nke na-adakwasị n'otu;
+- a Claude-Code-dakọtara ọnụ relay node (`anthropic-compatible-cc-*`), nke na-ewughachi ahụ arịrịọ na-adịghị ebu `safeguards`;
+- OmniRoute ochie nke bu ụzọ betas ekwenyere, ma ọ bụ ụdị koodu Claude n'okpuru nke ibe Anthropic depụtara maka oge ọnụ ụzọ.
+
+Gbaa `/status` na Claude Koodu: na** Ihe nkesa ọnọdụ akpaaka** Ahịrị na-agụ `Enabled` mgbe nyocha nke ihe nkesa na-arụ ọrụ. Ọ bụ Anthropic na-ekpebi ma a na-akwụ ụgwọ arịrịọ ndị ahụ, ọ bụghị site na OmniRoute.
+
+**Njehie nyocha** — profaịlụ enweghị akara ọ bụla. Jiri `omniroute launch --profile` (gbanye ya) ma ọ bụ bupu `ANTHROPIC_AUTH_TOKEN`.
+
+**Profaịlụ anaghị ekewapụ** — profaịlụ ọ bụla bụ `CLAUDE_CONFIG_DIR` dị iche iche; nyochaa `echo $CLAUDE_CONFIG_DIR` n'ime isi oge na `~/.claude/profiles/<name>`.

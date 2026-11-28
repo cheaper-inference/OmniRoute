@@ -329,19 +329,16 @@ mayar da ɓoyayyen samfoti (`maskedApiKey`: har zuwa haruffa 4 a kowane ƙarshen
 key, babu komai idan haruffa 8 ne ko ƙasa da haka) da kuma `projectId` na haɗin. Ba a saka waɗannan fields biyu
 a cikin response ga kowane key dabam.
 
-## Warware Credentials
+## Ƙaddamar Ƙarfafawa
 
-`getCloudAgentCredentials(providerId)` a cikin `src/lib/cloudAgent/api.ts`:
+`getCloudAgentCredentials(providerId)` in `src/lib/cloudAgent/api.ts`:
 
-1. Yana loda haɗe-haɗen provider masu aiki ta hanyar `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Ga kowane haɗi, yana fifita `apiKey` (bayan cire sararin gefuna). Idan babu, yana komawa ga `accessToken`.
-3. Yana dawo da token na farko da ba fanko ba a matsayin `{ apiKey: token }`.
-4. Yana dawo da `null` idan ba a sami token mai amfani ba — API yana amsawa da `400` tare da
-   `"Ba a saita credentials masu aiki ba don cloud agent provider: <id>"`.
+1. Yana loda hanyoyin sadarwa masu aiki ta hanyar `getProviderConnections({ provider: providerId, isActive: true })`.
+2. Ga kowane haɗin gwiwa, ya fi son `apiKey` (datsa). Faɗuwa zuwa `accessToken`.
+3. Yana dawo da alamar mara komai na farko a nannade azaman `{ apiKey: token }`.
+4. Yana dawo da `null` idan ba'a sami alamar mai amfani ba — API yana amsa `400` da `"No active credentials configured for cloud agent provider: <id>"`.
 
-Wannan yana nufin Cloud Agents suna sake amfani da teburin Provider Connection iri ɗaya da providers na LLM
-na yau da kullum. Don kunna Jules, ƙirƙiri haɗi mai aiki mai `provider: "jules"`
-da `apiKey` da aka cika.
+Wannan yana nufin Ma'aikatan Cloud suna sake amfani da tebur Haɗin Mai Ba da Shafi iri ɗaya kamar masu samar da LLM na yau da kullun. Don kunna Jules, ƙirƙirar haɗin kai mai aiki tare da `provider: "jules"` da `apiKey` mai yawan jama'a.
 
 ## Dashboard
 

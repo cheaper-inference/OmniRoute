@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Unterstützt** 22 Routing-Strategien** (siehe `src/shared/constants/routingStrategies.ts`):
 
-| Strategie           | Verhalten                                                                                                          |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `priority`          | Geordnete Liste des ersten Ziels                                                                                   |
-| `weighted`          | Wahrscheinlichkeit nach Gewicht pro Ziel                                                                           |
-| `round-robin`       | Gehen Sie die Ziele der Reihe nach durch                                                                           |
-| `context-relay`     | Übergeben Sie den Kontext zielübergreifend                                                                         |
-| `fill-first`        | Füllen Sie das Kontingent aus, bevor Sie mit dem nächsten Schritt fortfahren                                       |
-| `p2c`               | Macht zweier Möglichkeiten                                                                                         |
-| `random`            | Einheitlich zufällig                                                                                               |
-| `least-used`        | Wählen Sie diejenige aus, die in letzter Zeit am wenigsten verwendet wurde                                         |
-| `cost-optimized`    | Günstigstes gesundes Ziel zuerst                                                                                   |
-| `reset-aware`       | Kenntnis der Fenster zum Zurücksetzen des Anbieters                                                                |
-| `reset-window`      | Fensterbasiertes Routing zurücksetzen                                                                              |
-| `expiry-first`      | Geben Sie zuerst das Konto aus, dessen Kontingent ungenutzt ablaufen würde                                         |
-| `headroom`          | Der größte verbleibende Quotenspielraum zuerst                                                                     |
-| `quota-weighted`    | Überspringen Sie erschöpfte Konten und schöpfen Sie dann nach der verbleibenden Kontingent- ÷ -Inflight-Last       |
-| `strict-random`     | Wirklich einheitlich (keine Qualitätsgewichtung)                                                                   |
-| `auto`              | Verwenden Sie die 16-Faktor-Bewertung (`autoCombo/`).                                                              |
-| `lkgp`              | Letzter bekanntermaßen guter Anbieter zuerst                                                                       |
-| `context-optimized` | Am besten für Anfragen mit langem Kontext geeignet                                                                 |
-| `cache-optimized`   | Jedes wiederverwendbare Eingabeaufforderungspräfix an dasselbe Konto anheften (Eingabeaufforderungs-Cache-Treffer) |
-| `fusion`            | Parallel an ein Gremium verteilen und dann über einen Richter synthetisieren (`fusion.ts`)                         |
-| `pipeline`          | Kettenschritte — Die Ausgabe jedes Ziels speist das nächste                                                        |
-| `jev`               | Opt-in: TypeSafe Jev gibt zu, welche Ranglisteneinträge laufen; sonst Ihre Bestellung                              |
+| Strategie           | Verhalten                                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `priority`          | Geordnete Liste des ersten Ziels                                                                             |
+| `weighted`          | Wahrscheinlichkeit nach Gewicht pro Ziel                                                                     |
+| `round-robin`       | Gehen Sie die Ziele der Reihe nach durch                                                                     |
+| `context-relay`     | Übergeben Sie den Kontext zielübergreifend                                                                   |
+| `fill-first`        | Füllen Sie das Kontingent aus, bevor Sie mit dem nächsten Schritt fortfahren                                 |
+| `p2c`               | Macht zweier Möglichkeiten                                                                                   |
+| `random`            | Frische Mischung auf Anfrage                                                                                 |
+| `least-used`        | Wählen Sie diejenige mit den wenigsten erfassten Anfragen aus                                                |
+| `cost-optimized`    | Niedrigster Katalogeingangspreis zuerst                                                                      |
+| `reset-aware`       | Restkontingent + Reset-Dringlichkeit                                                                         |
+| `reset-window`      | Kontingentfenster, das zuerst zurückgesetzt wird                                                             |
+| `expiry-first`      | Geben Sie zuerst das Konto aus, dessen Kontingent ungenutzt ablaufen würde                                   |
+| `headroom`          | Der größte verbleibende Quotenspielraum zuerst                                                               |
+| `quota-weighted`    | Überspringen Sie erschöpfte Konten und schöpfen Sie dann nach der verbleibenden Kontingent- ÷ -Inflight-Last |
+| `strict-random`     | Gemischter Stapel: jedes Ziel einmal, bevor es wiederholt wird                                               |
+| `auto`              | Verwenden Sie die 16-Faktor-Bewertung (`autoCombo/`)                                                         |
+| `lkgp`              | Letzter bekanntermaßen guter Anbieter zuerst                                                                 |
+| `context-optimized` | Größtes bekanntes Kontextfenster zuerst                                                                      |
+| `cache-optimized`   | Bevorzugen Sie das Konto, das wahrscheinlich das Eingabeaufforderungspräfix im Cache enthält                 |
+| `fusion`            | Parallel an ein Gremium verteilen und dann über einen Richter synthetisieren (`fusion.ts`)                   |
+| `pipeline`          | Kettenschritte — Die Ausgabe jedes Ziels speist das nächste                                                  |
+| `jev`               | Opt-in: TypeSafe Jev gibt zu, welche Ranglisteneinträge laufen; sonst Ihre Bestellung                        |
 
 ### base.ts (1170 LOC)
 

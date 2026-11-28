@@ -12,6 +12,12 @@ Het neutrale `config/cli-tools-manifest.json` contract declareert canonieke IDs,
 
 Onderbrekings- en beëindigingssignalen worden doorgestuurd naar het kind. Het opstartprogramma wacht op de close-gebeurtenis van het kind voordat de tijdelijke configuratie wordt verwijderd. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` beheert de respijtperiode vóór gedwongen beëindiging (standaard 5000 milliseconden).
 
+`omniroute launch <tool>` (zie [LAUNCH.md](./LAUNCH.md) ) volgt dezelfde omgevingsregels en signaaldoorsturing, en voegt eraan toe:
+
+- **Gateway automatisch starten.** Voor een lokaal doel, wanneer er geen gateway antwoordt op de poort, start de launcher `omniroute serve --headless --no-open` gebonden aan `127.0.0.1` onder een losgemaakt reaper-proces. Elke lopende lancering heeft een lease in `DATA_DIR/launch/leases/` (hartslag elke 15 s, muf na 45 s of wanneer het proces voorbij is). De reaper stopt de gateway waarmee hij is gestart zodra er geen lease meer actief is voor de inactieve periode (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, standaard 10.000 milliseconden). Een gateway die de gebruiker heeft gestart, wordt gebruikt maar nooit gestopt. `--keep-gateway` of `omniroute gateway keep` verandert een launcher-gateway in een normale; `--no-start` herstelt het oude fail-if-down-gedrag. Alleen afgelegen doelen worden onderzocht.
+- **Sessies starten.** Bij elke lancering wordt een kortstondig `olx_` -sessietoken van de bovenliggende inloggegevens (`POST /api/launch/sessions`) aangemaakt, een hartslag gegeven terwijl de tool draait, de gebruikssamenvatting wordt gelezen en deze wordt ingetrokken nadat de tool wordt afgesloten. Het token is een strikte subset van het bovenliggende item: dezelfde machtigingen, dezelfde of een smallere catalogus, een kortere levensduur, en het is geen dashboardreferentie. De tool ontvangt het sessietoken, nooit de bovenliggende referentie, en verzoeken worden getagd met `launch:<tool>:<sessionId>` tenzij `--tag` wordt opgegeven. Een gateway zonder de sessie API mislukt met `GatewayTooOld` in plaats van terug te vallen op een lancering zonder bereik.
+- **Configuratie per lancering.** Toolconfiguratiebestanden worden naar een privé tijdelijke map geschreven (modus 0700, voorvoegsel `omnirouter-`) en verwijderd nadat het kind afsluit. Een `SIGKILL` van het opstartprogramma laat de map achter; `omniroute launch --cleanup` verwijdert dergelijke mappen zodra ze ouder zijn dan een dag.
+
 ## Gemini persistente installatie
 
 ```bash

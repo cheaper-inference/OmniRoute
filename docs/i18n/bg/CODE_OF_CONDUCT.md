@@ -54,15 +54,13 @@
 публикуването чрез официален профил в социална мрежа или изпълняването на ролята на назначен
 представител на онлайн или присъствено събитие.
 
-## Enforcement
+## Принудително изпълнение
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Случаи на злоупотреба, тормоз или по друг начин неприемливо поведение могат да бъдат докладвани на лидерите на общността, отговорни за правоприлагането, като отворят частен съветник за сигурност на
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+или като изпратите имейл на поддържащия на diegosouza.pw@outlook.com. За инциденти, свързани със сигурността, вижте [`SECURITY.md`](SECURITY.md). Всички жалби ще бъдат разгледани и разследвани бързо и справедливо.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Всички лидери на общността са задължени да зачитат неприкосновеността на личния живот и сигурността на докладващия за всеки инцидент.
 
 ## Насоки за прилагане
 

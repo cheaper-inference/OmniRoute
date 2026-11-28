@@ -88,18 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | Müəyyən edilmiş əsas URL                                 |
 | `ctx.apiKey`                 | `string \| null` | Təqdim edilibsə, API açarı                               |
 
-## Aşkarlama
+## Kəşf
 
-Plaginlər aşağıdakı mənbələrdən aşkarlanır:
+Pluginlər aşağıdakılardan aşkar edilir:
 
-1. `~/.omniroute/plugins/<name>/` — istifadəçinin lokal quraşdırmaları
-2. `OMNIROUTE_PLUGIN_PATH` env dəyişəni — xüsusi qovluq
+1. `~/.omniroute/plugins/node_modules/<name>/` — harada `omniroute plugin install` paketlər qoyur ( `npm -g` deyil, npm `--prefix`)
+2. `~/.omniroute/plugins/<name>/` — əl ilə kopyalanan plagin kataloqları
+3. `OMNIROUTE_PLUGIN_PATH` env var — xüsusi kataloqu
 
-Hər ikisi **yalnız CLI üçündür**. Server tərəfindəki plagin icra mühitinin (proksi daxilində işləyən marketplace/`plugin.json` plaginləri) öz skaneri və ayrıca əvəzetmə parametri olan `OMNIROUTE_PLUGINS_DIR` mövcuddur — baxın:
-[PLUGIN_MARKETPLACE.md → Plagin qovluğu](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Birinin təyin edilməsi digərinə təsir etmir.
+Symlinked qovluqlar (npm `plugin install ./dir` üçün nə yaradır) izlənilir.
 
-Yükləmə xətaları tutulur və xəbərdarlıq kimi göstərilir — nasaz plagin heç vaxt CLI-nin dayanmasına səbəb olmur.
+Hər ikisi** Yalnız CLI** . Server tərəfi plaqinin işləmə müddəti (proksi daxilində işləyən bazar/`plugin.json` plaginləri) öz skaneri ilə öz skanerinə malikdir, `OMNIROUTE_PLUGINS_DIR` — bax [PLUGIN_MARKETPLACE.md → Plugin kataloqu](./PLUGIN_MARKETPLACE.md#plugin-directory). Birinin təyin edilməsi digərinə təsir etmir.
+
+Yükləmə xətaları tutulur və xəbərdarlıq kimi çap olunur — pozulmuş plagin heç vaxt CLI çökdürmür.
 
 ## Təhlükəsizlik
 

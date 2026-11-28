@@ -4,12 +4,9 @@
 
 ---
 
-> **Viimati uuendatud:** 2026-08-28 — v3.8.51
-> Sujuvam väljalaskeprotsess, mis kasutab automatiseerimiseks Claude Code’i oskusi.
+> Sujuv väljalaskevoog, mis kasutab Claude Code oskusi automatiseerimiseks.
 >
-> **Hoidke järjekord/haru väljalasete vahel korras:** vaadake [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs` perekond + `npm run check:release-green` + `/babysit` + öine käitus). Selle
-> perioodiline käitamine — ja eriti **enne** selle kontrollnimekirja läbimist — tagab, et väljalaske PR algab korras olekus.
+> **Hoidke queue/branch väljaannete vahel rohelisena:** vt [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` perekond + `npm run check:release-green` + `/babysit` + igaõhtune). Running see perioodiliselt — ja eriti** enne** see kontrollnimekiri — muudab väljalaske PR alguse roheliseks.
 
 ## Lühidalt
 
@@ -37,7 +34,7 @@ npm run test:e2e           # valikuline, kuid soovitatav
 
 ## npm Trusted Publishing (vaikimisi alates versioonist 3.8.51) — lavastatud nõudmisel, otse tagavarana
 
-`npm-publish.yml` avaldab läbi** npm Trusted Publishing (OIDC)** vaikimisi: `stage-npm` töö (github-hostitud) vahetab GitHub ID-märgi selle käigu lühiajalise npm-mandaadi vastu. — hoidlas ei ole pikaealist npm-luba, 2FA viipa puudub, päritolu on lisatud. See on ümbersõit npm-sanktsioonidest nüüd, kui 2FA-d vahele jätvad märgid eemaldatakse; see taastab täisautomaatse voo, mis projektil oli kuni v3.8.48-ni, säilitades samal ajal WS1.3 garantii (lekkinud tunnus ei saa üksi avaldada — pole luba).
+`npm-publish.yml` avaldab läbi** npm Trusted Publishing (OIDC)** vaikimisi: `stage-npm` töö (github-hostitud) vahetab GitHub ID-märgi selle käigu lühiajalise npm-mandaadi vastu. — hoidlas ei ole pikaealist npm-luba, 2FA viipa puudub, päritolu on lisatud. See on ümbersõit npm-sanktsioonidest nüüd, mil 2FA vahele jätvad märgid eemaldatakse; see taastab täisautomaatse voo, mis projektil oli kuni v3.8.48-ni, säilitades samal ajal WS1.3 garantii (lekkinud tunnus ei saa üksi avaldada — pole luba).
 
 **Ühekordne seadistamine (omanik):** npmjs.com → pakett `omniroute` → Seaded → _Usaldusväärne väljaandja_ → GitHub: omanik `diegosouzapw`, repo `OmniRoute`, töövoog `npm-publish.yml` (keskkond: puudub). Kuni see pole olemas, nurjub automaatne samm `ENEEDAUTH`: uuesti saatmine `publish_mode=staged` (allpool) või `direct` abil.
 
@@ -60,7 +57,9 @@ Töövoog npm-publish ei avalda enam otse: see käivitab pakitud tarballi (`chec
 
 **Docker Hub `latest` (nõutav iga stabiilse SemVer avaldamise korral):** `docker-publish` töövoog peab märgistama** mõlemad** `X.Y.Z` ja kui `should-promote-latest.sh` nõustub, on see kõrgeim stabiilne SemVer, `:latest` koos** sama kokkuvõte** . Pärast tööd: jaoturi `latest` kokkuvõte võrdub uue SemVer kokkuvõttega ja `last_updated` teisaldamine. Ärge jätke `:latest` vanemale järgule, kui väljalaskemärkmed räägivad parandustest, mis eksisteerivad ainult gitis. Koostamise kiirkäivituste kasutamine `:latest`; GitOps peaks jätkama `X.Y.Z` kinnitamist. Vaadake [Docker vabastuskanaleid](../guides/DOCKER_GUIDE.md#release-channels) ja #10317.
 
-**Docker Hubi organisatsiooni hoidla (`cheaperinference/omniroute`):** Docker Hub ei saa hoidlat nimeruumide vahel teisaldada, seega säilitab `diegosouzapw/omniroute` oma tõmbamisajaloo ja iga väljalaske ning `mirror-org-dockerhub` töö `docker-publish` kopeerib iga välja antud versiooni (ja `:latest` kui seda edendatakse) `ghcr.io/cheaper-inference/omniroute` -st organisatsiooni hoidlasse. See vajab `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` saladusi; ilma nendeta jääb töö roheliseks koos hoiatusega "Docker Hub org peegel jäi vahele" ja teised registrid avaldavad tavapäraselt. Välja antud versiooni seal hiljem avaldamiseks käivitage** Toimingud → Peegelda Docker pilt Docker Hubi org-i → Käivitage töövoog** `version=X.Y.Z` (ja `promote_latest` kõrgeima stabiilse versiooni jaoks): see kopeerib olemasolevad pildid, ilma ümberehituseta.
+**Docker Hubi organisatsiooni hoidla (`cheaperinference/omniroute`):** Docker Hub ei saa hoidlat nimeruumide vahel teisaldada, seega säilitab `diegosouzapw/omniroute` oma tõmbamisajaloo ja iga väljalaske ning `mirror-org-dockerhub` töö `docker-publish` kopeerib iga välja antud versiooni (ja `:latest` kui seda edendatakse) `ghcr.io/cheaper-inference/omniroute` -st organisatsiooni hoidlasse. See vajab `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` saladusi; ilma nendeta jääb töö roheliseks koos hoiatusega "Docker Hub org peegel jäeti vahele" ja teised registrid avaldavad tavapäraselt. Välja antud versiooni seal hiljem avaldamiseks käivitage** Toimingud → Peegelda Docker kujutis Docker Hubi org-i → Käivitage töövoog** `version=X.Y.Z` (ja `promote_latest` kõrgeima stabiilse versiooni jaoks): see kopeerib olemasolevad pildid, ilma ümberehituseta. Selle hoidla Docker Hubi ülevaade on käsitsi määratud: seda redigeeriv API lükkab tagasi organisatsiooni juurdepääsulubad.
+
+Sama töövoog kopeerib ka kõik väljaanded GHCR pärandpaketti `ghcr.io/diegosouzapw/omniroute` kuni 2027-06-30, nii et selle külge kinnitatud installid värskendatakse pidevalt; selle indeks kannab kirjeldust "teisaldatud `ghcr.io/cheaper-inference/omniroute` sse". See vajab `GHCR_LEGACY_TOKEN` saladust (klassikaline `diegosouzapw` isiklik juurdepääsuluba koos `write:packages`); ilma selleta jääb töö vahele hoiatusega "Pärandi GHCR peegel jäeti vahele".
 
 ## Kiirparanduse kiirrada (silt `hotfix`)
 
@@ -144,14 +143,14 @@ Kõik väljalaskega seotud kohustused peavad järgima `type(scope): subject` vor
 
 **Kehtivad tüübid:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Kehtivad ulatused:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci`, `mcp`, `a2a`, `memory`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers` `executors`, `translator` `skills` `domain`
+**Kehtivad ulatused:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers` `executors`, `translator`, `domain`
 
 Katketavad muudatused: lisage ulatuse järele `BREAKING CHANGE:` jalus või `!` (nt `feat(api)!: drop /v0`).
 
 ### Dokumentatsioon
 
 - [ ] `npm run check:docs-sync` pääseb (automaatne käivitamine eelkinnitusega)
-- [ ] `npm run check:docs-all` läbib (vihmavari: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` läheb mööda. Selle nõuandev `check:deprecated-versions` märgib versioonid, mis on otseselt omistatud OmniRoute (3.6.x ja varasemad), ja ignoreerib kuupäevi.
 - [ ] `npm run check:env-doc-sync` väljub 0 — kood ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env leping on puutumata
 - [ ] `npm run check:doc-links` väljub 0-st — pärast ümberkorraldamist puuduvad katkised sisemised allahindlusviited
 - [ ] `docs/architecture/ARCHITECTURE.md` on hinnatud storage/runtime drift jaoks
@@ -283,7 +282,7 @@ Radari teade on `active: false` tahtlikult toime pandud. Aktiveerimine on eraldi
 - [ ] Kasutage üht krüpteeritud tehingu-meiliedastust heakskiidetud sender/domain ga
 - [ ] Tõestage varukoopia taastamine ja üks järelevalvega piiratud eelarvega uurimistöö
 - [ ] Enne annetustõendite vastuvõtmist kinnitage BRL/PIX ülevaatuseeskirjad
-- [ ] Lubage avalik kassa ainult pärast eelnevaid väravaid, seejärel aktiveerige uus `news.json` ID
+- [ ] Lubage avalik kassa alles pärast eelnevaid väravaid, seejärel aktiveerige uus `news.json` ID
 - [ ] Veenduge, et kodubänner kasutaks lokaliseeritud koopiat ja uus ID ilmub uuesti pärast vanema ID loobumist
 
 ## Manustatud teenuste suitsutest (v3.8.4+)
@@ -399,7 +398,7 @@ Arendamise tõkestus on üles ehitatud git torustikuga (tööpuud pole puudutatu
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

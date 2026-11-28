@@ -13,12 +13,12 @@ Agent Skills 是结构化的 SKILL.md 文件，用于指导外部智能体、MCP
 
 ## 概述
 
-该目录包含 **45 个 Agent Skills**（23 个 REST API 技能 + 21 个 CLI 技能 + 1 个配置工作流）。每个技能都包含：
+目录包含**45 特工技能**（23 REST API + 21 CLI + 1 配置工作流程）。每个技能有：
 
-- 一个**规范 ID**（`omni-auth`、`cli-serve` 等）
-- 位于 `skills/{id}/SKILL.md` 的 **SKILL.md** 文件，其中包含 YAML 前置元数据（`name`、`description`）和内容丰富的 Markdown 正文
-- 从 OpenAPI 规范和 CLI 注册表派生的 **REST 端点**（API 技能）或 **CLI 子命令**（CLI 技能）
-- 用于实时获取的 **GitHub 原始文件 URL**：`https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- 一个**规范ID** （`omni-auth`、 `cli-serve`等）
+- 一个**SKILL.md** `skills/{id}/SKILL.md`中的文件，带有YAML frontmatter (`name`, `description`) +丰富的 Markdown 正文
+- **REST端点**（API技能）或**CLI命令**（CLI技能）源自OpenAPI规范和CLI注册表
+- 一个**GitHub原始URL**对于实时获取： `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -252,31 +252,31 @@ curl "${BASE}/omni-providers/SKILL.md"
 
 ---
 
-## 生成器
+## 发电机
 
-生成器会读取精选目录、OpenAPI 规范和 CLI 注册表，并为每个条目写入 `skills/{id}/SKILL.md`：
+生成器读取策划目录+ OpenAPI spec + CLI注册表并为每个条目写入`skills/{id}/SKILL.md` ：
 
 ```bash
-# 预览（试运行，不写入）
+# Preview (dry run, no writes)
 curl -X POST http://localhost:20128/api/agent-skills/generate \
   -H "Authorization: Bearer <admin-key>" \
   -H "Content-Type: application/json" \
   -d '{"dryRun":true}'
 
-# 完整重新生成
+# Full regeneration
 curl -X POST http://localhost:20128/api/agent-skills/generate \
   -H "Authorization: Bearer <admin-key>" \
   -H "Content-Type: application/json" \
   -d '{"dryRun":false,"prune":false}'
 
-# 重新生成指定 ID
+# Regenerate specific IDs
 curl -X POST http://localhost:20128/api/agent-skills/generate \
   -H "Authorization: Bearer <admin-key>" \
   -H "Content-Type: application/json" \
   -d '{"dryRun":false,"onlyIds":["omni-providers","cli-serve"]}'
 ```
 
-生成器响应是一个 `GeneratorReport`：
+生成器响应是`GeneratorReport`：
 
 ```json
 {
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## 覆盖率 API
+## 覆盖范围API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

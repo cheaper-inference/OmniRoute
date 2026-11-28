@@ -4,9 +4,9 @@
 
 ---
 
-> **የእውነት ምንጭ፡-** `electron/` የስራ ቦታ** መጨረሻ የዘመነው፡-** 2026-06-28 — v3.8.40
+> **የእውነት ምንጭ፡-** `electron/` የስራ ቦታ
 
-OmniRoute አብሮገነብ የዴስክቶፕ አቋራጭ መተግበሪያ (Windows / macOS / Linux) ይልካል።**Electron 41** +** ኤሌክትሮን-ገንቢ 26.10** . የዴስክቶፕ መተግበሪያ የ Next.js ራሱን የቻለ አገልጋይ በልጅነት ሂደት ያፈልቃል፣ `BrowserWindow` ይጠቁማል እና የስርዓት መሣቢያ፣ ራስ-አፕዴተር፣ IPC ድልድይ እና ዜሮ-ውቅር ሚስጥራዊ ማስነሻን ይጨምራል።
+OmniRoute አብሮ የተሰራ የፕላትፎርም ዴስክቶፕ መተግበሪያ (Windows / macOS / Linux) ይልካል።**Electron 41** +** ኤሌክትሮን-ገንቢ 26.10** . የዴስክቶፕ መተግበሪያ የ Next.js ራሱን የቻለ አገልጋይ በልጅነት ሂደት ያፈልቃል፣ `BrowserWindow` ይጠቁማል እና የስርዓት መሣቢያ፣ ራስ-አፕዴተር፣ IPC ድልድይ እና ዜሮ-ውቅር ሚስጥራዊ ማስነሻን ይጨምራል።
 
 ## አርክቴክቸር
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## ራስ-አዘምን
 
-`electron-updater` ከ GitHub አቅራቢው (`diegosouzapw/OmniRoute`) ጋር ይጠቀማል።
+`electron-updater` ከ GitHub አቅራቢው (`cheaper-inference/OmniRoute`) ጋር ይጠቀማል።
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - ክንውኖች በ `update-status` IPC `checking`፣ `available`፣ `not-available`፣ `downloading` (ከ `percent` ጋር)፣ `downloaded`፣ `error`
@@ -273,7 +273,7 @@ AppImage መፈረም ከተፈረመ — አዘጋጅ `LINUX_GPG_KEY` አማራ
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ልቀቶች ወደ GitHub Releases (`diegosouzapw/OmniRoute`) ታትመዋል፣ ይህ ደግሞ `electron-updater` አዳዲስ ስሪቶችን የሚፈትሽበት ነው።
+ልቀቶች ወደ GitHub Releases (`cheaper-inference/OmniRoute`) ታትመዋል፣ ይህ ደግሞ `electron-updater` አዳዲስ ስሪቶችን የሚፈትሽበት ነው።
 
 ## መላ መፈለግ
 

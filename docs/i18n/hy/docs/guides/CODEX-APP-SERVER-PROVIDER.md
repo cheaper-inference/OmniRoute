@@ -21,24 +21,21 @@ OmniRoute-ը տրամադրում է OpenAI Codex-ն օգտագործելու **
 ## 1. Ճարտարապետություն
 
 ```
-┌─ OmniRoute հավելված ─────────────┐        ┌─ codex-app-server կողային կոնտեյներ ─┐
-│  CodexAppServerExecutor          │  WS    │  codex app-server                    │
-│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456          │
-│  (+ հնարավորությունների թոքեն)    │  JSON  │  --ws-auth capability-token          │
-│                                  │  RPC   │  ինքնուրույն կառավարում է OpenAI OAuth-ը │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, ավտոթարմացում) │
-        │ համօգտագործվում է (compose հատորներ) └─────────────────────────────────────┘
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
+│  CodexAppServerExecutor          │  WS    │  codex app-server                   │
+│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS հնարավորությունների թոքենը (երկուսն էլ միացնում են այն)
-  codex-appserver-home    → ~/.codex (auth.json-ը գրվում է կառավարման վահանակի կողմից,
-                             կարդացվում է կողային կոնտեյների codex app-server-ի կողմից)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Կողային կոնտեյները հասանելի է **միայն** ներքին compose ցանցում
-  (`ws://codex-app-server:1456`)՝ հնարավորությունների թոքենով պաշտպանված։ Այն
-  **երբեք** չի հրապարակվում հոսթում կամ համացանցում։
-- Codex CLI-ն ներառված է `omniroute:base`-ում, ուստի կողային կոնտեյներն
-  աշխատեցնելիս հոսթում կամ օգտատիրոջ համակարգչում codex տեղադրելու կարիք չկա։
+- Կողային մեքենան լսում է** միայն** Ներքին կազմման ցանցի վրա (`ws://codex-app-server:1456`) կարողությունների նշանի հետևում: Դա է** երբեք** հրապարակված հաղորդավարին կամ ինտերնետին:
+- Կողային մեքենան օգտագործում է `omniroute:cli-no-docker`, որը կառուցվել է `runner-cli-no-docker` թիրախից, որը ներառում է Codex CLI ը:
 
 ## 2. Գործարկում
 

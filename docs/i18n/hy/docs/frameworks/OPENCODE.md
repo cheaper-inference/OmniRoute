@@ -4,14 +4,11 @@
 
 ---
 
-> **Կարգավիճակ՝** Ընդհանուր հասանելիություն։
-> **Լսարան՝** Օպերատորներ, որոնք OpenCode-ը միացնում են OmniRoute-ի տեղակայմանը։
-> **Ճշմարտության աղբյուր (կազմաձևման սխեմա)՝** `src/shared/services/opencodeConfig.ts`
-> **Ճշմարտության աղբյուր (npm փաթեթ)՝** `@omniroute/opencode-provider/` (հրապարակման ենթակա աշխատանքային տարածք)
+> **Կարգավիճակը:** Ընդհանուր առմամբ հասանելի է:** Հանդիսատես.** Օպերատորները OpenCode միացնում են OmniRoute տեղակայմանը:** Ճշմարտության աղբյուրը (կազմաձևման սխեման).** `src/shared/services/opencodeConfig.ts`** Առաջարկվող npm փաթեթներ.** `@omniroute/opencode-plugin/` (OpenCode v1, տեղադրված `omniroute setup opencode` ի կողմից) և `@omniroute/opencode-plugin-v2/` (OpenCode v2): Ավելի հին `@omniroute/opencode-provider/` փաթեթն է** հնացած** (տես Ուղին 2):
 
-[OpenCode](https://opencode.ai)-ը գործակալային CLI/աշխատասեղանային AI հաճախորդ է։ Այն իր մատակարարների կատալոգը կարդում է `~/.config/opencode/opencode.json`-ից (կամ `opencode.jsonc`-ից) և հետևում է `https://opencode.ai/config.json` հասցեում գտնվող սխեմային։ OmniRoute-ն իրեն ներկայացնում է OpenCode-ին որպես այդ մատակարարներից մեկը. յուրաքանչյուր հարցում անցնում է OmniRoute-ի ստանդարտ՝ OpenAI-ի հետ համատեղելի `/v1` միջերեսով, ուստի OpenCode-ն ավտոմատ կերպով օգտվում է Auto-Combo երթուղումից, շղթայի անջատիչներից, բանալիների քաղաքականություններից, դիտարկելիությունից և այլն։
+[OpenCode](https://opencode.ai) գործակալ CLI/desktop AI հաճախորդ է: Այն կարդում է իր մատակարարների կատալոգը `~/.config/opencode/opencode.json` ից (կամ `opencode.jsonc`) և հետևում է `https://opencode.ai/config.json` ի սխեմային: OmniRoute իրեն ենթարկում է OpenCode ին, քանի որ այդ մատակարարներից մեկը — յուրաքանչյուր հարցում հոսում է OmniRoute ի ստանդարտ OpenAI-ի հետ համատեղելի `/v1` մակերևույթի միջով, այնպես որ OpenCode ավտոմատ կերպով օգտվում է Auto-Combo երթուղուցից, անջատիչներից, հիմնական քաղաքականություններից, դիտելիությունից և այլն:
 
-Աջակցվում է ինտեգրման **երկու ուղի**։ Ընտրեք դրանցից մեկը. դրանք ստեղծում են նույն կազմաձևումը։
+Այս էջը ներկայացնում է ստատիկ կազմաձևման երկու ուղիները ստորև. երկուսն էլ ստեղծում են նույն կազմաձևը: Մոդելների ցանկի համար, որը հետևում է ձեր կենդանի կատալոգին, դրա փոխարեն օգտագործեք plugin-ը. `omniroute setup opencode` տեղադրում է `@omniroute/opencode-plugin` (OpenCode v1) և `@omniroute/opencode-plugin-v2` թիրախավորում է OpenCode v2-ը (տես [CLI ինտեգրումները](../guides/CLI-INTEGRATIONS.md) և [OpenCode v2 հավելվածի ուղեցույցը](../guides/OPENCODE-V2-PLUGIN.md) ):
 
 ---
 
@@ -54,9 +51,11 @@ omniroute config opencode \
 
 ---
 
-## Ուղի 2 — npm փաթեթ `@omniroute/opencode-provider`
+## Ճանապարհ 2 — npm փաթեթ `@omniroute/opencode-provider` (հնացած)
 
-Խորհուրդ է տրվում, երբ կազմաձևումը ծրագրային կերպով ստեղծում եք Node/TS-ից (CI կոնվեյերներ, մոնոռեպոզիտորիաներ, հատուկ տեղադրիչների հոսքեր)։
+> **Հնացած.** Փաթեթը գրում է ստատիկ մոդելների ցուցակ, որը շեղվում է ձեր կենդանի OmniRoute կատալոգի հետևում: Դրա README խորհուրդ է տալիս միգրանալ `@omniroute/opencode-plugin` (կամ `@omniroute/opencode-plugin-v2` OpenCode v2-ի վրա): Ստորև բերված API ը պահվում է միայն առկա սկրիպտների համար:
+
+Օգտագործվում է Node/TS ից կազմաձևումը սկրիպտավորելիս (CI խողովակաշարեր, մոնոռեպոներ, մաքսային տեղադրողի հոսքեր):
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Ըստ ցանկության՝ փոխարինեք OpenCode-ին հասանելի մոդելների կատալոգը
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Գոյություն ունեցող ֆայլի հետ ոչ կործանարար միաձուլման համար վերարտադրեք `opencodeConfig.ts`-ի `mergeOpenCodeConfigText()`-ը կամ կանչեք CLI գեներատորը։
+Գոյություն ունեցող ֆայլի հետ ոչ կործանարար միաձուլման համար կրկնօրինակեք `mergeOpenCodeConfigText()` `opencodeConfig.ts` ից կամ զանգահարեք CLI գեներատորին:
 
-Ամբողջական API-ի համար տե՛ս [փաթեթի README-ը](../../@omniroute/opencode-provider/README.md)։
+Ամբողջական API համար տես [README](../../@omniroute/opencode-provider/README.md) փաթեթը:
 
 ---
 
@@ -157,7 +156,9 @@ Anthropic ոճի կլիենտների համար, որոնք ուղարկում 
 
 ## Տես նաև
 
-- [API տեղեկատու](../reference/API_REFERENCE.md) — OmniRoute REST-ի ամբողջական ինտերֆեյսը
+- [API հղում](../reference/API_REFERENCE.md) — լրիվ OmniRoute REST մակերես
 - [Auto-Combo](../routing/AUTO-COMBO.md) — ինչ է նշանակում `model: "auto"`
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (խորհուրդ է տրվում)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (հնացած)
 - Աղբյուր՝ `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

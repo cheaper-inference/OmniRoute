@@ -4,7 +4,7 @@
 
 ---
 
-> **ስሪት፡** v3.8.44** መጨረሻ የዘመነው፡-** 2026-10-28** ታዳሚዎች፡-** መሐንዲሶች የተካተቱ አገልግሎቶችን ማከል፣ ማቆየት ወይም ማረም (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box)።
+> **ስሪት፡** v3.8.44** ታዳሚዎች፡-** መሐንዲሶች የተካተቱ አገልግሎቶችን ማከል፣ ማቆየት ወይም ማረም (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box)።
 
 የተከተቱ አገልግሎቶች OmniRoute የሚጭኑት፣ የሚቆጣጠሩት እና እንደ አንደኛ ደረጃ የማዞሪያ ኢላማ የሚያጋልጡ በአካባቢው የተጫኑ የሂደት የጎን መኪና መሳሪያዎች ናቸው። እንደ ውጫዊ አቅራቢዎች (በበይነመረብ ላይ በ API ቁልፎች ይደርሳሉ) ፣ የተከተቱ አገልግሎቶች ከ OmniRoute ጋር በተመሳሳይ ማሽን ይሰራሉ እና በ loopback ይገናኛሉ።
 
@@ -43,9 +43,9 @@
 ስምንቱም ተመሳሳይ የቁጥጥር ሞዴል ይከተላሉ፡-
 
 - OmniRoute በ `DATA_DIR/services/{name}/` ስር ይጭናቸዋል (ከ OmniRoute የራሱ `package.json` የተገለለ)
-- OmniRoute እንደ ሕፃን ሂደቶች ይፈልቃል እና ይከታተላቸዋል
+- OmniRoute እንደ ልጅ ሂደቶች ይፈልጓቸዋል እና ይከታተላቸዋል
 - OmniRoute ጊዜ ያለፈበት API ቁልፍ በልጁ አካባቢ ውስጥ በመርፌ ያለማቋረጥ ይሽከረከራል (የሚመለከተው ከሆነ)
-- ሁሉም የአስተዳደር መንገዶች (`/api/services/*`) ናቸው።**LOCAL_ONLY** — ከ loopback ብቻ ተደራሽ ነው (ከባድ ህግ ቁጥር 17)
+- ሁሉም የአስተዳደር መንገዶች (`/api/services/*`) ናቸው።**LOCAL_ONLY** — ከ loopback ብቻ ተደራሽ ነው (ከባድ ህግ #17)
 
 ### ቁልፍ ውሳኔዎች (ከዲዛይን እቅድ)
 
@@ -210,7 +210,7 @@
 
 ## 4. API ማጣቀሻ
 
-ሁሉም መንገዶች በ `/api/services/` ስር ናቸው።**LOCAL_ONLY** (loopback ብቻ፣ ጠንካራ ህግ ቁጥር 17)። የድግግሞሽ ያልሆኑ ጥያቄዎች የአውት ቶከን ምንም ቢሆኑም `403 LOCAL_ONLY` ይቀበላሉ።
+ሁሉም መንገዶች በ `/api/services/` ስር ናቸው።**LOCAL_ONLY** (loopback ብቻ፣ ጠንካራ ህግ #17)። የድግግሞሽ ያልሆኑ ጥያቄዎች የአውት ቶከን ምንም ቢሆኑም `403 LOCAL_ONLY` ይቀበላሉ።
 
 ### 4.1 9 ራውተር የመጨረሻ ነጥቦች (11 መስመሮች)
 
@@ -237,7 +237,7 @@
 | `409` | ቀድሞውንም በመጫን ላይ (መቆለፊያ ተይዟል)                            |
 | `500` | npm መጫን አልተሳካም — ለጓደኛ ስህተት `message` ይመልከቱ             |
 
-**ማስታወሻዎች፡-** `execFile('npm', [...])` — ምንም ሼል የለም, ምንም interpolation (ከባድ ህግ #13) ይጠቀማል. EACCES ስህተቶች እንደ ወዳጃዊ መልዕክቶች ብቅ አሉ።
+**ማስታወሻዎች፡-** `execFile('npm', [...])` — ምንም ሼል የለም፣ ምንም interpolation (hard rule #13) ይጠቀማል። EACCES ስህተቶች እንደ ወዳጃዊ መልዕክቶች ብቅ አሉ።
 
 ---
 
@@ -329,7 +329,7 @@
 | `200` | `{ keyRotated: true, restarted: boolean }` |
 | `500` | ማሽከርከር አልተሳካም።                             |
 
-**ደህንነት፡** አዲሱ ቁልፍ በምላሹ በጭራሽ አይመለስም (የመረጃ ፍሰት የለም)። በ `version_manager` ሠንጠረዥ ውስጥ ኢንክሪፕት የተደረገ (AES-256-GCM) ተቀምጧል።
+**ደህንነት፡** አዲሱ ቁልፍ በምላሹ በጭራሽ አይመለስም (የምስክር ወረቀት የለም)። በ `version_manager` ሠንጠረዥ ውስጥ ኢንክሪፕት የተደረገ (AES-256-GCM) ተቀምጧል።
 
 ---
 
@@ -492,7 +492,7 @@ open-wa (`@open-wa/wa-automate`) WhatsApp ድርን በራስ ሰር ለመስ�
 | `POST` | `/api/services/openwa/auto-start` | ራስ-ጀምርን ቀያይር                               |
 | `GET`  | `/api/services/openwa/logs`       | SSE ሎግ ጅራት (በተጋራ `[name]/logs` ተለዋዋጭ መንገድ) |
 
-**API ቁልፍ** እንደ `WA_KEY` — ክፍት-ዋ አጠቃላይ `WA_*` -prefixed env በ `--key`/`-k` CLI አማራጭ ላይ ይሽረው (`dist/cli/setup.js::envArgs()`፣ በተጫነው 4.76.0 ጥቅል ላይ የተረጋገጠ)። ቅድመ ቅጥያ `ow_` በ `generateServiceApiKey()` ሲፈጠር። ክፍት-ዋ ቁልፉን ከ `key`/`api_key` HTTP ራስጌ ( `Authorization: Bearer` አይደለም) ያነባል; `/api-docs*` ከቼክ በግልጽ ነፃ ነው (`setupAuthenticationLayer` በ `dist/cli/server.js`)፣ ስለዚህ የጤና ምርመራው ምንም የማረጋገጫ ርዕስ አያስፈልገውም።
+**API ቁልፍ:** እንደ `WA_KEY` — ክፍት-ዋ አጠቃላይ `WA_*` -prefixed env በ `--key`/`-k` CLI አማራጭ ላይ ይሽረው (`dist/cli/setup.js::envArgs()`፣ በተጫነው 4.76.0 ጥቅል ላይ የተረጋገጠ)። ቅድመ ቅጥያ `ow_` በ `generateServiceApiKey()` ሲፈጠር። ክፍት-ዋ ቁልፉን ከ `key`/`api_key` HTTP ራስጌ ( `Authorization: Bearer` አይደለም) ያነባል; `/api-docs*` ከቼክ በግልጽ ነፃ ነው (`setupAuthenticationLayer` በ `dist/cli/server.js`)፣ ስለዚህ የጤና ምርመራው ምንም የማረጋገጫ ርዕስ አያስፈልገውም።
 
 **ማጣመር፡** open-wa ኦፊሴላዊ ያልሆነ እና ከ WhatsApp — ጋር ግንኙነት የለውም የተገናኘው ቁጥሩ ከ WhatsApp የራሱ አውቶማቲክ ማወቂያ የመከልከል አደጋ አለው። በመጀመሪያ ጅምር ላይ፣ የማጣመሪያው QR ኮድ ወደ stdout ታትሟል እና በነባሩ Logs panel/SSE ዥረት — በኩል በዚህ ውህደት ውስጥ ምንም የተወሰነ የQR-ምስል የመጨረሻ ነጥብ የለም።
 
@@ -536,7 +536,7 @@ LLMLingua ፈጣን-መጭመቂያ የጎን መኪና መጠቅለያ `@atjsh/
 | `POST` | `/api/services/singbox/auto-restart-adopted` | ለተቀበለ (ቅድመ-ነባር) ሂደት ራስ-ዳግም ማስጀመርን ቀይር        |
 | `GET`  | `/api/services/singbox/logs`                 | SSE ሎግ ጅራት (በተጋራ `[name]/logs` ተለዋዋጭ መንገድ)   |
 
-**TPROXY ሽቦ;** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) `config.json` ይጽፋል እና የ TPROXY ፋየርዎል ደንቦችን `applyTproxy()` በፊት ተቆጣጣሪውን ይጀምራል። ተቆጣጣሪው ከጠፋ ወይም `running` ላይ መድረስ ካልቻለ፣ አሁን በስህተት ደረጃ ተመዝግቧል (ውድቀቱን በዝምታ ከመዋጥ ይልቅ) ስለዚህ አንድ ኦፕሬተር ከኋላቸው የሚሰራ አድማጭ ሳይኖር የ TPROXY ህጎች መተግበራቸውን መንገር ይችላል።
+**TPROXY ሽቦ;** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) `config.json` ይጽፋል እና የ TPROXY ፋየርዎል ደንቦችን `applyTproxy()` በፊት ተቆጣጣሪውን ይጀምራል። ተቆጣጣሪው ከጠፋ ወይም `running` ላይ መድረስ ካልቻለ፣ አሁን በስህተት ደረጃ ተመዝግቧል (ውድቀቱን በፀጥታ ከመዋጥ ይልቅ) ስለዚህ አንድ ኦፕሬተር የ TPROXY ህጎችን ከኋላቸው የሚሠራ አድማጭ ሳይኖር መተግበሩን ይነግራል።
 
 ---
 
@@ -556,11 +556,9 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 - ስክሪፕስ `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` ከምላሹ
 - `<base href>` ለመወጋት እና ፍጹም ዱካዎችን መደበኛ ለማድረግ HTML ምላሾችን እንደገና ይጽፋል (`/foo` → `/dashboard/.../embed/foo`)
 
-ለተከተተው ዳሽቦርድ WebSocket ማሻሻያዎች የሚስተናገዱት በአንድ የተወሰነ ወደብ ላይ ባለው ተጓዳኝ አገልጋይ ነው ( `src/lib/services/embedWsProxy.ts` ይመልከቱ)።
+ለተከተተው ዳሽቦርድ WebSocket ማሻሻያዎች የሚስተናገዱት በአንድ የተወሰነ ወደብ ላይ ባለው ተጓዳኝ አገልጋይ ነው ( `src/lib/services/embedWsProxy.ts` ይመልከቱ)። እያንዳንዱ ማሻሻያ ዋሻው ከመከፈቱ በፊት የተፈቀደ ነው፣ እንደ HTTP ከተከተተው መንገድ ጋር ተመሳሳይ ህጎች አሉት፡ እኩያው ምንም የተገላቢጦሽ ተኪ ማስተላለፊያ ራስጌ፣ አሳሽ `Origin` የዳሽቦርድ መነሻ መሆን አለበት (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` የ loopback ነባሪዎችን ያራዝመዋል) እና ደዋዩ የዳሽቦርድ ክፍለ ጊዜ ወይም የአስተዳደር-scope API ቁልፍ ከዳሽቦርድ መግቢያ ካልሆነ በስተቀር ያስፈልገዋል።
 
-እያንዳንዱ ማሻሻያ ዋሻው ከመከፈቱ በፊት የተፈቀደ ነው፣ እንደ HTTP የተከተተ መንገድ ተመሳሳይ ህጎች አሉት፡ እኩያው ምንም የተገላቢጦሽ ተኪ ማስተላለፊያ ራስጌ የሌለው መሆን አለበት፣ አሳሽ `Origin` የዳሽቦርድ መነሻ መሆን አለበት (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` የ loopback ነባሪዎችን ያራዝማል) እና ደዋዩ የዳሽቦርድ ክፍለ ጊዜ ወይም የአስተዳደር-scope API ቁልፍ የዳሽቦርድ መግቢያ ካልሆነ በስተቀር ያስፈልገዋል።
-
-**ደህንነት፡** የተከተቱት ተኪ መንገዶች በ `LOCAL_ONLY_API_PREFIXES` ስር የተከፋፈሉ ሲሆኑ ከ loopback ብቻ ሊገኙ ይችላሉ። በ Cloudflare/Ngrok መሿለኪያ በኩል JWT ያገኘ አጥቂ ለተከተቱ አገልግሎቶች ፕሮክሲ ማድረግ አይችልም።
+**ደህንነት፡** የተከተቱት የተኪ መንገዶች በ `LOCAL_ONLY_API_PREFIXES` ስር የተከፋፈሉ ሲሆን ከ loopback ብቻ ሊገኙ ይችላሉ። በ Cloudflare/Ngrok መሿለኪያ በኩል JWT ያገኘ አጥቂ ለተከተቱ አገልግሎቶች ፕሮክሲ ማድረግ አይችልም።
 
 ---
 

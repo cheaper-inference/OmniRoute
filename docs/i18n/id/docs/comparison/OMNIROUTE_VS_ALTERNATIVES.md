@@ -11,7 +11,7 @@ Perbandingan fitur obyektif vs router AI sumber terbuka yang populer.
 | Fitur                                                   |                 OmniRoute 3.8                 |      LiteLLM 1.x      | OpenRouter (SaaS)  | kunci port |
 | ------------------------------------------------------- | :-------------------------------------------: | :-------------------: | :----------------: | :--------: |
 | **Penyedia**                                            |                    **329**                    |         ~100          |        ~50         |    ~30     |
-| **entri katalog Free/no-auth**                          |                    **155**                    |          n/a          |      melewati      |    n/a     |
+| **Penyedia dengan akses gratis**                        |          **50 dengan akses gratis**           |          n/a          |      melewati      |    n/a     |
 | **Dapat dihosting sendiri**                             |                      ✅                       |          ✅           |         ❌         | ⚠ dibayar  |
 | **entri katalog OAuth**                                 |                    **23**                     |       sebagian        |         ❌         |     ❌     |
 | **Kombo fallback otomatis**                             |                **22 strategi**                | berdasarkan prioritas | berbasis tingkatan | tertimbang |
@@ -38,7 +38,7 @@ Perbandingan fitur obyektif vs router AI sumber terbuka yang populer.
 
 ## Kapan harus memilih OmniRoute
 
-- Anda menghosting sendiri dan menginginkannya** cakupan penyedia maksimum** (394 penyedia, 155 entri katalog free/no-auth )
+- Anda menghosting sendiri dan menginginkannya** cakupan penyedia maksimum** (394 penyedia, 50 dengan akses gratis)
 - Anda membutuhkan sebuah** server MCP bawaan** (alat LLM, memori, keterampilan diekspos sebagai alat)
 - Anda membutuhkan** protokol A2A** untuk alur kerja agen-ke-agen
 - Anda ingin** siluman sidik jari** (JA3/JA4) untuk menghindari deteksi oleh CAPTCHAs hulu
@@ -56,12 +56,12 @@ Perbandingan fitur obyektif vs router AI sumber terbuka yang populer.
 - Anda tidak keberatan membayar per token dengan markup SaaS
 - Anda memerlukan **satu metode pembayaran** untuk semua penyedia
 
-## Kapan memilih Portkey
+## Kapan harus memilih Portkey
 
-- Anda memerlukan **SLA komersial** dengan jaminan uptime
-- Anda lebih memilih **dasbor terkelola** tanpa beban operasional
-- Anda memerlukan fitur **kepatuhan perusahaan** yang siap digunakan
+- Anda membutuhkan sebuah** SLA komersial** dengan jaminan uptime
+- Anda lebih memilih a** dasbor yang dikelola** tanpa operasi overhead
+- Anda membutuhkan** kepatuhan perusahaan** fitur di luar kotak
 
 ---
 
-_Terakhir diperbarui: 2026-08-02. Kirim koreksi melalui PR agar tabel ini tetap akurat._
+_Kirimkan koreksi melalui PR agar tabel ini tetap akurat._

@@ -4,86 +4,63 @@
 
 ---
 
-> **2026-11-19: tá scuaine an chumaisc Mergify ar scor** (cinneadh an úinéara). Ní shainíonn `.mergify.yml` scuaine a thuilleadh agus diúltaíonn sé do na horduithe Mergify a chumasc nó a athscríobhann iarratas tarraingthe. Déantar scaoileadh PRs a chumasc de láimh faoin tacar rialacha stórtha "Éiligh geataí glasa ar an scaoileadh gníomhach" (`Gate / CI` + `Gate / Quality`) go dtí go ritheann omni-scuaine i mód beo, agus trí scuaine omni ina dhiaidh sin ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Déanann na codanna Mergify thíos cur síos ar an scuaine mar a bhí.
+## Tuirlingt ar bhrainse scaoileadh
 
-Ós rud é v3.8.49 (WS3.2/WS3.4 den phlean quality/velocity ) is é an conair chumasc réamhshocraithe le haghaidh PRs athbhreithnithe go `release/vX.Y.Z`** Cumaisc scuaine chumaisc** (`.mergify.yml`); an** traein chumasc láimhe** doiciméadaithe thíos tá an FALLBACK — a úsáidtear le linn teagmhas, reo scaoileadh, nó má athraíonn plean Foinse Oscailte Mergify riamh.
+Rialaíonn an scuaine omni tuirlingthe go `release/vX.Y.Z`. Léigh an `mode` barrleibhéil i `config/merge-queue/config.json` ar an mbrainse réamhshocraithe sula dtagann tú i dtír PR. Féach [Omni-Queue](OMNI_QUEUE.md).
 
-## Conair réamhshocraithe: scuaine Mergify
+- **`shadow`** ritheann bailíochtú agus fágtar an tuirlingt go cumasc láimhe. Cuir `omni-queue` i bhfeidhm ar an PR ceadaithe ag a cheann deiridh. Seiceáil incháilitheacht le `npm run queue -- why <PR>`. Fan leis an bhfíorasc don cheann sin in `npm run queue -- history --base <branch>`. Lean ar aghaidh ar `would-land`. Ar `culprit-found` nó `would-dequeue`, coinnigh an cumasc agus socraigh an chúis.
+- **Eisceachtaí scáth.** Is féidir le traein le CI iomlán glas in aghaidh an bhuntois reatha dul ar aghaidh gan fíorasc scuaine ar leith. Tá an eisceacht chéanna i gceist nuair atá an bunáit reatha sa cheann PR cheana féin.
+- **`live`** úsáideann an lipéad `omni-queue` chun tuirlingt a spreagadh. Is í an scuaine amháin a thagann an PR i dtír. Fág orduithe chumasc agus brú díreach chuig an scuaine.
 
-1. Déanann na feachtais athbhreithniú ar an PR agus tugann siad stádas glas dó, agus faigheann sé faomhadh ó gheata ⭐ réamhchumaisc an úinéara
-   (an tuairisc + cinneadh de réir míre — féach `/merge-prs` Céim 0.75).
-2. Cuireann an t-úinéir (nó an seisiún atá ag gníomhú de réir chinneadh an úinéara) an lipéad **`queue`**
-   i bhfeidhm. IS ionann an lipéad agus an faomhadh cumaisc; ní dhéanann Mergify ach é a chur i gcrích.
-3. Bailíochtaíonn Mergify PRanna sa scuaine **go srathach** (ceann amháin ag an am) i gcoinne na ngeataí tapa
-   agus cumascann sé iad (squash). Baineann baisceáil + déroinnt uathoibríoch le sraith íoctha Mergify
-   ("Cannot use Merge Queue batch" ar an bplean saor in aisce, #7220), mar sin ní shocraíonn `.mergify.yml`
-   aon `batch_size`; fanann an bhaisceáil mar chúram ar an traein chumaisc láimhe thíos. Baintear PR a bhfuil
-   a sheiceálacha fós ar feitheamh tar éis `checks_timeout` (240 nóim = 2× p95 tomhaiste
-   `quality.yml`) den scuaine seachas ligean dó an scuaine a stopadh.
-4. Tar éis an chumaisc, bailíochtaíonn sreabhadh oibre leanúnach stádas glas na heisiúna an barr nua nuair a bhrúitear é
-   agus osclaíonn sé saincheist leithdháilte má tharla cúlchéim sa teaglaim (ní dhéanann sé aisiompú uathoibríoch riamh).
+Teastaíonn údarú an úinéara agus na seiceálacha riachtanacha is infheidhme maidir le gach tabhairt i dtír. Cuir `omni-queue` i bhfeidhm ach amháin tar éis don úinéir tuirlingthe a údarú. Teastaíonn cinneadh `protected-approved` an úinéara don PR sin freisin le PRs ag baint le cosáin chosanta.
 
-Ráillí cosanta (ar aon dul le Rialacha Dochta #21/#22 in `CLAUDE.md`):
+Éilíonn an tacar rialacha "Geataí glasa ar an scaoileadh gníomhach" glas `Gate / CI` agus `Gate / Quality` ar an ceann. Ná húsáid `--admin` choíche chun geata dearg a sheachbhóthar. Nascann bloic reo scaoilte isteach sa bhrainse reoite. Féach [Riail Crua 21](HARD_RULES_DETAIL.md). Ná lipéadaigh, cumasc ná brúigh chuig iarratas tarraingthe go bhfuil seisiún eile ag obair. Féach [Riail Crua 22](HARD_RULES_DETAIL.md).
 
-- **Reo eisiúna i bhfeidhm** → NÁ cuir lipéad ar PRanna atá dírithe ar an mbrainse reoite; athdhírigh iad ar
-  an `release/vX+1` gníomhach ar dtús.
-- **PR de chuid seisiúin eile atá ar siúl** → ná cuir lipéad air choíche; is é an seisiún ar leis é amháin a chuireann
-  a chuid oibre féin sa scuaine.
-- Ritheann difríochtaí tástálacha amháin agus PRanna a bhfuil an lipéad `hotfix` orthu CI laghdaithe cheana féin (féach
-  `RELEASE_CHECKLIST.md` → Mearlána Hotfix); glacann coinníollacha na scuaine le cibé
-  tacar seiceálacha a ritheadh i ndáiríre (`#check-failure=0` + `#check-pending=0`).
+## Iarratas tarraingt traenach
 
-## Rogha cúltaca: an traein chumaiscthe láimhe
+1. Tosaigh brainse traenach ag an mbunáit scaoilte reatha. Comhtháthaigh na ceannairí ball formheasta beachta ag baint úsáide as gealltanais chumaisc. A stair tiomantais a chaomhnú trí scuaise agus rebase a sheachaint.
+2. Oscail iarratas tarraingthe amháin don bhrainse traenach. Bailíochtaigh an PR sin lena CI iomlán féin ar an mbunleid reatha. Seiceáil an barr bun agus cinn na mball formheasta arís sula dtagann tú i dtír. Athnuaigh an traein agus a CI nuair a athraíonn an t-iarrthóir bailíochtaithe.
+3. Cuir PR na traenach i dtír le ceangal cumaisc faoin modh scuaine is infheidhme. I mód beo, caomhnaíonn modh tuirlingthe `merge-ff` na scuaine na gealltanais chumaisc. Is féidir teacht ar na baill bhunaidh ón bhrainse scaoileadh. Marcálann GitHub an ball PRs mar chumasc agus coinníonn na gealltanais a n-údair.
 
-Úsáidtear í nuair nach bhfuil an scuaine ar fáil. Déanann sé seo an cleachtas a d'fholmhaigh 33 PR in
-aon lá amháin le linn thimthriall v3.8.47 a chódú:
+Sampla poiblí is [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Chomhcheangail sé 18 ball PRs agus tháinig i dtír le gealltanas cumaisc ar 2026-11-24.
 
-1. **Cuir an bhaisc le chéile** (~10–30 PR athbhreithnithe+faofa). Seiceáil imbhuailtí `linked:`
-   (na `tap.testFiles` céanna, na smutáin CHANGELOG céanna) agus cuir iad sin in ord srathach.
-2. **Bailíochtaigh UAIR AMHÁIN**: i worktree leithlisithe bunaithe ar bharr na heisiúna, cumaisc gach
-   ceann baisce go háitiúil, ansin rith an tsraith atá coibhéiseach leis an eisiúint
-   (`npm run check:release-green`, cuir `--with-build` leis roimh eisiúint).
-   Uathoibríonn `scripts/release/merge-train.sh <base> <PR#>…` céimeanna 1–2 (díbrítear PRanna a bhfuil
-   coinbhleacht iontu, agus leanann an traein ar aghaidh). Ritheann an mód iomlán `npm run test:unit` — an
-   riteoir tiúnáilte don bhosca (`--test-concurrency=20`), **ní** an dá shard CI sheicheamhacha 4 chroí
-   a chuir an chéim cheannasach ag ~25% de bhosca 16 chroí (ceartaithe
-   2026-07-18). Coinníonn `--fast` (folmhuithe olltraenach laistigh den lá, faofa ag an úinéir 2026-07-18)
-   gach geata statach + vitest ach ní ritheann sé ach na comhaid node:test a d'athraigh na
-   PRanna a cuireadh ar bord; ní mór an tsraith IOMLÁN a rith uair amháin ar a laghad sa lá ar an
-   mbarr carntha (traein amháin gan `--fast`).
-3. **Glas** → cumaisc na PRanna in ord (agus `state,headRefOid` á athsheiceáil roimh gach ceann —
-   téann PR ar athraíodh a cheann ar ais isteach san athbhreithniú). Cruthaigh gurb é glan-difríocht gach cumaiscthe
-   athrú an PR féin (gan aisiompuithe auto-resolve: iniúch `git diff --stat` le haghaidh
-   scriosuithe lasmuigh den scóip).
-4. **Dearg** → déan an bhaisc a dhéroinnt ina leatha (bailíochtaigh gach leath) in ionad iad a athbhailíochtú
-   ceann ar cheann; cuir an PR is cúis leis ar ais sa scuaine athbhreithnithe leis an bhfianaise.
-5. **Ná déan riamh**: cumasc isteach sa bhrainse reoite le linn reo; úsáid `git stash` áit ar bith;
-   athrith CI ar fad agus súil agat go n-imeoidh toradh dearg (riail: is faisnéis é toradh dearg).
+Tagann sioncronú ar ais ó `main` go dtí an chéad bhrainse scaoilte eile trí ghealltanas cumaisc freisin. Is gá sinnsearacht `main` a chaomhnú le haghaidh sioncrónaithe níos déanaí. Féach [Leithlisiú Worktree](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Srathú (cén fáth a bhfuil an scuaine sábháilte le geataí tapa amháin)
+## An bailíochtóir traenach cumasc áitiúil
 
-- **In aghaidh an PR** (geataí tapa quality.yml): tástálacha a bhfuil tionchar TIA orthu + aonad iomlán 4-shard +
-  vitest + bailiúchán lint + seiceáil cineálacha + sláine doiciméadúcháin/changelog.
-- **In aghaidh na baisce/an bhairr** (glas leanúnach na heisiúna): geataí DOCHTA `--quick` ar gach push chuig
-  brainse na heisiúna; scuabthaí iomlána `--with-build --full-ci` 3×/lá.
-- **In aghaidh na heisiúna** (ci.yml ar PR na heisiúna): an mhaitrís iomlán lena n-áirítear E2E ×9,
-  déantán pacáiste + tástáil deataigh tosaithe tarball, cumhdach/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Ní dhéantar níos lú bailíochtaithe ar rud ar bith ná mar a rinneadh roimhe seo — ní ritheann an dromchla trom ach in aghaidh na baisce/an bhairr
-seachas in aghaidh an PR, agus is é sin a chuireann deireadh leis na turais anonn is anall O(N).
+Faigheann an bailíochtóir an bonn agus na cinn PR agus nascann sé iad i gcrann oibre indiúscartha. Ritheann sé a sraith paireacht uair amháin ar an gcrann mar thoradh air. Má theip ar fháil nó ar chumasc coinbhleacht díshealbhaíonn PR sin agus leanann an script leis an PRs atá fágtha .
 
-## Réamhriachtanais seiceála amach úir do `merge-train.sh`
+- **`--plan`** priontaí céimeanna agus bealaí amach an mhodha roghnaithe gan crann oibre a chruthú nó teagmháil a dhéanamh leis an gcianrialtán. Déan é a chomhcheangal le `--fast` chun an plean mear a iniúchadh.
+- **`--fast`** ritheann na geataí statacha coitianta, na comhaid roghnaithe `node:test` athraithe faoi `tests/unit/`, agus `npm run test:vitest`. Rith bailíochtú iomlán áitiúil ar a laghad uair sa lá ar an rinn carntha agus tú ag úsáid mód tapa.
+- **Mód iomlán** cuireann sé na geataí statacha lán-amháin agus ritheann `npm run test:unit` agus `npm run test:vitest`.
 
-Ritheann an script **réamhsheiceáil** a theipeann go luath ar an tseiceáil amach fhréamhach (roimh aon obair
-worktree) ionas nach féidir le suiteáil bhriste ligean uirthi féin gur traein dhearg í:
+Athdhéantar geata statach atá ag teip ar an mbonn gan teagmháil má tá an bonnsteora ar fáil. Tuairiscíonn an script teipeanna oidhreachta agus leanann sé ar aghaidh nuair a bhíonn gach líne sáraithe aitheanta le feiceáil ar an mbonn freisin agus nach bhfuil méadú tagtha ar an líon iomlán.
 
-1. `npm ci`, ansin rith an postinstall `bun` a chuireann npm bac air:
-   `(cd node_modules/bun && node install.js)` — murach sin teipeann ar `check:provider-consistency`
-   agus `check:known-symbols` (an dá cheann acu `bun scripts/…`) ar an traein AGUS ar an mbonn gan
-   aon líne sáraithe.
-2. Gan aon `node_modules/node_modules` fánach (crann spleáchais dúblach; lódálann React faoi dhó
-   agus teipeann ar shraitheanna UI vitest láithreach).
-3. `node_modules/.bin/tsc` i láthair agus inrite (ní bhíonn sé i suiteáil pháirteach).
+| Scoir | Brí                                                                                                                                                                   |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`   | An plean a phriontáil nó an tsraith a chríochnú. Liostaítear san achoimre sraith aon teipeanna statacha a fuarthas le hoidhreacht agus PRs a scaoiltear amach.        |
+| `1`   | Argóintí neamhbhailí, gan aon Seiceáil Git, theip ar réamheitilt, nó níor cuireadh ar bord PR.                                                                        |
+| `2`   | Theip ar sheic suite agus níor cháiligh sé mar sheic le hoidhreacht. Is féidir leis an oibreoir an bhaisc a dhéroinnt, an PR ciontaithe a dhíbirt, agus athreáchtáil. |
 
-Ritheann an traein an `npm run check:cycles:ratchet` blocála; is comhairleach é `npm run check:cycles`
-lom (liostaíonn sé na SCCanna agus scoireann sé le cód neamh-nialasach fiú ar bhonn sláintiúil).
+Soláthraíonn pas áitiúil fianaise dhiagnóiseach do shainchomhad an úinéara amháin. Tá údarú úinéara fós ag teastáil le haghaidh gach tuirlingthe, a seiceálacha riachtanacha féin, agus fíorasc na scuaine scátha nuair is infheidhme.
+
+## Sraitheadh
+
+- **Le PR.** CI agus Cáilíocht roghnaigh seiceálacha bunaithe ar na cosáin athraithe. Ritheann Cód PRs geataí cáilíochta tapa agus tástálacha tionchar, le haonaid ar leith agus poist Vitest i CI.
+- **In aghaidh an iarrthóra scuaine.** ritheann CI agus Cáilíocht an phróifíl iomlán don iarrthóir comhdhéanta ar a scuaine tag.
+- **De réir leideanna scaoileadh.** Ritheann Release-Green geataí crua tapaidh ar bhrú a mheaitseálann a scagairí cosáin. Trí rith sceidealta in aghaidh an lae a úsáideann an scuab iomlán don bhrainse scaoileadh.
+- **De réir scaoileadh.** Áirítear leis an maitrís CI iomlán shards E2E, bailíochtú pacáiste, deataigh tosaithe tarball, agus seiceálacha clúdaigh. Féach ar an [Seicliosta Eisiúna](RELEASE_CHECKLIST.md).
+
+## Réamhriachtanais seiceála úra le haghaidh `merge-train.sh`
+
+Ritheann an preflight roimh chruthú crainn oibre. Suiteáil spleáchais le `npm ci`. Deimhnigh go bhfuil `node_modules/.bin/tsc` inrite agus go bhfuil `node_modules/node_modules` as láthair. Seiceáil go n-éiríonn le `node_modules/.bin/bun --version`.
+
+Má scipeáladh an postinstall Bun, rith `(cd node_modules/bun && node install.js)`. Úsáideann seiceálacha comhsheasmhachta agus siombailí aitheanta Bun. Ritheann an bailíochtóir `npm run check:cycles:ratchet` mar gheata blocála. Tá an t-ordú aonair `npm run check:cycles` comhairleach.
+
+## Stair
+
+Scoraíodh scuaine chumasc Mergify ar 2026-11-19.

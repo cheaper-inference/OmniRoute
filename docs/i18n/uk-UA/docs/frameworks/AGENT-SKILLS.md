@@ -13,12 +13,12 @@
 
 ## Огляд
 
-Каталог містить **45 навичок агентів** (23 для REST API + 21 для CLI + 1 робочий процес конфігурації). Кожна навичка має:
+Каталог містить** 45 Навички агента** (23 REST API + 21 CLI + 1 процес налаштування). Кожен навик має:
 
-- **Канонічний ID** (`omni-auth`, `cli-serve` тощо)
-- Файл **SKILL.md** у `skills/{id}/SKILL.md` із YAML frontmatter (`name`, `description`) і детальним markdown-вмістом
-- **Кінцеві точки REST** (навички API) або **підкоманди CLI** (навички CLI), отримані зі специфікації OpenAPI та реєстру CLI
-- **Необроблену URL-адресу GitHub** для отримання актуальної версії: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- А** канонічний ID** (`omni-auth`, `cli-serve` тощо)
+- А**SKILL.md** файл у `skills/{id}/SKILL.md` із YAML frontmatter (`name`, `description`) + rich markdown body
+- **кінцеві точки REST** (навички API ) або** підкоманди CLI** (навички CLI ), отримані з реєстру OpenAPI spec і CLI
+- А**GitHub raw URL** для отримання в реальному часі: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## API покриття
+## Покриття API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -1,19 +1,14 @@
+# OpenCode Integration (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OPENCODE.md) · 🇪🇹 [am](../../../am/docs/frameworks/OPENCODE.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OPENCODE.md) · 🇦🇿 [az](../../../az/docs/frameworks/OPENCODE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OPENCODE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OPENCODE.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/OPENCODE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OPENCODE.md) · 🇩🇰 [da](../../../da/docs/frameworks/OPENCODE.md) · 🇩🇪 [de](../../../de/docs/frameworks/OPENCODE.md) · 🇬🇷 [el](../../../el/docs/frameworks/OPENCODE.md) · 🇪🇸 [es](../../../es/docs/frameworks/OPENCODE.md) · 🇪🇪 [et](../../../et/docs/frameworks/OPENCODE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OPENCODE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/OPENCODE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/OPENCODE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OPENCODE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OPENCODE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OPENCODE.md) · 🇮🇱 [he](../../../he/docs/frameworks/OPENCODE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OPENCODE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OPENCODE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OPENCODE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OPENCODE.md) · 🇮🇩 [id](../../../id/docs/frameworks/OPENCODE.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OPENCODE.md) · 🇮🇹 [it](../../../it/docs/frameworks/OPENCODE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OPENCODE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OPENCODE.md) · 🇰🇭 [km](../../../km/docs/frameworks/OPENCODE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OPENCODE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OPENCODE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/OPENCODE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OPENCODE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OPENCODE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OPENCODE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OPENCODE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OPENCODE.md) · 🇲🇲 [my](../../../my/docs/frameworks/OPENCODE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OPENCODE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OPENCODE.md) · 🇳🇴 [no](../../../no/docs/frameworks/OPENCODE.md) · 🇮🇳 [or](../../../or/docs/frameworks/OPENCODE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OPENCODE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OPENCODE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OPENCODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OPENCODE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OPENCODE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OPENCODE.md) · 🇱🇰 [si](../../../si/docs/frameworks/OPENCODE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OPENCODE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OPENCODE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OPENCODE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OPENCODE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OPENCODE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OPENCODE.md) · 🇮🇳 [te](../../../te/docs/frameworks/OPENCODE.md) · 🇹🇭 [th](../../../th/docs/frameworks/OPENCODE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OPENCODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OPENCODE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OPENCODE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OPENCODE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/OPENCODE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OPENCODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OPENCODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OPENCODE.md)
+
 ---
-title: "Integracja z OpenCode"
-version: 3.8.40
-lastUpdated: 2027-07-27
----
 
-# Integracja z OpenCode
+> **Status:** Ogólnie dostępne.** Publiczność:** Operatorzy łączą OpenCode z wdrożeniem OmniRoute.** Źródło prawdy (schemat konfiguracji):** `src/shared/services/opencodeConfig.ts`** Polecane pakiety npm:** `@omniroute/opencode-plugin/` (OpenCode v1, zainstalowany przez `omniroute setup opencode`) i `@omniroute/opencode-plugin-v2/` (OpenCode v2). Starszy pakiet `@omniroute/opencode-provider/` to** przestarzałe** (patrz Ścieżka 2).
 
-> **Status:** Ogólnie dostępne.
-> **Odbiorcy:** Operatorzy podłączający OpenCode do wdrożenia OmniRoute.
-> **Źródło prawdy (schemat konfiguracji):** `src/shared/services/opencodeConfig.ts`
-> **Źródło prawdy (pakiet npm):** `@omniroute/opencode-provider/` (publikowalny workspace)
+[OpenCode](https://opencode.ai) jest agentem klienta CLI/desktop AI. Czyta katalog swoich dostawców z `~/.config/opencode/opencode.json` (lub `opencode.jsonc`) i postępuje zgodnie ze schematem `https://opencode.ai/config.json`. OmniRoute naraża się na OpenCode jako jeden z tych dostawców — każde żądanie przepływa przez standardową powierzchnię `/v1` OmniRoute z OpenAI, więc OpenCode automatycznie korzysta z routingu Auto-Combo, wyłączników automatycznych, kluczowych zasad, obserwowalności itp.
 
-[OpenCode](https://opencode.ai) to agentowy klient AI CLI/desktop. Czyta katalog providerów z `~/.config/opencode/opencode.json` (lub `opencode.jsonc`) i stosuje schemat z `https://opencode.ai/config.json`. OmniRoute udostępnia się OpenCode jako jeden z tych providerów — każde żądanie przechodzi przez standardową, zgodną z OpenAI powierzchnię `/v1` OmniRoute, więc OpenCode automatycznie korzysta z routingu Auto-Combo, circuit breakerów, polityk kluczy, observability itd.
-
-Są **dwie obsługiwane ścieżki integracji**. Wybierz jedną — generują tę samą konfigurację.
+Ta strona dokumentuje dwie poniższe ścieżki static-config; oba generują tę samą konfigurację. Aby uzyskać listę modeli zgodną z Twoim aktywnym katalogiem, użyj zamiast tego wtyczki: `omniroute setup opencode` instaluje `@omniroute/opencode-plugin` (OpenCode v1), a `@omniroute/opencode-plugin-v2` celuje OpenCode v2 (patrz [integracje CLI](../guides/CLI-INTEGRATIONS.md) i [przewodnik po wtyczkach OpenCode v2](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -56,9 +51,11 @@ Wynikowy plik (domyślny katalog modeli):
 
 ---
 
-## Ścieżka 2 — pakiet npm `@omniroute/opencode-provider`
+## Ścieżka 2 — npm `@omniroute/opencode-provider` (przestarzały)
 
-Zalecana, gdy skryptujesz konfigurację z Node/TS (pipeline'y CI, monoreposy, własne flow instalatora).
+> **Przestarzałe.** Pakiet zapisuje statyczną listę modeli, która dryfuje za bieżącym katalogiem OmniRoute. Jego README zaleca migrację do `@omniroute/opencode-plugin` (lub `@omniroute/opencode-plugin-v2` na OpenCode v2). Poniższy API jest zachowywany tylko dla istniejących skryptów.
+
+Używane podczas pisania skryptu konfiguracji z Node/TS (potoki CI, monorepo, niestandardowe przepływy instalatora).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -79,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Aby nieniszcząco scalić z istniejącym plikiem, odtwórz `mergeOpenCodeConfigText()` z `opencodeConfig.ts` albo wywołaj generator CLI.
+Aby uzyskać nieniszczące połączenie z istniejącym plikiem, zreplikuj `mergeOpenCodeConfigText()` z `opencodeConfig.ts` lub wywołaj generator CLI.
 
-Pełne API znajdziesz w [README pakietu](../../@omniroute/opencode-provider/README.md).
+Pełny [pakiet README](../../@omniroute/opencode-provider/README.md) znajdziesz w pakiecie API.
 
 ---
 
@@ -157,9 +154,11 @@ Dla klientów w stylu Anthropic, które wysyłają `x-api-key` + `anthropic-vers
 
 ---
 
-## Zobacz też
+## Zobacz także
 
-- [API reference](../reference/API_REFERENCE.md) — pełna powierzchnia REST OmniRoute
+- [API referencja](../reference/API_REFERENCE.md) — pełna OmniRoute REST powierzchnia
 - [Auto-Combo](../routing/AUTO-COMBO.md) — co oznacza `model: "auto"`
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (zalecane)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (przestarzałe)
 - Źródło: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

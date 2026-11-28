@@ -59,15 +59,13 @@ Exempel på att representera vår gemenskap är att använda en officiell e-post
 publicera via ett officiellt konto på sociala medier eller agera som utsedd
 representant vid ett evenemang online eller på plats.
 
-## Enforcement
+## Tillämpning
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Fall av kränkande, trakasserande eller på annat sätt oacceptabelt beteende kan rapporteras till de samhällsledare som ansvarar för tillsynen genom att öppna en privat säkerhetsrådgivning på
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+eller genom att maila underhållaren på diegosouza.pw@outlook.com. För säkerhetskänsliga incidenter, se [`SECURITY.md`](SECURITY.md). Alla klagomål kommer att granskas och utredas snabbt och rättvist.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Alla samhällsledare är skyldiga att respektera integriteten och säkerheten för reportern av varje incident.
 
 ## Riktlinjer för tillämpning
 

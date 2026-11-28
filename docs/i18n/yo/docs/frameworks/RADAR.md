@@ -93,52 +93,30 @@ routing tàbí yíyan model padà — wo ìforúkọsílẹ̀ ọ̀tọ̀ ní ì
 
 ---
 
-## Sync data jẹ́ ìforúkọsílẹ̀ Ọ̀TỌ̀ — ìlérí àṣírí
+## Amuṣiṣẹpọ data jẹ SEPARATE ijade-inu — ileri asiri
 
-Ṣíṣe `RADAR_ENABLED` sí títàn ń ṣí UI nìkan. Ṣíṣe sync feed nílò ìforúkọsílẹ̀ kejì,
-tó dúró lọ́tọ̀, tí a fi pamọ́ sínú `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migration `136_radar_cache_settings.sql`). `syncRadar()` máa ṣàyẹ̀wò àsíá náà _àti_
-ìforúkọsílẹ̀ náà kí ó tó ṣe network call kankan:
+Titan-an `RADAR_ENABLED` nikan ṣii UI. Mimuuṣiṣẹpọ kikọ sii nilo iṣẹju-aaya kan, ijade ominira ti a fipamọ sinu `radar_settings.opt_in` (`src/lib/db/radar.ts`, migration `136_radar_cache_settings.sql`). `syncRadar()` ṣayẹwo asia _and_ ijade ṣaaju ṣiṣe ipe nẹtiwọki eyikeyi:
 
 ```
-Àsíá pípa       → { status: "disabled" }   — kò sí network call
-Opt-in jẹ́ false → { status: "opt_out" }    — kò sí network call
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Nígbà tí àwọn méjèèjì bá tàn, ọ̀nà sync náà ni:
+Nigbati awọn mejeeji ba wa ni titan, ọna amuṣiṣẹpọ jẹ:
 
-1. `GET <feed base URL>/v1/catalog/latest` pẹ̀lú `x-omniroute-radar-schema: 2` àti header
-   `Authorization: Bearer <supporter key>` tó jẹ́ àṣàyàn (wo ìsàlẹ̀). Àwọn server máa lo artifact ìyípadà v1
-   tí a fọwọ́ sí lọ́tọ̀ gẹ́gẹ́ bí default nígbà tí header schema kò sí, kí àwọn client àtijọ́ tí a ti fi sílẹ̀ lè máa
-   gba àwọn update.
-2. Èyí jẹ́ ìṣàn application fún download nìkan, ṣùgbọ́n ó ṣì jẹ́ request HTTPS. Amáyédẹrùn
-   tí a gbalejo máa gba metadata àsopọ̀ àjọṣe bíi IP orísun. Nígbà tí a bá ṣètò supporter
-   key, sync tún máa fi key náà ránṣẹ́ nínú header Bearer kí service náà lè pinnu
-   entitlement. Ní revision server aládàáni pàtó tí a dárúkọ nínú ààlà ẹ̀rí lókè,
-   ìṣírò request feed ń lo hash key, lílò àkójọpọ̀, àti HMAC IP tí a gé kúrú tí ó ń yí padà lójoojúmọ́
-   fún àyẹ̀wò abuse ọwọ́; àwọn table wọ̀nyẹn kò fi key tàbí IP pamọ́ ní ìrísí aise.
-   Àwọn log ìwọlé amáyédẹrùn àti outbox ìfiránṣẹ́ tí a encrypt jẹ́ àwọn ààlà iṣẹ́
-   ọ̀tọ̀.
-3. OmniRoute kì í fi prompt, response, conversation, credential olùpèsè, traffic model,
-   uptime, latency, tàbí àtúnṣe olùpèsè agbègbè ránṣẹ́ sí service Radar.
-4. A máa verify response náà, validate rẹ̀, a sì máa cache rẹ̀ ní agbègbè (wo
-   [Àwòṣe ààbò](#security-model)). Radar ní ọ̀nà network ẹgbẹ́ server mẹ́rin gan-an:
-   `syncRadar()` fún catalog, `syncRadarReferrals()` fún referral, àti
-   `syncRadarOffers()` / `syncRadarIntel()` fún offer àti Intel tí ó jẹ́ ti supporter nìkan.
+1. `GET <feed base URL>/v1/catalog/latest` pẹlu `x-omniroute-radar-schema: 2` ati akọsori `Authorization: Bearer <supporter key>` yiyan (wo isalẹ). Awọn olupin aiyipada si ohun-ọnà iyipada v1 lọtọ ti a fowo si nigbati akọsori ero ko si, nitorinaa awọn alabara ti o ti fi sori ẹrọ ti o dagba julọ ma n gba awọn imudojuiwọn.
+2. Eyi jẹ ṣiṣan ohun elo igbasilẹ-nikan, ṣugbọn o tun jẹ ibeere HTTPS. Awọn amayederun ti gbalejo gba metadata asopọ lasan gẹgẹbi orisun IP. Nigbati bọtini alatilẹyin ba tunto, amuṣiṣẹpọ tun firanṣẹ bọtini yẹn ni akọsori Bearer ki iṣẹ naa le yanju ẹtọ naa. Ni deede atunyẹwo ikọkọ-olupin ti a damọ ni aala ẹri ti o wa loke, ṣiṣe iṣiro ifunni-iṣiro nlo awọn hashes bọtini, lilo apapọ, ati HMAC ti o yiyi lojoojumọ ti IP fun atunyẹwo ilokulo afọwọṣe; awọn tabili yẹn duro bẹni bọtini tabi IP ni fọọmu aise. Awọn igbasilẹ iwọle si awọn amayederun ati apoti ifijiṣẹ ti paroko jẹ awọn aala iṣẹ ṣiṣe lọtọ.
+3. OmniRoute ko firanṣẹ awọn itọka, awọn idahun, awọn ibaraẹnisọrọ, awọn ẹri olupese, ijabọ awoṣe, akoko akoko, idaduro, tabi iṣeto olupese agbegbe si iṣẹ Radar.
+4. Idahun naa jẹ ijẹrisi, ti fọwọsi, ati fipamo ni agbegbe (wo [awoṣe Aabo](#security-model) ). Radar ni deede awọn ọna nẹtiwọọki ẹgbẹ mẹrin mẹrin: `syncRadar()` fun katalogi, `syncRadarReferrals()` fun awọn itọkasi, ati `syncRadarOffers()` / `syncRadarIntel()` fun awọn ipese alatilẹyin-nikan ati Intel.
 
-**Supporter key** jẹ́ token Bearer tó jẹ́ àṣàyàn (`radar_settings.supporter_key`)
-tí ó jẹ́ kí service feed pinnu tier tí yóò pèsè (wo
-[Àwọn tier](#tiers-community-and-live)). Ó jẹ́:
+Ayẹwo katalogi nṣiṣẹ ni gbogbo wakati 24. Nigbati ifunni ti a ti rii daju tun gbe ẹya ti a fipamọ ati ipele, amuṣiṣẹpọ ntọju fifuye isanwo cache, tunse `fetchedAt`, ati pe ayẹwo atẹle yoo wa ni awọn wakati 24 lẹhinna dipo ami ami wakati ti nbọ.
 
-- Tí a fi pamọ́ **ní ìrísí encrypted níbi ìpamọ́** pẹ̀lú àwọn helper AES-256-GCM `encrypt()`/`decrypt()`
-  kan náà (`src/lib/db/encryption.ts`) tí a ń lò fún credential olùpèsè.
-- Tí a ṣètò nípasẹ̀ `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) tí a sì
-  **kò dá padà láé** — response náà máa dá ìrísí tí a bo mọ́lẹ̀ padà (`omr_****abcd`).
-- Yíyí tàbí pípa á rẹ́ máa invalidate cache catalog, referral, offer, àti Intel papọ̀ lẹ́ẹ̀kan náà.
-  Sync/kíkà tó kàn máa pinnu entitlement tuntun ní ẹgbẹ́ server; fífi key pamọ́ fúnra rẹ̀ kò
-  ṣe network request tàbí lo key activation ìlò-ẹ̀ẹ̀kan.
-- Tí a fi ránṣẹ́ sí service feed gẹ́gẹ́ bí token Bearer lórí sync GET — kò sí nǹkan mìíràn nípa
-  key náà tí yóò jáde kúrò lọ́dọ̀ client.
+Awọn** bọtini alatilẹyin** jẹ ami iyan Bearer (`radar_settings.supporter_key`) ti o jẹ ki iṣẹ ifunni pinnu iru ipele ti yoo sin (wo [Awọn ipele](#tiers-community-and-live) ). O jẹ:
+
+- Ti o ti fipamọ** ti paroko ni isinmi** pẹlu awọn oluranlọwọ AES-256-GCM `encrypt()` `decrypt()` kanna (`src/lib/db/encryption.ts`) ti a lo fun awọn iwe-ẹri olupese.
+- Ṣeto nipasẹ `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) ati** ko echoed pada** — idahun da fọọmu ti o boju-boju pada (`omr_****abcd`).
+- Yiyipada tabi piparẹ rẹ ni atomiki sọ katalogi, awọn itọkasi, awọn ipese, ati awọn caches Intel di asan. Nigbamii ti sync/read yanjú titun entitlement server-ẹgbẹ; fifipamọ bọtini kan funrararẹ ko ṣe ibeere nẹtiwọki kan tabi jẹ bọtini imuṣiṣẹ lilo ẹyọkan.
+- Ti a fi ranṣẹ si iṣẹ ifunni bi aami Oluduro lori amuṣiṣẹpọ GET — ko si ohun miiran nipa bọtini lailai fi alabara silẹ.
 
 ---
 
@@ -423,82 +401,45 @@ version, tier }` — iye yìí ni dashboard ń fi hàn, kì í ṣe ààyè body
 
 ---
 
-## Àwọn òfin ìdàpọ̀ overlay ní àkókò kíkà
+## Ka-akoko agbekọja awọn ofin
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) ń da feed tí a fi pamọ́ sínú cache pọ̀ **lórí** ìpìlẹ̀
-àìyípadà ní **àkókò kíkà**, nínú `getRadarCatalog()`. A kì í ṣe àtúnṣe sí array ìpìlẹ̀
-(`FREE_MODEL_BUDGETS`) láé — a ń ṣe ìṣírò `MergedEntry[]` tuntun ní gbogbo
-ìpè.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) dapọ kikọ sii ti a fipamọ** lori** ipilẹ aimi ni** akoko kika** , inu `getRadarCatalog()`. Eto ipilẹ (`FREE_MODEL_BUDGETS`) ko yipada rara — kan ti ṣe iṣiro `MergedEntry[]` titun lori gbogbo ipe.
 
-Àwọn òfin mẹ́rin, ní ìtòlẹ́sẹẹsẹ agbára wọn:
+Awọn ofin mẹrin, ni aṣẹ ti iṣaaju:
 
-1. **Feed kì í kọ àtúnṣe abẹ́lé bò láé.** Fún ààyè kọ̀ọ̀kan: bí olùdarí bá ti
-   ṣe àtúnṣe ààyè kan lórí àkọsílẹ̀ kan (map `localOverrides`, tí kọ́kọ́rọ́ rẹ̀ jẹ́ `provider:modelId`),
-   a ó fo iye feed fún ààyè pàtó yẹn — iye olùdarí ló borí.
-2. **`enabled: false` ń pa àkọsílẹ̀ náà, pẹ̀lú ìtọ́kasí orísun.** Àkọsílẹ̀ feed tí ó pa
-   àkọsílẹ̀ kan yóò ṣètò `enabled: false` àti `disabledBy: "radar"` lórí àbájáde tí a dapọ̀,
-   kí UI lè ṣàlàyé _ìdí_ tí àkọsílẹ̀ kan fi yí padà láti wà lárọ̀ọ́wọ́tó sí pípa.
-3. **Àkọsílẹ̀ tí aṣàmúlò fi kún un tí kò sí nínú feed yóò wà láìyípadà.** Àwọn àkọsílẹ̀ tí
-   ó wà nínú ìpìlẹ̀ nìkan (tàbí tí a fi kún un ní abẹ́lé) tí kò sì ní àkọsílẹ̀ feed tó bá wọn mu
-   yóò kọjá lọ láìyípadà.
-4. **A kì í mú àkọsílẹ̀ tí a ti fi tombstone sí jí dìde láé.** Bí olùdarí bá pa
-   àkọsílẹ̀ kan ní pàtó (set `tombstones`), bí feed bá tún fi `provider:modelId` yẹn kún un nínú ẹ̀yà
-   tó tẹ̀ lé e, kò ní mú un padà.
+1. **Ifunni ko ni atunkọ agbelẹrọ agbegbe rara.** Fun aaye: ti oniṣẹ ba ti ṣe akanṣe aaye kan lori titẹ sii ( maapu `localOverrides`, `provider:modelId` keyed), iye ifunni fun aaye kan pato ti fo — iye oniṣẹ yoo bori.
+2. **`enabled: false` mu awọn titẹsi, pẹlu provenance.** Titẹ sii kikọ sii ti o yi iwọle si pipa ṣeto `enabled: false` ati `disabledBy: "radar"` lori abajade ti a dapọ, nitorina UI le ṣe alaye _why_ titẹsi kan wa lati wa si alaabo.
+3. **Akọsilẹ olumulo ti a ṣafikun ti ko si ninu kikọ sii wa laaye laifọwọkan.** Awọn titẹ sii ti o wa ni ipilẹ nikan (tabi ti a ṣafikun ni agbegbe) ati pe ko ni kikọ sii kikọ sii ti o baamu nipasẹ ko yipada.
+4. **Titẹwọle ti ibojì kan ko ni ji dide.** Ti o ba jẹ pe oniṣẹ naa paarẹ titẹ sii ni gbangba (ṣeto `tombstones` ), kikọ sii tun-fikun `provider:modelId` ni ẹya nigbamii ko mu pada.
 
-Àwọn ààyè tí a lè ṣàtúnṣe àti tombstones ni a fi pamọ́ sínú
-`radar_local_model_state` (migration `153_radar_local_model_state.sql`). Adapter DB gbogbogbò
-(`src/lib/db/radar.ts`) ń yí àwọn row wọ̀nyẹn padà sí map `localOverrides` àti set
-`tombstones` tí `applyFeed()` ń lò; `getRadarCatalog()` ìṣelọ́pọ̀ máa ń kó ipò yẹn wọlé
-lẹ́yìn tí àwọn ìdènà flag, cache, àti schema bá kọjá. `displayName` àti `enabled` nìkan ni
-olùdarí lè ṣàtúnṣe. A kò lè kọ ìdánimọ̀ provider/model, ìtọ́kasí orísun feed, quota, capabilities, ToS,
-àti dátà ìṣètò nípasẹ̀ ojú-ọ̀nà yìí.
+Awọn aaye ṣiṣatunṣe ati awọn okuta ibojì duro ni `radar_local_model_state` (iṣiwa `153_radar_local_model_state.sql`). Adaparọ DB ti gbogbo eniyan (`src/lib/db/radar.ts`) yi awọn ori ila wọnyẹn pada si maapu `localOverrides` ati eto `tombstones` ti a lo nipasẹ `applyFeed()`; awọn ẹru `getRadarCatalog()` iṣelọpọ ti o sọ lẹhin asia, kaṣe, ati awọn ẹnu-ọna eto eto. `displayName` ati `enabled` nikan ni o ṣee ṣe atunṣe onišẹ. idanimọ Provider/model, iṣafihan ifunni, ipin, awọn agbara, ToS, ati data iṣeto ko le kọ nipasẹ oju ilẹ yii.
 
-Dashboard náà ní àwọn ìgbésẹ̀ abẹ́lé mẹ́rin:
+Dasibodu naa ṣafihan awọn iṣe agbegbe mẹrin:
 
-- **Ṣàtúnṣe** ń yí orúkọ ìfihàn abẹ́lé àti ipò ìmúṣiṣẹ́ padà.
-- **Tun àwọn àyípadà abẹ́lé ṣe** ń pa àwọn ààyè méjèèjì tí a lè ṣàtúnṣe rẹ́ láìyí tombstone padà.
-- **Fi pamọ́** ń ṣẹ̀dá tombstone, kí àwọn ìmúdójúìwọ̀n feed tó bá wáyé lẹ́yìn náà má bàa lè tún row náà ṣẹ̀dá.
-- **Mú padà** ń yọ tombstone kúrò; àtúnṣe èyíkéyìí tí a fi pamọ́ lọ́tọ̀ ṣì máa ń ṣiṣẹ́.
+- **Ṣatunkọ** yipada orukọ ifihan agbegbe ati ipo ti o ṣiṣẹ.
+- **Tun awọn ayipada agbegbe to** nso mejeji Editable aaye lai yi a tombstone.
+- **Tọju** ṣẹda tombstone, ki nigbamii kikọ sii awọn imudojuiwọn ko le tun awọn kana.
+- **Mu pada** yọ awọn tombstone; eyikeyi idalẹkun lọtọ-fipamọ si maa wa ni ipa.
 
-Feed `enabled: false` ṣì jẹ́ ààyè àyọkà ààbò: ó máa ń borí `enabled: true` abẹ́lé tí ó ti di
-àtijọ́, ó ń jẹ́ kí àkọsílẹ̀ tí a dapọ̀ náà wà ní pípa, ó sì ń ṣàkọsílẹ̀ `disabledBy: "radar"`.
+A kikọ sii `enabled: false` si maa wa awọn ailewu sile: o AamiEye lori a stale agbegbe `enabled: true`, ntọju awọn ti dapọ titẹsi alaabo, ati awọn igbasilẹ `disabledBy: "radar"`.
 
-Àwọn ìtẹ̀jáde àkójọ ń lo `schemaVersion: 2`. `contextWindow` àti ọ̀kọ̀ọ̀kan nínú `tools`, `vision`, àti
-`thinking` jẹ́ `number | null` / `boolean | null` lọ́tọ̀ọ̀tọ̀: `null` túmọ̀ sí àìmọ̀, nígbà tí
-`false` túmọ̀ sí pé orísun provider oníṣẹ́ tí D16 fìdí rẹ̀ múlẹ̀ sọ ní pàtó pé capability náà kò sí.
-A kì í gbé àwọn flag registry/model-spec OmniRoute inú lọ́nà tààrà sí ipò àwọn òtítọ́ feed láé. Oníbàárà
-ṣì ń gba àwọn snapshot v1; nítorí builder àtijọ́ lo `false` gẹ́gẹ́ bí ààmì àìsí, a ń ṣe normalization v1 `false` sí àìmọ̀ nígbà tí v1 `true` ṣì jẹ́ òtítọ́. Àwọn ẹ̀yà schema àìmọ̀ máa ń kùnà lọ́nà tí ó di ohun gbogbo, cache tó fẹsẹ̀múlẹ̀ kẹ́yìn sì máa ń wà lárọ̀ọ́wọ́tó. Gbogbo model v2 tí ó ní context/capability tí kì í ṣe null gbọ́dọ̀ ní
-`metadataEvidenceUrls[]` HTTPS tí kò nílò credential; bí bẹ́ẹ̀ kọ́, ìfẹsẹ̀múlẹ̀ schema yóò kùnà, a kò sì ní
-rọ́pò cache náà. Tábìlì àkójọ ń fi gbogbo ipò mẹ́tẹ̀ẹ̀ta hàn gẹ́gẹ́ bí `✓`, `✕`, àti `?`.
+Awọn atẹjade katalogi lo `schemaVersion: 2`. `contextWindow` ati ọkọọkan ti `tools`, `vision`, ati `thinking` wa ni ominira `number | null` / `boolean | null`: `null` tumọ si aimọ, lakoko ti `false` tumọ si orisun olupese D16-confirmed kan sọ ni gbangba pe agbara ko si. Awọn asia OmniRoute registry/model-spec inu ko ni igbega taara si awọn ododo ifunni. Onibara tun gba awọn snapshots v1; nitori ti atijọ Akole lo `false` bi ohun isansa placeholder, v1 `false` ti wa ni deede to aimọ nigba ti v1 `true` si maa wa otito. Awọn ẹya apẹrẹ aimọ kuna ni pipade ati pe kaṣe to wulo to kẹhin wa. Gbogbo awoṣe v2 pẹlu context/capability ti kii ṣe asan gbọdọ gbe HTTPS `metadataEvidenceUrls[]` ti ko ni ẹri; bibẹẹkọ, afọwọsi eto kuna ati kaṣe ko rọpo. Tabili katalogi ṣe gbogbo awọn ipinlẹ mẹta bi `✓`, `✕`, ati `?`.
 
-### Àwọn combo ìtọ́sọ́nà àti ìráyè MCP
+### Awọn akojọpọ itọsọna ati wiwọle MCP
 
-Àwọn iye `familyId` tí a ti fìdí rẹ̀ múlẹ̀ yóò la overlay àkókò kíkà já, wọn yóò sì darí module mímọ́
-`buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). A máa dábàá family kan
-nígbà tí ó kéré tán provider ọ̀tọ̀ọ̀tọ̀ méjì bá ní àwọn connection tó ń ṣiṣẹ́ tí wọ́n sì ń ṣí model
-ID tí a ti yan ní pàtó síta. Àwọn model tí a pa, àwọn provider tí kò ṣiṣẹ́, model ID tí kò sí, àwọn family tó ní ọ̀kan ṣoṣo, àti àwọn
-ìbámu alias/prefix tí kò ṣe kedere máa ń kùnà lọ́nà tí ó di ohun gbogbo. Àwọn àbá máa ń lo strategy `priority` tó ti wà tẹ́lẹ̀, nípa títò
-budget oṣooṣù tó ń wáyé léraléra tó tóbi jù lọ síwájú; UI máa ń ṣẹ̀dá wọn nípasẹ̀ `POST /api/combos` nìkan.
+Awọn iye `familyId` ti o ni idaniloju ye lori iṣaju akoko kika ati wakọ module `buildRadarComboSuggestions()` mimọ (`src/lib/radar/comboSuggestions.ts`). Idile kan ni a daba nikan nigbati o kere ju awọn olupese meji pato ni awọn asopọ ti nṣiṣe lọwọ ati ṣiṣafihan awoṣe curated gangan ID. Awọn awoṣe alaabo, awọn olupese ti ko ṣiṣẹ, awoṣe IDs ti o padanu, awọn idile ẹyọkan, ati awọn ere-kere alias/prefix ti ko ni pipade kuna. Awọn imọran lo ilana `priority` ti o wa tẹlẹ, paṣẹ fun isuna ti o pọju loorekoore oṣooṣu akọkọ; UI da wọn nipasẹ `POST /api/combos` nikan.
 
-UI ìtọ́nisọ́nà náà wà ní `/dashboard/radar/combos`. Ó ń ka àwọn endpoint abẹ́lé
-`GET /api/radar/catalog` àti `GET /api/combos/builder/options` nìkan. Kò máa ń ṣe ìmúdójúìwọ̀n Radar,
-ka àwọn ẹ̀rí ìdánimọ̀ olùpèsè, tàbí kọ ohun kan tààrà sínú ibi ìpamọ́ dátà combo.
+UI ti a dari n gbe ni `/dashboard/radar/combos`. O ka nikan `GET /api/radar/catalog` agbegbe ati awọn aaye ipari `GET /api/combos/builder/options`. Ko ṣe okunfa amuṣiṣẹpọ Radar, ka awọn iwe-ẹri olupese, tabi kọ taara si ibi ipamọ data konbo.
 
-Àwọn oníbàárà MCP lè ka àfihàn abẹ́lé kan náà pẹ̀lú `omniroute_radar_catalog` (`read:radar`). Àwọn
-àsẹ̀ àṣàyàn `provider`, `familyId`, àti `enabledOnly` ni a máa ń ṣàyẹ̀wò lẹ́yìn kíkà
-`GET /api/radar/catalog` abẹ́lé lẹ́ẹ̀kan. Àbájáde tó ní ààlà rẹ̀ ní metadata catalog àti provider/model,
-orúkọ àfihàn, `familyId`, quota, àwọn agbára, ipò ìmúlò, origin, àti `disabledBy`; àwọn URL ìṣètò,
-àwọn ìgbésẹ̀, àwọn ìsopọ̀, àwọn àdírẹ́sì í-meèlì, àwọn kọ́kọ́rọ́, àti dátà ìtọ́kasí ni a kì í dá padà láé. Irinṣẹ́ yìí
-jẹ́ fún kíkà nìkan, kò sì máa ń pe `/api/radar/sync` láé.
+awọn onibara MCP le ka iṣiro agbegbe kanna pẹlu `omniroute_radar_catalog` (`read:radar`). Aṣayan `provider`, `familyId`, ati awọn asẹ `enabledOnly` jẹ iṣiro lẹhin kika `GET /api/radar/catalog` agbegbe kan. Ijade tiipa rẹ pẹlu metadata katalogi pẹlu provider/model, orukọ ifihan, `familyId`, ipin, awọn agbara, ipo ti o ṣiṣẹ, ipilẹṣẹ, ati `disabledBy`; setup URLs, awọn igbesẹ, awọn asopọ, awọn adirẹsi imeeli, awọn bọtini, ati data itọkasi ko ni da pada. Ohun elo yii jẹ kika-nikan ati pe ko pe `/api/radar/sync` rara. Nigbati kikọ sii cache ti ṣaju katalogi ti a fi sori ẹrọ, `meta.olderThanRelease` jẹ `true` ati ọpa naa da awọn awoṣe pada lati inu katalogi ti a fi sori ẹrọ pẹlu awọn ifasilẹ agbegbe ati awọn okuta ibojì ti a lo.
 
-### Àwọn àmì orísun
+### Provenance asami
 
-Gbogbo àkọsílẹ̀ tí a dapọ̀ ní field `origin` kan tí UI ń ṣàfihàn gẹ́gẹ́ bí badge:
+Gbogbo titẹ sii ti a dapọ n gbe aaye `origin` kan ti UI ṣe bi baaji kan:
 
-- `"baseline"` — kò yí padà láti inú catalog release aláìyípadà.
-- `"radar"` — field kan tàbí jù bẹ́ẹ̀ lọ ni feed ti ṣe ìmúdójúìwọ̀n.
-- `"local"` — olùṣàkóso ní ó kéré tán override abẹ́lé kan lórí àkọsílẹ̀ yìí (àwọn
-  override abẹ́lé máa ń borí feed ní gbogbo ìgbà gẹ́gẹ́ bí òfin 1, láìka ohun tí feed sọ sí).
+- `"baseline"` — untouched lati aimi Tu katalogi.
+- `"radar"` — aaye kan tabi diẹ sii ni a tunu nipasẹ kikọ sii.
+- `"local"` — oniṣẹ ni o ni o kere kan danu agbegbe lori yi titẹsi (agbegbe idojuk nigbagbogbo win lori kikọ sii fun ofin 1, laiwo ti ohun ti kikọ sii wi).
 
 ---
 

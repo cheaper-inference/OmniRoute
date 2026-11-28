@@ -469,107 +469,107 @@ Wewnątrz sesji interaktywnej:
 
 ---
 
-## Długotrwałe zadania
+## Zadania długotrwałe
 
-Dwie wartości domyślne OmniRoute mogą niepostrzeżenie zakłócać wielogodzinne sesje Codex CLI. Żadna z nich nie jest ustawieniem Codex CLI — obie znajdują się po stronie OmniRoute. Użytkownicy przenoszący konfigurację z nadrzędnych serwerów proxy, które przypisują konta na stałe i wyłączają limity bezczynności, często napotykają oba problemy i dochodzą do wniosku, że OmniRoute „nie potrafi utrzymać długiej sesji”.
+Dwie wartości domyślne OmniRoute mogą po cichu sabotować wielogodzinne sesje Codex CLI. Obydwa ustawienia Codex CLI — nie są aktywne po stronie OmniRoute. Użytkownicy migrujący konfigurację z zewnętrznych serwerów proxy, które przypinają konta i wyłączają przerwy w bezczynności, często trafiają na oba i dochodzą do wniosku, OmniRoute „nie jest w stanie wytrzymać długiej sesji”.
 
-| Objaw                                                                                   | Prawdopodobna przyczyna                                                                                   | Ustawienie               |
-| --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------ |
-| Sesja stale przełącza konta / ciągłość pamięci podręcznej promptów zanika między turami | TTL koligacji sesji wynosi `0` (wyłączony)                                                                | `sessionAffinityTtlMs`   |
-| Połączenie zrywa się w trakcie rozumowania bez komunikatu widocznego dla klienta        | Mechanizm nadzorujący bezczynność strumienia zadziałał po 10 minutach bez fragmentu z serwera nadrzędnego | `STREAM_IDLE_TIMEOUT_MS` |
+| Objaw                                                                                                 | Prawdopodobna przyczyna                                                                                     | Pokrętło                 |
+| ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------ |
+| Sesja ciągle przełącza konta/ciągłość pamięci podręcznej podpowiedzi zostaje utracona pomiędzy turami | Powinowactwo sesji TTL to `0` (wyłączone)                                                                   | `sessionAffinityTtlMs`   |
+| Połączenie zamiera w połowie rozumowania, bez monitu skierowanego do klienta                          | Watchdog bezczynności strumienia został uruchomiony po 10 minutach bez fragmentu przesyłania strumieniowego | `STREAM_IDLE_TIMEOUT_MS` |
 
-Powiązane dyskusje: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (przerywanie długich zadań), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (dlaczego koligacja jest domyślnie wyłączona). Śledzenie: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Powiązane dyskusje: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (długie usuwanie zadań), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (dlaczego powinowactwo jest domyślnie wyłączone). Śledzenie: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Koligacja sesji — przypisz jedną konwersację do jednego konta
+### 1. Powinowactwo sesji — przypina jedną rozmowę do jednego konta
 
-**Domyślnie:** `sessionAffinityTtlMs = 0` (wyłączona).
+**Domyślny:** `sessionAffinityTtlMs = 0` (wyłączony).
 
-**Gdzie ją ustawić**
+**Gdzie to ustawić**
 
-- Panel → **Ustawienia → Routing** → **Koligacja sesji** → **TTL koligacji (sekundy)** (`ComboDefaultsTab`)
-- Lub zaktualizuj ustawienia metodą PATCH, podając `sessionAffinityTtlMs` w **milisekundach** (zakres Zod `0`–`86_400_000`, tj. maksymalnie 24 godziny)
+- Deska rozdzielcza →** Ustawienia → Routing** →** Powinowactwo sesji** →** Powinowactwo TTL (sekundy)** (`ComboDefaultsTab`)
+- Lub ustawienia PATCH z wejściem `sessionAffinityTtlMs`** milisekundy** (zakres Zod `0`–`86_400_000`, czyli do 24 godzin)
 
-> Nazwa została zmieniona w #7274 z `codexSessionAffinityTtlMs`, przeznaczonego wyłącznie dla Codex. Starszy klucz jest nadal akceptowany jako alias tylko do odczytu; nowe konfiguracje powinny używać `sessionAffinityTtlMs`. Koligacja ma teraz zastosowanie do **każdego** dostawcy, gdy TTL jest większy niż `0`, a nie tylko do Codex — zobacz [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Koligacja sesji.
+> Zmieniono nazwę na #7274 z `codexSessionAffinityTtlMs` dostępnego wyłącznie w Kodeksie. Starszy klucz jest nadal akceptowany jako alias tylko do odczytu; nowe konfiguracje powinny używać `sessionAffinityTtlMs`. Powinowactwo ma teraz zastosowanie do** każdy** dostawca, gdy TTL znajdzie się powyżej `0`, nie tylko Codex — zobacz [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Powinowactwo sesji.
 
-**Co przestaje działać, gdy wartość pozostaje równa 0**
+**Co się psuje, gdy pozostaje na poziomie 0**
 
-Każda tura wieloturowej konwersacji Codex jest kierowana niezależnie zgodnie z aktywną strategią kombinacji i może trafić do **innego konta w każdej turze**. Powoduje to przerwanie ciągłości sesji / pamięci podręcznej promptów po stronie serwera nadrzędnego. OmniRoute uwzględnia nagłówki sesji Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) oraz pola treści, takie jak `prompt_cache_key` / `session_id`, tylko wtedy, gdy TTL jest większy niż `0` (`extractSessionAffinityKey` w `src/sse/services/auth.ts`).
+Każda tura wieloturowej rozmowy Codex jest kierowana niezależnie przez aktywną strategię kombi i może wylądować na** inne konto na turę** . To przerywa ciągłość sesji/pamięci podręcznej monitu. OmniRoute konsultuje tylko nagłówki sesji Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) i pola treści, takie jak `prompt_cache_key` / `session_id` gdy TTL jest większe niż `0` (`extractSessionAffinityKey` w `src/sse/services/auth.ts`).
 
-**Zalecenia dla pojedynczego zadania trwającego wiele godzin**
+**Zalecany do wielogodzinnego pojedynczego zadania**
 
-Ustaw TTL na wartość **większą niż przewidywany rzeczywisty czas trwania zadania** (maksymalna wartość w interfejsie to **86400 sekund** = 24 godziny):
+Ustaw TTL** powyżej oczekiwanej długości zadania** (UI max to** 86400 sekund** = 24 godziny):
 
-| Przewidywany czas zadania | TTL koligacji (interfejs, sekundy) | `sessionAffinityTtlMs` |
-| ------------------------- | ---------------------------------- | ---------------------- |
-| Kilka godzin              | `14400` (4 godz.)                  | `14400000`             |
-| Przez noc / ~12 godz.     | `43200` (12 godz.)                 | `43200000`             |
-| Pełna doba                | `86400` (24 godz., maksimum)       | `86400000`             |
+| Oczekiwana długość zadania | Powinowactwo TTL (UI, sekundy) | `sessionAffinityTtlMs` |
+| -------------------------- | ------------------------------ | ---------------------- |
+| Kilka godzin               | `14400` (4h)                   | `14400000`             |
+| Nocleg / ~ 12h             | `43200` (12h)                  | `43200000`             |
+| Cały dzień                 | `86400` (24h, maksymalnie)     | `86400000`             |
 
-Włączenie tej funkcji jest celowo opcjonalne: wyłączenie koligacji sprzyja równoważeniu obciążenia między kontami, natomiast jej włączenie sprzyja ciągłości jednej długiej sesji agenta. Ten przewodnik **nie** zmienia wartości domyślnej — operatorzy uruchamiający długie zadania Codex muszą samodzielnie włączyć tę funkcję.
+Wyrażenie zgody jest celowe: wyłączenie koligacji sprzyja równoważeniu obciążenia między kontami; włączenie tej opcji sprzyja ciągłości przez jedną długą sesję agenta. Ten przewodnik to robi** nie** zmień domyślnych operatorów — wykonujących długie zadania Codex, musisz się zgodzić.
 
-### 2. Limit czasu bezczynności strumienia — nie przerywaj tur z długimi okresami cichego rozumowania
+### 2. Limit czasu bezczynności strumienia — nie zabijaj cichych tur rozumowania
 
-**Domyślnie:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minut). Jeśli zmienna nie jest ustawiona, dziedziczy wartość z `REQUEST_TIMEOUT_MS`; wspólna wartość bazowa również wynosi 600000. Zobacz [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Limity czasu.
+**Domyślny:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minut). Dziedziczy po `REQUEST_TIMEOUT_MS`, gdy nie jest ustawiony; wspólna linia bazowa wynosi również 600000. Zobacz limity czasu [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) →.
 
-**Co przestaje działać przy wartości domyślnej**
+**Co psuje się domyślnie**
 
-Tura rozumowania / użycia narzędzia Codex, która pozostaje bezczynna przez ponad 10 minut i nie otrzymuje **żadnego rzeczywistego fragmentu danych ze źródła**, jest przymusowo zamykana przez mechanizm monitorujący bezczynność SSE (`open-sse/utils/stream.ts`). Klient często widzi jedynie zerwanie połączenia — co odpowiada sytuacji „zatrzymano automatycznie bez żadnego powiadomienia”.
+Rozumowanie Codex / obrót narzędzia, który pozostaje cichy przez ponad 10 minut** nie ma prawdziwego kawałka w górę** jest zamykany na siłę przez watchdog bezczynności SSE (`open-sse/utils/stream.ts`). Klient często widzi, że zerwanie połączenia, dopasowanie — „zatrzymuje się automatycznie bez żadnego powiadomienia”.
 
-Istotny szczegół: syntetyczny **heartbeat SSE OmniRoute nie resetuje** licznika bezczynności. Tylko rzeczywisty fragment treści ze źródła aktualizuje `lastChunkTime`. Cichy model, który nadal „myśli”, z punktu widzenia mechanizmu monitorującego wygląda identycznie jak źródło, które przestało odpowiadać.
+Krytyczny szczegół: syntetyczny OmniRoute firmy SSE** bicie serca nie resetuje się** bezczynny zegar. Tylko prawdziwy fragment treści nadrzędnej aktualizuje `lastChunkTime`. Cichy model, który wciąż „myśli”, z punktu widzenia nadzorcy wygląda identycznie jak model, który utknął w górnym biegu rzeki.
 
-Powiązana bezczynność treści w Undici: `FETCH_BODY_TIMEOUT_MS` (również domyślnie korzysta z tej samej wartości bazowej wynoszącej 10 minut; `0` ją wyłącza). W przypadku streamingu `FETCH_TIMEOUT_MS` obejmuje jedynie ustanawianie połączenia / pierwsze nagłówki — po aktywowaniu strumienia przestoje są kontrolowane przez `STREAM_IDLE_TIMEOUT_MS` i `FETCH_BODY_TIMEOUT_MS`.
+Powiązana brak aktywności ciała Undici: `FETCH_BODY_TIMEOUT_MS` (również domyślnie ustawiona jest ta sama 10-minutowa linia bazowa; `0` ją wyłącza). W przypadku przesyłania strumieniowego `FETCH_TIMEOUT_MS` obejmuje tylko konfigurację połączenia/pierwsze nagłówki — gdy strumień jest aktywny, straganami zarządzają `STREAM_IDLE_TIMEOUT_MS` i `FETCH_BODY_TIMEOUT_MS`.
 
-**Zalecane ustawienia dla pojedynczego zadania trwającego wiele godzin**
+**Zalecany do wielogodzinnego pojedynczego zadania**
 
-W środowisku procesu OmniRoute (`.env` / compose / systemd):
+W środowisku procesowym OmniRoute (`.env` / compose / systemd):
 
 ```bash
-# Wyłącz limity bezczynności strumienia i treści dla długich tur rozumowania
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Możesz też zwiększyć je powyżej najdłuższej oczekiwanej przerwy bez aktywności (wartości podawane są w milisekundach):
+Lub podnieś je powyżej najdłuższej oczekiwanej cichej przerwy (wartości podano w milisekundach):
 
 ```bash
-# Przykład: zezwól na maksymalnie 2 godziny ciszy między fragmentami danych ze źródła
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Po zmianie tych zmiennych środowiskowych uruchom ponownie OmniRoute.
+Uruchom ponownie OmniRoute po zmianie tych zmiennych środowiskowych.
 
-### Konkretna procedura — wielogodzinne zadanie Codex
+### Przepis betonowy — wielogodzinne zadanie Codex
 
-1. **Przypnij konto:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12 godz.) lub `86400` (maks. 24 godz.).
-2. **Zwiększ / wyłącz limity bezczynności** w środowisku OmniRoute:
+1. **Przypnij konto:** Pulpit nawigacyjny → Ustawienia → Routing → Powinowactwo sesji → Powinowactwo TTL = `43200` (12h) lub `86400` (maks. 24h).
+2. **Podnieś/wyłącz wartości odcięcia biegu jałowego** w środowisku OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Zachowaj standardową konfigurację Codex w pliku `config.toml` (`wire_api = "responses"`, prawidłowy `base_url`, `OMNIROUTE_API_KEY`) — po stronie Codex nie istnieją ustawienia koligacji sesji ani bezczynności dotyczące tych dwóch zachowań.
+3. Zachowaj zwykłe Codex `config.toml` (`wire_api = "responses"`, popraw `base_url`, `OMNIROUTE_API_KEY`) — nie istnieją pokrętła affinity/idle po stronie Kodeksu dla tych dwóch zachowań.
 4. Uruchom ponownie OmniRoute, a następnie rozpocznij długie zadanie Codex.
 
-### Decyzja dotycząca wartości domyślnych (#7287)
+### Decyzja domyślna (#7287)
 
-| Ustawienie               | Domyślna wartość  | Zmienić w tym przewodniku?                                                                                            |
-| ------------------------ | ----------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (wyłączone)   | **Nie** — pozostaje opcjonalne (równoważenie obciążenia a ciągłość; patrz Discussion #5718)                           |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min) | **Nie** — pozostaje 10 minut dla zwykłego ruchu; operatorzy długich zadań Codex zwiększają ten limit lub go wyłączają |
+| Pokrętło                 | Wysyłka domyślna  | Zmiany w tym przewodniku?                                                                        |
+| ------------------------ | ----------------- | ------------------------------------------------------------------------------------------------ |
+| `sessionAffinityTtlMs`   | `0` (wyłączone)   | **NIE** — pozostaje opcjonalna (równoważenie obciążenia a ciągłość; zobacz Dyskusja #5718)       |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min) | **NIE** — pozostaje 10 minut dla ruchu ogólnego; operatorzy long Codex podnoszą go lub wyłączają |
 
-Globalna zmiana którejkolwiek wartości domyślnej wpłynęłaby na zachowanie wszystkich klientów danej instancji, a nie tylko Codex. Należy udokumentować te ustawienia, ale pozostawić wartości domyślne bez zmian, dopóki operator nie podejmie wyraźnej decyzji o ich zmianie.
+Globalne odwrócenie dowolnego ustawienia domyślnego zmieniłoby zachowanie każdego klienta instancji, nie tylko Codex. Udokumentuj pokrętła; pozostaw ustawienia domyślne w spokoju, dopóki wyraźna decyzja operatora nie powie inaczej.
 
-### Diagnozowanie przerwań z powodu bezczynności
+### Diagnozowanie cięć jałowych
 
-Gdy mechanizm monitorujący bezczynność zostanie uruchomiony, OmniRoute zapisuje w logach wiersz o następującym formacie:
+Kiedy uruchamia się watchdog bezczynności, OmniRoute rejestruje linię w kształcie:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Wyszukaj za pomocą grep ciąg `Idle timeout: no data from` (albo kod `stream_idle_timeout` / nazwę błędu `StreamIdleTimeoutError`). Segment dostawcy odpowiada temu, którego OmniRoute użył dla danego żądania (`codex`, identyfikator innego dostawcy albo `provider`, jeśli dostawca jest nieznany) — nie zawsze jest to dosłownie ciąg `codex`.
+Grep dla `Idle timeout: no data from` (lub kod `stream_idle_timeout` / nazwa błędu `StreamIdleTimeoutError`). Segment dostawcy to dowolny element OmniRoute użyty w tym żądaniu (`codex`, identyfikator innego dostawcy lub `provider`, jeśli nieznany). — nie zawsze jest to dosłowny ciąg znaków `codex`.
 
 ---
 

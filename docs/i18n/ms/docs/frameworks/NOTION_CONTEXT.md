@@ -62,42 +62,31 @@ Ketiga-tiga kaedah memerlukan pengesahan papan pemuka (`isAuthenticated`). Semas
 OmniRoute menyimpan token dan serta-merta menjalankan carian ujian dengan 1 hasil; jika Notion
 mengembalikan objek ralat, token dikosongkan dan panggilan gagal dengan `400`.
 
-## Alat MCP (6)
+## alat MCP (6)
 
-Ditakrifkan dalam `open-sse/mcp-server/tools/notionTools.ts`. Token diperoleh semasa panggilan
-melalui `getNotionToken()`; jika tiada token dikonfigurasikan, alat akan membangkitkan
-`"Token integrasi Notion tidak dikonfigurasikan. Tetapkannya dalam Tetapan > Sumber Konteks."`
+Ditakrifkan dalam `open-sse/mcp-server/tools/notionTools.ts`. Token diselesaikan pada masa panggilan melalui `getNotionToken()`; jika tiada yang dikonfigurasikan alat itu membuang `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Alat                         | Skop           | Penerangan                                                                                                 |
-| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Cari halaman dan pangkalan data mengikut pertanyaan teks (mengembalikan tajuk, ID, URL). Berhalaman.       |
-| `notion_get_page`            | `read:notion`  | Dapatkan kandungan dan metadata halaman berdasarkan ID-nya.                                                |
-| `notion_list_block_children` | `read:notion`  | Senaraikan semua blok anak bagi blok atau halaman (pepohon blok). Berhalaman.                              |
-| `notion_query_database`      | `read:notion`  | Buat pertanyaan terhadap pangkalan data dengan `filter` + `sorts` pilihan (format API Notion). Berhalaman. |
-| `notion_get_database`        | `read:notion`  | Dapatkan skema/metadata pangkalan data berdasarkan ID.                                                     |
-| `notion_append_blocks`       | `write:notion` | Tambahkan blok anak pada blok atau halaman sedia ada (maksimum 100 blok bagi setiap permintaan).           |
+| alat                         | Skop           | Penerangan                                                                                                       |
+| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Cari halaman dan pangkalan data mengikut pertanyaan teks (mengembalikan tajuk, IDs, URLs). bernombor muka surat. |
+| `notion_get_page`            | `read:notion`  | Dapatkan kandungan dan metadata halaman dengan ID.                                                               |
+| `notion_list_block_children` | `read:notion`  | Senaraikan semua kanak-kanak blok bagi blok atau halaman (pokok blok). bernombor muka surat.                     |
+| `notion_query_database`      | `read:notion`  | Tanya pangkalan data dengan `filter` + `sorts` ( format Notion API ). bernombor muka surat.                      |
+| `notion_get_database`        | `read:notion`  | Dapatkan schema/metadata pangkalan data dengan ID.                                                               |
+| `notion_append_blocks`       | `write:notion` | Tambahkan kanak-kanak blok pada blok atau halaman sedia ada (maks 100 blok setiap permintaan).                   |
 
 ### Parameter input
 
-- `notion_search` — `query` (1–500 aksara), `pageSize` (1–100, lalai 20),
-  `startCursor` (pilihan).
-- `notion_get_page` — `pageId` (heks 32 aksara atau UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, lalai 50),
-  `startCursor` (pilihan).
-- `notion_query_database` — `databaseId`, `filter` (pilihan, format penapis Notion),
-  `sorts` (tatasusunan pilihan), `pageSize` (1–100, lalai 50), `startCursor` (pilihan).
+- `notion_search` — `query` (1–500 aksara), `pageSize` (1–100, lalai 20), `startCursor` (pilihan).
+- `notion_get_page` — `pageId` (32-char hex atau UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, lalai 50), `startCursor` (pilihan).
+- `notion_query_database` — `databaseId`, `filter` (pilihan, format penapis Notion ), `sorts` (tatasusunan pilihan), `pageSize` (1–100, lalai 50), `startCursor` (pilihan).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (tatasusunan objek blok),
-  `after` (kedudukan pilihan).
+- `notion_append_blocks` — `blockId`, `children` (susun objek blok), `after` (kedudukan pilihan).
 
 ### Skop
 
-Alat baca memerlukan `read:notion` dan alat tulis memerlukan `write:notion`.
-Skop dikuatkuasakan oleh `withScopeEnforcement()` dalam
-`open-sse/mcp-server/server.ts` hanya apabila `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; skop
-yang dibenarkan untuk pemanggil berasal daripada `OMNIROUTE_MCP_SCOPES` (dipisahkan koma) atau
-konteks skop kunci API yang disahkan. Lihat [MCP-SERVER.md](./MCP-SERVER.md) untuk
-model skop penuh.
+Alat baca memerlukan `read:notion` dan alat tulis memerlukan `write:notion`. Skop dikuatkuasakan oleh `withScopeEnforcement()` dalam `open-sse/mcp-server/server.ts` apabila `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, dan sentiasa untuk pemanggil HTTP/SSE yang kunci API tidak mempunyai `manage`/`admin`; skop yang dibenarkan pemanggil datang daripada `OMNIROUTE_MCP_SCOPES` (dipisahkan koma) atau konteks skop kunci API yang disahkan. Lihat [MCP-SERVER.md](./MCP-SERVER.md) untuk model skop penuh.
 
 ## Titik Akhir
 

@@ -4,13 +4,7 @@
 
 ---
 
-> **Sors awtorevoli:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, u l-builders pubbliċi f’`open-sse/utils/error.ts`
-> **Testijiet:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Aġġornat l-aħħar:** 2026-09-02 — v3.8.51
-> **Udjenza:** Kwalunkwe inġinier li jaħdem fuq risposti ta’ żbalji (rotot HTTP, streams SSE, executors, handlers MCP).
-> **Status:** **OBBLIGATORJU** għal kull mogħdija tal-kodiċi li tirritorna messaġġ ta’ żball lil klijent.
+> **Sors tal-verità:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, u l-bennejja pubblii fiz- `open-sse/utils/error.ts`** Testijiet:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Udjenza:** Kwalunkwe inġinier li jmiss tweġibiet għall-iżball (rotot HTTP, streams SSE, executors, MCP handlers).** Status:****MANDATORY** għal kull mogħdija tal-kodiċi li tirritorna messaġġ ta 'żball lil klijent.
 
 ## Għaliex jeżisti dan
 

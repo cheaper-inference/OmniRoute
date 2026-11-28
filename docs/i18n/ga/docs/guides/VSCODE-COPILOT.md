@@ -4,37 +4,37 @@
 
 ---
 
-Cuireann **OmniCopilot** gach samhail a fhreastalaíonn do OmniRoute uirthi isteach i roghnóir samhlacha _dúchais_ GitHub Copilot Chat.
-Níl aon dara taobhbharra ná aon chomhéadan comhrá ar leith ann — leanann mód gníomhaire Copilot, glaoch uirlisí,
-freastalaithe MCP agus treoracha saincheaptha ar aghaidh ag obair, ach iad ag rith ar an tsamhail a roghnaíonn tú.
+**OmniCopilot** cuireann sé do mhúnlaí comhrá OmniRoute agus combos leis an roghnóir samhail Comhrá Copilot dúchais. Bain úsáid as sreafaí oibre comhrá agus gníomhairí reatha an eagarthóra, le glaoch uirlisí agus fís nuair a thacaíonn an tsamhail roghnaithe leo.
 
-|                               |                                                                                                                                                 |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Suiteáil (VS Code)**        | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Suiteáil (forcanna)**       | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Cód foinseach / fadhbanna** | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Riachtanais**               | VS Code 1.104+                                                                                                                                  |
+|                              |                                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Suiteáil (VS Code)**       | [Margadh → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                  |
+| **Suiteáil (Oscail VSX)**    | Éilíonn [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — soláthraí samhail teanga comhoiriúnach agus APIs comhrá |
+| **Foinse / saincheisteanna** | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                                    |
+| **Éilíonn**                  | Cód VS 1.104 + (1.122 + chun é a úsáid gan síniú isteach GitHub nó plean Copilot )                                                    |
+| **Eisiúint reatha**          | OmniCopilot v1.5.1 ar an dá stór (scaoileadh 2026-11-24)                                                                              |
 
-> **Níl síntiús Copilot ag teastáil.** Ó VS Code 1.122 i leith, oibríonn soláthraí samhla teanga
-> gan síniú isteach ar GitHub agus gan aon phlean Copilot. Fanann comhlánuithe inlíne agus
-> gnéithe bunaithe ar leabuithe lasmuigh d'API an tsoláthraí agus tá Copilot fós ag teastáil uathu.
+Stóráil pictiúr ar** 2026-11-25 ( UTC)** , scaoileadh reatha:** 52,081 Marketplace suiteáilte** agus** 20,989 íosluchtú oscailte VSX** . Is méadrachtaí stórais éagsúla iad seo, ní comhaireamh úsáideora comhcheangailte. Foinsí: [Margadh](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) agus [Oscailte VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Ní bhunaíonn infhaighteacht oscailte VSX ann féin comhoiriúnacht le gach eagarthóir a úsáideann an chlár sin. Seiceáil tacaíocht comhrá agus samhail teanga an eagarthóra API.
+
+> **Níl aon síntiús Copilot ag teastáil le haghaidh comhrá BYOK i gCód VS 1.122 +.** Tacaíonn Microsoft le comhrá, uirlisí agus MCP gan síniú isteach GitHub nuair a bhíonn soláthraí cumraithe. Ar Chód VS 1.104–1.121 tá an síneadh fós ag obair, ach éilíonn Cód VS plean Copilot sínithe isteach. Fanann moltaí inlíne agus gnéithe bunaithe ar leabú lasmuigh den API soláthraí agus fós éilíonn siad Copilot; is féidir le riarthóirí Copilot Business/Enterprise soláthraithe samhlacha tríú páirtí a dhíchumasú de réir beartais; ní thaispeánann forc na samhlacha ach amháin má chuireann sé an comhrá-soláthraí API i bhfeidhm . Is féidir táillí a ghearradh fós ar úsáid soláthraithe in aghaidh an tsrutha. Féach [nótaí eisiúna Cód VS 1.122](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) agus [treoir mhúnla teanga](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
 ## Socrú
 
-1. **Rith OmniRoute** — `npm install -g omniroute && omniroute` (an deais ar `http://localhost:20128`).
-2. **Suiteáil an eisínteacht** — cuardaigh "OmniRoute" san amharc Eisínteachtaí.
-3. **Roghnaigh samhail** — Copilot Chat → roghnóir samhlacha → **Bainistigh Samhlacha…** → **OmniRoute**, ansin cuir tic leis
-   na cinn atá uait.
+1. **Rith OmniRoute** — `npm install -g omniroute && omniroute` (deais ar `http://localhost:20128`).
+2. **Suiteáil an síneadh** cuardaigh — "OmniRoute" san amharc Eisínteachtaí.
+3. **Ceangail** — coinnigh an `http://localhost:20128` réamhshocraithe nó socraigh do fhreastalaí URL agus API eochair tríd**OmniRoute: Bainistigh Ceangal** .
+4. **Roghnaigh samhail** — Copilot Comhrá → roghnóir →** Bainistigh Múnlaí…** →**OmniRoute** , ansin cuir tic leis an méid atá uait.
 
-Ní gá aon rud a chumrú nuair a ritheann OmniRoute ar an bport réamhshocraithe. I gcás cianásc, oscail
-**deilbhín OmniRoute sa Bharra Gníomhaíochta** (nó rith `OmniRoute: Manage Connection`) agus socraigh:
+Le haghaidh socruithe ceangail, oscail an** deilbhín OmniRoute sa Bharra Gníomhaíochta** (nó rith `OmniRoute: Manage Connection`) agus socraigh:
 
-- **URL an fhreastalaí** — fréamh an fhreastalaí, m.sh. `http://192.168.0.15:20128`. Cuireann an eisínteacht
-  an iarmhír `/v1` leis; ná cuir san áireamh í.
-- **Eochair API** — ach amháin nuair a shocraíonn an freastalaí `REQUIRE_API_KEY`. Stóráiltear í i slabhra eochracha an chórais oibriúcháin trí VS
-  Code SecretStorage, agus ní stóráiltear riamh í in `settings.json`.
+- **Freastalaí URL** — fréamh an fhreastalaí, m.sh. `http://omniroute.example.com:20128`. Tá an iarmhír `/v1` i gceangal leis an síneadh; ná cuir san áireamh é.
+- **eochair API** — ag teastáil nuair a éilíonn polasaí fíordheimhnithe tátail an fhreastalaí. Stóráilte trí VS Code SecretStorage, riamh i `settings.json`; tá eochracha a bhaineann go sonrach le spás oibre ar fáil. Bain úsáid as eochair údaraithe do na samhlacha is mian leat a nochtadh.
+
+Soláthraíonn an síneadh freisin táscaire nasctha, athnuachan múnla, comhthéacs samhla agus meiteashonraí praghsála (combanna san áireamh), réasúnaíocht sruthaithe le a** Iarracht smaointeoireachta** roghchlár ar VS Cód 1.120 +, táscaire teorainn laethúil barra stádais agus painéal úsáide (OmniRoute 3.8.50 +), cumraíocht CLI agus cluaisín painéal roghnach. Cinneann an tsamhail roghnaithe agus polasaí an fhreastalaí na cumais is féidir leat a úsáid.
 
 ---
 
@@ -119,26 +119,25 @@ Féach [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) agus saincheist
 
 ---
 
-## Do chuid uirlisí eile a chumrú ón taobh istigh de VS Code
+## Chumrú do uirlisí eile ón taobh istigh VS Cód
 
-Úsáideann **`OmniRoute: Configure Coding CLI`** an CLI `omniroute` chun próifílí atá réidh le húsáid a scríobh
-do Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo agus Roo — na cumraíochtaí céanna a bhfuil cur síos orthu in
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). Cuirtear an eochair API ar fáil don CLI tríd an
-athróg timpeallachta `OMNIROUTE_API_KEY`, agus ní chuirtear ar líne na n-orduithe riamh í.
+**`OmniRoute: Configure Coding CLI`** thiomáineann an `omniroute` CLI chun próifílí réidh le húsáid a scríobh le haghaidh 16 uirlis: Codex CLI, Claude Code, Cline, Leanúint ar aghaidh, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed, WhyCodes agus 5dive. Déanann an síneadh orduithe `setup-*` a agairt sa teirminéal comhtháite; suiteáil leagan den OmniRoute CLI a chuimsíonn an t-ordú roghnaithe. Féach ar an [treoir um chomhtháthú CLI](CLI-INTEGRATIONS.md) do na comhaid agus na bratacha a úsáideann gach oideas agus [clár uirlisí an tsínidh](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+Tugtar an eochair API don CLI trí `OMNIROUTE_API_KEY`, riamh ar an líne ordaithe. Is féidir le hoidis socraithe dintiúir a leanúint i gcumraíocht na sprice. Nuair a bhíonn eochair a bhaineann go sonrach le spás oibre á roinnt le cumraíocht leibhéal úsáideora na huirlise, iarrann an síneadh deimhniú ar dtús.
 
 ---
 
 ## Fabhtcheartú
 
-| Siomptóm                                                        | Cúis / réiteach                                                                                                                                                                                                                                                                                               |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Níl aon samhlacha OmniRoute sa roghnóir                         | Ní féidir an freastalaí a rochtain. Éiríonn ponc an bharra stádais liath; rith `OmniRoute: Check Connection`. Tá an aimsiú ciúin de réir dearaidh agus ní chuireann sé aon samhlacha leis seachas leid a thaispeáint.                                                                                         |
-| Taispeántar gach samhail faoi dhó                               | Tá leagan OmniCopilot níos sine ná 1.0.1 agat — nuashonraigh é. Iarrann an eisínteacht `?prefix=alias` anois.                                                                                                                                                                                                 |
-| Bhí samhail íomhá/fuaime liostaithe ach níl sí ann a thuilleadh | D’aon ghnó ó 1.0.1 — ní raibh sí in ann freagra a thabhairt ar iarratas comhrá riamh.                                                                                                                                                                                                                         |
-| Tá an painéal ar iarraidh ón mBarra Gníomhaíochta               | Bogann VS Code coimeádáin amhairc bhreise isteach sa roghchlár thar maoil **"…"** ag bun an Bharra Gníomhaíochta, agus fanann coimeádán a cuireadh i bhfolach trí dheaschliceáil i bhfolach. Deaschliceáil an Barra Gníomhaíochta → cuir tic le **OmniRoute**, nó oscail é le `OmniRoute: Manage Connection`. |
-| Osclaítear an painéal sa bhrabhsálaí in ainneoin mód `editor`   | Níor **tógadh** an freastalaí le `DASHBOARD_ALLOW_EMBED=vscode` (féach thuas) — ní dhéanann a shocrú ag am tosaithe ar shuiteáil réamhthógtha aon rud. Tá an cúlú d’aon ghnó.                                                                                                                                 |
-| Tá liosta na samhlacha as dáta tar éis soláthraithe a athrú     | `OmniRoute: Refresh Models`, nó an nasc ↻ sa phainéal.                                                                                                                                                                                                                                                        |
+| Siomptóim                                                   | Cause / shocrú                                                                                                                                                                                                                                                                                                                     |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Níl samhlacha OmniRoute sa roghnóir                         | Ní féidir teacht ar an bhfreastalaí. Téann an ponc barra stádais liath; rith `OmniRoute: Check Connection`. Tá fionnachtain ciúin ó thaobh dearaidh agus ní chuireann aon mhúnlaí leis seachas leideanna.                                                                                                                          |
+| Tá gach samhail le feiceáil faoi dhó                        | Tá tú ar OmniCopilot níos sine ná 1.0.1 nuashonrú —. Iarrann an síneadh `?prefix=alias` anois .                                                                                                                                                                                                                                    |
+| Samhail image/audio a bhíodh á liostú agus tá sé imithe     | D'aon ghnó ó 1.0.1 — ní fhéadfadh sé freagra a thabhairt ar iarratas comhrá.                                                                                                                                                                                                                                                       |
+| Painéal in easnamh ón mBarra Gníomhaíochta                  | bogann VS Code coimeádáin amharc breise isteach sa** "…"** cur thar maoil ag bun an Bharra Gníomhaíochta, agus coimeádán atá i bhfolach trí chliceáil ar dheis fanann sé i bhfolach. Deaschliceáil ar an mBarra Gníomhaíochta → tic**OmniRoute** , nó é a oscailt le `OmniRoute: Manage Connection`.                               |
+| Osclaíonn an painéal sa bhrabhsálaí ainneoin mód `editor`   | Ní raibh an freastalaí** tógtha** le `DASHBOARD_ALLOW_EMBED=vscode` (féach thuas) ní dhéanann — é a shocrú ag am tosaithe ar shuiteáil réamhthógtha. Tá an fallback d'aon ghnó.                                                                                                                                                    |
+| Tá liosta na múnlaí sean tar éis soláthraithe a athrú       | `OmniRoute: Refresh Models`, nó an nasc ↻ sa phainéal.                                                                                                                                                                                                                                                                             |
+| Deir an painéal _Ar Líne (samhail bactha)_, roghnóir folamh | Diúltaíonn an freastalaí an eochair. Sábháil an eochair cheart le** Sábháil & Tástáil** . Má socraíodh an eochair ar an bhfreastalaí ina ionad sin (cuireadh ar chumas, nó má thugtar rochtain ar na samhlacha), ní thugann an síneadh faoi deara leis féin: reáchtáil `OmniRoute: Refresh Models` nó oscail an painéal OmniRoute. |
 
 ---
 

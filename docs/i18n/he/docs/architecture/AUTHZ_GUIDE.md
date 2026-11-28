@@ -5,11 +5,10 @@
 ---
 
 > **מקור האמת:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **עודכן לאחרונה:** 2026-09-22 — מרחבי שמות של סקופים מצביעים על MCP-SERVER.md
 
-ל-OmniRoute יש צינור הרשאות מודע-לנתיבים שחוסם כל בקשת API. הסיווג הוא **דטרמיניסטי** ו**סגור-בכישלון** — כל דבר שלא ניתן לסווגו מסתיים כ-`MANAGEMENT` ודורש סשן או אסימון ברמת ניהול. עמוד זה מסביר את המודל למהנדסים המתחזקים נתיבים או מתכננים נקודות קצה חדשות.
+OmniRoute יש צינור הרשאות מודע למסלול שמסגר כל בקשת API. סיווג הוא** דטרמיניסטית** ו** כשל-סגור** — כל דבר שלא ניתן לסווג מסתיים כ- `MANAGEMENT` ודורש סשן או אסימון בדרגת ניהול. דף זה מסביר את המודל למהנדסים שמתחזקים מסלולים או תכנון נקודות קצה חדשות.
 
-![צינור AuthZ (3 מחלקות נתיבים + הערכת מדיניות)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > מקור: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -200,9 +199,9 @@ Incoming request → src/proxy.ts
 
 לכל כיתת מסלול יש מדיניות ב- `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) — תמיד מחזיר `allow({ kind: "anonymous", id: "anonymous" })`.
+- **`publicPolicy`** (`policies/public.ts`) — תמיד מחזיר את `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — מחלץ Bearer, מאמת באמצעות `validateApiKey()`. עובר לאנונימי רק כאשר דגל התכונה היעיל `REQUIRE_API_KEY` מושבת. הדגל האפקטיבי נפתר באמצעות `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) כך שדגמי תכונות של לוח המחוונים ומשתני סביבה שולטים `/api/v1/*`, `/api/v1beta/*` וכינויים באופן עקבי; כשלי פותר נכשל סגור. מאפשר בקשות הפעלה של לוח המחוונים במסלולי API של הלקוח (כולל `/api/v1/models`, המשמש את קטלוג הדגמים של לוח המחוונים). כאשר Entra ID SSO מופעלת, Bearer שהוא מבחינה מבנית אסימון Entra (שלושה מקטעי base64url, `RS*` alg, `kid`) מטופל על ידי ענף SSO** לִפנֵי** `validateApiKey()` ופסק הדין שלו הוא סופי — הוא לעולם לא נופל לנתיב מפתח ה-API או לסניף השפל לאנונימי, כך שהפסקת ספק זהות לא יכולה להפוך לגישה פתוחה. מפתחות API סטטיים אינם מושפעים. ראה [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — מקבל הפעלה של לוח המחוונים, בקשות פנימיות לסנכרון מודל (מתואמות ל- `/api/providers/[name]/(sync-models|models)`), או מדלג לחלוטין אם `isAuthRequired()` מחזיר false. מחזירה 403 (`AUTH_001`) כאשר אסימון נושא קיים אך לא חוקי, 401 אחרת. אוכפת גם את שכבות השמירה על המסלול (LOCAL_ONLY / ALWAYS_PROTECTED) לפני כל סניף סמכות — ראה [שכבות משמר המסלולים](../security/ROUTE_GUARD_TIERS.md). ניתן לגשת לנתיבי LOCAL_ONLY ב- `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (היום: `/api/mcp/`) ללא-loopback כאשר מפתח ה-Bearer נושא את היקף `manage` ; כל שאר הנתיבים LOCAL_ONLY נשארים strict-loopback ללא קשר להיקף.
+- **`managementPolicy`** (`policies/management.ts`) — מקבל הפעלה של לוח המחוונים, בקשות פנימיות לסנכרון מודל (מתואמות ל- `/api/providers/[name]/(sync-models|models)`), או מדלג לחלוטין אם `isAuthRequired()` מחזיר false. מחזירה 403 (`AUTH_001`) כאשר אסימון נושא קיים אך לא חוקי, 401 אחרת. אוכפת גם את שכבות השמירה על המסלול (LOCAL_ONLY / ALWAYS_PROTECTED) לפני כל סניף סמכות — ראה [שכבות משמר המסלולים](../security/ROUTE_GUARD_TIERS.md). ניתן לגשת לנתיבי LOCAL_ONLY ב- `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (היום: `/api/mcp/`) ללא-loopback כאשר מקש ה-Bearer נושא את היקף `manage`/`admin` או טווח `mcp:connect` הצר (`hasMcpConnectOrManageScope`), או עם הפעלה של לוח מחוונים מאומת; כל שאר הנתיבים LOCAL_ONLY נשארים ללא קשר להיקף.
 
 פוליסה מוצלחת מחזירה `AuthSubject` עם `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. מטפלים במורד הזרם יכולים לקרוא אותו באמצעות `assertAuth(request, "CLIENT_API")` ב- `src/server/authz/assertAuth.ts` במקום להפעיל מחדש את לוגיקה של אישור.
 
@@ -298,35 +297,22 @@ export async function POST(request: Request) {
 
 ## היקפים
 
-שלושה מרחבי שמות. כל בודק קורא רק את המחרוזות שלו. ההשוואה זה לצד זה,
-כולל מדוע `manage` נכשל ב-`scopeMatches` עבור `read:compression` ומדוע אסימון גישה מסוג
-`read` אינו יכול לבצע `PATCH /api/keys/{id}`, נמצאת ב-[שלושה מרחבי שמות של היקפים](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+שלושה מרחבי שמות. כל בודק קורא רק את המחרוזות שלו. זה לצד זה, כולל מדוע `manage` נכשל `scopeMatches` עבור `read:compression` ומדוע אסימון גישה של `read` אינו יכול `PATCH /api/keys/{id}`, הוא [Three scope namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-מפתחות API נושאים מערך `scopes` (המאוחסן כ-JSON ב-`api_keys.scopes`, ראה `src/lib/db/apiKeys.ts`).
+מקשי API נושאים מערך `scopes` (מאוחסן כ- JSON ב- `api_keys.scopes`, ראה `src/lib/db/apiKeys.ts`).
 
 ### היקף ניהול
 
-- `manage` / `admin` — `hasManageScope`. גישת Bearer לניתובים של API הניהול.
-- `mcp:connect`, `self:usage`, `self:account-quota`, ו-
-  `policy:bypass-provider-quota` הם היקפים תוספתיים של התאמה מדויקת. הם נמצאים
-  מחוץ ל-`MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` פותח רק את
-  החריץ הלא-לולאתי `/api/mcp/`.
+- `manage` / `admin` — `hasManageScope`. גישה נושאת למסלולי ניהול API.
+- `mcp:connect`, `self:usage`, `self:account-quota` ו- `policy:bypass-provider-quota` הם היקפי התאמה מדויקת מתווספים. הם יושבים מחוץ `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` פותח רק את ה- `/api/mcp/` non-loopback carve-out.
 
 ### היקפי כלי MCP
 
-קטלוג וכללי התאמה (מחרוזת זהה, או היקף מוענק המסיים ב-`*`):
-[היקפי כלי MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` ב-`src/shared/constants/mcpScopes.ts` הוא תת-הקבוצה המקלידה המקורית,
-לא הקטלוג המלא הזה. האכיפה מתבצעת ב-
-`open-sse/mcp-server/scopeEnforcement.ts` לאחר ש-`resolveCallerScopeContext()`
-פותר היקפים מפרטי אימות MCP, מטא-נתונים של בקשה, או `OMNIROUTE_MCP_SCOPES`.
-הוא נשאר כבוי אלא אם כן `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+כללי קטלוג והתאמה (מחרוזת זהה, או היקף מוענק המסתיים ב- `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` ב- `src/shared/constants/mcpScopes.ts` הוא קבוצת המשנה המקורית שהוקלדה, לא הקטלוג המלא הזה. האכיפה פועלת ב- `open-sse/mcp-server/scopeEnforcement.ts` לאחר ש- `resolveCallerScopeContext()` פותר היקפים מ- MCP auth info, request metadata או `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` מפעיל אותו באופן גלובלי (ברירת מחדל `false`), אבל הוא תמיד נאכף עבור מתקשר HTTP/SSE שמפתח API שלו חסר `manage`/`admin` (ראה `shouldForceScopeEnforcement()` ב- `open-sse/mcp-server/scopeEnforcement.ts`), ללא קשר לדגל.
 
-### היקפי אסימוני גישה
+### היקפי אסימון גישה
 
-`read` / `write` / `admin` על אסימוני `oma_live_…`, מדורגים לפי `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). דירוג זה חל על אישור אסימון הגישה בלבד.
-ראה [אימות ניהול](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` על אסימוני `oma_live_…`, מדורג לפי `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). דירוג זה חל על האישורים של אסימון הגישה בלבד. ראה [אימות ניהול](../guides/MANAGEMENT-AUTH.md).
 
 ## מתג דרישת אימות
 

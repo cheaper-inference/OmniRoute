@@ -12,6 +12,12 @@ Kontrak `config/cli-tools-manifest.json` netral mendeklarasikan IDs kanonik, ali
 
 Sinyal interupsi dan terminasi diteruskan ke anak. Peluncur menunggu acara close anak sebelum menghapus konfigurasi sementara. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` mengontrol masa tenggang sebelum penghentian paksa (default 5000 milidetik).
 
+`omniroute launch <tool>` (lihat [LAUNCH.md](./LAUNCH.md) ) mengikuti aturan lingkungan dan penerusan sinyal yang sama, dan menambahkan:
+
+- **Mulai otomatis gerbang.** Untuk target lokal, ketika tidak ada gateway yang menjawab di port, peluncur akan memulai `omniroute serve --headless --no-open` terikat ke `127.0.0.1` dalam proses penuai terpisah. Setiap peluncuran yang berjalan memiliki sewa dalam `DATA_DIR/launch/leases/` (detak jantung setiap 15 detik, basi setelah 45 detik atau saat prosesnya hilang). Reaper menghentikan gateway yang dimulai setelah tidak ada sewa yang aktif untuk waktu menganggur (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, default 10.000 milidetik). Gerbang yang dimulai oleh pengguna digunakan tetapi tidak pernah dihentikan. `--keep-gateway` atau `omniroute gateway keep` mengubah gerbang peluncur menjadi gerbang normal; `--no-start` mengembalikan perilaku fail-if-down yang lama. Target jarak jauh hanya diperiksa.
+- **Sesi peluncuran.** Setiap peluncuran mencetak token sesi `olx_` yang berumur pendek dari kredensial induk (`POST /api/launch/sessions`), menjalankannya saat alat berjalan, membaca ringkasan penggunaan dan mencabutnya setelah alat keluar. Token adalah bagian ketat dari induknya: izin yang sama, katalog yang sama atau lebih sempit, umur yang lebih pendek, dan ini bukan kredensial dasbor. Alat ini menerima token sesi, bukan kredensial induk, dan permintaan diberi tag `launch:<tool>:<sessionId>` kecuali `--tag` diberikan. Gateway tanpa sesi API gagal dengan `GatewayTooOld` alih-alih kembali ke peluncuran tanpa cakupan.
+- **Konfigurasi per peluncuran.** File konfigurasi alat ditulis ke direktori temp pribadi (mode 0700, awalan `omnirouter-`) dan dihapus setelah anak keluar. `SIGKILL` peluncur meninggalkan direktori; `omniroute launch --cleanup` menghapus direktori tersebut setelah berumur lebih dari satu hari.
+
 ## pengaturan persisten Gemini
 
 ```bash

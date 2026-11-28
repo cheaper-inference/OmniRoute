@@ -4,9 +4,9 @@
 
 ---
 
-> **Nima qaerda yashaydi: har bir kuzatilgan yuqori darajadagi katalog va ildiz fayl, bir qatorli maqsad bilan.** Oxirgi yangilangan: 2026-11-13 (OmniRoute v3.8.54)
+> **Nima qaerda yashaydi: har bir kuzatilgan yuqori darajadagi katalog va ildiz fayl, bir qatorli maqsad bilan.**
 >
-> Kodlar bazasi bo'ylab yo'lni topish uchun ushbu xaritadan foydalaning, so'ngra maxsus hujjatlarga havolalarni bajaring. Fayllar soni yuqoridagi sanada `git ls-files` bilan o'lchandi. Ular deyarli har bir nashr bilan o'zgaradi, shuning uchun ularga kattalik buyurtmalari sifatida munosabatda bo'ling.
+> Kodlar bazasi bo'ylab yo'lni topish uchun ushbu xaritadan foydalaning, so'ngra maxsus hujjatlarga havolalarni bajaring. Fayllar soni `git ls-files` dan keladi va deyarli har bir nashr bilan o'zgaradi. Ularni kattalik buyurtmalari sifatida ko'rib chiqing.
 
 ## Yuqori darajadagi daraxt
 

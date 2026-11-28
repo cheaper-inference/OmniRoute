@@ -5,39 +5,26 @@
 ---
 
 > **Sumber kebenaran:** `src/lib/guardrails/`
-> **Kemas kini terakhir:** 2026-10-17 — v3.8.52 (menambah [Liputan dan had](#coverage-and-limits):
-> laluan dan laluan respons mana yang dicapai oleh cangkuk, pengepala pelumpuhan yang
-> digabungkan (#16412), mod sekatan suntikan sebagai sempadan mandatori (#16413), dan apa
-> yang melihat respons sebelum post-call)
 
-Guardrails menguatkuasakan transformasi keselamatan, dasar, dan kandungan di sempadan
-antara OmniRoute dan pembekal hulu. Setiap guardrail boleh memeriksa (dan secara pilihan
-menolak, mengubah, atau menganotasi) beban data permintaan (`preCall`) dan respons hulu
-(`postCall`).
+Pengawal menguatkuasakan transformasi keselamatan, dasar dan kandungan di sempadan antara OmniRoute dan penyedia huluan. Setiap pagar boleh memeriksa (dan menolak, mengubah atau memberi anotasi secara pilihan) meminta muatan (`preCall`) dan respons huluan (`postCall`).
 
-Sistem ini bersifat **fail-open**: jika sesebuah guardrail melontarkan ralat semasa
-pelaksanaan, registri merekodkan ralat tersebut dan meneruskan dengan guardrail seterusnya
-daripada menggagalkan permintaan itu. Sekatan adalah keputusan eksplisit (`block: true`),
-tidak pernah berlaku secara tidak sengaja. Satu-satunya pengecualian ialah permintaan yang
-dibatalkan: apabila `signal` pemanggil dibatalkan, guardrail yang melontarkan ralat akan
-menolak larian cangkuk dan bukannya dilangkau.
+Sistemnya ialah** gagal-terbuka** : jika pagar melempar semasa melaksanakan, registri merekodkan ralat dan meneruskan dengan pagar seterusnya dan bukannya gagal permintaan. Menyekat adalah keputusan yang jelas (`block: true`), tidak pernah kemalangan. Satu pengecualian ialah permintaan yang dibatalkan: apabila `signal` pemanggil digugurkan, pagar pembaling menolak larian cangkuk dan bukannya dilangkau.
 
-Cangkuk ini **tidak** dijalankan pada setiap laluan atau setiap respons. Baca
-[Liputan dan had](#coverage-and-limits) sebelum bergantung pada guardrail sebagai kawalan
-keselamatan.
+Mata kail boleh** bukan** berjalan di setiap laluan atau setiap tindak balas. Baca [Liputan dan had](#coverage-and-limits) sebelum bergantung pada pagar sebagai kawalan keselamatan.
 
 ## Pengawal Terbina dalam
 
-Pendaftaran automatik memuatkan enam pagar dalam susunan keutamaan semasa import (lihat `registry.ts` → `registerDefaultGuardrails()`):
+Pendaftaran automatik memuatkan pagar ini dalam susunan keutamaan semasa import (lihat `registry.ts` → `registerDefaultGuardrails()`):
 
-| Keutamaan | Nama                | Peringkat      | Fail                  |
-| --------- | ------------------- | -------------- | --------------------- |
-| `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`       | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`      | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| Keutamaan | Nama                | Peringkat      | Fail                      |
+| --------- | ------------------- | -------------- | ------------------------- |
+| `1`       | `agent-guard`       | `preCall`      | `agentGuard/guardrail.ts` |
+| `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`         |
+| `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`          |
+| `7`       | `video-bridge`      | `preCall`      | `videoBridge.ts`          |
+| `10`      | `pii-masker`        | `pre` + `post` | `piiMasker.ts`            |
+| `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`      |
+| `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts`     |
 
 Nombor keutamaan yang lebih rendah dijalankan** pertama** .
 
@@ -50,7 +37,7 @@ Memintas permintaan yang mengandungi imej yang ditujukan** model bukan penglihat
 Aliran:
 
 1. Langkau jika model sasaran sudah menyokong penglihatan (melainkan jika ia muncul dalam senarai jambatan paksa `isVisionBridgeForcedModel`).
-2. Ekstrak bahagian imej melalui `extractImageParts(messages)` (`visionBridgeHelpers.ts`), yang mewakilkan kepada** pengesan media bersatu** `detectMediaParts()` dalam `open-sse/utils/mediaParts.ts` — sumber tunggal kebenaran yang dikongsi dengan penapis keserasian kombo. Pengekstrakan dibenarkan kepada bentuk `replaceImageParts` boleh sambung kembali (ekstrak ↔ menggantikan kontrak): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"`, dan Responses API `input_image`. Imej yang sepadan bersarang di dalam Kod Claude `tool_result.content` dan Output alat Respons juga diekstrak dan digantikan pada laluan asalnya; bentuk penunjuk sahaja adalah bahan penapis kombo dan tidak diekstrak. Langkau jika tiada ditemui.
+2. Ekstrak bahagian imej melalui `extractImageParts(messages)` (`visionBridgeHelpers.ts`), yang mewakilkan kepada** pengesan media bersatu** `detectMediaParts()` dalam `open-sse/utils/mediaParts.ts` — sumber tunggal kebenaran yang dikongsi dengan penapis keserasian kombo. Pengekstrakan dibenarkan kepada bentuk `replaceImageParts` boleh sambung kembali (ekstrak ↔ menggantikan kontrak): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"`, dan Responses API `input_image`. Imej yang sepadan yang bersarang di dalam Kod Claude `tool_result.content` dan Output alat Respons juga diekstrak dan diganti pada laluan asalnya; bentuk penunjuk sahaja adalah bahan penapis kombo dan tidak diekstrak. Langkau jika tiada ditemui.
 3. Selesaikan konfigurasi masa jalan melalui `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`): kunci tetapan `modalityBridge*` baharu menang; kunci `visionBridge*` warisan kekal a** sandaran satu kitaran** (tingkap balik). Langkau sebelum sebarang laluan media apabila jambatan dilumpuhkan.
 4. Pemilih mod (`modalityBridgeVisionMode`, lihat jadual di bawah) memutuskan laluan semula vs huraikan. Laluan semula mengembalikan `modifiedPayload` dengan hanya `model` ditukar, ditambah dengan meta `{ rerouted, fromModel, toModel, imagesKept }`.
 5. Huraikan laluan: tutup imej di `maxImages`, karang gesaan sedar tugas, rujuk cache huraikan, panggil model penglihatan** selari** (`Promise.allSettled`), dan menyuntik bahagian teks `[Image N]: <description>` di tempatnya. Perihalan yang gagal menghasilkan `null`: imej mentah dikekalkan untuk sasaran unknown/vision-capable (#4012), tetapi** sasaran langsung teks sahaja yang disahkan** atau kombo sifar penglihatan mendapat stub teks `(unavailable — no vision-capable provider connected)` eksplisit untuk setiap imej yang tidak diterangkan, termasuk kegagalan separa dan imej di luar had huraikan-panggilan (#17069). Kombo semua gagal yang sedia ada menggambarkan sandaran kekal di tempatnya (#8430).
@@ -98,7 +85,7 @@ Cache LRU + TTL dalam ingatan untuk menerangkan output, dikongsi seluruh proses.
 
 #### Normalisasi imej jauh (gelung kendiri describe/base64 ambil)
 
-Apabila jambatan mengambil a** jauh** imej itu sendiri — Anthropic menerangkan panggilan kendiri dan penukaran base64 format claude-wire (`ensureBase64ImagesForClaudeWire`), kedua-duanya melalui `fetchRemoteImageAsDataUri()` dalam `visionBridgeHelpers.ts` — data yang terhasil URI dihantar melalui `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) sebelum dibenamkan dalam permintaan model penglihatan. Imej bersaiz besar dikecilkan kepada a** 2048px tepi panjang** (memadankan had ubah saiz OpenAI/Anthropic sudah digunakan di bahagian pelayan), yang memotong muat naik bytes/latency tanpa mengubah perkara yang dilihat oleh model penglihatan. Saiz semula menggunakan `sharp`, dimuatkan melalui import dinamik: pada platform yang perduaan asalnya gagal dimuatkan, `normalizeDataUri()`** tidak pernah membuang** — ia kembali kepada laluan lalu bait asal, jadi laluan describe/base64-conversion sentiasa berfungsi. Bait bukan imej (pengambilan yang tidak mengembalikan imej yang boleh dinyahkod) juga disalurkan tanpa disentuh. Normalisasi ini merangkumi imej yang diambil oleh jambatan untuk — panggilan kendirinya sendiri. Ia tidak pernah digunakan pada muatan laluan mentah pemanggil, selaras dengan prinsip mutasi ikut serta sahaja (Peraturan Keras #20).
+Apabila jambatan mengambil a** jauh** imej itu sendiri — Anthropic menerangkan panggilan kendiri dan penukaran base64 format claude-wire (`ensureBase64ImagesForClaudeWire`), kedua-duanya melalui `fetchRemoteImageAsDataUri()` dalam `visionBridgeHelpers.ts` — data yang terhasil URI dihantar melalui `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) sebelum dibenamkan dalam permintaan model penglihatan. Imej bersaiz besar dikecilkan kepada a** 2048px tepi panjang** (memadankan had ubah saiz OpenAI/Anthropic sudah digunakan di bahagian pelayan), yang memotong muat naik bytes/latency tanpa mengubah perkara yang dilihat oleh model penglihatan. Saiz semula menggunakan `sharp`, dimuatkan melalui import dinamik: pada platform yang perduaan asalnya gagal dimuatkan, `normalizeDataUri()`** tidak pernah membuang** — ia kembali kepada laluan lalu bait asal, jadi laluan describe/base64-conversion sentiasa berfungsi. Bait bukan imej (pengambilan yang tidak mengembalikan imej boleh dikod) juga dihantar tanpa disentuh. Normalisasi ini merangkumi imej yang diambil oleh jambatan untuk — panggilan kendirinya sendiri. Ia tidak pernah digunakan pada muatan laluan mentah pemanggil, selaras dengan prinsip mutasi ikut serta sahaja (Peraturan Keras #20).
 
 #### Skema tetapan migrasi +
 
@@ -118,7 +105,7 @@ Kad Vision Bridge dahulu di bawah tetapan AI ialah pautan keserasian ke halaman 
 
 **Pintasan kemasukan gelung sendiri:** apabila laluan huraikan panggilan melalui OmniRoute sendiri `/v1` gelung sendiri (model pembekal bukan standard), sub-permintaan menghantar `x-omniroute-admission-bypass: internal` dan disahkan dengan bukti kelayakan gelung kendiri yang diselesaikan — pengawal `sk_omniroute` tempatan dalam mod tempatan, atau `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env yang dikonfigurasikan pengendali (#1350) supaya `REQUIRE_API_KEY=true` tetapan boleh dijalankan. Pintasan hanya diberikan untuk kelayakan yang tepat tersebut, jadi pelanggan luar tidak boleh menggunakan pengepala untuk melangkau kemasukan.
 
-Tetapan lalai warisan secara langsung dalam `src/shared/constants/visionBridgeDefaults.ts`; lalai mode/task-aware/cache baharu dan penyelesai tetapan hidup dalam `src/shared/constants/modalityBridgeDefaults.ts`. Pagar pembatas mendedahkan pilihan pembina `deps` supaya ujian boleh menyuntik pelaksanaan `getSettings` dan `callVisionModel` palsu.
+Tetapan lalai warisan secara langsung dalam `src/shared/constants/visionBridgeDefaults.ts`; mode/task-aware/cache baharu menjadi lalai dan penyelesai tetapan hidup dalam `src/shared/constants/modalityBridgeDefaults.ts`. Pagar pembatas mendedahkan pilihan pembina `deps` supaya ujian boleh menyuntik pelaksanaan `getSettings` dan `callVisionModel` palsu.
 
 ### Jambatan Audio (`audioBridge.ts`) — Jambatan Modaliti PR-3
 
@@ -153,7 +140,7 @@ Memintas bahagian video peringkat atas dalam Pelengkapan Sembang `messages` dan 
 
 Laluan permintaan `/v1` awam tidak pernah mengimport atau menggunakan subproses. Video jauh dimuat turun di bawah had 50 MiB ; video base64 sebaris mempunyai had konservatif 36 MiB yang dinyahkod setiap video supaya sampul surat model/messages/framing boleh kekal dalam had kemasukan permintaan JSON awam sebanyak 50 MiB. Anggaran panjang sebaris dan saiz dinyahkod disemak sebelum diperuntukkan. HTTPS diperlukan pada URL jauh awal dan setiap ubah hala, menggunakan pengawal keluar awam sahaja sedia ada dengan penyematan DNS. Bait kemudiannya melintasi sempadan broker `POST /api/modality-bridge/video/extract` dalaman yang tepat. Laluan itu ialah `LOCAL_ONLY` dan `SPAWN_CAPABLE`, hanya menerima permintaan per-proses yang disahkan, gelung balik dipercayai dan tidak sekali-kali menerima URL, laluan sistem fail, boleh laku atau senarai argumen. Saluran paip saiz badan API dan pembaca badan tambahan pengendali secara bebas menguatkuasakan had input broker 50 MiB. Baris gilir terhadnya menjalankan satu pengekstrakan pada satu masa, membenarkan empat kerja yang belum selesai dan mengehadkan input yang belum selesai pada 100 MiB.
 
-Di dalam broker, `ffprobe` membaca fail tempatan peribadi; senarai dibenarkan format tetap tidak termasuk senarai main dan format manifes. Untuk bekas keluarga MOV yang dibenarkan, rujukan data MOV luaran kekal dilumpuhkan secara lalai dan arahan tetap tidak mengikut sertakannya. Kedua-dua `ffprobe` dan `ffmpeg` menggunakan senarai putih protokol `file` -only, satu utas, tatasusunan hujah tetap, tiada shell dan boleh laku yang diselesaikan daripada `PATH`. Strim muka depan gambar yang dilampirkan bukan calon yang boleh dimainkan. Semua strim yang boleh dimainkan mesti memenuhi had dan strim lalai yang eksplisit diutamakan sebelum sandaran indeks terendah yang menentukan. Video dihadkan kepada 600 saat, 8,192 piksel setiap dimensi dan 33,554,432 piksel sumber. FFmpeg sampel 1–16 bingkai JPEG titik tengah, mengecilkan tepi panjang kepada paling banyak 1,024 piksel tanpa meningkatkan input yang lebih kecil dan tidak pernah menerima URL. Pensampelan ialah `uniform` secara lalai. Dasar `scene_aware` dan `segment_aware` percubaan pilihan melaksanakan satu pas FFmpeg tetap tambahan ke atas strim tempatan yang telah disahkan, pilih cap waktu adegan `showinfo` terhad dan kembali secara deterministik ke titik tengah seragam yang sama pada kegagalan pengesan, tamat masa, output cacat atau set calon kosong. Mod sedar segmen memperuntukkan sampel titik tengah secara berkadar dengan selang adegan yang disahkan; bukti sedar segmen dan tingkah laku sandaran diperincikan di bawah. Penutup keras 16 bingkai digunakan selepas pemilihan dalam setiap dasar. Apabila permintaan yang menyedari pemandangan hanya mempunyai belanjawan satu bingkai, ia menggunakan titik tengah seragam bagi tetingkap video penuh atau fokus yang aktif dan melaporkan `policyEffective: uniform`: satu bingkai pemandangan yang dipilih tidak dapat mengekalkan kedua-dua hujung sementara. Pemanggil boleh secara pilihan menyediakan tetingkap fokus terhingga (`start`/`end` saat); sempadan diapit pada tempoh media, tetingkap terbalik atau tidak terhingga ditolak, dan semua dasar pensampelan dilakukan hanya dalam selang yang dinormalkan. Tetingkap yang terhasil disertakan dalam metadata pensampelan dan dalam awalan perihalan yang tidak dipercayai supaya model hiliran boleh membezakan petikan fokus daripada garis masa penuh.
+Di dalam broker, `ffprobe` membaca fail tempatan peribadi; senarai dibenarkan format tetap tidak termasuk senarai main dan format manifes. Untuk bekas keluarga MOV yang dibenarkan, rujukan data MOV luaran kekal dilumpuhkan secara lalai dan arahan tetap tidak mengikut sertakannya. Kedua-dua `ffprobe` dan `ffmpeg` menggunakan senarai putih protokol `file` -only, satu utas, tatasusunan hujah tetap, tiada shell dan boleh laku yang diselesaikan daripada `PATH`. Strim muka depan gambar yang dilampirkan bukan calon yang boleh dimainkan. Semua strim yang boleh dimainkan mesti memenuhi had dan strim lalai yang eksplisit diutamakan sebelum sandaran indeks terendah yang menentukan. Video dihadkan kepada 600 saat, 8,192 piksel setiap dimensi dan 33,554,432 piksel sumber. FFmpeg sampel 1–16 bingkai JPEG titik tengah, mengecilkan tepi panjang kepada paling banyak 1,024 piksel tanpa meningkatkan input yang lebih kecil dan tidak pernah menerima URL. Pensampelan ialah `uniform` secara lalai. Dasar `scene_aware` dan `segment_aware` percubaan pilihan melaksanakan satu pas FFmpeg tetap tambahan ke atas strim tempatan yang telah disahkan, pilih cap waktu pemandangan `showinfo` yang dihadkan dan kembali secara deterministik ke titik tengah seragam yang sama pada kegagalan pengesan, tamat masa, output cacat atau set calon kosong. Mod sedar segmen memperuntukkan sampel titik tengah secara berkadar dengan selang adegan yang disahkan; bukti sedar segmen dan tingkah laku sandaran diperincikan di bawah. Penutup keras 16 bingkai digunakan selepas pemilihan dalam setiap dasar. Apabila permintaan yang menyedari pemandangan hanya mempunyai belanjawan satu bingkai, ia menggunakan titik tengah seragam bagi tetingkap video penuh atau fokus yang aktif dan melaporkan `policyEffective: uniform`: satu bingkai pemandangan yang dipilih tidak dapat mengekalkan kedua-dua hujung sementara. Pemanggil boleh secara pilihan menyediakan tetingkap fokus terhingga (`start`/`end` saat); sempadan diapit pada tempoh media, tetingkap terbalik atau tidak terhingga ditolak, dan semua dasar pensampelan dilakukan hanya dalam selang yang dinormalkan. Tetingkap yang terhasil disertakan dalam metadata pensampelan dan dalam awalan perihalan yang tidak dipercayai supaya model hiliran boleh membezakan petikan fokus daripada garis masa penuh.
 
 Fokus kapsyen semantik ialah tetapan yang berasingan dan eksplisit. Mod analisis `full` lalai mengekalkan gesaan bingkai sedia ada dan tidak sekali-kali memajukan teks permintaan kepada model kapsyen. Dalam mod `focused`, jambatan hanya membaca `text`/`input_text` bukan kosong yang ditulis oleh pengguna daripada bekas Sembang atau Respons yang sama, menormalkannya kepada NFC, meruntuhkan aksara kawalan dan ruang kosong dan mengehadkannya kepada 500 titik kod Unicode. Keputusan kosong kembali kepada gesaan `full` yang tepat. Pembayang yang boleh digunakan disiri sebagai JSON dalam blok konteks pengguna-tidak dipercayai khusus dan hanya boleh mengutamakan butiran yang boleh diperhatikan; ia tidak boleh mengatasi amaran berasingan terhadap arahan yang boleh dilihat atau didengar dalam media. Fokus teks tidak pernah menyimpulkan `start`/`end` atau mengubah pensampel temporal.
 
@@ -167,17 +154,17 @@ Penapis yang tiada, bukti malformed/empty, ralat pengesan atau tamat masa pra-an
 
 `scripts/perf/video-bridge-fu07-eval.ts` menjana lekapan FFmpeg sebenar yang menentukan untuk penjimatan kapsyen-panggilan selepas pemotongan, peruntukan belanjawan gerakan padat, bukti blur/exposure/SI-TI, pemotongan pantas dengan ekor panjang dan positif palsu pudar secara beransur-ansur. Ia merekodkan masa dinding pra-analisis dan, di mana `/usr/bin/time` tersedia, CPU kanak-kanak dan RSS puncak . Semakan kualitinya adalah ramalan struktur sahaja. Kualiti model kapsyen sebenar kekal `HOLD` kerana abah-abah ini tidak mempunyai titik akhir yang dibenarkan atau hakim beku. Simpanan kewangan juga kekal `HOLD` melainkan `--caption-cost-per-call-usd` membekalkan anggaran setiap panggilan positif yang jelas; skrip tidak pernah mengada-adakan mana-mana hasil.
 
-Setiap bingkai dihadkan kepada 4 MiB, semua bingkai mentah bersama-sama kepada 23 MiB, dan tindak balas broker bersiri kepada 32 MiB. Direktori sementara peribadi dialih keluar dalam `finally`. OmniRoute tidak menggabungkan FFmpeg dan tidak menerima laluan boleh laku tersuai. Sebelum kapsyen, jambatan menggunakan pas deduplikasi visual konservatif: setiap JPEG dikurangkan kepada penimbal skala kelabu 16 × 16 dan hanya dibandingkan dengan bingkai terakhir yang dikekalkan. Untuk belanjawan kapsyen yang diminta di atas satu bingkai, pengekstrakan membekalkan kumpulan calon terhad sehingga dua kali ganda belanjawan itu dan tidak melebihi 16 bingkai. Had yang diminta hanya digunakan selepas penduadua, dengan calon terpilih pertama dan terakhir dikekalkan semasa penipisan akhir apabila belanjawan sekurang-kurangnya dua. Dasar `grayscale-16x16-mean-cells-v2` versi menggunakan purata delta luma yang lebih besar dan nisbah sel lakaran kenit yang delta ternormalnya ialah sekurang-kurangnya 0.05. Ambang pendua ialah pemalar 0.04, dipilih untuk kebolehramalan dan bukannya didedahkan sebagai tetapan masa jalan. Isyarat kontras tinggi sekunder ini mengekalkan pergerakan kecil dan perubahan teks yang boleh dilihat yang boleh disembunyikan oleh perbandingan min sahaja. Ralat pembanding atau penyahkod gagal dibuka dan mengekalkan liputan. Metadata output memisahkan calon yang diekstrak, bingkai yang berjaya digunakan dan pendua visual digugurkan.
+Setiap bingkai dihadkan kepada 4 MiB, semua bingkai mentah bersama-sama kepada 23 MiB, dan tindak balas broker bersiri kepada 32 MiB. Direktori sementara peribadi dialih keluar dalam `finally`. OmniRoute tidak menggabungkan FFmpeg dan tidak menerima laluan boleh laku tersuai. Sebelum kapsyen, jambatan menggunakan pas deduplikasi visual konservatif: setiap JPEG dikurangkan kepada penimbal skala kelabu 16 × 16 dan hanya dibandingkan dengan bingkai terakhir yang dikekalkan. Untuk belanjawan kapsyen yang diminta di atas satu bingkai, pengekstrakan membekalkan kumpulan calon terhad sehingga dua kali ganda belanjawan itu dan tidak lebih daripada 16 bingkai. Had yang diminta hanya digunakan selepas penduadua, dengan calon terpilih pertama dan terakhir dikekalkan semasa penipisan akhir apabila belanjawan sekurang-kurangnya dua. Dasar `grayscale-16x16-mean-cells-v2` versi menggunakan purata delta luma yang lebih besar dan nisbah sel lakaran kenit yang delta ternormalnya ialah sekurang-kurangnya 0.05. Ambang pendua ialah pemalar 0.04, dipilih untuk kebolehramalan dan bukannya didedahkan sebagai tetapan masa jalan. Isyarat kontras tinggi sekunder ini mengekalkan pergerakan kecil dan perubahan teks yang boleh dilihat yang boleh disembunyikan oleh perbandingan min sahaja. Ralat pembanding atau penyahkod gagal dibuka dan mengekalkan liputan. Metadata output memisahkan calon yang diekstrak, bingkai yang berjaya digunakan dan pendua visual digugurkan.
 
 Bahagian video yang ditanda secara eksplisit mungkin meminta helaian kenalan bercap masa. Jambatan membina paling banyak grid JPEG 4 lajur, 16 bingkai. Setiap sel 512 piksel membakar cap masa sumbernya ke jalur bawah kontras tinggi, manakala cap masa yang sama kekal dalam metadata teks untuk perkaitan dan audit hiliran. JPEG lengkap kekal dihadkan pada 32 MiB. Jika `sharp` tidak boleh menyahkod atau menyusun grid, jambatan akan kembali ke bingkai JPEG individu; pengguguran pelanggan masih merambat melalui operasi helaian.
 
-Bukti promosi sengaja dipisahkan daripada penanda aras komposisi sintetik. `scripts/perf/video-bridge-contact-sheet-eval.ts` mentakrifkan abah-abah A/B versi skema untuk model penglihatan serasi OpenAI sebenar. Ia mengukur token yang dilaporkan pembekal, kependaman dinding hujung ke hujung (termasuk komposisi helaian), kiraan panggilan model dan pengekalan fakta yang ditakrifkan secara nyata. Respons model mentah tidak ditulis pada laporan; hanya SHA-256 digest dan fakta dipadankan IDs dikekalkan. Abah-abah tidak membuat panggilan rangkaian atau model berbayar melainkan `--execute-real` diluluskan dan `--model`, `OMNIROUTE_BASE_URL` dan `OMNIROUTE_API_KEY` dikonfigurasikan. Tanpa larian sebenar yang jelas itu, keputusan yang boleh dibaca mesinnya kekal `HOLD`; ukuran payload/call-count sintetik sahaja bukanlah bukti promosi.
+Bukti promosi sengaja diasingkan daripada penanda aras komposisi sintetik. `scripts/perf/video-bridge-contact-sheet-eval.ts` mentakrifkan abah-abah A/B versi skema untuk model penglihatan serasi OpenAI sebenar. Ia mengukur token yang dilaporkan pembekal, kependaman dinding hujung ke hujung (termasuk komposisi helaian), kiraan panggilan model dan pengekalan fakta yang ditakrifkan secara nyata. Respons model mentah tidak ditulis pada laporan; hanya SHA-256 digest dan fakta dipadankan IDs dikekalkan. Abah-abah tidak membuat panggilan rangkaian atau model berbayar melainkan `--execute-real` diluluskan dan `--model`, `OMNIROUTE_BASE_URL` dan `OMNIROUTE_API_KEY` dikonfigurasikan. Tanpa larian sebenar yang jelas itu, keputusan yang boleh dibaca mesinnya kekal `HOLD`; ukuran payload/call-count sintetik sahaja bukanlah bukti promosi.
 
 `scripts/perf/video-bridge-promotion-eval.ts` yang berasingan menggunakan pemerhatian FU-07 atau FU-09. Kemasukan kenaikan pangkat memerlukan kesemua lapan jenis senario sintetik serta klip sebenar yang telah dibersihkan, sekurang-kurangnya tiga ulangan terukur bagi setiap peranan dan kes, kesemua sepuluh metrik yang diisytiharkan, ringkasan media/prompt/expected-fact/settings beku, IDs pemerhatian unik dan pesanan A/B berbiji yang disahkan. Resit pelaksanaan mengikat corpus digest, calon tepat SHA dan semakan model. Ukuran yang tiada atau tidak sah kekal `HOLD`, termasuk CPU melebihi 30 saat, RSS puncak melebihi 512 MiB atau pra-analisis melebihi 30 saat. Ini adalah had kemasukan bukti, bukan jaminan penguatkuasaan RSS masa jalan baharu.
 
 FU-07 memerlukan sekurang-kurangnya 98% pengekalan kualiti dan kependaman p95 tidak lebih daripada 1.2x garis dasar, ditambah sama ada 0.05 penambahbaikan min ingatan semula seimbang kes mutlak pada min panggilan kapsyen bersamaan atau sekurang-kurangnya 10% kurang min panggilan kapsyen pasca-penutup. FU-09 memerlukan sekurang-kurangnya 0.85 kualiti, 95% pengekalan, 20% pengurangan kependaman median dan 10% pengurangan token. Kehilangan fakta kritikal, pematuhan suntikan atau kehilangan penggunaan menghalang promosi. Satu pelaksanaan tidak boleh mempromosikan apa-apa: `--previous-report` mengesahkan dua pelaksanaan yang berbeza, tidak bertindih, layak berturut-turut bagi policy/model revision/candidate/corpus. yang sama Percubaan pensampelan tidak boleh mengesahkan percubaan helaian kenalan.
 
-Pengumpul hendaklah menjaringkan respons dalam ingatan dan menyimpan `responseDigest` tambah metrik dan pengikatan pemerhatian, jangan sekali-kali teks respons. Pengguna juga membaca pemerhatian mentah warisan tetapi tidak pernah menyalin teks itu ke dalam laporannya. Tepat satu daripada `responseDigest` atau `rawResponseText` diterima untuk setiap pemerhatian. Senarai dibenarkan versi kekal kosong dengan lalai `hold` yang tidak boleh diubah. Penyertaan yang layak memerlukan rujukan bukti, dasar, semakan model, SHA calon tepat, ringkasan nyata dan dua IDs larian yang berbeza; konteks yang bercanggah ditolak. Metadata ini adalah kontrak audit, bukan bukti bahawa fail yang dirujuk mengandungi ukuran tulen. Semak resit sebenar sebelum menambah sebarang entri. Titik akhir statistik pengurusan dan papan pemuka Video mendedahkan kesediaan konservatif. Alias model yang dikonfigurasikan sahaja tidak menetapkan semakannya atau calon yang sedang berjalan SHA, jadi papan pemuka semasa melaporkan `HOLD` dan bukannya menggunakan semula kelayakan daripada konteks pelaksanaan yang lain. Pemilihan percubaan eksplisit kekal berasingan daripada promosi; tiada lalai diubah secara automatik.
+Pengumpul hendaklah menjaringkan respons dalam ingatan dan menyimpan `responseDigest` tambah metrik dan pengikatan pemerhatian, jangan sekali-kali teks respons. Pengguna juga membaca pemerhatian mentah warisan tetapi tidak pernah menyalin teks itu ke dalam laporannya. Tepat satu daripada `responseDigest` atau `rawResponseText` diterima untuk setiap pemerhatian. Senarai dibenarkan versi kekal kosong dengan lalai `hold` tidak berubah. Penyertaan yang layak memerlukan rujukan bukti, dasar, semakan model, SHA calon tepat, ringkasan nyata dan dua IDs larian yang berbeza; konteks yang bercanggah ditolak. Metadata ini adalah kontrak audit, bukan bukti bahawa fail yang dirujuk mengandungi ukuran tulen. Semak resit sebenar sebelum menambah sebarang entri. Titik akhir statistik pengurusan dan papan pemuka Video mendedahkan kesediaan konservatif. Alias model yang dikonfigurasikan sahaja tidak menetapkan semakannya atau calon yang sedang berjalan SHA, jadi papan pemuka semasa melaporkan `HOLD` dan bukannya menggunakan semula kelayakan daripada konteks pelaksanaan yang lain. Pemilihan percubaan eksplisit kekal berasingan daripada promosi; tiada lalai diubah secara automatik.
 
 Pemanggil boleh melampirkan tatasusunan `transcript.cues` pilihan pada bahagian video yang disokong apabila mereka sudah memiliki teks sejajar. Setiap kiu mesti membawa `text`, selang `start`/`end` terhingga dalam tempoh siasatan dan `source` yang disenarai putih (`client`, `embedded` atau `audio-bridge`); `confidence` lalai kepada `1` dan mesti kekal di antara `0` dan `1`. Petunjuk pendua tepat diruntuhkan. OmniRoute tidak sekali-kali memulakan transkripsi daripada metadata ini: isyarat yang disahkan disalin ke dalam hasil yang diterangkan dengan sumber, keyakinan dan selang waktu, dan dijadikan sebagai pemerhatian yang tidak dipercayai bersama kapsyen bingkai. Teks tidak sah, di luar julat atau bebas asal ditolak dan bukannya dicampur ke dalam strim kapsyen. Kedua-dua saluran transkrip badan permintaan menormalkan asal yang dibekalkan kepada `client`, termasuk label `embedded` atau `audio-bridge` yang ditegaskan sendiri. Hanya penyesuai milik pelayan boleh menetapkan label yang dipercayai tersebut melalui hujah `trustedSource` kod sahaja; medan JSON permintaan tidak boleh mencapai hujah itu. Teks transkrip kekal sebagai kandungan terbitan media yang tidak dipercayai, tanpa mengira asalnya dan tidak boleh sekali-kali menentukan kebenaran.
 
@@ -187,7 +174,7 @@ Pemanggil lanjutan boleh menyediakan trek `audioTranscript` untuk video yang sam
 
 **Medan video mentah (#12430).** Apabila jambatan didayakan dan sokongan video asli tidak diketahui atau tiada, medan `transcript`/`audioTranscript` yang ditentukan turut mengaktifkan `videoBridgeObserved`, walaupun selepas kegagalan perihalan atau had `maxVideos`. `null` dan rentetan kosong dikira; medan tidak hadir dan metadata bukan video tidak. Salinan yang disimpan menyunting medan ini atau meninggalkan permintaan dan caches/Memory dipintas.
 
-Pada laluan sandaran tersebut, isyarat pemanggil yang sah menjadi bahagian `text`/`input_text` yang disokong dan bukannya medan penyedia bukan standard. Kedua-dua runut yang dibekalkan permintaan kekal sebagai pemerhatian `client` yang tidak dipercayai, dengan amaran jelas bahawa video itu tidak diterangkan dan cap masa tidak disahkan terhadap media. Jumlah 256-cue/64-KiB sedia ada dan belanjawan per-kiu terpakai pada kedua-dua landasan bersama-sama; cap masa mesti sesuai dengan siling 600 saat broker dan sebarang tetingkap fokus yang dibekalkan. Runut yang tidak sah dibuang, bukan dimajukan sebagai teks sewenang-wenangnya; adik beradik yang sah masih boleh digunakan melainkan bajet gabungan mereka melebihi. medan Null/empty tidak menambah teks. Tiada pengambilan media atau transkripsi ditambahkan oleh sandaran ini. Medan sambungan transkrip dialih keluar daripada pembawa video sandaran dan objek `video_url`/`source`. Senarai kebenaran wayar OpenAI kekal ketat; pembawa video asli yang tidak diketahui kekal tersedia dan sasaran teks sahaja yang diketahui mengekalkan penanda selamat. Bayang-bayang redaksi berstruktur melindungi teks transkrip yang dilampirkan, manakala permintaan asal milik pemanggil kekal tidak berubah. Sasaran yang disokong asli dan jambatan yang dilumpuhkan mengekalkan gelagat pintasan sedia ada mereka.
+Pada laluan sandaran tersebut, isyarat pemanggil yang sah menjadi bahagian `text`/`input_text` yang disokong dan bukannya medan penyedia bukan standard. Kedua-dua runut yang dibekalkan permintaan kekal sebagai pemerhatian `client` yang tidak dipercayai, dengan amaran jelas bahawa video itu tidak diterangkan dan cap masa tidak disahkan terhadap media. Jumlah 256-cue/64-KiB sedia ada dan belanjawan per-kiu digunakan pada kedua-dua lagu bersama-sama; cap masa mesti sesuai dengan siling 600 saat broker dan sebarang tetingkap fokus yang dibekalkan. Runut yang tidak sah dibuang, bukan dimajukan sebagai teks sewenang-wenangnya; adik beradik yang sah masih boleh digunakan melainkan bajet gabungan mereka melebihi. medan Null/empty tidak menambah teks. Tiada pengambilan media atau transkripsi ditambahkan oleh sandaran ini. Medan sambungan transkrip dialih keluar daripada pembawa video sandaran dan objek `video_url`/`source`. Senarai kebenaran wayar OpenAI kekal ketat; pembawa video asli yang tidak diketahui kekal tersedia dan sasaran teks sahaja yang diketahui mengekalkan penanda selamat. Bayang-bayang redaksi berstruktur melindungi teks transkrip yang dilampirkan, manakala permintaan asal milik pemanggil kekal tidak berubah. Sasaran yang disokong asli dan jambatan yang dilumpuhkan mengekalkan gelagat pintasan sedia ada mereka.
 
 Salinan tersimpan tambahan menggunakan isyarat permintaan diperhatikan yang sama. Gambar permintaan pelanggan pra-pengawal mentah, permintaan belum selesai dalam memori dan log permintaan awal yang ditolak secara berstruktur menggantikan medan transkrip dalam bahagian video; gesaan rentetan yang disintesis oleh peringkat saluran paip dan serahan konteks disunting pada sinki badan permintaan berterusan. Penanda `video_content_removed` yang berterusan menjadikan sambungan `previous_response_id` gagal ditutup dan bukannya membina semula teks yang sengaja dibuang. Jika permintaan yang diperhatikan kehilangan bayang redaksi setiap bahagiannya sebelum mengelog, atau malah salah satu daripada beberapa bayang video gagal dipadankan selepas permintaan mutasi kemudian, badan permintaan yang dikekalkan akan ditinggalkan sepenuhnya dan bukannya mengekalkan transkrip yang telah disunting sebahagian.
 
@@ -203,7 +190,7 @@ Pengeluar pengeluaran menggunakan semula bingkai broker yang telah diperoleh han
 
 Respons JSON dan SSE yang berjaya mendedahkan paling banyak empat pemegang legap dalam pengepala `x-omniroute-video-drilldown` yang dibatasi. Asal pelayar yang dibenarkan boleh membaca pengepala itu tanpa meluaskan dasar asal CORS. Pengendali baharu menggunakan `v1.<32-byte random base64url token>`, dan pendaftaran hanya mengekalkan cincang SHA-256 mereka. Penghurai reader/header juga menerima token 64-hex warisan. Pengguna awam yang disahkan adalah `GET /api/v1/video-bridge/drilldown?handle=...`, dikawal secara bebas oleh `modalityBridgeVideoDrilldownRemoteEnabled=true`. Palsu berterusan yang eksplisit membatalkan akses walaupun apabila sandaran `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_REMOTE_ENABLED` env warisan didayakan. Pengekalan pengeluaran mempunyai sandaran `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_ENABLED` legasi yang serupa. Kedua-dua sandaran lalai dimatikan.
 
-Pengguna memperoleh pemilikan daripada kunci yang disahkan dan menggunakan dasar utama: kedua-dua GET dan DELETE tergolong dalam kategori titik akhir `video`, termasuk alias `/v1` dan `/api/v1`. Kunci dengan senarai dibenarkan titik akhir yang tidak kosong mesti termasuk `video`; kunci tanpa had kekal serasi. Pengguna mengembalikan 404 yang sama untuk pemegang kunci yang tidak diketahui, tamat tempoh dan satu lagi kunci. Ia menerima `variant=preview|standard|detail` (dimensi JPEG maksimum 320/640/1280, tidak pernah ditingkatkan), `limit=1..8` (atau alias `frames` warisan, tidak pernah kedua-duanya), `page` berasaskan sifar dan saat fokus `start`/`end` pilihan. Kekunci pertanyaan pendua dan tetingkap fokus terbalik ditolak. Setiap varian yang dikembalikan mempunyai cincangan kandungan sebenar dan metadata peleraian sebenar, dipautkan kepada sumber yang disimpan. Varian diperoleh apabila dibaca dan bukannya disimpan sebagai salinan simpanan tambahan. Respons JSON, termasuk Base64/envelope, dihadkan pada 32 MiB; halaman bersaiz besar mengembalikan 413 dan pelanggan mesti meminta lebih sedikit bingkai. Membaca pembatalan semakan di sekeliling setiap saiz semula dan menyemak semula kesahihan pemegang sebelum kembali. `DELETE` oleh pemilik adalah idempoten; pemadaman atau tamat tempoh TTL mengeluarkan sumber yang disimpan dan perakaunan penggunaan.
+Pengguna memperoleh pemilikan daripada kunci yang disahkan dan menggunakan dasar utama: kedua-dua GET dan DELETE tergolong dalam kategori titik akhir `video`, termasuk alias `/v1` dan `/api/v1`. Kunci dengan senarai dibenarkan titik akhir yang tidak kosong mesti termasuk `video`; kunci tanpa had kekal serasi. Pengguna mengembalikan 404 yang sama untuk pemegang kunci yang tidak diketahui, tamat tempoh dan satu lagi kunci. Ia menerima `variant=preview|standard|detail` (dimensi JPEG maksimum 320/640/1280, tidak pernah ditingkatkan), `limit=1..8` (atau alias `frames` warisan, tidak pernah kedua-duanya), `page` berasaskan sifar dan saat fokus `start`/`end` pilihan. Kekunci pertanyaan pendua dan tetingkap fokus terbalik ditolak. Setiap varian yang dikembalikan mempunyai cincang kandungan sebenar dan metadata peleraian sebenar, dipautkan kepada sumber yang dikekalkan. Varian diperoleh apabila dibaca dan bukannya disimpan sebagai salinan simpanan tambahan. Respons JSON, termasuk Base64/envelope, dihadkan pada 32 MiB; halaman bersaiz besar mengembalikan 413 dan pelanggan mesti meminta lebih sedikit bingkai. Membaca semakan pembatalan sekitar setiap saiz semula dan menyemak semula kesahihan pemegang sebelum kembali. `DELETE` oleh pemilik adalah idempoten; pemadaman atau tamat tempoh TTL mengeluarkan sumber yang disimpan dan perakaunan penggunaan.
 
 Kedai kongsi adalah proses setempat: pemegang tamat tempoh semasa dimulakan semula dan tidak boleh dipindahkan antara proses OmniRoute bebas. Statistik pengurusan mendedahkan pengekalan berkesan/ dasar jauh dan agregat dikekalkan entries/bytes sahaja, tidak sekali-kali media, rujukan, IDs atau pemegang utama. Panel tetapan Video menunjukkan nilai tersebut dan boleh mengekalkan kedua-dua suis persetujuan. Dokumentasi pelaksanaan ini bukan bukti penggunaan langsung atau promosi; penerimaan model sebenar dijejaki secara berasingan.
 
@@ -248,7 +235,7 @@ Pengawal tidak pernah menghalang; ia hanya menganotasi (`meta.detections`, `meta
 - **Pemilihan setiap jenis** — id terbina dalam disenaraikan dalam `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Tidak ditetapkan bermaksud setiap jenis (tingkah laku sebelum tetapan ini wujud). Corak `ssn_us` enjin permintaan memetakan kepada `ssn`. Templat (Minimal, Standard, Kewangan, Brazil, USA, GDPR, POPIA, Penuh) hanya mengisi kotak pilihan dalam UI.
 - **GDPR dan POPIA** — dua belas id terbina dalam meliputi EU dan pengecam peribadi Afrika Selatan (jadual di bawah). Regeks, pengesah dan teg bidang kuasa mereka tinggal dalam satu jadual, `src/shared/utils/piiPatterns.ts`, yang digunakan oleh kedua-dua sanitizer respons (`src/lib/piiSanitizer.ts`) dan masker permintaan (`src/shared/utils/inputSanitizer.ts`). Padanan disunting hanya apabila pengesahnya menerimanya; satu angka kosong tidak pernah cukup. Pengendali yang menyimpan pilihan yang disempitkan sebelum id ini wujud mengekalkan gelagat yang dimilikinya sehingga id baharu ditandakan.
 - **Corak tersuai** — sehingga 20 corak regex atau kad bebas (`*` = sehingga 64 aksara bukan ruang putih, `?` = satu). Perlawanan menjadi `[CUSTOM_REDACTED]`. Setiap corak melalui `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): paling banyak 500 aksara, bendera terhad kepada `g i m s u`, mesti dikompil, mesti melepasi `safe-regex` (penjejakan belakang malapetaka) dan tidak boleh sepadan dengan rentetan kosong atau pemegang tempat redaksi. Corak yang gagal ditolak apabila disimpan dan apabila diuji, dan baris tersimpan yang gagal dilangkau pada masa jalan dan bukannya dikompilasi. Corak tersuai hanya berjalan semasa topeng dihidupkan.
-- **Kaunter pengesanan** kiraan setiap jenis — (nilai tidak pernah sepadan), disimpan dalam memori dan tetapkan semula semasa mulakan semula (`src/lib/pii/piiDetectionStats.ts`). Mereka hanya meningkat semasa topeng dihidupkan.
+- **Kaunter pengesanan** kiraan setiap jenis — (tidak pernah padan dengan nilai), disimpan dalam memori dan tetapkan semula semasa dimulakan semula (`src/lib/pii/piiDetectionStats.ts`). Mereka hanya meningkat semasa topeng dihidupkan.
 
 Tetapan hidup dalam jadual `key_value` (ruang nama `pii_settings`, `src/lib/db/piiSettings.ts`) dan dibaca melalui cache 1 s. API:
 
@@ -277,7 +264,7 @@ Ketiganya memerlukan pengesahan pengurusan dan mengesahkan badan dengan Zod (`sr
 | `za_vat`            | Nombor VAT Afrika Selatan | 10 digit bermula dengan `4`** dan** "VAT" / "BTW" dalam 48 aksara sebelum ini            |
 | `za_tax_ref`        | Ruj cukai Afrika Selatan. | 10 digit bermula `0`-`3`, Luhn,** dan** "cukai" / "SARS" dalam 48 aksara sebelum ini     |
 
-Oleh kerana format digit sahaja bertembung dengan nombor pesanan, nombor binaan dan cap masa, yang paling lemah (`za_vat`, `za_tax_ref`) memerlukan kiu kata kunci dan nombor `0..` sepuluh digit kosong tidak dianggap sebagai nombor telefon Afrika Selatan. Ruang IBANs (`GB29 NWBK ...`) tidak sepadan. Pada laluan penstriman isyarat dilihat di dalam bahagian semasa sahaja. Id berada di hadapan corak telefon generik, jadi pengecam yang disahkan mengekalkan pemegang tempatnya sendiri (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Templat `gdpr` dan `popia` masing-masing memilih EU dan id Afrika Selatan. Masking sendiri kekal ikut serta (Peraturan Keras #20): tiada apa-apa di sini mengubah lalai bendera ciri.
+Oleh kerana format digit sahaja bertembung dengan nombor pesanan, nombor binaan dan cap masa, yang paling lemah (`za_vat`, `za_tax_ref`) memerlukan kiu kata kunci dan nombor `0..` sepuluh digit kosong tidak dianggap sebagai nombor telefon Afrika Selatan. IBANs dijarakkan (`GB29 NWBK ...`) tidak sepadan. Pada laluan penstriman isyarat dilihat di dalam bahagian semasa sahaja. Id berada di hadapan corak telefon generik, jadi pengecam yang disahkan mengekalkan pemegang tempatnya sendiri (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Templat `gdpr` dan `popia` masing-masing memilih EU dan id Afrika Selatan. Masking sendiri kekal ikut serta (Peraturan Keras #20): tiada apa-apa di sini mengubah lalai bendera ciri.
 
 ### Suntikan Segera (`promptInjection.ts`)
 
@@ -297,7 +284,7 @@ Sumber pengesanan:
 2. `DEFAULT_GUARD_PATTERNS` terbina dalam (kini `system_override_inline` dan `markdown_system_block`, kedua-dua keterukan `high` ).
 3. `customPatterns` pilihan diluluskan melalui pilihan pembina (rentetan, regex atau rekod `{ name, pattern, severity }` ).
 
-Apabila `mode === "block"`** dan** sekurang-kurangnya satu pengesanan memenuhi ambang keterukan, `preCall` mengembalikan `{ block: true, message: "Request rejected: suspicious content detected" }`. Dalam mod `warn`/`log`, pagar dilog tetapi membenarkan panggilan. `evaluatePromptInjection()` pembantu yang dikongsi juga dieksport untuk pemanggil yang perlu menilai gesaan tanpa melalui pendaftaran.
+Apabila `mode === "block"`** dan** sekurang-kurangnya satu pengesanan memenuhi ambang keterukan, `preCall` mengembalikan `{ block: true, message: "Request rejected: suspicious content detected" }`. Dalam mod `warn`/`log`, pagar dilog tetapi membenarkan panggilan. `evaluatePromptInjection()` pembantu kongsi juga dieksport untuk pemanggil yang perlu menilai gesaan tanpa melalui pendaftaran.
 
 **Imbas terikat (v3.8.20):** pengesan hanya memeriksa** 16 KB pertama** daripada teks gesaan yang digabungkan — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bait) dalam `src/shared/utils/inputSanitizer.ts`. Kedua-dua `detectInjection()` dan `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` sebelum menjalankan gelung corak. Arahan suntikan terletak berhampiran bahagian atas input, jadi ini mengehadkan regex CPU/GC pada muatan berbilang ratus KB tanpa pengesanan yang melemahkan (rujuk #3932, #4041).
 
@@ -308,9 +295,83 @@ berjalan terus** kedua-duanya** peringkat, terakhir dalam rantaian lalai (keutam
 - **Ikut serta sahaja** , konvensyen yang sama seperti redaksi PII (Peraturan Keras #20-bersebelahan): dilumpuhkan melainkan `settings.credentialRedactionEnabled === true`** atau** `CREDENTIAL_REDACTION_ENABLED=true`. Dengan ia dimatikan, guardrail adalah tiada-op — ia tidak pernah menyekat dan tidak pernah menulis semula.
 - `redactCredentials()` berjalan pada pokok payload/response penuh (`walkValue()`, prototaip-pencemaran-selamat, kitaran-selamat melalui `WeakSet`) dan menggantikan padanan dengan pemegang tempat `[REDACTED:<type>]`, mengklon hanya cawangan yang benar-benar berubah.
 - `CREDENTIAL_PATTERNS` meliputi kunci pembekal LLM (OpenAI, OpenAI-proj, Anthropic, Google, Muka Memeluk, Replika), token VCS/SaaS (GitHub, Slack, Linear, Notion, npm, Posmen, Discord), kunci pembayaran (Stripe, Square), kunci awan (AWS, kunci akses SendGrid, JWTs rentetan sambungan galas kelayakan (`mongodb://user:pass@...`, dsb.), dan corak nilai pengepala `Authorization`/`x-api-key`/`api-key`/`apikey` generik. Kekunci berbentuk pengepala (`authorization`, `x-api-key`, `api-key`, `apikey`) disunting secara struktur (nilai sahaja, awalan skema seperti `Bearer `/`Basic ` dipelihara) dan bukannya melalui regex teks generik.
+- Nilai di sebalik label bertopeng walaupun ia tidak mempunyai awalan pembekal: `DB_PASSWORD=…`, `AWS_SECRET_ACCESS_KEY=…`, `client_secret: …`, `?api_key=…` (label: `password`, `passwd`, `secret`, `secret_key`, `secret_access_key`, `api_key`, `access_token`, `refresh_token`, `auth_token`, dengan sebarang awalan seperti `DB_`). Label dan pemisah kekal dan nilainya menjadi `[REDACTED:secret]`. Nilai memerlukan 12 atau lebih aksara, jadi prosa seperti `password: required` kekal boleh dibaca; nilai yang bermula dengan `$` atau `%` (rujukan pembolehubah) dibiarkan sahaja.
 - Pengawal tidak pernah menghalang; ia hanya menulis semula (`modifiedPayload` / `modifiedResponse`) dan menganotasi (`meta.credentialsRedacted`, `meta.count`).
 
 Pengawal regresi: `tests/unit/credential-masker-guardrail.test.ts`.
+
+### Ejen Pengawal (`agentGuard/`)
+
+Pengawal ejen mengklasifikasikan pelanggan di sebalik permintaan kepada pembekal `claude` atau `anthropic` daripada pengepalanya. `AGENT_GUARD_MODE` mengambil tiga nilai: `off` (lalai), `monitor` dan `block`. Dengan `off`, tiada pengepala dibaca dan tiada yang dilog.
+
+Ejen rasmi diiktiraf oleh pengepala ini (berbanding dengan tidak sensitif huruf besar):
+
+- Kod Claude : `User-Agent` bermula dengan `claude-cli/` atau `claude-code/`, atau `x-app: cli` bersama dengan pengepala `anthropic-beta` atau `User-Agent` yang mengandungi `claude`.
+- Anthropic SDKs: `User-Agent` bermula dengan `Anthropic/`, `AsyncAnthropic/`, `anthropic-typescript/` atau `anthropic-python/`.
+
+Tahap lalai pembalak dalam pengeluaran (`info`) menunjukkan kedua-dua jenis baris. Dengan `APP_LOG_LEVEL=warn` hanya talian pihak ketiga yang diketahui kekal.
+
+Medan log: `agent`, `thirdParty`, `provider`, `model`, `apiKeyId`, `userAgent`, `xApp`, `anthropicBeta`, `xTitle`, `referer`, `stainless`. Nilai pengepala dan rentetan model dihadkan pada 200 aksara. Perujuk dilog tanpa rentetan pertanyaan, serpihan dan maklumat penggunanya. Kunci API, `Authorization`, `x-api-key` dan kuki tidak pernah dibaca.
+
+Fail: `src/lib/guardrails/agentGuard/classifier.ts`, `src/lib/guardrails/agentGuard/policy.ts`, `src/lib/guardrails/agentGuard/guardrail.ts`, `src/lib/guardrails/agentGuard/settings.ts`, `src/lib/guardrails/agentGuard/logLine.ts`, `src/lib/guardrails/agentGuard/enforcement.ts`, `src/sse/handlers/chat/agentGuardGate.ts`.
+
+**Had pengelasan (kedua-dua mod):**
+
+- Ejen yang dibina di atas SDK rasmi yang tidak menghantar `X-Title`, `HTTP-Referer` atau `User-Agent` sendiri kelihatan seperti SDK. pengepala `x-stainless-*` sahaja tidak menjadikan pelanggan rasmi.
+- Ejen pihak ketiga dipadankan dengan token seluruh perkataan dalam `User-Agent`, `X-Title` dan `HTTP-Referer` (atau `Referer`). Pelanggan tidak tersenarai muncul sebagai `unknown`.
+- Permintaan daripada pelanggan berasaskan penyemak imbas membawa `User-Agent` penyemak imbas sendiri dan dipaparkan sebagai tidak dikenali, melainkan `X-Title` atau perujuk membawa token pihak ketiga yang diketahui.
+- Satu baris log setiap permintaan yang diperhatikan: jangkakan volum pada kejadian sibuk.
+
+#### Pantau
+
+Dengan `AGENT_GUARD_MODE=monitor`, permintaan yang rentetan modelnya menamakan pembekal `claude` atau `anthropic` diklasifikasikan mengikut pengepala klien mereka. Apabila pelanggan bukan ejen rasmi, satu baris log dengan `tag: "AGENT_GUARD"` ditulis. Ia adalah `warn` untuk ejen pihak ketiga yang dikenali dan `info` untuk pelanggan yang tidak dikenali. Keutamaan `1`: pagar hanya membaca pengepala dan tidak pernah mengubah muatan, jadi ia berjalan sebelum jambatan media. `monitor` tidak pernah menghalang.
+
+**Had `monitor`:**
+
+- Setiap isyarat ialah pengepala dikawal klien. Ini adalah pemerhatian, bukan kawalan akses.
+- Pembekal dibaca daripada rentetan model sebelum model diselesaikan: `provider/model`, alias pembekal seperti `cc/…` dan id perkongsian kuota (`qtSd/<group>/<provider>/<model>`). Id model kosong, alias model, kombo dan normalisasi penghalaan kemudian tidak diikuti. Permintaan itu tidak dipatuhi.
+- Pemanggil boleh melangkaunya setiap permintaan melalui saluran disable registry (lihat [Melumpuhkan Guardrails Per-Request](#disabling-guardrails-per-request) ). Permintaan yang dilangkau tidak dipatuhi.
+- Ia berjalan hanya di tempat `runPreCallHooks` berjalan (lihat [Liputan dan had](#coverage-and-limits) ).
+
+#### Sekat
+
+Dengan `AGENT_GUARD_MODE=block`, pagar pra-panggilan tidak melakukan apa-apa. Pengendali sembang membuat keputusan sebaliknya:
+
+1. Keputusan dibuat apabila sasaran akan dihantar, pada penyedia permintaan diselesaikan. Alias pembekal, id model kosong, id perkongsian kuota dan setiap sasaran kombo dilindungi.
+2. Ia tidak dijalankan dalam pendaftaran pagar, jadi saluran lumpuh setiap permintaan tidak digunakan untuknya.
+3. Ejen pihak ketiga yang dikenali ditolak. Pelanggan yang tidak dikenali dilog seperti dalam `monitor`, dan ditolak hanya dengan `AGENT_GUARD_STRICT=true`. Kod Claude dan Anthropic SDKs rasmi tidak pernah ditolak.
+4. Penolakan adalah HTTP 403 dengan `error.type` `permission_error` dan `error.code` `client_agent_not_allowed`. Badan ialah ralat gaya OpenAI. Pada permintaan format Anthropic ia juga membawa `type: "error"` di peringkat teratas. Tiada pengepala `Retry-After` dan penolakan dikembalikan sebelum sebarang aliran bermula.
+5. Penolakan bukanlah kegagalan penyedia. Ia tidak menyentuh pemutus litar pembekal, penyejukan sambungan atau penguncian model.
+6. Dalam kombo, sasaran yang ditolak dilangkau dan sasaran yang selebihnya dijalankan. Permintaan gagal dengan ralat dasar apabila sekurang-kurangnya satu sasaran ditolak dan tiada sasaran melepasi pengawal. Kombo menyimpan ralatnya sendiri apabila entri peringkat atas menamakan penyedia lain yang diketahui, dengan awalan atau dengan id pembekal langkah. Sasaran keutamaan yang ditolak dengan `fallbackOnlyOnQuotaExhaustion` dilangkau dengan cara yang sama dan tidak menghentikan kombo. Sasaran bayangan disemak dan dilog, tetapi ia tidak pernah dikira sebagai sasaran yang melepasi pengawal.
+7. Kombo `fusion` gagal sebelum panel dijalankan apabila hakim perkhidmatan gabungan akan ditolak. Hakim itu datang daripada konfigurasi kombo atau daripada lalai kombo global. Semakan yang sama dijalankan apabila kombo gabungan dicapai melalui ubah hala jaringan keselamatan.
+8. Satu baris log bagi setiap permintaan dan pembekal, dengan `tag: "AGENT_GUARD"`, `warn` untuk penolakan dan medan yang sama seperti `monitor`.
+9. Atas kesilapan dalaman, pengawal gagal dibuka. Permintaan diteruskan dan satu `warn` line `agent guard failed open` direkodkan.
+
+**Had `block`:**
+
+- Setiap isyarat ialah pengepala dikawal klien. Pelanggan yang menghantar `User-Agent: claude-cli/…` dianggap sebagai Kod Claude. `block` menghalang ejen pihak ketiga yang tidak diubah suai. Ia bukan kawalan akses.
+- Proksi yang menanggalkan pengepala pengenalpasti menukarkan mana-mana klien kepada yang tidak dikenali. Pelanggan sedemikian dihidangkan tanpa `AGENT_GUARD_STRICT` dan ditolak dengannya. Jalankan pengawal pada contoh yang berhadapan dengan pelanggan. Contoh OmniRoute kedua di belakang yang pertama melihat pengepala yang pertama.
+- `AGENT_GUARD_STRICT` menolak setiap pelanggan pada penyedia yang bukan Kod Claude atau SDK rasmi. Itu termasuk pelanggan berasaskan pelayar dan taman permainan papan pemuka. Ujian langsung kombo papan pemuka dikecualikan, juga melalui ubah hala jaringan keselamatan.
+- Sesetengah ciri membina permintaan sembang mereka sendiri dan bukannya meneruskan permintaan pelanggan. Empat daripada mereka menghantarnya kembali melalui laluan OmniRoute `/v1/...` :
+  - kerja kelompok (`src/lib/batches/dispatch.ts`)
+  - alat inferens MCP (`open-sse/mcp-server/tools/inferenceTools.ts`)
+  - penghalaan pintar A2A (`src/lib/a2a/skills/smartRouting.ts`)
+  - jambatan penglihatan apabila ia menerangkan imej melalui OmniRoute (`src/lib/guardrails/visionBridgeHelpers.ts`)
+- Proksi sembang Telegram (`src/lib/telegram/chatProxy.ts`) membina permintaannya dalam proses dan memanggil pengendali sembang secara terus.
+- Permintaan dalaman tersebut membawa pengepala OmniRoute sendiri, bukan pengepala pelanggan yang memulakannya. Pengawal mengklasifikasikan mereka sebagai pelanggan yang tidak dikenali.
+- Tanpa `AGENT_GUARD_STRICT`, permintaan dalaman itu disampaikan kepada penyedia yang dikawal tidak kira siapa pun pelanggan asalnya. Ejen pihak ketiga yang mencapai Claude melalui mereka tidak ditolak.
+- Dengan `AGENT_GUARD_STRICT`, permintaan dalaman tersebut ditolak oleh penyedia yang dikawal sesiapa sahaja yang memulakannya, termasuk Kod Claude.
+- Hanya permintaan yang melalui pengendali sembang berpagar. Pengesahan model (`src/lib/modelValidation/runner.ts`) memanggil teras permintaan secara langsung dan tidak berpagar.
+- Hanya pembekal `claude` dan `anthropic` dilindungi. model Claude yang disediakan oleh penyedia lain tidak dilindungi, dan pembekal `claude-web` juga tidak dilindungi.
+- Sesetengah kombo menamakan sasaran yang tinggal tanpa awalan pembekal, sebagai id model kosong atau kombo bersarang. Apabila sasaran tersebut tidak tersedia atas sebab yang tidak berkaitan (pemutus terbuka, cooldown, lockout), permintaan tersebut gagal dengan ralat dasar.
+- Sasaran kombo yang dilangkau mengosongkan pin sasaran yang terakhir diketahui, seperti yang dilakukan oleh mana-mana sasaran yang dilangkau.
+- Hakim gabungan yang dinamakan dengan awalan penyedia terkawal ditolak sebelum panel dijalankan. Itu meliputi `anthropic/…`, `claude/…`, alias seperti `cc/…`, akhiran konteks seperti `[1m]` dan nama perkongsian kuota pada penyedia tersebut.
+- Hakim gabungan yang ditulis sebagai id model kosong, atau sebagai alias model yang diselesaikan kepada penyedia yang dikawal, ditolak hanya apabila ia dihantar. Panel telah pun dijalankan pada masa itu. Menamakan hakim dengan awalan penyedianya mengelakkannya. Tiada ejaan hakim sampai ke penyedia yang dijaga tanpa ditolak.
+- Pra-semak menolak hakim Claude yang dikonfigurasikan walaupun perkhidmatan gabungan akan menjatuhkan hakim itu pada masa tayangan. Perkhidmatan itu menjatuhkan hakim yang disembunyikan oleh pengendali, dan hakim yang tidak dapat menerima media permintaan. Kes kedua meliputi sokongan penglihatan yang tidak disahkan dan media lain yang tidak diterima oleh hakim. Kedua-dua laluan kombo berkelakuan seperti ini.
+- Pada ubah hala jaringan keselamatan, perkhidmatan kombo menerima tetapan kosong. Hakim yang ditetapkan hanya dalam lalai kombo global tidak pernah digunakan di sana.
+- Semasa `block` dihidupkan, pelanggan yang pengawal akan menolak pada pembekal yang dikawal tidak menggunakan laluan laju kereta sampingan, untuk mana-mana model. Di bawah `AGENT_GUARD_STRICT` iaitu setiap pelanggan yang tidak dikenali. Selepas semakan token gegantinya, `POST /v1/relay/chat/completions/bifrost` menjawab permintaan tersebut dengan pengepala 503 dan `X-Bifrost-Fallback`.
+- `POST /v1/messages/count_tokens` memberikan anggaran tempatan kepada pelanggan yang akan ditolak oleh pengawal pada pembekal yang model itu diselesaikan.
+- Tiada pengecualian setiap kunci.
 
 ## Kontrak Asas (`base.ts`)
 
@@ -356,64 +417,33 @@ Guardrail menandakan "tiada perubahan" dengan mengembalikan sama ada `void`, `{}
 nilai yang mengalir melalui rantai untuk guardrail hiliran.
 `signal?: AbortSignal` membawa kitar hayat pemanggil ke dalam guardrail. Pembatalan permintaan ialah pengecualian fail-open yang disengajakan: jambatan media menghentikan kerja dan pembersihan tanpa memulihkan media mentah kepada sasaran yang diketahui tidak menyokongnya.
 
-## Registri (`registry.ts`)
+## Pendaftaran (`registry.ts`)
 
 Singleton `guardrailRegistry` mendedahkan:
 
-- `register(guardrail)` — menambah (atau menggantikan mengikut nama ternormal) guardrail dan
-  menyusun semula mengikut `priority` menaik.
+- `register(guardrail)` — menambah (atau menggantikan dengan nama biasa) pagar dan menyusun semula dengan menaik `priority`.
 - `clear()` / `list()` — pembantu pentadbiran.
-- `runPreCallHooks(payload, context)` — mengulangi guardrail aktif, menyalurkan
-  payload melalui `modifiedPayload`, dan berhenti pada `block: true` pertama.
-- `runPostCallHooks(response, context)` — aliran yang sama pada bahagian respons.
-- `resetGuardrailsForTests({ registerDefaults })` — mengosongkan keadaan dan secara pilihan
-  mendaftar semula nilai lalai untuk pengasingan ujian yang bersih.
+- `runPreCallHooks(payload, context)` — melelarkan pagar pengadang aktif, menyusun muatan melalui `modifiedPayload`, dan berhenti pada `block: true` pertama .
+- `runPostCallHooks(response, context)` — aliran yang sama pada bahagian tindak balas.
+- `resetGuardrailsForTests({ registerDefaults })` — mengosongkan keadaan dan secara pilihan mendaftar semula lalai untuk pengasingan ujian bersih.
 
-Kedua-dua runner mengembalikan `{ blocked, payload|response, results, guardrail?, message? }`
-di mana `results` ialah tatasusunan rekod `GuardrailExecutionResult` yang merangkumi
-medan `blocked`, `skipped`, `modified`, `error`, dan `meta` bagi setiap guardrail,
-berguna untuk penjejakan.
+Kedua-dua pelari mengembalikan `{ blocked, payload|response, results, guardrail?, message? }` dengan `results` ialah susunan rekod `GuardrailExecutionResult` yang termasuk medan per-guardrail `blocked`, `skipped`, `modified`, `error`, dan `meta`, berguna untuk mengesan.
 
-### Menyahdayakan Guardrail Bagi Setiap Permintaan
+### Melumpuhkan Pengawal Per-Permintaan
 
-`resolveDisabledGuardrails({ apiKeyInfo, body, headers })` mengagregatkan senarai
-nama guardrail tanpa pendua yang patut dilangkau untuk permintaan
-semasa. Terdapat lima saluran, dibaca mengikut susunan ini dan digabungkan ke dalam satu senarai
-(kejadian pertama diutamakan semasa penyahpenduaan):
+`resolveDisabledGuardrails({ apiKeyInfo, body, headers })` mengagregatkan senarai pendua nama pagar yang harus dilangkau untuk permintaan semasa. Terdapat lima saluran, baca dalam susunan ini dan digabungkan menjadi satu senarai (kejadian pertama menang apabila menyahgandakan):
 
 1. `apiKeyInfo.disabledGuardrails`
-2. Badan permintaan `disabledGuardrails` (peringkat teratas)
-3. Badan permintaan `metadata.disabledGuardrails` (hanya apabila `metadata` ialah objek)
-4. Pengepala `x-omniroute-disabled-guardrails`
-5. Pengepala legasi `x-disabled-guardrails`
+2. Minta body `disabledGuardrails` (peringkat atas)
+3. Minta `metadata.disabledGuardrails` badan (hanya apabila `metadata` ialah objek)
+4. Tajuk `x-omniroute-disabled-guardrails`
+5. Tajuk legasi `x-disabled-guardrails`
 
-Kesemua lima saluran digabungkan, termasuk kedua-dua pengepala: menghantar kedua-dua
-`x-omniroute-disabled-guardrails` dan `x-disabled-guardrails` melangkau kesatuan
-senarai mereka, dan pengepala moden yang kosong tidak lagi menyembunyikan pengepala legasi
-([#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412), diperbaiki dalam
-[#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805)).
+Kesemua lima saluran digabungkan, kedua-dua pengepala termasuk: menghantar kedua-dua `x-omniroute-disabled-guardrails` dan `x-disabled-guardrails` melangkau penyatuan senarai mereka dan pengepala moden yang kosong tidak lagi menyembunyikan yang lama ( [#16412](https://github.com/cheaper-inference/OmniRoute/issues/16412), tetap dalam [#16805](https://github.com/cheaper-inference/OmniRoute/pull/16805) ).
 
-Nilai boleh berupa tatasusunan rentetan atau rentetan terpisah koma; nama dipangkas
-dan dinormalkan kepada kebab-case huruf kecil (`pii_masker` → `pii-masker`), dan
-entri kosong digugurkan. Hasilnya disalurkan melalui `context.disabledGuardrails`
-kepada registri, yang melangkau guardrail yang sepadan (`skipped: true` dalam `results`).
+Nilai mungkin tatasusunan rentetan atau rentetan yang dipisahkan koma; nama dipangkas dan dinormalkan kepada huruf kecil kebab-huruf (`pii_masker` → `pii-masker`), dan entri kosong digugurkan. Hasilnya dihantar melalui `context.disabledGuardrails` ke pendaftaran, yang melangkau pagar berpadanan (`skipped: true` dalam `results`).
 
-Senarai nyahdaya hanya menjejaskan **registri**. Mod `block` suntikan prompt ialah
-sempadan mandatori: middleware pengawal suntikan
-(`src/middleware/promptInjectionGuard.ts`) memanggil `evaluatePromptInjection()`
-tanpa sebarang senarai nyahdaya yang dikawal pemanggil (panggilan mati
-`resolveDisabledGuardrails({ body })` yang pernah dibuatnya telah dialih keluar dalam
-[#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934)), jadi permintaan
-yang menyahdayakan `prompt-injection` masih ditolak dalam mod `block`. Ini adalah
-mengikut reka bentuk. Saluran nyahdaya dikawal oleh pemanggil (badan permintaan,
-metadata, pengepala), dan pemanggil tidak boleh mematikan kawalan keselamatan
-yang ditetapkan oleh pengendali
-([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). Kesatuan
-pengepala daripada [#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)
-hanya mengubah guardrail registri mana yang dilangkau; ia tidak membenarkan klien
-memintas middleware. Dasar guardrail mandatori setiap kunci dan setiap kumpulan
-dijejak dalam RFC v4 [#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417).
-Lihat [Liputan dan had](#coverage-and-limits).
+Senarai lumpuh hanya mempengaruhi** pendaftaran** . Mod `block` suntikan segera ialah sempadan wajib: perisian tengah pengawal suntikan (`src/middleware/promptInjectionGuard.ts`) memanggil `evaluatePromptInjection()` tanpa sebarang senarai lumpuh kawalan pemanggil (panggilan `resolveDisabledGuardrails({ body })` mati yang digunakannya telah dialih keluar dalam [#16934](https://github.com/cheaper-inference/OmniRoute/pull/16934) ), jadi permintaan yang melumpuhkan `prompt-injection` masih ditolak dalam mod `block`. Ini adalah dengan reka bentuk. Saluran lumpuh adalah dikawal pemanggil (badan permintaan, metadata, pengepala) dan pemanggil tidak boleh mematikan kawalan keselamatan yang ditetapkan operator ( [#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413) ). Kesatuan pengepala daripada [#16412](https://github.com/cheaper-inference/OmniRoute/issues/16412) hanya menukar pagar pengawal pendaftaran yang dilangkau; ia tidak membenarkan pelanggan memintas perisian tengah. Dasar mandatori setiap kunci dan setiap kumpulan dijejaki dalam v4 RFC [#16417](https://github.com/cheaper-inference/OmniRoute/issues/16417). Lihat [Liputan dan had](#coverage-and-limits).
 
 ## Perintah Pelaksanaan
 
@@ -441,36 +471,38 @@ Pendaftaran guardrail disambungkan ke saluran paip sembang sahaja. Had ini disem
 | `runPreCallHooks`                           | Permintaan dikendalikan oleh `handleChat` (`src/sse/handlers/chat.ts`): `/v1/chat/completions`, `/v1/completions`, `/v1/messages`, `/v1/responses` (dan `/v1/responses/*`), `/v1/relay/chat/completions`, `/v1/providers/{provider}/chat/completions`, `/v1/api/chat`, `/v1/antigravity`, `/v1beta/models/*` dan proksi sembang Telegram. Juga titik akhir ujian papan pemuka `/api/guardrails/test`. Blok pra-panggilan mengembalikan HTTP 400. |
 | `runPostCallHooks`                          | **Bukan penstriman** balasan sembang sahaja (`open-sse/handlers/chatCore/nonStreamingResponse.ts`). Respons yang distrim tidak pernah sampai.                                                                                                                                                                                                                                                                                                    |
 | Menstrim PII                                | `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`), disalurkan ke dalam `streamingPipeline.ts` apabila `PII_RESPONSE_SANITIZATION` dihidupkan. Ia bukan pagar, jadi saluran lumpuhkan tidak menjejaskannya.                                                                                                                                                                                                                            |
-| Bilik kebal PII boleh diterbalikkan         | Permintaan dikendalikan oleh `handleChat` sahaja, apabila `PII_REDACTION_ENABLED` dan `PII_REVERSIBLE_VAULT_ENABLED` dihidupkan. Token dicetak oleh pra-panggilan `pii-masker` dan dipulihkan di pintu keluar `handleChat` (`src/lib/pii/requestTokenVaultScope.ts`). Melumpuhkan `pii-masker` untuk permintaan bermakna tiada apa yang dicetak.                                                                                                 |
+| Bilik kebal PII boleh diterbalikkan         | Permintaan dikendalikan oleh `handleChat` sahaja, apabila `PII_REDACTION_ENABLED` dan `PII_REVERSIBLE_VAULT_ENABLED` dihidupkan. Token dicetak oleh pra-panggilan `pii-masker` dan dipulihkan pada `handleChat` exit (`src/lib/pii/requestTokenVaultScope.ts`). Melumpuhkan `pii-masker` untuk permintaan bermakna tiada apa yang dicetak.                                                                                                       |
 | Perisian tengah pengawal suntikan (warisan) | Setiap laluan `/v1` cepat, termasuk keluarga sembang (lihat [liputan laluan](#injection-guard-route-coverage--red-team-phase-8--block-d) ). Suntikan segera sahaja.                                                                                                                                                                                                                                                                              |
 
 ### Apa yang tidak dilindungi
 
-- **Media, benam dan laluan data** (`/v1/images/*`, `/v1/embeddings`, `/v1/audio/*`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/rerank`, `/v1/search`, `/v1/moderations`) tidak pernah sampai ke registri. Tiada penyekat PII, pelekat kelayakan atau jambatan modaliti berjalan di sana. Satu-satunya pemeriksaan mereka ialah perisian tengah pengawal suntikan warisan.
+- **Media, benam dan laluan data** (`/v1/images/*`, `/v1/embeddings`, `/v1/audio/*`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/rerank`, `/v1/search`, `/v1/moderations`) tidak pernah sampai ke registri. Tiada penyamaran PII, penyamaran kelayakan atau jambatan modaliti berjalan di sana. Satu-satunya semakan mereka ialah perisian tengah pengawal suntikan warisan.
 - **Respons distrim** tiada pagar selepas panggilan: tiada `pii-masker` atau `credential-masker` pasca panggilan, dan tiada blok pasca panggilan. Hanya transformasi PII penstriman digunakan (apabila `PII_RESPONSE_SANITIZATION` dihidupkan). Bukti kelayakan yang digemakan semula dalam respons yang distrim tidak disunting.
-- **Lumpuhkan saluran berbanding perisian tengah (mengikut reka bentuk):** middleware menilai suntikan segera dengan panggilan sendiri ke `evaluatePromptInjection()`, tanpa melepasi sebarang senarai lumpuh dikawal pemanggil. mod `block` ialah sempadan wajib yang dilumpuhkan kawalan pemanggil tidak boleh memintas, termasuk pada laluan sembang-keluarga ( [#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413) ). Melumpuhkan `prompt-injection` hanya melangkau pagar pengawal pendaftaran.
+- **Lumpuhkan saluran berbanding perisian tengah (mengikut reka bentuk):** middleware menilai suntikan segera dengan panggilan sendiri ke `evaluatePromptInjection()`, tanpa melepasi sebarang senarai lumpuh kawalan pemanggil. mod `block` ialah sempadan wajib yang dilumpuhkan kawalan pemanggil tidak boleh memintas, termasuk pada laluan sembang-keluarga ( [#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413) ). Melumpuhkan `prompt-injection` hanya melangkau pagar pengawal pendaftaran.
 
 ### Perkara yang melihat respons sebelum pasca panggilan
 
 Pada laluan bukan penstriman susunannya ialah: pengekstrakan memori → pelaksanaan alat terbina dalam → pagar penghadang pasca panggilan → blok pasca panggilan keluar → stor cache semantik.
 
-- **Pengekstrakan memori** dan** pelaksanaan alat** lihat respons sebelum pagar selepas panggilan boleh menulis semula atau menyekatnya. Sejak [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401), pengekstrakan memori menjalankan teks yang diekstrak melalui `sanitizePII` apabila `PII_RESPONSE_SANITIZATION` dihidupkan (kedua-dua penstriman dan bukan penstriman), tetapi respons yang disekat selepas panggilan kemudian masih ditawarkan kepada memori dan alatan.
+- **Pengekstrakan memori** dan** pelaksanaan alat** lihat respons sebelum pagar selepas panggilan boleh menulis semula atau menyekatnya. Sejak [#16401](https://github.com/cheaper-inference/OmniRoute/pull/16401), pengekstrakan memori menjalankan teks yang diekstrak melalui `sanitizePII` apabila `PII_RESPONSE_SANITIZATION` dihidupkan (kedua-dua penstriman dan bukan penstriman), tetapi respons yang disekat selepas panggilan kemudian masih ditawarkan kepada memori dan alatan.
 - **Cache semantik** menyimpan respons selepas pasca panggilan, jadi ia menyimpan respons yang ditulis semula dan respons yang disekat tidak pernah dicache. Entri cache dikunci setiap kunci API.
 
 ## Konfigurasi
 
 Pembolehubah persekitaran dibaca oleh pagar terbina dalam:
 
-| Pembolehubah                          | Digunakan oleh             | Kesan                                                                                                   |
-| ------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | Tetapkan `false` untuk melumpuhkan pengesanan sepenuhnya.                                               |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | Dasar suntikan: `warn`, `block`, atau `log`. Nilai warisan `redact` tidak menulis semula teks suntikan. |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`         | Mod untuk pengawal suntikan; juga bendera ciri DB yang** mengatasi** env vars (DB > ENV).               |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | Keterukan minimum yang ditolak oleh `MODE=block` : `high` (lalai), `medium`, atau `low`.                |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | Alias warisan untuk `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                  |
-| `PII_REDACTION_ENABLED`               | `pii-masker`               | Apabila `true`, minta PII disunting (bebas daripada mod suntikan).                                      |
-| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | Dengan `PII_REDACTION_ENABLED`, token boleh balik pudina dan pulihkannya dalam respons 2xx.             |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (hiliran)     | Mengawal tingkah laku topeng bahagian tindak balas.                                                     |
+| Pembolehubah                          | Digunakan oleh             | Kesan                                                                                                                     |
+| ------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | Tetapkan `false` untuk melumpuhkan pengesanan sepenuhnya.                                                                 |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | Dasar suntikan: `warn`, `block`, atau `log`. Nilai warisan `redact` tidak menulis semula teks suntikan.                   |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`         | Mod untuk pengawal suntikan; juga bendera ciri DB yang** mengatasi** env vars (DB > ENV).                                 |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | Keterukan minimum yang ditolak oleh `MODE=block` : `high` (lalai), `medium`, atau `low`.                                  |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | Alias warisan untuk `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                                    |
+| `PII_REDACTION_ENABLED`               | `pii-masker`               | Apabila `true`, minta PII disunting (bebas daripada mod suntikan).                                                        |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | Dengan `PII_REDACTION_ENABLED`, token boleh balik pudina dan pulihkannya dalam respons 2xx.                               |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (hiliran)     | Mengawal tingkah laku topeng sisi tindak balas.                                                                           |
+| `AGENT_GUARD_MODE`                    | `agent-guard`              | `off` (lalai), `monitor` atau `block`. Juga bendera ciri DB (DB > ENV).                                                   |
+| `AGENT_GUARD_STRICT`                  | `agent-guard`              | `false` (lalai) atau `true`. Dengan `block`, juga menolak pelanggan yang tidak dikenali. Juga bendera ciri DB (DB > ENV). |
 
 Pengawal Modality Bridge membaca konfigurasi masa jalan daripada stor tetapan yang disokong DB (`getSettings()`), bukan env vars. Kekunci utama Vision ialah `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` dan `modalityBridgeCacheMaxEntries`. Kekunci `visionBridge*` warisan hanya diterima sebagai sandaran bacaan satu kitaran yang didokumenkan; penulisan papan pemuka menggunakan kekunci utama. Lalai dan penyelesai sandaran hidup dalam `src/shared/constants/modalityBridgeDefaults.ts`, dengan pemalar warisan dikekalkan dalam `src/shared/constants/visionBridgeDefaults.ts`.
 
@@ -532,39 +564,23 @@ akses pangkalan data atau rangkaian.
 - `docs/architecture/RESILIENCE_GUIDE.md` — lapisan ortogon (circuit breaker, cooldown)
 - `docs/reference/ENVIRONMENT.md` — rujukan penuh pemboleh ubah persekitaran
 
-## Liputan laluan injection-guard & red-team (Fasa 8 · Blok D)
+## Liputan laluan pengawal suntikan & pasukan merah (Fasa 8 · Blok D)
 
-Injection-guard (`createInjectionGuard` / `withInjectionGuard`) meliputi semua laluan
-yang menerima prompt pengguna. Ia mematuhi `INJECTION_GUARD_MODE` (lalai `warn` = log sahaja;
-`block` = mengembalikan HTTP 400 `SECURITY_001`).
+Pengawal suntikan (`createInjectionGuard` / `withInjectionGuard`) meliputi semua laluan yang menerima gesaan pengguna. Ia menghormati `INJECTION_GUARD_MODE` (log `warn` = lalai sahaja; `block` = mengembalikan HTTP 400 `SECURITY_001`).
 
-| Jenis            | Laluan                                                                                                                                               | Mod lalai |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| Teks (sedia ada) | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | warn      |
-| Generatif        | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | warn      |
-| Data             | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | warn      |
+| taip             | Laluan                                                                                                                                               | Mod lalai      |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| Teks (sedia ada) | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | memberi amaran |
+| Generatif        | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | memberi amaran |
+| Data             | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | memberi amaran |
 
-Pengekstrakan teks (`extractMessageContents`) meliputi `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`.
+Pengekstrakan teks (`extractMessageContents`) meliputi `messages`/`input`/`prompt`/`query` + `documents`/`instructions`/`system`.
 
-**Red-team (setiap malam, `nightly-llm-security.yml`):** promptfoo mengesahkan bahawa setiap laluan menyekat
-korpus OWASP-LLM dalam `INJECTION_GUARD_MODE=block`; garak menjalankan prob (dilangkau tanpa rahsia).
-`moderations` disertakan untuk konsistensi. Mod block ialah sempadan mandatori: `evaluatePromptInjection()`
-mengabaikan senarai nyahaktif setiap permintaan yang diserahkan kepadanya oleh middleware, jadi `disabledGuardrails`
-**tidak** mengecualikan sesebuah laluan daripadanya ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)).
+**Pasukan merah (setiap malam, `nightly-llm-security.yml`):** promptfoo mengesahkan bahawa setiap laluan menyekat korpus OWASP-LLM dalam `INJECTION_GUARD_MODE=block`; garak menjalankan kuar (langkau tanpa rahsia). `moderations` disertakan untuk konsistensi. Mod blok ialah sempadan wajib: `evaluatePromptInjection()` mengabaikan senarai lumpuh setiap permintaan yang dilalui perisian tengah, jadi `disabledGuardrails` melakukannya** bukan** mengecualikan laluan daripadanya ( [#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413) ).
 
-Aliran kerja malam (`.github/workflows/nightly-llm-security.yml`, cron + dispatch manual)
-mempunyai dua job:
+Aliran kerja setiap malam (`.github/workflows/nightly-llm-security.yml`, cron + manual dispatch) mempunyai dua kerja:
 
-- **`promptfoo-guard` (menyekat)** — menjalankan `promptfoo eval -c promptfooconfig.yaml`
-  dengan `INJECTION_GUARD_MODE=block`. Setiap kes berlawanan (cth. "ignore all
-  previous instructions…", jailbreak gaya DAN) menegaskan bahawa respons membawa
-  `error.code === "SECURITY_001"`, iaitu pengawal itu benar-benar menolak permintaan tersebut.
-- **`garak` (bersifat nasihat)** — menjalankan garak `--probes promptinject,dan,leakreplay`
-  terhadap instans OmniRoute tempatan (`http://localhost:20128/v1`). Disyaratkan pada
-  rahsia penyedia (`PROMPTFOO_PROVIDER_KEY`); dilangkau dengan lancar dan diakhiri
-  `|| true`, jadi ia melapor tanpa menggagalkan CI.
+- **`promptfoo-guard` (menyekat)** — menjalankan `promptfoo eval -c promptfooconfig.yaml` dengan `INJECTION_GUARD_MODE=block`. Setiap kes permusuhan (cth "abaikan semua arahan sebelumnya…", jailbreak gaya DAN) menegaskan tindak balas membawa `error.code === "SECURITY_001"`, iaitu pengawal sebenarnya menolak permintaan itu.
+- **`garak` (nasihat)** — menjalankan garak `--probes promptinject,dan,leakreplay` terhadap contoh OmniRoute tempatan (`http://localhost:20128/v1`). Berpagar pada rahsia pembekal (`PROMPTFOO_PROVIDER_KEY`); melangkau dengan anggun dan diakhiri dengan `|| true`, jadi ia melaporkan tanpa gagal CI.
 
-Liputan pembantu pengawal (`createInjectionGuard` / `withInjectionGuard`)
-merangkumi setiap laluan `/v1` yang membawa prompt; teks prompt diambil dari
-`messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` oleh
-`extractMessageContents()` dalam `src/shared/utils/inputSanitizer.ts`.
+Liputan pembantu pengawal (`createInjectionGuard` / `withInjectionGuard`) merangkumi setiap laluan `/v1` yang membawa segera; teks gesaan ditarik dari `messages`/`input`/`prompt`/`query` + `documents`/`instructions`/`system` oleh `extractMessageContents()` dalam `src/shared/utils/inputSanitizer.ts`.

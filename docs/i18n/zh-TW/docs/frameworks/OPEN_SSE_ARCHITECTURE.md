@@ -209,7 +209,7 @@ export async function handleChat(request: NextRequest) {
 
 ### combo.ts (4456 LOC)
 
-這**路由引擎**將組合解析為有序目標。
+這**路由引擎**that resolves a combo to ordered targets.
 
 ```ts
 // services/combo.ts
@@ -228,34 +228,34 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 支援**22種路由策略**（參見`src/shared/constants/routingStrategies.ts`）：
 
-| 策略                | 行為                                                       |
-| ------------------- | ---------------------------------------------------------- |
-| `priority`          | 第一目標有序列表                                           |
-| `weighted`          | 按每個目標權重的機率                                       |
-| `round-robin`       | 按順序循環瀏覽目標                                         |
-| `context-relay`     | 跨目標傳遞上下文                                           |
-| `fill-first`        | 在進入下一步之前先填滿配額                                 |
-| `p2c`               | 兩種選擇的力量                                             |
-| `random`            | 均勻隨機                                                   |
-| `least-used`        | 選擇最近使用次數最少的一個                                 |
-| `cost-optimized`    | 最便宜的健康目標優先                                       |
-| `reset-aware`       | 了解提供者重置窗口                                         |
-| `reset-window`      | 重置基於視窗的路由                                         |
-| `expiry-first`      | 先使用額度到期未使用的帳戶                                 |
-| `headroom`          | 最剩餘的配額空間優先                                       |
-| `quota-weighted`    | 跳過耗盡的帳戶，然後按剩餘配額提取÷飛行負載                |
-| `strict-random`     | 真正統一（無品質加權）                                     |
-| `auto`              | 使用 16 個因素評分 (`autoCombo/`)                          |
-| `lkgp`              | 最後已知的良好提供者優先                                   |
-| `context-optimized` | 最適合長上下文請求                                         |
-| `cache-optimized`   | 將每個可重複使用的提示前綴固定到同一帳戶（提示快取命中）   |
-| `fusion`            | 並行扇出到面板，然後透過法官進行合成（`fusion.ts`）        |
-| `pipeline`          | 鍊式步驟—每個目標的輸出都會饋送到下一個目標                |
-| `jev`               | 選擇加入： TypeSafe Jev 承認哪些排名條目運行；否則你的訂單 |
+| 策略                | 行為                                                                  |
+| ------------------- | --------------------------------------------------------------------- |
+| `priority`          | 第一目標有序列表                                                      |
+| `weighted`          | 按每個目標權重的機率                                                  |
+| `round-robin`       | 按順序循環瀏覽目標                                                    |
+| `context-relay`     | 跨目標傳遞上下文                                                      |
+| `fill-first`        | 在進入下一步之前先填滿配額                                            |
+| `p2c`               | 兩種選擇的力量                                                        |
+| `random`            | 依需求進行新鮮洗牌                                                    |
+| `least-used`        | 選擇記錄請求最少的一個                                                |
+| `cost-optimized`    | 最低目錄輸入價格優先                                                  |
+| `reset-aware`       | 剩餘配額+重設緊急                                                     |
+| `reset-window`      | 首先重置最快的配額窗口                                                |
+| `expiry-first`      | 先使用額度到期未使用的帳戶                                            |
+| `headroom`          | 最剩餘的配額空間優先                                                  |
+| `quota-weighted`    | 跳過耗盡的帳戶，然後按剩餘配額提取÷飛行負載                           |
+| `strict-random`     | 洗牌牌組：每個目標重複一次                                            |
+| `auto`              | 使用 16 個因素評分 (`autoCombo/`)                                     |
+| `lkgp`              | 最後已知的良好提供者優先                                              |
+| `context-optimized` | 首先是已知最大的上下文窗口                                            |
+| `cache-optimized`   | 首選可能在快取中保存提示前綴的帳戶                                    |
+| `fusion`            | 並行扇出到面板，然後透過法官進行合成（`fusion.ts`）                   |
+| `pipeline`          | 鍊式步驟—每個目標的輸出都會饋送到下一個目標                           |
+| `jev`               | Opt-in: TypeSafe Jev admits which ranked entries run; else your order |
 
 ### base.ts (1170 LOC)
 
-這**抽象執行者**每個執行器類別都擴展（直接或透過`DefaultExecutor`和其他子類別）。它包含：
+這**抽象執行者**每个执行器类都扩展（直接或通过`DefaultExecutor`和其他子类）。它包含：
 
 - `buildUrl()` —預設URL構造（子類別覆蓋自訂）
 - `buildHeaders()` —預設標頭（auth、內容類型）
@@ -371,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-解析透過`ExecutorRegistry` (`executors/registry.ts`)：每個專用執行器都在`executors/index.ts`的內建表中聲明，並在模組載入時透過`registerExecutor(alias, instance)`註冊； `getExecutor()`查閱註冊表，並為沒有專門條目的任何提供者回退到記憶的`DefaultExecutor` 。完整別名→執行器映射的特徵是黃金測試`tests/unit/executor-map-golden.test.ts`。
+解析透過`ExecutorRegistry` (`executors/registry.ts`)：每個專用執行器都在`executors/index.ts`的內建表中聲明，並在模組載入時透過`registerExecutor(alias, instance)`註冊；對於沒有專門條目的任何提供者， `getExecutor()`會查閱註冊表並回退到記憶的`DefaultExecutor` 。完整別名→執行器映射的特徵是黃金測試`tests/unit/executor-map-golden.test.ts`。
 
 ---
 

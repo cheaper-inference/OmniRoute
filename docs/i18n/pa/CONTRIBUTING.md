@@ -13,121 +13,107 @@ UI/UX, i18n, CLI, ਡੇਟਾਬੇਸ ਅਤੇ ਬਿਲਡ/ਡਿਪਲੌ�
 
 ---
 
-## ਵਿਕਾਸ ਸੈਟਅੱਪ
+## ਵਿਕਾਸ ਸੈੱਟਅੱਪ
 
-### ਪੂਰਵ-ਲੋੜਾਂ
+### ਪੂਰਵ-ਸ਼ਰਤਾਂ
 
 - **Node.js** `>=22.22.2 <23`, ਜਾਂ `>=24.0.0 <27` (ਸਿਫ਼ਾਰਸ਼ੀ: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Node 24 ਨਾਲ Windows:** ਮੌਜੂਦਾ 24 LTS ਪੈਚ ਰਿਲੀਜ਼ (ਘੱਟੋ-ਘੱਟ 24.20.0) ਵਰਤੋ।
-> ਪਹਿਲੀਆਂ ਰਿਲੀਜ਼ਾਂ ਸਫਲ ਟੈਸਟਾਂ ਤੋਂ ਬਾਅਦ `--test-force-exit` ਪ੍ਰਕਿਰਿਆ ਬੰਦ ਕਰਨ ਵੇਲੇ
-> ਅਬੋਰਟ ਹੋ ਸਕਦੀਆਂ ਹਨ। Node ਦਾ [Windows libuv fix](https://github.com/nodejs/node/pull/61999) ਇਸ
-> ਰਨਟਾਈਮ ਕ੍ਰੈਸ਼ ਨੂੰ ਠੀਕ ਕਰਦਾ ਹੈ; ਟੈਸਟ assertions ਅਤੇ runner exit checks ਚਾਲੂ ਰੱਖੋ।
+> **ਨੋਡ 24 ਦੇ ਨਾਲ Windows :** ਮੌਜੂਦਾ 24 LTS ਪੈਚ ਰੀਲੀਜ਼ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਘੱਟੋ-ਘੱਟ 24.20.0)। ਜਦੋਂ `--test-force-exit` ਪ੍ਰਕਿਰਿਆ ਨੂੰ ਬੰਦ ਕਰ ਦਿੰਦਾ ਹੈ ਤਾਂ ਪਹਿਲਾਂ ਰੀਲੀਜ਼ ਸਫਲ ਟੈਸਟਾਂ ਤੋਂ ਬਾਅਦ ਅਧੂਰਾ ਛੱਡ ਸਕਦੇ ਹਨ। ਨੋਡ ਦਾ [Windows libuv ਫਿਕਸ](https://github.com/nodejs/node/pull/61999) ਐਡਰੈੱਸ ਇਸ ਰਨਟਾਈਮ ਕਰੈਸ਼ ਨੂੰ; ਟੈਸਟ ਦੇ ਦਾਅਵੇ ਅਤੇ ਦੌੜਾਕ ਐਗਜ਼ਿਟ ਜਾਂਚਾਂ ਨੂੰ ਚਾਲੂ ਰੱਖੋ।
 
-> **npm v11+ ਵਰਤੋਂਕਾਰ (Node 24+):** `npm install` ਤੋਂ ਬਾਅਦ ਜਾਂਚ ਕਰੋ ਕਿ native modules ਇੰਸਟਾਲ ਹੋਏ ਹਨ:
-> `node -e "require('better-sqlite3')"`. ਜੇ ਇਹ `MODULE_NOT_FOUND` ਨਾਲ ਅਸਫਲ ਹੁੰਦਾ ਹੈ,
-> ਤਾਂ `npm approve-scripts better-sqlite3 && npm install` ਚਲਾਓ। ਵੇਖੋ
-> [Troubleshooting](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
+> **npm v11 + ਉਪਭੋਗਤਾ (ਨੋਡ 24 +):** `npm install` ਤੋਂ ਬਾਅਦ, ਪੁਸ਼ਟੀ ਕਰੋ ਕਿ ਮੂਲ ਮੋਡੀਊਲ ਸਥਾਪਿਤ ਕੀਤੇ ਗਏ ਸਨ: `node -e "require('better-sqlite3')"`। ਜੇ ਇਹ `MODULE_NOT_FOUND` ਨਾਲ ਅਸਫਲ ਹੁੰਦਾ ਹੈ, `npm approve-scripts better-sqlite3 && npm install` ਚਲਾਓ। [ਸਮੱਸਿਆ ਨਿਪਟਾਰਾ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ਦੇਖੋ।
 
-- **Git**
+- **ਗਿਟ**
 
-### ਕਲੋਨ ਅਤੇ ਇੰਸਟਾਲ
+### ਕਲੋਨ ਅਤੇ ਇੰਸਟਾਲ ਕਰੋ
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### ਵਾਤਾਵਰਣ ਵੈਰੀਏਬਲ
+### ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ
 
 ```bash
-# ਟੈਂਪਲੇਟ ਤੋਂ ਆਪਣੀ .env ਬਣਾਓ
+# Create your .env from the template
 cp .env.example .env
 
-# ਲੋੜੀਂਦੇ secrets ਤਿਆਰ ਕਰੋ
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ਵਿਕਾਸ ਲਈ ਮੁੱਖ ਵੈਰੀਏਬਲ:
+ਵਿਕਾਸ ਲਈ ਮੁੱਖ ਵੇਰੀਏਬਲ:
 
-| ਵੈਰੀਏਬਲ                | ਵਿਕਾਸ ਲਈ ਡਿਫ਼ਾਲਟ         | ਵੇਰਵਾ                 |
-| ---------------------- | ------------------------ | --------------------- |
-| `PORT`                 | `20128`                  | ਸਰਵਰ ਪੋਰਟ             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ਫਰੰਟਐਂਡ ਲਈ ਬੇਸ URL    |
-| `JWT_SECRET`           | (ਉੱਪਰ ਤਿਆਰ ਕਰੋ)          | JWT ਸਾਈਨਿੰਗ secret    |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | ਪਹਿਲੇ ਲੌਗਇਨ ਦਾ ਪਾਸਵਰਡ |
-| `APP_LOG_LEVEL`        | `info`                   | ਲੌਗ ਵੇਰਵੇ ਦਾ ਪੱਧਰ     |
+| ਵੇਰੀਏਬਲ                | ਡਿਫੌਲਟ ਡਿਵੈਲਪਮੈਂਟ        | ਵਰਣਨ                |
+| ---------------------- | ------------------------ | ------------------- |
+| `PORT`                 | `20128`                  | ਸਰਵਰ ਪੋਰਟ           |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ਫਰੰਟਐਂਡ ਲਈ ਬੇਸ URL  |
+| `JWT_SECRET`           | (ਉੱਪਰ ਤਿਆਰ ਕਰੋ)          | JWT ਦਸਤਖਤ ਗੁਪਤ      |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | ਪਹਿਲਾਂ ਲਾਗਇਨ ਪਾਸਵਰਡ |
+| `APP_LOG_LEVEL`        | `info`                   | ਲੌਗ ਵਰਬੋਸਿਟੀ ਪੱਧਰ   |
 
 ### ਡੈਸ਼ਬੋਰਡ ਸੈਟਿੰਗਾਂ
 
-ਡੈਸ਼ਬੋਰਡ ਉਹਨਾਂ ਫੀਚਰਾਂ ਲਈ UI ਟੌਗਲ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ ਜਿਨ੍ਹਾਂ ਨੂੰ ਵਾਤਾਵਰਣ ਵੈਰੀਏਬਲਾਂ ਰਾਹੀਂ ਵੀ ਕੌਂਫਿਗਰ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ:
+ਡੈਸ਼ਬੋਰਡ ਉਹਨਾਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਲਈ UI ਟੌਗਲ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ ਜੋ ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲਾਂ ਦੁਆਰਾ ਵੀ ਕੌਂਫਿਗਰ ਕੀਤੇ ਜਾ ਸਕਦੇ ਹਨ:
 
-| ਸੈਟਿੰਗ ਟਿਕਾਣਾ       | ਟੌਗਲ               | ਵੇਰਵਾ                           |
-| ------------------- | ------------------ | ------------------------------- |
-| Settings → Advanced | Debug Mode         | ਡੀਬੱਗ ਰਿਕਵੈਸਟ ਲੌਗ ਚਾਲੂ ਕਰੋ (UI) |
-| Settings → General  | Sidebar Visibility | ਸਾਈਡਬਾਰ ਸੈਕਸ਼ਨ ਦਿਖਾਓ/ਲੁਕਾਓ      |
+| ਨਿਰਧਾਰਿਤ ਸਥਾਨ   | ਟੌਗਲ ਕਰੋ            | ਵਰਣਨ                                 |
+| --------------- | ------------------- | ------------------------------------ |
+| ਸੈਟਿੰਗਜ਼ →      | ਡੀਬੱਗ ਮੋਡ           | ਡੀਬੱਗ ਬੇਨਤੀ ਲੌਗਸ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ (UI) |
+| ਸੈਟਿੰਗਾਂ → ਜਨਰਲ | ਸਾਈਡਬਾਰ ਦਰਿਸ਼ਗੋਚਰਤਾ | Show/hide ਸਾਈਡਬਾਰ ਭਾਗ                |
 
-ਇਹ ਸੈਟਿੰਗਾਂ ਡਾਟਾਬੇਸ ਵਿੱਚ ਸਟੋਰ ਹੁੰਦੀਆਂ ਹਨ ਅਤੇ ਰੀਸਟਾਰਟ ਤੋਂ ਬਾਅਦ ਵੀ ਕਾਇਮ ਰਹਿੰਦੀਆਂ ਹਨ। ਸੈਟ ਕੀਤੇ ਜਾਣ ’ਤੇ ਇਹ env var ਡਿਫ਼ਾਲਟਾਂ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦੀਆਂ ਹਨ।
+ਇਹ ਸੈਟਿੰਗਾਂ ਡਾਟਾਬੇਸ ਵਿੱਚ ਸਟੋਰ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ ਅਤੇ ਮੁੜ-ਚਾਲੂ ਹੋਣ 'ਤੇ ਜਾਰੀ ਰਹਿੰਦੀਆਂ ਹਨ, ਸੈੱਟ ਹੋਣ 'ਤੇ env var ਡਿਫੌਲਟ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦੇ ਹੋਏ।
 
-### ਲੋਕਲ ਤੌਰ ’ਤੇ ਚਲਾਉਣਾ
+### ਸਥਾਨਕ ਤੌਰ 'ਤੇ ਚੱਲ ਰਿਹਾ ਹੈ
 
 ```bash
-# ਵਿਕਾਸ ਮੋਡ (hot reload)
+# Development mode (hot reload)
 npm run dev
 
-# ਪ੍ਰੋਡਕਸ਼ਨ ਬਿਲਡ
-npm run build    # next build → .build/next/ ਫਿਰ assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# ਯੋਗਦਾਨਕਰਤਾਵਾਂ ਦੇ ਬਦਲਾਵਾਂ ਲਈ ਤੇਜ਼ backend/API-only compile
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# ਰਿਲੀਜ਼ ਬਿਲਡ (ਸਾਫ਼ rebuild + HEAD sentinel — deploy ਲਈ ਲੋੜੀਂਦਾ)
-npm run build:release   # rm -rf .build dist ਅਤੇ build + dist/BUILD_SHA ਲਿਖਦਾ ਹੈ
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# ਆਮ ਪੋਰਟ ਕੌਂਫਿਗਰੇਸ਼ਨ
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ਯੋਗਦਾਨਕਰਤਾ ਬਿਲਡ ਸਿਰਫ਼ compile-only validation ਕਰਦਾ ਹੈ: ਇਹ standalone
-distribution ਨੂੰ assemble ਨਹੀਂ ਕਰਦਾ ਅਤੇ optional native packaging assets ਵੀ build ਨਹੀਂ ਕਰਦਾ। ਜਦੋਂ ਤੁਹਾਨੂੰ
-shippable bundle ਦੀ ਜਾਂਚ ਕਰਨੀ ਹੋਵੇ, ਤਾਂ ਆਮ ਪ੍ਰੋਡਕਸ਼ਨ ਬਿਲਡ ਵਰਤੋ।
+ਯੋਗਦਾਨੀ ਬਿਲਡ ਕੰਪਾਈਲ-ਓਨਲੀ ਪ੍ਰਮਾਣਿਕਤਾ ਕਰਦਾ ਹੈ: ਇਹ ਸਟੈਂਡਅਲੋਨ ਡਿਸਟ੍ਰੀਬਿਊਸ਼ਨ ਨੂੰ ਇਕੱਠਾ ਨਹੀਂ ਕਰਦਾ ਜਾਂ ਵਿਕਲਪਿਕ ਮੂਲ ਪੈਕੇਜਿੰਗ ਸੰਪਤੀਆਂ ਦਾ ਨਿਰਮਾਣ ਨਹੀਂ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਤੁਹਾਨੂੰ ਭੇਜਣਯੋਗ ਬੰਡਲ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕਰਨ ਦੀ ਲੋੜ ਹੋਵੇ ਤਾਂ ਨਿਯਮਤ ਉਤਪਾਦਨ ਬਿਲਡ ਦੀ ਵਰਤੋਂ ਕਰੋ।
 
-### ਬਿਲਡ ਆਉਟਪੁੱਟ ਲੇਆਉਟ
+### ਆਉਟਪੁੱਟ ਲੇਆਉਟ ਬਣਾਓ
 
-| ਡਾਇਰੈਕਟਰੀ | ਸਮੱਗਰੀ                                                                      | ਟ੍ਰੈਕ ਕੀਤੀ |
-| --------- | --------------------------------------------------------------------------- | ---------- |
-| `src/`    | ਐਪਲੀਕੇਸ਼ਨ ਸਰੋਤ (TypeScript / TSX)                                           | ਹਾਂ        |
-| `.build/` | ਵਿਚਕਾਰਲੇ ਨਤੀਜੇ — `next build` ਆਉਟਪੁੱਟ (gitignored, `distDir = .build/next`) | ਨਹੀਂ       |
-| `dist/`   | Shippable bundle — `assembleStandalone` ਦੁਆਰਾ assembled (gitignored)        | ਨਹੀਂ       |
+| ਡਾਇਰੈਕਟਰੀ | ਸਮੱਗਰੀ                                                                   | ਟਰੈਕ ਕੀਤਾ |
+| --------- | ------------------------------------------------------------------------ | --------- |
+| `src/`    | ਐਪਲੀਕੇਸ਼ਨ ਸਰੋਤ (TypeScript / TSX)                                        | ਹਾਂ       |
+| `.build/` | ਇੰਟਰਮੀਡੀਏਟਸ — `next build` ਆਉਟਪੁੱਟ (gitignored, `distDir = .build/next`) | ਨੰ        |
+| `dist/`   | `assembleStandalone` ਦੁਆਰਾ ਇਕੱਠੇ ਕੀਤੇ ਜਾਣ ਯੋਗ ਬੰਡਲ — (gitigned)          | ਨੰ        |
 
-ਬਿਲਡ ਪਾਈਪਲਾਈਨ ਇੱਕੋ pass ਹੈ:
+ਬਿਲਡ ਪਾਈਪਲਾਈਨ ਇੱਕ ਸਿੰਗਲ ਪਾਸ ਹੈ:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js ਆਉਟਪੁੱਟ)
-  └─ assembleStandalone()                 (standalone + static + public + native assets ਕਾਪੀ ਕਰਦਾ ਹੈ)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ਪਹਿਲਾਂ ਦੋਵੇਂ ਡਾਇਰੈਕਟਰੀਆਂ ਨੂੰ ਵੀ ਸਾਫ਼ ਕਰਦਾ ਹੈ ਅਤੇ
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ਨੂੰ deploy integrity sentinel ਵਜੋਂ ਲਿਖਦਾ ਹੈ।
+`npm run build:release` ਪਹਿਲਾਂ ਦੋਵਾਂ ਡਾਇਰੈਕਟਰੀਆਂ ਨੂੰ ਸਾਫ਼ ਕਰਦਾ ਹੈ ਅਤੇ `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ਨੂੰ ਇੱਕ ਤੈਨਾਤ ਇਕਸਾਰਤਾ ਸੈਂਟੀਨੇਲ ਵਜੋਂ ਲਿਖਦਾ ਹੈ।
 
-`npm run build:contributor` backend-only build profile ਵਰਤਦਾ ਹੈ। ਇਹ build ਦੇ ਦੌਰਾਨ
-dashboard UI files ਨੂੰ ਅਸਥਾਈ ਤੌਰ ’ਤੇ stub ਕਰਦਾ ਹੈ, API route handlers ਨੂੰ ਕਾਇਮ ਰੱਖਦਾ ਹੈ,
-ਅਤੇ build ਤੋਂ ਬਾਅਦ ਅਸਲ files ਨੂੰ ਮੁੜ ਬਹਾਲ ਕਰਦਾ ਹੈ। ਡੈਸ਼ਬੋਰਡ UI ’ਤੇ ਅਸਰ ਪਾਉਣ ਵਾਲੇ ਬਦਲਾਵਾਂ ਜਾਂ ਪੂਰੀ
-release validation ਲਈ `npm run build` ਵਰਤੋ; contributor profile release build ਦਾ ਬਦਲ ਨਹੀਂ ਹੈ।
+`npm run build:contributor` ਬੈਕਐਂਡ-ਸਿਰਫ ਬਿਲਡ ਪ੍ਰੋਫਾਈਲ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ। ਇਹ ਬਿਲਡਿੰਗ ਦੌਰਾਨ ਡੈਸ਼ਬੋਰਡ UI ਫਾਈਲਾਂ ਨੂੰ ਅਸਥਾਈ ਤੌਰ 'ਤੇ ਸਟੱਬ ਕਰਦਾ ਹੈ, API ਰੂਟ ਹੈਂਡਲਰ ਰੱਖਦਾ ਹੈ, ਅਤੇ ਬਿਲਡ ਤੋਂ ਬਾਅਦ ਅਸਲ ਫਾਈਲਾਂ ਨੂੰ ਰੀਸਟੋਰ ਕਰਦਾ ਹੈ। ਡੈਸ਼ਬੋਰਡ UI ਪ੍ਰਭਾਵਿਤ ਕਰਨ ਵਾਲੀਆਂ ਤਬਦੀਲੀਆਂ ਲਈ ਜਾਂ ਪੂਰੀ ਰੀਲੀਜ਼ ਪ੍ਰਮਾਣਿਕਤਾ ਲਈ `npm run build` ਵਰਤੋਂ ਕਰੋ; ਯੋਗਦਾਨੀ ਪ੍ਰੋਫਾਈਲ ਰੀਲੀਜ਼ ਬਿਲਡ ਲਈ ਬਦਲ ਨਹੀਂ ਹੈ।
 
-> **VPS deploy ਨੋਟ:** ਰਿਮੋਟ image directory `/usr/lib/node_modules/omniroute/app/`
-> ਵਿੱਚ ਕੋਈ ਬਦਲਾਅ ਨਹੀਂ ਹੁੰਦਾ। deploy skills `dist/` ਦੀ ਸਮੱਗਰੀ ਨੂੰ ਇਸ ਵਿੱਚ rsync ਕਰਦੀਆਂ ਹਨ।
-> ਸਿਰਫ਼ ਰਿਪੋਜ਼ਟਰੀ ਅੰਦਰਲਾ build output path ਬਦਲਿਆ ਹੈ (`app/` → `dist/`)।
+> **VPS ਤੈਨਾਤ ਨੋਟ:** ਰਿਮੋਟ ਚਿੱਤਰ ਡਾਇਰੈਕਟਰੀ `/usr/lib/node_modules/omniroute/app/` ਬਦਲਿਆ ਨਹੀਂ ਹੈ। ਤੈਨਾਤ ਹੁਨਰ ਇਸ ਵਿੱਚ `dist/` ਦੀ ਸਮੱਗਰੀ ਨੂੰ rsync ਕਰਦਾ ਹੈ। ਸਿਰਫ਼ ਇਨ-ਰੇਪੋ ਬਿਲਡ ਆਉਟਪੁੱਟ ਮਾਰਗ ਨੂੰ ਮੂਵ ਕੀਤਾ ਗਿਆ ਹੈ (`app/` → `dist/`)।
 
-ਡਿਫ਼ਾਲਟ URLs:
+ਡਿਫਾਲਟ URLs:
 
-- **ਡੈਸ਼ਬੋਰਡ**: `http://localhost:20128/dashboard`
+- **ਡੈਸ਼ਬੋਰਡ** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -428,10 +414,10 @@ VPS ਡਿਪਲੌਇਆਂ ਲਈ, `npm run build` ਦੀ ਬਜਾਏ `npm ru
 
 ---
 
-## ਮਦਦ ਪ੍ਰਾਪਤ ਕਰਨਾ
+## ਮਦਦ ਪ੍ਰਾਪਤ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ
 
-- **ਆਰਕੀਟੈਕਚਰ**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) ਵੇਖੋ
-- **API ਹਵਾਲਾ**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) ਵੇਖੋ
-- **ਸੁਰੱਖਿਆ ਦਸਤਾਵੇਜ਼**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **ਓਪਰੇਸ਼ਨ ਦਸਤਾਵੇਜ਼**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **ਸਮੱਸਿਆਵਾਂ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **ਆਰਕੀਟੈਕਚਰ** : [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) ਵੇਖੋ
+- **API ਹਵਾਲਾ** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) ਦੇਖੋ
+- **ਸੁਰੱਖਿਆ ਦਸਤਾਵੇਜ਼** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **ਓਪਸ ਦਸਤਾਵੇਜ਼** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **ਮੁੱਦੇ** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

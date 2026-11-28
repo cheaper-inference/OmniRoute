@@ -472,136 +472,124 @@ Interaktīvā sesijā:
 
 ## Ilgstoši uzdevumi
 
-Divi OmniRoute noklusējuma iestatījumi var nemanāmi traucēt vairākas stundas ilgām Codex CLI sesijām. Neviens no tiem nav Codex CLI iestatījums — abi atrodas OmniRoute pusē. Lietotāji, kuri migrē konfigurāciju no augšupstraumes starpniekserveriem, kas piesaista kontus un atspējo dīkstāves pārtraukumus, bieži saskaras ar abām problēmām un secina, ka OmniRoute „nespēj uzturēt ilgstošu sesiju”.
+Divi OmniRoute noklusējuma iestatījumi var klusi sabotēt vairāku stundu Codex CLI sesijas. Neviens no tiem nav Codex CLI iestatījums — abi darbojas OmniRoute pusē. Lietotāji, kas migrē konfigurāciju no augšpuses starpniekserveriem, kas piesprauž kontus un atspējo dīkstāves pārtraukumus, bieži vien sasniedz abus un secina, ka OmniRoute “nevar uzturēt ilgu sesiju”.
 
-| Simptoms                                                                                        | Iespējamais cēlonis                                                               | Iestatījums              |
-| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------ |
-| Sesija turpina pārslēgt kontus / starp gājieniem tiek zaudēta uzvedņu kešatmiņas nepārtrauktība | Sesijas piesaistes TTL ir `0` (atspējots)                                         | `sessionAffinityTtlMs`   |
-| Savienojums pārtrūkst spriešanas laikā bez klientam parādītas uzvednes                          | Straumes dīkstāves uzraugs nostrādāja pēc 10 minūtēm bez augšupstraumes fragmenta | `STREAM_IDLE_TIMEOUT_MS` |
+| Simptoms                                                                                             | Iespējamais iemesls                                                         | Poga                     |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------ |
+| Sesija turpina pārslēgt kontus / starp pagriezieniem tiek zaudēta uzvednes kešatmiņas nepārtrauktība | Sesijas radniecība TTL ir `0` (atspējota)                                   | `sessionAffinityTtlMs`   |
+| Savienojums pazūd prāta vidū, bez uzvednes, kas vērsta uz klientu                                    | Straumes dīkstāves sargsuns tika izšauts pēc 10 minūtēm bez augšteces daļas | `STREAM_IDLE_TIMEOUT_MS` |
 
-Saistītās diskusijas: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ilgstošu uzdevumu pārtrūkšana), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (kāpēc piesaiste pēc noklusējuma ir izslēgta). Izsekošana: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Saistītās diskusijas: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ilgi uzdevumu kritumi), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (kāpēc afinitāte ir izslēgta pēc noklusējuma). Izsekošana: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Sesijas piesaiste — piesaistiet vienu sarunu vienam kontam
+### 1. Session Affinity — piesprauž vienu sarunu vienam kontam
 
-**Noklusējums:** `sessionAffinityTtlMs = 0` (atspējots).
+**Noklusējums:** `sessionAffinityTtlMs = 0` (invalīds).
 
 **Kur to iestatīt**
 
-- Informācijas panelis → **Iestatījumi → Maršrutēšana** → **Sesijas piesaiste** → **Piesaistes TTL (sekundes)** (`ComboDefaultsTab`)
-- Vai modificējiet iestatījumus ar PATCH, norādot `sessionAffinityTtlMs` **milisekundēs** (Zod diapazons `0`–`86_400_000`, t. i., līdz 24 stundām)
+- Informācijas panelis →** Iestatījumi → Maršrutēšana** →** Sesijas radniecība** →** Afinitāte TTL (sekundēs)** (`ComboDefaultsTab`)
+- Vai arī PATCH iestatījumi ar `sessionAffinityTtlMs` in** milisekundes** (Zod diapazons `0`–`86_400_000`, ti, līdz 24 stundām)
 
-> Lauks #7274 ietvaros pārdēvēts no tikai Codex paredzētā `codexSessionAffinityTtlMs`. Mantotā atslēga joprojām tiek pieņemta kā tikai lasāms aizstājvārds; jaunās konfigurācijās jāizmanto `sessionAffinityTtlMs`. Tagad piesaiste attiecas uz **jebkuru** nodrošinātāju, tiklīdz TTL pārsniedz `0`, nevis tikai uz Codex — skatiet [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Sesijas piesaiste.
+> Pārdēvēts par #7274 no Codex-only `codexSessionAffinityTtlMs`. Mantotā atslēga joprojām tiek pieņemta kā tikai lasāms aizstājvārds; jaunajās konfigurācijās jāizmanto `sessionAffinityTtlMs`. Saistība tagad attiecas uz** jebkura** nodrošinātājs, ja TTL ir virs `0`, ne tikai Codex — skatiet [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → sesijas afinitāti.
 
-**Kas nedarbojas, ja vērtība paliek 0**
+**Kas saplīst, ja paliek 0**
 
-Katrs vairāku gājienu Codex sarunas gājiens tiek maršrutēts neatkarīgi atbilstoši aktīvajai kombinācijas stratēģijai un katrā gājienā var nonākt pie **cita konta**. Tas izjauc augšupstraumes sesijas / uzvedņu kešatmiņas nepārtrauktību. OmniRoute ņem vērā Codex sesijas galvenes (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) un pamatteksta laukus, piemēram, `prompt_cache_key` / `session_id`, tikai tad, ja TTL ir lielāks par `0` (`extractSessionAffinityKey` failā `src/sse/services/auth.ts`).
+Katrs vairāku apgriezienu Codex sarunas pagrieziens tiek maršrutēts neatkarīgi, izmantojot aktīvās kombinācijas stratēģiju, un tas var nonākt** atšķirīgs konts katrā pagriezienā** . Tas pārtrauc sesijas / uzvednes kešatmiņas nepārtrauktību. OmniRoute apskata tikai Codex sesijas galvenes (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) un pamatteksta laukus, piemēram, `prompt_cache_key` / `session_id` ja TTL ir lielāks par `0` (`extractSessionAffinityKey` `src/sse/services/auth.ts`).
 
-**Ieteikums vienam vairākas stundas ilgam uzdevumam**
+**Ieteicams vairāku stundu vienam uzdevumam**
 
-Iestatiet TTL **virs paredzētā uzdevuma reālā ilguma** (lietotāja saskarnes maksimums ir **86400 sekundes** = 24 stundas):
+Iestatiet TTL** virs paredzamā uzdevuma sienas pulksteņa garuma** (UI max ir** 86400 sekundes** = 24 stundas):
 
-| Paredzamais uzdevuma ilgums | Piesaistes TTL (lietotāja saskarnē, sekundēs) | `sessionAffinityTtlMs` |
-| --------------------------- | --------------------------------------------- | ---------------------- |
-| Dažas stundas               | `14400` (4 h)                                 | `14400000`             |
-| Pa nakti / ~12 h            | `43200` (12 h)                                | `43200000`             |
-| Pilna diena                 | `86400` (24 h, maksimums)                     | `86400000`             |
+| Paredzamais uzdevuma ilgums | Afinitāte TTL (UI, sekundes) | `sessionAffinityTtlMs` |
+| --------------------------- | ---------------------------- | ---------------------- |
+| Dažas stundas               | `14400` (4 h)                | `14400000`             |
+| Nakšņošana / ~ 12h          | `43200` (12h)                | `43200000`             |
+| Pilna diena                 | `86400` (24 h, maksimums)    | `86400000`             |
 
-Apzināta izvēle ir obligāta: piesaistes atspējošana veicina slodzes līdzsvarošanu starp kontiem; tās iespējošana veicina vienas ilgstošas aģenta sesijas nepārtrauktību. Šī rokasgrāmata **nemaina** noklusējumu — operatoriem, kuri izpilda ilgstošus Codex uzdevumus, tas ir jāiespējo pašiem.
+Pieteikšanās ir apzināta: radniecības atspējošana veicina slodzes līdzsvarošanu starp kontiem; Iespējojot to, tiek veicināta vienas ilgas aģenta sesijas nepārtrauktība. Šī rokasgrāmata to dara** nē** mainīt noklusējuma — operatoriem, kuri veic garus Codex uzdevumus, ir jāizvēlas.
 
-### 2. Straumes dīkstāves taimauts — nepārtrauciet klusus spriešanas gājienus
+### 2. Straumes dīkstāves taimauts — nenogalina klusus argumentācijas pagriezienus
 
-**Noklusējums:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minūtes). Ja tas nav iestatīts, tas manto vērtību no `REQUEST_TIMEOUT_MS`; kopīgā bāzes vērtība arī ir 600000. Skatiet [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Taimauti.
+**Noklusējums:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minūtes). Tas pārmanto no `REQUEST_TIMEOUT_MS`, kad tas ir atiestatīts; koplietotā bāzes līnija arī ir 600000. Skatiet [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**Kas nedarbojas ar noklusējuma iestatījumu**
+**Kas saplīst pēc noklusējuma**
 
-Codex spriešanas / rīka darbība, kas klusē ilgāk par 10 minūtēm un nesaņem **nevienu īstu augšupstraumes fragmentu**, tiek piespiedu kārtā pārtraukta ar SSE dīkstāves uzraugu (`open-sse/utils/stream.ts`). Klients bieži redz tikai savienojuma pārtrūkšanu — tas atbilst situācijai “automātiski apstājās bez jebkāda paziņojuma”.
+Codex argumentācija / instrumenta pagrieziens, kas klusē vairāk nekā 10 minūtes ar** nav īsta augšteces gabala** tiek piespiedu kārtā slēgts ar SSE dīkstāves sargsuns (`open-sse/utils/stream.ts`). Klients bieži redz tukšu savienojuma samazināšanos — kas atbilst “automātiski apturēta bez brīdinājuma”.
 
-Būtiska nianse: OmniRoute sintētiskais SSE **sirdspuksts neatiestata** dīkstāves taimeri. `lastChunkTime` atjaunina tikai īsts augšupstraumes atbildes satura fragments. Kluss modelis, kas joprojām “domā”, no uzrauga skatpunkta izskatās tieši tāpat kā iestrēgusi augšupstraume.
+Kritiskā detaļa: OmniRoute sintētiskais SSE** sirdsdarbība netiek atiestatīta** dīkstāves pulkstenis. `lastChunkTime` atjaunina tikai īsts augšējais korpusa gabals. Kluss modelis, kas joprojām “domā” no sargsuņa viedokļa izskatās identisks apstājies augšpus straumei.
 
-Saistītais Undici atbildes satura neaktivitātes iestatījums: `FETCH_BODY_TIMEOUT_MS` (arī pēc noklusējuma izmanto to pašu 10 minūšu bāzes vērtību; `0` to atspējo). Straumēšanas gadījumā `FETCH_TIMEOUT_MS` attiecas tikai uz savienojuma izveidi / pirmajām galvenēm — tiklīdz straume ir aktīva, tās iestrēgšanu pārvalda `STREAM_IDLE_TIMEOUT_MS` un `FETCH_BODY_TIMEOUT_MS`.
+Saistītā Undici ķermeņa neaktivitāte: `FETCH_BODY_TIMEOUT_MS` (arī pēc noklusējuma ir tā pati 10 minūšu bāzes līnija; `0` to atspējo). Straumēšanai `FETCH_TIMEOUT_MS` aptver tikai savienojuma iestatīšanu/pirmās galvenes — kad straume ir aktīva, stendus regulē `STREAM_IDLE_TIMEOUT_MS` un `FETCH_BODY_TIMEOUT_MS`.
 
-**Ieteikums vienam vairākas stundas ilgam uzdevumam**
+**Ieteicams vairāku stundu vienam uzdevumam**
 
 OmniRoute procesa vidē (`.env` / compose / systemd):
 
 ```bash
-# Atspējot straumes dīkstāves un atbildes satura neaktivitātes ierobežojumus ilgiem spriešanas posmiem
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Vai palieliniet tos virs ilgākā paredzamā klusuma perioda (vērtības ir milisekundēs):
+Vai arī paaugstiniet tos virs gaidītās garākās klusās atstarpes (vērtības ir milisekundes):
 
 ```bash
-# Piemērs: atļaut līdz 2 stundām ilgu klusumu starp augšupstraumes fragmentiem
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Pēc šo vides mainīgo maiņas restartējiet OmniRoute.
+Pēc šo env vari mainīšanas restartējiet OmniRoute.
 
-### Konkrēta procedūra — vairākas stundas ilgs Codex uzdevums
+### Konkrēta recepte — vairāku stundu Codex uzdevums
 
-1. **Piesaistiet kontu:** Informācijas panelis → Iestatījumi → Maršrutēšana → Sesijas piesaiste → Piesaistes TTL = `43200` (12 h) vai `86400` (maks. 24 h).
-2. **Palieliniet / atspējojiet dīkstāves ierobežojumus** OmniRoute vidē:
+1. **Piespraust kontu:** Informācijas panelis → Iestatījumi → Maršrutēšana → Sesijas radniecība → Affinity TTL = `43200` (12h) vai `86400` (24h max).
+2. **Paaugstināt / atspējot dīkstāves ierobežojumus** OmniRoute vidē:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Saglabājiet ierasto Codex `config.toml` (`wire_api = "responses"`, pareizs `base_url`, `OMNIROUTE_API_KEY`) — šīm abām darbībām nav Codex puses piesaistes/dīkstāves iestatījumu.
-4. Restartējiet OmniRoute un pēc tam palaidiet ilgo Codex uzdevumu.
+3. Saglabājiet parasto Codex `config.toml` (`wire_api = "responses"`, pareizais `base_url`, `OMNIROUTE_API_KEY`) — šīm divām darbībām nepastāv Codex puses affinity/idle pogas.
+4. Restartējiet OmniRoute, pēc tam sāciet garo Codex uzdevumu.
 
-### Lēmums par noklusējuma vērtībām (#7287)
+### Noklusējuma lēmums (#7287)
 
-| Iestatījums              | Piegādes noklusējums | Vai mainīt šajā rokasgrāmatā?                                                                                |
-| ------------------------ | -------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `sessionAffinityTtlMs`   | `0` (izslēgts)       | **Nē** — joprojām jāieslēdz atsevišķi (slodzes līdzsvarošana pret nepārtrauktību; skatiet diskusiju #5718)   |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)    | **Nē** — vispārējai datplūsmai paliek 10 minūtes; ilgstošu Codex uzdevumu operatori to palielina vai atspējo |
+| Poga                     | Nosūtīšanas noklusējuma | Vai izmaiņas šajā rokasgrāmatā?                                                                      |
+| ------------------------ | ----------------------- | ---------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (izslēgts)          | **Nē** — paliek izvēles iespēja (slodzes līdzsvarošana pret nepārtrauktību; skatiet diskusiju #5718) |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)       | **Nē** — paliek 10 minūtes vispārējai satiksmei; garie Codex operatori to paaugstina vai atspējo     |
 
-Jebkuras noklusējuma vērtības globāla maiņa izmainītu darbību visiem instances klientiem, ne tikai Codex. Dokumentējiet iestatījumus; nemainiet noklusējuma vērtības, kamēr nav pieņemts skaidrs operatora lēmums.
+Pārvēršot kādu no noklusējuma vērtībām globāli, tiks mainīta katra instances klienta darbība, ne tikai Codex. Dokumentējiet pogas; atstājiet noklusējuma iestatījumus mierā, līdz operatora lēmumā ir norādīts citādi.
 
-### Dīkstāves izraisītu pārtraukumu diagnosticēšana
+### Tukšgaitas griezumu diagnostika
 
-Kad nostrādā dīkstāves uzraugs, OmniRoute reģistrē aptuveni šāda veida žurnāla rindu:
+Kad dīkstāves sargsuns izšauj, OmniRoute reģistrē līniju, kas veidota šādi:
 
 ```text
-[STREAM] Dīkstāves noildze: 600000ms nav datu no codex (modelis: cx/gpt-5.5)
+[STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Meklējiet ar grep `Idle timeout: no data from` (vai kodu `stream_idle_timeout` / kļūdas nosaukumu `StreamIdleTimeoutError`). Pakalpojuma sniedzēja segments ir tas, kuru OmniRoute izmantoja attiecīgajam pieprasījumam (`codex`, cita pakalpojuma sniedzēja identifikators vai `provider`, ja tas nav zināms) — tā ne vienmēr ir burtiskā virkne `codex`.
+Grep `Idle timeout: no data from` (vai kods `stream_idle_timeout` / kļūdas nosaukums `StreamIdleTimeoutError`). Pakalpojumu sniedzēja segments ir jebkurš OmniRoute kas tiek izmantots šim pieprasījumam (`codex`, cita nodrošinātāja ID vai `provider`, ja nav zināms) — tā ne vienmēr ir burtiskā virkne `codex`.
 
 ---
 
 ## Problēmu novēršana
 
-**`Error: wire_api = "chat" vairs netiek atbalstīts`**
-Noņemiet `wire_api = "chat"` no konfigurācijas. Iestatiet `wire_api = "responses"` vai izlaidiet šo lauku (kopš v0.138 noklusējuma vērtība ir `"responses"`).
+**`Error: wire_api = "chat" is no longer supported`** Noņemiet `wire_api = "chat"` no konfigurācijas. Iestatiet `wire_api = "responses"` vai izlaidiet lauku (noklusējuma vērtība ir `"responses"` kopš versijas 0.138).
 
-**`Error: model not found`**
-Pārbaudiet, vai modelis pastāv OmniRoute ar pareizo prefiksu. Izmantojiet `omniroute models list` vai atveriet `/dashboard/providers/<provider>`.
+**`Error: model not found`** Pārbaudiet, vai modelis pastāv OmniRoute ar pareizo prefiksu. Izmantojiet `omniroute models list` vai atveriet `/dashboard/providers/<provider>`.
 
-**`Authentication error`**
-Pārliecinieties, ka `OMNIROUTE_API_KEY` ir eksportēts: `echo $OMNIROUTE_API_KEY`.
+**`Authentication error`** Apstipriniet, `OMNIROUTE_API_KEY` ir eksportēts: `echo $OMNIROUTE_API_KEY`.
 
-**`ERROR: Missing environment variable: OMNIROUTE_API_KEY`**
-Codex pirms pirmā pieprasījuma veikšanas pārbauda, vai vides mainīgais pastāv. Eksportējiet
-īstu atslēgu aizsargātiem serveriem vai netukšu vietturi, piemēram,
-`OMNIROUTE_API_KEY=local`, ja jūsu **lokālajai** OmniRoute instancei nav
-nepieciešama autentifikācija. Restartējiet čaulu, ja pievienojāt to failam `~/.bashrc` vai `~/.zshrc`.
+**`ERROR: Missing environment variable: OMNIROUTE_API_KEY`** Codex pirms pirmā pieprasījuma veikšanas pārbauda, vai env var pastāv. Eksportējiet reālu aizsargāto serveru atslēgu vai vietturi, kas nav tukšs, piemēram, `OMNIROUTE_API_KEY=local` kad jūsu** vietējā** OmniRoute instancei nav nepieciešama autentifikācija. Restartējiet čaulu, ja pievienojāt to `~/.bashrc` vai `~/.zshrc`.
 
-**`Connection refused`**
-Pārbaudiet, vai OmniRoute darbojas un vai `base_url` resursdators/ports ir pareizs jūsu tīklam (lokālais, Tailscale vai VPS).
+**`Connection refused`** Pārbaudiet, OmniRoute darbojas un `base_url` host/port ir pareizs jūsu tīklam (vietējais vs Tailscale vs VPS).
 
-**Sesija avarē, tuvojoties konteksta ierobežojumam**
-Skaidri iestatiet `model_context_window` un `model_auto_compact_token_limit`. Skatiet iepriekš esošo konteksta loga tabulu.
+**Sesijas avārijas tuvu konteksta ierobežojumam** Skaidri iestatiet `model_context_window` un `model_auto_compact_token_limit`. Skatiet konteksta loga tabulu iepriekš.
 
-**Kompaktēšana tiek aktivizēta pārāk vēlu**
-Samaziniet `model_auto_compact_token_limit` līdz 80–85% no loga lieluma. Nekad neiestatiet vērtību virs 90%.
+**Blīvēšana aizdegas pārāk vēlu** Nolaidiet `model_auto_compact_token_limit` līdz 80–85% no loga. Nekad neuzstādiet virs 90%.
 
-**Profils netiek ielādēts (`-p <name>` tiek klusi ignorēts)**
-Pārliecinieties, ka fails pastāv vietā `~/.codex/<name>.config.toml` (bez prefiksa `profile-`). Izpildiet `ls ~/.codex/*.config.toml`.
+**Profils netiek ielādēts (`-p <name>` klusi ignorēts)** Apstipriniet, ka fails pastāv `~/.codex/<name>.config.toml` (bez `profile-` prefiksa). Palaidiet `ls ~/.codex/*.config.toml`.
 
-**Ilgstošs Codex uzdevums tiek pārtraukts izpildes laikā / starp darbībām tiek pārslēgti konti**
-Skatiet sadaļu [Ilgstoši uzdevumi](#long-running-tasks). Iespējojiet sesijas piesaisti (TTL jābūt ilgākam par uzdevuma ilgumu) un palieliniet vai atspējojiet `STREAM_IDLE_TIMEOUT_MS` / `FETCH_BODY_TIMEOUT_MS`. Meklējiet OmniRoute žurnālos tekstu `Idle timeout: no data from`.
+**Ilgs Codex uzdevums tiek pārtraukts vidū / pārslēdz kontus starp pagriezieniem** Skatiet [Ilgstoši uzdevumi](#long-running-tasks). Iespējojiet sesijas radniecību (TTL virs uzdevuma garuma) un paaugstiniet vai atspējojiet `STREAM_IDLE_TIMEOUT_MS` / `FETCH_BODY_TIMEOUT_MS`. Grep OmniRoute baļķi priekš `Idle timeout: no data from`.

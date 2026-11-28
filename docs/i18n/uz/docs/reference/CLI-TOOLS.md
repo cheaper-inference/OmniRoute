@@ -4,8 +4,6 @@
 
 ---
 
-Oxirgi yangilangan: 2026-08-23
-
 OmniRoute uchta maxsus boshqaruv paneli sahifalarida tarqalgan uchta CLI vositalari bilan birlashtirilgan:
 
 | Sahifa            | Marshrut                | Kontseptsiya                                                                      | Hisoblash        |
@@ -228,7 +226,7 @@ Yangi `configType: "custom"` vositalarida API marshrutlarining maxsus sozlamalar
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                  |
 | `POST /api/cli-tools/qwen-settings`         | Qwen kodi (`~/.qwen/settings.json` + ajratilgan `.env` kaliti)         |
 
-Barcha marshrutlar xato javoblari uchun `sanitizeErrorMessage()` foydalanadi (Qattiq qoida №12).
+Barcha marshrutlar xato javoblari uchun `sanitizeErrorMessage()` foydalanadi (Qattiq qoida #12).
 
 ---
 

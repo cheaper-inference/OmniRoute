@@ -168,9 +168,9 @@ Sørg for, at `copilot-m365-web` er aktiveret i** Dashboard → udbydere** . Udb
 
 ## Referencer
 
-- Problem: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Diskussion: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Udgave: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Diskussion: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Kilde: `src/shared/constants/providers/web-cookie.ts` (udbyderdefinition)
-- HAR-import: `src/shared/utils/m365HarImport.ts`
+- HAR import: `src/shared/utils/m365HarImport.ts`
 - Legitimationsfelter: `src/shared/providers/webSessionCredentials.ts`
-- Niveaudialog: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Tier modal: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

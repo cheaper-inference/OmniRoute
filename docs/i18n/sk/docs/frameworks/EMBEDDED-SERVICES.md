@@ -4,7 +4,7 @@
 
 ---
 
-> **Verzia:** v3.8.44** Posledná aktualizácia:** 2026-10-28** publikum:** Inžinieri pridávajú, udržiavajú alebo ladia vstavané služby (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Verzia:** v3.8.44** publikum:** Inžinieri pridávajú, udržiavajú alebo ladia vstavané služby (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Vstavané služby sú lokálne nainštalované nástroje sprievodcu procesov, ktoré OmniRoute inštaluje, dohliada a odhaľuje ako prvotriedne ciele smerovania. Na rozdiel od externých poskytovateľov (ku ktorým sa dostanete cez internet prostredníctvom kľúčov API ), vstavané služby bežia na rovnakom počítači ako OmniRoute a komunikujú cez slučku.
 
@@ -44,19 +44,19 @@ Všetkých osem sa riadi rovnakým modelom dohľadu:
 
 - OmniRoute ich nainštaluje pod `DATA_DIR/services/{name}/` (izolované od vlastného `package.json` OmniRoute)
 - OmniRoute ich vytvára a monitoruje ako podriadené procesy
-- OmniRoute vstrekne efemérny kľúč API do prostredia dieťaťa a otočí ho bez prestojov (ak je to možné)
-- Všetky cesty riadenia (`/api/services/*`) sú**LOCAL_ONLY** — prístupné iba zo spätnej slučky (tvrdé pravidlo č. 17)
+- OmniRoute vstrekne dočasný kľúč API do prostredia dieťaťa a otočí ho bez prestojov (ak je to možné)
+- Všetky cesty riadenia (`/api/services/*`) sú**LOCAL_ONLY** — prístupný iba zo spätnej slučky (tvrdé pravidlo #17)
 
 ### Kľúčové rozhodnutia (z plánu dizajnu)
 
-| rozhodnutie                                     | Hodnota                                                                |
-| ----------------------------------------------- | ---------------------------------------------------------------------- |
-| Prístup k palubnej doske k natívnemu UI 9Router | Reverzný proxy na `/dashboard/providers/services/9router/embed/*`      |
-| Inštalačný mechanizmus                          | `npm install {package}` cez `execFile` (bez interpolácie shellu)       |
-| Režim spotreby                                  | Poskytovateľ registrovaný ako `9router/{sub}/{model}` v routing engine |
-| správa kľúčov API                               | OmniRoute generuje, šifruje v pokoji (AES-256-GCM) a vkladá cez env    |
-| Umiestnenie palubnej dosky                      | `/dashboard/providers/services` (tri karty)                            |
-| Automatické spustenie                           | Prepnúť podľa služby, predvolená hodnota OFF                           |
+| rozhodnutie                                     | Hodnota                                                                     |
+| ----------------------------------------------- | --------------------------------------------------------------------------- |
+| Prístup k palubnej doske k natívnemu UI 9Router | Reverzný proxy na `/dashboard/providers/services/9router/embed/*`           |
+| Inštalačný mechanizmus                          | `npm install {package}` cez `execFile` (bez interpolácie shellu)            |
+| Režim spotreby                                  | Poskytovateľ registrovaný ako `9router/{sub}/{model}` v nástroji smerovania |
+| správa kľúčov API                               | OmniRoute generuje, šifruje v pokoji (AES-256-GCM) a vkladá cez env         |
+| Umiestnenie palubnej dosky                      | `/dashboard/providers/services` (tri karty)                                 |
+| Automatické spustenie                           | Prepnúť podľa služby, predvolená hodnota OFF                                |
 
 ---
 
@@ -210,7 +210,7 @@ v používateľskom rozhraní aktivujú súčasne.
 
 ## 4. API odkaz
 
-Všetky trasy pod `/api/services/` sú**LOCAL_ONLY** (iba spätná slučka, pevné pravidlo č. 17). Žiadosti bez spätnej slučky dostávajú `403 LOCAL_ONLY` bez ohľadu na autorizačný token.
+Všetky trasy pod `/api/services/` sú**LOCAL_ONLY** (iba spätná slučka, pevné pravidlo #17). Žiadosti bez spätnej slučky dostávajú `403 LOCAL_ONLY` bez ohľadu na autorizačný token.
 
 ### 4.1 9Koncové body smerovača (11 ciest)
 
@@ -237,7 +237,7 @@ Nainštalujte 9Router z npm. Vytvorí `DATA_DIR/services/9router/` s vlastným `
 | `409` | Už sa inštaluje (uzamknutý)                                   |
 | `500` | Inštalácia npm zlyhala — pozri `message` pre priateľskú chybu |
 
-**Poznámky:** Používa `execFile('npm', [...])` — bez shellu, bez interpolácie (tvrdé pravidlo č. 13). Chyby EACCES sa zobrazujú ako priateľské správy.
+**Poznámky:** Používa `execFile('npm', [...])` — bez shellu, bez interpolácie (tvrdé pravidlo #13). chyby EACCES sa zobrazujú ako priateľské správy.
 
 ---
 
@@ -500,7 +500,7 @@ open-wa (`@open-wa/wa-automate`) riadi bezhlavú inštanciu Chromium (cez Puppet
 
 ### 4,7 LLMLingua koncové body (8 trás)
 
-LLMLingua je postranný vozík `@atjsh/llmlingua-2` s okamžitou kompresiou (reálny model klasifikácie tokenov ONNX, stiahnutý z Hugging Face pri prvom volaní `/compress` ). Používa rovnaký tvar koncového bodu ako Bifrost (bez kľúča API — `needsApiKey: false`, nikdy nespracúva poverenia).
+LLMLingua je postranný vozík `@atjsh/llmlingua-2` s okamžitou kompresiou (reálny model klasifikácie tokenov ONNX, stiahnutý z Hugging Face pri prvom volaní `/compress` ). Používa rovnaký tvar koncového bodu ako Bifrost (žiadny kľúč API — `needsApiKey: false`, nikdy nespracúva poverenia).
 
 | Metóda | Cesta                                          | Popis                                                                        |
 | ------ | ---------------------------------------------- | ---------------------------------------------------------------------------- |
@@ -556,9 +556,7 @@ Tento proxy:
 - Z odpovede odoberie `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
 - Prepíše odpovede HTML na vloženie `<base href>` a normalizuje absolútne cesty (`/foo` → `/dashboard/.../embed/foo`)
 
-Aktualizácie WebSocket pre vstavaný dashboard sú spracované sprievodným serverom na vyhradenom porte (pozri `src/lib/services/embedWsProxy.ts`).
-
-Každá inovácia je autorizovaná pred otvorením tunela s rovnakými pravidlami ako HTTP embed route: peer musí byť loopback bez reverznej proxy hlavičky presmerovania, `Origin` prehliadača musí byť pôvodom dashboardu (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` rozširujú predvolené nastavenia loopback) a volajúci potrebuje reláciu dashboardu alebo kľúč API v rozsahu správy, pokiaľ nie je zakázané prihlásenie do dashboardu.
+Aktualizácie WebSocket pre vstavaný dashboard sú spracované sprievodným serverom na vyhradenom porte (pozri `src/lib/services/embedWsProxy.ts`). Každá aktualizácia je autorizovaná pred otvorením tunela s rovnakými pravidlami ako cesta vkladania HTTP : partner musí mať spätnú slučku bez záhlavia presmerovania reverznej proxy, `Origin` prehliadača musí byť pôvodom ovládacieho panela (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` rozširujú predvolené hodnoty spätnej slučky) a volajúci potrebuje reláciu ovládacieho panela alebo kľúč API v rozsahu správy, pokiaľ nie je zakázané prihlásenie na ovládací panel.
 
 **Zabezpečenie:** Vložené proxy trasy sú klasifikované pod `LOCAL_ONLY_API_PREFIXES` a je možné ich získať iba zo spätnej slučky. Útočník, ktorý získa JWT cez tunel Cloudflare/Ngrok nemôže proxy do vstavaných služieb.
 
@@ -854,65 +852,44 @@ predvoleným portom 20128 služby OmniRoute.
 
 ---
 
-## 8. Často kladené otázky
+## 8. FAQ
 
-**Otázka: Môžem sprístupniť koncové body vstavaných služieb klientom mimo rozhrania loopback?**
+**Otázka: Môžem sprístupniť koncové body vstavaných služieb klientom bez spätnej slučky?**
 
-Nie. Úroveň LOCAL_ONLY je zámerná (pevné pravidlo č. 17). Trasy, ktoré môžu spustiť
-`npm install` alebo vytvoriť procesy `node`, nesmú byť dostupné pre komunikáciu mimo
-rozhrania loopback, pretože JWT uniknutý prostredníctvom tunela (Cloudflare, Ngrok, Tailscale) by
-inak umožnil ľubovoľné vytváranie procesov. Pre
-`/api/services/` neexistuje žiadna výnimka — na rozdiel od `/api/mcp/` je táto trasa vylúčená
-zo zoznamu výnimiek pre rozsah správy. Pozrite si `docs/security/ROUTE_GUARD_TIERS.md`.
+Nie. Úroveň LOCAL_ONLY je zámerná (tvrdé pravidlo #17). Cesty, ktoré môžu vyvolať procesy `npm install` alebo spawn `node` nesmú byť dosiahnuteľné z prevádzky bez spätnej slučky, pretože únik JWT cez tunel (Cloudflare, Ngrok, Tailscale) by inak umožnil spúšťanie ľubovoľného procesu. Na rozdiel od `/api/mcp/` neexistuje žiadne vyňatie `/api/services/` —, je vyňaté zo zoznamu vynechaných oblastí správy. Pozri `docs/security/ROUTE_GUARD_TIERS.md`.
 
 ---
 
-**Otázka: Budú 9Router a CLIProxyAPI dostupné v produkčných/cloudových nasadeniach?**
+**Otázka: Budú 9Router a CLIProxyAPI dostupné v nasadení production/cloud ?**
 
-Áno. Obe služby používajú rovnaký model uprednostňujúci lokálne prostredie ako samotný OmniRoute. Sú spustené
-na rovnakom počítači a komunikujú cez rozhranie loopback. „Produkcia“ tu znamená VPS
-alebo lokálny server, na ktorom je nasadený OmniRoute, nie vzdialeného cloudového poskytovateľa.
+áno. Obe služby sa riadia rovnakým lokálnym modelom ako samotná OmniRoute. Bežia na rovnakom stroji a komunikujú cez slučku. „Produkcia“ tu znamená VPS alebo lokálny server, kde je nasadený OmniRoute, nie vzdialený poskytovateľ cloudu.
 
 ---
 
-**Otázka: Ako môžem ladiť supervisor?**
+**Otázka: Ako odladím supervízora?**
 
-1. Sledujte výstup streamu protokolov SSE: `curl -N http://localhost:20128/api/services/9router/logs`.
-2. Skontrolujte štruktúrované protokoly vo výstupe pino aplikácie OmniRoute, filtrované podľa
-   menného priestoru `service:supervisor`.
-3. Skontrolujte riadok DB: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
-4. Pomocou `GET /api/services/9router/status` zobrazte v jednom volaní aktuálny živý stav, PID, stav služby
-   a `lastError`.
+1. Zostatok prúdu denníka SSE : `curl -N http://localhost:20128/api/services/9router/logs`.
+2. Skontrolujte štruktúrované protokoly vo výstupe pino OmniRoute filtrovanom podľa priestoru názvov `service:supervisor`.
+3. Skontrolujte riadok DB : `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
+4. Použite `GET /api/services/9router/status` na zobrazenie aktuálneho živého stavu, PID, zdravia a `lastError` v jednom hovore.
 
 ---
 
-**Otázka: Supervisor zobrazuje `health: "degraded"` alebo `health: "unknown"`, ale stav je `"running"`. Je to problém?**
+**Otázka: Vedúci ukazuje `health: "degraded"` alebo `health: "unknown"` ale stav je `"running"`. Je to problém?**
 
-`"degraded"` znamená, že kontrola stavu vrátila odpoveď inú ako 200. `"unknown"` znamená, že ešte
-nebola dokončená žiadna kontrola (súbeh s prvým dopytovaním). Oba stavy sú počas spúšťania prechodné.
-Ak stav zostane `"degraded"` dlhšie než `healthIntervalMs * 3` ms po
-`"running"`, vstavaná služba je spustená, ale jej HTTP API neodpovedá. Skontrolujte,
-či je port v odpovedi so stavom správny a či služba na danom porte skutočne
-počúva.
+`"degraded"` znamená, že zdravotná sonda vrátila odpoveď non-200. `"unknown"` znamená, že ešte nebola dokončená žiadna sonda (preteky s prvým prieskumom). Obe sú počas spúšťania prechodné. Ak stav zostane `"degraded"` dlhšie ako `healthIntervalMs * 3` ms po `"running"`, vstavaná služba je spustená, ale jej HTTP API neodpovedá. Skontrolujte, či je port v odpovedi stavu správny a či služba na tomto porte skutočne počúva.
 
 ---
 
-**Otázka: Môžem zmeniť API kľúč služby 9Router bez úplného reštartu?**
+**Otázka: Môžem zmeniť kľúč 9Router API bez úplného reštartu?**
 
-Nie. API kľúč sa službe 9Router odovzdáva prostredníctvom premennej prostredia pri vytvorení procesu.
-Premenné prostredia nemožno v spustenom procese meniť. `POST .../rotate-key`
-automaticky zastaví a reštartuje službu, aby sa nový kľúč použil. Rotácia kľúča
-sa prejaví v rámci hodnoty `stopTimeoutMs` služby (predvolene 15 s) plus čas potrebný
-na jej spustenie.
+Nie. Kľúč API je odovzdaný do 9Router cez premennú prostredia v čase spawnovania. Premenné prostredia nemožno zmeniť v spustenom procese. `POST .../rotate-key` automaticky zastaví a reštartuje službu, aby sa použil nový kľúč. Otočenie kľúča sa prejaví v rámci `stopTimeoutMs` služby (predvolene 15 s) plus jej čas spustenia.
 
 ---
 
-**Otázka: Aký je limit kruhového zásobníka a čo sa stane, keď sa zaplní?**
+**Otázka: Aký je limit prstencovej vyrovnávacej pamäte a čo sa stane, keď sa naplní?**
 
-Každá služba má vyhradený 5 MB kruhový zásobník. Keď je zásobník plný, najstaršie
-riadky protokolu sa odstránia, aby sa uvoľnilo miesto pre nové. Udalosť SSE `snapshot` vráti
-najnovšie riadky v rámci limitu `tail`. Protokoly sa neukladajú na disk, pokiaľ
-v riadku DB nie je nastavená hodnota `logsBufferPath`.
+Každá služba má vyhradenú vyrovnávaciu pamäť 5 MB. Keď je vyrovnávacia pamäť plná, najstaršie línie denníka sa vyradia, aby sa uvoľnilo miesto pre nové. Udalosť SSE `snapshot` vráti najnovšie riadky v rámci limitu `tail`. Protokoly sa neuložia na disk, pokiaľ nie je v riadku DB nastavené `logsBufferPath`.
 
 ---
 

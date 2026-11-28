@@ -13,120 +13,107 @@ pokrivenost i korake usklađivanja.
 
 ---
 
-## Postavljanje razvojnog okruženja
+## Postavljanje razvoja
 
 ### Preduvjeti
 
-- **Node.js** `>=22.22.2 <23`, ili `>=24.0.0 <27` (preporučeno: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` ili `>=24.0.0 <27` (preporučeno: 24 LTS)
+- **npm** 10 +
 
-> **Windows s Node 24:** koristite trenutačno izdanje zakrpe 24 LTS (najmanje 24.20.0).
-> Ranija izdanja mogu prekinuti rad nakon uspješnih testova kada `--test-force-exit` zatvori
-> proces. Nodeov [Windows libuv ispravak](https://github.com/nodejs/node/pull/61999) rješava
-> ovaj pad tijekom izvođenja; provjere tvrdnji testova i izlaza pokretača ostavite uključene.
+> **Windows s čvorom 24:** koristite trenutno izdanje zakrpe 24 LTS (barem 24.20.0). Ranija izdanja mogu prekinuti nakon uspješnih testova kada `--test-force-exit` zatvori proces. Nodeov [Windows libuv popravak](https://github.com/nodejs/node/pull/61999) rješava ovo rušenje vremena izvođenja; ostavite testne tvrdnje i izlazne provjere pokretača uključenima.
 
-> **Korisnici npm v11+ (Node 24+):** nakon `npm install` provjerite jesu li izvorni moduli instalirani:
-> `node -e "require('better-sqlite3')"`. Ako ne uspije s `MODULE_NOT_FOUND`,
-> pokrenite `npm approve-scripts better-sqlite3 && npm install`. Pogledajte
-> [Otklanjanje poteškoća](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **korisnici npm v11 + (čvor 24 +):** Nakon `npm install`, provjerite jesu li instalirani izvorni moduli: `node -e "require('better-sqlite3')"`. Ako ne uspije sa `MODULE_NOT_FOUND`, pokrenite `npm approve-scripts better-sqlite3 && npm install`. Pogledajte [Rješavanje problema](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Kloniranje i instalacija
+### Kloniraj i instaliraj
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Varijable okruženja
+### Varijable okoline
 
 ```bash
-# Izradite svoj .env iz predloška
+# Create your .env from the template
 cp .env.example .env
 
-# Generirajte potrebne tajne
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Ključne varijable za razvoj:
 
-| Varijabla              | Zadana vrijednost za razvoj | Opis                        |
-| ---------------------- | --------------------------- | --------------------------- |
-| `PORT`                 | `20128`                     | Port poslužitelja           |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Osnovni URL za sučelje      |
-| `JWT_SECRET`           | (generirajte iznad)         | Tajna za potpisivanje JWT-a |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | Lozinka za prvu prijavu     |
-| `APP_LOG_LEVEL`        | `info`                      | Razina opširnosti zapisnika |
+| Varijabilna            | Zadano za razvoj         | Opis                       |
+| ---------------------- | ------------------------ | -------------------------- |
+| `PORT`                 | `20128`                  | Port poslužitelja          |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Baza URL za sučelje        |
+| `JWT_SECRET`           | (generiraj gore)         | JWT signing secret         |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Prva lozinka za prijavu    |
+| `APP_LOG_LEVEL`        | `info`                   | Razina opširnosti dnevnika |
 
 ### Postavke nadzorne ploče
 
-Nadzorna ploča pruža UI prekidače za značajke koje se također mogu konfigurirati putem varijabli okruženja:
+Nadzorna ploča nudi UI prekidače za značajke koje se također mogu konfigurirati putem varijabli okruženja:
 
-| Lokacija postavke   | Prekidač           | Opis                                                     |
-| ------------------- | ------------------ | -------------------------------------------------------- |
-| Settings → Advanced | Debug Mode         | Omogući zapisnike zahtjeva za otklanjanje poteškoća (UI) |
-| Settings → General  | Sidebar Visibility | Prikaži/sakrij odjeljke bočne trake                      |
+| Postavljanje lokacije | Prebacivanje                | Opis                                                     |
+| --------------------- | --------------------------- | -------------------------------------------------------- |
+| Postavke → Napredno   | Način otklanjanja pogrešaka | Omogući zapisnike zahtjeva za otklanjanje pogrešaka (UI) |
+| Postavke → Općenito   | Vidljivost bočne trake      | Show/hide bočne trake                                    |
 
-Te se postavke pohranjuju u bazi podataka i zadržavaju nakon ponovnog pokretanja, nadjačavajući zadane vrijednosti varijabli okruženja kada su postavljene.
+Te su postavke pohranjene u bazi podataka i ostaju postojane tijekom ponovnih pokretanja, nadjačavajući zadane env var kada su postavljene.
 
-### Lokalno pokretanje
+### Trčanje lokalno
 
 ```bash
-# Razvojni način (ponovno učitavanje bez ponovnog pokretanja)
+# Development mode (hot reload)
 npm run dev
 
-# Produkcijska izgradnja
-npm run build    # next build → .build/next/ zatim assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Brza kompilacija samo pozadine/API-ja za promjene suradnika
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Izgradnja izdanja (čista ponovna izgradnja + HEAD sentinel — potrebno za implementaciju)
-npm run build:release   # rm -rf .build dist && build + zapisuje dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Uobičajena konfiguracija porta
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Izgradnja za suradnike obavlja provjeru samo kompilacije: ne sastavlja samostalnu
-distribuciju niti izgrađuje neobavezna izvorna sredstva za pakiranje. Koristite uobičajenu produkcijsku izgradnju kada
-trebate provjeriti paket spreman za isporuku.
+Izrada suradnika izvodi provjeru valjanosti samo kompajliranjem: ne sastavlja samostalnu distribuciju niti ne izrađuje opcionalna izvorna sredstva za pakiranje. Upotrijebite redovitu proizvodnu verziju kada trebate potvrditi isporučivi paket.
 
-### Raspored izlaza izgradnje
+### Izrada izlaznog izgleda
 
-| Direktorij | Sadržaj                                                                          | Praćen |
-| ---------- | -------------------------------------------------------------------------------- | ------ |
-| `src/`     | Izvorni kod aplikacije (TypeScript / TSX)                                        | Da     |
-| `.build/`  | Međurezultati — izlaz `next build` (zanemaren u Gitu, `distDir = .build/next`)   | Ne     |
-| `dist/`    | Paket spreman za isporuku — sastavlja ga `assembleStandalone` (zanemaren u Gitu) | Ne     |
+| Imenik    | Sadržaj                                                                    | Prati se |
+| --------- | -------------------------------------------------------------------------- | -------- |
+| `src/`    | Izvor aplikacije (TypeScript / TSX)                                        | Da       |
+| `.build/` | Međuprodukti — `next build` izlaz (gitignored, `distDir = .build/next`)    | Ne       |
+| `dist/`   | Paket koji se može isporučiti — sastavio `assembleStandalone` (gitignored) | Ne       |
 
-Proces izgradnje odvija se u jednom prolazu:
+Cjevovod izgradnje je jedan prolaz:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (izlaz Next.jsa)
-  └─ assembleStandalone()                 (kopira standalone + static + public + native assets)
-       └─ izlaz: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` dodatno najprije čisti oba direktorija i zapisuje
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kao sentinel integriteta za implementaciju.
+`npm run build:release` dodatno prvo čisti oba direktorija i zapisuje `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kao čuvar integriteta implementacije.
 
-`npm run build:contributor` koristi profil izgradnje samo za pozadinu. Privremeno zamjenjuje
-datoteke UI-ja nadzorne ploče pomoćnim datotekama tijekom izgradnje, zadržava rukovatelje API ruta
-i vraća izvorne datoteke nakon izgradnje. Koristite `npm run build` za promjene koje utječu na UI nadzorne ploče ili za potpunu provjeru izdanja; profil za suradnike nije zamjena za izgradnju izdanja.
+`npm run build:contributor` koristi profil izgradnje samo za pozadinu. Privremeno uklanja UI datoteke nadzorne ploče tijekom izgradnje, zadržava API rukovatelje rutama i vraća izvorne datoteke nakon izgradnje. Koristite `npm run build` za promjene koje utječu na nadzornu ploču UI ili za potpunu provjeru valjanosti izdanja; profil suradnika nije zamjena za verziju izdanja.
 
-> **Napomena o implementaciji na VPS-u:** udaljeni direktorij slika `/usr/lib/node_modules/omniroute/app/`
-> ostaje nepromijenjen. Vještine implementacije rsyncaju sadržaj direktorija `dist/` u njega.
-> Promijenjena je samo putanja izlaza izgradnje unutar repozitorija (`app/` → `dist/`).
+> **napomena o implementaciji VPS :** udaljeni direktorij slika `/usr/lib/node_modules/omniroute/app/` je nepromijenjen. Vještine implementacije rsync sadržaj `dist/` -a u njega. Premješten je samo izlazni put izgradnje unutar repoa (`app/` → `dist/`).
 
-Zadani URL-ovi:
+Zadani URLs:
 
-- **Nadzorna ploča**: `http://localhost:20128/dashboard`
+- **Nadzorna ploča** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -434,8 +421,8 @@ Zatim koristite vještine `/deploy-vps-*-cc` koje rsync-aju `dist/` u udaljeni d
 
 ## Dobivanje pomoći
 
-- **Arhitektura**: Pogledajte [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Referenca API-ja**: Pogledajte [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Sigurnosna dokumentacija**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Operativna dokumentacija**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Problemi**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Arhitektura** : Vidi [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Referenca** : Vidi [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Sigurnosni dokumenti** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Operativni dokumenti** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Problemi** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

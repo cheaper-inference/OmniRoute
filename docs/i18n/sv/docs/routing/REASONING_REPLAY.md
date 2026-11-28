@@ -4,9 +4,9 @@
 
 ---
 
-> **Sanningens källa:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Senast uppdaterad:** 2026-06-28 — v3.8.40
+> **Sanningens källa:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
-OmniRoute fångar assistent `reasoning_content` som produceras av modeller i tänkande och spelar upp den på ett transparent sätt vid förfrågningar om flera svängar när uppströmsleverantören kräver det. Detta eliminerar de HTTP 400-fel som strikta leverantörer tar upp när en klients konversationshistorik saknar resonemanget från föregående vändning.
+OmniRoute fångar assistent `reasoning_content` som produceras av modeller i tänkande och spelar upp den på ett transparent sätt vid förfrågningar om flera svängar när uppströmsleverantören kräver det. Detta eliminerar HTTP 400-felen som strikta leverantörer tar upp när en klients konversationshistorik saknar resonemanget från föregående vändning.
 
 ## Varför detta finns
 

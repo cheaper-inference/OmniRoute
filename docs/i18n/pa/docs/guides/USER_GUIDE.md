@@ -242,33 +242,41 @@ Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 ਕਾਂਬੋ
+## 🎨 ਕੰਬੋਜ਼
 
-ਤੁਸੀਂ ਹਰੇਕ ਕਾਰਡ ਉੱਤੇ ਦਿੱਤੇ ਹੈਂਡਲ ਨੂੰ ਡ੍ਰੈਗ ਕਰਕੇ ਸਿੱਧੇ **Dashboard → Combos** ਵਿੱਚ ਕਾਂਬੋ ਕਾਰਡਾਂ ਦਾ ਕ੍ਰਮ ਬਦਲ ਸਕਦੇ ਹੋ। ਕ੍ਰਮ SQLite ਵਿੱਚ ਸਟੋਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ ਮੁੜ ਲੋਡ ਕਰਨ ’ਤੇ ਬਹਾਲ ਹੋ ਜਾਂਦਾ ਹੈ।
+ਤੁਸੀਂ ਸਿੱਧੇ ਵਿੱਚ ਕੰਬੋ ਕਾਰਡਾਂ ਨੂੰ ਮੁੜ ਆਰਡਰ ਕਰ ਸਕਦੇ ਹੋ** ਡੈਸ਼ਬੋਰਡ → ਕੰਬੋਜ਼** ਹਰੇਕ ਕਾਰਡ 'ਤੇ ਹੈਂਡਲ ਨੂੰ ਖਿੱਚ ਕੇ। ਆਰਡਰ ਨੂੰ SQLite ਵਿੱਚ ਸਟੋਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ ਰੀਲੋਡ ਕਰਨ 'ਤੇ ਰੀਸਟੋਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
 
-### ਉਦਾਹਰਨ 1: ਸਬਸਕ੍ਰਿਪਸ਼ਨ ਨੂੰ ਵੱਧ ਤੋਂ ਵੱਧ ਵਰਤੋ → ਸਸਤਾ ਬੈਕਅੱਪ
+### ਇੱਕ ਪ੍ਰਦਾਤਾ, ਮਾਡਲ, ਜਾਂ ਖਾਤਾ ਲੱਭੋ
 
-```
-Dashboard → Combos → ਨਵਾਂ ਬਣਾਓ
+ਕੰਬੋ ਬਣਾਓ ਜਾਂ ਸੰਪਾਦਿਤ ਕਰੋ ਵਿੱਚ, ਕਦਮ-ਦਰ-ਕਦਮ ਪ੍ਰਦਾਤਾ, ਮਾਡਲ, ਖਾਤਾ, ਅਤੇ ਕੰਬੋ-ਸੰਦਰਭ ਚੋਣਕਾਰ ਵਿੱਚ ਇੱਕ ਸਥਾਨਕ ਖੋਜ ਖੇਤਰ ਸ਼ਾਮਲ ਹੁੰਦਾ ਹੈ। ਪ੍ਰਦਰਸ਼ਿਤ ਨਾਮ, ਪਛਾਣਕਰਤਾ, ਪ੍ਰਦਾਤਾ ਉਪਨਾਮ, ਜਾਂ ਮਾਡਲ ਸਰੋਤ ਦੁਆਰਾ ਖੋਜ ਕਰੋ, ਫਿਰ ਇੱਕ ਨਤੀਜੇ 'ਤੇ ਕਲਿੱਕ ਕਰੋ ਜਾਂ ਐਰੋ ਕੁੰਜੀਆਂ ਦੀ ਵਰਤੋਂ ਕਰੋ ਅਤੇ ਐਂਟਰ ਕਰੋ। ਇੱਕ ਤੋਂ ਵੱਧ ਖੋਜ ਸ਼ਬਦ ਸਾਰੇ ਮੇਲ ਖਾਂਦੇ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ। ਖੋਜ ਨੂੰ ਕਲੀਅਰ ਕਰਨ ਜਾਂ Escape ਨੂੰ ਦਬਾਉਣ ਨਾਲ ਚੁਣਿਆ ਹੋਇਆ ਮੁੱਲ ਬਦਲਿਆ ਨਹੀਂ ਜਾਂਦਾ।
 
-ਨਾਮ: premium-coding
-ਮਾਡਲ:
-  1. cc/claude-opus-4-7 (ਮੁੱਖ ਸਬਸਕ੍ਰਿਪਸ਼ਨ)
-  2. glm/glm-4.7 (ਸਸਤਾ ਬੈਕਅੱਪ, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (ਸਭ ਤੋਂ ਸਸਤਾ ਫਾਲਬੈਕ, $0.3/1M)
+ਖੋਜ ਕਰਦੇ ਸਮੇਂ ਸਵੈਚਲਿਤ ਖਾਤਾ ਵਿਕਲਪ ਦ੍ਰਿਸ਼ਮਾਨ ਰਹਿੰਦਾ ਹੈ। ਇਸਦੀ ਵਿਕਲਪਿਕ ਖਾਤਾ ਪਾਬੰਦੀ ਸੂਚੀ ਵਿੱਚ ਇੱਕ ਵੱਖਰਾ ਫਿਲਟਰ ਹੈ: ਦਿਖਣਯੋਗ ਨਤੀਜਿਆਂ ਤੋਂ ਬਾਹਰ ਚੁਣੇ ਗਏ ਖਾਤੇ ਚੁਣੇ ਰਹਿੰਦੇ ਹਨ, ਅਤੇ ਗਿਣਤੀ ਵਿੱਚ ਉਹ ਸ਼ਾਮਲ ਹੁੰਦੇ ਹਨ। ਜਦੋਂ ਈਮੇਲ ਗੋਪਨੀਯਤਾ ਚਾਲੂ ਹੁੰਦੀ ਹੈ ਤਾਂ ਗੁਪਤ ਈਮੇਲ ਦੇ ਟੁਕੜੇ ਖੋਜਣ ਯੋਗ ਨਹੀਂ ਹੁੰਦੇ ਹਨ। ਕਦਮ ਜੋੜੋ ਅਤੇ ਆਮ ਵਾਂਗ ਕੰਬੋ ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰੋ; ਇੱਕ ਪੁੱਛਗਿੱਛ ਟਾਈਪ ਕਰਨ ਨਾਲ ਕੁਝ ਵੀ ਸੁਰੱਖਿਅਤ ਜਾਂ ਟੈਸਟ ਨਹੀਂ ਹੁੰਦਾ।
 
-CLI ਵਿੱਚ ਵਰਤੋਂ: premium-coding
-```
+ਉਹੀ ਸਥਾਨਕ ਖੋਜ ਕਨੈਕਸ਼ਨ-ਟੈਸਟ ਮਾਡਲਾਂ, ਕਸਟਮ CLI ਡਿਫੌਲਟ ਅਤੇ ਉਪਨਾਮ ਮਾਡਲਾਂ, ਅਤੇ ਸੁਰੱਖਿਅਤ-ਪ੍ਰਾਕਸੀ ਵਿਕਲਪਾਂ ਲਈ ਉਪਲਬਧ ਹੈ। ਮੌਜੂਦਾ ਸੇਵ, ਲਾਗੂ, ਅਤੇ ਟੈਸਟ ਕਾਰਵਾਈਆਂ ਵੱਖਰੀਆਂ ਰਹਿੰਦੀਆਂ ਹਨ।
 
-### ਉਦਾਹਰਨ 2: ਸਿਰਫ਼ ਮੁਫ਼ਤ (ਜ਼ੀਰੋ ਲਾਗਤ)
+### ਉਦਾਹਰਨ 1: ਵੱਧ ਤੋਂ ਵੱਧ ਗਾਹਕੀ → ਸਸਤੇ ਬੈਕਅੱਪ
 
 ```
-ਨਾਮ: free-combo
-ਮਾਡਲ:
-  1. if/kimi-k2.7-code (ਮੁਫ਼ਤ ਪਹੁੰਚ ਵਜੋਂ ਸੂਚੀਬੱਧ; ਪ੍ਰਦਾਤਾ ਦੀਆਂ ਸੀਮਾਵਾਂ ਲਾਗੂ ਹੋ ਸਕਦੀਆਂ ਹਨ)
-  2. kr/qwen3-coder-next (Kiro ਮੁਫ਼ਤ ਫਾਲਬੈਕ)
+Dashboard → Combos → Create New
 
-ਲਾਗਤ: ਇਸ ਵੇਲੇ $0 ਵਜੋਂ ਸੂਚੀਬੱਧ; ਸ਼ਰਤਾਂ ਅਤੇ ਉਪਲਬਧਤਾ ਬਦਲ ਸਕਦੀਆਂ ਹਨ
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### ਉਦਾਹਰਨ 2: ਸਿਰਫ਼-ਮੁਫ਼ਤ (ਜ਼ੀਰੋ ਲਾਗਤ)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -428,7 +436,7 @@ omniroute autostart disable
 ### VPS ਤੈਨਾਤੀ
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -510,8 +518,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -729,10 +737,10 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 #### ਪ੍ਰਤੀ-ਕੁਨੈਕਸ਼ਨ ਗੇਟਵੇ ਵਿਕਲਪ
 
-ਇਹ ਕੁੰਜੀਆਂ ਕਨੈਕਸ਼ਨ ਦੇ `providerSpecificData` ਵਿੱਚ ਜਾਂਦੀਆਂ ਹਨ (ਉਦਾਹਰਨ ਲਈ `PUT /api/providers/{id}` ਰਾਹੀਂ):
+ਇਹ ਕੁੰਜੀਆਂ ਇੱਕ ਕੁਨੈਕਸ਼ਨ ਦੇ `providerSpecificData` ਵਿੱਚ ਜਾਂਦੀਆਂ ਹਨ (ਉਦਾਹਰਨ ਲਈ `PUT /api/providers/{id}` ਰਾਹੀਂ):
 
 - `toolNameMaxLength` (ਪੂਰਨ ਅੰਕ, 1–1024) OpenAI ਚੈਟ-ਫਾਰਮੈਟ ਅਨੁਕੂਲ ਕਨੈਕਸ਼ਨਾਂ ਲਈ — ਜਿਸਦਾ ਗੇਟਵੇ ਲੰਬੇ ਟੂਲ ਨਾਮਾਂ ਨੂੰ ਰੱਦ ਕਰਦਾ ਹੈ। ਲੰਬੇ ਨਾਮ ਛੋਟੇ ਉਪਨਾਮਾਂ ਵਜੋਂ ਭੇਜੇ ਜਾਂਦੇ ਹਨ ਅਤੇ ਜਵਾਬ ਵਿੱਚ ਮੁੜ ਬਹਾਲ ਕੀਤੇ ਜਾਂਦੇ ਹਨ। OpenAI, Azure OpenAI, Azure AI ਫਾਊਂਡਰੀ, Mistral, NVIDIA, OpenCode Zen/Go ਅਤੇ ਮਿਊਜ਼ ਕੋਡ ਪਹਿਲਾਂ ਹੀ 64 ਤੋਂ ਵੱਧ ਅੱਖਰਾਂ ਦੇ ਨਾਮ ਬਿਨਾਂ ਕਿਸੇ ਸੈਟਿੰਗ ਦੇ ਹਨ। ਇੱਕ ਕਨੈਕਸ਼ਨ ਮੁੱਲ Azure OpenAI / Azure AI ਫਾਊਂਡਰੀ ਡਿਫੌਲਟ (ਇੱਕ ਸਖ਼ਤ ਗੇਟਵੇ ਦੇ ਪਿੱਛੇ ਇੱਕ Azure ਕਨੈਕਸ਼ਨ) ਨੂੰ ਬਦਲਦਾ ਹੈ ਅਤੇ ਇੱਕ ਕਸਟਮ ਅਨੁਕੂਲ ਨੋਡ ਲਈ ਸੀਮਾ ਨਿਰਧਾਰਤ ਕਰਦਾ ਹੈ; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ਅਤੇ ਮਿਊਜ਼ ਕੋਡ ਆਪਣੀ ਰਜਿਸਟਰੀ ਸੀਮਾ ਰੱਖਦੇ ਹਨ ਅਤੇ ਇਸ ਨੂੰ ਅਣਡਿੱਠ ਕਰਦੇ ਹਨ।
-- `quotaEndpoint` — ਗੇਟਵੇ ਦੇ quota/credits ਐਂਡਪੁਆਇੰਟ, ਡੈਸ਼ਬੋਰਡ ਕੋਟਾ ਸਟ੍ਰਿਪ ਅਤੇ ਕੋਟਾ-ਜਾਗਰੂਕ ਰੂਟਿੰਗ ਲਈ ਪੜ੍ਹੋ। ਓਪਨਏਆਈ- ਅਤੇ ਐਂਥਰੋਪਿਕ-ਅਨੁਕੂਲ ਕੁਨੈਕਸ਼ਨਾਂ ਦੋਵਾਂ 'ਤੇ ਕੰਮ ਕਰਦਾ ਹੈ; ਪੂਰੀ ਸ਼ਕਲ `open-sse/services/usage/openaiCompatible.ts` ਵਿੱਚ ਦਰਜ ਹੈ।
+- `quotaEndpoint` — ਗੇਟਵੇ ਦੇ quota/credits ਐਂਡਪੁਆਇੰਟ, ਡੈਸ਼ਬੋਰਡ ਕੋਟਾ ਸਟ੍ਰਿਪ ਅਤੇ ਕੋਟਾ-ਜਾਗਰੂਕ ਰੂਟਿੰਗ ਲਈ ਪੜ੍ਹੋ। ਓਪਨਏਆਈ- ਅਤੇ ਐਂਥਰੋਪਿਕ-ਅਨੁਕੂਲ ਕਨੈਕਸ਼ਨਾਂ ਦੋਵਾਂ 'ਤੇ ਕੰਮ ਕਰਦਾ ਹੈ; ਪੂਰੀ ਸ਼ਕਲ `open-sse/services/usage/openaiCompatible.ts` ਵਿੱਚ ਦਰਜ ਹੈ।
 
 ```json
 {
@@ -767,7 +775,7 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-ਸਿਰਫ਼ ਸਪਸ਼ਟ ਤੌਰ 'ਤੇ ਮਨਜ਼ੂਰ ਸੂਚੀਬੱਧ ਪੀਅਰ URL ਨੂੰ ਭੇਜੀਆਂ ਗਈਆਂ ਬੇਨਤੀਆਂ ਨੂੰ `X-OmniRoute-Peer-Trace` ਸਿਰਲੇਖ ਪ੍ਰਾਪਤ ਹੁੰਦਾ ਹੈ। ਇੱਕ ਗੇਟਵੇ HTTP `508 Loop Detected` ਨਾਲ ਇੱਕ ਦੁਹਰਾਈ ਉਦਾਹਰਨ ID ਜਾਂ ਥੱਕੇ ਹੋਏ ਹੌਪ ਬਜਟ ਨੂੰ ਰੱਦ ਕਰਦਾ ਹੈ; ਆਮ ਅੱਪਸਟਰੀਮ ਪ੍ਰਦਾਤਾ ਕੋਈ ਪੀਅਰ ਮੈਟਾਡੇਟਾ ਪ੍ਰਾਪਤ ਨਹੀਂ ਕਰਦੇ।
+ਸਿਰਫ਼ ਸਪਸ਼ਟ ਤੌਰ 'ਤੇ ਮਨਜ਼ੂਰ ਸੂਚੀਬੱਧ ਪੀਅਰ URL ਨੂੰ ਭੇਜੀਆਂ ਗਈਆਂ ਬੇਨਤੀਆਂ ਨੂੰ `X-OmniRoute-Peer-Trace` ਸਿਰਲੇਖ ਪ੍ਰਾਪਤ ਹੁੰਦਾ ਹੈ। ਇੱਕ ਗੇਟਵੇ HTTP `508 Loop Detected` ਨਾਲ ਇੱਕ ਦੁਹਰਾਈ ਉਦਾਹਰਨ ID ਜਾਂ ਥੱਕੇ ਹੋਪ ਬਜਟ ਨੂੰ ਰੱਦ ਕਰਦਾ ਹੈ; ਆਮ ਅੱਪਸਟਰੀਮ ਪ੍ਰਦਾਤਾ ਕੋਈ ਪੀਅਰ ਮੈਟਾਡੇਟਾ ਪ੍ਰਾਪਤ ਨਹੀਂ ਕਰਦੇ ਹਨ।
 
 ਪੀਅਰ ਚੇਨਿੰਗ ਡੇਟਾਬੇਸ ਪ੍ਰਤੀਕ੍ਰਿਤੀ ਜਾਂ ਹੋਸਟ ਫੇਲਓਵਰ ਨਹੀਂ ਹੈ। ਹਰੇਕ ਗੇਟਵੇ ਸੁਤੰਤਰ SQLite ਸਟੇਟ, ਕੈਚ, ਰੇਟ ਕਾਊਂਟਰ, ਅਤੇ ਸੈਸ਼ਨ ਰੱਖਦਾ ਹੈ। active/passive ਜਾਂ active/active ਉਪਲਬਧਤਾ ਲਈ ਇੱਕ ਸਿਹਤ-ਜਾਂਚ ਕੀਤੀ ਰਿਵਰਸ ਪ੍ਰੌਕਸੀ ਜਾਂ ਕਲਾਇੰਟ ਫੇਲਓਵਰ ਦੀ ਵਰਤੋਂ ਕਰੋ, ਅਤੇ ਕਦੇ ਵੀ ਇੱਕ SQLite ਡੇਟਾਬੇਸ ਨੂੰ ਕਈ ਚੱਲ ਰਹੇ OmniRoute ਉਦਾਹਰਨਾਂ ਵਿੱਚ ਮਾਊਂਟ ਨਾ ਕਰੋ।
 
@@ -879,8 +887,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` ਅਤੇ `cost-optimized`
 - ਸਾਰੇ ਉਮੀਦਵਾਰਾਂ ਵਿੱਚ `auto` — ਸਕੋਰ ਦੁਆਰਾ ਚਲਾਇਆ ਜਾਂਦਾ ਹੈ
 - `lkgp` (ਆਖਰੀ ਜਾਣਿਆ ਚੰਗਾ ਪ੍ਰਦਾਤਾ) — ਆਖਰੀ ਸਫਲ ਪ੍ਰਦਾਤਾ ਨੂੰ ਪਿੰਨ ਕਰਦਾ ਹੈ, ਫਿਰ ਨਿਯਮਾਂ 'ਤੇ ਵਾਪਸ ਆਉਂਦਾ ਹੈ
-- `context-optimized` — ਸਭ ਤੋਂ ਵੱਡੀ ਮੁਫਤ ਸੰਦਰਭ ਵਿੰਡੋ ਵਾਲਾ ਮਾਡਲ ਚੁਣਦਾ ਹੈ
-- `context-relay` — ਫਾਲੋ-ਅੱਪ ਮੋੜਾਂ ਲਈ ਲੰਬੇ-ਸੰਦਰਭ ਮਾਡਲਾਂ ਨੂੰ ਚੇਨ ਕਰਦਾ ਹੈ
+- `context-optimized` — ਪਹਿਲਾਂ ਸਭ ਤੋਂ ਵੱਡੀ ਜਾਣੀ ਜਾਂਦੀ ਪ੍ਰਸੰਗ ਵਿੰਡੋ ਦੇ ਨਾਲ ਮਾਡਲ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰਦਾ ਹੈ
+- `context-relay` — ਪ੍ਰਾਥਮਿਕਤਾ ਆਰਡਰ ਅਤੇ ਇੱਕ ਹੈਂਡਆਫ ਸੰਖੇਪ ਜਦੋਂ ਗੱਲਬਾਤ ਕਿਸੇ ਹੋਰ ਖਾਤੇ ਵਿੱਚ ਚਲੀ ਜਾਂਦੀ ਹੈ
 
 #### ਬਾਹਰੀ ਸਟਿੱਕੀ ਸੈਸ਼ਨ ਹੈਡਰ
 
@@ -1064,7 +1072,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | **ਲਚਕੀਲਾਪਨ** | ਬੇਨਤੀ ਕਤਾਰ, ਕਨੈਕਸ਼ਨ ਕੂਲਡਡਾਊਨ, ਪ੍ਰਦਾਤਾ ਬ੍ਰੇਕਰ ਸੰਰਚਨਾ, ਅਤੇ ਉਡੀਕ-ਲਈ-ਕੂਲਡਾਉਨ ਵਿਵਹਾਰ                                                                   |
 | **ਉੱਨਤ**     | ਗਲੋਬਲ ਪ੍ਰੌਕਸੀ ਕੌਂਫਿਗਰੇਸ਼ਨ (HTTP/SOCKS5), ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ ਪ੍ਰੌਕਸੀ ਓਵਰਰਾਈਡ                                                                            |
 
-ਜਨਰਲ ਹੁਣ ਸਿਰਫ਼ ਰੀਡ-ਓਨਲੀ ਲੌਗਿੰਗ ਅਤੇ ਕੈਸ਼ ਨੋਟਸ ਦੀ ਡੁਪਲੀਕੇਟ ਨਹੀਂ ਕਰਦਾ। `/api/settings/database` ਦੁਆਰਾ ਡਾਟਾਬੇਸ ਦੀ ਧਾਰਨਾ ਅਤੇ ਅਨੁਕੂਲਤਾ ਸੈਟਿੰਗਾਂ ਜਾਰੀ ਰਹਿੰਦੀਆਂ ਹਨ; ਮੈਨੂਅਲ ਕੈਸ਼ ਕਲੀਅਰਿੰਗ `DELETE /api/cache` ਦੀ ਵਰਤੋਂ ਕਰਦੀ ਹੈ। ਬੇਨਤੀ ਅਤੇ ਪ੍ਰੌਕਸੀ ਲੌਗ ਰੋਅ ਕੈਪਸ ਨੂੰ `CALL_LOGS_TABLE_MAX_ROWS` ਅਤੇ `PROXY_LOGS_TABLE_MAX_ROWS` ਦੁਆਰਾ ਨਿਯੰਤਰਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+ਜਨਰਲ ਹੁਣ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਲਈ ਲੌਗਿੰਗ ਅਤੇ ਕੈਸ਼ ਨੋਟਸ ਦੀ ਡੁਪਲੀਕੇਟ ਨਹੀਂ ਕਰਦਾ। `/api/settings/database` ਦੁਆਰਾ ਡਾਟਾਬੇਸ ਦੀ ਧਾਰਨਾ ਅਤੇ ਅਨੁਕੂਲਤਾ ਸੈਟਿੰਗਾਂ ਜਾਰੀ ਰਹਿੰਦੀਆਂ ਹਨ; ਮੈਨੂਅਲ ਕੈਸ਼ ਕਲੀਅਰਿੰਗ `DELETE /api/cache` ਦੀ ਵਰਤੋਂ ਕਰਦੀ ਹੈ। ਬੇਨਤੀ ਅਤੇ ਪ੍ਰੌਕਸੀ ਲੌਗ ਰੋਅ ਕੈਪਸ ਨੂੰ `CALL_LOGS_TABLE_MAX_ROWS` ਅਤੇ `PROXY_LOGS_TABLE_MAX_ROWS` ਦੁਆਰਾ ਨਿਯੰਤਰਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
 
 ---
 
@@ -1072,10 +1080,10 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 ਰਾਹੀਂ ਪਹੁੰਚ** ਡੈਸ਼ਬੋਰਡ → ਲਾਗਤਾਂ** .
 
-| ਟੈਬ      | ਮਕਸਦ                                                                                          |
-| -------- | --------------------------------------------------------------------------------------------- |
-| **ਬਜਟ**  | daily/weekly/monthly ਬਜਟ ਅਤੇ ਰੀਅਲ-ਟਾਈਮ ਟਰੈਕਿੰਗ ਦੇ ਨਾਲ ਪ੍ਰਤੀ API ਕੁੰਜੀ ਲਈ ਖਰਚ ਸੀਮਾਵਾਂ ਸੈੱਟ ਕਰੋ |
-| **ਕੀਮਤ** | ਮਾਡਲ ਕੀਮਤ ਇੰਦਰਾਜ਼ਾਂ ਨੂੰ ਦੇਖੋ ਅਤੇ ਸੰਪਾਦਿਤ ਕਰੋ — ਲਾਗਤ ਪ੍ਰਤੀ 1K input/output ਟੋਕਨ ਪ੍ਰਤੀ ਪ੍ਰਦਾਤਾ  |
+| ਟੈਬ      | ਮਕਸਦ                                                                                         |
+| -------- | -------------------------------------------------------------------------------------------- |
+| **ਬਜਟ**  | daily/weekly/monthly ਬਜਟ ਅਤੇ ਰੀਅਲ-ਟਾਈਮ ਟਰੈਕਿੰਗ ਦੇ ਨਾਲ ਪ੍ਰਤੀ API ਕੁੰਜੀ ਖਰਚ ਸੀਮਾਵਾਂ ਸੈੱਟ ਕਰੋ   |
+| **ਕੀਮਤ** | ਮਾਡਲ ਕੀਮਤ ਇੰਦਰਾਜ਼ਾਂ ਨੂੰ ਦੇਖੋ ਅਤੇ ਸੰਪਾਦਿਤ ਕਰੋ — ਲਾਗਤ ਪ੍ਰਤੀ 1K input/output ਟੋਕਨ ਪ੍ਰਤੀ ਪ੍ਰਦਾਤਾ |
 
 ```bash
 # API: Set a budget
@@ -1087,7 +1095,7 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**ਲਾਗਤ ਟਰੈਕਿੰਗ:** ਹਰੇਕ ਬੇਨਤੀ ਟੋਕਨ ਦੀ ਵਰਤੋਂ ਨੂੰ ਲੌਗ ਕਰਦੀ ਹੈ ਅਤੇ ਕੀਮਤ ਸਾਰਣੀ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਲਾਗਤ ਦੀ ਗਣਨਾ ਕਰਦੀ ਹੈ। ਵਿੱਚ ਬ੍ਰੇਕਡਾਊਨ ਵੇਖੋ** ਡੈਸ਼ਬੋਰਡ → ਵਰਤੋਂ** ਪ੍ਰਦਾਤਾ, ਮਾਡਲ, ਅਤੇ API ਕੁੰਜੀ ਦੁਆਰਾ।
+**ਲਾਗਤ ਟਰੈਕਿੰਗ:** ਹਰ ਬੇਨਤੀ ਟੋਕਨ ਦੀ ਵਰਤੋਂ ਨੂੰ ਲੌਗ ਕਰਦੀ ਹੈ ਅਤੇ ਕੀਮਤ ਸਾਰਣੀ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਲਾਗਤ ਦੀ ਗਣਨਾ ਕਰਦੀ ਹੈ। ਵਿੱਚ ਬ੍ਰੇਕਡਾਊਨ ਵੇਖੋ** ਡੈਸ਼ਬੋਰਡ → ਵਰਤੋਂ** ਪ੍ਰਦਾਤਾ, ਮਾਡਲ, ਅਤੇ API ਕੁੰਜੀ ਦੁਆਰਾ।
 
 ---
 
@@ -1144,20 +1152,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 ਵਿੱਚ ਪ੍ਰਤੀ-ਕੰਬੋ ਸੰਤੁਲਨ ਨੂੰ ਕੌਂਫਿਗਰ ਕਰੋ** ਡੈਸ਼ਬੋਰਡ → ਕੰਬੋਜ਼ → Create/Edit → ਰਣਨੀਤੀ** .
 
-| ਰਣਨੀਤੀ                        | ਵਰਣਨ                                                                       |
-| ----------------------------- | -------------------------------------------------------------------------- |
-| **ਰਾਊਂਡ-ਰੌਬਿਨ**               | ਮਾਡਲਾਂ ਰਾਹੀਂ ਕ੍ਰਮਵਾਰ ਘੁੰਮਾਉਂਦਾ ਹੈ                                          |
-| **ਤਰਜੀਹ**                     | ਹਮੇਸ਼ਾ ਪਹਿਲੇ ਮਾਡਲ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰਦਾ ਹੈ; ਗਲਤੀ 'ਤੇ ਹੀ ਵਾਪਸ ਆਉਂਦਾ ਹੈ            |
-| **ਬੇਤਰਤੀਬ**                   | ਹਰੇਕ ਬੇਨਤੀ ਲਈ ਕੰਬੋ ਤੋਂ ਇੱਕ ਬੇਤਰਤੀਬ ਮਾਡਲ ਚੁਣਦਾ ਹੈ                           |
-| **ਵਜ਼ਨ ਕੀਤਾ**                 | ਪ੍ਰਤੀ ਮਾਡਲ ਨਿਰਧਾਰਤ ਵਜ਼ਨ 'ਤੇ ਅਨੁਪਾਤਕ ਤੌਰ 'ਤੇ ਰੂਟ                            |
-| **ਸਭ ਤੋਂ ਘੱਟ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ** | ਸਭ ਤੋਂ ਘੱਟ ਹਾਲੀਆ ਬੇਨਤੀਆਂ ਵਾਲੇ ਮਾਡਲ ਲਈ ਰੂਟ (ਕੰਬੋ ਮੈਟ੍ਰਿਕਸ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ) |
-| **ਲਾਗਤ-ਅਨੁਕੂਲਿਤ**             | ਸਭ ਤੋਂ ਸਸਤੇ ਉਪਲਬਧ ਮਾਡਲ ਲਈ ਰੂਟ (ਕੀਮਤ ਸਾਰਣੀ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ)                |
+| ਰਣਨੀਤੀ                        | ਵਰਣਨ                                                                        |
+| ----------------------------- | --------------------------------------------------------------------------- |
+| **ਰਾਊਂਡ-ਰੌਬਿਨ**               | ਮਾਡਲਾਂ ਰਾਹੀਂ ਕ੍ਰਮਵਾਰ ਘੁੰਮਾਉਂਦਾ ਹੈ                                           |
+| **ਤਰਜੀਹ**                     | ਹਮੇਸ਼ਾ ਪਹਿਲੇ ਮਾਡਲ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰਦਾ ਹੈ; ਗਲਤੀ 'ਤੇ ਹੀ ਵਾਪਸ ਆਉਂਦਾ ਹੈ             |
+| **ਬੇਤਰਤੀਬ**                   | ਹਰੇਕ ਬੇਨਤੀ ਲਈ ਕੰਬੋ ਤੋਂ ਇੱਕ ਬੇਤਰਤੀਬ ਮਾਡਲ ਚੁਣਦਾ ਹੈ                            |
+| **ਵਜ਼ਨ ਕੀਤਾ**                 | ਪ੍ਰਤੀ ਮਾਡਲ ਨਿਰਧਾਰਤ ਵਜ਼ਨ 'ਤੇ ਅਨੁਪਾਤਕ ਤੌਰ 'ਤੇ ਰੂਟ                             |
+| **ਸਭ ਤੋਂ ਘੱਟ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ** | ਸਭ ਤੋਂ ਘੱਟ ਹਾਲੀਆ ਬੇਨਤੀਆਂ ਵਾਲੇ ਮਾਡਲ ਲਈ ਰੂਟ (ਕੌਂਬੋ ਮੈਟ੍ਰਿਕਸ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ) |
+| **ਲਾਗਤ-ਅਨੁਕੂਲਿਤ**             | ਸਭ ਤੋਂ ਸਸਤੇ ਉਪਲਬਧ ਮਾਡਲ ਲਈ ਰੂਟ (ਕੀਮਤ ਸਾਰਣੀ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ)                 |
 
 ਗਲੋਬਲ ਕੰਬੋ ਡਿਫੌਲਟ ਸੈੱਟ ਕੀਤੇ ਜਾ ਸਕਦੇ ਹਨ** ਡੈਸ਼ਬੋਰਡ → ਸੈਟਿੰਗਾਂ → ਰੂਟਿੰਗ → ਕੰਬੋ ਡਿਫੌਲਟ** . ਕੰਬੋ ਟਾਰਗੇਟ ਟਾਈਮਆਉਟ ਡਿਫੌਲਟ ਰੂਪ ਵਿੱਚ ਮੌਜੂਦਾ ਬੇਨਤੀ ਦਾ ਸਮਾਂ ਸਮਾਪਤ ਹੁੰਦਾ ਹੈ। ਵਰਤੋ** ਟੀਚਾ ਸਮਾਂ ਸਮਾਪਤ (ਸਕਿੰਟ)** ਕੰਬੋ ਡਿਫੌਲਟ ਜਾਂ ਵਿਅਕਤੀਗਤ ਕੰਬੋ 'ਤੇ ਸਿਰਫ ਉਦੋਂ ਹੀ ਜਦੋਂ ਪ੍ਰਤੀ-ਨਿਸ਼ਾਨਾ ਸੀਮਾ ਛੋਟੀ ਹੋਵੇ, ਤੇਜ਼ੀ ਨਾਲ ਫਾਲਬੈਕ ਨੂੰ ਚਾਲੂ ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ।
 
 ਜ਼ੀਰੋ-ਲੇਟੈਂਸੀ ਕੰਬੋ ਓਪਟੀਮਾਈਜੇਸ਼ਨ ਆਪਟ-ਇਨ ਹਨ। ਛੱਡੋ** ਜ਼ੀਰੋ-ਲੇਟੈਂਸੀ ਓਪਟੀਮਾਈਜੇਸ਼ਨ** ਇਹਨਾਂ ਲੇਟੈਂਸੀ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਰੇਸਿੰਗ ਫਾਲਬੈਕ ਟੀਚਿਆਂ, TTFT ਇਤਿਹਾਸ ਦੇ ਅਧਾਰ ਤੇ ਟੀਚਿਆਂ ਨੂੰ ਛੱਡਣ, ਜਾਂ ਫਾਲਬੈਕ ਬੇਨਤੀਆਂ ਨੂੰ ਸੰਕੁਚਿਤ ਕਰਨ ਤੋਂ ਰੋਕਣ ਲਈ ਅਯੋਗ; ਇਸ ਨੂੰ ਸਮਰੱਥ ਕਰਨਾ ਸੰਰਚਿਤ ਹੈਜਿੰਗ, ਭਵਿੱਖਬਾਣੀ TTFT ਛੱਡਣ ਅਤੇ ਪ੍ਰੋਐਕਟਿਵ ਫਾਲਬੈਕ ਕੰਪਰੈਸ਼ਨ ਨੂੰ ਲੋਅਰ ਟੇਲ ਲੇਟੈਂਸੀ ਲਈ routing/request ਵਫ਼ਾਦਾਰੀ ਦਾ ਵਪਾਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।
 
-ਅਸਮਰੱਥ** ਤਰਕਸ਼ੀਲ ਟੋਕਨ ਬਫਰ** ਜਦੋਂ ਅੱਪਸਟ੍ਰੀਮ ਪ੍ਰਦਾਤਾਵਾਂ ਨੂੰ ਸਖਤ `max_tokens` / `maxOutputTokens` ਸੀਮਾਵਾਂ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ। ਜਦੋਂ ਸਮਰਥਿਤ ਹੁੰਦਾ ਹੈ, ਤਾਂ ਕੰਬੋ ਰੂਟਿੰਗ ਇੱਕ ਜਾਣੇ-ਪਛਾਣੇ ਆਉਟਪੁੱਟ ਕੈਪ ਵਾਲੇ ਮਾਡਲਾਂ ਲਈ ਤਰਕ-ਮਾਡਲ ਹੈੱਡਰੂਮ ਨੂੰ ਜੋੜਦੀ ਹੈ ਅਤੇ ਜਦੋਂ ਸੁਰੱਖਿਅਤ ਬਫਰਡ ਮੁੱਲ ਉਸ ਕੈਪ ਤੋਂ ਵੱਧ ਜਾਂਦਾ ਹੈ ਤਾਂ ਕਲਾਇੰਟ ਟੋਕਨ ਸੀਮਾ ਨੂੰ ਬਦਲਿਆ ਨਹੀਂ ਛੱਡਦਾ ਹੈ। ਜੇਕਰ ਕਲਾਇੰਟ ਦੀ ਸੀਮਾ ਪਹਿਲਾਂ ਤੋਂ ਹੀ ਇੱਕ ਜਾਣੀ-ਪਛਾਣੀ ਕੈਪ ਤੋਂ ਉੱਪਰ ਹੈ, OmniRoute ਅੱਪਸਟ੍ਰੀਮ ਬੇਨਤੀ ਭੇਜਣ ਤੋਂ ਪਹਿਲਾਂ ਇਸਨੂੰ ਉਸ ਕੈਪ 'ਤੇ ਬੰਦ ਕਰ ਦਿੰਦਾ ਹੈ।
+ਅਸਮਰੱਥ** ਤਰਕਸ਼ੀਲ ਟੋਕਨ ਬਫਰ** ਜਦੋਂ ਅੱਪਸਟ੍ਰੀਮ ਪ੍ਰਦਾਤਾਵਾਂ ਨੂੰ ਸਖਤ `max_tokens` / `maxOutputTokens` ਸੀਮਾਵਾਂ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ। ਜਦੋਂ ਸਮਰਥਿਤ ਹੁੰਦਾ ਹੈ, ਤਾਂ ਕੰਬੋ ਰੂਟਿੰਗ ਇੱਕ ਜਾਣੇ-ਪਛਾਣੇ ਆਉਟਪੁੱਟ ਕੈਪ ਵਾਲੇ ਮਾਡਲਾਂ ਲਈ ਤਰਕ-ਮਾਡਲ ਹੈੱਡਰੂਮ ਨੂੰ ਜੋੜਦੀ ਹੈ ਅਤੇ ਜਦੋਂ ਸੁਰੱਖਿਅਤ ਬਫਰਡ ਮੁੱਲ ਉਸ ਕੈਪ ਤੋਂ ਵੱਧ ਜਾਂਦਾ ਹੈ ਤਾਂ ਕਲਾਇੰਟ ਟੋਕਨ ਸੀਮਾ ਨੂੰ ਬਦਲਿਆ ਨਹੀਂ ਛੱਡਦਾ ਹੈ। ਜੇਕਰ ਕਲਾਇੰਟ ਦੀ ਸੀਮਾ ਪਹਿਲਾਂ ਹੀ ਇੱਕ ਜਾਣੀ-ਪਛਾਣੀ ਕੈਪ ਤੋਂ ਉੱਪਰ ਹੈ, OmniRoute ਅੱਪਸਟ੍ਰੀਮ ਬੇਨਤੀ ਭੇਜਣ ਤੋਂ ਪਹਿਲਾਂ ਇਸਨੂੰ ਉਸ ਕੈਪ ਤੱਕ ਹੇਠਾਂ ਕਰ ਦਿੰਦਾ ਹੈ।
 
 ---
 
@@ -1329,32 +1337,34 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ## 💻 ਅੰਦਰੂਨੀ CLI
 
-OmniRoute ਸੈੱਟਅੱਪ, ਡਾਇਗਨੌਸਟਿਕਸ ਅਤੇ ਰਨਟਾਈਮ ਕੰਟਰੋਲ ਲਈ ਇੱਕ ਅੰਦਰੂਨੀ CLI (`omniroute …`) ਨਾਲ ਆਉਂਦਾ ਹੈ। ਇਹ **ਡੈਸ਼ਬੋਰਡ ਵਿਚਲੇ "CLI ਟੂਲਜ਼" ਪੰਨੇ ਤੋਂ ਵੱਖਰਾ ਹੈ**, ਜੋ ਤੀਜੀ-ਧਿਰ ਦੇ CLIs (Claude Code, Cursor, Codex, Cline, …) ਨੂੰ ਕੌਂਫਿਗਰ ਕਰਦਾ ਹੈ ਤਾਂ ਜੋ ਉਹ OmniRoute ਨਾਲ ਸੰਚਾਰ ਕਰ ਸਕਣ।
+OmniRoute ਸੈੱਟਅੱਪ, ਡਾਇਗਨੌਸਟਿਕਸ, ਅਤੇ ਰਨਟਾਈਮ ਨਿਯੰਤਰਣ ਲਈ ਇੱਕ ਅੰਦਰੂਨੀ CLI (`omniroute …`) ਭੇਜਦਾ ਹੈ। ਇਹ ਹੈ** ਡੈਸ਼ਬੋਰਡ ਵਿੱਚ "CLI ਟੂਲਸ" ਪੰਨੇ ਤੋਂ ਵੱਖ ਕਰੋ** , ਜੋ ਤੀਜੀ-ਧਿਰ CLIs (Claude ਕੋਡ, Cursor, Codex, Cline, …) ਨੂੰ ਸੰਰਚਿਤ ਕਰਦਾ ਹੈ ਤਾਂ ਜੋ ਉਹ OmniRoute ਨਾਲ ਗੱਲ ਕਰ ਸਕਣ।
 
 ```bash
-omniroute setup                    # ਇੰਟਰਐਕਟਿਵ ਵਿਜ਼ਾਰਡ (ਪਾਸਵਰਡ, ਪ੍ਰਦਾਤਾ, ਕਾਂਬੋ)
-omniroute setup --non-interactive  # CI-ਅਨੁਕੂਲ
-omniroute doctor                   # ਸਿਹਤ ਡਾਇਗਨੌਸਟਿਕਸ (ਡਾਟਾ ਡਾਇਰੈਕਟਰੀ, DB, ਪ੍ਰਦਾਤਾ, ਪੋਰਟ)
-omniroute providers available      # ਸਮਰਥਿਤ ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਸੂਚੀ
-omniroute providers list           # ਕੌਂਫਿਗਰ ਕੀਤੇ ਕਨੈਕਸ਼ਨਾਂ ਦੀ ਸੂਚੀ
-omniroute providers test <id>      # ਕਿਸੇ ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨ ਦੀ ਲਾਈਵ ਜਾਂਚ
-omniroute combos list              # ਕਾਂਬੋਆਂ ਦੀ ਸੂਚੀ
-omniroute combos switch <name>     # ਡਿਫਾਲਟ ਕਾਂਬੋ ਸੈੱਟ ਕਰੋ
-omniroute models                   # ਉਪਲਬਧ ਮਾਡਲਾਂ ਦੀ ਸੂਚੀ (--json, --search)
-omniroute keys add | list | remove # ਟਰਮੀਨਲ ਤੋਂ API ਕੁੰਜੀਆਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ
-omniroute backup                   # ਕੌਂਫਿਗ + DB ਦਾ ਸਨੈਪਸ਼ਾਟ
-omniroute restore [<timestamp>]    # ਸਨੈਪਸ਼ਾਟ ਤੋਂ ਰੀਸਟੋਰ ਕਰੋ
-omniroute health                   # ਵਿਸਤ੍ਰਿਤ ਸਿਹਤ ਜਾਣਕਾਰੀ (ਬ੍ਰੇਕਰ, ਕੈਸ਼, ਮੈਮੋਰੀ)
-omniroute quota                    # ਪ੍ਰਦਾਤਾ ਕੋਟੇ ਦੀ ਵਰਤੋਂ
-omniroute mcp status               # MCP ਸਰਵਰ ਦੀ ਸਥਿਤੀ
-omniroute a2a status               # A2A ਸਰਵਰ ਦੀ ਸਥਿਤੀ
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok ਟਨਲਾਂ
-omniroute reset-password           # ਐਡਮਿਨ ਪਾਸਵਰਡ ਰੀਸੈੱਟ ਕਰੋ
-omniroute --mcp                    # stdio ਉੱਤੇ MCP ਸਰਵਰ ਸ਼ੁਰੂ ਕਰੋ
-omniroute --port 3000              # ਸਰਵਰ ਨੂੰ ਕਸਟਮ ਪੋਰਟ ਉੱਤੇ ਸ਼ੁਰੂ ਕਰੋ
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-ਸੁਝਾਅ: ਅਸਿਹਤਮੰਦ ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨਾਂ ਬਾਰੇ ਚੇਤਾਵਨੀਆਂ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ `omniroute doctor --json` ਨੂੰ ਆਪਣੇ ਮਾਨੀਟਰਿੰਗ ਟੂਲ ਨਾਲ ਜੋੜੋ।
+ਸੁਝਾਅ: ਟੁੱਟੇ ਹੋਏ ਸਥਾਨਕ ਸਥਾਪਨਾ 'ਤੇ ਚੇਤਾਵਨੀ ਦੇਣ ਲਈ ਆਪਣੇ ਨਿਗਰਾਨੀ ਸਾਧਨ ਨਾਲ `omniroute doctor --json` ਜੋੜੋ। `doctor` ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨਾਂ ਦੀ ਜਾਂਚ ਨਹੀਂ ਕਰਦਾ; ਇਸਦੇ ਲਈ `omniroute providers test <id>` ਵਰਤੋਂ ਕਰੋ।
 
 ---
 

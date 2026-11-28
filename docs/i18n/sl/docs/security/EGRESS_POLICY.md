@@ -67,37 +67,37 @@ Direktiva je namenoma določena **za vsak posredniški strežnik posebej** in ne
 
 ---
 
-## Tri vrednosti
+## Tri vrednote
 
-| Vrednost | Oznaka v uporabniškem vmesniku | Vedenje                                                                                                                                                                                                 |
-| -------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`   | `Samodejno (dvojni sklad)`     | Operacijski sistem izbere družino. Pri gostitelju posredniškega strežnika, podanem kot naslov IP, je družina določena z naslovom; pri imenu gostitelja sta mogoči obe družini. To je privzeta vrednost. |
-| `ipv4`   | `Samo IPv4`                    | Omeji povezavo na IPv4. Povezava se varno prekine, če gostitelj posredniškega strežnika nima zapisa IPv4 (A).                                                                                           |
-| `ipv6`   | `Samo IPv6`                    | Omeji povezavo na IPv6. Povezava se varno prekine, če gostitelj posredniškega strežnika nima zapisa IPv6 (AAAA).                                                                                        |
+| Vrednost | oznaka UI           | Vedenje                                                                                                                                                |
+| -------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto`   | `Auto (dual-stack)` | OS izbere družino. Pri posredniškem gostitelju IP-literal je družina intrinzična dobesedu; za ime gostitelja sta primerni obe družini. To je privzeto. |
+| `ipv4`   | `IPv4 only`         | Pripne povezavo na IPv4. Ne uspe zapreti, če gostitelj proxy nima zapisa IPv4 (A).                                                                     |
+| `ipv6`   | `IPv6 only`         | Pripne povezavo na IPv6. Ne uspe zapreti, če gostitelj proxy nima zapisa IPv6 (AAAA).                                                                  |
 
-Nizi uporabniškega vmesnika so v `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+nizi UI živijo v `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Kako nastaviti družino
+## Kako ga konfigurirati
 
 ### Nadzorna plošča
 
-Izbirnik je v obrazcu za posredniški strežnik na zavihku **Proxy Pool**:
+Izbirnik je v nadomestni obliki** Nadomestni bazen** zavihek:
 
-1. Odprite **Nadzorna plošča → Nastavitve → Posredniški strežnik → Proxy Pool**
-2. Dodajte ali uredite posredniški strežnik
-3. Na spustnem seznamu **Družina IP** izberite `Samodejno (dvojni sklad)`, `Samo IPv4` ali `Samo IPv6`
-4. Shranite
+1. Odpri** Nadzorna plošča → Nastavitve → Proxy → Proxy Pool**
+2. Dodajte ali uredite proxy
+3. Nastavite** družina IP** spustni meni `Auto (dual-stack)`, `IPv4 only` ali `IPv6 only`
+4. Shrani
 
-Kontrolnik izrisuje `ProxyRegistryManager.tsx` (vgrajen v `proxy/ProxyPoolTab.tsx`).
+Nadzor upodobi `ProxyRegistryManager.tsx` (nameščen v `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Polje `family` je del podatkovnih vsebin za ustvarjanje/posodabljanje registra posredniških strežnikov. Preverjata ga `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`), obravnavata pa ga `POST` / `PATCH /api/v1/management/proxies`:
+Polje `family` je del uporabnih obremenitev registra proxy create/update, ki jih potrdi `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) in jih obravnava `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Ustvari posredniški strežnik, omejen na IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Spremeni obstoječi posredniški strežnik tako, da uporablja samo IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Isto polje sprejema tudi vgrajeni objekt konfiguracije posredniškega strežnika, ki se uporablja za vnose nadrejenih posredniških strežnikov (`upstream_proxy_config.family`, glejte [Podatkovni model](#data-model)).
+Isto polje sprejme tudi vgrajeni konfiguracijski objekt proxy, ki se uporablja za vnose navzgor v proxy (`upstream_proxy_config.family`, glejte [podatkovni model](#data-model) ).
 
-Za preostali del API-ja za ustvarjanje, branje, posodabljanje, brisanje in dodeljevanje posredniških strežnikov glejte [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Za preostali del proxyja CRUD/assignment API glejte [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

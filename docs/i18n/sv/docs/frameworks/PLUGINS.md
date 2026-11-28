@@ -88,20 +88,19 @@ Objektet `ctx` som skickas till `register(program, ctx)`:
 | `ctx.baseUrl`                | `string`         | Matchad bas-URL                                         |
 | `ctx.apiKey`                 | `string \| null` | API-nyckel om en sådan har angetts                      |
 
-## Identifiering
+## Upptäckt
 
-Insticksprogram identifieras från:
+Plugins upptäcks från:
 
-1. `~/.omniroute/plugins/<name>/` — användarlokala installationer
-2. Miljövariabeln `OMNIROUTE_PLUGIN_PATH` — anpassad katalog
+1. `~/.omniroute/plugins/node_modules/<name>/` — där `omniroute plugin install` placerar paket (en npm `--prefix`, inte `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — handkopierade plugin-kataloger
+3. `OMNIROUTE_PLUGIN_PATH` env var — anpassad katalog
 
-Båda är **endast för CLI:t**. Insticksprogramskörningen på serversidan (marknadsplatsens/`plugin.json`-insticksprogrammen
-som körs inuti proxyn) har en egen skanner med en egen åsidosättning,
-`OMNIROUTE_PLUGINS_DIR` — se
-[PLUGIN_MARKETPLACE.md → Katalog för insticksprogram](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Att ange den ena påverkar inte den andra.
+Symlinked kataloger (vad npm skapar för `plugin install ./dir`) följs.
 
-Inläsningsfel fångas upp och skrivs ut som varningar — ett trasigt insticksprogram kraschar aldrig CLI:t.
+Båda är** Endast CLI** . Server-side plugin runtime (marketplace/`plugin.json` plugins som körs inuti proxyn) har sin egen skanner med sin egen åsidosättning, `OMNIROUTE_PLUGINS_DIR` — se [PLUGIN_MARKETPLACE.md → Plugin katalog](./PLUGIN_MARKETPLACE.md#plugin-directory). Att ställa in det ena påverkar inte det andra.
+
+Inläsningsfel fångas upp och skrivs ut som varningar — en trasig plugin kraschar aldrig CLI.
 
 ## Säkerhet
 

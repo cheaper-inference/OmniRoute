@@ -92,16 +92,15 @@ Abun `ctx` da ake miƙawa zuwa `register(program, ctx)`:
 
 Ana gano plugins daga:
 
-1. `~/.omniroute/plugins/<name>/` — shigarwa na gida ga mai amfani
-2. Canjin env na `OMNIROUTE_PLUGIN_PATH` — kundin adireshi na musamman
+1. `~/.omniroute/plugins/node_modules/<name>/` — inda `omniroute plugin install` ke sanya fakiti (npm `--prefix`, ba `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — kundin adireshi na plugin ɗin da aka kwafi da hannu
+3. directory na al'ada `OMNIROUTE_PLUGIN_PATH` env var —
 
-Dukansu na **CLI kawai** ne. Tsarin gudanar da plugin na gefen saba (plugins na marketplace/`plugin.json`
-waɗanda ke gudana a cikin proxy) yana da nasa na'urar bincike tare da nasa sauyin saitin,
-`OMNIROUTE_PLUGINS_DIR` — duba
-[PLUGIN_MARKETPLACE.md → Kundin adireshin plugin](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Saita ɗaya ba ya shafar ɗayan.
+Ana bin kundayen adireshi masu alaƙa (abin da npm ke ƙirƙira don `plugin install ./dir`).
 
-Ana kama kurakuran lodawa kuma a buga su a matsayin gargaɗi — plugin mai matsala ba zai taɓa sa CLI ya daina aiki ba.
+Duka su ne** CLI-kawai** . Wurin aiki na gefen uwar garken-sabar (falon kasuwa/`plugin.json` plugins da ke gudana a cikin wakili) yana da nasa na'urar daukar hotan takardu tare da nasa override, `OMNIROUTE_PLUGINS_DIR` — duba [PLUGIN_MARKETPLACE.md → Plugin directory](./PLUGIN_MARKETPLACE.md#plugin-directory). Saita ɗaya baya shafar ɗayan.
+
+Ana kama kurakurai na lodawa kuma ana buga su azaman faɗakarwa — ɓoyayyen plugin ɗin bai taɓa rushewa da CLI ba.
 
 ## Tsaro
 

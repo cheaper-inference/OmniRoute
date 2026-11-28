@@ -168,9 +168,9 @@ Microsoft ఒకదాన్ని తిరిగి ఇచ్చినప్�
 
 ## సూచనలు
 
-- సమస్య: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- చర్చ: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- సోర్స్: `src/shared/constants/providers/web-cookie.ts` (ప్రొవైడర్ నిర్వచనం)
+- సంచిక: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- చర్చ: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- మూలం: `src/shared/constants/providers/web-cookie.ts` (ప్రొవైడర్ నిర్వచనం)
 - HAR దిగుమతి: `src/shared/utils/m365HarImport.ts`
 - క్రెడెన్షియల్ ఫీల్డ్లు: `src/shared/providers/webSessionCredentials.ts`
-- టియర్ మోడల్: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- టైర్ మోడల్: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

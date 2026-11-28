@@ -4,13 +4,7 @@
 
 ---
 
-> **Джерело істини:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` і публічні конструктори в `open-sse/utils/error.ts`
-> **Тести:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Останнє оновлення:** 2026-09-02 — v3.8.51
-> **Аудиторія:** Усі інженери, які працюють із відповідями про помилки (HTTP-маршрути, SSE-потоки, виконавці, обробники MCP).
-> **Статус:** **ОБОВ’ЯЗКОВО** для кожного шляху виконання коду, який повертає повідомлення про помилку клієнту.
+> **Джерело правди:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` і публічні конструктори в `open-sse/utils/error.ts`** Тести:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** аудиторія:** Відповіді на помилки будь-якого інженера (маршрути HTTP, потоки SSE, виконавці, обробники MCP ).** Статус:****MANDATORY** для кожного шляху коду, який повертає клієнту повідомлення про помилку.
 
 ## Навіщо це потрібно
 

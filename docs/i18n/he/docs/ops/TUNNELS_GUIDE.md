@@ -223,21 +223,21 @@ curl -X POST http://localhost:20128/api/tunnels/tailscale/enable \
 
 ## סיכום נקודות קצה
 
-| נקודת קצה                             | שיטה   | גוף הבקשה                           | אימות      |
-| ------------------------------------- | ------ | ----------------------------------- | ---------- |
-| `/api/tunnels/cloudflared`            | `GET`  | —                                   | management |
-| `/api/tunnels/cloudflared`            | `POST` | `{action: "enable" \| "disable"}`   | management |
-| `/api/tunnels/ngrok`                  | `GET`  | —                                   | management |
-| `/api/tunnels/ngrok`                  | `POST` | `{action, authToken?}`              | management |
-| `/api/tunnels/tailscale`              | `GET`  | —                                   | management |
-| `/api/tunnels/tailscale/check`        | `GET`  | —                                   | management |
-| `/api/tunnels/tailscale/install`      | `POST` | `{sudoPassword?}` (SSE)             | management |
-| `/api/tunnels/tailscale/start-daemon` | `POST` | `{sudoPassword?}`                   | management |
-| `/api/tunnels/tailscale/login`        | `POST` | `{hostname?}`                       | management |
-| `/api/tunnels/tailscale/enable`       | `POST` | `{sudoPassword?, hostname?, port?}` | management |
-| `/api/tunnels/tailscale/disable`      | `POST` | `{sudoPassword?}`                   | management |
+| נקודת קצה                             | שִׁיטָה | גוּף                                | Auth     |
+| ------------------------------------- | ------- | ----------------------------------- | -------- |
+| `/api/tunnels/cloudflared`            | `GET`   | —                                   | הַנהָלָה |
+| `/api/tunnels/cloudflared`            | `POST`  | `{action: "enable" \| "disable"}`   | הַנהָלָה |
+| `/api/tunnels/ngrok`                  | `GET`   | —                                   | הַנהָלָה |
+| `/api/tunnels/ngrok`                  | `POST`  | `{action, authToken?}`              | הַנהָלָה |
+| `/api/tunnels/tailscale`              | `GET`   | —                                   | הַנהָלָה |
+| `/api/tunnels/tailscale/check`        | `GET`   | —                                   | הַנהָלָה |
+| `/api/tunnels/tailscale/install`      | `POST`  | `{sudoPassword?}` (SSE)             | הַנהָלָה |
+| `/api/tunnels/tailscale/start-daemon` | `POST`  | `{sudoPassword?}`                   | הַנהָלָה |
+| `/api/tunnels/tailscale/login`        | `POST`  | `{hostname?}`                       | הַנהָלָה |
+| `/api/tunnels/tailscale/enable`       | `POST`  | `{sudoPassword?, hostname?, port?}` | הַנהָלָה |
+| `/api/tunnels/tailscale/disable`      | `POST`  | `{sudoPassword?}`                   | הַנהָלָה |
 
-אין נקודת קצה מרכזית `/api/settings/tunnels` — כל מנגנון עצמאי.
+אין נקודת קצה `/api/settings/tunnels` מרכזית — כל קצה אחורי הוא עצמאי.
 
 ## שיקולים לגבי קריאות חוזרות של OAuth
 

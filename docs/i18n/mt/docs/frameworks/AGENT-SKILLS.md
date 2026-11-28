@@ -13,12 +13,12 @@ L-Agent Skills huma fajls SKILL.md strutturati li jgħallmu lill-aġenti esterni
 
 ## Ħarsa ġenerali
 
-Il-katalgu fih **45 Agent Skill** (23 REST API + 21 CLI + fluss tax-xogħol wieħed għall-konfigurazzjoni). Kull skill għandha:
+Il-katalgu fih** 45 Ħiliet ta' Aġent** (23 REST API + 21 CLI + 1 fluss tax-xogħol tal-konfigurazzjoni). Kull ħila għandha:
 
-- **ID kanoniku** (`omni-auth`, `cli-serve`, eċċ.)
-- Fajl **SKILL.md** f’`skills/{id}/SKILL.md` b’YAML frontmatter (`name`, `description`) + korp markdown dettaljat
-- **Endpoints REST** (skills tal-API) jew **sottokmandi CLI** (skills tas-CLI) derivati mill-ispeċifikazzjoni OpenAPI u mir-reġistru tas-CLI
-- **URL raw ta’ GitHub** għall-aċċess dirett: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** ID kanoniku** (`omni-auth`, `cli-serve`, eċċ.)
+- A**SKILL.md** fajl `skills/{id}/SKILL.md` YAML frontmatter (`name`, `description`) + rich markdown body
+- **REST endpoints** (API ħiliet) jew** sottokmandi CLI** (ħiliet CLI ) derivati mir-reġistru OpenAPI spec u CLI
+- A**GitHub raw URL** għal fetch ħaj: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Ir-rispons tal-ġeneratur huwa `GeneratorReport`:
 
 ---
 
-## API tal-Kopertura
+## Coverage API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -4,8 +4,6 @@
 
 ---
 
-Ultima actualizare: 2026-08-23
-
 OmniRoute se integrează cu trei categorii de instrumente CLI răspândite în trei pagini de bord dedicate:
 
 | Pagină           | Traseu                  | Concept                                                                               | Conta          |

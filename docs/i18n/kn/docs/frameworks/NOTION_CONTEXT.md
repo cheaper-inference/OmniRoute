@@ -55,38 +55,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute ಟೋಕನ್ ಅನ್ನು ಉಳಿಸಿ ತಕ್ಷಣವೇ 1-ಫಲಿತಾಂಶದ ಪರೀಕ್ಷಾ ಹುಡುಕಾಟವನ್ನು ನಡೆಸುತ್ತದೆ; Notion
 ದೋಷ ಆಬ್ಜೆಕ್ಟ್ ಅನ್ನು ಹಿಂದಿರುಗಿಸಿದರೆ, ಟೋಕನ್ ಅನ್ನು ತೆರವುಗೊಳಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಕರೆ `400` ದೊಂದಿಗೆ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ.
 
-## MCP ಪರಿಕರಗಳು (6)
+## MCP ಉಪಕರಣಗಳು (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` ನಲ್ಲಿ ವ್ಯಾಖ್ಯಾನಿಸಲಾಗಿದೆ. ಕರೆ ಮಾಡುವ ಸಮಯದಲ್ಲಿ `getNotionToken()` ಮೂಲಕ ಟೋಕನ್ ಅನ್ನು ಪರಿಹರಿಸಲಾಗುತ್ತದೆ; ಯಾವುದನ್ನೂ ಕಾನ್ಫಿಗರ್ ಮಾಡದಿದ್ದರೆ ಪರಿಕರವು
-`"Notion ಇಂಟಿಗ್ರೇಶನ್ ಟೋಕನ್ ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿಲ್ಲ. ಅದನ್ನು Settings > Context Sources ನಲ್ಲಿ ಹೊಂದಿಸಿ."` ಎಂಬ ದೋಷವನ್ನು ಎಸೆಯುತ್ತದೆ.
+`open-sse/mcp-server/tools/notionTools.ts` ನಲ್ಲಿ ವ್ಯಾಖ್ಯಾನಿಸಲಾಗಿದೆ. ಟೋಕನ್ ಅನ್ನು ಕರೆ ಸಮಯದಲ್ಲಿ `getNotionToken()` ಮೂಲಕ ಪರಿಹರಿಸಲಾಗುತ್ತದೆ; ಯಾವುದನ್ನೂ ಕಾನ್ಫಿಗರ್ ಮಾಡದಿದ್ದರೆ ಉಪಕರಣವು `"Notion integration token not configured. Set it in Settings > Context Sources."` ಎಸೆಯುತ್ತದೆ
 
-| ಪರಿಕರ                        | ಸ್ಕೋಪ್         | ವಿವರಣೆ                                                                                                                     |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | ಪಠ್ಯ ಕ್ವೆರಿ ಮೂಲಕ ಪುಟಗಳು ಮತ್ತು ಡೇಟಾಬೇಸ್ಗಳನ್ನು ಹುಡುಕುತ್ತದೆ (ಶೀರ್ಷಿಕೆಗಳು, IDಗಳು, URLಗಳನ್ನು ಹಿಂದಿರುಗಿಸುತ್ತದೆ). ಪುಟೀಕರಿಸಲಾಗಿದೆ. |
-| `notion_get_page`            | `read:notion`  | ಪುಟವೊಂದರ ID ಮೂಲಕ ಅದರ ವಿಷಯ ಮತ್ತು ಮೆಟಾಡೇಟಾವನ್ನು ಪಡೆಯುತ್ತದೆ.                                                                  |
-| `notion_list_block_children` | `read:notion`  | ಬ್ಲಾಕ್ ಅಥವಾ ಪುಟದ ಎಲ್ಲಾ ಚೈಲ್ಡ್ ಬ್ಲಾಕ್ಗಳನ್ನು (ಬ್ಲಾಕ್ ಟ್ರೀ) ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ. ಪುಟೀಕರಿಸಲಾಗಿದೆ.                                  |
-| `notion_query_database`      | `read:notion`  | ಐಚ್ಛಿಕ `filter` + `sorts` ನೊಂದಿಗೆ ಡೇಟಾಬೇಸ್ ಅನ್ನು ಕ್ವೆರಿ ಮಾಡುತ್ತದೆ (Notion API ಸ್ವರೂಪ). ಪುಟೀಕರಿಸಲಾಗಿದೆ.                     |
-| `notion_get_database`        | `read:notion`  | ID ಮೂಲಕ ಡೇಟಾಬೇಸ್ನ ಸ್ಕೀಮಾ/ಮೆಟಾಡೇಟಾವನ್ನು ಪಡೆಯುತ್ತದೆ.                                                                         |
-| `notion_append_blocks`       | `write:notion` | ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಬ್ಲಾಕ್ ಅಥವಾ ಪುಟಕ್ಕೆ ಚೈಲ್ಡ್ ಬ್ಲಾಕ್ಗಳನ್ನು ಸೇರಿಸುತ್ತದೆ (ಪ್ರತಿ ವಿನಂತಿಗೆ ಗರಿಷ್ಠ 100 ಬ್ಲಾಕ್ಗಳು).                |
+| ಉಪಕರಣ                        | ವ್ಯಾಪ್ತಿ       | ವಿವರಣೆ                                                                                                             |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `notion_search`              | `read:notion`  | ಪಠ್ಯ ಪ್ರಶ್ನೆಯ ಮೂಲಕ ಪುಟಗಳು ಮತ್ತು ಡೇಟಾಬೇಸ್ಗಳನ್ನು ಹುಡುಕಿ (ಶೀರ್ಷಿಕೆಗಳನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ, IDs, URLs). ಪುಟ ಹಾಕಲಾಗಿದೆ. |
+| `notion_get_page`            | `read:notion`  | ಪುಟದ ವಿಷಯ ಮತ್ತು ಮೆಟಾಡೇಟಾವನ್ನು ಅದರ ID ಮೂಲಕ ಪಡೆಯಿರಿ.                                                                 |
+| `notion_list_block_children` | `read:notion`  | ಬ್ಲಾಕ್ ಅಥವಾ ಪುಟದ ಎಲ್ಲಾ ಬ್ಲಾಕ್ ಮಕ್ಕಳನ್ನು ಪಟ್ಟಿ ಮಾಡಿ (ಬ್ಲಾಕ್ ಟ್ರೀ). ಪುಟ ಹಾಕಲಾಗಿದೆ.                                   |
+| `notion_query_database`      | `read:notion`  | ಐಚ್ಛಿಕ `filter` + `sorts` (Notion API ಫಾರ್ಮ್ಯಾಟ್) ನೊಂದಿಗೆ ಡೇಟಾಬೇಸ್ ಅನ್ನು ಪ್ರಶ್ನಿಸಿ. ಪುಟ ಹಾಕಲಾಗಿದೆ.                 |
+| `notion_get_database`        | `read:notion`  | ID ಮೂಲಕ ಡೇಟಾಬೇಸ್ನ schema/metadata ಪಡೆಯಿರಿ.                                                                         |
+| `notion_append_blocks`       | `write:notion` | ಬ್ಲಾಕ್ ಮಕ್ಕಳನ್ನು ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಬ್ಲಾಕ್ ಅಥವಾ ಪುಟಕ್ಕೆ ಸೇರಿಸಿ (ಪ್ರತಿ ವಿನಂತಿಗೆ ಗರಿಷ್ಠ 100 ಬ್ಲಾಕ್ಗಳು).                |
 
-### ಇನ್ಪುಟ್ ಪ್ಯಾರಾಮೀಟರ್ಗಳು
+### ಇನ್ಪುಟ್ ನಿಯತಾಂಕಗಳು
 
-- `notion_search` — `query` (1–500 ಅಕ್ಷರಗಳು), `pageSize` (1–100, ಡೀಫಾಲ್ಟ್ 20),
-  `startCursor` (ಐಚ್ಛಿಕ).
-- `notion_get_page` — `pageId` (32-ಅಕ್ಷರದ ಹೆಕ್ಸ್ ಅಥವಾ UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ಡೀಫಾಲ್ಟ್ 50),
-  `startCursor` (ಐಚ್ಛಿಕ).
-- `notion_query_database` — `databaseId`, `filter` (ಐಚ್ಛಿಕ, Notion ಫಿಲ್ಟರ್ ಸ್ವರೂಪ),
-  `sorts` (ಐಚ್ಛಿಕ ಅರೆ), `pageSize` (1–100, ಡೀಫಾಲ್ಟ್ 50), `startCursor` (ಐಚ್ಛಿಕ).
+- `notion_search` — `query` (1–500 ಅಕ್ಷರಗಳು), `pageSize` (1–100, ಡೀಫಾಲ್ಟ್ 20), `startCursor` (ಐಚ್ಛಿಕ).
+- `notion_get_page` — `pageId` (32-ಚಾರ್ ಹೆಕ್ಸ್ ಅಥವಾ UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ಡೀಫಾಲ್ಟ್ 50), `startCursor` (ಐಚ್ಛಿಕ).
+- `notion_query_database` — `databaseId`, `filter` (ಐಚ್ಛಿಕ, Notion ಫಿಲ್ಟರ್ ಫಾರ್ಮ್ಯಾಟ್), `sorts` (ಐಚ್ಛಿಕ ಅರೇ), `pageSize` (1–100, ಡೀಫಾಲ್ಟ್ 50), `startCursor` (ಐಚ್ಛಿಕ).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (ಬ್ಲಾಕ್ ಆಬ್ಜೆಕ್ಟ್ಗಳ ಅರೆ),
-  `after` (ಐಚ್ಛಿಕ ಸ್ಥಾನ).
+- `notion_append_blocks` — `blockId`, `children` (ಬ್ಲಾಕ್ ವಸ್ತುಗಳ ರಚನೆ), `after` (ಐಚ್ಛಿಕ ಸ್ಥಾನ).
 
-### ಸ್ಕೋಪ್ಗಳು
+### ವ್ಯಾಪ್ತಿಗಳು
 
-ಓದುವ ಪರಿಕರಗಳಿಗೆ `read:notion` ಮತ್ತು ಬರೆಯುವ ಪರಿಕರಕ್ಕೆ `write:notion` ಅಗತ್ಯವಿದೆ.
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` ಆಗಿರುವಾಗ ಮಾತ್ರ
-`open-sse/mcp-server/server.ts` ನಲ್ಲಿನ `withScopeEnforcement()` ಮೂಲಕ ಸ್ಕೋಪ್ಗಳನ್ನು ಜಾರಿಗೊಳಿಸಲಾಗುತ್ತದೆ; ಕರೆ ಮಾಡುವವರ ಅನುಮತಿಸಲಾದ ಸ್ಕೋಪ್ಗಳು `OMNIROUTE_MCP_SCOPES` (ಅಲ್ಪವಿರಾಮದಿಂದ ಪ್ರತ್ಯೇಕಿಸಿದ) ಅಥವಾ ದೃಢೀಕರಿಸಲಾದ API ಕೀಯ ಸ್ಕೋಪ್ ಸಂದರ್ಭದಿಂದ ಬರುತ್ತವೆ. ಸಂಪೂರ್ಣ ಸ್ಕೋಪ್ ಮಾದರಿಗಾಗಿ [MCP-SERVER.md](./MCP-SERVER.md) ನೋಡಿ.
+ಓದುವ ಪರಿಕರಗಳಿಗೆ `read:notion` ಅಗತ್ಯವಿರುತ್ತದೆ ಮತ್ತು ಬರೆಯುವ ಸಾಧನಕ್ಕೆ `write:notion` ಅಗತ್ಯವಿದೆ. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ಮಾಡಿದಾಗ `open-sse/mcp-server/server.ts` ನಲ್ಲಿ `withScopeEnforcement()` ಯಿಂದ ಸ್ಕೋಪ್ಗಳನ್ನು ಜಾರಿಗೊಳಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಯಾವಾಗಲೂ API ಕೀಲಿಯು `manage`/`admin` ಇಲ್ಲದಿರುವ HTTP/SSE ಕಾಲರ್ಗೆ; ಕಾಲರ್ನ ಅನುಮತಿಸಲಾದ ಸ್ಕೋಪ್ಗಳು `OMNIROUTE_MCP_SCOPES` (ಅಲ್ಪವಿರಾಮದಿಂದ ಬೇರ್ಪಡಿಸಿದ) ಅಥವಾ ದೃಢೀಕರಿಸಿದ API ಕೀಯ ಸ್ಕೋಪ್ ಸಂದರ್ಭದಿಂದ ಬರುತ್ತವೆ. ಪೂರ್ಣ ವ್ಯಾಪ್ತಿಯ ಮಾದರಿಗಾಗಿ [MCP-SERVER.md](./MCP-SERVER.md) ನೋಡಿ.
 
 ## ಎಂಡ್ಪಾಯಿಂಟ್ಗಳು
 

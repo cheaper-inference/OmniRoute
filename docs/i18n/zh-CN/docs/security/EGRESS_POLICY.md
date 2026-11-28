@@ -67,15 +67,15 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ---
 
-## 三种取值
+## 三个价值观
 
-| 值     | UI 标签        | 行为                                                                                                                       |
-| ------ | -------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `自动（双栈）` | 由操作系统选择地址族。对于使用 IP 字面量的代理主机，地址族由该字面量本身决定；对于主机名，两种地址族均可使用。这是默认值。 |
-| `ipv4` | `仅 IPv4`      | 将连接限定为 IPv4。如果代理主机没有 IPv4（A）记录，则连接直接失败。                                                        |
-| `ipv6` | `仅 IPv6`      | 将连接限定为 IPv6。如果代理主机没有 IPv6（AAAA）记录，则连接直接失败。                                                     |
+| 价值   | UI标签              | 行为                                                                                                 |
+| ------ | ------------------- | ---------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS挑选家庭。对于 IP 字面量代理主机，族是字面量所固有的；对于主机名，两个系列都有资格。这是默认设置。 |
+| `ipv4` | `IPv4 only`         | 将连接固定到IPv4。如果代理主机没有IPv4 (A) 记录，则关闭失败。                                        |
+| `ipv6` | `IPv6 only`         | 将连接固定到IPv6。如果代理主机没有IPv6 (AAAA) 记录，则关闭失败。                                     |
 
-UI 字符串位于 `src/i18n/messages/en.json`（`labelFamily`、`familyAuto`、`familyIpv4`、`familyIpv6`、`familyHint`）。
+UI字符串存在于`src/i18n/messages/en.json` （`labelFamily`、 `familyAuto`、 `familyIpv4`、 `familyIpv6`、 `familyHint`）中。
 
 ---
 
@@ -83,21 +83,21 @@ UI 字符串位于 `src/i18n/messages/en.json`（`labelFamily`、`familyAuto`、
 
 ### 仪表板
 
-该选择器位于 **代理池** 选项卡的代理表单中：
+选择器是代理形式的**代理池**选项卡：
 
-1. 打开 **仪表板 → 设置 → 代理 → 代理池**
+1. 打开**仪表板→设置→代理→代理池**
 2. 添加或编辑代理
-3. 将 **IP 地址族** 下拉菜单设置为 `自动（双栈）`、`仅 IPv4` 或 `仅 IPv6`
-4. 保存
+3. 设置**IP家族**下拉至`Auto (dual-stack)`、 `IPv4 only`或`IPv6 only`
+4. 节省
 
-该控件由 `ProxyRegistryManager.tsx` 渲染（挂载于 `proxy/ProxyPoolTab.tsx`）。
+该控件由`ProxyRegistryManager.tsx`呈现（安装在`proxy/ProxyPoolTab.tsx`中）。
 
 ### API
 
-`family` 字段是代理注册表创建/更新载荷的一部分，由 `createProxyRegistrySchema` / `updateProxyRegistrySchema`（`src/shared/validation/schemas.ts`）验证，并由 `POST` / `PATCH /api/v1/management/proxies` 处理：
+`family`字段是代理注册表create/update有效负载的一部分，由`createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) 验证并由`POST` / `PATCH /api/v1/management/proxies`处理：
 
 ```bash
-# 创建一个仅使用 IPv6 的代理
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# 将现有代理更改为仅使用 IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-用于上游代理条目的内联代理配置对象也接受同一字段（`upstream_proxy_config.family`，参见[数据模型](#data-model)）。
+用于上游代理条目的内联代理配置对象（`upstream_proxy_config.family`，请参阅[数据模型](#data-model)）也接受相同的字段。
 
-有关代理 CRUD/分配 API 的其余内容，请参阅 [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md)。
+对于代理CRUD/assignment API的其余部分，请参阅[PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) 。
 
 ---
 

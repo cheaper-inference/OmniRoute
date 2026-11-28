@@ -4,12 +4,11 @@
 
 ---
 
-> **Sandhedskilde:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Senest opdateret:** 2026-06-28 — v3.8.40
+> **Sandhedens kilde:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute registrerer administrative handlinger, godkendelseshændelser, ændringer i livscyklussen for udbyderlegitimationsoplysninger og kald af MCP-værktøjer i SQLite-baserede revisionstabeller. Denne side beskriver, hvad der logges, hvor det gemmes, hvor længe det opbevares, hvordan API-nøgler kan fravælge logning, og hvordan dataene kan forespørges.
+OmniRoute registrerer administrative handlinger, godkendelseshændelser, ændringer i livscyklus for udbyderens legitimationsoplysninger og MCP værktøjsankaldelser til SQLite-understøttede revisionstabeller. Denne side dækker, hvad der bliver logget, hvor det bor, hvor længe det opbevares, hvordan API nøgler kan fravælges, og hvordan man forespørger dataene.
 
-Implementeringen findes i `src/lib/compliance/index.ts` (T-43 — "Overholdelseskontroller") og `src/lib/compliance/providerAudit.ts`. Revisionsskrivninger kaster aldrig fejl: Ved enhver fejl ignoreres kaldet lydløst, så revisionslogning ikke kan afbryde hovedflowet for anmodningen.
+Implementeringen lever i `src/lib/compliance/index.ts` (T-43 — "Compliance Controls") og `src/lib/compliance/providerAudit.ts`. Audit skriver aldrig kaste: ved enhver fejl sluges opkaldet lydløst, så revisionslogning ikke kan bryde hovedanmodningsstrømmen.
 
 ## Hvad bliver logget
 
@@ -127,31 +126,33 @@ kalder `POST /api/settings/purge-request-history`, som sletter `call_logs`,
 Standardværdier er defineret i `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## Fravalg med `noLog` (pr. API-nøgle)
+## `noLog` Opt-Out (pr. API nøgle)
 
-API-nøgler kan markeres, så deres efterfølgende kaldstrafik ikke logges.
-Flaget findes i tabellen `api_keys` (`no_log INTEGER DEFAULT 0`) og afspejles
-i et sæt i hukommelsen til hurtige opslag.
+API nøgler kan markeres, så deres downstream-opkaldstrafik ikke logges. Flaget lever på `api_keys` bordet (`no_log INTEGER DEFAULT 0`) og spejles i et sæt i hukommelsen til hot-path-opslag.
 
 ```bash
-# Opret en nøgle uden logning (administrationsgodkendelse påkrævet)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Hjælpefunktioner (`src/lib/compliance/index.ts`):
+Hjælpere (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — aktiver eller deaktiver posten i hukommelsen
-- `isNoLog(apiKeyId)` — kontrolleres på anmodningsstien; falder tilbage til en 30 sekunders
-  cachelagret læsning fra `api_keys.no_log`
-- `NO_LOG_API_KEY_IDS` (miljøvariabel, kommasepareret) — indlæses på forhånd i sættet i hukommelsen
-  ved opstart; nyttigt, når du ikke kan ændre kolonnen direkte
+- `setNoLog(apiKeyId, true|false)` — skifter indgangen i hukommelsen
+- `isNoLog(apiKeyId)` — kontrolleret på anmodningsstien; falder tilbage til en 30 s cached læsning fra `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, kommasepareret) — forudindlæst i hukommelsessættet ved opstart; nyttig, når du ikke kan skifte kolonnen direkte
 
-Administrative revisionshændelser (login, leverandørændringer, MCP-værktøjskald osv.)
-påvirkes **ikke** af `noLog` — det er kun trafiklogning pr. anmodning, der
-fravælges.
+Administrative revisionsbegivenheder (login, udbyderændringer, MCP værktøjsopkald osv.) er** ikke** påvirket af `noLog` — kun pr-anmodning trafiklogning er fravalgt.
+
+### Fravalg pr. anmodning (`x-omniroute-no-log`)
+
+En klient kan fravælge en enkelt inferensanmodning fra payload persistens uden at oprette en dedikeret nøgle. Send `x-omniroute-no-log: true` på anmodningen (`1` og `yes` accepteres også, der skelnes mellem store og små bogstaver). Det gælder for alle chatfamilieruter, der løber gennem chatbehandleren: Chatafslutninger, svar, meddelelser, fuldførelser og den Gemini-kompatible sti. Call-log-rækken er stadig skrevet med dens tidsstempel, model, udbyder, status, varighed og token-antal, men `request_body`, `response_body`, anmodningsresuméer og pipeline-artefakter er udeladt.
+
+Headeren er ORed med nøgleflaget: en no-log nøgle forbliver no-log uanset headeren, og headeren kan ikke genaktivere logning for en no-log nøgle. Overskriften fjernes, før anmodningen videresendes opstrøms.
+
+Det gør denne overskrift** ikke** deaktiver hukommelsesudtrækning eller den semantiske cache. Send `x-omniroute-no-memory: true` og `x-omniroute-no-cache: true` ved siden af, når anmodningen heller ikke må fortsætte med indhold i disse undersystemer.
 
 ## REST API
 

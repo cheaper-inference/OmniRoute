@@ -4,90 +4,63 @@
 
 ---
 
-> **2026-11-19: Mergify red čekanja za spajanje je povučen** (odluka vlasnika). `.mergify.yml` više ne definira red i odbija naredbe Mergify koje spajaju ili prepisuju zahtjev za povlačenjem. Izdanja PRs spajaju se ručno pod skupom pravila repozitorija "Zahtijevaj zelena vrata na aktivnom izdanju" (`Gate / CI` + `Gate / Quality`) dok se omni-queue ne pokrene u načinu rada uživo, a nakon toga kroz omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Odjeljci Mergify u nastavku opisuju red čekanja kakav je bio.
+## Slijetanje na granu za oslobađanje
 
-Od v3.8.49 (WS3.2/WS3.4 quality/velocity plana) zadana staza spajanja za pregledani PRs u `release/vX.Y.Z` je** Mergify red čekanja za spajanje** (`.mergify.yml`); the** ručni merge-train** dokumentiran u nastavku je FALLBACK — koji se koristi tijekom incidenata, zamrzavanja izdanja ili ako se plan Mergify Open Source ikada promijeni.
+Omni-queue upravlja slijetanjem u `release/vX.Y.Z`. Pročitajte `mode` najviše razine u `config/merge-queue/config.json` na zadanoj grani prije dohvaćanja PR. Pogledajte [Omni-Queue](OMNI_QUEUE.md).
 
-## Zadani put: Mergifyjev red čekanja
+- **`shadow`** pokreće provjeru valjanosti i prepušta slijetanje ručnom spajanju. Primijenite `omni-queue` na odobreni PR na njegovoj konačnoj glavi. Provjerite ispunjavanje uvjeta sa `npm run queue -- why <PR>`. Čekaj presudu za tu glavu u `npm run queue -- history --base <branch>`. Nastavi na `would-land`. Na `culprit-found` ili `would-dequeue` držite spajanje i popravite uzrok.
+- **Izuzeci u sjeni.** Vlak sa zelenim punim CI protiv trenutnog osnovnog vrha može nastaviti bez zasebne presude o čekanju. Ista iznimka vrijedi kada PR glava već sadrži trenutni osnovni vrh.
+- **`live`** koristi oznaku `omni-queue` za pokretanje slijetanja. Sam red čekanja spušta PR. Ostavite naredbe spajanja i izravna guranja u red čekanja.
 
-1. Kampanje pregledavaju PR i daju mu zeleno svjetlo, a vlasnik ga odobrava putem svojeg ⭐
-   kontrolnog koraka prije spajanja (izvješće + odluka za svaku stavku — pogledajte `/merge-prs`, korak 0.75).
-2. Vlasnik (ili sesija koja postupa prema vlasnikovoj odluci) dodjeljuje oznaku **`queue`**.
-   Ta oznaka JEST odobrenje za spajanje; Mergify ga samo izvršava.
-3. Mergify provjerava PR-ove u redu čekanja **serijski** (jedan po jedan) prema brzim
-   kontrolama i spaja ih (squash). Grupiranje + automatska bisekcija dio su Mergifyjeve
-   plaćene razine ("Cannot use Merge Queue batch" u besplatnom planu, #7220), stoga
-   `.mergify.yml` ne postavlja `batch_size`; grupiranje ostaje zadatak ručnog niza spajanja
-   opisanog u nastavku. PR čije su provjere i dalje na čekanju nakon `checks_timeout`
-   (240 min = 2× izmjereni p95 za `quality.yml`) uklanja se iz reda umjesto da blokira red.
-4. Nakon spajanja, kontinuirani tijek rada za provjeru ispravnosti izdanja provjerava novi
-   vrh grane pri pushu i otvara problem za utvrđivanje odgovornosti ako je kombinacija
-   uzrokovala regresiju (bez automatskog vraćanja promjena).
+Svako slijetanje zahtijeva odobrenje vlasnika i odgovarajuće potrebne provjere. Primijenite `omni-queue` tek nakon što je vlasnik odobrio slijetanje. PRs u redu čekanja koji dodiruje zaštićene staze također zahtijeva `protected-approved` odluku vlasnika za taj PR.
 
-Zaštitna pravila (odražavaju stroga pravila #21/#22 iz `CLAUDE.md`):
+Skup pravila "Zahtijevaj zelena vrata na aktivnom izdanju" zahtijeva zelene `Gate / CI` i `Gate / Quality` na glavi. Nikada nemojte koristiti `--admin` za zaobilaženje crvenih vrata. Blokovi zamrzavanja izdanja spajaju se u smrznutu granu. Vidi [Čvrsto pravilo 21](HARD_RULES_DETAIL.md). Nikada nemojte označavati, spajati ili gurati na zahtjev za povlačenjem da druga sesija radi. Vidi [Čvrsto pravilo 22](HARD_RULES_DETAIL.md).
 
-- **Aktivno zamrzavanje izdanja** → NEMOJTE označavati PR-ove usmjerene na zamrznutu
-  granu; prvo ih preusmjerite na aktivnu granu `release/vX+1`.
-- **PR druge sesije koji je u tijeku** → nikada ga nemojte označiti; samo vlasnička
-  sesija stavlja vlastiti rad u red čekanja.
-- Razlike koje sadrže samo testove i PR-ovi s oznakom `hotfix` već pokreću smanjeni skup
-  CI provjera (pogledajte `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); uvjeti reda čekanja
-  prihvaćaju onaj skup provjera koji je stvarno pokrenut (`#check-failure=0` +
-  `#check-pending=0`).
+## Zahtjev za povlačenje vlaka
 
-## Rezervna opcija: ručni vlak za spajanje
+1. Započni granu vlaka na trenutnom vrhu baze izdanja. Integrirajte točne odobrene glave članova korištenjem obveza spajanja. Sačuvajte njihovu povijest predaja izbjegavajući squash i rebase.
+2. Otvorite jedan zahtjev za povlačenje za granu vlaka. Potvrdite taj PR s vlastitim punim CI na trenutnom vrhu baze. Ponovno provjerite vrh baze i odobrene glave članova prije slijetanja. Osvježite vlak i njegov CI kada se validirani kandidat promijeni.
+3. Spustite vlak PR s predajom spajanja u primjenjivom načinu čekanja. U načinu rada uživo, `merge-ff` metoda slijetanja reda čekanja čuva predaje spajanja. Izvorne glave članova postaju dostupne iz grane izdanja. GitHub označava člana PRs kao spojenog i urezivanja zadržavaju svoje autore.
 
-Koristi se kada red nije dostupan. Time se formalizira praksa kojom su tijekom ciklusa v3.8.47
-u jednom danu obrađena 33 PR-a:
+Javni primjer je [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Kombinirao je 18 članova PRs i završio s obvezom spajanja 2026-11-24.
 
-1. **Sastavite grupu** (~10–30 pregledanih i odobrenih PR-ova). Provjerite kolizije `linked:`
-   (isti `tap.testFiles`, isti dijelovi CHANGELOG-a) i obradite ih slijedno.
-2. **Provjerite JEDNOM**: u izoliranom radnom stablu temeljenom na vrhu grane izdanja lokalno
-   spojite sve vrhove grupe, a zatim pokrenite skup provjera ekvivalentan izdanju
-   (`npm run check:release-green`; prije izdanja dodajte `--with-build`).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatizira korake 1–2 (PR-ovi u sukobu
-   izbacuju se, a vlak nastavlja). Puni način rada pokreće `npm run test:unit` — izvršavač
-   prilagođen računalu (`--test-concurrency=20`), **a ne** dvije uzastopne CI particije s
-   4 jezgre, zbog kojih je dominantna faza koristila samo ~25 % računala sa 16 jezgri
-   (ispravljeno 2026-07-18). `--fast` (obrada velikih vlakova tijekom dana, uz odobrenje
-   vlasnika 2026-07-18) zadržava svaku statičku kontrolu + vitest, ali pokreće samo
-   node:test datoteke koje su promijenili ukrcani PR-ovi; PUNI skup provjera i dalje se
-   mora pokrenuti barem jednom dnevno na akumuliranom vrhu (jedan vlak bez `--fast`).
-3. **Prolaz** → spojite PR-ove redom (ponovno provjeravajući `state,headRefOid` prije svakog —
-   PR čiji se vrh promijenio ponovno ulazi u pregled). Dokažite da je neto razlika svakog
-   spajanja isključivo vlastita promjena tog PR-a (bez automatskog razrješavanja vraćanjem:
-   provjerite `git diff --stat` radi brisanja izvan opsega).
-4. **Pad** → podijelite grupu napola (provjerite svaku polovicu) umjesto ponovne provjere
-   jednog po jednog PR-a; vratite problematični PR u red za pregled zajedno s dokazima.
-5. **Nikad**: ne spajajte u zamrznutu granu tijekom zamrzavanja; ne koristite `git stash`
-   nigdje; ne pokrećite CI iznova naslijepo u nadi da će pad nestati (pravilo: pad je informacija).
+Povratak sinkronizacije sa `main` na sljedeću granu izdanja također dolazi kroz predaju spajanja. Očuvanje `main` porijekla potrebno je za kasnije sinkronizacije. Pogledajte [Izolacija radnog stabla](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Razine (zašto je red siguran samo s brzim kontrolama)
+## Lokalni validator niza spajanja
 
-- **Po PR-u** (brze kontrole iz quality.yml): testovi na koje utječe TIA + puni jedinični
-  testovi u 4 particije + vitest + skup lint provjera + provjera tipova + provjera
-  cjelovitosti dokumentacije/CHANGELOG-a.
-- **Po grupi/vrhu** (kontinuirana provjera ispravnosti izdanja): STROGE kontrole `--quick`
-  pri svakom slanju na granu izdanja; puna izvođenja `--with-build --full-ci` 3× dnevno.
-- **Po izdanju** (ci.yml na PR-u izdanja): potpuna matrica, uključujući E2E ×9,
-  artefakt paketa + osnovnu provjeru pokretanja tarballa, pokrivenost/pragove.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Ništa se ne provjerava manje nego prije — zahtjevne provjere samo se pokreću po grupi/vrhu
-umjesto po PR-u, čime se uklanjaju O(N) povratni ciklusi.
+Validator dohvaća bazu i PR glave i kombinira ih u jednokratno radno stablo. Jednom pokreće svoj paritetni paket na rezultirajućem stablu. Neuspjelo dohvaćanje glave ili sukob spajanja izbacuje taj PR i skripta nastavlja s preostalim PRs.
 
-## Preduvjeti svježe radne kopije za `merge-train.sh`
+- **`--plan`** ispisuje korake odabranog načina rada i izlazi bez stvaranja radnog stabla ili kontaktiranja daljinskog upravljača. Kombinirajte ga sa `--fast` da provjerite brzi plan.
+- **`--fast`** pokreće uobičajena statička vrata, odabrane promijenjene `node:test` datoteke pod `tests/unit/` i `npm run test:vitest`. Pokrenite punu lokalnu provjeru najmanje jednom dnevno na akumuliranoj napojnici kada koristite brzi način.
+- **Puni način rada** dodaje puna samo statička vrata i pokreće `npm run test:unit` i `npm run test:vitest`.
 
-Skripta na korijenskoj radnoj kopiji pokreće **predprovjeru** koja se prekida pri prvom
-neuspjehu (prije bilo kakvog rada u radnom stablu), tako da se neispravna instalacija nikad
-ne može prikazati kao neuspješan vlak:
+Neispravna statička vrata ponovno se izvode na netaknutoj bazi ako je sonda baze dostupna. Skripta izvješćuje o naslijeđenim pogreškama i nastavlja kada se svaki prepoznati redak kršenja također pojavi u bazi, a ukupni broj nije porastao.
 
-1. Pokrenite `npm ci`, a zatim `bun` postinstall koji npm blokira:
-   `(cd node_modules/bun && node install.js)` — u suprotnom `check:provider-consistency`
-   i `check:known-symbols` (oba koriste `bun scripts/…`) padaju i na vlaku I na osnovi,
-   bez retka koji navodi kršenje.
-2. Ne smije postojati zalutali `node_modules/node_modules` (duplicirano stablo ovisnosti;
-   React se učitava dvaput, a UI vitest skupovi odmah padaju).
-3. `node_modules/.bin/tsc` mora postojati i biti izvršiv (u djelomičnoj instalaciji nedostaje).
+| Izlaz | Značenje                                                                                                                                               |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `0`   | Ispisao plan ili dovršio komplet. Sažetak paketa navodi sve naslijeđene statičke greške i izbačene PRs.                                                |
+| `1`   | Nevažeći argumenti, nema Git checkout-a, neuspješna pretprovjera ili PR nije upisan.                                                                   |
+| `2`   | Provjera paketa nije uspjela i nije se kvalificirala kao naslijeđena. Operater može prepoloviti seriju, izbaciti problematični PR i ponovno pokrenuti. |
 
-Vlak pokreće blokirajući `npm run check:cycles:ratchet`; samostalni `npm run check:cycles`
-savjetodavan je (ispisuje SCC-ove i završava s kodom različitim od nule čak i na ispravnoj osnovi).
+Lokalna propusnica pruža dijagnostičke dokaze samo za vlasnički dosje. Svako slijetanje i dalje zahtijeva autorizaciju vlasnika, vlastite potrebne provjere i odluku čekanja u sjeni kada je primjenjivo.
+
+## Razina
+
+- **Po PR.** CI i provjere odabira kvalitete na temelju promijenjenih putanja. Kod PRs pokreće brza vrata kvalitete i utjecajne testove, s odvojenim jedinicama i Vitest poslovima u CI.
+- **Po kandidatu u redu.** CI i Quality pokreću puni profil za sastavljenog kandidata na njegovom redu čekanja ref.
+- **Po savjetu za izdavanje.** Release-Green pokreće brza tvrda vrata na guranja koja odgovaraju njegovim filtrima putanje. Tri planirana izvođenja po danu koriste puni pregled za granu izdanja.
+- **Po izdanju.** Potpuna CI matrica uključuje E2E šardove, provjeru valjanosti paketa, tarball boot smoke i provjere pokrivenosti. Pogledajte [Kontrolni popis izdanja](RELEASE_CHECKLIST.md).
+
+## Preduvjeti za novu naplatu za `merge-train.sh`
+
+Pretprovjera se izvodi prije stvaranja radnih stabala. Instalirajte ovisnosti sa `npm ci`. Potvrdite da je `node_modules/.bin/tsc` izvršni i da `node_modules/node_modules` ne postoji. Provjerite je li `node_modules/.bin/bun --version` uspio.
+
+Ako je postinstalacija Bun preskočena, pokrenite `(cd node_modules/bun && node install.js)`. Dosljednost pružatelja i provjere poznatih simbola koriste Bun. Validator pokreće `npm run check:cycles:ratchet` kao blokirajuća vrata. Samostalna naredba `npm run check:cycles` je savjetodavna.
+
+## Povijest
+
+Red čekanja za spajanje Mergifyja povučen je 19. studenoga 2026.

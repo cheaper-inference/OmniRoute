@@ -6,23 +6,24 @@
 
 > Celoten referenčni priročnik za namestitev z Dockerjem. Za hiter začetek glejte [razdelek o Dockerju v datoteki README](../README.md#-docker).
 
-## Kazalo vsebine
+## Kazalo
 
-- [Hiter zagon](#quick-run)
+- [Hitri tek](#quick-run)
 - [Z datoteko okolja](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Docker Sestavi](#docker-compose)
 - [Razpoložljivi profili](#available-profiles)
-- [Konfiguriranje gostiteljskih orodij CLI, ko OmniRoute deluje v Dockerju](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Stranski vsebnik Redis](#redis-sidecar)
-- [Produkcijski Compose](#production-compose)
-- [Faze datoteke Dockerfile](#dockerfile-stages)
-- [Ključne okoljske spremenljivke](#critical-environment-variables)
-- [Docker Compose s Caddyjem (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Hitri tunel Cloudflare](#cloudflare-quick-tunnel)
+- [Utrjevanje posode](#container-hardening)
+- [Konfiguriranje orodij gostitelja CLI, ko se OmniRoute izvaja v Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Sidecar](#redis-sidecar)
+- [Produkcija Compose](#production-compose)
+- [Stopnje Dockerfile](#dockerfile-stages)
+- [Kritične spremenljivke okolja](#critical-environment-variables)
+- [Docker Sestavi s Caddyjem (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare hitri tunel](#cloudflare-quick-tunnel)
 - [Oznake slik](#image-tags)
-- [Posodobitve nadzorne plošče v Dockerju](#dashboard-updates-in-docker)
-- [Razpoložljivost: privzeti SQLite podpira eno repliko](#availability-default-sqlite-is-single-replica)
-- [Regionalne napake Gemini znotraj Dockerja](#gemini-regional-errors-inside-docker)
+- [Posodobitve nadzorne plošče v Docker](#dashboard-updates-in-docker)
+- [Razpoložljivost: privzeti SQLite je ena replika](#availability-default-sqlite-is-single-replica)
+- [regionalne napake Gemini znotraj Docker](#gemini-regional-errors-inside-docker)
 - [Pomembne opombe](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute vključuje profile Compose za glavne načine namestitve. Izberite tist
 | `web`             | `omniroute-web`  | Ponudniki spletnih sej, ki potrebujejo brskalnik: `gemini-web`, `claude-web`, `claude-turnstile` (zgradi `runner-web`, Chromium je vključen)                    | `docker compose --profile web up -d`         |
 
 > Kombinirati je mogoče več profilov: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Utrjevanje posode
+
+Storitve aplikacij `base`, `web`, `cli` in `host` v `docker-compose.yml` uporabljajo `cap_drop: [ALL]` in varnostno možnost `no-new-privileges:true`. Slika se izvaja kot nekorenski uporabnik `node` in posluša na visokih vratih, zato ne potrebuje zmožnosti Linux. Varnostna možnost preprečuje, da bi procesi pridobili privilegije prek binarnih datotek setuid.
+
+Samo profil `cli` namesti vtičnico Docker za samodejno posodabljanje. Glejte [Escape hatch: konfigurirajte lastni CLIs vsebnika](#escape-hatch-configure-the-containers-own-clis-use-sparingly) za varnostne posledice.
+
+Korenski datotečni sistem ostane privzeto zapisljiv. Profil `cli` zapiše konfiguracijo CLI in predpomni v domači imenik vsebnika, profil `web` shrani stanje seje Chromium, izvajalno okolje Next.js pa lahko zapiše predpomnilnike zunaj `/app/data`.
+
+Če želite preizkusiti korenski datotečni sistem samo za branje s profilom `base`, shranite to kot `docker-compose.override.yml` poleg `docker-compose.yml`. Compose samodejno prebere preglasitev.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Obstoječi nosilec `/app/data` ostane zapisljiv. Preizkusite svojo delovno obremenitev, preden uporabite to preglasitev v proizvodnji, saj bo morda morala pisati na druge poti.
 
 ## Konfiguriranje gostiteljskih orodij CLI, ko OmniRoute deluje v Dockerju
 
@@ -279,7 +304,7 @@ Obnašanje pomnilnika v Docker:
 
 ### Izvajalni čas RAM za agente za kodiranje
 
-Privzeta vrednost 1 GiB Docker je nadstropje dashboard/light-chat, ne velikost proizvodnje. Dolga telesa `POST /v1/responses` (na stotine sporočil, na desetine orodij) med stiskanjem ohranijo več grafov v pomnilniku. Dve prekrivajoči se zahtevi za žeton ~ 3 MiB / ~ 750k sta prekinili V8 ob** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) in prav tako zadel 16 GiB cgroup OOM. Glej [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Privzeta vrednost 1 GiB Docker je nadstropje dashboard/light-chat, ne velikost proizvodnje. Dolga telesa `POST /v1/responses` (na stotine sporočil, na desetine orodij) med stiskanjem ohranijo več grafov v pomnilniku. Dve prekrivajoči se zahtevi za žeton ~ 3 MiB / ~ 750k sta prekinili V8 ob** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) in prav tako zadel 16 GiB cgroup OOM. Glej [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Velikost** cgroup `--memory` nad kopico** izvorni medpomnilniki —, SQLite in vmesni deli za stiskanje so zunaj V8.
 
@@ -589,9 +614,9 @@ Stock Docker / Kubernetes OmniRoute je** en proces vozlišča + en zapisovalnik 
 | Pripravljenost   | HTTP `GET /healthz`                                        | Kratke časovne omejitve, ki zanko dogodkov obravnavajo kot mrtvo |
 | Globoko / ljudje | `/api/monitoring/health`                                   | Avtomatizirano kubelet liveness                                  |
 
-**Nadgradnje:** pričakujte, da bo vsaka seja padla. Izčrpajte stranke, če lahko; na privzeti SQLite ni tekoče posodobitve. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` bo nadomestil tudi edini postopek, ko je vsebnik nezdrav – enak radij eksplozije.
+**Nadgradnje:** pričakujte, da bo vsaka seja padla. Izčrpajte stranke, če lahko; na privzeti SQLite ni tekoče posodobitve. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` bo nadomestil tudi edini proces, ko je vsebnik Unhealthy — isti radij eksplozije.
 
-Pripravljeni manifesti in grafikon Helm so v živo v `deploy/kubernetes/` in `deploy/helm/omniroute/` — glejte [vodnik za uvajanje Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+Pripravljeni manifesti in grafikon Helm v živo v `deploy/kubernetes/` in `deploy/helm/omniroute/` — glejte [vodnik za uvajanje Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
 Delček Kubernetes za a** ena replika** (Potrebno je ponovno ustvarjanje; ne dvignite `replicas` za eno datoteko SQLite ):
 
@@ -620,9 +645,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` spanje omogoča, da kube spusti storitvene končne točke pred SIGTERM torej** novo** promet ustavi proces umiranja. `/v1/responses` SSE med letom se izčrpa do `SHUTDOWN_TIMEOUT_MS` (privzeto 30 s) prek težkih vstopnih zakupov (#11015). Nove zahteve, ki še vedno dosežejo proces, dobijo `503` + `Retry-After: 5`. Vrzel Znova ustvari prazno končno točko, dokler zamenjava ni pripravljena, ostaja močan izpad — to je topologija SQLite, ne napačna konfiguracija sonde.
+`preStop` spanje omogoča, da kube spusti končne točke storitve pred SIGTERM torej** novo** promet ustavi proces umiranja. `/v1/responses` SSE med letom se izčrpa do `SHUTDOWN_TIMEOUT_MS` (privzeto 30 s) prek težkih vstopnih zakupov (#11015). Nove zahteve, ki še dosežejo proces, dobijo `503` + `Retry-After: 5`. Vrzel Znova ustvari prazno končno točko, dokler zamenjava ni pripravljena, ostane močan izpad —, ki je topologija SQLite, ne napačna konfiguracija sonde.
 
-Zunanji Postgres /večzapisovalni HA je** ne** dokumentirana zaloga. Če potrebujete HA, obdržite eno repliko ali zaženite topologijo, ki jo je projekt preizkusil in dokumentiral ločeno. Delo Postgres/MySQL živi v [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Dokler se to ne pošlje, je edini podprt način razmnoževanja** velik** Zmogljivost `/v1/responses` je N neodvisnih procesov (naslednji razdelek), ne `replicas > 1` na enem nosilcu.
+Zunanji Postgres /večzapisovalni HA je** ne** dokumentirana zaloga. Če potrebujete HA, obdržite eno repliko ali zaženite topologijo, ki jo je projekt preizkusil in dokumentiral ločeno. Delo Postgres/MySQL živi v [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Dokler to ne bo odpremljeno, je edini podprt način razmnoževanja** velik** Zmogljivost `/v1/responses` je N neodvisnih procesov (naslednji razdelek), ne `replicas > 1` na enem nosilcu.
 
 ## Razširitev: N neodvisnih procesov
 
@@ -632,25 +657,25 @@ Kopije enega računa Codex ne smejo neodvisno porabiti njegovega žetona za osve
 
 Pasivni primerek ponovno prebere povezavo, ko je potrebna osvežitev, in sprejme samo drugačen žeton dostopa, ki še ni potekel. V nasprotnem primeru je osvežitev onemogočena, ne da bi potekla ali deaktivirala povezavo ali štela napako prekinitve osvežitve. Resnične napake pri preverjanju pristnosti navzgor še vedno uporabljajo običajno obračunavanje napak, eksponentno ohlajanje in običajno napako odjemalca; deaktivacija računa ostane trajna. Sinhronizirajte zasukane žetone lastnika, preden žetoni za dostop potečejo (privzeta prednost proaktivne osvežitve je pet minut) ali znova uvozite datoteko za preverjanje Codex. Pasivni uvozi shranijo dobavljene žetone, ne da bi jih preverili na končni točki žetona. Ročna osvežitev dashboard/API vrne `409 refresh_disabled`; nove prijave OAuth so nespremenjene. Glej [referenco okolja](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-One Node process is **one V8 heap**. Two overlapping ~3 MiB / ~750k-token coding-agent `POST /v1/responses` (RTK + Caveman) abort that heap at ~12 Gi (`FATAL ERROR: Reached heap limit`) and can OOM a 16 Gi cgroup. See [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). That measurement is a **memory-budget** warning, not a product hard-max of two concurrent long `/v1/responses`. Heavyweight chat admission is gated by an auto-derived ingest byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) sized from that same V8/cgroup ceiling — overriding it upward (or setting the legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) on an already-sized process reintroduces the abort. Small chats, `/healthz`, `/v1/models`, and MCP are **not** in that cap.
+En proces Node je** ena kopica V8** . Dva prekrivajoča se agenta za kodiranje ~ 3 MiB / ~ 750k-žetonov `POST /v1/responses` (RTK + Caveman) prekineta to kopico pri ~ 12 Gi (`FATAL ERROR: Reached heap limit`) in lahko OOM 16 Gi cgroup. Glej [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Ta meritev je a** pomnilniški proračun** opozorilo, ne izdelek hard-max dveh sočasnih dolgih `/v1/responses`. Sprejem težkega klepeta je omejen s samodejno izpeljanim proračunom za vnos bajtov (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), ki je odmerjen od iste zgornje meje V8/cgroup, ki ga — preglasi navzgor (ali nastavi zgornjo omejitev števila zahtev `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) v procesu že velikosti, ki ponovno uvede prekinitev. Mali klepeti, `/healthz`, `/v1/models` in MCP so** ne** v tej kapici.
 
 ### En proces: več kot dva dolga `/v1/responses`
 
-A** zdravo** proces (kup pod `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, privzeto `0.75`)** maj** zaženite več kot dva hkratna dolga `POST /v1/responses` ko je proračun v bajtu za celoten proces (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) še dovolj prostora. Telesa na ali nad `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (privzeto 256 KiB) sprejmejo enako težki zakup kot strukturno težke zahteve in uporabljajo isti [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Na desetine hkratnih dolgih odjemalcev SSE (operaterji pogosto potrebujejo 40–50) je a** pomnilniški proračun** vprašanje — kopica velikosti + primary/headroom reže + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ni stroga omejitev izdelka »največ 2«. Kopica pod pritiskom še vedno odpade z `503` ki ga je mogoče znova poskusiti, tako da se #7849 ne vrne.
+A** zdravo** proces (kup pod `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, privzeto `0.75`)** maj** zaženite več kot dva hkratna dolga `POST /v1/responses` ko je proračun v bajtu za celoten proces (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) še dovolj prostora. Telesa na ali nad `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (privzeto 256 KiB) vzamejo enak težki zakup kot strukturno težke zahteve in uporabljajo isti umik [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Na desetine sočasnih dolgih odjemalcev SSE (operaterji pogosto potrebujejo 40–50) je a** pomnilniški proračun** vprašanje — velikost kopice + primary/headroom reže + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ni trda omejitev izdelka »največ 2«. Kopica pod pritiskom se še vedno razprši z `503` ki ga je mogoče znova poskusiti, tako da se #7849 ne vrne.
 
 Za** množijo kupe** (neodvisni stari prostori V8)** danes** :
 
-| naredi                                                                                                                                                             | ne                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| Teči** N containers/pods** , vsak s svojim** lasten** `DATA_DIR` / glasnost                                                                                        | Nastavite `replicas > 1` proti eni datoteki SQLite                                    |
-| Velikost težka med letom + zdrav prostor za višino iz kopice / proračun v bajtih med letom; 1–2 je konzervativna privzeta vrednost #7849, ne trdi najvišji izdelek | Enemu procesu dajte 8 × RAM in neomejeno zgornjo mejo števila                         |
-| Izbirno: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` za** skupni števci kvot**                                                                            | Obravnavajte Redis kot skupno SQLite — ni                                             |
-| Podvojene skrivnosti ponudnika v vsako instanco (ali sprejmite particionirane nadzorne plošče)                                                                     | Pričakujte eno nadzorno ploščo/en dnevnik klicev v vseh instancah                     |
-| Spredaj s katerim koli izravnalnikom obremenitve; dovolj je sticky z ključem API ali sejo                                                                          | Zahtevajte vmesno programsko opremo, specifično za prodajalca, ki se zaveda velikosti |
+| naredi                                                                                                                                                 | ne                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| Teči** N containers/pods** , vsak s svojim** lasten** `DATA_DIR` / glasnost                                                                            | Nastavite `replicas > 1` proti eni datoteki SQLite                                    |
+| Velikost težka med letom + zdrav prostor za višino iz kopice / proračun v bajtih med letom; 1–2 je konzervativna privzeta vrednost #7849, ne trdi maks | Enemu procesu dajte 8 × RAM in neomejeno zgornjo mejo števila                         |
+| Izbirno: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` za** skupni števci kvot**                                                                | Obravnavajte Redis kot skupno SQLite — kar ni                                         |
+| Podvojene skrivnosti ponudnika v vsako instanco (ali sprejmite particionirane nadzorne plošče)                                                         | Pričakujte eno nadzorno ploščo/en dnevnik klicev v vseh instancah                     |
+| Spredaj s katerim koli izravnalnikom obremenitve; dovolj je sticky z ključem API ali sejo                                                              | Zahtevajte vmesno programsko opremo, specifično za prodajalca, ki se zaveda velikosti |
 
-Afiniteto med sejo in računom lahko delite tudi prek Redis: nastavite `OMNIROUTE_SESSION_AFFINITY_STORE=redis` in `REDIS_URL` za vsak proces z enakim `REDIS_KEY_PREFIX` in pozitivno nastavitvijo `sessionAffinityTtlMs`. Zatiči razrešijo zgoščene identitete uporabniških računov v primerno lokalno povezavo vsakega procesa, zato računom OAuth z ujemajočimi se metapodatki o identiteti ni treba imeti ujemajoče se povezave IDs. Znane identitete računov imajo prednost pred protislovnimi lokalnimi IDs pri ločljivosti pin in varovanem izselitvi; zapisi brez identitete (ali klicatelji izselitve brez identitete) ohranijo zapuščino ID guard. Računi brez stabilne identitete uporabe še vedno zahtevajo ujemanje IDs. napake Redis ali klici, ki presegajo 100 ms, se vrnejo na lokalni SQLite. Vsaka shramba afinitete Redis omeji odprte operacije na 8, zaobide Redis takoj, ko je polna, in sprosti reže šele, ko se osnovno delo poravna, ne ob roku klicatelja. Med izpadom Redis ni skupne resnice: vsak primerek se vrne k svoji lokalni afiniteti, seje se lahko znova pripnejo enkrat na primerek in primerki se lahko razlikujejo. Lepljivost ponovno konvergira skozi Redis, ko si opomore. Časovna omejitev omejuje čakanje in ne poslanega EVAL, ki lahko pristane po nadomestnem delu. Zapisi pri usmerjanju primerjajo natančno vrednost, opaženo z odločitvijo o usmerjanju, ne novo branje časa mutacije; opazovano zgrešeno ali nadomestno opazovanje SQLite se primerja z odsotnim ključem Redis. Zastareli zatiči so zamenjani v enem CAS, tako da pozen ukaz ne more nadomestiti ali izbrisati novejšega, drugačnega zatiča. Redis bere atomsko vrne vrednost in preostali strežnik TTL; pozitiven PTTL (ali brez izteka) določa živost, ne pisateljev časovni žig JSON ali bralčeva ura. Lokalni posnetki preslikajo preostali TTL v lokalni rok; obstoječi ključi JSON ostanejo berljivi in njihovi neobdelani bajti se ohranijo za CAS. Redis je edini vir resnice, medtem ko odgovarja. Potrjene skupne vstavitve, dotiki in izbrisi odstranijo lokalni vnos, nikoli ga ne namestijo ali osvežijo. SQLite na poti Redis vsebuje samo lastne nadomestne odločitve tega primerka zaradi napak Redis, časovnih omejitev ali nasičenosti sprejema, omejeno na TTL kot prej. Manjkajoči lokalni pin ob kasnejšem izpadu stane en nov izbor (en zgrešen pozivni predpomnilnik), ne napačen ali izločen račun. Zavrnjeni upserti vrnejo zmagovalca v skupni rabi in njegov preostali TTL atomsko: običajni izbor ponovno preveri preslikani lokalni rok in uporabi še vedno živega upravičenega zmagovalca, pri čemer se dotakne uporabe in beleženja za ta račun brez drugega pisanja v skupni rabi. Če ni na voljo, izbira obdrži lokalnega kandidata, pusti pin v skupni rabi nespremenjen in odda eno sporočilo o odpravljanju napak. Zavrnjen CAS ne piše SQLite; Redis napake, časovne omejitve ali nasičenost sprejema namesto tega uporabi obstoječo lokalno operacijo. Če odgovor poslane mutacije prispe po časovni omejitvi (sprejeto, zavrnjeno ali napaka), sinhrona primerjava in brisanje natančnih serializiranih vrednosti odstrani samo bajtno identično nadomestno vrstico časovne omejitve. Med to primerjavo in brisanjem ni čakanja; novejši zapis izpada je ohranjen. Varovana izselitev odstrani lastni lokalni pin neuspešnega računa, tudi ko je Redis izključen, in ga znova očisti po potrjeni skupni izselitvi. Čakajoči prejšnji odgovori v skupni rabi ne morejo obnoviti izločenega lokalnega žebljička, ker skupni uspehi nikoli ne napišejo SQLite. Kasnejši nadomestni izpad lahko znova pripne račun; pozneje sprejeto skupno pisanje obstaja samo v Redis. Redis zgreši, ne posvetujte se z lokalnim rezervnim stanjem. Ko je gonilnik izklopljen, na novo izbrani keglji ohranijo staro obliko štirih polj SQLite JSON ; samo usmerjanje Redis doda zgoščeno identiteto računa. Vnaprej pridobljeni žebljički se ponovno preverijo na meji njihove veljavnosti. Izbira brez zakupa Redis ponovno prebere trgovino, vendar lahko sinhrono načrtovanje zakupa še vedno uporablja žebljiček, izločen med vnaprejšnjim prenosom in načrtovanjem (sprejeto okno najboljšega napora). Obveza zakupa ne more preklopiti med računi po trajni zahtevi: pri zavrnjeni vstavitvi obdrži zahtevanega kandidata samo za to zahtevo in pusti skupnega zmagovalca nedotaknjenega, tako da je dogovor med primerki omejen na to pot. Preostali del tabele še vedno velja: to ne deli lepljivosti kombinirane seje, izvornih žebljičkov Codex turn, semaforjev računov, zaklepanja, omejitev porabe, konfiguracije ali dnevnikov klicev.
+Afiniteto med sejo in računom lahko delite tudi prek Redis: nastavite `OMNIROUTE_SESSION_AFFINITY_STORE=redis` in `REDIS_URL` za vsak proces z enakim `REDIS_KEY_PREFIX` in pozitivno nastavitvijo `sessionAffinityTtlMs`. Zatiči razrešijo zgoščene identitete uporabniških računov v primerno lokalno povezavo vsakega procesa, zato računom OAuth z ujemajočimi se metapodatki o identiteti ni treba imeti ujemajoče se povezave IDs. Znane identitete računov imajo prednost pred protislovnimi lokalnimi IDs pri ločljivosti pinov in varovani izselitvi; zapisi brez identitete (ali klicatelji izselitve brez identitete) ohranijo podedovano zaščito ID. Računi brez stabilne identitete uporabe še vedno zahtevajo ujemanje IDs. napake Redis ali klici, ki presegajo 100 ms, se vrnejo na lokalni SQLite. Vsaka shramba afinitete Redis omeji odprte operacije na 8, zaobide Redis takoj, ko je polna, in sprosti reže šele, ko se osnovno delo poravna, ne ob roku klicatelja. Med izpadom Redis ni skupne resnice: vsak primerek se vrne k svoji lokalni afiniteti, seje se lahko znova pripnejo enkrat na primerek in primerki se lahko razlikujejo. Lepljivost ponovno konvergira skozi Redis, ko si opomore. Časovna omejitev omejuje čakanje in ne poslanega EVAL, ki lahko pristane po nadomestnem delu. Zapisi pri usmerjanju primerjajo natančno vrednost, opaženo z odločitvijo o usmerjanju, ne novo branje časa mutacije; opaženo zgrešeno ali nadomestno opazovanje SQLite se primerja z odsotnim ključem Redis. Zastareli zatiči so zamenjani v enem CAS, tako da pozen ukaz ne more nadomestiti ali izbrisati novejšega, drugačnega zatiča. Redis bere atomsko vrne vrednost in preostali strežnik TTL; pozitiven PTTL (ali brez izteka) določa živost, ne pisateljev časovni žig JSON ali bralčeva ura. Lokalni posnetki preslikajo preostali TTL v lokalni rok; obstoječi ključi JSON ostanejo berljivi in njihovi neobdelani bajti se ohranijo za CAS. Redis je edini vir resnice, medtem ko odgovarja. Potrjene skupne vstavitve, dotiki in izbrisi odstranijo lokalni vnos, nikoli ga ne namestijo ali osvežijo. SQLite na poti Redis vsebuje samo lastne nadomestne odločitve tega primerka zaradi napak Redis, časovnih omejitev ali nasičenosti sprejema, omejeno na TTL kot prej. Manjkajoči lokalni pin ob kasnejšem izpadu stane en nov izbor (en zgrešen pozivni predpomnilnik), ne napačen ali izločen račun. Zavrnjeni upserti vrnejo zmagovalca v skupni rabi in njegov preostali TTL atomsko: običajni izbor ponovno preveri preslikani lokalni rok in uporabi še vedno živega upravičenega zmagovalca, pri čemer se dotakne uporabe in beleženja za ta račun brez drugega pisanja v skupni rabi. Če ni na voljo, izbira obdrži lokalnega kandidata, pusti pin v skupni rabi nespremenjen in odda eno sporočilo o odpravljanju napak. Zavrnjen CAS ne piše SQLite; Redis napake, časovne omejitve ali nasičenost sprejema namesto tega uporabijo obstoječo lokalno operacijo. Če odgovor poslane mutacije prispe po časovni omejitvi (sprejeto, zavrnjeno ali napaka), sinhrona primerjava in brisanje natančnih serializiranih vrednosti odstrani samo bajtno identično nadomestno vrstico časovne omejitve. Med to primerjavo in brisanjem ni čakanja; novejši zapis izpada je ohranjen. Varovana izselitev odstrani lastni lokalni pin neuspešnega računa, tudi ko je Redis izključen, in ga znova očisti po potrjeni skupni izselitvi. Čakajoči prejšnji odgovori v skupni rabi ne morejo obnoviti izločenega lokalnega žebljička, ker skupni uspehi nikoli ne napišejo SQLite. Kasnejši nadomestni izpad lahko znova pripne račun; pozneje sprejeto skupno pisanje obstaja samo v Redis. Redis zgreši, ne posvetujte se z lokalnim rezervnim stanjem. Ko je gonilnik izklopljen, na novo izbrani keglji ohranijo staro obliko štirih polj SQLite JSON ; samo usmerjanje Redis doda zgoščeno identiteto računa. Vnaprej pridobljeni žebljički se ponovno preverijo na meji njihove veljavnosti. Izbira brez zakupa Redis ponovno prebere trgovino, vendar lahko sinhrono načrtovanje zakupa še vedno uporablja žebljiček, izločen med vnaprejšnjim prenosom in načrtovanjem (sprejeto okno najboljšega napora). Obveza zakupa ne more preklopiti med računi po trajni zahtevi: pri zavrnjeni vstavitvi obdrži zahtevanega kandidata samo za to zahtevo in pusti skupnega zmagovalca nedotaknjenega, tako da je dogovor med primerki omejen na to pot. Preostali del tabele še vedno velja: to ne deli lepljivosti kombinirane seje, izvornih žebljičkov Codex turn, semaforjev računov, zaklepanja, omejitev porabe, konfiguracije ali dnevnikov klicev.
 
-Strojna oprema: sočasni dolgi `/v1/responses` na primerek je a** pomnilniški proračun** vprašanje (kup + inflight-byte / #10110). `N` neodvisen `DATA_DIR` s še vedno pomnožuje kopice: gostitelj RAM mora pokrivati `N × cgroup`, ne pa "en 16 Gi pod z N = 8." Nikoli ne `replicas > 1` v eni datoteki SQLite.
+Strojna oprema: sočasni dolgi `/v1/responses` na primerek je a** pomnilniški proračun** vprašanje (kup + inflight-byte / #10110). `N` neodvisen `DATA_DIR` s še vedno pomnožuje kopice: gostitelj RAM mora pokrivati `N × cgroup`, ne pa "en 16 Gi pod z N = 8." Nikoli ne `replicas > 1` na eno datoteko SQLite.
 
 Sestavite skico (dva kupa, dva zvezka — ne `deploy.replicas: 2`):
 
@@ -679,11 +704,11 @@ volumes:
   omniroute-b-data:
 ```
 
-Gostota med postopkom (stiskanje iz izolata HTTP ) je [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Ena logična gruča v trajnem stanju v skupni rabi je [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Gostota med postopkom (stiskanje iz izolata HTTP ) je [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Ena logična gruča v trajnem stanju v skupni rabi je [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Regionalne napake Gemini znotraj Docker
+## regionalne napake Gemini znotraj Docker
 
-Google AI Studio / Gemini API lahko vrne HTTP 400 z FAILED_PRECONDITION in `User location is not supported for the API use.` Uspešna zahteva na gostitelju ne dokazuje, da vsebnik uporablja isto izhodno pot. Naročanje DNS, povezljivost IPv4/IPv6, usmerjanje VPN in konfigurirani posredniki se lahko razlikujejo. Preverite [regije, ki jih podpira Google,](https://ai.google.dev/gemini-api/docs/available-regions) kot tudi dejansko pot povezave; sama ta napaka ne identificira slabega ključa API.
+Google AI Studio / Gemini API lahko vrne HTTP 400 z FAILED_PRECONDITION in `User location is not supported for the API use.` Uspešna zahteva na gostitelju ne dokazuje, da vsebnik uporablja isto izhodno pot. Naročanje DNS, povezljivost IPv4/IPv6, usmerjanje VPN in konfigurirani posredniki se lahko razlikujejo. Preverite [regije, ki jih podpira Google](https://ai.google.dev/gemini-api/docs/available-regions), kot tudi dejansko pot povezave; sama ta napaka ne identificira slabega ključa API.
 
 ### Dajte prednost proxyju, specifičnemu za povezavo
 
@@ -702,7 +727,7 @@ Zamenjajte `omniroute` s storitvijo, ki jo izvajate (na primer `omniroute-web`).
 
 ### Alternativa na ravni gostitelja: delujoča politika IPv6 in razreševalca
 
-Poročevalec [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) je obnovil dostop v svojem okolju tako, da je omogočil vsebnik IPv6 in spremenil izbiro naslova glibc. Obravnavajte to kot alternativo, specifično za okolje. Potrdite delujoč gostitelj IPv6, vsebnik egress/routing in pravila požarnega zidu, preden prilagodite nastavitve razreševalnika. Zasebni naslov ULA sam po sebi ne vzpostavi javne povezave IPv6.
+Poročevalec [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) je obnovil dostop v svojem okolju tako, da je omogočil vsebnik IPv6 in spremenil izbiro naslova glibc. Obravnavajte to kot alternativo, specifično za okolje. Potrdite delujoč gostitelj IPv6, vsebnik egress/routing in pravila požarnega zidu, preden prilagodite nastavitve razreševalnika. Zasebni naslov ULA sam po sebi ne vzpostavi javne povezave IPv6.
 
 Za storitve, ki so že povezane s privzetim omrežjem Compose, ta fragment omogoča IPv6 v tem omrežju; ohranite preostalo storitev, vrata, količine in konfiguracijo:
 
@@ -718,7 +743,7 @@ Na a** slika, ki temelji na glibc** , `/etc/gai.conf` lahko spremeni izbiro nasl
 
 To spremeni izbiro naslova OS za** ves izhodni promet v tem vsebniku** . Ne prisili vsake aplikacije, da izbere IPv6: pomembna sta tudi vrstni red DNS in izbira povezave Node. Zlasti `--dns-result-order=ipv4first` daje prednost IPv4 in ni zdravilo za napako IPv4-only. Glejte [Naročanje vozlišča DNS](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Po vsaki spremembi na ravni gostitelja znova preizkusite Gemini in druge ponudnike. Za vrnitev nazaj odstranite nastavek `gai.conf` po meri, obnovite prejšnjo omrežno konfiguracijo in znova ustvarite prizadeti service/network med vzdrževalnim obdobjem. Ponovno ustvarjanje omrežja lahko prekine druge vsebnike, ki so nanj priključeni; ne izbrišite obstojnega obsega podatkov.
+Po vsaki spremembi na ravni gostitelja ponovno preizkusite Gemini in druge ponudnike. Za vrnitev nazaj odstranite nastavek `gai.conf` po meri, obnovite prejšnjo omrežno konfiguracijo in znova ustvarite prizadeti service/network med vzdrževalnim obdobjem. Ponovno ustvarjanje omrežja lahko prekine druge vsebnike, ki so nanj priključeni; ne izbrišite obstojnega obsega podatkov.
 
 ## Pomembne opombe
 

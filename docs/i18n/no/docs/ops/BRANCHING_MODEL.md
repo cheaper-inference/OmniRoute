@@ -45,10 +45,10 @@ Når en utgivelse blir avstemt, åpnes et markørproblem merket `release-freeze`
 - Den neste syklusens `release/vX+1` kuttes fra den frosne spissen slik at bidragsyterne fortsetter å lande.
 - Åpne PRs som fortsatt retter seg mot den frosne grenen skal være** remålrettet** til den aktive (høyeste) `release/v*` grenen.
 
-Se etter en åpen frysing før du antar at grenen du vil ha er flettebar:
+Se etter en åpen frysing før du antar at grenen du ønsker er flettebar:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Merge mekanikk (eier `queue` label → Mergify) er dokumentert i [MERGE_TRAIN.md](./MERGE_TRAIN.md).

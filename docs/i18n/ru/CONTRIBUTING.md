@@ -10,119 +10,105 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ## Настройка разработки
 
-### Предварительные требования
+### Предварительные условия
 
 - **Node.js** `>=22.22.2 <23` или `>=24.0.0 <27` (рекомендуется: 24 LTS)
-- **npm** 10+
+- **НПМ** 10 +
 
-> **Windows с Node 24:** используйте текущий патч-релиз 24 LTS (не ниже 24.20.0).
-> Более ранние релизы могут завершить работу с ошибкой после успешного выполнения тестов, когда `--test-force-exit` закрывает
-> процесс. [Исправление Windows libuv для Node](https://github.com/nodejs/node/pull/61999) устраняет
-> этот сбой среды выполнения; проверки утверждений тестов и выхода раннера должны оставаться включёнными.
+> **Windows с узлом 24:** используйте текущую версию патча LTS 24 (не ниже 24.20.0). Более ранние выпуски могут прерываться после успешных тестов, когда `--test-force-exit` закрывает процесс. [Исправление Windows libuv](https://github.com/nodejs/node/pull/61999) от Node устраняет этот сбой во время выполнения; оставьте тестовые утверждения и проверки выхода бегуна включенными.
 
-> **Пользователи npm v11+ (Node 24+):** после выполнения `npm install` убедитесь, что нативные модули установлены:
-> `node -e "require('better-sqlite3')"`. Если команда завершается с ошибкой `MODULE_NOT_FOUND`,
-> выполните `npm approve-scripts better-sqlite3 && npm install`. См. раздел
-> [Устранение неполадок](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Пользователи npm v11 + (узел 24 +):** После `npm install` убедитесь, что встроенные модули установлены: `node -e "require('better-sqlite3')"`. Если с `MODULE_NOT_FOUND` не получается, запустите `npm approve-scripts better-sqlite3 && npm install`. См. [Устранение неполадок](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
-- **Git**
+- **Гит**
 
-### Клонирование и установка
+### Клонировать и установить
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Переменные окружения
+### Переменные среды
 
 ```bash
-# Создайте .env на основе шаблона
+# Create your .env from the template
 cp .env.example .env
 
-# Сгенерируйте необходимые секреты
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Основные переменные для разработки:
+Ключевые переменные для развития:
 
-| Переменная             | Значение по умолчанию для разработки | Описание                     |
-| ---------------------- | ------------------------------------ | ---------------------------- |
-| `PORT`                 | `20128`                              | Порт сервера                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`             | Базовый URL интерфейса       |
-| `JWT_SECRET`           | (сгенерировать выше)                 | Секрет для подписи JWT       |
-| `INITIAL_PASSWORD`     | `CHANGEME`                           | Пароль для первого входа     |
-| `APP_LOG_LEVEL`        | `info`                               | Уровень подробности журналов |
+| Переменная             | Разработка по умолчанию  | Описание                    |
+| ---------------------- | ------------------------ | --------------------------- |
+| `PORT`                 | `20128`                  | Порт сервера                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Базовый URL для фронтенда   |
+| `JWT_SECRET`           | (создать выше)           | секрет подписи JWT          |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Первый пароль для входа     |
+| `APP_LOG_LEVEL`        | `info`                   | Уровень детализации журнала |
 
 ### Настройки панели управления
 
-Панель управления предоставляет переключатели интерфейса для функций, которые также можно настроить с помощью переменных окружения:
+На панели мониторинга предусмотрены переключатели UI для функций, которые также можно настроить с помощью переменных среды:
 
-| Расположение настройки | Переключатель      | Описание                                       |
-| ---------------------- | ------------------ | ---------------------------------------------- |
-| Settings → Advanced    | Debug Mode         | Включить журналы отладки запросов (интерфейс)  |
-| Settings → General     | Sidebar Visibility | Показывать или скрывать разделы боковой панели |
+| Настройка местоположения | Переключать              | Описание                               |
+| ------------------------ | ------------------------ | -------------------------------------- |
+| Настройки → Расширенные  | Режим отладки            | Включить журналы запросов отладки (UI) |
+| Настройки → Общие        | Видимость боковой панели | Разделы боковой панели Show/hide       |
 
-Эти настройки хранятся в базе данных и сохраняются после перезапуска, переопределяя значения переменных окружения по умолчанию, если они заданы.
+Эти настройки хранятся в базе данных и сохраняются при перезапусках, переопределяя значения по умолчанию для env var, если они установлены.
 
-### Локальный запуск
+### Запуск локально
 
 ```bash
-# Режим разработки (горячая перезагрузка)
+# Development mode (hot reload)
 npm run dev
 
-# Сборка для продакшена
-npm run build    # next build → .build/next/ и затем assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Быстрая компиляция только backend/API для изменений контрибьюторов
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Сборка релиза (чистая пересборка + маркер HEAD — требуется для развёртывания)
-npm run build:release   # rm -rf .build dist и затем сборка + запись dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Обычная настройка порта
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Сборка для контрибьюторов выполняет только проверку компиляции: она не собирает автономный
-дистрибутив и не создаёт дополнительные нативные ресурсы для упаковки. Используйте обычную сборку
-для продакшена, если необходимо проверить готовый к поставке пакет.
+Сборка участника выполняет проверку только при компиляции: она не собирает автономный дистрибутив и не создает дополнительные собственные ресурсы упаковки. Используйте обычную производственную сборку, когда вам нужно проверить поставляемый пакет.
 
-### Структура выходных данных сборки
+### Создание макета вывода
 
-| Каталог   | Содержимое                                                                               | Отслеживается |
-| --------- | ---------------------------------------------------------------------------------------- | ------------- |
-| `src/`    | Исходный код приложения (TypeScript / TSX)                                               | Да            |
-| `.build/` | Промежуточные файлы — результат `next build` (игнорируется Git, `distDir = .build/next`) | Нет           |
-| `dist/`   | Готовый к поставке пакет — собирается с помощью `assembleStandalone` (игнорируется Git)  | Нет           |
+| Каталог   | Содержание                                                                         | Отслеживается |
+| --------- | ---------------------------------------------------------------------------------- | ------------- |
+| `src/`    | Источник приложения (TypeScript / TSX)                                             | Да            |
+| `.build/` | Промежуточные выходные данные — `next build` (gitignored, `distDir = .build/next`) | Нет           |
+| `dist/`   | Поставляемый комплект — собранный `assembleStandalone` (gitignored)                | Нет           |
 
-Конвейер сборки выполняется за один проход:
+Конвейер сборки представляет собой один проход:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (выходные данные Next.js)
-  └─ assembleStandalone()                 (копирует standalone + static + public + native assets)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` дополнительно сначала очищает оба каталога и записывает
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) как маркер целостности развёртывания.
+`npm run build:release` дополнительно сначала очищает оба каталога и записывает `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) в качестве датчика целостности развертывания.
 
-`npm run build:contributor` использует профиль сборки только для backend. Он временно подменяет
-файлы интерфейса панели управления заглушками во время сборки, сохраняет обработчики маршрутов API
-и восстанавливает исходные файлы после сборки. Используйте `npm run build` для изменений, затрагивающих
-интерфейс панели управления, или для полной проверки релиза; профиль для контрибьюторов не заменяет сборку релиза.
+`npm run build:contributor` использует профиль сборки только для серверной части. Он временно заглушает файлы UI панели мониторинга во время сборки, сохраняет обработчики маршрутов API и восстанавливает исходные файлы после сборки. Используйте `npm run build` для изменений, влияющих на панель мониторинга UI, или для полной проверки выпуска; профиль участника не заменяет сборку выпуска.
 
-> **Примечание о развёртывании на VPS:** удалённый каталог образа `/usr/lib/node_modules/omniroute/app/`
-> не изменяется. Навыки развёртывания синхронизируют содержимое `dist/` с ним с помощью rsync.
-> Изменился только путь выходных данных сборки внутри репозитория (`app/` → `dist/`).
+> **Примечание по развертыванию VPS :** каталог удаленного образа `/usr/lib/node_modules/omniroute/app/` не изменился. Навыки развертывания синхронизируют с ним содержимое `dist/`. Перемещен только выходной путь сборки в репозитории (`app/` → `dist/`).
 
-URL по умолчанию:
+URLs по умолчанию:
 
-- **Панель управления**: `http://localhost:20128/dashboard`
+- **Панель управления** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -431,8 +417,8 @@ docs/
 
 ## Получение помощи
 
-- **Архитектура**: см. [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Справочник API**: см. [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Документация по безопасности**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Документация по эксплуатации**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Сообщения о проблемах**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Архитектура** : См [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **Ссылка API** : см [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Документы по безопасности** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Операционная документация** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Проблемы** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

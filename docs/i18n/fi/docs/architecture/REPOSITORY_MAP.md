@@ -4,9 +4,9 @@
 
 ---
 
-> **Mikä asuu missä: jokainen jäljitetty ylätason hakemisto ja juuritiedosto, yksirivinen tarkoitus.** Viimeksi päivitetty: 13.11.2026 (OmniRoute v3.8.54)
+> **Mikä asuu missä: jokainen jäljitetty ylätason hakemisto ja juuritiedosto, yksirivinen tarkoitus.**
 >
-> Käytä tätä karttaa löytääksesi reittisi koodikannassa ja seuraa sitten linkkejä erityisiin asiakirjoihin. Tiedostojen määrä mitattiin `git ls-files` yllä olevana päivämääränä. Ne muuttuvat lähes jokaisen julkaisun yhteydessä, joten käsittele niitä suuruusluokkana.
+> Käytä tätä karttaa löytääksesi reittisi koodikannassa ja seuraa sitten linkkejä erityisiin asiakirjoihin. Tiedostojen määrä tulee `git ls-files` ja muuttuu melkein jokaisen julkaisun myötä. Käsittele niitä suuruusluokkia.
 
 ## Huipputason puu
 
@@ -36,7 +36,7 @@ OmniRoute/
 └── (root files — see below)
 ```
 
-Paikalliset, luodut tai yksityiset polut (kaikki gitifioidut, ei koskaan sitoutuneet, ei kuvattu tarkemmin):
+Paikalliset, luodut tai yksityiset polut (kaikki ohitetut, ei koskaan sitoutuneet, ei kuvattu tarkemmin):
 
 ```
 node_modules/            # npm dependencies

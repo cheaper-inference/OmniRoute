@@ -6,24 +6,25 @@
 
 > Cikakken bayani kan turawa da Docker. Don farawa cikin sauri, duba [sashen Docker na README](../README.md#-docker).
 
-## Jerin Abubuwan da ke Ciki
+## Teburin Abubuwan Ciki
 
-- [Gudanarwa Cikin Sauri](#quick-run)
-- [Tare da Fayil ɗin Muhalli](#with-environment-file)
-- [Docker Compose](#docker-compose)
-- [Profiles da Ake da Su](#available-profiles)
-- [Saita kayan aikin CLI na host lokacin da OmniRoute ke gudana a Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Saurin Gudu](#quick-run)
+- [Tare da Fayil na Muhalli](#with-environment-file)
+- [Docker Rubuta](#docker-compose)
+- [Bayanan martaba masu samuwa](#available-profiles)
+- [Kwantena taurin](#container-hardening)
+- [Yana daidaita kayan aikin CLI mai masaukin baki lokacin da OmniRoute ke gudana a cikin Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
 - [Redis Sidecar](#redis-sidecar)
-- [Compose na Production](#production-compose)
+- [Shirya Shirya](#production-compose)
 - [Matakan Dockerfile](#dockerfile-stages)
-- [Muhimman Environment Variables](#critical-environment-variables)
-- [Docker Compose tare da Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Matsalolin Muhalli Mai Muhimmanci](#critical-environment-variables)
+- [Docker Yi da Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
 - [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
-- [Tags na Image](#image-tags)
-- [Sabunta Dashboard a Docker](#dashboard-updates-in-docker)
-- [Samuwar sabis: SQLite na asali yana amfani da replica guda ɗaya](#availability-default-sqlite-is-single-replica)
-- [Kurakuran yanki na Gemini a cikin Docker](#gemini-regional-errors-inside-docker)
-- [Muhimman Bayanan Kula](#important-notes)
+- [Tags Hotuna](#image-tags)
+- [Sabunta dashboard a cikin Docker](#dashboard-updates-in-docker)
+- [Samun: tsoho SQLite kwafi ɗaya ne](#availability-default-sqlite-is-single-replica)
+- [Gemini kurakurai na yanki a cikin Docker](#gemini-regional-errors-inside-docker)
+- [Muhimman Bayanan kula](#important-notes)
 
 ---
 
@@ -89,6 +90,30 @@ OmniRoute yana zuwa da Compose profiles don manyan nau'ikan turawa. Zaɓi wanda 
 | `web`          | `omniroute-web`  | Masu samar da zaman yanar gizo da ke buƙatar browser: `gemini-web`, `claude-web`, `claude-turnstile` (yana gina `runner-web`, Chromium yana ciki)                           | `docker compose --profile web up -d`         |
 
 > Ana iya haɗa profiles da yawa: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Kwantena taurin
+
+Ayyukan `base`, `web`, `cli`, da `host` app a cikin `docker-compose.yml` suna amfani da `cap_drop: [ALL]` da zaɓin tsaro `no-new-privileges:true`. Hoton yana gudana azaman mai amfani da ba tushen `node` kuma yana sauraron manyan tashoshin jiragen ruwa, don haka baya buƙatar ƙarfin Linux. Zaɓin tsaro yana hana matakai daga samun gata ta hanyar binaries setuid.
+
+Bayanan martabar `cli` kawai yana hawa soket ɗin Docker don mai sabunta ta atomatik. Dubi [ƙyanƙyasar tserewa: saita CLIs na kwandon](#escape-hatch-configure-the-containers-own-clis-use-sparingly) don abubuwan tsaro.
+
+Tushen fayil ɗin yana dawwama a rubuce ta tsohuwa. Bayanan martabar `cli` yana rubuta tsarin CLI da caches a cikin kundin adireshi na gida, bayanin martabar `web` yana adana yanayin zaman Chromium, kuma lokacin aikin Next.js na iya rubuta caches a wajen `/app/data`.
+
+Don gwada tushen fayil ɗin karantawa kawai tare da bayanin martabar `base`, ajiye wannan azaman `docker-compose.override.yml` kusa da `docker-compose.yml`. Shirya karanta abin rufewa ta atomatik.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Dutsen `/app/data` da ake da shi yana tsayawa a rubuce. Gwada nauyin aikin ku kafin amfani da wannan wuce gona da iri a samarwa, tunda yana iya buƙatar rubutawa zuwa wasu hanyoyin.
 
 ## Daidaita kayan aikin CLI na na’ura mai masaukin baki lokacin da OmniRoute ke gudana a Docker
 
@@ -235,7 +260,7 @@ Stack na prod yana gudana a layi ɗaya da compose na dev (sunayen containers, po
 
 ## Matakan Dockerfile
 
-Wurin ajiya yana jigilar Dockerfile mai matakai da yawa (`Dockerfile`). An fallasa matakai huɗu; zaɓi `target` ɗin da ya dace don akwati na amfanin ku.
+Wurin ajiya yana jigilar Dockerfile mai matakai da yawa (`Dockerfile`). An fallasa matakai huɗu; zaɓi `target` ɗin da ya dace don akwati na amfani.
 
 | Mataki        | Hoton tushe           | Manufar                                                                                                                                                                                                                                                                                                                     |
 | ------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -256,15 +281,15 @@ docker build --target runner-web  -t omniroute:web  .
 
 Uku gina args suna sarrafa abin da darajar matakin `builder`. Suna lokacin ginawa ne kawai — `OMNIROUTE_MEMORY_MB` (a ƙasa) keɓantacce, kullin lokacin gudu.
 
-| Gina arg                    | Default | Tasiri                                                                                                               |
-| --------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`     | `0` yana ginawa tare da fakitin gidan yanar gizo: ƙananan ƙwaƙwalwar ajiya, a hankali. `1` ya shiga cikin Turbopack. |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`  | V8 heap rufi (`--max-old-space-size`) don `next build` da aka haɗe.                                                  |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`     | Ciyar da `CIRCLE_NODE_TOTAL`; Na gaba yana samun `workers = N - 1` don tarin bayanan shafi.                          |
+| Gina arg                    | Tsohuwar | Tasiri                                                                                                               |
+| --------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`      | `0` yana ginawa tare da fakitin gidan yanar gizo: ƙananan ƙwaƙwalwar ajiya, a hankali. `1` ya shiga cikin Turbopack. |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`   | V8 heap rufi (`--max-old-space-size`) don `next build` da aka haɗe.                                                  |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`      | Ciyar da `CIRCLE_NODE_TOTAL`; Na gaba yana samun `workers = N - 1` don tarin bayanan shafi.                          |
 
 `OMNIROUTE_BUILD_WORKERS` ita ce wadda za ta ɗaga a kan babban magini kuma wanda ake tuhuma idan ginin takura ya mutu** bayan** `✓ Compiled successfully`. Kowane ma'aikacin bayanan shafi shine tsarin kansa, haka ma iyaye `next build` kanta; Haihuwar VPS mai rai (fitilar #7518) ya auna RSS kowane tsari a ~ 4.5 GB mai zaman kansa daga tutocin `NODE_OPTIONS` (Turbopack yana tattarawa a ƙwaƙwalwar native/Rust a wajen tulin V8). Tsohuwar `2` (ma'aikacin → 1, jimillar matakai 2) yana da girma don masu gudu 16 GB /4 vCPU GitHub da aka karɓa waɗanda bututun bututun ke amfani da su. A `8` ( ma'aikatan → 7) wannan mai gudu ya ƙare da ƙwaƙwalwar ajiya kuma buildkit ya gaza matakin tare da `ResourceExhausted: ... cannot allocate memory`; `3` (ma'aikatan → 2) har yanzu basu dace ba da zarar an auna RSS na kowane-tsari kai tsaye maimakon tantancewa. `tests/unit/docker-build-memory-budget.test.ts` yayi lissafin akan siffa da aka auna kuma ya kasa idan ko dai kulli ya fi mai gudu girma.
 
-Turbopack tana tattarawa a cikin ƙwaƙwalwar ajiyar tsatsa da ke rayuwa** waje** tulin V8, don haka `OMNIROUTE_BUILD_MEMORY_MB` ba ya ɗaure shi. A kan rundunar da ke da silin ƙwaƙwalwar ajiya ginin yana yin SIGKILLed ta mai kashe OOM ba tare da kuskuren rubutu ba kwata-kwata — kawai yana tsayawa tsakiyar `Creating an optimized production build`, wanda ke karantawa kamar rataye maimakon abin tunawa. Abin da ya sa `Dockerfile` ya ɓace zuwa fakitin yanar gizon (`OMNIROUTE_USE_TURBOPACK=0`), sabanin `npm run dev` / `npm run build`, inda Turbopack shine lambar tsoho: `docker build .` bare ba tare da gina args ba (abin da Railway da sauran rundunonin dannawa ɗaya ke gudana) dole ne kada su mutu shiru a kan maginin ƙwaƙwalwar ajiya. Hotunan da aka buga sun riga sun wuce `OMNIROUTE_USE_TURBOPACK=0` a sarari a cikin `docker-publish.yml`. A kan maginin da ke da yawan RAM, shiga cikin Turbopack don ginawa cikin sauri:
+Turbopack tana tattarawa a cikin ƙwaƙwalwar Rust na asali da ke rayuwa** waje** tulin V8, don haka `OMNIROUTE_BUILD_MEMORY_MB` ba ya ɗaure shi. A kan rundunar da ke da silin ƙwaƙwalwar ajiya ginin yana yin SIGKILLed ta mai kashe OOM ba tare da kuskuren rubutu ba kwata-kwata — kawai yana tsayawa tsakiyar `Creating an optimized production build`, wanda ke karantawa kamar rataye maimakon abin tunawa. Abin da ya sa `Dockerfile` ya ɓace zuwa fakitin yanar gizon (`OMNIROUTE_USE_TURBOPACK=0`), sabanin `npm run dev` / `npm run build`, inda Turbopack shine lambar tsoho: `docker build .` bare ba tare da gina args ba (abin da Railway da sauran rundunonin dannawa ɗaya ke gudana) dole ne kada su mutu shiru a kan maginin ƙwaƙwalwar ajiya. Hotunan da aka buga sun riga sun wuce `OMNIROUTE_USE_TURBOPACK=0` a sarari a cikin `docker-publish.yml`. A kan maginin da ke da yawan RAM, shiga cikin Turbopack don ginawa cikin sauri:
 
 ```bash
 docker build --target runner-base \
@@ -295,7 +320,7 @@ Halin ƙwaƙwalwar ajiya a cikin Docker:
 
 ### Runtime RAM don coding agents
 
-Tsohuwar 1 GiB Docker bene ne na dashboard/light-chat, ba girman samarwa ba. Dogayen jikin `POST /v1/responses` (daruruwan saƙonni, dubun kayan aikin) suna riƙe da jadawalin ƙwaƙwalwar ajiya da yawa yayin matsawa. Buƙatun alamar alama guda biyu ~ 3 MiB / ~ 750k sun soke V8 a wata** 12 GiB** tsohon sarari (`FATAL ERROR: Reached heap limit`) da kuma buga 16 GiB cgroup OOM. Duba [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Tsohuwar 1 GiB Docker bene ne na dashboard/light-chat, ba girman samarwa ba. Dogayen jikin `POST /v1/responses` (daruruwan saƙonni, dubun kayan aikin) suna riƙe da jadawalin ƙwaƙwalwar ajiya da yawa yayin matsawa. Buƙatun alamar alama guda biyu ~ 3 MiB / ~ 750k sun soke V8 a wata** 12 GiB** tsohon sarari (`FATAL ERROR: Reached heap limit`) da kuma buga 16 GiB cgroup OOM. Duba [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Girman** tara `--memory` sama da tudun** — masu buffer na asali, SQLite, da matsakaitan matsawa suna zaune a wajen V8.
 
@@ -415,7 +440,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy yana saita daidaitattun masu kai masu kai don babban akwati. OmniRoute yana amfani da `NEXT_PUBLIC_BASE_URL` azaman asalin jama'a na canonical don sake kiran OAuth da hanyoyin haɗin jama'a; ingantaccen dashboard ya rubuta amfani da buƙatun asali iri ɗaya tare da kariyar CSRF mai ɗaure. Ba da damar `OMNIROUTE_TRUST_PROXY` kawai don ƙaddamar da ci-gaba inda da gangan kuke son OmniRoute ya samo asalin jama'a daga amintattun kanun labarai da aka tura maimakon ƙayyadaddun tsari.
+Caddy yana saita daidaitattun masu kai masu kai don babban akwati. OmniRoute yana amfani da `NEXT_PUBLIC_BASE_URL` azaman asalin jama'a na canonical don sake kiran OAuth da hanyoyin haɗin jama'a; ingantaccen dashboard ya rubuta amfani da buƙatun asali iri ɗaya tare da kariyar CSRF mai ɗaure. Ba da damar `OMNIROUTE_TRUST_PROXY` kawai don ƙaddamar da ci-gaba inda da gangan kuke son OmniRoute ya samo asalin jama'a daga amintattun kanun da aka tura maimakon ƙayyadaddun tsari.
 
 ## Cloudflare Quick Tunnel
 
@@ -636,9 +661,9 @@ spec:
             periodSeconds: 20
 ```
 
-barci `preStop` yana barin kube sauke wuraren ƙarshen sabis kafin SIGTERM haka** sabuwa** zirga-zirga yana tsayawa yana bugun tsarin mutuwa. A cikin jirgin `/v1/responses` SSE ana zubar da shi har zuwa `SHUTDOWN_TIMEOUT_MS` (tsoho na 30s) ta hanyar haya mai nauyi (#11015). Sabbin buƙatun da har yanzu suka kai ga aiwatar da samun `503` + `Retry-After: 5`. Sake ƙirƙira tazarar ƙarshen ƙarshen fanko har sai an shirya wanda zai maye gurbin ya kasance mai wuyar ƙarancin — wanda shine SQLite topology, ba kuskuren bincike ba.
+barci `preStop` yana barin kube sauke wuraren ƙarshen sabis kafin SIGTERM haka** sabo** zirga-zirgar ababen hawa yana tsayawa yana bugun tsarin mutuwa. A cikin jirgin `/v1/responses` SSE ana zubar da shi har zuwa `SHUTDOWN_TIMEOUT_MS` (tsohon 30s) ta hanyar haya mai nauyi (#11015). Sabbin buƙatun da har yanzu suka kai ga aiwatar da `503` + `Retry-After: 5`. Sake ƙirƙira tazarar ƙarshen ƙarshen fanko har sai an shirya maye gurbin ya kasance mai wuyar fita — wanda shine SQLite topology, ba kuskuren bincike ba.
 
-Postgres na waje/marubuci da yawa HA shine** ba** hanyar haja da aka rubuta. Idan kuna buƙatar HA, adana kwafi ɗaya ko gudanar da topology aikin ya gwada kuma an rubuta shi daban. Aikin Postgres/MySQL yana zaune a cikin [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Har sai wannan jirgi, hanya ɗaya da aka goyan baya don haɓaka** babba** Ƙarfin `/v1/responses` shine N matakai masu zaman kansu (sashe na gaba), ba `replicas > 1` akan ƙarar ɗaya ba.
+Postgres na waje/marubuci da yawa HA shine** ba** hanyar haja da aka rubuta. Idan kuna buƙatar HA, adana kwafi ɗaya ko gudanar da topology aikin ya gwada kuma an rubuta shi daban. Aikin Postgres/MySQL yana zaune a cikin [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Har sai wannan jiragen ruwa, hanya ɗaya tilo da aka goyan baya don haɓaka** babba** Ƙarfin `/v1/responses` shine N matakai masu zaman kansu (sashe na gaba), ba `replicas > 1` akan ƙarar ɗaya ba.
 
 ## Sikeli-fita: N matakai masu zaman kansu
 
@@ -648,25 +673,25 @@ Dole ne kwafin asusun Codex ɗaya kada ya cinye alamar wartsakewar amfanin guda 
 
 Misalin m yana sake karanta haɗin kai lokacin da ake buƙatar wartsakewa kuma yana ɗaukar wata alama ce ta daban, mara ƙarewa. In ba haka ba ana kashe wartsakewa ba tare da ƙarewa ko kashe haɗin haɗin gwiwa ko ƙirga gazawar mai wartsawa ba. Haƙiƙanin gazawar tantancewa ta sama har yanzu tana amfani da lissafin gazawar al'ada, sanyi mai faɗi da kuskuren abokin ciniki na yau da kullun; kashe asusu ya kasance na dindindin. Haɗa alamun jujjuyawar mai shi kafin alamun samun damar ƙarewa (tsofaffin jagorar wartsakewa shine mintuna biyar), ko sake shigo da fayil ɗin Codex auth. Shigo da keɓaɓɓu yana adana alamun da aka kawo ba tare da inganta su a ƙarshen alamar ba. Manual dashboard/API refresh dawo `409 refresh_disabled`; sababbin login OAuth ba su canzawa. Duba [bayanin muhalli](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Ɗayan tsari na Node shine** guda V8** . ~ 3 MiB / ~ 750k-token codeing-agent `POST /v1/responses` (RTK + Caveman) sun zubar da tsibin a ~ 12 Gi (`FATAL ERROR: Reached heap limit`) kuma suna iya OOM a 16 Gi rukuni. Duba [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Wannan ma'aunin shine a** ƙwaƙwalwar ajiya-kasafin kuɗi** gargadi, ba samfur mai wuya-max na tsayin `/v1/responses` guda biyu na lokaci ɗaya ba. An shigar da shigar da hira mai nauyi ta hanyar kasafin kudin shigar da aka samu ta atomatik (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) mai girman daga wancan V8/cgroup rufin — ya tsallake shi sama (ko saita madaidaicin ƙidaya `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) akan tsari mai girman gaske yana sake dawo da zubar da ciki. Ƙananan hirarraki, `/healthz`, `/v1/models`, da MCP sune** ba** a cikin wannan hular.
+Ɗayan tsari na Node shine** guda V8** . ~ 3 MiB / ~ 750k-token codeing-agent `POST /v1/responses` (RTK + Caveman) sun zubar da tsibin a ~ 12 Gi (`FATAL ERROR: Reached heap limit`) kuma suna iya OOM a 16 Gi rukuni. Duba [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Wannan ma'aunin shine a** ƙwaƙwalwar ajiya-kasafin kuɗi** gargadi, ba samfur mai wuya-max na tsayin `/v1/responses` guda biyu na lokaci ɗaya ba. An shigar da shigar da hira mai nauyi ta hanyar kasafin kudin shigar da aka samu ta atomatik (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) mai girman daga wancan V8/cgroup rufin — wanda ya tsallake shi sama (ko saita madaidaicin ƙidaya `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) akan tsari mai girman gaske yana sake dawo da zubar da ciki. Ƙananan hirarraki, `/healthz`, `/v1/models`, da MCP sune** ba** a cikin wannan hular.
 
 ### Tsari ɗaya: fiye da dogayen `/v1/responses` biyu
 
-A** lafiya** tsari (tuni kasa `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, tsoho `0.75`)** mai yiwuwa** gudanar da `POST /v1/responses` fiye da guda biyu na lokaci ɗaya lokacin da tsarin kasafin-faɗin inflight-byte (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) har yanzu yana da ɗaki. Jiki a ko sama da `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (tsoho 256 KiB) suna ɗaukar haya mai nauyi iri ɗaya kamar buƙatun-nauyin tsari kuma suna amfani da guda [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` gudun hijira (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Dubun abokan ciniki na SSE masu tsayi (masu aiki galibi suna buƙatar 40-50) shine a** ƙwaƙwalwar ajiya-kasafin kuɗi** tambaya — girman tsibi + primary/headroom ramummuka + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ba ƙaƙƙarfan ƙayyadaddun samfur na “max 2”. Har yanzu tulin matsi yana zubar da `503` mai sake gwadawa don haka #7849 baya dawowa.
+A** lafiya** tsari (tuni kasa `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, tsoho `0.75`)** mai yiwuwa** gudu fiye da biyu na tsawon `POST /v1/responses` a lokaci ɗaya lokacin da tsarin faɗin tsarin tafiyar da kasafin kuɗi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) yana da ɗaki. Jiki a ko sama da `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (tsoho 256 KiB) suna ɗaukar haya mai nauyi iri ɗaya kamar buƙatun-nauyin tsari kuma suna amfani da tseren [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` guda ɗaya (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Dubun abokan cinikin SSE na lokaci ɗaya (masu aiki galibi suna buƙatar 40-50) shine a** ƙwaƙwalwar ajiya-kasafin kuɗi** tambaya — girman tsibi + primary/headroom ramummuka + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ba ƙaƙƙarfan ƙayyadaddun samfur "max 2". Tulin da aka matsi har yanzu yana zubar da `503` mai sake gwadawa don kada #7849 ya dawo.
 
 Zuwa** ninka tsibi** (tsofaffin wuraren V8 masu zaman kansu)** yau** :
 
-| Yi                                                                                                                                                   | Kar ka                                                                    |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Gudu** N containers/pods** , kowacce da ta** nasa** `DATA_DIR` / girma                                                                               | Saita `replicas > 1` akan fayil ɗin SQLite ɗaya                           |
-| Girman nauyi a cikin jirgin + lafiyayyan-ɗakin kai daga tudun kasafin kuɗi-byte; 1-2 shine tsohowar #7849 mai ra'ayin mazan jiya, ba max samfurin ba | Ba da tsari guda 8 × RAM da hular ƙidayar da ba ta da iyaka               |
-| Na zaɓi: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` don** raba adadin ƙididdiga**                                                          | Bi da Redis kamar yadda aka raba SQLite — ba haka bane                    |
-| Kwafin sirrin mai badawa cikin kowane misali (ko karɓar dashboards da aka raba)                                                                      | Yi tsammanin dashboard ɗaya / log-log ɗin kira guda ɗaya a cikin al'amura |
-| Gaba tare da kowane ma'aunin nauyi; m ta maɓallin API ko zaman ya isa                                                                                | Bukatar ƙayyadaddun ƙayyadaddun dillali-sane mai matsakaici               |
+| Yi                                                                                                                                                                        | Kar ka                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Gudu** N containers/pods** , kowacce da ta** nasa** `DATA_DIR` / girma                                                                                                    | Saita `replicas > 1` akan fayil ɗin SQLite ɗaya                           |
+| Girman nauyi a cikin jirgin + lafiyayyan-ɗakin kai daga kasafin kuɗaɗen jirgin sama-byte; 1-2 shine tsohowar #7849 mai ra'ayin mazan jiya, ba max ɗin samfur mai ƙarfi ba | Ba da tsari guda 8 × RAM da hular ƙidayar da ba ta da iyaka               |
+| Na zaɓi: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` don** raba adadin ƙididdiga**                                                                               | Bi da Redis kamar yadda aka raba SQLite — ba haka bane                    |
+| Kwafin sirrin mai badawa cikin kowane misali (ko karɓar dashboards da aka raba)                                                                                           | Yi tsammanin dashboard ɗaya / log-log ɗin kira guda ɗaya a cikin al'amura |
+| Gaba tare da kowane ma'aunin nauyi; m ta maɓallin API ko zaman ya isa                                                                                                     | Bukatar ƙayyadaddun ƙayyadaddun dillali-sane mai matsakaici               |
 
-Hakanan za'a iya musayar alaƙa-zuwa-asusu ta hanyar Redis: saita `OMNIROUTE_SESSION_AFFINITY_STORE=redis` da `REDIS_URL` akan kowane tsari, tare da `REDIS_KEY_PREFIX` iri ɗaya da ingantaccen saitin `sessionAffinityTtlMs`. Fil suna warware hashed-account-account ga kowane tsari na cancantar haɗin gida, don haka asusun OAuth tare da madaidaitan metadata na ainihi baya buƙatar samun haɗin daidai IDs. Sanannun bayanan asusu suna gaba da IDs na gida masu cin karo da juna a cikin ƙudurin fil da korar da aka tsare; rubutattun bayanai ba tare da ainihi ba (ko masu kiran korar ba tare da ainihi ba) suna riƙe gadin ID gado. Lissafi ba tare da tsayayyen asalin amfani ba har yanzu suna buƙatar daidaita IDs. kurakurai Redis ko kira da suka wuce 100 ms suna komawa zuwa SQLite na gida. Kowane kantin Redis affinity yana ɗaukar fitattun ayyuka a 8, yana ƙetare Redis nan da nan idan ya cika, kuma yana fitar da ramummuka kawai lokacin da aikin da ke ƙasa ya daidaita, ba a ranar ƙarshe na mai kira ba. A lokacin fitar Redis babu gaskiya guda ɗaya: kowane misali yana komawa ga kusancinsa na gida, zaman na iya sake turawa sau ɗaya kowane misali, kuma al'amura na iya bambanta. Dankowa yana sake haɗuwa ta hanyar Redis lokacin da ya murmure. Ƙayyadaddun ƙayyadaddun lokacin jira, ba aika EVAL ba, wanda zai iya sauka bayan faɗuwa. Rubuce-rubucen ba da hanya tsakanin hanyoyin sadarwa kwatanta ainihin ƙimar da aka lura ta hanyar yanke shawara, ba sabon lokacin karatun maye gurbin ba; kuskuren da aka gani ko kallon faɗuwar SQLite yana kwatanta shi azaman maɓallin Redis da ba ya nan. Ana maye gurbin fil ɗin da aka daina amfani da su a cikin CAS ɗaya, don haka umarnin da ya ƙare ba zai iya maye gurbin ko share sabon fil ɗin daban ba. Redis karanta atomically mayar da darajar da sauran uwar garken TTL; tabbatacce PTTL (ko babu ƙarewa) yana ƙayyade rayuwa, ba tambarin lokaci JSON na marubuci ko agogon mai karatu ba. Taswirar hoto na gida wanda ya rage TTL zuwa ranar ƙarshe na gida; Maɓallan JSON da ake da su sun kasance ana iya karanta su kuma ana ajiye ɗanyen bytes ɗin su don CAS. Redis shine kawai tushen gaskiya yayin da yake amsawa. Tabbatar da abubuwan da aka raba, taɓawa da sharewa suna cire shigarwar gida, kar a taɓa shigar ko sabunta ta. SQLite akan hanyar Redis yana riƙe da wannan misalin nasa yanke shawara na koma baya daga kurakuran Redis, ƙarewar lokaci ko jimlar shiga, TTL mai iyaka kamar da. Fitin gida da ya ɓace a kan kashewa daga baya yana biyan sabon zaɓi guda ɗaya (raɓawar cache ɗaya), ba asusun da ba daidai ba ko korar. Abubuwan da aka ƙi yarda sun dawo da wanda ya ci nasara da sauran TTL ta atomatik: zaɓi na yau da kullun yana sake duba ranar ƙarshe na gida kuma yana amfani da wanda ya cancanci ci gaba mai rai, taɓa amfani da shiga wannan asusun ba tare da wani rubutaccen rubutu ba. Idan babu shi, zaɓi yana riƙe ɗan takara na gida, yana barin fil ɗin da aka raba baya canzawa kuma yana fitar da saƙon kuskure guda ɗaya. An ƙi CAS baya rubuta SQLite; Kurakurai Redis, ƙarewar lokaci ko jikewar shigar suna amfani da aikin gida na yanzu maimakon. Idan amsar maye gurbin da aka aika ta zo bayan ɓata lokaci (an yarda, ƙi ko kuskure), daidaitaccen daidaitaccen ƙimar kwatankwacin-da-share yana kawar da jeri na faɗuwar lokaci mai kama da byte. Babu jira tsakanin wancan kwatanta da shafewa; Ana adana sabon rubutaccen rubutu. Korar da aka keɓe yana cire fil ɗin asusun asusun da ya gaza koda tare da saukar Redis, kuma yana sake tsaftace shi bayan an tabbatar da korar da aka raba. Amsoshin da aka raba a baya ba za su iya dawo da fil ɗin gida da aka kora ba saboda nasarar da aka raba ba ta taɓa rubuta SQLite ba. Faɗuwar faɗuwa daga baya na iya mayar da asusu; Rubutun rabawa da aka karɓa daga baya ya wanzu a cikin Redis kawai. kuskuren Redis baya tuntuɓar jihar koma bayan gida. Tare da kashe direban, sabbin fitilun da aka zaɓa suna riƙe da siffar filin SQLite JSON huɗu; Hanyar hanyar Redis kawai tana ƙara ainihin asusun hashed. Ana sake bincika fil ɗin da aka riga aka gama a kan iyakar ƙarewarsu. Redis wanda ba na haya ba yana sake karanta kantin sayar da kayayyaki, amma tsarin hayar haɗin gwiwa na iya amfani da fil ɗin da aka fitar tsakanin prefetch da tsarawa (taga mafi kyawun ƙoƙarin da aka yarda). Yarjejeniyar hayar ba za ta iya canza asusu ba bayan da'awar mai ɗorewa: a kan ƙididdigewa yana riƙe ɗan takarar wannan buƙatar kawai kuma ya bar wanda ya ci nasara ba a taɓa shi ba, don haka yarjejeniya a kowane yanayi tana kan wannan hanyar. Sauran teburin har yanzu yana aiki: wannan baya raba haɗakar zaman mannewa, ɗan asalin Codex juya fil, semaphores na asusu, makullai, iyakoki, daidaitawa ko rajistan ayyukan kira.
+Hakanan za'a iya musayar alaƙa-zuwa-asusu ta hanyar Redis: saita `OMNIROUTE_SESSION_AFFINITY_STORE=redis` da `REDIS_URL` akan kowane tsari, tare da `REDIS_KEY_PREFIX` iri ɗaya da ingantaccen saitin `sessionAffinityTtlMs`. Fil suna warware hashed-account-account ga kowane tsari na cancantar haɗin gida, don haka asusun OAuth tare da madaidaitan metadata na ainihi baya buƙatar samun haɗin daidai IDs. Sanannun bayanan asusu suna gaba da IDs na gida masu cin karo da juna a cikin ƙudurin fil da korar da aka tsare; rubutattun bayanai ba tare da ainihi ba (ko masu kiran korar ba tare da ainihi ba) suna riƙe gadin ID gado. Lissafi ba tare da tsayayyen asalin amfani ba har yanzu suna buƙatar daidaita IDs. kurakurai Redis ko kira da suka wuce 100 ms suna komawa zuwa SQLite na gida. Kowane kantin Redis affinity yana ɗaukar fitattun ayyuka a 8, yana ƙetare Redis nan da nan idan ya cika, kuma yana fitar da ramummuka kawai lokacin da aikin da ke ƙasa ya daidaita, ba a ranar ƙarshe na mai kira ba. A lokacin fitar Redis babu gaskiya guda ɗaya: kowane misali yana komawa ga kusancinsa na gida, zaman na iya sake turawa sau ɗaya kowane misali, kuma al'amura na iya bambanta. Dankowa yana sake haɗuwa ta hanyar Redis lokacin da ya murmure. Ƙayyadaddun ƙayyadaddun lokacin jira, ba aika EVAL ba, wanda zai iya sauka bayan faɗuwa. Rubuce-rubucen ba da hanya tsakanin hanyoyin sadarwa kwatanta ainihin ƙimar da aka lura ta hanyar yanke shawara, ba sabon lokacin karatun maye gurbin ba; kuskuren da aka gani ko kallon faɗuwar SQLite yana kwatanta shi azaman maɓallin Redis da ba ya nan. Ana maye gurbin fil ɗin da aka daina amfani da su a cikin CAS ɗaya, don haka umarnin da ya ƙare ba zai iya maye gurbin ko share sabon fil ɗin daban ba. Redis karanta atomically mayar da darajar da sauran uwar garken TTL; tabbatacce PTTL (ko babu ƙarewa) yana ƙayyade rayuwa, ba tambarin lokaci JSON na marubuci ko agogon mai karatu ba. Taswirar hoto na gida wanda ya rage TTL zuwa ranar ƙarshe na gida; Maɓallan JSON da ake da su sun kasance ana iya karanta su kuma ana ajiye ɗanyen bytes ɗin su don CAS. Redis shine kawai tushen gaskiya yayin da yake amsawa. Tabbatar da abubuwan da aka raba, taɓawa da sharewa suna cire shigarwar gida, kar a taɓa shigar ko sabunta ta. SQLite akan hanyar Redis yana riƙe da wannan misalin nasa yanke shawara na koma baya daga kurakuran Redis, ƙarewar lokaci ko jimlar shiga, TTL mai iyaka kamar da. Fitin gida da ya ɓace a kan kashewa daga baya yana biyan sabon zaɓi guda ɗaya (raɓawar cache ɗaya), ba asusun da ba daidai ba ko korar. Abubuwan da aka ƙi yarda sun dawo da wanda ya ci nasara da sauran TTL ta atomatik: zaɓi na yau da kullun yana sake duba ranar ƙarshe na gida kuma yana amfani da wanda ya cancanci ci gaba mai rai, taɓa amfani da shiga wannan asusun ba tare da wani rubutaccen rubutu ba. Idan babu shi, zaɓi yana riƙe ɗan takara na gida, yana barin fil ɗin da aka raba baya canzawa kuma yana fitar da saƙon kuskure guda ɗaya. An ƙi CAS baya rubuta SQLite; Kurakurai Redis, ƙarewar lokaci ko jikewar shigar suna amfani da aikin gida na yanzu maimakon. Idan amsar maye gurbin da aka aika ta zo bayan ɓata lokaci (an yarda, ƙi ko kuskure), daidaitaccen daidaitaccen ƙimar kwatankwacin-da-share yana kawar da jeri na faɗuwar lokaci mai kama da byte. Babu jira tsakanin wancan kwatanta da shafewa; Ana adana sabon rubutaccen rubutu. Korar da aka keɓe yana cire fil ɗin asusun asusun da ya gaza koda tare da saukar Redis, kuma yana sake tsaftace shi bayan an tabbatar da korar da aka raba. Amsoshin da aka raba a baya ba za su iya dawo da fil ɗin gida da aka kora ba saboda nasarar da aka raba ba ta taɓa rubuta SQLite ba. Faɗuwar faɗuwar baya na iya mayar da asusu; Rubutun rabawa da aka karɓa daga baya ya wanzu a cikin Redis kawai. kuskuren Redis baya tuntuɓar jihar koma bayan gida. Tare da kashe direban, sabbin fitilun da aka zaɓa suna riƙe da siffar filin SQLite JSON huɗu; Hanyar hanyar Redis kawai tana ƙara ainihin asusun hashed. Ana sake bincika fil ɗin da aka riga aka gama a kan iyakar ƙarewarsu. Redis wanda ba na haya ba yana sake karanta kantin sayar da kayayyaki, amma tsarin hayar haɗin gwiwa na iya amfani da fil ɗin da aka fitar tsakanin prefetch da tsarawa (taga mafi kyawun ƙoƙarin da aka yarda). Yarjejeniyar hayar ba za ta iya canza asusu ba bayan da'awar mai ɗorewa: a kan ƙididdigewa yana riƙe ɗan takarar wannan buƙatar kawai kuma ya bar wanda ya ci nasara ba a taɓa shi ba, don haka yarjejeniya a kowane yanayi tana kan wannan hanyar. Sauran teburin har yanzu yana aiki: wannan baya raba haɗakar zaman mannewa, ɗan asalin Codex juya fil, semaphores na asusu, makullai, iyakoki, daidaitawa ko rajistan ayyukan kira.
 
-Hardware: lokaci-lokaci tsayin `/v1/responses` shine a** ƙwaƙwalwar ajiya-kasafin kuɗi** tambaya (heap + inflight-byte / #10110). `N` mai zaman kansa `DATA_DIR` s har yanzu yana ninka tsibirai: mai masaukin RAM dole ne ya rufe `N × cgroup`, ba "16 Gi pod guda ɗaya tare da N = 8." Kada a taɓa `replicas > 1` akan fayil ɗin SQLite ɗaya.
+Hardware: lokaci-lokaci tsayin `/v1/responses` shine a** ƙwaƙwalwar ajiya-kasafin kuɗi** tambaya (heap + inflight-byte / #10110). `N` mai zaman kansa `DATA_DIR` s har yanzu yana ninka tsibirai: RAM mai masaukin baki dole ne ya rufe `N × cgroup`, ba “16 Gi pod guda ɗaya tare da N = 8 ba.” Kada a `replicas > 1` akan fayil ɗin SQLite ɗaya.
 
 Ƙirƙirar zane (tuba biyu, juzu'i biyu — ba `deploy.replicas: 2`):
 
@@ -695,11 +720,11 @@ volumes:
   omniroute-b-data:
 ```
 
-Yawan aiki (matsi daga keɓewar HTTP ) shine [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Ɗayan tari mai ma'ana akan yanayi mai dorewa da aka raba shine [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Yawan aiki (matsi daga keɓe HTTP ) shine [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Ɗayan tari mai ma'ana akan yanayi mai dorewa da aka raba shine [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Kuskuren yanki na Gemini a cikin Docker
+## Gemini kurakurai na yanki a cikin Docker
 
-Google AI Studio / Gemini API na iya dawo da HTTP 400 tare da FAILED_PRECONDITION da `User location is not supported for the API use.` Buƙatar nasara akan mai masaukin ba ta tabbatar da cewa kwandon yana amfani da hanyar fita ɗaya ɗaya ba. odar DNS, haɗin IPv4/IPv6, hanyar VPN da kuma ƙayyadaddun proxies na iya bambanta. Bincika [yankuna masu goyan bayan Google](https://ai.google.dev/gemini-api/docs/available-regions) da kuma ainihin hanyar haɗin gwiwa; wannan kuskuren kadai baya gano maɓalli mara kyau API.
+Google AI Studio / Gemini API zai iya dawo da HTTP 400 tare da FAILED_PRECONDITION da `User location is not supported for the API use.` Buƙatar nasara akan mai watsa shiri baya tabbatar da cewa kwandon yana amfani da hanyar fita ɗaya ɗaya. odar DNS, haɗin IPv4/IPv6, hanyar VPN da kuma daidaitawar proxies na iya bambanta. Bincika [yankuna masu goyan bayan Google](https://ai.google.dev/gemini-api/docs/available-regions) da kuma ainihin hanyar haɗin gwiwa; wannan kuskuren kadai baya gano maɓalli mara kyau API.
 
 ### Fi son takamaiman wakili na haɗi
 
@@ -714,11 +739,11 @@ node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: t
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Sauya `omniroute` tare da sabis ɗin da kuke gudanarwa (misali, `omniroute-web`). Waɗannan umarni suna buga iyalai na adireshi ba tare da takaddun shaida ko adiresoshin IP. `6` da aka dawo kawai yana nuna DNS IPv6 yana aikatawa** ba** tabbatar da hanyar IPv6 mai amfani ko hanyar API. Inda aka shigar da `curl`, kwatanta `curl -4 -I https://generativelanguage.googleapis.com` da `curl -6 -I https://generativelanguage.googleapis.com` a cikin mahalli biyu. Martanin HTTP yana tabbatar da haɗin kai don wannan binciken, koda kuwa kuskure ne mara tabbas; buƙatun ƙirar ƙira kawai yana gwada cancantar Gemini.
+Sauya `omniroute` tare da sabis ɗin da kuke gudanarwa (misali, `omniroute-web`). Waɗannan umarni suna buga iyalai na adireshi ba tare da takaddun shaida ko adiresoshin IP. `6` da aka dawo kawai yana nuna DNS IPv6 yana aikatawa** ba** tabbatar da hanyar IPv6 mai amfani ko hanyar API. Inda aka shigar da `curl`, kwatanta `curl -4 -I https://generativelanguage.googleapis.com` da `curl -6 -I https://generativelanguage.googleapis.com` a cikin mahalli biyu. Martanin HTTP yana tabbatar da haɗin kai don wannan binciken, koda kuwa kuskure ne mara tabbas; kawai ingantaccen samfurin buƙatun yana gwada cancantar Gemini.
 
 ### Madadin matakin mai watsa shiri: IPv6 aiki da manufofin warwarewa
 
-Mai ba da rahoto na [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) ya dawo da damar shiga cikin muhallinsu ta hanyar ba da damar IPv6 kwantena da canza zaɓin adireshin glibc. Bi da wannan azaman madadin takamaiman yanayi. Tabbatar da IPv6 mai aiki, kwantena egress/routing da dokokin Tacewar zaɓi kafin daidaita abubuwan zaɓi. Adireshin ULA mai zaman kansa da kansa baya kafa haɗin IPv6 na jama'a.
+Mai ba da rahoto na [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) ya dawo da damar shiga cikin muhallinsu ta hanyar ba da damar IPv6 kwantena da canza zaɓin adireshin glibc. Bi da wannan azaman madadin takamaiman yanayi. Tabbatar da IPv6 mai aiki, kwantena egress/routing da dokokin Tacewar zaɓi kafin daidaita abubuwan zaɓi. Adireshin ULA mai zaman kansa da kansa baya kafa haɗin IPv6 na jama'a.
 
 Don ayyukan da aka riga aka haɗe zuwa tsohuwar hanyar sadarwa ta Compose, wannan guntu yana ba da damar IPv6 akan wannan hanyar sadarwa; Riƙe sauran sabis ɗinku, tashar jiragen ruwa, kundin girma da daidaitawa:
 
@@ -730,11 +755,11 @@ networks:
 
 Don cibiyar sadarwa mai suna, kunna ta akan hanyar sadarwar da sabis ɗin ke haɗawa. Docker na iya kasafta wani yanki na ULA ; zaži fayyace, cibiyar sadarwa mara sa6owa kawai lokacin da hanyar sadarwarka ta bukace ta. Duba [Docker IPv6 sadarwar](https://docs.docker.com/engine/daemon/ipv6/) kuma [Rubuta zaɓuɓɓukan cibiyar sadarwa](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Na a** Hoton tushen glibc** , `/etc/gai.conf` na iya canza zaɓin adireshin. Dockerfile na yanzu yana amfani da Debian; Hotunan tushen musl na al'ada ba sa raba wannan tsarin. Daidaiton da aka ruwaito yana canza alamar ULA daga `label fc00::/7 6` zuwa `label fc00::/7 1`. Fara daga cikakken teburin manufofin hoton kuma adana sauran shigarwar sa: ƙara `label` ko shigarwar `precedence` ya maye gurbin wancan tsohuwar tebur, don haka fayil ɗin da ke ɗauke da layin da aka canza kawai bai isa ba. [Ƙa'idar daidaitawar glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) ta rubuta waɗannan ilimin tarukan. Haɗa fayil ɗin da aka sake dubawa kawai a `/etc/gai.conf` kuma sake ƙirƙira sabis don amfani da shi.
+Na a** Hoton tushen glibc** , `/etc/gai.conf` na iya canza zaɓin adireshin. Dockerfile na yanzu yana amfani da Debian; Hotunan tushen musl na al'ada ba sa raba wannan tsarin. Daidaiton da aka ruwaito yana canza alamar ULA daga `label fc00::/7 6` zuwa `label fc00::/7 1`. Fara daga cikakken teburin manufofin hoton kuma adana sauran shigarwar sa: ƙara `label` ko shigarwar `precedence` ya maye gurbin wancan tsohuwar tebur, don haka fayil ɗin da ke ɗauke da layin da aka canza kawai bai isa ba. [Ƙa'idar daidaitawar glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) tana rubuta waɗannan tarukan. Haɗa fayil ɗin da aka sake dubawa kawai a `/etc/gai.conf` kuma sake ƙirƙira sabis don amfani da shi.
 
-Wannan yana canza zaɓin adireshin OS don** duk zirga-zirga mai fita a cikin wannan akwati** . Ba ya tilasta kowane aikace-aikace don zaɓar IPv6: Node's DNS order da zaɓin haɗin suna da mahimmanci. Musamman `--dns-result-order=ipv4first` ya fi son IPv4 kuma ba magani bane ga gazawar IPv4-only. Duba [Node DNS yana oda](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Wannan yana canza zaɓin adireshin OS don** duk zirga-zirga masu fita a cikin wannan akwati** . Ba ya tilasta kowane aikace-aikace don zaɓar IPv6: Node's DNS order da zaɓin haɗin suna da mahimmanci. Musamman `--dns-result-order=ipv4first` ya fi son IPv4 kuma ba magani bane ga gazawar IPv4-only. Duba [Node DNS yana oda](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Sake gwada Gemini da sauran masu samar da ku bayan kowane canjin matakin runduna. Don jujjuya baya, cire dutsen `gai.conf` na al'ada, maido da saitunan cibiyar sadarwar da ta gabata kuma sake ƙirƙirar service/network ɗin da abin ya shafa yayin taga gyarawa. Sake ƙirƙira hanyar sadarwa na iya katse sauran kwantena da ke makale da ita; kar a share ƙarar bayanan dagewa.
+Sake gwada Gemini da sauran masu samar da ku bayan kowane canji na matakin runduna. Don mirgine baya, cire dutsen `gai.conf` na al'ada, maido da saitunan cibiyar sadarwar da ta gabata kuma sake ƙirƙirar service/network da abin ya shafa yayin taga mai kulawa. Sake ƙirƙira hanyar sadarwa na iya katse sauran kwantena da ke makale da ita; kar a share ƙarar bayanan dagewa.
 
 ## Muhimman Bayanan Kula
 

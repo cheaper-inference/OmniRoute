@@ -20,24 +20,21 @@ URL ላይ ሊደረስበት የሚችል Codex CLI** ያስፈልገዋል፣ 
 ## 1. አርክቴክቸር
 
 ```
-┌─ OmniRoute መተግበሪያ ──────────────┐        ┌─ codex-app-server የጎን ኮንቴይነር ─────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ የችሎታ ቶከን)                  │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuthን በራሱ ያስተዳድራል       │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, ራስ-ሰር ዕድሳት) │
-        │ ይጋራል (compose volumes)           └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → የWS ችሎታ ቶከን (ሁለቱም ይሰቅሉታል)
-  codex-appserver-home    → ~/.codex (auth.json በዳሽቦርዱ ይጻፋል፣
-                             በጎን ኮንቴይነሩ codex app-server ይነበባል)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- የጎን ኮንቴይነሩ ከችሎታ ቶከን ጀርባ **በውስጣዊው compose አውታረ መረብ ላይ ብቻ**
-  (`ws://codex-app-server:1456`) ጥያቄዎችን ይቀበላል። ለአስተናጋጁ ወይም ለበይነመረብ
-  **ፈጽሞ** አይጋለጥም።
-- Codex CLI በ`omniroute:base` ውስጥ አስቀድሞ ተካትቷል፤ ስለዚህ የጎን ኮንቴይነሩን
-  ሲያስኬዱ በአስተናጋጁ ወይም በተጠቃሚው ማሽን ላይ codexን መጫን አያስፈልግም።
+- የጎን መኪናው ያዳምጣል** ብቻ** በውስጣዊ የአጻጻፍ አውታረ መረብ (`ws://codex-app-server:1456`) ከችሎታ ማስመሰያ በስተጀርባ። ነው።** በፍጹም** በአስተናጋጁ ወይም በይነመረብ ላይ ታትሟል።
+- የጎን መኪናው ከ `runner-cli-no-docker` ዒላማ የተገነባውን `omniroute:cli-no-docker` ይጠቀማል, እሱም Codex CLI ያካትታል.
 
 ## 2. ማስነሳት
 

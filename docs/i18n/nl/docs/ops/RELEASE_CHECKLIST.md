@@ -4,12 +4,9 @@
 
 ---
 
-> **Laatst bijgewerkt:** 2026-08-28 — v3.8.51
-> Gestroomlijnd releaseproces dat Claude Code-skills gebruikt voor automatisering.
+> Gestroomlijnde releasestroom die gebruik maakt van Claude Code-vaardigheden voor automatisering.
 >
-> **Houd de wachtrij/branch tussen releases groen:** zie [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs`-familie + `npm run check:release-green` + `/babysit` + nachtelijke uitvoering). Door dit
-> periodiek uit te voeren — en vooral **vóór** deze checklist — begint de release-PR groen.
+> **Houd de queue/branch groen tussen releases:** zie [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` familie + `npm run check:release-green` + `/babysit` + nachtelijk). Het uitvoeren van deze periodiek — en vooral** voor** deze checklist — zorgt ervoor dat de release PR groen begint.
 
 ## Kort samengevat
 
@@ -60,7 +57,9 @@ De npm-publish-workflow publiceert niet langer rechtstreeks: het start de ingepa
 
 **Docker Hub `latest` (vereist bij elke stabiele SemVer publicatie):** de `docker-publish` workflow moet taggen** beide** `X.Y.Z` en, wanneer `should-promote-latest.sh` akkoord gaat, is dit de hoogste stabiele SemVer, `:latest` met de** zelfde vertering** . Na de klus: Hub `latest` digest is gelijk aan de nieuwe SemVer digest en `last_updated` verplaatst. Laat `:latest` niet op een oudere build staan terwijl release-opmerkingen praten over oplossingen die alleen op git bestaan. Snelstartgidsen opstellen gebruik `:latest`; GitOps moet `X.Y.Z` blijven vastzetten. Zie [Docker releasekanalen](../guides/DOCKER_GUIDE.md#release-channels) en #10317.
 
-**Docker Hub-organisatierepository (`cheaperinference/omniroute`):** Docker Hub kan een repository niet tussen naamruimten verplaatsen, dus `diegosouzapw/omniroute` behoudt zijn pull-geschiedenis en elke release, en de `mirror-org-dockerhub` -taak van `docker-publish` kopieert elke uitgebrachte versie (en `:latest` wanneer gepromoveerd) van `ghcr.io/cheaper-inference/omniroute` naar de repository van de organisatie. Het heeft de `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` geheimen nodig; zonder hen blijft de taak groen met een waarschuwing "Docker Hub org mirror skipped" en publiceren de andere registers normaal. Als u daar later een vrijgegeven versie wilt publiceren, voert u de opdracht uit** Acties → Docker -afbeelding spiegelen naar de Docker Hub-org → Run-workflow** met `version=X.Y.Z` (en `promote_latest` voor de hoogste stabiele versie): het kopieert de bestaande afbeeldingen, niet opnieuw opbouwen.
+**Docker Hub-organisatierepository (`cheaperinference/omniroute`):** Docker Hub kan een repository niet tussen naamruimten verplaatsen, dus `diegosouzapw/omniroute` behoudt zijn pull-geschiedenis en elke release, en de `mirror-org-dockerhub` -taak van `docker-publish` kopieert elke uitgebrachte versie (en `:latest` wanneer gepromoveerd) van `ghcr.io/cheaper-inference/omniroute` naar de repository van de organisatie. Het heeft de `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` geheimen nodig; zonder hen blijft de taak groen met een waarschuwing "Docker Hub org mirror skipped" en publiceren de andere registers normaal. Als u daar later een vrijgegeven versie wilt publiceren, voert u de opdracht uit** Acties → Docker -afbeelding spiegelen naar de Docker Hub-org → Run-workflow** met `version=X.Y.Z` (en `promote_latest` voor de hoogste stabiele versie): het kopieert de bestaande afbeeldingen, niet opnieuw opbouwen. Het Docker Hub-overzicht van die repository wordt met de hand ingesteld: de API die het bewerkt, wijst Organization Access Tokens af.
+
+Dezelfde workflow kopieert ook elke release naar het oude GHCR pakket `ghcr.io/diegosouzapw/omniroute` tot 30-06-2027, zodat installaties die er nog aan vastzitten, worden bijgewerkt; de index heeft de beschrijving "verplaatst naar `ghcr.io/cheaper-inference/omniroute`". Het heeft het `GHCR_LEGACY_TOKEN` geheim nodig (een klassiek persoonlijk toegangstoken van `diegosouzapw` met `write:packages`); zonder dit wordt de taak overgeslagen met de waarschuwing "Legacy GHCR mirror skipped".
 
 ## Snelle hotfix-route (label `hotfix`)
 
@@ -120,7 +119,7 @@ matrix automatisch over, zonder label.
 - [ ] `npm run test:unit` — pas
 - [ ] `npm run test:vitest` — pass (MCP server, autoCombo, cache)
 - [ ] `npm run test:coverage` — poort 60/60/60/60 tevreden (statements/lines/functions/branches)
-- [ ] `npm run test:integration` — pass (bij wijzigingen raak DB / handlers aan)
+- [ ] `npm run test:integration` — pass (bij wijzigingen raakt u DB / handlers aan)
 - [ ] `npm run test:combo:matrix` — pass (combostrategiematrix: bewijst de selectiebeslissingen van alle 22 openbare routeringsstrategieën deterministisch; wordt uitgevoerd bij het aanraken van combo-routering, strategieresolutie of fallback-logica)
 - [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (gated real-upstream smoke; haalt een alleen-lezen DB momentopname van VPS `root@192.168.0.15`; raakt echte providers, kost credits; draait nooit in CI; slaat netjes over zonder de poort)
 - [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS live smoke: 7 HTTP scenario's tegen de live `.15` server via gewoon knooppunt ESM; vereist `ssh root@192.168.0.15`; creates/deletes alleen `__live_test__*` combo's; raakt echte providers; draait nooit in CI)
@@ -151,7 +150,7 @@ Belangrijke wijzigingen: voeg `BREAKING CHANGE:` voettekst of `!` toe na het ber
 ### Documentatie
 
 - [ ] `npm run check:docs-sync` -passen (automatisch uitgevoerd door pre-commit)
-- [ ] `npm run check:docs-all` passen (paraplu: docs-sync + docs-counts + env-doc-sync + verouderde versies + doc-links)
+- [ ] `npm run check:docs-all` gaat voorbij. Het advies `check:deprecated-versions` markeert versies die expliciet zijn toegeschreven aan OmniRoute (3.6.x en eerder) en negeert datums.
 - [ ] `npm run check:env-doc-sync` verlaat 0 — code ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env-contract is intact
 - [ ] `npm run check:doc-links` verlaat 0 — geen gebroken interne prijsverlagingsreferenties na herstructurering
 - [ ] `docs/architecture/ARCHITECTURE.md` beoordeeld voor storage/runtime drift
@@ -189,7 +188,7 @@ Belangrijke wijzigingen: voeg `BREAKING CHANGE:` voettekst of `!` toe na het ber
 - [ ] Indien nieuwe aanbieder toegevoegd: corresponderende uitvoerder in `open-sse/executors/`
 - [ ] Indien niet-OpenAI-formaat: vertaler in `open-sse/translator/`
 - [ ] Modellen geregistreerd in `open-sse/config/providerRegistry.ts`
-- [ ] Eenheidstests in `tests/unit/` cover provider classificatie en routing
+- [ ] Eenheidstests in `tests/unit/` -dekkingsproviderclassificatie en -routering
 
 ### Desktop (Electron)
 
@@ -203,7 +202,7 @@ Als `electron/` is gewijzigd:
 
 ### Bouw lay-out
 
-De repository gebruikt drie verschillende uitvoermappen — verwissel ze nooit:
+De repository gebruikt drie verschillende uitvoermappen — ze nooit door elkaar haalt:
 
 | Directory | Doel                                                            | Bijgehouden?        |
 | --------- | --------------------------------------------------------------- | ------------------- |
@@ -366,7 +365,7 @@ npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` voert niets uit: het leest git en `gh` en drukt de hele reeks — voorwaarden af (bron wordt opgelost, de bronrepository heeft de volledige geschiedenis — een ondiepe kloon kan `stable/v3` niet pushen, de ontvangende kant wijst het pakket af bij de eerste geënte ouder, dus gesneden uit een volledige kloon of `git fetch --unshallow origin` eerste — vorige tag bestaat, `package.json` is de doelversie, een `release-freeze` probleem is open, geen open `Release branch not green` probleem op een bestaande release branch — a branch die niet bestaat rapporteert `?` onbekend, nooit groen — omni-wachtrij brengt de release PRs binnen (G11: `config/merge-queue/config.json` geldig, zijn `bases` beheert de release branch, `mode` `live`, zijn label bestaat), de `release/*` regelset blokkeert nog steeds verwijdering en force-push, en `stable/v3` en `develop` bestaan nog niet), de twee branch-stappen, welke slapende workflow triggers en `if:` voorwaarden waar worden (en die afgesloten blijven door een repositoryvariabele of vastgemaakt aan de canonieke repository), de verwachte dist-tags (`latest` → 3.9.0, `next` en `nightly` leeg) en het terugdraaien. Sluit `0` = `RESULT: READY` af, `1` = een blokkerende voorwaarde is mislukt (`✗`), `2` = gebruiksfout. `--advisory <id,...>` downgradet een cheque naar een waarschuwing (`!`) zonder deze te verbergen.
+`scripts/release/dry-run-lts-cut.mjs` voert niets uit: het leest git en `gh` en drukt de hele reeks — voorwaarden af (bron wordt opgelost, de bronrepository heeft de volledige geschiedenis — een ondiepe kloon kan `stable/v3` niet pushen, de ontvangende kant wijst het pakket af bij de eerste geënte ouder, dus geknipt uit een volledige kloon of `git fetch --unshallow origin` eerste — vorige tag bestaat, `package.json` is de doelversie, een `release-freeze` probleem is open, geen open `Release branch not green` probleem op een bestaande release branch — a branch die niet bestaat rapporteert `?` onbekend, nooit groen — omni-wachtrij brengt de release PRs binnen (G11: `config/merge-queue/config.json` geldig, zijn `bases` beheert de release branch, `mode` `live`, zijn label bestaat), de `release/*` regelset blokkeert nog steeds verwijdering en force-push, en `stable/v3` en `develop` bestaan nog niet), de twee branch-stappen, welke slapende workflow triggers en `if:` voorwaarden waar worden (en die afgesloten blijven door een repositoryvariabele of vastgemaakt aan de canonieke repository), de verwachte dist-tags (`latest` → 3.9.0, `next` en `nightly` leeg) en het terugdraaien. Sluit `0` = `RESULT: READY` af, `1` = een blokkerende voorwaarde is mislukt (`✗`), `2` = gebruiksfout. `--advisory <id,...>` downgradet een cheque naar een waarschuwing (`!`) zonder deze te verbergen.
 
 Voer de echte cut-run uit terwijl de release-bevriezing van 3.9.0 nog open is — de takken worden gemaakt na de tag en voordat Fase 12c de bevriezing opheft.
 
@@ -399,7 +398,7 @@ De ontwikkel bump commit is gebouwd met git plumping (er wordt geen werkende boo
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

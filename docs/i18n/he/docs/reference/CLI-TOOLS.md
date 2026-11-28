@@ -4,8 +4,6 @@
 
 ---
 
-עדכון אחרון: 23-08-2026
-
 OmniRoute משתלב עם שלוש קטגוריות של כלי CLI הפרוסות על פני שלושה דפי לוח מחוונים ייעודיים:
 
 | עַמוּד      | מַסלוּל                 | מוּשָׂג                                                               | לִסְפּוֹר |
@@ -235,7 +233,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)            |
 | `POST /api/cli-tools/qwen-settings`         | קוד Qwen (מפתח + `.env` `~/.qwen/settings.json`                  |
 
-כל המסלולים משתמשים ב- `sanitizeErrorMessage()` לתגובות שגיאה (חוק קשה מס' 12).
+כל המסלולים משתמשים `sanitizeErrorMessage()` לתגובות שגיאה (Hard Rule #12).
 
 ---
 

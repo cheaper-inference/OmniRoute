@@ -13,12 +13,12 @@ Ang Agent Skills ay mga nakaayos na SKILL.md file na nagtuturo sa mga external a
 
 ## Pangkalahatang-ideya
 
-Naglalaman ang catalog ng **45 Agent Skills** (23 REST API + 21 CLI + 1 workflow ng configuration). Ang bawat skill ay may:
+Ang katalogo ay naglalaman ng** 45 Mga Kasanayan sa Ahente** (23 REST API + 21 CLI + 1 configuration workflow). Ang bawat kasanayan ay may:
 
-- Isang **canonical ID** (`omni-auth`, `cli-serve`, atbp.)
-- Isang **SKILL.md** file sa `skills/{id}/SKILL.md` na may YAML frontmatter (`name`, `description`) + detalyadong markdown body
-- Mga **REST endpoint** (mga API skill) o **CLI subcommand** (mga CLI skill) na nagmula sa OpenAPI spec at CLI registry
-- Isang **GitHub raw URL** para sa live fetch: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanonikal ID** (`omni-auth`, `cli-serve`, atbp.)
+- A**SKILL.md** file sa `skills/{id}/SKILL.md` na may YAML frontmatter (`name`, `description`) + rich markdown body
+- **REST mga endpoint** (API kasanayan) o**CLI subcommand** (CLI skills) na nagmula sa OpenAPI spec at CLI registry
+- A**GitHub raw URL** para sa live na pagkuha: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Ang tugon ng generator ay isang `GeneratorReport`:
 
 ---
 
-## Coverage API
+## Saklaw ng API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -333,15 +333,12 @@ tidak disertakan dalam respons untuk key lainnya.
 
 `getCloudAgentCredentials(providerId)` di `src/lib/cloudAgent/api.ts`:
 
-1. Memuat koneksi provider aktif melalui `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Untuk setiap koneksi, mengutamakan `apiKey` (setelah spasi kosong dihapus). Jika tidak tersedia, menggunakan `accessToken`.
-3. Mengembalikan token pertama yang tidak kosong, dibungkus sebagai `{ apiKey: token }`.
-4. Mengembalikan `null` jika tidak ditemukan token yang dapat digunakan — API merespons dengan `400` dan
-   `"Tidak ada kredensial aktif yang dikonfigurasi untuk provider cloud agent: <id>"`.
+1. Memuat koneksi penyedia aktif melalui `getProviderConnections({ provider: providerId, isActive: true })`.
+2. Untuk setiap koneksi, lebih memilih `apiKey` (dipangkas). Kembali ke `accessToken`.
+3. Mengembalikan token pertama yang tidak kosong yang dibungkus sebagai `{ apiKey: token }`.
+4. Mengembalikan `null` jika tidak ditemukan token yang dapat digunakan — API merespons `400` dengan `"No active credentials configured for cloud agent provider: <id>"`.
 
-Artinya, Cloud Agents menggunakan kembali tabel Provider Connection yang sama dengan provider
-LLM biasa. Untuk mengaktifkan Jules, buat koneksi aktif dengan `provider: "jules"`
-dan `apiKey` yang telah diisi.
+Ini berarti Agen Cloud menggunakan kembali tabel Koneksi Penyedia yang sama dengan penyedia LLM biasa. Untuk mengaktifkan Jules, buat koneksi aktif dengan `provider: "jules"` dan `apiKey` yang terisi.
 
 ## Dasbor
 

@@ -5,11 +5,10 @@
 ---
 
 > **Pinagmulan ng katotohanan:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Huling na-update:** 2026-09-22 — ang mga namespace ng saklaw ay tumuturo sa MCP-SERVER.md
 
-Ang OmniRoute ay may pipeline ng awtorisasyon na may kamalayan sa ruta na nagbabantay sa bawat kahilingan ng API. Ang klasipikasyon ay **deterministic** at **fail-closed** — anumang hindi maiklasipika ay nagtatapos bilang `MANAGEMENT` at nangangailangan ng session o token na pang-pamamahala. Ipinaliliwanag ng pahinang ito ang modelo para sa mga inhinyero na nagpapanatili ng mga ruta o nagdidisenyo ng mga bagong endpoint.
+OmniRoute ay may pipeline ng awtorisasyon na may alam sa ruta na nagbibigay-daan sa bawat kahilingan API. Ang pag-uuri ay** deterministiko** at** nabigo-sarado** — anumang bagay na hindi mauuri ay nagtatapos bilang `MANAGEMENT` at humihingi ng session o management-grade token. Ipinapaliwanag ng page na ito ang modelo para sa mga inhinyero na nagpapanatili ng mga ruta o pagdidisenyo ng mga bagong endpoint.
 
-![AuthZ pipeline (3 klase ng ruta + pagsusuri ng patakaran)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Pinagmulan: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -196,9 +195,9 @@ Ang mga pinagkakatiwalaang panloob na header (tinukoy sa `src/server/authz/heade
 
 Ang bawat klase ng ruta ay may patakaran sa `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) palaging nagbabalik ng `allow({ kind: "anonymous", id: "anonymous" })` —.
+- **`publicPolicy`** (`policies/public.ts`) — ay palaging nagbabalik `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extracts Bearer, nagpapatunay sa pamamagitan ng `validateApiKey()`. Nahulog sa anonymous lamang kapag ang epektibong `REQUIRE_API_KEY` feature flag ay hindi pinagana. Ang epektibong flag ay nareresolba sa pamamagitan ng `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) kaya ang Dashboard Feature Flags at environment variable ay patuloy na namamahala `/api/v1/*`, `/api/v1beta/*`, at mga alias; Ang mga pagkabigo sa solver ay nabigo na sarado. Pinapayagan ang mga kahilingan sa dashboard-session sa mga ruta API ng kliyente (kabilang ang `/api/v1/models`, na ginagamit ng catalog ng modelo ng dashboard). Kapag ang Entra ID SSO ay pinagana, ang isang Bearer na structurally ay isang Entra token (tatlong base64url segment, `RS*` alg, `kid`) ay pinangangasiwaan ng SSO branch** dati** `validateApiKey()` at ang hatol nito ay pangwakas na — hindi ito nahuhulog sa API-key path o sa degrade-to-anonymous na sangay, kaya hindi maaaring maging bukas na access ang pagkawala ng identity-provider. Ang mga static API key ay hindi naaapektuhan. Tingnan [ang Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) tumatanggap ang — ng sesyon ng dashboard, mga kahilingan sa panloob na pag-sync ng modelo (itinugma laban sa `/api/providers/[name]/(sync-models|models)`), o ganap na lumalaktaw kung nagbabalik ng false `isAuthRequired()`. Ibinabalik ang 403 (`AUTH_001`) kapag may Bearer token ngunit invalid, 401 kung hindi. Ipinapatupad din ang mga tier ng route-guard (LOCAL_ONLY / ALWAYS_PROTECTED) bago ang anumang auth branch — tingnan [ang Mga Tier ng Route Guard](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY path sa `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ngayon: `/api/mcp/`) ay maaaring ma-access mula sa non-loopback kapag ang Bearer key ay nagdadala ng `manage` scope; lahat ng iba pang mga LOCAL_ONLY path ay nananatiling mahigpit-loopback anuman ang saklaw.
+- **`managementPolicy`** (`policies/management.ts`) tumatanggap ang — ng sesyon ng dashboard, mga kahilingan sa panloob na pag-sync ng modelo (itinugma laban sa `/api/providers/[name]/(sync-models|models)`), o ganap na lumalaktaw kung nagbabalik ng false `isAuthRequired()`. Ibinabalik ang 403 (`AUTH_001`) kapag may Bearer token ngunit invalid, 401 kung hindi. Ipinapatupad din ang mga tier ng route-guard (LOCAL_ONLY / ALWAYS_PROTECTED) bago ang anumang auth branch — tingnan [ang Mga Tier ng Route Guard](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY path sa `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ngayon: `/api/mcp/`) ay maaaring ma-access mula sa non-loopback kapag ang Bearer key ay nagdadala ng `manage`/`admin` scope o ang makitid `mcp:connect` scope (`hasMcpConnectOrManageScope`), o gamit ang isang authenticated na session ng dashboard; lahat ng iba pang mga LOCAL_ONLY path ay nananatiling mahigpit-loopback anuman ang saklaw.
 
 Ang isang matagumpay na patakaran ay nagbabalik `AuthSubject` na may `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Mababasa ito ng mga humahawak sa downstream sa pamamagitan ng `assertAuth(request, "CLIENT_API")` sa `src/server/authz/assertAuth.ts` sa halip na muling patakbuhin ang logic ng auth.
 
@@ -292,24 +291,24 @@ Nagbabalik ng true ang `hasManageScope(scopes)` para sa `"manage"` o `"admin"`.
 
 Piliin ang set ayon sa hugis, hindi ayon sa kaginhawaan. Ang isang route ay inilalagay sa `PUBLIC_API_ROUTES_EXACT` (o sa `PUBLIC_READONLY_CORS_API_ROUTES` kung GET-only); isang tunay na subtree lamang ang inilalagay sa `PUBLIC_API_ROUTE_PREFIXES`, at **dapat itong magtapos sa `/`**. Kapag naglagay ng isang indibidwal na route sa listahan ng prefix, nailalantad din sa publiko ang bawat katabing path na may kaparehong mga panimulang character — kabilang ang mga kapatid na dynamic-segment na idadagdag sa hinaharap (GHSA-74g9-q8f6-793h). I-update ang mga unit test sa `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts`, at `tests/unit/authz/classify.test.ts`.
 
-## Mga Saklaw
+## Saklaw
 
-Tatlong namespace. Bawat checker ay nagbabasa lamang ng sarili nitong string. Ang paghahambing, kasama ang dahilan kung bakit nabigo ang `manage` sa `scopeMatches` para sa `read:compression` at kung bakit ang isang `read` access token ay hindi maaaring `PATCH /api/keys/{id}`, ay [Tatlong namespace ng saklaw](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Tatlong namespaces. Ang bawat checker ay nagbabasa lamang ng sarili nitong mga string. Ang magkatabi, kasama kung bakit nabigo `manage` `scopeMatches` para sa `read:compression` at kung bakit hindi maaaring `PATCH /api/keys/{id}` ang isang `read` access token , ay [Three scope namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Ang mga API key ay nagdadala ng `scopes` array (nakaimbak bilang JSON sa `api_keys.scopes`, tingnan ang `src/lib/db/apiKeys.ts`).
+Ang mga API key ay nagdadala ng `scopes` array (naka-imbak bilang JSON sa `api_keys.scopes`, tingnan `src/lib/db/apiKeys.ts`).
 
-### Saklaw ng Pamamahala
+### Saklaw ng pamamahala
 
-- `manage` / `admin` — `hasManageScope`. Bearer access sa mga ruta ng management API.
-- Ang `mcp:connect`, `self:usage`, `self:account-quota`, at `policy:bypass-provider-quota` ay mga additive exact-match scope. Ang mga ito ay nasa labas ng `MANAGEMENT_API_KEY_SCOPES`. Binubuksan lamang ng `mcp:connect` ang `/api/mcp/` non-loopback carve-out.
+- `manage` / `admin` — `hasManageScope`. Access ng maydala sa mga ruta ng pamamahala API.
+- `mcp:connect`, `self:usage`, `self:account-quota`, at `policy:bypass-provider-quota` ay mga additive exact-match na saklaw. Umupo sila sa labas `MANAGEMENT_API_KEY_SCOPES`. Binubuksan lang `mcp:connect` ang `/api/mcp/` non-loopback carve-out.
 
-### Mga saklaw ng tool ng MCP
+### mga saklaw ng MCP tool
 
-Katalogo at mga panuntunan sa pagtutugma (magkaparehong string, o isang ibinigay na scope na nagtatapos sa `*`): [Mga saklaw ng tool ng MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). Ang `MCP_SCOPE_LIST` sa `src/shared/constants/mcpScopes.ts` ay ang orihinal na typed subset, hindi ang buong katalogo. Ang pagpapatupad ay tumatakbo sa `open-sse/mcp-server/scopeEnforcement.ts` pagkatapos ma-resolve ng `resolveCallerScopeContext()` ang mga scope mula sa MCP auth info, request metadata, o `OMNIROUTE_MCP_SCOPES`. Mananatili itong naka-off maliban kung `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Catalog at pagtutugma ng mga panuntunan (magkaparehong string, o isang ibinigay na saklaw na nagtatapos sa `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` sa `src/shared/constants/mcpScopes.ts` ay ang orihinal na na-type na subset, hindi ang buong catalog. Tumatakbo ang pagpapatupad sa `open-sse/mcp-server/scopeEnforcement.ts` pagkatapos malutas `resolveCallerScopeContext()` ang mga saklaw mula MCP auth info, humiling ng metadata, o `OMNIROUTE_MCP_SCOPES`. Ino-on ito ng `OMNIROUTE_MCP_ENFORCE_SCOPES=true` sa buong mundo (default `false`), ngunit ito ay palaging ipinapatupad para sa isang HTTP/SSE na tumatawag na ang API key ay walang `manage`/`admin` (tingnan `shouldForceScopeEnforcement()` sa `open-sse/mcp-server/scopeEnforcement.ts`), anuman ang flag.
 
 ### Mga saklaw ng access-token
 
-`read` / `write` / `admin` sa `oma_live_…` na mga token, na niraranggo ng `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Ang ranggong ito ay nalalapat lamang sa credential ng access-token. Tingnan ang [Pagpapatunay ng Pamamahala](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` sa mga `oma_live_…` token, niraranggo ayon sa `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Nalalapat lang ang ranggo na ito sa kredensyal ng access-token. Tingnan [ang Management Authentication](../guides/MANAGEMENT-AUTH.md).
 
 ## Toggle ng Kinakailangang Auth
 

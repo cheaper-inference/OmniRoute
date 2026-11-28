@@ -132,32 +132,34 @@ flyctl deploy
 
 ## 5. Nepieciešamie parametri
 
-Šis projekts iesaka konfigurēt vismaz šādus parametrus Fly.io.
+Šis projekts iesaka Fly.io konfigurēt vismaz šādus parametrus.
 
-### 5.1 Verificēti parametri
+### 5.1. Verificētie parametri
 
-Šie parametri ir izmantoti faktiskajās izvietošanās pašreizējā `omniroute` lietotnē:
+Šie parametri ir izmantoti faktiskajos izvietojumos pašreizējā `omniroute` lietojumprogrammā:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (nepieciešams ražošanā — tiek izmantots WebSocket tilta autentifikācijai)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (nepieciešams ražošanā — ko izmanto WebSocket tilta autentifikācijai)
 - `STORAGE_ENCRYPTION_KEY`
 
-### 5.2 Par `INITIAL_PASSWORD`
+### 5.2. Par `INITIAL_PASSWORD`
 
-Pašreizējais projekts neiestata `INITIAL_PASSWORD`, jo šai izvietošanai tas nav nepieciešams.
+Pašreizējais projekts nenosaka `INITIAL_PASSWORD` jo šai izvietošanai tas nav nepieciešams.
 
 Ja tas nav iestatīts:
 
-- Sākuma žurnālā tiks norādīts, ka noklusējuma parole ir `CHANGEME`
-- Pēc izvietošanas pēc iespējas ātrāk jāmaina pierakstīšanās parole sistēmas iestatījumos
+- Jūs izveidojat informācijas paneļa paroli ievadīšanas vednī pirmajā apmeklējuma reizē. Pabeidziet paroles darbību: to izlaižot, tiek izslēgta pieteikšanās informācijas panelī, tādējādi informācijas panelis paliek atvērts ikvienam, kurš var sasniegt lietotni URL
+- Fly starpniekserveris sasniedz lietotni no adreses, kas nav atgriezeniskā saite, tāpēc pēc paroles iesniegšanas vednis pieprasa vienreizēju sāknēšanas pilnvaru, ko lietotne tajā brīdī izdrukā savā žurnālā: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Ja šī rinda ir izritināta no žurnāla, restartējiet lietotni un vēlreiz iesniedziet vedni, lai izdrukātu jaunu marķieri.
 
-Ja vēlaties inicializēt aizmugures parole bez uzraudzības, varat to pievēlāk:
+Lai iestatītu paroli bez uzraudzības, pievienojiet to pirms pirmā informācijas paneļa apmeklējuma (kad parole ir saglabāta, `INITIAL_PASSWORD` tiek ignorēts):
 
 - `INITIAL_PASSWORD`
+
+---
 
 ## 6. Ieteiktie parametri
 
@@ -272,28 +274,28 @@ Ja konsoles lapā `Secrets` nav redzami gaidītie mainīgie, pārbaudiet:
 
 ---
 
-## 9. Turpmākie atjauninājumi un laidieni
+## 9. Turpmākie atjauninājumi un izlaidumi
 
-Pēc koda atjaunināšanas laidiena process ir vienkāršs:
+Pēc koda atjaunināšanas izlaišanas process ir vienkāršs:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Ja nepieciešams atjaunināt tikai parametrus, nemainot kodu:
+Ja jums ir jāatjaunina tikai parametri, nemainot kodu:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly automātiski veiks mašīnu rotācijas atjaunināšanu.
+Fly automātiski veiks nepārtrauktu iekārtu atjaunināšanu.
 
-### 9.1 Upstream repozitorija atjauninājumu izsekošana, saglabājot jūsu dakšas `fly.toml`
+### 9.1. Augšupstraumes krātuves atjauninājumu izsekošana, vienlaikus saglabājot Fork `fly.toml`
 
-Ja pašreizējais repozijs ir dakša un vēlaties sinhronizēt atjauninājumus no upstream `https://github.com/diegosouzapw/OmniRoute`, sekojiet zemāk aprakstītajai darbplūsmai.
+Ja pašreizējā krātuve ir dakša un vēlaties sinhronizēt atjauninājumus no iepriekšējā `https://github.com/cheaper-inference/OmniRoute`, izpildiet tālāk norādīto darbplūsmu.
 
-Vispirms pārbaudiet savus attālinātos repozitorijus:
+Vispirms pārbaudiet tālvadības pultis:
 
 ```powershell
 git remote -v
@@ -301,31 +303,31 @@ git remote -v
 
 Jums vajadzētu redzēt vismaz:
 
-- `origin`, kas norāda uz jūsu paša dakšu
-- `upstream`, kas norāda uz sākotnējo repozitoriju
+- `origin` norāda uz savu dakšiņu
+- `upstream` norāda uz sākotnējo repozitoriju
 
 Ja `upstream` nav konfigurēts, pievienojiet to:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Pirms sinhronizēšanas ar upstream, izvelciet jaunākos kommitus un tagus:
+Pirms sinhronizēšanas ar augšējo straumi, iegūstiet jaunākās saistības un tagus:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Pārbaudiet pašreizējo versiju un upstream tagus:
+Pārbaudiet pašreizējo versiju un augšējos tagus:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Piezīme: Pašreizējā projekta versija ir `v3.8.0`. Tālāk minētie `v3.4.7` piemēri tiek saglabāti tikai kā vēsturiski piemēmi. Faktiskiem laidieniem izmantojiet `:latest` vai pašreizējās versijas tagu (piemēram, `:v3.8.0`).
+> Piezīme. Pašreizējā projekta versija ir `v3.8.0`. Tālāk norādītās `v3.4.7` atsauces tiek glabātas tikai kā vēsturiski piemēri. Faktiskajiem laidieniem izmantojiet `:latest` vai pašreizējās versijas tagu (piemēram, `:v3.8.0`).
 
-Ja vēlaties apvienot jaunāko upstream `main`, bet arī piespiedu kārtā saglabāt savas dakšas `fly.toml`, sekojiet šai darbplūsmai:
+Ja vēlaties sapludināt jaunāko augšupvērsto `main` vienlaikus stingri saglabājot dakšas `fly.toml`, izpildiet šo darbplūsmu:
 
 ```powershell
 git merge upstream/main
@@ -337,22 +339,22 @@ git push origin main
 
 Piezīmes:
 
-- `git merge upstream/main` sinhronizē jaunāko kodu no sākotnējā repozitorija
-- `git checkout HEAD~1 -- fly.toml` atjauno jūsu dakšas pašu `fly.toml` no pirms apvienošanas
-- Ja upstream nemainīja `fly.toml`, šis solis neieviesīs nekādas atšķirības
-- Ja upstream mainīja `fly.toml`, šis solis nodrošina, ka jūsu Fly lietojumprogrammas nosaukums, sējuma montēšanas vieta, reģions un citas dakšai specifiskās deplojuma konfigurācijas netiek pārrakstītas
+- `git merge upstream/main` sinhronizē jaunāko kodu no sākotnējās krātuves
+- `git checkout HEAD~1 -- fly.toml` atjauno jūsu dakšas `fly.toml` no pirms sapludināšanas
+- Ja augšup pa straumi nemainīja `fly.toml`, šī darbība neradīs nekādas atšķirības
+- Ja augšup pa straumi mainīja `fly.toml`, šī darbība nodrošina, ka jūsu Fly lietojumprogrammas nosaukums, sējuma stiprinājums, reģions un cita dakšai raksturīga izvietošanas konfigurācija netiek pārrakstīta.
 
-Ja vēlaties pieskaņoties konkrētam laidiena tagam (piemēram, `v3.4.7`), vispirms pārbaudiet, vai tags jau ir iekļauts `upstream/main`:
+Ja vēlaties veikt līdzināšanu ar noteiktu laidiena tagu (piemēram `v3.4.7`), vispirms pārbaudiet, vai tags jau ir iekļauts `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Veiksmīga atgriezeniskā vērtība nozīmē, ka `upstream/main` jau satur šo versiju; varat vienkārši apvienot `upstream/main`.
+Veiksmīga atgriešana nozīmē, ka `upstream/main` jau satur šo versiju; jūs varat vienkārši apvienot `upstream/main`.
 
-### 9.2 Standarta laidiena secība pēc upstream sinhronizēšanas
+### 9.2. Standarta izlaišanas secība pēc sinhronizācijas augšup pa straumi
 
-Pēc sinhronizēšanas ar sākotnējo repozitoriju, sekojiet šim ieteicamajam laidiena secībai:
+Pēc sinhronizēšanas ar sākotnējo repozitoriju izpildiet šo ieteicamo izlaišanas secību:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
@@ -362,7 +364,7 @@ Pēc sinhronizēšanas ar sākotnējo repozitoriju, sekojiet šim ieteicamajam l
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Šī ir faktiskā darbplūsma, ko izmantoja, atjauninot pašreizējo projektu līdz `v3.4.7` (piemērs attiecas uz vēsturisku versiju; pašreizējā faktiskā versija ir `v3.8.0`).
+Šī ir faktiskā darbplūsma, kas tiek izmantota, jauninot pašreizējo projektu uz `v3.4.7` (piemērs attiecas uz vēsturisko versiju; pašreizējā faktiskā versija ir `v3.8.0`).
 
 ---
 
@@ -416,16 +418,16 @@ Ja redzat `/app/data/...` vietā, `DATA_DIR` ir nepareizi konfigurēts, un tas n
 
 ---
 
-## 12. Biežākās Problemas
+## 12. Bieži sastopamās problēmas
 
-### 12.1 `Secrets` lapā ir tukšs
+### 12,1 `Secrets` lapa ir tukša
 
 Parasti ir divi iemesli:
 
-- Vēl neesat izpildījis `flyctl secrets set`
-- Skatāties citu lietojumprogrammu (piem., `oroute` vietā `omniroute`)
+- Jūs vēl neesat vadījis `flyctl secrets set`
+- Jūs skatāties citu lietojumprogrammu (piemēram, `oroute`, nevis `omniroute`)
 
-### 12.2 `flyctl deploy` ziņo `app not found`
+### 12.2 `flyctl deploy` Ziņojumi `app not found`
 
 Vispirms izveidojiet lietojumprogrammu:
 
@@ -433,23 +435,23 @@ Vispirms izveidojiet lietojumprogrammu:
 flyctl apps create omniroute
 ```
 
-### 12.3 `fly.toml` parsēšana neizdodas
+### 12,3 `fly.toml` parsēšana neizdodas
 
-Pārbaudiet šādus punktus:
+Pārbaudiet tālāk norādīto.
 
-- Vai komentāros ir garlaicīgas rakstzīmes
-- Vai TOML citēšana un atkāpes ir pareizas
+- Vai komentāros ir izkropļotas rakstzīmes
+- Vai TOML citāts un atkāpe ir pareiza
 
-### 12.4 Dati netiek saglabāti
+### 12.4. Dati nepastāv
 
-Pārbaudiet abus šos punktus:
+Pārbaudiet abas šīs lietas:
 
 - `fly.toml` satur `destination = '/data'`
 - `DATA_DIR` ir iestatīts uz `/data`
 
-### 12.5 Vai tas var darboties bez `INITIAL_PASSWORD`?
+### 12.5. Vai tas var darboties bez `INITIAL_PASSWORD`?
 
-Jā, tas var darboties. Tas atkāpsies uz noklusējuma paroli `CHANGEME`. Ražošanas vidē ieteicams pēc iespējas ātrāk mainīt aizmugures servera paroli.
+Jā. Ja `INITIAL_PASSWORD` ir atiestatīts, jūs izveidojat informācijas paneļa paroli ievadīšanas vednī pirmajā apmeklējuma reizē (5.2. sadaļa attiecas uz vienreizējo sāknēšanas pilnvaru un paroles darbību).
 
 ---
 

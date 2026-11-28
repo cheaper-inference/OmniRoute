@@ -4,86 +4,63 @@
 
 ---
 
-> **2026-11-19: layin Mergify ya yi ritaya** (shawarar mai gida). `.mergify.yml` baya bayyana jerin gwano kuma ya ƙi umarnin Mergify waɗanda ke haɗa ko sake rubuta buƙatun ja. Ana haɗe PRs ta hannu da hannu ƙarƙashin ƙa'idodin ma'ajin "Bukatar kofofin kore akan sakin aiki" (`Gate / CI` + `Gate / Quality`) har sai omni-queue yana gudana cikin yanayin rayuwa, kuma ta hanyar layin-kowane bayan haka ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Sassan Mergify da ke ƙasa suna bayyana jerin gwano kamar yadda yake.
+## Saukowa akan reshen saki
 
-Tun da v3.8.49 (WS3.2/WS3.4 na tsarin quality/velocity ) tsohuwar hanyar haɗawa don sake duba PRs zuwa `release/vX.Y.Z` shine** Haɗa layin haɗin kai** (`.mergify.yml`); da** jirgin kasa hade-haɗe** rubuce a ƙasa shine FALLBACK — da aka yi amfani da shi yayin aukuwa, daskarewa, ko kuma idan shirin Buɗaɗɗen Tushen Mergify ya taɓa canzawa.
+Layin-omni-line yana sarrafa saukowa zuwa `release/vX.Y.Z`. Karanta babban matakin `mode` a cikin `config/merge-queue/config.json` akan tsoho reshe kafin saukar da PR. Duba [Omni-Queue](OMNI_QUEUE.md).
 
-## Tsohuwar hanya: jerin jiran Mergify
+- **`shadow`** yana gudanar da tabbatarwa kuma ya bar saukowa zuwa haɗakar da hannu. Aiwatar da `omni-queue` zuwa ga PR da aka amince a kai na ƙarshe. Duba cancanta tare da `npm run queue -- why <PR>`. Jira hukuncin wannan shugaban a cikin `npm run queue -- history --base <branch>`. Ci gaba a kan `would-land`. A kan `culprit-found` ko `would-dequeue`, riƙe haɗin kuma gyara dalilin.
+- **Banbancin inuwa.** Jirgin kasa mai koren cikakken CI a kan titin tushe na yanzu zai iya ci gaba ba tare da wani hukunci na daban ba. Irin wannan keɓancewar ya shafi lokacin da shugaban PR ya riga ya ƙunshi tip ɗin tushe na yanzu.
+- **`live`** yana amfani da alamar `omni-queue` don jawo saukowa. Layin kawai ya sauka PR. Bar umarnin haɗuwa da turawa kai tsaye zuwa jerin gwano.
 
-1. Kamfen-kamfen sun duba/sun tabbatar da PR a matsayin mai kyau, kuma matakin ⭐
-   na kafin haɗewa na mai shi ya amince da shi (rahoton + shawarar kowane abu — duba `/merge-prs` Mataki na 0.75).
-2. Mai shi (ko zaman da ke aiki bisa shawarar mai shi) yana sanya alamar **`queue`**.
-   Alamar ITA CE amincewar haɗewa; Mergify kawai yake aiwatar da ita.
-3. Mergify yana tantance PRs da ke cikin jerin jira **ɗaya bayan ɗaya** bisa ga matakan
-   bincike masu sauri, sannan ya haɗa su (squash). Haɗawa rukuni-rukuni + rarrabawa ta atomatik domin gano matsala fasali ne na matakin Mergify mai kuɗi
-   ("Cannot use Merge Queue batch" a tsarin kyauta, #7220), don haka `.mergify.yml` bai saita
-   `batch_size` ba; haɗawa rukuni-rukuni ya ci gaba da zama aikin jirgin haɗewa na hannu da ke ƙasa. PR wanda
-   bincikensa har yanzu bai kammala ba bayan `checks_timeout` (minti 240 = 2× p95 da aka auna na
-   `quality.yml`) ana cire shi daga jerin jira maimakon ya tsaida jerin.
-4. Bayan haɗewa, tsarin aiki na ci gaba da tabbatar da cewa sakin yana da kyau yana tantance sabon kan reshe yayin push
-   kuma yana buɗe batun danganta musabbabin matsala idan haɗin ya haifar da koma baya (ba ya taɓa mayar da canjin baya ta atomatik).
+Kowane saukowa yana buƙatar izinin mai shi da abin da ake buƙata na cak. Aiwatar da `omni-queue` kawai bayan mai shi ya ba da izinin saukowa. PRs da aka yi layi na taɓa hanyoyin kariya kuma yana buƙatar shawarar `protected-approved` na mai shi na wannan PR.
 
-Matakan kariya (sun yi daidai da `CLAUDE.md` Dokoki Masu Tsauri #21/#22):
+"Bukatar korayen kore akan sakin aiki" ka'idojin suna buƙatar kore `Gate / CI` da `Gate / Quality` a kai. Kar a taɓa amfani da `--admin` don kewaya kofa ja. Tubalan daskarewar saki ya haɗu cikin reshen daskararre. Dubi [Dokokin Hard 21](HARD_RULES_DETAIL.md). Kada a taɓa yiwa alama, haɗa ko turawa zuwa buƙatar ja cewa wani zaman yana aiki. Dubi [Dokokin Hard 22](HARD_RULES_DETAIL.md).
 
-- **An buɗe daskarewar sakin** → KAR a sanya alama ga PRs da ke nufin reshen da aka daskare; fara sauya
-  maƙasudinsu zuwa `release/vX+1` mai aiki.
-- **PR na wani zaman da har yanzu ake aiki a kansa** → kar a taɓa sanya masa alama; zaman da ya mallake shi kaɗai ne yake sanya
-  aikinsa a jerin jira.
-- Canje-canjen gwaje-gwaje kawai da PRs masu alamar `hotfix` tuni suna gudanar da rageccen CI (duba
-  `RELEASE_CHECKLIST.md` → Hanyar Gaggawa ta Hotfix); sharuɗɗan jerin jira suna karɓar duk wani
-  saitin bincike da aka gudanar a zahiri (`#check-failure=0` + `#check-pending=0`).
+## Buƙatar ja jirgin ƙasa
 
-## Madadin gaggawa: jirgin haɗawa na hannu
+1. Fara reshen jirgin ƙasa a tip ɗin tushe na yanzu. Haɗa ainihin shugabannin membobin da aka amince da su ta amfani da ayyukan haɗaka. Kiyaye tarihin sadaukarwarsu ta hanyar guje wa ciyayi da sake zama.
+2. Buɗe buƙatun ja ɗaya don reshen jirgin ƙasa. Tabbatar da wannan PR tare da nasa cikakken CI akan tip ɗin tushe na yanzu. Sake bincika tushen tushe da shugabannin membobin da aka amince kafin sauka. Sake sabunta jirgin kasa da CI lokacin da ingantaccen ɗan takara ya canza.
+3. Kasa PR jirgin kasa tare da haɗa haɗin gwiwa a ƙarƙashin yanayin layin da ya dace. A cikin yanayin raye-raye, hanyar saukowa ta `merge-ff` na jerin gwano tana adana ayyukan haɗin gwiwa. Shugabannin memba na asali sun zama abin da za a iya samu daga reshen sakin. GitHub yana yiwa memba PRs alama a matsayin hade kuma ayyukan suna riƙe marubutan su.
 
-Ana amfani da shi lokacin da babu layin jiran. Wannan yana ƙa'ida aikin da ya kammala PRs 33 a
-rana ɗaya yayin zagayen v3.8.47:
+Misalin jama'a shine [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Ya haɗu da memba 18 PRs kuma ya sauka tare da ƙaddamarwa akan 2026-11-24.
 
-1. **Haɗa rukunin** (~10–30 PRs da aka yi wa bita+aka amince da su). Duba karo na `linked:`
-   (`tap.testFiles` iri ɗaya, sassan CHANGELOG iri ɗaya) sannan a jera waɗannan ɗaya bayan ɗaya.
-2. **Tantance SAU ƊAYA**: a cikin keɓantaccen worktree daga tip na release, haɗa dukkan
-   heads na rukunin a gida, sannan gudanar da jerin gwaje-gwajen da suka yi daidai da na release
-   (`npm run check:release-green`, ƙara `--with-build` kafin release).
-   `scripts/release/merge-train.sh <base> <PR#>…` yana sarrafa matakai 1–2 ta atomatik (PRs masu karo
-   sukan fita, jirgin ya ci gaba). Cikakken yanayi yana gudanar da `npm run test:unit` — runner
-   da aka daidaita don na'urar (`--test-concurrency=20`), **ba** shards biyu na CI masu cores 4
-   da ke gudana ɗaya bayan ɗaya ba, waɗanda suka sa babban matakin ya yi amfani da kusan 25% na na'ura mai cores 16 (an gyara
-   2026-07-18). `--fast` (kammala manyan jiragen cikin rana, mai shi ya amince 2026-07-18)
-   yana riƙe kowace ƙofar static + vitest amma yana gudanar da fayilolin node:test da PRs
-   da aka ɗora suka canza kawai; har yanzu DOLE ne a gudanar da CIKAKKEN jerin gwaje-gwajen aƙalla sau ɗaya kowace rana a kan
-   tip da aka tara (jirgi guda ba tare da `--fast` ba).
-3. **Kore** → haɗa PRs ɗin a jere (ana sake duba `state,headRefOid` kafin kowanne —
-   PR da head ɗinsa ya motsa zai koma layin bita). Tabbatar cewa net diff na kowane haɗawa shi ne
-   canjin PR ɗin kansa (babu auto-resolve reverts: bincika `git diff --stat` don
-   gogewa da ta fita daga iyakar aiki).
-4. **Ja** → raba rukunin gida biyu (tantance kowane rabi) maimakon sake tantancewa
-   ɗaya bayan ɗaya; mayar da PR mai laifi zuwa layin bita tare da shaidar.
-5. **Kada a taɓa**: haɗawa zuwa reshen da aka dakatar yayin freeze; amfani da `git stash` a ko'ina;
-   sake gudanar da CI gaba ɗaya da fatan ja zai ɓace (ƙa'ida: ja bayani ne).
+Mai daidaitawa daga `main` zuwa reshen sakewa na gaba shima ya sauka ta hanyar haɗin kai. Ana buƙatar adana zuriyar `main` don daidaitawa na baya. Dubi [Warewa Worktree](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Matakan aiki (dalilin da ya sa layin jiran yake da aminci da fast-gates kawai)
+## Mai tabbatar da haɗin gwiwar jirgin ƙasa
 
-- **Ga kowane PR** (quality.yml fast-gates): gwaje-gwajen da TIA ya shafa + cikakken unit mai shards 4 +
-  vitest + tarin lint + typecheck + amincin docs/changelog.
-- **Ga kowane rukuni/tip** (continuous release-green): ƙofofin WAJIBI na `--quick` a kowane push zuwa
-  reshen release; cikakken binciken `--with-build --full-ci` sau 3 a rana.
-- **Ga kowane release** (ci.yml a kan release PR): cikakken matrix har da E2E ×9,
-  package-artifact + tarball boot-smoke, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Ba a tantance komai ƙasa da yadda ake yi a baya — kawai ana gudanar da nauyin gwaje-gwaje mai nauyi ga kowane rukuni/tip
-maimakon ga kowane PR, wanda shi ne ke kawar da zagayen O(N).
+Mai inganci ya ɗauko tushe da kawunan PR ya haɗa su a cikin itacen aikin da za a iya zubarwa. Yana gudanar da suite ɗin sa sau ɗaya akan bishiyar da aka samu. Ƙunar kai ko haɗa rikici ya kasa fitar da PR kuma rubutun ya ci gaba da sauran PRs.
 
-## Abubuwan da ake buƙata a sabon checkout don `merge-train.sh`
+- **`--plan`** yana buga matakan da aka zaɓa kuma ya fita ba tare da ƙirƙirar itacen aiki ba ko tuntuɓar ramut. Haɗa shi da `--fast` don duba shirin mai sauri.
+- **`--fast`** yana gudanar da ƙofofin gama gari, zaɓaɓɓun fayilolin `node:test` da aka canza a ƙarƙashin `tests/unit/`, da `npm run test:vitest`. Gudun ingantaccen ingantaccen gida aƙalla sau ɗaya a rana akan tarin tukwici lokacin amfani da yanayin sauri.
+- **Cikakken yanayin** yana ƙara cikakkun ƙofofin tsaye kawai kuma yana gudanar da `npm run test:unit` da `npm run test:vitest`.
 
-Script ɗin yana gudanar da **preflight** mai dakatarwa nan take idan an sami kuskure a kan root checkout (kafin kowane aikin
-worktree) domin shigarwa da ta lalace kada ta taɓa ɓoye kanta a matsayin jirgi mai ja:
+Ana sake kunna kofa a tsaye a kan tushen da ba a taɓa taɓa ba idan akwai binciken tushe. Rubutun ya ba da rahoton gazawar da aka gada kuma yana ci gaba lokacin da kowane layin keta da aka sani shima ya bayyana akan tushe kuma adadin bai girma ba.
 
-1. `npm ci`, sannan a gudanar da `bun` postinstall da npm yake toshewa:
-   `(cd node_modules/bun && node install.js)` — in ba haka ba `check:provider-consistency`
-   da `check:known-symbols` (duka `bun scripts/…`) za su gaza a kan jirgin DA base ba tare da
-   layin violation ba.
-2. Kada a sami ragowar `node_modules/node_modules` (bishiyar dependencies mai kwafi; React yana lodawa sau biyu
-   kuma jerin gwaje-gwajen UI vitest suna gaza nan take).
-3. `node_modules/.bin/tsc` ya kasance kuma yana iya gudana (shigarwa marar cikawa ba ta da shi).
+| Fita | Ma'ana                                                                                                                             |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `0`  | Buga shirin ko kammala suite. Takaitacciyar suite ta lissafta duk wani gazawar da aka gada da kuma fitar da PRs.                   |
+| `1`  | Hujjoji mara inganci, babu rajistan Git, gazawar riga-kafi, ko babu PR da aka hau.                                                 |
+| `2`  | Chek suite ya gaza kuma bai cancanci matsayin gado ba. Mai aiki zai iya raba rukunin, fitar da PR mai laifi, kuma ya sake kunnawa. |
 
-Jirgin yana gudanar da `npm run check:cycles:ratchet` mai toshe ci gaba; `npm run check:cycles`
-kawai na ba da shawara ne (yana jera SCCs kuma yana fita da non-zero ko da base ɗin yana cikin ƙoshin lafiya).
+Fas ɗin gida yana ba da shaidar ganowa don takaddar mai shi kaɗai. Kowane saukowa har yanzu yana buƙatar izinin mai shi, bincikensa da ake buƙata, da hukuncin layin inuwa idan an zartar.
+
+## Tiering
+
+- **PR.** CI da Quality zaɓi cak bisa ga hanyoyin da aka canza. Lambar PRs tana gudanar da ƙofofin inganci da sauri da gwaje-gwaje masu tasiri, tare da rabe-rabe da ayyukan Vitest a cikin CI.
+- **Kowane ɗan takarar jerin gwano.** CI da Quality suna gudanar da cikakken bayanin ɗan takarar da aka haɗa akan layi ref.
+- **Tukwici na kowane saki.** Sakin-Green yana gudanar da ƙofofi masu ƙarfi a kan turawa waɗanda suka dace da matatun hanyar sa. Gudu uku da aka tsara a kowace rana suna amfani da cikakken sharewa don reshen sakin.
+- **Kowane saki.** Cikakken CI matrix ya haɗa da shards E2E, ingantattun fakiti, hayaƙin tayal na kwal, da duban ɗaukar hoto. Dubi [Lissafin Sakin](RELEASE_CHECKLIST.md) Sakin .
+
+## Abubuwan da ake buƙatun saɓo na dubawa don `merge-train.sh`
+
+Jirgin yana gudana kafin ƙirƙirar bishiyar aiki. Shigar da abin dogaro da `npm ci`. Tabbatar da cewa za'a iya aiwatar da `node_modules/.bin/tsc` kuma `node_modules/node_modules` baya nan. Duba cewa `node_modules/.bin/bun --version` yayi nasara.
+
+Idan an tsallake Bun postinstall, gudanar da `(cd node_modules/bun && node install.js)`. Daidaiton mai badawa da sanannun-tabbatattun alamun suna amfani da Bun. Mai inganci yana gudanar da `npm run check:cycles:ratchet` azaman ƙofar toshewa. Umurnin `npm run check:cycles` kadai nasiha ne.
+
+## Tarihi
+
+An yi ritayar layin haɗin kan Mergify a ranar 2026-11-19.

@@ -4,7 +4,7 @@
 
 ---
 
-> **Toleo:** v3.8.44** Mara ya mwisho kusasishwa:** 2026-10-28** Hadhira:** Wahandisi kuongeza, kudumisha, au kutatua huduma zilizopachikwa (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Toleo:** v3.8.44** Hadhira:** Wahandisi kuongeza, kudumisha, au kutatua huduma zilizopachikwa (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Huduma zilizopachikwa ni zana za mchakato wa kando zilizosakinishwa ndani ya nchi ambazo OmniRoute husakinisha, kusimamia na kufichua kama shabaha za daraja la kwanza za uelekezaji. Tofauti na watoa huduma wa nje (ambao hufikiwa kupitia mtandao kupitia funguo za API ), huduma zilizopachikwa huendeshwa kwa mashine sawa na OmniRoute na huwasiliana kupitia loopback.
 
@@ -45,7 +45,7 @@ Wote wanane wanafuata modeli sawa ya usimamizi:
 - OmniRoute huziweka chini ya `DATA_DIR/services/{name}/` (zilizotengwa na OmniRoute mwenyewe `package.json`)
 - OmniRoute huzaa na kuzifuatilia kama mchakato wa mtoto
 - OmniRoute huingiza ufunguo wa API wa muda mfupi kwenye mazingira ya mtoto na kuzungusha bila muda wa kupumzika (inapohitajika)
-- Njia zote za usimamizi (`/api/services/*`) ni**LOCAL_ONLY** — kupatikana tu kutoka kwa loopback (sheria ngumu # 17)
+- Njia zote za usimamizi (`/api/services/*`) ni**LOCAL_ONLY** — kupatikana tu kutoka kwa loopback (kanuni ngumu #17)
 
 ### Maamuzi muhimu (kutoka kwa mpango wa muundo)
 
@@ -209,7 +209,7 @@ hali za mashindano wakati, kwa mfano, uanzishaji otomatiki na kitufe cha UI vina
 
 ## 4. kumbukumbu ya API
 
-Njia zote chini ya `/api/services/` ni**LOCAL_ONLY** (Loopback tu, kanuni ngumu #17). Maombi yasiyo ya kitanzi hupokea `403 LOCAL_ONLY` bila kujali tokeni ya uthibitishaji.
+Njia zote chini ya `/api/services/` ni**LOCAL_ONLY** (Loopback tu, sheria ngumu #17). Maombi yasiyo ya kitanzi hupokea `403 LOCAL_ONLY` bila kujali tokeni ya uthibitishaji.
 
 ### 4.1 9Njia za mwisho za njia (njia 11)
 
@@ -236,7 +236,7 @@ Sakinisha 9Router kutoka npm. Huunda `DATA_DIR/services/9router/` na `package.js
 | `409` | Tayari inasakinisha (kufuli imeshikiliwa)                               |
 | `500` | npm kusakinisha kumeshindwa — tazama `message` kwa hitilafu ya kirafiki |
 
-**Vidokezo:** Hutumia `execFile('npm', [...])` — hakuna ganda, hakuna tafsiri (kanuni ngumu # 13). makosa EACCES yanaonekana kama ujumbe wa kirafiki.
+**Vidokezo:** Hutumia `execFile('npm', [...])` — hakuna ganda, hakuna tafsiri (kanuni ngumu #13). makosa EACCES yanaonekana kama ujumbe wa kirafiki.
 
 ---
 
@@ -272,7 +272,7 @@ Anzisha 9Router. Husajili msimamizi ikiwa bado hajasajiliwa, kisha piga simu `su
 
 #### `POST /api/services/9router/stop`
 
-Acha kwa neema 9Router. Hutuma SIGTERM, subiri sekunde 15, kisha SIGKILL ikiwa bado hai. Kutokuwa na uwezo wakati tayari kumesimamishwa.
+Acha kwa neema 9Router. Inatuma SIGTERM, subiri sekunde 15, kisha SIGKILL ikiwa bado hai. Kutokuwa na uwezo wakati tayari kumesimamishwa.
 
 **Mwili wa ombi:** hakuna
 
@@ -535,7 +535,7 @@ kisanduku cha kuimba kina umbo la mwisho sawa na njia ya Mux — no `rotate-key`
 | `POST` | `/api/services/singbox/auto-restart-adopted` | Geuza kuwasha upya kiotomatiki kwa mchakato uliopitishwa (uliopo awali).  |
 | `GET`  | `/api/services/singbox/logs`                 | SSE log tail (kupitia njia inayobadilika ya `[name]/logs` iliyoshirikiwa) |
 
-**TPROXY wiring:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) huandika `config.json` na kumwanzisha msimamizi kabla ya `applyTproxy()` kusakinisha sheria za ngome za TPROXY. Ikiwa msimamizi hayupo au atashindwa kufikia `running`, sasa inaingia katika kiwango cha makosa (badala ya kumeza kutofaulu kimya kimya) ili opereta aweze kusema kuwa sheria TPROXY zilitumika bila msikilizaji anayefanya kazi nyuma yao.
+**TPROXY wiring:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) huandika `config.json` na kumwanzisha msimamizi kabla ya `applyTproxy()` kusakinisha sheria za ngome za TPROXY. Ikiwa msimamizi anakosekana au atashindwa kufikia `running`, sasa inaingia katika kiwango cha makosa (badala ya kumeza kutofaulu kimya kimya) ili opereta aweze kusema kuwa sheria TPROXY zilitumika bila msikilizaji anayefanya kazi nyuma yao.
 
 ---
 
@@ -555,9 +555,7 @@ Wakala huyu:
 - Huondoa `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` kutoka kwa jibu
 - Huandika upya majibu HTML ili kuingiza `<base href>` na kurekebisha njia kabisa (`/foo` → `/dashboard/.../embed/foo`)
 
-uboreshaji wa WebSocket kwa dashibodi iliyopachikwa hushughulikiwa na seva shirikishi kwenye mlango maalum (ona `src/lib/services/embedWsProxy.ts`).
-
-Kila uboreshaji umeidhinishwa kabla ya handaki kufunguka, kwa sheria sawa na njia ya kupachika HTTP : programu rika lazima iwe kitanzi kisicho na kichwa cha usambazaji mbadala cha seva mbadala, kivinjari `Origin` lazima kiwe asili ya dashibodi (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` kupanua chaguo-msingi za kitanzi), na mpigaji simu anahitaji kikao cha dashibodi au ufunguo API wa usimamizi isipokuwa uwezekena na wigo wa dashibodi ya usimamizi.
+uboreshaji wa WebSocket kwa dashibodi iliyopachikwa hushughulikiwa na seva shirikishi kwenye mlango maalum (ona `src/lib/services/embedWsProxy.ts`). Kila sasisho limeidhinishwa kabla ya handaki kufunguka, kwa sheria sawa na njia ya HTTP iliyopachikwa: programu rika lazima iwe ya kurudi nyuma bila kichwa cha kusambaza seva mbadala kinyume, kivinjari `Origin` lazima kiwe asili ya dashibodi (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` kupanua chaguo-msingi za kitanzi), na mpigaji simu anahitaji kipindi cha dashibodi au wigo API dashibodi ya usimamizi isipokuwa kama wigo wa dashibodi ya usimamizi unaweza.
 
 **Usalama:** Njia za proksi zilizopachikwa zimeainishwa chini ya `LOCAL_ONLY_API_PREFIXES` na zinaweza kufikiwa tu kutoka kwa loopback. Mshambulizi anayepata JWT kupitia handaki ya Cloudflare/Ngrok hawezi kuwa proksi katika huduma zilizopachikwa.
 

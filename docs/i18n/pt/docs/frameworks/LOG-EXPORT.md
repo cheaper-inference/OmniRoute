@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Agendamento** — uma tarefa cron de `JobRegistry`, `log_export`, com o valor predefinido `0 * * * *` (de hora a hora,
-  UTC). Registada em `src/lib/initCloudSync.ts`; pode ser substituída com `OMNIROUTE_LOG_EXPORT_CRON`.
-  Cada execução processa todos os destinos **ativados**, sequencialmente.
-- **Cursor** — o `call_logs.rowid` implícito do SQLite, persistido por destino em
-  `log_export_destinations.cursor_row_id`. `timestamp` não é deliberadamente o cursor: os chamadores
-  podem fornecer o seu próprio valor, pelo que um pedido lento pode ser escrito depois de um mais rápido que tenha começado
-  mais tarde, e um cursor baseado na data/hora iria ignorá-lo.
-- **Processamento em lotes** — `batch_size` linhas por pedido (500 por predefinição), `max_rows_per_run` linhas por execução
-  (10000 por predefinição), para que um grande volume de dados pendentes seja processado ao longo de várias execuções agendadas, em vez de bloquear uma.
-- **Entrega** — o cursor só avança depois de `send()` ser concluído com êxito. Um lote que falhe deixa o
-  cursor onde estava, pelo que as mesmas linhas voltam a ser tentadas na execução seguinte. A garantia é de
-  entrega pelo menos uma vez, com eliminação de duplicados no destino, e não de entrega efetiva exatamente uma vez: o BigQuery identifica cada
-  linha pelo ID do registo de chamada, que respeita na medida do possível dentro da sua própria janela de eliminação de duplicados.
-- **Proteção contra sobreposição** — a execução agendada pelo cron e `POST .../run` podem ser acionados em simultâneo. Um destino
-  já em processamento é ignorado em vez de ser processado duas vezes (`skipped: true` no resultado da execução),
-  pelo que uma execução concorrente não pode reenviar um lote nem fazer recuar o cursor.
-- **Recuperação após purga** — se `cursor_row_id` ficar acima de `MAX(rowid)` (a tabela inteira foi
-  purgada e os rowids reiniciados), o executor recua para 0 em vez de deixar permanentemente de detetar registos.
+- **Horário** — um cron job `JobRegistry`, `log_export`, padronizado como `0 * * * *` (por hora, UTC). Registado no `src/lib/initCloudSync.ts`; substituível por `OMNIROUTE_LOG_EXPORT_CRON`. Cada carraça drena cada** habilitado** destino, sequencialmente.
+- **Cursor** — SQLite implícito `call_logs.rowid`, persistido por destino em `log_export_destinations.cursor_row_id`. `timestamp` não é deliberadamente o cursor: os chamadores podem fornecer o seu próprio valor, pelo que um pedido lento pode ser escrito após um pedido mais rápido iniciado posteriormente, e um cursor de registo de data e hora ignoraria.
+- **Lote** linhas — `batch_size` por pedido (padrão 500), linhas `max_rows_per_run` por execução (padrão 10000), pelo que um grande backlog drena vários ticks em vez de bloquear um.
+- **Entrega** — o cursor avança apenas após `send()` ser resolvido. Um lote com falha deixa o cursor onde estava, para que as mesmas linhas sejam repetidas na execução seguinte. A garantia é pelo menos uma vez mais a desduplicação no destino, não é verdade exactamente uma vez: BigQuery codifica cada linha pelo ID do registo de chamadas, que respeita com base no melhor esforço dentro da sua própria janela de desduplicação.
+- **Proteção de sobreposição** — o cron tick e `POST .../run` podem disparar em conjunto. Um destino já drenado é ignorado em vez de ser drenado duas vezes (`skipped: true` no resultado da execução), pelo que uma execução simultânea não pode reenviar um lote ou escrever o cursor ao contrário.
+- **Limpar recuperação** — se `cursor_row_id` terminar acima de `MAX(rowid)` (toda a tabela foi eliminada e os rowids reiniciados), o executor recua para 0 em vez de ficar permanentemente cego.
 
-### Executor isolado e limites
+### Corredor isolado e limites
 
-Cada execução de destino em Node inicia um processo filho separado e de curta duração ao nível do sistema operativo (`child_process`
-com IPC, não `worker_threads`). As leituras dos corpos, a análise/serialização de JSON dos dados, o
-`prepare()` do destino e as operações de E/S de rede do destino são executados nesse processo, e não no ciclo de eventos do servidor.
-Apenas a configuração e pequenas mensagens de progresso atravessam o IPC; os registos exportados nunca regressam
-ao servidor. A tarefa cron e a rota Executar agora mantêm o mesmo resultado público e a mesma proteção contra sobreposição.
+Cada destino executado no Node inicia um processo filho OS separado e de curta duração (`child_process` com IPC, e não `worker_threads`). As leituras do corpo, a carga útil JSON parsing/serialization, o destino `prepare()` e a rede de destino I/O são executados aí, e não no ciclo de eventos do servidor. Apenas as mensagens de configuração e as pequenas mensagens de progresso cruzam IPC; os registos exportados nunca regressam ao servidor. O cron job e a rota Run mantêm agora o mesmo resultado público e proteção de sobreposição.
 
-O processo filho abre o `DATA_DIR/storage.sqlite` resolvido pelo servidor em modo só de leitura, utilizando `node:sqlite`,
-com `busy_timeout=5000` e `query_only=ON`. Não importa qualquer singleton da base de dados nem executa
-migrações, cópias de segurança ou atualizações do SQLite. A gestão de artefactos em falta/corrompidos (incluindo o
-UPDATE de artefactos corrompidos) permanece apenas no percurso de detalhe do painel. Ambos os percursos partilham um
-resolvedor de detalhes puro; a exportação utiliza leituras assíncronas do sistema de ficheiros e a mesma ordem de resolução: artefacto → conteúdo
-embutido legado → disco legado → nenhum. Uma execução captura o rowid máximo de inserção
-quando o processo filho abre o seu leitor; as inserções posteriores aguardam a execução seguinte. Trata-se de um limite
-de inserção, não de uma transação SQLite de longa duração: os escritores WAL e os pontos de controlo continuam livres durante
-as esperas de rede. As atualizações/eliminações de linhas existentes não ficam congeladas por este limite.
+O filho abre o `DATA_DIR/storage.sqlite` resolvido somente leitura do servidor usando `node:sqlite`, com `busy_timeout=5000` e `query_only=ON`. Não importa nenhum singleton DB e não realiza migrações, backups ou atualizações SQLite. A contabilização do artefacto Missing/corrupt (incluindo o artefacto corrompido UPDATE) permanece apenas no caminho de detalhe do painel. Ambos os caminhos partilham um resolvedor de detalhes puro; a exportação utiliza leituras assíncronas do sistema de ficheiros e o mesmo artefacto → legado inline → disco legado → sem ordem de resolução. Uma execução captura o rowid de inserção máximo quando o filho abre o seu leitor; inserções posteriores aguardam a próxima execução. Este é um limite de inserção, não uma transação SQLite de longa duração: os gravadores e os pontos de verificação WAL permanecem livres durante as esperas da rede. Updates/deletions de linhas existentes não são congeladas por este limite.
 
-Após cada lote aceite, o processo filho aguarda uma confirmação. Primeiro, o servidor persiste
-o cursor com `advanceLogExportCursor` e depois envia `ack`; nenhum lote seguinte começa antes disso.
-Uma falha no envio, uma falha do processo ou um tempo limite excedido regista uma falha sem fazer avançar esse lote. Os lotes
-anteriormente confirmados mantêm-se consolidados; no máximo, apenas o lote não confirmado pode ser reenviado.
-O êxito só é registado após `done` e uma saída normal do processo filho. As falhas terminam o processo filho
-com SIGTERM, passando a SIGKILL após 500 ms, e o executor aguarda o encerramento do processo.
+Após cada lote aceite, a criança aguarda uma confirmação. O servidor primeiro persiste o cursor com `advanceLogExportCursor` e depois envia `ack`; nenhum lote seguinte começa antes dele. Uma falha de envio, bloqueio ou tempo limite regista a falha sem avançar o lote. Os lotes previamente reconhecidos mantêm-se confirmados; no máximo, o lote não confirmado poderá ser reenviado. O sucesso é registado apenas após `done` e uma saída filho limpa. As falhas terminam o filho com SIGTERM, aumentando para SIGKILL após 500 ms, e o executor aguarda o fecho do processo.
 
-| Variável de ambiente                          | Predefinição | Finalidade                                             |
-| --------------------------------------------- | ------------ | ------------------------------------------------------ |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000       | Limite de tempo real por destino                       |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024         | Limite do espaço antigo do V8 do processo filho, em MB |
+| Variável de ambiente                          | Predefinição | Finalidade                              |
+| --------------------------------------------- | ------------ | --------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000       | Limite de relógio de parede por destino |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024         | Limite de espaço antigo filho V8 em MB  |
 
-Os valores inválidos/não positivos/não inteiros utilizam as predefinições. A definição da heap não constitui um limite
-total de RSS; lotes muito grandes podem ainda esgotar a memória do processo filho e fazer a execução falhar em segurança.
-A predefinição de 1024 MB deixa margem para o lote predefinido de 500 linhas de artefactos de 512 KiB com
-os corpos ativados, incluindo a serialização JSON do BigQuery em blocos de bytes. Não torna seguro um
-lote de 10000 linhas com corpos. O esgotamento da heap do V8 regista uma falha com indicação de como agir: reduza o tamanho
-do lote ou aumente `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; o cursor permanece no último
-lote confirmado. Os corpos históricos embutidos/em disco não estão abrangidos pelo limite dos artefactos modernos.
-Os operadores devem prever o consumo de RSS separadamente, sobretudo em contentores com memória limitada.
+Os valores Invalid/non-positive/non-integer utilizam os padrões. A configuração do heap não é um limite total RSS ; lotes demasiado grandes ainda podem esgotar a memória filha e falhar a execução em segurança. O padrão 1024 MB deixa espaço para o lote padrão de 500 linhas de 512 artefactos KiB com corpos habilitados, incluindo a serialização JSON fragmentada em bytes de BigQuery. Isto não torna seguro um lote de corpos de 10.000 linhas. O esgotamento de heap V8 regista uma falha acionável: diminuir o tamanho do lote ou aumentar `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; o cursor permanece no último lote reconhecido. Os corpos inline/disk históricos não estão abrangidos pelo limite de artefacto moderno. Os operadores devem orçamentar RSS separadamente, especialmente dentro de contentores com memória limitada.
 
-O processo filho herda apenas o `DATA_DIR` resolvido, `NODE_ENV`, o `TZ` explícito (resolução
-da hora local de nomes de ficheiro legados), `ELECTRON_RUN_AS_NODE` quando presente e os seguintes parâmetros de saída:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (e as respetivas formas em minúsculas),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Um dispatcher global do Undici partilha a resolução de proxy baseada exclusivamente em variáveis de ambiente e as regras
-de exclusão de anfitriões locais do servidor, incluindo `NO_PROXY`; não importa `proxyFetch.ts` nem os respetivos sinalizadores de BD/funcionalidades.
-As credenciais do proxy são ocultadas na saída reencaminhada e nos erros registados. As credenciais do destino
-são transmitidas apenas numa mensagem IPC de arranque, nunca em argv nem no ambiente; o reencaminhamento de saída/erros
-recebe um prefixo e é sanitizado. Apenas `ExperimentalWarning` é desativado nos argumentos de execução do processo filho para evitar
-repetir o aviso de SQLite do Node em cada execução do cron; os outros tipos de aviso permanecem visíveis.
+O filho herda apenas `DATA_DIR`, `NODE_ENV`, `TZ` explícito (resolução de tempo local de nome de ficheiro legado), `ELECTRON_RUN_AS_NODE` quando presente e as seguintes entradas de saída: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (e as suas formas minúsculas), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Um despachante Undici global partilha a resolução de proxy de ambiente puro do servidor e as regras de desvio de host local, incluindo `NO_PROXY`; ele não importa `proxyFetch.ts` ou os seus sinalizadores DB/feature. As credenciais de proxy são editadas a partir da saída encaminhada e dos erros registados. As credenciais de destino apenas viajam numa mensagem start IPC, nunca em argv ou ambiente; o encaminhamento output/error é prefixado e higienizado. Apenas `ExperimentalWarning` é desativado nos argumentos exec filhos para evitar a repetição do aviso SQLite do Node a cada execução do cron; outros tipos de aviso permanecem visíveis.
 
-Os módulos de destino têm de poder ser importados sem dependências de Next.js/exclusivas do servidor. A implementação
-existente do BigQuery já cumpre esse contrato. As caches de tokens de acesso duram apenas durante a execução do processo
-filho, não entre execuções. O Node é o ambiente de execução suportado (`package.json` engines), mas a secção de instalação
-do Bun no README e `Dockerfile.bun` também apresentam uma via de compatibilidade em produção com
-`bun:sqlite` (`src/lib/db/core.ts` / adaptadores). Assim, no Bun, as exportações mantêm a via anterior
-no mesmo processo e emitem um aviso uma única vez: o isolamento da memória heap e do tempo limite do processo filho não está disponível. Utilize
-o Node para isolamento do ciclo de eventos e de situações de memória esgotada (OOM); o Bun não é tratado aqui como exclusivo de desenvolvimento.
+Os módulos de destino devem ser importáveis sem dependências Next.js/server-only. A implementação existente BigQuery já cumpre este contrato. Os caches de tokens de acesso duram apenas para a execução secundária, e não entre execuções. Node é o tempo de execução compatível (mecanismos `package.json` ). Existe um caminho de compatibilidade Bun de melhor esforço e não suportado (`bun:sqlite` em `src/lib/db/core.ts` / adaptadores e `Dockerfile.bun`), pelo que as exportações não devem ser interrompidas no mesmo. Em Bun, as exportações mantêm o caminho anterior do processo e emitem um aviso único: o isolamento filho heap/timeout não está disponível. Utilize o Node para o loop de eventos e isolamento OOM.
 
-Quando `includeBodies` estiver ativado, prefira uma frequência de poucos minutos, como
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, em vez de acumular uma hora de payloads pendentes.
-Os limites de lotes e de linhas continuam a limitar cada execução. O custo de arranque do processo é incorrido por destino em cada execução;
-isto troca um pequeno custo de arranque pelo isolamento do ciclo de eventos do servidor, não por uma redução da utilização total da CPU.
+Quando `includeBodies` estiver ativado, prefira uma cadência de nível de minuto, como `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, em vez de acumular uma lista de pendências de carga útil por hora. Os limites de lote e de linha ainda limitam cada execução. A inicialização do processo é paga por destino, por execução; isto representa um pequeno custo inicial para o isolamento do loop de eventos do servidor, e não redução da utilização total CPU.
 
-### Payloads (prompts e respostas)
+### Encargos úteis (prompts e conclusões)
 
-Por predefinição, a exportação contém apenas os campos de resumo apresentados na **lista** de Registos. Ativar
-**Exportar prompts e respostas** (`includeBodies`) envia também o que o painel de **detalhes** de Registos
-apresenta para cada chamada:
+By default the export carries only the summary fields the Logs **list** shows. Turning on **Export prompts and responses** (`includeBodies`) additionally ships what the Logs **detail** pane shows for each call:
 
-| Campo                            | O que contém                                                          |
-| -------------------------------- | --------------------------------------------------------------------- |
-| `request_body` / `response_body` | Os payloads da chamada tal como o painel os apresenta                 |
-| `pipeline_route_decision`        | O destino e o modelo escolhidos pelo encaminhador                     |
-| `pipeline_client_request`        | O pedido em bruto, exatamente como foi enviado pelo cliente           |
-| `pipeline_openai_request`        | Após a tradução para o formato interno da OpenAI                      |
-| `pipeline_provider_request`      | Tal como foi efetivamente enviado ao fornecedor, no respetivo dialeto |
-| `pipeline_provider_response`     | A resposta em bruto do fornecedor                                     |
-| `pipeline_client_response`       | O que foi devolvido ao chamador                                       |
-| `pipeline_error`                 | Detalhes do erro ao nível do pipeline numa chamada falhada            |
-| `bodies_truncated`               | Verdadeiro quando algum dos campos acima atingiu `maxBodyBytes`       |
+| Campo                            | O que contém                                                    |
+| -------------------------------- | --------------------------------------------------------------- |
+| `request_body` / `response_body` | As cargas úteis da chamada à medida que o painel as renderiza   |
+| `pipeline_route_decision`        | Qual o alvo e modelo que o router escolheu                      |
+| `pipeline_client_request`        | A solicitação bruta exatamente como o cliente a enviou          |
+| `pipeline_openai_request`        | Após a tradução para a forma OpenAI interna                     |
+| `pipeline_provider_request`      | Como realmente enviado upstream, no dialecto do fornecedor      |
+| `pipeline_provider_response`     | A resposta upstream bruta                                       |
+| `pipeline_client_response`       | O que foi devolvido ao chamador                                 |
+| `pipeline_error`                 | Detalhe do erro ao nível do pipeline para uma chamada com falha |
+| `bodies_truncated`               | Verdadeiro quando qualquer campo acima atinge `maxBodyBytes`    |
 
-Trata-se de conteúdo de prompts, pelo que está **desativado por predefinição** e é deliberadamente uma opção por destino.
-O que é enviado é o que o painel apresenta, porque a exportação e `getCallLogById` partilham a resolução
-de detalhes: os payloads já
-têm os dados pessoais sanitizados e os segredos ocultados quando são gravados, e uma chamada efetuada com uma
-chave de API `noLog` não armazena qualquer payload, pelo que não há nada para exportar.
+Este é um conteúdo imediato, pelo que é** desativado por defeito** e deliberadamente uma escolha por destino. O que vem é o que o painel mostra, porque o export e `getCallLogById` partilham a resolução de detalhes: as cargas úteis já são higienizadas com PII e editadas em segredo quando são gravadas, e uma chamada feita com uma chave `noLog` API não armazena qualquer carga útil, pelo que não há nada para exportar.
 
-Os payloads são lidos por linha a partir do artefacto no sistema de ficheiros, pelo que a hidratação só é executada para os destinos
-que a solicitaram. Um artefacto em falta ou corrompido resulta na exportação do respetivo resumo com payloads nulos, em vez
-de fazer falhar o lote e deixar o cursor bloqueado.
+As cargas úteis são lidas por linha do artefacto do sistema de ficheiros, pelo que a hidratação só é executada para destinos que a solicitaram. Um artefacto em falta ou corrompido exporta o seu resumo com cargas nulas em vez de falhar no lote e bloquear o cursor.
 
-`maxBodyBytes` (predefinição: 262144) limita cada campo. Os payloads mais longos são **truncados em vez de
-descartados** — um prompt cortado continua a responder a «o que foi pedido» — e a linha é assinalada com
-`bodies_truncated`. Os deltas transmitidos em fluxo, bloco a bloco, não são exportados; a resposta reconstituída
-já se encontra em `pipeline_provider_response` e `pipeline_client_response`.
+`maxBodyBytes` (default 262144) caps each field. Longer payloads are **truncated rather than dropped** — a clipped prompt still answers "what was asked" — and the row is flagged with `bodies_truncated`. Streamed chunk-by-chunk deltas are not exported; the assembled response is already in `pipeline_provider_response` and `pipeline_client_response`.
 
 ---
 

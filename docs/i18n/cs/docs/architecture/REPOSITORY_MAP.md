@@ -4,9 +4,9 @@
 
 ---
 
-> **Co kde žije: každý sledovaný adresář a kořenový soubor nejvyšší úrovně s jednořádkovým účelem.** Poslední aktualizace: 2026-11-13 (OmniRoute v3.8.54)
+> **Co kde žije: každý sledovaný adresář a kořenový soubor nejvyšší úrovně s jednořádkovým účelem.**
 >
-> Pomocí této mapy se zorientujte v kódové základně a poté postupujte podle odkazů na vyhrazené dokumenty. Počty souborů byly měřeny pomocí `git ls-files` k výše uvedenému datu. Mění se téměř s každým vydáním, takže s nimi zacházejte jako s řády.
+> Pomocí této mapy se zorientujte v kódové základně a poté postupujte podle odkazů na vyhrazené dokumenty. Počty souborů pocházejí ze `git ls-files` a mění se téměř s každým vydáním. Považujte je za řádové.
 
 ## Strom nejvyšší úrovně
 

@@ -4,13 +4,7 @@
 
 ---
 
-> **Pinagmumulan ng katotohanan:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, at ang mga pampublikong builder sa `open-sse/utils/error.ts`
-> **Mga test:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Huling na-update:** 2026-09-02 — v3.8.51
-> **Para kanino:** Sinumang engineer na humahawak ng mga tugon sa error (mga HTTP route, SSE stream, executor, MCP handler).
-> **Katayuan:** **SAPILITAN** para sa bawat code path na nagbabalik ng mensahe ng error sa isang client.
+> **Pinagmulan ng katotohanan:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, at ang mga pampublikong tagabuo sa `open-sse/utils/error.ts`** Mga pagsubok:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Madla:** Anumang engineer na humipo sa mga tugon ng error (HTTP ruta, SSE stream, executor, MCP handlers).** Katayuan:****MANDATORY** para sa bawat path ng code na nagbabalik ng mensahe ng error sa isang kliyente.
 
 ## Bakit ito umiiral
 

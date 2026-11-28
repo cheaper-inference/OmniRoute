@@ -8,21 +8,22 @@
 
 ## Werrej
 
-- [Tħaddim Rapidu](#quick-run)
-- [B’Fajl tal-Varjabbli tal-Ambjent](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Mexxi malajr](#quick-run)
+- [Bil-Fajl tal-Ambjent](#with-environment-file)
+- [Docker Jikkomponi](#docker-compose)
 - [Profili Disponibbli](#available-profiles)
-- [Konfigurazzjoni tal-għodod CLI tal-host meta OmniRoute jitħaddem f’Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Sidecar ta’ Redis](#redis-sidecar)
-- [Compose għall-Produzzjoni](#production-compose)
-- [Stadji tad-Dockerfile](#dockerfile-stages)
+- [Ebusija tal-kontenitur](#container-hardening)
+- [Konfigurazzjoni tal-għodda CLI tal-host meta OmniRoute jaħdem Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Sidecar](#redis-sidecar)
+- [Produzzjoni Ikkomponu](#production-compose)
+- [Stadji Dockerfile](#dockerfile-stages)
 - [Varjabbli Kritiċi tal-Ambjent](#critical-environment-variables)
-- [Docker Compose b’Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Mina Rapida ta’ Cloudflare](#cloudflare-quick-tunnel)
-- [Tags tal-Immaġnijiet](#image-tags)
-- [Aġġornamenti tad-dashboard f’Docker](#dashboard-updates-in-docker)
-- [Disponibbiltà: SQLite predefinit jappoġġja replika waħda](#availability-default-sqlite-is-single-replica)
-- [Żbalji reġjonali ta’ Gemini ġewwa Docker](#gemini-regional-errors-inside-docker)
+- [Docker Ikkomponi ma Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
+- [Tikketti tal-Immaġni](#image-tags)
+- [Aġġornamenti tad-dashboard fi Docker](#dashboard-updates-in-docker)
+- [Disponibbiltà: SQLite default huwa replika waħda](#availability-default-sqlite-is-single-replica)
+- [Gemini regional errors inside Docker](#gemini-regional-errors-inside-docker)
 - [Noti Importanti](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute jinkludi profili Compose għall-konfigurazzjonijiet ewlenin tal-iskjer
 | `web`               | `omniroute-web`  | Fornituri ta’ sessjonijiet tal-web li jeħtieġu browser: `gemini-web`, `claude-web`, `claude-turnstile` (jibni `runner-web`, bi Chromium inkluż)                | `docker compose --profile web up -d`         |
 
 > Jistgħu jingħaqdu diversi profili: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Ebusija tal-kontenitur
+
+Is-servizzi tal-app `base`, `web`, `cli`, u `host` `docker-compose.yml` jużaw `cap_drop: [ALL]` u l-għażla tas-sigurtà `no-new-privileges:true`. L-immaġni taħdem bħala l-utent mhux root `node` u jisma fuq portijiet għoljin, għalhekk ma teħtieġ l-ebda kapaċitajiet Linux. L-għażla tas-sigurtà tipprevjeni lill-proċessi milli jiksbu privileġġi permezz ta 'binarji setuid.
+
+Il-profil `cli` biss jimmonta s-sokit Docker għall-awto-updater. Ara [l-bokkaport tal-Escape: kkonfigura CLIs tal-kontenitur stess](#escape-hatch-configure-the-containers-own-clis-use-sparingly) għall-implikazzjonijiet tas-sigurtà.
+
+Is-sistema tal-fajls ta' l-għeruq tibqa' tinkiteb b'mod awtomatiku. Il-profil `cli` jikteb il-konfigurazzjoni CLI u l-caches fid-direttorju tad-dar tal-kontenitur, il-profil `web` jaħżen l-istat tas-sessjoni tal-Chromium, u r-runtime Next.js jista 'jikteb caches barra `/app/data`.
+
+Biex tipprova sistema ta' fajls ta' għerq li tinqara biss bil-profil `base`, issalva dan bħala `docker-compose.override.yml` ħdejn `docker-compose.yml`. Compose jaqra l-override awtomatikament.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Il-muntatura `/app/data` eżistenti tibqa’ miktuba. Ittestja l-ammont tax-xogħol tiegħek qabel tuża din l-override fil-produzzjoni, peress li jista 'jkollha bżonn tikteb f'mogħdijiet oħra.
 
 ## Konfigurazzjoni tal-għodod CLI tal-host meta OmniRoute jaħdem f'Docker
 
@@ -295,7 +320,7 @@ Imġieba tal-memorja Docker:
 
 ### Runtime RAM għall-coding agents
 
-Id-default 1 GiB Docker huwa art dashboard/light-chat, mhux daqs tal-produzzjoni. Korpi `POST /v1/responses` twal (mijiet ta 'messaġġi, għexieren ta' għodod) iżommu graffs multipli fil-memorja waqt il-kompressjoni. Żewġ talbiet ~ 3 MiB / ~ 750k-token li jikkoinċidu abortjaw V8 fi żmien** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) u tolqot ukoll 16 GiB cgroup OOM. Ara [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Id-default 1 GiB Docker huwa art dashboard/light-chat, mhux daqs tal-produzzjoni. Korpi `POST /v1/responses` twal (mijiet ta 'messaġġi, għexieren ta' għodod) iżommu graffs multipli fil-memorja waqt il-kompressjoni. Żewġ talbiet ~ 3 MiB / ~ 750k-token li jikkoinċidu abortjaw V8 fi żmien** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) u tolqot ukoll 16 GiB cgroup OOM. Ara [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Daqs** cgroup `--memory` fuq il-borz** — buffers indiġeni, SQLite, u intermedji tal-kompressjoni joqogħdu barra V8.
 
@@ -382,7 +407,7 @@ Għall-orkestraturi (Kubernetes, Nomad, eċċ.):
 
 `/healthz` jirrapporta ċiklu tal-ħajja tal-proċess (`ok` / `starting` / `stopping`). `/livez` huwa proċess-alive biss (200 kull meta l-handler jista 'jidħol; ma jistenna li jkun lest). It-tnejn għadhom jimxu fuq l-istess linja ta 'avvenimenti Node bħall-immaniġġjar tat-talbiet, għalhekk il-katalgu marbut mas-CPU jew ix-xogħol ta' kompressjoni jista 'jdewwemhom — busy ≠ dead. Ippreferi TCP liveness jekk HTTP sondi time out. Gwida sħiħa tas-sonda: [Gwida tal-monitoraġġ — Rakkomandazzjonijiet tas-sonda Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Ikkomponi ma' Caddy (HTTPS Auto-TLS)
+## Docker Ikkomponi ma Caddy (HTTPS Auto-TLS)
 
 OmniRoute jista 'jiġi espost b'mod sigur bl-użu ta' forniment awtomatiku ta ' SSL ta' Caddy. Kun żgur li r-rekord DNS A tad-dominju tiegħek jindika IP tas-server tiegħek.
 
@@ -415,7 +440,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy jistabbilixxi l-headers standard tal-kunsinna għall-kontenitur upstream. OmniRoute juża `NEXT_PUBLIC_BASE_URL` bħala l-oriġini pubblika kanonika għal callbacks OAuth u links pubbliċi ġġenerati; kitbiet ta' dashboard awtentikati jużaw talbiet tal-istess oriġini flimkien ma' protezzjoni CSRF marbuta mas-sessjoni. Ippermetti `OMNIROUTE_TRUST_PROXY` biss għal skjeramenti avvanzati fejn intenzjonalment trid li OmniRoute joħroġ l-oriġini pubblika minn headers mgħoddija ta' fiduċja minflok konfigurazzjoni espliċita.
+Caddy jistabbilixxi l-headers standard tal-kunsinna għall-kontenitur upstream. OmniRoute juża `NEXT_PUBLIC_BASE_URL` bħala l-oriġini pubblika kanonika għal callbacks OAuth u links pubbliċi ġġenerati; kitbiet ta' dashboard awtentikati jużaw talbiet tal-istess oriġini flimkien ma' protezzjoni CSRF marbuta mas-sessjoni. Ippermetti `OMNIROUTE_TRUST_PROXY` biss għal skjeramenti avvanzati fejn intenzjonalment trid li OmniRoute joħroġ l-oriġini pubblika minn headers mgħoddija fdati minflok konfigurazzjoni espliċita.
 
 ## Cloudflare Quick Tunnel
 
@@ -591,11 +616,11 @@ Is-servizz ineħħi t-talba qabel ma jagħmel pull sabiex eżekuzzjoni falluta m
 
 Stock Docker / Kubernetes OmniRoute is** wieħed Node proċess + wieħed SQLite kittieb** . Disponibbiltà għolja hija** mhux appoġġjat** fuq dik it-topoloġija.
 
-| Restrizzjoni                          | Konsegwenza                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kittieb waħdieni                      | Do** le** mexxi repliki multipli kontra l-istess fajl SQLite. Li jikkorrompi liz DB.                                                                                                                                                                                                                                               |
-| Recreate / restart / HEALTHCHECK kill | **Outage sħiħ** ta' matul it-titjira SSE, sessjonijiet dashboard, u stat fil-memorja. Kull klijent konness jinżel. Talbiet ġodda matul it-tieqa tal-endpoint vojta jiksbu reverse-proxy**`502 Bad Gateway: Unknown error`** , mhux OmniRoute JSON — il-klijenti ma jistgħux jiddistingwu dan minn falliment tal-fornitur (#11015). |
-| L-istess event loop bħal `/healthz`   | Katalgu impenjattiv jew qurdien tal-kompressjoni jista 'jdewwem is-sondi; timeout qasir imbagħad jerġa' jibda l-** biss** replika.                                                                                                                                                                                                 |
+| Restrizzjoni                          | Konsegwenza                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kittieb waħdieni                      | Do** le** mexxi repliki multipli kontra l-istess fajl SQLite. Li jikkorrompi liz DB.                                                                                                                                                                                                                                            |
+| Recreate / restart / HEALTHCHECK kill | **Outage sħiħ** ta' matul it-titjira SSE, sessjonijiet dashboard, u stat fil-memorja. Kull klijent konness jinżel. Talbiet ġodda matul it-tieqa tal-endpoint vojta jiksbu reverse-proxy**`502 Bad Gateway: Unknown error`** , mhux OmniRoute JSON — klijenti ma jistgħux jiddistingwu dan minn falliment tal-fornitur (#11015). |
+| L-istess event loop bħal `/healthz`   | Katalgu impenjattiv jew qurdien tal-kompressjoni jista 'jdewwem is-sondi; timeout qasir imbagħad jerġa' jibda l-** biss** replika.                                                                                                                                                                                              |
 
 **Matriċi tas-sonda** (ara wkoll [ir-rakkomandazzjonijiet tas-sonda Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -605,7 +630,7 @@ Stock Docker / Kubernetes OmniRoute is** wieħed Node proċess + wieħed SQLite 
 | Prontezza      | HTTP `GET /healthz`                                         | Timeouts stretti li jittrattaw event-loop busy bħala mejta |
 | Fond / bnedmin | `/api/monitoring/health`                                    | Ħajja kubelet awtomatizzata                                |
 
-**Titjib:** jistennew li kull sessjoni tinżel. Ixxotta l-klijenti jekk tista’; m'hemm l-ebda aġġornament kontinwu dwar SQLite default. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` se jissostitwixxi wkoll l-uniku proċess meta l-kontenitur ma jkunx tajjeb għas-saħħa — l-istess raġġ tal-blast.
+**Titjib:** jistennew li kull sessjoni tinżel. Ixxotta l-klijenti jekk tista’; m'hemm l-ebda aġġornament kontinwu dwar SQLite default. Ikkomponi `restart: unless-stopped` flimkien ma Docker `HEALTHCHECK` se jissostitwixxi wkoll l-uniku proċess meta l-kontenitur ikun Ħżiena għas-saħħa — istess raġġ tal-blast.
 
 Manifesti lesti u tabella Helm ħajjin `deploy/kubernetes/` u `deploy/helm/omniroute/` — ara l- [gwida għall-iskjerament ta' Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
@@ -636,9 +661,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep tikri kube qatra l-endpoints tas-Servizz qabel SIGTERM hekk** ġdid** it-traffiku jieqaf jolqot il-proċess tal-mewt. Matul it-titjira `/v1/responses` SSE jitbattal sa `SHUTDOWN_TIMEOUT_MS` (default 30s) permezz ta 'kirjiet ta' ammissjoni heavyweight (#11015). Talbiet ġodda li għadhom jilħqu l-proċess jiksbu `503` + `Retry-After: 5`. Id-distakk tar-Recreate vojt-endpoint sakemm is-sostituzzjoni tkun Lesta tibqa' qtugħ iebes - jiġifieri t-topoloġija SQLite, mhux sonda ħażina.
+`preStop` sleep tikri kube qatra l-endpoints tas-Servizz qabel SIGTERM hekk** ġdid** it-traffiku jieqaf jolqot il-proċess tal-mewt. Matul it-titjira `/v1/responses` SSE jitbattal sa `SHUTDOWN_TIMEOUT_MS` (default 30s) permezz ta 'kirjiet ta' ammissjoni heavyweight (#11015). Talbiet ġodda li għadhom jilħqu l-proċess jiksbu `503` + `Retry-After: 5`. Id-diskrepanza tal-punt ta' tmiem vojt mill-ġdid sakemm is-sostituzzjoni tkun Lesta tibqa' qtugħ iebes — li hija t-topoloġija SQLite, mhux konfigurazzjoni ħażina ta' sonda.
 
-Esterni Postgres / multi-writer HA is** le** mogħdija tal-istokk dokumentata. Jekk għandek bżonn HA, żomm replika waħda jew mexxi topoloġija li l-proġett ikun ittestja u ddokumenta separatament. Ix-xogħol Postgres/MySQL jgħix [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Sakemm il-vapuri, l-uniku mod appoġġjat biex timmultiplika** kbar** Il-kapaċità `/v1/responses` hija N proċessi indipendenti (sezzjoni li jmiss), mhux `replicas > 1` fuq volum wieħed.
+Esterni Postgres / multi-writer HA is** le** mogħdija tal-istokk dokumentata. Jekk għandek bżonn HA, żomm replika waħda jew mexxi topoloġija li l-proġett ikun ittestja u ddokumenta separatament. Postgres/MySQL jghix [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Sakemm il-vapuri, l-uniku mod appoġġjat biex timmultiplika** kbar** Il-kapaċità `/v1/responses` hija N proċessi indipendenti (sezzjoni li jmiss), mhux `replicas > 1` fuq volum wieħed.
 
 ## Skala-out: N proċessi indipendenti
 
@@ -646,27 +671,27 @@ Esterni Postgres / multi-writer HA is** le** mogħdija tal-istokk dokumentata. J
 
 Kopji ta' kont Codex wieħed m'għandhomx jikkunsmaw b'mod indipendenti t-token ta' aġġornament ta' użu wieħed tiegħu. F'każijiet li jikkunsmaw biss kredenzjali sinkronizzati, issettja `OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex` (alias `cx`). Ħalliha mhux issettjata fuq is-sid tar-rotazzjoni waħda. Kull proċess għadu jeħtieġ `DATA_DIR` tiegħu stess; din l-għażla la taqsam SQLite u lanqas tipprovdi sinkronizzazzjoni tat-tokens jew lock distribwit.
 
-L-istanza passiva terġa’ taqra l-konnessjoni meta jkun hemm bżonn ta’ aġġornament u tadotta biss token ta’ aċċess differenti u mhux skadut. Inkella, l-aġġornament jiġi diżattivat mingħajr ma tiskadi jew tiġi diżattivata l-konnessjoni jew jingħaddu falliment ta' refresh-breaker. Fallimenti reali ta 'awtentikazzjoni upstream għadhom jużaw kontabilità ta' falliment normali, cooldown esponenzjali u l-iżball normali tal-klijent; id-diżattivazzjoni tal-kont tibqa' permanenti. Issinkronizza t-tokens imdawra tas-sid qabel ma jiskadu t-tokens tal-aċċess (il-ċomb ta' aġġornar proattiv default huwa ħames minuti), jew erġa' jimporta l-fajl ta' awtentikazzjoni Codex. L-importazzjonijiet passivi jaħżnu t-tokens forniti mingħajr ma jivvalidawhom fil-punt tat-tmiem tat-token. Manwal dashboard/API refresh jirritorna `409 refresh_disabled`; logins ġodda OAuth mhumiex mibdula. Ara [referenza dwar l-ambjent](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
+L-istanza passiva terġa’ taqra l-konnessjoni meta jkun hemm bżonn ta’ aġġornament u tadotta biss token ta’ aċċess differenti u mhux skadut. Inkella, l-aġġornament jiġi diżattivat mingħajr ma tiskadi jew tiġi diżattivata l-konnessjoni jew jingħaddu l-falliment tal-interruttur tal-aġġornament. Fallimenti reali ta 'awtentikazzjoni upstream għadhom jużaw kontabilità ta' falliment normali, cooldown esponenzjali u l-iżball normali tal-klijent; id-diżattivazzjoni tal-kont tibqa' permanenti. Issinkronizza t-tokens imdawra tas-sid qabel ma jiskadu t-tokens tal-aċċess (il-ċomb ta' aġġornar proattiv default huwa ħames minuti), jew erġa' jimporta l-fajl ta' awtentikazzjoni Codex. L-importazzjonijiet passivi jaħżnu t-tokens forniti mingħajr ma jivvalidawhom fil-punt tat-tmiem tat-token. Manwal dashboard/API refresh jirritorna `409 refresh_disabled`; logins ġodda OAuth mhumiex mibdula. Ara [referenza dwar l-ambjent](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Wieħed proċess Node huwa** borġ wieħed V8** . Żewġ li jikkoinċidu ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman ) abort dak il-borġ ~ 12 Gi (`FATAL ERROR: Reached heap limit`) u jistgħu OOM a 16 Gi cgroup. Ara [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Dak il-kejl huwa a** memorja-baġit** twissija, mhux prodott hard-max ta 'żewġ `/v1/responses` twal konkorrenti . Ammissjoni ta 'chat ta' piż tqil hija mgħaġġla minn baġit ta 'byte ta' inġest awto-derivat (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) imqassam minn dak l-istess limitu ta V8/cgroup — li jegħlebha 'l fuq (jew li jistabbilixxi l-limitu tal-għadd ta' rikjesti `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` tal-legat) fuq proċess li diġà d-daqs jerġa' jintroduċi l-abort. Chats żgħar, `/healthz`, `/v1/models`, u MCP huma** le** f'dak il-kap.
+Wieħed proċess Node huwa** borġ wieħed V8** . Żewġ li jikkoinċidu ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman ) abort dak il-borġ ~ 12 Gi (`FATAL ERROR: Reached heap limit`) u jistgħu OOM a 16 Gi cgroup. Ara [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Dak il-kejl huwa a** memorja-baġit** twissija, mhux prodott hard-max ta 'żewġ `/v1/responses` twal konkorrenti . Ammissjoni ta 'chat ta' piż tqil hija mqabbda minn baġit ta 'byte ta' inġest awto-derivat (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) imqassam minn dak l-istess V8/cgroup ceiling — li jegħlebha 'l fuq (jew li jistabbilixxi l-limitu ta' għadd ta' talbiet `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` tal-legat) fuq proċess diġà ta' daqs jerġa' jintroduċi l-abort. Chats żgħar, `/healthz`, `/v1/models`, u MCP huma** le** f'dak il-kap.
 
 ### Proċess wieħed: aktar minn żewġ `/v1/responses` twal
 
-A** b'saħħithom** proċess (heap taħt `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`)** jista** mexxi aktar minn żewġ `POST /v1/responses` twal konkorrenti meta l-baġit tal-inflight-byte mal-proċess kollu (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) għad ikollu spazju. Korpi `OMNIROUTE_CHAT_LARGE_BODY_BYTES` jew 'il fuq (default 256 KiB) jieħdu l-istess kirja heavyweight bħat-talbiet ta' strutturi tqal u jużaw l-istess [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Għexieren ta 'klijenti SSE twal konkorrenti (l-operaturi ħafna drabi jeħtieġu 40-50) huwa a** memorja-baġit** mistoqsija — daqs borġ + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — mhux limitu iebes tal-prodott "max 2". Borġ taħt pressjoni għadu jitfa' `503` li jista' jerġa' jipprova sabiex #7849 ma jerġax lura.
+A** b'saħħithom** proċess (heap taħt `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`)** jista** mexxi aktar minn żewġ `POST /v1/responses` twal konkorrenti meta l-baġit tal-inflight-byte mal-proċess kollu (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) għad ikollu spazju. Korpi `OMNIROUTE_CHAT_LARGE_BODY_BYTES` jew 'il fuq (default 256 KiB) jieħdu l-istess kirja heavyweight bħat-talbiet ta' strutturi tqal u jużaw l-istess [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Għexieren ta' klijenti SSE twal konkorrenti (l-operaturi ħafna drabi jeħtieġu 40–50) huwa a** memorja-baġit** mistoqsija — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — mhux limitu iebes tal-prodott "max 2". Borġ taħt pressjoni għadu jitfa' `503` li jista' jerġa' jipprova sabiex #7849 ma jerġax lura.
 
 Biex** immoltiplika munzelli** (spazji antiki V8 indipendenti)** illum** :
 
-| Do                                                                                                                                                   | M'għandekx                                                     |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Mexxi** N containers/pods** , kull wieħed ma tiegħu** stess** `DATA_DIR` / volum                                                                     | Issettja `replicas > 1` kontra fajl SQLite wieħed              |
-| Daqs tqil waqt it-titjira + healthy-headroom mill-budget tal-heap / inflight-byte; 1–2 huwa d-default konservattiv #7849, mhux prodott iebes massimu | Agħti proċess wieħed 8 × RAM u limitu tal-għadd bla limitu     |
-| Fakultattiv: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` for** counters tal-kwota maqsuma**                                                 | Ittratta Redis bhala shared SQLite — mhux                      |
-| Idduplika sigrieti tal-fornitur f'kull istanza (jew aċċetta dashboards maqsuma)                                                                      | Jistennew dashboard wieħed / call-log wieħed f'każijiet kollha |
-| Quddiem bi kwalunkwe load balancer; sticky by API key jew sessjoni hija biżżejjed                                                                    | Jeħtieġu middleware speċifiku għall-bejjiegħ konxju tad-daqs   |
+| Do                                                                                                                                        | M'għandekx                                                     |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Mexxi** N containers/pods** , kull wieħed ma tiegħu** stess** `DATA_DIR` / volum                                                          | Issettja `replicas > 1` kontra fajl SQLite wieħed              |
+| Daqs tqil waqt it-titjira + healthy-headroom minn borġ / baġit inflight-byte; 1–2 huwa #7849 default konservattiv, mhux prodott iebes max | Agħti proċess wieħed 8 × RAM u limitu tal-għadd bla limitu     |
+| Fakultattiv: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` for** counters tal-kwota maqsuma**                                      | Ittratta Redis bhala shared SQLite — mhux                      |
+| Idduplika sigrieti tal-fornitur f'kull istanza (jew aċċetta dashboards maqsuma)                                                           | Jistennew dashboard wieħed / call-log wieħed f'każijiet kollha |
+| Quddiem bi kwalunkwe load balancer; sticky by API key jew sessjoni hija biżżejjed                                                         | Jeħtieġu middleware speċifiku għall-bejjiegħ konxju tad-daqs   |
 
-L-affinità bejn is-sessjoni u l-kont tista’ wkoll tiġi kondiviża permezz ta Redis: issettja `OMNIROUTE_SESSION_AFFINITY_STORE=redis` u `REDIS_URL` fuq kull proċess, bl-istess `REDIS_KEY_PREFIX` u setting `sessionAffinityTtlMs` pożittiv. Il-pinnijiet isolvu l-identitajiet tal-kont tal-użu bil-hashing għall-konnessjoni lokali eliġibbli ta' kull proċess, għalhekk il-kontijiet OAuth b'metadejta tal-identità li taqbel m'għandhomx għalfejn ikollhom konnessjoni li tqabbel IDs. L-identitajiet tal-kontijiet magħrufa jieħdu preċedenza fuq IDs lokali kontradittorji fir-riżoluzzjoni tal-pin u l-iżgumbrament mgħasses; rekords mingħajr identità (jew min iċempel iżgumbrament mingħajr identità) iżommu l-gwardja ID legata. Il-kontijiet mingħajr identità ta' użu stabbli għadhom jeħtieġu t-tqabbil ta IDs. Redis żbalji jew sejħiet li jaqbżu l-100 ms jaqgħu lura għal SQLite lokali. Kull maħżen ta 'affinità Redis jillimita operazzjonijiet pendenti fi 8, jevita Redis immedjatament meta jkun mimli, u jirrilaxxa slots biss meta x-xogħol sottostanti jissetilja, mhux fl-iskadenza ta' min iċempel. Waqt qtugħ ta' Redis m'hemm l-ebda verità kondiviża: kull istanza taqa' lura għall-affinità lokali tagħha stess, is-sessjonijiet jistgħu jerġgħu jimponu darba għal kull istanza, u l-istanzi jistgħu jvarjaw. It-twaħħil jerġa 'jikkonverġi permezz ta' Redis meta jirkupra. Il-timeout jillimita l-istennija, mhux EVAL mibgħut , li jista' jinżel wara fallback. Il-kitbiet tar-rotot iqabblu l-valur eżatt osservat mid-deċiżjoni tar-rotta, mhux qari frisk tal-ħin tal-mutazzjoni; miss osservat jew osservazzjoni fallback SQLite tqabbel bħala ċavetta Redis assenti. Labar skaduti huma sostitwiti CAS wieħed, għalhekk kmand tard ma jistax jissostitwixxi jew iħassar pin aktar ġdid u differenti. Redis jaqra atomikament jirritorna l-valur u server li jifdal TTL; PTTL pożittiv (jew l-ebda skadenza) jiddetermina l-ħajja, mhux it-timbru taż-żmien JSON tal-kittieb jew l-arloġġ tal-qarrej. Snapshots lokali mappa li fadal TTL għal skadenza lokali; iċ-ċwievet JSON eżistenti jibqgħu jinqraw u l-bytes mhux maħduma tagħhom jinżammu għal CAS. Redis huwa l-uniku sors ta 'verità filwaqt li jwieġeb. It-taqlib kondiviż ikkonfermat, tmiss u tħassar ineħħu l-entrata lokali, qatt ma tinstallaha jew aġġornaha. SQLite fuq il-mogħdija Redis iżomm biss id-deċiżjonijiet fallback ta 'din l-istanza stess minn żbalji Redis, timeouts jew saturazzjoni ta' ammissjoni, TTL-bounded bħal qabel. Pin lokali nieqes fuq qtugħ aktar tard jiswa għażla waħda ġdida (miss wieħed fil-pront-cache), mhux kont ħażin jew żgumbrat. Upserts miċħuda jirritornaw ir-rebbieħ kondiviż u TTL li jifdal tiegħu atomikament: għażla ordinarja tiċċekkja mill-ġdid l-iskadenza lokali mmappjata u tuża rebbieħ eliġibbli li għadu ħaj, li jmiss l-użu u l-illoggjar għal dak il-kont mingħajr kitba oħra kondiviża. Jekk ma tkunx disponibbli, l-għażla żżomm il-kandidat lokali, tħalli l-pin kondiviż mhux mibdula u temetti messaġġ wieħed ta' debug. Rejected CAS ma jiktebx SQLite; Żbalji Redis, timeouts jew saturazzjoni tad-dħul japplikaw l-operazzjoni lokali eżistenti minflok. Jekk it-tweġiba ta' mutazzjoni mibgħuta tasal wara timeout (aċċettata, miċħuda jew żball), paragun-u-delete ta' valur serializzat eżatt sinkroniku tneħħi biss ir-ringiela ta' riżerva ta' timeout identika għall-byte. M'hemm l-ebda stennija bejn dak il-paragun u t-tħassir; kitba ta' qtugħ aktar ġdid hija ppreservata. Żgumbrament mgħasses tneħħi l-pin lokali stess tal-kont fallut anke Redis l isfel, u jerġa' jnaddaf wara żgumbrament kondiviż ikkonfermat. Pendenti tweġibiet kondiviżi preċedenti ma jistgħux jirrestawraw pin lokali żgumbrat għaliex is-suċċessi kondiviżi qatt ma jiktbu SQLite. Fallback ta 'waqfien aktar tard jista' repin kont; kitba kondiviża aċċettata aktar tard teżisti biss Redis. Redis miss ma tikkonsultax l-istat lokali ta' riżerva. Bix-xufier mitfi, il-brilli li għadhom kif ġew magħżula jżommu l-forma SQLite JSON ta 'erba' kampijiet tal-legat; Redis routing biss iżid l-identità tal-kont hashed. Labar prefetched huma verifikati mill-ġdid fil-konfini ta 'skadenza tagħhom. Redis għażla mhux tal-kirja terġa’ taqra l-maħżen, iżda l-ippjanar tal-kera sinkroniku xorta jista’ juża pin żgumbrat bejn prefetch u ppjanar (tieqa tal-aħjar sforz aċċettata). Impenn ta' kiri ma jistax jaqleb il-kontijiet wara talba dejjiema: fuq upsert miċħud iżomm lill-kandidat mitlub għal dik it-talba biss u jħalli r-rebbieħ kondiviż mhux mimsus, għalhekk il-ftehim bejn l-istanzi huwa marbut fuq dik it-triq. Il-bqija tat-tabella għadha tapplika: dan ma jaqsamx it-twaħħil tas-sessjoni combo, pinnijiet nattivi Codex dawran, semafori tal-kontijiet, lockouts, limiti tal-infiq, konfigurazzjoni jew logs tas-sejħiet.
+L-affinità bejn is-sessjoni u l-kont tista’ wkoll tiġi kondiviża permezz ta Redis: issettja `OMNIROUTE_SESSION_AFFINITY_STORE=redis` u `REDIS_URL` fuq kull proċess, bl-istess `REDIS_KEY_PREFIX` u setting `sessionAffinityTtlMs` pożittiv. Il-pinnijiet isolvu l-identitajiet tal-kont tal-użu bil-hashing għall-konnessjoni lokali eliġibbli ta' kull proċess, għalhekk il-kontijiet OAuth b'metadejta tal-identità li taqbel m'għandhomx għalfejn ikollhom konnessjoni li tqabbel IDs. L-identitajiet tal-kontijiet magħrufa jieħdu preċedenza fuq IDs lokali kontradittorji fir-riżoluzzjoni tal-pin u l-iżgumbrament mgħasses; rekords mingħajr identità (jew min iċempel iżgumbrament mingħajr identità) iżommu l-gwardja ID legata. Il-kontijiet mingħajr identità ta' użu stabbli għadhom jeħtieġu t-tqabbil ta IDs. Redis żbalji jew sejħiet li jaqbżu l-100 ms jaqgħu lura għal SQLite lokali. Kull maħżen ta 'affinità Redis jillimita operazzjonijiet pendenti fi 8, jevita Redis immedjatament meta jkun mimli, u jirrilaxxa slots biss meta x-xogħol sottostanti jissetilja, mhux fl-iskadenza ta' min iċempel. Waqt qtugħ ta' Redis m'hemm l-ebda verità kondiviża: kull istanza taqa' lura għall-affinità lokali tagħha stess, is-sessjonijiet jistgħu jerġgħu jimponu darba għal kull istanza, u l-istanzi jistgħu jvarjaw. It-twaħħil mill-ġdid jikkonverġi permezz ta ' Redis meta jirkupra. Il-timeout jillimita l-istennija, mhux EVAL mibgħut , li jista' jinżel wara fallback. Il-kitbiet tar-rotot iqabblu l-valur eżatt osservat mid-deċiżjoni tar-rotta, mhux qari frisk tal-ħin tal-mutazzjoni; miss osservat jew osservazzjoni fallback SQLite tqabbel bħala ċavetta Redis assenti. Labar skaduti huma sostitwiti CAS wieħed, għalhekk kmand tard ma jistax jissostitwixxi jew iħassar pin aktar ġdid u differenti. Redis jaqra atomikament jirritorna l-valur u server li jifdal TTL; PTTL pożittiv (jew l-ebda skadenza) jiddetermina l-ħajja, mhux it-timbru taż-żmien JSON tal-kittieb jew l-arloġġ tal-qarrej. Snapshots lokali mappa li fadal TTL għal skadenza lokali; iċ-ċwievet JSON eżistenti jibqgħu jinqraw u l-bytes mhux maħduma tagħhom jinżammu għal CAS. Redis huwa l-uniku sors ta 'verità filwaqt li jwieġeb. It-taqlib kondiviż ikkonfermat, tmiss u tħassar ineħħu l-entrata lokali, qatt ma tinstallaha jew aġġornaha. SQLite fuq il-mogħdija Redis iżomm biss id-deċiżjonijiet fallback ta 'din l-istanza stess minn żbalji Redis, timeouts jew saturazzjoni ta' ammissjoni, TTL-bounded bħal qabel. Pin lokali nieqes fuq qtugħ aktar tard jiswa għażla waħda ġdida (miss wieħed fil-pront-cache), mhux kont ħażin jew żgumbrat. Upserts miċħuda jirritornaw ir-rebbieħ kondiviż u TTL li jifdal tiegħu atomikament: għażla ordinarja tiċċekkja mill-ġdid l-iskadenza lokali mmappjata u tuża rebbieħ eliġibbli li għadu ħaj, li jmiss l-użu u l-illoggjar għal dak il-kont mingħajr kitba oħra kondiviża. Jekk ma tkunx disponibbli, l-għażla żżomm il-kandidat lokali, tħalli l-pin kondiviż mhux mibdul u temetti messaġġ wieħed ta' debug. Rejected CAS ma jiktebx SQLite; Żbalji Redis, timeouts jew saturazzjoni tad-dħul japplikaw l-operazzjoni lokali eżistenti minflok. Jekk it-tweġiba ta' mutazzjoni mibgħuta tasal wara timeout (aċċettata, miċħuda jew żball), paragun-u-delete ta' valur serializzat eżatt sinkroniku tneħħi biss ir-ringiela ta' riżerva ta' timeout identika għall-byte. M'hemm l-ebda stennija bejn dak il-paragun u t-tħassir; kitba ta' qtugħ aktar ġdid hija ppreservata. Żgumbrament mgħasses tneħħi l-pin lokali stess tal-kont fallut anke Redis l isfel, u jerġa' jnaddaf wara żgumbrament kondiviż ikkonfermat. Pendenti tweġibiet kondiviżi preċedenti ma jistgħux jirrestawraw pin lokali żgumbrat minħabba suċċessi kondiviżi qatt ma jiktbu SQLite. Fallback ta 'waqfien aktar tard jista' repin kont; kitba kondiviża aċċettata aktar tard teżisti biss Redis. Redis miss ma tikkonsultax l-istat lokali ta' riżerva. Bix-xufier mitfi, il-brilli magħżula ġodda jżommu l-forma SQLite JSON ta 'erba' kampijiet tal-wirt; Redis routing biss iżid l-identità tal-kont hashed. Labar prefetched huma verifikati mill-ġdid fil-konfini ta 'skadenza tagħhom. Redis għażla mhux tal-kirja terġa’ taqra l-maħżen, iżda l-ippjanar tal-kera sinkroniku xorta jista’ juża pin żgumbrat bejn prefetch u ppjanar (tieqa tal-aħjar sforz aċċettata). Impenn ta' kiri ma jistax jaqleb il-kontijiet wara talba dejjiema: fuq upsert miċħud iżomm lill-kandidat mitlub għal dik it-talba biss u jħalli r-rebbieħ kondiviż mhux mimsus, għalhekk il-ftehim bejn l-istanzi huwa marbut fuq dik it-triq. Il-bqija tat-tabella għadha tapplika: dan ma jaqsamx it-twaħħil tas-sessjoni combo, pinnijiet nattivi Codex dawran, semafori tal-kontijiet, lockouts, limiti tal-infiq, konfigurazzjoni jew logs tas-sejħiet.
 
-Ħardwer: `/v1/responses` twil konkorrenti għal kull istanza huwa a** memorja-baġit** mistoqsija (heap + inflight-byte / #10110). `N` indipendenti `DATA_DIR` s għadhom jimmultiplikaw munzelli: host RAM għandu jkopri `N × cgroup`, mhux "wieħed 16 Gi pod b'N = 8." Qatt `replicas > 1` fuq fajl SQLite wieħed.
+Ħardwer: `/v1/responses` twil konkorrenti għal kull istanza huwa a** memorja-baġit** mistoqsija (heap + inflight-byte / #10110). `N` indipendenti `DATA_DIR` s għadhom jimmultiplikaw munzelli: host RAM għandu jkopri `N × cgroup`, mhux "pod wieħed ta' 16 Gi b'N = 8." Qatt `replicas > 1` fuq fajl SQLite wieħed.
 
 Ikkomponi skeċċ (żewġ munzelli, żewġ volumi — mhux `deploy.replicas: 2`):
 
@@ -695,55 +720,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Id-densità fil-proċess (kompressjoni barra mill-iżolat HTTP ) hija [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Raggruppament loġiku wieħed fuq stat durabbli kondiviż huwa [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Id-densità fil-proċess (kompressjoni mill-iżolat HTTP ) hija [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Raggruppament loġiku wieħed fuq stat durabbli kondiviż huwa [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Żbalji reġjonali ta' Gemini ġewwa Docker
+## Gemini regional errors inside Docker
 
-Google AI Studio / Gemini API jista' jirritorna HTTP 400 b'FAILED_PRECONDITION u
-`User location is not supported for the API use.` Talba li tirnexxi fuq il-host
-ma tippruvax li l-container juża l-istess rotta tal-ħruġ. L-ordni tad-DNS,
-il-konnettività IPv4/IPv6, ir-routing tal-VPN u l-proxies ikkonfigurati jistgħu jkunu differenti. Iċċekkja
-[r-reġjuni appoġġjati minn Google](https://ai.google.dev/gemini-api/docs/available-regions)
-kif ukoll ir-rotta effettiva tal-konnessjoni; dan l-iżball waħdu ma jindikax API key ħażina.
+Google AI Studio / Gemini API jista' jirritorna HTTP 400 FAILED_PRECONDITION u `User location is not supported for the API use.` Talba b'suċċess fuq il-host ma tipprovax li l-kontenitur juża l-istess rotta 'l barra. DNS ordering, IPv4/IPv6 connectivity, VPN routing u prokuri konfigurati jistgħu jvarjaw. Iċċekkja [r-reġjuni appoġġjati ta 'Google](https://ai.google.dev/gemini-api/docs/available-regions) kif ukoll ir-rotta tal-konnessjoni attwali; dan l-iżball waħdu ma jidentifikax ċavetta API ħażina.
 
-### Ippreferi proxy speċifiku għall-konnessjoni
+### Ippreferi prokura speċifika għall-konnessjoni
 
-Uża l-[konfigurazzjoni tal-proxy għal kull konnessjoni](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-ta' OmniRoute għall-konnessjoni Gemini affettwata, imbagħad erġa' wettaq **Test Connection** u talba żgħira
-bl-istess mudell. Dan iżomm il-bidla fir-routing limitata għal dik il-konnessjoni. Ivverifika
-li l-proxy jista' jintlaħaq mill-container, u li l-konnessjoni tassew tagħżlu.
-Il-bidla tar-rotta ma tiggarantix l-eliġibbiltà reġjonali tas-servizz upstream.
+Uża [l-konfigurazzjoni tal-prokura għal kull konnessjoni ta'](../ops/PROXY_GUIDE.md#4-level-proxy-system) OmniRoute għall-konnessjoni Gemini affettwata, imbagħad irrepeti** Konnessjoni tat-Test** u talba żgħira bl-istess mudell. Dan iżomm il-bidla tar-routing ambitu għal dik il-konnessjoni. Ivverifika li l-prokura tista' tintlaħaq mill-kontenitur, u li l-konnessjoni verament tagħżelha. It-tibdil tar-rotta ma jiggarantixxix eliġibilità reġjonali upstream.
 
-### Qabbel in-networking tal-host u tal-container
+### Qabbel in-netwerking tal-ospitanti u tal-kontejners
 
-Żomm il-key, il-mudell u t-talba identiċi meta tqabbel ir-riżultati awtentikati; qatt
-twaħħal kredenzjali, passwords tal-proxy jew headers tal-awtorizzazzjoni sħaħ f'issue.
-L-ewwel spezzjona liema familji ta' indirizzi joffri r-resolver tal-OS, billi tuża l-istess kmand
-fuq il-host u ġewwa l-container:
+Żomm iċ-ċavetta, il-mudell u t-talba identiċi meta tqabbel ir-riżultati awtentikati; qatt ma tippejstja kredenzjali, passwords ta' prokura jew headers ta' awtorizzazzjoni kompluti fi kwistjoni. L-ewwel spezzjona liema familji ta' indirizzi joffri s-solvent OS, billi tuża l-istess kmand fuq il-host u ġewwa l-kontenitur:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Ibdel `omniroute` bis-servizz li tħaddem (pereżempju, `omniroute-web`). Dawn
-il-kmandi jistampaw il-familji tal-indirizzi mingħajr kredenzjali jew indirizzi IP. `6`
-irritornat juri biss riżultat DNS IPv6: **ma** jippruvax li hemm rotta IPv6 li tista' tintuża jew aċċess għall-API.
-Fejn ikun installat `curl`, qabbel `curl -4 -I https://generativelanguage.googleapis.com`
-ma' `curl -6 -I https://generativelanguage.googleapis.com` fiż-żewġ ambjenti.
-Risposta HTTP tipprova l-konnettività għal dak it-test, anki jekk tkun żball mhux awtentikat;
-it-talba awtentikata tal-mudell biss tittestja l-eliġibbiltà għal Gemini.
+Ibdel `omniroute` bis-servizz li tmexxi (per eżempju, `omniroute-web`). Dawn il-kmandi jistampaw familji ta' indirizzi mingħajr kredenzjali jew indirizzi IP. `6` ritornat juri biss riżultat IPv6 DNS : jagħmel** le** jipprova rotta IPv6 użabbli jew aċċess API. Fejn `curl` huwa installat, qabbel `curl -4 -I https://generativelanguage.googleapis.com` ma `curl -6 -I https://generativelanguage.googleapis.com` fiż-żewġ ambjenti. Rispons HTTP jipprova konnettività għal dik is-sonda, anki jekk huwa żball mhux awtentikat; it-talba mudell awtentikata biss tittestja l-eliġibilità Gemini.
 
-### Alternattiva fil-livell tal-host: IPv6 li jaħdem u politika tar-resolver
+### Alternattiva fil-livell tal-ospitant: IPv6 tax-xogħol u politika tas-solvent
 
-Min irrapporta [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) irrestawra
-l-aċċess fl-ambjent tiegħu billi attiva IPv6 għall-container u biddel l-għażla tal-indirizzi
-ta' glibc. Ittratta dan bħala alternattiva speċifika għall-ambjent. Ikkonferma IPv6 li jaħdem fuq il-host,
-il-ħruġ/routing tal-container u r-regoli tal-firewall qabel taġġusta l-preferenzi tar-resolver.
-Indirizz ULA privat waħdu ma jistabbilixxix konnettività IPv6 pubblika.
+Ir-reporter ta ' [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) reġa' rrestawra l-aċċess fl-ambjent tagħhom billi ppermetta l-kontejner IPv6 u biddel l-għażla tal-indirizz glibc. Ittratta dan bħala alternattiva speċifika għall-ambjent. Ikkonferma r-regoli tal-host tax-xogħol IPv6, tal-kontenitur egress/routing u tal-firewall qabel ma taġġusta l-preferenzi tas-solvent. Indirizz ULA privat waħdu ma jistabbilixxix konnettività IPv6 pubblika.
 
-Għal servizzi diġà konnessi man-network default ta' Compose, din il-parti tattiva
-IPv6 fuq dak in-network; żomm il-bqija tas-servizz, il-ports, il-volumes u l-konfigurazzjoni tiegħek:
+Għas-servizzi diġà mehmuża man-netwerk default ta' Compose, dan il-framment jippermetti IPv6 fuq dak in-netwerk; żomm il-bqija tas-servizz tiegħek, portijiet, volumi u konfigurazzjoni:
 
 ```yaml
 networks:
@@ -751,30 +753,13 @@ networks:
     enable_ipv6: true
 ```
 
-Għal network b'isem, attivah fuq in-network li miegħu jingħaqad effettivament is-servizz. Docker jista'
-jalloka subnet ULA; agħżel subnet espliċita li ma tirkibx fuq oħra biss meta n-network tiegħek
-ikun jeħtieġha. Ara [in-networking IPv6 ta' Docker](https://docs.docker.com/engine/daemon/ipv6/)
-u [l-għażliet tan-network ta' Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Għal netwerk imsemmi, ppermettih fuq in-netwerk li s-servizz fil-fatt jingħaqad. Docker jista' jalloka subnet ULA ; agħżel subnet espliċita, li ma tikkoinċidix biss meta n-netwerk tiegħek jeħtieġha. Ara [Docker IPv6 networking](https://docs.docker.com/engine/daemon/ipv6/) u [Compose networking options](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Fuq **image ibbażata fuq glibc**, `/etc/gai.conf` jista' jibdel l-għażla tal-indirizzi. Id-Dockerfile
-attwali tar-repożitorju juża Debian; images personalizzati bbażati fuq musl ma jużawx dan il-mekkaniżmu.
-L-aġġustament irrappurtat jibdel it-tikketta ULA minn `label fc00::/7 6` għal
-`label fc00::/7 1`. Ibda mit-tabella sħiħa tal-politika tal-image u ppreserva l-entrati l-oħra
-tagħha: iż-żieda ta' entrata `label` jew `precedence` tissostitwixxi dik it-tabella default, għalhekk file
-li jkun fih biss il-linja mibdula mhuwiex biżżejjed. Ir-
-[referenza tal-konfigurazzjoni ta' glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-tiddokumenta dik l-imġiba. Agħmel bind-mount tal-file rieżaminat bħala read-only f'`/etc/gai.conf`
-u erġa' oħloq is-servizz biex tapplikah.
+Fuq a** immaġni bbażata fuq glibc** , `/etc/gai.conf` tista' tbiddel l-għażla tal-indirizz. Ir-repożitorju attwali Dockerfile juża Debian; immaġini bbażati fuq musl personalizzat ma jaqsmux dan il-mekkaniżmu. L-aġġustament irrappurtat ibiddel it-tikketta ULA minn `label fc00::/7 6` għal `label fc00::/7 1`. Ibda mit-tabella tal-politika sħiħa tal-immaġni u ppreserva l-entrati l-oħra tagħha: iż-żieda ta' dħul `label` jew `precedence` tissostitwixxi dik it-tabella default, għalhekk fajl li jkun fih biss il-linja mibdula ma jkunx biżżejjed. [Ir-referenza tal-konfigurazzjoni tal-glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) tiddokumenta dik is-semantika. Irbit immunta l-fajl revedut jinqara biss `/etc/gai.conf` u oħloq mill-ġdid is-servizz biex tapplikah.
 
-Dan jibdel l-għażla tal-indirizzi tal-OS għat-**traffiku kollu ħiereġ minn dak il-container**.
-Ma jġiegħelx lil kull applikazzjoni tagħżel IPv6: l-ordni tad-DNS ta' Node u l-għażla
-tal-konnessjoni huma importanti wkoll. B'mod partikolari, `--dns-result-order=ipv4first` jippreferi IPv4 u
-mhuwiex rimedju għal falliment limitat għal IPv4. Ara [l-ordni tad-DNS ta' Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Dan ibiddel l-għażla tal-indirizz OS għal** it-traffiku kollu 'l barra f'dak il-kontejner** . Ma ġġiegħel lil kull applikazzjoni tagħżel IPv6: L-ordni DNS ta 'Node u l-għażla tal-konnessjoni huma wkoll importanti. B'mod partikolari, `--dns-result-order=ipv4first` jippreferi IPv4 u mhuwiex rimedju għal falliment ta' IPv4-only. Ara [Node DNS ordering](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Erġa' ttestja Gemini u l-fornituri l-oħra tiegħek wara kwalunkwe bidla fil-livell tal-host. Biex treġġa' lura,
-neħħi l-mount personalizzat ta' `gai.conf`, irrestawra l-konfigurazzjoni preċedenti tan-network u
-erġa' oħloq is-servizz/network affettwat waqt perjodu ta' manutenzjoni. Il-ħolqien mill-ġdid ta' network
-jista' jinterrompi containers oħra konnessi miegħu; tħassarx il-volume tad-data persistenti.
+Erġa' ttestja Gemini u l-fornituri l-oħra tiegħek wara kwalunkwe bidla fil-livell tal-host. Biex terġa 'lura, neħħi l-muntatura `gai.conf` tad-dwana, irrestawra l-konfigurazzjoni tan-netwerk ta' qabel u toħloq mill-ġdid service/network affettwat waqt tieqa ta 'manutenzjoni. Il-ħolqien mill-ġdid ta' netwerk jista' jinterrompi kontenituri oħra mwaħħla miegħu; tħassarx il-volum tad-dejta persistenti.
 
 ## Noti Importanti
 

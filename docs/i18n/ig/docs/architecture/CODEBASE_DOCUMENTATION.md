@@ -4,18 +4,11 @@
 
 ---
 
-> **Ụdị:** v3.8.51
-> **Emelitere ikpeazụ:** 2026-06-28
-> **Ndị e bu n’obi:** Ndị injinia na-atụnye ụtụ na OmniRoute ma ọ bụ na-ewulite njikọta n’elu ya.
+> **Ụdị:** v3.8.51** Ndị na-ege ntị:** Ndị injinia na-enye aka na OmniRoute ma ọ bụ wuo njikọ n'elu ya.
 >
-> Maka eserese nhazi usoro dị elu na ihe kpatara sistemụ nta ọ bụla, gụọ
-> [ARCHITECTURE.md](./ARCHITECTURE.md). Maka nkọwa miri emi banyere sistemụ nta dị iche iche
-> (Auto Combo, sava MCP, sava A2A, Nkà, Ncheta, Ndị nnọchi anya Cloud, Nkwụsi ike,
-> Mkpakọ, wdg.), lee faịlụ ndị a raara nye ha n’ime ndekọ `docs/` a.
+> Maka eserese ụlọ dị elu na echiche dị n'azụ sistemụ ọ bụla, gụọ [ARCHITECTURE.md](./ARCHITECTURE.md). Maka mgbaba miri emi na sistemu nke onwe (Auto Combo, MCP server, A2A server, Skills, Memory, Cloud Agents, Resilience, Compression, wdg) hụ faịlụ raara onwe ha nye na ndekọ `docs/` a.
 
-Faịlụ a na-akọwa **ihe dị n’ebe nchekwa koodu ugbu a** ka injinia ọhụrụ
-wee nwee ike ịgagharị n’usoro ndekọ ahụ, ghọta nhazi oyi akwa n’oge ọrụ, ma mara ebe ọ ga-etinye koodu
-n’emeghị modulu ọhụrụ.
+Faịlụ a na-akọwa** ihe dị na repository taa** ka onye injinia ọhụrụ wee nwee ike ịnyagharị osisi ahụ, ghọta nhazi oge ịgba ọsọ, wee mara ebe ị ga-agbakwunye koodu na-echepụtaghị modul ọhụrụ.
 
 ---
 
@@ -566,35 +559,14 @@ Iwu ndị a na-ejikarị:
 
 ## 8. `scripts/`
 
-A haziri ya n'ime folda nta 6 dịka ebumnuche ha si dị.
+Haziri n'ime nchekwa nchekwa 6 site na ebumnuche.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, tinyere ngwa enyemaka ndị a na-eji naanị agụ maka ilekọta PR:
-  `ci-discriminate.sh` (na-ekewa akara nyocha dara ada nke PR n'ime nke ya / nke o ketara /
-  nke a na-amaghị, site n'iji PR ntụaka ma ọ bụ nsogbu base-red tụnyere ya) na `audit-worktree.sh`
-  (faịlụ ndị agbanwere, akụkụ ndị e chebere, asserts ndị ewepụrụ, ọnụ ọgụgụ suppressions, tsconfigs
-  nwa oge ndị fọdụrụ, isi PR ma e jiri ya tụnyere HEAD lokálụ — tupu a nabata PR nke onye ọrụ).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, gbakwunyere ndị na-agụ naanị PR ndị na-elekọta nwa `ci-discriminate.sh` (ụdị PR na-adịghị mma ma ọ bụ akara aka zq nke a na-amaghị / na-elele PR nke onwe ya. Okwu na-acha ọbara ọbara) na `audit-worktree.sh` (faịlụ ruru unyi, ebe echedoro, ihe ndị ewepụrụ, ọnụ ọgụgụ nkwụsị, tmp tsconfigs hapụrụ, isi PR vs local HEAD — tupu anabata PR onye ọrụ).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. Ụdị ọkọlọtọ `check-deprecated-versions.mjs` akọwapụtara nke ọma na OmniRoute (3.6.x na mbụ). Nyocha ahụ na-eleghara ụbọchị anya.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

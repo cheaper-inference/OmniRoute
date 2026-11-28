@@ -486,27 +486,27 @@ SSE 管理器按范围跟踪已连接的客户端，并且仅在排行榜数据�
 
 ---
 
-## 代币分享
+## 代币共享
 
 **文件：** `src/lib/gamification/sharing.ts`
 
-### 复式记账
+### 复式记账本
 
-每次转账都会在 `token_ledger` 中创建两行：
+每次传输都会在`token_ledger`中创建两行：
 
-| 行   | `from_key_id` | `to_key_id` | `amount` |
+| 排   | `from_key_id` | `to_key_id` | `amount` |
 | ---- | ------------- | ----------- | -------- |
-| 借记 | 发送方        | 接收方      | +amount  |
-| 贷记 | 接收方        | 发送方      | -amount  |
+| 借方 | 发件人        | 接收者      | +金额    |
+| 信用 | 接收者        | 发件人      | -amount  |
 
-等等——实际约定如下：
+等等—约定是：
 
-| 行   | `from_key_id` | `to_key_id` | `amount` | 含义         |
+| 排   | `from_key_id` | `to_key_id` | `amount` | 意义         |
 | ---- | ------------- | ----------- | -------- | ------------ |
-| 发送 | 发送方        | 接收方      | +amount  | 从发送方流出 |
-| 接收 | 接收方        | 发送方      | +amount  | 流入接收方   |
+| 发送 | 发件人        | 接收者      | +金额    | 从发送方流出 |
+| 收到 | 接收者        | 发件人      | +金额    | 流入接收器   |
 
-余额的计算方式如下：
+余额计算如下：
 
 ```sql
 SELECT
@@ -517,7 +517,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### 转账流程
+### 转移流程
 
 ```typescript
 export async function transferTokens(
@@ -528,19 +528,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **验证**：`amount > 0`、`fromKeyId !== toKeyId`。
-2. **幂等性**：检查账本中是否已存在 `idempotency_key`。
-   如果存在，则返回缓存的结果。
-3. **事务**（单个 SQLite 事务）：
-   a. 计算发送方余额。
-   b. 如果 `balance < amount`，则中止（余额不足）。
-   c. 插入发送行（`from=sender,`。
+1. **证实**： `amount > 0`， `fromKeyId !== toKeyId`。
+2. **幂等性**：检查`idempotency_key`是否已经存在于 ledger 中。如果是，则返回缓存结果。
+3. **交易**（单个SQLite交易）：计算发件人余额。 b.如果是`balance < amount`，则中止（资金不足）。 c.插入发送行 (`from=sender, to=receiver, amount`)。 d.插入接收行 (`from=receiver, to=sender, amount`)。
+4. **速率限制**：检查发送者的传输速率（最大 10 transfers/min）。
+5. **事件**：发出`token_share`游戏化事件以进行XP +徽章评估。
+6. 返回`{ success: true, balance: newBalance }`。
 
 ### 速率限制
 
-- 每个 API 密钥每分钟最多转账 10 次。
+- 每个API密钥每分钟最多 10 次传输。
 - 单次转账最多 10,000 个代币。
-- 每个 API 密钥每天最多转账 100,000 个代币。
+- 每个API密钥每天最多传输 100,000 个代币。
 
 ---
 

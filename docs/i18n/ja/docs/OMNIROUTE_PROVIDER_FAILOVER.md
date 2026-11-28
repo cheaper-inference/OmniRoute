@@ -21,3 +21,5 @@
   - 接頭辞付きの ID (`provider/model`) が別のプロバイダーに再ルーティングされることはありません。
 
 回路状態は`closed`、 `open`、および`half_open`です。クールダウンでは、制限付きプローブをスケジュールします。プローブが成功すると回線が閉じられ、プローブが失敗すると再び回線が開きます。
+
+プロバイダーのフェイルオーバーはゲートウェイ内で実行されます。ゲートウェイの停止中のクライアントの動作については[、 OmniRoute自体が到達不能になる場合」](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable)を参照してください。

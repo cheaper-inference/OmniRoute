@@ -99,37 +99,37 @@ Per combinatie:
 
 ---
 
-## Healthcheck-API
+## Gezondheidscheck API
 
-OmniRoute biedt **twee** HTTP-healthcheckinterfaces. Ze zijn niet onderling uitwisselbaar voor orchestrators.
+OmniRoute blootlegt** twee** HTTP gezondheidsoppervlakken. Ze zijn niet uitwisselbaar voor orkestrators.
 
-| Pad                          | Doel                                                                           | Belasting                            | Gebruiken voor                                                                  |
-| ---------------------------- | ------------------------------------------------------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------- |
-| `GET /healthz`               | Levenscyclus-liveness/readiness (`ok` / `starting` / `stopping`)               | Minimaal (alleen fasevlag)           | Kubernetes-**readiness**; milde **liveness** als u HTTP moet gebruiken          |
-| `GET /api/monitoring/health` | Uitgebreide systeem- en providersamenvatting (DB, heap, catalogusaantallen, …) | Zwaar (synchroon DB-/monitoringwerk) | Dashboards, uitgebreide blackboxcontroles, de ingebouwde healthcheck van Docker |
+| Pad                          | Doel                                                                                | Gewicht                                    | Gebruik voor                                                                 |
+| ---------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| `GET /healthz`               | Levenscyclus liveness/readiness (`ok` / `starting` / `stopping`)                    | Triviaal (alleen fasevlag)                 | Kubernetes** gereedheid** ; zacht** levendigheid** als u HTTP moet gebruiken |
+| `GET /api/monitoring/health` | Samenvatting van de diepe systeemzqa + provider (DB, heap, catalogusaantallen, ...) | Zwaar (synchronisatie DB / monitoringwerk) | Dashboards, blackbox deep checks, Docker's ingebouwde healthcheck            |
 
-> **Opmerking:** Provider-healthmatrices, autopilotproblemen, quotamonitors, tokenhealth en latentiedetails die verder gaan dan `/api/monitoring/health`, zijn beschikbaar via de **MCP-tool** `observability_snapshot` of de **dashboardpagina's** — hiervoor bestaan geen afzonderlijke REST-routes.
+> **Opmerking:** Gezondheidsmatrices van providers, problemen met de automatische piloot, quotamonitors, tokengezondheid en latentiedetails buiten `/api/monitoring/health` zijn beschikbaar via de**MCP -tool** `observability_snapshot` of de** dashboard** pagina's — daar zijn geen speciale REST routes voor.
 
-Beide routes worden uitgevoerd in dezelfde **Node-eventloop** als de afhandeling van aanvragen. Een CPU-intensief pad (omvangrijk cataloguswerk voor `GET /v1/models`, compressie van lange contexten/token-telling) kan **alle** HTTP-handlers vertragen, inclusief `/healthz`. Een bezette eventloop ≠ een uitgevallen proces. Los bij voorkeur de CPU-belasting op; het afstellen van probes vermindert alleen onterechte beëindigingen.
+Beide routes lopen over de** dezelfde knooppuntgebeurtenislus** als verzoekafhandeling. Een CPU-gebonden pad (groot `GET /v1/models` cataloguswerk, lange-contextcompressie / tokentelling) kan vertraging veroorzaken** alle** HTTP handlers, inclusief `/healthz`. Event-loop bezig ≠ proces dood. Geef er de voorkeur aan het varken te repareren; Het afstemmen van sondes vermindert alleen het aantal valse moorden.
 
-### Lichtgewicht orchestratorprobe
+### Lichtgewicht Orchestrator-sonde
 
 ```bash
 GET /healthz
-# of HEAD /healthz
+# or HEAD /healthz
 ```
 
 - **200** + body `ok` wanneer de levenscyclusfase van de server gereed is
 - **503** + `starting` / `stopping` tijdens het opstarten of afsluiten
-- Implementatie: `src/app/healthz/route.ts` (geen DB-ping)
+- Implementatie: `src/app/healthz/route.ts` (geen DB -ping)
 
-### Systeemstatus (uitgebreid)
+### Systeemstatus (diep)
 
 ```bash
 GET /api/monitoring/health
 ```
 
-Respons:
+Antwoord:
 
 ```json
 {
@@ -153,44 +153,35 @@ Respons:
 }
 ```
 
-#### `credentialHealth`: probe-cache versus SQLite-`test_status`
+#### `credentialHealth`: probe-cache vs SQLite `test_status`
 
-`GET /api/monitoring/health` → `credentialHealth` is de **in-memory probe-cachemeter**,
-geen live-dump van `provider_connections.test_status`. Na #12532 leest het
-aanvraagpad uitsluitend `getCachedCredentialHealthSummary()`; achtergrondprobes
-vernieuwen de cache buiten de eventloop om.
+`GET /api/monitoring/health` → `credentialHealth` is de** in-memory probe-cache-meter** , geen live dump van `provider_connections.test_status`. Na #12532 leest het verzoekpad alleen `getCachedCredentialHealthSummary()` ; achtergrondsondes vernieuwen de cache van de gebeurtenislus.
 
-| Laag                              | Waar                                                                  | Wat dit betekent                                                                                                                                                                                                                  |
-| --------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Probe-cachemeter                  | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | De laatste resultaten van credential-healthprobes die nog in het procesgeheugen staan. `source` is altijd `probe-cache`.                                                                                                          |
-| Details van mislukte verbindingen | `credentialHealth.failedConnections`                                  | Alleen aanwezig **wanneer `failed > 0`**. Begrensde lijst van cacherijen met `status=error` (`connectionId`, `status`, opgeschoonde `lastError` / `lastErrorType`). `failedOmitted` wordt ingesteld wanneer de lijst is afgekapt. |
-| Persistente SQLite-status         | `credentialHealth.staleDbNonOkCount`                                  | Aantal **actieve** (`is_active=1`) verbindingsrijen waarvan de opgeslagen `test_status` een bekende niet-ok-status is (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                          |
+| Laag                        | Waar                                                                  | Wat het betekent                                                                                                                                                                                                            |
+| --------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Probe-cache-meter           | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | De laatste testresultaten voor de status van de referenties worden nog steeds in het procesgeheugen bewaard. `source` is altijd `probe-cache`.                                                                              |
+| Mislukte verbindingsdetails | `credentialHealth.failedConnections`                                  | Cadeau** alleen als `failed > 0`** . Begrensde lijst met cacherijen met `status=error` (`connectionId`, `status`, opgeschoonde `lastError` / `lastErrorType`). `failedOmitted` wordt ingesteld toen de lijst werd afgedekt. |
+| SQLite plakkerige status    | `credentialHealth.staleDbNonOkCount`                                  | Telling van** actief** (`is_active=1`) verbindingsrijen waarvan de persistente `test_status` een bekende niet-ok is (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                      |
 
-De twee lagen kunnen bewust van elkaar verschillen:
+De twee lagen kunnen het met opzet oneens zijn:
 
-- Meter `failed=0` terwijl `staleDbNonOkCount>0` — SQLite bevat nog steeds een
-  persistente `test_status` (bijvoorbeeld `expired` of `credits_exhausted`) die
-  door de meest recente probe-cachemomentopname niet als `status=error` wordt geteld.
-- Meter `failed>0` terwijl SQLite er gezond uitziet — een recente probe is mislukt en
-  bevindt zich in de cache; de DB-rij is niet bijgewerkt of is later gewist.
+- Gauge `failed=0` terwijl `staleDbNonOkCount>0` — SQLite nog steeds een sticky `test_status` heeft (bijvoorbeeld `expired` of `credits_exhausted`) waarvan de laatste probe-cache-snapshot niet telt als `status=error`.
+- Bepaal `failed>0` terwijl SQLite er gezond uitziet. — Een recente test is mislukt en wordt in de cache opgeslagen; de DB rij is niet bijgewerkt of is later gewist.
 
-Stel bij het scrapen van dit endpoint geen waarschuwingen uitsluitend op basis van
-`provider_connections.test_status` in. Gebruik `failed` + `failedConnections` voor
-actuele probefouten en `staleDbNonOkCount` wanneer u het aantal opgeslagen
-persistente statussen nodig hebt.
+Waarschuw niet uitsluitend op `provider_connections.test_status` bij het schrapen van dit eindpunt. Gebruik `failed` + `failedConnections` voor live probe-fouten, en `staleDbNonOkCount` wanneer u de aanhoudende sticky-statustelling nodig hebt.
 
-### Aanbevelingen voor Kubernetes-probes
+### Aanbevelingen voor Kubernetes-sondes
 
-OmniRoute is één **Node-proces** (één eventloop). De standaard-Docker-`HEALTHCHECK` richt zich op het lichtgewicht `/healthz`. `/api/monitoring/health` is **te zwaar** voor liveness-intervallen van kubelet.
+OmniRoute is een** enkel knooppuntproces** (één gebeurtenislus). Voorraad Docker `HEALTHCHECK` richt zich op lichtgewicht `/healthz`. `/api/monitoring/health` is** te zwaar** voor kubelet-levendigheidsintervallen.
 
-| Probe                       | Aanbevolen doel                                                                   | Opmerkingen                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| --------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Opstarten**               | HTTP `GET /healthz` met een lange `failureThreshold` (of grote `startPeriod`)     | Koude start + SQLite-migratie kan meer dan enkele seconden duren                                                                                                                                                                                                                                                                                                                                                               |
-| **Gereedheid**              | HTTP `GET /healthz`                                                               | Levenscyclus `ok` / `starting` / `stopping` (200 versus 503). Fluctueert nog steeds als de lus door de CPU wordt geblokkeerd. Een **200 na meerdere seconden is niet gezond** (#10303) — dit betekent dat de eventloop geen processortijd kreeg voordat de handler van 3 bytes werd uitgevoerd                                                                                                                                 |
-| **Levendigheid**            | HTTP `GET /livez`, **of TCP** op de hoofdservicepoort (`PORT`, standaard `20128`) | `/livez` controleert alleen of het proces actief is (altijd 200 als de handler wordt uitgevoerd). Deze deelt nog steeds de eventloop — bezig ≠ dood, en detecteert uithongering van de eventloop (#10303) niet beter dan TCP. Geef de voorkeur aan **TCP** als HTTP-probes een time-out krijgen onder catalogus-/compressiebelasting; beëindig de pod in geen van beide gevallen vanwege korte onderbrekingen van de eventloop |
-| **Grondige statuscontrole** | `GET /api/monitoring/health` vanuit een externe checker                           | Niet voor kubelet `livenessProbe` / kort ingestelde `readinessProbe`                                                                                                                                                                                                                                                                                                                                                           |
+| Doorvragen           | Aanbevolen doel                                                                   | Opmerkingen                                                                                                                                                                                                                                                                                                                                                          |
+| -------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Opstarten**        | HTTP `GET /healthz` met een lange `failureThreshold` (of grote `startPeriod`)     | Koude start + SQLite migratie kan langer dan enkele seconden duren                                                                                                                                                                                                                                                                                                   |
+| **Bereidheid**       | HTTP `GET /healthz`                                                               | Levenscyclus `ok` / `starting` / `stopping` (200 versus 503). Flapt nog steeds als de lus CPU-geblokkeerd is. A** 200 in meerdere seconden is niet gezond** (#10303) — betekent dat de gebeurtenislus was uitgehongerd voordat de handler van 3 bytes werd uitgevoerd                                                                                                |
+| **Levendigheid**     | HTTP `GET /livez`,** of TCP** op de hoofdservicepoort (`PORT`, standaard `20128`) | `/livez` is alleen proces-levend (altijd 200 als de handler actief is). Het deelt nog steeds de gebeurtenislus — busy ≠ dead, en het detecteert event-loop starvation (#10303) niet beter dan TCP. De voorkeur geven aan**TCP** als HTTP tests time-out krijgen onder catalog/compression belasting; Doen** niet** dood de pod hoe dan ook op korte event-loop-boxen |
+| **Diepe gezondheid** | `GET /api/monitoring/health` van een externe controleur                           | Niet voor kubelet `livenessProbe` / strakke `readinessProbe`                                                                                                                                                                                                                                                                                                         |
 
-Voorbeeldstructuur (pas de drempelwaarden aan op basis van uw koude start en compressiebelasting):
+Voorbeeldvorm (pas de drempels aan uw koude start en compressiebelasting aan):
 
 ```yaml
 ports:
@@ -216,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Bij een vastgelopen eventloop kan HTTP /livez nog steeds een time-out krijgen. TCP is het
-  # conservatieve alternatief:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-Laat kubelet-**levendigheid** **niet** naar `/api/monitoring/health` verwijzen. Dat pad voert daadwerkelijk database-/monitoringwerk uit en geeft onder belasting fout-positieve resultaten.
+**Niet doen** punt kubelet** levendigheid** bij `/api/monitoring/health`. Dat pad doet echt DB/monitoring -werk en zal onder belasting vals-positief zijn.
 
-Gerelateerd: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (probes terwijl de eventloop bezig is), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (catalogusprijzen monopoliseren de processortijd), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (het tellen van compressietokens monopoliseert de processortijd).
+Gerelateerd: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (probes terwijl de gebeurtenislus bezig is), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (catalogusprijshog), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (compressietokentellinghog).
 
-### systemd-watchdog (vastgelopen eventloop)
+### systemd watchdog (bevroren gebeurtenislus)
 
-Op een systemd-host laat OmniRoute de servicebeheerder weten wanneer de service gereed is en blijft het pings versturen, zodat een server waarvan de eventloop is vastgelopen, wordt beëindigd en opnieuw gestart in plaats van actief maar stil te blijven. De pings zijn afkomstig van de eigen eventloop van de server: wanneer deze wordt geblokkeerd, stoppen de pings en start systemd de service opnieuw zodra `WatchdogSec` is verstreken zonder dat er een ping is ontvangen.
+Op een systemd-host vertelt OmniRoute de servicemanager wanneer deze gereed is en blijft deze pingen, zodat een server waarvan de gebeurtenislus vastzit, wordt afgebroken en opnieuw wordt opgestart in plaats van stil te blijven. De pings komen uit de eigen gebeurtenislus van de server: wanneer deze blokkeert, stoppen ze en systemd start de service opnieuw zodra `WatchdogSec` zonder één is verstreken.
 
-[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) schrijft al een gebruikerseenheid met deze configuratie. Een eenheid die u zelf schrijft (standaard `Type=simple`) krijgt geen watchdog, dus voeg deze regels toe aan de sectie `[Service]`:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) schrijft hiermee al een gebruikerseenheid. Een eenheid die u zelf schrijft (de standaard `Type=simple`) krijgt geen watchdog, dus voeg deze regels toe aan de `[Service]` sectie:
 
 ```ini
 [Service]
@@ -240,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-De gegenereerde eenheid stelt `Restart=on-failure` in, dus voeg ook die regel toe — zonder deze instelling beëindigt de watchdog alleen de vastgelopen service in plaats van deze opnieuw te starten.
+De gegenereerde eenheid stelt `Restart=on-failure` in, dus voeg die regel ook — toe. Zonder deze regel doodt de watchdog alleen de vastgelopen service in plaats van deze opnieuw te starten.
 
-- `Type=notify`: de service is „gestart” wanneer de server `READY=1` verzendt, niet wanneer het proces wordt geforkt. `TimeoutStartSec` begrenst een trage start.
-- `NotifyAccess=all`: de pings worden verzonden door het serverproces, dat een childproces is van de supervisor `omniroute serve`.
-- `WatchdogSec`: pings worden elke 60 seconden verzonden, dus gebruik **120 of meer**. Kleinere waarden zouden een gezonde server opnieuw starten.
-- Voer `omniroute serve` op de voorgrond uit. `--daemon` koppelt de server los van de cgroup van de eenheid, waardoor de notify-handshake nooit wordt voltooid.
+- `Type=notify`: de service wordt "gestart" wanneer de server `READY=1` verzendt, niet wanneer het proces wordt afgesplitst. `TimeoutStartSec` kent een trage start.
+- `NotifyAccess=all`: de pings worden verzonden door het serverproces, dat een onderliggend onderdeel is van de `omniroute serve` supervisor.
+- `WatchdogSec`: pings gaan elke 60 seconden uit, dus gebruik** 120 of meer** . Kleinere waarden zouden een gezonde server opnieuw opstarten.
+- Voer `omniroute serve` uit op de voorgrond. `--daemon` koppelt de server los van de cgroup van de eenheid en de handshake wordt nooit voltooid.
 
-Controleer na een herstart of deze actief is:
+Controleer of deze actief is na een herstart:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` toont de geconfigureerde vertraging en `WatchdogTimestamp` wordt elke minuut bijgewerkt. Een door de watchdog veroorzaakte herstart wordt vastgelegd als `Result=watchdog`. Om de pings uit te schakelen zonder de eenheid te wijzigen, stelt u `OMNIROUTE_DISABLE_SD_NOTIFY=1` in; zonder een `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows) wordt er niets verzonden.
+`WatchdogUSec` toont de geconfigureerde vertraging en `WatchdogTimestamp` gaat elke minuut vooruit. Een herstart veroorzaakt door de watchdog wordt geregistreerd als `Result=watchdog`. Om de pings uit te schakelen terwijl het apparaat blijft zoals het is, stelt u `OMNIROUTE_DISABLE_SD_NOTIFY=1` in; zonder een `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows) wordt er niets verzonden.
 
-De watchdog controleert alleen of de eventloop blijft draaien. Een server die traag is maar nog steeds voortgang boekt, wordt niet opnieuw gestart.
+De watchdog controleert alleen of de gebeurtenislus blijft lopen. Een server die langzaam is maar nog steeds draait, wordt niet opnieuw opgestart.
 
-### Optioneel werk in het aanvraagpad (geheugen, vaardigheden, tokenvernieuwing)
+### Optioneel verzoekpadwerk (geheugen, vaardigheden, tokenvernieuwing)
 
-Geheugenextractie, vaardigheidsinjectie en het vernieuwen van OAuth-tokens delen de **belangrijkste Node-eventloop** met `/healthz`. Het zijn via het dashboard in- en uitschakelbare functies (`memoryEnabled`, `skillsEnabled`), geen workerpool. Zie [Omgeving — kosten voor de eventloop](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Geheugenextractie, injectie van vaardigheden en vernieuwing van OAuth tokens delen de** belangrijkste knooppuntgebeurtenislus** met `/healthz`. Het zijn dashboard-schakelfuncties (`memoryEnabled`, `skillsEnabled`), geen werkrolpool. Zie [Omgeving — gebeurtenisluskosten](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
-### Providerstatus
+### Gezondheid van de aanbieder
 
-> **Geen REST-endpoint.** Gegevens over de providerstatus zijn beschikbaar via de MCP-tool `observability_snapshot` of de dashboardpagina `/dashboard/providers`.
+> **Geen REST eindpunt.** Gezondheidsgegevens van providers zijn beschikbaar via de MCP tool `observability_snapshot` of de dashboard `/dashboard/providers` -pagina.
 
-### Providerdetails
+### Providergegevens
 
-> **Geen REST-endpoint.** Details per provider zijn beschikbaar via de dashboardpagina `/dashboard/providers`.
+> **Geen REST eindpunt.** Details per provider zijn beschikbaar via de dashboard `/dashboard/providers` pagina.
 
 ---
 

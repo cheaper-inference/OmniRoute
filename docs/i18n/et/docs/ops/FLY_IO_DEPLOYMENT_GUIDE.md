@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Vajalikud parameetrid
+## 5. Nõutavad parameetrid
 
-Käesolev projekt soovitab konfigureerida Fly.io-l vähemalt järgmised parameetrid.
+See projekt soovitab saidil Fly.io konfigureerida vähemalt järgmised parameetrid.
 
 ### 5.1 Kontrollitud parameetrid
 
-Neid parameetreid on kasutatud praeguse `omniroute` rakenduse tegelikes juurutamistes:
+Neid parameetreid on praeguse `omniroute` rakenduse tegelikel juurutamisel kasutatud:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (vajalik tootmiskeskkonnas — kasutatakse WebSocket-i vahendaja autentimiseks)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (vajalik tootmises — mida kasutatakse WebSocket silla autentimiseks)
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 `INITIAL_PASSWORD` kohta
 
-Praeguses projektis ei ole `INITIAL_PASSWORD` määratud, kuna see juurutamine seda ei vaja.
+Praegune projekt ei määra `INITIAL_PASSWORD` kuna see juurutamine seda ei nõua.
 
-Kui see ei ole määratud:
+Kui see pole määratud:
 
-- käivituslogi näitab, et vaikeparool on `CHANGEME`
-- peaksite pärast juurutamist võimalikult kiiresti sisselogimisparooli süsteemi seadetes muutma
+- Armatuurlaua parooli loote sissevõtmise viisardis esimesel külastusel. Viige parooli samm lõpule: selle vahelejätmine lülitab armatuurlauale sisselogimise välja, mis jätab armatuurlaua avatuks kõigile, kes pääsevad rakendusse URL
+- Fly puhverserver jõuab rakendusse mitte-loopback-aadressilt, nii et pärast parooli esitamist küsib viisard ühekordset alglaadimisluba, mille rakendus prindib sel hetkel oma logisse: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Kui see rida on logist välja keritud, taaskäivitage rakendus ja esitage viisard uuesti uue märgi printimiseks
 
-Kui soovite tagavälise (unattended) taustaprotsessina algatada süsteemi parooli, saate seda hiljem lisada:
+Selle asemel parooli järelevalveta määramiseks lisage see enne esimest armatuurlaua külastust (kui parool on salvestatud, `INITIAL_PASSWORD` eiratakse):
 
 - `INITIAL_PASSWORD`
 
@@ -274,60 +274,60 @@ Kui konsooli lehel `Secrets` ei kuvata oodatud muutujaid, kontrolli:
 
 ---
 
-## 9. Järgnevad uuendused ja väljalasked
+## 9. Hilisemad uuendused ja väljalasked
 
-Pärast koodi uuendamist on väljalaskeprotsess lihtne:
+Pärast koodi värskendamist on väljalaskeprotsess lihtne:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Kui soovid uuendada ainult parameetreid koodi muutmata:
+Kui teil on vaja ainult parameetreid värskendada ilma koodi muutmata:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly teeb masinatele automaatselt astmelise (rolling) uuenduse.
+Fly teostab automaatselt masinate jooksva uuenduse.
 
-### 9.1 Ülempoolse hoidla (upstream) uuenduste jälgimine, säilitades samal ajal oma forgi `fly.toml` faili
+### 9.1 Ülesvoolu hoidla värskenduste jälgimine, säilitades samal ajal kahvli `fly.toml`
 
-Kui praegune hoidla on fork ja soovid sünkroonida uuendusi ülempoolsest hoidlast `https://github.com/diegosouzapw/OmniRoute`, järgi allolevat töövoogu.
+Kui praegune hoidla on kahvel ja soovite sünkroonida värskendusi ülesvoolu `https://github.com/cheaper-inference/OmniRoute`, järgige allolevat töövoogu.
 
-Kõigepealt kontrolli oma remote'e:
+Esmalt kontrollige oma kaugjuhtimispulte:
 
 ```powershell
 git remote -v
 ```
 
-Peaksid näha vähemalt:
+Peaksite nägema vähemalt:
 
-- `origin`, mis viitab sinu enda forgile
-- `upstream`, mis viitab algsele hoidlale
+- `origin` osutab enda kahvlile
+- `upstream` osutab algsele hoidlale
 
-Kui `upstream` ei ole konfigureeritud, lisa see:
+Kui `upstream` pole konfigureeritud, lisage see:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Enne ülempoolse hoidlaga sünkroonimist tõmba (fetch) uusimad commit'id ja tagid:
+Enne ülesvooluga sünkroonimist hankige uusimad kohustused ja sildid:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Kontrolli praegust versiooni ja ülempoolse hoidla tagisid:
+Kontrollige praegust versiooni ja ülesvoolu silte:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Märkus: Praeguse projekti versioon on `v3.8.0`. Allpool esinevad viited `v3.4.7`-le on säilitatud ainult ajaloolise näitena. Tegelike väljalaskete puhul kasuta `:latest` või praegust versioonitagi (nt `:v3.8.0`).
+> Märkus. Projekti praegune versioon on `v3.8.0`. Allpool olevaid `v3.4.7` -viiteid hoitakse ainult ajalooliste näidetena. Tegelike väljaannete puhul kasutage `:latest` või praeguse versiooni silti (nt `:v3.8.0`).
 
-Kui soovid liita ülempoolse hoidla uusima `main` haru, säilitades jõuga oma forgi `fly.toml` faili, järgi seda töövoogu:
+Kui soovite liita uusima ülesvoolu `main` hoides samal ajal jõuliselt oma kahvli `fly.toml`, järgige seda töövoogu.
 
 ```powershell
 git merge upstream/main
@@ -339,32 +339,32 @@ git push origin main
 
 Märkused:
 
-- `git merge upstream/main` sünkroonib algsest hoidlast uusima koodi
-- `git checkout HEAD~1 -- fly.toml` taastab sinu forgi enda `fly.toml` faili sellisel, nagu see oli enne liitmist
-- Kui ülempoolne hoidla ei muutnud `fly.toml` faili, ei tekita see samm mingeid erinevusi
-- Kui ülempoolne hoidla muutis `fly.toml` faili, tagab see samm, et sinu Fly rakenduse nimi, mahu (volume) ühendus, regioon ja teised forgile omased juurutuskonfiguratsioonid ei saa üle kirjutatud
+- `git merge upstream/main` sünkroonib algse hoidla uusima koodi
+- `git checkout HEAD~1 -- fly.toml` taastab teie kahvli enda `fly.toml` enne ühendamist
+- Kui ülesvoolu `fly.toml` ei muutnud, ei too see samm kaasa mingeid erinevusi
+- Kui ülesvoolu muutis `fly.toml`, tagab see samm, et teie Fly rakenduse nime, helitugevuse kinnitust, piirkonda ja muid kahvlipõhiseid juurutuskonfiguratsioone üle ei kirjutata
 
-Kui soovid joonduda konkreetse väljalaske tagiga (nt `v3.4.7`), kontrolli esmalt, et see tag on juba kaasatud `upstream/main` harus:
+Kui soovite joondada konkreetse väljalaskesildiga (nt `v3.4.7`), veenduge esmalt, et märgend on juba `upstream/main` kaasatud:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Edukas tagastus tähendab, et `upstream/main` sisaldab juba seda versiooni; seega võid lihtsalt liita `upstream/main`.
+Edukas tagastamine tähendab, et `upstream/main` juba sisaldab seda versiooni; saate `upstream/main` lihtsalt ühendada.
 
-### 9.2 Standardne väljalaske järjekord pärast ülempoolse hoidlaga sünkroonimist
+### 9.2 Standardne väljalaskejärjestus pärast ülesvoolu sünkroonimist
 
-Pärast algse hoidlaga sünkroonimist järgi seda soovitatud väljalaske järjekorda:
+Pärast algse hoidlaga sünkroonimist järgige seda soovitatavat väljalaskejärjekorda:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Taasta forgi `fly.toml`
+3. Taastage kahvli `fly.toml`
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-See on tegelik töövoog, mida kasutati praeguse projekti uuendamisel versioonile `v3.4.7` (näide viitab ajaloolisele versioonile; praegune tegelik versioon on `v3.8.0`).
+See on tegelik töövoog, mida kasutatakse praeguse projekti uuendamisel `v3.4.7` -le (näide viitab ajaloolisele versioonile; praegune tegelik versioon on `v3.8.0`).
 
 ---
 
@@ -420,38 +420,38 @@ Kui näete selle asemel `/app/data/...`, on `DATA_DIR` valesti konfigureeritud j
 
 ## 12. Levinud probleemid
 
-### 12.1 `Secrets` leht on tühi
+### 12,1 `Secrets` leht on tühi
 
-Selleks on üldjuhul kaks põhjust:
+Tavaliselt on kaks põhjust:
 
-- Te ei ole veel käivitanud `flyctl secrets set`
-- Te vaatate teist rakendust (nt `oroute` mitte `omniroute`)
+- Te pole veel `flyctl secrets set` jooksnud
+- Vaatate teist rakendust (nt `oroute` asemel `omniroute`)
 
-### 12.2 `flyctl deploy` teatab `app not found`
+### 12,2 `flyctl deploy` Teatab `app not found`
 
-Looge rakendus esmalt:
+Esmalt looge rakendus:
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-### 12.3 `fly.toml` parsimine ebaõnnestub
+### 12,3 `fly.toml` sõelumine ebaõnnestub
 
-Kontrollige järgmist:
+Kontrollige järgmist.
 
-- Kas kommentaarides on moonutatud tähemärke
-- Kas TOML-i jutumärgid ja treppimine on õiged
+- Kas kommentaarides on segaseid tegelasi
+- Kas TOML tsiteerimine ja taane on õiged
 
 ### 12.4 Andmed ei püsi
 
-Kontrollige mõlemat järgmist punkti:
+Kontrollige mõlemat järgmist.
 
 - `fly.toml` sisaldab `destination = '/data'`
-- `DATA_DIR` on määratud väärtusega `/data`
+- `DATA_DIR` on seatud väärtusele `/data`
 
-### 12.5 Kas rakendus saab töötada ilma `INITIAL_PASSWORD`-ita?
+### 12.5 Kas see töötab ilma `INITIAL_PASSWORD`?
 
-Jah, saab töötada. Sel juhul lähtub see vaikeparoolist `CHANGEME`. Tootmiskeskkonnas on soovitatav taustaprogrammi parool võimalikult kiiresti muuta.
+Jah. Kui `INITIAL_PASSWORD` on unset, loote armatuurlaua parooli esimesel külastusel liitumisviisardis (jaotis 5.2 hõlmab ühekordset alglaadimisluba ja paroolietappi).
 
 ---
 

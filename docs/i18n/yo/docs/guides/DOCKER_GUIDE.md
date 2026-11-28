@@ -6,24 +6,25 @@
 
 > Ìtọ́kasí pípé fún ìmúṣiṣẹ́ Docker. Fún ìbẹ̀rẹ̀ kíákíá, wo [abala Docker nínú README](../README.md#-docker).
 
-## Àtòjọ Àwọn Àkóónú
+## Atọka akoonu
 
-- [Ṣíṣe Kíákíá](#quick-run)
-- [Pẹ̀lú Fáìlì Àyíká](#with-environment-file)
-- [Docker Compose](#docker-compose)
-- [Àwọn Profile Tó Wà](#available-profiles)
-- [Ṣíṣètò àwọn irinṣẹ́ CLI ti host nígbà tí OmniRoute bá ń ṣiṣẹ́ nínú Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Awọn ọna Ṣiṣe](#quick-run)
+- [Pẹlu Faili Ayika](#with-environment-file)
+- [Docker Kọ](#docker-compose)
+- [Awọn profaili to wa](#available-profiles)
+- [Apoti lile](#container-hardening)
+- [Ṣiṣeto awọn irinṣẹ CLI agbalejo nigbati OmniRoute nṣiṣẹ ni Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
 - [Redis Sidecar](#redis-sidecar)
-- [Compose Fún Production](#production-compose)
-- [Àwọn Ìpele Dockerfile](#dockerfile-stages)
-- [Àwọn Variable Àyíká Tó Ṣe Pàtàkì](#critical-environment-variables)
-- [Docker Compose pẹ̀lú Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
-- [Àwọn Tag Image](#image-tags)
-- [Àwọn ìmúdójúìwọ̀n Dashboard nínú Docker](#dashboard-updates-in-docker)
-- [Wíwà-lárọ̀ọ́wọ́tó: SQLite àìyípadà jẹ́ replica kan ṣoṣo](#availability-default-sqlite-is-single-replica)
-- [Àwọn àṣìṣe agbègbè Gemini nínú Docker](#gemini-regional-errors-inside-docker)
-- [Àwọn Àkíyèsí Pàtàkì](#important-notes)
+- [Ṣiṣejade Ṣiṣejade](#production-compose)
+- [Awọn ipele Dockerfile](#dockerfile-stages)
+- [Lominu ni Ayika oniyipada](#critical-environment-variables)
+- [Docker Kọ pẹlu Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Quick Eefin](#cloudflare-quick-tunnel)
+- [Aworan Tags](#image-tags)
+- [Awọn imudojuiwọn Dasibodu ni Docker](#dashboard-updates-in-docker)
+- [Wiwa: aiyipada SQLite jẹ ẹda-ẹyọkan](#availability-default-sqlite-is-single-replica)
+- [awọn aṣiṣe agbegbe Gemini inu Docker](#gemini-regional-errors-inside-docker)
+- [Awọn akọsilẹ pataki](#important-notes)
 
 ---
 
@@ -89,6 +90,30 @@ OmniRoute ní àwọn profile Compose fún àwọn ìrísí ìmúṣiṣẹ́ p�
 | `web`             | `omniroute-web`  | Àwọn provider session wẹ́ẹ̀bù tó nílò browser: `gemini-web`, `claude-web`, `claude-turnstile` (ó build `runner-web`, Chromium wà nínú rẹ̀)                       | `docker compose --profile web up -d`         |
 
 > A lè darapọ̀ ọ̀pọ̀ profile: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Apoti lile
+
+Awọn `base`, `web`, `cli`, ati awọn iṣẹ app `host` ni `docker-compose.yml` lo `cap_drop: [ALL]` ati aṣayan aabo `no-new-privileges:true`. Aworan naa n ṣiṣẹ bi olumulo ti kii ṣe gbongbo `node` ati tẹtisi lori awọn ebute oko oju omi giga, nitorinaa ko nilo awọn agbara Linux. Aṣayan aabo ṣe idilọwọ awọn ilana lati gba awọn anfani nipasẹ awọn alakomeji setuid.
+
+Profaili `cli` nikan gbe soke Docker soke fun imudojuiwọn adaṣe. Wo [Escape hatch: tunto CLIs tirẹ](#escape-hatch-configure-the-containers-own-clis-use-sparingly) fun awọn ilolu aabo.
+
+Eto faili gbongbo duro ni kikọ nipasẹ aiyipada. Profaili `cli` kọ iṣeto CLI ati awọn caches ninu iwe ilana ile ti eiyan, profaili `web` n tọju ipo igba Chromium, ati akoko asiko Next.js le kọ awọn caches ni ita `/app/data`.
+
+Lati gbiyanju eto faili root kika-nikan pẹlu profaili `base`, fi eyi pamọ bi `docker-compose.override.yml` lẹgbẹẹ `docker-compose.yml`. Ṣajọ kika ifasilẹ naa laifọwọyi.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Oke `/app/data` ti o wa tẹlẹ duro ni kikọ. Ṣe idanwo fifuye iṣẹ rẹ ṣaaju lilo ifasilẹ yii ni iṣelọpọ, nitori o le nilo lati kọ si awọn ọna miiran.
 
 ## Ṣíṣètò àwọn irinṣẹ́ CLI ti host nígbà tí OmniRoute bá ń ṣiṣẹ́ nínú Docker
 
@@ -295,7 +320,7 @@ Iwa iranti ni Docker:
 
 ### Akoko ṣiṣe RAM fun awọn aṣoju ifaminsi
 
-1 GiB Docker aiyipada jẹ ilẹ dashboard/light-chat kan, kii ṣe iwọn iṣelọpọ kan. Awọn ara `POST /v1/responses` gigun (awọn ọgọọgọrun ti awọn ifiranṣẹ, awọn mewa ti awọn irinṣẹ) ṣe idaduro ọpọ awọn aworan inu-iranti lakoko funmorawon. Awọn ibeere ami-ami ~ 3 MiB / ~ 750k meji ti fagile V8 ni a** 12 GiB** aaye atijọ (`FATAL ERROR: Reached heap limit`) ati tun lu 16 GiB cgroup OOM. Wo [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+1 GiB Docker aiyipada jẹ ilẹ dashboard/light-chat kan, kii ṣe iwọn iṣelọpọ kan. Awọn ara `POST /v1/responses` gigun (awọn ọgọọgọrun ti awọn ifiranṣẹ, awọn mewa ti awọn irinṣẹ) ṣe idaduro ọpọ awọn aworan inu-iranti lakoko funmorawon. Awọn ibeere ami-ami ~ 3 MiB / ~ 750k meji ti fagile V8 ni a** 12 GiB** aaye atijọ (`FATAL ERROR: Reached heap limit`) ati tun lu 16 GiB cgroup OOM. Wo [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Iwọn** cgroup `--memory` loke okiti** — awọn buffers abinibi, SQLite, ati awọn agbedemeji funmorawon joko ni ita V8.
 
@@ -599,7 +624,7 @@ Iṣura Docker / Kubernetes OmniRoute jẹ** Ilana Node kan + ọkan SQLite onkq
 
 **Matrix ibere** (wo tun [Kubernetes awọn iṣeduro iwadii](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Iwadi        | Àfojúsùn                                                 | Maṣe lo                                           |
+| Iwadii       | Àfojúsùn                                                 | Maṣe lo                                           |
 | ------------ | -------------------------------------------------------- | ------------------------------------------------- |
 | Igbesi aye   | TCP on `PORT` (default `20128`), or soft HTTP `/healthz` | `/api/monitoring/health`                          |
 | Imurasilẹ    | HTTP `GET /healthz`                                      | Awọn akoko wiwọ ti o tọju iṣẹlẹ-lupu nšišẹ bi okú |
@@ -636,9 +661,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sun jẹ ki kube ju awọn aaye ipari Iṣẹ silẹ ṣaaju SIGTERM bẹ** titun** ijabọ duro kọlu ilana ti o ku. Ninu ọkọ ofurufu `/v1/responses` SSE ti wa ni imugbẹ to `SHUTDOWN_TIMEOUT_MS` (aiyipada 30s) nipasẹ awọn iyalo gbigba iwuwo iwuwo (#11015). Awọn ibeere tuntun ti o tun de ilana naa gba `503` + `Retry-After: 5`. Tun aafo opin-ofo ti o ṣofo titi di igba ti rirọpo yoo Ti ṣetan maa wa jade kuro ni lile — ti o jẹ SQLite topology, kii ṣe ṣiṣapẹrẹ aṣiṣe.
+`preStop` sun jẹ ki kube ju awọn aaye ipari Iṣẹ silẹ ṣaaju SIGTERM bẹ** titun** ijabọ duro kọlu ilana ti o ku. `/v1/responses` SSE ninu ọkọ ofurufu ti fa omi soke si `SHUTDOWN_TIMEOUT_MS` (aiyipada 30s) nipasẹ awọn iyalo gbigba iwuwo iwuwo (#11015). Awọn ibeere tuntun ti o tun de ilana naa gba `503` + `Retry-After: 5`. Tun aafo opin-ofo ti o ṣofo titi di igba ti rirọpo yoo Ti ṣetan maa wa jade kuro ni lile — ti o jẹ SQLite topology, kii ṣe ṣiṣapẹrẹ aṣiṣe.
 
-Ita Postgres / olona-onkqwe HA ni** kii ṣe** ọna iṣura ti o ni akọsilẹ. Ti o ba nilo HA, tọju ajọra ẹyọkan tabi ṣiṣẹ topology ti iṣẹ akanṣe ti ni idanwo ati ti ṣe akọsilẹ lọtọ. Ise Postgres/MySQL n gbe ni [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Titi di awọn ọkọ oju omi yẹn, ọna atilẹyin nikan lati pọ si** nla** agbara `/v1/responses` jẹ awọn ilana ominira N (apakan atẹle), kii ṣe `replicas > 1` lori iwọn didun kan.
+Ita Postgres / olona-onkqwe HA ni** kii ṣe** ọna iṣura ti o ni akọsilẹ. Ti o ba nilo HA, tọju ajọra ẹyọkan tabi ṣiṣe topology kan ti iṣẹ akanṣe ti ni idanwo ati ti ni akọsilẹ lọtọ. Ise Postgres/MySQL n gbe ni [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Titi di awọn ọkọ oju omi yẹn, ọna atilẹyin nikan lati pọ si** nla** agbara `/v1/responses` jẹ awọn ilana ominira N (apakan atẹle), kii ṣe `replicas > 1` lori iwọn didun kan.
 
 ## Asekale-jade: N ominira lakọkọ
 
@@ -648,25 +673,25 @@ Awọn ẹda ti akọọlẹ Codex kan ko gbọdọ jẹ ni ominira lilo aami is
 
 Apeere palolo naa tun ka asopọ naa nigbati o nilo isọdọtun ati gba iyatọ nikan, ami iwọle ti ko pari. Bibẹẹkọ isọdọtun jẹ alaabo laisi ipari tabi mu asopọ ṣiṣẹ tabi kika ikuna isọdọtun. Awọn ikuna ifitonileti oke gidi tun lo iṣiro ikuna deede, itutu agbaiye ati aṣiṣe alabara deede; deactivation iroyin si maa wa yẹ. Muṣiṣẹpọ awọn ami yiyi ti oniwun ṣaaju ki awọn ami iraye si pari (asiwaju isọdọtun alafaramo aiyipada jẹ iṣẹju marun), tabi tun gbe faili Codex auth wọle. Awọn agbewọle agbewọle palolo tọju awọn ami ti a pese laisi ifọwọsi wọn ni aaye ipari ami. Afọwọṣe dashboard/API sọtun pada `409 refresh_disabled`; titun OAuth wiwọle ko yipada. Wo [itọkasi ayika](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Ilana Node kan jẹ** òkiti V8 kan** . Meji agbekọja ~ 3 MiB / ~ 750k-token ifaminsi-aṣoju `POST /v1/responses` (RTK + Caveman) abort ti okiti ni ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ati ki o le OOM a 16 Gi akojọpọ. Wo [# #7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Wiwọn yẹn jẹ a** iranti-isuna** ikilọ, kii ṣe ọja lile-max ti meji ni igbakanna `/v1/responses`. Gbigbawọle iwiregbe iwuwo iwuwo jẹ titọ nipasẹ isuna-isuna ingest baiti ti a ṣe jade laifọwọyi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) ti o ni iwọn lati oke V8/cgroup aja — ti o bori rẹ si oke (tabi ṣeto eto-ipamọ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ibeere-ka fila) lori ilana ti o ni iwọn tẹlẹ yoo tun bẹrẹ iṣẹyun naa. Awọn ibaraẹnisọrọ kekere, `/healthz`, `/v1/models`, ati MCP jẹ** kii ṣe** ninu fila yẹn.
+Ilana Node kan jẹ** òkiti V8 kan** . Meji agbekọja ~ 3 MiB / ~ 750k-token ifaminsi-aṣoju `POST /v1/responses` (RTK + Caveman) abort ti okiti ni ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ati ki o le OOM a 16 Gi akojọpọ. Wo [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Wiwọn yẹn jẹ a** iranti-isuna** ikilọ, kii ṣe ọja lile-max ti awọn akoko gigun `/v1/responses` meji nigbakanna. Gbigbawọle iwiregbe iwuwo iwuwo jẹ titọ nipasẹ iṣuna baiti ingest ti a yọ jade laifọwọyi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) ti o jẹ lati iru — aja V8/cgroup kanna ti o bori rẹ si oke (tabi ṣeto ohun-ini `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ìbéèrè-ka fila) lori ilana ti o ni iwọn tẹlẹ yoo tun bẹrẹ iṣẹyun naa. Awọn ibaraẹnisọrọ kekere, `/healthz`, `/v1/models`, ati MCP jẹ** kii ṣe** ninu fila yẹn.
 
 ### Ọkan-ilana: diẹ ẹ sii ju meji gun `/v1/responses`
 
-A** ni ilera** ilana (òkiti ni isalẹ `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, aiyipada `0.75`)** le** ṣiṣe diẹ sii ju meji nigbakanna `POST /v1/responses` nigba ti ilana-jakejado inflight-baiti isuna (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) si tun ni yara. Awọn ara ni tabi loke `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (aiyipada 256 KiB) gba iyalo iwuwo iwuwo kanna gẹgẹbi awọn ibeere eto-eru ati lo ọna abayọ [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` kanna (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Awọn mewa ti awọn onibara SSE gigun nigbakanna (awọn oniṣẹ nigbagbogbo nilo 40-50) jẹ a** iranti-isuna** ibeere — iwọn òkiti + primary/headroom + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ko kan lile "max 2" ọja iye to. Okiti titẹ si tun ta silẹ pẹlu `503` ti a tun gbiyanju ki #7849 ko pada.
+A** ni ilera** ilana (òkiti ni isalẹ `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, aiyipada `0.75`)** le** ṣiṣe diẹ sii ju meji `POST /v1/responses` gigun nigbakanna nigbati ilana-jakejado inflight-baiti isuna (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) ṣi ni yara. Awọn ara ti o wa ni tabi loke `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (aiyipada 256 KiB) gba iyalo iwuwo iwuwo kanna gẹgẹbi awọn ibeere eto-eru ati lo ona abayo [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` kanna (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Awọn mewa ti awọn onibara SSE gigun nigbakanna (awọn oniṣẹ nigbagbogbo nilo 40-50) jẹ a** iranti-isuna** ibeere — iwọn òkiti + primary/headroom + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ko kan lile "max 2" ọja iye to. Òkiti tí a tẹ̀ mọ́lẹ̀ ṣì ń ta sílẹ̀ pẹ̀lú `503` tí a tún lè gbìyànjú kí #7849 má bàa padà.
 
 Si** isodipupo òkiti** (awọn aye atijọ V8 ominira)** loni** :
 
-| Ṣe                                                                                                                                 | Maṣe ṣe                                           |
-| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Ṣiṣe** N containers/pods** , kọọkan pẹlu awọn oniwe-** ti ara** `DATA_DIR` / iwọn didun                                            | Ṣeto `replicas > 1` lodi si faili SQLite kan      |
-| Iwon eru ni-flight + ni ilera-headroom lati òkiti / inflight-baiti isuna; 1-2 jẹ aiyipada # #7849 Konsafetifu, kii ṣe max ọja lile | Fun ilana kan 8 × RAM ati fila kika ti ko ni opin |
-| Yiyan: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` fun** pín ipin ounka**                                                 | Toju Redis bi pín SQLite — kii ṣe                 |
-| Ṣe pidánpidán awọn aṣiri olupese sinu apẹẹrẹ kọọkan (tabi gba awọn dasibodu ti a pin)                                              | Reti dasibodu kan / ipe-ipe kan kọja awọn iṣẹlẹ   |
-| Iwaju pẹlu eyikeyi fifuye iwọntunwọnsi; alalepo nipasẹ bọtini API tabi igba ti to                                                  | Beere ẹrọ agbedemeji onijaja kan pato iwọn-mọ     |
+| Ṣe                                                                                                                             | Maṣe ṣe                                           |
+| ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| Ṣiṣe** N containers/pods** , kọọkan pẹlu awọn oniwe-** ti ara** `DATA_DIR` / iwọn didun                                        | Ṣeto `replicas > 1` lodi si faili SQLite kan      |
+| Iwọn wuwo ni-flight + ilera-headroom lati òkiti / inflight-baiti isuna; 1–2 jẹ aiyipada #7849 Konsafetifu, kii ṣe max ọja lile | Fun ilana kan 8 × RAM ati fila kika ti ko ni opin |
+| Iyan: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` fun** pín ipin ounka**                                              | Toju Redis bi pín SQLite — kii ṣe                 |
+| Ṣe pidánpidán awọn aṣiri olupese sinu apẹẹrẹ kọọkan (tabi gba awọn dasibodu ti a pin)                                          | Reti dasibodu kan / ipe-ipe kan kọja awọn iṣẹlẹ   |
+| Iwaju pẹlu eyikeyi fifuye iwọntunwọnsi; alalepo nipasẹ bọtini API tabi igba ti to                                              | Beere ẹrọ agbedemeji onijaja kan pato iwọn-mọ     |
 
 Ibaṣepọ-si-iroyin tun le pin nipasẹ Redis: ṣeto `OMNIROUTE_SESSION_AFFINITY_STORE=redis` ati `REDIS_URL` lori ilana kọọkan, pẹlu `REDIS_KEY_PREFIX` kanna ati eto `sessionAffinityTtlMs` rere kan. Awọn pinni yanju awọn idamọ lilo-iroyin hashed si asopọ agbegbe ti o yẹ fun ilana kọọkan, nitorinaa awọn akọọlẹ OAuth pẹlu metadata idanimo ti o baamu ko nilo asopọ IDs ti o baamu. Awọn idanimọ akọọlẹ ti a mọ ni iṣaaju lori ilodi si IDs agbegbe ni ipinnu pin ati itusilẹ idaabobo; awọn igbasilẹ laisi idanimọ (tabi awọn olupe ilekuro laisi idanimọ) ni idaduro ẹṣọ ID julọ. Awọn akọọlẹ laisi idanimọ lilo iduroṣinṣin tun nilo IDs ti o baamu. awọn aṣiṣe Redis tabi awọn ipe ti o ju 100 ms ṣubu pada si SQLite agbegbe. Ile-itaja ijora Redis kọọkan ni awọn iṣẹ ṣiṣe to dayato si ni 8, o kọja Redis lẹsẹkẹsẹ nigbati o ba kun, o si tu awọn iho silẹ nikan nigbati iṣẹ abẹlẹ ba yanju, kii ṣe ni akoko ipari olupe. Lakoko ijade Redis ko si otitọ pinpin: apẹẹrẹ kọọkan ṣubu si isunmọ agbegbe tirẹ, awọn akoko le tun pin lẹẹkan fun apẹẹrẹ, ati awọn iṣẹlẹ le yato. Lilepo tun-converges nipasẹ Redis nigbati o ba bọsipọ. Awọn aala akoko akoko idaduro, kii ṣe EVAL ti a firanṣẹ, eyiti o le de lẹhin isubu. Awọn kikọ ipa ọna ṣe afiwe iye deede ti a ṣe akiyesi nipasẹ ipinnu ipa-ọna, kii ṣe akoko iyipada-akoko tuntun ka; miss akiyesi tabi akiyesi fallback SQLite ṣe afiwe bi bọtini Redis ti ko si. Atijo pinni ti wa ni rọpo ninu ọkan CAS, ki a pẹ pipaṣẹ ko le ropo tabi pa a Opo, o yatọ si pin. Redis ka atomically da iye pada ati olupin ti o ku TTL; PTTL rere (tabi ko si ipari) pinnu igbesi aye, kii ṣe akoko JSON onkọwe tabi aago oluka. Awọn aworan aworan agbegbe ti o ku TTL si akoko ipari agbegbe; awọn bọtini JSON ti o wa tẹlẹ wa ni kika ati pe awọn baiti aise wọn wa ni idaduro fun CAS. Redis nikan ni orisun ti otitọ nigba ti o dahun. Awọn iṣagbega pinpin timo, awọn fọwọkan ati piparẹ kuro ni titẹsi agbegbe, ma fi sori ẹrọ tabi sọtun. SQLite lori ọna Redis nikan ni awọn ipinnu ifẹhinti ti ararẹ lati awọn aṣiṣe Redis, awọn akoko ipari tabi itẹlọrun gbigba, TTL-opin bi iṣaaju. Pinni agbegbe ti o nsọnu lori ijade nigbamii jẹ idiyele yiyan tuntun kan (apadanu kaṣe-kiakia kan), kii ṣe aṣiṣe tabi akọọlẹ jade kuro. Awọn iṣipopada ti a kọ silẹ da olubori ti o pin pada ati TTL to ku ni atomiki: yiyan lasan tun ṣayẹwo akoko ipari agbegbe ti o ya aworan ati lo olubori ti o yẹ laaye, lilo ifọwọkan ati wíwọlé fun akọọlẹ yẹn laisi kikọ pinpin miiran. Ti ko ba si, yiyan ntọju oludije agbegbe, fi PIN ti o pin silẹ ko yipada ati gbejade ifiranṣẹ yokokoro kan. CAS ti a kọ ko kọ SQLite; awọn aṣiṣe Redis, awọn akoko ipari tabi itẹlọrun gbigba wọle lo iṣẹ agbegbe ti o wa dipo. Ti idahun iyipada ti a fi ranṣẹ ba de lẹhin igbati akoko bati (gba, kọ tabi aṣiṣe), imuṣiṣẹpọ deede-iye serialized-afiwe-ati-paarẹ yọkuro nikan baiti-aami-ipin akoko isubu. Ko si idaduro laarin afiwe ati piparẹ naa; kikọ outage tuntun ti wa ni ipamọ. Iyọkuro ti o ni aabo yọkuro PIN ti agbegbe ti o kuna paapaa pẹlu Redis si isalẹ, o si sọ di mimọ lẹẹkansi lẹhin idasile pinpin pinpin. Ni isunmọtosi awọn idahun pinpin iṣaaju ko le mu pada pin agbegbe ti o jade kuro nitori awọn aṣeyọri pinpin ko kọ SQLite rara. A nigbamii outage fallback le repin ohun iroyin; kikọ pinpin ti o gba nigbamii wa nikan ni Redis. awọn padanu Redis ko ṣe kan si ipo idapada agbegbe. Pẹlu awakọ ti o wa ni pipa, awọn pinni tuntun ti a yan ni idaduro apẹrẹ aaye mẹrin SQLite JSON ; afisona Redis nikan ṣe afikun idanimọ hashed. Awọn pinni ti a ti ṣaju tẹlẹ jẹ ayẹwo ni opin opin ipari wọn. Redis yiyan ti kii ṣe iyalo tun ka ile itaja naa, ṣugbọn igbero yiyalo amuṣiṣẹpọ tun le lo PIN ti o jade laarin prefetch ati igbogun (winse igbiyanju ti o dara julọ ti o gba). Iwe adehun yiyalo ko le yi awọn akọọlẹ pada lẹhin ibeere ti o tọ: lori ifisilẹ ti a kọ silẹ o tọju oludije ti o beere fun ibeere yẹn nikan o fi olubori ti o pin silẹ laifọwọkan, nitorinaa adehun kọja awọn iṣẹlẹ jẹ opin si ọna yẹn. Awọn iyokù ti awọn tabili si tun kan: yi ko ni pin konbo igba stickiness, abinibi Codex tan pinni, semaphores iroyin, lockouts, na ifilelẹ, iṣeto ni tabi ipe àkọọlẹ.
 
-Hardware: fun apẹẹrẹ nigbakanna gun `/v1/responses` jẹ a** iranti-isuna** ibeere (òkiti + inflight-baiti / # #10110). `N` ominira `DATA_DIR` s tun n pọ si awọn òkiti: alejo RAM gbọdọ bo `N × cgroup`, kii ṣe “ọkan 16 Gi pod pẹlu N = 8.” Maṣe `replicas > 1` rara lori faili SQLite kan.
+Hardware: fun apẹẹrẹ nigbakanna gun `/v1/responses` jẹ a** iranti-isuna** ibeere (òkiti + inflight-baiti / #10110). `N` olominira `DATA_DIR` s tun n pọ si awọn òkiti: RAM agbalejo gbọdọ bo `N × cgroup`, kii ṣe “ọkan 16 Gi pod pẹlu N = 8.” Maṣe `replicas > 1` lori faili SQLite kan.
 
 Kọ apẹrẹ (òkiti meji, awọn ipele meji — kii ṣe `deploy.replicas: 2`):
 
@@ -695,55 +720,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Ni-ilana iwuwo (funmorawon pa HTTP sọtọ) ni [# #11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Iṣupọ ọgbọn kan lori ipinlẹ ti o tọ pinpin jẹ [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+iwuwo inu ilana (funmorawon kuro ni sọtọ HTTP ) jẹ [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Iṣupọ ọgbọn kan lori ipinlẹ ti o tọ pinpin ni [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Àwọn àṣìṣe ẹkùn Gemini nínú Docker
+## awọn aṣiṣe agbegbe Gemini inu Docker
 
-Google AI Studio / Gemini API lè dá HTTP 400 padà pẹ̀lú FAILED_PRECONDITION àti
-`User location is not supported for the API use.` Ìbéèrè tó ṣàṣeyọrí lórí host
-kò fi hàn pé container náà ń lo ipa-ọ̀nà àbájáde kan náà. Bí DNS ṣe to àwọn àbájáde lẹ́sẹẹsẹ,
-àsopọ̀ IPv4/IPv6, ìtọ́sọ́nà VPN àti àwọn proxy tí a ti ṣètò lè yàtọ̀. Ṣàyẹ̀wò
-[àwọn ẹkùn tí Google ń ṣe àtìlẹ́yìn fún](https://ai.google.dev/gemini-api/docs/available-regions)
-pẹ̀lú ipa-ọ̀nà àsopọ̀ gangan; àṣìṣe yìí nìkan kò fi hàn pé API key náà kò dára.
+Google AI Studio / Gemini API le da HTTP 400 pada pẹlu FAILED_PRECONDITION ati `User location is not supported for the API use.` Ibeere aṣeyọri lori agbalejo ko jẹri pe eiyan naa nlo ipa ọna ijade kanna. pipaṣẹ DNS, asopọ IPv4/IPv6, ipa ọna VPN ati awọn aṣoju iṣeto le yatọ. Ṣayẹwo [awọn agbegbe ti o ni atilẹyin Google](https://ai.google.dev/gemini-api/docs/available-regions) gẹgẹbi ọna asopọ gangan; aṣiṣe yii nikan ko ṣe idanimọ bọtini API buburu kan.
 
-### Yan proxy kan pàtó fún àsopọ̀
+### Fẹ aṣoju-ọna asopọ kan pato
 
-Lo [ètò proxy fún àsopọ̀ kọ̀ọ̀kan](../ops/PROXY_GUIDE.md#4-level-proxy-system) ti OmniRoute
-fún àsopọ̀ Gemini tí ọ̀ràn náà kàn, lẹ́yìn náà tún **Test Connection** àti ìbéèrè kékeré kan ṣe
-pẹ̀lú model kan náà. Èyí ń mú kí àyípadà ìtọ́sọ́nà náà mọ sí àsopọ̀ yẹn nìkan. Ṣàrídájú
-pé container lè dé ọ̀dọ̀ proxy náà, àti pé àsopọ̀ náà yan án ní ti gidi.
-Yíyí ipa-ọ̀nà padà kò ṣe ìdánilójú pé ẹkùn náà yẹ gẹ́gẹ́ bí upstream ṣe pinnu.
+Lo [iṣeto aṣoju-asopọ](../ops/PROXY_GUIDE.md#4-level-proxy-system) OmniRoute's fun asopọ Gemini ti o kan, lẹhinna tun ṣe** Igbeyewo Asopọmọra** ati ibeere kekere kan pẹlu awoṣe kanna. Eyi jẹ ki iyipada ipa-ọna jẹ dopin si asopọ yẹn. Daju pe aṣoju le de ọdọ lati inu eiyan, ati pe asopọ naa yan gaan. Yiyipada ipa-ọna ko ṣe iṣeduro ipolowo yiyan agbegbe.
 
-### Ṣe àfiwé nẹ́tíwọ́ọ̀kì host àti container
+### Afiwe ogun ati eiyan Nẹtiwọki
 
-Jẹ́ kí key, model àti ìbéèrè jẹ́ ọ̀kan náà nígbà tí o bá ń fi àwọn àbájáde tí a ti fìdí ìdánimọ̀ múlẹ̀ wéra; má ṣe
-fi credentials, ọ̀rọ̀ aṣínà proxy tàbí authorization headers kíkún sínú issue láé.
-Kọ́kọ́ ṣàyẹ̀wò àwọn address families tí OS resolver ń pèsè, nípa lílo command kan náà
-lórí host àti nínú container:
+Jeki bọtini, awoṣe ati ibeere kanna nigbati o ba ṣe afiwe awọn abajade ti o jẹri; maṣe lẹẹmọ awọn iwe-ẹri, awọn ọrọ igbaniwọle aṣoju tabi awọn akọle aṣẹ pipe sinu ọran kan. Ṣayẹwo akọkọ eyiti o koju awọn idile ti olupinpin OS nfunni, ni lilo aṣẹ kanna lori agbalejo ati inu eiyan naa:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Rọ́pò `omniroute` pẹ̀lú service tí o ń ṣiṣẹ́ (fún àpẹẹrẹ, `omniroute-web`). Àwọn
-command wọ̀nyí máa ń tẹ address families jáde láìsí credentials tàbí IP addresses. `6`
-tí a dá padà fi àbájáde IPv6 DNS hàn nìkan: kò **fi ìdí rẹ̀ múlẹ̀** pé ipa-ọ̀nà IPv6 tó ṣeé lò tàbí ìráyè sí API wà.
-Níbi tí a ti fi `curl` sí, fi `curl -4 -I https://generativelanguage.googleapis.com`
-wé `curl -6 -I https://generativelanguage.googleapis.com` nínú àwọn àyíká méjèèjì.
-Ìdáhùn HTTP fi hàn pé àsopọ̀ wà fún ìdánwò yẹn, kódà bí ó bá jẹ́ àṣìṣe
-tí a kò fi ìdánimọ̀ múlẹ̀; ìbéèrè model tí a fi ìdánimọ̀ múlẹ̀ nìkan ló ń dán ìyẹ̀ Gemini wò.
+Rọpo `omniroute` pẹlu iṣẹ ti o nṣiṣẹ (fun apẹẹrẹ, `omniroute-web`). Awọn aṣẹ wọnyi tẹjade awọn idile adirẹsi laisi awọn iwe-ẹri tabi awọn adirẹsi IP. `6` ti o pada nikan fihan abajade IPv6 DNS kan: o ṣe** kii ṣe** jẹri ọna IPv6 ti o wulo tabi iraye API. Nibiti a ti fi `curl` sori ẹrọ, ṣe afiwe `curl -4 -I https://generativelanguage.googleapis.com` pẹlu `curl -6 -I https://generativelanguage.googleapis.com` ni awọn agbegbe mejeeji. Idahun HTTP ṣe afihan asopọmọra fun iwadii yẹn, paapaa ti o jẹ aṣiṣe ti ko ni ijẹrisi; nikan ibeere awoṣe ti o jẹri ṣe idanwo yiyẹyẹ Gemini.
 
-### Àṣàyàn ìpele host: IPv6 tó ń ṣiṣẹ́ àti ìlànà resolver
+### Yiyan ipele-ogun: IPv6 ṣiṣẹ ati eto imulo ipinnu
 
-Ẹni tó jabo [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) mú
-ìráyè padà bọ̀ sípò nínú àyíká wọn nípa ṣíṣe IPv6 container ṣiṣẹ́ àti yíyí bí glibc
-ṣe ń yan address padà. Ka èyí sí àṣàyàn tó jẹ́ pàtó fún àyíká náà. Ṣàrídájú IPv6 host
-tó ń ṣiṣẹ́, àbájáde/ìtọ́sọ́nà container àti àwọn òfin firewall kí o tó ṣàtúnṣe àwọn ààyò resolver.
-Address ULA aládání kan nìkan kò fi ìdí àsopọ̀ IPv6 gbogbogbò múlẹ̀.
+Onirohin ti [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) mu iwọle pada si agbegbe wọn nipa ṣiṣe IPv6 apoti ati yiyipada yiyan adirẹsi glibc. Toju eyi bi yiyan-pato ayika. Jẹrisi IPv6 agbalejo iṣẹ, egress/routing eiyan ati awọn ofin ogiriina ṣaaju ṣiṣe atunṣe awọn ayanfẹ ipinnu. Adirẹsi ULA ikọkọ funrararẹ ko ṣe agbekalẹ asopọ IPv6 ti gbogbo eniyan.
 
-Fún àwọn service tí a ti so mọ́ default network ti Compose tẹ́lẹ̀, àjákù yìí ń mú
-IPv6 ṣiṣẹ́ lórí network náà; pa ìyókù service, ports, volumes àti configuration rẹ mọ́:
+Fun awọn iṣẹ ti o ti somọ tẹlẹ nẹtiwọọki aiyipada Compose, ajẹkù yii jẹ ki IPv6 ṣiṣẹ lori nẹtiwọọki yẹn; idaduro iṣẹ iyokù rẹ, awọn ibudo, awọn iwọn ati iṣeto:
 
 ```yaml
 networks:
@@ -751,30 +753,13 @@ networks:
     enable_ipv6: true
 ```
 
-Fún named network, mú un ṣiṣẹ́ lórí network tí service náà darapọ̀ mọ́ ní ti gidi. Docker lè
-pín subnet ULA kan; yan subnet tó ṣe kedere, tí kò sì ní àgbélébùú pẹ̀lú òmíràn nígbà tí network rẹ
-bá nílò rẹ̀ nìkan. Wo [Docker IPv6 networking](https://docs.docker.com/engine/daemon/ipv6/)
-àti [Compose network options](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Fun nẹtiwọọki ti a npè ni, jẹ ki o ṣiṣẹ lori nẹtiwọọki iṣẹ naa n darapọ mọ. Docker le soto a ULA subnet; yan fojuhan, subnet ti kii ṣe agbekọja nikan nigbati nẹtiwọki rẹ ba nilo rẹ. Wo [Docker IPv6 nẹtiwọki](https://docs.docker.com/engine/daemon/ipv6/) ati [Kọ awọn aṣayan nẹtiwọki](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Lórí **image tó dá lórí glibc**, `/etc/gai.conf` lè yí bí a ṣe ń yan address padà. Dockerfile
-repository lọ́wọ́lọ́wọ́ ń lo Debian; àwọn image àkànṣe tó dá lórí musl kò lo ọ̀nà yìí.
-Àtúnṣe tí a jabo yí label ULA padà láti `label fc00::/7 6` sí
-`label fc00::/7 1`. Bẹ̀rẹ̀ láti policy table kíkún ti image náà, kí o sì pa àwọn entry rẹ̀ yòókù mọ́:
-fífi entry `label` tàbí `precedence` kún un máa rọ́pò default table yẹn, nítorí náà file
-tó ní ìlà tí a yí padà nìkan kò tó.
-[Àkọsílẹ̀ ìtọ́kasí configuration glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-ṣàlàyé àwọn ìlànà wọ̀nyẹn. Ṣe bind-mount file tí a ti ṣàyẹ̀wò gẹ́gẹ́ bí read-only sí `/etc/gai.conf`
-kí o sì tún service náà dá láti fi àyípadà náà sílò.
+Lori a** glibc-orisun aworan** , `/etc/gai.conf` le yi yiyan adirẹsi pada. Ibi ipamọ lọwọlọwọ Dockerfile nlo Debian; awọn aworan orisun musl aṣa ko pin ilana yii. Atunse ti a royin yi aami ULA pada lati `label fc00::/7 6` si `label fc00::/7 1`. Bẹrẹ lati tabili eto imulo pipe ti aworan naa ki o tọju awọn titẹ sii miiran: fifi `label` kan tabi titẹsi `precedence` rọpo tabili aiyipada yẹn, nitorinaa faili ti o ni laini iyipada nikan ko to. [Itọkasi atunto glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) ṣe awọn iwe atunmọ wọnyẹn. Di-fi faili ti a ṣe atunyẹwo kika-nikan ni `/etc/gai.conf` ki o tun iṣẹ naa ṣe lati lo.
 
-Èyí ń yí bí OS ṣe ń yan address padà fún **gbogbo outbound traffic nínú container yẹn**.
-Kò fipá mú gbogbo application láti yan IPv6: bí Node ṣe to DNS lẹ́sẹẹsẹ àti bí ó ṣe
-ń yan àsopọ̀ tún ṣe pàtàkì. Ní pàtàkì, `--dns-result-order=ipv4first` fẹ́ràn IPv4 jù
-kò sì jẹ́ ojútùú fún ìkùnà IPv4-nìkan. Wo [Node DNS ordering](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Eyi yipada yiyan adirẹsi OS fun** gbogbo ijabọ ti njade ni apoti yẹn** . Ko fi ipa mu gbogbo ohun elo lati yan IPv6: Node's DNS order ati yiyan asopọ tun ṣe pataki. Ni pataki, `--dns-result-order=ipv4first` fẹran IPv4 ati pe kii ṣe atunṣe fun ikuna IPv4-only. Wo [Node DNS pipaṣẹ](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Tún Gemini àti àwọn provider rẹ yòókù dán wò lẹ́yìn àyípadà èyíkéyìí ní ìpele host. Láti yí padà sí ti tẹ́lẹ̀,
-yọ mount `gai.conf` àkànṣe náà kúrò, dá network configuration ti tẹ́lẹ̀ padà, kí o sì
-tún service/network tí ọ̀ràn náà kàn dá ní àkókò maintenance window. Títún network kan dá
-lè dá iṣẹ́ àwọn container mìíràn tí a so mọ́ ọn dúró; má ṣe pa persistent data volume rẹ́.
+Tun idanwo Gemini ati awọn olupese rẹ miiran lẹhin iyipada ipele-ogun eyikeyi. Lati yi pada, yọ aṣa `gai.conf` òke, mu pada awọn ti tẹlẹ nẹtiwọki iṣeto ni ki o si tun awọn service/network fowo nigba kan window itọju. Nẹtiwọọki atunda le ṣe idiwọ awọn apoti miiran ti o somọ; maṣe pa iwọn didun data ti o duro.
 
 ## Àwọn Àkíyèsí Pàtàkì
 

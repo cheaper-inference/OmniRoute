@@ -4,86 +4,63 @@
 
 ---
 
-> **2026-11-19: Mergify-sammanslagningskön har tagits bort** (ägarens beslut). `.mergify.yml` definierar inte längre en kö och vägrar Mergify-kommandona som sammanfogar eller skriver om en pull-begäran. Release PRs slås samman för hand under repository-regeluppsättningen "Kräv gröna grindar på den aktiva releasen" (`Gate / CI` + `Gate / Quality`) tills omni-queue körs i live-läge, och genom omni-queue efter det ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Mergify-sektionerna nedan beskriver kön som den var.
+## Landar på en släppgren
 
-Sedan v3.8.49 (WS3.2/WS3.4 av quality/velocity planen) är standardsammanfogningsvägen för granskad PRs till `release/vX.Y.Z`** Slå samman sammanslagningskö** (`.mergify.yml`); de** manuellt sammanfogningståg** dokumenterat nedan är FALLBACK — som används under incidenter, frysningar av utgåvor eller om Mergify Open Source-planen någonsin ändras.
+Omni-kön styr landningar i `release/vX.Y.Z`. Läs toppnivån `mode` i `config/merge-queue/config.json` på standardgrenen innan du landar en PR. Se [Omni-Queue](OMNI_QUEUE.md).
 
-## Standardsökväg: Mergify-kön
+- **`shadow`** kör validering och lämnar landning till en manuell sammanslagning. Applicera `omni-queue` på den godkända PR :en vid dess slutliga huvud. Kontrollera behörighet med `npm run queue -- why <PR>`. Vänta på domen för det huvudet i `npm run queue -- history --base <branch>`. Fortsätt på `would-land`. På `culprit-found` eller `would-dequeue` håller du sammanfogningen och åtgärdar orsaken.
+- **Skuggundantag.** Ett tåg med grön full CI mot den aktuella basspetsen kan fortsätta utan en separat ködom. Samma undantag gäller när PR huvudet redan innehåller den aktuella basspetsen.
+- **`live`** använder `omni-queue` etiketten för att utlösa landning. Enbart kön landar PR. Lämna sammanslagningskommandon och direkt push till kön.
 
-1. PR:en granskas/grönmarkeras av kampanjerna och godkänns av ägarens ⭐-kontroll före sammanslagning
-   (rapporten + beslutet per objekt – se `/merge-prs` steg 0.75).
-2. Ägaren (eller sessionen som agerar utifrån ägarens beslut) lägger till etiketten **`queue`**.
-   Etiketten ÄR godkännandet för sammanslagning; Mergify verkställer det bara.
-3. Mergify validerar köade PR:er **sekventiellt** (en i taget) mot snabbkontrollerna
-   och sammanfogar dem (squash). Buntning + automatisk bisektion kräver en betald Mergify-nivå
-   ("Cannot use Merge Queue batch" i gratisplanen, #7220), så `.mergify.yml` anger ingen
-   `batch_size`; buntning hanteras i stället av det manuella sammanslagningståget nedan. En PR vars
-   kontroller fortfarande väntar efter `checks_timeout` (240 min = 2× uppmätt p95 för
-   `quality.yml`) tas bort ur kön i stället för att blockera den.
-4. Efter sammanslagningen validerar det kontinuerliga arbetsflödet för grön release den nya spetsen vid push
-   och öppnar ett attribueringsärende om kombinationen har försämrats (återställ aldrig automatiskt).
+Varje landning kräver ägarens tillstånd och tillämpliga kontroller. Applicera `omni-queue` först efter att ägaren har godkänt landning. Köad PRs som rör skyddade vägar kräver också ägarens `protected-approved` beslut för den PR.
 
-Skyddsräcken (motsvarar de hårda reglerna #21/#22 i `CLAUDE.md`):
+Regeluppsättningen "Kräv gröna grindar på den aktiva utgåvan" kräver grön `Gate / CI` och `Gate / Quality` på huvudet. Använd aldrig `--admin` för att kringgå en röd grind. Ett frigörande frysblock smälter samman i den frusna grenen. Se [hård regel 21](HARD_RULES_DETAIL.md). Märk, sammanfoga eller tryck aldrig till en pull-begäran att en annan session fungerar. Se [hård regel 22](HARD_RULES_DETAIL.md).
 
-- **Releasefrysning pågår** → märk INTE PR:er som är riktade mot den frysta grenen; ändra först mål
-  till den aktiva `release/vX+1`.
-- **En annan sessions pågående PR** → märk den aldrig; endast den ägande sessionen köar
-  sitt eget arbete.
-- Diffar som endast innehåller tester och PR:er med etiketten `hotfix` kör redan reducerad CI (se
-  `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); kövillkoren accepterar den uppsättning
-  kontroller som faktiskt kördes (`#check-failure=0` + `#check-pending=0`).
+## Begäran om tågdragning
 
-## Reservlösning: det manuella sammanfogningståget
+1. Starta en tåggren vid den aktuella frigöringsbasspetsen. Integrera de exakta godkända medlemshuvudena med merge commits. Bevara deras engagemanghistoria genom att undvika squash och rebase.
+2. Öppna en pull-förfrågan för tåggrenen. Validera den PR med sin egen fullständiga CI på den aktuella basspetsen. Kontrollera igen basspetsen och de godkända medlemshuvudena innan landning. Uppdatera tåget och dess CI när den validerade kandidaten ändras.
+3. Landa tåget PR med en merge commit i tillämpligt köläge. I live-läge bevarar köns `merge-ff` landningsmetod sammanslagningsbekräftelserna. De ursprungliga medlemshuvudena blir nåbara från frigöringsgrenen. GitHub markerar medlemmen PRs som sammanfogad och commits behåller sina författare.
 
-Används när kön inte är tillgänglig. Detta formaliserar den metod som tömde 33 PR:er på
-en dag under v3.8.47-cykeln:
+Ett offentligt exempel är [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Den kombinerade 18 medlemmar PRs och landade med ett sammanslagningsåtagande 2026-11-24.
 
-1. **Sätt samman gruppen** (cirka 10–30 granskade och godkända PR:er). Kontrollera `linked:`-kollisioner
-   (samma `tap.testFiles`, samma CHANGELOG-avsnitt) och serialisera dessa.
-2. **Validera EN GÅNG**: sammanfoga alla huvuden i gruppen lokalt i ett isolerat arbetsträd
-   från releasespetsen och kör sedan den releaseekvivalenta sviten
-   (`npm run check:release-green`, lägg till `--with-build` före en release).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatiserar steg 1–2 (PR:er med konflikter
-   avlägsnas och tåget fortsätter). Fullständigt läge kör `npm run test:unit` — den
-   maskinjusterade köraren (`--test-concurrency=20`), **inte** de två sekventiella CI-delarna
-   med 4 kärnor, vilka körde den dominerande fasen med cirka 25 % av en maskin med 16 kärnor (åtgärdat
-   2026-07-18). `--fast` (tömning av megatåg inom samma dag, ägargodkänd 2026-07-18)
-   behåller varje statisk kontroll + vitest men kör endast de node:test-filer som ändrats av de
-   ombordtagna PR:erna; den FULLSTÄNDIGA sviten måste fortfarande köras minst en gång per dag på den
-   ackumulerade spetsen (ett tåg utan `--fast`).
-3. **Grönt** → sammanfoga PR:erna i ordningsföljd (kontrollera `state,headRefOid` igen före varje —
-   en PR vars huvud har flyttats går tillbaka till granskning). Bevisa att nettodiffen för varje sammanfogning är
-   PR:ens egen ändring (inga återställningar genom automatisk konfliktlösning: granska `git diff --stat` efter
-   raderingar utanför omfånget).
-4. **Rött** → bisektera gruppen i halvor (validera varje halva) i stället för att omvalidera
-   en och en; skicka tillbaka den felande PR:en till granskningskön tillsammans med bevisen.
-5. **Aldrig**: sammanfoga till den frysta grenen under en frysning; använd `git stash` någonstans;
-   kör om all CI i hopp om att rött försvinner (regel: rött är information).
+En sync-back från `main` till nästa release-gren landar också genom en merge-commit. Att bevara `main` -anor krävs för senare synkroniseringar. Se [Isolering av arbetsträd](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Nivåindelning (varför kön är säker med enbart snabbkontroller)
+## Den lokala sammanslagnings-tågsvalideraren
 
-- **Per PR** (snabbkontroller i quality.yml): TIA-påverkade tester + fullständig enhetstestning med 4 delar +
-  vitest + lintpaket + typkontroll + integritetskontroll av dokumentation/ändringslogg.
-- **Per grupp/spets** (kontinuerlig release-green): HÅRDA `--quick`-kontroller vid varje push till
-  releasegrenen; fullständiga `--with-build --full-ci`-genomgångar 3×/dag.
-- **Per release** (ci.yml på release-PR:en): den fullständiga matrisen inkl. E2E ×9,
-  paketartefakt + starttest av tarball, täckning/spärrar.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Inget valideras mindre än tidigare — den tunga ytan körs bara per grupp/spets
-i stället för per PR, vilket är det som eliminerar O(N)-rundorna.
+Validatorn hämtar bas- och PR huvudena och kombinerar dem i ett engångsarbetsträd. Den kör sin paritetssvit en gång på det resulterande trädet. En misslyckad head-hämtnings- eller sammanfogningskonflikt matar ut den PR och skriptet fortsätter med återstående PRs.
 
-## Förutsättningar för `merge-train.sh` vid en ny utcheckning
+- **`--plan`** skriver ut det valda lägets steg och avslutar utan att skapa ett arbetsträd eller kontakta fjärrkontrollen. Kombinera den med `--fast` för att inspektera den snabba planen.
+- **`--fast`** kör de vanliga statiska grindarna, de valda ändrade `node:test` filerna under `tests/unit/` och `npm run test:vitest`. Kör en fullständig lokal validering minst en gång om dagen på den ackumulerade spetsen när du använder snabbläge.
+- **Fullt läge** lägger till de fullständiga statiska grindarna och kör `npm run test:unit` och `npm run test:vitest`.
 
-Skriptet kör en **förkontroll** med omedelbart avbrott vid fel på rotutcheckningen (före allt arbete
-med arbetsträd), så att en trasig installation aldrig kan ge sken av att vara ett rött tåg:
+En felaktig statisk gate körs om på den orörda basen om bassonden är tillgänglig. Skriptet rapporterar nedärvda misslyckanden och fortsätter när varje identifierad överträdelserad också visas på basen och det totala antalet inte har ökat.
 
-1. `npm ci`, kör sedan den `bun`-efterinstallation som npm blockerar:
-   `(cd node_modules/bun && node install.js)` — annars misslyckas `check:provider-consistency`
-   och `check:known-symbols` (båda `bun scripts/…`) på tåget OCH basen utan
-   någon överträdelsesrad.
-2. Ingen främmande `node_modules/node_modules` (ett duplicerat beroendeträd; React laddas två gånger
-   och UI-vitest-sviter misslyckas omedelbart).
-3. `node_modules/.bin/tsc` finns och är körbar (en ofullständig installation saknar den).
+| Utgång | Menande                                                                                                                           |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `0`    | Skrivit ut planen eller slutförde sviten. Svitsammanfattningen listar eventuella ärvda statiska fel och utmatade PRs.             |
+| `1`    | Ogiltiga argument, ingen Git-utcheckning, misslyckad preflight eller ingen PR ombord.                                             |
+| `2`    | En svitcheck misslyckades och kvalificerade sig inte som ärvd. Operatören kan dela partiet, mata ut den felande PR och köra igen. |
 
-Tåget kör den blockerande `npm run check:cycles:ratchet`; enbart `npm run check:cycles`
-är rådgivande (det listar SCC:erna och avslutas med en kod skild från noll även på en felfri bas).
+Ett lokalt pass tillhandahåller endast diagnostiska bevis för ägarens underlag. Varje landning kräver fortfarande ägartillstånd, sina egna nödvändiga kontroller och skuggködomen när så är tillämpligt.
+
+## Tiering
+
+- **Per PR.** CI och kvalitetskontroller baserat på de ändrade sökvägarna. Code PRs kör snabba kvalitetsgrindar och påverkade tester, med separata enhets- och Vitest -jobb i CI.
+- **Per kökandidat.** CI och Quality kör hela profilen för den sammansatta kandidaten på dess köref.
+- **Per släppspets.** Release-Green kör snabba hårda grindar på pushar som matchar dess vägfilter. Tre schemalagda körningar per dag använder full svep för releasegrenen.
+- **Per release.** Den fullständiga CI matrisen inkluderar E2E skärvor, paketvalidering, tarball boot smoke och täckningskontroller. Se [releasechecklistan](RELEASE_CHECKLIST.md).
+
+## Färska utcheckningsförutsättningar för `merge-train.sh`
+
+Preflighten körs innan arbetsträd skapas. Installera beroenden med `npm ci`. Bekräfta att `node_modules/.bin/tsc` är körbart och att `node_modules/node_modules` saknas. Kontrollera att `node_modules/.bin/bun --version` lyckas.
+
+Om efterinstallationen av Bun hoppades över, kör `(cd node_modules/bun && node install.js)`. Providerns konsistens och kontroller av kända symboler använder Bun. Validatorn kör `npm run check:cycles:ratchet` som en blockerande grind. Det fristående `npm run check:cycles` kommandot är rådgivande.
+
+## Historia
+
+Mergify-kön togs bort 2026-11-19.

@@ -123,55 +123,46 @@ sünkroonimistokeni käitumise.
 
 ## MCP tööriistad (22)
 
-Määratletud failis `open-sse/mcp-server/tools/obsidianTools.ts`. Luba/baas-URL määratakse
-iga kutse jaoks (esmalt API-võtme põhine, seejärel globaalne). Tööriistad, mis kasutavad OmniRoute'i **sünkroonimisserverit**
-(neli tööriista `obsidian_sync_*`), nõuavad lisaks OmniRoute'i seadetes konfigureeritud sünkroonimise autentimisluba.
+Määratletud keeles `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL lahendatakse kõne kohta (kõigepealt API-võtme kohta, seejärel globaalselt). Tööriistad, mis tabasid OmniRoute** sünkroonimisserver** (neli `obsidian_sync_*` tööriista) nõuavad lisaks OmniRoute sätetes konfigureeritud sünkroonimise autentimisluba.
 
 ### Lugemistööriistad (`read:obsidian`)
 
-| Tööriist                     | Kirjeldus                                                                                           |
-| ---------------------------- | --------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Kontrollib, kas Local REST API on kättesaadav ja autenditud.                                        |
-| `obsidian_search_simple`     | Täistekstiotsing märkmete sisust; tagastab väljavõtted koos failiteedega.                           |
-| `obsidian_search_structured` | Otsib JSON Logicu avaldise abil (and/or/regex/path filtrid).                                        |
-| `obsidian_read_note`         | Loeb märkme hoidla-suhtelise tee järgi; soovi korral konkreetse pealkirja, ploki või frontmatter'i. |
-| `obsidian_list_vault`        | Loetleb hoidlas olevad failid ja kataloogid (kirjete puuna).                                        |
-| `obsidian_get_document_map`  | Hangib märkme pealkirjastruktuuri kaardistusena pealkirjad → reanumbrid.                            |
-| `obsidian_get_note_metadata` | Hangib frontmatter'i, sildid, lingid ning tähe- ja sõnaarvu ilma täieliku sisuta.                   |
-| `obsidian_get_active_file`   | Hangib Obsidianis praegu aktiivse faili tee ja sisu.                                                |
-| `obsidian_get_periodic_note` | Hangib kuupäeva päeva-, nädala- või kuumärkme (vaikimisi tänase).                                   |
-| `obsidian_get_tags`          | Loetleb kõik hoidla sildid koos nende esinemissagedustega.                                          |
-| `obsidian_list_commands`     | Loetleb saadaolevad Obsidiani käskude ID-d (kasutamiseks koos käsuga `obsidian_execute_command`).   |
-| `obsidian_sync_status`       | OmniRoute'i sünkroonimisserveri olek: töötamine, hoidla nimi, port, tööaeg, viimane sünkroonimine.  |
-| `obsidian_sync_conflicts`    | Loetleb lahendamata sünkroonimiskonfliktid (tee, konfliktse faili tee, tuvastamise aeg).            |
+| Tööriist                     | Kirjeldus                                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Kontrollige, kas kohalik REST API on juurdepääsetav ja autenditud.                                |
+| `obsidian_search_simple`     | Märkme sisu täistekstiotsing; tagastab failiteedega katkendid.                                    |
+| `obsidian_search_structured` | Otsige JSON Logic avaldise (and/or/regex/path filtrid) abil.                                      |
+| `obsidian_read_note`         | Märkme lugemine võlvi suhtelise tee järgi; valikuliselt konkreetne heading/block/frontmatter.     |
+| `obsidian_list_vault`        | Loetlege hoidlas olevad failid ja kataloogid (kirjete puu).                                       |
+| `obsidian_get_document_map`  | Hankige märkme päise struktuur pealkirjade → ridade numbrite kaardina.                            |
+| `obsidian_get_note_metadata` | Hankige esikülg, sildid, lingid, char/word loend ilma täieliku sisuta.                            |
+| `obsidian_get_active_file`   | Hangi + s praegu aktiivse faili tee Obsidian.                                                     |
+| `obsidian_get_periodic_note` | Hankige kuupäeva kohta daily/weekly/monthly perioodiline märge (kui see välja jäetakse täna).     |
+| `obsidian_get_tags`          | Loetlege kõik varahoidla sildid koos nende sagedustega.                                           |
+| `obsidian_list_commands`     | Loetlege saadaolevad Obsidian käsud IDs (kasutage koos `obsidian_execute_command`).               |
+| `obsidian_sync_status`       | OmniRoute sünkroonimisserveri olek: töötab, varahoidla nimi, port, tööaeg, viimane sünkroonimine. |
+| `obsidian_sync_conflicts`    | Loetlege lahendamata sünkroonimise konfliktid (tee, konflikti tee, tuvastatud-at).                |
 
-### Kirjutamistööriistad (`write:obsidian`)
+### Kirjutamisvahendid (`write:obsidian`)
 
-| Tööriist                         | Kirjeldus                                                                                                  |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Loob või kirjutab üle etteantud Markdowni sisuga märkme.                                                   |
-| `obsidian_append_note`           | Lisab märkmele sisu; soovi korral konkreetse pealkirja või ploki alla.                                     |
-| `obsidian_patch_note`            | Lisab täpselt määratud pealkirja, ploki või frontmatter'i välja järele või ette või asendab selle.         |
-| `obsidian_delete_note`           | Kustutab märkme hoidlast jäädavalt.                                                                        |
-| `obsidian_move_note`             | Teisaldab või nimetab hoidlas oleva märkme ümber.                                                          |
-| `obsidian_execute_command`       | Käivitab Obsidiani käsu selle käsu ID järgi.                                                               |
-| `obsidian_open_file`             | Avab faili Obsidianis (loob selle, kui seda pole olemas).                                                  |
-| `obsidian_sync_trigger`          | Käivitab kohe kahesuunalise töölaua↔mobiilseadme hoidla sünkroonimise.                                     |
-| `obsidian_sync_resolve_conflict` | Lahendab sünkroonimiskonflikti: säilitab `local` (mobiilse), `remote` (töölaua) või `keep-both` (mõlemad). |
+| Tööriist                         | Kirjeldus                                                                                                      |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Looge või kirjutage üle antud Markdowni sisuga märge.                                                          |
+| `obsidian_append_note`           | Lisa märkmele sisu; valikuliselt konkreetsele heading/block.                                                   |
+| `obsidian_patch_note`            | Kirurgiliselt append/prepend/replace kursi, ploki või esiosa väljal.                                           |
+| `obsidian_delete_note`           | Kustutage märge varahoidlast jäädavalt.                                                                        |
+| `obsidian_move_note`             | Märkme teisaldamine või ümbernimetamine hoidlas.                                                               |
+| `obsidian_execute_command`       | Käivitage Obsidian käsk selle käsuga ID.                                                                       |
+| `obsidian_open_file`             | Avage fail Obsidian (loob selle, kui seda pole olemas).                                                        |
+| `obsidian_sync_trigger`          | Käivitage kohene kahesuunaline töölaua ↔ mobiilihoidla sünkroonimine.                                          |
+| `obsidian_sync_resolve_conflict` | Sünkroonimiskonflikti lahendamine: jätke alles `local` (mobiiltelefon), `remote` (lauaarvuti) või `keep-both`. |
 
 > [!NOTE]
-> Tööriista `obsidian_patch_note` sihtmärgid aktsepteerivad `targetType` väärtusi `heading | block | frontmatter`
-> ja `operation` väärtusi `append | prepend | replace` ning valikulist
-> `createTargetIfMissing` väärtust. Neli tööriista `obsidian_sync_*` suhtlevad kohaliku sünkroonimisserveriga
-> (vaikimisi `http://127.0.0.1:27781`) ja nõuavad sünkroonimisluba.
+> `obsidian_patch_note` sihtmärgid aktsepteerivad `targetType` `heading | block | frontmatter` ja `operation` `append | prepend | replace` koos valikulise `createTargetIfMissing`. Neli `obsidian_sync_*` -tööriista suhtlevad kohaliku sünkroonimisserveriga (vaikimisi `http://127.0.0.1:27781` ) ja nõuavad sünkroonimisluba.
 
 ### Ulatused
 
-Lugemistööriistad nõuavad ulatust `read:obsidian`; kirjutamistööriistad nõuavad ulatust `write:obsidian`. Jõustamine
-toimib samamoodi nagu Notionis — seda haldab `withScopeEnforcement()` failis
-`open-sse/mcp-server/server.ts`, selle aktiveerib `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ning
-lubatud ulatused pärinevad muutujast `OMNIROUTE_MCP_SCOPES` või API-võtme ulatuse kontekstist. Vaadake
-[MCP-SERVER.md](./MCP-SERVER.md).
+Lugemistööriistad nõuavad `read:obsidian`; kirjutamistööriistad nõuavad `write:obsidian`. Jõustamine on identne Notion — mida haldab `withScopeEnforcement()` failis `open-sse/mcp-server/server.ts`, mis on väratud `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ja sunnitud sisse lülitama HTTP/SSE helistajatele, kelle API -klahvil puudub `manage`/`admin`, lubatud ulatustega, mis pärinevad `OMNIROUTE_MCP_SCOPES` või API -võtme ulatuse kontekstist. Vaadake [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Lõpp-punktid
 

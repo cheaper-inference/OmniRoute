@@ -4,12 +4,9 @@
 
 ---
 
-> **ਆਖਰੀ ਵਾਰ ਅੱਪਡੇਟ ਕੀਤਾ:** 2026-08-28 — v3.8.51
-> ਆਟੋਮੇਸ਼ਨ ਲਈ Claude Code ਹੁਨਰਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਵਾਲਾ ਸੁਚਾਰੂ ਰਿਲੀਜ਼ ਪ੍ਰਵਾਹ।
+> ਸੁਚਾਰੂ ਰੀਲੀਜ਼ ਪ੍ਰਵਾਹ ਜੋ ਆਟੋਮੇਸ਼ਨ ਲਈ Claude ਕੋਡ ਹੁਨਰ ਦਾ ਲਾਭ ਉਠਾਉਂਦਾ ਹੈ।
 >
-> **ਰਿਲੀਜ਼ਾਂ ਦੇ ਵਿਚਕਾਰ ਕਤਾਰ/ਬ੍ਰਾਂਚ ਨੂੰ ਹਰਾ ਰੱਖੋ:** [RELEASE_GREEN.md](./RELEASE_GREEN.md) ਵੇਖੋ
-> (`/green-prs` ਪਰਿਵਾਰ + `npm run check:release-green` + `/babysit` + ਰਾਤ ਸਮੇਂ ਚੱਲਣ ਵਾਲਾ ਕੰਮ)। ਇਸਨੂੰ
-> ਸਮੇਂ-ਸਮੇਂ 'ਤੇ — ਅਤੇ ਖ਼ਾਸ ਕਰਕੇ ਇਸ ਚੈਕਲਿਸਟ ਤੋਂ **ਪਹਿਲਾਂ** — ਚਲਾਉਣ ਨਾਲ ਰਿਲੀਜ਼ PR ਹਰੀ ਸਥਿਤੀ ਵਿੱਚ ਸ਼ੁਰੂ ਹੁੰਦੀ ਹੈ।
+> **ਰੀਲੀਜ਼ਾਂ ਦੇ ਵਿਚਕਾਰ queue/branch ਹਰਾ ਰੱਖੋ:** [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` ਪਰਿਵਾਰ + `npm run check:release-green` + `/babysit` + ਰਾਤ ਨੂੰ) ਦੇਖੋ। ਇਸ ਨੂੰ ਸਮੇਂ-ਸਮੇਂ 'ਤੇ ਚਲਾਉਣਾ — ਅਤੇ ਖਾਸ ਤੌਰ 'ਤੇ** ਅੱਗੇ** ਇਹ ਚੈਕਲਿਸਟ — ਰੀਲੀਜ਼ PR ਨੂੰ ਹਰਾ ਬਣਾ ਦਿੰਦੀ ਹੈ।
 
 ## ਸੰਖੇਪ
 
@@ -37,7 +34,7 @@ npm run test:e2e           # ਵਿਕਲਪਿਕ, ਪਰ ਸਿਫ਼ਾਰਸ
 
 ## npm ਭਰੋਸੇਮੰਦ ਪਬਲਿਸ਼ਿੰਗ (v3.8.51 ਤੋਂ ਡਿਫੌਲਟ) — ਬੇਨਤੀ 'ਤੇ ਸਟੇਜ ਕੀਤੀ ਗਈ, ਸਿੱਧੇ ਫਾਲਬੈਕ ਵਜੋਂ
 
-`npm-publish.yml` ਦੁਆਰਾ ਪ੍ਰਕਾਸ਼ਿਤ ਕਰਦਾ ਹੈ** npm ਭਰੋਸੇਯੋਗ ਪਬਲਿਸ਼ਿੰਗ (OIDC)** ਮੂਲ ਰੂਪ ਵਿੱਚ: `stage-npm` ਜੌਬ (github-ਹੋਸਟਡ) ਉਸ ਰਨ ਲਈ ਇੱਕ ਥੋੜ੍ਹੇ ਸਮੇਂ ਲਈ npm ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਲਈ GitHub ਦੇ id-ਟੋਕਨ ਦਾ ਆਦਾਨ-ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ, ਰਿਪੋਜ਼ਟਰੀ ਸੀਕਰੇਟਸ ਵਿੱਚ — ਕੋਈ ਲੰਬੇ ਸਮੇਂ ਲਈ npm ਟੋਕਨ ਨਹੀਂ, ਕੋਈ 2FA ਪ੍ਰੋਂਪਟ, ਪ੍ਰੋਵੇਨੈਂਸ ਜੁੜਿਆ ਨਹੀਂ ਹੈ। ਇਹ ਹੁਣ 2FA ਨੂੰ ਛੱਡਣ ਵਾਲੇ ਟੋਕਨਾਂ ਨੂੰ ਰਿਟਾਇਰ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ; ਇਹ WS1.3 ਗਾਰੰਟੀ ਰੱਖਦੇ ਹੋਏ ਪ੍ਰੋਜੈਕਟ ਦੇ v3.8.48 ਤੱਕ ਦੇ ਪੂਰੀ ਤਰ੍ਹਾਂ ਆਟੋਮੈਟਿਕ ਪ੍ਰਵਾਹ ਨੂੰ ਬਹਾਲ ਕਰਦਾ ਹੈ (ਇੱਕ ਲੀਕ ਹੋਇਆ ਟੋਕਨ ਇਕੱਲਾ — ਪ੍ਰਕਾਸ਼ਿਤ ਨਹੀਂ ਕਰ ਸਕਦਾ ਹੈ, ਕੋਈ ਟੋਕਨ ਨਹੀਂ ਹੈ)।
+`npm-publish.yml` ਦੁਆਰਾ ਪ੍ਰਕਾਸ਼ਿਤ ਕਰਦਾ ਹੈ** npm ਭਰੋਸੇਯੋਗ ਪਬਲਿਸ਼ਿੰਗ (OIDC)** ਮੂਲ ਰੂਪ ਵਿੱਚ: `stage-npm` ਜੌਬ (github-ਹੋਸਟਡ) ਉਸ ਰਨ ਲਈ ਇੱਕ ਥੋੜ੍ਹੇ ਸਮੇਂ ਲਈ npm ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਲਈ GitHub ਦੇ id-ਟੋਕਨ ਦਾ ਆਦਾਨ-ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ, ਰਿਪੋਜ਼ਟਰੀ ਸੀਕਰੇਟਸ ਵਿੱਚ — ਕੋਈ ਲੰਬੇ ਸਮੇਂ ਲਈ npm ਟੋਕਨ ਨਹੀਂ, ਕੋਈ 2FA ਪ੍ਰੋਂਪਟ, ਪ੍ਰੋਵੇਨੈਂਸ ਜੁੜਿਆ ਨਹੀਂ ਹੈ। ਇਹ ਹੁਣ ਬਾਈਪਾਸ npm ਪਾਬੰਦੀਆਂ ਹਨ ਜੋ ਕਿ 2FA ਨੂੰ ਛੱਡਣ ਵਾਲੇ ਟੋਕਨਾਂ ਨੂੰ ਰਿਟਾਇਰ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ; ਇਹ WS1.3 ਗਾਰੰਟੀ ਰੱਖਦੇ ਹੋਏ ਪ੍ਰੋਜੈਕਟ ਦੇ v3.8.48 ਤੱਕ ਦੇ ਪੂਰੀ ਤਰ੍ਹਾਂ ਆਟੋਮੈਟਿਕ ਪ੍ਰਵਾਹ ਨੂੰ ਬਹਾਲ ਕਰਦਾ ਹੈ (ਇੱਕ ਲੀਕ ਹੋਇਆ ਟੋਕਨ ਇਕੱਲਾ — ਪ੍ਰਕਾਸ਼ਿਤ ਨਹੀਂ ਕਰ ਸਕਦਾ ਹੈ, ਕੋਈ ਟੋਕਨ ਨਹੀਂ ਹੈ)।
 
 **ਇੱਕ-ਵਾਰ ਸੈੱਟਅੱਪ (ਮਾਲਕ):** npmjs.com → ਪੈਕੇਜ `omniroute` → ਸੈਟਿੰਗਾਂ → _Trusted Publisher_ → GitHub: ਮਾਲਕ `diegosouzapw`, ਰੈਪੋ `OmniRoute`, ਵਰਕਫਲੋ `npm-publish.yml` (ਵਾਤਾਵਰਣ: ਕੋਈ ਨਹੀਂ)। ਜਦੋਂ ਤੱਕ ਇਹ ਮੌਜੂਦ ਨਹੀਂ ਹੈ, ਆਟੋਮੈਟਿਕ ਸਟੈਪ `ENEEDAUTH` ਨਾਲ ਫੇਲ ਹੋ ਜਾਂਦਾ ਹੈ: `publish_mode=staged` (ਹੇਠਾਂ) ਜਾਂ `direct` ਨਾਲ ਰੀ-ਡਿਸਪੈਚ।
 
@@ -52,7 +49,7 @@ npm-publish ਵਰਕਫਲੋ ਹੁਣ ਸਿੱਧੇ ਤੌਰ 'ਤੇ ਪ�
 3. `npm stage approve <id>` — 2FA ਪ੍ਰੋਂਪਟ IS ਪ੍ਰਕਾਸ਼ਿਤ ਕਰੋ। `npm stage reject <id>` ਰੱਦ ਕਰਦਾ ਹੈ।
 4. ਪੋਸਟ-ਪਬਲਿਸ਼ ਨੈੱਟ: ਪੋਸਟ-ਪਬਲਿਸ਼ ਵੈਰੀਫਾਇਰ (v3.8.49 ਪਲਾਨ ਦਾWS1 4) ਜਨਤਕ ਰਜਿਸਟਰੀ ਤੋਂ ਪ੍ਰਕਾਸ਼ਿਤ ਸੰਸਕਰਣ ਨੂੰ ਇੱਕ ਸਾਫ਼ ਕੰਟੇਨਰ ਵਿੱਚ ਸਥਾਪਿਤ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸਨੂੰ ਬੂਟ ਕਰਦਾ ਹੈ।
 
-**ਐਮਰਜੈਂਸੀ ਫਾਲਬੈਕ:** `publish_mode=direct` ਨਾਲ `workflow_dispatch` ਲੀਗੇਸੀ ਤੁਰੰਤ `npm publish` ਬਹਾਲ ਕਰਦਾ ਹੈ (ਸਿਰਫ਼ ਤਾਂ ਹੀ ਵਰਤੋ ਜੇਕਰ ਸਟੇਜਿੰਗ ਆਪਣੇ ਆਪ ਵਿੱਚ ਦੁਰਵਿਵਹਾਰ ਕਰਦਾ ਹੈ; ਕਿਉਂ ਰਿਕਾਰਡ ਕਰੋ)।
+**ਐਮਰਜੈਂਸੀ ਫਾਲਬੈਕ:** `workflow_dispatch` ਨਾਲ `publish_mode=direct` ਲੀਗੇਸੀ ਤੁਰੰਤ `npm publish` ਬਹਾਲ ਕਰਦਾ ਹੈ (ਸਿਰਫ਼ ਤਾਂ ਹੀ ਵਰਤੋ ਜੇਕਰ ਸਟੇਜਿੰਗ ਆਪਣੇ ਆਪ ਵਿੱਚ ਦੁਰਵਿਵਹਾਰ ਕਰਦੀ ਹੈ; ਰਿਕਾਰਡ ਕਿਉਂ)।
 
 **ਵਨ-ਟਾਈਮ ਹਾਰਡਨਿੰਗ (ਮਾਲਕ, npmjs.com):** ਸਿਰਫ਼-ਸਟੇਜ ਮੋਡ ਵਿੱਚ `omniroute` ਲਈ ਭਰੋਸੇਮੰਦ ਪ੍ਰਕਾਸ਼ਕ ਨੂੰ ਸੰਰਚਿਤ ਕਰੋ ਤਾਂ ਕਿ ਇੱਕ ਲੀਕ ਕੀਤਾ ਗਿਆ ਲੰਬੇ ਸਮੇਂ ਤੱਕ ਚੱਲਣ ਵਾਲਾ ਟੋਕਨ ਕਿਸੇ ਵੀ ਥਾਂ ਤੋਂ ਸਿੱਧੇ `npm publish` ਨਹੀਂ ਕਰ ਸਕਦਾ — CI ਸਿਰਫ਼ ਸਟੇਜ ਕਰ ਸਕਦਾ ਹੈ; ਸਿਰਫ਼ ਮਾਲਕ ਦੀ 2FA ਰੀਲੀਜ਼।
 
@@ -60,7 +57,9 @@ npm-publish ਵਰਕਫਲੋ ਹੁਣ ਸਿੱਧੇ ਤੌਰ 'ਤੇ ਪ�
 
 **Docker ਹੱਬ `latest` (ਹਰੇਕ ਸਥਿਰ SemVer ਪ੍ਰਕਾਸ਼ਨ ਲਈ ਲੋੜੀਂਦਾ):** `docker-publish` ਵਰਕਫਲੋ ਨੂੰ ਟੈਗ ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ** ਦੋਵੇਂ** `X.Y.Z` ਅਤੇ, ਜਦੋਂ `should-promote-latest.sh` ਸਹਿਮਤ ਹੁੰਦਾ ਹੈ ਇਹ ਉੱਚਤਮ ਸਥਿਰ SemVer ਹੈ, `:latest` ਨਾਲ** ਉਸੇ ਹੀ ਡਾਇਜੈਸਟ** . ਨੌਕਰੀ ਤੋਂ ਬਾਅਦ: ਹੱਬ `latest` ਡਾਈਜੈਸਟ ਨਵੇਂ SemVer ਡਾਇਜੈਸਟ ਅਤੇ `last_updated` ਮੂਵਡ ਦੇ ਬਰਾਬਰ ਹੈ। `:latest` ਪੁਰਾਣੇ ਬਿਲਡ 'ਤੇ ਨਾ ਛੱਡੋ ਜਦੋਂ ਕਿ ਰੀਲੀਜ਼ ਨੋਟ ਫਿਕਸਾਂ ਬਾਰੇ ਗੱਲ ਕਰਦੇ ਹਨ ਜੋ ਸਿਰਫ git 'ਤੇ ਮੌਜੂਦ ਹਨ। ਕੰਪੋਜ਼ ਕਵਿੱਕਸਟਾਰਟਸ `:latest` ਵਰਤੋਂ ਕਰਦੇ ਹਨ; GitOps `X.Y.Z` ਪਿੰਨ ਕਰਦੇ ਰਹਿਣਾ ਚਾਹੀਦਾ ਹੈ। [Docker ਰੀਲੀਜ਼ ਚੈਨਲ](../guides/DOCKER_GUIDE.md#release-channels) ਅਤੇ #10317 ਦੇਖੋ।
 
-**Docker ਹੱਬ ਸੰਸਥਾ ਰਿਪੋਜ਼ਟਰੀ (`cheaperinference/omniroute`):** Docker ਹੱਬ ਨਾਮ-ਸਥਾਨਾਂ ਦੇ ਵਿਚਕਾਰ ਇੱਕ ਰਿਪੋਜ਼ਟਰੀ ਨੂੰ ਮੂਵ ਨਹੀਂ ਕਰ ਸਕਦਾ ਹੈ, ਇਸਲਈ `diegosouzapw/omniroute` ਆਪਣੀ ਪੁੱਲ ਹਿਸਟਰੀ ਅਤੇ ਹਰ ਰੀਲੀਜ਼ ਨੂੰ ਰੱਖਦਾ ਹੈ, ਅਤੇ `docker-publish` ਦਾ `mirror-org-dockerhub` ਜੌਬ ਹਰੇਕ ਜਾਰੀ ਕੀਤੇ ਸੰਸਕਰਣ (ਅਤੇ `:latest` ਜਦੋਂ ਪ੍ਰਮੋਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ) ਨੂੰ `ghcr.io/cheaper-inference/omniroute` ਤੋਂ ਸੰਗਠਨ ਰਿਪੋਜ਼ਟਰੀ ਵਿੱਚ ਨਕਲ ਕਰਦਾ ਹੈ। ਇਸ ਨੂੰ `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ਭੇਦ ਦੀ ਲੋੜ ਹੈ; ਉਹਨਾਂ ਤੋਂ ਬਿਨਾਂ ਨੌਕਰੀ "Docker Hub org mirror skipped" ਚੇਤਾਵਨੀ ਨਾਲ ਹਰਾ ਰਹਿੰਦਾ ਹੈ ਅਤੇ ਹੋਰ ਰਜਿਸਟਰੀਆਂ ਆਮ ਤੌਰ 'ਤੇ ਪ੍ਰਕਾਸ਼ਿਤ ਹੁੰਦੀਆਂ ਹਨ। ਬਾਅਦ ਵਿੱਚ ਇੱਕ ਜਾਰੀ ਕੀਤੇ ਸੰਸਕਰਣ ਨੂੰ ਪ੍ਰਕਾਸ਼ਿਤ ਕਰਨ ਲਈ, ਚਲਾਓ** ਐਕਸ਼ਨ → ਮਿਰਰ Docker ਚਿੱਤਰ ਨੂੰ Docker ਹੱਬ org → ਰਨ ਵਰਕਫਲੋ** `version=X.Y.Z` (ਅਤੇ ਉੱਚੇ ਸਥਿਰ ਸੰਸਕਰਣ ਲਈ `promote_latest` ): ਇਹ ਮੌਜੂਦਾ ਚਿੱਤਰਾਂ ਦੀ ਨਕਲ ਕਰਦਾ ਹੈ, ਕੋਈ ਪੁਨਰ-ਨਿਰਮਾਣ ਨਹੀਂ।
+**Docker ਹੱਬ ਸੰਸਥਾ ਰਿਪੋਜ਼ਟਰੀ (`cheaperinference/omniroute`):** Docker ਹੱਬ ਨਾਮ-ਸਥਾਨਾਂ ਦੇ ਵਿਚਕਾਰ ਇੱਕ ਰਿਪੋਜ਼ਟਰੀ ਨੂੰ ਮੂਵ ਨਹੀਂ ਕਰ ਸਕਦਾ ਹੈ, ਇਸਲਈ `diegosouzapw/omniroute` ਆਪਣੀ ਪੁੱਲ ਹਿਸਟਰੀ ਅਤੇ ਹਰ ਰੀਲੀਜ਼ ਨੂੰ ਰੱਖਦਾ ਹੈ, ਅਤੇ `docker-publish` ਦਾ `mirror-org-dockerhub` ਜੌਬ ਹਰੇਕ ਜਾਰੀ ਕੀਤੇ ਸੰਸਕਰਣ (ਅਤੇ `:latest` ਜਦੋਂ ਪ੍ਰਮੋਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ) ਨੂੰ `ghcr.io/cheaper-inference/omniroute` ਤੋਂ ਸੰਗਠਨ ਰਿਪੋਜ਼ਟਰੀ ਵਿੱਚ ਨਕਲ ਕਰਦਾ ਹੈ। ਇਸ ਨੂੰ `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ਭੇਦ ਦੀ ਲੋੜ ਹੈ; ਉਹਨਾਂ ਤੋਂ ਬਿਨਾਂ ਨੌਕਰੀ "Docker Hub org mirror skipped" ਚੇਤਾਵਨੀ ਨਾਲ ਹਰਾ ਰਹਿੰਦਾ ਹੈ ਅਤੇ ਹੋਰ ਰਜਿਸਟਰੀਆਂ ਆਮ ਤੌਰ 'ਤੇ ਪ੍ਰਕਾਸ਼ਿਤ ਹੁੰਦੀਆਂ ਹਨ। ਬਾਅਦ ਵਿੱਚ ਇੱਕ ਜਾਰੀ ਕੀਤੇ ਸੰਸਕਰਣ ਨੂੰ ਪ੍ਰਕਾਸ਼ਿਤ ਕਰਨ ਲਈ, ਚਲਾਓ** ਐਕਸ਼ਨ → ਮਿਰਰ Docker ਚਿੱਤਰ ਨੂੰ Docker ਹੱਬ org → ਰਨ ਵਰਕਫਲੋ** `version=X.Y.Z` (ਅਤੇ ਉੱਚੇ ਸਥਿਰ ਸੰਸਕਰਣ ਲਈ `promote_latest` ): ਇਹ ਮੌਜੂਦਾ ਚਿੱਤਰਾਂ ਦੀ ਨਕਲ ਕਰਦਾ ਹੈ, ਕੋਈ ਪੁਨਰ-ਨਿਰਮਾਣ ਨਹੀਂ। ਉਸ ਰਿਪੋਜ਼ਟਰੀ ਦਾ Docker ਹੱਬ ਸੰਖੇਪ ਜਾਣਕਾਰੀ ਹੱਥ ਨਾਲ ਸੈੱਟ ਕੀਤੀ ਗਈ ਹੈ: API ਜੋ ਇਸਨੂੰ ਸੰਪਾਦਿਤ ਕਰਦੇ ਹਨ ਸੰਗਠਨ ਪਹੁੰਚ ਟੋਕਨਾਂ ਨੂੰ ਰੱਦ ਕਰਦੇ ਹਨ।
+
+ਇਹੀ ਵਰਕਫਲੋ 2027-06-30 ਤੱਕ ਲੀਗੇਸੀ GHCR ਪੈਕੇਜ `ghcr.io/diegosouzapw/omniroute` ਤੇ ਹਰ ਰੀਲੀਜ਼ ਦੀ ਨਕਲ ਵੀ ਕਰਦਾ ਹੈ, ਇਸਲਈ ਇਸ 'ਤੇ ਪਿੰਨ ਕੀਤੇ ਇੰਸਟੌਲ ਅੱਪਡੇਟ ਹੁੰਦੇ ਰਹਿੰਦੇ ਹਨ; ਇਸ ਦੇ ਸੂਚਕਾਂਕ ਵਿੱਚ " `ghcr.io/cheaper-inference/omniroute` ਵਿੱਚ ਤਬਦੀਲ" ਵਰਣਨ ਹੁੰਦਾ ਹੈ। ਇਸ ਨੂੰ `GHCR_LEGACY_TOKEN` ਗੁਪਤ ( `write:packages` ਦੇ ਨਾਲ `diegosouzapw` ਦਾ ਇੱਕ ਕਲਾਸਿਕ ਨਿੱਜੀ ਪਹੁੰਚ ਟੋਕਨ) ਦੀ ਲੋੜ ਹੈ; ਇਸ ਤੋਂ ਬਿਨਾਂ ਉਹ ਨੌਕਰੀ "ਲੇਗੇਸੀ GHCR ਮਿਰਰ ਛੱਡੀ ਗਈ" ਚੇਤਾਵਨੀ ਨਾਲ ਛੱਡੀ ਜਾਂਦੀ ਹੈ।
 
 ## ਹਾਟਫਿਕਸ ਫਾਸਟ-ਲੇਨ (ਲੇਬਲ `hotfix`)
 
@@ -89,7 +88,7 @@ E2E ਮੈਟ੍ਰਿਕਸ ਨੂੰ ਆਪਣੇ-ਆਪ ਛੱਡ ਦਿੰ�
 ### ਪ੍ਰੀ-ਰਿਲੀਜ਼
 
 - [ ] ਇਸ ਰੀਲੀਜ਼ ਲਈ ਨਿਸ਼ਾਨਾ ਬਣਾਏ ਗਏ ਸਾਰੇ PRs ਨੂੰ `release/vX.Y.0` ਵਿੱਚ ਮਿਲਾ ਦਿੱਤਾ ਗਿਆ ਹੈ
-- [ ] ਇਸ ਸੰਸਕਰਣ ਲਈ ਸਾਰੀਆਂ ਖੁੱਲ੍ਹੀਆਂ Linear/issue ਆਈਟਮਾਂ ਬੰਦ ਹਨ ਜਾਂ ਅਗਲੇ ਮੀਲਪੱਥਰ 'ਤੇ ਧੱਕ ਦਿੱਤੀਆਂ ਗਈਆਂ ਹਨ
+- [ ] ਇਸ ਸੰਸਕਰਣ ਲਈ ਸਾਰੀਆਂ ਖੁੱਲ੍ਹੀਆਂ Linear/issue ਆਈਟਮਾਂ ਨੂੰ ਬੰਦ ਕਰ ਦਿੱਤਾ ਗਿਆ ਹੈ ਜਾਂ ਅਗਲੇ ਮੀਲ ਪੱਥਰ 'ਤੇ ਧੱਕ ਦਿੱਤਾ ਗਿਆ ਹੈ
 - [ ] `release/vX.Y.0` ਸ਼ਾਖਾ 'ਤੇCI ਹਰਾ
 - [ ] ਕੋਡ ਵਿੱਚ ਕੋਈ `TODO(release)` ਮਾਰਕਰ ਨਹੀਂ: `grep -r "TODO(release)" src/ open-sse/`
 - [ ] Docker ਅਧਾਰ ਚਿੱਤਰ ਅੱਪ ਟੂ ਡੇਟ (ਵਰਤਮਾਨ ਵਿੱਚ `node:24.15.0-trixie-slim`)
@@ -144,14 +143,14 @@ E2E ਮੈਟ੍ਰਿਕਸ ਨੂੰ ਆਪਣੇ-ਆਪ ਛੱਡ ਦਿੰ�
 
 **ਵੈਧ ਕਿਸਮਾਂ:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**ਵੈਧ ਦਾਇਰੇ:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`
+**ਵੈਧ ਦਾਇਰੇ:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator` `authz` `domain`
 
-ਬ੍ਰੇਕਿੰਗ ਬਦਲਾਅ: ਸਕੋਪ (ਜਿਵੇਂ ਕਿ `feat(api)!: drop /v0`) ਦੇ ਬਾਅਦ `BREAKING CHANGE:` ਫੁੱਟਰ ਜਾਂ `!` ਸ਼ਾਮਲ ਕਰੋ।
+ਤੋੜਨ ਵਾਲੀਆਂ ਤਬਦੀਲੀਆਂ: ਸਕੋਪ (ਜਿਵੇਂ ਕਿ `feat(api)!: drop /v0`) ਦੇ ਬਾਅਦ `BREAKING CHANGE:` ਫੁੱਟਰ ਜਾਂ `!` ਸ਼ਾਮਲ ਕਰੋ।
 
 ### ਦਸਤਾਵੇਜ਼ੀਕਰਨ
 
 - [ ] `npm run check:docs-sync` ਪਾਸ (ਪ੍ਰੀ-ਕਮਿਟ ਦੁਆਰਾ ਆਟੋ-ਰਨ)
-- [ ] `npm run check:docs-all` ਪਾਸ (ਛਤਰੀ: docs-sync + docs-counts + env-doc-sync + ਬਰਤਰਫ਼-ਵਰਜਨ + doc-ਲਿੰਕਸ)
+- [ ] `npm run check:docs-all` ਪਾਸ ਕਰਦਾ ਹੈ। ਇਸਦੀ ਸਲਾਹਕਾਰ `check:deprecated-versions` ਫਲੈਗ ਸੰਸਕਰਣਾਂ ਨੂੰ ਸਪੱਸ਼ਟ ਤੌਰ 'ਤੇ OmniRoute (3.6.x ਅਤੇ ਇਸ ਤੋਂ ਪਹਿਲਾਂ ਵਾਲੇ) ਨਾਲ ਜੋੜਦਾ ਹੈ ਅਤੇ ਤਾਰੀਖਾਂ ਨੂੰ ਨਜ਼ਰਅੰਦਾਜ਼ ਕਰਦਾ ਹੈ।
 - [ ] `npm run check:env-doc-sync` ਬਾਹਰ ਨਿਕਲਦਾ ਹੈ 0 — ਕੋਡ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ਇਕਰਾਰਨਾਮਾ ਬਰਕਰਾਰ ਹੈ
 - [ ] `npm run check:doc-links` ਪੁਨਰਗਠਨ ਤੋਂ ਬਾਅਦ 0 — ਕੋਈ ਟੁੱਟੇ ਹੋਏ ਅੰਦਰੂਨੀ ਮਾਰਕਡਾਊਨ ਹਵਾਲੇ ਤੋਂ ਬਾਹਰ ਨਿਕਲਦਾ ਹੈ
 - [ ] `docs/architecture/ARCHITECTURE.md` ਨੇ storage/runtime drift ਲਈ ਸਮੀਖਿਆ ਕੀਤੀ
@@ -178,7 +177,7 @@ E2E ਮੈਟ੍ਰਿਕਸ ਨੂੰ ਆਪਣੇ-ਆਪ ਛੱਡ ਦਿੰ�
   - [ ] ਸਹੀ ਢੰਗ ਨਾਲ ਗਿਣਿਆ ਗਿਆ (ਕ੍ਰਮ ਵਿੱਚ ਕੋਈ ਅੰਤਰ ਨਹੀਂ)
 - [ ] ਤਾਜ਼ਾ ਇੰਸਟਾਲ 'ਤੇ ਟੈਸਟ ਕਰੋ: `~/.omniroute/omniroute.db` ਮਿਟਾਓ ਅਤੇ `npm run dev` ਚਲਾਓ
 - [ ] ਮੌਜੂਦਾ ਸਥਾਪਨਾ 'ਤੇ ਟੈਸਟ ਕਰੋ: ਬੈਕਅੱਪ DB, ਮਾਈਗ੍ਰੇਸ਼ਨ ਚਲਾਓ, ਸਕੀਮਾ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ
-- [ ] WAL ਫਾਈਲਾਂ (`-wal`, `-shm`) ਨੂੰ ਸਹੀ ਢੰਗ ਨਾਲ ਹੈਂਡਲ ਕੀਤਾ ਗਿਆ ਹੈ ਜੇਕਰ ਮਾਈਗਰੇਸ਼ਨ ਟੇਬਲ ਨੂੰ ਮੁੜ ਲਿਖਦਾ ਹੈ
+- [ ] WAL ਫਾਈਲਾਂ (`-wal`, `-shm`) ਸਹੀ ਢੰਗ ਨਾਲ ਹੈਂਡਲ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ ਜੇਕਰ ਮਾਈਗ੍ਰੇਸ਼ਨ ਟੇਬਲ ਨੂੰ ਮੁੜ ਲਿਖਦਾ ਹੈ
 
 ### ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ (Zod-ਪ੍ਰਮਾਣਿਤ)
 
@@ -195,11 +194,11 @@ E2E ਮੈਟ੍ਰਿਕਸ ਨੂੰ ਆਪਣੇ-ਆਪ ਛੱਡ ਦਿੰ�
 
 ਜੇਕਰ `electron/` ਬਦਲ ਗਿਆ ਹੈ:
 
-- [ ] `npm run electron:smoke:packaged` ਪਾਸ
+- [ ] `npm run electron:smoke:packaged` ਪਾਸ ਕਰਦਾ ਹੈ
 - [ ] `:win`, `:mac`, `:linux` ਵਿੱਚੋਂ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਲਈ ਜਾਂਚ ਕੀਤੀ ਗਈ ਬਿਲਡ
 - [ ] ਕੋਡ ਸਾਈਨਿੰਗ ਸਰਟੀਫਿਕੇਟ ਦੀ ਮਿਆਦ ਖਤਮ ਨਹੀਂ ਹੋਈ (ਜੇਕਰ ਹਸਤਾਖਰ ਕਰ ਰਹੇ ਹੋ)
 - [ ] `electron/package.json` ਸੰਸਕਰਣ ਰੂਟ `package.json` ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ
-- [ ] ਸਵੈ-ਅੱਪਡੇਟ ਚੈਨਲ ਪੁਆਇੰਟਰ ਨੂੰ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ ਹੈ ਜੇਕਰ `stable` ਨੂੰ ਜਾਰੀ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ
+- [ ] ਜੇਕਰ `stable` ਨੂੰ ਜਾਰੀ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ ਤਾਂ ਸਵੈ-ਅੱਪਡੇਟ ਚੈਨਲ ਪੁਆਇੰਟਰ ਨੂੰ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ
 
 ### ਲੇਆਉਟ ਬਣਾਓ
 
@@ -255,7 +254,7 @@ npm run build:release
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — ਦੋਨੋ
 - [ ] ਤੈਨਾਤ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ, `dist/BUILD_SHA` == `git rev-parse --short HEAD` ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ
-- [ ] ਬਿਲਡ ਨੂੰ ਉੱਥੇ ਚੱਲਣਾ ਚਾਹੀਦਾ ਹੈ ਜਿੱਥੇ `node_modules` ਅਸਲੀ ਹੈ (ਮੁੱਖ ਚੈਕਆਉਟ ਜਾਂ `npm ci`'d worktree — NOT a symlinked worktree)
+- [ ] ਬਿਲਡ ਉੱਥੇ ਚੱਲਣਾ ਚਾਹੀਦਾ ਹੈ ਜਿੱਥੇ `node_modules` ਅਸਲੀ ਹੈ (ਮੁੱਖ ਚੈਕਆਉਟ ਜਾਂ `npm ci`'d worktree — NOT a symlinked worktree)
 - [ ] ਸਮੋਕ ਟੈਸਟ ਤੈਨਾਤ ਉਦਾਹਰਨ:
   - ਓਪਨ `/dashboard/health` → ਚੈੱਕ ਵਰਜਨ ਸਟ੍ਰਿੰਗ ਮੇਲ ਰੀਲੀਜ਼
   - ਕਿਸੇ ਜਾਣੇ-ਪਛਾਣੇ ਪ੍ਰਦਾਤਾ ਦੇ ਵਿਰੁੱਧ ਇੱਕ `/v1/chat/completions` ਬੇਨਤੀ ਚਲਾਓ
@@ -389,7 +388,7 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-ਡਿਵੈਲਪ ਬੰਪ ਕਮਿਟ ਗਿੱਟ ਪਲੰਬਿੰਗ ਨਾਲ ਬਣਾਇਆ ਗਿਆ ਹੈ (ਕੋਈ ਕੰਮ ਕਰਨ ਵਾਲੇ ਰੁੱਖ ਨੂੰ ਛੂਹਿਆ ਨਹੀਂ ਗਿਆ ਹੈ) ਅਤੇ ਉਹੀ ਪੰਜ ਫਾਈਲਾਂ ਨੂੰ ਇੱਕ ਸਾਈਕਲ-ਓਪਨ ਕਮਿਟ ਦੇ ਰੂਪ ਵਿੱਚ ਬੰਪ ਕਰਦਾ ਹੈ: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` ਅਤੇ `docs/openapi.yaml`। `[4.0.0]` CHANGELOG ਸੈਕਸ਼ਨ ਅਤੇ ਇਸ ਦੇ i18n ਸ਼ੀਸ਼ੇ `develop` ਤੋਂ ਬਾਅਦ, ਇਸਦੇ ਪਹਿਲੇ PR ਤੋਂ ਪਹਿਲਾਂ ਖੋਲ੍ਹੇ ਜਾਂਦੇ ਹਨ। ਸਕ੍ਰਿਪਟ ਕਦੇ ਵੀ npm dist-tags — ਨੂੰ ਸਕ੍ਰੈਚ ਪੈਕੇਜ 'ਤੇ ਰਿਹਰਸਲ ਨਹੀਂ ਬਦਲਦੀ।
+ਡਿਵੈਲਪ ਬੰਪ ਕਮਿਟ ਗਿੱਟ ਪਲੰਬਿੰਗ ਨਾਲ ਬਣਾਇਆ ਗਿਆ ਹੈ (ਕੋਈ ਕੰਮ ਕਰਨ ਵਾਲੇ ਰੁੱਖ ਨੂੰ ਛੂਹਿਆ ਨਹੀਂ ਗਿਆ ਹੈ) ਅਤੇ ਉਹੀ ਪੰਜ ਫਾਈਲਾਂ ਨੂੰ ਇੱਕ ਸਾਈਕਲ-ਓਪਨ ਕਮਿਟ ਦੇ ਰੂਪ ਵਿੱਚ ਬੰਪ ਕਰਦਾ ਹੈ: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` ਅਤੇ `docs/openapi.yaml`। `[4.0.0]` CHANGELOG ਸੈਕਸ਼ਨ ਅਤੇ ਇਸ ਦੇ i18n ਸ਼ੀਸ਼ੇ `develop` ਤੋਂ ਬਾਅਦ, ਇਸਦੇ ਪਹਿਲੇ PR ਤੋਂ ਪਹਿਲਾਂ ਖੋਲ੍ਹੇ ਜਾਂਦੇ ਹਨ। ਸਕ੍ਰਿਪਟ ਕਦੇ ਵੀ npm dist-tags — ਨੂੰ ਸਕ੍ਰੈਚ ਪੈਕੇਜ 'ਤੇ ਰਿਹਰਸਲ ਨਹੀਂ ਬਦਲਦੀ ਹੈ।
 
 ### PR ਪੂਰਵਦਰਸ਼ਨ ਆਰਟੀਫੈਕਟ (ਇੱਕ ਵਾਰ ਬਣਾਓ, ਉਹੀ ਬਾਈਟਾਂ ਦਾ ਪ੍ਰਚਾਰ ਕਰੋ)
 
@@ -399,7 +398,7 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
@@ -408,7 +407,7 @@ npm install -g ./omniroute-*.tgz                          # preview install
 ### ਕੱਟ (3.9.0, GO ਤੋਂ ਬਾਅਦ)
 
 1. GO [LTS_GO_NO_GO](./LTS_GO_NO_GO.md)
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` ਪ੍ਰਿੰਟ `RESULT: READY`.
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` ਪ੍ਰਿੰਟਸ `RESULT: READY`.
 3. Create the branches on `origin` by hand with the commands the dry-run prints — the script refuses to push to `origin`. To reuse a reviewed develop commit, run the `--execute` rehearsal on the 3.9.0 tip against your fork first; it prints both SHAs, and the same commits can be pushed:
 
    ```bash

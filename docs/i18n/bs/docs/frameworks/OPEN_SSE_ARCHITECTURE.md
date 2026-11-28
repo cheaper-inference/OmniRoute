@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Podržava** 22 strategije rutiranja** (vidi `src/shared/constants/routingStrategies.ts`):
 
-| Strategija          | Ponašanje                                                                                           |
-| ------------------- | --------------------------------------------------------------------------------------------------- |
-| `priority`          | Prva ciljana uređena lista                                                                          |
-| `weighted`          | Vjerovatno prema težini po cilja                                                                    |
-| `round-robin`       | Prođite kroz ciljeve po redu                                                                        |
-| `context-relay`     | Prebacite kontekst na sve mete                                                                      |
-| `fill-first`        | Popunite kvotu prije prelaska na sljedeći                                                           |
-| `p2c`               | Moć dva izbora                                                                                      |
-| `random`            | Uniform random                                                                                      |
-| `least-used`        | Odaberite onaj s najmanje nedavnih upotreba                                                         |
-| `cost-optimized`    | Prvo najjeftinija zdrava meta                                                                       |
-| `reset-aware`       | Svjestan prozora za resetiranje provajdera                                                          |
-| `reset-window`      | Resetirajte rutiranje zasnovano na prozoru                                                          |
-| `expiry-first`      | Prvo potrošite račun čija bi kvota istekla neiskorišten                                             |
-| `headroom`          | Najprije većina preostalih kvota                                                                    |
-| `quota-weighted`    | Preskočite iscrpljene račune, a zatim izvucite prema preostaloj kvoti ÷ opterećenja tokom leta      |
-| `strict-random`     | Zaista ujednačeno (bez kvalitetnog ponderisanja)                                                    |
-| `auto`              | Koristite bodovanje sa 16 faktora (`autoCombo/`)                                                    |
-| `lkgp`              | Prvi poznati dobar provajder                                                                        |
-| `context-optimized` | Najbolje za zahtjeve dugog konteksta                                                                |
-| `cache-optimized`   | Zakačite svaki prefiks prompta za višekratnu upotrebu na isti račun (učitavanje predmemorije upita) |
-| `fusion`            | Paralelno se širite na panel, a zatim sintetizirajte preko sudije (`fusion.ts`)                     |
-| `pipeline`          | Lanac koraka — izlaz svake mete hrani sljedeći                                                      |
-| `jev`               | Opt-in: TypeSafe Jev priznaje koji se rangirani unosi trče; inače vaša narudžba                     |
+| Strategija          | Ponašanje                                                                                      |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
+| `priority`          | Prva ciljana uređena lista                                                                     |
+| `weighted`          | Vjerovatno prema težini po cilja                                                               |
+| `round-robin`       | Prođite kroz ciljeve po redu                                                                   |
+| `context-relay`     | Prebacite kontekst na sve mete                                                                 |
+| `fill-first`        | Popunite kvotu prije prelaska na sljedeći                                                      |
+| `p2c`               | Moć dva izbora                                                                                 |
+| `random`            | Svježe miješanje po zahtjevu                                                                   |
+| `least-used`        | Odaberite onaj s najmanje zabilježenih zahtjeva                                                |
+| `cost-optimized`    | Prvo najniža kataloška ulazna cijena                                                           |
+| `reset-aware`       | Preostala kvota + reset                                                                        |
+| `reset-window`      | Prozor kvote koji se najprije resetuje                                                         |
+| `expiry-first`      | Prvo potrošite račun čija bi kvota istekla neiskorišten                                        |
+| `headroom`          | Najprije većina preostalih kvota                                                               |
+| `quota-weighted`    | Preskočite iscrpljene račune, a zatim izvucite prema preostaloj kvoti ÷ opterećenja tokom leta |
+| `strict-random`     | Promiješani špil: svaka meta jednom prije ponavljanja                                          |
+| `auto`              | Koristite bodovanje sa 16 faktora (`autoCombo/`)                                               |
+| `lkgp`              | Prvi poznati dobar provajder                                                                   |
+| `context-optimized` | Najprije najveći poznati kontekstni prozor                                                     |
+| `cache-optimized`   | Preferirajte nalog koji će vjerovatno držati prompt prefiks u kešu                             |
+| `fusion`            | Paralelno se širite na panel, a zatim sintetizirajte preko sudije (`fusion.ts`)                |
+| `pipeline`          | Lanac koraka — izlaz svake mete hrani sljedeći                                                 |
+| `jev`               | Opt-in: TypeSafe Jev priznaje koji se rangirani unosi trče; inače vaša narudžba                |
 
 ### base.ts (1170 LOC)
 
@@ -297,7 +297,7 @@ Usluge su** fokusirani, jednonamjenski moduli** koje rukovaoci sastavljaju. Veli
 
 - `tokenRefresh.ts` — OAuth osvježi na 401
 - `accountFallback.ts` — prebaciti na alternativni račun
-- `sessionManager.ts` — stanje sesije s više okreta
+- `sessionManager.ts` — stanje sesije sa više okreta
 
 ### Inteligencija
 

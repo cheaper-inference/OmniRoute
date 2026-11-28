@@ -4,7 +4,7 @@
 
 ---
 
-> **Verżjoni:** v3.8.44** Aġġornata l-aħħar:** 2026-10-28** Udjenza:** Inġiniera li jżidu, iżommu, jew jiddibaggjaw servizzi inkorporati (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Verżjoni:** v3.8.44** Udjenza:** Inġiniera li jżidu, iżommu, jew jiddibaggjaw servizzi inkorporati (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Is-servizzi integrati huma għodod sidecar tal-proċess installati lokalment li OmniRoute jinstalla, jissorvelja, u jesponi bħala miri tar-rotot tal-ewwel klassi. B'differenza minn fornituri esterni (li jintlaħqu fuq l-internet permezz ta 'ċwievet API ), is-servizzi integrati jaħdmu fuq l-istess magna bħal OmniRoute u jikkomunikaw permezz ta' loopback.
 

@@ -4,14 +4,13 @@
 
 ---
 
-> **信頼できる情報源:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **最終更新日:** 2026-09-22 — スコープの名前空間はMCP-SERVER.mdを参照
+> **真実の情報源:** `src/server/authz/`、 `src/shared/constants/publicApiRoutes.ts`、 `src/lib/api/requireManagementAuth.ts`、 `src/shared/utils/apiAuth.ts`
 
-OmniRouteには、すべてのAPIリクエストをゲートするルート認識型認可パイプラインがあります。分類は**決定論的**であり、**フェイルクローズ**です。分類できないものはすべて`MANAGEMENT`として扱われ、セッションまたは管理グレードのトークンを要求します。このページでは、ルートを保守するエンジニアや新しいエンドポイントを設計するエンジニア向けにモデルを説明します。
+OmniRouteは、すべてのAPIリクエストをゲートするルート認識の承認パイプラインがあります。分類は**決定的な**そして**フェールクローズ**—分類できないものはすべて`MANAGEMENT`として扱われ、セッションまたは管理グレードのトークンが必要になります。このページでは、ルートの維持または新しいエンドポイントの設計を行うエンジニア向けのモデルについて説明します。
 
 ![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
-> ソース: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
+> 出典: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## 2つの認証モード
 
@@ -175,7 +174,7 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) —常に`allow({ kind: "anonymous", id: "anonymous" })`を返します。
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer を抽出し、 `validateApiKey()`経由で検証します。有効な`REQUIRE_API_KEY`機能フラグが無効になっている場合にのみ、匿名に移行します。有効なフラグは`isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) によって解決されるため、ダッシュボード機能フラグと環境変数によって`/api/v1/*`、 `/api/v1beta/*`、およびエイリアスが一貫して制御されます。リゾルバ障害がフェールクローズされる。クライアントAPIルート (ダッシュボード モデル カタログで使用される`/api/v1/models`を含む) でのダッシュボード セッション リクエストを許可します。 Entra ID SSOが有効な場合、構造的に Entra トークンであるベアラー (3 つの Base64url セグメント、 `RS*` alg、 `kid`) はSSOブランチによって処理されます。**前に**`validateApiKey()`とその判定は最終的な—であり、API キー パスや匿名ブランチへの劣化は決して通過しないため、アイデンティティ プロバイダーの停止がオープン アクセスになることはありません。静的APIキーは影響を受けません。 [「エントラID SSOを](../security/ENTRA_SSO.md)参照してください。
-- **`managementPolicy`** (`policies/management.ts`) — 、ダッシュボード セッション、内部モデル同期リクエスト ( `/api/providers/[name]/(sync-models|models)`と照合) を受け入れるか、 `isAuthRequired()` false を返した場合は完全にスキップします。 Bearer トークンが存在するが無効な場合は 403 (`AUTH_001`) を返し、それ以外の場合は 401 を返します。また、認証ブランチ—の前にルート ガード層 (LOCAL_ONLY / ALWAYS_PROTECTED) を適用します。 [「ルート ガード層」](../security/ROUTE_GUARD_TIERS.md)を参照してください。 `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (現在: `/api/mcp/`) のLOCAL_ONLYパスは、Bearer キーが`manage`スコープを保持している場合、非ループバックからアクセスできます。他のすべてのLOCAL_ONLYパスは、スコープに関係なく厳密なループバックのままです。
+- **`managementPolicy`** (`policies/management.ts`) — 、ダッシュボード セッション、内部モデル同期リクエスト ( `/api/providers/[name]/(sync-models|models)`と照合) を受け入れるか、 `isAuthRequired()` false を返した場合は完全にスキップします。 Bearer トークンが存在するが無効な場合は 403 (`AUTH_001`) を返し、それ以外の場合は 401 を返します。また、認証ブランチ—の前にルート ガード層 (LOCAL_ONLY / ALWAYS_PROTECTED) を適用します。 [「ルート ガード層」](../security/ROUTE_GUARD_TIERS.md)を参照してください。 `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (今日: `/api/mcp/`) のLOCAL_ONLYパスは、ベアラー キーが`manage`/`admin`スコープまたは狭い`mcp:connect`スコープ (`hasMcpConnectOrManageScope`) を伝送する場合、または認証されたダッシュボード セッションを使用する場合、非ループバックからアクセスできます。他のすべてのLOCAL_ONLYパスは、スコープに関係なく厳密なループバックのままです。
 
 ポリシーが成功すると、 `AuthSubject`と`kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`が返されます。ダウンストリーム ハンドラーは、認証ロジックを再実行する代わりに、 `src/server/authz/assertAuth.ts`の`assertAuth(request, "CLIENT_API")`を介してそれを読み取ることができます。
 
@@ -268,22 +267,22 @@ export async function POST(request: Request) {
 
 ## スコープ
 
-3つの名前空間があります。各チェッカーは自身の文字列のみを読み取ります。`manage`が`read:compression`に対して`scopeMatches`で失敗する理由や、`read`アクセストークンが`PATCH /api/keys/{id}`を実行できない理由を含む、並列の比較については、[3つのスコープ名前空間](../frameworks/MCP-SERVER.md#three-scope-namespaces)を参照してください。
+3 つの名前空間。各チェッカーは独自の文字列のみを読み取ります。 `manage` `read:compression`に対して`scopeMatches`に失敗する理由、および`read`アクセス トークンが`PATCH /api/keys/{id}`失敗する理由を含めて、並べて見ると、 [3 つのスコープの名前空間](../frameworks/MCP-SERVER.md#three-scope-namespaces)になります。
 
-APIキーには`scopes`配列が含まれています（`api_keys.scopes`にJSONとして保存されます。`src/lib/db/apiKeys.ts`を参照）。
+APIキーは`scopes`配列を保持します ( `api_keys.scopes`にJSONとして格納されます。 `src/lib/db/apiKeys.ts`参照)。
 
-### 管理スコープ
+### 管理範囲
 
-- `manage` / `admin` — `hasManageScope`。管理APIルートへのベアラーアクセス。
-- `mcp:connect`、`self:usage`、`self:account-quota`、および`policy:bypass-provider-quota`は、追加的な完全一致スコープです。これらは`MANAGEMENT_API_KEY_SCOPES`の範囲外にあります。`mcp:connect`は、`/api/mcp/`の非ループバックの切り出しのみを開放します。
+- `manage` / `admin` — `hasManageScope`。管理APIルートへのベアラー アクセス。
+- `mcp:connect`、 `self:usage`、 `self:account-quota`、および`policy:bypass-provider-quota`は、追加的な完全一致スコープです。彼らは`MANAGEMENT_API_KEY_SCOPES`外に座っています。 `mcp:connect` 、 `/api/mcp/`非ループバック カーブアウトのみを開きます。
 
-### MCPツールスコープ
+### MCPツールのスコープ
 
-カタログとマッチングルール（同一文字列、または`*`で終わる付与されたスコープ）：[MCPツールスコープ](../frameworks/MCP-SERVER.md#mcp-tool-scopes)。`src/shared/constants/mcpScopes.ts`にある`MCP_SCOPE_LIST`は、完全なカタログではなく、元の型付きサブセットです。`resolveCallerScopeContext()`がMCP認証情報、リクエストメタデータ、または`OMNIROUTE_MCP_SCOPES`からスコープを解決した後、`open-sse/mcp-server/scopeEnforcement.ts`で強制が実行されます。`OMNIROUTE_MCP_ENFORCE_SCOPES=true`でない限り、これは無効のままです。
+カタログおよび一致ルール (同一の文字列、または`*`で終わる許可されたスコープ): [MCPツールのスコープ](../frameworks/MCP-SERVER.md#mcp-tool-scopes)。 `src/shared/constants/mcpScopes.ts`の`MCP_SCOPE_LIST`は、完全なカタログではなく、元の型付きサブセットです。 `resolveCallerScopeContext()` MCP認証情報、リクエスト メタデータ、または`OMNIROUTE_MCP_SCOPES`からスコープを解決した後、 `open-sse/mcp-server/scopeEnforcement.ts`で強制が実行されます。 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`グローバルにこれをオンにしますが (デフォルトは`false`)、 APIキーに`manage`/`admin`がないHTTP/SSE呼び出し元に対しては、フラグに関係なく常に強制されます ( `open-sse/mcp-server/scopeEnforcement.ts`の`shouldForceScopeEnforcement()`を参照)。
 
-### アクセストークンスコープ
+### アクセストークンのスコープ
 
-`oma_live_…`トークンに対する`read` / `write` / `admin`は、`scopeSatisfies`（`src/lib/accessTokens/scopes.ts`）によってランク付けされます。このランクはアクセストークン資格情報にのみ適用されます。[管理認証](../guides/MANAGEMENT-AUTH.md)を参照してください。
+`oma_live_…`トークンの`read` / `write` / `admin` 、 `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) によってランク付けされます。このランクは、アクセス トークン資格情報にのみ適用されます。 [「管理認証」](../guides/MANAGEMENT-AUTH.md)を参照してください。
 
 ## 認証が必要です切り替え
 

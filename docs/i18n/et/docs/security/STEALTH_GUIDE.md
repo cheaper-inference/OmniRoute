@@ -4,11 +4,9 @@
 
 ---
 
-> **Tõeallikas:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Viimati uuendatud:** 2026-09-02 — v3.8.51
-> **Sihtrühm:** teenusepakkujapõhiseid varjatud integratsioone hooldavad insenerid.
+> **Tõe allikas:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Publik:** Insenerid, kes haldavad teenusepakkujapõhiseid varjatud integratsioone.
 
-OmniRoute integreerub teenusepakkujatega, kelle servaserverid tuvastavad aktiivselt mitteametlike klientide sõrmejälgi (TLS JA3/JA4, päiste järjestus, JSON-keha kuju, terviklustõendid). Sellel lehel kirjeldatakse OmniRoute'i pakutavaid varjatud toimimise võimalusi ja nende implementatsiooni asukohti.
+OmniRoute integreerub pakkujatega, kelle servad võtavad aktiivselt mitteametlike klientide sõrmejälgi (TLS JA3/JA4, päise järjestamine, JSON kehakuju, terviklikkuse märgid). Sellel lehel on dokumenteeritud salajased pinnad, OmniRoute paljastab ja kus need on rakendatud.
 
 ## Õiguslik ja eetiline märkus
 
@@ -66,65 +64,68 @@ Kinnitatud pakett toetab neid profiile, kuid tegelik WAF-i aktsepteerimine võib
 
 ---
 
-## Claude Code'i varjatud režiimi komplekt
+## Claude Code Stealth Bundle
 
-Kui `cliCompatMode` on sisse lülitatud, vormindab OmniRoute väljuvad Claude'i päringud ümber nii, et neid ei saaks eristada `claude-cli` liiklusest. Koostööd teevad kolm moodulit:
+Kui `cliCompatMode` on sisse lülitatud, kujundab OmniRoute väljaminevad Claude -päringud ümber nii, et neid ei saaks `claude-cli` -liiklusest eristada. Kolm moodulit teevad koostööd:
 
 ### `claudeCodeFingerprint.ts`
 
-Arvutab arvelduse päisesse lisatava 3-märgilise `cc_version` sõrmejälje:
+Arvutab arvelduspäisesse manustatud 3-kohalise `cc_version` sõrmejälje:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (kõvakodeeritud; vastab ametlikule kliendile)
-- Sisendid: esimese kasutajasõnumi teksti märgid indeksitel 4, 7 ja 20 + versioonistring
-- Väljund: 3-märgiline kuueteistkümnendsüsteemi prefiks
+- `FINGERPRINT_SALT = "59cf53e54c78"` (kõvakood; vastab ametlikule kliendile)
+- Sisendid: märgid esimese kasutajateate teksti + versiooni stringi indeksi 4, 7, 20 juures
+- Väljund: 3-tähemärgiline hex prefiks
 
 ### `claudeCodeCCH.ts` (kliendi sisu räsi)
 
-Serveripoolne tervikluskontroll, mille ametlik Claude Code CLI arvutab Bun/Zigi abil. OmniRoute rakendab selle uuesti paketiga `xxhash-wasm`:
+Serveripoolse terviklikkuse kontrollimine ametlikku Claude koodi CLI arvutab Bun/Zig. OmniRoute reimplementide kaudu `xxhash-wasm`:
 
-1. Serialiseerib keha kohatäitjaga `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Nullidega täidetud 5-märgiline väiketähtedega kuueteistkümnendsüsteemi väärtus
-4. Asendab `cch=00000;` arvutatud tokeniga
+1. Keha järjestamine `cch=00000;` kohahoidjaga
+2. Koostage räsivaade kahe lihtteksti asendusega, järgmises järjekorras (`hashView()`):
+   - igast `/"model":"[^"]*"/g` vastest saab `"model":""` — vaste peatub esimese `"` juures, seega tühjendatakse põgenenud jutumärgiga väärtus (`"model":"a\"b"`) ainult kuni selle jutumärgini, nagu klient seda teeb
+   - iga `/"max_tokens":\d+,|,?"max_tokens":\d+/g` vaste eemaldatakse — ainult arvväärtused igal sügavusel
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Nullpolsterdatud 5-kohalised väiketähtede kuuskant
+5. Asendage `cch=00000;` arvutatud märgiga
 
 Konstandid:
 
-- Algväärtus: `0x6e52736ac806831e`
+- Seemne: `0x4d659218e32a3268` (sobib Claude -koodi 2.1.252 ja 2.1.322 tagasisilmushõivega)
 - Muster: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Lisab „tundlike” kliendinimede esimese märgi järele Unicode'i **null-laiusega ühendaja** (`U+200D`), et ülesvoolu filtrid ei saaks neid grepiga leida. Vaikimisi sõnaloend:
+Sisestab Unicode'i** nulllaiusega tisler** (`U+200D`) pärast "tundlike" klientide nimede esimest tähemärki, nii et ülesvoolu filtrid ei saa neid grepida. Vaikimisi sõnade loend:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Rakendatakse järgmistele: `system`-plokid, kogu `messages[].content` ning `tools[].description` / `tools[].function.description`. Operaator saab loendi funktsiooniga `setSensitiveWords()` ümber määrata.
+Rakendatakse: `system` plokkidele, kõigile `messages[].content` ja `tools[].description` / `tools[].function.description`. Operaator alistatav `setSensitiveWords()` kaudu.
 
 ### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` pakkujad
 
-Kolmandate osapoolte Anthropicu vahendusteenuste jaoks, mis aktsepteerivad ainult „päris Claude Code'i” liiklust:
+Kolmanda osapoole Anthropic releede puhul, mis aktsepteerivad ainult "päris Claude -koodi" liiklust:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` vaikimisi
-- Ühendusepõhine lüliti „Luba redact-thinking beeta” lisab `redact-thinking-2026-02-12`, kui CC Compatible'i ülesvool nõuab konkreetselt redigeeritud mõtlemisvooge
-- Ühendusepõhine lüliti „Luba kokkuvõtliku mõtlemise kuvamine” salvestab `providerSpecificData.requestDefaults.summarizeThinking` ja lisab CC Compatible'i mõtlemispäringutele, millel pole kuvamisrežiimi veel määratud, väärtuse `display: "summarized"`
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x perekond)
-- Vaiketee: `/v1/messages?beta=true`
+- Ühendusepõhine lüliti "Luba redigeerimise mõtlemise beetaversioon" lisab `redact-thinking-2026-02-12`, kui CC ühilduv ülesvoolu nõuab konkreetselt redigeeritud mõtlemisvooge
+- Ühendusepõhine lüliti "Luba kokkuvõtliku mõtlemise kuva" salvestab `providerSpecificData.requestDefaults.summarizeThinking` ja lisab `display: "summarized"` CC Ühilduvad mõtlemispäringud, mis pole veel kuvamisrežiimi määranud
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (perekond Opus/Sonnet 4.x)
+- Vaikimisi tee: `/v1/messages?beta=true`
 
-Sama komplekti kaasmoodulid:
+Õdemoodulid samas komplektis:
 
-- `claudeCodeConstraints.ts` — temperatuuri ja vahemälu juhtimise reeglid
-- `claudeCodeToolRemapper.ts` — tööriistanimede ümbervastendamine
-- `claudeCodeExtraRemap.ts` — kasuliku koormuse täiendav normaliseerimine
+- `claudeCodeConstraints.ts` — temperatuuri + vahemälu juhtimise reeglid
+- `claudeCodeToolRemapper.ts` — tööriista-nime ümberjaotamine
+- `claudeCodeExtraRemap.ts` — lisakoormuse normaliseerimine
 
 ---
 
@@ -138,7 +139,7 @@ Ribad roostevabast terasest SDK markerid (`x-stainless-lang`, `x-stainless-packa
 
 ### ⚠️ risk: `ANTIGRAVITY_CREDITS=always` (konto keelu leviala)
 
-`ANTIGRAVITY_CREDITS=always` (kulub `open-sse/executors/antigravity.ts`) marsruudid** iga** taotlege Antigravity AI krediidi ülejääki (makstud Google krediiti), selle asemel, et lasta Google vabatasemel kvoodiväravaid asju. See on dokumenteeritud funktsioonina, kuid nii see on** kõige levinum teenusetingimuste rikkumise aruanne, mida näeme** — mitu Google Ultra kontot on `403 / "service disabled for ToS violation" / insufficient_quota` ga keelatud pärast mõnetunnist `=always` ga töötamist.
+`ANTIGRAVITY_CREDITS=always` (kulub `open-sse/executors/antigravity.ts`) marsruudid** iga** taotlege Antigravity AI krediidi ülejääki (makstud Google krediiti), selle asemel, et lasta Google vabatasemel kvoodiväravaid asju. See on dokumenteeritud funktsioonina, kuid nii see on** kõige levinum teenusetingimuste rikkumise aruanne, mida näeme** — mitu Google Ultra kontot on `403 / "service disabled for ToS violation" / insufficient_quota` -ga keelatud pärast mõnetunnist `=always` ga töötamist.
 
 Ülesvoolu jõustamine on sisse lülitatud**Google pool** , ei saa midagi OmniRoute ära hoida. env var nimi ja olemasolevad dokumendid panevad selle kõlama nagu turvaline klapp; see ei ole.
 
@@ -184,7 +185,7 @@ Puutepunktid:
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — mandaadi torustik
-- Algne vahejuhtumiaruanne: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Algne vahejuhtumiaruanne: Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

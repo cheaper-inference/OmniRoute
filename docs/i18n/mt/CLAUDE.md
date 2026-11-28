@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Ir-regoli kollha tal-proġett jinsabu f’[`AGENTS.md`](AGENTS.md)** — is-sors uniku tal-verità għal kull
-assistent tal-IA (arkitettura, konvenzjonijiet, ittestjar, kontrolli tal-kwalità, fluss tax-xogħol ta’ git, it-23 Regola Stretta,
-tagħlimiet dwar il-PII). Aqrah kollu; terġax iżżid ir-regoli tal-proġett hawnhekk. Dak kollu li ġej japplika BISS
-għal Claude Code — irfinar operazzjonali tar-regoli diġà definiti f’`AGENTS.md`.
+**Ir-regoli kollha tal-progett joqoghdu [`AGENTS.md`](AGENTS.md)** — is-sors uniku tal-verità għal kull assistent AI ; l-importazzjoni ta 'hawn fuq diġà tagħbha. Iżżidx mill-ġdid ir-regoli tal-proġett hawn. Kollox hawn taħt japplika ONLY għal Claude Kodiċi — ir-raffinamenti operattivi tar-regoli diġà definiti `AGENTS.md`.
 
-## Iżolament tal-worktree — Speċifiki għal Claude Code
+## L-iżolament tas-siġar tax-xogħol — Claude L-ispeċifiċitajiet tal-kodiċi
 
-Il-protokoll obbligatorju sħiħ tal-worktree (konferma tal-base branch, il-mogħdija kanonika
-`.claude/worktrees/`, `cp -al` node_modules, regoli tat-teardown) jinstab fi
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (mqassar f'`AGENTS.md` →
-Workflow tal-Git → "Iżolament tal-worktree"). Punti speċifiċi għal Claude Code:
+- Ikkonferma l-fergħa bażi mal-operatur permezz ta' `AskUserQuestion` (Hard Rule #19) sakemm ma jkunux diġà qalulek.
+- Oħloq is-siġra tax-xogħol bi `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (tinżel taħt `.claude/worktrees/`, hard-links `node_modules` u tikkopja `.husky/_`), imbagħad sejjaħ `EnterWorktree` bi `path` tagħha . Dejjem għaddi l-bażi: mingħajrha l-iskrittura jagħżel l-ogħla `release/*`, li jista 'ma jkunx dak li kkonferma l-operatur. Worktree li `EnterWorktree` joħloq waħdu la għandu l-hard links u lanqas il-ganċijiet, għalhekk l-ebda pre-commit gate ma jmur fiha.
 
-- Ikkonferma l-base branch mal-operatur permezz ta' `AskUserQuestion` (Regola Stretta #19) sakemm
-  ma jkunux diġà qalulek.
-- Agħti preferenza lill-għodda nattiva `EnterWorktree` — diġà toħloq worktrees taħt
-  `.claude/worktrees/` (il-mogħdija kanonika). Oħloq il-worktree bil-kmand dokumentat `git
-worktree add`, imbagħad sejjaħ `EnterWorktree` bil-`path` tiegħu.
+## Subaġenti u git
 
-## Sikurezza bejn is-sessjonijiet — speċifiċitajiet ta’ Claude Code
+Every subagent that touches git (Agent tool or Workflow script) gets Hard Rule #22a's `git stash` ban verbatim in its prompt — the recorded recurrence of the stash incident came through a subagent.
 
-Ir-Regoli Stretti #19/#21/#22 (f’`AGENTS.md`) jirregolaw sessjonijiet paralleli. Tfakkiriet operazzjonali għal dan
-il-harness:
+## Ippjanar artifacts — superpotenzi path overrides
 
-- **Irreplika l-projbizzjoni ta’ `git stash` kelma b’kelma fil-prompt ta’ kull subagent li juża git**
-  (għodda Agent / skripts tal-Workflow) — is-subagents ma jirtux dan il-fajl, u r-rikorrenza rreġistrata
-  tal-inċident ta’ stash seħħet permezz ta’ subagent.
-- Qabel ma tagħmel merge jew push għal kwalunkwe PR li ma ħloqtx _f’din is-sessjoni_, ħaddem `git worktree list`
-  u erġa’ ċċekkja `gh pr view <N> --json state,headRefOid` (Regola Stretta #22b).
-- Temm kull sessjoni bil-checkout ewlieni fuq il-fergħa li beda fuqha.
+Il-ħiliet tas-superpotenzi jħabbru nuqqasijiet taħt `docs/superpowers/plans/`, `docs/superpowers/specs/` u `docs/research/`. Ikteb mill-ġdid kull wieħed għall-ekwivalenti `_tasks/` tiegħu `AGENTS.md` → "Artifatti tal-Ippjanar u r-Riċerka" qabel ma tikteb, u kkommettiha `git -C _tasks …`, qatt fir-repo prinċipali.
 
-## Superpowers / artefatti tal-ippjanar — sostituzzjonijiet tal-paths
+## Scratch files — `_artifacts/`, mhux `/tmp`
 
-Il-konvenzjoni `_tasks/` hija definita f’`AGENTS.md` → "Planning & Research Artifacts". Il-ħiliet
-ta’ superpowers jiġu b’valuri predefiniti li jindikaw `docs/…` — dawk il-valuri predefiniti huma **sostitwiti
-hawnhekk**. Meta ħila ta’ superpowers tħabbar path bħal "issejvjat f’`docs/superpowers/plans/…`",
-ibdlu għall-ekwivalenti f’`_tasks/…` qabel tikteb:
+Dan il-proġett jegħleb is-scratchpad tas-sessjoni tal-arness (`/tmp/claude-*/…`). Ikteb fajls temporanji esportazzjonijiet —, zips iġġenerati, outputs intermedji ta 'darba — sa `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: mogħdija ta' għerq `_*` gitignored, sabiex l-operatur isib u jħassar il-bidu kollu f'post wieħed. Pjanijiet durabbli, specs, riċerka u hand-offs imorru għal `_tasks/` minflok (Hard Rule #23).
 
-| Artefatt (ħila)                                | Valur predefinit (TUŻAHX) | Minflok, issejvja hawnhekk                                    |
-| ---------------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Pjanijiet (`writing-plans`)                    | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Speċifikazzjonijiet / disinn (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Riċerka (`deep-research`, ad-hoc)              | `docs/research/`          | `_tasks/research/…`                                           |
-| Trasferimenti (`/handoff`)                     | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Bażi ħamra
 
-Agħmel commit ta’ dawk l-artefatti fir-repo `_tasks/` (`git -C _tasks …`), qatt fir-repo ewlieni.
-
-## Fajls temporanji / tax-xogħol — uża `_artifacts/`, mhux `/tmp`
-
-Dan il-proġett jissostitwixxi l-iscratchpad predefinit tas-sessjoni tal-harness (`/tmp/claude-*/…`). Ikteb
-fajls temporanji/tax-xogħol — esportazzjonijiet, zips iġġenerati, outputs intermedji ta’ darba, kull ħaġa li
-normalment tqiegħed f’`/tmp` — f’`/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` minflok.
-
-- `_artifacts/` huwa path `_*` fl-għerq: diġà huwa gitignored (`AGENTS.md` → "Root `_*` paths"), u jinsab
-  biss fuq id-diska, qatt ma jiġi tracked.
-- Raġuni: iż-żamma tal-output temporanju ġewwa l-proġett (minflok f’`/tmp`) tagħmilha faċli ħafna għall-operatur
-  biex isib u jħassar kollox temporanju f’post wieħed, minflok ifittex f’direttorji `/tmp`
-  effimeri u speċifiċi għas-sessjoni li jisparixxu jew jakkumulaw mingħajr ma jiġu tracked.
-- **Tħawwadx** dan ma’ `_tasks/` (Regola Stretta #23, ir-repo git privat tiegħu stess għal
-  pjanijiet/speċifikazzjonijiet/riċerka/trasferimenti dejjiema) — `_artifacts/` huwa għal fajls tax-xogħol li jistgħu jintremew biss; xejn
-  hawnhekk ma jeħtieġ jibqa’ jew jiġi verżjonat.
-
-## Base-green qabel tiftaħ PRs
-
-Qabel toħloq fergħa jew tiftaħ PR, ħaddem il-kontroll base-green (`AGENTS.md` → Git Workflow →
-"Base-green check"; il-ħiliet tal-proġett jirreferu għalih bħala `.agents/skills/_shared/base-green.md`). PR
-li jinfetaħ meta l-aħħar punt tal-base ikun aħmar irid jinkludi `⚠️ base-red inherited: #<issue>` fil-body tiegħu. Biex
-tneħħi stat aħmar akkumulat (l-aħħar punt tal-base + PRs ħomor), uża l-ħila `/sweep-reds`.
+Biex tbattal stat aħmar akkumulat (ponta bażi + red PRs), uża l-ħila `/sweep-reds`.

@@ -4,18 +4,11 @@
 
 ---
 
-> **વર્ઝન:** v3.8.51
-> **છેલ્લે અપડેટ કરેલું:** 2026-06-28
-> **લક્ષિત વાચકો:** OmniRouteમાં યોગદાન આપતા અથવા તેના પર આધારિત ઇન્ટિગ્રેશન્સ બનાવતા એન્જિનિયરો.
+> **સંસ્કરણ:** v3.8.51** પ્રેક્ષક:** ઇજનેરો OmniRoute અથવા તેની ટોચ પર એકીકરણ નિર્માણમાં ફાળો આપે છે.
 >
-> ઉચ્ચ-સ્તરીય આર્કિટેક્ચર ડાયાગ્રામ્સ અને દરેક સબસિસ્ટમ પાછળના તર્ક માટે,
-> [ARCHITECTURE.md](./ARCHITECTURE.md) વાંચો. વ્યક્તિગત સબસિસ્ટમ્સ
-> (Auto Combo, MCP સર્વર, A2A સર્વર, Skills, Memory, Cloud Agents, Resilience,
-> Compression વગેરે) વિશે ઊંડાણપૂર્વક જાણવા માટે આ `docs/` ડિરેક્ટરીમાં તેમની સમર્પિત ફાઇલો જુઓ.
+> ઉચ્ચ-સ્તરના આર્કિટેક્ચર ડાયાગ્રામ અને દરેક સબસિસ્ટમ પાછળના તર્ક માટે, [ARCHITECTURE.md](./ARCHITECTURE.md) વાંચો. વ્યક્તિગત સબસિસ્ટમ્સ (ઓટો કોમ્બો, MCP સર્વર, A2A સર્વર, સ્કિલ્સ, મેમરી, ક્લાઉડ એજન્ટ્સ, રેઝિલિયન્સ, કમ્પ્રેશન, વગેરે) પર ઊંડા ડાઇવ્સ માટે આ `docs/` ડિરેક્ટરીમાં તેમની સમર્પિત ફાઇલો જુઓ.
 
-આ ફાઇલ **રિપોઝિટરીમાં હાલમાં શું ઉપલબ્ધ છે** તેનું વર્ણન કરે છે, જેથી નવો એન્જિનિયર
-ટ્રીમાં નેવિગેટ કરી શકે, રનટાઇમ લેયરિંગ સમજી શકે અને નવા મોડ્યુલ્સ બનાવ્યા વિના
-ક્યાં કોડ ઉમેરવો તે જાણી શકે.
+આ ફાઇલ વર્ણવે છે** જે આજે રીપોઝીટરીમાં છે** જેથી નવો ઈજનેર વૃક્ષ પર નેવિગેટ કરી શકે, રનટાઇમ લેયરિંગને સમજી શકે અને નવા મોડ્યુલની શોધ કર્યા વિના કોડ ક્યાં ઉમેરવો તે જાણી શકે.
 
 ---
 
@@ -566,35 +559,14 @@ bin/
 
 ## 8. `scripts/`
 
-હેતુ અનુસાર 6 સબફોલ્ડરમાં ગોઠવાયેલ છે.
+હેતુ દ્વારા 6 સબફોલ્ડરમાં ગોઠવાયેલ.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, ઉપરાંત ફક્ત વાંચવા માટેના PR દેખરેખ સહાયકો
-  `ci-discriminate.sh` (સંદર્ભ PR અથવા base-red ઇશ્યૂની સામે PRના નિષ્ફળ થતા ચેકના સિગ્નેચરને પોતાના /
-  વારસામાં મળેલા / અજ્ઞાત તરીકે વર્ગીકૃત કરે છે) અને `audit-worktree.sh`
-  (ગંદી ફાઇલો, સુરક્ષિત સપાટીઓ, દૂર કરાયેલા asserts, suppressionની સંખ્યા, બાકી રહેલા
-  અસ્થાયી tsconfigs, PR head વિરુદ્ધ સ્થાનિક HEAD — કોઈ કાર્યકરનો PR સ્વીકારવામાં આવે તે પહેલાં).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, વત્તા ફક્ત વાંચવા માટેના PR PR' અથવા બેબીસિટીંગ માટે મદદરૂપ સંદર્ભ `ci-discriminate.sh` અથવા બેઝ-રેડ ઇશ્યૂ સામે પોતાની/વારસામાં મળેલી/અજ્ઞાત) અને `audit-worktree.sh` (ગંદી ફાઇલો, સુરક્ષિત સપાટીઓ, દૂર કરાયેલા દાવાઓ, દબાવવાની ગણતરીઓ, બચેલા tmp tsconfigs, PR head vs local HEAD — ) કાર્યકરના PR સ્વીકારતા પહેલા PR -તપાસો.
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` ફ્લેગ વર્ઝન સ્પષ્ટપણે OmniRoute (3.6.x અને પહેલાના) ને આભારી છે. ચેક તારીખોને અવગણે છે.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

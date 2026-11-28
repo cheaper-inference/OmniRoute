@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Vigezo Vinavyohitajika
+## 5. Vigezo vinavyohitajika
 
 Mradi huu unapendekeza kusanidi angalau vigezo vifuatavyo kwenye Fly.io.
 
-### 5.1 Vigezo Vilivyothibitishwa
+### 5.1 Vigezo vilivyothibitishwa
 
-Vigezo hivi vimetumika katika upelekaji halisi kwenye programu ya sasa ya `omniroute`:
+Vigezo hivi vimetumika katika upelekaji halisi kwenye programu `omniroute` ya sasa:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (inahitajika katika mazingira ya uzalishaji — hutumika kwa uthibitishaji wa daraja la WebSocket)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (inahitajika katika uzalishaji — inayotumika kwa uthibitishaji wa daraja la WebSocket )
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 Kuhusu `INITIAL_PASSWORD`
 
-Mradi wa sasa hauweki `INITIAL_PASSWORD` kwa sababu upelekaji huu hauihitaji.
+Mradi wa sasa hauweki `INITIAL_PASSWORD` kwa sababu upelekaji huu hauhitaji.
 
 Ikiwa haijawekwa:
 
-- Kumbukumbu ya uanzishaji itaonyesha kuwa nenosiri chaguo-msingi ni `CHANGEME`
-- Unapaswa kubadilisha nenosiri la kuingia katika mipangilio ya mfumo haraka iwezekanavyo baada ya upelekaji
+- Unaunda nenosiri la dashibodi katika kichawi cha uwekaji kwenye ziara ya kwanza. Kamilisha hatua ya nenosiri: kuiruka huzima kuingia kwenye dashibodi, ambayo huacha dashibodi wazi kwa mtu yeyote anayeweza kufikia programu URL
+- Wakala wa Fly hufikia programu kutoka kwa anwani isiyo ya nyuma, kwa hivyo baada ya kuwasilisha nenosiri mchawi anauliza tokeni ya wakati mmoja ya bootstrap, ambayo programu huchapisha kwenye kumbukumbu yake wakati huo: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Ikiwa laini hiyo imetoka kwenye logi, anzisha upya programu na uwasilishe mchawi tena ili kuchapisha tokeni mpya.
 
-Ikiwa unataka kuanzisha nenosiri la mfumo wa nyuma bila usimamizi wa moja kwa moja, unaweza kuliongeza baadaye:
+Ili kuweka nenosiri bila kushughulikiwa badala yake, liongeze kabla ya ziara ya kwanza ya dashibodi (mara tu nenosiri limehifadhiwa, `INITIAL_PASSWORD` hupuuzwa):
 
 - `INITIAL_PASSWORD`
 
@@ -276,26 +276,26 @@ Ikiwa ukurasa wa `Secrets` katika dashibodi hauonyeshi vigezo vinavyotarajiwa, h
 
 ## 9. Masasisho na Matoleo Yanayofuata
 
-Baada ya masasisho ya msimbo, mchakato wa kutoa toleo ni rahisi:
+Baada ya sasisho za nambari, mchakato wa kutolewa ni moja kwa moja:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Ikiwa unahitaji tu kusasisha vigezo bila kubadilisha msimbo:
+Ikiwa unahitaji tu kusasisha vigezo bila kubadilisha nambari:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly itafanya kiotomatiki sasisho la hatua kwa hatua la mashine.
+Fly itafanya usasishaji wa mashine kiotomatiki.
 
-### 9.1 Kufuatilia Masasisho ya Hifadhi ya Upstream Huku Ukihifadhi `fly.toml` ya Fork Yako
+### 9.1 Kufuatilia Usasisho wa Hazina ya Juu Huku Ukihifadhi `fly.toml` za Fork Yako
 
-Ikiwa hifadhi ya sasa ni fork na unataka kusawazisha masasisho kutoka upstream `https://github.com/diegosouzapw/OmniRoute`, fuata mtiririko wa kazi ulio hapa chini.
+Ikiwa hazina ya sasa ni uma na unataka kusasisha masasisho kutoka kwenye mkondo wa juu `https://github.com/cheaper-inference/OmniRoute`, fuata mtiririko wa kazi ulio hapa chini.
 
-Kwanza, thibitisha remote zako:
+Kwanza, thibitisha vidhibiti vyako vya mbali:
 
 ```powershell
 git remote -v
@@ -303,31 +303,31 @@ git remote -v
 
 Unapaswa kuona angalau:
 
-- `origin` ikielekeza kwenye fork yako mwenyewe
-- `upstream` ikielekeza kwenye hifadhi asili
+- `origin` akionyesha uma wako mwenyewe
+- `upstream` inayoelekeza kwenye hazina asili
 
-Ikiwa `upstream` haijasanidiwa, iongeze:
+Ikiwa `upstream` haijasanidiwa, ongeza:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Kabla ya kusawazisha na upstream, pakua commit na tag za hivi karibuni:
+Kabla ya kusawazisha na mkondo wa juu, leta ahadi na lebo za hivi punde:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Angalia toleo la sasa na tag za upstream:
+Angalia toleo la sasa na vitambulisho vya juu:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Kumbuka: Toleo la sasa la mradi ni `v3.8.0`. Marejeleo ya `v3.4.7` yaliyo hapa chini yamehifadhiwa kama mifano ya kihistoria pekee. Kwa matoleo halisi, tumia `:latest` au tag ya toleo la sasa (k.m. `:v3.8.0`).
+> Kumbuka: Toleo la sasa la mradi ni `v3.8.0`. Marejeleo ya `v3.4.7` hapa chini yanatunzwa kama mifano ya kihistoria pekee. Kwa matoleo halisi, tumia `:latest` au lebo ya toleo la sasa (km `:v3.8.0`).
 
-Ikiwa unataka kuunganisha `main` ya hivi karibuni ya upstream huku ukihifadhi kwa lazima `fly.toml` ya fork yako, fuata mtiririko huu wa kazi:
+Ikiwa unataka kuunganisha `main` ya hivi punde ya juu huku ukiweka kwa nguvu `fly.toml` ya uma yako, fuata mtiririko huu wa kazi:
 
 ```powershell
 git merge upstream/main
@@ -337,34 +337,34 @@ git commit -m "chore(deploy): keep fork fly.toml"
 git push origin main
 ```
 
-Maelezo:
+Vidokezo:
 
-- `git merge upstream/main` husawazisha msimbo wa hivi karibuni kutoka hifadhi asili
-- `git checkout HEAD~1 -- fly.toml` hurejesha `fly.toml` ya fork yako kutoka hali ya kabla ya muunganisho
-- Ikiwa upstream haikubadilisha `fly.toml`, hatua hii haitaleta tofauti zozote
-- Ikiwa upstream ilibadilisha `fly.toml`, hatua hii huhakikisha kwamba jina la programu yako ya Fly, mount ya volume, region, na usanidi mwingine wa deployment unaohusu fork yako hauandikwi juu
+- `git merge upstream/main` husawazisha msimbo wa hivi punde kutoka kwa hazina asili
+- `git checkout HEAD~1 -- fly.toml` hurejesha `fly.toml` ya uma yako mwenyewe kutoka kabla ya kuunganishwa
+- Ikiwa mkondo wa juu haukurekebisha `fly.toml`, hatua hii haitaleta tofauti zozote
+- Iwapo mkondo wa juu ulirekebisha `fly.toml`, hatua hii inahakikisha jina lako la programu ya Fly, eneo la kupachika sauti, eneo na usanidi mwingine wa uwekaji wa uma maalum haujafutwa.
 
-Ikiwa unataka kulandanisha na tag maalum ya toleo (k.m. `v3.4.7`), kwanza thibitisha kwamba tag hiyo tayari imejumuishwa katika `upstream/main`:
+Iwapo unataka kuoanisha na lebo maalum ya kutolewa (kwa mfano `v3.4.7`), kwanza thibitisha kwamba lebo hiyo tayari imejumuishwa katika `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Matokeo yenye mafanikio yanamaanisha kwamba `upstream/main` tayari ina toleo hilo; unaweza kuunganisha `upstream/main` moja kwa moja.
+Kurejesha kwa mafanikio kunamaanisha kuwa `upstream/main` tayari ina toleo hilo; unaweza kuunganisha kwa urahisi `upstream/main`.
 
-### 9.2 Mfuatano wa Kawaida wa Utoaji Baada ya Kusawazisha Upstream
+### 9.2 Mpangilio wa Utoaji wa Kawaida Baada ya Kusawazisha Mkondo wa Juu
 
-Baada ya kusawazisha na hifadhi asili, fuata mpangilio huu unaopendekezwa wa utoaji:
+Baada ya kusawazisha na hazina asili, fuata agizo hili la kutolewa lililopendekezwa:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Rejesha `fly.toml` ya fork
+3. Rejesha `fly.toml` ya uma
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Huu ndio mtiririko halisi wa kazi uliotumika wakati wa kusasisha mradi wa sasa hadi `v3.4.7` (mfano huo unarejelea toleo la kihistoria; toleo halisi la sasa ni `v3.8.0`).
+Huu ndio mtiririko halisi unaotumika wakati wa kusasisha mradi wa sasa hadi `v3.4.7` (mfano unarejelea toleo la kihistoria; toleo halisi la sasa ni `v3.8.0`).
 
 ---
 
@@ -418,16 +418,16 @@ Ukiona `/app/data/...` badala yake, `DATA_DIR` imesanidiwa kimakosa na lazima ir
 
 ---
 
-## 12. Matatizo ya Kawaida
+## 12. Masuala ya Kawaida
 
-### 12.1 Ukurasa wa `Secrets` Hauna Maudhui
+### 12.1 `Secrets` Ukurasa Ni Tupu
 
-Kwa kawaida kuna sababu mbili:
+Kawaida kuna sababu mbili:
 
-- Bado hujaendesha `flyctl secrets set`
-- Unatazama programu tofauti (kwa mfano, `oroute` badala ya `omniroute`)
+- Bado hujakimbia `flyctl secrets set`
+- Unatazama programu tofauti (kwa mfano `oroute` badala ya `omniroute`)
 
-### 12.2 `flyctl deploy` Inaripoti `app not found`
+### 12.2 `flyctl deploy` Ripoti `app not found`
 
 Unda programu kwanza:
 
@@ -435,23 +435,23 @@ Unda programu kwanza:
 flyctl apps create omniroute
 ```
 
-### 12.3 Uchanganuzi wa `fly.toml` Unashindwa
+### 12.3 `fly.toml` Kuchanganua Kumeshindwa
 
-Angalia mambo yafuatayo:
+Angalia yafuatayo:
 
-- Ikiwa kuna herufi zilizoharibika kwenye maoni
-- Ikiwa matumizi ya alama za kunukuu na ujongezaji wa TOML ni sahihi
+- Iwapo kuna wahusika walioharibika kwenye maoni
+- Iwapo TOML kunukuu na kuingiza ndani ni sahihi
 
-### 12.4 Data Haihifadhiwi kwa Kudumu
+### 12.4 Data Haiendelei
 
-Thibitisha mambo yote mawili yafuatayo:
+Thibitisha zote mbili zifuatazo:
 
 - `fly.toml` ina `destination = '/data'`
-- `DATA_DIR` imewekwa kuwa `/data`
+- `DATA_DIR` imewekwa `/data`
 
-### 12.5 Je, Inaweza Kuendeshwa Bila `INITIAL_PASSWORD`?
+### 12.5 Je, Inaweza Kukimbia Bila `INITIAL_PASSWORD`?
 
-Ndiyo, inaweza kuendeshwa. Itatumia nenosiri chaguomsingi la `CHANGEME`. Inapendekezwa kubadilisha nenosiri la backend haraka iwezekanavyo katika mazingira ya uzalishaji.
+Ndiyo. `INITIAL_PASSWORD` ikiwa haijawekwa, unaunda nenosiri la dashibodi katika kichawi cha uwekaji kwenye ziara ya kwanza (sehemu ya 5.2 inashughulikia tokeni ya wakati mmoja ya bootstrap na hatua ya nenosiri).
 
 ---
 

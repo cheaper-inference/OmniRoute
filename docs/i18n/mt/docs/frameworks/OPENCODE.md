@@ -4,14 +4,11 @@
 
 ---
 
-> **Status:** Disponibbli b’mod ġenerali.
-> **Udjenza:** Operaturi li qed jikkollegaw OpenCode ma’ installazzjoni ta’ OmniRoute.
-> **Sors awtorevoli (skema tal-konfigurazzjoni):** `src/shared/services/opencodeConfig.ts`
-> **Sors awtorevoli (pakkett npm):** `@omniroute/opencode-provider/` (workspace li jista’ jiġi ppubblikat)
+> **Status:** Ġeneralment disponibbli.** Udjenza:** Operaturi wiring OpenCode għal OmniRoute deployment.** Sors tal-verità (config schema):** `src/shared/services/opencodeConfig.ts`** Pakketti npm rakkomandati:** `@omniroute/opencode-plugin/` (OpenCode v1, installat minn `omniroute setup opencode`) u `@omniroute/opencode-plugin-v2/` (OpenCode v2). Il-pakkett `@omniroute/opencode-provider/` antik huwa** deprecated** (ara Mogħdija 2).
 
-[OpenCode](https://opencode.ai) huwa klijent tal-AI aġentiku għal CLI/desktop. Huwa jaqra l-katalgu tal-fornituri tiegħu minn `~/.config/opencode/opencode.json` (jew `opencode.jsonc`) u jsegwi l-iskema f’`https://opencode.ai/config.json`. OmniRoute jippreżenta ruħu lil OpenCode bħala wieħed minn dawk il-fornituri — kull talba tgħaddi mill-interfaċċa standard ta’ OmniRoute kompatibbli ma’ OpenAI, `/v1`, għalhekk OpenCode jibbenefika awtomatikament mir-routing ta’ Auto-Combo, circuit breakers, politiki taċ-ċwievet, osservabbiltà, eċċ.
+[OpenCode](https://opencode.ai) huwa klijent aġenti CLI/desktop AI. Jaqra l-katalgu tal-fornitur tiegħu minn `~/.config/opencode/opencode.json` (jew `opencode.jsonc`) u jsegwi l-iskema `https://opencode.ai/config.json`. OmniRoute jesponi ruħu għal OpenCode bħala wieħed minn dawk il-fornituri — kull talba tgħaddi mill-wiċċ `/v1` standard kompatibbli mal-OpenAI ta ' OmniRoute, għalhekk OpenCode jibbenefika awtomatikament minn rotta Auto-Combo, circuit breakers, politiki ewlenin, osservabilità, eċċ.
 
-Hemm **żewġ mogħdijiet ta’ integrazzjoni appoġġjati**. Agħżel wieħed — it-tnejn jiġġeneraw l-istess konfigurazzjoni.
+Din il-paġna tiddokumenta ż-żewġ mogħdijiet static-config hawn taħt; it-tnejn jiġġeneraw l-istess konfigurazzjoni. Għal lista mudell li ssegwi l-katalgu dirett tiegħek, uża l-plugin minflok: `omniroute setup opencode` jinstalla `@omniroute/opencode-plugin` (OpenCode v1), u `@omniroute/opencode-plugin-v2` jimmira OpenCode v2 (ara [l-integrazzjonijiet CLI](../guides/CLI-INTEGRATIONS.md) u l- [gwida tal-plugin OpenCode v2](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ Il-fajl li jirriżulta (katalgu predefinit tal-mudelli):
 
 ---
 
-## Mogħdija 2 — Pakkett npm `@omniroute/opencode-provider`
+## Mogħdija 2 — npm pakkett `@omniroute/opencode-provider` (deprecated)
 
-Rakkomandat meta tkun qed tikteb skript għall-konfigurazzjoni minn Node/TS (pipelines tas-CI, monorepos, flussi personalizzati tal-installatur).
+> **Deprecated.** Il-pakkett jikteb lista tal-mudelli statiċi li tgħaddi wara l-katalgu OmniRoute ħaj tiegħek. README tiegħu jirrakkomanda li jemigra lejn `@omniroute/opencode-plugin` (jew `@omniroute/opencode-plugin-v2` fuq OpenCode v2). API hawn taħt jinżamm għal skripts eżistenti biss.
+
+Użat meta ssir script tal-konfigurazzjoni minn Node/TS (pipelines CI, monorepos, flussi ta' installatur tad-dwana).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Fakultattiv: issostitwixxi l-katalgu tal-mudelli espost lil OpenCode
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Għal merge mhux distruttiv ma’ fajl eżistenti, irreplika `mergeOpenCodeConfigText()` minn `opencodeConfig.ts` jew sejjaħ il-ġeneratur CLI.
+Għal amalgamazzjoni mhux distruttiva kontra fajl eżistenti, irreplika `mergeOpenCodeConfigText()` minn `opencodeConfig.ts` jew ċempel lill-ġeneratur CLI.
 
-Ara l-[README tal-pakkett](../../@omniroute/opencode-provider/README.md) għall-API sħiħa.
+Ara l [-pakkett README](../../@omniroute/opencode-provider/README.md) ghaz- API shih.
 
 ---
 
@@ -157,7 +156,9 @@ Għal klijenti bi stil Anthropic li jibagħtu `x-api-key` + `anthropic-version`,
 
 ## Ara wkoll
 
-- [Referenza tal-API](../reference/API_REFERENCE.md) — is-superfiċje REST sħiħa ta’ OmniRoute
-- [Auto-Combo](../routing/AUTO-COMBO.md) — xi jfisser `model: "auto"`
-- [README ta’ `@omniroute/opencode-provider`](../../@omniroute/opencode-provider/README.md)
+- [API referenza](../reference/API_REFERENCE.md) — sħiħ OmniRoute REST wiċċ
+- [Auto-Combo](../routing/AUTO-COMBO.md) — xi tfisser `model: "auto"`
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (rakkomandat)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (deprecated)
 - Sors: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

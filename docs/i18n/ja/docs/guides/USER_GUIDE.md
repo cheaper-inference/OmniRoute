@@ -232,33 +232,41 @@ Claude および Claude Code 互換ルートでは、Opus と Sonnet
 
 ---
 
-## 🎨 コンボ
+## 🎨コンボ
 
-**Dashboard → Combos** で各カードのハンドルをドラッグすると、コンボカードを直接並べ替えられます。順序は SQLite に保存され、再読み込み時に復元されます。
+コンボカードを直接並べ替えることができます**ダッシュボード→コンボ**各カードのハンドルをドラッグします。注文はSQLiteに保存され、リロード時に復元されます。
 
-### 例 1: サブスクリプションを最大活用 → 安価なバックアップ
+### プロバイダー、モデル、またはアカウントを検索する
+
+コンボの作成または編集では、ステップバイステップのプロバイダー、モデル、アカウント、およびコンボ参照ピッカーにローカル検索フィールドが含まれています。表示された名前、識別子、プロバイダー エイリアス、またはモデル ソースで検索し、結果をクリックするか、矢印キーと Enter を使用します。複数の検索語はすべて一致する必要があります。検索をクリアするか Esc キーを押すと、選択した値は変更されません。
+
+自動アカウント選択は、検索中に表示されたままになります。オプションのアカウント制限リストには別のフィルターがあり、表示される結果以外の選択されたアカウントは選択されたままとなり、カウントにはそれらも含まれます。電子メールのプライバシーがオンになっている間、非表示の電子メールの断片は検索できません。ステップを追加し、通常どおりコンボを保存します。クエリを入力しても何も保存されず、テストも行われません。
+
+同じローカル検索は、接続テスト モデル、カスタムCLIのデフォルトおよびエイリアス モデル、および保存されたプロキシの選択に対して利用できます。既存の保存、適用、およびテストのアクションは別々のままです。
+
+### 例 1: サブスクリプション→格安バックアップを最大化する
 
 ```
 Dashboard → Combos → Create New
 
-名前: premium-coding
-モデル:
-  1. cc/claude-opus-4-7 (サブスクリプションのプライマリ)
-  2. glm/glm-4.7 (安価なバックアップ、$0.6/1M)
-  3. minimax/MiniMax-M2.7 (最も安価なフォールバック、$0.3/1M)
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
 
-CLI で使用: premium-coding
+Use in CLI: premium-coding
 ```
 
-### 例 2: 無料のみ（コストゼロ）
+### 例 2: 無料のみ (コストゼロ)
 
 ```
-名前: free-combo
-モデル:
-  1. if/kimi-k2.7-code (無料アクセスとして掲載。プロバイダーの制限が適用される場合があります)
-  2. kr/qwen3-coder-next (Kiro の無料フォールバック)
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
 
-コスト: 現在は $0 と記載されていますが、利用条件と提供状況は変更される可能性があります
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -404,7 +412,7 @@ omniroute autostart enable
 omniroute autostart disable
 ```
 
-### アンインストールする
+### アンインストール中
 
 OmniRouteが必要なくなった場合は、クリーンに削除するための 2 つの簡単なスクリプトが提供されています。
 
@@ -418,7 +426,7 @@ OmniRouteが必要なくなった場合は、クリーンに削除するため�
 ### VPS展開
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -500,8 +508,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -869,12 +877,12 @@ curl http://localhost:20128/api/models/catalog
 - `least-used`と`cost-optimized`
 - `auto` —すべての候補者にわたるスコア主導型
 - `lkgp` (Last Known Good Provider) —最後に成功したプロバイダーに固定し、ルールにフォールバックします。
-- `context-optimized` —最大の自由コンテキスト ウィンドウを持つモデルを選択します
-- `context-relay` —はフォローアップ ターンのためにロングコンテキスト モデルをチェーンします
+- `context-optimized` — 、最初に既知の最大のコンテキスト ウィンドウを使用してモデルを試行します。
+- `context-relay` —優先順位と、会話が別のアカウントに移動したときのハンドオフの概要
 
 #### 外部スティッキーセッションヘッダー
 
-外部セッション アフィニティ (リバース プロキシの背後にあるClaude Code/Codexエージェントなど) の場合は、次を送信します。
+外部セッション アフィニティ (たとえば、リバース プロキシの背後にあるClaude Code/Codexエージェント) の場合は、次を送信します。
 
 ```http
 X-Session-Id: your-session-key
@@ -1145,9 +1153,9 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 グローバルコンボのデフォルトは以下で設定できます。**ダッシュボード→設定→ルーティング→コンボのデフォルト**。コンボ ターゲット タイムアウトは、デフォルトで現在のリクエスト タイムアウトを継承します。使用**ターゲットタイムアウト(秒)**ターゲットごとの制限を短くすることでより高速なフォールバックをトリガーする必要がある場合にのみ、コンボのデフォルトまたは個々のコンボで使用します。
 
-ゼロレイテンシのコンボ最適化はオプトインです。離れる**ゼロレイテンシーの最適化**これらのレイテンシ機能がフォールバック ターゲットと競合したり、 TTFT履歴に基づいてターゲットをスキップしたり、フォールバック リクエストを圧縮したりするのを防ぐために無効化されます。これを有効にすると、構成されたヘッジ、予測TTFTスキップ、プロアクティブなフォールバック圧縮が可能になり、 routing/request忠実度を犠牲にしてテール レイテンシを低くすることができます。
+ゼロレイテンシのコンボ最適化はオプトインです。離れる**ゼロレイテンシーの最適化**これらのレイテンシ機能がフォールバック ターゲットと競合したり、 TTFT履歴に基づいてターゲットをスキップしたり、フォールバック リクエストを圧縮したりするのを防ぐために無効になります。これを有効にすると、構成されたヘッジ、予測TTFTスキップ、プロアクティブなフォールバック圧縮が可能になり、 routing/request忠実度を犠牲にしてテール レイテンシを低くすることができます。
 
-無効にする**推論トークンバッファ**アップストリームプロバイダーが厳格な`max_tokens` / `maxOutputTokens`制限を必要とする場合。コンボ ルーティングを有効にすると、既知の出力上限を持つモデルに対して推論モデルのヘッドルームのみが追加され、安全なバッファリングされた値がその上限を超える場合、クライアント トークンの制限は変更されません。クライアント制限がすでに既知の上限を超えている場合、 OmniRouteアップストリーム要求を送信する前に制限をその上限までクランプします。
+無効にする**推論トークンバッファ**上流プロバイダーが厳格な`max_tokens` / `maxOutputTokens`制限を必要とする場合。コンボ ルーティングを有効にすると、既知の出力上限を持つモデルに対して推論モデルのヘッドルームのみが追加され、安全なバッファリングされた値がその上限を超える場合、クライアント トークンの制限は変更されません。クライアント制限がすでに既知の上限を超えている場合、 OmniRouteアップストリーム要求を送信する前に制限をその上限までクランプします。
 
 ---
 
@@ -1164,7 +1172,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **署名キャッシュ**           | 重複排除キャッシュの統計 (アクティブなキー、ヒット率)      |
 | **レイテンシーテレメトリー** | プロバイダーごとのp50/p95/p99レイテンシの集計              |
 
-**プロのヒント:** [ヘルス] ページは 10 秒ごとに自動更新されます。サーキット ブレーカー カードを使用して、どのプロバイダーで問題が発生しているかを特定します。
+**プロのヒント:** [ヘルス] ページは 10 秒ごとに自動更新されます。サーキット ブレーカー カードを使用して、問題が発生しているプロバイダーを特定します。
 
 ---
 
@@ -1317,34 +1325,36 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ---
 
-## 💻 内部 CLI
+## 💻内部CLI
 
-OmniRoute には、セットアップ、診断、ランタイム制御用の内部 CLI（`omniroute …`）が付属しています。これは、サードパーティー製 CLI（Claude Code、Cursor、Codex、Cline など）が OmniRoute と通信できるように設定する、ダッシュボードの「CLI ツール」ページとは**別のものです**。
+OmniRouteは、セットアップ、診断、およびランタイム制御用の内部CLI (`omniroute …`) が同梱されています。これは**ダッシュボードの「CLI Tools」ページとは別のもの**、サードパーティのCLIs (Claudeコード、 Cursor、 Codex、 Clineなど) を構成して、 OmniRouteと通信できるようにします。
 
 ```bash
-omniroute setup                    # 対話形式のウィザード（パスワード、プロバイダー、コンボ）
-omniroute setup --non-interactive  # CI 向け
-omniroute doctor                   # ヘルス診断（データディレクトリ、DB、プロバイダー、ポート）
-omniroute providers available      # サポートされているプロバイダーを一覧表示
-omniroute providers list           # 設定済みの接続を一覧表示
-omniroute providers test <id>      # プロバイダー接続をリアルタイムでテスト
-omniroute combos list              # コンボを一覧表示
-omniroute combos switch <name>     # デフォルトのコンボを設定
-omniroute models                   # 利用可能なモデルを一覧表示（--json、--search）
-omniroute keys add | list | remove # ターミナルから API キーを管理
-omniroute backup                   # 設定と DB のスナップショットを作成
-omniroute restore [<timestamp>]    # スナップショットから復元
-omniroute health                   # 詳細なヘルス情報（ブレーカー、キャッシュ、メモリ）
-omniroute quota                    # プロバイダーのクォータ使用量
-omniroute mcp status               # MCP サーバーのステータス
-omniroute a2a status               # A2A サーバーのステータス
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok トンネル
-omniroute reset-password           # 管理者パスワードをリセット
-omniroute --mcp                    # stdio 経由で MCP サーバーを起動
-omniroute --port 3000              # カスタムポートでサーバーを起動
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-ヒント: `omniroute doctor --json` を監視ツールと組み合わせることで、プロバイダー接続に問題がある場合にアラートを発行できます。
+ヒント: `omniroute doctor --json`監視ツールと組み合わせて、壊れたローカル インストールについて警告します。 `doctor`プロバイダー接続をテストしません。それには`omniroute providers test <id>`使用します。
 
 ---
 

@@ -62,42 +62,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute зберігає токен і відразу виконує тестовий пошук з одним результатом; якщо Notion
 повертає об'єкт помилки, токен видаляється, а виклик завершується помилкою `400`.
 
-## Інструменти MCP (6)
+## інструменти MCP (6)
 
-Визначені в `open-sse/mcp-server/tools/notionTools.ts`. Токен визначається під час виклику
-через `getNotionToken()`; якщо його не налаштовано, інструмент повертає виняток
-`"Токен інтеграції Notion не налаштовано. Установіть його в Налаштування > Джерела контексту."`
+Визначено в `open-sse/mcp-server/tools/notionTools.ts`. Маркер розпізнається під час виклику через `getNotionToken()`; якщо жодного не налаштовано, інструмент видає `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Інструмент                   | Область доступу | Опис                                                                                                          |
-| ---------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`   | Пошук сторінок і баз даних за текстовим запитом (повертає назви, ідентифікатори та URL-адреси). З пагінацією. |
-| `notion_get_page`            | `read:notion`   | Отримання вмісту й метаданих сторінки за її ідентифікатором.                                                  |
-| `notion_list_block_children` | `read:notion`   | Виведення списку всіх дочірніх блоків блоку або сторінки (дерева блоків). З пагінацією.                       |
-| `notion_query_database`      | `read:notion`   | Запит до бази даних із необов'язковими `filter` + `sorts` (формат API Notion). З пагінацією.                  |
-| `notion_get_database`        | `read:notion`   | Отримання схеми/метаданих бази даних за ідентифікатором.                                                      |
-| `notion_append_blocks`       | `write:notion`  | Додавання дочірніх блоків до наявного блоку або сторінки (щонайбільше 100 блоків на запит).                   |
+| Інструмент                   | Область застосування | опис                                                                                                           |
+| ---------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`        | Пошук сторінок і баз даних за текстовим запитом (повертає заголовки, IDs, URLs). Пагінований.                  |
+| `notion_get_page`            | `read:notion`        | Отримати вміст і метадані сторінки за її ID.                                                                   |
+| `notion_list_block_children` | `read:notion`        | Список усіх дочірніх блоків блоку або сторінки (дерево блоків). Пагінований.                                   |
+| `notion_query_database`      | `read:notion`        | Зробіть запит до бази даних за допомогою необов’язкового `filter` + `sorts` (формат Notion API ). Пагінований. |
+| `notion_get_database`        | `read:notion`        | Отримайте schema/metadata бази даних за допомогою ID.                                                          |
+| `notion_append_blocks`       | `write:notion`       | Додайте дочірні блоки до існуючого блоку або сторінки (максимум 100 блоків на запит).                          |
 
 ### Вхідні параметри
 
-- `notion_search` — `query` (1–500 символів), `pageSize` (1–100, типове значення — 20),
-  `startCursor` (необов'язковий).
-- `notion_get_page` — `pageId` (32-символьне шістнадцяткове значення або UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, типове значення — 50),
-  `startCursor` (необов'язковий).
-- `notion_query_database` — `databaseId`, `filter` (необов'язковий, у форматі фільтра Notion),
-  `sorts` (необов'язковий масив), `pageSize` (1–100, типове значення — 50), `startCursor` (необов'язковий).
+- `notion_search` — `query` (1–500 символів), `pageSize` (1–100, за замовчуванням 20), `startCursor` (необов’язково).
+- `notion_get_page` — `pageId` (32-символьний hex або UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, за замовчуванням 50), `startCursor` (необов’язково).
+- `notion_query_database` — `databaseId`, `filter` (необов’язково, формат фільтра Notion ), `sorts` (необов’язковий масив), `pageSize` (1–100, за замовчуванням 50), `startCursor` (необов’язково).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (масив об'єктів блоків),
-  `after` (необов'язкова позиція).
+- `notion_append_blocks` — `blockId`, `children` (масив блокових об’єктів), `after` (опціональна позиція).
 
-### Області доступу
+### Області застосування
 
-Інструменти читання потребують `read:notion`, а інструмент запису — `write:notion`.
-Області доступу примусово перевіряються функцією `withScopeEnforcement()` у
-`open-sse/mcp-server/server.ts`, лише коли `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; дозволені
-для виклику області доступу надходять із `OMNIROUTE_MCP_SCOPES` (значення, розділені комами)
-або з контексту областей доступу автентифікованого ключа API. Повну модель областей доступу
-наведено в [MCP-SERVER.md](./MCP-SERVER.md).
+Для інструментів читання потрібен `read:notion`, а для запису – `write:notion`. Області примусово застосовуються `withScopeEnforcement()` у `open-sse/mcp-server/server.ts`, коли `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, і завжди для абонента HTTP/SSE, чий ключ API не містить `manage`/`admin`; Дозволені області дії абонента походять із `OMNIROUTE_MCP_SCOPES` (розділених комами) або контексту області видимості автентифікованого ключа API. Див. [MCP-SERVER.md](./MCP-SERVER.md) для повної моделі.
 
 ## Кінцеві точки
 

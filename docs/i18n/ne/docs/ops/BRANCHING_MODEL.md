@@ -47,12 +47,12 @@ flowchart LR
 
 - जमेको `release/vX.Y.Z` त्यो जहाजको लागि रिलिज कप्तानको हो।
 - अर्को चक्रको `release/vX+1` जमेको टिपबाट काटिएको छ त्यसैले योगदानकर्ताहरूले अवतरण कार्य जारी राख्छन्।
-- खुला PRs जुन अझै पनि जमेको शाखा लक्षित हुनुपर्छ** पुन: लक्षित** सक्रिय (उच्चतम) `release/v*` शाखामा।
+- खुल्ला PRs जुन अझै पनि जमेको शाखा लक्षित हुनुपर्छ** पुन: लक्षित** सक्रिय (उच्चतम) `release/v*` शाखामा।
 
 तपाईले चाहानु भएको शाखा मर्जयोग्य छ भनी मान्नु अघि खुला फ्रिजको लागि जाँच गर्नुहोस्:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 मर्ज मेकानिक्स (मालिक `queue` लेबल → Mergify) लाई [MERGE_TRAIN.md](./MERGE_TRAIN.md) मा दस्तावेज गरिएको छ।

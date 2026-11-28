@@ -271,95 +271,95 @@ Dzieje się to jednorazowo przy pierwszym uruchomieniu po aktualizacji. Użyj `m
 
 ---
 
-## Rynek darmowych serwerów proxy 1proxy
+## 1proxy Bezpłatny rynek proxy
 
-> 🆕 **Wkład od [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (zgłoszenie [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** Dodane przez [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Problem [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute integruje się z platformą społecznościową **[1proxy](https://1proxy-api.aitradepulse.com)**, zapewniając dostęp do **setek darmowych, zweryfikowanych serwerów proxy** z całego świata. Jest to idealne rozwiązanie dla użytkowników, którzy nie mają własnej infrastruktury proxy.
+OmniRoute integruje się z** [1 serwer proxy](https://1proxy-api.aitradepulse.com)** platforma społecznościowa, do której można uzyskać dostęp** setki bezpłatnych, zweryfikowanych serwerów proxy** z całego świata. Jest to idealne rozwiązanie dla użytkowników, którzy nie mają własnej infrastruktury proxy.
 
 ### Jak to działa
 
 ```
-┌─────────────┐  Synchronizacja ┌─────────────────┐    Rotacja    ┌──────────┐
-│  1proxy API │ ──────────────▶ │  proxy_registry  │ ────────────▶ │ Dostawca │
-│ (zewnętrzne)│   do 500 proxy  │  source=oneproxy │ wg jakości    │   API    │
-└─────────────┘                 └─────────────────┘                └──────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Synchronizacja** — OmniRoute pobiera zweryfikowane serwery proxy z 1proxy API
-2. **Przechowywanie** — Serwery proxy są zapisywane w tej samej tabeli `proxy_registry` z wartością `source = 'oneproxy'`
-3. **Filtrowanie** — Filtrowanie według protokołu, kraju i oceny jakości
-4. **Rotacja** — Wybór najlepszego serwera proxy przy użyciu strategii jakościowej, losowej lub sekwencyjnej
-5. **Automatyczne obniżanie oceny** — Serwery proxy, które zawiodły, otrzymują niższą ocenę jakości; poniżej progu → zostają oznaczone jako nieaktywne
+1. **Synchronizuj** — OmniRoute pobiera sprawdzone proxy z 1proxy API
+2. **Sklep** — Proxy są zapisywane w tej samej tabeli `proxy_registry` co `source = 'oneproxy'`
+3. **Filtr** — Filtruj według protokołu, kraju i wyniku jakości
+4. **Obracać** — Wybierz najlepszy serwer proxy, korzystając ze strategii jakościowej, losowej lub sekwencyjnej
+5. **Autodegradacja** — Nieudane serwery proxy mają obniżony wynik jakości; poniżej progu → oznaczony jako nieaktywny
 
 ### Synchronizowanie serwerów proxy
 
 **Za pośrednictwem panelu:**
 
-1. Przejdź do karty **Ustawienia → 1proxy**
-2. Kliknij **„Synchronizuj teraz”**
-3. Wyświetl statystyki: łączna liczba serwerów proxy, liczba aktywnych, średnia jakość i zestawienie według krajów
+1. Idź do** Ustawienia → 1proxy** patka
+2. Trzask** „Synchronizuj teraz”**
+3. Zobacz statystyki: łączna liczba serwerów proxy, liczba aktywnych, średnia jakość, podział według krajów
 
-**Za pośrednictwem API:**
+**Przez API:**
 
 ```bash
-# Uruchom synchronizację
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Odpowiedź:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
 ### Filtrowanie serwerów proxy
 
 ```bash
-# Filtruj według protokołu
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Filtruj według kraju
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Filtruj według minimalnej oceny jakości
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Łącz filtry
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### Oceny jakości serwerów proxy
+### Wyniki jakości proxy
 
 Każdy serwer proxy 1proxy zawiera metadane:
 
-| Pole            | Opis                                          |
-| --------------- | --------------------------------------------- |
-| `qualityScore`  | Ocena 0-100 uzyskana podczas walidacji 1proxy |
-| `latencyMs`     | Zmierzone opóźnienie sieciowe                 |
-| `anonymity`     | `transparent`, `anonymous` lub `elite`        |
-| `googleAccess`  | Czy serwer proxy ma dostęp do usług Google    |
-| `countryCode`   | Dwuliterowy kod kraju ISO                     |
-| `lastValidated` | Znacznik czasu ostatniej walidacji            |
+| Pole            | Opis                                                          |
+| --------------- | ------------------------------------------------------------- |
+| `qualityScore`  | Ocena 0-100 z walidacji 1proxy                                |
+| `latencyMs`     | Zmierzone opóźnienie sieci                                    |
+| `anonymity`     | `transparent`, `anonymous` lub `elite`                        |
+| `googleAccess`  | Określa, czy serwer proxy może uzyskać dostęp do usług Google |
+| `countryCode`   | Dwuliterowy kod kraju ISO                                     |
+| `lastValidated` | Znacznik czasu ostatniej walidacji                            |
 
-Oceny jakości są dynamicznie dostosowywane:
+Wyniki jakości są dostosowywane dynamicznie:
 
-- **Nieudane żądania** obniżają ocenę o 10 punktów
-- **Spadek oceny do ≤10** → serwer proxy zostaje oznaczony jako `inactive`
-- Nieaktywne serwery proxy są wykluczane z rotacji
+- **Nieudane żądania** obniżyć wynik o 10 punktów
+- **Wynik spada do ≤ 10** serwer proxy → jest oznaczony jako `inactive`
+- Nieaktywne proxy są wyłączone z rotacji
 
-### Strategie rotacji
+### Strategie rotacyjne
 
 ```bash
-# Rotacja według jakości (najlepszy serwer proxy jako pierwszy) — domyślna
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Rotacja losowa
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# Rotacja sekwencyjna (najpierw najdawniej zweryfikowany)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
@@ -368,53 +368,53 @@ curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
 
 Synchronizacja 1proxy ma wbudowany wyłącznik automatyczny:
 
-- Po **5 kolejnych nieudanych synchronizacjach** dalsze próby synchronizacji są blokowane
-- Zresetuj za pomocą: `resetOneproxyCircuitBreaker()` lub uruchom ponownie serwer
-- Stan synchronizacji jest dostępny pod adresem `GET /api/settings/oneproxy?action=status`
+- Po** 5 kolejnych błędów synchronizacji** , dalsze próby synchronizacji zostaną zablokowane
+- Zresetuj za pomocą: `resetOneproxyCircuitBreaker()` lub zrestartuj serwer
+- Stan synchronizacji jest dostępny na `GET /api/settings/oneproxy?action=status`
 
-### Usuwanie serwerów proxy 1proxy
+### Czyszczenie 1proxy proxy
 
 ```bash
-# Usuń pojedynczy serwer proxy 1proxy
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# Usuń WSZYSTKIE serwery proxy 1proxy (ręcznie dodane serwery proxy pozostaną bez zmian)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
 ---
 
-## Ochrona przed wykrywaniem i tryb niewidoczny
+## Ochrona przed wykrywaniem i ukrywanie się
 
-OmniRoute nie tylko przekierowuje ruch przez serwer proxy — sprawia również, że ruch wygląda wiarygodnie:
+OmniRoute nie tylko kieruje ruch przez serwer proxy — ale sprawia, że ruch wygląda na legalny:
 
-### Podszywanie się pod odcisk TLS
+### TLS Fałszowanie odcisków palców
 
-Wykorzystuje `wreq-js` do generowania odcisków TLS przypominających te używane przez przeglądarki, omijając systemy wykrywania botów, które oznaczają uzgodnienia TLS niepochodzące z przeglądarek.
+Używa `wreq-js` do generowania odcisków palców TLS podobnych do przeglądarki, omijając systemy wykrywania botów, które flagują uściski dłoni TLS inne niż przeglądarka.
 
-### Dopasowywanie odcisku CLI
+### CLI Dopasowanie odcisków palców
 
-**Przełącznik odcisku CLI** (`Ustawienia → Bezpieczeństwo`) zmienia kolejność nagłówków HTTP i pól treści JSON, aby dokładnie odpowiadały sygnaturze natywnych plików binarnych CLI (Claude Code, Codex itp.). Działa to **niezależnie od** serwera proxy:
+The**CLI Przełącznik odcisku palca** (`Settings → Security`) zmienia kolejność nagłówków HTTP i pól treści JSON, aby dopasować je do dokładnego podpisu natywnych plików binarnych CLI (kod Claude, Codex itp.). To działa** na górze** pełnomocnik:
 
 ```
-Twój adres IP (zablokowany) → Adres IP proxy (USA) → API dostawcy
-                               + podszywanie się pod TLS
-                               + odcisk CLI
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-Uzyskujesz jednocześnie **maskowanie adresu IP** i **autentyczność żądań**.
+Dostajesz oba** maskowanie IP** I** poproś o autentyczność** jednocześnie.
 
-### Zachowywanie adresu IP proxy
+### Pełnomocnik IP Konserwacja
 
-Oznaczone kolorami plakietki w panelu pokazują, który poziom proxy jest aktywny:
+Oznaczone kolorami plakietki na pulpicie nawigacyjnym pokazują, który poziom proxy jest aktywny:
 
-| Plakietka | Poziom     | Znaczenie                                       |
-| --------- | ---------- | ----------------------------------------------- |
-| 🟢        | Globalny   | Cały ruch przechodzi przez ten serwer proxy     |
-| 🟡        | Dostawca   | Przez proxy przechodzi tylko ruch tego dostawcy |
-| 🔵        | Połączenie | To konkretne konto lub klucz używa tego proxy   |
+| Odznaka | Poziom     | Oznaczający                                                 |
+| ------- | ---------- | ----------------------------------------------------------- |
+| 🟢      | Światowy   | Cały ruch przechodzi przez ten serwer proxy                 |
+| 🟡      | Dostawca   | Tylko ruch tego dostawcy jest przesyłany przez serwer proxy |
+| 🔵      | Połączenie | Ta konkretna key/account używa tego proxy                   |
 
-Plakietka pokazuje również ustalony adres IP proxy w celu weryfikacji.
+Odznaka pokazuje również rozwiązany serwer proxy IP w celu weryfikacji.
 
 ---
 
@@ -781,50 +781,26 @@ rozłóż obciążenie)
 
 ## Automatyczne wykluczanie awarii dla własnych serwerów proxy
 
-Pula marketplace 1proxy już samoczynnie obniża priorytet serwerów proxy, które uległy awarii (zobacz
-[Oceny jakości serwerów proxy](#proxy-quality-scores)). W przypadku serwerów proxy dodanych przez
-**Ciebie** do rejestru działający w tle harmonogram kontroli stanu
-(`src/lib/proxyHealth/scheduler.ts`) zapewnia takie samo zachowanie polegające na
-„automatycznym wykluczaniu niedziałającego elementu z łańcucha”, bez usuwania czegokolwiek:
+Pula 1proxy marketplace już sama automatycznie degraduje uszkodzone serwery proxy (zobacz [Wyniki Jakości serwerów proxy](#proxy-quality-scores) ). Dla proxy** Ty** dodany do rejestru harmonogram kondycji tła (`src/lib/proxyHealth/scheduler.ts`) zapewnia to samo zachowanie „automatycznie wykluczaj martwego członka z łańcucha”, bez usuwania czegokolwiek:
 
 ```bash
-# .env — wyłącz programowo serwer proxy po 3 kolejnych nieudanych testach i włącz go ponownie
-# automatycznie, gdy zacznie ponownie odpowiadać na testy.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Jak to działa w łańcuchu z wieloma serwerami proxy:
+Jak to pasuje do łańcucha z wieloma serwerami proxy:
 
-1. Harmonogram testuje każdy zarejestrowany serwer proxy co `PROXY_HEALTH_INTERVAL_MS`
-   (domyślnie 10 min; minimum 1 min).
-2. Po `PROXY_AUTO_REMOVE_AFTER` kolejnych **jednoznacznych** niepowodzeniach (rzeczywista
-   awaria połączenia — przekroczenie limitu czasu ani odpowiedź 5xx samego celu testowego nigdy się
-   nie liczą; zobacz [Sprawdzanie stanu serwerów proxy](#proxy-health-checking-v3816)) wartość `status`
-   serwera proxy zostaje ustawiona na `dead`.
-3. `dead` jest jednym ze statusów wykluczanych przez filtr aktywnych statusów używany podczas
-   wyboru z puli/rotacji, więc mechanizm rotacji danego zakresu (round-robin / losowy / sticky /
-   według opóźnienia — zobacz [Drzewo decyzyjne strategii rotacji](#rotation-strategy-decision-tree))
-   natychmiast przestaje przydzielać ten serwer proxy do nowych żądań. Nie ma to wpływu na żadne
-   inne serwery proxy w puli, a cała pula nigdy nie przełącza się po cichu na połączenie
-   bezpośrednie — zobacz zabezpieczenie fail-closed w
-   [4-poziomowym systemie proxy](#4-level-proxy-system).
-4. Harmonogram nadal testuje serwery proxy ze statusem `dead` w tym samym interwale. Następny
-   pomyślny test zmienia wartość `status` z powrotem na `active`, a serwer ponownie dołącza do
-   rotacji — bez konieczności ręcznego dodawania go ponownie.
+1. Program planujący sonduje każdy zarejestrowany serwer proxy co każde `PROXY_HEALTH_INTERVAL_MS` (domyślnie 10 minut; minimalnie 1 minuta).
+2. Po `PROXY_AUTO_REMOVE_AFTER` kolejnych** rozstrzygający** awarie (rzeczywisty błąd połączenia — przekroczenie limitu czasu lub własne 5xx celu sondy nigdy się nie liczy, zobacz [Sprawdzanie stanu serwera proxy](#proxy-health-checking-v3816) ), `status` serwera proxy jest ustawione na `dead`.
+3. `dead` to jeden ze statusów, który wyklucza filtr stanu aktywności używany przez rozdzielczość pool/rotation, więc rotacja zakresu (działanie okrężne / losowe / lepkie / opóźnienie / sesja — patrz [Drzewo decyzyjne strategii rotacji](#rotation-strategy-decision-tree) ) natychmiast przestaje przekazywać ten serwer proxy nowym żądaniom. Nie ma to wpływu na żadne inne serwery proxy w puli, a cała pula nigdy po cichu nie powraca do bezpośredniego połączenia. — patrz [4-poziomowy system proxy](#4-level-proxy-system) zapewniający zabezpieczenie przed awarią.
+4. Program planujący sprawdza serwery proxy `dead` w tych samych odstępach czasu. Następna udana sonda odwraca `status` z powrotem do `active` i ponownie wchodzi w rotację — nie jest wymagane ręczne ponowne dodawanie.
 
-Ta funkcja jest celowo **opcjonalna i niedestrukcyjna**: domyślnie harmonogram jedynie
-zlicza i rejestruje niepowodzenia (zobacz politykę C w `decision.ts`), a
-`PROXY_AUTO_DISABLE` nigdy nie usuwa wiersza — do tego służy osobna, bardziej agresywna
-flaga `PROXY_AUTO_REMOVE`. Jeśli obie flagi mają wartość `true`, pierwszeństwo ma
-`PROXY_AUTO_REMOVE` (programowe wyłączanie serwera proxy tuż przed jego usunięciem nie ma
-sensu). Pełną listę zmiennych zawiera dokumentacja
-[Konfiguracja środowiska](../reference/ENVIRONMENT.md).
+To jest celowe** dobrowolne i nieniszczące** : domyślnie program planujący zlicza i rejestruje tylko awarie (zobacz politykę C w `decision.ts`), a `PROXY_AUTO_DISABLE` nigdy nie usuwa wiersza —, do czego służy osobna, bardziej agresywna flaga `PROXY_AUTO_REMOVE`. Jeśli oba są ustawione na `true`, wygrywa `PROXY_AUTO_REMOVE` (proxy, które ma zostać usunięte, nie ma zastosowania do miękkiego wyłączania pomiędzy). Pełną listę zmiennych znajdziesz w dokumentacji [konfiguracji środowiska](../reference/ENVIRONMENT.md).
 
 ---
 
-> 📖 **Powiązana dokumentacja:**
+> 📖** Powiązana dokumentacja:**
 >
-> - [Podręcznik użytkownika](../guides/USER_GUIDE.md) — Ogólna konfiguracja i ustawienia
-> - [Dokumentacja API](../reference/API_REFERENCE.md) — Pełna dokumentacja API
-> - [Konfiguracja środowiska](../reference/ENVIRONMENT.md) — Wszystkie zmienne środowiskowe
+> - [Podręcznik użytkownika](../guides/USER_GUIDE.md) — Ogólna konfiguracja i konfiguracja - [API Odniesienie](../reference/API_REFERENCE.md) — Pełna dokumentacja API - [Konfiguracja środowiska](../reference/ENVIRONMENT.md) — Wszystkie zmienne środowiskowe

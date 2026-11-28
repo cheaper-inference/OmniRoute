@@ -151,30 +151,30 @@ Teman för fas 6–7:
 - [ ] Lägg till regressionstester för varje ej täckt produktionsfel som åtgärdas under arbetet mot 90 %
 - [ ] Höj täckningsgränsen i CI först när den lokala baslinjen är stabil under minst två körningar i följd
 
-## Ratchet-policy
+## Ratchet policy
 
-Uppdatera tröskelvärdena för `npm run test:coverage` först när projektet faktiskt överträffar nästa milstolpe med god marginal.
+Uppdatera `npm run test:coverage` -trösklar först efter att projektet faktiskt överskrider nästa milstolpe med en bekväm buffert.
 
-**Nuvarande gräns:** `npm run test:coverage` kräver **60 satser / 60 rader / 60 funktioner / 60 grenar** (mätvärdet baserades om i Quality-Gates fas 6A.1 – den tidigare baslinjen på 82,58 % var överdriven eftersom den räknade testfiler och exkluderade `open-sse`). Kommandot `test:coverage:legacy` bevarar det gamla mätvärdet 50/50/50 för historisk jämförelse.
+**Nuvarande grind:** `npm run test:coverage` upprätthåller** 60 satser / 60 rader / 60 funktioner / 60 grenar** (måttet baserades om i Quality-Gates Fase 6A.1 — den tidigare 82,58 % baslinjen var uppblåst eftersom den räknade testfiler och exkluderade `open-sse`). Kommandot `test:coverage:legacy` bevarar det gamla 50/50/50 -måttet för historisk jämförelse.
 
-För ad hoc-kontroller av tröskelvärden mot den senaste rapporten, använd:
+För ad hoc-tröskelkontroller mot den senaste rapporten använd:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Rekommenderad ratchet-sekvens (ordningen är `satser-rader / grenar / funktioner`):
+Rekommenderad spärrsekvens (ordningen är `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- nuvarande gräns (75/70/75)
+5. 75/70/72 <-- nuvarande gate (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Nästa ratchet-mål är `80/75/78` när grentäckningen håller sig över 78 % under två körningar i följd.
+Nästa spärrmål är `80/75/78` när grentäckningen håller över 78 % under två på varandra följande körningar.
 
 ## Känd lucka
 

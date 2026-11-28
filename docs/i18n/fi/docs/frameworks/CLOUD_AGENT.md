@@ -66,7 +66,7 @@ Synkronointi on **laiskaa**: tila päivitetään ylävirrasta jokaisella `GET /t
 Taustalla toimivaa kyselymekanismia ei ole. Ajantasaista tilaa tarvitsevien hallintapaneelien tulee kutsua GET-
 päätepistettä sopivin väliajoin.
 
-## `CloudAgentBase`-rajapinta
+## `CloudAgentBase` käyttöliittymä
 
 Lähde: `src/lib/cloudAgent/baseAgent.ts`
 
@@ -110,15 +110,15 @@ export abstract class CloudAgentBase {
     c: AgentCredentials
   ): Promise<{ name: string; url: string; branch?: string }[]>;
 
-  protected mapStatus(raw: string): CloudAgentStatus; // heuristinen ylävirran merkkijono → enumeraatio
+  protected mapStatus(raw: string): CloudAgentStatus; // heuristic upstream-string → enum
   protected generateTaskId(): string; // `task_<ts>_<rand>`
   protected generateActivityId(): string; // `act_<ts>_<rand>`
 }
 ```
 
-`CodexCloudAgent.approvePlan` aiheuttaa tarkoituksella poikkeuksen — Codex Cloud suunnittelee automaattisesti eikä siinä ole hyväksyntävaihetta. `CodexCloudAgent.listSources` palauttaa arvon `[]`.
+`CodexCloudAgent.approvePlan` heittää tarkoituksella — Codex -pilvisuunnittelun, eikä sillä ole hyväksyntäporttia. `CodexCloudAgent.listSources` palauttaa `[]`.
 
-`CursorCloudAgent` ohjaa Cursorin Background / Cloud Agents -agentteja sen virallisen REST-rajapinnan (`api.cursor.com/v0`) kautta käyttäen **käyttäjän tai palvelutilin API-avainta** — tämä on turvallisempi, Cursorin oma vaihtoehto Cursor IDE:n OAuth-istunnon uudelleenkäytölle (palveluntarjoaja `cursor`, johon liittyy varoitus käyttökiellon riskistä). Se on tavallinen REST-sovitin (ei natiivia `@cursor/sdk`-riippuvuutta). `approvePlan` aiheuttaa poikkeuksen (Cursor-agentit toimivat itsenäisesti); `listSources` luettelee avaimella käytettävissä olevat tietovarastot. Cursor palauttaa suuraakkosin kirjoitetut tilaluettelot (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`), jotka muunnetaan eksplisiittisesti yhteiseen `CloudAgentStatus`-tyyppiin. `baseUrl` voidaan ohittaa tunnistetietokohtaisesti, joten API-versio tai -polku voidaan korjata ilman koodimuutosta.
+`CursorCloudAgent` ohjaa Cursor:n tausta-/pilviagentteja virallisen REST API (`api.cursor.com/v0`) kautta** käyttäjä- tai palvelutilin API avain** — turvallisempi, ensimmäisen osapuolen vaihtoehto Cursor IDE:n OAuth istunnon uudelleenkäytölle (palveluntarjoaja `cursor`, joka sisältää varoituksen kieltoriskistä). Se on tavallinen REST sovitin (ei `@cursor/sdk` natiivista riippuvuutta). `approvePlan` -heitot (Cursor agentit juoksevat itsenäisesti); `listSources` luettelee avaimella saavutettavat arkistot. Cursor palauttaa UPPERCASE -tilanumerot (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`), jotka on kuvattu eksplisiittisesti jaettuun `CloudAgentStatus` hen. `baseUrl` on ohitettavissa tunnistekohtaisesti, joten API version/path voidaan korjata ilman koodin muutosta.
 
 ## Toimialatyypit
 

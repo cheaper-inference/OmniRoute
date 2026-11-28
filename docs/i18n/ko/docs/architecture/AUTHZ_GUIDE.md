@@ -4,12 +4,11 @@
 
 ---
 
-> **신뢰할 수 있는 출처:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **최종 업데이트:** 2026-09-22 — 스코프 네임스페이스는 MCP-SERVER.md를 가리킵니다.
+> **진실의 출처:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute는 모든 API 요청을 제어하는 경로 인식 권한 부여 파이프라인을 가지고 있습니다. 분류는 **결정론적**이며 **실패 시 닫힘(fail-closed)**입니다. 분류할 수 없는 모든 것은 `MANAGEMENT`로 처리되어 세션 또는 관리 등급 토큰을 요구합니다. 이 페이지는 경로를 유지 관리하거나 새로운 엔드포인트를 설계하는 엔지니어를 위한 모델을 설명합니다.
+OmniRoute 에는 모든 API 요청을 제어하는 경로 인식 인증 파이프라인이 있습니다. 분류는** 결정론적인** 그리고** 페일클로즈** — 분류할 수 없는 모든 것은 `MANAGEMENT` 로 끝나고 세션 또는 관리 등급 토큰을 요구합니다. 이 페이지에서는 경로를 유지 관리하거나 새 끝점을 설계하는 엔지니어를 위한 모델을 설명합니다.
 
-![AuthZ 파이프라인 (3가지 경로 클래스 + 정책 평가)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > 출처: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -176,7 +175,7 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) — 항상 `allow({ kind: "anonymous", id: "anonymous" })` 반환합니다.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer를 추출하고 `validateApiKey()` 통해 유효성을 검사합니다. 유효한 `REQUIRE_API_KEY` 기능 플래그가 비활성화된 경우에만 익명으로 전환됩니다. 유효 플래그는 `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`)를 통해 확인되므로 대시보드 기능 플래그와 환경 변수는 `/api/v1/*`, `/api/v1beta/*` 및 별칭을 일관되게 관리합니다. 해결 프로그램 오류가 실패로 종료되었습니다. 클라이언트 API 경로(대시보드 모델 카탈로그에서 사용되는 `/api/v1/models` 포함)에 대한 대시보드 세션 요청을 허용합니다. Entra ID SSO 활성화되면 구조적으로 Entra 토큰(3개의 base64url 세그먼트, `RS*` alg, `kid`)인 Bearer가 SSO 분기에 의해 처리됩니다.** ~ 전에** `validateApiKey()` 및 해당 평결은 최종 — 입니다. 이는 API 키 경로 또는 익명으로 저하 분기를 통과하지 않으므로 ID 제공자 중단은 공개 액세스가 될 수 없습니다. 정적 API 키는 영향을 받지 않습니다. [Entra ID SSO](../security/ENTRA_SSO.md) 참조하세요.
-- **`managementPolicy`** (`policies/management.ts`) — 대시보드 세션, 내부 모델 동기화 요청( `/api/providers/[name]/(sync-models|models)` 와 일치)을 수락하거나 `isAuthRequired()` false를 반환하는 경우 완전히 건너뜁니다. Bearer 토큰이 있지만 유효하지 않은 경우 403(`AUTH_001`)을 반환하고, 그렇지 않으면 401을 반환합니다. 또한 인증 분기 — 이전에 경로 보호 계층(LOCAL_ONLY / ALWAYS_PROTECTED)을 적용합니다. [경로 보호 계층을](../security/ROUTE_GUARD_TIERS.md) 참조하세요. Bearer 키가 `manage` 범위를 전달하는 경우 `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (현재: `/api/mcp/`)의 LOCAL_ONLY 경로는 비루프백에서 액세스할 수 있습니다. 다른 모든 LOCAL_ONLY 경로는 범위에 관계없이 엄격한 루프백을 유지합니다.
+- **`managementPolicy`** (`policies/management.ts`) — 대시보드 세션, 내부 모델 동기화 요청( `/api/providers/[name]/(sync-models|models)` 와 일치)을 수락하거나 `isAuthRequired()` false를 반환하는 경우 완전히 건너뜁니다. Bearer 토큰이 있지만 유효하지 않은 경우 403(`AUTH_001`)을 반환하고, 그렇지 않으면 401을 반환합니다. 또한 인증 분기 — 이전에 경로 보호 계층(LOCAL_ONLY / ALWAYS_PROTECTED)을 적용합니다. [경로 보호 계층을](../security/ROUTE_GUARD_TIERS.md) 참조하세요. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (현재: `/api/mcp/`)의 LOCAL_ONLY 경로는 Bearer 키가 `manage`/`admin` 범위 또는 좁은 `mcp:connect` 범위(`hasMcpConnectOrManageScope`)를 전달하는 경우 비루프백에서 액세스하거나 인증된 대시보드 세션을 통해 액세스할 수 있습니다. 다른 모든 LOCAL_ONLY 경로는 범위에 관계없이 엄격한 루프백을 유지합니다.
 
 성공적인 정책은 `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` 와 함께 `AuthSubject` 반환합니다. 다운스트림 핸들러는 인증 로직을 다시 실행하는 대신 `src/server/authz/assertAuth.ts` 의 `assertAuth(request, "CLIENT_API")` 통해 이를 읽을 수 있습니다.
 
@@ -222,7 +221,7 @@ PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-읽기 전용 경로는 공개입니다.** 오직** 안전한 방법을 위해. 참고: `classifyRoute()` PUBLIC fall-through — 에서 `/api/v1/*` 및 `/api/v1beta/*` 제외합니다. 이들은 항상 `CLIENT_API` 이므로 Bearer-key 정책이 계속 적용됩니다.
+읽기 전용 경로는 공개입니다.** 오직** 안전한 방법을 위해. 참고: `classifyRoute()` PUBLIC fallthrough — 에서 `/api/v1/*` 및 `/api/v1beta/*` 제외합니다. 이들은 항상 `CLIENT_API` 이므로 Bearer-key 정책이 계속 적용됩니다.
 
 ## 새 라우트 추가하기
 
@@ -267,24 +266,24 @@ export async function POST(request: Request) {
 
 편의성이 아니라 형태에 따라 세트를 선택하세요. 단일 라우트는 `PUBLIC_API_ROUTES_EXACT`에 추가하고(GET 전용인 경우 `PUBLIC_READONLY_CORS_API_ROUTES`), 실제 하위 트리만 `PUBLIC_API_ROUTE_PREFIXES`에 추가해야 하며 반드시 `/`로 끝나야 합니다. 단일 라우트를 접두사 목록에 넣으면 선행 문자가 같은 모든 인접 경로도 공개됩니다. 여기에는 나중에 추가되는 동적 세그먼트 형제 라우트도 포함됩니다(GHSA-74g9-q8f6-793h). `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts`, `tests/unit/authz/classify.test.ts`의 단위 테스트를 업데이트하세요.
 
-## 스코프
+## 범위
 
-세 가지 네임스페이스. 각 검사기는 자체 문자열만 읽습니다. `manage`가 `read:compression`에 대해 `scopeMatches`에 실패하는 이유와 `read` 액세스 토큰이 `PATCH /api/keys/{id}`를 수행할 수 없는 이유를 포함한 비교 설명은 [세 가지 스코프 네임스페이스](../frameworks/MCP-SERVER.md#three-scope-namespaces)를 참조하십시오.
+3개의 네임스페이스. 각 검사기는 자체 문자열만 읽습니다. `manage` `read:compression` 에 대해 `scopeMatches` 에 실패하는 이유와 `read` 액세스 토큰이 `PATCH /api/keys/{id}` 할 수 없는 이유를 포함하는 나란히 설명된 내용은 [Three range 네임스페이스](../frameworks/MCP-SERVER.md#three-scope-namespaces) 입니다.
 
-API 키는 `scopes` 배열을 가집니다 (`api_keys.scopes`에 JSON으로 저장되며, `src/lib/db/apiKeys.ts` 참조).
+API 키는 `scopes` 배열을 전달합니다( `api_keys.scopes` 에 JSON 로 저장됨, `src/lib/db/apiKeys.ts` 참조).
 
-### 관리 스코프
+### 관리 범위
 
-- `manage` / `admin` — `hasManageScope`. 관리 API 경로에 대한 베어러 액세스.
-- `mcp:connect`, `self:usage`, `self:account-quota`, 및 `policy:bypass-provider-quota`는 추가적인 정확 일치 스코프입니다. 이들은 `MANAGEMENT_API_KEY_SCOPES` 외부에 있습니다. `mcp:connect`는 `/api/mcp/` 비-루프백 carve-out만 엽니다.
+- `manage` / `admin` — `hasManageScope`. 관리 API 경로에 대한 베어러 액세스입니다.
+- `mcp:connect`, `self:usage`, `self:account-quota` 및 `policy:bypass-provider-quota` 는 추가 완전 일치 범위입니다. 그들은 `MANAGEMENT_API_KEY_SCOPES` 밖에 앉아 있습니다. `mcp:connect` `/api/mcp/` 비루프백 분할만 엽니다.
 
-### MCP 도구 스코프
+### MCP 도구 범위
 
-카탈로그 및 일치 규칙(동일한 문자열 또는 `*`로 끝나는 부여된 스코프): [MCP 도구 스코프](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts`의 `MCP_SCOPE_LIST`는 전체 카탈로그가 아닌 원래의 타입 지정된 서브셋입니다. `resolveCallerScopeContext()`가 MCP 인증 정보, 요청 메타데이터 또는 `OMNIROUTE_MCP_SCOPES`에서 스코프를 해결한 후 `open-sse/mcp-server/scopeEnforcement.ts`에서 강제가 실행됩니다. `OMNIROUTE_MCP_ENFORCE_SCOPES=true`가 아닌 한 비활성화됩니다.
+카탈로그 및 일치 규칙(동일한 문자열 또는 `*` 로 끝나는 부여된 범위): [MCP 도구 범위](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` 의 `MCP_SCOPE_LIST` 는 전체 카탈로그가 아닌 원래 유형의 하위 집합입니다. `resolveCallerScopeContext()` MCP 인증 정보, 요청 메타데이터 또는 `OMNIROUTE_MCP_SCOPES` 에서 범위를 확인한 후 `open-sse/mcp-server/scopeEnforcement.ts` 에서 시행이 실행됩니다. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` 이를 전역적으로 활성화하지만(기본값 `false`), 플래그에 관계없이 API 키에 `manage`/`admin` 없는 HTTP/SSE 호출자( `open-sse/mcp-server/scopeEnforcement.ts` 의 `shouldForceScopeEnforcement()` 참조)에 대해서는 항상 적용됩니다.
 
-### 액세스 토큰 스코프
+### 액세스 토큰 범위
 
-`oma_live_…` 토큰에 대한 `read` / `write` / `admin`은 `scopeSatisfies`(`src/lib/accessTokens/scopes.ts`)에 의해 순위가 매겨집니다. 이 순위는 액세스 토큰 자격 증명에만 적용됩니다. [관리 인증](../guides/MANAGEMENT-AUTH.md)을 참조하십시오.
+`scopeSatisfies` (`src/lib/accessTokens/scopes.ts`)로 순위가 매겨진 `oma_live_…` 토큰의 `read` / `write` / `admin`. 이 순위는 액세스 토큰 자격 증명에만 적용됩니다. [관리 인증을](../guides/MANAGEMENT-AUTH.md) 참조하십시오.
 
 ## 인증 필요 토글
 

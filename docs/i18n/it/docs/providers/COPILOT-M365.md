@@ -168,9 +168,9 @@ Assicurati che `copilot-m365-web` sia abilitato** Fornitori → del dashboard** 
 
 ## Riferimenti
 
-- Segnalazione: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Discussione: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Sorgente: `src/shared/constants/providers/web-cookie.ts` (definizione del provider)
-- Importazione HAR: `src/shared/utils/m365HarImport.ts`
+- Problema: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Discussione: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Fonte: `src/shared/constants/providers/web-cookie.ts` (definizione del fornitore)
+- HAR importazione: `src/shared/utils/m365HarImport.ts`
 - Campi delle credenziali: `src/shared/providers/webSessionCredentials.ts`
-- Finestra modale del livello: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Livello modale: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

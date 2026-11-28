@@ -93,52 +93,30 @@ hơn. Việc này không tải dữ liệu lên, không bắt đầu đồng b�
 
 ---
 
-## Đồng bộ dữ liệu là một lựa chọn tham gia RIÊNG BIỆT — cam kết về quyền riêng tư
+## Đồng bộ hóa dữ liệu là một lựa chọn tham gia SEPARATE — lời hứa về quyền riêng tư
 
-Việc bật `RADAR_ENABLED` chỉ mở khóa giao diện người dùng. Đồng bộ feed yêu cầu lựa chọn tham gia thứ hai,
-độc lập, được lưu trong `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migration `136_radar_cache_settings.sql`). `syncRadar()` kiểm tra cả cờ _và_ lựa chọn
-tham gia trước khi thực hiện bất kỳ lệnh gọi mạng nào:
+Bật `RADAR_ENABLED` chỉ mở khóa UI. Việc đồng bộ hóa nguồn cấp dữ liệu yêu cầu quyền chọn tham gia độc lập thứ hai được lưu trữ trong `radar_settings.opt_in` (`src/lib/db/radar.ts`, Migration `136_radar_cache_settings.sql`). `syncRadar()` kiểm tra cờ _and_ chọn tham gia trước khi thực hiện bất kỳ cuộc gọi mạng nào:
 
 ```
-Cờ tắt               → { status: "disabled" }   — không có lệnh gọi mạng
-Không chọn tham gia  → { status: "opt_out" }    — không có lệnh gọi mạng
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Khi cả hai đều được bật, luồng đồng bộ là:
+Khi cả hai đều bật, đường dẫn đồng bộ là:
 
-1. `GET <feed base URL>/v1/catalog/latest` với `x-omniroute-radar-schema: 2` và header
-   `Authorization: Bearer <supporter key>` tùy chọn (xem bên dưới). Khi không có header schema, máy chủ mặc định
-   sử dụng cấu phần chuyển tiếp v1 được ký riêng, nhờ đó các máy khách cũ đã cài đặt vẫn tiếp tục
-   nhận được bản cập nhật.
-2. Đây là luồng ứng dụng chỉ tải xuống, nhưng vẫn là một yêu cầu HTTPS. Cơ sở hạ tầng
-   được lưu trữ nhận siêu dữ liệu kết nối thông thường, chẳng hạn như địa chỉ IP nguồn. Khi supporter
-   key được cấu hình, quá trình đồng bộ cũng gửi key đó trong header Bearer để dịch vụ có thể xác định
-   quyền lợi. Tại đúng bản sửa đổi máy chủ riêng được xác định trong ranh giới bằng chứng ở trên,
-   việc thống kê yêu cầu feed sử dụng hash của key, dữ liệu sử dụng tổng hợp và HMAC rút gọn xoay vòng hằng ngày
-   của IP để phục vụ việc xem xét lạm dụng thủ công; các bảng đó không lưu key hay IP ở dạng thô.
-   Nhật ký truy cập cơ sở hạ tầng và hộp thư đi phân phối được mã hóa là các ranh giới vận hành
-   riêng biệt.
-3. OmniRoute không bao giờ gửi prompt, phản hồi, cuộc trò chuyện, thông tin xác thực của nhà cung cấp, lưu lượng mô hình,
-   thời gian hoạt động, độ trễ hoặc cấu hình nhà cung cấp cục bộ tới dịch vụ Radar.
-4. Phản hồi được xác minh, kiểm tra tính hợp lệ và lưu vào bộ nhớ đệm cục bộ (xem
-   [Mô hình bảo mật](#security-model)). Radar có đúng bốn đường dẫn mạng phía máy chủ:
-   `syncRadar()` cho danh mục, `syncRadarReferrals()` cho giới thiệu và
-   `syncRadarOffers()` / `syncRadarIntel()` cho ưu đãi và Intel chỉ dành cho người ủng hộ.
+1. `GET <feed base URL>/v1/catalog/latest` với `x-omniroute-radar-schema: 2` và tiêu đề `Authorization: Bearer <supporter key>` tùy chọn (xem bên dưới). Máy chủ mặc định sử dụng cấu phần phần mềm chuyển tiếp v1 được ký riêng khi không có tiêu đề lược đồ, vì vậy các máy khách đã cài đặt cũ hơn sẽ tiếp tục nhận được bản cập nhật.
+2. Đây là luồng ứng dụng chỉ tải xuống nhưng vẫn là yêu cầu HTTPS. Cơ sở hạ tầng được lưu trữ nhận siêu dữ liệu kết nối thông thường như nguồn IP. Khi khóa hỗ trợ được định cấu hình, tính năng đồng bộ hóa cũng sẽ gửi khóa đó trong tiêu đề Bearer để dịch vụ có thể giải quyết quyền được hưởng. Tại bản sửa đổi máy chủ riêng chính xác được xác định trong ranh giới bằng chứng ở trên, việc tính toán yêu cầu nguồn cấp dữ liệu sử dụng hàm băm khóa, mức sử dụng tổng hợp và HMAC cắt ngắn luân phiên hàng ngày của IP để xem xét lạm dụng thủ công; những bảng đó không tồn tại cả khóa lẫn IP ở dạng thô. Nhật ký truy cập cơ sở hạ tầng và hộp thư gửi đi được mã hóa là các ranh giới hoạt động riêng biệt.
+3. OmniRoute không bao giờ gửi lời nhắc, phản hồi, cuộc hội thoại, thông tin xác thực của nhà cung cấp, lưu lượng truy cập mô hình, thời gian hoạt động, độ trễ hoặc cấu hình của nhà cung cấp địa phương tới dịch vụ Radar.
+4. Phản hồi được xác minh, xác thực và lưu vào bộ nhớ đệm cục bộ (xem [Mô hình bảo mật](#security-model) ). Radar có chính xác bốn đường dẫn mạng phía máy chủ: `syncRadar()` cho danh mục, `syncRadarReferrals()` cho các lượt giới thiệu và `syncRadarOffers()` / `syncRadarIntel()` cho các ưu đãi chỉ dành cho người hỗ trợ và Intel.
 
-**Supporter key** là một Bearer token tùy chọn (`radar_settings.supporter_key`)
-cho phép dịch vụ feed quyết định cấp nào sẽ được cung cấp (xem
-[Các cấp](#tiers-community-and-live)). Key này:
+Việc kiểm tra danh mục diễn ra 24 giờ một lần. Khi nguồn cấp dữ liệu đã xác minh vẫn mang phiên bản và cấp được lưu trong bộ nhớ đệm, tính năng đồng bộ hóa sẽ giữ tải trọng được lưu trong bộ nhớ đệm, gia hạn `fetchedAt` và lần kiểm tra tiếp theo sẽ đến sau 24 giờ thay vì vào dấu tích hàng giờ tiếp theo.
 
-- Được lưu trữ **ở trạng thái nghỉ dưới dạng mã hóa** bằng cùng các helper AES-256-GCM `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`) được dùng cho thông tin xác thực của nhà cung cấp.
-- Được đặt thông qua `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) và
-  **không bao giờ được trả lại nguyên dạng** — phản hồi trả về dạng đã che (`omr_****abcd`).
-- Việc thay đổi hoặc xóa key sẽ vô hiệu hóa nguyên tử các bộ nhớ đệm danh mục, giới thiệu, ưu đãi và Intel. Lần
-  đồng bộ/đọc tiếp theo sẽ xác định quyền lợi mới ở phía máy chủ; việc lưu key tự nó không
-  tạo yêu cầu mạng hoặc sử dụng key kích hoạt dùng một lần.
-- Được gửi tới dịch vụ feed dưới dạng Bearer token trong yêu cầu GET đồng bộ — không có thông tin nào khác về
-  key rời khỏi máy khách.
+các** chìa khóa hỗ trợ** là mã thông báo Bearer tùy chọn (`radar_settings.supporter_key`) cho phép dịch vụ nguồn cấp dữ liệu quyết định cấp nào sẽ phân phát (xem [Cấp](#tiers-community-and-live) ). Đó là:
+
+- Đã lưu trữ** được mã hóa ở phần còn lại** với cùng một trình trợ giúp AES-256-GCM `encrypt()`/`decrypt()` (`src/lib/db/encryption.ts`) được sử dụng cho thông tin xác thực của nhà cung cấp.
+- Đặt qua `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) và** không bao giờ vang vọng trở lại** — phản hồi trả về dạng bị che (`omr_****abcd`).
+- Việc thay đổi hoặc xóa nó sẽ vô hiệu hóa danh mục, giới thiệu, ưu đãi và bộ đệm Intel. sync/read tiếp theo sẽ giải quyết phía máy chủ được hưởng quyền mới; việc lưu khóa không tự nó thực hiện yêu cầu mạng hoặc sử dụng khóa kích hoạt sử dụng một lần.
+- Được gửi đến dịch vụ nguồn cấp dữ liệu dưới dạng mã thông báo Bearer trên đồng bộ hóa GET — không có gì khác về khóa sẽ rời khỏi máy khách.
 
 ---
 
@@ -426,85 +404,45 @@ version, tier }` — đây là giá trị mà bảng điều khiển hiển th�
 
 ---
 
-## Quy tắc hợp nhất lớp phủ tại thời điểm đọc
+## Quy tắc hợp nhất lớp phủ thời gian đọc
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) hợp nhất feed được lưu trong bộ nhớ đệm **lên trên**
-đường cơ sở tĩnh tại **thời điểm đọc**, bên trong `getRadarCatalog()`. Mảng đường cơ sở
-(`FREE_MODEL_BUDGETS`) không bao giờ bị thay đổi — một `MergedEntry[]` mới được tính toán trong mỗi
-lần gọi.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) hợp nhất nguồn cấp dữ liệu được lưu trong bộ nhớ đệm** qua** đường cơ sở tĩnh tại** thời gian đọc** , bên trong `getRadarCatalog()`. Mảng cơ sở (`FREE_MODEL_BUDGETS`) không bao giờ bị đột biến — a `MergedEntry[]` được tính toán mới trên mỗi cuộc gọi.
 
 Bốn quy tắc, theo thứ tự ưu tiên:
 
-1. **Feed không bao giờ ghi đè một tùy chỉnh cục bộ.** Theo từng trường: nếu người vận hành đã
-   tùy chỉnh một trường trên mục (`localOverrides` map, với khóa `provider:modelId`),
-   giá trị của feed cho trường cụ thể đó sẽ bị bỏ qua — giá trị của người vận hành được ưu tiên.
-2. **`enabled: false` vô hiệu hóa mục và ghi lại nguồn gốc.** Một mục feed tắt
-   một mục sẽ đặt `enabled: false` và `disabledBy: "radar"` trên kết quả đã hợp nhất,
-   để UI có thể giải thích _tại sao_ một mục chuyển từ khả dụng sang bị vô hiệu hóa.
-3. **Mục do người dùng thêm nhưng không có trong feed vẫn được giữ nguyên.** Các mục
-   chỉ tồn tại trong đường cơ sở (hoặc được thêm cục bộ) và không có mục feed tương ứng
-   sẽ được chuyển tiếp mà không thay đổi.
-4. **Mục đã bị đánh dấu xóa không bao giờ được khôi phục.** Nếu người vận hành đã xóa rõ ràng một
-   mục (`tombstones` set), việc feed thêm lại `provider:modelId` đó trong một
-   phiên bản sau sẽ không khôi phục mục này.
+1. **Nguồn cấp dữ liệu không bao giờ ghi đè lên phần ghi đè cục bộ.** Mỗi trường: nếu toán tử đã tùy chỉnh một trường trên một mục nhập (`localOverrides` map, `provider:modelId` có khóa), giá trị của nguồn cấp dữ liệu cho trường cụ thể đó bị bỏ qua — giá trị của toán tử sẽ thắng.
+2. **`enabled: false` vô hiệu hóa mục nhập có xuất xứ.** Một mục nhập nguồn cấp dữ liệu tắt một mục nhập sẽ đặt `enabled: false` và `disabledBy: "radar"` trên kết quả được hợp nhất, do đó UI có thể giải thích _tại sao_ một mục nhập chuyển từ có sẵn sang bị vô hiệu hóa.
+3. **Mục nhập do người dùng thêm không có trong nguồn cấp dữ liệu sẽ không bị ảnh hưởng.** Các mục nhập chỉ tồn tại trong đường cơ sở (hoặc được thêm cục bộ) và không có mục nhập nguồn cấp dữ liệu tương ứng nào được chuyển qua không thay đổi.
+4. **Một mục nhập bị chôn vùi không bao giờ được hồi sinh.** Nếu nhà điều hành đã xóa một mục nhập một cách rõ ràng ( bộ `tombstones` ), thì nguồn cấp dữ liệu thêm lại `provider:modelId` đó vào phiên bản mới hơn sẽ không đưa nó trở lại.
 
-Các trường có thể chỉnh sửa và tombstone được lưu bền vững trong
-`radar_local_model_state` (migration `153_radar_local_model_state.sql`). Bộ điều hợp DB công khai
-(`src/lib/db/radar.ts`) chuyển đổi các hàng này thành `localOverrides` map và
-`tombstones` set được `applyFeed()` sử dụng; `getRadarCatalog()` trong môi trường production tải trạng thái đó
-sau khi vượt qua các bước kiểm tra cờ, bộ nhớ đệm và lược đồ. Chỉ `displayName` và `enabled` là
-người vận hành có thể chỉnh sửa. Danh tính provider/model, nguồn gốc feed, hạn ngạch, khả năng, ToS
-và dữ liệu thiết lập không thể được ghi qua bề mặt này.
+Các trường có thể chỉnh sửa và bia mộ được duy trì trong `radar_local_model_state` (di chuyển `153_radar_local_model_state.sql`). Bộ điều hợp DB công khai (`src/lib/db/radar.ts`) chuyển đổi các hàng đó thành bản đồ `localOverrides` và bộ `tombstones` được `applyFeed()` sử dụng; `getRadarCatalog()` sản xuất tải trạng thái đó sau khi cờ, bộ đệm và cổng lược đồ vượt qua. Chỉ `displayName` và `enabled` là có thể chỉnh sửa được bởi người vận hành. Danh tính Provider/model, nguồn cấp dữ liệu, hạn ngạch, khả năng, ToS và dữ liệu thiết lập không thể được ghi thông qua bề mặt này.
 
-Bảng điều khiển cung cấp bốn thao tác cục bộ:
+Trang tổng quan hiển thị bốn hành động cục bộ:
 
-- **Chỉnh sửa** thay đổi tên hiển thị cục bộ và trạng thái bật.
-- **Đặt lại các thay đổi cục bộ** xóa cả hai trường có thể chỉnh sửa mà không thay đổi tombstone.
-- **Ẩn** tạo một tombstone để các bản cập nhật feed sau này không thể tạo lại hàng.
-- **Khôi phục** xóa tombstone; mọi tùy chỉnh được lưu riêng vẫn tiếp tục có hiệu lực.
+- **Biên tập** thay đổi tên hiển thị cục bộ và trạng thái kích hoạt.
+- **Đặt lại các thay đổi cục bộ** xóa cả hai trường có thể chỉnh sửa mà không thay đổi bia mộ.
+- **Trốn** tạo bia mộ nên các bản cập nhật nguồn cấp dữ liệu sau này không thể tạo lại hàng.
+- **Khôi phục** dỡ bỏ bia mộ; mọi ghi đè được lưu riêng vẫn có hiệu lực.
 
-Giá trị `enabled: false` từ feed vẫn là ngoại lệ an toàn: nó được ưu tiên hơn giá trị cục bộ
-`enabled: true` đã cũ, giữ cho mục đã hợp nhất ở trạng thái vô hiệu hóa và ghi lại
-`disabledBy: "radar"`.
+Nguồn cấp dữ liệu `enabled: false` vẫn là ngoại lệ an toàn: nó thắng `enabled: true` cục bộ cũ, giữ cho mục nhập đã hợp nhất bị vô hiệu hóa và ghi lại `disabledBy: "radar"`.
 
-Các bản phát hành danh mục sử dụng `schemaVersion: 2`. `contextWindow` và từng trường `tools`, `vision` và
-`thinking` độc lập có kiểu `number | null` / `boolean | null`: `null` nghĩa là không xác định, trong khi
-`false` nghĩa là một nguồn chính thức của provider đã được D16 xác nhận nêu rõ rằng khả năng đó không tồn tại.
-Các cờ model-spec/registry nội bộ của OmniRoute không bao giờ được trực tiếp nâng thành dữ kiện của feed. Client
-vẫn chấp nhận các snapshot v1; vì builder cũ dùng `false` làm giá trị giữ chỗ cho sự vắng mặt, `false` trong v1 được
-chuẩn hóa thành không xác định, còn `true` trong v1 vẫn là dữ kiện. Các phiên bản lược đồ không xác định sẽ bị từ chối
-theo nguyên tắc đóng an toàn và bộ nhớ đệm hợp lệ gần nhất vẫn khả dụng. Mọi model v2 có context/khả năng không phải null
-đều phải có `metadataEvidenceUrls[]` HTTPS không yêu cầu thông tin xác thực; nếu không, quá trình xác thực lược đồ sẽ thất bại
-và bộ nhớ đệm không được thay thế. Bảng danh mục hiển thị cả ba trạng thái dưới dạng `✓`, `✕` và `?`.
+Các ấn phẩm danh mục sử dụng `schemaVersion: 2`. `contextWindow` và mỗi `tools`, `vision` và `thinking` độc lập với `number | null` / `boolean | null`: `null` có nghĩa là không xác định, trong khi `false` có nghĩa là nguồn cung cấp chính thức D16-confirmed cho biết rõ ràng rằng không có khả năng này. Cờ OmniRoute registry/model-spec nội bộ không bao giờ được quảng bá trực tiếp để cung cấp thông tin thực tế. Máy khách vẫn chấp nhận ảnh chụp nhanh v1; bởi vì trình tạo cũ đã sử dụng `false` làm phần giữ chỗ vắng mặt, v1 `false` được chuẩn hóa thành không xác định trong khi v1 `true` vẫn là thực tế. Phiên bản lược đồ không xác định không đóng được và bộ đệm hợp lệ cuối cùng vẫn có sẵn. Mọi mô hình v2 có context/capability khác null phải mang HTTPS `metadataEvidenceUrls[]` không có thông tin xác thực; nếu không thì việc xác thực lược đồ không thành công và bộ đệm không được thay thế. Bảng danh mục hiển thị cả ba trạng thái dưới dạng `✓`, `✕` và `?`.
 
-### Các combo được hướng dẫn và quyền truy cập MCP
+### Combo có hướng dẫn và truy cập MCP
 
-Các giá trị `familyId` đã được xác nhận vẫn tồn tại sau lớp phủ tại thời điểm đọc và được dùng cho module thuần
-`buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Một family chỉ được đề xuất
-khi ít nhất hai provider riêng biệt có kết nối đang hoạt động và cung cấp chính xác model ID được tuyển chọn.
-Các model bị vô hiệu hóa, provider không hoạt động, model ID bị thiếu, family chỉ có một thành viên và các
-kết quả khớp alias/prefix mơ hồ đều bị từ chối theo nguyên tắc đóng an toàn. Các đề xuất sử dụng chiến lược
-`priority` hiện có, sắp xếp ngân sách hằng tháng định kỳ lớn nhất lên trước; UI chỉ tạo chúng thông qua `POST /api/combos`.
+Các giá trị `familyId` được xác nhận tồn tại trong lớp phủ thời gian đọc và điều khiển mô-đun `buildRadarComboSuggestions()` thuần túy (`src/lib/radar/comboSuggestions.ts`). Một dòng chỉ được đề xuất khi có ít nhất hai nhà cung cấp riêng biệt có kết nối hoạt động và hiển thị mô hình được quản lý chính xác ID. Các mô hình bị vô hiệu hóa, nhà cung cấp không hoạt động, mô hình IDs bị thiếu, họ đơn lẻ và các kết quả alias/prefix không rõ ràng không đóng được. Các đề xuất sử dụng chiến lược `priority` hiện có, đặt trước ngân sách định kỳ hàng tháng lớn nhất; UI chỉ tạo ra chúng thông qua `POST /api/combos`.
 
-Giao diện người dùng có hướng dẫn nằm tại `/dashboard/radar/combos`. Giao diện này chỉ đọc các endpoint cục bộ
-`GET /api/radar/catalog` và `GET /api/combos/builder/options`. Giao diện không bao giờ kích hoạt đồng bộ Radar,
-đọc thông tin xác thực của nhà cung cấp hoặc ghi trực tiếp vào cơ sở dữ liệu combo.
+UI được hướng dẫn sống tại `/dashboard/radar/combos`. Nó chỉ đọc các điểm cuối `GET /api/radar/catalog` và `GET /api/combos/builder/options` cục bộ. Nó không bao giờ kích hoạt đồng bộ hóa Radar, đọc thông tin xác thực của nhà cung cấp hoặc ghi trực tiếp vào cơ sở dữ liệu kết hợp.
 
-Các máy khách MCP có thể đọc cùng một phép chiếu cục bộ bằng `omniroute_radar_catalog` (`read:radar`). Các bộ lọc
-`provider`, `familyId` và `enabledOnly` tùy chọn được đánh giá sau một lần đọc cục bộ từ
-`GET /api/radar/catalog`. Đầu ra khép kín của công cụ bao gồm siêu dữ liệu danh mục cùng với nhà cung cấp/mô hình,
-tên hiển thị, `familyId`, hạn ngạch, các khả năng, trạng thái kích hoạt, nguồn gốc và `disabledBy`; URL thiết lập,
-các bước, kết nối, địa chỉ email, khóa và dữ liệu giới thiệu không bao giờ được trả về. Công cụ này
-chỉ đọc và không bao giờ gọi `/api/radar/sync`.
+khách hàng MCP có thể đọc cùng một phép chiếu cục bộ với `omniroute_radar_catalog` (`read:radar`). Các bộ lọc `provider`, `familyId` và `enabledOnly` tùy chọn được đánh giá sau một lần đọc `GET /api/radar/catalog` cục bộ. Đầu ra đóng của nó bao gồm siêu dữ liệu danh mục cộng với provider/model, tên hiển thị, `familyId`, hạn ngạch, khả năng, trạng thái kích hoạt, nguồn gốc và `disabledBy`; thiết lập URLs, các bước, kết nối, địa chỉ e-mail, khóa và dữ liệu giới thiệu không bao giờ được trả lại. Công cụ này ở chế độ chỉ đọc và không bao giờ gọi `/api/radar/sync`. Khi nguồn cấp dữ liệu được lưu vào bộ nhớ đệm có trước danh mục đã cài đặt, `meta.olderThanRelease` là `true` và công cụ sẽ trả về các mô hình từ danh mục đã cài đặt có áp dụng ghi đè cục bộ và bia mộ.
 
-### Dấu chỉ nguồn gốc
+### Dấu hiệu xuất xứ
 
-Mỗi mục đã hợp nhất đều có một trường `origin` mà giao diện người dùng hiển thị dưới dạng huy hiệu:
+Mỗi mục được hợp nhất đều mang một trường `origin` mà UI hiển thị dưới dạng huy hiệu:
 
-- `"baseline"` — không thay đổi so với danh mục bản phát hành tĩnh.
-- `"radar"` — một hoặc nhiều trường đã được làm mới bởi nguồn cấp dữ liệu.
-- `"local"` — người vận hành có ít nhất một ghi đè cục bộ trên mục này (các ghi đè cục bộ
-  luôn được ưu tiên hơn nguồn cấp dữ liệu theo quy tắc 1, bất kể nguồn cấp dữ liệu nói gì).
+- `"baseline"` — chưa được xử lý khỏi danh mục phát hành tĩnh.
+- `"radar"` — một hoặc nhiều trường đã được nguồn cấp dữ liệu làm mới.
+- `"local"` — toán tử có ít nhất một ghi đè cục bộ đối với mục nhập này (ghi đè cục bộ luôn giành chiến thắng trước nguồn cấp dữ liệu theo quy tắc 1, bất kể nguồn cấp dữ liệu nói gì).
 
 ---
 

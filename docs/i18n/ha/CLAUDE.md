@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Dukkan ƙa'idojin aikin suna cikin [`AGENTS.md`](AGENTS.md)** — shi ne tushen gaskiya guda ɗaya ga kowane mataimakin AI
-(gine-gine, ƙa'idojin aiki, gwaji, matakan tabbatar da inganci, tsarin aikin git, Ƙa'idoji Masu Tsauri 23,
-abubuwan da aka koya game da PII). Karanta shi gaba ɗaya; kada ka sake ƙara ƙa'idojin aikin a nan. Duk abin da ke ƙasa ya shafi Claude Code KAWAI
-— gyare-gyaren gudanarwa na ƙa'idojin da aka riga aka bayyana a cikin `AGENTS.md`.
+**Duk dokokin aikin suna rayuwa a cikin [`AGENTS.md`](AGENTS.md)** — tushen gaskiya guda ɗaya ga kowane mataimaki AI ; shigo da kayan da ke sama ya riga ya loda shi. Kada a sake ƙara ƙa'idodin aikin anan. Duk abin da ke ƙasa ya shafi ONLY zuwa Claude Code — gyare-gyaren aiki na ƙa'idodin da aka riga aka ayyana a `AGENTS.md`.
 
-## Keɓe worktree — abubuwan musamman na Claude Code
+## Keɓewar aiki — Claude ƙayyadaddun lambar
 
-Cikakken tsarin worktree na tilas (tabbatar da base-branch, hanyar doka ta `.claude/worktrees/`,
-`cp -al` node_modules, dokokin teardown) yana cikin
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (an taƙaita shi a `AGENTS.md` →
-Tsarin Aikin Git → "Keɓe worktree"). Abubuwan musamman na Claude Code:
+- Tabbatar da reshen tushe tare da mai aiki ta hanyar `AskUserQuestion` (Hard Rule #19) sai dai idan sun riga sun faɗa muku.
+- Ƙirƙirar itacen aiki tare da `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (ta sauka ƙarƙashin `.claude/worktrees/`, hard-links `node_modules` da kwafi `.husky/_`), sannan a kira `EnterWorktree` tare da `path`. Koyaushe wuce tushe: ba tare da shi rubutun yana ɗaukar `release/*` mafi girma ba, wanda ƙila ba shine wanda mai aiki ya tabbatar ba. Itacen aiki da `EnterWorktree` ke ƙirƙira da kansa ba shi da maɗauran haɗin kai ko ƙugiya, don haka babu wata ƙofar da ta riga ta yi aiki a ciki.
 
-- Tabbatar da base branch tare da mai amfani ta hanyar `AskUserQuestion` (Doka Mai Ƙarfi #19) sai dai idan
-  sun riga sun gaya maka.
-- Ka fi son kayan aikin `EnterWorktree` na asali — tuni yana ƙirƙirar worktrees a ƙarƙashin
-  `.claude/worktrees/` (hanyar doka). Ƙirƙiri worktree da umarnin `git
-worktree add` da aka rubuta, sannan ka kira `EnterWorktree` da `path` nasa.
+## Subagents da git
 
-## Tsaro tsakanin zaman aiki — takamaiman bayanai na Claude Code
+Duk wani wakilin da ya taɓa git (Agent Tool or Workflow script) yana samun Hard Rule #22 a's `git stash` ban verbatim a cikin gaggawar — da aka yi rikodin sake aukuwar lamarin ya zo ta hanyar mai magana.
 
-Ƙa'idoji Masu Tsauri #19/#21/#22 (a cikin `AGENTS.md`) suna tafiyar da zaman aiki masu gudana a lokaci guda. Tunatarwar gudanarwa ga wannan
-tsari:
+## Shirye-shiryen kayan tarihi — yana da iko ya wuce hanya
 
-- **Maimaita haramcin `git stash` kalma-da-kalma a cikin umarnin kowane ƙaramin wakili da zai taɓa git**
-  (kayan aikin Agent / rubutun Workflow) — ƙananan wakilai ba sa gadon wannan fayil, kuma maimaituwar
-  matsalar stash da aka rubuta ta faru ne ta hannun ƙaramin wakili.
-- Kafin haɗawa ko turawa zuwa kowane PR da ba ka ƙirƙira ba _a wannan zaman_, gudanar da `git worktree list`
-  sannan ka sake duba `gh pr view <N> --json state,headRefOid` (Ƙa'ida Mai Tsauri #22b).
-- Ƙare kowane zaman aiki tare da babban wurin checkout a reshen da ya fara a kai.
+Superpowers skills announce defaults under `docs/superpowers/plans/`, `docs/superpowers/specs/` and `docs/research/`. Sake rubuta kowanne zuwa `_tasks/` daidai yake a cikin `AGENTS.md` → "Tsarin Tsare-tsare & Bincike Abubuwan Kaya" kafin rubutawa, kuma yi shi da `git -C _tasks …`, ba a cikin babban repo ba.
 
-## Superpowers / kayan tsarawa — sauya hanyoyi
+## Scratch fayiloli — `_artifacts/`, ba `/tmp`
 
-An bayyana tsarin `_tasks/` a cikin `AGENTS.md` → "Planning & Research Artifacts". Ƙwarewar
-superpowers suna zuwa da tsoffin saituna masu nuni zuwa `docs/…` — waɗannan tsoffin saitunan an **sauya su
-a nan**. Idan wata ƙwarewar superpowers ta sanar da hanya kamar "an adana a `docs/superpowers/plans/…`",
-sake rubuta ta zuwa makamanciyar hanyar `_tasks/…` kafin rubutawa:
+Wannan aikin ya ƙetare ɓangarorin ɗorawa na kayan aiki (`/tmp/claude-*/…`). Rubuta fayilolin wucin gadi — fitarwa, samar da zips, matsakaicin fitowar — zuwa `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` na lokaci-lokaci: hanyar `_*` mai gitignored, don haka mai aiki ya nemo kuma yana share duk wani karce a wuri guda. Tsare-tsare masu dorewa, ƙayyadaddun bayanai, bincike da kashe-kashe suna zuwa `_tasks/` maimakon (Hard Dokokin #23).
 
-| Kayan aiki (ƙwarewa)                         | Tsohuwar hanya (KADA a yi amfani da ita) | Ajiye a nan maimakon haka                                     |
-| -------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------- |
-| Tsare-tsare (`writing-plans`)                | `docs/superpowers/plans/`                | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Ƙayyadaddun bayanai / ƙira (`brainstorming`) | `docs/superpowers/specs/`                | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Bincike (`deep-research`, na lokaci-lokaci)  | `docs/research/`                         | `_tasks/research/…`                                           |
-| Miƙa aiki (`/handoff`)                       | —                                        | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Red tushe
 
-Yi commit na waɗannan kayan a cikin ma'ajiyar `_tasks/` (`git -C _tasks …`), ba a cikin babban ma'ajiyar ba.
-
-## Fayilolin gwaji / na wucin gadi — yi amfani da `_artifacts/`, ba `/tmp` ba
-
-Wannan aikin ya sauya tsohon wurin rubutun gwaji na zaman aiki na tsarin (`/tmp/claude-*/…`). Rubuta
-fayilolin wucin gadi/na aiki — exports, zip da aka samar, sakamakon matsakaici na amfani sau ɗaya, duk abin da
-da in ba haka ba za ka saka a `/tmp` — zuwa `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` maimakon haka.
-
-- `_artifacts/` hanya ce ta tushen `_*`: an riga an sanya ta cikin gitignore (`AGENTS.md` → "Root `_*` paths"), tana
-  kan faifai kawai, ba a taɓa bibiyarta.
-- Dalili: ajiye sakamakon gwaji a cikin aikin (maimakon `/tmp`) yana sauƙaƙa wa mai gudanarwa
-  ganowa da share duk abin wucin gadi a wuri guda, maimakon nema a cikin manyan fayilolin
-  `/tmp` na musamman ga zaman aiki waɗanda suke ɓacewa ko tara abubuwan da ba a bibiyarsu.
-- Kada ka **rikita** wannan da `_tasks/` (Ƙa'ida Mai Tsauri #23, ma'ajiyar git mai zaman kanta don
-  tsare-tsare/ƙayyadaddun bayanai/bincike/miƙa aiki masu ɗorewa) — `_artifacts/` na fayilolin aiki masu yarwa ne kawai, babu abin
-  da ke nan da yake buƙatar tsira ko a ba shi sigar.
-
-## Tabbatar da koren tushe kafin buɗe PRs
-
-Kafin ƙirƙirar reshe ko buɗe PR, gudanar da binciken koren tushe (`AGENTS.md` → Git Workflow →
-"Base-green check"; ƙwarewar aikin tana ambatonsa a matsayin `.agents/skills/_shared/base-green.md`). Duk PR da
-aka buɗe alhali ƙarshen tushe ja ne dole ne ya ƙunshi `⚠️ base-red inherited: #<issue>` a jikinsa. Don
-kawar da tarin yanayin ja (ƙarshen tushe + PRs ja), yi amfani da ƙwarewar `/sweep-reds`.
+Don matse jajayen da aka tara (tushe tip + ja PRs), yi amfani da fasaha `/sweep-reds`.

@@ -5,11 +5,10 @@
 ---
 
 > **Tiesos šaltinis:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Paskutinį kartą atnaujinta:** 2026-09-22 — aprėpties vardų sritys nurodo į MCP-SERVER.md
 
-OmniRoute turi maršrutą atpažįstančią autorizacijos sistemą, kuri kontroliuoja kiekvieną API užklausą. Klasifikacija yra **deterministinė** ir **uždaroma gedimo atveju** — viskas, kas negali būti klasifikuota, tampa `MANAGEMENT` ir reikalauja sesijos arba valdymo lygio prieigos rakto. Šiame puslapyje paaiškinamas modelis inžinieriams, prižiūrintiems maršrutus arba kuriantiems naujus galinius taškus.
+OmniRoute turi maršrutą žinomą autorizavimo vamzdyną, kuris perduoda kiekvieną API užklausą. Klasifikacija yra** deterministinis** ir** nesėkmingai uždarytas** — viskas, ko negalima klasifikuoti, baigiasi kaip `MANAGEMENT` ir reikalauja seanso arba valdymo lygio prieigos rakto. Šiame puslapyje paaiškinamas modelis, skirtas inžinieriams, tvarkantiems maršrutus arba kuriantiems naujus galinius taškus.
 
-![Autorizacijos sistema (3 maršrutų klasės + politikos vertinimas)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Šaltinis: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -193,7 +192,7 @@ Kiekviena maršruto klasė turi `src/server/authz/policies/` politiką:
 
 - **`publicPolicy`** (`policies/public.ts`) — visada grąžina `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — ekstraktai Nenešėjas, patvirtina per `validateApiKey()`. Patenka į anoniminį tik tada, kai išjungta efektyvi `REQUIRE_API_KEY` funkcijos vėliavėlė. Veiksminga vėliavėlė išsprendžiama naudojant `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), todėl prietaisų skydelio funkcijų vėliavėlės ir aplinkos kintamieji nuosekliai valdo `/api/v1/*`, `/api/v1beta/*` ir slapyvardžius; sprendiklio gedimai nepavyksta uždaryti. Leidžia pateikti informacijos suvestinės seanso užklausas kliento API maršrutuose (įskaitant `/api/v1/models`, naudojamą prietaisų skydelio modelių kataloge). Kai Entra ID SSO yra įjungtas, nešėją, kuri struktūriškai yra Entra prieigos raktas (trys base64url segmentai, `RS*` alg, `kid`), tvarko SSO šaka.** prieš** `validateApiKey()` ir jo sprendimas yra galutinis. — jis niekada nepatenka į API rakto kelią arba į anoniminį atšaką, todėl tapatybės teikėjo gedimas negali tapti atvira prieiga. Statiniai API klavišai neturi įtakos. Žr. [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — priima prietaisų skydelio seansą, vidinio modelio sinchronizavimo užklausas (atitinka `/api/providers/[name]/(sync-models|models)`) arba visiškai praleidžia, jei `isAuthRequired()` grąžina false. Grąžina 403 (`AUTH_001`), kai yra nešiklio ženklas, bet jis negalioja, 401 kitu atveju. Taip pat įgyvendina maršruto apsaugos pakopas (LOCAL_ONLY / ALWAYS_PROTECTED) prieš bet kurią autentifikavimo šaką — see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY keliai `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (šiandien: `/api/mcp/`) gali būti pasiekiami be kilpos, kai nešiklio raktas turi `manage` sritį; visi kiti LOCAL_ONLY keliai išlieka griežti atgal, nepaisant taikymo srities.
+- **`managementPolicy`** (`policies/management.ts`) — priima prietaisų skydelio seansą, vidinio modelio sinchronizavimo užklausas (atitinka `/api/providers/[name]/(sync-models|models)`) arba visiškai praleidžia, jei `isAuthRequired()` grąžina false. Grąžina 403 (`AUTH_001`), kai yra nešiklio ženklas, bet jis negalioja, 401 kitu atveju. Taip pat įgyvendina maršruto apsaugos pakopas (LOCAL_ONLY / ALWAYS_PROTECTED) prieš bet kurią autentifikavimo šaką — see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY keliai `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (šiandien: `/api/mcp/`) gali būti pasiekiami be kilpos, kai nešiklio raktas turi `manage`/`admin` sritį arba siaurą `mcp:connect` sritį (`hasMcpConnectOrManageScope`), arba naudojant autentifikuotą prietaisų skydelio seansą; visi kiti LOCAL_ONLY keliai išlieka griežti atgal, nepaisant taikymo srities.
 
 Sėkminga politika grąžina `AuthSubject` su `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Tolesni tvarkytojai gali jį nuskaityti naudodami `assertAuth(request, "CLIENT_API")` `src/server/authz/assertAuth.ts` o ne pakartotinai paleisti autentifikavimo logiką.
 
@@ -284,36 +283,24 @@ Sėkmės atveju `requireManagementAuth()` grąžina `null`, o klaidos atveju —
 
 Rinkinį pasirinkite pagal formą, o ne pagal patogumą. Vienas maršrutas įtraukiamas į `PUBLIC_API_ROUTES_EXACT` (arba į `PUBLIC_READONLY_CORS_API_ROUTES`, jei jis skirtas tik GET); į `PUBLIC_API_ROUTE_PREFIXES` įtraukiamas tik tikras pomedis, ir jis **privalo baigtis `/`**. Į prefiksų sąrašą įtraukus vieną maršrutą, taip pat paviešinamas kiekvienas gretimas kelias, turintis tuos pačius pradinius simbolius, įskaitant vėliau pridėtus giminingus maršrutus su dinaminiais segmentais (GHSA-74g9-q8f6-793h). Atnaujinkite vienetinius testus failuose `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` ir `tests/unit/authz/classify.test.ts`.
 
-## Aprėptys
+## Taikymo sritis
 
-Trys vardų sritys. Kiekvienas tikrintojas skaito tik savo eilutes. Palyginimas,
-įskaitant tai, kodėl `manage` nepavyksta `scopeMatches` dėl `read:compression` ir kodėl `read` prieigos raktas negali `PATCH /api/keys/{id}`, yra
-[Trys aprėpties vardų sritys](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Trys vardų erdvės. Kiekvienas tikrintuvas skaito tik savo eilutes. Greta, įskaitant tai, kodėl `manage` nepavyksta `scopeMatches` `read:compression` ir kodėl `read` prieigos raktas negali būti `PATCH /api/keys/{id}`, yra [trys apimties vardų erdvės](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API raktai turi `scopes` masyvą (saugomą kaip JSON `api_keys.scopes`, žr. `src/lib/db/apiKeys.ts`).
+API klavišai turi `scopes` masyvą (saugomi kaip JSON `api_keys.scopes`, žr. `src/lib/db/apiKeys.ts`).
 
-### Valdymo aprėptis
+### Valdymo apimtis
 
-- `manage` / `admin` — `hasManageScope`. Nešėjo prieiga prie valdymo API maršrutų.
-- `mcp:connect`, `self:usage`, `self:account-quota` ir
-  `policy:bypass-provider-quota` yra adityvios tikslios atitikties aprėptys. Jos yra už `MANAGEMENT_API_KEY_SCOPES` ribų. `mcp:connect` atidaro tik
-  `/api/mcp/` negrįžtamojo ryšio išpjovą.
+- `manage` / `admin` — `hasManageScope`. Nešininko prieiga prie valdymo API maršrutų.
+- `mcp:connect`, `self:usage`, `self:account-quota` ir `policy:bypass-provider-quota` yra papildomos tikslios atitikties apimtys. Jie sėdi `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` atidaro tik `/api/mcp/` be kilpos iškirpimą.
 
-### MCP įrankio aprėptys
+### MCP įrankių taikikliai
 
-Katalogas ir atitikimo taisyklės (identiška eilutė arba suteikta aprėptis, besibaigianti `*`):
-[MCP įrankio aprėptys](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` faile `src/shared/constants/mcpScopes.ts` yra originalus tipizuotas
-poaibis, o ne visas katalogas. Vykdymas vyksta
-`open-sse/mcp-server/scopeEnforcement.ts` po to, kai `resolveCallerScopeContext()`
-išsprendžia aprėptis iš MCP autentifikavimo informacijos, užklausos metaduomenų arba `OMNIROUTE_MCP_SCOPES`.
-Jis lieka išjungtas, nebent `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Katalogas ir atitikimo taisyklės (identiška eilutė arba suteikta apimtis, kurios pabaiga yra `*`): [MCP įrankių apimtis](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` `src/shared/constants/mcpScopes.ts` yra originalus įvestas poaibis, o ne visas katalogas. Vykdymas vykdomas `open-sse/mcp-server/scopeEnforcement.ts` po to, kai `resolveCallerScopeContext()` išsprendžia apimtis iš MCP autentifikavimo informacijos, užklausos metaduomenų arba `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` jį įjungia visame pasaulyje (numatytasis `false`), tačiau jis visada taikomas HTTP/SSE skambintojui, kurio API klaviše trūksta `manage`/`admin` (žr. `shouldForceScopeEnforcement()` `open-sse/mcp-server/scopeEnforcement.ts`), neatsižvelgiant į vėliavėlę.
 
-### Prieigos rakto aprėptys
+### Prieigos prieigos raktų apimtis
 
-`read` / `write` / `admin` ant `oma_live_…` žetonų, reitinguojamų pagal `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Šis reitingas taikomas tik prieigos rakto
-kredencialui. Žr. [Valdymo autentifikavimas](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` ant `oma_live_…` žetonų, reitinguojami pagal `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Šis reitingas taikomas tik prieigos prieigos rakto kredencialams. Žr. [Valdymo autentifikavimas](../guides/MANAGEMENT-AUTH.md).
 
 ## Reikalingas autentifikavimas
 

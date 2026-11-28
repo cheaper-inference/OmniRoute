@@ -5,11 +5,10 @@
 ---
 
 > **Πηγή αλήθειας:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Τελευταία ενημέρωση:** 2026-09-22 — οι χώροι ονομάτων εμβέλειας παραπέμπουν στο MCP-SERVER.md
 
-Το OmniRoute διαθέτει μια διοχέτευση εξουσιοδότησης με επίγνωση διαδρομών, η οποία ελέγχει κάθε αίτημα API. Η ταξινόμηση είναι **ντετερμινιστική** και **fail-closed** — οτιδήποτε δεν μπορεί να ταξινομηθεί καταλήγει ως `MANAGEMENT` και απαιτεί συνεδρία ή διακριτικό επιπέδου διαχείρισης. Αυτή η σελίδα εξηγεί το μοντέλο για μηχανικούς που συντηρούν διαδρομές ή σχεδιάζουν νέα τελικά σημεία.
+OmniRoute διαθέτει έναν αγωγό εξουσιοδότησης που γνωρίζει τη διαδρομή που καλύπτει κάθε αίτημα API. Ταξινόμηση είναι** ντετερμινιστική** και** αποτυχία-κλειστό** — οτιδήποτε δεν μπορεί να ταξινομηθεί καταλήγει ως `MANAGEMENT` και απαιτεί μια περίοδο λειτουργίας ή διακριτικό βαθμού διαχείρισης. Αυτή η σελίδα εξηγεί το μοντέλο για μηχανικούς που διατηρούν διαδρομές ή σχεδιάζουν νέα τελικά σημεία.
 
-![Διοχέτευση AuthZ (3 κλάσεις διαδρομών + αξιολόγηση πολιτικής)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Πηγή: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -198,7 +197,7 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) — επιστρέφει πάντα `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — αποσπάσματα Bearer, επικυρώνει μέσω `validateApiKey()`. Πέφτει σε ανώνυμη μόνο όταν η ενεργή σημαία χαρακτηριστικών `REQUIRE_API_KEY` είναι απενεργοποιημένη. Η αποτελεσματική επισήμανση επιλύεται μέσω `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), επομένως οι σημαίες χαρακτηριστικών του πίνακα ελέγχου και οι μεταβλητές περιβάλλοντος διέπουν με συνέπεια `/api/v1/*`, `/api/v1beta/*` και ψευδώνυμα. οι αποτυχίες του επιλύτη αποτυγχάνουν να κλείσουν. Επιτρέπει αιτήματα συνεδρίας πίνακα εργαλείων σε διαδρομές πελάτη API (συμπεριλαμβανομένου του `/api/v1/models`, που χρησιμοποιείται από τον κατάλογο μοντέλων του πίνακα εργαλείων). Όταν το Entra ID SSO είναι ενεργοποιημένο, ένας φορέας που είναι δομικά ένα διακριτικό Entra (τρία τμήματα base64url, `RS*` alg, `kid`) αντιμετωπίζεται από τον κλάδο SSO** προτού** `validateApiKey()` και η ετυμηγορία του είναι οριστική — δεν περνά ποτέ στη διαδρομή κλειδιού API ή στον κλάδο υποβάθμισης σε ανώνυμο, επομένως μια διακοπή παροχής ταυτότητας δεν μπορεί να γίνει ανοιχτή πρόσβαση. Τα στατικά κλειδιά API δεν επηρεάζονται. Δείτε [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — αποδέχεται περίοδο λειτουργίας πίνακα εργαλείων, εσωτερικά αιτήματα συγχρονισμού μοντέλου (αντιστοιχίζονται σε `/api/providers/[name]/(sync-models|models)`) ή παρακάμπτει εντελώς εάν `isAuthRequired()` επιστρέψει false. Επιστρέφει 403 (`AUTH_001`) όταν υπάρχει ένα διακριτικό φορέα αλλά δεν είναι έγκυρο, 401 διαφορετικά. Επίσης, επιβάλλει τις βαθμίδες προστασίας διαδρομής (LOCAL_ONLY / ALWAYS_PROTECTED) πριν από οποιοδήποτε κλάδο εξουσιοδότησης — ανατρέξτε στο [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). Τα μονοπάτια LOCAL_ONLY στο `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (σήμερα: `/api/mcp/`) μπορούν να προσπελαστούν από non-loopback όταν το κλειδί Bearer φέρει το εύρος `manage`. όλα τα άλλα μονοπάτια LOCAL_ONLY παραμένουν αυστηρά-loopback ανεξάρτητα από το εύρος.
+- **`managementPolicy`** (`policies/management.ts`) — αποδέχεται περίοδο λειτουργίας πίνακα εργαλείων, εσωτερικά αιτήματα συγχρονισμού μοντέλου (αντιστοιχίζονται σε `/api/providers/[name]/(sync-models|models)`) ή παρακάμπτει εντελώς εάν `isAuthRequired()` επιστρέψει false. Επιστρέφει 403 (`AUTH_001`) όταν υπάρχει ένα διακριτικό φορέα αλλά δεν είναι έγκυρο, 401 διαφορετικά. Επίσης, επιβάλλει τις βαθμίδες προστασίας διαδρομής (LOCAL_ONLY / ALWAYS_PROTECTED) πριν από οποιοδήποτε κλάδο εξουσιοδότησης — ανατρέξτε στο [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). Οι διαδρομές LOCAL_ONLY στο `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (σήμερα: `/api/mcp/`) μπορούν να προσπελαστούν από μη επαναφορά όταν το κλειδί φέροντος φέρει το εύρος `manage`/`admin` ή το στενό εύρος `mcp:connect` (`hasMcpConnectOrManageScope`) ή με μια επαληθευμένη περίοδο λειτουργίας πίνακα εργαλείων. όλα τα άλλα μονοπάτια LOCAL_ONLY παραμένουν αυστηρά-loopback ανεξάρτητα από το εύρος.
 
 Μια επιτυχημένη πολιτική επιστρέφει `AuthSubject` με `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Οι μεταγενέστεροι χειριστές μπορούν να το διαβάσουν μέσω `assertAuth(request, "CLIENT_API")` σε `src/server/authz/assertAuth.ts` αντί να εκτελούν ξανά τη λογική εξουσιοδότησης.
 
@@ -289,38 +288,24 @@ export async function POST(request: Request) {
 
 Επιλέξτε το σύνολο βάσει μορφής και όχι βάσει ευκολίας. Μία διαδρομή τοποθετείται στο `PUBLIC_API_ROUTES_EXACT` (ή στο `PUBLIC_READONLY_CORS_API_ROUTES` αν είναι μόνο για GET)· μόνο ένα πραγματικό υποδέντρο τοποθετείται στο `PUBLIC_API_ROUTE_PREFIXES` και **πρέπει να τελειώνει σε `/`**. Η τοποθέτηση μιας μεμονωμένης διαδρομής στη λίστα προθεμάτων δημοσιοποιεί επίσης κάθε γειτονική διαδρομή που έχει τους ίδιους αρχικούς χαρακτήρες — συμπεριλαμβανομένων συγγενικών διαδρομών με δυναμικά τμήματα που θα προστεθούν αργότερα (GHSA-74g9-q8f6-793h). Ενημερώστε τις δοκιμές μονάδας στα `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` και `tests/unit/authz/classify.test.ts`.
 
-## Εμβέλειες
+## Πεδίο εφαρμογής
 
-Τρεις χώροι ονομάτων. Κάθε ελεγκτής διαβάζει μόνο τις δικές του συμβολοσειρές. Η παράθεση,
-συμπεριλαμβανομένου του γιατί το `manage` αποτυγχάνει στο `scopeMatches` για το `read:compression` και γιατί ένα
-διακριτικό πρόσβασης `read` δεν μπορεί να εκτελέσει `PATCH /api/keys/{id}`, βρίσκεται στην ενότητα
-[Τρεις χώροι ονομάτων εμβέλειας](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Τρεις χώροι ονομάτων. Κάθε πούλι διαβάζει μόνο τις δικές του χορδές. Το side-by-side, συμπεριλαμβανομένου του γιατί `manage` αποτυγχάνει `scopeMatches` για `read:compression` και το γιατί ένα διακριτικό πρόσβασης `read` δεν μπορεί `PATCH /api/keys/{id}`, είναι [οι τρεις χώροι ονομάτων εύρους](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Τα κλειδιά API περιλαμβάνουν έναν πίνακα `scopes` (αποθηκευμένο ως JSON στο `api_keys.scopes`, βλ. `src/lib/db/apiKeys.ts`).
+Τα κλειδιά API φέρουν έναν πίνακα `scopes` (αποθηκευμένο ως JSON στο `api_keys.scopes`, βλέπε `src/lib/db/apiKeys.ts`).
 
-### Εμβέλεια διαχείρισης
+### Πεδίο διαχείρισης
 
-- `manage` / `admin` — `hasManageScope`. Πρόσβαση Bearer στις διαδρομές API διαχείρισης.
-- Τα `mcp:connect`, `self:usage`, `self:account-quota` και
-  `policy:bypass-provider-quota` είναι προσθετικές εμβέλειες ακριβούς αντιστοίχισης. Βρίσκονται
-  εκτός του `MANAGEMENT_API_KEY_SCOPES`. Το `mcp:connect` ανοίγει μόνο την
-  εξαίρεση μη loopback για το `/api/mcp/`.
+- `manage` / `admin` — `hasManageScope`. Πρόσβαση φορέα σε διαδρομές διαχείρισης API.
+- `mcp:connect`, `self:usage`, `self:account-quota` και `policy:bypass-provider-quota` είναι προσθετικά πεδία ακριβούς αντιστοίχισης. Κάθονται έξω `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` ανοίγει μόνο το `/api/mcp/` non-loopback carve-out.
 
-### Εμβέλειες εργαλείων MCP
+### πεδία εργαλείων MCP
 
-Κατάλογος και κανόνες αντιστοίχισης (πανομοιότυπη συμβολοσειρά ή μια εκχωρημένη εμβέλεια που λήγει σε `*`):
-[Εμβέλειες εργαλείων MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-Το `MCP_SCOPE_LIST` στο `src/shared/constants/mcpScopes.ts` είναι το αρχικό υποσύνολο με τύπους,
-όχι ο πλήρης κατάλογος. Η επιβολή εκτελείται στο
-`open-sse/mcp-server/scopeEnforcement.ts` αφού το `resolveCallerScopeContext()`
-επιλύσει τις εμβέλειες από τις πληροφορίες ελέγχου ταυτότητας MCP, τα μεταδεδομένα αιτήματος ή το `OMNIROUTE_MCP_SCOPES`.
-Παραμένει απενεργοποιημένη εκτός εάν έχει οριστεί `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Κατάλογος και κανόνες αντιστοίχισης (πανομοιότυπη συμβολοσειρά ή παραχωρημένο εύρος που τελειώνει σε `*`): [πεδία εργαλείων MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` στο `src/shared/constants/mcpScopes.ts` είναι το αρχικό πληκτρολόγιο υποσύνολο, όχι ο πλήρης κατάλογος. Η επιβολή εκτελείται στο `open-sse/mcp-server/scopeEnforcement.ts` αφού `resolveCallerScopeContext()` επιλύει πεδία από πληροφορίες εξουσιοδότησης MCP, μεταδεδομένα αιτήματος ή `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` το ενεργοποιεί καθολικά (προεπιλογή `false`), αλλά επιβάλλεται πάντα για έναν καλούντα HTTP/SSE του οποίου το κλειδί API δεν έχει `manage`/`admin` (βλ. `shouldForceScopeEnforcement()` στο `open-sse/mcp-server/scopeEnforcement.ts`), ανεξάρτητα από τη σημαία.
 
-### Εμβέλειες διακριτικών πρόσβασης
+### Πεδία με διακριτικό πρόσβασης
 
-`read` / `write` / `admin` σε διακριτικά `oma_live_…`, ταξινομημένα βάσει του `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Αυτή η κατάταξη εφαρμόζεται μόνο στο διαπιστευτήριο διακριτικού πρόσβασης.
-Βλ. [Έλεγχος ταυτότητας διαχείρισης](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` σε μάρκες `oma_live_…`, κατάταξη κατά `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Αυτή η κατάταξη ισχύει μόνο για τα διαπιστευτήρια διακριτικού πρόσβασης. Δείτε [Έλεγχος ταυτότητας διαχείρισης](../guides/MANAGEMENT-AUTH.md).
 
 ## Απαιτείται Auth Εναλλαγή
 

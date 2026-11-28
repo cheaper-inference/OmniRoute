@@ -4,14 +4,11 @@
 
 ---
 
-> **Status:** Tersedia secara umum.
-> **Audiens:** Operator yang menghubungkan OpenCode ke deployment OmniRoute.
-> **Sumber kebenaran (skema konfigurasi):** `src/shared/services/opencodeConfig.ts`
-> **Sumber kebenaran (paket npm):** `@omniroute/opencode-provider/` (workspace yang dapat dipublikasikan)
+> **Status:** Tersedia secara umum.** Hadirin:** Operator menghubungkan OpenCode ke penerapan OmniRoute.** Sumber kebenaran (skema konfigurasi):** `src/shared/services/opencodeConfig.ts`** Paket npm yang direkomendasikan:** `@omniroute/opencode-plugin/` (OpenCode v1, diinstal oleh `omniroute setup opencode`) dan `@omniroute/opencode-plugin-v2/` (OpenCode v2). Paket `@omniroute/opencode-provider/` yang lebih lama adalah** tidak digunakan lagi** (lihat Jalur 2).
 
-[OpenCode](https://opencode.ai) adalah klien AI agentik berbasis CLI/desktop. OpenCode membaca katalog penyedianya dari `~/.config/opencode/opencode.json` (atau `opencode.jsonc`) dan mengikuti skema di `https://opencode.ai/config.json`. OmniRoute mengekspos dirinya kepada OpenCode sebagai salah satu penyedia tersebut — setiap permintaan mengalir melalui antarmuka `/v1` standar OmniRoute yang kompatibel dengan OpenAI, sehingga OpenCode secara otomatis mendapatkan manfaat dari perutean Auto-Combo, circuit breaker, kebijakan kunci, observabilitas, dan sebagainya.
+[OpenCode](https://opencode.ai) adalah klien CLI/desktop AI agen. Ia membaca katalog penyedianya dari `~/.config/opencode/opencode.json` (atau `opencode.jsonc`) dan mengikuti skema di `https://opencode.ai/config.json`. OmniRoute mengekspos dirinya ke OpenCode sebagai salah satu penyedia — setiap permintaan mengalir melalui permukaan `/v1` standar yang kompatibel dengan OpenAI OmniRoute, sehingga OpenCode secara otomatis mendapat manfaat dari perutean Kombo Otomatis, pemutus sirkuit, kebijakan utama, kemampuan observasi, dll.
 
-Ada **dua jalur integrasi yang didukung**. Pilih salah satu — keduanya menghasilkan konfigurasi yang sama.
+Halaman ini mendokumentasikan dua jalur konfigurasi statis di bawah; keduanya menghasilkan konfigurasi yang sama. Untuk daftar model yang mengikuti katalog langsung Anda, gunakan plugin sebagai gantinya: `omniroute setup opencode` menginstal `@omniroute/opencode-plugin` (OpenCode v1), dan `@omniroute/opencode-plugin-v2` menargetkan OpenCode v2 (lihat [integrasi CLI](../guides/CLI-INTEGRATIONS.md) dan [panduan plugin OpenCode v2](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ File yang dihasilkan (katalog model default):
 
 ---
 
-## Jalur 2 — Paket npm `@omniroute/opencode-provider`
+## Jalur 2 paket — npm `@omniroute/opencode-provider` (tidak digunakan lagi)
 
-Direkomendasikan saat Anda membuat skrip konfigurasi dari Node/TS (pipeline CI, monorepo, alur penginstal kustom).
+> **Tidak digunakan lagi.** Paket ini menulis daftar model statis yang berada di belakang katalog OmniRoute langsung Anda. README -nya merekomendasikan migrasi ke `@omniroute/opencode-plugin` (atau `@omniroute/opencode-plugin-v2` di OpenCode v2). API di bawah ini disimpan hanya untuk skrip yang sudah ada.
+
+Digunakan saat membuat skrip konfigurasi dari Node/TS (pipa CI, monorepos, alur penginstal khusus).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Opsional: timpa katalog model yang diekspos ke OpenCode
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Untuk penggabungan non-destruktif dengan file yang sudah ada, replikasi `mergeOpenCodeConfigText()` dari `opencodeConfig.ts` atau panggil generator CLI.
+Untuk penggabungan non-destruktif terhadap file yang sudah ada, replikasi `mergeOpenCodeConfigText()` dari `opencodeConfig.ts` atau hubungi generator CLI.
 
-Lihat [README paket](../../@omniroute/opencode-provider/README.md) untuk API selengkapnya.
+Lihat [paket README](../../@omniroute/opencode-provider/README.md) untuk API selengkapnya.
 
 ---
 
@@ -157,7 +156,9 @@ Untuk klien bergaya Anthropic yang mengirim `x-api-key` + `anthropic-version`, `
 
 ## Lihat juga
 
-- [Referensi API](../reference/API_REFERENCE.md) — keseluruhan antarmuka REST OmniRoute
-- [Auto-Combo](../routing/AUTO-COMBO.md) — arti `model: "auto"`
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [referensi API](../reference/API_REFERENCE.md) — permukaan OmniRoute REST penuh
+- [Kombo Otomatis](../routing/AUTO-COMBO.md) — apa arti `model: "auto"`
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (disarankan)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (tidak digunakan lagi)
 - Sumber: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

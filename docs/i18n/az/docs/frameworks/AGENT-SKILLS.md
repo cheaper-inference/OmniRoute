@@ -11,14 +11,14 @@ Agent Skills xarici agentlərə, MCP klientlərinə və A2A orkestratorlarına O
 
 ---
 
-## İcmal
+## Ümumi baxış
 
-Kataloqda **45 Agent Skill** (23 REST API + 21 CLI + 1 konfiqurasiya iş axını) mövcuddur. Hər skill aşağıdakılara malikdir:
+Kataloqda var** 45 Agent Bacarıqları** (23 REST API + 21 CLI + 1 konfiqurasiya iş axını). Hər bir bacarıq var:
 
-- **Kanonik ID** (`omni-auth`, `cli-serve` və s.)
-- `skills/{id}/SKILL.md` daxilində YAML ön məlumatı (`name`, `description`) + zəngin markdown məzmunu olan **SKILL.md** faylı
-- OpenAPI spesifikasiyası və CLI reyestrindən əldə edilən **REST son nöqtələri** (API skill-ləri) və ya **CLI alt əmrləri** (CLI skill-ləri)
-- Canlı yükləmə üçün **GitHub xam URL-i**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanonik ID** (`omni-auth`, `cli-serve` və s.)
+- A**SKILL.md** YAML frontmatter (`name`, `description`) + zəngin markdown gövdəsi ilə `skills/{id}/SKILL.md` də fayl
+- **REST son nöqtələri** (API bacarıqları) və ya**CLI alt əmrləri** (CLI bacarıqları) OpenAPI spec və CLI reyestrindən əldə edilir
+- A**GitHub xam URL** canlı gətirmə üçün: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Generatorun cavabı `GeneratorReport` obyektidir:
 
 ---
 
-## Əhatə API-si
+## Əhatə dairəsi API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

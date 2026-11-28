@@ -4,9 +4,9 @@
 
 ---
 
-> **Ni nini kinaishi wapi: kila saraka ya kiwango cha juu na faili ya mizizi inayofuatiliwa, yenye kusudi la mstari mmoja.** Ilisasishwa mwisho: 2026-11-13 (OmniRoute v3.8.54)
+> **Ni nini kinaishi wapi: kila saraka ya kiwango cha juu na faili ya mizizi inayofuatiliwa, yenye kusudi la mstari mmoja.**
 >
-> Tumia ramani hii kutafuta njia yako kwenye msingi wa kanuni, kisha ufuate viungo vya hati maalum. Hesabu za faili zilipimwa kwa `git ls-files` katika tarehe iliyo hapo juu. Wanabadilika na karibu kila toleo, kwa hivyo wachukue kama maagizo ya ukubwa.
+> Tumia ramani hii kutafuta njia yako kwenye msingi wa kanuni, kisha ufuate viungo vya hati maalum. Hesabu za faili hutoka kwa `git ls-files` na hubadilika karibu kila toleo. Wachukue kama maagizo ya ukubwa.
 
 ## Mti wa kiwango cha juu
 

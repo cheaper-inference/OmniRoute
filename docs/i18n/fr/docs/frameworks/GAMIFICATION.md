@@ -493,25 +493,25 @@ que lorsque les données du classement ont réellement changé depuis le dernier
 
 ## Partage de jetons
 
-**Fichier :** `src/lib/gamification/sharing.ts`
+**Déposer:** `src/lib/gamification/sharing.ts`
 
-### Comptabilité en partie double
+### Grand livre à double entrée
 
-Chaque transfert crée deux lignes dans `token_ledger` :
+Chaque transfert crée deux lignes dans `token_ledger`:
 
-| Ligne  | `from_key_id` | `to_key_id`  | `amount` |
-| ------ | ------------- | ------------ | -------- |
-| Débit  | expéditeur    | destinataire | +montant |
-| Crédit | destinataire  | expéditeur   | -montant |
+| Rangée | `from_key_id` | `to_key_id` | `amount`  |
+| ------ | ------------- | ----------- | --------- |
+| Débit  | expéditeur    | récepteur   | montant + |
+| Crédit | récepteur     | expéditeur  | -amount   |
 
-Attendez — la convention est la suivante :
+Attendez — la convention est :
 
-| Ligne     | `from_key_id` | `to_key_id`  | `amount` | Signification               |
-| --------- | ------------- | ------------ | -------- | --------------------------- |
-| Envoi     | expéditeur    | destinataire | +montant | Sortie pour l’expéditeur    |
-| Réception | destinataire  | expéditeur   | +montant | Entrée pour le destinataire |
+| Rangée   | `from_key_id` | `to_key_id` | `amount`  | Signification            |
+| -------- | ------------- | ----------- | --------- | ------------------------ |
+| Envoyer  | expéditeur    | récepteur   | montant + | Sortie de l'expéditeur   |
+| Recevoir | récepteur     | expéditeur  | montant + | Entrée vers le récepteur |
 
-Le solde est calculé comme suit :
+Le solde est calculé comme suit :
 
 ```sql
 SELECT
@@ -522,7 +522,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Déroulement du transfert
+### Flux de transfert
 
 ```typescript
 export async function transferTokens(
@@ -533,19 +533,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Validation** : `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotence** : vérifier si `idempotency_key` existe déjà dans le registre.
-   Si oui, renvoyer le résultat mis en cache.
-3. **Transaction** (transaction SQLite unique) :
-   a. Calculer le solde de l’expéditeur.
-   b. Si `balance < amount`, annuler (fonds insuffisants).
-   c. Insérer la ligne d’envoi (`from=sender,`.
+1. **Valider** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotence** : vérifiez si `idempotency_key` existe déjà dans le grand livre. Si oui, renvoie le résultat mis en cache.
+3. **Transaction** (transaction SQLite unique) : a. Calculez le solde de l’expéditeur. b. Si `balance < amount`, abandonnez (fonds insuffisants). c. Insérez la ligne d'envoi (`from=sender, to=receiver, amount`). d. Insérez la ligne de réception (`from=receiver, to=sender, amount`).
+4. **Limite de taux** : vérifiez le taux de transfert pour l'expéditeur (max 10 transfers/min).
+5. **Événement** : émet un événement de gamification `token_share` pour l'évaluation du badge XP +.
+6. Retournez `{ success: true, balance: newBalance }`.
 
 ### Limitation du débit
 
-- 10 transferts par minute et par clé API au maximum.
-- 10 000 jetons au maximum par transfert.
-- 100 000 jetons transférés par jour et par clé API au maximum.
+- Max 10 transferts par minute par clé API.
+- Max 10 000 jetons par transfert unique.
+- Max 100 000 jetons transférés par jour par clé API.
 
 ---
 

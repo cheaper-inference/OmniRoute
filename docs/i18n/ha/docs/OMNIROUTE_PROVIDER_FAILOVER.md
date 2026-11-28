@@ -14,10 +14,12 @@ Tsohuwar manufar mai ba da ƙetare tana ba da damar ƙoƙarce-ƙoƙarcen mai ba 
 
 - **Combos** sun gaza tsakanin maƙasudinsu bisa ga dabarun haɗin gwiwa da saitunan su.
 - **Model id** ( `provider/` prefix) wanda masu samarwa da yawa ke aiki, ba tare da haɗin ainihin sunan ba, ana fara aikawa zuwa zaɓin zaɓin mai bada. Idan wannan yunƙurin ya gaza ta hanyar manufofin ta gaza kan gaba, ana aika buƙatun iri ɗaya zuwa mai bada aiki na gaba wanda ke ba da id. Amsar tana ɗauke da `x-omniroute-fallback-attempts` tare da adadin masu samarwa da aka gwada kafin wanda ya amsa.
-  - Kowane madadin yana da izini daidai kamar yadda aka zaɓa. Maɓallin maɓalli API ko bai yarda da shi ba an tsallake shi ba tare da kiran sama ba, kuma abokin ciniki ya sami ainihin kuskuren sama, ba ƙin yarda da manufa don manufa da ba a taɓa ambata ba.
+  - Kowane madadin yana da izini daidai kamar yadda aka zaɓa. Maɓallin maɓalli API ko bai yarda da shi ba an tsallake shi ba tare da kiran sama ba, kuma abokin ciniki yana samun ainihin kuskuren sama, ba ƙin yarda da manufa don manufa da ba a taɓa ambata ba.
   - Amsar da ta gaza ne kawai ke ci gaba: babu abin da ya gaza bayan byte na farko.
   - Musanya samfurin faɗuwar gaggawa yana aiki ne kawai bayan kowane mai ba da samfurin da ake buƙata ya gaza.
   - Buƙatun da aka liƙa zuwa haɗin (`x-omniroute-connection`) yana tsayawa akan sa.
   - Ba a taɓa sake tura id ɗin da aka riga aka kafi (`provider/model`) zuwa wani mai badawa ba.
 
 Jihohin da'ira sune `closed`, `open`, da `half_open`. Wani sanyi yana tsara tsarin bincike mai iyaka; bincike mai nasara ya rufe da'irar kuma binciken da ya gaza sake buɗe shi.
+
+gazawar mai bayarwa yana gudana cikin ƙofar. Duba [Lokacin da OmniRoute kanta ba ta iya isa](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) ga halayen abokin ciniki yayin fitan kofa.

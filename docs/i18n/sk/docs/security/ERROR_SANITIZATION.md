@@ -4,13 +4,7 @@
 
 ---
 
-> **Zdroj pravdy:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` a verejné zostavovacie funkcie v `open-sse/utils/error.ts`
-> **Testy:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Posledná aktualizácia:** 2026-09-02 — v3.8.51
-> **Cieľová skupina:** Každý technik pracujúci s chybovými odpoveďami (HTTP trasy, SSE streamy, exekútory, obslužné rutiny MCP).
-> **Stav:** **POVINNÉ** pre každú cestu kódu, ktorá klientovi vracia chybové hlásenie.
+> **Zdroj pravdy:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` a verejní stavitelia v `open-sse/utils/error.ts`** Testy:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** publikum:** Každý inžinier, ktorý sa dotkne chybových odpovedí (trasy HTTP, toky SSE, vykonávače, manipulátory MCP ).** Stav:****MANDATORY** pre každú cestu kódu, ktorá vráti klientovi chybovú správu.
 
 ## Prečo to existuje
 

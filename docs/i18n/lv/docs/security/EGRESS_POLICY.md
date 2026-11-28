@@ -69,13 +69,13 @@ Direktīva ir apzināti paredzēta **katram starpniekserverim atsevišķi**, nev
 
 ## Trīs vērtības
 
-| Vērtība | UI etiķete                 | Darbība                                                                                                                                                                                   |
-| ------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`  | `Automātiski (duālā kopa)` | OS izvēlas saimi. Ja starpniekservera resursdators ir norādīts kā IP literālis, saimi nosaka pats literālis; resursdatora nosaukumam ir pieejamas abas saimes. Šī ir noklusējuma vērtība. |
-| `ipv4`  | `Tikai IPv4`               | Piesaista savienojumu IPv4. Savienojums netiek izveidots, ja starpniekservera resursdatoram nav IPv4 (A) ieraksta.                                                                        |
-| `ipv6`  | `Tikai IPv6`               | Piesaista savienojumu IPv6. Savienojums netiek izveidots, ja starpniekservera resursdatoram nav IPv6 (AAAA) ieraksta.                                                                     |
+| Vērtība | UI etiķete          | Uzvedība                                                                                                                                                                         |
+| ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`  | `Auto (dual-stack)` | OS izvēlas ģimeni. IP-literāla starpniekservera saimniekdatoram ģimene ir raksturīga burtiskajam; resursdatora nosaukumam ir piemērotas abas ģimenes. Šī ir noklusējuma vērtība. |
+| `ipv4`  | `IPv4 only`         | Piesprauž savienojumu ar IPv4. Neizdevās aizvērt, ja starpniekservera saimniekdatoram nav IPv4 (A) ieraksta.                                                                     |
+| `ipv6`  | `IPv6 only`         | Piesprauž savienojumu ar IPv6. Neizdevās aizvērt, ja starpniekservera resursdatoram nav IPv6 (AAAA) ieraksta.                                                                    |
 
-UI virknes atrodas failā `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+UI virknes dzīvo `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
@@ -83,21 +83,21 @@ UI virknes atrodas failā `src/i18n/messages/en.json` (`labelFamily`, `familyAut
 
 ### Informācijas panelis
 
-Atlasītājs atrodas cilnes **Starpniekserveru pūls** starpniekservera veidlapā:
+Atlasītājs ir starpniekservera formā** Starpniekservera baseins** cilne:
 
-1. Atveriet **Informācijas panelis → Iestatījumi → Starpniekserveris → Starpniekserveru pūls**
+1. Atvērt** Informācijas panelis → iestatījumi → starpniekserveris → starpniekservera kopa**
 2. Pievienojiet vai rediģējiet starpniekserveri
-3. Iestatiet nolaižamajā sarakstā **IP saime** vērtību `Automātiski (duālā kopa)`, `Tikai IPv4` vai `Tikai IPv6`
-4. Saglabājiet
+3. Iestatiet**IP ģimene** nolaižamajā izvēlnē uz `Auto (dual-stack)`, `IPv4 only` vai `IPv6 only`
+4. Saglabāt
 
-Vadīklu atveido `ProxyRegistryManager.tsx` (montēts failā `proxy/ProxyPoolTab.tsx`).
+Vadību nodrošina `ProxyRegistryManager.tsx` (uzstādīts `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Lauks `family` ir daļa no starpniekserveru reģistra izveides/atjaunināšanas lietderīgajām slodzēm; to validē `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) un apstrādā `POST` / `PATCH /api/v1/management/proxies`:
+Lauks `family` ir daļa no starpniekservera reģistra create/update lietderīgās slodzes, ko apstiprina `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) un apstrādā `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Izveidot starpniekserveri, kas izmanto tikai IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Mainīt esošu starpniekserveri, lai tas izmantotu tikai IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-To pašu lauku pieņem arī iekļautais starpniekservera konfigurācijas objekts, kas tiek izmantots augšupstraumes starpniekservera ierakstiem (`upstream_proxy_config.family`; skatiet sadaļu [Datu modelis](#data-model)).
+To pašu lauku pieņem arī iekļautais starpniekservera konfigurācijas objekts, kas tiek izmantots augšpus starpniekservera ierakstiem (`upstream_proxy_config.family`, skatiet [sadaļu Datu modelis](#data-model) ).
 
-Informāciju par pārējo starpniekserveru CRUD/piešķiršanas API skatiet failā [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Par pārējo starpniekserveri CRUD/assignment API skatiet [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

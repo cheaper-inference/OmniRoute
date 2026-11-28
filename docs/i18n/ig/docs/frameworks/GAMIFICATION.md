@@ -508,23 +508,23 @@ mgbe data tebụl ndị ndu gbanwere n’ezie kemgbe ezipụrụ ya ikpeazụ.
 
 **Faịlụ:** `src/lib/gamification/sharing.ts`
 
-### Akwụkwọ Ndekọ Ntinye Abụọ
+### Akwụkwọ ndebanye ugboro abụọ
 
 Nyefe ọ bụla na-emepụta ahịrị abụọ na `token_ledger`:
 
-| Ahịrị  | `from_key_id` | `to_key_id`   | `amount` |
-| ------ | ------------- | ------------- | -------- |
-| Debit  | onye na-eziga | onye na-anata | +amount  |
-| Credit | onye na-anata | onye na-eziga | -amount  |
+| Ahịrị          | `from_key_id` | `to_key_id` | `amount` |
+| -------------- | ------------- | ----------- | -------- |
+| Debit          | onye zitere   | onye nnata  | + ego    |
+| Ebe E Si Nweta | onye nnata    | onye zitere | -amount  |
 
-Chere — usoro a na-eji bụ:
+Chere — mgbakọ ahụ bụ:
 
-| Ahịrị | `from_key_id` | `to_key_id`   | `amount` | Ihe ọ pụtara                     |
-| ----- | ------------- | ------------- | -------- | -------------------------------- |
-| Zipụ  | onye na-eziga | onye na-anata | +amount  | Ọpụpụ sitere n'aka onye na-eziga |
-| Nnata | onye na-anata | onye na-eziga | +amount  | Mbata nye onye na-anata          |
+| Ahịrị | `from_key_id` | `to_key_id` | `amount` | Pụtara                     |
+| ----- | ------------- | ----------- | -------- | -------------------------- |
+| Ziga  | onye zitere   | onye nnata  | + ego    | Mbupu sitere na onye nzipu |
+| Nara  | onye nnata    | onye zitere | + ego    | Ntinye na nnata            |
 
-A na-agbakọ ego fọdụrụ dị ka:
+A na-agbakọ nguzozi dịka:
 
 ```sql
 SELECT
@@ -535,7 +535,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Usoro Nyefe
+### Usoro mbufe
 
 ```typescript
 export async function transferTokens(
@@ -546,19 +546,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Nyochaa**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotency**: lelee ma `idempotency_key` adịlarị n'akwụkwọ ndekọ ahụ.
-   Ọ bụrụ ee, weghachite nsonaazụ echekwara.
-3. **Azụmahịa** (otu azụmahịa SQLite):
-   a. Gbakọọ ego fọdụrụ nke onye na-eziga.
-   b. Ọ bụrụ na `balance < amount`, kwụsị ya (ego ezughị).
-   c. Tinye ahịrị izipu (`from=sender,`.
+1. **Kwado** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Enweghị ike** : lelee ma `idempotency_key` adịlarị na leta. Ọ bụrụ ee, weghachi nsonaazụ echekwara.
+3. **Azụmahịa** (otu SQLite azụmahịa): a. Gbakọọ nguzozi ziri ezi. b. Ọ bụrụ `balance < amount`, ime (ego ezughi oke). c. Fanye ahịrị izipu (`from=sender, to=receiver, amount`). d. Fanye ahịrị nnata (`from=receiver, to=sender, amount`).
+4. **Oke oke** : lelee ọnụego mbufe maka onye zitere (max 10 transfers/min).
+5. **Ihe omume** ihe omume gamification emit `token_share` maka nyocha baajị XP +.
+6. laghachi `{ success: true, balance: newBalance }`.
 
-### Mmachi Ọsọ
+### Oke oke
 
-- Nyefe kachasị bụ 10 kwa nkeji maka API key ọ bụla.
-- Token kachasị bụ 10,000 maka otu nyefe.
-- Token kachasị a ga-enyefe kwa ụbọchị bụ 100,000 maka API key ọ bụla.
+- Kacha 10 na-enyefe kwa nkeji kwa igodo API.
+- Kachasị 10,000 token kwa otu mbufe.
+- Oke 100,000 token bufere kwa ụbọchị kwa igodo API.
 
 ---
 

@@ -67,37 +67,37 @@ PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777) တွင် စ
 
 ---
 
-## တန်ဖိုးသုံးမျိုး
+## တန်ဖိုးသုံးခု
 
-| တန်ဖိုး | UI အညွှန်း                 | လုပ်ဆောင်ပုံ                                                                                                                                                                                              |
-| ------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`  | `အလိုအလျောက် (dual-stack)` | OS က family ကို ရွေးချယ်သည်။ IP-literal proxy host အတွက် family သည် literal တွင်ပင် မူလအားဖြင့် သတ်မှတ်ထားသည်။ hostname အတွက် family နှစ်မျိုးစလုံးကို အသုံးပြုနိုင်သည်။ ဤတန်ဖိုးသည် ပုံသေတန်ဖိုးဖြစ်သည်။ |
-| `ipv4`  | `IPv4 သာ`                  | ချိတ်ဆက်မှုကို IPv4 အဖြစ် သတ်မှတ်ထားသည်။ Proxy host တွင် IPv4 (A) record မရှိပါက ချိတ်ဆက်မှုကို ပိတ်ထားသည့်အခြေအနေဖြင့် မအောင်မြင်စေသည်။                                                                  |
-| `ipv6`  | `IPv6 သာ`                  | ချိတ်ဆက်မှုကို IPv6 အဖြစ် သတ်မှတ်ထားသည်။ Proxy host တွင် IPv6 (AAAA) record မရှိပါက ချိတ်ဆက်မှုကို ပိတ်ထားသည့်အခြေအနေဖြင့် မအောင်မြင်စေသည်။                                                               |
+| တန်ဖိုး | UI တံဆိပ်           | အနေအထိုင်                                                                                                                                                                      |
+| ------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto`  | `Auto (dual-stack)` | OS မိသားစုကို ရွေးသည်။ IP-literal proxy host တစ်ခုအတွက်၊ မိသားစုသည် ပကတိအားဖြင့် ပင်ကိုယ်၊ အိမ်ရှင်အမည်အတွက်၊ မိသားစုနှစ်ခုလုံးသည် အရည်အချင်းပြည့်မီသည်။ ဤသည်မှာ ပုံသေဖြစ်သည်။ |
+| `ipv4`  | `IPv4 only`         | ချိတ်ဆက်မှုကို IPv4 သို့ ပင်ထိုးပါ။ proxy host တွင် IPv4 (A) မှတ်တမ်းမရှိပါက ပိတ်ပါ။                                                                                           |
+| `ipv6`  | `IPv6 only`         | ချိတ်ဆက်မှုကို IPv6 သို့ ပင်ထိုးပါ။ proxy host တွင် IPv6 (AAAA) မှတ်တမ်းမရှိပါက ပိတ်မရပါ။                                                                                      |
 
-UI စာသားများသည် `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`) တွင် ရှိသည်။
+UI ကြိုးများသည် `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`) တွင် နေထိုင်သည်။
 
 ---
 
-## ပြင်ဆင်သတ်မှတ်နည်း
+## Configure လုပ်နည်း
 
-### Dashboard
+### ဒိုင်ခွက်
 
-ရွေးချယ်မှုထိန်းချုပ်ခလုတ်သည် **Proxy Pool** tab ၏ proxy form တွင် ရှိသည်-
+ရွေးချယ်သူသည် ပရောက်စီပုံစံတွင် ရှိနေသည်။** Proxy Pool** တက်ဘ်-
 
-1. **Dashboard → Settings → Proxy → Proxy Pool** ကို ဖွင့်ပါ
-2. Proxy တစ်ခုကို ထည့်ပါ သို့မဟုတ် တည်းဖြတ်ပါ
-3. **IP family** dropdown ကို `အလိုအလျောက် (dual-stack)`, `IPv4 သာ` သို့မဟုတ် `IPv6 သာ` ဟု သတ်မှတ်ပါ
-4. သိမ်းဆည်းပါ
+1. ဖွင့်သည်။** ဒက်ရှ်ဘုတ် → ဆက်တင်များ → ပရောက်စီ → ပရောက်စီရေကန်**
+2. ပရောက်စီကို ထည့်ပါ သို့မဟုတ် တည်းဖြတ်ပါ။
+3. သတ်မှတ်ပါ။**IP မိသားစု** `Auto (dual-stack)`၊ `IPv4 only`၊ သို့မဟုတ် `IPv6 only` သို့ dropdown
+4. သိမ်းဆည်းပါ။
 
-ဤထိန်းချုပ်ခလုတ်ကို `ProxyRegistryManager.tsx` က render လုပ်ပေးသည် (`proxy/ProxyPoolTab.tsx` တွင် mounted လုပ်ထားသည်)။
+ထိန်းချုပ်မှုကို `ProxyRegistryManager.tsx` ( `proxy/ProxyPoolTab.tsx` တွင်တပ်ဆင်ထားသည်) ဖြင့်ပြန်ဆိုသည်။
 
 ### API
 
-`family` field သည် proxy registry ဖန်တီးခြင်း/အပ်ဒိတ်လုပ်ခြင်း payload များ၏ အစိတ်အပိုင်းဖြစ်ပြီး `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) က အတည်ပြုစစ်ဆေးကာ `POST` / `PATCH /api/v1/management/proxies` က ကိုင်တွယ်သည်-
+`family` အကွက်သည် `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) မှ အတည်ပြုပြီး `POST` / `PATCH /api/v1/management/proxies` မှ ကိုင်တွယ်သည့် proxy registry create/update payloads ၏ တစ်စိတ်တစ်ပိုင်းဖြစ်သည်။
 
 ```bash
-# IPv6 သာ အသုံးပြုသည့် proxy တစ်ခုကို ဖန်တီးရန်
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# ရှိပြီးသား proxy တစ်ခုကို IPv4 သာ အသုံးပြုရန် ပြောင်းလဲခြင်း
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Upstream-proxy entry များအတွက် အသုံးပြုသည့် inline proxy config object ကလည်း အလားတူ field ကို လက်ခံသည် (`upstream_proxy_config.family`၊ [ဒေတာမော်ဒယ်](#data-model) ကို ကြည့်ပါ)။
+တူညီသောအကွက်ကို အထက်ရေစီးကြောင်း-ပရောက်စီထည့်သွင်းမှုများအတွက် အသုံးပြုသည့် inline proxy config object (`upstream_proxy_config.family`၊ [ဒေတာမော်ဒယ်ကို](#data-model) ကြည့်ပါ)။
 
-ကျန် proxy CRUD/assignment API အကြောင်းအရာများအတွက် [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) ကို ကြည့်ပါ။
+ကျန်တဲ့ proxy CRUD/assignment API အတွက် [PROXY_GUIDE.md ကို](../ops/PROXY_GUIDE.md) ကြည့်ပါ။
 
 ---
 

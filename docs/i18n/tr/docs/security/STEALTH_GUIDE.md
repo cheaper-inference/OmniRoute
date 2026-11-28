@@ -4,11 +4,9 @@
 
 ---
 
-> **Doğruluk kaynağı:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Son güncelleme:** 2026-09-02 — v3.8.51
-> **Hedef kitle:** Sağlayıcıya özgü gizlilik entegrasyonlarının bakımını yapan mühendisler.
+> **Gerçeğin kaynağı:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Kitle:** Sağlayıcıya özel gizli entegrasyonları sürdüren mühendisler.
 
-OmniRoute, uç noktaları resmî olmayan istemcilerin aktif olarak parmak izini çıkaran sağlayıcılarla (TLS JA3/JA4, başlık sıralaması, JSON gövde yapısı, bütünlük belirteçleri) entegre olur. Bu sayfa, OmniRoute'un sunduğu gizlilik yüzeylerini ve bunların nerede uygulandığını açıklar.
+OmniRoute kenarları aktif olarak resmi olmayan istemcilerin parmak izini alan sağlayıcılarla (TLS JA3/JA4, başlık sıralaması, JSON gövde şekli, bütünlük belirteçleri) bütünleşir. Bu sayfa OmniRoute açığa çıkardığı gizli yüzeyleri ve bunların nerede uygulandığını belgelemektedir.
 
 ## Yasal ve Etik Bildirim
 
@@ -83,65 +81,68 @@ parmak izi değişikliklerini açıkça yetkilendirilmiş canlı bir hesapla do�
 
 ---
 
-## Claude Code Gizlilik Paketi
+## Claude Kodu Gizli Paketi
 
-`cliCompatMode` açık olduğunda OmniRoute, giden Claude isteklerini `claude-cli` trafiğinden ayırt edilemeyecek şekilde yeniden biçimlendirir. Üç modül birlikte çalışır:
+`cliCompatMode` açık olduğunda OmniRoute, giden Claude isteklerini `claude-cli` trafiğinden ayırt edilemeyecek şekilde yeniden şekillendirir. Üç modül işbirliği yapıyor:
 
 ### `claudeCodeFingerprint.ts`
 
-Faturalandırma başlığına gömülen 3 karakterli `cc_version` parmak izini hesaplar:
+Faturalandırma başlığına gömülü 3 karakterli `cc_version` parmak izini hesaplar:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (sabit kodlanmıştır; resmî istemciyle eşleşir)
-- Girdiler: İlk kullanıcı mesajı metninin 4, 7 ve 20. indekslerindeki karakterler + sürüm dizesi
+- `FINGERPRINT_SALT = "59cf53e54c78"` (sabit kodlanmış; resmi müşteriyle eşleşir)
+- Girişler: ilk kullanıcı mesajı metni + sürüm dizesinin 4, 7, 20 dizinindeki karakterler
 - Çıktı: 3 karakterli onaltılık önek
 
-### `claudeCodeCCH.ts` (İstemci İçerik Karması)
+### `claudeCodeCCH.ts` (İstemci İçeriği Karması)
 
-Resmî Claude Code CLI'ın Bun/Zig aracılığıyla hesapladığı sunucu taraflı bütünlük denetimidir. OmniRoute bunu `xxhash-wasm` ile yeniden uygular:
+Sunucu tarafı bütünlüğü, Bun/Zig. OmniRoute ile `xxhash-wasm` yeniden uygulamaları aracılığıyla CLI hesapladığı resmi Claude Kodunu kontrol eder:
 
-1. Gövdeyi `cch=00000;` yer tutucusuyla serileştirin
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Sıfırlarla doldurulmuş, 5 karakterli küçük harfli onaltılık değer
-4. `cch=00000;` ifadesini hesaplanan belirteçle değiştirin
+1. Gövdeyi `cch=00000;` yer tutucuyla serileştirin
+2. Karma görünümünü iki düz metin değişimiyle şu sırayla oluşturun (`hashView()`):
+   - `/"model":"[^"]*"/g` her eşleşmesi `"model":""` — olur, eşleşme ilk `"` durur, dolayısıyla kaçışlı alıntıya (`"model":"a\"b"`) sahip bir değer, müşterinin yaptığı gibi yalnızca bu alıntıya kadar boşaltılır.
+   - `/"max_tokens":\d+,|,?"max_tokens":\d+/g` her eşleşmesi kaldırılır — yalnızca sayısal değerler, herhangi bir derinlikte
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Sıfır dolgulu 5 karakterli küçük harfli altıgen
+5. `cch=00000;` hesaplanan jetonla değiştirin
 
 Sabitler:
 
-- Başlangıç değeri: `0x6e52736ac806831e`
+- Tohum: `0x4d659218e32a3268` ( Claude Code 2.1.252 ve 2.1.322'nin geri döngü yakalamalarıyla eşleşir)
 - Desen: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Üst sistem filtrelerinin bunları grep ile aramasını engellemek için "hassas" istemci adlarının ilk karakterinden sonra bir Unicode **sıfır genişlikli birleştirici** (`U+200D`) ekler. Varsayılan sözcük listesi:
+Unicode ekler** sıfır genişlikli marangoz** (`U+200D`) "hassas" istemci adlarının ilk karakterinden sonra kullanılır, böylece yukarı akış filtreleri bunları göremez. Varsayılan kelime listesi:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Şunlara uygulanır: `system` blokları, tüm `messages[].content` alanları ve `tools[].description` / `tools[].function.description`. Operatör tarafından `setSensitiveWords()` aracılığıyla geçersiz kılınabilir.
+Uygulandığı yerler: `system` blokları, tüm `messages[].content` ve `tools[].description` / `tools[].function.description`. `setSensitiveWords()` aracılığıyla operatör tarafından geçersiz kılınabilir.
 
 ### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` sağlayıcıları
 
-Yalnızca "gerçek Claude Code" trafiğini kabul eden üçüncü taraf Anthropic aktarıcıları için:
+Yalnızca "gerçek Claude Kodu" trafiğini kabul eden üçüncü taraf Anthropic geçişleri için:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- Varsayılan olarak `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- Bağlantı başına "Redaksiyonlu düşünme betasını etkinleştir" seçeneği, bir CC Compatible üst sistemi özellikle redaksiyonlu düşünme akışları gerektirdiğinde `redact-thinking-2026-02-12` ekler
-- Bağlantı başına "Özetlenmiş düşünme gösterimini etkinleştir" seçeneği, `providerSpecificData.requestDefaults.summarizeThinking` değerini saklar ve henüz bir gösterim modu ayarlanmamış CC Compatible düşünme isteklerine `display: "summarized"` ekler
+- varsayılan olarak `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
+- Bağlantı başına "Redaksiyon düşünme beta'yı etkinleştir" düğmesi, CC Uyumlu bir yukarı akış özellikle düzeltilmiş düşünme akışları gerektirdiğinde `redact-thinking-2026-02-12` ekler
+- Bağlantı başına "Özetlenmiş düşünme ekranını etkinleştir" geçişi `providerSpecificData.requestDefaults.summarizeThinking` depolar ve CC `display: "summarized"` ekler Halihazırda bir görüntüleme modu ayarlamamış uyumlu düşünme istekleri
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x ailesi)
 - Varsayılan yol: `/v1/messages?beta=true`
 
 Aynı paketteki kardeş modüller:
 
-- `claudeCodeConstraints.ts` — sıcaklık + önbellek denetimi kuralları
+- `claudeCodeConstraints.ts` — sıcaklık + önbellek kontrolü kuralları
 - `claudeCodeToolRemapper.ts` — araç adı yeniden eşleme
-- `claudeCodeExtraRemap.ts` — ek yük normalleştirme
+- `claudeCodeExtraRemap.ts` — ekstra yük normalizasyonu
 
 ---
 
@@ -171,7 +172,7 @@ Yukarı yöndeki yaptırım açık**Google tarafı** OmniRoute önleyebileceği 
 2. **Auto-Combo aracılığıyla yükü sağlayıcılara dağıtın** (`model: "auto"` veya `kr/glm/etc` -combo) tek bir Antigravity hesabını doyurmak yerine.
 3. **Bağlantı başına RPM sınırlarını ayarlayın** Antigravity sağlayıcısının düzenleme sayfasında (Kontrol Paneli → Sağlayıcıları → Antigravity → bağlantı → hız sınırı). 30-60 RPM, sürekli kullanım için savunulabilir bir üst sınırdır.
 4. **Kararlı, operatör kontrollü yukarı akış ağı kullanın** ve bir hesabı ilgisiz kullanıcılar veya iş yükleri arasında paylaşmaktan kaçının.
-5. **Yasaklanmışsa** : `support.google.com` → " Workspace/Account erişimini geri yükle" aracılığıyla itirazda bulunun ve `quota_exceeded` / `service disabled` yanıt gövdesinin tam olarak gönderildiği Google gönderin. Restorasyon garanti edilmez.
+5. **Yasaklanmışsa** : `quota_exceeded` / `service disabled` yanıt gövdesinin tam olarak gönderildiği Google ile `support.google.com` → " Workspace/Account erişimini geri yükle" aracılığıyla itirazda bulunun. Restorasyon garanti edilmez.
 
 Ortam referansı, her kredi modunun hesap ve harcama sonuçlarını belgelemektedir.
 
@@ -193,7 +194,7 @@ Her iki sağlayıcı da Antigravity ürünü OAuth oturumuyla kimlik doğrulamas
 | `gemini`          | Gemini (Google AI Studio) | Google AI Studio'dan Gemini API anahtarı (ücretsiz katman mevcuttur)                 |
 | `vertex`          | Tepe noktası AI           | Hizmet Hesabı JSON, OAuth erişim belirteci veya Vertex Express API anahtarı (Gemini) |
 
-Bu sağlayıcılar, Antigravity ürün oturumunun aksine, API erişimi için Google kimlik bilgilerini kullanır. Her kullanımı uyumlu hale getirmezler veya yaptırım riskini ortadan kaldırmazlar: her biri kendi şartlarına tabidir ve operatörün bunların dağıtımını kontrol etmesi gerekir. Örneğin, [Gemini API Ek Hizmet Şartları,](https://ai.google.dev/gemini-api/terms) yalnızca API istemcilerinin Avrupa Ekonomik Alanı, İsviçre veya Birleşik Krallık'taki kullanıcılara sunulması durumunda Ücretli Hizmetlere izin verir ve Ücretsiz Hizmetlere gönderilen içerik, Google ürünlerini geliştirmek için kullanılabilir. Vertex AI bunun yerine Google Cloud koşullarının ( [Hizmete Özel Koşullar](https://cloud.google.com/terms/service-terms) ) kapsamına girer. Fiyatlandırma ve kotalar, Antigravity aboneliği yerine bu API koşullarına göre yapılır.
+Bu sağlayıcılar, Antigravity ürün oturumunun aksine, API erişimi için Google kimlik bilgilerini kullanır. Her kullanımı uyumlu hale getirmezler veya yaptırım riskini ortadan kaldırmazlar: her biri kendi şartlarına tabidir ve operatörün bunların dağıtımını kontrol etmesi gerekir. Örneğin, [Gemini API Ek Hizmet Şartları,](https://ai.google.dev/gemini-api/terms) yalnızca API istemcilerinin Avrupa Ekonomik Alanı, İsviçre veya Birleşik Krallık'taki kullanıcılara sunulması durumunda Ücretli Hizmetlere izin verir ve Ücretsiz Hizmetlere gönderilen içerik, Google ürünlerini geliştirmek için kullanılabilir. Vertex AI bunun yerine Google Cloud koşullarının ( [Hizmete Özel Koşullar](https://cloud.google.com/terms/service-terms) ) kapsamına girer. Fiyatlandırma ve kotalar, Antigravity aboneliği yerine bu API şartlarını takip eder.
 
 Yukarıda açıklanan Antigravity askıya alma durumlarından kaçınmak isteyen operatörler, kullanımlarının sağlayıcının şartlarına uygun olup olmadığını kontrol ettikten sonra Gemini trafiğini `antigravity` / `agy` yerine bu sağlayıcılardan birine yönlendirmelidir.
 
@@ -201,7 +202,7 @@ Temas noktaları:
 
 - `open-sse/executors/antigravity.ts` — reads `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — kimlik bilgileri sıhhi tesisat
-- Orijinal olay raporu: Tartışma [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Orijinal olay raporu: Tartışma [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

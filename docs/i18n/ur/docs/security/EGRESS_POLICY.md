@@ -69,35 +69,35 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## تین اقدار
 
-| قدر    | UI لیبل               | طرزِ عمل                                                                                                                                                 |
-| ------ | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `خودکار (ڈوئل اسٹیک)` | OS فیملی منتخب کرتا ہے۔ IP-literal پراکسی ہوسٹ کے لیے، فیملی خود literal میں مضمر ہوتی ہے؛ جبکہ hostname کے لیے دونوں فیملیز اہل ہوتی ہیں۔ یہ ڈیفالٹ ہے۔ |
-| `ipv4` | `صرف IPv4`            | کنکشن کو IPv4 تک محدود کرتا ہے۔ اگر پراکسی ہوسٹ کا کوئی IPv4 (A) ریکارڈ نہ ہو تو کنکشن بند رکھتے ہوئے ناکام ہو جاتا ہے۔                                  |
-| `ipv6` | `صرف IPv6`            | کنکشن کو IPv6 تک محدود کرتا ہے۔ اگر پراکسی ہوسٹ کا کوئی IPv6 (AAAA) ریکارڈ نہ ہو تو کنکشن بند رکھتے ہوئے ناکام ہو جاتا ہے۔                               |
+| قدر    | UI لیبل             | رویہ                                                                                                                                                    |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS خاندان کو چنتا ہے۔ ایک IP-لٹریل پراکسی میزبان کے لیے، خاندان لغوی سے اندرونی ہوتا ہے۔ میزبان نام کے لیے، دونوں خاندان اہل ہیں۔ یہ پہلے سے طے شدہ ہے۔ |
+| `ipv4` | `IPv4 only`         | IPv4 سے کنکشن پن کرتا ہے۔ اگر پراکسی میزبان کے پاس کوئی IPv4 (A) ریکارڈ نہیں ہے تو بند ہو جاتا ہے۔                                                      |
+| `ipv6` | `IPv6 only`         | IPv6 سے کنکشن پن کرتا ہے۔ اگر پراکسی میزبان کے پاس کوئی IPv6 (AAAA) ریکارڈ نہیں ہے تو بند ہو جاتا ہے۔                                                   |
 
-UI اسٹرنگز `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`) میں موجود ہیں۔
+UI سٹرنگز `src/i18n/messages/en.json` میں رہتے ہیں (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`)۔
 
 ---
 
-## اسے کنفیگر کرنے کا طریقہ
+## اسے ترتیب دینے کا طریقہ
 
 ### ڈیش بورڈ
 
-سلیکٹر **Proxy Pool** ٹیب کے پراکسی فارم میں موجود ہے:
+سلیکٹر کی پراکسی شکل میں ہے۔** پراکسی پول** ٹیب:
 
-1. **Dashboard → Settings → Proxy → Proxy Pool** کھولیں
-2. پراکسی شامل یا ترمیم کریں
-3. **IP family** ڈراپ ڈاؤن کو `خودکار (ڈوئل اسٹیک)`، `صرف IPv4`، یا `صرف IPv6` پر سیٹ کریں
-4. محفوظ کریں
+1. کھولیں۔** ڈیش بورڈ → سیٹنگز → Proxy → پراکسی پول**
+2. ایک پراکسی شامل یا ترمیم کریں۔
+3. سیٹ کریں۔**IP خاندان** `Auto (dual-stack)`، `IPv4 only`، یا `IPv6 only` پر ڈراپ ڈاؤن
+4. محفوظ کریں۔
 
-یہ کنٹرول `ProxyRegistryManager.tsx` کے ذریعے رینڈر ہوتا ہے (جو `proxy/ProxyPoolTab.tsx` میں ماؤنٹ کیا گیا ہے)۔
+کنٹرول `ProxyRegistryManager.tsx` ( `proxy/ProxyPoolTab.tsx` میں نصب) کے ذریعہ پیش کیا جاتا ہے۔
 
 ### API
 
-`family` فیلڈ پراکسی رجسٹری بنانے/اپ ڈیٹ کرنے کے payloads کا حصہ ہے، جس کی توثیق `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) کے ذریعے ہوتی ہے اور اسے `POST` / `PATCH /api/v1/management/proxies` کے ذریعے ہینڈل کیا جاتا ہے:
+`family` فیلڈ پراکسی رجسٹری create/update پے لوڈز کا حصہ ہے، جس کی توثیق `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) اور `POST` / `PATCH /api/v1/management/proxies` کے ذریعے کی جاتی ہے:
 
 ```bash
-# صرف IPv6 استعمال کرنے والی پراکسی بنائیں
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# موجودہ پراکسی کو صرف IPv4 پر تبدیل کریں
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-یہی فیلڈ upstream-proxy اندراجات کے لیے استعمال ہونے والے inline پراکسی config object میں بھی قبول کی جاتی ہے (`upstream_proxy_config.family`، [ڈیٹا ماڈل](#data-model) دیکھیں)۔
+اسی فیلڈ کو ان لائن پراکسی کنفگ آبجیکٹ کے ذریعے بھی قبول کیا جاتا ہے جو اپ اسٹریم پراکسی اندراجات کے لیے استعمال ہوتا ہے (`upstream_proxy_config.family`، دیکھیں [ڈیٹا ماڈل](#data-model) )۔
 
-بقیہ پراکسی CRUD/assignment API کے لیے، [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) دیکھیں۔
+باقی پراکسی CRUD/assignment API کے لیے دیکھیں [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

@@ -21,24 +21,21 @@ være **logget inn**.
 ## 1. Arkitektur
 
 ```
-┌─ OmniRoute-app ─────────────────┐        ┌─ codex-app-server-sidevogn ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ funksjonstoken)              │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  administrerer OpenAI OAuth selv    │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, autofornying) │
-        │ deler (compose-volumer)            └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS-funksjonstokenet (begge monterer det)
-  codex-appserver-home    → ~/.codex (auth.json skrives av kontrollpanelet,
-                             leses av sidevognens codex app-server)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidevognen lytter **bare** på det interne compose-nettverket
-  (`ws://codex-app-server:1456`) bak et funksjonstoken. Den blir **aldri**
-  eksponert mot verten eller internett.
-- Codex CLI er innebygd i `omniroute:base`, så det er ikke nødvendig å installere
-  codex på verten eller brukerens maskin når du kjører sidevognen.
+- Sidevognen lytter** bare** på det interne komponeringsnettverket (`ws://codex-app-server:1456`) bak et kapasitetstoken. Det er det** aldri** publisert til verten eller internett.
+- Sidevognen bruker `omniroute:cli-no-docker`, bygget fra `runner-cli-no-docker` målet, som inkluderer Codex CLI.
 
 ## 2. Start den
 

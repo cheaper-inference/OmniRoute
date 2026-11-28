@@ -6,23 +6,24 @@
 
 > የተሟላ የDocker ማሰማሪያ ማጣቀሻ። በፍጥነት ለመጀመር፣ [የREADME Docker ክፍልን](../README.md#-docker) ይመልከቱ።
 
-## የይዘት ማውጫ
+## ማውጫ
 
-- [ፈጣን አስጀማሪ](#quick-run)
+- [ፈጣን ሩጫ](#quick-run)
 - [ከአካባቢ ፋይል ጋር](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Docker ጻፍ](#docker-compose)
 - [የሚገኙ መገለጫዎች](#available-profiles)
-- [OmniRoute በDocker ውስጥ ሲሰራ የአስተናጋጁን CLI መሣሪያዎች ማዋቀር](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [ኮንቴይነር ማጠንከሪያ](#container-hardening)
+- [OmniRoute በ Docker ውስጥ ሲሰራ የአስተናጋጅ CLI መሳሪያዎችን በማዋቀር ላይ](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
 - [Redis Sidecar](#redis-sidecar)
-- [የምርት Compose](#production-compose)
-- [የDockerfile ደረጃዎች](#dockerfile-stages)
+- [የምርት አዘጋጅ](#production-compose)
+- [Dockerfile ደረጃዎች](#dockerfile-stages)
 - [ወሳኝ የአካባቢ ተለዋዋጮች](#critical-environment-variables)
-- [Docker Compose ከCaddy (HTTPS) ጋር](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare ፈጣን Tunnel](#cloudflare-quick-tunnel)
-- [የImage መለያዎች](#image-tags)
-- [በDocker ውስጥ የDashboard ዝማኔዎች](#dashboard-updates-in-docker)
-- [ተገኝነት፦ ነባሪው SQLite ነጠላ-replica ነው](#availability-default-sqlite-is-single-replica)
-- [በDocker ውስጥ የGemini ክልላዊ ስህተቶች](#gemini-regional-errors-inside-docker)
+- [Docker በ Caddy ጻፍ (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare ፈጣን መሿለኪያ](#cloudflare-quick-tunnel)
+- [የምስል መለያዎች](#image-tags)
+- [የዳሽቦርድ ዝመናዎች በ Docker](#dashboard-updates-in-docker)
+- [ተገኝነት፡ ነባሪ SQLite ነጠላ-ብዜት ነው።](#availability-default-sqlite-is-single-replica)
+- [Gemini ክልላዊ ስህተቶች Docker ውስጥ](#gemini-regional-errors-inside-docker)
 - [ጠቃሚ ማስታወሻዎች](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute ለዋና ዋና የማሰማሪያ ቅርጾች የCompose መገለ�
 | `web`         | `omniroute-web`  | Browser የሚያስፈልጋቸው የድር-session አቅራቢዎች፦ `gemini-web`፣ `claude-web`፣ `claude-turnstile` (`runner-web`ን ይገነባል፣ Chromium ተካትቷል)  | `docker compose --profile web up -d`         |
 
 > በርካታ መገለጫዎችን ማጣመር ይቻላል፦ `docker compose --profile cli --profile cliproxyapi up -d`።
+
+## ኮንቴይነር ማጠንከሪያ
+
+በ `docker-compose.yml` ውስጥ ያለው `base`፣ `web`፣ `cli` እና `host` መተግበሪያ አገልግሎቶች `cap_drop: [ALL]` እና የ `no-new-privileges:true` የደህንነት አማራጩን ይጠቀማሉ። ምስሉ ስር ያልሆነ ተጠቃሚ `node` ሆኖ ይሰራል እና በከፍተኛ ወደቦች ላይ ያዳምጣል፣ ስለዚህ ምንም Linux ችሎታዎች አያስፈልገውም። የደህንነት አማራጩ ሂደቶች በሴቱይድ ሁለትዮሾች በኩል መብቶችን እንዳያገኙ ይከላከላል።
+
+ለራስ-አዘምን የ `cli` መገለጫ ብቻ የ Docker ሶኬትን ይጭናል። [Escape hatchን ይመልከቱ፡ ለደህንነት አንድምታ የእቃውን የራሱን CLIs ያዋቅሩ](#escape-hatch-configure-the-containers-own-clis-use-sparingly) ።
+
+የስር ፋይል ስርዓቱ በነባሪነት ሊፃፍ ይችላል። የ `cli` መገለጫ CLI ውቅረትን እና መሸጎጫዎችን በመያዣው የቤት ማውጫ ውስጥ ይጽፋል፣ የ `web` መገለጫ የChromium ክፍለ ጊዜ ሁኔታን ያከማቻል እና የ Next.js ጊዜ ከ `/app/data` ውጭ መሸጎጫዎችን ይጽፋል።
+
+ተነባቢ-ብቻ ስርወ ፋይል ስርዓትን ከ `base` መገለጫ ጋር ለመሞከር፣ ይህን እንደ `docker-compose.override.yml` ከ `docker-compose.yml` ቀጥሎ ያስቀምጡት። መፃፍ በራስ ሰር መሻርን ያነባል።
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+ያለው `/app/data` ተራራ መፃፍ የሚችል ሆኖ ይቆያል። ይህን መሻር በምርት ውስጥ ከመጠቀምዎ በፊት የስራ ጫናዎን ይፈትሹ፣ ምክንያቱም ወደ ሌሎች ዱካዎች መጻፍ ያስፈልገው ይሆናል።
 
 ## OmniRoute በDocker ውስጥ ሲሰራ የአስተናጋጁን CLI መሣሪያዎች ማዋቀር
 
@@ -279,7 +304,7 @@ docker build --target runner-base \
 | ቅርቅብ       | የመያዣ ጣሪያ       | ውጤት                        |
 | ---------- | -------------- | -------------------------- |
 | Turbopack  | 8 GiB / 16 GiB | OOM-በፀጥታ በሁለቱም ተገደለ        |
-| የድረ-ገጽ ጥቅል | 8 GiB          | የሠራተኛ SIGKILLed መገንባት      |
+| የድረ-ገጽ ጥቅል | 8 GiB          | ሠራተኛ SIGKILLed መገንባት       |
 | የድረ-ገጽ ጥቅል | 12 GiB         | ተሳክቷል፣ ከፍተኛው 11.1 GiB ደርሷል |
 
 ### የአሂድ ጊዜ ነባሪዎች
@@ -295,7 +320,7 @@ docker build --target runner-base \
 
 ### የሩጫ ጊዜ RAM ለኮድ ወኪሎች
 
-የ1 GiB Docker ነባሪ የ dashboard/light-chat ወለል እንጂ የምርት መጠን አይደለም። ረጅም `POST /v1/responses` አካላት (በመቶዎች የሚቆጠሩ መልእክቶች፣ አስር መሳሪያዎች) በሚጨመቁበት ጊዜ ብዙ የማስታወሻ ግራፎችን ይይዛሉ። ሁለት ተደራራቢ ~ 3 MiB / ~ 750k-ቶከን ጥያቄዎች V8ን በኤ አቋርጠዋል።** 12 GiB** የድሮ ቦታ (`FATAL ERROR: Reached heap limit`) እና እንዲሁም 16 GiB cgroup OOM ን መታ። [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ተመልከት.
+የ1 GiB Docker ነባሪ የ dashboard/light-chat ወለል እንጂ የምርት መጠን አይደለም። ረጅም `POST /v1/responses` አካላት (በመቶዎች የሚቆጠሩ መልእክቶች፣ አስር መሳሪያዎች) በሚጨመቁበት ጊዜ ብዙ የማስታወሻ ግራፎችን ይይዛሉ። ሁለት ተደራራቢ ~ 3 MiB / ~ 750k-ቶከን ጥያቄዎች V8ን በኤ አቋርጠዋል።** 12 GiB** የድሮ ቦታ (`FATAL ERROR: Reached heap limit`) እና እንዲሁም 16 GiB cgroup OOM ን መታ። [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) ተመልከት.
 
 መጠን** cgroup `--memory` ከቁልል በላይ** — ቤተኛ ቋጠሮዎች፣ SQLite እና መጭመቂያ መካከለኛ ከV8 ውጪ ተቀምጠዋል።
 
@@ -384,7 +409,7 @@ services:
 
 ## Docker በ Caddy ጻፍ (HTTPS Auto-TLS)
 
-OmniRoute የ Caddy አውቶማቲክ SSL አቅርቦትን በመጠቀም ደህንነቱ በተጠበቀ ሁኔታ መጋለጥ ይችላል። የጎራዎን DNS ያረጋግጡ ሪከርድ ወደ አገልጋይዎ IP።
+የ Caddy አውቶማቲክ SSL አቅርቦትን በመጠቀም OmniRoute ደህንነቱ በተጠበቀ ሁኔታ ሊጋለጥ ይችላል። የጎራዎን DNS ያረጋግጡ ሪከርድ ወደ አገልጋይዎ IP።
 
 ```yaml
 services:
@@ -415,7 +440,7 @@ volumes:
   omniroute-data:
 ```
 
-ካዲ ለላይኛው መያዣ መደበኛውን የማስተላለፊያ ራስጌዎችን ያዘጋጃል። OmniRoute `NEXT_PUBLIC_BASE_URL` እንደ ቀኖናዊ የህዝብ ምንጭ ለ OAuth ጥሪ መልሶች እና ለተፈጠሩ የህዝብ ማገናኛዎች ይጠቀማል። የተረጋገጠ ዳሽቦርድ ይጽፋል ተመሳሳይ መነሻ ጥያቄዎችን እና ከክፍለ ጊዜ ጋር የተያያዘ CSRF ጥበቃን ይጠቀሙ። ሆን ብለህ OmniRoute ከግልጽ ውቅረት ይልቅ የህዝብ ምንጭን ከታመኑ የተላለፉ ራስጌዎች እንዲያገኝ ለፈለክበት የላቀ ስምሪት `OMNIROUTE_TRUST_PROXY` ያንቁ።
+ካዲ ለላይኛው መያዣ መደበኛ የማስተላለፊያ ራስጌዎችን ያዘጋጃል። OmniRoute `NEXT_PUBLIC_BASE_URL` እንደ ቀኖናዊ የህዝብ ምንጭ ለ OAuth ጥሪ መልሶች እና ለተፈጠሩ የህዝብ ማገናኛዎች ይጠቀማል። የተረጋገጠ ዳሽቦርድ ይጽፋል ተመሳሳይ መነሻ ጥያቄዎችን እና ከክፍለ ጊዜ ጋር የተያያዘ CSRF ጥበቃን ይጠቀሙ። ሆን ብለህ OmniRoute ከግልጽ ውቅረት ይልቅ የህዝብ ምንጭን ከታመኑ የተላለፉ ራስጌዎች እንዲያገኝ ለፈለክበት የላቀ ስምሪት `OMNIROUTE_TRUST_PROXY` ያንቁ።
 
 ## Cloudflare Quick Tunnel
 
@@ -626,7 +651,7 @@ spec:
 
 `preStop` እንቅልፍ kube እንዲጥል ያስችለዋል የአገልግሎት የመጨረሻ ነጥቦች ከ SIGTERM በፊት** አዲስ** ትራፊክ ወደ ሞት ሂደት መምታት ያቆማል። በበረራ ላይ `/v1/responses` SSE እስከ `SHUTDOWN_TIMEOUT_MS` (ነባሪ 30ዎች) በከባድ ክብደት ቅበላ ሊዝ (#11015) በኩል ይፈስሳል። አሁንም ወደ ሂደቱ የሚደርሱ አዳዲስ ጥያቄዎች `503` + `Retry-After: 5` ያገኛሉ። ተተኪው ዝግጁ እስኪሆን ድረስ ባዶ-መጨረሻ ነጥብ ክፍተቱን እንደገና ይፍጠሩ የ SQLite ቶፖሎጂ እንጂ የመመርመሪያ ስህተት ውቅረት አይደለም —
 
-ውጫዊ Postgres / ባለብዙ ጸሃፊ HA ነው።** አይደለም** የተመዘገበ የአክሲዮን መንገድ. HA ከፈለጉ፣ ነጠላ ቅጂ ያስቀምጡ ወይም ፕሮጀክቱ የፈተነውን እና በተናጠል የመዘገበውን ቶፖሎጂ ያካሂዱ። የ Postgres/MySQL ስራ በ [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ውስጥ ይኖራል. እስከዚያ መርከቦች ድረስ፣ ብቸኛው የሚደገፍ መንገድ ማባዛት።** ትልቅ** `/v1/responses` አቅም N ገለልተኛ ሂደቶች ነው (ቀጣዩ ክፍል)፣ በአንድ ጥራዝ ላይ `replicas > 1` አይደለም።
+ውጫዊ Postgres / ባለብዙ ጸሃፊ HA ነው።** አይደለም** የተመዘገበ የአክሲዮን መንገድ። HA ከፈለጉ፣ ነጠላ ቅጂ ያስቀምጡ ወይም ፕሮጀክቱ የፈተነውን እና በተናጠል የመዘገበውን ቶፖሎጂ ያካሂዱ። የ Postgres/MySQL ስራ በ [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) ውስጥ ይኖራል. እስከዚያ መርከቦች ድረስ፣ ብቸኛው የሚደገፍ መንገድ ማባዛት።** ትልቅ** `/v1/responses` አቅም N ገለልተኛ ሂደቶች ነው (ቀጣዩ ክፍል)፣ በአንድ ጥራዝ ላይ `replicas > 1` አይደለም።
 
 ## ልኬት-ውጭ: N ገለልተኛ ሂደቶች
 
@@ -636,25 +661,25 @@ spec:
 
 ተገብሮ ምሳሌው ማደስ ሲያስፈልግ ግንኙነቱን እንደገና ያነብባል እና የተለየ፣ ጊዜው ያላለፈበት የመዳረሻ ማስመሰያ ብቻ ይቀበላል። ያለበለዚያ ማደስ ግንኙነቱን ሳያልቅ ወይም ሳያቦዝን ወይም የማደስ ሰባሪ አለመሳካቱን ሳይቆጥር ተሰናክሏል። እውነተኛ ወደላይ የማረጋገጫ አለመሳካቶች አሁንም መደበኛ ውድቀት የሂሳብ, ገላጭ ማቀዝቀዣ እና መደበኛ ደንበኛ ስህተት; የመለያ መጥፋት በቋሚነት ይቆያል። የመዳረሻ ቶከኖች ከማብቃታቸው በፊት የባለቤቱን የተሽከረከሩ ቶከኖች ያመሳስሉ (ነባሪው ንቁ የማደስ መሪ አምስት ደቂቃ ነው) ወይም የ Codex auth ፋይልን እንደገና ያስመጡ። ተገብሮ ከውጭ የሚገቡ ቶከኖች በቶከን መጨረሻ ነጥብ ላይ ሳያረጋግጡ ያከማቻሉ። በእጅ dashboard/API አድስ `409 refresh_disabled` ይመልሳል; አዲስ OAuth መግቢያዎች አልተለወጡም። [የአካባቢ ማጣቀሻ](../reference/ENVIRONMENT.md#passive-codex-token-refresh) ይመልከቱ.
 
-አንድ የመስቀለኛ መንገድ ሂደት ነው።** አንድ V8 ክምር** . ሁለት ተደራራቢ ~ 3 MiB / ~ 750k-ቶከን ኮድ-ወኪል `POST /v1/responses` (RTK + Caveman) ያንን ክምር በ ~ 12 Gi (`FATAL ERROR: Reached heap limit`) አስወገደ እና OOM a 16 Gi ግሩፕ። [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ይመልከቱ። ያ መለኪያ ሀ** ትውስታ-በጀት** ማስጠንቀቂያ፣ የሁለት ተከታታይ ረጅም `/v1/responses` ከባድ-ከፍተኛ ምርት አይደለም። የከባድ ክብደት ቻት መግቢያ በራስ በመነጨ የኢንጀስት ባይት ባጀት (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`፣ `src/shared/middleware/admissionBudget.ts`) መጠን ከዛው V8/cgroup ጣሪያ ወደላይ ከፍ — (ወይም የቅርስ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ጥያቄ-ቆጠራ ካፕ በማዘጋጀት) ቀድሞውኑ መጠን ባለው ሂደት ውርጃውን እንደገና ያስተዋውቃል። ትናንሽ ቻቶች፣ `/healthz`፣ `/v1/models` እና MCP ናቸው።** አይደለም** በዚያ ቆብ ውስጥ.
+አንድ የመስቀለኛ መንገድ ሂደት ነው።** አንድ V8 ክምር** . ሁለት ተደራራቢ ~ 3 MiB / ~ 750k-ቶከን ኮድ-ወኪል `POST /v1/responses` (RTK + Caveman) ያንን ክምር በ ~ 12 Gi (`FATAL ERROR: Reached heap limit`) አስወገደ እና OOM a 16 Gi ግሩፕ። [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) ይመልከቱ። ያ መለኪያ ሀ** ትውስታ-በጀት** ማስጠንቀቂያ፣ ከፍተኛ የሁለት ጊዜ ረጅም `/v1/responses` ምርት አይደለም። የከባድ ክብደት ቻት መግቢያ በራስ የመነጨ የኢንጀስት ባይት ባጀት (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`፣ `src/shared/middleware/admissionBudget.ts`) መጠን ከዛው V8/cgroup ጣሪያ — ወደ ላይ የሚሽረው (ወይም የቅርስ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` የጥያቄ ቆጠራ ካፕ በማዘጋጀት) ቀድሞውኑ መጠን ባለው ሂደት ውርጃውን እንደገና ያስተዋውቃል። ትናንሽ ቻቶች፣ `/healthz`፣ `/v1/models` እና MCP ናቸው።** አይደለም** በዚያ ቆብ ውስጥ.
 
 ### አንድ-ሂደት: ከሁለት በላይ ረጅም `/v1/responses`
 
-ሀ** ጤናማ** ሂደት (ከዝቃ በታች `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`፣ ነባሪ `0.75`)** ግንቦት** ሂደቱ-ሰፊ የበረራ-ባይት ባጀት (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) አሁንም ቦታ ሲኖረው ከሁለት በላይ በአንድ ጊዜ ረጅም `POST /v1/responses` ያሂዱ። በ `OMNIROUTE_CHAT_LARGE_BODY_BYTES` ላይ ያሉ ወይም ከዚያ በላይ የሆኑ አካላት (ነባሪ 256 KiB) ልክ እንደ መዋቅር-ከባድ ጥያቄዎች ተመሳሳይ የከባድ ሚዛን ሊዝ ይወስዳሉ እና ተመሳሳይ [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` ማምለጫ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) ይጠቀማሉ። በአስርዎች የሚቆጠሩ በተመሳሳይ ረጅም SSE ደንበኞች (ኦፕሬተሮች ብዙውን ጊዜ ከ40-50 ያስፈልጋቸዋል) ሀ** ትውስታ-በጀት** ጥያቄ — መጠን ክምር + primary/headroom ቦታዎች + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ከባድ "ከፍተኛ 2" የምርት ገደብ አይደለም. #7849 ተመልሶ እንዳይመጣ ግፊት ያለው ክምር አሁንም በድጋሚ ሊሞከር በሚችል `503` ይፈስሳል።
+ሀ** ጤናማ** ሂደት (ከዝቃ በታች `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`፣ ነባሪ `0.75`)** ግንቦት** ሂደቱ-ሰፊ የበረራ-ባይት ባጀት (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) አሁንም ቦታ ሲኖረው ከሁለት በላይ በአንድ ጊዜ ረጅም `POST /v1/responses` ያሂዱ። በ `OMNIROUTE_CHAT_LARGE_BODY_BYTES` ላይ ወይም ከዚያ በላይ የሆኑ አካላት (ነባሪ 256 KiB) ልክ እንደ መዋቅር-ከባድ ጥያቄዎች ተመሳሳይ የከባድ ሚዛን ኪራይ ውል ወስደዋል እና ተመሳሳይ [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` ማምለጫ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) ይጠቀማሉ። በአስርዎች የሚቆጠሩ በተመሳሳይ ረጅም SSE ደንበኞች (ኦፕሬተሮች ብዙውን ጊዜ ከ40-50 ያስፈልጋቸዋል) ሀ** ትውስታ-በጀት** ጥያቄ — መጠን ክምር + primary/headroom ቦታዎች + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ከባድ "ከፍተኛ 2" የምርት ገደብ አይደለም. የግፊት ክምር አሁንም እንደገና ሊሞከር በሚችል `503` ስለሚፈስ #7849 አይመለስም።
 
 ለ** ክምርን ማባዛት** (ገለልተኛ V8 አሮጌ-ክፍተት)** ዛሬ** :
 
-| መ ስ ራ ት                                                                                           | አትሥራ                                          |
-| ------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| ሩጡ** N containers/pods** , እያንዳንዱ የራሱ ጋር** የራሱ** `DATA_DIR` / ድምጽ                                 | በአንድ SQLite ፋይል ላይ `replicas > 1` አዘጋጅ        |
-| መጠን ከባድ በበረራ + ጤናማ-ዋና ክፍል ከ ክምር / በረራ-ባይት በጀት; 1–2 ወግ አጥባቂው # #7849 ነባሪ እንጂ የጠንካራ ምርት ከፍተኛ አይደለም። | አንድ ሂደት 8 × RAM እና ያልተገደበ ቆጠራ ይስጡ             |
-| አማራጭ `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` ለ** የጋራ ኮታ ቆጣሪዎች**                      | Redis እንደተጋራ SQLite — እንዳልሆነ አድርገው ይያዙት።      |
-| በእያንዳንዱ ምሳሌ ውስጥ የአቅራቢውን ሚስጥሮች ያባዙ (ወይም የተከፋፈሉ ዳሽቦርዶችን ይቀበሉ)                                       | በአንድ ዳሽቦርድ/አንድ የጥሪ ምዝግብ ማስታወሻ በአጋጣሚዎች ላይ ይጠብቁ |
-| ከማንኛውም ጭነት ሚዛን ጋር ፊት ለፊት; የሚለጠፍ በ API ቁልፍ ወይም ክፍለ ጊዜ በቂ ነው።                                       | የተወሰነ መጠን ያለው አቅራቢ መካከለኛ ዌር ጠይቅ               |
+| መ ስ ራ ት                                                                                       | አትሥራ                                          |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| ሩጡ** N containers/pods** , እያንዳንዱ የራሱ ጋር** የራሱ** `DATA_DIR` / ድምጽ                             | በአንድ SQLite ፋይል ላይ `replicas > 1` አዘጋጅ        |
+| መጠን ከባድ በበረራ + ጤናማ-ዋና ክፍል ከ ክምር / በረራ-ባይት በጀት; 1–2 ወግ አጥባቂ #7849 ነባሪ እንጂ ጠንካራ ምርት ከፍተኛ አይደለም። | አንድ ሂደት 8 × RAM እና ያልተገደበ ቆጠራ ይስጡ             |
+| አማራጭ `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` ለ** የጋራ ኮታ ቆጣሪዎች**                  | Redis እንደተጋራ SQLite — እንዳልሆነ አድርገው ይያዙት።      |
+| በእያንዳንዱ ምሳሌ ውስጥ የአቅራቢውን ሚስጥሮች ያባዙ (ወይም የተከፋፈሉ ዳሽቦርዶችን ይቀበሉ)                                   | በአንድ ዳሽቦርድ/አንድ የጥሪ ምዝግብ ማስታወሻ በአጋጣሚዎች ላይ ይጠብቁ |
+| ከማንኛውም ጭነት ሚዛን ጋር ፊት ለፊት; የሚለጠፍ በ API ቁልፍ ወይም ክፍለ ጊዜ በቂ ነው።                                   | የተወሰነ መጠን ያለው አቅራቢ መካከለኛ ዌር ጠይቅ               |
 
 የክፍለ-ጊዜ-መለያ ዝምድና በ Redis በኩል ሊጋራ ይችላል፡ በእያንዳንዱ ሂደት ላይ `OMNIROUTE_SESSION_AFFINITY_STORE=redis` እና `REDIS_URL` ያዘጋጁ፣ በተመሳሳዩ `REDIS_KEY_PREFIX` እና አወንታዊ `sessionAffinityTtlMs` መቼት። ፒኖች የአጠቃቀም-መለያ ማንነቶችን ለእያንዳንዱ ሂደት ብቁ አካባቢያዊ ግንኙነትን ይፈታሉ፣ ስለዚህ OAuth መለያዎች ተዛማጅ የማንነት ዲበ ውሂብ ተዛማጅ ግንኙነት IDs አያስፈልጋቸውም። የታወቁ የመለያ መታወቂያዎች ከአካባቢያዊ IDs በተቃራኒ በፒን መፍታት እና ጥበቃ የሚደረግለት ማስወጣት ይቀድማሉ። ያለማንነት መዝገቦች (ወይም ማንነታቸው ሳይታወቅ ከቤት ማስወጣት ደዋዮች) ID ጥበቃን ያቆያሉ። የተረጋጋ የአጠቃቀም መለያ የሌላቸው መለያዎች አሁንም ተዛማጅ IDs ያስፈልጋቸዋል። Redis ስህተቶች ወይም ጥሪዎች ከ100 ms በላይ ወደ አካባቢያዊ SQLite ይመለሳሉ። እያንዳንዱ Redis ዝምድና መደብር በ 8 ላይ አስደናቂ ስራዎችን ይሸፍናል ፣ ሲሞላ ወዲያውኑ Redis ያልፋል እና ክፍተቶችን የሚለቀቀው መሰረታዊ ስራው ሲጠናቀቅ ብቻ ነው እንጂ በተጠራው የመጨረሻ ቀን አይደለም። በ Redis ማቋረጥ ወቅት ምንም የተጋራ እውነት የለም፡ እያንዳንዱ ምሳሌ ወደ የራሱ አካባቢያዊ ዝምድና ይመለሳል፣ ክፍለ-ጊዜዎች በምሳሌ አንድ ጊዜ እንደገና ሊሰኩ ይችላሉ፣ እና አጋጣሚዎች ሊለያዩ ይችላሉ። ተለጣፊነት ሲያገግም በ Redis በኩል እንደገና ይሰበሰባል። የጊዜ ማብቂያው መጠበቅን ይገድባል እንጂ የተላከ EVAL አይደለም፣ ይህም ከመውደቅ በኋላ ሊያርፍ ይችላል። ማዘዋወር ይጽፋል በማዘዋወር ውሳኔ የተመለከተውን ትክክለኛ ዋጋ ያወዳድሩ እንጂ አዲስ ሚውቴሽን-ጊዜ ንባብ አይደለም፤ የታየ ሚስ ወይም የ SQLite ውድቀት ምልከታ ከማይገኝ Redis ቁልፍ ጋር ያወዳድራል። ያረጁ ፒኖች በአንድ CAS ይተካሉ፣ ስለዚህ ዘግይቶ ያለፈ ትእዛዝ አዲስ፣ የተለየ ፒን መተካት ወይም መሰረዝ አይችልም። Redis በአቶሚክ ያነባል እሴቱን እና የቀረውን አገልጋይ TTL ይመልሱ; አዎንታዊ PTTL (ወይም ምንም የማለፊያ ጊዜ) መኖርን ይወስናል እንጂ የጸሐፊውን JSON የጊዜ ማህተም ወይም የአንባቢውን ሰዓት አይደለም። የቀረው TTL ወደ አካባቢያዊ ቀነ ገደብ የሚቀረው የአካባቢ ቅጽበተ-ፎቶዎች ካርታ; አሁን ያሉት JSON ቁልፎች ሊነበቡ የሚችሉ ናቸው እና ጥሬ ባይታቸው ለ CAS ይቆያሉ። Redis ሲመልስ ብቸኛው የእውነት ምንጭ ነው። የተረጋገጡ የተጋሩ ማሻሻያዎች፣ ንክኪዎች እና ሰርዝዎች አካባቢያዊ ግቤትን ያስወግዱት፣ በጭራሽ አይጭኑት ወይም አያድሱት። SQLite በ Redis መንገድ ላይ የዚህ ምሳሌ የራሱን የውድቀት ውሳኔዎች ከ Redis ስህተቶች፣ የጊዜ ማብቂያዎች ወይም የመግቢያ ሙሌት፣ እንደበፊቱ በቲቲኤል የተገደበ ውሳኔዎችን ብቻ ይይዛል። በኋለኛው መቋረጥ ላይ የጠፋ አካባቢያዊ ፒን አንድ አዲስ ምርጫ (አንድ ፈጣን መሸጎጫ ማጣት) ያስከፍላል፣ የተሳሳተ ወይም የተባረረ መለያ አይደለም። ውድቅ የተደረጉ አስተያየቶች የጋራ አሸናፊውን እና ቀሪውን TTL በአቶሚክ ይመለሳሉ፡ ተራ ምርጫ በካርታው ላይ የተቀመጠውን የአካባቢ ቀነ-ገደብ እንደገና ይፈትሽ እና አሁንም በህይወት ያለ ብቁ አሸናፊ ይጠቀማል፣ አጠቃቀምን ነካ እና ለዛ መለያ ያለ ሌላ የጋራ ፅሁፍ መግባት። የማይገኝ ከሆነ ምርጫው የአካባቢውን እጩ ያቆያል፣ የተጋራው ፒን ሳይለወጥ ይተዋል እና አንድ የማረም መልእክት ያስተላልፋል። ውድቅ የተደረገ CAS SQLite አይጽፍም; Redis ስህተቶች፣ የጊዜ ማብቂያዎች ወይም የመግቢያ ሙሌት በምትኩ ያለውን የአካባቢ ስራ ይተገበራሉ። የተላከ ሚውቴሽን ምላሽ ጊዜው ካለፈ በኋላ (ተቀባይነት ያለው፣ ውድቅ ወይም ስህተት) ከደረሰ፣ የተመሳሰለ ትክክለኛ ተከታታይ-እሴት ማወዳደር-እና-ሰርዝ የባይት-ተመሳሳይ የጊዜ ማብቂያ የመመለሻ ረድፍ ብቻ ያስወግዳል። በዚያ ንጽጽር እና ስረዛ መካከል ምንም መጠበቅ የለም; አዲስ የተዘጋ ጽሑፍ ተጠብቆ ይቆያል። ጥበቃ የሚደረግለት ማስወጣት ያልተሳካው መለያ የራሱ አካባቢያዊ ፒን Redis ዝቅ እያለ እንኳን ያስወግዳል እና የጋራ ማስወጣት ከተረጋገጠ በኋላ እንደገና ያጸዳዋል። ቀደም የተጋሩ ምላሾች በመጠባበቅ ላይ ያሉ የተባረሩ አካባቢያዊ ፒን ወደነበሩበት መመለስ አይችሉም ምክንያቱም የጋራ ስኬቶች SQLite ፈጽሞ አይጽፉም። በኋላ የተቋረጠ ውድቀት መለያን እንደገና ሊያስተካክል ይችላል; በኋላ ተቀባይነት ያለው የጋራ ጽሁፍ በ Redis ውስጥ ብቻ ይኖራል. Redis ያመለጡ የአካባቢ መውደቅ ሁኔታን አያማክሩም። ነጂው ሲጠፋ፣ አዲስ የተመረጡ ፒኖች የባለአራት መስክ SQLite JSON ቅርፅን ይዘው ይቆያሉ፤ Redis ራውቲንግ ብቻ የሃሽ መለያ ማንነትን ይጨምራል። ቀድሞ የተዘጋጁ ፒኖች ጊዜው የሚያበቃበት ድንበራቸው ላይ እንደገና ተረጋግጧል። Redis የሊዝ ያልሆነ ምርጫ መደብሩን በድጋሚ ያነባል፣ ነገር ግን የተመሳሰለ የሊዝ እቅድ አሁንም በቅድመ-ፈች እና በእቅድ መካከል የተባረረ ፒን መጠቀም ይችላል (ተቀባይነት ያለው ምርጥ ጥረት መስኮት)። የሊዝ ውል ከዘላቂ የይገባኛል ጥያቄ በኋላ ሂሳቡን መቀየር አይችልም፡ ውድቅ ከተደረገ በኋላ የይገባኛል ጥያቄ የቀረበለትን እጩ ለጥያቄው ብቻ ያቆየዋል እና የተጋራውን አሸናፊ ሳይነካ ይተወዋል፣ ስለዚህ የሁኔታዎች ስምምነት በዚያ መንገድ ላይ የተገደበ ነው። የቀረው ሠንጠረዡ አሁንም ይሠራል፡ ይህ ጥምር ክፍለ ጊዜ ተጣባቂነት፣ ቤተኛ Codex መታጠፊያ ፒን ፣ የመለያ ሴማፎሮች ፣ መቆለፊያዎች ፣ ገደቦች ፣ ውቅር ወይም የጥሪ ምዝግብ ማስታወሻዎችን አያጋራም።
 
-ሃርድዌር፡ በአንድ ጊዜ በተመሳሳይ ረጅም `/v1/responses` ሀ** ትውስታ-በጀት** ጥያቄ (ክምር + inflight-byte / #10110)። `N` ገለልተኛ `DATA_DIR` s አሁንም ክምርን ያበዛል፡ አስተናጋጅ RAM `N × cgroup` መሸፈን አለበት እንጂ “አንድ 16 Gi pod with N = 8” አይደለም። በአንድ SQLite ፋይል ላይ በጭራሽ `replicas > 1` አታድርጉ።
+ሃርድዌር፡ በአንድ ጊዜ በአንድ ጊዜ ረጅም `/v1/responses` ሀ** ትውስታ-በጀት** ጥያቄ (ክምር + inflight-byte / #10110)። `N` ገለልተኛ `DATA_DIR` s አሁንም ክምርን ያበዛል፡ አስተናጋጅ RAM `N × cgroup` መሸፈን አለበት እንጂ “አንድ 16 Gi pod with N = 8” አይደለም። በአንድ SQLite ፋይል ላይ በጭራሽ `replicas > 1` አታድርጉ።
 
 ንድፍ ጻፍ (ሁለት ክምር፣ ሁለት ጥራዞች — አይደለም `deploy.replicas: 2`):
 
@@ -683,58 +708,32 @@ volumes:
   omniroute-b-data:
 ```
 
-በሂደት ላይ ያለ ጥግግት ( HTTP ማግለል መጨናነቅ) [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) ነው። በጋራ የሚበረክት ሁኔታ ላይ አንድ ምክንያታዊ ዘለላ [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ነው።
+በሂደት ላይ ያለ ጥግግት ( HTTP ማግለል መጨናነቅ) [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) ነው። በጋራ የሚበረክት ሁኔታ ላይ አንድ ምክንያታዊ ዘለላ [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) ነው።
 
-## በDocker ውስጥ የGemini ክልላዊ ስህተቶች
+## Gemini ክልላዊ ስህተቶች Docker ውስጥ
 
-Google AI Studio / Gemini API፣ FAILED_PRECONDITION ያለውን HTTP 400 እና
-`User location is not supported for the API use.` መመለስ ይችላል። በhost ላይ የተሳካ ጥያቄ
-container-ው ተመሳሳይ የወጪ መስመርን እንደሚጠቀም አያረጋግጥም። የDNS ቅደም ተከተል፣
-የIPv4/IPv6 ግንኙነት፣ የVPN ማስተላለፊያ እና የተዋቀሩ proxies ሊለያዩ ይችላሉ።
-[Google የሚደግፋቸውን ክልሎች](https://ai.google.dev/gemini-api/docs/available-regions)
-እንዲሁም ትክክለኛውን የግንኙነት መስመር ያረጋግጡ፤ ይህ ስህተት ብቻውን የተሳሳተ API key መኖሩን አያመለክትም።
+Google AI ስቱዲዮ / Gemini API HTTP 400ን በ FAILED_PRECONDITION እና `User location is not supported for the API use.` መመለስ ይችላል በአስተናጋጁ ላይ የተሳካ ጥያቄ መያዣው ተመሳሳይ የወጪ መንገድ መጠቀሙን አያረጋግጥም። DNS ማዘዝ፣ IPv4/IPv6 ግንኙነት፣ VPN ራውቲንግ እና የተዋቀሩ ፕሮክሲዎች ሊለያዩ ይችላሉ። [የ Google የሚደገፉ ክልሎችን](https://ai.google.dev/gemini-api/docs/available-regions) እንዲሁም ትክክለኛውን የግንኙነት መስመር ያረጋግጡ; ይህ ስህተት ብቻ መጥፎ API ቁልፍን አይለይም።
 
-### ለየግንኙነቱ የተወሰነ proxy ይምረጡ
+### ግንኙነት-ተኮር ተኪ ይምረጡ
 
-ለተጎዳው Gemini ግንኙነት የOmniRouteን
-[ለየግንኙነቱ የproxy ውቅር](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-ይጠቀሙ፤ ከዚያም **ግንኙነትን ሞክር** እና በተመሳሳይ model አነስተኛ ጥያቄን እንደገና ያስኪዱ።
-ይህ የማስተላለፊያ ለውጡን በዚያ ግንኙነት ብቻ እንዲወሰን ያደርገዋል። proxy-ው ከcontainer-ው
-ሊደረስበት እንደሚችል እና ግንኙነቱ በእርግጥ እንደሚመርጠው ያረጋግጡ።
-መስመሩን መቀየር upstream የክልል ብቁነትን አያረጋግጥም።
+ለተጎዳው Gemini ግንኙነት OmniRoute's [per-connection proxy ውቅርን](../ops/PROXY_GUIDE.md#4-level-proxy-system) ተጠቀም እና እንደገና ድገም።** ግንኙነትን ይሞክሩ** እና ተመሳሳይ ሞዴል ያለው ትንሽ ጥያቄ. ይህ የማስተላለፊያ ለውጡ ለዚያ ግንኙነት እንዲሰፋ ያደርገዋል። ተኪው ከመያዣው ውስጥ ሊደረስበት የሚችል መሆኑን እና ግንኙነቱ በትክክል እንደመረጠው ያረጋግጡ። መንገዱን መቀየር ወደላይ የክልል ብቁነት ዋስትና አይሰጥም።
 
-### የhost እና container አውታረ መረብን ያነጻጽሩ
+### የአስተናጋጅ እና የኮንቴይነር ኔትወርክን ያወዳድሩ
 
-የተረጋገጡ ውጤቶችን ሲያነጻጽሩ key-ውን፣ model-ውን እና ጥያቄውን ተመሳሳይ ያድርጉ፤
-credentials፣ የproxy passwords ወይም ሙሉ authorization headers በissue ውስጥ ፈጽሞ አይለጥፉ።
-መጀመሪያ፣ ተመሳሳዩን command በhost ላይ እና በcontainer ውስጥ በመጠቀም
-የOS resolver የትኞቹን የaddress families እንደሚያቀርብ ይመርምሩ፦
+የተረጋገጡ ውጤቶችን ሲያወዳድሩ ቁልፉን, ሞዴል እና ጥያቄን አንድ አይነት ያቆዩ; ምስክርነቶችን፣ የተኪ የይለፍ ቃሎችን ወይም የፈቃድ ራስጌዎችን በአንድ ጉዳይ ላይ በጭራሽ አይለጥፉ። በመጀመሪያ OS ፈላጊው የትኛውን ቤተሰብ አድራሻ እንደሚያቀርብ መርምር፣ በአስተናጋጁ እና በመያዣው ውስጥ ያለውን ተመሳሳይ ትዕዛዝ በመጠቀም፡-
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-`omniroute`ን በሚያስኬዱት service ይተኩት (ለምሳሌ፣ `omniroute-web`)። እነዚህ
-commands credentials ወይም IP addresses ሳያሳዩ address familiesን ያትማሉ። የተመለሰ `6`
-የIPv6 DNS ውጤት መኖሩን ብቻ ያሳያል፤ ጥቅም ላይ የሚውል IPv6 route ወይም API access
-መኖሩን **አያረጋግጥም**። `curl` በተጫነበት ቦታ፣ በሁለቱም environments ውስጥ
-`curl -4 -I https://generativelanguage.googleapis.com`ን ከ
-`curl -6 -I https://generativelanguage.googleapis.com` ጋር ያነጻጽሩ።
-ምላሹ unauthenticated error ቢሆንም፣ የHTTP ምላሽ ለዚያ probe ግንኙነት መኖሩን ያረጋግጣል፤
-የGemini ብቁነትን የሚፈትሸው authenticated model request ብቻ ነው።
+እርስዎ በሚያሄዱት አገልግሎት (ለምሳሌ `omniroute-web`) `omniroute` ። እነዚህ ትዕዛዞች የአድራሻ ቤተሰቦችን ያለ ምስክርነቶች ወይም IP አድራሻዎች ያትማሉ። የተመለሰ `6` የ IPv6 DNS ውጤት ብቻ ያሳያል፡ ያደርጋል** አይደለም** ጥቅም ላይ ሊውል የሚችል IPv6 መንገድ ወይም API መዳረሻ ያረጋግጡ። `curl` በተጫነበት ቦታ፣ በሁለቱም አካባቢዎች `curl -4 -I https://generativelanguage.googleapis.com` ከ `curl -6 -I https://generativelanguage.googleapis.com` ጋር ያወዳድሩ። የ HTTP ምላሽ ያልተረጋገጠ ስህተት ቢሆንም ለዚያ መፈተሻ ግንኙነትን ያረጋግጣል። የተረጋገጠው የሞዴል ጥያቄ ብቻ Gemini ብቁነትን ይፈትሻል።
 
-### የhost ደረጃ አማራጭ፦ የሚሰራ IPv6 እና resolver policy
+### የአስተናጋጅ ደረጃ አማራጭ፡ የሚሰራ IPv6 እና ፈቺ ፖሊሲ
 
-የ[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) ሪፖርት አቅራቢ
-የcontainer IPv6ን በማንቃት እና የglibc address selectionን በመቀየር በenvironment-አቸው
-ውስጥ accessን መልሰዋል። ይህን ለተወሰነ environment ብቻ እንደሚሠራ አማራጭ ይቁጠሩት።
-የresolver preferencesን ከማስተካከልዎ በፊት የhost IPv6 በትክክል እንደሚሠራ፣
-የcontainer egress/routing እና firewall rules ትክክል መሆናቸውን ያረጋግጡ።
-የግል ULA address ብቻውን የpublic IPv6 connectivity መኖሩን አያረጋግጥም።
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) ዘጋቢ ኮንቴነር IPv6 ን በማንቃት እና የglibc አድራሻ ምርጫን በመቀየር በአካባቢያቸው ያለውን ተደራሽነት መልሷል። ይህንን እንደ አካባቢ-ተኮር አማራጭ አድርገው ይያዙት። የመፍትሄ አማራጮችን ከማስተካከልዎ በፊት የሚሰራ አስተናጋጅ IPv6፣የኮንቴይነር egress/routing እና የፋየርዎል ህጎችን ያረጋግጡ። የግል ULA አድራሻ በራሱ የወል IPv6 ግንኙነትን አይመሰርትም።
 
-ቀድሞውኑ ከCompose default network ጋር ለተያያዙ services፣ ይህ fragment
-በዚያ network ላይ IPv6ን ያነቃል፤ የቀረውን service፣ ports፣ volumes እና configuration ያቆዩ፦
+ቀድሞውኑ ከ Compose's ነባሪ አውታረ መረብ ጋር ለተያያዙ አገልግሎቶች፣ ይህ ቁራጭ በዚያ አውታረ መረብ ላይ IPv6 ያስችለዋል። የቀረውን አገልግሎትህን፣ ወደቦችህን፣ ጥራዞችህን እና ውቅረትህን አቆይ፡
 
 ```yaml
 networks:
@@ -742,30 +741,13 @@ networks:
     enable_ipv6: true
 ```
 
-ለnamed network፣ service-ው በእርግጥ በሚቀላቀልበት network ላይ ያንቁት። Docker
-የULA subnet ሊመድብ ይችላል፤ networkዎ ሲፈልገው ብቻ ግልጽ የሆነ፣ የማይደራረብ subnet ይምረጡ።
-[Docker IPv6 networking](https://docs.docker.com/engine/daemon/ipv6/) እና
-[Compose network options](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6)ን ይመልከቱ።
+ለተሰየመ አውታረ መረብ፣ አገልግሎቱ በትክክል በሚቀላቀለው አውታረ መረብ ላይ አንቃው። Docker የ ULA ንዑስ መረብን መመደብ ይችላል; አውታረ መረብዎ ሲፈልግ ብቻ ግልጽ፣ የማይደራረብ ንዑስ መረብ ይምረጡ። [Docker IPv6 አውታረ መረብን](https://docs.docker.com/engine/daemon/ipv6/) ይመልከቱ እና [የአውታረ መረብ አማራጮችን ይጻፉ](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6) ።
 
-በ**glibc ላይ በተመሠረተ image** ውስጥ፣ `/etc/gai.conf` address selectionን ሊቀይር ይችላል።
-አሁን ያለው የrepository Dockerfile Debianን ይጠቀማል፤ ብጁ musl-based images ይህን ዘዴ አይጋሩም።
-ሪፖርት የተደረገው ማስተካከያ የULA labelን ከ`label fc00::/7 6` ወደ
-`label fc00::/7 1` ይቀይራል። ከimage-ው ሙሉ policy table ይጀምሩ እና ሌሎቹን
-entries ያቆዩ፤ `label` ወይም `precedence` entry መጨመር ያንን default table ስለሚተካ፣
-የተቀየረውን መስመር ብቻ የያዘ file በቂ አይደለም።
-የ[glibc configuration reference](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-እነዚያን semantics ይገልጻል። የተገመገመውን file በ`/etc/gai.conf` ላይ read-only አድርገው bind-mount ያድርጉ
-እና ለውጡን ለመተግበር service-ውን እንደገና ይፍጠሩ።
+በ** በglibc ላይ የተመሠረተ ምስል** , `/etc/gai.conf` የአድራሻ ምርጫን ሊለውጥ ይችላል. የአሁኑ ማከማቻ Dockerfile Debian ይጠቀማል; በሙስል ላይ የተመሰረቱ ምስሎች ይህንን ዘዴ አይጋሩም። ሪፖርት የተደረገው ማስተካከያ የ ULA መለያውን ከ `label fc00::/7 6` ወደ `label fc00::/7 1` ይለውጠዋል። ከምስሉ የተሟላ የመመሪያ ሠንጠረዥ ይጀምሩ እና ሌሎች ግቤቶችን ያስቀምጡ `label` ወይም `precedence` ማስገባት ነባሪውን ሰንጠረዥ ይተካዋል፣ ስለዚህ የተቀየረውን መስመር ብቻ የያዘ ፋይል በቂ አይደለም። የ [glibc ውቅር ማመሳከሪያ](https://github.com/bminor/glibc/blob/master/posix/gai.conf) እነዚያን የትርጉም ጽሑፎች ሰነድቷል። የተገመገመውን ፋይል ተነባቢ-ብቻ በ `/etc/gai.conf` አስረው እና እሱን ለመተግበር አገልግሎቱን እንደገና ይፍጠሩ።
 
-ይህ ለ**በዚያ container ውስጥ ላለ ሁሉም outbound traffic** የOS address selectionን ይቀይራል።
-ሁሉም application IPv6ን እንዲመርጥ አያስገድድም፤ የNode DNS order እና connection selection
-እንዲሁም ተጽዕኖ አላቸው። በተለይ፣ `--dns-result-order=ipv4first` IPv4ን ይመርጣል
-እና ለIPv4-only failure መፍትሔ አይደለም። [Node DNS ordering](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder)ን ይመልከቱ።
+ይህ OS አድራሻ ምርጫን ይለውጣል** በዚያ መያዣ ውስጥ ሁሉም የወጪ ትራፊክ** . እያንዳንዱ መተግበሪያ IPv6 እንዲመርጥ አያስገድድም: የመስቀለኛ መንገድ DNS ቅደም ተከተል እና የግንኙነት ምርጫም አስፈላጊ ነው. በተለይም `--dns-result-order=ipv4first` IPv4 ይመርጣል እና ለ IPv4-only ውድቀት መፍትሄ አይሆንም። [መስቀለኛ መንገድ DNS](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder) ይመልከቱ።
 
-ከማንኛውም የhost ደረጃ ለውጥ በኋላ Geminiን እና ሌሎች providersዎን እንደገና ይፈትሹ።
-ወደ ቀድሞው ሁኔታ ለመመለስ፣ ብጁ `gai.conf` mountን ያስወግዱ፣ የቀድሞውን network configuration ይመልሱ
-እና በmaintenance window ጊዜ የተጎዳውን service/network እንደገና ይፍጠሩ። networkን እንደገና
-መፍጠር ከእሱ ጋር የተያያዙ ሌሎች containersን ሊያቋርጥ ይችላል፤ persistent data volume-ውን አይሰርዙ።
+ከማንኛውም የአስተናጋጅ ደረጃ ለውጥ በኋላ Gemini እና ሌሎች አቅራቢዎችዎን እንደገና ይሞክሩ። መልሶ ለመንከባለል፣ ብጁ `gai.conf` ተራራን ያስወግዱ፣ የቀደመውን የአውታረ መረብ ውቅር ወደነበረበት ይመልሱ እና በጥገና መስኮት ወቅት የተጎዳውን service/network ይፍጠሩ። አውታረ መረብን እንደገና መፍጠር ከእሱ ጋር የተያያዙ ሌሎች መያዣዎችን ሊያቋርጥ ይችላል; የማያቋርጥ የውሂብ መጠን አይሰርዙ.
 
 ## ጠቃሚ ማስታወሻዎች
 

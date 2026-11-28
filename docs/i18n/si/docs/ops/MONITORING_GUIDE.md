@@ -99,31 +99,31 @@ OmniRoute සතුව **නිරීක්ෂණ ස්තර 3ක්** ඇත:
 
 ---
 
-## සෞඛ්ය පරීක්ෂණ API
+## සෞඛ්ය පරීක්ෂාව API
 
-OmniRoute මඟින් HTTP සෞඛ්ය අතුරුමුහුණත් **දෙකක්** නිරාවරණය කරයි. Orchestrator සඳහා ඒවා එකිනෙක හුවමාරු කර භාවිත කළ නොහැක.
+OmniRoute නිරාවරණය කරයි** දෙකක්** HTTP සෞඛ්ය මතුපිට. වාදකයින් සඳහා ඒවා එකිනෙකට හුවමාරු කළ නොහැක.
 
-| මාර්ගය                       | අරමුණ                                                                | බර                                      | භාවිත කළ යුත්තේ                                                     |
-| ---------------------------- | -------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------- |
-| `GET /healthz`               | ජීවනචක්ර සජීවීතාව/සූදානම්තාව (`ok` / `starting` / `stopping`)        | ඉතා සුළුය (අදියර සලකුණ පමණි)            | Kubernetes **readiness**; HTTP භාවිත කළ යුතුම නම් මෘදු **liveness** |
-| `GET /api/monitoring/health` | පද්ධතිය + provider පිළිබඳ ගැඹුරු සාරාංශය (DB, heap, catalog ගණන්, …) | බරයි (සමමුහුර්ත DB / monitoring කාර්යය) | Dashboard, blackbox ගැඹුරු පරීක්ෂණ, Docker හි අන්තර්ගත healthcheck  |
+| මාර්ගය                       | අරමුණ                                                           | බර                                 | සඳහා භාවිතා කරන්න                                                          |
+| ---------------------------- | --------------------------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------- |
+| `GET /healthz`               | ජීවන චක්‍රය liveness/readiness (`ok` / `starting` / `stopping`) | සුළු (අදියර ධජය පමණි)              | කුබර්නෙටස්** සූදානම** ; මෘදු** සජීවී බව** ඔබ HTTP භාවිතා කළ යුතු නම්       |
+| `GET /api/monitoring/health` | ගැඹුරු පද්ධති + සපයන්නාගේ සාරාංශය (DB, ගොඩ, නාමාවලි ගණන්, ...)  | බර (සමමුහුර්ත DB / අධීක්ෂණ කාර්යය) | උපකරණ පුවරු, බ්ලැක්බොක්ස් ගැඹුරු චෙක්පත්, Docker හි බිල්ට් සෞඛ්‍ය පරීක්ෂාව |
 
-> **සටහන:** Provider සෞඛ්ය න්යාස, autopilot ගැටලු, quota monitor, token සෞඛ්යය, සහ `/api/monitoring/health` ඉක්මවන latency විස්තර **MCP tool** `observability_snapshot` හෝ **dashboard** පිටු හරහා ලබාගත හැක — ඒවා සඳහා වෙන්වූ REST මාර්ග නොමැත.
+> **සටහන:** සපයන්නාගේ සෞඛ්‍ය න්‍යාස, ස්වයංක්‍රීය නියමු ගැටළු, කෝටා නිරීක්ෂකයින්, ටෝකන් සෞඛ්‍යය සහ `/api/monitoring/health` ඉක්මවා ඇති ප්‍රමාද විස්තර**MCP මෙවලම** `observability_snapshot` හෝ** උපකරණ පුවරුව** පිටු — ඒවා සඳහා කැප වූ REST මාර්ග නොමැත.
 
-මාර්ග දෙකම request හැසිරවීම සිදුකරන **එම Node event loop එකේම** ක්රියාත්මක වේ. CPU-බරැති මාර්ගයක් (විශාල `GET /v1/models` catalog කාර්යයක්, දිගු-context compression / token ගණනය) `/healthz` ඇතුළුව **සියලුම** HTTP handler ප්රමාද කළ හැක. Event-loop එක කාර්යබහුල වීම ≠ process එක මියගොස් තිබීම. සම්පත් අධිකව භාවිත කරන කාර්යය නිවැරදි කිරීම වඩා සුදුසුය; probe සැකසුම් වෙනස් කිරීමෙන් අඩුවන්නේ වැරදි ලෙස process නැවැත්වීම් පමණි.
+මාර්ග දෙකම ධාවනය වේ** එකම නෝඩ් සිදුවීම් ලූපය** ඉල්ලීම හැසිරවීම ලෙස. CPU-බැඳි මාර්ගයක් (විශාල `GET /v1/models` නාමාවලිය වැඩ, දිගු සන්දර්භය සම්පීඩනය / ටෝකන් ගණන් කිරීම) ප්‍රමාද විය හැක** සියලු** `/healthz` ඇතුළුව HTTP හසුරුවන්නන්. Event-loop කාර්යබහුල ≠ ක්‍රියාවලිය මිය ගියේය. ඌරා සවි කිරීමට කැමති; පරීක්ෂණ සුසර කිරීම ව්‍යාජ ඝාතනයන් අඩු කරයි.
 
-### සැහැල්ලු orchestrator probe එක
+### සැහැල්ලු වාදක පරීක්ෂණය
 
 ```bash
 GET /healthz
-# හෝ HEAD /healthz
+# or HEAD /healthz
 ```
 
-- server ජීවනචක්ර අදියර සූදානම් වූ විට **200** + body `ok`
-- ආරම්භ කිරීමේදී හෝ වසා දැමීමේදී **503** + `starting` / `stopping`
-- ක්රියාත්මක කිරීම: `src/app/healthz/route.ts` (DB ping එකක් නොමැත)
+- **200** + body `ok` සේවාදායක ජීවන චක්‍ර අදියර සූදානම් වූ විට
+- **503** ආරම්භයේදී හෝ වසා දැමීමේදී + `starting` / `stopping`
+- ක්‍රියාත්මක කිරීම: `src/app/healthz/route.ts` ( DB ping නැත)
 
-### පද්ධති සෞඛ්යය (ගැඹුරු)
+### පද්ධති සෞඛ්‍යය (ගැඹුරු)
 
 ```bash
 GET /api/monitoring/health
@@ -153,42 +153,35 @@ GET /api/monitoring/health
 }
 ```
 
-#### `credentialHealth`: probe-cache සහ SQLite `test_status`
+#### `credentialHealth`: probe-cache vs SQLite `test_status`
 
-`GET /api/monitoring/health` → `credentialHealth` යනු `provider_connections.test_status` හි සජීවී dump එකක් නොව, **මතකය තුළ පවතින probe-cache
-gauge එකයි**. #12532 පසු request මාර්ගය කියවන්නේ `getCachedCredentialHealthSummary()` පමණි; පසුබිම් probe
-event loop එකෙන් පිටත cache එක refresh කරයි.
+`GET /api/monitoring/health` → `credentialHealth` යනු** in-memory probe-cache gage** `provider_connections.test_status` හි සජීවී ඩම්ප් එකක් නොවේ. #12532 ට පසු ඉල්ලීම් මාර්ගය කියවෙන්නේ `getCachedCredentialHealthSummary()` පමණි; පසුබිම් පරීක්ෂණ මගින් සිදුවීම් ලූපයෙන් හැඹිලිය නැවුම් කරයි.
 
-| ස්තරය                     | ස්ථානය                                                                | එහි අර්ථය                                                                                                                                                                                                    |
-| ------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Probe-cache gauge         | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | process මතකයේ තවමත් රඳවා ඇති අවසන් credential-health probe ප්රතිඵල. `source` සැමවිටම `probe-cache` වේ.                                                                                                       |
-| අසාර්ථක connection විස්තර | `credentialHealth.failedConnections`                                  | **`failed > 0` වන විට පමණක්** පවතී. `status=error` සහිත cache row සීමිත ලැයිස්තුවක් (`connectionId`, `status`, පිරිසිදු කළ `lastError` / `lastErrorType`). ලැයිස්තුව සීමා කළ විට `failedOmitted` සකසනු ලැබේ. |
-| SQLite ස්ථාවර status      | `credentialHealth.staleDbNonOkCount`                                  | දන්නා non-ok (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`) persisted `test_status` එකක් ඇති **සක්රිය** (`is_active=1`) connection row ගණන.                               |
+| ස්ථරය                     | කොහෙද                                                                 | එහි තේරුම කුමක්ද                                                                                                                                                                                                |
+| ------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| පරීක්ෂණ-හැඹිලි මානය       | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | අවසන් අක්තපත්‍ර-සෞඛ්‍ය පරීක්ෂණ ප්‍රතිඵල තවමත් ක්‍රියාවලි මතකයේ රඳවා ඇත. `source` සෑම විටම `probe-cache` වේ.                                                                                                     |
+| අසාර්ථක සම්බන්ධතා විස්තරය | `credentialHealth.failedConnections`                                  | ඉදිරිපත් කරන්න** `failed > 0` විට පමණි** . `status=error` (`connectionId`, `status`, sanitized `lastError` / `lastErrorType`) සමඟ සීමා වූ හැඹිලි පේළි ලැයිස්තුව. ලැයිස්තුව සීමා කළ විට `failedOmitted` සකසා ඇත. |
+| SQLite ඇලෙන සුළු තත්ත්වය  | `credentialHealth.staleDbNonOkCount`                                  | ගණන්** ක්රියාකාරී** (`is_active=1`) සම්බන්ධතා පේළි එහි දිගටම පවතින `test_status` දන්නා ok නොවන (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                               |
 
-මෙම ස්තර දෙක සැලසුම් කර ඇති පරිදි එකිනෙකට නොගැළපිය හැක:
+ස්ථර දෙක අරමුණ මත එකඟ නොවිය හැක:
 
-- Gauge එකේ `failed=0` වන අතර `staleDbNonOkCount>0` — නවතම
-  probe-cache snapshot එක `status=error` ලෙස ගණන් නොගන්නා ස්ථාවර
-  `test_status` එකක් (උදාහරණයක් ලෙස `expired` හෝ `credits_exhausted`) SQLite තුළ තවමත් පවතී.
-- Gauge එකේ `failed>0` වන අතර SQLite සෞඛ්ය සම්පන්න ලෙස පෙනේ — මෑත probe එකක් අසාර්ථක වී
-  cache කර ඇත; DB row එක යාවත්කාලීන කර නැත, නැතහොත් පසුව හිස් කර ඇත.
+- `staleDbNonOkCount>0` — SQLite තවමත් ඇලෙන සුළු `test_status` (උදාහරණයක් ලෙස `expired` හෝ `credits_exhausted`) ඇති අතර `failed=0` මැනීම, නවතම පරීක්ෂණ-හැඹිලි ස්නැප්ෂොට් `status=error` ලෙස ගණන් නොගනී.
+- `failed>0` මැනීම SQLite සෞඛ්‍ය සම්පන්න ලෙස පෙනෙන අතර — මෑත පරීක්ෂණයක් අසාර්ථක වූ අතර හැඹිලිගත කර ඇත; DB පේළිය යාවත්කාලීන කර නැත, නැතහොත් පසුව ඉවත් කර ඇත.
 
-මෙම endpoint එක scrape කරන විට `provider_connections.test_status` මත පමණක් පදනම්ව alert නොකරන්න.
-සජීවී probe අසාර්ථකත්ව සඳහා `failed` + `failedConnections` භාවිත කරන්න, සහ persisted sticky-status ගණන අවශ්ය විට
-`staleDbNonOkCount` භාවිත කරන්න.
+මෙම අන්ත ලක්ෂ්‍යය සීරීමට ලක් කිරීමේදී `provider_connections.test_status` මත පමණක් අනතුරු අඟවන්න එපා. සජීවී පරීක්ෂණ අසාර්ථක වීම් සඳහා `failed` + `failedConnections` භාවිතා කරන්න, සහ ඔබට දිගටම පවතින ඇලෙන සුළු-තත්ත්ව ගණන අවශ්‍ය විට `staleDbNonOkCount` භාවිතා කරන්න.
 
-### Kubernetes probe නිර්දේශ
+### Kubernetes නිර්දේශ විමර්ශනය කරයි
 
-OmniRoute යනු **තනි Node process එකකි** (එක් event loop එකක්). සම්මත Docker `HEALTHCHECK` සැහැල්ලු `/healthz` ඉලක්ක කරයි. kubelet liveness interval සඳහා `/api/monitoring/health` **අධික බරකින් යුක්තය**.
+OmniRoute යනු a** තනි Node ක්රියාවලිය** (එක් සිදුවීම් ලූපයක්). කොටස් Docker `HEALTHCHECK` සැහැල්ලු `/healthz` ඉලක්ක කරයි. `/api/monitoring/health` වේ** බර වැඩියි** kubelet liveness intervals සඳහා.
 
-| පරීක්ෂණය          | නිර්දේශිත ඉලක්කය                                                                    | සටහන්                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ----------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **ආරම්භය**        | දිගු `failureThreshold` එකක් (හෝ විශාල `startPeriod` එකක්) සහිත HTTP `GET /healthz` | ශීත ආරම්භය + SQLite සංක්රමණය සඳහා තත්පර කිහිපයකට වඩා ගත විය හැක                                                                                                                                                                                                                                                                                                                                        |
-| **සූදානම**        | HTTP `GET /healthz`                                                                 | ජීවන චක්රය `ok` / `starting` / `stopping` (200 එදිරිව 503). ලූපය CPU මඟින් අවහිර වී ඇත්නම් තවමත් තත්ත්වය දෝලනය වේ. **තත්පර කිහිපයකට පසු ලැබෙන 200 ප්රතිචාරයක් සෞඛ්ය සම්පන්න නොවේ** (#10303) — එයින් අදහස් වන්නේ බයිට් 3ක හසුරුවන්නා ක්රියාත්මක වීමට පෙර event loop එකට සම්පත් නොලැබුණු බවයි                                                                                                            |
-| **සජීවී බව**      | HTTP `GET /livez`, **හෝ ප්රධාන සේවා port එකේ TCP** (`PORT`, පෙරනිමිය `20128`)       | `/livez` පරීක්ෂා කරන්නේ process එක සජීවීද යන්න පමණි (හසුරුවන්නා ක්රියාත්මක වන්නේ නම් සැමවිටම 200). එය තවමත් එම event loop එකම භාවිත කරයි — කාර්යබහුල ≠ අක්රීය, එමෙන්ම එය TCP වලට වඩා හොඳින් event-loop සම්පත් හිඟය (#10303) හඳුනා නොගනී. නාමාවලිය/සම්පීඩන භාරය යටතේ HTTP පරීක්ෂණ කල් ඉකුත් වන්නේ නම් **TCP** වඩා සුදුසුය; කුමන ක්රමය භාවිත කළත් කෙටි event-loop ඇණහිටීම් නිසා pod එක අවසන් **නොකරන්න** |
-| **ගැඹුරු සෞඛ්යය** | බාහිර පරීක්ෂකයකින් `GET /api/monitoring/health`                                     | kubelet `livenessProbe` / දැඩි `readinessProbe` සඳහා නොවේ                                                                                                                                                                                                                                                                                                                                              |
+| විමර්ශනය කරන්න    | නිර්දේශිත ඉලක්කය                                                           | සටහන්                                                                                                                                                                                                                                                                                                                         |
+| ----------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **පණ ගන්වන්න**    | දිගු `failureThreshold` (හෝ විශාල `startPeriod`) සහිත `GET /healthz` HTTP  | සීතල ආරම්භය + SQLite සංක්‍රමණය තත්පර කිහිපයක් ඉක්මවිය හැක                                                                                                                                                                                                                                                                     |
+| **සූදානම**        | HTTP `GET /healthz`                                                        | ජීවන චක්‍රය `ok` / `starting` / `stopping` (200 vs 503). ලූපය CPU-අවහිර කර ඇත්නම් තවමත් ෆ්ලැප් වේ. ඒ** තත්පර කිහිපයකින් 200 සෞඛ්ය සම්පන්න නොවේ** (#10303) — එයින් අදහස් වන්නේ 3-බයිට් හසුරුවන්නා ධාවනය වීමට පෙර සිදුවීම් ලූපය සාගින්නෙන් පෙළෙන බවයි                                                                           |
+| **සජීවී බව**      | HTTP `GET /livez`,** හෝ TCP** ප්‍රධාන සේවා වරායේ (`PORT`, default `20128`) | `/livez` යනු ක්‍රියාවලි-සජීවී පමණි (හැසිරුම්කරු ධාවනය කරන්නේ නම් සෑම විටම 200). එය තවමත් Event loop — කාර්යබහුල ≠ මිය ගොස් ඇති අතර, එය TCP වලට වඩා සිදුවීම්-ලූප් සාගින්න (#10303) හඳුනා නොගනී. කැමති**TCP** HTTP පරීක්ෂණ catalog/compression භාරය යටතේ කාලය අවසන් නම්; කරන්න** නැත** කෙටි ඉවෙන්ට්-ලූප් කුටි මත පොඩ් මරා දමන්න |
+| **ගැඹුරු සෞඛ්යය** | බාහිර පරීක්ෂකයෙකුගෙන්`GET /api/monitoring/health`                          | kubelet `livenessProbe` / tight `readinessProbe` සඳහා නොවේ                                                                                                                                                                                                                                                                    |
 
-උදාහරණ ව්යුහය (ඔබේ ශීත-ආරම්භය සහ සම්පීඩන භාරය අනුව සීමා සකසන්න):
+උදාහරණ හැඩය (ඔබේ සීතල-ආරම්භක සහ සම්පීඩන භාරයට සීමාවන් සකසන්න):
 
 ```yaml
 ports:
@@ -214,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # event-loop ඇණහිටීමක් යටතේ HTTP /livez තවමත් කල් ඉකුත් විය හැක. TCP යනු
-  # වඩා ගතානුගතික විකල්පයයි:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-kubelet **සජීවී බවේ** පරීක්ෂණය `/api/monitoring/health` වෙත යොමු **නොකරන්න**. එම මාර්ගය සැබෑ DB/අධීක්ෂණ කාර්යයන් සිදු කරන අතර භාරය යටතේ ව්යාජ ධනාත්මක ප්රතිඵල ලබා දෙනු ඇත.
+**නෑ** ලක්ෂ්යය kubelet** සජීවී බව** `/api/monitoring/health`. එම මාර්ගය සැබෑ DB/monitoring ක්‍රියා කරන අතර බර යටතේ ව්‍යාජ-ධනාත්මක වනු ඇත.
 
-අදාළ: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (event loop එක කාර්යබහුලව තිබියදී සිදු කරන පරීක්ෂණ), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (නාමාවලි මිලකරණය සම්පත් අධික ලෙස භාවිත කිරීම), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (සම්පීඩන token ගණනය සම්පත් අධික ලෙස භාවිත කිරීම).
+ආශ්රිත: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (සිදුවීම් ලූපය කාර්යබහුල වන විට පරීක්ෂණ), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (නාමාවලි මිල හොග්), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (සම්පීඩන ටෝකන-ගණන හොග්).
 
-### systemd watchdog (අක්රීය වූ event loop)
+### systemd මුරකරු (ශීත කළ සිදුවීම් ලූපය)
 
-systemd host එකකදී, OmniRoute එය සූදානම් වූ විට service manager වෙත දැනුම් දී දිගටම සංඥා යවයි. එම නිසා event loop එක සිර වී ඇති server එකක් ක්රියාත්මක නමුත් නිහඬව තැබීම වෙනුවට අවසන් කර නැවත ආරම්භ කරනු ලැබේ. මෙම සංඥා පැමිණෙන්නේ server එකේම event loop එකෙනි: එය අවහිර වූ විට ඒවා නතර වන අතර, කිසිදු සංඥාවක් නොමැතිව `WatchdogSec` කාලය ගත වූ පසු systemd සේවාව නැවත ආරම්භ කරයි.
+systemd ධාරකයක, OmniRoute එය සුදානම් වූ විට සේවා කළමනාකරුට පවසන අතර එය දිගටම ping කරයි, එබැවින් සිදුවීම් ලූපය සිරවී ඇති සේවාදායකයක් මිය ගොස් නිහඬව සිටීම වෙනුවට නැවත ආරම්භ වේ. පිං පැමිණෙන්නේ සේවාදායකයාගේම සිදුවීම් ලූපයෙන්: එය අවහිර වූ විට, ඒවා නතර වන අතර, `WatchdogSec` එකක් නොමැතිව පසු වූ පසු systemd නැවත ආරම්භ කරයි.
 
-[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) දැනටමත් මෙය සහිත user unit එකක් ලියයි. ඔබම ලියන unit එකකට (පෙරනිමිය `Type=simple`) watchdog එකක් නොලැබෙන බැවින්, එහි `[Service]` කොටසට මෙම පේළි එක් කරන්න:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) දැනටමත් මෙය සමඟ පරිශීලක ඒකකයක් ලියයි. ඔබ විසින්ම ලියන ඒකකයකට (පෙරනිමි `Type=simple`) මුර බල්ලා නොලැබේ, එබැවින් මෙම රේඛා එහි `[Service]` කොටසට එක් කරන්න:
 
 ```ini
 [Service]
@@ -238,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-ජනනය කළ unit එක `Restart=on-failure` ලෙස සකසන බැවින් එම පේළියද එක් කරන්න — එය නොමැතිව watchdog එක සිර වූ සේවාව නැවත ආරම්භ කිරීම වෙනුවට එය අවසන් කිරීම පමණක් සිදු කරයි.
+උත්පාදනය කරන ලද ඒකකය `Restart=on-failure` සකසයි, එබැවින් එය නොමැතිව එම රේඛාව මෙන්ම — එකතු කරන්න මුරකරු එය නැවත ආරම්භ කිරීම වෙනුවට සිරවී ඇති සේවාව විනාශ කරයි.
 
-- `Type=notify`: process එක fork වන විට නොව, server එක `READY=1` යවන විට සේවාව "ආරම්භ වූ" ලෙස සැලකේ. `TimeoutStartSec` මන්දගාමී ආරම්භයකට සීමාවක් පනවයි.
-- `NotifyAccess=all`: සංඥා යවනු ලබන්නේ `omniroute serve` supervisor එකේ child එකක් වන server process එක මඟිනි.
-- `WatchdogSec`: සංඥා සෑම තත්පර 60කට වරක් යවන බැවින් **120 හෝ ඊට වැඩි** අගයක් භාවිත කරන්න. ඊට කුඩා අගයන් සෞඛ්ය සම්පන්න server එකක් නැවත ආරම්භ කරනු ඇත.
-- `omniroute serve` foreground එකේ ධාවනය කරන්න. `--daemon` මඟින් server එක unit එකේ cgroup වෙතින් වෙන් කරන අතර notify handshake එක කිසිවිටෙක සම්පූර්ණ නොවේ.
+- `Type=notify`: සේවාව "ආරම්භ වන්නේ" සේවාදායකය `READY=1` යවන විට මිස ක්‍රියාවලිය දෙබල වන විට නොවේ. `TimeoutStartSec` මන්දගාමී ආරම්භයක් සීමා කරයි.
+- `NotifyAccess=all`: පිං යවනු ලබන්නේ `omniroute serve` අධීක්ෂකගේ දරුවෙකු වන සේවාදායක ක්‍රියාවලිය මගිනි.
+- `WatchdogSec`: සෑම තත්පර 60 කට වරක් පිං පිටතට යයි, එබැවින් භාවිතා කරන්න** 120 හෝ ඊට වැඩි** . කුඩා අගයන් නිරෝගී සේවාදායකයක් නැවත ආරම්භ කරනු ඇත.
+- පෙරබිමෙහි `omniroute serve` ධාවනය කරන්න. `--daemon` මඟින් සේවාදායකය ඒකකයේ cgroup වෙතින් වෙන් කරන අතර දැනුම් දීමේ අතට අත දීම කිසිදා සම්පූර්ණ නොවේ.
 
-නැවත ආරම්භ කිරීමකින් පසු එය සක්රිය බව පරීක්ෂා කරන්න:
+නැවත ආරම්භ කිරීමෙන් පසු එය සක්‍රිය දැයි පරීක්ෂා කරන්න:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` වින්යාස කළ ප්රමාදය පෙන්වන අතර `WatchdogTimestamp` සෑම මිනිත්තුවකටම ඉදිරියට යයි. watchdog එක නිසා සිදු වූ නැවත ආරම්භයක් `Result=watchdog` ලෙස සටහන් වේ. unit එක එලෙසම තබාගෙන සංඥා අක්රිය කිරීමට `OMNIROUTE_DISABLE_SD_NOTIFY=1` සකසන්න; `NOTIFY_SOCKET` එකක් නොමැති විට (terminal, Docker, Electron, Windows) කිසිවක් යවනු නොලැබේ.
+`WatchdogUSec` වින්‍යාසගත ප්‍රමාදය පෙන්වන අතර `WatchdogTimestamp` සෑම මිනිත්තුවකම ඉදිරියට යයි. මුරකරු විසින් නැවත ආරම්භ කිරීම `Result=watchdog` ලෙස සටහන් වේ. ඒකකය එලෙසම තබා ගනිමින් පිං අක්‍රිය කිරීමට, `OMNIROUTE_DISABLE_SD_NOTIFY=1` සකසන්න; `NOTIFY_SOCKET` නොමැතිව (පර්යන්තය, Docker, Electron, Windows) කිසිවක් යවන්නේ නැත.
 
-watchdog එක පරීක්ෂා කරන්නේ event loop එක දිගටම ක්රියාත්මක වන බව පමණි. මන්දගාමී නමුත් තවමත් ක්රියාත්මක වන server එකක් නැවත ආරම්භ නොකෙරේ.
+මුර බල්ලා පරීක්‍ෂා කරන්නේ සිදුවීම් ලූපය දිගටම ක්‍රියාත්මක වේද යන්න පමණි. මන්දගාමී නමුත් තවමත් හැරෙමින් පවතින සේවාදායකයක් නැවත ආරම්භ නොවේ.
 
-### විකල්ප request-path කාර්යයන් (මතකය, කුසලතා, token නැවුම් කිරීම)
+### විකල්ප ඉල්ලීම්-මාර්ග වැඩ (මතකය, කුසලතා, සංකේත නැවුම් කිරීම)
 
-මතක නිස්සාරණය, කුසලතා ඇතුළත් කිරීම සහ OAuth ටෝකන නැවුම් කිරීම `/healthz` සමඟ **ප්රධාන Node සිදුවීම් ලූපය** බෙදා ගනී. ඒවා worker pool එකක් නොව, dashboard එකෙන් සක්රිය හෝ අක්රිය කළ හැකි විශේෂාංග (`memoryEnabled`, `skillsEnabled`) වේ. [පරිසරය — සිදුවීම් ලූපය මත memory, skills සහ token refresh හි පිරිවැය](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349) බලන්න.
+මතකය නිස්සාරණය, කුසලතා එන්නත් කිරීම සහ OAuth ටෝකන් නැවුම් කිරීම බෙදා ගනී** ප්‍රධාන නෝඩ් සිදුවීම් පුඩුව** `/healthz` සමඟ. ඒවා උපකරණ පුවරුව-ටොගල් විශේෂාංග (`memoryEnabled`, `skillsEnabled`), සේවක සංචිතයක් නොවේ. [පරිසරය — Event-loop පිරිවැය](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349) බලන්න.
 
-### සැපයුම්කරුගේ සෞඛ්ය තත්ත්වය
+### සැපයුම්කරු සෞඛ්යය
 
-> **REST endpoint එකක් නොමැත.** සැපයුම්කරුගේ සෞඛ්ය දත්ත MCP මෙවලම වන `observability_snapshot` හෝ dashboard හි `/dashboard/providers` පිටුව හරහා ලබා ගත හැක.
+> **REST අවසන් ලක්ෂ්‍ය නැත.** සපයන්නාගේ සෞඛ්‍ය දත්ත MCP මෙවලම `observability_snapshot` හෝ උපකරණ පුවරුව `/dashboard/providers` පිටුව හරහා ලබා ගත හැක.
 
-### සැපයුම්කරුගේ විස්තර
+### සපයන්නාගේ විස්තර
 
-> **REST endpoint එකක් නොමැත.** එක් එක් සැපයුම්කරුගේ විස්තර dashboard හි `/dashboard/providers` පිටුව හරහා ලබා ගත හැක.
+> **REST අවසන් ලක්ෂ්‍ය නැත.** එක්-සැපයුම්කරු විස්තර උපකරණ පුවරුව `/dashboard/providers` පිටුව හරහා ලබා ගත හැක.
 
 ---
 

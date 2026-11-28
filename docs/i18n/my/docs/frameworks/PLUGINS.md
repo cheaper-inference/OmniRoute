@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | ဖြေရှင်းသတ်မှတ်ထားသော base URL                                     |
 | `ctx.apiKey`                 | `string \| null` | ပေးထားပါက API key                                                  |
 
-## ရှာဖွေတွေ့ရှိခြင်း
+## ရှာဖွေတွေ့ရှိမှု
 
-Plugin များကို အောက်ပါနေရာများမှ ရှာဖွေတွေ့ရှိသည်-
+ပလပ်အင်များကို ရှာဖွေတွေ့ရှိသည်-
 
-1. `~/.omniroute/plugins/<name>/` — အသုံးပြုသူ၏ local ထည့်သွင်းမှုများ
-2. `OMNIROUTE_PLUGIN_PATH` env var — စိတ်ကြိုက် directory
+1. `omniroute plugin install` ပက်ကေ့ဂျ်များထည့်သည့်နေရာတွင်`~/.omniroute/plugins/node_modules/<name>/` — (npm `--prefix`၊ `npm -g` မဟုတ်ပါ။)
+2. `~/.omniroute/plugins/<name>/` — လက်-ကူးယူထားသော ပလပ်အင်လမ်းညွှန်များ
+3. `OMNIROUTE_PLUGIN_PATH` env var — စိတ်ကြိုက်လမ်းညွှန်
 
-နှစ်ခုစလုံးသည် **CLI အတွက်သာ** ဖြစ်သည်။ Server-side plugin runtime (proxy အတွင်း အလုပ်လုပ်သော marketplace/`plugin.json`
-plugin များ) တွင် ၎င်း၏ကိုယ်ပိုင် override ဖြစ်သည့်
-`OMNIROUTE_PLUGINS_DIR` နှင့်အတူ ကိုယ်ပိုင် scanner ရှိသည် —
-[PLUGIN_MARKETPLACE.md → Plugin directory](./PLUGIN_MARKETPLACE.md#plugin-directory) ကို ကြည့်ပါ။
-တစ်ခုကို သတ်မှတ်ခြင်းသည် အခြားတစ်ခုအပေါ် သက်ရောက်မှုမရှိပါ။
+Symlinked လမ်းညွှန်များ ( `plugin install ./dir` အတွက် npm ဖန်တီးသည်) ကို လိုက်နာသည်။
 
-Loading error များကို ဖမ်းယူပြီး သတိပေးချက်များအဖြစ် ပြသသည် — ပျက်နေသော plugin တစ်ခုသည် CLI ကို မည်သည့်အခါမျှ crash ဖြစ်စေမည်မဟုတ်ပါ။
+နှစ်ယောက်စလုံးက** CLI သီးသန့်** . server-side plugin runtime (proxy အတွင်းရှိ marketplace/`plugin.json` plugins) တွင် ၎င်း၏ကိုယ်ပိုင် scanner ပါရှိပြီး၊ `OMNIROUTE_PLUGINS_DIR` — [PLUGIN_MARKETPLACE.md → Plugin directory ကို](./PLUGIN_MARKETPLACE.md#plugin-directory) ကြည့်ပါ။ တစ်ခုသတ်မှတ်ခြင်းသည် အခြားတစ်ခုကို မထိခိုက်စေပါ။
+
+Loading error များကို ဖမ်းမိပြီး ပုံနှိပ်ခြင်း — ပျက်သွားသော ပလပ်အင်သည် CLI ကို ဘယ်သောအခါမှ မပျက်စီးစေကြောင်း သတိပေးချက်အဖြစ် ရိုက်နှိပ်ထားသည်။
 
 ## လုံခြုံရေး
 

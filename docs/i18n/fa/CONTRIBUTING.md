@@ -8,28 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## راهاندازی محیط توسعه
+## راه اندازی توسعه
 
-### پیشنیازها
+### پیش نیازها
 
-- **Node.js** `>=22.22.2 <23`، یا `>=24.0.0 <27` (توصیهشده: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` یا `>=24.0.0 <27` (توصیه می شود: 24 LTS)
+- **npm** 10 +
 
-> **ویندوز با Node 24:** از وصلهٔ فعلی 24 LTS (حداقل 24.20.0) استفاده کنید.
-> نسخههای قبلی ممکن است پس از موفقیت آزمایشها، هنگام بستن فرایند توسط `--test-force-exit` متوقف شوند.
-> [رفع مشکل Windows در libuv](https://github.com/nodejs/node/pull/61999) این
-> خرابی زمان اجرا را برطرف میکند؛ assertions آزمایش و بررسیهای خروج runner را فعال نگه دارید.
+> **Windows با نود 24:** از انتشار پچ 24 LTS فعلی (حداقل 24.20.0) استفاده کنید. هنگامی که `--test-force-exit` فرآیند را می بندد، نسخه های قبلی می توانند پس از آزمایش های موفقیت آمیز لغو شوند. [رفع Windows libuv](https://github.com/nodejs/node/pull/61999) Node به این خرابی زمان اجرا میپردازد. اظهارات آزمون و بررسی های خروج دونده را فعال نگه دارید.
 
-> **کاربران npm v11+ (Node 24+):** پس از `npm install`، بررسی کنید ماژولهای بومی نصب شدهاند:
-> `node -e "require('better-sqlite3')"`. اگر با `MODULE_NOT_FOUND` شکست خورد،
-> `npm approve-scripts better-sqlite3 && npm install` را اجرا کنید. [راهنمای رفع اشکال](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) را ببینید.
+> **کاربران npm v11 + (Node 24 +):** پس از `npm install`، بررسی کنید که ماژول های بومی نصب شده اند: `node -e "require('better-sqlite3')"`. اگر با `MODULE_NOT_FOUND` ناموفق بود `npm approve-scripts better-sqlite3 && npm install` را اجرا کنید. [عیب یابی را](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ببینید.
 
 - **Git**
 
-### کلون و نصب
+### شبیه سازی و نصب
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -37,89 +32,83 @@ npm install
 ### متغیرهای محیطی
 
 ```bash
-# فایل .env خود را از الگو ایجاد کنید
+# Create your .env from the template
 cp .env.example .env
 
-# رازهای موردنیاز را تولید کنید
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-متغیرهای کلیدی برای توسعه:
+متغیرهای کلیدی توسعه:
 
-| متغیر                  | مقدار پیشفرض توسعه       | توضیحات              |
-| ---------------------- | ------------------------ | -------------------- |
-| `PORT`                 | `20128`                  | پورت سرور            |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | نشانی پایهٔ فرانتاند |
-| `JWT_SECRET`           | (در بالا تولید میشود)    | راز امضای JWT        |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | گذرواژهٔ نخستین ورود |
-| `APP_LOG_LEVEL`        | `info`                   | سطح جزئیات گزارشها   |
+| متغیر                  | پیش فرض توسعه            | توضیحات                  |
+| ---------------------- | ------------------------ | ------------------------ |
+| `PORT`                 | `20128`                  | پورت سرور                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | پایه URL برای frontend   |
+| `JWT_SECRET`           | (تولید در بالا)          | رمز امضای JWT            |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | اولین رمز ورود به سیستم  |
+| `APP_LOG_LEVEL`        | `info`                   | سطح پرحرفی ورود به سیستم |
 
 ### تنظیمات داشبورد
 
-داشبورد گزینههای رابط کاربری برای قابلیتهایی ارائه میدهد که میتوانند از طریق متغیرهای محیطی نیز پیکربندی شوند:
+داشبورد کلیدهای UI را برای ویژگی هایی ارائه می دهد که می توانند از طریق متغیرهای محیطی نیز پیکربندی شوند:
 
-| محل تنظیمات       | گزینه                     | توضیحات                                            |
-| ----------------- | ------------------------- | -------------------------------------------------- |
-| تنظیمات → پیشرفته | حالت اشکالزدایی           | فعالسازی گزارشهای درخواست اشکالزدایی (رابط کاربری) |
-| تنظیمات → عمومی   | قابلمشاهدهبودن نوار کناری | نمایش/پنهانکردن بخشهای نوار کناری                  |
+| تنظیم مکان        | تغییر وضعیت دهید | توضیحات                                      |
+| ----------------- | ---------------- | -------------------------------------------- |
+| تنظیمات → پیشرفته | حالت اشکال زدایی | فعال کردن گزارش های درخواست اشکال زدایی (UI) |
+| تنظیمات → عمومی   | نمای نوار کناری  | بخش های نوار کناری Show/hide                 |
 
-این تنظیمات در پایگاه داده ذخیره میشوند و پس از راهاندازی مجدد نیز باقی میمانند و در صورت تنظیم، پیشفرضهای متغیرهای محیطی را لغو میکنند.
+این تنظیمات در پایگاه داده ذخیره میشوند و در طول راهاندازی مجدد باقی میمانند و در صورت تنظیم، پیشفرض env var را لغو میکنند.
 
-### اجرای محلی
+### در حال اجرا به صورت محلی
 
 ```bash
-# حالت توسعه (بارگذاری مجدد خودکار)
+# Development mode (hot reload)
 npm run dev
 
-# ساخت تولید
-npm run build    # next build → .build/next/ سپس assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# کامپایل سریع فقط برای backend/API برای تغییرات مشارکتکنندگان
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# ساخت انتشار (بازسازی پاک + sentinel مربوط به HEAD — موردنیاز برای استقرار)
-npm run build:release   # rm -rf .build dist و سپس build + نوشتن dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# پیکربندی رایج پورت
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ساخت مشارکتکنندگان فقط اعتبارسنجی زمان کامپایل را انجام میدهد: این ساخت، توزیع مستقل را سرهمبندی نمیکند و داراییهای اختیاری بستهبندی بومی را نیز نمیسازد. هر زمان که نیاز دارید بستهٔ قابلانتشار را اعتبارسنجی کنید، از ساخت معمولی تولید استفاده کنید.
+ساخت مشارکت کننده فقط اعتبارسنجی کامپایل را انجام می دهد: توزیع مستقل را جمع آوری نمی کند یا دارایی های بسته بندی بومی اختیاری را نمی سازد. زمانی که نیاز به تأیید اعتبار بسته قابل حمل دارید، از ساخت تولید معمولی استفاده کنید.
 
-### ساختار خروجی ساخت
+### طرح بندی خروجی بسازید
 
-| پوشه      | محتویات                                                                               | ردیابیشده |
-| --------- | ------------------------------------------------------------------------------------- | --------- |
-| `src/`    | کد منبع برنامه (TypeScript / TSX)                                                     | بله       |
-| `.build/` | فایلهای میانی — خروجی `next build` (نادیدهگرفتهشده توسط git، `distDir = .build/next`) | خیر       |
-| `dist/`   | بستهٔ قابلانتشار — سرهمبندیشده توسط `assembleStandalone` (نادیدهگرفتهشده توسط git)    | خیر       |
+| دایرکتوری | مطالب                                                                             | پیگیری شد |
+| --------- | --------------------------------------------------------------------------------- | --------- |
+| `src/`    | منبع برنامه (TypeScript / TSX)                                                    | بله       |
+| `.build/` | خروجی — `next build` واسطه (gitignored، `distDir = .build/next`)                  | خیر       |
+| `dist/`   | بسته نرم افزاری قابل حمل — مونتاژ شده توسط `assembleStandalone` (با نادیده گرفتن) | خیر       |
 
-خط لولهٔ ساخت در یک مرحله انجام میشود:
+خط لوله ساخت یک گذر است:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (خروجی Next.js)
-  └─ assembleStandalone()                 (کپی standalone + static + public + native assets)
-       └─ output: dist/                   (server.js، .next/static/، public/، node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` علاوه بر این، ابتدا هر دو پوشه را پاک میکند و
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) را بهعنوان sentinel یکپارچگی استقرار مینویسد.
+`npm run build:release` علاوه بر این ابتدا هر دو دایرکتوری را پاک می کند و `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) را به عنوان یک Deploy integrity Sentinel می نویسد.
 
-`npm run build:contributor` از پروفایل ساخت فقط backend استفاده میکند. این دستور هنگام ساخت،
-بهطور موقت فایلهای رابط کاربری داشبورد را stub میکند، handlerهای مسیر API را نگه میدارد
-و پس از ساخت، فایلهای اصلی را بازیابی میکند. برای تغییراتی که بر رابط کاربری داشبورد اثر میگذارند
-یا برای اعتبارسنجی کامل انتشار، از `npm run build` استفاده کنید؛ پروفایل مشارکتکنندگان جایگزین ساخت انتشار نیست.
+`npm run build:contributor` از نمایه ساخت فقط باطن استفاده می کند. در حین ساخت، فایلهای UI داشبورد را موقتاً خرد میکند، کنترلکنندههای مسیر API را نگه میدارد و فایلهای اصلی را پس از ساخت بازیابی میکند. `npm run build` برای تغییراتی که بر داشبورد UI تأثیر میگذارد یا برای تأیید نسخه کامل استفاده کنید. نمایه مشارکت کننده جایگزینی برای نسخه انتشار نیست.
 
-> **یادداشت استقرار VPS:** پوشهٔ تصویر راه دور `/usr/lib/node_modules/omniroute/app/`
-> بدون تغییر باقی میماند. مهارتهای استقرار، محتویات `dist/` را با rsync در آن کپی میکنند.
-> فقط مسیر خروجی ساخت درون مخزن جابهجا شده است (`app/` → `dist/`).
+> **یادداشت توسعه VPS :** دایرکتوری تصویر راه دور `/usr/lib/node_modules/omniroute/app/` بدون تغییر است. Deploy skills محتویات `dist/` را در آن همگام سازی می کند. فقط مسیر خروجی ساخت in-repo منتقل شد (`app/` → `dist/`).
 
-نشانیهای پیشفرض:
+URLs پیش فرض:
 
-- **داشبورد**: `http://localhost:20128/dashboard`
+- **داشبورد** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -420,10 +409,10 @@ docs/
 
 ---
 
-## دریافت راهنمایی
+## دریافت کمک
 
-- **معماری**: به [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) مراجعه کنید
-- **مرجع API**: به [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) مراجعه کنید
-- **مستندات امنیتی**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md)، [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md)، [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md)، [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **مستندات عملیات**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **مسائل**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **معماری** : رجوع به [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **مرجع API** : رجوع به [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **اسناد امنیتی** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **اسناد عملیاتی** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **مسائل** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

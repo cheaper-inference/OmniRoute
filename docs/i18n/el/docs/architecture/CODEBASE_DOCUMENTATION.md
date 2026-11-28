@@ -4,18 +4,11 @@
 
 ---
 
-> **Έκδοση:** v3.8.51
-> **Τελευταία ενημέρωση:** 2026-06-28
-> **Απευθύνεται σε:** Μηχανικούς που συνεισφέρουν στο OmniRoute ή αναπτύσσουν ενσωματώσεις πάνω σε αυτό.
+> **Εκδοχή:** v3.8.51** Ακροατήριο:** Μηχανικοί που συνεισφέρουν στο OmniRoute ή χτίζουν ενσωματώσεις πάνω από αυτό.
 >
-> Για διαγράμματα αρχιτεκτονικής υψηλού επιπέδου και το σκεπτικό πίσω από κάθε υποσύστημα, διαβάστε το
-> [ARCHITECTURE.md](./ARCHITECTURE.md). Για λεπτομερείς αναλύσεις μεμονωμένων υποσυστημάτων
-> (Auto Combo, διακομιστής MCP, διακομιστής A2A, Skills, Memory, Cloud Agents, Resilience,
-> Compression κ.λπ.), ανατρέξτε στα αντίστοιχα αρχεία τους σε αυτόν τον κατάλογο `docs/`.
+> Για διαγράμματα αρχιτεκτονικής υψηλού επιπέδου και τη συλλογιστική πίσω από κάθε υποσύστημα, διαβάστε [ARCHITECTURE.md](./ARCHITECTURE.md). Για βαθιές καταδύσεις σε μεμονωμένα υποσυστήματα (Auto Combo, διακομιστής MCP, διακομιστής A2A, Skills, Memory, Cloud Agents, Resilience, Compression, κ.λπ.) δείτε τα ειδικά αρχεία τους σε αυτόν τον κατάλογο `docs/`.
 
-Αυτό το αρχείο περιγράφει **τι υπάρχει σήμερα στο αποθετήριο**, ώστε ένας νέος μηχανικός
-να μπορεί να περιηγηθεί στη δομή καταλόγων, να κατανοήσει τη διαστρωμάτωση του περιβάλλοντος εκτέλεσης και να γνωρίζει πού να προσθέσει κώδικα
-χωρίς να επινοήσει νέες λειτουργικές μονάδες.
+Αυτό το αρχείο περιγράφει** αυτό που υπάρχει στο αποθετήριο σήμερα** έτσι ώστε ένας νέος μηχανικός να μπορεί να πλοηγηθεί στο δέντρο, να κατανοήσει τη στρώση χρόνου εκτέλεσης και να ξέρει πού να προσθέσει κώδικα χωρίς να εφεύρει νέες μονάδες.
 
 ---
 
@@ -679,35 +672,14 @@ bin/
 
 ## 8. `scripts/`
 
-Οργανωμένο σε 6 υποφακέλους ανά σκοπό.
+Οργανώνεται σε 6 υποφακέλους ανά σκοπό.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, καθώς και τα βοηθητικά εργαλεία μόνο για ανάγνωση για την παρακολούθηση των PR
-  `ci-discriminate.sh` (ταξινομεί τις υπογραφές των αποτυχημένων ελέγχων ενός PR σε δικές του / κληρονομημένες /
-  άγνωστες, σε σύγκριση με ένα PR αναφοράς ή το ζήτημα base-red) και `audit-worktree.sh`
-  (τροποποιημένα αρχεία, προστατευμένες επιφάνειες, αφαιρεμένα asserts, πλήθος καταστολών, εναπομείναντα
-  προσωρινά tsconfigs, κεφαλή PR έναντι τοπικού HEAD — πριν γίνει αποδεκτό το PR ενός worker).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, συν τους βοηθούς φύλαξης PR μόνο για ανάγνωση `ci-discriminate.sh` (ταξινομεί μια PR's signher in a failing / PR -che το θέμα με το βασικό κόκκινο) και `audit-worktree.sh` (βρώμικα αρχεία, προστατευμένες επιφάνειες, αφαιρεθείσες δηλώσεις, μετρήσεις καταστολής, υπολειπόμενα tmp tsconfigs, PR head εναντίον τοπικού HEAD — πριν γίνει αποδεκτό PR ενός εργάτη).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` επισημαίνει εκδόσεις που αποδίδονται ρητά στο OmniRoute (3.6.x και παλαιότερες). Η επιταγή αγνοεί ημερομηνίες.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

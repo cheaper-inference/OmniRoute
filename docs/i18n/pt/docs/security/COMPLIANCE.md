@@ -4,20 +4,11 @@
 
 ---
 
-> **Fonte fidedigna:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Última atualização:** 2026-06-28 — v3.8.40
+> **Fonte da verdade:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-O OmniRoute regista ações administrativas, eventos de autenticação, alterações
-ao ciclo de vida das credenciais dos fornecedores e invocações de ferramentas
-MCP em tabelas de auditoria suportadas por SQLite. Esta página descreve o que é
-registado, onde é armazenado, durante quanto tempo é conservado, como as chaves
-de API podem optar pela exclusão e como consultar os dados.
+OmniRoute regista ações administrativas, eventos de autenticação, alterações no ciclo de vida das credenciais do fornecedor e invocações da ferramenta MCP para tabelas de auditoria suportadas pelo SQLite. Esta página aborda o que é registado, onde fica, durante quanto tempo é retido, como as chaves API podem ser eliminadas e como consultar os dados.
 
-A implementação encontra-se em `src/lib/compliance/index.ts` (T-43 — "Controlos
-de Conformidade") e `src/lib/compliance/providerAudit.ts`. As escritas de
-auditoria nunca lançam exceções: em caso de falha, a chamada é silenciosamente
-ignorada, para que o registo de auditoria não possa interromper o fluxo
-principal do pedido.
+A implementação reside em `src/lib/compliance/index.ts` (T-43 — "Controlos de conformidade") e `src/lib/compliance/providerAudit.ts`. As gravações de auditoria nunca são lançadas: em qualquer falha, a chamada é engolida silenciosamente, pelo que o registo de auditoria não pode interromper o fluxo de pedido principal.
 
 ## O Que é Registado
 
@@ -136,31 +127,33 @@ a tabela legada `request_detail_logs` e os artefactos locais dos pedidos em
 Os valores predefinidos estão definidos em `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## Exclusão de registo com `noLog` (por chave de API)
+## Desativação `noLog` (por chave API )
 
-As chaves de API podem ser configuradas para que o tráfego das respetivas chamadas subsequentes não seja registado. O
-sinalizador encontra-se na tabela `api_keys` (`no_log INTEGER DEFAULT 0`) e é replicado
-num conjunto em memória para consultas no caminho crítico.
+As chaves API podem ser sinalizadas para que o tráfego de chamadas a jusante não seja registado. O sinalizador encontra-se na tabela `api_keys` (`no_log INTEGER DEFAULT 0`) e é espelhado num conjunto na memória para pesquisas de hot path.
 
 ```bash
-# Criar uma chave sem registo (requer autenticação de gestão)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Funções auxiliares (`src/lib/compliance/index.ts`):
+Ajudantes (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — ativa ou desativa a entrada em memória
-- `isNoLog(apiKeyId)` — verificada no caminho do pedido; recorre, em alternativa, a uma leitura de
-  `api_keys.no_log` armazenada em cache durante 30 s
-- `NO_LOG_API_KEY_IDS` (variável de ambiente, separada por vírgulas) — pré-carregada no conjunto em memória
-  durante o arranque; útil quando não é possível alterar diretamente a coluna
+- `setNoLog(apiKeyId, true|false)` — alterna a entrada na memória
+- `isNoLog(apiKeyId)` — verificado no caminho do pedido; volta para uma leitura em cache de 30 s do `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, separado por vírgula) — pré-carregado no conjunto de memória no arranque; útil quando não pode alternar a coluna diretamente
 
-Os eventos de auditoria administrativos (início de sessão, alterações de fornecedores, chamadas a ferramentas MCP, etc.)
-**não** são afetados por `noLog` — apenas o registo de tráfego por pedido é
-desativado.
+Os eventos de auditoria administrativa (login, alterações de fornecedor, chamadas de ferramenta MCP, etc.) são** não** afetado pelo `noLog` — apenas o registo de tráfego por pedido é desativado.
+
+### Desativação por pedido (`x-omniroute-no-log`)
+
+Um cliente pode optar por um único pedido de inferência fora da persistência da carga útil sem criar uma chave dedicada. Enviar `x-omniroute-no-log: true` no pedido (`1` e `yes` também são aceites, sem distinção entre maiúsculas e minúsculas). Aplica-se a todas as rotas da família de chat que passam pelo manipulador de chat: conclusões de chat, respostas, mensagens, conclusões e o caminho compatível com Gemini. A linha do registo de chamadas ainda é gravada com o seu carimbo de data/hora, modelo, fornecedor, estado, duração e contagens de tokens, mas `request_body`, `response_body`, resumos de pedidos e artefactos de pipeline são omitidos.
+
+O cabeçalho é ORed com o sinalizador de chave: uma chave sem registo permanece sem registo, independentemente do cabeçalho, e o cabeçalho não pode reativar o registo em log para uma chave sem registo. O cabeçalho é removido antes de o pedido ser encaminhado para o upstream.
+
+Este cabeçalho faz** não** desativar a extração de memória ou a cache semântica. Envie `x-omniroute-no-memory: true` e `x-omniroute-no-cache: true` juntos quando o pedido também não deve persistir o conteúdo nestes subsistemas.
 
 ## API REST
 

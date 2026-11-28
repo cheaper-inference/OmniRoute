@@ -112,58 +112,48 @@ request ପଠାଯାଏ ନାହିଁ। HTTP callerମାନଙ୍କର �
 ପ୍ରତି-key Obsidian ବିନ୍ୟାସ ନଥିବା authenticated keyଗୁଡ଼ିକ global fallback ବଜାୟ ରଖନ୍ତି।
 ଚାରିଟି `obsidian_sync_*` tool ସେମାନଙ୍କର ପୃଥକ sync-token ଆଚରଣ ବଜାୟ ରଖେ।
 
-## MCP ଟୁଲ୍ଗୁଡ଼ିକ (22)
+## MCP ସାଧନ (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts`ରେ ପରିଭାଷିତ। ଟୋକନ୍/base-URL ପ୍ରତ୍ୟେକ
-କଲ୍ ପାଇଁ ସମାଧାନ କରାଯାଏ (ପ୍ରଥମେ ପ୍ରତି-API-key, ତା’ପରେ ଗ୍ଲୋବାଲ୍)। OmniRoute **ସିଙ୍କ୍ ସର୍ଭର୍**କୁ
-ଆକ୍ସେସ୍ କରୁଥିବା ଟୁଲ୍ଗୁଡ଼ିକ (ଚାରୋଟି `obsidian_sync_*` ଟୁଲ୍) ପାଇଁ ଅତିରିକ୍ତ ଭାବରେ OmniRoute
-ସେଟିଂସ୍ରେ କନଫିଗର୍ କରାଯାଇଥିବା ସିଙ୍କ୍ ପ୍ରମାଣୀକରଣ ଟୋକନ୍ ଆବଶ୍ୟକ।
+`open-sse/mcp-server/tools/obsidianTools.ts` ରେ ବ୍ୟାଖ୍ୟା କରାଯାଇଛି। token/base-URL କଲ୍ ପ୍ରତି ସମାଧାନ ହୋଇଛି (ପ୍ରତି API- କି ପ୍ରଥମେ, ପରେ ବିଶ୍ global ସ୍ତରୀୟ)। ସାଧନ ଯାହା OmniRoute କୁ ହିଟ୍ କରେ।** ସିଙ୍କ ସର୍ଭର।** (ଚାରୋଟି `obsidian_sync_*` ସାଧନ) ଅତିରିକ୍ତ ଭାବରେ OmniRoute ସେଟିଙ୍ଗରେ ବିନ୍ୟାସିତ ସିଙ୍କ auth ଟୋକେନ୍ ଆବଶ୍ୟକ କରେ।
 
-### ପଠନ ଟୁଲ୍ଗୁଡ଼ିକ (`read:obsidian`)
+### ସାଧନ ପ Read ନ୍ତୁ (`read:obsidian`)
 
-| ଟୁଲ୍                         | ବର୍ଣ୍ଣନା                                                                                      |
-| ---------------------------- | --------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Local REST API ଉପଲବ୍ଧ ଏବଂ ପ୍ରମାଣୀକୃତ କି ନାହିଁ ଯାଞ୍ଚ କରେ।                                      |
-| `obsidian_search_simple`     | ନୋଟ୍ ବିଷୟବସ୍ତୁର ପୂର୍ଣ୍ଣ-ଟେକ୍ସଟ୍ ସନ୍ଧାନ; ଫାଇଲ୍ ପଥ ସହିତ ସ୍ନିପେଟ୍ ଫେରାଏ।                         |
-| `obsidian_search_structured` | JSON Logic ଏକ୍ସପ୍ରେସନ୍ ବ୍ୟବହାର କରି ସନ୍ଧାନ କରେ (and/or/regex/path ଫିଲ୍ଟର୍ଗୁଡ଼ିକ)।              |
-| `obsidian_read_note`         | vault-ସାପେକ୍ଷ ପଥ ଅନୁସାରେ ଏକ ନୋଟ୍ ପଢ଼େ; ଇଚ୍ଛାନୁସାରେ ନିର୍ଦ୍ଦିଷ୍ଟ heading/block/frontmatter।     |
-| `obsidian_list_vault`        | vaultରେ ଥିବା ଫାଇଲ୍ ଏବଂ ଡିରେକ୍ଟୋରିଗୁଡ଼ିକର ତାଲିକା ଦିଏ (ଏଣ୍ଟ୍ରିଗୁଡ଼ିକର ଟ୍ରି)।                    |
-| `obsidian_get_document_map`  | ନୋଟ୍ର heading ଗଠନକୁ heading → ଲାଇନ୍ ନମ୍ବର ମ୍ୟାପ୍ ଭାବରେ ପ୍ରାପ୍ତ କରେ।                           |
-| `obsidian_get_note_metadata` | ସମ୍ପୂର୍ଣ୍ଣ ବିଷୟବସ୍ତୁ ବିନା frontmatter, ଟ୍ୟାଗ୍, ଲିଙ୍କ୍, ଅକ୍ଷର/ଶବ୍ଦ ସଂଖ୍ୟା ପ୍ରାପ୍ତ କରେ।         |
-| `obsidian_get_active_file`   | Obsidianରେ ବର୍ତ୍ତମାନ ସକ୍ରିୟ ଫାଇଲ୍ର ପଥ + ବିଷୟବସ୍ତୁ ପ୍ରାପ୍ତ କରେ।                                |
-| `obsidian_get_periodic_note` | ଏକ ତାରିଖ ପାଇଁ ଦୈନିକ/ସାପ୍ତାହିକ/ମାସିକ ପର୍ଯ୍ୟାୟିକ ନୋଟ୍ ପ୍ରାପ୍ତ କରେ (ଛାଡ଼ିଦେଲେ ଆଜିର)।             |
-| `obsidian_get_tags`          | ସମସ୍ତ vault ଟ୍ୟାଗ୍କୁ ସେମାନଙ୍କର ଆବୃତ୍ତି ସହିତ ତାଲିକାଭୁକ୍ତ କରେ।                                  |
-| `obsidian_list_commands`     | ଉପଲବ୍ଧ Obsidian କମାଣ୍ଡ IDଗୁଡ଼ିକର ତାଲିକା ଦିଏ (`obsidian_execute_command` ସହିତ ବ୍ୟବହାର କରନ୍ତୁ)। |
-| `obsidian_sync_status`       | OmniRoute ସିଙ୍କ୍ ସର୍ଭର୍ ସ୍ଥିତି: ଚାଲୁ ଅଛି କି ନାହିଁ, vault ନାମ, ପୋର୍ଟ୍, ଅପ୍ଟାଇମ୍, ଶେଷ ସିଙ୍କ୍।   |
-| `obsidian_sync_conflicts`    | ଅସମାଧିତ ସିଙ୍କ୍ ଦ୍ୱନ୍ଦ୍ୱଗୁଡ଼ିକର ତାଲିକା ଦିଏ (ପଥ, ଦ୍ୱନ୍ଦ୍ୱ ପଥ, ଚିହ୍ନଟ ସମୟ)।                      |
+| ସାଧନ                         | ବର୍ଣ୍ଣନା                                                                                                    |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | ସ୍ଥାନୀୟ REST API ଉପଲବ୍ଧ ଏବଂ ପ୍ରାମାଣିକ ହୋଇଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ।                                          |
+| `obsidian_search_simple`     | ନୋଟ୍ ବିଷୟବସ୍ତୁର ପୂର୍ଣ୍ଣ-ପାଠ୍ୟ ସନ୍ଧାନ; ଫାଇଲ୍ ପଥ ସହିତ ସ୍ନିପେଟ୍ ରିଟର୍ନ କରେ।                                    |
+| `obsidian_search_structured` | ଏକ JSON ଲଜିକ୍ ଏକ୍ସପ୍ରେସନ୍ (and/or/regex/path ଫିଲ୍ଟର୍) ବ୍ୟବହାର କରି ଖୋଜ।                                      |
+| `obsidian_read_note`         | ଭାଲ୍ଟ-ଆପେକ୍ଷିକ ପଥ ଦ୍ୱାରା ଏକ ନୋଟ୍ ପ Read ନ୍ତୁ; ବ ally କଳ୍ପିକ ଭାବରେ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ heading/block/frontmatter. |
+| `obsidian_list_vault`        | ଭାଲ୍ଟରେ ଥିବା ଫାଇଲ ଏବଂ ଡିରେକ୍ଟୋରୀଗୁଡ଼ିକୁ ତାଲିକାଭୁକ୍ତ କର (ଏଣ୍ଟ୍ରି ଗଛ)।                                        |
+| `obsidian_get_document_map`  | → ରେଖା ସଂଖ୍ୟାଗୁଡିକର ମାନଚିତ୍ର ଭାବରେ ନୋଟର ହେଡିଙ୍ଗ୍ ସଂରଚନା ପ୍ରାପ୍ତ କରନ୍ତୁ।                                     |
+| `obsidian_get_note_metadata` | ପୂର୍ଣ୍ଣ ବିଷୟବସ୍ତୁ ବିନା ଫ୍ରଣ୍ଟମାଟର୍, ଟ୍ୟାଗ୍, ଲିଙ୍କ୍, char/word ଗଣନା ପାଆନ୍ତୁ।                                 |
+| `obsidian_get_active_file`   | Obsidian ରେ ସମ୍ପ୍ରତି ସକ୍ରିୟ ଫାଇଲର + ପଥ ପାଆନ୍ତୁ।                                                             |
+| `obsidian_get_periodic_note` | ଏକ ତାରିଖ ପାଇଁ daily/weekly/monthly ପର୍ଯ୍ୟାୟ ନୋଟ୍ ପାଆନ୍ତୁ (ଆଜି ଯଦି ବାଦ ଦିଆଯାଏ)।                              |
+| `obsidian_get_tags`          | ସେମାନଙ୍କର ଫ୍ରିକ୍ୱେନ୍ସି ସହିତ ସମସ୍ତ ଭାଲ୍ଟ ଟ୍ୟାଗ୍ ତାଲିକାଭୁକ୍ତ କର।                                              |
+| `obsidian_list_commands`     | ଉପଲବ୍ଧ Obsidian ନିର୍ଦ୍ଦେଶ IDs ତାଲିକାଭୁକ୍ତ କର ( `obsidian_execute_command` ସହିତ ବ୍ୟବହାର)।                    |
+| `obsidian_sync_status`       | OmniRoute ସିଙ୍କ ସର୍ଭର ସ୍ଥିତି: ଚାଲିବା, ଭାଲ୍ଟ ନାମ, ପୋର୍ଟ, ଅପଟାଇମ୍, ଶେଷ ସିଙ୍କ୍।                                |
+| `obsidian_sync_conflicts`    | ସମାଧାନ ହୋଇନଥିବା ସିଙ୍କ ଦ୍ୱନ୍ଦ୍ୱଗୁଡିକ (ପଥ, ଦ୍ୱନ୍ଦ୍ୱ ପଥ, ଚିହ୍ନଟ-ରେ) ତାଲିକାଭୁକ୍ତ କର।                            |
 
-### ଲେଖନ ଟୁଲ୍ଗୁଡ଼ିକ (`write:obsidian`)
+### ସାଧନ ଲେଖନ୍ତୁ (`write:obsidian`)
 
-| ଟୁଲ୍                             | ବର୍ଣ୍ଣନା                                                                                     |
-| -------------------------------- | -------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | ଦିଆଯାଇଥିବା Markdown ବିଷୟବସ୍ତୁ ସହିତ ଏକ ନୋଟ୍ ସୃଷ୍ଟି କିମ୍ବା ଓଭର୍ରାଇଟ୍ କରେ।                      |
-| `obsidian_append_note`           | ଏକ ନୋଟ୍ରେ ବିଷୟବସ୍ତୁ ଯୋଡ଼େ; ଇଚ୍ଛାନୁସାରେ ନିର୍ଦ୍ଦିଷ୍ଟ heading/blockରେ।                          |
-| `obsidian_patch_note`            | heading, block, କିମ୍ବା frontmatter ଫିଲ୍ଡରେ ସଠିକ୍ ଭାବେ append/prepend/replace କରେ।            |
-| `obsidian_delete_note`           | vaultରୁ ଏକ ନୋଟ୍କୁ ସ୍ଥାୟୀ ଭାବରେ ବିଲୋପ କରେ।                                                    |
-| `obsidian_move_note`             | vault ମଧ୍ୟରେ ଏକ ନୋଟ୍କୁ ସ୍ଥାନାନ୍ତର କିମ୍ବା ପୁନଃନାମକରଣ କରେ।                                     |
-| `obsidian_execute_command`       | ଏହାର କମାଣ୍ଡ ID ଦ୍ୱାରା ଏକ Obsidian କମାଣ୍ଡ ଚଲାଏ।                                               |
-| `obsidian_open_file`             | Obsidianରେ ଏକ ଫାଇଲ୍ ଖୋଲେ (ଏହା ନଥିଲେ ସୃଷ୍ଟି କରେ)।                                             |
-| `obsidian_sync_trigger`          | ତୁରନ୍ତ ଦ୍ୱିମୁଖୀ desktop↔mobile vault ସିଙ୍କ୍ ଆରମ୍ଭ କରେ।                                       |
-| `obsidian_sync_resolve_conflict` | ଏକ ସିଙ୍କ୍ ଦ୍ୱନ୍ଦ୍ୱ ସମାଧାନ କରେ: `local` (mobile), `remote` (desktop), କିମ୍ବା `keep-both` ରଖେ। |
+| ସାଧନ                             | ବର୍ଣ୍ଣନା                                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | ଦିଆଯାଇଥିବା ମାର୍କଡାଉନ୍ ବିଷୟବସ୍ତୁ ସହିତ ଏକ ନୋଟ୍ ସୃଷ୍ଟି କିମ୍ବା ଓଭର୍ ରାଇଟ୍ କରନ୍ତୁ।                     |
+| `obsidian_append_note`           | ଏକ ଟିପ୍ପଣୀରେ ବିଷୟବସ୍ତୁ ଯୋଡନ୍ତୁ; ବ ally କଳ୍ପିକ ଭାବରେ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ heading/block. କୁ।             |
+| `obsidian_patch_note`            | ଏକ ହେଡିଙ୍ଗ୍, ବ୍ଲକ୍, କିମ୍ବା ଫ୍ରଣ୍ଟମାଟର୍ ଫିଲ୍ଡରେ ସର୍ଜିକାଲ୍ append/prepend/replace।                  |
+| `obsidian_delete_note`           | ଭାଲ୍ଟରୁ ଏକ ନୋଟ୍ ସ୍ଥାୟୀଭାବେ ବିଲୋପ କରନ୍ତୁ।                                                          |
+| `obsidian_move_note`             | ଭାଲ୍ଟ ମଧ୍ୟରେ ଏକ ନୋଟ୍ ଘୁଞ୍ଚାନ୍ତୁ କିମ୍ବା ନାମ ପରିବର୍ତ୍ତନ କରନ୍ତୁ।                                     |
+| `obsidian_execute_command`       | ଏହାର ନିର୍ଦ୍ଦେଶ ID ଦ୍ୱାରା ଏକ Obsidian ନିର୍ଦ୍ଦେଶକୁ ଏକଜେକ୍ୟୁଟ୍ କର।                                   |
+| `obsidian_open_file`             | Obsidian ରେ ଏକ ଫାଇଲ୍ ଖୋଲନ୍ତୁ (ଯଦି ଏହା ନାହିଁ ତେବେ ଏହାକୁ ସୃଷ୍ଟି କରେ)।                               |
+| `obsidian_sync_trigger`          | ଏକ ତୁରନ୍ତ ଦ୍ୱି-ଦିଗୀୟ ଡେସ୍କଟପ୍↔ ମୋବାଇଲ୍ ଭାଲ୍ଟ ସିଙ୍କ୍କୁ ଟ୍ରିଗର କରନ୍ତୁ।                              |
+| `obsidian_sync_resolve_conflict` | ଏକ ସିଙ୍କ ବିବାଦର ସମାଧାନ କରନ୍ତୁ: `local` (ମୋବାଇଲ୍), `remote` (ଡେସ୍କଟପ୍), କିମ୍ବା `keep-both` ରଖନ୍ତୁ। |
 
 > [!NOTE]
-> `obsidian_patch_note` ଟାର୍ଗେଟ୍ଗୁଡ଼ିକ `heading | block | frontmatter`ର `targetType`
-> ଏବଂ `append | prepend | replace`ର `operation` ଗ୍ରହଣ କରନ୍ତି, ସହିତ ଏକ ଇଚ୍ଛାଧୀନ
-> `createTargetIfMissing`। ଚାରୋଟି `obsidian_sync_*` ଟୁଲ୍ ସ୍ଥାନୀୟ ସିଙ୍କ୍
-> ସର୍ଭର୍ (`http://127.0.0.1:27781` ଡିଫଲ୍ଟ ଭାବେ) ସହିତ ଯୋଗାଯୋଗ କରେ ଏବଂ ସିଙ୍କ୍ ଟୋକନ୍ ଆବଶ୍ୟକ କରେ।
+> `obsidian_patch_note` ଲକ୍ଷ୍ୟଗୁଡ଼ିକ `heading | block | frontmatter` ର `targetType` ଏବଂ `append | prepend | replace` ର `operation`, ଏକ ଇଚ୍ଛାଧୀନ `createTargetIfMissing` ସହିତ ଗ୍ରହଣ କରେ। ଚାରୋଟି `obsidian_sync_*` ଉପକରଣଗୁଡ଼ିକ ସ୍ଥାନୀୟ ସିଙ୍କ ସର୍ଭର (ଡିଫଲ୍ଟ ଭାବରେ`http://127.0.0.1:27781` ) ସହିତ କଥା ହୁଏ ଏବଂ ସିଙ୍କ ଟୋକେନ୍ ଆବଶ୍ୟକ କରେ।
 
-### ସ୍କୋପ୍ଗୁଡ଼ିକ
+### ପରିସର
 
-ପଠନ ଟୁଲ୍ଗୁଡ଼ିକ ପାଇଁ `read:obsidian` ଆବଶ୍ୟକ; ଲେଖନ ଟୁଲ୍ଗୁଡ଼ିକ ପାଇଁ `write:obsidian` ଆବଶ୍ୟକ। ପ୍ରବର୍ତ୍ତନ
-Notion ସହିତ ସମାନ — `open-sse/mcp-server/server.ts`ରେ ଥିବା `withScopeEnforcement()` ଦ୍ୱାରା
-ପରିଚାଳିତ, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ, ଏବଂ ଅନୁମୋଦିତ
-ସ୍କୋପ୍ଗୁଡ଼ିକ `OMNIROUTE_MCP_SCOPES` କିମ୍ବା API keyର ସ୍କୋପ୍ ପ୍ରସଙ୍ଗରୁ ନିଆଯାଏ। ଦେଖନ୍ତୁ
-[MCP-SERVER.md](./MCP-SERVER.md)।
+ପ tools ଼ିବା ଉପକରଣଗୁଡ଼ିକ `read:obsidian` ଆବଶ୍ୟକ କରେ; ଲେଖିବା ଉପକରଣଗୁଡ଼ିକ `write:obsidian` ଆବଶ୍ୟକ କରେ। `withScopeEnforcement()` Notion ପରିଚାଳିତ, `open-sse/mcp-server/server.ts` `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ଗେଟେଡ୍ ଏବଂ HTTP/SSE କଲର୍ମାନଙ୍କ ପାଇଁ ବାଧ୍ୟତାମୂଳକ — ଯାହାର API ଚାବିରେ `manage`/`admin` ଅଭାବ, `OMNIROUTE_MCP_SCOPES` କିମ୍ବା API କି ପରିସର ପରିସରରୁ ଅନୁମତି ପ୍ରାପ୍ତ ସ୍କୋପ୍ ସହିତ ବାଧ୍ୟତାମୂଳକ ଅଟେ। [MCP-SERVER.md](./MCP-SERVER.md) ଦେଖନ୍ତୁ।
 
 ## ଏଣ୍ଡପଏଣ୍ଟଗୁଡ଼ିକ
 

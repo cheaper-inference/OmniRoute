@@ -185,91 +185,49 @@ sisällä niitä.
 
 ---
 
-## Virustorjunnan väärät positiiviset havainnot
+## Virustorjunta Väärät positiiviset
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG asettaa `README.md`-tiedoston karanteeniin tunnisteella `MD:HttpRequest-inf[Susp]`
+### Avast/AVG karanteeni `README.md` `MD:HttpRequest-inf[Susp]` kanssa
 
-**Kyseessä on väärä positiivinen havainto. Mikään ei ole saastunut, eikä toimenpiteitä tarvita.**
+**Tämä on väärä positiivinen. Mikään ei ole saanut tartuntaa, eikä mitään toimenpiteitä vaadita.**
 
-Avast ja AVG käyttävät heuristiikkaa, joka merkitsee paljon HTTP-pyynnöiltä näyttäviä
-linkkejä sisältävät teksti-/Markdown-tiedostot epäilyttäviksi. OmniRouten `README.md`
-toimitetaan npm-paketin mukana (se on lueteltu kohdassa `package.json` → `files`), joten
-globaalissa asennuksessa se päätyy polkuun `node_modules/omniroute/README.md` — ja sisältää
-noin 15 `http://localhost:20128/...`-esimerkkiä (MCP:n HTTP/SSE-päätepisteet, A2A:n
-`.well-known`-URL-osoitteen ja `curl`-katkelmia). Tämä linkkitiheys riittää laukaisemaan
-heuristiikan.
+Avast ja AVG käyttävät heuristia, joka merkitsee plain-text/Markdown -tiedostot, jotka sisältävät monia HTTP-pyynnön näköisiä linkkejä. OmniRoute:n `README.md` toimitetaan npm-paketin sisällä (se on luettelossa `package.json` → `files`), joten se laskeutuu kohtaan `node_modules/omniroute/README.md` globaalissa asennuksessa — ja sisältää ~ 15 `http://localhost:20128/...` -esimerkkiä ( MCP HTTP/SSE -päätepisteet, A2A `.well-known` URL ja `curl` ). Tuo linkkitiheys riittää laukaisemaan heuristiikan.
 
-Jos tämä alkoi vasta äskettäin: tiedoston luonne ei ole muuttunut. README-tiedoston
-päätepistetaulukko kasvoi (MCP HTTP + SSE + A2A lisättiin), ja siihen lisättiin enemmän
-`curl`-esimerkkejä, minkä vuoksi se ylitti raja-arvon.
+Jos tämä alkoi vasta äskettäin: tiedosto ei muuttunut luontoissuorituksina. README kasvatti päätepistetaulukkoaan (MCP HTTP + SSE + A2A lisättiin) ja lisää `curl` esimerkkejä, mikä työnsi sen kynnyksen yli.
 
-Tiedosto on passiivinen dokumentaatio, jossa ei ole lainkaan suoritettavaa sisältöä. Voit
-palauttaa sen turvallisesti karanteenista.
+Tiedosto on inerttiä dokumentaatiota, jossa ei ole suoritettavaa sisältöä. Voit turvallisesti palauttaa sen karanteenista.
 
-**Toimi näin:**
+**Mitä tehdä:**
 
-1. **Lopeta ilmoitukset** — lisää asennushakemisto virustorjunnan poikkeuksiin
-   (Avast: Settings → Exceptions) lisäämällä globaali `node_modules`-polkusi ja/tai
-   OmniRouten datahakemisto (`~/.omniroute/`).
-2. **Ilmoita väärästä positiivisesta havainnosta** — <https://www.avast.com/false-positive-file-form.php>,
-   ja liitä mukaan karanteeniin asetettu `README.md`. Tämä korjaustapa auttaa kaikkia,
-   sillä ongelma johtuu valmistajan heuristiikan ylireagoinnista tekstitiedostoon.
+1. **Lopeta ilmoitukset** — sulje pois asennushakemisto virustorjunnastasi (Avast: Settings → Exceptions), lisää globaali `node_modules` polku and/or the OmniRoute data dir (`~/.omniroute/`).
+2. **Ilmoita väärästä positiivisesta** — <https://www.avast.com/false-positive-file-form.php>, kiinnittää karanteeniin asetettu `README.md`. Tämä on korjaus, joka auttaa kaikkia, koska se on toimittajan heuristista ylireagointia tekstitiedostoon.
 
-**Miksi emme ”korjaa” tätä omalta puoleltamme:** kaikki esimerkit käyttävät osoitetta
-`http://localhost`, eikä localhost voi käyttää `https`-yhteyttä ilman itse allekirjoitettujen
-varmenteiden aiheuttamaa vaivaa. Dokumentaation vääristely yhden valmistajan heuristiikan
-kiertämiseksi haittaisi kaikkia lukijoita vain skannerivirheen vuoksi.
+**Miksi emme "korjaa" tätä puolellamme:** kaikki esimerkit ovat `http://localhost`, ja localhost ei voi olla `https` ilman itseallekirjoitetun varmenteen kitkaa. Asiakirjojen muokkaaminen yhden toimittajan heuristiikan väistämiseksi vahingoittaisi jokaista lukijaa, jotta se voisi tyydyttää skannerivirheen.
 
-### Kaspersky merkitsee työpöytäsovelluksen tunnisteella `PDM:Trojan.Win32.Generic`
+### Kaspersky merkitsee Desktop-sovelluksen nimellä `PDM:Trojan.Win32.Generic`
 
-**Kyseessä on käyttäytymisheuristiikan aiheuttama väärä positiivinen havainto. Mikään ei ole saastunut.**
-Kasperskyn `PDM:`-etuliite tarkoittaa, että arvio on peräisin sen Proactive Defense Module
-(System Watcher) -moduulista, joka arvioi asennusohjelman _toimintaa_ sen sijaan, että
-vertailisi sitä tunnettuihin haittaohjelmiin. Kun tunnistus laukeaa, Kaspersky ”peruuttaa”
-koko asennuksen — poistaen jo kirjoittamansa tiedostot — jolloin sovellus jää rikkinäiseksi
-tai katoaa kokonaan.
+**Tämä on väärä positiivinen käyttäytymisheuristinen tulos. Mikään ei ole tarttunut.** Kasperskyn `PDM:` etuliite tarkoittaa, että tuomio tulee sen Proactive Defence Module (System Watcher) -moduulista, joka arvioi, mitä asennusohjelma _tekee_ sen sijaan, että se vertaa sitä tunnettuihin haittaohjelmiin. Kun se käynnistyy, Kaspersky "palauttaa" koko asennuksen — poistamalla tiedostot, jotka se oli jo kirjoittanut — joten sovellus päätyy rikki tai puuttuu.
 
-Sen merkitsemät tiedostot ovat työpöytäsovellukseen sisällytettyjen ilmoitettujen avoimen
-lähdekoodin riippuvuuksien tavallisia osia, esimerkiksi:
+Sen merkitsemät tiedostot ovat osia ilmoitetuista avoimen lähdekoodin riippuvuuksista, jotka on yhdistetty työpöytäsovellukseen, esimerkiksi:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` ja
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), selaimen automatisointiin
-  tarkoitettu kirjasto, jota käytetään sovelluksen sisäiseen palveluntarjoajiin kirjautumiseen
-  ja selainpohjaiseen keskusteluun.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — lukittu natiivi `wreq-js`-sidonta, jota käytetään selaimen sormenjälkeä jäljitteleviin
-  HTTP-pyyntöihin verkkoevästeitä käyttävillä palveluntarjoajilla (`<arch>` on `x64` tai
-  `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` ja `workerProcessEntry.js` — [Playwright](https://playwright.dev), selainautomaatiokirjasto, jota käytetään sovelluksen sisäiseen palveluntarjoajan kirjautumiseen ja selaimen tukemaan chattiin.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — kiinnitetty `wreq-js` natiivisidos, jota käytetään selaimen sormenjäljessä oleviin HTTP -tiedostoihin verkkoevästeiden tarjoajissa (`<arch>` on `x64` tai `arm64`).
 
-**Miksi tunnistus laukeaa:** Windows-asennusohjelmaa **ei ole vielä allekirjoitettu
-koodivarmenteella**, joten allekirjoittamattomalla NSIS-asennusohjelmalla ei ole lainkaan
-mainetta ja käyttäytymisheuristiikat toimivat mahdollisimman aggressiivisesti. Kun tähän
-yhdistetään mukana toimitettava natiivi DLL-tiedosto ja sadat hakemistoon
-`%LOCALAPPDATA%\Programs\OmniRoute` kirjoitettavat `.js`-tiedostot (mukaan lukien Next.js:n
-itsenäisen koontiversion tiivistepäätteiset pakettihakemistot), heuristiikka laukeaa helposti.
-Koodin allekirjoitus on suunnitteilla; siihen asti ongelma voi toistua uusissa julkaisuissa.
+**Miksi se syttyy:** Windows -asennusohjelma on** ei vielä koodiallekirjoitettu** , joten allekirjoittamattomalla NSIS asentajalla on nolla maine, ja käyttäytymisheuristiikka toimii maksimaalisella aggressiolla. Yhdessä niputettuun alkuperäiseen DLL ja satoihin `%LOCALAPPDATA%\Programs\OmniRoute` llä kirjoitettuihin `.js` -tiedostoihin (mukaan lukien hash-liitetyt pakettihakemistot erillisestä Next.js versiosta), tämä riittää laukaisemaan heuristiikan. Koodin allekirjoitus on suunniteltu; kunnes se laskeutuu, uudet julkaisut voivat toistaa tämän.
 
-**Toimi näin:**
+**Mitä tehdä:**
 
-1. **Tarkista ensin lataamasi tiedosto** (tämä sulkee pois peukaloidun tiedoston
-   mahdollisuuden). Jokaisessa julkaisussa julkaistaan `latest.yml`, jonka `sha512`-kenttä
-   (base64) kattaa `OmniRoute.Setup.<version>.exe`-asennusohjelman. Suorita PowerShellissä
-   asennusohjelman sisältävässä kansiossa:
+1. **Vahvista ensin lataus** (sulkee pois peukaloidun tiedoston). Jokainen julkaisu julkaisee `latest.yml`, jonka `sha512` kenttä (base64) kattaa `OmniRoute.Setup.<version>.exe` asennusohjelman. PowerShell:ssä asennusohjelman sisältävästä kansiosta:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Tulosteen on vastattava arvoa `latest.yml` → `sha512`. Jos se ei vastaa, poista tiedosto
-   ja lataa se uudelleen ainoastaan [GitHubin julkaisusivulta](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Palauta + lisää poikkeus** — palauta peruutetut kohteet karanteenista ja lisää
-   `%LOCALAPPDATA%\Programs\OmniRoute` poikkeukseksi (Kaspersky → Settings → Threats and Exclusions)
-   ja asenna sitten uudelleen.
-3. **Ilmoita väärästä positiivisesta havainnosta** — <https://opentip.kaspersky.com/>.
-   Käyttäjien lähettämät väärien positiivisten havaintojen ilmoitukset nopeuttavat aidosti
-   sallittujen luetteloon lisäämistä.
+   Tulosteen on vastattava `latest.yml` → `sha512`. Jos ei, poista tiedosto ja lataa se uudelleen vain [GitHub julkaisusivulta](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Palauta + -sulkeminen** — palauta palautetut kohteet karanteenista ja lisää `%LOCALAPPDATA%\Programs\OmniRoute` n poissulkeminen (Kaspersky → Settings → Threats and Exclusions), asenna sitten uudelleen.
+3. **Ilmoita väärästä positiivisesta** — <https://opentip.kaspersky.com/>. Käyttäjien lähettämät FP -raportit nopeuttavat todellakin sallittujen luetteloon lisäämistä.
 
 ---
 
@@ -881,10 +839,10 @@ Lisää oireita:
 
 ---
 
-## Oletko yhä jumissa?
+## edelleen jumissa?
 
-- **GitHub-ongelmat**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Arkkitehtuuri**: Katso sisäiset tiedot tiedostosta [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
-- **API-viite**: Katso kaikki päätepisteet tiedostosta [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
-- **Kunnonvalvontanäkymä**: Tarkista järjestelmän reaaliaikainen tila kohdasta **Dashboard → Health**
-- **Muunnin**: Käytä kohtaa **Dashboard → Translator** muotoiluongelmien vianmääritykseen
+- **GitHub ongelmat** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Arkkitehtuuri** : Katso [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) sisäiset tiedot
+- **API Viite** : Katso [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) kaikista päätepisteistä
+- **Terveyden hallintapaneeli** : Tarkista** Kojelauta → Health** reaaliaikainen järjestelmän tila
+- **Kääntäjä** : Käytä** Kojelaudan → -kääntäjä** muotoongelmien korjaamiseen

@@ -47,7 +47,7 @@ Egy kiadás egyeztetésekor megnyílik egy `release-freeze` címkével ellátott
 Ellenőrizze, hogy nincs-e nyitott lefagyás, mielőtt feltételezi, hogy a kívánt ág összevonható:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Az egyesítési mechanika (a tulajdonos `queue` címke → Mergify) [MERGE_TRAIN.md](./MERGE_TRAIN.md) fájlban van dokumentálva.

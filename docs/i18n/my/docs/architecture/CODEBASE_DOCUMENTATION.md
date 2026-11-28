@@ -4,18 +4,11 @@
 
 ---
 
-> **ဗားရှင်း:** v3.8.51
-> **နောက်ဆုံးအပ်ဒိတ်:** 2026-06-28
-> **ရည်ရွယ်ဖတ်ရှုသူများ:** OmniRoute တွင် ပါဝင်ဖန်တီးနေသော သို့မဟုတ် ၎င်းအပေါ်တွင် ပေါင်းစည်းမှုများ တည်ဆောက်နေသော အင်ဂျင်နီယာများ။
+> **ဗားရှင်း-** v3.8.51** ပရိသတ်-** OmniRoute ကို ပံ့ပိုးပေးသော အင်ဂျင်နီယာများ သို့မဟုတ် ၎င်းအပေါ်တွင် ပေါင်းစည်းမှုများ တည်ဆောက်ခြင်း။
 >
-> အဆင့်မြင့် ဗိသုကာပုံကြမ်းများနှင့် subsystem တစ်ခုစီ၏ နောက်ကွယ်ရှိ အကြောင်းပြချက်များအတွက်
-> [ARCHITECTURE.md](./ARCHITECTURE.md) ကို ဖတ်ရှုပါ။ Subsystem တစ်ခုချင်းစီ
-> (Auto Combo၊ MCP server၊ A2A server၊ Skills၊ Memory၊ Cloud Agents၊ Resilience၊
-> Compression စသည်တို့) ကို အသေးစိတ်လေ့လာရန် ဤ `docs/` directory ရှိ ၎င်းတို့အတွက် သီးသန့်ဖိုင်များကို ကြည့်ပါ။
+> အဆင့်မြင့်ဗိသုကာပုံချပ်များနှင့် စနစ်ခွဲတစ်ခုစီ၏နောက်ကွယ်ရှိ ကျိုးကြောင်းဆင်ခြင်မှုအတွက် [ARCHITECTURE.md](./ARCHITECTURE.md) ဖတ်ပါ။ သီးခြားစနစ်ခွဲများ (Auto Combo၊ MCP server၊ A2A server၊ Skills၊ Memory၊ Cloud Agents၊ Resilience၊ Compression စသည်ဖြင့်) တွင် ၎င်းတို့၏ သီးခြားဖိုင်များကို ဤ `docs/` လမ်းညွှန်တွင် ကြည့်ပါ။
 
-ဤဖိုင်သည် **ယနေ့ repository ထဲတွင် အမှန်တကယ်ရှိနေသောအရာများ** ကို ဖော်ပြထားပြီး၊ အင်ဂျင်နီယာအသစ်တစ်ဦးအနေဖြင့်
-tree အတွင်း လမ်းညွှန်ရှာဖွေနိုင်ရန်၊ runtime layering ကို နားလည်နိုင်ရန်နှင့် module အသစ်များ
-မဖန်တီးဘဲ code ကို မည်သည့်နေရာတွင် ထည့်သွင်းရမည်ကို သိရှိနိုင်ရန် ရည်ရွယ်သည်။
+ဤဖိုင်တွင် ဖော်ပြထားပါသည်။** ယနေ့ repository မှာ ဘာတွေပါလဲ။** သို့မှသာ အင်ဂျင်နီယာအသစ်သည် သစ်ပင်ကို လမ်းညွှန်နိုင်သည်၊ runtime layering ကို နားလည်နိုင်ပြီး module အသစ်များကို မတီထွင်ဘဲ ကုဒ်ထည့်ရမည့်နေရာကို သိနိုင်စေရန်။
 
 ---
 
@@ -566,35 +559,14 @@ bin/
 
 ## 8. `scripts/`
 
-ရည်ရွယ်ချက်အလိုက် ဖိုင်တွဲခွဲ 6 ခုဖြင့် စုစည်းထားသည်။
+ရည်ရွယ်ချက်ဖြင့် ဖိုင်တွဲခွဲ 6 ခုအဖြစ် စုစည်းထားသည်။
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`။
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`၊ ထို့အပြင် ဖတ်ရှုရန်သက်သက်ဖြစ်သော PR စောင့်ကြည့်ရေး အကူကိရိယာများဖြစ်သည့်
-  `ci-discriminate.sh` (PR တစ်ခု၏ မအောင်မြင်သော စစ်ဆေးမှု လက္ခဏာများကို ကိုယ်ပိုင် / အမွေဆက်ခံရရှိသော /
-  မသိရှိသော ဟူ၍ ရည်ညွှန်း PR သို့မဟုတ် base-red issue နှင့် နှိုင်းယှဉ်ကာ ခွဲခြားပေးသည်) နှင့် `audit-worktree.sh`
-  (worker တစ်ဦး၏ PR ကို လက်မခံမီ dirty ဖိုင်များ၊ ကာကွယ်ထားသော မျက်နှာပြင်များ၊ ဖယ်ရှားထားသော asserts များ၊ suppression အရေအတွက်များ၊ ကျန်ရှိနေသော
-  ယာယီ tsconfigs များ၊ PR head နှင့် local HEAD တို့ကို စစ်ဆေးသည်)။
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`။
-- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`။
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`။
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`။
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, ပေါင်းဖတ်ရန်-သပ်သပ် PR ကလေးထိန်းအကူအညီပေးသူများ `ci-discriminate.sh` (အမည်မသိ PR၏ အမွေဆက်ခံခြင်း သို့မဟုတ် ပျက်ကွက်ခြင်းသို့ အမျိုးအစားခွဲထားသည် အခြေခံ-အနီရောင်ပြဿနာ) နှင့် PR (ညစ်ပတ်သောဖိုင်များ၊ ကာကွယ်ထားသောမျက်နှာပြင်များ၊ အခိုင်အမာပြောဆိုမှုများ၊ ဖိနှိပ်မှုအရေအတွက်များ၊ လက်ကျန် tmp tsconfigs၊ PR ဦးခေါင်းနှင့် ဒေသခံ HEAD — `audit-worktree.sh` အလုပ်သမားတစ်ဦး၏ PR လက်ခံခြင်းမပြုမီ)။
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` အလံများသည် OmniRoute (3.6.x နှင့် အထက်) နှင့် အတိအကျသတ်မှတ်ထားသော ဗားရှင်းများ။ စစ်ဆေးမှုသည် ရက်စွဲများကို လျစ်လျူရှုသည်။
+- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

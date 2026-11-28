@@ -118,55 +118,48 @@ curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ندارند، همچنان از پیکربندی سراسری بهعنوان گزینهٔ جایگزین استفاده میکنند. چهار ابزار
 `obsidian_sync_*` رفتار جداگانهٔ خود را برای توکن همگامسازی حفظ میکنند.
 
-## ابزارهای MCP (22)
+## ابزار MCP (22)
 
-در `open-sse/mcp-server/tools/obsidianTools.ts` تعریف شدهاند. توکن/نشانی URL پایه در هر فراخوانی تعیین میشود (ابتدا بر اساس کلید API و سپس بهصورت سراسری). ابزارهایی که به **سرور همگامسازی** OmniRoute متصل میشوند (چهار ابزار `obsidian_sync_*`)، علاوه بر این به توکن احراز هویت همگامسازی که در تنظیمات OmniRoute پیکربندی شده است نیاز دارند.
+در `open-sse/mcp-server/tools/obsidianTools.ts` تعریف شده است. token/base-URL در هر تماس حل می شود (اول به ازای کلید API، سپس سراسری). ابزارهایی که به OmniRoute ضربه می زنند** سرور همگام سازی** (چهار ابزار `obsidian_sync_*` ) علاوه بر این به نشانه تأیید اعتبار همگام سازی پیکربندی شده در تنظیمات OmniRoute نیاز دارند.
 
-### ابزارهای خواندن (`read:obsidian`)
+### ابزار خواندن (`read:obsidian`)
 
-| ابزار                        | توضیحات                                                                                               |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | بررسی میکند که آیا Local REST API در دسترس است و احراز هویت شده است.                                  |
-| `obsidian_search_simple`     | جستوجوی تماممتنی در محتوای یادداشتها؛ قطعههای متن را همراه با مسیر فایلها برمیگرداند.                 |
-| `obsidian_search_structured` | جستوجو با استفاده از یک عبارت JSON Logic (فیلترهای and/or/regex/path).                                |
-| `obsidian_read_note`         | خواندن یادداشت بر اساس مسیر نسبی به vault؛ بهصورت اختیاری یک عنوان/بلوک/frontmatter مشخص.             |
-| `obsidian_list_vault`        | فهرستکردن فایلها و پوشههای vault (درخت ورودیها).                                                      |
-| `obsidian_get_document_map`  | دریافت ساختار عنوانهای یادداشت بهشکل نگاشت عنوانها → شماره خطوط.                                      |
-| `obsidian_get_note_metadata` | دریافت frontmatter، برچسبها، پیوندها و تعداد نویسهها/واژهها بدون محتوای کامل.                         |
-| `obsidian_get_active_file`   | دریافت مسیر و محتوای فایل فعال فعلی در Obsidian.                                                      |
-| `obsidian_get_periodic_note` | دریافت یادداشت دورهای روزانه/هفتگی/ماهانه برای یک تاریخ (در صورت حذف، امروز).                         |
-| `obsidian_get_tags`          | فهرستکردن همه برچسبهای vault همراه با تعداد تکرار آنها.                                               |
-| `obsidian_list_commands`     | فهرستکردن شناسههای فرمان موجود Obsidian (برای استفاده با `obsidian_execute_command`).                 |
-| `obsidian_sync_status`       | وضعیت سرور همگامسازی OmniRoute: در حال اجرا بودن، نام vault، درگاه، مدتزمان فعالیت و آخرین همگامسازی. |
-| `obsidian_sync_conflicts`    | فهرستکردن تعارضهای حلنشده همگامسازی (مسیر، مسیر تعارض و زمان شناسایی).                                |
+| ابزار                        | توضیحات                                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | بررسی کنید که آیا REST API محلی قابل دسترسی و تأیید اعتبار است یا خیر.                      |
+| `obsidian_search_simple`     | جستجوی متن کامل محتوای یادداشت؛ قطعه هایی را با مسیرهای فایل برمی گرداند.                   |
+| `obsidian_search_structured` | جستجو با استفاده از عبارت منطق JSON (فیلترهای and/or/regex/path ).                          |
+| `obsidian_read_note`         | خواندن یادداشت بر اساس مسیر طاق نسبی. اختیاری یک heading/block/frontmatter. خاص             |
+| `obsidian_list_vault`        | فایل ها و دایرکتوری ها را در صندوق (درخت ورودی) فهرست کنید.                                 |
+| `obsidian_get_document_map`  | ساختار عنوان یادداشت را به عنوان نقشه ای از اعداد خط سرفصل های → دریافت کنید.               |
+| `obsidian_get_note_metadata` | مطالب اصلی، برچسبها، پیوندها، تعداد char/word را بدون محتوای کامل دریافت کنید.              |
+| `obsidian_get_active_file`   | مسیر + محتوای فایل فعال فعلی را در Obsidian دریافت کنید.                                    |
+| `obsidian_get_periodic_note` | یادداشت ادواری daily/weekly/monthly را برای یک تاریخ دریافت کنید (اگر امروز حذف شود).       |
+| `obsidian_get_tags`          | همه تگ های طاق را با فرکانس آنها فهرست کنید.                                                |
+| `obsidian_list_commands`     | دستور Obsidian موجود IDs را فهرست کنید (از `obsidian_execute_command` استفاده کنید).        |
+| `obsidian_sync_status`       | وضعیت سرور همگام سازی OmniRoute : در حال اجرا، نام طاق، پورت، زمان آپدیت، آخرین همگام سازی. |
+| `obsidian_sync_conflicts`    | تضادهای حل نشده همگام سازی (مسیر، مسیر تضاد، شناسایی-در) را فهرست کنید.                     |
 
-### ابزارهای نوشتن (`write:obsidian`)
+### ابزار نوشتن (`write:obsidian`)
 
-| ابزار                            | توضیحات                                                                             |
-| -------------------------------- | ----------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | ایجاد یا بازنویسی یک یادداشت با محتوای Markdown دادهشده.                            |
-| `obsidian_append_note`           | افزودن محتوا به یک یادداشت؛ بهصورت اختیاری در یک عنوان/بلوک مشخص.                   |
-| `obsidian_patch_note`            | افزودن/پیشافزودن/جایگزینی دقیق در یک عنوان، بلوک یا فیلد frontmatter.               |
-| `obsidian_delete_note`           | حذف دائمی یک یادداشت از vault.                                                      |
-| `obsidian_move_note`             | جابهجایی یا تغییر نام یک یادداشت درون vault.                                        |
-| `obsidian_execute_command`       | اجرای یک فرمان Obsidian بر اساس شناسه فرمان آن.                                     |
-| `obsidian_open_file`             | بازکردن یک فایل در Obsidian (اگر وجود نداشته باشد، آن را ایجاد میکند).              |
-| `obsidian_sync_trigger`          | راهاندازی یک همگامسازی دوطرفه فوری vault بین دسکتاپ↔موبایل.                         |
-| `obsidian_sync_resolve_conflict` | حل یک تعارض همگامسازی: نگهداشتن `local` (موبایل)، `remote` (دسکتاپ) یا `keep-both`. |
+| ابزار                            | توضیحات                                                                                      |
+| -------------------------------- | -------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | یک یادداشت با محتوای Markdown ایجاد کنید یا بازنویسی کنید.                                   |
+| `obsidian_append_note`           | افزودن محتوا به یادداشت؛ اختیاری به یک heading/block. خاص                                    |
+| `obsidian_patch_note`            | append/prepend/replace جراحی در یک میدان سرفصل، بلوک یا قسمت جلویی.                          |
+| `obsidian_delete_note`           | یک یادداشت را برای همیشه از صندوق حذف کنید.                                                  |
+| `obsidian_move_note`             | یک یادداشت را در خزانه جابجا یا تغییر نام دهید.                                              |
+| `obsidian_execute_command`       | یک دستور Obsidian را با دستور ID آن اجرا کنید.                                               |
+| `obsidian_open_file`             | یک فایل را در Obsidian باز کنید (اگر وجود نداشته باشد آن را ایجاد می کند).                   |
+| `obsidian_sync_trigger`          | همگامسازی خزانه موبایل دسکتاپ ↔ فوری دو طرفه را راهاندازی کنید.                              |
+| `obsidian_sync_resolve_conflict` | تضاد همگام سازی را حل کنید: `local` (موبایل)، `remote` (رومیزی) یا `keep-both` را نگه دارید. |
 
 > [!NOTE]
-> مقصدهای `obsidian_patch_note` مقدار `targetType` از نوع `heading | block | frontmatter`
-> و مقدار `operation` از نوع `append | prepend | replace` را میپذیرند و
-> `createTargetIfMissing` اختیاری است. چهار ابزار `obsidian_sync_*` با سرور همگامسازی
-> محلی (`http://127.0.0.1:27781` بهصورت پیشفرض) ارتباط برقرار میکنند و به توکن همگامسازی نیاز دارند.
+> اهداف `obsidian_patch_note` `targetType` `heading | block | frontmatter` و `operation` `append | prepend | replace` را با `createTargetIfMissing` اختیاری می پذیرند. چهار ابزار `obsidian_sync_*` با سرور همگام سازی محلی (به طور پیش فرض `http://127.0.0.1:27781` ) صحبت می کنند و به نشانه همگام سازی نیاز دارند.
 
-### دامنهها
+### محدوده ها
 
-ابزارهای خواندن به `read:obsidian` و ابزارهای نوشتن به `write:obsidian` نیاز دارند. اعمال محدودیت
-همانند Notion است — توسط `withScopeEnforcement()` در
-`open-sse/mcp-server/server.ts` مدیریت میشود، با `OMNIROUTE_MCP_ENFORCE_SCOPES=true` فعال
-میشود و دامنههای مجاز از `OMNIROUTE_MCP_SCOPES` یا زمینه دامنه کلید API گرفته میشوند. به
-[MCP-SERVER.md](./MCP-SERVER.md) مراجعه کنید.
+ابزار خواندن نیاز به `read:obsidian` دارد. ابزار نوشتن `write:obsidian` نیاز دارد. اجرا مشابه Notion — است که توسط `withScopeEnforcement()` در `open-sse/mcp-server/server.ts` انجام میشود، در `OMNIROUTE_MCP_ENFORCE_SCOPES=true` قرار میگیرد و برای تماسگیرندگان HTTP/SSE که کلید API فاقد `manage`/`admin` است، اجباری میشود، با محدودههای مجاز که از `OMNIROUTE_MCP_SCOPES` یا زمینه محدوده کلید API منبع میشوند. رجوع [MCP-SERVER.md](./MCP-SERVER.md) شود.
 
 ## نقاط پایانی
 

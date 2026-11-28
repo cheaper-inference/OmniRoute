@@ -6,75 +6,25 @@
 
 @AGENTS.md
 
-**Sheria zote za mradi zimo katika [`AGENTS.md`](AGENTS.md)** — chanzo pekee cha ukweli kwa kila
-msaidizi wa AI (usanifu, kanuni, majaribio, vigezo vya ubora, mtiririko wa kazi wa git, Sheria 23
-Ngumu, mafunzo kuhusu PII). Isome kikamilifu; usiongeze tena sheria za mradi hapa. Kila kitu hapa
-chini kinatumika kwa Claude Code PEKEE — maboresho ya kiutendaji ya sheria ambazo tayari
-zimefafanuliwa katika `AGENTS.md`.
+**Sheria zote za mradi zinaishi katika [`AGENTS.md`](AGENTS.md)** — chanzo kimoja cha ukweli kwa kila msaidizi wa AI ; uagizaji hapo juu tayari unaipakia. Usiongeze tena sheria za mradi hapa. Kila kitu hapa chini kinatumika ONLY kwa Claude Kanuni — uboreshaji wa uendeshaji wa sheria zilizofafanuliwa tayari katika `AGENTS.md`.
 
-## Kutengwa kwa worktree — maelezo mahususi ya Claude Code
+## Kutengwa kwa mti wa kazi — Claude Maadili ya Msimbo
 
-Itifaki kamili ya lazima ya worktree (uthibitisho wa base-branch, njia rasmi ya
-`.claude/worktrees/`, `cp -al` node_modules, sheria za kusafisha) iko katika
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (imefupishwa katika `AGENTS.md` →
-Git Workflow → "Worktree isolation"). Mambo mahususi ya Claude Code:
+- Thibitisha tawi la msingi na opereta kupitia `AskUserQuestion` (Hard Rule #19) isipokuwa kama wamekuambia tayari.
+- Unda mti wa kazi kwa `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (inatua chini ya `.claude/worktrees/`, hard-links `node_modules` na nakala `.husky/_`), kisha piga `EnterWorktree` na `path` yake . Pitisha msingi kila wakati: bila hiyo hati huchagua ya juu zaidi `release/*`, ambayo inaweza kuwa sio ile ambayo operator alithibitisha. Mti wa kazi ambao `EnterWorktree` huunda peke yake hauna viunganishi ngumu wala ndoano, kwa hivyo hakuna lango la kabla ya ahadi linaloingia ndani yake.
 
-- Thibitisha base branch na mwendeshaji kupitia `AskUserQuestion` (Hard Rule #19) isipokuwa
-  wameshakuambia.
-- Tumia zana asilia ya `EnterWorktree` — tayari huunda worktrees chini ya
-  `.claude/worktrees/` (njia rasmi). Unda worktree kwa amri iliyoandikwa ya `git
-worktree add`, kisha ita `EnterWorktree` kwa kutumia `path` yake.
+## Subagents na git
 
-## Usalama kati ya vipindi — mahususi kwa Claude Code
+Kila wakala mdogo anayegusa git (Zana ya Wakala au hati ya mtiririko wa kazi) hupata Neno Ngumu #22 a's `git stash` ya kupiga marufuku kwa haraka — urudiaji uliorekodiwa wa tukio la kuficha ulikuja kupitia ajenti ndogo.
 
-Sheria Ngumu #19/#21/#22 (katika `AGENTS.md`) zinasimamia vipindi sambamba. Vikumbusho vya
-kiutendaji kwa mazingira haya:
+## Upangaji wa vibaki vya programu — nguvu kuu hubatilishwa
 
-- **Rudia marufuku ya `git stash` neno kwa neno katika prompt ya kila subagent inayogusa git**
-  (zana ya Agent / hati za Workflow) — subagent hazirithi faili hii, na tukio la stash
-  lililojirudia lilitokea kupitia subagent.
-- Kabla ya kuunganisha au kusukuma kwenye PR yoyote ambayo hukuiunda _katika kipindi hiki_,
-  endesha `git worktree list` na ukague tena `gh pr view <N> --json state,headRefOid`
-  (Sheria Ngumu #22b).
-- Maliza kila kipindi huku checkout kuu ikiwa kwenye tawi ililoanzia.
+Ujuzi wa Superpowers unatangaza chaguomsingi chini ya `docs/superpowers/plans/`, `docs/superpowers/specs/` na `docs/research/`. Andika upya kila moja kwa `_tasks/` yake inayolingana katika `AGENTS.md` → "Artifacts za Kupanga na Utafiti" kabla ya kuandika, na uifanye na `git -C _tasks …`, kamwe katika repo kuu.
 
-## Superpowers / vizalia vya upangaji — ubatilishaji wa njia
+## Changua faili — `_artifacts/`, sio `/tmp`
 
-Utaratibu wa `_tasks/` umefafanuliwa katika `AGENTS.md` → "Planning & Research Artifacts". Skills
-za superpowers huja na chaguo-msingi zinazoelekeza kwenye `docs/…` — chaguo-msingi hizo
-**zimebatilishwa hapa**. Wakati skill ya superpowers inapotangaza njia kama "imehifadhiwa katika
-`docs/superpowers/plans/…`", iandike upya kuwa njia inayolingana ya `_tasks/…` kabla ya kuandika:
+Mradi huu unabatilisha padi ya kukwaruza ya kipindi cha kuunganisha (`/tmp/claude-*/…`). Andika faili za muda zinazouzwa nje —, zipu zinazozalishwa, matokeo ya kati ya mara moja — hadi `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: njia `_*` iliyopuuzwa, ili opereta apate na kufuta mikwaruzo yote katika sehemu moja. Mipango ya kudumu, vipimo, utafiti na miondoko ya mkono huenda kwa `_tasks/` badala yake ( Kanuni Ngumu #23).
 
-| Kizalia (skill)                   | Chaguo-msingi (USITUMIE)  | Hifadhi hapa badala yake                                      |
-| --------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Mipango (`writing-plans`)         | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Vipimo / muundo (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Utafiti (`deep-research`, ad-hoc) | `docs/research/`          | `_tasks/research/…`                                           |
-| Makabidhiano (`/handoff`)         | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Msingi nyekundu
 
-Commit vizalia hivyo ndani ya repo ya `_tasks/` (`git -C _tasks …`), kamwe si katika repo kuu.
-
-## Faili za muda / za majaribio — tumia `_artifacts/`, si `/tmp`
-
-Mradi huu unabatilisha scratchpad chaguo-msingi ya kipindi ya mazingira haya
-(`/tmp/claude-*/…`). Andika faili za muda/za kufanyia kazi — exports, zip zilizozalishwa, matokeo
-ya kati ya matumizi ya mara moja, chochote ambacho ungeweka katika `/tmp` — katika
-`/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` badala yake.
-
-- `_artifacts/` ni njia ya msingi ya `_*`: tayari imepuuzwa na git (`AGENTS.md` → "Root `_*`
-  paths"), ipo kwenye diski pekee, na haifuatiliwi kamwe.
-- Sababu: kuweka matokeo ya muda ndani ya mradi (badala ya `/tmp`) humwezesha mwendeshaji kupata
-  na kufuta kila kitu cha muda kwa urahisi katika sehemu moja, badala ya kutafuta katika saraka
-  za muda za `/tmp` zinazohusiana na vipindi mahususi ambazo hutoweka au kukusanya faili
-  zisizofuatiliwa.
-- **Usichanganye** hii na `_tasks/` (Sheria Ngumu #23, repo yake binafsi ya git kwa mipango,
-  vipimo, utafiti na makabidhiano ya kudumu) — `_artifacts/` ni kwa faili za kufanyia kazi
-  zinazoweza kutupwa pekee; hakuna kitu hapa kinachohitaji kudumu au kudhibitiwa kwa matoleo.
-
-## Hakikisha msingi ni wa kijani kabla ya kufungua PR
-
-Kabla ya kuunda tawi au kufungua PR, endesha ukaguzi wa base-green (`AGENTS.md` → Git Workflow →
-"Base-green check"; skills za mradi zinarejelea kama `.agents/skills/_shared/base-green.md`). PR
-iliyofunguliwa wakati ncha ya msingi ni nyekundu lazima iwe na `⚠️ base-red inherited: #<issue>`
-katika maelezo yake. Ili kuondoa hali nyekundu iliyolimbikizwa (ncha ya msingi + PR nyekundu),
-tumia skill ya `/sweep-reds`.
+Ili kuondoa hali nyekundu iliyokusanywa (ncha ya msingi + red PRs), tumia ujuzi wa `/sweep-reds`.

@@ -166,11 +166,11 @@ OmniRoute сканує HAR на Chathub WebSocket URL, витягує `access_to
 
 Переконайтеся, що `copilot-m365-web` увімкнено** Інформаційна панель → Провайдери** . На деяких рівнях постачальник може бути прихований за умовчанням.
 
-## Посилання
+## Список літератури
 
-- Проблема: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Обговорення: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Вихідний код: `src/shared/constants/providers/web-cookie.ts` (визначення провайдера)
-- Імпорт HAR: `src/shared/utils/m365HarImport.ts`
+- Випуск: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Обговорення: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Джерело: `src/shared/constants/providers/web-cookie.ts` (визначення постачальника)
+- Імпорт HAR : `src/shared/utils/m365HarImport.ts`
 - Поля облікових даних: `src/shared/providers/webSessionCredentials.ts`
-- Модальне вікно тарифного плану: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Модальний рівень: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

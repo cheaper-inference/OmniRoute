@@ -6,23 +6,24 @@
 
 > Riferimento completo per il deployment con Docker. Per iniziare rapidamente, consulta la [sezione Docker del README](../README.md#-docker).
 
-## Indice
+## Sommario
 
-- [Avvio rapido](#quick-run)
+- [Corsa veloce](#quick-run)
 - [Con file di ambiente](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Docker Componi](#docker-compose)
 - [Profili disponibili](#available-profiles)
-- [Configurazione degli strumenti CLI dell'host quando OmniRoute viene eseguito in Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Sidecar Redis](#redis-sidecar)
-- [Compose per la produzione](#production-compose)
-- [Stage del Dockerfile](#dockerfile-stages)
-- [Variabili di ambiente critiche](#critical-environment-variables)
-- [Docker Compose con Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Tunnel rapido Cloudflare](#cloudflare-quick-tunnel)
-- [Tag delle immagini](#image-tags)
+- [Indurimento del contenitore](#container-hardening)
+- [Configurazione degli strumenti host CLI quando OmniRoute viene eseguito in Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Sidecar](#redis-sidecar)
+- [Composizione di produzione](#production-compose)
+- [Fasi del Dockerfile](#dockerfile-stages)
+- [Variabili ambientali critiche](#critical-environment-variables)
+- [Docker Componi con Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Tunnel veloce](#cloudflare-quick-tunnel)
+- [Tag immagine](#image-tags)
 - [Aggiornamenti della dashboard in Docker](#dashboard-updates-in-docker)
-- [Disponibilità: SQLite predefinito supporta una sola replica](#availability-default-sqlite-is-single-replica)
-- [Errori regionali di Gemini all'interno di Docker](#gemini-regional-errors-inside-docker)
+- [Disponibilità: SQLite predefinito è a replica singola](#availability-default-sqlite-is-single-replica)
+- [Gemini errori regionali all'interno di Docker](#gemini-regional-errors-inside-docker)
 - [Note importanti](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute include profili Compose per le principali configurazioni di deployment
 | `web`                | `omniroute-web`  | Provider basati su sessioni web che richiedono un browser: `gemini-web`, `claude-web`, `claude-turnstile` (compila `runner-web`, Chromium incluso)     | `docker compose --profile web up -d`         |
 
 > È possibile combinare più profili: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Indurimento del contenitore
+
+I servizi app `base`, `web`, `cli` e `host` in `docker-compose.yml` utilizzano `cap_drop: [ALL]` e l'opzione di sicurezza `no-new-privileges:true`. L'immagine viene eseguita come utente non root `node` e ascolta su porte elevate, quindi non necessita di funzionalità Linux. L'opzione di sicurezza impedisce ai processi di ottenere privilegi tramite i binari setuid.
+
+Solo il profilo `cli` monta il socket Docker per l'aggiornamento automatico. Vedi [Portello di fuga: configura lo CLIs del contenitore](#escape-hatch-configure-the-containers-own-clis-use-sparingly) per le implicazioni sulla sicurezza.
+
+Il filesystem root rimane scrivibile per impostazione predefinita. Il profilo `cli` scrive la configurazione CLI e memorizza nella cache la directory home del contenitore, il profilo `web` memorizza lo stato della sessione Chromium e il runtime Next.js può scrivere cache all'esterno `/app/data`.
+
+Per provare un filesystem root di sola lettura con il profilo `base`, salvalo come `docker-compose.override.yml` accanto a `docker-compose.yml`. Compose legge l'override automaticamente.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Il montaggio `/app/data` esistente rimane scrivibile. Testa il tuo carico di lavoro prima di utilizzare questo override in produzione, poiché potrebbe essere necessario scrivere su altri percorsi.
 
 ## Configurazione degli strumenti CLI dell'host quando OmniRoute viene eseguito in Docker
 
@@ -295,7 +320,7 @@ Comportamento della memoria in Docker:
 
 ### Runtime RAM per agenti di codifica
 
-Il valore predefinito di 1 GiB Docker è un pavimento dashboard/light-chat, non una dimensione di produzione. I corpi `POST /v1/responses` lunghi (centinaia di messaggi, decine di strumenti) conservano più grafici in memoria durante la compressione. Due richieste sovrapposte di token ~ 3 MiB / ~ 750k hanno interrotto V8 in un** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) e ha anche colpito un 16 GiB cgroup OOM. Vedi [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Il valore predefinito di 1 GiB Docker è un pavimento dashboard/light-chat, non una dimensione di produzione. I corpi `POST /v1/responses` lunghi (centinaia di messaggi, decine di strumenti) conservano più grafici in memoria durante la compressione. Due richieste sovrapposte di token ~ 3 MiB / ~ 750k hanno interrotto V8 in un** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) e ha anche colpito un 16 GiB cgroup OOM. Vedi [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Misurare** cgroup `--memory` sopra l'heap** I buffer nativi —, SQLite e gli intermedi di compressione si trovano all'esterno della V8.
 
@@ -582,7 +607,7 @@ Stock Docker / Kubernetes OmniRoute è** un processo Node + uno scrittore SQLite
 | Vincolo                               | Conseguenza                                                                                                                                                                                                                                                                                                                                     |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Scrittore unico                       | Fare** non** eseguire più repliche sullo stesso file SQLite. Ciò corrompe DB.                                                                                                                                                                                                                                                                   |
-| Ricrea / riavvia / HEALTHCHECK uccidi | **Interruzione completa** di SSE in volo, sessioni del dashboard e stato in memoria. Ogni client connesso cade. Le nuove richieste durante la finestra dell'endpoint vuoto ottengono un proxy inverso**`502 Bad Gateway: Unknown error`** , non OmniRoute JSON : i client non sono in grado di distinguerlo da un errore del provider (#11015). |
+| Ricrea / riavvia / HEALTHCHECK uccidi | **Interruzione completa** di SSE in volo, sessioni del dashboard e stato in memoria. Ogni client connesso cade. Le nuove richieste durante la finestra dell'endpoint vuoto ottengono un proxy inverso**`502 Bad Gateway: Unknown error`** , non OmniRoute JSON — i client non sono in grado di distinguerlo da un errore del provider (#11015). |
 | Stesso ciclo di eventi di `/healthz`  | Un catalogo occupato o un tick di compressione possono ritardare le sonde; un breve timeout quindi riavvia il** soltanto** replica.                                                                                                                                                                                                             |
 
 **Matrice della sonda** (vedi anche [raccomandazioni sulla sonda Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
@@ -593,9 +618,9 @@ Stock Docker / Kubernetes OmniRoute è** un processo Node + uno scrittore SQLite
 | Prontezza      | HTTP `GET /healthz`                                     | Timeout stretti che trattano il ciclo di eventi occupato come morto |
 | Profondo/umani | `/api/monitoring/health`                                | Liveness kubelet automatizzato                                      |
 
-**Aggiornamenti:** aspettarsi che ogni sessione venga interrotta. Prosciuga i clienti se puoi; non è previsto alcun aggiornamento progressivo su SQLite predefinito. Componi `restart: unless-stopped` più Docker `HEALTHCHECK` sostituirà anche l'unico processo quando il contenitore non è integro: stesso raggio di esplosione.
+**Aggiornamenti:** aspettarsi che ogni sessione venga interrotta. Prosciuga i clienti se puoi; non è previsto alcun aggiornamento progressivo su SQLite predefinito. Componi `restart: unless-stopped` più Docker `HEALTHCHECK` sostituirà anche l'unico processo quando il contenitore è integro — lo stesso raggio di esplosione.
 
-Manifest già pronti e un grafico Helm disponibili in `deploy/kubernetes/` e `deploy/helm/omniroute/` : consulta la [guida alla distribuzione di Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+I manifest già pronti e un grafico Helm sono disponibili in `deploy/kubernetes/` e `deploy/helm/omniroute/` — consulta la [guida alla distribuzione di Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
 Snippet Kubernetes per a** replica unica** (La ricreazione è obbligatoria; non sollevare `replicas` contro un file SQLite ):
 
@@ -624,9 +649,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep consente a kube di eliminare gli endpoint del servizio prima di SIGTERM** nuovo** il traffico smette di colpire il processo morente. In volo `/v1/responses` SSE viene prosciugato fino a `SHUTDOWN_TIMEOUT_MS` (default 30) tramite contratti di locazione di ammissione pesanti (#11015). Le nuove richieste che raggiungono ancora il processo ottengono `503` + `Retry-After: 5`. L'intervallo Ricrea endpoint vuoto finché la sostituzione non è pronta rimane un'interruzione grave: si tratta della topologia SQLite, non di un'errata configurazione della sonda.
+`preStop` sleep consente a kube di eliminare gli endpoint del servizio prima di SIGTERM** nuovo** il traffico smette di colpire il processo morente. In volo `/v1/responses` SSE viene prosciugato fino a `SHUTDOWN_TIMEOUT_MS` (default 30) tramite contratti di locazione di ammissione pesanti (#11015). Le nuove richieste che raggiungono ancora il processo ricevono `503` + `Retry-After: 5`. L'opzione Ricrea intervallo endpoint vuoto finché la sostituzione non è pronta rimane un'interruzione grave — che è la topologia SQLite, non un'errata configurazione della sonda.
 
-Postgres esterno / HA multi-scrittore lo è** non** un percorso documentato delle scorte. Se hai bisogno HA, mantieni una singola replica o esegui una topologia che il progetto ha testato e documentato separatamente. L'opera Postgres/MySQL vive in [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Fino a quando non verrà spedito, l'unico modo supportato per moltiplicarsi** grande** La capacità `/v1/responses` è costituita da N processi indipendenti (sezione successiva), non `replicas > 1` su un volume.
+Postgres esterno / HA multi-scrittore lo è** non** un percorso documentato delle scorte. Se hai bisogno HA, mantieni una singola replica o esegui una topologia che il progetto ha testato e documentato separatamente. L'opera Postgres/MySQL vive in [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Fino a quando non verrà spedito, l'unico modo supportato per moltiplicarsi** grande** La capacità `/v1/responses` è N processi indipendenti (sezione successiva), non `replicas > 1` su un volume.
 
 ## Scale-out: N processi indipendenti
 
@@ -636,18 +661,18 @@ Le copie di un account Codex non devono consumare in modo indipendente il token 
 
 L'istanza passiva rilegge la connessione quando è necessario un aggiornamento e adotta solo un token di accesso diverso e non scaduto. In caso contrario, l'aggiornamento viene disabilitato senza scadenza o disattivazione della connessione o conteggio di un errore dell'interruttore di aggiornamento. I veri errori di autenticazione upstream utilizzano ancora la normale contabilità degli errori, il raffreddamento esponenziale e il normale errore del client; la disattivazione dell'account rimane permanente. Sincronizza i token ruotati del proprietario prima che i token di accesso scadano (il tempo di aggiornamento proattivo predefinito è di cinque minuti) o reimporta il file di autenticazione Codex. Le importazioni passive archiviano i token forniti senza convalidarli nell'endpoint del token. L'aggiornamento manuale dashboard/API restituisce `409 refresh_disabled`; i nuovi accessi OAuth rimangono invariati. Vedere [riferimento all'ambiente](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Il processo One Node è** un heap V8** . Due ~ 3 MiB / ~ 750k-token coding-agent sovrapposti `POST /v1/responses` (RTK + Caveman) interrompono quell'heap a ~ 12 Gi (`FATAL ERROR: Reached heap limit`) e possono OOM un 16 Gi cgroup. Vedi [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Quella misura è a** bilancio della memoria** attenzione, non un prodotto hard-max di due long `/v1/responses` simultanei. L'ammissione alla chat pesante è controllata da un budget di byte di acquisizione derivato automaticamente (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimensionato dallo stesso soffitto V8/cgroup — sovrascrivendolo verso l'alto (o impostando il limite di conteggio delle richieste `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` legacy) su un processo già dimensionato reintroduce l'interruzione. Le chat piccole, `/healthz`, `/v1/models` e MCP lo sono** non** in quel berretto.
+Il processo One Node è** un heap V8** . Due ~ 3 MiB / ~ 750k-token coding-agent sovrapposti `POST /v1/responses` (RTK + Caveman) interrompono quell'heap a ~ 12 Gi (`FATAL ERROR: Reached heap limit`) e possono OOM un 16 Gi cgroup. Vedi [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Quella misura è a** bilancio della memoria** attenzione, non un prodotto hard-max di due lunghi `/v1/responses` simultanei. L'ammissione alla chat pesante è controllata da un budget di byte di acquisizione derivato automaticamente (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimensionato dallo stesso soffitto V8/cgroup — sovrascrivendolo verso l'alto (o impostando il limite di conteggio delle richieste `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` legacy) su un processo già dimensionato reintroduce l'interruzione. Le piccole chat, `/healthz`, `/v1/models` e MCP lo sono** non** in quel berretto.
 
 ### Un processo: più di due lunghi `/v1/responses`
 
-UN** salutare** processo (heap sotto `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, predefinito `0.75`)** Maggio** eseguire più di due `POST /v1/responses` lunghi simultanei quando il budget di byte in volo a livello di processo (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / # #10110) ha ancora spazio. I corpi pari o superiori `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) accettano lo stesso lease pesante delle richieste pesanti per la struttura e utilizzano lo stesso escape [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Decine di client SSE lunghi simultanei (gli operatori spesso ne hanno bisogno 40-50) sono a** bilancio della memoria** domanda — dimensione heap + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — non è un limite di prodotto rigido “max 2”. Un heap sotto pressione perde ancora con `503` riprovabile, quindi #7849 non ritorna.
+UN** salutare** processo (heap sotto `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, predefinito `0.75`)** Maggio** eseguire più di due `POST /v1/responses` lunghi simultanei quando il budget di byte in volo a livello di processo (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) ha ancora spazio. I corpi pari o superiori `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) accettano lo stesso lease pesante delle richieste pesanti per la struttura e utilizzano lo stesso escape [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Decine di client long SSE simultanei (gli operatori spesso ne hanno bisogno 40-50) sono a** bilancio della memoria** domanda — size heap + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — non è un limite di prodotto rigido “max 2”. Un heap sotto pressione perde comunque `503` riprovabile, quindi #7849 non ritorna.
 
 A** moltiplicare i cumuli** (vecchi spazi V8 indipendenti)** Oggi** :
 
 | Fare                                                                                                                                                         | Non farlo                                                                  |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
 | Correre** containers/pods** , ognuno con il suo** Proprio** `DATA_DIR` /volume                                                                               | Imposta `replicas > 1` rispetto a un file SQLite                           |
-| Dimensioni pesanti in volo + headroom salutare dal budget heap / byte in volo; 1–2 è il valore predefinito conservativo #7849, non un prodotto difficile max | Assegnare a un processo 8 × RAM e un limite di conteggio illimitato        |
+| Dimensioni pesanti in volo + headroom salutare dal budget heap / byte in volo; 1–2 è il valore predefinito #7849 conservativo, non un prodotto difficile max | Assegnare a un processo 8 × RAM e un limite di conteggio illimitato        |
 | Opzionale: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` per** contatori delle quote condivise**                                                      | Trattare Redis come SQLite — condiviso non lo è                            |
 | Duplica i segreti del provider in ogni istanza (o accetta dashboard partizionati)                                                                            | È previsto un dashboard/un registro delle chiamate tra le istanze          |
 | Frontale con qualsiasi bilanciatore di carico; è sufficiente appiccicoso tramite chiave API o sessione                                                       | Richiedere un middleware sensibile alle dimensioni specifico del fornitore |
@@ -683,55 +708,32 @@ volumes:
   omniroute-b-data:
 ```
 
-La densità durante il processo (compressione dell'isolato HTTP ) è [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Un cluster logico sullo stato durevole condiviso è [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+La densità durante il processo (compressione dell'isolato HTTP ) è [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Un cluster logico sullo stato durevole condiviso è [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Errori regionali di Gemini all'interno di Docker
+## Gemini errori regionali all'interno di Docker
 
-Google AI Studio / Gemini API può restituire un errore HTTP 400 con FAILED_PRECONDITION e
-`User location is not supported for the API use.` Una richiesta riuscita sull'host
-non dimostra che il container utilizzi la stessa route in uscita. L'ordine DNS,
-la connettività IPv4/IPv6, il routing VPN e i proxy configurati possono differire. Consulta
-[le regioni supportate da Google](https://ai.google.dev/gemini-api/docs/available-regions)
-e verifica anche la route di connessione effettiva; questo errore, da solo, non indica che la chiave API non sia valida.
+Google AI Studio / Gemini API può restituire HTTP 400 con FAILED_PRECONDITION e `User location is not supported for the API use.` Una richiesta riuscita sull'host non dimostra che il contenitore utilizza lo stesso percorso in uscita. L'ordinamento DNS, la connettività IPv4/IPv6, il routing VPN e i proxy configurati possono differire. Controlla [le regioni supportate da Google](https://ai.google.dev/gemini-api/docs/available-regions) e il percorso di connessione effettivo; questo errore da solo non identifica una chiave API errata.
 
 ### Preferire un proxy specifico per la connessione
 
-Utilizza la [configurazione del proxy per connessione](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-di OmniRoute per la connessione Gemini interessata, quindi ripeti **Test Connection** ed esegui una piccola richiesta
-con lo stesso modello. In questo modo, la modifica del routing resta limitata a quella connessione. Verifica
-che il proxy sia raggiungibile dal container e che la connessione lo selezioni effettivamente.
-La modifica della route non garantisce l'idoneità regionale presso il provider upstream.
+Utilizza [la configurazione proxy per connessione](../ops/PROXY_GUIDE.md#4-level-proxy-system) di OmniRoute per la connessione Gemini interessata, quindi ripeti** Prova connessione** e una piccola richiesta con lo stesso modello. Ciò mantiene la modifica del routing nell'ambito di tale connessione. Verificare che il proxy sia raggiungibile dal contenitore e che la connessione lo selezioni effettivamente. La modifica del percorso non garantisce l'ammissibilità regionale a monte.
 
-### Confrontare la rete dell'host e del container
+### Confronta la rete host e quella dei contenitori
 
-Quando confronti i risultati autenticati, mantieni invariati chiave, modello e richiesta; non
-incollare mai in una segnalazione credenziali, password del proxy o header di autorizzazione completi.
-Per prima cosa, verifica quali famiglie di indirizzi vengono fornite dal resolver del sistema operativo, utilizzando lo stesso comando
-sull'host e all'interno del container:
+Mantieni la chiave, il modello e la richiesta identici quando confronti i risultati autenticati; non incollare mai credenziali, password proxy o intestazioni di autorizzazione complete in un problema. Per prima cosa controlla quali famiglie di indirizzi offre il risolutore OS, utilizzando lo stesso comando sull'host e all'interno del contenitore:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Sostituisci `omniroute` con il servizio che utilizzi (ad esempio, `omniroute-web`). Questi
-comandi mostrano le famiglie di indirizzi senza credenziali né indirizzi IP. Un valore `6`
-restituito indica soltanto un risultato DNS IPv6: **non** dimostra che esista una route IPv6 utilizzabile o che sia possibile accedere all'API.
-Se `curl` è installato, confronta `curl -4 -I https://generativelanguage.googleapis.com`
-con `curl -6 -I https://generativelanguage.googleapis.com` in entrambi gli ambienti.
-Una risposta HTTP dimostra la connettività per quella verifica, anche se si tratta di un errore
-non autenticato; soltanto la richiesta autenticata al modello verifica l'idoneità all'uso di Gemini.
+Sostituisci `omniroute` con il servizio che esegui (ad esempio `omniroute-web`). Questi comandi stampano famiglie di indirizzi senza credenziali o indirizzi IP. Un `6` restituito mostra solo un risultato IPv6 DNS : lo fa** non** dimostrare un percorso IPv6 utilizzabile o un accesso API. Dove è installato `curl`, confrontare `curl -4 -I https://generativelanguage.googleapis.com` con `curl -6 -I https://generativelanguage.googleapis.com` in entrambi gli ambienti. Una risposta HTTP dimostra la connettività per quella sonda, anche se si tratta di un errore non autenticato; solo la richiesta del modello autenticato verifica l'idoneità Gemini.
 
-### Alternativa a livello di host: IPv6 funzionante e policy del resolver
+### Alternativa a livello di host: IPv6 funzionante e politica di risoluzione
 
-L'autore della segnalazione [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) ha ripristinato
-l'accesso nel proprio ambiente abilitando IPv6 per i container e modificando la selezione degli indirizzi
-di glibc. Considera questa soluzione come un'alternativa specifica per l'ambiente. Verifica che IPv6 funzioni sull'host
-e controlla l'uscita e il routing dei container, nonché le regole del firewall, prima di modificare le preferenze del resolver.
-Un indirizzo ULA privato, da solo, non garantisce la connettività IPv6 pubblica.
+Il giornalista di [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) ha ripristinato l'accesso al proprio ambiente abilitando il contenitore IPv6 e modificando la selezione dell'indirizzo glibc. Trattatelo come un'alternativa specifica per l'ambiente. Conferma il funzionamento dell'host IPv6, del contenitore egress/routing e delle regole del firewall prima di modificare le preferenze del risolutore. Un indirizzo ULA privato di per sé non stabilisce la connettività IPv6 pubblica.
 
-Per i servizi già collegati alla rete predefinita di Compose, questo frammento abilita
-IPv6 su tale rete; mantieni invariati il resto del servizio, le porte, i volumi e la configurazione:
+Per i servizi già collegati alla rete predefinita di Compose, questo frammento abilita IPv6 su quella rete; conserva il resto del servizio, delle porte, dei volumi e della configurazione:
 
 ```yaml
 networks:
@@ -739,30 +741,13 @@ networks:
     enable_ipv6: true
 ```
 
-Per una rete denominata, abilitalo sulla rete a cui il servizio è effettivamente collegato. Docker può
-allocare una subnet ULA; seleziona una subnet esplicita e non sovrapposta soltanto quando richiesto dalla tua rete.
-Consulta [la gestione delle reti IPv6 di Docker](https://docs.docker.com/engine/daemon/ipv6/)
-e [le opzioni di rete di Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Per una rete denominata, abilitarla sulla rete a cui si unisce effettivamente il servizio. Docker può allocare una sottorete ULA ; seleziona una sottorete esplicita e non sovrapposta solo quando la tua rete lo richiede. Consulta le opzioni [di rete Docker IPv6](https://docs.docker.com/engine/daemon/ipv6/) e [Componi rete](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-In un'**immagine basata su glibc**, `/etc/gai.conf` può modificare la selezione degli indirizzi. Il Dockerfile
-corrente del repository utilizza Debian; le immagini personalizzate basate su musl non condividono questo meccanismo.
-La modifica segnalata cambia l'etichetta ULA da `label fc00::/7 6` a
-`label fc00::/7 1`. Parti dalla tabella completa delle policy dell'immagine e mantieni le altre
-voci: l'aggiunta di una voce `label` o `precedence` sostituisce la tabella predefinita, pertanto un file
-contenente soltanto la riga modificata non è sufficiente. Il
-[riferimento alla configurazione di glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-documenta questo comportamento. Esegui il bind mount del file verificato in sola lettura in `/etc/gai.conf`
-e ricrea il servizio per applicarlo.
+Su un** immagine basata su glibc** , `/etc/gai.conf` può modificare la selezione dell'indirizzo. L'attuale repository Dockerfile utilizza Debian; le immagini personalizzate basate su Musl non condividono questo meccanismo. La modifica segnalata modifica l'etichetta ULA da `label fc00::/7 6` a `label fc00::/7 1`. Inizia dalla tabella delle policy completa dell'immagine e preserva le altre voci: l'aggiunta di una voce `label` o `precedence` sostituisce quella tabella predefinita, quindi un file contenente solo la riga modificata non è sufficiente. Il [riferimento alla configurazione di glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) documenta questa semantica. Eseguire il bind-mount del file rivisto in sola lettura su `/etc/gai.conf` e ricreare il servizio per applicarlo.
 
-Questa operazione modifica la selezione degli indirizzi del sistema operativo per **tutto il traffico in uscita da quel container**.
-Non obbliga tutte le applicazioni a scegliere IPv6: sono rilevanti anche l'ordine DNS e la selezione
-della connessione da parte di Node. In particolare, `--dns-result-order=ipv4first` assegna la priorità a IPv4 e
-non è una soluzione per un errore che si verifica usando esclusivamente IPv4. Consulta [l'ordinamento DNS di Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Ciò modifica la selezione dell'indirizzo OS per** tutto il traffico in uscita in quel contenitore** . Non obbliga tutte le applicazioni a scegliere IPv6: anche l'ordine DNS del nodo e la selezione della connessione sono importanti. In particolare, `--dns-result-order=ipv4first` preferisce IPv4 e non è un rimedio al fallimento IPv4-only. Vedi [Ordinamento del nodo DNS](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Dopo ogni modifica a livello di host, verifica nuovamente Gemini e gli altri provider. Per eseguire il rollback,
-rimuovi il mount personalizzato di `gai.conf`, ripristina la configurazione di rete precedente e
-ricrea il servizio o la rete interessati durante una finestra di manutenzione. La ricreazione di una rete
-può interrompere gli altri container a essa collegati; non eliminare il volume dei dati persistenti.
+Testa nuovamente Gemini e gli altri tuoi fornitori dopo qualsiasi modifica a livello di host. Per eseguire il rollback, rimuovere il montaggio `gai.conf` personalizzato, ripristinare la configurazione di rete precedente e ricreare service/network interessato durante una finestra di manutenzione. La ricreazione di una rete può interrompere altri contenitori ad essa collegati; non eliminare il volume di dati persistenti.
 
 ## Note importanti
 

@@ -11,7 +11,7 @@ Objectieve functievergelijking versus populaire open-source AI routers.
 | Functie                                                  |                 OmniRoute 3.8                  |       LiteLLM 1.x       |  OpenRouter (SaaS)  |  Portkey   |
 | -------------------------------------------------------- | :--------------------------------------------: | :---------------------: | :-----------------: | :--------: |
 | **Aanbieders**                                           |                    **329**                     |          ~100           |         ~50         |    ~30     |
-| **Free/no-auth -catalogusvermeldingen**                  |                    **155**                     |           n/a           |      doorgang       |    n/a     |
+| **Aanbieders met gratis toegang**                        |           **50 met gratis toegang**            |           n/a           |      doorgang       |    n/a     |
 | **Zelf-hostbaar**                                        |                       ✅                       |           ✅            |         ❌          | ⚠ betaald  |
 | **OAuth -catalogusvermeldingen**                         |                     **23**                     |      gedeeltelijk       |         ❌          |     ❌     |
 | **Auto-fallback-combo's**                                |               **22 strategieën**               | op prioriteit gebaseerd | op niveau gebaseerd |  gewogen   |
@@ -38,7 +38,7 @@ Objectieve functievergelijking versus populaire open-source AI routers.
 
 ## Wanneer moet u voor OmniRoute kiezen?
 
-- Je host zelf en wilt** maximale providerdekking** (394 aanbieders, 155 free/no-auth -catalogusvermeldingen)
+- Je host zelf en wilt** maximale providerdekking** (394 aanbieders, 50 met gratis toegang)
 - Je hebt een nodig** ingebouwde MCP server** (LLM tools, geheugen, vaardigheden blootgesteld als tools)
 - Je hebt nodig**A2A -protocol** voor agent-tot-agent-workflows
 - Jij wilt** vingerafdruk stealth** (JA3/JA4) om detectie door stroomopwaartse CAPTCHAs te voorkomen
@@ -56,12 +56,12 @@ Objectieve functievergelijking versus populaire open-source AI routers.
 - Je vindt het prima om per token te betalen, inclusief SaaS-opslag
 - Je hebt **één betaalmethode** nodig voor alle providers
 
-## Wanneer kies je voor Portkey?
+## Wanneer kiest u voor Portkey?
 
-- Je hebt een **commerciële SLA** met uptimegaranties nodig
-- Je geeft de voorkeur aan een **beheerd dashboard** zonder operationele overhead
-- Je hebt kant-en-klare **functies voor bedrijfscompliance** nodig
+- Je hebt een nodig** commerciële SLA** met uptime-garanties
+- Je geeft de voorkeur aan een** beheerd dashboard** zonder operationele overhead
+- Je hebt nodig** naleving van de ondernemingswetgeving** functies uit de doos
 
 ---
 
-_Laatst bijgewerkt: 2026-08-02. Dien correcties in via een PR om deze tabel nauwkeurig te houden._
+_Geef correcties door via PR om deze tabel accuraat te houden._

@@ -169,7 +169,7 @@ Kõnelogi artefaktid (kui need on lubatud) kirjutatakse asukohta `${DATA_DIR}/ca
 
 ### chatCore.ts (5977 rida)
 
-The** peamine päringu menetleja** . Vaatamata oma suurusele on sellel selge struktuur:
+The** peamine päringu menetleja** . Vaatamata suurusele on sellel selge struktuur:
 
 ```ts
 // Pseudo-structure of chatCore.ts
@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Toetab** 22 marsruutimisstrateegiat** (vt `src/shared/constants/routingStrategies.ts`):
 
-| strateegia          | Käitumine                                                                                     |
-| ------------------- | --------------------------------------------------------------------------------------------- |
-| `priority`          | Esimene sihtmärk järjestatud loend                                                            |
-| `weighted`          | Tõenäosus sihtkaalu järgi                                                                     |
-| `round-robin`       | Liikuge järjekorras läbi sihtmärkide                                                          |
-| `context-relay`     | Edasta konteksti sihtmärkide vahel                                                            |
-| `fill-first`        | Enne järgmise juurde liikumist täitke kvoot                                                   |
-| `p2c`               | Kahe valiku võimsus                                                                           |
-| `random`            | Ühtlane juhuslik                                                                              |
-| `least-used`        | Valige see, mida on hiljuti kasutatud kõige vähem                                             |
-| `cost-optimized`    | Kõigepealt odavaim tervislik sihtmärk                                                         |
-| `reset-aware`       | Teadlik pakkuja lähtestamisakendest                                                           |
-| `reset-window`      | Lähtestage aknapõhine marsruutimine                                                           |
-| `expiry-first`      | Kulutage konto, mille kvoot aeguks kasutamata esimesena                                       |
-| `headroom`          | Esmalt suurem osa järelejäänud kvootidest                                                     |
-| `quota-weighted`    | Jätke ammendatud kontod vahele, seejärel kasutage järelejäänud kvooti ÷ lennu ajal            |
-| `strict-random`     | Tõeliselt ühtlane (kvaliteetne kaalumine puudub)                                              |
-| `auto`              | Kasutage 16-tegurilist hindamist (`autoCombo/`)                                               |
-| `lkgp`              | Esimene teadaolev hea pakkuja                                                                 |
-| `context-optimized` | Parim pika kontekstiga päringute jaoks                                                        |
-| `cache-optimized`   | Kinnitage iga korduvkasutatavate viipade eesliide samale kontole (viipade vahemälu tabamused) |
-| `fusion`            | Tuulutage paralleelselt paneelile, seejärel sünteesige kohtuniku kaudu (`fusion.ts`)          |
-| `pipeline`          | Ahelasammud — iga sihtmärgi väljund toidab järgmist                                           |
-| `jev`               | Opt-in: TypeSafe Jev tunnistab, millised järjestatud kirjed jooksevad; muidu teie tellimus    |
+| strateegia          | Käitumine                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| `priority`          | Esimene sihtmärk järjestatud loend                                                         |
+| `weighted`          | Tõenäosus sihtkaalu järgi                                                                  |
+| `round-robin`       | Liikuge järjekorras läbi sihtmärkide                                                       |
+| `context-relay`     | Edasta konteksti sihtmärkide vahel                                                         |
+| `fill-first`        | Enne järgmise juurde liikumist täitke kvoot                                                |
+| `p2c`               | Kahe valiku võimsus                                                                        |
+| `random`            | Värske segamine vastavalt soovile                                                          |
+| `least-used`        | Valige see, millel on kõige vähem registreeritud taotlusi                                  |
+| `cost-optimized`    | Esmalt madalaim kataloogi sisendhind                                                       |
+| `reset-aware`       | Ülejäänud kvoot + lähtestage kiireloomulisus                                               |
+| `reset-window`      | Kvoodiaken, mis lähtestatakse kõige varem                                                  |
+| `expiry-first`      | Kulutage konto, mille kvoot aeguks kasutamata esimesena                                    |
+| `headroom`          | Esmalt suurem osa järelejäänud kvootidest                                                  |
+| `quota-weighted`    | Jätke ammendatud kontod vahele, seejärel kasutage järelejäänud kvooti ÷ lennu ajal         |
+| `strict-random`     | Segatud tekk: iga sihtmärk üks kord enne kordust                                           |
+| `auto`              | Kasutage 16-tegurilist hindamist (`autoCombo/`)                                            |
+| `lkgp`              | Esimene teadaolev hea pakkuja                                                              |
+| `context-optimized` | Esmalt suurim teadaolev konteksti aken                                                     |
+| `cache-optimized`   | Eelistage kontot, mis tõenäoliselt hoiab vahemälus viipa eesliidet                         |
+| `fusion`            | Tuulutage paralleelselt paneelile, seejärel sünteesige kohtuniku kaudu (`fusion.ts`)       |
+| `pipeline`          | Ahelasammud — iga sihtmärgi väljund toidab järgmist                                        |
+| `jev`               | Opt-in: TypeSafe Jev tunnistab, millised järjestatud kirjed jooksevad; muidu teie tellimus |
 
 ### base.ts (1170 LOC)
 

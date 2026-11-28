@@ -168,9 +168,9 @@ OmniRoute σαρώνει το HAR για το Chathub WebSocket URL, εξάγε�
 
 ## Αναφορές
 
-- Ζήτημα: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Συζήτηση: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Πηγαίος κώδικας: `src/shared/constants/providers/web-cookie.ts` (ορισμός παρόχου)
-- Εισαγωγή HAR: `src/shared/utils/m365HarImport.ts`
+- Θέμα: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Συζήτηση: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Πηγή: `src/shared/constants/providers/web-cookie.ts` (ορισμός παρόχου)
+- HAR εισαγωγή: `src/shared/utils/m365HarImport.ts`
 - Πεδία διαπιστευτηρίων: `src/shared/providers/webSessionCredentials.ts`
-- Παράθυρο επιπέδου συνδρομής: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Τροπικό επίπεδο: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

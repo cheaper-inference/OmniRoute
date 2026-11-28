@@ -185,84 +185,49 @@ zijn opgenomen; de basisimage bevat deze niet.
 
 ---
 
-## Valse positieven van antivirussoftware
+## Antivirus valse positieven
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG plaatst `README.md` in quarantaine met `MD:HttpRequest-inf[Susp]`
+### Avast/AVG quarantaine `README.md` met `MD:HttpRequest-inf[Susp]`
 
-**Dit is een vals positief resultaat. Niets is geïnfecteerd en er is geen actie vereist.**
+**Dit is een vals-positief resultaat. Er is niets geïnfecteerd en er is geen actie vereist.**
 
-Avast en AVG gebruiken een heuristische detectie die platte tekst-/Markdown-bestanden markeert die veel
-links bevatten die op HTTP-verzoeken lijken. OmniRoute's `README.md` wordt meegeleverd in het npm-pakket (het
-staat vermeld in `package.json` → `files`), waardoor het bij een globale installatie terechtkomt in
-`node_modules/omniroute/README.md` — en het bevat ongeveer 15 voorbeelden met `http://localhost:20128/...`
-(de MCP HTTP/SSE-eindpunten, de A2A-URL onder `.well-known` en `curl`-fragmenten). Die hoeveelheid links is
-voldoende om de heuristische detectie te activeren.
+Avast en AVG voeren een heuristiek uit die plain-text/Markdown bestanden markeert die veel op HTTP-verzoeken lijkende links bevatten. OmniRoute's `README.md` wordt binnen het npm-pakket geleverd (het wordt vermeld in `package.json` → `files`), dus het belandt op `node_modules/omniroute/README.md` op een globale installatie — en het bevat ~ 15 `http://localhost:20128/...` -voorbeelden (de MCP HTTP/SSE eindpunten, de A2A `.well-known` URL en `curl` fragmenten). Die linkdichtheid is genoeg om de heuristiek te laten struikelen.
 
-Als dit pas onlangs is begonnen: het soort bestand is niet veranderd. De tabel met eindpunten in de README is
-uitgebreid (MCP HTTP + SSE + A2A zijn toegevoegd), evenals het aantal `curl`-voorbeelden, waardoor
-de drempel werd overschreden.
+Als dit pas recent is begonnen: het dossier is niet van aard veranderd. De README breidde zijn eindpuntentabel uit (MCP HTTP + SSE + A2A werd toegevoegd) en meer `curl` voorbeelden, waardoor de drempel werd overschreden.
 
-Het bestand is passieve documentatie zonder uitvoerbare inhoud. U kunt het veilig herstellen
-vanuit quarantaine.
+Het bestand is een inerte documentatie zonder uitvoerbare inhoud. U kunt het veilig herstellen vanuit quarantaine.
 
 **Wat te doen:**
 
-1. **Stop de meldingen** — sluit de installatiemap uit in uw antivirussoftware
-   (Avast: Instellingen → Uitzonderingen) door het pad naar uw globale `node_modules` en/of de
-   OmniRoute-gegevensmap (`~/.omniroute/`) toe te voegen.
-2. **Meld het valse positieve resultaat** — <https://www.avast.com/false-positive-file-form.php>
-   en voeg het in quarantaine geplaatste `README.md` toe. Dit is de oplossing die iedereen helpt, aangezien het
-   de heuristische detectie van de leverancier is die te sterk reageert op een tekstbestand.
+1. **Stop de meldingen** — sluit de installatiemap uit in uw antivirusprogramma (Avast: Instellingen → Uitzonderingen), waarbij u uw globale `node_modules` pad and/or de OmniRoute -gegevensmap (`~/.omniroute/`) toevoegt.
+2. **Rapporteer het vals-positieve resultaat** — <https://www.avast.com/false-positive-file-form.php>, waarbij de in quarantaine geplaatste `README.md` wordt toegevoegd. Dit is de oplossing die iedereen helpt, omdat het de heuristische manier is waarop de leverancier overdreven reageert op een tekstbestand.
 
-**Waarom we dit niet aan onze kant "oplossen":** alle voorbeelden gebruiken `http://localhost`, en
-localhost kan niet zonder problemen met zelfondertekende certificaten via `https` worden gebruikt. De documentatie
-verminken om de heuristische detectie van één leverancier te omzeilen, zou iedere lezer benadelen om een fout in een scanner
-tegemoet te komen.
+**Waarom we dit niet van onze kant "repareren":** de voorbeelden zijn allemaal `http://localhost` en localhost kan niet `https` zijn zonder wrijving met zelfondertekende certificaten. Het verminken van de documenten om de heuristiek van één leverancier te ontwijken zou elke lezer schade berokkenen als hij een scannerbug oplost.
 
-### Kaspersky markeert de desktop-app als `PDM:Trojan.Win32.Generic`
+### Kaspersky markeert de Desktop-app als `PDM:Trojan.Win32.Generic`
 
-**Dit is een vals positief resultaat van een gedragsheuristiek. Niets is geïnfecteerd.** Het
-voorvoegsel `PDM:` van Kaspersky betekent dat het oordeel afkomstig is van de Proactive Defense Module (System Watcher),
-die beoordeelt wat het installatieprogramma _doet_ in plaats van het te vergelijken met bekende malware. Wanneer
-de detectie wordt geactiveerd, draait Kaspersky de volledige installatie "terug" — waarbij bestanden worden verwijderd die al
-waren geschreven — waardoor de app beschadigd raakt of verdwijnt.
+**Dit is een vals-positief resultaat van een gedragsheuristiek. Er is niets geïnfecteerd.** `PDM:` -voorvoegsel van Kaspersky betekent dat het oordeel afkomstig is van de Proactive Defense Module (System Watcher), die beoordeelt wat het installatieprogramma _doet_ in plaats van het te vergelijken met bekende malware. Wanneer het wordt geactiveerd, "draait" Kaspersky de hele installatie — terug en verwijdert bestanden die het al — had geschreven, zodat de app uiteindelijk kapot gaat of ontbreekt.
 
-De bestanden die worden gemarkeerd, zijn standaardonderdelen van opgegeven opensource-afhankelijkheden die met de
-desktop-app zijn gebundeld, bijvoorbeeld:
+De bestanden die het markeert, zijn standaardonderdelen van gedeclareerde, open-source afhankelijkheden die bij de desktop-app zijn gebundeld, bijvoorbeeld:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` en
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), de bibliotheek voor browserautomatisering
-  die wordt gebruikt voor het aanmelden bij providers vanuit de app en voor chat via een browser.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — de vastgezette native binding van `wreq-js` die wordt gebruikt voor HTTP met een browservingerafdruk bij providers
-  die webcookies gebruiken (`<arch>` is `x64` of `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` en `workerProcessEntry.js` — [Playwright](https://playwright.dev), de browserautomatiseringsbibliotheek die wordt gebruikt voor in-app-provideraanmelding en browserondersteunde chat.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — de vastgezette `wreq-js` native binding die wordt gebruikt voor HTTP met browservingerafdruk op webcookieproviders (`<arch>` is `x64` of `arm64`).
 
-**Waarom dit wordt geactiveerd:** het Windows-installatieprogramma is **nog niet digitaal ondertekend**, waardoor een niet-ondertekend NSIS-
-installatieprogramma geen reputatie heeft en gedragsheuristieken maximaal agressief worden uitgevoerd. In combinatie
-met een gebundelde native DLL en honderden `.js`-bestanden die onder
-`%LOCALAPPDATA%\Programs\OmniRoute` worden geschreven (waaronder pakketmappen met hash-achtervoegsels uit de
-zelfstandige Next.js-build), is dat voldoende om de heuristische detectie te activeren. Codeondertekening staat gepland;
-totdat dit is geïmplementeerd, kan dit bij nieuwe releases opnieuw gebeuren.
+**Waarom het vuurt:** het Windows installatieprogramma is** nog niet medeondertekend** , dus een niet-ondertekend NSIS installatieprogramma heeft geen reputatie en gedragsheuristieken draaien op maximale agressie. Gecombineerd met een gebundelde native DLL en honderden `.js` bestanden geschreven onder `%LOCALAPPDATA%\Programs\OmniRoute` (inclusief met hash achtervoegde pakketmappen uit de standalone Next.js build), is dat genoeg om de heuristiek te doorbreken. Het ondertekenen van codes is gepland; totdat het landt, kunnen nieuwe releases dit herhalen.
 
 **Wat te doen:**
 
-1. **Verifieer eerst uw download** (om een gemanipuleerd bestand uit te sluiten). Bij iedere release wordt
-   `latest.yml` gepubliceerd, waarvan het veld `sha512` (base64) betrekking heeft op het installatieprogramma
-   `OmniRoute.Setup.<version>.exe`. Voer in PowerShell, vanuit de map met het installatieprogramma, het volgende uit:
+1. **Controleer eerst uw download** (sluit een gemanipuleerd bestand uit). Elke release publiceert `latest.yml`, waarvan het `sha512` veld (base64) het `OmniRoute.Setup.<version>.exe` installatieprogramma omvat. In PowerShell, vanuit de map met het installatieprogramma:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   De uitvoer moet overeenkomen met `latest.yml` → `sha512`. Als dit niet het geval is, verwijdert u het bestand en
-   downloadt u het opnieuw, uitsluitend vanaf de [GitHub-releasepagina](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Herstel + sluit uit** — herstel de teruggedraaide items vanuit quarantaine en voeg een uitsluiting
-   toe voor `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Instellingen → Bedreigingen en uitsluitingen),
-   en installeer vervolgens opnieuw.
-3. **Meld het valse positieve resultaat** — <https://opentip.kaspersky.com/>. Door gebruikers ingediende meldingen van
-   valse positieven versnellen het toevoegen aan de toelatingslijst daadwerkelijk.
+   De uitvoer moet overeenkomen met `latest.yml` → `sha512`. Als dit niet het geval is, verwijdert u het bestand en downloadt u het alleen opnieuw vanaf de [GitHub releases-pagina](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Herstel + uitsluiten** — herstelt de teruggedraaide items uit quarantaine en voegt een uitsluiting toe voor `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Instellingen → Bedreigingen en uitsluitingen), en installeer vervolgens opnieuw.
+3. **Rapporteer het vals-positieve resultaat** — <https://opentip.kaspersky.com/>. Door gebruikers ingediende FP -rapporten versnellen de toelatingslijst aanzienlijk.
 
 ---
 
@@ -875,10 +840,10 @@ Meer symptomen:
 
 ---
 
-## Nog steeds vastgelopen?
+## Zit je nog steeds vast?
 
-- **GitHub Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Architectuur**: Zie [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) voor interne details
-- **API-referentie**: Zie [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) voor alle endpoints
-- **Statusdashboard**: Controleer **Dashboard → Health** voor de realtime systeemstatus
-- **Vertaler**: Gebruik **Dashboard → Translator** om problemen met de opmaak op te sporen
+- **GitHub problemen** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Architectuur** : Zie [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) voor interne details
+- **API Referentie** : Zie [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) voor alle eindpunten
+- **Gezondheidsdashboard** : Rekening** Dashboard → Gezondheid** voor realtime systeemstatus
+- **Vertaler** : Gebruik** Dashboard → Vertaler** om formaatproblemen op te lossen

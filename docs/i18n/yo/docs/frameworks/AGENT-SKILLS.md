@@ -11,14 +11,14 @@ Agent Skills jẹ́ àwọn fáìlì SKILL.md tí a ṣètò sí ìlànà, tí �
 
 ---
 
-## Àkíyèsí Gbogbogbò
+## Akopọ
 
-Àkójọ náà ní **45 Agent Skills** (23 REST API + 21 CLI + 1 ìṣàn-iṣẹ́ ìṣètò). Skill kọ̀ọ̀kan ní:
+Awọn katalogi ninu** 45 aṣoju ogbon** (23 REST API + 21 CLI + 1 iṣan-iṣẹ iṣeto ni). Ọgbọn kọọkan ni:
 
-- **ID àṣẹ** kan (`omni-auth`, `cli-serve`, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)
-- Fáìlì **SKILL.md** kan nínú `skills/{id}/SKILL.md` pẹ̀lú YAML frontmatter (`name`, `description`) + àkóónú markdown ọlọ́rọ̀
-- **Àwọn endpoint REST** (àwọn skill API) tàbí **àwọn subcommand CLI** (àwọn skill CLI) tí a mú jáde láti inú OpenAPI spec àti àkọsílẹ̀ CLI
-- **URL raw GitHub** kan fún gbígbà á ní tààrà: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** canonical ID** (`omni-auth`, `cli-serve`, ati bẹbẹ lọ)
+- A**SKILL.md** faili ni `skills/{id}/SKILL.md` pẹlu YAML frontmatter (`name`, `description`) + ara markdown ọlọrọ
+- **REST opin** ( ogbon API ) tabi**CLI subcommands** (awọn ọgbọn CLI ) ti o jade lati OpenAPI spec ati iforukọsilẹ CLI
+- A**GitHub aise URL** fun ifiwe bu: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## API Ìborí
+## Ibora API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

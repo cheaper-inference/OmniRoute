@@ -4,12 +4,9 @@
 
 ---
 
-> **Terakhir diperbarui:** 2026-08-28 — v3.8.51
-> Alur rilis yang disederhanakan dengan memanfaatkan skill Claude Code untuk otomatisasi.
+> Alur rilis yang disederhanakan yang memanfaatkan keterampilan Kode Claude untuk otomatisasi.
 >
-> **Jaga agar antrean/cabang tetap hijau di antara rilis:** lihat [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (keluarga `/green-prs` + `npm run check:release-green` + `/babysit` + proses setiap malam). Menjalankan
-> ini secara berkala — dan terutama **sebelum** daftar periksa ini — membuat PR rilis dimulai dalam kondisi hijau.
+> **Jaga agar queue/branch tetap hijau di antara rilis:** lihat [RELEASE_GREEN.md](./RELEASE_GREEN.md) ( keluarga `/green-prs` + `npm run check:release-green` + `/babysit` + nightly). Menjalankan ini secara berkala — dan khususnya** sebelum** daftar periksa ini — membuat rilis PR mulai berwarna hijau.
 
 ## Ringkasan
 
@@ -60,7 +57,9 @@ Alur kerja npm-publish tidak lagi dipublikasikan secara langsung: ia mem-boot ta
 
 **Docker Hub `latest` (diperlukan pada setiap penerbitan SemVer stabil):** alur kerja `docker-publish` harus diberi tag** keduanya** `X.Y.Z` dan, jika `should-promote-latest.sh` setuju, ini adalah SemVer stabil tertinggi, `:latest` dengan** intisari yang sama** . Setelah pekerjaan: Intisari `latest` hub sama dengan intisari SemVer baru dan `last_updated` dipindahkan. Jangan tinggalkan `:latest` di versi lama sementara catatan rilis membahas tentang perbaikan yang hanya ada di git. Mulai cepat penulisan gunakan `:latest`; GitOps harus terus menyematkan `X.Y.Z`. Lihat [saluran rilis Docker](../guides/DOCKER_GUIDE.md#release-channels) dan #10317.
 
-**repositori organisasi Docker Hub (`cheaperinference/omniroute`):** Docker Hub tidak dapat memindahkan repositori antar namespace, jadi `diegosouzapw/omniroute` menyimpan riwayat penarikannya dan setiap rilis, dan tugas `mirror-org-dockerhub` dari `docker-publish` menyalin setiap versi yang dirilis (dan `:latest` saat dipromosikan) dari `ghcr.io/cheaper-inference/omniroute` ke repositori organisasi. Dibutuhkan rahasia `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; tanpa mereka, pekerjaan tetap hijau dengan peringatan "Docker Hub org mirror dilewati" dan pendaftar lainnya menerbitkan secara normal. Untuk menerbitkan versi rilis di sana nanti, jalankan** Tindakan → Cerminkan gambar Docker ke Docker Hub org → Jalankan alur kerja** dengan `version=X.Y.Z` (dan `promote_latest` untuk versi stabil tertinggi): ia menyalin gambar yang ada, tanpa membangun kembali.
+**repositori organisasi Docker Hub (`cheaperinference/omniroute`):** Docker Hub tidak dapat memindahkan repositori antar namespace, jadi `diegosouzapw/omniroute` menyimpan riwayat penarikannya dan setiap rilis, dan tugas `mirror-org-dockerhub` dari `docker-publish` menyalin setiap versi yang dirilis (dan `:latest` saat dipromosikan) dari `ghcr.io/cheaper-inference/omniroute` ke repositori organisasi. Dibutuhkan rahasia `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; tanpa mereka, pekerjaan tetap hijau dengan peringatan "Docker Hub org mirror dilewati" dan pendaftar lainnya menerbitkan secara normal. Untuk menerbitkan versi rilis di sana nanti, jalankan** Tindakan → Cerminkan gambar Docker ke Docker Hub org → Jalankan alur kerja** dengan `version=X.Y.Z` (dan `promote_latest` untuk versi stabil tertinggi): ia menyalin gambar yang ada, tanpa membangun kembali. Ikhtisar Docker Hub repositori tersebut diatur secara manual: API yang mengeditnya menolak Token Akses Organisasi.
+
+Alur kerja yang sama juga menyalin setiap rilis ke paket GHCR lama `ghcr.io/diegosouzapw/omniroute` hingga 30-06-2027, sehingga instalasi yang masih disematkan padanya terus diperbarui; indeksnya membawa deskripsi "dipindahkan ke `ghcr.io/cheaper-inference/omniroute`". Itu memerlukan rahasia `GHCR_LEGACY_TOKEN` (token akses pribadi klasik `diegosouzapw` dengan `write:packages`); tanpanya pekerjaan itu akan dilewati dengan peringatan "Legacy GHCR mirror skipped".
 
 ## Jalur Cepat Hotfix (label `hotfix`)
 
@@ -151,7 +150,7 @@ Perubahan yang dapat menyebabkan gangguan: tambahkan `BREAKING CHANGE:` footer a
 ### Dokumentasi
 
 - [ ] `npm run check:docs-sync` pass (dijalankan otomatis dengan pra-komit)
-- [ ] `npm run check:docs-all` pass (payung: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` lolos. `check:deprecated-versions` penasehatnya menandai versi yang secara eksplisit dikaitkan dengan OmniRoute (3.6.x dan sebelumnya) dan mengabaikan tanggal.
 - [ ] `npm run check:env-doc-sync` keluar 0 kode — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env kontrak masih utuh
 - [ ] `npm run check:doc-links` keluar 0 — tidak ada referensi penurunan harga internal yang rusak setelah restrukturisasi
 - [ ] `docs/architecture/ARCHITECTURE.md` ditinjau untuk penyimpangan storage/runtime
@@ -277,7 +276,7 @@ Pengumuman Radar sengaja dilakukan dengan `active: false`. Aktivasi adalah perub
 
 - [ ] Semua Radar PRs yang ditumpuk digabungkan dan ujung pelepas CI berwarna hijau
 - [ ] Menyebarkan dan menghentikan rute OSS Radar dengan `RADAR_ENABLED` masih nonaktif secara default
-- [ ] Asap `GET /planos`, `/termos`, `/privacidade`, dan `/reembolso` pada host Radar bernama
+- [ ] Asap `GET /planos`, `/termos`, `/privacidade`, dan `/reembolso` pada host Radar yang bernama
 - [ ] Catat operator identity/contact/address dan tinjauan hukum yang disetujui pemilik di layanan swasta
 - [ ] Latihan Stripe Checkout dan webhook yang ditandatangani hanya dalam mode uji coba
 - [ ] Lakukan satu pengiriman email transaksional terenkripsi dengan sender/domain yang disetujui
@@ -399,7 +398,7 @@ Komitmen pengembangan dikembangkan dibuat dengan pipa git (tidak ada pohon kerja
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
@@ -407,9 +406,9 @@ Proses ini melakukan `npm ci`, `npm run build:release`, `npm run check:pack-arti
 
 ### Pemotongan (3.9.0, setelah GO)
 
-1. GO direkam di [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+1. GO direkam dalam [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` mencetak `RESULT: READY`.
-3. Buat cabang di `origin` dengan tangan dengan perintah yang dicetak secara kering — skrip menolak untuk mendorong ke `origin`. Untuk menggunakan kembali komit pengembangan yang telah ditinjau, jalankan latihan `--execute` pada tip 3.9.0 pada fork Anda terlebih dahulu; itu mencetak keduanya SHAs, dan komit yang sama dapat didorong:
+3. Buat cabang di `origin` dengan tangan dengan perintah print run kering — skrip menolak untuk mendorong ke `origin`. Untuk menggunakan kembali komit pengembangan yang telah ditinjau, jalankan latihan `--execute` pada tip 3.9.0 pada fork Anda terlebih dahulu; itu mencetak keduanya SHAs, dan komit yang sama dapat didorong:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop

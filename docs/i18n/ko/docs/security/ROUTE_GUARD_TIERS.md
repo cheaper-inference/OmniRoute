@@ -16,9 +16,9 @@
 
 이러한 경로는 하위 프로세스를 생성하거나 런타임 코드를 실행합니다. 이를 비루프백 트래픽에 노출시키면 유효한 JWT (예: Cloudflared/Ngrok 터널을 통해)를 획득한 공격자가 — 알려진 CVE 클래스( [GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj) )로 생성하는 프로세스를 트리거할 수 있습니다.
 
-**GHSA-fhh6-4qxv-rpqj 는 무엇입니까(공격 클래스):** management/agent 서버는 하위 프로세스(`npm install`, `node`, 브라우저, 프록시, `git`, `tar`, …)를 시작하는 엔드포인트를 노출합니다. 운영자가 nginx/Cloudflare/Tailscale 터널 뒤에 OmniRoute 배치하고 JWT 유출되었거나 인증이 — 잘못 구성되어 오프 호스트 — 에서 해당 엔드포인트에 도달할 수 있는 경우 공격자는 " API 호출"을 "호스트에서 명령 실행"(원격 코드 실행)으로 전환합니다. OmniRoute 다음을 시행하여 이를 종료합니다.** 인증 확인 전에 무조건 루프백 호스트 확인** , 모든 스폰 가능 경로에서: 터널을 통해 유출된 토큰은 여전히 스폰 지점에 도달할 수 없습니다.
+**GHSA-fhh6-4qxv-rpqj 는 무엇입니까(공격 클래스):** management/agent 서버는 하위 프로세스(`npm install`, `node`, 브라우저, 프록시, `git`, `tar`, ...)를 시작하는 엔드포인트를 노출합니다. 운영자가 nginx/Cloudflare/Tailscale 터널 뒤에 OmniRoute 배치하고 JWT 유출되었거나 인증이 — 잘못 구성되어 오프 호스트 — 에서 해당 엔드포인트에 도달할 수 있는 경우 공격자는 " API 호출"을 "호스트에서 명령 실행"(원격 코드 실행)으로 전환합니다. OmniRoute 다음을 시행하여 이를 종료합니다.** 인증 확인 전에 무조건 루프백 호스트 확인** , 모든 스폰 가능 경로에서: 터널을 통해 유출된 토큰은 여전히 스폰 지점에 도달할 수 없습니다.
 
-**전체 LOCAL_ONLY 세트.** 신뢰할 수 있는 소스는 `src/server/authz/routeGuard.ts` 의 `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` 입니다. 아래 표는 현재 상태를 반영합니다. `check-route-guard-membership` 게이트는 생성 가능 접두사 아래의 모든 `route.ts` 열거하고 로컬 전용으로 분류되지 않은 것이 있으면 CI 에 실패합니다.
+**전체 LOCAL_ONLY 세트.** 신뢰할 수 있는 소스는 `src/server/authz/routeGuard.ts` 의 `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` 입니다. 아래 표는 현재 상태를 반영합니다. `check-route-guard-membership` 게이트는 생성 가능 접두사 아래의 모든 `route.ts` 열거하고 로컬 전용으로 분류되지 않은 경우 CI 에 실패합니다.
 
 | 접두사/패턴                                                                                              | 왜 로컬 전용인가요?                                                                                |
 | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
@@ -65,7 +65,11 @@
 
 요청이 메타데이터에 `manage` 범위(또는 `admin`)를 포함하는 `Authorization: Bearer <api-key>` 전달하는 경우에만 LOCAL_ONLY 경로 MAY 의 하위 집합도 비루프백에서 액세스할 수 있습니다. 분할은 `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` 통해 경로별로 명시적으로 제어되므로 새로운 LOCAL_ONLY 경로의 기본값은 엄격한 루프백으로 유지됩니다. 인증되지 않은 요청과 비관리 키를 사용한 요청은 여전히 `403 LOCAL_ONLY` 로 거부됩니다.
 
-현재 우회할 수 있는 유일한 접두사는 `/api/mcp/` 입니다. `/api/cli-tools/runtime/` 및 `/api/services/` 임의의 하위 프로세스(`npm install`, `node`)를 생성할 수 있기 때문에 의도적으로 제외됩니다. 이는 LOCAL_ONLY 계층이 방지하기 위해 존재하는 정확한 CVE 클래스입니다.
+기본 우회 가능한 접두사는 `/api/mcp/` 및 `/api/resilience/connections` 입니다. 두 번째는 아무것도 생성하지 않는 읽기 전용 JSON 입니다. 이는 인증된 대시보드 세션 또는 `manage` 키에 대해 복원력 > 연결이 원격 대시보드(관리형 인스턴스, 터널, 역방향 프록시)에 로드되는 반면 익명의 원격 호출자는 `requireLogin=false` 시에도 여전히 `403 LOCAL_ONLY` — 얻도록 목록에 있습니다. 자체 목록을 저장한 설치는 해당 목록을 유지합니다. `/api/cli-tools/runtime/` 및 `/api/services/` 임의의 하위 프로세스(`npm install`, `node`)를 생성할 수 있기 때문에 의도적으로 제외됩니다. 이는 LOCAL_ONLY 계층이 방지하기 위해 존재하는 정확한 CVE 클래스입니다.
+
+#### 읽기 방법 예외
+
+몇 가지 LOCAL_ONLY 경로는 정확한 경로(`LOCAL_ONLY_API_GET_EXEMPTIONS`)에 따라 `GET`/`HEAD`/`OPTIONS` 에 대해서만 면제됩니다. 읽기는 생성을 수행하지 않고 쓰기 메소드는 수행합니다. `GET /api/skills/executions` 는 그 중 하나입니다 — 는 저장된 실행 행(두 개의 SQLite 읽기)을 나열하므로 Skills > Executions가 원격 대시보드에 로드되는 반면, 기술을 실행하고 샌드박스 컨테이너 생성에 도달하는 `POST /api/skills/executions` 루프백 전용으로 유지됩니다. 면제된 읽기는 MANAGEMENT 계층에 속합니다.
 
 **#7895 — `mcp:connect` 좁은 범위:** `/api/mcp/` 분할 ALSO `src/server/authz/policies/management.ts` 의 `hasMcpConnectOrManageScope()` 를 통해 확인된 좁은 `mcp:connect` 범위(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`)를 보유하는 Bearer 키를 허용합니다. 이는 `/api/mcp/` 로 범위가 지정됩니다. ONLY — `mcp:connect` 다른 관리 경로(다른 모든 LOCAL_ONLY 우회 접두사 포함, 추가해야 하는 경우 포함)에 대해 아무것도 부여하지 않으며 의도적으로 `MANAGEMENT_API_KEY_SCOPES` 에서 제외됩니다. `manage`/`admin` 를 보유한 키는 여전히 이전과 똑같이 분할을 통과합니다. `mcp:connect` 광범위한 관리 액세스가 필요하지 않은 원격 MCP 전용 호출자를 위한 낮은 권한의 대안입니다.
 
@@ -84,7 +88,7 @@
 역방향 프록시 또는 터널(nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok) 뒤에서 OmniRoute 실행하는 경우 루프백 검사는 — 위의 생성 가능 경로를 계속 보호합니다. 클라이언트 주소가 루프백이 아닌 요청은 `403 LOCAL_ONLY` 로 거부됩니다.** 인증이 실행되기 전에** , 따라서 유출된 JWT 스폰에 도달할 수 없습니다. 두 가지 운영자 책임이 남아 있습니다.
 
 - **클라이언트 IP 루프백으로 위조하여 403을 "수정"하지 마십시오.** `X-Forwarded-For: 127.0.0.1` 또는 소스 주소를 루프백으로 다시 쓰는 프록시를 설정하면 이 계층이 닫은 RCE 클래스가 정확히 다시 열립니다. 생성 가능한 경로가 아닌 프록시 — 통해 dashboard/API 노출합니다.
-- **관리 범위 우회를 최소화하십시오.** `/api/mcp/` 만 우회 가능하며, `manage` -scoped API 키로만 우회 가능합니다. `SPAWN_CAPABLE_PREFIXES` 우회 목록 — 에 추가할 수 없습니다. zqf는 zod 스키마가 이를 거부하고 `isLocalOnlyBypassableByManageScope` 런타임 시 이를 거부합니다(심층 방어). 이는 대시보드에서 "우회할 수 없음"을 의미합니다. 동일한 거부 목록에는 생성되지 않지만 — `/api/oauth/kiro/auto-import` (호스트-로컬 Kiro 자격 증명 파일 읽기), `/api/discovery/` 및 `/api/issue-agent/` 중 하나로 원격으로 연결할 수 없어야 하는 몇 가지 LOCAL_ONLY 경로도 포함되어 있습니다. 또한 런타임 스냅샷 로더는 저장된 설정 행에서 이러한 항목을 삭제하며 레거시 JSON 가져오기(`/api/settings/import-json`)는 바이패스 키를 절대 쓰지 않습니다. 모든 `LOCAL_ONLY_API_PREFIXES` 항목은 거부 목록에 있거나 우회 적격(`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`)으로 검토되어야 합니다. `/api/providers/` 아래의 동적 세그먼트 및 정적 경로 생성 가능 경로(예: `/login`, `/refresh-cursor`)는 플랫 `SPAWN_CAPABLE_PREFIXES` 배열 — 가 아닌 `src/shared/constants/spawnCapablePrefixes.ts` 의 정규식 기반 `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` 컴패니언으로 보호됩니다. 플랫 배열은 이를 포착하기 위해 전체 `/api/providers/` 접두사를 덮어야 하며, 이는 CRUD 제공자에 대해 합법적으로 사용하는 경로 트리 원격 대시보드를 과도하게 확장합니다.
+- **관리 범위 우회를 최소화하십시오.** 기본적으로 `/api/mcp/` 및 읽기 전용 `/api/resilience/connections` 만 우회 가능하며 `manage` -scoped API 키 또는 인증된 대시보드 세션을 통해서만 우회 가능합니다. `SPAWN_CAPABLE_PREFIXES` 우회 목록에 추가될 수 없습니다 — zod 스키마는 이를 거부하고 `isLocalOnlyBypassableByManageScope` 런타임에 이를 거부합니다(심층 방어). 이는 대시보드가 "우회할 수 없음"을 의미하는 것입니다. 동일한 거부 목록에는 생성되지 않지만 — `/api/oauth/kiro/auto-import` (호스트-로컬 Kiro 자격 증명 파일 읽기), `/api/discovery/` 및 `/api/issue-agent/` 중 하나로 원격으로 연결할 수 없어야 하는 몇 가지 LOCAL_ONLY 경로도 포함되어 있습니다. 또한 런타임 스냅샷 로더는 저장된 설정 행에서 이러한 항목을 삭제하며 레거시 JSON 가져오기(`/api/settings/import-json`)는 바이패스 키를 절대 쓰지 않습니다. 모든 `LOCAL_ONLY_API_PREFIXES` 항목은 거부 목록에 있거나 우회 적격(`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`)으로 검토되어야 합니다. `/api/providers/` (예: `/login`, `/refresh-cursor`) 아래의 동적 세그먼트 및 정적 경로 생성 가능 경로는 플랫 `SPAWN_CAPABLE_PREFIXES` 배열 zqz가 아닌 `src/shared/constants/spawnCapablePrefixes.ts` 의 정규식 기반 `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` 동반으로 포함됩니다. 플랫 배열은 이를 포착하기 위해 전체 `/api/providers/` 접두사를 포함해야 하며, — CRUD 제공자에 대해 합법적으로 사용하는 경로 트리 원격 대시보드를 과도하게 확장합니다.
 
 **액세스 감사** 호스트 외부에서 다음 경로에 도달하는 것이 없는지 확인하기 위한 — :
 

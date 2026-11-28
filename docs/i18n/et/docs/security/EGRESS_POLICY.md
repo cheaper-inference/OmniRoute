@@ -69,35 +69,35 @@ Direktiiv on teadlikult **puhverserveripõhine**, mitte globaalne — teie kogum
 
 ## Kolm väärtust
 
-| Väärtus | Kasutajaliidese silt      | Käitumine                                                                                                                                                                              |
-| ------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`  | `Automaatne (kaksikpinu)` | OS valib aadressiperekonna. IP-literaalist puhverserveri hosti korral määrab aadressiperekonna literaal ise; hostinime korral sobivad mõlemad aadressiperekonnad. See on vaikeväärtus. |
-| `ipv4`  | `Ainult IPv4`             | Seob ühenduse IPv4-ga. Ühendust ei looda, kui puhverserveri hostil puudub IPv4 (A) kirje.                                                                                              |
-| `ipv6`  | `Ainult IPv6`             | Seob ühenduse IPv6-ga. Ühendust ei looda, kui puhverserveri hostil puudub IPv6 (AAAA) kirje.                                                                                           |
+| Väärtus | UI silt             | Käitumine                                                                                                                                      |
+| ------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`  | `Auto (dual-stack)` | OS valib pere. IP-literaalse puhverserveri puhul on perekond literaalile omane; hostinime jaoks sobivad mõlemad perekonnad. See on vaikeseade. |
+| `ipv4`  | `IPv4 only`         | Kinnitab ühenduse IPv4. Sulgemine ebaõnnestub, kui puhverserveril pole IPv4 (A) kirjet.                                                        |
+| `ipv6`  | `IPv6 only`         | Kinnitab ühenduse IPv6. Sulgemine nurjub, kui puhverserveris puudub IPv6 (AAAA) kirje.                                                         |
 
-Kasutajaliidese stringid asuvad failis `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+UI stringid elavad `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Seadistamine
+## Kuidas seda konfigureerida
 
-### Töölaud
+### Armatuurlaud
 
-Valik asub vahekaardi **Puhverserverite kogum** puhverserveri vormil:
+Valija on puhverserveri kujul** Puhverserveri bassein** vahekaart:
 
-1. Avage **Töölaud → Seaded → Puhverserver → Puhverserverite kogum**
-2. Lisage puhverserver või muutke olemasolevat
-3. Määrake rippmenüü **IP-aadressiperekond** väärtuseks `Automaatne (kaksikpinu)`, `Ainult IPv4` või `Ainult IPv6`
-4. Salvestage
+1. Avatud** Armatuurlaud → → Puhverserver → Puhverserver**
+2. Lisage või muutke puhverserverit
+3. Määrake**IP perekond** rippmenüüst `Auto (dual-stack)`, `IPv4 only` või `IPv6 only`
+4. Salvesta
 
-Juhtelemendi renderdab `ProxyRegistryManager.tsx` (ühendatud failis `proxy/ProxyPoolTab.tsx`).
+Juhtseadet renderdab `ProxyRegistryManager.tsx` (paigaldatud `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Väli `family` kuulub puhverserveriregistri loomise ja uuendamise päringukehadesse, seda valideerivad `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ning töötlevad `POST` / `PATCH /api/v1/management/proxies`:
+Väli `family` on osa puhverserveri registrist create/update kasulikud koormused, mida kinnitab `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ja mida haldab `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Loo ainult IPv6 kasutav puhverserver
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Muuda olemasolev puhverserver ainult IPv4 kasutavaks
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Sama välja aktsepteerib ka ülesvoolu puhverserveri kirjete jaoks kasutatav tekstisisene puhverserveri konfiguratsiooniobjekt (`upstream_proxy_config.family`, vt [Andmemudel](#data-model)).
+Sama välja aktsepteerib ka sisemine puhverserveri konfiguratsiooniobjekt, mida kasutatakse ülesvoolu puhverserveri kirjete jaoks (`upstream_proxy_config.family`, vt [Andmemudel](#data-model) ).
 
-Ülejäänud puhverserveri loomise, lugemise, uuendamise, kustutamise ja määramise API kohta vt [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Ülejäänud puhverserveri CRUD/assignment API kohta vt [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

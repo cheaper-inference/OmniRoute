@@ -15,9 +15,11 @@ Standardprincipen för flera leverantörer tillåter upp till tre leverantörsf�
 - **Combos** misslyckas mellan sina mål enligt kombons egen strategi och inställningar.
 - **Ett blott modell-id** (inget `provider/` prefix) som flera aktiva leverantörer tjänar, utan någon kombination av det exakta namnet, skickas först till leverantörens slutledningsval. Om det försöket misslyckas på ett sätt som policyn misslyckas med, skickas samma begäran till nästa aktiva leverantör som betjänar ID:t. Svaret bär `x-omniroute-fallback-attempts` med antalet provade leverantörer före den som svarade.
   - Varje suppleant är auktoriserad precis som om slutsatsen hade valt den. Ett mål som API -nyckeln blockerar eller inte erkänner hoppas över utan ett uppströmsanrop, och klienten får det verkliga uppströmsfelet, inte ett policyavslag för ett mål som den aldrig namngav.
-  - Endast ett misslyckat svar går vidare: ingenting misslyckas efter den första streamade byten.
+  - Bara ett misslyckat svar går vidare: ingenting misslyckas efter den första streamade byten.
   - Nödfallsmodellbytet gäller endast efter att varje leverantör av den begärda modellen har misslyckats.
   - En begäran som är fäst vid en anslutning (`x-omniroute-connection`) stannar kvar på den.
   - Ett prefix-id (`provider/model`) omdirigeras aldrig till en annan leverantör.
 
 Kretstillstånden är `closed`, `open` och `half_open`. En nedkylning schemalägger en avgränsad sond; en framgångsrik sond stänger kretsen och en misslyckad sond öppnar den igen.
+
+Provider failover körs inuti gatewayen. Se [När OmniRoute själv är otillgänglig](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) för klientbeteende under ett gatewayavbrott.

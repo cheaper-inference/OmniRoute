@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Harmonogram** — jedno zadanie cron w `JobRegistry`, `log_export`, domyślnie `0 * * * *` (co godzinę,
-  UTC). Rejestrowane w `src/lib/initCloudSync.ts`; można je nadpisać za pomocą `OMNIROUTE_LOG_EXPORT_CRON`.
-  Każde wyzwolenie przetwarza kolejno wszystkie **włączone** miejsca docelowe.
-- **Kursor** — niejawne pole `call_logs.rowid` w SQLite, zapisywane osobno dla każdego miejsca docelowego w
-  `log_export_destinations.cursor_row_id`. Pole `timestamp` celowo nie jest kursorem: wywołujący
-  mogą podawać własną wartość, więc wolne żądanie może zostać zapisane po szybszym, które rozpoczęło się
-  później, a kursor oparty na znaczniku czasu by je pominął.
-- **Przetwarzanie partiami** — `batch_size` wierszy na żądanie (domyślnie 500), `max_rows_per_run` wierszy na uruchomienie
-  (domyślnie 10000), dzięki czemu duże zaległości są przetwarzane w kilku wyzwoleniach, zamiast blokować jedno.
-- **Dostarczanie** — kursor przesuwa się dopiero po pomyślnym zakończeniu `send()`. Nieudana partia pozostawia
-  kursor w dotychczasowym miejscu, więc te same wiersze są ponawiane przy następnym uruchomieniu. Gwarancją jest
-  dostarczenie co najmniej raz oraz deduplikacja po stronie miejsca docelowego, a nie rzeczywiste dostarczenie dokładnie raz: BigQuery identyfikuje każdy
-  wiersz za pomocą identyfikatora wpisu dziennika wywołań, który uwzględnia w miarę możliwości w ramach własnego okna deduplikacji.
-- **Ochrona przed nakładaniem się uruchomień** — wyzwolenie cron i `POST .../run` mogą nastąpić jednocześnie. Miejsce docelowe,
-  które jest już przetwarzane, zostaje pominięte zamiast być przetwarzane dwukrotnie (`skipped: true` w wyniku uruchomienia),
-  więc równoległe uruchomienie nie może ponownie wysłać partii ani cofnąć kursora.
-- **Odzyskiwanie po wyczyszczeniu danych** — jeśli `cursor_row_id` przekroczy `MAX(rowid)` (cała tabela została
-  wyczyszczona, a wartości rowid zaczęły się od początku), mechanizm wykonawczy cofa kursor do 0, zamiast trwale przestać wykrywać dane.
+- **Harmonogram** — jedno zadanie cron `JobRegistry`, `log_export`, domyślnie `0 * * * *` (co godzinę, UTC). Zarejestrowany w `src/lib/initCloudSync.ts`; można zastąpić za pomocą `OMNIROUTE_LOG_EXPORT_CRON`. Każdy kleszcz wysysa każdy** włączony** miejsce docelowe, sekwencyjnie.
+- **Cursor** — Niejawne SQLite `call_logs.rowid`, utrwalone dla miejsca docelowego w `log_export_destinations.cursor_row_id`. `timestamp` celowo nie jest kursorem: osoby wywołujące mogą podać własną wartość, więc wolne żądanie może zostać zapisane po szybszym, które rozpoczęło się później, a kursor znacznika czasu pominie je.
+- **Dozowanie** — `batch_size` wierszy na żądanie (domyślnie 500), `max_rows_per_run` wierszy na uruchomienie (domyślnie 10000), więc duże zaległości wyczerpują się przez kilka taktów zamiast blokować jeden.
+- **Dostawa** — kursor przesuwa się dopiero po rozwiązaniu `send()`. Partia, która się nie powiodła, pozostawia kursor w miejscu, w którym się znajdował, więc przy następnym uruchomieniu ponawiana jest próba tych samych wierszy. Gwarancja obejmuje co najmniej raz plus deduplikację po stronie docelowej, a nie dokładnie raz: BigQuery klucz do każdego wiersza według identyfikatora dziennika połączeń, który honoruje przy zachowaniu najlepszych starań w ramach własnego okna deduplikacji.
+- **Osłona nakładania się** — cron tick i `POST .../run` mogą uruchamiać się razem. Miejsce docelowe, które już się wyczerpuje, jest pomijane, a nie opróżniane dwukrotnie (`skipped: true` w wyniku uruchomienia), więc równoczesny przebieg nie może ponownie wysłać partii ani zapisać kursora wstecz.
+- **Oczyść odzysk** — jeśli `cursor_row_id` znajdzie się powyżej `MAX(rowid)` (cała tabela została wyczyszczona i zrestartowano rowidy), biegacz cofa się do 0, zamiast tracić na stałe ślepość.
 
-### Izolowany mechanizm wykonawczy i limity
+### Izolowany biegacz i limity
 
-Każde uruchomienie eksportu do miejsca docelowego w Node uruchamia oddzielny, krótkotrwały proces potomny systemu operacyjnego (`child_process`
-z IPC, a nie `worker_threads`). Odczyty treści, parsowanie i serializacja ładunku JSON, metoda
-`prepare()` miejsca docelowego oraz sieciowe operacje wejścia/wyjścia miejsca docelowego odbywają się właśnie tam, a nie w pętli zdarzeń serwera.
-Przez IPC przechodzą tylko konfiguracja i niewielkie komunikaty o postępie; eksportowane rekordy nigdy nie wracają
-do serwera. Zadanie cron i trasa Uruchom teraz zachowują ten sam publiczny wynik oraz ochronę przed nakładaniem się uruchomień.
+Każde miejsce docelowe uruchamiane w węźle rozpoczyna oddzielny, krótkotrwały proces potomny OS (`child_process` z IPC, a nie `worker_threads`). Odczyty treści, ładunek JSON parsing/serialization, miejsce docelowe `prepare()` i sieć docelowa I/O działają tam, a nie w pętli zdarzeń serwera. Przez IPC przepływają tylko informacje o konfiguracji i drobne komunikaty o postępie; wyeksportowane rekordy nigdy nie wracają na serwer. Zadanie cron i trasa Uruchom teraz zachowują ten sam wynik publiczny i ochronę przed nakładaniem się.
 
-Proces potomny otwiera plik `DATA_DIR/storage.sqlite` ze ścieżki ustalonej przez serwer w trybie tylko do odczytu za pomocą `node:sqlite`,
-z ustawieniami `busy_timeout=5000` i `query_only=ON`. Nie importuje singletonu bazy danych ani nie wykonuje
-migracji, kopii zapasowych czy aktualizacji SQLite. Obsługa ewidencji brakujących/uszkodzonych artefaktów (w tym
-aktualizacja UPDATE dotycząca uszkodzonego artefaktu) pozostaje wyłącznie w ścieżce szczegółów panelu. Obie ścieżki współdzielą czystą
-funkcję rozwiązywania szczegółów; eksport korzysta z asynchronicznych odczytów systemu plików i tej samej kolejności wyszukiwania: artefakt → starsza
-postać osadzona → starsza postać na dysku → brak. Uruchomienie utrwala maksymalną wartość rowid wstawionych rekordów
-w chwili otwarcia czytnika przez proces potomny; późniejsze operacje wstawiania czekają na następne uruchomienie. Jest to granica
-wstawiania, a nie długotrwała transakcja SQLite: procesy zapisujące WAL i punkty kontrolne mogą działać swobodnie podczas
-oczekiwania na sieć. Ta granica nie zamraża aktualizacji ani usuwania istniejących wierszy.
+Dziecko otwiera serwer `DATA_DIR/storage.sqlite` w trybie tylko do odczytu, używając `node:sqlite`, z `busy_timeout=5000` i `query_only=ON`. Nie importuje singletonu DB i nie wykonuje migracji, kopii zapasowych ani aktualizacji SQLite. Księgowanie artefaktów Missing/corrupt (w tym uszkodzony artefakt UPDATE) pozostaje tylko w ścieżce szczegółów pulpitu nawigacyjnego. Obie ścieżki korzystają z mechanizmu rozwiązywania wyłącznie szczegółów; eksport wykorzystuje asynchroniczne odczyty systemu plików i ten sam artefakt → starszy inline → starszy dysk → brak kolejności rozdzielczości. Uruchomienie tworzy migawkę maksymalnego wiersza wstawiania, gdy dziecko otwiera swój czytnik; późniejsze wstawki czekają na kolejne uruchomienie. Jest to granica wstawiania, a nie długotrwała transakcja SQLite : moduły zapisujące WAL i punkty kontrolne pozostają wolne podczas oczekiwania sieci. Updates/deletions istniejących wierszy nie jest zablokowanych przez tę granicę.
 
-Po każdej zaakceptowanej partii proces potomny czeka na potwierdzenie. Serwer najpierw zapisuje
-kursor za pomocą `advanceLogExportCursor`, a następnie wysyła `ack`; wcześniej nie rozpoczyna się żadna następna partia.
-Błąd wysyłania, awaria lub przekroczenie limitu czasu powodują zarejestrowanie niepowodzenia bez przesuwania kursora dla tej partii. Wcześniej
-potwierdzone partie pozostają zatwierdzone; ponownie wysłana może zostać co najwyżej jedna niepotwierdzona partia.
-Sukces jest rejestrowany dopiero po otrzymaniu `done` i prawidłowym zakończeniu procesu potomnego. W razie niepowodzenia proces potomny jest kończony
-sygnałem SIGTERM, a po 500 ms sygnałem SIGKILL, zaś mechanizm wykonawczy czeka na zamknięcie procesu.
+Po każdej przyjętej partii dziecko oczekuje na potwierdzenie. Serwer najpierw utrzymuje kursor za pomocą `advanceLogExportCursor`, następnie wysyła `ack`; żadna następna partia nie rozpoczyna się przed nią. Niepowodzenie wysyłania, awaria lub przekroczenie limitu czasu rejestruje niepowodzenie bez przesuwania tej partii. Wcześniej potwierdzone partie pozostają zaangażowane; co najwyżej jedna niepotwierdzona partia może zostać wysłana ponownie. Sukces jest rejestrowany dopiero po `done` i czystym wyjściu dziecka. Niepowodzenia kończą dziecko za pomocą SIGTERM, eskalując do SIGKILL po 500 ms, a moduł uruchamiający czeka na zamknięcie procesu.
 
-| Zmienna środowiskowa                          | Wartość domyślna | Przeznaczenie                                     |
-| --------------------------------------------- | ---------------- | ------------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000           | Limit czasu rzeczywistego na miejsce docelowe     |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024             | Limit obszaru old-space V8 procesu potomnego w MB |
+| Zmienna środowiskowa                          | Domyślny | Zamiar                                        |
+| --------------------------------------------- | -------- | --------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Limit zegara ściennego dla miejsca docelowego |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Limit starej przestrzeni podrzędnej V8 w MB   |
 
-Wartości nieprawidłowe, niedodatnie lub niecałkowite powodują użycie wartości domyślnych. Ustawienie sterty nie jest limitem całkowitego
-RSS; bardzo duże partie nadal mogą wyczerpać pamięć procesu potomnego i bezpiecznie zakończyć uruchomienie niepowodzeniem.
-Domyślne 1024 MB pozostawia zapas dla domyślnej partii 500 wierszy artefaktów o rozmiarze 512 KiB przy
-włączonym eksportowaniu treści, z uwzględnieniem serializacji JSON w porcjach bajtowych stosowanej przez BigQuery. Nie sprawia to, że
-partia 10000 wierszy z treścią staje się bezpieczna. Wyczerpanie sterty V8 powoduje zarejestrowanie błędu ze wskazówką działania: zmniejsz rozmiar
-partii lub zwiększ `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kursor pozostaje na ostatniej
-potwierdzonej partii. Historyczne treści osadzone lub przechowywane na dysku nie są objęte współczesnym limitem rozmiaru artefaktów.
-Operatorzy muszą osobno zaplanować budżet RSS, szczególnie w kontenerach z ograniczoną pamięcią.
+Wartości Invalid/non-positive/non-integer używają wartości domyślnych. Ustawienie sterty nie jest całkowitym limitem RSS ; bardzo duże partie mogą nadal wyczerpać pamięć podrzędną i bezpiecznie zakończyć się niepowodzeniem. Wartość domyślna 1024 MB pozostawia zapas dla domyślnej partii 500 wierszy zawierającej 512 artefaktów KiB z włączonymi treściami, w tym serializacją BigQuery z fragmentami bajtów JSON. Nie sprawia to, że partia ciał zawierająca 10000 rzędów jest bezpieczna. Wyczerpanie sterty V8 rejestruje awarię, którą można podjąć: zmniejsz rozmiar partii lub zwiększ `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kursor pozostaje na ostatniej potwierdzonej partii. Historyczne ciała inline/disk nie są objęte nowoczesnym limitem artefaktów. Operatorzy muszą oddzielnie budżetować RSS, szczególnie w przypadku kontenerów o ograniczonej pamięci.
 
-Proces potomny dziedziczy wyłącznie rozwiązaną wartość `DATA_DIR`, `NODE_ENV`, jawnie ustawione `TZ` (ustalanie
-czasu lokalnego dla starszego formatu nazw plików), `ELECTRON_RUN_AS_NODE`, jeśli jest obecne, oraz następujące ustawienia połączeń wychodzących:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (i ich odpowiedniki zapisane małymi literami),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Globalny dispatcher Undici korzysta z tych samych co serwer reguł ustalania proxy wyłącznie na podstawie zmiennych środowiskowych oraz omijania proxy
-dla hostów lokalnych, w tym `NO_PROXY`; nie importuje `proxyFetch.ts` ani powiązanych z nim flag bazy danych i funkcji.
-Dane uwierzytelniające proxy są maskowane w przekazywanych danych wyjściowych i rejestrowanych błędach. Dane uwierzytelniające miejsca docelowego
-są przesyłane wyłącznie w jednym komunikacie startowym IPC, nigdy przez argv ani zmienne środowiskowe; przekazywane dane wyjściowe i błędy
-są opatrywane prefiksem i oczyszczane. W argumentach uruchomieniowych procesu potomnego wyłączane są tylko ostrzeżenia `ExperimentalWarning`, aby uniknąć
-powtarzania ostrzeżenia Node dotyczącego SQLite przy każdym uruchomieniu zadania cron; inne typy ostrzeżeń pozostają widoczne.
+Dziecko dziedziczy tylko rozwiązane `DATA_DIR`, `NODE_ENV`, jawne `TZ` (starsze rozpoznawanie nazw plików w czasie lokalnym), `ELECTRON_RUN_AS_NODE` jeśli jest obecne, oraz następujące dane wejściowe wychodzące: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (i ich formy pisane małymi literami), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Globalny dyspozytor Undici dzieli się z serwerem rozdzielczością czystego środowiska proxy i regułami obejścia hosta lokalnego, w tym `NO_PROXY`; nie importuje `proxyFetch.ts` ani jego flag DB/feature. Poświadczenia proxy są redagowane na podstawie przekazanych danych wyjściowych i zarejestrowanych błędów. Poświadczenia miejsca docelowego są przesyłane tylko w jednym komunikacie startowym IPC, nigdy w argv lub środowisku; Przekazywanie output/error jest poprzedzone i oczyszczone. Tylko `ExperimentalWarning` jest wyłączone w argumentach potomnych exec, aby uniknąć powtarzania ostrzeżenia SQLite Node'a przy każdym uruchomieniu cron; inne typy ostrzeżeń pozostają widoczne.
 
-Moduły miejsc docelowych muszą umożliwiać import bez zależności Next.js ani zależności przeznaczonych wyłącznie dla serwera. Istniejąca
-implementacja BigQuery już spełnia ten wymóg. Pamięć podręczna tokenów dostępu istnieje tylko przez czas działania procesu potomnego,
-a nie między uruchomieniami. Obsługiwanym środowiskiem uruchomieniowym jest Node (pole engines w `package.json`), ale sekcja instalacji Bun w README
-oraz `Dockerfile.bun` wskazują również ścieżkę zgodności produkcyjnej z użyciem
-`bun:sqlite` (`src/lib/db/core.ts` / adaptery). Dlatego w środowisku Bun eksport zachowuje wcześniejszą
-ścieżkę działania w tym samym procesie i emituje jednorazowe ostrzeżenie: izolacja sterty i limitu czasu w procesie potomnym jest niedostępna. Używaj
-Node, aby uzyskać izolację pętli zdarzeń i ochronę przed skutkami wyczerpania pamięci; Bun nie jest tu traktowany jako środowisko wyłącznie deweloperskie.
+Moduły docelowe muszą umożliwiać import bez zależności Next.js/server-only. Istniejąca implementacja BigQuery już spełnia tę umowę. Pamięci podręczne tokenów dostępu trwają tylko dla przebiegu podrzędnego, a nie między przebiegami. Węzeł to obsługiwane środowisko wykonawcze (silniki `package.json` ). Istnieje najlepsza, nieobsługiwana ścieżka kompatybilności Bun (`bun:sqlite` w `src/lib/db/core.ts` / adapters i `Dockerfile.bun`), więc eksport nie może się pod nią złamać. W przypadku Bun eksporty zachowują poprzednią ścieżkę procesu i emitują jednorazowe ostrzeżenie: izolacja podrzędnego heap/timeout jest niedostępna. Użyj węzła do izolacji pętli zdarzeń i OOM.
 
-Gdy włączone jest `includeBodies`, preferuj harmonogram z częstotliwością rzędu minut, taki jak
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, zamiast gromadzić dane przez godzinę przed eksportem.
-Limity partii i wierszy nadal ograniczają każde uruchomienie. Koszt uruchomienia procesu jest ponoszony dla każdego miejsca docelowego przy każdym uruchomieniu;
-niewielki koszt startu zapewnia izolację pętli zdarzeń serwera, a nie zmniejszenie całkowitego zużycia CPU.
+Gdy `includeBodies` jest włączona, preferuj rytm minutowy, taki jak `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` zamiast gromadzić godzinne zaległości. Limity partii i wierszy są nadal powiązane w każdym przebiegu. Uruchomienie procesu jest opłacane według miejsca docelowego i przebiegu; oznacza to niewielki koszt uruchomienia w zamian za izolację pętli zdarzeń serwera, a nie zmniejszenie całkowitego wykorzystania CPU.
 
-### Dane żądań i odpowiedzi (prompty i wygenerowane odpowiedzi)
+### Ładunki (podpowiedzi i zakończenia)
 
-Domyślnie eksport zawiera tylko pola podsumowania widoczne na **liście** logów. Włączenie
-opcji **Eksportuj prompty i odpowiedzi** (`includeBodies`) dodatkowo powoduje przesyłanie danych widocznych w panelu **szczegółów**
-logów dla każdego wywołania:
+Domyślnie eksport zawiera tylko pola podsumowania, czyli Logi** lista** widać. Włączanie** Eksportuj podpowiedzi i odpowiedzi** (`includeBodies`) dodatkowo wysyła to, co Logs** szczegół** okienko pokazuje dla każdego połączenia:
 
-| Pole                             | Zawartość                                                                   |
-| -------------------------------- | --------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Dane wywołania w postaci wyświetlanej w panelu                              |
-| `pipeline_route_decision`        | Cel i model wybrane przez router                                            |
-| `pipeline_client_request`        | Surowe żądanie dokładnie w postaci wysłanej przez klienta                   |
-| `pipeline_openai_request`        | Po przekształceniu do wewnętrznego formatu OpenAI                           |
-| `pipeline_provider_request`      | W postaci faktycznie wysłanej do dostawcy, w jego formacie                  |
-| `pipeline_provider_response`     | Surowa odpowiedź dostawcy                                                   |
-| `pipeline_client_response`       | Dane zwrócone do wywołującego                                               |
-| `pipeline_error`                 | Szczegóły błędu potoku dla nieudanego wywołania                             |
-| `bodies_truncated`               | Wartość prawda, gdy dowolne z powyższych pól osiągnęło limit `maxBodyBytes` |
+| Pole                             | Co to trzyma                                                        |
+| -------------------------------- | ------------------------------------------------------------------- |
+| `request_body` / `response_body` | Ładunki wywołań w miarę ich renderowania na pulpicie nawigacyjnym   |
+| `pipeline_route_decision`        | Który cel i model wybrał router                                     |
+| `pipeline_client_request`        | Surowe żądanie dokładnie w takiej formie, w jakiej je wysłał klient |
+| `pipeline_openai_request`        | Po przełożeniu na wewnętrzny kształt OpenAI                         |
+| `pipeline_provider_request`      | W rzeczywistości wysłane w górę, w dialekcie dostawcy               |
+| `pipeline_provider_response`     | Surowa odpowiedź typu upstream                                      |
+| `pipeline_client_response`       | Co zostało zwrócone dzwoniącemu                                     |
+| `pipeline_error`                 | Szczegóły błędu na poziomie potoku w przypadku nieudanego wywołania |
+| `bodies_truncated`               | Prawda, gdy dowolne pole powyżej trafi `maxBodyBytes`               |
 
-Są to treści promptów, dlatego opcja jest **domyślnie wyłączona**, a jej włączenie jest celowo osobnym wyborem dla każdego miejsca docelowego.
-Przesyłane są te same dane, które pokazuje panel, ponieważ eksport i `getCallLogById` korzystają ze wspólnego mechanizmu
-ustalania szczegółów: dane są
-już oczyszczane z danych osobowych i sekretów podczas zapisu, a wywołanie wykonane przy użyciu
-klucza API `noLog` w ogóle nie zapisuje danych żądania ani odpowiedzi, więc nie ma czego eksportować.
+To jest treść natychmiastowa i taka jest** domyślnie wyłączone** i celowo wybór miejsca docelowego. Panel kontrolny pokazuje, które statki są wyświetlane, ponieważ eksport i `getCallLogById` mają wspólną rozdzielczość szczegółów: ładunki są już oczyszczane pod kątem danych osobowych i edytowane w tajemnicy podczas ich zapisywania, a wywołanie wykonane za pomocą klucza `noLog` API nie przechowuje żadnego ładunku, więc nie ma nic do eksportowania.
 
-Dane żądań i odpowiedzi są odczytywane dla każdego wiersza z artefaktu w systemie plików, więc ich doładowywanie odbywa się tylko dla miejsc docelowych,
-które tego zażądały. W przypadku brakującego lub uszkodzonego artefaktu eksportowane jest podsumowanie z pustymi wartościami danych zamiast
-przerywania partii i blokowania kursora.
+Ładunki są odczytywane w każdym wierszu z artefaktu systemu plików, więc nawadnianie odbywa się tylko w przypadku miejsc docelowych, które o to poprosiły. Brakujący lub uszkodzony artefakt eksportuje swoje podsumowanie z ładunkiem o wartości zerowej, zamiast zakończyć się niepowodzeniem partii i zablokowaniem kursora.
 
-`maxBodyBytes` (domyślnie 262144) ogranicza rozmiar każdego pola. Dłuższe dane są **obcinane, a nie
-pomijane** — skrócony prompt nadal odpowiada na pytanie „o co zapytano” — a wiersz jest oznaczany flagą
-`bodies_truncated`. Przyrostowe fragmenty strumienia nie są eksportowane; złożona odpowiedź
-znajduje się już w `pipeline_provider_response` i `pipeline_client_response`.
+`maxBodyBytes` (domyślnie 262144) zamyka każde pole. Dłuższe ładunki są** obcięte, a nie opuszczone** — przycięty monit nadal odpowiada „o co zapytano” —, a wiersz jest oznaczony flagą `bodies_truncated`. Strumieniowe delty fragment po fragmencie nie są eksportowane; zmontowana odpowiedź jest już w `pipeline_provider_response` i `pipeline_client_response`.
 
 ---
 

@@ -151,30 +151,30 @@ Temi per le Fasi 6-7:
 - [ ] Aggiungere test di regressione per ogni bug del codice di produzione non coperto e corretto durante il percorso verso il 90%
 - [ ] Aumentare la soglia di copertura nella CI solo dopo che la baseline locale è rimasta stabile per almeno due esecuzioni consecutive
 
-## Politica di ratchet
+## Politica del cricchetto
 
-Aggiornare le soglie di `npm run test:coverage` solo dopo che il progetto ha effettivamente superato il traguardo successivo con un margine adeguato.
+Aggiorna le soglie `npm run test:coverage` solo dopo che il progetto ha effettivamente superato il traguardo successivo con un buffer confortevole.
 
-**Soglia attuale:** `npm run test:coverage` impone **60 istruzioni / 60 righe / 60 funzioni / 60 rami** (la metrica è stata ricalibrata in Quality-Gates Fase 6A.1 — il precedente valore di riferimento dell'82,58% era sovrastimato perché conteggiava i file di test ed escludeva `open-sse`). Il comando `test:coverage:legacy` mantiene la precedente metrica 50/50/50 per consentire confronti storici.
+**Cancello attuale:** `npm run test:coverage` impone** 60 istruzioni / 60 righe / 60 funzioni / 60 rami** (la metrica è stata ribasata in Quality-Gates Fase 6A.1 — il precedente riferimento dell'82,58% era gonfiato perché conteggiava i file di test ed escludeva `open-sse`). Il comando `test:coverage:legacy` conserva la vecchia metrica 50/50/50 per il confronto storico.
 
-Per controlli estemporanei delle soglie rispetto al report più recente, utilizzare:
+Per i controlli delle soglie ad hoc rispetto all'ultimo report utilizzare:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Sequenza di ratchet consigliata (l'ordine è `istruzioni-righe / rami / funzioni`):
+Sequenza di cricchetti consigliata (l'ordine è `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- soglia attuale (75/70/75)
+5. 75/70/72 <-- porta corrente (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Il prossimo obiettivo di ratchet è `80/75/78`, una volta che la copertura dei rami si mantiene sopra il 78% per due esecuzioni consecutive.
+Il prossimo obiettivo da raggiungere sarà `80/75/78` una volta che la copertura delle filiali sarà superiore al 78% per due esecuzioni consecutive.
 
 ## Lacuna nota
 

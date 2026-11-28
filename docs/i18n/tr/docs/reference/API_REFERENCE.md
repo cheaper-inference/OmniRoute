@@ -49,7 +49,7 @@ Her dağıtım, derleme sırasında `docs/openapi.yaml` dosyasından oluşturula
 
 ---
 
-## Sohbet Tamamlama
+## Sohbet Tamamlamaları
 
 ```bash
 POST /v1/chat/completions
@@ -65,35 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### Özel Üst Bilgiler
+### Özel Başlıklar
 
-| Header                   | Direction | Description                                                                                                                                                                                                                               |
-| ------------------------ | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | İstek     | Önbelleği devre dışı bırakmak için `true` olarak ayarlayın                                                                                                                                                                                |
-| `x-omniroute-no-memory`  | İstek     | Bu istek için bellek + beceri enjeksiyonunu atlamak üzere `true` olarak ayarlayın (no-cache davranışını yansıtır; çağrı başına token/maliyet ek yükünü önler)                                                                             |
-| `X-OmniRoute-Progress`   | İstek     | İlerleme olayları için `true` olarak ayarlayın                                                                                                                                                                                            |
-| `X-Session-Id`           | İstek     | Harici oturum bağlılığı için sabit oturum anahtarı                                                                                                                                                                                        |
-| `x_session_id`           | İstek     | Alt çizgili varyant da kabul edilir (doğrudan HTTP)                                                                                                                                                                                       |
-| `X-OmniRoute-Session-Id` | İstek     | Çağıran tarafından sağlanan oturum/konuşma etiketi (belleğe de aktarılır). Mevcut olduğunda, oturum başına maliyet ilişkilendirmesi için `call_logs.session_tag` alanına olduğu gibi kaydedilir (#8249) — yoksa hiçbir zaman sentezlenmez |
-| `Idempotency-Key`        | İstek     | Yinelenen istekleri ayırt etme anahtarı (5 saniyelik pencere)                                                                                                                                                                             |
-| `X-Request-Id`           | İstek     | Alternatif yinelenen istekleri ayırt etme anahtarı                                                                                                                                                                                        |
-| `x-omniroute-connection` | İstek     | Tek modelli bir isteği kimliğiyle belirli bir sağlayıcı bağlantısına (hesaba) sabitleyin — bkz. [İstek başına hesap sabitleme](#account-pinning-per-request)                                                                              |
-| `X-OmniRoute-Cache`      | Yanıt     | `HIT` veya `MISS` (akışsız)                                                                                                                                                                                                               |
-| `X-OmniRoute-Idempotent` | Yanıt     | Yinelenen isteklerin ayıklandığını belirtmek için `true`                                                                                                                                                                                  |
-| `X-OmniRoute-Progress`   | Yanıt     | İlerleme takibi etkinse `enabled`                                                                                                                                                                                                         |
-| `X-OmniRoute-Session-Id` | Yanıt     | OmniRoute tarafından kullanılan etkin oturum kimliği                                                                                                                                                                                      |
-| `X-OmniRoute-Request-Id` | Yanıt     | İstek ilişkilendirme kimliği (biliniyorsa)                                                                                                                                                                                                |
-| `X-OmniRoute-Version`    | Yanıt     | OmniRoute derleme sürümü (her zaman mevcut)                                                                                                                                                                                               |
-| `X-OmniRoute-Cost-Saved` | Yanıt     | Önbellek isabetinde önlenen USD tutarı (yalnızca önbellek isabetlerinde)                                                                                                                                                                  |
-| `X-OmniRoute-Decision`   | Yanıt     | Yönlendirme izi: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>`, birleşik stratejidir; birleşik olmayan bir istek için `single` değerini alır) — tamamlama yanıtlarında her zaman bulunur                                  |
+| Başlık                   | Yön        | Tanım                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Rica etmek | Önbelleği atlamak için `true` ayarlayın                                                                                                                                                                                                                                                                                                                                                                   |
+| `x-omniroute-no-memory`  | Rica etmek | Bu istek için bellek + becerileri enjeksiyonunu atlamak için `true` ayarlayın (önbelleksiz olanı yansıtır; çağrı başına token/cost yükünü önler)                                                                                                                                                                                                                                                          |
+| `x-omniroute-no-log`     | Rica etmek | Bu çıkarım isteğine yönelik çağrı günlüklerinden request/response verilerini çıkarmak için `true` olarak ayarlayın (tüm sohbet ailesi rotaları: Sohbet Tamamlamaları, Yanıtlar, Mesajlar, Tamamlamalar, Gemini). Zaman damgası, model, durum, süre ve jeton sayımları hâlâ kaydedilmektedir. İçeriğin tamamını devre dışı bırakmak için `x-omniroute-no-memory` ve `x-omniroute-no-cache` ile birleştirin |
+| `X-OmniRoute-Progress`   | Rica etmek | İlerleme olayları için `true` ayarla                                                                                                                                                                                                                                                                                                                                                                      |
+| `X-Session-Id`           | Rica etmek | Harici oturum benzeşimi için yapışkan oturum anahtarı                                                                                                                                                                                                                                                                                                                                                     |
+| `x_session_id`           | Rica etmek | Alt çizgi çeşidi de kabul edilir (doğrudan HTTP)                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Session-Id` | Rica etmek | Arayanın sağladığı session/conversation etiketi (aynı zamanda belleği de besler). Mevcut olduğunda, oturum başına maliyet ilişkilendirmesi için `call_logs.session_tag` aynen devam edilir (#8249) — yokken asla sentezlenmez                                                                                                                                                                             |
+| `Idempotency-Key`        | Rica etmek | Tekilleştirme anahtarı (5s penceresi)                                                                                                                                                                                                                                                                                                                                                                     |
+| `X-Request-Id`           | Rica etmek | Alternatif yinelenenleri kaldırma anahtarı                                                                                                                                                                                                                                                                                                                                                                |
+| `x-omniroute-connection` | Rica etmek | Tek modelli bir isteği, — kimliğine göre bir sağlayıcı bağlantısına (hesaba) sabitleme (bkz. [İstek başına hesap sabitleme](#account-pinning-per-request) )                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Cache`      | Cevap      | `HIT` veya `MISS` (akışsız)                                                                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Idempotent` | Cevap      | tekilleştirilmişse `true`                                                                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Progress`   | Cevap      | ilerleme takibi açıksa `enabled`                                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Session-Id` | Cevap      | OmniRoute tarafından kullanılan etkili oturum ID                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Request-Id` | Cevap      | Korelasyon kimliğini iste (bilindiğinde)                                                                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Version`    | Cevap      | OmniRoute derleme sürümü (her zaman mevcut)                                                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Cost-Saved` | Cevap      | USD bir HIT kaçınılan önbellek (yalnızca önbellek isabetleri)                                                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Decision`   | Cevap      | Yönlendirme izlemesi: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` birleşik stratejidir veya birleşik olmayan istek için `single` ) — her zaman tamamlanma yanıtlarında mevcuttur                                                                                                                                                                                                        |
 
-> Nginx notu: alt çizgili üstbilgilere (örneğin `x_session_id`) güveniyorsanız `underscores_in_headers on;` yönergesini etkinleştirin.
+> Nginx notu: alt çizgi başlıklarına güveniyorsanız (örneğin `x_session_id`), `underscores_in_headers on;` etkinleştirin.
 
 #### İstek başına hesap sabitleme
 
-Bir sağlayıcının birden fazla bağlantısı (hesap veya anahtar) olduğunda OmniRoute normalde
-hesap seçme stratejisi aracılığıyla birini seçer. Bir istek bunun yerine
-`x-omniroute-connection` üstbilgisiyle belirli bir bağlantıya sabitlenebilir:
+Bir sağlayıcının birden fazla bağlantısı (hesaplar veya anahtarlar) olduğunda, OmniRoute normalde hesap seçme stratejisi aracılığıyla bunlardan birini seçer. Bir istek bunun yerine belirli bir bağlantıyı `x-omniroute-connection` başlığına sabitleyebilir:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,25 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Kimliği nerede bulabilirsiniz?** Panoda sağlayıcı sayfasını açın
-  (**Panel → Sağlayıcılar → <provider>**) ve bir bağlantı satırındaki `xxxxxxxx…` kimlik çipine
-  tıklayın — bu işlem tam bağlantı kimliğini kopyalar.
-- **Hangi istekler bunu dikkate alır?** `/v1/chat/completions`, `/v1/messages` ve
-  `/v1/responses` üzerindeki tek model istekleri (`provider/model`). Kombinasyonlar başlığı yok
-  sayar: her kombinasyon adımı için bir hesabı, adımın kendi bağlantısı üzerinden sabitleyin.
-- **Sabitleme bir tercih değil, kesin bir kuraldır.** Sabitlenen bağlantı yalnızca kendisi
-  kullanılır. İstek içinde gerçekleşen bir hata, hesabın bekleme süresini kaydeder ancak aynı
-  sağlayıcıdaki kardeş hesaba geçiş yapmaz.
-- **Bekleme süresi ve kota sabitlemeyi kaldırır.** Sabitlenen bağlantı bekleme süresindeyken,
-  kota tükenmişse veya bir kota politikası tarafından engellenmişse sonraki istekler, sabitlenmemiş
-  trafikle tamamen aynı şekilde sağlayıcının diğer bağlantılarına geri döner.
-- **Bilinmeyen veya devre dışı kimlikler başarısız olur.** Sağlayıcının etkin havuzunda bulunmayan
-  bir kimlik (silinmiş, devre dışı bırakılmış veya başka bir sağlayıcıya ait) uygun hesap bırakmaz;
-  bu nedenle istek sessizce başka yere yönlendirilmek yerine başarısız olur.
+- **Kimlik nerede bulunur?** Sağlayıcı sayfasını kontrol panelinde açın (** Kontrol Paneli → Sağlayıcıları → <provider>** ) ve bağlantı satırındaki `xxxxxxxx…` kimlik çipine tıklayın — tam bağlantı kimliğini kopyalar.
+- **Hangi istekler onu onurlandırır.** `/v1/chat/completions`, `/v1/messages` ve `/v1/responses` tek modelli istekler (`provider/model`). Kombinasyonlar başlığı yok sayar: bunun yerine adımın kendi bağlantısı üzerinden her kombin adımı için bir hesap sabitleyin.
+- **Pin katıdır, bir tercih değildir.** Sabitlenmiş bağlantı yalnızca kullanılır. İsteğin içindeki bir hata, hesabın bekleme süresini kaydeder ancak** Olumsuz** aynı sağlayıcının kardeş hesabına geçiş yapın.
+- **Bekleme süresi ve kota, PIN'i serbest bırakır.** Sabitlenmiş bağlantı soğurken, kota tükenirken veya bir kota politikası tarafından engellenirken, daha sonraki istekler, tıpkı sabitlenmemiş trafik gibi, sağlayıcının diğer bağlantılarına geri döner.
+- **Bilinmeyen veya devre dışı bırakılan kimlikler başarısız oluyor.** Sağlayıcının aktif havuzunda olmayan (silinmiş, devre dışı bırakılmış veya başka bir sağlayıcıya ait olan) bir kimlik uygun bir hesap bırakmaz, dolayısıyla istek sessizce başka bir yere yönlendirilmek yerine başarısız olur.
 
-Claude Code, özel başlıkları `ANTHROPIC_CUSTOM_HEADERS` üzerinden gönderir. Bunu `env` bloğuna
-`~/.claude/settings.json` içinde veya proje başına farklı bir hesabı sabitlemek için proje
-düzeyindeki `.claude/settings.json` dosyasına ekleyin:
+Claude Code, `ANTHROPIC_CUSTOM_HEADERS` aracılığıyla özel başlıklar gönderir. Proje başına farklı bir hesabı sabitlemek için bunu `~/.claude/settings.json` `env` bloğuna veya proje düzeyinde `.claude/settings.json` koyun:
 
 ```jsonc
 {
@@ -133,12 +120,11 @@ düzeyindeki `.claude/settings.json` dosyasına ekleyin:
 }
 ```
 
-Kaynak: `src/sse/handlers/chat.ts` (başlık okuma), `src/sse/services/auth.ts` ve
-`src/sse/services/sessionAffinityPin.ts` (sabitlemenin kaldırılması ve havuzda bulunmama kontrolü).
+Kaynak: `src/sse/handlers/chat.ts` (başlık okuma), `src/sse/services/auth.ts` ve `src/sse/services/sessionAffinityPin.ts` (pin serbest bırakma ve havuzda eksik kontrolü).
 
-> **Maliyet telemetrisi başlıkları:** akışsız başarılı yanıtlar ayrıca `X-OmniRoute-*` maliyet telemetrisi kümesini de taşır — `X-OmniRoute-Response-Cost` (USD, sabit 10 ondalık basamak; ücretsiz/fiyatlandırılmamış için `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` ve `X-OmniRoute-Fallback-Attempts` (yalnızca 0'dan büyük olduğunda), ayrıca `X-OmniRoute-Request-Id` ve `X-OmniRoute-Version`. Bunlar sohbet tamamlamaları, `/v1/responses`, `/v1/messages` **ve medya uç noktaları** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` ve `/v1/moderations` (maliyet her zaman `0`) — tarafından gönderilir. Medya maliyeti, fiyatlandırma mevcut olduğunda modalite başına (görüntü başına, saniye başına, karakter başına, arama birimi başına) hesaplanır; aksi takdirde `0` olur (fail-open).
+> **Maliyet telemetri başlıkları:** Akışsız başarı yanıtları aynı zamanda `X-OmniRoute-*` maliyet telemetri setini de taşır — `X-OmniRoute-Response-Cost` (USD, sabit 10 ondalık sayı; free/unpriced için `0.0000000000` ), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` ve `X-OmniRoute-Fallback-Attempts` (yalnızca > 0 olduğunda), artı `X-OmniRoute-Request-Id` ve `X-OmniRoute-Version`. Bunlar sohbet tamamlamaları tarafından yayılır, `/v1/responses`, `/v1/messages`,** ve medya uç noktaları** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` ve `/v1/moderations` (her zaman `0` maliyeti). Medya maliyeti, fiyatlandırma mevcut olduğunda modaliteye göre (görüntü başına, saniye başına, karakter başına, arama birimi başına) hesaplanır, aksi takdirde `0` (açılma durumunda) hesaplanır.
 
-> **Önbellek isabeti maliyet semantiği:** anlamsal önbellek İSABETİ (`X-OmniRoute-Cache-Hit: true`) durumunda üst akışa çağrı yapılmaz; bu nedenle `X-OmniRoute-Response-Cost`, isabeti sunmanın **artımlı** maliyeti olarak `0.0000000000` olur. Orijinal/oluşacak maliyet ayrı olarak `X-OmniRoute-Cost-Saved` içinde bildirilir. Faturalandırma tüketicileri `X-OmniRoute-Response-Cost` değerlerini toplamalıdır (isabetlerin maliyeti yoktur); önbellek analizleri `X-OmniRoute-Cost-Saved` değerlerini bir araya getirebilir.
+> **Önbellek isabetli maliyet semantiği:** anlamsal önbellek HIT (`X-OmniRoute-Cache-Hit: true`) herhangi bir yukarı akış çağrısı yapılmaz, bu nedenle `X-OmniRoute-Response-Cost` `0.0000000000` (** artımlı** isabeti sunmanın maliyeti). original/would-have-been maliyeti `X-OmniRoute-Cost-Saved` ayrı olarak raporlanır. Faturalandırma tüketicilerinin `X-OmniRoute-Response-Cost` toplaması gerekir (isabetlerin hiçbir maliyeti yoktur); önbellek analitiği `X-OmniRoute-Cost-Saved` toplayabilir.
 
 ## Özel Yönetilen Oturum Kiraları
 
@@ -359,6 +345,8 @@ Mevcut sağlayıcılar arasında OpenAI (GPT Image 2), xAI (Grok Image), Togethe
 
 `n` `n` görüntülerini `data[]` biçiminde döndürür. Yukarı akış API çağrı başına bir görüntü döndüren sağlayıcılar (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolik, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), uçuş sırasında en fazla 4 olmak üzere `n` ayrı yukarı akış çağrıları alır. Sabit bir `seed` çağrı dizini (`seed`, `seed + 1`, …) ile dengelenir, böylece görüntüler farklılık gösterir ancak tekrarlanabilir kalır. `n` sınırı 10'dur. Herhangi bir çağrı başarısız olursa istek bir bütün olarak başarısız olur. Yayılma formatlarının listesi `open-sse/handlers/imageGeneration/fanOut.ts` içindeki `SINGLE_IMAGE_FANOUT_FORMATS` şeklindedir.
 
+Codex GPT Görüntü modelleri (`codex/gpt-image-*`) yalnızca PNG döndürür: yukarı akış `jpeg` veya `webp` istendiğinde bile `200` PNG baytlarıyla yanıt verir. Başka herhangi bir `output_format` (`webp`, `jpeg`, ...) ile yapılan bir istek sessizce göz ardı edilmek yerine HTTP 400 ile reddedilir; atlayın veya `png` gönderin. `output_compression` iletilmiyor.
+
 ZenMux mevcut API anahtarı bağlantısını yeniden kullanır ve `zenmux/` veya `zm/` öneklerini kabul eder:
 
 - `zenmux/openai/gpt-image-2`, ZenMuxOpenAI Görüntüleri API kullanır. Seçenekler arasında `size`, `quality`, `n`, `output_format`, `output_compression`, `background` ve `response_format` bulunur.
@@ -376,7 +364,7 @@ GET /v1/images/generations
 
 ---
 
-## Belge OCR'si
+## Belge OCR
 
 ```bash
 POST /v1/ocr
@@ -392,17 +380,15 @@ Content-Type: application/json
 }
 ```
 
-`model`, `provider/model` ön eki aracılığıyla OCR sağlayıcısını seçer; yalın bir model kimliği (ör.
-`mistral-ocr-latest`), kayıtlı sağlayıcısına çözümlenir ve `model` belirtilmezse varsayılan olarak
-Mistral (`mistral-ocr-latest`) kullanılır. Kayıtlı sağlayıcılar (`open-sse/config/ocrRegistry.ts`):
+`model` OCR sağlayıcısını bir `provider/model` öneki aracılığıyla seçer; çıplak bir model kimliği (örneğin `mistral-ocr-latest`) kayıtlı sağlayıcısına çözümlenir ve atlanan bir `model` varsayılan olarak Mistral (`mistral-ocr-latest`) olur. Kayıtlı sağlayıcılar (`open-sse/config/ocrRegistry.ts`):
 
-| Sağlayıcı kimliği             | Model kimliği        | `model` değeri                                                 | Notlar                                                                                                                       |
-| ----------------------------- | -------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (veya yalın `mistral-ocr-latest`) | Eşzamanlı — yanıt, tek üst seviye çağrıdan doğrudan döndürülür.                                                              |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                    | Eşzamansız üst seviye işlem (`analyze` + yoklama) — aşağıya bakın.                                                           |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                        | Vertex AI'nin `openapi/chat/completions` iş ortağı uç noktası üzerinden eşzamanlı — kimlik doğrulama/URL için aşağıya bakın. |
+| Sağlayıcı kimliği             | Model kimliği                                      | `model` değeri                                                  | Notlar                                                                                                                                                                                                                                           |
+| ----------------------------- | -------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mistral`                     | `mistral-ocr-latest`                               | `mistral/mistral-ocr-latest` (veya çıplak `mistral-ocr-latest`) | Senkronize — yanıtı doğrudan tek yukarı akış çağrısından döndürülür.                                                                                                                                                                             |
+| `azure-document-intelligence` | `prebuilt-read`                                    | `azure-document-intelligence/prebuilt-read`                     | Asenkron yukarı akış (`analyze` + anketi) — aşağıya bakın.                                                                                                                                                                                       |
+| `vertex-deepseek-ocr`         | kendi kendine konuşlandırılan (yerleşik model yok) | `vertex-deepseek-ocr/<your-deployed-model-id>`                  | Kendi Vertex AI Model Garden DeepSeek-OCR uç noktanız (`openapi/chat/completions` şekli) aracılığıyla senkronize; Google yönetilen `deepseek-ocr-maas` 2026-10-21 (#20423) tarihinde kullanımdan kaldırdı, böylece kimlik 400 değerini döndürdü. |
 
-Her üç sağlayıcı da aynı Mistral biçimli gövdeyle yanıt verir:
+Her üç sağlayıcı da aynı Mistral şeklindeki gövdeyle yanıt veriyor:
 
 ```json
 {
@@ -412,27 +398,13 @@ Her üç sağlayıcı da aynı Mistral biçimli gövdeyle yanıt verir:
 }
 ```
 
-### Azure Document Intelligence yoklama akışı
+### Azure Document Intelligence anket akışı
 
-Azure Document Intelligence'ın `analyze` API'si eşzamansızdır: ilk istek bir gövde yerine
-`Operation-Location` başlığı döndürür ve sonuç için yoklama yapılması gerekir. İşleyici
-(`open-sse/handlers/ocr.ts`), bu URL'yi 30 denemeye kadar her saniye yoklar; `ok` olmayan bir yoklama yanıtında veya
-`"failed"` durumunda hızlıca başarısız olur (yoklamaya devam etmez) ve deneme bütçesi tükendikten sonra işlem
-hâlâ çalışıyorsa `504` döndürür. Son Azure yanıtı, çağırana döndürülmeden önce Mistral tarafından kullanılan aynı
-`pages`/`markdown` biçiminde normalleştirilir; böylece istemci kodunun sağlayıcıya özel durumları ele alması gerekmez.
+Azure Document Intelligence'ın `analyze` API eşzamansızdır: ilk istek, gövde yerine bir `Operation-Location` başlığı döndürür ve sonucun yoklanması gerekir. İşleyici (`open-sse/handlers/ocr.ts`), 30 denemeye kadar her saniye URL yoklar,`ok` olmayan bir yoklama yanıtında veya `"failed"` durumunda hızlı bir şekilde başarısız olur (yoklama yapmaz) ve deneme bütçesi tükendikten sonra işlem hala çalışıyorsa `504` döndürür. Nihai Azure yanıtı, arayana geri gönderilmeden önce Mistral tarafından kullanılan aynı `pages`/`markdown` şekline göre normalleştirilir, böylece istemci kodunun sağlayıcıyı özel harf durumuna getirmesi gerekmez.
 
-### Vertex AI DeepSeek OCR kimlik doğrulaması ve uç nokta çözümleme
+### Vertex AI DeepSeek OCR kimlik doğrulama ve uç nokta çözünürlüğü
 
-`vertex-deepseek-ocr`, OmniRoute'un sohbet/görüntü trafiği için zaten desteklediği aynı Vertex AI kimlik doğrulamasını
-(`open-sse/executors/vertex.ts`) yeniden kullanır: bağlantının API anahtarı, bir Hizmet Hesabı JSON kimlik bilgisi
-(JWT-bearer akışı aracılığıyla kısa ömürlü bir OAuth erişim belirteciyle değiştirilir) veya olduğu gibi kullanılan
-önceden oluşturulmuş bir OAuth erişim belirteci olabilir. Üst seviye uç nokta URL'si, bağlantının projesi ve
-bölgesinden oluşturulan Vertex'in genel `openapi/chat/completions` iş ortağı uç noktasıdır —
-açıkça belirtilen bir `providerSpecificData.project`/`providerSpecificData.region` her zaman önceliklidir;
-aksi durumda proje, Hizmet Hesabı JSON'undaki `project_id` değerinden türetilir ve bölge varsayılan olarak
-`us-central1` olur. Her iki çözümleme de `open-sse/handlers/ocr.ts` içinde
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) gerçekleştirilir ve
-`src/app/api/v1/ocr/route.ts` tarafından `handleOcr`'a gönderilmeden önce kullanılır.
+`vertex-deepseek-ocr` OmniRoute chat/image trafiği (`open-sse/executors/vertex.ts`) için zaten desteklediği aynı Vertex AI kimlik doğrulamasını yeniden kullanır: bağlantının API anahtarı ya bir Hizmet Hesabı JSON kimlik bilgisidir (JWT taşıyıcı akışı aracılığıyla kısa ömürlü bir OAuth erişim belirteciyle değiştirilir) ya da olduğu gibi kullanılan, önceden basılmış bir OAuth erişim belirtecidir. Yukarı akış uç noktası URL Vertex'in genel `openapi/chat/completions` ortağı uç noktasıdır; bağlantının projesinden ve — bölgesinden oluşturulan açık bir `providerSpecificData.project`/`providerSpecificData.region` her zaman kazanır; aksi takdirde proje, Hizmet Hesabı JSON `project_id` türetilir ve bölge varsayılan olarak `us-central1` olur. Her iki çözümleme de `handleOcr` gönderilmeden önce `src/app/api/v1/ocr/route.ts` tarafından tüketilen `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) gerçekleşir.
 
 ---
 
@@ -682,75 +654,100 @@ Upstream sözleşmeleri: [ses efektleri](https://elevenlabs.io/docs/api-referenc
 
 ## Uyumluluk Uç Noktaları
 
-| Yöntem | Yol                                       | Biçim                                  |
-| ------ | ----------------------------------------- | -------------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                                 |
-| POST   | `/v1/messages`                            | Anthropic                              |
-| POST   | `/v1/responses`                           | OpenAI Responses                       |
-| POST   | `/v1/embeddings`                          | OpenAI                                 |
-| POST   | `/v1/images/generations`                  | OpenAI Images                          |
-| POST   | `/v1/images/edits`                        | OpenAI Images (düzenleme/inpaint)      |
-| POST   | `/v1/videos/generations`                  | OpenAI tarzı video oluşturma           |
-| POST   | `/v1/music/generations`                   | OpenAI tarzı müzik oluşturma           |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                     |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (ses gövdesi döndürür)      |
-| POST   | `/v1/rerank`                              | Cohere/Voyage tarzı yeniden sıralama   |
-| POST   | `/v1/classify`                            | Jina sınıflandırma (`api.jina.ai`)     |
-| POST   | `/v1/segment`                             | Jina segmentleyici (`segment.jina.ai`) |
-| POST   | `/v1/moderations`                         | OpenAI Moderations                     |
-| GET    | `/v1/models`                              | OpenAI                                 |
-| POST   | `/v1/models/query`                        | Filtrelenmiş model kısa listesi        |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                              |
-| GET    | `/v1beta/models`                          | Gemini                                 |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                 |
-| POST   | `/v1/api/chat`                            | Ollama                                 |
-| GET    | `/api/v1/vscode/{token}/`                 | OpenAI katalog diğer adı               |
-| GET    | `/api/v1/vscode/{token}/models`           | OpenAI modelleri diğer adı             |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI belirteçli diğer adı            |
-| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responses belirteçli diğer adı  |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama belirteçli diğer adı            |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama etiketleri belirteçli diğer adı |
+| Yöntem | Yol                                       | Biçim                                       |
+| ------ | ----------------------------------------- | ------------------------------------------- |
+| POST   | `/v1/chat/completions`                    | OpenAI                                      |
+| POST   | `/v1/messages`                            | Anthropic                                   |
+| POST   | `/v1/responses`                           | OpenAI Yanıtları                            |
+| POST   | `/v1/embeddings`                          | OpenAI                                      |
+| POST   | `/v1/images/generations`                  | OpenAI Görselleri                           |
+| POST   | `/v1/images/edits`                        | OpenAI Görselleri (edit/inpaint)            |
+| POST   | `/v1/videos/generations`                  | OpenAI tarzı video oluşturma                |
+| POST   | `/v1/music/generations`                   | OpenAI tarzı müzik üretimi                  |
+| POST   | `/v1/audio/transcriptions`                | OpenAI Ses (STT)                            |
+| POST   | `/v1/audio/speech`                        | OpenAI TTS (ses gövdesini döndürür)         |
+| POST   | `/v1/rerank`                              | Cohere/Voyage-style yeniden sıralaması      |
+| POST   | `/v1/classify`                            | Jina sınıflandırması (`api.jina.ai`)        |
+| POST   | `/v1/segment`                             | Jina bölümleyici (`segment.jina.ai`)        |
+| POST   | `/v1/moderations`                         | OpenAI Moderasyonları                       |
+| POST   | `/v1/systemone`                           | Sistem Bir yazılan kararlar                 |
+| POST   | `/v1/decisions`                           | OpenAI Kararları (yerel)                    |
+| GET    | `/v1/systemone/models`                    | Karar modeli kataloğu                       |
+| GET    | `/v1/models`                              | OpenAI                                      |
+| POST   | `/v1/models/query`                        | Filtrelenmiş model kısa listesi             |
+| POST   | `/v1/messages/count_tokens`               | Anthropic                                   |
+| GET    | `/v1beta/models`                          | Gemini                                      |
+| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                      |
+| POST   | `/v1/api/chat`                            | Ollama                                      |
+| GET    | `/api/v1/vscode/{token}/`                 | OpenAI katalog takma adı                    |
+| GET    | `/api/v1/vscode/{token}/models`           | OpenAI modelleri takma adı                  |
+| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenleştirilmiş takma ad            |
+| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responses tokenleştirilmiş takma ad  |
+| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenleştirilmiş takma ad            |
+| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama etiketleri tokenleştirilmiş takma ad |
 
-Tüm POST rotaları aynı yapıyı izler: `Bearer your-api-key` + Zod tarafından doğrulanan JSON gövdesi (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` vb.; bkz. `src/shared/validation/schemas.ts`). Şema doğrulaması başarısız olduğunda 4xx döndürülür.
+Tüm POST rotaları aynı şekli takip eder: `Bearer your-api-key` + Zod onaylı JSON gövdesi (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` vb., bkz. `src/shared/validation/schemas.ts`). Şema hatası durumunda 4xx döndürülür.
 
-`Authorization: Bearer ...` ekleyemeyen istemciler için OmniRoute, API anahtarlarını URL içinde sorgu dizesi uyumluluğu (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) veya aşağıda belgelenen özel `/api/v1/vscode/{token}/...` uç noktaları aracılığıyla da kabul eder.
+`Authorization: Bearer ...` ekleyemeyen istemciler için OmniRoute, sorgu dizesi uyumluluğu (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) veya aşağıda belgelenen özel `/api/v1/vscode/{token}/...` uç noktaları aracılığıyla URL API anahtarlarını da kabul eder.
 
 ```bash
-# Yeniden sıralama (bulut kayıt sağlayıcısı veya "<prefix>/<model>" biçiminde OpenAI uyumlu sağlayıcı düğümü)
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina sınıflandırma (Foundation API kimlik bilgileri)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina segmentleyici
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina arama (s.jina.ai; sağlayıcı diğer adları: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderasyonlar
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg (veya istenen biçimde) gövde döndürür
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS bir dil ve ses gerektirir: `language`, "en" değerini varsayılan olarak kullanır; eksik
-# bir ses veya OpenAI stok ses adı (alloy, nova, …) "Adrian" değerine dönüştürülür
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Görüntü düzenleme (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Video / müzik oluşturma (sağlayıcı ön ekli model kimliği)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Sağlayıcı düğümlerini yeniden sırala:** `POST /v1/rerank` ayrıca `<node-prefix>/<model>` olarak adreslenen OpenAI uyumlu sağlayıcı düğümlerine (oMLX, vLLM, Infinity, bir ağ geçidinin arkasındaki TEI, …) yönlendirme yapar. Loopback düğümleri (`localhost`, `127.0.0.1`, `172.16.0.0/12`) her zaman uygundur; operatörün `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` içinde listelediği ana bilgisayar adları da (ör. `http://reranker:8080/v1` gibi bir Docker/Compose hizmet adı) uygundur. Bunlar doğrudan çağrılır; hiçbir zaman `HTTP(S)_PROXY` veya bir bağlantının sabitlenmiş proxy'si üzerinden çağrılmaz. Başka herhangi bir ana bilgisayardaki düğümler — bir LAN cihazı veya Tailscale eş düğümü — yalnızca operatör `RERANK_REMOTE_PROVIDER_NODES` özellik bayrağını etkinleştirdiğinde ve düğümün temel URL'si sağlayıcı giden URL politikasını (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) geçtiğinde uygundur. Bellek motorunun yeniden sıralama adımı bu rotayı loopback üzerinden çağırır; dolayısıyla aynı kural Bellek ayarlarındaki `rerankProviderModel` için de geçerlidir.
+> **Sağlayıcı düğümlerini yeniden sıralayın:** `POST /v1/rerank` ayrıca `<node-prefix>/<model>` olarak adreslenen OpenAI uyumlu sağlayıcı düğümlerine (oMLX, vLLM, Infinity, TEI bir ağ geçidinin arkasında,…) yönlendirir. Geri döngü düğümleri (`localhost`, `127.0.0.1`, `172.16.0.0/12`) ve `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` operatörün listelediği ana bilgisayar adları da her zaman uygundur (örneğin, `http://reranker:8080/v1` gibi bir Docker/Compose hizmet adı; bunlar doğrudan çağrılır, asla `HTTP(S)_PROXY` veya bir bağlantının sabitlenmiş proxy'si aracılığıyla çağrılmaz). Başka herhangi bir ana bilgisayardaki —, LAN kutusu veya Tailscale eş — düğümler, yalnızca operatör `RERANK_REMOTE_PROVIDER_NODES` özellik işaretini etkinleştirdiğinde uygundur** Ve** düğümün tabanı URL sağlayıcının giden URL politikasını (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) geçirir. Bellek motorunun yeniden sıralama adımı bu rotayı geri döngü üzerinden çağırır, dolayısıyla Bellek ayarlarında `rerankProviderModel` de aynı kural yönetir.
 >
-> **Yerel sunucu biçimleri:** Düğüm `<base>/v1/rerank` üzerinden, 404 durumunda ise `<base>/rerank` üzerinden (Infinity, TEI) çağrılır. Üst akış gövdesi hem Cohere/OpenAI yazımını (`documents`, `return_documents`) hem de TEI yazımını (`texts`, `return_text`) taşır ve üst akış yanıtı Cohere zarf biçimine normalleştirilir: TEI'nin yalın `[{index, score, text}]` yanıtı, ince ağ geçitlerinden gelen `{results: [{index, score}]}` ve Voyage tarzı `{data: [...]}` yanıtlarının tümü istemciye puana göre sıralanmış ve `top_n` ile sınırlandırılmış `{results: [{index, relevance_score, document?}]}` olarak döner.
+> **Yerel sunucu şekilleri:** düğüm `<base>/v1/rerank` ve 404'te `<base>/rerank` (Sonsuz, TEI) çağrılır. Yukarı akış gövdesi hem Cohere/OpenAI yazımını (`documents`, `return_documents`) hem de TEI yazımını (`texts`, `return_text`) taşır ve yukarı akış yanıtı Cohere zarfına normalleştirilir: TEI çıplak `[{index, score, text}]`, ince ağ geçitlerinden `{results: [{index, score}]}` ve Voyage tarzı `{data: [...]}` tümü müşteriye `{results: [{index, relevance_score, document?}]}` olarak geri döner, puana göre sıralanır ve `top_n` ile sınırlanır.
 
-> **Sağlayıcı düğümü keşfi:** OpenAI uyumlu bir sağlayıcı düğümündeki modeller, düğüm öneki altında `GET /v1/models` içinde görünür. Uç nokta meta verisi taşımayan satırlar (yerel `/v1/models` listelerinde tipik olarak görüldüğü üzere) düğümün `apiType` değerini devralır; bu nedenle bir `embeddings` düğümünün modelleri varsayılan olarak sohbete ayarlanmak yerine `type: "embedding"`, bir `rerank` düğümünün modelleri ise `type: "rerank"` olur. Senkronize edilen veya elle eklenen bir satırdaki açık `supportedEndpoints` değeri yine önceliklidir.
+> **Sağlayıcı düğüm keşfi:** OpenAI uyumlu sağlayıcı düğümündeki modeller `GET /v1/models` düğüm öneki altında görünür. Hiçbir uç nokta meta verisi taşımayan satırlar (yerel `/v1/models` listeleri için tipiktir), düğümün `apiType` devralır; dolayısıyla, sohbeti varsayılan olarak ayarlamak yerine bir `embeddings` düğümünün modelleri `type: "embedding"` ve bir `rerank` düğümünün modelleri `type: "rerank"` ; senkronize edilmiş veya manuel olarak eklenen bir satırdaki açık bir `supportedEndpoints` hâlâ önceliklidir.
+
+### Yazılan Kararlar
+
+Karar modelleri, metin oluşturmak yerine yazılı soruları kalibre edilmiş olasılıklarla yanıtlar. Bunlar hiçbir zaman sohbet modelleri değildir ve iki iletişim biçimi hiçbir zaman birbirine çevrilmez:
+
+- `POST /v1/systemone` — Birinci Sistem `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter kararları, Cloudflare İşçiler AI, yerel Ollama).
+- `POST /v1/decisions` — yerel OpenAI Kararlar `{ model, input, questions: [...] }`, bir `openai` bağlantısı tarafından sunulur. Model `openai/gpt-6-luna` (çıplak `gpt-6-luna` de işe yarar). Cevaplar, dokunulmadan, soru sırasına göre geri gelir.
+- `GET /v1/systemone/models` — her iki türden bir katalog; her satır kendi `api_format` (`systemone` veya `decisions`) adlandırır. `limit` / `after` sayfası son liste. `X-OmniRoute-Catalog-Status` başlığı `complete`, `partial` veya `unavailable` (503) şeklinde okunur.
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions` API anahtarının model izin verilenler listesi, `decisions` uç nokta kategorisi, bütçe ve bağlantı kapsamı herhangi bir kimlik bilgisi okunmadan önce kontrol edilir. Kimlik bilgisi, anahtarın kapsamı içinde saklanan `openai` bağlantısıdır (asla bir ortam anahtarı değildir); URL bağlantı tabanı yalnızca kimlik bilgileri, sorgu veya bu OmniRoute işaret etmeyen bir `http(s)` URL olduğunda dikkate alınır. Çağrı, `decision` otomatik yönlendirici ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ) ile aynı korumalı aktarım yoluyla ayrılır: sağlayıcı giden koruması, yeniden deneme yok, yönlendirme yok, 5 saniyelik zaman aşımı ve 64 KB yanıt sınırı (daha büyük bir yanıt 502'dir). İstek gövdeleri 4 MiB ile sınırlıdır. Her çağrı yeni bir `Idempotency-Key` gönderir. Hatalar yalnızca yukarı akış durumunu taşır; gövdesini, URL, anahtarı veya istemi asla taşımaz.
 
 ### Özel Sağlayıcı Rotaları
 
@@ -760,7 +757,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Sağlayıcı öneki eksikse otomatik olarak eklenir. Uyuşmayan modeller `400` döndürür.
+Sağlayıcı öneki eksikse otomatik olarak eklenir. Eşleşmeyen modeller `400` değerini döndürür.
 
 ---
 

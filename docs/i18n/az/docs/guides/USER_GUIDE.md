@@ -247,33 +247,41 @@ Modellər: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Kombinasiyalar
+## 🎨 Combos
 
-Hər kartdakı tutacağı sürükləməklə kombinasiya kartlarının sırasını birbaşa **İdarəetmə paneli → Kombinasiyalar** bölməsində dəyişə bilərsiniz. Sıra SQLite-da saxlanılır və yenidən yükləndikdə bərpa olunur.
+Kombo kartları birbaşa olaraq yenidən sifariş edə bilərsiniz** İdarə paneli → Combos** hər bir kartdakı sapı sürükləyərək. Sifariş SQLite -də saxlanılır və yenidən yükləndikdə bərpa olunur.
 
-### Nümunə 1: Abunəliyi maksimum istifadə et → Ucuz ehtiyat
+### Provayder, model və ya hesab tapın
 
-```
-İdarəetmə paneli → Kombinasiyalar → Yenisini yarat
+Combo Yaradın və ya Redaktə edin, addım-addım Provayder, Model, Hesab və birləşdirilmiş istinad seçicilərinə yerli axtarış sahəsi daxildir. Göstərilən ad, identifikator, provayder ləqəbi və ya model mənbəyi ilə axtarın, sonra nəticəyə klikləyin və ya ox düymələrindən istifadə edin və Enter düyməsini basın. Çoxsaylı axtarış şərtlərinin hamısı uyğun olmalıdır. Axtarışı silmək və ya Escape düyməsini sıxmaq seçilmiş dəyəri dəyişməz olaraq qalır.
 
-Ad: premium-coding
-Modellər:
-  1. cc/claude-opus-4-7 (Əsas abunəlik modeli)
-  2. glm/glm-4.7 (Ucuz ehtiyat, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Ən ucuz ehtiyat variantı, $0.3/1M)
+Axtarış zamanı avtomatik hesab seçimi görünən qalır. Onun isteğe bağlı hesab məhdudiyyətləri siyahısında ayrıca filtr var: görünən nəticələrdən kənar seçilmiş hesablar seçilmiş qalır və saya onlar da daxildir. E-poçt məxfiliyi aktiv olduqda gizli e-poçt fraqmentləri axtarıla bilməz. Addım əlavə edin və hər zamanki kimi kombini saxlayın; sorğunun yazılması heç nə saxlamır və ya sınaqdan keçirmir.
 
-CLI-da istifadə: premium-coding
-```
+Eyni yerli axtarış əlaqə testi modelləri, Xüsusi CLI defolt və ləqəb modelləri və saxlanmış proksi seçimləri üçün əlçatandır. Mövcud saxlama, tətbiq etmə və sınaq əməliyyatları ayrı qalır.
 
-### Nümunə 2: Yalnız pulsuz (Sıfır xərc)
+### Nümunə 1: Abunəliyi maksimuma çatdırın → Ucuz Yedəkləmə
 
 ```
-Ad: free-combo
-Modellər:
-  1. if/kimi-k2.7-code (pulsuz giriş kimi göstərilir; provayder məhdudiyyətləri tətbiq oluna bilər)
-  2. kr/qwen3-coder-next (Kiro pulsuz ehtiyat variantı)
+Dashboard → Combos → Create New
 
-Xərc: hazırda $0 kimi göstərilir; şərtlər və əlçatanlıq dəyişə bilər
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### Nümunə 2: Yalnız Pulsuz (Sıfır Xərc)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -433,7 +441,7 @@ Artıq OmniRoute ehtiyacınız olmadıqda, təmiz silmək üçün iki sürətli 
 ### VPS Yerləşdirmə
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -515,8 +523,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -603,7 +611,7 @@ post_install() {
 | Dəyişən                                 | Defolt                   | Təsvir                                                                                                                                                             |
 | --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `JWT_SECRET`                            | _(avtomatik yaradılan)_  | JWT imzalama sirri — ilk işə salındıqda avtomatik olaraq yaradıldı və `server.env` ə qədər davam etdi; məlumat kataloqu efemer olduqda onu açıq şəkildə təyin edin |
-| `INITIAL_PASSWORD`                      | _(ayarlanmadı)_          | İlk giriş parolu. npm/source quraşdırmaları `CHANGEME` ilə başlayır: onu dəyişdirin. Ayarlanmadı: işə başlama sehrbazı                                             |
+| `INITIAL_PASSWORD`                      | _(ayarlanmadı)_          | İlk giriş parolu. npm/source quraşdırmaları `CHANGEME` ilə başlayır: onu dəyişdirin. Quraşdırılmadı: qoşulma sehrbazı                                              |
 | `DATA_DIR`                              | `~/.omniroute`           | Məlumat kataloqu (db, istifadə, qeydlər)                                                                                                                           |
 | `PORT`                                  | çərçivə standartı        | Xidmət portu (nümunələrdə `20128` )                                                                                                                                |
 | `HOSTNAME`                              | çərçivə standartı        | Hostu bağlayın (Docker defolt olaraq `0.0.0.0`)                                                                                                                    |
@@ -718,7 +726,7 @@ OpenAI API dilində danışan hər hansı bir şlüz (öz-özünə yerləşdiril
 3. **Prefiks** : marşrutlaşdırma adı. Müştərilər modelləri `<prefix>/<model>` adlandırırlar, buna görə də `mygw` prefiksi olan qovşaq `mygw/gpt-4o-mini` xidmət edir. Tələb olunur; xarakter məhdudiyyəti yoxdur.
 4. **API növü** : şlüzün xidmət etdiyi son nöqtə ailəsi (Söhbət Tamamlamaları, Cavablar, Yerləşdirmələr, audio, şəkillər).
 5. **Baza URL** : tam `/chat/completions` yolu deyil, `/v1` (məsələn `https://gateway.example.com/v1`) daxil olmaqla API kökü. Qeyri-standart yolları olan şlüzlər onları altına qoyur** Qabaqcıl Parametrlər** (söhbət yolu, modellər yolu).
-6. The**API açarı (yoxlama üçün)** sahə yalnız əlaqəni yoxlayır. Düyün yaratdıqdan sonra onu açın və istifadə edin** Əlaqə əlavə edin** sorğuların istifadə edəcəyi açarı saxlamaq üçün.
+6. The**API açarı (yoxlama üçün)** sahə yalnız əlaqəni yoxlayır. Düyün yaratdıqdan sonra onu açın və istifadə edin** Bağlantı əlavə edin** sorğuların istifadə edəcəyi açarı saxlamaq üçün.
 
 Düyün `openai-compatible-<apiType>-<uuid>` formasının daxili identifikatorunu alır; heç vaxt onu yazmağa ehtiyac yoxdur, prefiks ictimai addır.
 
@@ -772,7 +780,7 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Yalnız açıq şəkildə icazə verilən həmyaşıd URL -ya göndərilən sorğular `X-OmniRoute-Peer-Trace` başlığını alır. Şlüz təkrar ID nümunəsini və ya HTTP `508 Loop Detected` ilə tükənmiş hop büdcəsini rədd edir; adi upstream provayderlər həmyaşıd metadata qəbul etmirlər.
+Yalnız açıq şəkildə icazə verilmiş həmyaşıd URL -ya göndərilən sorğular `X-OmniRoute-Peer-Trace` başlığını alır. Şlüz təkrar ID nümunəsini və ya HTTP `508 Loop Detected` ilə tükənmiş hop büdcəsini rədd edir; adi upstream provayderlər həmyaşıd metadata qəbul etmirlər.
 
 Peer zəncirləmə verilənlər bazası replikasiyası və ya hostun əvəzlənməsi deyil. Hər bir şlüz müstəqil SQLite vəziyyətini, keşləri, tarif sayğaclarını və sessiyaları saxlayır. active/passive və ya active/active əlçatanlığı üçün sağlamlığı yoxlanılmış əks proksi və ya müştəri əvəzetməsindən istifadə edin və heç vaxt bir SQLite verilənlər bazasını çoxsaylı işləyən OmniRoute instansiyalarına quraşdırmayın.
 
@@ -786,7 +794,7 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Təchizatçı prefiksi yoxdursa, avtomatik əlavə edilir. Uyğun olmayan modellər `400` qaytarır.
+Provayder prefiksi yoxdursa, avtomatik əlavə edilir. Uyğun olmayan modellər `400` qaytarır.
 
 ### Şəbəkə Proksi Konfiqurasiyası
 
@@ -865,14 +873,14 @@ vasitəsilə konfiqurasiya edin** İdarə paneli → Parametrləri → Marşrutl
 
 **İdarə panelində görünən strategiyalar (hesab səviyyəsində marşrutlaşdırma):**
 
-| Strategiya                    | Təsvir                                                                                                             |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Əvvəlcə doldurun**          | Prioritet qaydasında hesablardan istifadə edir — əsas hesab əlçatan olmayana qədər bütün sorğuları idarə edir      |
-| **Dəyirmi Robin**             | Konfiqurasiya edilə bilən yapışqan limiti olan bütün hesablar arasında dövrə vurur (defolt: hər hesaba 3 zəng)     |
-| **P2C (İki Seçim Gücü)**      | 2 təsadüfi hesab və daha sağlam birinə gedən marşrut seçir — sağlamlıq haqqında məlumatlılıqla yükü balanslaşdırır |
-| **Təsadüfi**                  | Fisher-Yates shuffle istifadə edərək hər sorğu üçün təsadüfi hesab seçir                                           |
-| **Az İstifadə Edilib**        | Trafiki bərabər paylayan ən köhnə `lastUsedAt` vaxt damğası olan hesaba marşrutlar                                 |
-| **Xərclər optimallaşdırılıb** | Ən aşağı qiymətli provayderlər üçün optimallaşdırılaraq, ən aşağı prioritet dəyəri olan hesaba marşrutlar          |
+| Strategiya                 | Təsvir                                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Əvvəlcə doldurun**       | Prioritet qaydasında hesablardan istifadə edir — əsas hesab əlçatan olmayana qədər bütün sorğuları idarə edir      |
+| **Dəyirmi Robin**          | Konfiqurasiya edilə bilən yapışqan limiti olan bütün hesablar arasında dövrə vurur (defolt: hər hesaba 3 zəng)     |
+| **P2C (İki Seçim Gücü)**   | 2 təsadüfi hesab və daha sağlam birinə gedən marşrut seçir — sağlamlıq haqqında məlumatlılıqla yükü balanslaşdırır |
+| **Təsadüfi**               | Fisher-Yates shuffle istifadə edərək hər sorğu üçün təsadüfi hesab seçir                                           |
+| **Az İstifadə Edilib**     | Trafiki bərabər paylayan ən köhnə `lastUsedAt` vaxt damğası olan hesaba marşrutlar                                 |
+| **Xərc optimallaşdırılıb** | Ən aşağı qiymətli provayderlər üçün optimallaşdırılaraq, ən aşağı prioritet dəyəri olan hesaba marşrutlar          |
 
 **Qabaqcıl kombo və avtomatik strategiyalar** (kombo və ya `auto/*` prefiksləri vasitəsilə konfiqurasiya edilə bilər — bax [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
@@ -884,8 +892,8 @@ vasitəsilə konfiqurasiya edin** İdarə paneli → Parametrləri → Marşrutl
 - `least-used` və `cost-optimized`
 - `auto` — bütün namizədlər arasında hesaba əsaslanan
 - `lkgp` (Son Bilinən Yaxşı Provayder) — sonuncu uğurlu provayderə bağlanır, sonra qaydalara qayıdır
-- `context-optimized` — ən böyük pulsuz kontekst pəncərəsi olan modeli seçir
-- `context-relay` — zəncirləri təqib növbələri üçün uzun kontekstli modellər
+- `context-optimized` — ilk olaraq ən böyük məlum kontekst pəncərəsi olan modeli sınayır
+- `context-relay` — prioritet sırası və söhbət başqa hesaba keçdikdə ötürmə xülasəsi
 
 #### Xarici Yapışqan Sessiya Başlığı
 
@@ -903,9 +911,9 @@ Nginx istifadə edirsinizsə və alt xətt başlıqlarını göndərirsinizsə, 
 underscores_in_headers on;
 ```
 
-#### Wildcard Model Təxəllüsü
+#### Wildcard Model ləqəbləri
 
-Model adlarını dəyişdirmək üçün joker nümunələr yaradın:
+Model adlarını dəyişdirmək üçün joker simvollar yaradın:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
@@ -978,7 +986,7 @@ omniroute combo create free-stack \
 
 Təsvirin anlaşılması və kodun yaradılmasını əhatə edən iş axınları üçün yüksək sürətli mətn generasiyası ilə xüsusi görmə modellərinin qoşalaşdırılması.
 
-- **Nümunə** : Görmə qabiliyyətinə malik modelləri ilk, ən son isə yüksək məhsuldarlığa malik text/code modelini siyahıya alan `Priority` kombinatı.
+- **Nümunə** : İlk olaraq görmə qabiliyyətinə malik modelləri, sonuncu isə yüksək məhsuldarlığa malik text/code modelini siyahıya alan `Priority` kombinatı.
 - **Modellər** :
   1. `gemini/gemini-2.5-pro` (Güclü image/multimodal anlama)
   2. `openai/gpt-4o` (Balanslı görmə və alət istifadəsi)
@@ -1015,9 +1023,9 @@ OmniRoute beş komponentlə provayder səviyyəsində davamlılığı həyata ke
 
    Provayder kəsicisinin işləmə vaxtı vəziyyəti göstərilir** Dashboard → Health** yalnız.
 
-4. **Soğutma müddətini gözləyin** — Əgər hər bir namizəd bağlantısı artıq soyuyursa, OmniRoute ən erkən soyumağı gözləyə və eyni müştəri sorğusunu avtomatik olaraq təkrarlaya bilər.
+4. **Soğutma müddətini gözləyin** — Əgər hər bir namizəd bağlantısı artıq soyuyursa, OmniRoute ən erkən soyumağı gözləyə və avtomatik olaraq eyni müştəri sorğusunu təkrar sınaya bilər.
 
-5. **Rate Limit Avtomatik Aşkarlanması** — Yuxarı provayderlər açıq-aşkar gözləmə pəncərələrini qaytardıqda, parametr aktivləşdirildikdə həmin göstərişlər yerli əlaqənin soyudulma müddətini ləğv edir.
+5. **Rate Limit Avtomatik Aşkarlanması** — Yuxarı provayderlər açıq gözləmə pəncərələrini qaytardıqda, parametr aktivləşdirildikdə, bu göstərişlər yerli əlaqənin soyudulma müddətini ləğv edir.
 
 **Pro İpucu:** istifadə edin** Sağlamlıq** fasilədən sonra canlı provayder açarlarını yoxlamaq və sıfırlamaq üçün səhifə. Resilience səhifəsi yalnız konfiqurasiyanı dəyişir.
 
@@ -1158,7 +1166,7 @@ Hər kombo balansını konfiqurasiya edin** Dashboard → Combos → Create/Edit
 | **Az İstifadə Edilib**      | Ən az son sorğu ilə modelə marşrutlar (kombo metriklərdən istifadə edir)       |
 | **Xərc-Optimallaşdırılmış** | Ən ucuz mövcud modelə marşrutlar (qiymət cədvəlindən istifadə edir)            |
 
-Qlobal kombinasiya standartları quraşdırıla bilər** Dashboard → Parametrləri → Routing → Combo Defolt** . Qarışıq hədəf fasilələri defolt olaraq cari sorğu fasiləsini miras alır. istifadə edin** Hədəf fasiləsi (saniyə)** kombo defoltlarında və ya fərdi komboda yalnız hədəf başına daha qısa limit daha sürətli geri dönməyə səbəb olduqda.
+Qlobal kombinasiya standartları quraşdırıla bilər** Dashboard → Parametrləri → Routing → Combo Defolt** . Qarışıq hədəf fasilələri defolt olaraq cari sorğu fasiləsini miras alır. istifadə edin** Hədəf fasiləsi (saniyə)** kombo defoltlarında və ya fərdi komboda yalnız hədəf başına daha qısa limit daha sürətli geri qayıtmağa səbəb olduqda.
 
 Sıfır gecikmə kombo optimallaşdırmaları daxil edilir. tərk et** Sıfır gecikmə optimallaşdırmaları** bu gecikmə funksiyalarının ehtiyat hədəflərlə yarışmasının, TTFT tarixçəsinə əsaslanan hədəflərin atlanmasının və ya geri qaytarma sorğularının sıxılmasının qarşısını almaq üçün deaktiv edilib; onu aktivləşdirmək konfiqurasiya edilmiş hedcinq, proqnozlaşdırılan TTFT atlamaları və aşağı quyruq gecikməsi üçün routing/request sədaqəti ilə ticarət etmək üçün proaktiv geri sıxılmaya imkan verir.
 
@@ -1334,32 +1342,34 @@ Son nöqtələrin tam kataloqu və sorğu/cavab sxemləri üçün [API_REFERENCE
 
 ## 💻 Daxili CLI
 
-OmniRoute quraşdırma, diaqnostika və işləmə zamanı idarəetmə üçün daxili CLI (`omniroute …`) ilə təqdim olunur. Bu, üçüncü tərəf CLI-lərinin (Claude Code, Cursor, Codex, Cline, …) OmniRoute ilə əlaqə qura bilməsi üçün onları konfiqurasiya edən idarəetmə panelindəki **"CLI Alətləri" səhifəsindən ayrıdır**.
+OmniRoute quraşdırma, diaqnostika və icra müddətinə nəzarət üçün daxili CLI (`omniroute …`) göndərir. bu** tablosunda "CLI Tools" səhifəsindən ayrı** , üçüncü tərəf CLIs (Claude Kodu, Cursor, Codex, Cline, …) konfiqurasiya edir ki, onlar OmniRoute ilə danışa bilsinlər.
 
 ```bash
-omniroute setup                    # İnteraktiv quraşdırma köməkçisi (parol, provayderlər, kombinasiyalar)
-omniroute setup --non-interactive  # CI üçün uyğundur
-omniroute doctor                   # Sağlamlıq diaqnostikası (məlumat kataloqu, verilənlər bazası, provayderlər, portlar)
-omniroute providers available      # Dəstəklənən provayderləri sadala
-omniroute providers list           # Konfiqurasiya edilmiş bağlantıları sadala
-omniroute providers test <id>      # Provayder bağlantısını real vaxtda sına
-omniroute combos list              # Kombinasiyaları sadala
-omniroute combos switch <name>     # Standart kombinasiyanı təyin et
-omniroute models                   # Mövcud modelləri sadala (--json, --search)
-omniroute keys add | list | remove # API açarlarını terminaldan idarə et
-omniroute backup                   # Konfiqurasiyanın və verilənlər bazasının anlıq surətini yarat
-omniroute restore [<timestamp>]    # Anlıq surətdən bərpa et
-omniroute health                   # Ətraflı sağlamlıq məlumatı (qoruyucular, keş, yaddaş)
-omniroute quota                    # Provayder kvotasının istifadəsi
-omniroute mcp status               # MCP serverinin statusu
-omniroute a2a status               # A2A serverinin statusu
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunelləri
-omniroute reset-password           # Administrator parolunu sıfırla
-omniroute --mcp                    # MCP serverini stdio üzərindən işə sal
-omniroute --port 3000              # Serveri fərdi portda işə sal
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-İpucu: qeyri-sağlam provayder bağlantıları barədə xəbərdarlıq almaq üçün `omniroute doctor --json` əmrini monitorinq alətinizlə birlikdə istifadə edin.
+İpucu: zədələnmiş yerli quraşdırma barədə xəbərdarlıq etmək üçün `omniroute doctor --json` monitorinq alətinizlə birləşdirin. `doctor` provayder əlaqələrini sınaqdan keçirmir; bunun üçün `omniroute providers test <id>` istifadə edin.
 
 ---
 

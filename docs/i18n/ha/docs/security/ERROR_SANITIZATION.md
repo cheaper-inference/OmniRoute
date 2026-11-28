@@ -4,13 +4,7 @@
 
 ---
 
-> **Tushen gaskiya:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, da masu gina bayanan jama'a a cikin `open-sse/utils/error.ts`
-> **Gwaje-gwaje:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Sabuntawa ta ƙarshe:** 2026-09-02 — v3.8.51
-> **Masu karatu:** Duk wani injiniya da ke aiki da martanin kurakurai (hanyoyin HTTP, rafukan SSE, masu aiwatarwa, masu sarrafa MCP).
-> **Matsayi:** **WAJIBI** ga kowace hanyar lamba da ke mayar da saƙon kuskure ga abokin ciniki.
+> **Tushen gaskiya:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, da maginin jama'a a cikin `open-sse/utils/error.ts`** Gwaje-gwaje:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Masu sauraro:** Duk wani injiniyan da ya taɓa amsa kuskure (hanyoyin HTTP, rafukan SSE, masu zartarwa, masu sarrafa MCP ).** Matsayi:****MANDATORY** ga kowane hanyar lambar da ke mayar da saƙon kuskure ga abokin ciniki.
 
 ## Dalilin samuwar wannan
 

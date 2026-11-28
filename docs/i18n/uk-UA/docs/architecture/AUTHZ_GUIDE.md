@@ -4,12 +4,11 @@
 
 ---
 
-> **Джерело істини:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Останнє оновлення:** 22.09.2026 — простори імен області вказують на MCP-SERVER.md
+> **Джерело правди:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute має конвеєр авторизації, що враховує маршрути та захищає кожен запит API. Класифікація є **детермінованою** та **закривається при збої** — все, що не може бути класифіковано, стає `MANAGEMENT` і вимагає сесії або токена рівня управління. Ця сторінка пояснює модель для інженерів, які підтримують маршрути або розробляють нові кінцеві точки.
+OmniRoute має конвеєр авторизації з урахуванням маршруту, який пропускає кожен запит API. Класифікація є** детермінований** і** безвідмовно закритий** — все, що не може бути класифіковане, закінчується як `MANAGEMENT` і вимагає маркер сеансу або рівня керування. На цій сторінці пояснюється модель для інженерів, які обслуговують маршрути або проектують нові кінцеві точки.
 
-![Конвеєр AuthZ (3 класи маршрутів + оцінка політики)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Джерело: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -183,13 +182,13 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) — завжди повертає `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — витягує носій, перевіряє через `validateApiKey()`. Переходить до анонімного лише тоді, коли прапор ефективної функції `REQUIRE_API_KEY` вимкнено. Ефективний прапор розв’язується через `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), тому прапорці функцій панелі інструментів і змінні середовища керують `/api/v1/*`, `/api/v1beta/*` та псевдонімами послідовно; збій розв'язувача не закривається. Дозволяє надсилати запити на сеанс панелі керування на маршрутах API клієнта (включаючи `/api/v1/models`, який використовується каталогом моделей панелі). Коли Entra ID SSO увімкнено, носій, який структурно є маркером Entra (три сегменти base64url, `RS*` alg, `kid`), обробляється гілкою SSO** раніше** `validateApiKey()` і його вердикт остаточний — він ніколи не потрапляє до шляху ключа API або гілки переходу до анонімного, тому збій постачальника ідентифікаційної інформації не може стати відкритим доступом. Статичні ключі API не впливають. Див. [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — приймає сеанс інформаційної панелі, внутрішні запити на синхронізацію моделі (співставляються з `/api/providers/[name]/(sync-models|models)`) або повністю пропускає, якщо `isAuthRequired()` повертає false. Повертає 403 (`AUTH_001`), якщо маркер носія присутній, але недійсний, 401 в іншому випадку. Також забезпечує виконання рівнів охорони маршруту (LOCAL_ONLY / ALWAYS_PROTECTED) перед будь-якою гілкою авторизації — див. [Рівні охорони маршруту](../security/ROUTE_GUARD_TIERS.md). Шляхи LOCAL_ONLY у `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (сьогодні: `/api/mcp/`) можуть бути доступні без зворотного зв’язку, якщо ключ-носій містить область `manage` ; усі інші шляхи LOCAL_ONLY залишаються строгими зацикленими, незалежно від обсягу.
+- **`managementPolicy`** (`policies/management.ts`) — приймає сеанс інформаційної панелі, внутрішні запити на синхронізацію моделі (співставляються з `/api/providers/[name]/(sync-models|models)`) або повністю пропускає, якщо `isAuthRequired()` повертає false. Повертає 403 (`AUTH_001`), якщо маркер носія присутній, але недійсний, 401 в іншому випадку. Також забезпечує виконання рівнів охорони маршруту (LOCAL_ONLY / ALWAYS_PROTECTED) перед будь-якою гілкою авторизації — див. [Рівні охорони маршруту](../security/ROUTE_GUARD_TIERS.md). Шляхи LOCAL_ONLY у `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (сьогодні: `/api/mcp/`) можуть бути доступні без зворотного зв’язку, коли носійний ключ містить область `manage`/`admin` або вузьку область `mcp:connect` (`hasMcpConnectOrManageScope`), або за допомогою автентифікованого сеансу інформаційної панелі; усі інші шляхи LOCAL_ONLY залишаються строгими зацикленими, незалежно від обсягу.
 
 Успішна політика повертає `AuthSubject` з `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Нижчі обробники можуть прочитати його через `assertAuth(request, "CLIENT_API")` у `src/server/authz/assertAuth.ts` замість повторного запуску логіки авторизації.
 
 ## Список публічних маршрутів
 
-`src/shared/constants/publicApiRoutes.ts` є явним дозволеним списком:
+`src/shared/constants/publicApiRoutes.ts` є явним білим списком:
 
 Список поділено на** форму** , і розділення є несучим (GHSA-74g9-q8f6-793h): префікс збігається з `startsWith()`, тому він також відповідає кожному суміжному шляху, що має спільні початкові символи. `/api/usage/om-usage` як префікс, позначений як `/api/usage/om-usage<anything>` PUBLIC, і Next вирішує це як `/api/usage/[connectionId]` — обробник без власної авторизації.
 
@@ -274,38 +273,24 @@ export async function POST(request: Request) {
 
 Вибирайте набір за формою, а не за зручністю. Один маршрут слід додавати до `PUBLIC_API_ROUTES_EXACT` (або до `PUBLIC_READONLY_CORS_API_ROUTES`, якщо він призначений лише для GET); лише справжнє піддерево слід додавати до `PUBLIC_API_ROUTE_PREFIXES`, і воно **має закінчуватися на `/`**. Додавання окремого маршруту до списку префіксів також робить публічним кожен суміжний шлях, що має такі самі початкові символи, — включно зі спорідненими маршрутами з динамічними сегментами, доданими пізніше (GHSA-74g9-q8f6-793h). Оновіть модульні тести в `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` і `tests/unit/authz/classify.test.ts`.
 
-## Області видимості (Scopes)
+## Області застосування
 
-Три простори імен. Кожен перевіряльник читає лише власні рядки. Порівняння,
-включно з тим, чому `manage` не проходить `scopeMatches` для `read:compression` і чому
-токен доступу `read` не може `PATCH /api/keys/{id}`, знаходиться в
-[Три простори імен областей видимості](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Три простори імен. Кожна шашка читає лише свої власні рядки. Пліч-о-пліч, включно з тим, чому `manage` не працює `scopeMatches` для `read:compression` і чому маркер доступу `read` не може `PATCH /api/keys/{id}`, є [три простори імен області](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
 Ключі API містять масив `scopes` (зберігається як JSON у `api_keys.scopes`, див. `src/lib/db/apiKeys.ts`).
 
-### Область видимості управління
+### Сфера управління
 
-- `manage` / `admin` — `hasManageScope`. Доступ Bearer до маршрутів API управління.
-- `mcp:connect`, `self:usage`, `self:account-quota` та
-  `policy:bypass-provider-quota` є адитивними областями видимості з точним збігом. Вони знаходяться
-  поза `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` відкриває лише
-  не-зворотний виріз `/api/mcp/`.
+- `manage` / `admin` — `hasManageScope`. Доступ носія до керування маршрутами API.
+- `mcp:connect`, `self:usage`, `self:account-quota` і `policy:bypass-provider-quota` є адитивними областями точної відповідності. Вони сидять на вулиці `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` відкриває лише виділення `/api/mcp/` без петлі.
 
-### Області видимості інструментів MCP
+### області дії інструменту MCP
 
-Каталог та правила відповідності (ідентичний рядок або надана область видимості, що закінчується на `*`):
-[Області видимості інструментів MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` у `src/shared/constants/mcpScopes.ts` є оригінальною типізованою
-підмножиною, а не повним каталогом. Примусове виконання відбувається в
-`open-sse/mcp-server/scopeEnforcement.ts` після того, як `resolveCallerScopeContext()`
-розв'язує області видимості з інформації про автентифікацію MCP, метаданих запиту або `OMNIROUTE_MCP_SCOPES`.
-Воно залишається вимкненим, якщо `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Каталог і правила відповідності (ідентичний рядок або наданий обсяг, що закінчується на `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` у `src/shared/constants/mcpScopes.ts` — це оригінальна типізована підмножина, а не повний каталог. Примусове виконання виконується в `open-sse/mcp-server/scopeEnforcement.ts` після того, як `resolveCallerScopeContext()` вирішить області з інформації автентифікації MCP, метаданих запиту або `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` вмикає його глобально (за замовчуванням `false`), але він завжди застосовується для абонента HTTP/SSE, у якого ключ API відсутній `manage`/`admin` (див. `shouldForceScopeEnforcement()` в `open-sse/mcp-server/scopeEnforcement.ts`), незалежно від прапора.
 
-### Області видимості токенів доступу
+### Області маркерів доступу
 
-`read` / `write` / `admin` на токенах `oma_live_…`, ранжовані за `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Цей ранг застосовується лише до облікових даних токена доступу.
-Див. [Автентифікація управління](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` на токенах `oma_live_…`, упорядкованих за `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Цей ранг застосовується лише до облікових даних маркера доступу. Перегляньте [автентифікацію керування](../guides/MANAGEMENT-AUTH.md).
 
 ## Потрібна автентифікація
 

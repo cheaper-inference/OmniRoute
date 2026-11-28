@@ -26,57 +26,53 @@ Az OmniRoute három különálló, de egymással összefüggő reziliencia-mecha
 > az nem változtat semmin — inkább kapcsolja át a kapcsolót a
 > **Beállítások → Reziliencia** oldalon (vagy törölje a mentett mezőt).
 
-## 1. Szolgáltatószintű circuit breaker
+## 1. Szolgáltató áramköri megszakító
 
-**Hatókör:** a teljes szolgáltató (pl. `glm`, `openai`, `anthropic`).
+**Hatály:** teljes szolgáltató (pl. `glm`, `openai`, `anthropic`).
 
-**Cél:** leállítani a forgalom küldését egy olyan szolgáltató felé, amely az upstream/szolgáltatási szinten ismételten meghibásodik.
+**Cél:** ne küldjön forgalmat olyan szolgáltatónak, amely ismételten meghibásodik a upstream/service szinten.
 
-**Megvalósítás:**
+**Végrehajtás:**
 
-- Központi osztály: `src/shared/utils/circuitBreaker.ts`
+- Alaposztály: `src/shared/utils/circuitBreaker.ts`
 - Bekötés: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Státusz API: `GET /api/monitoring/health`
-- Visszaállítási API: `POST /api/resilience/reset`
-- Befoglalók (wrapper): `open-sse/services/accountFallback.ts`
-- Adatbázis-tábla: `domain_circuit_breakers`
+- API állapot: `GET /api/monitoring/health`
+- API visszaállítása: `POST /api/resilience/reset`
+- Burkolatok: `open-sse/services/accountFallback.ts`
+- DB táblázat: `domain_circuit_breakers`
 
-**Állapotok:**
+**Államok:**
 
-- `CLOSED` — a normál forgalom engedélyezett
-- `DEGRADED` — a forgalom továbbra is engedélyezett, de a rendszer nyomon követi a megnövekedett szolgáltatói hibákat; visszatér `CLOSED` állapotba elegendő sikeres kérés után, érvényes kapcsolatteszt esetén, vagy ha az utolsó hibatípushoz tartozó leghosszabb `OPEN` tartás (annak `cooldownByKind` értéke, ennek hiányában a `resetTimeout`, × `maxBackoffMultiplier`, de legalább egy cooldown) új hiba nélkül eltelik
-- `OPEN` — a szolgáltató ideiglenesen blokkolva; a combo útválasztás kihagyja
-- `HALF_OPEN` — a visszaállítási időtúllépés lejárt; próbakérés engedélyezett
+- `CLOSED` — normál forgalom engedélyezett
+- `DEGRADED` — forgalom továbbra is engedélyezett, de a megnövekedett szolgáltatói hibákat nyomon követik; elegendő siker esetén, érvényes kapcsolódási teszt esetén vagy az utolsó hibatípus leghosszabb `OPEN` tartása után (annak `cooldownByKind` értéke, különben `resetTimeout`, × `maxBackoffMultiplier`, legalább egy lehűlés) új hiba nélkül tér vissza `CLOSED`
+- `OPEN` — szolgáltató ideiglenesen blokkolva; a kombinált útválasztás kihagyja
+- `HALF_OPEN` — reset timeout letelt; szonda kérése engedélyezett
 
-**Konfigurálható alapértékek (`open-sse/config/constants.ts`, elérhetők: Dashboard → Settings → Resilience):**
+**Konfigurálható alapértékek (`open-sse/config/constants.ts`, megjelenítve a Dashboard → Beállítások → Resilience menüpontjában):**
 
-| Osztály | Degradálódik  | Kinyit  | Visszaállítási időtúllépés |
-| ------- | ------------- | ------- | -------------------------- |
-| OAuth   | 5 hiba        | 8 hiba  | 60s                        |
-| API-key | 7 hiba        | 12 hiba | 30s                        |
-| Local   | származtatott | 2 hiba  | 15s                        |
+| Osztály   | Lefokozott at | Nyitás:   | Időkorlát visszaállítása |
+| --------- | ------------- | --------- | ------------------------ |
+| OAuth     | 5 kudarc      | 8 kudarc  | 60-as évek               |
+| API-kulcs | 7 kudarc      | 12 kudarc | 30-as évek               |
 
-A `degradationThreshold` szabályozza, hogy a szolgáltató mikor lép `DEGRADED` állapotba; a `failureThreshold` azt szabályozza, hogy mikor nyit ki és kerül kihagyásra. A helyi (local) szolgáltatói profilok egyelőre nem érhetők el a Resilience beállítási oldalon.
+`degradationThreshold` szabályozza, hogy a szolgáltató mikor lép be `DEGRADED`; `failureThreshold` vezérli, mikor nyílik meg és mikor kerül kihagyásra. `PROVIDER_PROFILES.local` (2 hiba / 15 s) a `open-sse/config/constants.ts` but-ban van definiálva** még nincs bekötve** : `getProviderCategory()` csak `oauth` vagy `apikey` értéket ad vissza, így a helyi szolgáltatók a OAuth vagy API-kulcs profilt használják.
 
-**Kioldó kódok:** csak szolgáltatói szintű státuszok: `[408, 500, 502, 503, 504]`. NE oldjon ki fiókszintű hibákra (a legtöbb 401/403/429 — ezek a cooldownhoz vagy a lockouthoz tartoznak).
+**Utazási kódok:** csak szolgáltatói szintű állapotok `[408, 500, 502, 503, 504]`. Fiókszintű hibák esetén végezzen NOT -kioldást (a legtöbb 401/403/429 — a cooldownhoz vagy a lockouthoz tartozik).
 
-**Lusta (lazy) felépülés:** amikor az `OPEN` lejár, a `getStatus()`, `canExecute()`, `getRetryAfterMs()` `HALF_OPEN` állapotra frissít. Ugyanezek a lekérdezések (és a következő hiba) az elavult `DEGRADED` állapotot is visszafokozzák `CLOSED` értékre. Háttéridőzítőre nincs szükség.
+**Lusta felépülés:** amikor `OPEN` lejár, `getStatus()`, `canExecute()`, `getRetryAfterMs()` állapot frissítése `HALF_OPEN` értékre. Ugyanez a kiolvasás (és a következő hiba) egy elavult `DEGRADED` visszabont `CLOSED`-re. Nincs szükség háttéridőzítőre.
 
 ---
 
-### Opcionális (opt-in) globális szolgáltatói cooldown (ablakkapu)
+### Feliratkozás globális szolgáltatói lehűtés (ablakkapu)
 
-Egy negyedik, **opt-in** réteg (`PROVIDER_COOLDOWN_ENABLED`, alapértelmezetten **ki**) kérések közötti memóriát tart fenn a hibázó szolgáltatókról az
-`open-sse/services/providerCooldownTracker.ts` fájlban; ezt a combo célfeloldás kérdezi le, így az egymást követő combo kérések nem járnak be újra egy éppen meghibásodott szolgáltatót. A szolgáltatói szintű bejegyzések a `PROVIDER_PROFILES` ablakkaput követik:
+Egy negyedik,** feliratkozás** réteg (`PROVIDER_COOLDOWN_ENABLED`, alapértelmezett** le** ) megőrzi a keresztkérések memóriáját a meghibásodott szolgáltatókról `open-sse/services/providerCooldownTracker.ts` ben, amelyet a kombinált célfeloldás kezel, így az egymást követő kombinált kérések leállítják az éppen meghibásodott szolgáltatók újraindulását. A szolgáltatói szintű bejegyzések tiszteletben tartják a `PROVIDER_PROFILES` ablakkaput:
 
-| Profil  | kiold ennyi után (`providerFailureThreshold`) | ezen az ablakon belül (`providerFailureWindowMs`) | ennyi ideig hűl (`providerCooldownMs`) |
-| ------- | --------------------------------------------: | ------------------------------------------------: | -------------------------------------: |
-| OAuth   |                                          `10` |                                           `15min` |                                 `5min` |
-| API key |                                          `15` |                                           `30min` |                                `10min` |
+| Profil    | utáni utazások (`providerFailureThreshold`) | belül (`providerFailureWindowMs`) | hűti a (`providerCooldownMs`) |
+| --------- | ------------------------------------------: | --------------------------------: | ----------------------------: |
+| OAuth     |                                        `10` |                           `15min` |                        `5min` |
+| API kulcs |                                        `15` |                           `30min` |                       `10min` |
 
-A küszöbérték alatt a szolgáltató **nem** minősül hűlés alatt állónak; egy sikeres kérés törli az ablakot. A kapcsolatszintű bejegyzések (`provider:connectionId`) ehelyett az exponenciális `minRetryCooldownMs → maxRetryCooldownMs` backoffot tartják meg. Felülírások:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Regressziós ellenőrzés: `tests/unit/provider-cooldown-window-gate.test.ts`.
+A küszöb alatt van a szolgáltató** nem** hűtésnek tekinthető; a siker kitisztítja az ablakot. A kapcsolatszintű bejegyzések (`provider:connectionId`) ehelyett megtartják az exponenciális `minRetryCooldownMs → maxRetryCooldownMs` visszalépést. Felülbírálások: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regressziós őr: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Csatlakozás Lehűlés
 
@@ -749,6 +745,21 @@ Valós korlátok:
 
 ---
 
+## Amikor maga OmniRoute elérhetetlen
+
+A szolgáltató megszakítója, a kapcsolat lehűtése és a modellzár mind az átjárón belül fut. Ha a kliens nem tudja elérni az átjárót, kapcsolati hibát kap. OmniRoute nem tudja elhárítani ezt a kudarcot. Az ügyfél dönti el, hogy megpróbálja-e újra, és milyen üzenetet jelenít meg.
+
+OmniRoute jelenleg nem biztosít ügyféloldali tartalékot, és nem határoz meg szabályzatot sem. Konfiguráljon bármilyen alternatív útvonalat a kliensben vagy az átjáró előtt.
+
+- `GET /api/health` hitelesítés nélkül ellenőrzi az életerőt.
+- `GET /api/health/ping` ellenőrzi a készenlétet, beleértve azt is, hogy az adatbázis válaszol-e.
+- `GET /api/monitoring/health` mélyebb egészségügyi áttekintést nyújt a hitelesített hívóknak.
+- `omniroute launch <tool>` megvizsgálja `/api/monitoring/health` az ügyfél elindítása előtt. Automatikusan elindíthat egy helyi átjárót. `--no-start` esetén egy elérhetetlen átjáró `GatewayUnreachable` és `69` kilépési kódot eredményez.
+
+Egy kliens OmniRoute kapcsolatának leválasztásához kövesse [az Ügyfélkonfiguráció visszaállítása részt](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Hibakeresés
 
 - A weighted combo `503 all_targets_cooling_down` választ ad (`Retry-After` beállítva, a `diagnostics.excluded` minden célt felsorol `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable` értékkel) → a pool konfigurálva van és csatlakozik, minden cél csupán egy hibatűrési időzítő miatt van kizárva; a `[COMBO] Weighted selection: every target excluded before dispatch — …` figyelmeztetés megnevezi az okokat és a hátralévő másodperceket. Az ugyanettől a combotól érkező `404 no_executable_targets` azt jelenti, hogy nem járt közre hibatűrési időzítő (nincs mit futtatni, vagy minden fiók elbukott a rendelkezésreállási próbán). Az `open-sse/services/combo/pinRecovery.ts` fájlban készült, a `targetResolution.ts`-ben összegyűjtött kizárásokból.
@@ -760,73 +771,68 @@ Valós korlátok:
 
 ---
 
-## Futásidejű állapot — gyorsreferencia ügynököknek
+## Futásidejű állapot — ügynök gyorsreferencia
 
-> Szó szerint áthelyezve az `AGENTS.md` fájlból → "Resilience Runtime State" (PR #12743), hogy az ügynök-útmutató a 40k kontextuskeret alatt maradjon. Ez a fenti szakaszok sűrített, ügynököknek szóló nézete; a számozott szakaszok maradnak a teljes referencia.
+> Szó szerint átkerült `AGENTS.md` → „Resilience Runtime State” (PR #12743) állományból, így az ügynöki útmutató a 40 000 kontextusköltségvetés alatt marad. Ez a fenti szakaszok összesített, ügynökre néző képe; a számozott szakaszok továbbra is a teljes referencia.
 
-Az OmniRoute három rokon, de eltérő ideigleneshiba-kezelési mechanizmussal rendelkezik. Az útválasztási viselkedés hibakeresésekor tartsa külön a hatókörüket. Tekintse meg a [3 rétegű hibatűrési diagramot](../diagrams/exported/resilience-3layers.svg)
-(forrás: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-az egy pillantással áttekinthető térképért.
+OmniRoute három kapcsolódó, de különálló átmeneti meghibásodási mechanizmusa van. Tartsa külön a hatókörüket az útválasztási viselkedés hibakeresésekor. Tekintse meg a [3 rétegű rugalmassági diagramot](../diagrams/exported/resilience-3layers.svg) (forrás: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) egy áttekinthető térképért.
 
-### Szolgáltatói megszakító (Provider Circuit Breaker)
+### Szolgáltató áramköri megszakító
 
-**Hatókör**: teljes szolgáltató, pl. `glm`, `openai`, `anthropic`.
+**Hatály** : teljes szolgáltató, pl `glm`, `openai`, `anthropic`.
 
-**Cél**: leállítani a forgalom küldését egy olyan szolgáltató felé, amely ismételten hibázik az upstream/szolgáltatási szinten, hogy egyetlen egészségtelen szolgáltató se lassítsa le az összes kérést.
+**Cél** : hagyja abba a forgalom küldését egy olyan szolgáltatónak, amely ismétlődően meghibásodik a upstream/service szinten, így egy egészségtelen szolgáltató nem lassít le minden kérést.
 
-**Megvalósítás**:
+**Végrehajtás** :
 
 - Alaposztály: `src/shared/utils/circuitBreaker.ts`
-- Chat-kapu/végrehajtás bekötése: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Futásidejű állapot-API: `src/app/api/monitoring/health/route.ts`
-- Közös burkolók: `open-sse/services/accountFallback.ts`
-- Tárolt állapottábla: `domain_circuit_breakers`
+- Chat gate/execution vezetékek: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Futásidejű állapot API: `src/app/api/monitoring/health/route.ts`
+- Megosztott burkolatok: `open-sse/services/accountFallback.ts`
+- Megmaradt állapottábla: `domain_circuit_breakers`
 
-**Állapotok** (4 — `src/shared/utils/circuitBreaker.ts`):
+**államok** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: a normál forgalom engedélyezett.
-- `DEGRADED`: korai figyelmeztető sáv — a hibák átlépték a degradálási küszöböt, de még nem a megszakító küszöbét; a forgalom tovább áramlik, a műszerfalak megjelenítik a figyelmeztetést. Egy érvényes kapcsolatteszt vagy egy új hiba nélküli nyugodt ablak visszaállítja `CLOSED` állapotba (az ablakot a `docs/architecture/RESILIENCE_GUIDE.md` írja le).
-- `OPEN`: a szolgáltató ideiglenesen blokkolva van; a hívók provider-circuit-open választ kapnak, vagy a combo-útválasztás egy másik célra lép.
-- `HALF_OPEN`: a visszaállítási időtúllépés eltelt; engedélyezett egy próbakérés. Siker esetén a megszakító bezárul, hiba esetén újra kinyílik.
+- `CLOSED`: normál forgalom megengedett.
+- `DEGRADED`: a korai figyelmeztető sáv — meghibásodása átlépte a degradációs küszöböt, de még nem a megszakítási küszöböt; a forgalom továbbra is folyik, a műszerfalakon megjelenik a figyelmeztetés. Egy érvényes kapcsolatteszt vagy egy csendes ablak új hiba nélkül visszaadja `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` van az ablak).
+- `OPEN`: a szolgáltató ideiglenesen le van tiltva; a hívók szolgáltatói áramkör nyitott választ kapnak, vagy a kombinált útválasztás egy másik célpontra ugrik.
+- `HALF_OPEN`: a visszaállítási időtúllépés lejárt; lehetővé teszi a vizsgálati kérelmet. A siker bezárja a megszakítót, a kudarc újra kinyitja.
 
-**Alapértékek** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, amelyet a `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` fogyaszt a `src/lib/resilience/settings.ts` fájlban → `getCircuitBreaker(provider, …)` a `src/sse/handlers/chatHelpers.ts` fájlban). A teljes szolgáltatót érintő megszakító a `circuitBreakerThreshold` / `circuitBreakerReset` értékeken fut:
+**Defaults** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, consumed via `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` in `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). The whole-provider breaker runs on `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profil    | degradálódik ennél | kinyit ennél (`circuitBreakerThreshold`) | visszaállítás (`circuitBreakerReset`) |
-| --------- | -----------------: | ---------------------------------------: | ------------------------------------: |
-| OAuth     |                `5` |                                      `8` |                                 `60s` |
-| API-kulcs |                `7` |                                     `12` |                                 `30s` |
-| Helyi     |    (származtatott) |                                      `2` |                                 `15s` |
+| Profil    | degradálódik at | nyit (`circuitBreakerThreshold`) | visszaállítás (`circuitBreakerReset`) |
+| --------- | --------------: | -------------------------------: | ------------------------------------: |
+| OAuth     |             `5` |                              `8` |                                 `60s` |
+| API kulcs |             `7` |                             `12` |                                 `30s` |
 
-A `PROVIDER_PROFILES` emellett definiálja a `providerFailureThreshold` (10/15/2), a `providerFailureWindowMs` (15/30/5 perc) és a `providerCooldownMs` (5/10/1 perc) értékeket: ezek működtetik **az opt-in globális Provider Cooldown ablakkapuját** (`PROVIDER_COOLDOWN_ENABLED`, alapértelmezetten kikapcsolva) — az `open-sse/services/providerCooldownTracker.ts` szolgáltatószintű bejegyzése csak akkor számít hűlésnek, ha `providerFailureThreshold` hiba történik a `providerFailureWindowMs` időablakon belül, és ezután `providerCooldownMs` ideig hűl. Ezek NEM az élő megszakító küszöbértékei — ne hangolja őket megszakítóviselkedést várva. Minden alapérték felülírható az `OMNIROUTE_PROVIDER_BREAKER_*` és `OMNIROUTE_CIRCUIT_BREAKER_*` környezeti változókon keresztül; a futásidőben pontos referenciatáblázat a `docs/architecture/RESILIENCE_GUIDE.md` fájlban található.
+A `local` profil (`2` errors / `15s`) is létezik `PROVIDER_PROFILES`-ben, de ez nincs bekötve a megszakítóba: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) csak `oauth` vagy `apikey` paramétereket fogadja el, `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) pedig e kettő közül az egyiket adja vissza (a nem regisztrált szolgáltatók `apikey` kapják).
 
-Csak szolgáltatószintű hibastátuszok válthatják ki a szolgáltatói megszakítót:
+`PROVIDER_PROFILES` definiálja `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) és `providerCooldownMs` (5/10/1 min) — OAuth/API key/local is, ahol a helyi értékek ugyanazon okból inertek, mint fent: ezek adják a teljesítményt a** ablakkapu a globális szolgáltatói lehűlésben** (`PROVIDER_COOLDOWN_ENABLED`, alapértelmezett kikapcsolva) — a szolgáltató szintű bejegyzés `open-sse/services/providerCooldownTracker.ts` -ben csak `providerFailureWindowMs` belüli `providerFailureThreshold` meghibásodások után számít hűtésnek, majd `providerCooldownMs` esetén hűt. Ezek NOT az élő megszakító küszöbértékei — nem hangolják őket, várva a megszakító viselkedését. Minden alapértelmezett érték felülírható a `OMNIROUTE_PROVIDER_BREAKER_*` és `OMNIROUTE_CIRCUIT_BREAKER_*` env vars segítségével; a futásidejű pontosságú referenciatábla `docs/architecture/RESILIENCE_GUIDE.md`-ban él.
+
+Csak a szolgáltatói szintű hibaállapotok kapcsolhatják ki a szolgáltatói megszakítót:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Normál fiók-/kulcs-/modellhibákra — mint a legtöbb `401`, `403` vagy `429` eset — ne váltsa ki a teljes szolgáltatót érintő megszakítót. Ezek általában a kapcsolati cooldown vagy a modell-zárolás hatókörébe tartoznak. Egy általános API-kulcsos szolgáltató `403`-as hibájának helyreállíthatónak kell lennie, hacsak nem végleges szolgáltatói/fiókhibának minősül.
+Ne kapcsolja ki a teljes szolgáltató megszakítóját normál account/key/model hibák esetén, mint például a legtöbb `401`, `403` vagy `429` eset. Ezek általában a kapcsolat lehűléséhez vagy a modellzáráshoz tartoznak. Az általános API-kulcs-szolgáltató `403` helyreállíthatónak kell lennie, kivéve, ha terminális provider/account hibának minősül.
 
-A megszakító lusta helyreállást használ, nem háttéridőzítőt. Amikor az `OPEN` állapot lejár,
-az olyan olvasások, mint a `getStatus()`, a `canExecute()` és a `getRetryAfterMs()`,
-`HALF_OPEN` állapotra frissítik az állapotot, így a dashboardok és a combo-jelöltépítők
-nem zárják ki véglegesen a lejárt providert.
+A megszakító lusta helyreállítást használ, nem háttéridőzítőt. Amikor `OPEN` lejár, az olyan olvasmányok, mint `getStatus()`, `canExecute()` és `getRetryAfterMs()`, az állapotot `HALF_OPEN`-re frissítik, így az irányítópultok és a kombinált építőjelöltek nem zárnak ki örökre egy lejárt szolgáltatót.
 
-### Kapcsolati cooldown
+### Csatlakozás lehűlés
 
-**Hatókör**: egy provider-kapcsolat/fiók/kulcs.
+**Hatály** : egy szolgáltató connection/account/key.
 
-**Cél**: egy hibás kulcs/fiók ideiglenes kihagyása, miközben ugyanannak a providernek a
-többi kapcsolata továbbra is kiszolgálhatja a kéréseket.
+**Cél** : ideiglenesen kihagy egy rossz key/account miközben lehetővé teszi, hogy ugyanazon szolgáltató más kapcsolatok továbbra is kiszolgálják a kéréseket.
 
-**Megvalósítás**:
+**Végrehajtás** :
 
-- Írási/frissítési útvonal: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Fiókválasztás/-szűrés: `src/sse/services/auth.ts::getProviderCredentials...`
-- Cooldown-számítás: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Write/update elérési út: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Számla selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Lehűlési számítás: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Beállítások: `src/lib/resilience/settings.ts`
 
-Fontos mezők a provider-kapcsolatokon:
+Fontos mezők a szolgáltatói kapcsolatoknál:
 
 ```ts
 rateLimitedUntil;
@@ -837,72 +843,50 @@ errorCode;
 backoffLevel;
 ```
 
-Fiókválasztás során egy kapcsolat akkor kerül kihagyásra, amíg:
+A fiók kiválasztása során a kapcsolat kimarad, ha:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-A cooldownok szintén lusták: amikor a `rateLimitedUntil` a múltba kerül, a kapcsolat
-ismét jogosulttá válik. Sikeres használatkor a `clearAccountError()` törli a
-`testStatus`, `rateLimitedUntil` és hibamezőket, valamint a `backoffLevel` értékét.
+A lehűlés is lusták: ha `rateLimitedUntil` a múltban van, a kapcsolat újra használhatóvá válik. Sikeres használat esetén `clearAccountError()` törli `testStatus`, `rateLimitedUntil`, hibamezőket és `backoffLevel` mezőket.
 
-Alapértelmezett kapcsolati cooldown-viselkedés:
+A kapcsolat alapértelmezett lehűtési viselkedése:
 
-- OAuth alap-cooldown: `5s`.
-- API-kulcs alap-cooldown: `3s`.
-- API-kulcs esetén a `429`-es hiba előnyben részesítse a felmenő rendszer
-  újrapróbálkozási jelzéseit (`Retry-After`, reset fejlécek vagy értelmezhető
-  reset-szöveg), ha azok elérhetők.
-- Az ismétlődő, helyreállítható hibák exponenciális visszatartást (backoff)
-  használnak:
+- OAuth alaphűtés: `5s`.
+- API-kulcsos alaphűtés: `3s`.
+- A `429` API-kulcsnak előnyben kell részesítenie az upstream újrapróbálkozási tippeket (`Retry-After`, reset headers vagy elemezhető visszaállítási szöveg), ha rendelkezésre állnak.
+- Az ismétlődő helyreállítható hibák exponenciális visszalépést használnak:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-A thundering-herd elleni védelem megakadályozza, hogy az ugyanazon a kapcsolaton
-egyidejűleg bekövetkező hibák ismételten meghosszabbítsák a cooldownt, vagy kétszer
-növeljék a `backoffLevel` értékét.
+A mennydörgés elleni csordavédő megakadályozza, hogy ugyanazon a csatlakozáson fellépő egyidejű meghibásodások ismételten meghosszabbítsák a lehűlést vagy duplán növeljék `backoffLevel`.
 
-A terminális állapotok nem cooldownok. A `banned`, az `expired` (amely csak N
-korlátozott újrapróbálkozás után válik terminálissá az `EXPIRED_RETRY_MAX`
-révén) és a `credits_exhausted` állapotoknak nem elérhetőnek kell maradniuk, amíg a
-hitelesítő adatok/beállítások meg nem változnak, vagy egy operátor vissza nem állítja
-őket. Ne írja felül a terminális állapotokat átmeneti cooldown-állapottal.
+A terminálállapotok nem lehűtések. `banned`, `expired` (amely csak N korlátos újrapróbálkozás után válik terminállá `EXPIRED_RETRY_MAX` keresztül), és `credits_exhausted` elérhetetlen marad mindaddig, amíg credentials/settings meg nem változik, vagy egy operátor vissza nem állítja őket. Ne írja felül a terminálállapotokat tranziens lehűlési állapottal.
 
-### Modell-kizárás
+### Modellzárás
 
-**Hatókör**: provider + kapcsolat + modell.
+**Hatály** : szolgáltató + kapcsolat + modell.
 
-**Cél**: elkerülni egy teljes kapcsolat letiltását, amikor csak egyetlen modell nem
-érhető el vagy kvótakorlátos az adott kapcsolaton.
+**Cél** : kerülje a teljes kapcsolat letiltását, ha csak egy modell nem érhető el, vagy az adott kapcsolathoz korlátozott a kvóta.
 
 Példák:
 
-- Modellenkénti kvótával rendelkező providerek, amelyek `429`-et adnak vissza.
-- Helyi providerek, amelyek egy hiányzó modellre `404`-et adnak vissza.
-- Provider-specifikus mód-/modelljogosultsági hibák, például bizonyos Grok-módok.
+- A modellenkénti kvótaszolgáltatók `429` adják vissza.
+- Helyi szolgáltatók visszaküldik `404` egy hiányzó modellért.
+- Szolgáltatóspecifikus mode/model -engedélyhibák, például kiválasztott Grok módok.
 
-A modell-kizárás az `open-sse/services/accountFallback.ts` fájlban található, és
-lehetővé teszi, hogy ugyanaz a kapcsolat továbbra is kiszolgálja a többi modellt.
+A modellzárolás `open-sse/services/accountFallback.ts` ban működik, és lehetővé teszi, hogy ugyanaz a kapcsolat továbbra is kiszolgáljon más modelleket.
 
 ### Hibakeresési útmutató
 
-- Ha egy provider összes kulcsa ki van hagyva, vizsgálja meg mind a provider
-  megszakítójának állapotát, mind az egyes kapcsolatok
-  `rateLimitedUntil`/`testStatus` értékeit.
-- Ha egy provider a reset-ablak után is véglegesen kizártnak tűnik, ellenőrizze, hogy a
-  kód a nyers `state` értéket olvassa-e a `getStatus()`/`canExecute()` használata
-  helyett.
-- Ha egy providerkulcs hibázik, de a többinek működnie kellene, a provider-megszakító
-  helyett a kapcsolati cooldownt részesítse előnyben.
-- Ha csak egyetlen modell hibázik, a kapcsolati cooldown helyett a modell-kizárást
-  részesítse előnyben.
-- Ha egy állapotnak öngyógyulónak kell lennie, rendelkeznie kell egy jövőbeli
-  időbélyeggel/reset-időtúllépéssel és egy olyan olvasási útvonallal, amely frissíti a
-  lejárt állapotot. A végleges állapotok manuális hitelesítőadat- vagy
-  konfigurációmódosítást igényelnek.
+- Ha egy szolgáltató összes kulcsát kihagyja, ellenőrizze a szolgáltató megszakító állapotát és az egyes kapcsolatok `rateLimitedUntil`/`testStatus` értékét.
+- Ha egy szolgáltató véglegesen kizártnak tűnik a visszaállítási ablak után, ellenőrizze, hogy a kód a nyers `state` olvassa-e `getStatus()`/`canExecute()` használata helyett.
+- Ha az egyik szolgáltatói kulcs meghibásodik, de a többinek működnie kell, előnyben részesítse a kapcsolat lehűlését a szolgáltatói megszakító helyett.
+- Ha csak egy modell hibásodik meg, előnyben részesítse a modellzárolást a csatlakozás lehűtésével szemben.
+- Ha egy állapot helyreáll, akkor rendelkeznie kell egy jövőbeli timestamp/reset időtúllépéssel és egy olvasási útvonallal, amely frissíti a lejárt állapotot. Az állandó állapotokhoz manuálisan kell módosítani a hitelesítési adatokat vagy a konfigurációt.
 
 ---
 

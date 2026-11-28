@@ -4,14 +4,13 @@
 
 ---
 
-> **အမှန်တရား၏ရင်းမြစ်:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **နောက်ဆုံးပြင်ဆင်သည့်ရက်စွဲ:** 2026-09-22 — scope namespaces များသည် MCP-SERVER.md ကိုညွှန်ပြသည်။
+> **အမှန်တရားအရင်းအမြစ်-** `src/server/authz/`၊ `src/shared/constants/publicApiRoutes.ts`၊ `src/lib/api/requireManagementAuth.ts`၊ `src/shared/utils/apiAuth.ts`
 
-OmniRoute တွင် API တောင်းဆိုမှုတိုင်းကို ကာကွယ်ပေးသည့် route-aware authorization pipeline တစ်ခုရှိသည်။ အမျိုးအစားခွဲခြားခြင်းသည် **သတ်မှတ်နိုင်သော** နှင့် **ပျက်ကွက်ပါကပိတ်သော** ဖြစ်သည် — အမျိုးအစားခွဲခြား၍မရသော မည်သည့်အရာမဆို `MANAGEMENT` အဖြစ်ဆုံးဖြတ်ပြီး session သို့မဟုတ် management-grade token လိုအပ်သည်။ ဤစာမျက်နှာသည် routes များကို ထိန်းသိမ်းထားသော သို့မဟုတ် endpoing အသစ်များ ဒီဇိုင်းဆွဲသော အင်ဂျင်နီယာများအတွက် မော်ဒယ်ကို ရှင်းပြထားသည်။
+OmniRoute တွင် API တောင်းဆိုမှုတိုင်းကို ဂိတ်ပေါက်ပေးသည့် လမ်းကြောင်း-သတိပြုခွင့်ပြုချက်ပိုက်လိုင်းတစ်ခု ရှိသည်။ အမျိုးအစားခွဲခြားခြင်းဖြစ်ပါသည်။** အဆုံးအဖြတ်ပေးသည်။** နှင့်** ပျက်ကွက်** — ခွဲခြား၍မရသော မည်သည့်အရာမ `MANAGEMENT` အဖြစ်အဆုံးသတ်ပြီး စက်ရှင် သို့မဟုတ် စီမံခန့်ခွဲမှုအဆင့် တိုကင်တစ်ခု တောင်းဆိုသည်။ ဤစာမျက်နှာသည် လမ်းကြောင်းများကို ထိန်းသိမ်းသည့် အင်ဂျင်နီယာများအတွက် မော်ဒယ် သို့မဟုတ် အဆုံးမှတ်အသစ်များကို ဒီဇိုင်းဆွဲခြင်းအကြောင်း ရှင်းပြထားသည်။
 
 ![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
-> ရင်းမြစ်: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
+> အရင်းအမြစ်: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## Auth Mode နှစ်မျိုး
 
@@ -196,7 +195,7 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) — အမြဲတမ်း `allow({ kind: "anonymous", id: "anonymous" })` ပြန်ပေးသည်။
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer ကို ထုတ်ယူပြီး `validateApiKey()` မှတဆင့် အတည်ပြုသည်။ ထိရောက်သော `REQUIRE_API_KEY` အင်္ဂါရပ်အလံကို ပိတ်ထားမှသာ အမည်မသိအဖြစ်သို့ ရောက်သွားနိုင်သည်။ ထိရောက်သောအလံကို `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) မှတဆင့်ဖြေရှင်းပြီးဖြစ်သောကြောင့် Dashboard အင်္ဂါရပ်အလံများနှင့် ပတ်ဝန်းကျင်ပြောင်းလဲမှုများသည် `/api/v1/*`၊ `/api/v1beta/*` နှင့် aliases များကို တသမတ်တည်းအုပ်ချုပ်သည်။ ဖြေရှင်းသူ ချို့ယွင်းချက် ပျက်ကွက် ပိတ်ထားသည်။ ကလိုင်းယင့် API လမ်းကြောင်းများပေါ်တွင် ဒက်ရှ်ဘုတ်-ဆက်ရှင်တောင်းဆိုမှုများကို ခွင့်ပြုသည် ( `/api/v1/models` အပါအဝင်၊ ဒက်ရှ်ဘုတ်မော်ဒယ်ကတ်တလောက်က အသုံးပြုသည်)။ Entra ID SSO ဖွင့်သောအခါ၊ ဖွဲ့စည်းတည်ဆောက်ပုံအရ Entra တိုကင် (base64url segments သုံးခု၊ `RS*` alg၊ `kid`) ကို SSO ဌာနခွဲမှ ကိုင်တွယ်သည်** မီ** `validateApiKey()` နှင့် ၎င်း၏ စီရင်ချက်သည် နောက်ဆုံး — ဖြစ်ပြီး ၎င်းသည် API-ကီးလမ်းကြောင်း သို့မဟုတ် အမည်မသိဌာနခွဲသို့ ကျဆင်းသွားခြင်းသို့ ဘယ်သောအခါမှ မကျရောက်ပါ၊ ထို့ကြောင့် အထောက်အထားဝန်ဆောင်မှုပေးသူ ပြတ်တောက်မှုသည် ဖွင့်သုံးခွင့်ဖြစ်လာမည်မဟုတ်ပါ။ Static API ကီးများသည် သက်ရောက်မှုမရှိပါ။ [Entra ID SSO](../security/ENTRA_SSO.md) ကြည့်ပါ။
-- **`managementPolicy`** (`policies/management.ts`) — ဒက်ရှ်ဘုတ်ဆက်ရှင်၊ အတွင်းပိုင်း မော်ဒယ်-စင့်ခ်လုပ်ခြင်း တောင်းဆိုချက်များကို လက်ခံသည် ( `/api/providers/[name]/(sync-models|models)` နှင့် ကိုက်ညီသည်) သို့မဟုတ် `isAuthRequired()` မှားယွင်းပါက ပြန်ပို့ပါက လုံးဝကျော်သွားပါသည်။ Bearer တိုကင်တစ်ခုရှိနေသော်လည်း မမှန်ပါက 403 (`AUTH_001`) ကို ပြန်ပေးသည်။ စစ်မှန်သောဌာနခွဲ — [Route Guard Tiers ကို](../security/ROUTE_GUARD_TIERS.md) မတွေ့မီ လမ်းကြောင်းစောင့်အဆင့် (LOCAL_ONLY / ALWAYS_PROTECTED) ကိုလည်း တွန်းအားပေးပါသည်။ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ရှိ LOCAL_ONLY လမ်းကြောင်းများ (ယနေ့- `/api/mcp/`) ကို Bearer သော့သည် `manage` နယ်ပယ်ကို သယ်ဆောင်လာသောအခါတွင် လှည့်ပတ်မဟုတ်သောမှ ဝင်ရောက်ကြည့်ရှုနိုင်သည်။ အခြား LOCAL_ONLY လမ်းကြောင်းများအားလုံးသည် နယ်ပယ်မခွဲခြားဘဲ တင်းကျပ်သော-လှည့်ပတ်နေပါသည်။
+- **`managementPolicy`** (`policies/management.ts`) — ဒက်ရှ်ဘုတ်ဆက်ရှင်၊ အတွင်းပိုင်း မော်ဒယ်-စင့်ခ်လုပ်ခြင်း တောင်းဆိုချက်များကို လက်ခံသည် ( `/api/providers/[name]/(sync-models|models)` နှင့် ကိုက်ညီသည်) သို့မဟုတ် `isAuthRequired()` မှားယွင်းပါက ပြန်ပို့ပါက လုံးဝကျော်သွားပါသည်။ Bearer တိုကင်တစ်ခုရှိနေသော်လည်း မမှန်ပါက 403 (`AUTH_001`) ကို ပြန်ပေးသည်။ စစ်မှန်သောဌာနခွဲ — [Route Guard Tiers ကို](../security/ROUTE_GUARD_TIERS.md) မတွေ့မီ လမ်းကြောင်းစောင့်အဆင့် (LOCAL_ONLY / ALWAYS_PROTECTED) ကိုလည်း တွန်းအားပေးပါသည်။ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ရှိ LOCAL_ONLY လမ်းကြောင်းများ (ယနေ့- `/api/mcp/`) သို့မဟုတ် Bearer key သည် `manage`/`admin` နယ်ပယ် သို့မဟုတ် ကျဉ်းမြောင်းသော `mcp:connect` နယ်ပယ် (`hasMcpConnectOrManageScope`) သို့မဟုတ် စစ်မှန်ကြောင်းသက်သေပြထားသော ဒက်ရှ်ဘုတ်စက်ရှင်ဖြင့် သယ်ဆောင်လာသောအခါတွင် လှည့်ပတ်မဟုတ်သောမှ ဝင်ရောက်နိုင်သည်။ အခြား LOCAL_ONLY လမ်းကြောင်းများအားလုံးသည် နယ်ပယ်မခွဲခြားဘဲ တင်းကျပ်သော-လှည့်ပတ်နေပါသည်။
 
 အောင်မြင်သောမူဝါဒသည် `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ဖြင့် ပြန်ပေးသည်။ အောက်ခြေမှ ကိုင်တွယ်သူများသည် auth logic ကို ပြန်လည်လုပ်ဆောင်မည့်အစား `assertAuth(request, "CLIENT_API")` ရှိ `src/server/authz/assertAuth.ts` မှတစ်ဆင့် ဖတ်နိုင်သည်။
 
@@ -242,7 +241,7 @@ PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Read-only လမ်းကြောင်းများသည် အများသူငှာဖြစ်သည်။** အားလုံးအတွက်** လုံခြုံသောနည်းလမ်းများအတွက်။ မှတ်ချက်- `classifyRoute()` `/api/v1/*` နှင့် `/api/v1beta/*` PUBLIC မှတဆင့် — မှ ဖယ်ထုတ်ထားခြင်းဖြစ်ပြီး ၎င်းတို့သည် အမြဲတမ်း `CLIENT_API` ဖြစ်သောကြောင့် Bearer-key မူဝါဒကို ဆက်လက်ကျင့်သုံးဆဲဖြစ်သည်။
+Read-only လမ်းကြောင်းများသည် အများသူငှာဖြစ်သည်။** သာ** လုံခြုံသောနည်းလမ်းများအတွက်။ မှတ်ချက်- `classifyRoute()` `/api/v1/*` နှင့် `/api/v1beta/*` PUBLIC မှတဆင့် — မှ ဖယ်ထုတ်ထားခြင်းဖြစ်ပြီး ၎င်းတို့သည် အမြဲတမ်း `CLIENT_API` ဖြစ်သောကြောင့် Bearer-key မူဝါဒကို ဆက်လက်ကျင့်သုံးဆဲဖြစ်သည်။
 
 ## Route အသစ်တစ်ခု ထည့်သွင်းခြင်း
 
@@ -287,33 +286,24 @@ export async function POST(request: Request) {
 
 အဆင်ပြေမှုအလိုက် မဟုတ်ဘဲ ပုံသဏ္ဌာန်အလိုက် set ကို ရွေးချယ်ပါ။ Route တစ်ခုတည်းကို `PUBLIC_API_ROUTES_EXACT` ထဲတွင် ထည့်ပါ (သို့မဟုတ် GET-only ဖြစ်ပါက `PUBLIC_READONLY_CORS_API_ROUTES` ထဲတွင် ထည့်ပါ)။ စစ်မှန်သော subtree ကိုသာ `PUBLIC_API_ROUTE_PREFIXES` ထဲတွင် ထည့်ရမည်ဖြစ်ပြီး ၎င်းသည် **`/` ဖြင့် အဆုံးသတ်ရမည်**။ Route တစ်ခုတည်းကို prefix စာရင်းထဲတွင် ထည့်သွင်းခြင်းသည် ၎င်း၏ ရှေ့စာလုံးများ တူညီသော အနီးကပ် path အားလုံးကိုပါ public အဖြစ် ဖွင့်ပေးသွားမည် — နောင်တွင် ထည့်သွင်းမည့် dynamic-segment sibling များလည်း ပါဝင်သည် (GHSA-74g9-q8f6-793h)။ `tests/unit/public-api-routes.test.ts`၊ `tests/unit/authz/public-route-exact-match.test.ts` နှင့် `tests/unit/authz/classify.test.ts` ရှိ unit test များကို အပ်ဒိတ်လုပ်ပါ။
 
-## Scopes များ
+## နယ်ပယ်များ
 
-namespace သုံးခု။ စစ်ဆေးသူတစ်ဦးစီသည် ၎င်း၏ကိုယ်ပိုင် string များကိုသာ ဖတ်သည်။ `manage` သည် `read:compression` အတွက် `scopeMatches` ကို အဘယ်ကြောင့် မအောင်မြင်သနည်း၊ `read` access token သည် `PATCH /api/keys/{id}` ကို အဘယ်ကြောင့် မလုပ်ဆောင်နိုင်သနည်း အပါအဝင် ဘေးချင်းကပ်လျက် ရှင်းပြချက်ကို [Three scope namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces) တွင် ကြည့်ပါ။
+အမည်နေရာ သုံးခု။ checker တစ်ခုစီသည် ၎င်း၏ကိုယ်ပိုင်စာကြောင်းများကိုသာ ဖတ်သည်။ `read:compression` အတွက် `manage` ကျရှုံး `scopeMatches` နှင့် `read` access token အဘယ်ကြောင့် `PATCH /api/keys/{id}` မရရခြင်း အပါအဝင် ဘေးချင်းကပ် ၊ မှာ [နယ်ပယ် သုံးခု](../frameworks/MCP-SERVER.md#three-scope-namespaces) ဖြစ်သည် ။
 
-API key များတွင် `scopes` array တစ်ခု ပါရှိသည် (`api_keys.scopes` တွင် JSON အဖြစ် သိမ်းဆည်းထားသည်၊ `src/lib/db/apiKeys.ts` ကို ကြည့်ပါ)။
+API သော့များသည် `scopes` array ကိုသယ်ဆောင်သည် ( `api_keys.scopes` တွင် JSON အဖြစ်သိမ်းဆည်းထားသော `src/lib/db/apiKeys.ts` ကြည့်ပါ)။
 
-### Management scope
+### စီမံခန့်ခွဲမှုနယ်ပယ်
 
-- `manage` / `admin` — `hasManageScope`။ management API route များသို့ Bearer access။
-- `mcp:connect`, `self:usage`, `self:account-quota`, နှင့်
-  `policy:bypass-provider-quota` တို့သည် ထပ်ပေါင်းနိုင်သော တိကျစွာ ကိုက်ညီသည့် scope များဖြစ်သည်။ ၎င်းတို့သည် `MANAGEMENT_API_KEY_SCOPES` ၏ အပြင်ဘက်တွင် ရှိသည်။ `mcp:connect` သည် `/api/mcp/` non-loopback carve-out ကိုသာ ဖွင့်ပေးသည်။
+- `manage` / `admin` — `hasManageScope`။ စီမံခန့်ခွဲမှု API လမ်းကြောင်းများသို့ ကိုင်ဆောင်ဝင်ရောက်ခြင်း။
+- `mcp:connect`, `self:usage`, `self:account-quota`, နှင့် `policy:bypass-provider-quota` များသည် ပေါင်းထည့်ထားသော အတိအကျ-ကိုက်ညီမှုနယ်ပယ်များဖြစ်သည်။ `MANAGEMENT_API_KEY_SCOPES` အပြင်မှာ ထိုင်ကြတယ်။ `mcp:connect` `/api/mcp/` non-loopback carve-out ကိုသာဖွင့်သည်။
 
-### MCP tool scopes
+### MCP tool နယ်ပယ်များ
 
-Catalog နှင့် ကိုက်ညီမှု စည်းမျဉ်းများ (တူညီသော string၊ သို့မဟုတ် `*` ဖြင့် အဆုံးသတ်သော ခွင့်ပြုထားသည့် scope)၊
-[MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes)။
-`src/shared/constants/mcpScopes.ts` ရှိ `MCP_SCOPE_LIST` သည် မူရင်း typed
-subset ဖြစ်ပြီး၊ ထို full catalog မဟုတ်ပါ။ အကောင်အထည်ဖော်မှုသည်
-`open-sse/mcp-server/scopeEnforcement.ts` တွင် `resolveCallerScopeContext()`
-မှ MCP auth အချက်အလက်၊ request metadata သို့မဟုတ် `OMNIROUTE_MCP_SCOPES` မှ scope များကို ဖြေရှင်းပြီးနောက် လုပ်ဆောင်သည်။
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` မဟုတ်ပါက ၎င်းသည် ပိတ်ထားသည်။
+ကတ်တလောက်နှင့် ကိုက်ညီသော စည်းမျဉ်းများ (တူညီသော စာကြောင်းများ၊ သို့မဟုတ် `*` ဖြင့်အဆုံးသတ်ထားသော ခွင့်ပြုထားသော နယ်ပယ်): [MCP ကိရိယာ နယ်ပယ်များ](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ။ `src/shared/constants/mcpScopes.ts` တွင် `MCP_SCOPE_LIST` သည် ကက်တလောက်အပြည့်အစုံမဟုတ်ဘဲ မူရင်းရိုက်ထည့်ထားသော အတွဲဖြစ်သည်။ `resolveCallerScopeContext()` မှ နယ်ပယ်များကို MCP စစ်မှန်ကြောင်းအချက်အလက်၊ မက်တာဒေတာ တောင်းဆိုမှု သို့မဟုတ် `OMNIROUTE_MCP_SCOPES` မှ နယ်ပယ်များကို ဖြေရှင်းပြီးနောက် ပြဋ္ဌာန်းချက်သည် `open-sse/mcp-server/scopeEnforcement.ts` တွင် လုပ်ဆောင်သည်။ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` သည် ၎င်းကို တစ်ကမ္ဘာလုံးတွင် ဖွင့်ပေးသည် (မူလ `false`) ၊ သို့သော် API သော့မပါသော `manage`/`admin` (အလံမခွဲခြားဘဲ `shouldForceScopeEnforcement()` တွင် `open-sse/mcp-server/scopeEnforcement.ts` တွင်ကြည့်ပါ) ၊ HTTP/SSE ခေါ်ဆိုသူအတွက် အမြဲတမ်း ပြဌာန်းထားသည်။
 
-### Access-token scopes
+### Access-token နယ်ပယ်များ
 
-`oma_live_…` token များပေါ်ရှိ `read` / `write` / `admin` ကို `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`) ဖြင့် အဆင့်သတ်မှတ်သည်။ ဤအဆင့်သည် access-token
-credential အတွက်သာ သက်ဆိုင်သည်။ [Management Authentication](../guides/MANAGEMENT-AUTH.md) ကို ကြည့်ပါ။
+`scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) ဖြင့် အဆင့်သတ်မှတ်ထားသော `oma_live_…` တိုကင်များတွင်`read` / `write` / `admin` ဤအဆင့်သည် ဝင်ရောက်ခွင့် တိုကင်အထောက်အထားအတွက်သာ အကျုံးဝင်ပါသည်။ [Management Authentication ကို](../guides/MANAGEMENT-AUTH.md) ကြည့်ပါ။
 
 ## အထောက်အထားပြရန် လိုအပ်သည်
 

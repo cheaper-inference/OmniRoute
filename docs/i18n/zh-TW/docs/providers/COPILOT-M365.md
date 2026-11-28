@@ -166,11 +166,11 @@ OmniRoute掃描HAR中的 Chathub WebSocket URL，提取`access_token`和`chathub
 
 確保`copilot-m365-web`已啟用**儀表板→提供者**。預設情況下，某些層中的提供者可能是隱藏的。
 
-## 參考資料
+## 參考
 
-- 問題：[#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- 討論：[#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- 原始碼：`src/shared/constants/providers/web-cookie.ts`（提供者定義）
-- HAR 匯入：`src/shared/utils/m365HarImport.ts`
-- 認證資訊欄位：`src/shared/providers/webSessionCredentials.ts`
-- 方案層級對話方塊：`src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- 問題： [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- 討論： [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- 來源： `src/shared/constants/providers/web-cookie.ts` （提供者定義）
+- HAR導入： `src/shared/utils/m365HarImport.ts`
+- 憑證欄位： `src/shared/providers/webSessionCredentials.ts`
+- 層級模式： `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

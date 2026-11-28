@@ -4,18 +4,11 @@
 
 ---
 
-> **Leagan:** v3.8.51
-> **Nuashonraithe go deireanach:** 2026-06-28
-> **Lucht léitheoireachta:** Innealtóirí atá ag cur le OmniRoute nó ag tógáil comhtháthuithe air.
+> **Leagan:** v3.8.51** Lucht Féachana:** Innealtóirí a chuireann le OmniRoute nó ag tógáil comhtháthú ar a bharr.
 >
-> Le haghaidh léaráidí ardleibhéil den ailtireacht agus an réasúnaíocht taobh thiar de gach fochóras, léigh
-> [ARCHITECTURE.md](./ARCHITECTURE.md). Le haghaidh mionléargais ar fhochórais aonair
-> (Auto Combo, freastalaí MCP, freastalaí A2A, Skills, Memory, Cloud Agents, Resilience,
-> Compression, etc.) féach ar a gcomhaid thiomnaithe sa chomhadlann `docs/` seo.
+> Le haghaidh léaráidí ailtireachta ardleibhéil agus an réasúnaíocht taobh thiar de gach fochóras, léigh [ARCHITECTURE.md](./ARCHITECTURE.md). Le haghaidh tumthaí domhain ar fhochórais aonair (Auto Combo, freastalaí MCP, freastalaí A2A, Scileanna, Cuimhne, Gníomhairí Néal, Athléimneacht, Comhbhrú, etc.) féach ar a gcuid comhad tiomnaithe san eolaire `docs/` seo.
 
-Déanann an comhad seo cur síos ar **a bhfuil sa stór inniu** ionas gur féidir le hinnealtóir nua
-an crann a nascleanúint, srathú an ama rite a thuiscint, agus fios a bheith aige cá háit le cód a chur
-gan modúil nua a cheapadh.
+Déanann an file seo cur síos ar** cad atá sa stór inniu** ionas gur féidir le hinnealtóir nua an crann a nascleanúint, an t-am rite a thuiscint, agus fios a bheith aige cá háit le cód a chur leis gan modúil nua a chumadh.
 
 ---
 
@@ -681,33 +674,12 @@ Orduithe coitianta:
 
 Eagraithe i 6 fhofhillteán de réir cuspóra.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, chomh maith leis na huirlisí cúnta inléite amháin chun súil a choinneáil ar PRanna:
-  `ci-discriminate.sh` (a dhéanann sínithe seiceálacha teipthe PR a rangú mar chinn dá chuid féin / mar chinn
-  oidhreachtúla / mar chinn anaithnide i gcomparáid le PR tagartha nó leis an tsaincheist base-red) agus `audit-worktree.sh`
-  (comhaid shalacha, dromchlaí cosanta, dearbhuithe bainte, comhairimh choiscthe, tsconfiganna tmp
-  atá fágtha, ceann PR i gcomparáid leis an HEAD áitiúil — sula nglactar le PR oibrí).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, móide na cúntóirí inléite amháin PR feighlíochta leanaí `ci-discriminate.sh` ( sórtálann PR sínithe le hoidhreacht / ag PR anaithnide nó sínithe eisiúint bonn-dearg) agus `audit-worktree.sh` (comhaid salach, dromchlaí cosanta, dearbhuithe bainte, comhaireamh faoi chois, tmp tsconfigs fágtha, ceann PR vs HEAD — áitiúil sula nglacfar le PR oibrí).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. leaganacha bratacha `check-deprecated-versions.mjs` a chuirtear i leith OmniRoute go sainráite (3.6.x agus níos luaithe). Déanann an seic neamhaird ar dhátaí.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

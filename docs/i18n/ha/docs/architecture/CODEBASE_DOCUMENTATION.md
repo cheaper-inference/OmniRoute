@@ -4,18 +4,11 @@
 
 ---
 
-> **Sigar:** v3.8.51
-> **Sabuntawa na ƙarshe:** 2026-06-28
-> **Masu karatu:** Injiniyoyin da ke ba da gudummawa ga OmniRoute ko suke gina haɗe-haɗe a samansa.
+> **Siga:** v3.8.51** Masu sauraro:** Injiniyoyin da ke ba da gudummawa ga OmniRoute ko gina haɗin kai a kai.
 >
-> Don zane-zanen tsarin gine-gine na gaba ɗaya da dalilan da suka sa aka tsara kowane ƙaramin tsari, karanta
-> [ARCHITECTURE.md](./ARCHITECTURE.md). Don cikakken bayani kan kowane ƙaramin tsari
-> (Auto Combo, MCP server, A2A server, Skills, Memory, Cloud Agents, Resilience,
-> Compression, da sauransu), duba fayilolinsu na musamman a cikin wannan kundin `docs/`.
+> Don zane-zanen gine-gine masu girma da kuma dalili a bayan kowane tsarin ƙasa, karanta [ARCHITECTURE.md](./ARCHITECTURE.md). Don nutsewa mai zurfi a kan ƙananan tsarin guda ɗaya (Auto Combo, uwar garken MCP, uwar garken A2A, Skills, Memory, Agents Cloud, Resilience, Compression, da dai sauransu) duba fayilolin sadaukar da kai a cikin wannan kundin adireshin `docs/`.
 
-Wannan fayil yana bayyana **abin da yake cikin ma'ajiyar a yau** domin sabon injiniya
-ya iya kewaya tsarin kundin, ya fahimci matakan lokacin aiki, kuma ya san inda zai ƙara lamba
-ba tare da ƙirƙiro sabbin modules ba.
+Wannan fayil ya bayyana** abin da ke cikin ma'ajiyar a yau** ta yadda sabon injiniya zai iya kewaya bishiyar, ya fahimci tsarin aikin lokaci, kuma ya san inda zai ƙara code ba tare da ƙirƙira sababbin kayayyaki ba.
 
 ---
 
@@ -677,35 +670,14 @@ Umarni na gama-gari:
 
 ## 8. `scripts/`
 
-An tsara su zuwa manyan fayiloli 6 bisa ga manufarsu.
+An tsara shi zuwa manyan manyan fayiloli 6 da manufa.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, tare da mataimakan sa ido kan PR masu karantawa kawai:
-  `ci-discriminate.sh` (yana rarraba alamomin binciken da suka gaza na PR zuwa nasa / waɗanda ya gada /
-  waɗanda ba a sani ba ta hanyar kwatanta su da wani PR na tunani ko matsalar base-red) da `audit-worktree.sh`
-  (fayiloli masu sauye-sauyen da ba a adana ba, ɓangarorin da aka kare, asserts da aka cire, adadin
-  suppressions, tsconfigs na wucin-gadi da suka rage, kan PR idan aka kwatanta da HEAD na gida — kafin a amince da PR na ma'aikaci).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, da mataimaki PR masu kula da jarirai `ci-discriminate.sh` kawai (nau'in gazawar PR a kan abin da ba a sani ba) Batun PR mai tushe) da `audit-worktree.sh` (fayil masu datti, filaye masu kariya, abubuwan da aka cire, ƙididdige ƙididdigewa, ragowar tmp tsconfigs, shugaban PR vs HEAD na gida — kafin a karɓi PR na ma'aikaci).
+- **`scripts/check/`** — `check-cycles.mjs` `test-report-summary.mjs` `check-docs-sync.mjs` `check-route-validation.mjs` `check-docs-counts-sync.mjs` `check-deprecated-versions.mjs` `check-env-doc-sync.mjs` `check-t11-any-budget.mjs` `check-pr-test-policy.mjs` `check-supported-node-runtime.ts` `check-deprecated-versions.mjs` tutocin da aka dangana ga OmniRoute (3.6.x da baya). Duban yayi watsi da kwanakin.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

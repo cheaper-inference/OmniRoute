@@ -151,30 +151,30 @@ Vaiheiden 6–7 teemat:
 - [ ] Lisää regressiotestit jokaiselle kattamattomalle tuotantovirheelle, joka korjataan 90 prosentin tavoittelun aikana
 - [ ] Nosta CI:n kattavuusrajaa vasta, kun paikallinen lähtötaso on pysynyt vakaana vähintään kahdella peräkkäisellä ajokerralla
 
-## Räikkäkäytäntö
+## Räikkäpolitiikka
 
-Päivitä `npm run test:coverage` -kynnysarvoja vasta, kun projekti todella ylittää seuraavan välitavoitteen riittävällä marginaalilla.
+Päivitä `npm run test:coverage` kynnykset vasta, kun projekti todella ylittää seuraavan virstanpylvään mukavalla puskurilla.
 
-**Nykyinen raja:** `npm run test:coverage` edellyttää arvoja **60 lauseille / 60 riveille / 60 funktioille / 60 haaroille** (mittari määritettiin uudelleen Quality-Gates-vaiheessa 6A.1 — aiempi 82.58%:n lähtötaso oli liian korkea, koska siinä laskettiin mukaan testitiedostot ja jätettiin `open-sse` pois). `test:coverage:legacy`-komento säilyttää vanhan 50/50/50-mittarin historiallista vertailua varten.
+**Nykyinen portti:** `npm run test:coverage` pakottaa** 60 lausetta / 60 riviä / 60 funktiota / 60 haaraa** (mittari perustui uudelleen Quality-Gates Fase 6A.1 — hen, aikaisempi 82,58 %:n perusviiva nostettiin, koska se laski testitiedostot ja poisti `open-sse`). Komento `test:coverage:legacy` säilyttää vanhan 50/50/50 metriikan historiallista vertailua varten.
 
-Voit tehdä uusimpaan raporttiin perustuvia yksittäisiä kynnysarvotarkistuksia seuraavasti:
+Käytä ad hoc -kynnyksen tarkistuksia viimeisimmän raportin perusteella:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Suositeltu räikkäjärjestys (järjestys on `lauseet-rivit / haarat / funktiot`):
+Suositeltu räikkäjärjestys (järjestys on `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- nykyinen raja (75/70/75)
+5. 75/70/72 <-- nykyinen portti (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Seuraava räikkätavoite on `80/75/78`, kun haarakattavuus pysyy yli 78%:ssa kahdella peräkkäisellä suorituskerralla.
+Seuraava räikkätavoite on `80/75/78`, kun haaran peitto on yli 78 % kahdella peräkkäisellä ajolla.
 
 ## Tunnettu puute
 

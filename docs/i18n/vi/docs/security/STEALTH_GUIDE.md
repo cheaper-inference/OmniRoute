@@ -4,11 +4,9 @@
 
 ---
 
-> **Nguồn chuẩn:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Cập nhật lần cuối:** 2026-09-02 — v3.8.51
-> **Đối tượng:** Các kỹ sư duy trì những tích hợp ẩn mình dành riêng cho từng nhà cung cấp.
+> **Nguồn của sự thật:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Khán giả:** Các kỹ sư duy trì tích hợp tàng hình dành riêng cho nhà cung cấp.
 
-OmniRoute tích hợp với các nhà cung cấp có hệ thống biên chủ động nhận diện dấu vân tay của các client không chính thức (TLS JA3/JA4, thứ tự header, cấu trúc phần thân JSON, token toàn vẹn). Trang này mô tả các bề mặt ẩn mình mà OmniRoute cung cấp và nơi chúng được triển khai.
+OmniRoute tích hợp với các nhà cung cấp có các cạnh tích cực lấy dấu vân tay của các khách hàng không chính thức (TLS JA3/JA4, thứ tự tiêu đề, hình dạng nội dung JSON, mã thông báo toàn vẹn). Trang này ghi lại các bề mặt tàng hình OmniRoute phơi bày và nơi chúng được triển khai.
 
 ## Thông báo Pháp lý và Đạo đức
 
@@ -53,65 +51,68 @@ Các hồ sơ được gói đã ghim hỗ trợ, nhưng mức độ chấp nh�
 
 ---
 
-## Gói ẩn mình Claude Code
+## Gói tàng hình mã Claude
 
-Khi `cliCompatMode` được bật, OmniRoute định hình lại các yêu cầu Claude gửi đi để chúng không thể phân biệt được với lưu lượng từ `claude-cli`. Ba mô-đun phối hợp với nhau:
+Khi `cliCompatMode` được bật, OmniRoute sẽ định hình lại các yêu cầu Claude gửi đi để chúng không thể phân biệt được với lưu lượng truy cập `claude-cli`. Ba mô-đun cộng tác:
 
 ### `claudeCodeFingerprint.ts`
 
-Tính toán dấu vân tay `cc_version` gồm 3 ký tự được nhúng trong tiêu đề thanh toán:
+Tính toán dấu vân tay `cc_version` 3 ký tự được nhúng trong tiêu đề thanh toán:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (được mã hóa cứng; khớp với ứng dụng khách chính thức)
-- Đầu vào: các ký tự tại chỉ mục 4, 7, 20 của văn bản tin nhắn người dùng đầu tiên + chuỗi phiên bản
-- Đầu ra: tiền tố hex gồm 3 ký tự
+- `FINGERPRINT_SALT = "59cf53e54c78"` (mã hóa cứng; khớp với khách hàng chính thức)
+- Đầu vào: các ký tự ở chỉ số 4, 7, 20 của chuỗi phiên bản + văn bản tin nhắn của người dùng đầu tiên
+- Đầu ra: tiền tố hex 3-char
 
-### `claudeCodeCCH.ts` (Hàm băm nội dung ứng dụng khách)
+### `claudeCodeCCH.ts` (Băm nội dung khách hàng)
 
-Kiểm tra tính toàn vẹn phía máy chủ mà Claude Code CLI chính thức tính toán thông qua Bun/Zig. OmniRoute triển khai lại bằng `xxhash-wasm`:
+Kiểm tra tính toàn vẹn phía máy chủ Mã Claude chính thức CLI tính toán thông qua các lần triển khai lại Bun/Zig. OmniRoute với `xxhash-wasm`:
 
-1. Tuần tự hóa phần thân với phần giữ chỗ `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Chuỗi hex chữ thường gồm 5 ký tự, được đệm bằng số 0
-4. Thay thế `cch=00000;` bằng token đã tính toán
+1. Nối tiếp nội dung với phần giữ chỗ `cch=00000;`
+2. Xây dựng chế độ xem băm bằng hai thay thế văn bản thuần túy, theo thứ tự sau (`hashView()`):
+   - mỗi trận đấu của `/"model":"[^"]*"/g` trở thành `"model":""` — trận đấu dừng ở `"` đầu tiên, do đó, một giá trị có trích dẫn thoát (`"model":"a\"b"`) chỉ được làm trống cho đến trích dẫn đó, như khách hàng làm
+   - mọi trận đấu của `/"max_tokens":\d+,|,?"max_tokens":\d+/g` đều bị xóa — chỉ các giá trị số, ở bất kỳ độ sâu nào
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Hex chữ thường 5 ký tự không đệm
+5. Thay thế `cch=00000;` bằng mã thông báo được tính toán
 
-Các hằng số:
+Hằng số:
 
-- Seed: `0x6e52736ac806831e`
-- Mẫu: `/\bcch=([0-9a-f]{5});/`
+- Seed: `0x4d659218e32a3268` (khớp với các ảnh chụp vòng lặp của Mã Claude 2.1.252 và 2.1.322)
+- Hoa văn: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Chèn một **ký tự nối có độ rộng bằng 0** Unicode (`U+200D`) sau ký tự đầu tiên của các tên ứng dụng khách "nhạy cảm" để bộ lọc thượng nguồn không thể tìm chúng bằng grep. Danh sách từ mặc định:
+Chèn một Unicode** công cụ nối có chiều rộng bằng không** (`U+200D`) sau ký tự đầu tiên của tên khách hàng "nhạy cảm" để các bộ lọc ngược dòng không thể grep chúng. Danh sách từ mặc định:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Áp dụng cho: các khối `system`, toàn bộ `messages[].content` và `tools[].description` / `tools[].function.description`. Người vận hành có thể ghi đè thông qua `setSensitiveWords()`.
+Áp dụng cho: khối `system`, tất cả `messages[].content` và `tools[].description` / `tools[].function.description`. Toán tử có thể ghi đè thông qua `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — các nhà cung cấp `anthropic-compatible-cc-*`
+### nhà cung cấp `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`
 
-Dành cho các relay Anthropic bên thứ ba chỉ chấp nhận lưu lượng "Claude Code thực":
+Đối với chuyển tiếp Anthropic của bên thứ ba chỉ chấp nhận lưu lượng truy cập "Mã Claude thực":
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` theo mặc định
-- Nút chuyển "Bật bản beta ẩn nội dung suy luận" cho từng kết nối sẽ thêm `redact-thinking-2026-02-12` khi một thượng nguồn Tương thích CC yêu cầu cụ thể các luồng suy luận đã được ẩn
-- Nút chuyển "Bật hiển thị suy luận tóm tắt" cho từng kết nối sẽ lưu `providerSpecificData.requestDefaults.summarizeThinking` và thêm `display: "summarized"` vào các yêu cầu suy luận Tương thích CC chưa đặt chế độ hiển thị
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (họ Opus/Sonnet 4.x)
+- Nút chuyển đổi "Bật phiên bản beta tư duy sắp xếp lại" trên mỗi kết nối sẽ thêm `redact-thinking-2026-02-12` khi dòng ngược tương thích CC đặc biệt yêu cầu các luồng suy nghĩ được sắp xếp lại
+- Nút chuyển đổi "Bật hiển thị tư duy tóm tắt" trên mỗi kết nối lưu trữ `providerSpecificData.requestDefaults.summarizeThinking` và thêm `display: "summarized"` vào CC Các yêu cầu tư duy tương thích chưa đặt chế độ hiển thị
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (gia đình Opus/Sonnet 4.x)
 - Đường dẫn mặc định: `/v1/messages?beta=true`
 
-Các mô-đun liên quan trong cùng gói:
+Các mô-đun chị em trong cùng một gói:
 
-- `claudeCodeConstraints.ts` — các quy tắc về temperature + cache-control
-- `claudeCodeToolRemapper.ts` — ánh xạ lại tên công cụ
-- `claudeCodeExtraRemap.ts` — chuẩn hóa payload bổ sung
+- `claudeCodeConstraints.ts` — nhiệt độ + quy tắc kiểm soát bộ đệm
+- ánh xạ lại tên công cụ `claudeCodeToolRemapper.ts` —
+- `claudeCodeExtraRemap.ts` — chuẩn hóa tải trọng bổ sung
 
 ---
 
@@ -132,7 +133,7 @@ Việc thực thi ngược dòng đang diễn ra** bên Google** , không phải
 **Tại sao tính năng này thu hút khả năng phát hiện lạm dụng mạnh mẽ hơn so với mức sử dụng chỉ ở cấp độ miễn phí:**
 
 - Chi tiêu tự động được duy trì trên một tài khoản Google duy nhất gắn cờ khác với số lượt truy cập-hạn ngạch-và-điểm dừng cấp miễn phí.
-- Tín dụng vượt mức không có mức trần, do đó, một khách hàng bị định cấu hình sai có thể tiêu tốn hàng trăm USD trong vài phút và trông giống như lưu lượng truy cập bot hoặc bán lại khóa API.
+- Tín dụng vượt mức không có mức trần, do đó, một khách hàng bị định cấu hình sai có thể tiêu tốn hàng trăm USD trong vài phút và trông giống như lưu lượng bot hoặc bán lại khóa API.
 - Nhiều người dùng OmniRoute đạt được các khoản tín dụng vượt mức song song từ cùng một IP bên ngoài sẽ tạo ra tín hiệu.
 
 **Tư thế khuyên dùng:**
@@ -163,7 +164,7 @@ Cả hai nhà cung cấp đều xác thực bằng phiên OAuth của sản ph�
 | `gemini`        | Gemini (Google AI Studio) | Khóa Gemini API từ Google AI Studio (có sẵn cấp miễn phí)                                 |
 | `vertex`        | Đỉnh AI                   | Tài khoản dịch vụ JSON, mã thông báo truy cập OAuth hoặc khóa API Vertex Express (Gemini) |
 
-Các nhà cung cấp này sử dụng các vấn đề về thông tin xác thực Google để truy cập API, không giống như phiên sản phẩm Antigravity. Chúng không làm cho mọi hoạt động sử dụng đều tuân thủ hoặc loại bỏ rủi ro thực thi: mỗi điều khoản đều bị chi phối bởi các điều khoản riêng mà nhà điều hành phải kiểm tra khi triển khai. Ví dụ: [Điều khoản dịch vụ bổ sung Gemini API](https://ai.google.dev/gemini-api/terms) chỉ cho phép Dịch vụ trả phí khi khách hàng API được cung cấp cho người dùng ở Khu vực kinh tế Châu Âu, Thụy Sĩ hoặc Vương quốc Anh và nội dung được gửi tới Dịch vụ không trả phí có thể được sử dụng để cải thiện sản phẩm của Google. Thay vào đó, Vertex AI thuộc các điều khoản của đám mây Google ( [Điều khoản cụ thể của dịch vụ](https://cloud.google.com/terms/service-terms) ). Giá cả và hạn ngạch tuân theo các điều khoản API đó thay vì đăng ký Antigravity.
+Các nhà cung cấp này sử dụng các vấn đề về thông tin xác thực Google để truy cập API, không giống như phiên sản phẩm Antigravity. Chúng không làm cho mọi hoạt động sử dụng đều tuân thủ hoặc loại bỏ rủi ro thực thi: mỗi điều khoản đều bị chi phối bởi các điều khoản riêng mà nhà điều hành phải kiểm tra khi triển khai. Ví dụ: [Điều khoản dịch vụ bổ sung Gemini API](https://ai.google.dev/gemini-api/terms) chỉ cho phép Dịch vụ trả phí khi khách hàng API được cung cấp cho người dùng ở Khu vực kinh tế Châu Âu, Thụy Sĩ hoặc Vương quốc Anh và nội dung được gửi tới Dịch vụ không trả phí có thể được sử dụng để cải thiện sản phẩm của Google. Thay vào đó, Vertex AI thuộc các điều khoản của Google Cloud ( [Điều khoản cụ thể của dịch vụ](https://cloud.google.com/terms/service-terms) ). Giá cả và hạn ngạch tuân theo các điều khoản API đó thay vì đăng ký Antigravity.
 
 Các nhà khai thác muốn tránh việc tạm dừng Antigravity được mô tả ở trên nên định tuyến lưu lượng truy cập Gemini thông qua một trong những nhà cung cấp này thay vì `antigravity` / `agy`, sau khi kiểm tra xem việc sử dụng của họ có phù hợp với các điều khoản của nhà cung cấp hay không.
 
@@ -171,7 +172,7 @@ Các nhà khai thác muốn tránh việc tạm dừng Antigravity được mô 
 
 - `open-sse/executors/antigravity.ts` — đọc `process.env.ANTIGRAVITY_CREDITS`
 - hệ thống ống nước chứng chỉ `src/lib/oauth/providers/antigravity.ts` —
-- Báo cáo sự cố ban đầu: Thảo luận [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Báo cáo sự cố ban đầu: Thảo luận [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

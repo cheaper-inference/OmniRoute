@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) și OpenCode (`x-opencode-session`) sunt re
 
 Directorul de lucru diferă între mașini, astfel încât același depozit poate apărea pe căi diferite. Trimiteți proiectul în mod explicit în schimb: Claude Code adaugă toate anteturile listate în `ANTHROPIC_CUSTOM_HEADERS` la fiecare cerere de model, iar OmniRoute citește două dintre ele:
 
-| Antet                      | Valoare                                                                 |
-| -------------------------- | ----------------------------------------------------------------------- |
-| `x-omniroute-project`      | Numele proiectului, de exemplu `omniroute`                              |
-| `x-omniroute-project-repo` | Telecomanda normalizată, de exemplu `github.com/diegosouzapw/OmniRoute` |
+| Antet                      | Valoare                                                                      |
+| -------------------------- | ---------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Numele proiectului, de exemplu `omniroute`                                   |
+| `x-omniroute-project-repo` | Telecomanda normalizată, de exemplu `github.com/cheaper-inference/OmniRoute` |
 
 Ambele sunt citite doar pentru atribuire; nu sunt niciodată redirecționate către furnizorul din amonte.
 
@@ -263,28 +263,20 @@ necesare opțiuni suplimentare. Suprascrieți setarea pentru fiecare invocare cu
 
 ## Depanare
 
-**Claude Code ignoră gateway-ul** — confirmați că `ANTHROPIC_BASE_URL` **nu conține
-`/v1`** și reporniți `claude` (variabilele de mediu sunt citite o singură dată la pornire). `omniroute launch`
-se ocupă de acest lucru pentru dvs.
+**Codul Claude ignoră gateway-ul** — confirma `ANTHROPIC_BASE_URL` are** nu `/v1`** și reporniți `claude` (env este citit o dată la pornire). `omniroute launch` se ocupă de asta pentru tine.
 
-**Selectorul `/model` este gol / modelele gateway-ului lipsesc** — necesită Claude Code
-v2.1.219+ și `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Numai ID-urile de model `claude*` /
-`anthropic*` apar în selector; forțați orice alt model cu
-`ANTHROPIC_MODEL=<id>` (aceasta este metoda utilizată de profiluri).
+**`/model` picker este gol / lipsesc modele de gateway** — are nevoie de codul Claude v2.1.219 + și `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Doar modelul `claude*` / `anthropic*` IDs apar în selector; forțați orice alt model cu `ANTHROPIC_MODEL=<id>` (așa fac profilurile).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code trimite întotdeauna ID-uri de model **fără prefix**
-(de exemplu, `claude-opus-4-8`), astfel încât, atunci când sunt conectați atât furnizorul Claude Code (`cc/…`), cât și
-furnizorul Claude (`claude/…`), ID-ul fără prefix corespunde la două rute, iar
-OmniRoute refuză să ghicească. Puteți remedia problema în oricare dintre următoarele moduri: fixați un ID cu prefix folosind
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` sau activați **Preferă Claude Code pentru
-modelele Claude fără prefix** — comutatorul de pe pagina furnizorului Claude sau
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (dezactivat implicit;
-consultați [Mediu](../reference/ENVIRONMENT.md)) — ceea ce direcționează ID-urile `claude-*`
-fără prefix către Claude Code. Prefixele explicite ale furnizorilor au întotdeauna prioritate.
+**`400 Ambiguous model 'claude-…'`** — Claude Codul trimite întotdeauna** neprefixate** modelul IDs (de ex. `claude-opus-4-8`), deci atunci când ambii furnizori de cod Claude (`cc/…`) și Claude (`claude/…`) sunt conectați, id-ul gol se potrivește cu două rute și OmniRoute refuză să ghicească. Remediați-l în orice fel: fixați un id prefixat cu `ANTHROPIC_MODEL=cc/claude-opus-4-8` sau activați** Preferați codul Claude pentru modelele Claude fără prefix** — comutatorul de pe pagina furnizorului Claude sau `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (dezactivat implicit; consultați [Mediu](../reference/ENVIRONMENT.md) ) — care direcționează `claude-*` IDs goale către codul Claude. Prefixele explicite ale furnizorilor câștigă întotdeauna.
 
-**Erori de autentificare** — profilul nu conține niciun token. Utilizați `omniroute launch --profile`
-(îl injectează) sau exportați `ANTHROPIC_AUTH_TOKEN`.
+**„modul automat... această sesiune nu este eligibilă” (solicitările clasificatorului sunt facturate)** — în modul automat Claude Code solicită serverului să revizuiască acțiunile din propriile cereri de model ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Aceasta necesită valoarea `anthropic-beta` `dangerous-tool-use-2026-09-03` și câmpul corp `safeguards` pentru a ajunge Anthropic ca o pereche, iar `safeguard_results` plus instrumentul din amonte-utilizați IDs pentru a reveni neschimbat. OmniRoute face acest lucru atunci când cererea este direcționată către furnizorul nativ `claude` sau către un nod `anthropic-compatible-*`, transmisă în flux sau nu (garda de regresie: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Alte ținte nu pot returna recenzia, așa că Claude Code revine la propriile solicitări de clasificator și arată notificarea:
 
-**Profilurile nu sunt izolate** — fiecare profil este un `CLAUDE_CONFIG_DIR` distinct;
-verificați dacă `echo $CLAUDE_CONFIG_DIR` din cadrul sesiunii indică
-`~/.claude/profiles/<name>`.
+- un model pe un furnizor non-antropic sau un combo care ajunge pe unul;
+- un nod releu compatibil cu Claude-Code (`anthropic-compatible-cc-*`), care reconstruiește corpul cererii și nu poartă `safeguards`;
+- un OmniRoute mai vechi care precede beta-urile listate cu permise sau o versiune de cod Claude sub cea pe care o listează pagina Anthropic pentru sesiunile gateway.
+
+Rulați `/status` în codul Claude : the** Server în modul automat** rândul citește `Enabled` în timp ce revizuirea serverului este activă. Dacă aceste cereri sunt facturate este decis de Anthropic, nu de OmniRoute.
+
+**Erori de autentificare** — profilul nu deține nici un simbol. Utilizați `omniroute launch --profile` (se injectează) sau exportați `ANTHROPIC_AUTH_TOKEN`.
+
+**Profilurile nu izolează** — fiecare profil este un `CLAUDE_CONFIG_DIR` distinct; verificați `echo $CLAUDE_CONFIG_DIR` în interiorul punctelor de sesiune la `~/.claude/profiles/<name>`.

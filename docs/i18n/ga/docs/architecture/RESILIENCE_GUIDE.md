@@ -12,57 +12,53 @@ Tá trí mheicníocht athléimneachta ar leith ach gaolmhar OmniRoute. Tá raon 
 
 > **Tosaíocht Env-vs-deais le haghaidh athléimneacht scoránaigh.** Scoránaigh an rogha an diúltaithe i athléimneacht síol ón timpeallacht — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — sholáthar ach an _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Lean boolean in `resilienceSettings` (Deais →** Socruithe → Athléimneacht** Bhuaigh / `PATCH /api/resilience`, stóráilte i `key_value`) thar an luach env: coimeádann normalú (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) an boolean stóráilte aon uair a bhíonn ceann ann. Ag socrú env var den sórt sin go `true` ar imscaradh inar sábháladh an painéal cheana `false` mar sin ní athraítear rud ar bith — smeach an scoránaigh isteach** Socruithe → Athléimneacht** (nó soiléir an réimse stóráilte) ina ionad sin.
 
-## 1. Bristeoir Cuarda an tSoláthraí
+## 1. Soláthraí Circuit Breaker
 
-**Raon feidhme:** an soláthraí iomlán (m.sh., `glm`, `openai`, `anthropic`).
+**Scóip:** soláthraí iomlán (m.sh., `glm`, `openai`, `anthropic`).
 
-**Cuspóir:** stop a chur le trácht a sheoladh chuig soláthraí atá ag teip go minic ag leibhéal an tsrutha suas/seirbhíse.
+**Cuspóir:** stop a chur le trácht a sheoladh chuig soláthraí atá ag teip arís agus arís eile ar an leibhéal upstream/service.
 
-**Feidhmiú:**
+**Cur i bhfeidhm:**
 
-- Croí-aicme: `src/shared/utils/circuitBreaker.ts`
+- Bunrang: `src/shared/utils/circuitBreaker.ts`
 - Sreangú: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API stádais: `GET /api/monitoring/health`
-- API athshocraithe: `POST /api/resilience/reset`
-- Filleoirí: `open-sse/services/accountFallback.ts`
-- Tábla BS: `domain_circuit_breakers`
+- Stádas API: `GET /api/monitoring/health`
+- Athshocraigh API: `POST /api/resilience/reset`
+- Fillteáin: `open-sse/services/accountFallback.ts`
+- tábla DB : `domain_circuit_breakers`
 
 **Stáit:**
 
-- `CLOSED` — ceadaítear gnáththrácht
-- `DEGRADED` — ceadaítear trácht fós, ach tá teipeanna méadaithe an tsoláthraí á rianú; filleann sé ar `CLOSED` nuair a bhíonn go leor rathanna ann, ar thástáil nasc bhailí, nó tar éis na tréimhse `OPEN` is faide a coinníodh don chineál teipe deireanaí (a luach `cooldownByKind`, nó `resetTimeout` mura bhfuil sé ann, × `maxBackoffMultiplier`, ar a laghad tréimhse fuaraithe amháin) gan teip nua
-- `OPEN` — soláthraí bacaithe go sealadach; scipeálann an ródú teaglama é
-- `HALF_OPEN` — tá an t-am athshocraithe thart; ceadaítear iarratas tástála
+- `CLOSED` — gnáththrácht ceadaithe
+- Tá trácht `DEGRADED` — fós ceadaithe, ach tá teipeanna soláthraithe ardaithe á rianú; filleann ar `CLOSED` ar dhóthain ratha, ar thástáil nasc bailí, nó tar éis an shealbhú `OPEN` is faide don chineál teip dheireanach (a luach `cooldownByKind`, eile `resetTimeout`, × `maxBackoffMultiplier`, fuarú amháin ar a laghad) gan teip nua
+- soláthraí `OPEN` — bac go sealadach; scipeann ródú teaglama é
+- tá teorainn ama athshocraithe `HALF_OPEN` — caite; iarratas taiscéalaíochta ceadaithe
 
-**Réamhshocruithe in-chumraithe (`open-sse/config/constants.ts`, nochta faoi Painéal → Socruithe → Athléimneacht):**
+**Réamhshocruithe inchumraithe (`open-sse/config/constants.ts`, nochta i Socruithe Deais → Resilience → ):**
 
-| Aicme   | Díghrádaithe ag | Osclaíonn sé ag | Am athshocraithe |
-| ------- | --------------- | --------------- | ---------------- |
-| OAuth   | 5 theip         | 8 dteip         | 60s              |
-| API-key | 7 dteip         | 12 theip        | 30s              |
-| Áitiúil | díorthaithe     | 2 theip         | 15s              |
+| Aicme       | Díghrádaithe ag | Osclaítear ag | Athshocraigh teorainn ama |
+| ----------- | --------------- | ------------- | ------------------------- |
+| OAuth       | 5 teip          | 8 teip        | 60s                       |
+| API-eochair | 7 teip          | 12 teip       | 30s                       |
 
-Rialaíonn `degradationThreshold` cathain a théann soláthraí isteach i `DEGRADED`; rialaíonn `failureThreshold` cathain a osclaíonn sé agus a scipeáiltear é. Níl próifílí soláthraí áitiúla nochta ar leathanach socruithe Athléimneachta go fóil.
+rialaíonn `degradationThreshold` nuair a théann soláthraí isteach `DEGRADED`; rialaíonn `failureThreshold` nuair a osclaíonn sé agus nuair a dhéantar scipeáil air. Tá `PROVIDER_PROFILES.local` (2 theip / 15s) sainmhínithe i `open-sse/config/constants.ts` ach** gan sreang fós** : ní thagann `getProviderCategory()` ar ais ach `oauth` nó `apikey`, mar sin úsáideann soláthraithe áitiúla an phróifíl OAuth nó API-key.
 
-**Cóid thuislithe:** stádais ar leibhéal soláthraí amháin `[408, 500, 502, 503, 504]`. NÁ tuisl ar earráidí ar leibhéal cuntais (formhór 401/403/429 — is le fuarú nó glasáil iad sin).
+**Cóid turais:** stádas soláthraí amháin `[408, 500, 502, 503, 504]`. Déan turas NOT le haghaidh earráidí ar leibhéal cuntais (baineann an chuid is mó 401/403/429 — leo siúd le fuarú nó frithdhúnadh).
 
-**Aisfháil leisciúil:** nuair a éagann `OPEN`, nuashonraíonn `getStatus()`, `canExecute()`, `getRetryAfterMs()` an staid go `HALF_OPEN`. Cuireann na léamha céanna (agus an chéad teip eile) `DEGRADED` ró-shean ar ais go `CLOSED` de réir a chéile. Ní gá lasc ama cúlra.
+**Aisghabháil leisciúil:** nuair a théann `OPEN` in éag, `getStatus()`, `canExecute()`, `getRetryAfterMs()` refresh state to `HALF_OPEN`. Léann an rud céanna (agus an chéad teip eile) meath `DEGRADED` sean ar ais go `CLOSED`. Níl aon lasc ama cúlra ag teastáil.
 
 ---
 
-### Fuarú Domhanda Soláthraí Roghnach (geata fuinneoige)
+### Fuarú Soláthraí Opt-isteach Domhanda (geata na fuinneoige)
 
-Coinníonn ceathrú sraith **roghnach** (`PROVIDER_COOLDOWN_ENABLED`, réamhshocrú **múchta**) cuimhne thras-iarratais ar sholáthraithe teipthe in
-`open-sse/services/providerCooldownTracker.ts`, ar a dtagraíonn réiteach spriocanna teaglama ionas go scoirfidh iarratais theaglama as a chéile de bheith ag athshiúl soláthraí ar theip air díreach roimhe. Urramaíonn iontrálacha ar leibhéal soláthraí geata fuinneoige `PROVIDER_PROFILES`:
+ceathrú,** rogha an diúltaithe** ciseal (`PROVIDER_COOLDOWN_ENABLED`, réamhshocraithe** as** ) go gcoimeádann sé cuimhne tras-iarratais ar sholáthraithe a dteipeann orthu i `open-sse/services/providerCooldownTracker.ts`, i gcomhairle leis trí réiteach spriocanna teaglama ionas go stopann iarratais teaglama i ndiaidh a chéile ag siúl arís ar sholáthraí ar theip air. Onóir iontrálacha ar leibhéal an tsoláthraí geata na fuinneoige `PROVIDER_PROFILES` :
 
-| Próifíl     | tuislithe tar éis (`providerFailureThreshold`) | laistigh de (`providerFailureWindowMs`) | fuaraithe ar feadh (`providerCooldownMs`) |
-| ----------- | ---------------------------------------------: | --------------------------------------: | ----------------------------------------: |
-| OAuth       |                                           `10` |                                 `15min` |                                    `5min` |
-| Eochair API |                                           `15` |                                 `30min` |                                   `10min` |
+| Próifíl     | turais tar éis (`providerFailureThreshold`) | istigh (`providerFailureWindowMs`) | fuaraíonn do (`providerCooldownMs`) |
+| ----------- | ------------------------------------------: | ---------------------------------: | ----------------------------------: |
+| OAuth       |                                        `10` |                            `15min` |                              `5min` |
+| eochair API |                                        `15` |                            `30min` |                             `10min` |
 
-Faoi bhun an tairseach **ní** mheastar go bhfuil an soláthraí ag fuarú; glanann rath an fhuinneog. Coinníonn iontrálacha ar leibhéal naisc (`provider:connectionId`) an cúlú eachtrúil `minRetryCooldownMs → maxRetryCooldownMs` ina ionad sin. Sáruithe:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Garda cúlchéimnithe: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Faoi bhun na tairsí tá an soláthraí** nach bhfuil** mheas fuarú; glanann rath an fhuinneog. Coinníonn iontrálacha leibhéal ceangail (`provider:connectionId`) an t-iarmhír `minRetryCooldownMs → maxRetryCooldownMs` easpónantúil ina ionad sin. Sáraítear: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Garda aischéimnithí: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Cooldown Ceangal
 
@@ -755,6 +751,21 @@ macánta:
 
 ---
 
+## Nuair a bhíonn OmniRoute féin dosroichte
+
+Ritheann an soláthróir scoradán ciorcaid, fuarú nasc, agus frithdhúnadh samhail laistigh den gheata. Mura féidir leis an gcliant an geata a bhaint amach, faigheann sé earráid cheangail. ní féidir le OmniRoute an teip sin a thascradh. Cinneann an cliant ar cheart triail a bhaint as arís agus cén teachtaireacht a thaispeánfar.
+
+Faoi láthair ní sholáthraíonn OmniRoute aon chúlpháirtí ar thaobh an chliaint agus ní shainíonn sé aon bheartas ina leith. Cumraigh aon bhealach malartach sa chliant nó os comhair an gheata.
+
+- seiceálann `GET /api/health` beocht gan fíordheimhniú.
+- seiceálann `GET /api/health/ping` ullmhacht, lena n-áirítear an bhfreagraíonn an bunachar sonraí.
+- Tugann `GET /api/monitoring/health` forbhreathnú sláinte níos doimhne do ghlaoiteoirí fíordheimhnithe.
+- `omniroute launch <tool>` probes `/api/monitoring/health` roimh thosú ar an gcliant. Féadann sé geata áitiúil a thosú go huathoibríoch. Le `--no-start`, bíonn `GatewayUnreachable` agus cód scoir `69` mar thoradh ar gheata dosroichte .
+
+Chun cliant a dhínascadh ó OmniRoute, lean [cumraíocht an chliaint ar ais](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Dífhabhtú
 
 - Freagraíonn an teaglaim ualaithe le `503 all_targets_cooling_down` (`Retry-After` socraithe, liostaíonn `diagnostics.excluded` gach sprioc le `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → tá an linn cumraithe agus ceangailte, níl ach gach sprioc eisiata ag amadóir athléimneachta; ainmníonn an rabhadh `[COMBO] Weighted selection: every target excluded before dispatch — …` na cúiseanna agus na soicindí atá fágtha. Ciallaíonn `404 no_executable_targets` ón teaglaim chéanna nach raibh aon amadóir athléimneachta i gceist (faic le rith, nó theip ar gach cuntas tástálaí na hinfhaighteachta). Tógtha in `open-sse/services/combo/pinRecovery.ts` ó na heisiaimh a bailíodh in `targetResolution.ts`.
@@ -766,98 +777,68 @@ macánta:
 
 ---
 
-## Staid am rite — tagairt thapa don ghníomhaire
+## Tagairt thapa gníomhaire — runtime state
 
-> Bogadh focal ar fhocal ó `AGENTS.md` → "Resilience Runtime State" (PR #12743) ionas
-> go bhfanann treoir an ghníomhaire faoi bhun an bhuicéid chomhthéacs 40k. Is é seo an
-> tuairim chomhdhlúite, dírithe ar an ngníomhaire, ar na rannóga thuas; is iad na rannóga
-> uimhrithe an tagairt iomlán fós.
+> Ar athraíodh a ionad focal ar fhocal ó `AGENTS.md` → "Resilience Runtime State" (PR #12743) agus mar sin fanann treoir na ngníomhairí faoi bhuiséad comhthéacs 40k. Is é an dearcadh comhdhlúite, aghaidh ar ghníomhairí de na hailt thuas; fanann na hailt uimhrithe mar thagairt iomlán.
 
-Tá trí mheicníocht theipeanna sealadacha ag OmniRoute atá gaolmhar ach ar leithligh ó
-chéile. Coinnigh a raon feidhme scartha agus iompar ródaithe á dhífhabhtú agat. Féach an
-[léaráid athléimneachta 3 chiseal](../diagrams/exported/resilience-3layers.svg)
-(foinse: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-le haghaidh forbhreathnaithe gasta.
+Tá trí mheicníocht theip shealadach ghaolmhar ach ar leith OmniRoute. Coinnigh a scóip ar leith nuair a bhíonn iompar ródaithe á dífhabhtú. Féach ar an [léaráid athléimneachta 3-chiseal](../diagrams/exported/resilience-3layers.svg) (foinse: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) le haghaidh sracfhéachaint ar léarscáil.
 
-### Cuardabristeoir an tSoláthraí
+### Soláthraí Circuit Breaker
 
-**Raon feidhme**: an soláthraí iomlán, m.sh. `glm`, `openai`, `anthropic`.
+**Raon feidhme** : soláthraí iomlán, m.sh. `glm`, `openai`, `anthropic`.
 
-**Cuspóir**: stop a chur le trácht a sheoladh chuig soláthraí atá ag teip arís agus arís
-eile ar leibhéal an tsrutha suas/seirbhíse, ionas nach gcuireann soláthraí amháin
-míshláintiúil moill ar gach iarratas.
+**Cuspóir** : stop a chur le trácht a sheoladh chuig soláthraí a theipeann arís agus arís eile ar an leibhéal upstream/service, mar sin ní mhoillíonn soláthraí míshláintiúil amháin gach iarratas.
 
-**Feidhmiú**:
+**Cur i bhfeidhm** :
 
-- Croí-rang: `src/shared/utils/circuitBreaker.ts`
-- Sreangú geata/forghníomhaithe an chomhrá: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API stádais am rite: `src/app/api/monitoring/health/route.ts`
-- Filleáin chomhroinnte: `open-sse/services/accountFallback.ts`
-- Tábla stádais buanaithe: `domain_circuit_breakers`
+- Bunrang: `src/shared/utils/circuitBreaker.ts`
+- Comhrá gate/execution sreangú: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Stádas ama rite API: `src/app/api/monitoring/health/route.ts`
+- Cumhdaigh roinnte: `open-sse/services/accountFallback.ts`
+- Tábla stáit fós: `domain_circuit_breakers`
 
-**Stádais** (4 — `src/shared/utils/circuitBreaker.ts`):
+**Stáit** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: ceadaítear gnáth-thrácht.
-- `DEGRADED`: banda luathrabhaidh — sháraigh teipeanna an tairseach díghrádaithe ach ní
-  tairseach an bhrisithe go fóil; leanann trácht ar aghaidh, taispeánann na painéil an
-  rabhadh. Filleann tástáil bhailí ceangail nó fuinneog chiúin gan teip nua é go `CLOSED`
-  (tá an fhuinneog in `docs/architecture/RESILIENCE_GUIDE.md`).
-- `OPEN`: tá an soláthraí bacaithe go sealadach; faigheann glaonnaigh freagra
-  «cuardach soláthraí oscailte» nó scipeann an ródú teaglama chuig sprioc eile.
-- `HALF_OPEN`: tá teorainn ama an athshocraithe caite; ceadaigh iarratas tástála.
-  Dúnann rath an bristeoir, osclaíonn teip arís é.
+- `CLOSED`: ceadaítear gnáththrácht.
+- `DEGRADED`: theip ar bhanna luathrabhaidh — an tairseach díghrádaithe ach ní raibh an tairseach briste fós; sreabhann an trácht go fóill, taispeánann daais an rabhadh. Tugann tástáil bhailí naisc nó fuinneog chiúin gan teip nua ar ais go `CLOSED` (tá an fhuinneog ag `docs/architecture/RESILIENCE_GUIDE.md` ).
+- `OPEN`: tá an soláthraí bactha go sealadach; faigheann glaoiteoirí freagra oscailte-chiorcad-soláthraí nó scipeanna ródaithe teaglama chuig sprioc eile.
+- `HALF_OPEN`: tá teorainn ama athshocraithe caite; iarratas taiscéalaíochta a cheadú. Rath Dúnann an breaker, teip osclaíonn sé arís.
 
-**Réamhshocruithe** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, á gcatheamh trí
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` in `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). Feidhmíonn
-bristeoir an tsoláthraí iomláin ar `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Réamhshocruithe** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, arna gcaitheamh trí `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` i `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` i `src/sse/handlers/chatHelpers.ts`). Ritheann an briseoir soláthróir uile ar `circuitBreakerThreshold` / `circuitBreakerReset`:
 
 | Próifíl     | díghrádaíonn ag | osclaíonn ag (`circuitBreakerThreshold`) | athshocrú (`circuitBreakerReset`) |
 | ----------- | --------------: | ---------------------------------------: | --------------------------------: |
 | OAuth       |             `5` |                                      `8` |                             `60s` |
-| Eochair API |             `7` |                                     `12` |                             `30s` |
-| Áitiúil     |   (díorthaithe) |                                      `2` |                             `15s` |
+| eochair API |             `7` |                                     `12` |                             `30s` |
 
-Sainmhíníonn `PROVIDER_PROFILES` freisin `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 nóim) agus `providerCooldownMs` (5/10/1 nóim): is iad
-seo a chumhachtaíonn **geata fuinneoige an Fhuaraithe Soláthraí dhomhanda le roghnú
-isteach** (`PROVIDER_COOLDOWN_ENABLED`, múchta de réir réamhshocraithe) — ní áirítear
-iontráil ar leibhéal soláthraí in `open-sse/services/providerCooldownTracker.ts` mar
-fhuarú ach tar éis `providerFailureThreshold` teip laistigh de `providerFailureWindowMs`,
-agus ansin fuaireann sí ar feadh `providerCooldownMs`. NÍ tairseacha an bhrisithe bheo
-iad seo — ná déan iad a thiúnadh ag súil le hiompar an bhrisithe. Is féidir gach
-réamhshocrú a shárú trí na hathróga comhshaoil `OMNIROUTE_PROVIDER_BREAKER_*` agus
-`OMNIROUTE_CIRCUIT_BREAKER_*`; tá an tábla tagartha cruinn don am rite in
-`docs/architecture/RESILIENCE_GUIDE.md`.
+Tá próifíl `local` ( teipeanna `2` / `15s`) ann freisin i `PROVIDER_PROFILES`, ach níl sé sreangaithe isteach sa bhriseadh: ní ghlacann `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) ach `oauth` nó `apikey`, agus cuireann `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) ar ais ceann den dá cheann sin (faigh soláthraithe neamhchláraithe `apikey`).
 
-Níor cheart ach do stádais teipe ar leibhéal soláthraí bristeoir an tsoláthraí a scor:
+Sainmhíníonn `PROVIDER_PROFILES` freisin `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min ) agus `providerCooldownMs` (5/10/1 min ) — OAuth/API key/local, áit a bhfuil na luachanna áitiúla támh ar an gcúis chéanna thuas: tá na luachanna seo** geata fuinneoige an tsoláthraí domhanda rogha an diúltaithe Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, réamhshocraithe as) — ní áirítear iontráil ar leibhéal an tsoláthraí i `open-sse/services/providerCooldownTracker.ts` ach mar fhuarú tar éis teipeanna `providerFailureThreshold` taobh istigh de `providerFailureWindowMs`, agus ansin fuaraíonn sé le haghaidh `providerCooldownMs`. Tá siad NOT tairseacha an scoradáin beo — ná bí ag súil leo ag súil le hiompar briste. Is féidir gach réamhshocrú a shárú trí na `OMNIROUTE_PROVIDER_BREAKER_*` agus `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; tá an tábla tagartha cruinn-ama rite ina chónaí in `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Níor cheart ach stádas teipe ar leibhéal an tsoláthraí a thurais ar an soláthróir:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Ná scor bristeoir an tsoláthraí iomláin le haghaidh gnáth-earráidí cuntais/eochair/mhúnla
-cosúil le formhór na gcásanna `401`, `403`, nó `429`. Is le fuarú ceangail nó glasáil
-múnla a bhaineann siad sin de ghnáth. Ba cheart go mbeadh `403` ó sholáthraí cineálach
-eochair API in-athghabhála mura bhfuil sé aicmithe mar earráid chríochnaitheach
-soláthraí/chuntais.
+Ná turas ar an scoradán soláthraí uile le haghaidh gnáth-earráidí account/key/model mar an chuid is mó cásanna `401`, `403`, nó `429`. Is le fuascailt cheangail nó frithdhúnadh samhail a bhaineann na cinn sin de ghnáth. Ba cheart go mbeadh soláthraí cineálach API-eochair `403` in-aisghabhála mura rangaítear é mar earráid teirminéil provider/account.
 
-Úsáideann an bristeoir téarnamh leisciúil, seachas lasc ama cúlra. Nuair a éagann `OPEN`, déanann léamha ar nós `getStatus()`, `canExecute()`, agus `getRetryAfterMs()` an staid a athnuachan go `HALF_OPEN`, ionas nach leanann deais agus tógálaithe iarrthóirí teaglaim ag eisiamh soláthraí éagtha go deo.
+Úsáideann an scoradán aisghabháil leisciúil, ní lasc ama cúlra. Nuair a théann `OPEN` in éag, léann cosúil le `getStatus()`, `canExecute()`, agus `getRetryAfterMs()` an stát a athnuachan go `HALF_OPEN`, mar sin ní choinníonn dashboards agus tógálaithe iarrthóra teaglama ag eisiamh soláthraí atá imithe in éag go deo.
 
-### Fuarú Ceangail
+### Ceangal Fuarú
 
-**Scóip**: ceangal/cuntas/eochair sholáthraí amháin.
+**Raon feidhme** : soláthraí amháin connection/account/key.
 
-**Cuspóir**: eochair nó cuntas droch-chaighdeánach amháin a scipeáil go sealadach agus ceangail eile don soláthraí céanna á gceadú chun leanúint ag freastal ar iarratais.
+**Cuspóir** : scipeáil droch key/account amháin go sealadach agus ligean do naisc eile don soláthraí céanna leanúint ar aghaidh ag freastal ar iarratais.
 
-**Feidhmiú**:
+**Cur i bhfeidhm** :
 
-- Conair scríofa/nuashonraithe: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Roghnú/scagadh cuntais: `src/sse/services/auth.ts::getProviderCredentials...`
-- Ríomh an fhuaraithe: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- cosán Write/update : `src/sse/services/auth.ts::markAccountUnavailable()`
+- Cuntas selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Ríomh fuarú: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Socruithe: `src/lib/resilience/settings.ts`
 
-Réimsí tábhachtacha ar cheangail sholáthraí:
+Réimsí tábhachtacha ar naisc soláthraí:
 
 ```ts
 rateLimitedUntil;
@@ -868,50 +849,50 @@ errorCode;
 backoffLevel;
 ```
 
-Le linn roghnú cuntais, scipeáiltear ceangal fad is:
+Le linn roghnú an chuntais, ní dhéantar nasc a dhéanamh agus:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Is fuaruithe leisciúla iad freisin: nuair atá `rateLimitedUntil` san am atá caite, bíonn an ceangal incháilithe arís. Ar úsáid rathúil, glanann `clearAccountError()` `testStatus`, `rateLimitedUntil`, réimsí earráide, agus `backoffLevel`.
+Bíonn na fuaráin leisciúil freisin: nuair a bhíonn `rateLimitedUntil` san am atá caite, éiríonn an nasc incháilithe arís. Ar úsáid rathúil, glanann `clearAccountError()` `testStatus`, `rateLimitedUntil`, réimsí earráide, agus `backoffLevel`.
 
-Iompar réamhshocraithe fuaraithe ceangail:
+Iompar réamhshocraithe um chúngú nasc:
 
-- Fuarú bonnlíne OAuth: `5s`.
-- Fuarú bonnlíne eochair API: `3s`.
-- Ba cheart do `429` eochair API tosaíocht a thabhairt do leideanna athraigh uasabhair (`Retry-After`, ceanntásca athshocraithe, nó téacs athshocraithe inpharsáilte) nuair atá siad ar fáil.
-- Úsáideann teipeanna in-aisghabhála arís agus arís eile cúlcheadú easpónantúil:
+- fuarú bonn OAuth : `5s`.
+- Fuarú bonn eochair API: `3s`.
+- Ba cheart gurbh fhearr le API-eochair `429` leideanna atriail in aghaidh an tsrutha (`Retry-After`, athshocraigh ceanntásca, nó téacs athshocraithe in-parseáilte) nuair atá siad ar fáil.
+- Úsáideann teipeanna in-aisghabhála arís agus arís eile cúlú easpónantúil:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Cuireann an garda frith-thundering-herd cosc ar theipeanna comhthráthacha ar an gceangal céanna an fuarú a leathnú arís agus arís eile nó `backoffLevel` a mhéadú faoi dhó.
+Coscann an garda tréada frith-thundering teipeanna comhthráthacha ar an nasc céanna ó shíneadh arís agus arís eile ar an fuarú nó méadú dúbailte `backoffLevel`.
 
-Ní fuaruithe iad staideanna críochfoirt. Tá sé beartaithe go bhfanfaidh `banned`, `expired` (nach mbíonn críochfoirt ann ach tar éis N atriail theoranta trí `EXPIRED_RETRY_MAX`), agus `credits_exhausted` as láthair go dtí go n-athrófar dintiúir/socruithe nó go n-athshocróidh oibreoir iad. Ná forscríobh staideanna críochfoirt le staid fhuaraithe shealadaigh.
+Ní fuascailtí iad stáit chríochfoirt. Tá sé beartaithe go bhfanfaidh `banned`, `expired` (a thagann chun bheith ina teirminéal ach amháin tar éis a theorannú credentials/settings trí `EXPIRED_RETRY_MAX`) agus go dtí go n-athshocróidh `credits_exhausted` iad. Ná scríobh stáit teirminéil le staid neamhbhuan fuarúcháin.
 
-### Glasáil Múnlaí
+### Frithdhúnadh Múnla
 
-**Scóip**: soláthraí + ceangal + múnla.
+**Raon feidhme** : soláthraí + nasc + samhail.
 
-**Cuspóir**: ceangal iomlán a dhíchumasú a sheachaint nuair nach bhfuil ach múnla amháin as láthair nó teoranta do chuóta don cheangal sin.
+**Cuspóir** : seachain nasc iomlán a dhíchumasú nuair nach bhfuil ach múnla amháin ar fáil nó nuair nach bhfuil ach cuóta teoranta don nasc sin.
 
 Samplaí:
 
-- Soláthraithe cuóta in aghaidh an mhúnla a fhilleann `429`.
-- Soláthraithe áitiúla a fhilleann `404` do mhúnla amháin atá ar iarraidh.
-- Teipeanna ceadanna mód/múnla atá sainiúil don soláthraí, ar nós móid roghnaithe Grok.
+- Soláthraithe cuóta in aghaidh an mhúnla ag filleadh `429`.
+- Soláthraithe áitiúla ag filleadh `404` do mhúnla amháin atá in easnamh.
+- Teipeanna ar chead mode/model a bhaineann go sonrach le soláthraí ar nós modhanna Grok roghnaithe.
 
-Tá glasáil múnlaí lonnaithe i `open-sse/services/accountFallback.ts` agus ligeann sí don cheangal céanna leanúint ag freastal ar mhúnlaí eile.
+Cónaíonn frithdhúnadh múnla i `open-sse/services/accountFallback.ts` agus ligeann sé don nasc céanna leanúint ar aghaidh ag freastal ar mhúnlaí eile.
 
 ### Treoir Dífhabhtaithe
 
-- Má scipeáiltear gach eochair do sholáthraí, scrúdaigh staid bhristeoir an tsoláthraí agus `rateLimitedUntil`/`testStatus` gach ceangail araon.
-- Má bhíonn soláthraí eisithe go buan tar éis na fuinneoige athshocraithe, seiceáil an bhfuil an cód ag léamh `state` amh in ionad `getStatus()`/`canExecute()` a úsáid.
-- Má theipeann ar eochair sholáthraí amháin ach ba cheart go n-oibreodh cinn eile, tabhair tosaíocht d'fhuarú ceangail seachas bristeoir soláthraí.
-- Má theipeann ar mhúnla amháin, tabhair tosaíocht do ghlasáil múnlaí seachas fuarú ceangail.
-- Má ba cheart go dtiocfadh staid chucu féin, ba cheart go mbeadh stampa ama amach anseo/teorainn ama athshocraithe aici agus conair léite a athnuachanann staid éagtha. Éilíonn stádais bhuan athruithe láimhe ar dhintiúir nó ar chumraíocht.
+- Má dhéantar na heochracha go léir do sholáthraí a dhíbirt, déan iniúchadh ar staid bhriste an tsoláthraí agus ar `rateLimitedUntil`/`testStatus`.
+- Má dhealraíonn sé go bhfuil soláthraí eisiata go buan tar éis na fuinneoige athshocraithe, seiceáil an bhfuil an cód ag léamh amh `state` seachas `getStatus()`/`canExecute()` a úsáid.
+- Má theipeann ar eochair soláthraí amháin ach gur cheart go n-oibreoidh cinn eile, b'fhearr le fuarú nasc thar an soláthróir.
+- Mura dteipeann ach ar shamhail amháin, b’fhearr le frithdhúnadh na samhla seachas fuarú nasc.
+- Más rud é gur cheart do stát é féin a ghnóthú, ba cheart go mbeadh teorainn ama timestamp/reset aige amach anseo agus cosán léite a athnuachan staid atá imithe in éag. Teastaíonn athruithe láimhe nó cumraíochta le haghaidh stádas buan.
 
 ---
 

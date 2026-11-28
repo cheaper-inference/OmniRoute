@@ -47,13 +47,13 @@ máa ń nílò kí a tún ibi tí wọ́n dojú kọ ṣe kí a tó dapọ̀ w�
 Nigbati itusilẹ ba n ṣe atunṣe, ọrọ asami kan ti a samisi `release-freeze` yoo ṣii. Iyẹn** ko da idagbasoke** :
 
 - `release/vX.Y.Z` tio tutunini jẹ ti oludari idasilẹ fun ọkọ oju-omi yẹn.
-- `release/vX+1` ọmọ t’okan ti ge lati ori didi ti o tutu ki awọn oluranlọwọ tọju iṣẹ ibalẹ.
+- `release/vX+1` ọmọ ti o tẹle ni a ge lati ori didi ti o tutu ki awọn oluranlọwọ tọju iṣẹ ibalẹ.
 - Ṣii PRs ti o tun fojusi ẹka ti o tutuni yẹ ki o jẹ** atunbere** si ẹka `release/v*` ti nṣiṣe lọwọ (ti o ga julọ).
 
 Ṣayẹwo fun didi ṣiṣi ṣaaju ro pe ẹka ti o fẹ jẹ idapọ:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mekaniki dapọ (onini `queue` aami → Mergify) jẹ akọsilẹ ni [MERGE_TRAIN.md](./MERGE_TRAIN.md).

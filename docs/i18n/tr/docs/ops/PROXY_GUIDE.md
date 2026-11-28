@@ -273,58 +273,58 @@ Bu işlem, yükseltmeden sonraki ilk başlatmada bir kez gerçekleşir. Yeniden 
 
 ## 1proxy Ücretsiz Proxy Pazarı
 
-> 🆕 **[@oyi77](https://github.com/oyi77) tarafından katkıda bulunulmuştur** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Sorun [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** Katkıda bulunan: [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Sayı [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute, dünyanın dört bir yanından **yüzlerce ücretsiz, doğrulanmış proxy'ye** erişim sağlamak için **[1proxy](https://1proxy-api.aitradepulse.com)** topluluk platformuyla entegre olur. Bu, kendi proxy altyapısına sahip olmayan kullanıcılar için idealdir.
+OmniRoute integrates with the** [1proxy](https://1proxy-api.aitradepulse.com)** erişim sağlamak için topluluk platformu** yüzlerce ücretsiz, doğrulanmış proxy** from around the world. Bu, kendi proxy altyapısına sahip olmayan kullanıcılar için mükemmeldir.
 
 ### Nasıl Çalışır?
 
 ```
-┌─────────────┐   Senkronize Et   ┌─────────────────┐    Döndür     ┌───────────┐
-│  1proxy API │ ─────────────────▶ │  proxy_registry  │ ────────────▶ │ Sağlayıcı │
-│   (harici)  │  500 proxy'ye kadar│  source=oneproxy │ kaliteye göre │    API     │
-└─────────────┘                    └─────────────────┘                └───────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Senkronize et** — OmniRoute, doğrulanmış proxy'leri 1proxy API'sinden alır
-2. **Sakla** — Proxy'ler aynı `proxy_registry` tablosuna `source = 'oneproxy'` ile kaydedilir
-3. **Filtrele** — Protokole, ülkeye ve kalite puanına göre filtreleyin
-4. **Döndür** — Kalite, rastgele veya sıralı stratejileri kullanarak en iyi proxy'yi seçin
-5. **Otomatik düşürme** — Başarısız proxy'lerin kalite puanı düşürülür; eşik değerin altına düşenler → etkin değil olarak işaretlenir
+1. **Senkronizasyon** — OmniRoute, 1proxy API doğrulanmış proxy'leri getirir
+2. **Mağaza** — Proxy'ler `source = 'oneproxy'` ile aynı `proxy_registry` tablosuna kaydedilir
+3. **Filtre** — Protokole, ülkeye, kalite puanına göre filtrele
+4. **Döndür** — Kalite, rastgele veya sıralı stratejiler kullanarak en iyi proxy'yi seçin
+5. **Auto-degrade** — Başarısız proxy'lerin kalite puanları düşer; eşiğin altında → etkin değil olarak işaretlendi
 
 ### Proxy'leri Senkronize Etme
 
-**Kontrol Paneli Üzerinden:**
+**Via Dashboard:**
 
-1. **Ayarlar → 1proxy** sekmesine gidin
-2. **"Şimdi Senkronize Et"** düğmesine tıklayın
-3. İstatistikleri görüntüleyin: toplam proxy sayısı, etkin proxy sayısı, ortalama kalite ve ülkelere göre dağılım
+1. Git** Settings → 1proxy** sekme
+2. Tıklamak** "Şimdi Eşitle"**
+3. İstatistikleri görüntüleyin: toplam proxy sayısı, aktif sayı, ortalama kalite, ülkeye göre dağılım
 
-**API Üzerinden:**
+**API aracılığıyla:**
 
 ```bash
-# Senkronizasyonu tetikle
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Yanıt:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
 ### Proxy'leri Filtreleme
 
 ```bash
-# Protokole göre filtrele
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Ülkeye göre filtrele
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Minimum kalite puanına göre filtrele
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Filtreleri birleştir
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
@@ -332,34 +332,34 @@ curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&
 
 Her 1proxy proxy'si meta verilerle birlikte gelir:
 
-| Alan            | Açıklama                                         |
-| --------------- | ------------------------------------------------ |
-| `qualityScore`  | 1proxy doğrulamasından alınan 0-100 arası puan   |
-| `latencyMs`     | Ölçülen ağ gecikmesi                             |
-| `anonymity`     | `transparent`, `anonymous` veya `elite`          |
-| `googleAccess`  | Proxy'nin Google hizmetlerine erişip erişemediği |
-| `countryCode`   | İki harfli ISO ülke kodu                         |
-| `lastValidated` | Son doğrulamanın zaman damgası                   |
+| Alan            | Tanım                                              |
+| --------------- | -------------------------------------------------- |
+| `qualityScore`  | 1proxy doğrulamasından 0-100 derecelendirme        |
+| `latencyMs`     | Measured network latency                           |
+| `anonymity`     | `transparent`, `anonymous` veya `elite`            |
+| `googleAccess`  | Proxy'nin Google hizmetlerine erişip erişemeyeceği |
+| `countryCode`   | İki harfli ISO ülke kodu                           |
+| `lastValidated` | Son doğrulamanın zaman damgası                     |
 
 Kalite puanları dinamik olarak ayarlanır:
 
-- **Başarısız istekler** puanı 10 azaltır
-- **Puan ≤10'a düşerse** → proxy `inactive` olarak işaretlenir
-- Etkin olmayan proxy'ler döndürme işlemine dahil edilmez
+- **Başarısız istekler** puanı 10 puan düşürün
+- **Puan ≤ 10'a düşüyor** → proxy is marked `inactive`
+- Etkin olmayan proxy'ler rotasyonun dışında bırakılır
 
-### Döndürme Stratejileri
+### Rotasyon Stratejileri
 
 ```bash
-# Kaliteye göre döndür (önce en iyi proxy) — varsayılan
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Rastgele döndürme
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# Sıralı (önce en uzun süredir doğrulanmamış olan)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
@@ -368,53 +368,53 @@ curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
 
 1proxy senkronizasyonunda yerleşik bir devre kesici bulunur:
 
-- **Art arda 5 senkronizasyon hatasından** sonra diğer senkronizasyon girişimleri engellenir
+- Sonrasında** 5 ardışık senkronizasyon hatası** , daha fazla senkronizasyon girişimi engellenir
 - Şununla sıfırlayın: `resetOneproxyCircuitBreaker()` veya sunucuyu yeniden başlatın
-- Senkronizasyon durumu `GET /api/settings/oneproxy?action=status` adresinden alınabilir
+- Senkronizasyon durumu `GET /api/settings/oneproxy?action=status` mevcuttur
 
 ### 1proxy Proxy'lerini Temizleme
 
 ```bash
-# Tek bir 1proxy proxy'sini sil
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# TÜM 1proxy proxy'lerini temizle (manuel proxy'lere dokunulmaz)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
 ---
 
-## Algılama Önleme ve Gizlilik
+## Algılanma Önleme ve Gizlilik
 
-OmniRoute, trafiği yalnızca bir proxy üzerinden yönlendirmekle kalmaz — trafiğin meşru görünmesini de sağlar:
+OmniRoute trafiği yalnızca bir proxy — üzerinden yönlendirmez, trafiğin meşru görünmesini sağlar:
 
-### TLS Parmak İzi Sahteciliği
+### TLS Parmak İzi Sahtekarlığı
 
-Tarayıcı benzeri TLS parmak izleri oluşturmak için `wreq-js` kullanarak tarayıcı dışı TLS el sıkışmalarını işaretleyen bot algılama sistemlerini atlatır.
+Tarayıcı dışı TLS el sıkışmalarını işaretleyen bot algılama sistemlerini atlayarak tarayıcı benzeri TLS parmak izleri oluşturmak için `wreq-js` kullanır.
 
 ### CLI Parmak İzi Eşleştirme
 
-**CLI Parmak İzi Anahtarı** (`Ayarlar → Güvenlik`), HTTP başlıklarını ve JSON gövde alanlarını yerel CLI ikili dosyalarının (Claude Code, Codex vb.) imzasıyla tam olarak eşleşecek şekilde yeniden sıralar. Bu özellik, proxy'nin **üzerine ek olarak** çalışır:
+**CLI Parmak İzi Geçişi** (`Settings → Security`) HTTP başlıklarını ve JSON gövde alanlarını, yerel CLI ikili dosyalarının (Claude Code, Codex vb.) tam imzasıyla eşleşecek şekilde yeniden sıralar. Bu işe yarıyor** üstüne** vekil:
 
 ```
-IP adresiniz (engellenmiş) → Proxy IP'si (ABD) → Sağlayıcı API'si
-                              + TLS sahteciliği
-                              + CLI parmak izi
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-Aynı anda hem **IP maskeleme** hem de **istek özgünlüğü** elde edersiniz.
+İkisini de alırsın**IP maskeleme** Ve** özgünlük iste** aynı anda.
 
-### Proxy IP'sini Koruma
+### Proxy IP Koruması
 
-Kontrol panelindeki renk kodlu rozetler, hangi proxy düzeyinin etkin olduğunu gösterir:
+Kontrol panelindeki renk kodlu rozetler hangi proxy düzeyinin etkin olduğunu gösterir:
 
-| Rozet | Düzey     | Anlamı                                           |
-| ----- | --------- | ------------------------------------------------ |
-| 🟢    | Genel     | Tüm trafik bu proxy üzerinden geçer              |
-| 🟡    | Sağlayıcı | Yalnızca bu sağlayıcının trafiği proxy'den geçer |
-| 🔵    | Bağlantı  | Bu belirli anahtar/hesap bu proxy'yi kullanır    |
+| Rozet | Seviye    | Anlam                                                |
+| ----- | --------- | ---------------------------------------------------- |
+| 🟢    | Küresel   | Tüm trafik bu proxy üzerinden geçiyor                |
+| 🟡    | sağlayıcı | Yalnızca bu sağlayıcının trafiğine proxy uygulanıyor |
+| 🔵    | Bağlantı  | Bu belirli key/account bu proxy'yi kullanıyor        |
 
-Rozet ayrıca doğrulama için çözümlenen proxy IP'sini de gösterir.
+Rozet ayrıca doğrulama için çözümlenen proxy IP da gösterir.
 
 ---
 
@@ -780,52 +780,28 @@ Bir kapsama birden fazla proxy atandığında OmniRoute, her istek için hangisi
 dağıtın)
 ```
 
-## Kendi Proxy’leriniz İçin Otomatik Hata Sonrası Devre Dışı Bırakma
+## Kendi Proxy'leriniz için Otomatik Arıza Hariç Tutma
 
-1proxy pazar yeri havuzu, başarısız proxy’lerin derecesini zaten otomatik olarak düşürür (bkz.
-[Proxy Kalite Puanları](#proxy-quality-scores)). Kayıt defterine **sizin**
-eklediğiniz proxy’ler için arka plan sağlık zamanlayıcısı
-(`src/lib/proxyHealth/scheduler.ts`), hiçbir şeyi silmeden aynı “çalışmayan bir üyeyi
-zincirden otomatik olarak çıkarma” davranışını sağlar:
+1proxy pazar havuzu, başarısız olan proxy'leri zaten kendi başına otomatik olarak düşürür (bkz. [Proxy Kalite Puanları](#proxy-quality-scores) ). Vekiller için** Sen** Kayıt defterine eklenen arka plan sağlık planlayıcısı (`src/lib/proxyHealth/scheduler.ts`), hiçbir şeyi silmeden aynı "ölü bir üyeyi zincirden otomatik olarak hariç tut" davranışını sağlar:
 
 ```bash
-# .env — art arda 3 başarısız yoklamadan sonra bir proxy'yi geçici olarak devre dışı bırakın;
-# yoklamalara yeniden yanıt vermeye başladığında otomatik olarak tekrar etkinleştirin.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Çoklu proxy zincirine nasıl uyduğu:
+Çoklu proxy zincirine nasıl uyar:
 
-1. Zamanlayıcı, kayıtlı her proxy’yi her `PROXY_HEALTH_INTERVAL_MS`
-   aralığında yoklar (varsayılan 10 dk.; minimum 1 dk.).
-2. Art arda `PROXY_AUTO_REMOVE_AFTER` adet **kesin** başarısızlıktan sonra (gerçek
-   bir bağlantı hatasıdır; zaman aşımı veya yoklama hedefinin kendi 5xx yanıtı hiçbir zaman
-   sayılmaz, bkz. [Proxy Sağlık Denetimi](#proxy-health-checking-v3816)), proxy’nin `status`
-   değeri `dead` olarak ayarlanır.
-3. `dead`, havuz/döndürme çözümlemesinin kullandığı etkin durum filtresinin
-   hariç tuttuğu durumlardan biridir; bu nedenle kapsamın döndürme mekanizması (sıralı / rastgele / yapışkan /
-   gecikme — bkz. [Döndürme Stratejisi Karar Ağacı](#rotation-strategy-decision-tree))
-   söz konusu proxy’yi yeni isteklere vermeyi hemen durdurur. Havuzdaki diğer proxy’ler
-   bundan etkilenmez ve havuzun tamamı hiçbir zaman sessizce doğrudan bağlantıya
-   geri dönmez — hatada kapalı koruma mekanizması için bkz.
-   [4 Seviyeli Proxy Sistemi](#4-level-proxy-system).
-4. Zamanlayıcı, `dead` proxy’leri aynı aralıkta yoklamaya devam eder. Bir sonraki
-   başarılı yoklama, `status` değerini tekrar `active` olarak değiştirir ve proxy yeniden döndürmeye dahil olur —
-   manuel olarak yeniden eklemek gerekmez.
+1. Zamanlayıcı her kayıtlı proxy'yi her `PROXY_HEALTH_INTERVAL_MS` araştırır (varsayılan 10 dakika; minimum 1 dakika).
+2. Ardışık `PROXY_AUTO_REMOVE_AFTER` sonra** kesin** başarısızlıklar (gerçek bir bağlantı hatası — zaman aşımı veya araştırma hedefinin kendi 5xx'i hiçbir zaman sayılmaz, bkz. [Proxy Sağlık Kontrolü](#proxy-health-checking-v3816) ), proxy'nin `status` `dead` olarak ayarlanır.
+3. `dead` pool/rotation çözümlemesi tarafından kullanılan canlı durum filtresinin hariç tuttuğu durumlardan biridir, dolayısıyla bir kapsamın rotasyonu (yuvarlak-robin / rastgele / yapışkan / gecikme / oturum — bkz. [Rotasyon Stratejisi Karar Ağacı](#rotation-strategy-decision-tree) ) bu proxy'yi yeni isteklere vermeyi anında durdurur. Havuzdaki başka hiçbir proxy etkilenmez ve havuzun tamamı hiçbir zaman sessizce doğrudan bağlantıya geri dönmez. [4 Seviyeli Proxy Sisteminin](#4-level-proxy-system) arıza kapatma korumasına —.
+4. Zamanlayıcı, `dead` proxy'lerini aynı aralıkta incelemeye devam eder. Bir sonraki başarılı prob, `status` `active` geri çevirir ve manuel olarak yeniden eklemeye gerek kalmadan — dönüşüne yeniden girer.
 
-Bu davranış bilinçli olarak **isteğe bağlı ve tahribatsızdır**: zamanlayıcı varsayılan olarak yalnızca
-başarısızlıkları sayar ve günlüğe kaydeder (`decision.ts` içindeki C politikasına bakın);
-`PROXY_AUTO_DISABLE` hiçbir zaman bir satırı silmez — ayrı ve daha agresif olan
-`PROXY_AUTO_REMOVE` bayrağı bunun içindir. Her ikisi de `true` olarak ayarlanırsa
-`PROXY_AUTO_REMOVE` öncelikli olur (silinmek üzere olan bir proxy’yi arada geçici olarak
-devre dışı bırakmanın bir faydası yoktur). Değişkenlerin tam listesi için
-[Ortam Yapılandırması](../reference/ENVIRONMENT.md) başvuru belgesine bakın.
+Bu kasıtlı olarak** isteğe bağlı ve tahribatsız** : varsayılan olarak zamanlayıcı yalnızca hataları sayar ve günlüğe kaydeder ( `decision.ts` C politikasına bakın) ve `PROXY_AUTO_DISABLE`, ayrı, daha agresif `PROXY_AUTO_REMOVE` bayrağının amacı olan — satırını asla silmez. Her ikisi de `true` olarak ayarlanırsa `PROXY_AUTO_REMOVE` kazanır (silinmek üzere olan bir proxy'nin aradaki geçici devre dışı bırakma işleminin hiçbir faydası yoktur). Değişken listesinin tamamı için [Ortam Yapılandırması](../reference/ENVIRONMENT.md) referansına bakın.
 
 ---
 
-> 📖 **İlgili belgeler:**
+> 📖** İlgili belgeler:**
 >
-> - [Kullanıcı Kılavuzu](../guides/USER_GUIDE.md) — Genel kurulum ve yapılandırma
-> - [API Başvurusu](../reference/API_REFERENCE.md) — Eksiksiz API belgeleri
-> - [Ortam Yapılandırması](../reference/ENVIRONMENT.md) — Tüm ortam değişkenleri
+> - [Kullanıcı Kılavuzu](../guides/USER_GUIDE.md) — Genel kurulum ve yapılandırma - [API Referans](../reference/API_REFERENCE.md) — Tam API belgeleri - [Ortam Yapılandırması](../reference/ENVIRONMENT.md) — Tüm ortam değişkenleri

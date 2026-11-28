@@ -12,25 +12,19 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Điều kiện tiên quyết
 
-- **Node.js** `>=22.22.2 <23`, hoặc `>=24.0.0 <27` (khuyến nghị: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` hoặc `>=24.0.0 <27` (được khuyến nghị: 24 LTS)
+- **npm** 10 +
 
-> **Windows với Node 24:** sử dụng bản vá 24 LTS hiện tại (ít nhất 24.20.0).
-> Các bản phát hành cũ hơn có thể kết thúc đột ngột sau khi kiểm thử thành công khi `--test-force-exit` đóng
-> tiến trình. [Bản sửa lỗi Windows libuv của Node](https://github.com/nodejs/node/pull/61999) khắc phục
-> lỗi crash thời gian chạy này; hãy giữ nguyên các assertion kiểm thử và kiểm tra thoát của runner.
+> **Windows với Nút 24:** sử dụng bản phát hành bản vá 24 LTS hiện tại (ít nhất là 24.20.0). Các bản phát hành trước đó có thể bị hủy sau khi kiểm tra thành công khi `--test-force-exit` đóng quy trình. [Bản sửa lỗi Windows libuv](https://github.com/nodejs/node/pull/61999) của Node giải quyết sự cố thời gian chạy này; luôn bật các xác nhận kiểm tra và kiểm tra thoát của người chạy.
 
-> **Người dùng npm v11+ (Node 24+):** Sau khi `npm install`, hãy xác minh các mô-đun native đã được cài đặt:
-> `node -e "require('better-sqlite3')"`. Nếu lệnh này thất bại với `MODULE_NOT_FOUND`,
-> hãy chạy `npm approve-scripts better-sqlite3 && npm install`. Xem
-> [Khắc phục sự cố](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Người dùng npm v11 + (Nút 24 +):** Sau `npm install`, hãy xác minh các mô-đun gốc đã được cài đặt: `node -e "require('better-sqlite3')"`. Nếu không thành công với `MODULE_NOT_FOUND`, hãy chạy `npm approve-scripts better-sqlite3 && npm install`. Xem [Khắc phục sự cố](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Sao chép và cài đặt
+### Sao chép & Cài đặt
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,88 +32,83 @@ npm install
 ### Biến môi trường
 
 ```bash
-# Tạo .env từ mẫu
+# Create your .env from the template
 cp .env.example .env
 
-# Tạo các secret bắt buộc
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Các biến chính cho quá trình phát triển:
+Các biến chính cho sự phát triển:
 
-| Biến                   | Giá trị mặc định khi phát triển | Mô tả                       |
-| ---------------------- | ------------------------------- | --------------------------- |
-| `PORT`                 | `20128`                         | Cổng máy chủ                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`        | URL cơ sở cho frontend      |
-| `JWT_SECRET`           | (tạo ở trên)                    | Secret ký JWT               |
-| `INITIAL_PASSWORD`     | `CHANGEME`                      | Mật khẩu đăng nhập lần đầu  |
-| `APP_LOG_LEVEL`        | `info`                          | Mức độ chi tiết của nhật ký |
+| Biến                   | Mặc định phát triển      | Sự miêu tả                         |
+| ---------------------- | ------------------------ | ---------------------------------- |
+| `PORT`                 | `20128`                  | Cổng máy chủ                       |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL cơ sở cho giao diện người dùng |
+| `JWT_SECRET`           | (tạo ở trên)             | bí mật ký JWT                      |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Mật khẩu đăng nhập lần đầu         |
+| `APP_LOG_LEVEL`        | `info`                   | Mức độ chi tiết của nhật ký        |
 
-### Cài đặt bảng điều khiển
+### Cài đặt trang tổng quan
 
-Bảng điều khiển cung cấp các nút chuyển đổi UI cho những tính năng cũng có thể được cấu hình thông qua các biến môi trường:
+Trang tổng quan cung cấp các nút chuyển đổi UI cho các tính năng cũng có thể được định cấu hình thông qua các biến môi trường:
 
-| Vị trí cài đặt      | Nút chuyển đổi     | Mô tả                           |
-| ------------------- | ------------------ | ------------------------------- |
-| Settings → Advanced | Debug Mode         | Bật nhật ký yêu cầu gỡ lỗi (UI) |
-| Settings → General  | Sidebar Visibility | Hiện/ẩn các phần của thanh bên  |
+| Cài đặt vị trí     | Chuyển đổi         | Sự miêu tả                      |
+| ------------------ | ------------------ | ------------------------------- |
+| Cài đặt → nâng cao | Chế độ gỡ lỗi      | Bật nhật ký yêu cầu gỡ lỗi (UI) |
+| Cài đặt → Chung    | Hiển thị thanh bên | phần thanh bên Show/hide        |
 
-Các cài đặt này được lưu trong cơ sở dữ liệu và vẫn giữ nguyên sau khi khởi động lại, đồng thời ghi đè các giá trị mặc định của biến môi trường khi được thiết lập.
+Các cài đặt này được lưu trữ trong cơ sở dữ liệu và tồn tại trong suốt quá trình khởi động lại, ghi đè các giá trị mặc định của env var khi được đặt.
 
 ### Chạy cục bộ
 
 ```bash
-# Chế độ phát triển (tải lại nóng)
+# Development mode (hot reload)
 npm run dev
 
-# Bản dựng production
-npm run build    # next build → .build/next/ rồi assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Biên dịch nhanh chỉ dành cho backend/API đối với các thay đổi của contributor
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Bản dựng phát hành (dựng lại sạch + sentinel HEAD — bắt buộc khi deploy)
-npm run build:release   # rm -rf .build dist && build + ghi dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Cấu hình cổng phổ biến
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bản dựng dành cho contributor chỉ thực hiện kiểm tra biên dịch: bản dựng này không tập hợp
-bản phân phối standalone hoặc xây dựng các asset đóng gói native tùy chọn. Hãy sử dụng bản dựng production thông thường
-khi cần xác thực bundle có thể phát hành.
+Bản dựng cộng tác viên thực hiện xác thực chỉ biên dịch: nó không tập hợp bản phân phối độc lập hoặc xây dựng nội dung đóng gói gốc tùy chọn. Sử dụng bản dựng sản xuất thông thường khi bạn cần xác thực gói có thể chuyển được.
 
-### Bố cục đầu ra bản dựng
+### Xây dựng bố cục đầu ra
 
-| Thư mục   | Nội dung                                                                           | Được theo dõi |
-| --------- | ---------------------------------------------------------------------------------- | ------------- |
-| `src/`    | Mã nguồn ứng dụng (TypeScript / TSX)                                               | Có            |
-| `.build/` | Các tệp trung gian — đầu ra của `next build` (gitignored, `distDir = .build/next`) | Không         |
-| `dist/`   | Bundle có thể phát hành — được tập hợp bởi `assembleStandalone` (gitignored)       | Không         |
+| Thư mục   | Nội dung                                                                   | Đã theo dõi |
+| --------- | -------------------------------------------------------------------------- | ----------- |
+| `src/`    | Nguồn ứng dụng (TypeScript / TSX)                                          | Đúng        |
+| `.build/` | Trung gian đầu ra — `next build` (gitignored, `distDir = .build/next`)     | KHÔNG       |
+| `dist/`   | Gói — có thể vận chuyển được lắp ráp bởi `assembleStandalone` (gitignored) | KHÔNG       |
 
-Pipeline bản dựng chỉ gồm một lượt:
+Đường dẫn xây dựng là một đường chuyền duy nhất:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (đầu ra Next.js)
-  └─ assembleStandalone()                 (sao chép standalone + static + public + native assets)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` bổ sung việc dọn dẹp cả hai thư mục trước, sau đó ghi
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) làm sentinel kiểm tra tính toàn vẹn khi deploy.
+Ngoài ra,`npm run build:release` còn dọn sạch cả hai thư mục trước tiên và ghi `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dưới dạng trọng điểm triển khai tính toàn vẹn.
 
-`npm run build:contributor` sử dụng profile bản dựng chỉ dành cho backend. Profile này tạm thời thay thế các tệp UI của bảng điều khiển bằng stub trong quá trình xây dựng, giữ lại các trình xử lý route API và khôi phục các tệp ban đầu sau khi bản dựng hoàn tất. Hãy sử dụng `npm run build` cho các thay đổi ảnh hưởng đến UI bảng điều khiển hoặc để xác thực đầy đủ bản phát hành; profile dành cho contributor không thay thế cho bản dựng phát hành.
+`npm run build:contributor` sử dụng hồ sơ xây dựng chỉ phụ trợ. Nó tạm thời loại bỏ các tệp UI của bảng điều khiển trong khi xây dựng, giữ lại các trình xử lý tuyến đường API và khôi phục các tệp gốc sau khi xây dựng. Sử dụng `npm run build` cho những thay đổi ảnh hưởng đến UI trang tổng quan hoặc để xác thực bản phát hành đầy đủ; hồ sơ cộng tác viên không phải là sự thay thế cho bản phát hành.
 
-> **Lưu ý khi deploy lên VPS:** thư mục image từ xa `/usr/lib/node_modules/omniroute/app/`
-> không thay đổi. Các skill deploy sẽ rsync nội dung của `dist/` vào thư mục này.
-> Chỉ đường dẫn đầu ra của bản dựng trong repository đã thay đổi (`app/` → `dist/`).
+> **lưu ý triển khai VPS :** thư mục hình ảnh từ xa `/usr/lib/node_modules/omniroute/app/` không thay đổi. Các kỹ năng triển khai rsync nội dung của `dist/` vào đó. Chỉ có đường dẫn đầu ra của bản dựng trong repo được di chuyển (`app/` → `dist/`).
 
-URL mặc định:
+URLs mặc định :
 
-- **Bảng điều khiển**: `http://localhost:20128/dashboard`
+- **Trang tổng quan** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -427,8 +416,8 @@ Sau đó, hãy sử dụng các skill `/deploy-vps-*-cc` để đồng bộ `dis
 
 ## Nhận trợ giúp
 
-- **Kiến trúc**: Xem [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Tài liệu tham khảo API**: Xem [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Tài liệu bảo mật**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Tài liệu vận hành**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Vấn đề**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Ngành kiến trúc** : Xem [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **tham khảo API** : Xem [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Tài liệu bảo mật** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Tài liệu hoạt động** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Vấn đề** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

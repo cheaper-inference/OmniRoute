@@ -4,26 +4,13 @@
 
 ---
 
-> **Hiteles forrás:** `src/lib/memory/` és `src/app/api/memory/`
-> **Legutóbbi frissítés:** 2026-06-28 — v3.8.40 (alapértelmezetten kikapcsolva + int8 kvantálási felzárkóztatás)
+> **Az igazság forrása:** `src/lib/memory/` és `src/app/api/memory/`
 
-Az OmniRoute API-kulcs alapján (és opcionálisan munkamenet-azonosító alapján) társított, tartós társalgási memóriát biztosít. Az emlékek automatikusan, egyszerű reguláriskifejezés-alapú mintaillesztéssel kerülnek kinyerésre az LLM-válaszokból, majd a későbbi kérésekbe egy bevezető rendszerüzenetként lesznek visszainjektálva (vagy első felhasználói üzenetként azoknál a szolgáltatóknál, amelyek elutasítják a rendszerszerepet).
+OmniRoute állandó társalgási memóriát biztosít API billentyűvel (és opcionálisan munkamenet-azonosítóval) kulcsolva. A memóriákat a rendszer automatikusan kinyeri LLM válaszokból egyszerű reguláris kifejezés-egyeztetéssel, és visszaadja a következő kérésekbe vezető rendszerüzenetként (vagy első felhasználói üzenetként a rendszerszerepet elutasító szolgáltatók esetében).
 
-> **A memória alapértelmezetten KI van kapcsolva (v3.8.30+).** A `DEFAULT_MEMORY_SETTINGS.enabled`
-> értéke mostantól `false` (`src/lib/memory/settings.ts`). A memória engedélyezése
-> legfeljebb `maxTokens` (~2k) mennyiségű lekért kontextust injektál **minden**
-> csevegési kérésbe, ami számlázásra kerül — ez váratlan költséget jelenthet az új
-> telepítéseknél és a saját kontextusukat kezelő klienseknél. Kifejezetten engedélyezze a
-> **Settings → Memory** menüpontban (a `MemorySkillsTab` a memória engedélyezésekor
-> tokenköltségre figyelmeztető kiemelést jelenít meg).
-> Egy kliens egyetlen kérés esetén letilthatja ezt az `x-omniroute-no-memory`
-> kérésfejléccel (`true`/`1`/`yes`) — lásd a kérésfejlécek táblázatát az
-> [API_REFERENCE.md](../reference/API_REFERENCE.md) dokumentumban. A memória nélküli kérés
-> `memoryOwnerId = null` értéket állít be, ami az adott kérésnél **mind** a memória,
-> **mind** a készségek injektálását letiltja
-> (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **A memória alapértelmezés szerint OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` most `false` (`src/lib/memory/settings.ts`). A memória engedélyezése akár `maxTokens` (~ 2k) leolvasott kontextus beillesztését** minden** csevegési kérés, amelyet meglepő költséggel számláznak — az új telepítések és a saját környezetüket kezelő ügyfelek számára. Jelölje be a lehetőséget** Beállítások → memória** (a `MemorySkillsTab` token-költség figyelmeztetést mutat, ha a memória engedélyezve van). A kliens egyetlen kérést is leállíthat a `x-omniroute-no-memory` kérés fejlécével (`true`/`1`/`yes`) — lásd a kérésfejléc táblázatot [API_REFERENCE.md](../reference/API_REFERENCE.md) fájlban. A nincs memória kérés beállítja `memoryOwnerId = null`, ami letiltja** mindkét** memória és készséginjektálás ehhez a kéréshez (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-A memória hatóköre **API-kulcsonként**, nem pedig felhasználónként különül el — az ugyanazzal az API-kulccsal hitelesített összes kérés ugyanazt a memóriakészletet használja, amely opcionálisan tovább szűkíthető a `sessionId` alapján.
+A memória az** API kulcsonkénti hatókör** , nem felhasználónként — minden, ugyanazzal a API kulccsal hitelesített kérés ugyanazon a memóriatáron osztozik, `sessionId` opcionális további hatókörével.
 
 ## Architektúra
 
@@ -705,22 +692,22 @@ Benchmark egy tipikus 4 magos x86-kiszolgálón (egyenként ~100 tokenes szöveg
 
 ---
 
-## Ténykinyerési minták (v3.8.16+)
+## Ténykivonási minták (v3.8.16 +)
 
-Az `extraction.ts` modul (`src/lib/memory/extraction.ts`) **reguláris kifejezésekkel végzett mintaillesztést** használ strukturált tények kinyerésére a beszélgetések üzeneteiből. E minták megértése segít a kinyerés minőségének az adott felhasználási esethez igazításában.
+A `extraction.ts` modul (`src/lib/memory/extraction.ts`) használja** regex mintaillesztés** hogy strukturált tényeket vonjunk ki a beszélgetés üzeneteiből. Ezeknek a mintáknak a megértése segít az extrakciós minőség beállításában az Ön használati esetéhez.
 
-### Alapértelmezett mintakategóriák
+### Alapértelmezett minta kategóriák
 
-| Kategória           | Példaminta                                                                         | Kinyert adatok                       |
-| ------------------- | ---------------------------------------------------------------------------------- | ------------------------------------ |
-| PREFERENCE_PATTERNS | `"Előnyben részesítem: <X>"`, `"Szeretem: <X>"`, `"Utálom: <X>"`                   | Felhasználói preferenciák            |
-| DECISION_PATTERNS   | `"<X>-et fogok használni"`, `"Úgy döntöttem, hogy <X>"`, `"<X> mellett döntöttem"` | Felhasználói döntések (epizodikusak) |
-| PATTERN_PATTERNS    | `"Általában <X>"`, `"Mindig <X>"`, `"Soha nem <X>"`                                | Tartós viselkedési minták            |
+| Kategória           | Példa minta                                                 | Rögzítések                         |
+| ------------------- | ----------------------------------------------------------- | ---------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Felhasználói beállítások           |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Felhasználói döntések (epizodikus) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Tartós viselkedési minták          |
 
-### Példaminták (egyszerűsítve)
+### Példaminták (egyszerűsített)
 
 ```ts
-// Forrás: src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -733,36 +720,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Mi kerül kinyerésre
+### Amit kivonnak
 
-Amikor egy felhasználó ezt mondja:
+Amikor egy felhasználó azt mondja:
 
-> „Előnyben részesítem a TypeScriptet. Ehhez a projekthez Postgrest fogok használni. Mindig commitolok a push előtt. Nem szeretem a Pythont.”
-> A kinyerés 4 memóriaelemet hoz létre:
+> "Inkább TypeScript részesítem előnyben. Postgres fogom használni ehhez a projekthez. Mindig elkötelezem magam, mielőtt lenyomom. Nem szeretem a Python-t." A kivonás 4 memóriát eredményez:
 >
-> | Kulcs                                | Kategória  | Típus    | Tartalom                      |
-> | ------------------------------------ | ---------- | -------- | ----------------------------- |
-> | `preference:typescript`              | preference | factual  | „TypeScript”                  |
-> | `decision:postgres_for_this_project` | decision   | episodic | „Postgres ehhez a projekthez” |
-> | `pattern:commit_before_pushing`      | pattern    | factual  | „commit a push előtt”         |
-> | `preference:python`                  | preference | factual  | „Python”                      |
+> | kulcs | kategória | típus | tartalom | | ------------------------------------- | ---------- | -------- | ---------------------------- | | `preference:typescript` | preferencia | tényszerű | "TypeScript" | | `decision:postgres_for_this_project` | döntés | epizodikus | Postgres | | `pattern:commit_before_pushing` | | tényszerű | "commit before push" | | `preference:python` | preferencia | tényszerű | "Python" |
 
-### Kinyerési korlátok
+### Kitermelési határok
 
-A túlzott kinyerés megelőzése érdekében a következő korlátok érvényesek:
+Az elszabadult extrakció megelőzése érdekében a következő korlátozások érvényesek:
 
 | Minimális tartalomhossz | 3 karakter |
 | Maximális tartalomhossz | 500 karakter |
 
-### Mikor érdemes letiltani a kinyerést
+### Mikor kell letiltani a kivonást
 
-A kinyerés automatikusan lefut, amikor a memória engedélyezve van; nincs külön,
-csak a kinyerésre vonatkozó kapcsoló. A kikapcsolásához teljesen tiltsa le a memóriát (`enabled: false`
-a `PUT /api/settings/memory` végponton keresztül). Ezt a következő esetekben érdemes megfontolni:
+A kicsomagolás automatikusan lefut, amikor a memória engedélyezve van; nincs külön csak kivonatolási kapcsoló. A kikapcsoláshoz teljesen tiltsa le a memóriát (`enabled: false` via `PUT /api/settings/memory`). Fontolja meg ezt, ha:
 
-- Nagy az üzenetforgalom, és a kinyerés költsége nem elhanyagolható
-- A beszélgetések többnyire átmeneti jellegűek (csevegés, hibakeresés), és nincs hosszú távú értékük
-- A kontextust már egyéni bővítményeken keresztül rögzíti
+- Nagy az üzenetmennyiség, és a kivonatolási költség nem triviális
+- Beszélgetései többnyire átmenetiek (csevegés, hibakeresés), és nincs hosszú távú értékük
+- Ön már rögzíti a kontextust egyéni bővítményekkel
 
 ---
 

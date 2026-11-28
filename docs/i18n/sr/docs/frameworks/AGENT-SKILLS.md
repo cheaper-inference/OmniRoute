@@ -13,12 +13,12 @@ Agent Skills су структуриране SKILL.md датотеке које 
 
 ## Преглед
 
-Каталог садржи **45 Agent Skills** (23 за REST API + 21 за CLI + 1 ток рада за конфигурацију). Свака вештина има:
+Каталог садржи** 45 Вештине агента** (23 REST API + 21 CLI + 1 радни ток конфигурације). Свака вештина има:
 
-- **Канонски ID** (`omni-auth`, `cli-serve` итд.)
-- **SKILL.md** датотеку у `skills/{id}/SKILL.md` са YAML уводним метаподацима (`name`, `description`) + богатим markdown садржајем
-- **REST крајње тачке** (API вештине) или **CLI поткоманде** (CLI вештине), изведене из OpenAPI спецификације и CLI регистра
-- **GitHub raw URL** за преузимање уживо: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- А** канонски ID** (`omni-auth`, `cli-serve`, итд.)
+- А**SKILL.md** датотека у `skills/{id}/SKILL.md` са YAML фронтматтер (`name`, `description`) + богата маркдовн боди
+- **REST крајње тачке** (API вештине) или**CLI подкоманде** (CLI вештине) изведено из OpenAPI спец и CLI регистра
+- А**GitHub сирово URL** за преузимање уживо: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## API покривености
+## Покривеност API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -4,192 +4,157 @@
 
 ---
 
-O OmniRoute é fornecido como um Progressive Web App totalmente instalável. Ao acessar o dashboard por qualquer navegador móvel — Android (Chrome) ou iOS (Safari) — você pode usar a opção "Adicionar à tela inicial" e obter uma experiência semelhante à de um aplicativo nativo, sem precisar de uma loja de aplicativos.
+Instale o painel OmniRoute como um Progressive Web App para abri-lo na tela inicial ou na área de trabalho em uma janela independente. O aplicativo instalado ainda precisa de uma conexão com o servidor OmniRoute para navegação, dados do painel e solicitações API. Os ativos estáticos armazenados em cache não fornecem um gateway offline ou um painel offline.
 
 ## O que é um PWA?
 
-Um Progressive Web App transforma o dashboard web do OmniRoute em algo com a aparência e a experiência de um aplicativo móvel nativo. Depois de instalado, ele:
+Um Progressive Web App usa o painel da web com um ícone de aplicativo e uma janela separada. Depois de instalado, OmniRoute:
 
-- É iniciado pela tela inicial com seu próprio ícone
-- É aberto em tela cheia — sem barra de endereços ou interface de abas do navegador
-- Funciona offline com uma página dedicada de conectividade
-- Armazena recursos estáticos em cache para um carregamento mais rápido
-- Oferece suporte às orientações retrato e paisagem
+- Inicia na tela inicial ou na área de trabalho
+- Abre no modo autônomo, sem a barra de endereços e guias habituais do navegador
+- Armazena em cache ativos estáticos selecionados
+- Suporta orientações retrato e paisagem
 
 ## Instalação
 
-### Android (Chrome)
+Use um endereço HTTPS para um servidor em outro dispositivo. Quando o servidor é executado no mesmo dispositivo, `http://localhost:20128` também atende aos requisitos de instalação do navegador. Um endereço `http://YOUR_IP:20128` simples não atende a esses requisitos. Os menus e prompts de instalação dependem do navegador e do sistema operacional. Veja [os requisitos de instalação do PWA do MDN](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
 
-1. Abra o dashboard do OmniRoute no Chrome: `http://YOUR_IP:20128`
-2. O Chrome exibirá automaticamente um banner **"Adicionar o OmniRoute à tela inicial"** ou:
-   - Toque no menu **⋮** (três pontos) → **"Adicionar à tela inicial"** ou **"Instalar aplicativo"**
-3. Confirme a solicitação
-4. O OmniRoute aparecerá na tela inicial como um aplicativo independente
+### Android (cromo)
+
+1. Abra seu endereço OmniRoute HTTPS ou `http://localhost:20128` para um servidor no mesmo telefone.
+2. Abra o**⋮** menu e escolha** Instalar aplicativo** ou** Adicionar à tela inicial** , se oferecido.
+3. Confirme a solicitação.
+4. Abra OmniRoute na tela inicial.
 
 ### iOS (Safari)
 
-1. Abra o dashboard do OmniRoute no Safari: `http://YOUR_IP:20128`
-2. Toque no botão **Compartilhar** (caixa com uma seta)
-3. Role para baixo e toque em **"Adicionar à Tela de Início"**
-4. Dê um nome a ele (o padrão é "OmniRoute") e toque em **Adicionar**
-5. O OmniRoute aparecerá na tela inicial com o ícone do aplicativo
+1. Abra seu endereço OmniRoute HTTPS no Safari.
+2. Tocar** Compartilhar** →** Adicionar à tela inicial** .
+3. Confirme o nome e toque em** Adicionar** .
+4. Abra OmniRoute na tela inicial.
 
-### Desktop (Chrome / Edge)
+### Área de trabalho (Chrome/Edge)
 
-1. Abra o dashboard do OmniRoute
-2. Clique no **ícone de instalação** na barra de endereços (ou ⋮ → "Instalar OmniRoute...")
-3. Confirme a solicitação
-4. O OmniRoute será aberto em uma janela independente — sem abas e sem barra de endereços
+1. Abra seu painel OmniRoute.
+2. Use o ícone de instalação do navegador ou o** Instalar aplicativo** entrada de menu, se oferecida.
+3. Confirme o prompt para abrir OmniRoute em sua própria janela.
 
-## Recursos
+## Características
 
-### Experiência em tela cheia
+### Janela autônoma
 
-O manifesto está configurado com `display: "fullscreen"`, o que significa que o aplicativo instalado usa a tela inteira — sem interface do navegador e sem sobreposição da barra de status. Isso faz com que o dashboard realmente pareça nativo.
+O manifesto define `display: "standalone"` e `start_url: "/dashboard"`. O aplicativo instalado abre o painel em uma janela do aplicativo. Os controles do navegador e do sistema operacional ainda podem aparecer; o manifesto não solicita o modo de tela cheia.
 
-### Suporte offline
+### Ativos armazenados em cache e requisitos de rede
 
-O OmniRoute inclui um service worker (`sw.js`) que fornece armazenamento inteligente em cache:
+O [service worker](../../public/sw.js) armazena em cache recursos selecionados da mesma origem:
 
-| Tipo de recurso                                                                                                                                                                                                                          | Estratégia                               | Comportamento                                                                                                  |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Shell do aplicativo**                                                                                                                                                                                                                  | Cache primeiro                           | `/`, `/offline`, o manifesto e os ícones são pré-armazenados em cache durante a instalação                     |
-| **Recursos estáticos** (CSS, JS, imagens, fontes)                                                                                                                                                                                        | Rede primeiro, com fallback para o cache | Busca a versão mais recente na rede; usa o cache como fallback se estiver offline                              |
-| **Bundles do Next.js** (`/_next/`)                                                                                                                                                                                                       | Rede primeiro, com atualização do cache  | Busca na rede e atualiza o cache; fornece a versão em cache se estiver offline                                 |
-| **Solicitações de navegação**                                                                                                                                                                                                            | Ignorar (nunca interceptadas)            | O navegador gerencia o fallback de HTTP/3→HTTP/2; um socket QUIC inativo não deve se tornar `Response.error()` |
-| **Rotas da API/do dashboard** (`/api/`, `/a2a`, `/dashboard`, os aliases da Client API `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, além de `/callback`, `/login`; comparados sem diferenciar maiúsculas de minúsculas) | Ignorar (nunca armazenadas em cache)     | Sempre vão diretamente para o servidor — nunca são interceptadas pelo service worker                           |
+| Solicitação ou recurso                     | Estratégia             | Comportamento                                                                                                                        |
+| ------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Recursos de tempo de instalação            | Pré-cache              | `/`, `/manifest.webmanifest`, `/icon-512.png` e `/apple-touch-icon.png` são armazenados em cache durante a instalação do trabalhador |
+| ativos estáticos Next.js (`/_next/`)       | Rede em primeiro lugar | As respostas bem-sucedidas atualizam o cache; um erro de rede recorre a uma resposta existente em cache                              |
+| Outros CSS, JS, imagens e fontes estáticas | Cache primeiro         | Uma resposta existente em cache é reutilizada; respostas de rede bem-sucedidas são armazenadas em cache em caso de falha             |
+| Navegação na página                        | Ignorar                | O navegador busca a página diretamente; nenhum substituto off-line é veiculado                                                       |
+| API, painel e rotas de autenticação        | Ignorar                | O trabalhador não intercepta ou armazena em cache essas solicitações                                                                 |
+| Outras solicitações não estáticas          | Rede                   | Nenhuma pesquisa ou armazenamento de cache                                                                                           |
 
-### Página offline
+As rotas excluídas são `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` e `/login`, combinadas sem distinção entre maiúsculas e minúsculas nos limites do caminho. Solicitações de origem cruzada e não GET também ignoram o trabalhador.
 
-Quando a rede está indisponível e um usuário navega para uma nova página, o service worker fornece uma página dedicada em `/offline` que:
+### Página de conectividade
 
-- Exibe uma mensagem clara de **"Problema de conectividade"**
-- Mostra um **indicador de status online/offline em tempo real** que é atualizado instantaneamente
-- Fornece um botão **"Tentar conexão novamente"** para recarregar quando a conectividade retornar
-- Inclui um link para a **Página de status** para diagnóstico
+A página `/offline` fornece uma mensagem de conectividade, um indicador online/offline, um** Tentar novamente a conexão** botão e um link para a página de status. Isso é** não pré-armazenado em cache** e o trabalhador de serviço faz** não** redirecionar navegações com falha para ele. A sua existência não torna novas páginas acessíveis sem o servidor.
 
-### Ícones do aplicativo
+### Ícones de aplicativos
 
-O OmniRoute fornece ícones otimizados para cada plataforma:
+O manifesto anuncia estes ícones PNG :
 
-| Arquivo                | Tamanho         | Usado por                                              |
-| ---------------------- | --------------- | ------------------------------------------------------ |
-| `icon-512.png`         | 512×512         | Solicitação de instalação do Android, tela de abertura |
-| `apple-touch-icon.png` | 180×180         | Ícone da tela inicial do iOS                           |
-| `icon-192.svg`         | 192×192 (vetor) | Ícone adaptável do Android                             |
-| `apple-touch-icon.svg` | 180×180 (vetor) | Fallback da Apple                                      |
-| `favicon.svg`          | Vetor           | Abas do navegador                                      |
-| `favicon.ico`          | Vários tamanhos | Navegadores antigos                                    |
+| Arquivo                | Tamanho | Usar                                   |
+| ---------------------- | ------- | -------------------------------------- |
+| `icon-192.png`         | 192×192 | Ícone geral do aplicativo              |
+| `icon-512.png`         | 512×512 | Ícone de aplicativo geral e mascarável |
+| `apple-touch-icon.png` | 180×180 | Ícone da tela inicial da Apple         |
 
-### Registro automático
+O navegador seleciona o ícone apropriado para o destino de instalação.
 
-O service worker é registrado automaticamente por meio do componente `<PwaRegister />` no layout raiz. Nenhuma ação do usuário é necessária — o aplicativo se torna instalável assim que o navegador detecta o manifesto e o service worker válidos.
+### Registro Automático
 
-## Arquitetura técnica
+`PwaRegister` registra o trabalhador em produção quando o navegador oferece suporte a trabalhadores de serviço. O modo de desenvolvimento cancela o registro dos trabalhadores e limpa os caches para evitar que ativos obsoletos interfiram no recarregamento a quente. Os prompts de instalação continuam sendo uma decisão do navegador.
 
-### Manifesto do aplicativo Web (`manifest.webmanifest`)
+## Arquitetura Técnica
 
-Gerado pelo Next.js por meio de `src/app/manifest.ts`:
+### Manifesto de aplicativo da web
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+Next.js gera `/manifest.webmanifest` a partir de [`src/app/manifest.ts`](../../src/app/manifest.ts). Suas principais configurações são:
 
-### Service Worker (`public/sw.js`)
+| Contexto              | Valor                                        |
+| --------------------- | -------------------------------------------- |
+| `short_name`          | `OmniRoute`                                  |
+| `start_url`           | `/dashboard`                                 |
+| `scope`               | `/`                                          |
+| `display`             | `standalone`                                 |
+| `orientation`         | `any`                                        |
+| Cores de fundo e tema | A paleta de luz padrão do `PWA_THEME_COLORS` |
 
-Um service worker básico (sem dependências de frameworks) com:
+O nome e a descrição do manifesto são valores estáticos nesse arquivo de origem. O manifesto instalado não segue a configuração do nome da instância ou a paleta ativa em todas as visitas.
 
-- **Fase de instalação**: Armazena previamente em cache o shell do aplicativo (raiz, página offline, manifesto e ícones)
-- **Fase de ativação**: Remove versões antigas do cache e assume o controle de todos os clientes
-- **Fase de busca**: Roteamento inteligente com base no tipo de requisição (navegação, recurso estático ou API)
-- **Versionamento do cache**: `omniroute-pwa-v3` — incremente esse valor para forçar um novo cache após uma atualização
+### Trabalhador de serviço
 
-### Metadados do layout (`src/app/layout.tsx`)
+[`public/sw.js`](../../public/sw.js) não tem dependência de estrutura de service-worker:
 
-O layout raiz fornece todas as metatags necessárias para a conformidade com PWA:
+- **Instalar:** pré-armazena em cache os quatro recursos listados acima e ativa o novo trabalhador.
+- **Ativar:** remove gerações de cache mais antigas e reivindica clientes.
+- **Buscar:** aplica as estratégias de ativos estáticos e exclusões de rota acima.
+- **Versionamento:** o nome do cache de origem é `omniroute-pwa-v3`; a construção de produção carimba a identidade do cache.
+- **Notificações:** lida com eventos `push` recebidos e foca ou abre uma janela quando uma notificação é clicada.
 
-- Link `manifest` para `/manifest.webmanifest`
-- `apple-web-app-capable: true` para o modo independente no iOS
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` para o Chrome no Android
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` para renderização de ponta a ponta
+Os manipuladores de eventos push por si só não estabelecem uma assinatura push ativa ou uma entrega de servidor configurada. Não presuma que as notificações estão habilitadas apenas porque o PWA está instalado.
 
-### Componente: `PwaRegister`
+### Metadados e registro de layout
 
-Localizado em `src/shared/components/PwaRegister.tsx`, este componente cliente:
+[`src/app/layout.tsx`](../../src/app/layout.tsx) fornece o link do manifesto, metadados independentes da Apple, cores do tema e `viewport-fit: cover`. O título da página e o título do aplicativo web da Apple usam o nome da instância. A cor do tema ativo do navegador segue a paleta; o manifesto de instalação usa a cor clara padrão.
 
-1. É executado durante a montagem (somente no lado do cliente)
-2. Verifica se o navegador oferece suporte a `serviceWorker`
-3. Registra `/sw.js` silenciosamente (os erros são ignorados para evitar o bloqueio do aplicativo)
-4. Não renderiza nada (`return null`) — é um componente usado apenas para efeitos colaterais
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) é executado no cliente e registra `/sw.js` com a compilação ID em seu URL. Ele detecta gerações de cache incompatíveis e pode redefinir o trabalhador e recarregar uma vez para se recuperar de uma instalação mais antiga. A falha no registro não bloqueia o painel.
 
-## Uso com o Termux (Android)
+## Use com Termux (Android)
 
-Ao executar o OmniRoute no Android por meio do Termux, o PWA funciona perfeitamente:
+1. Inicie OmniRoute no Termux: `npx -y omniroute@latest`.
+2. Abra o Chrome no mesmo telefone: `http://localhost:20128`.
+3. Instale o PWA através do menu de instalação do navegador.
+4. Mantenha o servidor Termux em execução enquanto usa o painel.
 
-1. Inicie o OmniRoute no Termux: `npx omniroute`
-2. Abra o Chrome no mesmo celular: `http://localhost:20128`
-3. Instale o PWA por meio da opção "Adicionar à tela inicial"
-4. O PWA se conecta ao servidor local do Termux — tudo é executado no dispositivo
+O telefone hospeda o gateway e seu painel. As solicitações para provedores AI remotos ainda precisam de acesso à rede. Consulte o [guia Termux](TERMUX_GUIDE.md) para configurações e considerações sobre a vida útil do processo do Android.
 
-Essa combinação significa que seu celular Android é tanto o **servidor** (Termux) quanto o **cliente** (PWA) — um gateway de IA completo e autossuficiente.
+## Use de outros dispositivos
 
-## Uso em outros dispositivos
-
-Instale o PWA em qualquer dispositivo cujo navegador tenha acesso ao seu servidor OmniRoute:
-
-- **Outro celular/tablet**: Acesse `http://PHONE_IP:20128` e instale o PWA
-- **Notebook**: Abra o Chrome/Edge e instale-o como um PWA para desktop
-- **Smart TV com navegador**: Acesse o painel em tela cheia
+Abra o endereço HTTPS do servidor em um telefone, tablet ou desktop e siga o fluxo de instalação do navegador. O servidor deve permanecer acessível a partir de cada dispositivo. Consulte o [guia do túnel](../ops/TUNNELS_GUIDE.md) para opções de acesso remoto.
 
 ## Personalização
 
 ### Nome da instância
 
-O título do PWA respeita a configuração de **Nome da instância** em `Painel → Configurações`. Se você renomear sua instância para "Meu gateway de IA", o PWA instalado exibirá esse nome.
+O** Nome da instância** a configuração altera os metadados do painel, incluindo o título da página e o título do aplicativo da web da Apple. O manifesto gerado usa um nome estático, portanto, essa configuração não garante que um aplicativo já instalado seja renomeado.
 
 ### Favicon personalizado
 
-Se você enviar um favicon personalizado por meio de `Painel → Configurações`, o ícone do PWA no desktop refletirá o ícone personalizado. Os ícones da tela inicial em dispositivos móveis usam os arquivos predefinidos `icon-512.png` e `apple-touch-icon.png`.
+Um favicon personalizado altera o favicon do navegador. O manifesto de instalação ainda anuncia os arquivos PNG acima; alterar o favicon não substitui os ícones da tela inicial.
 
 ## Limitações
 
-- **Sem notificações push** — O service worker não implementa a Push API. Em vez disso, as notificações são gerenciadas pelo aplicativo Electron.
-- **Sem sincronização em segundo plano** — As ações offline não são enfileiradas para serem repetidas. O PWA serve principalmente para visualização do dashboard.
-- **Restrições do iOS** — O Safari no iOS não oferece suporte a todos os recursos de PWA (por exemplo, os prompts de instalação são manuais e os service workers em segundo plano são limitados).
-- **Tamanho do cache** — O service worker armazena em cache apenas recursos estáticos. Payloads de resposta grandes provenientes de rotas `/api/` nunca são armazenados em cache.
-- **Ícones personalizados em dispositivos móveis** — Alterar o favicon nas configurações não atualiza o ícone da tela inicial em dispositivos móveis (isso exige gerar novamente os ícones do PWA).
+- **Conexão de servidor necessária:** a navegação da página, o estado do painel e as solicitações API não têm um substituto offline.
+- **Sem sincronização em segundo plano:** ações off-line não são enfileiradas para reprodução.
+- **Diferenças do navegador:** menus de instalação, apresentação de janelas e suporte a notificações variam de acordo com a plataforma.
+- **Nenhum cache de resposta API :** o trabalhador exclui API, painel e rotas de autenticação.
+- **Ícones de instalação estática:** a atualização desses ícones requer a alteração dos ativos anunciados; os navegadores podem reter metadados instalados.
 
 ## Referência de arquivos
 
-| Arquivo                                 | Finalidade                                                         |
-| --------------------------------------- | ------------------------------------------------------------------ |
-| `src/app/manifest.ts`                   | Rota de manifesto do Next.js (gera `manifest.webmanifest`)         |
-| `public/sw.js`                          | Service worker com lógica de cache                                 |
-| `src/shared/components/PwaRegister.tsx` | Componente cliente que registra o service worker                   |
-| `src/app/offline/page.tsx`              | Página alternativa offline com indicador de status em tempo real   |
-| `src/app/layout.tsx`                    | Layout raiz com metadados de PWA (apple-web-app, theme-color etc.) |
-| `public/icon-512.png`                   | Ícone PNG de 512×512 (Android, tela de inicialização)              |
-| `public/apple-touch-icon.png`           | Ícone PNG de 180×180 (tela inicial do iOS)                         |
-| `public/icon-192.svg`                   | Ícone SVG de 192×192 (ícone adaptativo do Android)                 |
-| `public/apple-touch-icon.svg`           | Ícone SVG de 180×180 (alternativa para dispositivos Apple)         |
+| Arquivo                                                                                | Propósito                                                      |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Manifesto de aplicativo web gerado                             |
+| [public/sw.js](../../public/sw.js)                                                     | Cache, exclusões e manipuladores de eventos de notificação     |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Registro de produção e recuperação de cache obsoleto           |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Página de conectividade, não um substituto off-line automático |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Metadados da página e configurações da janela de visualização  |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Valores de cores de tema compartilhados                        |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 ícone do aplicativo                                  |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 ícone da Apple                                       |

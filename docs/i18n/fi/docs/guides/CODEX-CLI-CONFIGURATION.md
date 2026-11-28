@@ -473,107 +473,107 @@ Vuorovaikutteisen istunnon sisällä:
 
 ---
 
-## Pitkäkestoiset tehtävät
+## Pitkäkestoisia tehtäviä
 
-Kaksi OmniRouten oletusasetusta voi huomaamatta sabotoida useita tunteja kestäviä Codex CLI -istuntoja. Kumpikaan ei ole Codex CLI -asetus — molemmat sijaitsevat OmniRoute-puolella. Käyttäjät, jotka siirtävät määrityksen aiemmista välityspalvelimista, joissa tilit kiinnitetään ja joutokäynnin aikakatkaisut poistetaan käytöstä, törmäävät usein molempiin ja päättelevät, ettei OmniRoute ”pysty ylläpitämään pitkää istuntoa”.
+Kaksi OmniRoute oletusasetusta voivat hiljaisesti sabotoida usean tunnin Codex CLI -istuntoja. Kumpikaan ei ole Codex CLI asetus — molemmat elävät OmniRoute puolella. Käyttäjät, jotka siirtävät asetuksia ylävirran välityspalvelimista, jotka kiinnittävät tilejä ja poistavat tyhjäkäynnin katkaisut, osuvat usein molempiin ja päättelevät, että OmniRoute "ei kestä pitkää istuntoa".
 
-| Oire                                                                                   | Todennäköinen syy                                                                 | Säädin                   |
-| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------ |
-| Istunto vaihtaa jatkuvasti tiliä / kehotevälimuistin jatkuvuus katoaa vuorojen välillä | Istunnon affiniteetin TTL on `0` (poistettu käytöstä)                             | `sessionAffinityTtlMs`   |
-| Yhteys katkeaa kesken päättelyn ilman asiakkaalle näkyvää kehotetta                    | Virran joutokäynnin valvonta laukesi, kun ylävirrasta ei saatu osaa 10 minuuttiin | `STREAM_IDLE_TIMEOUT_MS` |
+| Oire                                                                                           | Todennäköinen syy                                                                     | Nuppi                    |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------ |
+| Istunto vaihtaa tiliä jatkuvasti / kehotteen välimuistin jatkuvuus menetetään vuorojen välillä | Istunnon affiniteetti TTL on `0` (pois käytöstä)                                      | `sessionAffinityTtlMs`   |
+| Yhteys katkeaa kesken päättelyn ilman asiakaskohtaista kehotetta                               | Virtauksen tyhjäkäynnillä vahtikoira ammuttiin 10 minuutin kuluttua ilman vastavirtaa | `STREAM_IDLE_TIMEOUT_MS` |
 
-Aiheeseen liittyviä keskusteluja: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (pitkän tehtävän katkeamiset), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (miksi affiniteetti on oletusarvoisesti poissa käytöstä). Seuranta: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Aiheeseen liittyviä keskusteluja: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (pitkien tehtävien pudotukset), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (miksi affiniteetti ei ole käytössä). Seuranta: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Istunnon affiniteetti — kiinnitä yksi keskustelu yhteen tiliin
+### 1. Istunnon affinity — kiinnitä yksi keskustelu yhdelle tilille
 
-**Oletus:** `sessionAffinityTtlMs = 0` (poistettu käytöstä).
+**Oletus:** `sessionAffinityTtlMs = 0` (vammainen).
 
-**Missä se asetetaan**
+**Mihin se asetetaan**
 
-- Hallintapaneeli → **Asetukset → Reititys** → **Istunnon affiniteetti** → **Affiniteetin TTL (sekunteina)** (`ComboDefaultsTab`)
-- Tai tee asetuksiin PATCH-pyyntö käyttäen `sessionAffinityTtlMs`-arvoa **millisekunteina** (Zod-alue `0`–`86_400_000`, eli enintään 24 tuntia)
+- Kojelauta →** Asetukset → Reititys** →** Istunnon affiniteetti** →** Affiniteetti TTL (sekuntia)** (`ComboDefaultsTab`)
+- Tai PATCH asetukset, joissa on `sessionAffinityTtlMs` in** millisekuntia** (Zod alue `0`–`86_400_000`, eli jopa 24 tuntia)
 
-> Nimi vaihdettiin muutoksessa #7274 vain Codexia koskeneesta `codexSessionAffinityTtlMs`-nimestä. Vanha avain hyväksytään edelleen vain luku -aliaksena; uusissa määrityksissä tulee käyttää `sessionAffinityTtlMs`-avainta. Affiniteetti koskee nyt **kaikkia** palveluntarjoajia, kun TTL on suurempi kuin `0`, ei vain Codexia — katso [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Istunnon affiniteetti.
+> Nimetty uudelleen kielellä #7274 koodista vain Codex `codexSessionAffinityTtlMs`. Vanha avain hyväksytään edelleen vain luku -aliakseksi; uusien asetusten pitäisi käyttää `sessionAffinityTtlMs`. Affiniteetti koskee nyt** mikä tahansa** palveluntarjoaja, kun TTL on `0` yläpuolella, ei vain Codex — katso [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → -istunnon affiniteetti.
 
-**Mikä rikkoutuu, kun arvoksi jää 0**
+**Mikä rikkoutuu, kun se pysyy 0:ssa**
 
-Monivuoroisen Codex-keskustelun jokainen vuoro reititetään erikseen aktiivisen yhdistelmästrategian mukaisesti, joten jokainen vuoro voi päätyä **eri tilille**. Tämä rikkoo ylävirran istunnon ja kehotevälimuistin jatkuvuuden. OmniRoute tarkistaa Codex-istunto-otsakkeet (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) ja rungon kentät, kuten `prompt_cache_key` / `session_id`, vain silloin, kun TTL on suurempi kuin `0` (`extractSessionAffinityKey` tiedostossa `src/sse/services/auth.ts`).
+Monikäänteisen Codex keskustelun jokaisen käännöksen reitittää itsenäisesti aktiivinen yhdistelmästrategia ja se voi laskeutua** eri tili vuoroa kohden** . Tämä katkaisee ylävirran istunnon / kehotteen välimuistin jatkuvuuden. OmniRoute tarkastelee vain Codex -istunnon otsikoita (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) ja runkokenttiä, kuten `prompt_cache_key` / `session_id` kun TTL on suurempi kuin `0` (`extractSessionAffinityKey` in `src/sse/services/auth.ts`).
 
-**Suositus useita tunteja kestävään yksittäiseen tehtävään**
+**Suositellaan usean tunnin yksittäiseen tehtävään**
 
-Aseta TTL **tehtävän odotettua kokonaiskestoa pidemmäksi** (käyttöliittymän enimmäisarvo on **86400 sekuntia** = 24 tuntia):
+Aseta TTL** tehtävän odotetun seinäkellon pituuden yli** (UI max on** 86400 sekuntia** = 24 tuntia):
 
-| Tehtävän odotettu kesto | Affiniteetin TTL (käyttöliittymässä, sekunteina) | `sessionAffinityTtlMs` |
-| ----------------------- | ------------------------------------------------ | ---------------------- |
-| Muutama tunti           | `14400` (4 h)                                    | `14400000`             |
-| Yön yli / ~12 h         | `43200` (12 h)                                   | `43200000`             |
-| Koko päivä              | `86400` (24 h, enimmäisarvo)                     | `86400000`             |
+| Tehtävän odotettu pituus | Affiniteetti TTL (UI, sekuntia) | `sessionAffinityTtlMs` |
+| ------------------------ | ------------------------------- | ---------------------- |
+| Muutama tunti            | `14400` (4h)                    | `14400000`             |
+| Yöpyminen / ~ 12h        | `43200` (12h)                   | `43200000`             |
+| Koko päivä               | `86400` (24h, maksimi)          | `86400000`             |
 
-Valinnaisuus on tarkoituksellista: affiniteetin poistaminen käytöstä suosii kuormantasausta tilien välillä, kun taas sen käyttöönotto suosii yhden pitkän agentti-istunnon jatkuvuutta. Tämä opas **ei** muuta oletusasetusta — pitkiä Codex-tehtäviä suorittavien ylläpitäjien on otettava asetus erikseen käyttöön.
+Osallistuminen on tarkoituksellista: suhdanteiden poistaminen käytöstä suosii tilien kuormitusta; sen mahdollistaminen suosii jatkuvuutta yhdelle pitkälle agenttiistunnolle. Tämä opas tekee** ei** muuttaa oletusarvoisia — operaattoreita pitkiä Codex -tehtäviä suorittavien operaattorien on valittava se.
 
-### 2. Virran joutokäynnin aikakatkaisu — älä katkaise hiljaisia päättelyvuoroja
+### 2. Stream idle timeout — eivät tapa hiljaisia päättelykäänteitä
 
-**Oletus:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minuuttia). Jos sitä ei ole asetettu, se periytyy `REQUEST_TIMEOUT_MS`-muuttujasta; myös yhteinen perustaso on 600000. Katso [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Aikakatkaisut.
+**Oletus:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minuuttia). Se perii `REQUEST_TIMEOUT_MS` stä, kun se ei ole asetettu; jaettu perusviiva on myös 600000. Katso [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**Mikä rikkoutuu oletusasetuksella**
+**Mikä hajoaa oletuksena**
 
-Codexin päättely-/työkaluvuoro, joka pysyy hiljaisena yli 10 minuuttia ilman **yhtäkään todellista ylävirran datapalaa**, suljetaan pakotetusti SSE:n toimettomuusvalvojan (`open-sse/utils/stream.ts`) toimesta. Asiakas havaitsee usein vain yhteyden katkeamisen ilman lisätietoja — mikä vastaa kuvausta ”pysähtyi automaattisesti ilman ilmoitusta”.
+Codex -päättely / työkalun käännös, joka pysyy äänettömänä yli 10 minuuttia** ei varsinaista ylävirran palaa** on pakko-suljettu SSE idle watchdog (`open-sse/utils/stream.ts`) toimesta. Asiakas näkee usein paljaan yhteyden katkeamisen — joka vastaa "pysähtynyt automaattisesti ilman ilmoitusta".
 
-Kriittinen yksityiskohta: OmniRouten synteettinen SSE-**syke ei nollaa** toimettomuusajastinta. Vain todellinen ylävirran rungon datapala päivittää `lastChunkTime`-arvon. Hiljainen malli, joka edelleen ”ajattelee”, näyttää valvojan näkökulmasta samalta kuin jumittunut ylävirta.
+Kriittinen yksityiskohta: OmniRoute synteettinen SSE** syke ei nollaudu** tyhjäkäyntikello. Vain todellinen ylävirran runkopala päivittää `lastChunkTime`. Hiljainen, edelleen "ajatteleva" malli näyttää vahtikoiran näkökulmasta identtiseltä vastavirtaan pysähtyneen mallin kanssa.
 
-Tähän liittyy Undicin rungon toimettomuusraja: `FETCH_BODY_TIMEOUT_MS` (myös sen oletusarvona on sama 10 minuutin perustaso; `0` poistaa sen käytöstä). Suoratoistossa `FETCH_TIMEOUT_MS` kattaa vain yhteyden muodostamisen / ensimmäisten otsakkeiden vastaanottamisen — kun suoratoisto on aktiivinen, jumittumista hallitsevat `STREAM_IDLE_TIMEOUT_MS` ja `FETCH_BODY_TIMEOUT_MS`.
+Aiheeseen liittyvä Undici-kappaleen passiivisuus: `FETCH_BODY_TIMEOUT_MS` (oletusarvo on myös sama 10 minuutin perusviiva; `0` poistaa sen käytöstä). Suoratoistoa varten `FETCH_TIMEOUT_MS` kattaa vain yhteyden määrityksen / ensimmäiset otsikot — kun suoratoisto on aktiivinen, keskeytyksiä hallitsevat `STREAM_IDLE_TIMEOUT_MS` ja `FETCH_BODY_TIMEOUT_MS`.
 
-**Suositus useita tunteja kestävään yksittäiseen tehtävään**
+**Suositellaan usean tunnin yksittäiseen tehtävään**
 
-OmniRoute-prosessin ympäristössä (`.env` / compose / systemd):
+OmniRoute -prosessiympäristössä (`.env` / compose / systemd):
 
 ```bash
-# Poista suoratoiston toimettomuus- ja rungon toimettomuuskatkaisut käytöstä pitkiä päättelyvuoroja varten
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Tai nosta ne pisintä odottamaasi hiljaista jaksoa suuremmiksi (arvot ovat millisekunteina):
+Tai nosta ne pisimmän odottamasi hiljaisen välin yläpuolelle (arvot ovat millisekunteja):
 
 ```bash
-# Esimerkki: salli enintään 2 tunnin hiljaisuus ylävirran datapalasien välillä
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Käynnistä OmniRoute uudelleen näiden ympäristömuuttujien muuttamisen jälkeen.
+Käynnistä OmniRoute uudelleen näiden env-muuttujien vaihtamisen jälkeen.
 
-### Konkreettinen ohje — useita tunteja kestävä Codex-tehtävä
+### Konkreettinen resepti — usean tunnin Codex tehtävä
 
-1. **Kiinnitä tili:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12 h) tai `86400` (enintään 24 h).
-2. **Nosta toimettomuusrajoja tai poista ne käytöstä** OmniRouten ympäristössä:
+1. **Kiinnitä tili:** Kojelauta → Asetukset → Reititys → → TTL = `43200` (12h) tai `86400` (24h max.).
+2. **Nosta / poista tyhjäkäynnin katkaisut** OmniRoute ympäristössä:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Säilytä tavallinen Codexin `config.toml` (`wire_api = "responses"`, oikea `base_url`, `OMNIROUTE_API_KEY`) — Codex-puolella ei ole affiniteetti- tai toimettomuusasetuksia näitä kahta toimintoa varten.
-4. Käynnistä OmniRoute uudelleen ja aloita sitten pitkä Codex-tehtävä.
+3. Säilytä tavallinen Codex `config.toml` (`wire_api = "responses"`, oikea `base_url`, `OMNIROUTE_API_KEY`) — Codex-puolen affinity/idle nuppeja ei ole olemassa näille kahdelle käytökselle.
+4. Käynnistä OmniRoute uudelleen ja aloita sitten pitkä Codex tehtävä.
 
-### Oletusarvoja koskeva päätös (#7287)
+### Oletuspäätös (#7287)
 
-| Asetus                   | Toimitettava oletusarvo | Muutetaanko tässä oppaassa?                                                                                                         |
-| ------------------------ | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (pois käytöstä)     | **Ei** — säilyy valinnaisena (kuormantasaus vs. jatkuvuus; katso Discussion #5718)                                                  |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)       | **Ei** — säilyy 10 minuutissa yleiselle liikenteelle; pitkien Codex-tehtävien ylläpitäjät nostavat rajaa tai poistavat sen käytöstä |
+| Nuppi                    | Toimituksen oletusarvo | Muutos tähän oppaaseen?                                                                                           |
+| ------------------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (pois päältä)      | **Ei** — pysyy valinnaisena (kuormituksen tasapainotus vs. jatkuvuus; katso keskustelu #5718)                     |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)      | **Ei** — pysyy 10 minuuttia yleisessä liikenteessä; pitkät Codex operaattorit nostavat tai poistavat sen käytöstä |
 
-Kumman tahansa oletusarvon muuttaminen maailmanlaajuisesti muuttaisi toimintaa instanssin jokaisen asiakkaan osalta, ei vain Codexin. Dokumentoi asetukset; jätä oletusarvot ennalleen, kunnes nimenomaisella ylläpitäjän päätöksellä määrätään toisin.
+Kumman tahansa oletusarvon kääntäminen maailmanlaajuisesti muuttaisi ilmentymän jokaisen asiakkaan käyttäytymistä, ei vain Codex. Dokumentoi nupit; jätä oletusasetukset rauhaan, kunnes operaattorin nimenomaisessa päätöksessä sanotaan toisin.
 
-### Toimettomuudesta johtuvien katkaisujen diagnosointi
+### Tyhjäkäynnin leikkausten diagnosointi
 
-Kun toimettomuusvalvoja aktivoituu, OmniRoute kirjaa seuraavanmuotoisen rivin:
+Kun joutokäynnillä oleva vahtikoira laukaisee, OmniRoute kirjaa seuraavan muotoisen viivan:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Etsi komennolla grep merkkijonoa `Idle timeout: no data from` (tai koodia `stream_idle_timeout` / virheen nimeä `StreamIdleTimeoutError`). Palveluntarjoajaosa on se, jota OmniRoute käytti kyseisessä pyynnössä (`codex`, jonkin muun palveluntarjoajan tunniste tai `provider`, jos palveluntarjoaja ei ole tiedossa) — se ei aina ole kirjaimellisesti `codex`.
+Grep for `Idle timeout: no data from` (tai koodi `stream_idle_timeout` / virheen nimi `StreamIdleTimeoutError`). Tarjoajasegmentti on mikä tahansa kyseisessä pyynnössä käytetty OmniRoute (`codex`, toinen palveluntarjoajan tunnus tai `provider`, jos tuntematon) — se ei aina ole kirjaimellinen merkkijono `codex`.
 
 ---
 

@@ -4,11 +4,9 @@
 
 ---
 
-> **Haqiqat manbasi:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Oxirgi yangilanish:** 2026-09-02 — v3.8.51
-> **Auditoriya:** Provayderga xos yashirin integratsiyalarni qoʻllab-quvvatlovchi muhandislar.
+> **Haqiqat manbai:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Tomoshabinlar:** Provayderga xos maxfiy integratsiyani ta'minlovchi muhandislar.
 
-OmniRoute rasmiy boʻlmagan mijozlarning raqamli izlarini faol ravishda aniqlaydigan provayderlar bilan integratsiyalashadi (TLS JA3/JA4, sarlavhalar tartibi, JSON tanasi shakli, yaxlitlik tokenlari). Ushbu sahifada OmniRoute taqdim etadigan yashirinlik mexanizmlari va ularning qayerda amalga oshirilgani hujjatlashtiriladi.
+OmniRoute chekkalari norasmiy mijozlar (TLS JA3/JA4, sarlavhalar tartibi, JSON tana shakli, yaxlitlik tokenlari) faol ravishda barmoq izini oladigan provayderlar bilan birlashadi. Ushbu sahifada yashirin yuzalar OmniRoute fosh etiladigan va ular qayerda amalga oshirilganligi hujjatlashtirilgan.
 
 ## Huquqiy va axloqiy eslatma
 
@@ -66,65 +64,68 @@ Profillar mahkamlangan paket tomonidan qo‘llab-quvvatlanadi, biroq haqiqiy WAF
 
 ---
 
-## Claude Code yashirinlik toʻplami
+## Claude Code Stealth Bundle
 
-`cliCompatMode` yoqilganida, OmniRoute chiquvchi Claude soʻrovlarini `claude-cli` trafigidan ajratib boʻlmaydigan tarzda qayta shakllantiradi. Uchta modul birgalikda ishlaydi:
+`cliCompatMode` yoqilgan bo'lsa, OmniRoute chiquvchi Claude so'rovlarini o'zgartiradi, shuning uchun ularni `claude-cli` trafigidan ajratib bo'lmaydi. Uch modul hamkorlik qiladi:
 
 ### `claudeCodeFingerprint.ts`
 
-Billing sarlavhasiga joylashtiriladigan 3 belgili `cc_version` raqamli izini hisoblaydi:
+To‘lov sarlavhasiga o‘rnatilgan 3 ta belgili `cc_version` barmoq izini hisoblaydi:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (kodga qatʼiy yozilgan; rasmiy mijozga mos keladi)
-- Kirish maʼlumotlari: birinchi foydalanuvchi xabari matnining 4, 7 va 20-indekslaridagi belgilar + versiya satri
-- Chiqish: 3 belgili o‘n oltilik prefiks
+- `FINGERPRINT_SALT = "59cf53e54c78"` (qattiq kodlangan; rasmiy mijozga mos keladi)
+- Kirishlar: birinchi foydalanuvchi xabari matni + versiyasi satrining 4, 7, 20 indeksidagi belgilar
+- Chiqish: 3-belgili hex prefiksi
 
-### `claudeCodeCCH.ts` (Mijoz kontenti xeshi)
+### `claudeCodeCCH.ts` (mijoz kontenti xeshi)
 
-Rasmiy Claude Code CLI Bun/Zig orqali hisoblaydigan server tomonidagi yaxlitlik tekshiruvi. OmniRoute uni `xxhash-wasm` yordamida qayta amalga oshiradi:
+Server tomonining yaxlitligini tekshirish `xxhash-wasm` bilan Bun/Zig. OmniRoute reimplements orqali rasmiy Claude Code CLI hisoblaydi:
 
-1. Asosiy qismni `cch=00000;` toʻldiruvchisi bilan serializatsiya qilish
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Nol bilan toʻldirilgan, kichik harflardagi 5 belgili o‘n oltilik qiymat
-4. `cch=00000;` ni hisoblangan token bilan almashtirish
+1. `cch=00000;` toʻldiruvchisi bilan korpusni seriyali qiling
+2. Xesh ko'rinishini ikkita oddiy matnni almashtirish bilan quyidagi tartibda yarating (`hashView()`):
+   - `/"model":"[^"]*"/g` ning har bir mosligi `"model":""` — aylanadi, moslik birinchi `"` to'xtaydi, shuning uchun qo'shtirnoq qo'shtirnoqli qiymat (`"model":"a\"b"`) mijozga o'xshab, faqat shu qo'shtirnoqgacha bo'shatiladi.
+   - `/"max_tokens":\d+,|,?"max_tokens":\d+/g` ning har bir mosligi — faqat raqamli qiymatlar, istalgan chuqurlikda olib tashlanadi
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Nol toʻldirilgan 5 belgili kichik olti burchakli
+5. `cch=00000;` hisoblangan token bilan almashtiring
 
 Konstantalar:
 
-- Boshlangʻich qiymat: `0x6e52736ac806831e`
-- Andoza: `/\bcch=([0-9a-f]{5});/`
+- Seed: `0x4d659218e32a3268` ( Claude kodi 2.1.252 va 2.1.322 ning qaytadan olingan suratlariga mos keladi)
+- Naqsh: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Yuqori oqim filtrlari ularni grep orqali topa olmasligi uchun “sezgir” mijoz nomlarining birinchi belgisidan keyin Unicode **nol kenglikdagi birlashtiruvchi** (`U+200D`) belgisini kiritadi. Standart soʻzlar roʻyxati:
+Unicode kiritadi** nol kenglikdagi birlashtiruvchi** (`U+200D`) "sezgir" mijoz nomlarining birinchi belgisidan keyin yuqori oqim filtrlari ularni grep qila olmaydi. Birlamchi soʻzlar roʻyxati:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Quyidagilarga qoʻllanadi: `system` bloklari, barcha `messages[].content` hamda `tools[].description` / `tools[].function.description`. Operator `setSensitiveWords()` orqali buni oʻzgartirishi mumkin.
+Qo'llaniladigan: `system` bloklari, barcha `messages[].content`, va `tools[].description` / `tools[].function.description`. `setSensitiveWords()` orqali operator tomonidan bekor qilinadi.
 
 ### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` provayderlari
 
-Faqat “haqiqiy Claude Code” trafigini qabul qiladigan uchinchi tomon Anthropic reley serverlari uchun:
+Faqat "haqiqiy Claude Code" trafigini qabul qiladigan uchinchi tomon Anthropic relelari uchun:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- Standart holatda `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- Har bir ulanish uchun “Enable redact-thinking beta” tugmasi, CC Compatible yuqori oqimi aynan tahrirlangan fikrlash oqimlarini talab qilganida, `redact-thinking-2026-02-12` ni qoʻshadi
-- Har bir ulanish uchun “Enable summarized thinking display” tugmasi `providerSpecificData.requestDefaults.summarizeThinking` qiymatini saqlaydi va koʻrsatish rejimi avvaldan belgilanmagan CC Compatible fikrlash soʻrovlariga `display: "summarized"` ni qoʻshadi
+- sukut bo'yicha `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
+- Har bir ulanish uchun “Oʻzgartirish-fikrlash beta-versiyasini yoqish” tugmasi CC Mos keladigan yuqori oqim maxsus tahrirlangan fikrlash oqimlarini talab qilganda `redact-thinking-2026-02-12` qoʻshadi.
+- Har bir ulanish uchun “Umumiy fikrlash displeyini yoqish” tugmasi `providerSpecificData.requestDefaults.summarizeThinking` saqlaydi va `display: "summarized"` ga CC ni ko‘rsatish rejimi o‘rnatilmagan mos fikrlash so‘rovlariga qo‘shadi.
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x oilasi)
 - Standart yoʻl: `/v1/messages?beta=true`
 
-Shu toʻplamdagi yordamchi modullar:
+Xuddi shu to'plamdagi qardosh modullar:
 
-- `claudeCodeConstraints.ts` — harorat + keshni boshqarish qoidalari
-- `claudeCodeToolRemapper.ts` — vosita nomlarini qayta moslashtirish
-- `claudeCodeExtraRemap.ts` — qoʻshimcha foydali yukni meʼyorlashtirish
+- `claudeCodeConstraints.ts` — harorati + kesh-nazorat qoidalari
+- `claudeCodeToolRemapper.ts` — asbob nomini qayta ko'rib chiqish
+- `claudeCodeExtraRemap.ts` — qo'shimcha yukni normallashtirish
 
 ---
 
@@ -150,7 +151,7 @@ Yuqori oqimni qo'llash yoqilgan**Google tomoni** , OmniRoute hech narsa oldini o
 
 **Tavsiya etilgan holat:**
 
-1. Operator to'langan kredit va hisobni amalga oshirish xavfini aniq qabul qilmasa, standart `ANTIGRAVITY_CREDITS=off` saqlang. `retry` birinchi navbatda oddiy so'rovni yuboradi va 429 mos kvotadan keyin kreditlarni ko'pi bilan bir marta kiritadi; `always` birinchi so'rov bo'yicha kreditlarni kiritadi.
+1. Operator to'langan kredit va hisobni amalga oshirish xavfini aniq qabul qilmasa, standart `ANTIGRAVITY_CREDITS=off` saqlang. `retry` birinchi navbatda oddiy so'rovni yuboradi va 429 mos kvotadan so'ng kreditlarni ko'pi bilan bir marta kiritadi; `always` birinchi so'rov bo'yicha kreditlarni kiritadi.
 2. **Auto-Combo orqali yukni provayderlar bo'ylab tarqating** (`model: "auto"` yoki `kr/glm/etc` -combo) bitta Antigravity hisobini to'ldirish o'rniga.
 3. **Har bir ulanish uchun RPM chegaralarini o'rnating** Antigravity provayderining tahrirlash sahifasida (Dashboard → Provayderlar → Antigravity → ulanish → tezligi chegarasi). 30-60 RPM - barqaror foydalanish uchun himoyalangan yuqori chegara.
 4. **Barqaror, operator tomonidan boshqariladigan yuqori oqim tarmog'idan foydalaning** va bir-biriga bog'liq bo'lmagan foydalanuvchilar yoki ish yuklari orasida bitta hisobni almashishdan saqlaning.
@@ -184,7 +185,7 @@ Tegishli nuqtalar:
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` ni o‘qiydi
 - `src/lib/oauth/providers/antigravity.ts` — santexnika
-- Voqea haqida asl hisobot: [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183) muhokamasi
+- Voqea haqida asl hisobot: [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183) muhokamasi
 
 ---
 

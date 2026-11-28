@@ -330,19 +330,16 @@ atgriež maskētu priekšskatījumu (`maskedApiKey`: līdz 4 rakstzīmēm katrā
 atslēgai un nevienu atslēgām ar 8 vai mazāk rakstzīmēm) un savienojuma `projectId`. Abi lauki tiek
 izlaisti no atbildes jebkurai citai atslēgai.
 
-## Akreditācijas datu noteikšana
+## Akreditācijas datu izšķirtspēja
 
-`getCloudAgentCredentials(providerId)` failā `src/lib/cloudAgent/api.ts`:
+`getCloudAgentCredentials(providerId)` `src/lib/cloudAgent/api.ts`:
 
-1. Ielādē aktīvos pakalpojumu sniedzēju savienojumus, izmantojot `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Katram savienojumam priekšroka tiek dota `apiKey` (ar noņemtām atstarpēm). Ja tā nav pieejama, izmanto `accessToken`.
-3. Atgriež pirmo netukšo pilnvaru, kas ietverta objektā `{ apiKey: token }`.
-4. Atgriež `null`, ja netiek atrasta neviena izmantojama pilnvara — API atbild ar `400` un
-   `"Mākoņa aģenta pakalpojumu sniedzējam nav konfigurēti aktīvi akreditācijas dati: <id>"`.
+1. Ielādē aktīvos pakalpojumu sniedzēja savienojumus, izmantojot `getProviderConnections({ provider: providerId, isActive: true })`.
+2. Katram savienojumam dod priekšroku `apiKey` (apgriezts). Atgriežas `accessToken`.
+3. Atgriež pirmo netukšo marķieri, kas iesaiņots kā `{ apiKey: token }`.
+4. Atgriež `null`, ja netiek atrasts lietojams marķieris — API atbild `400` ar `"No active credentials configured for cloud agent provider: <id>"`.
 
-Tas nozīmē, ka mākoņa aģenti atkārtoti izmanto to pašu pakalpojumu sniedzēju savienojumu tabulu, ko parastie LLM
-pakalpojumu sniedzēji. Lai iespējotu Jules, izveidojiet aktīvu savienojumu ar `provider: "jules"`
-un aizpildītu `apiKey`.
+Tas nozīmē, ka mākoņa aģenti atkārtoti izmanto to pašu pakalpojumu sniedzēja savienojuma tabulu, ko parastie LLM pakalpojumu sniedzēji. Lai iespējotu Jules, izveidojiet aktīvu savienojumu ar `provider: "jules"` un aizpildītu `apiKey`.
 
 ## Informācijas panelis
 

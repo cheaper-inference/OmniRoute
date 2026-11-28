@@ -5,29 +5,12 @@
 ---
 
 > **Zdroj pravdy:** `src/lib/memory/` a `src/app/api/memory/`
-> **Posledná aktualizácia:** 2026-06-28 — v3.8.40 (predvolene vypnuté + dobehnutie kvantizácie int8)
 
-OmniRoute poskytuje trvalú konverzačnú pamäť viazanú na kľúč API (a
-voliteľne na ID relácie). Spomienky sa automaticky extrahujú z odpovedí LLM
-pomocou jednoduchého porovnávania vzorov regulárnych výrazov a opätovne sa vkladajú do následných
-požiadaviek ako úvodná systémová správa (alebo prvá používateľská správa pri poskytovateľoch, ktorí
-odmietajú systémovú rolu).
+OmniRoute poskytuje trvalú konverzačnú pamäť kľúčovanú kľúčom API (a voliteľne ID relácie). Spomienky sa extrahujú automaticky z odpovedí LLM prostredníctvom ľahkého porovnávania vzorov regulárnych výrazov a vkladajú sa späť do nasledujúcich požiadaviek ako hlavná systémová správa (alebo prvá používateľská správa pre poskytovateľov, ktorí odmietajú systémovú rolu).
 
-> **Pamäť je predvolene VYPNUTÁ (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled` je
-> teraz `false` (`src/lib/memory/settings.ts`). Zapnutie pamäte vloží až
-> `maxTokens` (~2k) získaného kontextu do **každej** chatovej požiadavky, čo je
-> spoplatnené — ide o neočakávaný náklad pri nových inštaláciách a pre klientov, ktorí spravujú
-> vlastný kontext. Zapnite ju explicitne v časti **Nastavenia → Pamäť** (karta
-> `MemorySkillsTab` pri zapnutej pamäti zobrazuje upozornenie na náklady za tokeny).
-> Klient môže pamäť pre jednu požiadavku vypnúť pomocou hlavičky požiadavky
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — pozrite si tabuľku hlavičiek požiadaviek v
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Požiadavka bez pamäte nastaví
-> `memoryOwnerId = null`, čím sa pre danú požiadavku vypne **aj** vkladanie pamäte,
-> **aj** vkladanie zručností (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Predvolene je pamäť OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` je teraz `false` (`src/lib/memory/settings.ts`). Povolenie pamäte vloží do `maxTokens` (~ 2k) načítaného kontextu** každý** žiadosť o rozhovor, ktorá je účtovaná — za prekvapivé náklady na nové inštalácie a pre klientov, ktorí si spravujú svoj vlastný kontext. Prihláste sa explicitne pod** Nastavenia → Memory** ( `MemorySkillsTab` zobrazuje upozornenie na cenu tokenu, keď je povolená pamäť). Klient môže odhlásiť jednu požiadavku pomocou hlavičky požiadavky `x-omniroute-no-memory` (`true`/`1`/`yes`) — pozrite si tabuľku hlavičiek požiadaviek v [API_REFERENCE.md](../reference/API_REFERENCE.md). Požiadavka bez pamäte nastaví `memoryOwnerId = null`, ktorá sa deaktivuje** oboje** injekcia pamäte a zručností pre túto požiadavku (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Pamäť má **rozsah podľa kľúča API**, nie podľa používateľa — každá požiadavka overená
-rovnakým kľúčom API zdieľa rovnaký fond pamäte, s voliteľným ďalším
-vymedzením rozsahu podľa `sessionId`.
+Pamäť je** rozsah podľa kľúča API** , nie na používateľa — každá požiadavka overená rovnakým kľúčom API zdieľa rovnakú pamäťovú oblasť s voliteľným ďalším rozsahom pomocou `sessionId`.
 
 ## Architektúra
 
@@ -385,24 +368,17 @@ fakty bez ich uloženia.
 `estimateTokens` sa exportuje a používa pri načítaní, sumarizácii a v nástroji MCP
 `omniroute_memory_search`.
 
-## Vkladanie (`injection.ts`)
+## vstrekovanie (`injection.ts`)
 
 `injectMemory(request, memories, provider)`:
 
-1. Spojí obsah všetkých pamätí do jedného reťazca `Memory context: …`.
+1. Spája všetok obsah pamäte do jedného reťazca `Memory context: …`.
 2. Vyberie stratégiu podľa názvu poskytovateľa:
-   - **Systémová správa** (predvolené pre OpenAI, Anthropic, Gemini, …) — vloží
-     `{role: "system", content: memoryText}` pred všetky existujúce systémové
-     správy, takže systémové pokyny používateľa majú naďalej prednosť.
-   - **Používateľská správa** (záložná možnosť) — pre poskytovateľov v
-     `PROVIDERS_WITHOUT_SYSTEM_MESSAGE`: `o1`, `o1-mini`, `o1-preview`,
-     `glm`, `glmt`, `glm-cn`, `zai`, `qianfan`. Títo odmietajú systémovú rolu,
-     inak by vrátili stav 400 (pozri problém č. 1701 pre GLM/Zhipu).
+   - **Systémová správa** (predvolené pre OpenAI, Anthropic, Gemini, ...) — pridáva `{role: "system", content: memoryText}` pred akékoľvek existujúce systémové správy, takže systémové výzvy používateľov majú stále prednosť.
+   - **Správa používateľa** (záložný) — pre poskytovateľov v `PROVIDERS_WITHOUT_SYSTEM_MESSAGE`: `o1`, `o1-mini`, `o1-preview`, `glm`, `glmt`, `glm-cn`, `zai`, `qianfan`. Tieto odmietajú systémovú rolu a inak by 400 (porovnaj problém #1701 pre GLM/Zhipu).
 3. Zaznamená počet, stratégiu a model pod `memory.injection.injected`.
 
-`providerSupportsSystemMessage(provider)` sa exportuje pre volajúcich, ktorí
-potrebujú vykonávať vlastné rozhodnutia o smerovaní. Neznámi poskytovatelia majú
-z bezpečnostných dôvodov predvolenú hodnotu `true` (systémová rola je povolená).
+`providerSupportsSystemMessage(provider)` sa exportuje pre volajúcich, ktorí sa musia rozhodnúť o smerovaní sami. Neznámi poskytovatelia predvolene používajú `true` (povolená systémová rola) kvôli bezpečnosti.
 
 ## Nastavenia (`settings.ts`)
 
@@ -712,22 +688,22 @@ Benchmark na typickom 4-jadrovom serveri x86 (texty s približne 100 tokenmi):
 
 ---
 
-## Vzory extrakcie faktov (v3.8.16+)
+## Vzory extrakcie faktov (v3.8.16 +)
 
-Modul `extraction.ts` (`src/lib/memory/extraction.ts`) používa **porovnávanie pomocou regulárnych výrazov** na extrakciu štruktúrovaných faktov zo správ konverzácie. Pochopenie týchto vzorov vám pomôže vyladiť kvalitu extrakcie pre váš prípad použitia.
+Používa modul `extraction.ts` (`src/lib/memory/extraction.ts`).** zhoda regulárnych vzorov** extrahovať štruktúrované fakty z konverzačných správ. Pochopenie týchto vzorov vám pomôže vyladiť kvalitu extrakcie pre váš prípad použitia.
 
 ### Predvolené kategórie vzorov
 
-| Kategória           | Príklad vzoru                                                 | Zachytáva                            |
-| ------------------- | ------------------------------------------------------------- | ------------------------------------ |
-| PREFERENCE_PATTERNS | `"Preferujem <X>"`, `"Mám rád <X>"`, `"Neznášam <X>"`         | Preferencie používateľa              |
-| DECISION_PATTERNS   | `"Použijem <X>"`, `"Rozhodol som sa <X>"`, `"Vybral som <X>"` | Rozhodnutia používateľa (epizodické) |
-| PATTERN_PATTERNS    | `"Zvyčajne <X>"`, `"Vždy <X>"`, `"Nikdy <X>"`                 | Trvalé vzorce správania              |
+| Kategória           | Príklad vzoru                                               | Zachytáva                             |
+| ------------------- | ----------------------------------------------------------- | ------------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Užívateľské preferencie               |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Rozhodnutia používateľov (epizodické) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Pretrvávajúce vzorce správania        |
 
 ### Príklady vzorov (zjednodušené)
 
 ```ts
-// Zo súboru src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -744,32 +720,24 @@ const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\
 
 Keď používateľ povie:
 
-> "Preferujem TypeScript. Pre tento projekt použijem Postgres. Pred odoslaním zmien vždy vykonám commit. Nemám rád Python."
-> Extrakcia vytvorí 4 pamäťové záznamy:
+> "Dávam prednosť TypeScript. Pre tento projekt použijem Postgres. Pred tlačou sa vždy zaviažem. Nemám rád Python." Extrakcia vytvára 4 pamäte:
 >
-> | Kľúč                                 | Kategória   | Typ        | Obsah                         |
-> | ------------------------------------ | ----------- | ---------- | ----------------------------- |
-> | `preference:typescript`              | preferencia | faktický   | "TypeScript"                  |
-> | `decision:postgres_for_this_project` | rozhodnutie | epizodický | "Postgres pre tento projekt"  |
-> | `pattern:commit_before_pushing`      | vzor        | faktický   | "commit pred odoslaním zmien" |
-> | `preference:python`                  | preferencia | faktický   | "Python"                      |
+> | Kľúč | Kategória | Typ | Obsah | | ------------------------------------ | ----------- | -------- | ------------------ | | `preference:typescript` | faktická | " | "TypeScript| | `decision:postgres_for_this_project` rozhodnutie | epizodické | " | pre tento projekt" | | `pattern:commit_before_pushing` | vzor | faktické | "zaviazať sa pred tlačením" | | `preference:python` | | preferencie | " |Postgres
 
-### Limity extrakcie
+### Limity ťažby
 
-Aby sa zabránilo nekontrolovanej extrakcii, platia nasledujúce limity:
+Aby sa predišlo únikovej extrakcii, platia nasledujúce limity:
 
-| Minimálna dĺžka obsahu | 3 znaky |
+| Min. dĺžka obsahu | 3 znaky |
 | Maximálna dĺžka obsahu | 500 znakov |
 
-### Kedy vypnúť extrakciu
+### Kedy zakázať extrakciu
 
-Extrakcia sa spúšťa automaticky vždy, keď je povolená pamäť; neexistuje samostatný
-prepínač iba pre extrakciu. Ak ju chcete vypnúť, úplne zakážte pamäť (`enabled: false`
-prostredníctvom `PUT /api/settings/memory`). Zvážte to v nasledujúcich prípadoch:
+Extrakcia sa spustí automaticky vždy, keď je povolená pamäť; neexistuje žiadny samostatný prepínač iba na extrakciu. Ak ju chcete vypnúť, úplne vypnite pamäť (`enabled: false` cez `PUT /api/settings/memory`). Zvážte to, keď:
 
-- Máte veľký objem správ a náklady na extrakciu nie sú zanedbateľné
-- Vaše konverzácie sú prevažne dočasné (chat, ladenie) a nemajú dlhodobú hodnotu
-- Kontext už zachytávate pomocou vlastných pluginov
+- Máte veľký objem správ a náklady na extrakciu nie sú triviálne
+- Vaše konverzácie sú väčšinou prechodné (chat, ladenie) bez dlhodobej hodnoty
+- Kontext už zachytávate pomocou vlastných doplnkov
 
 ---
 

@@ -4,10 +4,9 @@
 
 ---
 
-> **Lietotājiem**: Vai meklējat vienkāršu ceļvedi? Skatiet [Bezmaksas līmeņu ceļvedi](../getting-started/FREE-TIERS-GUIDE.md), lai saņemtu secīgus norādījumus bezmaksas MI iegūšanai.
+> **Lietotājiem** : Vai meklējat vienkāršu ceļvedi? Skatiet [bezmaksas līmeņu rokasgrāmatu](../getting-started/FREE-TIERS-GUIDE.md), lai iegūtu detalizētus norādījumus par bezmaksas AI iegūšanu.
 
-> **Pēdējoreiz izpētīts:** 2026-06-17 — katra pakalpojumu sniedzēja izpēte tīmeklī (oficiālā dokumentācija + pēdējo 7 dienu ziņas, 50 aģentu pārbaude ar kritisku verifikāciju), atjauninot visas bezmaksas līmeņa kvotas un ToS. **Daļēja atkārtota revīzija 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — skatiet tālāk piezīmi ar datumu).
-> **Autoritatīvais avots (katalogs):** `open-sse/config/freeModelCatalog.ts` (katra MODEĻA budžeti, novēršot kopīgo kvotu kopu dublēšanos). Tālāk norādītie tokenu budžeta skaitļi ir iegūti aktuālā tīmekļa izpētē un ir **aptuveni** — skatiet [Metodoloģiju un atrunas](#methodology--caveats).
+> **Pēdējo reizi pārbaudīts:** 2026-11-23. Katra rinda ar kvotu, katrs izbeigtais piedāvājums un katra karšu vārti tajā dienā tika atkārtoti atvērti pakalpojumu sniedzēja lapā (`config/quality/free-catalog-evidence.json`). Iepriekšējās caurlaides: 2026. gada 17. gada 17. gada pakalpojumu sniedzēja izpēte un 2026. 09.02. daļēja atkārtota revīzija.** Patiesības avots (katalogs):** `open-sse/config/freeModelCatalog.ts` (budžeti katram MODElim, kopa atņemts). Tālāk norādītie marķiera budžeta skaitļi nāk no tiešsaistes tiešsaistes izpētes un ir** tuvināšana** — skatiet [metodoloģiju un brīdinājumus](#methodology--caveats).
 
 ## TL;DR — cik daudz brīvu secinājumu OmniRoute faktiski apkopo?
 
@@ -15,22 +14,23 @@
 
 **Pārbaudīts 2026-10-08:** [Cerebras](https://www.cerebras.ai/pricing) piedāvā vienreizēju reklāmas kredītu 5 ASV dolāru apmērā, kuram ir nepieciešams maksājuma veids un kura derīguma termiņš beidzas pēc 30 dienām. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) publicē project/model/tier ātruma ierobežojumus; tas paliek ārpus kvantitatīvā mēneša virsraksta.
 
-| Metrika                                              | Žetoni / mēnesī | Nozīme                                                                                                                                                                                                                                                                        |
-| ---------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dokumentēta periodiska dotācija (pastāvīga)**      | **~ 1.62B**     | Brīvais līmenis** baseini** (katram modeļu katalogam), tiek skaitīts katrs koplietotais kopums** vienreiz** . Tiešsaistes avots aiz `/api/free-tier/summary` un informācijas paneļa bezmaksas budžeta lapas.** Izmantojiet šo numuru.**                                       |
-| **+ pirmais mēnesis ar reģistrēšanās kredītiem**     | **~ 2.22B**     | Pastāvīgi + vienreizējas reģistrēšanās kredīti (Z.AI 20 M, DeepSeek 5 M, …), tiek noņemti par katru kontu.** Tikai pirmajā mēnesī** — neatkārtojas.                                                                                                                           |
-| **+ pastāvīgi bez maksas, nav publicēts vāciņš**     | _neizmērāms_    | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — reāla periodiska piekļuve, rate/concurrency-limited,** nav žetonu vāciņa, ko skaitīt** . Uzskaitīti, nekad nav summēti (to skaitīšana pie `RPM×24/7` ir inflācija, ko mēs noraidām).   |
-| **+ depozīta-atbloķēšanas palielinājums**            | **+~ 24M**      | Vienreizējs** 10 $** OpenRouter papildināšana palielina savu brīvo kopu no 50 → 1000 req/day. Tiek ziņots atsevišķi, tāpēc tas nekad nepalielina nemainīgo skaitli.                                                                                                           |
-| **+ aiz reģionālās identitātes pārbaudes**           | **+~ 6M**       | `modelscope` (Alibaba Cloud saistošs + kontinentālās Ķīnas reālā vārda pārbaude). Reāla periodiska kvota, kas tiek rādīta kā `gatedRecurringTokens` / `gatedProviders` un informācijas panelī. Nekad nav apkopots virsrakstā: +~ 6M aiz reģionālās identitātes verifikācijas. |
-| Teorētiskie griesti (visi likmes ierobežojumi, 24/7) | ~ 10B           | Katra pakalpojumu sniedzēja tarifa ierobežojuma summa, kas ekstrapolēta uz nepārtrauktu lietošanu.** Nav garantija** — neuzrakstiet šo virsrakstu.                                                                                                                            |
+| Metrika                                          | Žetoni / mēnesī | Nozīme                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dokumentēta periodiska dotācija (pastāvīga)**  | **~ 90M**       | Brīvais līmenis** baseini** (katram modeļu katalogam), tiek skaitīts katrs koplietotais kopums** vienreiz** . Tiešsaistes avots aiz `/api/free-tier/summary` un informācijas paneļa bezmaksas budžeta lapas.** Izmantojiet šo numuru.**                                       |
+| **+ pirmais mēnesis ar reģistrēšanās kredītiem** | **~ 153M**      | Pastāvīgi + vienreizējas reģistrēšanās kredīti (Z.AI 20 M, DeepSeek 5 M, …), tiek noņemti par katru kontu.** Tikai pirmajā mēnesī** — neatkārtojas.                                                                                                                           |
+| **+ pastāvīgi bez maksas, nav publicēts vāciņš** | _neizmērāms_    | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — reāla periodiska piekļuve, rate/concurrency-limited,** nav žetonu vāciņa, ko skaitīt** . Uzskaitīti, nekad nav summēti (to skaitīšana pie `RPM×24/7` ir inflācija, ko mēs noraidām).   |
+| **+ depozīta-atbloķēšanas palielinājums**        | **+~ 24M**      | Vienreizējs** 10 $** OpenRouter papildināšana palielina savu brīvo kopu no 50 → 1000 req/day. Tiek ziņots atsevišķi, tāpēc tas nekad nepalielina nemainīgo skaitli.                                                                                                           |
+| **+ aiz reģionālās identitātes pārbaudes**       | **+~ 6M**       | `modelscope` (Alibaba Cloud saistošs + kontinentālās Ķīnas reālā vārda pārbaude). Reāla periodiska kvota, kas tiek rādīta kā `gatedRecurringTokens` / `gatedProviders` un informācijas panelī. Nekad nav apkopots virsrakstā: +~ 6M aiz reģionālās identitātes verifikācijas. |
 
-**Godīgs virsraksts:** _OmniRoute agregāti**~ 1.62B dokumentēti bezmaksas marķieri mēnesī** (līdz ~ 2,22 B jūsu pirmajā mēnesī ar reģistrēšanās kredītiem) 26 brīvā līmeņa baseinos —, kā arī ilgstoši bez ierobežojumiem nodrošinātāju — un RTK + Caveman saspiešanas (15–95% marķiera ietaupījums) vēl vairāk._
+**Godīgs virsraksts:** _OmniRoute katalogi**~ 90M bezmaksas žetoni** mēnesi, ko varat faktiski izmantot (līdz ~ 153 miljoniem pirmajā mēnesī ar reģistrēšanās kredītiem), no 12 pulkiem ar publicētu kvotu, kā arī ilgu nepārtraukti bezmaksas pakalpojumu sniedzēju skaitu bez ierobežojumiem. RTK + Caveman saspiešana (15–95% marķiera ietaupījums) to palielina._
 
-> **Kāpēc tas ir samazinājies salīdzinājumā ar iepriekšējo ~ 1.94B.** 2026. 06.17. atsvaidzināšana ir godīguma labojums, nevis zaudējums: `gemini` tagad ir noņemts no kopas (tika palielināts, skaitot katru Flash variantu atsevišķi, 462 M → 60 M), `cloudflare-ai` ir koriģēts uz tā reālo 10k-Neurons/day (122 miljoni → 30 miljoni), `doubao` atkārtota reģistrācija. izslēgšanas līmeņi ir noņemti (`chutes`/`phind`/`kluster` pārtraukta). Daļēji kompensē `llm7` (pareizais 5M/day → 150M) un jauni bezmaksas pakalpojumu sniedzēji (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Vēstures piezīmes. Zemāk esošie skaitļi raksturo tā laika katalogu; tie nav šodienas skaitļi._
 >
-> **Vēl vairāk labots uz ~ 1.37B versijā 3.8.42:** Pēc bezmaksas priekšskatījuma beigām `longcat` tika pārklasificēts no 150M/mo periodiskas dotācijas uz vienreizēju 10 miljonu reģistrācijas kredītu. Tas pats godīguma noteikums — neviens pakalpojumu sniedzējs netika atmests kļūdas dēļ.
+> **Kāpēc tas samazinājās no iepriekšējiem 1,94 miljardiem.** 2026. 06.17. atsvaidzināšana ir godīguma labojums, nevis zaudējums: `gemini` tagad ir noņemts no kopas (tika palielināts, skaitot katru Flash variantu atsevišķi, 462 M → 60 M), `cloudflare-ai` ir labots uz tā reālo 10k-Neurons/day (122 M → 30 M), `doubao` atkārtota reģistrācija, aqf atkārtota reģistrācija. izslēgšanas līmeņi ir noņemti (`chutes`/`phind`/`kluster` pārtraukta). Daļēji kompensē `llm7` (pareizais 5M/day → 150M) un jauni bezmaksas pakalpojumu sniedzēji (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Atjaunināts 2026-08-26 pēc Felo Web aiziešanas pensijā:** Felo Web tiek izslēgts, kamēr tā GPL atvasinātais provenance/licensing paliek HOLD; avots ziņoja par 38 baseina atslēgām tajā laikā. Kopu skaits ir tiešs un CI varēts (`check:docs-counts` neizdodas veidot, ja iepriekš minētie skaitļi novirzās no `computeFreeModelTotals()`).
+> **Vēl vairāk labots uz 1,37 miljardiem versijā 3.8.42:** Pēc bezmaksas priekšskatījuma beigām `longcat` tika pārklasificēts no 150M/mo periodiskas dotācijas uz vienreizēju 10 miljonu reģistrācijas kredītu. Tas pats godīguma noteikums — neviens pakalpojumu sniedzējs netika atmests kļūdas dēļ.
+>
+> **Atjaunināts 2026-08-26 pēc Felo Web aiziešanas pensijā:** Felo Web tiek izslēgts, kamēr tā GPL atvasinātais provenance/licensing paliek HOLD; avots ziņoja par 38 baseina atslēgām tajā laikā.
 >
 > **Atkārtoti pārbaudīts 2026-09-02, salīdzinot ar pakalpojumu sniedzēju lapām** (avoti: `// evidence:` komentāri blakus katram atkārtoti pārbaudītajam ierakstam `open-sse/config/freeModelCatalog.data.ts`): `gemini` un `ollama-cloud` vairs nepublicē marķiera skaitli (Google noņēma katra modeļa bezmaksas tabulu 2025. gada 23. gada decembrī; Ollama bezmaksas plāns ir "sākuma lietošanas kredīti"), un tagad tie ir norādīti kā** bez vāciņa** , nekad nav summēts (− 80M); `groq` ir pieci** katram modelim** 200 K-TPD vāciņi (katrs 6 miljoni, + 15 miljoni) ar trim atlaistajiem IDs samazinājumiem; `nara` ir viens 7M/day spainis (+ 60M, 210M). `mistral`'s 1B ir redzams tikai konta konsolē, — skatiet _Pierādījumu klases_ sadaļā Metodoloģija.
 >
@@ -38,26 +38,114 @@
 >
 > **Labots 2026-09-03 (#11773):** `cerebras` tika pārklasificēts no 30M/mo periodiskas dotācijas (vecā bezkartes 1 miljons tokens/day izmēģinājuma versija) uz vienreizēju reģistrēšanās kredītu 5 ASV dolāru apmērā, kuram ir nepieciešams maksājuma veids. Tāds pats godīguma noteikums kā LongCat.
 >
-> **Plus xKiro (2026-09-03):** jaunais `xkiro-free` pūls (150M/mo) pievieno 35. atkārtotu baseina atslēgu. Felo Web tiek izslēgts, kamēr tā GPL atvasinātais provenance/licensing paliek uz HOLD. Tagad ziņo avots** 26 atkārtotas baseina atslēgas** un**~ 1.62B stabils** — tiešraides, CI varētu numuru (`check:docs-counts` neizdodas veidot, ja tas novirzās no `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** jaunais `xkiro-free` pūls (150M/mo) pievieno 35. atkārtotu baseina atslēgu. Felo Web tiek izslēgts, kamēr tā GPL atvasinātais provenance/licensing paliek uz HOLD. Tobrīd avots ziņoja par 34 pūla atslēgām un 1,62 miljardiem marķieru mēnesī (nemainīgi).
 
-Lielākais** dokumentēts** līdzstrādnieki: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (pieci vāciņi katram modelim), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` ir izslēgts — tā 10 miljoni LongCat-2.0 dotācija ir vienreizējs KYC reģistrēts kredīts, nevis periodisks mēneša budžets.)
+Lielākais** dokumentēts** šodienas reālā skaitļa veicinātāji: `groq` 24M (4 katram modelim vāciņi), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` ir izslēgta — tā 10 miljoni LongCat-2.0 dotācija ir vienreizējs, ar KYC saistīts reģistrācijas kredīts, nevis periodisks mēneša budžets.)
 
-> ⚠️ Teorētisko griestu (~ 10B) palielina pakalpojumu sniedzēji, kuriem ir tikai likmes ierobežojums ar** nav publicēta marķiera vāciņa** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`), kuru skaitļi būtu `RPM/TPM × 24/7 × 30d` — teorētiskais maksimums, ko neviens atsevišķs konts neuzturēs. Tie ir** izslēgts** no aizsargājamā numura (tā vietā tiek rādīts rindā "pastāvīgi brīvs, bez ierobežojuma"). Tā ir tā pati inflācija, kas padara konkurentu vairāku miljardu prasības neuzticamas.
+## Labojums, 2026. gada novembris
+
+Līdz šim izlaišanai šajā lapā un README bija norādīti 1,62 miljardi bezmaksas marķieru mēnesī. Tas bija nepareizi. Četros baseinos bija 93% no tā, un visi četri bija mainījušies pie pakalpojumu sniedzēja, kamēr mūsu katalogs palika nemainīgs. Patiesais skaitlis šodien ir ~ 90 miljoni bezmaksas žetonu mēnesī. Tabulā ir norādīts, kas mainījās katrā pakalpojumu sniedzējā, blakus tam, ko mēs kļūdījāmies.
+
+| Kas mainījies pie pakalpojumu sniedzēja (datums, avots)                                                                                          | Kas mums kļūdījās (kas, kopš kura laika)                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| Mistral: bezmaksas režīms vairs neietver API piekļuvi (docs.mistral.ai, lasiet 2026-11-18)                                                       | Mēs turpinājām skaitīt 1 miljardu marķieru mēnesī no konsoles rādījuma 2026-09-02 un nekad to nepārbaudījām |
+| Nara: Bezmaksas plānā nav norādīts neviens modelis (pakalpojumu sniedzēja `router.bynara.id/api/plans`, lasīt 2026.11.18.)                       | Mēs saskaitījām 210 miljonus žetonu mēnesī                                                                  |
+| xKiro: 500 000 marķieru dienā vienā kontā (xkiro.com, lasīt 2026.11.18.)                                                                         | Katalogā palika 30 modeļi IDs, kas vairs neeksistē                                                          |
+| LLM7: ierobežojumu lapa ir pazudusi, un neviena oficiāla lapa nepublicē bezmaksas kvotu (2026-11-23)                                             | Mēs saskaitījām 150 miljonus žetonu mēnesī bez datētiem pierādījumiem                                       |
+| Groq: viens modelis no bezmaksas baseina tika izbeigts (2026-09-14)                                                                              | Baseins saglabāja savu veco izmēru                                                                          |
+| AgentRouter: pakalpojumu sniedzējs katru dienu norāda 25 $ reģistrēšanās kredītu un vēl 50 $, lai reģistrētos uzaicinājumam (lasīt 2026. 11.23.) | Mēs uzskaitījām reģistrēšanās kredītu 200 $                                                                 |
+| Predibase: produkts beidzās                                                                                                                      | Mēs joprojām skaitījām tā reģistrācijas kredītu pirmajā mēnesī                                              |
+| (nav)                                                                                                                                            | 16 pakalpojumu sniedzēji saglabāja bezmaksas piedāvājuma karogu pēc piedāvājuma beigām                      |
+| (nav)                                                                                                                                            | README solīja atkārtotu auditu ik pēc divām nedēļām. Pēdējais pirms tam bija 2026-09-02                     |
+| (nav)                                                                                                                                            | Dokumentu pārbaude pieļāva 0,05 B novirzi un nevarēja nolasīt skaitļus miljonos                             |
+
+Summējot vienu kvotu katrā rindā, tiek palielināts jebkurš katalogs, ieskaitot mūsu. Tāpēc rindas summētā figūra nes savu etiķeti un īstā atrodas tieši zem tās.
+
+## Kas skaitās
+
+Rinda tiek ieskaitīta brīvajos skaitļos, ja tas viss atbilst:
+
+- Kvota atkārtojas un tiek publicēta paša nodrošinātāja lapā, blakus kataloga rindai ar datētu pierādījumu.
+- Viens konts katram pakalpojumu sniedzējam. Nekas, kam nepieciešams maksājums, karte, depozīts vai identitātes pārbaude (KYC). Kvota, kurai ir nepieciešams tālruņa numurs, Telegram vai Discord lai reģistrētos, ir norādīta atsevišķi kā “ar sociālo reģistrāciju”, nekad netiek rādīta reālajā skaitļā.
+- Neviens pakalpojumu sniedzējs nav atzīmējis `tos: "avoid"`, un tikai pakalpojumu sniedzēja oficiālais API.
+- Vienreizējās reģistrēšanās kredīti tiek ieskaitīti tikai pirmā mēneša rādītājā un tikai tad, ja karte netiek prasīta. Vienreizējs depozīts, kas palielina kvotu, ir atsevišķs stimuls. Paaugstinājumi nekad netiek ņemti vērā reālajā skaitā.
+- Meklēšanas, balss un multivides pakalpojumu sniedzēji netiek ņemti vērā pēc piekļuves veida un katra marķiera. Viņi saņem savu skaitu savās vienībās (rezultāti, rakstzīmes, attēli) šajā lapā, kad pārskaitīšana tos pievieno; tie nekad netiek pievienoti viens otram vai pārvērsti par žetoniem.
+
+Ko nozīmē katrs publiskais skaits:
+
+- **Pakalpojumu sniedzēji ar bezmaksas piekļuvi** (50 šodien: 43 ar API atslēgu, 6 bez atslēgas, 1, izmantojot rīka kontu): pakalpojumu sniedzēji ar vismaz vienu kataloga rindu, kas nodrošina bezmaksas piekļuvi atkarībā no tā, kā jūs to sasniedzat.
+- **Kataloga rindas ar brīvu piekļuvi** (šodien 214): viena rinda katram pakalpojumu sniedzējam un modelim.
+- **Baseini ar publicētu kvotu** (šodien 12): dalītās kvotas aiz reālā skaitļa, katra tiek skaitīta vienreiz.
+- **Atšķirīgi bezmaksas modeļi** (šodien 185): rindas, kas sagrupētas pēc modeļa ID.
+- **Atzīmēts ar bezmaksas piedāvājumu** (šodien 140 + ): katrs pakalpojumu sniedzējs, kura reģistra ierakstā ir `hasFree`, tostarp meklēšanas, balss un multivides pakalpojumu sniedzēji, izmēģinājumi un reģistrēšanās kredīti.
+
+Katrs skaits tiek kataloģizēts, nevis pārbaudīts katram zvanam: tajā ir norādīts katalogā norādītais, nevis tas, ka katrs maršruts atbild tieši tagad.
+
+## Kā mēs skaitām
+
+Trīs skaitļi nāk no tā paša kataloga, kas pārbaudīts 2026.11.23.:
+
+- **Reāls skaitlis, ~ 90 miljoni bezmaksas žetonu mēnesī.** Katra dalītā kvota tiek skaitīta vienreiz, tāpēc pieci modeļi aiz vienas dienas naudas ir viena pabalsts. Tas ir tas, ko faktiski var izmantot viens konts pie katra pakalpojumu sniedzēja. Ar vienreizējiem reģistrēšanās kredītiem, ~ 153 miljoni pirmajā mēnesī.
+- **Lielais skaitlis, ~ 11.3B, summēts pa rindu** , iekļauti beigušies piedāvājumi. Tas ir veids, kā tiek skaitīti citi katalogi. Gandrīz viss ir vēsture: 98,6% no piedāvājumiem, kas vairs nepastāv. Mēs to drukājam tikai ar etiķeti un ar īsto figūru blakus.
+- **Tiešsaistes katalogs, ~ 159M summēts katrā tiešraides rindā** : viena un tā pati rinda pēc rindas summa bez beigu piedāvājumiem.
+
+Metode pēc rindas (`row-sum-v1`) atbilst četriem noteikumiem:
+
+1. Katra uzskaitītā rinda tiek pievienota tāda, kāda tā ir, neapvienojot rindas, kas koplieto vienu pūlu.
+2. Tiek pievienotas tikai marķieros publicētās kvotas. Pieprasījumos, kredītos vai neironos publicētā kvota tiek skaitīta kā nulle (`FREE_QUOTA_UNIT` in `open-sse/config/freeModelCatalog.ts`).
+3. Reģistrācijas kredīti, depozīta palielinājumi un izslēgtās rindas (`enabled: false`) ir izlaistas.
+4. Lielais skaitlis katras uzskaitītās rindas pēdējā kvotā pievieno pabeigto piedāvājumu virsgrāmatu (`open-sse/config/freeModelCatalog.retired.data.ts`). Tajā tiek ievadītas tikai tās rindas, kas ir pārtrauktas kopš `RETIRED_LEDGER_SINCE`, un katra rinda tiek izslēgta 12 mēnešus pēc tās beigām.
+
+Ja skaitīšanas veids pa rindiņām vairs nav izplatīts vai uzturētājs tā nolemj, lielais skaitlis atstāj katru lapu un paliek tikai īstais skaitlis.
+
+## Noņemts/nav brīva līmeņa
+
+Pakalpojumu sniedzēji, kuru bezmaksas piedāvājums beidzās vai kurus nevarēja apstiprināt. Tie paliek reģistrā ar `hasFree: false` (vai ir izņemti no bezmaksas kataloga) un nekad netiek ieskaitīti nevienā bezmaksas skaitļā. Šis nav pakalpojumu sniedzēju saraksts, kas pēc pieprasījuma noņemti no OmniRoute (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Pakalpojumu sniedzējs    | Kopš       | Kāpēc                                                                                      | Avots                                       |
+| ------------------------ | ---------- | ------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| `mistral`                | 2026-11-23 | Bezmaksas režīms vairs neietver API piekļuvi                                               | docs.mistral.ai (lietošanas ierobežojumi)   |
+| `nara`                   | 2026-11-23 | Bezmaksas plānā nav norādīts neviens modelis                                               | `router.bynara.id/api/plans`                |
+| `llm7`                   | 2026-11-23 | Nevienā oficiālajā lapā netiek publicēta bezmaksas kvota                                   | pakalpojumu sniedzēja vietne                |
+| `navy`                   | 2026-11-23 | Oficiālajās lapās nevarēja apstiprināt nevienu bezmaksas kvotu                             | api.navy                                    |
+| `bluesminds`             | 2026-11-23 | Lietošanai nepieciešams kredīts, kas iegādāts no pakalpojumu sniedzēja                     | `api.bluesminds.com/api/status`             |
+| `arcee-ai`               | 2026-11-23 | Tikai apmaksātas cenas                                                                     | docs.arcee.ai (cenas)                       |
+| `huggingface`            | 2026-11-23 | Bezmaksas kontos ir jāiegādājas kredīti vai jājaunina uz PRO                               | huggingface.co (secinājumu sniedzēju cenas) |
+| `huggingchat`            | 2026-11-23 | Hugging Face secinājumam ir nepieciešami iegādāti kredīti vai PRO                          | huggingface.co (secinājumu sniedzēju cenas) |
+| `ainative`               | 2026-11-23 | Hobbyist plāns tiek apmaksāts pēc 3 dienu izmēģinājuma perioda                             | pakalpojumu sniedzēja cenu lapa             |
+| `stepfun`                | 2026-11-23 | Tikai maksas par lietošanu                                                                 | pakalpojumu sniedzēja cenu lapa             |
+| `predibase`              | 2026-11-23 | Produkta ražošana pārtraukta                                                               | predibase.com                               |
+| `poolside`               | 2026-10-31 | Tiešais secinājums izslēgts                                                                | platform.poolside.ai                        |
+| `amazon-q`               | 2026-05-15 | Nav jaunu bezmaksas reģistrēšanās gadījumu                                                 | pakalpojumu sniedzēja lapa                  |
+| `chat-oripe`             | 2026-11-23 | API saimniekdators atbild uz HTTP 530                                                      | API saimnieks                               |
+| `naga-ai`                | 2026-11-23 | Naga.ac nodrošinātāja dublikāts                                                            | api.naga.ac                                 |
+| `dxnt`                   | 2026-11-23 | Reģistrācijas bonuss pastāv, taču neviens modelis to nepieņem                              | dxnt.com                                    |
+| `ollama-cloud`           | 2026-11-09 | Mākoņu modeļi ir apmaksāti par marķieri vai uz tiem attiecas maksas plāni                  | ollama.com (#19334)                         |
+| `chutes`                 | 2026-03    | Bezmaksas līmenis beidzies                                                                 | pakalpojumu sniedzēja lapa                  |
+| `phind`                  | 2026-01    | Uzņēmums slēgts                                                                            | pakalpojumu sniedzēja lapa                  |
+| `kluster`                | 2026-06-09 | Saulriets (pārcelts uz MITO)                                                               | pakalpojumu sniedzēja lapa                  |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo bezmaksas atsaukts; Nemotron akcija beidzās 2026-06 (atkārtoti pārbaudīta 2026-06-18) | pakalpojumu sniedzēja lapa                  |
+| `aimlapi`                | 2026-06-18 | Bezmaksas līmenis ir apturēts                                                              | pakalpojumu sniedzēja lapa                  |
+| `yi`                     | 2026-06-18 | Yi-Light aizgāja pensijā, maksā līdzi                                                      | pakalpojumu sniedzēja lapa                  |
+| `featherless-ai`         | 2026-06    | Pašreizējā bezmaksas līmeņa nav                                                            | pakalpojumu sniedzēja lapa                  |
+| `chipotle`               | 2026-09-15 | Tērzēšanas logrīks, kas atrodas aiz tā, atbild uz 404 katrā maršrutā (#13131, #4037)       | amelia.chipotle.com                         |
+
+`iflytek` / `sparkdesk` saglabājiet sarakstu ar pakalpojumu sniegšanas noteikumu piezīmi: Spark Lite ir bezmaksas, taču ToS ierobežo starpniekservera un releja izmantošanu.
 
 ---
 
-## 2026-06-17 atjauninājums — kas mainījies kopš 2026-06-05
+## 2026-06-17 atsvaidzināt —, kas mainījies kopš 2026-06-05
 
-50 aģentu tīmekļa izpētes posms (oficiālā dokumentācija + pēdējo 7 dienu jaunumi, ar pretdarbības metodi pārbaudīts) atsvaidzināja visu katalogu. Galvenās izmaiņas:
+50 aģentu tīmekļa izpētes caurlaide (oficiālās docs + last-7-days ziņas, pārbaudītas pretrunīgi) atsvaidzināja visu katalogu. Izceltie:
 
-- **Noņemti / vairs nav bezmaksas līmeņa (2026):** `chutes` (bezmaksas līmenis beidzās 2026-03), `phind` (uzņēmums beidza darbību 2026-01), `kluster` (darbība pārtraukta 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo bezmaksas piekļuve atcelta 2026-05-24, Nemotron akcija beidzās 2026-06 — atkārtoti pārbaudīts 2026-06-18), `aimlapi` (bezmaksas līmenis apturēts — atkārtoti pārbaudīts 2026-06-18), `yi` (Yi-Light izņemts no piedāvājuma, maksa pēc patēriņa — atkārtoti pārbaudīts 2026-06-18), `featherless-ai` (pašlaik nav bezmaksas līmeņa), `chipotle` (Chipotle "Pepper AI" — ar apgriezto inženieriju iegūtais `amelia.chipotle.com` Amelia tērzēšanas logrīks, ar kuru pakalpojumu sniedzējs sazinājās, tagad katrā maršrutā, tostarp saknē, atgriež 404; aizmugursistēma atslēgta/pārcelta, apstiprināts 2026-09-15 — pilnībā noņemts no kataloga, #13131/#4037). `iflytek` / `sparkdesk` paliek sarakstā, bet ar brīdinājuma piezīmi par lietošanas noteikumiem (Spark Lite ir bezmaksas; lietošanas noteikumi ierobežo starpniekserveru/releju izmantošanu).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` atslēgti 2026-06-01, bet `2.5 Pro` izgāja no bezmaksas līmeņa (2026-04); bezmaksas līmenis tagad ir **tikai Flash saimei** (2.5/3/3.1/3.5 Flash + Gemma). Katalogs tagad **apvieno vienā pūlā** Flash saimi (iepriekš skaits bija uzpūsts, katru variantu skaitot atsevišķi: 462M → 60M).
-- **Labotie skaitļi:** `cloudflare-ai` 122M → **30M** (reālie 10k neironu dienā), `doubao` pārklasificēts kā vienreizējs reģistrācijas kredīts (neatjaunojams), `llm7` 4M → **150M** (dokumentēti 5M žetonu dienā), `together` "-Free" galapunkti pārtraukti → $25 reģistrācijas kredīts arī noņemts (nepieciešams $5 minimālais pirkums, bezmaksas izmēģinājuma nav), `longcat` Preview beidzies + Flash modeļi izņemti no apgrozības → tikai **LongCat-2.0**, pārklasificēts kā vienreizējs **10M** žetonu reģistrācijas kredīts (pieejams pēc KYC verifikācijas, neatjaunojams).
-- **Poolside tiešās secināšanas pakalpojuma beigas (pārbaudīts 2026-10-20):** [oficiālā platforma](https://platform.poolside.ai/) paziņo par slēgšanu **2026-10-31** un aicina lietotājus lejupielādēt tās modeļus no Hugging Face pašmitināšanai. Tiešajam `poolside` pakalpojumu sniedzējam ir šis brīdinājums. Manuāli atlasītajā bezmaksas katalogā nav tiešu Poolside ierakstu; tā ar Poolside nosauktie ieraksti pieder `kilo-gateway`. Šis paziņojums neapstiprina to modeļu pieejamību, ko apkalpo Kilo, Cline, NVIDIA vai citas vārtejas, tāpēc šie ieraksti uz šā pamata netiek noņemti.
-- **Atklāti jauni bezmaksas pakalpojumu sniedzēji:** ⭐ **Kilo Code** (`kilo-gateway` — rotējoša "Auto Free" izlase: NVIDIA Nemotron 3 saime, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 rotējoši bezmaksas programmēšanas modeļi, atjaunināts 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash pastāvīgi bez maksas + 20M reģistrācijas bonuss) un `arcee-ai` Trinity Large Preview.
-- **Jauni godīgi līmeņi** (skatīt Metodoloģiju): kategorija _pastāvīgi-bezmaksas-bet-bez-griestiem_ (reāla regulāra piekļuve, nav žetonu griestu, ko skaitīt) un _depozīta-atbloķēšanas pastiprinājums_ (OpenRouter $10 → +24M/mēn.), abi parādīti **atsevišķi**, lai tie nekad neuzpūstu galveno skaitli.
+- **Noņemts/bez brīva līmeņa:** pārcēlās uz [savu sadaļu](#removed--no-free-tier).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` tika slēgts 2026-06-01 un `2.5 Pro` atstāja brīvo līmeni (2026-04); tagad ir bezmaksas līmenis** Tikai zibatmiņas ģimenei** (2.5/3/3.1/3.5 Flash + Gemma). Katalogs tagad** baseini** Flash saime (tika palielināta, skaitot katru variantu atsevišķi: 462M → 60M).
+- **Laboti skaitļi:** `cloudflare-ai` 122M →** 30 miljoni** (īsts 10k-Neurons/day), `doubao` pārklasificēts kā vienreizējs reģistrēšanās kredīts (nav atkārtots), `llm7` 4M →** 150 miljoni** (dokumentēti 5 M tokens/day), `together` "-Bezmaksas" galapunkti pārtraukti → 25 $ reģistrēšanās kredīts arī noņemts (nepieciešams minimālais pirkums 5 ASV dolāru apmērā, bez bezmaksas izmēģinājuma versijas), `longcat` Priekšskatījums beidzās + Flash modeļi, →**LongCat-2.0** tikai, pārklasificēts par vienreizēju** 10 miljoni**-token pierakstīšanās kredīts (ar KYC nodrošināts, neatkārtojas).
+- **Baseina tiešā secinājuma beigas (pārbaudīts 2026-10-20):** [oficiālā platforma](https://platform.poolside.ai/) paziņo par izslēgšanu** 2026-10-31** un liek lietotājiem lejupielādēt savus modeļus no Hugging Face pašmitināšanai. Tiešais `poolside` nodrošinātājs sniedz šo brīdinājumu. Ar rokām veidotajā bezmaksas katalogā nav tiešu ierakstu pie baseina; tā Poolside ieraksti pieder `kilo-gateway`. Šis paziņojums nenosaka Kilo, Cline, NVIDIA vai citu vārteju apkalpoto modeļu pieejamību, tāpēc šie ieraksti netiek atsaukti, pamatojoties uz to.
+- **Atklāti jauni bezmaksas pakalpojumu sniedzēji:** ⭐** Kilo kods** (`kilo-gateway` — rotējošs "Auto Free" komplekts: NVIDIA Nemotron 3 ģimene, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode Zen** (`opencode-zen` — 10 rotējoši bezmaksas kodēšanas modeļi, atsvaidzināts 2026.10.20.), ⭐** Z.AI / Žipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash pastāvīgi bezmaksas + 20M reģistrēšanās bonuss) un `arcee-ai` Trinity Large priekšskatījums.
+- **Jauni godīgi līmeņi** (skatiet metodiku): _pastāvīgi bezmaksas, bet bez ierobežojumiem_ kategorija (reāla periodiska piekļuve, bez pilnvaru skaita ierobežojuma, kas jāskaita) un _depozīta atbloķēšanas pastiprinājums_ (OpenRouter $ 10 → +24M/mo), abas ir parādītas** atsevišķi** tāpēc viņi nekad neuzpūš virsrakstu.
 
-> Detalizētā tabula pa pakalpojumu sniedzējiem tālāk tekstā ir **2026-06-05 momentuzņēmums**; iepriekš minētās izmaiņas to aizstāj. Aktuālais, kanoniskais avots ir katalogs pa modeļiem `open-sse/config/freeModelCatalog.ts`.
+> Tālāk ir sniegta detalizēta tabula katram pakalpojumu sniedzējam** 2026-06-05 momentuzņēmums** ; iepriekš esošās deltas to aizstāj. Tiešais, kanoniskais avots ir katra modeļa katalogs `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -113,7 +201,7 @@ apzināti.
 
 ## Metodoloģija un brīdinājumi
 
-- Skaitļi ir** augšējās robežas aplēses** no katra pakalpojumu sniedzēja dokumentētajiem brīvā līmeņa limitiem** 2026-06-17** , kas apkopota tīmekļa izpētē. Bezmaksas līmeņi pastāvīgi mainās, pirms paļaušanās uz figūru — pārbaudiet.
+- Skaitļi ir** augšējās robežas aplēses** no katra pakalpojumu sniedzēja dokumentētajiem brīvā līmeņa ierobežojumiem, pēdējoreiz pārbaudīts** 2026-11-23** katrai rindai ar kvotu. Bezmaksas līmeņi pastāvīgi mainās, pirms paļaušanās uz figūru — pārbaudiet.
 - **Par ko patiesībā garantē ieraksts.** Nevienam ierakstam nav norādīts katras rindas ticamības novērtējums, un API nesniedz nevienu — uzskata katru iepriekš minēto skaitli kā tādas pašas, nenoteiktas kvalitātes aprēķinu. Divi fakti atšķiras, jo tie ir atlasīti manuāli, nevis secināti: 44 ieraksti ietver neatkarīgi dokumentētu stingru apturēšanu (39 no tiem ir xKiro rindas, kurām visām ir viena dienas nauda), un 22 ierakstiem ir tūlītēja apmācības atklāšana. `hardStopGuaranteed` tiek iestatīts tikai tad, ja paša pakalpojumu sniedzēja noteikumos ir teikts, ka, pārsniedzot bezmaksas kvotu, pieprasījums tiek noraidīts, nevis klusībā sāk izrakstīt jums rēķinu, norādot avotu komentārā blakus ierakstam; tas nekad nav iestatīts uz noklusējuma vērtību `true`, un ieraksts, kuru neviens nav pārbaudījis, paliek neiestatīts. Tātad trūkstošais cietā apturēšanas karodziņš nozīmē "nav izveidots", nevis "zināms, ka jums jāmaksā".**STRICT režīms** (izvēles `freeAccessPolicy=strict` maršrutēšanas aizsargs) uzticas tikai tiem ierakstiem, kuriem ir karodziņš; katrs otrais brīvais līmenis tiek izslēgts kā `no-hard-stop` (sk. `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Kad aizsargs filtrē kopu, operatora redzamais žurnāls ziņo gan par izslēgšanas skaitu, gan tā `no-hard-stop` daļu.
 - `estMonthlyFreeTokens` = tikai periodiski ikmēneša marķieri.** Vienreizējie pierakstīšanās kredīti netiek atkārtoti** un skaitīt kā 0. Pārtrauktie līmeņi arī ir 0.
 - Ikdienas marķiera vāciņš → `monthly = daily × 30`. Tikai RPD dokumentēts → `RPD × ~800 output tokens × 30`. Tikai RPM/TPM (bez dienas ierobežojuma) →** bez vāciņa** (skatīt zemāk).
@@ -128,11 +216,11 @@ apzināti.
 
 Lielākā daļa skaitļu "bezmaksas marķieri mēnesī" šajā vietā ir katra modeļa etiķešu summas. Mūsējais ar nolūku nav:
 
-- **Katrs koplietošanas baseins tiek ieskaitīts vienu reizi.** Mistral bezmaksas plāns ir viens 1B/month pabalsts katrai organizācijai; Ja to uzskaita piecos modeļos, tas nav 5B. Summējot pēc modeļa, varētu lasīt mūsu pašu katalogu**~ 7.4B** (pārrēķināts 2026-09-03; šis skaitlis nav saistīts ar CI pārmēriet to — kad katalogs mainās) — virsrakstā teikts**~ 1.47B** jo tieši to var tērēt viens katra pakalpojumu sniedzēja konts.
+- **Katrs koplietošanas baseins tiek ieskaitīts vienu reizi.** Pieci modeļi aiz viena pabalsta ir viens pabalsts, nevis pieci. Viena un tā paša kataloga rindu pa rindai un kāpēc mēs to drukājam, ir norādīts sadaļā [Kā mēs rēķinām](#how-we-count).
 - **Dienas limiti tiek konvertēti, likmes netiek konvertētas.** Dokumentēts tokens/day vāciņš kļūst `× 30`; dokumentēts requests/day vāciņš kļūst `RPD × ~800 tokens × 30`; pakalpojumu sniedzējs, kas publicē tikai pieprasījumus minūtē** nē** mēneša skaitlis, un tas ir norādīts kā _bez ierobežojuma_, nekad nav summēts. Likmes limita reizināšana ar 24/7 ir inflācija, no kuras mēs atsakāmies.
 - **Kvotas aiz reģionālās identitātes pārbaudes ir parādītas atsevišķi** (`+~6M behind regional identity verification`), jo lielākā daļa lasītāju tos nevar izmantot.
 - **Reģistrācijas kredīti ir tikai pirmajā mēnesī** un uzrādīts kā otrs skaitlis, kas nekad nav sajaukts ar nemainīgu skaitli.
-- **Ciparu nodrošina CI.** `npm run check:docs-counts` pārrēķina kopsummas no kataloga un neizdodas veidot, kad šis fails, README vai budžeta karte novirzās no tiem.
+- **Ko dara dokumentu pārbaude.** `npm run check:docs-counts` (izlaides režīms) pārrēķina reālo skaitli, pirmā mēneša skaitli un divu rindu summas no kataloga, un neizdodas, ja README, šī lapa vai bezmaksas līmeņu ceļvedis izdrukā citu vērtību vai izdrukā lielo skaitli bez etiķetes un reālo. Budžeta karte tiek pārzīmēta no tiem pašiem faktiem izlaišanas brīdī.
 
 ---
 
@@ -241,74 +329,74 @@ Lielākā daļa skaitļu "bezmaksas marķieri mēnesī" šajā vietā ir katra m
 
 ---
 
-## Bezmaksas līmenis katram pakalpojumu sniedzējam (Bytez/Nous pārbaudīts 2026.10.15.; atkārtoti pārbaudītas rindas 2026.09.02.; citas 2026.06.17.)
+## Katra nodrošinātāja bezmaksas līmenis (katalogs pārbaudīts 2026.11.23.)
 
-> Atjaunots no katra modeļa kataloga (`open-sse/config/freeModelCatalog.ts`), noņemts no kopas. Kārtots pēc periodiskas vienmērīgas tokens/mo. `uncapped*` = pastāvīgi brīvas, bet nav publicētas pilnvaras vāciņa (rate/concurrency-limited) — reālas piekļuves,** nē** apkopots virsrakstā. `—` = tikai kredīts / bez atslēgas / nav nosakāms ar marķieri.
+> Apkopts ar rokām no katra modeļa kataloga (`open-sse/config/freeModelCatalog.data.ts`); pēdējo reizi pārbaudīts 2026-11-23. Sakārtots pēc katra kopfonda reālajiem ikmēneša marķieriem (katrs koplietotais kopums tiek skaitīts vienu reizi). `uncapped*` = pastāvīgi bezmaksas, bet bez publicēta pilnvaru vāciņa (rate/concurrency-limited): reāla piekļuve,** nē** summēti reālajā attēlā. `not counted` = ir atkārtota kvota, ko reālais skaitlis atstāj ārpusē (`avoid` vai aiz reģionālās identitātes pārbaudes). Pakalpojumu sniedzēji, kuru piedāvājums beidzās, atrodas [līmenī Noņemts/bez maksas](#removed--no-free-tier). `—` = kredīts tikai / bez atslēgas / nav nosakāms ar marķieri.
 
-| Pakalpojumu sniedzējs | Brīvais tips          | Stabils tokens/mo | Kredīts pirmajā mēnesī | ToS            | Modeļi |
-| --------------------- | --------------------- | ----------------- | ---------------------- | -------------- | ------ |
-| `mistral`             | atkārtojas            | ~ 1.00B           | —                      | piesardzību    | 5      |
-| `nara`                | atkārtojas            | ~ 210M            | —                      | piesardzību    | 8      |
-| `llm7`                | atkārtojas            | ~ 150M            | —                      | piesardzību    | 4      |
-| `xkiro`               | atkārtojas            | ~ 150M            | —                      | piesardzību    | 39     |
-| `longcat`             | vienreizējs           | —                 | 10 miljoni             | piesardzību    | 1      |
-| `cerebras`            | vienreizējs           | —                 | 5 ASV dolāru kredīts   | piesardzību    | 2      |
-| `cloudflare-ai`       | atkārtojas            | ~ 30M             | —                      | piesardzību    | 9      |
-| `groq`                | atkārtojas            | ~ 30M             | —                      | piesardzību    | 5      |
-| `api-airforce`        | atkārtojas            | ~ 24M             | —                      | piesardzību    | 7      |
-| `bluesminds`          | atkārtojas            | ~ 7M              | —                      | neviennozīmīgi | 22     |
-| `sambanova`           | atkārtojas            | ~ 6M              | —                      | piesardzību    | 5      |
-| `arcee-ai`            | atkārtojas            | ~ 5M              | —                      | piesardzību    | 1      |
-| `bazaarlink`          | atkārtojas            | ~ 4M              | —                      | piesardzību    | 32     |
-| `openrouter`          | atkārtojas            | ~ 1M              | —                      | piesardzību    | 1      |
-| `cohere`              | atkārtojas            | ~ 800K            | —                      | piesardzību    | 6      |
-| `huggingchat`         | atkārtojas            | ~ 500K            | —                      | piesardzību    | 4      |
-| `morph`               | atkārtojas            | ~ 400K            | —                      | labi           | 2      |
-| `huggingface`         | atkārtojas            | ~ 200K            | —                      | piesardzību    | 6      |
-| `kiro`                | atkārtojas            | ~ 25K             | —                      | izvairīties    | 12     |
-| `glm-cn`              | bez vāciņa            | bez vāciņa\*      | ~ 20M                  | labi           | 4      |
-| `baidu`               | bez vāciņa            | bez vāciņa\*      | —                      | piesardzību    | 1      |
-| `gemini`              | bez vāciņa            | bez vāciņa\*      | —                      | piesardzību    | 4      |
-| `kilo-gateway`        | bez vāciņa            | bez vāciņa\*      | —                      | piesardzību    | 7      |
-| `opencode-zen`        | bez vāciņa            | bez vāciņa\*      | —                      | piesardzību    | 10     |
-| `tencent`             | bez vāciņa            | bez vāciņa\*      | —                      | piesardzību    | 1      |
-| `vertex`              | reģistrācijas kredīts | —                 | ~ 300M                 | piesardzību    | 10     |
-| `agentrouter`         | reģistrācijas kredīts | —                 | ~ 200M                 | piesardzību    | 4      |
-| `predibase`           | reģistrācijas kredīts | —                 | ~ 25M                  | piesardzību    | 1      |
-| `doubao`              | reģistrācijas kredīts | —                 | ~ 15M                  | neviennozīmīgi | 1      |
-| `ai21`                | reģistrācijas kredīts | —                 | ~ 10M                  | izvairīties    | 2      |
-| `deepseek`            | reģistrācijas kredīts | —                 | ~ 5M                   | labi           | 2      |
-| `hyperbolic`          | reģistrācijas kredīts | —                 | ~ 5M                   | labi           | 8      |
-| `nscale`              | reģistrācijas kredīts | —                 | ~ 5M                   | piesardzību    | 6      |
-| `bytez`               | kredīts (rek.)        | —                 | nezināms               | neviennozīmīgi | 1      |
-| `deepinfra`           | reģistrācijas kredīts | —                 | ~ 1M                   | piesardzību    | 22     |
-| `fireworks`           | reģistrācijas kredīts | —                 | ~ 1M                   | izvairīties    | 10     |
-| `nebius`              | reģistrācijas kredīts | —                 | ~ 1M                   | piesardzību    | 1      |
-| `qoder`               | reģistrācijas kredīts | —                 | ~ 1M                   | piesardzību    | 14     |
-| `scaleway`            | reģistrācijas kredīts | —                 | ~ 1M                   | labi           | 6      |
-| `novita`              | reģistrācijas kredīts | —                 | ~ 500K                 | piesardzību    | 1      |
-| `agy`                 | bez atslēgas          | —                 | —                      | izvairīties    | 16     |
-| `baichuan`            | bez atslēgas          | —                 | —                      | neviennozīmīgi | 1      |
-| `blackbox`            | bez atslēgas          | —                 | —                      | izvairīties    | 6      |
-| `coze`                | bez atslēgas          | —                 | —                      | izvairīties    | 1      |
-| `duckduckgo-web`      | bez atslēgas          | —                 | —                      | izvairīties    | 6      |
-| `freemodel-dev`       | bez atslēgas          | —                 | —                      | nezināms       | 4      |
-| `friendliai`          | bez atslēgas          | —                 | —                      | izvairīties    | 2      |
-| `iflytek`             | bez atslēgas          | —                 | —                      | izvairīties    | 1      |
-| `inference-net`       | bez atslēgas          | —                 | —                      | piesardzību    | 3      |
-| `liquid`              | bez atslēgas          | —                 | —                      | nezināms       | 1      |
-| `monsterapi`          | bez atslēgas          | —                 | —                      | neviennozīmīgi | 1      |
-| `muse-spark-web`      | bez atslēgas          | —                 | —                      | izvairīties    | 3      |
-| `nlpcloud`            | bez atslēgas          | —                 | —                      | izvairīties    | 1      |
-| `nvidia`              | bez vāciņa            | bez vāciņa\*      | —                      | piesardzību    | 3      |
-| `pollinations`        | bez atslēgas          | —                 | —                      | piesardzību    | 31     |
-| `publicai`            | bez atslēgas          | —                 | —                      | piesardzību    | 3      |
-| `reka`                | bez atslēgas          | —                 | —                      | piesardzību    | 2      |
-| `sensenova`           | bez atslēgas          | —                 | —                      | piesardzību    | 1      |
-| `sparkdesk`           | bez atslēgas          | —                 | —                      | piesardzību    | 1      |
-| `stepfun`             | bez atslēgas          | —                 | —                      | labi           | 1      |
-| `t3-web`              | bez atslēgas          | —                 | —                      | izvairīties    | 23     |
-| `uncloseai`           | bez atslēgas          | —                 | —                      | piesardzību    | 3      |
+| Pakalpojumu sniedzējs | Brīvais tips          | Īsts tokens/mo                       | Kredīts pirmajā mēnesī | ToS            | Modeļi |
+| --------------------- | --------------------- | ------------------------------------ | ---------------------- | -------------- | ------ |
+| `api-airforce`        | atkārtojas            | ~ 24M                                | —                      | piesardzību    | 5      |
+| `groq`                | atkārtojas            | ~ 24M (4 vāciņi katram modelim)      | —                      | piesardzību    | 4      |
+| `cloudflare-ai`       | atkārtojas            | ~ 23M                                | —                      | piesardzību    | 8      |
+| `xkiro`               | atkārtojas            | ~ 15M                                | —                      | piesardzību    | 9      |
+| `bazaarlink`          | atkārtojas            | ~ 1.4M                               | —                      | piesardzību    | 1      |
+| `openrouter`          | atkārtojas            | ~ 1.2M                               | —                      | piesardzību    | 1      |
+| `cohere`              | atkārtojas            | ~ 800K                               | —                      | piesardzību    | 6      |
+| `sambanova`           | atkārtojas            | ~ 480K                               | —                      | piesardzību    | 2      |
+| `morph`               | atkārtojas            | ~ 160K                               | —                      | labi           | 2      |
+| `glm-cn`              | bez vāciņa            | bez vāciņa\*                         | 20 miljoni             | labi           | 4      |
+| `agnes`               | bez vāciņa            | bez vāciņa\*                         | —                      | labi           | 3      |
+| `agnes-cn`            | bez vāciņa            | bez vāciņa\*                         | —                      | labi           | 3      |
+| `aion`                | bez vāciņa            | bez vāciņa\*                         | —                      | labi           | 4      |
+| `baidu`               | bez vāciņa            | bez vāciņa\*                         | —                      | piesardzību    | 1      |
+| `gemini`              | bez vāciņa            | bez vāciņa\*                         | —                      | piesardzību    | 4      |
+| `glm`                 | bez vāciņa            | bez vāciņa\*                         | —                      | labi           | 2      |
+| `kilo-gateway`        | bez vāciņa            | bez vāciņa\*                         | —                      | piesardzību    | 12     |
+| `nvidia`              | bez vāciņa            | bez vāciņa\*                         | —                      | piesardzību    | 3      |
+| `onomeo`              | bez vāciņa            | bez vāciņa\*                         | —                      | piesardzību    | 2      |
+| `requesty`            | bez vāciņa            | bez vāciņa\*                         | —                      | piesardzību    | 2      |
+| `sealion`             | bez vāciņa            | bez vāciņa\*                         | —                      | labi           | 5      |
+| `tokenharbor`         | bez vāciņa            | bez vāciņa\*                         | —                      | piesardzību    | 2      |
+| `coze`                | atkārtojas            | nav skaitīts (`avoid`)               | —                      | izvairīties    | 1      |
+| `inference-net`       | atkārtojas            | nav ieskaitīts                       | —                      | piesardzību    | 3      |
+| `kiro`                | atkārtojas            | nav skaitīts (`avoid`)               | —                      | izvairīties    | 7      |
+| `modelscope`          | atkārtojas            | aiz reģionālās identitātes pārbaudes | —                      | piesardzību    | 2      |
+| `nlpcloud`            | atkārtojas            | nav skaitīts (`avoid`)               | —                      | izvairīties    | 1      |
+| `reka`                | atkārtojas            | nav ieskaitīts                       | —                      | piesardzību    | 2      |
+| `t3-web`              | atkārtojas            | nav skaitīts (`avoid`)               | —                      | izvairīties    | 23     |
+| `bytez`               | kredīts (rek.)        | —                                    | —                      | neviennozīmīgi | 1      |
+| `doubao`              | reģistrācijas kredīts | —                                    | 15 miljoni             | neviennozīmīgi | 1      |
+| `longcat`             | reģistrācijas kredīts | —                                    | 10 miljoni             | piesardzību    | 1      |
+| `deepseek`            | reģistrācijas kredīts | —                                    | 5 miljoni              | labi           | 2      |
+| `hyperbolic`          | reģistrācijas kredīts | —                                    | 5 miljoni              | labi           | 8      |
+| `nscale`              | reģistrācijas kredīts | —                                    | 5 miljoni              | piesardzību    | 6      |
+| `deepinfra`           | reģistrācijas kredīts | —                                    | 1 miljons              | piesardzību    | 22     |
+| `qoder`               | reģistrācijas kredīts | —                                    | 1 miljons              | piesardzību    | 9      |
+| `scaleway`            | reģistrācijas kredīts | —                                    | 1 miljons              | labi           | 6      |
+| `novita`              | reģistrācijas kredīts | —                                    | 500 tūkst              | piesardzību    | 1      |
+| `agentrouter`         | reģistrācijas kredīts | —                                    | —                      | piesardzību    | 1      |
+| `ai21`                | reģistrācijas kredīts | —                                    | —                      | izvairīties    | 2      |
+| `baichuan`            | reģistrācijas kredīts | —                                    | —                      | neviennozīmīgi | 1      |
+| `cerebras`            | reģistrācijas kredīts | —                                    | —                      | piesardzību    | 2      |
+| `fireworks`           | reģistrācijas kredīts | —                                    | —                      | izvairīties    | 10     |
+| `freemodel-dev`       | reģistrācijas kredīts | —                                    | —                      | nezināms       | 4      |
+| `monsterapi`          | reģistrācijas kredīts | —                                    | —                      | neviennozīmīgi | 1      |
+| `nebius`              | reģistrācijas kredīts | —                                    | —                      | piesardzību    | 1      |
+| `publicai`            | reģistrācijas kredīts | —                                    | —                      | piesardzību    | 3      |
+| `sensenova`           | reģistrācijas kredīts | —                                    | —                      | piesardzību    | 1      |
+| `vertex`              | reģistrācijas kredīts | —                                    | —                      | piesardzību    | 16     |
+| `agy`                 | bez atslēgas          | —                                    | —                      | izvairīties    | 9      |
+| `aihorde`             | bez atslēgas          | —                                    | —                      | labi           | 3      |
+| `blackbox`            | bez atslēgas          | —                                    | —                      | izvairīties    | 6      |
+| `duckduckgo-web`      | bez atslēgas          | —                                    | —                      | izvairīties    | 6      |
+| `friendliai`          | bez atslēgas          | —                                    | —                      | izvairīties    | 2      |
+| `iflytek`             | bez atslēgas          | —                                    | —                      | izvairīties    | 1      |
+| `liquid`              | bez atslēgas          | —                                    | —                      | nezināms       | 1      |
+| `muse-spark-web`      | bez atslēgas          | —                                    | —                      | izvairīties    | 3      |
+| `ovhcloud`            | bez atslēgas          | —                                    | —                      | labi           | 5      |
+| `pollinations`        | bez atslēgas          | —                                    | —                      | piesardzību    | 24     |
+| `sparkdesk`           | bez atslēgas          | —                                    | —                      | piesardzību    | 1      |
+| `uncloseai`           | bez atslēgas          | —                                    | —                      | piesardzību    | 1      |
 
 ---
 

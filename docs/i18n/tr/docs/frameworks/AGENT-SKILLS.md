@@ -13,12 +13,12 @@ Agent Skills; harici agent'lara, MCP istemcilerine ve A2A orkestratörlerine Omn
 
 ## Genel Bakış
 
-Katalogda **45 Agent Skill** bulunur (23 REST API + 21 CLI + 1 yapılandırma iş akışı). Her skill şunlara sahiptir:
+Katalog şunları içerir:** 45 Temsilci Becerisi** (23 REST API + 21 CLI + 1 yapılandırma iş akışı). Her beceri şunları içerir:
 
-- Bir **standart ID** (`omni-auth`, `cli-serve` vb.)
-- YAML frontmatter (`name`, `description`) ve zengin bir markdown gövdesi içeren `skills/{id}/SKILL.md` konumundaki bir **SKILL.md** dosyası
-- OpenAPI spesifikasyonundan ve CLI kayıt defterinden türetilen **REST endpoint'leri** (API skill'leri) veya **CLI alt komutları** (CLI skill'leri)
-- Canlı erişim için bir **GitHub ham içerik URL'si**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanonik ID** (`omni-auth`, `cli-serve`, vb.)
+- A**SKILL.md** YAML ön maddesi (`name`, `description`) ile `skills/{id}/SKILL.md` dosya + zengin işaretleme gövdesi
+- **REST uç noktaları** (API becerileri) veya**CLI alt komutları** (CLI becerileri) OpenAPI spesifikasyonundan ve CLI kayıt defterinden türetilmiştir
+- A**GitHub ham URL** canlı getirme için: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Oluşturucu yanıtı bir `GeneratorReport` nesnesidir:
 
 ---
 
-## Kapsam API'si
+## Kapsama API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

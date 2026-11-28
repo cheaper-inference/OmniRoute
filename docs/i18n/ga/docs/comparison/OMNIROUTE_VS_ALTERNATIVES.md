@@ -11,14 +11,14 @@ Comparáid oibiachtúil gné vs ródairí foinse oscailte AI coitianta.
 | Gné                                                         |                OmniRoute 3.8                 |      LiteLLM 1.x       | OpenRouter (SaaS) |   Portkey   |
 | ----------------------------------------------------------- | :------------------------------------------: | :--------------------: | :---------------: | :---------: |
 | **Soláthraithe**                                            |                   **329**                    |          ~100          |        ~50        |     ~30     |
-| **iontrálacha catalóg Free/no-auth**                        |                   **155**                    |          n/a           |    pasbhealach    |     n/a     |
+| **Soláthraithe le rochtain saor in aisce**                  |       **50 le rochtain saor in aisce**       |          n/a           |     pasfhocal     |     n/a     |
 | **Féin-óstach**                                             |                      ✅                      |           ✅           |        ❌         |  ⚠ íoctha   |
 | **iontrálacha catalóg OAuth**                               |                    **23**                    |       páirteach        |        ❌         |     ❌      |
 | **Comhcheangail uathoibríoch-fallback**                     |               **22 straitéis**               | bunaithe ar thosaíocht |  sraithbhunaithe  |  ualaithe   |
 | **Comhleá (sintéis breitheamh painéal comhthreomhar + )**   |                      ✅                      |           ❌           |        ❌         |     ❌      |
 | **Tier 1/2/3 fallback (síntiús → cheap → saor in aisce)**   |                   ✅ + UI                    |      lámhleabhar       |        n/a        | lámhleabhar |
 | **Comhbhrú comhartha**                                      | Stack 12-inneall (RTK + Caveman + LLMLingua) |       aon cheann       |    aon cheann     | aon cheann  |
-| **Giniúint ilmhódach (speech/music/video)**                 |                      ✅                      |           ❌           |    pasbhealach    |     ❌      |
+| **Giniúint ilmhódach (speech/music/video)**                 |                      ✅                      |           ❌           |     pasfhocal     |     ❌      |
 | **Freastalaí MCP ionsuite**                                 |           ✅ 110 uirlisí, 33 scóip           |           ❌           |        ❌         |     ❌      |
 | **prótacal A2A**                                            |                ✅ 6 scileanna                |           ❌           |        ❌         |     ❌      |
 | **Cuimhne (veicteora FTS5 + )**                             |                      ✅                      |           ❌           |        ❌         |     ❌      |
@@ -38,10 +38,10 @@ Comparáid oibiachtúil gné vs ródairí foinse oscailte AI coitianta.
 
 ## Nuair a roghnú OmniRoute
 
-- Tá tú féin-óstach agus ba mhaith leat** clúdach soláthraí uasta** (394 soláthraí, 155 iontráil free/no-auth )
+- Tá tú féin-óstach agus ba mhaith leat** clúdach soláthraí uasta** (394 soláthraí, 50 le rochtain saor in aisce)
 - Ní mór duit a** freastalaí MCP ionsuite** ( uirlisí LLM, cuimhne, scileanna nochta mar uirlisí)
 - Ní mór duit** prótacal A2A** le haghaidh sreafaí oibre gníomhaire-go-ghníomhaire
-- Ba mhaith leat** stealth méarloirg** (JA3/JA4) chun braite a sheachaint ag CAPTCHAs in aghaidh an tsrutha
+- Ba mhaith leat** stealth méarloirg** (JA3/JA4) chun braite trí CAPTCHAs in aghaidh an tsrutha a sheachaint
 - Ní mór duit** gnéithe fiontair** (ráillí cosanta, evals, rian iniúchta) gan bille SaaS
 
 ## Cathain LiteLLM a roghnú
@@ -56,12 +56,12 @@ Comparáid oibiachtúil gné vs ródairí foinse oscailte AI coitianta.
 - Níl aon fhadhb agat íoc de réir comhartha ar bhreisiú praghais SaaS
 - Teastaíonn **modh íocaíochta aonair** uait thar gach soláthraí
 
-## Cathain Portkey a roghnú
+## Nuair a roghnaíonn tú Portkey
 
-- Teastaíonn **SLA tráchtála** uait le ráthaíochtaí aga fónaimh
-- Is fearr leat **deais bhainistithe** gan forchostas oibríochtaí
-- Teastaíonn **gnéithe comhlíontachta fiontair** réamhshocraithe uait
+- Ní mór duit a** SLA tráchtála** le ráthaíochtaí Aga fónaimh
+- Is fearr leat a** painéal bainistíochta** gan comharchumainn lastuas
+- Ní mór duit** comhlíonadh fiontair** gnéithe amach as an mbosca
 
 ---
 
-_Nuashonrú deireanach: 2026-08-02. Cuir ceartúcháin isteach trí PR chun an tábla seo a choinneáil cruinn._
+_Cuir isteach ceartúcháin trí PR chun an tábla seo a choinneáil cruinn._

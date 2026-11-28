@@ -4,30 +4,13 @@
 
 ---
 
-> **Sors awtorevoli:** `src/lib/memory/` u `src/app/api/memory/`
-> **Aġġornat l-aħħar:** 2026-06-28 — v3.8.40 (diżattivat b’mod awtomatiku + aġġornament tal-kwantizzazzjoni int8)
+> **Sors tal-verità:** `src/lib/memory/` u `src/app/api/memory/`
 
-OmniRoute jipprovdi memorja persistenti tal-konverżazzjonijiet identifikata permezz tal-API key (u
-b’mod fakultattiv permezz tal-ID tas-sessjoni). Il-memorji jiġu estratti awtomatikament mit-tweġibiet tal-LLM
-permezz ta’ tqabbil ħafif ta’ mudelli regex u jerġgħu jiddaħħlu fit-talbiet
-sussegwenti bħala messaġġ tas-sistema fil-bidu (jew bħala l-ewwel messaġġ tal-utent għall-fornituri li
-jirrifjutaw ir-rwol tas-sistema).
+OmniRoute jipprovdi memorja ta' konversazzjoni persistenti immarkata b'ċavetta API (u b'għażla id-sessjoni). Il-memorji huma estratti awtomatikament minn tweġibiet LLM permezz ta 'tqabbil tal-mudell regex ħafif u injettati lura f'talbiet sussegwenti bħala messaġġ ewlieni tas-sistema (jew l-ewwel messaġġ tal-utent għal fornituri li jirrifjutaw ir-rwol tas-sistema).
 
-> **Il-memorja hija DIŻATTIVATA b’mod awtomatiku (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> issa huwa `false` (`src/lib/memory/settings.ts`). L-attivazzjoni tal-memorja ddaħħal sa
-> `maxTokens` (~2k) ta’ kuntest irkuprat f’**kull** talba taċ-chat, li
-> tiġi ċċarġjata — spiża mhux mistennija għal installazzjonijiet ġodda u għal klijenti li jimmaniġġjaw
-> il-kuntest tagħhom stess. Agħżel li tattivaha b’mod espliċitu taħt **Settings → Memory** (it-tab
-> `MemorySkillsTab` turi avviż dwar l-ispiża tat-tokens meta l-memorja tkun attivata).
-> Klijent jista’ jagħżel li jeskludi talba waħda permezz tal-header tat-talba
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — ara t-tabella tal-headers tat-talbiet f’
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Talba mingħajr memorja tissettja
-> `memoryOwnerId = null`, u dan jiddiżattiva **kemm** l-injezzjoni tal-memorja **kif ukoll** dik tal-ħiliet għal
-> dik it-talba (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Il-memorja hija OFF awtomatikament (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` issa huwa `false` (`src/lib/memory/settings.ts`). L-abilitazzjoni tal-memorja tinjetta sa `maxTokens` (~ 2k) ta' kuntest irkuprat f'** kull** talba taċ-chat, li hija fatturata — spiża sorprendenti għal installazzjonijiet ġodda u għal klijenti li jimmaniġġjaw il-kuntest tagħhom stess. Opt in espliċitament taħt** Settings → Memorja** (iż- `MemorySkillsTab` juri callout ta’ twissija ta’ token-cost meta l-memorja tkun attivata). Klijent jista' jagħżel talba waħda bl-header tar-rikjesta `x-omniroute-no-memory` (`true`/`1`/`yes`) — ara t-tabella tal-intestaturi tar-rikjesta [API_REFERENCE.md](../reference/API_REFERENCE.md). Talba mingħajr memorja tistabbilixxi `memoryOwnerId = null`, li tiddiżattiva** it-tnejn** memorja u injezzjoni tal-ħiliet għal dik it-talba (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Il-memorja hija **limitata għal kull API key**, mhux għal kull utent — kull talba awtentikata
-bl-istess API key taqsam l-istess ġabra ta’ memorji, b’possibbiltà fakultattiva ta’
-limitazzjoni ulterjuri permezz ta’ `sessionId`.
+Memorja hija** scoped per API key** , mhux għal kull utent — kull talba awtentikata bl-istess ċavetta API taqsam l-istess pool tal-memorja, b'skoping ulterjuri fakultattiv minn `sessionId`.
 
 ## Arkitettura
 
@@ -342,25 +325,15 @@ u l-ambitu huwa wieħed minn `session`, `apiKey`, jew `global`. L-ambitu predefi
 
 ## Estrazzjoni tal-Fatti (`extraction.ts`)
 
-L-estrazzjoni hija **bbażata fuq regex**, mhux fuq LLM — titħaddem fil-proċess permezz ta'
-`setImmediate()` sabiex qatt ma timblokka l-fluss tar-rispons:
+Estrazzjoni hija** ibbażat fuq regex** , mhux — bbażata fuq LLM taħdem fil-proċess ma `setImmediate()` u għalhekk qatt ma timblokka l-fluss tar-rispons:
 
-- **Mudelli ta' preferenza** → `MemoryType.FACTUAL`
-  (eż. `Nippreferi …`, `Jogħġobni ħafna …`, `il-favorit tiegħi huwa …`, `Nobgħod …`)
-- **Mudelli ta' deċiżjoni** → `MemoryType.EPISODIC`
-  (eż. `Se nuża …`, `Għażilt …`, `Iddeċidejt fuq …`, `Se nadotta …`)
-- **Mudelli ta' drawwiet** → `MemoryType.FACTUAL`
-  (eż. `Normalment jien …`, `Jien dejjem …`, `Għandi t-tendenza li …`)
+- **Mudelli ta' preferenza** → `MemoryType.FACTUAL` (eż. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Mudelli ta' deċiżjoni** → `MemoryType.EPISODIC` (eż. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Mudelli tal-mudell** → `MemoryType.FACTUAL` (eż. `I usually …`, `I always …`, `I tend to …`)
 
-Kull tqabbil jiġi ssanitizzat (`trim`, tnaqqis tal-ispazji bojod, limitat għal 500 karattru),
-deduplikat fil-lott permezz ta' `factKey(category, content)` stabbli, u
-maħżun permezz ta' `createMemory()` bil-metadata
-`{category, extractedAt, source: "llm_response"}`. It-test tal-input huwa limitat għal
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — meta jkun itwal, tintuża l-**parti finali** tat-test
-sabiex l-aktar kontenut reċenti tal-assistent dejjem jiġi inkluż.
+Kull taqbila hija sanitizzata (`trim`, whitespace-collapse, limitata għal 500 chars), deduplikata fil-lott permezz ta' `factKey(category, content)` stabbli, u maħżuna permezz `createMemory()` b'metadata `{category, extractedAt, source: "llm_response"}`. It-test tad-dħul huwa limitat għal 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — meta jkun itwal, il-** denb** tat-test jintuża sabiex l-aktar kontenut reċenti tal-assistent dejjem jipparteċipa.
 
-`extractFactsFromText(text)` hija esportata għat-testijiet u tirritorna l-fatti strutturati
-mingħajr ma taħżinhom.
+`extractFactsFromText(text)` jiġi esportat għat-testijiet u jirritorna l-fatti strutturati mingħajr ma jaħżenhom.
 
 ## Irkupru (`retrieval.ts`)
 
@@ -717,22 +690,22 @@ Test ta' prestazzjoni fuq server x86 tipiku b'4 cores (testi ta' madwar 100 toke
 
 ---
 
-## Mudelli għall-Estrazzjoni tal-Fatti (v3.8.16+)
+## Mudelli ta' Estrazzjoni tal-Fatti (v3.8.16 +)
 
-Il-modulu `extraction.ts` (`src/lib/memory/extraction.ts`) juża **tqabbil ta’ mudelli b’espressjonijiet regolari** biex joħroġ fatti strutturati mill-messaġġi tal-konverżazzjonijiet. Il-fehim ta’ dawn il-mudelli jgħinek tirfina l-kwalità tal-estrazzjoni għall-każ tal-użu tiegħek.
+Il-modulu `extraction.ts` (`src/lib/memory/extraction.ts`) juża** tqabbil tal-mudell regex** biex jiġu estratti fatti strutturati minn messaġġi ta’ konversazzjoni. Il-fehim ta 'dawn ix-xejriet jgħinek tixgħel il-kwalità tal-estrazzjoni għall-każ tal-użu tiegħek.
 
-### Kategoriji tal-Mudelli Predefiniti
+### Kategoriji tal-Mudelli Default
 
-| Kategorija          | Eżempju ta’ mudell                                      | X’jaqbad                            |
-| ------------------- | ------------------------------------------------------- | ----------------------------------- |
-| PREFERENCE_PATTERNS | `"Nippreferi <X>"`, `"Jogħġobni <X>"`, `"Nobgħod <X>"`  | Preferenzi tal-utent                |
-| DECISION_PATTERNS   | `"Se nuża <X>"`, `"Iddeċidejt li <X>"`, `"Għażilt <X>"` | Deċiżjonijiet tal-utent (episodiċi) |
-| PATTERN_PATTERNS    | `"Normalment <X>"`, `"Dejjem <X>"`, `"Qatt ma <X>"`     | Mudelli persistenti ta’ mġiba       |
+| Kategorija          | Eżempju tal-mudell                                          | Qbid                                |
+| ------------------- | ----------------------------------------------------------- | ----------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Preferenzi tal-utent                |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Deċiżjonijiet tal-utent (episodiċi) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Mudelli ta' mġieba persistenti      |
 
-### Eżempji ta’ Mudelli (Issimplifikati)
+### Mudelli Eżempji (Simplifikati)
 
 ```ts
-// Minn src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -745,36 +718,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### X’Jiġi Estratt
+### What Gets Estratt
 
 Meta utent jgħid:
 
-> "Nippreferi TypeScript. Se nuża Postgres għal dan il-proġett. Dejjem nagħmel commit qabel ma nagħmel push. Python ma jogħġobnix."
-> L-estrazzjoni tipproduċi 4 memorji:
+> "Nippreferi TypeScript. Ser nuża Postgres għal dan il-proġett. Dejjem nimpenja ruħi qabel nimbotta. Ma nħobbx Python." L-estrazzjoni tipproduċi 4 memorji:
 >
-> | Ċavetta                              | Kategorija | Tip       | Kontenut                       |
-> | ------------------------------------ | ---------- | --------- | ------------------------------ |
-> | `preference:typescript`              | preferenza | fattwali  | "TypeScript"                   |
-> | `decision:postgres_for_this_project` | deċiżjoni  | episodiku | "Postgres għal dan il-proġett" |
-> | `pattern:commit_before_pushing`      | mudell     | fattwali  | "commit qabel push"            |
-> | `preference:python`                  | preferenza | fattwali  | "Python"                       |
+> | Ewlenin | Kategorija | Tip | Kontenut | | ------------------------------------ | ---------- | -------- | -------------------------- | | `preference:typescript` | preference | fattwali | "TypeScript" | | `decision:postgres_for_this_project` | decision | episodic | "Postgres for this project pattern | | factual `pattern:commit_before_pushing` | | | before pushing" | | `preference:python` | preference | | "Python" |
 
-### Limiti tal-Estrazzjoni
+### Limiti ta' Estrazzjoni
 
-Biex tiġi evitata estrazzjoni bla kontroll, japplikaw il-limiti li ġejjin:
+Biex tiġi evitata l-estrazzjoni runaway, japplikaw il-limiti li ġejjin:
 
-| Tul minimu tal-kontenut | 3 karattri |
-| Tul massimu tal-kontenut | 500 karattru |
+| Tul tal-kontenut min | 3 chars |
+| Tul massimu tal-kontenut | 500 karattri |
 
-### Meta Għandek Tiddiżattiva l-Estrazzjoni
+### Meta tiddiżattiva l-estrazzjoni
 
-L-estrazzjoni titħaddem awtomatikament kull meta l-memorja tkun attivata; ma hemm l-ebda
-swiċċ separat għall-estrazzjoni biss. Biex titfiha, iddiżattiva l-memorja kompletament (`enabled: false`
-permezz ta’ `PUT /api/settings/memory`). Ikkunsidra li tagħmel dan meta:
+L-estrazzjoni taħdem awtomatikament kull meta l-memorja tkun attivata; m'hemm l-ebda toggle separat għall-estrazzjoni biss. Biex itfih, iddiżattiva l-memorja għal kollox (`enabled: false` permezz `PUT /api/settings/memory`). Ikkunsidra li tagħmel hekk meta:
 
-- Għandek volum għoli ta’ messaġġi u l-ispiża tal-estrazzjoni mhijiex negliġibbli
-- Il-konverżazzjonijiet tiegħek huma fil-biċċa l-kbira temporanji (chat, debugging) mingħajr valur fit-tul
-- Diġà qed taqbad il-kuntest permezz ta’ plugins personalizzati
+- Għandek volum ta 'messaġġ għoli u l-ispiża tal-estrazzjoni mhix trivjali
+- Il-konversazzjonijiet tiegħek huma l-aktar temporanji (chat, debugging) mingħajr valur fit-tul
+- Diġà qed taqbad il-kuntest permezz ta' plugins personalizzati
 
 ---
 

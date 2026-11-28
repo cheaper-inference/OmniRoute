@@ -51,11 +51,13 @@ MCP服务器公开三种传输，全部由同一个`createMcpServer()`工厂支�
 
 ### 远程访问（管理范围旁路）
 
-`/api/mcp/*`位于LOCAL_ONLY层 (`src/server/authz/routeGuard.ts`) —默认情况下只有环回主机 (`localhost`、 `127.0.0.1`、 `::1`) 可以到达它。从 v3.8.2 开始，如果非环回客户端提供其密钥携带`manage`范围的`Authorization: Bearer <api-key>`则它们可以连接。这是通过隧道、反向代理或公共主机名到达远程MCP服务器的唯一方法。
+`/api/mcp/*`位于LOCAL_ONLY层 (`src/server/authz/routeGuard.ts`)。路由防护可识别环回和受信任的专用 LAN 对等体。当启用配置的`/api/mcp/`旁路并提供带有`mcp:connect`、 `manage`或`admin` `Authorization: Bearer <api-key>`时，其他客户端可以到达传输。经过身份验证的仪表板会话也可以满足此绕过要求。
+
+对于仅使用 MCP 的远程客户端，授予`mcp:connect`及其所需工具的范围；例如， `mcp:connect`和`read:health`允许连接和调用`omniroute_get_health`。连接范围本身并不授权工具操作。对于没有`manage`或`admin` HTTP/SSE键，工具范围检查是强制性的，无论`OMNIROUTE_MCP_ENFORCE_SCOPES`如何。
 
 ```bash
-# Grant manage scope: open the dashboard API Keys page and toggle
-# "Management Access" on the key, or POST scopes:["manage"] when creating.
+# Create an OmniRoute key with mcp:connect and the required tool scopes.
+# A key with manage or admin also passes the remote route gate.
 
 # Then connect from a remote MCP client:
 curl -i \
@@ -67,7 +69,7 @@ curl -i \
   https://your-public-host.example/api/mcp/stream
 ```
 
-非管理密钥（或无承载）返回`403 LOCAL_ONLY`。同级前缀`/api/cli-tools/runtime/*`是有意NOT可绕过的—请参阅[Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) 。
+无法满足启用的旁路的外部客户端返回`403 LOCAL_ONLY`。禁用`localOnlyManageScopeBypassEnabled`或删除`/api/mcp/`前缀会禁用该外部路由访问，即使对于管理密钥也是如此。同级前缀`/api/cli-tools/runtime/*`故意不可绕过—请参阅[Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) 。
 
 ### 原产地验证
 
@@ -307,7 +309,7 @@ API密钥上的`manage` 、 MCP工具上的`read:compression`和`oma_live_…`�
 
 #### 匹配
 
-目录是[MCP工具范围](#mcp-tool-scopes)下的表格。不要将`src/shared/constants/mcpScopes.ts`中的`MCP_SCOPE_LIST`视为该目录：它是原始类型化子集。后来的工具在它旁边声明了更多范围（`read:notion`、 `read:skills`、 `read:local-corpus`和表的其余部分）。
+目录是[MCP工具范围](#mcp-tool-scopes)下的表。不要将`src/shared/constants/mcpScopes.ts`中的`MCP_SCOPE_LIST`视为该目录：它是原始类型化子集。后来的工具在它旁边声明了更多范围（`read:notion`、 `read:skills`、 `read:local-corpus`和表的其余部分）。
 
 `open-sse/mcp-server/scopeEnforcement.ts`中的`evaluateToolScopes`允许在每个所需范围与某个授予范围匹配时进行调用：
 
@@ -317,7 +319,7 @@ API密钥上的`manage` 、 MCP工具上的`read:compression`和`oma_live_…`�
 
 对于`read:compression`，范围为`["manage"]`的键无法使用`scopeMatches` 。当`admin`、 `mcp:connect`、 `read`和`write`是唯一授予的字符串时，相同的调用会失败。除了尾随`*`之外， MCP工具范围之间没有层次结构。
 
-除非`OMNIROUTE_MCP_ENFORCE_SCOPES=true` （默认`false`），否则强制执行。当它关闭时， `evaluateToolScopes`允许调用并跳过目录。当它打开时， HTTP使用承载密钥的`api_keys.scopes`作为`authInfo` （请参阅[每密钥HTTP范围绑定](#per-key-http-scope-binding-7895)）。当没有关键范围解析时，授予的集合会落入MCP `_meta` （仅适用于HTTP身份验证上下文中的HTTP/SSE调用者；stdio 调用者的`_meta`会被忽略，因为客户端控制它并且它不携带每个调用者身份），然后是`OMNIROUTE_MCP_SCOPES`。
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true`启用全局强制（默认`false`）。每当HTTP/SSE从`authInfo`解析密钥的范围并且密钥缺少`manage`或`admin`时（包括通过环回发出的请求），强制执行也是强制性的。在其余流程中，全局标志控制`evaluateToolScopes`是否检查目录。 HTTP/SSE将承载密钥的`api_keys.scopes`绑定到`authInfo` ，与该标志无关（请参阅[每密钥HTTP范围绑定](#per-key-http-scope-binding-7895)）。当没有关键范围解析时，授予的集合将传递到MCP `_meta` （仅适用于HTTP身份验证上下文中的HTTP/SSE调用者；stdio 调用者的`_meta`被忽略，因为客户端控制它并且它不携带每个调用者身份），然后是`OMNIROUTE_MCP_SCOPES`。
 
 #### 访问令牌范围
 
@@ -377,33 +379,33 @@ API密钥上的`manage` 、 MCP工具上的`read:compression`和`oma_live_…`�
 
 支持通配符范围： `read:*`授予所有读取范围， `*`授予完全访问权限。
 
-### `mcp:connect` —窄路能力 (#7895)
+### `mcp:connect` —窄航路能力 (#7895)
 
-从非环回到达HTTP/SSE MCP传输 (`/api/mcp/*`) 需要`/api/mcp/` LOCAL_ONLY剥离（请参阅`docs/security/ROUTE_GUARD_TIERS.md`）。从历史上看，剥离只接受完整的`manage`/`admin` -scope API密钥—对于只需要谈论MCP调用者来说太宽泛了。 `src/shared/constants/managementScopes.ts`现在导出`MCP_CONNECT_SCOPE = "mcp:connect"`：一个附加的窄范围（与`SELF_USAGE_SCOPE`相同的先例），授权ONLY `src/server/authz/policies/management.ts` —中的`/api/mcp/`旁路，它不授予其他管理路由访问权限，并故意保留OUT或`MANAGEMENT_API_KEY_SCOPES`。持有`manage`/`admin`密钥仍然通过剥离不变； `mcp:connect`是远程仅 MCP 调用者的低权限替代方案，通过`hasMcpConnectOrManageScope()`检查。
+从外部环回或可信LAN到达HTTP/SSE MCP传输 (`/api/mcp/*`) 需要`/api/mcp/` LOCAL_ONLY剥离（请参阅`docs/security/ROUTE_GUARD_TIERS.md`）。从历史上看，剥离只接受完整的`manage`/`admin` -scope API密钥—对于只需要谈论MCP调用者来说太宽泛了。 `src/shared/constants/managementScopes.ts`现在导出`MCP_CONNECT_SCOPE = "mcp:connect"`：一个附加的窄范围（与`SELF_USAGE_SCOPE`相同的先例），授权ONLY在`src/server/authz/policies/management.ts`中绕过`/api/mcp/` —它不授予其他管理路由访问权限，并故意保留OUT或`MANAGEMENT_API_KEY_SCOPES`。持有`manage`/`admin`密钥仍然通过剥离不变； `mcp:connect`是远程仅 MCP 调用者的低权限替代方案，通过`hasMcpConnectOrManageScope()`检查。
 
 ### 每键HTTP范围绑定 (#7895)
 
-通过HTTP/SSE， `open-sse/mcp-server/httpTransport.ts`现在通过`resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) 解析调用者的真实`api_keys.scopes`并将其传递给MCP SDK的`transport.handleRequest(req, { authInfo })`，因此`extra.authInfo.scopes`到达每个工具调用都反映了 Bearer key 自己的范围。 `scopeEnforcement.ts`的`resolveCallerScopeContext()`已经将`authInfo`优先于`_meta`和`OMNIROUTE_MCP_SCOPES` env 后备—这仅填充第一个、最高优先级的源，该源之前未通过HTTP提供。当没有API密钥解析时（无标头、无效密钥）， `authInfo`保持`undefined`状态，并且解析会继续到现有的`meta`/env 链不变。 stdio 没有每个调用者的身份（请参阅`mcpCallerIdentity.ts`），并且不受每个密钥绑定—影响，它会跳过`_meta`步骤（`_meta`仅在HTTP身份验证上下文中受到尊重，#15159）并仅从`OMNIROUTE_MCP_SCOPES` env 密钥解析。
+通过HTTP/SSE， `open-sse/mcp-server/httpTransport.ts`现在通过`resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) 解析调用者的真实`api_keys.scopes`并将其传递给MCP SDK的`transport.handleRequest(req, { authInfo })`，因此`extra.authInfo.scopes`到达每个工具调用都反映了 Bearer key 自己的范围。 `scopeEnforcement.ts`的`resolveCallerScopeContext()`已经将`authInfo`优先于`_meta`和`OMNIROUTE_MCP_SCOPES` env 后备—这仅填充第一个、最高优先级的源，该源之前未通过HTTP提供。当没有API密钥解析时（无标头、无效密钥）， `authInfo`保持`undefined`状态，并且解析会落入现有的`meta`/env 链不变。 stdio 没有每个调用者的身份（请参阅`mcpCallerIdentity.ts`），并且不受每个密钥绑定—影响，它会跳过`_meta`步骤（`_meta`仅在HTTP身份验证上下文中得到尊重， #15159）并单独从`OMNIROUTE_MCP_SCOPES` env 密钥解析。
 
-**Enforcement is forced on for narrow-scoped HTTP/SSE callers regardless of `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` defaulting to `false` is only safe for the local/stdio single-operator flow, where there is no per-caller identity to scope against. `open-sse/mcp-server/server.ts::withScopeEnforcement()` turns per-tool scope enforcement on unconditionally (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) whenever `resolveCallerScopeContext()` resolved `source === "authInfo"` (i.e. a real per-key HTTP Authorization header, HTTP/SSE-only) AND that key does not hold full `manage`/`admin` scope. This closes the gap where a key holding ONLY the narrow `mcp:connect` bypass scope — documented above as authorizing nothing but the `/api/mcp/` LOCAL_ONLY carve-out — could otherwise invoke every MCP tool once an operator enabled remote/non-loopback MCP access, simply because `OMNIROUTE_MCP_ENFORCE_SCOPES` ships `false` by default. A full `manage`/`admin` key over HTTP, and every stdio/local caller, keep the existing `OMNIROUTE_MCP_ENFORCE_SCOPES`-gated behavior unchanged.
+**无论`OMNIROUTE_MCP_ENFORCE_SCOPES`为何，都会对范围狭窄的HTTP/SSE调用者强制执行。**每当`resolveCallerScopeContext()`解析`source === "authInfo"` （即真正的每键HTTP授权头HTTP/SSE-only） AND该键不包含完整的`manage`/`admin`范围时， `open-sse/mcp-server/server.ts::withScopeEnforcement()`无条件地打开每个工具范围强制（ `scopeEnforcement.ts`中的`shouldForceScopeEnforcement()` ）。这弥补了上面记录的持有ONLY密钥和狭窄的`mcp:connect`绕过范围—的差距，因为除了`/api/mcp/` LOCAL_ONLY剥离—之外什么都不授权，一旦操作员启用了remote/non-loopback MCP访问，就可以调用每个MCP工具，因为`OMNIROUTE_MCP_ENFORCE_SCOPES`默认情况下附带`false` 。 HTTP上的`manage`/`admin`键、stdio 调用者和HTTP流没有每个键`authInfo`保留全局标志的行为。本地主机不会免除具有狭窄密钥范围的HTTP调用者的强制检查。
 
 ---
 
 ## 环境变量
 
-| 多变的                                  | 默认                       | 目的                                                                                                                                                                                                                                                                                                                             |
-| :-------------------------------------- | :------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`   | MCP服务器调用OmniRoute内部APIs时使用的基础URL                                                                                                                                                                                                                                                                                    |
-| `OMNIROUTE_API_KEY`                     | （空的）                   | API密钥作为`Authorization: Bearer`转发到内部API调用                                                                                                                                                                                                                                                                              |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` （仅`"true"`启用） | 启用后，缺失范围会拒绝工具调用并将`scope_denied:<reason>`记录在审核日志中。对于从缺乏完整`manage`/`admin`范围—的每键授权标头 (`source === "authInfo"`) 解析的任何HTTP/SSE调用者，无论此标志如何，强制执行ALSO例如仅保留窄`mcp:connect`旁路范围—键，因此此默认值仅对于local/stdio单操作符流是安全的，对于远程非环回访问永远不安全 |
-| `OMNIROUTE_MCP_SCOPES`                  | （空的）                   | 默认情况下被视为“可用”的范围的逗号分隔白名单（当调用者不提供自己的范围时使用）                                                                                                                                                                                                                                                   |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | （取消=开启）              | 当设置为`0/false/off/no`，在注册时禁用MCP描述压缩                                                                                                                                                                                                                                                                                |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | （取消=开启）              | 与上面相同的切换的备用别名                                                                                                                                                                                                                                                                                                       |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                    | 中止内部管理读取预算（健康、弹性、组合、配额、使用）                                                                                                                                                                                                                                                                             |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                    | 中止等待提供者的跃点的预算（`route_request`、 `web_search`、 `web_fetch`）                                                                                                                                                                                                                                                       |
-| `MCP_TOOL_DENY`                         | （取消设置=无过滤器）      | 从`tools/list`中删除的以逗号分隔的工具名称（工具基数缩减—见下文）                                                                                                                                                                                                                                                                |
-| `MCP_TOOL_ALLOW`                        | （取消设置=无过滤器）      | 以逗号分隔的工具名称以独占方式保留（允许列表模式—见下文）                                                                                                                                                                                                                                                                        |
-| `DATA_DIR`                              | `~/.omniroute`             | 心跳文件写入`${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                                                                                                                                                                             |
+| 多变的                                  | 默认                       | 目的                                                                                                                                                                    |
+| :-------------------------------------- | :------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`   | MCP服务器调用OmniRoute内部APIs时使用的基础URL                                                                                                                           |
+| `OMNIROUTE_API_KEY`                     | （空的）                   | API密钥作为`Authorization: Bearer`转发到内部API调用                                                                                                                     |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` （仅`"true"`启用） | 启用全局工具范围检查；否认日志`scope_denied:<reason>`。始终对每个键`authInfo`缺少`manage`/`admin`的HTTP/SSE调用者强制执行检查，即使在环回时也是如此。其他流使用此标志。 |
+| `OMNIROUTE_MCP_SCOPES`                  | （空的）                   | 默认情况下被视为“可用”的范围的逗号分隔白名单（当调用者不提供自己的范围时使用）                                                                                          |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | （取消=开启）              | 当设置为`0/false/off/no`，在注册时禁用MCP描述压缩                                                                                                                       |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | （取消=开启）              | 与上面相同的切换的备用别名                                                                                                                                              |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                    | 中止内部管理读取预算（健康、弹性、组合、配额、使用）                                                                                                                    |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                    | 中止等待提供者的跃点的预算（`route_request`、 `web_search`、 `web_fetch`）                                                                                              |
+| `MCP_TOOL_DENY`                         | （取消设置=无过滤器）      | 从`tools/list`中删除的以逗号分隔的工具名称（工具基数缩减—见下文）                                                                                                       |
+| `MCP_TOOL_ALLOW`                        | （取消设置=无过滤器）      | 以逗号分隔的工具名称以独占方式保留（允许列表模式—见下文）                                                                                                               |
+| `DATA_DIR`                              | `~/.omniroute`             | 心跳文件写入`${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                    |
 
 ---
 

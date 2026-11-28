@@ -118,58 +118,48 @@ sahaja tidak membenarkan akses; kelayakan persekitaran sah yang dikenal pasti se
 kekunci mengekalkan sandaran global. Empat alat `obsidian_sync_*` mengekalkan gelagat
 token penyegerakan yang berasingan.
 
-## Alat MCP (22)
+## alat MCP (22)
 
-Ditakrifkan dalam `open-sse/mcp-server/tools/obsidianTools.ts`. Token/URL asas ditentukan
-bagi setiap panggilan (kunci per-API didahulukan, kemudian global). Alat yang mengakses **pelayan penyegerakan**
-OmniRoute (empat alat `obsidian_sync_*`) juga memerlukan token pengesahan penyegerakan yang dikonfigurasikan
-dalam tetapan OmniRoute.
+Ditakrifkan dalam `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL diselesaikan setiap panggilan (per-API-key dahulu, kemudian global). Alat yang memukul OmniRoute** pelayan penyegerakan** (empat alat `obsidian_sync_*` ) juga memerlukan token pengesahan penyegerakan yang dikonfigurasikan dalam tetapan OmniRoute.
 
 ### Alat baca (`read:obsidian`)
 
-| Alat                         | Penerangan                                                                                                  |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Semak sama ada Local REST API boleh dicapai dan telah disahkan.                                             |
-| `obsidian_search_simple`     | Carian teks penuh bagi kandungan nota; mengembalikan petikan berserta laluan fail.                          |
-| `obsidian_search_structured` | Cari menggunakan ungkapan JSON Logic (penapis and/or/regex/path).                                           |
-| `obsidian_read_note`         | Baca nota mengikut laluan relatif peti besi; secara pilihan, tajuk/blok/frontmatter tertentu.               |
-| `obsidian_list_vault`        | Senaraikan fail dan direktori dalam peti besi (pepohon entri).                                              |
-| `obsidian_get_document_map`  | Dapatkan struktur tajuk nota sebagai peta tajuk → nombor baris.                                             |
-| `obsidian_get_note_metadata` | Dapatkan frontmatter, tag, pautan, kiraan aksara/perkataan tanpa kandungan penuh.                           |
-| `obsidian_get_active_file`   | Dapatkan laluan + kandungan fail yang sedang aktif dalam Obsidian.                                          |
-| `obsidian_get_periodic_note` | Dapatkan nota berkala harian/mingguan/bulanan untuk sesuatu tarikh (hari ini jika tidak dinyatakan).        |
-| `obsidian_get_tags`          | Senaraikan semua tag peti besi berserta kekerapannya.                                                       |
-| `obsidian_list_commands`     | Senaraikan ID perintah Obsidian yang tersedia (gunakan dengan `obsidian_execute_command`).                  |
-| `obsidian_sync_status`       | Status pelayan penyegerakan OmniRoute: berjalan, nama peti besi, port, masa operasi, penyegerakan terakhir. |
-| `obsidian_sync_conflicts`    | Senaraikan konflik penyegerakan yang belum diselesaikan (laluan, laluan konflik, masa dikesan).             |
+| alat                         | Penerangan                                                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `obsidian_check_status`      | Semak sama ada REST API setempat boleh dicapai dan disahkan.                                                 |
+| `obsidian_search_simple`     | Carian teks penuh kandungan nota; mengembalikan coretan dengan laluan fail.                                  |
+| `obsidian_search_structured` | Cari menggunakan ungkapan Logik JSON ( penapis and/or/regex/path ).                                          |
+| `obsidian_read_note`         | Baca nota mengikut laluan relatif bilik kebal; pilihan heading/block/frontmatter. tertentu                   |
+| `obsidian_list_vault`        | Senaraikan fail dan direktori dalam peti besi (pokok entri).                                                 |
+| `obsidian_get_document_map`  | Dapatkan struktur tajuk nota sebagai peta tajuk nombor baris →.                                              |
+| `obsidian_get_note_metadata` | Dapatkan frontmatter, tag, pautan, kiraan char/word tanpa kandungan penuh.                                   |
+| `obsidian_get_active_file`   | Dapatkan laluan + kandungan fail yang sedang aktif dalam Obsidian.                                           |
+| `obsidian_get_periodic_note` | Dapatkan nota berkala daily/weekly/monthly untuk tarikh (hari ini jika ditinggalkan).                        |
+| `obsidian_get_tags`          | Senaraikan semua teg bilik kebal dengan frekuensinya.                                                        |
+| `obsidian_list_commands`     | Senaraikan perintah Obsidian yang tersedia IDs (gunakan dengan `obsidian_execute_command`).                  |
+| `obsidian_sync_status`       | status pelayan penyegerakan OmniRoute : berjalan, nama bilik kebal, port, masa aktif, penyegerakan terakhir. |
+| `obsidian_sync_conflicts`    | Senaraikan konflik penyegerakan yang tidak dapat diselesaikan (laluan, laluan konflik, dikesan-di).          |
 
 ### Alat tulis (`write:obsidian`)
 
-| Alat                             | Penerangan                                                                                            |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Cipta atau tulis ganti nota dengan kandungan Markdown yang diberikan.                                 |
-| `obsidian_append_note`           | Tambahkan kandungan pada nota; secara pilihan pada tajuk/blok tertentu.                               |
-| `obsidian_patch_note`            | Tambah di belakang/tambah di hadapan/ganti secara tepat pada tajuk, blok, atau medan frontmatter.     |
-| `obsidian_delete_note`           | Padam nota secara kekal daripada peti besi.                                                           |
-| `obsidian_move_note`             | Pindahkan atau namakan semula nota dalam peti besi.                                                   |
-| `obsidian_execute_command`       | Jalankan perintah Obsidian mengikut ID perintahnya.                                                   |
-| `obsidian_open_file`             | Buka fail dalam Obsidian (menciptanya jika fail tersebut tidak wujud).                                |
-| `obsidian_sync_trigger`          | Cetuskan penyegerakan peti besi desktop↔mudah alih dua hala dengan segera.                            |
-| `obsidian_sync_resolve_conflict` | Selesaikan konflik penyegerakan: kekalkan `local` (mudah alih), `remote` (desktop), atau `keep-both`. |
+| alat                             | Penerangan                                                                                           |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Buat atau tulis ganti nota dengan kandungan Markdown yang diberikan.                                 |
+| `obsidian_append_note`           | Tambahkan kandungan pada nota; pilihan kepada heading/block. tertentu                                |
+| `obsidian_patch_note`            | Pembedahan append/prepend/replace pada tajuk, blok atau medan frontmatter.                           |
+| `obsidian_delete_note`           | Padamkan nota dari peti besi secara kekal.                                                           |
+| `obsidian_move_note`             | Alihkan atau namakan semula nota dalam bilik kebal.                                                  |
+| `obsidian_execute_command`       | Laksanakan perintah Obsidian dengan perintahnya ID.                                                  |
+| `obsidian_open_file`             | Buka fail dalam Obsidian (menciptanya jika ia tidak wujud).                                          |
+| `obsidian_sync_trigger`          | Cetuskan penyegerakan peti besi mudah alih ↔ desktop dwiarah segera.                                 |
+| `obsidian_sync_resolve_conflict` | Selesaikan konflik penyegerakan: kekalkan `local` (mudah alih), `remote` (desktop) atau `keep-both`. |
 
 > [!NOTE]
-> Sasaran `obsidian_patch_note` menerima `targetType` berupa `heading | block | frontmatter`
-> dan `operation` berupa `append | prepend | replace`, dengan
-> `createTargetIfMissing` sebagai pilihan. Empat alat `obsidian_sync_*` berkomunikasi dengan pelayan penyegerakan
-> setempat (`http://127.0.0.1:27781` secara lalai) dan memerlukan token penyegerakan.
+> sasaran `obsidian_patch_note` menerima `targetType` daripada `heading | block | frontmatter` dan `operation` daripada `append | prepend | replace`, dengan `createTargetIfMissing` pilihan. Empat alat `obsidian_sync_*` bercakap dengan pelayan penyegerakan tempatan (`http://127.0.0.1:27781` secara lalai) dan memerlukan token penyegerakan.
 
 ### Skop
 
-Alat baca memerlukan `read:obsidian`; alat tulis memerlukan `write:obsidian`. Penguatkuasaan
-adalah sama seperti Notion — dikendalikan oleh `withScopeEnforcement()` dalam
-`open-sse/mcp-server/server.ts`, tertakluk pada `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, dengan
-skop yang dibenarkan diperoleh daripada `OMNIROUTE_MCP_SCOPES` atau konteks skop kunci API. Lihat
-[MCP-SERVER.md](./MCP-SERVER.md).
+Alat baca memerlukan `read:obsidian`; alat tulis memerlukan `write:obsidian`. Penguatkuasaan adalah sama dengan Notion — yang dikendalikan oleh `withScopeEnforcement()` dalam `open-sse/mcp-server/server.ts`, berpagar pada `OMNIROUTE_MCP_ENFORCE_SCOPES=true` dan dipaksa hidup untuk pemanggil HTTP/SSE yang kunci API tidak mempunyai `manage`/`admin`, dengan skop yang dibenarkan diperoleh daripada `OMNIROUTE_MCP_SCOPES` atau konteks skop kunci API. Lihat [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Titik akhir
 

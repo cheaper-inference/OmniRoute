@@ -488,25 +488,25 @@ liderlik tablosu verileri son gönderimden bu yana gerçekten değiştiğinde g�
 
 ---
 
-## Token Paylaşımı
+## Jeton Paylaşımı
 
 **Dosya:** `src/lib/gamification/sharing.ts`
 
-### Çift Taraflı Kayıt Sistemi
+### Çift Girişli Defter
 
-Her transfer, `token_ledger` tablosunda iki satır oluşturur:
+Her aktarım `token_ledger` iki satır oluşturur:
 
-| Satır  | `from_key_id` | `to_key_id` | `amount` |
-| ------ | ------------- | ----------- | -------- |
-| Borç   | gönderen      | alıcı       | +tutar   |
-| Alacak | alıcı         | gönderen    | -tutar   |
+| Sıra  | `from_key_id` | `to_key_id` | `amount`  |
+| ----- | ------------- | ----------- | --------- |
+| Borç  | gönderen      | alıcı       | + miktarı |
+| Kredi | alıcı         | gönderen    | -amount   |
 
-Bekleyin — kullanılan kural şöyledir:
+Bekle — kongre şu şekildedir:
 
-| Satır    | `from_key_id` | `to_key_id` | `amount` | Anlam                   |
-| -------- | ------------- | ----------- | -------- | ----------------------- |
-| Gönderim | gönderen      | alıcı       | +tutar   | Gönderenden para çıkışı |
-| Alım     | alıcı         | gönderen    | +tutar   | Alıcıya para girişi     |
+| Sıra      | `from_key_id` | `to_key_id` | `amount`  | Anlam             |
+| --------- | ------------- | ----------- | --------- | ----------------- |
+| Göndermek | gönderen      | alıcı       | + miktarı | Gönderenden çıkış |
+| Almak     | alıcı         | gönderen    | + miktarı | Alıcıya giriş     |
 
 Bakiye şu şekilde hesaplanır:
 
@@ -519,7 +519,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Transfer Akışı
+### Aktarım Akışı
 
 ```typescript
 export async function transferTokens(
@@ -530,19 +530,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Doğrulama**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Tekrarlanabilirlik**: `idempotency_key` değerinin defterde zaten mevcut olup olmadığını kontrol edin.
-   Mevcutsa önbelleğe alınmış sonucu döndürün.
-3. **İşlem** (tek bir SQLite işlemi):
-   a. Gönderenin bakiyesini hesaplayın.
-   b. `balance < amount` ise işlemi iptal edin (yetersiz bakiye).
-   c. Gönderim satırını ekleyin (`from=gönderen,` döndürün.
+1. **Doğrula** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **iktidarsızlık** : `idempotency_key` defterde zaten mevcut olup olmadığını kontrol edin. Evetse, önbelleğe alınmış sonucu döndürün.
+3. **İşlem** (tek SQLite işlemi): a. Gönderenin bakiyesini hesaplayın. B. `balance < amount` ise iptal edin (yetersiz fon). C. Gönderme satırını (`from=sender, to=receiver, amount`) ekleyin. D. Alma satırını (`from=receiver, to=sender, amount`) ekleyin.
+4. **Oran sınırı** : gönderenin aktarım hızını kontrol edin (maks. 10 transfers/min).
+5. **Etkinlik** : XP + rozeti değerlendirmesi için `token_share` oyunlaştırma etkinliği yayınlayın.
+6. `{ success: true, balance: newBalance }` döndür.
 
-### Hız Sınırlama
+### Hız Sınırlaması
 
-- API anahtarı başına dakikada en fazla 10 transfer.
-- Tek bir transferde en fazla 10.000 token.
-- API anahtarı başına günde en fazla 100.000 token transferi.
+- API anahtarı başına dakikada maksimum 10 transfer.
+- Tek transfer başına maksimum 10.000 jeton.
+- API anahtarı başına günde maksimum 100.000 jeton aktarılır.
 
 ---
 

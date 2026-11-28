@@ -13,7 +13,7 @@ Oletusarvoinen palveluntarjoajien välinen käytäntö sallii enintään kolme p
 ## Missä sitä sovelletaan
 
 - **Yhdistelmät** epäonnistua kohteidensa välillä yhdistelmän oman strategian ja asetusten mukaisesti.
-- **Paljas mallitunnus** (ei `provider/` etuliitettä), jota useat aktiiviset palveluntarjoajat palvelevat ilman saman nimen yhdistelmää, lähetetään ensin palveluntarjoajan päättelyvalimiin. Jos tämä yritys epäonnistuu tavalla, jolla käytäntö epäonnistuu, sama pyyntö lähetetään seuraavalle aktiiviselle palveluntarjoajalle, joka palvelee tunnusta. Vastauksessa on `x-omniroute-fallback-attempts`, jossa on ennen vastaajaa yrittäneiden tarjoajien lukumäärä.
+- **Paljas mallitunnus** (ei `provider/` etuliitettä), jota useat aktiiviset palveluntarjoajat palvelevat ilman saman nimen yhdistelmää, lähetetään ensin palveluntarjoajan päätelmävalikoille. Jos tämä yritys epäonnistuu tavalla, jolla käytäntö epäonnistuu, sama pyyntö lähetetään seuraavalle aktiiviselle palveluntarjoajalle, joka palvelee tunnusta. Vastauksessa on `x-omniroute-fallback-attempts`, jossa on ennen vastaajaa yrittäneiden tarjoajien lukumäärä.
   - Jokainen varajäsen on valtuutettu täsmälleen ikään kuin johtopäätös olisi valinnut sen. Kohde, jonka API -näppäin estää tai ei hyväksy, ohitetaan ilman ylävirran puhelua, ja asiakas saa todellisen ylävirran virheen, ei käytäntöjen hylkäämistä kohteelle, jota se ei koskaan nimeänyt.
   - Vain epäonnistunut vastaus siirtyy eteenpäin: mikään ei epäonnistu ensimmäisen suoratoistotavun jälkeen.
   - Varamallin vaihto hätätilanteessa on voimassa vain, kun jokainen pyydetyn mallin toimittaja on epäonnistunut.
@@ -21,3 +21,5 @@ Oletusarvoinen palveluntarjoajien välinen käytäntö sallii enintään kolme p
   - Etuliitettyä tunnusta (`provider/model`) ei koskaan reititetä uudelleen toiselle palveluntarjoajalle.
 
 Piirin tilat ovat `closed`, `open` ja `half_open`. Jäähdytys ajoittaa rajoitetun luotain; onnistunut anturi sulkee piirin ja epäonnistunut anturi avaa sen uudelleen.
+
+Palveluntarjoajan vikasieto tapahtuu yhdyskäytävän sisällä. Katso [Kun OmniRoute itsessään ei ole tavoitettavissa](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) asiakkaan käyttäytymiselle yhdyskäytäväkatkon aikana.

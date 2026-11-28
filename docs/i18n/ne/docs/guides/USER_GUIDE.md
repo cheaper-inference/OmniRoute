@@ -246,33 +246,41 @@ Dashboard → Connect Kiro → AWS Builder ID वा Google/GitHub → ~५० �
 
 ---
 
-## 🎨 कम्बोहरू
+## 🎨 कम्बोस
 
-प्रत्येक कार्डको ह्यान्डल तानेर तपाईंले **Dashboard → Combos** मा कम्बो कार्डहरूको क्रम सीधै परिवर्तन गर्न सक्नुहुन्छ। क्रम SQLite मा भण्डारण हुन्छ र पुनः लोड गर्दा पुनर्स्थापित हुन्छ।
+तपाइँ सिधै कम्बो कार्डहरू पुन: क्रमबद्ध गर्न सक्नुहुन्छ** ड्यासबोर्ड → कम्बोस** प्रत्येक कार्डमा ह्यान्डल तानेर। अर्डर SQLite मा भण्डारण गरिएको छ र पुन: लोडमा पुनर्स्थापित हुन्छ।
 
-### उदाहरण 1: सदस्यता अधिकतम प्रयोग → सस्तो ब्याकअप
+### एक प्रदायक, मोडेल, वा खाता खोज्नुहोस्
+
+कम्बो सिर्जना वा सम्पादनमा, चरण-दर-चरण प्रदायक, मोडेल, खाता, र कम्बो-सन्दर्भ चयनकर्ताहरूले स्थानीय खोज क्षेत्र समावेश गर्दछ। प्रदर्शित नाम, पहिचानकर्ता, प्रदायक उपनाम, वा मोडेल स्रोत द्वारा खोजी गर्नुहोस्, त्यसपछि परिणाममा क्लिक गर्नुहोस् वा तीर कुञ्जीहरू प्रयोग गर्नुहोस् र इन्टर गर्नुहोस्। बहु खोज शब्दहरू सबै मिल्नुपर्छ। खोज हटाउन वा एस्केप थिच्दा चयन गरिएको मान अपरिवर्तित रहन्छ।
+
+स्वचालित खाता विकल्प खोजी गर्दा देखिने रहन्छ। यसको वैकल्पिक खाता प्रतिबन्ध सूचीमा छुट्टै फिल्टर छ: देखिने नतिजा बाहिरका चयन गरिएका खाताहरू चयन गरि रहन्छन्, र गणनामा ती समावेश हुन्छन्। इमेल गोपनीयता सक्रिय हुँदा लुकेका इमेल टुक्राहरू खोज्न मिल्दैन। चरण थप्नुहोस् र सामान्य रूपमा कम्बो बचत गर्नुहोस्; क्वेरी टाइप गर्दा केहि बचत वा परीक्षण गर्दैन।
+
+उही स्थानीय खोज जडान-परीक्षण मोडेलहरू, अनुकूलन CLI पूर्वनिर्धारित र उपनाम मोडेलहरू, र सुरक्षित-प्रोक्सी विकल्पहरूको लागि उपलब्ध छ। अवस्थित बचत, लागू, र परीक्षण कार्यहरू अलग रहन्छन्।
+
+### उदाहरण १: अधिकतम सदस्यता → सस्तो ब्याकअप
 
 ```
 Dashboard → Combos → Create New
 
-नाम: premium-coding
-मोडेलहरू:
-  1. cc/claude-opus-4-7 (प्राथमिक सदस्यता)
-  2. glm/glm-4.7 (सस्तो ब्याकअप, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (सबैभन्दा सस्तो फल्ब्याक, $0.3/1M)
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
 
-CLI मा प्रयोग गर्नुहोस्: premium-coding
+Use in CLI: premium-coding
 ```
 
-### उदाहरण 2: निःशुल्क मात्र (शून्य लागत)
+### उदाहरण २: नि:शुल्क मात्र (शून्य लागत)
 
 ```
-नाम: free-combo
-मोडेलहरू:
-  1. if/kimi-k2.7-code (निःशुल्क पहुँचका रूपमा सूचीकृत; प्रदायकका सीमाहरू लागू हुन सक्छन्)
-  2. kr/qwen3-coder-next (Kiro को निःशुल्क फल्ब्याक)
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
 
-लागत: हाल $0 का रूपमा सूचीकृत; सर्तहरू र उपलब्धता परिवर्तन हुन सक्छन्
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -373,7 +381,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI स्वचालित रूपमा `~/.omniroute/.env` वा `./.env` बाट `.env` लोड गर्छ। कार्य निर्देशिकामा `./.env` कुञ्जीहरूको छोटो अनुमति सूची मात्र सेट गर्न सक्छ (`REQUIRE_API_KEY`, लोकेल, समय क्षेत्र र रङ सेटिङहरू, पोर्टहरू होइन); सबै कुरा `~/.omniroute/.env` मा राख्नुहोस्। [CLI सुरुवात सम्झौताहरू](CLI-LAUNCH-CONTRACTS.md#working-directory-env) हेर्नुहोस्।
+CLI स्वचालित रूपमा `~/.omniroute/.env` वा `./.env` बाट `.env` लोड गर्दछ। कार्य निर्देशिकामा `./.env` कुञ्जीहरूको छोटो अनुमति सूची मात्र सेट गर्न सक्छ (`REQUIRE_API_KEY`, लोकेल, समय क्षेत्र र रङ सेटिङहरू, पोर्टहरू होइन); सबै कुरा `~/.omniroute/.env` मा राख्नुहोस्। [CLI सुरुवात सम्झौताहरू](CLI-LAUNCH-CONTRACTS.md#working-directory-env) हेर्नुहोस्।
 
 ### ट्रे मोड
 
@@ -432,7 +440,7 @@ omniroute autostart disable
 ### VPS तैनाती
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -499,7 +507,7 @@ CLI बाइनरीहरूसँग होस्ट-एकीकृत म�
 
 ### शून्य Linux (xbps-src)
 
-Void Linux प्रयोगकर्ताहरूले `xbps-src` क्रस-कम्पाइलेशन ढाँचा प्रयोग गरेर नेटिभ रूपमा OmniRoute प्याकेज र स्थापना गर्न सक्छन्। यसले आवश्यक `better-sqlite3` नेटिभ बाइन्डिङहरू सहित Node.js स्ट्यान्डअलोन निर्माणलाई स्वचालित बनाउँछ।
+Void Linux प्रयोगकर्ताहरूले `xbps-src` क्रस-कम्पाइलेशन ढाँचा प्रयोग गरेर नेटिभ रूपमा OmniRoute प्याकेज र स्थापना गर्न सक्छन्। यसले Node.js स्ट्यान्डअलोन निर्माणलाई आवश्यक `better-sqlite3` नेटिभ बाइन्डिङहरू सहित स्वचालित बनाउँछ।
 
 <details>
 <summary><b>xbps-src टेम्प्लेट हेर्नुहोस्</b></summary>
@@ -514,8 +522,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -705,7 +713,7 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 नोट:
 
-- OpenRouter र OpenAI/Anthropic-compatible प्रदायकहरू बाट व्यवस्थित छन्** उपलब्ध मोडेलहरू** मात्र। म्यानुअल थप्नुहोस्, आयात गर्नुहोस्, र एउटै उपलब्ध मोडेल सूचीमा सबै भूमि स्वत सिंक गर्नुहोस्, त्यसैले ती प्रदायकहरूको लागि कुनै छुट्टै अनुकूलन मोडेलहरू खण्ड छैन।
+- OpenRouter र OpenAI/Anthropic-compatible प्रदायकहरू बाट व्यवस्थित छन्** उपलब्ध मोडेलहरू** मात्र। एउटै उपलब्ध मोडेल सूचीमा सबै भूमि म्यानुअल थप्नुहोस्, आयात गर्नुहोस्, र स्वत: सिंक गर्नुहोस्, त्यसैले ती प्रदायकहरूको लागि कुनै छुट्टै अनुकूलन मोडेल खण्ड छैन।
 - द** अनुकूलन मोडेलहरू** खण्ड व्यवस्थित उपलब्ध-मोडेल आयातहरू पर्दाफाश नगर्ने प्रदायकहरूको लागि हो।
 
 ### अनुकूलन OpenAI-कम्प्याटिबल प्रदायकहरू
@@ -735,7 +743,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 यी कुञ्जीहरू जडानको `providerSpecificData` मा जान्छन् (उदाहरणका लागि `PUT /api/providers/{id}` मार्फत):
 
-- `toolNameMaxLength` (पूर्णांक, 1–1024) — OpenAI च्याट-ढाँचा मिल्दो जडानहरूको लागि जसको गेटवेले लामो उपकरण नामहरू अस्वीकार गर्दछ। लामो नामहरू छोटो उपनामको रूपमा पठाइन्छ र प्रतिक्रियामा पुनर्स्थापित गरिन्छ। OpenAI, Azure OpenAI, Azure AI फाउन्ड्री, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code पहिले नै कुनै सेटिङ बिना 64 वर्णहरू भन्दा बढी नामहरू छन्। जडान मानले Azure OpenAI / Azure AI फाउन्ड्री पूर्वनिर्धारित (एक कडा गेटवे पछाडि Azure जडान) लाई प्रतिस्थापन गर्दछ र अनुकूल अनुकूल नोडको लागि सीमा सेट गर्दछ; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code ले तिनीहरूको रजिस्ट्री सीमा राख्छ र यसलाई बेवास्ता गर्दछ।
+- `toolNameMaxLength` (पूर्णांक, 1–1024) — OpenAI च्याट-ढाँचा मिल्दो जडानहरूको लागि जसको गेटवेले लामो उपकरण नामहरू अस्वीकार गर्दछ। लामो नामहरू छोटो उपनामको रूपमा पठाइन्छ र प्रतिक्रियामा पुनर्स्थापित गरिन्छ। OpenAI, Azure OpenAI, Azure AI फाउन्ड्री, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code पहिले नै कुनै सेटिङ बिना 64 वर्णहरू भन्दा बढी नामहरू छन्। जडान मानले Azure OpenAI / Azure AI फाउन्ड्री पूर्वनिर्धारित (एक कडा गेटवे पछाडि Azure जडान) लाई प्रतिस्थापन गर्दछ र अनुकूल अनुकूल नोडको लागि सीमा सेट गर्दछ; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code ले आफ्नो रजिस्ट्री सीमा राख्छ र यसलाई बेवास्ता गर्छ।
 - `quotaEndpoint` — गेटवेको quota/credits अन्त्य बिन्दु, ड्यासबोर्ड कोटा स्ट्रिप र कोटा-सचेत मार्गका लागि पढ्नुहोस्। OpenAI- र Anthropic-compatible जडानहरूमा काम गर्दछ; पूर्ण आकार `open-sse/services/usage/openaiCompatible.ts` मा दस्तावेज गरिएको छ।
 
 ```json
@@ -868,9 +876,9 @@ curl http://localhost:20128/api/models/catalog
 | ---------------------------- | ------------------------------------------------------------------------------------------------------ |
 | **पहिले भर्नुहोस्**          | प्राथमिकता क्रममा खाताहरू प्रयोग गर्दछ — प्राथमिक खाताले अनुपलब्ध नभएसम्म सबै अनुरोधहरू ह्यान्डल गर्दछ |
 | **राउन्ड रोबिन**             | कन्फिगर योग्य टाँसिने सीमाको साथ सबै खाताहरू मार्फत चक्र (पूर्वनिर्धारित: प्रति खाता 3 कलहरू)          |
-| **P2C (दुई विकल्पको शक्ति)** | 2 अनियमित खाताहरू र स्वस्थका लागि मार्गहरू छनोट गर्दछ एक — स्वास्थ्य जागरूकताको साथ लोड ब्यालेन्स      |
+| **P2C (दुई विकल्पको शक्ति)** | 2 अनियमित खाताहरू र स्वस्थका लागि मार्गहरू छान्छ एक — स्वास्थ्य जागरूकताको साथ लोड ब्यालेन्स           |
 | **अनियमित**                  | Fisher-Yates shuffle प्रयोग गरी प्रत्येक अनुरोधको लागि अनियमित रूपमा खाता चयन गर्दछ                    |
-| **कम प्रयोग गरिएको**         | सबैभन्दा पुरानो `lastUsedAt` टाइमस्ट्याम्पको साथ खातामा मार्गहरू, ट्राफिक समान रूपमा वितरण गर्दै       |
+| **कम प्रयोग गरिएको**         | सबैभन्दा पुरानो `lastUsedAt` टाइमस्ट्याम्पको साथ खातामा मार्गहरू, यातायात समान रूपमा वितरण गर्दै       |
 | **लागत अनुकूलित**            | सबैभन्दा कम प्राथमिकता मूल्यको साथ खातामा मार्गहरू, सबैभन्दा कम लागत प्रदायकहरूको लागि अनुकूलन         |
 
 **उन्नत कम्बो र स्वत: रणनीतिहरू** (प्रति कम्बो कन्फिगर योग्य वा `auto/*` उपसर्गहरू मार्फत — हेर्नुहोस् [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
@@ -883,8 +891,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` र `cost-optimized`
 - सबै उम्मेद्वारहरूमा`auto` — स्कोर-संचालित
 - `lkgp` (अन्तिम ज्ञात राम्रो प्रदायक) — अन्तिम सफल प्रदायकमा पिन गर्छ, त्यसपछि नियमहरूमा फर्किन्छ।
-- `context-optimized` — सबैभन्दा ठूलो नि: शुल्क सन्दर्भ विन्डोको साथ मोडेल छान्छ
-- `context-relay` — फलो-अप पालोहरूको लागि लामो-सन्दर्भ मोडेलहरू चेन गर्दछ
+- `context-optimized` — ले सबैभन्दा ठूलो ज्ञात सन्दर्भ सञ्झ्यालको साथ मोडेल प्रयास गर्दछ
+- `context-relay` — प्राथमिकता आदेश र कुराकानी अर्को खातामा सर्दा ह्यान्डअफ सारांश
 
 #### बाह्य स्टिकी सत्र हेडर
 
@@ -932,7 +940,7 @@ Chain: production-fallback
 
 #### 1. कोडिङ एजेन्ट कम्बो: Cost/Speed फलब्याकको साथ उच्च-अन्त तर्क
 
-कोडिङ एजेन्टहरूको लागि आदर्श (OpenCode, Claude कोड, Cursor, Cline)। सुरुमा सीमान्त तर्क मोडेलहरूमा मार्गहरू, कोटा थकान वा त्रुटिहरूमा द्रुत कोडिङ मोडेलहरूमा फर्किँदै।
+कोडिङ एजेन्टहरूको लागि आदर्श (OpenCode, Claude कोड, Cursor, Cline)। मार्गहरू सुरुमा सीमान्त तर्क मोडेलहरूमा, कोटा थकान वा त्रुटिहरूमा द्रुत कोडिङ मोडेलहरूमा फर्किँदै।
 
 - **ड्यासबोर्ड** : Combos → नयाँ कम्बो → नाम: `agent-coding` → रणनीति: `Priority`
 - **मोडेलहरू** :
@@ -996,7 +1004,7 @@ OmniRoute पाँच कम्पोनेन्टहरूसँग प्�
    - **अनुरोधहरू बीचको न्यूनतम समय** — अनुरोधहरू बीच मिलिसेकेन्डमा न्यूनतम अन्तर
    - **अधिकतम समवर्ती अनुरोधहरू** — प्रति खाता अधिकतम एक साथ अनुरोधहरू
 
-2. **जडान कूलडाउन** पुन: प्रयास गर्न सकिने विफलताहरू पछि एकल जडानको लागि — प्रति-प्रमाण-प्रकार कन्फिगरेसन:
+2. **जडान कूलडाउन** पुन: प्रयास गर्न मिल्ने विफलता पछि एकल जडानको लागि — प्रति-प्रमाण-प्रकार कन्फिगरेसन:
    - **बेस कूलडाउन** पुन: प्रयास गर्न मिल्ने अपस्ट्रिम विफलताहरूको लागि — पूर्वनिर्धारित कूलडाउन विन्डो
    - **अपस्ट्रीम पुन: प्रयास संकेतहरू प्रयोग गर्नुहोस्** — सम्मान आधिकारिक `Retry-After` वा रिसेट संकेतहरू प्रदान गर्दा
    - **अधिकतम ब्याकअफ चरणहरू** — दोहोरिने विफलताहरूको लागि अधिकतम घातीय ब्याकअफ स्तर
@@ -1004,7 +1012,7 @@ OmniRoute पाँच कम्पोनेन्टहरूसँग प्�
 3. **प्रदायक सर्किट ब्रेकर** — अन्त-देखि-अन्त प्रदायक विफलताहरू ट्र्याक गर्दछ, कन्फिगर गरिएको चेतावनी थ्रेसहोल्डमा अपमानित प्रदायकलाई चिन्ह लगाउँदछ, र कन्फिगर गरिएको विफलता थ्रेसहोल्ड पुगेपछि ब्रेकर खोल्छ:
    - **पतन थ्रेसहोल्ड** — `DEGRADED` प्रविष्ट गर्नु अघि लगातार प्रदायक विफलता
    - **असफलता थ्रेसहोल्ड** — `OPEN` प्रविष्ट गर्नु अघि लगातार प्रदायक विफलता
-   - **टाइमआउट रिसेट गर्नुहोस्** — समय सञ्झ्याल प्रदायक पुन: परीक्षण गर्नु अघि
+   - **टाइमआउट रिसेट गर्नुहोस्** — समय सञ्झ्याल प्रदायकको पुन: परीक्षण गर्नु अघि
    - **CLOSED** (स्वस्थ) — अनुरोधहरू सामान्य रूपमा प्रवाहित हुन्छन्
    - **DEGRADED** — अनुरोधहरू अझै पनि प्रवाह हुन्छन् जबकि उन्नत विफलताहरू ट्र्याक गरिन्छ
    - **OPEN** — प्रदायक बारम्बार विफलता पछि अस्थायी रूपमा अवरुद्ध छ
@@ -1018,7 +1026,7 @@ OmniRoute पाँच कम्पोनेन्टहरूसँग प्�
 
 5. **मूल्य सीमा स्वतः पत्ता लगाउने** — जब अपस्ट्रिम प्रदायकहरूले स्पष्ट प्रतीक्षा विन्डोहरू फर्काउँछन्, ती संकेतहरूले स्थानीय जडान कूलडाउनलाई ओभरराइड गर्दछ जब सेटिङ सक्षम हुन्छ।
 
-**प्रो सुझाव:** प्रयोग गर्नुहोस्** स्वास्थ्य** आउटेज पछि प्रत्यक्ष प्रदायक ब्रेकरहरू निरीक्षण गर्न र रिसेट गर्न पृष्ठ। लचिलोपन पृष्ठले मात्र कन्फिगरेसन परिवर्तन गर्दछ।
+**प्रो टिप:** प्रयोग गर्नुहोस्** स्वास्थ्य** आउटेज पछि प्रत्यक्ष प्रदायक ब्रेकरहरू निरीक्षण गर्न र रिसेट गर्न पृष्ठ। लचिलोपन पृष्ठले मात्र कन्फिगरेसन परिवर्तन गर्दछ।
 
 ---
 
@@ -1178,7 +1186,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **हस्ताक्षर क्यास**        | डुप्लिकेशन क्यास तथ्याङ्कहरू (सक्रिय कुञ्जीहरू, हिट दर)  |
 | **विलम्बता टेलिमेट्री**    | प्रति प्रदायक p50/p95/p99 विलम्बता एकत्रीकरण             |
 
-**प्रो सुझाव:** स्वास्थ्य पृष्ठ प्रत्येक 10 सेकेन्डमा स्वत: रिफ्रेस हुन्छ। कुन प्रदायकहरूले समस्याहरू भोगिरहेका छन् भनेर पहिचान गर्न सर्किट ब्रेकर कार्ड प्रयोग गर्नुहोस्।
+**प्रो टिप:** स्वास्थ्य पृष्ठ प्रत्येक 10 सेकेन्डमा स्वत: रिफ्रेस हुन्छ। कुन प्रदायकहरूले समस्याहरू भोगिरहेका छन् भनेर पहिचान गर्न सर्किट ब्रेकर कार्ड प्रयोग गर्नुहोस्।
 
 ---
 
@@ -1333,32 +1341,34 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ## 💻 आन्तरिक CLI
 
-OmniRoute ले सेटअप, निदान र रनटाइम नियन्त्रणका लागि आन्तरिक CLI (`omniroute …`) उपलब्ध गराउँछ। यो ड्यासबोर्डको **"CLI Tools" पृष्ठभन्दा अलग हो**, जसले तेस्रो-पक्षीय CLI हरू (Claude Code, Cursor, Codex, Cline, …) लाई OmniRoute सँग सञ्चार गर्न सक्ने गरी कन्फिगर गर्छ।
+OmniRoute सेटअप, निदान, र रनटाइम नियन्त्रणको लागि आन्तरिक CLI (`omniroute …`) पठाउँछ। यो हो** ड्यासबोर्डमा "CLI उपकरणहरू" पृष्ठबाट अलग गर्नुहोस्** , जसले तेस्रो-पक्ष CLIs कन्फिगर गर्दछ (Claude Code, Cursor, Codex, Cline, …) ताकि तिनीहरू OmniRoute मा कुरा गर्न सक्छन्।
 
 ```bash
-omniroute setup                    # अन्तरक्रियात्मक विजार्ड (पासवर्ड, प्रदायकहरू, संयोजनहरू)
-omniroute setup --non-interactive  # CI-अनुकूल
-omniroute doctor                   # स्वास्थ्य निदान (डेटा डाइरेक्टरी, DB, प्रदायकहरू, पोर्टहरू)
-omniroute providers available      # समर्थित प्रदायकहरूको सूची
-omniroute providers list           # कन्फिगर गरिएका जडानहरूको सूची
-omniroute providers test <id>      # प्रदायक जडानको प्रत्यक्ष परीक्षण
-omniroute combos list              # संयोजनहरूको सूची
-omniroute combos switch <name>     # पूर्वनिर्धारित संयोजन सेट गर्नुहोस्
-omniroute models                   # उपलब्ध मोडेलहरूको सूची (--json, --search)
-omniroute keys add | list | remove # टर्मिनलबाट API कुञ्जीहरू व्यवस्थापन गर्नुहोस्
-omniroute backup                   # कन्फिगरेसन + DB को स्न्यापसट
-omniroute restore [<timestamp>]    # स्न्यापसटबाट पुनर्स्थापना गर्नुहोस्
-omniroute health                   # विस्तृत स्वास्थ्य जानकारी (ब्रेकरहरू, क्यास, मेमोरी)
-omniroute quota                    # प्रदायक कोटा प्रयोग
-omniroute mcp status               # MCP सर्भरको स्थिति
-omniroute a2a status               # A2A सर्भरको स्थिति
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok टनेलहरू
-omniroute reset-password           # प्रशासकको पासवर्ड रिसेट गर्नुहोस्
-omniroute --mcp                    # stdio मार्फत MCP सर्भर सुरु गर्नुहोस्
-omniroute --port 3000              # आफूले रोजेको पोर्टमा सर्भर सुरु गर्नुहोस्
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-सुझाव: अस्वस्थ प्रदायक जडानहरूबारे चेतावनी प्राप्त गर्न `omniroute doctor --json` लाई आफ्नो निगरानी उपकरणसँग जोड्नुहोस्।
+सुझाव: बिग्रिएको स्थानीय स्थापनामा सचेत गराउनको लागि तपाईंको निगरानी उपकरणसँग `omniroute doctor --json` जोडा गर्नुहोस्। `doctor` प्रदायक जडानहरू परीक्षण गर्दैन; यसको लागि `omniroute providers test <id>` प्रयोग गर्नुहोस्।
 
 ---
 

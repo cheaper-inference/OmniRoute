@@ -18,28 +18,24 @@ app-server URL-ൽ ലഭ്യമായ ഒരു Codex CLI** ആവശ്യ�
 
 ---
 
-## 1. ആർക്കിടെക്ചർ
+## 1. വാസ്തുവിദ്യ
 
 ```
-┌─ OmniRoute ആപ്പ് ────────────────┐        ┌─ codex-app-server സൈഡ്കാർ ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ ശേഷി ടോക്കൺ)                 │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuth സ്വയം കൈകാര്യം ചെയ്യുന്നു │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, സ്വയം പുതുക്കൽ) │
-        │ പങ്കിടുന്നു (compose വോള്യങ്ങൾ)      └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS ശേഷി ടോക്കൺ (രണ്ടും ഇത് മൗണ്ട് ചെയ്യുന്നു)
-  codex-appserver-home    → ~/.codex (ഡാഷ്ബോർഡ് എഴുതുന്ന auth.json,
-                             സൈഡ്കാറിന്റെ codex app-server വായിക്കുന്നു)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- ശേഷി ടോക്കൺ ഉപയോഗിച്ച് സംരക്ഷിച്ചിട്ടുള്ള ആന്തരിക compose നെറ്റ്വർക്കിൽ
-  (`ws://codex-app-server:1456`) **മാത്രമാണ്** സൈഡ്കാർ ലിസൺ ചെയ്യുന്നത്. ഇത്
-  ഹോസ്റ്റിലേക്കോ ഇന്റർനെറ്റിലേക്കോ **ഒരിക്കലും** പബ്ലിഷ് ചെയ്യപ്പെടുന്നില്ല.
-- Codex CLI, `omniroute:base`-ൽ ഉൾപ്പെടുത്തിയിട്ടുണ്ട്; അതിനാൽ സൈഡ്കാർ
-  പ്രവർത്തിപ്പിക്കുമ്പോൾ ഹോസ്റ്റിലോ ഉപയോക്താവിന്റെ മെഷീനിലോ codex ഇൻസ്റ്റാൾ
-  ചെയ്യേണ്ടതില്ല.
+- സൈഡ്കാർ ശ്രദ്ധിക്കുന്നു** മാത്രം** ആന്തരിക കമ്പോസ് നെറ്റ്വർക്കിൽ (`ws://codex-app-server:1456`) ഒരു ശേഷി ടോക്കണിനു പിന്നിൽ. അത്** ഒരിക്കലും** ഹോസ്റ്റിലേക്കോ ഇൻ്റർനെറ്റിലേക്കോ പ്രസിദ്ധീകരിച്ചു.
+- സൈഡ്കാർ `omniroute:cli-no-docker` ഉപയോഗിക്കുന്നു, `runner-cli-no-docker` ടാർഗെറ്റിൽ നിന്ന് നിർമ്മിച്ചതാണ്, അതിൽ Codex CLI ഉൾപ്പെടുന്നു.
 
 ## 2. പ്രവർത്തിപ്പിക്കുക
 

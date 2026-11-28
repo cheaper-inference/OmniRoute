@@ -96,59 +96,30 @@ engedélyezési lehetőséget.
 
 ---
 
-## Az adatszinkronizálás KÜLÖN engedélyezendő — adatvédelmi ígéretünk
+## Az adatszinkronizálás egy SEPARATE opt-in — az adatvédelmi ígéret
 
-A `RADAR_ENABLED` bekapcsolása csak a felhasználói felületet teszi elérhetővé. A hírfolyam
-szinkronizálásához egy második, független engedélyezés szükséges, amelyet a
-`radar_settings.opt_in` tárol (`src/lib/db/radar.ts`, migráció:
-`136_radar_cache_settings.sql`). A `syncRadar()` minden hálózati hívás előtt ellenőrzi
-a jelzőt _és_ az engedélyezési beállítást:
+`RADAR_ENABLED` bekapcsolása csak a UI zárolását oldja fel. A hírcsatorna szinkronizálásához egy második, független engedélyezésre van szükség `radar_settings.opt_in` -ben (`src/lib/db/radar.ts`, migration `136_radar_cache_settings.sql`). `syncRadar()` ellenőrzi a jelzőt _és_ az engedélyezést, mielőtt bármilyen hálózati hívást kezdeményezne:
 
 ```
-Jelző kikapcsolva    → { status: "disabled" }   — nincs hálózati hívás
-Engedélyezés hamis   → { status: "opt_out" }    — nincs hálózati hívás
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Ha mindkettő be van kapcsolva, a szinkronizálás menete a következő:
+Ha mindkettő be van kapcsolva, a szinkronizálási útvonal a következő:
 
-1. `GET <feed base URL>/v1/catalog/latest` az `x-omniroute-radar-schema: 2` fejléccel és egy
-   opcionális `Authorization: Bearer <supporter key>` fejléccel (lásd alább). A kiszolgálók
-   alapértelmezés szerint a külön aláírt v1 átmeneti összetevőt használják, ha a sémafejléc
-   hiányzik, így a régebben telepített kliensek továbbra is kapnak frissítéseket.
-2. Ez csak letöltésre szolgáló alkalmazásfolyamat, de ettől még HTTPS-kérés történik. Az
-   üzemeltetett infrastruktúra megkapja a szokásos kapcsolati metaadatokat, például a forrás
-   IP-címét. Ha támogatói kulcs van beállítva, a szinkronizálás ezt a kulcsot is elküldi a
-   Bearer fejlécben, hogy a szolgáltatás meghatározhassa a jogosultságot. A bizonyítékok fent
-   meghatározott határában azonosított pontos privátkiszolgáló-revíziónál a hírfolyamkérések
-   elszámolása kulcskivonatokat, összesített használati adatokat és az IP-cím naponta változó,
-   csonkolt HMAC-értékét használja a manuális visszaélés-ellenőrzéshez; ezek a táblák sem a
-   kulcsot, sem az IP-címet nem őrzik meg nyers formában. Az infrastruktúra hozzáférési naplói
-   és a titkosított kézbesítési kimenő tár különálló üzemeltetési határokat képeznek.
-3. Az OmniRoute soha nem küld promptokat, válaszokat, beszélgetéseket, szolgáltatói hitelesítő
-   adatokat, modellforgalmat, üzemidőt, késleltetést vagy helyi szolgáltatói konfigurációt a
-   Radar szolgáltatásnak.
-4. A válasz hitelesítése és ellenőrzése után az helyileg gyorsítótárazásra kerül (lásd:
-   [Biztonsági modell](#security-model)). A Radarnak pontosan négy kiszolgálóoldali hálózati
-   útvonala van: a katalógushoz tartozó `syncRadar()`, az ajánlásokhoz tartozó
-   `syncRadarReferrals()`, valamint a kizárólag támogatóknak elérhető ajánlatokhoz és Intelhez
-   tartozó `syncRadarOffers()` / `syncRadarIntel()`.
+1. `GET <feed base URL>/v1/catalog/latest` `x-omniroute-radar-schema: 2` vel és egy opcionális `Authorization: Bearer <supporter key>` fejléccel (lásd alább). A kiszolgálók alapértelmezés szerint a külön aláírt v1 átmeneti mellékterméket használják, ha a sémafejléc hiányzik, így a régebbi telepített ügyfelek folyamatosan kapnak frissítéseket.
+2. Ez egy csak letölthető alkalmazásfolyam, de továbbra is HTTPS kérés. A hosztolt infrastruktúra normál kapcsolati metaadatokat kap, például a forrás IP. Ha egy támogatói kulcs konfigurálva van, a szinkronizálás azt a kulcsot is elküldi a Bearer fejlécben, így a szolgáltatás fel tudja oldani a jogosultságot. A fenti bizonyítékok határában azonosított pontos privát-szerver-revíziónál az adatfolyam-kérés elszámolása kulcskivonatokat, összesített használatot és a IP naponta forgó csonkolt HMAC használja a visszaélések kézi felülvizsgálatához; ezek a táblák sem a kulcsot, sem a IP nem tartják meg nyers formában. Az infrastruktúra-hozzáférési naplók és a titkosított kézbesítési kimenő postafiók külön működési határt jelent.
+3. OmniRoute soha nem küld értesítéseket, válaszokat, beszélgetéseket, szolgáltatói hitelesítő adatokat, modellforgalmat, üzemidőt, késleltetést vagy helyi szolgáltatói konfigurációt a Radar szolgáltatásnak.
+4. A válasz ellenőrzése, érvényesítése és helyi gyorsítótárba kerül (lásd: [Biztonsági modell](#security-model) ). A Radarnak pontosan négy szerveroldali hálózati elérési útja van: `syncRadar()` a katalógushoz, `syncRadarReferrals()` az ajánlásokhoz és `syncRadarOffers()` / `syncRadarIntel()` a csak támogatói ajánlatokhoz és az Intelhez.
 
-A **támogatói kulcs** egy opcionális Bearer token (`radar_settings.supporter_key`),
-amely lehetővé teszi, hogy a hírfolyam-szolgáltatás eldöntse, melyik szintet szolgálja ki
-(lásd: [Szintek](#tiers-community-and-live)). A kulcs:
+A katalógus ellenőrzése 24 óránként lefut. Amikor az ellenőrzött hírcsatorna még mindig tartalmazza a gyorsítótárban tárolt verziót és szintet, a szinkronizálás megtartja a gyorsítótárban tárolt hasznos terhelést, megújítja `fetchedAt`, és a következő ellenőrzés 24 órával később történik, a következő óránkénti jelölés helyett.
 
-- **Titkosítva van tárolva** ugyanazokkal az AES-256-GCM `encrypt()`/`decrypt()`
-  segédfüggvényekkel (`src/lib/db/encryption.ts`), amelyeket a szolgáltatói hitelesítő
-  adatokhoz is használunk.
-- A `POST /api/radar/settings` végponton keresztül állítható be
-  (`{ supporterKey: "omr_" + 40 hex chars }`), és **soha nem kerül visszaküldésre** —
-  a válasz maszkolt formát ad vissza (`omr_****abcd`).
-- Módosítása vagy törlése atomi módon érvényteleníti a katalógus, az ajánlások, az ajánlatok
-  és az Intel gyorsítótárát. A következő szinkronizálás vagy olvasás kiszolgálóoldalon állapítja
-  meg az új jogosultságot; a kulcs mentése önmagában nem indít hálózati kérést, és nem használ
-  fel egyszer használatos aktiválási kulcsot.
-- A rendszer Bearer tokenként küldi el a hírfolyam-szolgáltatásnak a szinkronizálási GET-kérésben
-  — a kulccsal kapcsolatban semmilyen más adat nem hagyja el a klienst.
+A** támogató kulcs** egy opcionális Bearer token (`radar_settings.supporter_key`), amely lehetővé teszi a feed szolgáltatás számára, hogy eldöntse, melyik szintet szolgálja ki (lásd [a szintek című részt](#tiers-community-and-live) ). Ez:
+
+- Tárolva** nyugalmi állapotban titkosítva** ugyanazokkal a AES-256-GCM `encrypt()`/`decrypt()` segítőkkel (`src/lib/db/encryption.ts`), amelyeket a szolgáltatói hitelesítő adatokhoz használnak.
+- Állítsa be `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) és a** soha nem visszhangzott vissza** — a válasz maszkolt formát (`omr_****abcd`) ad vissza.
+- Ennek megváltoztatása vagy törlése érvényteleníti a katalógust, a hivatkozásokat, az ajánlatokat és az Intel gyorsítótárakat. A következő sync/read feloldja az új jogosultság szerveroldalát; a kulcs mentése önmagában nem küld hálózati kérést, és nem használ fel egyszer használatos aktiváló kulcsot.
+- A hírcsatorna-szolgáltatásnak elküldve hordozó tokenként a szinkronizáláson GET — a kulccsal kapcsolatban semmi más nem hagyja el a klienst.
 
 ---
 
@@ -437,84 +408,45 @@ version, tier }` formában — az irányítópult ezt az értéket jeleníti meg
 
 ---
 
-## Olvasáskori átfedéses egyesítés szabályai
+## Olvasási idejű fedvény egyesítési szabályok
 
-Az `applyFeed()` (`src/lib/radar/applyFeed.ts`) **olvasáskor**, a `getRadarCatalog()` függvényen belül egyesíti a gyorsítótárazott feedet
-a statikus alapállapotra **ráfedve**. Az alapállapot tömbje
-(`FREE_MODEL_BUDGETS`) soha nem módosul — minden
-híváskor frissen számított `MergedEntry[]` jön létre.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) egyesíti a gyorsítótárazott hírfolyamot** felett** a statikus alapvonal at** olvasási idő** , belül `getRadarCatalog()`. Az alapvonali tömb (`FREE_MODEL_BUDGETS`) soha nem mutálódik — a `MergedEntry[]` minden hívásnál frissen kerül kiszámításra.
 
-Négy szabály, elsőbbségi sorrendben:
+Négy szabály, fontossági sorrendben:
 
-1. **A feed soha nem ír felül helyi felülbírálást.** Mezőnként: ha az üzemeltető
-   személyre szabott egy mezőt egy bejegyzésen (a `provider:modelId` szerint kulcsolt `localOverrides` leképezésben),
-   akkor a feed adott mezőhöz tartozó értékét a rendszer kihagyja — az üzemeltető értéke érvényesül.
-2. **Az `enabled: false` letiltja a bejegyzést, az eredet megjelölésével.** A bejegyzést kikapcsoló
-   feedbejegyzés `enabled: false` és `disabledBy: "radar"` értéket állít be az egyesített eredményen,
-   így a felhasználói felület meg tudja magyarázni, _miért_ vált egy bejegyzés elérhetőből letiltottá.
-3. **A felhasználó által hozzáadott, a feedben nem szereplő bejegyzés változatlanul megmarad.** A kizárólag
-   az alapállapotban létező (vagy helyileg hozzáadott), megfelelő feedbejegyzéssel nem rendelkező
-   bejegyzések változatlanul továbbhaladnak.
-4. **A törlésre megjelölt bejegyzés soha nem áll vissza.** Ha az üzemeltető kifejezetten törölt egy
-   bejegyzést (a `tombstones` halmazban), akkor a feed egy későbbi verzióban ismét hozzáadott
-   `provider:modelId` bejegyzése nem állítja azt vissza.
+1. **A hírcsatorna soha nem írja felül a helyi felülírást.** Mezőnként: ha az operátor testreszabott egy mezőt egy bejegyzésen (`localOverrides` térkép, kulcsolt `provider:modelId`), akkor az adott mezőhöz tartozó feed értéke kimarad — az operátor értéke nyer.
+2. **`enabled: false` letiltja a bejegyzést származással.** Egy bejegyzést kikapcsoló hírcsatorna-bejegyzés beállítja `enabled: false` és `disabledBy: "radar"` az egyesített eredményre, így a UI meg tudja magyarázni, hogy _miért_ vált egy bejegyzés elérhetőről letiltásra.
+3. **A hírfolyamban nem szereplő, felhasználó által hozzáadott bejegyzés érintetlenül megmarad.** Azok a bejegyzések, amelyek csak az alapvonalon léteznek (vagy helyileg lettek hozzáadva), és nem rendelkeznek megfelelő hírcsatorna-bejegyzéssel, változatlan formában haladnak át.
+4. **A sírköves bejegyzés soha nem támad fel.** Ha az operátor kifejezetten törölt egy bejegyzést (`tombstones` set), a hírfolyam, amely egy későbbi verzióban `provider:modelId` újból hozzáadja, nem hozza vissza azt.
 
-A szerkeszthető mezőket és a törlésjelöléseket a
-`radar_local_model_state` tárolja (migráció: `153_radar_local_model_state.sql`). A nyilvános DB-adapter
-(`src/lib/db/radar.ts`) ezeket a sorokat alakítja át az `applyFeed()` által használt `localOverrides` leképezéssé és
-`tombstones` halmazzá; az éles `getRadarCatalog()` ezt az állapotot a funkciójelző-, gyorsítótár- és sémaellenőrzések
-sikeres teljesülése után tölti be. Az üzemeltető csak a `displayName` és az `enabled` értékét
-szerkesztheti. A szolgáltató/modell identitása, a feed eredete, a kvóta, a képességek, a szolgáltatási feltételek
-és a beállítási adatok ezen a felületen keresztül nem írhatók.
+A szerkeszthető mezők és sírkövek `radar_local_model_state` ban (migráció `153_radar_local_model_state.sql`) megmaradnak. A nyilvános DB adapter (`src/lib/db/radar.ts`) ezeket a sorokat a `applyFeed()` által használt `localOverrides` leképezéssé és `tombstones` halmazzá alakítja ; A production `getRadarCatalog()` betölti azt az állapotot, miután a zászló, a gyorsítótár és a sémakapuk áthaladtak. Csak `displayName` és `enabled` szerkeszthető az operátor által. Provider/model azonosító, a takarmány származási helye, a kvóta, a képességek, ToS és a beállítási adatok nem írhatók át ezen a felületen.
 
-Az irányítópult négy helyi műveletet kínál:
+Az irányítópulton négy helyi művelet látható:
 
-- Az **Edit** módosítja a helyi megjelenítési nevet és az engedélyezett állapotot.
-- A **Reset local changes** mindkét szerkeszthető mezőt törli a törlésjelölés módosítása nélkül.
-- A **Hide** törlésjelölést hoz létre, így a későbbi feedfrissítések nem hozhatják újra létre a sort.
-- A **Restore** eltávolítja a törlésjelölést; az ettől függetlenül mentett felülbírálások továbbra is érvényben maradnak.
+- **Szerkesztés** megváltoztatja a helyi megjelenítési nevet és az engedélyezett állapotot.
+- **Helyi módosítások visszaállítása** törli mindkét szerkeszthető mezőt sírkő megváltoztatása nélkül.
+- **Elrejt** sírkövet hoz létre, így a hírcsatorna későbbi frissítései nem tudják újra létrehozni a sort.
+- **Visszaállítás** eltávolítja a sírkövet; minden külön mentett felülírás érvényben marad.
 
-A feed `enabled: false` értéke továbbra is biztonsági kivétel: elsőbbséget élvez az elavult helyi
-`enabled: true` értékkel szemben, letiltva tartja az egyesített bejegyzést, és rögzíti a `disabledBy: "radar"` értéket.
+A `enabled: false` hírcsatorna továbbra is a biztonsági kivétel: nyer egy elavult helyi `enabled: true` felett, letiltja az egyesített bejegyzést, és rögzíti `disabledBy: "radar"`.
 
-A katalóguskiadványok `schemaVersion: 2` értéket használnak. A `contextWindow`, valamint a `tools`, a `vision` és a
-`thinking` mind egymástól függetlenül `number | null` / `boolean | null`: a `null` azt jelenti, hogy ismeretlen, míg a
-`false` azt jelenti, hogy egy D16 által megerősített hivatalos szolgáltatói forrás kifejezetten azt állítja, hogy a képesség nem érhető el.
-Az OmniRoute belső beállításjegyzék-/modellspecifikációs jelzői soha nem minősülnek közvetlenül feedtényeknek. A kliens
-továbbra is elfogadja a v1 pillanatképeket; mivel a régi összeállító a `false` értéket a hiány helyőrzőjeként használta, a v1 `false`
-ismeretlenre normalizálódik, míg a v1 `true` tényszerű marad. Az ismeretlen sémaverziók biztonságosan meghiúsulnak, és az
-utolsó érvényes gyorsítótár továbbra is elérhető marad. Minden olyan v2 modellnek, amely nem null értékű kontextussal/képességgel rendelkezik,
-hitelesítő adatok nélkül elérhető HTTPS `metadataEvidenceUrls[]` értékeket kell tartalmaznia; ellenkező esetben a sémaellenőrzés meghiúsul, és a
-gyorsítótár nem cserélődik le. A katalógustáblázat mindhárom állapotot `✓`, `✕` és `?` formában jeleníti meg.
+A katalógus kiadványok `schemaVersion: 2` használják. `contextWindow` és `tools`, `vision` és `thinking` mindegyike egymástól függetlenül `number | null` / `boolean | null`: `null` azt jelenti, hogy ismeretlen, míg `false` azt jelenti, hogy a D16-confirmed hivatalos szolgáltatói forrása kifejezetten azt mondja, hogy a képesség hiányzik. A belső OmniRoute registry/model-spec jelzők soha nem kerülnek elő közvetlenül a tények továbbítására. Az ügyfél továbbra is elfogadja a v1 pillanatképeket; mivel a régi építő `false` használta hiányhelyőrzőként, a v1 `false` ismeretlenre normalizálódik, míg a v1 `true` tényszerű marad. Az ismeretlen sémaverziók bezárása sikertelen, és az utolsó érvényes gyorsítótár elérhető marad. Minden nem nulla context/capability vel rendelkező v2-modellnek tartalmaznia kell egy hitelesítő adatok nélküli HTTPS `metadataEvidenceUrls[]`; ellenkező esetben a séma ellenőrzése meghiúsul, és a gyorsítótár nem kerül cserére. A katalógustábla mindhárom állapotot `✓`, `✕` és `?` néven jeleníti meg.
 
-### Irányított kombinációk és MCP-hozzáférés
+### Irányított kombók és MCP hozzáférés
 
-A megerősített `familyId` értékek megmaradnak az olvasáskori átfedés után, és ezek vezérlik a tiszta
-`buildRadarComboSuggestions()` modult (`src/lib/radar/comboSuggestions.ts`). A rendszer csak akkor javasol egy családot,
-ha legalább két különböző szolgáltató rendelkezik aktív kapcsolattal, és elérhetővé teszi a pontosan megadott, válogatott modellazonosítót.
-A letiltott modellek, az inaktív szolgáltatók, a hiányzó modellazonosítók, az egyetlen elemből álló családok és a nem egyértelmű
-álnév-/előtag-egyezések biztonságosan meghiúsulnak. A javaslatok a meglévő `priority` stratégiát használják, a
-legnagyobb ismétlődő havi keretet sorolva előre; a felhasználói felület kizárólag a `POST /api/combos` útvonalon keresztül hozza létre őket.
+A megerősített `familyId` értékek túlélik az olvasási idejű átfedést, és a tiszta `buildRadarComboSuggestions()` modult (`src/lib/radar/comboSuggestions.ts`) hajtják. A család csak akkor javasolt, ha legalább két különböző szolgáltató aktív kapcsolattal rendelkezik, és a ID pontos kurált modellt teszik közzé. A letiltott modellek, az inaktív szolgáltatók, a hiányzó IDs modell, az egytagú családok és a kétértelmű alias/prefix egyezések meghiúsulnak. A javaslatok a meglévő `priority` stratégiát használják, először a legnagyobb ismétlődő havi költségvetést rendelve; a UI csak `POST /api/combos` keresztül hozza létre őket.
 
-Az irányított felhasználói felület a `/dashboard/radar/combos` útvonalon érhető el. Kizárólag a helyi
-`GET /api/radar/catalog` és `GET /api/combos/builder/options` végpontokból olvas. Soha nem indít Radar-szinkronizálást,
-nem olvassa a szolgáltatói hitelesítő adatokat, és nem ír közvetlenül a kombinációs adatbázisba.
+Az irányított UI itt lakik: `/dashboard/radar/combos`. Csak a helyi `GET /api/radar/catalog` és `GET /api/combos/builder/options` végpontokat olvassa be. Soha nem indítja el a radar szinkronizálást, nem olvassa be a szolgáltatói hitelesítő adatokat, és nem ír közvetlenül a kombinált adatbázisba.
 
-Az MCP-kliensek ugyanezt a helyi leképezést olvashatják az `omniroute_radar_catalog` (`read:radar`) használatával. Az
-opcionális `provider`, `familyId` és `enabledOnly` szűrők kiértékelése egyetlen helyi
-`GET /api/radar/catalog` olvasás után történik. Korlátozott kimenete tartalmazza a katalógus metaadatait, valamint a szolgáltatót/modellt,
-a megjelenítési nevet, a `familyId` értékét, a kvótát, a képességeket, az engedélyezési állapotot, az eredetet és a `disabledBy` értékét; a beállítási URL-ek,
-lépések, kapcsolatok, e-mail-címek, kulcsok és ajánlási adatok soha nem kerülnek visszaadásra. Ez az eszköz
-csak olvasási műveleteket végez, és soha nem hívja meg az `/api/radar/sync` végpontot.
+MCP kliensek ugyanazt a helyi vetületet tudják beolvasni `omniroute_radar_catalog` (`read:radar`). Az opcionális `provider`, `familyId` és `enabledOnly` szűrők egy helyi `GET /api/radar/catalog` olvasás után kerülnek kiértékelésre. Zárt kimenete tartalmazza a katalógus metaadatait, valamint provider/model, a megjelenített nevet, `familyId`, a kvótát, a képességeket, az engedélyezett állapotot, az eredetet és `disabledBy`; setup URLs, lépések, kapcsolatok, e-mail címek, kulcsok és hivatkozási adatok soha nem kerülnek visszaadásra. Ez az eszköz csak olvasható, és soha nem hívja meg `/api/radar/sync`. Ha a gyorsítótárazott hírcsatorna a telepített katalógus előtti, `meta.olderThanRelease` értéke `true`, és az eszköz modelleket ad vissza a telepített katalógusból helyi felülírásokkal és sírkövek alkalmazásával.
 
-### Eredetjelölők
+### Származási jelzők
 
-Minden egyesített bejegyzés rendelkezik egy `origin` mezővel, amelyet a felhasználói felület jelvényként jelenít meg:
+Minden egyesített bejegyzés tartalmaz egy `origin` mezőt, amelyet a UI jelvényként jelenít meg:
 
-- `"baseline"` — változatlanul a statikus kiadási katalógusból származik.
-- `"radar"` — egy vagy több mezőt frissített az adatfolyam.
-- `"local"` — az üzemeltető legalább egy helyi felülbírálást adott meg ehhez a bejegyzéshez (az 1. szabály szerint a helyi
-  felülbírálások mindig elsőbbséget élveznek az adatfolyammal szemben, függetlenül attól, hogy mit tartalmaz az adatfolyam).
+- `"baseline"` — érintetlen a statikus kiadási katalógusból.
+- `"radar"` — egy vagy több mezőt frissített a hírcsatorna.
+- `"local"` — az operátornak legalább egy helyi felülírása van ezen a bejegyzésen (a helyi felülírások mindig az 1. szabály szerint nyerik a hírfolyamot, függetlenül attól, hogy a hírcsatorna mit mond).
 
 ---
 

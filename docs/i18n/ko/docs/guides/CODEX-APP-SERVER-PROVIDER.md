@@ -17,27 +17,24 @@ Codex CLI에 접근할 수 있어야** 하며 해당 CLI가 **로그인된 상�
 
 ---
 
-## 1. 아키텍처
+## 1. 건축
 
 ```
-┌─ OmniRoute 앱 ──────────────────┐        ┌─ codex-app-server 사이드카 ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ 기능 토큰)                   │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuth 자체 관리             │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, 자동 갱신)    │
-        │ 공유(compose 볼륨)                 └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS 기능 토큰(양쪽 모두 마운트)
-  codex-appserver-home    → ~/.codex(대시보드가 auth.json을 작성하고,
-                             사이드카의 codex app-server가 읽음)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- 사이드카는 기능 토큰으로 보호되는 내부 compose 네트워크
-  (`ws://codex-app-server:1456`)에서만 수신 대기합니다. 호스트나 인터넷에
-  **절대로** 게시되지 않습니다.
-- Codex CLI는 `omniroute:base`에 포함되어 있으므로 사이드카를 실행할 때
-  호스트나 사용자 머신에 codex를 설치할 필요가 없습니다.
+- 사이드카가 듣는다** 오직** 기능 토큰 뒤에 있는 내부 작성 네트워크(`ws://codex-app-server:1456`)에 있습니다. 그것은** 절대** 호스트나 인터넷에 게시됩니다.
+- 사이드카는 Codex CLI 포함하는 `runner-cli-no-docker` 대상에서 구축된 `omniroute:cli-no-docker` 사용합니다.
 
 ## 2. 실행하기
 

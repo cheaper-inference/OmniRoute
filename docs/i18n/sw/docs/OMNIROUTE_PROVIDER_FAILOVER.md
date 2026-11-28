@@ -14,10 +14,12 @@ Sera ya mtoa huduma mtambuka huruhusu hadi majaribio matatu ya mtoa huduma, kuja
 
 - **Mchanganyiko** kushindwa kati ya malengo yao kulingana na mkakati na mipangilio ya mchanganyiko.
 - **Kitambulisho cha mfano wazi** (hakuna kiambishi awali cha `provider/` ) ambacho watoa huduma kadhaa amilifu hutumikia, bila mchanganyiko wa jina hilo halisi, hutumwa kwanza kwa chaguo za makisio za mtoa huduma. Jaribio hilo likishindwa kwa njia ambayo sera itashindwa kuendelea, ombi lile lile litatumwa kwa mtoa huduma anayefuata anayetoa kitambulisho. Jibu hubeba `x-omniroute-fallback-attempts` na idadi ya watoa huduma waliojaribiwa kabla ya yule aliyejibu.
-  - Kila mbadala imeidhinishwa haswa kana kwamba ufahamu umeichagua. Lengo ambalo ufunguo wa API huzuia au halikubali hurukwa bila simu ya juu, na mteja hupata hitilafu halisi ya mkondo, si kukataliwa kwa sera kwa lengo ambalo halijataja kamwe.
+  - Kila mbadala imeidhinishwa haswa kana kwamba ufahamu umeichagua. Lengo ambalo ufunguo wa API huzuia au halikubali kurukwa bila simu ya juu, na mteja hupata hitilafu halisi ya mkondo, si kukataliwa kwa sera kwa lengo ambalo halijataja kamwe.
   - Jibu ambalo halijafaulu ndilo linaloendelea: hakuna kinachoshindikana baada ya baiti ya kwanza iliyotiririshwa.
   - Ubadilishanaji wa muundo mbadala wa dharura hutumika tu baada ya kila mtoa huduma wa muundo ulioombwa kushindwa.
   - Ombi lililobandikwa kwenye muunganisho (`x-omniroute-connection`) hukaa juu yake.
   - Kitambulisho chenye kiambishi awali (`provider/model`) hakirudishwi kwa mtoa huduma mwingine.
 
 Majimbo ya mzunguko ni `closed`, `open`, na `half_open`. Utulivu hupanga uchunguzi ulio na mipaka; uchunguzi uliofanikiwa hufunga mzunguko na uchunguzi ulioshindwa huifungua tena.
+
+Kushindwa kwa mtoaji huendesha ndani ya lango. Tazama [Wakati OmniRoute yenyewe haipatikani](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) kwa tabia ya mteja wakati wa kukatika kwa lango.

@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Semua aturan proyek berada di [`AGENTS.md`](AGENTS.md)** — satu-satunya sumber kebenaran untuk setiap
-asisten AI (arsitektur, konvensi, pengujian, gerbang kualitas, alur kerja git, 23 Aturan Keras,
-pembelajaran PII). Baca seluruhnya; jangan tambahkan kembali aturan proyek di sini. Semua hal di bawah ini berlaku HANYA
-untuk Claude Code — penyempurnaan operasional dari aturan yang sudah ditetapkan dalam `AGENTS.md`.
+**Semua aturan proyek ada di [`AGENTS.md`](AGENTS.md)** — satu-satunya sumber kebenaran untuk setiap asisten AI ; impor di atas sudah memuatnya. Jangan menambahkan kembali aturan proyek di sini. Segala sesuatu di bawah ini berlaku ONLY untuk Claude Kode — penyempurnaan operasional aturan yang sudah ditentukan di `AGENTS.md`.
 
-## Isolasi worktree — Hal spesifik Claude Code
+## Isolasi pohon kerja — Claude Kode spesifik
 
-Protokol worktree wajib yang lengkap (konfirmasi branch dasar, path kanonik
-`.claude/worktrees/`, `cp -al` node_modules, aturan teardown) ada di
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (dirangkum di `AGENTS.md` →
-Git Workflow → "Worktree isolation"). Poin-poin spesifik Claude Code:
+- Konfirmasikan cabang dasar dengan operator melalui `AskUserQuestion` (Hard Rule #19) kecuali mereka sudah memberi tahu Anda.
+- Buat pohon kerja dengan `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (berada di bawah `.claude/worktrees/`, hard-link `node_modules` dan salin `.husky/_`), lalu panggil `EnterWorktree` dengan `path` nya. Selalu lewati basis: tanpanya skrip akan memilih `release/*` tertinggi, yang mungkin bukan yang dikonfirmasi oleh operator. Pohon kerja yang `EnterWorktree` buat dengan sendirinya tidak memiliki hard link maupun hook, jadi tidak ada gerbang pra-komitmen yang berjalan di dalamnya.
 
-- Konfirmasi branch dasar dengan operator melalui `AskUserQuestion` (Aturan Keras #19) kecuali
-  mereka sudah memberitahumu.
-- Utamakan tool native `EnterWorktree` — tool ini sudah membuat worktree di bawah
-  `.claude/worktrees/` (path kanonik). Buat worktree dengan perintah `git
-worktree add` yang terdokumentasi, lalu panggil `EnterWorktree` dengan `path`-nya.
+## Subagen dan git
 
-## Keamanan lintas sesi — khusus Claude Code
+Setiap subagen yang menyentuh git (alat Agen atau skrip Alur Kerja) mendapatkan Aturan Keras #22 larangan `git stash` demi kata dalam promptnya — rekaman kejadian simpanan datang melalui subagen.
 
-Aturan Keras #19/#21/#22 (dalam `AGENTS.md`) mengatur sesi paralel. Pengingat operasional untuk
-harness ini:
+## Artefak perencanaan — jalur kekuatan super dikesampingkan
 
-- **Replikasikan larangan `git stash` secara verbatim dalam prompt setiap subagen yang menyentuh git**
-  (tool Agent / skrip Workflow) — subagen tidak mewarisi file ini, dan insiden stash yang tercatat
-  berulang terjadi melalui subagen.
-- Sebelum melakukan merge atau push ke PR apa pun yang tidak Anda buat _dalam sesi ini_, jalankan `git worktree list`
-  dan periksa kembali `gh pr view <N> --json state,headRefOid` (Aturan Keras #22b).
-- Akhiri setiap sesi dengan checkout utama berada pada branch tempat sesi tersebut dimulai.
+Keterampilan negara adidaya mengumumkan default di bawah `docs/superpowers/plans/`, `docs/superpowers/specs/` dan `docs/research/`. Tulis ulang masing-masing ke `_tasks/` yang setara di `AGENTS.md` → "Artefak Perencanaan & Penelitian" sebelum menulis, dan komit dengan `git -C _tasks …`, jangan pernah di repo utama.
 
-## Superpowers / artefak perencanaan — penggantian path
+## Gores file — `_artifacts/`, bukan `/tmp`
 
-Konvensi `_tasks/` didefinisikan dalam `AGENTS.md` → "Artefak Perencanaan & Riset". Skill
-superpowers disertakan dengan default yang mengarah ke `docs/…` — default tersebut **diganti
-di sini**. Ketika skill superpowers mengumumkan path seperti "disimpan ke `docs/superpowers/plans/…`",
-ubah ke padanan `_tasks/…` sebelum menulis:
+Proyek ini mengesampingkan papan gores sesi harness (`/tmp/claude-*/…`). Tulis file sementara ekspor —, zip yang dihasilkan, keluaran perantara satu kali — ke `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: jalur root `_*` yang gitignored, sehingga operator menemukan dan menghapus semua awal di satu tempat. Rencana, spesifikasi, penelitian, dan penyerahan yang tahan lama akan diberikan ke `_tasks/` (Aturan Keras #23).
 
-| Artefak (skill)                        | Default (JANGAN digunakan) | Simpan di sini sebagai gantinya                               |
-| -------------------------------------- | -------------------------- | ------------------------------------------------------------- |
-| Rencana (`writing-plans`)              | `docs/superpowers/plans/`  | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Spesifikasi / desain (`brainstorming`) | `docs/superpowers/specs/`  | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Riset (`deep-research`, ad-hoc)        | `docs/research/`           | `_tasks/research/…`                                           |
-| Serah terima (`/handoff`)              | —                          | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Basis merah
 
-Commit artefak tersebut di dalam repo `_tasks/` (`git -C _tasks …`), jangan pernah di repo utama.
-
-## File sementara / draf — gunakan `_artifacts/`, bukan `/tmp`
-
-Proyek ini mengganti scratchpad sesi default harness (`/tmp/claude-*/…`). Tulis
-file sementara/kerja — ekspor, zip yang dihasilkan, output perantara sekali pakai, apa pun yang
-biasanya akan Anda letakkan di `/tmp` — ke `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` sebagai gantinya.
-
-- `_artifacts/` adalah path root `_*`: sudah diabaikan git (`AGENTS.md` → "Path root `_*`"), hanya berada
-  di disk, tidak pernah dilacak.
-- Alasan: menyimpan output sementara di dalam proyek (alih-alih `/tmp`) memudahkan operator
-  menemukan dan menghapus semua hal sementara di satu tempat, alih-alih mencarinya di berbagai
-  direktori `/tmp` sementara khusus sesi yang menghilang atau menumpuk tanpa terlacak.
-- **Jangan** samakan ini dengan `_tasks/` (Aturan Keras #23, repo git privat tersendiri untuk
-  rencana/spesifikasi/riset/serah terima yang tahan lama) — `_artifacts/` hanya untuk file kerja sekali pakai, tidak ada
-  di sini yang perlu dipertahankan atau diberi versi.
-
-## Base-green sebelum membuka PR
-
-Sebelum membuat branch atau membuka PR, jalankan pemeriksaan base-green (`AGENTS.md` → Alur Kerja Git →
-"Pemeriksaan base-green"; skill proyek merujuknya sebagai `.agents/skills/_shared/base-green.md`). PR
-yang dibuka saat tip dasar berstatus merah harus memuat `⚠️ base-red inherited: #<issue>` dalam body-nya. Untuk
-mengatasi akumulasi status merah (tip dasar + PR merah), gunakan skill `/sweep-reds`.
+Untuk menguras akumulasi status merah (ujung dasar + merah PRs), gunakan keterampilan `/sweep-reds`.

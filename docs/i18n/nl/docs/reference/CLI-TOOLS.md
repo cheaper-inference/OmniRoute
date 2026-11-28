@@ -4,8 +4,6 @@
 
 ---
 
-Laatst bijgewerkt: 23-08-2026
-
 OmniRoute kan worden geïntegreerd met drie categorieën CLI tools, verspreid over drie speciale dashboardpagina's:
 
 | Pagina           | Route                   | Concept                                                                         | Graaf        |
@@ -236,7 +234,7 @@ Nieuwe tools met `configType: "custom"` hebben speciale instellingen API -routes
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                       |
 | `POST /api/cli-tools/qwen-settings`         | Qwen code (`~/.qwen/settings.json` + speciale `.env` sleutel)               |
 
-Alle routes gebruiken `sanitizeErrorMessage()` voor foutreacties (harde regel nr. 12).
+Alle routes gebruiken `sanitizeErrorMessage()` voor foutreacties (harde regel #12).
 
 ---
 

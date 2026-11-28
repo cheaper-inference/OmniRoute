@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Semua peraturan projek terkandung dalam [`AGENTS.md`](AGENTS.md)** — sumber kebenaran tunggal untuk setiap
-pembantu AI (seni bina, konvensyen, pengujian, gerbang kualiti, aliran kerja git, 23 Peraturan Tegas,
-pembelajaran PII). Baca sepenuhnya; jangan tambahkan semula peraturan projek di sini. Semua perkara di bawah terpakai HANYA
-untuk Claude Code — penambahbaikan operasi terhadap peraturan yang telah ditakrifkan dalam `AGENTS.md`.
+**Semua peraturan projek hidup dalam [`AGENTS.md`](AGENTS.md)** — sumber kebenaran tunggal untuk setiap pembantu AI ; import di atas sudah memuatkannya. Jangan tambah semula peraturan projek di sini. Semua perkara di bawah digunakan ONLY pada Claude Kod — penghalusan operasi peraturan yang telah ditakrifkan dalam `AGENTS.md`.
 
-## Pengasingan worktree — Perkara khusus Claude Code
+## Pengasingan pokok kerja — Claude Kod khusus
 
-Protokol worktree mandatori penuh (pengesahan cabang asas, laluan kanonikal `.claude/worktrees/`,
-`cp -al` node_modules, peraturan teardown) terdapat dalam
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (diringkaskan dalam `AGENTS.md` →
-Git Workflow → "Worktree isolation"). Perkara khusus Claude Code:
+- Sahkan cawangan asas dengan pengendali melalui `AskUserQuestion` (Peraturan Keras #19) melainkan mereka sudah memberitahu anda.
+- Cipta worktree dengan `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (ia mendarat di bawah `.claude/worktrees/`, pautan keras `node_modules` dan salin `.husky/_`), kemudian panggil `EnterWorktree` dengan `path`. Sentiasa lulus pangkalan: tanpanya skrip memilih `release/*` tertinggi, yang mungkin bukan yang disahkan oleh pengendali. Pohon kerja yang `EnterWorktree` cipta dengan sendirinya tidak mempunyai pautan keras mahupun cangkuk, jadi tiada gerbang pra-komit berjalan di dalamnya.
 
-- Sahkan cabang asas dengan operator melalui `AskUserQuestion` (Peraturan Tegas #19) melainkan mereka
-  telah memberitahu anda.
-- Utamakan alat `EnterWorktree` asli — ia sudah pun mencipta worktree di bawah
-  `.claude/worktrees/` (laluan kanonikal). Cipta worktree dengan perintah `git worktree add` yang
-  didokumentasikan, kemudian panggil `EnterWorktree` dengan `path`-nya.
+## Subagen dan git
 
-## Keselamatan merentas sesi — perkara khusus Claude Code
+Setiap subagen yang menyentuh git (Alat ejen atau skrip Aliran Kerja) mendapat Peraturan Keras #22 a's `git stash` ban verbatim dalam — gesaannya, pengulangan yang direkodkan bagi insiden simpanan datang melalui subagen.
 
-Peraturan Tegas #19/#21/#22 (dalam `AGENTS.md`) mengawal sesi selari. Peringatan operasi untuk
-persekitaran ini:
+## Merancang artifak — kuasa besar laluan mengatasi
 
-- **Salin larangan `git stash` secara verbatim ke dalam gesaan setiap subagen yang menyentuh git**
-  (alat Agent / skrip Workflow) — subagen tidak mewarisi fail ini, dan kejadian berulang
-  bagi insiden stash yang direkodkan berlaku melalui subagen.
-- Sebelum menggabungkan atau menolak ke mana-mana PR yang tidak anda cipta _dalam sesi ini_, jalankan `git worktree list`
-  dan semak semula `gh pr view <N> --json state,headRefOid` (Peraturan Tegas #22b).
-- Akhiri setiap sesi dengan checkout utama berada pada cabang yang sama seperti ketika sesi bermula.
+Kemahiran kuasa besar mengumumkan keingkaran di bawah `docs/superpowers/plans/`, `docs/superpowers/specs/` dan `docs/research/`. Tulis semula setiap satu pada `_tasks/` yang setara dalam `AGENTS.md` → "Artifak Perancangan & Penyelidikan" sebelum menulis, dan masukkannya dengan `git -C _tasks …`, jangan sekali-kali dalam repo utama.
 
-## Superpowers / artifak perancangan — penggantian laluan
+## Gores fail — `_artifacts/`, bukan `/tmp`
 
-Konvensyen `_tasks/` ditakrifkan dalam `AGENTS.md` → "Artifak Perancangan & Penyelidikan". Kemahiran
-superpowers disediakan dengan lalai yang menghala ke `docs/…` — lalai tersebut **digantikan
-di sini**. Apabila kemahiran superpowers mengumumkan laluan seperti "disimpan ke `docs/superpowers/plans/…`",
-tulis semula kepada laluan `_tasks/…` yang setara sebelum menulis:
+Projek ini mengatasi pad awal sesi abah-abah (`/tmp/claude-*/…`). Tulis fail sementara eksport —, zip yang dijana, keluaran perantaraan sekali sahaja — ke `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: laluan `_*` akar gitignore, supaya pengendali mencari dan memadam semua calar di satu tempat. Pelan tahan lama, spesifikasi, penyelidikan dan penyerahan pergi ke `_tasks/` sebaliknya (Peraturan Keras #23).
 
-| Artifak (kemahiran)                         | Lalai (JANGAN gunakan)    | Simpan di sini sebagai ganti                                  |
-| ------------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Pelan (`writing-plans`)                     | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Spesifikasi / reka bentuk (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Penyelidikan (`deep-research`, ad-hoc)      | `docs/research/`          | `_tasks/research/…`                                           |
-| Serahan (`/handoff`)                        | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Pangkalan merah
 
-Commit artifak tersebut di dalam repo `_tasks/` (`git -C _tasks …`), jangan sekali-kali dalam repo utama.
-
-## Fail contengan / sementara — gunakan `_artifacts/`, bukan `/tmp`
-
-Projek ini menggantikan pad contengan sesi lalai persekitaran (`/tmp/claude-*/…`). Tulis
-fail sementara/kerja — eksport, zip yang dijana, output perantaraan sekali guna, apa-apa sahaja yang
-biasanya anda letakkan dalam `/tmp` — ke `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` sebagai ganti.
-
-- `_artifacts/` ialah laluan akar `_*`: sudah diabaikan oleh git (`AGENTS.md` → "Laluan akar `_*`"), hanya wujud
-  pada cakera, tidak pernah dijejaki.
-- Sebab: menyimpan output contengan di dalam projek (berbanding `/tmp`) memudahkan operator
-  mencari dan memadam semua perkara sementara di satu tempat, dan bukannya mencarinya merentasi
-  direktori `/tmp` khusus sesi yang bersifat sementara, yang hilang atau mengumpulkan fail tidak dijejaki.
-- Jangan **kelirukan** ini dengan `_tasks/` (Peraturan Tegas #23, repo git peribadinya sendiri untuk
-  pelan/spesifikasi/penyelidikan/serahan yang berkekalan) — `_artifacts/` hanya untuk fail kerja yang boleh dibuang, tiada apa-apa
-  di sini yang perlu dikekalkan atau diversi.
-
-## Pastikan asas hijau sebelum membuka PR
-
-Sebelum mencipta cabang atau membuka PR, jalankan semakan asas hijau (`AGENTS.md` → Aliran Kerja Git →
-"Semakan asas hijau"; kemahiran projek merujuknya sebagai `.agents/skills/_shared/base-green.md`). PR
-yang dibuka ketika tip asas berstatus merah mesti mengandungi `⚠️ base-red inherited: #<issue>` dalam badannya. Untuk
-menghapuskan keadaan merah yang terkumpul (tip asas + PR merah), gunakan kemahiran `/sweep-reds`.
+Untuk mengalirkan keadaan merah terkumpul (hujung asas + merah PRs), gunakan kemahiran `/sweep-reds`.

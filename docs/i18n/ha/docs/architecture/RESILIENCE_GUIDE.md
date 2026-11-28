@@ -12,54 +12,53 @@ OmniRoute tana da hanyoyi daban-daban amma suna da alaƙa. Kowannensu yana da iy
 
 > **Gabatar da Env-vs-dashboard don juriyar juriya.** Juriyar barin shiga yana jujjuya iri daga muhallin — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — kawai yana ba da _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean ya ci gaba a cikin `resilienceSettings` (Dashboard →** Saituna → Resilience** / `PATCH /api/resilience`, adana a cikin `key_value`) yayi nasara akan darajar env: daidaitawa (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) yana adana boolean da aka adana a duk lokacin da akwai. Saita irin wannan env var zuwa `true` akan turawa inda dashboard ya rigaya ya ajiye `false` saboda haka babu abin da ya canza — ya juya zuwa** Saituna → Resilience** (ko share filin da aka adana) maimakon.
 
-## 1. Circuit Breaker na Mai Ba da Sabis
+## 1. Mai Bayar da Wuta
 
-**Fanni:** dukkan mai ba da sabis (misali, `glm`, `openai`, `anthropic`).
+**Iyakar:** dukan mai bada (misali, `glm`, `openai`, `anthropic`).
 
-**Manufa:** dakatar da aika zirga-zirga zuwa ga mai ba da sabis da yake gazawa akai-akai a matakin upstream/sabis.
+**Manufar:** dakatar da aika zirga-zirga zuwa mai badawa wanda ke yawan kasawa a matakin upstream/service.
 
 **Aiwatarwa:**
 
-- Babban class: `src/shared/utils/circuitBreaker.ts`
-- Haɗi (wiring): `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API na matsayi: `GET /api/monitoring/health`
-- API na sake saita: `POST /api/resilience/reset`
-- Masu rufi (wrappers): `open-sse/services/accountFallback.ts`
-- Teburin DB: `domain_circuit_breakers`
+- Core class: `src/shared/utils/circuitBreaker.ts`
+- Waya: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Matsayin API: `GET /api/monitoring/health`
+- Sake saita API: `POST /api/resilience/reset`
+- Wrappers: `open-sse/services/accountFallback.ts`
+- tebur DB : `domain_circuit_breakers`
 
-**Matsayoyi:**
+**Jihohi:**
 
-- `CLOSED` — ana ƙyale zirga-zirga ta al'ada
-- `DEGRADED` — har yanzu ana ƙyale zirga-zirga, amma ana bin diddigin gazawar mai ba da sabis da ta ƙaru; yana komawa `CLOSED` idan nasarori sun isa, ko bayan gwajin haɗi mai inganci, ko bayan mafi tsawon riƙon `OPEN` na irin gazawar ƙarshe (ƙimar `cooldownByKind` nasa, in ba haka ba `resetTimeout`, × `maxBackoffMultiplier`, aƙalla sanyaya ɗaya) ba tare da sabuwar gazawa ba
-- `OPEN` — an toshe mai ba da sabis na ɗan lokaci; tsara hanyar combo na ƙetare shi
-- `HALF_OPEN` — lokacin sake saita ya ƙare; ana ƙyale buƙatar bincike (probe)
+- `CLOSED` — zirga-zirga na yau da kullun an yarda
+- Har yanzu ana ba da izinin zirga-zirgar `DEGRADED` —, amma ana bin diddigin gazawar masu bada sabis; ya dawo zuwa `CLOSED` akan isassun nasarori, akan ingantaccen gwajin haɗin gwiwa, ko kuma bayan riƙe `OPEN` mafi tsayi don nau'in gazawar ƙarshe (ƙimar `cooldownByKind` ɗinsa, sauran `resetTimeout`, × `maxBackoffMultiplier`, aƙalla sanyi ɗaya) ba tare da sabon gazawa ba.
+- An toshe mai bada `OPEN` — na ɗan lokaci; combo routing ya tsallake shi
+- `HALF_OPEN` — sake saita lokaci ya wuce; an yarda da buƙatar bincike
 
-**Tsaftacewar asali mai iya daidaitawa (`open-sse/config/constants.ts`, an fallasa su a Dashboard → Settings → Resilience):**
+**Abubuwan da za a iya daidaitawa (`open-sse/config/constants.ts`, fallasa a cikin Dashboard → Saitunan Tsare → tsare):**
 
-| Aji     | Ya lalace a | Ya buɗe a | Lokacin sake saita |
-| ------- | ----------- | --------- | ------------------ |
-| OAuth   | gazawa 5    | gazawa 8  | 60s                |
-| API-key | gazawa 7    | gazawa 12 | 30s                |
-| Na gida | an samar    | gazawa 2  | 15s                |
+| Class   | Wulakantacce a | Yana buɗewa a | Sake saita lokacin ƙarewa |
+| ------- | -------------- | ------------- | ------------------------- |
+| OAuth   | 5 gazawa       | 8 gazawa      | 60s                       |
+| API-key | 7 gazawa       | 12 kasawa     | 30s                       |
 
-`degradationThreshold` na sarrafa lokacin da mai ba da sabis zai shiga `DEGRADED`; `failureThreshold` na sarrafa lokacin da zai buɗe kuma a ƙetare shi. Har yanzu ba a fallasa bayanan martaba (profiles) na masu ba da sabis na gida a shafin saitunan Resilience ba tukuna.
+`degradationThreshold` yana sarrafa lokacin da mai bayarwa ya shiga `DEGRADED`; `failureThreshold` yana sarrafa lokacin da ya buɗe kuma an tsallake shi. `PROVIDER_PROFILES.local` (2 kasawa / 15s) an bayyana shi a cikin `open-sse/config/constants.ts` amma** ba a waya tukuna** : `getProviderCategory()` yana dawo da `oauth` ko `apikey` kawai, don haka masu samar da gida suna amfani da bayanin martabar OAuth ko API-key.
 
-**Lambobin kunna (trip codes):** matsayoyi na matakin mai ba da sabis kawai `[408, 500, 502, 503, 504]`. KADA a kunna saboda kurakuran matakin asusu (mafi yawancin 401/403/429 — waɗancan na cooldown ko kullewa (lockout) ne).
+**Lambobin tafiya:** Matsayin matakin mai bada kawai `[408, 500, 502, 503, 504]`. Yi tafiya NOT don kurakuran matakin asusu (mafi yawan 401/403/429 — waɗanda ke cikin sanyi ko kullewa).
 
-**Farfaɗowa mai jinkiri (lazy recovery):** lokacin da `OPEN` ya ƙare, `getStatus()`, `canExecute()`, `getRetryAfterMs()` suna sabunta matsayi zuwa `HALF_OPEN`. Irin waɗannan karatun (da kuma gazawar ta gaba) suna raguzza `DEGRADED` da ya shafe lokacinsa zuwa `CLOSED`. Ba a buƙatar mai ƙidayar lokaci na bayan gida (background timer).
+**Rage farfadowa:** lokacin da `OPEN` ta ƙare, `getStatus()`, `canExecute()`, `getRetryAfterMs()` refresh state to `HALF_OPEN`. Haka karantawa (da gazawar ta gaba) ruɓar ruɓewar tsayayyen `DEGRADED` zuwa `CLOSED`. Ba a buƙatar mai ƙidayar baya.
 
 ---
 
-### Cooldown na Mai Ba da Sabis na Duniya, ta Zaɓi (ƙofar taga)
+### Ci gaba da Cooldown Mai Ba da Sabis na Duniya (ƙofar taga)
 
-Wani mataki na huɗu, mai **zaɓi** (`PROVIDER_COOLDOWN_ENABLED`, asali a **kashe**), yana riƙe ƙwaƙwalwar ajiya ta masu ba da sabis masu gazawa tsakanin buƙatu a cikin `open-sse/services/providerCooldownTracker.ts`, wanda ƙudurin manufar combo yana tuntuba domin buƙatun combo da ke jere su daina sake tafiyarwa mai ba da sabis da ya yi gazawa kwanan nan. Shigarwar matakin mai ba da sabis suna mutunta ƙofar tagar `PROVIDER_PROFILES`:
+Na hudu,** ficewa** Layer (`PROVIDER_COOLDOWN_ENABLED`, tsoho** kashe** ) yana riƙe ƙwaƙwalwar ajiyar giciye na masu samar da gazawa a cikin `open-sse/services/providerCooldownTracker.ts`, tuntuɓar ƙudurin haɗakarwa don haka buƙatun haduwa a jere sun daina sake tafiya mai ba da sabis wanda kawai ya gaza. Shigar-matakin mai bayarwa suna girmama ƙofar taga `PROVIDER_PROFILES` :
 
-| Bayani  | Kunna bayan (`providerFailureThreshold`) | A cikin (`providerFailureWindowMs`) | Sanyaya na (`providerCooldownMs`) |
-| ------- | ---------------------------------------: | ----------------------------------: | --------------------------------: |
-| OAuth   |                                     `10` |                             `15min` |                            `5min` |
-| API key |                                     `15` |                             `30min` |                           `10min` |
+| Bayanan martaba | tafiye-tafiye bayan (`providerFailureThreshold`) | ciki (`providerFailureWindowMs`) | sanyaya ga (`providerCooldownMs`) |
+| --------------- | -----------------------------------------------: | -------------------------------: | --------------------------------: |
+| OAuth           |                                             `10` |                          `15min` |                            `5min` |
+| API key         |                                             `15` |                          `30min` |                           `10min` |
 
-A ƙasan wannan ƙofa, **ba** a ɗaukar mai ba da sabis a sanyaya (cooling); nasara ɗaya tana share tagar. Shigarwar matakin haɗi (`provider:connectionId`) kuma suna ci gaba da amfani da jinkirin ƙaruwa (exponential backoff) na `minRetryCooldownMs → maxRetryCooldownMs` maimakon haka. Abubuwan maye gurbi (overrides): `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Mai kare koma baya (regression guard): `tests/unit/provider-cooldown-window-gate.test.ts`.
+A ƙasa bakin kofa mai bayarwa yana** ba** la'akari da sanyaya; nasara ta share taga. Shigar da matakin haɗin kai (`provider:connectionId`) yana kiyaye `minRetryCooldownMs → maxRetryCooldownMs` mai ƙima a maimakon haka. Saukewa: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Mai gadin koma baya: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Haɗin Cooldown
 
@@ -725,6 +724,21 @@ ta rate alama ɗaya ce da quota da ta ƙare. Iyakokin gaskiya:
 
 ---
 
+## Lokacin da ita kanta OmniRoute ba za a iya kaiwa ba
+
+Mai watsewar da'ira, sanyin haɗin haɗi, da kulle ƙirar ƙira duk suna gudana cikin ƙofar. Idan abokin ciniki ba zai iya isa bakin ƙofa ba, yana samun kuskuren haɗi. OmniRoute ba zai iya shiga wannan gazawar ba. Abokin ciniki ya yanke shawarar ko zai sake gwadawa da wane saƙo zai nuna.
+
+OmniRoute a halin yanzu yana ba da baya baya ga abokin ciniki kuma yana ayyana babu wata manufa game da shi. Sanya kowace hanya dabam a cikin abokin ciniki ko a gaban ƙofa.
+
+- `GET /api/health` yana duba rayuwa ba tare da tantancewa ba.
+- `GET /api/health/ping` yana bincika shirye-shiryen, gami da ko bayanan bayanan sun amsa.
+- `GET /api/monitoring/health` yana ba da ingantattun masu kira cikakken bayanin lafiya.
+- `omniroute launch <tool>` bincika `/api/monitoring/health` kafin fara abokin ciniki. Yana iya fara ƙofar gida ta atomatik. Tare da `--no-start`, ƙofar da ba za a iya kaiwa ba yana haifar da `GatewayUnreachable` da lambar fita `69`.
+
+Don cire haɗin abokin ciniki daga OmniRoute, bi [Maimaita tsarin abokin ciniki](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Warware Kurakurai
 
 - Combo mai nauyi (weighted) tana amsa da `503 all_targets_cooling_down` (an saita `Retry-After`, `diagnostics.excluded` yana lissafa kowace target tare da `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → an saita pool kuma an haɗa ta, kawai an keɓe kowace target saboda mai ƙidayar lokacin juriya; gargaɗin `[COMBO] Weighted selection: every target excluded before dispatch — …` yana ambaton dalilai da sakan da suka rage. `404 no_executable_targets` daga wannan combo yana nufin babu mai ƙidayar lokacin juriya da ya shiga (babu abin aiki, ko kowace account ta kasa binciken samuwa). An gina shi a `open-sse/services/combo/pinRecovery.ts` daga keɓewar da aka tattara a `targetResolution.ts`.
@@ -736,94 +750,68 @@ ta rate alama ɗaya ce da quota da ta ƙare. Iyakokin gaskiya:
 
 ---
 
-## Yanayin runtime — taƙaitaccen bayani ga agent
+## Runtime state — agent mai sauri tunani
 
-> An motsa shi kamar yadda yake daga `AGENTS.md` → "Resilience Runtime State" (PR #12743) domin jagorar agent
-> ta kasance ƙasa da kasafin context na 40k. Wannan shi ne ra'ayin da aka taƙaita wa agent na
-> sassan da ke sama; sassan da aka lamba su ne cikakken bayani.
+> An matsar da kai tsaye daga `AGENTS.md` → "Jihar Runtime Resilience" (PR #12743) don haka jagorar wakili ya tsaya ƙarƙashin kasafin mahallin 40k. Yana da maƙarƙashiya, ra'ayin wakili na sassan da ke sama; sassan da aka ƙidaya sun kasance cikakken bayani.
 
-OmniRoute yana da hanyoyi uku masu alaƙa amma daban-daban na magance gazawar wucin gadi. Riƙe
-fagen kowanne a daban lokacin warware halin tsara hanya. Duba
-[zane-zanen juriya na matakai 3](../diagrams/exported/resilience-3layers.svg)
-(tushe: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-don taswira da za a fahimta da wuri.
+OmniRoute yana da alaƙa guda uku amma daban-daban hanyoyin gazawar wucin gadi. Kiyaye iyakokin su daban lokacin da za a gyara halayen tuƙi. Duba zanen [juriya mai Layer 3](../diagrams/exported/resilience-3layers.svg) (tushen: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) don taswirar kallo-kallo.
 
-### Mai Yanke Da'ira na Provider (Provider Circuit Breaker)
+### Mai Bayar da Wuta
 
-**Fage**: dukan provider, misali `glm`, `openai`, `anthropic`.
+**Iyakar** : dukan mai bada, misali `glm`, `openai`, `anthropic`.
 
-**Manufa**: dakatar da aika zirga-zirga zuwa provider da ke ci gaba da gazawa a matakin
-upstream/sabis, domin provider ɗaya mara lafiya kada ya jinkirtar da kowace buƙata.
+**Manufar** : daina aika zirga-zirga zuwa ga mai ba da sabis wanda ke raguwa akai-akai a matakin upstream/service, don haka mai ba da lafiya mara lafiya baya rage kowace buƙata.
 
-**Aiwatarwa**:
+**Aiwatarwa** :
 
-- Babban class: `src/shared/utils/circuitBreaker.ts`
-- Haɗin ƙofa/aiwatarwa na chat: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API na yanayin runtime: `src/app/api/monitoring/health/route.ts`
-- Abubuwan rufewa da ake amfani da su tare: `open-sse/services/accountFallback.ts`
-- Teburin yanayin da aka adana: `domain_circuit_breakers`
+- Core class: `src/shared/utils/circuitBreaker.ts`
+- Taɗi gate/execution wayoyi: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Runtime status API: `src/app/api/monitoring/health/route.ts`
+- Abubuwan da aka raba: `open-sse/services/accountFallback.ts`
+- Teburin jiha mai dagewa: `domain_circuit_breakers`
 
-**Yanayi** (4 — `src/shared/utils/circuitBreaker.ts`):
+**Jihohi** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: ana ƙyale zirga-zirga na yau da kullum.
-- `DEGRADED`: yankin gargaɗi na farko — gazawu sun wuce matakin raguwa amma ba su kai
-  matakin mai yanke da'ira ba tukuna; zirga-zirga na ci gaba da gudana, dashboards na nuna
-  gargaɗin. Gwajin haɗi da ya yi nasara ko tagar shiru ba tare da sabuwar gazawa ba zai
-  mayar da shi `CLOSED`
-  (`docs/architecture/RESILIENCE_GUIDE.md` yana da tagar).
-- `OPEN`: an toshe provider na wucin gadi; masu kira na samun amsar provider-circuit-open
-  ko kuma tsara hanyar combo tana tsallakawa zuwa wani target.
-- `HALF_OPEN`: lokacin jira na reset ya wuce; ƙyale buƙatar bincike. Nasara tana rufe
-  mai yanke da'ira, gazawa tana buɗe shi kuma.
+- `CLOSED`: an ba da izinin zirga-zirga na yau da kullun.
+- `DEGRADED`: ƙungiyar gargaɗin farko — gazawar ta ƙetare iyakar ƙasƙantar da kai amma ba tukuna ba tukuna; zirga-zirga har yanzu yana gudana, dashboards suna nuna gargaɗin. Gwajin haɗi mai inganci ko taga shiru ba tare da sabon gazawa ba yana mayar da shi zuwa `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` yana da taga).
+- `OPEN`: an toshe mai bada sabis na ɗan lokaci; masu kira suna samun amsawa-buɗaɗɗen amsawa ko tsallakawa zuwa wata manufa.
+- `HALF_OPEN`: sake saita lokaci ya wuce; ba da izinin buƙatun bincike. Nasara tana rufe mai karyawa, gazawar ta sake buɗewa.
 
-**Asali** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, ana amfani da shi ta
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` a `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` a `src/sse/handlers/chatHelpers.ts`). Mai yanke da'irar
-dukan provider yana aiki bisa `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Default** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, cinyewa ta hanyar `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` a cikin `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` a cikin `src/sse/handlers/chatHelpers.ts`). Mai karyawar gabaɗaya mai bayarwa yana gudana akan `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profile      | yana raguwa a | yana buɗewa a (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
-| ------------ | ------------: | ----------------------------------------: | ----------------------------: |
-| OAuth        |           `5` |                                       `8` |                         `60s` |
-| Maɓallin API |           `7` |                                      `12` |                         `30s` |
-| Na gida      |    (an fitar) |                                       `2` |                         `15s` |
+| Bayanan martaba | wulakantacce a | yana buɗewa a (`circuitBreakerThreshold`) | sake saita (`circuitBreakerReset`) |
+| --------------- | -------------: | ----------------------------------------: | ---------------------------------: |
+| OAuth           |            `5` |                                       `8` |                              `60s` |
+| API key         |            `7` |                                      `12` |                              `30s` |
 
-`PROVIDER_PROFILES` kuma yana ayyana `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (minti 15/30/5) da `providerCooldownMs` (minti 5/10/1): waɗannan su ne ke
-tafiyar da **ƙofar tagar Provider Cooldown ta duniya wadda ake zaɓi (opt-in)** (`PROVIDER_COOLDOWN_ENABLED`, a asali
-a kashe) — ana ƙidaya shigar matakin provider a `open-sse/services/providerCooldownTracker.ts` a matsayin
-tana sanyaya ne kawai bayan gazawu `providerFailureThreshold` a cikin `providerFailureWindowMs`, sannan
-tana sanyaya har na `providerCooldownMs`. Waɗannan BA ƙimomin mai yanke da'ira mai rai ba
-ne — kada ka daidaita su kana sa ran halin mai yanke da'ira. Ana iya tilasta kowane asali ta
-masu canjin muhalli `OMNIROUTE_PROVIDER_BREAKER_*` da `OMNIROUTE_CIRCUIT_BREAKER_*`;
-teburin bayanin da ya dace da runtime yana cikin `docs/architecture/RESILIENCE_GUIDE.md`.
+Profiler `local` (`2` gazawa / `15s`) shima yana cikin `PROVIDER_PROFILES`, amma ba a haɗa shi cikin mai karyawa: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) kawai yana karɓar `oauth` ko `apikey`, kuma `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) ya dawo da ɗayan waɗannan biyun (masu samar da rajista ba su sami `apikey`).
 
-Yanayin gazawa na matakin provider kawai ya kamata ya kunna mai yanke da'irar provider:
+`PROVIDER_PROFILES` kuma yana bayyana `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) da `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, inda ma'auni na gida ba su da tushe don wannan dalili kamar na sama: waɗannan suna da iko.** Ƙofar taga na ficewa daga Mai ba da Cooldown na duniya** (`PROVIDER_COOLDOWN_ENABLED`, tsoho a kashe) — shigarwa matakin mai bayarwa a cikin `open-sse/services/providerCooldownTracker.ts` kawai yana ƙididdigewa azaman sanyaya ne bayan gazawar `providerFailureThreshold` a cikin `providerFailureWindowMs`, sannan yayi sanyi don `providerCooldownMs`. Su ne NOT madaidaicin madaidaicin rayayyun — ba sa daidaita su da tsammanin halayen karya. Kowane tsoho yana da lalacewa ta hanyar `OMNIROUTE_PROVIDER_BREAKER_*` da `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; Madaidaicin tebur na lokaci-lokaci yana rayuwa a cikin `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Matsayin gazawar matakin mai bayarwa ne kawai ya kamata ya ɓata mai warwarewar:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Kada a kunna mai yanke da'irar dukan provider saboda kurakuran account/maɓalli/model na yau da kullum kamar yawancin
-lokutan `401`, `403`, ko `429`. Waɗancan yawanci na cooldown na haɗi ko lockout na model
-ne. `403` na provider na maɓallin API na gaba ɗaya ya kamata ya iya dawowa sai dai idan an rarraba
-shi a matsayin kuskuren provider/account na ƙarshe.
+Kar a tuntuɓi mai ba da sabis gabaɗaya don kurakuran account/key/model na yau da kullun kamar yawancin lamuran `401`, `403`, ko `429`. Waɗancan yawanci suna cikin yanayin sanyin haɗi ko kulle ƙirar ƙira. Mai ba da maɓalli na API na gaba ɗaya `403` yakamata a iya murmurewa sai dai idan an ƙirƙira shi azaman kuskuren provider/account na ƙarshe.
 
-Mai katsewa yana amfani da murmurewar banɗakewa, ba mai ƙidayar lokaci na bango ba. Idan `OPEN` ya ƙare, karatun kamar `getStatus()`, `canExecute()`, da `getRetryAfterMs()` suna sabunta matsayin zuwa `HALF_OPEN`, don haka dashboards da masu gina zaɓaɓɓun haɗe-haɗen combo ba za su ci gaba da fitar da mai samarwa da ya ƙare har abada ba.
+Mai karyawa yana amfani da farfadowar kasala, ba mai ƙidayar lokaci ba. Lokacin da `OPEN` ya ƙare, a karanta kamar `getStatus()`, `canExecute()`, da `getRetryAfterMs()` suna wartsakar da jihar zuwa `HALF_OPEN`, don haka dashboards da ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun ƙwararrun qungiyoyin da masu ginawa da masu ginin gine-gine ba su ci gaba da keɓance ma'aikatan da suka ƙare ba har abada.
 
-### Lokacin Hutawar Haɗin Gwiwa
+### Haɗin Cooldown
 
-**Yanki**: haɗin gwiwa/asusu/maƙallin mai samarwa guda ɗaya.
+**Iyakar** : daya mai bayarwa connection/account/key.
 
-**Dalili**: tsallake maƙalli/asusu mara kyau ɗaya na wucin gadi yayin da ake barin sauran haɗin gwiwa na wannan mai samarwa su ci gaba da bauta wa buƙatun.
+**Manufar** : tsallake key/account mara kyau na ɗan lokaci yayin ba da damar sauran haɗin kai don mai bayarwa iri ɗaya don ci gaba da ba da buƙatun.
 
-**Aiwatarwa**:
+**Aiwatarwa** :
 
-- Hanyar rubutawa/sabuntawa: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Zaɓen asusu/tacewa: `src/sse/services/auth.ts::getProviderCredentials...`
-- Lissafin hutawa: `open-sse/services/accountFallback.ts::checkFallbackError()`
-- Saitunan: `src/lib/resilience/settings.ts`
+- Write/update : `src/sse/services/auth.ts::markAccountUnavailable()`
+- Account selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Ƙimar sanyi: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Saituna: `src/lib/resilience/settings.ts`
 
-Manyan filayen a kan haɗin gwiwar masu samarwa:
+Filaye masu mahimmanci akan haɗin kai:
 
 ```ts
 rateLimitedUntil;
@@ -834,50 +822,50 @@ errorCode;
 backoffLevel;
 ```
 
-Lokacin zaɓen asusu, ana tsallake haɗin gwiwa yayin:
+Yayin zabar asusu, ana tsallake haɗin kai yayin:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Hutawa ma na banɗakewa ne: idan `rateLimitedUntil` ya wuce, haɗin gwiwa yana sake samun cancanta. Bayan amfani mai nasara, `clearAccountError()` yana share `testStatus`, `rateLimitedUntil`, filayen kuskure, da `backoffLevel`.
+Cooldowns kuma malalaci ne: lokacin da `rateLimitedUntil` ta kasance a baya, haɗin zai sake cancanta. A kan nasarar amfani, `clearAccountError()` yana share `testStatus`, `rateLimitedUntil`, filayen kuskure, da `backoffLevel`.
 
-Halin hutawar haɗin gwiwa na tsoho:
+Tsohuwar halayen kwantar da hankali:
 
-- Hutawar tushe ta OAuth: `5s`.
-- Hutawar tushe ta API-key: `3s`.
-- API-key `429` ya kamata ya fi amfani da alamun sake gwadawa daga sama (`Retry-After`, kanun bayanai na sake saitawa, ko rubutun sake saitawa da za a iya karanta shi) idan suna akwai.
-- Maimaitawar gazawuwar da za a iya murmurewa tana amfani da jinkiri mai ƙaruwa ta nuni (exponential backoff):
+- OAuth tushe cooldown: `5s`.
+- API-key tushe sanyi: `3s`.
+- API-key `429` yakamata ya fifita alamun sake gwadawa na sama (`Retry-After`, sake saiti na kan kai, ko rubutun sake saitin sake saiti) idan akwai.
+- Rashin nasara mai maimaitawa yana amfani da koma baya mai ma'ana:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Kariyar anti-thundering-herd tana hana gazawuwar lokaci guda a kan wannan haɗin gwiwa daga maimaita tsawaita hutawa ko ƙara `backoffLevel` har sau biyu.
+The anti-thundering-garken garke yana hana gazawar lokaci guda akan haɗin gwiwa ɗaya daga maimaita sanyi ko ƙara sau biyu `backoffLevel`.
 
-Matsayoyin ƙarshe ba hutawa ba ne. `banned`, `expired` (wanda ke zama na ƙarshe ne kawai bayan sake gwadawa N da aka iyakance ta `EXPIRED_RETRY_MAX`), da `credits_exhausted` ana shirin su kasance ba a samun su ba sai an canza bayanan shiga/saitunan ko mai gudanarwa ya sake saita su. Kada a rubuta matsayoyin ƙarshe da matsayin hutawa na wucin gadi.
+Jihohin tasha ba masu sanyi ba ne. `banned`, `expired` (wanda ke zama m kawai bayan N da aka sake gwadawa ta hanyar `EXPIRED_RETRY_MAX`), kuma `credits_exhausted` ana nufin ya kasance babu samuwa har sai credentials/settings ya canza ko mai aiki ya sake saita su. Kar a sake rubuta jihohin tasha tare da yanayin sanyi na wucin gadi.
 
-### Kullewar Samfuri
+### Kulle Model
 
-**Yanki**: mai samarwa + haɗin gwiwa + samfuri.
+**Iyakar** : mai bada + haɗin + model.
 
-**Dalili**: guji kashe duka haɗin gwiwa lokacin da samfuri guda ɗaya ne kawai ba a samu ko aka iyakance masa rabo a wannan haɗin gwiwa.
+**Manufar** : guje wa kashe gabaɗayan haɗin kai lokacin da babu samfuri ɗaya kawai ko ke da iyaka ga wannan haɗin.
 
 Misalai:
 
-- Masu samar da rabo na kowane-samfuri da ke mayar da `429`.
-- Masu samarwa na gida da ke mayar da `404` domin samfuri ɗaya da ba a samu ba.
-- Gazawar izinin yanayi/samfuri na wani takamaiman mai samarwa kamar zaɓaɓɓun yanayin Grok.
+- Masu ba da kewayon ƙididdiga na kowane samfuri suna dawo da `429`.
+- Masu samar da gida suna dawo da `404` don ƙira ɗaya da ya ɓace.
+- Fassara takamammen mai ba da izini mode/model kamar zaɓaɓɓun hanyoyin Grok.
 
-Kullewar samfuri tana cikin `open-sse/services/accountFallback.ts` kuma tana barin wannan haɗin gwiwa ya ci gaba da bauta wa sauran samfuran.
+Makullin ƙirar yana rayuwa a cikin `open-sse/services/accountFallback.ts` kuma yana barin haɗin guda ɗaya ya ci gaba da hidimar wasu ƙira.
 
-### Jagorar Gano Kura-kurai
+### Jagorar gyara kuskure
 
-- Idan an tsallake duk maƙallan wani mai samarwa, duba duka matsayin mai katsewar mai samarwa da `rateLimitedUntil`/`testStatus` na kowane haɗin gwiwa.
-- Idan wani mai samarwa ya bayyana an fitar da shi har abada bayan tagar sake saitawa, duba ko lambar tana karanta `state` kai tsaye maimakon amfani da `getStatus()`/`canExecute()`.
-- Idan maƙallin mai samarwa ɗaya ya gaza amma sauran ya kamata su yi aiki, fi son hutawar haɗin gwiwa a kan mai katsewar mai samarwa.
-- Idan samfuri ɗaya ne kawai ya gaza, fi son kullewar samfuri a kan hutawar haɗin gwiwa.
-- Idan wani matsayi ya kamata ya murmure da kansa, ya kamata ya kasance da tambarin lokaci na gaba/lokacin sake saitawa da hanyar karantawa da ke sabunta matsayin da ya ƙare. Matsayoyin dindindin suna buƙatar canje-canjen bayanan shiga ko saituna da hannu.
+- Idan an tsallake duk maɓallan mai bayarwa, duba yanayin mai ba da izini da kowane haɗin `rateLimitedUntil`/`testStatus`.
+- Idan mai bada ya bayyana na dindindin bayan taga sake saiti, duba ko lambar tana karanta raw `state` maimakon amfani da `getStatus()`/`canExecute()`.
+- Idan maɓallin mai bada ɗaya ya gaza amma wasu yakamata suyi aiki, gwammaci sanyin haɗi akan mai warwarewar mai badawa.
+- Idan samfurin ɗaya kawai ya gaza, fi son kulle ƙirar akan sanyin haɗi.
+- Idan jihar ta kamata ta murmure da kanta, yakamata ta sami lokacin timestamp/reset na gaba da kuma hanyar karantawa wanda ke sabunta yanayin ƙarewa. Matsayi na dindindin yana buƙatar takaddun shaidar hannu ko daidaita canje-canje.
 
 ---
 

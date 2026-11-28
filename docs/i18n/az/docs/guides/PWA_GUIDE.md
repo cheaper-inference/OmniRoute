@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute tam quraşdırıla bilən Proqressiv Veb Tətbiq kimi təqdim olunur. İdarəetmə panelinə istənilən mobil brauzerdən — Android (Chrome) və ya iOS (Safari) — daxil olduqda, **"Əsas ekrana əlavə et"** seçimi ilə heç bir tətbiq mağazasına ehtiyac olmadan yerli tətbiqə bənzər təcrübə əldə edə bilərsiniz.
+Əsas ekranınızdan və ya masaüstünüzdən müstəqil pəncərədə açmaq üçün OmniRoute tablosunu Proqressiv Veb Tətbiqi kimi quraşdırın. Quraşdırılmış proqram hələ də naviqasiya, idarə paneli məlumatları və API sorğuları üçün OmniRoute serverinizə qoşulmalıdır. Keşlənmiş statik aktivlər oflayn şlüz və ya oflayn idarə paneli təmin etmir.
 
 ## PWA nədir?
 
-Proqressiv Veb Tətbiq OmniRoute veb idarəetmə panelini görünüş və istifadə baxımından yerli mobil tətbiqə bənzər həllə çevirir. Quraşdırıldıqdan sonra o:
+Proqressiv Veb Tətbiqi proqram piktoqramı və ayrıca pəncərəsi olan veb tablosundan istifadə edir. Quraşdırıldıqdan sonra OmniRoute:
 
-- Öz ikonası ilə əsas ekranınızdan başladılır
-- Tam ekran rejimində açılır — brauzerin ünvan sətri və ya tab interfeysi olmur
-- Xüsusi bağlantı səhifəsi ilə oflayn rejimdə işləyir
-- Daha sürətli yüklənmə üçün statik resursları keşləyir
-- Həm portret, həm də albom istiqamətlərini dəstəkləyir
+- Əsas ekranınızdan və ya masaüstünüzdən işə salınır
+- Brauzerin adi ünvan çubuğu və nişanları olmadan müstəqil rejimdə açılır
+- Seçilmiş statik aktivləri keşləyir
+- Portret və landşaft istiqamətlərini dəstəkləyir
 
 ## Quraşdırma
 
+Başqa bir cihazdakı server üçün HTTPS ünvanından istifadə edin. Server eyni cihazda işlədikdə, `http://localhost:20128` brauzerin quraşdırılması tələblərinə də cavab verir. Düz `http://YOUR_IP:20128` ünvanı bu tələblərə cavab vermir. Quraşdırma menyuları və göstərişləri brauzerdən və əməliyyat sistemindən asılıdır. [MDN-nin PWA quraşdırma tələblərinə](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required) baxın.
+
 ### Android (Chrome)
 
-1. OmniRoute idarəetmə panelini Chrome-da açın: `http://YOUR_IP:20128`
-2. Chrome avtomatik olaraq **"OmniRoute-u əsas ekrana əlavə et"** bannerini göstərəcək. Alternativ olaraq:
-   - **⋮** menyusuna (üç nöqtə) toxunun → **"Əsas ekrana əlavə et"** və ya **"Tətbiqi quraşdır"**
-3. Sorğunu təsdiqləyin
-4. OmniRoute əsas ekranınızda müstəqil tətbiq kimi görünəcək
+1. OmniRoute HTTPS ünvanınızı və ya eyni telefonda server üçün `http://localhost:20128` açın.
+2. açın**⋮** menyu və seçin** Proqramı quraşdırın** və ya** Əsas ekrana əlavə edin** , təklif olunarsa.
+3. Sorğunu təsdiq edin.
+4. Əsas ekrandan OmniRoute açın.
 
 ### iOS (Safari)
 
-1. OmniRoute idarəetmə panelini Safari-də açın: `http://YOUR_IP:20128`
-2. **Paylaş** düyməsinə (oxlu qutu) toxunun
-3. Aşağı sürüşdürün və **"Əsas ekrana əlavə et"** seçiminə toxunun
-4. Ona ad verin (standart olaraq "OmniRoute") və **Əlavə et** seçiminə toxunun
-5. OmniRoute tətbiq ikonası ilə əsas ekranınızda görünəcək
+1. Safari-də OmniRoute HTTPS ünvanınızı açın.
+2. vurun** Paylaşın** →** Əsas Ekrana əlavə edin** .
+3. Adı təsdiqləyin və vurun** Əlavə et** .
+4. Əsas ekrandan OmniRoute açın.
 
 ### Masaüstü (Chrome / Edge)
 
-1. OmniRoute idarəetmə panelini açın
-2. Ünvan sətrindəki **quraşdırma ikonasına** klikləyin (və ya ⋮ → "OmniRoute-u quraşdır...")
-3. Sorğunu təsdiqləyin
-4. OmniRoute müstəqil pəncərə kimi açılacaq — tablar və ünvan sətri olmadan
+1. OmniRoute idarə panelinizi açın.
+2. Brauzerin quraşdırma simgesini və ya istifadə edin** Proqramı quraşdırın** təklif olunarsa, menyu girişi.
+3. OmniRoute öz pəncərəsində açmaq üçün sorğunu təsdiqləyin.
 
 ## Xüsusiyyətlər
 
-### Tam ekran təcrübəsi
+### Bağımsız Pəncərə
 
-Manifest `display: "fullscreen"` ilə konfiqurasiya edilib. Bu, quraşdırılmış tətbiqin bütün ekrandan istifadə etməsi deməkdir — brauzer interfeysi yoxdur və status sətri üst-üstə düşmür. Bu, idarəetmə panelinə həqiqi yerli tətbiq görünüşü və təəssüratı verir.
+Manifest `display: "standalone"` və `start_url: "/dashboard"` dəstləridir. Quraşdırılmış proqram idarəetmə panelini proqram pəncərəsində açır. Brauzer və əməliyyat sistemi idarəetmə elementləri hələ də görünə bilər; manifest tam ekran rejimi tələb etmir.
 
-### Oflayn dəstəyi
+### Keşlənmiş Aktivlər və Şəbəkə Tələbləri
 
-OmniRoute ağıllı keşləməni təmin edən xidmət işçisini (`sw.js`) ehtiva edir:
+[Xidmət işçisi](../../public/sw.js) seçilmiş eyni mənşəli resursları keşləyir:
 
-| Resurs növü                                                                                                                                                                                                                                        | Strategiya                        | Davranış                                                                                                               |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **Tətbiq qabığı**                                                                                                                                                                                                                                  | Əvvəlcə keş                       | `/`, `/offline`, manifest və ikonalar quraşdırma zamanı əvvəlcədən keşlənir                                            |
-| **Statik resurslar** (CSS, JS, şəkillər, şriftlər)                                                                                                                                                                                                 | Keş ehtiyatı ilə əvvəlcə şəbəkə   | Şəbəkədən yenilənmiş versiyanı əldə edir; oflayn olduqda keşə müraciət edir                                            |
-| **Next.js paketləri** (`/_next/`)                                                                                                                                                                                                                  | Keş yeniləməsi ilə əvvəlcə şəbəkə | Şəbəkədən əldə edir və keşi yeniləyir; oflayn olduqda keşlənmiş versiyanı təqdim edir                                  |
-| **Naviqasiya sorğuları**                                                                                                                                                                                                                           | Yan keçid (heç vaxt tutulmur)     | HTTP/3→HTTP/2 ehtiyat keçidini brauzer idarə edir; işləməyən QUIC soketi `Response.error()` nəticəsinə çevrilməməlidir |
-| **API / idarəetmə paneli marşrutları** (`/api/`, `/a2a`, `/dashboard`, klient API ləqəbləri `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, həmçinin `/callback`, `/login`; böyük-kiçik hərf fərqi nəzərə alınmadan uyğunlaşdırılır) | Yan keçid (heç vaxt keşlənmir)    | Həmişə birbaşa serverə yönləndirilir — xidmət işçisi tərəfindən heç vaxt tutulmur                                      |
+| Sorğu və ya aktiv                             | Strategiya     | Davranış                                                                                                                   |
+| --------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Quraşdırma vaxtı resursları                   | Əvvəlcədən keş | `/`, `/manifest.webmanifest`, `/icon-512.png` və `/apple-touch-icon.png` işçinin quraşdırılması zamanı yaddaşda saxlanılır |
+| Next.js statik aktivlər (`/_next/`)           | Şəbəkə - ilk   | Uğurlu cavablar keşi yeniləyir; şəbəkə xətası mövcud keşlənmiş cavaba qayıdır                                              |
+| Digər statik CSS, JS, şəkillər və şriftlər    | Keş-ilk        | Mövcud keşlənmiş cavab təkrar istifadə olunur; Uğurlu şəbəkə cavabları buraxılmış halda yaddaşda saxlanılır                |
+| Səhifə naviqasiyası                           | Yan keçin      | Brauzer birbaşa səhifəni alır; heç bir oflayn geri dönüş təmin edilmir                                                     |
+| API, tablosuna və autentifikasiya marşrutları | Yan keçin      | İşçi bu sorğulara müdaxilə etmir və ya keş etmir                                                                           |
+| Digər qeyri-statik sorğular                   | Şəbəkə         | Keş axtarışı və ya yaddaş yoxdur                                                                                           |
 
-### Oflayn səhifəsi
+İstisna edilən marşrutlar `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` və `/login`, yol sərhədlərində hərf hərfləri ilə uyğunlaşdırılmışdır. Çarpaz mənşəli və qeyri-GET sorğuları da işçidən yan keçir.
 
-Şəbəkə əlçatan olmadıqda və istifadəçi yeni səhifəyə keçdikdə, xidmət işçisi aşağıdakı imkanları təmin edən xüsusi `/offline` səhifəsini göstərir:
+### Əlaqə səhifəsi
 
-- Aydın **"Bağlantı problemi"** mesajını göstərir
-- Real vaxtda yenilənən canlı **onlayn/oflayn status göstəricisini** göstərir
-- Bağlantı bərpa edildikdə səhifəni yenidən yükləmək üçün **"Bağlantını yenidən yoxla"** düyməsini təqdim edir
-- Diaqnostika üçün **Status səhifəsinə** keçid verir
+`/offline` səhifəsi əlaqə mesajı, online/offline göstəricisi, a** Bağlantıya yenidən cəhd edin** düyməsi və status səhifəsinə keçid. elədir** qabaqcadan yaddaşda saxlanmayıb** və xidmət işçisi edir** yox** uğursuz naviqasiyaları ona yönləndirin. Onun mövcudluğu yeni səhifələri server olmadan əlçatan etmir.
 
-### Tətbiq ikonaları
+### Proqram İkonları
 
-OmniRoute hər platforma üçün optimallaşdırılmış ikonalar təqdim edir:
+Manifest bu PNG nişanlarını reklam edir:
 
-| Fayl                   | Ölçü             | İstifadə yeri                                |
-| ---------------------- | ---------------- | -------------------------------------------- |
-| `icon-512.png`         | 512×512          | Android quraşdırma sorğusu, başlanğıc ekranı |
-| `apple-touch-icon.png` | 180×180          | iOS əsas ekran ikonası                       |
-| `icon-192.svg`         | 192×192 (vektor) | Android adaptiv ikonası                      |
-| `apple-touch-icon.svg` | 180×180 (vektor) | Apple ehtiyat variantı                       |
-| `favicon.svg`          | Vektor           | Brauzer tabları                              |
-| `favicon.ico`          | Müxtəlif ölçülü  | Köhnə brauzerlər                             |
+| Fayl                   | Ölçü    | istifadə edin                            |
+| ---------------------- | ------- | ---------------------------------------- |
+| `icon-192.png`         | 192×192 | Ümumi proqram simvolu                    |
+| `icon-512.png`         | 512×512 | Ümumi və maskalana bilən proqram simvolu |
+| `apple-touch-icon.png` | 180×180 | Apple ana ekranı simvolu                 |
 
-### Avtomatik qeydiyyat
+Brauzer quraşdırma hədəfi üçün uyğun simvolu seçir.
 
-Xidmət işçisi kök tərtibatdakı `<PwaRegister />` komponenti vasitəsilə avtomatik qeydiyyata alınır. İstifadəçinin heç bir əməliyyat etməsinə ehtiyac yoxdur — brauzer etibarlı manifesti və xidmət işçisini aşkarlayan kimi tətbiq quraşdırıla bilən olur.
+### Avtomatik Qeydiyyat
 
-## Texniki Arxitektura
+Brauzer xidmət işçilərini dəstəklədiyi zaman `PwaRegister` işçini istehsalda qeyd edir. İnkişaf rejimi işçiləri qeydiyyatdan çıxarır və köhnə aktivlərin isti yenidən yükləməyə mane olmasının qarşısını almaq üçün keşləri təmizləyir. Quraşdırma göstərişləri brauzer qərarı olaraq qalır.
 
-### Veb Tətbiq Manifesti (`manifest.webmanifest`)
+## Texniki Memarlıq
 
-Next.js tərəfindən `src/app/manifest.ts` vasitəsilə yaradılır:
+### Veb Tətbiq Manifest
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+Next.js [`src/app/manifest.ts`](../../src/app/manifest.ts) dən `/manifest.webmanifest` yaradır. Onun əsas parametrləri bunlardır:
 
-### Xidmət İşçisi (`public/sw.js`)
+| Parametr              | Dəyər                                          |
+| --------------------- | ---------------------------------------------- |
+| `short_name`          | `OmniRoute`                                    |
+| `start_url`           | `/dashboard`                                   |
+| `scope`               | `/`                                            |
+| `display`             | `standalone`                                   |
+| `orientation`         | `any`                                          |
+| Fon və mövzu rəngləri | `PWA_THEME_COLORS` dan standart işıq palitrası |
 
-Heç bir freymvork asılılığı olmayan standart xidmət işçisi, aşağıdakı imkanları təqdim edir:
+Manifestin adı və təsviri həmin mənbə faylındakı statik dəyərlərdir. Quraşdırılmış manifest hər səfərdə nümunə adı parametrinə və ya aktiv palitraya əməl etmir.
 
-- **Quraşdırma mərhələsi**: Tətbiq qabığını (kök səhifə, oflayn səhifə, manifest və ikonlar) əvvəlcədən keşləyir
-- **Aktivləşdirmə mərhələsi**: Köhnə keş versiyalarını təmizləyir və bütün klientləri idarəetməyə götürür
-- **Sorğuların emalı mərhələsi**: Sorğu növünə (naviqasiya, statik resurs, API) əsaslanan ağıllı marşrutlaşdırma həyata keçirir
-- **Keş versiyalaşdırması**: `omniroute-pwa-v3` — yeniləmə zamanı yeni keşin yaradılmasını məcburi etmək üçün bunu artırın
+### Xidmət işçisi
 
-### Maket Metadatası (`src/app/layout.tsx`)
+[`public/sw.js`](../../public/sw.js) xidmət işçisi çərçivəsindən asılılığı yoxdur:
 
-Kök maket PWA tələblərinə uyğunluq üçün tələb olunan bütün meta teqlərini təmin edir:
+- **Quraşdırın:** yuxarıda sadalanan dörd resursu qabaqcadan yaddaşa alır və yeni işçini aktivləşdirir.
+- **Aktivləşdirin:** köhnə keş nəsillərini silir və müştəriləri iddia edir.
+- **Alın:** yuxarıdakı statik aktiv strategiyalarını və marşrut istisnalarını tətbiq edir.
+- **Versiya:** mənbə keşinin adı `omniroute-pwa-v3`; istehsal quruluşu keş identifikasiyasına möhür vurur.
+- **Bildirişlər:** daxil olan `push` hadisələrini idarə edir və bildiriş kliklədikdə fokuslanır və ya pəncərəni açır.
 
-- `/manifest.webmanifest` ünvanına yönələn `manifest` keçidi
-- iOS-da müstəqil rejim üçün `apple-web-app-capable: true`
-- `apple-web-app-status-bar-style: black-translucent`
-- Android Chrome üçün `mobile-web-app-capable: yes`
-- `theme-color: #0b0f1a`
-- ekranın kənarlarınadək renderləmə üçün `viewport-fit: cover`
+Təkcə təkan hadisəsi idarəçiləri aktiv təkan abunəsi və ya konfiqurasiya edilmiş server çatdırılması yaratmır. Yalnız PWA quraşdırıldığı üçün bildirişlərin aktiv olduğunu düşünməyin.
 
-### Komponent: `PwaRegister`
+### Layout Metadata və Qeydiyyat
 
-`src/shared/components/PwaRegister.tsx` ünvanında yerləşən bu klient komponenti:
+[`src/app/layout.tsx`](../../src/app/layout.tsx) manifest keçidi, Apple müstəqil metadata, mövzu rəngləri və `viewport-fit: cover` təmin edir. Səhifənin başlığı və Apple veb tətbiqinin başlığı nümunə adından istifadə edir. Canlı brauzer mövzu rəngi palitranı izləyir; quraşdırma manifesti standart açıq rəngdən istifadə edir.
 
-1. Qoşulma zamanı işə düşür (yalnız klient tərəfində)
-2. Brauzerdə `serviceWorker` dəstəyinin olub-olmadığını yoxlayır
-3. `/sw.js` faylını səssizcə qeydiyyatdan keçirir (tətbiqin bloklanmasının qarşısını almaq üçün xətalar nəzərə alınmır)
-4. Heç nə render etmir (`return null`) — bu, yalnız yan təsir yaradan komponentdir
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) müştəri üzərində işləyir və URL də ID quruluşu ilə `/sw.js` qeyd edir. O, uyğun olmayan keş nəsillərini aşkar edir və işçini sıfırlaya və köhnə quraşdırmadan bərpa etmək üçün bir dəfə yenidən yükləyə bilər. Qeydiyyatın uğursuzluğu tablosunu bloklamır.
 
-## Termux ilə İstifadə (Android)
+## Termux ilə istifadə edin (Android)
 
-OmniRoute Android-də Termux vasitəsilə işə salındıqda PWA problemsiz işləyir:
+1. Termux-da OmniRoute başlayın: `npx -y omniroute@latest`.
+2. Eyni telefonda Chrome-u açın: `http://localhost:20128`.
+3. Brauzerin quraşdırma menyusu vasitəsilə PWA quraşdırın.
+4. Paneldən istifadə edərkən Termux serverini işlək vəziyyətdə saxlayın.
 
-1. OmniRoute-u Termux-da başladın: `npx omniroute`
-2. Eyni telefonda Chrome-u açın: `http://localhost:20128`
-3. PWA-nı «Əsas ekrana əlavə et» vasitəsilə quraşdırın
-4. PWA yerli Termux serverinə qoşulur — hər şey birbaşa cihazda işləyir
+Telefon həm şluz, həm də onun idarə panelinə sahibdir. Uzaqdan AI provayderlərinə edilən sorğular hələ də şəbəkəyə giriş tələb edir. Quraşdırma və Android prosesinin ömrü boyu mülahizələr üçün [Termux bələdçisinə](TERMUX_GUIDE.md) baxın.
 
-Bu kombinasiya Android telefonunuzun həm **server** (Termux), həm də **klient** (PWA) olması deməkdir — tam müstəqil süni intellekt şlüzü.
+## Digər Cihazlardan istifadə edin
 
-## Digər Cihazlardan İstifadə
-
-PWA-nı OmniRoute serverinizə brauzer vasitəsilə çıxışı olan istənilən cihazda quraşdırın:
-
-- **Başqa telefon/planşet**: `http://PHONE_IP:20128` ünvanına keçin və PWA-nı quraşdırın
-- **Noutbuk**: Chrome/Edge-i açın və onu masaüstü PWA kimi quraşdırın
-- **Brauzerli smart televizor**: İdarə panelinə tam ekran rejimində daxil olun
+Telefonda, planşetdə və ya masaüstündə serverin HTTPS ünvanını açın, sonra həmin brauzerin quraşdırma prosesini izləyin. Server hər bir cihazdan əlçatan olmalıdır. Uzaqdan giriş seçimləri üçün [tunel bələdçisinə](../ops/TUNNELS_GUIDE.md) baxın.
 
 ## Fərdiləşdirmə
 
-### İnstan­sın Adı
+### Nümunə Adı
 
-PWA başlığı `Dashboard → Settings` bölməsindəki **İnstan­sın Adı** parametrini nəzərə alır. İnstan­sınızın adını «Mənim Süni İntellekt Şlüzüm» olaraq dəyişdirsəniz, quraşdırılmış PWA həmin adı göstərəcək.
+The** Nümunə Adı** parametr səhifə başlığı və Apple veb tətbiqinin başlığı daxil olmaqla, tablosunun metadatasını dəyişir. Yaradılmış manifest statik addan istifadə edir, ona görə də bu parametr artıq quraşdırılmış tətbiqin adının dəyişdirilməsinə zəmanət vermir.
 
 ### Fərdi Favikon
 
-`Dashboard → Settings` vasitəsilə fərdi favikon yükləsəniz, masaüstündəki PWA ikonu həmin fərdi ikonu əks etdirəcək. Mobil cihazların əsas ekranındakı ikonlar əvvəlcədən hazırlanmış `icon-512.png` və `apple-touch-icon.png` fayllarından istifadə edir.
+Fərdi favikon brauzerin favikonunu dəyişir. Quraşdırma manifesti hələ də yuxarıdakı PNG fayllarını reklam edir; favikonun dəyişdirilməsi həmin ev ekranı nişanlarını əvəz etmir.
 
 ## Məhdudiyyətlər
 
-- **Push bildirişləri yoxdur** — Xidmət işçisi Push API-ni tətbiq etmir. Bunun əvəzinə bildirişlər Electron tətbiqi tərəfindən idarə olunur.
-- **Fon sinxronizasiyası yoxdur** — Oflayn əməliyyatlar sonradan təkrar icra edilmək üçün növbəyə əlavə olunmur. PWA əsasən idarə panelinə baxış üçün nəzərdə tutulub.
-- **iOS məhdudiyyətləri** — iOS-dakı Safari bütün PWA funksiyalarını dəstəkləmir (məsələn, quraşdırma təklifləri əl ilə göstərilir və fon xidmət işçiləri məhduddur).
-- **Keş ölçüsü** — Xidmət işçisi yalnız statik resursları keşləyir. `/api/` marşrutlarından gələn böyük cavab məlumatları heç vaxt keşlənmir.
-- **Mobil cihazlarda fərdi ikonlar** — Tənzimləmələrdə favikonun dəyişdirilməsi mobil cihazdakı əsas ekran ikonunu yeniləmir (bunun üçün PWA ikonlarının yenidən yaradılması tələb olunur).
+- **Server bağlantısı tələb olunur:** səhifə naviqasiyası, tablosunun vəziyyəti və API sorğularının oflayn geri qaytarılması yoxdur.
+- **Fon sinxronizasiyası yoxdur:** oflayn hərəkətlər təkrar oxunmaq üçün növbəyə qoyulmur.
+- **Brauzer fərqləri:** quraşdırma menyuları, pəncərə təqdimatı və bildiriş dəstəyi platformaya görə dəyişir.
+- **API cavab keşi yoxdur:** işçi API, tablosunu və autentifikasiya marşrutlarını istisna edir.
+- **Statik quraşdırma nişanları:** həmin nişanların yenilənməsi reklam edilən aktivlərin dəyişdirilməsini tələb edir; brauzerlər quraşdırılmış metadatanı saxlaya bilər.
 
-## Fayllar üzrə arayış
+## Fayllara istinad
 
-| Fayl                                    | Məqsəd                                                                      |
-| --------------------------------------- | --------------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Next.js manifest marşrutu (`manifest.webmanifest` yaradır)                  |
-| `public/sw.js`                          | Keşləmə məntiqinə malik xidmət işçisi                                       |
-| `src/shared/components/PwaRegister.tsx` | Xidmət işçisini qeydiyyatdan keçirən müştəri komponenti                     |
-| `src/app/offline/page.tsx`              | Canlı status göstəricisinə malik oflayn ehtiyat səhifəsi                    |
-| `src/app/layout.tsx`                    | PWA metaməlumatlarına (apple-web-app, theme-color və s.) malik kök tərtibat |
-| `public/icon-512.png`                   | 512×512 PNG ikon (Android, açılış ekranı)                                   |
-| `public/apple-touch-icon.png`           | 180×180 PNG ikon (iOS əsas ekranı)                                          |
-| `public/icon-192.svg`                   | 192×192 SVG ikon (Android adaptiv ikonu)                                    |
-| `public/apple-touch-icon.svg`           | 180×180 SVG ikon (Apple ehtiyat ikonu)                                      |
+| Fayl                                                                                   | Məqsəd                                                |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Yaradılmış veb tətbiq manifest                        |
+| [public/sw.js](../../public/sw.js)                                                     | Keşləmə, istisnalar və bildiriş hadisəsi işləyiciləri |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | İstehsalın qeydiyyatı və köhnəlmiş keşin bərpası      |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Qoşulma səhifəsi, avtomatik oflayn geri dönüş deyil   |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Səhifə metadatası və görünüş pəncərəsi parametrləri   |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Paylaşılan mövzu-rəng dəyərləri                       |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 proqram simvolu                             |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple nişanı                                |

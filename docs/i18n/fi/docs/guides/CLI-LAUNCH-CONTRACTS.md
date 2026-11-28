@@ -12,6 +12,12 @@ Neutraali `config/cli-tools-manifest.json` -sopimus ilmoittaa kanonisen IDs, ali
 
 Keskeytys- ja lopetussignaalit välitetään lapselle. Käynnistysohjelma odottaa lapsen sulkemistapahtumaa ennen väliaikaisen määrityksen poistamista. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` ohjaa lisäaikaa ennen pakotettua lopettamista (oletus 5000 millisekuntia).
 
+`omniroute launch <tool>` (katso [LAUNCH.md](./LAUNCH.md) ) noudattaa samoja ympäristösääntöjä ja signaalin edelleenlähetystä ja lisää:
+
+- **Yhdyskäytävän automaattinen käynnistys.** Paikalliselle kohteelle, kun portissa ei vastaa yhdyskäytävää, kantoraketti käynnistää `omniroute serve --headless --no-open` sidottuna `127.0.0.1` irrotetun reaper-prosessin alaisena. Jokaisella käynnissä olevalla laukaisulla on `DATA_DIR/launch/leases/` n vuokrasopimus (syke 15 sekunnin välein, vanhentunut 45 sekunnin kuluttua tai kun sen prosessi on poissa). Viikatemies pysäyttää aloittamansa yhdyskäytävän, kun mitään vuokrasopimusta ei ole ollut voimassa joutokäynnin armon ajaksi (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, oletusarvo 10 000 millisekuntia). Käyttäjän käynnistämää yhdyskäytävää käytetään, mutta sitä ei koskaan pysäytetty. `--keep-gateway` tai `omniroute gateway keep` muuttaa kantorakettiyhdyskäytävän tavalliseksi; `--no-start` palauttaa vanhan epäonnistua jos alas -käyttäytymisen. Vain etäkohteet tutkitaan.
+- **Käynnistä istunnot.** Jokainen käynnistys luo lyhytaikaisen `olx_` istuntotunnisteen ylätason valtuustiedoista (`POST /api/launch/sessions`), sykee sitä, kun työkalu on käynnissä, lukee käyttöyhteenvedon ja peruuttaa sen työkalun poistuttua. Tunnus on sen ylätason tiukka osajoukko: samat käyttöoikeudet, sama tai kapeampi luettelo, lyhyempi käyttöikä, eikä se ole kojelaudan valtuustieto. Työkalu vastaanottaa istuntotunnisteen, ei koskaan ylätason valtuustietoja, ja pyynnöt merkitään `launch:<tool>:<sessionId>` ellei `--tag` ole annettu. Yhdyskäytävä ilman istuntoa API epäonnistuu `GatewayTooOld` kanssa sen sijaan, että se palaisi suojaamattomaan käynnistykseen.
+- **Käynnistyskohtainen konfigurointi.** Työkalun konfigurointitiedostot kirjoitetaan yksityiseen väliaikaiseen hakemistoon (tila 0700, etuliite `omnirouter-`) ja poistetaan, kun lapsi poistuu. Kantoraketin `SIGKILL` jättää hakemiston taakse; `omniroute launch --cleanup` poistaa tällaiset hakemistot, kun ne ovat yli vuorokauden vanhempia.
+
 ## Gemini jatkuva asennus
 
 ```bash

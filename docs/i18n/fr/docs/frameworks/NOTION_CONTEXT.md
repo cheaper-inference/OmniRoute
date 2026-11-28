@@ -62,42 +62,31 @@ Les trois méthodes nécessitent une authentification au tableau de bord (`isAut
 OmniRoute enregistre le jeton et exécute immédiatement une recherche de test limitée à 1 résultat ; si Notion
 renvoie un objet d’erreur, le jeton est supprimé et l’appel échoue avec le code `400`.
 
-## Outils MCP (6)
+## outils MCP (6)
 
-Définis dans `open-sse/mcp-server/tools/notionTools.ts`. Le jeton est récupéré au moment de l’appel
-via `getNotionToken()` ; si aucun jeton n’est configuré, l’outil génère l’erreur
-`"Le jeton d’intégration Notion n’est pas configuré. Définissez-le dans Paramètres > Sources de contexte."`
+Défini dans `open-sse/mcp-server/tools/notionTools.ts`. Le jeton est résolu au moment de l'appel via `getNotionToken()`; si aucun n'est configuré, l'outil lance `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Outil                        | Portée         | Description                                                                                                           |
-| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Recherche des pages et des bases de données à partir d’une requête textuelle (renvoie les titres, ID et URL). Paginé. |
-| `notion_get_page`            | `read:notion`  | Récupère le contenu et les métadonnées d’une page à partir de son ID.                                                 |
-| `notion_list_block_children` | `read:notion`  | Répertorie tous les blocs enfants d’un bloc ou d’une page (l’arborescence des blocs). Paginé.                         |
-| `notion_query_database`      | `read:notion`  | Interroge une base de données avec `filter` + `sorts` facultatifs (format de l’API Notion). Paginé.                   |
-| `notion_get_database`        | `read:notion`  | Récupère le schéma et les métadonnées d’une base de données à partir de son ID.                                       |
-| `notion_append_blocks`       | `write:notion` | Ajoute des blocs enfants à un bloc ou à une page existants (100 blocs maximum par requête).                           |
+| Outil                        | Portée         | Description                                                                                                 |
+| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Rechercher des pages et des bases de données par requête textuelle (renvoie les titres, IDs, URLs). Paginé. |
+| `notion_get_page`            | `read:notion`  | Obtenez le contenu et les métadonnées d'une page par son ID.                                                |
+| `notion_list_block_children` | `read:notion`  | Répertorie tous les enfants de bloc d'un bloc ou d'une page (l'arborescence des blocs). Paginé.             |
+| `notion_query_database`      | `read:notion`  | Interrogez une base de données avec `filter` + `sorts` en option (format Notion API ). Paginé.              |
+| `notion_get_database`        | `read:notion`  | Obtenez le schema/metadata d'une base de données par ID.                                                    |
+| `notion_append_blocks`       | `write:notion` | Ajoutez des enfants de bloc à un bloc ou une page existante (maximum 100 blocs par requête).                |
 
-### Paramètres d’entrée
+### Paramètres d'entrée
 
-- `notion_search` — `query` (1 à 500 caractères), `pageSize` (1 à 100, valeur par défaut : 20),
-  `startCursor` (facultatif).
-- `notion_get_page` — `pageId` (hexadécimal de 32 caractères ou UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1 à 100, valeur par défaut : 50),
-  `startCursor` (facultatif).
-- `notion_query_database` — `databaseId`, `filter` (facultatif, format de filtre Notion),
-  `sorts` (tableau facultatif), `pageSize` (1 à 100, valeur par défaut : 50), `startCursor` (facultatif).
+- `notion_search` — `query` (1 à 500 caractères), `pageSize` (1 à 100, 20 par défaut), `startCursor` (facultatif).
+- `notion_get_page` — `pageId` (32 caractères hexadécimaux ou UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1-100, 50 par défaut), `startCursor` (facultatif).
+- `notion_query_database` — `databaseId`, `filter` (facultatif, format de filtre Notion ), `sorts` (tableau facultatif), `pageSize` (1 à 100, 50 par défaut), `startCursor` (facultatif).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (tableau d’objets de bloc),
-  `after` (position facultative).
+- `notion_append_blocks` — `blockId`, `children` (tableau d'objets bloc), `after` (position facultative).
 
 ### Portées
 
-Les outils de lecture nécessitent `read:notion` et l’outil d’écriture nécessite `write:notion`.
-Les portées sont appliquées par `withScopeEnforcement()` dans
-`open-sse/mcp-server/server.ts` uniquement lorsque `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ; les
-portées autorisées de l’appelant proviennent de `OMNIROUTE_MCP_SCOPES` (séparées par des virgules) ou du
-contexte de portée de la clé API authentifiée. Consultez [MCP-SERVER.md](./MCP-SERVER.md) pour connaître le
-modèle complet des portées.
+Les outils de lecture nécessitent `read:notion` et l'outil d'écriture nécessite `write:notion`. Les portées sont appliquées par `withScopeEnforcement()` dans `open-sse/mcp-server/server.ts` lorsque `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, et toujours pour un appelant HTTP/SSE dont la clé API manque `manage`/`admin`; les étendues autorisées de l'appelant proviennent de `OMNIROUTE_MCP_SCOPES` (séparés par des virgules) ou du contexte d'étendue de la clé API authentifiée. Voir [MCP-SERVER.md](./MCP-SERVER.md) pour le modèle complet.
 
 ## Points de terminaison
 

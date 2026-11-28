@@ -4,18 +4,11 @@
 
 ---
 
-> **ვერსია:** v3.8.51
-> **ბოლო განახლება:** 2026-06-28
-> **აუდიტორია:** ინჟინრები, რომლებსაც წვლილი შეაქვთ OmniRoute-ში ან მის საფუძველზე ინტეგრაციებს ქმნიან.
+> **ვერსია:** v3.8.51** აუდიტორია:** ინჟინრები, რომლებიც წვლილი შეიტანეს OmniRoute ან მის თავზე ქმნიან ინტეგრაციას.
 >
-> მაღალი დონის არქიტექტურული დიაგრამებისა და თითოეული ქვესისტემის საფუძვლად არსებული მსჯელობის გასაცნობად წაიკითხეთ
-> [ARCHITECTURE.md](./ARCHITECTURE.md). ცალკეული ქვესისტემების
-> (Auto Combo, MCP სერვერი, A2A სერვერი, Skills, Memory, Cloud Agents, Resilience,
-> Compression და სხვ.) სიღრმისეულად გასაცნობად იხილეთ მათი შესაბამისი ფაილები ამ `docs/` დირექტორიაში.
+> მაღალი დონის არქიტექტურის დიაგრამებისა და თითოეული ქვესისტემის მიღმა მსჯელობისთვის წაიკითხეთ [ARCHITECTURE.md](./ARCHITECTURE.md). ცალკეულ ქვესისტემებზე ღრმა ჩაყვინთვისთვის (Auto Combo, MCP სერვერი, A2A სერვერი, Skills, Memory, Cloud Agents, Resilience, Compression და ა.შ.) იხილეთ მათი გამოყოფილი ფაილები ამ `docs/` დირექტორიაში.
 
-ეს ფაილი აღწერს **რა არსებობს რეპოზიტორიაში დღეს**, რათა ახალმა ინჟინერმა
-შეძლოს ხის სტრუქტურაში ორიენტირება, შესრულების დროის ფენების გაგება და იმის ცოდნა, თუ სად დაამატოს კოდი
-ახალი მოდულების გამოგონების გარეშე.
+ეს ფაილი აღწერს** რაც დღეს საცავში არსებობს** რათა ახალმა ინჟინერმა შეძლოს ხეზე ნავიგაცია, გაიგოს გაშვების ფენა და იცოდეს სად დაამატოთ კოდი ახალი მოდულების გამოგონების გარეშე.
 
 ---
 
@@ -566,35 +559,14 @@ bin/
 
 ## 8. `scripts/`
 
-დანიშნულების მიხედვით ორგანიზებულია 6 ქვე-საქაღალდედ.
+ორგანიზებულია 6 ქვესაქაღალდეში დანიშნულების მიხედვით.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, ასევე PR-ების მონიტორინგისთვის განკუთვნილი მხოლოდ წაკითხვადი დამხმარე სკრიპტები:
-  `ci-discriminate.sh` (PR-ის წარუმატებელი შემოწმებების ხელწერებს ახარისხებს საკუთარ /
-  მემკვიდრეობით / უცნობ კატეგორიებად, ეტალონურ PR-თან ან საბაზისო წარუმატებლობის საკითხთან შედარებით) და `audit-worktree.sh`
-  (შეცვლილი ფაილები, დაცული ზედაპირები, წაშლილი მტკიცებები, ჩახშობების რაოდენობა, დარჩენილი
-  დროებითი tsconfig-ები, PR-ის head ადგილობრივ HEAD-თან შედარებით — მუშაკის PR-ის მიღებამდე).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, პლუს მხოლოდ წაკითხვადი PR ძიძების დამხმარეები `ci-discriminate.sh` (ახარისხებს PR ის ხელმოწერის უცნობ ცნობას PR ში ძირითადი წითელი საკითხი) და `audit-worktree.sh` (ბინძური ფაილები, დაცული ზედაპირები, ამოღებული მტკიცებულებები, ჩახშობის რაოდენობა, დარჩენილი tmp tsconfigs, PR head vs ადგილობრივი HEAD — მუშის PR მიღებამდე).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` ასახელებს ვერსიებს, რომლებიც აშკარად მიეკუთვნება OmniRoute (3.6.x და უფრო ადრე). ჩეკი უგულებელყოფს თარიღებს.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

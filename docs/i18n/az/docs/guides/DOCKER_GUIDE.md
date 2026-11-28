@@ -8,22 +8,23 @@
 
 ## Mündəricat
 
-- [Sürətli işə salma](#quick-run)
-- [Mühit faylı ilə](#with-environment-file)
-- [Docker Compose](#docker-compose)
-- [Mövcud profillər](#available-profiles)
-- [OmniRoute Docker-də işləyərkən host CLI alətlərinin konfiqurasiyası](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Sürətli qaçış](#quick-run)
+- [Ətraf Mühit Faylı ilə](#with-environment-file)
+- [Docker Yarat](#docker-compose)
+- [Mövcud Profillər](#available-profiles)
+- [Konteynerin bərkidilməsi](#container-hardening)
+- [OmniRoute Docker də işlədiyi zaman host CLI alətlərinin konfiqurasiyası](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
 - [Redis Sidecar](#redis-sidecar)
-- [İstehsal mühiti üçün Compose](#production-compose)
-- [Dockerfile mərhələləri](#dockerfile-stages)
-- [Kritik mühit dəyişənləri](#critical-environment-variables)
-- [Caddy (HTTPS) ilə Docker Compose](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare sürətli tuneli](#cloudflare-quick-tunnel)
-- [İmaj teqləri](#image-tags)
-- [Docker-də idarəetmə paneli yeniləmələri](#dashboard-updates-in-docker)
-- [Əlçatanlıq: standart SQLite yalnız bir replikanı dəstəkləyir](#availability-default-sqlite-is-single-replica)
-- [Docker daxilində Gemini regional xətaları](#gemini-regional-errors-inside-docker)
-- [Vacib qeydlər](#important-notes)
+- [İstehsal Tərtib](#production-compose)
+- [Dockerfile Mərhələləri](#dockerfile-stages)
+- [Kritik Mühit Dəyişənləri](#critical-environment-variables)
+- [Docker Caddy ilə Yarat (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Sürətli Tunel](#cloudflare-quick-tunnel)
+- [Şəkil Teqləri](#image-tags)
+- [Docker-da idarə paneli yeniləmələri](#dashboard-updates-in-docker)
+- [Mövcudluq: standart SQLite tək replikadır](#availability-default-sqlite-is-single-replica)
+- [Docker daxilində Gemini regional səhvlər](#gemini-regional-errors-inside-docker)
+- [Vacib Qeydlər](#important-notes)
 
 ---
 
@@ -89,6 +90,30 @@ OmniRoute əsas yerləşdirmə formaları üçün Compose profilləri ilə təqd
 | `web`             | `omniroute-web`  | Brauzer tələb edən veb sessiya provayderləri: `gemini-web`, `claude-web`, `claude-turnstile` (`runner-web` qurulur, Chromium daxildir)                  | `docker compose --profile web up -d`         |
 
 > Bir neçə profil birləşdirilə bilər: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Konteynerin bərkidilməsi
+
+`docker-compose.yml` -dəki `base`, `web`, `cli` və `host` tətbiq xidmətləri `cap_drop: [ALL]` və `no-new-privileges:true` təhlükəsizlik seçimindən istifadə edir. Şəkil kök olmayan istifadəçi `node` kimi işləyir və yüksək portlarda dinləyir, ona görə də Linux imkanlarına ehtiyac yoxdur. Təhlükəsizlik seçimi setuid binaries vasitəsilə proseslərin imtiyazlar qazanmasının qarşısını alır.
+
+Yalnız `cli` profili avtomatik yeniləyici üçün Docker yuvasını quraşdırır. [Escape lyukuna baxın: təhlükəsizlik təsirləri üçün konteynerin öz CLIs konfiqurasiya edin](#escape-hatch-configure-the-containers-own-clis-use-sparingly).
+
+Kök fayl sistemi standart olaraq yazıla bilən qalır. `cli` profili CLI konfiqurasiyasını və keşləri konteynerin ev kataloquna yazır, `web` profili Chromium sessiya vəziyyətini saxlayır və Next.js işləmə vaxtı `/app/data` xaricində keşləri yaza bilər.
+
+`base` profili ilə yalnız oxuna bilən kök fayl sistemini sınamaq üçün bunu `docker-compose.yml` yanında `docker-compose.override.yml` olaraq qeyd edin. Bəstələmə avtomatik olaraq ləğvi oxuyur.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Mövcud `/app/data` montajı yazıla bilən qalır. İstehsalda bu ləğvetmədən istifadə etməzdən əvvəl iş yükünüzü sınayın, çünki başqa yollara yazmaq lazım ola bilər.
 
 ## OmniRoute Docker-də işləyərkən host CLI alətlərinin konfiqurasiyası
 
@@ -241,7 +266,7 @@ Repozitoriya çoxmərhələli Dockerfile (`Dockerfile`) göndərir. Dörd mərh�
 | ------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `builder`     | `node:26-trixie-slim` | Deps (`npm ci --legacy-peer-deps`) quraşdırır və `npm run build` işləyir (Turbopack standart olaraq — aşağıda Quraşdırma vaxtı resurslarına baxın)                                                                                                                                      |
 | `runner-base` | `node:26-trixie-slim` | Next.js müstəqil çıxışı ilə istehsal müddəti.** Heç CLIs provayderi yığılmayıb.**                                                                                                                                                                                                       |
-| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` və qlobal CLIs əlavə edir : `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Agent iş axını üçün bunu seçin.**                                                                                                                 |
+| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` və qlobal CLIs əlavə edir : `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Agent iş axınları üçün bunu seçin.**                                                                                                              |
 | `runner-web`  | `runner-base`         | Veb-sessiya provayderləri üçün Playwright + Chromium brauzeri (`--with-deps`) əlavə edir: `gemini-web`, `claude-web`, `claude-turnstile`.** Həmin provayderlərdən istifadə edərkən bunu seçin** — düz şəkil sorğu zamanı uğursuz olur (Bunsuz Kanallar altındakı `-web` qeydinə baxın). |
 
 Müəyyən bir hədəfi əl ilə qurun:
@@ -262,7 +287,7 @@ docker build --target runner-web  -t omniroute:web  .
 | `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | Yaranan `next build` üçün V8 yığın tavanı (`--max-old-space-size`).                                       |
 | `OMNIROUTE_BUILD_WORKERS`   | `2`    | `CIRCLE_NODE_TOTAL` qidalanır; Sonrakı səhifə məlumatlarının toplanması üçün `workers = N - 1` əldə edir. |
 
-`OMNIROUTE_BUILD_WORKERS` böyük bir inşaatçıya yetişdiriləcək və məhdud bir quruluş öləndə şübhələnəcək şəxsdir** sonra** `✓ Compiled successfully`. Hər bir səhifə məlumat işçisi öz prosesidir və ana `next build` özü də; canlı VPS reproduksiyası ( #7518 məsələsi) `NODE_OPTIONS` yığın bayrağından asılı olmayaraq hər bir prosesin zirvəsi RSS ~ 4,5 GB -da ölçdü (Turbopack V8 yığınından kənar native/Rust yaddaşında tərtib edir). Defolt `2` (→ 1 işçi, cəmi 2 proses) dərc boru kəmərinin istifadə etdiyi 16 GB / 4 vCPU GitHub-da yerləşdirilmiş qaçışçılar üçün ölçülür. `8` də (→ 7 işçi) həmin qaçışçının yaddaşı tükəndi və buildkit `ResourceExhausted: ... cannot allocate memory` ilə addımı atmadı; `3` (→ 2 işçi) hər bir proses üzrə RSS nəticə çıxarmaq əvəzinə birbaşa ölçüldükdən sonra hələ də uyğun gəlmədi. `tests/unit/docker-build-memory-budget.test.ts` ölçülmüş rəqəmə qarşı hesab edir və hər iki düymə qaçışçını üstələyirsə uğursuz olur.
+`OMNIROUTE_BUILD_WORKERS` böyük bir inşaatçıya yetişdiriləcək və məhdud bir quruluş öləndə şübhələnəcək şəxsdir** sonra** `✓ Compiled successfully`. Hər bir səhifə məlumat işçisi öz prosesidir və ana `next build` özü də; canlı VPS reproduksiyası ( #7518 məsələsi) `NODE_OPTIONS` yığın bayrağından asılı olmayaraq hər bir prosesin zirvəsi RSS ~ 4.5 GB -da ölçdü (Turbopack V8 yığınından kənar native/Rust yaddaşında tərtib edir). Defolt `2` (→ 1 işçi, cəmi 2 proses) dərc boru kəmərinin istifadə etdiyi 16 GB / 4 vCPU GitHub-da yerləşdirilmiş qaçışçılar üçün ölçülür. `8` də (→ 7 işçi) həmin qaçışçının yaddaşı tükəndi və buildkit `ResourceExhausted: ... cannot allocate memory` ilə addımı atmadı; `3` (→ 2 işçi) hər bir proses üzrə RSS nəticə çıxarmaq əvəzinə birbaşa ölçüldükdən sonra hələ də uyğun gəlmədi. `tests/unit/docker-build-memory-budget.test.ts` ölçülmüş rəqəmə qarşı hesab edir və hər iki düymə qaçışçını üstələyirsə uğursuz olur.
 
 Turbopack yaşayan yerli Rust yaddaşında tərtib edir** kənarda** V8 yığını, buna görə də `OMNIROUTE_BUILD_MEMORY_MB` onu bağlamır. Yaddaş tavanı olan hostda qurulma daha sonra OOM killer tərəfindən heç bir xəta mətni olmadan SIGKILLed edilir — o, sadəcə olaraq yaddaşdan çıxmış deyil, asılma kimi oxunan orta `Creating an optimized production build` dayandırır. Məhz buna görə də `Dockerfile` defolt olaraq veb paketinə (`OMNIROUTE_USE_TURBOPACK=0`), Turbopack defolt kodu olduğu `npm run dev` -dan fərqli olaraq veb paketi ( `npm run build` təyin edir: heç bir qurma argları olmayan çılpaq `docker build .` (Dəmiryolu və digər bir kliklə hostların işlədiyi) yaddaşla təchiz edilmiş qurucuda səssizcə ölməməlidir. Dərc edilmiş şəkillər artıq `OMNIROUTE_USE_TURBOPACK=0` -də açıq şəkildə `docker-publish.yml` dən keçir. Bol RAM olan inşaatçıda daha sürətli qurmaq üçün Turbopack ə daxil olun:
 
@@ -278,7 +303,7 @@ Bu ağac üzərində ölçülən (`--target runner-base`, `OMNIROUTE_BUILD_MEMOR
 
 | Bundler    | Konteyner tavanı | Nəticə                                   |
 | ---------- | ---------------- | ---------------------------------------- |
-| Turbopack  | 8 GiB / 16 GiB   | OOM-hər ikisi də səssizcə öldürüldü      |
+| Turbopack  | 8 GiB / 16 GiB   | Səssizcə hər ikisində OOM öldürüldü      |
 | veb paketi | 8 GiB            | işçi SIGKILLed qurmaq                    |
 | veb paketi | 12 GiB           | müvəffəq oldu, 11,1 GiB-da zirvəyə çatdı |
 
@@ -286,7 +311,7 @@ Bu ağac üzərində ölçülən (`--target runner-base`, `OMNIROUTE_BUILD_MEMOR
 
 `runner-base` tərəfindən ixrac edilən defoltlar : `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Docker-da yaddaş davranışı:
+Docker da yaddaş davranışı:
 
 - Təsvir `OMNIROUTE_MEMORY_MB=1024` təyin edir və ondan `NODE_OPTIONS=--max-old-space-size=1024` alır.
 - Faktiki server prosesi `OMNIROUTE_MEMORY_MB` oxuyan və `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` əlavə edən müstəqil başlatma vasitəsi ilə başlayır.
@@ -295,16 +320,16 @@ Docker-da yaddaş davranışı:
 
 ### Kodlaşdırma agentləri üçün iş vaxtı RAM
 
-1 GiB Docker standartı istehsal ölçüsü deyil, dashboard/light-chat mərtəbəsidir. Uzun `POST /v1/responses` gövdələri (yüzlərlə mesaj, onlarla alət) sıxılma zamanı çoxlu yaddaşdaxili qrafikləri saxlayır. Üst-üstə düşən iki ~ 3 MiB / ~ 750k-token sorğusu V8-i dayandırdı** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) və həmçinin 16 GiB cgroup OOM vurdu. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) baxın.
+1 GiB Docker standartı istehsal ölçüsü deyil, dashboard/light-chat mərtəbəsidir. Uzun `POST /v1/responses` gövdələri (yüzlərlə mesaj, onlarla alət) sıxılma zamanı çoxlu yaddaşdaxili qrafikləri saxlayır. Üst-üstə düşən iki ~ 3 MiB / ~ 750k-token sorğusu V8-i dayandırdı** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) və həmçinin 16 GiB cgroup OOM vurdu. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) baxın.
 
 Ölçü** cgroup `--memory` yığının üstündə** — yerli buferləri, SQLite və sıxılma aralıqları V8-dən kənarda oturur.
 
-| İş yükü                                    | `OMNIROUTE_MEMORY_MB`       | Konteyner / qrup         | Qeydlər                                                                                     |
-| ------------------------------------------ | --------------------------- | ------------------------ | ------------------------------------------------------------------------------------------- |
-| İdarə paneli, bir işıqlı söhbət            | `1024` (defolt şəkil)       | ≥2 GiB                   |                                                                                             |
-| Bir kodlaşdırma agenti (Claude/Codex/Grok) | `8192`                      | ≥10 GiB                  | Tipik bir seanslı `/v1/responses`                                                           |
-| İki eyni vaxtda uzun `/v1/responses`       | `10240`–`12288`             | ≥12–16 GiB               | ~ 12 GiB yığınında ölçülən V8 abort                                                         |
-| Üç + eyni vaxtda uzun kontekstlər          | bir proses üzərində etməyin | serialize / daha çox RAM | Defolt ağır çəkidə qəbul uçuşda 1-dir; RAM olmadan yüksəldilməsi abortu yenidən tətbiq edir |
+| İş yükü                                    | `OMNIROUTE_MEMORY_MB`       | Konteyner / qrup         | Qeydlər                                                                                    |
+| ------------------------------------------ | --------------------------- | ------------------------ | ------------------------------------------------------------------------------------------ |
+| İdarə paneli, bir işıqlı söhbət            | `1024` (defolt şəkil)       | ≥2 GiB                   |                                                                                            |
+| Bir kodlaşdırma agenti (Claude/Codex/Grok) | `8192`                      | ≥10 GiB                  | Tipik bir seanslı `/v1/responses`                                                          |
+| İki eyni vaxtda uzun `/v1/responses`       | `10240`–`12288`             | ≥12–16 GiB               | ~ 12 GiB yığınında ölçülən V8 abort                                                        |
+| Üç + eyni vaxtda uzun kontekstlər          | bir proses üzərində etməyin | serialize / daha çox RAM | Defolt ağır çəkidə qəbul uçuşda 1-dir; RAM olmadan yüksəldilməsi aborta yenidən daxil edir |
 
 çılpaq metal üzərində `omniroute serve` `OMNIROUTE_MEMORY_MB` olduqda ~ 35% RAM -ni kalibrləyir (qısqaclı `[512, 4096]`)** təyin olunmadı** . Docker həmişə `1024` təyin edir, beləliklə, kalibrləmə heç vaxt rəsmi şəkildə işləməsin.
 
@@ -579,11 +604,11 @@ Uğursuz icranın dövrə düşməməsi üçün xidmət endirmədən əvvəl sor
 
 Fond Docker / Kubernetes OmniRoute edir** bir Node prosesi + bir SQLite yazıçısı** . Yüksək əlçatanlıqdır** dəstəklənmir** həmin topologiyada.
 
-| Məhdudiyyət                                              | Nəticə                                                                                                                                                                                                                                                                                                  |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tək yazıçı                                               | Et** yox** eyni SQLite faylına qarşı bir neçə replika işlədin. Bu DB korlayır.                                                                                                                                                                                                                          |
-| Yenidən yaradın / yenidən başladın / HEALTHCHECK öldürün | **Tam kəsinti** uçuş zamanı SSE, tablosuna seanslar və yaddaşda olan vəziyyət. Hər bağlı müştəri düşür. Boş son nöqtə pəncərəsi zamanı yeni sorğular əks proksi əldə edir**`502 Bad Gateway: Unknown error`** , OmniRoute JSON deyil — müştərilər bunu provayderin nasazlığından ayıra bilmir (#11015). |
-| `/healthz` ilə eyni hadisə dövrəsi                       | Məşğul olan kataloq və ya sıxılma işarəsi zondları gecikdirə bilər; qısa bir fasilədən sonra proqramı yenidən işə salır** yalnız** replika.                                                                                                                                                             |
+| Məhdudiyyət                                              | Nəticə                                                                                                                                                                                                                                                                                                           |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tək yazıçı                                               | Et** yox** eyni SQLite faylına qarşı bir neçə replika işlədin. Bu DB korlayır.                                                                                                                                                                                                                                   |
+| Yenidən yaradın / yenidən başladın / HEALTHCHECK öldürün | **Tam kəsinti** uçuş zamanı SSE, tablosuna seanslar və yaddaşda olan vəziyyət. Hər bağlı müştəri düşür. Boş son nöqtə pəncərəsi zamanı yeni sorğular əks proksi əldə edir**`502 Bad Gateway: Unknown error`** , OmniRoute deyil JSON — müştərilər bunu provayderin nasazlığından (#11015) fərqləndirə bilmirlər. |
+| `/healthz` ilə eyni hadisə dövrəsi                       | Məşğul olan kataloq və ya sıxılma işarəsi zondları gecikdirə bilər; qısa bir fasilədən sonra proqramı yenidən işə salır** yalnız** replika.                                                                                                                                                                      |
 
 **Prob matrisi** (həmçinin [Kubernetes araşdırma tövsiyələrinə](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) baxın):
 
@@ -593,9 +618,9 @@ Fond Docker / Kubernetes OmniRoute edir** bir Node prosesi + bir SQLite yazıç�
 | Hazırlıq         | HTTP `GET /healthz`                                          | Hadisə döngəsini ölü kimi qəbul edən sıx fasilələr |
 | Dərin / insanlar | `/api/monitoring/health`                                     | Avtomatlaşdırılmış kubelet canlılığı               |
 
-**Təkmilləşdirmələr:** hər seansın düşəcəyini gözləyin. Mümkünsə, müştəriləri boşaltın; default SQLite-da yuvarlanan yeniləmə yoxdur. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` eyni zamanda konteyner qeyri-sağlam olduqda yeganə prosesi əvəz edəcək - eyni partlayış radiusu.
+**Təkmilləşdirmələr:** hər seansın düşəcəyini gözləyin. Mümkünsə, müştəriləri boşaltın; default SQLite-da yuvarlanan yeniləmə yoxdur. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` konteyner qeyri-sağlam — eyni partlayış radiusu olduqda yeganə prosesi əvəz edəcək.
 
-Hazır manifestlər və Helm diaqramı `deploy/kubernetes/` və `deploy/helm/omniroute/` də yaşayır — [Kubernetes yerləşdirmə təlimatına](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) baxın.
+Hazır manifestlər və Helm diaqramı `deploy/kubernetes/` və `deploy/helm/omniroute/` — də yaşayır, [Kubernetes yerləşdirmə təlimatına](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) baxın.
 
 a üçün Kubernetes fraqmenti** tək replika** (Yenidən yaratmaq tələb olunur; `replicas` bir SQLite faylına qarşı qaldırmayın):
 
@@ -624,9 +649,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` yuxu, SIGTERM dən əvvəl Xidmət son nöqtələrini kube buraxmağa imkan verir** yeni** Trafik ölüm prosesini vuraraq dayanır. Uçuş zamanı `/v1/responses` SSE ağır çəkili qəbul icarələri (#11015) vasitəsilə `SHUTDOWN_TIMEOUT_MS` ə qədər (defolt 30s) boşaldılır. Hələ də prosesə çatan yeni sorğular `503` + `Retry-After: 5` alır. Dəyişdirmə Hazır olana qədər boş son nöqtə boşluğunu yenidən yarat çətin bir kəsinti olaraq qalır - bu, SQLite topologiyasıdır, yanlış konfiqurasiya yox.
+`preStop` yuxu, SIGTERM dən əvvəl Xidmət son nöqtələrini kube buraxmağa imkan verir** yeni** Trafik ölüm prosesini vuraraq dayanır. Uçuş zamanı `/v1/responses` SSE ağır çəkili qəbul icarələri (#11015) vasitəsilə `SHUTDOWN_TIMEOUT_MS` ə qədər (defolt 30s) boşaldılır. Hələ də prosesə çatan yeni sorğular `503` + `Retry-After: 5` alır. Dəyişdirmə Hazır olana qədər boş son nöqtə boşluğunu yenidən yarat, SQLite topologiyası olan çətin kəsilmə — olaraq qalır, yanlış konfiqurasiya yox.
 
-Xarici Postgres / çox yazıçı HA edir** yox** sənədləşdirilmiş ehtiyat yolu. Əgər sizə HA lazımdırsa, tək nüsxə saxlayın və ya layihənin ayrıca sınaqdan keçirdiyi və sənədləşdirdiyi topologiyanı işə salın. Postgres/MySQL işi [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) -də yaşayır. O qədər gəmilər, çoxaltmaq üçün yeganə dəstəklənir** böyük** `/v1/responses` tutumu bir cilddə `replicas > 1` deyil, N müstəqil prosesdir (növbəti bölmə).
+Xarici Postgres / çox yazıçı HA edir** yox** sənədləşdirilmiş ehtiyat yolu. Əgər sizə HA lazımdırsa, tək nüsxə saxlayın və ya layihənin ayrıca sınaqdan keçirdiyi və sənədləşdirdiyi topologiyanı işə salın. Postgres/MySQL işi [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) -də yaşayır. O qədər gəmilər, çoxaltmaq üçün yeganə dəstəklənir** böyük** `/v1/responses` tutumu bir cilddə `replicas > 1` deyil, N müstəqil prosesdir (növbəti bölmə).
 
 ## Ölçəyi azaltmaq: N müstəqil proses
 
@@ -636,23 +661,23 @@ Bir Codex hesabının nüsxələri müstəqil olaraq onun birdəfəlik yeniləm�
 
 Passiv instansiya yeniləməyə ehtiyac olduqda əlaqəni yenidən oxuyur və yalnız fərqli, müddəti bitmiş giriş nişanını qəbul edir. Əks halda, yeniləmə müddəti bitmədən və ya əlaqəni deaktiv etmədən və ya yeniləmə kəsicisinin nasazlığını hesablamadan deaktiv edilir. Real upstream autentifikasiya uğursuzluqları hələ də normal uğursuzluq uçotu, eksponensial soyutma və normal müştəri xətası istifadə edir; hesabın deaktivasiyası daimi olaraq qalır. Giriş tokenlərinin müddəti bitməzdən əvvəl sahibinin fırlanan tokenlərini sinxronlaşdırın (defolt aktiv yeniləmə potensialı beş dəqiqədir) və ya Codex auth faylını yenidən idxal edin. Passiv idxallar, tədarük edilmiş tokenləri tokenin son nöqtəsində təsdiq etmədən saxlayır. Manual dashboard/API yeniləmə `409 refresh_disabled` qaytarır; yeni OAuth girişləri dəyişməyib. [Ətraf mühit istinadına](../reference/ENVIRONMENT.md#passive-codex-token-refresh) baxın.
 
-Bir Node prosesidir** bir V8 yığını** . İki üst-üstə düşən ~ 3 MiB / ~ 750k-token kodlaşdırma agenti `POST /v1/responses` (RTK + Caveman) həmin yığını ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ilə dayandırır və 16 Gi cqrupunu OOM edə bilər. Bax [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Həmin ölçü a** yaddaş büdcəsi** xəbərdarlıq, iki eyni vaxtda uzun `/v1/responses` olan bir məhsul hard-max deyil. Ağır çəkili söhbətə giriş, eyni V8/cgroup tavan — ilə ölçülən avtomatik əldə edilən qəbul bayt büdcəsi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) ilə təmin edilir və onu yuxarıya doğru üstələyir (yaxud köhnə `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` sorğu sayı həddini təyin etməklə) artıq ölçülü prosesdə ləğvi yenidən tətbiq edir. Kiçik söhbətlər, `/healthz`, `/v1/models` və MCP** yox** o qapaqda.
+Bir Node prosesidir** bir V8 yığını** . İki üst-üstə düşən ~ 3 MiB / ~ 750k-token kodlaşdırma agenti `POST /v1/responses` (RTK + Caveman) həmin yığını ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ilə dayandırır və 16 Gi cqrupunu OOM edə bilər. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) baxın. Həmin ölçü a** yaddaş büdcəsi** xəbərdarlıq, iki eyni vaxtda uzun `/v1/responses` bir məhsul hard-max . Ağır çəkili söhbətə giriş eyni V8/cgroup tavanından ölçülən avtomatik əldə edilən qəbul bayt büdcəsi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) ilə təmin edilir — onu yuxarıya doğru üstələyən (yaxud köhnə `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` sorğu sayı həddini təyin etməklə) artıq ölçülü prosesdə ləğvi yenidən tətbiq edir. Kiçik söhbətlər, `/healthz`, `/v1/models` və MCP** yox** o qapaqda.
 
 ### Bir proses: ikidən çox uzun `/v1/responses`
 
-A** sağlam** proses ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` altındakı yığın, standart `0.75`)** bilər** Proses üzrə geniş uçuş bayt büdcəsində (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) hələ də yer olduqda ikidən çox eyni vaxtda uzun `POST /v1/responses` işlədin. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` və ya yuxarıda olan orqanlar (defolt 256 KiB) struktur tələbləri ilə eyni ağır çəkili icarəni götürür və eyni [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) istifadə edir. Onlarla eyni vaxtda uzun SSE müştərisi (operatorlara çox vaxt 40-50 lazımdır)** yaddaş büdcəsi** sual — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — çətin “max 2” məhsul limiti deyil. Təzyiqli yığın yenə də təkrar cəhd edilə bilən `503` ilə tökülür, beləliklə #7849 geri qayıtmır.
+A** sağlam** proses ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` altındakı yığın, standart `0.75`)** bilər** Proses üzrə geniş uçuş bayt büdcəsində (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) hələ də yer olduqda ikidən çox eyni vaxtda uzun `POST /v1/responses` işlədin. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (defolt 256 KiB) və ya ondan yuxarı olan orqanlar ağır struktur tələbləri ilə eyni ağır çəkili icarəni götürür və eyni [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) istifadə edir. Onlarla eyni vaxtda uzun SSE müştərisi (operatorlara çox vaxt 40-50 lazımdır)** yaddaş büdcəsi** sual — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — çətin “max 2” məhsul limiti deyil. Təzyiqli yığın hələ də təkrar cəhd edilə bilən `503` ilə tökülür, beləliklə #7849 geri qayıtmır.
 
 Kimə** yığınları çoxaltmaq** (müstəqil V8 köhnə məkanlar)** bu gün** :
 
-| Et                                                                                                                             | etməyin                                                         |
-| ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| Qaç** N containers/pods** , hər biri öz** sahibi** `DATA_DIR` / həcm                                                           | Bir SQLite faylına qarşı `replicas > 1` təyin edin              |
-| Ölçü ağır uçuşda + sağlam-boş yerdən yığın / uçuş bayt büdcəsi; 1–2 mühafizəkar #7849 standartıdır, maksimum sərt məhsul deyil | Bir prosesə 8 × RAM və qeyri-məhdud sayma həddi verin           |
-| Könüllü: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` üçün** paylaşılan kvota sayğacları**                             | Redis nı paylaşılan SQLite — kimi qəbul edin                    |
-| Hər bir nüsxədə provayder sirlərini dublikat edin (və ya bölmələrə ayrılmış panelləri qəbul edin)                              | Nümunələr arasında bir tablosunu / bir zəng qeydini gözləyin    |
-| İstənilən yük balanslayıcısı ilə ön; API düyməsi və ya sessiya ilə yapışqan kifayətdir                                         | Satıcı üçün xüsusi ölçüdən xəbərdar olan ara proqram tələb edin |
+| Et                                                                                                                          | etməyin                                                         |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Qaç** N containers/pods** , hər biri öz** sahibi** `DATA_DIR` / həcm                                                        | Bir SQLite faylına qarşı `replicas > 1` təyin edin              |
+| Ölçü ağır uçuşda + sağlam-boş yerdən yığın / uçuş bayt büdcəsi; 1–2 mühafizəkar #7849 defoltdur, maksimum sərt məhsul deyil | Bir prosesə 8 × RAM və qeyri-məhdud sayma həddi verin           |
+| Könüllü: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` üçün** paylaşılan kvota sayğacları**                          | Redis nı paylaşılan SQLite — kimi qəbul edin                    |
+| Hər bir nüsxədə provayder sirlərini dublikat edin (və ya bölmələrə ayrılmış panelləri qəbul edin)                           | Nümunələr arasında bir tablosunu / bir zəng qeydini gözləyin    |
+| İstənilən yük balanslayıcısı ilə ön; API düyməsi və ya sessiya ilə yapışqan kifayətdir                                      | Satıcı üçün xüsusi ölçüdən xəbərdar olan ara proqram tələb edin |
 
-Sessiyadan hesaba yaxınlıq Redis vasitəsilə də paylaşıla bilər: eyni `REDIS_KEY_PREFIX` və müsbət `sessionAffinityTtlMs` parametri ilə hər bir prosesdə `OMNIROUTE_SESSION_AFFINITY_STORE=redis` və `REDIS_URL` təyin edin. Sancaqlar hər bir prosesin uyğun yerli bağlantısına hash edilmiş istifadə hesabı identifikatorlarını həll edir, ona görə də uyğun identifikasiya metadatası olan OAuth hesablarında uyğun əlaqə IDs olmamalıdır. Məlum hesab identifikasiyası pin həllində və mühafizə olunan çıxarılmada ziddiyyətli yerli IDs dan üstündür; şəxsiyyəti olmayan qeydlər (və ya şəxsiyyəti olmayan evakuasiya edənlər) miras ID mühafizəsini saxlayır. Sabit istifadə identifikasiyası olmayan hesablar hələ də uyğun IDs tələb edir. Redis səhvləri və ya 100 ms-dən çox zənglər yerli SQLite ə qayıdır. Hər bir Redis yaxınlıq mağazası görkəmli əməliyyatları 8-də saxlayır, dolduqda dərhal Redis yan keçir və zəng edənin son tarixində deyil, yalnız əsas iş həll edildikdə yuvaları buraxır. Redis kəsilməsi zamanı ortaq bir həqiqət yoxdur: hər bir nümunə öz yerli yaxınlığına qayıdır, seanslar hər instansiyada bir dəfə yenidən bağlana bilər və nümunələr fərqli ola bilər. Yapışqanlıq bərpa edildikdə Redis vasitəsilə yenidən birləşir. Taymout gözləmə həddinə çatır, göndərilən EVAL deyil, geri qayıtdıqdan sonra enə bilər. Marşrutlaşdırma yazıları yeni mutasiya vaxtı oxunuşu deyil, marşrutlaşdırma qərarının müşahidə etdiyi dəqiq dəyəri müqayisə edir; müşahidə edilmiş qaçırma və ya SQLite ehtiyat müşahidəsi olmayan Redis açarı kimi müqayisə edilir. Köhnəlmiş sancaqlar bir CAS-da dəyişdirilir, buna görə də gecikmiş əmr daha yeni, fərqli pin əvəz edə və ya silə bilməz. Redis oxuyur atomik olaraq dəyəri qaytarır və qalan server TTL; müsbət PTTL (və ya müddəti bitməmiş) yazıçının JSON vaxt damğasını və ya oxucunun saatını deyil, canlılığı müəyyən edir. Yerli son tarixə qədər TTL yerli snapshots xəritəsi; mövcud JSON açarları oxunaqlı qalır və onların xam baytları CAS üçün saxlanılır. Redis cavab verərkən həqiqətin yeganə mənbəyidir. Təsdiqlənmiş paylaşılan əlavələr, toxunmalar və silmələr yerli girişi silir, heç vaxt quraşdırmayın və ya yeniləməyin. Redis yolunda SQLite əvvəlki kimi TTL ilə məhdudlaşan Redis xətaları, fasilələr və ya qəbul doymalarından yalnız bu instansiyanın öz ehtiyat qərarlarını saxlayır. Sonrakı kəsilmədə çatışmayan yerli pin səhv və ya çıxarılan hesaba deyil, bir təzə seçimə (bir tez keş buraxılmasına) başa gəlir. Rədd edilmiş əlavələr paylaşılan qalibi və onun qalan TTL atomik şəkildə qaytarır: adi seçim xəritələşdirilmiş yerli son tarixi yenidən yoxlayır və hələ də canlı uyğun qalibdən istifadə edir, istifadəyə toxunur və başqa paylaşılan yazma olmadan həmin hesaba daxil olur. Əgər o, mövcud deyilsə, seçim yerli namizədi saxlayır, paylaşılan pin dəyişdirilmədən qalır və bir sazlama mesajı verir. Rədd edilmiş CAS SQLite yazmır; Redis səhvləri, fasilələr və ya qəbul doyması əvəzinə mövcud yerli əməliyyatı tətbiq edir. Göndərilən mutasiyanın cavabı fasilədən sonra (qəbul edilib, rədd edilib və ya xəta) gəlsə, sinxron dəqiq seriallaşdırılmış dəyər müqayisəsi və silinməsi yalnız bayt-eyni zaman aşımı ehtiyat sırasını silir. Bu müqayisə ilə silinmə arasında heç bir gözləmə yoxdur; daha yeni kəsilmə yazısı saxlanılır. Mühafizəli çıxarma, hətta Redis aşağı olsa belə, uğursuz hesabın yerli pinini silir və paylaşılan çıxarılma təsdiqləndikdən sonra onu yenidən təmizləyir. Gözlənilən əvvəlki paylaşılan cavablar çıxarılan yerli pin bərpa edə bilməz, çünki paylaşılan uğurlar heç vaxt SQLite yazmır. Sonrakı kəsilmə geri dönüşü hesabı yenidən işlədə bilər; sonra qəbul edilən paylaşılan yazı yalnız Redis-də mövcuddur. Redis buraxılışları yerli ehtiyat vəziyyətinə müraciət etmir. Sürücü söndürüldükdə, yeni seçilmiş sancaqlar köhnə dörd sahəli SQLite JSON formasını saxlayır; yalnız Redis marşrutlaşdırma hashed hesab şəxsiyyətini əlavə edir. Əvvəlcədən gətirilən sancaqlar, istifadə müddəti bitdikdə yenidən yoxlanılır. Redis qeyri-icarə seçimi mağazanı yenidən oxuyur, lakin sinxron icarə planlaması hələ də əvvəlcədən gətirmə və planlaşdırma arasında çıxarılan pindən istifadə edə bilər (qəbul edilmiş ən yaxşı səy pəncərəsi). İcarə öhdəliyi uzunmüddətli iddiadan sonra hesabları dəyişə bilməz: rədd cavabı verildikdə o, yalnız həmin sorğu üçün iddia edilən namizədi saxlayır və paylaşılan qalibi toxunulmaz qoyur, beləliklə, instansiyalar arasında razılaşma həmin yolda məhdudlaşdırılır. Cədvəlin qalan hissəsi hələ də tətbiq olunur: bu, kombinasiya seansının yapışqanlığını, yerli Codex dönmə pinlərini, hesab semaforlarını, bloklamaları, xərcləmə limitlərini, konfiqurasiyanı və ya zəng qeydlərini paylaşmır.
+Sessiyadan hesaba yaxınlıq Redis vasitəsilə də paylaşıla bilər: eyni `REDIS_KEY_PREFIX` və müsbət `sessionAffinityTtlMs` parametri ilə hər bir prosesdə `OMNIROUTE_SESSION_AFFINITY_STORE=redis` və `REDIS_URL` təyin edin. Sancaqlar hər bir prosesin uyğun yerli bağlantısına hash edilmiş istifadə hesabı identifikatorlarını həll edir, ona görə də uyğun identifikasiya metadatası olan OAuth hesablarında uyğun əlaqə IDs olmamalıdır. Məlum hesab identifikasiyası pin həllində və mühafizə olunan çıxarılmada ziddiyyətli yerli IDs dan üstündür; şəxsiyyəti olmayan qeydlər (və ya şəxsiyyəti olmayan evakuasiya edənlər) miras ID mühafizəsini saxlayır. Sabit istifadə identifikasiyası olmayan hesablar hələ də uyğun IDs tələb edir. Redis səhvləri və ya 100 ms-dən çox zənglər yerli SQLite ə qayıdır. Hər bir Redis yaxınlıq mağazası görkəmli əməliyyatları 8-də saxlayır, dolduqda dərhal Redis yan keçir və zəng edənin son tarixində deyil, yalnız əsas iş həll edildikdə yuvaları buraxır. Redis kəsilməsi zamanı ortaq bir həqiqət yoxdur: hər bir nümunə öz yerli yaxınlığına qayıdır, seanslar hər instansiyada bir dəfə yenidən bağlana bilər və nümunələr fərqli ola bilər. Yapışqanlıq bərpa edildikdə Redis vasitəsilə yenidən birləşir. Taymout gözləmə həddinə çatır, göndərilən EVAL deyil, geri qayıtdıqdan sonra enə bilər. Marşrutlaşdırma yazıları yeni mutasiya vaxtı oxunuşu deyil, marşrutlaşdırma qərarının müşahidə etdiyi dəqiq dəyəri müqayisə edir; müşahidə edilmiş qaçırma və ya SQLite ehtiyat müşahidəsi olmayan Redis açarı kimi müqayisə edilir. Köhnəlmiş sancaqlar bir CAS-da dəyişdirilir, buna görə də gecikmiş əmr daha yeni, fərqli pin əvəz edə və ya silə bilməz. Redis oxuyur atomik olaraq dəyəri və qalan serveri qaytarır TTL; müsbət PTTL (və ya müddəti bitməmiş) yazıçının JSON vaxt damğasını və ya oxucunun saatını deyil, canlılığı müəyyən edir. Yerli son tarixə TTL qalan yerli snapshots xəritəsi; mövcud JSON açarları oxunaqlı qalır və onların xam baytları CAS üçün saxlanılır. Redis cavab verərkən həqiqətin yeganə mənbəyidir. Təsdiqlənmiş paylaşılan əlavələr, toxunmalar və silmələr yerli girişi silir, heç vaxt quraşdırmayın və ya yeniləməyin. Redis yolunda SQLite əvvəlki kimi TTL ilə məhdudlaşan Redis xətaları, fasilələr və ya qəbul doymalarından yalnız bu instansiyanın öz ehtiyat qərarlarını saxlayır. Sonrakı kəsilmədə çatışmayan yerli pin səhv və ya çıxarılan hesaba deyil, bir təzə seçimə (bir tez keş buraxılmasına) başa gəlir. Rədd edilmiş əlavələr paylaşılan qalibi və onun qalan TTL atomik şəkildə qaytarır: adi seçim xəritələşdirilmiş yerli son tarixi yenidən yoxlayır və hələ də canlı uyğun qalibdən istifadə edir, istifadəyə toxunur və başqa paylaşılan yazma olmadan həmin hesaba daxil olur. O, mövcud deyilsə, seçim yerli namizədi saxlayır, paylaşılan pin-i dəyişməz qalır və bir sazlama mesajı verir. Rədd edilmiş CAS SQLite yazmır; Redis səhvləri, fasilələr və ya qəbul doyması əvəzinə mövcud yerli əməliyyatı tətbiq edir. Göndərilən mutasiyanın cavabı fasilədən sonra (qəbul edilib, rədd edilib və ya xəta) gəlsə, sinxron dəqiq seriallaşdırılmış dəyər müqayisəsi və silinməsi yalnız bayt-eyni zaman aşımı ehtiyat sırasını silir. Bu müqayisə ilə silinmə arasında heç bir gözləmə yoxdur; daha yeni kəsilmə yazısı saxlanılır. Mühafizəli çıxarılma, hətta Redis aşağı olsa belə, uğursuz hesabın yerli pinini silir və paylaşılan çıxarılma təsdiqləndikdən sonra onu yenidən təmizləyir. Gözlənilən əvvəlki paylaşılan cavablar çıxarılan yerli pin bərpa edə bilməz, çünki paylaşılan uğurlar heç vaxt SQLite yazmır. Sonrakı kəsilmə bərpası hesabı yenidən işlədə bilər; sonra qəbul edilən paylaşılan yazı yalnız Redis-də mövcuddur. Redis buraxılışları yerli ehtiyat vəziyyətinə müraciət etmir. Sürücü söndürüldükdə, yeni seçilmiş sancaqlar köhnə dörd sahəli SQLite JSON formasını saxlayır; yalnız Redis marşrutlaşdırma hashed hesab şəxsiyyətini əlavə edir. Əvvəlcədən gətirilən sancaqlar, istifadə müddəti bitdikdə yenidən yoxlanılır. Redis qeyri-icarə seçimi mağazanı yenidən oxuyur, lakin sinxron icarə planlaması hələ də əvvəlcədən gətirmə və planlaşdırma arasında çıxarılan pindən istifadə edə bilər (qəbul edilmiş ən yaxşı səy pəncərəsi). İcarə öhdəliyi uzunmüddətli iddiadan sonra hesabları dəyişə bilməz: rədd cavabı verildikdə o, yalnız həmin sorğu üçün iddia edilən namizədi saxlayır və paylaşılan qalibi toxunulmaz qoyur, beləliklə, instansiyalar arasında razılaşma həmin yolda məhdudlaşdırılır. Cədvəlin qalan hissəsi hələ də tətbiq olunur: bu, kombinasiya seansının yapışqanlığını, yerli Codex dönmə pinlərini, hesab semaforlarını, bloklamaları, xərcləmə limitlərini, konfiqurasiyanı və ya zəng qeydlərini paylaşmır.
 
 Avadanlıq: instansiya başına paralel uzun `/v1/responses` a** yaddaş büdcəsi** sual (heap + inflight-byte / #10110). `N` müstəqil `DATA_DIR` s hələ də yığınları çoxaldır: host RAM “N = 8 ilə bir 16 Gi pod” deyil, `N × cgroup` əhatə etməlidir. Heç vaxt bir SQLite faylında `replicas > 1`.
 
@@ -683,60 +708,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Prosesdaxili sıxlıq ( HTTP izolyatının sıxılması) [#11023-](https://github.com/diegosouzapw/OmniRoute/issues/11023) dür. Paylaşılan davamlı vəziyyətdə bir məntiqi klaster [#8075-](https://github.com/diegosouzapw/OmniRoute/issues/8075) dir.
+Prosesdaxili sıxlıq ( HTTP izolyasiyasından sıxılma) [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) dir. Paylaşılan davamlı vəziyyətdə bir məntiqi klaster [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) dir.
 
-## Docker daxilində Gemini regional xətaları
+## Docker daxilində Gemini regional səhvlər
 
-Google AI Studio / Gemini API HTTP 400, FAILED_PRECONDITION və
-`User location is not supported for the API use.` xətasını qaytara bilər. Sorğunun hostda
-uğurlu olması konteynerin eyni çıxış marşrutundan istifadə etdiyini sübut etmir. DNS sıralaması,
-IPv4/IPv6 bağlantısı, VPN marşrutlaşdırması və konfiqurasiya edilmiş proksilər fərqli ola bilər.
-Faktiki bağlantı marşrutu ilə yanaşı,
-[Google-un dəstəklədiyi regionları](https://ai.google.dev/gemini-api/docs/available-regions)
-da yoxlayın; təkcə bu xəta API açarının etibarsız olduğunu göstərmir.
+Google AI Studio / Gemini API FAILED_PRECONDITION və `User location is not supported for the API use.` ilə HTTP 400 qaytara bilər Hostda uğurlu sorğu konteynerin eyni çıxış marşrutundan istifadə etdiyini sübut etmir. DNS sifarişi, IPv4/IPv6 bağlantısı, VPN marşrutlaşdırma və konfiqurasiya edilmiş proksilər fərqli ola bilər. [Google-ın dəstəklənən bölgələrini](https://ai.google.dev/gemini-api/docs/available-regions), eləcə də faktiki əlaqə marşrutunu yoxlayın; tək bu səhv pis API açarını müəyyən etmir.
 
-### Bağlantıya məxsus proksiyə üstünlük verin
+### Bağlantı üçün xüsusi proksiyə üstünlük verin
 
-Təsirə məruz qalan Gemini bağlantısı üçün OmniRoute-un
-[hər bağlantı üzrə proksi konfiqurasiyasından](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-istifadə edin, sonra eyni modellə **Test Connection** əməliyyatını və kiçik bir sorğunu
-təkrarlayın. Bu, marşrut dəyişikliyini yalnız həmin bağlantı ilə məhdudlaşdırır.
-Proksinin konteynerdən əlçatan olduğunu və bağlantının həqiqətən onu seçdiyini yoxlayın.
-Marşrutun dəyişdirilməsi yuxarı səviyyəli xidmətin regional uyğunluğuna zəmanət vermir.
+Təsirə məruz qalan Gemini bağlantısı üçün OmniRoute-nın [hər bağlantı üzrə proksi konfiqurasiyasından](../ops/PROXY_GUIDE.md#4-level-proxy-system) istifadə edin, sonra təkrarlayın** Test Bağlantısı** və eyni model ilə kiçik bir sorğu. Bu, marşrut dəyişikliyini həmin əlaqə üçün əhatə edir. Proksinin konteynerdən əlçatan olduğunu və əlaqənin onu həqiqətən seçdiyini yoxlayın. Marşrutun dəyişdirilməsi yuxarı axının regional uyğunluğuna zəmanət vermir.
 
 ### Host və konteyner şəbəkələrini müqayisə edin
 
-Autentifikasiya edilmiş nəticələri müqayisə edərkən açarı, modeli və sorğunu eyni saxlayın;
-heç vaxt giriş məlumatlarını, proksi parollarını və ya tam avtorizasiya başlıqlarını problem
-hesabatına yerləşdirməyin. Əvvəlcə hostda və konteyner daxilində eyni əmrdən istifadə edərək
-əməliyyat sistemi rezolverinin hansı ünvan ailələrini təqdim etdiyini yoxlayın:
+Doğrulanmış nəticələri müqayisə edərkən açarı, modeli və sorğunu eyni saxlayın; heç vaxt etimadnamələri, proksi parolları və ya tam avtorizasiya başlıqlarını problemə yapışdırmayın. Əvvəlcə hostda və konteynerin içərisində eyni əmrdən istifadə edərək OS həlledicisinin hansı ünvan ailələrini təklif etdiyini yoxlayın:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-`omniroute` əvəzinə işlətdiyiniz xidməti yazın (məsələn, `omniroute-web`). Bu əmrlər giriş
-məlumatlarını və ya IP ünvanlarını göstərmədən ünvan ailələrini çap edir. Qaytarılan `6`
-yalnız IPv6 DNS nəticəsinin olduğunu göstərir: bu, işlək IPv6 marşrutunu və ya API-yə
-çıxışı **sübut etmir**. `curl` quraşdırılıbsa, hər iki mühitdə
-`curl -4 -I https://generativelanguage.googleapis.com` ilə
-`curl -6 -I https://generativelanguage.googleapis.com` nəticələrini müqayisə edin.
-Autentifikasiyasız xəta olsa belə, HTTP cavabı həmin yoxlama üçün bağlantının mövcudluğunu
-sübut edir; Gemini uyğunluğunu yalnız autentifikasiya edilmiş model sorğusu yoxlayır.
+`omniroute` işlədiyiniz xidmətlə əvəz edin (məsələn, `omniroute-web`). Bu əmrlər etimadnamələri və ya IP ünvanları olmayan ünvan ailələrini çap edir. Qaytarılan `6` yalnız IPv6 DNS nəticəsini göstərir: göstərir** yox** faydalı IPv6 marşrutu və ya API girişini sübut edin. `curl` quraşdırıldığı yerdə hər iki mühitdə `curl -6 -I https://generativelanguage.googleapis.com` ilə `curl -4 -I https://generativelanguage.googleapis.com` müqayisə edin. HTTP cavabı, təsdiqlənməmiş xəta olsa belə, həmin zond üçün əlaqəni sübut edir; yalnız təsdiqlənmiş model sorğusu Gemini uyğunluğunu yoxlayır.
 
-### Host səviyyəli alternativ: işlək IPv6 və rezolver siyasəti
+### Host səviyyəli alternativ: işləyən IPv6 və həlledici siyasət
 
-[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) hesabatının müəllifi
-konteyner IPv6-nı aktivləşdirərək və glibc ünvan seçimini dəyişərək öz mühitində çıxışı
-bərpa edib. Bunu mühitə xas alternativ kimi qəbul edin. Rezolver üstünlüklərini
-dəyişməzdən əvvəl host IPv6-nın işlədiyini, konteynerin çıxışını/marşrutlaşdırmasını və
-firewall qaydalarını yoxlayın. Təkcə şəxsi ULA ünvanının olması ictimai IPv6 bağlantısının
-mövcudluğunu təsdiqləmir.
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) müxbiri konteyner IPv6 ni aktivləşdirmək və glibc ünvan seçimini dəyişdirməklə öz mühitinə girişi bərpa etdi. Bunu ətraf mühitə uyğun alternativ kimi qəbul edin. Həlledici üstünlükləri tənzimləməzdən əvvəl işləyən host IPv6, konteyner egress/routing və firewall qaydalarını təsdiqləyin. Şəxsi ULA ünvanı öz-özünə ictimai IPv6 bağlantısı yaratmır.
 
-Artıq Compose-un standart şəbəkəsinə qoşulmuş xidmətlər üçün bu fraqment həmin şəbəkədə
-IPv6-nı aktivləşdirir; xidmətinizin, portların, cildlərin və konfiqurasiyanın qalan
-hissəsini saxlayın:
+Artıq Compose-un defolt şəbəkəsinə qoşulmuş xidmətlər üçün bu fraqment həmin şəbəkədə IPv6 aktivləşdirir; xidmətinizin qalan hissəsini, portları, həcmləri və konfiqurasiyanı qoruyun:
 
 ```yaml
 networks:
@@ -744,34 +741,13 @@ networks:
     enable_ipv6: true
 ```
 
-Adlandırılmış şəbəkə üçün bunu xidmətin faktiki qoşulduğu şəbəkədə aktivləşdirin. Docker
-ULA altşəbəkəsi ayıra bilər; yalnız şəbəkəniz bunu tələb etdikdə açıq şəkildə göstərilmiş,
-üst-üstə düşməyən altşəbəkə seçin. Baxın:
-[Docker IPv6 şəbəkəsi](https://docs.docker.com/engine/daemon/ipv6/) və
-[Compose şəbəkə seçimləri](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Adlandırılmış şəbəkə üçün onu xidmətin həqiqətən qoşulduğu şəbəkədə aktivləşdirin. Docker ULA alt şəbəkəsini ayıra bilər; yalnız şəbəkəniz bunu tələb etdikdə açıq, üst-üstə düşməyən alt şəbəkə seçin. [Docker IPv6 networking](https://docs.docker.com/engine/daemon/ipv6/) və [Compose network options-a](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6) baxın.
 
-**glibc əsaslı təsvirdə** `/etc/gai.conf` ünvan seçimini dəyişə bilər. Repozitoriyanın
-cari Dockerfile faylı Debian istifadə edir; fərdiləşdirilmiş musl əsaslı təsvirlərdə bu
-mexanizm yoxdur. Bildirilən dəyişiklik ULA etiketini `label fc00::/7 6` sətrindən
-`label fc00::/7 1` sətrinə dəyişir. Təsvirin tam siyasət cədvəlindən başlayın və onun
-digər qeydlərini qoruyun: `label` və ya `precedence` qeydinin əlavə edilməsi həmin
-standart cədvəli əvəz edir, buna görə də yalnız dəyişdirilmiş sətri ehtiva edən fayl
-kifayət deyil.
-[glibc konfiqurasiya arayışında](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-bu semantika sənədləşdirilib. Nəzərdən keçirilmiş faylı yalnız oxuma rejimində
-`/etc/gai.conf` ünvanına bind-mount edin və tətbiq olunması üçün xidməti yenidən yaradın.
+On a** glibc əsaslı şəkil** , `/etc/gai.conf` ünvan seçimini dəyişə bilər. Cari depo Dockerfile Debian istifadə edir; xüsusi musl əsaslı şəkillər bu mexanizmi paylaşmır. Məlumatlı tənzimləmə ULA etiketini `label fc00::/7 6` dən `label fc00::/7 1` a dəyişir. Şəklin tam siyasət cədvəlindən başlayın və onun digər qeydlərini qoruyun: `label` və ya `precedence` girişinin əlavə edilməsi həmin standart cədvəli əvəz edir, ona görə də yalnız dəyişdirilmiş sətri ehtiva edən fayl kifayət deyil. [Glibc konfiqurasiya arayışı](https://github.com/bminor/glibc/blob/master/posix/gai.conf) həmin semantikanı sənədləşdirir. Baxılan faylı `/etc/gai.conf` -də yalnız oxumaq üçün bağlayın və onu tətbiq etmək üçün xidməti yenidən yaradın.
 
-Bu, həmin konteynerdəki **bütün çıxış trafiki üçün** əməliyyat sisteminin ünvan seçimini
-dəyişir. Bu, hər tətbiqi IPv6 seçməyə məcbur etmir: Node-un DNS sıralaması və bağlantı
-seçimi də əhəmiyyətlidir. Xüsusilə, `--dns-result-order=ipv4first` IPv4-ə üstünlük verir
-və yalnız IPv4-də baş verən nasazlığın həlli deyil. Baxın:
-[Node DNS sıralaması](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Bu, üçün OS ünvan seçimini dəyişir** həmin konteynerdəki bütün gedən trafik** . O, hər tətbiqi IPv6 seçməyə məcbur etmir: Node-un DNS sırası və əlaqə seçimi də vacibdir. Xüsusilə, `--dns-result-order=ipv4first` IPv4 üstünlük verir və IPv4-only uğursuzluğuna çarə deyil. [Node DNS sifarişinə](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder) baxın.
 
-Host səviyyəsində hər hansı dəyişiklikdən sonra Gemini-ni və digər provayderlərinizi
-yenidən yoxlayın. Geri qaytarmaq üçün fərdiləşdirilmiş `gai.conf` mount-unu silin, əvvəlki
-şəbəkə konfiqurasiyasını bərpa edin və texniki xidmət müddətində təsirə məruz qalan
-xidməti/şəbəkəni yenidən yaradın. Şəbəkənin yenidən yaradılması ona qoşulmuş digər
-konteynerlərin işini dayandıra bilər; daimi məlumat cildini silməyin.
+Hər hansı host səviyyəsində dəyişiklikdən sonra Gemini və digər provayderlərinizi yenidən sınaqdan keçirin. Geri qaytarmaq üçün xüsusi `gai.conf` montajını çıxarın, əvvəlki şəbəkə konfiqurasiyasını bərpa edin və təmir pəncərəsi zamanı təsirlənmiş service/network yenidən yaradın. Şəbəkənin yenidən yaradılması ona qoşulmuş digər konteynerləri dayandıra bilər; davamlı məlumat həcmini silməyin.
 
 ## Vacib qeydlər
 

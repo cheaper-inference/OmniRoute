@@ -11,7 +11,7 @@ Objektivna primerjava funkcij s priljubljenimi odprtokodnimi usmerjevalniki AI.
 | Funkcija                                                  |                OmniRoute 3.8                 |     LiteLLM 1.x      | OpenRouter (SaaS) |  Portkey  |
 | --------------------------------------------------------- | :------------------------------------------: | :------------------: | :---------------: | :-------: |
 | **Ponudniki**                                             |                   **329**                    |         ~100         |        ~50        |    ~30    |
-| **vnosi v katalog Free/no-auth**                          |                   **155**                    |         n/a          |      prehod       |    n/a    |
+| **Ponudniki z brezplačnim dostopom**                      |          **50 s prostim dostopom**           |         n/a          |      prehod       |    n/a    |
 | **Samostojno gostovanje**                                 |                      ✅                      |          ✅          |        ❌         | ⚠ plačan  |
 | **vnosi v katalog OAuth**                                 |                    **23**                    |        delno         |        ❌         |    ❌     |
 | **Samodejne nadomestne kombinacije**                      |               **22 strategij**               | na podlagi prioritet |     na ravni      |  tehtano  |
@@ -38,7 +38,7 @@ Objektivna primerjava funkcij s priljubljenimi odprtokodnimi usmerjevalniki AI.
 
 ## Kdaj izbrati OmniRoute
 
-- Sami gostite in želite** največja pokritost ponudnika** (394 ponudnikov, 155 kataloških vnosov free/no-auth )
+- Sami gostite in želite** največja pokritost ponudnika** (394 ponudnikov, 50 z brezplačnim dostopom)
 - Potrebujete a** vgrajen strežnik MCP** (LLM orodja, spomin, spretnosti, izpostavljene kot orodja)
 - Potrebujete** protokol A2A** za poteke dela od agenta do agenta
 - hočeš** prikriti prstni odtis** (JA3/JA4), da bi se izognili odkrivanju z zgornjim CAPTCHAs
@@ -58,10 +58,10 @@ Objektivna primerjava funkcij s priljubljenimi odprtokodnimi usmerjevalniki AI.
 
 ## Kdaj izbrati Portkey
 
-- Potrebujete **komercialni SLA** z jamstvi razpoložljivosti
-- Želite **upravljano nadzorno ploščo** brez operativnih stroškov
-- Potrebujete **funkcije za skladnost v podjetjih**, pripravljene za takojšnjo uporabo
+- Potrebujete a** komercialni SLA** z garancijami za neprekinjeno delovanje
+- Raje imate a** upravljana nadzorna plošča** brez operativnih stroškov
+- Potrebujete** skladnost podjetja** funkcije takoj po namestitvi
 
 ---
 
-_Nazadnje posodobljeno: 2026-08-02. Popravke pošljite prek PR-ja, da bo ta tabela ostala točna._
+_Pošljite popravke prek PR, da bo ta tabela točna._

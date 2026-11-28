@@ -16,128 +16,63 @@ konveyer reyestr əsasında qurulduğundan, əlavə təyinatlar mövcud sistemi 
 ## 1. Necə işləyir
 
 ```
-server (konfiqurasiyanın şifrəsini aç + yoxla, kursoru uyğunlaşdır)
-  → IPC-ni başlat → təcrid olunmuş exportChild ƏS prosesi
-    → yalnız oxunan storage.sqlite → ortaq çağırış jurnalı sorğusu/uyğunlaşdırması
-      → artefaktların asinxron yüklənməsi → təyinat prepare()/send()
-        → paket IPC → server kursoru saxlayır → təsdiq IPC
-          → növbəti paket; tamamlanma IPC → server uğuru qeydə alır
+server (decrypt + validate config, reconcile cursor)
+  → start IPC → isolated exportChild OS process
+    → read-only storage.sqlite → shared call-log query/mapping
+      → async artifact hydration → destination prepare()/send()
+        → batch IPC → server persists cursor → ack IPC
+          → next batch; done IPC → server records success
 ```
 
-- **Cədvəl** — bir `JobRegistry` cron tapşırığı, `log_export`, standart olaraq `0 * * * *` (hər saat,
-  UTC). `src/lib/initCloudSync.ts` daxilində qeydiyyata alınır; `OMNIROUTE_LOG_EXPORT_CRON` ilə dəyişdirilə bilər.
-  Hər işə düşmədə bütün **aktiv** təyinatların gözləyən qeydləri ardıcıl emal olunur.
-- **Kursor** — SQLite-ın gizli `call_logs.rowid` dəyəri, hər təyinat üçün
-  `log_export_destinations.cursor_row_id` daxilində saxlanılır. `timestamp` qəsdən kursor kimi istifadə edilmir: çağıranlar
-  öz dəyərlərini verə bildiyindən, yavaş sorğu daha gec başlamış sürətli sorğudan sonra yazıla bilər
-  və zaman nişanı əsaslı kursor onu ötürərdi.
-- **Paketləmə** — hər sorğuda `batch_size` sətir (standart 500), hər icrada `max_rows_per_run` sətir
-  (standart 10000); beləliklə, böyük yığılma bir işə düşməni bloklamaq əvəzinə bir neçə işə düşmə ərzində emal olunur.
-- **Çatdırılma** — kursor yalnız `send()` uğurla tamamlandıqdan sonra irəliləyir. Paket uğursuz olduqda
-  kursor olduğu yerdə qalır və eyni sətirlər növbəti icrada yenidən göndərilir. Təminat
-  həqiqi «dəqiq bir dəfə» deyil, «ən azı bir dəfə» çatdırılma və təyinat tərəfində dublikatların aradan qaldırılmasıdır: BigQuery hər
-  sətir üçün açar kimi çağırış jurnalının identifikatorundan istifadə edir və öz dublikatları aradan qaldırma intervalı daxilində buna mümkün qədər əməl edir.
-- **Üst-üstə düşmədən qorunma** — cron işə düşməsi və `POST .../run` eyni anda baş verə bilər. Artıq
-  emal olunan təyinat iki dəfə emal olunmaq əvəzinə ötürülür (icra nəticəsində `skipped: true`),
-  buna görə paralel icra paketi yenidən göndərə və ya kursoru geriyə yaza bilməz.
-- **Tam təmizlənmədən sonra bərpa** — `cursor_row_id` dəyəri `MAX(rowid)` dəyərindən böyük olarsa (bütün cədvəl
-  təmizlənib və rowid dəyərləri yenidən başlayıbsa), icraçı qeydləri həmişəlik görməz hala düşmək əvəzinə kursoru 0-a qaytarır.
+- **Cədvəl** — bir `JobRegistry` cron işi, `log_export`, defolt olaraq `0 * * * *` (saatlıq, UTC). `src/lib/initCloudSync.ts`-də qeydiyyatdan keçmişdir; `OMNIROUTE_LOG_EXPORT_CRON` ilə əvəz edilə bilər. Hər gənə hər drains** aktivləşdirildi** təyinat, ardıcıl olaraq.
+- **Cursor** — SQLite- nin gizli `call_logs.rowid`, `log_export_destinations.cursor_row_id` də hər təyinat üçün davam etdi . `timestamp` qəsdən kursor deyil: zəng edənlər öz dəyərini verə bilər, belə ki, sonradan başlayan daha sürətli sorğudan sonra yavaş sorğu yazıla bilər və zaman damğası kursoru onu atlayar.
+- **Partiya** hər sorğu üçün — `batch_size` sətirləri (standart 500), hər qaçış üçün `max_rows_per_run` sətirləri (defolt 10000) beləliklə, böyük bir geriləmə birini bloklamaq əvəzinə bir neçə gənə üzərindən boşaldılır.
+- **Çatdırılma** — kursor yalnız `send()` həll edildikdən sonra irəliləyir. Uğursuz toplu kursoru olduğu yerdə tərk edir, beləliklə, eyni sətirlər növbəti qaçışda yenidən yoxlanılır. Zəmanət ən azı bir dəfə üstəgəl təyinat tərəfinin dublikasiyasıdır, dəqiq bir dəfə doğru deyil: BigQuery hər cərgəni zəng qeydinin identifikatoru ilə klaviş edir və bu, öz dedup pəncərəsində ən yaxşı səy əsasında qiymətləndirir.
+- **Üst-üstə düşən qoruyucu** — the cron tick və `POST .../run` birlikdə atəş edə bilər. Artıq boşaldılan təyinat iki dəfə boşaldılmaq əvəzinə atlanır (çalışma nəticəsində `skipped: true` ), buna görə də paralel qaçış partiyanı yenidən göndərə və ya kursoru geriyə yaza bilməz.
+- **Təmizləmə bərpası** — əgər `cursor_row_id` `MAX(rowid)` dən yuxarı olarsa (bütün cədvəl təmizləndi və sıralar yenidən başladılıb), qaçışçı həmişəlik kor olmaq əvəzinə 0-a geri sarılır.
 
-### Təcrid olunmuş icraçı və məhdudiyyətlər
+### Təcrid olunmuş qaçışçı və məhdudiyyətlər
 
-Node üzərində hər təyinatın icrası ayrıca, qısamüddətli ƏS törəmə prosesi başladır (IPC ilə `child_process`,
-`worker_threads` deyil). Gövdələrin oxunması, faydalı yükün JSON təhlili/serializasiyası, təyinatın
-`prepare()` funksiyası və təyinatın şəbəkə giriş-çıxışı serverin hadisə dövrəsində deyil, həmin prosesdə işləyir.
-IPC üzərindən yalnız konfiqurasiya və kiçik gedişat mesajları ötürülür; ixrac edilən qeydlər heç vaxt
-serverə qayıtmır. Cron tapşırığı və İndi işə sal marşrutu eyni xaricə təqdim olunan nəticəni və üst-üstə düşmədən qorunmanı saxlayır.
+Node-da işə salınan hər bir təyinat ayrı, qısamüddətli OS uşaq prosesinə başlayır (`child_process` ilə IPC, `worker_threads` deyil). Bədən oxunuşları, faydalı yük JSON parsing/serialization, təyinat `prepare()` və təyinat şəbəkəsi I/O hamısı serverin hadisə dövrəsində deyil, orada işləyir. Yalnız konfiqurasiya və kiçik irəliləyiş mesajları keçir IPC; ixrac edilmiş qeydlər heç vaxt serverə qayıtmır. Cron işi və İndi Run marşrutu eyni ictimai nəticəni və üst-üstə düşən mühafizəni saxlayır.
 
-Törəmə proses serverin müəyyən etdiyi `DATA_DIR/storage.sqlite` faylını `node:sqlite` vasitəsilə yalnız oxuma rejimində,
-`busy_timeout=5000` və `query_only=ON` ilə açır. O, heç bir verilənlər bazası singletonunu idxal etmir və
-miqrasiya, ehtiyat nüsxələmə və ya SQLite yeniləmələri həyata keçirmir. Çatışmayan/zədələnmiş artefaktların uçotu (o cümlədən
-zədələnmiş artefakt üçün UPDATE) yalnız idarəetmə panelinin təfərrüat emalı yolunda qalır. Hər iki yol eyni yan təsirsiz
-təfərrüat həlledicisindən istifadə edir; ixrac asinxron fayl sistemi oxumalarından və eyni artefakt → köhnə
-daxili məlumat → köhnə disk məlumatı → heç biri həll ardıcıllığından istifadə edir. Törəmə proses oxuyucusunu açanda icra maksimum əlavəetmə rowid dəyərini
-qeydə alır; sonrakı əlavələr növbəti icranı gözləyir. Bu, əlavəetmə
-sərhədidir, uzunmüddətli SQLite tranzaksiyası deyil: şəbəkə gözləmələri zamanı WAL yazıcıları və yoxlama nöqtələri sərbəst qalır.
-Bu sərhəd mövcud sətirlərin yenilənməsini/silinməsini dondurmur.
+Uşaq `busy_timeout=5000` və `query_only=ON` ilə `node:sqlite` istifadə edərək serverin həll edilmiş `DATA_DIR/storage.sqlite` -nı yalnız oxumaq üçün açır. O, heç bir DB singleton idxal etmir və miqrasiya, ehtiyat nüsxələri və ya SQLite yeniləmələri həyata keçirmir. Missing/corrupt artefakt mühasibatlığı ( UPDATE zədələnmiş artefakt daxil olmaqla) yalnız tablosunun təfərrüat yolunda qalır. Hər iki yol təmiz detal həlledicisini paylaşır; ixrac asinxron fayl sistemi oxunuşlarından və eyni artefaktdan istifadə edir → legacy inline → legacy disk → none resolution order. Uşaq oxuyucunu açdıqda qaçış maksimum daxiletmə sətirini çəkir; sonrakı daxiletmələr növbəti qaçışı gözləyir. Bu, uzunmüddətli SQLite əməliyyatı deyil, daxiletmə sərhədidir: WAL yazıçıları və nəzarət nöqtələri şəbəkə gözləmələri zamanı sərbəst qalır. mövcud cərgələrin Updates/deletions bu sərhədlə dondurulmur.
 
-Hər qəbul edilmiş paketdən sonra törəmə proses təsdiq gözləyir. Server əvvəlcə
-kursoru `advanceLogExportCursor` ilə saxlayır, sonra `ack` göndərir; bundan əvvəl növbəti paket başlamır.
-Göndərmə xətası, qəza və ya vaxt aşımı həmin paketin kursorunu irəlilətmədən uğursuzluğu qeydə alır. Əvvəllər
-təsdiqlənmiş paketlər təsdiqlənmiş olaraq qalır; ən çoxu bir təsdiqlənməmiş paket yenidən göndərilə bilər.
-Uğur yalnız `done` mesajından və törəmə prosesin xətasız çıxışından sonra qeydə alınır. Uğursuzluqlar zamanı törəmə proses
-SIGTERM ilə dayandırılır, 500 ms sonra isə SIGKILL tətbiq olunur və icraçı prosesin bağlanmasını gözləyir.
+Hər qəbul edilmiş partiyadan sonra uşaq qəbulu gözləyir. Server əvvəlcə kursoru `advanceLogExportCursor` ilə saxlayır, sonra `ack` göndərir; ondan əvvəl növbəti partiya başlamır. Göndərmə uğursuzluğu, qəza və ya vaxt aşımı həmin partiyanı irəlilətmədən uğursuzluğu qeyd edir. Əvvəllər qəbul edilmiş partiyalar sadiq qalır; ən çox bir qəbul edilməmiş partiya yenidən göndərilə bilər. Uğur yalnız `done` və təmiz uşaq çıxışından sonra qeyd olunur. Uğursuzluqlar uşağı SIGTERM ilə dayandırır, 500 ms-dən sonra SIGKILL -ə yüksəlir və qaçışçı prosesin bağlanmasını gözləyir.
 
-| Mühit dəyişəni                                | Standart | Məqsəd                                      |
-| --------------------------------------------- | -------- | ------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Hər təyinat üçün real vaxt limiti           |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Törəmə prosesin V8 old-space limiti, MB ilə |
+| Ətraf mühit dəyişkənliyi                      | Defolt | Məqsəd                              |
+| --------------------------------------------- | ------ | ----------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | Hər təyinat üçün divar saatı limiti |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | MB-da uşaq V8 köhnə boşluq limiti   |
 
-Yanlış/müsbət olmayan/tam ədəd olmayan dəyərlər üçün standart dəyərlər istifadə olunur. Dinamik yaddaş parametri ümumi
-RSS limiti deyil; çox böyük paketlər yenə də törəmə prosesin yaddaşını tükədə və icranın təhlükəsiz şəkildə uğursuz olmasına səbəb ola bilər.
-1024 MB standart dəyəri, BigQuery-nin baytlara görə hissələrə bölünmüş JSON serializasiyası da daxil olmaqla,
-gövdələr aktiv olduqda 512 KiB artefaktlardan ibarət standart 500 sətirlik paket üçün əlavə ehtiyat saxlayır. Bu, gövdələri olan
-10000 sətirlik paketi təhlükəsiz etmir. V8 dinamik yaddaşı tükəndikdə, görülməli tədbiri göstərən xəta qeydə alınır: paket
-ölçüsünü azaldın və ya `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` dəyərini artırın; kursor son
-təsdiqlənmiş paketdə qalır. Köhnə daxili/disk gövdələrinə müasir artefakt ölçüsü məhdudiyyəti tətbiq edilmir.
-Operatorlar, xüsusən yaddaşı məhdud konteynerlərdə, RSS üçün ayrıca resurs planlaşdırmalıdırlar.
+Invalid/non-positive/non-integer dəyərləri standartları istifadə edir. Yığın parametri ümumi RSS limiti deyil; çox böyük partiyalar hələ də uşaq yaddaşını tükəndirə və təhlükəsiz şəkildə qaça bilər. 1024 MB defolt, BigQuery-nin bayt-parçalanmış JSON serializasiyası da daxil olmaqla, gövdələri aktivləşdirilmiş 512 KiB artefaktdan ibarət defolt 500 cərgə toplu üçün boşluq buraxır. Bu, 10000 cərgəlik gövdə partiyasını təhlükəsiz etmir. V8 yığın tükənməsi təsirli bir uğursuzluğu qeyd edir: partiyanın ölçüsünü azaldın və ya `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` artırın; kursor sonuncu təsdiq edilmiş topluda qalır. Tarixi inline/disk cisimləri müasir artefakt qapağı ilə əhatə olunmur. Operatorlar RSS ayrıca, xüsusən də yaddaş məhdud konteynerlər daxilində büdcə ayırmalıdırlar.
 
-Alt proses yalnız həll edilmiş `DATA_DIR`, `NODE_ENV`, açıq şəkildə təyin edilmiş `TZ` (köhnə fayl adlarında
-yerli vaxtın müəyyənləşdirilməsi), mövcud olduqda `ELECTRON_RUN_AS_NODE` və aşağıdakı çıxış parametrlərini miras alır:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (və onların kiçik hərflə yazılmış formaları),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Qlobal Undici dispetçeri serverin yalnız mühit dəyişənlərinə əsaslanan proksi müəyyənləşdirmə və yerli hostlar üçün
-proksidən yan keçmə qaydalarını, o cümlədən `NO_PROXY` qaydasını paylaşır; o, `proxyFetch.ts` və ya onun verilənlər bazası/funksiya bayraqlarını idxal etmir.
-Proksi giriş məlumatları ötürülən çıxışdan və qeydə alınan xətalardan gizlədilir. Təyinatın giriş məlumatları
-yalnız bir başlanğıc IPC mesajında ötürülür, heç vaxt argv və ya mühit vasitəsilə ötürülmür; ötürülən çıxışa/xətalara
-prefiks əlavə edilir və həssas məlumatlar təmizlənir. Hər cron icrasında Node-un SQLite xəbərdarlığının
-təkrarlanmaması üçün alt prosesin icra arqumentlərində yalnız `ExperimentalWarning` söndürülür; digər xəbərdarlıq növləri görünən qalır.
+Uşaq yalnız həll edilmiş `DATA_DIR`, `NODE_ENV`, açıq `TZ` (miras fayl adı yerli vaxt ayırdetmə), mövcud olduqda `ELECTRON_RUN_AS_NODE` və aşağıdakı gedən daxiletmələri miras alır: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (və `SSL_CERT_DIR` kiçik hərf formaları), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS` `SSL_CERT_FILE` Qlobal Undici dispetçer serverin təmiz mühit-proksi həllini və `NO_PROXY` daxil olmaqla yerli hostdan yan keçmə qaydalarını paylaşır; `proxyFetch.ts` və ya onun DB/feature bayraqlarını idxal etmir. Proksi etimadnamələri yönləndirilmiş çıxışdan və qeydə alınmış səhvlərdən redaktə edilir. Təyinat etimadnamələri yalnız bir başlanğıc IPC mesajında səyahət edir, heç vaxt argv və ya mühitdə deyil; output/error yönləndirilməsi prefiks edilir və təmizlənir. Yalnız `ExperimentalWarning` uşaq icra arqumentlərində qeyri-aktivdir ki, Node-un SQLite lərinin hər cron qaçışına xəbərdarlıq etməsinin qarşısını almaq; digər xəbərdarlıq növləri görünən qalır.
 
-Təyinat modulları Next.js/yalnız server üçün olan asılılıqlar olmadan idxal edilə bilməlidir. Mövcud
-BigQuery tətbiqi artıq bu tələbi ödəyir. Giriş tokenlərinin keşləri yalnız alt prosesin
-icrası müddətində saxlanılır, icralar arasında saxlanılmır. Dəstəklənən icra mühiti Node-dur (`package.json` engines), lakin README-dəki Bun
-quraşdırma bölməsi və `Dockerfile.bun` həmçinin
-`bun:sqlite` (`src/lib/db/core.ts` / adapterlər) istifadə edən istehsal mühiti üçün uyğunluq yolunu təqdim edir. Buna görə Bun altında ixraclar əvvəlki
-prosesdaxili yolu saxlayır və birdəfəlik xəbərdarlıq verir: alt prosesin heap/vaxt limiti izolyasiyası mövcud deyil.
-Hadisə dövrəsi və OOM izolyasiyası üçün Node istifadə edin; burada Bun yalnız inkişaf mühiti üçün nəzərdə tutulmuş sayılmır.
+Təyinat modulları Next.js/server-only asılılığı olmadan idxal edilə bilən olmalıdır. Mövcud BigQuery tətbiqi artıq həmin müqaviləyə cavab verir. Access-token keşləri yalnız uşaq qaçışı üçün davam edir, qaçışlar arasında deyil. Node dəstəklənən iş vaxtıdır (`package.json` mühərrikləri). Ən yaxşı səy, dəstəklənməyən Bun uyğunluğu yolu mövcuddur ( `src/lib/db/core.ts` / adapterlərdə `bun:sqlite` və `Dockerfile.bun`), buna görə də ixraclar onun altından pozulmamalıdır. Bun altında ixraclar əvvəlki prosesdaxili yolu saxlayır və birdəfəlik xəbərdarlıq verir: uşaq heap/timeout izolyasiyası əlçatan deyil. Hadisə döngəsi və OOM izolyasiyası üçün Node istifadə edin.
 
-`includeBodies` aktiv olduqda, bir saatlıq faydalı yük yığılmasına yol vermək əvəzinə
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` kimi dəqiqə səviyyəli tezliyə üstünlük verin.
-Paket və sətir limitləri yenə də hər icranı məhdudlaşdırır. Hər icrada hər təyinat üçün
-prosesin başladılması xərci yaranır; bu, ümumi CPU istifadəsini azaltmaq üçün deyil, kiçik başlanğıc xərci müqabilində serverin hadisə dövrəsini izolyasiya etmək üçündür.
+`includeBodies` aktivləşdirildikdə, saatlıq faydalı yükün yığılması əvəzinə, `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` kimi dəqiqə səviyyəli kadansa üstünlük verin. Partiya və sıra məhdudiyyətləri hələ də hər qaçışa bağlıdır. Prosesin işə salınması hər qaçış üçün təyinat üzrə ödənilir; bu, ümumi CPU istifadəsini azaltmaqla deyil, server hadisə-loop təcrid üçün kiçik bir başlanğıc dəyəri ticarət edir.
 
-### Faydalı yüklər (sorğular və tamamlamalar)
+### Faydalı yüklər (istəklər və tamamlamalar)
 
-Standart olaraq ixrac yalnız Jurnalların **siyahısında** göstərilən xülasə sahələrini daşıyır.
-**Sorğuları və cavabları ixrac et** (`includeBodies`) seçiminin aktivləşdirilməsi əlavə olaraq hər çağırış üçün Jurnalların **təfərrüatlar**
-panelində göstərilənləri göndərir:
+Varsayılan olaraq, ixrac yalnız jurnalların xülasə sahələrini daşıyır** siyahı** göstərir. Yandırılır** İxrac sorğuları və cavablar** (`includeBodies`) əlavə olaraq Logs nə göndərir** təfərrüat** panel hər zəng üçün göstərilir:
 
-| Sahə                             | Nə saxlayır                                                                     |
-| -------------------------------- | ------------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Çağırışın faydalı yükləri, idarəetmə panelində göstərildiyi kimi                |
-| `pipeline_route_decision`        | Marşrutlaşdırıcının seçdiyi hədəf və model                                      |
-| `pipeline_client_request`        | Müştərinin göndərdiyi sorğu, olduğu kimi                                        |
-| `pipeline_openai_request`        | Daxili OpenAI formatına çevrildikdən sonrakı sorğu                              |
-| `pipeline_provider_request`      | Provayderin formatında, faktiki olaraq yuxarı axına göndərildiyi kimi           |
-| `pipeline_provider_response`     | Yuxarı axından alınan emal edilməmiş cavab                                      |
-| `pipeline_client_response`       | Çağıran tərəfə qaytarılan məlumat                                               |
-| `pipeline_error`                 | Uğursuz çağırış üçün konveyer səviyyəli xəta təfərrüatları                      |
-| `bodies_truncated`               | Yuxarıdakı sahələrdən hər hansı biri `maxBodyBytes` həddinə çatdıqda doğru olur |
+| Sahə                             | Nə tutur                                                   |
+| -------------------------------- | ---------------------------------------------------------- |
+| `request_body` / `response_body` | İdarə paneli onları göstərdiyi kimi zəng faydalı yüklənir  |
+| `pipeline_route_decision`        | Router hansı hədəfi və modeli seçdi                        |
+| `pipeline_client_request`        | Xam sorğu tam olaraq müştərinin göndərdiyi kimi            |
+| `pipeline_openai_request`        | Daxili OpenAI formasına tərcümə edildikdən sonra           |
+| `pipeline_provider_request`      | Əslində provayder ləhcəsində yuxarıya göndərildiyi kimi    |
+| `pipeline_provider_response`     | Xam yuxarı axın cavabı                                     |
+| `pipeline_client_response`       | Nə zəng edənə qaytarıldı                                   |
+| `pipeline_error`                 | Uğursuz zəng üçün boru kəməri səviyyəsində xəta detalı     |
+| `bodies_truncated`               | Yuxarıdakı hər hansı sahə `maxBodyBytes` vurduqda doğrudur |
 
-Bu, sorğu məzmunudur, ona görə də **standart olaraq söndürülüb** və qəsdən hər təyinat üçün ayrıca seçilir.
-Göndərilənlər idarəetmə panelində göstərilənlərlə eynidir, çünki ixrac və `getCallLogById` təfərrüatların
-əldə edilməsi mexanizmini paylaşır: faydalı yüklər
-yazılarkən artıq şəxsi identifikasiya məlumatlarından təmizlənir və məxfi məlumatlar gizlədilir;
-`noLog` API açarı ilə edilən çağırış isə ümumiyyətlə heç bir faydalı yük saxlamır, buna görə ixrac ediləcək heç nə yoxdur.
+Bu operativ məzmundur, belədir** default olaraq söndürülür** və bilərəkdən hər bir təyinat yeri seçimi. Gəmilər tablosunun göstərdiyi şeydir, çünki ixrac və `getCallLogById` təfərrüatlı qətnaməni paylaşır: faydalı yüklər yazıldıqda artıq PII-dən təmizlənir və məxfi redaktə edilir və `noLog` API açarı ilə edilən zəng heç bir yükü saxlamır, buna görə də ixrac ediləcək heç nə yoxdur.
 
-Faydalı yüklər fayl sistemindəki artefaktdan hər sətir üçün ayrıca oxunur, buna görə məlumatların tamamlanması yalnız
-bunu tələb edən təyinatlar üçün yerinə yetirilir. Artefakt çatışmadıqda və ya zədələndikdə paketi uğursuz etmək və kursoru ilişib saxlamaq əvəzinə
-onun xülasəsi null faydalı yüklərlə ixrac edilir.
+Faydalı yüklər fayl sistemi artefaktından hər cərgə oxunur, buna görə nəmləndirmə yalnız bunu tələb edən istiqamətlər üçün işləyir. Çatışmayan və ya pozulmuş artefakt, topluda uğursuzluq və kursoru bağlamaq əvəzinə, öz xülasəsini sıfır faydalı yüklərlə ixrac edir.
 
-`maxBodyBytes` (standart dəyər 262144) hər sahənin ölçüsünü məhdudlaşdırır. Daha uzun faydalı yüklər **atılmaq əvəzinə
-qısaldılır** — qısaldılmış sorğu yenə də "nə soruşulmuşdu" sualına cavab verir — və sətir
-`bodies_truncated` ilə işarələnir. Axınla hissə-hissə ötürülən fərqlər ixrac edilmir; yığılmış cavab
-artıq `pipeline_provider_response` və `pipeline_client_response` sahələrindədir.
+`maxBodyBytes` (defolt 262144) hər sahəni əhatə edir. Daha uzun faydalı yüklər** azaltmaq əvəzinə kəsildi** — kəsilmiş sorğu hələ də "nə soruşulub" sualına cavab verir — və sıra `bodies_truncated` ilə işarələnir. Streamed chunk-by-chunk deltalar ixrac edilmir; yığılmış cavab artıq `pipeline_provider_response` və `pipeline_client_response` dədir.
 
 ---
 

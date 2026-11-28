@@ -8,21 +8,22 @@
 
 ## 目次
 
-- [クイック実行](#quick-run)
-- [環境ファイルを使用する](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [クイックラン](#quick-run)
+- [環境ファイルあり](#with-environment-file)
+- [Docker作成](#docker-compose)
 - [利用可能なプロファイル](#available-profiles)
-- [OmniRoute を Docker で実行する場合のホスト CLI ツールの設定](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Redis サイドカー](#redis-sidecar)
-- [本番環境向け Compose](#production-compose)
+- [容器の硬化](#container-hardening)
+- [OmniRouteがDockerで実行される場合のホストCLIツールの構成](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redisサイドカー](#redis-sidecar)
+- [プロダクションコンポーズ](#production-compose)
 - [Dockerfile のステージ](#dockerfile-stages)
 - [重要な環境変数](#critical-environment-variables)
-- [Caddy（HTTPS）を使用する Docker Compose](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
-- [イメージタグ](#image-tags)
-- [Docker でのダッシュボード更新](#dashboard-updates-in-docker)
-- [可用性：デフォルトの SQLite は単一レプリカ](#availability-default-sqlite-is-single-replica)
-- [Docker 内での Gemini のリージョンエラー](#gemini-regional-errors-inside-docker)
+- [Dockerキャディで作成 (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflareクイック トンネル](#cloudflare-quick-tunnel)
+- [画像タグ](#image-tags)
+- [Dockerのダッシュボードの更新](#dashboard-updates-in-docker)
+- [可用性: デフォルトのSQLiteは単一レプリカです](#availability-default-sqlite-is-single-replica)
+- [Docker内のGemini地域エラー](#gemini-regional-errors-inside-docker)
 - [重要な注意事項](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute には、主要なデプロイ構成向けの Compose プロファイ�
 | `web`                | `omniroute-web`  | ブラウザーを必要とする Web セッションプロバイダー：`gemini-web`、`claude-web`、`claude-turnstile`（`runner-web` をビルド、Chromium を含む）    | `docker compose --profile web up -d`         |
 
 > 複数のプロファイルを組み合わせることができます：`docker compose --profile cli --profile cliproxyapi up -d`。
+
+## 容器の硬化
+
+`docker-compose.yml`の`base`、 `web`、 `cli`、および`host`アプリ サービスは、 `cap_drop: [ALL]`および`no-new-privileges:true`セキュリティ オプションを使用します。イメージは非 root ユーザー`node`として実行され、上位ポートでリッスンするため、 Linux機能は必要ありません。セキュリティ オプションは、プロセスが setuid バイナリを通じて特権を取得することを防ぎます。
+
+`cli`プロファイルのみが自動アップデーターのDockerソケットをマウントします。セキュリティへの影響については、 [「エスケープ ハッチ: コンテナー独自のCLIsの構成」を](#escape-hatch-configure-the-containers-own-clis-use-sparingly)参照してください。
+
+ルート ファイルシステムはデフォルトで書き込み可能のままです。 `cli`プロファイルは、コンテナのホーム ディレクトリにCLI構成とキャッシュを書き込み、 `web`プロファイルは Chromium セッション状態を保存し、 Next.jsランタイムは`/app/data`外部にキャッシュを書き込むことができます。
+
+`base`プロファイルを使用して読み取り専用ルート ファイルシステムを試すには、これを`docker-compose.yml`の隣に`docker-compose.override.yml`として保存します。 Compose はオーバーライドを自動的に読み取ります。
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+既存の`/app/data`マウントは引き続き書き込み可能です。他のパスに書き込む必要がある場合があるため、実稼働環境でこのオーバーライドを使用する前にワークロードをテストしてください。
 
 ## OmniRoute を Docker で実行する場合のホスト CLI ツールの設定
 
@@ -242,10 +267,10 @@ docker compose -f docker-compose.prod.yml down
 | ------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `builder`     | `node:26-trixie-slim` | Installs deps (`npm ci --legacy-peer-deps`) and runs `npm run build` (Turbopack by default — see Build-time resources below)                                                                                                                                                                              |
 | `runner-base` | `node:26-trixie-slim` | Next.jsスタンドアロン出力を使用した運用ランタイム。**プロバイダーCLIsはバンドルされていません。**                                                                                                                                                                                                         |
-| `runner-cli`  | `runner-base`         | `git`、 `docker.io`、 `docker-compose`およびグローバルCLIs: `@openai/codex`、 `@anthropic-ai/claude-code`、 `droid`、 `openclaw`を追加します。**エージェント ワークフローの場合はこれを選択します。**                                                                                                     |
+| `runner-cli`  | `runner-base`         | `git`、 `docker.io`、 `docker-compose`およびグローバルCLIs: `@openai/codex`、 `@anthropic-ai/claude-code`、 `droid`、 `openclaw`を追加します。**エージェントのワークフローにはこれを選択してください。**                                                                                                  |
 | `runner-web`  | `runner-base`         | Web セッションプロバイダー`gemini-web`、 `claude-web`、 `claude-turnstile`) 用の Chromium ブラウザー (`--with-deps`) にPlaywright +追加します。**これらのプロバイダーを使用する場合はこれを選択してください**—プレーン イメージがないと、リクエスト時に失敗します (リリース チャネルの`-web`メモを参照)。 |
 
-特定のターゲットを手動でビルドします。
+特定のターゲットを手動で構築します。
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -263,7 +288,7 @@ docker build --target runner-web  -t omniroute:web  .
 | `OMNIROUTE_BUILD_MEMORY_MB` | `6144`     | 生成された`next build`の V8 ヒープ上限 (`--max-old-space-size`)。                                                    |
 | `OMNIROUTE_BUILD_WORKERS`   | `2`        | フィード`CIRCLE_NODE_TOTAL`;次に、ページデータ収集用の`workers = N - 1`を導出します。                                |
 
-`OMNIROUTE_BUILD_WORKERS` 、大きなビルダーに対して発生させるべきものであり、制約されたビルドが停止したときに疑うべきものです**後**`✓ Compiled successfully`。各ページ データ ワーカーは独自のプロセスであり、親`next build`自体も同様です。ライブVPS再現 ( #7518の問題) では、 `NODE_OPTIONS`ヒープ フラグとは関係なく、 ~ 4.5 GBで各プロセスのピークRSSが測定されました (Turbopack V8 ヒープの外のnative/Rustメモリでコンパイルされます)。 `2`のデフォルト (→ 1 ワーカー、合計 2 プロセス) は、パブリッシュ パイプラインが使用する 16 GB / 4 vCPU GitHub ホスト ランナーに合わせてサイズ設定されています。 `8` (→ 7 ワーカー) では、ランナーがメモリを使い果たし、ビルドキットは`ResourceExhausted: ... cannot allocate memory`のステップに失敗しました。プロセスごとのRSSが推測ではなく直接測定されると、 `3` (→ 2 ワーカー) は依然として適合しませんでした。 `tests/unit/docker-build-memory-budget.test.ts`測定された数値に対して演算を実行し、いずれかのノブがランナーを超えると失敗します。
+`OMNIROUTE_BUILD_WORKERS` 、大きなビルダーに対して発生させるべきものであり、制約されたビルドが停止したときに疑うべきものです**後**`✓ Compiled successfully`。各ページ データ ワーカーは独自のプロセスであり、親`next build`自体も同様です。ライブVPS再現 ( #7518発行) では、 `NODE_OPTIONS`ヒープ フラグとは関係なく、各プロセスのピークRSS ~ 4.5 GBで測定しました (Turbopack V8 ヒープの外のnative/Rustメモリでコンパイルされます)。 `2`のデフォルト (→ 1 ワーカー、合計 2 プロセス) は、パブリッシュ パイプラインが使用する 16 GB / 4 vCPU GitHub ホスト ランナーに合わせてサイズ設定されています。 `8` (→ 7 ワーカー) では、ランナーがメモリを使い果たし、ビルドキットは`ResourceExhausted: ... cannot allocate memory`のステップに失敗しました。プロセスごとのRSSが推測ではなく直接測定されると、 `3` (→ 2 ワーカー) は依然として適合しませんでした。 `tests/unit/docker-build-memory-budget.test.ts`測定された数値に対して演算を実行し、いずれかのノブがランナーを超えると失敗します。
 
 Turbopackネイティブの Rust メモリ内でコンパイルされます。**外**V8 ヒープなので、 `OMNIROUTE_BUILD_MEMORY_MB`それをバインドしません。メモリ上限のあるホストでは、ビルドはOOMキラーによってSIGKILLedれ、エラー テキストはまったく表示されません—は単に`Creating an optimized production build`の途中で停止します。これは、メモリ不足ではなくハングしているように見えます。 Turbopackコードのデフォルトである`npm run dev` / `npm run build`とは異なり、 `Dockerfile`デフォルトが webpack (`OMNIROUTE_USE_TURBOPACK=0`) になるのはこのためです。ビルド引数のない裸の`docker build .` (Railway やその他のワンクリック ホストが実行するもの) は、メモリ制限のあるビルダー上でサイレントに終了してはなりません。パブリッシュされたイメージは、 `docker-publish.yml`で明示的に`OMNIROUTE_USE_TURBOPACK=0`すでに渡しています。 RAMが豊富にあるビルダーでは、ビルドを高速化するためにTurbopackを選択します。
 
@@ -296,7 +321,7 @@ Dockerでのメモリの動作:
 
 ### コーディングエージェント用のランタイムRAM
 
-1 GiB Dockerデフォルトは、実稼働サイズではなく、 dashboard/light-chatフロアです。長い`POST /v1/responses`本体 (数百のメッセージ、数十のツール) は、圧縮中に複数のメモリ内グラフを保持します。 2 つの重複する~ 3 MiB / ~ 750k トークン要求により、V8 が一度に中止されました。** GiB** old-space (`FATAL ERROR: Reached heap limit`) と 16 GiB cgroup OOMもヒットしました。 [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)参照してください。
+1 GiB Dockerデフォルトは、実稼働サイズではなく、 dashboard/light-chatフロアです。長い`POST /v1/responses`本体 (数百のメッセージ、数十のツール) は、圧縮中に複数のメモリ内グラフを保持します。 2 つの重複する~ 3 MiB / ~ 750k トークン要求により、V8 が一度に中止されました。** GiB** old-space (`FATAL ERROR: Reached heap limit`) と 16 GiB cgroup OOMもヒットしました。 [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849)参照してください。
 
 サイズ**ヒープ上の cgroup `--memory`** —ネイティブ バッファー、 SQLite、および圧縮中間バッファーは V8 の外部にあります。
 
@@ -385,7 +410,7 @@ Docker healthcheck は、アクティブな`OMNIROUTE_BASE_PATH`がプレフィ�
 
 ## Docker Compose with Caddy (HTTPS Auto-TLS)
 
-Caddy の自動SSLプロビジョニングを使用して、OmniRoute安全に公開できます。ドメインのDNS A レコードがサーバーのIPを指していることを確認してください。
+Caddy の自動SSLプロビジョニングを使用して、OmniRoute安全に公開できます。ドメインのDNS A レコードがサーバーのIPを指していることを確認します。
 
 ```yaml
 services:
@@ -416,7 +441,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy は、上流コンテナの標準転送ヘッダーを設定します。 OmniRoute OAuthコールバックおよび生成されたパブリック リンクの正規のパブリック オリジンとして`NEXT_PUBLIC_BASE_URL`使用します。認証されたダッシュボードの書き込みでは、同一オリジンのリクエストとセッション バインドのCSRF保護が使用されます。 OmniRoute明示的な構成ではなく、信頼できる転送ヘッダーからパブリック オリジンを意図的に取得するようにする高度な展開の場合にのみ、 `OMNIROUTE_TRUST_PROXY`有効にします。
+Caddy は、上流コンテナの標準転送ヘッダーを設定します。 OmniRoute OAuthコールバックおよび生成されたパブリック リンクの正規のパブリック オリジンとして`NEXT_PUBLIC_BASE_URL`使用します。認証されたダッシュボードの書き込みでは、同一オリジンのリクエストとセッション バインドのCSRF保護が使用されます。 OmniRoute明示的な構成ではなく、信頼された転送ヘッダーからパブリック オリジンを意図的に取得するようにする高度な展開の場合にのみ、 `OMNIROUTE_TRUST_PROXY`有効にします。
 
 ## Cloudflare Quick Tunnel
 
@@ -578,13 +603,13 @@ sudo systemctl enable --now omniroute-update.path
 
 ## 可用性: デフォルトのSQLiteは単一レプリカです
 
-ストックDocker / Kubernetes OmniRouteは**1 つのノード プロセス+ 1 つのSQLiteライター**。高可用性は**サポートされていません**そのトポロジ上で。
+ストックDocker / Kubernetes OmniRouteは**1 つのノード プロセス+ 1 つのSQLiteライター**。高可用性は**サポートされていません**そのトポロジー上で。
 
-| 制約                            | 結果                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| シングルライター                | する**ない**同じSQLiteファイルに対して複数のレプリカを実行します。これによりDBが破損します。                                                                                                                                                                                                                                                 |
-| 再作成/再起動/ HEALTHCHECK kill | **完全停止**実行中のSSE、ダッシュボード セッション、およびメモリ内の状態。接続されているすべてのクライアントがドロップします。空のエンドポイント ウィンドウ中の新しいリクエストはリバース プロキシを取得します**`502 Bad Gateway: Unknown error`** OmniRoute JSONではなく、クライアントはこれをプロバイダーの障害と区別できません (#11015)。 |
-| `/healthz`と同じイベントループ  | ビジーなカタログまたは圧縮ティックにより、プローブが遅れる可能性があります。短いタイムアウト後に再起動します**のみ**レプリカ。                                                                                                                                                                                                               |
+| 制約                            | 結果                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| シングルライター                | する**ない**同じSQLiteファイルに対して複数のレプリカを実行します。これによりDBが破損します。                                                                                                                                                                                                                                                    |
+| 再作成/再起動/ HEALTHCHECK kill | **完全停止**実行中のSSE、ダッシュボード セッション、およびメモリ内の状態。接続されているすべてのクライアントがドロップします。空のエンドポイント ウィンドウ中の新しいリクエストはリバース プロキシを取得します**`502 Bad Gateway: Unknown error`** OmniRoute JSON —ではなく、クライアントはこれをプロバイダーの障害 (#11015) と区別できません。 |
+| `/healthz`と同じイベントループ  | ビジーなカタログまたは圧縮ティックにより、プローブが遅れる可能性があります。短いタイムアウト後に再起動します**のみ**レプリカ。                                                                                                                                                                                                                  |
 
 **プローブマトリックス**( [Kubernetes プローブの推奨事項](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)も参照してください):
 
@@ -594,9 +619,9 @@ sudo systemctl enable --now omniroute-update.path
 | 準備完了  | HTTP `GET /healthz`                                              | イベントループビジーをデッドとして扱う厳しいタイムアウト |
 | 深層/人間 | `/api/monitoring/health`                                         | 自動化された kubelet 活性化                              |
 
-**アップグレード:**すべてのセッションがドロップされることが予想されます。可能であればクライアントを排出します。デフォルトのSQLiteにはローリング アップデートはありません。 Compose `restart: unless-stopped` plus Docker `HEALTHCHECK`は、コンテナーが異常である場合、同じ爆発半径の場合にのみプロセスを置き換えます。
+**アップグレード:**すべてのセッションがドロップされることが予想されます。可能であればクライアントを排出します。デフォルトのSQLiteにはローリング アップデートはありません。 Compose `restart: unless-stopped` plus Docker `HEALTHCHECK`は、コンテナーが異常な—同じ爆発半径である場合にのみプロセスを置き換えます。
 
-既製のマニフェストと Helm チャートは`deploy/kubernetes/`および`deploy/helm/omniroute/`に存在します。Kubernetes[デプロイメント ガイドを](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md)参照してください。
+既製のマニフェストと Helm チャートは`deploy/kubernetes/`および`deploy/helm/omniroute/` —に存在します。Kubernetes[デプロイメント ガイドを](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md)参照してください。
 
 の Kubernetes スニペット**単一のレプリカ**(再作成が必要です。1 つのSQLiteファイルに対して`replicas`生成しないでください):
 
@@ -625,9 +650,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep により、kube はSIGTERMの前にサービス エンドポイントをドロップできるようになります。**新しい**死にかけているプロセスにトラフィックが到達しなくなります。実行中の`/v1/responses` SSEは、ヘビーウェイト アドミッション リース (#11015) を介して`SHUTDOWN_TIMEOUT_MS` (デフォルト 30 秒) まで排出されます。まだプロセスに到達する新しいリクエストは、 `503` + `Retry-After: 5`を取得します。交換の準備ができるまでの空のエンドポイントのギャップの再作成は、ハード停止のままです。これは、プローブの設定ミスではなく、 SQLiteトポロジです。
+`preStop` sleep により、kube はSIGTERMの前にサービス エンドポイントをドロップできるようになります。**新しい**死にかけているプロセスにトラフィックが到達しなくなります。実行中の`/v1/responses` SSEは、ヘビーウェイト アドミッション リース (#11015) を介して`SHUTDOWN_TIMEOUT_MS` (デフォルトは 30 秒) まで排出されます。まだプロセスに到達する新しいリクエストは、 `503` + `Retry-After: 5`を取得します。交換の準備ができるまでの空のエンドポイントのギャップの再作成は、プローブの設定ミスではなく、 SQLiteトポロジであるハード停止—のままです。
 
-外部Postgres /マルチライターHAは**ない**文書化されたストックパス。 HAが必要な場合は、単一のレプリカを保持するか、プロジェクトが個別にテストして文書化したトポロジを実行します。 Postgres/MySQL作品は[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)にあります。それが出荷されるまで、サポートされている唯一の乗算方法**大きい**`/v1/responses`容量は、1 つのボリューム上の`replicas > 1`ではなく、N 個の独立したプロセス (次のセクション) です。
+外部Postgres /マルチライターHAは**ない**文書化されたストックパス。 HAが必要な場合は、単一のレプリカを保持するか、プロジェクトが個別にテストして文書化したトポロジを実行します。 Postgres/MySQL作業は[#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)に存在します。それが出荷されるまで、サポートされている唯一の乗算方法**大きい**`/v1/responses`容量は、1 つのボリューム上の`replicas > 1`ではなく、N 個の独立したプロセス (次のセクション) です。
 
 ## スケールアウト: N 個の独立したプロセス
 
@@ -637,25 +662,25 @@ spec:
 
 パッシブ インスタンスは、更新が必要なときに接続を再読み込みし、期限切れになっていない別のアクセス トークンのみを採用します。それ以外の場合、接続の有効期限が切れたり非アクティブ化されたり、リフレッシュ ブレーカーの失敗がカウントされたりすることなく、リフレッシュは無効になります。実際のアップストリーム認証の失敗では、引き続き通常の失敗アカウンティング、指数関数的クールダウン、および通常のクライアント エラーが使用されます。アカウントの無効化は永久的なままです。アクセス トークンの有効期限が切れる前に、所有者のローテーションされたトークンを同期するか (デフォルトのプロアクティブな更新リードタイムは 5 分です)、 Codex認証ファイルを再インポートします。パッシブ インポートでは、提供されたトークンがトークン エンドポイントで検証されずに保存されます。手動dashboard/APIリフレッシュは`409 refresh_disabled`を返します。新しいOAuthログインは変更されません。[環境リファレンス を](../reference/ENVIRONMENT.md#passive-codex-token-refresh)参照してください。
 
-One Node process is **one V8 heap**. Two overlapping ~3 MiB / ~750k-token coding-agent `POST /v1/responses` (RTK + Caveman) abort that heap at ~12 Gi (`FATAL ERROR: Reached heap limit`) and can OOM a 16 Gi cgroup. See [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). That measurement is a **memory-budget** warning, not a product hard-max of two concurrent long `/v1/responses`. Heavyweight chat admission is gated by an auto-derived ingest byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) sized from that same V8/cgroup ceiling — overriding it upward (or setting the legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) on an already-sized process reintroduces the abort. Small chats, `/healthz`, `/v1/models`, and MCP are **not** in that cap.
+1 つのノードのプロセスは、** 1 つの V8 ヒープ**。 2 つの重複する~ 3 MiB / ~ 750k トークン コーディング エージェント`POST /v1/responses` (RTK + Caveman) は、 ~ 12 Gi (`FATAL ERROR: Reached heap limit`) でそのヒープを中止し、16 Gi cgroup をOOMできます。 [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849)参照してください。その測定値は、**メモリバジェット**警告。2 つの同時 Long `/v1/responses`の積ハードマックスではありません。ヘビーウェイト チャットの許可は、同じV8/cgroup上限からサイズ設定された自動導出の取り込みバイト バジェット (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`、 `src/shared/middleware/admissionBudget.ts`) によってゲートされます。すでにサイズが設定されているプロセスで—それをオーバーライドする (または従来の`OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT`リクエスト カウントの上限を設定する) と、中止が再導入されます。小さなチャット、 `/healthz`、 `/v1/models`、およびMCPは、**ない**そのキャップの中に。
 
 ### 1 プロセス: 2 つ以上の長い`/v1/responses`
 
-あ**健康**プロセス ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`の下のヒープ、デフォルト`0.75`)** 5月**プロセス全体のインフライトバイト バジェット (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) にまだ余裕がある場合は、2 つを超えるロング`POST /v1/responses`を同時に実行します。 `OMNIROUTE_CHAT_LARGE_BODY_BYTES`以上のボディ (デフォルトは 256 KiB) は、構造が重いリクエストと同じヘビーウェイト リースを取得し、同じ[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom`エスケープ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) を使用します。数十の長いSSEクライアントを同時に実行する (オペレーターは通常 40 ～ 50 を必要とする)**メモリバジェット**質問—サイズ ヒープ+ primary/headroomスロット+ `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` —製品の厳密な「最大 2」制限ではありません。圧力をかけられたヒープは依然として再試行可能な`503`でシェッドされるため、#7849 は返されません。
+あ**健康**プロセス ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`の下のヒープ、デフォルト`0.75`)** 5月**プロセス全体のインフライトバイト バジェット (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) にまだ余裕があるときに、3 つ以上の long `POST /v1/responses`を同時に実行します。 `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (デフォルトは 256 KiB) 以上のボディは、構造が重いリクエストと同じヘビーウェイト リースを取得し、同じ[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom`エスケープ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) を使用します。数十の長いSSEクライアント (オペレーターは多くの場合 40 ～ 50 を必要とする) を同時に実行するのは、**メモリバジェット**質問—サイズ ヒープ+ primary/headroomスロット+ `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` —製品の厳密な「最大 2」制限ではありません。圧力をかけられたヒープは依然として再試行可能な`503`を排除するため、 #7849戻りません。
 
 に**ヒープを乗算する**(独立した V8 オールドスペース)**今日**:
 
-| する                                                                                                                                                       | しないでください                                                             |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| 走る**containers/pods** 、それぞれにその**自分の**`DATA_DIR` / ボリューム                                                                                  | 1 つのSQLiteファイルに対して`replicas > 1`設定する                           |
-| ヒープ/インフライトバイトバジェットからの重いインフライト+健全なヘッドルームのサイズ。 1–2 は保守的な #7849 のデフォルトであり、製品の最大値ではありません | 1 つのプロセスに 8 × RAMと無制限のカウント上限を与える                       |
-| オプション: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL`**共有クォータカウンター**                                                                 | Redis共有SQLite —として扱いますが、そうではありません                        |
-| プロバイダーのシークレットを各インスタンスに複製します (またはパーティション化されたダッシュボードを受け入れます)。                                        | 複数のインスタンスにわたって 1 つのダッシュボード / 1 つの通話ログが必要です |
-| 前面にはロードバランサーが装備されています。 APIキーまたはセッションによるスティッキーで十分です                                                           | ベンダー固有のサイズ認識ミドルウェアが必要                                   |
+| する                                                                                                                                                            | しないでください                                                             |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 走る**containers/pods** 、それぞれにその**自分の**`DATA_DIR` / ボリューム                                                                                       | 1 つのSQLiteファイルに対して`replicas > 1`設定する                           |
+| ヒープ/インフライトバイトバジェットからの重いインフライト+健全なヘッドルームのサイズ。 1 ～ 2 は保守的な#7849デフォルトであり、ハード積の最大値ではありません。 | 1 つのプロセスに 8 × RAMと無制限のカウント上限を与える                       |
+| オプション: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL`**共有クォータカウンター**                                                                      | Redis共有SQLite —として扱いますが、そうではありません                        |
+| プロバイダーのシークレットを各インスタンスに複製します (またはパーティション化されたダッシュボードを受け入れます)。                                             | 複数のインスタンスにわたって 1 つのダッシュボード / 1 つの通話ログが必要です |
+| 前面にはロードバランサーが装備されています。 APIキーまたはセッションによるスティッキーで十分です                                                                | ベンダー固有のサイズ認識ミドルウェアが必要                                   |
 
-セッションとアカウントのアフィニティは、 Redisを通じて共有することもできます。同じ`REDIS_KEY_PREFIX`と正の`sessionAffinityTtlMs`設定を使用して、各プロセスで`OMNIROUTE_SESSION_AFFINITY_STORE=redis`と`REDIS_URL`設定します。 Pin は、ハッシュされた使用状況アカウント ID を各プロセスの適格なローカル接続に解決するため、一致する ID メタデータを持つOAuthアカウントには一致する接続IDsが必要ありません。既知のアカウント ID は、PIN 解決および保護されたエビクションにおいて、矛盾するローカルIDsよりも優先されます。 ID のないレコード (または ID のない削除呼び出し元) は、従来のIDガードを保持します。安定した使用 ID を持たないアカウントでも、 IDs照合が必要です。 Redisエラーまたは 100 ミリ秒を超える呼び出しは、ローカルSQLiteにフォールバックします。各Redisアフィニティ ストアは、未処理の操作を 8 に制限し、満杯の場合は直ちにRedisバイパスし、呼び出し元の期限ではなく、基礎となる作業が落ち着いたときにのみスロットを解放します。 Redis停止中、共有される真実はありません。各インスタンスは独自のローカル アフィニティにフォールバックし、セッションはインスタンスごとに 1 回再固定される可能性があり、インスタンスが分岐する可能性があります。スティッキーは、回復するとRedisを通じて再収束します。タイムアウトは送信されたEVALではなく待機を制限し、フォールバック後に到達する可能性があります。ルーティング書き込みでは、新たな変更時間の読み取りではなく、ルーティング決定によって観察された正確な値が比較されます。観測されたミスまたはSQLiteフォールバック観測は、存在しないRedisキーとして比較されます。廃止されたピンは 1 つのCASで置き換えられるため、後のコマンドでは新しい別のピンを置き換えたり削除したりすることはできません。 Redisアトミックに値を読み取り、残りのサーバーTTLを返します。書き込み側のJSONタイムスタンプや読み取り側のクロックではなく、正のPTTL (または有効期限なし) によって生存性が決まります。ローカル スナップショットは、残りのTTLをローカルの期限にマッピングします。既存のJSONキーは読み取り可能なままであり、その生のバイトはCAS用に保持されます。 Redis 、応答する際の唯一の真実の情報源です。共有の更新/挿入、タッチ、および削除によってローカル エントリが削除されることを確認し、インストールまたは更新を行わないでください。 Redisパス上のSQLite 、以前と同様に TTL 制限付きで、 Redisエラー、タイムアウト、またはアドミッション飽和からのこのインスタンス自身のフォールバック決定のみを保持します。その後の停止時にローカル PIN が失われると、間違ったアカウントや削除されたアカウントではなく、新しい選択が 1 回 (プロンプト キャッシュ ミスが 1 回) 発生します。拒否された upsert は、共有された勝者とその残りのTTLアトミックに返します。通常の選択では、マップされたローカル期限を再チェックし、まだ有効な勝者を使用し、別の共有書き込みを行わずにそのアカウントの使用状況とログに影響を与えます。使用できない場合は、ローカル候補が選択され、共有ピンは変更されないままとなり、1 つのデバッグ メッセージが生成されます。拒否されたCAS SQLiteを書き込みません。 Redisエラー、タイムアウト、またはアドミッションの飽和の場合は、代わりに既存のローカル操作が適用されます。送信されたミューテーションの応答がタイムアウト (受け入れ、拒否、またはエラー) 後に到着した場合、同期の正確なシリアル値の比較と削除により、バイトが同一のタイムアウト フォールバック行のみが削除されます。その比較と削除の間に待機はありません。新しい停止書き込みは保存されます。ガード付きエビクションでは、 Redisダウンしている場合でも、失敗したアカウント自体のローカル PIN が削除され、共有エビクションが確認された後に再度クリーンアップされます。共有成功ではSQLiteが書き込まれないため、保留中の以前の共有応答では、排除されたローカル ピンを復元できません。その後の停止フォールバックにより、アカウントが再固定される可能性があります。後で受け入れられる共有書き込みはRedisにのみ存在します。 Redisミスはローカル フォールバック状態を参照しません。ドライバーがオフの場合、新しく選択されたピンは従来の 4 フィールドSQLite JSON形状を保持します。 Redisルーティングのみがハッシュ化されたアカウント ID を追加します。プリフェッチされたピンは、有効期限の境界で再チェックされます。 Redis非リース選択ではストアが再読み取りされますが、同期リース プランニングでは、プリフェッチとプランニングの間で削除されたピンを引き続き使用できます (ベスト エフォート ウィンドウとして認められています)。リースコミットは、永続的要求の後にアカウントを切り替えることはできません。拒否された upsert では、その要求に対してのみ要求された候補を保持し、共有された勝者には影響を与えないため、インスタンス間の合意はそのパスに制限されます。表の残りの部分は引き続き適用されます。これは、コンボ セッションのスティッキー性、ネイティブCodexターン ピン、アカウント セマフォ、ロックアウト、支出制限、構成、または通話ログを共有しません。
+セッションとアカウントのアフィニティは、 Redisを通じて共有することもできます。同じ`REDIS_KEY_PREFIX`と正の`sessionAffinityTtlMs`設定を使用して、各プロセスで`OMNIROUTE_SESSION_AFFINITY_STORE=redis`と`REDIS_URL`設定します。 Pin は、ハッシュされた使用状況アカウント ID を各プロセスの適格なローカル接続に解決するため、一致する ID メタデータを持つOAuthアカウントには一致する接続IDsが必要ありません。既知のアカウント ID は、PIN 解決および保護されたエビクションにおいて、矛盾するローカルIDsよりも優先されます。 ID のないレコード (または ID のない削除呼び出し元) は、従来のIDガードを保持します。安定した使用 ID を持たないアカウントでも、 IDs照合が必要です。 Redisエラーまたは 100 ミリ秒を超える呼び出しは、ローカルSQLiteにフォールバックします。各Redisアフィニティ ストアは、未処理の操作を 8 に制限し、満杯の場合は直ちにRedisバイパスし、呼び出し元の期限ではなく、基礎となる作業が落ち着いたときにのみスロットを解放します。 Redis停止中、共有される真実はありません。各インスタンスは独自のローカル アフィニティにフォールバックし、セッションはインスタンスごとに 1 回再固定される可能性があり、インスタンスが分岐する可能性があります。スティッキーは、回復するとRedisを通じて再収束します。タイムアウトは送信されたEVALではなく待機を制限し、フォールバック後に到達する可能性があります。ルーティング書き込みでは、新たな変更時間の読み取りではなく、ルーティング決定によって観察された正確な値が比較されます。観測されたミスまたはSQLiteフォールバック観測は、存在しないRedisキーとして比較されます。廃止されたピンは 1 つのCASで置き換えられるため、後のコマンドでは新しい別のピンを置き換えたり削除したりすることはできません。 Redisアトミックに値を読み取り、残りのサーバーTTLを返します。書き込み側のJSONタイムスタンプや読み取り側のクロックではなく、正のPTTL (または有効期限なし) によって生存性が決まります。ローカル スナップショットは、残りのTTLをローカルの期限にマッピングします。既存のJSONキーは読み取り可能なままであり、その生のバイトはCAS用に保持されます。 Redis 、応答する際の唯一の真実の情報源です。共有の更新/挿入、タッチ、および削除によってローカル エントリが削除されることを確認し、インストールまたは更新を行わないでください。 Redisパス上のSQLite 、以前と同様に TTL 制限付きで、 Redisエラー、タイムアウト、またはアドミッション飽和からのこのインスタンス自身のフォールバック決定のみを保持します。その後の停止時にローカル PIN が失われると、間違ったアカウントや削除されたアカウントではなく、新しい選択が 1 回 (プロンプト キャッシュ ミスが 1 回) 発生します。拒否された upsert は、共有された勝者とその残りのTTLアトミックに返します。通常の選択では、マップされたローカル期限を再チェックし、まだ有効な勝者を使用し、別の共有書き込みを行わずにそのアカウントの使用状況とログに影響を与えます。使用できない場合は、ローカル候補が選択され、共有ピンは変更されないままになり、1 つのデバッグ メッセージが生成されます。拒否されたCAS SQLiteを書き込みません。 Redisエラー、タイムアウト、またはアドミッションの飽和の場合は、代わりに既存のローカル操作が適用されます。送信されたミューテーションの応答がタイムアウト (受け入れ、拒否、またはエラー) 後に到着した場合、同期の正確なシリアル値の比較と削除により、バイトが同一のタイムアウト フォールバック行のみが削除されます。その比較と削除の間に待機はありません。新しい停止書き込みは保存されます。ガード付きエビクションでは、 Redisダウンしている場合でも、失敗したアカウント自体のローカル PIN が削除され、共有エビクションが確認された後に再度クリーンアップされます。共有成功ではSQLiteが書き込まれないため、保留中の以前の共有応答では、排除されたローカル ピンを復元できません。その後の停止フォールバックにより、アカウントが再固定される可能性があります。後で受け入れられる共有書き込みはRedisにのみ存在します。 Redisミスはローカル フォールバック状態を参照しません。ドライバーがオフの場合、新しく選択されたピンは従来の 4 フィールドSQLite JSON形状を保持します。 Redisルーティングのみがハッシュ化されたアカウント ID を追加します。プリフェッチされたピンは、有効期限の境界で再チェックされます。 Redis非リース選択ではストアが再読み取りされますが、同期リース プランニングでは、プリフェッチとプランニングの間で削除されたピンを引き続き使用できます (ベスト エフォート ウィンドウとして認められています)。リースコミットは、永続的要求の後にアカウントを切り替えることはできません。拒否された upsert では、その要求に対してのみ要求された候補を保持し、共有された勝者には影響を与えないため、インスタンス間の合意はそのパスに制限されます。表の残りの部分は引き続き適用されます。これは、コンボ セッションのスティッキー性、ネイティブCodexターン ピン、アカウント セマフォ、ロックアウト、支出制限、構成、または通話ログを共有しません。
 
-ハードウェア: インスタンスごとの同時実行ロング`/v1/responses`は、**メモリバジェット**質問 (ヒープ+飛行中のバイト / #10110)。 `N`に依存しない`DATA_DIR`は依然としてヒープを増大させます。ホストRAM 、「N = 8 を備えた 1 つの 16 Gi ポッド」ではなく、 `N × cgroup`をカバーする必要があります。 1 つのSQLiteファイルに対して`replicas > 1`実行しないでください。
+ハードウェア: インスタンスごとの同時実行ロング`/v1/responses`は、**メモリバジェット**質問 (ヒープ+インフライトバイト / #10110)。 `N`に依存しない`DATA_DIR`は依然としてヒープを増大させます。ホストRAM 、「N = 8 を備えた 1 つの 16 Gi ポッド」ではなく、 `N × cgroup`をカバーする必要があります。 1 つのSQLiteファイルに対して`replicas > 1`実行しないでください。
 
 スケッチを作成します (2 つのヒープ、2 つのボリューム—ではなく`deploy.replicas: 2`):
 
@@ -684,56 +709,32 @@ volumes:
   omniroute-b-data:
 ```
 
-インプロセス密度 ( HTTP分離株からの圧縮) は[#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023)です。共有永続状態の 1 つの論理クラスターは[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)です。
+インプロセス密度 ( HTTP分離物の圧縮) は[#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023)です。共有永続状態の 1 つの論理クラスターは[#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)です。
 
-## Docker 内での Gemini の地域エラー
+## Docker内のGemini地域エラー
 
-Google AI Studio / Gemini API は、FAILED_PRECONDITION と
-`User location is not supported for the API use.` を伴う HTTP 400 を返すことがあります。ホスト上でリクエストが成功しても、
-コンテナが同じ外向きルートを使用しているとは限りません。DNS の順序、
-IPv4/IPv6 の接続性、VPN ルーティング、設定済みプロキシが異なる場合があります。
-[Google のサポート対象地域](https://ai.google.dev/gemini-api/docs/available-regions)
-と実際の接続ルートの両方を確認してください。このエラーだけでは、API キーが無効であるとは判断できません。
+Google AI Studio / Gemini API 、 FAILED_PRECONDITIONおよび`User location is not supported for the API use.`でHTTP 400 を返すことができます。 ホスト上でのリクエストが成功しても、コンテナが同じアウトバウンド ルートを使用していることは証明されません。 DNS順序、 IPv4/IPv6接続、 VPNルーティング、および構成されたプロキシは異なる場合があります。 [Googleのサポートされているリージョン](https://ai.google.dev/gemini-api/docs/available-regions)と実際の接続ルートを確認してください。このエラーだけでは、不正なAPIキーは特定されません。
 
 ### 接続固有のプロキシを優先する
 
-影響を受けている Gemini 接続には、OmniRoute の[接続単位のプロキシ設定](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-を使用し、その後、同じモデルで **Test Connection** と小規模なリクエストを
-再実行してください。これにより、ルーティングの変更をその接続のみに限定できます。プロキシに
-コンテナから到達できること、および接続で実際にそのプロキシが選択されていることを確認してください。
-ルートを変更しても、アップストリーム側の地域要件を満たすことが保証されるわけではありません。
+影響を受けるGemini接続に対してOmniRouteの[接続ごとのプロキシ構成](../ops/PROXY_GUIDE.md#4-level-proxy-system)を使用し、繰り返します**テスト接続**そして同じモデルに関する小さなリクエスト。これにより、ルーティング変更の範囲がその接続に限定されます。プロキシがコンテナから到達可能であること、および接続が実際にプロキシを選択していることを確認します。ルートを変更しても、上流地域の適格性は保証されません。
 
 ### ホストとコンテナのネットワークを比較する
 
-認証済みの結果を比較する際は、キー、モデル、リクエストを同一に保ってください。認証情報、
-プロキシパスワード、完全な認証ヘッダーを Issue に貼り付けないでください。
-まず、OS のリゾルバーがどのアドレスファミリーを提示するかを、ホストと
-コンテナ内で同じコマンドを使用して確認します。
+認証結果を比較するときは、キー、モデル、リクエストを同一にしてください。資格情報、プロキシパスワード、または完全な認証ヘッダーを問題に貼り付けないでください。まず、ホスト上とコンテナー内で同じコマンドを使用して、 OSリゾルバーが提供するアドレス ファミリを検査します。
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-`omniroute` は、実行しているサービス（例: `omniroute-web`）に置き換えてください。これらの
-コマンドは、認証情報や IP アドレスを表示せずにアドレスファミリーを出力します。`6` が返されても、
-IPv6 の DNS 結果が存在することを示すだけであり、使用可能な IPv6 ルートや API アクセスを
-証明するものでは**ありません**。`curl` がインストールされている場合は、両方の環境で
-`curl -4 -I https://generativelanguage.googleapis.com` と
-`curl -6 -I https://generativelanguage.googleapis.com` を比較してください。
-未認証エラーであっても、HTTP レスポンスがあれば、そのプローブにおける接続性は証明されます。
-Gemini の利用可否を確認できるのは、認証済みのモデルリクエストだけです。
+`omniroute`実行するサービス (たとえば、 `omniroute-web`) に置き換えます。これらのコマンドは、資格情報またはIPアドレスなしでアドレス ファミリを出力します。返された`6`には、 IPv6 DNS結果のみが表示されます。**ない**使用可能なIPv6ルートまたはAPIアクセスを証明します。 `curl`がインストールされている場合、両方の環境で`curl -4 -I https://generativelanguage.googleapis.com`と`curl -6 -I https://generativelanguage.googleapis.com`を比較します。 HTTP応答は、たとえ認証されていないエラーであっても、そのプローブの接続を証明します。認証されたモデルリクエストのみがGemini適格性をテストします。
 
-### ホストレベルの代替手段: 動作する IPv6 とリゾルバーポリシー
+### ホストレベルの代替: 動作するIPv6およびリゾルバーポリシー
 
-[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) の報告者は、コンテナの IPv6 を有効にし、
-glibc のアドレス選択を変更することで、その環境でのアクセスを復旧しました。
-これは環境固有の代替手段として扱ってください。リゾルバーの優先設定を調整する前に、
-ホストの IPv6 が動作していること、コンテナの外向き通信とルーティング、およびファイアウォールルールを確認してください。
-プライベート ULA アドレスがあるだけでは、パブリック IPv6 接続が確立されているとはいえません。
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762)のレポーターは、コンテナーIPv6を有効にし、glibc アドレスの選択を変更することで、環境内のアクセスを復元しました。これを環境固有の代替手段として扱います。リゾルバー設定を調整する前に、動作しているホストIPv6、コンテナーegress/routing 、およびファイアウォール ルールを確認してください。プライベートULAアドレスだけでは、パブリックIPv6接続は確立されません。
 
-すでに Compose のデフォルトネットワークに接続されているサービスでは、次のフラグメントによって
-そのネットワークで IPv6 が有効になります。サービス、ポート、ボリューム、その他の設定は維持してください。
+Compose のデフォルト ネットワークにすでに接続されているサービスの場合、このフラグメントによりそのネットワーク上でIPv6有効になります。残りのサービス、ポート、ボリューム、構成を保持します。
 
 ```yaml
 networks:
@@ -741,30 +742,13 @@ networks:
     enable_ipv6: true
 ```
 
-名前付きネットワークの場合は、サービスが実際に接続するネットワークで有効にしてください。Docker は
-ULA サブネットを割り当てられます。明示的な重複しないサブネットは、ネットワークで必要な場合にのみ選択してください。
-[Docker IPv6 ネットワーク](https://docs.docker.com/engine/daemon/ipv6/)
-および [Compose のネットワークオプション](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6)を参照してください。
+名前付きネットワークの場合は、サービスが実際に参加するネットワーク上でそれを有効にします。 Docker ULAサブネットを割り当てることができます。ネットワークで必要な場合にのみ、重複しない明示的なサブネットを選択してください。 [Docker IPv6ネットワーキング」](https://docs.docker.com/engine/daemon/ipv6/)および[「Compose ネットワーク オプション」](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6)を参照してください。
 
-**glibc ベースのイメージ**では、`/etc/gai.conf` でアドレス選択を変更できます。現在の
-リポジトリの Dockerfile は Debian を使用しています。カスタムの musl ベースイメージでは、この仕組みは共有されません。
-報告された調整では、ULA のラベルを `label fc00::/7 6` から
-`label fc00::/7 1` に変更しています。イメージの完全なポリシーテーブルを基にして、その他の
-エントリを維持してください。`label` または `precedence` のエントリを追加すると、そのデフォルトテーブルが置き換えられるため、
-変更した行だけを含むファイルでは不十分です。
-[glibc の設定リファレンス](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-に、これらのセマンティクスが記載されています。確認済みのファイルを `/etc/gai.conf` に読み取り専用で
-バインドマウントし、サービスを再作成して適用してください。
+On a **glibc-based image**, `/etc/gai.conf` can change address selection. The current repository Dockerfile uses Debian; custom musl-based images do not share this mechanism. The reported adjustment changes the ULA label from `label fc00::/7 6` to `label fc00::/7 1`. Start from the image's complete policy table and preserve its other entries: adding a `label` or `precedence` entry replaces that default table, so a file containing only the changed line is insufficient. The [glibc configuration reference](https://github.com/bminor/glibc/blob/master/posix/gai.conf) documents those semantics. Bind-mount the reviewed file read-only at `/etc/gai.conf` and recreate the service to apply it.
 
-これにより、そのコンテナ内の**すべての外向きトラフィック**に対する OS のアドレス選択が変更されます。
-すべてのアプリケーションに IPv6 の選択を強制するものではありません。Node の DNS 順序と接続の
-選択も影響します。特に、`--dns-result-order=ipv4first` は IPv4 を優先するため、
-IPv4 のみで発生する障害への対処にはなりません。[Node の DNS 順序](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder)を参照してください。
+これにより、 OSアドレスの選択が変更されます。**そのコンテナ内のすべての送信トラフィック**。すべてのアプリケーションにIPv6選択を強制するわけではありません。ノードのDNS順序と接続の選択も重要です。特に、 `--dns-result-order=ipv4first` IPv4優先し、 IPv4-only障害に対する救済策ではありません。 [「ノードDNS順序付け」を](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder)参照してください。
 
-ホストレベルの変更後は、Gemini とその他のプロバイダーを再テストしてください。ロールバックするには、
-カスタムの `gai.conf` マウントを削除し、以前のネットワーク設定を復元して、
-メンテナンス時間中に影響を受けるサービスまたはネットワークを再作成してください。ネットワークを再作成すると、
-それに接続されている他のコンテナが中断される可能性があります。永続データボリュームは削除しないでください。
+ホストレベルの変更後、 Geminiと他のプロバイダーを再テストします。ロールバックするには、メンテナンス期間中にカスタム`gai.conf`マウントを削除し、以前のネットワーク構成を復元して、影響を受けるservice/networkを再作成します。ネットワークを再作成すると、ネットワークに接続されている他のコンテナが中断される可能性があります。永続データ ボリュームは削除しないでください。
 
 ## 重要な注意事項
 

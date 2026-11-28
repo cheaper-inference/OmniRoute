@@ -4,7 +4,7 @@
 
 ---
 
-> **Zdroj pravdy:** pracovný priestor `electron/`** Posledná aktualizácia:** 2026-06-28 — v3.8.40
+> **Zdroj pravdy:** pracovný priestor `electron/`
 
 OmniRoute dodáva desktopovú aplikáciu pre rôzne platformy (Windows / macOS / Linux) postavenú na**Electron 41** +** elektron-staviteľ 26.10** . Desktopová aplikácia vytvorí samostatný server Next.js ako podriadený proces, ukáže naň `BrowserWindow` a pridá systémovú lištu, automatickú aktualizáciu, most IPC a tajný bootstrap s nulovou konfiguráciou.
 
@@ -198,7 +198,7 @@ Nastaviť cez `session.defaultSession.webRequest.onHeadersReceived`. Pozoruhodn�
 
 ## Automatická aktualizácia
 
-Používa `electron-updater` s poskytovateľom GitHub (`diegosouzapw/OmniRoute`).
+Používa `electron-updater` s poskytovateľom GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Udalosti preposlané do vykresľovacieho modulu cez `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (so `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefakty pristávajú v `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Vydania sú publikované v GitHub Releases (`diegosouzapw/OmniRoute`), kde `electron-updater` tiež kontroluje nové verzie.
+Vydania sú publikované v GitHub Releases (`cheaper-inference/OmniRoute`), kde `electron-updater` tiež kontroluje nové verzie.
 
 ## Riešenie problémov
 

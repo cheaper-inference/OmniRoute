@@ -60,15 +60,13 @@ Eksempler på at repræsentere vores fællesskab omfatter brug af en officiel e-
 opslag via en officiel konto på sociale medier eller at fungere som udpeget
 repræsentant ved et online- eller offlinearrangement.
 
-## Enforcement
+## Håndhævelse
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Tilfælde af krænkende, chikanerende eller på anden måde uacceptabel adfærd kan rapporteres til de samfundsledere, der er ansvarlige for håndhævelse ved at åbne en privat sikkerhedsrådgivning kl.
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+eller ved at sende en e-mail til vedligeholderen på diegosouza.pw@outlook.com. For sikkerhedsfølsomme hændelser, se [`SECURITY.md`](SECURITY.md). Alle klager vil blive gennemgået og undersøgt hurtigt og retfærdigt.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Alle samfundsledere er forpligtet til at respektere privatlivets fred og sikkerhed for reporteren af enhver hændelse.
 
 ## Retningslinjer for håndhævelse
 

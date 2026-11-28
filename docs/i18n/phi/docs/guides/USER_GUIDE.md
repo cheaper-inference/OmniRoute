@@ -248,33 +248,41 @@ Mga modelo: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Mga Combo
+## 🎨 Combos
 
-Maaari mong baguhin ang pagkakasunod-sunod ng mga combo card nang direkta sa **Dashboard → Mga Combo** sa pamamagitan ng pag-drag sa handle ng bawat card. Iniimbak ang pagkakasunod-sunod sa SQLite at ibinabalik kapag nag-reload.
+Maaari mong muling ayusin ang mga combo card nang direkta** Dashboard → Combos** sa pamamagitan ng pag-drag sa hawakan sa bawat card. Ang order ay naka-imbak sa SQLite at naibalik sa reload.
 
-### Halimbawa 1: I-maximize ang Subscription → Murang Backup
+### Maghanap ng provider, modelo, o account
 
-```
-Dashboard → Mga Combo → Gumawa ng Bago
+Sa Gumawa o Mag-edit ng Combo, ang step-by-step na Provider, Modelo, Account, at mga picker ng combo-reference ay may kasamang lokal na field sa paghahanap. Maghanap ayon sa ipinapakitang pangalan, identifier, alias ng provider, o pinagmulan ng modelo, pagkatapos ay i-click ang isang resulta o gamitin ang mga arrow key at Enter. Ang maramihang mga termino para sa paghahanap ay dapat magkatugma. Ang pag-clear sa paghahanap o pagpindot sa Escape ay hindi nagbabago sa napiling halaga.
 
-Pangalan: premium-coding
-Mga Modelo:
-  1. cc/claude-opus-4-7 (Pangunahing subscription)
-  2. glm/glm-4.7 (Murang backup, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Pinakamurang fallback, $0.3/1M)
+Ang awtomatikong pagpipilian sa account ay mananatiling nakikita habang naghahanap. Ang opsyonal na listahan ng paghihigpit sa account nito ay may hiwalay na filter: ang mga napiling account sa labas ng mga nakikitang resulta ay mananatiling napili, at kasama sa bilang ang mga ito. Hindi mahahanap ang mga nakatagong email fragment habang naka-on ang privacy ng email. Idagdag ang hakbang at i-save ang combo gaya ng dati; Ang pag-type ng query ay hindi nagse-save o sumusubok ng anuman.
 
-Gamitin sa CLI: premium-coding
-```
+Ang parehong lokal na paghahanap ay magagamit para sa mga modelo ng pagsubok sa koneksyon, Custom CLI default at mga modelo ng alias, at mga pagpipiliang naka-save na proxy. Nananatiling hiwalay ang mga kasalukuyang aksyon sa pag-save, paglalapat, at pagsubok.
 
-### Halimbawa 2: Libre Lamang (Walang Gastos)
+### Halimbawa 1: I-maximize ang Subscription → Cheap Backup
 
 ```
-Pangalan: free-combo
-Mga Modelo:
-  1. if/kimi-k2.7-code (nakalistang libreng access; maaaring malapat ang mga limitasyon ng provider)
-  2. kr/qwen3-coder-next (Libreng fallback ng Kiro)
+Dashboard → Combos → Create New
 
-Gastos: kasalukuyang nakalista bilang $0; maaaring magbago ang mga tuntunin at availability
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### Halimbawa 2: Libre-Lamang (Zero na Gastos)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -434,7 +442,7 @@ Kapag hindi mo na kailangan OmniRoute, nagbibigay kami ng dalawang mabilis na sc
 ### VPS Deployment
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -516,8 +524,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -604,13 +612,13 @@ post_install() {
 | Variable                                | Default                  | Paglalarawan                                                                                                                                                 |
 | --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `JWT_SECRET`                            | _(auto-generated)_       | JWT signing secret — awtomatikong nabuo sa unang pagtakbo at nagpatuloy sa `server.env`; itakda ito nang tahasan kapag ang direktoryo ng data ay panandalian |
-| `INITIAL_PASSWORD`                      | _(unset)_                | Unang login password. Ang mga pag-install ng npm/source ay nagsisimula sa `CHANGEME`: palitan ito. Hindi nakatakda: onboarding wizard                        |
+| `INITIAL_PASSWORD`                      | _(unset)_                | Unang password sa pag-login. Ang mga pag-install ng npm/source ay nagsisimula sa `CHANGEME`: palitan ito. Hindi nakatakda: onboarding wizard                 |
 | `DATA_DIR`                              | `~/.omniroute`           | Direktoryo ng data (db, paggamit, mga log)                                                                                                                   |
 | `PORT`                                  | default na framework     | Port ng serbisyo (`20128` sa mga halimbawa)                                                                                                                  |
 | `HOSTNAME`                              | default na framework     | Bind host (Docker defaults to `0.0.0.0`)                                                                                                                     |
 | `NODE_ENV`                              | default na runtime       | Itakda ang `production` para sa pag-deploy                                                                                                                   |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Ang pampublikong base URL ay lumabas sa dashboard at nakalantad sa server (pinapalitan ang legacy `BASE_URL`)                                                |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cloud sync endpoint base URL (pinapalitan ang legacy na `CLOUD_URL`)                                                                                         |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cloud sync endpoint base URL (pinapalitan ang legacy `CLOUD_URL`)                                                                                            |
 | `API_KEY_SECRET`                        | _(auto-generated)_       | HMAC secret para sa mga nabuong API key na awtomatikong nabuo ang — sa unang pagtakbo at nagpatuloy sa `server.env`                                          |
 | `REQUIRE_API_KEY`                       | `false`                  | Ipatupad ang Bearer API key sa `/v1/*`                                                                                                                       |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                  | Pahintulutan ang mga na-authenticate na user ng dashboard na ipakita ang buong nakaimbak na API key value on demand                                          |
@@ -737,7 +745,7 @@ Pumili ng natatanging prefix (`mygw`, `acme-proxy`). Kung nabigo ang mga kahilin
 
 Ang mga key na ito ay napupunta sa `providerSpecificData` ng isang koneksyon (halimbawa sa pamamagitan ng `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — para sa OpenAI chat-format compatible na koneksyon na ang gateway ay tinatanggihan ang mahabang pangalan ng tool. Ang mas mahahabang pangalan ay ipinapadala bilang maiikling alyas at ibinabalik sa tugon. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go at Muse Code ay may mga pangalan nang alias na higit sa 64 na character na walang setting. Pinapalitan ng value ng koneksyon ang Azure OpenAI / Azure AI Foundry default (isang Azure na koneksyon sa likod ng mas mahigpit na gateway) at nagtatakda ng limitasyon para sa custom na katugmang node; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go at Muse Code ay pinapanatili ang kanilang limitasyon sa pagpapatala at huwag pansinin ito.
+- `toolNameMaxLength` (integer, 1–1024) — para sa OpenAI chat-format compatible na koneksyon na ang gateway ay tinatanggihan ang mahabang pangalan ng tool. Ang mas mahahabang pangalan ay ipinapadala bilang maiikling alyas at ibinabalik sa tugon. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go at Muse Code ay may mga pangalan nang alias na higit sa 64 na character na walang setting. Pinapalitan ng value ng koneksyon ang default ng Azure OpenAI / Azure AI Foundry (isang Azure na koneksyon sa likod ng mas mahigpit na gateway) at nagtatakda ng limitasyon para sa custom na katugmang node; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go at Muse Code ay pinapanatili ang kanilang limitasyon sa pagpapatala at huwag pansinin ito.
 - `quotaEndpoint` — ang quota/credits endpoint ng gateway, basahin para sa dashboard quota strip at quota-aware na pagruruta. Gumagana sa parehong OpenAI- at Anthropic-compatible na koneksyon; ang buong hugis ay nakadokumento sa `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -755,7 +763,7 @@ Ang mga key na ito ay napupunta sa `providerSpecificData` ng isang koneksyon (ha
 
 ### Pagkakadena OmniRoute Mga Kapantay
 
-Ang isa pang OmniRoute gateway ay maaaring idagdag bilang a** Custom na OpenAI-compatible** provider. Gamitin ang `/v1` base na URL ng peer at isang nakalaang, pinakakaunting pribilehiyong API key na ibinigay ng peer na iyon.
+Ang isa pang OmniRoute gateway ay maaaring idagdag bilang a** Custom na OpenAI-compatible** provider. Gamitin ang `/v1` base na URL ng peer at isang dedikadong API key na may pinakamababang pribilehiyo na ibinigay ng peer na iyon.
 
 Para sa reciprocal o multi-hop chain, paganahin ang opt-in loop guard sa bawat gateway:
 
@@ -773,9 +781,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Ang mga kahilingan lang na ipinadala sa isang tahasang pinahihintulutang peer URL ang makakatanggap ng `X-OmniRoute-Peer-Trace` header. Tinatanggihan ng gateway ang paulit-ulit na instance ID o naubos na hop budget na may HTTP `508 Loop Detected`; Ang mga ordinaryong upstream provider ay hindi tumatanggap ng peer metadata.
+Ang mga kahilingan lang na ipinadala sa isang tahasang pinahihintulutang peer URL ang makakatanggap ng `X-OmniRoute-Peer-Trace` header. Tinatanggihan ng gateway ang paulit-ulit na pagkakataon ID o naubos na hop na badyet na may HTTP `508 Loop Detected`; Ang mga ordinaryong upstream provider ay hindi tumatanggap ng peer metadata.
 
-Ang peer chaining ay hindi pagtitiklop ng database o host failover. Ang bawat gateway ay nagpapanatili ng independiyenteng estado SQLite, mga cache, mga counter ng rate, at mga session. Gumamit ng reverse proxy na sinusuri sa kalusugan o failover ng kliyente para sa availability active/passive o active/active, at huwag na huwag mag-mount ng isang SQLite database sa maraming mga tumatakbong OmniRoute na pagkakataon.
+Ang peer chaining ay hindi database replication o host failover. Ang bawat gateway ay nagpapanatili ng independiyenteng estado SQLite, mga cache, mga tagabilang ng rate, at mga session. Gumamit ng reverse proxy na sinusuri sa kalusugan o failover ng kliyente para sa availability active/passive o active/active, at huwag na huwag mag-mount ng isang database SQLite sa maraming mga tumatakbong OmniRoute instance.
 
 ### Nakalaang Mga Ruta ng Provider
 
@@ -885,12 +893,12 @@ I-configure sa pamamagitan ng** Dashboard → Mga Setting → Pagruruta** . Inil
 - `least-used` at `cost-optimized`
 - `auto` — score-driven sa lahat ng kandidato
 - `lkgp` (Huling Kilalang Mabuting Provider) — pin sa huling matagumpay na provider, pagkatapos ay bumabalik sa mga panuntunan
-- Pinipili ng `context-optimized` — ang modelo na may pinakamalaking libreng window ng konteksto
-- `context-relay` — chains long-context models para sa follow-up turns
+- Sinubukan muna ng `context-optimized` — ang modelo na may pinakamalaking kilalang window ng konteksto
+- `context-relay` — priority order at isang handoff summary kapag lumipat ang pag-uusap sa ibang account
 
 #### External Sticky Session Header
 
-Para sa panlabas na affinity ng session (halimbawa, mga ahente ng Claude Code/Codex sa likod ng mga reverse proxy), ipadala ang:
+Para sa external na session affinity (halimbawa, Claude Code/Codex agent sa likod ng mga reverse proxy), ipadala ang:
 
 ```http
 X-Session-Id: your-session-key
@@ -1012,7 +1020,7 @@ Ipinapatupad ng OmniRoute ang pagiging matatag sa antas ng provider na may liman
    - **OPEN** Ang — Provider ay pansamantalang hinarangan pagkatapos ng paulit-ulit na pagkabigo
    - **HALF_OPEN** — Pagsusuri kung nakabawi na ang provider
 
-   Nananatili ang mga limitasyon sa rate ng `429` na saklaw ng koneksyon** Cooldown ng Koneksyon** at huwag ibilang sa tagapagbigay ng breaker.
+   Nananatili ang mga limitasyon sa rate ng `429` na saklaw ng koneksyon** Cooldown ng Koneksyon** at huwag ibilang sa tagapagbigay breaker.
 
    Ang provider breaker runtime state ay ipinapakita sa** Dashboard → Health** lamang.
 
@@ -1093,7 +1101,7 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Pagsubaybay sa Gastos:** Ang bawat kahilingan ay nag-log ng paggamit ng token at kinakalkula ang gastos gamit ang talahanayan ng pagpepresyo. Tingnan ang mga breakdown sa** Dashboard → Paggamit** ng provider, modelo, at API key.
+**Pagsubaybay sa Gastos:** Ang bawat kahilingan ay nagla-log ng paggamit ng token at kinakalkula ang gastos gamit ang talahanayan ng pagpepresyo. Tingnan ang mga breakdown sa** Dashboard → Paggamit** ng provider, modelo, at API key.
 
 ---
 
@@ -1335,32 +1343,34 @@ Tingnan ang [API_REFERENCE.md](../reference/API_REFERENCE.md) para sa kumpletong
 
 ## 💻 Panloob na CLI
 
-Ang OmniRoute ay may kasamang panloob na CLI (`omniroute …`) para sa pag-setup, mga diagnostic, at pagkontrol sa runtime. **Hiwalay ito sa pahina ng "Mga CLI Tool" sa dashboard**, na nagko-configure ng mga third-party na CLI (Claude Code, Cursor, Codex, Cline, …) upang makakonekta ang mga ito sa OmniRoute.
+Nagpapadala OmniRoute ng panloob CLI (`omniroute …`) para sa setup, diagnostics, at runtime control. Ito ay** hiwalay sa pahina ng "CLI Tools" sa dashboard** , na nagko-configure ng third-party CLIs (Claude Code, Cursor, Codex, Cline, …) para makausap nila ang OmniRoute.
 
 ```bash
-omniroute setup                    # Interaktibong wizard (password, mga provider, mga combo)
-omniroute setup --non-interactive  # Angkop para sa CI
-omniroute doctor                   # Mga diagnostic sa kalagayan (data dir, DB, mga provider, mga port)
-omniroute providers available      # Ilista ang mga sinusuportahang provider
-omniroute providers list           # Ilista ang mga naka-configure na koneksyon
-omniroute providers test <id>      # Subukan nang live ang koneksyon sa provider
-omniroute combos list              # Ilista ang mga combo
-omniroute combos switch <name>     # Itakda ang default na combo
-omniroute models                   # Ilista ang mga available na modelo (--json, --search)
-omniroute keys add | list | remove # Pamahalaan ang mga API key mula sa terminal
-omniroute backup                   # Gumawa ng snapshot ng config + DB
-omniroute restore [<timestamp>]    # Mag-restore mula sa isang snapshot
-omniroute health                   # Detalyadong kalagayan (mga breaker, cache, memory)
-omniroute quota                    # Paggamit ng quota ng provider
-omniroute mcp status               # Katayuan ng MCP server
-omniroute a2a status               # Katayuan ng A2A server
-omniroute tunnel list|create|stop  # Mga Cloudflare/Tailscale/ngrok tunnel
-omniroute reset-password           # I-reset ang admin password
-omniroute --mcp                    # Simulan ang MCP server sa pamamagitan ng stdio
-omniroute --port 3000              # Simulan ang server sa isang custom na port
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Tip: ipares ang `omniroute doctor --json` sa iyong monitoring tool upang makatanggap ng alerto kapag may hindi maayos na koneksyon sa provider.
+Tip: ipares ang `omniroute doctor --json` sa iyong monitoring tool upang alertuhan ang isang sirang lokal na pag-install. hindi sinusubok `doctor` ang mga koneksyon ng provider; gamitin `omniroute providers test <id>` para diyan.
 
 ---
 

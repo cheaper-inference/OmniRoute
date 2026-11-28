@@ -226,7 +226,7 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Dəstəkləyir** 22 marşrutlaşdırma strategiyası** ( `src/shared/constants/routingStrategies.ts` baxın):
+Dəstəkləyir** 22 marşrutlaşdırma strategiyası** (bax `src/shared/constants/routingStrategies.ts`):
 
 | Strategiya          | Davranış                                                                                      |
 | ------------------- | --------------------------------------------------------------------------------------------- |
@@ -236,19 +236,19 @@ Dəstəkləyir** 22 marşrutlaşdırma strategiyası** ( `src/shared/constants/r
 | `context-relay`     | Hədəflər arasında konteksti təhvil verin                                                      |
 | `fill-first`        | Növbəti keçidə keçməzdən əvvəl kvotanı doldurun                                               |
 | `p2c`               | İki seçimin gücü                                                                              |
-| `random`            | Uniform təsadüfi                                                                              |
-| `least-used`        | Ən az istifadə olunanı seçin                                                                  |
-| `cost-optimized`    | Əvvəlcə ən ucuz sağlam hədəf                                                                  |
-| `reset-aware`       | Provayderin sıfırlama pəncərələrindən xəbərdardır                                             |
-| `reset-window`      | Pəncərə əsaslı marşrutlaşdırmanı sıfırlayın                                                   |
+| `random`            | İstəyə görə təzə qarışdırma                                                                   |
+| `least-used`        | Ən az qeydə alınmış sorğu olanı seçin                                                         |
+| `cost-optimized`    | Əvvəlcə ən aşağı kataloq giriş qiyməti                                                        |
+| `reset-aware`       | Qalan kvota + təcili sıfırlanır                                                               |
+| `reset-window`      | Əvvəlcə ən tez sıfırlanan kvota pəncərəsi                                                     |
 | `expiry-first`      | Kvotasının müddəti bitəcək hesabı əvvəlcə istifadə olunmadan xərcləyin                        |
 | `headroom`          | Qalan kvotaların çoxu birincidir                                                              |
 | `quota-weighted`    | Tükənmiş hesabları atlayın, sonra uçuşda qalan kvota ÷ ilə çəkin                              |
-| `strict-random`     | Həqiqətən vahid (keyfiyyət çəkisi yoxdur)                                                     |
+| `strict-random`     | Qarışıq göyərtə: təkrarlardan əvvəl hər hədəf bir dəfə                                        |
 | `auto`              | 16 faktorlu qiymətləndirmədən istifadə edin (`autoCombo/`)                                    |
 | `lkgp`              | Son tanınan yaxşı provayder əvvəlcə                                                           |
-| `context-optimized` | Uzun məzmunlu sorğular üçün ən yaxşısı                                                        |
-| `cache-optimized`   | Hər bir təkrar istifadə edilə bilən sorğu prefiksini eyni hesaba bərkidin (prompt-cache hits) |
+| `context-optimized` | Əvvəlcə məlum olan ən böyük kontekst pəncərəsi                                                |
+| `cache-optimized`   | Tələb prefiksini keşdə saxlayacaq hesaba üstünlük verin                                       |
 | `fusion`            | Paralel olaraq panelə havalandırın, sonra hakim vasitəsilə sintez edin (`fusion.ts`)          |
 | `pipeline`          | Zəncirli addımlar — hər hədəfin çıxışı növbətini qidalandırır                                 |
 | `jev`               | Daxil olun: TypeSafe Jev hansı reytinqli girişlərin işlədiyini etiraf edir; başqa sifarişiniz |
@@ -353,7 +353,7 @@ export default {
 
 **Fərdi auth** provayder reyestrinin auth konfiqurasiyası (API açarı, OAuth, başlıq profilləri) vasitəsilə idarə olunur.
 
-**Fərdi sorğu orqanı** transformasiyalar (məsələn, `system` `messages` dən ayıran Anthropic ) `open-sse/translator/`-də hər provayder üçün qeydə alınır.
+**Xüsusi sorğu orqanı** transformasiyalar (məsələn, `system` `messages` dən ayıran Anthropic ) `open-sse/translator/`-də hər provayder üçün qeydə alınır.
 
 ````
 
@@ -371,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-Qətnamə `ExecutorRegistry` (`executors/registry.ts`) üzərindən keçir: hər bir ixtisaslaşdırılmış icraçı `executors/index.ts` nin daxili cədvəlində elan edilir və modulun yüklənməsi zamanı `registerExecutor(alias, instance)` vasitəsilə qeydə alınır; `getExecutor()` reyestrlə məsləhətləşir və xüsusi giriş olmadan istənilən provayder üçün yadda saxlanılan `DefaultExecutor` a qayıdır. Tam ləqəb → icraçı xəritələşdirilməsi qızıl test `tests/unit/executor-map-golden.test.ts` ilə xarakterizə olunur.
+Qətnamə `ExecutorRegistry` (`executors/registry.ts`) üzərindən keçir: hər bir ixtisaslaşdırılmış icraçı `executors/index.ts` nin daxili cədvəlində elan edilir və modulun yüklənməsi zamanı `registerExecutor(alias, instance)` vasitəsilə qeydə alınır; `getExecutor()` reyestrlə məsləhətləşir və xüsusi giriş olmadan istənilən provayder üçün yadda saxlanılan `DefaultExecutor` -ə qayıdır. Tam ləqəb → icraçı xəritələşdirilməsi qızıl test `tests/unit/executor-map-golden.test.ts` ilə xarakterizə olunur.
 
 ---
 

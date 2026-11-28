@@ -4,12 +4,9 @@
 
 ---
 
-> **Paskutinį kartą atnaujinta:** 2026-08-28 — v3.8.51
-> Supaprastintas leidimo procesas, automatizavimui naudojantis Claude Code įgūdžius.
+> Supaprastintas išleidimo srautas, panaudojantis Claude kodo įgūdžius automatizuojant.
 >
-> **Tarp leidimų išlaikykite eilę / šaką be klaidų:** žr. [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs` šeima + `npm run check:release-green` + `/babysit` + naktinis vykdymas). Periodiškai tai vykdant —
-> ypač **prieš** naudojant šį kontrolinį sąrašą — leidimo PR nuo pat pradžių bus be klaidų.
+> **Laikykite queue/branch žalią tarp leidimų:** žr [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` family + `npm run check:release-green` + `/babysit` + nightly). Veikia tai periodiškai — ir ypač** prieš** dėl šio kontrolinio sąrašo — leidimas PR pradedamas žaliai.
 
 ## Trumpai
 
@@ -60,7 +57,9 @@ npm-publish darbo eiga nebeskelbia tiesiogiai: ji paleidžia supakuotą tarbalą
 
 **Docker Hub `latest` (reikalingas kiekviename stabiliame SemVer publikacijoje):** `docker-publish` darbo eiga turi būti pažymėta** tiek** `X.Y.Z` ir, kai `should-promote-latest.sh` sutinka, tai yra didžiausias stabilus SemVer, `:latest` su** tas pats santrauka** . Po darbo: „Hub `latest` santrauka prilygsta naujai SemVer santraukai ir `last_updated` perkelta. Nepalikite `:latest` senesnės versijos versijoje, o laidos pastabose kalbama apie pataisymus, kurie egzistuoja tik „git“. Sukurti greitas pradžias naudoti `:latest`; GitOps turėtų nuolat prisegti `X.Y.Z`. Žr. [Docker išleidimo kanalus](../guides/DOCKER_GUIDE.md#release-channels) ir #10317.
 
-**Docker Hub“ organizacijos saugykla (`cheaperinference/omniroute`):** Docker Hub negali perkelti saugyklos tarp vardų erdvių, todėl `diegosouzapw/omniroute` išsaugo savo ištraukimo istoriją ir kiekvieną leidimą, o `mirror-org-dockerhub` užduotis `docker-publish` nukopijuoja kiekvieną išleistą versiją (ir `:latest` kai paaukštinama) iš `ghcr.io/cheaper-inference/omniroute` į organizacijos saugyklą. Tam reikia `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` paslapčių; be jų darbas lieka žalias su įspėjimu „Docker Hub org veidrodis praleistas“, o kiti registrai skelbiami įprastai. Jei norite vėliau ten paskelbti išleistą versiją, paleiskite** Veiksmai → Veidrodinis Docker vaizdas į Docker Hub organizaciją → Paleisti darbo eigą** su `version=X.Y.Z` (ir `promote_latest` aukščiausios stabilios versijos atveju): jis kopijuoja esamus vaizdus, be perstatymo.
+**Docker Hub“ organizacijos saugykla (`cheaperinference/omniroute`):** Docker Hub negali perkelti saugyklos tarp vardų erdvių, todėl `diegosouzapw/omniroute` išsaugo savo ištraukimo istoriją ir kiekvieną leidimą, o `mirror-org-dockerhub` užduotis `docker-publish` nukopijuoja kiekvieną išleistą versiją (ir `:latest` kai paaukštinama) iš `ghcr.io/cheaper-inference/omniroute` į organizacijos saugyklą. Tam reikia `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` paslapčių; be jų darbas lieka žalias su įspėjimu „Docker Hub org veidrodis praleistas“, o kiti registrai skelbiami įprastai. Jei norite vėliau ten paskelbti išleistą versiją, paleiskite** Veiksmai → Veidrodinis Docker vaizdas į Docker Hub organizaciją → Paleisti darbo eigą** su `version=X.Y.Z` (ir `promote_latest` aukščiausios stabilios versijos atveju): jis kopijuoja esamus vaizdus, be perstatymo. Tos saugyklos Docker Hub“ apžvalga nustatyta ranka: ją redaguojantis API atmeta organizacijos prieigos prieigos raktus.
+
+Ta pati darbo eiga taip pat nukopijuoja kiekvieną leidimą į seną GHCR paketą `ghcr.io/diegosouzapw/omniroute` iki 2027-06-30, todėl prie jo vis dar prisegti diegimai nuolat atnaujinami; jo indekse yra aprašymas „perkelta į `ghcr.io/cheaper-inference/omniroute`“. Jam reikalingas `GHCR_LEGACY_TOKEN` secret (klasikinis asmeninės prieigos raktas `diegosouzapw` su `write:packages`); be jo praleidžiamas darbas su įspėjimu „Senas GHCR veidrodis praleistas“.
 
 ## Spartusis karštųjų pataisų kelias (žyma `hotfix`)
 
@@ -144,14 +143,14 @@ Visi su leidimu susiję įsipareigojimai turi atitikti `type(scope): subject` fo
 
 **Tinkami tipai:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Galiojančios apimties:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `executors` `ci` `authz` `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `translator`, `domain`
+**Galiojančios apimties:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci` `executors` `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `translator`, `domain`
 
 Neveikiantys pakeitimai: po apimties pridėkite `BREAKING CHANGE:` poraštę arba `!` (pvz., `feat(api)!: drop /v0`).
 
 ### Dokumentacija
 
 - [ ] `npm run check:docs-sync` leidimai (automatinis paleidimas iš anksto patvirtinus)
-- [ ] `npm run check:docs-all` leidimai (skėtis: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` praeina. Jo patariamasis `check:deprecated-versions` žymi versijas, aiškiai priskirtas OmniRoute (3.6.x ir senesnėms), ir nepaiso datų.
 - [ ] `npm run check:env-doc-sync` išeina 0 — kodas ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env sutartis nepažeista
 - [ ] `npm run check:doc-links` išeina 0 — po restruktūrizavimo nėra sugadintų vidinių kainų mažinimo nuorodų
 - [ ] `docs/architecture/ARCHITECTURE.md` įvertino storage/runtime drift
@@ -177,7 +176,7 @@ Neveikiantys pakeitimai: po apimties pridėkite `BREAKING CHANGE:` poraštę arb
   - [ ] Perkėlimai, susiję su sandoriais
   - [ ] Teisingai sunumeruota (nėra tarpų iš eilės)
 - [ ] Išbandykite naują diegimą: ištrinkite `~/.omniroute/omniroute.db` ir paleiskite `npm run dev`
-- [ ] Išbandykite esamą diegimą: sukurkite atsarginę kopiją DB, paleiskite perkėlimą, patikrinkite schemą
+- [ ] Išbandykite esamą diegimą: kurkite atsarginę kopiją DB, paleiskite perkėlimą, patikrinkite schemą
 - [ ] WAL failai (`-wal`, `-shm`) tvarkomi teisingai , jei perkėlimas perrašo lenteles
 
 ### Teikėjų katalogas (patvirtinta Zod)
@@ -230,7 +229,7 @@ Ar NOT paleiskite `npm run build` o po to atskirą `npm run build:cli` skirtą �
 - [ ] `npm run build:release` pavyksta ir `dist/BUILD_SHA` == `git rev-parse --short HEAD`
 - [ ] `npm run check:pack-artifact` clean — be `app.__qa_backup`, `scripts/scratch`, `package-lock.json` ar kitų vietinių likučių
 - [ ] `dist/server.js` egzistuoja po sukūrimo
-- [ ] Pasirenkamas vietinis supakuotas vykdymo laikas: `npm run dev:candidate -- validate` po to, kai `npm run dev:candidate -- build` paleidžia supakuotą tarballą izoliuotame `DATA_DIR` ir patikrina `/api/health` + `/v1/models` (žr. [indėlį Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
+- [ ] Pasirenkamas vietinis paketinis vykdymo laikas: `npm run dev:candidate -- validate` po to, kai `npm run dev:candidate -- build` paleidžia supakuotą tarballą izoliuotame `DATA_DIR` ir patikrina `/api/health` + `/v1/models` (žr. [indėlį Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
 ### Žymėjimas ir išleidimas
 
@@ -269,11 +268,11 @@ Naudodami lengvą rsync srautą naudokite įgūdžius — no `npm pack`, no `npm
   - Pridedama prie išleidimo pastabų / tinklaraščio įrašo
 - [ ] Atnaujinkite GitHub Discussions / Discord su pranešimu apie išleidimą
 - [ ] Atidarykite kitos versijos etapą
-- [ ] Jei kritiška: prisegkite diskusiją arba įrašą `news.json` kad gautumėte reklamjuostę programoje
+- [ ] Jei kritiška: prisegkite diskusiją arba įrašą `news.json` kad galėtumėte naudoti reklamjuostę programoje
 
 ### Radaro viešojo paleidimo vartai
 
-„Radaro“ pranešimas yra sąmoningai susijęs su `active: false`. Aktyvinimas yra atskiras pakeitimas po to, kai įrodomas kiekvienas toliau nurodytas elementas:
+„Radaro“ pranešimas yra tyčia susijęs su `active: false`. Aktyvinimas yra atskiras pakeitimas po to, kai įrodomas kiekvienas toliau pateiktas elementas:
 
 - [ ] Visi sukrauti radaro PRs yra sujungti, o atleidimo antgalis CI yra žalias
 - [ ] Įdiekite ir dūminkite OSS radaro maršrutus, kai pagal numatytuosius nustatymus `RADAR_ENABLED` vis dar išjungtas
@@ -284,7 +283,7 @@ Naudodami lengvą rsync srautą naudokite įgūdžius — no `npm pack`, no `npm
 - [ ] Įrodykite atsarginės kopijos atkūrimą ir vieną prižiūrimą, riboto biudžeto tyrimą
 - [ ] Prieš priimdami donorystės įrodymus, patvirtinkite BRL/PIX peržiūros politiką
 - [ ] Įgalinkite viešą patikrą tik po ankstesnių vartų, tada suaktyvinkite naująjį `news.json` ID
-- [ ] Patikrinkite, ar pagrindiniame reklamjuostėse naudojama lokalizuota kopija ir, atmetus senesnį ID, vėl pasirodys naujas ID
+- [ ] Patikrinkite, ar pagrindiniame reklamjuostėse naudojama lokalizuota kopija ir, atmetus senesnį ID, vėl pasirodo naujas ID
 
 ## Įterptųjų paslaugų bazinis patikrinimas (v3.8.4+)
 
@@ -399,7 +398,7 @@ Kūrimo įtaisas yra sukurtas naudojant git santechniką (nepaliečiamas joks da
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

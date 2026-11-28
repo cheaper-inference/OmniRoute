@@ -13,12 +13,12 @@
 
 ## अवलोकन
 
-क्याटलगमा **45 वटा एजेन्ट स्किलहरू** (23 REST API + 21 CLI + 1 कन्फिगरेसन कार्यप्रवाह) छन्। प्रत्येक स्किलमा निम्न हुन्छन्:
+सूची समावेश छ** 45 एजेन्ट कौशल** (23 REST API + 21 CLI + 1 कन्फिगरेसन कार्यप्रवाह)। प्रत्येक कौशल छ:
 
-- एउटा **आधिकारिक ID** (`omni-auth`, `cli-serve`, आदि)
-- `skills/{id}/SKILL.md` मा YAML frontmatter (`name`, `description`) + समृद्ध markdown सामग्रीसहितको एउटा **SKILL.md** फाइल
-- OpenAPI स्पेसिफिकेसन र CLI रजिस्ट्रीबाट प्राप्त **REST एन्डपोइन्टहरू** (API स्किलहरू) वा **CLI सबकमाण्डहरू** (CLI स्किलहरू)
-- प्रत्यक्ष रूपमा प्राप्त गर्नका लागि एउटा **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ए** क्यानोनिकल ID** (`omni-auth`, `cli-serve`, आदि)
+- ए**SKILL.md** `skills/{id}/SKILL.md` मा फाइल YAML फ्रन्टमेटर (`name`, `description`) + रिच मार्कडाउन बडी
+- **REST अन्त्य बिन्दुहरू** (API कौशल) वा**CLI उपआदेशहरू** (CLI कौशल) OpenAPI spec र CLI रजिस्ट्रीबाट व्युत्पन्न
+- ए**GitHub कच्चा URL** प्रत्यक्ष प्राप्तिका लागि: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 

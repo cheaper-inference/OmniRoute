@@ -4,26 +4,11 @@
 
 ---
 
-title: "Zgodność i audyt"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
+> **Źródło prawdy:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-# Zgodność i audyt
+OmniRoute rejestruje działania administracyjne, zdarzenia uwierzytelniania, zmiany cyklu życia poświadczeń dostawcy i wywołania narzędzi MCP w tabelach audytu wspieranych przez SQLite. Na tej stronie opisano, co jest rejestrowane, gdzie się znajduje, jak długo jest przechowywane, w jaki sposób klucze API mogą zrezygnować i jak sprawdzać dane.
 
-> **Source of truth:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Last updated:** 2026-06-28 — v3.8.40
-
-OmniRoute zapisuje akcje administracyjne, zdarzenia uwierzytelniania, zmiany
-cyklu życia poświadczeń providerów oraz wywołania narzędzi MCP w tabelach
-audytu opartych o SQLite. Ta strona opisuje, co jest logowane, gdzie to
-mieszka, jak długo jest przechowywane, jak klucze API mogą się wypisać
-(opt-out) oraz jak odpytywać te dane.
-
-Implementacja znajduje się w `src/lib/compliance/index.ts` (T-43 — "Compliance
-Controls") oraz `src/lib/compliance/providerAudit.ts`. Zapis audytu nigdy nie
-rzuca wyjątku: przy dowolnej awarii wywołanie jest cicho połykane, żeby
-logowanie audytu nie mogło przerwać głównego przepływu żądania.
+Implementacja znajduje się w `src/lib/compliance/index.ts` (T-43 — „Kontrola zgodności”) i `src/lib/compliance/providerAudit.ts`. Zapisy audytu nigdy nie są zgłaszane: w przypadku jakiegokolwiek niepowodzenia połączenie jest cicho przechwytywane, więc rejestrowanie audytu nie może przerwać głównego przepływu żądań.
 
 ## Co jest rejestrowane
 
@@ -144,11 +129,9 @@ legacy `request_detail_logs` oraz lokalne artefakty żądań pod
 Domyślne wartości są zdefiniowane w `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## Opt-out `noLog` (per klucz API)
+## `noLog` Rezygnacja (na klucz API )
 
-Klucze API można oznaczyć tak, by ich downstreamowy ruch wywołań nie był
-logowany. Flaga żyje w tabeli `api_keys` (`no_log INTEGER DEFAULT 0`) i jest
-odzwierciedlana w zbiorze w pamięci do szybkich lookupów na hot-path.
+Klucze API można oflagować, aby ruch połączeń przychodzących nie był rejestrowany. Flaga znajduje się w tabeli `api_keys` (`no_log INTEGER DEFAULT 0`) i jest odzwierciedlana w zestawie w pamięci do wyszukiwania gorących ścieżek.
 
 ```bash
 # Create a no-log key (management auth required)
@@ -158,17 +141,21 @@ curl -X POST http://localhost:20128/api/keys \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Helpery (`src/lib/compliance/index.ts`):
+Pomocnicy (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — przełącza wpis w pamięci
-- `isNoLog(apiKeyId)` — sprawdzane na ścieżce żądania; w razie potrzeby
-  spada do odczytu z cache 30 s z `api_keys.no_log`
-- `NO_LOG_API_KEY_IDS` (env, lista rozdzielona przecinkami) — wstępnie
-  ładowane do zbioru w pamięci przy starcie; przydatne, gdy nie możesz
-  przełączyć kolumny bezpośrednio
+- `setNoLog(apiKeyId, true|false)` — przełącz wpis w pamięci
+- `isNoLog(apiKeyId)` — zaznaczone na ścieżce żądania; powraca do 30-sekundowego odczytu z pamięci podręcznej z `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, oddzielone przecinkami) — wstępnie załadowane do pamięci ustawionej podczas rozruchu; przydatne, gdy nie można bezpośrednio przełączyć kolumny
 
-Administracyjne zdarzenia audytu (login, zmiany providerów, wywołania narzędzi MCP itd.)
-**nie** są objęte przez `noLog` — opt-out dotyczy tylko logowania ruchu per żądanie.
+Zdarzenia audytu administracyjnego (logowanie, zmiany dostawcy, wywołania narzędzia MCP itp.) to:** nie** wpływ ma `noLog` — wyłączono rejestrowanie ruchu tylko na żądanie.
+
+### Rezygnacja na żądanie (`x-omniroute-no-log`)
+
+Klient może zrezygnować z pojedynczego żądania wnioskowania z trwałości ładunku bez tworzenia dedykowanego klucza. Wyślij `x-omniroute-no-log: true` na żądanie (`1` i `yes` są również akceptowane, wielkość liter nie jest rozróżniana). Dotyczy to każdej trasy rodziny rozmów, która przebiega przez moduł obsługi czatu: zakończenia czatu, odpowiedzi, wiadomości, uzupełnienia i ścieżka zgodna z Gemini. Wiersz dziennika połączeń jest nadal zapisywany wraz ze sygnaturą czasową, modelem, dostawcą, statusem, czasem trwania i liczbą tokenów, ale `request_body`, `response_body`, podsumowania żądań i artefakty potoku są pomijane.
+
+Nagłówek to ORed z flagą klucza: klucz bez dziennika pozostaje bez dziennika niezależnie od nagłówka, a nagłówek nie może ponownie włączyć rejestrowania dla klucza bez dziennika. Nagłówek jest usuwany przed przesłaniem żądania w górę.
+
+Ten nagłówek tak** nie** wyłącz wyodrębnianie pamięci lub semantyczną pamięć podręczną. Wyślij wraz z nim `x-omniroute-no-memory: true` i `x-omniroute-no-cache: true` jeśli żądanie nie może również utrwalać treści w tych podsystemach.
 
 ## REST API
 

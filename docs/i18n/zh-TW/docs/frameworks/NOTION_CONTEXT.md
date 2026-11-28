@@ -59,40 +59,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute 會儲存權杖，並立即執行只傳回 1 筆結果的測試搜尋；若 Notion
 傳回錯誤物件，系統會清除權杖，且呼叫會以 `400` 失敗。
 
-## MCP 工具（6 個）
+## MCP工具 (6)
 
-定義於 `open-sse/mcp-server/tools/notionTools.ts`。權杖會在呼叫
-時透過 `getNotionToken()` 解析；若尚未設定權杖，工具會擲回
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
+在`open-sse/mcp-server/tools/notionTools.ts`中定義。令牌在呼叫時透過`getNotionToken()`解析；如果沒有配置，工具會拋出`"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| 工具                         | 範圍           | 說明                                                                   |
-| ---------------------------- | -------------- | ---------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | 依文字查詢搜尋頁面與資料庫（傳回標題、ID、URL）。支援分頁。            |
-| `notion_get_page`            | `read:notion`  | 依頁面 ID 取得頁面內容與中繼資料。                                     |
-| `notion_list_block_children` | `read:notion`  | 列出區塊或頁面的所有子區塊（區塊樹狀結構）。支援分頁。                 |
-| `notion_query_database`      | `read:notion`  | 使用可選的 `filter` + `sorts`（Notion API 格式）查詢資料庫。支援分頁。 |
-| `notion_get_database`        | `read:notion`  | 依 ID 取得資料庫的結構描述／中繼資料。                                 |
-| `notion_append_blocks`       | `write:notion` | 將子區塊附加至現有區塊或頁面（每個請求最多 100 個區塊）。              |
+| 工具                         | 範圍           | 描述                                                                |
+| ---------------------------- | -------------- | ------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | 透過文字查詢搜尋頁面和資料庫（返回標題、 IDs、 URLs）。已分頁。     |
+| `notion_get_page`            | `read:notion`  | 透過ID取得頁面的內容和元資料。                                      |
+| `notion_list_block_children` | `read:notion`  | 列出區塊或頁面（區塊樹）的所有區塊子層級。已分頁。                  |
+| `notion_query_database`      | `read:notion`  | 使用可選的`filter` + `sorts` （Notion API格式）查詢資料庫。已分頁。 |
+| `notion_get_database`        | `read:notion`  | 透過ID取得資料庫的schema/metadata 。                                |
+| `notion_append_blocks`       | `write:notion` | 將區塊子級附加到現有區塊或頁面（每個請求最多 100 個區塊）。         |
 
 ### 輸入參數
 
-- `notion_search` — `query`（1–500 個字元）、`pageSize`（1–100，預設為 20）、
-  `startCursor`（可選）。
-- `notion_get_page` — `pageId`（32 個字元的十六進位值或 UUID）。
-- `notion_list_block_children` — `blockId`、`pageSize`（1–100，預設為 50）、
-  `startCursor`（可選）。
-- `notion_query_database` — `databaseId`、`filter`（可選，Notion 篩選條件格式）、
-  `sorts`（可選陣列）、`pageSize`（1–100，預設為 50）、`startCursor`（可選）。
-- `notion_get_database` — `databaseId`。
-- `notion_append_blocks` — `blockId`、`children`（區塊物件陣列）、
-  `after`（可選位置）。
+- `notion_search` — `query` （1–500 個字元）、 `pageSize` （1–100，預設 20）、 `startCursor` （可選）。
+- `notion_get_page` — `pageId` （32 個字元的十六進位或UUID）。
+- `notion_list_block_children` — `blockId`、 `pageSize` （1–100，預設 50）、 `startCursor` （可選）。
+- `notion_query_database` — `databaseId`、 `filter` （可選， Notion過濾器格式）、 `sorts` （可選數組）、 `pageSize` （1–100，預設 50）、 `startCursor` （可選）。
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`、 `children` （區塊物件陣列）、 `after` （可選位置）。
 
 ### 範圍
 
-讀取工具需要 `read:notion`，寫入工具則需要 `write:notion`。
-只有當 `OMNIROUTE_MCP_ENFORCE_SCOPES=true` 時，才會由
-`open-sse/mcp-server/server.ts` 中的 `withScopeEnforcement()` 強制執行範圍限制；
-呼叫端允許的範圍來自 `OMNIROUTE_MCP_SCOPES`（以逗號分隔），或已驗證 API 金鑰的範圍內容。完整的範圍模型請參閱 [MCP-SERVER.md](./MCP-SERVER.md)。
+讀取工具需要`read:notion` ，寫入工具需要`write:notion`。當`OMNIROUTE_MCP_ENFORCE_SCOPES=true`時，範圍由`withScopeEnforcement()`在`open-sse/mcp-server/server.ts`中強制執行，並且始終適用於API密鑰缺少`manage`/`admin`的HTTP/SSE呼叫者；呼叫者允許的範圍來自`OMNIROUTE_MCP_SCOPES` （逗號分隔）或經過驗證的API密鑰的範圍上下文。有關完整範圍模型，請參閱[MCP-SERVER.md](./MCP-SERVER.md) 。
 
 ## 端點
 

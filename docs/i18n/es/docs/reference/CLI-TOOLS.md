@@ -4,8 +4,6 @@
 
 ---
 
-Última actualización: 2026-08-23
-
 OmniRoute se integra con tres categorías de herramientas CLI distribuidas en tres páginas de panel dedicadas:
 
 | Página          | Ruta                    | Concepto                                                                                        | Contar       |
@@ -235,7 +233,7 @@ Las nuevas herramientas con `configType: "custom"` tienen configuraciones dedica
 | `POST /api/cli-tools/grok-build-settings`   | Grok Compilación (~/.grok/config.toml, `[model.omniroute]`)                       |
 | `POST /api/cli-tools/qwen-settings`         | Código Qwen (`~/.qwen/settings.json` + dedicada `.env` )                          |
 
-Todas las rutas utilizan `sanitizeErrorMessage()` para respuestas de error (Regla estricta n.° 12).
+Todas las rutas utilizan `sanitizeErrorMessage()` para respuestas de error (regla estricta #12).
 
 ---
 

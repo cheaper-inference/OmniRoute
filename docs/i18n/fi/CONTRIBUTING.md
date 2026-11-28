@@ -8,29 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Kehitysympäristön määritys
+## Kehitysasetukset
 
 ### Edellytykset
 
 - **Node.js** `>=22.22.2 <23` tai `>=24.0.0 <27` (suositus: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows ja Node 24:** käytä nykyistä 24 LTS -korjausjulkaisua (vähintään 24.20.0).
-> Aiemmat julkaisut voivat keskeyttää prosessin onnistuneiden testien jälkeen, kun `--test-force-exit` sulkee
-> prosessin. Noden [Windows libuv -korjaus](https://github.com/nodejs/node/pull/61999) korjaa
-> tämän ajonaikaisen kaatumisen; pidä testiväitteet ja suorittimen poistumistarkistukset käytössä.
+> **Windows solmulla 24:** käytä nykyistä 24 LTS -päivitysversiota (vähintään 24.20.0). Aiemmat julkaisut voivat keskeytyä onnistuneiden testien jälkeen, kun `--test-force-exit` sulkee prosessin. Noden [Windows libuv -korjaus](https://github.com/nodejs/node/pull/61999) korjaa tämän ajonaikaisen kaatumisen; pidä testivahvistukset ja juoksijan poistumistarkistukset käytössä.
 
-> **npm v11+ -käyttäjät (Node 24+):** tarkista `npm install` -komennon jälkeen, että natiivimoduulit asennettiin:
-> `node -e "require('better-sqlite3')"`. Jos komento epäonnistuu virheellä `MODULE_NOT_FOUND`,
-> suorita `npm approve-scripts better-sqlite3 && npm install`. Katso
-> [Vianmääritys](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + -käyttäjät (Node 24 +):** Tarkista `npm install` jälkeen, että alkuperäiset moduulit on asennettu: `node -e "require('better-sqlite3')"`. Jos `MODULE_NOT_FOUND` epäonnistuu, suorita `npm approve-scripts better-sqlite3 && npm install`. Katso [Vianetsintä](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Kloonaus ja asennus
+### Kloonaa ja asenna
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,92 +32,83 @@ npm install
 ### Ympäristömuuttujat
 
 ```bash
-# Luo .env-muuttuja mallista
+# Create your .env from the template
 cp .env.example .env
 
-# Luo vaaditut salaisuudet
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Kehityksen kannalta tärkeät muuttujat:
+Keskeiset muuttujat kehitystä varten:
 
-| Muuttuja               | Kehityksen oletusarvo       | Kuvaus                             |
-| ---------------------- | --------------------------- | ---------------------------------- |
-| `PORT`                 | `20128`                     | Palvelimen portti                  |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Käyttöliittymän perus-URL          |
-| `JWT_SECRET`           | (luo yllä olevalla tavalla) | JWT-allekirjoituksen salaisuus     |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | Ensimmäisen kirjautumisen salasana |
-| `APP_LOG_LEVEL`        | `info`                      | Lokien yksityiskohtaisuustaso      |
+| Muuttuva               | Kehityksen oletusarvo    | Kuvaus                          |
+| ---------------------- | ------------------------ | ------------------------------- |
+| `PORT`                 | `20128`                  | Palvelimen portti               |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Base URL käyttöliittymälle      |
+| `JWT_SECRET`           | (luo yllä)               | JWT allekirjoituksen salaisuus  |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Ensimmäinen kirjautumissalasana |
+| `APP_LOG_LEVEL`        | `info`                   | Lokin sanallisuustaso           |
 
-### Hallintapaneelin asetukset
+### Kojelaudan asetukset
 
-Hallintapaneelissa on käyttöliittymän vaihtopainikkeita ominaisuuksille, jotka voidaan määrittää myös ympäristömuuttujilla:
+Kojelauta tarjoaa UI -kytkimet ominaisuuksille, jotka voidaan myös määrittää ympäristömuuttujien kautta:
 
-| Asetuksen sijainti  | Vaihtopainike      | Kuvaus                                                      |
-| ------------------- | ------------------ | ----------------------------------------------------------- |
-| Settings → Advanced | Debug Mode         | Ota virheenkorjauksen pyyntölokit käyttöön (käyttöliittymä) |
-| Settings → General  | Sidebar Visibility | Näytä/piilota sivupalkin osiot                              |
+| Sijainnin asettaminen     | Vaihda              | Kuvaus                                      |
+| ------------------------- | ------------------- | ------------------------------------------- |
+| Asetukset → Lisäasetukset | Virheenkorjaustila  | Ota virheenkorjauspyyntölokit käyttöön (UI) |
+| Asetukset → Yleiset       | Sivupalkin näkyvyys | Show/hide sivupalkin osat                   |
 
-Nämä asetukset tallennetaan tietokantaan, ja ne säilyvät uudelleenkäynnistysten yli. Kun ne on määritetty, ne ohittavat ympäristömuuttujien oletusarvot.
+Nämä asetukset tallennetaan tietokantaan ja säilyvät uudelleenkäynnistyksen jälkeen ohittaen env var -oletukset, kun ne on asetettu.
 
-### Suorittaminen paikallisesti
+### Juokse paikallisesti
 
 ```bash
-# Kehitystila (kuuma uudelleenlataus)
+# Development mode (hot reload)
 npm run dev
 
-# Tuotantokoontiversio
-npm run build    # next build → .build/next/ ja sen jälkeen assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Nopea vain taustajärjestelmän ja API:n käännös avustajien muutoksia varten
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Julkaisukoontiversio (puhdas uudelleenkoonti + HEAD-paikkamerkki — käyttöönottoa varten pakollinen)
-npm run build:release   # rm -rf .build dist ja build + kirjoittaa dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Yleinen portin määritys
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Avustajakoontiversio suorittaa vain käännöksen validoinnin: se ei kokoa itsenäistä
-jakelua eikä rakenna valinnaisia natiivipaketoinnin resursseja. Käytä tavallista tuotantokoontiversiota,
-kun haluat validoida toimitettavan paketin.
+Osallistujan koontiversio suorittaa vain käännöstarkistuksen: se ei kokoa itsenäistä jakelua tai rakenna valinnaisia alkuperäisiä pakkausresursseja. Käytä tavallista tuotantokoontiversiota, kun sinun on vahvistettava lähetettävä paketti.
 
-### Koontituloksen hakemistorakenne
+### Rakenna lähtöasettelu
 
-| Hakemisto | Sisältö                                                                           | Seurattu |
-| --------- | --------------------------------------------------------------------------------- | -------- |
-| `src/`    | Sovelluksen lähdekoodi (TypeScript / TSX)                                         | Kyllä    |
-| `.build/` | Väliaikaistiedostot — `next build` -tulos (gitignorettu, `distDir = .build/next`) | Ei       |
-| `dist/`   | Toimitettava paketti — `assembleStandalone` kokoaa sen (gitignorettu)             | Ei       |
+| Hakemisto | Sisällys                                                                 | Seurattu |
+| --------- | ------------------------------------------------------------------------ | -------- |
+| `src/`    | Sovelluslähde (TypeScript / TSX)                                         | Kyllä    |
+| `.build/` | Välitason — `next build` -lähtö (gitignored, `distDir = .build/next`)    | Ei       |
+| `dist/`   | Toimitettava — nippu, jonka on koonnut `assembleStandalone` (gitignored) | Ei       |
 
-Koontiputki on yksivaiheinen:
+Rakennusputki on yksikertainen:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js-tulos)
-  └─ assembleStandalone()                 (kopioi standalone + static + public + native assets)
-       └─ tulos: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` tyhjentää lisäksi ensin molemmat hakemistot ja kirjoittaa
-`dist/BUILD_SHA`-tiedoston (= `git rev-parse --short HEAD`) käyttöönoton eheyden paikkamerkiksi.
+`npm run build:release` lisäksi puhdistaa ensin molemmat hakemistot ja kirjoittaa `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) käyttöönoton eheyden vartijaksi.
 
-`npm run build:contributor` käyttää vain taustajärjestelmälle tarkoitettua koontiprofiilia. Se korvaa
-hallintapaneelin käyttöliittymän tiedostot tilapäisesti koonnin ajaksi, säilyttää API-reittien käsittelijät
-ja palauttaa alkuperäiset tiedostot koonnin jälkeen. Käytä `npm run build` -komentoa muutoksille, jotka
-vaikuttavat hallintapaneelin käyttöliittymään, tai täydelliseen julkaisun validointiin; avustajaprofiili
-ei korvaa julkaisukoontiversiota.
+`npm run build:contributor` käyttää vain backend-koontiprofiilia. Se sulkee väliaikaisesti kojelaudan UI -tiedostot rakentamisen aikana, säilyttää API -reitinkäsittelijät ja palauttaa alkuperäiset tiedostot rakentamisen jälkeen. Käytä `npm run build` komentoa muutoksiin, jotka vaikuttavat kojelautaan UI tai täyden julkaisun vahvistukseen; avustajaprofiili ei korvaa julkaisuversiota.
 
-> **VPS-käyttöönottoa koskeva huomautus:** etäpalvelimen kuvatiedostoja sisältävä hakemisto `/usr/lib/node_modules/omniroute/app/`
-> säilyy muuttumattomana. Käyttöönoton työkalut synkronoivat `dist/`-hakemiston sisällön sinne rsyncillä.
-> Vain repositorion sisäinen koontituloksen polku siirrettiin (`app/` → `dist/`).
+> **VPS deploy huomautus:** etäkuvahakemisto `/usr/lib/node_modules/omniroute/app/` on muuttumaton. Käyttöönottotaidot rsynkronoivat `dist/` n sisällön siihen. Vain repossa olevan koontiversion lähtöpolku siirrettiin (`app/` → `dist/`).
 
-Oletus-URL-osoitteet:
+Oletus URLs:
 
-- **Hallintapaneeli**: `http://localhost:20128/dashboard`
+- **Kojelauta** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -431,8 +416,8 @@ Käytä sitten `/deploy-vps-*-cc`-taitoja, jotka synkronoivat `dist/`-hakemiston
 
 ## Avun saaminen
 
-- **Arkkitehtuuri**: Katso [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API-viite**: Katso [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Tietoturvadokumentaatio**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Ylläpitodokumentaatio**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Ongelmat**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Arkkitehtuuri** : Katso [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Viite** : Katso [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Turvallisuusasiakirjat** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops-dokumentit** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Ongelmat** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

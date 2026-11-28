@@ -132,9 +132,9 @@ flyctl deploy
 
 ## 5. Parameter yang Diperlukan
 
-Projek ini mengesyorkan supaya sekurang-kurangnya parameter berikut dikonfigurasikan pada Fly.io.
+Projek ini mengesyorkan mengkonfigurasi sekurang-kurangnya parameter berikut pada Fly.io.
 
-### 5.1 Parameter yang Disahkan
+### 5.1 Parameter Disahkan
 
 Parameter ini telah digunakan dalam penggunaan sebenar pada aplikasi `omniroute` semasa:
 
@@ -143,19 +143,19 @@ Parameter ini telah digunakan dalam penggunaan sebenar pada aplikasi `omniroute`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (diperlukan dalam pengeluaran — digunakan untuk pengesahan jambatan WebSocket)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (diperlukan dalam pengeluaran — yang digunakan untuk pengesahan jambatan WebSocket )
 - `STORAGE_ENCRYPTION_KEY`
 
-### 5.2 Tentang `INITIAL_PASSWORD`
+### 5.2 Mengenai `INITIAL_PASSWORD`
 
 Projek semasa tidak menetapkan `INITIAL_PASSWORD` kerana penggunaan ini tidak memerlukannya.
 
 Jika ia tidak ditetapkan:
 
-- Log permulaan akan menunjukkan bahawa kata laluan lalai ialah `CHANGEME`
-- Anda hendaklah menukar kata laluan log masuk dalam tetapan sistem secepat mungkin selepas penggunaan
+- Anda mencipta kata laluan papan pemuka dalam wizard onboarding pada lawatan pertama. Lengkapkan langkah kata laluan: melangkaunya akan mematikan log masuk papan pemuka, yang membiarkan papan pemuka terbuka kepada sesiapa sahaja yang boleh mencapai apl URL
+- Proksi Fly mencapai apl daripada alamat bukan gelung balik, jadi selepas anda menyerahkan kata laluan wizard meminta token bootstrap sekali, yang dicetak apl ke lognya pada masa itu: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Jika baris itu telah menatal keluar dari log, mulakan semula apl dan serahkan wizard sekali lagi untuk mencetak token baharu
 
-Jika anda mahu memulakan kata laluan bahagian belakang tanpa pengawasan, anda boleh menambahkannya kemudian:
+Untuk menetapkan kata laluan tanpa pengawasan sebaliknya, tambahkannya sebelum lawatan papan pemuka pertama (sebaik kata laluan disimpan, `INITIAL_PASSWORD` diabaikan):
 
 - `INITIAL_PASSWORD`
 
@@ -283,51 +283,51 @@ git pull
 flyctl deploy
 ```
 
-Jika anda hanya perlu mengemas kini parameter tanpa mengubah kod:
+Jika anda hanya perlu mengemas kini parameter tanpa menukar kod:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly akan melaksanakan kemas kini berperingkat pada mesin secara automatik.
+Fly akan melakukan kemas kini mesin secara automatik.
 
-### 9.1 Menjejaki Kemas Kini Repositori Hulu Sambil Mengekalkan `fly.toml` Fork Anda
+### 9.1 Mengesan Kemas Kini Repositori Hulu Semasa Memelihara `fly.toml` Fork Anda
 
-Jika repositori semasa ialah fork dan anda mahu menyegerakkan kemas kini daripada repositori hulu `https://github.com/diegosouzapw/OmniRoute`, ikuti aliran kerja di bawah.
+Jika repositori semasa ialah garpu dan anda ingin menyegerakkan kemas kini daripada `https://github.com/cheaper-inference/OmniRoute` huluan , ikut aliran kerja di bawah.
 
-Mula-mula, sahkan remote anda:
+Mula-mula, sahkan alat kawalan jauh anda:
 
 ```powershell
 git remote -v
 ```
 
-Anda sepatutnya melihat sekurang-kurangnya:
+Anda harus melihat sekurang-kurangnya:
 
-- `origin` yang menghala ke fork anda sendiri
-- `upstream` yang menghala ke repositori asal
+- `origin` tunjuk garfu sendiri
+- `upstream` menunjuk ke repositori asal
 
-Jika `upstream` belum dikonfigurasikan, tambahkannya:
+Jika `upstream` tidak dikonfigurasikan, tambahkannya:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Sebelum menyegerakkan dengan repositori hulu, dapatkan commit dan tag terkini:
+Sebelum menyegerakkan dengan huluan, dapatkan komitmen dan teg terkini:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Semak versi semasa dan tag repositori hulu:
+Semak versi semasa dan teg huluan:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Nota: Versi projek semasa ialah `v3.8.0`. Rujukan `v3.4.7` di bawah dikekalkan sebagai contoh sejarah sahaja. Untuk keluaran sebenar, gunakan `:latest` atau tag versi semasa (contohnya `:v3.8.0`).
+> Nota: Versi projek semasa ialah `v3.8.0`. Rujukan `v3.4.7` di bawah disimpan sebagai contoh sejarah sahaja. Untuk keluaran sebenar, gunakan `:latest` atau teg versi semasa (cth `:v3.8.0`).
 
-Jika anda mahu menggabungkan `main` repositori hulu yang terkini sambil mengekalkan `fly.toml` fork anda secara paksa, ikuti aliran kerja ini:
+Jika anda ingin menggabungkan `main` hulu terbaharu sambil mengekalkan `fly.toml` garpu anda secara paksa, ikut aliran kerja ini:
 
 ```powershell
 git merge upstream/main
@@ -340,31 +340,31 @@ git push origin main
 Nota:
 
 - `git merge upstream/main` menyegerakkan kod terkini daripada repositori asal
-- `git checkout HEAD~1 -- fly.toml` memulihkan `fly.toml` milik fork anda daripada keadaan sebelum penggabungan
-- Jika repositori hulu tidak mengubah suai `fly.toml`, langkah ini tidak akan menghasilkan sebarang perbezaan
-- Jika repositori hulu mengubah suai `fly.toml`, langkah ini memastikan nama aplikasi Fly, pelekapan volum, rantau dan konfigurasi penggunaan lain yang khusus untuk fork anda tidak ditulis ganti
+- `git checkout HEAD~1 -- fly.toml` memulihkan `fly.toml` garpu anda sendiri sebelum percantuman
+- Jika huluan tidak mengubah suai `fly.toml`, langkah ini tidak akan memperkenalkan sebarang perbezaan
+- Jika huluan telah mengubah suai `fly.toml`, langkah ini memastikan nama aplikasi Fly, lekapan volum, rantau dan konfigurasi penggunaan khusus garpu yang lain tidak ditimpa
 
-Jika anda mahu menyelaraskan dengan tag keluaran tertentu (contohnya `v3.4.7`), sahkan terlebih dahulu bahawa tag tersebut sudah disertakan dalam `upstream/main`:
+Jika anda ingin menjajarkan dengan teg keluaran tertentu (cth `v3.4.7`), mula-mula sahkan bahawa teg itu sudah disertakan dalam `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Hasil yang berjaya bermaksud `upstream/main` sudah mengandungi versi tersebut; anda hanya perlu menggabungkan `upstream/main`.
+Pemulangan yang berjaya bermakna `upstream/main` sudah mengandungi versi tersebut; anda hanya boleh menggabungkan `upstream/main`.
 
-### 9.2 Urutan Keluaran Standard Selepas Menyegerakkan Repositori Hulu
+### 9.2 Urutan Keluaran Standard Selepas Menyegerakkan Hulu
 
-Selepas menyegerakkan dengan repositori asal, ikuti urutan keluaran yang disyorkan ini:
+Selepas menyegerakkan dengan repositori asal, ikut perintah keluaran yang disyorkan ini:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Pulihkan `fly.toml` fork
+3. Pulihkan `fly.toml` garpu
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Ini ialah aliran kerja sebenar yang digunakan semasa menaik taraf projek semasa kepada `v3.4.7` (contoh tersebut merujuk kepada versi sejarah; versi sebenar semasa ialah `v3.8.0`).
+Ini ialah aliran kerja sebenar yang digunakan semasa menaik taraf projek semasa kepada `v3.4.7` (contoh merujuk kepada versi sejarah; versi sebenar semasa ialah `v3.8.0`).
 
 ---
 
@@ -420,38 +420,38 @@ Jika anda melihat `/app/data/...` sebaliknya, `DATA_DIR` telah dikonfigurasi den
 
 ## 12. Isu Lazim
 
-### 12.1 Halaman `Secrets` Kosong
+### 12.1 `Secrets` Halaman Kosong
 
 Biasanya terdapat dua sebab:
 
-- Anda belum menjalankan `flyctl secrets set`
-- Anda sedang melihat aplikasi yang berbeza (contohnya `oroute` dan bukannya `omniroute`)
+- Anda masih belum menjalankan `flyctl secrets set`
+- Anda sedang melihat aplikasi yang berbeza (cth `oroute` bukannya `omniroute`)
 
-### 12.2 `flyctl deploy` Melaporkan `app not found`
+### 12.2 `flyctl deploy` Laporan `app not found`
 
-Cipta aplikasi terlebih dahulu:
+Buat aplikasi dahulu:
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-### 12.3 Penghuraian `fly.toml` Gagal
+### 12.3 `fly.toml` Menghurai Gagal
 
 Semak perkara berikut:
 
-- Sama ada terdapat aksara rosak dalam komen
-- Sama ada penggunaan tanda petik dan pengengsotan TOML adalah betul
+- Sama ada terdapat watak bercelaru dalam komen
+- Sama ada petikan dan lekukan TOML adalah betul
 
-### 12.4 Data Tidak Disimpan Secara Kekal
+### 12.4 Data Tidak Berterusan
 
-Sahkan kedua-dua perkara berikut:
+Sahkan kedua-dua yang berikut:
 
 - `fly.toml` mengandungi `destination = '/data'`
 - `DATA_DIR` ditetapkan kepada `/data`
 
 ### 12.5 Bolehkah Ia Berjalan Tanpa `INITIAL_PASSWORD`?
 
-Ya, ia boleh berjalan. Ia akan menggunakan kata laluan lalai `CHANGEME`. Anda disyorkan supaya menukar kata laluan bahagian belakang secepat mungkin dalam persekitaran pengeluaran.
+ya. Dengan `INITIAL_PASSWORD` tidak ditetapkan, anda mencipta kata laluan papan pemuka dalam wizard onboarding pada lawatan pertama (bahagian 5.2 merangkumi token bootstrap sekali dan langkah kata laluan).
 
 ---
 

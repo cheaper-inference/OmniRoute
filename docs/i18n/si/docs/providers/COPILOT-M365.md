@@ -166,11 +166,11 @@ Microsoft එකක් ආපසු ලබා දෙන විට දේශී�
 
 `copilot-m365-web` සබල කර ඇති බව සහතික කර ගන්න** උපකරණ පුවරුව → සපයන්නන්** . සැපයුම්කරු සමහර ස්ථර වල පෙරනිමියෙන් සැඟවිය හැක.
 
-## යොමු
+## යොමු කිරීම්
 
-- ගැටලුව: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- සාකච්ඡාව: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- මූලාශ්රය: `src/shared/constants/providers/web-cookie.ts` (සපයන්නාගේ අර්ථදැක්වීම)
-- HAR ආයාතය: `src/shared/utils/m365HarImport.ts`
+- නිකුතුව: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- සාකච්ඡාව: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- මූලාශ්රය: `src/shared/constants/providers/web-cookie.ts` (සැපයුම්කරු අර්ථ දැක්වීම)
+- HAR ආනයනය: `src/shared/utils/m365HarImport.ts`
 - අක්තපත්ර ක්ෂේත්ර: `src/shared/providers/webSessionCredentials.ts`
-- Tier modal එක: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- ස්ථර මාදිලිය: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

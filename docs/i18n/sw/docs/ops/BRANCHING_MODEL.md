@@ -53,7 +53,7 @@ Wakati toleo linapatanishwa, toleo la alama linaloitwa `release-freeze` hufungul
 Angalia kufungia wazi kabla ya kudhani tawi unalotaka linaweza kuunganishwa:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Unganisha mechanics (lebo ya mmiliki `queue` → Mergify) imeandikwa katika [MERGE_TRAIN.md](./MERGE_TRAIN.md).

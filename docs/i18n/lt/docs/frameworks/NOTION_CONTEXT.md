@@ -67,39 +67,29 @@ iškvieta nepavyksta ir grąžina `400`.
 
 ## MCP įrankiai (6)
 
-Apibrėžti faile `open-sse/mcp-server/tools/notionTools.ts`. Žetonas nustatomas iškvietimo
-metu naudojant `getNotionToken()`; jei jis nesukonfigūruotas, įrankis pateikia klaidą
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
+Apibrėžiama `open-sse/mcp-server/tools/notionTools.ts`. Žetonas išsprendžiamas skambučio metu per `getNotionToken()`; jei nė vienas nesukonfigūruotas, įrankis išmeta `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Įrankis                      | Aprėptis       | Aprašymas                                                                                                |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Ieško puslapių ir duomenų bazių pagal tekstinę užklausą (grąžina pavadinimus, ID ir URL). Puslapiuojama. |
-| `notion_get_page`            | `read:notion`  | Gauna puslapio turinį ir metaduomenis pagal jo ID.                                                       |
-| `notion_list_block_children` | `read:notion`  | Pateikia visus bloko arba puslapio antrinius blokus (blokų medį). Puslapiuojama.                         |
-| `notion_query_database`      | `read:notion`  | Vykdo duomenų bazės užklausą su pasirenkamais `filter` + `sorts` (Notion API formatu). Puslapiuojama.    |
-| `notion_get_database`        | `read:notion`  | Gauna duomenų bazės schemą ir metaduomenis pagal ID.                                                     |
-| `notion_append_blocks`       | `write:notion` | Prideda antrinius blokus prie esamo bloko arba puslapio (ne daugiau kaip 100 blokų vienoje užklausoje).  |
+| Įrankis                      | Taikymo sritis | Aprašymas                                                                                                      |
+| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Ieškokite puslapiuose ir duomenų bazėse pagal tekstinę užklausą (pateikia pavadinimus, IDs, URLs). Puslapiais. |
+| `notion_get_page`            | `read:notion`  | Gaukite puslapio turinį ir metaduomenis pagal jo ID.                                                           |
+| `notion_list_block_children` | `read:notion`  | Išvardykite visus bloko ar puslapio antrinius blokus (bloko medį). Puslapiais.                                 |
+| `notion_query_database`      | `read:notion`  | Pateikite užklausą duomenų bazėje naudodami pasirenkamą `filter` + `sorts` (Notion API formatas). Puslapiais.  |
+| `notion_get_database`        | `read:notion`  | Gaukite duomenų bazės schema/metadata pagal ID.                                                                |
+| `notion_append_blocks`       | `write:notion` | Pridėti bloko antrinius elementus prie esamo bloko arba puslapio (daugiausia 100 blokų vienoje užklausoje).    |
 
 ### Įvesties parametrai
 
-- `notion_search` — `query` (1–500 simbolių), `pageSize` (1–100, numatytoji reikšmė 20),
-  `startCursor` (pasirenkamas).
-- `notion_get_page` — `pageId` (32 simbolių šešioliktainė reikšmė arba UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, numatytoji reikšmė 50),
-  `startCursor` (pasirenkamas).
-- `notion_query_database` — `databaseId`, `filter` (pasirenkamas, Notion filtro formatas),
-  `sorts` (pasirenkamas masyvas), `pageSize` (1–100, numatytoji reikšmė 50), `startCursor` (pasirenkamas).
+- `notion_search` — `query` (1–500 simbolių), `pageSize` (1–100, numatytoji 20), `startCursor` (pasirenkama).
+- `notion_get_page` — `pageId` (32 simbolių šešioliktainė arba UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, numatytoji 50), `startCursor` (pasirenkama).
+- `notion_query_database` — `databaseId`, `filter` (pasirenkamas, Notion filtro formatas), `sorts` (pasirenkamas masyvas), `pageSize` (1–100, numatytasis 50), `startCursor` (pasirenkamas).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (blokų objektų masyvas),
-  `after` (pasirenkama pozicija).
+- `notion_append_blocks` — `blockId`, `children` (blokinių objektų masyvas), `after` (pasirenkama padėtis).
 
-### Aprėptys
+### Taikymo sritis
 
-Skaitymo įrankiams reikalinga `read:notion`, o rašymo įrankiui — `write:notion`.
-Aprėptis faile `open-sse/mcp-server/server.ts` užtikrina `withScopeEnforcement()`, tačiau
-tik kai `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; iškvietėjo leidžiamos aprėptys gaunamos iš
-`OMNIROUTE_MCP_SCOPES` (atskirtos kableliais) arba autentifikuoto API rakto aprėpties
-konteksto. Visas aprėpčių modelis aprašytas faile [MCP-SERVER.md](./MCP-SERVER.md).
+Skaitymo įrankiams reikia `read:notion`, o rašymo įrankiui – `write:notion`. Apimtys vykdomos `withScopeEnforcement()` `open-sse/mcp-server/server.ts`, kai `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, ir visada HTTP/SSE skambinančiajam, kurio API klaviše trūksta `manage`/`admin`; skambinančiojo leistinos apimtys gaunamos iš `OMNIROUTE_MCP_SCOPES` (atskirtos kableliais) arba autentifikuoto API rakto apimties konteksto. Visą modelį rasite [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Galiniai taškai
 

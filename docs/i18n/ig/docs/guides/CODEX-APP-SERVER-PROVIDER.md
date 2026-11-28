@@ -17,27 +17,24 @@ na URL app-server ahaziri**, ma CLI ahụ ga-abụrịrị na **abanyela na aka�
 
 ---
 
-## 1. Nhazi usoro
+## 1. Nhazi
 
 ```
-┌─ Ngwa OmniRoute ────────────────┐        ┌─ sidecar codex-app-server ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ token ikike)                 │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  na-ejikwa OpenAI OAuth n'onwe ya   │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, mmegharị onwe)│
-        │ na-ekekọrịta (compose volumes)     └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → token ikike WS (ha abụọ na-etinye ya)
-  codex-appserver-home    → ~/.codex (auth.json nke dashboard dere,
-                             nke codex app-server dị na sidecar na-agụ)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidecar na-ege ntị **naanị** na netwọkụ compose dị n'ime
-  (`ws://codex-app-server:1456`) n'azụ token ikike. **Ọ dịghị mgbe**
-  a na-eme ka host ma ọ bụ ịntanetị nweta ya.
-- E tinyelarị Codex CLI n'ime `omniroute:base`, ya mere ọ dịghị mkpa ịwụnye codex na
-  host ma ọ bụ igwe onye ọrụ mgbe ị na-agba sidecar ahụ.
+- Ụgbọ ala na-ege ntị** naanị** na esịtidem dere netwọk (`ws://codex-app-server:1456`) n'azụ a ike token. Ọ bụ** ọ dịghị mgbe** bipụtara na onye ọbịa ma ọ bụ ịntanetị.
+- The sidecar na-eji `omniroute:cli-no-docker`, wuru site na `runner-cli-no-docker` lekwasịrị anya, nke gụnyere Codex CLI.
 
 ## 2. Malite ya
 

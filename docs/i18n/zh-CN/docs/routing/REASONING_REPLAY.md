@@ -4,7 +4,7 @@
 
 ---
 
-> **事实来源：** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`**最后更新：** 2026-06-28 — v3.8.40
+> **事实来源：** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute捕获由思维模式模型生成的助手`reasoning_content` ，并在上游提供者需要时在多轮请求上透明地重放它。这消除了严格的提供者在客户端的对话历史记录缺少前一轮推理时引发的HTTP 400 错误。
 
@@ -40,7 +40,7 @@ Turn N+1 (client sends follow-up):
 
 工具调用条目存储在`buildToolCallCacheKey()`下，它是请求范围和工具调用 id 的摘要，因此另一个API密钥或会话使用的相同 id 不会选择该条目。范围来自`buildReasoningCacheScope()`： API密钥 ID，加上请求有会话密钥时的会话密钥。因此， `tool_call_id`列和仪表板显示这些条目的摘要。
 
-普通（非工具调用）助理轮次的键控方式不同： `buildAssistantMessageCacheKey()`消化会话范围加上该轮次之前的规范化 OpenAI 格式记录，因为一旦`tools`存在， DeepSeek就需要对_每个_先前轮次进行推理。对于 Responses-API 目标（例如`opencode-go/deepseek-v4-flash`，路由到`/responses`），上游主体携带`input`，而不是`messages`，因此`translateRequest()` (`open-sse/translator/index.ts`) 报告它通过回调选项消化的枢轴转录本，并且捕获站点消化相同的转录本。对于每种源格式，响应重播过程都在OpenAI枢轴上运行，因此Anthropic消息客户端（Claude → OpenAI →响应）也会重播。
+普通（非工具调用）助理轮次的键控方式不同： `buildAssistantMessageCacheKey()`消化会话范围以及该轮次之前的规范化 OpenAI 格式记录，因为一旦`tools`存在， DeepSeek就需要对_每个_先前轮次进行推理。对于 Responses-API 目标（例如`opencode-go/deepseek-v4-flash`，路由到`/responses`），上游主体携带`input`，而不是`messages`，因此`translateRequest()` (`open-sse/translator/index.ts`) 报告它通过回调选项消化的枢轴转录本，并且捕获站点消化相同的转录本。对于每种源格式，响应重播过程都在OpenAI枢轴上运行，因此Anthropic消息客户端（Claude → OpenAI →响应）也会重播。
 
 ## 存储—混合内存+ SQLite
 

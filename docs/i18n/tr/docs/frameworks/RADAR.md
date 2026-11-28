@@ -94,52 +94,30 @@ yönlendirmeyi veya model seçimini değiştirmez — aşağıdaki ayrı katıl�
 
 ---
 
-## Veri eşitleme AYRI bir katılım seçeneğidir — gizlilik taahhüdü
+## Veri senkronizasyonu bir SEPARATE katılımıdır — gizlilik vaadi
 
-`RADAR_ENABLED` değerini açmak yalnızca kullanıcı arayüzünün kilidini açar. Akışın eşitlenmesi,
-`radar_settings.opt_in` içinde saklanan ikinci ve bağımsız bir katılım seçeneği gerektirir
-(`src/lib/db/radar.ts`, geçiş `136_radar_cache_settings.sql`). `syncRadar()`, herhangi bir ağ çağrısı
-yapmadan önce bayrağı _ve_ katılım seçeneğini denetler:
+`RADAR_ENABLED` açmak yalnızca UI kilidini açar. Akışın senkronize edilmesi, `radar_settings.opt_in` depolanan ikinci, bağımsız bir katılım gerektirir (`src/lib/db/radar.ts`, geçiş `136_radar_cache_settings.sql`). `syncRadar()` herhangi bir ağ araması yapmadan önce katılımı _ve_ işaretini kontrol eder:
 
 ```
-Bayrak kapalı     → { status: "disabled" }   — ağ çağrısı yok
-Katılım seçilmedi → { status: "opt_out" }    — ağ çağrısı yok
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Her ikisi de açıkken eşitleme yolu şöyledir:
+Her ikisi de açık olduğunda senkronizasyon yolu şöyledir:
 
-1. `x-omniroute-radar-schema: 2` ve isteğe bağlı bir `Authorization: Bearer <supporter key>`
-   üstbilgisiyle (aşağıya bakın) `GET <feed base URL>/v1/catalog/latest`. Şema üstbilgisi olmadığında
-   sunucular varsayılan olarak ayrıca imzalanmış v1 geçiş artefaktını sunar; böylece eski kurulu istemciler
-   güncellemeleri almaya devam eder.
-2. Bu, yalnızca indirmeye yönelik bir uygulama akışıdır ancak yine de bir HTTPS isteğidir. Barındırılan
-   altyapı, kaynak IP gibi olağan bağlantı meta verilerini alır. Bir destekçi anahtarı
-   yapılandırıldığında eşitleme, hizmetin yetkilendirmeyi belirleyebilmesi için bu anahtarı Bearer
-   üstbilgisinde de gönderir. Yukarıdaki kanıt sınırında belirtilen tam özel sunucu revizyonunda,
-   akış isteği muhasebesi; manuel kötüye kullanım incelemesi için anahtar karmalarını, toplu kullanımı ve
-   IP'nin günlük olarak dönüşümlü, kısaltılmış HMAC değerini kullanır; bu tablolar ne anahtarı ne de IP'yi
-   ham biçimde kalıcı olarak saklar. Altyapı erişim günlükleri ve şifrelenmiş teslimat giden kutusu
-   ayrı operasyonel sınırlardır.
-3. OmniRoute; istemleri, yanıtları, konuşmaları, sağlayıcı kimlik bilgilerini, model trafiğini,
-   çalışma süresini, gecikmeyi veya yerel sağlayıcı yapılandırmasını Radar hizmetine hiçbir zaman göndermez.
-4. Yanıt doğrulanır, geçerliliği denetlenir ve yerel olarak önbelleğe alınır (bkz.
-   [Güvenlik modeli](#security-model)). Radar'ın sunucu tarafında tam olarak dört ağ yolu vardır:
-   katalog için `syncRadar()`, yönlendirmeler için `syncRadarReferrals()` ve
-   yalnızca destekçilere özel teklifler ile Intel için `syncRadarOffers()` / `syncRadarIntel()`.
+1. `x-omniroute-radar-schema: 2` ve isteğe bağlı bir `Authorization: Bearer <supporter key>` başlığı ile `GET <feed base URL>/v1/catalog/latest` (aşağıya bakın). Şema başlığı olmadığında sunucular varsayılan olarak ayrı olarak imzalanmış v1 geçiş yapıtını kullanır, böylece daha eski yüklü istemciler güncellemeleri almaya devam eder.
+2. Bu yalnızca indirilebilen bir uygulama akışıdır ancak yine de bir HTTPS isteğidir. Barındırılan altyapı, IP kaynağı gibi sıradan bağlantı meta verilerini alır. Bir destekçi anahtarı yapılandırıldığında, hizmetin yetkilendirmeyi çözümleyebilmesi için Sync bu anahtarı Taşıyıcı başlığına da gönderir. Yukarıdaki kanıt sınırında tanımlanan tam özel sunucu revizyonunda, feed-request muhasebesi, manuel kötüye kullanım incelemesi için anahtar karmalarını, toplam kullanımı ve IP günlük olarak dönen kesik HMAC kullanır; bu tablolar ne anahtarı ne de IP ham biçimde korur. Altyapı erişim günlükleri ve şifrelenmiş dağıtım giden kutusu ayrı operasyonel sınırlardır.
+3. OmniRoute hiçbir zaman istemleri, yanıtları, konuşmaları, sağlayıcı kimlik bilgilerini, model trafiğini, çalışma süresini, gecikmeyi veya yerel sağlayıcı yapılandırmasını Radar hizmetine göndermez.
+4. Yanıt yerel olarak doğrulanır, doğrulanır ve önbelleğe alınır (bkz. [Güvenlik modeli](#security-model) ). Radar'ın tam olarak dört sunucu tarafı ağ yolu vardır: katalog için `syncRadar()`, yönlendirmeler için `syncRadarReferrals()` ve yalnızca destekçilere yönelik teklifler ve Intel için `syncRadarOffers()` / `syncRadarIntel()`.
 
-**Destekçi anahtarı**, akış hizmetinin hangi katmanı sunacağına karar vermesini sağlayan
-isteğe bağlı bir Bearer belirtecidir (`radar_settings.supporter_key`) (bkz.
-[Katmanlar](#tiers-community-and-live)). Bu anahtar:
+Katalog kontrolü her 24 saatte bir yapılır. Doğrulanan yayın hâlâ önbelleğe alınan sürümü ve katmanı taşıdığında, senkronizasyon önbelleğe alınan veriyi tutar, `fetchedAt` yeniler ve bir sonraki kontrol, bir sonraki saatlik onay yerine 24 saat sonra gelir.
 
-- Sağlayıcı kimlik bilgileri için kullanılan aynı AES-256-GCM `encrypt()`/`decrypt()`
-  yardımcılarıyla (`src/lib/db/encryption.ts`) **bekleme hâlindeyken şifrelenmiş** olarak saklanır.
-- `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) aracılığıyla ayarlanır ve
-  **asla geri gönderilmez** — yanıt, maskelenmiş bir biçim (`omr_****abcd`) döndürür.
-- Değiştirilmesi veya temizlenmesi; katalog, yönlendirme, teklif ve Intel önbelleklerini atomik olarak geçersiz kılar. Bir
-  sonraki eşitleme/okuma, yeni yetkilendirmeyi sunucu tarafında belirler; bir anahtarın kaydedilmesi
-  kendi başına ağ isteği yapmaz veya tek kullanımlık bir etkinleştirme anahtarını tüketmez.
-- Eşitleme GET isteğinde akış hizmetine Bearer belirteci olarak gönderilir — anahtar hakkında başka
-  hiçbir şey istemciyi terk etmez.
+**destekçi anahtarı** feed hizmetinin hangi [katmanda](#tiers-community-and-live) hizmet vereceğine karar vermesini sağlayan isteğe bağlı bir Taşıyıcı jetondur (`radar_settings.supporter_key`). Bu:
+
+- Saklandı** dinlenme sırasında şifrelenmiş** sağlayıcı kimlik bilgileri için kullanılan AES-256-GCM `encrypt()`/`decrypt()` yardımcılarının (`src/lib/db/encryption.ts`) aynısıyla.
+- `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) aracılığıyla ayarlayın ve** asla geri dönmedi** — yanıt maskelenmiş bir form (`omr_****abcd`) döndürür.
+- Bunu değiştirmek veya temizlemek kataloğu, yönlendirmeleri, teklifleri ve Intel önbelleklerini atomik olarak geçersiz kılar. Bir sonraki sync/read yeni yetkilendirme sunucusu tarafını çözer; Bir anahtarı kaydetmenin kendisi bir ağ isteğinde bulunmaz veya tek kullanımlık etkinleştirme anahtarını tüketmez.
+- Senkronizasyonda bir Taşıyıcı jetonu olarak besleme hizmetine gönderilir GET — anahtarla ilgili başka hiçbir şey istemciden ayrılmaz.
 
 ---
 
@@ -404,98 +382,45 @@ version, tier }` olarak döndürülen katmandır — gösterge panelinin göster
 
 ---
 
-## Okuma zamanındaki katman birleştirme kuralları
+## Okuma zamanı yer paylaşımı birleştirme kuralları
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`), önbelleğe alınmış akışı `getRadarCatalog()`
-içinde **okuma zamanında** statik temel verilerin **üzerine** birleştirir. Temel dizi
-(`FREE_MODEL_BUDGETS`) hiçbir zaman değiştirilmez — her çağrıda yeni bir `MergedEntry[]`
-hesaplanır.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) önbelleğe alınan yayını birleştirir** üzerinde** statik taban çizgisi** okuma zamanı** , `getRadarCatalog()` içinde. Temel dizi (`FREE_MODEL_BUDGETS`) hiçbir zaman mutasyona uğramaz — `MergedEntry[]` her çağrıda yeniden hesaplanır.
 
 Öncelik sırasına göre dört kural:
 
-1. **Akış, yerel bir geçersiz kılmayı asla üzerine yazmaz.** Alan bazında: Operatör
-   bir girdideki alanı özelleştirmişse (`provider:modelId` ile anahtarlanmış
-   `localOverrides` eşlemesi), akışın söz konusu alana ait değeri atlanır — operatörün
-   değeri kazanır.
-2. **`enabled: false`, kaynağı belirtilerek girdiyi devre dışı bırakır.** Bir girdiyi
-   kapatan akış girdisi, birleştirilmiş sonuçta `enabled: false` ve
-   `disabledBy: "radar"` ayarlarını yapar; böylece kullanıcı arayüzü bir girdinin
-   kullanılabilir durumdan devre dışı duruma _neden_ geçtiğini açıklayabilir.
-3. **Akışta bulunmayan, kullanıcı tarafından eklenmiş bir girdi değişmeden korunur.**
-   Yalnızca temel verilerde bulunan (veya yerel olarak eklenmiş) ve karşılık gelen bir
-   akış girdisi olmayan girdiler değişmeden aktarılır.
-4. **Silinmiş olarak işaretlenen bir girdi asla yeniden oluşturulmaz.** Operatör bir
-   girdiyi açıkça silmişse (`tombstones` kümesi), akışın daha sonraki bir sürümde bu
-   `provider:modelId` değerini yeniden eklemesi girdiyi geri getirmez.
+1. **Feed hiçbir zaman yerel geçersiz kılmanın üzerine yazmaz.** Alan başına: operatör bir girişteki bir alanı özelleştirmişse (`localOverrides` haritası, `provider:modelId` anahtarlı), söz konusu alan için feed'in değeri atlanır — operatörün değeri kazanır.
+2. **`enabled: false`, kaynağıyla birlikte girişi devre dışı bırakır.** Bir girişi kapatan bir besleme girişi, birleştirilmiş sonuçta `enabled: false` ve `disabledBy: "radar"` ayarlar, böylece UI bir girişin neden kullanılabilir durumdan devre dışı durumuna geçtiğini açıklayabilir.
+3. **Akışta bulunmayan, kullanıcı tarafından eklenen bir girişe dokunulmadan kalır.** Yalnızca taban çizgisinde mevcut olan (veya yerel olarak eklenen) ve karşılık gelen feed girişi olmayan girişler değişmeden geçer.
+4. **Mezar taşıyla yazılan bir giriş asla yeniden diriltilmez.** Operatör bir girişi (`tombstones` seti) açıkça silmişse, bu `provider:modelId` daha sonraki bir sürümde yeniden eklenmesi onu geri getirmez.
 
-Düzenlenebilir alanlar ve silme işaretleri,
-`radar_local_model_state` içinde kalıcılaştırılır (`153_radar_local_model_state.sql`
-geçişi). Genel DB bağdaştırıcısı (`src/lib/db/radar.ts`), bu satırları `applyFeed()`
-tarafından kullanılan `localOverrides` eşlemesine ve `tombstones` kümesine dönüştürür;
-üretimdeki `getRadarCatalog()`, bayrak, önbellek ve şema denetimlerinden sonra bu durumu
-yükler. Yalnızca `displayName` ve `enabled` operatör tarafından düzenlenebilir.
-Sağlayıcı/model kimliği, akış kaynağı, kota, yetenekler, kullanım koşulları ve kurulum
-verileri bu yüzey üzerinden yazılamaz.
+Düzenlenebilir alanlar ve mezar taşları `radar_local_model_state` (geçiş `153_radar_local_model_state.sql`) kalıcıdır. Genel DB bağdaştırıcısı (`src/lib/db/radar.ts`), bu satırları `applyFeed()` tarafından kullanılan `localOverrides` haritasına ve `tombstones` kümesine dönüştürür; üretim `getRadarCatalog()` bayrak, önbellek ve şema geçitleri geçtikten sonra bu durumu yükler. Yalnızca `displayName` ve `enabled` operatör tarafından düzenlenebilir. Provider/model kimliği, feed kaynağı, kota, yetenekler, ToS ve kurulum verileri bu yüzey üzerinden yazılamaz.
 
-Gösterge paneli dört yerel eylem sunar:
+Kontrol paneli dört yerel eylemi gösterir:
 
-- **Düzenle**, yerel görünen adı ve etkin durumunu değiştirir.
-- **Yerel değişiklikleri sıfırla**, silme işaretini değiştirmeden düzenlenebilir iki
-  alanı da temizler.
-- **Gizle**, sonraki akış güncellemelerinin satırı yeniden oluşturamaması için bir
-  silme işareti oluşturur.
-- **Geri yükle**, silme işaretini kaldırır; ayrıca kaydedilmiş herhangi bir geçersiz
-  kılma geçerliliğini korur.
+- **Düzenlemek** yerel görünen adı ve etkin durumu değiştirir.
+- **Yerel değişiklikleri sıfırla** mezar taşını değiştirmeden her iki düzenlenebilir alanı da temizler.
+- **Saklamak** bir mezar taşı oluşturduğundan daha sonraki feed güncellemeleri satırı yeniden oluşturamaz.
+- **Eski haline getirmek** mezar taşını kaldırır; ayrı olarak kaydedilen herhangi bir geçersiz kılma geçerli kalır.
 
-Akıştaki `enabled: false` bir güvenlik istisnası olmaya devam eder: Güncelliğini
-yitirmiş yerel bir `enabled: true` değerine üstün gelir, birleştirilmiş girdiyi devre
-dışı tutar ve `disabledBy: "radar"` değerini kaydeder.
+Bir feed `enabled: false` güvenlik istisnası olmaya devam ediyor: eski bir yerel `enabled: true` kazanıyor, birleştirilmiş girişi devre dışı bırakıyor ve `disabledBy: "radar"` kaydediyor.
 
-Katalog yayınları `schemaVersion: 2` kullanır. `contextWindow` ile `tools`, `vision` ve
-`thinking` alanlarının her biri bağımsız olarak `number | null` / `boolean | null`
-türündedir: `null` bilinmiyor anlamına gelirken `false`, D16 tarafından doğrulanmış
-resmî bir sağlayıcı kaynağının ilgili yeteneğin bulunmadığını açıkça belirttiği
-anlamına gelir. Dahili OmniRoute kayıt/model belirtimi bayrakları hiçbir zaman doğrudan
-akış olgularına dönüştürülmez. İstemci hâlâ v1 anlık görüntülerini kabul eder; eski
-oluşturucu yokluğu belirtmek için `false` kullandığından, v1 `false` bilinmiyor olarak
-normalleştirilirken v1 `true` olgusal kalır. Bilinmeyen şema sürümleri güvenli biçimde
-başarısız olur ve son geçerli önbellek kullanılabilir durumda kalır. Null olmayan bir
-bağlam/yeteneğe sahip her v2 modeli, kimlik bilgisi gerektirmeyen HTTPS
-`metadataEvidenceUrls[]` taşımalıdır; aksi takdirde şema doğrulaması başarısız olur ve
-önbellek değiştirilmez. Katalog tablosu üç durumun tümünü `✓`, `✕` ve `?` olarak
-gösterir.
+Katalog yayınları `schemaVersion: 2` kullanır. `contextWindow` ve `tools`, `vision` ve `thinking` her biri bağımsız olarak `number | null` / `boolean | null`: `null` bilinmeyen anlamına gelirken `false`, D16-confirmed resmi sağlayıcı kaynağının açıkça bu yeteneğin bulunmadığını söylediği anlamına gelir. Dahili OmniRoute registry/model-spec işaretleri hiçbir zaman doğrudan gerçekleri beslemek için tanıtılmaz. İstemci hâlâ v1 anlık görüntülerini kabul ediyor; eski oluşturucu `false` yokluk yer tutucusu olarak kullandığından, v1 `false` bilinmeyene normalleştirilirken v1 `true` gerçek kalır. Bilinmeyen şema sürümleri başarısız bir şekilde kapatılır ve son geçerli önbellek kullanılabilir durumda kalır. Boş olmayan context/capability sahip her v2 modeli, kimlik bilgisi içermeyen bir HTTPS `metadataEvidenceUrls[]` taşımalıdır; aksi takdirde şema doğrulaması başarısız olur ve önbellek değiştirilmez. Katalog tablosu üç durumu da `✓`, `✕` ve `?` olarak gösterir.
 
-### Yönlendirmeli kombinasyonlar ve MCP erişimi
+### Kılavuzlu kombinasyonlar ve MCP erişimi
 
-Doğrulanmış `familyId` değerleri okuma zamanındaki katman birleştirmesinden sonra
-korunur ve saf `buildRadarComboSuggestions()` modülünü
-(`src/lib/radar/comboSuggestions.ts`) yönlendirir. Bir aile yalnızca en az iki farklı
-sağlayıcının etkin bağlantıları olduğunda ve tam olarak düzenlenmiş model kimliğini
-sunduğunda önerilir. Devre dışı modeller, etkin olmayan sağlayıcılar, eksik model
-kimlikleri, tek üyeli aileler ve belirsiz takma ad/ön ek eşleşmeleri güvenli biçimde
-başarısız olur. Öneriler mevcut `priority` stratejisini kullanarak en büyük yinelenen
-aylık bütçeyi ilk sıraya koyar; kullanıcı arayüzü bunları yalnızca
-`POST /api/combos` üzerinden oluşturur.
+Onaylanan `familyId` değerleri, okuma zamanı katmanından sağ çıkar ve saf `buildRadarComboSuggestions()` modülünü (`src/lib/radar/comboSuggestions.ts`) çalıştırır. Bir aile yalnızca en az iki farklı sağlayıcının aktif bağlantılara sahip olması ve tam olarak seçilmiş ID modelini göstermesi durumunda önerilir. Devre dışı bırakılan modeller, etkin olmayan sağlayıcılar, eksik model IDs, tekil aileler ve belirsiz alias/prefix eşleşmeleri başarısız şekilde kapatılır. Öneriler, en büyük yinelenen aylık bütçeyi ilk önce sıralayarak mevcut `priority` stratejisini kullanır; UI onları yalnızca `POST /api/combos` aracılığıyla yaratır.
 
-Yönlendirmeli kullanıcı arayüzü `/dashboard/radar/combos` konumunda bulunur. Yalnızca yerel
-`GET /api/radar/catalog` ve `GET /api/combos/builder/options` uç noktalarını okur. Hiçbir zaman Radar senkronizasyonunu tetiklemez,
-sağlayıcı kimlik bilgilerini okumaz veya combo veritabanına doğrudan yazmaz.
+Rehberlik edilen UI `/dashboard/radar/combos` yaşar. Yalnızca yerel `GET /api/radar/catalog` ve `GET /api/combos/builder/options` uç noktalarını okur. Hiçbir zaman Radar senkronizasyonunu tetiklemez, sağlayıcı kimlik bilgilerini okumaz veya doğrudan birleşik veritabanına yazmaz.
 
-MCP istemcileri aynı yerel projeksiyonu `omniroute_radar_catalog` (`read:radar`) ile okuyabilir. İsteğe bağlı
-`provider`, `familyId` ve `enabledOnly` filtreleri, tek bir yerel
-`GET /api/radar/catalog` okumasından sonra değerlendirilir. Kapalı çıktısı; katalog meta verilerinin yanı sıra sağlayıcı/model,
-görünen ad, `familyId`, kota, yetenekler, etkinlik durumu, kaynak ve `disabledBy` alanlarını içerir; kurulum URL'leri,
-adımlar, bağlantılar, e-posta adresleri, anahtarlar ve yönlendirme verileri hiçbir zaman döndürülmez. Bu araç
-salt okunurdur ve hiçbir zaman `/api/radar/sync` çağrısı yapmaz.
+MCP istemcileri aynı yerel projeksiyonu `omniroute_radar_catalog` (`read:radar`) ile okuyabilir. İsteğe bağlı `provider`, `familyId` ve `enabledOnly` filtreleri, bir yerel `GET /api/radar/catalog` okumasından sonra değerlendirilir. Kapalı çıktısı, katalog meta verilerinin yanı sıra provider/model, görünen ad, `familyId`, kota, yetenekler, etkin durum, kaynak ve `disabledBy` içerir; setup URLs, adımlar, bağlantılar, e-posta adresleri, anahtarlar ve yönlendirme verileri asla döndürülmez. Bu araç salt okunurdur ve hiçbir zaman `/api/radar/sync` çağırmaz. Önbelleğe alınan yayın yüklü katalogdan önce olduğunda, `meta.olderThanRelease` `true` ve araç, yerel geçersiz kılmalar ve işaret taşları uygulanmış olarak yüklü katalogdan modelleri döndürür.
 
 ### Kaynak belirteçleri
 
-Birleştirilen her girdi, kullanıcı arayüzünün rozet olarak görüntülediği bir `origin` alanı taşır:
+Birleştirilen her giriş, UI rozet olarak oluşturduğu bir `origin` alanı taşır:
 
-- `"baseline"` — statik sürüm kataloğundan alınan hâliyle değiştirilmemiştir.
-- `"radar"` — bir veya daha fazla alan akış tarafından yenilenmiştir.
-- `"local"` — operatörün bu girdide en az bir yerel geçersiz kılması vardır (akışın ne söylediğine bakılmaksızın, 1. kurala göre yerel
-  geçersiz kılmalar her zaman akışa üstün gelir).
+- `"baseline"` — statik sürüm kataloğundan dokunulmamıştır.
+- `"radar"` — bir veya daha fazla alan feed tarafından yenilendi.
+- `"local"` — operatörün bu girişte en az bir yerel geçersiz kılma işlemi vardır (yerel geçersiz kılmalar, feed'in ne söylediğine bakılmaksızın, kural 1'e göre her zaman feed'i kazanır).
 
 ---
 

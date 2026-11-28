@@ -159,19 +159,15 @@ curl -X POST http://localhost:20128/api/evals/suites \
 
 I casi vengono eseguiti **in sequenza**. Attualmente non esiste alcun flag per la concorrenza.
 
-## Dashboard
+## Pannello di controllo
 
-L'interfaccia utente si trova in `Dashboard → Utilizzo → Valutazioni`
-(`src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx`). Da qui è
-possibile:
+La UI abita a `Dashboard → Usage → Evals` (`src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx`). Da lì puoi:
 
-- Esplorare le suite integrate e personalizzate con un'anteprima caso per caso.
-- Creare/modificare/eliminare suite personalizzate con il generatore di casi.
-- Scegliere una destinazione (valori predefiniti della suite / modello / combinazione), facoltativamente una seconda
-  `compareTarget` e, sempre facoltativamente, una chiave API, quindi avviare l'esecuzione su richiesta.
-- Esaminare la cronologia delle esecuzioni, l'esito positivo/negativo di ogni caso, la latenza e gli output acquisiti.
-- Visualizzare il prospetto progressivo aggregato in base all'ultima esecuzione per ogni ambito
-  `(suite, target)`.
+- Sfoglia le suite integrate e personalizzate con l'anteprima caso per caso.
+- Create/edit/delete suite personalizzate con il case builder.
+- Scegli un target (predefiniti della suite/modello/combo), facoltativamente un secondo `compareTarget`, facoltativamente una chiave API, quindi esegui su richiesta.
+- Esamina la cronologia delle esecuzioni, pass/fail per caso, la latenza e gli output acquisiti.
+- Visualizza la scorecard mobile aggregata nell'ultima esecuzione per ambito `(suite, target)`.
 
 ## Relazione con la RFC Auto-Assessment
 

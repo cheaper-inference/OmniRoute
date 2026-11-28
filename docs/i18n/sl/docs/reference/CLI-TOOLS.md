@@ -4,15 +4,13 @@
 
 ---
 
-Zadnja posodobitev: 2026-08-23
-
 OmniRoute se integrira s tremi kategorijami orodij CLI, razporejenih na treh namenskih straneh nadzorne plošče:
 
 | Stran        | Pot                     | Koncept                                                                                    | štetje        |
 | ------------ | ----------------------- | ------------------------------------------------------------------------------------------ | ------------- |
 | **kode CLI** | `/dashboard/cli-code`   | Orodja za kodiranje, ki jih usmerite na OmniRoute (odjemalec → CLI → OmniRoute → ponudnik) | 26            |
 | **CLI**      | `/dashboard/cli-agents` | Avtonomni agenti, ki jih usmerite na OmniRoute (isti tok, širši obseg)                     | 11            |
-| **ACP**      | `/dashboard/acp-agents` | CLIs, da se OmniRoute ustvari kot zaledje prek stdio/ACP (obraten tok)                     | glej register |
+| **ACP**      | `/dashboard/acp-agents` | CLIs, da se OmniRoute pojavi kot zaledje prek stdio/ACP (obraten tok)                      | glej register |
 
 Podedovane poti preusmerijo prek 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
@@ -235,7 +233,7 @@ Nova orodja z `configType: "custom"` imajo namenske nastavitve API routes:
 | `POST /api/cli-tools/grok-build-settings`   | Zgradba Grok (~/.grok/config.toml, `[model.omniroute]`)                         |
 | `POST /api/cli-tools/qwen-settings`         | koda Qwen ( namenski ključ `~/.qwen/settings.json` + `.env` )                   |
 
-Vse poti uporabljajo `sanitizeErrorMessage()` za odzive na napake (trdo pravilo št. 12).
+Vse poti uporabljajo `sanitizeErrorMessage()` za odzive na napake (trdo pravilo #12).
 
 ---
 

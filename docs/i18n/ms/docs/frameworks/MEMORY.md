@@ -4,30 +4,13 @@
 
 ---
 
-> **Sumber rujukan utama:** `src/lib/memory/` dan `src/app/api/memory/`
-> **Kemas kini terakhir:** 2026-06-28 — v3.8.40 (dimatikan secara lalai + penyelarasan pengkuantuman int8)
+> **Sumber kebenaran:** `src/lib/memory/` dan `src/app/api/memory/`
 
-OmniRoute menyediakan ingatan perbualan berterusan yang dikunci mengikut kunci API (dan
-ID sesi secara pilihan). Ingatan diekstrak secara automatik daripada respons LLM
-melalui pemadanan corak regex yang ringan dan disuntik semula ke dalam permintaan
-seterusnya sebagai mesej sistem pembuka (atau mesej pengguna pertama untuk penyedia yang
-menolak peranan sistem).
+OmniRoute menyediakan memori perbualan berterusan yang dikunci oleh kekunci API (dan secara pilihan id sesi). Kenangan diekstrak secara automatik daripada respons LLM melalui padanan corak regex ringan dan disuntik semula ke dalam permintaan seterusnya sebagai mesej sistem terkemuka (atau mesej pengguna pertama untuk pembekal yang menolak peranan sistem).
 
-> **Ingatan DIMATIKAN secara lalai (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> kini ialah `false` (`src/lib/memory/settings.ts`). Pengaktifan ingatan menyuntik sehingga
-> `maxTokens` (~2k) konteks yang diperoleh semula ke dalam **setiap** permintaan sembang, yang
-> dikenakan bayaran — kos yang tidak dijangka untuk pemasangan baharu dan klien yang mengurus
-> konteks mereka sendiri. Aktifkan secara jelas di bawah **Tetapan → Ingatan** (
-> `MemorySkillsTab` memaparkan petak amaran kos token apabila ingatan diaktifkan).
-> Klien boleh mengecualikan satu permintaan dengan pengepala permintaan
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — lihat jadual pengepala permintaan dalam
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Permintaan tanpa ingatan menetapkan
-> `memoryOwnerId = null`, yang menyahdayakan **kedua-dua** penyuntikan ingatan dan kemahiran untuk
-> permintaan tersebut (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Memori ialah OFF secara lalai (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` kini `false` (`src/lib/memory/settings.ts`). Mendayakan memori menyuntik sehingga `maxTokens` (~ 2k) konteks yang diambil ke dalam** setiap** permintaan sembang, yang dibilkan — sebagai kos yang mengejutkan untuk pemasangan baharu dan untuk pelanggan yang mengurus konteks mereka sendiri. Ikut serta secara eksplisit di bawah** Tetapan → Memori** ( `MemorySkillsTab` menunjukkan petak bual amaran kos token apabila memori didayakan). Pelanggan boleh memilih keluar satu permintaan dengan pengepala permintaan `x-omniroute-no-memory` (`true`/`1`/`yes`) — lihat jadual pengepala permintaan dalam [API_REFERENCE.md](../reference/API_REFERENCE.md). Permintaan tanpa memori menetapkan `memoryOwnerId = null`, yang menyahdayakan** kedua-duanya** memori dan suntikan kemahiran untuk permintaan itu (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Ingatan **diskopkan mengikut kunci API**, bukan mengikut pengguna — setiap permintaan yang disahkan
-dengan kunci API yang sama berkongsi himpunan ingatan yang sama, dengan pengskopan lanjut secara pilihan
-mengikut `sessionId`.
+Ingatan adalah** berskop setiap kunci API** , bukan setiap pengguna — setiap permintaan yang disahkan dengan kunci API yang sama berkongsi kumpulan memori yang sama, dengan skop lanjut pilihan oleh `sessionId`.
 
 ## Seni bina
 
@@ -336,25 +319,15 @@ dan skop ialah salah satu daripada `session`, `apiKey`, atau `global`. Skop lala
 
 ## Pengekstrakan Fakta (`extraction.ts`)
 
-Pengekstrakan adalah **berasaskan regex**, bukannya berasaskan LLM — ia dijalankan dalam proses dengan
-`setImmediate()` supaya tidak sekali-kali menyekat aliran respons:
+Pengekstrakan adalah** berasaskan regex** , bukan — berasaskan LLM, ia berjalan dalam proses dengan `setImmediate()` jadi ia tidak pernah menyekat aliran respons:
 
-- **Pola keutamaan** → `MemoryType.FACTUAL`
-  (cth. `Saya lebih suka …`, `Saya sangat menyukai …`, `kegemaran saya ialah …`, `Saya benci …`)
-- **Pola keputusan** → `MemoryType.EPISODIC`
-  (cth. `Saya akan menggunakan …`, `Saya memilih …`, `Saya membuat keputusan untuk menggunakan …`, `Saya akan menerima pakai …`)
-- **Pola tabiat** → `MemoryType.FACTUAL`
-  (cth. `Saya biasanya …`, `Saya sentiasa …`, `Saya cenderung untuk …`)
+- **Corak keutamaan** → `MemoryType.FACTUAL` (cth `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Corak keputusan** → `MemoryType.EPISODIC` (cth `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Corak corak** → `MemoryType.FACTUAL` (cth `I usually …`, `I always …`, `I tend to …`)
 
-Setiap padanan disanitasi (`trim`, merapatkan ruang kosong, dihadkan kepada 500 aksara),
-dinyahduplikasi dalam kelompok melalui `factKey(category, content)` yang stabil, dan
-disimpan melalui `createMemory()` dengan metadata
-`{category, extractedAt, source: "llm_response"}`. Teks input dihadkan kepada
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — apabila lebih panjang, **bahagian hujung** teks
-digunakan supaya kandungan pembantu yang paling terkini sentiasa disertakan.
+Setiap padanan dibersihkan (`trim`, ruang kosong-runtuhkan, dihadkan pada 500 aksara), dinyahduplikasi dalam kelompok melalui `factKey(category, content)` yang stabil dan disimpan melalui `createMemory()` dengan metadata `{category, extractedAt, source: "llm_response"}`. Teks input dihadkan pada 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — apabila lebih lama, the** ekor** daripada teks digunakan supaya kandungan pembantu terkini sentiasa mengambil bahagian.
 
-`extractFactsFromText(text)` dieksport untuk ujian dan mengembalikan fakta berstruktur
-tanpa menyimpannya.
+`extractFactsFromText(text)` dieksport untuk ujian dan mengembalikan fakta berstruktur tanpa menyimpannya.
 
 ## Pengambilan Semula (`retrieval.ts`)
 
@@ -710,22 +683,22 @@ Penanda aras pada pelayan x86 4 teras biasa (teks ~100 token setiap satu):
 
 ---
 
-## Corak Pengekstrakan Fakta (v3.8.16+)
+## Corak Pengekstrakan Fakta (v3.8.16 +)
 
-Modul `extraction.ts` (`src/lib/memory/extraction.ts`) menggunakan **padanan corak regex** untuk mengekstrak fakta berstruktur daripada mesej perbualan. Memahami corak ini membantu anda melaraskan kualiti pengekstrakan untuk kes penggunaan anda.
+Modul `extraction.ts` (`src/lib/memory/extraction.ts`) menggunakan** padanan corak regex** untuk mengekstrak fakta berstruktur daripada mesej perbualan. Memahami corak ini membantu anda menala kualiti pengekstrakan untuk bekas penggunaan anda.
 
 ### Kategori Corak Lalai
 
-| Kategori            | Contoh corak                                                                       | Yang ditangkap                |
-| ------------------- | ---------------------------------------------------------------------------------- | ----------------------------- |
-| PREFERENCE_PATTERNS | `"Saya lebih suka <X>"`, `"Saya suka <X>"`, `"Saya benci <X>"`                     | Keutamaan pengguna            |
-| DECISION_PATTERNS   | `"Saya akan menggunakan <X>"`, `"Saya memutuskan untuk <X>"`, `"Saya memilih <X>"` | Keputusan pengguna (episodik) |
-| PATTERN_PATTERNS    | `"Saya biasanya <X>"`, `"Saya sentiasa <X>"`, `"Saya tidak pernah <X>"`            | Corak tingkah laku berterusan |
+| kategori            | Contoh corak                                                | Tangkapan                          |
+| ------------------- | ----------------------------------------------------------- | ---------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Keutamaan pengguna                 |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Keputusan pengguna (episodik)      |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Corak tingkah laku yang berterusan |
 
-### Contoh Corak (Dipermudah)
+### Contoh Corak (Diringkaskan)
 
 ```ts
-// Daripada src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -738,36 +711,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Perkara yang Diekstrak
+### Apa yang Dapat Diekstrak
 
 Apabila pengguna berkata:
 
-> "Saya lebih suka TypeScript. Saya akan menggunakan Postgres untuk projek ini. Saya sentiasa membuat commit sebelum melakukan push. Saya tidak suka Python."
-> Pengekstrakan menghasilkan 4 memori:
+> "Saya lebih suka TypeScript. Saya akan gunakan Postgres untuk projek ini. Saya selalu komited sebelum menolak. Saya tidak suka Python." Pengekstrakan menghasilkan 4 kenangan:
 >
-> | Kunci                                | Kategori   | Jenis    | Kandungan                               |
-> | ------------------------------------ | ---------- | -------- | --------------------------------------- |
-> | `preference:typescript`              | preference | factual  | "TypeScript"                            |
-> | `decision:postgres_for_this_project` | decision   | episodic | "Postgres untuk projek ini"             |
-> | `pattern:commit_before_pushing`      | pattern    | factual  | "membuat commit sebelum melakukan push" |
-> | `preference:python`                  | preference | factual  | "Python"                                |
+> | Key | Category | Type | Content | | ------------------------------------ | ---------- | -------- | --------------------------- | | `preference:typescript` | preference | factual | "TypeScript" | | `decision:postgres_for_this_project` | decision | episodic | "Postgres for this project" | | `pattern:commit_before_pushing` | pattern | factual | "commit before pushing" | | `preference:python` | preference | factual | "Python" |
 
 ### Had Pengekstrakan
 
-Untuk mengelakkan pengekstrakan tanpa kawalan, had berikut dikenakan:
+Untuk mengelakkan pengekstrakan lari, had berikut dikenakan:
 
-| Panjang kandungan minimum | 3 aksara |
+| Panjang kandungan min | 3 aksara |
 | Panjang kandungan maksimum | 500 aksara |
 
-### Masa untuk Menyahdayakan Pengekstrakan
+### Bila untuk Melumpuhkan Pengekstrakan
 
-Pengekstrakan berjalan secara automatik apabila memori didayakan; tiada togol berasingan
-untuk pengekstrakan sahaja. Untuk mematikannya, nyahdayakan memori sepenuhnya (`enabled: false`
-melalui `PUT /api/settings/memory`). Pertimbangkan untuk berbuat demikian apabila:
+Pengekstrakan berjalan secara automatik apabila memori didayakan; tiada togol pengekstrakan sahaja yang berasingan. Untuk mematikannya, lumpuhkan memori sepenuhnya (`enabled: false` melalui `PUT /api/settings/memory`). Pertimbangkan untuk berbuat demikian apabila:
 
-- Anda mempunyai jumlah mesej yang tinggi dan kos pengekstrakan tidak boleh diabaikan
-- Perbualan anda kebanyakannya bersifat sementara (sembang, penyahpepijatan) tanpa nilai jangka panjang
-- Anda sudah menangkap konteks melalui pemalam tersuai
+- Anda mempunyai volum mesej yang tinggi dan kos pengekstrakan adalah tidak penting
+- Perbualan anda kebanyakannya bersifat sementara (sembang, nyahpepijat) tanpa nilai jangka panjang
+- Anda sudah pun menangkap konteks melalui pemalam tersuai
 
 ---
 

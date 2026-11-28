@@ -4,11 +4,9 @@
 
 ---
 
-> **Foinse na fírinne:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Nuashonraithe go deireanach:** 2026-09-02 — v3.8.51
-> **Lucht léitheoireachta:** Innealtóirí a chothaíonn comhtháthuithe ceilteachta a bhaineann go sonrach le soláthraithe.
+> **Foinse na fírinne:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Lucht Féachana:** Innealtóirí ag cothabháil comhtháthú stealth a bhaineann go sonrach leis an soláthraí.
 
-Comhtháthaíonn OmniRoute le soláthraithe a ndéanann a n-imeall méarlorgaireacht ghníomhach ar chliaint neamhoifigiúla (TLS JA3/JA4, ord na gceanntásca, cruth chorp JSON, comharthaí sláine). Déanann an leathanach seo doiciméadú ar na dromchlaí ceilteachta a nochtann OmniRoute agus ar na háiteanna ina gcuirtear i bhfeidhm iad.
+Comhtháthaíonn OmniRoute le soláthraithe a bhfuil a n-imill go gníomhach le cliaint neamhoifigiúla méarloirg (TLS JA3/JA4, ordú ceanntásca, cruth comhlacht JSON, comharthaí sláine). Déanann an leathanach seo doiciméadú ar na dromchlaí stealth a nochtar OmniRoute agus an áit a gcuirtear i bhfeidhm iad.
 
 ## Fógra Dlíthiúil agus Eiticiúil
 
@@ -74,65 +72,68 @@ sula maítear paireacht le brabhsálaí réamhtheachtach.
 
 ---
 
-## Beart Rúnda Claude Code
+## Claude Bundle Cód Stealth
 
-Nuair atá `cliCompatMode` casta air, athmhúnlaíonn OmniRoute iarratais Claude atá ag dul amach ionas nach féidir iad a idirdhealú ó thrácht `claude-cli`. Comhoibríonn trí mhodúl:
+Nuair a bhíonn `cliCompatMode` ar siúl, déanann OmniRoute iarratais Claude atá ag dul as oifig a athmhúnlú ionas nach féidir iad a aithint ó thrácht `claude-cli`. Comhoibríonn trí mhodúl:
 
 ### `claudeCodeFingerprint.ts`
 
-Ríomhann sé méarlorg 3-charachtar `cc_version` atá leabaithe sa cheanntásc billeála:
+Ríomhann sé an méarloirg `cc_version` 3-charr atá leabaithe sa cheanntásc billeála:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (crua-chódaithe; meaitseálann sé an cliant oifigiúil)
-- Ionchuir: carachtair ag innéacs 4, 7, 20 de théacs na chéad teachtaireachta úsáideora + teaghrán an leagain
-- Aschur: réimír heicsidheachúlach 3-charachtar
+- `FINGERPRINT_SALT = "59cf53e54c78"` (cód crua; meaitseálann an cliant oifigiúil)
+- Ionchuir: charachtair ag innéacs 4, 7, 20 den chéad teachtaireacht úsáideora téacs leagan + teaghrán
+- Aschur: réimír heicsidheachúlach 3 char
 
-### `claudeCodeCCH.ts` (Hais Inneachair an Chliaint)
+### `claudeCodeCCH.ts` (Hais Ábhar Cliant)
 
-Seiceáil sláine ar thaobh an fhreastalaí a ríomhann CLI oifigiúil Claude Code trí Bun/Zig. Déanann OmniRoute í a athchur chun feidhme le `xxhash-wasm`:
+Seiceáil sláine thaobh an fhreastalaí an Cód Claude oifigiúil ríomhann CLI Bun/Zig. OmniRoute reimplements le `xxhash-wasm`:
 
-1. Srathaigh an corp leis an ionadchoinneálaí `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Heicsidheachúlach litreacha beaga 5-charachtar, stuáilte le nialais
-4. Cuir an comhartha ríofa in ionad `cch=00000;`
+1. An comhlacht sraitheach le coinneálaí `cch=00000;`
+2. Tóg an radharc hash le dhá athchur gnáth-théacs, san ord seo (`hashView()`):
+   - éiríonn gach meaitseáil de `/"model":"[^"]*"/g` `"model":""` — stopann an cluiche ag an gcéad `"`, mar sin ní fholmhú luach le luachan éalaigh (`"model":"a\"b"`) ach suas go dtí an luachan sin , mar a dhéanann an cliant
+   - baintear gach meaitseáil de `/"max_tokens":\d+,|,?"max_tokens":\d+/g` — ach luachanna uimhriúla, ag doimhneacht ar bith
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. heicsidheachúlach 5-charr stuáilte nialasach
+5. Cuir an comhartha ríomhairithe in ionad `cch=00000;`
 
-Tairisigh:
+Tairiscintí:
 
-- Síol: `0x6e52736ac806831e`
+- Síl: `0x4d659218e32a3268` (meaitseálann sé gabhálacha loopback de Chód Claude 2.1.252 agus 2.1.322)
 - Patrún: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Cuireann sé **nascóir nialasleithead** Unicode (`U+200D`) isteach i ndiaidh an chéad charachtair d’ainmneacha cliant “íogaire” ionas nach féidir le scagairí réamhtheachtacha iad a aimsiú le grep. Liosta réamhshocraithe focal:
+Ionsáigh Unicode** siúinéir náid-leithead** (`U+200D`) tar éis an chéad charachtar d'ainmneacha cliant "íogair" ionas nach féidir le scagairí réamhtheachtacha iad a ghreamú. Liosta réamhshocraithe focal:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Cuirtear i bhfeidhm é ar: bloic `system`, gach `messages[].content`, agus `tools[].description` / `tools[].function.description`. Is féidir leis an oibreoir é a shárú trí `setSensitiveWords()`.
+Curtha i bhfeidhm ar: bloic `system`, gach `messages[].content`, agus `tools[].description` / `tools[].function.description`. Is féidir an t-oibreoir a shárú trí `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — soláthraithe `anthropic-compatible-cc-*`
+### soláthraithe `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`
 
-Le haghaidh athsheachadáin Anthropic tríú páirtí nach nglacann ach le trácht “fíor-Claude Code”:
+Maidir le hathsheachadáin Anthropic tríú páirtí nach nglacann ach le trácht “fíor-Chód Claude ”:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` de réir réamhshocraithe
-- Cuireann an scorán “Cumasaigh béite redact-thinking” in aghaidh an naisc `redact-thinking-2026-02-12` leis nuair a éilíonn réamhtheachta CC Compatible go sonrach sruthanna smaointeoireachta folaithe
-- Stórálann an scorán “Cumasaigh taispeáint achoimrithe smaointeoireachta” in aghaidh an naisc `providerSpecificData.requestDefaults.summarizeThinking` agus cuireann sé `display: "summarized"` le hiarratais smaointeoireachta CC Compatible nach raibh mód taispeána socraithe acu cheana
+- Cuireann an scorán in aghaidh an naisc "Enable redact- Thinking beta" `redact-thinking-2026-02-12` leis nuair a éilíonn CC In aghaidh srutha go sonrach sruthanna smaointeoireachta athcheartaithe
+- Scoránaigh an nasc "Cumasaigh taispeáint smaointeoireachta achomair" `providerSpecificData.requestDefaults.summarizeThinking` agus cuireann sé `display: "summarized"` le CC Iarratais smaointeoireachta comhoiriúnacha nár shocraigh mód taispeána cheana
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (teaghlach Opus/Sonnet 4.x)
 - Conair réamhshocraithe: `/v1/messages?beta=true`
 
-Modúil ghaolmhara sa bheart céanna:
+Modúil deirfiúracha sa bheart céanna:
 
-- `claudeCodeConstraints.ts` — rialacha teochta + rialúcháin taisce
-- `claudeCodeToolRemapper.ts` — athmhapáil ainmneacha uirlisí
-- `claudeCodeExtraRemap.ts` — normalú breise pálasta
+- `claudeCodeConstraints.ts` — teocht + rialacha taisce-rialaithe
+- `claudeCodeToolRemapper.ts` — uirlis-ainm athmhapála
+- normalú pálasta breise `claudeCodeExtraRemap.ts` —
 
 ---
 
@@ -146,14 +147,14 @@ Stiallacha marcóirí SDK dhosmálta (`x-stainless-lang`, `x-stainless-package-v
 
 ### Riosca ⚠️ : `ANTIGRAVITY_CREDITS=always` (láthair te toirmeasc cuntais)
 
-bealaí `ANTIGRAVITY_CREDITS=always` ( arna gcaitheamh ag `open-sse/executors/antigravity.ts`).** gach** iarratas trí fhorchostais chreidmheasa Antigravity AI (creidmheasanna Google íoctha) in ionad rudaí geata cuóta saorshraith Google a ligean ar cíos. Tá sé seo doiciméadaithe mar ghné, ach tá sé** an tuarascáil aonair is coitianta ar shárú ToS a fheicimid** Tá cosc ar chuntais — iolracha Google Ultra le `403 / "service disabled for ToS violation" / insufficient_quota` tar éis dóibh a bheith ag rith le `=always` ar feadh cúpla uair an chloig .
+bealaí `ANTIGRAVITY_CREDITS=always` ( arna gcaitheamh ag `open-sse/executors/antigravity.ts`).** gach** iarratas trí Antigravity AI Overages Creidmheasa (creidmheasanna Google íoctha) in ionad rudaí geata cuóta saorshraith Google a ligean ar cíos. Tá sé seo doiciméadaithe mar ghné, ach tá sé** an tuarascáil aonair is coitianta ar shárú ToS a fheicimid** Tá cosc ar chuntais — iolracha Google Ultra le `403 / "service disabled for ToS violation" / insufficient_quota` tar éis dóibh a bheith ag rith le `=always` ar feadh cúpla uair an chloig .
 
 Tá an forfheidhmiú in aghaidh an tsrutha ar siúl** taobh Google** , ní féidir aon rud OmniRoute a chosc. Fágann an t-ainm env var agus na doiciméid atá ann cheana go bhfuil sé cosúil le cnapán sábháilte le smeach; nach bhfuil sé.
 
 **Cén fáth a tharraingíonn sé seo braite mí-úsáide níos ionsaithí ná úsáid saorshraith amháin:**
 
 - Léiríonn caiteachas uathoibríoch marthanach ar chuntas Google amháin ar bhealach difriúil ná amas-chuóta agus stadanna saorshraitheanna.
-- Níl aon uasteorainn ráta ag ró-íocaíochtaí creidmheasa, mar sin is féidir le cliant míchumraithe sruthán trí na céadta USD i nóiméid agus cuma tráchta athdhíola nó bot API-eochair.
+- Níl aon uasteorainn ráta ag ró-íocaíochtaí creidmheasa, mar sin is féidir le cliant míchumraithe sruthán trí na céadta USD i nóiméid agus cuma tráchta athdhíola nó bot API-eochair air.
 - Comhdhúile an comhartha ag úsáideoirí iolracha OmniRoute a bhuaileann creidmheasanna overage go comhthreomhar ón IP seachtrach céanna.
 
 **Staidiúir mholta:**
@@ -192,7 +193,7 @@ Pointí tadhaill:
 
 - `open-sse/executors/antigravity.ts` — léann `process.env.ANTIGRAVITY_CREDITS`
 - pluiméireacht inchreidte `src/lib/oauth/providers/antigravity.ts` —
-- Tuairisc bhunaidh teagmhais: Plé [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Tuairisc bhunaidh teagmhais: Plé [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

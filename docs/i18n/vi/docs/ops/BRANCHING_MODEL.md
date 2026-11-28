@@ -53,7 +53,7 @@ Khi một bản phát hành đang được đối chiếu, một vấn đề đ�
 Kiểm tra tình trạng đóng băng mở trước khi cho rằng nhánh bạn muốn có thể hợp nhất được:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Cơ chế hợp nhất (chủ sở hữu nhãn `queue` → Mergify) được ghi lại trong [MERGE_TRAIN.md](./MERGE_TRAIN.md).

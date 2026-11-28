@@ -4,8 +4,6 @@
 
 ---
 
-Utolsó frissítés: 2026-08-23
-
 OmniRoute CLI eszközök három kategóriájával integrálható, három dedikált irányítópult-oldalon:
 
 | oldal            | Útvonal                 | Koncepció                                                                                  | Gróf                  |
@@ -235,7 +233,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                          |
 | `POST /api/cli-tools/qwen-settings`         | Qwen kód (`~/.qwen/settings.json` + dedikált `.env` kulcs)                     |
 
-Minden útvonal `sanitizeErrorMessage()` használja a hibaválaszokhoz (12. kemény szabály).
+Minden útvonal `sanitizeErrorMessage()` használja a hibaválaszokhoz (Kemény szabály #12).
 
 ---
 

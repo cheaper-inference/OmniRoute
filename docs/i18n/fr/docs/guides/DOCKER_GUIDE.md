@@ -9,20 +9,21 @@
 ## Table des matières
 
 - [Exécution rapide](#quick-run)
-- [Avec un fichier d’environnement](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Avec fichier d'environnement](#with-environment-file)
+- [Docker Composer](#docker-compose)
 - [Profils disponibles](#available-profiles)
-- [Configuration des outils CLI de l’hôte lorsqu’OmniRoute s’exécute dans Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Conteneur compagnon Redis](#redis-sidecar)
-- [Configuration Compose pour la production](#production-compose)
-- [Étapes du Dockerfile](#dockerfile-stages)
-- [Variables d’environnement critiques](#critical-environment-variables)
-- [Docker Compose avec Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Durcissement des conteneurs](#container-hardening)
+- [Configuration des outils hôte CLI lorsque OmniRoute s'exécute dans Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Side-car](#redis-sidecar)
+- [Composition de production](#production-compose)
+- [Étapes du fichier Docker](#dockerfile-stages)
+- [Variables d'environnement critiques](#critical-environment-variables)
+- [Docker Composez avec Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
 - [Tunnel rapide Cloudflare](#cloudflare-quick-tunnel)
-- [Étiquettes d’image](#image-tags)
+- [Balises d’images](#image-tags)
 - [Mises à jour du tableau de bord dans Docker](#dashboard-updates-in-docker)
-- [Disponibilité : SQLite par défaut ne prend en charge qu’un seul réplica](#availability-default-sqlite-is-single-replica)
-- [Erreurs régionales de Gemini dans Docker](#gemini-regional-errors-inside-docker)
+- [Disponibilité : SQLite par défaut est une réplique unique](#availability-default-sqlite-is-single-replica)
+- [erreurs régionales Gemini à l'intérieur Docker](#gemini-regional-errors-inside-docker)
 - [Remarques importantes](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute fournit des profils Compose adaptés aux principales configurations de
 | `web`           | `omniroute-web`  | Fournisseurs utilisant des sessions web et nécessitant un navigateur : `gemini-web`, `claude-web`, `claude-turnstile` (construit `runner-web`, Chromium inclus) | `docker compose --profile web up -d`         |
 
 > Plusieurs profils peuvent être combinés : `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Durcissement des conteneurs
+
+Les services d'application `base`, `web`, `cli` et `host` dans `docker-compose.yml` utilisent `cap_drop: [ALL]` et l'option de sécurité `no-new-privileges:true`. L'image s'exécute en tant qu'utilisateur non root `node` et écoute sur les ports élevés, elle n'a donc pas besoin de fonctionnalités Linux. L'option de sécurité empêche les processus d'obtenir des privilèges via les binaires setuid.
+
+Seul le profil `cli` monte le socket Docker pour le programme de mise à jour automatique. Voir [Trappe d'évacuation : configurez le propre CLIs du conteneur](#escape-hatch-configure-the-containers-own-clis-use-sparingly) pour les implications en matière de sécurité.
+
+Le système de fichiers racine reste accessible en écriture par défaut. Le profil `cli` écrit la configuration CLI et les caches dans le répertoire personnel du conteneur, le profil `web` stocke l'état de la session Chromium et le runtime Next.js peut écrire des caches en dehors `/app/data`.
+
+Pour essayer un système de fichiers racine en lecture seule avec le profil `base`, enregistrez-le sous `docker-compose.override.yml` à côté de `docker-compose.yml`. Compose lit automatiquement le remplacement.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Le support `/app/data` existant reste accessible en écriture. Testez votre charge de travail avant d'utiliser ce remplacement en production, car il faudra peut-être écrire sur d'autres chemins.
 
 ## Configuration des outils CLI de l’hôte lorsque OmniRoute s’exécute dans Docker
 
@@ -295,14 +320,14 @@ Comportement de la mémoire dans Docker:
 
 ### Runtime RAM pour les agents de codage
 
-La valeur par défaut de 1 GiB Docker est un plancher dashboard/light-chat, pas une taille de production. Les corps `POST /v1/responses` longs (des centaines de messages, des dizaines d'outils) conservent plusieurs graphiques en mémoire pendant la compression. Deux demandes de jetons ~ 3 MiB / ~ 750k qui se chevauchent ont interrompu le V8 à un moment donné.** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) et a également atteint un groupe de contrôle 16 GiB OOM. Voir [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+La valeur par défaut de 1 GiB Docker est un plancher dashboard/light-chat, pas une taille de production. Les corps `POST /v1/responses` longs (des centaines de messages, des dizaines d'outils) conservent plusieurs graphiques en mémoire pendant la compression. Deux demandes de jetons ~ 3 MiB / ~ 750k qui se chevauchent ont interrompu le V8 à un moment donné.** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) et a également atteint un groupe de contrôle 16 GiB OOM. Voir [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Taille** cgroup `--memory` au-dessus du tas** Les tampons natifs —, SQLite et les intermédiaires de compression se trouvent en dehors de V8.
 
 | Charge de travail                      | `OMNIROUTE_MEMORY_MB`          | Conteneur/groupe de contrôle | Remarques                                                                                            |
 | -------------------------------------- | ------------------------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------- |
 | Tableau de bord, un chat léger         | `1024` (image par défaut)      | ≥2 GiB                       |                                                                                                      |
-| Un agent de codage (Claude/Codex/Grok) | `8192`                         | ≥10 GiB                      | `/v1/responses` typique en une seule séance                                                          |
+| Un agent de codage (Claude/Codex/Grok) | `8192`                         | ≥10 GiB                      | `/v1/responses` typique en une seule session                                                         |
 | Deux `/v1/responses` longs simultanés  | `10240`–`12288`                | ≥12–16 GiB                   | Abandon du V8 mesuré au ~ 12 GiB                                                                     |
 | Trois contextes longs simultanés +     | ne pas faire un seul processus | sérialiser / plus RAM        | L'admission par défaut des poids lourds est de 1 en vol ; l'augmenter sans RAM réintroduit l'abandon |
 
@@ -626,7 +651,7 @@ spec:
 
 `preStop` sleep permet à kube de supprimer les points de terminaison du service avant SIGTERM donc** nouveau** le trafic cesse de heurter le processus de mort. `/v1/responses` SSE en vol est drainé jusqu'à `SHUTDOWN_TIMEOUT_MS` (30 s par défaut) via des baux d'admission lourds (#11015). Les nouvelles requêtes qui parviennent encore au processus obtiennent `503` + `Retry-After: 5`. L'intervalle de recréation du point de terminaison vide jusqu'à ce que le remplacement soit prêt reste une panne grave — qui correspond à la topologie SQLite, et non une mauvaise configuration de la sonde.
 
-Postgres externe / HA multi-écrivain est** pas** un chemin de stock documenté. Si vous avez besoin de HA, conservez une seule réplique ou exécutez une topologie que le projet a testée et documentée séparément. L'œuvre Postgres/MySQL vit dans [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Jusqu'à ce que cela soit livré, le seul moyen pris en charge de multiplier** grand** La capacité `/v1/responses` est de N processus indépendants (section suivante), et non `replicas > 1` sur un volume.
+Postgres externe / HA multi-écrivain est** pas** un chemin de stock documenté. Si vous avez besoin de HA, conservez une seule réplique ou exécutez une topologie que le projet a testée et documentée séparément. L'œuvre Postgres/MySQL vit dans [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Jusqu'à ce que cela soit livré, le seul moyen pris en charge de multiplier** grand** La capacité `/v1/responses` est de N processus indépendants (section suivante), et non `replicas > 1` sur un volume.
 
 ## Scale-out : N processus indépendants
 
@@ -636,11 +661,11 @@ Les copies d'un compte Codex ne doivent pas consommer indépendamment son jeton 
 
 L'instance passive relit la connexion lorsqu'une actualisation est nécessaire et adopte uniquement un jeton d'accès différent et non expiré. Sinon, l'actualisation est désactivée sans expirer ni désactiver la connexion ni compter une défaillance du disjoncteur d'actualisation. Les véritables échecs d'authentification en amont utilisent toujours la comptabilité des échecs normale, le temps de recharge exponentiel et l'erreur client normale ; la désactivation du compte reste permanente. Synchronisez les jetons en rotation du propriétaire avant l'expiration des jetons d'accès (le délai d'actualisation proactive par défaut est de cinq minutes) ou réimportez le fichier d'authentification Codex. Les importations passives stockent les jetons fournis sans les valider au point de terminaison du jeton. L'actualisation manuelle dashboard/API renvoie `409 refresh_disabled`; les nouvelles connexions OAuth sont inchangées. Voir [la référence sur l'environnement](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Un processus de nœud est** un tas V8** . Deux agents de codage de jetons ~ 3 MiB / ~ 750k qui se chevauchent `POST /v1/responses` (RTK + Caveman ) abandonnent ce tas à ~ 12 Gi (`FATAL ERROR: Reached heap limit`) et peuvent OOM un cgroup de 16 Gi. Voir [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Cette mesure est une** budget mémoire** avertissement, pas un produit hard-max de deux longs `/v1/responses` simultanés. L'admission au chat lourd est contrôlée par un budget d'octets d'ingestion dérivé automatiquement (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimensionné à partir de ce même plafond V8/cgroup — le remplaçant vers le haut (ou en définissant l'ancien plafond de nombre de requêtes `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) sur un processus déjà dimensionné réintroduit l'abandon. Les petits chats, `/healthz`, `/v1/models` et MCP sont** pas** dans cette casquette.
+Un processus de nœud est** un tas V8** . Deux agents de codage de jetons ~ 3 MiB / ~ 750k qui se chevauchent `POST /v1/responses` (RTK + Caveman ) abandonnent ce tas à ~ 12 Gi (`FATAL ERROR: Reached heap limit`) et peuvent OOM un cgroup de 16 Gi. Voir [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Cette mesure est une** budget mémoire** avertissement, pas un produit hard-max de deux longs `/v1/responses` simultanés. L'admission au chat lourd est contrôlée par un budget d'octets d'ingestion dérivé automatiquement (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimensionné à partir de ce même plafond V8/cgroup — le remplaçant vers le haut (ou la définition du plafond de nombre de requêtes `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` hérité) sur un processus déjà dimensionné réintroduit l'abandon. Les petites discussions, `/healthz`, `/v1/models` et MCP sont** pas** dans cette casquette.
 
 ### Un seul processus : plus de deux `/v1/responses` longs
 
-UN** en bonne santé** processus (tas sous `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` par défaut)** peut** exécutez plus de deux `POST /v1/responses` longs simultanés lorsque le budget d'octets en vol à l'échelle du processus (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) a encore de la place. Les corps égaux ou supérieurs à `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (par défaut 256 KiB) prennent le même bail lourd que les requêtes lourdes en structure et utilisent le même échappement [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Des dizaines de clients SSE longs simultanés (les opérateurs ont souvent besoin de 40 à 50) représentent un** budget mémoire** question — taille du tas + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — pas une limite de produit stricte « max 2 ». Un tas sous pression perd toujours du `503` réessayable, donc #7849 ne revient pas.
+UN** en bonne santé** processus (tas sous `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` par défaut)** peut** exécutez plus de deux `POST /v1/responses` longs simultanés lorsque le budget d'octets en vol à l'échelle du processus (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) a encore de la place. Les corps égaux ou supérieurs à `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (par défaut 256 KiB) prennent le même bail lourd que les requêtes lourdes en structure et utilisent le même échappement [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Des dizaines de clients SSE longs simultanés (les opérateurs ont souvent besoin de 40 à 50) constituent un** budget mémoire** question — taille tas + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — pas une limite de produit stricte « max 2 ». Un tas sous pression perd toujours du `503` réessayable, donc #7849 ne revient pas.
 
 À** multiplier les tas** (anciens espaces V8 indépendants)** aujourd'hui** :
 
@@ -652,7 +677,7 @@ UN** en bonne santé** processus (tas sous `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_R
 | Dupliquer les secrets du fournisseur dans chaque instance (ou accepter les tableaux de bord partitionnés)                                                     | Attendez-vous à un tableau de bord/un journal d'appels pour toutes les instances |
 | Front avec n’importe quel équilibreur de charge ; collant par clé API ou session suffit                                                                       | Exiger un middleware sensible à la taille spécifique au fournisseur              |
 
-L'affinité session-compte peut également être partagée via Redis: définissez `OMNIROUTE_SESSION_AFFINITY_STORE=redis` et `REDIS_URL` sur chaque processus, avec le même `REDIS_KEY_PREFIX` et un paramètre `sessionAffinityTtlMs` positif. Les broches résolvent les identités de compte d'utilisation hachées avec la connexion locale éligible de chaque processus, de sorte que les comptes OAuth avec des métadonnées d'identité correspondantes n'ont pas besoin d'avoir une connexion correspondante IDs. Les identités de compte connues ont priorité sur IDs locaux contradictoires dans la résolution des broches et l'expulsion surveillée ; les enregistrements sans identité (ou les appelants d'expulsion sans identité) conservent l'héritage ID guard. Les comptes sans identité d'utilisation stable nécessitent toujours une correspondance IDs. Les erreurs Redis ou les appels dépassant 100 ms reviennent au SQLite local. Chaque magasin d'affinité Redis limite les opérations en cours à 8, contourne Redis immédiatement lorsqu'il est plein et libère des emplacements uniquement lorsque le travail sous-jacent est réglé, et non à la date limite de l'appelant. Lors d'une panne Redis il n'y a pas de vérité partagée : chaque instance revient à sa propre affinité locale, les sessions peuvent être réépinglées une fois par instance et les instances peuvent diverger. L'adhésivité converge à nouveau vers Redis lorsqu'elle récupère. Le délai d'attente limite l'attente, pas un EVAL envoyé, qui peut atterrir après le repli. Les écritures de routage comparent la valeur exacte observée par la décision de routage, et non une nouvelle lecture au moment de la mutation ; un échec observé ou une observation de repli SQLite se compare à une clé Redis absente. Les broches obsolètes sont remplacées en un seul CAS, donc une commande tardive ne peut pas remplacer ou supprimer une broche plus récente et différente. Redis lit renvoie atomiquement la valeur et le serveur restant TTL; PTTL positif (ou aucune expiration) détermine la vivacité, et non l'horodatage JSON de l'écrivain ou l'horloge du lecteur. Les instantanés locaux mappent ce TTL restant à une date limite locale ; les clés JSON existantes restent lisibles et leurs octets bruts sont conservés pour CAS. Redis est la seule source de vérité pendant qu'il répond. Les ajouts, touches et suppressions partagés confirmés suppriment l'entrée locale, ne l'installent ni ne l'actualisent jamais. SQLite sur le chemin Redis ne contient que les propres décisions de secours de cette instance en cas d'erreurs Redis, de délais d'attente ou de saturation d'admission, limitées par TTL comme auparavant. Une broche locale manquante lors d'une panne ultérieure coûte un nouveau choix (un échec de cache d'invite), pas un compte erroné ou expulsé. Les upserts rejetés renvoient le gagnant partagé et son TTL restant de manière atomique : la sélection ordinaire revérifie la date limite locale mappée et utilise un gagnant éligible encore actif, touchant l'utilisation et se connectant à ce compte sans autre écriture partagée. S'il n'est pas disponible, la sélection conserve le candidat local, laisse le code PIN partagé inchangé et émet un message de débogage. CAS rejeté n'écrit pas SQLite; Les erreurs Redis, les délais d'attente ou la saturation d'admission appliquent à la place l'opération locale existante. Si la réponse d'une mutation envoyée arrive après un délai d'attente (accepté, rejeté ou erreur), une comparaison et une suppression synchrone et exacte de la valeur sérialisée supprime uniquement la ligne de secours du délai d'expiration identique à l'octet. Il n'y a pas d'attente entre cette comparaison et la suppression ; une écriture de panne plus récente est conservée. L'expulsion surveillée supprime le code PIN local du compte défaillant, même avec Redis down, et le nettoie à nouveau après l'expulsion partagée confirmée. Les réponses partagées antérieures en attente ne peuvent pas restaurer une broche locale expulsée car les succès partagés n'écrivent jamais SQLite. Une panne ultérieure peut réépingler un compte ; une écriture partagée acceptée ultérieurement n'existe que dans Redis. Les échecs Redis ne consultent pas l'état de secours local. Lorsque le pilote est désactivé, les broches nouvellement sélectionnées conservent la forme SQLite JSON à quatre champs héritée ; seul le routage Redis ajoute l'identité du compte hachée. Les broches préextraites sont revérifiées à leur limite d'expiration. La sélection sans bail Redis relit le magasin, mais la planification de bail synchrone peut toujours utiliser une épingle expulsée entre la prélecture et la planification (une fenêtre de meilleur effort acceptée). Un engagement de location ne peut pas changer de compte après une revendication durable : en cas de rejet, il conserve le candidat revendiqué pour cette demande uniquement et laisse le gagnant partagé intact, de sorte que l'accord entre les instances est limité à ce chemin. Le reste du tableau s'applique toujours : cela ne partage pas la persistance des sessions combinées, les broches d'activation Codex natives, les sémaphores de compte, les verrouillages, les limites de dépenses, la configuration ou les journaux d'appels.
+L'affinité session-compte peut également être partagée via Redis: définissez `OMNIROUTE_SESSION_AFFINITY_STORE=redis` et `REDIS_URL` sur chaque processus, avec le même `REDIS_KEY_PREFIX` et un paramètre `sessionAffinityTtlMs` positif. Les broches résolvent les identités de compte d'utilisation hachées avec la connexion locale éligible de chaque processus, de sorte que les comptes OAuth avec des métadonnées d'identité correspondantes n'ont pas besoin d'avoir une connexion correspondante IDs. Les identités de compte connues ont priorité sur IDs locaux contradictoires dans la résolution des broches et l'expulsion surveillée ; les enregistrements sans identité (ou les appelants d'expulsion sans identité) conservent l'héritage ID guard. Les comptes sans identité d'utilisation stable nécessitent toujours une correspondance IDs. Les erreurs Redis ou les appels dépassant 100 ms reviennent au SQLite local. Chaque magasin d'affinité Redis limite les opérations en cours à 8, contourne Redis immédiatement lorsqu'il est plein et libère des emplacements uniquement lorsque le travail sous-jacent est réglé, et non à la date limite de l'appelant. Lors d'une panne Redis il n'y a pas de vérité partagée : chaque instance revient à sa propre affinité locale, les sessions peuvent être réépinglées une fois par instance et les instances peuvent diverger. L'adhésivité converge à nouveau vers Redis lorsqu'elle récupère. Le délai d'attente limite l'attente, pas un EVAL envoyé, qui peut atterrir après le repli. Les écritures de routage comparent la valeur exacte observée par la décision de routage, et non une nouvelle lecture au moment de la mutation ; un échec observé ou une observation de repli SQLite se compare à une clé Redis absente. Les broches obsolètes sont remplacées en un seul CAS, donc une commande tardive ne peut pas remplacer ou supprimer une broche plus récente et différente. Redis lit renvoie atomiquement la valeur et le serveur restant TTL; PTTL positif (ou aucune expiration) détermine la vivacité, et non l'horodatage JSON de l'écrivain ou l'horloge du lecteur. Les instantanés locaux mappent ce TTL restant à une date limite locale ; les clés JSON existantes restent lisibles et leurs octets bruts sont conservés pour CAS. Redis est la seule source de vérité pendant qu'il répond. Les ajouts, touches et suppressions partagés confirmés suppriment l'entrée locale, ne l'installent ni ne l'actualisent jamais. SQLite sur le chemin Redis ne contient que les propres décisions de secours de cette instance en cas d'erreurs Redis, de délais d'attente ou de saturation d'admission, limitées par TTL comme auparavant. Une broche locale manquante lors d'une panne ultérieure coûte un nouveau choix (un échec de cache d'invite), pas un compte erroné ou expulsé. Les upserts rejetés renvoient le gagnant partagé et son TTL restant de manière atomique : la sélection ordinaire revérifie la date limite locale mappée et utilise un gagnant éligible encore actif, touchant l'utilisation et se connectant à ce compte sans autre écriture partagée. S'il n'est pas disponible, la sélection conserve le candidat local, laisse le code PIN partagé inchangé et émet un message de débogage. CAS rejeté n'écrit pas SQLite; Les erreurs Redis, les délais d'attente ou la saturation d'admission appliquent à la place l'opération locale existante. Si la réponse d'une mutation envoyée arrive après un délai d'attente (accepté, rejeté ou erreur), une comparaison et une suppression synchrone et exacte de la valeur sérialisée supprime uniquement la ligne de secours du délai d'expiration identique à l'octet. Il n'y a pas d'attente entre cette comparaison et la suppression ; une écriture de panne plus récente est conservée. L'expulsion surveillée supprime le code PIN local du compte défaillant, même avec Redis down, et le nettoie à nouveau après l'expulsion partagée confirmée. Les réponses partagées antérieures en attente ne peuvent pas restaurer une broche locale expulsée car les succès partagés n'écrivent jamais SQLite. Une panne ultérieure peut réépingler un compte ; une écriture partagée acceptée ultérieurement n'existe que dans Redis. Les échecs Redis ne consultent pas l'état de repli local. Lorsque le pilote est désactivé, les broches nouvellement sélectionnées conservent la forme SQLite JSON à quatre champs héritée ; seul le routage Redis ajoute l'identité du compte hachée. Les broches préextraites sont revérifiées à leur limite d'expiration. La sélection sans bail Redis relit le magasin, mais la planification de bail synchrone peut toujours utiliser une épingle expulsée entre la prélecture et la planification (une fenêtre de meilleur effort acceptée). Un engagement de location ne peut pas changer de compte après une revendication durable : en cas de rejet, il conserve le candidat revendiqué pour cette demande uniquement et laisse le gagnant partagé intact, de sorte que l'accord entre les instances est limité à ce chemin. Le reste du tableau s'applique toujours : cela ne partage pas la persistance des sessions combinées, les broches d'activation Codex natives, les sémaphores de compte, les verrouillages, les limites de dépenses, la configuration ou les journaux d'appels.
 
 Matériel : `/v1/responses` long simultané par instance est un** budget mémoire** question (tas + inflight-byte / #10110). `DATA_DIR` indépendants `N` multiplient toujours les tas : l'hôte RAM doit couvrir `N × cgroup`, et non "un pod de 16 Gi avec N = 8". Ne `replicas > 1` jamais sur un seul fichier SQLite.
 
@@ -683,55 +708,32 @@ volumes:
   omniroute-b-data:
 ```
 
-La densité en cours de processus (compression de l'isolat HTTP ) est [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Un cluster logique sur un état durable partagé est [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+La densité en cours de processus (compression de l'isolat HTTP ) est [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Un cluster logique sur un état durable partagé est [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Erreurs régionales Gemini dans Docker
+## erreurs régionales Gemini à l'intérieur Docker
 
-Google AI Studio / l’API Gemini peut renvoyer une erreur HTTP 400 avec FAILED_PRECONDITION et
-`User location is not supported for the API use.` Une requête réussie sur l’hôte
-ne prouve pas que le conteneur utilise la même route sortante. L’ordre DNS,
-la connectivité IPv4/IPv6, le routage VPN et les proxys configurés peuvent différer. Consultez
-[les régions prises en charge par Google](https://ai.google.dev/gemini-api/docs/available-regions)
-ainsi que la route de connexion réelle ; cette erreur seule n’indique pas que la clé API est incorrecte.
+Google AI Studio / Gemini API peut renvoyer HTTP 400 avec FAILED_PRECONDITION et `User location is not supported for the API use.` Une requête réussie sur l'hôte ne prouve pas que le conteneur utilise la même route sortante. L'ordre DNS, la connectivité IPv4/IPv6, le routage VPN et les proxys configurés peuvent différer. Vérifiez [les régions prises en charge par Google](https://ai.google.dev/gemini-api/docs/available-regions) ainsi que l'itinéraire de connexion réel ; cette erreur à elle seule n'identifie pas une mauvaise clé API.
 
-### Privilégier un proxy propre à la connexion
+### Préférer un proxy spécifique à la connexion
 
-Utilisez la [configuration de proxy par connexion](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-d’OmniRoute pour la connexion Gemini concernée, puis relancez **Tester la connexion** et une petite requête
-avec le même modèle. Ainsi, le changement de routage reste limité à cette connexion. Vérifiez
-que le proxy est accessible depuis le conteneur et que la connexion le sélectionne effectivement.
-La modification de la route ne garantit pas l’éligibilité régionale auprès du fournisseur en amont.
+Utilisez [la configuration proxy par connexion](../ops/PROXY_GUIDE.md#4-level-proxy-system) de OmniRoute pour la connexion Gemini concernée, puis répétez** Tester la connexion** et une petite demande avec le même modèle. Cela maintient le changement de routage limité à cette connexion. Vérifiez que le proxy est accessible depuis le conteneur et que la connexion le sélectionne réellement. La modification du tracé ne garantit pas l’éligibilité régionale en amont.
 
-### Comparer la mise en réseau de l’hôte et du conteneur
+### Comparez les réseaux d'hôtes et de conteneurs
 
-Conservez une clé, un modèle et une requête identiques lorsque vous comparez les résultats authentifiés ; ne
-publiez jamais d’identifiants, de mots de passe de proxy ou d’en-têtes d’autorisation complets dans un ticket.
-Commencez par vérifier quelles familles d’adresses sont proposées par le résolveur du système d’exploitation, en utilisant la même commande
-sur l’hôte et dans le conteneur :
+Gardez la clé, le modèle et la demande identiques lors de la comparaison des résultats authentifiés ; ne collez jamais d’informations d’identification, de mots de passe proxy ou d’en-têtes d’autorisation complets dans un problème. Inspectez d’abord les familles d’adresses proposées par le résolveur OS, en utilisant la même commande sur l’hôte et à l’intérieur du conteneur :
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Remplacez `omniroute` par le service que vous exécutez (par exemple, `omniroute-web`). Ces
-commandes affichent les familles d’adresses sans identifiants ni adresses IP. Une valeur `6`
-renvoyée indique uniquement un résultat DNS IPv6 : elle ne prouve **pas** qu’une route IPv6 utilisable ou qu’un accès à l’API existe.
-Lorsque `curl` est installé, comparez `curl -4 -I https://generativelanguage.googleapis.com`
-à `curl -6 -I https://generativelanguage.googleapis.com` dans les deux environnements.
-Une réponse HTTP prouve la connectivité pour ce test, même s’il s’agit d’une erreur non authentifiée ;
-seule la requête authentifiée au modèle permet de tester l’éligibilité à Gemini.
+Remplacez `omniroute` par le service que vous exécutez (par exemple, `omniroute-web`). Ces commandes impriment des familles d'adresses sans informations d'identification ni adresses IP. Un `6` renvoyé affiche uniquement un résultat IPv6 DNS : c'est le cas** pas** prouver une route IPv6 ou un accès API utilisable. Là où `curl` est installé, comparez `curl -4 -I https://generativelanguage.googleapis.com` avec `curl -6 -I https://generativelanguage.googleapis.com` dans les deux environnements. Une réponse HTTP prouve la connectivité de cette sonde, même s'il s'agit d'une erreur non authentifiée ; seule la demande de modèle authentifiée teste l'éligibilité Gemini.
 
-### Alternative au niveau de l’hôte : IPv6 fonctionnel et stratégie du résolveur
+### Alternative au niveau de l'hôte : fonctionnement de la politique IPv6 et du résolveur
 
-L’auteur du signalement [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) a rétabli
-l’accès dans son environnement en activant IPv6 pour les conteneurs et en modifiant la sélection
-des adresses de la glibc. Considérez cette solution comme une alternative propre à l’environnement. Vérifiez le bon fonctionnement
-d’IPv6 sur l’hôte, la sortie et le routage des conteneurs ainsi que les règles du pare-feu avant d’ajuster les préférences du résolveur.
-Une adresse ULA privée ne suffit pas à établir une connectivité IPv6 publique.
+Le journaliste de [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) a restauré l'accès à son environnement en activant le conteneur IPv6 et en modifiant la sélection de l'adresse glibc. Considérez cela comme une alternative spécifique à l’environnement. Confirmez les règles de l'hôte de travail IPv6, du conteneur egress/routing et du pare-feu avant d'ajuster les préférences du résolveur. Une adresse ULA privée n'établit pas en elle-même une connectivité IPv6 publique.
 
-Pour les services déjà rattachés au réseau par défaut de Compose, ce fragment active
-IPv6 sur ce réseau ; conservez le reste de la configuration de votre service, notamment les ports et les volumes :
+Pour les services déjà attachés au réseau par défaut de Compose, ce fragment active IPv6 sur ce réseau ; conservez le reste de votre service, vos ports, vos volumes et votre configuration :
 
 ```yaml
 networks:
@@ -739,30 +741,13 @@ networks:
     enable_ipv6: true
 ```
 
-Pour un réseau nommé, activez cette option sur le réseau auquel le service est effectivement rattaché. Docker peut
-allouer un sous-réseau ULA ; choisissez un sous-réseau explicite sans chevauchement uniquement si votre réseau
-l’exige. Consultez [la mise en réseau IPv6 de Docker](https://docs.docker.com/engine/daemon/ipv6/)
-et [les options réseau de Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Pour un réseau nommé, activez-le sur le réseau auquel le service rejoint réellement. Docker peut allouer un sous-réseau ULA ; sélectionnez un sous-réseau explicite et sans chevauchement uniquement lorsque votre réseau l'exige. Voir [Mise en réseau Docker IPv6](https://docs.docker.com/engine/daemon/ipv6/) et [Options réseau Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Sur une **image basée sur la glibc**, `/etc/gai.conf` peut modifier la sélection des adresses. Le Dockerfile
-actuel du dépôt utilise Debian ; les images personnalisées basées sur musl ne partagent pas ce mécanisme.
-L’ajustement signalé remplace l’étiquette ULA `label fc00::/7 6` par
-`label fc00::/7 1`. Partez de la table de stratégie complète de l’image et conservez ses autres
-entrées : l’ajout d’une entrée `label` ou `precedence` remplace cette table par défaut ; un fichier
-contenant uniquement la ligne modifiée est donc insuffisant. La
-[référence de configuration de la glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-documente cette sémantique. Montez le fichier vérifié en lecture seule sur `/etc/gai.conf`
-et recréez le service pour appliquer la modification.
+Sur un** image basée sur la glibc** , `/etc/gai.conf` peut modifier la sélection d'adresse. Le référentiel actuel Dockerfile utilise Debian ; les images personnalisées basées sur Musl ne partagent pas ce mécanisme. L'ajustement signalé modifie l'étiquette ULA de `label fc00::/7 6` à `label fc00::/7 1`. Partez de la table de stratégie complète de l'image et conservez ses autres entrées : l'ajout d'une entrée `label` ou `precedence` remplace cette table par défaut, donc un fichier contenant uniquement la ligne modifiée est insuffisant. La [référence de configuration de la glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) documente cette sémantique. Montez en liaison le fichier révisé en lecture seule sur `/etc/gai.conf` et recréez le service pour l'appliquer.
 
-Cette modification affecte la sélection des adresses par le système d’exploitation pour **tout le trafic sortant de ce conteneur**.
-Elle ne force pas toutes les applications à choisir IPv6 : l’ordre DNS et la sélection
-des connexions de Node ont également leur importance. En particulier, `--dns-result-order=ipv4first` privilégie IPv4 et
-ne résout pas une défaillance propre à IPv4. Consultez [l’ordre DNS de Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Cela modifie la sélection d'adresse OS pour** tout le trafic sortant dans ce conteneur** . Cela n'oblige pas toutes les applications à choisir IPv6: l'ordre DNS du nœud et la sélection de connexion sont également importants. En particulier, `--dns-result-order=ipv4first` préfère IPv4 et ne constitue pas un remède à un échec IPv4-only. Voir [Ordre des nœuds DNS](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Testez de nouveau Gemini et vos autres fournisseurs après toute modification au niveau de l’hôte. Pour revenir en arrière,
-supprimez le montage personnalisé de `gai.conf`, restaurez la configuration réseau précédente et
-recréez le service ou le réseau concerné pendant une fenêtre de maintenance. La recréation d’un réseau
-peut interrompre les autres conteneurs qui y sont rattachés ; ne supprimez pas le volume de données persistant.
+Testez à nouveau Gemini et vos autres fournisseurs après tout changement au niveau de l'hôte. Pour restaurer, supprimez le montage `gai.conf` personnalisé, restaurez la configuration réseau précédente et recréez le service/network concerné pendant une fenêtre de maintenance. La recréation d'un réseau peut interrompre les autres conteneurs qui y sont attachés ; ne supprimez pas le volume de données persistant.
 
 ## Remarques importantes
 

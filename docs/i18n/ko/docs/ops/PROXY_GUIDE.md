@@ -271,112 +271,112 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy 무료 프록시 마켓플레이스
 
-> 🆕 **[@oyi77](https://github.com/oyi77) 기여** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (이슈 [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** 작성자: [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (문제 [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute는 **[1proxy](https://1proxy-api.aitradepulse.com)** 커뮤니티 플랫폼과 통합되어 전 세계의 **검증된 무료 프록시 수백 개**에 대한 액세스를 제공합니다. 자체 프록시 인프라가 없는 사용자에게 적합합니다.
+OmniRoute 다음과 통합됩니다.** [1프록시](https://1proxy-api.aitradepulse.com)** 액세스를 제공하는 커뮤니티 플랫폼** 수백 개의 검증된 무료 프록시** 전 세계에서. 이는 자체 프록시 인프라가 없는 사용자에게 적합합니다.
 
 ### 작동 방식
 
 ```
-┌─────────────┐     동기화     ┌─────────────────┐    순환       ┌──────────┐
-│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ 제공자    │
-│    (외부)    │  최대 500개   │  source=oneproxy │  품질 기준    │   API    │
-└─────────────┘    프록시      └─────────────────┘               └──────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **동기화** — OmniRoute가 1proxy API에서 검증된 프록시를 가져옵니다
-2. **저장** — 프록시는 동일한 `proxy_registry` 테이블에 `source = 'oneproxy'`로 저장됩니다
-3. **필터링** — 프로토콜, 국가, 품질 점수별로 필터링합니다
-4. **순환** — 품질, 무작위 또는 순차 전략을 사용하여 최적의 프록시를 선택합니다
-5. **자동 성능 저하 처리** — 실패한 프록시는 품질 점수가 감소하며, 임계값 미만이 되면 → 비활성 상태로 표시됩니다
+1. **동조** — OmniRoute 1proxy API 에서 검증된 프록시를 가져옵니다.
+2. **가게** — 프록시는 `source = 'oneproxy'` 와 동일한 `proxy_registry` 테이블에 저장됩니다.
+3. **필터** — 프로토콜, 국가, 품질 점수별로 필터링
+4. **회전** — 품질, 무작위 또는 순차 전략을 사용하여 최고의 프록시를 선택하세요.
+5. **자동 저하** — 실패한 프록시는 품질 점수가 낮아집니다. 임계값 미만 → 비활성으로 표시됨
 
-### 프록시 동기화
+### 프록시 동기화 중
 
-**대시보드에서:**
+**대시보드를 통해:**
 
-1. **Settings → 1proxy** 탭으로 이동합니다
-2. **"Sync Now"**를 클릭합니다
-3. 전체 프록시 수, 활성 프록시 수, 평균 품질, 국가별 분석 등 통계를 확인합니다
+1. 이동** 설정 → 1proxy** 꼬리표
+2. 딸깍 하는 소리** "지금 동기화"**
+3. 통계 보기: 총 프록시, 활성 개수, 평균 품질, 국가별 분석
 
-**API를 통해:**
+**API 통해 :**
 
 ```bash
-# 동기화 실행
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# 응답:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
 ### 프록시 필터링
 
 ```bash
-# 프로토콜별 필터링
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# 국가별 필터링
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# 최소 품질 점수별 필터링
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# 필터 조합
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### 프록시 품질 점수
+### 프록시 품질평가점수
 
-각 1proxy 프록시에는 다음과 같은 메타데이터가 포함됩니다:
+각 1proxy 프록시에는 메타데이터가 제공됩니다.
 
-| 필드            | 설명                                    |
-| --------------- | --------------------------------------- |
-| `qualityScore`  | 1proxy 검증에서 부여된 0-100점 평점     |
-| `latencyMs`     | 측정된 네트워크 지연 시간               |
-| `anonymity`     | `transparent`, `anonymous` 또는 `elite` |
-| `googleAccess`  | 프록시의 Google 서비스 액세스 가능 여부 |
-| `countryCode`   | 두 글자로 된 ISO 국가 코드              |
-| `lastValidated` | 마지막 검증 타임스탬프                  |
+| 필드            | 설명                                             |
+| --------------- | ------------------------------------------------ |
+| `qualityScore`  | 1개의 프록시 검증에서 0~100 등급                 |
+| `latencyMs`     | 측정된 네트워크 대기 시간                        |
+| `anonymity`     | `transparent`, `anonymous` 또는 `elite`          |
+| `googleAccess`  | 프록시가 Google 서비스에 액세스할 수 있는지 여부 |
+| `countryCode`   | 두 글자로 된 ISO 국가 코드                       |
+| `lastValidated` | 마지막 검증의 타임스탬프                         |
 
-품질 점수는 동적으로 조정됩니다:
+품질평가점수는 동적으로 조정됩니다.
 
-- **실패한 요청**은 점수를 10점 감소시킵니다
-- **점수가 ≤10으로 감소** → 프록시가 `inactive`로 표시됩니다
-- 비활성 프록시는 순환 대상에서 제외됩니다
+- **실패한 요청** 점수를 10점 감점하다
+- **점수가 ≤ 10으로 떨어졌습니다.** → 프록시는 `inactive` 로 표시됩니다.
+- 비활성 프록시는 순환에서 제외됩니다.
 
 ### 순환 전략
 
 ```bash
-# 품질별 순환(최상의 프록시 우선) — 기본값
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# 무작위 순환
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# 순차 순환(가장 오래전에 검증된 프록시 우선)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
-### 서킷 브레이커
+### 회로 차단기
 
-1proxy 동기화에는 서킷 브레이커가 내장되어 있습니다:
+1proxy 동기화에는 회로 차단기가 내장되어 있습니다.
 
-- **동기화가 5회 연속 실패**하면 이후의 동기화 시도가 차단됩니다
-- `resetOneproxyCircuitBreaker()`를 사용하거나 서버를 재시작하여 초기화합니다
-- 동기화 상태는 `GET /api/settings/oneproxy?action=status`에서 확인할 수 있습니다
+- 후에** 5회 연속 동기화 실패** , 추가 동기화 시도가 차단됩니다.
+- 다음으로 재설정: `resetOneproxyCircuitBreaker()` 또는 서버 다시 시작
+- 동기화 상태는 `GET /api/settings/oneproxy?action=status` 에서 확인할 수 있습니다.
 
-### 1proxy 프록시 삭제
+### 1개의 프록시 프록시 지우기
 
 ```bash
-# 단일 1proxy 프록시 삭제
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# 모든 1proxy 프록시 삭제(수동 프록시는 그대로 유지됨)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
@@ -384,35 +384,35 @@ curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 
 ## 탐지 방지 및 스텔스
 
-OmniRoute는 단순히 프록시를 통해 트래픽을 라우팅하는 데 그치지 않고, 트래픽이 정상적인 요청처럼 보이도록 만듭니다.
+OmniRoute 프록시 — 통해 트래픽을 라우팅하는 것이 아니라 트래픽이 합법적인 것처럼 보이게 만듭니다.
 
-### TLS 핑거프린트 스푸핑
+### TLS 지문 스푸핑
 
-`wreq-js`를 사용하여 브라우저와 유사한 TLS 핑거프린트를 생성함으로써, 브라우저가 아닌 TLS 핸드셰이크를 탐지하는 봇 감지 시스템을 우회합니다.
+`wreq-js` 사용하여 브라우저와 유사한 TLS 지문을 생성하고 브라우저가 아닌 TLS 핸드셰이크에 플래그를 지정하는 봇 감지 시스템을 우회합니다.
 
-### CLI 핑거프린트 일치
+### CLI 지문 매칭
 
-**CLI 핑거프린트 토글**(`설정 → 보안`)은 네이티브 CLI 바이너리(Claude Code, Codex 등)의 정확한 시그니처와 일치하도록 HTTP 헤더와 JSON 본문 필드의 순서를 재정렬합니다. 이 기능은 프록시와 **함께** 작동합니다.
+그만큼**CLI 지문 토글** (`Settings → Security`)는 기본 CLI 바이너리(Claude 코드, Codex 등)의 정확한 서명과 일치하도록 HTTP 헤더 및 JSON 본문 필드를 재정렬합니다. 이것은 작동합니다** 위에** 프록시:
 
 ```
-사용자 IP(차단됨) → 프록시 IP(미국) → 제공자 API
-                    + TLS 스푸핑
-                    + CLI 핑거프린트
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-따라서 **IP 마스킹**과 **요청 신뢰성**을 동시에 확보할 수 있습니다.
+당신은 둘 다 얻습니다**IP 마스킹** 그리고** 진정성을 요청하다** 동시에.
 
-### 프록시 IP 유지
+### 프록시 IP 보존
 
-대시보드의 색상 구분 배지는 현재 활성화된 프록시 수준을 보여줍니다.
+대시보드의 색상으로 구분된 배지는 활성화된 프록시 수준을 보여줍니다.
 
-| 배지 | 수준   | 의미                                 |
-| ---- | ------ | ------------------------------------ |
-| 🟢   | 전역   | 모든 트래픽이 이 프록시를 통과함     |
-| 🟡   | 제공자 | 이 제공자의 트래픽만 프록시를 통과함 |
-| 🔵   | 연결   | 이 특정 키/계정이 이 프록시를 사용함 |
+| 배지 | 수준   | 의미                                        |
+| ---- | ------ | ------------------------------------------- |
+| 🟢   | 글로벌 | 모든 트래픽은 이 프록시를 통과합니다.       |
+| 🟡   | 공급자 | 이 공급자의 트래픽만 프록시됩니다.          |
+| 🔵   | 연결   | 이 특정 key/account 이 프록시를 사용합니다. |
 
-배지에는 검증을 위해 확인된 프록시 IP도 표시됩니다.
+배지에는 확인을 위해 해결된 프록시 IP 도 표시됩니다.
 
 ---
 
@@ -776,47 +776,28 @@ ORDER BY latency_ms DESC;
 분산)
 ```
 
-## 자체 프록시의 자동 장애 제외
+## 자신의 프록시에 대한 자동 실패 제외
 
-1proxy 마켓플레이스 풀은 이미 실패한 프록시의 등급을 자체적으로 자동 하향 조정합니다([프록시 품질 점수](#proxy-quality-scores) 참조). 레지스트리에 **직접** 추가한 프록시의 경우, 백그라운드 상태 스케줄러(`src/lib/proxyHealth/scheduler.ts`)가 아무것도 삭제하지 않으면서 동일한 "작동하지 않는 구성원을 체인에서 자동 제외"하는 동작을 제공합니다.
+1proxy 마켓플레이스 풀은 이미 실패한 프록시의 품질을 자동으로 저하시킵니다( [프록시 품질 점수](#proxy-quality-scores) 참조). 프록시의 경우** 너** 레지스트리에 추가되면 백그라운드 상태 스케줄러(`src/lib/proxyHealth/scheduler.ts`)는 아무것도 삭제하지 않고 동일한 "체인에서 자동으로 죽은 멤버 제외" 동작을 제공합니다.
 
 ```bash
-# .env — 연속된 프로브가 3번 실패하면 프록시를 일시적으로 비활성화하고,
-# 프로브에 다시 응답하기 시작하면 자동으로 다시 활성화합니다.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-다중 프록시 체인에서 작동하는 방식은 다음과 같습니다.
+다중 프록시 체인에 적합한 방식:
 
-1. 스케줄러는 등록된 모든 프록시를 `PROXY_HEALTH_INTERVAL_MS` 간격으로 프로브합니다
-   (기본값 10분, 최솟값 1분).
-2. 연속으로 `PROXY_AUTO_REMOVE_AFTER`번의 **확정적** 장애가 발생하면(실제 연결
-   장애를 의미하며, 시간 초과 또는 프로브 대상 자체의 5xx 응답은 절대 포함되지
-   않습니다. [프록시 상태 확인](#proxy-health-checking-v3816) 참조), 프록시의
-   `status`가 `dead`로 설정됩니다.
-3. `dead`는 풀/로테이션 해석에서 사용하는 활성 상태 필터가 제외하는 상태 중
-   하나이므로, 해당 범위의 로테이션(라운드 로빈 / 무작위 / 고정 / 지연 시간 —
-   [로테이션 전략 결정 트리](#rotation-strategy-decision-tree) 참조)은 새 요청에
-   해당 프록시를 즉시 할당하지 않습니다. 풀의 다른 프록시는 영향을 받지 않으며,
-   전체 풀이 인지되지 않은 채 직접 연결로 대체되는 일도 없습니다. 페일 클로즈
-   보호 기능은 [4단계 프록시 시스템](#4-level-proxy-system)을 참조하세요.
-4. 스케줄러는 동일한 간격으로 `dead` 프록시를 계속 프로브합니다. 다음 프로브가
-   성공하면 `status`가 다시 `active`로 전환되고 프록시는 로테이션에 재진입합니다.
-   수동으로 다시 추가할 필요가 없습니다.
+1. 스케줄러는 `PROXY_HEALTH_INTERVAL_MS` (기본값 10분, 최소 1분)마다 등록된 모든 프록시를 조사합니다.
+2. `PROXY_AUTO_REMOVE_AFTER` 연속 이후** 단호한** 실패(실제 연결 실패 — 시간 초과 또는 프로브 대상 자체의 5xx는 계산되지 않습니다. [프록시 상태 확인](#proxy-health-checking-v3816) 참조), 프록시의 `status` `dead` 로 설정됩니다.
+3. `dead` 는 pool/rotation 확인에서 사용되는 활성 상태 필터가 제외하는 상태 중 하나이므로 범위의 회전(라운드 로빈/랜덤/고정/대기 시간/세션 — 참조 [회전 전략 결정 트리](#rotation-strategy-decision-tree) 참조)은 해당 프록시를 새 요청에 전달하는 것을 즉시 중지합니다. 풀의 다른 프록시는 영향을 받지 않으며 전체 풀은 자동으로 직접 연결로 폴백되지 않습니다 — [4레벨 프록시 시스템](#4-level-proxy-system) 페일클로즈 가드를 참조하세요.
+4. 스케줄러는 동일한 간격으로 `dead` 프록시를 계속 검색합니다. 다음번 성공적인 프로브는 `status` `active` 로 다시 뒤집고 수동 재추가가 필요하지 않은 회전 — 에 다시 들어갑니다.
 
-이 기능은 의도적으로 **옵트인 방식이며 비파괴적**입니다. 기본적으로 스케줄러는
-실패 횟수를 집계하고 로그만 기록하며(`decision.ts`의 정책 C 참조),
-`PROXY_AUTO_DISABLE`은 행을 삭제하지 않습니다. 행 삭제는 별도의 더 강력한
-`PROXY_AUTO_REMOVE` 플래그가 담당합니다. 둘 다 `true`로 설정된 경우
-`PROXY_AUTO_REMOVE`가 우선합니다(곧 삭제될 프록시를 중간에 일시적으로
-비활성화할 필요가 없기 때문입니다). 전체 변수 목록은
-[환경 구성](../reference/ENVIRONMENT.md) 참조 문서를 확인하세요.
+이건 고의로** 옵트인 및 비파괴적** : 기본적으로 스케줄러는 실패만 계산하고 기록하며( `decision.ts` 의 정책 C 참조), `PROXY_AUTO_DISABLE` 별도의 보다 공격적인 `PROXY_AUTO_REMOVE` 플래그의 용도인 — 행을 삭제하지 않습니다. 둘 다 `true` 로 설정되면 `PROXY_AUTO_REMOVE` 승리합니다(삭제될 프록시는 그 사이에 소프트 비활성화를 사용하지 않습니다). 전체 변수 목록은 [환경 구성](../reference/ENVIRONMENT.md) 참조를 확인하세요.
 
 ---
 
-> 📖 **관련 문서:**
+> 📖** 관련 문서:**
 >
-> - [사용자 가이드](../guides/USER_GUIDE.md) — 일반 설정 및 구성
-> - [API 참조](../reference/API_REFERENCE.md) — 전체 API 문서
-> - [환경 구성](../reference/ENVIRONMENT.md) — 모든 환경 변수
+> - [사용자 가이드](../guides/USER_GUIDE.md) — 일반 설정 및 구성 - [API 참조](../reference/API_REFERENCE.md) — 전체 API 문서 - [환경 구성](../reference/ENVIRONMENT.md) — 모든 환경 변수

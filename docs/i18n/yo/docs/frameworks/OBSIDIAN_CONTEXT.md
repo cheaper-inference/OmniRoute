@@ -114,58 +114,48 @@ láṣẹ láti wọlé; ìwé ẹ̀rí àyíká tó fẹsẹ̀ múlẹ̀, tí �
 àfẹ́yìntì àgbáyé. Àwọn irinṣẹ́ `obsidian_sync_*` mẹ́rin náà ṣì ń lo ìhùwàsí àmì ìdánimọ̀
 ìmúdọ́gba ọ̀tọ̀ tiwọn.
 
-## Àwọn irinṣẹ́ MCP (22)
+## irinṣẹ MCP (22)
 
-A ṣàlàyé wọn nínú `open-sse/mcp-server/tools/obsidianTools.ts`. Token/base-URL ni a máa ń pinnu
-nígbà ìpè kọ̀ọ̀kan (ti kọ́kọ́rọ́ API kọ̀ọ̀kan lákọ̀ọ́kọ́, lẹ́yìn náà ti àgbáyé). Àwọn irinṣẹ́ tó ń lo ẹ̀rọ aṣàmúlò **ìṣiṣẹ́pọ̀**
-OmniRoute (àwọn irinṣẹ́ `obsidian_sync_*` mẹ́rin náà) tún nílò token ìfàṣẹsí ìṣiṣẹ́pọ̀ tí a ṣètò
-nínú àwọn ààtò OmniRoute.
+Ti tumọ si ni `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL naa jẹ ipinnu fun ipe kan (fun-API-bọtini akọkọ, lẹhinna agbaye). Awọn irinṣẹ ti o lu OmniRoute** amuṣiṣẹpọ olupin** (awọn irinṣẹ `obsidian_sync_*` mẹrin) ni afikun nilo ami amuṣiṣẹpọ auth ti a tunto ni awọn eto OmniRoute.
 
-### Àwọn irinṣẹ́ kíkà (`read:obsidian`)
+### Awọn irinṣẹ kika (`read:obsidian`)
 
-| Irinṣẹ́                       | Àpèjúwe                                                                                                      |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `obsidian_check_status`      | Ṣàyẹ̀wò bóyá Local REST API ṣeé dé àti pé a ti fi ìdánimọ̀ múlẹ̀.                                               |
-| `obsidian_search_simple`     | Ṣàwárí ọ̀rọ̀ kíkún nínú àkóónú àkọsílẹ̀; ó ń dá àwọn àjákù ọ̀rọ̀ padà pẹ̀lú àwọn ipa fáìlì.                        |
-| `obsidian_search_structured` | Ṣàwárí nípa lílo gbólóhùn JSON Logic (àwọn àsẹ and/or/regex/path).                                           |
-| `obsidian_read_note`         | Ka àkọsílẹ̀ nípasẹ̀ ipa tó jẹ́ mọ́ vault; ó lè jẹ́ àkọlé/block/frontmatter kan pàtó.                              |
-| `obsidian_list_vault`        | Ṣe àtòjọ àwọn fáìlì àti àwọn àpò inú vault (igi àwọn àkọsílẹ̀).                                               |
-| `obsidian_get_document_map`  | Gba ìṣètò àkọlé àkọsílẹ̀ náà gẹ́gẹ́ bí àwòrán àwọn àkọlé → àwọn nọ́ńbà ìlà.                                      |
-| `obsidian_get_note_metadata` | Gba frontmatter, àwọn tag, àwọn link, àti iye ẹyọ ọ̀rọ̀/ọ̀rọ̀ láìgba gbogbo àkóónú.                              |
-| `obsidian_get_active_file`   | Gba ipa + àkóónú fáìlì tó ń ṣiṣẹ́ lọ́wọ́lọ́wọ́ nínú Obsidian.                                                     |
-| `obsidian_get_periodic_note` | Gba àkọsílẹ̀ àsìkò ojoojúmọ́/ọ̀sọ̀ọ̀sẹ̀/oṣooṣù fún ọjọ́ kan (òní bí a kò bá sọ ọ́).                                  |
-| `obsidian_get_tags`          | Ṣe àtòjọ gbogbo tag inú vault pẹ̀lú iye ìgbà tí ọ̀kọ̀ọ̀kan farahàn.                                              |
-| `obsidian_list_commands`     | Ṣe àtòjọ àwọn ID àṣẹ Obsidian tó wà (lò ó pẹ̀lú `obsidian_execute_command`).                                  |
-| `obsidian_sync_status`       | Ipò ẹ̀rọ aṣàmúlò ìṣiṣẹ́pọ̀ OmniRoute: bóyá ó ń ṣiṣẹ́, orúkọ vault, port, àkókò tó ti ṣiṣẹ́, ìṣiṣẹ́pọ̀ tó ṣẹ̀ṣẹ̀ wáyé. |
-| `obsidian_sync_conflicts`    | Ṣe àtòjọ àwọn ìtakora ìṣiṣẹ́pọ̀ tí a kò tíì yanjú (ipa, ipa ìtakora, ìgbà tí a rí i).                          |
+| Irinṣẹ                       | Apejuwe                                                                                      |
+| ---------------------------- | -------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Ṣayẹwo boya agbegbe REST API jẹ eyiti o le de ọdọ ati ti jẹri.                               |
+| `obsidian_search_simple`     | Wiwa ọrọ-kikun ti akoonu akọsilẹ; pada snippets pẹlu awọn ọna faili.                         |
+| `obsidian_search_structured` | Ṣewadii nipa lilo ikosile JSON Logic kan (awọn asẹ and/or/regex/path ).                      |
+| `obsidian_read_note`         | Ka akọsilẹ nipasẹ ọna ifinkan-ojulumo; iyan kan pato heading/block/frontmatter.              |
+| `obsidian_list_vault`        | Ṣe atokọ awọn faili ati awọn ilana ninu ifinkan (igi ti awọn titẹ sii).                      |
+| `obsidian_get_document_map`  | Gba eto akọle akọsilẹ bi maapu awọn akọle → awọn nọmba laini.                                |
+| `obsidian_get_note_metadata` | Gba ọrọ iwaju, awọn afi, awọn ọna asopọ, kika char/word laisi akoonu kikun.                  |
+| `obsidian_get_active_file`   | Gba akoonu ọna + ti faili ti nṣiṣẹ lọwọlọwọ ni Obsidian.                                     |
+| `obsidian_get_periodic_note` | Gba akọsilẹ igbakọọkan daily/weekly/monthly fun ọjọ kan (loni ti o ba yọkuro).               |
+| `obsidian_get_tags`          | Ṣe atokọ gbogbo awọn aami ifinkan pẹlu awọn loorekoore wọn.                                  |
+| `obsidian_list_commands`     | Atokọ ti o wa Obsidian pipaṣẹ IDs (lo pẹlu `obsidian_execute_command`).                      |
+| `obsidian_sync_status`       | ipo olupin ìsiṣẹpọ OmniRoute : nṣiṣẹ, orukọ ifinkan, ibudo, akoko akoko, imuṣiṣẹpọ to kẹhin. |
+| `obsidian_sync_conflicts`    | Ṣe atokọ awọn ija amuṣiṣẹpọ ti ko yanju (ọna, ipa-ọna ija, ti a rii-ni).                     |
 
-### Àwọn irinṣẹ́ kíkọ (`write:obsidian`)
+### Awọn irinṣẹ kikọ (`write:obsidian`)
 
-| Irinṣẹ́                           | Àpèjúwe                                                                              |
-| -------------------------------- | ------------------------------------------------------------------------------------ |
-| `obsidian_write_note`            | Ṣẹ̀dá àkọsílẹ̀ tàbí kọ lé e lórí pẹ̀lú àkóónú Markdown tí a fún un.                     |
-| `obsidian_append_note`           | Fi àkóónú kún àkọsílẹ̀; ó lè jẹ́ sí àkọlé/block kan pàtó.                              |
-| `obsidian_patch_note`            | Fi kún lẹ́yìn/fi kún ṣáájú/rọ́pò ní àkọlé, block, tàbí ààyè frontmatter lọ́nà pípéye.   |
-| `obsidian_delete_note`           | Pa àkọsílẹ̀ rẹ́ pátápátá kúrò nínú vault.                                              |
-| `obsidian_move_note`             | Gbé àkọsílẹ̀ tàbí tún un lorúkọ nínú vault.                                           |
-| `obsidian_execute_command`       | Ṣàmúṣẹ àṣẹ Obsidian nípasẹ̀ ID àṣẹ rẹ̀.                                                |
-| `obsidian_open_file`             | Ṣí fáìlì kan nínú Obsidian (ó máa ṣẹ̀dá rẹ̀ bí kò bá sí).                              |
-| `obsidian_sync_trigger`          | Bẹ̀rẹ̀ ìṣiṣẹ́pọ̀ vault olójú-ọ̀nà-méjì desktop↔mobile lẹ́sẹ̀kẹsẹ̀.                           |
-| `obsidian_sync_resolve_conflict` | Yanjú ìtakora ìṣiṣẹ́pọ̀: pa `local` (mobile) mọ́, `remote` (desktop), tàbí `keep-both`. |
+| Irinṣẹ                           | Apejuwe                                                                                   |
+| -------------------------------- | ----------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Ṣẹda tabi tunkọ akọsilẹ pẹlu akoonu Markdown ti a fun.                                    |
+| `obsidian_append_note`           | Fi akoonu kun si akọsilẹ; iyan si kan pato heading/block.                                 |
+| `obsidian_patch_note`            | Ni abẹ append/prepend/replace ni aaye akọle, idina, tabi aaye iwaju.                      |
+| `obsidian_delete_note`           | Pa akọsilẹ rẹ patapata lati inu ifinkan.                                                  |
+| `obsidian_move_note`             | Gbe tabi fun lorukọ mii akọsilẹ laarin ile ifipamọ.                                       |
+| `obsidian_execute_command`       | Ṣiṣe pipaṣẹ Obsidian kan nipasẹ aṣẹ rẹ ID.                                                |
+| `obsidian_open_file`             | Ṣii faili ni Obsidian (ṣẹda rẹ ti ko ba si).                                              |
+| `obsidian_sync_trigger`          | Ṣe okunfa tabili onidari-ọna lẹsẹkẹsẹ ↔ amuṣiṣẹpọ vault alagbeka.                         |
+| `obsidian_sync_resolve_conflict` | Yanju rogbodiyan amuṣiṣẹpọ: tọju `local` (alagbeka), `remote` (tabili), tabi `keep-both`. |
 
 > [!NOTE]
-> Àwọn àfojúsùn `obsidian_patch_note` gba `targetType` ti `heading | block | frontmatter`
-> àti `operation` ti `append | prepend | replace`, pẹ̀lú
-> `createTargetIfMissing` tí kì í ṣe dandan. Àwọn irinṣẹ́ `obsidian_sync_*` mẹ́rin náà ń bá ẹ̀rọ aṣàmúlò ìṣiṣẹ́pọ̀ agbègbè
-> (`http://127.0.0.1:27781` nípa àìyípadà) sọ̀rọ̀, wọ́n sì nílò token ìṣiṣẹ́pọ̀.
+> awọn ibi-afẹde `obsidian_patch_note` gba `targetType` ti `heading | block | frontmatter` ati `operation` ti `append | prepend | replace`, pẹlu `createTargetIfMissing` yiyan. Awọn irinṣẹ `obsidian_sync_*` mẹrin naa sọrọ si olupin amuṣiṣẹpọ agbegbe (`http://127.0.0.1:27781` nipasẹ aiyipada) ati nilo ami amuṣiṣẹpọ.
 
-### Àwọn ààyè àṣẹ
+### Awọn aaye
 
-Àwọn irinṣẹ́ kíkà nílò `read:obsidian`; àwọn irinṣẹ́ kíkọ nílò `write:obsidian`. Ìmúṣẹ
-jẹ́ ọ̀nà kan náà pẹ̀lú Notion — `withScopeEnforcement()` nínú
-`open-sse/mcp-server/server.ts` ló ń bójú tó o, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ló sì ń ṣàkóso rẹ̀, pẹ̀lú
-àwọn ààyè àṣẹ tí a gbà láti `OMNIROUTE_MCP_SCOPES` tàbí ọ̀rọ̀-àyíká ààyè àṣẹ kọ́kọ́rọ́ API náà. Wo
-[MCP-SERVER.md](./MCP-SERVER.md).
+Awọn irinṣẹ kika nilo `read:obsidian`; Awọn irinṣẹ kọ nilo `write:obsidian`. Imudaniloju jẹ aami kanna si Notion — ti a ṣakoso nipasẹ `withScopeEnforcement()` ni `open-sse/mcp-server/server.ts`, ti a fi agbara mu lori `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ati fi agbara mu fun awọn olupe HTTP/SSE ti bọtini API ko ni `manage`/`admin`, pẹlu awọn aaye ti a gba laaye ti o jade lati `OMNIROUTE_MCP_SCOPES` tabi aaye aaye aaye API naa. Wo [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Àwọn endpoint
 

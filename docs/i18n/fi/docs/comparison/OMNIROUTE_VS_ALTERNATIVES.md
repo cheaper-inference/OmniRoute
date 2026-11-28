@@ -11,7 +11,7 @@ Objektiivinen ominaisuuksien vertailu suosittuihin avoimen lähdekoodin AI reiti
 | Ominaisuus                                             |                  OmniRoute 3.8                  |      LiteLLM 1.x      | OpenRouter (SaaS) |   Portavain   |
 | ------------------------------------------------------ | :---------------------------------------------: | :-------------------: | :---------------: | :-----------: |
 | **Palveluntarjoajat**                                  |                     **329**                     |         ~100          |        ~50        |      ~30      |
-| **Free/no-auth -luettelomerkinnät**                    |                     **155**                     |          n/a          |     läpikulku     |      n/a      |
+| **Palveluntarjoajat, joilla on ilmainen pääsy**        |               **50 vapaa pääsy**                |          n/a          |     läpikulku     |      n/a      |
 | **Itsenäinen isäntä**                                  |                       ✅                        |          ✅           |        ❌         |   ⚠ maksoi    |
 | **OAuth -luettelomerkinnät**                           |                     **23**                      |      osittainen       |        ❌         |      ❌       |
 | **Automaattiset varayhdistelmät**                      |                **22 strategiaa**                | prioriteettipohjainen |   tasopohjainen   |  painotettu   |
@@ -38,8 +38,8 @@ Objektiivinen ominaisuuksien vertailu suosittuihin avoimen lähdekoodin AI reiti
 
 ## Milloin valita OmniRoute
 
-- Isäntät itse ja haluat** palveluntarjoajan enimmäiskattavuus** (394 palveluntarjoajaa, 155 free/no-auth -luettelomerkintää)
-- Tarvitset a** sisäänrakennettu MCP -palvelin** (LLM työkalut, muisti, työkaluina näkyvät taidot)
+- Isäntät itse ja haluat** palveluntarjoajan enimmäiskattavuus** (394 palveluntarjoajaa, 50 ilmaisella pääsyllä)
+- Tarvitset a** sisäänrakennettu MCP -palvelin** (LLM työkalut, muisti, työkaluina paljastetut taidot)
 - Tarvitset**A2A protokolla** agenttien välisiä työnkulkuja varten
 - Haluat** sormenjälkien salailu** (JA3/JA4) välttääksesi ylävirran CAPTCHAs havaitsemisen
 - Tarvitset** yrityksen ominaisuuksia** (suojakaiteet, evals, kirjausketju) ilman SaaS -laskua
@@ -56,12 +56,12 @@ Objektiivinen ominaisuuksien vertailu suosittuihin avoimen lähdekoodin AI reiti
 - Tokenikohtainen maksaminen SaaS-lisähinnalla sopii sinulle
 - Tarvitset **yhden maksutavan** kaikille palveluntarjoajille
 
-## Milloin Portkey kannattaa valita
+## Milloin valita Portkey
 
-- Tarvitset **kaupallisen SLA:n**, johon sisältyvät käytettävyystakuut
-- Haluat mieluummin **hallinnoidun hallintapaneelin** ilman ylläpidon aiheuttamaa lisätyötä
-- Tarvitset käyttövalmiita **yritystason vaatimustenmukaisuusominaisuuksia**
+- Tarvitset a** kaupallinen SLA** käyttöaikatakuilla
+- Pidät mieluummin a** hallittu kojelauta** ilman operaatioita yläpuolella
+- Tarvitset** yrityksen vaatimustenmukaisuus** ominaisuuksia pois laatikosta
 
 ---
 
-_Päivitetty viimeksi: 2026-08-02. Lähetä korjaukset PR:nä, jotta taulukon tiedot pysyvät paikkansapitävinä._
+_Lähetä korjaukset PR kautta, jotta tämä taulukko pysyy oikeana._

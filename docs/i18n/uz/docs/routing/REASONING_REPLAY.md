@@ -4,7 +4,7 @@
 
 ---
 
-> **Haqiqat manbai:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Oxirgi yangilangan:** 2026-06-28 — v3.8.40
+> **Haqiqat manbai:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute fikrlash rejimi modellari tomonidan ishlab chiqarilgan `reasoning_content` yordamchisini suratga oladi va yuqori oqim provayderi talab qilganda uni ko‘p burilishli so‘rovlarda shaffof tarzda takrorlaydi. Bu mijozning suhbatlari tarixida oldingi navbatning asosi yo'q bo'lganda, qattiq provayderlar ko'taradigan HTTP 400 xatolarini yo'q qiladi.
 

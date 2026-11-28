@@ -4,15 +4,11 @@
 
 ---
 
-> **Haqiqiy manba:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Oxirgi yangilanish:** 2026-06-28 — v3.8.40
+> **Haqiqat manbai:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-OmniRoute platforma hodisalari yuz berganda HTTP vebhuklarini ishga tushirishi mumkin. Ulardan
-Slack, PagerDuty, Datadog, ichki ogohlantirish xizmatlari yoki istalgan HTTP qabul qiluvchisi bilan integratsiya qilish uchun foydalaning.
+OmniRoute platforma voqealarida HTTP veb-huklarini yoqishi mumkin. Ulardan Slack, PagerDuty, Datadog, ichki ogohlantirish xizmatlari yoki har qanday HTTP qabul qiluvchisi bilan integratsiya qilish uchun foydalaning.
 
-Dispetcher har bir yetkazib berishni HMAC-SHA256 bilan imzolaydi, vaqtinchalik
-nosozliklarda qayta urinadi, har bir vebhuk bo‘yicha yetkazib berish holatini kuzatadi va
-muntazam ravishda muvaffaqiyatsiz bo‘layotgan endpointlarni avtomatik tarzda o‘chiradi.
+Dispetcher har bir yetkazib berishni HMAC-SHA256 bilan imzolaydi, vaqtinchalik nosozliklarni qayta ko‘rib chiqadi, har bir vebhuk uchun yetkazib berish holatini kuzatadi va muvaffaqiyatsiz bo‘layotgan so‘nggi nuqtalarni avtomatik ravishda o‘chiradi.
 
 ## Qo'llab-quvvatlanadigan voqealar
 

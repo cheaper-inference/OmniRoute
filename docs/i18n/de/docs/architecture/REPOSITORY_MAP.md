@@ -4,9 +4,9 @@
 
 ---
 
-> **Was lebt wo: jedes verfolgte Verzeichnis der obersten Ebene und jede Stammdatei mit einem einzeiligen Zweck.** Letzte Aktualisierung: 13.11.2026 (OmniRoute v3.8.54)
+> **Was lebt wo: jedes verfolgte Verzeichnis der obersten Ebene und jede Stammdatei mit einem einzeiligen Zweck.**
 >
-> Verwenden Sie diese Karte, um sich in der Codebasis zurechtzufinden, und folgen Sie dann den Links zu den entsprechenden Dokumenten. Die Dateianzahl wurde mit `git ls-files` am oben genannten Datum gemessen. Sie ändern sich mit fast jeder Veröffentlichung. Behandeln Sie sie daher als Größenordnungen.
+> Verwenden Sie diese Karte, um sich in der Codebasis zurechtzufinden, und folgen Sie dann den Links zu den entsprechenden Dokumenten. Die Anzahl der Dateien stammt von `git ls-files` und ändert sich mit fast jeder Veröffentlichung. Behandeln Sie sie als Größenordnungen.
 
 ## Baum der obersten Ebene
 

@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | כתובת ה-URL הבסיסית לאחר פתרון                        |
 | `ctx.apiKey`                 | `string \| null` | מפתח API, אם סופק                                     |
 
-## גילוי
+## תַגלִית
 
-תוספים מתגלים מתוך:
+תוספים מתגלים מ:
 
-1. `~/.omniroute/plugins/<name>/` — התקנות מקומיות של המשתמש
-2. משתנה הסביבה `OMNIROUTE_PLUGIN_PATH` — תיקייה מותאמת אישית
+1. `~/.omniroute/plugins/node_modules/<name>/` — שבו `omniroute plugin install` שם חבילות ( npm `--prefix`, לא `npm -g`)
+2. מדריכי פלאגין `~/.omniroute/plugins/<name>/` — שהועתקו ביד
+3. `OMNIROUTE_PLUGIN_PATH` env var — ספרייה מותאמת אישית
 
-שניהם מיועדים **ל-CLI בלבד**. לסביבת הריצה של התוספים בצד השרת (תוספי marketplace/`plugin.json`
-שפועלים בתוך ה-proxy) יש סורק משלה עם הגדרת עקיפה משלו,
-`OMNIROUTE_PLUGINS_DIR` — ראו
-[PLUGIN_MARKETPLACE.md ← תיקיית התוספים](./PLUGIN_MARKETPLACE.md#plugin-directory).
-הגדרת אחד מהם אינה משפיעה על האחר.
+ספריות עם קישור סימול (מה ש-npm יוצר עבור `plugin install ./dir`) עוקבים אחריהם.
 
-שגיאות טעינה נלכדות ומוצגות כאזהרות — תוסף פגום לעולם אינו גורם לקריסת ה-CLI.
+שניהם** CLI בלבד** . לזמן הריצה של הפלאגין בצד השרת (תוספי ה-marketplace/`plugin.json` שפועלים בתוך ה-proxy) יש סורק משלו עם עקיפה משלו, `OMNIROUTE_PLUGINS_DIR` — ראה [PLUGIN_MARKETPLACE.md → Plugin directory](./PLUGIN_MARKETPLACE.md#plugin-directory). הגדרה של אחת לא משפיעה על השני.
+
+שגיאות טעינה נתפסות ומודפסות כאזהרות — תוסף שבור לעולם לא קורס את CLI.
 
 ## אבטחה
 

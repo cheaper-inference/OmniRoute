@@ -63,43 +63,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 sábhálann OmniRoute an comhartha agus ritheann sé cuardach tástála 1 toradh láithreach; má
 fhilleann Notion oibiacht earráide, glantar an comhartha agus teipeann ar an nglao le `400`.
 
-## Uirlisí MCP (6)
+## uirlisí MCP (6)
 
-Sainmhínítear iad in `open-sse/mcp-server/tools/notionTools.ts`. Réitítear an comhartha tráth
-an ghlao trí `getNotionToken()`; mura bhfuil ceann ar bith cumraithe, caitheann an uirlis
-`"Níl comhartha comhtháthaithe Notion cumraithe. Socraigh é in Socruithe > Foinsí Comhthéacs."`
+Sainithe in `open-sse/mcp-server/tools/notionTools.ts`. Réitítear an comhartha ag am glaonna trí `getNotionToken()`; mura bhfuil ceann ar bith cumraithe caitheann an uirlis `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Uirlis                       | Scóip          | Cur síos                                                                                                                         |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Cuardaigh leathanaigh agus bunachair sonraí de réir iarratais téacs (filleann sé teidil, aitheantais, URLanna). Leathanachaithe. |
-| `notion_get_page`            | `read:notion`  | Faigh inneachar agus meiteashonraí leathanaigh de réir a aitheantais.                                                            |
-| `notion_list_block_children` | `read:notion`  | Liostaigh gach macbhloc de bhloc nó de leathanach (an crann bloc). Leathanachaithe.                                              |
-| `notion_query_database`      | `read:notion`  | Cuir ceist ar bhunachar sonraí le `filter` + `sorts` roghnacha (formáid Notion API). Leathanachaithe.                            |
-| `notion_get_database`        | `read:notion`  | Faigh scéimre/meiteashonraí bunachair sonraí de réir a aitheantais.                                                              |
-| `notion_append_blocks`       | `write:notion` | Cuir macbhloic i gceangal le bloc nó leathanach atá ann cheana (uasmhéid 100 bloc in aghaidh an iarratais).                      |
+| Uirlis                       | Raon feidhme   | Cur síos                                                                                                                |
+| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Cuardaigh leathanaigh agus bunachair shonraí de réir cheist téacs (cuartaíonn sé teidil, IDs, URLs). leathanacháilte.   |
+| `notion_get_page`            | `read:notion`  | Faigh ábhar agus meiteashonraí leathanach trína ID.                                                                     |
+| `notion_list_block_children` | `read:notion`  | Liostaigh gach páiste bloc de bhloc nó de leathanach (an crann bloc). leathanacháilte.                                  |
+| `notion_query_database`      | `read:notion`  | Ceist bunachar sonraí le `filter` + `sorts` roghnach (formáid Notion API ). leathanacháilte.                            |
+| `notion_get_database`        | `read:notion`  | Íosluchtaigh schema/metadata bunachar sonraí ag ID.                                                                     |
+| `notion_append_blocks`       | `write:notion` | Cuir leanaí bloc i gceangal le bloc nó le leathanach atá ann cheana féin (100 bloc ar a mhéad in aghaidh an iarratais). |
 
 ### Paraiméadair ionchuir
 
-- `notion_search` — `query` (1–500 carachtar), `pageSize` (1–100, réamhshocrú 20),
-  `startCursor` (roghnach).
-- `notion_get_page` — `pageId` (heics 32 carachtar nó UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, réamhshocrú 50),
-  `startCursor` (roghnach).
-- `notion_query_database` — `databaseId`, `filter` (roghnach, formáid scagaire Notion),
-  `sorts` (eagar roghnach), `pageSize` (1–100, réamhshocrú 50), `startCursor` (roghnach).
+- `notion_search` — `query` (1–500 chars), `pageSize` (1–100, réamhshocraithe 20), `startCursor` (roghnach).
+- `notion_get_page` — `pageId` (32-char heics nó UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, réamhshocraithe 50), `startCursor` (roghnach).
+- `notion_query_database` — `databaseId`, `filter` (roghnach, formáid scagaire Notion ), `sorts` (eagar roghnach), `pageSize` (1–100, réamhshocraithe 50), `startCursor` (roghnach).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (eagar oibiachtaí bloc),
-  `after` (suíomh roghnach).
+- `notion_append_blocks` — `blockId`, `children` (eagar de bhloc-rudaí), `after` (seasamh roghnach).
 
-### Scóipeanna
+### Scóip
 
-Éilíonn na huirlisí léitheoireachta `read:notion` agus éilíonn an uirlis scríbhneoireachta
-`write:notion`. Cuireann `withScopeEnforcement()` in
-`open-sse/mcp-server/server.ts` na scóipeanna i bhfeidhm nuair atá
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` amháin; tagann scóipeanna ceadaithe an ghlaoiteora ó
-`OMNIROUTE_MCP_SCOPES` (deighilte le camóga) nó ó chomhthéacs scóip na heochrach API
-fíordheimhnithe. Féach [MCP-SERVER.md](./MCP-SERVER.md) le haghaidh na samhla scóip
-iomláine.
+Teastaíonn `read:notion` leis na huirlisí léite agus tá `write:notion` ag teastáil ón uirlis scríobh . Cuirtear scóip i bhfeidhm ag `withScopeEnforcement()` in `open-sse/mcp-server/server.ts` nuair a `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, agus i gcónaí do ghlaoiteoir HTTP/SSE a bhfuil easpa `manage`/`admin` API eochair; Tagann scóip cheadaithe an ghlaoiteora ó `OMNIROUTE_MCP_SCOPES` (scartha le camóg) nó ó chomhthéacs raon feidhme na heochrach API fíordheimhnithe. Féach [MCP-SERVER.md](./MCP-SERVER.md) le haghaidh an tsamhail raon feidhme iomlán.
 
 ## Críochphointí
 

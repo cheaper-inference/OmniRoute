@@ -6,12 +6,12 @@
 
 Objektīvs funkciju salīdzinājums ar populāriem atvērtā AI maršrutētājiem.
 
-> **Metodoloģija** : 2026. gada 2. ceturksnī pārbaudīti publiskie atpirkšanas darījumi. Versijas, kā norādīts sarakstā. Iesniedziet labojumus, izmantojot PR — mēs vēlamies, lai tie būtu precīzi.
+> **Metodoloģija** : 2026. gada 2. ceturksnī pārbaudīti publiskie atpirkšanas darījumi. Versijas, kā norādīts sarakstā. Iesniedziet labojumus, izmantojot PR — Mēs vēlamies, lai tie būtu precīzi.
 
 | Funkcija                                                     |                  OmniRoute 3.8                   |  LiteLLM 1.x   | OpenRouter (SaaS) |  Portatslēga   |
 | ------------------------------------------------------------ | :----------------------------------------------: | :------------: | :---------------: | :------------: |
 | **Pakalpojumu sniedzēji**                                    |                     **329**                      |      ~100      |        ~50        |      ~30       |
-| **Free/no-auth kataloga ieraksti**                           |                     **155**                      |      n/a       |     caurlaide     |      n/a       |
+| **Pakalpojumu sniedzēji ar bezmaksas piekļuvi**              |           **50 ar bezmaksas piekļuvi**           |      n/a       |     caurlaide     |      n/a       |
 | **Patstāvīgs**                                               |                        ✅                        |       ✅       |        ❌         |  ⚠ samaksāja   |
 | **OAuth kataloga ieraksti**                                  |                      **23**                      |     daļēja     |        ❌         |       ❌       |
 | **Automātiskās atkāpšanās kombinācijas**                     |                **22 stratēģijas**                | uz prioritātēm |      līmenī       |    svērtais    |
@@ -38,7 +38,7 @@ Objektīvs funkciju salīdzinājums ar populāriem atvērtā AI maršrutētājie
 
 ## Kad izvēlēties OmniRoute
 
-- Jūs pats saimniekojat un vēlaties** maksimālais pakalpojumu sniedzēja pārklājums** (394 pakalpojumu sniedzējs, 155 free/no-auth ieraksti katalogā)
+- Jūs pats saimniekojat un vēlaties** maksimālais pakalpojumu sniedzēja pārklājums** (394 pakalpojumu sniedzēji, 50 ar bezmaksas piekļuvi)
 - Jums ir nepieciešams a** iebūvēts MCP serveris** (LLM rīki, atmiņa, prasmes, kas parādītas kā rīki)
 - Tev vajag**A2A protokols** aģents-aģents darbplūsmām
 - Jūs vēlaties** pirkstu nospiedumu slēpšana** (JA3/JA4), lai izvairītos no atklāšanas ar augšpus CAPTCHAs
@@ -58,10 +58,10 @@ Objektīvs funkciju salīdzinājums ar populāriem atvērtā AI maršrutētājie
 
 ## Kad izvēlēties Portkey
 
-- Jums nepieciešams **komerciāls SLA** ar darbspējas laika garantijām
-- Jūs dodat priekšroku **pārvaldītam informācijas panelim** bez ekspluatācijas administrēšanas sloga
-- Jums nepieciešamas gatavas **uzņēmumu atbilstības** funkcijas
+- Jums ir nepieciešams a** komerciālais SLA** ar darbības laika garantijām
+- Jūs dodat priekšroku a** pārvaldītais informācijas panelis** bez operācijām virs galvas
+- Tev vajag** uzņēmuma atbilstība** funkcijas ārpus kastes
 
 ---
 
-_Pēdējo reizi atjaunināts: 2026-08-02. Iesniedziet labojumus, izmantojot PR, lai šī tabula būtu precīza._
+_Iesniedziet labojumus, izmantojot PR, lai šī tabula būtu precīza._

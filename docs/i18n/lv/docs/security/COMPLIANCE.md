@@ -5,17 +5,10 @@
 ---
 
 > **Patiesības avots:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Pēdējoreiz atjaunināts:** 2026-06-28 — v3.8.40
 
-OmniRoute reģistrē administratīvās darbības, autentifikācijas notikumus, pakalpojumu
-sniedzēju akreditācijas datu dzīves cikla izmaiņas un MCP rīku izsaukumus SQLite
-audita tabulās. Šajā lapā ir aprakstīts, kas tiek reģistrēts, kur dati atrodas, cik ilgi tie
-tiek glabāti, kā API atslēgām var atteikties no reģistrēšanas un kā veikt datu vaicājumus.
+OmniRoute reģistrē administratīvās darbības, autentifikācijas notikumus, nodrošinātāja akreditācijas datu dzīves cikla izmaiņas un MCP rīku izsaukumus SQLite atbalstītās audita tabulās. Šajā lapā ir aprakstīts, kas tiek reģistrēts, kur tas dzīvo, cik ilgi tas tiek saglabāts, kā API atslēgas var atteikties un kā veikt datu vaicājumus.
 
-Implementācija atrodas failos `src/lib/compliance/index.ts` (T-43 — „Atbilstības
-kontroles”) un `src/lib/compliance/providerAudit.ts`. Audita ierakstīšana nekad neizraisa izņēmumu:
-jebkuras kļūmes gadījumā izsaukums tiek klusi ignorēts, lai audita reģistrēšana nevarētu pārtraukt
-galveno pieprasījuma plūsmu.
+Ieviešana darbojas `src/lib/compliance/index.ts` (T-43 — "Atbilstības kontroles") un `src/lib/compliance/providerAudit.ts`. Audits raksta nekad: jebkuras kļūmes gadījumā zvans tiek klusi norīts, tāpēc audita reģistrēšana nevar pārtraukt galveno pieprasījumu plūsmu.
 
 ## Kas tiek reģistrēts
 
@@ -135,33 +128,33 @@ tīrīšanas. Pieprasījumu žurnālu lapa izsauc
 Noklusējuma vērtības ir definētas failā `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## `noLog` atteikšanās opcija (katrai API atslēgai)
+## `noLog` atteikšanās (katrai API atslēgai)
 
-API atslēgas var atzīmēt tā, lai to pakārtoto izsaukumu datplūsma netiktu
-reģistrēta. Šis karogs atrodas tabulā `api_keys` (`no_log INTEGER DEFAULT 0`)
-un tiek atspoguļots atmiņā glabātā kopā ātrai piekļuvei kritiskajā izpildes
-ceļā.
+API taustiņus var atzīmēt, lai to pakārtotā zvanu trafika netiktu reģistrēta. Karogs atrodas uz `api_keys` tabulas (`no_log INTEGER DEFAULT 0`) un tiek atspoguļots atmiņā esošajā komplektā karstā ceļa meklēšanai.
 
 ```bash
-# Izveido atslēgu bez žurnalēšanas (nepieciešama pārvaldības autentifikācija)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Palīgfunkcijas (`src/lib/compliance/index.ts`):
+Palīgi (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — pārslēdz ierakstu atmiņā
-- `isNoLog(apiKeyId)` — tiek pārbaudīta pieprasījuma izpildes ceļā; ja ieraksta
-  nav, izmanto 30 s kešotu nolasījumu no `api_keys.no_log`
-- `NO_LOG_API_KEY_IDS` (vides mainīgais, vērtības atdalītas ar komatiem) —
-  sistēmas palaišanas laikā tiek iepriekš ielādēts atmiņā glabātajā kopā;
-  noder, ja kolonnu nevar pārslēgt tieši
+- `setNoLog(apiKeyId, true|false)` — pārslēgt ierakstu atmiņā
+- `isNoLog(apiKeyId)` — pārbaudīts pieprasījuma ceļā; atgriežas 30 s kešatmiņā nolasītā `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, ar komatu atdalīts) — kas ir iepriekš ielādēts atmiņas komplektā sāknēšanas laikā; noderīga, ja nevarat tieši pārslēgt kolonnu
 
-`noLog` **neietekmē** administratīvos audita notikumus (pieteikšanos,
-pakalpojumu sniedzēju izmaiņas, MCP rīku izsaukumus u.c.) — atteikšanās attiecas
-tikai uz katra pieprasījuma datplūsmas žurnalēšanu.
+Administratīvā audita notikumi (pieteikšanās, pakalpojumu sniedzēja izmaiņas, MCP rīku izsaukumi utt.) ir** nē** `noLog` ietekmē — ir atteikta tikai trafika reģistrēšana pēc pieprasījuma.
+
+### Atteikšanās pēc pieprasījuma (`x-omniroute-no-log`)
+
+Klients var izvēlēties vienu secinājumu pieprasījumu no lietderīgās slodzes noturības, neizveidojot īpašu atslēgu. Nosūtiet `x-omniroute-no-log: true` pēc pieprasījuma (tiek pieņemti arī `1` un `yes`, nav reģistrjutīgi). Tas attiecas uz katru tērzēšanas ģimenes maršrutu, kas iet caur tērzēšanas apdarinātāju: tērzēšanas pabeigšanas, atbildes, ziņojumi, pabeigšanas un ar Gemini saderīgs ceļš. Zvanu žurnāla rinda joprojām tiek rakstīta ar laika zīmogu, modeli, nodrošinātāju, statusu, ilgumu un pilnvaru skaitu, taču tiek izlaisti `request_body`, `response_body`, pieprasījumu kopsavilkumi un konveijera artefakti.
+
+Galvene ir ORed ar atslēgas karogu: bezreģistrācijas atslēga paliek nereģistrēta neatkarīgi no galvenes, un galvene nevar atkārtoti iespējot nereģistrēšanas atslēgas reģistrēšanu. Pirms pieprasījuma pārsūtīšanas augšup pa straumi tiek noņemta galvene.
+
+Šī galvene dara** nē** atspējojiet atmiņas izvilkšanu vai semantisko kešatmiņu. Nosūtiet `x-omniroute-no-memory: true` un `x-omniroute-no-cache: true` kopā ar to, ja pieprasījuma saturs nedrīkst saglabāties arī šajās apakšsistēmās.
 
 ## REST API
 

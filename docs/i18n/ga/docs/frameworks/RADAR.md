@@ -94,52 +94,30 @@ ródú ná roghnú samhla — féach an rogha ar leith thíos.
 
 ---
 
-## Is rogha AR LEITH é sioncronú sonraí — an gealltanas príobháideachais
+## Is ionann sioncronú sonraí agus SEPARATE opt-in — an gealltanas príobháideachta
 
-Ní dhéanann casadh `RADAR_ENABLED` air ach an Chomhéadain a dhíghlasáil. Teastaíonn an dara
-rogha neamhspleách, atá stóráilte in `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-ascnamh `136_radar_cache_settings.sql`), chun an fotha a shioncronú. Seiceálann `syncRadar()` an bhratach _agus_ an
-rogha sula ndéanann sé aon ghlao líonra:
+Má chuirtear `RADAR_ENABLED` ar siúl ní scaoilfidh sé ach an UI. Chun an fotha a shioncronú is gá an dara rogha diúltaithe neamhspleách a stóráiltear in `radar_settings.opt_in` (`src/lib/db/radar.ts`, imirce `136_radar_cache_settings.sql`). Seiceálann `syncRadar()` an bhratach _agus_ an rogha diúltaithe roimh aon ghlao líonra a dhéanamh:
 
 ```
-Bratach múchta    → { status: "disabled" }   — gan aon ghlao líonra
-Rogha diúltaithe  → { status: "opt_out" }    — gan aon ghlao líonra
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Nuair atá an dá cheann ar siúl, seo é an chonair sioncronaithe:
+Nuair a bhíonn an dá cheann ar siúl, is é an chonair sioncronaithe:
 
-1. `GET <feed base URL>/v1/catalog/latest` le `x-omniroute-radar-schema: 2` agus ceanntásc roghnach
-   `Authorization: Bearer <supporter key>` (féach thíos). Úsáideann freastalaithe déantán aistrithe v1 atá
-   sínithe ar leithligh mar réamhshocrú nuair atá ceanntásc na scéimre as láthair, ionas go leanfaidh cliaint
-   suiteáilte níos sine d'uasdátuithe a fháil.
-2. Is sreabhadh feidhmchláir íoslódála amháin é seo, ach is iarratas HTTPS é fós. Faigheann an bonneagar
-   óstáilte gnáth-mheiteashonraí ceangail amhail an seoladh IP foinseach. Nuair atá eochair tacaíochta
-   cumraithe, seolann an sioncronú an eochair sin sa cheanntásc Bearer freisin ionas gur féidir leis an tseirbhís
-   an teidlíocht a réiteach. Ag an athbhreithniú beacht ar an bhfreastalaí príobháideach a sainaithníodh sa
-   teorainn fianaise thuas, úsáideann cuntasaíocht iarrataí fotha haiseanna eochrach, úsáid chomhiomlán, agus HMAC
-   teasctha den IP a rothlaítear go laethúil le haghaidh athbhreithniú láimhe ar mhí-úsáid; ní choinníonn na táblaí
-   sin an eochair ná an IP i bhfoirm amh. Is teorainneacha oibríochtúla ar leith iad logaí rochtana bonneagair
-   agus an bosca amach criptithe seachadta.
-3. Ní sheolann OmniRoute leideanna, freagraí, comhráite, dintiúir soláthraí, trácht samhla,
-   aga fónaimh, aga folaigh ná cumraíocht áitiúil an tsoláthraí chuig seirbhís Radar riamh.
-4. Déantar an freagra a fhíorú, a bhailíochtú agus a thaisceadh go háitiúil (féach
-   [Samhail slándála](#security-model)). Tá ceithre chonair líonra ar thaobh an fhreastalaí go díreach ag Radar:
-   `syncRadar()` don chatalóg, `syncRadarReferrals()` d'atreoruithe, agus
-   `syncRadarOffers()` / `syncRadarIntel()` do thairiscintí agus Intel atá ar fáil do lucht tacaíochta amháin.
+1. `GET <feed base URL>/v1/catalog/latest` le `x-omniroute-radar-schema: 2` agus ceanntásc roghnach `Authorization: Bearer <supporter key>` (féach thíos). Réamhshocrú freastalaithe ar an déantán trasdula v1 sínithe go leithleach nuair a bhíonn an ceanntásc scéimre as láthair, mar sin cliaint níos sine suiteáilte ag fáil nuashonruithe i gcónaí.
+2. Is sreabhadh feidhmchláir íoslódála amháin é seo, ach is iarratas HTTPS fós é. Faigheann an bonneagar óstaithe meiteashonraí gnáthnaisc amhail an fhoinse IP. Nuair a bhíonn eochair tacaithe cumraithe, seolann Sync an eochair sin freisin sa cheanntásc Iompróra ionas gur féidir leis an tseirbhís an teidlíocht a réiteach. Ag an athbhreithniú beacht ar an bhfreastalaí príobháideach a aithníodh sa teorainn fhianaise thuas, úsáideann cuntasaíocht iarratais beathaithe hashes eochair, úsáid chomhiomlán, agus HMAC teasctha rothlach laethúil den IP le haghaidh athbhreithniú ar mhí-úsáid láimhe; ní mhaireann na táblaí sin an eochair ná an IP i bhfoirm amh. Is teorainneacha oibríochta ar leith iad logaí rochtana bonneagair agus an bosca seolta criptithe.
+3. ní sheolann OmniRoute leideanna, freagraí, comhráite, dintiúir an tsoláthraí, trácht múnla, aga fónaimh, latency, nó cumraíocht an tsoláthraí áitiúil chuig an tseirbhís Radar.
+4. Déantar an freagra a fhíorú, a bhailíochtú agus a thaisceadh go háitiúil (féach [Múnla Slándála](#security-model) ). Tá ceithre chonair líonra taobh freastalaí go díreach ag Radar: `syncRadar()` don chatalóg, `syncRadarReferrals()` le haghaidh atreoraithe, agus `syncRadarOffers()` / `syncRadarIntel()` le haghaidh tairiscintí tacaithe amháin agus Intel.
 
-Is comhartha Bearer roghnach í an **eochair tacaíochta** (`radar_settings.supporter_key`)
-a ligeann don tseirbhís fotha cinneadh a dhéanamh faoin tsraith atá le soláthar (féach
-[Sraitheanna](#tiers-community-and-live)). Tá sí:
+Ritheann seiceáil na catalóige gach 24 uair. Nuair a bhíonn an leagan agus an tsraith i dtaisce fós ag an bhfotha fíoraithe, coinníonn sioncronú an t-ualach pálasta i dtaisce, athnuachan `fetchedAt`, agus tagann an chéad seiceáil eile 24 uair an chloig ina dhiaidh sin in ionad an chéad tic uair an chloig eile.
 
-- Stóráilte **criptithe ar diosca** leis na cúntóirí céanna AES-256-GCM `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`) a úsáidtear do dhintiúir soláthraí.
-- Socraithe trí `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) agus
-  **ní chuirtear ar ais riamh í** — tugann an freagra foirm mhasctha ar ais (`omr_****abcd`).
-- Má athraítear nó má ghlantar í, déantar taiscí na catalóige, na n-atreoruithe, na dtairiscintí agus Intel a
-  neamhbhailíochtú go hadaimh. Réitíonn an chéad sioncronú/léamh eile an teidlíocht nua ar thaobh an fhreastalaí;
-  ní dhéanann sábháil eochrach iarratas líonra ann féin agus ní ídíonn sé eochair ghníomhachtaithe aonúsáide.
-- Seoltar chuig an tseirbhís fotha í mar chomhartha Bearer ar an GET sioncronaithe — ní fhágann aon rud eile
-  faoin eochair an cliant riamh.
+Tá an** eochair tacaíochta** is comhartha Iompróra roghnach (`radar_settings.supporter_key`) é a ligeann don tseirbhís beathaithe cinneadh a dhéanamh maidir leis an tsraith le freastal air (féach [Sraitheanna](#tiers-community-and-live) ). Tá sé:
+
+- Stóráilte** criptithe ar fos** leis na cúntóirí AES-256-GCM `encrypt()`/`decrypt()` céanna (`src/lib/db/encryption.ts`) a úsáidtear le haghaidh dintiúir an tsoláthraí.
+- Socraigh trí `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) agus** riamh macalla ar ais** — seolann an freagra foirm chumhdaigh (`omr_****abcd`).
+- Má dhéantar an chatalóg, na tarchuir, na tairiscintí, agus na caches Intel a neamhbhailíochtú go hadamhach má dhéantar é a athrú nó a ghlanadh. Réitíonn an chéad sync/read eile taobh an fhreastalaí teidlíochta nua; ní dhéantar iarratas líonra féin a shábháil ná ní ídíonn sé eochair gníomhachtaithe aonúsáide.
+- Seolta chuig an tseirbhís beathaithe mar chomhartha Iompróra ar an sync GET — ní fhágann aon rud eile faoin eochair an cliant riamh.
 
 ---
 
@@ -434,84 +412,45 @@ version, tier }` — is é seo an luach a thaispeánann an deais, agus ní réim
 
 ---
 
-## Rialacha cumaisc forleagain ag am léite
+## Rialacha cumasc forleagain am léite
 
-Cumascann `applyFeed()` (`src/lib/radar/applyFeed.ts`) an fotha i dtaisce **thar** an
-mbunlíne statach **ag am léite**, laistigh de `getRadarCatalog()`. Ní shóchlaítear an t-eagar bunlíne
-(`FREE_MODEL_BUDGETS`) riamh — ríomhtar `MergedEntry[]` as an nua le gach
-glao.
+chumasc `applyFeed()` (`src/lib/radar/applyFeed.ts`) an fotha i dtaisce** thar** an bunlíne statach ag** am léite** , taobh istigh `getRadarCatalog()`. Ní dhéantar an t-eagar bunlíne (`FREE_MODEL_BUDGETS`) a athrú riamh — a `MergedEntry[]` ríomhtar úr ar gach glao.
 
 Ceithre riail, in ord tosaíochta:
 
-1. **Ní fhorscríobhann an fotha sárú áitiúil riamh.** De réir réimse: má tá
-   réimse ar iontráil saincheaptha ag an oibreoir (léarscáil `localOverrides`, eochraithe de réir `provider:modelId`),
-   scipeáiltear luach an fhotha don réimse sonrach sin — bíonn an bua ag luach an oibreora.
-2. **Díchumasaíonn `enabled: false` an iontráil, agus coinnítear a bunáitíocht.** Má mhúchann iontráil fotha
-   iontráil, socraítear `enabled: false` agus `disabledBy: "radar"` ar an toradh cumaiscthe,
-   ionas gur féidir leis an UI a mhíniú _cén fáth_ ar athraigh iontráil ó bheith ar fáil go bheith díchumasaithe.
-3. **Maireann iontráil a chuir úsáideoir leis agus nach bhfuil san fhotha gan athrú.** Iontrálacha nach
-   bhfuil ann ach sa bhunlíne (nó a cuireadh leis go háitiúil) agus nach bhfuil iontráil chomhfhreagrach fotha
-   acu, téann siad tríd gan athrú.
-4. **Ní athbheoitear iontráil a bhfuil leac uaighe aici riamh.** Má scrios an t-oibreoir
-   iontráil go sainráite (tacar `tombstones`), ní thugann athchur an `provider:modelId` sin ag an bhfotha i leagan
-   níos déanaí ar ais í.
+1. **Ní fhorscríobhann beathú riamh sárú áitiúil.** In aghaidh an réimse: má tá réimse ar iontráil sainoiriúnaithe ag an oibreoir ( léarscáil `localOverrides`, eochrach `provider:modelId`), ní dhéantar luach an fhotha don réimse sonrach sin a scipeáil — bhuaigh luach an oibreora.
+2. **díchumasaítear `enabled: false` an iontráil, le foinse.** Socraíonn iontráil fotha a mhúchtar iontráil `enabled: false` agus `disabledBy: "radar"` ar an toradh cumaiscthe, mar sin is féidir leis an UI a mhíniú _why_ iontráil a chuaigh ó ar fáil go díchumasaithe.
+3. **Maireann iontráil úsáideoir-bhreis nach bhfuil sa bheatha gan teagmháil.** Ní thagann aon athrú ar iontrálacha nach bhfuil ann ach sa bhunlíne (nó a cuireadh leis go háitiúil) agus nach bhfuil aon iontráil bheatha chomhfhreagrach acu.
+4. **Ní aiséirí riamh iontráil leac uaighe.** Má scriosann an t-oibreoir iontráil (`tombstones` set ) go sainráite, ní thabharfaidh an fotha ar ais leis `provider:modelId` sin i leagan níos déanaí é.
 
-Coimeádtar na réimsí ineagarthóireachta agus na leaca uaighe go marthanach in
-`radar_local_model_state` (aistriú `153_radar_local_model_state.sql`). Tiontaíonn an cuibheoir poiblí DB
-(`src/lib/db/radar.ts`) na rónna sin ina léarscáil `localOverrides` agus ina thacar
-`tombstones` a úsáideann `applyFeed()`; lódálann `getRadarCatalog()` táirgthe an staid sin
-tar éis do na geataí brataí, taisce agus scéimre pas a fháil. Ní féidir leis an oibreoir ach `displayName` agus `enabled` a chur in eagar.
-Ní féidir céannacht soláthraí/samhla, bunáitíocht fotha, cuóta, cumais, ToS,
-ná sonraí socraithe a scríobh tríd an dromchla seo.
+Tá na réimsí agus na leaca uaighe in-eagarthóireachta fós in `radar_local_model_state` (imirce `153_radar_local_model_state.sql`). Tiontaíonn an cuibheoir poiblí DB (`src/lib/db/radar.ts`) na sraitheanna sin isteach sa léarscáil `localOverrides` agus sraith `tombstones` a úsáideann `applyFeed()`; ualaí `getRadarCatalog()` táirgeachta a luann tar éis pas na mbratach, an taisce agus na geataí scéimre. Ní féidir ach `displayName` agus `enabled` a chur in eagar. Ní féidir aitheantas Provider/model, foinse beathaithe, cuóta, cumais, ToS, agus sonraí socraithe a scríobh tríd an dromchla seo.
 
-Cuireann an deais ceithre ghníomh áitiúla ar fáil:
+Nochtann an painéal ceithre ghníomh áitiúla:
 
-- Athraíonn **Edit** an t-ainm taispeána áitiúil agus an staid chumasaithe.
-- Glanann **Reset local changes** an dá réimse ineagarthóireachta gan leac uaighe a athrú.
-- Cruthaíonn **Hide** leac uaighe, ionas nach féidir le nuashonruithe fotha níos déanaí an ró a athchruthú.
-- Baineann **Restore** an leac uaighe; fanann aon sárú a sábháladh ar leithligh i bhfeidhm.
+- **Cuir in eagar** athraíonn an t-ainm taispeána áitiúil agus an stát cumasaithe.
+- **Athshocraigh athruithe áitiúla** glanann an dá réimse eagarthóireachta gan leac uaighe a athrú.
+- **Folaigh** cruthaíonn sé leac uaighe, mar sin ní féidir le nuashonruithe fothaithe níos déanaí an tsraith a athchruthú.
+- **Athchóirigh** baintear an leac uaighe; tá aon sárú arna shábháil ar leithligh fós i bhfeidhm.
 
-Is eisceacht sábháilteachta fós é `enabled: false` ón bhfotha: bíonn an bua aige ar
-`enabled: true` áitiúil atá sean, coinníonn sé an iontráil chumaiscthe díchumasaithe, agus taifeadann sé `disabledBy: "radar"`.
+Is eisceacht sábháilteachta fós é fotha `enabled: false` : buaileann sé thar `enabled: true` sean-áitiúil , coimeádann sé an iontráil chumaisc faoi mhíchumas, agus taifeadann sé `disabledBy: "radar"`.
 
-Úsáideann foilseacháin chatalóige `schemaVersion: 2`. Is `number | null` / `boolean | null` go neamhspleách iad `contextWindow` agus gach ceann de `tools`, `vision`, agus
-`thinking`: ciallaíonn `null` nach fios, agus
-ciallaíonn `false` go ndeir foinse oifigiúil soláthraí atá deimhnithe ag D16 go sainráite nach bhfuil an cumas ann.
-Ní chuirtear bratacha inmheánacha clárlainne/sonraíochta samhla OmniRoute chun cinn go díreach mar fhíricí fotha riamh. Glacann an cliant
-le seatanna v1 fós; ós rud é gur úsáid an sean-tógálaí `false` mar ionadchoinneálaí d'easnamh, normalófar `false` v1
-go staid anaithnid agus fanann `true` v1 mar fhíric. Teipeann leaganacha anaithnide scéimre go dúnta agus fanann an
-taisce bhailí dheireanach ar fáil. Ní mór do gach samhail v2 a bhfuil comhthéacs/cumas neamh-null aici
-`metadataEvidenceUrls[]` HTTPS gan dintiúir a iompar; murach sin, teipeann bailíochtú na scéimre agus ní
-chuirtear aon rud in áit na taisce. Rindreálann tábla na catalóige na trí staid go léir mar `✓`, `✕`, agus `?`.
+Úsáideann foilseacháin chatalóg `schemaVersion: 2`. Tá `contextWindow` agus gach ceann de `tools`, `vision`, agus `thinking` neamhspleách `number | null` / `boolean | null`: ciallaíonn `null` anaithnid, cé go gciallaíonn `false` soláthraí oifigiúil D16-confirmed foinse a deir go sainráite go bhfuil an cumas as láthair. Ní chuirtear bratacha inmheánacha OmniRoute registry/model-spec chun cinn go díreach riamh chun fíricí a chothú. Glacann an cliant le pictiúir v1 fós; toisc gur bhain an sean-tógálaí úsáid as `false` mar áitshealbhóir neamhláithreachta, déantar v1 `false` a normalú go anaithnid agus v1 `true` fós fíorasach. Teipeann ar leaganacha scéimre anaithnid dúnta agus tá an taisce bailí deiridh fós ar fáil. Caithfidh HTTPS `metadataEvidenceUrls[]` saor ó dhintiúir a bheith ar gach samhail v2 le context/capability neamhnull ; nó ní theipeann ar bhailíochtú scéimre agus ní athraítear an taisce. Déanann tábla na catalóige gach ceann de na trí stát a sholáthar mar `✓`, `✕`, agus `?`.
 
-### Teaglamaí treoraithe agus rochtain MCP
+### combos treoraithe agus rochtain MCP
 
-Maireann luachanna deimhnithe `familyId` an forleagan ag am léite agus tiomáineann siad an modúl íon
-`buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Ní mholtar fine
-ach amháin nuair a bhíonn naisc ghníomhacha ag dhá sholáthraí ar leith ar a laghad agus nuair a nochtann siad ID beacht na samhla coimeádta.
-Teipeann samhlacha díchumasaithe, soláthraithe neamhghníomhacha, IDanna samhla atá ar iarraidh, finte aonair, agus meaitseálacha
-ailias/réimír débhríocha go dúnta. Úsáideann moltaí an straitéis `priority` atá ann cheana, agus an
-buiséad míosúil athfhillteach is mó á chur ar dtús; ní chruthaíonn an UI iad ach trí `POST /api/combos`.
+Maireann luachanna dearbhaithe `familyId` an forleagan am léite agus tiomáineann siad an modúl `buildRadarComboSuggestions()` íon (`src/lib/radar/comboSuggestions.ts`). Ní mholtar teaghlach ach amháin nuair a bhíonn naisc ghníomhacha ag dhá sholáthraí ar leith ar a laghad agus nuair a nochtar an tsamhail cheart coimeádaithe ID. Teipeann ar mhúnlaí míchumasaithe, soláthraithe neamhghníomhacha, IDs samhail in easnamh, teaghlaigh singleton, agus meaitseanna débhríoch alias/prefix dúnta. Úsáideann moltaí an straitéis `priority` atá ann cheana féin, chun an buiséad míosúil athfhillteach is mó a ordú ar dtús; ní chruthaíonn an UI iad ach trí `POST /api/combos`.
 
-Tá an Chomhéadain threoraithe le fáil ag `/dashboard/radar/combos`. Ní léann sí ach na críochphointí áitiúla
-`GET /api/radar/catalog` agus `GET /api/combos/builder/options`. Ní thionscnaíonn sí sioncronú Radar riamh,
-ní léann sí dintiúir soláthraithe, agus ní scríobhann sí go díreach chuig bunachar sonraí na dteaglamaí.
+Cónaíonn an UI treoraithe ag `/dashboard/radar/combos`. Ní léann sé ach na críochphointí áitiúla `GET /api/radar/catalog` agus `GET /api/combos/builder/options`. Ní spreagann sé sioncrónú Radar choíche, léann sé dintiúir an tsoláthraí, nó scríobhann sé go díreach chuig an mbunachar sonraí teaglama.
 
-Is féidir le cliaint MCP an teilgean áitiúil céanna a léamh le `omniroute_radar_catalog` (`read:radar`). Déantar na
-scagairí roghnacha `provider`, `familyId`, agus `enabledOnly` a mheas tar éis aon léamh áitiúil amháin
-`GET /api/radar/catalog`. Áirítear ina aschur dúnta meiteashonraí na catalóige mar aon le soláthraí/samhail,
-ainm taispeána, `familyId`, cuóta, cumais, staid chumasaithe, bunús, agus `disabledBy`; ní thugtar URLanna cumraíochta,
-céimeanna, naisc, seoltaí ríomhphoist, eochracha ná sonraí atreoraithe ar ais riamh. Is uirlis
-inléite amháin í seo agus ní agraíonn sí `/api/radar/sync` riamh.
+Is féidir le cliaint MCP an teilgean áitiúil céanna a léamh le `omniroute_radar_catalog` (`read:radar`). Déantar na scagairí roghnacha `provider`, `familyId`, agus `enabledOnly` a mheas tar éis léamh amháin `GET /api/radar/catalog` áitiúil. Áirítear ar a aschur dúnta meiteashonraí catalóige móide provider/model, ainm taispeána, `familyId`, cuóta, cumais, staid chumasaithe, tionscnamh, agus `disabledBy`; setup URLs, céimeanna, naisc, seoltaí r-phoist, eochracha, agus sonraí atreoraithe ní ar ais. Tá an uirlis seo inléite amháin agus ní úsáidtear `/api/radar/sync` riamh . Nuair a thagann an fotha i dtaisce roimh an gcatalóg suiteáilte, is `meta.olderThanRelease` é `true` agus cuireann an uirlis samhlacha ar ais ón gcatalóg suiteáilte le sáruithe áitiúla agus leaca uaighe i bhfeidhm.
 
-### Marcóirí bunáitíochta
+### Marcóirí tionscnaimh
 
-Tá réimse `origin` ag gach iontráil chumaiscthe, a thaispeánann an Chomhéadain mar shuaitheantas:
+Tá réimse `origin` ar gach iontráil chumaisc a thugann an UI mar shuaitheantas:
 
-- `"baseline"` — gan athrú ón gcatalóg statach eisiúna.
-- `"radar"` — rinne an fotha réimse amháin nó níos mó a athnuachan.
-- `"local"` — tá sárú áitiúil amháin ar a laghad déanta ag an oibreoir ar an iontráil seo (bíonn
-  tosaíocht i gcónaí ag sáruithe áitiúla ar an bhfotha de réir riail 1, beag beann ar a ndeir an fotha).
+- `"baseline"` — gan teagmháil ón gcatalóg scaoileadh statach.
+- `"radar"` — rinneadh réimse amháin nó níos mó a athnuachan ag an bhfotha.
+- `"local"` — tá ar a laghad sáraithe áitiúil amháin ag an oibreoir ar an iontráil seo (buaiteann sáruithe áitiúla i gcónaí ar an mbeathú de réir riail 1, beag beann ar a bhfuil á rá sa bheatha).
 
 ---
 

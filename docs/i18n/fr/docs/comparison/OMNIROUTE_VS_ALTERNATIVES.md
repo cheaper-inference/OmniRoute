@@ -11,7 +11,7 @@ Comparaison objective des fonctionnalités par rapport aux routeurs AI open sour
 | Fonctionnalité                                                  |                 OmniRoute 3.8                  |        LiteLLM         |  OpenRouter (SaaS)   |  Portoloin   |
 | --------------------------------------------------------------- | :--------------------------------------------: | :--------------------: | :------------------: | :----------: |
 | **Fournisseurs**                                                |                    **329**                     |          ~100          |         ~50          |     ~30      |
-| **entrées du catalogue Free/no-auth**                           |                    **155**                     |          n/a           |       passage        |     n/a      |
+| **Fournisseurs avec accès gratuit**                             |             **50 en accès libre**              |          n/a           |       passage        |     n/a      |
 | **Auto-hébergable**                                             |                       ✅                       |           ✅           |          ❌          |    ⚠ payé    |
 | **entrées du catalogue OAuth**                                  |                     **23**                     |        partiel         |          ❌          |      ❌      |
 | **Combos de repli automatique**                                 |               **22 stratégies**                | basé sur les priorités | basé sur les niveaux |   pondéré    |
@@ -38,7 +38,7 @@ Comparaison objective des fonctionnalités par rapport aux routeurs AI open sour
 
 ## Quand choisir OmniRoute
 
-- Vous vous auto-hébergez et souhaitez** couverture maximale du fournisseur** (394 fournisseurs, 155 entrées catalogue free/no-auth )
+- Vous vous auto-hébergez et souhaitez** couverture maximale du fournisseur** (394 prestataires dont 50 en accès gratuit)
 - Vous avez besoin d'un** serveur MCP intégré** (outils LLM, mémoire, compétences exposées comme outils)
 - Vous avez besoin** protocole A2A** pour les flux de travail d'agent à agent
 - Tu veux** furtivité des empreintes digitales** (JA3/JA4) pour éviter la détection par CAPTCHAs en amont
@@ -56,12 +56,12 @@ Comparaison objective des fonctionnalités par rapport aux routeurs AI open sour
 - Vous acceptez de payer par token avec la marge d’un SaaS
 - Vous avez besoin d’un **mode de paiement unique** pour tous les fournisseurs
 
-## Quand choisir Portkey
+## Quand choisir un portoloin
 
-- Vous avez besoin d’un **SLA commercial** avec des garanties de disponibilité
-- Vous préférez un **tableau de bord géré** sans surcharge opérationnelle
-- Vous avez besoin de **fonctionnalités de conformité pour les entreprises** prêtes à l’emploi
+- Vous avez besoin d'un** SLA commerciale** avec des garanties de disponibilité
+- Vous préférez un** tableau de bord géré** sans frais généraux d'exploitation
+- Vous avez besoin** conformité de l'entreprise** fonctionnalités prêtes à l'emploi
 
 ---
 
-_Dernière mise à jour : 2026-08-02. Soumettez les corrections via une PR afin que ce tableau reste exact._
+_Soumettez les corrections via PR pour que ce tableau reste précis._

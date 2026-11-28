@@ -4,9 +4,9 @@
 
 ---
 
-> **Πηγή αλήθειας:** χώρο εργασίας `electron/`** Τελευταία ενημέρωση:** 2026-06-28 — v3.8.40
+> **Πηγή αλήθειας:** χώρο εργασίας `electron/`
 
-OmniRoute στέλνει μια εφαρμογή για υπολογιστές πολλαπλών πλατφορμών (Windows / macOS / Linux) ενσωματωμένη σε**Electron 41** +** ηλεκτρονιοδομητής 26.10** . Η εφαρμογή για επιτραπέζιους υπολογιστές δημιουργεί τον αυτόνομο διακομιστή Next.js ως θυγατρική διεργασία, δείχνει ένα `BrowserWindow` σε αυτόν και προσθέτει ένα δίσκο συστήματος, μια αυτόματη ενημέρωση, τη γέφυρα IPC και μια μυστική ζώνη εκκίνησης μηδενικής διαμόρφωσης.
+OmniRoute αποστέλλει μια εφαρμογή για υπολογιστές πολλαπλών πλατφορμών (Windows / macOS / Linux) ενσωματωμένη σε**Electron 41** +** ηλεκτρονιοδομητής 26.10** . Η εφαρμογή για επιτραπέζιους υπολογιστές δημιουργεί τον αυτόνομο διακομιστή Next.js ως θυγατρική διεργασία, δείχνει ένα `BrowserWindow` σε αυτόν και προσθέτει ένα δίσκο συστήματος, μια αυτόματη ενημέρωση, τη γέφυρα IPC και μια μυστική εκκίνηση μηδενικής διαμόρφωσης.
 
 ## Αρχιτεκτονική
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## Αυτόματη ενημέρωση
 
-Χρησιμοποιεί `electron-updater` με τον πάροχο GitHub (`diegosouzapw/OmniRoute`).
+Χρησιμοποιεί `electron-updater` με τον πάροχο GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Τα συμβάντα προωθούνται στο renderer μέσω `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (με `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ npm run electron:build:win
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Οι εκδόσεις δημοσιεύονται στο GitHub Releases (`diegosouzapw/OmniRoute`), όπου επίσης `electron-updater` ελέγχει για νέες εκδόσεις.
+Οι εκδόσεις δημοσιεύονται στο GitHub Releases (`cheaper-inference/OmniRoute`), όπου επίσης `electron-updater` ελέγχει για νέες εκδόσεις.
 
 ## Αντιμετώπιση προβλημάτων
 

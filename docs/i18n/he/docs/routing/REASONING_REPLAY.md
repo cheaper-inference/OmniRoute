@@ -4,7 +4,7 @@
 
 ---
 
-> **מקור האמת:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** עודכן לאחרונה:** 2026-06-28 — v3.8.40
+> **מקור האמת:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute לוכד את עוזר `reasoning_content` המיוצר על ידי מודלים של מצב חשיבה ומציג אותו בשקיפות בבקשות מרובות פניות כאשר הספק במעלה הזרם דורש זאת. זה מבטל את השגיאות HTTP 400 שספקים קפדניים מעלים כאשר היסטוריית השיחות של לקוח חסרה את ההיגיון של התור הקודם.
 

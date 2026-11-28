@@ -4,14 +4,11 @@
 
 ---
 
-> **ሁኔታ:** በአጠቃላይ የሚገኝ።
-> **ታዳሚዎች:** OpenCodeን ከOmniRoute ስርጭት ጋር የሚያገናኙ ኦፕሬተሮች።
-> **ዋና የመረጃ ምንጭ (የውቅር መርሐግብር):** `src/shared/services/opencodeConfig.ts`
-> **ዋና የመረጃ ምንጭ (npm ጥቅል):** `@omniroute/opencode-provider/` (ሊታተም የሚችል workspace)
+> **ሁኔታ፡** በአጠቃላይ ይገኛል።** ታዳሚዎች፡-** OpenCode ወደ OmniRoute ማሰማራት ኦፕሬተሮች ሽቦዎች።** የእውነት ምንጭ (የውቅረት ንድፍ)፡-** `src/shared/services/opencodeConfig.ts`** የሚመከሩ የ npm ጥቅሎች፡-** `@omniroute/opencode-plugin/` (OpenCode v1፣ በ `omniroute setup opencode` የተጫነ) እና `@omniroute/opencode-plugin-v2/` (OpenCode v2)። የድሮው `@omniroute/opencode-provider/` ጥቅል ነው።** ተቋርጧል** (መንገድ 2 ይመልከቱ)።
 
-[OpenCode](https://opencode.ai) ወኪል-ተኮር CLI/ዴስክቶፕ AI ደንበኛ ነው። የአቅራቢዎች ካታሎጉን ከ`~/.config/opencode/opencode.json` (ወይም `opencode.jsonc`) ያነባል፣ እንዲሁም በ`https://opencode.ai/config.json` የሚገኘውን መርሐግብር ይከተላል። OmniRoute ራሱን ለOpenCode ከእነዚያ አቅራቢዎች እንደ አንዱ ያቀርባል — እያንዳንዱ ጥያቄ በOmniRoute መደበኛ OpenAI-ተኳኋኝ `/v1` በይነገጽ በኩል ያልፋል፤ በዚህም OpenCode ከAuto-Combo ማዞሪያ፣ circuit breakers፣ የቁልፍ ፖሊሲዎች፣ ታዛቢነት እና ሌሎችም በራስ-ሰር ተጠቃሚ ይሆናል።
+[OpenCode](https://opencode.ai) ወኪል CLI/desktop AI ደንበኛ ነው። የአቅራቢውን ካታሎግ ከ `~/.config/opencode/opencode.json` (ወይም `opencode.jsonc`) ያነባል እና በ `https://opencode.ai/config.json` ላይ ያለውን እቅድ ይከተላል። OmniRoute እራሱን ለ OpenCode ያጋልጣል ከእነዚያ አቅራቢዎች አንዱ — እያንዳንዱ ጥያቄ የሚፈሰው በ OmniRoute መደበኛ OpenAI-ተኳሃኝ `/v1` ወለል ነው፣ስለዚህ OpenCode በራስ-ሰር ከአውቶ-ኮምቦ ማዞሪያ፣ሰርክሪት መግቻዎች፣ቁልፍ ፖሊሲዎች፣ተመልካችነት፣ወዘተ ይጠቀማል።
 
-**ሁለት የሚደገፉ የውህደት መንገዶች** አሉ። አንዱን ይምረጡ — ሁለቱም ተመሳሳይ ውቅር ያመነጫሉ።
+ይህ ገጽ ከዚህ በታች ያሉትን ሁለቱን የማይንቀሳቀስ-ውቅር መንገዶችን ይመዘግባል። ሁለቱም ተመሳሳይ ውቅር ይፈጥራሉ. የቀጥታ ካታሎግዎን ለሚከተለው የሞዴል ዝርዝር በምትኩ ተሰኪውን ይጠቀሙ `omniroute setup opencode` ጭነቶች `@omniroute/opencode-plugin` (OpenCode v1) እና `@omniroute/opencode-plugin-v2` ኢላማዎች OpenCode v2 ( [CLI ውህደቶችን](../guides/CLI-INTEGRATIONS.md) እና የ [OpenCode v2 plugin መመሪያን](../guides/OPENCODE-V2-PLUGIN.md) ይመልከቱ)።
 
 ---
 
@@ -54,9 +51,11 @@ omniroute config opencode \
 
 ---
 
-## መንገድ 2 — npm ጥቅል `@omniroute/opencode-provider`
+## መንገድ 2 — npm ጥቅል `@omniroute/opencode-provider` (የተቋረጠ)
 
-ውቅሩን ከNode/TS በስክሪፕት ሲያዘጋጁ (CI pipelines፣ monorepos፣ ብጁ የመጫኛ ፍሰቶች) የሚመከር።
+> **ተቋርጧል።** ጥቅሉ ከእርስዎ የቀጥታ OmniRoute ካታሎግ ጀርባ የሚንሸራተት የማይንቀሳቀስ ሞዴል ዝርዝር ይጽፋል። የእሱ README ወደ `@omniroute/opencode-plugin` (ወይንም `@omniroute/opencode-plugin-v2` በ OpenCode v2) መሰደድን ይመክራል። ከታች ያለው API ለነባር ስክሪፕቶች ብቻ ነው የተቀመጠው።
+
+አወቃቀሩን ከ Node/TS (CI pipelines፣ monorepos፣ ብጁ ጫኚ ፍሰቶችን) ሲጽፉ ጥቅም ላይ ይውላል።
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // አማራጭ፦ ለOpenCode የሚቀርበውን የሞዴል ካታሎግ ይተኩ
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-ከነባር ፋይል ጋር ሳያበላሽ ለማዋሃድ፣ ከ`opencodeConfig.ts` የሚገኘውን `mergeOpenCodeConfigText()` ያባዙ ወይም CLI አመንጪውን ይጠቀሙ።
+ከነባሩ ፋይል ጋር ለማያበላሽ ውህደት፣ `mergeOpenCodeConfigText()` ከ `opencodeConfig.ts` ይድገሙት ወይም ወደ CLI ጄነሬተር ይደውሉ።
 
-ለሙሉ API [የጥቅሉን README](../../@omniroute/opencode-provider/README.md) ይመልከቱ።
+ሙሉውን API ለማግኘት [ጥቅሉን README](../../@omniroute/opencode-provider/README.md) ይመልከቱ።
 
 ---
 
@@ -155,9 +154,11 @@ export const OMNIROUTE_DEFAULT_OPENCODE_MODELS = [
 
 ---
 
-## በተጨማሪ ይመልከቱ
+## በተጨማሪም ይመልከቱ
 
-- [የAPI ማጣቀሻ](../reference/API_REFERENCE.md) — ሙሉው የOmniRoute REST አገልግሎት ወሰን
-- [Auto-Combo](../routing/AUTO-COMBO.md) — `model: "auto"` ምን ማለት እንደሆነ
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
-- ምንጭ፦ `src/shared/services/opencodeConfig.ts`፣ `src/lib/cli-helper/config-generator/opencode.ts`፣ `@omniroute/opencode-provider/src/index.ts`
+- [API ማጣቀሻ](../reference/API_REFERENCE.md) — ሙሉ OmniRoute REST ወለል
+- [Auto-Combo](../routing/AUTO-COMBO.md) — `model: "auto"` ማለት ምን ማለት ነው።
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (የሚመከር)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (የተቋረጠ)
+- ምንጭ `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

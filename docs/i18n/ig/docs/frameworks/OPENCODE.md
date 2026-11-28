@@ -4,14 +4,11 @@
 
 ---
 
-> **Ọnọdụ:** Dị maka ojiji n'ozuzu.
-> **Ndị e zubere maka ha:** Ndị na-ahụ maka sistemụ na-ejikọ OpenCode na nrụnye OmniRoute.
-> **Isi mmalite ziri ezi (schema nhazi):** `src/shared/services/opencodeConfig.ts`
-> **Isi mmalite ziri ezi (ngwugwu npm):** `@omniroute/opencode-provider/` (workspace enwere ike ibipụta)
+> **Ọnọdụ:** Dị n'ozuzu.** Ndị na-ege ntị:** Ndị na-arụ ọrụ na-ejikọta OpenCode na ntinye OmniRoute.** Isi mmalite nke eziokwu ( config schema):** `src/shared/services/opencodeConfig.ts`** Ngwunye npm akwadoro:** `@omniroute/opencode-plugin/` (OpenCode v1, nke `omniroute setup opencode` arụnyere) na `@omniroute/opencode-plugin-v2/` (OpenCode v2). Ngwungwu `@omniroute/opencode-provider/` ochie bụ** kwụsịrị** (lee Ụzọ 2).
 
-[OpenCode](https://opencode.ai) bụ ngwa ahịa AI nke nwere ike ịrụ ọrụ dịka agent na CLI/desktop. Ọ na-agụ katalọgụ provider ya site na `~/.config/opencode/opencode.json` (ma ọ bụ `opencode.jsonc`) ma na-agbaso schema dị na `https://opencode.ai/config.json`. OmniRoute na-egosi onwe ya nye OpenCode dịka otu n'ime provider ndị ahụ — arịrịọ ọ bụla na-agafe n'elu `/v1` ọkọlọtọ OmniRoute nke dakọtara na OpenAI, ya mere OpenCode na-erite uru ozugbo site na routing Auto-Combo, circuit breakers, iwu key, observability, wdg.
+[OpenCode](https://opencode.ai) bụ onye ahịa CLI/desktop AI nnọchite anya. Ọ na-agụ katalọgụ onye na-eweta ya site na `~/.config/opencode/opencode.json` (ma ọ bụ `opencode.jsonc`) wee na-agbaso atụmatụ na `https://opencode.ai/config.json`. OmniRoute na-ekpughere onwe ya na OpenCode dị ka otu n'ime ndị na-enye — arịrịọ ọ bụla na-aga site na OmniRoute ọkọlọtọ OpenAI dakọtara `/v1` elu, yabụ OpenCode na-erite uru na-akpaghị aka site na njem Auto-Combo, ndị na-emebi sekit, atumatu isi, nleba anya, wdg.
 
-E nwere **ụzọ njikọta abụọ a na-akwado**. Họrọ otu — ha abụọ na-emepụta otu nhazi ahụ.
+Ibe a na-edekọ ụzọ abụọ static-config n'okpuru; ha abụọ na-emepụta otu nhazi. Maka ndepụta ihe atụ nke na-esote katalọgụ dị ndụ, jiri ngwa mgbakwunye kama: `omniroute setup opencode` installs `@omniroute/opencode-plugin` (OpenCode v1), na `@omniroute/opencode-plugin-v2` targets OpenCode v2 (lee [CLI integrations](../guides/CLI-INTEGRATIONS.md) na [OpenCode v2 plugin guide](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ Faịlụ a na-enweta (katalọgụ model ndabara):
 
 ---
 
-## Ụzọ 2 — ngwugwu npm `@omniroute/opencode-provider`
+## Ụzọ 2 — npm ngwugwu `@omniroute/opencode-provider` (kwụpụrụ)
 
-A na-atụ aro ya mgbe ị na-eji Node/TS ede script maka nhazi ahụ (pipeline CI, monorepo, usoro installer ahaziri iche).
+> **Akwụsịla.** Ngwungwu ahụ na-ede ndepụta ihe atụ kwụ ọtọ nke na-aga n'azụ katalọgụ OmniRoute dị ndụ gị. README ya na-akwado ịkwaga na `@omniroute/opencode-plugin` (ma ọ bụ `@omniroute/opencode-plugin-v2` na OpenCode v2). Edobere API dị n'okpuru maka naanị edemede dị adị.
+
+A na-eji ya mgbe ị na-edepụta nhazi site na Node/TS ( pipeline CI, monorepos, ihe nrụnye omenala).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Nhọrọ: dochie katalọgụ model e gosiri OpenCode
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Maka merge na-adịghị emebi faịlụ dị adị, mepụtagharịa `mergeOpenCodeConfigText()` site na `opencodeConfig.ts` ma ọ bụ kpọọ generator CLI.
+Maka njikọ na-adịghị emebi emebi megide faịlụ dị adị, megharịa `mergeOpenCodeConfigText()` site na `opencodeConfig.ts` ma ọ bụ kpọọ onye na-emepụta CLI.
 
-Hụ [README nke ngwugwu ahụ](../../@omniroute/opencode-provider/README.md) maka API zuru ezu.
+Hụ [ngwugwu README](../../@omniroute/opencode-provider/README.md) maka API zuru ezu.
 
 ---
 
@@ -157,7 +156,9 @@ Maka klayentị ụdị Anthropic ndị na-eziga `x-api-key` + `anthropic-versio
 
 ## Hụkwa
 
-- [Ntụaka API](../reference/API_REFERENCE.md) — nkọwa zuru ezu nke OmniRoute REST
+- [API ntụaka](../reference/API_REFERENCE.md) — zuru OmniRoute REST elu
 - [Auto-Combo](../routing/AUTO-COMBO.md) — ihe `model: "auto"` pụtara
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
-- Koodu mmalite: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (atụ aro)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (dapụrụ)
+- Isi mmalite: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

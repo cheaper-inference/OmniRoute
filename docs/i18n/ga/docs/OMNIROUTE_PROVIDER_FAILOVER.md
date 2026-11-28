@@ -21,3 +21,5 @@ Ceadaíonn an polasaí réamhshocraithe tras-soláthraí suas le trí iarracht s
   - Ní athródaítear aitheantas réamhshocrú (`provider/model`) go soláthraí eile riamh.
 
 Is iad na stáit chiorcaid ná `closed`, `open`, agus `half_open`. Déanann fuarú síos taiscéalaí teorantach a sceidealú; Dúnann taiscéalaí rathúil an ciorcad agus athosclaíonn taiscéalaí teipthe é.
+
+Ritheann teip an tsoláthraí laistigh den gheata. Féach [Nuair nach féidir dul i dteagmháil le OmniRoute féin](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) maidir le hiompar cliant le linn briseadh geata.

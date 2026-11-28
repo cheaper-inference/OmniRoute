@@ -176,85 +176,49 @@ Malitegharịa OmniRoute mgbe nrụnye ahụ gasịrị, wee nwalee arịrịọ
 
 ---
 
-## Nchọpụta Ụgha nke Antivirus
+## Ezi Ụgha Antivirus
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG na-etinye `README.md` na kwarantaini dịka `MD:HttpRequest-inf[Susp]`
+### Avast/AVG kwarantaini `README.md` na `MD:HttpRequest-inf[Susp]`
 
-**Nke a bụ nchọpụta ụgha. Ọ dịghị ihe butere nje, ọ dịghịkwa ihe a chọrọ ka eme.**
+**Nke a bụ echiche ụgha. Ọ nweghị ihe butere ọrịa, ọ nweghịkwa ihe a chọrọ.**
 
-Avast na AVG na-eji usoro heuristic nke na-akanye faịlụ ederede nkịtị/Markdown nwere ọtụtụ
-njikọ ndị yiri arịrịọ HTTP. `README.md` nke OmniRoute so n'ime ngwugwu npm (e depụtara ya
-na `package.json` → `files`), ya mere, mgbe echichi zuru ụwa ọnụ gasịrị, ọ na-adị na
-`node_modules/omniroute/README.md` — ọ nwekwara ihe atụ `http://localhost:20128/...` ruru ~15
-(ebe njedebe MCP HTTP/SSE, URL A2A `.well-known`, na iberibe `curl`). Ọnụọgụ njikọ ndị ahụ
-ezuola ime ka heuristic ahụ nye mkpu.
+Avast na AVG na-agba ọsọ ọsọ na-atụpụta faịlụ plain-text/Markdown nwere ọtụtụ njikọ HTTP-achọrọ. OmniRoute's `README.md` ụgbọ mmiri n'ime ngwugwu npm (e depụtara ya na `package.json` → `files`), yabụ ọ na-agbada na `node_modules/omniroute/README.md` na nrụnye — zuru ụwa ọnụ ma ọ nwere ihe atụ ~ 15 `http://localhost:20128/...` (ebe njedebe MCP HTTP/SSE, A2A `.well-known` URL, na `curl` snippets). Njupụta njikọ ahụ zuru ezu iji mebie heuristic.
 
-Ọ bụrụ na nke a malitere naanị n'oge na-adịbeghị anya: ụdị faịlụ ahụ agbanwebeghị. Tebụl ebe
-njedebe dị na README bawanyere (agbakwunyere MCP HTTP + SSE + A2A), tinyekwa ọtụtụ ihe atụ
-`curl`, nke mere ka ọ gafee oke ahụ.
+Ọ bụrụ na nke a malitere naanị n'oge na-adịbeghị anya: faịlụ ahụ agbanweghị n'ụdị. README tolitere tebụl njedebe ya (MCP HTTP + SSE + A2A agbakwunyere) yana ihe atụ `curl` ndị ọzọ, nke mere ka ọ gafee n'ọnụ ụzọ.
 
-Faịlụ ahụ bụ naanị akwụkwọ nkọwa na-adịghị arụ ọrụ, na-enweghị ọdịnaya ọ bụla a pụrụ imepụta.
-Ị nwere ike iweghachi ya na kwarantaini n'enweghị nsogbu.
+Faịlụ a bụ akwụkwọ inert nwere ọdịnaya efu enwere ike ime ya. Ị nwere ike weghachi ya n'enweghị nsogbu na kwarantaini.
 
-**Ihe ị ga-eme:**
+**Ihe a ga-eme:**
 
-1. **Kwụsị ọkwa ndị ahụ** — wepụ ndekọ echichi ahụ n'ihe antivirus gị na-enyocha
-   (Avast: Settings → Exceptions), site n'ịgbakwunye ụzọ `node_modules` zuru ụwa ọnụ gị
-   na/ma ọ bụ ndekọ data OmniRoute (`~/.omniroute/`).
-2. **Kọọrọ ha nchọpụta ụgha ahụ** — <https://www.avast.com/false-positive-file-form.php>,
-   ma tinye `README.md` e debere na kwarantaini. Nke a bụ ndozi ga-enyere mmadụ niile aka,
-   ebe ọ bụ heuristic nke onye nrụpụta ahụ na-emeghachi omume gabiga ókè nye faịlụ ederede.
+1. **Kwụsị ọkwa** — ewepu ndekọ nwụnye na antivirus gị (Avast: Settings → Exceptions), na-agbakwunye ụzọ `node_modules` zuru ụwa ọnụ gị and/or na OmniRoute data dir (`~/.omniroute/`).
+2. **Kwuo ihe ọma ụgha** — <https://www.avast.com/false-positive-file-form.php>, na-ejikọta `README.md` iche iche . Nke a bụ nrụzi na-enyere onye ọ bụla aka, ebe ọ bụ na ọ bụ oke iwe nke onye na-ere ahịa na faịlụ ederede.
 
-**Ihe mere anyị anaghị “edozi” nke a n'akụkụ anyị:** ihe atụ niile bụ `http://localhost`,
-localhost enweghịkwa ike ịbụ `https` n'enweghị nsogbu asambodo nke onwe. Ịgbanwe akwụkwọ
-nkowapụta ahụ iji gbanahụ heuristic nke otu onye nrụpụta ga-emerụ onye ọ bụla na-agụ ya
-naanị iji meeju ahụhụ dị na nyocha ahụ afọ.
+**Ihe kpatara na anyị anaghị "dozie" nke a n'akụkụ anyị:** ihe atụ ndị a niile bụ `http://localhost`, na localhost enweghị ike ịbụ `https` na-enweghị esemokwu nke aka ya bịanyere aka na ya. Ijikwa docs iji gbanarị otu onye na-ere ahịa ga-ewute onye na-agụ akwụkwọ ọ bụla iji mejuo ahụhụ nyocha.
 
-### Kaspersky na-akanye ngwa Desktop dịka `PDM:Trojan.Win32.Generic`
+### Kaspersky tụpụtara ngwa Desktop dị ka `PDM:Trojan.Win32.Generic`
 
-**Nke a bụ nchọpụta ụgha sitere na heuristic omume. Ọ dịghị ihe butere nje.** Prefix `PDM:`
-nke Kaspersky pụtara na mkpebi ahụ sitere na Proactive Defense Module (System Watcher) ya,
-nke na-ekpebi ihe installer ahụ _na-eme_ kama iji ya tụnyere malware ndị a maara. Mgbe ọ
-nyere mkpu, Kaspersky na-“eweghachi azụ” echichi ahụ dum — na-ehichapụ faịlụ ndị o deela —
-ya mere ngwa ahụ na-emesị mebie ma ọ bụ funahụ.
+**Nke a bụ ihe na-adịghị mma sitere na heuristic omume. Ọ nweghị ihe butere ọrịa ahụ.** Kaspersky's `PDM:` prefix pụtara na mkpebi a sitere na Proactive Defence Module (System Watcher), nke na-ekpebi ihe installer _eme_ kama ikwekọ ya megide malware ama ama. Mgbe ọ gbara ọkụ, Kaspersky "na-atụgharị azụ" nrụnye niile — na-ehichapụ faịlụ ọ deburu — ka ngwa ahụ mebie ma ọ bụ na-efu.
 
-Faịlụ ndị ọ na-akanye bụ akụkụ nkịtị nke ndabere open-source ndị ekwuputara, nke esonyere na
-ngwa desktop ahụ, dịka ọmụmaatụ:
+Faịlụ ndị ọ na-atụnyere bụ akụkụ ngwaahịa nke ekwuputara, ihe ndabere mepere emepe jikọtara na ngwa desktọpụ, dịka ọmụmaatụ:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` na
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), ọbaakwụkwọ otomeshọn
-  ihe nchọgharị eji maka nbanye provider n'ime ngwa na nkata na-adabere n'ihe nchọgharị.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — njikọ native `wreq-js` akpọchiri na ụdị a kapịrị ọnụ, nke eji maka HTTP nwere akara
-  mkpịsịaka ihe nchọgharị na provider ndị na-eji kuki webụ (`<arch>` bụ `x64` ma ọ bụ `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` na `workerProcessEntry.js` — [Playwright](https://playwright.dev), ọbá akwụkwọ ihe nchọgharị-akpaaka ejiri maka nbanye na ndị na-eweta ngwa yana nkata ihe nchọgharị na-akwado.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — njide nwa afọ `wreq-js` pinned ejiri maka HTTP akara mkpịsị aka ihe nchọgharị na ndị na-eweta kuki webụ (`<arch>` bụ `x64` ma ọ bụ `arm64`).
 
-**Ihe mere o ji enye mkpu:** installer Windows ahụ **enwebeghị mbinye aka koodu**, ya mere
-installer NSIS na-enweghị mbinye aka enweghị aha ọma ọ bụla, heuristics omume na-arụkwa ọrụ
-n'ụzọ kacha sie ike. Mgbe nke a jikọtara na DLL native esonyere na ya na ọtụtụ narị faịlụ
-`.js` e dere n'okpuru `%LOCALAPPDATA%\Programs\OmniRoute` (gụnyere ndekọ ngwugwu nwere hash
-na njedebe sitere na build standalone nke Next.js), nke ahụ ezuola ime ka heuristic ahụ nye
-mkpu. A na-eme atụmatụ itinye mbinye aka koodu; ruo mgbe e mere ya, mwepụta ọhụrụ nwere ike
-ime ka nke a mee ọzọ.
+**Ihe mere o ji agba ọkụ:** onye nrụnye Windows bụ** edebeghị koodu aka** , yabụ onye nrụnye NSIS na-edebanyeghị aha enweghị aha efu yana omume heuristics na-agba ọsọ na oke iwe. Ejikọtara ya na DLL nwa afọ chịkọtara yana ọtụtụ narị faịlụ `.js` edere n'okpuru `%LOCALAPPDATA%\Programs\OmniRoute` (gụnyere akwụkwọ ntụzịaka hash-suffixed si na Next.js standalone build), nke ahụ ezuola ime njem ahụ. A na-eme atụmatụ ịbanye koodu; ruo mgbe ọ rutere, mwepụta ọhụrụ nwere ike ikwugharị nke a.
 
-**Ihe ị ga-eme:**
+**Ihe a ga-eme:**
 
-1. **Buru ụzọ nyochaa nbudata gị** (nke a ga-ewepụ ohere na e metụgharịrị faịlụ ahụ). Mwepụta
-   ọ bụla na-ebipụta `latest.yml`, nke mpaghara `sha512` ya (base64) na-ekpuchi installer
-   `OmniRoute.Setup.<version>.exe`. Na PowerShell, site na folda nwere installer ahụ:
+1. **Buru ụzọ nyochaa nbudata gị** (na-ewepụ faịlụ mebiri emebi). Ntọhapụ ọ bụla na-ebipụta `latest.yml`, nke ubi `sha512` (base64) na-ekpuchi ihe nrụnye `OmniRoute.Setup.<version>.exe`. Na PowerShell, site na folda nwere ihe nrụnye:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Nsonaazụ ahụ ga-adabarịrị na `latest.yml` → `sha512`. Ọ bụrụ na ọ dabaraghị, hichapụ faịlụ
-   ahụ ma budata ya ọzọ naanị site na [ibe mwepụta GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Weghachi + wepụ n'ihe a na-enyocha** — weghachi ihe ndị a weghachiri azụ site na
-   kwarantaini ma gbakwunye mwepu maka `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky →
-   Settings → Threats and Exclusions), wee wụnye ya ọzọ.
-3. **Kọọrọ ha nchọpụta ụgha ahụ** — <https://opentip.kaspersky.com/>. Akụkọ FP ndị
-   ndị ọrụ zitere na-eme ka itinye ya na ndepụta ihe a na-anabata mee ngwa ngwa n'ezie.
+   Nsonaazụ ga-adakọrịrị `latest.yml` → `sha512`. Ọ bụrụ na ọ meghị, hichapụ faịlụ ahụ wee budata naanị na [ibe ewepụtara GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Weghachite +** — weghachi ihe ndị akpọgharịrị na kwarantaini wee gbakwunye mwepu maka `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions), wee tinyegharịa.
+3. **Kwuo ihe ọma ụgha** — <https://opentip.kaspersky.com/>. Ozi FP nke onye ọrụ nyefere na-eme ka ndetu ikike dị ngwa.
 
 ---
 
@@ -862,10 +826,10 @@ Mgbaàmà ndị ọzọ:
 
 ---
 
-## Ị Ka Nọgidesiri Ike?
+## Ọ ka na-arapara?
 
-- **Nsogbu GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Nhazi Sistemụ**: Lee [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) maka nkọwa dị n'ime
-- **Ntụaka API**: Lee [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) maka endpoints niile
-- **Dashboard Ahụike**: Lelee **Dashboard → Health** maka ọnọdụ sistemụ ozugbo
-- **Onye Ntụgharị**: Jiri **Dashboard → Translator** chọpụta ma dozie nsogbu nhazi
+- **GitHub** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Nhazi** Lee [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) maka nkọwa ime
+- **API** Lee [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) maka njedebe njedebe niile
+- **Dashboard ahụike** : Lelee** Dashboard → Health** maka ezigbo oge usoro ọnọdụ
+- **Onye ntụgharị asụsụ** : Jiri** Dashboard → Ntụgharị** iji dozie nsogbu usoro

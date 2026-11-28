@@ -330,19 +330,16 @@ eine maskierte Vorschau (`maskedApiKey`: bis zu 4 Zeichen an jedem Ende, weniger
 Schlüssel, keine bei 8 oder weniger Zeichen) sowie die `projectId` der Verbindung zurückgegeben. Beide Felder werden
 bei allen anderen Schlüsseln in der Antwort weggelassen.
 
-## Auflösung der Anmeldedaten
+## Auflösung von Anmeldeinformationen
 
 `getCloudAgentCredentials(providerId)` in `src/lib/cloudAgent/api.ts`:
 
-1. Lädt aktive Provider-Verbindungen über `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Bevorzugt für jede Verbindung `apiKey` (bereinigt). Verwendet ersatzweise `accessToken`.
-3. Gibt das erste nicht leere Token als `{ apiKey: token }` zurück.
-4. Gibt `null` zurück, wenn kein verwendbares Token gefunden wird — die API antwortet mit `400` und
-   `"Keine aktiven Anmeldedaten für den Cloud-Agent-Provider konfiguriert: <id>"`.
+1. Lädt aktive Providerverbindungen über `getProviderConnections({ provider: providerId, isActive: true })`.
+2. Bevorzugt für jede Verbindung `apiKey` (getrimmt). Fällt auf `accessToken` zurück.
+3. Gibt das erste nicht leere Token zurück, das als `{ apiKey: token }` verpackt ist.
+4. Gibt `null` zurück, wenn kein verwendbares Token gefunden wird — API antwortet `400` mit `"No active credentials configured for cloud agent provider: <id>"`.
 
-Das bedeutet, dass Cloud Agents dieselbe Provider-Verbindungstabelle wie reguläre LLM-Provider
-verwenden. Um Jules zu aktivieren, erstellen Sie eine aktive Verbindung mit `provider: "jules"`
-und einem ausgefüllten `apiKey`.
+Dies bedeutet, dass Cloud-Agenten dieselbe Provider-Verbindungstabelle wie reguläre LLM Provider wiederverwenden. Um Jules zu aktivieren, erstellen Sie eine aktive Verbindung mit `provider: "jules"` und einem gefüllten `apiKey`.
 
 ## Dashboard
 

@@ -61,43 +61,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute がトークンを保存し、直ちに結果 1 件のテスト検索を実行します。Notion が
 エラーオブジェクトを返した場合、トークンは消去され、呼び出しは `400` で失敗します。
 
-## MCP ツール（6 個）
+## MCPツール (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` で定義されています。トークンは呼び出し時に
-`getNotionToken()` を介して解決されます。トークンが設定されていない場合、ツールは
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
-をスローします。
+`open-sse/mcp-server/tools/notionTools.ts`で定義されています。トークンは呼び出し時に`getNotionToken()`経由で解決されます。何も設定されていない場合、ツールは`"Notion integration token not configured. Set it in Settings > Context Sources."`をスローします
 
-| ツール                       | スコープ       | 説明                                                                                                           |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | テキストクエリでページやデータベースを検索します（タイトル、ID、URL を返します）。ページネーション対応。       |
-| `notion_get_page`            | `read:notion`  | ID を指定してページのコンテンツとメタデータを取得します。                                                      |
-| `notion_list_block_children` | `read:notion`  | ブロックまたはページのすべての子ブロック（ブロックツリー）を一覧表示します。ページネーション対応。             |
-| `notion_query_database`      | `read:notion`  | オプションの `filter` + `sorts`（Notion API 形式）を使用してデータベースをクエリします。ページネーション対応。 |
-| `notion_get_database`        | `read:notion`  | ID を指定してデータベースのスキーマ／メタデータを取得します。                                                  |
-| `notion_append_blocks`       | `write:notion` | 既存のブロックまたはページに子ブロックを追加します（1 リクエストあたり最大 100 ブロック）。                    |
+| 道具                         | 範囲           | 説明                                                                                                                    |
+| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | テキスト クエリによってページとデータベースを検索します (タイトル、 IDs、 URLsを返します)。ページネーションされました。 |
+| `notion_get_page`            | `read:notion`  | ページのコンテンツとメタデータをIDで取得します。                                                                        |
+| `notion_list_block_children` | `read:notion`  | ブロックまたはページ (ブロック ツリー) のすべてのブロックの子をリストします。ページネーションされました。               |
+| `notion_query_database`      | `read:notion`  | オプションの`filter` + `sorts` (Notion API形式) を使用してデータベースをクエリします。ページネーションされました。      |
+| `notion_get_database`        | `read:notion`  | IDでデータベースのschema/metadata取得します。                                                                           |
+| `notion_append_blocks`       | `write:notion` | ブロックの子を既存のブロックまたはページに追加します (リクエストごとに最大 100 ブロック)。                              |
 
-### 入力パラメーター
+### 入力パラメータ
 
-- `notion_search` — `query`（1～500 文字）、`pageSize`（1～100、デフォルト 20）、
-  `startCursor`（任意）。
-- `notion_get_page` — `pageId`（32 文字の 16 進数または UUID）。
-- `notion_list_block_children` — `blockId`、`pageSize`（1～100、デフォルト 50）、
-  `startCursor`（任意）。
-- `notion_query_database` — `databaseId`、`filter`（任意、Notion のフィルター形式）、
-  `sorts`（任意の配列）、`pageSize`（1～100、デフォルト 50）、`startCursor`（任意）。
-- `notion_get_database` — `databaseId`。
-- `notion_append_blocks` — `blockId`、`children`（ブロックオブジェクトの配列）、
-  `after`（任意の位置）。
+- `notion_search` — `query` (1 ～ 500 文字)、 `pageSize` (1 ～ 100、デフォルト 20)、 `startCursor` (オプション)。
+- `notion_get_page` — `pageId` (32 文字の 16 進数またはUUID)。
+- `notion_list_block_children` — `blockId`、 `pageSize` (1 ～ 100、デフォルトは 50)、 `startCursor` (オプション)。
+- `notion_query_database` — `databaseId`、 `filter` (オプション、 Notionフィルター形式)、 `sorts` (オプションの配列)、 `pageSize` (1 ～ 100、デフォルト 50)、 `startCursor` (オプション)。
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`、 `children` (ブロック オブジェクトの配列)、 `after` (オプションの位置)。
 
 ### スコープ
 
-読み取りツールには `read:notion`、書き込みツールには `write:notion` が必要です。
-スコープは、`OMNIROUTE_MCP_ENFORCE_SCOPES=true` の場合にのみ
-`open-sse/mcp-server/server.ts` の `withScopeEnforcement()` によって適用されます。
-呼び出し元に許可されるスコープは、`OMNIROUTE_MCP_SCOPES`（カンマ区切り）または
-認証済み API キーのスコープコンテキストから取得されます。スコープモデルの詳細については、
-[MCP-SERVER.md](./MCP-SERVER.md) を参照してください。
+読み取りツールには`read:notion`が必要で、書き込みツールには`write:notion`が必要です。スコープは、 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`の場合は`open-sse/mcp-server/server.ts`の`withScopeEnforcement()`によって適用され、 APIキーに`manage`/`admin`ないHTTP/SSE呼び出し元に対しては常に適用されます。呼び出し元の許可されたスコープは、 `OMNIROUTE_MCP_SCOPES` (カンマ区切り) または認証されたAPIキーのスコープ コンテキストから取得されます。フルスコープモデルについては、 [MCP-SERVER.md](./MCP-SERVER.md)参照してください。
 
 ## エンドポイント
 

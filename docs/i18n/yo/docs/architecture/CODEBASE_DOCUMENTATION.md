@@ -4,18 +4,11 @@
 
 ---
 
-> **Ẹ̀yà:** v3.8.51
-> **Ìgbà ìmúdójúìwọ̀n tó kẹ́yìn:** 2026-06-28
-> **Àwọn olùkà:** Àwọn onímọ̀-ẹ̀rọ tí ń ṣàfikún sí OmniRoute tàbí tí ń kọ́ àwọn ìṣọ̀kan lórí rẹ̀.
+> **Ẹya:** v3.8.51** Olugbo:** Awọn onimọ-ẹrọ ti n ṣe idasi si OmniRoute tabi awọn iṣọpọ ile lori oke rẹ.
 >
-> Fún àwọn àwòrán atọ́ka ìṣètò ìmọ̀-ẹ̀rọ gbogbogbò àti ìrònú tó wà lẹ́yìn ẹ̀ka-iṣẹ́ kọ̀ọ̀kan, ka
-> [ARCHITECTURE.md](./ARCHITECTURE.md). Fún àlàyé jíjinlẹ̀ nípa àwọn ẹ̀ka-iṣẹ́ kọ̀ọ̀kan
-> (Auto Combo, MCP server, A2A server, Skills, Memory, Cloud Agents, Resilience,
-> Compression, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ), wo àwọn fáìlì tí a yàn fún wọn nínú àkójọpọ̀ `docs/` yìí.
+> Fun awọn aworan atọka giga-giga ati ero lẹhin eto-ipilẹ kọọkan, ka [ARCHITECTURE.md](./ARCHITECTURE.md). Fun awọn besomi jinlẹ lori awọn eto abẹlẹ kọọkan (Auto Combo, olupin MCP, olupin A2A, Awọn ọgbọn, Iranti, Awọn Aṣoju Awọsanma, Resilience, Compression, ati bẹbẹ lọ) wo awọn faili iyasọtọ wọn ninu itọsọna `docs/` yii.
 
-Fáìlì yìí ṣàpèjúwe **ohun tó wà nínú ibi ìpamọ́ kóòdù náà lónìí** kí onímọ̀-ẹ̀rọ tuntun
-lè lọ káàkiri ìṣètò igi náà, lóye bí àwọn ìpele runtime ṣe tò, kí ó sì mọ ibi tí yóò ti ṣàfikún kóòdù
-láì dá àwọn module tuntun sílẹ̀.
+Faili yii ṣe apejuwe** ohun ti o wa ninu ibi ipamọ loni** ki a titun ẹlẹrọ le lilö kiri ni igi, ye awọn asiko isise layering, ki o si mọ ibi ti lati fi koodu lai a pilẹ titun modulu.
 
 ---
 
@@ -566,35 +559,14 @@ A ṣe àfihàn binary méjì nínú `package.json` → `bin`:
 
 ## 8. `scripts/`
 
-A ṣètò rẹ̀ sínú àwọn fódà kéékèèké mẹ́fà gẹ́gẹ́ bí ète wọn.
+Ṣeto sinu awọn folda kekere 6 nipasẹ idi.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, pẹ̀lú àwọn olùrànlọ́wọ́ àbójútó PR tí ó jẹ́ fún kíkà nìkan
-  `ci-discriminate.sh` (ń ṣètò àwọn àmì ìdánwò tí ó kùnà ti PR sí ti ara rẹ̀ / èyí tí ó jogún /
-  àìmọ̀ ní ìfiwéra pẹ̀lú PR àtọ́ka tàbí ọ̀ràn base-red) àti `audit-worktree.sh`
-  (àwọn fáìlì tí ó ní àyípadà, àwọn apá tí a dáàbò bò, àwọn assert tí a yọ, iye ìdínkù ìkìlọ̀, àwọn
-  tmp tsconfigs tí ó ṣẹ́ kù, orí PR ní ìfiwéra pẹ̀lú HEAD abẹ́lé — kí a tó gba PR òṣìṣẹ́ kan).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, pẹlu awọn oluranlọwọ PR olutọju ọmọ-ọwọ nikan `ci-discriminate.sh` (to iru aṣiṣe PR kan si ami aimọ / ṣayẹwo PR ti ara rẹ) Ọrọ ipilẹ-pupa) ati `audit-worktree.sh` (awọn faili idọti, awọn ipele ti o ni aabo, awọn imuduro yiyọ kuro, awọn iṣiro idinku, awọn tmp tsconfigs ajẹkù, ori PR vs HEAD — ṣaaju ki o to gba PR oṣiṣẹ).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. awọn ẹya awọn asia `check-deprecated-versions.mjs` ni gbangba ti a sọ si OmniRoute (3.6.x ati ṣaaju). Awọn ayẹwo foju awọn ọjọ.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

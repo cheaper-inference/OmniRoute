@@ -4,20 +4,11 @@
 
 ---
 
-> **Patikimas šaltinis:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Paskutinį kartą atnaujinta:** 2026-06-28 — v3.8.40
+> **Tiesos šaltinis:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-„OmniRoute“ registruoja administracinius veiksmus, autentifikavimo įvykius, teikėjų
-prisijungimo duomenų gyvavimo ciklo pakeitimus ir MCP įrankių iškvietimus „SQLite“
-pagrįstose audito lentelėse. Šiame puslapyje aprašoma, kas registruojama, kur
-saugomi duomenys, kiek laiko jie išlaikomi, kaip API raktams galima išjungti
-registravimą ir kaip vykdyti duomenų užklausas.
+OmniRoute įrašo administracinius veiksmus, autentifikavimo įvykius, teikėjo kredencialų gyvavimo ciklo pakeitimus ir MCP įrankių iškvietimus į SQLite paremtas audito lenteles. Šiame puslapyje aprašoma, kas registruojama, kur ji gyvena, kiek laiko saugoma, kaip galima atsisakyti API raktų ir kaip pateikti duomenų užklausą.
 
-Realizacija yra failuose `src/lib/compliance/index.ts` (T-43 — „Atitikties
-valdikliai“) ir `src/lib/compliance/providerAudit.ts`. Audito įrašymo operacijos
-niekada negeneruoja išimčių: įvykus bet kokiai klaidai, iškvietimas tyliai
-ignoruojamas, kad audito registravimas negalėtų sutrikdyti pagrindinės užklausos
-eigos.
+Diegimas veikia `src/lib/compliance/index.ts` (T-43 — „Atitikties valdikliai“) ir `src/lib/compliance/providerAudit.ts`. Auditas rašo niekada: bet kokio gedimo atveju skambutis tyliai praryjamas, todėl audito registravimas negali nutraukti pagrindinio užklausų srauto.
 
 ## Kas registruojama
 
@@ -137,33 +128,33 @@ valdymo. Užklausų žurnalų puslapis iškviečia
 Numatytosios reikšmės apibrėžtos faile `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## `noLog` atsisakymas (kiekvienam API raktui)
+## `noLog` atsisakymas (už API raktą)
 
-API raktai gali būti pažymėti taip, kad jų siunčiamų iškvietimų srautas nebūtų
-registruojamas. Žyma saugoma lentelėje `api_keys` (`no_log INTEGER DEFAULT 0`),
-o jos reikšmė taip pat įtraukiama į atmintyje saugomą rinkinį, skirtą sparčiai
-paieškai dažnai naudojamame vykdymo kelyje.
+API klavišai gali būti pažymėti, kad jų skambučių srautas nebūtų registruojamas. Vėliava yra ant `api_keys` lentelės (`no_log INTEGER DEFAULT 0`) ir yra atspindima atmintyje esančiame rinkinyje karštojo kelio paieškai.
 
 ```bash
-# Sukurti raktą, kurio veiksmai neregistruojami (reikalingas valdymo autentifikavimas)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Pagalbinės funkcijos (`src/lib/compliance/index.ts`):
+Pagalbininkai (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — įjungia arba išjungia įrašą atmintyje
-- `isNoLog(apiKeyId)` — tikrinama užklausos apdorojimo kelyje; jei įrašo nėra,
-  naudojama 30 sek. podėlyje saugoma reikšmė, nuskaityta iš `api_keys.no_log`
-- `NO_LOG_API_KEY_IDS` (aplinkos kintamasis, reikšmės atskirtos kableliais) —
-  paleidžiant iš anksto įkeliama į atmintyje saugomą rinkinį; naudinga, kai
-  negalite tiesiogiai keisti stulpelio reikšmės
+- `setNoLog(apiKeyId, true|false)` — perjungti įrašą atmintyje
+- `isNoLog(apiKeyId)` — patikrintas užklausos kelyje; grįžta į 30 s talpyklos nuskaitymą iš `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, kableliais atskirtas) — iš anksto įkeltas į atminties rinkinį paleidžiant; naudinga, kai negalite tiesiogiai perjungti stulpelio
 
-Administraciniai audito įvykiai (prisijungimas, teikėjų pakeitimai, MCP įrankių
-iškvietimai ir kt.) **nėra** paveikiami `noLog` — atsisakoma tik atskirų
-užklausų srauto registravimo.
+Administracinio audito įvykiai (prisijungimas, teikėjo pasikeitimai, MCP įrankių iškvietimai ir kt.) yra** ne** paveiktas `noLog` — atsisakoma tik srauto registravimo pagal užklausą.
+
+### Atsisakymas pagal užklausą (`x-omniroute-no-log`)
+
+Klientas gali pasirinkti vieną išvados užklausą iš naudingosios apkrovos pastovumo nesukurdamas specialaus rakto. Siųsti `x-omniroute-no-log: true` pagal užklausą (`1` ir `yes` taip pat priimami, neskiriant didžiųjų ir mažųjų raidžių). Tai taikoma kiekvienam pokalbių šeimos maršrutui, kuris eina per pokalbių tvarkyklę: pokalbių užbaigimai, atsakymai, pranešimai, užbaigimai ir su Dvyniais suderinamas kelias. Skambučių žurnalo eilutė vis dar rašoma su laiko žyma, modeliu, teikėju, būsena, trukme ir prieigos raktų skaičiais, tačiau `request_body`, `response_body`, užklausų suvestinės ir konvejeriniai objektai yra praleisti.
+
+Antraštė yra ORed su rakto vėliavėle: raktas be registravimo lieka neregistruotas, nepaisant antraštės, o antraštė negali iš naujo įjungti registravimo, kai raktas neprisijungia. Prieš persiunčiant užklausą, antraštė pašalinama.
+
+Ši antraštė tai daro** ne** išjungti atminties ištraukimą arba semantinę talpyklą. Siųskite `x-omniroute-no-memory: true` ir `x-omniroute-no-cache: true` kartu su juo, kai užklausos turinys neturi išlikti ir tuose posistemiuose.
 
 ## REST API
 

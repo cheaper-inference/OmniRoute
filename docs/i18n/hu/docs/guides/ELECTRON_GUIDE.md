@@ -4,7 +4,7 @@
 
 ---
 
-> **Az igazság forrása:** `electron/` munkaterület** Utolsó frissítés:** 2026-06-28 — v3.8.40
+> **Az igazság forrása:** `electron/` munkaterület
 
 OmniRoute egy többplatformos asztali alkalmazást (Windows / macOS / Linux) szállít, amelyre épül**Electron 41** +** elektronépítő 26.10** . Az asztali alkalmazás a Next.js önálló kiszolgálót gyermekfolyamatként hozza létre, egy `BrowserWindow` mutat rá, és hozzáad egy rendszertálcát, automatikus frissítőt, IPC hidat és nulla konfigurációs titkos rendszerindítót.
 
@@ -198,7 +198,7 @@ Beállítás `session.defaultSession.webRequest.onHeadersReceived` keresztül. F
 
 ## Automatikus frissítés
 
-`electron-updater` használja a GitHub szolgáltatóval (`diegosouzapw/OmniRoute`).
+`electron-updater` használja a GitHub szolgáltatóval (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC keresztül a megjelenítőhöz továbbított események: `checking`, `available`, `not-available`, `downloading` ( `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Leletek landolnak `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-A kiadásokat GitHub Releases (`diegosouzapw/OmniRoute`) közzéteszi, ahol `electron-updater` is keresi az új verziókat.
+A kiadásokat GitHub Releases (`cheaper-inference/OmniRoute`) közzéteszi, ahol `electron-updater` is keresi az új verziókat.
 
 ## Hibaelhárítás
 

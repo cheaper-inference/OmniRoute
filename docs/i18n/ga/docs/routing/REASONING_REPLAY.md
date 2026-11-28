@@ -4,9 +4,9 @@
 
 ---
 
-> **Foinse na fírinne:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Nuashonraithe is déanaí:** 2026-06-28 — v3.8.40
+> **Foinse na fírinne:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
-Gabhann OmniRoute cúntóir `reasoning_content` a tháirgtear trí mhúnlaí modh smaointeoireachta agus athsheinntear é go trédhearcach ar iarratais il-casaidh nuair a éilíonn an soláthraí réamhtheachtacha é. Cuireann sé seo deireadh leis na hearráidí HTTP 400 a ardaíonn soláthraithe dochta nuair a bhíonn réasúnaíocht an tseam roimhe in easnamh ar stair chomhrá an chliaint.
+Gabhann OmniRoute cúntóir `reasoning_content` arna dtáirgeadh ag samhlacha modh smaointeoireachta agus athsheinntear é go trédhearcach ar iarratais il-casaidh nuair a éilíonn an soláthraí réamhtheachtacha é. Cuireann sé seo deireadh leis na hearráidí HTTP 400 a ardaíonn soláthraithe dochta nuair a bhíonn réasúnaíocht an tseam roimhe in easnamh ar stair chomhrá an chliaint.
 
 ## Cén Fáth Atá Seo ann
 

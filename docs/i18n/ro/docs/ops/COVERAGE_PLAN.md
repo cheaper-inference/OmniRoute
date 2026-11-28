@@ -151,30 +151,30 @@ Teme pentru Fazele 6-7:
 - [ ] Adăugarea unor teste de regresie pentru fiecare eroare din codul de producție remediată în timpul efortului de atingere a pragului de 90%
 - [ ] Ridicarea pragului de acoperire în CI numai după ce valoarea de referință locală este stabilă pentru cel puțin două rulări consecutive
 
-## Politica de creștere incrementală a pragurilor
+## Politica cu clichet
 
-Actualizați pragurile pentru `npm run test:coverage` numai după ce proiectul depășește efectiv următoarea etapă cu o marjă confortabilă.
+Actualizați pragurile `npm run test:coverage` numai după ce proiectul depășește de fapt următorul reper cu un tampon confortabil.
 
-**Pragul curent:** `npm run test:coverage` impune **60 instrucțiuni / 60 linii / 60 funcții / 60 ramuri** (metrica a fost recalibrată în Quality-Gates Faza 6A.1 — valoarea de referință anterioară de 82,58% era mărită artificial, deoarece număra fișierele de testare și excludea `open-sse`). Comanda `test:coverage:legacy` păstrează vechea metrică 50/50/50 pentru comparații istorice.
+**Poarta actuala:** `npm run test:coverage` impune** 60 de instrucțiuni / 60 de linii / 60 de funcții / 60 de ramuri** (valoarea a fost rebazată în Quality-Gates Fase 6A.1 — valoarea de referință anterioară de 82,58% a fost umflată deoarece a numărat fișierele de testare și a exclus `open-sse`). Comanda `test:coverage:legacy` păstrează vechea metrică 50/50/50 pentru comparație istorică.
 
-Pentru verificări ad-hoc ale pragurilor pe baza celui mai recent raport, utilizați:
+Pentru verificări ad-hoc ale pragului față de cel mai recent raport, utilizați:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Secvența recomandată de creștere incrementală a pragurilor (ordinea este `instrucțiuni-linii / ramuri / funcții`):
+Secvența de clichet recomandată (comanda este `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- pragul curent (75/70/75)
+5. 75/70/72 <-- poarta curentă (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Următoarea țintă de creștere a pragurilor este `80/75/78`, odată ce acoperirea ramurilor se menține peste 78% în două rulări consecutive.
+Următoarea țintă de clichet este `80/75/78` odată ce acoperirea ramurilor se menține peste 78% pentru două runde consecutive.
 
 ## Lacună cunoscută
 

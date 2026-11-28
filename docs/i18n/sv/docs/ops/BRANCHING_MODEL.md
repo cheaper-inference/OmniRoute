@@ -48,7 +48,7 @@ När en utgåva stäms av öppnas ett markörproblem märkt `release-freeze`. At
 Kontrollera om det finns en öppen frysning innan du antar att grenen du vill ha är sammanfogbar:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Merge mekanik (ägare `queue` label → Mergify) dokumenteras i [MERGE_TRAIN.md](./MERGE_TRAIN.md).

@@ -484,23 +484,23 @@ SSE meneceri hər əhatə dairəsi üzrə qoşulmuş müştəriləri izləyir v�
 
 **Fayl:** `src/lib/gamification/sharing.ts`
 
-### İkitərəfli Mühasibat Uçotu
+### İkili Giriş Kitabı
 
-Hər köçürmə `token_ledger` cədvəlində iki sətir yaradır:
+Hər transfer `token_ledger`-da iki sıra yaradır:
 
-| Sətir  | `from_key_id` | `to_key_id` | `amount` |
-| ------ | ------------- | ----------- | -------- |
-| Debet  | göndərən      | qəbul edən  | +məbləğ  |
-| Kredit | qəbul edən    | göndərən    | -məbləğ  |
+| Sıra   | `from_key_id` | `to_key_id` | `amount`  |
+| ------ | ------------- | ----------- | --------- |
+| Debet  | göndərən      | qəbuledici  | + məbləği |
+| Kredit | qəbuledici    | göndərən    | -amount   |
 
-Lakin qəbul edilmiş qayda belədir:
+Gözləyin — konvensiya belədir:
 
-| Sətir    | `from_key_id` | `to_key_id` | `amount` | Məna                        |
-| -------- | ------------- | ----------- | -------- | --------------------------- |
-| Göndərmə | göndərən      | qəbul edən  | +məbləğ  | Göndərənin hesabından çıxış |
-| Qəbul    | qəbul edən    | göndərən    | +məbləğ  | Qəbul edənin hesabına giriş |
+| Sıra       | `from_key_id` | `to_key_id` | `amount`  | Mənası            |
+| ---------- | ------------- | ----------- | --------- | ----------------- |
+| Göndər     | göndərən      | qəbuledici  | + məbləği | Göndərəndən çıxış |
+| Qəbul edin | qəbuledici    | göndərən    | + məbləği | Qəbulediciyə axın |
 
-Balans belə hesablanır:
+Balans aşağıdakı kimi hesablanır:
 
 ```sql
 SELECT
@@ -511,7 +511,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Köçürmə Axını
+### Transfer axını
 
 ```typescript
 export async function transferTokens(
@@ -522,19 +522,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Doğrulama**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **İdempotentlik**: `idempotency_key` dəyərinin reyestrdə artıq mövcud olub-olmadığını yoxlayın.
-   Mövcuddursa, keşlənmiş nəticəni qaytarın.
-3. **Tranzaksiya** (vahid SQLite tranzaksiyası):
-   a. Göndərənin balansını hesablayın.
-   b. Əgər `balance < amount` olarsa, dayandırın (kifayət qədər vəsait yoxdur).
-   c. Göndərmə sətrini daxil edin (`from=sender,` qaytarın.
+1. **Doğrulayın** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Qüsursuzluq** : kitabda `idempotency_key` artıq olub olmadığını yoxlayın. Əgər belədirsə, keşlənmiş nəticəni qaytarın.
+3. **Əməliyyat** (tək SQLite əməliyyatı): a. Göndərən balansını hesablayın. b. Əgər `balance < amount`, ləğv edin (kafi vəsait yoxdur). c. Göndərmə sətirini daxil edin (`from=sender, to=receiver, amount`). d. Qəbul sətirini daxil edin (`from=receiver, to=sender, amount`).
+4. **Məzənnə limiti** : göndərən üçün köçürmə sürətini yoxlayın (maks. 10 transfers/min).
+5. **Hadisə** : XP + nişanının qiymətləndirilməsi üçün `token_share` oyunlaşdırma hadisəsi buraxın.
+6. `{ success: true, balance: newBalance }` qaytarın.
 
-### Tezlik Məhdudlaşdırması
+### Məhdudiyyət dərəcəsi
 
-- Hər API açarı üçün dəqiqədə maksimum 10 köçürmə.
-- Bir köçürmə üçün maksimum 10,000 token.
-- Hər API açarı üçün gündə maksimum 100,000 token köçürməsi.
+- API açarı üçün dəqiqədə maksimum 10 köçürmə.
+- Bir köçürmə üçün maksimum 10.000 token.
+- API açarı üçün gündə maksimum 100.000 token köçürülür.
 
 ---
 

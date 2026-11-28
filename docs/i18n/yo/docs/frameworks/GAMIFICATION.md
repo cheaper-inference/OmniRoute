@@ -503,27 +503,27 @@ ránṣẹ́ nìkan nígbà tí dátà tábìlì olórí bá ti yí padà ní t�
 
 ---
 
-## Pípín Token
+## Pipin àmi
 
-**Fáìlì:** `src/lib/gamification/sharing.ts`
+**Faili:** `src/lib/gamification/sharing.ts`
 
-### Ìwé-Àkọsílẹ̀ Ẹnu-Ọ̀nà Méjì
+### Ledger-Ilọpo meji
 
-Gbogbo ìfiránṣẹ́ ṣẹ̀dá ìlà méjì nínú `token_ledger`:
+Gbogbo gbigbe ṣẹda awọn ori ila meji ni `token_ledger`:
 
-| Ìlà      | `from_key_id` | `to_key_id` | `amount` |
+| kana     | `from_key_id` | `to_key_id` | `amount` |
 | -------- | ------------- | ----------- | -------- |
-| Dẹ́bítì   | olùránṣẹ́      | olùgbà      | +amount  |
-| Kírẹ́dítì | olùgbà        | olùránṣẹ́    | -amount  |
+| Debiti   | olufiranṣẹ    | olugba      | +        |
+| Kirẹditi | olugba        | olufiranṣẹ  | -amount  |
 
-Dúró — àṣà tí a ń lò ni:
+Duro — apejọ naa jẹ:
 
-| Ìlà     | `from_key_id` | `to_key_id` | `amount` | Ìtumọ̀                       |
-| ------- | ------------- | ----------- | -------- | --------------------------- |
-| Firanṣẹ́ | olùránṣẹ́      | olùgbà      | +amount  | Ìṣàn jáde láti ọ̀dọ̀ olùránṣẹ́ |
-| Gba     | olùgbà        | olùránṣẹ́    | +amount  | Ìṣàn wọlé sí ọ̀dọ̀ olùgbà     |
+| kana    | `from_key_id` | `to_key_id` | `amount` | Itumo                        |
+| ------- | ------------- | ----------- | -------- | ---------------------------- |
+| Firanṣẹ | olufiranṣẹ    | olugba      | +        | Ti njade lati ọdọ olufiranṣẹ |
+| Gba     | olugba        | olufiranṣẹ  | +        | Inflow si olugba             |
 
-A ń ṣírò ìwọ̀ntúnwọ̀nsì báyìí:
+A ṣe iṣiro iwọntunwọnsi bi:
 
 ```sql
 SELECT
@@ -534,7 +534,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Ìṣàn Ìfiránṣẹ́
+### Gbigbe Sisan
 
 ```typescript
 export async function transferTokens(
@@ -545,19 +545,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Ṣe ìfọwọ́sí**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Àìyípadà-àbájáde**: ṣàyẹ̀wò bóyá `idempotency_key` ti wà tẹ́lẹ̀ nínú ìwé-àkọsílẹ̀.
-   Tó bá rí bẹ́ẹ̀, dá àbájáde tí a fi pamọ́ padà.
-3. **Ìdúnàádúrà** (ìdúnàádúrà SQLite kan ṣoṣo):
-   a. Ṣírò ìwọ̀ntúnwọ̀nsì olùránṣẹ́.
-   b. Tí `balance < amount`, fòpin sí i (owó kò tó).
-   c. Ṣàfikún ìlà ìfiránṣẹ́ (`from=olùránṣẹ́,` padà.
+1. **Fifọwọsi** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Ailagbara** : ṣayẹwo boya `idempotency_key` ti wa tẹlẹ ninu iwe akọọlẹ. Ti o ba jẹ bẹẹni, da esi ti a fipamọ pada.
+3. **Idunadura** (ẹyọkan SQLite idunadura): a. Iṣiro iwontunwonsi Olu. b. Ti o ba `balance < amount`, abort (owo ti ko to). c. Fi ila fifiranṣẹ sii (`from=sender, to=receiver, amount`). d. Fi ila gbigba sii (`from=receiver, to=sender, amount`).
+4. **Iwọn idiwọn** : ṣayẹwo oṣuwọn gbigbe fun olufiranṣẹ (max 10 transfers/min).
+5. **Iṣẹlẹ** : emit `token_share` gamification iṣẹlẹ fun XP + baaji igbelewọn.
+6. Pada `{ success: true, balance: newBalance }`.
 
-### Dídín Ìwọ̀n Kù
+### Idiwọn Oṣuwọn
 
-- Ó pọ̀jù ìfiránṣẹ́ 10 fún ìṣẹ́jú kan fún kọ́kọ́rọ́ API kọ̀ọ̀kan.
-- Ó pọ̀jù token 10,000 fún ìfiránṣẹ́ kan ṣoṣo.
-- Ó pọ̀jù token 100,000 tí a lè fi ránṣẹ́ fún ọjọ́ kan fún kọ́kọ́rọ́ API kọ̀ọ̀kan.
+- Awọn gbigbe 10 ti o pọju fun iṣẹju kan fun bọtini API.
+- Awọn ami ami 10,000 ti o pọju fun gbigbe kan.
+- O pọju awọn ami ami 100,000 ti o gbe lọ si ọjọ kan fun bọtini API.
 
 ---
 

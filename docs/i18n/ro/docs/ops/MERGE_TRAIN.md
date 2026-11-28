@@ -4,86 +4,63 @@
 
 ---
 
-> **2026-11-19: coada de îmbinare Mergify este retrasă** (decizia proprietarului). `.mergify.yml` nu mai definește o coadă și refuză comenzile Mergify care îmbină sau rescriu o cerere de extragere. Lansările PRs sunt îmbinate manual sub setul de reguli ale depozitului „Necesită porți verzi pentru lansarea activă” (`Gate / CI` + `Gate / Quality`) până când omni-queue rulează în modul live, iar apoi prin omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Secțiunile Mergify de mai jos descriu coada așa cum a fost.
+## Aterizare pe o ramură de eliberare
 
-De la v3.8.49 (WS3.2/WS3.4 al planului quality/velocity ) calea implicită de îmbinare pentru PRs revizuit în `release/vX.Y.Z` este** Îmbinați coada de îmbinare** (`.mergify.yml`); cel** tren de îmbinare manuală** documentat mai jos este FALLBACK — utilizat în timpul incidentelor, înghețarilor de lansare sau dacă planul Mergify Open Source se schimbă vreodată.
+Omni-coada guvernează aterizările în `release/vX.Y.Z`. Citiți `mode` de nivel superior în `config/merge-queue/config.json` pe ramura implicită înainte de a obține un PR. Consultați [Omni-Queue](OMNI_QUEUE.md).
 
-## Calea implicită: coada Mergify
+- **`shadow`** rulează validarea și lasă aterizarea unei îmbinări manuale. Aplicați `omni-queue` la PR aprobat la capul său final. Verificați eligibilitatea cu `npm run queue -- why <PR>`. Așteptați verdictul pentru acel cap în `npm run queue -- history --base <branch>`. Continuați pe `would-land`. Pe `culprit-found` sau `would-dequeue`, țineți apăsat combinarea și remediați cauza.
+- **Excepții în umbră.** Un tren cu CI verde plin împotriva vârfului de bază curent poate continua fără un verdict separat de coadă. Aceeași excepție se aplică atunci când capul PR conține deja vârful de bază curent.
+- **`live`** folosește eticheta `omni-queue` pentru a declanșa aterizarea. Numai coada aterizează PR. Lăsați comenzile de îmbinare și împinge direct în coadă.
 
-1. PR-ul este revizuit/validat de campanii și aprobat prin poarta ⭐ de dinaintea îmbinării
-   a proprietarului (raportul + decizia pentru fiecare element — consultați Pasul 0.75 din `/merge-prs`).
-2. Proprietarul (sau sesiunea care acționează în baza deciziei proprietarului) aplică eticheta
-   **`queue`**. Eticheta REPREZINTĂ aprobarea îmbinării; Mergify doar o execută.
-3. Mergify validează PR-urile din coadă **secvențial** (unul câte unul) în raport cu verificările rapide
-   și le îmbină (squash). Procesarea în loturi + bisecția automată necesită un nivel Mergify cu plată
-   („Cannot use Merge Queue batch” în planul gratuit, #7220), astfel încât `.mergify.yml` nu setează
-   niciun `batch_size`; procesarea în loturi rămâne sarcina trenului de îmbinare manual de mai jos. Un PR ale cărui
-   verificări sunt încă în așteptare după `checks_timeout` (240 min = 2× valoarea p95 măsurată pentru
-   `quality.yml`) este eliminat din coadă în loc să blocheze coada.
-4. După îmbinare, fluxul de lucru continuu pentru validarea versiunii verifică noul vârf la push
-   și deschide un tichet de atribuire dacă această combinație a produs o regresie (nu efectuează niciodată revenirea automată).
+Fiecare aterizare necesită autorizația proprietarului și verificările necesare aplicabile. Aplicați `omni-queue` numai după ce proprietarul a autorizat aterizarea. PRs pus în coadă care atinge căile protejate necesită, de asemenea, decizia `protected-approved` a proprietarului pentru acel PR.
 
-Măsuri de protecție (reflectă Regulile stricte #21/#22 din `CLAUDE.md`):
+Setul de reguli „Necesită porți verzi pentru lansarea activă” necesită `Gate / CI` și `Gate / Quality` verzi pe cap. Nu utilizați niciodată `--admin` pentru a ocoli o poartă roșie. Blocurile de înghețare de eliberare se îmbină în ramura înghețată. Vezi [Regula 21](HARD_RULES_DETAIL.md). Nu etichetați, îmbinați sau împingeți niciodată la o solicitare de extragere că o altă sesiune funcționează. Vezi [Regula 22](HARD_RULES_DETAIL.md).
 
-- **Înghețarea versiunii este activă** → NU etichetați PR-urile care vizează ramura înghețată; redirecționați-le mai întâi către
-  ramura activă `release/vX+1`.
-- **PR-ul în curs al altei sesiuni** → nu îl etichetați niciodată; numai sesiunea proprietară își adaugă
-  propria lucrare în coadă.
-- Diferențele care conțin doar teste și PR-urile etichetate cu `hotfix` rulează deja un CI redus (consultați
-  `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); condițiile cozii acceptă orice
-  set de verificări care a rulat efectiv (`#check-failure=0` + `#check-pending=0`).
+## Cererea de tragere a trenului
 
-## Soluția de rezervă: trenul de integrare manual
+1. Începeți o ramură de tren la vârful actual al bazei de eliberare. Integrați exact șefii de membri aprobati folosind comite de îmbinare. Păstrează istoricul de comitere evitând squash și rebase.
+2. Deschideți o cerere de tragere pentru ramura de tren. Validați acel PR cu propriul CI complet pe vârful de bază curent. Verificați din nou vârful bazei și capetele membrelor aprobate înainte de aterizare. Actualizează trenul și CI său atunci când candidatul validat se schimbă.
+3. Aterizați trenul PR cu un commit de îmbinare în modul de coadă aplicabil. În modul live, metoda de aterizare `merge-ff` a cozii păstrează comiterile de îmbinare. Capetele de membru original devin accesibile din ramura de lansare. GitHub marchează membrul PRs ca fuzionat și commit-urile își păstrează autorii.
 
-Se utilizează atunci când coada nu este disponibilă. Aceasta formalizează practica prin care au fost procesate 33 de PR-uri
-într-o singură zi în timpul ciclului v3.8.47:
+Un exemplu public este [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). A combinat 18 membri PRs și a aterizat cu un commit de fuziune pe 2026-11-24.
 
-1. **Asamblați lotul** (aproximativ 10–30 de PR-uri revizuite și aprobate). Verificați coliziunile `linked:`
-   (aceleași `tap.testFiles`, aceleași porțiuni din CHANGELOG) și serializați-le.
-2. **Validați O SINGURĂ DATĂ**: într-un worktree izolat, creat din vârful ramurii de release, integrați local toate
-   head-urile lotului, apoi rulați suita echivalentă celei de release
-   (`npm run check:release-green`; adăugați `--with-build` înaintea unui release).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatizează pașii 1–2 (PR-urile cu conflicte
-   sunt eliminate, iar trenul continuă). Modul complet rulează `npm run test:unit` — executorul
-   optimizat pentru mașină (`--test-concurrency=20`), **nu** cele două shard-uri CI secvențiale cu 4 nuclee,
-   care făceau ca faza dominantă să utilizeze aproximativ 25% dintr-o mașină cu 16 nuclee (remediat la
-   2026-07-18). `--fast` (procesări de mega-trenuri pe parcursul zilei, aprobate de proprietar la 2026-07-18)
-   păstrează fiecare poartă statică + vitest, dar rulează numai fișierele node:test modificate de
-   PR-urile urcate în tren; suita COMPLETĂ trebuie să ruleze în continuare cel puțin o dată pe zi pe
-   vârful acumulat (un tren fără `--fast`).
-3. **Validare reușită** → integrați PR-urile în ordine (reverificând `state,headRefOid` înainte de fiecare —
-   un PR al cărui head s-a modificat reintră în procesul de revizuire). Demonstrați că diferența netă a fiecărei integrări este
-   propria modificare a PR-ului (fără reveniri prin rezolvare automată: auditați `git diff --stat` pentru
-   ștergeri din afara domeniului vizat).
-4. **Validare eșuată** → împărțiți lotul în jumătăți prin bisecție (validați fiecare jumătate), în loc să revalidați
-   PR-urile unul câte unul; retrimiteți PR-ul problematic în coada de revizuire împreună cu dovezile.
-5. **Niciodată**: nu integrați în timpul unei înghețări în ramura înghețată; nu folosiți `git stash` nicăieri;
-   nu rerulați în masă CI-ul sperând că o eroare va dispărea (regulă: o eroare reprezintă informație).
+O sincronizare înapoi de la `main` la următoarea ramură de lansare ajunge, de asemenea, printr-o comitere de îmbinare. Păstrarea ascendenței `main` este necesară pentru sincronizările ulterioare. Consultați [Izolarea arborelui de lucru](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Niveluri (de ce coada este sigură doar cu verificările rapide)
+## Validatorul local de îmbinare-tren
 
-- **Per PR** (verificările rapide din quality.yml): teste afectate conform TIA + suita unit completă în 4 shard-uri +
-  vitest + setul de verificări lint + verificarea tipurilor + integritatea documentației/CHANGELOG-ului.
-- **Per lot/vârf** (release-green continuu): porți OBLIGATORII `--quick` la fiecare push în
-  ramura de release; rulări complete `--with-build --full-ci` de 3 ori/zi.
-- **Per release** (ci.yml pe PR-ul de release): matricea completă, inclusiv E2E ×9,
-  artefactul pachetului + verificarea rapidă de pornire din tarball, acoperirea/pragurile progresive.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Nimic nu este validat mai puțin decât înainte — suprafața costisitoare rulează doar per lot/vârf,
-în loc să ruleze per PR, ceea ce elimină ciclurile O(N).
+Validatorul preia capetele de bază și PR și le combină într-un arbore de lucru de unică folosință. Își rulează suita de paritate o dată pe arborele rezultat. Un conflict de preluare sau de îmbinare a capului eșuat ejectează acel PR și scriptul continuă cu PRs rămas.
 
-## Cerințe preliminare pentru un checkout nou pentru `merge-train.sh`
+- **`--plan`** imprimă pașii modului selectat și iese fără a crea un arbore de lucru sau a contacta telecomanda. Combină-l cu `--fast` pentru a inspecta planul rapid.
+- **`--fast`** rulează porțile statice comune, fișierele `node:test` modificate selectate sub `tests/unit/` și `npm run test:vitest`. Rulați o validare locală completă cel puțin o dată pe zi pe vârful acumulat atunci când utilizați modul rapid.
+- **Modul complet** adaugă porțile statice complete și rulează `npm run test:unit` și `npm run test:vitest`.
 
-Scriptul rulează o verificare preliminară **fail-fast** pe checkout-ul rădăcină (înainte de orice operațiune
-în worktree), astfel încât o instalare defectă să nu poată fi confundată niciodată cu un tren cu erori:
+O poartă statică eșuată este reluată pe baza neatinsă dacă sonda de bază este disponibilă. Scriptul raportează eșecurile moștenite și continuă atunci când fiecare linie de încălcare recunoscută apare și pe bază și numărul total nu a crescut.
 
-1. `npm ci`, apoi rulați scriptul postinstall pentru `bun`, pe care npm îl blochează:
-   `(cd node_modules/bun && node install.js)` — altfel, `check:provider-consistency`
-   și `check:known-symbols` (ambele folosesc `bun scripts/…`) eșuează atât pe tren, CÂT ȘI pe bază,
-   fără nicio linie care să indice încălcarea.
-2. Nu trebuie să existe un `node_modules/node_modules` rezidual (un arbore de dependențe duplicat; React se încarcă de două ori,
-   iar suitele UI vitest eșuează instantaneu).
-3. `node_modules/.bin/tsc` trebuie să fie prezent și executabil (lipsește dintr-o instalare parțială).
+| Ieșire | Sens                                                                                                                           |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `0`    | A tipărit planul sau a finalizat suita. Rezumatul suitei listează toate erorile statice moștenite și PRs ejectat.              |
+| `1`    | Argumente nevalide, nicio verificare Git, verificare prealabilă eșuată sau PR îmbarcat.                                        |
+| `2`    | O verificare a sumei nu a reușit și nu s-a calificat ca moștenit. Operatorul poate diviza lotul, ejecta PR ofensator și relua. |
 
-Trenul rulează comanda blocantă `npm run check:cycles:ratchet`; simplul `npm run check:cycles`
-este informativ (listează SCC-urile și se încheie cu un cod diferit de zero chiar și pe o bază validă).
+Un permis local oferă dovezi de diagnosticare numai pentru dosarul proprietarului. Fiecare aterizare necesită încă autorizarea proprietarului, propriile verificări necesare și verdictul din coada umbră, atunci când este cazul.
+
+## Nivelare
+
+- **Per PR.** CI și Verificări de selectare a calității pe baza căilor modificate. Code PRs rulează rapid porți de calitate și teste de impact, cu unități separate și joburi Vitest în CI.
+- **Pe candidat la coadă.** CI și Quality rulează profilul complet pentru candidatul compus din lista sa de ref.
+- **Per vârf de eliberare.** Release-Green rulează porți rapide și dure la împingeri care se potrivesc cu filtrele sale de cale. Trei execuții programate pe zi folosesc întregul sweep pentru ramura de lansare.
+- **Per lansare.** Matricea completă CI include fragmente E2E, validarea pachetului, fumul de cizme tarball și verificări de acoperire. Consultați [Lista de verificare a lansării](RELEASE_CHECKLIST.md).
+
+## Cerințe preliminare pentru proaspăt achiziție pentru `merge-train.sh`
+
+Verificarea prealabilă rulează înainte de a crea arbori de lucru. Instalați dependențe cu `npm ci`. Confirmați că `node_modules/.bin/tsc` este executabil și că `node_modules/node_modules` este absent. Verificați dacă `node_modules/.bin/bun --version` reușește.
+
+Dacă postinstalarea Bun a fost omisă, rulați `(cd node_modules/bun && node install.js)`. Consecvența furnizorului și verificările simbolurilor cunoscute folosesc Bun. Validatorul rulează `npm run check:cycles:ratchet` ca o poartă de blocare. Comanda `npm run check:cycles` autonomă este consultativă.
+
+## Istorie
+
+Coada de îmbinare Mergify a fost retrasă pe 2026-11-19.

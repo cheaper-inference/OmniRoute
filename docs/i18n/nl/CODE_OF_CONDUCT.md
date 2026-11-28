@@ -53,15 +53,13 @@ Voorbeelden van het vertegenwoordigen van onze gemeenschap zijn het gebruik van 
 het plaatsen van berichten via een officieel socialemedia-account of het optreden als een aangewezen
 vertegenwoordiger tijdens een online- of offline-evenement.
 
-## Enforcement
+## Handhaving
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Gevallen van beledigend, intimiderend of anderszins onaanvaardbaar gedrag kunnen worden gemeld aan de gemeenschapsleiders die verantwoordelijk zijn voor de handhaving door een particulier beveiligingsadvies te openen op
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+of door de beheerder een e-mail te sturen op diegosouza.pw@outlook.com. Voor veiligheidsgevoelige incidenten, zie [`SECURITY.md`](SECURITY.md). Alle klachten zullen snel en eerlijk worden beoordeeld en onderzocht.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Alle gemeenschapsleiders zijn verplicht om de privacy en veiligheid van de melder van elk incident te respecteren.
 
 ## Handhavingsrichtlijnen
 

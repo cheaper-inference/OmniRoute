@@ -4,14 +4,11 @@
 
 ---
 
-> **Matsayi:** Akwai don amfanin kowa.
-> **Masu karatu:** Masu gudanarwa da ke haɗa OpenCode da turawar OmniRoute.
-> **Tushen gaskiya (tsarin daidaitawa):** `src/shared/services/opencodeConfig.ts`
-> **Tushen gaskiya (kunshin npm):** `@omniroute/opencode-provider/` (workspace da za a iya wallafawa)
+> **Matsayi:** Gabaɗaya akwai.** Masu sauraro:** Masu aiki suna haɗa OpenCode zuwa tura OmniRoute.** Tushen gaskiya (tsarin tsari):** `src/shared/services/opencodeConfig.ts`** Abubuwan da aka ba da shawarar npm:** `@omniroute/opencode-plugin/` (OpenCode v1, wanda `omniroute setup opencode` ya shigar) da `@omniroute/opencode-plugin-v2/` (OpenCode v2). Tsohuwar kunshin `@omniroute/opencode-provider/` shine** deprecated** (duba Hanya ta 2).
 
-[OpenCode](https://opencode.ai) abokin ciniki ne na AI mai wakilci wanda ke aiki ta CLI/desktop. Yana karanta kundin masu samar da sabis daga `~/.config/opencode/opencode.json` (ko `opencode.jsonc`) kuma yana bin tsarin da ke `https://opencode.ai/config.json`. OmniRoute yana gabatar da kansa ga OpenCode a matsayin ɗaya daga cikin waɗannan masu samar da sabis — kowace buƙata tana bi ta daidaitacciyar fuskar OmniRoute mai dacewa da OpenAI ta `/v1`, don haka OpenCode yana cin gajiyar turawar Auto-Combo, circuit breakers, manufofin maɓalli, sa ido, da sauransu ta atomatik.
+[OpenCode](https://opencode.ai) abokin ciniki ne na CLI/desktop AI. Yana karanta kasidar mai bada sa daga `~/.config/opencode/opencode.json` (ko `opencode.jsonc`) kuma yana bin tsarin a `https://opencode.ai/config.json`. OmniRoute tana fallasa kanta ga OpenCode a matsayin ɗaya daga cikin waɗancan masu samar da — kowace buƙata tana gudana ta daidaitaccen OmniRoute's daidaitaccen OpenAI mai dacewa `/v1`, don haka OpenCode yana fa'ida ta atomatik daga zirga-zirgar Auto-Combo, masu saɓowar kewayawa, mahimman manufofin, lura, da sauransu.
 
-Akwai **hanyoyin haɗawa guda biyu da ake tallafawa**. Zaɓi ɗaya — dukansu suna samar da daidaitawa iri ɗaya.
+Wannan shafin yana rubuta hanyoyin daidaita-daidaitacce guda biyu a ƙasa; duka suna samar da tsari iri ɗaya. Don lissafin samfurin da ke biye da kas ɗin ku na rayuwa, yi amfani da plugin ɗin maimakon: `omniroute setup opencode` yana shigar da `@omniroute/opencode-plugin` (OpenCode v1), da `@omniroute/opencode-plugin-v2` hari OpenCode v2 (duba [haɗin haɗin CLI](../guides/CLI-INTEGRATIONS.md) da [jagorar plugin OpenCode v2](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ Fayil ɗin da aka samar (tsohon kundin samfura):
 
 ---
 
-## Hanya ta 2 — Kunshin npm `@omniroute/opencode-provider`
+## Hanyar 2 — npm kunshin `@omniroute/opencode-provider` (wanda aka yanke)
 
-An ba da shawarar wannan idan kana sarrafa daidaitawar ta Node/TS (bututun CI, monorepos, hanyoyin mai-shigarwa na musamman).
+> **Deprecated.** Kunshin yana rubuta jeri na ƙirar ƙira wanda ke tafiya a bayan kundin kundin OmniRoute na ku. README ɗinsa yana ba da shawarar ƙaura zuwa `@omniroute/opencode-plugin` (ko `@omniroute/opencode-plugin-v2` akan OpenCode v2). An ajiye API da ke ƙasa don rubutun da ake da su kawai.
+
+Ana amfani dashi lokacin rubuta saitin daga Node/TS (bututun CI, monorepos, mai shigar da al'ada).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Na zaɓi: sauya kundin samfuran da ake nuna wa OpenCode
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Don haɗawa ba tare da lalata fayil ɗin da yake akwai ba, sake aiwatar da `mergeOpenCodeConfigText()` daga `opencodeConfig.ts` ko kuma kira mai samarwa na CLI.
+Don haɗakar da ba ta lalacewa da fayil ɗin data kasance, kwafi `mergeOpenCodeConfigText()` daga `opencodeConfig.ts` ko kira janareta CLI.
 
-Duba [README na kunshin](../../@omniroute/opencode-provider/README.md) don cikakken API.
+Duba [kunshin README](../../@omniroute/opencode-provider/README.md) don cikakken API.
 
 ---
 
@@ -157,7 +156,9 @@ Ga clients masu salon Anthropic waɗanda ke aika `x-api-key` + `anthropic-versio
 
 ## Duba kuma
 
-- [Manazartar API](../reference/API_REFERENCE.md) — cikakken tsarin OmniRoute REST
-- [Auto-Combo](../routing/AUTO-COMBO.md) — abin da `model: "auto"` ke nufi
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
-- Tushen lamba: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`
+- [API reference](../reference/API_REFERENCE.md) — cikakken OmniRoute REST surface
+- [Auto-Combo](../routing/AUTO-COMBO.md) — me `model: "auto"` ke nufi
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (an ba da shawarar)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (deprecated)
+- Source: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

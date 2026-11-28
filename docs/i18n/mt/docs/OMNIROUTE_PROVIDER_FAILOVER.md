@@ -21,3 +21,5 @@ Il-politika default bejn il-fornituri tippermetti sa tliet tentattivi tal-fornit
   - Id prefissat (`provider/model`) qatt ma tinbidel lejn fornitur ieħor.
 
 L-istati taċ-ċirkwit huma `closed`, `open`, u `half_open`. A cooldown iskedi sonda bounded; sonda ta 'suċċess tagħlaq iċ-ċirkwit u sonda li falliet terġa' tiftaħha.
+
+Il-falliment tal-fornitur jaħdem ġewwa l-gateway. Ara [Meta OmniRoute nnifisha ma tkunx tista' tintlaħaq](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) għall-imġieba tal-klijent waqt qtugħ ta' gateway.

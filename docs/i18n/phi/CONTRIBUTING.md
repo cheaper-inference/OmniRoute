@@ -8,121 +8,107 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Setup sa Pag-develop
+## Setup ng Pag-unlad
 
-### Mga Kinakailangan
+### Mga kinakailangan
 
 - **Node.js** `>=22.22.2 <23`, o `>=24.0.0 <27` (inirerekomenda: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows gamit ang Node 24:** gamitin ang kasalukuyang 24 LTS patch release (hindi bababa sa 24.20.0).
-> Maaaring mag-abort ang mga naunang release matapos ang matagumpay na mga test kapag isinasara ng `--test-force-exit` ang
-> proseso. Tinutugunan ng [Windows libuv fix](https://github.com/nodejs/node/pull/61999) ng Node
-> ang runtime crash na ito; panatilihing naka-enable ang mga assertion ng test at mga pagsusuri sa paglabas ng runner.
+> **Windows na may Node 24:** gamitin ang kasalukuyang 24 LTS patch release (hindi bababa sa 24.20.0). Maaaring i-abort ang mga naunang release pagkatapos ng matagumpay na mga pagsubok kapag isinara ng `--test-force-exit` ang proseso. [Windows libuv fix](https://github.com/nodejs/node/pull/61999) ng Node ay tumutugon sa runtime crash na ito; panatilihing naka-enable ang mga paninindigan sa pagsubok at paglabas ng runner.
 
-> **Mga gumagamit ng npm v11+ (Node 24+):** Pagkatapos ng `npm install`, tiyaking na-install ang mga native module:
-> `node -e "require('better-sqlite3')"`. Kung mabigo ito dahil sa `MODULE_NOT_FOUND`,
-> patakbuhin ang `npm approve-scripts better-sqlite3 && npm install`. Tingnan ang
-> [Pag-troubleshoot](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + user (Node 24 +):** Pagkatapos `npm install`, i-verify na na-install ang mga native na module: `node -e "require('better-sqlite3')"`. Kung nabigo ito sa `MODULE_NOT_FOUND`, patakbuhin `npm approve-scripts better-sqlite3 && npm install`. Tingnan ang [Pag-troubleshoot](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Pag-clone at Pag-install
+### I-clone at I-install
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Mga Environment Variable
+### Mga variable ng kapaligiran
 
 ```bash
-# Gumawa ng iyong .env mula sa template
+# Create your .env from the template
 cp .env.example .env
 
-# Bumuo ng mga kinakailangang secret
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Mga pangunahing variable para sa development:
+Mga pangunahing variable para sa pag-unlad:
 
-| Variable               | Default para sa Development | Paglalarawan                   |
-| ---------------------- | --------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                     | Port ng server                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Base URL para sa frontend      |
-| `JWT_SECRET`           | (bumuo sa itaas)            | Secret para sa pag-sign ng JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | Password sa unang pag-login    |
-| `APP_LOG_LEVEL`        | `info`                      | Antas ng verbosity ng log      |
+| Variable               | Default ng Pag-unlad     | Paglalarawan                |
+| ---------------------- | ------------------------ | --------------------------- |
+| `PORT`                 | `20128`                  | Port ng server              |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Base URL para sa frontend   |
+| `JWT_SECRET`           | (bumuo sa itaas)         | JWT signing secret          |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Unang password sa pag-login |
+| `APP_LOG_LEVEL`        | `info`                   | Mag-log verbosity level     |
 
 ### Mga Setting ng Dashboard
 
-Nagbibigay ang dashboard ng mga UI toggle para sa mga feature na maaari ring i-configure gamit ang mga environment variable:
+Nagbibigay ang dashboard ng UI toggle para sa mga feature na maaari ding i-configure sa pamamagitan ng mga variable ng kapaligiran:
 
-| Lokasyon ng Setting | Toggle             | Paglalarawan                             |
-| ------------------- | ------------------ | ---------------------------------------- |
-| Settings → Advanced | Debug Mode         | I-enable ang mga debug request log (UI)  |
-| Settings → General  | Sidebar Visibility | Ipakita/itago ang mga seksyon ng sidebar |
+| Pagtatakda ng Lokasyon | I-toggle           | Paglalarawan                                          |
+| ---------------------- | ------------------ | ----------------------------------------------------- |
+| Mga Setting → Advanced | Debug Mode         | Paganahin ang mga log ng kahilingan sa pag-debug (UI) |
+| → ang mga setting      | Sidebar Visibility | Show/hide sidebar na mga seksyon                      |
 
-Naka-store ang mga setting na ito sa database at nananatili kahit mag-restart, at ino-override ang mga default ng env var kapag itinakda.
+Ang mga setting na ito ay naka-store sa database at nagpapatuloy sa mga pag-restart, na na-override ang mga env var default kapag nakatakda.
 
-### Pagpapatakbo nang Lokal
+### Tumatakbo sa Lokal
 
 ```bash
 # Development mode (hot reload)
 npm run dev
 
 # Production build
-npm run build    # next build → .build/next/ at pagkatapos ay assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Mabilis na backend/API-only compile para sa mga pagbabago ng contributor
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Release build (malinis na rebuild + HEAD sentinel — kinakailangan para sa deploy)
-npm run build:release   # rm -rf .build dist at build + nagsusulat ng dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Karaniwang configuration ng port
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Nagsasagawa ang contributor build ng compile-only validation: hindi nito ina-assemble ang standalone
-distribution o bina-build ang mga opsyonal na native packaging asset. Gamitin ang regular na production build kapag
-kailangan mong i-validate ang shippable bundle.
+Ang build ng contributor ay nagsasagawa ng compile-only validation: hindi nito binubuo ang standalone distribution o bumuo ng mga opsyonal na asset ng native packaging. Gamitin ang regular na production build kapag kailangan mong i-validate ang shippable bundle.
 
-### Layout ng Build Output
+### Bumuo ng Output Layout
 
-| Directory | Mga Nilalaman                                                                   | Naka-track |
-| --------- | ------------------------------------------------------------------------------- | ---------- |
-| `src/`    | Source ng application (TypeScript / TSX)                                        | Oo         |
-| `.build/` | Mga intermediate — output ng `next build` (gitignored, `distDir = .build/next`) | Hindi      |
-| `dist/`   | Shippable bundle — ina-assemble ng `assembleStandalone` (gitignored)            | Hindi      |
+| Direktoryo | Mga nilalaman                                                                 | Sinusubaybayan |
+| ---------- | ----------------------------------------------------------------------------- | -------------- |
+| `src/`     | Pinagmulan ng application (TypeScript / TSX)                                  | Oo             |
+| `.build/`  | Mga intermediate — `next build` na output (giignore, `distDir = .build/next`) | Hindi          |
+| `dist/`    | Naipapadalang bundle — na binuo ng `assembleStandalone` (giignore)            | Hindi          |
 
-Isang pass lamang ang build pipeline:
+Ang build pipeline ay isang solong pass:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (output ng Next.js)
-  └─ assembleStandalone()                 (kinokopya ang standalone + static + public + native assets)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-Nililinis din ng `npm run build:release` ang dalawang directory muna at nagsusulat ng
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bilang deploy integrity sentinel.
+Bukod dito, nililinis muna `npm run build:release` ang parehong mga direktoryo at isinulat `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) bilang isang deploy na integrity sentinel.
 
-Ginagamit ng `npm run build:contributor` ang backend-only build profile. Pansamantala nitong hina-harangan ang
-mga dashboard UI file habang nagbu-build, pinananatili ang mga API route handler, at ibinabalik ang orihinal na mga file
-pagkatapos ng build. Gamitin ang `npm run build` para sa mga pagbabagong nakaaapekto sa dashboard UI o para sa buong
-release validation; hindi kapalit ng release build ang contributor profile.
+Ginagamit ng `npm run build:contributor` ang backend-only build profile. Pansamantala itong nag-stub ng mga file UI sa dashboard habang gumagawa, nagpapanatili ng mga humahawak ng ruta API, at nire-restore ang mga orihinal na file pagkatapos ng build. Gamitin ang `npm run build` para sa mga pagbabagong nakakaapekto sa dashboard UI o para sa buong pagpapatunay ng release; ang profile ng nag-aambag ay hindi isang kapalit para sa pagbuo ng release.
 
-> **Tala para sa VPS deploy:** hindi nagbabago ang remote image directory na `/usr/lib/node_modules/omniroute/app/`.
-> Sini-rsync ng mga deploy skill ang mga nilalaman ng `dist/` papunta rito.
-> Tanging ang build output path sa loob ng repository ang inilipat (`app/` → `dist/`).
+> **VPS deploy note:** ang malayuang direktoryo ng imahe `/usr/lib/node_modules/omniroute/app/` ay hindi nagbabago. Ang mga kasanayan sa pag-deploy ay nag-sync ng mga nilalaman ng `dist/` dito. Tanging ang in-repo build output path ang inilipat (`app/` → `dist/`).
 
-Mga default na URL:
+Default na URLs:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **Dashboard** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -429,10 +415,10 @@ Pagkatapos, gamitin ang mga skill na `/deploy-vps-*-cc`, na gumagamit ng rsync u
 
 ---
 
-## Paghingi ng Tulong
+## Pagkuha ng Tulong
 
-- **Arkitektura**: Tingnan ang [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Sanggunian ng API**: Tingnan ang [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Mga dokumento sa seguridad**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Mga dokumento sa operasyon**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Mga isyu**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Arkitektura** : Tingnan [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Sanggunian** : Tingnan [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Mga doc ng seguridad** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops docs** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Mga isyu** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

@@ -151,30 +151,30 @@ Maudhui makuu ya Awamu za 6-7:
 - [ ] Ongeza majaribio ya urejeshi kwa kila hitilafu ya uzalishaji ambayo haikuwa imefunikwa na iliyorekebishwa wakati wa msukumo wa kufikia 90%
 - [ ] Pandisha kizingiti cha ufunikaji katika CI baada tu ya kiwango cha msingi cha ndani kuwa thabiti kwa angalau utekelezaji mbili mfululizo
 
-## Sera ya ratchet
+## Sera ya Ratchet
 
-Sasisha vizingiti vya `npm run test:coverage` tu baada ya mradi kuzidi hatua inayofuata kwa kiasi cha kutosha.
+Sasisha vizingiti vya `npm run test:coverage` baada tu ya mradi kuzidi hatua muhimu inayofuata kwa bafa ya starehe.
 
-**Kizingiti cha sasa:** `npm run test:coverage` kinatekeleza **kauli 60 / mistari 60 / vitendakazi 60 / matawi 60** (kipimo kiliwekewa msingi mpya katika Quality-Gates Awamu ya 6A.1 — msingi wa awali wa 82.58% ulikuwa umeongezwa kupita kiasi kwa sababu ulihesabu faili za majaribio na kuondoa `open-sse`). Amri ya `test:coverage:legacy` huhifadhi kipimo cha zamani cha 50/50/50 kwa ajili ya ulinganisho wa kihistoria.
+**Lango la sasa:** `npm run test:coverage` inatekeleza** Taarifa 60 / mistari 60 / kazi 60 / matawi 60** (kipimo kiliwekwa upya katika Quality-Gates Fase 6A.1 — kiwango cha awali cha 82.58% kiliongezwa kwa sababu kilihesabu faili za majaribio na kutojumuisha `open-sse`). Amri `test:coverage:legacy` huhifadhi kipimo cha 50/50/50 cha zamani kwa ulinganisho wa kihistoria.
 
-Kwa ukaguzi wa papo hapo wa vizingiti dhidi ya ripoti ya hivi karibuni, tumia:
+Kwa ukaguzi wa kiwango cha ad-hoc dhidi ya matumizi ya hivi karibuni ya ripoti:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Mfuatano wa ratchet unaopendekezwa (mpangilio ni `kauli-mistari / matawi / vitendakazi`):
+Mfuatano wa ratchet unaopendekezwa (agizo ni `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- kizingiti cha sasa (75/70/75)
+5. 75/70/72 <- lango la sasa (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Lengo linalofuata la ratchet ni `80/75/78` mara tu ufunikaji wa matawi unapodumu zaidi ya 78% katika utekelezaji mara mbili mfululizo.
+Lengo linalofuata ni `80/75/78` mara huduma ya tawi inazidi 78% kwa mikimbio mbili mfululizo.
 
 ## Pengo linalojulikana
 

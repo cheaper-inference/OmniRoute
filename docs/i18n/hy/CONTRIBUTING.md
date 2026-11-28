@@ -13,29 +13,23 @@ UI/UX-ի, i18n-ի, CLI-ի, տվյալների բազայի և կառուցման
 
 ---
 
-## Մշակման կարգավորում
+## Զարգացման կարգավորում
 
-### Նախապայմաններ
+### Նախադրյալներ
 
-- **Node.js** `>=22.22.2 <23`, կամ `>=24.0.0 <27` (խորհուրդ է տրվում՝ 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` կամ `>=24.0.0 <27` (խորհուրդ է տրվում՝ 24 LTS)
+- **npm** 10 +
 
-> **Windows՝ Node 24-ով.** օգտագործեք ընթացիկ 24 LTS patch թողարկումը (առնվազն 24.20.0)։
-> Ավելի վաղ թողարկումները կարող են դադարեցնել աշխատանքը հաջողված թեստերից հետո, երբ `--test-force-exit`-ը փակում է
-> գործընթացը։ Node-ի [Windows libuv-ի ուղղումը](https://github.com/nodejs/node/pull/61999) լուծում է
-> այս runtime-ի խափանումը․ մի անջատեք թեստերի assertion-ները և runner-ի ելքի ստուգումները։
+> **Windows հանգույց 24-ով:** օգտագործեք ընթացիկ 24 LTS կարկատանի թողարկումը (առնվազն 24.20.0): Ավելի վաղ թողարկումները կարող են ընդհատվել հաջող փորձարկումներից հետո, երբ `--test-force-exit` փակում է գործընթացը: Node-ի [Windows libuv շտկումը](https://github.com/nodejs/node/pull/61999) հասցեագրում է այս գործարկման խափանումը; միացված պահեք թեստի պնդումները և վազորդի ելքի ստուգումները:
 
-> **npm v11+ օգտվողներ (Node 24+).** `npm install`-ից հետո ստուգեք՝ արդյոք native մոդուլները տեղադրվել են․
-> `node -e "require('better-sqlite3')"`. Եթե այն ձախողվում է `MODULE_NOT_FOUND`-ով,
-> կատարեք `npm approve-scripts better-sqlite3 && npm install`. Տե՛ս
-> [Խնդիրների լուծում](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)։
+> **npm v11 + օգտվողներ (Node 24 +):** `npm install` ից հետո ստուգեք, որ տեղադրվել են բնիկ մոդուլներ՝ `node -e "require('better-sqlite3')"`: Եթե `MODULE_NOT_FOUND` ով ձախողվի, գործարկեք `npm approve-scripts better-sqlite3 && npm install`: Տես [Անսարքությունների վերացում](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) :
 
 - **Git**
 
 ### Կլոնավորում և տեղադրում
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -43,87 +37,84 @@ npm install
 ### Շրջակա միջավայրի փոփոխականներ
 
 ```bash
-# Ստեղծեք ձեր .env-ը ձևանմուշից
+# Create your .env from the template
 cp .env.example .env
 
-# Ստեղծեք անհրաժեշտ գաղտնիքները
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Մշակման համար հիմնական փոփոխականները՝
+Զարգացման հիմնական փոփոխականները.
 
-| Փոփոխական              | Մշակման լռելյայն արժեք   | Նկարագրություն                      |
-| ---------------------- | ------------------------ | ----------------------------------- |
-| `PORT`                 | `20128`                  | Սերվերի պորտ                        |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Frontend-ի հիմնական URL             |
-| `JWT_SECRET`           | (ստեղծել վերևում)        | JWT ստորագրման գաղտնիք              |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Առաջին մուտքի գաղտնաբառ             |
-| `APP_LOG_LEVEL`        | `info`                   | Մատյանների մանրամասնության մակարդակ |
+| Փոփոխական              | Զարգացման լռելյայն       | Նկարագրություն                  |
+| ---------------------- | ------------------------ | ------------------------------- |
+| `PORT`                 | `20128`                  | Սերվերի նավահանգիստ             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Հիմք URL ճակատային մասի համար   |
+| `JWT_SECRET`           | (ստեղծել վերևում)        | JWT ստորագրման գաղտնիք          |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Առաջին մուտքի գաղտնաբառը        |
+| `APP_LOG_LEVEL`        | `info`                   | Մատյանների խոսակցական մակարդակը |
 
-### Կառավարման վահանակի կարգավորումներ
+### Վահանակի կարգավորումներ
 
-Կառավարման վահանակը տրամադրում է հնարավորությունների համար UI անջատիչներ, որոնք կարող են նաև կարգավորվել շրջակա միջավայրի փոփոխականների միջոցով։
+Վահանակի վահանակը տրամադրում է UI անջատիչներ այն հնարավորությունների համար, որոնք կարող են կազմաձևվել նաև շրջակա միջավայրի փոփոխականների միջոցով.
 
-| Կարգավորման տեղադրություն | Անջատիչ            | Նկարագրություն                                   |
-| ------------------------- | ------------------ | ------------------------------------------------ |
-| Settings → Advanced       | Debug Mode         | Միացնել վրիպազերծման հարցումների մատյանները (UI) |
-| Settings → General        | Sidebar Visibility | Ցուցադրել/թաքցնել կողագոտու բաժինները            |
+| Տեղադրության կարգավորում    | Փոխարկել                         | Նկարագրություն                                   |
+| --------------------------- | -------------------------------- | ------------------------------------------------ |
+| Կարգավորումներ → Ընդլայնված | Վրիպազերծման ռեժիմ               | Միացնել վրիպազերծման հարցումների մատյանները (UI) |
+| Կարգավորումներ → Ընդհանուր  | Կողային վահանակի տեսանելիություն | Show/hide կողագոտի հատվածներ                     |
 
-Այս կարգավորումները պահվում են տվյալների բազայում և պահպանվում են վերագործարկումներից հետո՝ սահմանվելու դեպքում փոխարինելով env փոփոխականների լռելյայն արժեքները։
+Այս կարգավորումները պահվում են տվյալների բազայում և պահպանվում են վերագործարկումների ընթացքում՝ վերացնելով env var կանխադրվածները, երբ սահմանված է:
 
-### Տեղային գործարկում
+### Վազում տեղական
 
 ```bash
-# Մշակման ռեժիմ (թեժ վերաբեռնում)
+# Development mode (hot reload)
 npm run dev
 
-# Արտադրական կառուցում
+# Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Արագ backend/API-only կոմպիլյացիա մասնակիցների փոփոխությունների համար
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Թողարկման կառուցում (մաքուր վերակառուցում + HEAD sentinel — անհրաժեշտ է տեղակայման համար)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Պորտի ընդհանուր կարգավորում
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Մասնակցի կառուցումը կատարում է միայն կոմպիլյացիայի վավերացում․ այն չի հավաքում standalone բաշխումը և չի կառուցում կամընտիր native փաթեթավորման ակտիվներ։ Օգտագործեք սովորական արտադրական կառուցումը, երբ անհրաժեշտ է վավերացնել առաքման ենթակա փաթեթը։
+Աջակցողի կառուցումը կատարում է միայն կոմպիլյացիայի վավերացում. այն չի հավաքում ինքնուրույն բաշխումը կամ չի ստեղծում կամընտիր բնիկ փաթեթավորման ակտիվներ: Օգտագործեք սովորական արտադրության կառուցվածքը, երբ ձեզ անհրաժեշտ է վավերացնել առաքվող փաթեթը:
 
-### Կառուցման արդյունքի դասավորություն
+### Կառուցեք ելքային դասավորությունը
 
-| Գրացուցակ | Բովանդակություն                                                                  | Հետևվո՞ւմ է |
-| --------- | -------------------------------------------------------------------------------- | ----------- |
-| `src/`    | Հավելվածի սկզբնական կոդ (TypeScript / TSX)                                       | Այո         |
-| `.build/` | Միջանկյալ ֆայլեր — `next build`-ի արդյունք (gitignored, `distDir = .build/next`) | Ոչ          |
-| `dist/`   | Առաքման ենթակա փաթեթ — հավաքվում է `assembleStandalone`-ի կողմից (gitignored)    | Ոչ          |
+| տեղեկատու | Բովանդակություն                                                    | Հետևվել է |
+| --------- | ------------------------------------------------------------------ | --------- |
+| `src/`    | Հավելվածի աղբյուրը (TypeScript / TSX)                              | Այո՛      |
+| `.build/` | Միջանկյալ — `next build` ելք (gitignored, `distDir = .build/next`) | Ոչ        |
+| `dist/`   | Առաքվող — փաթեթ՝ հավաքված `assembleStandalone` ի կողմից (անտեսված) | Ոչ        |
 
-Կառուցման pipeline-ը մեկ անցում է՝
+Կառուցման խողովակաշարը մեկ անցուղի է.
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js-ի արդյունք)
-  └─ assembleStandalone()                 (պատճենում է standalone + static + public + native assets)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release`-ը լրացուցիչ նախ մաքրում է երկու գրացուցակները և գրում
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`)՝ որպես տեղակայման ամբողջականության sentinel։
+`npm run build:release` լրացուցիչ մաքրում է երկու դիրեկտորիաները և գրում է `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) որպես տեղակայման ամբողջականության պահակ:
 
-`npm run build:contributor`-ը օգտագործում է միայն backend-ի կառուցման պրոֆիլը։ Կառուցման ընթացքում այն ժամանակավորապես փոխարինում է կառավարման վահանակի UI ֆայլերը, պահպանում API route handler-ները և կառուցումից հետո վերականգնում սկզբնական ֆայլերը։ Օգտագործեք `npm run build`-ը այն փոփոխությունների համար, որոնք ազդում են կառավարման վահանակի UI-ի վրա, կամ ամբողջական թողարկման վավերացման համար․ մասնակցի պրոֆիլը չի փոխարինում թողարկման կառուցմանը։
+`npm run build:contributor` օգտագործում է միայն backend-ի կառուցման պրոֆիլը: Այն ժամանակավորապես փակում է վահանակի UI ֆայլերը կառուցման ընթացքում, պահում է API երթուղու մշակողները և վերականգնում է սկզբնական ֆայլերը կառուցելուց հետո: Օգտագործեք `npm run build` փոփոխությունների համար, որոնք ազդում են UI վահանակի վրա կամ ամբողջական թողարկման վավերացման համար. ներդրողի պրոֆիլը չի փոխարինում թողարկման կառուցմանը:
 
-> **VPS-ի տեղակայման նշում․** հեռակա image-ի `/usr/lib/node_modules/omniroute/app/`
-> գրացուցակը չի փոխվում։ Տեղակայման skills-ները `dist/`-ի պարունակությունը rsync են անում այնտեղ։
-> Փոխվել է միայն պահոցում կառուցման արդյունքի ուղին (`app/` → `dist/`)։
+> **VPS deploy նշում.** հեռակառավարվող պատկերի տեղեկատու `/usr/lib/node_modules/omniroute/app/` անփոփոխ է: Տեղակայման հմտությունները համաժամեցնում են `dist/` ի բովանդակությունը դրա մեջ: Միայն ռեպո կառուցման ելքային ուղին է տեղափոխվել (`app/` → `dist/`):
 
-Լռելյայն URL-ներ՝
+Կանխադրված URLs:
 
-- **Կառավարման վահանակ**՝ `http://localhost:20128/dashboard`
-- **API**՝ `http://localhost:20128/v1`
+- **Վահանակ** ՝ `http://localhost:20128/dashboard`
+- **API**: `http://localhost:20128/v1`
 
 ---
 
@@ -429,8 +420,8 @@ VPS-ում տեղակայելու համար օգտագործեք `npm run build
 
 ## Օգնություն ստանալը
 
-- **Ճարտարապետություն**: Տե՛ս [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API տեղեկատու**: Տե՛ս [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Անվտանգության փաստաթղթեր**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Շահագործման փաստաթղթեր**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Խնդիրներ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Ճարտարապետություն** Տե՛ս [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Հղում** Տե՛ս [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Անվտանգության փաստաթղթեր** ՝ [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Գործողությունների փաստաթղթեր** ՝ [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Հարցեր** ՝ [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

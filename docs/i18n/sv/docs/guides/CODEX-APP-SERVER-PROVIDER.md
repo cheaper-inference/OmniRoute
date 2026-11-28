@@ -21,24 +21,21 @@ måste vara **inloggat**.
 ## 1. Arkitektur
 
 ```
-┌─ OmniRoute-app ────────────────┐        ┌─ codex-app-server-sidovagn ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ behörighetstoken)            │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  hanterar själv OpenAI OAuth        │
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
 └──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
-        │ delar (compose-volymer)            └─────────────────────────────────────┘
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS-behörighetstoken (båda monterar den)
-  codex-appserver-home    → ~/.codex (auth.json skrivs av instrumentpanelen,
-                             läses av sidovagnens codex app-server)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidovagnen lyssnar **endast** på det interna compose-nätverket
-  (`ws://codex-app-server:1456`) bakom en behörighetstoken. Den publiceras
-  **aldrig** till värden eller internet.
-- Codex CLI är inbyggt i `omniroute:base`, så ingen installation av codex behövs
-  på värden eller användarens dator när du kör sidovagnen.
+- Sidovagnen lyssnar** endast** på det interna komponeringsnätverket (`ws://codex-app-server:1456`) bakom en kapacitetstoken. Det är det** aldrig** publiceras till värden eller internet.
+- Sidovagnen använder `omniroute:cli-no-docker`, byggd från `runner-cli-no-docker` målet, som inkluderar Codex CLI.
 
 ## 2. Starta den
 

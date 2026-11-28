@@ -4,12 +4,9 @@
 
 ---
 
-> **Senest opdateret:** 2026-08-28 — v3.8.51
 > Strømlinet udgivelsesflow, der udnytter Claude Code-færdigheder til automatisering.
 >
-> **Hold køen/branchen grøn mellem udgivelser:** se [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs`-familien + `npm run check:release-green` + `/babysit` + natlig kørsel). Hvis dette
-> køres regelmæssigt — og især **før** denne tjekliste — starter udgivelses-PR'en grønt.
+> **Hold queue/branch grøn mellem udgivelser:** se [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` familie + `npm run check:release-green` + `/babysit` + hver nat). Kører denne periodisk — og især** før** denne tjekliste — gør udgivelsen PR til at starte grøn.
 
 ## Kort fortalt
 
@@ -56,11 +53,13 @@ npm-publish workflowet udgiver ikke længere direkte: det starter den pakkede ta
 
 **Engangshærdning (ejer, npmjs.com):** konfigurer Trusted Publisher til `omniroute` i scene-kun-tilstand, så et lækket langtidsholdbart token ikke kan `npm publish` direkte hvor som helst — CI kun kan scene; kun ejerens 2FA-udgivelser.
 
-**Broken-artefact playbook (uændret):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` som standardrefleks (minutter, reversibel); `npm unpublish` kun inde i 72h/no-dependents vinduet og aldrig som det første træk. Docker: omskriv aldrig et versionstag — rollback peger `latest` igen til den sidste gode digest.
+**Broken-artefact playbook (uændret):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` som standardrefleks (minutter, reversibel); `npm unpublish` kun inde i 72h/no-dependents vinduet og aldrig som det første træk. Docker: omskriv aldrig et versionstag — rollback peger `latest` tilbage til det sidste gode digest.
 
 **Docker Hub `latest` (påkrævet ved hver stabil SemVer -udgivelse):** `docker-publish` -arbejdsgangen skal mærkes** begge** `X.Y.Z` og, når `should-promote-latest.sh` stemmer overens, er dette den højeste stabile SemVer, `:latest` med** samme fordøjelse** . Efter jobbet: Hub `latest` digest er lig med den nye SemVer digest og `last_updated` flyttet. Efterlad ikke `:latest` på en ældre build, mens release notes taler om rettelser, der kun findes på git. Komponér hurtigstarter brug `:latest`; GitOps skal blive ved med at fastgøre `X.Y.Z`. Se [Docker udgivelseskanaler](../guides/DOCKER_GUIDE.md#release-channels) og #10317.
 
-**Docker Hub organisations repository (`cheaperinference/omniroute`):** Docker Hub kan ikke flytte et lager mellem navneområder, så `diegosouzapw/omniroute` beholder sin pull-historik og hver udgivelse, og `mirror-org-dockerhub` -jobbet for `docker-publish` kopierer hver frigivet version (og `:latest` når den promoveres) fra `ghcr.io/cheaper-inference/omniroute` til organisationens lager. Den har brug for `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` -hemmelighederne; uden dem forbliver jobbet grønt med en "Docker Hub org-spejl sprunget over" advarsel, og de andre registre udgiver normalt. Kør for at udgive en udgivet version der senere** Handlinger → Spejl Docker billedet til Docker Hub org → Kør workflow** med `version=X.Y.Z` (og `promote_latest` for den højeste stabile version): den kopierer de eksisterende billeder, ingen genopbygning.
+**Docker Hub organisations repository (`cheaperinference/omniroute`):** Docker Hub kan ikke flytte et lager mellem navneområder, så `diegosouzapw/omniroute` beholder sin pull-historik og hver udgivelse, og `mirror-org-dockerhub` -jobbet for `docker-publish` kopierer hver frigivet version (og `:latest` når den promoveres) fra `ghcr.io/cheaper-inference/omniroute` til organisationens lager. Den har brug for `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` -hemmelighederne; uden dem forbliver jobbet grønt med en "Docker Hub org-spejl sprunget over" advarsel, og de andre registre udgiver normalt. Kør for at udgive en udgivet version der senere** Handlinger → Spejl Docker billedet til Docker Hub org → Kør workflow** med `version=X.Y.Z` (og `promote_latest` for den højeste stabile version): den kopierer de eksisterende billeder, ingen genopbygning. Dette lagers Docker Hub-oversigt er indstillet i hånden: de API, der redigerer det, afviser organisationsadgangstokens.
+
+Den samme arbejdsgang kopierer også hver udgivelse til den gamle GHCR pakke `ghcr.io/diegosouzapw/omniroute` indtil 2027-06-30, så installationer, der stadig er fastgjort til den, bliver ved med at opdatere; dens indeks bærer en "moved to `ghcr.io/cheaper-inference/omniroute`" beskrivelse. Den har brug for `GHCR_LEGACY_TOKEN` hemmeligheden (en klassisk personlig adgangstoken for `diegosouzapw` med `write:packages`); uden det springer jobbet over med en advarsel "Legacy GHCR mirror spred".
 
 ## Hurtig hotfix-bane (label `hotfix`)
 
@@ -88,7 +87,7 @@ E2E-matrixen over uden nogen label.
 
 ### Pre-release
 
-- [ ] Alle PRs der er målrettet mod denne udgivelse, fusioneres til `release/vX.Y.0`
+- [ ] Alle PRs der er målrettet til denne udgivelse, fusioneres til `release/vX.Y.0`
 - [ ] Alle åbne Linear/issue elementer for denne version lukkes eller skubbes til næste milepæl
 - [ ] CI grøn på `release/vX.Y.0` gren
 - [ ] Ingen `TODO(release)` -markører i kode: `grep -r "TODO(release)" src/ open-sse/`
@@ -151,7 +150,7 @@ Bryd ændringer: Tilføj `BREAKING CHANGE:` footer eller `!` efter omfanget (f.e
 ### Dokumentation
 
 - [ ] `npm run check:docs-sync` -pas (automatisk kørsel ved pre-commit)
-- [ ] `npm run check:docs-all` pas (paraply: docs-sync + docs-counts + env-doc-sync + forældede-versioner + doc-links)
+- [ ] `npm run check:docs-all` passerer. Dens rådgivende `check:deprecated-versions` markerer versioner, der udtrykkeligt tilskrives OmniRoute (3.6.x og tidligere) og ignorerer datoer.
 - [ ] `npm run check:env-doc-sync` exits 0 — kode ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env kontrakt er intakt
 - [ ] `npm run check:doc-links` exits 0 — ingen brudte interne markdown-referencer efter omstrukturering
 - [ ] `docs/architecture/ARCHITECTURE.md` anmeldt for storage/runtime drift
@@ -399,7 +398,7 @@ Development bump commit er bygget med git plumbing (intet arbejdstræ berøres) 
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
@@ -418,7 +417,7 @@ Kørslen udfører `npm ci`, `npm run build:release`, `npm run check:pack-artifac
 4. Beskyt `stable/v3` og `develop` (regelsæt + merge queue) før den første PR lander.
 5. De sovende arbejdsgange tænder efter filialeksistens: `forward-port.yml` (push til `stable/v3`), `validate-stable-pr.yml` (PRs til `stable/v3`) og `nightly-v4-build.yml` (bygger `develop`). Inden start, skal du indstille `secrets.FORWARD_PORT_TOKEN` lagerhemmeligheden (så CI kører på forward-port PRs); natlig udgivelse forbliver slukket, indtil ejeren indstiller lagervariablen `vars.NIGHTLY_PUBLISH` til `true`, og npm Trusted Publishing accepterer `nightly-v4-build.yml`. Kanalopløsningen er `scripts/release/dist-tag.mjs`, den samme resolver `npm-publish.yml` bruger.
 6. Bekræft kanalerne: `npm view omniroute dist-tags --json` viser `latest` = 3.9.0 og ingen `next` / `nightly` indtil v4 udgives.
-7. Tilbageføring, hvis nødvendigt: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` og `npm dist-tag add omniroute@3.8.59 latest`.
+7. Rollback, hvis nødvendigt: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` og `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

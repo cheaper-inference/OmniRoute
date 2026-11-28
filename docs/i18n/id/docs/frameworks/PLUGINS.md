@@ -92,16 +92,15 @@ Objek `ctx` yang diteruskan ke `register(program, ctx)`:
 
 Plugin ditemukan dari:
 
-1. `~/.omniroute/plugins/<name>/` — instalasi lokal pengguna
-2. Variabel lingkungan `OMNIROUTE_PLUGIN_PATH` — direktori khusus
+1. `~/.omniroute/plugins/node_modules/<name>/` — tempat `omniroute plugin install` meletakkan paket (sebuah npm `--prefix`, bukan `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — direktori plugin yang disalin dengan tangan
+3. `OMNIROUTE_PLUGIN_PATH` env var — direktori khusus
 
-Keduanya **hanya untuk CLI**. Runtime plugin sisi server (marketplace/plugin `plugin.json`
-yang berjalan di dalam proksi) memiliki pemindai dan pengaturan penggantinya sendiri,
-`OMNIROUTE_PLUGINS_DIR` — lihat
-[PLUGIN_MARKETPLACE.md → Direktori plugin](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Mengatur salah satunya tidak memengaruhi yang lain.
+Direktori yang disinkronkan (yang dibuat npm untuk `plugin install ./dir`) diikuti.
 
-Kesalahan pemuatan ditangkap dan ditampilkan sebagai peringatan — plugin yang rusak tidak akan pernah menyebabkan CLI berhenti bekerja.
+Keduanya** Khusus CLI** . Runtime plugin sisi server (pasar/ plugin `plugin.json` yang berjalan di dalam proxy) memiliki pemindai sendiri dengan override sendiri, `OMNIROUTE_PLUGINS_DIR` — lihat [PLUGIN_MARKETPLACE.md → Plugin Directory](./PLUGIN_MARKETPLACE.md#plugin-directory). Pengaturan yang satu tidak mempengaruhi yang lain.
+
+Kesalahan pemuatan ditangkap dan dicetak sebagai peringatan — plugin yang rusak tidak pernah membuat CLI mogok.
 
 ## Keamanan
 

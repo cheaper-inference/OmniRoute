@@ -13,12 +13,12 @@ Agentų įgūdžiai yra struktūrizuoti SKILL.md failai, mokantys išorinius age
 
 ## Apžvalga
 
-Kataloge yra **45 agentų įgūdžiai** (23 REST API + 21 CLI + 1 konfigūravimo darbo eiga). Kiekvienas įgūdis turi:
+Kataloge yra** 45 Agento įgūdžiai** (23 REST API + 21 CLI + 1 konfigūravimo darbo eiga). Kiekvienas įgūdis turi:
 
-- **Kanoninį ID** (`omni-auth`, `cli-serve` ir t. t.)
-- **SKILL.md** failą, esantį `skills/{id}/SKILL.md`, su YAML metaduomenimis (`name`, `description`) ir išsamiu markdown turiniu
-- **REST galinius taškus** (API įgūdžiai) arba **CLI subkomandas** (CLI įgūdžiai), gautus iš OpenAPI specifikacijos ir CLI registro
-- **GitHub neapdoroto turinio URL**, skirtą tiesioginiam gavimui: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanoninis ID** (`omni-auth`, `cli-serve` ir kt.)
+- A**SKILL.md** failas `skills/{id}/SKILL.md` su YAML frontmatter (`name`, `description`) + rich markdown body
+- **REST galiniai taškai** (API įgūdžiai) arba**CLI subkomandos** (CLI įgūdžius), gautus iš OpenAPI spec ir CLI registro
+- A**GitHub raw URL** tiesioginiam atsisiuntimui: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Generatoriaus atsakymas yra `GeneratorReport`:
 
 ---
 
-## Aprėpties API
+## Aprėptis API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

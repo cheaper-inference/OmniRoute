@@ -4,7 +4,7 @@
 
 ---
 
-> **Kilde til sannhet:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Sist oppdatert:** 2026-06-28 — v3.8.40
+> **Kilde til sannhet:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute fanger opp assistent `reasoning_content` produsert av tenkemodusmodeller og spiller den på nytt på forespørsler om flere svinger når oppstrømsleverandøren krever det. Dette eliminerer HTTP 400-feilene som strenge tilbydere reiser når en klients samtalehistorikk mangler resonnementet fra forrige tur.
 

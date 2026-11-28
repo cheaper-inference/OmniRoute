@@ -99,31 +99,31 @@ Kiekvienam deriniui:
 
 ---
 
-## Būklės patikros API
+## Sveikatos patikrinimas API
 
-OmniRoute pateikia **dvi** HTTP būklės patikros sąsajas. Orkestravimo sistemose jos nėra tarpusavyje pakeičiamos.
+OmniRoute atskleidžia** du** HTTP sveikatos paviršiai. Jie nėra keičiami orkestrantams.
 
-| Kelias                       | Paskirtis                                                                   | Apkrova                                      | Kam naudoti                                                                         |
-| ---------------------------- | --------------------------------------------------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `GET /healthz`               | Gyvavimo ciklo veikimo / parengties būsena (`ok` / `starting` / `stopping`) | Minimali (tik fazės žymė)                    | Kubernetes **parengčiai**; negriežtai **veikimo patikrai**, jei būtina naudoti HTTP |
-| `GET /api/monitoring/health` | Išsami sistemos ir teikėjų suvestinė (DB, kaupas, katalogo kiekiai, …)      | Didelė (sinchroninis DB / stebėsenos darbas) | Skydeliams, išsamioms išorinėms patikroms, integruotajai Docker būklės patikrai     |
+| Kelias                       | Tikslas                                                                   | Svoris                                        | Naudoti                                                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `GET /healthz`               | Gyvenimo ciklas liveness/readiness (`ok` / `starting` / `stopping`)       | Trivialus (tik fazės vėliavėlė)               | Kubernetes** pasirengimas** ; minkštas** gyvumas** jei turite naudoti HTTP                              |
+| `GET /api/monitoring/health` | Gilios sistemos + teikėjo santrauka (DB, krūva, katalogų skaičius ir kt.) | Sunkus (sinchronizuoti DB / stebėjimo darbas) | Prietaisų skydeliai, juodosios dėžės giluminiai patikrinimai, Docker integruotas sveikatos patikrinimas |
 
-> **Pastaba:** teikėjų būklės matricos, autopiloto problemos, kvotų stebėjimo priemonės, prieigos raktų būklė ir išsamesnė delsos informacija nei pateikiama `/api/monitoring/health` pasiekiama per **MCP įrankį** `observability_snapshot` arba **skydelio** puslapius — tam nėra atskirų REST maršrutų.
+> **Pastaba:** Teikėjo sveikatos matricos, autopiloto problemos, kvotų stebėjimo priemonės, žetonų būsena ir delsos duomenys, viršijantys `/api/monitoring/health` pasiekiami per**MCP įrankis** `observability_snapshot` arba** prietaisų skydelis** puslapiai — nėra jiems skirtų REST maršrutų.
 
-Abu maršrutai vykdomi toje **pačioje Node įvykių kilpoje** kaip ir užklausų apdorojimas. Procesorių intensyviai naudojantis kelias (didelio `GET /v1/models` katalogo apdorojimas, ilgo konteksto glaudinimas / prieigos raktų skaičiavimas) gali uždelsti **visas** HTTP apdorojimo programas, įskaitant `/healthz`. Užimta įvykių kilpa ≠ neveikiantis procesas. Pirmenybę teikite apkrovos šaltinio pašalinimui; patikrų derinimas tik sumažina klaidingų proceso nutraukimų skaičių.
+Abu maršrutai važiuoja** ta pati Node įvykio kilpa** kaip prašymų tvarkymas. Su procesoriaus susietas kelias (didelis `GET /v1/models` katalogo darbas, ilgo konteksto glaudinimas / prieigos raktų skaičiavimas) gali uždelsti** visi** HTTP tvarkyklės, įskaitant `/healthz`. Įvykio ciklo užimtas ≠ procesas neveikia. Pirmenybę teikia šerno tvirtinimui; zondo derinimas tik sumažina klaidingų nužudymų skaičių.
 
-### Lengva orkestravimo sistemos patikra
+### Lengvas orkestro zondas
 
 ```bash
 GET /healthz
-# arba HEAD /healthz
+# or HEAD /healthz
 ```
 
-- **200** + turinys `ok`, kai serverio gyvavimo ciklo fazė yra parengta
-- **503** + `starting` / `stopping` paleidimo arba išjungimo metu
-- Įgyvendinimas: `src/app/healthz/route.ts` (be DB patikros)
+- **200** + body `ok` kai serverio gyvavimo ciklo etapas yra paruoštas
+- **503** + `starting` / `stopping` įkrovos arba išjungimo metu
+- Diegimas: `src/app/healthz/route.ts` (be DB ping)
 
-### Sistemos būklė (išsami)
+### Sistemos sveikata (gili)
 
 ```bash
 GET /api/monitoring/health
@@ -153,43 +153,35 @@ Atsakymas:
 }
 ```
 
-#### `credentialHealth`: patikrų podėlis ir SQLite `test_status`
+#### `credentialHealth`: probe-cache vs SQLite `test_status`
 
-`GET /api/monitoring/health` → `credentialHealth` yra **atmintyje laikomas patikrų podėlio
-rodiklis**, o ne tiesioginė `provider_connections.test_status` išklotinė. Po #12532
-užklausos kelias nuskaito tik `getCachedCredentialHealthSummary()`; foninės patikros
-atnaujina podėlį ne įvykių kilpoje.
+`GET /api/monitoring/health` → `credentialHealth` yra** atmintyje esantis zondo talpyklos matuoklis** , o ne gyvas `provider_connections.test_status` sąvartynas. Po #12532 užklausos kelias skaitomas tik `getCachedCredentialHealthSummary()` ; fono zondai atnaujina talpyklą iš įvykio kilpos.
 
-| Sluoksnis                     | Kur                                                                   | Ką tai reiškia                                                                                                                                                                                                            |
-| ----------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Patikrų podėlio rodiklis      | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Naujausi kredencialų būklės patikrų rezultatai, vis dar laikomi proceso atmintyje. `source` visada yra `probe-cache`.                                                                                                     |
-| Nepavykusio ryšio informacija | `credentialHealth.failedConnections`                                  | Pateikiama **tik kai `failed > 0`**. Riboto dydžio podėlio eilučių, kurių `status=error`, sąrašas (`connectionId`, `status`, išvalyti `lastError` / `lastErrorType`). Kai sąrašas apribojamas, nustatoma `failedOmitted`. |
-| Išliekanti SQLite būsena      | `credentialHealth.staleDbNonOkCount`                                  | **Aktyvių** (`is_active=1`) ryšio eilučių, kurių išsaugotas `test_status` yra žinoma netinkama būsena (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`), skaičius.                        |
+| Sluoksnis              | Kur                                                                   | Ką tai reiškia                                                                                                                                                                                                             |
+| ---------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Probe-cache matuoklis  | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Paskutiniai kredencialų sveikatos tyrimo rezultatai vis dar saugomi proceso atmintyje. `source` visada yra `probe-cache`.                                                                                                  |
+| Nepavyko ryšio detalė  | `credentialHealth.failedConnections`                                  | Pateikti** tik kai `failed > 0`** . Apribotas talpyklos eilučių su `status=error` sąrašas (`connectionId`, `status`, sanitized `lastError` / `lastErrorType`). `failedOmitted` yra nustatytas, kai sąrašas buvo apribotas. |
+| SQLite lipnus statusas | `credentialHealth.staleDbNonOkCount`                                  | Skaičius iš** aktyvus** (`is_active=1`) jungčių eilutės, kurių išlikęs `test_status` yra žinomas negeras (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                                |
 
-Šie du sluoksniai gali tyčia nesutapti:
+Du sluoksniai gali tyčia nesutapti:
 
-- Rodiklis `failed=0`, o `staleDbNonOkCount>0` — SQLite vis dar turi išliekantį
-  `test_status` (pavyzdžiui, `expired` arba `credits_exhausted`), kurio naujausia
-  patikrų podėlio momentinė kopija neskaičiuoja kaip `status=error`.
-- Rodiklis `failed>0`, nors SQLite būsena atrodo tinkama — neseniai atlikta patikra nepavyko ir jos
-  rezultatas išsaugotas podėlyje; DB eilutė nebuvo atnaujinta arba vėliau buvo išvalyta.
+- Matuokite `failed=0` o `staleDbNonOkCount>0` — SQLite vis dar turi lipnų `test_status` (pvz., `expired` arba `credits_exhausted`), todėl naujausia talpyklos momentinė nuotrauka nėra skaičiuojama kaip `status=error`.
+- Matuokite `failed>0` o SQLite atrodo sveikas — neseniai atliktas zondas nepavyko ir yra talpykloje; DB eilutė nebuvo atnaujinta arba vėliau buvo išvalyta.
 
-Tikrinant šį galinį tašką, nesiųskite įspėjimo remdamiesi vien `provider_connections.test_status`.
-Tiesioginėms patikrų klaidoms naudokite `failed` + `failedConnections`, o
-`staleDbNonOkCount` — kai reikia išsaugotų išliekančių būsenų skaičiaus.
+Nubraukdami šį galinį tašką, neįspėkite tik dėl `provider_connections.test_status`. Naudokite `failed` + `failedConnections` tiesioginiams zondo gedimams ir `staleDbNonOkCount`, kai reikia nuolatinio lipnios būsenos skaičiaus.
 
-### Kubernetes patikrų rekomendacijos
+### Kubernetes zondo rekomendacijos
 
-OmniRoute yra **vienas Node procesas** (viena įvykių kilpa). Standartinė Docker `HEALTHCHECK` naudoja lengvą `/healthz`. `/api/monitoring/health` yra **per sunkus** kubelet veikimo patikrų intervalams.
+OmniRoute yra a** vieno mazgo procesas** (viena įvykio kilpa). Akcinis Docker `HEALTHCHECK` skirtas lengvam `/healthz`. `/api/monitoring/health` yra** per sunkus** kubeleto gyvumo intervalams.
 
-| Patikra             | Rekomenduojamas tikslas                                                                       | Pastabos                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Paleidimo**       | HTTP `GET /healthz` su ilgu `failureThreshold` (arba dideliu `startPeriod`)                   | Šaltasis paleidimas ir SQLite migracija gali užtrukti ilgiau nei kelias sekundes                                                                                                                                                                                                                                                                                                                                            |
-| **Parengties**      | HTTP `GET /healthz`                                                                           | Gyvavimo ciklo būsenos `ok` / `starting` / `stopping` (200 ir 503). Vis tiek svyruoja, jei ciklą blokuoja CPU. **200 atsakymas po kelių sekundžių nereiškia, kad būsena gera** (#10303) — tai reiškia, kad įvykių ciklas buvo užlaikytas prieš paleidžiant 3 baitų apdorojimo programą                                                                                                                                      |
-| **Gyvybingumo**     | HTTP `GET /livez` **arba TCP** pagrindiniame paslaugos prievade (`PORT`, numatytasis `20128`) | `/livez` tik patvirtina, kad procesas veikia (visada grąžina 200, jei paleidžiama apdorojimo programa). Jis vis tiek naudoja tą patį įvykių ciklą — užimtas ≠ neveikiantis, be to, įvykių ciklo užlaikymą (#10303) aptinka ne geriau nei TCP. Rinkitės **TCP**, jei HTTP patikros baigiasi dėl skirtojo laiko katalogo / glaudinimo apkrovos metu; bet kuriuo atveju **nenutraukite** podo dėl trumpų įvykių ciklo strigčių |
-| **Išsamios būklės** | `GET /api/monitoring/health` iš išorinės tikrinimo priemonės                                  | Netinka kubelet `livenessProbe` / dažnai vykdomai `readinessProbe`                                                                                                                                                                                                                                                                                                                                                          |
+| Zondas            | Rekomenduojamas tikslas                                                                          | Pastabos                                                                                                                                                                                                                                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Paleidimas**    | HTTP `GET /healthz` su ilgu `failureThreshold` (arba dideliu `startPeriod`)                      | Šalto paleidimo + SQLite migracija gali viršyti kelias sekundes                                                                                                                                                                                                                                                                                   |
+| **Pasirengimas**  | HTTP `GET /healthz`                                                                              | Gyvenimo ciklas `ok` / `starting` / `stopping` (200 prieš 503). Vis dar sklendžia, jei kilpa yra užblokuota CPU. A** 200 per kelias sekundes nėra sveika** (#10303) — tai reiškia, kad įvykių ciklas buvo išalintas prieš paleidžiant 3 baitų tvarkyklę                                                                                           |
+| **Gyvumas**       | HTTP `GET /livez`,** arba TCP** pagrindiniame aptarnavimo prievade (`PORT`, numatytasis `20128`) | `/livez` yra tik proceso gyvas (visada 200, jei tvarkyklė veikia). Jis vis dar dalijasi įvykių ciklu — busy ≠ dead ir neaptinka įvykių ciklo bado (#10303) geriau nei TCP. Pirmenybė**TCP** jei HTTP zondo laikas baigiasi esant catalog/compression apkrovai; daryti** ne** bet kuriuo atveju nužudykite anketą trumpuose įvykių ciklo kioskuose |
+| **Gili sveikata** | `GET /api/monitoring/health` iš išorinio tikrintuvo                                              | Ne kubelet `livenessProbe` / sandariam `readinessProbe`                                                                                                                                                                                                                                                                                           |
 
-Pavyzdinė konfigūracija (pritaikykite ribines vertes pagal savo šaltojo paleidimo ir glaudinimo apkrovą):
+Formos pavyzdys (sureguliuokite slenksčius pagal šalto paleidimo ir suspaudimo apkrovą):
 
 ```yaml
 ports:
@@ -215,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Įvykių ciklui užstrigus, HTTP /livez skirtojo laiko vis tiek gali nepakakti. TCP yra
-  # konservatyvi alternatyva:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-**Nenukreipkite** kubelet **gyvybingumo** patikros į `/api/monitoring/health`. Šis kelias iš tikrųjų vykdo DB / stebėsenos operacijas ir esant apkrovai gali klaidingai pranešti apie gedimą.
+**Negalima** taškas kubelet** gyvumas** ties `/api/monitoring/health`. Šis kelias atlieka tikrą DB/monitoring darbą ir bus klaidingai teigiamas esant apkrovai.
 
-Susiję klausimai: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (patikros, kai įvykių ciklas užimtas), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (katalogo kainodaros operacija monopolizuoja išteklius), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (glaudinimo leksemų skaičiavimo operacija monopolizuoja išteklius).
+Susiję: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (tiria, kai įvykių ciklas užimtas), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (katalogo kainodaros šuo), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (glaudinimo atpažinimo žetonų skaičius).
 
-### systemd priežiūros mechanizmas (užstrigęs įvykių ciklas)
+### systemd watchdog (užšaldyta įvykių kilpa)
 
-systemd pagrindu veikiančioje sistemoje OmniRoute praneša paslaugų tvarkytuvei, kai yra pasirengusi, ir reguliariai siunčia jai signalus, todėl serveris, kurio įvykių ciklas užstrigo, nutraukiamas bei paleidžiamas iš naujo, užuot toliau veikęs be atsako. Signalai siunčiami iš paties serverio įvykių ciklo: jam užsiblokavus, signalai sustoja, o pasibaigus `WatchdogSec` laikotarpiui be signalo systemd iš naujo paleidžia paslaugą.
+Sisteminiame pagrindiniame kompiuteryje OmniRoute praneša paslaugų vadybininkui, kada jis yra pasirengęs, ir toliau jį pinguoja, todėl serveris, kurio įvykių ciklas įstrigo, užmušamas ir paleidžiamas iš naujo, o ne tyli. Pingai gaunami iš paties serverio įvykių ciklo: kai jis užblokuojamas, jie sustoja, o systemd iš naujo paleidžia paslaugą, kai tik `WatchdogSec` pasibaigia.
 
-[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) jau sukuria tai naudojantį naudotojo vienetą. Savarankiškai sukurtas vienetas (numatytasis `Type=simple`) priežiūros mechanizmo neturi, todėl į jo `[Service]` skiltį įtraukite šias eilutes:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) jau rašo vartotojo vienetą su šiuo. Vienetas, kurį parašėte pats (numatytasis `Type=simple`), negauna sergėtojo, todėl į jo `[Service]` skyrių pridėkite šias eilutes:
 
 ```ini
 [Service]
@@ -239,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-Sugeneruotame vienete nustatyta `Restart=on-failure`, todėl taip pat įtraukite šią eilutę — be jos priežiūros mechanizmas tik nutrauks užstrigusią paslaugą, bet jos nepaleis iš naujo.
+Sugeneruotas vienetas nustato `Restart=on-failure`, todėl pridėkite tą eilutę taip pat — be jos, sergėtojas tik nužudo užstrigusią paslaugą, o ne ją paleidžia iš naujo.
 
-- `Type=notify`: paslauga laikoma „paleista“, kai serveris išsiunčia `READY=1`, o ne tada, kai procesas sukuria atšaką. `TimeoutStartSec` apriboja lėto paleidimo trukmę.
-- `NotifyAccess=all`: signalus siunčia serverio procesas, kuris yra `omniroute serve` prižiūrinčiojo proceso antrinis procesas.
-- `WatchdogSec`: signalai siunčiami kas 60 sekundžių, todėl naudokite **120 arba daugiau**. Mažesnės vertės iš naujo paleistų tinkamai veikiantį serverį.
-- Vykdykite `omniroute serve` priekiniame plane. `--daemon` atskiria serverį nuo vieneto cgroup, todėl pranešimų apsikeitimas niekada neužbaigiamas.
+- `Type=notify`: paslauga "paleidžiama", kai serveris siunčia `READY=1`, o ne tada, kai procesas išsišakoja. `TimeoutStartSec` riboja lėtą pradžią.
+- `NotifyAccess=all`: pingus siunčia serverio procesas, kuris yra `omniroute serve` prižiūrėtojo antrinis.
+- `WatchdogSec`: ping užgęsta kas 60 sekundžių, todėl naudokite** 120 ar daugiau** . Mažesnės reikšmės iš naujo paleistų sveiką serverį.
+- Paleiskite `omniroute serve` pirmame plane. `--daemon` atskiria serverį nuo įrenginio cgrupės ir pranešimo rankos paspaudimas niekada nesibaigia.
 
-Paleidę iš naujo patikrinkite, ar mechanizmas aktyvus:
+Patikrinkite, ar jis aktyvus paleidus iš naujo:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` rodo sukonfigūruotą delsą, o `WatchdogTimestamp` kas minutę atnaujinamas. Priežiūros mechanizmo sukeltas paleidimas iš naujo įrašomas kaip `Result=watchdog`. Norėdami išjungti signalus nekeisdami vieneto, nustatykite `OMNIROUTE_DISABLE_SD_NOTIFY=1`; jei nėra `NOTIFY_SOCKET` (terminale, Docker, Electron, Windows), niekas nesiunčiama.
+`WatchdogUSec` rodo sukonfigūruotą delsą, o `WatchdogTimestamp` kas minutę juda į priekį. Paleidimas iš naujo, kurį sukelia „watchdog“, įrašomas kaip `Result=watchdog`. Norėdami išjungti pingus, išlaikant įrenginį tokį, koks jis yra, nustatykite `OMNIROUTE_DISABLE_SD_NOTIFY=1`; be `NOTIFY_SOCKET` (terminalas, Docker, Electron, Windows) niekas nesiunčiama.
 
-Priežiūros mechanizmas tik tikrina, ar įvykių ciklas tebevykdomas. Lėtai veikiantis, bet vis dar besisukantis serveris iš naujo nepaleidžiamas.
+Stebėtojas tik tikrina, ar įvykių ciklas tęsiasi. Lėtas, bet vis tiek besisukantis serveris iš naujo nepaleidžiamas.
 
-### Pasirenkamos užklausos kelio operacijos (atmintis, įgūdžiai, leksemų atnaujinimas)
+### Pasirenkamas užklausos kelio darbas (atmintis, įgūdžiai, prieigos rakto atnaujinimas)
 
-Atminties išgavimas, įgūdžių įterpimas ir OAuth prieigos rakto atnaujinimas naudoja **pagrindinę Node įvykių kilpą** kartu su `/healthz`. Tai yra valdymo skydelyje įjungiamos ir išjungiamos funkcijos (`memoryEnabled`, `skillsEnabled`), o ne darbuotojų telkinys. Žr. [Aplinka — įvykių kilpos sąnaudos](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Atminties ištraukimas, įgūdžių injekcija ir OAuth prieigos rakto atnaujinimas bendrinami** pagrindinė Node įvykių kilpa** su `/healthz`. Tai yra prietaisų skydelio perjungimo funkcijos (`memoryEnabled`, `skillsEnabled`), o ne darbuotojų grupė. Žr. [Aplinka — įvykio ciklo kaina](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
-### Teikėjo būklė
+### Teikėjo sveikata
 
-> **REST galinio taško nėra.** Teikėjo būklės duomenys pasiekiami naudojant MCP įrankį `observability_snapshot` arba valdymo skydelio puslapyje `/dashboard/providers`.
+> **Nėra REST galutinio taško.** Teikėjo sveikatos duomenys pasiekiami naudojant MCP įrankį `observability_snapshot` arba prietaisų skydelio `/dashboard/providers` puslapį.
 
-### Išsami teikėjo informacija
+### Tiekėjo informacija
 
-> **REST galinio taško nėra.** Išsami kiekvieno teikėjo informacija pasiekiama valdymo skydelio puslapyje `/dashboard/providers`.
+> **Nėra REST galutinio taško.** Išsamią informaciją apie kiekvieną teikėją rasite informacijos suvestinės `/dashboard/providers` puslapyje.
 
 ---
 

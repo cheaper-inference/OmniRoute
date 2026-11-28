@@ -4,13 +4,7 @@
 
 ---
 
-> **Sursa de referință:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` și constructorii publici din `open-sse/utils/error.ts`
-> **Teste:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Ultima actualizare:** 2026-09-02 — v3.8.51
-> **Public-țintă:** Orice inginer care lucrează cu răspunsuri de eroare (rute HTTP, fluxuri SSE, executori, gestionari MCP).
-> **Stare:** **OBLIGATORIU** pentru fiecare cale de cod care returnează unui client un mesaj de eroare.
+> **Sursa adevărului:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, și constructorii publici din `open-sse/utils/error.ts`** Teste:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Public:** Orice inginer care atinge răspunsurile de eroare ( rute HTTP, fluxuri SSE, executanți, handler MCP ).** Stare:****MANDATORY** pentru fiecare cale de cod care returnează un mesaj de eroare unui client.
 
 ## De ce există
 

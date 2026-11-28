@@ -185,85 +185,49 @@ ma tinkludihomx.
 
 ---
 
-## Pożittivi Foloz tal-Antivirus
+## Pożittivi Foloz Antivirus
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG ipoġġu `README.md` fi kwarantina b’`MD:HttpRequest-inf[Susp]`
+### Avast/AVG kwarantina `README.md` ma `MD:HttpRequest-inf[Susp]`
 
-**Dan huwa pożittiv falz. Xejn mhu infettat, u mhi meħtieġa l-ebda azzjoni.**
+**Dan huwa pożittiv falz. Xejn mhu infettat, u l-ebda azzjoni mhi meħtieġa.**
 
-Avast u AVG jużaw euristika li timmarka fajls b’test sempliċi/Markdown li jkun fihom ħafna
-links li jixbhu talbiet HTTP. Il-`README.md` ta’ OmniRoute jiġi inkluż fil-pakkett npm (huwa
-elenkat f’`package.json` → `files`), għalhekk jispiċċa f’`node_modules/omniroute/README.md`
-waqt installazzjoni globali — u fih madwar 15-il eżempju `http://localhost:20128/...` (l-endpoints
-HTTP/SSE tal-MCP, il-URL `.well-known` tal-A2A, u siltiet ta’ `curl`). Dik id-densità ta’ links
-hija biżżejjed biex tattiva l-euristika.
+Avast u AVG jmexxu euristiku li jimmarka fajls plain-text/Markdown li fihom ħafna links li jħarsu talbiet HTTP. OmniRoute's `README.md` vapuri ġewwa l-pakkett npm (huwa elenkat fi `package.json` → `files`), għalhekk jinżel `node_modules/omniroute/README.md` fuq — ta' installazzjoni globali u fih ~ 15 `http://localhost:20128/...` eżempji (l-endpoints MCP HTTP/SSE iż- A2A `.well-known` URL, u `curl` ). Dik id-densità tal-link hija biżżejjed biex tbattal l-euristika.
 
-Jekk dan beda reċentement biss: it-tip ta’ fajl ma nbidilx. Ir-README kabbar it-tabella
-tal-endpoints tiegħu (ġew miżjuda MCP HTTP + SSE + A2A) u żdiedu aktar eżempji ta’ `curl`,
-u b’hekk qabeż il-limitu.
+Jekk dan beda biss reċentement: il-fajl ma nbidilx in natura. README kibret it-tabella tal-endpoints (MCP HTTP + SSE + A2A ġew miżjuda) u aktar eżempji `curl`, li mbuttawha lil hinn mil-limitu.
 
-Il-fajl huwa dokumentazzjoni inattiva mingħajr ebda kontenut eżegwibbli. Tista’ tirrestawrah
-b’mod sigur mill-kwarantina.
+Il-fajl huwa dokumentazzjoni inerti b'kontenut eżekutibbli żero. Tista' tirrestawraha b'mod sikur mill-kwarantina.
 
-**X’għandek tagħmel:**
+**X'għandek tagħmel:**
 
-1. **Waqqaf in-notifiki** — eskludi d-direttorju tal-installazzjoni mill-antivirus tiegħek
-   (Avast: Settings → Exceptions), billi żżid il-path globali ta’ `node_modules` u/jew
-   id-direttorju tad-data ta’ OmniRoute (`~/.omniroute/`).
-2. **Irrapporta l-pożittiv falz** — <https://www.avast.com/false-positive-file-form.php>,
-   u ehmeż il-`README.md` li jinsab fi kwarantina. Din hija s-soluzzjoni li tgħin lil kulħadd,
-   peress li hija l-euristika tal-bejjiegħ li qed tirreaġixxi żżejjed għal fajl ta’ test.
+1. **Waqqaf in-notifiki** — teskludi d-direttorju tal-installazzjoni fl-antivirus tiegħek (Avast: Settings → Eċċezzjonijiet), billi żżid il-mogħdija `node_modules` globali tiegħek and/or - OmniRoute data dir (`~/.omniroute/`).
+2. **Irrapporta l-pożittiv falz** — <https://www.avast.com/false-positive-file-form.php>, twahhal iz- `README.md` kwarantina . Din hija l-soluzzjoni li tgħin lil kulħadd, peress li hija l-ewristika tal-bejjiegħ li tirreaġixxi żżejjed għal fajl ta 'test.
 
-**Għaliex ma “nsewwux” dan min-naħa tagħna:** l-eżempji kollha huma `http://localhost`, u
-localhost ma jistax ikun `https` mingħajr id-diffikultajiet ta’ ċertifikat awtofirmat. Li
-ngħawġu d-dokumentazzjoni biex nevitaw l-euristika ta’ bejjiegħ wieħed jagħmel ħsara lil kull
-qarrej biex jikkumpensa għal bug fl-iskaner.
+**Għaliex aħna ma "niffissaw" dan min-naħa tagħna:** l-eżempji huma kollha `http://localhost`, u localhost ma jistax ikun `https` mingħajr frizzjoni ta' ċertifikat iffirmat minnu nnifsu. It-tfixkil tad-doks biex jiġi evitat l-euristika ta' bejjiegħ wieħed iweġġa' lil kull qarrej biex jissodisfa bug tal-iskaner.
 
 ### Kaspersky jimmarka l-app tad-Desktop bħala `PDM:Trojan.Win32.Generic`
 
-**Dan huwa pożittiv falz minn euristika tal-imġiba. Xejn mhu infettat.** Il-prefiss `PDM:`
-ta’ Kaspersky jfisser li l-verdett ġej mill-Proactive Defense Module (System Watcher) tiegħu,
-li jiġġudika x’_jagħmel_ l-installatur minflok iqabblu ma’ malware magħruf. Meta jiġi attivat,
-Kaspersky “ireġġa’ lura” l-installazzjoni kollha — billi jħassar fajls li jkun diġà kiteb —
-għalhekk l-app tispiċċa bil-ħsara jew nieqsa.
+**Dan huwa pożittiv falz minn euristiku komportamentali. Xejn mhu infettat.** Il-prefiss `PDM:` ta' Kaspersky ifisser li l-verdett ġej mill-Modulu ta' Difiża Proattiva tiegħu (System Watcher), li jiġġudika x'jagħmel_ l-installatur aktar milli jqabbel ma' malware magħruf. Meta tispara, Kaspersky "jirrombla lura" l-installazzjoni kollha — tħassar fajls li kienet diġà kitbet — sabiex l-app tispiċċa miksura jew nieqsa.
 
-Il-fajls li jimmarka huma partijiet standard ta’ dipendenzi open-source ddikjarati u inklużi
-mal-app tad-desktop, pereżempju:
+Il-fajls li jimmarka huma partijiet tal-istokk tad-dipendenzi dikjarati ta' sors miftuħ miġbura mal-app tad-desktop, pereżempju:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` u
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), il-librerija
-  tal-awtomazzjoni tal-browser użata għall-login mal-fornitur minn ġewwa l-app u għaċ-chat
-  appoġġjat mill-browser.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — il-binding nattiv iffissat ta’ `wreq-js` użat għal HTTP b’marka tas-swaba’ tal-browser
-  fuq fornituri b’cookies tal-web (`<arch>` huwa `x64` jew `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` u `workerProcessEntry.js` — [Playwright](https://playwright.dev), il-librerija tal-awtomazzjoni tal-browser użata għal login tal-fornitur fl-app u chat appoġġjat mill-browser.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — l-irbit indiġenu `wreq-js` ippinjat użat għal HTTP bil-marki tas-swaba’ tal-browser fuq fornituri tal-web-cookie (`<arch>` huwa `x64` jew `arm64`).
 
-**Għaliex jiġi attivat:** l-installatur tal-Windows **għadu mhux iffirmat bil-kodiċi**,
-għalhekk installatur NSIS mhux iffirmat m’għandu ebda reputazzjoni u l-euristiċi tal-imġiba
-joperaw bl-aggressività massima. Meta dan jingħaqad ma’ DLL nattiva inkluża u mijiet ta’
-fajls `.js` miktuba taħt `%LOCALAPPDATA%\Programs\OmniRoute` (inklużi direttorji ta’ pakketti
-b’hash miżjud mill-build standalone ta’ Next.js), dan ikun biżżejjed biex jattiva l-euristika.
-L-iffirmar tal-kodiċi huwa ppjanat; sakemm jiġi implimentat, rilaxxi ġodda jistgħu jirrepetu dan.
+**Għaliex jispara:** l-installatur Windows huwa** għadu mhux iffirmat bil-kodiċi** , għalhekk installatur NSIS mhux iffirmat għandu reputazzjoni żero u euristiċi tal-imġieba jaħdmu b'aggressjoni massima. Flimkien ma' DLL indiġeni magħqud u mijiet ta' fajls `.js` miktuba taħt `%LOCALAPPDATA%\Programs\OmniRoute` (inklużi direttorji ta' pakketti b'suffiss ta' hash mill-build standalone Next.js ), dan huwa biżżejjed biex tbattal l-euristika. L-iffirmar tal-kodiċi huwa ppjanat; sakemm tinżel, ħarġiet ġodda jistgħu jirrepetu dan.
 
-**X’għandek tagħmel:**
+**X'għandek tagħmel:**
 
-1. **L-ewwel ivverifika d-download tiegħek** (dan jeskludi fajl li jkun ġie mbagħbas). Kull
-   rilaxx jippubblika `latest.yml`, li l-field `sha512` tiegħu (base64) ikopri l-installatur
-   `OmniRoute.Setup.<version>.exe`. F’PowerShell, mill-folder li fih l-installatur:
+1. **Ivverifika t-tniżżil tiegħek l-ewwel** (eskludi fajl imbagħbas). Kull rilaxx jippubblika `latest.yml`, li l-qasam `sha512` tiegħu (base64) ikopri l-installatur `OmniRoute.Setup.<version>.exe`. PowerShell, mill-folder li fih l-installatur:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   L-output irid jaqbel ma’ `latest.yml` → `sha512`. Jekk ma jaqbilx, ħassar il-fajl u
-   niżżlu mill-ġdid biss mill-[paġna tar-rilaxxi ta’ GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Irrestawra + eskludi** — irrestawra mill-kwarantina l-elementi li tneħħew meta l-installazzjoni
-   treġġgħet lura u żid esklużjoni għal `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky →
-   Settings → Threats and Exclusions), imbagħad installa mill-ġdid.
-3. **Irrapporta l-pożittiv falz** — <https://opentip.kaspersky.com/>. Rapporti FP mibgħuta
-   mill-utenti tassew iħaffu ż-żieda mal-lista ta’ permessi.
+   L-output għandu jaqbel ma `latest.yml` → `sha512`. Jekk ma jagħmilx hekk, ħassar il-fajl u tniżżel mill-ġdid biss mill- [paġna tar-rilaxxi GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Restore + eskludi** — jirrestawra l-oġġetti rrumblati mill-kwarantina u żid esklużjoni għal `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Theddid u Esklużjonijiet), imbagħad installa mill-ġdid.
+3. **Irrapporta l-pożittiv falz** — <https://opentip.kaspersky.com/>. Ir-rapporti FP sottomessi mill-utent ġenwinament iħaffu l-listing tal-permessi.
 
 ---
 
@@ -871,10 +835,10 @@ Aktar sintomi:
 
 ---
 
-## Għadek Imwaħħal?
+## Għadha mwaħħla?
 
-- **Kwistjonijiet fuq GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Arkitettura**: Ara [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) għad-dettalji interni
-- **Referenza tal-API**: Ara [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) għall-endpoints kollha
-- **Dashboard tas-Saħħa**: Iċċekkja **Dashboard → Health** għall-istatus tas-sistema f’ħin reali
-- **Traduttur**: Uża **Dashboard → Translator** biex tiddibaggja problemi tal-format
+- **GitHub Kwistjonijiet** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Arkitettura** : Ara [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) ghal dettalji interni
+- **API Referenza** : Ara [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) għall-endpoints kollha
+- **Dashboard tas-Saħħa** : Iċċekkja** Dashboard → Health** għall-istatus tas-sistema f'ħin reali
+- **Traduttur** : Uża** Dashboard → Translator** biex tiddibaggja kwistjonijiet ta' format

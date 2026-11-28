@@ -4,13 +4,7 @@
 
 ---
 
-> **ସତ୍ୟର ପ୍ରାମାଣିକ ଉତ୍ସ:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, ଏବଂ `open-sse/utils/error.ts`ରେ ଥିବା ସାର୍ବଜନୀନ builders
-> **ପରୀକ୍ଷାଗୁଡ଼ିକ:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **ଶେଷ ଅଦ୍ୟତନ:** 2026-09-02 — v3.8.51
-> **ଲକ୍ଷ୍ୟ ପାଠକ:** ତ୍ରୁଟି ପ୍ରତିକ୍ରିୟାଗୁଡ଼ିକୁ ପରିବର୍ତ୍ତନ କରୁଥିବା ଯେକୌଣସି ଇଞ୍ଜିନିୟର୍ (HTTP routes, SSE streams, executors, MCP handlers)।
-> **ସ୍ଥିତି:** କ୍ଲାଏଣ୍ଟକୁ ଏକ ତ୍ରୁଟି ସନ୍ଦେଶ ଫେରାଉଥିବା ପ୍ରତ୍ୟେକ code path ପାଇଁ **ବାଧ୍ୟତାମୂଳକ**।
+> **ସତ୍ୟର ଉତ୍ସ:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, ଏବଂ `open-sse/utils/error.ts` ରେ ଜନସାଧାରଣ ନିର୍ମାଣକାରୀ।** ପରୀକ୍ଷା:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** ଦର୍ଶକ:** ତ୍ରୁଟି ପ୍ରତିକ୍ରିୟାକୁ ସ୍ପର୍ଶ କରୁଥିବା ଯେକ Any ଣସି ଇଞ୍ଜିନିୟର (HTTP ମାର୍ଗ, SSE ଷ୍ଟ୍ରିମ୍, ଏକଜେକ୍ୟୁଟର, MCP ହ୍ୟାଣ୍ଡେଲର୍)।** ସ୍ଥିତି:****MANDATORY** ପ୍ରତ୍ୟେକ କୋଡ୍ ପଥ ପାଇଁ ଯାହା ଏକ କ୍ଲାଏଣ୍ଟକୁ ଏକ ତ୍ରୁଟି ବାର୍ତ୍ତା ଫେରାଇଥାଏ।
 
 ## ଏହା କାହିଁକି ଅଛି
 

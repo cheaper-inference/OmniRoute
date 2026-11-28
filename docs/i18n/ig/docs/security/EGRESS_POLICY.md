@@ -67,37 +67,37 @@ E ji ụma mee ka ntụziaka ahụ bụrụ **maka proxy ọ bụla**, ọ bụg
 
 ---
 
-## Uru Atọ Ahụ
+## Uru Atọ
 
-| Uru    | Aha UI                 | Omume                                                                                                                                                       |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `Akpaaka (dual-stack)` | OS na-ahọrọ ụdị IP. Maka proxy host nke bụ IP-literal, ụdị IP ahụ dị n'ime literal ahụ n'onwe ya; maka hostname, a pụrụ iji ụdị abụọ ahụ. Nke a bụ ndabara. |
-| `ipv4` | `Naanị IPv4`           | Na-amanye njikọ ahụ iji IPv4. Ọ na-ajụ njikọ kpamkpam ma ọ bụrụ na proxy host enweghị ndekọ IPv4 (A).                                                       |
-| `ipv6` | `Naanị IPv6`           | Na-amanye njikọ ahụ iji IPv6. Ọ na-ajụ njikọ kpamkpam ma ọ bụrụ na proxy host enweghị ndekọ IPv6 (AAAA).                                                    |
+| Uru    | UI akara            | Omume                                                                                                                                                   |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS na-ahọta ezinụlọ. Maka onye nnabata proxy nke IP, ezinaụlọ ahụ dị mkpa na nke nkịtị; maka aha nnabata, ezinaụlọ abụọ a tozuru oke. Nke a bụ ndabara. |
+| `ipv4` | `IPv4 only`         | Tinye njikọ na IPv4. Emechiela ma ọ bụrụ na onye nnabata proxy enweghị ndekọ IPv4 (A).                                                                  |
+| `ipv6` | `IPv6 only`         | Tinye njikọ na IPv6. Emechiela ma ọ bụrụ na onye nnabata proxy enweghị ndekọ IPv6 (AAAA).                                                               |
 
-Eriri UI dị na `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+Ụdọ UI na-ebi na `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Otu E Si Hazie Ya
+## Otu esi ahazi ya
 
 ### Dashboard
 
-Ihe nhọpụta ahụ dị n'ụdị proxy nke taabụ **Proxy Pool**:
+Onye nhọpụta ahụ nọ n'ụdị proxy nke** Pool proxy** tab:
 
-1. Mepee **Dashboard → Settings → Proxy → Proxy Pool**
-2. Tinye proxy ọhụrụ ma ọ bụ dezie nke dị adị
-3. Tọọ dropdown **IP family** ka ọ bụrụ `Akpaaka (dual-stack)`, `Naanị IPv4`, ma ọ bụ `Naanị IPv6`
-4. Chekwaa
+1. Mepee** Dashboard → Ntọala → Proxy → Pool Proxy**
+2. Tinye ma ọ bụ dezie proxy
+3. Tọọ nke** ezinụlọ IP** dobe na `Auto (dual-stack)`, `IPv4 only`, ma ọ bụ `IPv6 only`
+4. Chekwa
 
-`ProxyRegistryManager.tsx` na-emepụta njikwa ahụ (etinyere ya na `proxy/ProxyPoolTab.tsx`).
+A na-eme njikwa ahụ site na `ProxyRegistryManager.tsx` (dokwasara na `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Field `family` bụ akụkụ nke payload ndị e ji emepụta/emelite proxy registry, nke `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) na-enyocha ma `POST` / `PATCH /api/v1/management/proxies` na-ahazi:
+Ebe `family` bụ akụkụ nke ndebanye aha proxy create/update, nke `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) kwadoro ma `POST` / `PATCH /api/v1/management/proxies` na-ejikwa ya:
 
 ```bash
-# Mepụta proxy nke na-eji naanị IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Gbanwee proxy dị adị ka ọ jiri naanị IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-A na-anabatakwa otu field ahụ n'ime inline proxy config object a na-eji maka upstream-proxy entries (`upstream_proxy_config.family`, lee [Ụdị Data](#data-model)).
+A na-anabatakwa otu ogige ahụ site na ihe nhazi proxy inline ejiri maka ntinye proxy elu (`upstream_proxy_config.family`, lee [Data Model](#data-model) ).
 
-Maka akụkụ ndị ọzọ nke API CRUD/assignment nke proxy, lee [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Maka ndị ọzọ proxy CRUD/assignment API, lee [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

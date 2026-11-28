@@ -504,25 +504,25 @@ khi dữ liệu bảng xếp hạng thực sự thay đổi kể từ lần đ�
 
 ---
 
-## Chia sẻ Token
+## Chia sẻ mã thông báo
 
-**Tệp:** `src/lib/gamification/sharing.ts`
+**Tài liệu:** `src/lib/gamification/sharing.ts`
 
-### Sổ cái kép
+### Sổ cái ghi kép
 
-Mỗi lần chuyển tạo hai hàng trong `token_ledger`:
+Mỗi lần chuyển sẽ tạo hai hàng trong `token_ledger`:
 
-| Hàng   | `from_key_id` | `to_key_id` | `amount` |
-| ------ | ------------- | ----------- | -------- |
-| Ghi nợ | người gửi     | người nhận  | +amount  |
-| Ghi có | người nhận    | người gửi   | -amount  |
+| Hàng ngang | `from_key_id` | `to_key_id` | `amount`  |
+| ---------- | ------------- | ----------- | --------- |
+| Ghi nợ     | người gửi     | người nhận  | số tiền + |
+| Tín dụng   | người nhận    | người gửi   | -amount   |
 
-Khoan đã — quy ước là:
+Đợi — quy ước là:
 
-| Hàng | `from_key_id` | `to_key_id` | `amount` | Ý nghĩa                 |
-| ---- | ------------- | ----------- | -------- | ----------------------- |
-| Gửi  | người gửi     | người nhận  | +amount  | Dòng ra từ người gửi    |
-| Nhận | người nhận    | người gửi   | +amount  | Dòng vào cho người nhận |
+| Hàng ngang | `from_key_id` | `to_key_id` | `amount`  | Nghĩa                     |
+| ---------- | ------------- | ----------- | --------- | ------------------------- |
+| Gửi        | người gửi     | người nhận  | số tiền + | Dòng tiền đi từ người gửi |
+| Nhận được  | người nhận    | người gửi   | số tiền + | Dòng vào tới người nhận   |
 
 Số dư được tính như sau:
 
@@ -535,7 +535,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Luồng chuyển
+### Dòng chuyển
 
 ```typescript
 export async function transferTokens(
@@ -546,19 +546,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Xác thực**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Tính lũy đẳng**: kiểm tra xem `idempotency_key` đã tồn tại trong sổ cái hay chưa.
-   Nếu có, trả về kết quả đã lưu trong bộ nhớ đệm.
-3. **Giao dịch** (một giao dịch SQLite duy nhất):
-   a. Tính số dư của người gửi.
-   b. Nếu `balance < amount`, hủy bỏ (không đủ số dư).
-   c. Chèn hàng gửi (`from=sender,`.
+1. **Xác thực** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **sự bình thường** : kiểm tra xem `idempotency_key` đã tồn tại trong sổ cái chưa. Nếu có, trả về kết quả được lưu trong bộ nhớ cache.
+3. **Giao dịch** (giao dịch SQLite đơn): a. Tính số dư người gửi. b. Nếu `balance < amount`, hủy bỏ (không đủ tiền). c. Chèn hàng gửi (`from=sender, to=receiver, amount`). d. Chèn hàng nhận (`from=receiver, to=sender, amount`).
+4. **Giới hạn tỷ lệ** : kiểm tra tốc độ truyền cho người gửi (tối đa 10 transfers/min).
+5. **Sự kiện** : phát ra sự kiện trò chơi `token_share` để đánh giá huy hiệu XP +.
+6. Trả lại `{ success: true, balance: newBalance }`.
 
-### Giới hạn tốc độ
+### Giới hạn tỷ lệ
 
 - Tối đa 10 lần chuyển mỗi phút cho mỗi khóa API.
 - Tối đa 10.000 token cho mỗi lần chuyển.
-- Tối đa 100.000 token được chuyển mỗi ngày cho mỗi khóa API.
+- Tối đa 100.000 mã thông báo được chuyển mỗi ngày cho mỗi khóa API.
 
 ---
 

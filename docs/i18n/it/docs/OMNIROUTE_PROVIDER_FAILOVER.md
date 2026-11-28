@@ -21,3 +21,5 @@ La policy predefinita tra provider consente fino a tre tentativi del provider, l
   - Un ID con prefisso (`provider/model`) non viene mai reindirizzato a un altro provider.
 
 Gli stati del circuito sono `closed`, `open` e `half_open`. Un tempo di recupero programma un'indagine delimitata; una sonda riuscita chiude il circuito e una sonda guasta lo riapre.
+
+Il failover del provider viene eseguito all'interno del gateway. Vedere [Quando OmniRoute stesso non è raggiungibile](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) per il comportamento del client durante un'interruzione del gateway.

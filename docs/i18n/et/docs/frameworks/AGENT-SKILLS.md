@@ -13,12 +13,12 @@ Agent Skills on struktureeritud SKILL.md failid, mis õpetavad välistele agenti
 
 ## Ülevaade
 
-Kataloog sisaldab **45 Agent Skill'i** (23 REST API + 21 CLI + 1 konfiguratsiooni töövoog). Igal oskusel on:
+Kataloog sisaldab** 45 Agendioskused** (23 REST API + 21 CLI + 1 konfiguratsiooni töövoog). Igal oskusel on:
 
-- **Kanooniline ID** (`omni-auth`, `cli-serve` jne)
-- Fail **SKILL.md** asukohas `skills/{id}/SKILL.md`, mis sisaldab YAML-i eessisu (`name`, `description`) ja põhjalikku markdown-sisu
-- OpenAPI spetsifikatsioonist ja CLI registrist tuletatud **REST lõpp-punktid** (API oskused) või **CLI alamkäsud** (CLI oskused)
-- **GitHubi toorvaate URL** reaalajas laadimiseks: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanooniline ID** (`omni-auth`, `cli-serve` jne)
+- A**SKILL.md** `skills/{id}/SKILL.md` faili koos YAML frontmatter (`name`, `description`) + rich markdown body
+- **REST lõpp-punktid** (API oskused) või**CLI alamkäsud** (CLI oskused), mis on tuletatud OpenAPI spec ja CLI registrist
+- A**GitHub toores URL** reaalajas toomiseks: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Generaatori vastus on `GeneratorReport`:
 
 ---
 
-## Katvuse API
+## Katvus API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

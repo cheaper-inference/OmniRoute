@@ -11,14 +11,14 @@ Is comhaid struchtúrtha SKILL.md iad Scileanna Gníomhaire a mhúineann do ghn�
 
 ---
 
-## Forléargas
+## Forbhreathnú
 
-Tá **45 Scil Gníomhaire** sa chatalóg (23 REST API + 21 CLI + 1 sreabhadh oibre cumraíochta). Tá na nithe seo a leanas ag gach scil:
+Tá sa chatalóg** 45 Scileanna Gníomhaire** (23 REST API + 21 CLI + 1 sreabhadh oibre cumraíochta). Tá gach scil:
 
-- **Aitheantas canónach** (`omni-auth`, `cli-serve`, etc.)
-- Comhad **SKILL.md** in `skills/{id}/SKILL.md` le réamhábhar YAML (`name`, `description`) + corp saibhir markdown
-- **Críochphointí REST** (scileanna API) nó **fo-orduithe CLI** (scileanna CLI) a dhíorthaítear ó shonraíocht OpenAPI agus ó chlárlann CLI
-- **URL amh GitHub** le haghaidh aisghabháil bheo: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** ID canonical** (`omni-auth`, `cli-serve`, srl.)
+- A**SKILL.md** comhad i `skills/{id}/SKILL.md` le ábhar tosaigh YAML (`name`, `description`) comhlacht marcála síos saibhir +
+- **críochphointí REST** ( scileanna API ) nó**CLI fo-orduithe** ( scileanna CLI ) díorthaithe ón gclár OpenAPI spec agus CLI
+- A**GitHub amh URL** le haghaidh beir beo: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Is `GeneratorReport` é freagra an ghineadóra:
 
 ---
 
-## API Clúdaigh
+## Clúdach API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

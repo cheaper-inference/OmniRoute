@@ -67,15 +67,15 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ---
 
-## ሦስቱ እሴቶች
+## ሶስቱ እሴቶች
 
-| እሴት    | የUI መለያ             | ባህሪ                                                                                                                    |
-| ------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `ራስ-ሰር (ባለሁለት-ስታክ)` | OS የIP ቤተሰቡን ይመርጣል። ለIP-ሊተራል ፕሮክሲ አስተናጋጅ፣ ቤተሰቡ በሊተራሉ ውስጥ በተፈጥሮ የተወሰነ ነው፤ ለአስተናጋጅ ስም ደግሞ ሁለቱም ቤተሰቦች ብቁ ናቸው። ይህ ነባሪው ነው። |
-| `ipv4` | `IPv4 ብቻ`           | ግንኙነቱን በIPv4 ላይ ይገድባል። የፕሮክሲ አስተናጋጁ የIPv4 (A) መዝገብ ከሌለው ግንኙነቱን በአስተማማኝ ሁኔታ ይከለክላል።                                     |
-| `ipv6` | `IPv6 ብቻ`           | ግንኙነቱን በIPv6 ላይ ይገድባል። የፕሮክሲ አስተናጋጁ የIPv6 (AAAA) መዝገብ ከሌለው ግንኙነቱን በአስተማማኝ ሁኔታ ይከለክላል።                                  |
+| ዋጋ     | UI መለያ              | ባህሪ                                                                                                  |
+| ------ | ------------------- | ---------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS ቤተሰቡን ይመርጣል. ለአይፒ-ቀጥታ ፕሮክሲ አስተናጋጅ፣ ቤተሰቡ ለትክክለኛው ውስጣዊ ነው; ለአስተናጋጅ ስም ሁለቱም ቤተሰቦች ብቁ ናቸው። ይህ ነባሪ ነው። |
+| `ipv4` | `IPv4 only`         | ግንኙነቱን ወደ IPv4 ይሰኩት . የተኪ አስተናጋጁ ምንም IPv4 (A) መዝገብ ከሌለው አይዘጋም።                                       |
+| `ipv6` | `IPv6 only`         | ግንኙነቱን ወደ IPv6 ይሰኩት . የተኪ አስተናጋጁ ምንም IPv6 (AAAA) መዝገብ ከሌለው አይዘጋም።                                    |
 
-የUI ሕብረቁምፊዎች በ`src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`) ውስጥ ይገኛሉ።
+UI ሕብረቁምፊዎች `src/i18n/messages/en.json` ውስጥ ይኖራሉ (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`)።
 
 ---
 
@@ -83,21 +83,21 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ### ዳሽቦርድ
 
-መራጩ በ**Proxy Pool** ትር የፕሮክሲ ቅጽ ውስጥ ይገኛል፦
+መራጩ በፕሮክሲ መልክ ነው።** ተኪ ገንዳ** ትር፡
 
-1. **Dashboard → Settings → Proxy → Proxy Pool** ይክፈቱ
-2. ፕሮክሲ ያክሉ ወይም ያርትዑ
-3. የ**IP ቤተሰብ** ተቆልቋይ ምናሌን ወደ `ራስ-ሰር (ባለሁለት-ስታክ)`፣ `IPv4 ብቻ` ወይም `IPv6 ብቻ` ያቀናብሩ
-4. ያስቀምጡ
+1. ክፈት** ዳሽቦርድ → መቼቶች → ተኪ → ተኪ ገንዳ**
+2. ተኪ ያክሉ ወይም ያርትዑ
+3. ያቀናብሩ**IP ቤተሰብ** ወደ `Auto (dual-stack)`፣ `IPv4 only` ወይም `IPv6 only` መውረድ
+4. አስቀምጥ
 
-መቆጣጠሪያው በ`ProxyRegistryManager.tsx` ይሰራል (`proxy/ProxyPoolTab.tsx` ውስጥ የተጫነ)።
+መቆጣጠሪያው በ `ProxyRegistryManager.tsx` (በ `proxy/ProxyPoolTab.tsx` ውስጥ ተጭኗል).
 
 ### API
 
-የ`family` መስክ የፕሮክሲ መዝገብ መፍጠሪያ/ማዘመኛ payload-ዎች አካል ነው፤ በ`createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ይረጋገጣል እና በ`POST` / `PATCH /api/v1/management/proxies` ይስተናገዳል፦
+`family` መስክ በ `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) የተረጋገጠ እና በ `POST` / `PATCH /api/v1/management/proxies` የሚስተናገደው የተኪ መዝገብ create/update ጭነት አካል ነው።
 
 ```bash
-# IPv6-ብቻ ፕሮክሲ ይፍጠሩ
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# ነባር ፕሮክሲን ወደ IPv4-ብቻ ይቀይሩ
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-ይህ መስክ ለupstream-proxy ግቤቶች በሚያገለግለው የውስጥ መስመር ፕሮክሲ ውቅር ነገርም ተቀባይነት አለው (`upstream_proxy_config.family`፣ [የውሂብ ሞዴል](#data-model)ን ይመልከቱ)።
+ተመሳሳዩን መስክ ደግሞ ለላይ-ተኪ ግቤቶች ጥቅም ላይ በሚውለው የውስጠ-መስመር ፕሮክሲ ውቅር ነገር ተቀባይነት አለው (`upstream_proxy_config.family`፣ [የውሂብ ሞዴልን](#data-model) ይመልከቱ)።
 
-ስለተቀረው የፕሮክሲ CRUD/ምደባ API፣ [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md)ን ይመልከቱ።
+ለተቀረው ፕሮክሲ CRUD/assignment API፣ [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) ን ይመልከቱ።
 
 ---
 

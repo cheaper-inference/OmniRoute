@@ -151,30 +151,30 @@ Témy pre fázy 6 – 7:
 - [ ] Pridať regresné testy pre každú nepokrytú chybu v produkčnom kóde opravenú počas zvyšovania pokrytia na 90 %
 - [ ] Zvýšiť prah pokrytia v CI až po tom, ako bude lokálna východisková hodnota stabilná aspoň počas dvoch po sebe nasledujúcich spustení
 
-## Politika postupného zvyšovania
+## Zásady račne
 
-Prahové hodnoty pre `npm run test:coverage` aktualizujte až vtedy, keď projekt skutočne prekročí ďalší míľnik s dostatočnou rezervou.
+Aktualizujte prahové hodnoty `npm run test:coverage` až potom, čo projekt skutočne prekročí ďalší míľnik s pohodlnou vyrovnávacou pamäťou.
 
-**Aktuálna hranica:** `npm run test:coverage` vynucuje **60 príkazov / 60 riadkov / 60 funkcií / 60 vetiev** (metrika bola prepočítaná vo fáze Quality-Gates 6A.1 — predchádzajúca východisková hodnota 82,58 % bola nadhodnotená, pretože započítavala testovacie súbory a vylučovala `open-sse`). Príkaz `test:coverage:legacy` zachováva starú metriku 50/50/50 na historické porovnanie.
+**Aktuálna brána:** `npm run test:coverage` presadzuje** 60 výpisov / 60 riadkov / 60 funkcií / 60 pobočiek** (metrika bola prepracovaná v Quality-Gates Fase 6A.1 — skoršia 82,58 % základná hodnota bola nafúknutá, pretože počítala testovacie súbory a vylučovala `open-sse`). Príkaz `test:coverage:legacy` zachová starú metriku 50/50/50 pre historické porovnanie.
 
-Na jednorazovú kontrolu prahových hodnôt podľa najnovšej správy použite:
+Pre ad-hoc prahové kontroly oproti poslednému prehľadu použite:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Odporúčaná postupnosť zvyšovania (poradie je `príkazy-riadky / vetvy / funkcie`):
+Odporúčaná sekvencia račne (poradie je `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- aktuálna hranica (75/70/75)
+5. 75/70/72 <-- aktuálna brána (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Ďalším cieľom zvýšenia je `80/75/78`, keď pokrytie vetiev zostane nad 78 % počas dvoch po sebe nasledujúcich spustení.
+Ďalším ratchetovým cieľom je `80/75/78`, keď sa pokrytie pobočky udrží nad 78 % počas dvoch po sebe nasledujúcich cyklov.
 
 ## Známy nedostatok
 

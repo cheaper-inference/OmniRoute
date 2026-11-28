@@ -220,24 +220,23 @@ admin console တွင် Funnel ကို မဖွင့်ထားပါက
 | --------------- | ---------------------------------------------- |
 | `TAILSCALE_BIN` | `tailscale` binary path ကို အစားထိုးသတ်မှတ်ရန် |
 
-## Endpoint အကျဉ်းချုပ်
+## အဆုံးမှတ်အကျဉ်းချုပ်
 
-| Endpoint                              | Method | Body                                | Auth       |
-| ------------------------------------- | ------ | ----------------------------------- | ---------- |
-| `/api/tunnels/cloudflared`            | `GET`  | —                                   | management |
-| `/api/tunnels/cloudflared`            | `POST` | `{action: "enable" \| "disable"}`   | management |
-| `/api/tunnels/ngrok`                  | `GET`  | —                                   | management |
-| `/api/tunnels/ngrok`                  | `POST` | `{action, authToken?}`              | management |
-| `/api/tunnels/tailscale`              | `GET`  | —                                   | management |
-| `/api/tunnels/tailscale/check`        | `GET`  | —                                   | management |
-| `/api/tunnels/tailscale/install`      | `POST` | `{sudoPassword?}` (SSE)             | management |
-| `/api/tunnels/tailscale/start-daemon` | `POST` | `{sudoPassword?}`                   | management |
-| `/api/tunnels/tailscale/login`        | `POST` | `{hostname?}`                       | management |
-| `/api/tunnels/tailscale/enable`       | `POST` | `{sudoPassword?, hostname?, port?}` | management |
-| `/api/tunnels/tailscale/disable`      | `POST` | `{sudoPassword?}`                   | management |
+| အဆုံးမှတ်                             | နည်းလမ်း | ခန္ဓာ                               | အထောက်အထား     |
+| ------------------------------------- | -------- | ----------------------------------- | -------------- |
+| `/api/tunnels/cloudflared`            | `GET`    | —                                   | စီမံခန့်ခွဲမှု |
+| `/api/tunnels/cloudflared`            | `POST`   | `{action: "enable" \| "disable"}`   | စီမံခန့်ခွဲမှု |
+| `/api/tunnels/ngrok`                  | `GET`    | —                                   | စီမံခန့်ခွဲမှု |
+| `/api/tunnels/ngrok`                  | `POST`   | `{action, authToken?}`              | စီမံခန့်ခွဲမှု |
+| `/api/tunnels/tailscale`              | `GET`    | —                                   | စီမံခန့်ခွဲမှု |
+| `/api/tunnels/tailscale/check`        | `GET`    | —                                   | စီမံခန့်ခွဲမှု |
+| `/api/tunnels/tailscale/install`      | `POST`   | `{sudoPassword?}` (SSE)             | စီမံခန့်ခွဲမှု |
+| `/api/tunnels/tailscale/start-daemon` | `POST`   | `{sudoPassword?}`                   | စီမံခန့်ခွဲမှု |
+| `/api/tunnels/tailscale/login`        | `POST`   | `{hostname?}`                       | စီမံခန့်ခွဲမှု |
+| `/api/tunnels/tailscale/enable`       | `POST`   | `{sudoPassword?, hostname?, port?}` | စီမံခန့်ခွဲမှု |
+| `/api/tunnels/tailscale/disable`      | `POST`   | `{sudoPassword?}`                   | စီမံခန့်ခွဲမှု |
 
-ဗဟိုချုပ်ကိုင်ထားသော `/api/settings/tunnels` endpoint မရှိပါ — backend တစ်ခုချင်းစီသည်
-သီးခြားလွတ်လပ်စွာ အလုပ်လုပ်ပါသည်။
+နောက်ခံအစွန်တစ်ခုစီသည် သီးခြား `/api/settings/tunnels` အဆုံးမှတ် — မရှိပါ။
 
 ## OAuth callback အတွက် ထည့်သွင်းစဉ်းစားရမည့်အချက်များ
 

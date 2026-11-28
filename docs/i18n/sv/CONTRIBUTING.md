@@ -8,29 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Utvecklingskonfiguration
+## Utvecklingsinställningar
 
 ### Förutsättningar
 
 - **Node.js** `>=22.22.2 <23`, eller `>=24.0.0 <27` (rekommenderas: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows med Node 24:** använd den aktuella 24 LTS-korrigeringsversionen (minst 24.20.0).
-> Äldre versioner kan avslutas efter lyckade tester när `--test-force-exit` stänger
-> processen. Node:s [Windows libuv-korrigering](https://github.com/nodejs/node/pull/61999) åtgärdar
-> denna krasch i runtime; behåll testkontrollerna och kontrollerna av körarens avslut aktiverade.
+> **Windows med nod 24:** använd den nuvarande 24 LTS patchversionen (minst 24.20.0). Tidigare utgåvor kan avbrytas efter framgångsrika tester när `--test-force-exit` stänger processen. Nodes [Windows libuv fix](https://github.com/nodejs/node/pull/61999) adresserar denna runtime krasch; håll testpåståenden och löparavgångskontroller aktiverade.
 
-> **Användare av npm v11+ (Node 24+):** Efter `npm install` ska du verifiera att inbyggda moduler har installerats:
-> `node -e "require('better-sqlite3')"`. Om kommandot misslyckas med `MODULE_NOT_FOUND`,
-> kör `npm approve-scripts better-sqlite3 && npm install`. Se
-> [Felsökning](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + användare (nod 24 +):** Efter `npm install`, verifiera att inbyggda moduler har installerats: `node -e "require('better-sqlite3')"`. Om det misslyckas med `MODULE_NOT_FOUND`, kör `npm approve-scripts better-sqlite3 && npm install`. Se [Felsökning](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
 ### Klona och installera
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,91 +32,83 @@ npm install
 ### Miljövariabler
 
 ```bash
-# Skapa din .env från mallen
+# Create your .env from the template
 cp .env.example .env
 
-# Generera obligatoriska hemligheter
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Viktiga variabler för utveckling:
+Nyckelvariabler för utveckling:
 
-| Variabel               | Standardvärde för utveckling | Beskrivning                      |
-| ---------------------- | ---------------------------- | -------------------------------- |
-| `PORT`                 | `20128`                      | Serverport                       |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Bas-URL för frontend             |
-| `JWT_SECRET`           | (generera ovan)              | Hemlighet för JWT-signering      |
-| `INITIAL_PASSWORD`     | `CHANGEME`                   | Lösenord för första inloggningen |
-| `APP_LOG_LEVEL`        | `info`                       | Detaljnivå för loggning          |
+| Variabel               | Utveckling Standard      | Beskrivning                  |
+| ---------------------- | ------------------------ | ---------------------------- |
+| `PORT`                 | `20128`                  | Serverport                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Base URL för frontend        |
+| `JWT_SECRET`           | (generera ovan)          | JWT undertecknande hemlighet |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Första inloggningslösenordet |
+| `APP_LOG_LEVEL`        | `info`                   | Logga mångfaldsnivå          |
 
 ### Inställningar för instrumentpanelen
 
-Instrumentpanelen innehåller UI-reglage för funktioner som även kan konfigureras via miljövariabler:
+Instrumentpanelen tillhandahåller UI -växlar för funktioner som också kan konfigureras via miljövariabler:
 
-| Inställningens plats | Reglage            | Beskrivning                                    |
-| -------------------- | ------------------ | ---------------------------------------------- |
-| Settings → Advanced  | Debug Mode         | Aktivera felsökningsloggar för begäranden (UI) |
-| Settings → General   | Sidebar Visibility | Visa/dölj avsnitt i sidofältet                 |
+| Ställa in plats          | Växla                 | Beskrivning                                       |
+| ------------------------ | --------------------- | ------------------------------------------------- |
+| Inställningar → Advanced | Felsökningsläge       | Aktivera loggar för felsökningsförfrågningar (UI) |
+| Inställningar → Allmänt  | Sidofältets synlighet | Show/hide sidofältssektioner                      |
 
-Dessa inställningar lagras i databasen och finns kvar efter omstarter. När de har angetts åsidosätter de standardvärdena för miljövariablerna.
+Dessa inställningar lagras i databasen och kvarstår vid omstarter, och åsidosätter standardinställningarna för env var när de ställs in.
 
 ### Kör lokalt
 
 ```bash
-# Utvecklingsläge (automatisk omladdning)
+# Development mode (hot reload)
 npm run dev
 
-# Produktionsbygge
+# Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Snabb backend-/API-kompilering för bidragsgivares ändringar
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Releasebygge (ren ombyggnad + HEAD-sentinell — krävs för driftsättning)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Vanlig portkonfiguration
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bidragsgivarbygget utför validering som endast omfattar kompilering: det sammanställer inte
-den fristående distributionen och bygger inte valfria inbyggda paketeringstillgångar. Använd
-det vanliga produktionsbygget när du behöver validera det leveransklara paketet.
+Contributor build utför enbart kompileringsvalidering: den sätter inte ihop den fristående distributionen eller bygger valfria inbyggda förpackningstillgångar. Använd den vanliga produktionsversionen när du behöver validera det leveransbara paketet.
 
-### Layout för byggutdata
+### Bygg utdatalayout
 
-| Katalog   | Innehåll                                                                   | Versionshanterad |
-| --------- | -------------------------------------------------------------------------- | ---------------- |
-| `src/`    | Programmets källkod (TypeScript / TSX)                                     | Ja               |
-| `.build/` | Mellanresultat — `next build`-utdata (gitignored, `distDir = .build/next`) | Nej              |
-| `dist/`   | Leveransklart paket — sammanställt av `assembleStandalone` (gitignored)    | Nej              |
+| Katalog   | Innehåll                                                                     | Spåras |
+| --------- | ---------------------------------------------------------------------------- | ------ |
+| `src/`    | Applikationskälla (TypeScript / TSX)                                         | Ja     |
+| `.build/` | Mellanprodukter — `next build` -utgång (gitignored, `distDir = .build/next`) | Inga   |
+| `dist/`   | Leveransbart paket — monterat av `assembleStandalone` (gitignored)           | Inga   |
 
-Byggprocessen består av ett enda steg:
+Byggpipelinen är ett enda pass:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js-utdata)
-  └─ assembleStandalone()                 (kopierar standalone + static + public + native assets)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` rensar dessutom båda katalogerna först och skriver
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en integritetssentinell för driftsättning.
+`npm run build:release` rensar dessutom båda katalogerna först och skriver `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en deploy integrity sentinel.
 
-`npm run build:contributor` använder backendens enda byggprofil. Den ersätter tillfälligt
-filer för instrumentpanelens UI med stubbar under bygget, behåller API-routarnas hanterare
-och återställer originalfilerna efter bygget. Använd `npm run build` för ändringar som påverkar
-instrumentpanelens UI eller för fullständig releasevalidering; bidragsgivarprofilen ersätter inte releasebygget.
+`npm run build:contributor` använder byggprofilen endast för backend. Den stoppar tillfälligt instrumentbrädans UI -filer medan den bygger, behåller API rutthanterare och återställer de ursprungliga filerna efter bygget. Använd `npm run build` för ändringar som påverkar instrumentpanelen UI eller för fullständig versionsvalidering; bidragsgivarens profil är inte en ersättning för versionen.
 
-> **Obs! om VPS-driftsättning:** den fjärranslutna bildkatalogen `/usr/lib/node_modules/omniroute/app/`
-> är oförändrad. Driftsättningsfärdigheterna rsync:ar innehållet i `dist/` till den.
-> Endast byggutdatasökvägen i projektet flyttades (`app/` → `dist/`).
+> **VPS deploy note:** fjärrbildkatalogen `/usr/lib/node_modules/omniroute/app/` är oförändrad. Deploy skills rsync innehållet i `dist/` in i det. Endast in-repo-byggets utdatabana flyttades (`app/` → `dist/`).
 
-Standard-URL:er:
+Standard URLs:
 
-- **Instrumentpanel**: `http://localhost:20128/dashboard`
+- **Instrumentbräda** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -430,8 +416,8 @@ Använd sedan färdigheterna `/deploy-vps-*-cc`, som synkroniserar `dist/` med f
 
 ## Få hjälp
 
-- **Arkitektur**: Se [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API-referens**: Se [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Säkerhetsdokumentation**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Driftdokumentation**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Problemrapporter**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Arkitektur** : Se [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API referens** : Se [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Säkerhetsdokument** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops docs** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **frågor** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

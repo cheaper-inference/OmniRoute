@@ -4,7 +4,7 @@
 
 ---
 
-> **Versija:** v3.8.44** Pēdējo reizi atjaunināts:** 2026-10-28** Auditorija:** Inženieri, kas pievieno, uztur vai atkļūdo iegultos pakalpojumus (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versija:** v3.8.44** Auditorija:** Inženieri, kas pievieno, uztur vai atkļūdo iegultos pakalpojumus (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Iegultie pakalpojumi ir lokāli instalēti procesa blakusvāģu rīki, kurus OmniRoute instalē, uzrauga un atklāj kā pirmšķirīgus maršrutēšanas mērķus. Atšķirībā no ārējiem pakalpojumu sniedzējiem (kuri tiek sasniegti internetā, izmantojot API taustiņus), iegultie pakalpojumi darbojas tajā pašā datorā kā OmniRoute un sazinās, izmantojot atgriezenisko saiti.
 
@@ -35,7 +35,7 @@ Ir iegulti astoņi pakalpojumi:
 | **CLIProxyAPI**    | GitHub izlaišanas binārs (`cliproxy`) |       8317        | Vietējais starpniekservera adapteris Anthropic CLI autentifikācijas plūsmām. Nodrošina rezerves maršrutēšanu, kad beidzas OAuth pilnvaru derīguma termiņš                                                                                                                                                                                           |
 | **Mux**            | `mux` (bez galvas `mux server`)       |       8322        | Vietējais aģents-orķestrācijas dēmons (coder/mux). Dzīves cikla pārvaldīts tikai —, nevis maršrutēšanas mērķis (nav LLM starpniekservera).                                                                                                                                                                                                          |
 | **Bifrost**        | `@maximhq/bifrost`                    |       8080        | Iet AI vārtejas releja aizmugursistēmu. Skrienot, automātiski tiek atlasīts pēc stafetes maršruta (`/v1/relay/`)                                                                                                                                                                                                                                    |
-| **Dario**          | `@askalf/dario`                       |       3456        | Claude abonēšanas starpniekserveris — alternative/failover to CLIProxyAPI Kloda koda formas datplūsmai; ievadītā atslēga kļūst `DARIO_ADMIN_TOKEN` kas nodrošina tās `/admin/*` OAuth vadības plakni                                                                                                                                                |
+| **Dario**          | `@askalf/dario`                       |       3456        | Kloda abonēšanas starpniekserveris — alternative/failover līdz CLIProxyAPI Kloda koda formas datplūsmai; ievadītā atslēga kļūst `DARIO_ADMIN_TOKEN` kas nodrošina tās `/admin/*` OAuth vadības plakni                                                                                                                                               |
 | **open-wa**        | `@open-wa/wa-automate`                |       8323        | WhatsApp Web automatizācija (bez galvas Chromium, izmantojot Puppeteer). Dzīves cikla pārvaldīts tikai —, nevis maršrutēšanas mērķis.                                                                                                                                                                                                               |
 | **LLMLingua**      | `@atjsh/llmlingua-2`                  |       20135       | Ātrās saspiešanas blakusvāģa — īsts LLMLingua-2 ONNX modelis ( Microsoft algoritma JS/TS ports). `open-sse/services/compression/engines/llmlingua/index.ts` nosūta `/compress` pār HTTP uz to, atgriežoties uz procesā esošā darbinieka pavediena aizmuguri, kad blakusvāģis ir nolaists. Dzīves cikla pārvaldīts tikai — nav maršrutēšanas mērķis. |
 | **dziedāt kaste**  | GitHub izlaišanas binārs (`singbox`)  |       20140       | TPROXY blakusvāģa atbalsta `applyTproxy()` caurspīdīgā starpniekservera pārtveršana (`src/mitm/tproxy/setup.ts`). Instalēšanas programma lejupielādē piesprausto, ar kontrolsummu pārbaudīto laidienu. Dzīves cikla pārvaldīts tikai — nevis maršrutēšanas mērķis (nav LLM starpniekservera)                                                        |
@@ -45,7 +45,7 @@ Visas astoņas ievēro vienu un to pašu uzraudzības modeli:
 - OmniRoute instalē tos zem `DATA_DIR/services/{name}/` (izolēts no paša OmniRoute `package.json`)
 - OmniRoute nārsto un uzrauga tos kā bērna procesus
 - OmniRoute ievada īslaicīgu API atslēgu bērna vidē un pagriež to bez dīkstāves (ja piemērojams)
-- Visi pārvaldības maršruti (`/api/services/*`) ir**LOCAL_ONLY** — pieejams tikai no cilpas (cietais noteikums Nr. 17)
+- Visi pārvaldības maršruti (`/api/services/*`) ir**LOCAL_ONLY** — pieejams tikai no cilpas (cietais noteikums #17)
 
 ### Galvenie lēmumi (no dizaina plāna)
 
@@ -209,7 +209,7 @@ sacensības apstākļus, piemēram, ja automātiskā palaišana un lietotāja sa
 
 ## 4. API atsauce
 
-Visi maršruti zem `/api/services/` ir**LOCAL_ONLY** (tikai cilpa, stingri noteikums Nr. 17). Pieprasījumi bez cilpas saņem `403 LOCAL_ONLY` neatkarīgi no autentifikācijas pilnvaras.
+Visi maršruti zem `/api/services/` ir**LOCAL_ONLY** (tikai cilpa, cietais noteikums #17). Pieprasījumi bez cilpas saņem `403 LOCAL_ONLY` neatkarīgi no autentifikācijas pilnvaras.
 
 ### 4.1 9 Maršrutētāja galapunkti (11 maršruti)
 
@@ -236,7 +236,7 @@ Instalējiet 9Router no npm. Izveido `DATA_DIR/services/9router/` ar savu `packa
 | `409`   | Jau instalēšana (noturēta slēdzene)                                              |
 | `500`   | npm instalēšana neizdevās. — skatiet `message`, lai uzzinātu par draudzīgu kļūdu |
 
-**Piezīmes:** Izmanto `execFile('npm', [...])` — bez apvalka, bez interpolācijas (cietais noteikums Nr. 13). EACCES kļūdas tiek parādītas kā draudzīgi ziņojumi.
+**Piezīmes:** Izmanto `execFile('npm', [...])` — bez apvalka, bez interpolācijas (cietais noteikums #13). EACCES kļūdas tiek parādītas kā draudzīgi ziņojumi.
 
 ---
 
@@ -386,7 +386,7 @@ Pārslēdziet automātiskās palaišanas karogu. Kad `enabled: true`, pakalpojum
 
 #### `GET /api/services/9router/logs`
 
-SSE dzīvu žurnālu straume no 9Router stdout/stderr gredzenu bufera.
+SSE dzīvu žurnālu straume no 9Router stdout/stderr gredzena bufera.
 
 **Vaicājuma parametri:**
 
@@ -526,7 +526,7 @@ sing-box ir tāda pati galapunkta forma kā Mux — bez `rotate-key` maršruta, 
 | Metode | Ceļš                                         | Apraksts                                                                 |
 | ------ | -------------------------------------------- | ------------------------------------------------------------------------ |
 | `POST` | `/api/services/singbox/install`              | Lejupielādējiet + verify piesprausto sing-box laidienu                   |
-| `POST` | `/api/services/singbox/start`                | Sākt sing-box (`sing-box run -c config.json`)                            |
+| `POST` | `/api/services/singbox/start`                | Sākt singlodzi (`sing-box run -c config.json`)                           |
 | `POST` | `/api/services/singbox/stop`                 | Pietura sing-box                                                         |
 | `POST` | `/api/services/singbox/restart`              | Restartējiet sing-box                                                    |
 | `POST` | `/api/services/singbox/update`               | Re-verify/reinstall piesprausto atbrīvošanu                              |
@@ -535,13 +535,13 @@ sing-box ir tāda pati galapunkta forma kā Mux — bez `rotate-key` maršruta, 
 | `POST` | `/api/services/singbox/auto-restart-adopted` | Pārslēgt automātisko restartēšanu pieņemtam (iepriekš esošajam) procesam |
 | `GET`  | `/api/services/singbox/logs`                 | SSE baļķa aste (izmantojot kopīgotu `[name]/logs` dinamisko maršrutu)    |
 
-**TPROXY elektroinstalācija:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) raksta `config.json` un palaiž uzraugu, pirms `applyTproxy()` instalē TPROXY ugunsmūra noteikumus. Ja uzrauga trūkst vai tas nesasniedz `running`, tas tagad reģistrē kļūdu līmenī (nevis klusi norīt kļūmi), lai operators varētu pateikt, ka TPROXY kārtulas tika piemērotas bez strādājoša klausītāja aiz tiem.
+**TPROXY elektroinstalācija:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) raksta `config.json` un palaiž uzraugu, pirms `applyTproxy()` instalē TPROXY ugunsmūra noteikumus. Ja pārrauga trūkst vai tas nesasniedz `running`, tas tagad reģistrē kļūdu līmenī (nevis klusi norīt kļūmi), lai operators varētu pateikt, ka TPROXY kārtulas tika piemērotas bez strādājoša klausītāja aiz tiem.
 
 ---
 
-### 4.9. Reversais starpniekserveris (9 maršrutētāja informācijas paneļa iegulšana)
+### 4.9. Reversais starpniekserveris (9. maršrutētāja informācijas paneļa iegulšana)
 
-Informācijas panelis iegulst 9Router web UI iframe iekšpusē, izmantojot iekšējo apgriezto starpniekserveri vietnē:
+Informācijas panelī ir iegults 9Router web UI iframe iekšpusē, izmantojot iekšējo reverso starpniekserveri:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
@@ -555,9 +555,7 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 - Izņem no atbildes `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
 - Pārraksta HTML atbildes, lai ievadītu `<base href>` un normalizētu absolūtos ceļus (`/foo` → `/dashboard/.../embed/foo`)
 
-WebSocket jauninājumus iegultajam informācijas panelim apstrādā pavadošais serveris speciālā portā (skatiet `src/lib/services/embedWsProxy.ts`).
-
-Katrs WebSocket jauninājums tiek autorizēts pirms tuneļa atvēršanas saskaņā ar tiem pašiem noteikumiem, ko izmanto HTTP iegulšanas maršruts: savienojuma otram galam jāizmanto atgriezeniskās cilpas adrese bez reversā starpniekservera pārsūtīšanas galvenes, pārlūka `Origin` vērtībai jābūt informācijas paneļa izcelsmei (`LIVE_WS_ALLOWED_ORIGINS` un `LIVE_WS_ALLOWED_HOSTS` paplašina atgriezeniskās cilpas noklusējuma iestatījumus), un izsaucējam ir nepieciešama informācijas paneļa sesija vai pārvaldības tvēruma API atslēga, ja vien pieteikšanās informācijas panelī nav atspējota.
+WebSocket upgrades for the embedded dashboard are handled by a companion server on a dedicated port (see `src/lib/services/embedWsProxy.ts`). Every upgrade is authorized before the tunnel opens, with the same rules as the HTTP embed route: the peer must be loopback with no reverse-proxy forwarding header, a browser `Origin` must be a dashboard origin (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` extend the loopback defaults), and the caller needs a dashboard session or a management-scope API key unless dashboard login is disabled.
 
 **Drošība:** Iegulšanas starpniekservera maršruti ir klasificēti zem `LOCAL_ONLY_API_PREFIXES`, un tos var sasniegt tikai no atpakaļcilpas. Uzbrucējs, kurš iegūst JWT izmantojot Cloudflare/Ngrok tuneli, nevar izmantot starpniekserveri iegultos pakalpojumos.
 
@@ -852,65 +850,44 @@ Laukā `lastError` redzams `"Fast crash (exited with code 1)"`.
 
 ---
 
-## 8. Bieži uzdotie jautājumi
+## 8. FAQ
 
-**J: Vai iegulto pakalpojumu galapunktus varu padarīt pieejamus klientiem ārpus atgriezeniskās cilpas?**
+**J: Vai es varu atklāt iegulto pakalpojumu galapunktus klientiem, kuriem nav atgriezeniskās saites?**
 
-Nē. LOCAL_ONLY līmenis ir ieviests apzināti (stingrais noteikums Nr. 17). Maršruti, kas var izsaukt
-`npm install` vai palaist `node` procesus, nedrīkst būt sasniedzami datplūsmai, kas nav no atgriezeniskās
-cilpas, jo pretējā gadījumā caur tuneli (Cloudflare, Ngrok, Tailscale) nopludināts JWT
-ļautu patvaļīgi palaist procesus. Attiecībā uz
-`/api/services/` nav nekādu iespēju atteikties no šī ierobežojuma — atšķirībā no `/api/mcp/` tas nav iekļauts pārvaldības tvēruma apiešanas
-sarakstā. Skatiet `docs/security/ROUTE_GUARD_TIERS.md`.
+Nē. LOCAL_ONLY līmenis ir tīšs (stingrs noteikums #17). Maršruti, kas var izsaukt `npm install` vai radīt `node` procesus, nedrīkst būt sasniedzami no trafika, kas nav atgriezeniskā cilpa, jo JWT noplūde caur tuneli (Cloudflare, Ngrok, Tailscale) pretējā gadījumā pieļautu patvaļīgu procesa izplatīšanos. Atšķirībā no `/api/mcp/` `/api/services/` — nav atteikšanās, tas ir izslēgts no pārvaldības jomas apiešanas saraksta. Skatiet `docs/security/ROUTE_GUARD_TIERS.md`.
 
 ---
 
-**J: Vai 9Router un CLIProxyAPI būs pieejami produkcijas/mākoņa izvietojumos?**
+**J: Vai 9Router un CLIProxyAPI būs pieejami production/cloud izvietojumos?**
 
-Jā. Abi pakalpojumi izmanto to pašu lokāli orientēto modeli kā pats OmniRoute. Tie darbojas
-tajā pašā iekārtā un sazinās, izmantojot atgriezenisko cilpu. Šeit „produkcija” nozīmē VPS
-vai lokālo serveri, kurā ir izvietots OmniRoute, nevis attālinātu mākoņpakalpojumu sniedzēju.
+Jā. Abi pakalpojumi darbojas pēc tāda paša vietējā modeļa kā pats OmniRoute. Tie darbojas vienā un tajā pašā mašīnā un sazinās, izmantojot atgriezenisko cilpu. “Ražošana” šeit nozīmē VPS vai vietējo serveri, kurā ir izvietots OmniRoute, nevis attālo mākoņpakalpojumu sniedzēju.
 
 ---
 
-**J: Kā atkļūdot pārraugu?**
+**J: Kā es varu atkļūdot uzraugu?**
 
-1. Sekojiet SSE žurnāla straumei: `curl -N http://localhost:20128/api/services/9router/logs`.
-2. Pārbaudiet strukturētos žurnālus OmniRoute pino izvadē, filtrējot pēc
-   `service:supervisor` nosaukumvietas.
+1. Aizveriet SSE baļķu straumi: `curl -N http://localhost:20128/api/services/9router/logs`.
+2. Pārbaudiet strukturētos žurnālus OmniRoute pino izvadē, kas filtrēta pēc `service:supervisor` nosaukumvietas.
 3. Pārbaudiet DB rindu: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
-4. Izmantojiet `GET /api/services/9router/status`, lai vienā izsaukumā skatītu pašreizējo aktīvo stāvokli, PID, darbspēju
-   un `lastError`.
+4. Izmantojiet `GET /api/services/9router/status`, lai vienā zvanā skatītu pašreizējo tiešraides stāvokli, PID, veselību un `lastError`.
 
 ---
 
-**J: Pārraugs rāda `health: "degraded"` vai `health: "unknown"`, bet stāvoklis ir `"running"`. Vai tā ir problēma?**
+**J: Uzraugs parāda `health: "degraded"` vai `health: "unknown"`, bet stāvoklis ir `"running"`. Vai tā ir problēma?**
 
-`"degraded"` nozīmē, ka darbspējas pārbaude atgrieza atbildi, kas nav 200. `"unknown"` nozīmē, ka vēl nav
-pabeigta neviena pārbaude (sacensības situācija ar pirmo aptauju). Abi stāvokļi palaišanas laikā ir pārejoši.
-Ja darbspēja saglabājas `"degraded"` ilgāk par `healthIntervalMs * 3` ms pēc
-`"running"`, iegultais pakalpojums darbojas, taču tā HTTP API neatbild. Statusa
-atbildē pārbaudiet, vai ports ir pareizs un vai pakalpojums šajā portā patiešām
-klausās.
+`"degraded"` nozīmē, ka veselības zonde ir atgriezusi non-200 atbildi. `"unknown"` nozīmē, ka zonde vēl nav pabeigta (sacīkstes ar pirmo aptauju). Abi ir pārejoši palaišanas laikā. Ja stāvoklis saglabājas `"degraded"` ilgāk par `healthIntervalMs * 3` ms pēc `"running"`, iegultais pakalpojums darbojas, bet tā HTTP API nereaģē. Pārbaudiet, vai statusa atbildē ports ir pareizs un vai pakalpojums patiešām klausās šo portu.
 
 ---
 
-**J: Vai varu mainīt 9Router API atslēgu bez pilnīgas restartēšanas?**
+**J: Vai es varu mainīt 9Router API taustiņu bez pilnīgas restartēšanas?**
 
-Nē. API atslēga procesa palaišanas laikā tiek nodota 9Router, izmantojot vides mainīgo.
-Vides mainīgos nevar mainīt procesā, kas jau darbojas. `POST .../rotate-key`
-automātiski aptur un restartē pakalpojumu, lai lietotu jauno atslēgu. Atslēgas rotācija
-stājas spēkā pakalpojuma `stopTimeoutMs` laikā (pēc noklusējuma 15 s), kam pieskaitīts tā palaišanas
-laiks.
+Nē. API atslēga tiek nodota 9Router, izmantojot vides mainīgo nārsta laikā. Vides mainīgos nevar mainīt darbības procesā. `POST .../rotate-key` automātiski aptur un restartē pakalpojumu, lai lietotu jauno atslēgu. Atslēgas rotācija stājas spēkā pakalpojuma `stopTimeoutMs` (noklusējums 15 s) un tā palaišanas laikā.
 
 ---
 
-**J: Kāds ir gredzenbufera ierobežojums, un kas notiek, kad tas tiek aizpildīts?**
+**J: Kāds ir gredzena bufera ierobežojums un kas notiek, kad tas piepildās?**
 
-Katram pakalpojumam ir atsevišķs 5 MB gredzenbuferis. Kad buferis ir pilns, vecākās
-žurnāla rindas tiek izmestas, lai atbrīvotu vietu jaunām. SSE `snapshot` notikums atgriež
-jaunākās rindas `tail` ierobežojuma ietvaros. Žurnāli netiek saglabāti diskā, ja vien
-DB rindā nav iestatīts `logsBufferPath`.
+Katram pakalpojumam ir īpašs 5 MB gredzena buferis. Kad buferis ir pilns, vecākās baļķu līnijas tiek izliktas, lai atbrīvotu vietu jaunām. Notikums SSE `snapshot` atgriež jaunākās rindas `tail` ierobežojuma ietvaros. Žurnāli netiek saglabāti diskā, ja vien rindā DB nav iestatīts `logsBufferPath`.
 
 ---
 

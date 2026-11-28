@@ -68,14 +68,14 @@ Codex (`<environment_context><cwd>`) e OpenCode (`x-opencode-session`) são reco
 
 O diretório de trabalho difere entre máquinas, pelo que o mesmo repositório pode aparecer em caminhos diferentes. Em vez disso, submeta o projeto explicitamente: o código Claude adiciona quaisquer cabeçalhos listados em `ANTHROPIC_CUSTOM_HEADERS` a cada pedido de modelo e OmniRoute lê dois deles:
 
-| Cabeçalho                  | Valor                                                                |
-| -------------------------- | -------------------------------------------------------------------- |
-| `x-omniroute-project`      | Nome do projeto, por exemplo, `omniroute`                            |
-| `x-omniroute-project-repo` | Remoto normalizado, por exemplo, `github.com/diegosouzapw/OmniRoute` |
+| Cabeçalho                  | Valor                                                                     |
+| -------------------------- | ------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Nome do projeto, por exemplo, `omniroute`                                 |
+| `x-omniroute-project-repo` | Remoto normalizado, por exemplo, `github.com/cheaper-inference/OmniRoute` |
 
 Ambos são lidos apenas para atribuição; nunca são encaminhados para o fornecedor upstream.
 
-`ANTHROPIC_CUSTOM_HEADERS` é lido uma vez no arranque e os ficheiros de definições armazenam valores literais, por isso calcule-os quando o código Claude for iniciado. Adicione isto ao `~/.zshrc` ou `~/.bashrc` e continue a iniciar `claude` na pasta do projeto:
+`ANTHROPIC_CUSTOM_HEADERS` é lido uma vez na inicialização e os arquivos de configurações armazenam valores literais, portanto, calcule-os quando o código Claude for iniciado. Adicione isto ao `~/.zshrc` ou `~/.bashrc` e continue a iniciar `claude` na pasta do projeto:
 
 ```bash
 claude() {
@@ -96,7 +96,7 @@ x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-A expressão `sed` remove quaisquer credenciais, string de consulta e fragmentos incorporados no URL remoto e os cabeçalhos já em `ANTHROPIC_CUSTOM_HEADERS` são mantidos. As extensões IDE iniciam o código Claude sem seu shell, portanto, suas sessões retornam ao diretório de trabalho.
+A expressão `sed` remove quaisquer credenciais, string de consulta e fragmentos incorporados no URL remoto e os cabeçalhos já em `ANTHROPIC_CUSTOM_HEADERS` são mantidos. As extensões IDE iniciam o código Claude sem o seu shell, pelo que as suas sessões regressam ao diretório de trabalho.
 
 ---
 
@@ -281,30 +281,22 @@ necessários parâmetros adicionais. Substitua estes valores em cada invocação
 
 ---
 
-## Resolução de problemas
+## Solução de problemas
 
-**O Claude Code ignora o gateway** — confirme que `ANTHROPIC_BASE_URL` **não
-contém `/v1`** e reinicie o `claude` (as variáveis de ambiente são lidas uma única vez durante o arranque). `omniroute launch`
-trata disto por si.
+**O código Claude ignora o gateway** — confirma `ANTHROPIC_BASE_URL` tem** não `/v1`** e reinicie `claude` (env é lido uma vez no arranque). `omniroute launch` trata disso para si.
 
-**O seletor `/model` está vazio / não apresenta os modelos do gateway** — requer o Claude Code
-v2.1.219+ e `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Apenas os IDs de modelos `claude*` /
-`anthropic*` aparecem no seletor; force qualquer outro modelo com
-`ANTHROPIC_MODEL=<id>` (é isto que os perfis fazem).
+**O seletor `/model` está vazio/faltam modelos de gateway** — necessita do código Claude v2.1.219 + e `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Apenas o modelo `claude*` / `anthropic*` IDs aparece no seletor; forçar qualquer outro modelo com `ANTHROPIC_MODEL=<id>` (é o que os perfis fazem).
 
-**`400 Ambiguous model 'claude-…'`** — o Claude Code envia sempre IDs de modelos **sem prefixo**
-(por exemplo, `claude-opus-4-8`), pelo que, quando os fornecedores Claude Code (`cc/…`) e
-Claude (`claude/…`) estão ambos ligados, o ID sem prefixo corresponde a duas rotas e
-o OmniRoute recusa-se a escolher. Corrija o problema de uma destas formas: fixe um ID com prefixo através de
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` ou ative **Preferir o Claude Code para
-modelos Claude sem prefixo** — a opção na página do fornecedor Claude, ou
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (desativada por predefinição;
-consulte [Ambiente](../reference/ENVIRONMENT.md)) — o que encaminha os IDs `claude-*`
-sem prefixo para o Claude Code. Os prefixos explícitos dos fornecedores têm sempre precedência.
+**`400 Ambiguous model 'claude-…'`** Código — Claude envia sempre** sem prefixo** modelo IDs (por exemplo, `claude-opus-4-8`), pelo que, quando os fornecedores Claude Code (`cc/…`) e Claude (`claude/…`) estão ligados, o id simples corresponde a duas rotas e OmniRoute recusa-se a adivinhar. Corrija de qualquer forma: fixe um id prefixado com `ANTHROPIC_MODEL=cc/claude-opus-4-8` ou ative** Prefira o código Claude para modelos Claude sem prefixo** — o botão de comutação na página do fornecedor Claude ou `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (padrão desativado; ver [Ambiente](../reference/ENVIRONMENT.md) ) — que encaminha `claude-*` IDs simples para o código Claude. Os prefixos explícitos do fornecedor ganham sempre.
 
-**Erros de autenticação** — o perfil não contém qualquer token. Utilize `omniroute launch --profile`
-(injeta o token) ou exporte `ANTHROPIC_AUTH_TOKEN`.
+**"modo automático… esta sessão não é elegível" (pedidos de classificador cobrados)** — no modo automático O código Claude pede ao servidor para rever as ações dentro dos seus próprios pedidos de modelo ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Isto precisa do valor `anthropic-beta` `dangerous-tool-use-2026-09-03` e do campo `safeguards` body para chegar Anthropic como um par, e `safeguard_results` mais a ferramenta upstream usa IDs para voltar inalterado. OmniRoute faz isto quando o pedido é encaminhado para o fornecedor `claude` nativo ou para um nó `anthropic-compatible-*`, transmitido ou não (guarda de regressão: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Outros alvos não podem devolver a revisão, pelo que o Código Claude recorre aos seus próprios pedidos de classificador e mostra o aviso:
 
-**Os perfis não ficam isolados** — cada perfil corresponde a um `CLAUDE_CONFIG_DIR` distinto;
-verifique se `echo $CLAUDE_CONFIG_DIR`, dentro da sessão, aponta para
-`~/.claude/profiles/<name>`.
+- um modelo num fornecedor não antrópico, ou um combo que chega a um;
+- um nó de retransmissão compatível com Claude-Code (`anthropic-compatible-cc-*`), que reconstrói o corpo do pedido e não transporta `safeguards`;
+- um OmniRoute mais antigo anterior aos betas permitidos ou uma versão do código Claude abaixo daquela que a página Anthropic lista para as sessões de gateway.
+
+Execute `/status` no código Claude : o** Servidor em modo automático** linha lê `Enabled` enquanto a revisão do servidor está ativa. Se estes pedidos serão cobrados é decidido por Anthropic, e não por OmniRoute.
+
+**Erros de autenticação** — o perfil não contém token. Utilize `omniroute launch --profile` (inject) ou exporte `ANTHROPIC_AUTH_TOKEN`.
+
+**Os perfis não isolam** — cada perfil é um `CLAUDE_CONFIG_DIR` distinto; verificar `echo $CLAUDE_CONFIG_DIR` dentro dos pontos de sessão em `~/.claude/profiles/<name>`.

@@ -6,24 +6,25 @@
 
 > Ntụaka zuru ezu maka ibunye Docker. Maka ibido ngwa ngwa, lee [ngalaba Docker dị na README](../README.md#-docker).
 
-## Ndepụta Ihe Dị N'ime
+## Tebulu ọdịnaya
 
-- [Ịgba Ọsọ Ngwa Ngwa](#quick-run)
-- [Iji Faịlụ Gburugburụ](#with-environment-file)
-- [Docker Compose](#docker-compose)
-- [Profaịlụ Ndị Dị](#available-profiles)
-- [Ịhazigharị ngwa CLI nke host mgbe OmniRoute na-arụ ọrụ n'ime Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Ọsọ ọsọ](#quick-run)
+- [Site na faịlụ gburugburu](#with-environment-file)
+- [Docker dere](#docker-compose)
+- [Profaịlụ dị](#available-profiles)
+- [Akpa ike siri ike](#container-hardening)
+- [Na-ahazi ngwa CLI onye ọbịa mgbe OmniRoute na-agba na Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
 - [Redis Sidecar](#redis-sidecar)
-- [Compose Maka Production](#production-compose)
-- [Nzọụkwụ Dockerfile](#dockerfile-stages)
-- [Promagbanwe Gburugburụ Ndị Dị Mkpa](#critical-environment-variables)
-- [Docker Compose na Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
-- [Mkpado Image](#image-tags)
-- [Mmelite Dashboard n'ime Docker](#dashboard-updates-in-docker)
-- [Nnweta: SQLite ndabara na-akwado naanị otu replica](#availability-default-sqlite-is-single-replica)
-- [Njehie mpaghara Gemini n'ime Docker](#gemini-regional-errors-inside-docker)
-- [Ihe Ndị Dị Mkpa Ịmara](#important-notes)
+- [Mepụta dee](#production-compose)
+- [Usoro Dockerfile](#dockerfile-stages)
+- [Mgbanwe gburugburu ebe obibi dị egwu](#critical-environment-variables)
+- [Docker jiri Caddy dee (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare ngwa ngwa](#cloudflare-quick-tunnel)
+- [Mkpado onyonyo](#image-tags)
+- [Mmelite dashboard na Docker](#dashboard-updates-in-docker)
+- [Nnweta: SQLite ndabara bụ otu oyiri](#availability-default-sqlite-is-single-replica)
+- [Gemini njehie mpaghara n'ime Docker](#gemini-regional-errors-inside-docker)
+- [Ihe ndetu dị mkpa](#important-notes)
 
 ---
 
@@ -89,6 +90,30 @@ OmniRoute na-abịa na profaịlụ Compose maka ụdị mbunye ndị bụ isi. 
 | `web`            | `omniroute-web`  | Ndị na-eweta ọrụ web-session chọrọ browser: `gemini-web`, `claude-web`, `claude-turnstile` (na-build `runner-web`, Chromium dị n'ime)     | `docker compose --profile web up -d`         |
 
 > Enwere ike ijikọta ọtụtụ profaịlụ: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Akpa ike siri ike
+
+Ọrụ `base`, `web`, `cli` na `host` dị na `docker-compose.yml` na-eji `cap_drop: [ALL]` yana nhọrọ nchekwa `no-new-privileges:true`. Onyonyo a na-agba ọsọ dị ka onye na-abụghị mgbọrọgwụ `node` ma na-ege ntị na ọdụ ụgbọ mmiri dị elu, yabụ na ọ dịghị mkpa ikike Linux. Nhọrọ nchekwa na-egbochi usoro iji nweta ihe ùgwù site na ọnụọgụ abụọ setuid.
+
+Naanị profaịlụ `cli` na-ebuli oghere Docker maka mmelite akpaaka. Hụ [Escape hatch: hazie CLIs nke akpa ahụ](#escape-hatch-configure-the-containers-own-clis-use-sparingly) maka ihe nchekwa.
+
+Sistemụ faịlụ mgbọrọgwụ na-edobe na ndabara. Profaịlụ `cli` na-ede nhazi CLI na caches n'ime ndekọ ụlọ nke akpa, profaịlụ `web` na-echekwa ọnọdụ nnọkọ Chromium, na oge Next.js nwere ike ide cache na mpụga `/app/data`.
+
+Iji nwalee sistemụ faịlụ mgbọrọgwụ naanị na profaịlụ `base`, chekwaa nke a dị ka `docker-compose.override.yml` n'akụkụ `docker-compose.yml`. Ederede na-agụ nkwụsị ahụ na-akpaghị aka.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Ugwu `/app/data` dị adị na-anọ na-ederede. Nwalee ibu ọrụ gị tupu i jiri nfefe a na mmepụta, ebe ọ nwere ike ịdị mkpa ka edegara ya ụzọ ndị ọzọ.
 
 ## Ịhazigharị ngwa CLI nke kọmputa nnabata mgbe OmniRoute na-arụ ọrụ n'ime Docker
 
@@ -272,7 +297,7 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-agbanyere `webpackBuildWorker`, yabụ `next build` na-agba nne na nna** na** usoro onye ọrụ na onye ọ bụla na-asọpụrụ `OMNIROUTE_BUILD_MEMORY_MB` iche iche. Mee elu ụlọ nke akpa ahụ n'elu ihe ruru okpukpu abụọ karịa uru ahụ, ọ bụghị otu ugboro.
+agbanyere `webpackBuildWorker`, yabụ `next build` na-agba nne na nna** na** usoro onye ọrụ na onye ọ bụla na-asọpụrụ `OMNIROUTE_BUILD_MEMORY_MB` iche iche. Ha nha n'uko ụlọ n'elu ihe ruru okpukpu abụọ karịa uru ahụ, ọ bụghị otu ugboro.
 
 A tụrụ n'elu osisi a (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
@@ -295,16 +320,16 @@ Omume ebe nchekwa na Docker:
 
 ### Oge ojiri gaa RAM maka ndị nnọchite koodu
 
-Ihe ndabara 1 GiB Docker bụ ala dashboard/light-chat, ọ bụghị nha mmepụta. Ogologo `POST /v1/responses` (ọtụtụ narị ozi, iri ngwaọrụ) na-ejigide ọtụtụ eserese ebe nchekwa n'oge mkpakọ. Arịrịọ abụọ jikọtara ~ 3 MiB / ~ 750k akwụsịla V8 na a.** 12 GiB** Oghere ochie (`FATAL ERROR: Reached heap limit`) ma kụọkwa otu 16 GiB cgroup OOM. Lee [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Ihe ndabara 1 GiB Docker bụ ala dashboard/light-chat, ọ bụghị nha mmepụta. Ogologo `POST /v1/responses` (ọtụtụ narị ozi, iri ngwaọrụ) na-ejigide ọtụtụ eserese ebe nchekwa n'oge mkpakọ. Arịrịọ abụọ jikọtara ~ 3 MiB / ~ 750k akwụsịla V8 na a.** 12 GiB** Oghere ochie (`FATAL ERROR: Reached heap limit`) ma kụọkwa otu 16 GiB cgroup OOM. Lee [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Nha** otu `--memory` n'elu ikpo** — nwa afọ buffers, SQLite, na mkpakọ etiti na-anọdụ na mpụga V8.
 
-| Ibu ọrụ                                | `OMNIROUTE_MEMORY_MB`    | Akpa / otu          | Ihe ndetu                                                                                               |
-| -------------------------------------- | ------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------- |
-| Dashboard, otu nkata ọkụ               | `1024` (ndabara onyonyo) | ≥2 GiB              |                                                                                                         |
-| Otu onye ọrụ koodu (Claude/Codex/Grok) | `8192`                   | ≥10 GiB             | Otu oge `/v1/responses`                                                                                 |
-| `/v1/responses` abụọ na-ejikọta ọnụ    | `10240`–`12288`          | ≥12–16 GiB          | Atụtara V8 ime na ~ 12 GiB ikpo                                                                         |
-| Atọ + n'otu oge ogologo okirikiri      | emela n'otu usoro        | serialize / ọzọ RAM | Nbanye dị arọ nke ezighi ezi bụ 1 n'ime ụgbọ elu; na-ebuli ya na-enweghị RAM na-eweghachite ime ime ahụ |
+| Ibu ọrụ                                | `OMNIROUTE_MEMORY_MB`    | Akpa / otu          | Ihe ndetu                                                                                           |
+| -------------------------------------- | ------------------------ | ------------------- | --------------------------------------------------------------------------------------------------- |
+| Dashboard, otu nkata ọkụ               | `1024` (ndabara onyonyo) | ≥2 GiB              |                                                                                                     |
+| Otu onye ọrụ koodu (Claude/Codex/Grok) | `8192`                   | ≥10 GiB             | Otu oge `/v1/responses`                                                                             |
+| `/v1/responses` abụọ na-ejikọta ọnụ    | `10240`–`12288`          | ≥12–16 GiB          | Atụtara V8 ime na ~ 12 GiB ikpo                                                                     |
+| Atọ + n'otu oge ogologo okirikiri      | emela n'otu usoro        | serialize / ọzọ RAM | Nbanye dị arọ nke ezighi ezi bụ 1 n'ime ụgbọ elu; na-ebuli ya na-enweghị RAM na-eweghachite ime ime |
 
 `omniroute serve` on iferi metal calibrates ~ 35% nke RAM (clamped `[512, 4096]`) mgbe `OMNIROUTE_MEMORY_MB` bụ** ịtọhapụ** . Docker na-edobe `1024` mgbe niile, nke mere na nhazigharị agaghị aga na onyonyo gọọmentị.
 
@@ -384,7 +409,7 @@ Maka ndị egwu egwu (Kubernetes, Nomad, wdg):
 
 ## Docker Jiri Caddy dee (HTTPS Auto-TLS)
 
-Enwere ike kpughee OmniRoute nke ọma site na iji ntinye SSL akpaaka nke Caddy. Gbaa mbọ hụ DNS ngalaba gị Ndekọ na-atụ aka na IP nkesa gị.
+Enwere ike kpughee OmniRoute na nzuzo site na iji ntinye SSL akpaaka nke Caddy. Gbaa mbọ hụ DNS ngalaba gị Ndekọ na-atụ aka na IP nkesa gị.
 
 ```yaml
 services:
@@ -415,7 +440,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy na-esetịpụrụ nkụnye eji isi mee ihe ọkọlọtọ maka akpa elu. OmniRoute na-eji `NEXT_PUBLIC_BASE_URL` dị ka mmalite ọha na eze maka OAuth oku azụ na njikọ ọha ewepụtara; dashboard ezitere na-ede na-eji arịrịọ mmalite gbakwunyere nchekwa CSRF nwere oge. Naanị mee `OMNIROUTE_TRUST_PROXY` maka mbugharị elu ebe ị na-ama ụma chọọ ka OmniRoute nweta mmalite ọha site na nkụnye eji isi mee ndị tụkwasịrị obi kama nhazi nke ọma.
+Caddy na-esetịpụrụ nkụnye eji isi mee ihe ọkọlọtọ maka akpa elu. OmniRoute na-eji `NEXT_PUBLIC_BASE_URL` dịka mmalite ọha na eze maka OAuth oku azụ na njikọ ọha ewepụtara; dashboard ezitere na-ede na-eji arịrịọ mmalite gbakwunyere nchekwa CSRF nwere oge. Naanị mee `OMNIROUTE_TRUST_PROXY` maka mbugharị elu ebe ị na-ama ụma chọọ ka OmniRoute nweta mmalite ọha site na nkụnye eji isi mee ndị tụkwasịrị obi kama nhazi nke ọma.
 
 ## Ọwara Ngwa Ngwa Cloudflare
 
@@ -591,11 +616,11 @@ Service ahụ na-ewepụ arịrịọ ahụ tupu ọ dọrọ image ka mmeghar�
 
 Stock Docker / Kubernetes OmniRoute bụ** otu Node usoro + otu SQLite odee** . Nnukwu nnweta bụ** akwadoghị** na topology.
 
-| Mmachi                                     | Ihe si na ya pụta                                                                                                                                                                                                                                                                                          |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Otu onye edemede                           | Mee** ọ bụghị** mee ọtụtụ oyiri megide otu faịlụ SQLite. Nke ahụ na-emebi DB.                                                                                                                                                                                                                              |
-| Megharịa / malitegharịa / HEALTHCHECK igbu | **Ọpụpụ zuru oke** nke SSE ụgbọ elu, nnọkọ dashboard, na steeti ebe nchekwa. Onye ahịa ọ bụla ejikọrọ na-ada. Arịrịọ ọhụrụ n'oge mpio ihe efu na-enweta proxy reverse**`502 Bad Gateway: Unknown error`** , ọ bụghị OmniRoute JSON — ndị ahịa enweghị ike ịmata nke a na ọdịda onye na-eweta ọrụ (#11015). |
-| Otu ihe omume dị ka `/healthz`             | Katalọgụ na-arụsi ọrụ ike ma ọ bụ akara mkpakọ nwere ike igbu oge nyocha; obere oge wee malitegharịa** naanị** oyiri.                                                                                                                                                                                      |
+| Mmachi                                     | Ihe si na ya pụta                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Otu onye edemede                           | Mee** ọ bụghị** mee ọtụtụ oyiri megide otu faịlụ SQLite. Nke ahụ na-emebi DB.                                                                                                                                                                                                                          |
+| Megharịa / malitegharịa / HEALTHCHECK igbu | **Ọpụpụ zuru oke** nke SSE ụgbọ elu, nnọkọ dashboard, na steeti ebe nchekwa. Onye ahịa ọ bụla ejikọrọ na-ada. Arịrịọ ọhụrụ n'oge mpio ihe efu na-enweta proxy reverse**`502 Bad Gateway: Unknown error`** , ọ bụghị OmniRoute JSON — ndị ahịa enweghị ike ịmata nke a na ọdịda onye na-eweta (#11015). |
+| Otu ihe omume dị ka `/healthz`             | Katalọgụ na-arụsi ọrụ ike ma ọ bụ akara mkpakọ nwere ike igbu oge nyocha; obere oge wee malitegharịa** naanị** oyiri.                                                                                                                                                                                  |
 
 **Nyocha matrix** (leekwa [ndụmọdụ Kubernetes nyocha](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -605,9 +630,9 @@ Stock Docker / Kubernetes OmniRoute bụ** otu Node usoro + otu SQLite odee** . 
 | Njikere      | HTTP `GET /healthz`                                              | Oge nkwụsịtụ siri ike na-ewere mmemme-loop na-arụ ọrụ ka onye nwụrụ anwụ |
 | Deep / mmadụ | `/api/monitoring/health`                                         | Kubelet ndụ akpaaka                                                      |
 
-**Nkwalite:** na-atụ anya ka nnọkọ ọ bụla daa. Wepu ndị ahịa ma ọ bụrụ na ị nwere ike; enweghị mmelite mkpọgharị na ndabara SQLite. Mepụta `restart: unless-stopped` gbakwunyere Docker `HEALTHCHECK` ga-anọchikwa naanị usoro mgbe akpa adịghị mma - otu mgbawa radius.
+**Nkwalite:** na-atụ anya ka nnọkọ ọ bụla daa. Wepu ndị ahịa ma ọ bụrụ na ị nwere ike; enweghị mmelite mkpọgharị na ndabara SQLite. Mepụta `restart: unless-stopped` gbakwunyere Docker `HEALTHCHECK` ga-anọchikwa naanị usoro mgbe akpa ahụ na-adịghị mma — otu mgbawa radius.
 
-Ngosipụta emebere emebere yana eserese Helm na-ebi na `deploy/kubernetes/` na `deploy/helm/omniroute/` - lee [ntuziaka ntinye nke Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+Ngosipụta emebere emebere yana eserese Helm na-ebi na `deploy/kubernetes/` na `deploy/helm/omniroute/` — hụ [ntuziaka ntinye nke Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
 Kubernetes snippet maka a** otu oyiri** (Achọrọ imegharia; ebulila `replicas` megide otu faịlụ SQLite ):
 
@@ -636,9 +661,9 @@ spec:
             periodSeconds: 20
 ```
 
-ụra `preStop` na-ahapụ kube dobe njedebe ọrụ tupu SIGTERM so** ọhụrụ** okporo ụzọ na-akwụsị ịkụ usoro ịnwụ anwụ. A na-ekpochapụ `/v1/responses` SSE n'ime ụgbọ elu ruo `SHUTDOWN_TIMEOUT_MS` (30s ndabara) site na mgbazinye nnabata arọ (#11015). Arịrịọ ọhụrụ ka ruru usoro a ga-enweta `503` + `Retry-After: 5`. Megharia oghere ngwụcha ngwụcha ruo mgbe nnọchi ya dị njikere na-anọgide na-apụ apụ - ya bụ SQLite topology, ọ bụghị nyocha misconfig.
+ụra `preStop` na-ahapụ kube dobe njedebe ọrụ tupu SIGTERM so** ọhụrụ** okporo ụzọ na-akwụsị ịkụ usoro ịnwụ anwụ. N'ime ụgbọ elu `/v1/responses` SSE na-agbapụta ruo `SHUTDOWN_TIMEOUT_MS` (30s ndabara) site na mgbazinye nnabata arọ (#11015). Arịrịọ ọhụrụ ka ruru usoro a ga-enweta `503` + `Retry-After: 5`. Megharịa oghere ngwụcha ngwụcha ruo mgbe nnọchi dị njikere na-anọgide na-apụ apụ — nke bụ SQLite topology, ọ bụghị nyocha misconfig.
 
-Mpụga Postgres / ọtụtụ odee HA bụ** ọ bụghị** ụzọ ngwaahịa edepụtara. Ọ bụrụ na ịchọrọ HA, debe otu oyiri ma ọ bụ mee topology ihe oru ngo nwalere wee detuo ya iche. Ọrụ Postgres/MySQL bi na [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Ruo mgbe ụgbọ mmiri ahụ, naanị ụzọ akwadoro iji mụbaa** nnukwu** ikike `/v1/responses` bụ N usoro nnwere onwe (ngalaba na-esote), ọ bụghị `replicas > 1` n'otu olu.
+Mpụga Postgres / ọtụtụ odee HA bụ** ọ bụghị** ụzọ ngwaahịa edepụtara. Ọ bụrụ na ịchọrọ HA, debe otu oyiri ma ọ bụ mee topology ihe oru ngo nwalere wee detuo ya iche. Ọrụ Postgres/MySQL bi na [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Ruo mgbe ụgbọ mmiri ahụ, naanị ụzọ akwadoro iji mụbaa** nnukwu** ikike `/v1/responses` bụ N usoro nnwere onwe (ngalaba na-esote), ọ bụghị `replicas > 1` n'otu olu.
 
 ## Ọnụ ọgụgụ: N usoro nke onwe
 
@@ -646,27 +671,27 @@ Mpụga Postgres / ọtụtụ odee HA bụ** ọ bụghị** ụzọ ngwaahịa
 
 Mpempe akwụkwọ nke otu akaụntụ Codex agaghị eripịa ihe ngosi ume ọhụrụ na-eji otu ya. N'oge na-eri naanị nzere emekọrịtara ọnụ, tọọ `OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex` (utu aha `cx`). Hapụ ya na ịtọghị ya na otu onye nwe ntụgharị. Usoro ọ bụla ka chọrọ `DATA_DIR` nke ya; nhọrọ a anaghị ekekọrịta SQLite ma ọ bụ na-eweta mmekọrịta token ma ọ bụ mkpọchi ekesara.
 
-Ihe atụ na-agafe agafe na-agụghachi njikọ ahụ mgbe ọ dị mkpa ume ọhụrụ wee nabata naanị ihe dị iche, akara ohere agwụbeghị. Ma ọ bụghị ya, a ga-enwe nkwarụ na-emepeghị ma ọ bụ gbanyụọ njikọ ahụ ma ọ bụ na-agụta ọdịda na-emebi ume ọhụrụ. Ezi upstream nyocha ọdịda ka na-eji nkịtị ndekọ ọdịda, exponential cooldown na nkịtị ahịa njehie; nkwụsị akaụntụ na-adịgide adịgide. Mekọrịta akara ntugharị nke onye nwe tupu ohere akara agwụ (nduzi ume ọhụrụ na-arụ ọrụ bụ nkeji ise), ma ọ bụ bubata faịlụ Codex auth ọzọ. Mbubata na-agafe agafe na-echekwa akara ngosi enyere na-akwadoghị ha na njedebe akara. Akwụkwọ ntuziaka dashboard/API ume eweghachi `409 refresh_disabled`; nbanye OAuth ọhụrụ agbanwebeghị. Hụ [ntụnye aka gburugburu](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
+Ihe atụ na-agafe agafe na-agụghachi njikọ ahụ mgbe ọ dị mkpa ume ọhụrụ wee nabata naanị ihe dị iche, akara ohere agwụbeghị. Ma ọ bụghị ya, a ga-enwe nkwarụ na-eku ume ma ọ bụ mebie njikọ ahụ ma ọ bụ na-agụta ọdịda na-emebi ume ọhụrụ. Ezi upstream nyocha ọdịda ka na-eji nkịtị ndekọ ọdịda, exponential cooldown na nkịtị ahịa njehie; nkwụsị akaụntụ na-adịgide adịgide. Mekọrịta akara ntugharị nke onye nwe tupu ohere akara agwụ (nduzi ume ọhụrụ na-arụ ọrụ bụ nkeji ise), ma ọ bụ bubata faịlụ Codex auth ọzọ. Mbubata na-agafe agafe na-echekwa akara ngosi enyere na-akwadoghị ha na njedebe akara. Akwụkwọ ntuziaka dashboard/API ume eweghachi `409 refresh_disabled`; nbanye OAuth ọhụrụ agbanwebeghị. Hụ [ntụnye aka gburugburu](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-One Node process is **one V8 heap**. Two overlapping ~3 MiB / ~750k-token coding-agent `POST /v1/responses` (RTK + Caveman) abort that heap at ~12 Gi (`FATAL ERROR: Reached heap limit`) and can OOM a 16 Gi cgroup. See [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). That measurement is a **memory-budget** warning, not a product hard-max of two concurrent long `/v1/responses`. Heavyweight chat admission is gated by an auto-derived ingest byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) sized from that same V8/cgroup ceiling — overriding it upward (or setting the legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) on an already-sized process reintroduces the abort. Small chats, `/healthz`, `/v1/models`, and MCP are **not** in that cap.
+One Node process is **one V8 heap**. Two overlapping ~3 MiB / ~750k-token coding-agent `POST /v1/responses` (RTK + Caveman) abort that heap at ~12 Gi (`FATAL ERROR: Reached heap limit`) and can OOM a 16 Gi cgroup. See [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). That measurement is a **memory-budget** warning, not a product hard-max of two concurrent long `/v1/responses`. Heavyweight chat admission is gated by an auto-derived ingest byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) sized from that same V8/cgroup ceiling — overriding it upward (or setting the legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) on an already-sized process reintroduces the abort. Small chats, `/healthz`, `/v1/models`, and MCP are **not** in that cap.
 
 ### Otu usoro: ihe karịrị `/v1/responses` ogologo abụọ
 
-A** ahụike** usoro (kpobo n'okpuru `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, ndabara `0.75`)** nwere ike** na-agba ọsọ karịa `POST /v1/responses` abụọ na-emekọ ihe ọnụ mgbe usoro mmefu ego inflight-byte (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) ka nwere ohere. Ahụ na ma ọ bụ karịa `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (ndabara 256 KiB) na-ewere otu mgbazinye arọ dị arọ dị ka arịrịọ nhazi-dị arọ ma jiri otu [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` mgbapụ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Ọtụtụ iri ndị ahịa SSE ogologo oge (ndị ọrụ na-achọkarị 40-50) bụ a** ebe nchekwa-mmefu ego** ajụjụ — nha obo + primary/headroom oghere + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — abụghị oke ngwaahịa “max 2” siri ike. Obo nrụgide ka na-awụfu na `503` enwere ike ịnwale ya #7849 agaghị alaghachi.
+A** ahụike** usoro (kpobo n'okpuru `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, ndabara `0.75`)** nwere ike** na-agba ọsọ karịa `POST /v1/responses` abụọ na-emekọ ihe ọnụ mgbe usoro mmefu ego inflight-byte (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) ka nwere ohere. Ahụ dị na ma ọ bụ karịa `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (ndabara 256 KiB) na-ewere otu mgbazinye arọ dị arọ dị ka arịrịọ nhazi-dị arọ ma jiri otu mgbapụ [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Ọtụtụ iri ndị ahịa SSE ogologo oge (ndị ọrụ na-achọkarị 40-50) bụ a** ebe nchekwa-mmefu ego** ajụjụ — nha obo + primary/headroom oghere + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — abụghị oke ngwaahịa “max 2” siri ike. Obo nwere nrụgide ka na-awụfu na `503` enwere ike ịnwale ka #7849 ghara ịlaghachi.
 
 Iji** mụbaa ikpo** (oghere ochie V8 nọọrọ onwe ya)** taa** :
 
-| Mee                                                                                                                                              | Emela                                                |
-| ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
-| Gbaa ọsọ** N containers/pods** , nke ọ bụla nwere ya** nke onwe** `DATA_DIR` / olu                                                               | Tọọ `replicas > 1` megide otu faịlụ SQLite           |
-| Nha dị arọ n'ime ụgbọ elu + ahụike-isi ụlọ si na mmefu ego nke ikpo ọkụ / inflight-byte; 1-2 bụ mgbanwe #7849 ndabara, ọ bụghị ngwaahịa siri ike | Nye otu usoro 8 × RAM na okpu ọnụ na-enweghị oke     |
-| Nhọrọ: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` maka** òkè ọnụ ọgụgụ**                                                               | Na-emeso Redis ka òkè SQLite — ọ bụghị               |
-| Mepụta ihe nzuzo ndị na-eweta ihe n'ime ihe atụ ọ bụla (ma ọ bụ nabata dashboard nke kewara)                                                     | Na-atụ anya otu dashboard / otu ndekọ oku n'ofe oge  |
-| N'ihu na ihe nkwụnye ibu ọ bụla; nnyapade site API igodo ma ọ bụ nnọkọ zuru ezu                                                                  | Chọrọ onye na-ere ahịa akọwapụtara nke ọma nke etiti |
+| Mee                                                                                                                                                             | Emela                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Gbaa ọsọ** N containers/pods** , nke ọ bụla nwere ya** nke onwe** `DATA_DIR` / olu                                                                              | Tọọ `replicas > 1` megide otu faịlụ SQLite           |
+| Nha dị arọ n'ime ụgbọ elu + ahụike-isi ụlọ si na mmefu ego nke ikpo ọkụ / inflight-byte; 1–2 bụ ndabara #7849 nke na-achọghị nchekwa, ọ bụghị ngwaahịa siri ike | Nye otu usoro 8 × RAM na okpu ọnụ na-enweghị oke     |
+| Nhọrọ: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` maka** òkè ọnụ ọgụgụ**                                                                              | Na-emeso Redis ka òkè SQLite — ọ bụghị               |
+| Mepụta ihe nzuzo ndị na-eweta ihe n'ime ihe atụ ọ bụla (ma ọ bụ nabata dashboard nke kewara)                                                                    | Na-atụ anya otu dashboard / otu ndekọ oku n'ofe oge  |
+| N'ihu na ihe nkwụnye ibu ọ bụla; nnyapade site API igodo ma ọ bụ nnọkọ zuru ezu                                                                                 | Chọrọ onye na-ere ahịa akọwapụtara nke ọma nke etiti |
 
 Enwere ike ịkekọrịta mmekọrịta na akaụntụ site na Redis: tọọ `OMNIROUTE_SESSION_AFFINITY_STORE=redis` na `REDIS_URL` na usoro ọ bụla, yana otu `REDIS_KEY_PREFIX` na ntọala `sessionAffinityTtlMs` dị mma. Pins na-edozi njirimara akaụntụ ojiji hashed na njikọ mpaghara nke usoro ọ bụla tozuru oke, yabụ akaụntụ OAuth nwere metadata njirimara dabara enweghị mkpa inwe njikọ IDs. Ihe njirimara akaụntụ ama ama na-ebute ụzọ karịa IDs mpaghara na-emegiderịta onwe ya na mkpebi pin na nchụpụ echedoro; ndekọ na-enweghị njirimara (ma ọ bụ ndị na-akpọ nchụpụ na-enweghị njirimara) na-ejigide ihe nchekwa ID. Akaụntụ na-enweghị njirimara ojiji kwụsiri ike ka chọrọ IDs dakọtara. mperi Redis ma ọ bụ oku gafere 100 ms daa azụ na SQLite mpaghara. Storelọ ahịa mmekọ Redis ọ bụla na-arụ ọrụ pụtara ìhè na 8, na-agafe Redis ozugbo ọ juputara, ma wepụta oghere naanị mgbe ọrụ dị n'okpuru ga-edozi, ọ bụghị n'oge ngwụcha nke onye ọkpụkpọ. N'oge mwepu Redis enweghị eziokwu na-ekerịta: ihe atụ ọ bụla na-adaghachi na mmekọ obodo nke ya, nnọkọ nwere ike ịtụgharị otu ugboro n'otu ihe atụ, na oge nwere ike ịdịgasị iche. Nrapara na-agbakọta ọzọ site na Redis mgbe ọ gbakere. Oge nkwụsịtụ na-echere, ọ bụghị EVAL ezitere, nke nwere ike ịdata ma ọ daa azụ. Routing na-ede na-atụnyere kpọmkwem uru a hụrụ site na ntugharị mkpebi, ọ bụghị a ọhụrụ mutation-oge ọgụgụ; ihe nlebanya anya ma ọ bụ SQLite nleba anya na-atụnyere dị ka igodo Redis adịghị. A na-edochi ntụtụ ochie n'otu CAS, yabụ iwu mbubreyo enweghị ike dochie ma ọ bụ hichapụ pin ọhụrụ dị iche. Redis na-agụ atomically weghachi uru na nke fọdụrụ TTL; ziri ezi PTTL (ma ọ bụ enweghị expiry) na-ekpebi ịdị ndụ, ọ bụghị akara JSON nke onye edemede ma ọ bụ elekere onye na-agụ ya. Ihe onyonyo onyonyo mpaghara nke fọdụrụ TTL ruo oge ngwụcha mpaghara; igodo JSON dị adị na-anọgide na-agụ ma na-edobe bytes raw ha maka CAS. Redis bụ naanị isi iyi nke eziokwu ka ọ na-aza. Nkwukọrịta nkekọrịta akwadoro, metụ na ihichapụ na-ewepụ ntinye mpaghara, wụnyela ma ọ bụ megharịa ya. SQLite n'ụzọ Redis na-ejide naanị mkpebi ndaghachi azụ nke ihe atụ a site na njehie Redis, nkwụsị oge ma ọ bụ nnabata nnabata, nwere TTL dị ka ọ dị na mbụ. Ntụtụ mpaghara na-efu efu n'oge mgbụsị akwụkwọ na-efu otu nhọrọ ọhụrụ (otu oghere cache ozugbo), ọ bụghị akaụntụ na-ezighi ezi ma ọ bụ chụpụrụ. Mkpesa ndị a jụrụ ajụ na-eweghachi onye mmeri nkekọrịtara na TTL nke fọdụrụ n'ụzọ atọ: nhọrọ nkịtị na-enyocha oge imecha mpaghara ma na-eji onye mmeri tozuru oke na-adị ndụ, na-emetụ aka na ịbanye maka akaụntụ ahụ na-enweghị ederede ọzọ. Ọ bụrụ na ọ dịghị, nhọrọ na-edobe onye ndoro-ndoro ochichi obodo, hapụ pin pin na-agbanweghị ma wepụta otu ozi nbipu. CAS jụrụ ajụ anaghị ede SQLite; njehie Redis, nkwụsị oge ma ọ bụ nnabata nnabata na-etinye ọrụ mpaghara dị ugbu a kama. Ọ bụrụ na nzaghachi ngbanwe ezitere abịarute ka oge gwụchara (anabatara, jụrụ ma ọ bụ njehie), ntụnyere na-ehichapụ ọnụ na-emekọrịtara ọnụ na-ewepụ naanị byte yiri ahịrị ọdịda oge. Enweghị nchere n'etiti ntụnyere na ihichapụ ahụ; A na-echekwa ederede mpụ ọhụrụ. Nchụpụ echedoro na-ewepụ pin mpaghara akaụntụ nke dara ada ọbụlagodi na Redis gbadaa, wee sachaa ya ọzọ ka ekwenyechara nchụpụ nkekọrịta. Azịza ekekọrịtara na-echere na mbụ enweghị ike iweghachi ntụtụ mpaghara a chụpụrụ n'ihi na ihe ịga nke ọma nkekọrịtara anaghị ede SQLite. Nkwụghachi azụ n'ikpeazụ nwere ike iweghachi akaụntụ; Edemekọrịta nkekọrịta nabata emechara dị naanị na Redis. Redis efu anaghị agụta steeti ọdịda ọdịda mpaghara. Mgbe onye ọkwọ ụgbọ ala gbanyụrụ, ntụtụ ahọpụtara ọhụrụ na-ejigide udi nke ubi SQLite JSON anọ; naanị Redis routing na-agbakwunye njirimara akaụntụ hashed. A na-enyocha ntụtụ ebutegoro na oke njedebe ha. Nhọrọ nke anaghị agbazinye ego Redis na-agụgharị ụlọ ahịa ahụ, mana atụmatụ ịgbazinye ego na-emekọrịta ihe ka nwere ike iji ntụtụ chụpụrụ n'etiti prefetch na atụmatụ (mpio mbọ kacha mma anabatara). Nkwekọrịta mgbazinye enweghị ike ịgbanwee akaụntụ ma ọ gafechara: na nkwupụta a jụrụ ajụ, ọ na-edobe onye a na-arịọ arịrịọ maka arịrịọ ahụ naanị wee hapụ onye meriri na-emeri ihe, yabụ nkwekọrịta n'ofe ikpe ga-adabere n'ụzọ ahụ. Tebụl ndị ọzọ ka na-emetụta: nke a anaghị ekere òkè nnọkọ nnọkọ, ntudo Codex nwa afọ, semaphores akaụntụ, mkpọchi mkpọchi, oke oke, nhazi ma ọ bụ ndekọ oku.
 
-Akụrụngwa: kwa oge n'otu oge ogologo `/v1/responses` bụ a** ebe nchekwa-mmefu ego** ajụjụ (kpokoro + inflight-byte / #10110). `N` nnwere onwe `DATA_DIR` s ka na-amụba obo: onye ọbịa RAM ga-ekpuchi `N × cgroup`, ọ bụghị "otu 16 Gi pod na N = 8." Ọ dịghị mgbe `replicas > 1` na otu faịlụ SQLite.
+Akụrụngwa: kwa oge n'otu oge ogologo `/v1/responses` bụ a** ebe nchekwa-mmefu ego** ajụjụ (kpokoro + inflight-byte / #10110). `N` nnwere onwe `DATA_DIR` s ka na-amụba obo: RAM onye ọbịa ga-ekpuchi `N × cgroup`, ọ bụghị "otu 16 Gi pod na N = 8." Ọ dịghị mgbe `replicas > 1` na otu faịlụ SQLite.
 
 Dee sketch (obo abụọ, mpịakọta abụọ — abụghị `deploy.replicas: 2`):
 
@@ -695,55 +720,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Njupụta n'ime usoro (mkpakọ kwụsịrị HTTP iche) bụ [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Otu ụyọkọ ezi uche dị na steeti na-adịgide adịgide bụ [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Njupụta n'ime usoro (mkpakọ pụọ iche HTTP ) bụ [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Otu ụyọkọ ezi uche dị na steeti na-adịgide adịgide bụ [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Njehie mpaghara Gemini n'ime Docker
+## Gemini njehie mpaghara n'ime Docker
 
-Google AI Studio / Gemini API nwere ike iweghachi HTTP 400 nwere FAILED_PRECONDITION na
-`User location is not supported for the API use.` Arịrịọ gara nke ọma na host
-anaghị egosi na container na-eji otu ụzọ ọpụpụ ahụ. Nhazi usoro DNS,
-njikọ IPv4/IPv6, ụzọ VPN na proxy ahaziri nwere ike ịdị iche. Lelee
-[mpaghara Google na-akwado](https://ai.google.dev/gemini-api/docs/available-regions)
-yana ụzọ njikọ a na-eji n'ezie; naanị njehie a anaghị egosi na API key adịghị mma.
+Google AI Studio / Gemini API nwere ike weghachite HTTP 400 na FAILED_PRECONDITION na `User location is not supported for the API use.` Arịrịọ na-aga nke ọma na onye ọbịa anaghị egosi na akpa ahụ na-eji otu ụzọ ọpụpụ. ịtụ DNS, njikọ IPv4/IPv6, ụzọ VPN na proxies ahaziri nwere ike ịdị iche. Lelee [mpaghara Google na-akwado](https://ai.google.dev/gemini-api/docs/available-regions) yana ụzọ njikọ n'ezie; naanị njehie a anaghị achọpụta igodo API ọjọọ.
 
-### Họrọ proxy akọwapụtara maka otu njikọ
+### Họta proxy akọwapụtara njikọ
 
-Jiri [nhazi proxy maka njikọ ọ bụla](../ops/PROXY_GUIDE.md#4-level-proxy-system) nke OmniRoute
-maka njikọ Gemini emetụtara, wee megharịa **Nwalee Njikọ** na obere arịrịọ
-jiri otu model ahụ. Nke a na-eme ka mgbanwe ụzọ ahụ metụta naanị njikọ ahụ. Nyochaa
-na container nwere ike iru proxy ahụ, nakwa na njikọ ahụ na-ahọrọ
-ya n'ezie. Ịgbanwe ụzọ anaghị ekwe nkwa na mpaghara ahụ ga-eru eru n'akụkụ upstream.
+Jiri [nhazi proxy nke njikọ](../ops/PROXY_GUIDE.md#4-level-proxy-system) OmniRoute maka njikọ Gemini emetụtara, wee kwugharịa** Nwalee Njikọ** na obere arịrịọ nwere otu ihe nlereanya. Nke a na-eme ka mgbanwe ntụgharị ụzọ gafere na njikọ ahụ. Chọpụta na enwere ike ịnweta proxy site na akpa ahụ, yana njikọ ahụ na-ahọrọ ya n'ezie. Ịgbanwe ụzọ anaghị ekwe nkwa ntozu mpaghara elu.
 
-### Tụnyere netwọkụ host na container
+### Tulee ndị ọbịa na ịkparịta ụka n'akpa
 
-Debe key, model na arịrịọ ka ha bụrụ otu mgbe ị na-atụnyere nsonaazụ e nyere nkwenye njirimara; etinyela
-ozi nzuzo, okwuntughe proxy ma ọ bụ authorization headers zuru ezu n'ime issue.
-Buru ụzọ lelee address families nke OS resolver na-enye, site n'iji otu command ahụ
-na host nakwa n'ime container:
+Debe igodo, ihe nlere anya na arịrịọ otu mgbe ị na-atụnyere nsonaazụ egosipụtara; etinyekwala nzere, okwuntughe proxy ma ọ bụ isi okwu ikike zuru oke n'ime nsogbu. Buru ụzọ nyochaa ezinaụlọ ndị OS resolver na-enye, na-eji otu iwu ahụ na onye ọbịa na n'ime akpa:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Dochie `omniroute` na service ị na-agba (dịka ọmụmaatụ, `omniroute-web`). Command ndị a
-na-ebipụta address families na-enweghị ozi nzuzo ma ọ bụ IP addresses. `6` eweghachiri
-na-egosi naanị nsonaazụ IPv6 DNS: ọ **naghị** egosi na e nwere ụzọ IPv6 a pụrụ iji ma ọ bụ ohere API.
-Ebe arụnyere `curl`, tụnyere `curl -4 -I https://generativelanguage.googleapis.com`
-na `curl -6 -I https://generativelanguage.googleapis.com` na gburugburu abụọ ahụ.
-Nzaghachi HTTP na-egosi na njikọ dị maka ule ahụ, ọbụlagodi ma ọ bụrụ njehie
-na-enweghị nkwenye njirimara; naanị arịrịọ model nwere nkwenye njirimara na-anwale ntozu Gemini.
+Dochie `omniroute` na ọrụ ị na-agba (dịka ọmụmaatụ, `omniroute-web`). Iwu ndị a na-ebipụta ezinụlọ adreesị na-enweghị nzere ma ọ bụ adreesị IP. `6` eweghachiri na-egosi naanị IPv6 DNS : ọ na-eme ya** ọ bụghị** gosi ụzọ IPv6 ma ọ bụ ohere API ga-arụ ọrụ. Ebe arụnyere `curl`, tulee `curl -4 -I https://generativelanguage.googleapis.com` na `curl -6 -I https://generativelanguage.googleapis.com` na gburugburu abụọ ahụ. Nzaghachi HTTP na-egosi njikọta maka nyocha ahụ, ọbụlagodi na ọ bụ mperi enweghị nkwenye; naanị arịrịọ ụdị akwadoro na-anwale ntozu Gemini.
 
-### Nhọrọ n'ọkwa host: IPv6 na-arụ ọrụ na iwu resolver
+### Nhọrọ-ọkwa onye ọbịa: IPv6 na-arụ ọrụ na amụma mkpebi
 
-Onye kọrọ [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) weghachiri
-ohere n'ime gburugburu ha site n'ịgbanye IPv6 nke container na ịgbanwe nhọpụta address
-nke glibc. Were nke a dị ka nhọrọ pụrụ iche maka gburugburu ahụ. Kwenye na IPv6 nke host
-na-arụ ọrụ, na container nwere egress/routing, nakwa na iwu firewall ziri ezi tupu ịgbanwe mmasị resolver.
-Private ULA address naanị ya anaghị egosi na njikọ IPv6 ọha dị.
+Onye nta akụkọ nke [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) weghachite ohere na gburugburu ha site n'ịkwado akpa IPv6 na ịgbanwe adreesị glibc. Were nke a dị ka ihe ọzọ metụtara gburugburu ebe obibi. Kwenye onye na-arụ ọrụ IPv6, akpa egress/routing na firewall iwu tupu ịhazigharị mmasị ndị na-edozi ihe. Adreesị ULA nkeonwe n'onwe ya anaghị ewepụta njikọ IPv6 ọha.
 
-Maka services etinyelarị na default network nke Compose, iberibe nhazi a na-agbanye
-IPv6 na network ahụ; debe akụkụ ndị ọzọ nke service, ports, volumes na configuration gị:
+Maka ọrụ agbakwunyere na netwọk ndabara nke Compose, iberibe a na-enyere IPv6 na netwọk ahụ; Jido ọrụ ndị ọzọ, ọdụ ụgbọ mmiri, mpịakọta na nhazi gị:
 
 ```yaml
 networks:
@@ -751,30 +753,13 @@ networks:
     enable_ipv6: true
 ```
 
-Maka named network, gbanye ya na network nke service ahụ sonyere n'ezie. Docker nwere ike
-ikenye ULA subnet; họrọ subnet doro anya nke na-adịghị ekpuchi nke ọzọ naanị mgbe network gị
-chọrọ ya. Hụ [netwọkụ IPv6 Docker](https://docs.docker.com/engine/daemon/ipv6/)
-na [nhọrọ network Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Maka netwọk akpọrọ, mee ya na netwọkụ ọrụ na-esonye n'ezie. Docker nwere ike ekenye subnet ULA ; họrọ subnet doro anya, anaghị ejikọta ya naanị mgbe netwọk gị chọrọ ya. Hụ [Docker IPv6 ịkparịta ụka n'Ịntanet](https://docs.docker.com/engine/daemon/ipv6/) na [dee nhọrọ netwọk](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Na **image dabere na glibc**, `/etc/gai.conf` nwere ike ịgbanwe nhọpụta address. Dockerfile nke
-repository dị ugbu a na-eji Debian; images ahaziri ahazi dabere na musl anaghị eji otu usoro a.
-Mgbanwe a kọrọ na-agbanwe label ULA site na `label fc00::/7 6` gaa na
-`label fc00::/7 1`. Malite na policy table zuru ezu nke image ahụ ma debe entries ndị ọzọ:
-ịgbakwunye entry `label` ma ọ bụ `precedence` na-anọchi default table ahụ, ya mere file
-nwere naanị ahịrị a gbanwere ezughị oke.
-[ntụaka nhazi glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-na-akọwa usoro ndị ahụ. Jiri bind-mount tinye file a nyochara dị ka read-only na `/etc/gai.conf`
-ma mepụtaghachi service ahụ iji tinye mgbanwe ahụ n'ọrụ.
+Na a** onyonyo dabere na glibc** , `/etc/gai.conf` nwere ike ịgbanwe adreesị nhọrọ. Dockerfile ebe nchekwa dị ugbu a na-eji Debian; Onyonyo dabere na musl omenala anaghị ekekọrịta usoro a. Ndozigharị a kọrọ na-agbanwe akara ULA site na `label fc00::/7 6` gaa `label fc00::/7 1`. Malite na tebụl amụma zuru oke ma chekwaa ndenye ya ndị ọzọ: ịgbakwunye `label` ma ọ bụ ntinye `precedence` na-anọchi tebụl ndabara ahụ, yabụ faịlụ nwere naanị ahịrị gbanwere ezughi oke. [Ntụaka nhazi glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) na-edepụta semantiks ndị ahụ. Kekọta-kpọkwaa faịlụ enyochara naanị na `/etc/gai.conf` wee megharịa ọrụ ahụ ka itinye ya n'ọrụ.
 
-Nke a na-agbanwe nhọpụta address nke OS maka **okporo ụzọ ọpụpụ niile n'ime container ahụ**.
-Ọ naghị amanye application ọ bụla ịhọrọ IPv6: usoro DNS nke Node na nhọpụta
-njikọ dịkwa mkpa. Karịsịa, `--dns-result-order=ipv4first` na-ahọrọ IPv4 karịa
-ma ọ bụghị ihe ngwọta maka ọdịda metụtara naanị IPv4. Hụ [usoro DNS Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Nke a na-agbanwe nhọrọ adreesị OS maka** okporo ụzọ niile na-apụ apụ n'ime akpa ahụ** . Ọ naghị amanye ngwa ọ bụla ịhọrọ IPv6: Node's DNS order na njikọ nhọrọ dịkwa mkpa. Karịsịa, `--dns-result-order=ipv4first` na-ahọrọ IPv4 ma ọ bụghị ihe ngwọta maka ọdịda IPv4-only. Hụ [Node DNS ịtụ](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Nwalee Gemini na providers ndị ọzọ gị ọzọ mgbe mgbanwe ọ bụla n'ọkwa host gasịrị. Iji laghachi azụ,
-wepụ custom `gai.conf` mount, weghachite nhazi network gara aga ma
-mepụtaghachi service/network emetụtara n'oge mmezi. Imegharị network
-nwere ike ịkwụsị containers ndị ọzọ ejikọrọ na ya; ehichapụla persistent data volume.
+Nwalee Gemini na ndị na-eweta gị ndị ọzọ ka mgbanwe ọkwa ọ bụla gachara. Iji tụgharịa azụ, wepụ ugwu `gai.conf` omenala, weghachi nhazi netwọkụ gara aga ma megharịa service/network emetụtara n'oge windo mmezi. Imegharị netwọkụ nwere ike ịkwụsị arịa ndị ọzọ etinyere na ya; ehichapụla olu data na-adịgide adịgide.
 
 ## Ihe Ndị Dị Mkpa Ịmara
 

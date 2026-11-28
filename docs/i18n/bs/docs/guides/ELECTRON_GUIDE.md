@@ -4,9 +4,9 @@
 
 ---
 
-> **Izvor istine:** `electron/` radni prostor** Posljednje ažurirano:** 2026-06-28 — v3.8.40
+> **Izvor istine:** `electron/` radni prostor
 
-OmniRoute isporučuje višeplatformsku desktop aplikaciju (Windows / macOS / Linux) izgrađenu na**Electron 41** +** graditelj elektrona 26.10** . Desktop aplikacija pokreće Next.js samostalni server kao podređeni proces, usmjerava `BrowserWindow` na njega i dodaje sistemsku traku, automatski ažuriranje, IPC most i tajni bootstrap sa nultom konfiguracijom.
+OmniRoute isporučuje desktop aplikaciju za više platformi (Windows / macOS / Linux) izgrađenu na**Electron 41** +** graditelj elektrona 26.10** . Desktop aplikacija pokreće Next.js samostalni server kao podređeni proces, usmjerava `BrowserWindow` na njega i dodaje sistemsku paletu, auto-updater, IPC most i tajni bootstrap sa nultom konfiguracijom.
 
 ## Arhitektura
 
@@ -198,7 +198,7 @@ Postavljeno preko `session.defaultSession.webRequest.onHeadersReceived`. Značaj
 
 ## Automatsko ažuriranje
 
-Koristi `electron-updater` sa GitHub provajderom (`diegosouzapw/OmniRoute`).
+Koristi `electron-updater` sa GitHub provajderom (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Događaji se prosljeđuju rendereru preko `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (sa `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefakti slijeću u `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Izdanja se objavljuju u GitHub izdanjima (`diegosouzapw/OmniRoute`), gdje `electron-updater` također provjerava nove verzije.
+Izdanja se objavljuju u GitHub izdanjima (`cheaper-inference/OmniRoute`), gdje `electron-updater` također provjerava nove verzije.
 
 ## Rješavanje problema
 

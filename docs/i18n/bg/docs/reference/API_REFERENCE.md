@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### Персонализирани заглавки
 
-| Header                   | Direction | Description                                                                                                                                                                                                                       |
-| ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Заявка    | Задайте `true`, за да заобиколите кеша                                                                                                                                                                                            |
-| `x-omniroute-no-memory`  | Заявка    | Задайте `true`, за да пропуснете инжектирането на памет и умения за тази заявка (отразява no-cache; избягва разходите за токени/цена при всяко извикване)                                                                         |
-| `X-OmniRoute-Progress`   | Заявка    | Задайте `true` за събития за напредъка                                                                                                                                                                                            |
-| `X-Session-Id`           | Заявка    | Ключ за залепена сесия за афинитет към външна сесия                                                                                                                                                                               |
-| `x_session_id`           | Заявка    | Вариантът с долна черта също се приема (директен HTTP)                                                                                                                                                                            |
-| `X-OmniRoute-Session-Id` | Заявка    | Предоставен от извикващия маркер за сесия/разговор (също се подава към паметта). Когато е наличен, се записва дословно в `call_logs.session_tag` за отчитане на разходите по сесии (#8249) — никога не се генерира, когато липсва |
-| `Idempotency-Key`        | Заявка    | Ключ за премахване на дубликати (прозорец от 5 s)                                                                                                                                                                                 |
-| `X-Request-Id`           | Заявка    | Алтернативен ключ за премахване на дубликати                                                                                                                                                                                      |
-| `x-omniroute-connection` | Заявка    | Фиксира заявка към един модел към една връзка с доставчик (акаунт) чрез нейния идентификатор — вижте [Фиксиране на акаунт за заявка](#account-pinning-per-request)                                                                |
-| `X-OmniRoute-Cache`      | Отговор   | `HIT` или `MISS` (при непотоково предаване)                                                                                                                                                                                       |
-| `X-OmniRoute-Idempotent` | Отговор   | `true`, ако е премахнат дубликат                                                                                                                                                                                                  |
-| `X-OmniRoute-Progress`   | Отговор   | `enabled`, ако проследяването на напредъка е включено                                                                                                                                                                             |
-| `X-OmniRoute-Session-Id` | Отговор   | Ефективният идентификатор на сесията, използван от OmniRoute                                                                                                                                                                      |
-| `X-OmniRoute-Request-Id` | Отговор   | Идентификатор за съпоставяне на заявката (когато е известен)                                                                                                                                                                      |
-| `X-OmniRoute-Version`    | Отговор   | Версия на компилацията на OmniRoute (винаги присъства)                                                                                                                                                                            |
-| `X-OmniRoute-Cost-Saved` | Отговор   | Сумата в USD, спестена от кеша при HIT (само при попадения в кеша)                                                                                                                                                                |
-| `X-OmniRoute-Decision`   | Отговор   | Проследяване на маршрутизирането: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` е комбинираната стратегия или `single` за заявка без комбинация) — винаги присъства в отговорите при приключване                  |
+| Заглавка                 | Посока  | Описание                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Заявка  | Задайте `true` за заобикаляне на кеша                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `x-omniroute-no-memory`  | Заявка  | Задайте `true`, за да пропуснете инжектирането + умения в паметта за тази заявка (отразява без кеш; избягва излишните разходи за token/cost на повикване)                                                                                                                                                                                                                                                                               |
+| `x-omniroute-no-log`     | Заявка  | Задайте `true`, за да пропуснете request/response полезни натоварвания от регистрационните файлове на повикванията за тази заявка за извод (всички маршрути за семейство чат: Завършвания на чат, Отговори, Съобщения, Завършвания, Gemini). Времето, моделът, състоянието, продължителността и броят на токените все още се записват. Комбинирайте с `x-omniroute-no-memory` и `x-omniroute-no-cache` за пълно отказване от съдържание |
+| `X-OmniRoute-Progress`   | Заявка  | Задайте `true` за събития за прогрес                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `X-Session-Id`           | Заявка  | Залепващ сесиен ключ за афинитет към външна сесия                                                                                                                                                                                                                                                                                                                                                                                       |
+| `x_session_id`           | Заявка  | Вариантът с долна черта също се приема (директен HTTP)                                                                                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Session-Id` | Заявка  | Осигурен от повикващия session/conversation таг (също захранва паметта). Когато присъства, продължава дословно до `call_logs.session_tag` за приписване на разходите за сесия (#8249) — никога не се синтезира, когато отсъства                                                                                                                                                                                                         |
+| `Idempotency-Key`        | Заявка  | Ключ за дедупиране (5 сек. прозорец)                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `X-Request-Id`           | Заявка  | Алтернативен ключ за дедупиране                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `x-omniroute-connection` | Заявка  | Закачете заявка с един модел към една връзка на доставчик (акаунт) по нейния идентификатор — вижте [Фиксиране на акаунт за заявка](#account-pinning-per-request)                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Cache`      | Отговор | `HIT` или `MISS` (без стрийминг)                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Idempotent` | Отговор | `true` ако е дедупликиран                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Progress`   | Отговор | `enabled` ако проследяването на напредъка е включено                                                                                                                                                                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Session-Id` | Отговор | Ефективна сесия ID използвана от OmniRoute                                                                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Request-Id` | Отговор | Идентификационен номер на корелация на заявка (когато е известен)                                                                                                                                                                                                                                                                                                                                                                       |
+| `X-OmniRoute-Version`    | Отговор | OmniRoute build версия (винаги присъства)                                                                                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Cost-Saved` | Отговор | USD кешът, избегнат на HIT (само кеш удари)                                                                                                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Decision`   | Отговор | Проследяване на маршрута: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` е комбинираната стратегия или `single` за некомбинирана заявка) — винаги присъства при отговорите за завършване                                                                                                                                                                                                                                 |
 
-> Бележка за Nginx: ако разчитате на заглавки с долна черта (например `x_session_id`), активирайте `underscores_in_headers on;`.
+> Забележка на Nginx: ако разчитате на заглавки с долна черта (например `x_session_id`), активирайте `underscores_in_headers on;`.
 
-#### Фиксиране на акаунт за заявка
+#### Фиксиране на акаунт на заявка
 
-Когато доставчикът има няколко връзки (акаунти или ключове), OmniRoute обикновено избира една
-чрез своята стратегия за избор на акаунт. Вместо това заявката може да фиксира конкретна връзка
-чрез заглавката `x-omniroute-connection`:
+Когато даден доставчик има няколко връзки (акаунти или ключове), OmniRoute обикновено избира една чрез своята стратегия за избор на акаунт. Вместо това една заявка може да закачи една конкретна връзка със заглавката `x-omniroute-connection` :
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,17 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Къде да намерите id.** Отворете страницата на доставчика в таблото
-  (**Dashboard → Providers → <provider>**) и щракнете върху чипа с id `xxxxxxxx…` на реда за връзката — това копира пълния id на връзката.
-- **Кои заявки го използват.** Заявки към единичен модел (`provider/model`) към
-  `/v1/chat/completions`, `/v1/messages` и `/v1/responses`. Комбинациите игнорират заглавката: фиксирайте акаунт за всяка стъпка на комбинацията чрез собствената връзка на стъпката.
-- **Фиксирането е строго, а не предпочитание.** Фиксираната връзка се използва изключително. Неуспешна операция в рамките на заявката записва cooldown за акаунта, но **не** преминава към съседен акаунт на същия доставчик.
-- **Cooldown и квотата освобождават фиксирането.** Докато фиксираната връзка е в cooldown,
-  квотата е изчерпана или връзката е блокирана от политика за квоти, следващите заявки преминават към другите връзки на доставчика, точно както заявките без фиксиране.
-- **Непознати или деактивирани id водят до грешка.** Id, който не е в активния пул на доставчика (изтрит, деактивиран или принадлежащ към друг доставчик), не оставя допустим акаунт, така че заявката се проваля, вместо незабелязано да бъде насочена другаде.
+- **Къде да намеря id.** Отворете страницата на доставчика в таблото за управление (** Табло за управление → Доставчици → <provider>** ) и щракнете върху `xxxxxxxx…` id чипа на ред за връзка — той копира пълния идентификатор на връзката.
+- **Които искания го спазват.** Заявки с един модел (`provider/model`) на `/v1/chat/completions`, `/v1/messages` и `/v1/responses`. Комбинациите игнорират заглавката: вместо това фиксирайте акаунт на комбо стъпка през собствената връзка на стъпката.
+- **Щифтът е строг, а не предпочитание.** Закрепената връзка се използва изключително. Провал в заявката записва изчакването на акаунта, но го прави** не** завъртете към братски акаунт на същия доставчик.
+- **Освобождаване на щифта за охлаждане и квота.** Докато фиксираната връзка се охлажда, квотата е изчерпана или е блокирана от политика за квота, по-късните заявки се връщат към други връзки на доставчика, точно както незакрепения трафик.
+- **Неизвестни или деактивирани идентификатори са неуспешни.** Идентификатор, който не е в активния пул на доставчика (изтрит, деактивиран или принадлежащ на друг доставчик), не оставя отговарящ на условията акаунт, така че заявката е неуспешна, вместо безшумно да се маршрутизира другаде.
 
-Claude Code изпраща персонализирани заглавки чрез `ANTHROPIC_CUSTOM_HEADERS`. Поставете го в блока
-`env` на `~/.claude/settings.json` или във файл `.claude/settings.json` на ниво проект, за да фиксирате различен акаунт за всеки проект:
+Claude кодът изпраща персонализирани заглавки през `ANTHROPIC_CUSTOM_HEADERS`. Поставете го в `env` блока на `~/.claude/settings.json` или в `.claude/settings.json` на ниво проект, за да закачите различен акаунт за проект:
 
 ```jsonc
 {
@@ -125,12 +120,11 @@ Claude Code изпраща персонализирани заглавки чр�
 }
 ```
 
-Източник: `src/sse/handlers/chat.ts` (прочитане на заглавката), `src/sse/services/auth.ts` и
-`src/sse/services/sessionAffinityPin.ts` (освобождаване на фиксирането и проверка за липсващ елемент в пула).
+Източник: `src/sse/handlers/chat.ts` (четене на заглавка), `src/sse/services/auth.ts` и `src/sse/services/sessionAffinityPin.ts` (освобождаване на щифта и проверка за липсващи от пула).
 
-> **Заглавки за телеметрия на разходите:** отговорите за успешни заявки без streaming също съдържат набора `X-OmniRoute-*` за телеметрия на разходите — `X-OmniRoute-Response-Cost` (USD, фиксирани 10 десетични знака; `0.0000000000` за безплатни/без зададена цена), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` и `X-OmniRoute-Fallback-Attempts` (само когато е > 0), както и `X-OmniRoute-Request-Id` и `X-OmniRoute-Version`. Те се генерират от chat completions, `/v1/responses`, `/v1/messages` **и крайните точки за медия** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` и `/v1/moderations` (винаги с разход `0`). Разходът за медия се изчислява според типа медия (на изображение, на секунда, на символ, на единица за търсене), когато има налична информация за ценообразуването, в противен случай е `0` (fail-open).
+> **Заглавия за телеметрия на разходите:** отговорите за успех без поточно предаване също носят `X-OmniRoute-*` набора разходи-телеметрия — `X-OmniRoute-Response-Cost` (USD, фиксирани 10 знака след десетичната запетая; `0.0000000000` за free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` и `X-OmniRoute-Fallback-Attempts` (само когато > 0), плюс `X-OmniRoute-Request-Id` и `X-OmniRoute-Version`. Те се излъчват от завършвания на чат, `/v1/responses`, `/v1/messages`,** и крайните точки на медиите** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` и `/v1/moderations` (винаги струва `0`). Медийните разходи се изчисляват за модалност (на изображение, на секунда, на знак, на единица за търсене), когато ценообразуването е налично, в противен случай `0` (отваряне при грешка).
 
-> **Семантика на разходите при попадение в кеша:** при HIT на семантичния кеш (`X-OmniRoute-Cache-Hit: true`) не се извършва upstream извикване, така че `X-OmniRoute-Response-Cost` е `0.0000000000` (това е **добавъчният** разход за обслужване на попадението). Оригиналният/предполагаемият разход се отчита отделно в `X-OmniRoute-Cost-Saved`. Потребителите на данни за таксуване трябва да сумират `X-OmniRoute-Response-Cost` (попаденията не струват нищо); анализите на кеша могат да агрегират `X-OmniRoute-Cost-Saved`.
+> **Семантика на разходите за кеширане:** на семантичен кеш HIT (`X-OmniRoute-Cache-Hit: true`) не се прави извикване нагоре по веригата, така че `X-OmniRoute-Response-Cost` е `0.0000000000` (** инкрементален** разходи за сервиране на попадението). Разходите original/would-have-been се отчитат отделно в `X-OmniRoute-Cost-Saved`. Потребителите на таксуване трябва да сумират `X-OmniRoute-Response-Cost` (посещенията не струват нищо); кеш анализите могат да агрегират `X-OmniRoute-Cost-Saved`.
 
 ## Ексклузивен лизинг на управлявани сесии
 
@@ -345,6 +339,8 @@ Content-Type: application/json
 
 `n` връща `n` изображения в `data[]`. Доставчиците, чийто API нагоре връща едно изображение на повикване (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), получават `n` отделни повиквания нагоре, най-много 4 в полет. Фиксираният `seed` се компенсира от индекса на повикване (`seed`, `seed + 1`, …), така че изображенията се различават, но остават възпроизводими. `n` е ограничен до 10. Заявката е неуспешна като цяло, ако някое извикване е неуспешно. Списъкът с разклонени формати е `SINGLE_IMAGE_FANOUT_FORMATS` в `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Моделите на изображения (`codex/gpt-image-*`) връщат само PNG : нагоре отговаря `200` с PNG байтове, дори когато се иска `jpeg` или `webp`. Заявка с който и да е друг `output_format` (`webp`, `jpeg`, ...) се отхвърля с HTTP 400, вместо да бъде тихо игнорирана; пропуснете го или изпратете `png`. `output_compression` не се препраща.
+
 ZenMux използва повторно съществуващата връзка с API ключ и приема `zenmux/` или `zm/` префикси:
 
 - `zenmux/openai/gpt-image-2` използва ZenMux изображенията на OpenAI API. Опциите включват `size`, `quality`, `n`, `output_format`, `output_compression`, `background` и `response_format`.
@@ -362,7 +358,7 @@ GET /v1/images/generations
 
 ---
 
-## OCR на документи
+## Документ OCR
 
 ```bash
 POST /v1/ocr
@@ -378,17 +374,15 @@ Content-Type: application/json
 }
 ```
 
-`model` избира OCR доставчика чрез префикс `provider/model`; самостоятелен идентификатор на модел (напр.
-`mistral-ocr-latest`) се насочва към регистрирания му доставчик, а ако `model` е пропуснат, по подразбиране се използва
-Mistral (`mistral-ocr-latest`). Регистрирани доставчици (`open-sse/config/ocrRegistry.ts`):
+`model` избира доставчика OCR чрез префикс `provider/model` ; id на голи модел (напр. `mistral-ocr-latest`) се преобразува в своя регистриран доставчик, а пропуснат `model` по подразбиране е Mistral (`mistral-ocr-latest`). Регистрирани доставчици (`open-sse/config/ocrRegistry.ts`):
 
-| Идентификатор на доставчика   | Идентификатор на модела | Стойност на `model`                                                   | Бележки                                                                                                              |
-| ----------------------------- | ----------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest`    | `mistral/mistral-ocr-latest` (или самостоятелно `mistral-ocr-latest`) | Синхронен — отговорът се връща директно от единственото upstream извикване.                                          |
-| `azure-document-intelligence` | `prebuilt-read`         | `azure-document-intelligence/prebuilt-read`                           | Асинхронен upstream (`analyze` + poll) — вижте по-долу.                                                              |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`     | `vertex-deepseek-ocr/deepseek-ocr-maas`                               | Синхронен, чрез партньорския endpoint `openapi/chat/completions` на Vertex AI — вижте по-долу за удостоверяване/URL. |
+| ID на доставчика              | ID на модела                                 | `model` стойност                                            | Бележки                                                                                                                                                                                                           |
+| ----------------------------- | -------------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                         | `mistral/mistral-ocr-latest` (или гол `mistral-ocr-latest`) | Синхронен — отговорът се връща директно от единично повикване нагоре.                                                                                                                                             |
+| `azure-document-intelligence` | `prebuilt-read`                              | `azure-document-intelligence/prebuilt-read`                 | Асинхронен възходящ поток (`analyze` + анкета) — вижте по-долу.                                                                                                                                                   |
+| `vertex-deepseek-ocr`         | самостоятелно разгръщане (без вграден модел) | `vertex-deepseek-ocr/<your-deployed-model-id>`              | Синхронно, чрез вашия собствен Vertex AI Model Garden DeepSeek-OCR крайна точка (`openapi/chat/completions` форма); Google оттегли управлявания `deepseek-ocr-maas` на 2026-10-21 (#20423), така че id връща 400. |
 
-И трите доставчика отговарят с тяло в същия формат като Mistral:
+И тримата доставчика отговарят в едно и също тяло с форма на Mistral:
 
 ```json
 {
@@ -398,28 +392,13 @@ Mistral (`mistral-ocr-latest`). Регистрирани доставчици (`
 }
 ```
 
-### Процес на изчакване при Azure Document Intelligence
+### Поток на анкета на Azure Document Intelligence
 
-API на Azure Document Intelligence за `analyze` е асинхронен: първоначалната заявка връща
-заглавка `Operation-Location` вместо тяло, а резултатът трябва да бъде извлечен чрез периодични заявки. Обработчикът
-(`open-sse/handlers/ocr.ts`) изпраща заявка към този URL всяка секунда за до 30 опита, прекратява незабавно (не
-продължава да изпраща заявки) при отговор от извикването за проверка, който не е `ok`, или при статус `"failed"`, и връща `504`, ако
-операцията все още се изпълнява след изчерпване на бюджета от опити. Крайният отговор от Azure се
-нормализира до същата форма с `pages`/`markdown`, използвана от Mistral, преди да бъде върнат на
-извикващия, така че клиентският код не трябва да обработва доставчика по специален начин.
+`analyze` API на Azure Document Intelligence е асинхронен: първоначалната заявка връща `Operation-Location` заглавка вместо тяло и резултатът трябва да бъде поискан. Манипулаторът (`open-sse/handlers/ocr.ts`) анкетира, че URL всяка секунда за до 30 опита, се проваля бързо (не продължава анкетирането) при отговор на анкета, който не е `ok` или състояние на `"failed"` и връща `504` ако операцията все още се изпълнява след изчерпване на бюджета за опит. Окончателният отговор на Azure се нормализира в същата форма `pages`/`markdown`, използвана от Mistral, преди да бъде върнат на повикващия, така че клиентският код не трябва да поставя в специален случай доставчика.
 
-### Удостоверяване и разрешаване на endpoint за Vertex AI DeepSeek OCR
+### Vertex AI DeepSeek OCR auth и резолюция на крайна точка
 
-`vertex-deepseek-ocr` използва повторно същото удостоверяване на Vertex AI, което OmniRoute вече поддържа за
-трафик към чат/изображения (`open-sse/executors/vertex.ts`): API ключът на връзката е или
-идентификационни данни на Service Account във формат JSON (обменени за краткоживеещ OAuth access token чрез потока
-JWT-bearer), или вече издаден OAuth access token, който се използва както е. URL адресът на upstream endpoint-а е общият
-партньорски endpoint `openapi/chat/completions` на Vertex, изграден от проекта и региона на връзката — изричните
-`providerSpecificData.project`/`providerSpecificData.region` винаги имат предимство;
-в противен случай проектът се извлича от `project_id` в JSON данните на Service Account, а регионът по подразбиране е
-`us-central1`. И двете разрешавания се извършват в `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), а резултатите им се използват от
-`src/app/api/v1/ocr/route.ts` преди изпращане към `handleOcr`.
+`vertex-deepseek-ocr` използва повторно същото Vertex AI удостоверяване, OmniRoute вече поддържа за chat/image трафик (`open-sse/executors/vertex.ts`): API ключът на връзката е или JSON идентификационен номер на сервизен акаунт (обменен за краткотраен OAuth токен за достъп чрез потока JWT-носител) или вече изсечен OAuth токен за достъп, използван такъв, какъвто е. Крайната точка нагоре по веригата URL е генеричната `openapi/chat/completions` партньорска крайна точка на Vertex, изградена от проекта на връзката и региона —, изрично `providerSpecificData.project`/`providerSpecificData.region` винаги печели; в противен случай проектът се извлича от `project_id` на сервизния акаунт на JSON и регионът по подразбиране е `us-central1`. И двете резолюции се случват в `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), консумирани от `src/app/api/v1/ocr/route.ts` преди изпращане до `handleOcr`.
 
 ---
 
@@ -675,95 +654,102 @@ curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
 
 ## Крайни точки за съвместимост
 
-| Метод | Път                                       | Формат                                  |
-| ----- | ----------------------------------------- | --------------------------------------- |
-| POST  | `/v1/chat/completions`                    | OpenAI                                  |
-| POST  | `/v1/messages`                            | Anthropic                               |
-| POST  | `/v1/responses`                           | OpenAI Responses                        |
-| POST  | `/v1/embeddings`                          | OpenAI                                  |
-| POST  | `/v1/images/generations`                  | OpenAI Images                           |
-| POST  | `/v1/images/edits`                        | OpenAI Images (редактиране/inpaint)     |
-| POST  | `/v1/videos/generations`                  | Генериране на видео в стил OpenAI       |
-| POST  | `/v1/music/generations`                   | Генериране на музика в стил OpenAI      |
-| POST  | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                      |
-| POST  | `/v1/audio/speech`                        | OpenAI TTS (връща аудио тяло)           |
-| POST  | `/v1/rerank`                              | Повторно класиране в стил Cohere/Voyage |
-| POST  | `/v1/classify`                            | Класифициране с Jina (`api.jina.ai`)    |
-| POST  | `/v1/segment`                             | Сегментатор на Jina (`segment.jina.ai`) |
-| POST  | `/v1/moderations`                         | OpenAI Moderations                      |
-| GET   | `/v1/models`                              | OpenAI                                  |
-| POST  | `/v1/models/query`                        | Филтриран кратък списък с модели        |
-| POST  | `/v1/messages/count_tokens`               | Anthropic                               |
-| GET   | `/v1beta/models`                          | Gemini                                  |
-| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                  |
-| POST  | `/v1/api/chat`                            | Ollama                                  |
-| GET   | `/api/v1/vscode/{token}/`                 | Псевдоним на каталога на OpenAI         |
-| GET   | `/api/v1/vscode/{token}/models`           | Псевдоним на моделите на OpenAI         |
-| POST  | `/api/v1/vscode/{token}/chat/completions` | Псевдоним на OpenAI с токен             |
-| POST  | `/api/v1/vscode/{token}/responses`        | Псевдоним на OpenAI Responses с токен   |
-| POST  | `/api/v1/vscode/{token}/api/chat`         | Псевдоним на Ollama с токен             |
-| GET   | `/api/v1/vscode/{token}/api/tags`         | Псевдоним на таговете на Ollama с токен |
+| Метод | Пътека                                    | формат                                |
+| ----- | ----------------------------------------- | ------------------------------------- |
+| POST  | `/v1/chat/completions`                    | OpenAI                                |
+| POST  | `/v1/messages`                            | Anthropic                             |
+| POST  | `/v1/responses`                           | OpenAI отговори                       |
+| POST  | `/v1/embeddings`                          | OpenAI                                |
+| POST  | `/v1/images/generations`                  | OpenAI изображения                    |
+| POST  | `/v1/images/edits`                        | OpenAI изображения (edit/inpaint)     |
+| POST  | `/v1/videos/generations`                  | Генериране на видео в стил OpenAI     |
+| POST  | `/v1/music/generations`                   | Генериране на музика в стил OpenAI    |
+| POST  | `/v1/audio/transcriptions`                | OpenAI аудио (STT)                    |
+| POST  | `/v1/audio/speech`                        | OpenAI TTS (връща аудио тяло)         |
+| POST  | `/v1/rerank`                              | Cohere/Voyage-style прекласиране      |
+| POST  | `/v1/classify`                            | Jina класифицира (`api.jina.ai`)      |
+| POST  | `/v1/segment`                             | Джина сегментатор (`segment.jina.ai`) |
+| POST  | `/v1/moderations`                         | OpenAI Модерации                      |
+| POST  | `/v1/systemone`                           | Типизирани решения на System One      |
+| POST  | `/v1/decisions`                           | OpenAI решения (роден)                |
+| GET   | `/v1/systemone/models`                    | Каталог решения-модели                |
+| GET   | `/v1/models`                              | OpenAI                                |
+| POST  | `/v1/models/query`                        | Списък с филтрирани модели            |
+| POST  | `/v1/messages/count_tokens`               | Anthropic                             |
+| GET   | `/v1beta/models`                          | Gemini                                |
+| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                |
+| POST  | `/v1/api/chat`                            | Ollama                                |
+| GET   | `/api/v1/vscode/{token}/`                 | псевдоним на каталога OpenAI          |
+| GET   | `/api/v1/vscode/{token}/models`           | OpenAI модели псевдоним               |
+| POST  | `/api/v1/vscode/{token}/chat/completions` | OpenAI токенизиран псевдоним          |
+| POST  | `/api/v1/vscode/{token}/responses`        | OpenAI отговори токенизиран псевдоним |
+| POST  | `/api/v1/vscode/{token}/api/chat`         | Ollama токенизиран псевдоним          |
+| GET   | `/api/v1/vscode/{token}/api/tags`         | Ollama тагове токенизиран псевдоним   |
 
-Всички POST маршрути следват една и съща форма: `Bearer your-api-key` + JSON тяло, валидирано чрез Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` и др.; вижте `src/shared/validation/schemas.ts`). При неуспешна проверка на схемата се връща отговор 4xx.
+Всички POST маршрути следват една и съща форма: `Bearer your-api-key` + Zod-валидирано JSON тяло (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` и т.н., вижте `src/shared/validation/schemas.ts`). 4xx се връща при повреда на схемата.
 
-За клиенти, които не могат да добавят `Authorization: Bearer ...`, OmniRoute приема API ключове и в URL чрез съвместимост с query string (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) или чрез специалните крайни точки `/api/v1/vscode/{token}/...`, описани по-долу.
+За клиенти, които не могат да прикачат `Authorization: Bearer ...`, OmniRoute също приема API ключове в URL чрез съвместимост на низове за заявки (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) или специалните `/api/v1/vscode/{token}/...` крайни точки, документирани по-долу.
 
 ```bash
-# Повторно класиране (доставчик от облачния регистър или възел на доставчик, съвместим с OpenAI, като "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Класифициране с Jina (идентификационни данни за Foundation API)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Сегментатор на Jina
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Търсене с Jina (s.jina.ai; псевдоними на доставчика: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Модериране
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — връща тяло audio/mpeg (или заявения формат)
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS изисква език и глас: `language` по подразбиране е "en"; липсващ
-# глас или стандартно име на глас на OpenAI (alloy, nova, …) се преобразува в "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Редактиране на изображение (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Генериране на видео / музика (идентификатор на модел с префикс на доставчика)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Пренасочване на възли на доставчици:** `POST /v1/rerank` също маршрутизира към съвместими с OpenAI възли на доставчици
-> (oMLX, vLLM, Infinity, TEI зад gateway, …), адресирани като `<node-prefix>/<model>`. Loopback
-> възлите (`localhost`, `127.0.0.1`, `172.16.0.0/12`) винаги са допустими, както и имената на хостове,
-> посочени от оператора в `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (например име на Docker/Compose услуга,
-> като `http://reranker:8080/v1`; те се извикват директно, никога чрез `HTTP(S)_PROXY` или чрез фиксирания proxy на дадена
-> връзка). Възли на всеки друг хост — LAN машина или Tailscale peer — са допустими само когато операторът активира
-> feature flag-а `RERANK_REMOTE_PROVIDER_NODES` **и** базовият URL на възела преминава политиката за изходящи URL адреси на доставчици
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Стъпката за rerank на memory engine извиква този маршрут чрез loopback, така че същото правило важи за
-> `rerankProviderModel` в настройките на Memory.
+> **Пренареждане на възлите на доставчика:** `POST /v1/rerank` също маршрутизира до възли на доставчик, съвместими с OpenAI (oMLX, vLLM, Infinity, TEI зад шлюз, …), адресирани като `<node-prefix>/<model>`. Възлите за обратна връзка (`localhost`, `127.0.0.1`, `172.16.0.0/12`) винаги отговарят на условията, както и имената на хостове, които операторът изброява в `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (напр. име на услуга Docker/Compose като `http://reranker:8080/v1`; те се извикват директно, никога чрез `HTTP(S)_PROXY` или фиксиран прокси на връзката). Възлите на всеки друг хост — LAN кутия или Tailscale peer — отговарят на условията само когато операторът активира флага на функцията `RERANK_REMOTE_PROVIDER_NODES`** и** базовият URL на възела предава изходящата URL политика на доставчика (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Стъпката за пренареждане на механизма на паметта извиква този маршрут през обратна връзка, така че същото правило управлява `rerankProviderModel` в настройките на паметта.
 >
-> **Форми на локалния сървър:** възелът се извиква на `<base>/v1/rerank`, а при 404 — на `<base>/rerank`
-> (Infinity, TEI). Тялото към upstream съдържа и двата варианта на изписване — Cohere/OpenAI (`documents`,
-> `return_documents`) и TEI (`texts`, `return_text`), а отговорът от upstream се нормализира до envelope-а на Cohere:
-> необработеният масив на TEI `[{index, score, text}]`, `{results: [{index, score}]}`
-> от опростени gateway-и и подобният на Voyage `{data: [...]}` се връщат към клиента като
-> `{results: [{index, relevance_score, document?}]}`, сортирани по score и ограничени до `top_n`.
+> **Форми на локален сървър:** възелът се извиква при `<base>/v1/rerank` и при 404 при `<base>/rerank` (Infinity, TEI). Тялото нагоре носи както Cohere/OpenAI изписването (`documents`, `return_documents`), така и TEI изписването (`texts`, `return_text`), а отговорът нагоре по веригата е нормализиран към обвивката Cohere : голият `[{index, score, text}]` на TEI, `{results: [{index, score}]}` от тънки шлюзове и `{data: [...]}` в стил Voyage се връщат на клиента като `{results: [{index, relevance_score, document?}]}`, сортирани по резултат и ограничени до `top_n`.
 
-> **Откриване на възли на доставчици:** моделите на съвместим с OpenAI възел на доставчик се показват в `GET /v1/models`
-> под префикса на възела. Редовете без метаданни за endpoint (типично за локални списъци `/v1/models`)
-> наследяват неговия `apiType`, така че моделите на възел `embeddings` са с
-> `type: "embedding"`, а моделите на възел `rerank` са с `type: "rerank"`, вместо по подразбиране да се считат за chat;
-> изрично зададеното `supportedEndpoints` в синхронизиран или ръчно добавен ред все пак има предимство.
+> **Откриване на възел на доставчик:** моделите на възел на доставчик, съвместим с OpenAI, се показват в `GET /v1/models` под префикса на възел. Редове, които не носят метаданни за крайна точка (типично за локални `/v1/models` списъци), наследяват `apiType` на възела, така че моделите на `embeddings` възел са `type: "embedding"`, а моделите на `rerank` възел са `type: "rerank"` вместо чат по подразбиране; изричен `supportedEndpoints` на синхронизиран или ръчно добавен ред все още има предимство.
 
-### Специализирани маршрути за доставчици
+### Типизирани решения
+
+Моделите за вземане на решения отговарят на въведени въпроси с калибрирани вероятности, вместо да генерират текст. Те никога не са модели за чат и двата кабелни формата никога не се превеждат един в друг:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter решения, Cloudflare Работници AI, локален Ollama).
+- `POST /v1/decisions` — собствени OpenAI решения `{ model, input, questions: [...] }`, обслужвани от `openai` връзка. Модела е `openai/gpt-6-luna` (голото `gpt-6-luna` също става). Отговорите се връщат във въпросителен ред, недокоснати.
+- `GET /v1/systemone/models` — един каталог от двата вида; всеки ред наименува своя `api_format` (`systemone` или `decisions`). `limit` / `after` страница окончателния списък. Заглавката `X-OmniRoute-Catalog-Status` гласи `complete`, `partial` или `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+В `/v1/decisions` списъкът с разрешени модели на ключа API, категорията на крайната точка `decisions`, бюджетът и обхватът на връзката се проверяват, преди да бъдат прочетени идентификационни данни. Идентификационните данни са съхранената `openai` връзка в обхвата на ключа (никога ключ за среда); база за връзка URL се зачита само когато е `http(s)` URL без идентификационни данни, заявка или фрагмент, който не сочи към този OmniRoute. Обаждането тръгва през същия защитен транспорт като `decision` автоматичния маршрутизатор ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): изходяща защита на доставчика, без повторни опити, без пренасочвания, 5 s таймаут и 64 KB таван за отговор (по-големият отговор е 502). Телата на заявката са ограничени до 4 MiB. Всяко повикване изпраща нов `Idempotency-Key`. Грешките носят само състоянието нагоре по веригата, никога тялото, URL, ключа или подканата.
+
+### Специализирани маршрути на доставчик
 
 ```bash
 POST /v1/providers/{provider}/chat/completions

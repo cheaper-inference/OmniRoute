@@ -14,10 +14,12 @@ Podrazumevana politika više provajdera dozvoljava do tri pokušaja provajdera, 
 
 - **Kombinacije** neuspjeh između svojih ciljeva prema vlastitoj strategiji i postavkama kombinacije.
 - **ID golog modela** (bez `provider/` prefiksa) koje opslužuje nekoliko aktivnih provajdera, bez kombinacije tog tačnog imena, prvo se šalje odabiru za zaključivanje provajdera. Ako taj pokušaj ne uspije na način na koji politika ne uspije, isti zahtjev se šalje sljedećem aktivnom provajderu koji poslužuje ID. Odgovor nosi `x-omniroute-fallback-attempts` sa brojem provajdera koji su pokušali prije onog koji je odgovorio.
-  - Svaki zamjenik je ovlašten točno kao da ga je zaključak odabrao. Cilj koji API ključ blokira ili ne priznaje se preskače bez upstream poziva, a klijent dobija stvarnu uzvodnu grešku, a ne odbijanje politike za cilj koji nikada nije imenovao.
+  - Svaki zamjenik je ovlašten točno kao da ga je zaključak odabrao. Cilj koji API ključ blokira ili ne priznaje se preskače bez upstream poziva, a klijent dobija stvarnu grešku uzvoda, a ne odbijanje politike za cilj koji nikada nije imenovao.
   - Nastavlja se samo neuspjeli odgovor: ništa ne uspijeva nakon prvog prenesenog bajta.
   - Hitna zamjenska zamjena modela primjenjuje se samo nakon što svaki dobavljač traženog modela nije uspio.
   - Zahtjev zakačen na vezu (`x-omniroute-connection`) ostaje na njoj.
   - Id sa prefiksom (`provider/model`) se nikada ne preusmjerava na drugog provajdera.
 
 Stanja kola su `closed`, `open` i `half_open`. Hlađenje zakazuje ograničenu sondu; uspješna sonda zatvara krug, a neuspješna sonda ga ponovo otvara.
+
+Provajder greška se pokreće unutar gateway-a. Pogledajte [Kada je sama OmniRoute nedostupna](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) za ponašanje klijenta tokom ispada mrežnog prolaza.

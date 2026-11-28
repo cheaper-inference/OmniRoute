@@ -151,30 +151,30 @@ Témata pro fáze 6–7:
 - [ ] Přidat regresní testy pro každou nepokrytou produkční chybu opravenou během úsilí o dosažení 90 %
 - [ ] Zvýšit minimální požadované pokrytí v CI až poté, co bude místní výchozí stav stabilní alespoň ve dvou po sobě jdoucích spuštěních
 
-## Zásady postupného zpřísňování
+## Zásady ráčny
 
-Prahové hodnoty `npm run test:coverage` aktualizujte teprve poté, co projekt skutečně překročí další milník s dostatečnou rezervou.
+Aktualizujte prahové hodnoty `npm run test:coverage` až poté, co projekt skutečně překročí další milník s pohodlným bufferem.
 
-**Aktuální limit:** `npm run test:coverage` vynucuje **60 příkazů / 60 řádků / 60 funkcí / 60 větví** (metrika byla nově nastavena ve fázi Quality-Gates 6A.1 — dřívější výchozí hodnota 82.58 % byla nadhodnocená, protože započítávala testovací soubory a nezahrnovala `open-sse`). Příkaz `test:coverage:legacy` zachovává pro historické porovnání původní metriku 50/50/50.
+**Aktuální brána:** `npm run test:coverage` prosazuje** 60 výpisů / 60 řádků / 60 funkcí / 60 poboček** (metrika byla přepracována v Quality-Gates Fase 6A.1 — dřívější 82,58% výchozí hodnota byla nafouknutá, protože počítala testovací soubory a vylučovala `open-sse`). Příkaz `test:coverage:legacy` zachová starou metriku 50/50/50 pro historické srovnání.
 
-Pro jednorázové kontroly prahové hodnoty vůči nejnovější zprávě použijte:
+Pro ad-hoc prahové kontroly proti nejnovější zprávě použijte:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Doporučená posloupnost zpřísňování (pořadí je `příkazy-řádky / větve / funkce`):
+Doporučená sekvence ráčny (pořadí je `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- aktuální limit (75/70/75)
+5. 75/70/72 <-- aktuální brána (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Dalším cílem zpřísnění je `80/75/78`, jakmile se pokrytí větví udrží nad 78 % ve dvou po sobě jdoucích spuštěních.
+Dalším ratchetovým cílem je `80/75/78`, jakmile se pokrytí pobočky udrží nad 78 % po dva po sobě jdoucí běhy.
 
 ## Známý nedostatek
 

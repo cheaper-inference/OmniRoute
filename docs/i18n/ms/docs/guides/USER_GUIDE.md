@@ -244,31 +244,39 @@ Model: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ## 🎨 Kombo
 
-Anda boleh menyusun semula kad kombo secara langsung dalam **Papan Pemuka → Kombo** dengan menyeret pemegang pada setiap kad. Susunan tersebut disimpan dalam SQLite dan dipulihkan apabila dimuatkan semula.
+Anda boleh menyusun semula kad kombo terus masuk** Kombo → papan pemuka** dengan menyeret pemegang pada setiap kad. Pesanan disimpan dalam SQLite dan dipulihkan semasa muat semula.
+
+### Cari pembekal, model atau akaun
+
+Dalam Cipta atau Edit Kombo, Pembekal langkah demi langkah, Model, Akaun dan pemilih rujukan kombo termasuk medan carian setempat. Cari mengikut nama yang dipaparkan, pengecam, alias pembekal atau sumber model, kemudian klik hasil carian atau gunakan kekunci anak panah dan Enter. Berbilang istilah carian mesti semua sepadan. Mengosongkan carian atau menekan Escape meninggalkan nilai yang dipilih tidak berubah.
+
+Pilihan akaun automatik kekal kelihatan semasa mencari. Senarai sekatan akaun pilihannya mempunyai penapis yang berasingan: akaun yang dipilih di luar hasil yang boleh dilihat kekal dipilih, dan kiraan termasuk mereka. Serpihan e-mel tersembunyi tidak boleh dicari semasa privasi e-mel dihidupkan. Tambah langkah dan simpan kombo seperti biasa; menaip pertanyaan tidak menyimpan atau menguji apa-apa.
+
+Carian setempat yang sama tersedia untuk model ujian sambungan, lalai CLI tersuai dan model alias dan pilihan proksi yang disimpan. Tindakan simpan, gunakan dan ujian sedia ada kekal berasingan.
 
 ### Contoh 1: Maksimumkan Langganan → Sandaran Murah
 
 ```
-Papan Pemuka → Kombo → Cipta Baharu
+Dashboard → Combos → Create New
 
-Nama: premium-coding
-Model:
-  1. cc/claude-opus-4-7 (Langganan utama)
-  2. glm/glm-4.7 (Sandaran murah, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Pilihan terakhir termurah, $0.3/1M)
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
 
-Gunakan dalam CLI: premium-coding
+Use in CLI: premium-coding
 ```
 
-### Contoh 2: Percuma Sahaja (Kos Sifar)
+### Contoh 2: Percuma-Sahaja (Kos Sifar)
 
 ```
-Nama: free-combo
-Model:
-  1. if/kimi-k2.7-code (disenaraikan dengan akses percuma; had penyedia mungkin dikenakan)
-  2. kr/qwen3-coder-next (Pilihan sandaran percuma Kiro)
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
 
-Kos: kini disenaraikan sebagai $0; terma dan ketersediaan mungkin berubah
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -428,7 +436,7 @@ Apabila anda tidak lagi memerlukan OmniRoute, kami menyediakan dua skrip pantas 
 ### VPS Deployment
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -510,8 +518,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -702,7 +710,7 @@ Atau gunakan Papan Pemuka:** Pembekal → [Penyedia] → Model Tersuai** .
 Nota:
 
 - pembekal OpenRouter dan OpenAI/Anthropic-compatible diuruskan daripada** Model Tersedia** sahaja. Tambah, import dan autosegerakkan secara manual semua mendarat dalam senarai model tersedia yang sama, jadi tiada bahagian Model Tersuai yang berasingan untuk pembekal tersebut.
-- The** Model Tersuai** seksyen bertujuan untuk pembekal yang tidak mendedahkan import model tersedia terurus.
+- The** Model Tersuai** bahagian bertujuan untuk pembekal yang tidak mendedahkan import model tersedia terurus.
 
 ### Penyedia Serasi OpenAI Tersuai
 
@@ -769,7 +777,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 Hanya permintaan yang dihantar kepada URL rakan setara yang dibenarkan secara eksplisit menerima pengepala `X-OmniRoute-Peer-Trace`. Gerbang menolak ID instance berulang atau belanjawan hop yang habis dengan HTTP `508 Loop Detected`; pembekal huluan biasa tidak menerima metadata rakan sebaya.
 
-Peer chaining bukanlah replikasi pangkalan data atau failover hos. Setiap gerbang menyimpan keadaan SQLite bebas, cache, kaunter kadar dan sesi. Gunakan proksi terbalik atau failover pelanggan yang disemak kesihatan untuk ketersediaan active/passive atau active/active, dan jangan sekali-kali memasang satu pangkalan data SQLite ke dalam berbilang tika OmniRoute yang sedang berjalan.
+Peer chaining bukanlah replikasi pangkalan data atau failover hos. Setiap gerbang menyimpan keadaan SQLite bebas, cache, kaunter kadar dan sesi. Gunakan proksi terbalik yang disemak kesihatan atau failover klien untuk ketersediaan active/passive atau active/active, dan jangan sekali-kali memasang satu pangkalan data SQLite ke dalam berbilang tika OmniRoute yang sedang berjalan.
 
 ### Laluan Penyedia Khusus
 
@@ -878,9 +886,9 @@ Konfigurasikan melalui** Papan pemuka → Tetapan → Penghalaan** . Papan pemuk
 - `p2c` (Kuasa Dua Pilihan)
 - `least-used` dan `cost-optimized`
 - `auto` — dipacu markah merentasi semua calon
-- `lkgp` (Penyedia Baik Terakhir Diketahui) — pin kepada penyedia terakhir yang berjaya, kemudian kembali kepada peraturan
-- `context-optimized` — memilih model dengan tetingkap konteks percuma terbesar
-- `context-relay` — merantai model konteks panjang untuk giliran susulan
+- `lkgp` (Pembekal Baik Terakhir Diketahui) — pin kepada penyedia terakhir yang berjaya, kemudian kembali kepada peraturan
+- `context-optimized` — mencuba model dengan tetingkap konteks terbesar yang diketahui terlebih dahulu
+- perintah keutamaan `context-relay` — ditambah dengan ringkasan lepas tangan apabila perbualan beralih ke akaun lain
 
 #### Pengepala Sesi Melekit Luaran
 
@@ -1010,7 +1018,7 @@ OmniRoute melaksanakan daya tahan peringkat pembekal dengan lima komponen:
 
    Keadaan masa jalan pemutus pembekal ditunjukkan pada** Papan pemuka → Kesihatan** sahaja.
 
-4. **Tunggu Cooldown** — Jika setiap sambungan calon sudah reda, OmniRoute boleh menunggu tempoh bertenang yang paling awal dan mencuba semula permintaan pelanggan yang sama secara automatik.
+4. **Tunggu Cooldown** — Jika setiap sambungan calon sudah reda, OmniRoute boleh menunggu cooldown terawal dan mencuba semula permintaan pelanggan yang sama secara automatik.
 
 5. **Pengesanan Auto Had Kadar** — Apabila penyedia huluan mengembalikan tetingkap tunggu eksplisit, pembayang tersebut mengatasi tempoh akhir sambungan tempatan apabila tetapan didayakan.
 
@@ -1064,7 +1072,7 @@ Halaman tetapan disusun ke dalam** 7 tab** untuk navigasi mudah:
 | **Ketahanan**   | Minta baris gilir, penyejukan sambungan, konfigurasi pemutus penyedia dan gelagat tunggu untuk penyejukan                                                             |
 | **Maju**        | Konfigurasi proksi global (HTTP/SOCKS5), penggantian proksi setiap pembekal                                                                                           |
 
-Umum tidak lagi menduplikasi pengelogan baca sahaja dan nota cache. Pengekalan pangkalan data dan tetapan pengoptimuman diteruskan melalui `/api/settings/database`; pembersihan cache manual menggunakan `DELETE /api/cache`. Had baris log permintaan dan proksi dikawal oleh `CALL_LOGS_TABLE_MAX_ROWS` dan `PROXY_LOGS_TABLE_MAX_ROWS`.
+Umum tidak lagi menduplikasi pengelogan baca sahaja dan nota cache. Tetapan pengekalan dan pengoptimuman pangkalan data diteruskan melalui `/api/settings/database`; pembersihan cache manual menggunakan `DELETE /api/cache`. Had baris log permintaan dan proksi dikawal oleh `CALL_LOGS_TABLE_MAX_ROWS` dan `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1327,34 +1335,36 @@ Lihat [API_REFERENCE.md](../reference/API_REFERENCE.md) untuk katalog titik akhi
 
 ---
 
-## 💻 CLI Dalaman
+## 💻 Dalaman CLI
 
-OmniRoute menyediakan CLI dalaman (`omniroute …`) untuk persediaan, diagnostik dan kawalan masa jalan. Ini **berasingan daripada halaman "Alat CLI" dalam papan pemuka**, yang mengkonfigurasi CLI pihak ketiga (Claude Code, Cursor, Codex, Cline, …) supaya alat tersebut boleh berkomunikasi dengan OmniRoute.
+OmniRoute menghantar CLI dalaman (`omniroute …`) untuk persediaan, diagnostik dan kawalan masa jalan. Ini adalah** berasingan daripada halaman "CLI Tools" dalam papan pemuka** , yang mengkonfigurasi CLIs pihak ketiga (Claude Code, Cursor, Codex, Cline, …) supaya mereka boleh bercakap dengan OmniRoute.
 
 ```bash
-omniroute setup                    # Bestari interaktif (kata laluan, penyedia, gabungan)
-omniroute setup --non-interactive  # Sesuai untuk CI
-omniroute doctor                   # Diagnostik kesihatan (direktori data, DB, penyedia, port)
-omniroute providers available      # Senaraikan penyedia yang disokong
-omniroute providers list           # Senaraikan sambungan yang dikonfigurasi
-omniroute providers test <id>      # Uji sambungan penyedia secara langsung
-omniroute combos list              # Senaraikan gabungan
-omniroute combos switch <name>     # Tetapkan gabungan lalai
-omniroute models                   # Senaraikan model yang tersedia (--json, --search)
-omniroute keys add | list | remove # Urus kekunci API daripada terminal
-omniroute backup                   # Ambil petikan konfigurasi + DB
-omniroute restore [<timestamp>]    # Pulihkan daripada petikan
-omniroute health                   # Kesihatan terperinci (pemutus, cache, memori)
-omniroute quota                    # Penggunaan kuota penyedia
-omniroute mcp status               # Status pelayan MCP
-omniroute a2a status               # Status pelayan A2A
-omniroute tunnel list|create|stop  # Terowong Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Tetapkan semula kata laluan pentadbir
-omniroute --mcp                    # Mulakan pelayan MCP melalui stdio
-omniroute --port 3000              # Mulakan pelayan pada port tersuai
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Petua: gandingkan `omniroute doctor --json` dengan alat pemantauan anda untuk memberikan amaran tentang sambungan penyedia yang tidak sihat.
+Petua: gandingkan `omniroute doctor --json` dengan alat pemantauan anda untuk memaklumkan pemasangan setempat yang rosak. `doctor` tidak menguji sambungan pembekal; gunakan `omniroute providers test <id>` untuk itu.
 
 ---
 

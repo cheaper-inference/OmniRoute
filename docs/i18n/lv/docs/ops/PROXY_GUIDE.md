@@ -271,150 +271,150 @@ Tas notiek vienreiz, veicot pirmo palaišanu pēc jaunināšanas. Lai migrāciju
 
 ---
 
-## 1proxy bezmaksas starpniekserveru tirgus
+## 1proxy Bezmaksas starpniekservera tirgus
 
-> 🆕 **Pievienoja [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (problēma [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** Ieguldīja [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (izdevums [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute integrējas ar **[1proxy](https://1proxy-api.aitradepulse.com)** kopienas platformu, lai nodrošinātu piekļuvi **simtiem bezmaksas, pārbaudītu starpniekserveru** no visas pasaules. Tas ir lieliski piemērots lietotājiem, kuriem nav savas starpniekserveru infrastruktūras.
+OmniRoute integrējas ar** [1 starpniekserveris](https://1proxy-api.aitradepulse.com)** kopienas platforma, kurai nodrošināt piekļuvi** simtiem bezmaksas, apstiprinātu starpniekserveru** no visas pasaules. Tas ir lieliski piemērots lietotājiem, kuriem nav savas starpniekservera infrastruktūras.
 
 ### Kā tas darbojas
 
 ```
-┌─────────────┐  Sinhronizācija ┌─────────────────┐   Rotācija    ┌──────────────────────┐
-│  1proxy API │ ───────────────▶ │  proxy_registry  │ ────────────▶ │ Pakalpojuma sniedzēja │
-│   (ārējs)    │    līdz 500     │  source=oneproxy │ pēc kvalitātes│         API           │
-└─────────────┘ starpniekserveru └─────────────────┘               └──────────────────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Sinhronizācija** — OmniRoute iegūst pārbaudītus starpniekserverus no 1proxy API
-2. **Saglabāšana** — starpniekserveri tiek saglabāti tajā pašā `proxy_registry` tabulā ar `source = 'oneproxy'`
-3. **Filtrēšana** — filtrējiet pēc protokola, valsts un kvalitātes vērtējuma
-4. **Rotācija** — izvēlieties labāko starpniekserveri, izmantojot kvalitātes, nejaušas vai secīgas izvēles stratēģiju
-5. **Automātiska pazemināšana** — starpniekserveriem, kuru izmantošana neizdodas, tiek samazināts kvalitātes vērtējums; ja tas ir zem sliekšņa → tie tiek atzīmēti kā neaktīvi
+1. **Sinhronizēt** — OmniRoute ienes apstiprinātos starpniekserverus no 1proxy API
+2. **Veikals** — Starpniekserveri tiek saglabāti tajā pašā `proxy_registry` tabulā ar `source = 'oneproxy'`
+3. **Filtrs** — Filtrēt pēc protokola, valsts, kvalitātes rādītāja
+4. **Pagriezt** — Izvēlieties labāko starpniekserveri, izmantojot kvalitātes, nejaušas vai secīgas stratēģijas
+5. **Automātiska degradācija** — Neveiksmīgiem starpniekserveriem tiek samazināts kvalitātes rādītājs; zem sliekšņa → atzīmēts kā neaktīvs
 
 ### Starpniekserveru sinhronizēšana
 
 **Izmantojot informācijas paneli:**
 
-1. Atveriet cilni **Iestatījumi → 1proxy**
-2. Noklikšķiniet uz **„Sinhronizēt tagad”**
-3. Skatiet statistiku: kopējais starpniekserveru skaits, aktīvo serveru skaits, vidējā kvalitāte un sadalījums pa valstīm
+1. Dodieties uz** Iestatījumi → 1proxy** cilne
+2. Noklikšķiniet** "Sinhronizēt tūlīt"**
+3. Skatīt statistiku: kopējais starpniekserveru skaits, aktīvo skaits, vidējā kvalitāte, sadalījums pa valstīm
 
-**Izmantojot API:**
+**Pa API:**
 
 ```bash
-# Sākt sinhronizāciju
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Atbilde:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
 ### Starpniekserveru filtrēšana
 
 ```bash
-# Filtrēt pēc protokola
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Filtrēt pēc valsts
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Filtrēt pēc minimālā kvalitātes vērtējuma
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Apvienot filtrus
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### Starpniekserveru kvalitātes vērtējumi
+### Starpniekservera kvalitātes rādītāji
 
-Katram 1proxy starpniekserverim ir pievienoti metadati:
+Katram 1 starpniekserveram ir metadati:
 
 | Lauks           | Apraksts                                               |
 | --------------- | ------------------------------------------------------ |
-| `qualityScore`  | 1proxy validācijas vērtējums no 0 līdz 100             |
+| `qualityScore`  | Vērtējums 0–100 no 1 starpniekservera validācijas      |
 | `latencyMs`     | Izmērītais tīkla latentums                             |
 | `anonymity`     | `transparent`, `anonymous` vai `elite`                 |
 | `googleAccess`  | Vai starpniekserveris var piekļūt Google pakalpojumiem |
 | `countryCode`   | Divu burtu ISO valsts kods                             |
 | `lastValidated` | Pēdējās validācijas laikspiedols                       |
 
-Kvalitātes vērtējumi tiek dinamiski pielāgoti:
+Kvalitātes rādītāji tiek dinamiski pielāgoti:
 
-- **Neizdevušies pieprasījumi** samazina vērtējumu par 10 punktiem
-- **Vērtējums samazinās līdz ≤10** → starpniekserveris tiek atzīmēts kā `inactive`
+- **Neizdevušies pieprasījumi** samazināt rezultātu par 10 punktiem
+- **Rezultāts samazinās līdz ≤ 10** → starpniekserveris ir atzīmēts `inactive`
 - Neaktīvie starpniekserveri tiek izslēgti no rotācijas
 
 ### Rotācijas stratēģijas
 
 ```bash
-# Rotācija pēc kvalitātes (vispirms labākais starpniekserveris) — noklusējuma stratēģija
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Nejauša rotācija
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# Secīga rotācija (vispirms visilgāk nevalidētais)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
-### Ķēdes pārtraucējs
+### Strāvas slēdzis
 
-1proxy sinhronizācijai ir iebūvēts ķēdes pārtraucējs:
+1 starpniekservera sinhronizācijai ir iebūvēts ķēdes pārtraucējs:
 
-- Pēc **5 secīgām sinhronizācijas kļūmēm** turpmākie sinhronizācijas mēģinājumi tiek bloķēti
-- Atiestatiet ar `resetOneproxyCircuitBreaker()` vai restartējiet serveri
-- Sinhronizācijas statuss ir pieejams adresē `GET /api/settings/oneproxy?action=status`
+- Pēc** 5 secīgas sinhronizācijas kļūmes** , turpmākie sinhronizācijas mēģinājumi ir bloķēti
+- Atiestatiet ar: `resetOneproxyCircuitBreaker()` vai restartējiet serveri
+- Sinhronizācijas statuss ir pieejams vietnē `GET /api/settings/oneproxy?action=status`
 
-### 1proxy starpniekserveru dzēšana
+### 1 starpniekservera starpniekserveru notīrīšana
 
 ```bash
-# Dzēst vienu 1proxy starpniekserveri
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# Dzēst VISUS 1proxy starpniekserverus (manuāli pievienotie starpniekserveri netiek mainīti)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
 ---
 
-## Aizsardzība pret noteikšanu un maskēšanās
+## Pretnoteikšana un slepenība
 
-OmniRoute ne tikai maršrutē datplūsmu caur starpniekserveri — tas liek datplūsmai izskatīties leģitīmai:
+OmniRoute ne tikai maršrutē satiksmi caur starpniekserveri — bet arī liek satiksmei izskatīties likumīgai:
 
-### TLS digitālā nospieduma imitēšana
+### TLS Pirkstu nospiedumu viltošana
 
-Izmanto `wreq-js`, lai ģenerētu pārlūkprogrammai līdzīgus TLS digitālos nospiedumus, apejot robotu noteikšanas sistēmas, kas atzīmē TLS rokasspiedienus, kuri nenāk no pārlūkprogrammas.
+Izmanto `wreq-js`, lai ģenerētu pārlūkprogrammai līdzīgus TLS pirkstu nospiedumus, apejot robotu noteikšanas sistēmas, kas atzīmē TLS rokasspiedienus, kas nav pārlūkprogrammas.
 
-### CLI digitālā nospieduma atbilstība
+### CLI pirkstu nospiedumu saskaņošana
 
-**CLI digitālā nospieduma pārslēgs** (`Iestatījumi → Drošība`) pārkārto HTTP galvenes un JSON pamatteksta laukus, lai tie precīzi atbilstu vietējo CLI bināro failu (Claude Code, Codex u.c.) signatūrai. Tas darbojas **papildus** starpniekserverim:
+The**CLI pirkstu nospiedumu pārslēgšana** (`Settings → Security`) pārkārto HTTP galvenes un JSON pamatteksta laukus, lai tie precīzi atbilstu vietējo CLI bināro failu parakstam (Claude kods, Codex utt.). Tas darbojas** virsū** starpniekserveris:
 
 ```
-Jūsu IP (bloķēta) → Starpniekservera IP (ASV) → Pakalpojumu sniedzēja API
-                    + TLS imitēšana
-                    + CLI digitālais nospiedums
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-Jūs vienlaikus iegūstat gan **IP maskēšanu**, gan **pieprasījumu autentiskumu**.
+Jūs saņemat abus**IP maskēšana** un** pieprasīt autentiskumu** vienlaikus.
 
-### Starpniekservera IP saglabāšana
+### Proxy IP saglabāšana
 
-Krāsu kodiem atbilstošas emblēmas informācijas panelī parāda, kurš starpniekservera līmenis ir aktīvs:
+Informācijas paneļa krāsu kodētas emblēmas parāda, kurš starpniekservera līmenis ir aktīvs:
 
-| Emblēma | Līmenis     | Nozīme                                                     |
-| ------- | ----------- | ---------------------------------------------------------- |
-| 🟢      | Globāls     | Visa datplūsma tiek virzīta caur šo starpniekserveri       |
-| 🟡      | Sniedzējs   | Tiek starpniekota tikai šī pakalpojumu sniedzēja datplūsma |
-| 🔵      | Savienojums | Šī konkrētā atslēga/konts izmanto šo starpniekserveri      |
+| Žetons | Līmenis               | Nozīme                                                  |
+| ------ | --------------------- | ------------------------------------------------------- |
+| 🟢     | Globāli               | Visa satiksme notiek caur šo starpniekserveri           |
+| 🟡     | Pakalpojumu sniedzējs | Tiek nodrošināta tikai šī pakalpojumu sniedzēja trafika |
+| 🔵     | Savienojums           | Šis konkrētais key/account izmanto šo starpniekserveri  |
 
-Emblēma verifikācijai parāda arī atrisināto starpniekservera IP.
+Emblēma parāda arī pārbaudīto starpniekserveri IP verifikācijai.
 
 ---
 
@@ -778,51 +778,28 @@ Izmantojiet `random`
 vienmērīgi)
 ```
 
-## Automātiska nedarbojošos paša starpniekserveru izslēgšana
+## Automātiska kļūmju izslēgšana jūsu starpniekserveriem
 
-1proxy tirdzniecības vietas pūls jau pats automātiski pazemina nedarbojošos starpniekserveru prioritāti (skatiet
-[Starpniekserveru kvalitātes rādītāji](#proxy-quality-scores)). Jūsu reģistram pievienotajiem
-starpniekserveriem fona darbspējas plānotājs
-(`src/lib/proxyHealth/scheduler.ts`) nodrošina tādu pašu darbību — „automātiski
-izslēgt nedarbojošos dalībnieku no ķēdes”, neko nedzēšot:
+1 starpniekservera tirgus kopums jau pats automātiski degradē neizdevušos starpniekserverus (skatiet [Starpniekservera kvalitātes rādītājus](#proxy-quality-scores) ). Starpniekserveriem** tu** Pievienots reģistram, fona veselības plānotājs (`src/lib/proxyHealth/scheduler.ts`) nodrošina tādu pašu darbību "automātiski izslēgt mirušu dalībnieku no ķēdes", neko neizdzēšot:
 
 ```bash
-# .env — programmiski atspējot starpniekserveri pēc 3 secīgām neveiksmīgām pārbaudēm un
-# automātiski to atkārtoti iespējot, tiklīdz tas atkal sāk atbildēt uz pārbaudēm.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Kā tas darbojas vairāku starpniekserveru ķēdē:
+Kā tas iekļaujas vairāku starpniekserveru ķēdē:
 
-1. Plānotājs pārbauda katru reģistrēto starpniekserveri ik pēc `PROXY_HEALTH_INTERVAL_MS`
-   (pēc noklusējuma — 10 min.; minimums — 1 min.).
-2. Pēc `PROXY_AUTO_REMOVE_AFTER` secīgām **pārliecinošām** neveiksmēm (reālas
-   savienojuma kļūmes — noildze vai paša pārbaudes mērķa 5xx atbilde nekad netiek ieskaitīta; skatiet
-   [Starpniekserveru darbspējas pārbaude](#proxy-health-checking-v3816)) starpniekservera `status` tiek
-   iestatīts uz `dead`.
-3. `dead` ir viens no statusiem, kurus izslēdz pūla/rotācijas
-   atrisināšanā izmantotais aktīvo statusu filtrs, tādēļ tvēruma rotācija (secīga / nejauša / piesaistīta /
-   pēc latentuma — skatiet [Rotācijas stratēģijas lēmumu koks](#rotation-strategy-decision-tree))
-   nekavējoties pārtrauc piešķirt šo starpniekserveri jauniem pieprasījumiem. Citi pūla
-   starpniekserveri netiek ietekmēti, un viss pūls nekad nemanāmi nepārslēdzas uz tiešu
-   savienojumu — skatiet [4 līmeņu starpniekserveru sistēmas](#4-level-proxy-system) kļūmes gadījumā savienojumu bloķējošo
-   aizsardzību.
-4. Plānotājs turpina pārbaudīt `dead` starpniekserverus ar to pašu intervālu. Nākamā
-   veiksmīgā pārbaude maina `status` atpakaļ uz `active`, un starpniekserveris atgriežas rotācijā —
-   manuāla atkārtota pievienošana nav nepieciešama.
+1. Plānotājs pārbauda katru reģistrēto starpniekserveri ik pēc `PROXY_HEALTH_INTERVAL_MS` (noklusējuma 10 min; vismaz 1 min).
+2. Pēc `PROXY_AUTO_REMOVE_AFTER` pēc kārtas** pārliecinošs** kļūmes (reāla savienojuma kļūme — noildze vai paša zondes mērķa 5xx nekad netiek skaitītas, skatiet [sadaļu Starpniekservera stāvokļa pārbaude](#proxy-health-checking-v3816) ), starpniekservera `status` ir iestatīts uz `dead`.
+3. `dead` ir viens no statusiem, ko izslēdz dzīvā statusa filtrs, ko izmanto pool/rotation izšķirtspēja, tāpēc tvēruma rotācija (apkārtējā darbība / nejaušs / lipīgs / latentums / sesija — skatiet [Rotācijas stratēģijas lēmumu koku](#rotation-strategy-decision-tree) ) nekavējoties pārtrauc šī starpniekservera nodošanu jauniem pieprasījumiem. Netiek ietekmēti nekādi citi baseina starpniekserveri, un viss baseins nekad klusībā neatgriežas tiešā savienojumā — Skatiet [4 līmeņu starpniekservera sistēmas](#4-level-proxy-system) atteices aizvēršanas aizsargu.
+4. Plānotājs turpina pārbaudīt `dead` starpniekserverus tajā pašā intervālā. Nākamā veiksmīgā zonde pārvērš `status` atpakaļ uz `active`, un tā atkārtoti ieslēdzas — rotācijā, nav nepieciešama manuāla atkārtota pievienošana.
 
-Šī funkcija ir apzināti **brīvprātīgi iespējojama un nedestruktīva**: pēc noklusējuma plānotājs tikai
-uzskaita un reģistrē žurnālā neveiksmes (skatiet politiku C failā `decision.ts`), un `PROXY_AUTO_DISABLE`
-nekad nedzēš rindu — tam ir paredzēts atsevišķais, agresīvākais
-`PROXY_AUTO_REMOVE` karodziņš. Ja abi ir iestatīti uz `true`, prioritāte ir `PROXY_AUTO_REMOVE`
-(starpniekserverim, kuru tūlīt dzēsīs, starpposmā nav jēgas to programmiski atspējot). Pilnu
-mainīgo sarakstu skatiet [Vides konfigurācijas](../reference/ENVIRONMENT.md) uzziņā.
+Tas ir apzināti** izvēles un nesagraujošas** : pēc noklusējuma plānotājs tikai uzskaita un reģistrē kļūmes (skatiet politiku C `decision.ts`), un `PROXY_AUTO_DISABLE` nekad neizdzēš rindu — un tam ir paredzēts atsevišķs, agresīvāks `PROXY_AUTO_REMOVE` karodziņš. Ja abi ir iestatīti uz `true`, uzvar `PROXY_AUTO_REMOVE` (starpniekserveris, kuru drīzumā paredzēts dzēst, nav izmantojams mīkstajai atspējošanai starp tām). Pilnu mainīgo sarakstu skatiet sadaļā [Environment Config](../reference/ENVIRONMENT.md).
 
 ---
 
-> 📖 **Saistītā dokumentācija:**
+> 📖** Saistītā dokumentācija:**
 >
-> - [Lietotāja rokasgrāmata](../guides/USER_GUIDE.md) — Vispārīga iestatīšana un konfigurēšana
-> - [API uzziņa](../reference/API_REFERENCE.md) — Pilna API dokumentācija
-> - [Vides konfigurācija](../reference/ENVIRONMENT.md) — Visi vides mainīgie
+> - [Lietotāja rokasgrāmata](../guides/USER_GUIDE.md) — Vispārīga iestatīšana un konfigurācija - [API Atsauce](../reference/API_REFERENCE.md) — Pilna API dokumentācija - [Vides konfigurācija](../reference/ENVIRONMENT.md) — Visi vides mainīgie

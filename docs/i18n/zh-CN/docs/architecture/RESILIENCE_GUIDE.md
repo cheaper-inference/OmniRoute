@@ -12,61 +12,53 @@ OmniRoute具有三种不同但相关的弹性机制。每个都有不同的范�
 
 > **弹性切换的环境与仪表板优先级。**从环境— `QUOTA_PREFLIGHT_CUTOFF_ENABLED`、 `PROVIDER_COOLDOWN_ENABLED`、 `STREAM_RECOVERY_ENABLED`、 `STREAM_RECOVERY_MIDSTREAM_ENABLED`、 `STREAM_THROUGHPUT_WATCHDOG_ENABLED` —播种的选择加入弹性切换仅提供 *default* （`DEFAULT_RESILIENCE_SETTINGS`、 `src/lib/resilience/settings.ts`）。 `resilienceSettings`中保留了一个布尔值（仪表板→**设置→弹性**/ `PATCH /api/resilience`，存储在`key_value`中）胜过 env 值：规范化（`toBoolean`， `src/lib/resilience/settings/normalize.ts`）在存在时保留存储的布尔值。在仪表板已保存`false`部署上将这样的环境变量设置为`true`因此不会改变任何—翻转切换**设置→弹性**（或清除存储的字段）。
 
-## 1. 提供者熔断器（Provider Circuit Breaker）
+## 1. 提供者熔断机制
 
-**作用范围：**整个提供者（例如 `glm`、`openai`、`anthropic`）。
+**范围：**整个提供者（例如， `glm`、 `openai`、 `anthropic`）。
 
-**用途：**停止向上游/服务层面持续失败的提供者发送流量。
+**目的：**停止向在upstream/service级别反复失败的提供者发送流量。
 
-**实现：**
+**执行：**
 
-- 核心类：`src/shared/utils/circuitBreaker.ts`
-- 接线：`src/sse/handlers/chatHelpers.ts`、`src/sse/handlers/chat.ts`
-- 状态 API：`GET /api/monitoring/health`
-- 重置 API：`POST /api/resilience/reset`
-- 封装：`open-sse/services/accountFallback.ts`
-- 数据库表：`domain_circuit_breakers`
+- 核心类： `src/shared/utils/circuitBreaker.ts`
+- 接线： `src/sse/handlers/chatHelpers.ts`、 `src/sse/handlers/chat.ts`
+- 状态API: `GET /api/monitoring/health`
+- 重置API: `POST /api/resilience/reset`
+- 包装： `open-sse/services/accountFallback.ts`
+- DB表： `domain_circuit_breakers`
 
-**状态：**
+**国家：**
 
-- `CLOSED` — 允许正常流量
-- `DEGRADED` — 仍允许流量，但正在跟踪升高的提供者失败次数；在取得足够多的成功、通过有效的连接测试，或在上次失败类型对应的最长 `OPEN` 保持时间（其 `cooldownByKind` 值，否则为 `resetTimeout`，× `maxBackoffMultiplier`，至少一个冷却周期）内没有出现新失败后，会回到 `CLOSED`
-- `OPEN` — 提供者被临时阻断；组合路由会跳过它
-- `HALF_OPEN` — 重置超时已过；允许探测请求
+- `CLOSED` —允许正常流量
+- `DEGRADED` —流量仍然允许，但正在跟踪增加的提供者故障；在足够成功的情况下、在有效的连接测试中或在最后一种失败类型的最长`OPEN`保持之后（其`cooldownByKind`值，否则`resetTimeout`、 × `maxBackoffMultiplier`，至少一次冷却）后返回`CLOSED` ，而没有新的失败
+- `OPEN` —提供者暂时被屏蔽；组合路由会跳过它
+- `HALF_OPEN` —重置超时已过；允许探测请求
 
-**可配置默认值（`open-sse/config/constants.ts`，在 Dashboard → Settings → Resilience 中公开）：**
+**可配置的默认值（`open-sse/config/constants.ts`，在仪表板→设置→弹性中公开）：**
 
-| 类别    | 进入降级（Degraded） | 熔断（Opens） | 重置超时 |
-| ------- | -------------------- | ------------- | -------- |
-| OAuth   | 5 次失败             | 8 次失败      | 60s      |
-| API-key | 7 次失败             | 12 次失败     | 30s      |
-| Local   | 派生                 | 2 次失败      | 15s      |
+| 班级    | 降级于  | 开放时间 | 重置超时 |
+| ------- | ------- | -------- | -------- |
+| OAuth   | 5次失败 | 8次失败  | 60年代   |
+| API密钥 | 7次失败 | 12次失败 | 30秒     |
 
-`degradationThreshold` 控制提供者何时进入 `DEGRADED`；`failureThreshold` 控制其何时熔断并被跳过。Local 提供者配置文件尚未在 Resilience 设置页面中公开。
+`degradationThreshold`控制提供者何时进入`DEGRADED`； `failureThreshold`控制何时打开并被跳过。 `PROVIDER_PROFILES.local` （2次失败/15秒）在`open-sse/config/constants.ts`中定义，但是**还没接线**： `getProviderCategory()`仅返回`oauth`或`apikey`，因此本地提供者使用OAuth或 API 密钥配置文件。
 
-**触发条件码：**仅提供者级状态码 `[408, 500, 502, 503, 504]`。账户级错误（大多数 401/403/429——它们属于冷却或锁定范畴）**不会**触发熔断。
+**行程代码：**仅提供者级别的状态`[408, 500, 502, 503, 504]`。做NOT行程为账户级错误（大多数401/403/429 —属于冷却或锁定）。
 
-**惰性恢复：**当 `OPEN` 过期时，`getStatus()`、`canExecute()`、`getRetryAfterMs()` 会将状态刷新为 `HALF_OPEN`。同样的读取操作（以及下一次失败）会使过期的 `DEGRADED` 衰减回 `CLOSED`。无需后台定时器。
+**惰性恢复：**当`OPEN`过期时， `getStatus()`、 `canExecute()`、 `getRetryAfterMs()`刷新状态为`HALF_OPEN`。相同的读取（以及下一次失败）将陈旧的`DEGRADED`衰减回`CLOSED`。无需后台计时器。
 
 ---
 
-### 可选启用的全局 Provider Cooldown（窗口门控）
+### 选择加入全球提供者冷却（窗口门）
 
-第四层是**可选启用**的（`PROVIDER_COOLDOWN_ENABLED`，默认**关闭**），它在
-`open-sse/services/providerCooldownTracker.ts` 中保留失败提供者的
-跨请求记忆，由组合目标解析逻辑查询，使连续的组合请求不再重新遍历刚刚
-失败的提供者。提供者级条目遵循 `PROVIDER_PROFILES` 的窗口门控：
+第四个，**选择加入**层（`PROVIDER_COOLDOWN_ENABLED`，默认**离开**）在`open-sse/services/providerCooldownTracker.ts`中保留失败提供者的交叉请求内存，并通过组合目标解析进行咨询，以便连续的组合请求停止重新遍历刚刚失败的提供者。提供者级别的条目尊重`PROVIDER_PROFILES`窗口门：
 
-| 配置文件 | 触发所需次数（`providerFailureThreshold`） | 时间窗口（`providerFailureWindowMs`） | 冷却时长（`providerCooldownMs`） |
-| -------- | -----------------------------------------: | ------------------------------------: | -------------------------------: |
-| OAuth    |                                       `10` |                               `15min` |                           `5min` |
-| API key  |                                       `15` |                               `30min` |                          `10min` |
+| 轮廓  | (`providerFailureThreshold`) 之后的行程 | 里面（`providerFailureWindowMs`） | 冷却 (`providerCooldownMs`) |
+| ----- | --------------------------------------: | --------------------------------: | --------------------------: |
+| OAuth |                                    `10` |                           `15min` |                      `5min` |
+| API键 |                                    `15` |                           `30min` |                     `10min` |
 
-低于阈值时，该提供者**不会**被视为冷却中；一次成功会清除该窗口。
-连接级条目（`provider:connectionId`）则保留指数级的
-`minRetryCooldownMs → maxRetryCooldownMs` 退避策略。覆盖配置：
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`。
-回归防护测试：`tests/unit/provider-cooldown-window-gate.test.ts`。
+提供者低于阈值**不是**考虑冷却；成功清除了窗口。连接级条目 (`provider:connectionId`) 保留指数`minRetryCooldownMs → maxRetryCooldownMs`退避。覆盖： `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`。回归守卫： `tests/unit/provider-cooldown-window-gate.test.ts`。
 
 ## 2. 连接冷却
 
@@ -593,6 +585,21 @@ reached”）的 429 会先由配额文本回退逻辑（`buildSubscriptionQuota
 
 ---
 
+## 当OmniRoute本身不可达时
+
+提供者断路器、连接冷却和模型锁定都在网关内运行。如果客户端无法到达网关，则会出现连接错误。 OmniRoute无法拦截该故障。客户端决定是否重试以及显示什么消息。
+
+OmniRoute目前不提供客户端回退，也没有为其定义任何策略。在客户端或网关前面配置任何备用路由。
+
+- `GET /api/health`无需身份验证即可检查活性。
+- `GET /api/health/ping`检查准备情况，包括数据库是否响应。
+- `GET /api/monitoring/health`为经过身份验证的呼叫者提供更深入的健康状况概览。
+- `omniroute launch <tool>`在启动客户端之前探测`/api/monitoring/health` 。它可以自动启动本地网关。使用`--no-start`，无法访问的网关会导致`GatewayUnreachable`和退出代码`69`。
+
+要断开客户端与OmniRoute的连接，请遵循[恢复客户端配置](../guides/UNINSTALL.md#revert-client-configuration)。
+
+---
+
 ## 调试
 
 - 加权组合（Weighted combo）返回 `503 all_targets_cooling_down`（设置了 `Retry-After`，`diagnostics.excluded` 列出每个目标及其 `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable` 状态）→ 说明资源池已配置并连接，只是所有目标都被某个弹性计时器排除了；`[COMBO] Weighted selection: every target excluded before dispatch — …` 警告会给出原因和剩余秒数。同一个组合返回 `404 no_executable_targets` 则表示没有涉及弹性计时器（没有可运行的目标，或者每个账号都未通过可用性探测）。构建逻辑位于 `open-sse/services/combo/pinRecovery.ts`，排除信息收集自 `targetResolution.ts`。
@@ -604,94 +611,68 @@ reached”）的 429 会先由配额文本回退逻辑（`buildSubscriptionQuota
 
 ---
 
-## 运行时状态 —— 代理快速参考
+## 运行时状态—代理快速参考
 
-> 原文从 `AGENTS.md` 的 "Resilience Runtime State" 一节原样迁移而来（PR #12743），
-> 以使代理指南保持在 40k 上下文预算之内。这是上述各节的精简、面向代理的视图；
-> 编号章节仍是完整参考。
+> 从`AGENTS.md` → “弹性运行时状态”(PR #12743) 中逐字移动，因此代理指南保持在 40k 上下文预算以下。这是上面各部分的面向代理的浓缩视图；编号部分仍然是完整的参考。
 
-OmniRoute 有三种相关但不同的临时故障机制。在调试路由行为时，请保持它们的
-作用域清晰区分。参见
-[3 层弹性架构图](../diagrams/exported/resilience-3layers.svg)
-（源文件：[diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)）
-以快速了解整体结构。
+OmniRoute具有三种相关但不同的临时故障机制。调试路由行为时，保持它们的作用域是分开的。请参阅[3 层弹性图](../diagrams/exported/resilience-3layers.svg)（来源： [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ）以获得概览图。
 
-### 提供者熔断器
+### 供应商断路器
 
-**作用域**：整个提供者，例如 `glm`、`openai`、`anthropic`。
+**范围**：整个提供者，例如`glm`、 `openai`、 `anthropic`。
 
-**目的**：停止向在上游/服务层面反复失败的提供者发送流量，避免一个不健康的
-提供者拖慢每个请求。
+**目的**：停止向在upstream/service级别反复失败的提供者发送流量，因此不健康的提供者不会减慢每个请求。
 
-**实现**：
+**执行**：
 
-- 核心类：`src/shared/utils/circuitBreaker.ts`
-- 聊天门控/执行接线：`src/sse/handlers/chatHelpers.ts`、`src/sse/handlers/chat.ts`
-- 运行时状态 API：`src/app/api/monitoring/health/route.ts`
-- 共享封装：`open-sse/services/accountFallback.ts`
-- 持久化状态表：`domain_circuit_breakers`
+- 核心类： `src/shared/utils/circuitBreaker.ts`
+- 聊天gate/execution接线： `src/sse/handlers/chatHelpers.ts`、 `src/sse/handlers/chat.ts`
+- 运行时状态API: `src/app/api/monitoring/health/route.ts`
+- 共享包装器： `open-sse/services/accountFallback.ts`
+- 持久状态表： `domain_circuit_breakers`
 
-**状态**（共 4 个 —— `src/shared/utils/circuitBreaker.ts`）：
+**州**(4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`：正常放行流量。
-- `DEGRADED`：预警区间 —— 失败次数已越过降级阈值，但尚未达到熔断
-  阈值；流量仍然放行，仪表盘显示警告。一次有效的连接测试或一段没有
-  新故障的静默窗口会使其回到 `CLOSED`
-  （窗口说明见 `docs/architecture/RESILIENCE_GUIDE.md`）。
-- `OPEN`：提供者被临时阻断；调用方会收到提供者熔断响应，
-  或者组合路由跳到其他目标。
-- `HALF_OPEN`：重置超时已到；允许一个探测请求。探测成功则闭合
-  熔断器，失败则再次打开。
+- `CLOSED`：允许正常流量。
+- `DEGRADED`：预警带—故障已超过降级阈值，但尚未达到断路器阈值；交通仍然畅通，仪表板显示警告。有效的连接测试或没有新故障的安静窗口将其返回给`CLOSED` （`docs/architecture/RESILIENCE_GUIDE.md`有该窗口）。
+- `OPEN`：提供者被暂时阻止；呼叫者获得提供者电路开放响应或组合路由跳到另一个目标。
+- `HALF_OPEN`: 重置超时已过；允许探测请求。成功关闭断路器，失败再次打开断路器。
 
-**默认值**（`open-sse/config/constants.ts` → `PROVIDER_PROFILES`，经由
-`src/lib/resilience/settings.ts` 中的 `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` 消费，
-再传入 `src/sse/handlers/chatHelpers.ts` 中的 `getCircuitBreaker(provider, …)`）。整个提供者级别的
-熔断器依据 `circuitBreakerThreshold` / `circuitBreakerReset` 运行：
+**默认值**（`open-sse/config/constants.ts` → `PROVIDER_PROFILES`，通过`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` `src/lib/resilience/settings.ts` → in `src/sse/handlers/chatHelpers.ts`中的`getCircuitBreaker(provider, …)`消耗）。整体提供者断路器在`circuitBreakerThreshold` / `circuitBreakerReset`上运行：
 
-| 配置文件 | 降级阈值 | 熔断阈值（`circuitBreakerThreshold`） | 重置时间（`circuitBreakerReset`） |
-| -------- | -------: | ------------------------------------: | --------------------------------: |
-| OAuth    |      `5` |                                   `8` |                             `60s` |
-| API 密钥 |      `7` |                                  `12` |                             `30s` |
-| 本地     | （派生） |                                   `2` |                             `15s` |
+| 轮廓  | 降解于 | 开盘于 (`circuitBreakerThreshold`) | 重置（`circuitBreakerReset`） |
+| ----- | -----: | ---------------------------------: | ----------------------------: |
+| OAuth |    `5` |                                `8` |                         `60s` |
+| API键 |    `7` |                               `12` |                         `30s` |
 
-`PROVIDER_PROFILES` 还定义了 `providerFailureThreshold`（10/15/2）、
-`providerFailureWindowMs`（15/30/5 分钟）和 `providerCooldownMs`（5/10/1 分钟）：这些参数驱动的是
-**可选开启的全局提供者冷却（Provider Cooldown）的窗口门控**（`PROVIDER_COOLDOWN_ENABLED`，默认
-关闭）—— `open-sse/services/providerCooldownTracker.ts` 中的提供者级条目只有在
-`providerFailureWindowMs` 窗口内达到 `providerFailureThreshold` 次失败后才算进入冷却，随后
-冷却 `providerCooldownMs` 时长。它们**不是**实时熔断器的阈值 —— 不要调整它们并期望
-改变熔断器行为。所有默认值都可以通过
-`OMNIROUTE_PROVIDER_BREAKER_*` 和 `OMNIROUTE_CIRCUIT_BREAKER_*` 环境变量覆盖；
-与运行时一致的参考表位于 `docs/architecture/RESILIENCE_GUIDE.md`。
+`local`配置文件 (`2` Failures / `15s`) 也存在于`PROVIDER_PROFILES`中，但它没有连接到断路器： `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) 只接受`oauth`或`apikey`，而`getProviderCategory()` (`open-sse/config/providerRegistry.ts`) 返回这两个之一（未注册的提供者获取`apikey`）。
 
-只有提供者级别的故障状态码才应触发提供者熔断器：
+`PROVIDER_PROFILES`还定义了`providerFailureThreshold` (10/15/2)、 `providerFailureWindowMs` (15/30/5 min) 和`providerCooldownMs` (5/10/1 min) — OAuth/API key/local，其中局部值是惰性的，原因与上述相同：这些为**选择加入全球提供者冷却时间的窗口**（`PROVIDER_COOLDOWN_ENABLED`，默认关闭） — `open-sse/services/providerCooldownTracker.ts`中的提供者级别条目仅在`providerFailureWindowMs`内的`providerFailureThreshold`失败后才算作冷却，然后为`providerCooldownMs`冷却。它们是NOT实时断路器的阈值—不会根据期望的断路器行为来调整它们。每个默认值都可以通过`OMNIROUTE_PROVIDER_BREAKER_*`和`OMNIROUTE_CIRCUIT_BREAKER_*`环境变量覆盖；运行时精确的参考表位于`docs/architecture/RESILIENCE_GUIDE.md`中。
+
+只有提供程序级别的故障状态才应使提供程序断路器跳闸：
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-对于普通的账号/密钥/模型错误，例如大多数 `401`、`403` 或 `429` 情况，不应触发
-整个提供者级别的熔断器。这些通常属于连接冷却或模型锁定的范畴。通用 API 密钥
-提供者返回的 `403` 应该是可恢复的，除非它被归类为终止性的提供者/账号错误。
+不要因正常的account/key/model错误（如大多数`401`、 `403`或`429`情况）而触发整个提供者断路器。这些通常属于连接冷却或模型锁定。通用 API 密钥提供程序`403`应该是可恢复的，除非它被分类为终端provider/account错误。
 
-断路器采用惰性恢复，而非后台定时器。当 `OPEN` 状态过期时，诸如
-`getStatus()`、`canExecute()` 和 `getRetryAfterMs()` 的读取操作会将状态刷新为
-`HALF_OPEN`，这样仪表盘和组合候选构建器就不会一直无限期地排除一个已过期的 provider。
+断路器使用延迟恢复，而不是后台计时器。当`OPEN`过期时， `getStatus()`、 `canExecute()`和`getRetryAfterMs()`等读取会将状态刷新为`HALF_OPEN`，因此仪表板和组合候选构建器不会永远排除过期的提供程序。
 
-### 连接冷却（Connection Cooldown）
+### 连接冷却
 
-**作用范围**：单个 provider 连接/账户/密钥。
+**范围**： 一位供应商connection/account/key.
 
-**目的**：临时跳过一个异常的密钥/账户，同时允许同一 provider 的其他连接继续处理请求。
+**目的**：暂时跳过一个坏的key/account同时允许同一提供者的其他连接继续服务请求。
 
-**实现**：
+**执行**：
 
-- 写入/更新路径：`src/sse/services/auth.ts::markAccountUnavailable()`
-- 账户选择/过滤：`src/sse/services/auth.ts::getProviderCredentials...`
-- 冷却时间计算：`open-sse/services/accountFallback.ts::checkFallbackError()`
-- 设置：`src/lib/resilience/settings.ts`
+- Write/update路径： `src/sse/services/auth.ts::markAccountUnavailable()`
+- 帐号selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- 冷却时间计算： `open-sse/services/accountFallback.ts::checkFallbackError()`
+- 设置： `src/lib/resilience/settings.ts`
 
-provider 连接上的重要字段：
+提供者连接的重要字段：
 
 ```ts
 rateLimitedUntil;
@@ -702,57 +683,50 @@ errorCode;
 backoffLevel;
 ```
 
-在账户选择期间，满足以下条件时连接会被跳过：
+在帐户选择过程中，在以下情况下会跳过连接：
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-冷却同样是惰性的：当 `rateLimitedUntil` 已成为过去时间，连接将重新变为可用。成功使用后，`clearAccountError()` 会清除 `testStatus`、
-`rateLimitedUntil`、错误字段以及 `backoffLevel`。
+冷却时间也是惰性的：当`rateLimitedUntil`过去时，连接再次变得合格。成功使用后， `clearAccountError()`会清除`testStatus`、 `rateLimitedUntil`、错误字段和`backoffLevel`。
 
-默认的连接冷却行为：
+默认连接冷却行为：
 
-- OAuth 基础冷却时间：`5s`。
-- API 密钥基础冷却时间：`3s`。
-- API 密钥遇到 `429` 时，应优先采用上游的重试提示（`Retry-After`、reset 响应头或
-  可解析的 reset 文本），如果有的话。
-- 重复出现的可恢复故障使用指数退避：
+- OAuth基础冷却时间： `5s`。
+- API 密钥基础冷却时间： `3s`。
+- API 密钥`429`应该更喜欢上游重试提示（`Retry-After`、重置标头或可解析重置文本）（如果可用）。
+- 重复的可恢复故障使用指数退避：
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-防惊群（anti-thundering-herd）保护机制可防止同一连接上的并发故障反复延长冷却时间或重复递增 `backoffLevel`。
+反雷群保护可防止同一连接上重复延长冷却时间或双倍递增`backoffLevel`而发生并发故障。
 
-终态（terminal states）不是冷却。`banned`、`expired`（仅在经过 N 次有界重试后才变为终态，由 `EXPIRED_RETRY_MAX` 控制）和 `credits_exhausted` 旨在保持不可用状态，直到凭据/设置发生变更或由运维人员手动重置。
-不要用瞬态冷却状态覆盖终态。
+终止状态不是冷却时间。 `banned`、 `expired` （仅在通过`EXPIRED_RETRY_MAX` N 次有界重试后才变为终端）和`credits_exhausted`旨在保持不可用，直到credentials/settings更改或操作员重置它们。不要用瞬态冷却状态覆盖最终状态。
 
-### 模型锁定（Model Lockout）
+### 型号锁定
 
-**作用范围**：provider + 连接 + 模型。
+**范围**：提供者+连接+模型。
 
-**目的**：当某个连接上仅有一个模型不可用或配额受限时，避免禁用整个连接。
+**目的**：当只有一个模型不可用或该连接受到配额限制时，避免禁用整个连接。
 
 示例：
 
-- 按模型配额计费的 provider 返回 `429`。
-- 本地 provider 对某个缺失的模型返回 `404`。
-- 特定 provider 的模式/模型权限故障，例如选定的 Grok 模式。
+- 每个模型的配额提供者返回`429`。
+- 本地提供者针对一种缺失型号返回`404` 。
+- 特定于提供者的mode/model权限失败，例如选定的Grok模式。
 
-模型锁定位于 `open-sse/services/accountFallback.ts`，它允许同一连接继续为其他模型提供服务。
+模型锁定存在于`open-sse/services/accountFallback.ts`中，并允许相同的连接继续为其他模型提供服务。
 
-### 调试指南
+### 调试指导
 
-- 如果某个 provider 的所有密钥都被跳过，请同时检查 provider 断路器状态和每个
-  连接的 `rateLimitedUntil`/`testStatus`。
-- 如果某个 provider 在重置窗口之后似乎被永久排除，请检查代码是否在直接读取原始的
-  `state`，而没有使用 `getStatus()`/`canExecute()`。
-- 如果某个 provider 密钥失败但其他密钥应该可用，优先使用连接冷却而非
-  provider 断路器。
-- 如果只有一个模型失败，优先使用模型锁定而非连接冷却。
-- 如果某个状态应当自我恢复，它应该具有一个未来的时间戳/重置超时，以及一条
-  能刷新过期状态的读取路径。永久性状态需要手动修改凭据或配置。
+- 如果跳过提供程序的所有键，请检查提供程序断路器状态和每个连接的`rateLimitedUntil`/`testStatus`。
+- 如果提供者在重置窗口后显示为永久排除，请检查代码是否正在读取原始`state`而不是使用`getStatus()`/`canExecute()`。
+- 如果一个提供程序密钥失败，但其他提供程序密钥应该可以工作，则优先选择连接冷却而不是提供程序断路器。
+- 如果只有一个模型失败，则优先选择模型锁定而不是连接冷却。
+- 如果一个状态应该自我恢复，它应该有一个未来的timestamp/reset超时和一个刷新过期状态的读取路径。永久状态需要手动凭据或配置更改。
 
 ---
 

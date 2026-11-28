@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Schema** — één cron-taak in `JobRegistry`, `log_export`, met als standaard `0 * * * *` (elk uur,
-  UTC). Geregistreerd in `src/lib/initCloudSync.ts`; te overschrijven met `OMNIROUTE_LOG_EXPORT_CRON`.
-  Elke uitvoering verwerkt alle **ingeschakelde** bestemmingen achtereenvolgens.
-- **Cursor** — de impliciete `call_logs.rowid` van SQLite, per bestemming opgeslagen in
-  `log_export_destinations.cursor_row_id`. `timestamp` is bewust niet de cursor: aanroepers
-  kunnen hun eigen waarde opgeven, waardoor een trage aanvraag kan worden weggeschreven na een snellere die
-  later begon. Een tijdstempelcursor zou die dan overslaan.
-- **Batchverwerking** — `batch_size` rijen per aanvraag (standaard 500), `max_rows_per_run` rijen per uitvoering
-  (standaard 10000), zodat een grote achterstand over meerdere uitvoeringen wordt verwerkt in plaats van één uitvoering te blokkeren.
-- **Aflevering** — de cursor wordt pas bijgewerkt nadat `send()` is voltooid. Bij een mislukte batch blijft de
-  cursor staan, zodat dezelfde rijen bij de volgende uitvoering opnieuw worden geprobeerd. De garantie is
-  minimaal één aflevering met ontdubbeling aan de bestemmingszijde, niet strikt precies één aflevering: BigQuery gebruikt de
-  aanroeplog-id als sleutel voor elke rij en houdt daar binnen zijn eigen ontdubbelingsvenster naar beste vermogen rekening mee.
-- **Overlapbeveiliging** — de cron-uitvoering en `POST .../run` kunnen tegelijk worden gestart. Een bestemming
-  die al wordt verwerkt, wordt overgeslagen in plaats van tweemaal verwerkt (`skipped: true` in het uitvoeringsresultaat),
-  zodat een gelijktijdige uitvoering geen batch opnieuw kan versturen of de cursor kan terugzetten.
-- **Herstel na leegmaken** — als `cursor_row_id` hoger uitkomt dan `MAX(rowid)` (de hele tabel is
-  leeggemaakt en de rowid-waarden zijn opnieuw begonnen), zet de uitvoerder de cursor terug naar 0 in plaats van permanent geen records meer te zien.
+- **Schema** — één `JobRegistry` cronjob, `log_export`, standaard ingesteld op `0 * * * *` (per uur, UTC). Geregistreerd in `src/lib/initCloudSync.ts`; overschrijfbaar met `OMNIROUTE_LOG_EXPORT_CRON`. Elke teek zuigt elke teek leeg** ingeschakeld** bestemming, opeenvolgend.
+- **Cursor** — SQLite's impliciete `call_logs.rowid`, bleef bestaan per bestemming in `log_export_destinations.cursor_row_id`. `timestamp` is met opzet niet de cursor: aanroepers kunnen hun eigen waarde opgeven, zodat een langzame aanvraag kan worden geschreven na een snellere aanvraag die later is gestart, en een tijdstempelcursor zou deze overslaan.
+- **Batchen** — `batch_size` rijen per verzoek (standaard 500), `max_rows_per_run` rijen per run (standaard 10000), zodat een grote achterstand over meerdere ticks leegloopt in plaats van er één te blokkeren.
+- **Levering** — de cursor gaat pas verder nadat `send()` is opgelost. Bij een mislukte batch blijft de cursor staan waar deze stond, zodat bij de volgende run dezelfde rijen opnieuw worden geprobeerd. De garantie is minstens één keer plus deduplicatie aan de bestemmingszijde, en is niet precies één keer waar: BigQuery sleutelt elke rij aan de hand van de call-log-ID, die het op een best-effort-basis respecteert binnen zijn eigen dedup-venster.
+- **Overlapbescherming** — de cron tick en `POST .../run` kunnen samen vuren. Een bestemming die al leeg is, wordt overgeslagen in plaats van tweemaal leeggemaakt (`skipped: true` in het runresultaat), dus een gelijktijdige run kan een batch niet opnieuw verzenden of de cursor achteruit schrijven.
+- **Herstel opruimen** — als `cursor_row_id` boven `MAX(rowid)` uitkomt (de hele tafel is leeggemaakt en de rowids zijn opnieuw gestart), dan spoelt de loper terug naar 0 in plaats van permanent blind te worden.
 
-### Geïsoleerde uitvoerder en limieten
+### Geïsoleerde loper en grenzen
 
-Elke bestemmingsuitvoering op Node start een afzonderlijk, kortstondig onderliggend besturingssysteemproces (`child_process`
-met IPC, niet `worker_threads`). Het lezen van body's, het parsen/serialiseren van payload-JSON, het aanroepen van
-`prepare()` voor de bestemming en alle netwerk-I/O naar de bestemming vinden daar plaats, niet in de eventloop van de server.
-Alleen configuratie en kleine voortgangsberichten gaan via IPC; geëxporteerde records keren nooit terug naar
-de server. De cron-taak en de route Nu uitvoeren behouden hetzelfde publieke resultaat en dezelfde overlapbeveiliging.
+Elke bestemming die op Node wordt uitgevoerd, start een afzonderlijk, kortstondig onderliggend OS proces (`child_process` met IPC, niet `worker_threads`). Body reads, payload JSON parsing/serialization, bestemming `prepare()` en bestemmingsnetwerk I/O worden allemaal daar uitgevoerd, niet op de gebeurtenislus van de server. Alleen configuratie- en kleine voortgangsberichten passeren IPC; geëxporteerde records keren nooit terug naar de server. De cronjob en Nu uitvoeren-route behouden hetzelfde openbare resultaat en overlappende beveiliging.
 
-Het onderliggende proces opent het door de server bepaalde `DATA_DIR/storage.sqlite` alleen-lezen met `node:sqlite`,
-met `busy_timeout=5000` en `query_only=ON`. Het importeert geen databasesingleton en voert geen
-migraties, back-ups of SQLite-updates uit. De administratie van ontbrekende/beschadigde artefacten (inclusief de
-UPDATE voor beschadigde artefacten) blijft uitsluitend onderdeel van het detailpad in het dashboard. Beide paden delen een zuivere
-detailresolver; export gebruikt asynchrone bestandssysteemlezingen en dezelfde resolutievolgorde: artefact → verouderd
-inline → verouderd op schijf → geen. Een uitvoering legt de maximale invoeg-rowid vast
-wanneer het onderliggende proces zijn lezer opent; latere invoegingen wachten op de volgende uitvoering. Dit is een invoeggrens,
-geen langdurige SQLite-transactie: WAL-schrijvers en checkpoints blijven vrij tijdens
-het wachten op het netwerk. Updates/verwijderingen van bestaande rijen worden door deze grens niet bevroren.
+Het kind opent de opgeloste `DATA_DIR/storage.sqlite` van de server als alleen-lezen met `node:sqlite`, met `busy_timeout=5000` en `query_only=ON`. Het importeert geen DB singleton en voert geen migraties, back-ups of SQLite updates uit. Missing/corrupt -artefactboekhouding (inclusief het corrupte artefact UPDATE) blijft alleen in het dashboarddetailpad. Beide paden delen een pure detailoplosser; export gebruikt asynchrone bestandssysteemlezingen en hetzelfde artefact → legacy inline → legacy schijf → geen resolutievolgorde. Een run maakt een momentopname van de maximale invoeging rowid wanneer het kind de lezer opent; latere inserts wachten op de volgende run. Dit is een invoeggrens, geen SQLite transactie met een lange levensduur: WAL schrijvers en controlepunten blijven vrij tijdens netwerkwachttijden. Updates/deletions van bestaande rijen worden niet bevroren door deze grens.
 
-Na elke geaccepteerde batch wacht het onderliggende proces op een bevestiging. De server slaat eerst
-de cursor op met `advanceLogExportCursor` en verstuurt vervolgens `ack`; vóór die tijd begint er geen volgende batch.
-Een verzendfout, crash of time-out registreert een fout zonder de cursor voor die batch bij te werken. Eerder
-bevestigde batches blijven vastgelegd; hoogstens de ene onbevestigde batch kan opnieuw worden verstuurd.
-Succes wordt pas geregistreerd na `done` en een normale beëindiging van het onderliggende proces. Bij fouten wordt het onderliggende proces beëindigd
-met SIGTERM, na 500 ms opgeschaald naar SIGKILL, en wacht de uitvoerder totdat het proces is afgesloten.
+Na elke geaccepteerde batch wacht het kind op een bevestiging. De server houdt de cursor eerst vast met `advanceLogExportCursor` en verzendt vervolgens `ack`; er begint geen volgende batch eerder. Een verzendfout, crash of time-out registreert een fout zonder de batch vooruit te zetten. Eerder bevestigde batches blijven vastgelegd; Hooguit kan de ene niet-bevestigde batch opnieuw worden verzonden. Succes wordt pas geregistreerd na `done` en een schone child-exit. Mislukkingen beëindigen het kind met SIGTERM en escaleren na 500 ms naar SIGKILL, en de runner wacht op afsluiting van het proces.
 
-| Omgevingsvariabele                            | Standaard | Doel                                                   |
-| --------------------------------------------- | --------- | ------------------------------------------------------ |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000    | Maximale verstreken tijd per bestemming                |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024      | V8-old-space-limiet van het onderliggende proces in MB |
+| Omgevingsvariabele                            | Standaard | Doel                            |
+| --------------------------------------------- | --------- | ------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000    | Wandkloklimiet per bestemming   |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024      | Kind V8 oude ruimtelimiet in MB |
 
-Bij ongeldige, niet-positieve of niet-gehele waarden worden de standaardwaarden gebruikt. De heapinstelling is geen totale
-RSS-limiet; zeer grote batches kunnen het geheugen van het onderliggende proces nog steeds uitputten en de uitvoering veilig laten mislukken.
-De standaardwaarde van 1024 MB laat ruimte voor de standaardbatch van 500 rijen met artefacten van 512 KiB wanneer
-body's zijn ingeschakeld, inclusief de JSON-serialisatie van BigQuery in op bytes gebaseerde blokken. Dit maakt een
-batch van 10000 rijen met body's niet veilig. Uitputting van de V8-heap registreert een fout met een concrete herstelactie: verklein de batch
-of verhoog `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; de cursor blijft bij de laatst
-bevestigde batch. Historische inline/op schijf opgeslagen body's vallen niet onder de moderne artefactlimiet.
-Beheerders moeten apart rekening houden met het RSS-geheugengebruik, vooral in containers met een geheugenlimiet.
+Invalid/non-positive/non-integer -waarden gebruiken de standaardwaarden. De heap-instelling is geen totale RSS limiet; zeer grote batches kunnen nog steeds het kindergeheugen uitputten en de uitvoering veilig mislukken. De standaardwaarde van 1024 MB laat ruimte over voor de standaard batch van 500 rijen van 512 KiB artefacten met ingeschakelde lichamen, inclusief BigQuery's byte-chunked JSON serialisatie. Het maakt een carrosserie met 10.000 rijen niet batchveilig. V8 heap exhaustion registreert een actiegerichte fout: verlaag de batchgrootte of verhoog `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; de cursor blijft bij de laatst bevestigde batch staan. Historische inline/disk lichamen vallen niet onder de moderne artefactkap. Operators moeten RSS afzonderlijk budgetteren, vooral in containers met beperkte geheugen.
 
-Het onderliggende proces erft alleen de bepaalde `DATA_DIR`, `NODE_ENV`, expliciete `TZ` (voor de
-verwerking van lokale tijd in verouderde bestandsnamen), `ELECTRON_RUN_AS_NODE` indien aanwezig, en de volgende invoer voor uitgaand verkeer:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (en hun varianten in kleine letters),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Een globale Undici-dispatcher deelt de uitsluitend op omgevingsvariabelen gebaseerde proxybepaling en de regels voor het
-omzeilen van de proxy voor lokale hosts van de server, inclusief `NO_PROXY`; deze importeert noch `proxyFetch.ts`, noch de bijbehorende database-/functieflags.
-Proxyreferenties worden verwijderd uit doorgestuurde uitvoer en vastgelegde fouten. Referenties voor de bestemming
-worden uitsluitend in één IPC-startbericht verzonden, nooit via argv of de omgeving; doorgestuurde uitvoer en fouten
-krijgen een voorvoegsel en worden opgeschoond. Alleen `ExperimentalWarning` wordt uitgeschakeld in de uitvoeringsargumenten van het onderliggende proces om te voorkomen
-dat de SQLite-waarschuwing van Node bij elke cron-uitvoering wordt herhaald; andere waarschuwingstypen blijven zichtbaar.
+Het onderliggende item erft alleen de opgeloste `DATA_DIR`, `NODE_ENV`, expliciete `TZ` (legacy bestandsnaam lokale tijdresolutie), `ELECTRON_RUN_AS_NODE` indien aanwezig, en de volgende uitgaande invoer: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (en hun kleine letters), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Een wereldwijde Undici-dispatcher deelt de pure omgevingsproxyresolutie en lokale host-bypassregels van de server, inclusief `NO_PROXY`; het importeert geen `proxyFetch.ts` of zijn DB/feature -vlaggen. Proxyreferenties worden geredigeerd op basis van doorgestuurde uitvoer en geregistreerde fouten. Bestemmingsreferenties reizen slechts in één start IPC -bericht, nooit argv of omgeving; output/error -doorsturen wordt voorafgegaan en opgeschoond. Alleen `ExperimentalWarning` is uitgeschakeld in onderliggende exec-argumenten om te voorkomen dat SQLite -waarschuwing van Node bij elke cron-run wordt herhaald; andere waarschuwingstypen blijven zichtbaar.
 
-Bestemmingsmodules moeten geïmporteerd kunnen worden zonder Next.js-/server-only-afhankelijkheden. De bestaande
-BigQuery-implementatie voldoet al aan die vereiste. Caches voor toegangstokens blijven alleen bestaan tijdens de uitvoering
-van het onderliggende proces, niet tussen uitvoeringen. Node is de ondersteunde runtime (engines in `package.json`), maar de Bun-installatiesectie
-in de README en `Dockerfile.bun` bieden ook een compatibiliteitsroute voor productie met
-`bun:sqlite` (`src/lib/db/core.ts` / adapters). Onder Bun behouden exports daarom het eerdere
-uitvoeringspad binnen hetzelfde proces en geven ze een eenmalige waarschuwing: heap-/time-outisolatie via een onderliggend proces is niet beschikbaar. Gebruik
-Node voor eventloop- en OOM-isolatie; Bun wordt hier niet als uitsluitend voor ontwikkeling beschouwd.
+Bestemmingsmodules moeten importeerbaar zijn zonder Next.js/server-only afhankelijkheden. De bestaande BigQuery implementatie voldoet al aan dat contract. Toegangstokencaches duren alleen voor de onderliggende uitvoering, niet voor meerdere uitvoeringen. Knooppunt is de ondersteunde runtime (`package.json` engines). Er bestaat een best-effort, niet-ondersteund Bun -compatibiliteitspad (`bun:sqlite` in `src/lib/db/core.ts` / adapters, en `Dockerfile.bun`), dus exporten mogen er niet onder breken. Onder Bun behouden exporten het vorige in-process pad en geven ze een eenmalige waarschuwing: onderliggende heap/timeout isolatie is niet beschikbaar. Gebruik Node voor event-loop en OOM isolatie.
 
-Wanneer `includeBodies` is ingeschakeld, verdient een interval op minutenniveau zoals
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` de voorkeur boven het opbouwen van een uur aan achterstallige payloads.
-Batch- en rijlimieten begrenzen nog steeds elke uitvoering. Het proces wordt per bestemming per uitvoering opgestart;
-hierbij worden geringe opstartkosten ingeruild voor isolatie van de server-eventloop, niet voor een lager totaal CPU-gebruik.
+Wanneer `includeBodies` is ingeschakeld, geeft u de voorkeur aan een cadans op minuutniveau, zoals `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` in plaats van een achterstallige payload per uur op te bouwen. Batch- en rijlimieten zijn nog steeds gebonden aan elke run. Procesopstarten wordt per bestemming per run betaald; dit ruilt een kleine opstartkost in voor server event-loop isolatie, en niet voor een verminderd totaal CPU gebruik.
 
-### Payloads (prompts en antwoorden)
+### Payloads (aanwijzingen en voltooiingen)
 
-Standaard bevat de export alleen de samenvattingsvelden die de **lijst** met logs toont. Door
-**Prompts en antwoorden exporteren** (`includeBodies`) in te schakelen, wordt daarnaast geëxporteerd wat het **detailvenster**
-van de logs voor elke aanroep toont:
+Standaard bevat de export alleen de samenvattingsvelden van de Logboeken** lijst** toont. Aanzetten** Exporteer prompts en antwoorden** (`includeBodies`) verzendt bovendien wat de Logs** detail** venster toont voor elk gesprek:
 
-| Veld                             | Inhoud                                                                   |
-| -------------------------------- | ------------------------------------------------------------------------ |
-| `request_body` / `response_body` | De payloads van de aanroep zoals het dashboard ze weergeeft              |
-| `pipeline_route_decision`        | Welk doel en model de router heeft gekozen                               |
-| `pipeline_client_request`        | Het onbewerkte verzoek, precies zoals de client het heeft verzonden      |
-| `pipeline_openai_request`        | Na omzetting naar de interne OpenAI-structuur                            |
-| `pipeline_provider_request`      | Zoals daadwerkelijk upstream verzonden, in het formaat van de provider   |
-| `pipeline_provider_response`     | Het onbewerkte upstream-antwoord                                         |
-| `pipeline_client_response`       | Wat aan de aanroeper is teruggegeven                                     |
-| `pipeline_error`                 | Foutdetails op pipelineniveau voor een mislukte aanroep                  |
-| `bodies_truncated`               | Waar wanneer een van de bovenstaande velden `maxBodyBytes` heeft bereikt |
+| Veld                             | Wat het bevat                                                                     |
+| -------------------------------- | --------------------------------------------------------------------------------- |
+| `request_body` / `response_body` | De payloads van de oproep worden weergegeven wanneer het dashboard deze weergeeft |
+| `pipeline_route_decision`        | Welk doel en model de router heeft gekozen                                        |
+| `pipeline_client_request`        | Het onbewerkte verzoek precies zoals de klant het heeft verzonden                 |
+| `pipeline_openai_request`        | Na vertaling naar de interne OpenAI vorm                                          |
+| `pipeline_provider_request`      | Zoals feitelijk stroomopwaarts verzonden, in het dialect van de provider          |
+| `pipeline_provider_response`     | De ruwe stroomopwaartse reactie                                                   |
+| `pipeline_client_response`       | Wat werd teruggegeven aan de beller                                               |
+| `pipeline_error`                 | Foutdetails op pijplijnniveau voor een mislukte oproep                            |
+| `bodies_truncated`               | Waar als een veld erboven `maxBodyBytes` treft                                    |
 
-Dit is promptinhoud, dus deze optie staat **standaard uit** en is bewust een keuze per bestemming.
-Wat wordt geëxporteerd, is wat het dashboard toont, omdat de export en `getCallLogById` dezelfde verwerking
-van details delen: payloads zijn
-al ontdaan van persoonsgegevens en geheimen wanneer ze worden opgeslagen, en een aanroep met een
-`noLog`-API-sleutel slaat helemaal geen payload op, zodat er niets te exporteren is.
+Dit is snelle inhoud, zo is het** standaard uitgeschakeld** en bewust een keuze per bestemming. Wat wordt weergegeven, is wat het dashboard laat zien, omdat export en `getCallLogById` de detailresolutie delen: payloads worden al PII-opgeschoond en in het geheim geredigeerd wanneer ze worden geschreven, en een oproep gedaan met een `noLog` API sleutel slaat helemaal geen payload op, dus er valt niets te exporteren.
 
-Payloads worden per rij uit het bestandssysteemartefact gelezen, dus het laden ervan gebeurt alleen voor bestemmingen
-die daarom hebben gevraagd. Bij een ontbrekend of beschadigd artefact wordt de samenvatting geëxporteerd met null-payloads, in plaats
-van de batch te laten mislukken en de cursor te laten vastlopen.
+Payloads worden per rij uit het bestandssysteemartefact gelezen, dus hydratatie wordt alleen uitgevoerd voor bestemmingen die erom hebben gevraagd. Een ontbrekend of beschadigd artefact exporteert zijn samenvatting met null-payloads in plaats van dat de batch mislukt en de cursor vastloopt.
 
-`maxBodyBytes` (standaard 262144) begrenst elk veld. Langere payloads worden **afgekapt in plaats van
-weggelaten** — een ingekorte prompt beantwoordt nog steeds de vraag "wat werd er gevraagd" — en de rij wordt gemarkeerd met
-`bodies_truncated`. Gestreamde delta's per chunk worden niet geëxporteerd; het samengestelde antwoord staat
-al in `pipeline_provider_response` en `pipeline_client_response`.
+`maxBodyBytes` (standaard 262144) sluit elk veld af. Langere ladingen wel** afgekapt in plaats van te laten vallen** — een geknipte prompt antwoordt nog steeds "wat werd gevraagd" — en de rij wordt gemarkeerd met `bodies_truncated`. Gestreamde delta's per stuk worden niet geëxporteerd; het verzamelde antwoord bevindt zich al in `pipeline_provider_response` en `pipeline_client_response`.
 
 ---
 

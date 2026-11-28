@@ -4,7 +4,7 @@
 
 ---
 
-> **真実の情報源:** `electron/`ワークスペース**最終更新日:** 2026-06-28 — v3.8.40
+> **真実の情報源:** `electron/`ワークスペース
 
 OmniRoute 、上に構築されたクロスプラットフォーム デスクトップ アプリ (Windows / macOS / Linux) を出荷します。**Electron 41** +**電子ビルダー 26.10** 。デスクトップ アプリは、 Next.jsスタンドアロン サーバーを子プロセスとして生成し、それに`BrowserWindow`を指定し、システム トレイ、自動アップデータ、 IPCブリッジ、およびゼロ構成のシークレット ブートストラップを追加します。
 
@@ -92,7 +92,7 @@ scripts/
     └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-`main.js`と`preload.js`はどちらも**CommonJS `.js`ファイル**、 TypeScriptはありません。レンダラ側の型指定は`electron/types.d.ts`にあります。
+`main.js`と`preload.js`はどちらも**CommonJS `.js`ファイル**、 TypeScriptはありません。レンダラー側の型指定は`electron/types.d.ts`にあります。
 
 ## IPCブリッジ (`preload.js`)
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## 自動更新
 
-`electron-updater` GitHubプロバイダー (`diegosouzapw/OmniRoute`) とともに使用します。
+`electron-updater` GitHubプロバイダー (`cheaper-inference/OmniRoute`) とともに使用します。
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC経由でレンダラーに転送されるイベント: `checking`、 `available`、 `not-available`、 `downloading` ( `percent`を使用)、 `downloaded`、 `error`
@@ -273,7 +273,7 @@ AppImage署名はオプションです。署名する場合は—設定し、 `L
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-リリースはGitHubリリース (`diegosouzapw/OmniRoute`) に公開され、 `electron-updater`新しいバージョンをチェックする場所でもあります。
+リリースはGitHubリリース (`cheaper-inference/OmniRoute`) に公開され、 `electron-updater`新しいバージョンをチェックする場所でもあります。
 
 ## トラブルシューティング
 

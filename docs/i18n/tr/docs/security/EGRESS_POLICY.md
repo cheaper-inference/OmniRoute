@@ -69,35 +69,35 @@ Yönerge kasıtlı olarak global değil, **proxy başınadır** — havuzunuzdak
 
 ## Üç Değer
 
-| Değer  | Kullanıcı arayüzü etiketi | Davranış                                                                                                                                                                                   |
-| ------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auto` | `Otomatik (çift yığın)`   | İşletim sistemi aileyi seçer. IP değişmezi olan bir proxy ana makinesi için aile, değişmezin kendisinde bulunur; bir ana makine adı için her iki aile de kullanılabilir. Varsayılan budur. |
-| `ipv4` | `Yalnızca IPv4`           | Bağlantıyı IPv4'e sabitler. Proxy ana makinesinin IPv4 (A) kaydı yoksa bağlantı güvenli biçimde başarısız olur.                                                                            |
-| `ipv6` | `Yalnızca IPv6`           | Bağlantıyı IPv6'ya sabitler. Proxy ana makinesinin IPv6 (AAAA) kaydı yoksa bağlantı güvenli biçimde başarısız olur.                                                                        |
+| Değer  | UI etiketi          | Davranış                                                                                                                                                  |
+| ------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS aileyi seçer. Bir IP-literal proxy ana bilgisayarı için aile, değişmezin esasıdır; bir ana makine adı için her iki aile de uygundur. Bu varsayılandır. |
+| `ipv4` | `IPv4 only`         | Bağlantıyı IPv4 sabitler. Proxy ana bilgisayarında IPv4 (A) kaydı yoksa kapatılamaz.                                                                      |
+| `ipv6` | `IPv6 only`         | Bağlantıyı IPv6 sabitler. Proxy ana bilgisayarında IPv6 (AAAA) kaydı yoksa kapatılamaz.                                                                   |
 
-Kullanıcı arayüzü dizeleri `src/i18n/messages/en.json` dosyasında bulunur (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+UI dizeleri `src/i18n/messages/en.json` yaşar (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Nasıl Yapılandırılır?
+## Nasıl Yapılandırılır
 
 ### Kontrol Paneli
 
-Seçici, **Proxy Havuzu** sekmesindeki proxy formunda bulunur:
+Seçici, proxy formundadır.** Vekil Havuzu** sekme:
 
-1. **Kontrol Paneli → Ayarlar → Proxy → Proxy Havuzu** bölümünü açın
-2. Bir proxy ekleyin veya düzenleyin
-3. **IP ailesi** açılır menüsünü `Otomatik (çift yığın)`, `Yalnızca IPv4` veya `Yalnızca IPv6` olarak ayarlayın
-4. Kaydedin
+1. Açık** Kontrol Paneli → Ayarları → Proxy → Proxy Havuzu**
+2. Proxy ekleme veya düzenleme
+3. Ayarla**IP ailesi** `Auto (dual-stack)`, `IPv4 only` veya `IPv6 only` açılan menü
+4. Kaydetmek
 
-Denetim, `ProxyRegistryManager.tsx` tarafından oluşturulur (`proxy/ProxyPoolTab.tsx` içinde bağlanır).
+Kontrol `ProxyRegistryManager.tsx` tarafından gerçekleştirilir ( `proxy/ProxyPoolTab.tsx` monte edilmiştir).
 
 ### API
 
-`family` alanı, proxy kayıt defteri oluşturma/güncelleme yüklerinin bir parçasıdır; `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) tarafından doğrulanır ve `POST` / `PATCH /api/v1/management/proxies` tarafından işlenir:
+`family` alanı, `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) tarafından doğrulanan ve `POST` / `PATCH /api/v1/management/proxies` tarafından işlenen proxy kayıt defteri create/update yüklerinin bir parçasıdır:
 
 ```bash
-# Yalnızca IPv6 kullanan bir proxy oluştur
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Mevcut bir proxy'yi yalnızca IPv4 kullanacak şekilde değiştir
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Aynı alan, yukarı akış proxy girdileri için kullanılan satır içi proxy yapılandırma nesnesi tarafından da kabul edilir (`upstream_proxy_config.family`; bkz. [Veri Modeli](#data-model)).
+Aynı alan, yukarı akış proxy girişleri için kullanılan satır içi proxy yapılandırma nesnesi tarafından da kabul edilir (`upstream_proxy_config.family`, bkz. [Veri Modeli](#data-model) ).
 
-Proxy CRUD/atama API'sinin geri kalanı için [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) belgesine bakın.
+Proxy CRUD/assignment API geri kalanı için bkz [PROXY_GUIDE](../ops/PROXY_GUIDE.md)
 
 ---
 

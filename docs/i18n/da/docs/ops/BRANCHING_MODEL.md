@@ -39,7 +39,7 @@ skal normalt målrettes mod en anden gren før sammenfletning.
 
 ## Frigør fryse (parallelle cyklusser)
 
-Når en udgivelse bliver afstemt, åbnes et markørproblem mærket `release-freeze`. At** stopper ikke udviklingen** :
+Når en udgivelse er ved at blive afstemt, åbnes et markørproblem mærket `release-freeze`. At** stopper ikke udviklingen** :
 
 - Den frosne `release/vX.Y.Z` tilhører frigivelseskaptajnen for det skib.
 - Den næste cyklus `release/vX+1` skæres fra den frosne spids, så bidragyderne fortsætter med at lande.
@@ -48,12 +48,12 @@ Når en udgivelse bliver afstemt, åbnes et markørproblem mærket `release-free
 Tjek for en åben frysning, før du antager, at den gren, du ønsker, kan flettes:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Merge mekanik (ejer `queue` label → Mergify) er dokumenteret i [MERGE_TRAIN.md](./MERGE_TRAIN.md).
 
-> **2026-11-19: Mergify-fletningskøen er trukket tilbage** (ejers beslutning). `.mergify.yml` definerer ikke længere en kø og afviser de Mergify-kommandoer, der fusionerer eller omskriver en pull-anmodning. Release PRs flettes i hånden under repository-regelsættet "Kræv grønne porte på den aktive udgivelse" (`Gate / CI` + `Gate / Quality`) indtil omni-queue kører i live mode, og gennem omni-queue derefter ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). `queue` etiketten fletter ikke længere noget.
+> **2026-11-19: Mergify-fletningskøen er trukket tilbage** (ejers beslutning). `.mergify.yml` definerer ikke længere en kø og afviser Mergify-kommandoer, der flettes eller omskriver en pull-anmodning. Release PRs flettes i hånden under repository-regelsættet "Kræv grønne porte på den aktive udgivelse" (`Gate / CI` + `Gate / Quality`) indtil omni-queue kører i live mode, og gennem omni-queue derefter ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). `queue` etiketten fletter ikke længere noget.
 
 ## Hvorfor både en gren og et tag?
 

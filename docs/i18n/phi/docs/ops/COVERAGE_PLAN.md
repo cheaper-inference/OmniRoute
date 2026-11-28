@@ -151,19 +151,19 @@ Mga tema para sa mga Phase 6-7:
 - [ ] Magdagdag ng mga regression test para sa bawat hindi nasaklaw na production bug na naayos habang itinutulak ang coverage tungo sa 90%
 - [ ] Taasan lamang ang coverage gate sa CI kapag matatag na ang lokal na baseline sa hindi bababa sa dalawang magkasunod na run
 
-## Patakaran sa ratchet
+## Patakaran ng ratchet
 
-I-update lamang ang mga threshold ng `npm run test:coverage` kapag aktuwal nang lumampas ang proyekto sa susunod na milestone nang may sapat na palugit.
+I-update lamang ang mga threshold `npm run test:coverage` pagkatapos aktwal na lumampas ang proyekto sa susunod na milestone na may komportableng buffer.
 
-**Kasalukuyang gate:** Ipinapatupad ng `npm run test:coverage` ang **60 pahayag / 60 linya / 60 function / 60 sangay** (muling ibinatay ang sukatan sa Quality-Gates Yugto 6A.1 — masyadong mataas ang naunang baseline na 82.58% dahil isinama nito ang mga test file at hindi isinama ang `open-sse`). Pinapanatili ng command na `test:coverage:legacy` ang lumang sukatang 50/50/50 para sa makasaysayang paghahambing.
+**Kasalukuyang gate:** ipinapatupad ni `npm run test:coverage`** 60 pahayag / 60 linya / 60 function / 60 sangay** (binase muli ang sukatan sa Quality-Gates Fase 6A.1 — ang naunang 82.58% baseline ay napalaki dahil binibilang nito ang mga test file at hindi kasama `open-sse`). Pinapanatili ng `test:coverage:legacy` command ang lumang sukatan 50/50/50 para sa makasaysayang paghahambing.
 
-Para sa mga ad-hoc na pagsusuri ng threshold batay sa pinakabagong ulat, gamitin ang:
+Para sa mga ad-hoc threshold na pagsusuri laban sa pinakabagong paggamit ng ulat:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Inirerekomendang pagkakasunod-sunod ng ratchet (ang ayos ay `mga pahayag-mga linya / mga sangay / mga function`):
+Inirerekomendang ratchet sequence (ang pagkakasunud-sunod ay `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
@@ -174,7 +174,7 @@ Inirerekomendang pagkakasunod-sunod ng ratchet (ang ayos ay `mga pahayag-mga lin
 7. 85/80/84
 8. 90/85/88
 
-Ang susunod na target ng ratchet ay `80/75/78` kapag nanatiling mas mataas sa 78% ang coverage ng mga sangay sa dalawang magkasunod na pagpapatakbo.
+Ang susunod na target ng ratchet ay `80/75/78` kapag ang saklaw ng sangay ay umabot nang higit sa 78% para sa dalawang magkasunod na pagtakbo.
 
 ## Kilalang kakulangan
 

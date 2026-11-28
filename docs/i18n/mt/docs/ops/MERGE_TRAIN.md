@@ -4,74 +4,63 @@
 
 ---
 
-> **2026-11-19: il-kju ta' amalgamazzjoni Mergify huwa rtirat** (deċiżjoni tas-sid). `.mergify.yml` m'għadux jiddefinixxi kju u jirrifjuta l-kmandi Mergify li jingħaqdu jew jiktbu mill-ġdid pull request. Ir-rilaxx PRs huma magħquda bl-idejn taħt ir-regoli tar-repożitorju "Jeħtieġu gradi ħodor fuq ir-rilaxx attiv" (`Gate / CI` + `Gate / Quality`) sakemm omni-queue jaħdem fil-modalità ħaj, u permezz ta 'omni-queue wara dak ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). It-taqsimiet Mergify hawn taħt jiddeskrivu l-kju kif kien.
+## Inżul fuq fergħa tar-rilaxx
 
-Peress li v3.8.49 (WS3.2/WS3.4 tal-pjan quality/velocity ) il-mogħdija ta' amalgamazzjoni default għal PRs rivedut `release/vX.Y.Z` hija l-** Għaqda kju amalgamazzjoni** (`.mergify.yml`); il** merge-trejn manwali** dokumentat hawn taħt huwa l- FALLBACK — użat waqt inċidenti, iffriżar tar-rilaxx, jew jekk il-pjan Mergify Open Source qatt jinbidel.
+L-omni-queue jirregola l-inżul `release/vX.Y.Z`. Aqra l- `mode` tal-ogħla livell `config/merge-queue/config.json` fuq il-fergħa default qabel ma tħoll PR. Ara [Omni-Queue](OMNI_QUEUE.md).
 
-## Mogħdija awtomatika: il-kju ta’ Mergify
+- **`shadow`** tmexxi l-validazzjoni u tħalli l-inżul għal amalgamazzjoni manwali. Applika `omni-queue` għaż- PR approvat fir-ras finali tiegħu. Iċċekkja l-eliġibilità ma `npm run queue -- why <PR>`. Stenna l-verdett għal dak ir-ras `npm run queue -- history --base <branch>`. Ipproċedi fuq `would-land`. Fuq `culprit-found` jew `would-dequeue`, żomm l-għaqda u waħħal il-kawża.
+- **Shadow eċċezzjonijiet.** Ferrovija CI ħadra sħiħa kontra l-ponta tal-bażi kurrenti tista' tipproċedi mingħajr verdett tal-kju separat. L-istess eċċezzjoni tapplika meta r-ras PR diġà fiha l-ponta bażi attwali.
+- **`live`** juża t-tikketta `omni-queue` biex iqanqal l-inżul. Il-kju waħdu jniżżel iż- PR. Ħalli l-kmandi tal-għaqda u l-imbuttar dirett lejn il-kju.
 
-1. Il-PR jiġi rieżaminat/jingħata l-aħdar mill-kampanji u approvat mill-gate ⭐ ta’ qabel il-merge tas-sid (ir-rapport + id-deċiżjoni għal kull element — ara `/merge-prs` Pass 0.75).
-2. Is-sid (jew is-sessjoni li taġixxi fuq id-deċiżjoni tas-sid) japplika t-tikketta **`queue`**. It-tikketta HIJA l-approvazzjoni tal-merge; Mergify sempliċement jeżegwixxiha.
-3. Mergify jivvalida l-PRs fil-kju **b’mod sekwenzjali** (wieħed kull darba) kontra l-fast-gates u jagħmel il-merge (squash). Il-batching + il-bisection awtomatika huma parti minn livell imħallas ta’ Mergify ("Cannot use Merge Queue batch" fuq il-pjan bla ħlas, #7220), għalhekk `.mergify.yml` ma jistabbilixxi ebda `batch_size`; il-batching jibqa’ l-kompitu tal-merge-train manwali hawn taħt. PR li l-kontrolli tiegħu jkunu għadhom pendenti wara `checks_timeout` (240 min = 2× il-p95 imkejjel ta’ `quality.yml`) jitneħħa mill-kju minflok ma jwaqqaf il-kju.
-4. Wara l-merge, il-workflow kontinwu ta’ validazzjoni tal-istat aħdar tar-rilaxx jivvalida t-tip il-ġdid waqt il-push u jiftaħ issue ta’ attribuzzjoni jekk il-kombinazzjoni tkun marret lura (qatt ma jagħmel auto-revert).
+Kull inżul jeħtieġ l-awtorizzazzjoni tas-sid u l-kontrolli meħtieġa applikabbli. Applika `omni-queue` biss wara li s-sid ikun awtorizza l-inżul. PRs fil-kju li jmiss mogħdijiet protetti jeħtieġu wkoll id-deċiżjoni `protected-approved` tas-sid għal dak PR.
 
-Miżuri ta’ protezzjoni (jirriflettu `CLAUDE.md` Regoli Stretti #21/#22):
+Ir-regoli "Jeħtieġu gradi ħodor fuq ir-rilaxx attiv" jeħtieġ `Gate / CI` aħdar u `Gate / Quality` fuq ir-ras. Qatt tuża `--admin` biex tevita gate aħmar. Blokki tal-friża rilaxx jingħaqdu fil-fergħa ffriżata. Ara [Regola Iebsa 21](HARD_RULES_DETAIL.md). Qatt ttikketta, tingħaqad jew timbotta għal talba tal-ġibda li sessjoni oħra tkun qed taħdem. Ara [Regola Iebsa 22](HARD_RULES_DETAIL.md).
 
-- **Release freeze miftuħ** → TAPPLIKAX tikketti fuq PRs immirati lejn il-fergħa ffriżata; l-ewwel immirahom mill-ġdid lejn ir-`release/vX+1` attiv.
-- **PR in-flight ta’ sessjoni oħra** → qatt tapplikalu tikketta; hija biss is-sessjoni sid li tqiegħed ix-xogħol tagħha stess fil-kju.
-- Diffs tat-testijiet biss u PRs bit-tikketta `hotfix` diġà jħaddmu CI mnaqqas (ara `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); il-kundizzjonijiet tal-kju jaċċettaw kwalunkwe sett ta’ kontrolli li fil-fatt tħaddem (`#check-failure=0` + `#check-pending=0`).
+## It-talba tal-ġibda tal-ferrovija
 
-## Għażla ta’ riżerva: il-merge-train manwali
+1. Ibda fergħa tal-ferrovija fil-ponta tal-bażi tar-rilaxx attwali. Integra l-kapijiet tal-membri approvati eżatti bl-użu ta 'merge commits. Ippreserva l-istorja tal-impenn tagħhom billi tevita squash u rebase.
+2. Iftaħ talba waħda tal-ġibda għall-fergħa tal-ferrovija. Ivvalida dik PR biż CI sħiħ tagħha stess fuq il-ponta bażi kurrenti. Iċċekkja mill-ġdid il-ponta tal-bażi u l-irjus tal-membri approvati qabel l-inżul. Aġġorna l-ferrovija u CI tagħha meta l-kandidat validat jinbidel.
+3. Inżul il-ferrovija PR b'merge commit taħt il-modalità kju applikabbli. Fil-modalità live, il-metodu tal-inżul `merge-ff` tal-kju jippreserva l-commits tal-merge. L-irjus tal-membri oriġinali jsiru aċċessibbli mill-fergħa tar-rilaxx. GitHub jimmarka l-membru PRs bħala magħqud u l-kommessi jżommu l-awturi tagħhom.
 
-Jintuża meta l-kju ma jkunx disponibbli. Dan jikkodifika l-prattika li pproċessat 33 PR
-f’ġurnata waħda matul iċ-ċiklu v3.8.47:
+Eżempju pubbliku huwa [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Hija għaqqad 18-il membru PRs u niżel b'commit ta' merger fl-2026-11-24.
 
-1. **Arma l-lott** (~10–30 PR rieżaminati+approvati). Iċċekkja għal kolliżjonijiet `linked:`
-   (l-istess `tap.testFiles`, l-istess hunks taċ-CHANGELOG) u ssekwenzjahom.
-2. **Ivvalida DARBA**: f’worktree iżolat mit-tip tar-rilaxx, agħmel merge lokalment tal-heads
-   kollha tal-lott, imbagħad ħaddem is-suite ekwivalenti għal dik tar-rilaxx
-   (`npm run check:release-green`, żid `--with-build` qabel rilaxx).
-   `scripts/release/merge-train.sh <base> <PR#>…` jawtomatizza l-passi 1–2 (PRs f’kunflitt
-   jitneħħew, u t-train ikompli). Il-modalità sħiħa tħaddem `npm run test:unit` — ir-runner
-   aġġustat għall-magna (`--test-concurrency=20`), **mhux** iż-żewġ shards sekwenzjali ta’ CI
-   b’4 cores, li ġiegħlu lill-fażi dominanti tuża ~25% ta’ magna b’16-il core (irranġat
-   2026-07-18). `--fast` (għall-ipproċessar ta’ mega-trains matul il-ġurnata, approvat mis-sid
-   2026-07-18) iżomm kull gate statiku + vitest iżda jħaddem biss il-fajls node:test mibdula
-   mill-PRs abbord; is-suite SĦIĦA xorta trid titħaddem mill-inqas darba kuljum fuq it-tip
-   akkumulat (train wieħed mingħajr `--fast`).
-3. **Aħdar** → agħmel merge tal-PRs f’sekwenza (erġa’ ċċekkja `state,headRefOid` qabel kull wieħed —
-   PR li ċċaqlaqlu l-head jerġa’ jidħol għar-rieżami). Ipprova li n-net diff ta’ kull merge huwa
-   l-bidla tal-PR innifsu (l-ebda reverts b’auto-resolve: awditja `git diff --stat` għal
-   tħassir barra mill-ambitu).
-4. **Aħmar** → aqsam il-lott binarjament f’nofsijiet (ivvalida kull nofs) minflok terġa’ tivvalida
-   wieħed wieħed; erġa’ poġġi l-PR problematiku fil-kju tar-rieżami flimkien mal-evidenza.
-5. **Qatt**: tagħmel merge waqt waqfa fil-branch iffriżat; tuża `git stash` kullimkien;
-   terġa’ tħaddem is-CI kollu bit-tama li l-aħmar jgħib (regola: aħmar huwa informazzjoni).
+Sinkronizzazzjoni lura minn `main` għall-fergħa tar-rilaxx li jmiss tinżel ukoll permezz ta 'commit ta' merge. Il-preservazzjoni tal-antenati `main` hija meħtieġa għal sync-backs aktar tard. Ara [l-Iżolament tas-Siġar tax-Xogħol](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Klassifikazzjoni f’livelli (għaliex il-kju huwa sikur b’fast-gates biss)
+## Il-validatur lokali tal-merge-trein
 
-- **Għal kull PR** (fast-gates ta’ quality.yml): testijiet affettwati mit-TIA + unit sħiħ b’4 shards +
-  vitest + ġabra ta’ lint + typecheck + integrità tad-dokumentazzjoni/changelog.
-- **Għal kull lott/tip** (release-green kontinwu): gates STRETTI `--quick` ma’ kull push lejn
-  il-branch tar-rilaxx; sweeps sħaħ `--with-build --full-ci` 3×/jum.
-- **Għal kull rilaxx** (ci.yml fuq il-PR tar-rilaxx): il-matriċi sħiħa inklużi E2E ×9,
-  package-artifact + tarball boot-smoke, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Xejn mhu qed jiġi vvalidat inqas minn qabel — is-superfiċje tqila sempliċement titħaddem għal kull lott/tip
-minflok għal kull PR, u dan huwa dak li jelimina r-round-trips O(N).
+Il-validatur iġib il-bażi u l-irjus PR u jgħaqqadhom f'siġra tax-xogħol li tintrema. Hija tmexxi l-parità suite tagħha darba fuq is-siġra li tirriżulta. Konflitt ta' head fetch jew ta' amalgamazzjoni fallut iwarrab dak PR u l-iskript ikompli biż- PRs li jifdal.
 
-## Prerekwiżiti ta’ checkout ġdid għal `merge-train.sh`
+- **`--plan`** tipprintja l-passi u l-ħruġ tal-mod magħżul mingħajr ma toħloq siġra tax-xogħol jew tikkuntattja l-remote. Għaqqadha ma ' `--fast` biex tispezzjona l-pjan mgħaġġel.
+- **`--fast`** imexxi l-gradi statiċi komuni, il-fajls `node:test` magħżula mibdula taħt `tests/unit/`, u `npm run test:vitest`. Mexxi validazzjoni lokali sħiħa mill-inqas darba kuljum fuq il-ponta akkumulata meta tuża l-modalità veloċi.
+- **Modalità sħiħa** iżid il-gradi statiċi full-biss u jmexxi `npm run test:unit` u `npm run test:vitest`.
 
-L-iskript iħaddem **preflight** fail-fast fuq ir-root checkout (qabel kwalunkwe xogħol
-fuq il-worktree) sabiex installazzjoni difettuża qatt ma tkun tista’ tidher bħala train aħmar:
+Xatba statika li tfalli terġa' titħaddem fuq il-bażi mhux mittiefsa jekk is-sonda bażi tkun disponibbli. L-iskrittura tirrapporta fallimenti wiret u tkompli meta kull linja ta 'ksur rikonoxxut tidher ukoll fuq il-bażi u l-għadd totali ma kiberx.
 
-1. `npm ci`, imbagħad ħaddem il-postinstall ta’ `bun` li npm jimblokka:
-   `(cd node_modules/bun && node install.js)` — inkella `check:provider-consistency`
-   u `check:known-symbols` (it-tnejn `bun scripts/…`) ifallu fuq it-train U fuq il-base
-   mingħajr linja ta’ ksur.
-2. Ebda `node_modules/node_modules` żejjed (siġra duplikata ta’ dipendenzi; React jitgħabba darbtejn
-   u s-suites UI ta’ vitest ifallu immedjatament).
-3. `node_modules/.bin/tsc` preżenti u eżegwibbli (installazzjoni parzjali ma jkollhiex).
+| Ħruġ | Tifsira                                                                                                                      |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `0`  | Stampat il-pjan jew imlejt is-suite. Is-sommarju tas-suit jelenka kwalunkwe fallimenti statiċi li ntirtu u PRs ejected.      |
+| `1`  | Argumenti invalidi, ebda checkout Git, preflight fallut, jew ebda PR abbord.                                                 |
+| `2`  | Suite check falla u ma kkwalifikax bħala wiret. L-operatur jista' jqaxxar il-lott, jitfa' l PR li joffendi, u jerġa' jmexxi. |
 
-It-train iħaddem il-`npm run check:cycles:ratchet` obbligatorju; `npm run check:cycles`
-waħdu huwa konsultattiv (jelenka l-SCCs u joħroġ b’status mhux żero anki fuq base f’saħħtu).
+Pass lokali jipprovdi evidenza dijanjostika għad-dossier tas-sid biss. Kull inżul xorta jeħtieġ l-awtorizzazzjoni tas-sid, il-kontrolli meħtieġa tiegħu stess, u l-verdett tal-kju shadow meta applikabbli.
+
+## Tiring
+
+- **Per PR.** CI u kontrolli tal-għażla tal-kwalità bbażati fuq il-mogħdijiet mibdula. Il-kodiċi PRs imexxi xtiebi ta 'kwalità veloċi u testijiet impatt, b'impjiegi separati ta' unità u Vitest CI.
+- **Għal kull kandidat fil-kju.** CI u Kwalità jmexxu l-profil sħiħ għall-kandidat kompost fuq il-kju tiegħu ref.
+- **Kull ponta rilaxx.** Rilaxx-Green imexxi xtiebi iebsin malajr fuq pushes li jaqblu mal-filtri tal-passaġġ tiegħu. Tliet ġirjiet skedati kuljum jużaw l-isweep sħiħ għall-fergħa tar-rilaxx.
+- **Għal kull rilaxx.** Il-matriċi CI sħiħa tinkludi shards E2E, validazzjoni tal-pakkett, duħħan tarball boot, u kontrolli tal-kopertura. Ara l [-Lista ta' Kontroll tar-Rilaxx](RELEASE_CHECKLIST.md).
+
+## Prerekwiżiti ta' checkout frisk għal `merge-train.sh`
+
+It-titjira ta' qabel taħdem qabel ma toħloq siġar tax-xogħol. Installa dipendenzi `npm ci`. Ikkonferma li `node_modules/.bin/tsc` huwa eżekutibbli u li `node_modules/node_modules` huwa assenti. Iċċekkja li `node_modules/.bin/bun --version` jirnexxi.
+
+Jekk Bun postinstall inqabeż, ħaddem `(cd node_modules/bun && node install.js)`. Il-konsistenza tal-fornitur u l-kontrolli tas-simbolu magħruf jużaw Bun. Il-validatur imexxi `npm run check:cycles:ratchet` bħala xatba tal-imblukkar. Il-kmand `npm run check:cycles` waħdu huwa konsultattiv.
+
+## Storja
+
+Il-kju ta' amalgamazzjoni ta' Mergify ġie rtirat fl-2026-11-19.

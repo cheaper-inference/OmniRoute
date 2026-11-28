@@ -241,11 +241,19 @@ Modeli: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Kombinacije
+## 🎨 kombinacije
 
-Kartice kombinacija možete preslagati direktno u **Dashboard → Combos** povlačenjem ručke na svakoj kartici. Redoslijed se pohranjuje u SQLite i vraća prilikom ponovnog učitavanja.
+Možete promijeniti redoslijed kombiniranih karata izravno** Nadzorna ploča → Combos** povlačenjem ručice na svakoj kartici. Narudžba je pohranjena u SQLite i vraćena pri ponovnom učitavanju.
 
-### Primjer 1: Maksimalno iskoristi pretplatu → jeftina rezerva
+### Pronađite davatelja usluga, model ili račun
+
+U Stvori ili Uredi kombinaciju, alati za odabir dobavljača, modela, računa i referentne kombinacije korak po korak uključuju lokalno polje za pretraživanje. Pretražujte prema prikazanom nazivu, identifikatoru, aliasu davatelja ili izvoru modela, a zatim kliknite rezultat ili upotrijebite tipke sa strelicama i Enter. Višestruki pojmovi za pretraživanje moraju se podudarati. Brisanje pretraživanja ili pritisak na Escape ostavlja odabranu vrijednost nepromijenjenom.
+
+Automatski odabir računa ostaje vidljiv tijekom pretraživanja. Njegov izborni popis ograničenja računa ima zaseban filter: odabrani računi izvan vidljivih rezultata ostaju odabrani, a broj ih uključuje. Skrivene fragmente e-pošte nije moguće pretraživati dok je uključena privatnost e-pošte. Dodajte korak i spremite kombinaciju kao i obično; upisivanjem upita ništa se ne sprema niti testira.
+
+Isto lokalno pretraživanje dostupno je za modele testiranja veze, prilagođene CLI zadane modele i modele aliasa te izbore spremljenog proxyja. Postojeće akcije spremanja, primjene i testiranja ostaju odvojene.
+
+### Primjer 1: Povećanje pretplate → sigurnosna kopija
 
 ```
 Dashboard → Combos → Create New
@@ -259,7 +267,7 @@ Models:
 Use in CLI: premium-coding
 ```
 
-### Primjer 2: Samo besplatno (nulti trošak)
+### Primjer 2: Samo besplatno (nula troškova)
 
 ```
 Name: free-combo
@@ -427,7 +435,7 @@ Kada više ne trebate OmniRoute, nudimo dvije brze skripte za čisto uklanjanje:
 ### VPS implementacija
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -458,7 +466,7 @@ OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 pm2 start ecosystem.config.js
 ```
 
-Napravi `ecosystem.config.js`:
+Stvorite `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -509,8 +517,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -718,7 +726,7 @@ Bilo koji pristupnik koji govori OpenAI API (proxy s vlastitim hostom, vLLM, agr
 
 #### Rezervirani prefiksi
 
-Prefiks ne može biti ID ili pseudonim ugrađenog pružatelja usluga (na primjer `openai`, `cf`), niti ID povučenog pružatelja usluga. Razrešivač modela provjerava ugrađene ID-ove i pseudonime prije prilagođenih čvorova, tako da čvor koji koristi jedan od tih prefiksa nikada ne bi primio promet: `<prefix>/model` bi umjesto toga išao ugrađenom pružatelju ili se ne bi zatvorio ako bi se taj pružatelj povukao. Stvaranje ili uređivanje čvora s takvim prefiksom odbija se s:
+Prefiks ne može biti ID ili pseudonim ugrađenog pružatelja usluga (na primjer `openai`, `cf`), niti ID povučenog pružatelja usluga. Razrešivač modela provjerava ugrađene ID-ove i pseudonime prije prilagođenih čvorova, tako da čvor koji koristi jedan od tih prefiksa nikada ne bi primio promet: `<prefix>/model` bi umjesto toga išao ugrađenom pružatelju ili se ne bi uspio zatvoriti ako bi se taj pružatelj povukao. Stvaranje ili uređivanje čvora s takvim prefiksom odbija se s:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
@@ -766,9 +774,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Samo zahtjevi poslani izričito dopuštenom peer URL primaju `X-OmniRoute-Peer-Trace` zaglavlje. Gateway odbija ponovljenu instancu ID ili iscrpljeni proračun skoka sa HTTP `508 Loop Detected`; obični uzvodni pružatelji usluga ne primaju ravnopravne metapodatke.
+Samo zahtjevi poslani izričito dopuštenom ravnopravnom URL primaju `X-OmniRoute-Peer-Trace` zaglavlje. Gateway odbija ponovljenu instancu ID ili iscrpljeni proračun skoka sa HTTP `508 Loop Detected`; obični uzvodni pružatelji ne primaju ravnopravne metapodatke.
 
-Peer lančano nije replikacija baze podataka ili failover hosta. Svaki gateway čuva neovisno SQLite stanje, predmemorije, brojače stopa i sesije. Za dostupnost active/passive ili active/active koristite provjereni obrnuti proxy ili klijentski failover i nikada ne montirajte jednu SQLite bazu podataka u više pokrenutih OmniRoute instanci.
+Peer lančano nije replikacija baze podataka ili host failover. Svaki pristupnik čuva neovisno SQLite stanje, predmemorije, brojače stopa i sesije. Za dostupnost active/passive ili active/active koristite provjereni obrnuti proxy ili klijentski failover i nikada ne montirajte jednu SQLite bazu podataka u više pokrenutih OmniRoute instanci.
 
 ### Namjenske rute pružatelja usluga
 
@@ -780,7 +788,7 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Prefiks pružatelja automatski se dodaje ako nedostaje. Neusklađeni modeli vraćaju `400`.
+Prefiks pružatelja automatski se dodaje ako nedostaje. Nepodudarni modeli vraćaju `400`.
 
 ### Konfiguracija mrežnog proxyja
 
@@ -878,8 +886,8 @@ Konfigurirajte putem** Nadzorna ploča → Postavke → Usmjeravanje** . Nadzorn
 - `least-used` i `cost-optimized`
 - `auto` — na temelju rezultata svih kandidata
 - `lkgp` (posljednji poznati dobar pružatelj) — se prikači na posljednjeg uspješnog pružatelja, a zatim se vraća na pravila
-- `context-optimized` — bira model s najvećim prozorom slobodnog konteksta
-- `context-relay` — povezuje modele dugog konteksta za naknadne zaokrete
+- `context-optimized` — prvo pokušava model s najvećim poznatim kontekstnim prozorom
+- `context-relay` — redoslijed prioriteta plus sažetak primopredaje kada se razgovor premjesti na drugi račun
 
 #### Vanjsko ljepljivo zaglavlje sesije
 
@@ -897,7 +905,7 @@ Ako koristite Nginx i šaljete zaglavlja obrazaca podvlake, omogućite:
 underscores_in_headers on;
 ```
 
-#### Aliasi modela sa zamjenskim znakovima
+#### Zamjenski nazivi modela
 
 Stvorite uzorke zamjenskih znakova za ponovno mapiranje naziva modela:
 
@@ -992,7 +1000,7 @@ OmniRoute implementira otpornost na razini pružatelja usluga s pet komponenti:
    - **Maks. istodobnih zahtjeva** — Maksimalan broj istovremenih zahtjeva po računu
 
 2. **Hlađenje veze** — Per-auth-type konfiguracija za jednu vezu nakon ponovnih neuspjeha:
-   - **Osnovno hlađenje** — Zadani prozor hlađenja za kvarove uzvoda koji se mogu ponovno pokušati
+   - **Osnovno hlađenje** — Zadani prozor za hlađenje za kvarove uzvoda koji se mogu ponovno pokušati
    - **Koristite upstream savjete za ponovni pokušaj** — Poštuje autoritativne savjete `Retry-After` ili poništavanje ako su navedeni
    - **Maks. koraci odustajanja** — Maksimalna eksponencijalna razina povlačenja za ponovljene kvarove
 
@@ -1154,7 +1162,7 @@ Konfigurirajte balansiranje po kombinaciji** Nadzorna ploča → kombinacije →
 
 Mogu se postaviti zadane globalne kombinacije** Nadzorna ploča → Postavke → Usmjeravanje → Combo Defaults** . Combo target timeout prema zadanim postavkama nasljeđuje trenutni timeout zahtjeva. Koristiti** Ciljano vrijeme čekanja (sekunde)** na zadanim postavkama kombinacije ili pojedinačnoj kombinaciji samo kada bi kraće ograničenje po cilju trebalo pokrenuti brže vraćanje.
 
-Kombinirane optimizacije bez kašnjenja su opt-in. Otiđi** Optimizacije bez kašnjenja** onemogućeno kako bi se spriječilo da ove značajke latencije utrkuju rezervne ciljeve, preskaču ciljeve na temelju TTFT povijesti ili komprimiraju rezervne zahtjeve; omogućavanje omogućuje konfiguriranu zaštitu, prediktivno preskakanje TTFT -a i proaktivnu pomoćnu kompresiju za razmjenu vjernosti routing/request za nižu latenciju repa.
+Kombinirane optimizacije bez kašnjenja su opt-in. Otiđi** Optimizacije bez kašnjenja** onemogućeno kako bi se spriječilo da ove značajke latencije utrkuju rezervne ciljeve, preskaču ciljeve na temelju TTFT povijesti ili komprimiraju rezervne zahtjeve; njegovo omogućavanje omogućuje konfiguriranu zaštitu, prediktivno preskakanje TTFT -a i proaktivnu pomoćnu kompresiju za razmjenu vjernosti routing/request za nižu latenciju repa.
 
 Onemogući** Međuspremnik tokena obrazloženja** kada uzvodni pružatelji usluga zahtijevaju stroga ograničenja `max_tokens` / `maxOutputTokens`. Kada je omogućeno, kombinirano usmjeravanje samo dodaje prostor za model rezoniranja za modele s poznatim ograničenjem izlaza i ostavlja ograničenje tokena klijenta nepromijenjenim kada bi vrijednost sigurnog međuspremnika premašila to ograničenje. Ako je ograničenje klijenta već iznad poznatog ograničenja, OmniRoute ga spušta na to ograničenje prije slanja uzlaznog zahtjeva.
 
@@ -1166,7 +1174,7 @@ Pristup putem** Nadzorna ploča → Zdravlje** . Pregled stanja sustava u stvarn
 
 | Kartica                        | Što pokazuje                                                                |
 | ------------------------------ | --------------------------------------------------------------------------- |
-| **Status sustava**             | Vrijeme rada, verzija, korištenje memorije, direktorij podataka             |
+| **Status sustava**             | Vrijeme rada, verzija, upotreba memorije, direktorij podataka               |
 | **Zdravlje pružatelja usluga** | Stanje izvođenja prekidača globalnog dobavljača                             |
 | **Ograničenja stope**          | Hlađenja aktivne veze po računu s preostalim vremenom                       |
 | **Aktivna zaključavanja**      | Aktivna zaključavanja i privremena isključenja na temelju modela            |
@@ -1328,32 +1336,34 @@ Pogledajte [API_REFERENCE.md](../reference/API_REFERENCE.md) za potpuni katalog 
 
 ## 💻 Interni CLI
 
-OmniRoute isporučuje interni CLI (`omniroute …`) za postavljanje, dijagnostiku i kontrolu izvođenja. Ovo je **odvojeno od stranice "CLI Tools" u nadzornoj ploči**, koja konfigurira CLI alate trećih strana (Claude Code, Cursor, Codex, Cline, …) da mogu komunicirati s OmniRoute-om.
+OmniRoute isporučuje interni CLI (`omniroute …`) za postavljanje, dijagnostiku i kontrolu vremena izvođenja. Ovo je** odvojeno od stranice "CLI Alati" na nadzornoj ploči** , koji konfigurira CLIs treće strane (Claude kod, Cursor, Codex, Cline, …) tako da mogu razgovarati sa OmniRoute.
 
 ```bash
-omniroute setup                    # Interaktivni čarobnjak (lozinka, dobavljači, kombinacije)
-omniroute setup --non-interactive  # Prilagođeno za CI
-omniroute doctor                   # Dijagnostika stanja (podatkovni direktorij, baza podataka, dobavljači, portovi)
-omniroute providers available      # Ispis podržanih dobavljača
-omniroute providers list           # Ispis konfiguriranih veza
-omniroute providers test <id>      # Testiranje veze dobavljača u stvarnom vremenu
-omniroute combos list              # Ispis kombinacija
-omniroute combos switch <name>     # Postavljanje zadane kombinacije
-omniroute models                   # Ispis dostupnih modela (--json, --search)
-omniroute keys add | list | remove # Upravljanje API ključevima iz terminala
-omniroute backup                   # Snimka konfiguracije i baze podataka
-omniroute restore [<timestamp>]    # Vraćanje iz snimke
-omniroute health                   # Detaljno stanje (breakeri, predmemorija, memorija)
-omniroute quota                    # Iskorištenost kvote dobavljača
-omniroute mcp status                # Status MCP servera
-omniroute a2a status                # Status A2A servera
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tuneli
-omniroute reset-password           # Resetiranje administratorske lozinke
-omniroute --mcp                    # Pokretanje MCP servera preko stdio
-omniroute --port 3000              # Pokretanje servera na prilagođenom portu
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Savjet: kombinirajte `omniroute doctor --json` s vašim alatom za nadzor za obavijesti o neispravnim vezama s dobavljačima.
+Savjet: uparite `omniroute doctor --json` sa svojim alatom za nadzor kako biste upozorili na pokvarenu lokalnu instalaciju. `doctor` ne testira veze pružatelja; koristite `omniroute providers test <id>` za to.
 
 ---
 

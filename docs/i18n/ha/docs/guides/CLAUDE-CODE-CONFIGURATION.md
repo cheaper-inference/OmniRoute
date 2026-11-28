@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) da OpenCode (`x-opencode-session`) ana gane
 
 Littafin jagorar aiki ya bambanta tsakanin injuna, don haka ma'aji guda ɗaya na iya nunawa a ƙarƙashin hanyoyi daban-daban. Aika aikin a sarari maimakon: lambar Claude tana ƙara kowane taken da aka jera a cikin `ANTHROPIC_CUSTOM_HEADERS` zuwa kowane buƙatun ƙira, kuma OmniRoute ya karanta biyu daga cikinsu:
 
-| Kai                        | Daraja                                                            |
-| -------------------------- | ----------------------------------------------------------------- |
-| `x-omniroute-project`      | Sunan aikin, misali `omniroute`                                   |
-| `x-omniroute-project-repo` | Remut ɗin daidaitacce, misali `github.com/diegosouzapw/OmniRoute` |
+| Kai                        | Daraja                                                                 |
+| -------------------------- | ---------------------------------------------------------------------- |
+| `x-omniroute-project`      | Sunan aikin, misali `omniroute`                                        |
+| `x-omniroute-project-repo` | Remut ɗin daidaitacce, misali `github.com/cheaper-inference/OmniRoute` |
 
 Dukansu ana karanta su kawai don sifa; ba a taɓa tura su zuwa ga mai samarwa na sama ba.
 
@@ -261,30 +261,22 @@ buƙatar ƙarin flags. Sauya wannan ga kowane kira ta amfani da `--remote` / `--
 
 ---
 
-## Magance matsaloli
+## Shirya matsala
 
-**Claude Code yana yin watsi da gateway** — tabbatar cewa `ANTHROPIC_BASE_URL` ba ya ɗauke da
-`/v1` sannan ka sake kunna `claude` (ana karanta env sau ɗaya ne kawai yayin farawa). `omniroute launch`
-yana gudanar da wannan a madadinka.
+**Claude Code yayi watsi da ƙofa** — tabbatar da `ANTHROPIC_BASE_URL` yana da** ba `/v1`** kuma sake kunna `claude` (ana karanta env sau ɗaya a farawa). `omniroute launch` yana sarrafa muku wannan.
 
-**Mai zaɓin `/model` babu komai / ƙirar gateway sun ɓace** — yana buƙatar Claude Code
-v2.1.219+ da `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. ID na ƙira masu farawa da `claude*` /
-`anthropic*` ne kawai suke bayyana a mai zaɓin; tilasta amfani da kowace irin ƙira ta hanyar
-`ANTHROPIC_MODEL=<id>` (abin da profiles suke yi ke nan).
+**`/model` picker fanko ne / rasa ƙirar ƙofa** — yana buƙatar Claude Code v2.1.219 + da `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Samfurin `claude*` / `anthropic*` kawai IDs ya bayyana a cikin mai ɗauka; tilasta kowane samfurin tare da `ANTHROPIC_MODEL=<id>` (wannan shine abin da bayanan martaba suke yi).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code koyaushe yana aika ID na ƙira **ba tare da prefix ba**
-(misali `claude-opus-4-8`), saboda haka idan an haɗa duka masu samarwar Claude Code (`cc/…`) da
-Claude (`claude/…`), ID ɗin da ba shi da prefix zai dace da hanyoyi biyu kuma
-OmniRoute zai ƙi yin hasashe. Gyara ta ɗaya daga cikin hanyoyi biyu: ƙayyade ID mai prefix da
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, ko kunna **Fifita Claude Code ga
-ƙirar Claude marasa prefix** — maɓallin sauyawa a shafin mai samarwar Claude, ko
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (a kashe yake ta tsohuwa;
-duba [Muhalli](../reference/ENVIRONMENT.md)) — wanda zai tura ID na `claude-*`
-marasa prefix zuwa Claude Code maimakon haka. Prefix na mai samarwa da aka bayyana a sarari koyaushe ne yake da fifiko.
+**`400 Ambiguous model 'claude-…'`** — Claude Code koyaushe yana aikawa** mara iyaka** samfurin IDs (misali `claude-opus-4-8`), don haka lokacin da aka haɗa duka masu samar da Claude Code (`cc/…`) da Claude (`claude/…`) id ɗin ya yi daidai da hanyoyi biyu kuma OmniRoute ya ƙi tsammani. Gyara shi ta kowace hanya: fiɗa id prefixed tare da `ANTHROPIC_MODEL=cc/claude-opus-4-8`, ko kunna** Fi son lambar Claude don ƙirar Claude mara fafifid** — toggle akan shafin mai bada Claude, ko `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (default off; see [Environment](../reference/ENVIRONMENT.md) ) — wanda ke tafiyar da `claude-*` IDs zuwa lambar Claude maimakon. Bayyanar bayanan mai ba da labari koyaushe yana yin nasara.
 
-**Kurakuran auth** — profile ba ya riƙe token. Yi amfani da `omniroute launch --profile`
-(yana shigar da shi) ko ka export `ANTHROPIC_AUTH_TOKEN`.
+**"Yanayin atomatik… wannan zaman bai cancanci ba" (an biya buƙatun ƙira)** — a yanayin atomatik lambar Claude tana tambayar uwar garken don duba ayyuka a cikin buƙatun samfurin sa ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Wannan yana buƙatar ƙimar `anthropic-beta` `dangerous-tool-use-2026-09-03` da filin jikin `safeguards` don isa Anthropic a matsayin biyu, da `safeguard_results` tare da kayan aiki na sama-amfani da IDs don dawowa baya canzawa. OmniRoute yana yin haka lokacin da aka tura buƙatar zuwa ga mai samar da `claude` na asali ko zuwa kumburin `anthropic-compatible-*`, mai gudana ko a'a (mai tsaron koma baya: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Sauran makasudin ba za su iya mayar da bita ba, don haka lambar Claude ta koma ga buƙatun sa na ƙira kuma ta nuna sanarwar:
 
-**Profiles ba sa ware juna** — kowane profile yana da nasa `CLAUDE_CONFIG_DIR` na daban;
-tabbatar cewa `echo $CLAUDE_CONFIG_DIR` a cikin session yana nuna
-`~/.claude/profiles/<name>`.
+- samfuri akan mai ba da ɗan adam, ko haɗaɗɗen da ke kan ɗaya;
+- node mai dacewa da Claude-Code (`anthropic-compatible-cc-*`), wanda ke sake gina jikin buƙatun kuma baya ɗaukar `safeguards`;
+- tsohuwar OmniRoute wadda ta riga ta riga da jerin sunayen betas, ko sigar lambar Claude da ke ƙasa wadda shafin Anthropic ya jera don zaman ƙofar.
+
+Gudu `/status` a cikin Claude Code: da** Sabar yanayin atomatik** layi yana karanta `Enabled` yayin da bitar uwar garken ke aiki. Ko ana biyan waɗannan buƙatun ta Anthropic ne ke yanke hukunci, ba ta OmniRoute ba.
+
+**Kurakurai na gaskiya** — profile ba shi da alama. Yi amfani da `omniroute launch --profile` (allurar da shi) ko fitarwa `ANTHROPIC_AUTH_TOKEN`.
+
+**Bayanan martaba ba sa ware** — kowane bayanin martaba na `CLAUDE_CONFIG_DIR` ne; tabbatar da `echo $CLAUDE_CONFIG_DIR` a cikin wuraren zama a `~/.claude/profiles/<name>`.

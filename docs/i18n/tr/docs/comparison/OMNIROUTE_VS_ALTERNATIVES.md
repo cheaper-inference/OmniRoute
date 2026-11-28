@@ -4,14 +4,14 @@
 
 ---
 
-Popüler açık kaynaklı AI yönlendiricileriyle objektif özellik karşılaştırması.
+Popüler açık kaynaklı AI yönlendiricileriyle nesnel özellik karşılaştırması.
 
 > **Metodoloji** : Halka açık repolar denetlendi 2026-Q2. Sürümler listelendiği gibidir. Düzeltmeleri PR — aracılığıyla gönderin, bunun doğru olmasını istiyoruz.
 
 | Özellik                                                   |                OmniRoute 3.8                 |  LiteLLM 1.x  | OpenRouter (SaaS) |  Anahtar  |
 | --------------------------------------------------------- | :------------------------------------------: | :-----------: | :---------------: | :-------: |
 | **Sağlayıcılar**                                          |                   **329**                    |     ~100      |        ~50        |    ~30    |
-| **Free/no-auth katalog girişleri**                        |                   **155**                    |      n/a      |       geçiş       |    n/a    |
+| **Ücretsiz erişime sahip sağlayıcılar**                   |           **50 ücretsiz erişimle**           |      n/a      |       geçiş       |    n/a    |
 | **Kendi kendine barındırılabilir**                        |                      ✅                      |      ✅       |        ❌         | ⚠ ödendi  |
 | **OAuth katalog girişleri**                               |                    **23**                    |     kısmi     |        ❌         |    ❌     |
 | **Otomatik geri dönüş kombinasyonları**                   |               **22 strateji**                | öncelik bazlı |   katman bazlı    | ağırlıklı |
@@ -38,7 +38,7 @@ Popüler açık kaynaklı AI yönlendiricileriyle objektif özellik karşılaşt
 
 ## OmniRoute ne zaman seçmelisiniz?
 
-- Kendini barındırıyorsun ve istiyorsun** maksimum sağlayıcı kapsamı** (394 sağlayıcı, 155 free/no-auth katalog girişi)
+- Kendini barındırıyorsun ve istiyorsun** maksimum sağlayıcı kapsamı** (394 sağlayıcı, 50'si ücretsiz erişimli)
 - ihtiyacın var** yerleşik MCP sunucusu** (LLM araçları, hafıza, araç olarak ortaya çıkan beceriler)
 - ihtiyacın var**A2A protokolü** temsilciden temsilciye iş akışları için
 - Sen istiyorsun** parmak izi gizliliği** (JA3/JA4) yukarı akışlı CAPTCHAs tarafından tespit edilmekten kaçınmak için
@@ -56,12 +56,12 @@ Popüler açık kaynaklı AI yönlendiricileriyle objektif özellik karşılaşt
 - SaaS kâr marjıyla token başına ödeme yapmak sizin için uygunsa
 - Tüm sağlayıcılarda **tek bir ödeme yöntemine** ihtiyacınız varsa
 
-## Portkey ne zaman tercih edilmeli?
+## Portkey ne zaman seçilmelidir?
 
-- Çalışma süresi garantileri içeren **ticari bir SLA'ya** ihtiyacınız varsa
-- Operasyon yükü olmadan **yönetilen bir kontrol panelini** tercih ediyorsanız
-- Kullanıma hazır **kurumsal uyumluluk** özelliklerine ihtiyacınız varsa
+- ihtiyacın var** ticari SLA** çalışma süresi garantileriyle
+- Birini tercih edersin** yönetilen kontrol paneli** operasyon ek yükü olmadan
+- ihtiyacın var** kurumsal uyumluluk** kutunun dışındaki özellikler
 
 ---
 
-_Son güncelleme: 2026-08-02. Bu tabloyu doğru tutmak için düzeltmeleri PR aracılığıyla gönderin._
+_Bu tablonun doğru kalması için düzeltmeleri PR aracılığıyla gönderin._

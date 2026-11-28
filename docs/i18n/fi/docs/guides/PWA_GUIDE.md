@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute toimitetaan täysin asennettavana progressiivisena verkkosovelluksena (PWA). Kun käytät hallintapaneelia millä tahansa mobiiliselaimella — Androidilla (Chrome) tai iOS:llä (Safari) — voit valita "Lisää Koti-valikkoon" ja saada natiivisovelluksen kaltaisen käyttökokemuksen ilman sovelluskauppaa.
+Asenna OmniRoute Dashboard Progressive Web App -sovellukseksi avataksesi sen aloitusnäytöltä tai työpöydältä erillisessä ikkunassa. Asennettu sovellus tarvitsee edelleen yhteyden OmniRoute -palvelimeesi navigointia, kojelautatietoja ja API -pyyntöjä varten. Välimuistissa olevat staattiset resurssit eivät tarjoa offline-yhdyskäytävää tai offline-hallintapaneelia.
 
 ## Mikä on PWA?
 
-Progressiivinen verkkosovellus muuttaa OmniRoute-verkkohallintapaneelin sovellukseksi, joka näyttää ja tuntuu natiivilta mobiilisovellukselta. Asennuksen jälkeen se:
+Progressiivinen verkkosovellus käyttää web-hallintapaneelia, jossa on sovelluskuvake ja erillinen ikkuna. Asennuksen jälkeen OmniRoute:
 
-- Käynnistyy aloitusnäytöltä omasta kuvakkeestaan
-- Avautuu koko näytön tilassa — selaimen osoitepalkkia tai välilehtikäyttöliittymää ei näytetä
-- Toimii offline-tilassa erillisen yhteyssivun avulla
-- Tallentaa staattiset resurssit välimuistiin nopeampaa lataamista varten
-- Tukee sekä pysty- että vaakasuuntaa
+- Käynnistyy aloitusnäytöltä tai työpöydältä
+- Avautuu itsenäisenä tilassa ilman selaimen tavallista osoitepalkkia ja välilehtiä
+- Tallentaa välimuistiin valitut staattiset resurssit
+- Tukee pysty- ja vaakasuuntauksia
 
 ## Asennus
 
+Käytä HTTPS -osoitetta toisen laitteen palvelimelle. Kun palvelin toimii samalla laitteella, `http://localhost:20128` täyttää myös selaimen asennettavuusvaatimukset. Pelkkä `http://YOUR_IP:20128` -osoite ei täytä näitä vaatimuksia. Asennusvalikot ja kehotteet riippuvat selaimesta ja käyttöjärjestelmästä. Katso [MDN:n PWA -asennusvaatimukset](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
+
 ### Android (Chrome)
 
-1. Avaa OmniRoute-hallintapaneeli Chromessa: `http://YOUR_IP:20128`
-2. Chrome näyttää automaattisesti **"Lisää OmniRoute aloitusnäyttöön"** -bannerin, tai:
-   - Napauta **⋮**-valikkoa (kolme pistettä) → **"Lisää aloitusnäyttöön"** tai **"Asenna sovellus"**
-3. Vahvista kehote
-4. OmniRoute ilmestyy aloitusnäytöllesi itsenäisenä sovelluksena
+1. Avaa OmniRoute HTTPS -osoitteesi tai `http://localhost:20128` palvelimelle samassa puhelimessa.
+2. Avaa**⋮** valikko ja valitse** Asenna sovellus** tai** Lisää aloitusnäyttöön** , jos tarjotaan.
+3. Vahvista kehote.
+4. Avaa OmniRoute aloitusnäytöstä.
 
 ### iOS (Safari)
 
-1. Avaa OmniRoute-hallintapaneeli Safarissa: `http://YOUR_IP:20128`
-2. Napauta **Jaa**-painiketta (nuolella varustettu laatikko)
-3. Vieritä alaspäin ja napauta **"Lisää Koti-valikkoon"**
-4. Anna sille nimi (oletuksena "OmniRoute") ja napauta **Lisää**
-5. OmniRoute ilmestyy aloitusnäytöllesi sovelluskuvakkeena
+1. Avaa OmniRoute HTTPS -osoitteesi Safarissa.
+2. Napauta** Jakaa** →** Lisää aloitusnäyttöön** .
+3. Vahvista nimi ja napauta** Lisätä** .
+4. Avaa OmniRoute aloitusnäytöstä.
 
 ### Työpöytä (Chrome / Edge)
 
-1. Avaa OmniRoute-hallintapaneeli
-2. Napsauta osoitepalkin **asennuskuvaketta** (tai ⋮ → "Asenna OmniRoute...")
-3. Vahvista kehote
-4. OmniRoute avautuu itsenäiseen ikkunaan — ei välilehtiä eikä osoitepalkkia
+1. Avaa OmniRoute -kojelautasi.
+2. Käytä selaimen asennuskuvaketta tai** Asenna sovellus** valikkokohta, jos tarjotaan.
+3. Vahvista kehote avata OmniRoute omassa ikkunassaan.
 
 ## Ominaisuudet
 
-### Koko näytön käyttökokemus
+### Itsenäinen ikkuna
 
-Sovellusmanifestissa on asetus `display: "fullscreen"`, mikä tarkoittaa, että asennettu sovellus käyttää koko näyttöä — ilman selaimen käyttöliittymää tai tilapalkin päällekkäisyyttä. Tämän ansiosta hallintapaneeli tuntuu aidosti natiivilta.
+Manifesti asettaa `display: "standalone"` ja `start_url: "/dashboard"`. Asennettu sovellus avaa kojelaudan sovellusikkunassa. Selaimen ja käyttöjärjestelmän ohjaimet voivat silti näkyä; luettelo ei pyydä koko näytön tilaa.
 
-### Offline-tuki
+### Välimuistissa olevat resurssit ja verkkovaatimukset
 
-OmniRoute sisältää service workerin (`sw.js`), joka tarjoaa älykkään välimuistitallennuksen:
+[Palvelutyöntekijä](../../public/sw.js) tallentaa välimuistiin valitut samaa alkuperää olevat resurssit:
 
-| Resurssityyppi                                                                                                                                                                                                | Strategia                                   | Toiminta                                                                                                             |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Sovellusrunko**                                                                                                                                                                                             | Välimuisti ensin                            | `/`, `/offline`, manifesti ja kuvakkeet tallennetaan välimuistiin asennuksen yhteydessä                              |
-| **Staattiset resurssit** (CSS, JS, kuvat, fontit)                                                                                                                                                             | Verkko ensin, välimuisti varalla            | Noutaa tuoreen version verkosta; käyttää välimuistia offline-tilassa                                                 |
-| **Next.js-paketit** (`/_next/`)                                                                                                                                                                               | Verkko ensin ja välimuistin päivitys        | Noutaa verkosta ja päivittää välimuistin; käyttää välimuistiversiota offline-tilassa                                 |
-| **Navigointipyynnöt**                                                                                                                                                                                         | Ohitus (ei koskaan siepata)                 | Selain huolehtii HTTP/3→HTTP/2-varayhteydestä; toimimaton QUIC-yhteys ei saa muuttua `Response.error()`-vastaukseksi |
-| **API-/hallintapaneelireitit** (`/api/`, `/a2a`, `/dashboard`, asiakasrajapinnan aliakset `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex` sekä `/callback`, `/login`; kirjainkoosta riippumatta) | Ohitus (ei koskaan tallenneta välimuistiin) | Siirtyy aina suoraan palvelimelle — service worker ei koskaan sieppaa pyyntöä                                        |
+| Pyyntö tai omaisuus                      | strategia        | Käyttäytyminen                                                                                                                            |
+| ---------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Asennusaikaresurssit                     | Pre-cache        | `/`, `/manifest.webmanifest`, `/icon-512.png` ja `/apple-touch-icon.png` tallennetaan välimuistiin työntekijän asennuksen aikana          |
+| Next.js staattiset varat (`/_next/`)     | Verkko ensin     | Onnistuneet vastaukset päivittävät välimuistin; verkkovirhe palaa olemassa olevaan välimuistissa olevaan vastaukseen                      |
+| Muut staattiset CSS, JS, kuvat ja fontit | Välimuisti ensin | Olemassa oleva välimuistissa oleva vastaus käytetään uudelleen; onnistuneet verkkovastaukset tallennetaan välimuistiin, jos se ei onnistu |
+| Sivulla navigointi                       | Ohittaa          | Selain hakee sivun suoraan; offline-varaa ei tarjota                                                                                      |
+| API, kojelauta ja todennusreitit         | Ohittaa          | Työntekijä ei sieppaa tai tallenna näitä pyyntöjä välimuistiin                                                                            |
+| Muut ei-staattiset pyynnöt               | Verkko           | Ei välimuistin hakua tai tallennusta                                                                                                      |
 
-### Offline-sivu
+Poissuljetut reitit ovat `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` ja `/login`, joiden kirjainkoolla ei ole merkitystä polun rajoissa. Ristiinlähtöiset ja ei-GET-pyynnöt ohittavat myös työntekijän.
 
-Kun verkkoyhteys ei ole käytettävissä ja käyttäjä siirtyy uudelle sivulle, service worker näyttää erillisen `/offline`-sivun, joka:
+### Yhteyssivu
 
-- Näyttää selkeän **"Yhteysongelma"**-viestin
-- Näyttää reaaliaikaisesti päivittyvän **online-/offline-tilailmaisimen**
-- Tarjoaa **"Yritä yhteyttä uudelleen"** -painikkeen sivun lataamiseksi uudelleen, kun yhteys palautuu
-- Sisältää linkin diagnostiikkaa varten **tilasivulle**
+`/offline` sivulla on yhteysviesti, online/offline -ilmaisin, a** Yritä muodostaa yhteys uudelleen** -painiketta ja linkin tilasivulle. Se on** ei ole valmiiksi tallennettu** ja huoltotyöntekijä tekee** ei** uudelleenohjaa epäonnistuneet navigoinnit siihen. Sen olemassaolo ei tee uusille sivuille pääsyä ilman palvelinta.
 
 ### Sovelluskuvakkeet
 
-OmniRoute tarjoaa kullekin alustalle optimoidut kuvakkeet:
+Luettelossa mainostetaan näitä PNG kuvakkeita:
 
-| Tiedosto               | Koko              | Käyttökohde                          |
-| ---------------------- | ----------------- | ------------------------------------ |
-| `icon-512.png`         | 512×512           | Androidin asennuskehote, aloituskuva |
-| `apple-touch-icon.png` | 180×180           | iOS:n aloitusnäytön kuvake           |
-| `icon-192.svg`         | 192×192 (vektori) | Androidin mukautuva kuvake           |
-| `apple-touch-icon.svg` | 180×180 (vektori) | Applen varakuvake                    |
-| `favicon.svg`          | Vektori           | Selaimen välilehdet                  |
-| `favicon.ico`          | Useita kokoja     | Vanhat selaimet                      |
+| Tiedosto               | Koko    | Käyttää                              |
+| ---------------------- | ------- | ------------------------------------ |
+| `icon-192.png`         | 192×192 | Yleinen sovelluskuvake               |
+| `icon-512.png`         | 512×512 | Yleinen ja maskoitava sovelluskuvake |
+| `apple-touch-icon.png` | 180×180 | Applen aloitusnäytön kuvake          |
+
+Selain valitsee asennuskohteelle sopivan kuvakkeen.
 
 ### Automaattinen rekisteröinti
 
-Service worker rekisteröidään automaattisesti juuriasettelun `<PwaRegister />`-komponentin kautta. Käyttäjän toimia ei tarvita — sovellus voidaan asentaa heti, kun selain havaitsee kelvollisen manifestin ja service workerin.
+`PwaRegister` rekisteröi työntekijän tuotantoon, kun selain tukee palvelutyöntekijöitä. Kehitystila poistaa työntekijöiden rekisteröinnin ja tyhjentää välimuistit, jotta vanhentunut omaisuus ei häiritse kuumaa uudelleenlatausta. Asennuskehotteet jäävät selaimen päätökseen.
 
 ## Tekninen arkkitehtuuri
 
-### Verkkosovellusmanifesti (`manifest.webmanifest`)
+### Verkkosovellusluettelo
 
-Next.js luo sen tiedoston `src/app/manifest.ts` kautta:
+Next.js luo `/manifest.webmanifest` :n [`src/app/manifest.ts`](../../src/app/manifest.ts). Sen tärkeimmät asetukset ovat:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Asetus                | Arvo                                 |
+| --------------------- | ------------------------------------ |
+| `short_name`          | `OmniRoute`                          |
+| `start_url`           | `/dashboard`                         |
+| `scope`               | `/`                                  |
+| `display`             | `standalone`                         |
+| `orientation`         | `any`                                |
+| Tausta- ja teemavärit | `PWA_THEME_COLORS` oletusvalopaletti |
 
-### Service Worker (`public/sw.js`)
+Luettelon nimi ja kuvaus ovat staattisia arvoja kyseisessä lähdetiedostossa. Asennettu luettelo ei seuraa esiintymän nimi -asetusta tai aktiivista palettia jokaisella käynnillä.
 
-Tavallinen service worker (ei riippuvuuksia sovelluskehyksistä), joka sisältää seuraavat toiminnot:
+### Palvelutyöntekijä
 
-- **Asennusvaihe**: Esitallentaa sovelluskehyksen välimuistiin (juuripolku, offline-sivu, manifesti ja kuvakkeet)
-- **Aktivointivaihe**: Poistaa vanhat välimuistiversiot ja ottaa kaikki asiakasohjelmat hallintaansa
-- **Hakuvaihe**: Älykäs reititys pyynnön tyypin perusteella (navigointi, staattinen resurssi tai API)
-- **Välimuistin versiointi**: `omniroute-pwa-v3` — suurenna tätä versionumeroa, jos haluat pakottaa välimuistin uusimisen päivityksen yhteydessä
+[`public/sw.js`](../../public/sw.js) ei ole palvelutyöntekijän kehysriippuvuutta:
 
-### Asettelun metatiedot (`src/app/layout.tsx`)
+- **Asentaa:** tallentaa valmiiksi välimuistiin neljä yllä lueteltua resurssia ja aktivoi uuden työntekijän.
+- **Aktivoida:** poistaa vanhemmat välimuistisukupolvet ja vaativat asiakkaat.
+- **Hae:** soveltaa yllä olevia staattisen omaisuuden strategioita ja reittien poissulkemisia.
+- **Versiointi:** lähdevälimuistin nimi on `omniroute-pwa-v3`; tuotantokoonnos leimaa välimuistin identiteetin.
+- **Ilmoitukset:** käsittelee saapuvat `push` -tapahtumat ja tarkentaa tai avaa ikkunan, kun ilmoitusta napsautetaan.
 
-Juuriasettelu tarjoaa kaikki PWA-yhteensopivuuden edellyttämät metatunnisteet:
+Push-tapahtumakäsittelijät eivät yksin muodosta aktiivista push-tilausta tai määritettyä palvelintoimitusta. Älä oleta, että ilmoitukset ovat käytössä vain siksi, että PWA on asennettu.
 
-- `manifest`-linkki kohteeseen `/manifest.webmanifest`
-- `apple-web-app-capable: true` iOS:n itsenäistä tilaa varten
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` Android Chromea varten
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` reunasta reunaan ulottuvaa hahmonnusta varten
+### Asettelun metatiedot ja rekisteröinti
 
-### Komponentti: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) tarjoaa manifest-linkin, Applen erilliset metatiedot, teeman värit ja `viewport-fit: cover`. Sivun otsikko ja Apple-verkkosovelluksen otsikko käyttävät ilmentymän nimeä. Live-selaimen teeman väri seuraa palettia; asennusluettelo käyttää oletusvaloväriä.
 
-Tiedostossa `src/shared/components/PwaRegister.tsx` sijaitseva asiakaskomponentti:
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) toimii asiakaskoneessa ja rekisteröi `/sw.js` ID -koontiversioon URL:ssä. Se havaitsee yhteensopimattomat välimuistisukupolvet ja voi nollata työntekijän ja ladata sen uudelleen kerran palauttaakseen vanhan asennuksen. Rekisteröintivirhe ei estä kojelautaa.
 
-1. Suoritetaan liitettäessä (vain asiakaspuolella)
-2. Tarkistaa selaimen `serviceWorker`-tuen
-3. Rekisteröi tiedoston `/sw.js` hiljaisesti (virheet ohitetaan, jotta ne eivät estä sovelluksen toimintaa)
-4. Ei hahmonna mitään (`return null`) — komponenttia käytetään ainoastaan sivuvaikutuksen suorittamiseen
+## Käytä Termuxin kanssa (Android)
 
-## Käyttö Termuxin kanssa (Android)
+1. Aloita OmniRoute Termuxissa: `npx -y omniroute@latest`.
+2. Avaa Chrome samassa puhelimessa: `http://localhost:20128`.
+3. Asenna PWA selaimen asennusvalikon kautta.
+4. Pidä Termux-palvelin käynnissä, kun käytät kojelautaa.
 
-Kun OmniRoutea käytetään Androidissa Termuxin kautta, PWA toimii saumattomasti:
+Puhelimessa on sekä yhdyskäytävä että sen kojelauta. Pyynnöt etä- AI palveluntarjoajille tarvitsevat edelleen verkkoyhteyden. Katso [Termux-oppaasta](TERMUX_GUIDE.md) asennusta ja Android-prosessin elinikää koskevat näkökohdat.
 
-1. Käynnistä OmniRoute Termuxissa: `npx omniroute`
-2. Avaa Chrome samassa puhelimessa: `http://localhost:20128`
-3. Asenna PWA valitsemalla "Lisää aloitusnäyttöön"
-4. PWA muodostaa yhteyden paikalliseen Termux-palvelimeen — kaikki suoritetaan laitteessa
+## Käytä muista laitteista
 
-Tämä yhdistelmä tarkoittaa, että Android-puhelimesi toimii sekä **palvelimena** (Termux) että **asiakasohjelmana** (PWA) — kyseessä on täysin itsenäinen tekoäly-yhdyskäytävä.
+Avaa palvelimen HTTPS -osoite puhelimella, tabletilla tai työpöydällä ja seuraa sitten kyseisen selaimen asennuskulkua. Palvelimen on oltava tavoitettavissa jokaiselta laitteelta. Katso [tunnelioppaasta](../ops/TUNNELS_GUIDE.md) etäkäyttövaihtoehdot.
 
-## Käyttö muilta laitteilta
+## Räätälöinti
 
-Asenna PWA mille tahansa laitteelle, jonka selaimella voi käyttää OmniRoute-palvelintasi:
+### Ilmentymän nimi
 
-- **Toinen puhelin/tabletti**: Siirry osoitteeseen `http://PHONE_IP:20128` ja asenna PWA
-- **Kannettava tietokone**: Avaa Chrome/Edge ja asenna se työpöydän PWA-sovelluksena
-- **Selaimella varustettu älytelevisio**: Käytä hallintapaneelia koko näytön tilassa
+The** Ilmentymän nimi** asetus muuttaa kojelaudan metatietoja, mukaan lukien sivun otsikko ja Applen verkkosovelluksen otsikko. Luodussa luettelossa käytetään staattista nimeä, joten tämä asetus ei takaa, että jo asennettu sovellus nimetään uudelleen.
 
-## Mukauttaminen
+### Mukautettu Favicon
 
-### Instanssin nimi
-
-PWA:n nimi noudattaa kohdassa **Hallintapaneeli → Asetukset** määritettyä **Instanssin nimi** -asetusta. Jos annat instanssillesi nimeksi "Oma tekoäly-yhdyskäytävä", asennettu PWA näyttää kyseisen nimen.
-
-### Mukautettu suosikkikuvake
-
-Jos lataat mukautetun suosikkikuvakkeen kohdassa `Hallintapaneeli → Asetukset`, työpöydän PWA-kuvake käyttää mukautettua kuvaketta. Mobiililaitteen aloitusnäytön kuvakkeet käyttävät valmiiksi luotuja tiedostoja `icon-512.png` ja `apple-touch-icon.png`.
+Mukautettu favicon muuttaa selaimen suosikkikuvaketta. Asennusluettelo mainostaa edelleen yllä olevia PNG tiedostoja; faviconin muuttaminen ei korvaa näitä aloitusnäytön kuvakkeita.
 
 ## Rajoitukset
 
-- **Ei push-ilmoituksia** — Service worker ei toteuta Push API -rajapintaa. Ilmoituksista vastaa sen sijaan Electron-sovellus.
-- **Ei taustasynkronointia** — Offline-tilassa tehtyjä toimintoja ei aseteta jonoon myöhempää suorittamista varten. PWA on ensisijaisesti koontinäytön katseluun tarkoitettu sovellus.
-- **iOS-rajoitukset** — iOS:n Safari ei tue kaikkia PWA-ominaisuuksia (esimerkiksi asennuskehotteet ovat manuaalisia ja service workereiden taustatoimintaa on rajoitettu).
-- **Välimuistin koko** — Service worker tallentaa välimuistiin vain staattiset resurssit. `/api/`-reittien suuria vastaussisältöjä ei koskaan tallenneta välimuistiin.
-- **Mukautetut kuvakkeet mobiililaitteissa** — Faviconin vaihtaminen asetuksissa ei päivitä mobiililaitteen aloitusnäytön kuvaketta (tämä edellyttää PWA-kuvakkeiden luomista uudelleen).
+- **Palvelinyhteys vaaditaan:** sivunavigointi-, hallintapaneelin tila- ja API -pyynnöillä ei ole offline-varaa.
+- **Ei taustasynkronointia:** offline-toimintoja ei ole asetettu uusintajonoon.
+- **Selaimen erot:** asennusvalikot, ikkunaesitys ja ilmoitustuki vaihtelevat käyttöympäristön mukaan.
+- **Ei API -vastausvälimuistia:** työntekijä sulkee pois API, kojelaudan ja todennusreitit.
+- **Staattiset asennuskuvakkeet:** näiden kuvakkeiden päivittäminen edellyttää mainostettujen resurssien muuttamista; selaimet voivat säilyttää asennetut metatiedot.
 
-## Tiedostoviite
+## Tiedostojen viite
 
-| Tiedosto                                | Tarkoitus                                                          |
-| --------------------------------------- | ------------------------------------------------------------------ |
-| `src/app/manifest.ts`                   | Next.js-manifestireitti (luo tiedoston `manifest.webmanifest`)     |
-| `public/sw.js`                          | Välimuistilogiikan sisältävä service worker                        |
-| `src/shared/components/PwaRegister.tsx` | Service workerin rekisteröivä asiakaskomponentti                   |
-| `src/app/offline/page.tsx`              | Offline-varasivu reaaliaikaisella tilailmaisimella                 |
-| `src/app/layout.tsx`                    | Juuriasettelu PWA-metatietoineen (apple-web-app, theme-color jne.) |
-| `public/icon-512.png`                   | 512×512 PNG-kuvake (Android, käynnistysnäyttö)                     |
-| `public/apple-touch-icon.png`           | 180×180 PNG-kuvake (iOS:n aloitusnäyttö)                           |
-| `public/icon-192.svg`                   | 192×192 SVG-kuvake (Androidin mukautuva kuvake)                    |
-| `public/apple-touch-icon.svg`           | 180×180 SVG-kuvake (Applen varakuvake)                             |
+| Tiedosto                                                                               | Tarkoitus                                                      |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Luotu verkkosovellusluettelo                                   |
+| [public/sw.js](../../public/sw.js)                                                     | Välimuisti, poissulkemiset ja ilmoitustapahtumien käsittelijät |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Tuotannon rekisteröinti ja vanhentuneen välimuistin palautus   |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Yhteyssivu, ei automaattinen offline-varavaihtoehto            |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Sivun metatiedot ja näkymäasetukset                            |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Jaetut teema-väriarvot                                         |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 -sovelluskuvake                                      |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple-kuvake                                         |

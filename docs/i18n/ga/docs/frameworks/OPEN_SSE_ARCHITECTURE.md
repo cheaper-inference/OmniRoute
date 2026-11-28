@@ -236,19 +236,19 @@ Tacaíochtaí** 22 straitéis ródaithe** (féach `src/shared/constants/routingS
 | `context-relay`     | Tabhair comhthéacs trasna na spriocanna                                               |
 | `fill-first`        | Líon an cuóta roimh bogadh go dtí an chéad cheann eile                                |
 | `p2c`               | Cumhacht dhá rogha                                                                    |
-| `random`            | Éide randamach                                                                        |
-| `least-used`        | Roghnaigh an ceann is lú úsáidí le déanaí                                             |
-| `cost-optimized`    | An sprioc sláintiúil is saoire ar dtús                                                |
-| `reset-aware`       | Feasach ar fhuinneoga athshocrú soláthraí                                             |
-| `reset-window`      | Athshocraigh ródú fuinneogbhunaithe                                                   |
+| `random`            | Suaitheadh úr de réir iarratais                                                       |
+| `least-used`        | Roghnaigh an ceann leis an líon is lú iarratas taifeadta                              |
+| `cost-optimized`    | An praghas ionchuir catalóige is ísle ar dtús                                         |
+| `reset-aware`       | An cuóta atá fágtha + práinne a athshocrú                                             |
+| `reset-window`      | Fuinneog cuóta a athshocróidh is túisce ar dtús                                       |
 | `expiry-first`      | Caith an cuntas a rachadh a chuóta in éag gan úsáid ar dtús                           |
 | `headroom`          | An chuid is mó de spás cloiginn fágtha ar dtús                                        |
 | `quota-weighted`    | Léim amach cuntais ídithe, ansin tarraing trí chuóta fágtha ÷ ualach in-eitilte       |
-| `strict-random`     | Fíor aonfhoirmeach (gan ualú cáilíochta)                                              |
+| `strict-random`     | Deic shuffled: gach sprioc uair amháin roimh athrá                                    |
 | `auto`              | Úsáid scóráil 16-fachtóir (`autoCombo/`)                                              |
 | `lkgp`              | An soláthraí maith is déanaí ar a dtugtar ar dtús                                     |
-| `context-optimized` | Is fearr le haghaidh iarratais fad-chomhthéacs                                        |
-| `cache-optimized`   | Pinn gach réimír leide ath-inúsáidte chuig an gcuntas céanna (amas leid-taisce)       |
+| `context-optimized` | An fhuinneog comhthéacs is mó atá ar eolas ar dtús                                    |
+| `cache-optimized`   | B'fhearr leat an cuntas ar dócha go mbeidh an réimír pras i dtaisce                   |
 | `fusion`            | Fan amach chuig painéal ag an am céanna, ansin sintéis trí bhreitheamh (`fusion.ts`)  |
 | `pipeline`          | Céimeanna slabhra — cothaíonn aschur gach sprice an chéad cheann eile                 |
 | `jev`               | Liostáil: TypeSafe admhaíonn Jev cé na hiontrálacha rangaithe a ritheann; eile d'ordú |
@@ -309,7 +309,7 @@ Tá seirbhísí** modúil aonfheidhme dírithe** a dhéanann láimhseálaithe. N
 ### Athléimneacht
 
 - `resilience.ts` — retry, backoff, breaker orchestration
-- `emergencyFallback.ts` — rogha dheireanach a thagann ar ais
+- `emergencyFallback.ts` — rogha dheireanach titim siar
 - `modelDeprecation.ts` — bealach uathoibríoch chuig samhlacha comharba
 
 ### Stáit

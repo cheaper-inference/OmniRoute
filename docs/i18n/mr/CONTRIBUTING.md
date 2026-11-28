@@ -10,118 +10,105 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ## विकास सेटअप
 
-### पूर्वअट
+### पूर्वतयारी
 
-- **Node.js** `>=22.22.2 <23`, किंवा `>=24.0.0 <27` (शिफारस: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`, किंवा `>=24.0.0 <27` (शिफारस केलेले: 24 LTS)
+- **एनपीएम** 10 +
 
-> **Node 24 सह Windows:** सध्याचे 24 LTS पॅच रिलीज वापरा (किमान 24.20.0).
-> जुन्या रिलीजमध्ये `--test-force-exit` प्रक्रिया बंद केल्यानंतर यशस्वी चाचण्यांनंतरही प्रक्रिया
-> थांबू शकते. Node मधील [Windows libuv दुरुस्ती](https://github.com/nodejs/node/pull/61999) या
-> रनटाइम क्रॅशचे निराकरण करते; चाचणी assertions आणि runner exit तपासण्या सक्षम ठेवा.
+> **नोड 24 सह Windows :** वर्तमान 24 LTS पॅच रिलीझ वापरा (किमान 24.20.0). जेव्हा `--test-force-exit` प्रक्रिया बंद करते तेव्हा यशस्वी चाचण्यांनंतर पूर्वीचे प्रकाशन रद्द होऊ शकते. नोडचे [Windows libuv फिक्स](https://github.com/nodejs/node/pull/61999) पत्ते या रनटाइम क्रॅश; चाचणी विधान आणि धावपटू बाहेर पडा तपासा सक्षम ठेवा.
 
-> **npm v11+ वापरकर्ते (Node 24+):** `npm install` नंतर native modules स्थापित झाले आहेत का ते तपासा:
-> `node -e "require('better-sqlite3')"`. हे `MODULE_NOT_FOUND` सह अयशस्वी झाल्यास,
-> `npm approve-scripts better-sqlite3 && npm install` चालवा. [समस्यानिवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) पहा.
+> **npm v11 + वापरकर्ते (नोड 24 +):** `npm install` नंतर, नेटिव्ह मॉड्युल्स स्थापित केल्याचे सत्यापित करा: `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` सह अयशस्वी झाल्यास, `npm approve-scripts better-sqlite3 && npm install` चालवा. [समस्यानिवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) पहा.
 
-- **Git**
+- **गिट**
 
-### क्लोन आणि स्थापना
+### क्लोन आणि स्थापित करा
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### पर्यावरण चल
+### पर्यावरण परिवर्तने
 
 ```bash
-# टेम्पलेटमधून तुमची .env फाइल तयार करा
+# Create your .env from the template
 cp .env.example .env
 
-# आवश्यक secrets तयार करा
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-विकासासाठी महत्त्वाची चल:
+विकासासाठी प्रमुख चल:
 
-| Variable               | Development Default      | Description             |
-| ---------------------- | ------------------------ | ----------------------- |
-| `PORT`                 | `20128`                  | सर्व्हर पोर्ट           |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | फ्रंटएंडसाठी बेस URL    |
-| `JWT_SECRET`           | (generate above)         | JWT signing secret      |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | पहिल्या लॉगिनचा पासवर्ड |
-| `APP_LOG_LEVEL`        | `info`                   | लॉग तपशीलवारपणाची पातळी |
+| चल                     | विकास डीफॉल्ट            | वर्णन                 |
+| ---------------------- | ------------------------ | --------------------- |
+| `PORT`                 | `20128`                  | सर्व्हर पोर्ट         |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | फ्रंटएंडसाठी बेस URL  |
+| `JWT_SECRET`           | (वर निर्माण करा)         | JWT स्वाक्षरी गुप्त   |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | प्रथम लॉगिन पासवर्ड   |
+| `APP_LOG_LEVEL`        | `info`                   | लॉग व्हर्बोसिटी पातळी |
 
 ### डॅशबोर्ड सेटिंग्ज
 
-डॅशबोर्डमध्ये अशा वैशिष्ट्यांसाठी UI टॉगल उपलब्ध आहेत, जी पर्यावरण चलांद्वारेही कॉन्फिगर केली जाऊ शकतात:
+डॅशबोर्ड अशा वैशिष्ट्यांसाठी UI टॉगल प्रदान करतो जे पर्यावरण व्हेरिएबल्सद्वारे देखील कॉन्फिगर केले जाऊ शकतात:
 
-| Setting Location    | Toggle             | Description                    |
-| ------------------- | ------------------ | ------------------------------ |
-| Settings → Advanced | Debug Mode         | डीबग विनंती लॉग सक्षम करा (UI) |
-| Settings → General  | Sidebar Visibility | साइडबार विभाग दाखवा/लपवा       |
+| स्थान सेट करत आहे  | टॉगल करा           | वर्णन                          |
+| ------------------ | ------------------ | ------------------------------ |
+| सेटिंग्ज → प्रगत   | डीबग मोड           | डीबग विनंती लॉग सक्षम करा (UI) |
+| सेटिंग्ज → सामान्य | साइडबार दृश्यमानता | Show/hide साइडबार विभाग        |
 
-ही सेटिंग्ज डेटाबेसमध्ये साठवली जातात आणि रीस्टार्टनंतरही कायम राहतात. सेट केल्यावर ती env var डीफॉल्ट्सवर अधिलिखित होतात.
+या सेटिंग्ज डेटाबेसमध्ये संग्रहित केल्या जातात आणि रीस्टार्टमध्ये टिकून राहतात, सेट केल्यावर env var डीफॉल्ट ओव्हरराइड करतात.
 
-### स्थानिक पातळीवर चालवणे
+### स्थानिक पातळीवर चालत आहे
 
 ```bash
-# विकास मोड (हॉट रीलोड)
+# Development mode (hot reload)
 npm run dev
 
-# उत्पादन बिल्ड
-npm run build    # next build → .build/next/ नंतर assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# योगदानकर्त्यांच्या बदलांसाठी जलद backend/API-only compile
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# रिलीज बिल्ड (स्वच्छ पुनर्बिल्ड + HEAD sentinel — deploy साठी आवश्यक)
-npm run build:release   # rm -rf .build dist आणि build + dist/BUILD_SHA लिहिते
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# सामान्य पोर्ट कॉन्फिगरेशन
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-योगदानकर्ता बिल्ड केवळ compile-only प्रमाणीकरण करते: ते standalone
-distribution एकत्र करत नाही किंवा पर्यायी native packaging assets बिल्ड करत नाही. पाठवता येणाऱ्या bundle चे प्रमाणीकरण
-करायचे असल्यास नियमित production build वापरा.
+योगदानकर्ता बिल्ड केवळ संकलित प्रमाणीकरण करते: ते स्टँडअलोन वितरण एकत्र करत नाही किंवा पर्यायी मूळ पॅकेजिंग मालमत्ता तयार करत नाही. जेव्हा तुम्हाला शिप करण्यायोग्य बंडल प्रमाणित करण्याची आवश्यकता असेल तेव्हा नियमित उत्पादन बिल्ड वापरा.
 
-### बिल्ड आउटपुटची मांडणी
+### आउटपुट लेआउट तयार करा
 
-| Directory | Contents                                                                  | Tracked |
-| --------- | ------------------------------------------------------------------------- | ------- |
-| `src/`    | Application source (TypeScript / TSX)                                     | होय     |
-| `.build/` | Intermediates — `next build` output (gitignored, `distDir = .build/next`) | नाही    |
-| `dist/`   | Shippable bundle — assembled by `assembleStandalone` (gitignored)         | नाही    |
+| निर्देशिका | सामग्री                                                                | मागोवा घेतला |
+| ---------- | ---------------------------------------------------------------------- | ------------ |
+| `src/`     | अर्जाचा स्रोत (TypeScript / TSX)                                       | होय          |
+| `.build/`  | इंटरमीडिएट्स — `next build` आउटपुट (gitigned, `distDir = .build/next`) | नाही         |
+| `dist/`    | `assembleStandalone` द्वारे शिप करण्यायोग्य बंडल — (gitigned)          | नाही         |
 
-बिल्ड पाइपलाइन एकाच पासमध्ये चालते:
+बिल्ड पाइपलाइन एकच पास आहे:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js output)
-  └─ assembleStandalone()                 (standalone + static + public + native assets कॉपी करते)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` सुरुवातीला दोन्ही डिरेक्टरी स्वच्छ करते आणि
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) हे deploy integrity sentinel म्हणून लिहिते.
+`npm run build:release` याव्यतिरिक्त प्रथम दोन्ही डिरेक्टरी साफ करते आणि `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ला डिप्लॉय इंटिग्रिटी सेंटिनेल म्हणून लिहिते.
 
-`npm run build:contributor` backend-only build profile वापरते. बिल्ड करताना ते
-डॅशबोर्ड UI फाइल्सना तात्पुरते stub करते, API route handlers ठेवते आणि बिल्डनंतर मूळ फाइल्स
-पुनर्स्थापित करते. डॅशबोर्ड UI वर परिणाम करणाऱ्या बदलांसाठी किंवा पूर्ण release प्रमाणीकरणासाठी
-`npm run build` वापरा; contributor profile हा release build चा पर्याय नाही.
+`npm run build:contributor` बॅकएंड-ओन्ली बिल्ड प्रोफाइल वापरते. ते तात्पुरते डॅशबोर्ड UI फाइल्स बांधताना स्टब करते, API रूट हँडलर ठेवते आणि बिल्ड केल्यानंतर मूळ फाइल्स रिस्टोअर करते. डॅशबोर्ड UI प्रभावित करणाऱ्या बदलांसाठी किंवा पूर्ण प्रकाशन प्रमाणीकरणासाठी `npm run build` वापरा; कंट्रिब्युटर प्रोफाईल रिलीझ बिल्डसाठी बदली नाही.
 
-> **VPS deploy सूचना:** remote image directory `/usr/lib/node_modules/omniroute/app/`
-> अपरिवर्तित आहे. deploy skills `dist/` मधील सामग्री त्यात rsync करतात.
-> केवळ in-repo build output path बदलला आहे (`app/` → `dist/`).
+> **VPS उपयोजित टीप:** रिमोट इमेज डिरेक्टरी `/usr/lib/node_modules/omniroute/app/` अपरिवर्तित आहे. उपयोजित कौशल्ये त्यात `dist/` ची सामग्री rsync करतात. फक्त इन-रेपो बिल्ड आउटपुट मार्ग हलविला (`app/` → `dist/`).
 
 डीफॉल्ट URLs:
 
-- **डॅशबोर्ड**: `http://localhost:20128/dashboard`
+- **डॅशबोर्ड** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -426,10 +413,10 @@ VPS डिप्लॉयसाठी, `npm run build` ऐवजी `npm run bui
 
 ---
 
-## मदत मिळवणे
+## मदत मिळत आहे
 
-- **आर्किटेक्चर**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) पहा
-- **API संदर्भ**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) पहा
-- **सुरक्षा दस्तऐवज**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **ऑपरेशन्स दस्तऐवज**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **समस्या**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **आर्किटेक्चर** : [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) पहा
+- **API संदर्भ** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) पहा
+- **सुरक्षा दस्तऐवज** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **ऑप्स डॉक्स** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **मुद्दे** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

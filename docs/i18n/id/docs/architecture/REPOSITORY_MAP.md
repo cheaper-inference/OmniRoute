@@ -4,9 +4,9 @@
 
 ---
 
-> **Apa yang ada di mana: setiap direktori tingkat atas dan file root yang dilacak, dengan tujuan satu baris.** Terakhir diperbarui: 13-11-2026 (OmniRoute v3.8.54)
+> **Apa yang ada di mana: setiap direktori tingkat atas dan file root yang dilacak, dengan tujuan satu baris.**
 >
-> Gunakan peta ini untuk menjelajahi basis kode, lalu ikuti tautan ke dokumen khusus. Jumlah file diukur dengan `git ls-files` pada tanggal di atas. Mereka berubah hampir di setiap rilis, jadi perlakukan mereka sebagai besaran.
+> Gunakan peta ini untuk menjelajahi basis kode, lalu ikuti tautan ke dokumen khusus. Jumlah file berasal dari `git ls-files` dan berubah hampir di setiap rilis. Perlakukan mereka sebagai besarnya.
 
 ## Pohon tingkat atas
 

@@ -12,6 +12,12 @@ Neytral `config/cli-tools-manifest.json` müqaviləsi kanonik IDs, ləqəblər, 
 
 Kəsmə və bitirmə siqnalları uşağa ötürülür. Başlatıcı müvəqqəti konfiqurasiyanı silməzdən əvvəl uşağın yaxın hadisəsini gözləyir. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` məcburi dayandırmadan əvvəl güzəşt müddətini idarə edir (defolt 5000 millisaniyə).
 
+`omniroute launch <tool>` (bax [LAUNCH.md](./LAUNCH.md) ) eyni mühit qaydalarına və siqnal ötürülməsinə əməl edir və əlavə edir:
+
+- **Gateway avtomatik işə salınması.** Yerli hədəf üçün, portda heç bir şlüz cavab vermədikdə, başlatma qurğusu ayrılmış biçən prosesində `127.0.0.1` yə bağlı `omniroute serve --headless --no-open` başlayır. Hər bir işə salınma `DATA_DIR/launch/leases/` də icarəyə malikdir (ürək döyüntüsü hər 15 saniyədən bir, 45 saniyədən sonra köhnəlir və ya proses bitdikdə). Boş vaxt üçün heç bir icarə verilmədikdən sonra biçən işə saldığı şlüzü dayandırır (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, standart 10000 millisaniyə). İstifadəçinin başlatdığı, lakin heç vaxt dayanmadığı şlüz istifadə olunur. `--keep-gateway` və ya `omniroute gateway keep` başlatma şlüzünü normal birinə çevirir; `--no-start` köhnə uğursuzluq davranışını bərpa edir. Uzaqdan hədəflər yalnız yoxlanılır.
+- **Seansları işə salın.** Hər işə salınma ana etimadnaməsindən (`POST /api/launch/sessions`) qısa müddətli `olx_` sessiya nişanı çıxarır, alət işləyərkən onu ürək döyüntüləri döyündürür, istifadə xülasəsini oxuyur və alət çıxdıqdan sonra onu ləğv edir. Token onun əsas hissəsinin ciddi alt çoxluğudur: eyni icazələr, eyni və ya daha dar kataloq, daha qısa ömür və o, idarə paneli etimadnaməsi deyil. Alət heç vaxt ana etimadnaməsini deyil, sessiya işarəsini alır və `--tag` verilmədikcə sorğular `launch:<tool>:<sessionId>` işarələnir. API sessiyası olmayan şlüz əhatə olunmamış işə düşmək əvəzinə `GatewayTooOld` ilə uğursuz olur.
+- **Hər işə salma konfiqurasiyası.** Alət konfiqurasiya faylları şəxsi müvəqqəti qovluğa yazılır (rejim 0700, `omnirouter-` prefiksi) və uşaq çıxdıqdan sonra silinir. Başlatıcının `SIGKILL` qovluğu qovluğu geridə qoyur; `omniroute launch --cleanup` belə qovluqları bir gündən köhnə olduqdan sonra silir.
+
 ## Gemini davamlı quraşdırma
 
 ```bash

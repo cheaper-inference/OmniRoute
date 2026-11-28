@@ -4,7 +4,7 @@
 
 ---
 
-> **Versija:** v3.8.44** Paskutinį kartą atnaujinta:** 2026-10-28** Auditorija:** Inžinieriai prideda, prižiūri arba derina įterptąsias paslaugas (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versija:** v3.8.44** Auditorija:** Inžinieriai prideda, prižiūri arba derina įterptąsias paslaugas (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Įterptosios paslaugos yra vietoje įdiegti proceso šoniniai įrankiai, kuriuos OmniRoute įdiegia, prižiūri ir pateikia kaip pirmos klasės maršruto parinkimo taikinius. Skirtingai nuo išorinių paslaugų teikėjų (kurie pasiekiami internetu per API klavišus), įterptosios paslaugos veikia tame pačiame įrenginyje kaip ir OmniRoute ir palaiko ryšį per kilpą.
 
@@ -34,7 +34,7 @@
 | **9 Maršrutizatorius** | `9router`                                 |         20130         | AI maršrutizatorius, kurį OmniRoute gali naudoti kaip antrinį tiekėją. Modeliai rodomi kaip `9router/{sub}/{model}`                                                                                                                                                                                                                                              |
 | **CLIProxyAPI**        | GitHub išleidimo dvejetainis (`cliproxy`) |         8317          | Vietinis tarpinio serverio adapteris, skirtas Anthropic CLI autentifikavimo srautams. Suteikia atsarginį maršrutą, kai baigiasi OAuth prieigos raktų galiojimo laikas                                                                                                                                                                                            |
 | **Mux**                | `mux` (be galvos `mux server`)            |         8322          | Vietinis agentas-orkestravimo demonas (coder/mux). Tik — valdomas pagal gyvavimo ciklą, o ne maršruto parinkimo tikslas (jokio LLM tarpinio serverio).                                                                                                                                                                                                           |
-| **Bifrost**            | `@maximhq/bifrost`                        |         8080          | Eikite į AI-gateway relės užpakalinę programą. Bėgant, automatiškai parenkamas pagal estafetės maršrutą (`/v1/relay/`)                                                                                                                                                                                                                                           |
+| **Bifrost**            | `@maximhq/bifrost`                        |         8080          | Eiti į AI-gateway relay backend. Bėgant, automatiškai parenkamas pagal estafetės maršrutą (`/v1/relay/`)                                                                                                                                                                                                                                                         |
 | **Dario**              | `@askalf/dario`                           |         3456          | Claude prenumeratos tarpinis serveris — alternative/failover to CLIProxyAPI Claude kodo formos srautui; įšvirkštas raktas tampa `DARIO_ADMIN_TOKEN` fiksuojančiu jo `/admin/*` OAuth valdymo plokštumą                                                                                                                                                           |
 | **atviras-wa**         | `@open-wa/wa-automate`                    |         8323          | WhatsApp Web automatizavimas (be galvos Chromium per Puppeteer). Tik — valdomas pagal gyvavimo ciklą, o ne maršruto parinkimo tikslas.                                                                                                                                                                                                                           |
 | **LLMLingua**          | `@atjsh/llmlingua-2`                      |         20135         | Greito suspaudimo šoninės priekabos — tikras LLMLingua-2 ONNX modelis ( Microsoft algoritmo JS/TS prievadas). `open-sse/services/compression/engines/llmlingua/index.ts` siunčia `/compress` per HTTP į jį ir grįžta į apdorojamą darbuotojo gijos galinę dalį, kai šoninė priekaba nuleidžiama. Tik — valdomas gyvavimo ciklu, o ne maršruto parinkimo tikslas. |
@@ -45,7 +45,7 @@ Visos aštuonios laikosi to paties priežiūros modelio:
 - OmniRoute juos įdiegia pagal `DATA_DIR/services/{name}/` (atskirtas nuo paties OmniRoute `package.json`)
 - OmniRoute neršia ir stebi juos kaip vaiko procesus
 - OmniRoute įveda trumpalaikį API raktą į vaiko aplinką ir sukasi jį be prastovos (jei taikoma)
-- Visi valdymo maršrutai (`/api/services/*`) yra**LOCAL_ONLY** — pasiekiamas tik iš kilpos (17 griežta taisyklė)
+- Visi valdymo maršrutai (`/api/services/*`) yra**LOCAL_ONLY** — pasiekiamas tik iš kilpos (kietoji taisyklė #17)
 
 ### Pagrindiniai sprendimai (iš projektavimo plano)
 
@@ -209,7 +209,7 @@ lenktyniavimo sąlygų, kai, pavyzdžiui, automatinis paleidimas ir naudotojo s�
 
 ## 4. API nuoroda
 
-Visi maršrutai pagal `/api/services/` yra**LOCAL_ONLY** (tik kilpa, griežta taisyklė Nr. 17). Neatgalinės užklausos gauna `403 LOCAL_ONLY` neatsižvelgiant į autentifikavimo prieigos raktą.
+Visi maršrutai pagal `/api/services/` yra**LOCAL_ONLY** (tik kilpa, griežta taisyklė #17). Neatgalinės užklausos gauna `403 LOCAL_ONLY` neatsižvelgiant į autentifikavimo prieigos raktą.
 
 ### 4.1 9Maršrutizatoriaus galiniai taškai (11 maršrutų)
 
@@ -236,7 +236,7 @@ Visi maršrutai pagal `/api/services/` yra**LOCAL_ONLY** (tik kilpa, griežta ta
 | `409`  | Jau įdiegta (užraktas laikomas)                         |
 | `500`  | npm įdiegti nepavyko — žr. `message` draugišką klaidą   |
 
-**Pastabos:** Naudoja `execFile('npm', [...])` — be apvalkalo, be interpoliacijos (griežta taisyklė Nr. 13). EACCES klaidos pateikiamos kaip draugiški pranešimai.
+**Pastabos:** Naudoja `execFile('npm', [...])` — be apvalkalo, be interpoliacijos (kieta taisyklė #13). EACCES klaidos pateikiamos kaip draugiški pranešimai.
 
 ---
 
@@ -297,7 +297,7 @@ Atitinka `stop()` tada `start()` po operacijos užraktu.
 
 #### `POST /api/services/9router/update`
 
-Atnaujina 9Router į naujesnę npm versiją. Jei paslauga veikia, ji pirmiausia sustabdoma, paleidžiamas npm diegimas (naujesnės versijos įdiegimas vietoje), o tada paslauga paleidžiama iš naujo.
+Atnaujina 9Router į naujesnę npm versiją. Jei paslauga veikia, ji pirmiausia sustabdoma, vykdomas npm diegimas (naujesnės versijos įdiegimas vietoje), o tada paslauga paleidžiama iš naujo.
 
 **Prašymo įstaiga** (visa neprivaloma):
 
@@ -535,7 +535,7 @@ sing-box turi tokią pačią galinio taško formą kaip ir Mux — be `rotate-ke
 | `POST`  | `/api/services/singbox/auto-restart-adopted` | Perjungti automatinį iš naujo paleisti priimtą (anksčiau egzistuojantį) procesą |
 | `GET`   | `/api/services/singbox/logs`                 | SSE log tail (per bendrinamą `[name]/logs` dinaminį maršrutą)                   |
 
-**TPROXY laidai:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) įrašo `config.json` ir paleidžia prižiūrėtoją prieš `applyTproxy()` įdiegiant TPROXY ugniasienės taisykles. Jei prižiūrėtojo trūksta arba jis nepasiekia `running`, dabar jis registruojasi klaidų lygiu (o ne tyliai praryja gedimą), kad operatorius galėtų pasakyti, kad TPROXY taisyklės buvo pritaikytos be veikiančio klausytojo už jų.
+**TPROXY laidai:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) įrašo `config.json` ir paleidžia prižiūrėtoją prieš `applyTproxy()` įdiegiant TPROXY ugniasienės taisykles. Jei prižiūrėtojo trūksta arba jis nepasiekia `running`, dabar jis registruojasi klaidų lygiu (o ne tyliai praryja gedimą), kad operatorius galėtų pasakyti, kad TPROXY taisyklės buvo pritaikytos be veikiančio klausytojo.
 
 ---
 
@@ -555,9 +555,7 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 - Iš atsakymo pašalina `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
 - Perrašo HTML atsakymus, kad įterptų `<base href>` ir normalizuotų absoliučius kelius (`/foo` → `/dashboard/.../embed/foo`)
 
-WebSocket naujinimus, skirtus įterptajam prietaisų skydeliui, tvarko papildomas serveris, esantis tam skirtame prievade (žr. `src/lib/services/embedWsProxy.ts`).
-
-Kiekvienas naujinimas patvirtinamas prieš atidarant tunelį, laikantis tos pačios taisyklės kaip ir HTTP įterpimo maršrutas: lygiavertis partneris turi būti grįžtamasis ryšys be atvirkštinio tarpinio serverio persiuntimo antraštės, naršyklės `Origin` turi būti informacijos suvestinės kilmė (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` išplėsti atgalinio ciklo numatytuosius nustatymus), o skambinančiajam reikia išjungti prietaisų skydelio seansą arba API keyboard.
+WebSocket naujinimus, skirtus įterptajam prietaisų skydeliui, tvarko papildomas serveris, esantis tam skirtame prievade (žr. `src/lib/services/embedWsProxy.ts`). Kiekvienas naujinimas patvirtinamas prieš atidarant tunelį, taikant tas pačias taisykles, kaip ir HTTP įterpimo maršrute: lygiavertis partneris turi būti atgalinis be atvirkštinio tarpinio serverio persiuntimo antraštės, naršyklės `Origin` turi būti informacijos suvestinės kilmė (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` pratęsia atgalinio ciklo numatytuosius nustatymus), o skambinančiajam reikia išjungti prietaisų API seansą arba išjungta daqgboard login.
 
 **Saugumas:** Įterpti tarpinio serverio maršrutai yra klasifikuojami kaip `LOCAL_ONLY_API_PREFIXES` ir juos galima pasiekti tik per kilpą. Užpuolikas, gavęs JWT per Cloudflare/Ngrok tunelį, negali prisijungti prie įterptųjų paslaugų.
 
@@ -565,71 +563,55 @@ Kiekvienas naujinimas patvirtinamas prieš atidarant tunelį, laikantis tos pač
 
 ## 5. Saugumas
 
-### LOCAL_ONLY vykdymo užtikrinimas (griežta taisyklė Nr. 17)
+### LOCAL_ONLY vykdymas (kieta taisyklė #17)
 
-Visi maršrutai, esantys po `/api/services/` ir `/dashboard/providers/services/*/embed/`,
-faile `src/server/authz/routeGuard.ts` klasifikuojami kaip LOCAL_ONLY. Vietinio grįžtamojo ryšio patikra
-vykdoma besąlygiškai prieš bet kurią autentifikavimo šaką:
+Visi maršrutai pagal `/api/services/` ir `/dashboard/providers/services/*/embed/` klasifikuojami kaip LOCAL_ONLY `src/server/authz/routeGuard.ts`. Atgalinis tikrinimas vykdomas besąlygiškai prieš bet kurią autentifikavimo šaką:
 
 ```
-gaunama užklausa
+request arrives
   → isLocalOnlyPath(path)?
-      → ne grįžtamojo ryšio adresas → 403 LOCAL_ONLY (visada, prieš autentifikavimo patikrą)
-      → grįžtamojo ryšio adresas    → tęsti įprastą autentifikavimą
+      → non-loopback → 403 LOCAL_ONLY (always, before auth check)
+      → loopback    → fall through to normal auth
 ```
 
-Tai neleidžia nutekėjusiam JWT (pvz., per tunelį) inicijuoti `npm install` arba
-procesų paleidimo. Visą lygių matricą žr. `docs/security/ROUTE_GUARD_TIERS.md`.
+Tai neleidžia nutekėjusiam JWT (pvz., per tunelį) suaktyvinti `npm install` arba proceso neršto. Žr. `docs/security/ROUTE_GUARD_TIERS.md` visos pakopos matricą.
 
-### API rakto įterpimas
+### API rakto įpurškimas
 
-9Router ir Mux savo HTTP galiniams taškams reikalauja API rakto / nešėjo prieigos rakto.
-OmniRoute:
+9Router ir Mux reikalauja API key/bearer prieigos rakto savo HTTP galiniams taškams. OmniRoute:
 
-1. Sugeneruoja raktą naudodama `crypto.randomBytes(32).toString("base64url")` su
-   konkrečiai paslaugai skirtu prefiksu (`nr_` – 9Router, `mx_` – Mux).
-2. Užšifruoja jį saugojimo metu naudodama AES-256-GCM (tą patį šifrą, kuris naudojamas teikėjo prisijungimo duomenims).
-3. Iššifruoja ir paleidimo metu įterpia jį kaip aplinkos kintamąjį —
-   `NINEROUTER_API_KEY` – 9Router, `MUX_SERVER_AUTH_TOKEN` – Mux (niekada kaip CLI
-   parinktį, todėl prieigos raktas niekada nerodomas `ps` / procesų sąrašuose).
-4. Niekada negrąžina nešifruoto rakto jokiame HTTP atsakyme.
+1. Sugeneruoja raktą per `crypto.randomBytes(32).toString("base64url")` su konkrečiai paslaugai skirtu priešdėliu (`nr_` 9Router, `mx_` Mux).
+2. Užšifruoja jį ramybės būsenoje naudodamas AES-256-GCM (tas pats šifras, naudojamas tiekėjo kredencialams).
+3. Iššifruoja ir įveda jį kaip aplinkos kintamąjį kūrimo metu — `NINEROUTER_API_KEY`, skirtas 9Router, `MUX_SERVER_AUTH_TOKEN` skirtas Mux (niekada nėra CLI vėliavėlė, todėl prieigos raktas niekada nerodomas `ps`/process sąrašuose).
+4. Niekada negrąžina paprasto teksto rakto jokiame HTTP atsakyme.
 
-CLIProxyAPI paleidimo metu gauna specialų duomenų lygmens raktą
-(`needsApiKey: true` — naudojamą modeliams sinchronizuoti su adapteriu).
+CLIProxyAPI gauna tam skirtą duomenų plokštumos raktą, įšvirkštą paleidimo metu (`needsApiKey: true` — naudojamas modelio sinchronizavimui su adapteriu).
 
-### Apsauga nuo SSRF
+### SSRF gynyba
 
-Atvirkštinis HTTP tarpinis serveris (`/dashboard/.../embed/[...path]`) yra griežtai sukonfigūruotas persiųsti
-tik į `http://127.0.0.1:{port}`. Jis niekada neseka peradresavimų į paskirties vietas,
-kurios nėra grįžtamojo ryšio adresai. Biblioteka `ssrf-req-filter` naudojama atmesti bet kokį aukštesniojo lygmens serverio URL, kuris
-nurodo už grįžtamojo ryšio diapazono ribų esantį adresą.
+Atvirkštinis HTTP tarpinis serveris (`/dashboard/.../embed/[...path]`) yra užkoduotas, kad būtų persiunčiamas tik į `http://127.0.0.1:{port}`. Ji niekada nevykdo peradresavimų į neciklinio atgalinio ryšio paskirties vietas. `ssrf-req-filter` biblioteka naudojama atmesti bet kokį URL prieš srovę, kuris išsprendžiamas už grįžtamojo ciklo diapazono ribų.
 
-### Komandų apvalkalo sauga (griežta taisyklė Nr. 13)
+### Korpuso sauga (griežta taisyklė #13)
 
-`npm install` iškviečiama naudojant `execFile('npm', ['install', pkg, '--prefix', dir])` —
-be šabloninių literalų, komandų apvalkalo ar išorinių kelių interpoliavimo komandos
-eilutėje. Vykdymo metu naudojamos reikšmės (prievadai, API raktai) perduodamos per antrinio proceso objektą `env`.
+`npm install` iškviečiamas per `execFile('npm', ['install', pkg, '--prefix', dir])` — be šablono literalų, jokio apvalkalo, jokio išorinių kelių interpoliacijos į komandų eilutę. Vykdymo laiko reikšmės (prievadai, API raktai) perduodamos per vaiko `env` objektą.
 
-### Klaidų informacijos išvalymas (griežta taisyklė Nr. 12)
+### Išvalymo klaida (griežta taisyklė #12)
 
-Visi klaidų atsakymai iš `/api/services/*` apdorojami naudojant `buildErrorBody()` arba
-`sanitizeErrorMessage()`. Neapdorotos `err.stack` ir `err.message` reikšmės niekada nėra pažodžiui grąžinamos
-kvietėjui.
+Visi atsakymai į klaidas iš `/api/services/*` eina per `buildErrorBody()` arba `sanitizeErrorMessage()`. Neapdoroti `err.stack` ir `err.message` niekada nėra grąžinami skambinančiajam.
 
 ---
 
 ## 6. Naujos įterptosios paslaugos pridėjimas
 
-Atlikite šiuos 8 veiksmus. Esamas realizacijas aplankuose `src/lib/services/installers/`
-ir `src/app/api/services/` laikykite pagrindiniu pavyzdžiu.
+Atlikite šiuos 8 veiksmus. Skaitykite esamus `src/lib/services/installers/` ir `src/app/api/services/` diegimus kaip kanoninę nuorodą.
 
-### 1 veiksmas — sukurkite diegimo programą
+### 1 veiksmas — Sukurkite diegimo programą
 
-Sukurkite `src/lib/services/installers/{name}.ts` pagal `ninerouter.ts`:
+Sukurkite `src/lib/services/installers/{name}.ts` pagal `ninerouter.ts` modelį:
 
 ```typescript
 export const NAME_PACKAGE = "your-npm-package";
-export const NAME_DEFAULT_PORT = 20132; // pasirinkite laisvą prievadą
+export const NAME_DEFAULT_PORT = 20132; // pick a free port
 
 export async function install(version = "latest"): Promise<InstallResult> { ... }
 export async function update(version = "latest"): Promise<InstallResult> { ... }
@@ -639,12 +621,11 @@ export async function getInstalledVersion(): Promise<string | null> { ... }
 export async function getLatestVersion(): Promise<string | null> { ... }
 ```
 
-Naudokite `runNpm(['install', NAME_PACKAGE, '--prefix', dir])` iš `installers/utils.ts`
-— niekada nenaudokite `execSync` ar interpoliavimo komandų apvalkale.
+Nenaudokite `runNpm(['install', NAME_PACKAGE, '--prefix', dir])` iš `installers/utils.ts` — niekada nenaudokite `execSync` arba apvalkalo interpoliacijos.
 
-### 2 veiksmas — užregistruokite pradinio paleidimo konfigūracijoje
+### 2 veiksmas — Užsiregistruokite įkrovos programoje
 
-Į masyvą `SERVICES`, esantį `src/lib/services/bootstrap.ts`, pridėkite `ServiceEntry`:
+Pridėkite `ServiceEntry` prie `SERVICES` masyvo `src/lib/services/bootstrap.ts`:
 
 ```typescript
 {
@@ -654,103 +635,77 @@ Naudokite `runNpm(['install', NAME_PACKAGE, '--prefix', dir])` iš `installers/u
   healthIntervalMs: 5_000,
   stopTimeoutMs: 15_000,
   logsBufferBytes: 5_242_880,
-  needsApiKey: true, // false, jei API rakto nereikia
+  needsApiKey: true, // false if no API key needed
 }
 ```
 
-Išplėskite `buildSpawnArgsFactory()`, kad būtų apdorojama sąlyga `cfg.tool === "myservice"`.
+Išplėskite `buildSpawnArgsFactory()`, kad galėtumėte valdyti `cfg.tool === "myservice"`.
 
-#### Prijungiamo teikėjo papildinio sutartis (1 etapas, Nr. 7333)
+#### Prijungiamo teikėjo ir papildinio sutartis (1 etapas, #7333)
 
-`src/lib/services/providerPlugins/` pristato `ServiceProviderPlugin` sutartį, kuri
-sujungia vidinės sistemos `bootstrap.ts` laukus `ServiceEntry` ir `serviceBackends.ts`
-manifesto šablono laukus į vieną objektą, užuot to paties vidinės sistemos komponento struktūrą
-atskirai aprašius dviejuose nesusijusiuose failuose. Šiuo metu **perkeltas tik `9router`**
-— `bootstrap.ts` suformuoja savo `SERVICES[]` įrašą iš
-`getServiceProviderPlugin("9router")` (`src/lib/services/providerPlugins/registry.ts`),
-o jei papildinio kada nors trūktų, išmeta paleidimo klaidą. `cliproxy`, `mux` ir `bifrost`
-toliau naudoja ankstesnius įterptinius `SERVICES[]` literalus be pakeitimų.
+`src/lib/services/providerPlugins/` pristato `ServiceProviderPlugin` sutartį, pagal kurią `bootstrap.ts` `ServiceEntry` laukai ir `serviceBackends.ts` manifesto šablono laukai supakuojami į vieną objektą, o ne ta pati vidinės sistemos forma būtų išreikšta atskirai dviejuose nesusijusiuose failuose. Nuo šio rašymo** perkeltas tik `9router`** — `bootstrap.ts` gauna `SERVICES[]` įrašą iš `getServiceProviderPlugin("9router")` (`src/lib/services/providerPlugins/registry.ts`), išmesdamas paleidimo klaidą, jei įskiepio kada nors trūksta. `cliproxy`, `mux` ir `bifrost` lieka nepakitę jau esamuose eilutiniuose `SERVICES[]` literaluose.
 
-`open-sse/config/providerPluginManifest.ts` taip pat papildytas
-`createServiceBackendManifestEntry(pluginId, template)` pagalbine funkcija, kuri iš `SERVICE_BACKEND_MANIFEST_TEMPLATE` įrašo sukuria tinkamai suformuotą
-`ProviderPluginManifestEntry` — ji
-**dar nėra** prijungta prie jokio aktyvaus užklausų kelio (nei `generateProviderPluginManifestFromRegistry()`,
-nei `/v1/providers/[provider]/models`); tai lieka vėlesniam darbui, kai sutartis bus
-patikrinta su antruoju vidinės sistemos komponentu.
+`open-sse/config/providerPluginManifest.ts` taip pat gavo priedą `createServiceBackendManifestEntry(pluginId, template)` pagalbininką, kuris sukuria gerai suformuotą `ProviderPluginManifestEntry` iš `SERVICE_BACKEND_MANIFEST_TEMPLATE` įrašo — tai yra** ne** prijungtas prie bet kurio tiesioginio užklausos kelio (nei `generateProviderPluginManifestFromRegistry()` nei `/v1/providers/[provider]/models`); tai tebėra tolesnis veiksmas, kai įrodoma, kad sutartis bus sudaryta dėl antrosios užpakalinės programos.
 
-Atidėta vėlesnėms PR ir sekama pagal užduotį Nr. 7333: `cliproxyapi` perkėlimas naudojant tą patį
-registrą, `mux` / `bifrost` apibendrinimas į sąjungą `ServiceBackendPluginId`,
-vykdyklės maršrutizavimo specialiųjų atvejų (`open-sse/executors/index.ts`,
-`open-sse/handlers/chatCore/executorProxy.ts`) įtraukimas į papildinio sutartį ir
-`createServiceBackendManifestEntry()` prijungimas prie aktyvaus manifesto / modelių kodo kelio.
+Atidėtas tolesniam PRs, stebimas #7333 leidimu : `cliproxyapi` perkėlimas per tą patį registrą, `mux`/`bifrost` apibendrinimas į `ServiceBackendPluginId` sąjungą, vykdytojo nukreipimo specialaus korpuso (`open-sse/executors/index.ts`, `open-sse/handlers/chatCore/executorProxy.ts`) sulankstymas į papildinio sutartį ir `createServiceBackendManifestEntry()` laidų sujungimas į tiesioginį kodo kelią manifest/models.
 
-### 3 veiksmas — pridėkite migraciją ir pradinius DB duomenis
+### 3 veiksmas — Pridėkite migraciją ir DB sėklą
 
-Pasirūpinkite, kad paslauga turėtų eilutę lentelėje `version_manager`, naudodami migraciją aplanke
-`src/lib/db/migrations/`. Eilutė turi būti tokia:
+Įsitikinkite, kad paslauga turi `version_manager` eilutę per `src/lib/db/migrations/` perkėlimą. Eilėje turi būti:
 
 ```sql
 INSERT OR IGNORE INTO version_manager (tool, status, auto_start, provider_expose)
 VALUES ('myservice', 'not_installed', 0, 0);
 ```
 
-### 4 veiksmas — sukurkite 7 API galinius taškus
+### 4 veiksmas — Sukurkite 7 API galinius taškus
 
-Aplanke `src/app/api/services/{name}/`:
+Pagal `src/app/api/services/{name}/`:
 
 ```
-_lib.ts            getOrInitSupervisor() pagalbinė funkcija
-install/route.ts   POST — iškviečia installer.install()
-start/route.ts     POST — iškviečia supervisor.start()
-stop/route.ts      POST — iškviečia supervisor.stop()
-restart/route.ts   POST — iškviečia supervisor.restart()
-update/route.ts    POST — iškviečia installer.update()
-status/route.ts    GET  — sujungia esamąją ir DB būseną
-auto-start/route.ts POST — perjungia auto_start žymą
+_lib.ts            getOrInitSupervisor() helper
+install/route.ts   POST — calls installer.install()
+start/route.ts     POST — calls supervisor.start()
+stop/route.ts      POST — calls supervisor.stop()
+restart/route.ts   POST — calls supervisor.restart()
+update/route.ts    POST — calls installer.update()
+status/route.ts    GET  — merges live + DB status
+auto-start/route.ts POST — toggles auto_start flag
 ```
 
-Bendrinamas maršrutas `GET /api/services/[name]/logs` jau prijungtas — jokių pakeitimų
-ten nereikia.
+Bendras `GET /api/services/[name]/logs` maršrutas jau yra prijungtas prie — jokių pakeitimų ten nereikia.
 
-Visus klaidų atsakymus perduokite per `createErrorResponse()` / `buildErrorBody()`.
+Perduokite visus atsakymus į klaidas per `createErrorResponse()` / `buildErrorBody()`.
 
-### 5 veiksmas — įtraukite į LOCAL_ONLY_API_PREFIXES
+### 5 veiksmas — Pridėti prie LOCAL_ONLY_API_PREFIXES
 
-Faile `src/server/authz/routeGuard.ts` patikrinkite, ar `/api/services/` jau įtrauktas.
-Jei įvedate naują priešdėlį (pvz., `/api/tools/`), pridėkite jį ir prie
-`LOCAL_ONLY_API_PREFIXES`, ir, jei jis paleidžia procesus, prie `SPAWN_CAPABLE_PREFIXES`.
-Pridėkite testą faile `tests/unit/authz/routeGuard.test.ts`.
+`src/server/authz/routeGuard.ts` patikrinkite, ar `/api/services/` jau yra sąraše. Jei įvedate naują priešdėlį (pvz., `/api/tools/`), pridėkite jį prie `LOCAL_ONLY_API_PREFIXES` ir, jei jis sukuria procesus, į `SPAWN_CAPABLE_PREFIXES`. Pridėkite testą į `tests/unit/authz/routeGuard.test.ts`.
 
-### 6 veiksmas — pridėkite UI kortelę
+### 6 veiksmas — Pridėkite UI skirtuką
 
-Sukurkite `src/app/(dashboard)/dashboard/providers/services/tabs/{Name}ServiceTab.tsx`.
-Pakartotinai naudokite bendrinamus komponentus:
+Sukurkite `src/app/(dashboard)/dashboard/providers/services/tabs/{Name}ServiceTab.tsx`. Pakartotinai naudokite bendrinamus komponentus:
 
-- `ServiceStatusCard` — tiesioginė būsena + veikimo būklės ženklelis
-- `ServiceLifecycleButtons` — Paleisti / Sustabdyti / Paleisti iš naujo / Atnaujinti
-- `ServiceLogsPanel` — SSE žurnalo pabaiga (jungiasi prie `/api/services/{name}/logs`)
-- `ApiKeyCard` — rakto parodymas + pakeitimas (jei `needsApiKey: true`)
+- `ServiceStatusCard` — gyvos būklės + sveikatos ženklelis
+- `ServiceLifecycleButtons` — Pradėti / Sustabdyti / Paleisti iš naujo / Atnaujinti
+- `ServiceLogsPanel` — SSE log tail (jungiasi prie `/api/services/{name}/logs`)
+- `ApiKeyCard` — klavišas atskleidžia + pasukimą (jei `needsApiKey: true`)
 
-Užregistruokite kortelę faile `ServicesPageShell.tsx`.
+Užregistruokite skirtuką `ServicesPageShell.tsx`.
 
-### 7 veiksmas — pridėkite teikėjo įrašą (jei paslauga yra maršruto parinkimo paskirties vieta)
+### 7 veiksmas — Pridėkite teikėjo įrašą (jei paslauga yra nukreipimo tikslas)
 
-Jei įterptoji paslauga pateikia su OpenAI suderinamą `/v1/chat/completions` galinį tašką:
+Jei įterptoji paslauga atskleidžia su OpenAI suderinamą `/v1/chat/completions` galinį tašką:
 
-1. Pridėkite teikėjo įrašą faile `src/shared/constants/providers.ts` su `isEmbeddedService: true`.
-2. Sukurkite `open-sse/executors/{name}.ts`, išplečiantį `BaseExecutor`. Kiekvienai užklausai
-   iš naujo raskite prievadą ir API raktą (niekada nelaikykite jų konstruktoriaus podėlyje).
-   Grąžinkite `503 service_not_running` atsakymą, kai prižiūryklės būsena nėra `"running"`.
-3. Užregistruokite modelius faile `open-sse/config/providerRegistry.ts`, naudodami paslaugos
-   priešdėlį (pvz., `myservice/sub/model`). `modelSync.ts` palaikys jų aktualumą.
+1. Pridėkite teikėjo įrašą `src/shared/constants/providers.ts` su `isEmbeddedService: true`.
+2. Sukurkite `open-sse/executors/{name}.ts` pratęsimą `BaseExecutor`. Pakartotinai ieškokite prievado ir API rakto pagal užklausą (niekada nelaikykite talpyklos konstruktoriuje). Grąžina `503 service_not_running` atsakymą, kai prižiūrėtojo būsena nėra `"running"`.
+3. Užregistruokite modelius `open-sse/config/providerRegistry.ts` su paslaugų priešdėliu (pvz., `myservice/sub/model`). `modelSync.ts` juos nuolat atnaujins.
 
-### 8 veiksmas — dokumentuokite ir testuokite
+### 8 veiksmas — Dokumentuokite ir patikrinkite
 
-1. Atnaujinkite `docs/frameworks/EMBEDDED-SERVICES.md` (šį failą) — įtraukite paslaugą į
-   §1 lentelę, o visus naujus galinius taškus — į §4.
-2. Pridėkite vienetinius testus kataloge `tests/unit/services/` (gyvavimo ciklo, diegimo programos, API formos).
-3. Pridėkite integracinį testą kataloge `tests/integration/services/` (vykdomą tik nustačius `RUN_SERVICES_INT=1`).
-4. Papildykite `docs/openapi.yaml` naujais galiniais taškais.
+1. Atnaujinkite `docs/frameworks/EMBEDDED-SERVICES.md` (šį failą) — pridėkite paslaugą prie 1 dalies lentelės ir visus naujus galutinius taškus prie 4.
+2. Pridėkite vienetų testus `tests/unit/services/` (gyvenimo ciklas, montuotojas, API forma).
+3. Pridėti integracijos testą `tests/integration/services/` (už `RUN_SERVICES_INT=1`).
+4. Atnaujinkite `docs/openapi.yaml` naudodami naujus galutinius taškus.
 
 ---
 
@@ -851,65 +806,44 @@ numatytuoju OmniRoute 20128 prievadu.
 
 ---
 
-## 8. DUK
+## 8. FAQ
 
-**K.: Ar galiu įterptųjų paslaugų galinius taškus padaryti pasiekiamus ne vietinės sąsajos klientams?**
+**Kl.: Ar galiu atskleisti įterptųjų paslaugų galinius taškus negrįžtamiems klientams?**
 
-Ne. LOCAL_ONLY lygmuo yra numatytas sąmoningai (griežtoji taisyklė Nr. 17). Maršrutai, kurie gali vykdyti
-`npm install` arba paleisti `node` procesus, neturi būti pasiekiami srautui ne iš vietinės sąsajos,
-nes per tunelį („Cloudflare“, „Ngrok“, „Tailscale“) nutekėjęs JWT priešingu atveju leistų
-savavališkai paleisti procesus. Maršrutui
-`/api/services/` nėra jokios galimybės taikyti išimtį — kitaip nei `/api/mcp/`, jis neįtrauktas į valdymo aprėpties apėjimo
-sąrašą. Žr. `docs/security/ROUTE_GUARD_TIERS.md`.
+Ne. LOCAL_ONLY pakopa yra tyčinė (kieta taisyklė #17). Maršrutai, kurie gali iškviesti `npm install` arba sukurti `node` procesus, neturi būti pasiekiami iš neciklinio srauto, nes nutekėjęs JWT per tunelį (Cloudflare, Ngrok, Tailscale) leistų savavališkai pradėti procesą. Skirtingai nei `/api/mcp/`, `/api/services/` — nėra atsisakymo, jis neįtrauktas į valdymo apimties apėjimo sąrašą. Žiūrėkite `docs/security/ROUTE_GUARD_TIERS.md`.
 
 ---
 
-**K.: Ar 9Router ir CLIProxyAPI bus pasiekiamos produkcinėje / debesijos aplinkoje?**
+**Kl.: Ar 9Router ir CLIProxyAPI bus prieinami naudojant production/cloud ?**
 
-Taip. Abi paslaugos veikia pagal tą patį pirmiausia vietinio naudojimo modelį kaip ir pati „OmniRoute“. Jos veikia
-tame pačiame kompiuteryje ir bendrauja per vietinę sąsają. „Produkcinė“ aplinka čia reiškia VPS
-arba vietinį serverį, kuriame įdiegta „OmniRoute“, o ne nuotolinį debesijos paslaugų teikėją.
+Taip. Abi paslaugos veikia pagal tą patį vietinį modelį, kaip ir pati OmniRoute. Jie veikia toje pačioje mašinoje ir bendrauja per kilpą. „Gamyba“ čia reiškia VPS arba vietinį serverį, kuriame yra įdiegtas OmniRoute, o ne nuotolinį debesies paslaugų teikėją.
 
 ---
 
-**K.: Kaip derinti prižiūrėtoją?**
+**Kl .: Kaip derinti prižiūrėtoją?**
 
-1. Stebėkite SSE žurnalų srautą: `curl -N http://localhost:20128/api/services/9router/logs`.
-2. Patikrinkite „OmniRoute“ „pino“ išvesties struktūrinius žurnalus, filtruodami pagal
-   `service:supervisor` vardų sritį.
+1. Uodega SSE rąstų srautui: `curl -N http://localhost:20128/api/services/9router/logs`.
+2. Patikrinkite struktūrinius žurnalus OmniRoute pino išvestyje, filtruotoje pagal `service:supervisor` vardų erdvę.
 3. Patikrinkite DB eilutę: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
-4. Naudokite `GET /api/services/9router/status`, kad vienu iškvietimu pamatytumėte dabartinę vykdymo būseną, PID, veikimo būklę
-   ir `lastError`.
+4. Naudokite `GET /api/services/9router/status` kad pamatytumėte dabartinę tiesioginę būseną, PID, sveikatą ir `lastError` vienu skambučiu.
 
 ---
 
-**K.: Prižiūrėtojas rodo `health: "degraded"` arba `health: "unknown"`, tačiau būsena yra `"running"`. Ar tai problema?**
+**Kl.: Prižiūrėtojas rodo `health: "degraded"` arba `health: "unknown"`, bet būsena yra `"running"`. Ar tai problema?**
 
-`"degraded"` reiškia, kad veikimo būklės patikra grąžino ne 200 atsakymą. `"unknown"` reiškia, kad dar nebaigta
-nė viena patikra (sutapo su pirmąja apklausa). Abi būsenos paleidimo metu yra laikinos.
-Jei praėjus daugiau nei `healthIntervalMs * 3` ms po
-`"running"` veikimo būklė vis dar yra `"degraded"`, įterptoji paslauga veikia, tačiau jos HTTP API neatsako. Patikrinkite,
-ar būsenos atsakyme nurodytas tinkamas prievadas ir ar paslauga iš tiesų
-jo klausosi.
+`"degraded"` reiškia, kad sveikatos zondas pateikė non-200 atsakymą. `"unknown"` reiškia, kad joks tyrimas dar nebaigtas (lenktynės su pirmąja apklausa). Abu yra trumpalaikiai paleidimo metu. Jei sveikata išlieka `"degraded"` ilgiau nei `healthIntervalMs * 3` ms po `"running"`, įterptoji paslauga veikia, bet jos HTTP API nereaguoja. Patikrinkite, ar prievadas yra teisingas būsenos atsakyme ir ar paslauga iš tikrųjų klausosi to prievado.
 
 ---
 
-**K.: Ar galiu pakeisti 9Router API raktą visiškai nepaleisdamas iš naujo?**
+**Kl.: Ar galiu pakeisti 9Router API klavišą visiškai neperkraunant?**
 
-Ne. API raktas perduodamas 9Router per aplinkos kintamąjį proceso paleidimo metu.
-Veikiančio proceso aplinkos kintamųjų pakeisti negalima. `POST .../rotate-key`
-automatiškai sustabdo ir iš naujo paleidžia paslaugą, kad būtų pritaikytas naujasis raktas. Rakto pakeitimas
-įsigalioja per paslaugos `stopTimeoutMs` laiką (numatytoji reikšmė – 15 s) ir jos paleidimo
-trukmę.
+Ne. Raktas API perduodamas 9Router per aplinkos kintamąjį paleidimo metu. Aplinkos kintamieji negali būti keičiami vykstančiame procese. `POST .../rotate-key` automatiškai sustabdo ir iš naujo paleidžia paslaugą, kad pritaikytų naują raktą. Raktų pasukimas įsigalioja per paslaugos `stopTimeoutMs` (numatytasis 15 s) ir jos paleidimo laiką.
 
 ---
 
-**K.: Kokia yra žiedinio buferio riba ir kas nutinka jam užsipildžius?**
+**Kl .: kokia yra žiedo buferio riba ir kas nutinka jam užpildžius?**
 
-Kiekviena paslauga turi atskirą 5 MB žiedinį buferį. Kai buferis užsipildo, seniausios
-žurnalo eilutės pašalinamos, kad atsirastų vietos naujoms. SSE `snapshot` įvykis grąžina
-naujausias eilutes, neviršijant `tail` ribos. Žurnalai nėra nuolat įrašomi į diską, nebent
-DB eilutėje nustatytas `logsBufferPath`.
+Kiekviena paslauga turi 5 MB žiedo buferį. Kai buferis pilnas, seniausios rąstų linijos iškeldinamos, kad būtų vietos naujoms. Įvykis SSE `snapshot` grąžina naujausias `tail` ribos eilutes. Žurnalai neišsaugomi diske, nebent `logsBufferPath` yra nustatytas DB eilutėje.
 
 ---
 

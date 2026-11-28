@@ -116,58 +116,48 @@ rochtain; tá tacaíocht fós ann do dhintiúr bailí timpeallachta a réitíonn
 Coinníonn eochracha fíordheimhnithe nach bhfuil cumraíocht Obsidian in aghaidh na heochrach acu an cúltaca domhanda.
 Coinníonn na ceithre uirlis `obsidian_sync_*` a n-iompar ceadchomhartha sioncronaithe ar leith.
 
-## Uirlisí MCP (22)
+## uirlisí MCP (22)
 
-Sainmhínítear iad in `open-sse/mcp-server/tools/obsidianTools.ts`. Réitítear an comhartha/an bun-URL
-do gach glao (de réir na heochrach API ar dtús, ansin go domhanda). Éilíonn uirlisí a dhéanann teagmháil le **freastalaí sioncronaithe**
-OmniRoute (na ceithre uirlis `obsidian_sync_*`) an comhartha fíordheimhnithe sioncronaithe atá cumraithe
-i socruithe OmniRoute freisin.
+Sainithe in `open-sse/mcp-server/tools/obsidianTools.ts`. Réitítear na token/base-URL in aghaidh an ghlao (in aghaidh an API-eochair ar dtús, ansin domhanda). Uirlisí a bhuaileann an OmniRoute** freastalaí sioncronaithe** (na ceithre uirlis `obsidian_sync_*` ) chomh maith leis sin teastaíonn an comhartha sync auth atá cumraithe i socruithe OmniRoute.
 
-### Uirlisí léite (`read:obsidian`)
+### Léigh uirlisí (`read:obsidian`)
 
-| Uirlis                       | Cur síos                                                                                                           |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `obsidian_check_status`      | Seiceáil an bhfuil an Local REST API insroichte agus fíordheimhnithe.                                              |
-| `obsidian_search_simple`     | Cuardach lántéacs ar inneachar nótaí; tugtar blúirí le conairí comhad ar ais.                                      |
-| `obsidian_search_structured` | Cuardaigh le slonn JSON Logic (scagairí and/or/regex/path).                                                        |
-| `obsidian_read_note`         | Léigh nóta de réir conair atá coibhneasta leis an taisclann; ceannteideal/bloc/frontmatter ar leith de rogha.      |
-| `obsidian_list_vault`        | Liostaigh comhaid agus eolairí sa taisclann (crann iontrálacha).                                                   |
-| `obsidian_get_document_map`  | Faigh struchtúr ceannteideal an nóta mar mhapa de cheannteidil → uimhreacha línte.                                 |
-| `obsidian_get_note_metadata` | Faigh frontmatter, clibeanna, naisc, líon carachtar/focal gan an t-inneachar iomlán.                               |
-| `obsidian_get_active_file`   | Faigh conair + inneachar an chomhaid atá gníomhach in Obsidian faoi láthair.                                       |
-| `obsidian_get_periodic_note` | Faigh an nóta tréimhsiúil laethúil/seachtainiúil/míosúil do dháta (inniu má fhágtar ar lár é).                     |
-| `obsidian_get_tags`          | Liostaigh clibeanna uile na taisclainne lena minicíochtaí.                                                         |
-| `obsidian_list_commands`     | Liostaigh aitheantais orduithe Obsidian atá ar fáil (úsáid le `obsidian_execute_command`).                         |
-| `obsidian_sync_status`       | Stádas fhreastalaí sioncronaithe OmniRoute: ag rith, ainm na taisclainne, port, aga fónaimh, sioncronú deireanach. |
-| `obsidian_sync_conflicts`    | Liostaigh coinbhleachtaí sioncronaithe gan réiteach (conair, conair choinbhleachta, am braite).                    |
+| Uirlis                       | Cur síos                                                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `obsidian_check_status`      | Seiceáil an bhfuil an logánta REST API insroichte agus fíordheimhnithe.                                      |
+| `obsidian_search_simple`     | Cuardach téacs iomlán ar ábhar nótaí; filleann sé blúirí le conairí comhaid.                                 |
+| `obsidian_search_structured` | Cuardaigh le slonn loighic JSON (scagairí and/or/regex/path ).                                               |
+| `obsidian_read_note`         | Léigh nóta de réir cosán a bhaineann le cruinneachán; go roghnach heading/block/frontmatter. ar leith        |
+| `obsidian_list_vault`        | Liostaigh comhaid agus eolairí sa cruinneachán (crann na n-iontrálacha).                                     |
+| `obsidian_get_document_map`  | Faigh struchtúr ceannteidil an nóta mar léarscáil de na ceannteidil → line numbers.                          |
+| `obsidian_get_note_metadata` | Faigh ábhar tosaigh, clibeanna, naisc, comhaireamh char/word gan an t-ábhar iomlán.                          |
+| `obsidian_get_active_file`   | Faigh inneachar + cosán an chomhaid atá gníomhach faoi láthair i Obsidian.                                   |
+| `obsidian_get_periodic_note` | Faigh an nóta tréimhsiúil daily/weekly/monthly le haghaidh dáta (inniu má fágtar ar lár é).                  |
+| `obsidian_get_tags`          | Déan liosta de na clibeanna cruinneachán go léir agus a gcuid minicíochtaí.                                  |
+| `obsidian_list_commands`     | Liostaigh ordú Obsidian IDs atá ar fáil (úsáid le `obsidian_execute_command`).                               |
+| `obsidian_sync_status`       | OmniRoute stádas freastalaí sioncronaithe: rith, ainm cruinneachán, port, Aga fónaimh, sioncrónú deireanach. |
+| `obsidian_sync_conflicts`    | Liostaigh coinbhleachtaí sioncronaithe gan réiteach (cosán, cosán coinbhleachta, braite-at).                 |
 
-### Uirlisí scríofa (`write:obsidian`)
+### Scríobh uirlisí (`write:obsidian`)
 
-| Uirlis                           | Cur síos                                                                                           |
-| -------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Cruthaigh nó forscríobh nóta leis an inneachar Markdown a thugtar.                                 |
-| `obsidian_append_note`           | Cuir inneachar le nóta; le ceannteideal/bloc ar leith de rogha.                                    |
-| `obsidian_patch_note`            | Cuir leis/cuir roimh/ionadaigh go beacht ag ceannteideal, bloc, nó réimse frontmatter.             |
-| `obsidian_delete_note`           | Scrios nóta go buan ón taisclann.                                                                  |
-| `obsidian_move_note`             | Bog nó athainmnigh nóta laistigh den taisclann.                                                    |
-| `obsidian_execute_command`       | Rith ordú Obsidian de réir a aitheantais ordaithe.                                                 |
-| `obsidian_open_file`             | Oscail comhad in Obsidian (cruthaítear é mura bhfuil sé ann).                                      |
-| `obsidian_sync_trigger`          | Spreag sioncronú déthreoch láithreach idir taisclann an deisce↔an fhóin phóca.                     |
-| `obsidian_sync_resolve_conflict` | Réitigh coinbhleacht sioncronaithe: coinnigh `local` (fón póca), `remote` (deasc), nó `keep-both`. |
+| Uirlis                           | Cur síos                                                                                               |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `obsidian_write_note`            | Cruthaigh nó scríobh nóta le hábhar Markdown tugtha.                                                   |
+| `obsidian_append_note`           | Cuir ábhar le nóta; go roghnach chuig heading/block. ar leith                                          |
+| `obsidian_patch_note`            | Máinliachta append/prepend/replace ag ceannteideal, bloc, nó réimse tosaigh.                           |
+| `obsidian_delete_note`           | Scrios nóta as an cruinneachán go buan.                                                                |
+| `obsidian_move_note`             | Bog nó athainmnigh nóta laistigh den chruinneachán.                                                    |
+| `obsidian_execute_command`       | Rith ordú Obsidian trína ordú ID.                                                                      |
+| `obsidian_open_file`             | Oscail comhad i Obsidian (cruthaítear é mura bhfuil sé ann).                                           |
+| `obsidian_sync_trigger`          | Spreag sioncronú cruinneachán soghluaiste déthreo láithreach ↔.                                        |
+| `obsidian_sync_resolve_conflict` | Réitigh coinbhleacht sioncronaithe: coinnigh `local` (soghluaiste), `remote` (deisce), nó `keep-both`. |
 
 > [!NOTE]
-> Glacann spriocanna `obsidian_patch_note` le `targetType` de `heading | block | frontmatter`
-> agus `operation` de `append | prepend | replace`, le
-> `createTargetIfMissing` roghnach. Déanann na ceithre uirlis `obsidian_sync_*` cumarsáid leis an bhfreastalaí sioncronaithe
-> logánta (`http://127.0.0.1:27781` de réir réamhshocraithe) agus éilíonn siad an comhartha sioncronaithe.
+> Glacann spriocanna `obsidian_patch_note` `targetType` de `heading | block | frontmatter` agus `operation` de `append | prepend | replace`, le `createTargetIfMissing` roghnach. Labhraíonn na ceithre uirlis `obsidian_sync_*` leis an bhfreastalaí sioncronaithe áitiúil (`http://127.0.0.1:27781` de réir réamhshocraithe) agus teastaíonn an comhartha sioncronaithe.
 
 ### Scóip
 
-Éilíonn uirlisí léite `read:obsidian`; éilíonn uirlisí scríofa `write:obsidian`. Is ionann an forfheidhmiú
-agus forfheidhmiú Notion — láimhseálann `withScopeEnforcement()` é in
-`open-sse/mcp-server/server.ts`, faoi rialú `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, agus
-faightear na scóip cheadaithe ó `OMNIROUTE_MCP_SCOPES` nó ó chomhthéacs scóipe na heochrach API. Féach
-[MCP-SERVER.md](./MCP-SERVER.md).
+Éilíonn uirlisí Léigh `read:obsidian`; scríobh uirlisí gá `write:obsidian`. Tá an forfheidhmiú comhionann le Notion — láimhsithe ag `withScopeEnforcement()` in `open-sse/mcp-server/server.ts`, gated ar `OMNIROUTE_MCP_ENFORCE_SCOPES=true` agus iachall ar do ghlaoiteoirí HTTP/SSE a bhfuil easpa `manage`/`admin` ar a n-eochair API, le scóipeanna ceadaithe arna bhfoinsiú ó `OMNIROUTE_MCP_SCOPES` nó ó chomhthéacs scóip na heochrach API. Féach [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Críochphointí
 

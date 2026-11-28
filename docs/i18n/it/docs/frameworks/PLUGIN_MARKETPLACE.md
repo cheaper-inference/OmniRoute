@@ -4,29 +4,13 @@
 
 ---
 
-> **Fonte autorevole:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`,
-> `scanner.ts`, `loader.ts`), `src/app/api/plugins/` e
-> `src/app/(dashboard)/dashboard/plugins/`
-> **Ultimo aggiornamento:** 2026-06-28 — v3.8.40
+> **Fonte della verità:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`, `scanner.ts`, `loader.ts`), `src/app/api/plugins/` `src/app/(dashboard)/dashboard/plugins/`
 
-OmniRoute include un sistema di plugin in stile WordPress. I plugin sono
-directory autonome, ciascuna con un manifest `plugin.json` e un file di ingresso,
-che si agganciano alla pipeline delle richieste (`onRequest` / `onResponse` /
-`onError`) e agli eventi del ciclo di vita (`onInstall` / `onActivate` /
-`onDeactivate` / `onUninstall`).
+OmniRoute fornisce un sistema di plugin in stile WordPress. I plugin sono directory autonome — ciascuna con un manifest `plugin.json` e un file di ingresso — che si collega alla pipeline della richiesta (`onRequest` / `onResponse` / `onError`) e agli eventi del ciclo di vita (`onInstall` / `onActivate` / `onDeactivate` / `onUninstall`).
 
-Il **Marketplace dei plugin** costituisce il livello di rilevamento sopra tale
-sistema. Espone un catalogo consultabile di plugin installabili. Per impostazione
-predefinita, il catalogo è un piccolo registro iniziale integrato; un operatore
-può configurarlo affinché utilizzi l'URL di un registro remoto personalizzato,
-nel qual caso il recupero è protetto da una misura anti-SSRF con risoluzione DNS
-(vedere [Sicurezza](#security)).
+IL** Mercato dei plugin** è il livello di scoperta sopra quel sistema. Espone un catalogo sfogliabile di plugin installabili. Per impostazione predefinita il catalogo è un piccolo registro seed integrato; un operatore può indirizzarlo a un registro remoto personalizzato URL, nel qual caso il recupero viene rafforzato da una guardia SSRF che risolve il DNS (vedere [Sicurezza](#security) ).
 
-Ogni route dei plugin è accessibile **solo tramite loopback** (livello 1 —
-`LOCAL_ONLY`): i plugin caricano ed eseguono codice in processi figlio, pertanto
-le route non sono raggiungibili da origini non loopback, indipendentemente
-dall'autenticazione. Vedere
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
+Ogni percorso del plugin lo è** solo loopback** (Livello 1 — `LOCAL_ONLY`): i plugin caricano ed eseguono codice nei processi figli, quindi i percorsi sono irraggiungibili da un'origine non di loopback indipendentemente dall'autenticazione. Vedi [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
 ## Come si adatta Together
 
@@ -89,18 +73,19 @@ iniziale.
 
 Tutti gli endpoint richiedono l'autenticazione di gestione (`requireManagementAuth`)** E** sono solo loopback — `/api/plugins` e `/api/plugins/` sono elencati in `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Punto finale                     | Metodo | Descrizione                                                              |
-| -------------------------------- | ------ | ------------------------------------------------------------------------ |
-| `/api/plugins`                   | GET    | Elenca i plugin installati (filtro `?status=` opzionale)                 |
-| `/api/plugins`                   | POST   | Installa un plugin dalla directory dei sorgenti dei plugin               |
-| `/api/plugins/scan`              | POST   | Scansiona la directory dei plugin e registra nuovi plugin                |
-| `/api/plugins/marketplace`       | GET    | Elenca le voci del catalogo del marketplace                              |
-| `/api/plugins/[name]`            | GET    | Ottieni i dettagli del plugin installato                                 |
-| `/api/plugins/[name]`            | DELETE | Disinstallare un plug-in                                                 |
-| `/api/plugins/[name]/activate`   | POST   | Attiva (carica gli hook del registro + )                                 |
-| `/api/plugins/[name]/deactivate` | POST   | Disattiva (fire `onDeactivate`, annulla registrazione hook)              |
-| `/api/plugins/[name]/config`     | GET    | Ottieni lo schema di configurazione + della configurazione del plugin    |
-| `/api/plugins/[name]/config`     | PUT    | Aggiorna la configurazione del plugin (convalidato rispetto allo schema) |
+| Punto finale                       | Metodo | Descrizione                                                              |
+| ---------------------------------- | ------ | ------------------------------------------------------------------------ |
+| `/api/plugins`                     | GET    | Elenca i plugin installati (filtro `?status=` opzionale)                 |
+| `/api/plugins`                     | POST   | Installa un plugin dalla directory dei sorgenti dei plugin               |
+| `/api/plugins/scan`                | POST   | Scansiona la directory dei plugin e registra nuovi plugin                |
+| `/api/plugins/marketplace`         | GET    | Elenca le voci del catalogo del marketplace                              |
+| `/api/plugins/marketplace/install` | POST   | Installa un plug-in del marketplace in base al nome                      |
+| `/api/plugins/[name]`              | GET    | Ottieni i dettagli del plugin installato                                 |
+| `/api/plugins/[name]`              | DELETE | Disinstallare un plug-in                                                 |
+| `/api/plugins/[name]/activate`     | POST   | Attiva (carica gli hook del registro + )                                 |
+| `/api/plugins/[name]/deactivate`   | POST   | Disattiva (fire `onDeactivate`, annulla registrazione hook)              |
+| `/api/plugins/[name]/config`       | GET    | Ottieni lo schema di configurazione + della configurazione del plugin    |
+| `/api/plugins/[name]/config`       | PUT    | Aggiorna la configurazione del plugin (convalidato rispetto allo schema) |
 
 Il filtro `GET /api/plugins` `status` accetta uno tra `installed` / `active` / `inactive` / `error`. Un valore non valido restituisce `400`.
 
@@ -122,7 +107,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 La `path` deve essere un** assoluto** percorso di una directory** all'interno della directory dei sorgenti del plugin** : `plugin-sources` accanto alla radice del plugin, quindi `~/.omniroute/plugin-sources/` per impostazione predefinita o `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` quando quella variabile è impostata (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Copia o clona prima il plugin lì. L'installazione viene rifiutata con `400` quando il percorso contiene `..` o un byte null, si trova all'esterno di quella directory, si risolve all'esterno di essa tramite un collegamento simbolico, contiene un collegamento simbolico la cui destinazione è all'esterno di essa o quando la directory non esiste. La directory di origine deve contenere uno `plugin.json` valido (o essere genitore di uno). In caso di successo, la risposta è `201` con la riga del plugin installato.
 
-A differenza degli altri percorsi di plugin, questo richiede le credenziali di gestione (una sessione del dashboard o una chiave API con ambito di gestione) anche quando l'accesso è disabilitato (`requireLogin=false`): l'installazione del codice non è mai un'azione anonima.
+A differenza degli altri percorsi di plugin, questo richiede le credenziali di gestione (una sessione del dashboard o una chiave API con ambito di gestione) anche quando l'accesso è disabilitato (`requireLogin=false`): l'installazione del codice non è mai un'azione anonima. Lo stesso vale per `POST /api/plugins/marketplace/install` (corpo `{ "name": "<plugin>" }`).
 
 ### Sfoglia il mercato
 
@@ -140,7 +125,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` convalida ogni valore fornito rispetto allo `configSchema` del plugin (dichiarato nel manifest): i campi `number` rispettano `min`/`max`, i campi `select` devono corrispondere allo `enum` dichiarato. Sono consentite le chiavi non presenti nello schema.
+`PUT .../config` convalida il corpo rispetto allo `configSchema` del plugin (dichiarato nel manifest) con `validatePluginConfig()` da `src/lib/plugins/manifest.ts`: ogni chiave deve essere dichiarata nello schema, i valori devono corrispondere al tipo dichiarato, i campi `number` rispettano `min`/`max` e i campi `select` devono corrispondere allo `enum` dichiarato. Qualsiasi violazione restituisce `400` e non viene memorizzato nulla. Un plugin che dichiara no `configSchema` non ha chiavi configurabili, quindi la richiesta viene rifiutata con `400` ("Il plugin non dichiara alcuna chiave configurabile").
 
 ## Configurazione
 
@@ -220,13 +205,13 @@ Uno URL che fallisce uno dei due livelli non interrompe la richiesta — il merc
 
 ### Isolamento dell'esecuzione del plugin
 
-> **I plugin non sono sandbox.** Il figlio è un normale processo Node.js in esecuzione come utente OmniRoute, senza contesto VM e senza flag di autorizzazione Node.js, quindi il codice del plugin può leggere e scrivere qualsiasi file che l'utente può, eseguire programmi e raggiungere la rete. `requires.permissions` decide solo quali variabili di ambiente riceve il bambino; le altre autorizzazioni non vengono applicate. Installa solo i plugin di cui ti fidi. Il limite del processo riportato di seguito contiene arresti anomali e blocchi; non è un confine di sicurezza.
+> **I plugin non sono sandbox per impostazione predefinita.** Il figlio è un normale processo Node.js in esecuzione come utente OmniRoute, senza contesto VM e senza flag di autorizzazione Node.js, quindi il codice del plugin può leggere e scrivere qualsiasi file che l'utente può, eseguire programmi e raggiungere la rete. `requires.permissions` decide solo quali variabili di ambiente riceve il bambino; le altre autorizzazioni non vengono applicate. Il flag di funzionalità `PLUGIN_PERMISSION_MODEL_ENABLED` di attivazione (disattivato per impostazione predefinita) esegue ciascun plug-in nel modello di autorizzazione Node.js creato da tali autorizzazioni, ad eccezione di `network`, che Node.js non può limitare (vedere [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Installa solo i plugin di cui ti fidi. Il limite del processo riportato di seguito contiene arresti anomali e blocchi; non è un confine di sicurezza.
 
 - **Isolamento del processo** — `loadPlugin()` (`src/lib/plugins/loader.ts`) genera ciascun plugin in un processo figlio Node.js separato e comunica tramite IPC. Le chiamate hook hanno un timeout con l'escalation `SIGTERM` → `SIGKILL`.
 - **Lista consentita buste** — il bambino riceve solo un insieme di variabili di ambiente consentite; l'insieme più ampio viene concesso solo quando il manifest richiede l'autorizzazione `env`.
 - **Installare il contenimento della sorgente** — `POST /api/plugins` legge solo dalla directory dei sorgenti del plugin (vedi "Installa da un percorso locale"): il percorso è canonizzato con `realpath`, deve rimanere rigorosamente all'interno di quella directory e un albero dei sorgenti che trasporta un collegamento simbolico che sfugge ad esso viene rifiutato prima che qualsiasi cosa venga copiata.
 - **Contenimento del percorso** — install/upgrade/uninstall asserisce che la directory del plugin e `manifest.main` si risolvono** entro** la root del plugin gestito prima di qualsiasi copia o eliminazione ricorsiva (protegge da percorsi DB manomessi e attraversamento `../` in `manifest.main`). L'attivazione risolve i collegamenti simbolici tramite `realpath` e rifiuta di caricare un punto di ingresso che sfugge alla directory del plugin.
-- **Perno di integrità opzionale** — un manifest può dichiarare un campo `integrity` ( formato `sha256-<base64>`, SRI ). Se presente, il caricatore verifica l'hash del file di ingresso al momento del caricamento e rifiuta di attivarsi in caso di mancata corrispondenza. È un rilevamento antimanomissione opzionale,** non** un limite di sicurezza: non limita ciò che può fare un plugin caricato.
+- **Perno di integrità opzionale** — un manifest può dichiarare un campo `integrity` ( formato `sha256-<base64>`, SRI ). Se presente, il caricatore verifica l'hash del file di ingresso al momento del caricamento e rifiuta di attivarsi in caso di mancata corrispondenza. È un rilevamento di manomissione opzionale,** non** un limite di sicurezza: non limita ciò che può fare un plugin caricato.
 - **Nessuna credenziale client negli hook** — il contesto passato a `onRequest`, `onResponse` e `onError` ha le intestazioni `authorization`, `x-api-key`, `proxy-authorization` e `cookie` rimosse e il record della chiave API non contiene alcun valore chiave (`redactPluginContext()` in `src/lib/plugins/hooks.ts`).
 
 ## Manifesto (`plugin.json`)

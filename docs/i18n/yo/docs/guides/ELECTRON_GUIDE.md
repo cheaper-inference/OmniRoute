@@ -4,7 +4,7 @@
 
 ---
 
-> **Orisun otitọ:** `electron/` aaye iṣẹ** Imudojuiwọn to kẹhin:** 2026-06-28 — v3.8.40
+> **Orisun otitọ:** `electron/` aaye iṣẹ
 
 OmniRoute gbe ohun elo tabili ori ẹrọ agbelebu kan (Windows / macOS / Linux) ti a ṣe lori**Electron 41** +** elekitironi-Akole 26.10** . Ohun elo tabili tabili naa nfa olupin iduroṣinṣin Next.js bi ilana ọmọde, tọka `BrowserWindow` kan si i, o si ṣafikun atẹ eto, imudojuiwọn adaṣe, afara IPC, ati bootstrap aṣiri odo-iṣeto.
 
@@ -198,7 +198,7 @@ Ayika ilana naa ti mu nigbati ohun elo ba bẹrẹ, nitorinaa eto tabi oluyipada
 
 ## Imudojuiwọn laifọwọyi
 
-Nlo `electron-updater` pẹlu olupese GitHub (`diegosouzapw/OmniRoute`).
+Nlo `electron-updater` pẹlu olupese GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Awọn iṣẹlẹ ti a firanṣẹ siwaju si oluṣe nipasẹ `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (pẹlu `percent`), `downloaded`, `error`
@@ -263,7 +263,7 @@ npm run electron:build:win
 
 ### Linux
 
-wíwọlé AppImage jẹ aṣayan — ṣeto `LINUX_GPG_KEY` ti o ba forukọsilẹ.
+wíwọlé AppImage jẹ — ti o jẹ iyan ṣeto `LINUX_GPG_KEY` ti o ba ti fowo si.
 
 ## Pinpin
 
@@ -273,7 +273,7 @@ Awọn ohun-ọṣọ ilẹ ni `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Awọn idasilẹ ti wa ni atẹjade si awọn idasilẹ GitHub (`diegosouzapw/OmniRoute`), eyiti o tun wa nibiti `electron-updater` n ṣayẹwo fun awọn ẹya tuntun.
+Awọn idasilẹ ti wa ni atẹjade si awọn idasilẹ GitHub (`cheaper-inference/OmniRoute`), eyiti o tun wa nibiti `electron-updater` n ṣayẹwo fun awọn ẹya tuntun.
 
 ## Laasigbotitusita
 

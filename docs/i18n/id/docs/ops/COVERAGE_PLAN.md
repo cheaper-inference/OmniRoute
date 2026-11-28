@@ -151,30 +151,30 @@ Tema untuk Fase 6-7:
 - [ ] Tambahkan pengujian regresi untuk setiap bug produksi yang ditemukan dan diperbaiki selama upaya mencapai 90%
 - [ ] Naikkan ambang cakupan di CI hanya setelah garis dasar lokal stabil selama setidaknya dua kali proses berturut-turut
 
-## Kebijakan ratchet
+## Kebijakan roda gigi
 
-Perbarui ambang batas `npm run test:coverage` hanya setelah proyek benar-benar melampaui tonggak pencapaian berikutnya dengan margin yang memadai.
+Perbarui ambang batas `npm run test:coverage` hanya setelah proyek benar-benar melampaui pencapaian berikutnya dengan buffer yang nyaman.
 
-**Batas saat ini:** `npm run test:coverage` memberlakukan **60 pernyataan / 60 baris / 60 fungsi / 60 cabang** (metrik tersebut dihitung ulang dalam Quality-Gates Fase 6A.1 — baseline 82.58% sebelumnya terlalu tinggi karena menghitung file pengujian dan mengecualikan `open-sse`). Perintah `test:coverage:legacy` mempertahankan metrik lama 50/50/50 untuk perbandingan historis.
+**Gerbang saat ini:** `npm run test:coverage` menegakkan** 60 pernyataan / 60 baris / 60 fungsi / 60 cabang** (metrik tersebut didasarkan pada Gerbang Kualitas Fase 6A.1 — garis dasar 82,58% sebelumnya ditingkatkan karena menghitung file pengujian dan mengecualikan `open-sse`). Perintah `test:coverage:legacy` mempertahankan metrik 50/50/50 lama untuk perbandingan historis.
 
-Untuk pemeriksaan ambang batas ad hoc terhadap laporan terbaru, gunakan:
+Untuk pemeriksaan ambang batas ad-hoc terhadap laporan terbaru, gunakan:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Urutan ratchet yang direkomendasikan (urutannya adalah `pernyataan-baris / cabang / fungsi`):
+Urutan ratchet yang disarankan (urutan `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- batas saat ini (75/70/75)
+5. 75/70/72 <-- gerbang saat ini (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Target ratchet berikutnya adalah `80/75/78` setelah cakupan cabang bertahan di atas 78% selama dua kali proses berturut-turut.
+Target ratchet berikutnya adalah `80/75/78` setelah cakupan cabang bertahan di atas 78% untuk dua kali berturut-turut.
 
 ## Kekurangan yang diketahui
 

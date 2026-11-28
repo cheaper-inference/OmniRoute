@@ -12,57 +12,53 @@ OmniRoute ima tri različita, ali povezana mehanizma otpornosti. Svaka ima druga
 
 > **Env-vs-dashboard prioritet za prekidače otpornosti.** Opt-in otpornost prebacuje iz okruženja — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — isporučuje samo _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean je ostao u `resilienceSettings` (Nadzorna ploča →** Postavke → Otpornost** / `PATCH /api/resilience`, pohranjen u `key_value`) pobjeđuje vrijednost env: normalizacija (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) zadržava pohranjeni boolean kad god postoji. Postavljanje takvog env var na `true` na implementaciji gdje je kontrolna ploča već spremljena `false` stoga ništa ne mijenja — okrenite prekidač u** Postavke → Otpornost** (ili obrišite pohranjeno polje).
 
-## 1. Prekidač kruga provajdera (Provider Circuit Breaker)
+## 1. Provajderski prekidač
 
 **Opseg:** cijeli provajder (npr. `glm`, `openai`, `anthropic`).
 
-**Svrha:** prestati slati saobraćaj provajderu koji više puta uzastopno otkazuje na nivou upstream-a/usluge.
+**svrha:** zaustavite slanje saobraćaja do provajdera koji stalno kvari na upstream/service nivou.
 
 **Implementacija:**
 
 - Osnovna klasa: `src/shared/utils/circuitBreaker.ts`
-- Povezivanje: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Ožičenje: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
 - Status API: `GET /api/monitoring/health`
-- Reset API: `POST /api/resilience/reset`
-- Omotači: `open-sse/services/accountFallback.ts`
+- Resetiraj API: `POST /api/resilience/reset`
+- Omoti: `open-sse/services/accountFallback.ts`
 - DB tabela: `domain_circuit_breakers`
 
-**Stanja:**
+**države:**
 
-- `CLOSED` — normalni saobraćaj je dozvoljen
-- `DEGRADED` — saobraćaj je i dalje dozvoljen, ali se prate povećani neuspjesi provajdera; vraća se na `CLOSED` nakon dovoljnog broja uspjeha, nakon važećeg testa veze, ili nakon isteka najdužeg `OPEN` zadržavanja za posljednju vrstu neuspjeha (njena vrijednost `cooldownByKind`, inače `resetTimeout`, × `maxBackoffMultiplier`, najmanje jedan cooldown) bez novog neuspjeha
-- `OPEN` — provajder je privremeno blokiran; combo usmjeravanje ga preskače
-- `HALF_OPEN` — reset timeout je istekao; probni zahtjev je dozvoljen
+- `CLOSED` — normalan saobraćaj dozvoljen
+- `DEGRADED` — saobraćaj je i dalje dozvoljen, ali se prate povećani kvarovi provajdera; vraća se na `CLOSED` nakon dovoljno uspjeha, na važećem testu veze ili nakon najdužeg zadržavanja `OPEN` za posljednju vrstu greške (njegova `cooldownByKind` vrijednost, inače `resetTimeout`, × `maxBackoffMultiplier`, barem jedno hlađenje) bez novog neuspjeha
+- `OPEN` — provajder privremeno blokiran; kombinovano rutiranje to preskače
+- `HALF_OPEN` — vremensko ograničenje resetovanja je proteklo; zahtjev za sondom dozvoljen
 
-**Konfigurabilne zadane vrijednosti (`open-sse/config/constants.ts`, izložene u Dashboard → Settings → Resilience):**
+**Zadane postavke koje se mogu konfigurirati (`open-sse/config/constants.ts`, izložene na kontrolnoj tabli → Postavke → otpornosti):**
 
-| Klasa   | Degradira se na | Otvara se na | Reset timeout |
-| ------- | --------------- | ------------ | ------------- |
-| OAuth   | 5 neuspjeha     | 8 neuspjeha  | 60s           |
-| API-key | 7 neuspjeha     | 12 neuspjeha | 30s           |
-| Local   | izvedeno        | 2 neuspjeha  | 15s           |
+| Klasa     | Degradirano na | Otvara se u | Poništi vremensko ograničenje |
+| --------- | -------------- | ----------- | ----------------------------- |
+| OAuth     | 5 neuspjeha    | 8 kvarova   | 60s                           |
+| API ključ | 7 kvarova      | 12 kvarova  | 30s                           |
 
-`degradationThreshold` kontroliše kada provajder ulazi u `DEGRADED`; `failureThreshold` kontroliše kada se otvara i preskače. Profili lokalnih provajdera još nisu izloženi na stranici postavki otpornosti (Resilience).
+`degradationThreshold` kontroliše kada provajder uđe u `DEGRADED`; `failureThreshold` kontroliše kada se otvori i preskoči. `PROVIDER_PROFILES.local` (2 kvara / 15s) je definiran u `open-sse/config/constants.ts` ali** još nije ožičen** : `getProviderCategory()` vraća samo `oauth` ili `apikey`, tako da lokalni provajderi koriste profil OAuth ili API ključa.
 
-**Kodovi aktivacije:** samo statusi na nivou provajdera `[408, 500, 502, 503, 504]`. NE aktivirati za greške na nivou naloga (većina 401/403/429 — one pripadaju cooldown-u ili lockout-u).
+**Šifre putovanja:** samo statusi na nivou provajdera `[408, 500, 502, 503, 504]`. Uradite NOT trip za greške na nivou naloga (većina 401/403/429 — onih koji pripadaju hlađenju ili zaključavanju).
 
-**Lijeni oporavak:** kada `OPEN` istekne, `getStatus()`, `canExecute()`, `getRetryAfterMs()` osvježavaju stanje na `HALF_OPEN`. Ista čitanja (i sljedeći neuspjeh) postepeno vraćaju zastarjelo `DEGRADED` nazad na `CLOSED`. Pozadinski tajmer nije potreban.
+**Lijeni oporavak:** kada `OPEN` istekne, `getStatus()`, `canExecute()`, `getRetryAfterMs()` osvježavaju stanje u `HALF_OPEN`. Isto glasi (i sljedeći neuspjeh) raspada zastarjeli `DEGRADED` natrag u `CLOSED`. Nije potreban tajmer u pozadini.
 
 ---
 
-### Opcionalno globalno zahlađenje provajdera (kapija vremenskog prozora)
+### Opt-in globalno hlađenje dobavljača (prozorska kapija)
 
-Četvrti, **opcionalni** sloj (`PROVIDER_COOLDOWN_ENABLED`, zadano **isključeno**) čuva memoriju o neuspjelim provajderima kroz više zahtjeva u
-`open-sse/services/providerCooldownTracker.ts`, koju koristi razrješavanje combo ciljeva, tako da uzastopni combo zahtjevi prestaju ponovno prolaziti kroz provajdera koji je upravo otkazao. Zapisi na nivou provajdera poštuju kapiju vremenskog prozora iz `PROVIDER_PROFILES`:
+četvrti,** opt-in** sloj (`PROVIDER_COOLDOWN_ENABLED`, zadano** off** ) čuva memoriju unakrsnih zahtjeva neuspjelih provajdera u `open-sse/services/providerCooldownTracker.ts`, koju konsultuje rezolucija kombiniranog cilja, tako da uzastopni kombinirani zahtjevi prestanu ponovno pratiti provajdera koji upravo nije uspio. Unosi na nivou provajdera poštuju `PROVIDER_PROFILES` vrata prozora:
 
-| Profil  | aktivira se nakon (`providerFailureThreshold`) | unutar (`providerFailureWindowMs`) | hladi se (`providerCooldownMs`) |
-| ------- | ---------------------------------------------: | ---------------------------------: | ------------------------------: |
-| OAuth   |                                           `10` |                            `15min` |                          `5min` |
-| API key |                                           `15` |                            `30min` |                         `10min` |
+| Profil  | putovanja nakon (`providerFailureThreshold`) | unutra (`providerFailureWindowMs`) | hladi za (`providerCooldownMs`) |
+| ------- | -------------------------------------------: | ---------------------------------: | ------------------------------: |
+| OAuth   |                                         `10` |                            `15min` |                          `5min` |
+| API key |                                         `15` |                            `30min` |                         `10min` |
 
-Ispod praga provajder se **ne** smatra u hlađenju; uspjeh briše prozor. Zapisi na nivou veze (`provider:connectionId`) umjesto toga zadržavaju eksponencijalni backoff `minRetryCooldownMs → maxRetryCooldownMs`. Nadjačavanja:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Regresijska zaštita: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Ispod praga je provajder** ne** razmatra hlađenje; uspjeh otvara prozor. Umjesto toga, unosi na razini veze (`provider:connectionId`) zadržavaju eksponencijalni `minRetryCooldownMs → maxRetryCooldownMs` backoff. Poništava: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Zaštitnik regresije: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Hlađenje veze
 
@@ -768,6 +764,21 @@ reached“) klasifikuje kao `quota_exhausted` pomoću rezervne klasifikacije na 
 
 ---
 
+## Kada je sama OmniRoute nedostižna
+
+Prekidač strujnog kola dobavljača, hlađenje veze i zaključavanje modela rade unutar gateway-a. Ako klijent ne može doći do gatewaya, dobija grešku veze. OmniRoute ne može presresti taj neuspjeh. Klijent odlučuje da li će pokušati ponovo i koju poruku će prikazati.
+
+OmniRoute trenutno ne pruža rezervnu verziju na strani klijenta i ne definira politiku za to. Konfigurirajte bilo koju alternativnu rutu u klijentu ili ispred gatewaya.
+
+- `GET /api/health` provjerava živost bez autentifikacije.
+- `GET /api/health/ping` provjerava spremnost, uključujući da li baza podataka odgovara.
+- `GET /api/monitoring/health` daje autentificiranim pozivaocima dublji pregled zdravlja.
+- `omniroute launch <tool>` provjerava `/api/monitoring/health` prije pokretanja klijenta. Može automatski pokrenuti lokalni gateway. Sa `--no-start`, nedostupni gateway rezultira `GatewayUnreachable` i izlaznim kodom `69`.
+
+Da odspojite klijenta sa OmniRoute, slijedite [Vrati konfiguraciju klijenta](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Otklanjanje grešaka
 
 - Weighted combo odgovara sa `503 all_targets_cooling_down` (postavljen `Retry-After`, `diagnostics.excluded` navodi svaki cilj sa `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → pool je konfiguriran i povezan, svaki cilj je samo isključen tajmerom otpornosti; upozorenje `[COMBO] Weighted selection: every target excluded before dispatch — …` navodi razloge i preostale sekunde. `404 no_executable_targets` iz istog combo-a znači da nijedan tajmer otpornosti nije bio uključen (nema ničega za izvršavanje, ili svaki račun nije prošao provjeru dostupnosti). Izgrađeno u `open-sse/services/combo/pinRecovery.ts` na osnovu isključenja prikupljenih u `targetResolution.ts`.
@@ -779,94 +790,68 @@ reached“) klasifikuje kao `quota_exhausted` pomoću rezervne klasifikacije na 
 
 ---
 
-## Stanje u vrijeme izvršavanja — brza referenca za agente
+## Brza referenca o stanju izvođenja — agenta
 
-> Doslovno preneseno iz `AGENTS.md` → "Resilience Runtime State" (PR #12743) kako bi
-> vodič za agente ostao ispod budžeta konteksta od 40k. Ovo je sažeti prikaz gornjih
-> odjeljaka namijenjen agentima; numerirani odjeljci ostaju potpuna referenca.
+> Doslovno premješteno iz `AGENTS.md` → "Resilience Runtime State" (PR #12743) tako da vodič za agente ostaje ispod budžeta konteksta od 40k. To je sažeti, agentski pogled na gornje sekcije; numerisani delovi ostaju puna referenca.
 
-OmniRoute ima tri povezana, ali različita mehanizma za privremene kvarove. Prilikom
-otklanjanja grešaka u ponašanju rutiranja držite njihove opsege odvojenima. Pogledajte
-[dijagram otpornosti u 3 sloja](../diagrams/exported/resilience-3layers.svg)
-(izvor: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-kao mapu za brzi pregled.
+OmniRoute ima tri povezana, ali različita mehanizma privremenog kvara. Neka njihov opseg bude odvojen kada otklanjate greške u ponašanju rutiranja. Pogledajte [3-slojni dijagram otpornosti](../diagrams/exported/resilience-3layers.svg) (izvor: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) za mapu na prvi pogled.
 
-### Circuit breaker providera
+### Provajderski prekidač
 
-**Opseg**: cijeli provider, npr. `glm`, `openai`, `anthropic`.
+**Obim** : cijeli provajder, npr. `glm`, `openai`, `anthropic`.
 
-**Svrha**: zaustaviti slanje prometa provideru koji uzastopno ne uspijeva na
-upstream/servisnom nivou, kako jedan neispravan provider ne bi usporavao svaki zahtjev.
+**Svrha** : zaustavite slanje saobraćaja do provajdera koji stalno kvari na upstream/service nivou, tako da jedan nezdrav provajder ne usporava svaki zahtjev.
 
-**Implementacija**:
+**Implementacija** :
 
 - Osnovna klasa: `src/shared/utils/circuitBreaker.ts`
-- Povezivanje chat gate-a/izvršavanja: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API statusa u vrijeme izvršavanja: `src/app/api/monitoring/health/route.ts`
-- Dijeljeni wrapperi: `open-sse/services/accountFallback.ts`
-- Tabela trajnog stanja: `domain_circuit_breakers`
+- Chat gate/execution ožičenje: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Runtime status API: `src/app/api/monitoring/health/route.ts`
+- Zajednički omoti: `open-sse/services/accountFallback.ts`
+- Tabela postojanih stanja: `domain_circuit_breakers`
 
-**Stanja** (4 — `src/shared/utils/circuitBreaker.ts`):
+**države** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: normalan promet je dozvoljen.
-- `DEGRADED`: zona ranog upozorenja — kvarovi su prešli prag degradacije, ali još ne i
-  prag breakera; promet i dalje teče, nadzorne ploče prikazuju upozorenje. Važeći test
-  konekcije ili miran period bez novih kvarova vraća ga u `CLOSED`
-  (`docs/architecture/RESILIENCE_GUIDE.md` sadrži podatke o tom prozoru).
-- `OPEN`: provider je privremeno blokiran; pozivaoci dobijaju odgovor da je circuit
-  providera otvoren, ili combo rutiranje prelazi na drugi cilj.
-- `HALF_OPEN`: vrijeme reseta je isteklo; dozvoljava se probni zahtjev. Uspjeh zatvara
-  breaker, neuspjeh ga ponovo otvara.
+- `CLOSED`: normalan saobraćaj je dozvoljen.
+- `DEGRADED`: kvarovi u opsegu ranog upozorenja — prešli su prag degradacije, ali još uvijek ne prelazni prag; saobraćaj i dalje teče, kontrolne table pokazuju upozorenje. Ispravan test veze ili tihi prozor bez novog kvara vraća ga na `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` ima prozor).
+- `OPEN`: provajder je privremeno blokiran; pozivaoci dobijaju odgovor na otvaranje kola provajdera ili kombinovano rutiranje preskače na drugu metu.
+- `HALF_OPEN`: isteklo je vremensko ograničenje za resetovanje; dozvolite zahtjev za sondom. Uspjeh zatvara prekidač, neuspjeh ga ponovo otvara.
 
-**Zadane vrijednosti** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, koriste se putem
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` u `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` u `src/sse/handlers/chatHelpers.ts`). Breaker cijelog
-providera radi na osnovu `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Defaults** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, konzumira se preko `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` u `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` u `src/sse/handlers/chatHelpers.ts`). Prekidač cijelog dobavljača radi na `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profil    | degradira na | otvara se na (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
-| --------- | -----------: | ---------------------------------------: | ----------------------------: |
-| OAuth     |          `5` |                                      `8` |                         `60s` |
-| API ključ |          `7` |                                     `12` |                         `30s` |
-| Lokalni   |   (izvedeno) |                                      `2` |                         `15s` |
+| Profil  | degradira na | otvara se u (`circuitBreakerThreshold`) | resetiraj (`circuitBreakerReset`) |
+| ------- | -----------: | --------------------------------------: | --------------------------------: |
+| OAuth   |          `5` |                                     `8` |                             `60s` |
+| API key |          `7` |                                    `12` |                             `30s` |
 
-`PROVIDER_PROFILES` također definiše `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) i `providerCooldownMs` (5/10/1 min): oni pokreću
-**prozorsku barijeru opcionalnog globalnog Provider Cooldown-a** (`PROVIDER_COOLDOWN_ENABLED`,
-zadano isključeno) — unos na nivou providera u `open-sse/services/providerCooldownTracker.ts`
-smatra se hlađenjem tek nakon `providerFailureThreshold` kvarova unutar
-`providerFailureWindowMs`, a zatim se hladi tokom `providerCooldownMs`. Oni NISU pragovi
-aktivnog breakera — nemojte ih podešavati očekujući ponašanje breakera. Svaku zadanu
-vrijednost moguće je nadjačati putem env varijabli `OMNIROUTE_PROVIDER_BREAKER_*` i
-`OMNIROUTE_CIRCUIT_BREAKER_*`; referentna tabela koja odgovara stvarnom radu nalazi se u
-`docs/architecture/RESILIENCE_GUIDE.md`.
+`local` profil (`2` fails / `15s`) takođe postoji u `PROVIDER_PROFILES`, ali nije povezan sa prekidačem: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) prihvata samo `oauth` ili `apikey`, a `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) vraća jedno od ta dva (neregistrovani provajderi dobijaju `apikey`).
 
-Samo statusi kvarova na nivou providera smiju aktivirati breaker providera:
+`PROVIDER_PROFILES` također definira `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) i `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, gdje su lokalne vrijednosti inertne iz istog razloga kao gore: one pokreću** prozorska kapija opt-in globalnog hlađenja dobavljača** (`PROVIDER_COOLDOWN_ENABLED`, podrazumevano isključeno) — unos na nivou provajdera u `open-sse/services/providerCooldownTracker.ts` se računa samo kao hlađenje nakon `providerFailureThreshold` grešaka unutar `providerFailureWindowMs`, a zatim se hladi za `providerCooldownMs`. Oni su NOT pragovi prekidača uživo — ih ne podešavaju očekujući ponašanje prekidača. Svaka zadana vrijednost se može zaobići kroz `OMNIROUTE_PROVIDER_BREAKER_*` i `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; referentna tablica koja je tačna za vrijeme izvođenja živi u `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Samo statusi kvara na nivou provajdera bi trebali isključiti prekidač provajdera:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Nemojte aktivirati breaker cijelog providera zbog uobičajenih grešaka računa/ključa/modela,
-kao što su većina slučajeva `401`, `403` ili `429`. One obično pripadaju cooldown-u
-konekcije ili model lockout-u. Generički `403` providera s API ključem trebao bi biti
-oporavljiv, osim ako se ne klasificira kao terminalna greška providera/računa.
+Nemojte isključivati prekidač cijelog dobavljača za normalne account/key/model greške kao što je većina slučajeva `401`, `403` ili `429`. Oni obično pripadaju hlađenju veze ili zaključavanju modela. Generički dobavljač API ključeva `403` bi trebao biti nadoknadiv osim ako nije klasifikovan kao terminalna provider/account greška.
 
-Prekidač koristi lijeni oporavak, a ne pozadinski tajmer. Kada `OPEN` istekne, čitanja poput `getStatus()`, `canExecute()` i `getRetryAfterMs()` osvježavaju stanje na `HALF_OPEN`, tako da nadzorne ploče i graditelji kombinovanih kandidata ne nastavljaju zauvijek isključivati provajder čije je ograničenje isteklo.
+Prekidač koristi lijeni oporavak, a ne tajmer u pozadini. Kada `OPEN` istekne, čitanja kao što su `getStatus()`, `canExecute()` i `getRetryAfterMs()` osvježavaju stanje na `HALF_OPEN`, tako da kontrolne ploče i kombo graditelji kandidata ne isključuju zauvijek istekao provajder.
 
-### Hlađenje konekcije
+### Hlađenje veze
 
-**Opseg**: jedna konekcija/račun/ključ provajdera.
+**Obim** : jedan provajder connection/account/key.
 
-**Svrha**: privremeno preskočiti jedan loš ključ/račun, dok ostale konekcije za istog provajdera nastavljaju opsluživati zahtjeve.
+**Svrha** : privremeno preskočiti jednu lošu key/account dok dozvoljavate drugim konekcijama za istog provajdera da nastave posluživati zahtjeve.
 
-**Implementacija**:
+**Implementacija** :
 
-- Putanja za pisanje/ažuriranje: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Izbor/filtriranje računa: `src/sse/services/auth.ts::getProviderCredentials...`
-- Izračun hlađenja: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Write/update put: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Račun selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Proračun hlađenja: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Postavke: `src/lib/resilience/settings.ts`
 
-Važna polja na konekcijama provajdera:
+Važna polja vezana za provajderske veze:
 
 ```ts
 rateLimitedUntil;
@@ -877,50 +862,50 @@ errorCode;
 backoffLevel;
 ```
 
-Tokom izbora računa, konekcija se preskače dok vrijedi:
+Tokom odabira računa, veza se preskače dok:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Hlađenja su također lijena: kada `rateLimitedUntil` bude u prošlosti, konekcija ponovo postaje podobna. Prilikom uspješne upotrebe, `clearAccountError()` briše `testStatus`, `rateLimitedUntil`, polja greške i `backoffLevel`.
+Hlađenje je također lijeno: kada je `rateLimitedUntil` u prošlosti, veza ponovo postaje prihvatljiva. Nakon uspješnog korištenja, `clearAccountError()` briše `testStatus`, `rateLimitedUntil`, polja greške i `backoffLevel`.
 
-Zadano ponašanje hlađenja konekcije:
+Zadano ponašanje hlađenja veze:
 
-- Osnovno hlađenje za OAuth: `5s`.
-- Osnovno hlađenje za API ključ: `3s`.
-- `429` za API ključ treba dati prednost upstream nagovještajima za ponovni pokušaj (`Retry-After`, zaglavlja resetovanja ili tekst resetovanja koji se može parsirati) kada su dostupni.
-- Ponovljeni neuspjesi koji se mogu otkloniti koriste eksponencijalno postepeno povećanje:
+- OAuth bazno hlađenje: `5s`.
+- Hlađenje baze API-ključa: `3s`.
+- API ključ `429` bi trebao preferirati upstream savjete za ponovni pokušaj (`Retry-After`, zaglavlja za poništavanje ili tekst koji se može raščlaniti) kada su dostupni.
+- Ponovljeni kvarovi koji se mogu popraviti koriste eksponencijalno povlačenje:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Zaštita od „thundering herd“ efekta sprječava da istovremeni neuspjesi na istoj konekciji višestruko produžavaju hlađenje ili dvostruko inkrementiraju `backoffLevel`.
+Zaštita od grmljavine sprečava istovremene kvarove na istoj vezi od uzastopnog produženja hlađenja ili dvostrukog povećanja `backoffLevel`.
 
-Terminalna stanja nisu hlađenja. `banned`, `expired` (koje postaje terminalno tek nakon N ograničenih ponovnih pokušaja preko `EXPIRED_RETRY_MAX`) i `credits_exhausted` namijenjena su da ostanu nedostupna dok se kredencijali/postavke ne promijene ili ih operater ručno resetuje. Nemojte prepisivati terminalna stanja prolaznim stanjem hlađenja.
+Terminalna stanja nisu hlađenje. `banned`, `expired` (koji postaje terminal tek nakon N ograničenih pokušaja preko `EXPIRED_RETRY_MAX`) i `credits_exhausted` su namijenjeni da ostanu nedostupni dok se credentials/settings ne promijeni ili ih operater resetuje. Nemojte prepisivati terminalna stanja s prolaznim stanjem hlađenja.
 
-### Blokada modela
+### Model Lockout
 
-**Opseg**: provajder + konekcija + model.
+**Obim** : provajder + konekcija + model.
 
-**Svrha**: izbjeći onemogućavanje cijele konekcije kada je samo jedan model nedostupan ili ograničen kvotom za tu konekciju.
+**Svrha** : izbjegavajte onemogućavanje cijele veze kada je samo jedan model nedostupan ili ograničen kvotom za tu vezu.
 
-Primjeri:
+primjeri:
 
-- Provajderi s kvotom po modelu koji vraćaju `429`.
-- Lokalni provajderi koji vraćaju `404` za jedan model koji nedostaje.
-- Neuspjesi dozvola za način rada/model specifičnih za provajdera, poput odabranih Grok načina.
+- Dobavljači kvota po modelu vraćaju `429`.
+- Lokalni provajderi vraćaju `404` za jedan model koji nedostaje.
+- Greške mode/model dozvola specifičnih za dobavljača, kao što su odabrani Grok načini.
 
-Blokada modela nalazi se u `open-sse/services/accountFallback.ts` i omogućava istoj konekciji da nastavi opsluživati druge modele.
+Zaključavanje modela živi u `open-sse/services/accountFallback.ts` i omogućava da ista konekcija nastavi služiti drugim modelima.
 
 ### Smjernice za otklanjanje grešaka
 
-- Ako su svi ključevi za nekog provajdera preskočeni, pregledajte i stanje prekidača provajdera i `rateLimitedUntil`/`testStatus` svake konekcije.
-- Ako se čini da je provajder trajno isključen nakon prozora resetovanja, provjerite čita li kod sirovo `state` umjesto da koristi `getStatus()`/`canExecute()`.
-- Ako jedan ključ provajdera ne uspije, a drugi bi trebali raditi, dajte prednost hlađenju konekcije nad prekidačem provajdera.
-- Ako samo jedan model ne uspije, dajte prednost blokadi modela nad hlađenjem konekcije.
-- Ako se neko stanje treba samo oporaviti, treba imati buduću vremensku oznaku/istek za resetovanje i putanju čitanja koja osvježava isteklo stanje. Trajni statusi zahtijevaju ručne izmjene kredencijala ili konfiguracije.
+- Ako su svi ključevi za provajdera preskočeni, provjerite stanje prekidača oba provajdera i `rateLimitedUntil`/`testStatus` svake veze.
+- Ako se dobavljač pojavi trajno isključen nakon prozora za resetiranje, provjerite da li kod čita sirovi `state` umjesto da koristite `getStatus()`/`canExecute()`.
+- Ako jedan ključ provajdera pokvari, ali drugi bi trebali raditi, radije hlađenje veze umjesto prekidača provajdera.
+- Ako samo jedan model ne uspije, dajte prednost zaključavanju modela nego hlađenju veze.
+- Ako bi se stanje trebalo samooporavljati, trebalo bi imati budući timestamp/reset timeout i putanju za čitanje koja osvježava stanje isteka. Trajni statusi zahtijevaju ručne promjene vjerodajnica ili konfiguracije.
 
 ---
 

@@ -18,27 +18,24 @@ app-server URL-এ পৌঁছানো যায় এমন একটি Cod
 
 ---
 
-## 1. আর্কিটেকচার
+## 1. স্থাপত্য
 
 ```
-┌─ OmniRoute অ্যাপ ────────────────┐        ┌─ codex-app-server সাইডকার ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ সক্ষমতা টোকেন)               │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuth নিজেই পরিচালনা করে    │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, স্বয়ংক্রিয় রিফ্রেশ) │
-        │ শেয়ার করে (compose volumes)       └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS সক্ষমতা টোকেন (উভয়েই এটি mount করে)
-  codex-appserver-home    → ~/.codex (dashboard দ্বারা লেখা auth.json,
-                             সাইডকারের codex app-server দ্বারা পড়া হয়)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- সাইডকারটি সক্ষমতা টোকেনের আড়ালে **শুধু** অভ্যন্তরীণ compose নেটওয়ার্কে
-  (`ws://codex-app-server:1456`) listen করে। এটি হোস্ট বা ইন্টারনেটে **কখনোই**
-  প্রকাশ করা হয় না।
-- Codex CLI `omniroute:base`-এর মধ্যে আগে থেকেই অন্তর্ভুক্ত থাকে, তাই সাইডকার
-  চালানোর সময় হোস্ট বা ব্যবহারকারীর মেশিনে codex install করার প্রয়োজন নেই।
+- সাইডকার শোনে** শুধুমাত্র** অভ্যন্তরীণ কম্পোজ নেটওয়ার্কে (`ws://codex-app-server:1456`) একটি ক্ষমতা টোকেনের পিছনে। এটা** কখনই** হোস্ট বা ইন্টারনেটে প্রকাশিত।
+- সাইডকারটি `omniroute:cli-no-docker` ব্যবহার করে, `runner-cli-no-docker` টার্গেট থেকে তৈরি, যার মধ্যে রয়েছে Codex CLI।
 
 ## 2. এটি চালু করুন
 

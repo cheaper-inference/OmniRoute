@@ -4,12 +4,11 @@
 
 ---
 
-> **Isi iyi nke eziokwu:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Emelitere ikpeazụ:** 2026-06-28 — v3.8.40
+> **Isi mmalite nke eziokwu:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute na-edekọ omume nchịkwa, ihe omume nyocha njirimara, mgbanwe n’usoro ndụ nke nzere ndị na-eweta ọrụ, na oku ngwaọrụ MCP n’ime tebụl nyocha SQLite na-akwado. Ibe a na-akọwa ihe ndị a na-edekọ, ebe ha dị, ogologo oge a na-edowe ha, otu igodo API nwere ike isi họrọ ịghara isonye, na otu esi ajụ data ahụ ajụjụ.
+OmniRoute na-edekọ omume nhazi, mmemme nyocha, mgbanwe okirikiri ndụ onye na-eweta, yana arịrịọ MCP na tebụl nyocha nke SQLite kwadoro. Ibe a na-ekpuchi ihe a na-abanye, ebe ọ dị ndụ, ogologo oge ọ na-ejigide, ka igodo API nwere ike isi pụọ, yana otu esi ajụ data ahụ.
 
-Mmejuputa ya dị na `src/lib/compliance/index.ts` (T-43 — "Njikwa Nrubeisi") na `src/lib/compliance/providerAudit.ts`. Ide ndekọ nyocha anaghị atụpụ njehie ma ọlị: mgbe ọdịda ọ bụla mere, a na-eleghara oku ahụ anya na nzuzo ka ndekọ nyocha ghara imebi usoro arịrịọ bụ isi.
+Mmejuputa a na-ebi na `src/lib/compliance/index.ts` (T-43 — "Njikwa Nkwekọrịta") na `src/lib/compliance/providerAudit.ts`. Audit na-ede, ọ dịghị mgbe ị ga-atụfu: na ọdịda ọ bụla a na-eloda oku a n'ime jụụ ka ndekọ nyocha enweghị ike imebi isi arịrịọ.
 
 ## Ihe A Na-edekọ
 
@@ -127,14 +126,12 @@ na-akpọ `POST /api/settings/purge-request-history`, nke na-ehichapụ `call_lo
 A kọwapụtara ndabara na `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## Ọpụpụ `noLog` (maka API key ọ bụla)
+## `noLog` Nwepu (kwa igodo API )
 
-Enwere ike itinye akara na API key ka a ghara idekọ okporo ụzọ oku ha na-aga n'ihu. Akara ahụ
-dị na tebụl `api_keys` (`no_log INTEGER DEFAULT 0`) ma a na-edepụtaghachi ya
-n'ime set dị na ebe nchekwa maka nchọpụta ụzọ ngwa ngwa.
+Enwere ike ịdeba igodo API ka abanyeghị na okporo ụzọ oku ala ha. Ọkọlọtọ na-ebi na tebụl `api_keys` (`no_log INTEGER DEFAULT 0`) ma na-egosipụta ya n'ime ebe nchekwa edobere maka nlele ụzọ ọkụ.
 
 ```bash
-# Mepụta key anaghị edekọ ndekọ (achọrọ ikike njikwa)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
@@ -143,14 +140,19 @@ curl -X POST http://localhost:20128/api/keys \
 
 Ndị enyemaka (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — gbanye ma ọ bụ gbanyụọ ntinye dị na ebe nchekwa
-- `isNoLog(apiKeyId)` — a na-enyocha ya n'ụzọ arịrịọ; ọ bụrụ na nke ahụ agaghị ekwe omume, ọ na-eji ọgụgụ echekwara nke sekọnd 30
-  sitere na `api_keys.no_log`
-- `NO_LOG_API_KEY_IDS` (env, ndị rikoma kewara) — a na-ebubata ha n'ime set dị na ebe nchekwa
-  mgbe sistemụ na-amalite; ọ bara uru mgbe ị na-enweghị ike ịgbanwe kọlụm ahụ ozugbo
+- `setNoLog(apiKeyId, true|false)` — tụgharịa ntinye ebe nchekwa
+- `isNoLog(apiKeyId)` — enyochara n'ụzọ arịrịọ; daa azụ na skịta 30 echekwara na `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, rikoma-kewapụrụ) — ebugoro n'ime ebe nchekwa edobere na buut; bara uru mgbe ị nweghị ike ịgbanwuo kọlụm ozugbo
 
-`noLog` **anaghị** emetụta mmemme nyocha nchịkwa (nbanye, mgbanwe ndị na-enye ọrụ, oku ngwa MCP, wdg.)
-— ọ bụ naanị idekọ okporo ụzọ nke arịrịọ ọ bụla ka a na-ahapụ.
+Ihe omume nyocha nchịkwa (nbanye, mgbanwe ndị na-eweta, oku ngwá ọrụ MCP, wdg) bụ** ọ bụghị** nke `noLog` — metụtara bụ naanị ndenye okporo ụzọ ọ bụla ka a na-ewepụ.
+
+### Mpụpụ maka arịrịọ ọ bụla (`x-omniroute-no-log`)
+
+Onye ahịa nwere ike ịhọrọ otu arịrịọ ntinye aka na nkwụsi ike n'ịkwụ ụgwọ na-emepụtaghị igodo raara onwe ya nye. Ziga `x-omniroute-no-log: true` na arịrịọ (`1` na `yes` na-anabatakwa, ikpe enweghị mmetụta). Ọ na-emetụta ụzọ nkata-ezinaụlọ ọ bụla na-aga site na onye na-ahụ maka nkata: Mmecha nkata, nzaghachi, ozi, mmecha na ụzọ Gemini dakọtara. A ka na-ede ahịrị ndekọ oku na akara oge ya, ihe nlere anya, onye na-eweta ya, ọkwa ya, ogologo oge na ọnụ ọgụgụ akara ya, mana `request_body`, `response_body`, nchịkọta arịrịọ na ihe arụrụ arụ ọrụ pipeline ka ewepụrụ.
+
+Ihe nkụnye eji isi mee bụ ORed nwere ọkọlọtọ igodo: igodo enweghị ndekọ na-adịgide na-enweghị ndekọ n'agbanyeghị nkụnye eji isi mee, na nkụnye eji isi mee enweghị ike ịmeghachi ndekọ ndekọ maka igodo enweghị ndekọ. A na-ewepụ nkụnye eji isi mee tupu ebuga arịrịọ a n'elu mmiri.
+
+nkụnye eji isi mee** ọ bụghị** gbanyụọ mmịpụta ebe nchekwa ma ọ bụ cache semantic. Ziga `x-omniroute-no-memory: true` na `x-omniroute-no-cache: true` n'akụkụ ya mgbe arịrịọ ahụ agaghị adịgide n'ime ọdịnaya na sistemụ ndị ahụ.
 
 ## REST API
 

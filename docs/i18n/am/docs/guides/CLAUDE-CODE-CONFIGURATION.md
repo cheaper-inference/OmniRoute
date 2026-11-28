@@ -51,31 +51,31 @@ Entra ID SSO እንደዚህ ነው የሚሰራው `scripts/cli/omniroute-sso.m
 
 ## የአጠቃቀም ባህሪ: ክፍለ-ጊዜዎች እና ፕሮጀክቶች
 
-OmniRoute የእያንዳንዱን API ቁልፍ ጥያቄዎች ወደ ውስጥ ይመድባል** ወኪል ክፍለ ጊዜዎች** እና መዝገቦች የትኛው** ፕሮጀክት** እያንዳንዱ ክፍለ ጊዜ በ (`agent_sessions` table) ላይ ሰርቷል፣ ስለዚህ አጠቃቀም እና ወጪ በእያንዳንዱ የቡድን አባል፣ በፕሮጀክት እና በአንድ ክፍለ ጊዜ ሪፖርት ሊደረግ ይችላል።
+OmniRoute የእያንዳንዱን API ቁልፍ ጥያቄዎች ወደ ውስጥ ይመድባል** ወኪል ክፍለ ጊዜዎች** እና መዝገቦች የትኛው** ፕሮጀክት** እያንዳንዱ ክፍለ ጊዜ በ (`agent_sessions` ሠንጠረዥ) ላይ ይሰራል፣ ስለዚህ አጠቃቀም እና ወጪ በእያንዳንዱ የቡድን አባል፣ በፕሮጀክት እና በአንድ ክፍለ ጊዜ ሪፖርት ሊደረግ ይችላል።
 
 ያለ ደንበኛ ማዋቀር የሚቀዳው፡-
 
-| መስክ    | ምንጭ                                                                                                                                    |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| ክፍለ ጊዜ | `x-claude-code-session-id` ራስጌ (ከ `metadata.user_id.session_id` ጋር ተመሳሳይ እሴት)፣ በእያንዳንዱ ክፍለ ጊዜ የተረጋጋ                                    |
-| ፕሮጀክት  | `Primary working directory:` መስመር Claude ኮድ በውስጡ የአካባቢ መልእክት ውስጥ ይልካል; በ `.claude/worktrees/` ስር ያሉ የ worktree አቃፊዎች ወደ ማከማቻው ስም ይወስዳሉ |
-| ቅርንጫፍ  | `Current branch:` ከ git ሁኔታ Claude ኮድ ከመጀመሪያው መልእክት ጋር ይልካል                                                                            |
-| ደንበኛ   | `user-agent` (`claude-cli/<version>`)                                                                                                  |
+| መስክ    | ምንጭ                                                                                                                                 |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| ክፍለ ጊዜ | `x-claude-code-session-id` ራስጌ (ከ `metadata.user_id.session_id` ጋር ተመሳሳይ እሴት)፣ በእያንዳንዱ ክፍለ ጊዜ የተረጋጋ                                 |
+| ፕሮጀክት  | የ `Primary working directory:` መስመር Claude ኮድ በአካባቢ መልእክቱ ውስጥ ይልካል; በ `.claude/worktrees/` ስር ያሉ የ worktree አቃፊዎች ወደ ማከማቻው ስም ይወስዳሉ |
+| ቅርንጫፍ  | `Current branch:` ከ git ሁኔታ Claude ኮድ ከመጀመሪያው መልእክት ጋር ይልካል                                                                         |
+| ደንበኛ   | `user-agent` (`claude-cli/<version>`)                                                                                               |
 
-Codex (`<environment_context><cwd>`) እና OpenCode (`x-opencode-session`) በተመሳሳይ መንገድ ይታወቃሉ። ቁልፎች በ** ምንም-ምዝግብ ማስታወሻ** የነቃ የክፍለ ጊዜ መታወቂያ እና ራስጌ የሚቀርቡ የፕሮጀክት መስኮችን ብቻ ማስቀመጥ; ከጥያቄው (መንገድ ፣ ቅርንጫፍ) የተነበበ ምንም ነገር አይከማችም።
+Codex (`<environment_context><cwd>`) እና OpenCode (`x-opencode-session`) በተመሳሳይ መንገድ ይታወቃሉ። ቁልፎች በ** ምንም-ምዝግብ ማስታወሻ** የነቃ ክፍለ ጊዜ መታወቂያ እና ራስጌ-የሚቀርቡ የፕሮጀክት መስኮችን ብቻ ማስቀመጥ; ከጥያቄው (መንገድ ፣ ቅርንጫፍ) የተነበበ ምንም ነገር አይከማችም።
 
 ### ፕሮጀክቱን በግልፅ መሰየም (የሚመከር)
 
 የስራ ማውጫው በማሽኖች መካከል ይለያያል, ስለዚህ ተመሳሳይ ማከማቻ በተለያዩ መንገዶች ስር ሊታይ ይችላል. በምትኩ ፕሮጀክቱን በግልፅ ይላኩ፡- Claude Code በ `ANTHROPIC_CUSTOM_HEADERS` የተዘረዘሩ ማናቸውንም አርዕስት በእያንዳንዱ የሞዴል ጥያቄ ላይ ያክላል፣ እና OmniRoute ሁለቱን ያነባል፡-
 
-| ራስጌ                        | ዋጋ                                                         |
-| -------------------------- | ---------------------------------------------------------- |
-| `x-omniroute-project`      | የፕሮጀክት ስም፣ ለምሳሌ `omniroute`                                |
-| `x-omniroute-project-repo` | መደበኛ የርቀት መቆጣጠሪያ፣ ለምሳሌ `github.com/diegosouzapw/OmniRoute` |
+| ራስጌ                        | ዋጋ                                                              |
+| -------------------------- | --------------------------------------------------------------- |
+| `x-omniroute-project`      | የፕሮጀክት ስም፣ ለምሳሌ `omniroute`                                     |
+| `x-omniroute-project-repo` | መደበኛ የርቀት መቆጣጠሪያ፣ ለምሳሌ `github.com/cheaper-inference/OmniRoute` |
 
 ሁለቱም የሚነበቡት ለባለቤትነት ብቻ ነው; ወደ ላይኛው ዥረት አቅራቢ በጭራሽ አይተላለፉም።
 
-`ANTHROPIC_CUSTOM_HEADERS` በሚነሳበት ጊዜ አንድ ጊዜ ይነበባል፣ እና የቅንጅቶች ፋይሎች ትክክለኛ እሴቶችን ያከማቻሉ፣ ስለዚህ Claude Code ሲጀመር ያሰሉት። ይህንን ወደ `~/.zshrc` ወይም `~/.bashrc` ያክሉ እና `claude` ከፕሮጀክት አቃፊው ይጀምሩ
+`ANTHROPIC_CUSTOM_HEADERS` በሚነሳበት ጊዜ አንድ ጊዜ ይነበባል፣ እና የቅንጅቶች ፋይሎች ቀጥተኛ እሴቶችን ያከማቻሉ፣ ስለዚህ Claude Code ሲጀመር ያሰሉት። ይህንን ወደ `~/.zshrc` ወይም `~/.bashrc` ያክሉ እና `claude` ከፕሮጀክት አቃፊው ይጀምሩ
 
 ```bash
 claude() {
@@ -96,7 +96,7 @@ x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-`sed` አገላለጽ ማንኛቸውም ምስክርነቶችን፣ የመጠይቅ ሕብረቁምፊ እና በሩቅ URL ውስጥ የተከተተ ቁርጥራጭ፣ እና ራስጌዎች በ `ANTHROPIC_CUSTOM_HEADERS` ውስጥ ይቀመጣሉ። IDE ቅጥያዎች Claude ኮድን ያለእርስዎ ሼል ያስጀምራሉ፣ ስለዚህ ክፍለ ጊዜዎቻቸው ወደ የስራ ማውጫው ይመለሳሉ።
+`sed` አገላለጽ ማንኛቸውም ምስክርነቶችን፣ የመጠይቅ ሕብረቁምፊ እና በሩቅ URL ውስጥ የተከተተ ቁራጭ፣ እና ራስጌዎች በ `ANTHROPIC_CUSTOM_HEADERS` ውስጥ ይቀመጣሉ። IDE ቅጥያዎች Claude ኮድን ያለእርስዎ ሼል ያስጀምራሉ፣ ስለዚህ ክፍለ ጊዜዎቻቸው ወደ የስራ ማውጫው ይመለሳሉ።
 
 ---
 
@@ -254,29 +254,22 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL="glm/glm-4.7-flash"
 
 ---
 
-## መላ ፍለጋ
+## መላ መፈለግ
 
-**Claude Code መግቢያውን ችላ ይላል** — `ANTHROPIC_BASE_URL` **`/v1` እንደሌለው**
-ያረጋግጡ፣ ከዚያ `claude`ን ዳግም ያስጀምሩ (env በማስጀመሪያ ጊዜ አንድ ጊዜ ብቻ ይነበባል)። `omniroute launch`
-ይህን ለእርስዎ ያከናውናል።
+**Claude ኮድ የመግቢያ መንገዱን ችላ ይላል።** — አረጋግጥ `ANTHROPIC_BASE_URL` እንዳለው** `/v1` የለም** እና `claude` እንደገና ያስጀምሩ (env በሚነሳበት ጊዜ አንድ ጊዜ ይነበባል)። `omniroute launch` ይህንን ለእርስዎ ያስተናግዳል።
 
-**የ`/model` መራጩ ባዶ ነው / የመግቢያ ሞዴሎች ጠፍተዋል** — Claude Code
-v2.1.219+ እና `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ያስፈልጋሉ። በመራጩ ውስጥ የሚታዩት `claude*` /
-`anthropic*` የሞዴል IDዎች ብቻ ናቸው፤ ማንኛውንም ሌላ ሞዴል በ
-`ANTHROPIC_MODEL=<id>` ያስገድዱ (መገለጫዎች የሚያደርጉት ይህንኑ ነው)።
+**`/model` መራጭ ባዶ ነው / የጎደሉ የጌትዌይ ሞዴሎች** — Claude ኮድ v2.1.219 + እና `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ያስፈልገዋል። በቃሚው ውስጥ `claude*` / `anthropic*` ሞዴል IDs ብቻ ይታያል; ማንኛውንም ሌላ ሞዴል በ `ANTHROPIC_MODEL=<id>` ያስገድዱ (ይህ መገለጫዎች የሚያደርጉት ነው)።
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code ሁልጊዜ **ቅድመ ቅጥያ የሌላቸው**
-የሞዴል IDዎችን (ለምሳሌ `claude-opus-4-8`) ይልካል፤ ስለዚህ ሁለቱም Claude Code (`cc/…`) እና
-Claude (`claude/…`) አቅራቢዎች ሲገናኙ ቅድመ ቅጥያ የሌለው id ከሁለት መስመሮች ጋር ይዛመዳል፣ እና
-OmniRoute መገመትን አይቀበልም። ከሁለቱ መንገዶች በአንዱ ያስተካክሉት፦ ቅድመ ቅጥያ ያለውን id በ
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` ይወስኑ፣ ወይም **ቅድመ ቅጥያ ለሌላቸው Claude ሞዴሎች Claude Codeን
-ቅድሚያ ስጥ**ን ያንቁ — በClaude አቅራቢ ገጽ ላይ ያለውን መቀያየሪያ፣ ወይም
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true`ን (በነባሪ ጠፍቷል፤
-[አካባቢ](../reference/ENVIRONMENT.md)ን ይመልከቱ) — ይህም ቅድመ ቅጥያ የሌላቸውን `claude-*`
-IDዎች በምትኩ ወደ Claude Code ያዞራል። ግልጽ የአቅራቢ ቅድመ ቅጥያዎች ሁልጊዜ ቅድሚያ ያገኛሉ።
+**`400 Ambiguous model 'claude-…'`** — Claude ኮድ ሁልጊዜ ይልካል** ቅድመ ቅጥያ የሌለው** ሞዴል IDs (ለምሳሌ `claude-opus-4-8`)፣ ስለዚህ ሁለቱም የ Claude ኮድ (`cc/…`) እና Claude (`claude/…`) አቅራቢዎች ሲገናኙ ባዶ መታወቂያው ከሁለት መንገዶች ጋር ይዛመዳል እና OmniRoute ለመገመት ፈቃደኛ አይሆንም። በማንኛውም መንገድ አስተካክሉት፡ ቅድመ ቅጥያ መታወቂያን በ `ANTHROPIC_MODEL=cc/claude-opus-4-8` ይሰኩት ወይም አንቃ** ላልተቀየሙ Claude ሞዴሎች Claude ኮድን ይምረጡ** — በ Claude አቅራቢ ገጽ ላይ ያለውን መቀያየር፣ ወይም `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (ነባሪ ጠፍቷል፣ [አካባቢን](../reference/ENVIRONMENT.md) ይመልከቱ) — በምትኩ ባዶ `claude-*` IDs ወደ Claude ኮድ የሚያመራው። ግልጽ የሆኑ የአቅራቢዎች ቅድመ ቅጥያዎች ሁልጊዜ ያሸንፋሉ።
 
-**የማረጋገጫ ስህተቶች** — መገለጫው ምንም ቶከን አይይዝም። `omniroute launch --profile`ን
-ይጠቀሙ (ቶከኑን ያስገባል) ወይም `ANTHROPIC_AUTH_TOKEN`ን export ያድርጉ።
+**"ራስ-ሰር ሁነታ… ይህ ክፍለ ጊዜ ብቁ አይደለም" (የክላሲፋየር ጥያቄዎች ተከፍለዋል)** — በራስ ሁነታ Claude ኮድ አገልጋዩ በራሱ የሞዴል ጥያቄዎች ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ) ውስጥ ያሉትን ድርጊቶች እንዲገመግም ይጠይቃል። ያ `anthropic-beta` እሴት `dangerous-tool-use-2026-09-03` እና `safeguards` አካል መስክ Anthropic እንደ ጥንድ ለመድረስ ያስፈልገዋል፣ እና `safeguard_results` እና የላይኛው መሳሪያ አጠቃቀም IDs ሳይለወጥ ተመልሶ ይመጣል። OmniRoute ይህን የሚያደርገው ጥያቄው ወደ ቤተኛ `claude` አቅራቢ ወይም ወደ `anthropic-compatible-*` መስቀለኛ መንገድ ሲተላለፍ፣ ሲተላለፍም ባይሆንም (የመመለሻ ጠባቂ `tests/integration/claude-auto-mode-classifier-e2e.test.ts`)። ሌሎች ኢላማዎች ግምገማውን መመለስ አይችሉም፣ ስለዚህ Claude ኮድ ወደ ራሱ የክላሲፋየር ጥያቄዎች ይመለሳል እና ማስታወቂያውን ያሳያል፡-
 
-**መገለጫዎች አይነጣጠሉም** — እያንዳንዱ መገለጫ የተለየ `CLAUDE_CONFIG_DIR` ነው፤ በክፍለ ጊዜው ውስጥ
-`echo $CLAUDE_CONFIG_DIR` ወደ `~/.claude/profiles/<name>` እንደሚያመለክት ያረጋግጡ።
+- አንትሮፖኒክ ባልሆነ አቅራቢ ላይ ያለ ሞዴል ወይም በአንዱ ላይ የሚያርፍ ጥምር;
+- የጥያቄውን አካል እንደገና የሚገነባ እና `safeguards` የማይይዝ ክላውድ-ኮድ-ተኳሃኝ የመተላለፊያ መስቀለኛ መንገድ (`anthropic-compatible-cc-*`);
+- ከተፈቀደው ቤታ በፊት የቆየ OmniRoute ፣ ወይም የ Anthropic ገጹ ለመግቢያ ክፍለ ጊዜዎች ከዘረዘረው በታች ያለው የ Claude ኮድ ስሪት።
+
+`/status` በ Claude ኮድ አሂድ፡ የ** ራስ-ሰር ሁነታ አገልጋይ** የአገልጋዩ ግምገማ ንቁ ሲሆን ረድፍ `Enabled` ያነባል። እነዚያ ጥያቄዎች ክፍያ መከፈላቸው የሚወሰነው በ Anthropic ሳይሆን በ OmniRoute ነው።
+
+**የማረጋገጫ ስህተቶች** — መገለጫው ምንም ምልክት አልያዘም። `omniroute launch --profile` ተጠቀም (መርፌ ያስገባዋል) ወይም `ANTHROPIC_AUTH_TOKEN` ላክ።
+
+**መገለጫዎች አይገለሉም።** — እያንዳንዱ መገለጫ የተለየ `CLAUDE_CONFIG_DIR` ነው; በ `~/.claude/profiles/<name>` ላይ በክፍለ-ጊዜው ውስጥ `echo $CLAUDE_CONFIG_DIR` ያረጋግጡ።

@@ -45,48 +45,31 @@ Bifrost je isključivo `external` (dostupan samo putem `BIFROST_BASE_URL`).
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
 `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) omogućuju pozivateljima filtriranje prema onome što mehanizam doista može učiniti, umjesto tvrdog kodiranja grana za svaki pojedini identifikator.
 
-## Os A — ugrađene usluge (strana nadziranog procesa)
+## Os A — ugrađene usluge (nadzirana strana procesa)
 
-- **Registar nadziranih procesa:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (trenutačno: `9router`, `cliproxy`).
-- **Vlasnik životnog ciklusa:** `src/lib/services/ServiceSupervisor.ts` — `start()` pokreće
-  podređeni proces, čeka prolazak provjere `waitForHealthy()`, preusmjerava stdout/stderr u kružni međuspremnik;
-  `stop()` šalje SIGTERM→SIGKILL; sve je serijalizirano pod zaključavanjem.
-- **Unija stanja** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error`, uz
-  ortogonalni `HealthState = healthy | unhealthy | unknown`.
-- **Zašto zaseban proces (a ne SDK unutar procesa)?** Izolacija procesa omogućuje
-  neovisno upravljanje instalacijom/pokretanjem/zaustavljanjem/zdravljem/zapisnicima za svaki pomoćni proces te omogućuje
-  primjenu zaštite pokretanja preko povratne petlje. Modeliranje prilagodnika unutar procesa budući je zadatak —
-  zastavica mogućnosti `native-hot-path` mjesto je na kojem bi se to izrazilo.
+- **Registar nadziranih procesa:** `src/lib/services/bootstrap.ts` `SERVICES[]` (danas: `9router`, `cliproxy`).
+- **Vlasnik životnog ciklusa:** `src/lib/services/ServiceSupervisor.ts` — `start()` stvara dijete, ulazi na `waitForHealthy()`, dodiruje stdout/stderr u međuspremnik prstena; `stop()` SIGTERM→SIGKILL; sve serijalizirano pod ključem.
+- **Državna zajednica** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error`, plus ortogonalni `HealthState = healthy | unhealthy | unknown`.
+- **Zašto poseban proces (ne in-proc SDK)?** Izolacija procesa ono je što čini install/start/stop/health/logs neovisno kontroliranim po bočnoj prikolici i omogućuje primjenu zaštite povratne petlje. Modeliranje in-proc adaptera je budući rad. — zastavica mogućnosti `native-hot-path` je mjesto gdje bi to bilo izraženo.
 
-### Ugovor ruta životnog ciklusa (`/api/services/<tool>/…`)
+### Ugovor o ruti životnog ciklusa (`/api/services/<tool>/…`)
 
-Statusni kodovi **namjerno ovise o stanju/glagolu/putanji** — to je ugovor, a ne
-nedosljednost:
+Statusni kodovi su**state/verb/path-specific prema dizajnu** — ovo je ugovor, a ne nedosljednost:
 
-| Poziv                           | Uvjet                                               | Status                                  |
-| ------------------------------- | --------------------------------------------------- | --------------------------------------- |
-| `POST .../start`                | usluga je `not_installed`                           | **409** (preduvjet)                     |
-| `POST .../stop`                 | već zaustavljena                                    | **200** (idempotentna prazna operacija) |
-| `GET .../status`                | U redu                                              | **200** (`live ?? row ?? "unknown"`)    |
-| `POST .../start`                | neuspješno pokretanje procesa                       | **503** (prolazna pogreška)             |
-| `GET .../status`, `.../stop`    | neuhvaćena pogreška                                 | **500**                                 |
-| `GET /api/services/<x>/logs`    | nepoznat alat `<x>`                                 | **404** `Service '<x>' not found`       |
-| `GET .../status?reveal=key`     | nedostaje `X-Reveal-Confirm: yes`                   | **403** (samo 9router)                  |
-| **bilo koji** `/api/services/*` | pozivatelj nije na povratnoj petlji/privatnom LAN-u | **403 LOCAL_ONLY**                      |
+| Poziv                           | Stanje                             | Status                               |
+| ------------------------------- | ---------------------------------- | ------------------------------------ |
+| `POST .../start`                | usluga `not_installed`             | **409** (preduvjet)                  |
+| `POST .../stop`                 | već zaustavljeno                   | **200** (idempotent no-op)           |
+| `GET .../status`                | OK                                 | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`                | spawn neuspjeh                     | **503** (prolazno)                   |
+| `GET .../status`, `.../stop`    | neuhvaćena pogreška                | **500**                              |
+| `GET /api/services/<x>/logs`    | nepoznati alat `<x>`               | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`     | nedostaje `X-Reveal-Confirm: yes`  | **403** (samo 9router)               |
+| **bilo koji** `/api/services/*` | pozivatelj ne loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-Sva tijela pogrešaka oblikuje `createErrorResponse()` →
-`{ error: { message, type }, requestId }`, pri čemu se `type` izvodi iz statusa
-(`500→server_error`, `404→not_found`, `409→conflict`, inače `invalid_request`) i predstavlja
-strojno obradivi razlikovni element. Poruke su unaprijed pročišćene
-(`sanitizeErrorMessage()`, Strogo pravilo br. 12).
+Sva tijela pogreške oblikovana su pomoću `createErrorResponse()` → `{ error: { message, type }, requestId }`, gdje je `type` izvedeno iz statusa (`500→server_error`, `404→not_found`, `409→conflict`, inače `invalid_request`) i diskriminator koji strojno djeluje. Poruke su unaprijed dezinficirane (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**Zaštita povratne petlje** najčešći je izvor odgovora `403`: `/api/services/` nalazi se u
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`), a
-`src/server/authz/policies/management.ts` odbija svakog pozivatelja koji nije na povratnoj petlji / privatnom LAN-u
-**prije autentikacije**, jer te rute pokreću podređene procese (Stroga pravila 15
-i 17). Pristup putem javnog tunela namjerno rezultira statusom `403`.
+**Zaštitna petlja** je najčešći izvor `403`: `/api/services/` je u `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) i `src/server/authz/policies/management.ts` odbija bilo koji pozivatelj bez povratne petlje / koji nije privatni LAN** prije autent** , jer te rute rađaju podređene procese (tvrda pravila 15 i 17). Doći do njih kroz javni tunel je `403` po dizajnu.
 
 ## Os B — pozadinski sustav usmjeravanja releja (strana otpreme)
 

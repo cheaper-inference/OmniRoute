@@ -4,9 +4,9 @@
 
 ---
 
-> **Həqiqətin mənbəyi:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Son yeniləmə:** 28-06-2026 — v3.8.40
+> **Həqiqətin mənbəyi:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
-OmniRoute düşünmə rejimi modelləri tərəfindən hazırlanmış köməkçi `reasoning_content` çəkir və yuxarı axın provayderi tələb etdikdə, çoxdövrəli sorğularda onu şəffaf şəkildə təkrarlayır. Bu, müştərinin söhbət tarixçəsində əvvəlki növbənin əsaslandırmasını əldən verdiyi zaman ciddi provayderlərin qaldırdığı HTTP 400 səhvlərini aradan qaldırır.
+OmniRoute düşünmə rejimi modelləri tərəfindən istehsal edilən köməkçi `reasoning_content` çəkir və yuxarı provayder tələb etdikdə, onu çoxdövrəli sorğularda şəffaf şəkildə təkrarlayır. Bu, müştərinin söhbət tarixçəsində əvvəlki növbənin əsaslandırmasını əldən verdiyi zaman ciddi provayderlərin qaldırdığı HTTP 400 səhvlərini aradan qaldırır.
 
 ## Bu Niyə Mövcuddur
 

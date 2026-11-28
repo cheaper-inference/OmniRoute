@@ -168,9 +168,9 @@ Asegúrese de que `copilot-m365-web` esté habilitado en** Proveedores de tabler
 
 ## Referencias
 
-- Incidencia: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Discusión: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Código fuente: `src/shared/constants/providers/web-cookie.ts` (definición del proveedor)
-- Importación HAR: `src/shared/utils/m365HarImport.ts`
+- Problema: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Discusión: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Fuente: `src/shared/constants/providers/web-cookie.ts` (definición de proveedor)
+- importación HAR : `src/shared/utils/m365HarImport.ts`
 - Campos de credenciales: `src/shared/providers/webSessionCredentials.ts`
-- Ventana modal del nivel: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Modal de nivel: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

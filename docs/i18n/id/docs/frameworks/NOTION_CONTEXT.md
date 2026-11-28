@@ -65,42 +65,31 @@ OmniRoute menyimpan token dan langsung menjalankan pencarian uji dengan 1 hasil;
 Notion mengembalikan objek kesalahan, token akan dihapus dan panggilan gagal dengan
 `400`.
 
-## Alat MCP (6)
+## alat MCP (6)
 
-Didefinisikan dalam `open-sse/mcp-server/tools/notionTools.ts`. Token diambil saat
-pemanggilan melalui `getNotionToken()`; jika belum dikonfigurasi, alat akan melempar
-`"Token integrasi Notion belum dikonfigurasi. Atur di Pengaturan > Sumber Konteks."`
+Didefinisikan dalam `open-sse/mcp-server/tools/notionTools.ts`. Token diselesaikan pada waktu panggilan melalui `getNotionToken()`; jika tidak ada yang dikonfigurasi, alat akan menampilkan `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Alat                         | Cakupan        | Deskripsi                                                                                          |
+| Alat                         | Cakupan        | Keterangan                                                                                         |
 | ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Mencari halaman dan basis data berdasarkan kueri teks (mengembalikan judul, ID, URL). Berpaginasi. |
-| `notion_get_page`            | `read:notion`  | Mendapatkan konten dan metadata halaman berdasarkan ID-nya.                                        |
-| `notion_list_block_children` | `read:notion`  | Mencantumkan semua blok turunan dari blok atau halaman (struktur blok). Berpaginasi.               |
-| `notion_query_database`      | `read:notion`  | Mengueri basis data dengan `filter` + `sorts` opsional (format API Notion). Berpaginasi.           |
-| `notion_get_database`        | `read:notion`  | Mendapatkan skema/metadata basis data berdasarkan ID.                                              |
-| `notion_append_blocks`       | `write:notion` | Menambahkan blok turunan ke blok atau halaman yang ada (maks. 100 blok per permintaan).            |
+| `notion_search`              | `read:notion`  | Cari halaman dan database berdasarkan kueri teks (mengembalikan judul, IDs, URLs). diberi halaman. |
+| `notion_get_page`            | `read:notion`  | Dapatkan konten dan metadata halaman dengan ID-nya.                                                |
+| `notion_list_block_children` | `read:notion`  | Daftar semua anak blok dari suatu blok atau halaman (pohon blok). diberi halaman.                  |
+| `notion_query_database`      | `read:notion`  | Kueri database dengan `filter` + `sorts` (format Notion API ) opsional. diberi halaman.            |
+| `notion_get_database`        | `read:notion`  | Dapatkan schema/metadata database dengan ID.                                                       |
+| `notion_append_blocks`       | `write:notion` | Tambahkan anak blok ke blok atau halaman yang ada (maks 100 blok per permintaan).                  |
 
 ### Parameter masukan
 
-- `notion_search` — `query` (1–500 karakter), `pageSize` (1–100, bawaan 20),
-  `startCursor` (opsional).
-- `notion_get_page` — `pageId` (heksadesimal 32 karakter atau UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, bawaan 50),
-  `startCursor` (opsional).
-- `notion_query_database` — `databaseId`, `filter` (opsional, format filter Notion),
-  `sorts` (array opsional), `pageSize` (1–100, bawaan 50), `startCursor` (opsional).
+- `notion_search` — `query` (1–500 karakter), `pageSize` (1–100, default 20), `startCursor` (opsional).
+- `notion_get_page` — `pageId` (32-char hex atau UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, default 50), `startCursor` (opsional).
+- `notion_query_database` — `databaseId`, `filter` (opsional, format filter Notion ), `sorts` (array opsional), `pageSize` (1–100, default 50), `startCursor` (opsional).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (array objek blok),
-  `after` (posisi opsional).
+- `notion_append_blocks` — `blockId`, `children` (array objek blok), `after` (posisi opsional).
 
-### Cakupan
+### Lingkup
 
-Alat baca memerlukan `read:notion` dan alat tulis memerlukan `write:notion`.
-Cakupan diberlakukan oleh `withScopeEnforcement()` di
-`open-sse/mcp-server/server.ts` hanya ketika `OMNIROUTE_MCP_ENFORCE_SCOPES=true`;
-cakupan yang diizinkan untuk pemanggil berasal dari `OMNIROUTE_MCP_SCOPES` (dipisahkan
-koma) atau konteks cakupan kunci API yang terautentikasi. Lihat
-[MCP-SERVER.md](./MCP-SERVER.md) untuk model cakupan lengkap.
+Alat baca memerlukan `read:notion` dan alat tulis memerlukan `write:notion`. Cakupan diberlakukan oleh `withScopeEnforcement()` di `open-sse/mcp-server/server.ts` ketika `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, dan selalu untuk pemanggil HTTP/SSE yang kunci API tidak memiliki `manage`/`admin`; cakupan yang diizinkan pemanggil berasal dari `OMNIROUTE_MCP_SCOPES` (dipisahkan koma) atau konteks cakupan kunci API yang diautentikasi. Lihat [MCP-SERVER.md](./MCP-SERVER.md) untuk model cakupan penuh.
 
 ## Endpoint
 

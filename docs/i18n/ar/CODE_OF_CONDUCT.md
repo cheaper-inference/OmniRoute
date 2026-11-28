@@ -42,15 +42,13 @@
 أو النشر عبر حساب رسمي على وسائل التواصل الاجتماعي، أو العمل بصفة ممثل
 مُعيّن في فعالية عبر الإنترنت أو خارجه.
 
-## Enforcement
+## التنفيذ
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+قد يتم الإبلاغ عن حالات السلوك المسيء أو المضايق أو غير المقبول إلى قادة المجتمع المسؤولين عن التنفيذ عن طريق فتح استشارة أمنية خاصة على
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+أو عن طريق إرسال بريد إلكتروني إلى المشرف على diegosouza.pw@outlook.com. بالنسبة للحوادث الحساسة للأمان، راجع [`SECURITY.md`](SECURITY.md). ستتم مراجعة جميع الشكاوى والتحقيق فيها بسرعة وبشكل عادل.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+جميع قادة المجتمع ملزمون باحترام خصوصية وأمن مراسل أي حادث.
 
 ## إرشادات الإنفاذ
 

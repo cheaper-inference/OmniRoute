@@ -503,27 +503,27 @@ när topplistans data faktiskt har ändrats sedan den senaste utskicket.
 
 ---
 
-## Tokendelning
+## Token-delning
 
 **Fil:** `src/lib/gamification/sharing.ts`
 
-### Dubbel bokföring
+### Dubbelbokföring
 
 Varje överföring skapar två rader i `token_ledger`:
 
-| Rad    | `from_key_id` | `to_key_id` | `amount` |
-| ------ | ------------- | ----------- | -------- |
-| Debet  | avsändare     | mottagare   | +belopp  |
-| Kredit | mottagare     | avsändare   | -belopp  |
+| Rad       | `from_key_id` | `to_key_id` | `amount` |
+| --------- | ------------- | ----------- | -------- |
+| Debitera  | avsändare     | mottagare   | + belopp |
+| Kreditera | mottagare     | avsändare   | -amount  |
 
-Vänta — konventionen är:
+Vänta — är konventionen:
 
-| Rad     | `from_key_id` | `to_key_id` | `amount` | Betydelse              |
-| ------- | ------------- | ----------- | -------- | ---------------------- |
-| Skicka  | avsändare     | mottagare   | +belopp  | Utflöde från avsändare |
-| Ta emot | mottagare     | avsändare   | +belopp  | Inflöde till mottagare |
+| Rad    | `from_key_id` | `to_key_id` | `amount` | Menande                 |
+| ------ | ------------- | ----------- | -------- | ----------------------- |
+| Skicka | avsändare     | mottagare   | + belopp | Utflöde från avsändaren |
+| Få     | mottagare     | avsändare   | + belopp | Inflöde till mottagare  |
 
-Saldot beräknas så här:
+Saldo beräknas som:
 
 ```sql
 SELECT
@@ -534,7 +534,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Överföringsflöde
+### Överför flöde
 
 ```typescript
 export async function transferTokens(
@@ -545,19 +545,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Validering**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotens**: kontrollera om `idempotency_key` redan finns i liggaren.
-   Om den gör det returneras det cachelagrade resultatet.
-3. **Transaktion** (en enda SQLite-transaktion):
-   a. Beräkna avsändarens saldo.
-   b. Om `balance < amount`, avbryt (otillräckligt saldo).
-   c. Infoga sändningsrad (`from=sender,`.
+1. **Bekräfta** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotens** : kontrollera om `idempotency_key` redan finns i reskontra. Om ja, returnera cachade resultat.
+3. **Transaktion** (enkel SQLite -transaktion): a. Beräkna avsändarens saldo. b. Om `balance < amount`, avbryt (otillräckliga medel). c. Infoga sändrad (`from=sender, to=receiver, amount`). d. Infoga mottagningsrad (`from=receiver, to=sender, amount`).
+4. **Prisgräns** : kontrollera överföringshastigheten för avsändaren (max 10 transfers/min).
+5. **Händelse** : sänd ut `token_share` gamification-event för utvärdering XP + -märket.
+6. Returnera `{ success: true, balance: newBalance }`.
 
-### Hastighetsbegränsning
+### Prisbegränsande
 
-- Högst 10 överföringar per minut och API-nyckel.
-- Högst 10 000 tokens per enskild överföring.
-- Högst 100 000 överförda tokens per dag och API-nyckel.
+- Max 10 överföringar per minut per API nyckel.
+- Max 10 000 tokens per enkel överföring.
+- Max 100 000 tokens överförda per dag per API nyckel.
 
 ---
 

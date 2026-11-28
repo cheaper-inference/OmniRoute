@@ -4,12 +4,9 @@
 
 ---
 
-> **Последње ажурирање:** 2026-08-28 — v3.8.51
-> Поједностављен ток издавања који користи вештине Claude Code-а за аутоматизацију.
+> Поједностављени ток издања који користи Claude Цоде вештине за аутоматизацију.
 >
-> **Одржавајте ред/грану у исправном стању између издања:** погледајте [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (породица `/green-prs` + `npm run check:release-green` + `/babysit` + ноћно покретање). Периодично покретање
-> овога — а нарочито **пре** ове контролне листе — обезбеђује да PR за издање од почетка буде исправан.
+> **Нека queue/branch буде зелена између издања:** види [RELEASE_GREEN.мд](./RELEASE_GREEN.md) (`/green-prs` породица + `npm run check:release-green` + `/babysit` + нигхтли). Покретање овог периодично — и посебно** пре** ова контролна листа — чини издање PR зелено.
 
 ## Укратко
 
@@ -60,7 +57,9 @@ npm run test:e2e           # опционално, али препоручено
 
 **Docker Хуб `latest` (потребно при сваком стабилном SemVer објављивању):** `docker-publish` радни ток мора да означи** обоје** `X.Y.Z` и, када се `should-promote-latest.sh` слаже, ово је највиша стабилна SemVer, `:latest` са** исти дигест** . После посла: Хуб `latest` дигест је једнак новом SemVer дигест и `last_updated` је померен. Не остављајте `:latest` на старијој верзији док белешке о издању говоре о исправкама које постоје само на гит-у. Састављање брзих почетака користите `:latest`; GitOps треба да настави да закачи `X.Y.Z`. Погледајте [Docker канале издања](../guides/DOCKER_GUIDE.md#release-channels) и #10317.
 
-**Docker Хуб организационо складиште (`cheaperinference/omniroute`):** Docker Хуб не може да помера спремиште између простора имена, тако да `diegosouzapw/omniroute` чува своју историју повлачења и свако издање, а `mirror-org-dockerhub` посао `docker-publish` копира сваку објављену верзију (и `:latest` када се унапреди) из `ghcr.io/cheaper-inference/omniroute` у репозиторијум организације. Потребне су тајне `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; без њих посао остаје зелен са упозорењем „Docker Хуб орг огледало прескочено“ и други регистри се објављују нормално. Да бисте касније тамо објавили објављену верзију, покрените** Радње → Пресликавање Docker слике у Docker Хуб орг → Покрени ток посла** са `version=X.Y.Z` (и `promote_latest` за највишу стабилну верзију): копира постојеће слике, без реконструкције.
+**Docker Хуб организационо складиште (`cheaperinference/omniroute`):** Docker Хуб не може да помера спремиште између простора имена, тако да `diegosouzapw/omniroute` чува своју историју повлачења и свако издање, а `mirror-org-dockerhub` посао `docker-publish` копира сваку објављену верзију (и `:latest` када се унапреди) из `ghcr.io/cheaper-inference/omniroute` у репозиторијум организације. Потребне су тајне `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; без њих посао остаје зелен са упозорењем „Docker Хуб орг огледало прескочено“ и други регистри се објављују нормално. Да бисте касније тамо објавили објављену верзију, покрените** Радње → Пресликавање Docker слике у Docker Хуб орг → Покрени ток посла** са `version=X.Y.Z` (и `promote_latest` за највишу стабилну верзију): копира постојеће слике, без реконструкције. Преглед Docker Хуб-а тог спремишта се поставља ручно: API који га уређује одбија токене за приступ организацији.
+
+Исти ток посла такође копира свако издање у застарели GHCR пакет `ghcr.io/diegosouzapw/omniroute` до 30.06.2027, тако да се инсталације које су и даље закачене за њега стално ажурирају; његов индекс носи опис "премештено у `ghcr.io/cheaper-inference/omniroute`". Потребна му је тајна `GHCR_LEGACY_TOKEN` (класични лични токен за приступ `diegosouzapw` са `write:packages`); без тога тај посао прескаче са упозорењем „Легаци GHCR миррор прескочен“.
 
 ## Брза трака за хитне исправке (ознака `hotfix`)
 
@@ -88,7 +87,7 @@ quality-gate, quality-extended) и задржава брзе провере ви
 
 ### Пре-релеасе
 
-- [ ] Сви PRs циљани на ово издање су спојени у `release/vX.Y.0`
+- [ ] Сви PRs циљани на ово издање су спојени са `release/vX.Y.0`
 - [ ] Све отворене Linear/issue ставке за ову верзију су затворене или пребачене на следећу прекретницу
 - [ ] CI зелена на `release/vX.Y.0` грани
 - [ ] Нема `TODO(release)` маркера у коду: `grep -r "TODO(release)" src/ open-sse/`
@@ -136,7 +135,7 @@ quality-gate, quality-extended) и задржава брзе провере ви
 - **пре-пусх:** брзе детерминистичке капије — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (активирано 13.06.2026). Намерно искључује `test:unit` (споро; покривено CI `test-unit` послом).
   - Ручно покрените `npm run test:unit` пре гурања грана за отпуштање.
 
-Ако закачивање не успе: решите основни проблем, немојте заобилазити помоћу `--no-verify`.
+Ако кука не успе: решите основни проблем, немојте заобилазити помоћу `--no-verify`.
 
 ### Конвенционалне обавезе
 
@@ -146,12 +145,12 @@ quality-gate, quality-extended) и задржава брзе провере ви
 
 **Важећи опсег:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator` `authz` `domain`
 
-Преломне измене: додајте `BREAKING CHANGE:` подножје или `!` после опсега (нпр. `feat(api)!: drop /v0`).
+Преломне промене: додајте `BREAKING CHANGE:` подножје или `!` после опсега (нпр. `feat(api)!: drop /v0`).
 
 ### Документација
 
 - [ ] `npm run check:docs-sync` пролази (аутоматски се покреће пре урезивања)
-- [ ] `npm run check:docs-all` пролази (кишобран: доцс-синц + доцс-цоунтс + енв-доц-синц + застареле верзије + доц-линкс)
+- [ ] `npm run check:docs-all` пролази. Његов саветодавни `check:deprecated-versions` означава верзије експлицитно приписане OmniRoute (3.6.к и раније) и игнорише датуме.
 - [ ] `npm run check:env-doc-sync` излази 0 — код ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` уговор је нетакнут
 - [ ] `npm run check:doc-links` излази 0 — нема прекинутих интерних референци смањења вредности након реструктурирања
 - [ ] `docs/architecture/ARCHITECTURE.md` прегледан за storage/runtime дрифт
@@ -205,7 +204,7 @@ quality-gate, quality-extended) и задржава брзе провере ви
 
 Репозиторијум користи три различита излазна директоријума — их никада не меша:
 
-| Именик    | сврха                                                               | Пратили?        |
+| Именик    | Сврха                                                               | Пратили?        |
 | --------- | ------------------------------------------------------------------- | --------------- |
 | `src/`    | Извор апликације (TypeScript / TSX)                                 | Да              |
 | `.build/` | Направи интермедијере — `next build` оутпут (`distDir`)             | Не (игнорисано) |
@@ -399,11 +398,11 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Покретање врши `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, пакује тарбалл, покреће `npm run check:pack-boot` (лажне тајне, ефемерни дир података), поново пакује и не успева осим ако сажетак није идентичан, затим снима `artifact-identity.json` (глава SHA, база SHA, хеш закључане датотеке, платформа, ABI, чвор — ) зки буилд `scripts/release/artifact-identity.mjs` атестира тарбалл у посебном послу. Промовисање прегледа значи инсталирање тог тарбалл-а: никада не градите поново из извора.
+Покретање врши `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, пакује тарбалл, покреће `npm run check:pack-boot` (лажне тајне, ефемерни дир података), поново пакује и не успева осим ако сажетак није идентичан, затим снима `artifact-identity.json` (глава SHA, база SHA, хеш закључане датотеке, платформа, ABI, чвор — ) зки буилд `scripts/release/artifact-identity.mjs` атестира тарбалл у посебном послу. Промовисање прегледа значи инсталирање тог тарбалл-а: никада немојте поново правити из извора.
 
 ### Рез (3.9.0, после GO)
 

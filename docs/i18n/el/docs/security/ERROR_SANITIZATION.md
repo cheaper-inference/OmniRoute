@@ -4,13 +4,7 @@
 
 ---
 
-> **Πηγή αλήθειας:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` και οι δημόσιοι builders στο `open-sse/utils/error.ts`
-> **Δοκιμές:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Τελευταία ενημέρωση:** 2026-09-02 — v3.8.51
-> **Απευθύνεται σε:** Κάθε μηχανικό που επεξεργάζεται αποκρίσεις σφαλμάτων (διαδρομές HTTP, ροές SSE, executors, χειριστές MCP).
-> **Κατάσταση:** **ΥΠΟΧΡΕΩΤΙΚΟ** για κάθε διαδρομή κώδικα που επιστρέφει μήνυμα σφάλματος σε πελάτη.
+> **Πηγή αλήθειας:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` και οι δημόσιοι κατασκευαστές στο `open-sse/utils/error.ts`** Δοκιμές:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Ακροατήριο:** Οποιοσδήποτε μηχανικός αγγίζει τις απαντήσεις σφαλμάτων (διαδρομές HTTP, ροές SSE, εκτελεστές, χειριστές MCP ).** Κατάσταση:****MANDATORY** για κάθε διαδρομή κώδικα που επιστρέφει μήνυμα σφάλματος σε έναν πελάτη.
 
 ## Γιατί υπάρχει αυτό
 

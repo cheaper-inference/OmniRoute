@@ -53,7 +53,7 @@ Beginilah cara Entra ID SSO berfungsi: `scripts/cli/omniroute-sso.mjs token` men
 
 OmniRoute mengumpulkan setiap permintaan kunci API ke dalam** sesi ejen** dan rekod yang** projek** setiap sesi diusahakan ( jadual `agent_sessions` ), jadi penggunaan dan kos boleh dilaporkan setiap ahli pasukan, setiap projek dan setiap sesi.
 
-Apa yang direkodkan tanpa sebarang persediaan pelanggan:
+Perkara yang direkodkan tanpa sebarang persediaan pelanggan:
 
 | Padang    | Sumber                                                                                                                                                          |
 | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) dan OpenCode (`x-opencode-session`) diiktir
 
 Direktori kerja berbeza antara mesin, jadi repositori yang sama boleh muncul di bawah laluan yang berbeza. Hantar projek secara eksplisit sebaliknya: Kod Claude menambah sebarang pengepala yang disenaraikan dalam `ANTHROPIC_CUSTOM_HEADERS` pada setiap permintaan model dan OmniRoute membaca dua daripadanya:
 
-| Pengepala                  | Nilai                                                                       |
-| -------------------------- | --------------------------------------------------------------------------- |
-| `x-omniroute-project`      | Nama projek, cth `omniroute`                                                |
-| `x-omniroute-project-repo` | Alat kawalan jauh yang dinormalkan, cth `github.com/diegosouzapw/OmniRoute` |
+| Pengepala                  | Nilai                                                                            |
+| -------------------------- | -------------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Nama projek, cth `omniroute`                                                     |
+| `x-omniroute-project-repo` | Alat kawalan jauh yang dinormalkan, cth `github.com/cheaper-inference/OmniRoute` |
 
 Kedua-duanya hanya dibaca untuk atribusi; mereka tidak pernah dimajukan kepada pembekal huluan.
 
@@ -287,30 +287,22 @@ bendera tambahan diperlukan. Atasi tetapan ini bagi setiap pelaksanaan dengan `-
 
 ---
 
-## Penyelesaian masalah
+## Menyelesaikan masalah
 
-**Claude Code mengabaikan get laluan** — pastikan `ANTHROPIC_BASE_URL` **tidak
-mengandungi `/v1`** dan mulakan semula `claude` (persekitaran dibaca sekali sahaja semasa permulaan). `omniroute launch`
-menguruskan perkara ini untuk anda.
+**Kod Claude mengabaikan pintu masuk** — confirm `ANTHROPIC_BASE_URL` ada** tiada `/v1`** dan mulakan semula `claude` (env dibaca sekali pada permulaan). `omniroute launch` mengendalikan ini untuk anda.
 
-**Pemilih `/model` kosong / model get laluan tiada** — memerlukan Claude Code
-v2.1.219+ dan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Hanya ID model `claude*` /
-`anthropic*` muncul dalam pemilih; paksa mana-mana model lain dengan
-`ANTHROPIC_MODEL=<id>` (inilah yang dilakukan oleh profil).
+**`/model` picker kosong / tiada model get laluan** — memerlukan Kod Claude v2.1.219 + dan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Hanya `claude*` / `anthropic*` model IDs muncul dalam pemilih; memaksa mana-mana model lain dengan `ANTHROPIC_MODEL=<id>` (inilah yang dilakukan oleh profil).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code sentiasa menghantar ID model
-**tanpa awalan** (contohnya `claude-opus-4-8`), jadi apabila kedua-dua penyedia Claude Code (`cc/…`) dan
-Claude (`claude/…`) disambungkan, ID tanpa awalan sepadan dengan dua laluan dan
-OmniRoute enggan membuat andaian. Betulkannya dengan salah satu cara: tetapkan ID berawalan dengan
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, atau dayakan **Utamakan Claude Code untuk
-model Claude tanpa awalan** — togol pada halaman penyedia Claude, atau
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (dimatikan secara lalai;
-lihat [Persekitaran](../reference/ENVIRONMENT.md)) — yang menghalakan ID `claude-*` tanpa awalan
-kepada Claude Code. Awalan penyedia yang dinyatakan secara jelas sentiasa diutamakan.
+**`400 Ambiguous model 'claude-…'`** — Claude Kod sentiasa dihantar** unprefixed** model IDs (cth `claude-opus-4-8`), jadi apabila kedua-dua pembekal Kod Claude (`cc/…`) dan Claude (`claude/…`) disambungkan, id kosong sepadan dengan dua laluan dan OmniRoute enggan meneka. Betulkan sama ada cara: sematkan id awalan dengan `ANTHROPIC_MODEL=cc/claude-opus-4-8`, atau dayakan** Lebih suka Kod Claude untuk model Claude tidak ditetapkan** — togol pada halaman pembekal Claude, atau `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (lalai dimatikan; lihat [Persekitaran](../reference/ENVIRONMENT.md) ) — yang mengarahkan `claude-*` IDs ke Claude Kod sebaliknya. Awalan penyedia eksplisit sentiasa menang.
 
-**Ralat pengesahan** — profil tidak menyimpan sebarang token. Gunakan `omniroute launch --profile`
-(menyuntikkannya) atau eksport `ANTHROPIC_AUTH_TOKEN`.
+**"mod auto ... sesi ini tidak layak" (permintaan pengelas dibilkan)** — dalam mod auto Kod Claude meminta pelayan menyemak tindakan dalam permintaan modelnya sendiri ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Itu memerlukan nilai `anthropic-beta` `dangerous-tool-use-2026-09-03` dan medan badan `safeguards` untuk mencapai Anthropic sebagai pasangan, dan `safeguard_results` ditambah IDs penggunaan alat huluan untuk kembali tidak berubah. OmniRoute melakukan ini apabila permintaan dihalakan ke penyedia `claude` asli atau ke nod `anthropic-compatible-*`, distrim atau tidak (pengawal regresi: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Sasaran lain tidak boleh mengembalikan semakan, jadi Kod Claude kembali kepada permintaan pengelasnya sendiri dan menunjukkan notis:
 
-**Profil tidak terasing** — setiap profil mempunyai `CLAUDE_CONFIG_DIR` yang berbeza;
-sahkan `echo $CLAUDE_CONFIG_DIR` dalam sesi menghala ke
-`~/.claude/profiles/<name>`.
+- model pada penyedia bukan Anthropic, atau kombo yang mendarat pada satu;
+- nod geganti serasi Claude-Code (`anthropic-compatible-cc-*`), yang membina semula badan permintaan dan tidak membawa `safeguards`;
+- OmniRoute yang lebih lama yang mendahului beta yang tersenarai dibenarkan, atau versi Kod Claude di bawah versi halaman Anthropic yang disenaraikan untuk sesi get laluan.
+
+Jalankan `/status` dalam Claude Kod: the** Pelayan mod auto** baris membaca `Enabled` semasa semakan pelayan aktif. Sama ada permintaan tersebut dibilkan diputuskan oleh Anthropic, bukan oleh OmniRoute.
+
+**Ralat pengesahan** — profil tidak memegang token. Gunakan `omniroute launch --profile` (menyuntikkannya) atau eksport `ANTHROPIC_AUTH_TOKEN`.
+
+**Profil tidak diasingkan** — setiap profil ialah `CLAUDE_CONFIG_DIR` yang berbeza; sahkan `echo $CLAUDE_CONFIG_DIR` di dalam mata sesi di `~/.claude/profiles/<name>`.

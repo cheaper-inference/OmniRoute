@@ -30,147 +30,110 @@ Klien (`src/lib/obsidian/api.ts`) membungkus Local REST API dengan:
   umum (HTTP pada `27123`, **bukan** endpoint MCP pada `27124`) dan format Tailscale.
 - **Pengodean path** relatif terhadap vault agar path catatan yang berisi spasi/garis miring tetap aman.
 
-## Penyiapan
+## Pengaturan
 
-Tidak ada **variabel lingkungan** untuk token atau URL dasar Obsidian — keduanya
-disimpan dalam tabel SQLite `key_value` (namespace `obsidian`) melalui
-`src/lib/db/obsidian.ts`. Token tersebut **dienkripsi saat disimpan** (AES-256-GCM,
-dengan fallback kompatibilitas mundur berupa teks biasa). Konfigurasikan dari tab
-**Context Sources** pada dasbor Endpoint (`ObsidianSourceCard`), atau melalui REST API
-pengaturan.
+Ada** tidak ada variabel lingkungan** untuk token Obsidian atau basis URL — keduanya disimpan di tabel SQLite `key_value` (namespace `obsidian`) melalui `src/lib/db/obsidian.ts`. Tokennya adalah** dienkripsi saat istirahat** (AES-256-GCM, dengan fallback kompatibilitas mundur teks biasa). Konfigurasikan dari** Sumber Konteks** tab di dasbor Endpoint (`ObsidianSourceCard`), atau melalui pengaturan REST API.
 
 > [!IMPORTANT]
-> Plugin **Obsidian Local REST API** harus diinstal dan dijalankan. Antarmuka REST-nya
-> mendengarkan pada **HTTP `127.0.0.1:27123`** (URL dasar default). Port `27124`
-> merupakan endpoint MCP/HTTPS yang _terpisah_ dan secara eksplisit ditolak oleh rute
-> pengaturan. Jika menghubungkan dari perangkat lain, gunakan
-> `http://<tailscale-ip>:27123`.
+> Itu**Obsidian Lokal REST API** plugin harus diinstal dan dijalankan. Antarmuka REST -nya mendengarkan**HTTP `127.0.0.1:27123`** (basis default URL). Port `27124` adalah titik akhir _separate_ MCP/HTTPS dan secara eksplisit ditolak oleh rute pengaturan. Jika menghubungkan dari perangkat lain, gunakan `http://<tailscale-ip>:27123`.
 
 ### Kunci konfigurasi (SQLite `key_value`, namespace `obsidian`)
 
-| Kunci             | Tujuan                                                | Dienkripsi |
-| ----------------- | ----------------------------------------------------- | ---------- |
-| `api_key`         | Token bearer Local REST API                           | ya         |
-| `base_url`        | URL dasar REST (default `http://127.0.0.1:27123`)     | tidak      |
-| `vault_path`      | Jalur absolut ke direktori vault (untuk sinkronisasi) | tidak      |
-| `webdav_username` | Nama pengguna WebDAV yang dibuat (sinkronisasi vault) | tidak      |
-| `webdav_password` | Kata sandi WebDAV yang dibuat (sinkronisasi vault)    | ya         |
-| `webdav_enabled`  | Apakah sinkronisasi vault WebDAV diaktifkan           | tidak      |
+| Kunci             | Tujuan                                                    | Terenkripsi |
+| ----------------- | --------------------------------------------------------- | ----------- |
+| `api_key`         | Token pembawa REST API lokal                              | Ya          |
+| `base_url`        | REST dasar URL (default `http://127.0.0.1:27123`)         | TIDAK       |
+| `vault_path`      | Jalur absolut ke direktori vault (untuk sinkronisasi)     | TIDAK       |
+| `webdav_username` | Nama pengguna WebDAV yang dihasilkan (sinkronisasi vault) | TIDAK       |
+| `webdav_password` | Kata sandi WebDAV yang dihasilkan (sinkronisasi brankas)  | Ya          |
+| `webdav_enabled`  | Apakah sinkronisasi WebDAV vault diaktifkan               | TIDAK       |
 
-### Mengonfigurasi melalui REST
+### Konfigurasikan melalui REST
 
 ```bash
-# Simpan + validasi token Local REST API (POST memvalidasi melalui pemeriksaan status)
+# Save + validate the Local REST API token (POST validates via a status check)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
 
-# Periksa status koneksi (mengembalikan connected, hasToken, baseUrl, vaultPath)
+# Check connection status (returns connected, hasToken, baseUrl, vaultPath)
 curl http://localhost:20128/api/settings/obsidian
 
-# Putuskan koneksi (menghapus token yang tersimpan)
+# Disconnect (clears the stored token)
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Semua metode memerlukan autentikasi dasbor. `POST` menolak URL apa pun pada port
-`27124` dan memvalidasi token dengan memanggil endpoint status Local REST API sebelum
-menyimpannya.
+Semua metode memerlukan otentikasi dasbor. `POST` menolak URL apa pun di port `27124` dan memvalidasi token dengan memanggil titik akhir status REST API Lokal sebelum bertahan.
 
-### Sinkronisasi vault WebDAV
+### sinkronisasi brankas WebDAV
 
-`src/app/api/settings/obsidian/webdav/route.ts` mengelola sinkronisasi vault opsional
-yang didukung WebDAV (dijalankan oleh `src/lib/obsidianSync.ts`). Mengaktifkannya akan
-mengarahkan OmniRoute ke direktori vault lokal dan membuat pasangan nama pengguna/kata
-sandi WebDAV acak:
+`src/app/api/settings/obsidian/webdav/route.ts` mengelola sinkronisasi vault opsional yang didukung WebDAV (didorong oleh `src/lib/obsidianSync.ts`). Mengaktifkannya akan mengarahkan OmniRoute ke direktori vault lokal dan mencetak pasangan WebDAV username/password acak:
 
 ```bash
-# Aktifkan sinkronisasi WebDAV untuk direktori vault (membuat nama pengguna/kata sandi)
+# Enable WebDAV sync for a vault directory (mints username/password)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
 
-# Dapatkan status sinkronisasi WebDAV (kredensial hanya dikembalikan saat diaktifkan)
+# Get WebDAV sync status (credentials returned only while enabled)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# Nonaktifkan sinkronisasi WebDAV (menghapus kredensial + .stignore yang dikelola)
+# Disable WebDAV sync (clears credentials + managed .stignore)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
 ### Keamanan & Transportasi
 
-otentikasi WebDAV menerapkan pelacakan kegagalan dan penguncian per-IP (10 upaya gagal dalam jangka waktu 60 detik memicu penguncian 5 menit dengan `429 Too Many Requests` dan `Retry-After`). Karena WebDAV mengirimkan kredensial autentikasi dasar, mengakhiri TLS (atau merutekan melalui terowongan aman seperti Tailscale atau Cloudflare Tunnel) sangat disarankan saat mengakses titik akhir WebDAV di luar loopback.
+otentikasi WebDAV menerapkan pelacakan kegagalan dan penguncian per-IP (10 upaya gagal dalam jangka waktu 60 detik memicu penguncian 5 menit dengan `429 Too Many Requests` dan `Retry-After`). Karena WebDAV mengirimkan kredensial autentikasi dasar, sangat disarankan untuk mengakhiri TLS (atau merutekan melalui terowongan aman seperti Terowongan Tailscale atau Cloudflare ) saat mengakses titik akhir WebDAV di luar loopback.
 
 ### Sumber konteks per kunci API (opsional)
 
-Konfigurasi Obsidian dapat dicakup **per kunci API** melalui tabel
-`api_key_context_sources` (`src/lib/db/apiKeyContextSources.ts`). Ketika panggilan MCP
-membawa ID kunci API yang terautentikasi, `getObsidianConfigForApiKey()` mengutamakan
-token/URL-dasar/jalur-vault milik kunci tersebut (`source: "api_key"`) dan jika tidak
-tersedia akan menggunakan konfigurasi global sebagai fallback (`source: "global"`).
+Obsidian config dapat dicakup** per kunci API** melalui tabel `api_key_context_sources` (`src/lib/db/apiKeyContextSources.ts`). Ketika panggilan MCP membawa id kunci API yang diautentikasi, `getObsidianConfigForApiKey()` lebih memilih token/base-URL/vault-path (`source: "api_key"`) milik kunci itu sendiri dan sebaliknya kembali ke konfigurasi global (`source: "global"`).
 
-Alat MCP non-sinkronisasi memerlukan identitas pemanggil yang telah diresolusi sebelum
-membaca konfigurasi ini. Pemanggil tanpa identitas menerima
-`Token API Obsidian belum dikonfigurasi`, dan tidak ada permintaan vault yang dikirim.
-Pemanggil HTTP diresolusi melalui kredensial permintaannya; pemanggil stdio dapat
-diresolusi melalui `OMNIROUTE_API_KEY` atau `ROUTER_API_KEY`. Pemanggil HTTP yang tidak
-dapat diresolusi tidak dapat mewarisi identitas lingkungan server. ID placeholder saja
-tidak memberikan otorisasi akses; kredensial lingkungan valid yang diresolusi menjadi
-`env-key` tetap didukung. Kunci yang terautentikasi tanpa konfigurasi Obsidian per kunci
-tetap menggunakan fallback global. Keempat alat `obsidian_sync_*` mempertahankan perilaku
-token sinkronisasinya yang terpisah.
+Alat MCP yang tidak disinkronkan memerlukan identitas pemanggil yang diselesaikan sebelum membaca konfigurasi ini. Penelepon tanpa identitas menerima `Obsidian API token not configured`, dan tidak ada permintaan brankas yang dikirim. penelepon HTTP menyelesaikannya melalui kredensial permintaan mereka; penelepon stdio dapat menyelesaikannya melalui `OMNIROUTE_API_KEY` atau `ROUTER_API_KEY`. Penelepon HTTP yang belum terselesaikan tidak dapat mewarisi identitas lingkungan server. Placeholder IDs saja tidak mengizinkan akses; kredensial lingkungan valid yang memutuskan `env-key` tetap didukung. Kunci yang diautentikasi tanpa konfigurasi Obsidian per kunci mempertahankan fallback global. Keempat alat `obsidian_sync_*` mempertahankan perilaku token sinkronisasinya yang terpisah.
 
-## Alat MCP (22)
+## alat MCP (22)
 
-Didefinisikan dalam `open-sse/mcp-server/tools/obsidianTools.ts`. Token/base-URL ditentukan
-untuk setiap pemanggilan (per kunci API terlebih dahulu, lalu global). Alat yang mengakses **server sinkronisasi**
-OmniRoute (keempat alat `obsidian_sync_*`) juga memerlukan token autentikasi sinkronisasi yang dikonfigurasi
-dalam pengaturan OmniRoute.
+Didefinisikan dalam `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL diselesaikan per panggilan (per kunci API terlebih dahulu, lalu global). Alat yang mencapai OmniRoute** server sinkronisasi** (empat alat `obsidian_sync_*` ) juga memerlukan token autentikasi sinkronisasi yang dikonfigurasi dalam pengaturan OmniRoute.
 
 ### Alat baca (`read:obsidian`)
 
-| Alat                         | Deskripsi                                                                                                   |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Memeriksa apakah Local REST API dapat dijangkau dan diautentikasi.                                          |
-| `obsidian_search_simple`     | Pencarian teks lengkap pada konten catatan; mengembalikan cuplikan beserta jalur file.                      |
-| `obsidian_search_structured` | Mencari menggunakan ekspresi JSON Logic (filter and/or/regex/path).                                         |
-| `obsidian_read_note`         | Membaca catatan berdasarkan jalur relatif terhadap vault; secara opsional judul/blok/frontmatter tertentu.  |
-| `obsidian_list_vault`        | Mencantumkan file dan direktori dalam vault (pohon entri).                                                  |
-| `obsidian_get_document_map`  | Mendapatkan struktur judul catatan sebagai pemetaan judul → nomor baris.                                    |
-| `obsidian_get_note_metadata` | Mendapatkan frontmatter, tag, tautan, jumlah karakter/kata tanpa konten lengkap.                            |
-| `obsidian_get_active_file`   | Mendapatkan jalur + konten file yang sedang aktif di Obsidian.                                              |
-| `obsidian_get_periodic_note` | Mendapatkan catatan periodik harian/mingguan/bulanan untuk suatu tanggal (hari ini jika tidak dicantumkan). |
-| `obsidian_get_tags`          | Mencantumkan semua tag vault beserta frekuensinya.                                                          |
-| `obsidian_list_commands`     | Mencantumkan ID perintah Obsidian yang tersedia (digunakan dengan `obsidian_execute_command`).              |
-| `obsidian_sync_status`       | Status server sinkronisasi OmniRoute: berjalan, nama vault, port, waktu aktif, sinkronisasi terakhir.       |
-| `obsidian_sync_conflicts`    | Mencantumkan konflik sinkronisasi yang belum diselesaikan (jalur, jalur konflik, waktu terdeteksi).         |
+| Alat                         | Keterangan                                                                                               |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Periksa apakah REST API Lokal dapat dijangkau dan diautentikasi.                                         |
+| `obsidian_search_simple`     | Pencarian teks lengkap dari konten catatan; mengembalikan cuplikan dengan jalur file.                    |
+| `obsidian_search_structured` | Cari menggunakan ekspresi Logika JSON (filter and/or/regex/path ).                                       |
+| `obsidian_read_note`         | Membaca catatan berdasarkan jalur relatif brankas; opsional heading/block/frontmatter. tertentu          |
+| `obsidian_list_vault`        | Daftar file dan direktori di brankas (pohon entri).                                                      |
+| `obsidian_get_document_map`  | Dapatkan struktur judul catatan sebagai peta judul nomor baris →.                                        |
+| `obsidian_get_note_metadata` | Dapatkan materi depan, tag, tautan, jumlah char/word tanpa konten lengkap.                               |
+| `obsidian_get_active_file`   | Dapatkan jalur konten + dari file yang sedang aktif di Obsidian.                                         |
+| `obsidian_get_periodic_note` | Dapatkan catatan periodik daily/weekly/monthly untuk suatu tanggal (hari ini jika dihilangkan).          |
+| `obsidian_get_tags`          | Cantumkan semua tag vault dengan frekuensinya.                                                           |
+| `obsidian_list_commands`     | Daftar perintah Obsidian yang tersedia IDs (gunakan dengan `obsidian_execute_command`).                  |
+| `obsidian_sync_status`       | status server sinkronisasi OmniRoute : berjalan, nama brankas, port, waktu aktif, sinkronisasi terakhir. |
+| `obsidian_sync_conflicts`    | Cantumkan konflik sinkronisasi yang belum terselesaikan (jalur, jalur konflik, terdeteksi di).           |
 
 ### Alat tulis (`write:obsidian`)
 
-| Alat                             | Deskripsi                                                                                                |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Membuat atau menimpa catatan dengan konten Markdown yang diberikan.                                      |
-| `obsidian_append_note`           | Menambahkan konten ke catatan; secara opsional ke judul/blok tertentu.                                   |
-| `obsidian_patch_note`            | Menambahkan sebelum/sesudah atau mengganti secara presisi pada judul, blok, atau bidang frontmatter.     |
-| `obsidian_delete_note`           | Menghapus catatan dari vault secara permanen.                                                            |
-| `obsidian_move_note`             | Memindahkan atau mengganti nama catatan dalam vault.                                                     |
-| `obsidian_execute_command`       | Menjalankan perintah Obsidian berdasarkan ID perintahnya.                                                |
-| `obsidian_open_file`             | Membuka file di Obsidian (membuatnya jika belum ada).                                                    |
-| `obsidian_sync_trigger`          | Memicu sinkronisasi vault dua arah desktop↔seluler secara langsung.                                      |
-| `obsidian_sync_resolve_conflict` | Menyelesaikan konflik sinkronisasi: pertahankan `local` (seluler), `remote` (desktop), atau `keep-both`. |
+| Alat                             | Keterangan                                                                                            |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Buat atau timpa catatan dengan konten Penurunan Harga tertentu.                                       |
+| `obsidian_append_note`           | Tambahkan konten ke catatan; opsional untuk heading/block. tertentu                                   |
+| `obsidian_patch_note`            | Pembedahan append/prepend/replace pada bidang heading, blok, atau frontmatter.                        |
+| `obsidian_delete_note`           | Hapus catatan dari brankas secara permanen.                                                           |
+| `obsidian_move_note`             | Memindahkan atau mengganti nama catatan di dalam brankas.                                             |
+| `obsidian_execute_command`       | Jalankan perintah Obsidian dengan perintahnya ID.                                                     |
+| `obsidian_open_file`             | Buka file di Obsidian (buat jika tidak ada).                                                          |
+| `obsidian_sync_trigger`          | Memicu sinkronisasi brankas seluler ↔ desktop dua arah secara langsung.                               |
+| `obsidian_sync_resolve_conflict` | Selesaikan konflik sinkronisasi: pertahankan `local` (seluler), `remote` (desktop), atau `keep-both`. |
 
 > [!NOTE]
-> Target `obsidian_patch_note` menerima `targetType` berupa `heading | block | frontmatter`
-> dan `operation` berupa `append | prepend | replace`, dengan
-> `createTargetIfMissing` opsional. Keempat alat `obsidian_sync_*` berkomunikasi dengan server sinkronisasi lokal
-> (`http://127.0.0.1:27781` secara default) dan memerlukan token sinkronisasi.
+> target `obsidian_patch_note` menerima `targetType` dari `heading | block | frontmatter` dan `operation` dari `append | prepend | replace`, dengan `createTargetIfMissing` opsional. Keempat alat `obsidian_sync_*` berkomunikasi dengan server sinkronisasi lokal (`http://127.0.0.1:27781` secara default) dan memerlukan token sinkronisasi.
 
-### Cakupan
+### Lingkup
 
-Alat baca memerlukan `read:obsidian`; alat tulis memerlukan `write:obsidian`. Penerapannya
-identik dengan Notion — ditangani oleh `withScopeEnforcement()` dalam
-`open-sse/mcp-server/server.ts`, diaktifkan berdasarkan `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, dengan
-cakupan yang diizinkan bersumber dari `OMNIROUTE_MCP_SCOPES` atau konteks cakupan kunci API. Lihat
-[MCP-SERVER.md](./MCP-SERVER.md).
+Alat baca memerlukan `read:obsidian`; alat tulis memerlukan `write:obsidian`. Penegakan identik dengan Notion — yang ditangani oleh `withScopeEnforcement()` di `open-sse/mcp-server/server.ts`, dilindungi `OMNIROUTE_MCP_ENFORCE_SCOPES=true` dan dipaksakan untuk penelepon HTTP/SSE yang kunci API tidak memiliki `manage`/`admin`, dengan cakupan yang diizinkan bersumber dari `OMNIROUTE_MCP_SCOPES` atau konteks cakupan kunci API. Lihat [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Endpoint
 

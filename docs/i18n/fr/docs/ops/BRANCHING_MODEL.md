@@ -48,7 +48,7 @@ Lorsqu'une version est rapprochée, un problème de marqueur intitulé `release-
 Recherchez un gel ouvert avant de supposer que la branche souhaitée est fusionnable :
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Les mécanismes de fusion (propriétaire `queue` label → Mergify) sont documentés dans [MERGE_TRAIN.md](./MERGE_TRAIN.md).

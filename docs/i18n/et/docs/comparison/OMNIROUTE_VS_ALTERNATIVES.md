@@ -11,7 +11,7 @@ Objektiivne funktsioonide võrdlus populaarsete avatud lähtekoodiga AI ruuterit
 | Funktsioon                                           |                 OmniRoute 3.8                 |    LiteLLM 1.x    | OpenRouter (SaaS) |   Portkey    |
 | ---------------------------------------------------- | :-------------------------------------------: | :---------------: | :---------------: | :----------: |
 | **Pakkujad**                                         |                    **329**                    |       ~100        |        ~50        |     ~30      |
-| **Free/no-auth kataloogikirjed**                     |                    **155**                    |        n/a        |     läbimine      |     n/a      |
+| **Tasuta juurdepääsuga pakkujad**                    |          **50 tasuta juurdepääsuga**          |        n/a        |     läbimine      |     n/a      |
 | **Ise majutav**                                      |                      ✅                       |        ✅         |        ❌         |   ⚠ maksis   |
 | **OAuth kataloogikirjed**                            |                    **23**                     |      osaline      |        ❌         |      ❌      |
 | **Automaatsed tagavarakombinatsioonid**              |              **22 strateegiat**               | prioriteedipõhine |    astmepõhine    |   kaalutud   |
@@ -38,7 +38,7 @@ Objektiivne funktsioonide võrdlus populaarsete avatud lähtekoodiga AI ruuterit
 
 ## Millal valida OmniRoute
 
-- Sa ise võõrustad ja tahad** pakkuja maksimaalne katvus** (394 pakkujat, 155 free/no-auth kataloogikirjet)
+- Sa ise võõrustad ja tahad** maksimaalne pakkuja katvus** (394 pakkujat, 50 tasuta juurdepääsuga)
 - Teil on vaja a** sisseehitatud MCP server** (LLM tööriistad, mälu, tööriistadena eksponeeritud oskused)
 - Teil on vaja**A2A protokoll** agentidevaheliste töövoogude jaoks
 - Sa tahad** sõrmejälgede vargus** (JA3/JA4), et vältida ülesvoolu CAPTCHAs tuvastamist
@@ -58,10 +58,10 @@ Objektiivne funktsioonide võrdlus populaarsete avatud lähtekoodiga AI ruuterit
 
 ## Millal valida Portkey
 
-- Vajate käideldavusgarantiidega **kommertslikku SLA-d**
-- Eelistate **hallatud juhtpaneeli** ilma käitamisega seotud lisakoormuseta
-- Vajate kohe kasutusvalmis **ettevõtte nõuetele vastavuse** funktsioone
+- Teil on vaja a** kaubanduslik SLA** koos tööaja garantiidega
+- Eelistad a** hallatav armatuurlaud** ilma operatsioonideta
+- Teil on vaja** ettevõtte vastavus** funktsioonid karbist välja
 
 ---
 
-_Viimati uuendatud: 2026-08-02. Tabeli täpsuse säilitamiseks esitage parandused PR-i kaudu._
+_Tabeli täpsuse säilitamiseks esitage parandused PR kaudu._

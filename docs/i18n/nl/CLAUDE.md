@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Alle projectregels staan in [`AGENTS.md`](AGENTS.md)** — de enige gezaghebbende bron voor elke AI-
-assistent (architectuur, conventies, tests, kwaliteitscontroles, git-workflow, de 23 Harde Regels,
-PII-lessen). Lees het bestand volledig; voeg hier geen projectregels opnieuw toe. Alles hieronder is ALLEEN
-van toepassing op Claude Code — operationele verfijningen van regels die al in `AGENTS.md` zijn vastgelegd.
+**Alle projectregels leven in [`AGENTS.md`](AGENTS.md)** — de enige bron van waarheid voor iedere AI assistent; de import hierboven laadt het al. Voeg hier geen projectregels opnieuw toe. Alles hieronder is van toepassing ONLY op Claude Code — operationele verfijningen van regels die al zijn gedefinieerd in `AGENTS.md`.
 
-## Worktree-isolatie — specifieke punten voor Claude Code
+## Werkboomisolatie — Claude Codespecificaties
 
-Het volledige verplichte worktree-protocol (bevestiging van de basisbranch, het canonieke pad
-`.claude/worktrees/`, `cp -al` voor node_modules, afbreekregels) staat in
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (samengevat in `AGENTS.md` →
-Git-workflow → "Worktree-isolatie"). Punten die specifiek zijn voor Claude Code:
+- Bevestig de basistak bij de operator via `AskUserQuestion` (Hard Rule #19), tenzij ze u dit al hebben verteld.
+- Maak de werkboom met `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (deze komt terecht onder `.claude/worktrees/`, koppelt `node_modules` hard en kopieert `.husky/_`), roep vervolgens `EnterWorktree` aan met zijn `path`. Geef altijd de basis door: zonder deze kiest het script de hoogste `release/*`, wat mogelijk niet degene is die de operator heeft bevestigd. Een werkboom die `EnterWorktree` zelf maakt, heeft noch de harde links, noch de hooks, dus er draait geen pre-commit-poort in.
 
-- Bevestig de basisbranch met de operator via `AskUserQuestion` (Harde regel #19), tenzij die
-  het je al heeft verteld.
-- Gebruik bij voorkeur de ingebouwde `EnterWorktree`-tool — die maakt worktrees al aan onder
-  `.claude/worktrees/` (het canonieke pad). Maak de worktree aan met het gedocumenteerde `git
-worktree add`-commando en roep daarna `EnterWorktree` aan met het bijbehorende `path`.
+## Subagenten en git
 
-## Veiligheid tussen sessies — specifieke aandachtspunten voor Claude Code
+Elke subagent die git aanraakt (Agent tool of Workflow script) krijgt de harde regel #22 a's `git stash` ban letterlijk in de prompt — de geregistreerde herhaling van het stash-incident kwam via een subagent.
 
-Harde Regels #19/#21/#22 (in `AGENTS.md`) zijn van toepassing op parallelle sessies. Operationele herinneringen voor deze
-omgeving:
+## Planningsartefacten — superkrachten padoverschrijvingen
 
-- **Neem het verbod op `git stash` letterlijk over in de prompt van elke subagent die git gebruikt**
-  (Agent-tool / Workflow-scripts) — subagents nemen dit bestand niet over en het vastgelegde
-  terugkerende stash-incident vond plaats via een subagent.
-- Voer voordat je wijzigingen samenvoegt of pusht naar een PR die je niet _in deze sessie_ hebt aangemaakt `git worktree list`
-  uit en controleer `gh pr view <N> --json state,headRefOid` opnieuw (Harde Regel #22b).
-- Beëindig elke sessie met de hoofdcheckout op de branch waarop deze begon.
+Vaardigheden van superkrachten kondigen standaardwaarden aan onder `docs/superpowers/plans/`, `docs/superpowers/specs/` en `docs/research/`. Herschrijf elk naar zijn `_tasks/` equivalent in `AGENTS.md` → "Planning & Research Artefacts" voordat u het schrijft, en commit het met `git -C _tasks …`, nooit in de hoofdrepository.
 
-## Superpowers-/planningsartefacten — padafwijkingen
+## Scratch-bestanden — `_artifacts/`, niet `/tmp`
 
-De conventie voor `_tasks/` is vastgelegd in `AGENTS.md` → "Planning & Research Artifacts". De
-superpowers-skills worden geleverd met standaardwaarden die naar `docs/…` verwijzen — die standaardwaarden worden
-**hier overschreven**. Wanneer een superpowers-skill een pad aankondigt zoals "opgeslagen in `docs/superpowers/plans/…`",
-herschrijf dit dan naar het equivalent onder `_tasks/…` voordat je het bestand opslaat:
+Dit project overschrijft het sessiekladblok van het harnas (`/tmp/claude-*/…`). Schrijf tijdelijke bestanden — -exports, gegenereerde zips, eenmalige tussenuitvoer — naar `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: een gitignored root `_*` pad, zodat de operator alle scratch-bestanden op één plek vindt en verwijdert. Duurzame plannen, specificaties, onderzoek en overdrachten gaan in plaats daarvan naar `_tasks/` (Hard Rule #23).
 
-| Artefact (skill)                          | Standaard (NIET gebruiken) | Sla het in plaats daarvan hier op                             |
-| ----------------------------------------- | -------------------------- | ------------------------------------------------------------- |
-| Plannen (`writing-plans`)                 | `docs/superpowers/plans/`  | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Specificaties / ontwerp (`brainstorming`) | `docs/superpowers/specs/`  | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Onderzoek (`deep-research`, ad-hoc)       | `docs/research/`           | `_tasks/research/…`                                           |
-| Overdrachten (`/handoff`)                 | —                          | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Rode basis
 
-Commit die artefacten binnen de `_tasks/`-repository (`git -C _tasks …`), nooit in de hoofdrepository.
-
-## Klad-/tijdelijke bestanden — gebruik `_artifacts/`, niet `/tmp`
-
-Dit project overschrijft de standaardkladlocatie van de omgeving voor sessies (`/tmp/claude-*/…`). Schrijf
-tijdelijke/werkbestanden — exports, gegenereerde zipbestanden, eenmalige tussenresultaten en alles wat je
-anders in `/tmp` zou plaatsen — in plaats daarvan naar `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`.
-
-- `_artifacts/` is een `_*`-pad in de hoofdmap: het wordt al door git genegeerd (`AGENTS.md` → "Root `_*` paths"), staat
-  alleen op schijf en wordt nooit gevolgd.
-- Reden: door tijdelijke uitvoer binnen het project te bewaren (in plaats van in `/tmp`), kan de operator
-  alle tijdelijke bestanden eenvoudig op één plek vinden en verwijderen, in plaats van te moeten zoeken in vluchtige,
-  sessiespecifieke `/tmp`-mappen die verdwijnen of waarin niet-gevolgde bestanden zich ophopen.
-- Verwar dit **niet** met `_tasks/` (Harde Regel #23, een eigen privé-git-repository voor duurzame
-  plannen/specificaties/onderzoek/overdrachten) — `_artifacts/` is uitsluitend bedoeld voor wegwerpbare werkbestanden; niets
-  hierin hoeft behouden te blijven of te worden geversioneerd.
-
-## Groene basis vóór het openen van PR's
-
-Voer vóór het maken van een branch of openen van een PR de controle op een groene basis uit (`AGENTS.md` → Git Workflow →
-"Base-green check"; projectskills verwijzen ernaar als `.agents/skills/_shared/base-green.md`). Een PR
-die wordt geopend terwijl de tip van de basisbranch rood is, moet `⚠️ base-red inherited: #<issue>` in de beschrijving bevatten. Gebruik
-de skill `/sweep-reds` om een opgebouwde rode status (tip van de basisbranch + rode PR's) weg te werken.
+Gebruik de `/sweep-reds` vaardigheid om een opgehoopte rode staat (basistip + red PRs) af te voeren.

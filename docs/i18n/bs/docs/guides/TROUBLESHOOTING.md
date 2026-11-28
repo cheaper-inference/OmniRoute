@@ -185,82 +185,49 @@ ne uključuje.
 
 ---
 
-## Lažno pozitivni rezultati antivirusa
+## Lažni pozitivni antivirusni programi
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG stavlja `README.md` u karantin uz `MD:HttpRequest-inf[Susp]`
+### Avast/AVG karantin `README.md` sa `MD:HttpRequest-inf[Susp]`
 
-**Ovo je lažno pozitivan rezultat. Ništa nije zaraženo i nije potrebno ništa poduzimati.**
+**Ovo je lažno pozitivno. Ništa nije zaraženo i nije potrebna nikakva akcija.**
 
-Avast i AVG koriste heuristiku koja označava obične tekstualne/Markdown datoteke koje sadrže mnogo
-linkova nalik HTTP zahtjevima. OmniRouteov `README.md` isporučuje se unutar npm paketa (naveden je
-u `package.json` → `files`), pa se prilikom globalne instalacije nalazi na `node_modules/omniroute/README.md`
-— a sadrži oko 15 primjera `http://localhost:20128/...` (MCP HTTP/SSE krajnje tačke, A2A
-`.well-known` URL i `curl` isječke). Ta gustoća linkova dovoljna je da aktivira heuristiku.
+Avast i AVG pokreću heuristiku koja označava plain-text/Markdown datoteke koje sadrže mnogo veza koje izgledaju kao HTTP zahtjevi. OmniRoute-ov `README.md` se isporučuje unutar npm paketa (naveden je u `package.json` → `files`), tako da slijeće na `node_modules/omniroute/README.md` na globalnoj instalaciji — i sadrži ~ 15 `http://localhost:20128/...` primjera (krajnje tačke MCP HTTP/SSE, A2A `.well-known` URL i `curl` snippets). Ta gustina veze je dovoljna da otkači heuristiku.
 
-Ako je ovo počelo tek nedavno: vrsta datoteke se nije promijenila. README je dobio proširenu
-tabelu krajnjih tačaka (dodani su MCP HTTP + SSE + A2A) i više `curl` primjera, čime je
-prešao prag.
+Ako je ovo počelo tek nedavno: datoteka se nije promijenila u naturi. README je povećao svoju tabelu krajnjih tačaka (dodan je MCP HTTP + SSE + A2A ) i više `curl` primjera, što ga je gurnulo preko praga.
 
-Datoteka je neaktivna dokumentacija bez ikakvog izvršnog sadržaja. Možete je bezbjedno vratiti
-iz karantina.
+Datoteka je inertna dokumentacija bez izvršnog sadržaja. Možete ga sigurno vratiti iz karantina.
 
-**Šta učiniti:**
+**šta učiniti:**
 
-1. **Zaustavite obavještenja** — izuzmite instalacijski direktorij u svom antivirusnom programu
-   (Avast: Postavke → Izuzeci), dodajući putanju do globalnog `node_modules` direktorija i/ili
-   OmniRoute direktorija s podacima (`~/.omniroute/`).
-2. **Prijavite lažno pozitivan rezultat** — <https://www.avast.com/false-positive-file-form.php>,
-   prilažući `README.md` iz karantina. Ovo je rješenje koje pomaže svima jer je problem u tome što
-   heuristika proizvođača pretjerano reaguje na tekstualnu datoteku.
+1. **Zaustavite obavještenja** — izuzima instalacijski direktorij u vašem antivirusu (Avast: Postavke → izuzeci), dodajući vašu globalnu `node_modules` putanju and/or OmniRoute data dir (`~/.omniroute/`).
+2. **Prijavite lažno pozitivan** — <https://www.avast.com/false-positive-file-form.php>, prilaganje `README.md` u karantinu. Ovo je popravka koja pomaže svima, budući da je to heuristička reakcija dobavljača na tekstualnu datoteku.
 
-**Zašto ovo ne „popravljamo“ s naše strane:** svi primjeri koriste `http://localhost`, a
-localhost ne može koristiti `https` bez poteškoća sa samopotpisanim certifikatima. Izobličavanje dokumentacije
-radi izbjegavanja heuristike jednog proizvođača naštetilo bi svakom čitaocu samo da bi se udovoljilo grešci skenera.
+**Zašto ovo ne "popravimo" sa naše strane:** svi primjeri su `http://localhost`, a localhost ne može biti `https` bez samopotpisanog certifikata. Pokvariti dokumente kako bi se izbjegla heuristika jednog dobavljača naškodilo bi svakom čitaocu da zadovolji grešku skenera.
 
-### Kaspersky označava desktop aplikaciju kao `PDM:Trojan.Win32.Generic`
+### Kaspersky označava aplikaciju za desktop kao `PDM:Trojan.Win32.Generic`
 
-**Ovo je lažno pozitivan rezultat heuristike ponašanja. Ništa nije zaraženo.** Kasperskyjev
-prefiks `PDM:` znači da procjena dolazi iz njegovog modula Proactive Defense Module (System Watcher),
-koji procjenjuje šta instalacijski program _radi_, umjesto da ga upoređuje s poznatim zlonamjernim softverom. Kada
-se aktivira, Kaspersky „poništava“ cijelu instalaciju — brišući datoteke koje je već
-zapisao — pa aplikacija na kraju bude neispravna ili nedostaje.
+**Ovo je lažno pozitivan rezultat heuristike ponašanja. Ništa nije zaraženo.** Kasperskyjev `PDM:` prefiks znači da presuda dolazi od njegovog modula proaktivne odbrane (System Watcher), koji prosuđuje šta instalater _radi_ umjesto da ga uporedi s poznatim zlonamjernim softverom. Kada se pokrene, Kaspersky "povlači" cijelu instalaciju — brišući datoteke koje je već napisao — tako da aplikacija na kraju bude pokvarena ili nedostaje.
 
-Datoteke koje označava standardni su dijelovi deklarisanih zavisnosti otvorenog koda uključenih uz
-desktop aplikaciju, na primjer:
+Datoteke koje označava su dio deklariranih ovisnosti otvorenog koda u paketu s desktop aplikacijom, na primjer:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` i
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), biblioteka za automatizaciju
-  preglednika koja se koristi za prijavu kod pružatelja usluga unutar aplikacije i razgovor zasnovan na pregledniku.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — fiksirana nativna `wreq-js` veza koja se koristi za HTTP s otiskom preglednika kod pružatelja usluga
-  koji koriste web kolačiće (`<arch>` je `x64` ili `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` i `workerProcessEntry.js` — [Playwright](https://playwright.dev), biblioteka za automatizaciju pretraživača koja se koristi za prijavu provajdera u aplikaciji i ćaskanje podržano pretraživačem.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — zakačeno `wreq-js` izvorno povezivanje koje se koristi za HTTP sa otiskom prstiju pretraživača na dobavljačima web kolačića (`<arch>` je `x64` ili `arm64`).
 
-**Zašto se aktivira:** instalacijski program za Windows **još nije potpisan kodnim certifikatom**, pa nepotpisani NSIS
-instalacijski program nema nikakvu reputaciju, a heuristika ponašanja radi s maksimalnom agresivnošću. U kombinaciji
-s uključenim nativnim DLL-om i stotinama `.js` datoteka zapisanih u
-`%LOCALAPPDATA%\Programs\OmniRoute` (uključujući direktorije paketa sa sufiksom kontrolnog sažetka iz
-samostalne Next.js verzije), to je dovoljno da aktivira heuristiku. Potpisivanje koda je planirano;
-dok se ne uvede, ovo se može ponavljati s novim izdanjima.
+**Zašto pali:** Windows instalater je** još nije potpisan kodom** , tako da nepotpisani NSIS instalater ima nultu reputaciju i heuristika ponašanja radi sa maksimalnom agresivnošću. U kombinaciji sa priloženim izvornim DLL i stotinama `.js` datoteka napisanih pod `%LOCALAPPDATA%\Programs\OmniRoute` (uključujući direktorije paketa sa sufiksom s hash-om iz samostalne verzije Next.js ), to je dovoljno da se ometa heuristika. Planirano je potpisivanje koda; dok ne sleti, nova izdanja mogu ovo ponoviti.
 
-**Šta učiniti:**
+**šta učiniti:**
 
-1. **Prvo provjerite preuzetu datoteku** (time se isključuje mogućnost izmijenjene datoteke). Svako izdanje objavljuje
-   `latest.yml`, čije polje `sha512` (base64) obuhvata instalacijski program
-   `OmniRoute.Setup.<version>.exe`. U PowerShellu, iz direktorija koji sadrži instalacijski program:
+1. **Prvo potvrdite preuzimanje** (isključuje neovlašteni fajl). Svako izdanje objavljuje `latest.yml`, čije `sha512` polje (base64) pokriva `OmniRoute.Setup.<version>.exe` instalater. U PowerShell, iz fascikle koja sadrži instalater:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Izlaz se mora podudarati s `latest.yml` → `sha512`. Ako se ne podudara, izbrišite datoteku i
-   ponovo je preuzmite isključivo sa [stranice GitHub izdanja](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Vratite + izuzmite** — vratite poništene stavke iz karantina i dodajte izuzetak
-   za `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Postavke → Prijetnje i izuzeci),
-   a zatim ponovo instalirajte.
-3. **Prijavite lažno pozitivan rezultat** — <https://opentip.kaspersky.com/>. FP prijave
-   koje pošalju korisnici zaista ubrzavaju dodavanje na listu dozvoljenih stavki.
+   Izlaz mora odgovarati `latest.yml` → `sha512`. Ako nije, izbrišite datoteku i ponovo je preuzmite samo sa [stranice GitHub izdanja](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Vrati + exclude** — vrati vraćene stavke iz karantina i dodaj isključenje za `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → postavke → Pretnje i izuzeci), a zatim ponovo instaliraj.
+3. **Prijavite lažno pozitivan** — <https://opentip.kaspersky.com/>. FP izvještaji koje su podnijeli korisnici istinski ubrzavaju popis dozvoljenih.
 
 ---
 
@@ -868,10 +835,10 @@ Više simptoma:
 
 ---
 
-## Još uvijek ne radi?
+## Still Stuck?
 
-- **GitHub problemi**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Arhitektura**: Interne detalje pogledajte u [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
-- **API referenca**: Sve krajnje tačke pogledajte u [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
-- **Nadzorna ploča zdravlja sistema**: Provjerite **Nadzorna ploča → Zdravlje** za status sistema u stvarnom vremenu
-- **Prevodilac**: Koristite **Nadzorna ploča → Prevodilac** za otklanjanje poteškoća s formatom
+- **GitHub Issues** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Arhitektura** : Pogledajte [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) za interne detalje
+- **API Reference** : Pogledajte [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) za sve krajnje tačke
+- **Health Dashboard** : Provjerite** Kontrolna tabla → Health** za status sistema u realnom vremenu
+- **Prevodilac** : Koristite** Kontrolna tabla → Translator** za otklanjanje grešaka u formatu

@@ -67,37 +67,37 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ---
 
-## Три значення
+## Три цінності
 
-| Значення | Мітка в UI          | Поведінка                                                                                                                                                                       |
-| -------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`   | `Авто (dual-stack)` | ОС вибирає сімейство. Для хоста проксі, заданого IP-літералом, сімейство визначається самим літералом; для імені хоста доступні обидва сімейства. Це значення за замовчуванням. |
-| `ipv4`   | `Лише IPv4`         | Прив’язує з’єднання до IPv4. Завершується помилкою, якщо хост проксі не має запису IPv4 (A).                                                                                    |
-| `ipv6`   | `Лише IPv6`         | Прив’язує з’єднання до IPv6. Завершується помилкою, якщо хост проксі не має запису IPv6 (AAAA).                                                                                 |
+| Значення | мітка UI            | Поведінка                                                                                                                                           |
+| -------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`   | `Auto (dual-stack)` | OS вибирає сім'ю. Для проксі-хоста IP-літералу сімейство є притаманним літералу; для імені хоста придатні обидві родини. Це значення за умовчанням. |
+| `ipv4`   | `IPv4 only`         | Закріплює підключення до IPv4. Не вдається закрити, якщо проксі-сервер не має запису IPv4 (A).                                                      |
+| `ipv6`   | `IPv6 only`         | Закріплює підключення до IPv6. Не вдається закрити, якщо проксі-сервер не має запису IPv6 (AAAA).                                                   |
 
-Рядки UI містяться в `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+рядки UI знаходяться в `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
 ## Як це налаштувати
 
-### Панель керування
+### Приладова панель
 
-Селектор розташований у формі проксі на вкладці **Пул проксі**:
+Селектор має форму проксі** Пул проксі** вкладка:
 
-1. Відкрийте **Панель керування → Налаштування → Проксі → Пул проксі**
+1. ВІДЧИНЕНО** Інформаційна панель → Settings → Proxy → Proxy Pool**
 2. Додайте або відредагуйте проксі
-3. У розкривному списку **Сімейство IP** виберіть `Авто (dual-stack)`, `Лише IPv4` або `Лише IPv6`
-4. Збережіть
+3. Встановіть** сім'я IP** спадне меню до `Auto (dual-stack)`, `IPv4 only` або `IPv6 only`
+4. зберегти
 
-Елемент керування відтворюється компонентом `ProxyRegistryManager.tsx` (змонтованим у `proxy/ProxyPoolTab.tsx`).
+Елемент керування надає `ProxyRegistryManager.tsx` (змонтований у `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Поле `family` є частиною даних запитів створення/оновлення реєстру проксі, перевіряється за допомогою `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) та обробляється через `POST` / `PATCH /api/v1/management/proxies`:
+Поле `family` є частиною корисних даних create/update реєстру проксі-серверів, перевірених `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) і оброблених `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Створити проксі лише для IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Перевести наявний проксі в режим лише IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Це саме поле також підтримується вбудованим об’єктом конфігурації проксі, який використовується для записів висхідного проксі (`upstream_proxy_config.family`, див. [Модель даних](#data-model)).
+Те саме поле також приймає об’єкт конфігурації вбудованого проксі-сервера, який використовується для записів висхідного проксі-сервера (`upstream_proxy_config.family`, див. [Модель даних](#data-model) ).
 
-Щодо решти API CRUD/призначення проксі див. [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Про решту проксі CRUD/assignment API див. [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

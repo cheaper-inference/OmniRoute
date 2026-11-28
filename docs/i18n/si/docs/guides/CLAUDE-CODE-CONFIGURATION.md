@@ -66,12 +66,12 @@ Codex (`<environment_context><cwd>`) සහ OpenCode (`x-opencode-session`) එ�
 
 ### ව්‍යාපෘතිය පැහැදිලිව නම් කිරීම (නිර්දේශිතයි)
 
-වැඩ කරන නාමාවලිය යන්ත්‍ර අතර වෙනස් වේ, එබැවින් එකම ගබඩාව විවිධ මාර්ග යටතේ පෙන්විය හැක. ඒ වෙනුවට ව්‍යාපෘතිය පැහැදිලිව යවන්න: Claude කේතය සෑම ආදර්ශ ඉල්ලීමකටම `ANTHROPIC_CUSTOM_HEADERS` හි ලැයිස්තුගත කර ඇති ඕනෑම ශීර්ෂයක් එක් කරයි, සහ OmniRoute ඒවායින් දෙකක් කියවයි:
+යන්ත්‍ර අතර වැඩ කරන නාමාවලිය වෙනස් වේ, එබැවින් එකම ගබඩාව විවිධ මාර්ග යටතේ පෙන්විය හැක. ඒ වෙනුවට ව්‍යාපෘතිය පැහැදිලිව යවන්න: Claude කේතය සෑම ආදර්ශ ඉල්ලීමකටම `ANTHROPIC_CUSTOM_HEADERS` හි ලැයිස්තුගත කර ඇති ඕනෑම ශීර්ෂයක් එක් කරයි, සහ OmniRoute ඒවායින් දෙකක් කියවයි:
 
-| ශීර්ෂකය                    | වටිනාකම                                                           |
-| -------------------------- | ----------------------------------------------------------------- |
-| `x-omniroute-project`      | ව්‍යාපෘතියේ නම, උදා: `omniroute`                                  |
-| `x-omniroute-project-repo` | සාමාන්‍යකරණය කළ දුරස්ථය, උදා: `github.com/diegosouzapw/OmniRoute` |
+| ශීර්ෂකය                    | වටිනාකම                                                                |
+| -------------------------- | ---------------------------------------------------------------------- |
+| `x-omniroute-project`      | ව්‍යාපෘතියේ නම, උදා: `omniroute`                                       |
+| `x-omniroute-project-repo` | සාමාන්‍යකරණය කළ දුරස්ථය, උදා: `github.com/cheaper-inference/OmniRoute` |
 
 දෙකම කියවන්නේ ආරෝපණය සඳහා පමණි; ඒවා කිසිවිටෙක උඩුගංගත සැපයුම්කරු වෙත යොමු නොකෙරේ.
 
@@ -249,28 +249,22 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL="glm/glm-4.7-flash"
 
 ---
 
-## දෝෂ නිරාකරණය
+## දෝෂගවේෂණය
 
-**Claude Code ද්වාරය නොසලකා හරියි** — `ANTHROPIC_BASE_URL` තුළ **`/v1`
-නොමැති** බව තහවුරු කර `claude` නැවත ආරම්භ කරන්න (ආරම්භයේදී env එක් වරක් පමණක් කියවනු ලැබේ). `omniroute launch`
-මෙය ඔබ වෙනුවෙන් හසුරුවයි.
+**Claude කේතය ද්වාරය නොසලකා හරියි** — තහවුරු `ANTHROPIC_BASE_URL` සතුව ඇත** `/v1` නැත** සහ `claude` නැවත ආරම්භ කරන්න (env ආරම්භයේදී වරක් කියවනු ලැබේ). `omniroute launch` ඔබ වෙනුවෙන් මෙය හසුරුවයි.
 
-**`/model` තේරීම් ලැයිස්තුව හිස්ය / ද්වාර ආකෘති අස්ථානගතය** — Claude Code
-v2.1.219+ සහ `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` අවශ්ය වේ. තේරීම් ලැයිස්තුවේ දිස්වන්නේ `claude*` /
-`anthropic*` ආකෘති ID පමණි; වෙනත් ඕනෑම ආකෘතියක් `ANTHROPIC_MODEL=<id>` මඟින් බලෙන් තෝරන්න (පැතිකඩ සිදු කරන්නේ මෙයයි).
+**`/model` picker හිස් / නැති වූ ද්වාර ආකෘති වේ** — සඳහා Claude කේතය v2.1.219 + සහ `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` අවශ්‍ය වේ. පිකර් තුළ දිස්වන්නේ `claude*` / `anthropic*` මාදිලිය IDs පමණි; `ANTHROPIC_MODEL=<id>` සමඟ වෙනත් ඕනෑම ආකෘතියක් බල කරන්න (මෙය පැතිකඩයන් කරන්නේ මෙයයි).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code සෑම විටම **උපසර්ග රහිත**
-ආකෘති ID යවයි (උදා. `claude-opus-4-8`), එබැවින් Claude Code (`cc/…`) සහ
-Claude (`claude/…`) සැපයුම්කරුවන් දෙදෙනාම සම්බන්ධ කර ඇති විට, උපසර්ග රහිත id එක මාර්ග දෙකකට ගැළපෙන අතර
-OmniRoute අනුමාන කිරීම ප්රතික්ෂේප කරයි. මෙය ක්රම දෙකෙන් එකකින් නිවැරදි කරන්න: `ANTHROPIC_MODEL=cc/claude-opus-4-8` මඟින් උපසර්ගයක් සහිත id එකක් නියම කරන්න, නැතහොත්
-**උපසර්ග රහිත Claude ආකෘති සඳහා Claude Code ප්රමුඛ කරන්න** සබල කරන්න — Claude සැපයුම්කරු පිටුවේ ඇති ටොගලය, හෝ
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (පෙරනිමියෙන් අක්රියයි;
-[පරිසරය](../reference/ENVIRONMENT.md) බලන්න) — මෙය උපසර්ග රහිත `claude-*`
-ID වෙනුවට Claude Code වෙත යොමු කරයි. පැහැදිලි සැපයුම්කරු උපසර්ගවලට සැමවිටම ප්රමුඛත්වය ලැබේ.
+**`400 Ambiguous model 'claude-…'`** — Claude කේතය සෑම විටම යවයි** උපසර්ග නොකළ** ආකෘතිය IDs (උදා `claude-opus-4-8`), එබැවින් Claude කේතය (`cc/…`) සහ Claude (`claude/…`) සපයන්නන් යන දෙකම සම්බන්ධ වූ විට හිස් හැඳුනුම්පත මාර්ග දෙකට ගැලපෙන අතර OmniRoute අනුමාන කිරීම ප්‍රතික්ෂේප කරයි. එය එක් ආකාරයකින් නිවැරදි කරන්න: `ANTHROPIC_MODEL=cc/claude-opus-4-8` සමඟ උපසර්ග හැඳුනුම්පතක් අමුණන්න, නැතහොත් සබල කරන්න** උපසර්ග නොකළ Claude මාදිලි සඳහා Claude කේතයට කැමති වන්න** Claude සපයන්නා පිටුවේ ටොගල කිරීම —, නැතහොත් `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (පෙරනිමිය අක්‍රියයි; [පරිසරය](../reference/ENVIRONMENT.md) බලන්න) — ඒ වෙනුවට හිස් `claude-*` IDs Claude කේතය වෙත යොමු කරයි. පැහැදිලි සැපයුම්කරු උපසර්ග සැම විටම ජය ගනී.
 
-**සත්යාපන දෝෂ** — පැතිකඩෙහි ටෝකනයක් නොමැත. `omniroute launch --profile`
-භාවිත කරන්න (එය ටෝකනය ඇතුළත් කරයි) හෝ `ANTHROPIC_AUTH_TOKEN` නිර්යාත කරන්න.
+**"ස්වයං මාදිලිය … මෙම සැසිය සුදුසුකම් නොලබයි" (වර්ගීකරණ ඉල්ලීම් බිල්පත් කර ඇත)** — ස්වයංක්‍රීය ප්‍රකාරයේදී Claude කේතය සේවාදායකයෙන් තමන්ගේම ආදර්ශ ඉල්ලීම් ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ) තුළ ක්‍රියා සමාලෝචනය කරන ලෙස ඉල්ලා සිටී. එයට යුගලයක් ලෙස Anthropic වෙත ළඟා වීමට `anthropic-beta` අගය `dangerous-tool-use-2026-09-03` සහ `safeguards` ශරීර ක්ෂේත්‍රය අවශ්‍ය වේ, සහ නොවෙනස්ව ආපසු පැමිණීමට `safeguard_results` සහ upstream tool-use IDs. OmniRoute මෙය කරන්නේ ඉල්ලීම ස්වදේශික `claude` සපයන්නා වෙත හෝ `anthropic-compatible-*` node එකක් වෙත යොමු කළ විට, ප්‍රවාහය කළ හෝ නොකළ විට (regression guard: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). වෙනත් ඉලක්කවලට සමාලෝචනය ආපසු ලබා දිය නොහැක, එබැවින් Claude කේතය එහි වර්ගීකරණ ඉල්ලීම් වෙත ආපසු ගොස් දැනුම්දීම පෙන්වයි:
 
-**පැතිකඩ හුදකලා නොවේ** — සෑම පැතිකඩක්ම වෙනස් `CLAUDE_CONFIG_DIR` එකකි;
-සැසිය තුළ `echo $CLAUDE_CONFIG_DIR` මඟින් එය
-`~/.claude/profiles/<name>` වෙත යොමු වන බව තහවුරු කරන්න.
+- මානව-නොවන සපයන්නෙකු මත ආකෘතියක්, හෝ එකකට ගොඩබසින සංයෝජනයක්;
+- Claude-Code-compatible relay node (`anthropic-compatible-cc-*`), ඉල්ලීම් ශරීරය නැවත ගොඩනඟන සහ `safeguards` රැගෙන නොයන;
+- අවසර ලත් බීටා වලට පෙර පැරණි OmniRoute, හෝ Anthropic පිටුව ගේට්වේ සැසි සඳහා ලැයිස්තුගත කර ඇති එකට පහළින් Claude කේත අනුවාදයක්.
+
+Claude කේතයෙන් `/status` ධාවනය කරන්න: the** ස්වයංක්‍රීය මාදිලියේ සේවාදායකය** සේවාදායකයේ සමාලෝචනය සක්‍රියව පවතින අතරතුර පේළිය `Enabled` කියවයි. එම ඉල්ලීම් බිල්පත් කරන්නේද යන්න තීරණය වන්නේ Anthropic මගින් මිස OmniRoute මගින් නොවේ.
+
+**සත්‍යාපන දෝෂ** — පැතිකඩෙහි ටෝකනයක් නොමැත. `omniroute launch --profile` භාවිතා කරන්න (එය එන්නත් කරයි) හෝ අපනයන `ANTHROPIC_AUTH_TOKEN`.
+
+**පැතිකඩ හුදකලා නොවේ** — සෑම පැතිකඩක්ම වෙනස් `CLAUDE_CONFIG_DIR` වේ; `~/.claude/profiles/<name>` හි සැසි ලක්ෂ්‍ය තුළ `echo $CLAUDE_CONFIG_DIR` සත්‍යාපනය කරන්න.

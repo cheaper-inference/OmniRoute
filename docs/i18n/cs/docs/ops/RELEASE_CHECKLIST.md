@@ -4,12 +4,9 @@
 
 ---
 
-> **Poslední aktualizace:** 2026-08-28 — v3.8.51
-> Zjednodušený proces vydávání, který k automatizaci využívá dovednosti Claude Code.
+> Zjednodušený tok uvolňování, který využívá dovednosti Claude Code pro automatizaci.
 >
-> **Udržujte frontu/větev mezi vydáními v zeleném stavu:** viz [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (rodina `/green-prs` + `npm run check:release-green` + `/babysit` + noční běh). Pravidelné
-> spouštění — a zejména **před** tímto kontrolním seznamem — zajistí, že PR vydání začne v zeleném stavu.
+> **Mezi vydáními udržujte queue/branch zelenou:** viz [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` rodina + `npm run check:release-green` + `/babysit` + nightly). Spuštění tohoto pravidelně — a zvláště** před** tento kontrolní seznam — způsobí, že spuštění PR bude zelené.
 
 ## Stručně
 
@@ -58,9 +55,11 @@ Pracovní postup npm-publish již nepublikuje přímo: zavede zabalený tarball 
 
 **Příručka rozbitého artefaktu (beze změny):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` jako výchozí reflex (minuty, reverzibilní); `npm unpublish` pouze uvnitř okna 72h/no-dependents a nikdy jako první tah. Docker: nikdy nepřepisujte značku verze — rollback je přesměrování `latest` na poslední dobrý výtah.
 
-**Docker Hub `latest` (vyžadováno při každém stabilním publikování SemVer ):** pracovní postup `docker-publish` musí označit** obě** `X.Y.Z` a pokud `should-promote-latest.sh` souhlasí, jedná se o nejvyšší stabilní SemVer, `:latest` s** stejný digest** . Po úloze: Hub `latest` digest se rovná novému SemVer digest a `last_updated` se přesunul. Nenechávejte `:latest` na starším sestavení, dokud poznámky k vydání hovoří o opravách, které existují pouze na Gitu. Rychlé skládání použijte `:latest`; GitOps by měl nadále připínat `X.Y.Z`. Viz [kanály vydání Docker](../guides/DOCKER_GUIDE.md#release-channels) a #10317.
+**Docker Hub `latest` (vyžadováno při každém stabilním publikování SemVer ):** pracovní postup `docker-publish` musí označit** obě** `X.Y.Z` a když `should-promote-latest.sh` souhlasí, jedná se o nejvyšší stabilní SemVer, `:latest` s** stejný digest** . Po úloze: Hub `latest` digest se rovná novému SemVer digest a `last_updated` se přesunul. Nenechávejte `:latest` na starším sestavení, dokud poznámky k vydání hovoří o opravách, které existují pouze na Gitu. Rychlé skládání použijte `:latest`; GitOps by měl nadále připínat `X.Y.Z`. Viz [kanály vydání Docker](../guides/DOCKER_GUIDE.md#release-channels) a #10317.
 
-**Úložiště organizace Docker Hub (`cheaperinference/omniroute`):** Docker Hub nemůže přesouvat úložiště mezi jmennými prostory, takže `diegosouzapw/omniroute` uchovává svou historii stahování a každé vydání a úloha `mirror-org-dockerhub` `docker-publish` zkopíruje každou vydanou verzi (a `:latest` při povýšení) ze `ghcr.io/cheaper-inference/omniroute` do úložiště organizace. Potřebuje tajemství `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; bez nich zůstane úloha zelená s varováním „Docker Hub org mirror skipped“ a ostatní registry publikují normálně. Chcete-li tam později publikovat vydanou verzi, spusťte** Akce → Zrcadlení obrazu Docker do Docker Hub org → Spusťte pracovní postup** s `version=X.Y.Z` (a `promote_latest` pro nejvyšší stabilní verzi): zkopíruje stávající obrazy, bez přestavby.
+**Úložiště organizace Docker Hub (`cheaperinference/omniroute`):** Docker Hub nemůže přesouvat úložiště mezi jmennými prostory, takže `diegosouzapw/omniroute` uchovává svou historii stahování a každé vydání a úloha `mirror-org-dockerhub` `docker-publish` zkopíruje každou vydanou verzi (a `:latest` při povýšení) ze `ghcr.io/cheaper-inference/omniroute` do úložiště organizace. Potřebuje tajemství `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; bez nich zůstane úloha zelená s varováním „Docker Hub org mirror skipped“ a ostatní registry publikují normálně. Chcete-li tam později publikovat vydanou verzi, spusťte** Akce → Zrcadlení obrazu Docker do Docker Hub org → Spusťte pracovní postup** s `version=X.Y.Z` (a `promote_latest` pro nejvyšší stabilní verzi): zkopíruje stávající obrazy, bez přestavby. Přehled Docker centra tohoto úložiště je nastaven ručně: API, které jej upravuje, odmítá přístupové tokeny organizace.
+
+Stejný pracovní postup také zkopíruje každé vydání do staršího balíčku GHCR `ghcr.io/diegosouzapw/omniroute` až do 30. 6. 2027, takže instalace, které jsou k němu stále připojené, se neustále aktualizují; jeho index nese popis "přesunuto do `ghcr.io/cheaper-inference/omniroute`". Potřebuje tajemství `GHCR_LEGACY_TOKEN` (klasický osobní přístupový token `diegosouzapw` s `write:packages`); bez něj tato úloha přeskakuje s varováním „Přeskočení zrcadla staršího GHCR “.
 
 ## Zrychlený režim pro opravy (štítek `hotfix`)
 
@@ -151,7 +150,7 @@ Přerušení změn: přidejte zápatí `BREAKING CHANGE:` nebo `!` za rozsah (na
 ### Dokumentace
 
 - [ ] průkazy `npm run check:docs-sync` (automatické spuštění před potvrzením)
-- [ ] `npm run check:docs-all` passy (deštník: docs-sync + docs-counts + env-doc-sync + zastaralé-verze + doc-links)
+- [ ] `npm run check:docs-all` projde. Jeho poradní `check:deprecated-versions` označuje verze výslovně přiřazené k OmniRoute (3.6.xa starší) a ignoruje data.
 - [ ] `npm run check:env-doc-sync` ukončí 0 kód — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env smlouva je nedotčena
 - [ ] `npm run check:doc-links` končí 0 — po restrukturalizaci žádné nefunkční interní markdown reference
 - [ ] `docs/architecture/ARCHITECTURE.md` recenzován na storage/runtime drift
@@ -211,7 +210,7 @@ Pokud se `electron/` změnil:
 | `.build/` | Sestavení meziproduktů — `next build` výstup (`distDir`)  | Ne (ignorováno) |
 | `dist/`   | Odesílatelný balíček npm — sestavený `assembleStandalone` | Ne (ignorováno) |
 
-> **Poznámka provozovatele:** vzdálený adresář obrazu VPS zůstává `/usr/lib/node_modules/omniroute/app/`. Pouze** in-repo** sestavení výstupu přesunuto (`app/` → `dist/`). Dovednosti nasazení rsync `dist/` obsah do vzdáleného `app/` dir — žádné změny VPS cesty.
+> **Poznámka provozovatele:** vzdálený adresář obrazu VPS zůstává `/usr/lib/node_modules/omniroute/app/`. Pouze** in-repo** výstup sestavení se přesunul (`app/` → `dist/`). Dovednosti nasazení rsync `dist/` obsah do vzdáleného `app/` dir — žádné změny VPS cesty.
 
 **Postup jedné sestavení:**
 
@@ -399,7 +398,7 @@ Vyvíjecí bump odevzdání je vytvořeno pomocí git plumbing (nedotkne se žá
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

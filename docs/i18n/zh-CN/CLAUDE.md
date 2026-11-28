@@ -6,49 +6,25 @@
 
 @AGENTS.md
 
-**所有项目规则均位于 [`AGENTS.md`](AGENTS.md) 中**——它是每个 AI 助手在架构、约定、测试、质量门禁、git 工作流、23 条硬性规则以及 PII 经验方面的唯一事实来源。请完整阅读该文件；不要在此处重复添加项目规则。以下所有内容**仅适用于 Claude Code**——它们是对 `AGENTS.md` 中已定义规则的操作层面细化。
+**所有项目规则都在[`AGENTS.md`](AGENTS.md)中**—每个AI助理的单一事实来源；上面的导入已经加载了它。不要在此处重新添加项目规则。下面的所有内容都将ONLY应用于Claude代码—对`AGENTS.md`中已定义的规则进行操作细化。
 
-## Worktree 隔离 — Claude Code 特定说明
+## 工作树隔离— Claude代码细节
 
-完整的强制性 worktree 协议（基础分支确认、`.claude/worktrees/` 规范路径、`cp -al` node_modules、清理规则）见
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)（摘要见 `AGENTS.md` →
-Git 工作流 → “Worktree 隔离”）。Claude Code 特有的要点：
+- 通过`AskUserQuestion` （硬规则#19）与操作员确认基本分支，除非他们已经告诉你了。
+- 使用`scripts/dev/new-worktree.sh <branch> <confirmed-base>`创建工作树（它位于`.claude/worktrees/`下，硬链接`node_modules`并复制`.husky/_`），然后使用其`path`调用`EnterWorktree` 。始终传递基值：如果没有它，脚本会选择最高的`release/*`，这可能不是操作员确认的值。 `EnterWorktree`自己创建的工作树既没有硬链接也没有钩子，因此其中没有预提交门运行。
 
-- 除非操作者已经告知你，否则通过 `AskUserQuestion` 与其确认基础分支（硬性规则 #19）。
-- 优先使用原生的 `EnterWorktree` 工具——它已经会在 `.claude/worktrees/`（规范路径）下创建 worktree。使用文档中记载的 `git
-worktree add` 命令创建 worktree，然后调用 `EnterWorktree` 并传入其 `path`。
+## 子代理和 git
 
-## 跨会话安全——Claude Code 特定说明
+每个接触 git（代理工具或工作流程脚本）的子代理都会在其提示符中逐字获得硬规则#22 a 的`git stash`禁令—记录的存储事件的重复发生来自子代理。
 
-硬性规则 #19/#21/#22（位于 `AGENTS.md`）用于约束并行会话。此运行环境的操作提醒：
+## 规划工件—超能力路径覆盖
 
-- **在每个会接触 git 的子代理提示词中，逐字重申 `git stash` 禁令**
-  （Agent 工具/工作流脚本）——子代理不会继承此文件，而且有记录的 stash 事件复发正是由子代理引起的。
-- 在合并或推送到任何并非由你在_本次会话_中创建的 PR 之前，运行 `git worktree list`
-  并重新检查 `gh pr view <N> --json state,headRefOid`（硬性规则 #22b）。
-- 每次会话结束时，确保主检出目录回到会话开始时所在的分支。
+超能力技能在`docs/superpowers/plans/`、 `docs/superpowers/specs/`和`docs/research/`下宣布默认值。在编写之前，将每个重写为`AGENTS.md` → “规划和研究工件”中的`_tasks/`等效项，并使用`git -C _tasks …`提交，而不是在主存储库中提交。
 
-## Superpowers / 规划产物——路径覆盖
+## 暂存文件— `_artifacts/`，而不是`/tmp`
 
-`_tasks/` 约定定义于 `AGENTS.md` →“规划与研究产物”。superpowers 技能附带指向 `docs/…` 的默认设置——这些默认设置在**此处被覆盖**。当 superpowers 技能声明类似“已保存至 `docs/superpowers/plans/…`”的路径时，请在写入前将其改写为对应的 `_tasks/…` 路径：
+该项目会覆盖线束的会话暂存器 (`/tmp/claude-*/…`)。写入临时文件—导出、生成的 zip、一次性中间输出—到`/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`：一个 gitignored 根`_*`路径，因此操作员在一处找到并删除所有暂存。持久的计划、规格、研究和移交都交给`_tasks/` （硬规则#23）。
 
-| 产物（技能）                      | 默认路径（请勿使用）      | 改为保存到此处                                                |
-| --------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| 计划（`writing-plans`）           | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| 规范/设计（`brainstorming`）      | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| 研究（`deep-research`、临时研究） | `docs/research/`          | `_tasks/research/…`                                           |
-| 交接（`/handoff`）                | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## 红底
 
-请在 `_tasks/` 仓库内提交这些产物（`git -C _tasks …`），绝不要提交到主仓库。
-
-## 草稿/临时文件——使用 `_artifacts/`，不要使用 `/tmp`
-
-本项目覆盖了运行环境的默认会话暂存目录（`/tmp/claude-*/…`）。请将临时文件/工作文件——导出文件、生成的 zip、一次性中间输出，以及任何原本会放入 `/tmp` 的内容——改为写入 `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`。
-
-- `_artifacts/` 是根目录下的 `_*` 路径：已被 git 忽略（`AGENTS.md` →“根目录 `_*` 路径”），仅存在于磁盘上，永不跟踪。
-- 原因：与 `/tmp` 相比，将草稿输出保留在项目内部，可以让操作人员轻松地在一个位置找到并删除所有临时内容，而无需在会消失或不断累积未跟踪内容的临时会话专属 `/tmp` 目录中四处查找。
-- 请**勿**将其与 `_tasks/` 混淆（硬性规则 #23；它是一个独立的私有 git 仓库，用于存放需要持久保存的计划、规范、研究和交接资料）——`_artifacts/` 仅用于可丢弃的工作文件，其中的任何内容都不需要保留或进行版本控制。
-
-## 打开 PR 前确保基础分支为绿色
-
-在创建分支或打开 PR 之前，运行基础分支绿色检查（`AGENTS.md` → Git 工作流 →“基础分支绿色检查”；项目技能将其引用为 `.agents/skills/_shared/base-green.md`）。如果打开 PR 时基础分支最新提交处于失败状态，则必须在其正文中包含 `⚠️ base-red inherited: #<issue>`。如需清理累积的失败状态（基础分支最新提交及失败的 PR），请使用 `/sweep-reds` 技能。
+要排出累积的红色状态（基础提示+红色PRs），请使用`/sweep-reds`技能。

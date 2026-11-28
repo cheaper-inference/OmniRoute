@@ -4,7 +4,7 @@
 
 ---
 
-> **مصدر الحقيقة:** `src/lib/db/reasoningCache.ts`، `open-sse/services/reasoningCache.ts`** آخر تحديث:** 2026-06-28 — v3.8.40
+> **مصدر الحقيقة:** `src/lib/db/reasoningCache.ts`، `open-sse/services/reasoningCache.ts`
 
 يلتقط OmniRoute المساعد `reasoning_content` الذي تنتجه نماذج وضع التفكير ويعيد تشغيله بشفافية عند طلبات متعددة المنعطفات عندما يطلبه الموفر الرئيسي. يؤدي هذا إلى التخلص من أخطاء HTTP 400 التي يثيرها مقدمو الخدمة الصارمون عندما يفتقد سجل محادثة العميل أسباب الدور السابق.
 

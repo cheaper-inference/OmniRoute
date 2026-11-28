@@ -111,58 +111,48 @@ truy cập; thông tin xác thực môi trường hợp lệ phân giải thành
 Các khóa đã xác thực nhưng không có cấu hình Obsidian riêng cho khóa vẫn sử dụng phương án dự phòng toàn cục.
 Bốn công cụ `obsidian_sync_*` vẫn giữ hành vi token đồng bộ riêng biệt của chúng.
 
-## Công cụ MCP (22)
+## công cụ MCP (22)
 
-Được định nghĩa trong `open-sse/mcp-server/tools/obsidianTools.ts`. Token/base-URL được phân giải
-cho từng lệnh gọi (ưu tiên theo API key, sau đó mới đến cấu hình toàn cục). Các công cụ truy cập **máy chủ đồng bộ**
-OmniRoute (bốn công cụ `obsidian_sync_*`) còn yêu cầu token xác thực đồng bộ được cấu hình
-trong phần cài đặt OmniRoute.
+Được xác định trong `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL được giải quyết cho mỗi cuộc gọi (trước tiên là mỗi khóa API, sau đó là toàn cầu). Công cụ đạt được OmniRoute** máy chủ đồng bộ** (bốn công cụ `obsidian_sync_*` ) cũng yêu cầu mã thông báo xác thực đồng bộ hóa được định cấu hình trong cài đặt OmniRoute.
 
 ### Công cụ đọc (`read:obsidian`)
 
-| Công cụ                      | Mô tả                                                                                                        |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `obsidian_check_status`      | Kiểm tra xem Local REST API có thể truy cập được và đã xác thực hay chưa.                                    |
-| `obsidian_search_simple`     | Tìm kiếm toàn văn trong nội dung ghi chú; trả về các đoạn trích kèm đường dẫn tệp.                           |
-| `obsidian_search_structured` | Tìm kiếm bằng biểu thức JSON Logic (các bộ lọc and/or/regex/path).                                           |
-| `obsidian_read_note`         | Đọc ghi chú theo đường dẫn tương đối với vault; có thể chỉ định heading/block/frontmatter cụ thể.            |
-| `obsidian_list_vault`        | Liệt kê các tệp và thư mục trong vault (dạng cây mục nhập).                                                  |
-| `obsidian_get_document_map`  | Lấy cấu trúc heading của ghi chú dưới dạng ánh xạ heading → số dòng.                                         |
-| `obsidian_get_note_metadata` | Lấy frontmatter, thẻ, liên kết và số ký tự/từ mà không cần toàn bộ nội dung.                                 |
-| `obsidian_get_active_file`   | Lấy đường dẫn + nội dung của tệp hiện đang hoạt động trong Obsidian.                                         |
-| `obsidian_get_periodic_note` | Lấy ghi chú định kỳ hằng ngày/hằng tuần/hằng tháng cho một ngày (mặc định là hôm nay nếu bỏ qua).            |
-| `obsidian_get_tags`          | Liệt kê tất cả thẻ trong vault cùng tần suất xuất hiện.                                                      |
-| `obsidian_list_commands`     | Liệt kê các ID lệnh Obsidian hiện có (dùng với `obsidian_execute_command`).                                  |
-| `obsidian_sync_status`       | Trạng thái máy chủ đồng bộ OmniRoute: đang chạy, tên vault, cổng, thời gian hoạt động, lần đồng bộ gần nhất. |
-| `obsidian_sync_conflicts`    | Liệt kê các xung đột đồng bộ chưa được giải quyết (đường dẫn, đường dẫn xung đột, thời điểm phát hiện).      |
+| Dụng cụ                      | Sự miêu tả                                                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Kiểm tra xem REST API cục bộ có thể truy cập và xác thực hay không.                                               |
+| `obsidian_search_simple`     | Tìm kiếm toàn văn nội dung ghi chú; trả về các đoạn có đường dẫn tệp.                                             |
+| `obsidian_search_structured` | Tìm kiếm bằng biểu thức Logic JSON (bộ lọc and/or/regex/path ).                                                   |
+| `obsidian_read_note`         | Đọc ghi chú theo đường dẫn tương đối vault; tùy chọn một heading/block/frontmatter. cụ thể                        |
+| `obsidian_list_vault`        | Liệt kê các tập tin và thư mục trong vault (cây mục).                                                             |
+| `obsidian_get_document_map`  | Lấy cấu trúc tiêu đề của ghi chú dưới dạng bản đồ các số dòng → của tiêu đề.                                      |
+| `obsidian_get_note_metadata` | Nhận frontmatter, tags, links, char/word count mà không có nội dung đầy đủ.                                       |
+| `obsidian_get_active_file`   | Lấy nội dung đường dẫn + của tệp hiện đang hoạt động trong Obsidian.                                              |
+| `obsidian_get_periodic_note` | Nhận ghi chú định kỳ daily/weekly/monthly cho một ngày (hôm nay nếu bị bỏ qua).                                   |
+| `obsidian_get_tags`          | Liệt kê tất cả các thẻ vault với tần số của chúng.                                                                |
+| `obsidian_list_commands`     | Liệt kê lệnh Obsidian có sẵn IDs (sử dụng với `obsidian_execute_command`).                                        |
+| `obsidian_sync_status`       | Trạng thái máy chủ đồng bộ hóa OmniRoute : đang chạy, tên vault, cổng, thời gian hoạt động, đồng bộ hóa lần cuối. |
+| `obsidian_sync_conflicts`    | Liệt kê các xung đột đồng bộ hóa chưa được giải quyết (đường dẫn, đường dẫn xung đột, được phát hiện tại).        |
 
-### Công cụ ghi (`write:obsidian`)
+### Công cụ viết (`write:obsidian`)
 
-| Công cụ                          | Mô tả                                                                                              |
-| -------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Tạo hoặc ghi đè một ghi chú bằng nội dung Markdown được cung cấp.                                  |
-| `obsidian_append_note`           | Nối thêm nội dung vào ghi chú; có thể chỉ định một heading/block cụ thể.                           |
-| `obsidian_patch_note`            | Nối thêm/chèn trước/thay thế chính xác tại một heading, block hoặc trường frontmatter.             |
-| `obsidian_delete_note`           | Xóa vĩnh viễn một ghi chú khỏi vault.                                                              |
-| `obsidian_move_note`             | Di chuyển hoặc đổi tên một ghi chú trong vault.                                                    |
-| `obsidian_execute_command`       | Thực thi một lệnh Obsidian theo ID lệnh của lệnh đó.                                               |
-| `obsidian_open_file`             | Mở một tệp trong Obsidian (tạo tệp nếu chưa tồn tại).                                              |
-| `obsidian_sync_trigger`          | Kích hoạt ngay quá trình đồng bộ vault hai chiều giữa máy tính↔thiết bị di động.                   |
-| `obsidian_sync_resolve_conflict` | Giải quyết xung đột đồng bộ: giữ `local` (thiết bị di động), `remote` (máy tính) hoặc `keep-both`. |
+| Dụng cụ                          | Sự miêu tả                                                                                           |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Tạo hoặc ghi đè ghi chú bằng nội dung Markdown nhất định.                                            |
+| `obsidian_append_note`           | Nối nội dung vào ghi chú; tùy chọn cho một heading/block. cụ thể                                     |
+| `obsidian_patch_note`            | Phẫu thuật append/prepend/replace tại một trường tiêu đề, khối hoặc mặt trước.                       |
+| `obsidian_delete_note`           | Xóa vĩnh viễn một ghi chú khỏi vault.                                                                |
+| `obsidian_move_note`             | Di chuyển hoặc đổi tên ghi chú trong vault.                                                          |
+| `obsidian_execute_command`       | Thực hiện lệnh Obsidian bằng lệnh ID của nó.                                                         |
+| `obsidian_open_file`             | Mở một tệp trong Obsidian (tạo nó nếu nó không tồn tại).                                             |
+| `obsidian_sync_trigger`          | Kích hoạt đồng bộ hóa vault di động ↔ trên máy tính để bàn hai chiều ngay lập tức.                   |
+| `obsidian_sync_resolve_conflict` | Giải quyết xung đột đồng bộ hóa: giữ `local` (di động), `remote` (máy tính để bàn) hoặc `keep-both`. |
 
 > [!NOTE]
-> Các đích của `obsidian_patch_note` chấp nhận `targetType` là `heading | block | frontmatter`
-> và `operation` là `append | prepend | replace`, cùng tùy chọn
-> `createTargetIfMissing`. Bốn công cụ `obsidian_sync_*` giao tiếp với máy chủ đồng bộ cục bộ
-> (`http://127.0.0.1:27781` theo mặc định) và yêu cầu token đồng bộ.
+> Mục tiêu `obsidian_patch_note` chấp nhận `targetType` của `heading | block | frontmatter` và `operation` của `append | prepend | replace`, với `createTargetIfMissing` tùy chọn. Bốn công cụ `obsidian_sync_*` giao tiếp với máy chủ đồng bộ hóa cục bộ (`http://127.0.0.1:27781` theo mặc định) và yêu cầu mã thông báo đồng bộ hóa.
 
-### Phạm vi quyền
+### Phạm vi
 
-Các công cụ đọc yêu cầu `read:obsidian`; các công cụ ghi yêu cầu `write:obsidian`. Cơ chế thực thi
-giống hệt Notion — được xử lý bởi `withScopeEnforcement()` trong
-`open-sse/mcp-server/server.ts`, được kiểm soát bởi `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, với
-các phạm vi được phép lấy từ `OMNIROUTE_MCP_SCOPES` hoặc ngữ cảnh phạm vi của API key. Xem
-[MCP-SERVER.md](./MCP-SERVER.md).
+Công cụ đọc yêu cầu `read:obsidian`; công cụ viết yêu cầu `write:obsidian`. Việc thực thi giống hệt với Notion — được xử lý bởi `withScopeEnforcement()` trong `open-sse/mcp-server/server.ts`, được kiểm soát trên `OMNIROUTE_MCP_ENFORCE_SCOPES=true` và bắt buộc đối với những người gọi HTTP/SSE có khóa API thiếu `manage`/`admin`, với phạm vi được phép có nguồn gốc từ `OMNIROUTE_MCP_SCOPES` hoặc ngữ cảnh phạm vi của khóa API. Xem [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Điểm cuối
 

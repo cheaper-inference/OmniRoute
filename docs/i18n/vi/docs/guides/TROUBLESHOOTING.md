@@ -185,51 +185,49 @@ thì không.
 
 ---
 
-## Các trường hợp phần mềm diệt virus nhận diện nhầm
+## Kết quả dương tính giả về phần mềm chống vi-rút
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG cách ly `README.md` với cảnh báo `MD:HttpRequest-inf[Susp]`
+### Avast/AVG cách ly `README.md` với `MD:HttpRequest-inf[Susp]`
 
-**Đây là nhận diện nhầm. Không có gì bị nhiễm và bạn không cần thực hiện hành động nào.**
+**Đây là một kết quả dương tính giả. Không có gì bị nhiễm và không cần phải làm gì cả.**
 
-Avast và AVG sử dụng một cơ chế heuristic để gắn cờ các tệp văn bản thuần túy/Markdown chứa nhiều liên kết trông giống yêu cầu HTTP. `README.md` của OmniRoute được đóng gói trong gói npm (tệp này được liệt kê trong `package.json` → `files`), nên khi cài đặt toàn cục, nó nằm tại `node_modules/omniroute/README.md` — và chứa khoảng 15 ví dụ `http://localhost:20128/...` (các điểm cuối HTTP/SSE của MCP, URL `.well-known` của A2A và các đoạn lệnh `curl`). Mật độ liên kết đó đủ để kích hoạt cơ chế heuristic.
+Avast và AVG chạy một phương pháp phỏng đoán gắn cờ các tệp plain-text/Markdown chứa nhiều liên kết trông giống yêu cầu HTTP. `README.md` của OmniRoute được vận chuyển bên trong gói npm (nó được liệt kê trong `package.json` → `files`), do đó, nó hạ cánh tại `node_modules/omniroute/README.md` trên một bản cài đặt toàn cầu — và nó chứa các ví dụ ~ 15 `http://localhost:20128/...` (điểm cuối MCP HTTP/SSE, đoạn mã A2A `.well-known` URL và `curl` ). Mật độ liên kết đó đủ để gây khó khăn cho quá trình phỏng đoán.
 
-Nếu hiện tượng này chỉ mới bắt đầu gần đây: bản chất của tệp không hề thay đổi. README đã được bổ sung thêm các mục trong bảng điểm cuối (MCP HTTP + SSE + A2A) và nhiều ví dụ `curl` hơn, khiến nó vượt quá ngưỡng.
+Nếu điều này chỉ bắt đầu gần đây: tệp không thay đổi về loại. README đã phát triển bảng điểm cuối của nó (MCP HTTP + SSE + A2A đã được thêm vào) và nhiều ví dụ về `curl` hơn, điều này đã đẩy nó vượt quá ngưỡng.
 
-Tệp này chỉ là tài liệu tĩnh, hoàn toàn không chứa nội dung thực thi. Bạn có thể khôi phục tệp từ vùng cách ly một cách an toàn.
+Tệp này là tài liệu trơ không có nội dung thực thi. Bạn có thể khôi phục nó một cách an toàn từ vùng cách ly.
 
-**Cách xử lý:**
+**Phải làm gì:**
 
-1. **Dừng thông báo** — loại trừ thư mục cài đặt khỏi quá trình quét của phần mềm diệt virus (Avast: Settings → Exceptions), bằng cách thêm đường dẫn `node_modules` toàn cục và/hoặc thư mục dữ liệu OmniRoute (`~/.omniroute/`).
-2. **Báo cáo trường hợp nhận diện nhầm** — <https://www.avast.com/false-positive-file-form.php>, đính kèm tệp `README.md` đã bị cách ly. Đây là cách khắc phục có lợi cho tất cả mọi người, vì nguyên nhân là cơ chế heuristic của nhà cung cấp phản ứng quá mức với một tệp văn bản.
+1. **Dừng thông báo** — loại trừ thư mục cài đặt trong phần mềm chống vi-rút của bạn (Avast: Cài đặt → Ngoại lệ), thêm đường dẫn `node_modules` toàn cầu của bạn and/or thư mục dữ liệu OmniRoute (`~/.omniroute/`).
+2. **Báo cáo dương tính giả** — <https://www.avast.com/false-positive-file-form.php>, đính kèm `README.md` đã cách ly . Đây là bản sửa lỗi giúp ích cho tất cả mọi người vì đây là phản ứng thái quá theo kinh nghiệm của nhà cung cấp đối với tệp văn bản.
 
-**Tại sao chúng tôi không “khắc phục” vấn đề này từ phía mình:** tất cả ví dụ đều sử dụng `http://localhost`, và localhost không thể sử dụng `https` mà không gặp rắc rối với chứng chỉ tự ký. Việc chỉnh sửa sai lệch tài liệu để né cơ chế heuristic của một nhà cung cấp sẽ gây bất tiện cho mọi độc giả chỉ để chiều theo một lỗi của trình quét.
+**Tại sao chúng ta không “sửa” lỗi này về phía mình:** tất cả các ví dụ đều là `http://localhost` và localhost không thể là `https` nếu không có xung đột về chứng chỉ tự ký. Việc xáo trộn tài liệu để né tránh phương pháp phỏng đoán của một nhà cung cấp sẽ gây tổn hại cho mọi người đọc để thỏa mãn lỗi máy quét.
 
 ### Kaspersky gắn cờ ứng dụng Desktop là `PDM:Trojan.Win32.Generic`
 
-**Đây là nhận diện nhầm từ cơ chế heuristic hành vi. Không có gì bị nhiễm.** Tiền tố `PDM:` của Kaspersky cho biết kết luận đến từ Proactive Defense Module (System Watcher), mô-đun đánh giá những gì trình cài đặt _thực hiện_ thay vì đối chiếu nó với phần mềm độc hại đã biết. Khi cảnh báo được kích hoạt, Kaspersky sẽ “hoàn tác” toàn bộ quá trình cài đặt — xóa các tệp mà nó đã ghi — khiến ứng dụng bị hỏng hoặc biến mất.
+**Đây là kết quả dương tính giả từ phương pháp phỏng đoán hành vi. Không có gì bị nhiễm bệnh.** Tiền tố `PDM:` của Kaspersky có nghĩa là phán quyết đến từ Mô-đun phòng thủ chủ động (Trình theo dõi hệ thống), mô-đun này sẽ đánh giá những gì trình cài đặt _does_ thực hiện thay vì so sánh nó với phần mềm độc hại đã biết. Khi nó kích hoạt, Kaspersky "khôi phục" toàn bộ cài đặt —, xóa các tập tin mà nó đã ghi — nên ứng dụng sẽ bị hỏng hoặc bị thiếu.
 
-Các tệp bị gắn cờ là những thành phần tiêu chuẩn thuộc các phần phụ thuộc mã nguồn mở đã được công khai và đóng gói cùng ứng dụng desktop, ví dụ:
+Các tệp mà nó gắn cờ là các phần gốc của các phần phụ thuộc nguồn mở được khai báo đi kèm với ứng dụng dành cho máy tính để bàn, ví dụ:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` và
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), thư viện tự động hóa trình duyệt được sử dụng để đăng nhập nhà cung cấp ngay trong ứng dụng và hỗ trợ trò chuyện dựa trên trình duyệt.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — liên kết native `wreq-js` được cố định phiên bản, dùng cho HTTP mang dấu vân tay trình duyệt trên các nhà cung cấp sử dụng cookie web (`<arch>` là `x64` hoặc `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` và `workerProcessEntry.js` — [Playwright](https://playwright.dev), thư viện tự động hóa trình duyệt được sử dụng để đăng nhập vào nhà cung cấp trong ứng dụng và trò chuyện được trình duyệt hỗ trợ.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — liên kết gốc `wreq-js` được ghim được sử dụng cho HTTP lấy dấu vân tay của trình duyệt trên các nhà cung cấp cookie web (`<arch>` là `x64` hoặc `arm64`).
 
-**Tại sao cảnh báo được kích hoạt:** trình cài đặt Windows **chưa được ký mã**, vì vậy trình cài đặt NSIS không có chữ ký sẽ không có bất kỳ mức độ uy tín nào và các cơ chế heuristic hành vi sẽ hoạt động ở mức nghiêm ngặt tối đa. Khi kết hợp với một DLL native được đóng gói kèm và hàng trăm tệp `.js` được ghi vào `%LOCALAPPDATA%\Programs\OmniRoute` (bao gồm các thư mục gói có hậu tố hash từ bản dựng độc lập của Next.js), điều đó đủ để kích hoạt cơ chế heuristic. Việc ký mã đã được lên kế hoạch; cho đến khi được triển khai, vấn đề này có thể lặp lại với các bản phát hành mới.
+**Tại sao nó cháy:** trình cài đặt Windows là** chưa được ký mã** , do đó, trình cài đặt NSIS không dấu sẽ không có danh tiếng và phương pháp phỏng đoán hành vi chạy ở mức tối đa. Kết hợp với một DLL gốc đi kèm và hàng trăm tệp `.js` được viết bằng `%LOCALAPPDATA%\Programs\OmniRoute` (bao gồm các thư mục gói có hậu tố băm từ bản dựng độc lập Next.js ), điều đó đủ để vượt qua thử nghiệm. Việc ký mã đã được lên kế hoạch; cho đến khi nó hạ cánh, các bản phát hành mới có thể lặp lại điều này.
 
-**Cách xử lý:**
+**Phải làm gì:**
 
-1. **Trước tiên, hãy xác minh tệp đã tải xuống** (để loại trừ khả năng tệp bị can thiệp). Mỗi bản phát hành đều cung cấp `latest.yml`, trong đó trường `sha512` (base64) bao phủ trình cài đặt `OmniRoute.Setup.<version>.exe`. Trong PowerShell, từ thư mục chứa trình cài đặt:
+1. **Trước tiên hãy xác minh tải xuống của bạn** (loại trừ một tập tin giả mạo). Mọi bản phát hành đều xuất bản `latest.yml`, có trường `sha512` (base64) bao gồm trình cài đặt `OmniRoute.Setup.<version>.exe`. Trong PowerShell, từ thư mục chứa trình cài đặt:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Kết quả đầu ra phải khớp với `latest.yml` → `sha512`. Nếu không khớp, hãy xóa tệp và chỉ tải xuống lại từ [trang phát hành trên GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Khôi phục + loại trừ** — khôi phục các mục đã bị hoàn tác từ vùng cách ly và thêm ngoại lệ cho `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions), sau đó cài đặt lại.
-3. **Báo cáo trường hợp nhận diện nhầm** — <https://opentip.kaspersky.com/>. Các báo cáo nhận diện nhầm do người dùng gửi thực sự giúp đẩy nhanh quá trình đưa ứng dụng vào danh sách cho phép.
+   Đầu ra phải khớp với `latest.yml` → `sha512`. Nếu không, hãy xóa tệp và chỉ tải xuống lại từ [trang phát hành GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Khôi phục + loại trừ** — khôi phục các mục được khôi phục khỏi vùng cách ly và thêm một loại trừ cho `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Cài đặt → Các mối đe dọa và loại trừ), sau đó cài đặt lại.
+3. **Báo cáo dương tính giả** — <https://opentip.kaspersky.com/>. Báo cáo FP do người dùng gửi thực sự giúp tăng tốc độ đưa vào danh sách cho phép.
 
 ---
 
@@ -839,10 +837,10 @@ Thêm triệu chứng:
 
 ---
 
-## Vẫn gặp sự cố?
+## Vẫn bị mắc kẹt?
 
-- **Vấn đề trên GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Kiến trúc**: Xem [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) để biết chi tiết nội bộ
-- **Tài liệu tham khảo API**: Xem [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) để biết tất cả các endpoint
-- **Bảng điều khiển tình trạng**: Kiểm tra **Dashboard → Health** để xem trạng thái hệ thống theo thời gian thực
-- **Trình dịch**: Sử dụng **Dashboard → Translator** để gỡ lỗi các vấn đề về định dạng
+- **vấn đề về GitHub** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Ngành kiến trúc** : Xem [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) để biết chi tiết nội bộ
+- **tham khảo API** : Xem [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) để biết tất cả các điểm cuối
+- **Trang tổng quan về sức khỏe** : Kiểm tra** Bảng điều khiển → Sức khỏe** để biết trạng thái hệ thống thời gian thực
+- **Người phiên dịch** : Sử dụng** Bảng điều khiển → Translator** để gỡ lỗi các vấn đề về định dạng

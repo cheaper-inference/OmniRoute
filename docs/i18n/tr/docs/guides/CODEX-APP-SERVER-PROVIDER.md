@@ -18,28 +18,24 @@ ve bu CLI'da **oturum açılmış** olmalıdır.
 
 ---
 
-## 1. Mimari
+## 1. Mimarlık
 
 ```
-┌─ OmniRoute uygulaması ───────────┐        ┌─ codex-app-server yardımcı konteyneri ┐
-│  CodexAppServerExecutor          │  WS    │  codex app-server                     │
-│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456           │
-│  (+ yetenek token'ı)             │  JSON  │  --ws-auth capability-token           │
-│                                  │  RPC   │  OpenAI OAuth'u kendi yönetir          │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, otomatik yenileme)│
-        │ paylaşır (compose birimleri)       └────────────────────────────────────────┘
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
+│  CodexAppServerExecutor          │  WS    │  codex app-server                   │
+│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS yetenek token'ı (her ikisi de bağlar)
-  codex-appserver-home    → ~/.codex (auth.json dashboard tarafından yazılır,
-                             yardımcı konteynerdeki codex app-server tarafından okunur)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Yardımcı konteyner, bir yetenek token'ının arkasında **yalnızca** dahili compose
-  ağını (`ws://codex-app-server:1456`) dinler. Ana makineye veya internete
-  **hiçbir zaman** yayımlanmaz.
-- Codex CLI, `omniroute:base` imajına dahil edilmiştir; dolayısıyla yardımcı
-  konteyneri çalıştırdığınızda ana makineye veya kullanıcının cihazına codex
-  kurulması gerekmez.
+- Sepet dinliyor** sadece** bir yetenek belirtecinin arkasındaki dahili oluşturma ağında (`ws://codex-app-server:1456`). öyle** Asla** ana bilgisayara veya internete yayınlanır.
+- Sepet, Codex CLI içeren `runner-cli-no-docker` hedefinden oluşturulan `omniroute:cli-no-docker` kullanır.
 
 ## 2. Çalıştırma
 

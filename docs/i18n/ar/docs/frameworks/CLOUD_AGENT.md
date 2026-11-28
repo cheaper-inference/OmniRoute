@@ -110,15 +110,15 @@ export abstract class CloudAgentBase {
     c: AgentCredentials
   ): Promise<{ name: string; url: string; branch?: string }[]>;
 
-  protected mapStatus(raw: string): CloudAgentStatus; // تحويل استدلالي من سلسلة نصية واردة إلى تعداد
+  protected mapStatus(raw: string): CloudAgentStatus; // heuristic upstream-string → enum
   protected generateTaskId(): string; // `task_<ts>_<rand>`
   protected generateActivityId(): string; // `act_<ts>_<rand>`
 }
 ```
 
-تطرح `CodexCloudAgent.approvePlan` استثناءً عن قصد — إذ تنشئ Codex Cloud الخطط تلقائيًا ولا تحتوي على بوابة موافقة. تُرجع `CodexCloudAgent.listSources` القيمة `[]`.
+تقوم `CodexCloudAgent.approvePlan` برمي خطط — Codex Cloud التلقائية عمدًا وليس لديها بوابة موافقة. `CodexCloudAgent.listSources` ترجع `[]`.
 
-تشغّل `CursorCloudAgent` وكلاء Cursor في الخلفية / السحابة عبر واجهة REST API الرسمية الخاصة بها (`api.cursor.com/v0`) باستخدام **مفتاح API لمستخدم أو لحساب خدمة** — وهو البديل الأكثر أمانًا والمقدَّم من الطرف الأول بدلًا من إعادة استخدام جلسة OAuth الخاصة ببيئة Cursor IDE (المزوّد `cursor`، الذي يتضمن تحذيرًا من خطر الحظر). وهي موائم REST بسيط (من دون اعتماد أصلي على `@cursor/sdk`). تطرح `approvePlan` استثناءً (تعمل وكلاء Cursor بصورة مستقلة)؛ وتسرد `listSources` المستودعات التي يمكن الوصول إليها باستخدام المفتاح. تُرجع Cursor تعدادات الحالة بأحرف كبيرة (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`)، وتُربط صراحةً بتعداد `CloudAgentStatus` المشترك. يمكن تجاوز `baseUrl` لكل بيانات اعتماد، بحيث يمكن تصحيح إصدار/مسار واجهة API دون تغيير الشيفرة.
+تقوم `CursorCloudAgent` بتشغيل الخلفية / Cloud Agents الخاصة بـ Cursor من خلال REST API (`api.cursor.com/v0`) الرسمي مع** مفتاح API للمستخدم أو حساب الخدمة** — هو بديل الطرف الأول الأكثر أمانًا لإعادة استخدام جلسة OAuth الخاصة بـ Cursor IDE(الموفر `cursor`، الذي يحمل تحذيرًا بمخاطر الحظر). إنه محول REST عادي (لا يوجد تبعية أصلية `@cursor/sdk` ). رميات `approvePlan` (يعمل وكلاء Cursor بشكل مستقل)؛ يسرد `listSources` المستودعات التي يمكن الوصول إليها عن طريق المفتاح. يقوم Cursor بإرجاع تعدادات حالة UPPERCASE (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`)، المعينة بشكل صريح إلى `CloudAgentStatus` المشترك. `baseUrl` قابل للتجاوز لكل بيانات اعتماد لذا يمكن تصحيح API version/path دون تغيير التعليمات البرمجية.
 
 ## أنواع المجال
 

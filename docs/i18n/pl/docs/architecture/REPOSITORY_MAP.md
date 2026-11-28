@@ -4,9 +4,9 @@
 
 ---
 
-> **Co gdzie mieszka: każdy śledzony katalog najwyższego poziomu i plik główny, z przeznaczeniem jednowierszowym.** Ostatnia aktualizacja: 2026-11-13 (OmniRoute v3.8.54)
+> **Co gdzie mieszka: każdy śledzony katalog najwyższego poziomu i plik główny, z przeznaczeniem jednowierszowym.**
 >
-> Skorzystaj z tej mapy, aby odnaleźć drogę w bazie kodu, a następnie skorzystaj z łączy do dedykowanych dokumentów. Liczbę plików zmierzono za pomocą `git ls-files` w dniu podanym powyżej. Zmieniają się niemal przy każdym wydaniu, więc traktuj je jak rzędy wielkości.
+> Użyj tej mapy, aby odnaleźć drogę w bazie kodu, a następnie skorzystaj z łączy do dedykowanych dokumentów. Liczba plików pochodzi z `git ls-files` i zmienia się z prawie każdym wydaniem. Traktuj je jako rzędy wielkości.
 
 ## Drzewo najwyższego poziomu
 
@@ -36,7 +36,7 @@ OmniRoute/
 └── (root files — see below)
 ```
 
-Ścieżki lokalne, wygenerowane lub prywatne (wszystkie gitignorowane, nigdy nie zatwierdzane, nie opisane dalej):
+Ścieżki lokalne, wygenerowane lub prywatne (wszystkie gitignorowane, nigdy nie zatwierdzane, nie opisywane dalej):
 
 ```
 node_modules/            # npm dependencies

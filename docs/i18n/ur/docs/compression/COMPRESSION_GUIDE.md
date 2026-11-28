@@ -331,36 +331,24 @@ RTK mode، **[RTK AI](https://github.com/rtk-ai)** کے **[RTK - Rust Token Kill
 
 ---
 
-## جدید کمپریشن سسٹمز
+## اعلی درجے کی کمپریشن سسٹمز
 
-اوپر بیان کردہ 7 موڈز کے علاوہ (سورس `codex-responses` اور
-`omniglyph` موڈز بھی قبول کرتا ہے، جن کا احاطہ یہ گائیڈ نہیں کرتی)، ذیل کے حصے ان خصوصیات
-کا احاطہ کرتے ہیں جو ان موڈز کے اندر یا ان کے ساتھ کام کرتی ہیں: Tool Result Compression اور Progressive Aging
-aggressive انجن کے مراحل 1 اور 2 ہیں (Aggressive موڈ اور stacked pipeline کا ایک `aggressive`
-مرحلہ)، Stacked Pipeline وہ طریقہ ہے جس سے Stacked موڈ چلتا ہے، Cache-Aware Compression
-کیشنگ فراہم کنندگان کے لیے `aggressive` اور `ultra` کو `standard` پر گھٹا دیتا ہے جب کمپریشن
-فعال ہو، جبکہ Caveman Output Mode اور Output Styles اختیاری system-prompt ہدایات ہیں،
-جو بطور ڈیفالٹ غیر فعال ہوتی ہیں اور درخواست کو کمپریس کرنے کے بجائے ماڈل کے آؤٹ پٹ کو تشکیل دیتی ہیں۔
+اوپر بیان کردہ 7 طریقوں کے علاوہ (ذریعہ `codex-responses` اور `omniglyph` طریقوں کو بھی قبول کرتا ہے، جن کا یہ گائیڈ احاطہ نہیں کرتا ہے)، ذیل کے حصے ان خصوصیات کا احاطہ کرتے ہیں جو ان طریقوں کے اندر یا اس کے ساتھ کام کرتی ہیں: ٹول رزلٹ کمپریشن اور پروگریسو ایجنگ جارحانہ انجن کے 1 اور 2 مرحلے ہیں (جارحانہ موڈ اور ایک `aggressive` لائن)، اسٹیک اسٹیک، سٹیک پائپ لائن کا مرحلہ کیسے چلتا ہے۔ Cache-Aware Compression `aggressive` اور `ultra` کو کیشنگ فراہم کنندگان کے لیے `standard` میں گھٹا دیتا ہے جب کہ کمپریشن آن ہوتا ہے، اور Caveman آؤٹ پٹ موڈ اور آؤٹ پٹ اسٹائلز آپٹ ان سسٹم پرامپٹ ہدایات ہیں، جو ڈیفالٹ طور پر بند ہیں، جو درخواست کو کمپریس کرنے کے بجائے ماڈل کے آؤٹ پٹ کو شکل دیتی ہیں۔
 
-### کیش سے آگاہ کمپریشن
+### کیشے سے آگاہ کمپریشن
 
-کچھ فراہم کنندگان (جیسے prompt caching کے ساتھ Anthropic) **prompt caching** کی معاونت کرتے ہیں،
-جو انہیں اخراجات اور تاخیر کم کرنے کے لیے پرامپٹ کے کچھ حصوں کو کیش کرنے کی سہولت دیتی ہے۔ جب
-کیشنگ فعال ہو، تو aggressive کمپریشن درحقیقت کارکردگی کو **نقصان** پہنچا سکتی ہے
-کیونکہ یہ کیش شدہ ٹوکنز کو تبدیل کر دیتی ہے، جس سے کیش غیر مؤثر ہو جاتا ہے۔
+کچھ فراہم کنندگان (جیسے Anthropic فوری کیشنگ کے ساتھ) سپورٹ کرتے ہیں۔** فوری کیشنگ** ، جو انہیں لاگت اور تاخیر کو کم کرنے کے لیے پرامپٹ کے حصوں کو کیش کرنے دیتا ہے۔ جب کیشنگ کو فعال کیا جاتا ہے، جارحانہ کمپریشن اصل میں کر سکتا ہے** چوٹ** کارکردگی کیونکہ یہ کیش شدہ ٹوکنز کو تبدیل کرتا ہے، کیشے کو باطل کرتا ہے۔
 
-`cachingAware.ts` ماڈیول **کیشنگ سیاق کا پتہ لگا کر** اور
-اسی کے مطابق **کمپریشن حکمتِ عملی کو ایڈجسٹ کر کے** یہ مسئلہ حل کرتا ہے۔
+`cachingAware.ts` ماڈیول اسے حل کرتا ہے۔** کیشنگ سیاق و سباق کا پتہ لگانا** اور** کمپریشن کی حکمت عملی کو ایڈجسٹ کرنا** اس کے مطابق
 
-#### یہ کیسے کام کرتا ہے
+#### یہ کیسے کام کرتا ہے۔
 
-1. **کیشنگ سیاق کا پتہ لگانا** — درخواست کی body میں `cache_control` مارکرز تلاش کرتا ہے
-2. **کیشنگ فراہم کنندگان کی شناخت** — جانچتا ہے کہ آیا ہدف فراہم کنندہ کیشنگ کی معاونت کرتا ہے
-3. **حکمتِ عملی کو ایڈجسٹ کرنا** — کیشنگ فراہم کنندگان کے لیے `aggressive`/`ultra` کو `standard` پر گھٹا دیتا ہے
-4. **سسٹم پرامپٹ کو چھوڑنا** — سسٹم پرامپٹس عموماً کیش ہوتے ہیں، اس لیے انہیں کمپریس نہ کریں
+1. **کیشنگ سیاق و سباق کا پتہ لگائیں۔** — `cache_control` مارکر کے لیے درخواست کے باڈی کو اسکین کرتا ہے۔
+2. **کیشنگ فراہم کنندگان کی شناخت کریں۔** — چیک کرتا ہے کہ آیا ہدف فراہم کرنے والا کیشنگ کو سپورٹ کرتا ہے۔
+3. **حکمت عملی کو ایڈجسٹ کریں۔** — کیشنگ فراہم کنندگان کے لیے `aggressive`/`ultra` کو `standard` سے نیچے کرتا ہے
+4. **سسٹم پرامپٹ کو چھوڑیں۔** — سسٹم پرامپٹس عام طور پر کیش ہوتے ہیں، اس لیے انہیں کمپریس نہ کریں۔
 
-حکمتِ عملی کا معاون ایک `deterministicOnly` فلیگ بھی واپس کرتا ہے، لیکن پلان بلڈر صرف
-حکمتِ عملی استعمال کرتا ہے — فی الحال بعد کا کوئی مرحلہ اس فلیگ کو نہیں پڑھتا۔
+حکمت عملی کا مددگار ایک `deterministicOnly` جھنڈا بھی واپس کرتا ہے، لیکن منصوبہ بنانے والا صرف حکمت عملی — استعمال کرتا ہے جو آج جھنڈے کو نہیں پڑھتا۔
 
 #### کوڈ کی مثال
 
@@ -373,7 +361,7 @@ import {
 const body = {
   model: "anthropic/claude-sonnet-4.5",
   messages: [{ role: "user", content: "Hello" }],
-  cache_control: { type: "ephemeral" }, // ← کیش مارکر
+  cache_control: { type: "ephemeral" }, // ← Cache marker
 };
 
 const ctx = detectCachingContext(body, { provider: "anthropic" });
@@ -383,28 +371,19 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 // → { strategy: "standard", skipSystemPrompt: true, deterministicOnly: true }
 ```
 
-#### کب استعمال کریں
+#### کب استعمال کرنا ہے۔
 
-کیش سے آگاہ کمپریشن **ہمیشہ فعال** رہتی ہے — کسی کنفیگریشن کی ضرورت نہیں۔ جب بھی
-کمپریشن فعال ہو اور ہدف فراہم کنندہ prompt caching کی معاونت کرتا ہو (Anthropic، OpenAI،
-وغیرہ)، یہ عمل میں آ جاتی ہے؛ واضح `cache_control` مارکرز درکار نہیں ہوتے — صرف کیشنگ فراہم کنندہ
-ہی تنزلی کو متحرک کر دیتا ہے، جبکہ صرف مارکرز کبھی ایسا نہیں کرتے (مارکر کی شناخت کیش
-ٹیلی میٹری کو ڈیٹا فراہم کرتی ہے، حکمتِ عملی کے فیصلے کو نہیں)۔
+کیشے سے آگاہ کمپریشن ہے۔** ہمیشہ پر** — کسی ترتیب کی ضرورت نہیں ہے۔ جب بھی کمپریشن آن ہوتا ہے تو یہ شروع ہوتا ہے اور ہدف فراہم کرنے والا فوری کیشنگ (Anthropic، OpenAI، وغیرہ) کو سپورٹ کرتا ہے۔ واضح `cache_control` مارکر کی ضرورت نہیں ہے — ایک کیشنگ فراہم کنندہ تنزلی کو متحرک کرتا ہے، اور اکیلے مارکر کبھی نہیں کرتے (مارکر کا پتہ لگانے سے کیش ٹیلی میٹری فیڈ ہوتی ہے، حکمت عملی کا فیصلہ نہیں)۔
 
-### تدریجی ایجنگ
+OpenRouter صرف `anthropic/*` ماڈلز کے لیے ایک کیشنگ فراہم کنندہ کے طور پر شمار ہوتا ہے: Claude کوڈ کی درخواستیں اپنے `cache_control` بریک پوائنٹس (زیادہ سے زیادہ 4) رکھتی ہیں اور گارڈ سابقے کی حفاظت کرتا ہے، جبکہ ہر دوسرا OpenRouter خاندان (`openai/`, `google/`, `qwen/`, …) چھین اور غیر محفوظ رہتا ہے۔
 
-طویل گفتگوؤں میں پیغامات کے بہت سے ادوار جمع ہو جاتے ہیں، لیکن پرانے ادوار کی
-اہمیت کم ہوتی جاتی ہے۔ `progressiveAging.ts` ماڈیول **ٹرن کے فاصلے کے لحاظ سے پیغامات کو مختصر کرتا ہے**
-(فاصلہ گفتگو کے اختتام سے ناپا جاتا ہے)۔ فراہم کردہ ڈیفالٹس
-(`verbatim: 2, light: 2, moderate: 3`) کے ساتھ:
+### ترقی پسند خستہ
 
-- **آخری 2 ٹرنز (فاصلہ ≤ 2)**: من و عن برقرار رکھے جاتے ہیں
-- **فاصلہ 3**: Caveman کمپریشن (اضافی الفاظ کا اخراج)
-- **فاصلہ 4+**: Assistant پیغامات کا خلاصہ کیا جاتا ہے؛ user پیغامات کو ان کی پہلی
-  سطر تک محدود کر دیا جاتا ہے، جس کی حد 120 حروف ہے؛ دیگر roles میں کوئی تبدیلی نہیں ہوتی۔ سسٹم پرامپٹس، پہلے سے aged
-  پیغامات اور تازہ ترین user پیغام فاصلے سے قطع نظر ہمیشہ من و عن برقرار رکھے جاتے ہیں۔
-  کسی چیز کو مکمل طور پر حذف نہیں کیا جاتا، اور فراہم کردہ ڈیفالٹس کے ساتھ `light`
-  بینڈ تک پہنچنا ممکن نہیں (`light`، `verbatim` کے برابر ہے)۔
+لمبی گفتگو میں پیغام کے کئی موڑ جمع ہوتے ہیں، لیکن پرانے موڑ کم متعلقہ ہو جاتے ہیں۔ `progressiveAging.ts` ماڈیول** باری باری فاصلے سے پیغامات کو کم کرتا ہے۔** (گفتگو کے اختتام سے فاصلہ ماپا گیا)۔ بھیجے گئے ڈیفالٹس کے ساتھ (`verbatim: 2, light: 2, moderate: 3`):
+
+- **آخری 2 موڑ (فاصلہ ≤ 2)** : لفظ بہ لفظ رکھا
+- **فاصلہ 3** : کیو مین کمپریشن (فلر ہٹانا)
+- **فاصلہ 4 +** : معاون پیغامات کا خلاصہ؛ صارف کے پیغامات کو ان کی پہلی لائن تک کم کر دیا گیا، 120 حروف پر محدود۔ دیگر کردار اچھوتے. سسٹم پرامپٹس، پہلے سے پرانے پیغامات اور صارف کے تازہ ترین پیغامات کو ہمیشہ لفظی طور پر رکھا جاتا ہے قطع نظر دوری کے۔ کچھ بھی سیدھا نہیں چھوڑا جاتا ہے، اور `light` بینڈ بھیجے گئے ڈیفالٹس (`light` equals `verbatim`) کے ساتھ ناقابل رسائی ہے۔
 
 #### کوڈ کی مثال
 
@@ -415,68 +394,47 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... مزید 50 ٹرنز ...
+  // ... 50 more turns ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // آخری 3 ٹرنز: من و عن
-  light: 8, // فاصلہ <= 8: ہلکی کمپریشن
-  moderate: 20, // فاصلہ <= 20: caveman کمپریشن
-  fullSummary: 5, // type کے لیے درکار، banding کوڈ اسے نہیں پڑھتا
-  // فاصلہ > 20: خلاصہ کیا جاتا ہے (assistant) / پہلی سطر برقرار رکھی جاتی ہے (user)
+  verbatim: 3, // last 3 turns: verbatim
+  light: 8, // distance <= 8: lite compression
+  moderate: 20, // distance <= 20: caveman compression
+  fullSummary: 5, // required by the type, not read by the banding code
+  // distance > 20: summarized (assistant) / first line kept (user)
 });
 
-// saved = محفوظ کیے گئے ٹوکنز کی تعداد
+// saved = number of tokens saved
 ```
 
-#### کب استعمال کریں
+#### کب استعمال کرنا ہے۔
 
-Progressive aging، `aggressive` موڈ کے لیے **ہمیشہ فعال** ہوتی ہے — یہ
-`compressAggressive()` کا مرحلہ 2 ہے۔ Ultra موڈ اسے نہیں چلاتا۔ یہ
-خصوصاً درج ذیل کے لیے مؤثر ہے:
+ترقی پسند عمر رسیدہ ہے۔** ہمیشہ پر** `aggressive` موڈ — کے لیے یہ `compressAggressive()` کا مرحلہ 2 ہے۔ الٹرا موڈ اسے نہیں چلاتا۔ یہ خاص طور پر مؤثر ہے:
 
-- طویل عرصے تک جاری رہنے والے کوڈنگ سیشنز
-- کئی دنوں پر محیط گفتگوئیں
-- بہت سی ٹول کالز والے ایجنٹک ورک فلو
+- طویل عرصے سے چلنے والے کوڈنگ سیشن
+- کئی دن کی گفتگو
+- بہت سے ٹول کالز کے ساتھ ایجنٹ ورک فلو
 
-### Caveman آؤٹ پٹ موڈ
+### کیو مین آؤٹ پٹ موڈ
 
-Caveman آؤٹ پٹ موڈ **سسٹم پرامپٹ ہدایات** شامل کرتا ہے جو خود ماڈل سے
-مختصر آؤٹ پٹ کی درخواست کرتی ہیں — `lite` لیول مکمل جملے برقرار رکھتے ہوئے مختصر جوابات مانگتا ہے، `full`
-اسے "سمجھ دار غار کے انسان کی طرح مختصر جواب دینے" کو کہتا ہے، اور `ultra` ٹیلی گرافک آؤٹ پٹ مانگتا ہے؛
-ہدایات صرف درخواست کرتی ہیں، وہ اس کی ضمانت نہیں دے سکتیں۔ درخواستوں کو یہ ہدایات
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) کے ذریعے ملتی ہیں:
-`open-sse/handlers/chatCore.ts` پہلے back-compat shim
-(`resolveOutputStyleSelection()` جو
-`open-sse/services/compression/outputStyles/backCompat.ts` میں ہے) کے ذریعے انتخاب طے کرتا ہے، جو `outputStyles`
-خالی ہونے کی صورت میں، فعال `cavemanOutputMode` کو
-`cavemanOutputMode.intensity` پر `terse-prose` آؤٹ پٹ اسٹائل سے میپ کرتا ہے (ذیل میں Back-compat دیکھیں)؛ غیر خالی `outputStyles`
-انتخاب کو جوں کا توں استعمال کیا جاتا ہے، اور پھر `cavemanOutputMode.enabled` اور `intensity` کا کوئی
-اثر نہیں ہوتا، جبکہ اس کا `autoClarity` ٹوگل پھر بھی لاگو رہتا ہے۔ `outputMode.ts` میں
-ہدایات کے متن (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`)، مواد کا بائی پاس اور
-placement helper موجود ہیں جنہیں injection استعمال کرتا ہے؛ اس کے اپنے `applyCavemanOutputMode()` injector کا کوئی
-production caller نہیں ہے۔
+Caveman آؤٹ پٹ موڈ شامل کرتا ہے۔** نظام فوری ہدایات** جو کہ ماڈل سے ہی terse output — کے لیے پوچھتا ہے، `lite` لیول مختصر جوابات کے لیے پوچھتا ہے جو مکمل جملے رکھتے ہیں، `full` اسے "سمارٹ کیو مین کی طرح مختصر جواب دینے" کو کہتا ہے، اور `ultra` ٹیلی گرافک آؤٹ پٹ کے لیے پوچھتا ہے۔ ہدایات صرف پوچھتی ہیں، وہ اس کی ضمانت نہیں دے سکتے۔ درخواستیں انہیں `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) کے ذریعے موصول ہوتی ہیں : `open-sse/handlers/chatCore.ts` سب سے پہلے بیک کمپیٹ شیم (`resolveOutputStyleSelection()` میں `open-sse/services/compression/outputStyles/backCompat.ts`) کے ساتھ انتخاب کو حل کرتا ہے، جو `outputStyles` خالی ہونے پر، `cavemanOutputMode.intensity` پر ایک فعال `cavemanOutputMode` `terse-prose` آؤٹ پٹ سٹائل میں نقش کرتا ہے (ذیل میں Back-compat دیکھیں)؛ ایک غیر خالی `outputStyles` انتخاب جیسا ہے استعمال کیا جاتا ہے، اور `cavemanOutputMode.enabled` اور `intensity` کوئی اثر نہیں ہوتا ہے، جبکہ اس کا `autoClarity` ٹوگل اب بھی لاگو ہوتا ہے۔ `outputMode.ts` انسٹرکشن ٹیکسٹس (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`)، مواد بائی پاس اور پلیسمنٹ ہیلپر رکھتا ہے جو انجیکشن استعمال کرتا ہے۔ اس کے اپنے `applyCavemanOutputMode()` انجیکٹر کا کوئی پروڈکشن کالر نہیں ہے۔
 
-#### یہ کیسے کام کرتا ہے
+#### یہ کیسے کام کرتا ہے۔
 
-یہ موڈ اِن پٹ کو کمپریس نہیں کرتا۔ یہ سسٹم پرامپٹ میں ایک ہدایتی بلاک شامل کرتا ہے
-(ذیل میں انجیکشن کا طریقہ دیکھیں)، اور درخواست کے لیے منتخب کردہ کوئی بھی اِن پٹ کمپریشن موڈ
-اس کے بعد بھی اس باڈی پر چلتا ہے جس میں اب یہ بلاک موجود ہوتا ہے۔ مشترکہ
-حدود کی شق، جس پر ہر سطح ختم ہوتی ہے، سے پہلے انگریزی `full` سطح یوں ہے:
+یہ موڈ ان پٹ کو کمپریس نہیں کرتا ہے۔ یہ سسٹم پرامپٹ میں ایک انسٹرکشن بلاک کا اضافہ کرتا ہے (دیکھیں کہ انجیکشن نیچے کیسے کام کرتا ہے)، اور درخواست کے لیے منتخب کیا گیا کوئی بھی ان پٹ کمپریشن موڈ اب بھی اس باڈی پر چلتا ہے جس میں اب بلاک ہوتا ہے۔ مشترکہ حدود کی شق سے پہلے جس کے ساتھ ہر سطح ختم ہوتی ہے، انگریزی `full` لیول پڑھتا ہے:
 
-> "ہوشیار غار انسان کی طرح مختصر جواب دیں۔ حروفِ تعریف (a/an/the)، غیر ضروری الفاظ (just/really/basically/actually/simply)، رسمی کلمات اور تذبذب والے الفاظ حذف کریں۔ نامکمل جملے قابلِ قبول ہیں۔ مختصر مترادفات استعمال کریں (extensive نہیں، big؛ implement نہیں، fix)۔ تمام تکنیکی مواد، code، errors، URLs، identifiers بعینہٖ رکھیں۔"
+> "سمارٹ کیو مین کی طرح سخت جواب دیں۔ آرٹیکلز (a/an/the) ، فلر (just/really/basically/actually/simply) ، pleasantries ، ہیجنگ۔ ٹکڑے OK. مختصر مترادفات (بڑا نہیں وسیع ، درست نہیں کرنا)۔ تمام تکنیکی مواد، کوڈ، غلطیاں، URLs, identifier کو رکھیں۔"
 
-یہ خصوصاً ان کاموں کے لیے مؤثر ہے:
+یہ خاص طور پر اچھی طرح سے کام کرتا ہے:
 
-- کوڈ جنریشن (مختصر آؤٹ پٹ = کم ٹوکنز)
-- فوری سوال و جواب (تفصیلی وضاحتوں کی ضرورت نہیں)
-- بیچ پروسیسنگ (تھروپٹ زیادہ سے زیادہ کریں)
+- کوڈ جنریشن (ٹرسر آؤٹ پٹ = کم ٹوکن)
+- فوری سوال و جواب (تفصیلات کی ضرورت نہیں)
+- بیچ پروسیسنگ (زیادہ سے زیادہ تھرو پٹ)
 
-#### کب استعمال کریں
+#### کب استعمال کرنا ہے۔
 
-Caveman آؤٹ پٹ موڈ **اختیاری** ہے۔ کمپریشن آن ہونے کی صورت میں (`enabled: true`، یعنی Compression Settings صفحے کا ماسٹر ٹوگل
-آن ہو)، اسے `cavemanOutputMode.enabled` کے ذریعے آن کریں؛ `intensity`
-سے `lite`، `full` یا `ultra` منتخب کیا جاتا ہے:
+کیو مین آؤٹ پٹ موڈ ہے۔** آپٹ ان** . کمپریشن آن کرنے کے ساتھ (`enabled: true`، کمپریشن سیٹنگز کے صفحے پر ماسٹر ٹوگل)، اسے `cavemanOutputMode.enabled` کے ساتھ آن کریں۔ `intensity` چنتا ہے `lite`، `full` یا `ultra`:
 
 ```json
 {
@@ -488,99 +446,44 @@ Caveman آؤٹ پٹ موڈ **اختیاری** ہے۔ کمپریشن آن ہون�
 }
 ```
 
-کمپریشن کومبو کا **Output Mode** ٹوگل (`outputMode`، اور سطح `outputModeIntensity` میں)
-ان درخواستوں کے لیے یہی سوئچ سیٹ کرتا ہے جن پر وہ کومبو لاگو ہوتا ہے، اور
-`omniroute_set_compression_engine` MCP ٹول اپنے بولین `outputMode`
-آرگیومنٹ کے ذریعے اسے لکھتا ہے۔ غیر خالی `outputStyles` انتخاب کو اس سوئچ پر ترجیح حاصل ہے۔ ڈیش بورڈ میں **Terse prose** آؤٹ پٹ اسٹائل فعال کرنے سے یہی بلاک انجیکٹ ہوتا ہے (ذیل میں Output
-Styles دیکھیں)۔
+ایک کمپریشن کومبو** آؤٹ پٹ موڈ** ٹوگل (`outputMode`, `outputModeIntensity` میں لیول ) ان درخواستوں کے لیے وہی سوئچ سیٹ کرتا ہے جن پر کومبو لاگو ہوتا ہے، اور `omniroute_set_compression_engine` MCP ٹول اسے اپنے بولین `outputMode` دلیل کے ذریعے لکھتا ہے۔ ایک غیر خالی `outputStyles` انتخاب کو اس سوئچ پر فوقیت حاصل ہے۔ ڈیش بورڈ میں، فعال کرنا** مختصر نثر** آؤٹ پٹ اسٹائل ایک ہی بلاک کو انجیکشن دیتا ہے (نیچے آؤٹ پٹ اسٹائلز دیکھیں)۔
 
 ### آؤٹ پٹ اسٹائلز (کیٹلاگ)
 
-اوپر بیان کردہ Caveman آؤٹ پٹ موڈ **پرانا سنگل اسٹائل راستہ** ہے۔ Phase 4 نے اسے
-قابلِ امتزاج آؤٹ پٹ اسٹائلز کے ایک کیٹلاگ میں عمومی بنا دیا: `OUTPUT_STYLE_CATALOG`، جو
-`open-sse/services/compression/outputStyles/catalog.ts` میں ہے۔ ہر اسٹائل سسٹم پرامپٹ کی
-ایک ہدایت ہے جو ماڈل سے خود کم لاگت والا آؤٹ پٹ طلب کرتی ہے؛ اسٹائلز کو ایک ساتھ فعال کیا جا سکتا ہے
-اور انہیں کیٹلاگ کی ترتیب میں انجیکٹ کیا جاتا ہے۔
+اوپر کیو مین آؤٹ پٹ موڈ ہے۔** میراثی واحد طرز کا راستہ** . فیز 4 نے اسے کمپوز ایبل آؤٹ پٹ اسٹائل کے کیٹلاگ میں عام کیا: `OUTPUT_STYLE_CATALOG` in `open-sse/services/compression/outputStyles/catalog.ts`۔ ہر طرز ایک نظام کی فوری ہدایت ہے جو خود ماڈل سے سستی پیداوار مانگتی ہے۔ شیلیوں کو ایک ساتھ فعال کیا جا سکتا ہے اور کیٹلاگ ترتیب میں انجکشن کیا جاتا ہے.
 
-| اسٹائل                       | `id`            | اس کا کام                                                                                                                                                                                                                                            | ہدایات کی زبانیں                              |
-| ---------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| مختصر نثر                    | `terse-prose`   | غیر ضروری الفاظ/حروفِ تعریف/تذبذب حذف کرتا ہے؛ تکنیکی مواد بعینہٖ رکھتا ہے۔ پرانے Caveman آؤٹ پٹ موڈ جیسا ہی متن (حوالہ دیا گیا ہے، دوبارہ تحریر نہیں کیا گیا)۔                                                                                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| کم کوڈ                       | `less-code`     | YAGNI درجہ بندی: سب سے چھوٹی کارآمد تبدیلی، بلاطلب تجریدات نہیں۔                                                                                                                                                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ponytail (سست سینئر ڈویلپر)  | `ponytail`      | "بہترین کوڈ وہ ہے جو کبھی لکھا ہی نہ جائے": دوبارہ استعمال > ازسرِنو تحریر، بنیادی وجہ > علامت، مختصر ترین کارآمد diff۔                                                                                                                              | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| مجھے ADHD ہے (عمل پہلے)      | `i-have-adhd`   | عمل پہلے (نثر سے پہلے command/path/snippet)، نمبر شدہ محدود مراحل، ایک ٹھوس اگلا مرحلہ، کوئی تمہید/خلاصہ/اختتامی کلمات نہیں۔ [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT) سے ماخوذ۔                                             | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Antislop UI فلٹر             | `antislop-ui`   | ہر بصری تکنیک کو مقصدی جانچ پر پورا اترنا چاہیے (درجہ بندی، شناخت، قابلِ مطالعہ ہونا)؛ ڈیفالٹ gradients/glass/glow نہیں، محدود پیلیٹ، ٹیمپلیٹ لے آؤٹس نہیں۔ دونوں antislop اسٹائلز بے کار کنٹرولز اور من گھڑت دعوؤں کی ممانعت والی حد شامل کرتے ہیں۔ | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Antislop متن اور انسانی فلٹر | `antislop-copy` | مخصوص متن (کوئی em dash، عمومی CTAs، buzzwords، chatbot اختتامی کلمات یا من گھڑت حقائق نہیں) اور لوگوں سے متعلق اصول: WCAG AA کنٹراسٹ، نمایاں فوکس، کی بورڈ رسائی، خالی/لوڈنگ/خرابی کی حالتیں، موبائل ری فلو۔                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| مختصر CJK (文言)             | `terse-cjk`     | `full`/`ultra` جواب کلاسیکی چینی (文言) میں؛ `lite` صرف مختصر جوابات طلب کرتا ہے، فعلی الفاظ، رسمی کلمات یا آرائش کے بغیر۔                                                                                                                           | zh (لوکیل تک محدود، ذیل میں دیکھیں)           |
+| انداز                          | `id`            | یہ کیا کرتا ہے                                                                                                                                                                                                                                       | ہدایات کی زبانیں۔                             |
+| ------------------------------ | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| مختصر نثر                      | `terse-prose`   | filler/articles/hedging چھوڑ دو تکنیکی مادہ کو درست رکھیں۔ لیگیسی کیو مین آؤٹ پٹ موڈ جیسا متن (حوالہ دیا گیا، دوبارہ ٹائپ نہیں کیا گیا)۔                                                                                                             | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| کم کوڈ                         | `less-code`     | YAGNI سیڑھی: کام کرنے والی سب سے چھوٹی تبدیلی، کوئی غیر درخواست شدہ تجرید نہیں۔                                                                                                                                                                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| پونی ٹیل (سست سینئر دیو)       | `ponytail`      | "بہترین کوڈ وہ کوڈ ہے جو کبھی نہیں لکھا جاتا ہے": دوبارہ استعمال > دوبارہ لکھنا، بنیادی وجہ > علامت، مختصر ترین کام کرنے والا فرق۔                                                                                                                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| میرے پاس ADHD ہے (ایکشن-پہلے)  | `i-have-adhd`   | ایکشن پہلے ( نثر سے پہلے command/path/snippet )، نمبر والے پابند مراحل، ONE کنکریٹ اگلا مرحلہ، کوئی preamble/recap/closers. [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT) سے موافق نہیں ہے۔                                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| اینٹی سلپ UI فلٹر              | `antislop-ui`   | ہر بصری تکنیک کے لیے ایک مقصدی امتحان پاس کرنا ضروری ہے (تنظیم، شناخت، پڑھنے کی اہلیت)؛ کوئی ڈیفالٹ gradients/glass/glow، کیپڈ پیلیٹ، کوئی ٹیمپلیٹ لے آؤٹ نہیں۔ دونوں اینٹی سلپ اسٹائل میں کوئی ڈیڈ کنٹرولز / بغیر من گھڑت دعووں کی حد شامل ہوتی ہے۔ | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| اینٹی سلپ کاپی اور انسانی فلٹر | `antislop-copy` | مخصوص کاپی (no em dash، generic CTAs، buzzwords، chatbot closers، invented facts) نیز لوگوں کے اصول: WCAG AA کنٹراسٹ، مرئی فوکس، کی بورڈ ریچ، empty/loading/error اسٹیٹس، موبائل ری فلو۔                                                             | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Terse CJK (文言)               | `terse-cjk`     | کلاسیکی چینی میں `full`/`ultra` جواب (文言)؛ `lite` صرف فنکشن کے الفاظ، خوشیوں یا زیبائش کے بغیر مختصر جوابات مانگتا ہے۔                                                                                                                             | zh (مقامی گیٹڈ، نیچے دیکھیں)                  |
 
-ہر اسٹائل کے ساتھ شدت کی تین سطحیں — `lite`، `full`، `ultra` — آتی ہیں، اور ہر سطح
-مشترکہ حدود کی شق (`outputMode.ts` میں `SHARED_BOUNDARIES`) پر ختم ہوتی ہے، جو
-code blocks، file paths، commands، errors اور URLs کو بعینہٖ رکھتی ہے۔ `terse-prose` اور
-`terse-cjk` کی سطحوں کے متن اس فہرست میں identifiers بھی شامل کرتے ہیں۔
+ہر سٹائل تین شدت کی سطحیں — `lite`، `full`، `ultra` — بھیجتا ہے اور ہر سطح کا اختتام مشترکہ حدود کی شق ( `outputMode.ts` میں `SHARED_BOUNDARIES` ) کے ساتھ ہوتا ہے، جو کوڈ بلاکس، فائل پاتھ، کمانڈز، ایررز اور URLs کو درست رکھتا ہے۔ `terse-prose` اور `terse-cjk` سطح کے متن اس فہرست میں شناخت کنندگان کو شامل کرتے ہیں۔
 
-`terse-cjk` دو مقامات پر `zh` لوکیل تک محدود ہے۔ Compression Settings صفحہ
-اس کی قطار صرف اس وقت دکھاتا ہے جب ڈیش بورڈ UI کی زبان چینی (`zh-CN` یا `zh-TW`) ہو، اور
-`applyOutputStyles()` اسے صرف اس وقت انجیکٹ کرتا ہے جب درخواست کی طے شدہ زبان (ذیل میں Language
-selection دیکھیں) `zh` ہو۔ قطار چھپانے سے محفوظ شدہ `terse-cjk` انتخاب صاف نہیں ہوتا:
-settings API کسی بھی style id کو قبول کرتی ہے، اور صفحے پر دوسرے اسٹائلز محفوظ کرنے سے یہ برقرار رہتا ہے۔ درخواست
-کے وقت، `applyOutputStyles()` کی زبان کی جانچ ہی واحد لوکیل گیٹ ہے۔
+`terse-cjk` دو جگہوں پر `zh` کو لوکل گیٹڈ ہے۔ کمپریشن سیٹنگز کا صفحہ اپنی قطار کو صرف اس وقت درج کرتا ہے جب ڈیش بورڈ UI زبان چینی ہو (`zh-CN` یا `zh-TW`)، اور `applyOutputStyles()` اسے صرف اس صورت میں داخل کرتا ہے جب درخواست کی حل شدہ زبان (نیچے زبان کا انتخاب دیکھیں) `zh` ہو۔ قطار کو چھپانے سے محفوظ کردہ `terse-cjk` انتخاب صاف نہیں ہوتا ہے: ترتیبات API کسی بھی اسٹائل آئی ڈی کو قبول کرتی ہے، اور صفحہ پر دیگر اسٹائلز کو محفوظ کرنا اسے برقرار رکھتا ہے۔ درخواست کے وقت، `applyOutputStyles()` زبان کی جانچ واحد لوکل گیٹ ہے۔
 
-#### انجیکشن کیسے کام کرتا ہے
+#### انجیکشن کیسے کام کرتا ہے۔
 
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) انتخاب کو
-کیٹلاگ کے مطابق حل کرتا ہے (نامعلوم ids اور locale سے غیر مطابقت رکھنے والے styles کو
-خارج کر دیا جاتا ہے، یہ کبھی error نہیں بنتے؛ ایسا انتخاب جو کسی style تک حل نہ ہو، body کو
-بغیر تبدیلی کے چھوڑ دیتا ہے اور `no_styles` کے طور پر skip ہو جاتا ہے)، منتخب instructions کو
-کیٹلاگ کی ترتیب میں یکجا کرتا ہے،
-boundaries clause کو **ایک بار** شامل کرتا ہے (نیز safety clause، `SAFETY_BOUNDARIES` یا اس کا
-ترجمہ، جب `less-code` یا `ponytail` منتخب ہو)، اور block کو ایک واحد
-idempotency marker (`[OmniRoute Output Styles]`) سے شروع کرتا ہے، لہٰذا دوبارہ لاگو کرنا no-op
-ہوتا ہے۔ جب حل شدہ زبان (ذیل میں Language selection دیکھیں) کا ترجمہ دستیاب ہو، تو انگریزی کے
-بجائے localized instruction شامل کی جاتی ہے۔
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) کیٹلاگ کے خلاف انتخاب کو حل کرتا ہے (نامعلوم آئی ڈیز اور لوکل سے مماثل طرزیں چھوڑ دی جاتی ہیں، کبھی کوئی غلطی نہیں ہوتی؛ ایک انتخاب جو کسی بھی طرز کو حل کرتا ہے وہ باڈی کو تبدیل نہیں کرتا، `no_styles` کے طور پر چھوڑا جاتا ہے)، منتخب ہدایات کو کیٹلاگ ترتیب میں جوڑتا ہے، حدود کی شق کو شامل کرتا ہے۔** ایک بار** (علاوہ حفاظتی شق، `SAFETY_BOUNDARIES` یا اس کا ترجمہ، جب `less-code` یا `ponytail` انتخاب کیا جاتا ہے)، اور بلاک کو ایک واحد آئیڈیمپوٹینسی مارکر (`[OmniRoute Output Styles]`) سے شروع کرتا ہے، اس لیے دوبارہ درخواست دینا ایک نہیں ہے۔ جب حل شدہ زبان (نیچے زبان کا انتخاب دیکھیں) کا ترجمہ ہوتا ہے، تو انگریزی کی بجائے مقامی ہدایات کو انجکشن کیا جاتا ہے۔
 
-ایسی body میں جس کی `messages` array خالی نہ ہو، idempotency check، content bypass سے پہلے
-چلتا ہے: جب `[OmniRoute Output Styles]` marker پہلے ہی top-level
-`system` field (ایک string یا content-block array) میں، یا string content والے کسی system
-message میں موجود ہو، تو body کو `already_applied` کے طور پر بغیر تبدیلی کے چھوڑ دیا جاتا ہے
-اور کوئی keyword check نہیں چلتا۔
-بصورتِ دیگر، content bypass (`shouldBypassCavemanOutputMode()` جو
-`open-sse/services/compression/outputMode.ts` میں ہے) آخری تین
-messages کے متن کو، ان کے role سے قطع نظر، چیک کرتا ہے اور جب وہ متن security،
-ناقابلِ واپسی action یا clarification keywords، یا ترتیب کے لحاظ سے حساس sequence سے match
-کرے تو پورے turn کے لیے styles کو skip کر دیتا ہے: `first`، `then`، `after that`، `before`،
-`rollback` یا `backup`، جن کے بعد 240 حروف کے اندر `delete`، `drop`، `migrate`، `deploy` یا
-`release` آئے۔ bypass اس وقت چلتا ہے جب **Auto-Clarity Bypass** toggle
-(`cavemanOutputMode.autoClarity`، جو بطور ڈیفالٹ on ہوتا ہے) on ہو؛ toggle کو off کرنے سے
-keyword check skip ہو جاتا ہے۔
+غیر خالی `messages` صف والی باڈی پر، آئیڈیمپوٹینسی چیک مواد کو بائی پاس کرنے سے پہلے چلتا ہے: جب `[OmniRoute Output Styles]` مارکر پہلے سے ہی ٹاپ لیول `system` فیلڈ (ایک سٹرنگ یا کنٹینٹ-بلاک اری) یا سٹرنگ مواد والے سسٹم میسج میں ہوتا ہے، باڈی کو `already_applied` کے طور پر کوئی تبدیلی نہیں کی جاتی ہے اور کوئی کلیدی لفظ چیک نہیں چلتا ہے۔ بصورت دیگر مواد کا بائی پاس (`shouldBypassCavemanOutputMode()` in `open-sse/services/compression/outputMode.ts`) آخری تین پیغامات کے متن کو چیک کرتا ہے، خواہ ان کا کوئی بھی کردار ہو، اور جب وہ متن اس کی سیکیورٹی، ناقابل واپسی کارروائی یا وضاحتی کلیدی الفاظ، یا ترتیب کے لحاظ سے حساس ترتیب `deploy` میل کھاتا ہے تو پورے موڑ کے لیے اسلوب کو چھوڑ دیتا ہے: `first`, `then`, `after that` `before` followed 240 حروف کے اندر بذریعہ `delete`، `drop`، `migrate`، `rollback` یا `backup` `release` بائی پاس چلتا ہے جبکہ** آٹو کلیرٹی بائی پاس** ٹوگل (`cavemanOutputMode.autoClarity`، آن ڈیفالٹ) آن ہے؛ ٹوگل کو آف کرنے سے مطلوبہ الفاظ کی جانچ پڑتال ہو جاتی ہے۔
 
-جب bypass turn کو گزرنے دیتا ہے، تو `placeSystemInstruction()` (اسی file میں)، جو کبھی نیا
-`messages[0]` نہیں بناتا، block کو درج ذیل میں سے پہلے دستیاب مقام پر رکھتا ہے:
+جب بائی پاس سے گزرنے دیتا ہے، `placeSystemInstruction()` (وہی فائل)، جو کبھی بھی نیا `messages[0]` نہیں بناتا، بلاک کو ان میں سے پہلے میں رکھتا ہے:
 
-1. شروع میں موجود string content والا system message: block اس کے متن کے بعد append کیا جاتا ہے۔
-2. top-level `system` field: block کو string کے متن کے بعد append کیا جاتا ہے، یا
-   content-block array میں نئے text block کے طور پر شامل کیا جاتا ہے۔
-3. بعد میں آنے والا پہلا string content والا system message: block اس کے
-   متن کے بعد append کیا جاتا ہے۔
-4. مذکورہ بالا میں سے کوئی نہیں: block کو `messages` کے آخر میں ایک نئے system message میں رکھا جاتا ہے۔
+1. سٹرنگ مواد کے ساتھ ایک اہم سسٹم پیغام: بلاک کو اس کے متن کے بعد جوڑا جاتا ہے۔
+2. ٹاپ لیول `system` فیلڈ: بلاک کو سٹرنگ کے ٹیکسٹ کے بعد جوڑ دیا جاتا ہے، یا مواد بلاک کی صف میں نئے ٹیکسٹ بلاک کے طور پر شامل کیا جاتا ہے۔
+3. سٹرنگ مواد کے ساتھ پہلا بعد کا سسٹم پیغام: بلاک کو اس کے متن کے بعد جوڑا جاتا ہے۔
+4. مندرجہ بالا میں سے کوئی بھی نہیں: بلاک `messages` کے آخر میں ایک نئے سسٹم میسج میں جاتا ہے۔
 
-ایسی body میں جس میں `messages` array نہ ہو (یا وہ خالی ہو)، کوئی content bypass نہیں چلتا اور
-top-level `system` field سے رجوع نہیں کیا جاتا۔ block کو string
-`instructions` field کے متن کے بعد append کیا جاتا ہے، الا یہ کہ اس field میں پہلے ہی
-`[OmniRoute Output Styles]` marker موجود ہو؛ ایسی صورت میں body کو
-`already_applied` کے طور پر بغیر تبدیلی کے چھوڑ دیا جاتا ہے۔ جب body میں string
-`instructions` field نہ ہو لیکن `input` موجود ہو
-(ایک string یا array)، تو block، `instructions` بن جاتا ہے اور اس field میں پہلے سے موجود کسی
-بھی non-string value کو بدل دیتا ہے۔ ایسی body جس میں نہ string `instructions` field ہو اور
-نہ string یا array `input`، اسے بغیر تبدیلی کے چھوڑ دیا جاتا ہے اور `no_messages` کے طور پر
-skip کیا جاتا ہے۔
+`messages` صف کے بغیر کسی باڈی پر (یا خالی کے ساتھ)، کوئی مواد بائی پاس نہیں چلتا ہے اور ٹاپ لیول `system` فیلڈ سے مشورہ نہیں کیا جاتا ہے۔ بلاک کو سٹرنگ `instructions` فیلڈ کے ٹیکسٹ کے بعد جوڑ دیا جاتا ہے، جب تک کہ اس فیلڈ میں پہلے سے ہی `[OmniRoute Output Styles]` مارکر موجود نہ ہو، اس صورت میں باڈی کو `already_applied` کے طور پر کوئی تبدیلی نہیں کی جاتی ہے۔ جب باڈی میں کوئی سٹرنگ `instructions` فیلڈ نہیں ہوتی ہے لیکن اس میں `input` (ایک سٹرنگ یا ایک صف) ہوتی ہے، تو بلاک بن جاتا ہے `instructions`، کسی بھی غیر سٹرنگ ویلیو کی جگہ لے لیتا ہے جو اس فیلڈ میں ہے۔ ایک باڈی جس میں نہ تو سٹرنگ `instructions` فیلڈ ہے اور نہ ہی سٹرنگ یا ارے `input` کوئی تبدیلی نہیں کی جاتی ہے اور اسے `no_messages` کے طور پر چھوڑ دیا جاتا ہے۔
 
-#### فعال کرنے کا طریقہ
+#### چالو کرنے کا طریقہ
 
-dashboard میں: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`)، Output styles section: ہر style کے لیے ایک row، جس میں on/off
-toggle اور level selector ہوتا ہے۔ styles اس وقت inject ہوتے ہیں جب compression خود on ہو
-(page کا master toggle، `enabled`)۔ **Auto-Clarity Bypass** toggle، **Caveman**
-page (`/dashboard/context/caveman`) کے **Output Mode** card میں ہے۔ Programmatically،
-compression config انتخاب کو یوں persist کرتا ہے:
+ڈیش بورڈ میں:** کمپریشن سیاق و → کمپریشن کی ترتیبات** (`/dashboard/context/settings`)، آؤٹ پٹ اسٹائلز سیکشن: on/off ٹوگل اور لیول سلیکٹر کے ساتھ فی اسٹائل ایک قطار۔ اسٹائل انجیکشن لگاتے ہیں جب کمپریشن خود آن ہوتا ہے (صفحہ کا ماسٹر ٹوگل، `enabled`)۔ دی** آٹو کلیرٹی بائی پاس** ٹوگل پر ہے** غار والا** صفحہ (`/dashboard/context/caveman`)، اس میں** آؤٹ پٹ موڈ** کارڈ پروگرام کے لحاظ سے، کمپریشن کنفیگ اس طرح کے انتخاب کو برقرار رکھتا ہے:
 
 ```json
 {
@@ -591,133 +494,50 @@ compression config انتخاب کو یوں persist کرتا ہے:
 }
 ```
 
-Back-compat: جب تک `outputStyles` خالی ہے، legacy `cavemanOutputMode.enabled`
-setting، `cavemanOutputMode.intensity` پر `terse-prose` سے map ہوتی ہے۔ اس کے بعد block
-`[OmniRoute Output Styles]` marker سے شروع ہوتا ہے، جبکہ legacy `applyCavemanOutputMode()`
-injector نے `[OmniRoute Caveman Output Mode]` لکھا تھا۔ marker کے نیچے، متن en، pt-BR، es، de،
-fr، it، ru، id اور vi میں legacy injection سے match کرتا ہے؛ ja اور zh میں boundaries clause
-سے پہلے ایک اضافی space ہوتا ہے۔ `terse-prose` کا pt-BR، es، de، fr، it، ru، zh، ja، id اور vi
-میں ترجمہ ہوتا ہے، لہٰذا ایسا request جس کی resolved language `hu` ہو، انگریزی متن حاصل کرتا
-ہے، جبکہ legacy injector اس کا Hungarian متن استعمال کرتا تھا۔
+بیک کمپیٹ: جب کہ `outputStyles` خالی ہے، لیگیسی `cavemanOutputMode.enabled` سیٹنگ کے نقشے کو `cavemanOutputMode.intensity` پر `terse-prose` ہے۔ بلاک پھر `[OmniRoute Output Styles]` مارکر سے شروع ہوتا ہے، جہاں لیگیسی `applyCavemanOutputMode()` انجیکٹر نے `[OmniRoute Caveman Output Mode]` لکھا تھا۔ مارکر کے نیچے، متن en,pt-BR, es, de, fr, it, ru, id اور vi میں لیگیسی انجیکشن سے میل کھاتا ہے۔ ja اور zh میں یہ حدود کی شق سے پہلے ایک اضافی جگہ رکھتا ہے۔ `terse-prose` کا ترجمہ pt-BR, es, de, fr, it, ru, zh, ja, id اور vi میں ہوتا ہے، لہذا ایک درخواست جس کی حل شدہ زبان `hu` ہے انگریزی متن حاصل کرتا ہے جہاں لیگیسی انجیکٹر نے اپنا ہنگریئن استعمال کیا تھا۔
 
-Output-style زبان کا انتخاب (`resolveOutputStyleLanguage()` جو
-`outputStyles/apply.ts` میں ہے): جب `languageConfig.enabled` on ہو، تو `autoDetect`،
-request کی `messages` array میں موجود تازہ ترین ایسے user message کا sample لیتا ہے جس میں
-متن ہو (string content، یا اس کے content parts کا `text`) اور اس پر Caveman engine کا detector
-(`detectCompressionLanguage()`) چلاتا ہے۔ detector ایسے متن کے لیے `zh` لوٹاتا ہے جس میں Han
-حروف ہوں مگر kana نہ ہو؛ بصورتِ دیگر یہ `it`، `pt-BR`، `es`، `de`، `fr`، `ru`، `ja`، `hu`
-اور `id` میں سے اس زبان کو لوٹاتا ہے جس کے hint matches سب سے زیادہ ہوں، اور جب کوئی match نہ
-ہو تو `en` لوٹاتا ہے — جس متن کو یہ classify نہ کر سکے اسے English ملتی ہے، کبھی
-`defaultLanguage` نہیں، اور `vi` کبھی detect نہیں ہوتا، اگرچہ styles کے ساتھ `vi` متن شامل
-ہوتا ہے۔ Responses API body اپنے turns کو `input` میں رکھتی ہے، جس کا sample نہیں لیا جاتا،
-لہٰذا اسے پہلے `defaultLanguage`، پھر English ملتی ہے۔ جب `messages` میں کسی user message کے
-پاس متن نہ ہو، یا `autoDetect` off ہو، تو `defaultLanguage` لاگو ہوتی ہے، پھر English۔ جب
-`languageConfig.enabled` off ہو، تو زبان English ہوتی ہے — الا یہ کہ request پر کوئی
-compression combo لاگو ہو (request کے routing combo کو assign کیا گیا combo، یا default
-compression combo جس پر chatCore built-in stacked pipeline کے لیے fallback کرتا ہے):
-combo لاگو کرنے سے اس request کے لیے `languageConfig.enabled` on ہو جاتا ہے اور
-`defaultLanguage`، combo کے language packs سے set ہوتی ہے (saved value، اگر وہ combo کے packs
-میں سے ایک ہو، بصورتِ دیگر combo کا پہلا pack، جس کا ڈیفالٹ `en` ہے)، جبکہ saved
-`autoDetect` (بطور ڈیفالٹ on) بدستور لاگو رہتا ہے۔ Caveman input engine اپنے rule-pack کی زبان
-ایک مختلف طریقے سے منتخب کرتا ہے — ہر text part کے لیے الگ، اور auto-detect off ہونے پر
-`enabledPacks` کی شرط کے ساتھ۔
+Output-style language selection (`resolveOutputStyleLanguage()` in `outputStyles/apply.ts`): with `languageConfig.enabled` on, `autoDetect` samples the latest user message in the request's `messages` array that has text (string content, or the `text` of its content parts) and runs the Caveman engine's detector (`detectCompressionLanguage()`) on it. The detector returns `zh` for text with Han characters and no kana; otherwise it returns whichever of `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` and `id` has the most hint matches, and `en` when none match — text it cannot classify gets English, never `defaultLanguage`, and `vi` is never detected although the styles ship `vi` text. A Responses API body keeps its turns in `input`, which is not sampled, so it gets `defaultLanguage`, then English. When no user message in `messages` has text, or with `autoDetect` off, `defaultLanguage` applies, then English. With `languageConfig.enabled` off, the language is English — unless a compression combo applies to the request (a combo assigned to the request's routing combo, or the default compression combo chatCore falls back to for the built-in stacked pipeline): applying a combo turns `languageConfig.enabled` on for that request and sets `defaultLanguage` from the combo's language packs (the saved value if it is one of the combo's packs, otherwise the combo's first pack, which defaults to `en`), while the saved `autoDetect` (on by default) still applies. The Caveman input engine picks its rule-pack language differently — per text part and, with auto-detect off, gated on `enabledPacks`.
 
-اسٹائل × زبان میٹرکس کو
-`tests/unit/compression/output-styles-i18n-matrix.test.ts` کے ذریعے مقرر کیا گیا ہے: ہر کیٹلاگ اسٹائل کے لیے ٹیسٹ کے `BASELINE_LANGUAGES` میں ایک
-اندراج ضروری ہے؛ جو اسٹائل locale-gated نہ ہو، اسے لازماً
-pt-BR ترجمے کے ساتھ فراہم کیا جانا چاہیے (locale-gated `terse-cjk` اس اصول سے مستثنیٰ ہے)، الا یہ کہ وہ
-`KNOWN_ENGLISH_ONLY` میں درج ہو، جس میں صرف ایسے اسٹائل شامل ہو سکتے ہیں جن کے کوئی ترجمے سرے سے موجود نہ ہوں —
-اگر کسی درج شدہ اسٹائل کا کوئی بھی ترجمہ موجود ہو تو ٹیسٹ ناکام ہو جاتا ہے؛ اور اگر کوئی اسٹائل
-اپنے `BASELINE_LANGUAGES` اندراج میں درج کسی زبان سے محروم ہو جائے تو بھی ٹیسٹ ناکام ہو جاتا ہے۔ اسٹائل شامل کرنے کے لیے،
-[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style) دیکھیں۔
+اسٹائل × لینگویج میٹرکس `tests/unit/compression/output-styles-i18n-matrix.test.ts` کے ذریعہ پن کیا جاتا ہے: ہر کیٹلاگ اسٹائل کو ٹیسٹ کے `BASELINE_LANGUAGES` میں اندراج کی ضرورت ہوتی ہے۔ ایک طرز جو لوکل گیٹڈ نہیں ہے اسے pt-BR ترجمہ بھیجنا چاہیے (locale-gated `terse-cjk` اس اصول سے مستثنیٰ ہے) جب تک کہ یہ `KNOWN_ENGLISH_ONLY` میں درج نہ ہو، جس میں صرف — کے بغیر ترجمہ کے ایسے اسٹائل ہو سکتے ہیں جس کا کوئی بھی ترجمہ ٹیسٹ میں ناکام ہوجاتا ہے۔ اور سٹائل ٹیسٹ میں ناکام ہو جاتا ہے جب وہ ایسی زبان کھو دیتا ہے جو اس کے `BASELINE_LANGUAGES` اندراج کی فہرست میں درج ہے۔ ایک انداز شامل کرنے کے لیے، [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style) دیکھیں۔
 
-### ٹول نتیجے کی کمپریشن
+### ٹول رزلٹ کمپریشن
 
-`open-sse/services/compression/toolResultCompressor.ts` میں موجود `compressToolResult()`
-ٹول نتیجے کے متن کو **5 حکمتِ عملیوں** کے ذریعے کمپریس کرتا ہے۔ یہ انہیں اسی ترتیب سے آزماتا ہے، اور
-پہلی فعال حکمتِ عملی، جس کی جانچ مواد سے مماثل ہو، نتیجے کا فیصلہ کرتی ہے:
+`open-sse/services/compression/toolResultCompressor.ts` میں `compressToolResult()` ٹول نتیجہ کے متن کو اس کے ساتھ کمپریس کرتا ہے۔** 5 حکمت عملی** . یہ انہیں اس ترتیب میں آزماتا ہے، اور پہلی فعال حکمت عملی جس کا چیک مواد سے میل کھاتا ہے نتیجہ کا فیصلہ کرتا ہے:
 
-1. **`fileContent`**: 3 یا اس سے زیادہ سطروں پر مشتمل ایسا مواد جس میں کم از کم ایک سطر،
-   ابتدائی indentation نظرانداز کرنے کے بعد، `import `، `export `، `function `، `class `،
-   `const `، `let `، `var ` یا `return ` (کلیدی لفظ کے ساتھ ایک space) سے، یا `if`،
-   `for` یا `while` کے بعد `(` یا ` (` سے شروع ہو، اس کی پہلی 20 اور آخری 5 سطریں برقرار
-   رکھی جاتی ہیں، جبکہ حذف شدہ درمیانی حصہ نشان زد ہوتا ہے۔
-2. **`grepSearch`**: ایسا مواد جس میں کم از کم ایک سطر `<path>:<digits>:` کی شکل میں ہو،
-   جہاں پہلے colon سے قبل متن میں whitespace نہ ہو، صرف انہی سطروں کو برقرار رکھتا ہے،
-   زیادہ سے زیادہ 30، پھر مزید مماثلتوں کی تعداد اور مماثل فائلوں کی فہرست شامل کرتا ہے؛
-   ہر دوسری سطر حذف کر دی جاتی ہے۔ حکمتِ عملی کو فعال کرنے کے لیے ایسی ایک سطر کافی ہے، لہٰذا
-   `12:30:45` جیسے timestamp سے شروع ہونے والی log سطر بھی شمار ہوتی ہے۔
-3. **`shellOutput`**: ایسا output جس میں ANSI CSI sequence (`ESC[` کے بعد اعداد یا
-   semicolons اور پھر ایک حرف، جیسا کہ color codes میں ہوتا ہے) یا متن میں کہیں بھی `$` کے بعد
-   whitespace ہو، ان sequences کو کھو دیتا ہے (دیگر escapes، جیسے `ESC[?25l` یا
-   OSC window-title sequence، برقرار رہتے ہیں) اور آخری 50 سطریں رکھتا ہے، جبکہ مسلسل
-   دہرائی گئی سطروں کو یکجا کر دیتا ہے۔ چونکہ یہ جانچ `json` اور `errorMessage` سے پہلے چلتی ہے،
-   اس لیے ایسا JSON یا error output جس میں اس نوعیت کا `$` ہو، `shellOutput` فعال ہونے کی صورت میں
-   کبھی ان تک نہیں پہنچتا۔
-4. **`json`**: 2,000 حروف سے بڑا ایسا JSON payload جو اختیاری whitespace کے بعد `{` یا `[`
-   سے شروع ہو اور کامیابی سے parse ہو جائے، اس کا خلاصہ بنایا جاتا ہے: 7 سے زیادہ items والی array
-   میں پہلی 5 اور آخری 2 items اور کل تعداد برقرار رہتی ہے، جبکہ object میں اس کی پہلی 20
-   keys رکھی جاتی ہیں، اور ہر nested object یا array value کو `{…N keys}` placeholder سے
-   بدل دیا جاتا ہے (array کے لیے N اس کی length ہوتی ہے) اور پہلے 20 کے بعد حذف ہونے والی keys
-   کی تعداد بتانے کے لیے `_remaining_<N>_keys` marker شامل کیا جاتا ہے۔ Scalar values مکمل نقل
-   کی جاتی ہیں، اس لیے 20 یا اس سے کم keys اور بغیر nested values والا object صرف دوبارہ indent
-   ہوتا ہے — minified object میں حروف بڑھ جاتے ہیں اور وہ غیر تبدیل شدہ رہتا ہے۔
-5. **`errorMessage`**: ایسا output جس میں کہیں بھی اور حروف کی کسی بھی صورت میں `error:`،
-   `error ` (لفظ کے بعد ایک space، جیسے `no error found` میں)، `[error]`،
-   `exception:`، `exception `، `[exception]` یا `traceback` موجود ہو، اس کی پہلی سطر،
-   اگلی 10 سطریں اور آخری 3 سطریں برقرار رکھی جاتی ہیں، جبکہ ان کے درمیان کی سطروں کی جگہ
-   `… [N frames elided] …` marker آتا ہے۔ Marker صرف اس وقت ظاہر ہوتا ہے جب پہلی سطر کے بعد
-   13 سے زیادہ سطریں ہوں، لہٰذا 14 یا اس سے کم سطروں والا error output مختصر نہیں ہوتا
-   (12 یا 13 سطروں کی صورت میں آخری 3 سطریں پہلے سے برقرار رکھی گئی سطروں کو دہراتی ہیں)۔
+1. **`fileContent`** : 3 یا اس سے زیادہ لائنوں کا مواد جس میں کم از کم ایک لائن، معروف حاشیہ کو نظر انداز کرتے ہوئے، `import `، `export `، `function `، `class `، `const `، `let `، `var ` یا `return ` (کلیدی لفظ جمع ایک جگہ) سے شروع ہوتی ہے، یا `if`، `for` یا اس کی پیروی کرتے ہوئے `(` ، ` (` یا `while` کی پیروی کریں۔ پہلی 20 اور آخری 5 لائنیں، جس میں ایلیڈڈ درمیانی نشان لگا ہوا ہے۔
+2. **`grepSearch`** : `<path>:<digits>:` فارم کی کم از کم ایک لائن والا مواد، جہاں پہلی بڑی آنت سے پہلے کے متن میں کوئی وائٹ اسپیس نہیں ہے، صرف ان لائنوں کو رکھتا ہے، زیادہ سے زیادہ 30، اس کے بعد مزید میچوں کی گنتی اور مماثل فائلوں کی فہرست؛ ہر دوسری لائن گرا دی گئی ہے۔ حکمت عملی کو متحرک کرنے کے لیے ایسی ہی ایک لائن کافی ہے، اس لیے ٹائم اسٹیمپ جیسے `12:30:45` سے شروع ہونے والی لاگ لائن بھی شمار ہوتی ہے۔
+3. **`shellOutput`** : آؤٹ پٹ جس میں ANSI CSI تسلسل ہوتا ہے (`ESC[` پھر ہندسے یا سیمکولنز پھر ایک حرف، جیسا کہ کلر کوڈز میں ہوتا ہے) یا `$` اس کے بعد متن میں کہیں بھی وائٹ اسپیس ہوتا ہے وہ ان ترتیبوں کو کھو دیتا ہے (دیگر فرار، جیسے `ESC[?25l` یا OSC ونڈو ٹائٹل کی ترتیب اور کٹوتی کی ترتیب 5 کو دہرایا جاتا ہے) لائنیں گر گئیں. `$` یہ چیک `json` اور `errorMessage` `shellOutput` پہلے چلتا ہے JSON
+4. **`json`** : 2,000 حروف سے زیادہ JSON پے لوڈ جو `{` یا `[` (اختیاری وائٹ اسپیس کے بعد) سے شروع ہوتا ہے اور تجزیہ کا خلاصہ کیا جاتا ہے: 7 سے زیادہ آئٹمز کی ایک صف اپنی پہلی 5 اور آخری 2 آئٹمز اور اس کی کل گنتی رکھتی ہے، اور ایک آبجیکٹ اپنی پہلی 20 کلیدوں کو رکھتا ہے، ہر نیسٹڈ آبجیکٹ یا سرنی کی جگہ `{…N keys}` کے لیے ایک قدر کی جگہ ہوتی ہے۔ لمبائی) اور ایک `_remaining_<N>_keys` مارکر پہلے 20 سے آگے نکل کر چابیاں گنتا ہے۔ اسکیلر ویلیوز پوری طرح کاپی ہو جاتی ہیں، اس لیے 20 کلیدوں یا اس سے کم کا کوئی شے جس میں کوئی نیسٹڈ ویلیوز نہیں ہوتی ہے صرف — دوبارہ انڈینٹ کیا جاتا ہے اور ایک چھوٹے سے حروف حاصل ہوتے ہیں اور کوئی تبدیلی نہیں ہوتی ہے۔
+5. **`errorMessage`** : آؤٹ پٹ جس میں کہیں بھی اور کسی بھی حرف کی صورت میں، `error:`، `error ` (اسپیس کے بعد لفظ، جیسا کہ `no error found` میں ہوتا ہے)، `[error]`، `exception:`، `exception `، `[exception]` یا `traceback` اپنی پہلی لائن، اگلی 10 لائنیں اور آخری 3، ان کے درمیان `… [N frames elided] …` مارکر کی جگہ رکھتا ہے۔ مارکر صرف اس وقت ظاہر ہوتا ہے جب 13 سے زیادہ لائنیں پہلی لائن کی پیروی کرتی ہیں، لہذا 14 لائنوں یا اس سے کم کی خرابی کی پیداوار کو چھوٹا نہیں کیا جاتا ہے (12 یا 13 لائنوں پر آخری 3 ریپیٹ لائنیں پہلے ہی رکھی ہوئی ہیں)۔
 
-کسی حکمتِ عملی کے مماثل ہونے کے بعد، چاہے وہ کچھ بھی نہ بچائے، بعد کی حکمتِ عملیاں
-نہیں آزمائی جاتیں۔ جب مماثل حکمتِ عملی کوئی تخمینی tokens نہ بچائے (length ÷ 4، اوپر کی جانب round کیا ہوا) —
-مثلاً 25 یا اس سے کم سطروں والی code-like فائل، یا 2,000 سے زیادہ
-حروف والی ایسی JSON array جس میں 7 یا اس سے کم items ہوں — تو aggressive engine اصل tool
-result برقرار رکھتا ہے: دونوں callers (`compressAggressive()` اور `compressAnthropicToolResultBlock()`)
-اصل کو اس وقت برقرار رکھتے ہیں جب `saved` 0 یا اس سے کم ہو، جبکہ `compressToolResult()` خود پھر بھی
-اسی حکمتِ عملی کا output واپس کرتا ہے۔ Tool-result مرحلہ حتمی فیصلہ نہیں ہے:
-engine کا fallback summarizer اب بھی 8,192 حروف سے طویل `tool` یا `function` message کو
-مختصر کر سکتا ہے (`maxTokensPerMessage`، 2,048، ضرب 4)۔
+حکمت عملی کے میچ کے بعد، یہاں تک کہ ایک جو کچھ بھی نہیں بچاتا، بعد کی حکمت عملیوں کو آزمایا نہیں جاتا ہے۔ جب مماثلت کی حکمت عملی کوئی تخمینہ شدہ ٹوکن محفوظ نہیں کرتی ہے (لمبائی ÷ 4، راؤنڈ اپ) — مثال کے طور پر 25 لائنوں یا اس سے کم کی کوڈ جیسی فائل، یا 7 آئٹمز یا اس سے کم — کے ساتھ 2,000 حروف سے زیادہ کا JSON سرنی، جارحانہ انجن اصل ٹول کا نتیجہ برقرار رکھتا ہے: جب کال کرنے والے اور `compressAggressive()` ( `compressAnthropicToolResultBlock()`) دونوں کو `saved` ۔ یا نیچے، جبکہ `compressToolResult()` خود اب بھی اس حکمت عملی کا آؤٹ پٹ واپس کرتا ہے۔ ٹول نتیجہ مرحلہ آخری لفظ نہیں ہے: انجن کا فال بیک سمریزر اب بھی `tool` یا `function` پیغام کو 8,192 حروف سے چھوٹا کر سکتا ہے (`maxTokensPerMessage`, 2,048, times 4)۔
 
-#### کب استعمال کریں
+#### کب استعمال کرنا ہے۔
 
-Tool result compression، aggressive engine کا مرحلہ 1 ہے (`open-sse/services/compression/aggressive.ts` میں
-`compressAggressive()`)، اس لیے یہ Aggressive mode میں اور stacked pipeline کے کسی
-`aggressive` مرحلے میں چلتی ہے۔ یہ OpenAI-shape کے `tool` اور `function`
-messages اور Anthropic کے `tool_result` blocks کے اندر موجود متن کو کمپریس کرتی ہے۔ ہر حکمتِ عملی کا
-`aggressive.toolStrategies` کے تحت اپنا switch ہے، اور سب بطور default فعال ہوتے ہیں۔ Dashboard میں،
-compression فعال اور default mode، Aggressive ہونے کی صورت میں switches، Caveman صفحے کے
-**Advanced** view میں ہوتے ہیں۔
+ٹول رزلٹ کمپریشن ایگریسو انجن کا مرحلہ 1 ہے (`compressAggressive()` in `open-sse/services/compression/aggressive.ts`)، اس لیے یہ ایگریسو موڈ میں اور اسٹیک شدہ پائپ لائن کے `aggressive` قدم میں چلتا ہے۔ یہ OpenAI-shape `tool` اور `function` پیغامات اور Anthropic `tool_result` بلاکس کے اندر موجود متن کو کمپریس کرتا ہے۔ `aggressive.toolStrategies` کے تحت ہر حکمت عملی کا اپنا سوئچ ہوتا ہے، یہ سب بذریعہ ڈیفالٹ آن ہوتا ہے۔ ڈیش بورڈ میں، سوئچز Caveman صفحہ میں ہیں۔** اعلی درجے کی** کمپریشن آن ہونے کے دوران دیکھیں اور ڈیفالٹ موڈ جارحانہ ہے۔
 
-### Stacked Pipeline
+### اسٹیک شدہ پائپ لائن
 
-Stacked mode میں **متعدد engines یکے بعد دیگرے** چلتے ہیں — عموماً پہلے RTK
-(tool output پر 60-90% بچت)، پھر باقی متن پر Caveman (~46% input
-بچت)۔ ان دونوں کو ملا کر یہ **78-95% eligible range** بنتی ہے (اوپر Upstream Savings Math
-دیکھیں): `1 - (1 - 0.60..0.90) × (1 - 0.46)` کی اوسط ≈89% ہے۔
+اسٹیکڈ موڈ چلتا ہے۔** ترتیب میں متعدد انجن** — عام طور پر پہلے RTK (ٹول آؤٹ پٹ پر 60-90% بچت)، پھر باقی متن پر Caveman (~ 46% ان پٹ بچت)۔ پر مشتمل، یہ ہے** 78-95% اہل حد** (اوپر اپ اسٹریم بچت ریاضی دیکھیں): `1 - (1 - 0.60..0.90) × (1 - 0.46)` اوسط ≈ 89%۔
 
-#### یہ کیسے کام کرتا ہے
+#### یہ کیسے کام کرتا ہے۔
 
 ```
 Input (1000 tokens)
   → RTK (command-aware filter) → 200 tokens
-    → Caveman (اضافی مواد کا اخراج) → 108 tokens
-  → Output (108 tokens، ~89% بچت)
+    → Caveman (filler removal) → 108 tokens
+  → Output (108 tokens, ~89% savings)
 ```
 
-#### کب استعمال کریں
+#### کب استعمال کرنا ہے۔
 
-Stacked mode کو درج ذیل کے لیے استعمال کریں:
+اسٹیکڈ موڈ کا استعمال کریں:
 
-- Tool-heavy workflows (agentic coding، تحقیق)
-- لاگت کے حوالے سے حساس batch processing
-- جب آپ کو tokens کی زیادہ سے زیادہ بچت درکار ہو
+- ٹول ہیوی ورک فلوز (ایجنٹک کوڈنگ، تحقیق)
+- لاگت کے لحاظ سے حساس بیچ پروسیسنگ
+- جب آپ کو ٹوکن کی زیادہ سے زیادہ بچت کی ضرورت ہو۔
 
-Stacked pipelines کو global `stackedPipeline` compression
-setting کے ذریعے، یا کسی routing combo کو تفویض کیے گئے named compression combo کے ذریعے configure کیا جاتا ہے (اوپر
-Per-Combo Override دیکھیں) — auto-combo `modePack` کے ذریعے نہیں (وہ field صرف
-auto-combo model selection کے weights دوبارہ متعین کرتی ہے، اور `stacked` کوئی valid pack name نہیں ہے)۔
+اسٹیک شدہ پائپ لائنوں کو عالمی `stackedPipeline` کمپریشن سیٹنگ کے ذریعے ترتیب دیا جاتا ہے، یا کسی روٹنگ کومبو کو تفویض کردہ ایک نامزد کمپریشن کومبو کے ذریعے (اوپر پر کامبو اوور رائیڈ دیکھیں) — آٹو کومبو `modePack` کے ذریعے نہیں (وہ فیلڈ صرف آٹو کومبو ماڈل کے انتخاب کو دوبارہ وزن دیتی ہے، اور `stacked` ایک درست pack نام نہیں ہے)۔
 
 ---
 

@@ -185,83 +185,49 @@ merangkuminya.
 
 ---
 
-## Positif Palsu Antivirus
+## Antivirus Positif Palsu
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG mengkuarantin `README.md` dengan `MD:HttpRequest-inf[Susp]`
+### Avast/AVG kuarantin `README.md` dengan `MD:HttpRequest-inf[Susp]`
 
-**Ini ialah positif palsu. Tiada apa-apa yang dijangkiti dan tiada tindakan diperlukan.**
+**Ini adalah positif palsu. Tiada apa-apa yang dijangkiti, dan tiada tindakan diperlukan.**
 
-Avast dan AVG menjalankan heuristik yang menandai fail teks biasa/Markdown yang mengandungi banyak
-pautan yang kelihatan seperti permintaan HTTP. `README.md` OmniRoute disertakan dalam pakej npm (ia
-disenaraikan dalam `package.json` → `files`), maka ia ditempatkan di `node_modules/omniroute/README.md` semasa
-pemasangan global — dan ia mengandungi kira-kira 15 contoh `http://localhost:20128/...` (titik akhir
-HTTP/SSE MCP, URL `.well-known` A2A dan petikan `curl`). Kepadatan pautan tersebut
-mencukupi untuk mencetuskan heuristik itu.
+Avast dan AVG menjalankan heuristik yang membenderakan fail plain-text/Markdown yang mengandungi banyak pautan yang kelihatan seperti permintaan HTTP. OmniRoute `README.md` dihantar ke dalam pakej npm (ia disenaraikan dalam `package.json` → `files`), jadi ia mendarat di `node_modules/omniroute/README.md` pada — pemasangan global dan ia mengandungi ~ 15 `http://localhost:20128/...` contoh (titik akhir MCP HTTP/SSE, A2A `.well-known` URL dan coretan `curl` ). Ketumpatan pautan itu sudah cukup untuk menghalang heuristik.
 
-Jika perkara ini baru berlaku kebelakangan ini: jenis fail tersebut tidak berubah. README telah menambah
-jadual titik akhirnya (MCP HTTP + SSE + A2A telah ditambahkan) dan lebih banyak contoh `curl`, yang menyebabkannya
-melepasi ambang.
+Jika ini bermula baru-baru ini: fail tidak berubah dalam bentuk. README meningkatkan jadual titik akhirnya (MCP HTTP + SSE + A2A telah ditambah) dan lebih banyak contoh `curl`, yang menolaknya melepasi ambang.
 
-Fail tersebut ialah dokumentasi pasif tanpa sebarang kandungan boleh laku. Anda boleh memulihkannya
-daripada kuarantin dengan selamat.
+Fail adalah dokumentasi lengai dengan kandungan boleh laku sifar. Anda boleh memulihkannya dengan selamat daripada kuarantin.
 
-**Tindakan yang perlu diambil:**
+**Apa yang perlu dilakukan:**
 
-1. **Hentikan pemberitahuan** — kecualikan direktori pemasangan dalam antivirus anda
-   (Avast: Settings → Exceptions), dengan menambahkan laluan `node_modules` global anda dan/atau
-   direktori data OmniRoute (`~/.omniroute/`).
-2. **Laporkan positif palsu** — <https://www.avast.com/false-positive-file-form.php>,
-   dengan melampirkan `README.md` yang dikuarantin. Inilah pembaikan yang membantu semua orang kerana
-   heuristik vendor tersebut bertindak secara berlebihan terhadap fail teks.
+1. **Hentikan pemberitahuan** — mengecualikan direktori pemasangan dalam antivirus anda (Avast: Tetapan → Pengecualian), menambah laluan `node_modules` global anda and/or dir data OmniRoute (`~/.omniroute/`).
+2. **Laporkan positif palsu** — <https://www.avast.com/false-positive-file-form.php>, melampirkan `README.md` yang dikuarantin . Ini adalah pembetulan yang membantu semua orang, kerana ia adalah heuristik vendor yang bertindak balas berlebihan terhadap fail teks.
 
-**Mengapa kami tidak "membetulkan" perkara ini di pihak kami:** semua contoh menggunakan `http://localhost`, dan
-localhost tidak boleh menggunakan `https` tanpa kerumitan sijil ditandatangani sendiri. Mengubah suai dokumentasi untuk
-mengelakkan heuristik satu vendor akan menyusahkan setiap pembaca semata-mata untuk memenuhi kehendak pepijat pengimbas.
+**Mengapa kami tidak "membetulkan" perkara ini di pihak kami:** contohnya semua `http://localhost`, dan localhost tidak boleh menjadi `https` tanpa geseran sijil yang ditandatangani sendiri. Mengganggu dokumen untuk mengelak heuristik satu vendor akan menyakiti setiap pembaca untuk memenuhi pepijat pengimbas.
 
-### Kaspersky menandai aplikasi Desktop sebagai `PDM:Trojan.Win32.Generic`
+### Kaspersky membenderakan apl Desktop sebagai `PDM:Trojan.Win32.Generic`
 
-**Ini ialah positif palsu daripada heuristik tingkah laku. Tiada apa-apa yang dijangkiti.** Awalan
-`PDM:` Kaspersky bermaksud keputusan tersebut datang daripada Proactive Defense Module (System Watcher),
-yang menilai perkara yang _dilakukan_ oleh pemasang dan bukannya memadankannya dengan perisian hasad yang diketahui. Apabila
-ia dicetuskan, Kaspersky "mengembalikan" keseluruhan pemasangan — dengan memadamkan fail yang telah
-ditulis — maka aplikasi akhirnya rosak atau hilang.
+**Ini adalah positif palsu daripada heuristik tingkah laku. Tiada yang dijangkiti.** Awalan `PDM:` Kaspersky bermaksud keputusan itu datang daripada Modul Pertahanan Proaktifnya (Pemerhati Sistem), yang menilai perkara yang _lakukan_ oleh pemasang dan bukannya memadankannya dengan perisian hasad yang diketahui. Apabila ia menyala, Kaspersky "memusingkan" keseluruhan pemasangan — yang memadamkan fail yang telah ditulisnya — supaya apl itu akhirnya rosak atau hilang.
 
-Fail yang ditandainya ialah komponen standard bagi kebergantungan sumber terbuka yang diisytiharkan dan disertakan bersama
-aplikasi desktop, contohnya:
+Fail yang dibenderakannya ialah bahagian stok kebergantungan sumber terbuka yang diisytiharkan yang digabungkan dengan apl desktop, contohnya:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` dan
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), pustaka automasi
-  pelayar yang digunakan untuk log masuk penyedia dalam aplikasi dan sembang berasaskan pelayar.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — pengikatan natif `wreq-js` yang versinya ditetapkan, digunakan untuk HTTP dengan cap jari pelayar pada penyedia
-  berasaskan kuki web (`<arch>` ialah `x64` atau `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` dan `workerProcessEntry.js` — [Playwright](https://playwright.dev), pustaka automasi penyemak imbas yang digunakan untuk log masuk pembekal dalam apl dan sembang yang disokong penyemak imbas.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — ikatan asli `wreq-js` yang disematkan digunakan untuk HTTP cap jari pelayar pada penyedia kuki web (`<arch>` ialah `x64` atau `arm64`).
 
-**Mengapa ia dicetuskan:** pemasang Windows **belum ditandatangani dengan kod**, maka pemasang NSIS
-yang tidak ditandatangani tidak mempunyai reputasi dan heuristik tingkah laku berjalan dengan tahap keagresifan maksimum. Apabila digabungkan
-dengan DLL natif yang disertakan dan ratusan fail `.js` yang ditulis di bawah
-`%LOCALAPPDATA%\Programs\OmniRoute` (termasuk direktori pakej dengan akhiran cincangan daripada binaan
-kendiri Next.js), hal ini mencukupi untuk mencetuskan heuristik tersebut. Penandatanganan kod telah dirancang;
-sehingga ia dilaksanakan, keluaran baharu mungkin mengulangi perkara ini.
+**Mengapa ia menyala:** pemasang Windows ialah** belum ditandatangani kod** , jadi pemasang NSIS yang tidak ditandatangani mempunyai reputasi sifar dan heuristik tingkah laku dijalankan pada pencerobohan maksimum. Digabungkan dengan DLL asli yang digabungkan dan beratus-ratus fail `.js` yang ditulis di bawah `%LOCALAPPDATA%\Programs\OmniRoute` (termasuk direktori pakej akhiran cincang daripada binaan kendiri Next.js ), itu sudah cukup untuk menghalang heuristik. Penandatanganan kod dirancang; sehingga ia mendarat, keluaran baharu boleh mengulangi perkara ini.
 
-**Tindakan yang perlu diambil:**
+**Apa yang perlu dilakukan:**
 
-1. **Sahkan muat turun anda terlebih dahulu** (untuk menolak kemungkinan fail telah diusik). Setiap keluaran menerbitkan
-   `latest.yml`, yang medan `sha512`-nya (base64) merangkumi pemasang `OmniRoute.Setup.<version>.exe`.
-   Dalam PowerShell, dari folder yang mengandungi pemasang:
+1. **Sahkan muat turun anda dahulu** (menolak fail yang diusik). Setiap keluaran menerbitkan `latest.yml`, yang medan `sha512` (base64) meliputi pemasang `OmniRoute.Setup.<version>.exe`. Dalam PowerShell, dari folder yang mengandungi pemasang:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Output mesti sepadan dengan `latest.yml` → `sha512`. Jika tidak sepadan, padamkan fail tersebut dan
-   muat turun semula hanya daripada [halaman keluaran GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Pulihkan + kecualikan** — pulihkan item yang dikembalikan daripada kuarantin dan tambahkan pengecualian
-   untuk `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
-   kemudian pasang semula.
-3. **Laporkan positif palsu** — <https://opentip.kaspersky.com/>. Laporan positif palsu
-   yang dihantar oleh pengguna benar-benar mempercepat proses penyenaraian dibenarkan.
+   Keluaran mesti sepadan dengan `latest.yml` → `sha512`. Jika tidak, padamkan fail dan muat turun semula hanya dari [halaman keluaran GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Pulihkan + exclude** — memulihkan item yang digulung semula daripada kuarantin dan tambah pengecualian untuk `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Tetapan → Ancaman dan Pengecualian), kemudian pasang semula.
+3. **Laporkan positif palsu** — <https://opentip.kaspersky.com/>. Laporan FP yang diserahkan pengguna benar-benar mempercepatkan penyenaraian dibenarkan.
 
 ---
 
@@ -873,10 +839,10 @@ Lebih banyak gejala:
 
 ---
 
-## Masih Tersekat?
+## Masih Terperangkap?
 
-- **Isu GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Seni Bina**: Lihat [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) untuk butiran dalaman
-- **Rujukan API**: Lihat [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) untuk semua titik akhir
-- **Papan Pemuka Kesihatan**: Semak **Papan Pemuka → Kesihatan** untuk status sistem masa nyata
-- **Penterjemah**: Gunakan **Papan Pemuka → Penterjemah** untuk menyahpepijat isu format
+- **GitHub Isu** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Seni bina** : Lihat [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) untuk butiran dalaman
+- **API Rujukan** : Lihat [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) untuk semua titik akhir
+- **Papan Pemuka Kesihatan** : Semak** Papan pemuka → Kesihatan** untuk status sistem masa nyata
+- **Penterjemah** : Gunakan** Penterjemah → papan pemuka** untuk menyahpepijat isu format

@@ -12,57 +12,53 @@ OmniRoute ina njia tatu tofauti lakini zinazohusiana za ustahimilivu. Kila moja 
 
 > **Env-vs-dashibodi utangulizi kwa ajili ya kugeuza uthabiti.** Ustahimilivu wa kuchagua kuingia hugeuza mbegu kutoka kwa mazingira — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — hutoa tu _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). boolean iliendelea katika `resilienceSettings` (Dashibodi →** Mipangilio Ustahimilivu →** / `PATCH /api/resilience`, iliyohifadhiwa katika `key_value`) inashinda thamani ya env: kuhalalisha (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) huweka boolean iliyohifadhiwa wakati wowote inapokuwepo. Kuweka env var kama `true` kwenye upelekaji ambapo dashibodi tayari imehifadhiwa `false` kwa hivyo haibadilishi chochote — geuza kibadilishaji ndani** Mipangilio Ustahimilivu →** (au futa sehemu iliyohifadhiwa) badala yake.
 
-## 1. Mvunja Mzunguko wa Mtoa Huduma (Provider Circuit Breaker)
+## 1. Mvunjaji wa Mzunguko wa Mtoa huduma
 
-**Wigo:** mtoa huduma mzima (k.m., `glm`, `openai`, `anthropic`).
+**Upeo:** mtoa huduma mzima (kwa mfano, `glm`, `openai`, `anthropic`).
 
-**Kusudi:** kuacha kutuma trafiki kwa mtoa huduma anayeshindwa mara kwa mara katika kiwango cha upstream/huduma.
+**Kusudi:** acha kutuma trafiki kwa mtoa huduma ambayo mara kwa mara inashindwa katika kiwango upstream/service.
 
 **Utekelezaji:**
 
-- Darasa kuu: `src/shared/utils/circuitBreaker.ts`
-- Muunganisho: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API ya hali: `GET /api/monitoring/health`
-- API ya kuweka upya: `POST /api/resilience/reset`
-- Vifunikaji (wrappers): `open-sse/services/accountFallback.ts`
-- Jedwali la DB: `domain_circuit_breakers`
+- Darasa la msingi: `src/shared/utils/circuitBreaker.ts`
+- Wiring: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Hali API: `GET /api/monitoring/health`
+- Weka upya API: `POST /api/resilience/reset`
+- Waandishi: `open-sse/services/accountFallback.ts`
+- meza DB : `domain_circuit_breakers`
 
-**Hali:**
+**Mataifa:**
 
 - `CLOSED` — trafiki ya kawaida inaruhusiwa
-- `DEGRADED` — trafiki bado inaruhusiwa, lakini kushindwa kwa mtoa huduma kwa kiwango cha juu kunafuatiliwa; hurejea `CLOSED` baada ya mafanikio ya kutosha, baada ya jaribio halali la muunganisho, au baada ya kushikilia `OPEN` kwa muda mrefu zaidi kwa aina ya kushindwa ya mwisho (thamani yake ya `cooldownByKind`, vinginevyo `resetTimeout`, × `maxBackoffMultiplier`, angalau muda mmoja wa kupoa) bila kushindwa kupya
-- `OPEN` — mtoa hudume amezuiliwa kwa muda; uelekezaji wa combo humuruka
-- `HALF_OPEN` — muda wa kuweka upya umeisha; ombi la uchunguzi (probe) linaruhusiwa
+- Trafiki ya `DEGRADED` — bado inaruhusiwa, lakini mapungufu makubwa ya watoa huduma yanafuatiliwa; inarudi kwa `CLOSED` kwa mafanikio ya kutosha, kwenye jaribio halali la unganisho, au baada ya kushikilia kwa muda mrefu zaidi kwa `OPEN` kwa aina ya mwisho ya kutofaulu (thamani yake ya `cooldownByKind`, sivyo `resetTimeout`, × `maxBackoffMultiplier`, angalau baridi moja) bila kutofaulu mpya.
+- mtoa huduma wa `OPEN` — amezuiwa kwa muda; uelekezaji wa mseto huiruka
+- muda wa kuweka upya `HALF_OPEN` — umepita; ombi la uchunguzi linaruhusiwa
 
-**Chaguo-msingi zinazoweza kusanidiwa (`open-sse/config/constants.ts`, zimefichuliwa katika Dashboard → Settings → Resilience):**
+**Chaguo-msingi zinazoweza kusanidiwa (`open-sse/config/constants.ts`, iliyofichuliwa katika Mipangilio ya Dashibodi → → Uthabiti):**
 
-| Darasa  | Hudidimia baada ya | Hufunguka baada ya | Muda wa kuweka upya |
-| ------- | ------------------ | ------------------ | ------------------- |
-| OAuth   | kushindwa 5        | kushindwa 8        | 60s                 |
-| API-key | kushindwa 7        | kushindwa 12       | 30s                 |
-| Local   | inayotokana        | kushindwa 2        | 15s                 |
+| Darasa         | Imeshushwa hadhi katika | Inafunguliwa saa | Weka upya muda wa kuisha |
+| -------------- | ----------------------- | ---------------- | ------------------------ |
+| OAuth          | 5 kushindwa             | 8 kushindwa      | 60s                      |
+| Ufunguo wa API | 7 kushindwa             | 12 kushindwa     | 30s                      |
 
-`degradationThreshold` hudhibiti lini mtoa huduma anaingia `DEGRADED`; `failureThreshold` hudhibiti lini anafunguka na kurukwa. Wasifu wa watoa huduma wa Local bado haujafichuliwa kwenye ukurasa wa mipangilio ya Resilience.
+`degradationThreshold` hudhibiti mtoa huduma anapoingia `DEGRADED`; `failureThreshold` hudhibiti inapofunguka na kurukwa. `PROVIDER_PROFILES.local` (2 kushindwa / 15s) imefafanuliwa katika `open-sse/config/constants.ts` lakini** haijaunganishwa bado** : `getProviderCategory()` inarudisha `oauth` au `apikey` pekee, kwa hivyo watoa huduma wa ndani hutumia wasifu wa OAuth au ufunguo wa API.
 
-**Misimbo ya kukatiza:** hali za kiwango cha mtoa huduma tu `[408, 500, 502, 503, 504]`. USIKATIZE kwa makosa ya kiwango cha akaunti (mengi ya 401/403/429 — hayo ni ya muda wa kupoa (cooldown) au kufungwa (lockout)).
+**Nambari za safari:** hadhi za kiwango cha mtoa huduma pekee `[408, 500, 502, 503, 504]`. Fanya safari NOT kwa hitilafu za kiwango cha akaunti (zaidi 401/403/429 — hizo ni za kupoeza au kufungia nje).
 
-**Urejeshaji wa kuchelewa (lazy recovery):** wakati `OPEN` inapoisha muda wake, `getStatus()`, `canExecute()`, `getRetryAfterMs()` husasisha hali hadi `HALF_OPEN`. Usoaji huo huo (na kushindwa kunakofuata) hupunguza `DEGRADED` iliyopitwa na wakati kurudi `CLOSED`. Hakuna kipima muda cha usuli kinachohitajika.
+**Ahueni ya uvivu:** `OPEN` inapoisha, `getStatus()`, `canExecute()`, `getRetryAfterMs()` hali ya kuonyesha upya hadi `HALF_OPEN`. Vivyo hivyo (na kutofaulu kwa pili) kuoza `DEGRADED` iliyochakaa kurudi `CLOSED`. Hakuna kipima muda cha usuli kinachohitajika.
 
 ---
 
-### Muda wa Kupoa kwa Mtoa Huduma wa Kimataifa wa Kujiunga (Opt-in global Provider Cooldown) — geto la dirisha (window gate)
+### Jijumuishe kuingia kwa Mtoa Huduma wa kimataifa (lango la dirisha)
 
-Tabaka la nne, la **kujiunga kwa hiari** (`PROVIDER_COOLDOWN_ENABLED`, chaguo-msingi **kimezimwa**) huhifadhi kumbukumbu ya watoa huduma wanaoshindwa kati ya maombi katika
-`open-sse/services/providerCooldownTracker.ts`, inayotazamwa na utatuzi wa malengo ya combo ili maombi mfululizo ya combo yaache kutembelea tena mtoa huduma aliyeshindwa hivi karibuni. Vipengee vya kiwango cha mtoa huduma hutii geto la dirisha la `PROVIDER_PROFILES`:
+ya nne,** chagua kuingia** safu (`PROVIDER_COOLDOWN_ENABLED`, chaguo-msingi** imezimwa** ) huweka kumbukumbu ya maombi mtambuka ya watoa huduma walioshindwa katika `open-sse/services/providerCooldownTracker.ts`, iliyoshauriwa na azimio la shabaha ya mseto ili maombi ya mseto yanayofuatana yakome kumtembeza tena mtoa huduma ambaye ameshindwa. Maingizo ya kiwango cha mtoaji huheshimu lango la dirisha `PROVIDER_PROFILES` :
 
-| Wasifu  | hutikia baada ya (`providerFailureThreshold`) | ndani ya (`providerFailureWindowMs`) | hupoa kwa (`providerCooldownMs`) |
-| ------- | --------------------------------------------: | -----------------------------------: | -------------------------------: |
-| OAuth   |                                          `10` |                              `15min` |                           `5min` |
-| API key |                                          `15` |                              `30min` |                          `10min` |
+| Wasifu         | safari baada ya (`providerFailureThreshold`) | ndani (`providerFailureWindowMs`) | inapoa kwa (`providerCooldownMs`) |
+| -------------- | -------------------------------------------: | --------------------------------: | --------------------------------: |
+| OAuth          |                                         `10` |                           `15min` |                            `5min` |
+| ufunguo wa API |                                         `15` |                           `30min` |                           `10min` |
 
-Chini ya kizingiti mtoa huduma **hana**kubaliwa kuwa anapoa; mafanikio hufuta dirisha. Vipengee vya kiwango cha muunganisho (`provider:connectionId`) hubaki na kupungua kasi (backoff) wa kielezo `minRetryCooldownMs → maxRetryCooldownMs` badala yake. Kubatilisha:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Ulinzi dhidi ya kurudi nyuma: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Chini ya kizingiti mtoaji yuko** sivyo** kuchukuliwa baridi; mafanikio husafisha dirisha. Maingizo ya kiwango cha muunganisho (`provider:connectionId`) huweka nyuma kipeo cha `minRetryCooldownMs → maxRetryCooldownMs` badala yake. Ubatilifu: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Mlinzi wa kurudisha nyuma: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Kupunguza Uunganisho
 
@@ -688,6 +684,21 @@ iliyoisha. Vizuizi vya kweli:
 
 ---
 
+## Wakati OmniRoute yenyewe haipatikani
+
+Kikatiza saketi cha mtoa huduma, upunguzaji kasi wa muunganisho, na kufunga nje kwa mfano vyote huendeshwa ndani ya lango. Ikiwa mteja hawezi kufikia lango, anapata hitilafu ya uunganisho. OmniRoute haiwezi kukatiza kushindwa huko. Mteja anaamua kama atajaribu tena na ni ujumbe gani wa kuonyesha.
+
+OmniRoute kwa sasa haitoi urejesho wa upande wa mteja na haifafanui sera yake. Sanidi njia yoyote mbadala katika mteja au mbele ya lango.
+
+- `GET /api/health` hukagua uhai bila uthibitishaji.
+- `GET /api/health/ping` hukagua utayari, ikijumuisha kama hifadhidata inajibu.
+- `GET /api/monitoring/health` inawapa wapigaji walioidhinishwa muhtasari wa kina wa afya.
+- `omniroute launch <tool>` huchunguza `/api/monitoring/health` kabla ya kuanzisha mteja. Inaweza kuanzisha lango la ndani kiotomatiki. Kwa `--no-start`, lango lisiloweza kufikiwa husababisha `GatewayUnreachable` na kutoka kwa msimbo `69`.
+
+Ili kutenganisha mteja kutoka OmniRoute, fuata [Rejesha usanidi wa mteja](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Utatuzi wa Hitilafu
 
 - Combo ya weighted hujibu `503 all_targets_cooling_down` (`Retry-After` imewekwa, `diagnostics.excluded` inataja kila lengo kwa `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → kundi (pool) limewekwa mipangilio na limeunganishwa, kila lengo limetengwa tu na kipima-muda cha ustahimilivu; onyo `[COMBO] Weighted selection: every target excluded before dispatch — …` linataja sababu na sekunde zilizobaki. `404 no_executable_targets` kutoka combo hiyohiyo inamaanisha hakuna kipima-muda cha ustahimilivu kilichohusika (hakuna cha kuendesha, au kila akaunti imeshindwa uchunguzi wa upatikanaji). Imejengwa katika `open-sse/services/combo/pinRecovery.ts` kutoka kwa vitengwa vilivyokusanywa katika `targetResolution.ts`.
@@ -699,91 +710,65 @@ iliyoisha. Vizuizi vya kweli:
 
 ---
 
-## Hali ya wakati wa utekelezaji — rejea ya haraka ya ajenti
+## Marejeleo ya haraka ya wakala wa hali — ya wakati wa utekelezaji
 
-> Imehamishiwa kama ilivyo (verbatim) kutoka `AGENTS.md` → "Resilience Runtime State" (PR #12743) ili
-> mwongozo wa ajenti ubaki chini ya bajeti ya muktadha ya 40k. Huu ni mtazamo uliofupishwa unaolenga
-> ajenti wa sehemu zilizo hapo juu; sehemu zenye namba zinabaki kuwa marejeleo kamili.
+> Imehamishwa kwa neno moja kutoka `AGENTS.md` → "Jimbo la Muda wa Ustahimilivu" (PR #12743) ili mwongozo wa wakala ubaki chini ya bajeti ya muktadha wa 40k. Ni mwonekano uliofupishwa, unaoelekea wakala wa sehemu zilizo hapo juu; sehemu zilizowekwa nambari zinabaki kuwa marejeleo kamili.
 
-OmniRoute ina mbinu tatu zinazohusiana lakini tofauti za kushughulikia kushindwa kwa muda. Weka
-wigo wao tofauti unapotatua tabia ya uelekezaji. Angalia
-[mchoro wa tabaka 3 za ustahimilivu](../diagrams/exported/resilience-3layers.svg)
-(chimbuko: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-kwa ramani ya mwonekano wa haraka.
+OmniRoute ina njia tatu zinazohusiana lakini tofauti za kutofaulu kwa muda. Weka upeo wao tofauti wakati wa kurekebisha tabia ya uelekezaji. Tazama [mchoro wa uthabiti wa safu-3](../diagrams/exported/resilience-3layers.svg) (chanzo: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) kwa ramani ya mwonekano.
 
-### Kivunja-Mzunguko cha Mtoa Huduma (Provider Circuit Breaker)
+### Mtoa huduma Mzunguko
 
-**Wigo**: mtoa huduma mzima, k.m. `glm`, `openai`, `anthropic`.
+**Upeo** : mtoa huduma mzima, kwa mfano `glm`, `openai`, `anthropic`.
 
-**Lengo**: kuacha kutuma trafiki kwa mtoa huduma anayeshindwa mara kwa mara katika kiwango cha
-upstream/huduma, ili mtoa huduma mmoja asiye na afya asipunguze kasi ya kila ombi.
+**Kusudi** : acha kutuma trafiki kwa mtoa huduma ambayo inashindwa mara kwa mara katika kiwango cha upstream/service, ili mtoa huduma mmoja asiye na afya asipunguze kasi ya kila ombi.
 
-**Utekelezaji**:
+**Utekelezaji** :
 
-- Darasa kuu: `src/shared/utils/circuitBreaker.ts`
-- Uunganishaji wa lango la chat/utekelezaji: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API ya hali ya wakati wa utekelezaji: `src/app/api/monitoring/health/route.ts`
-- Vifuniko vya pamoja: `open-sse/services/accountFallback.ts`
-- Jedwali la hali linalohifadhiwa: `domain_circuit_breakers`
+- Darasa la msingi: `src/shared/utils/circuitBreaker.ts`
+- Wiring gate/execution ya gumzo: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Hali ya wakati wa utekelezaji API: `src/app/api/monitoring/health/route.ts`
+- Vifungashio vilivyoshirikiwa: `open-sse/services/accountFallback.ts`
+- Jedwali la hali inayoendelea: `domain_circuit_breakers`
 
-**Hali** (4 — `src/shared/utils/circuitBreaker.ts`):
+**Mataifa** ( `src/shared/utils/circuitBreaker.ts` 4 — ):
 
 - `CLOSED`: trafiki ya kawaida inaruhusiwa.
-- `DEGRADED`: kanda ya onyo la mapema — kushindwa kumevuka kizingiti cha kupungua lakini bado
-  hakijafikia kizingiti cha kivunja-mzunguko; trafiki bado inaendelea, dashibodi zinaonyesha onyo.
-  Jaribio halali la muunganisho au dirisha tulivu bila kushindwa kupya huirudisha hadi `CLOSED`
-  (`docs/architecture/RESILIENCE_GUIDE.md` ina dirisha hilo).
-- `OPEN`: mtoa huduma amezuiwa kwa muda; witoaji hupokea jibu la provider-circuit-open
-  au uelekezaji wa combo huruka hadi lengo lingine.
-- `HALF_OPEN`: muda wa kuweka upya (reset timeout) umeisha; ruhusu ombi la uchunguzi (probe).
-  Mafanikio hufunga kivunja-mzunguko, kushindwa hukifungua tena.
+- `DEGRADED`: bendi ya kuonya mapema — kushindwa kuvuka kizingiti cha uharibifu lakini bado si kizingiti cha mvunjaji; trafiki bado inatiririka, dashibodi zinaonyesha onyo. Jaribio halali la muunganisho au dirisha tulivu lisilo na kosa jipya huirudisha kwa `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` ina dirisha).
+- `OPEN`: mtoaji amezuiwa kwa muda; wapigaji simu hupata jibu la mtoa huduma-wazi-mzunguko au kurukwa kwa uelekezaji wa mseto hadi kwa lengo lingine.
+- `HALF_OPEN`: muda wa kuweka upya umepita; ruhusu ombi la uchunguzi. Mafanikio hufunga mvunjaji, kushindwa hufungua tena.
 
-**Chaguomsingi** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, zinazotumika kupitia
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` katika `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` katika `src/sse/handlers/chatHelpers.ts`). Kivunja-mzunguko cha
-mtoa huduma mzima kinaendeshwa kwa `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Chaguomsingi** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, inatumiwa kupitia `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` katika `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` katika `src/sse/handlers/chatHelpers.ts`). Kivunja mtoa huduma mzima huendesha `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Wasifu         |  hupungua kwa | hufunguka kwa (`circuitBreakerThreshold`) | kuweka upya (`circuitBreakerReset`) |
-| -------------- | ------------: | ----------------------------------------: | ----------------------------------: |
-| OAuth          |           `5` |                                       `8` |                               `60s` |
-| Ufunguo wa API |           `7` |                                      `12` |                               `30s` |
-| Ya ndani       | (inayotokana) |                                       `2` |                               `15s` |
+| Wasifu         | inashusha hadhi | inafungua saa (`circuitBreakerThreshold`) | weka upya (`circuitBreakerReset`) |
+| -------------- | --------------: | ----------------------------------------: | --------------------------------: |
+| OAuth          |             `5` |                                       `8` |                             `60s` |
+| ufunguo wa API |             `7` |                                      `12` |                             `30s` |
 
-`PROVIDER_PROFILES` pia hufafanua `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (dakika 15/30/5) na `providerCooldownMs` (dakika 5/10/1): hizi huchochea
-**lango la dirisha la Provider Cooldown ya kimataifa ya hiari (opt-in)** (`PROVIDER_COOLDOWN_ENABLED`,
-chaguomsingi imezimwa) — ingizo la kiwango cha mtoa huduma katika
-`open-sse/services/providerCooldownTracker.ts` huhesabiwa kama linalopooza tu baada ya kushindwa
-kwa idadi ya `providerFailureThreshold` ndani ya `providerFailureWindowMs`, kisha hupooza kwa
-`providerCooldownMs`. Hizi SI vizingiti vya kivunja-mzunguko kilicho hai — usizirekebishe
-ukitarajia tabia ya kivunja-mzunguko. Kila chaguomsingi inaweza kubatilishwa kupitia
-vigezo vya mazingira `OMNIROUTE_PROVIDER_BREAKER_*` na `OMNIROUTE_CIRCUIT_BREAKER_*`;
-jedwali la rejea sahihi la wakati wa utekelezaji liko katika `docs/architecture/RESILIENCE_GUIDE.md`.
+Wasifu wa `local` (`2` kushindwa / `15s`) pia upo katika `PROVIDER_PROFILES`, lakini haujaunganishwa kwenye kivunja: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) inakubali tu `oauth` au `apikey`, na `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) inarejesha mojawapo ya hizo mbili ( watoa huduma ambao hawajasajiliwa wanapata `apikey`).
 
-Hali za kushindwa za kiwango cha mtoa huduma pekee ndizo zinazopaswa kuuwasha kivunja-mzunguko cha mtoa huduma:
+`PROVIDER_PROFILES` pia inafafanua `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) na `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, ambapo maadili ya ndani hayatumiki kwa sababu sawa na hapo juu:** lango la dirisha la Cooldown ya Mtoa Huduma ya kuchagua kuingia** (`PROVIDER_COOLDOWN_ENABLED`, chaguo-msingi kuzima) — kiingilio cha kiwango cha mtoa huduma katika `open-sse/services/providerCooldownTracker.ts` huhesabiwa tu kama kupoeza baada ya hitilafu za `providerFailureThreshold` ndani `providerFailureWindowMs`, na kisha kupoa kwa `providerCooldownMs`. Ni NOT vizingiti vya mvunjaji wa moja kwa moja — usizipange ukitarajia tabia ya mvunjaji. Kila chaguo-msingi inaweza kubatilishwa kupitia `OMNIROUTE_PROVIDER_BREAKER_*` na `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; jedwali la marejeleo la wakati wa kukimbia linaishi `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Hali za kutofaulu kwa kiwango cha mtoa huduma pekee ndizo zinazopaswa kumkwaza kivunja mtoa huduma:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Usiuwashe kivunja-mzunguko cha mtoa huduma mzima kwa makosa ya kawaida ya akaunti/ufunguo/modeli
-kama visa vingi vya `401`, `403`, au `429`. Hivyo mara nyingi ni vya connection cooldown au model
-lockout. `403` ya mtoa huduma wa kawaida wa ufunguo wa API inapaswa kuwa inayoweza kupona
-isipokuwa ikigawanywa kama kosa la mwisho la mtoa huduma/akaunti.
+Usitembeze kivunja mtoa huduma mzima kwa makosa ya kawaida account/key/model kama vile visa vingi `401`, `403`, au `429`. Hizo kwa kawaida ni za upunguzaji kasi wa muunganisho au mtindo wa kufunga nje. Mtoa huduma wa ufunguo wa kawaida wa API `403` anafaa kurejeshwa isipokuwa iwe imeainishwa kama hitilafu provider/account ya mwisho.
 
-Mvunjaji hutumia urejeshaji wa uvivu, si kipima muda cha usuli. `OPEN` inapokwisha muda wake, kusoma kama vile `getStatus()`, `canExecute()`, na `getRetryAfterMs()` hufanya upya hali kuwa `HALF_OPEN`, hivyo dashibodi na wajenzi wa wagombea wa combo hawaendelei kumtenga mtoa huduma aliyekwisha muda wake milele.
+Kivunjaji hutumia ahueni ya uvivu, sio kipima saa cha usuli. Muda wa `OPEN` unapoisha, husomwa kama vile `getStatus()`, `canExecute()`, na `getRetryAfterMs()` onyesha hali upya kwa `HALF_OPEN`, ili dashibodi na waundaji wa wagombea wa mchanganyiko wasiendelee kumtenga mtoa huduma aliyemaliza muda wake milele.
 
-### Muda wa Kupooza kwa Muunganisho
+### Cooldown ya Muunganisho
 
-**Wigo**: muunganisho/akaunti/ufunguo mmoja wa mtoa huduma.
+**Upeo** : mtoa huduma connection/account/key.
 
-**Kusudi**: kuruka kwa muda ufunguo/akaunti moja mbaya huku ukiruhusu miunganisho mingine ya mtoa huduma yuleyule kuendelea kutumikia maombi.
+**Kusudi** : ruka key/account moja mbaya kwa muda huku ukiruhusu miunganisho mingine kwa mtoaji huyo huyo kuendelea kuwasilisha maombi.
 
-**Utekelezaji**:
+**Utekelezaji** :
 
-- Njia ya kuandika/kusasisha: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Uchaguzi/uchujaji wa akaunti: `src/sse/services/auth.ts::getProviderCredentials...`
-- Hesabu ya muda wa kupooza: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- njia Write/update : `src/sse/services/auth.ts::markAccountUnavailable()`
+- Akaunti selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Hesabu ya kushuka chini: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Mipangilio: `src/lib/resilience/settings.ts`
 
 Sehemu muhimu kwenye miunganisho ya watoa huduma:
@@ -797,50 +782,50 @@ errorCode;
 backoffLevel;
 ```
 
-Wakati wa uchaguzi wa akaunti, muunganisho hurukwa huku:
+Wakati wa kuchagua akaunti, muunganisho unarukwa wakati:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Muda wa kupooza pia ni wa uvivu: `rateLimitedUntil` ikishapita, muunganisho hupata sifa tena. Baada ya matumizi yenye mafanikio, `clearAccountError()` hufuta `testStatus`, `rateLimitedUntil`, sehemu za makosa, na `backoffLevel`.
+Cooldowns pia ni wavivu: wakati `rateLimitedUntil` iko katika siku za nyuma, uunganisho unastahiki tena. Inapotumiwa kwa mafanikio, `clearAccountError()` husafisha `testStatus`, `rateLimitedUntil`, sehemu za makosa na `backoffLevel`.
 
-Tabia chaguo-msingi ya muda wa kupooza kwa muunganisho:
+Tabia chaguomsingi ya upunguzaji wa muunganisho:
 
-- Muda wa msingi wa kupooza wa OAuth: `5s`.
-- Muda wa msingi wa kupooza wa ufunguo wa API: `3s`.
-- Kwa ufunguo wa API, `429` inapaswa kupendelea vidokezo vya kujaribu tena vya mkondo wa juu (`Retry-After`, vichwa vya kurejesha, au maandishi ya kurejesha yanayoweza kuchanganuliwa) yanapopatikana.
-- Kushindwa kwa kurudiarudia kunakoweza kurejeshwa hutumia backoff ya kipeuo:
+- OAuth msingi baridi: `5s`.
+- Upunguzaji wa ufunguo wa API-msingi: `3s`.
+- Ufunguo wa API `429` unapaswa kupendelea vidokezo vya kujaribu tena mkondo wa juu (`Retry-After`, weka upya vichwa, au maandishi yanayoweza kuchanganuliwa) yanapopatikana.
+- Makosa yanayorudiwa yanayoweza kurejeshwa hutumia urejesho wa kielelezo:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Ulinzi wa anti-thundering-herd huzuia kushindwa kwa sambamba kwenye muunganisho huo huo kuongeza muda wa kupooza kwa kurudiarudia au kuongeza `backoffLevel` mara mbili.
+Mlinzi wa kuzuia ngurumo huzuia hitilafu za wakati mmoja kwenye muunganisho sawa kutokana na kupanua mara kwa mara ubaridi au kuongeza mara mbili `backoffLevel`.
 
-Hali za mwisho si muda wa kupooza. `banned`, `expired` (ambayo inakuwa ya mwisho tu baada ya majaribio N yaliyowekewa kikomo kupitia `EXPIRED_RETRY_MAX`), na `credits_exhausted` zimekusudiwa kubaki hazipatikani hadi sifa za uthibitishaji/mipangilio zibadilike au mwendeshaji azirejeshe upya. Usiandike juu ya hali za mwisho kwa hali ya mpito ya muda wa kupooza.
+Majimbo ya vituo sio baridi. `banned`, `expired` (ambayo inakuwa terminal tu baada ya N kujaribiwa tena kupitia `EXPIRED_RETRY_MAX`), na `credits_exhausted` inakusudiwa kusalia bila kupatikana hadi credentials/settings ibadilike au opereta aiweke upya. Usifute hali ya mwisho na hali ya utulivu ya muda mfupi.
 
-### Kufungwa kwa Modeli
+### Kufungia kwa Mfano
 
-**Wigo**: mtoa huduma + muunganisho + modeli.
+**Upeo** : mtoa huduma + muunganisho wa + mfano.
 
-**Kusudi**: epuka kulemaza muunganisho mzima wakati modeli moja tu haipatikani au imezuiwa na mgawo kwa muunganisho huo.
+**Kusudi** : epuka kuzima muunganisho mzima wakati muundo mmoja pekee haupatikani au umezuiwa kwa muunganisho huo.
 
 Mifano:
 
-- Watoa huduma wenye mgawo kwa kila modeli wanaorejesha `429`.
-- Watoa huduma wa ndani wanaorejesha `404` kwa modeli moja inayokosekana.
-- Kushindwa kwa ruhusa za hali/modeli mahususi kwa mtoa huduma kama hali zilizochaguliwa za Grok.
+- Watoa huduma za upendeleo kwa kila mfano wanaorudisha `429`.
+- Watoa huduma wa ndani wanaorudisha `404` kwa modeli moja inayokosekana.
+- Kushindwa kwa ruhusa za mode/model maalum kwa mtoaji kama vile modi Grok zilizochaguliwa.
 
-Kufungwa kwa modeli kunapatikana kwenye `open-sse/services/accountFallback.ts` na huruhusu muunganisho huo huo kuendelea kutumikia modeli nyingine.
+Kufungia nje kwa mfano huishi `open-sse/services/accountFallback.ts` na huruhusu muunganisho sawa kuendelea kuhudumia miundo mingine.
 
 ### Mwongozo wa Utatuzi
 
-- Ikiwa funguo zote za mtoa huduma zimerukwa, kagua hali ya mvunjaji wa mtoa huduma pamoja na `rateLimitedUntil`/`testStatus` ya kila muunganisho.
-- Ikiwa mtoa huduma anaonekana ametengwa kabisa baada ya dirisha la kurejesha, angalia kama msimbo unasoma `state` ghafi badala ya kutumia `getStatus()`/`canExecute()`.
-- Ikiwa ufunguo mmoja wa mtoa huduma unashindwa lakini wengine wangepaswa kufanya kazi, pendelea muda wa kupooza kwa muunganisho badala ya mvunjaji wa mtoa huduma.
-- Ikiwa modeli moja tu inashindwa, pendelea kufungwa kwa modeli badala ya muda wa kupooza kwa muunganisho.
-- Ikiwa hali inapaswa kujiponya yenyewe, inapaswa kuwa na alama ya muda ya siku zijazo/muda wa kukwisha wa kurejesha na njia ya kusoma inayofanya upya hali iliyokwisha. Hali za kudumu zinahitaji mabadiliko ya mwongozo ya sifa za uthibitishaji au usanidi.
+- Ikiwa vitufe vyote vya mtoa huduma vimerukwa, kagua hali ya kivunja mtoa huduma na kila muunganisho `rateLimitedUntil`/`testStatus`.
+- Ikiwa mtoa huduma anaonekana kutengwa kabisa baada ya dirisha la kuweka upya, angalia ikiwa msimbo unasoma `state` ghafi badala ya kutumia `getStatus()`/`canExecute()`.
+- Ikiwa ufunguo mmoja wa mtoa huduma utashindwa lakini wengine wanapaswa kufanya kazi, pendelea upunguzaji wa muunganisho badala ya kikatiza cha mtoa huduma.
+- Iwapo muundo mmoja pekee hautafaulu, pendelea kufungia nje kwa muundo badala ya upunguzaji wa muunganisho.
+- Iwapo jimbo linapaswa kujirekebisha, linapaswa kuwa na muda wa timestamp/reset siku zijazo na njia ya kusoma ambayo itaonyesha upya hali ambayo muda wake umeisha. Hali za kudumu zinahitaji kitambulisho mwenyewe au mabadiliko ya usanidi.
 
 ---
 

@@ -12,54 +12,53 @@ OmniRoute יש שלושה מנגנוני חוסן ברורים אך קשורים
 
 > **עדיפות Env-vs-Dashboard עבור חילופי חוסן.** חוסן ההצטרפות הופך את ה-seeded מהסביבה — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — לספק רק את _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). בוליאן נמשך ב- `resilienceSettings` (Dashboard →** הגדרות → Resilience** / `PATCH /api/resilience`, מאוחסן ב- `key_value`) מנצח את ערך ה-env: נורמליזציה (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) שומרת על הבולאלי המאוחסן בכל פעם שקיים אחד. הגדרה של env var כזה ל- `true` בפריסה שבה לוח המחוונים כבר שמר את `false` ולכן לא משנה כלום. — הפוך את המתג פנימה** הגדרות → Resilience** (או נקה את השדה המאוחסן) במקום זאת.
 
-## 1. מפסק מעגל ברמת ספק (Provider Circuit Breaker)
+## 1. מפסק חשמל של ספק
 
-**היקף:** ספק שלם (למשל, `glm`, `openai`, `anthropic`).
+**תְחוּם:** ספק שלם (למשל, `glm`, `openai`, `anthropic`).
 
-**מטרה:** להפסיק לשלוח תעבורה לספק שנכשל שוב ושוב ברמת ה-upstream/השירות.
+**מַטָרָה:** להפסיק לשלוח תעבורה לספק שנכשל שוב ושוב ברמת upstream/service.
 
-**מימוש:**
+**יישום:**
 
-- מחלקת ליבה: `src/shared/utils/circuitBreaker.ts`
+- שיעור ליבה: `src/shared/utils/circuitBreaker.ts`
 - חיווט: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- ‏API סטטוס: `GET /api/monitoring/health`
-- ‏API איפוס: `POST /api/resilience/reset`
-- עטיפות (Wrappers): `open-sse/services/accountFallback.ts`
-- טבלת DB: `domain_circuit_breakers`
+- סטטוס API: `GET /api/monitoring/health`
+- אפס API: `POST /api/resilience/reset`
+- עטיפות: `open-sse/services/accountFallback.ts`
+- שולחן DB : `domain_circuit_breakers`
 
-**מצבים:**
+**מדינות:**
 
-- `CLOSED` — תעבורה רגילה מותרת
-- `DEGRADED` — תעבורה עדיין מותרת, אך כשלים מוגברים של הספק נמצאים במעקב; חוזר ל-`CLOSED` לאחר מספיק הצלחות, לאחר בדיקת חיבור תקינה, או לאחר החזקת ה-`OPEN` הארוכה ביותר עבור סוג הכשל האחרון (ערך ה-`cooldownByKind` שלו, אחרת `resetTimeout`, × `maxBackoffMultiplier`, לפחות cooldown אחד) ללא כשל חדש
-- `OPEN` — הספק חסום זמנית; ניתוב combo מדלג עליו
-- `HALF_OPEN` — הזמן הקצוב לאיפוס חלף; בקשת בדיקה (probe) מותרת
+- `CLOSED` — תנועה רגילה מותרת
+- תעבורת `DEGRADED` — עדיין מותרת, אך עוקבים אחר כשלים בספקים גבוהים; חוזר ל- `CLOSED` בהצלחות מספיקות, בבדיקת חיבור תקפה, או לאחר החזקה של `OPEN` הארוכה ביותר עבור סוג הכשל האחרון (ערך `cooldownByKind` שלו, else `resetTimeout`, × `maxBackoffMultiplier`, לפחות צינון אחד) ללא כשל חדש
+- ספק `OPEN` — נחסם זמנית; ניתוב משולב מדלג עליו
+- פסק הזמן לאיפוס `HALF_OPEN` — חלף; בקשת בדיקה מותרת
 
-**ברירות מחדל ניתנות להגדרה (`open-sse/config/constants.ts`, חשופות תחת Dashboard → Settings → Resilience):**
+**ברירות מחדל הניתנות להגדרה (`open-sse/config/constants.ts`, חשופה ב-Dashboard → Settings → Resilience):**
 
-| מחלקה   | נכנס ל-DEGRADED לאחר | נפתח (OPEN) לאחר | זמן קצוב לאיפוס |
-| ------- | -------------------- | ---------------- | --------------- |
-| OAuth   | 5 כשלים              | 8 כשלים          | 60s             |
-| API-key | 7 כשלים              | 12 כשלים         | 30s             |
-| Local   | נגזר                 | 2 כשלים          | 15s             |
+| מַחלָקָה | מושפל ב | נפתח ב      | אפס פסק זמן |
+| -------- | ------- | ----------- | ----------- |
+| OAuth    | 5 כשלים | 8 כשלים     | שנות ה-60   |
+| מפתח API | 7 כשלים | 12 כישלונות | שנות ה-30   |
 
-‏`degradationThreshold` שולט מתי ספק נכנס ל-`DEGRADED`; `failureThreshold` שולט מתי הוא נפתח ומדולג עליו. פרופילי ספק מקומיים (Local) עדיין אינם חשופים בעמוד ההגדרות של Resilience.
+`degradationThreshold` שולט כאשר ספק נכנס `DEGRADED`; `failureThreshold` שולט מתי הוא נפתח ומדלגים עליו. `PROVIDER_PROFILES.local` (2 כשלים / 15s) מוגדר ב- `open-sse/config/constants.ts` אבל** עדיין לא חוטי** : `getProviderCategory()` מחזיר רק `oauth` או `apikey`, כך שספקים מקומיים משתמשים בפרופיל OAuth או API-key.
 
-**קודי שקיעה (Trip):** רק סטטוסים ברמת הספק `[408, 500, 502, 503, 504]`. אין לשקוע עבור שגיאות ברמת החשבון (רוב 401/403/429 — אלה שייכות ל-cooldown או ל-lockout).
+**קודי טיול:** רק סטטוסים ברמת הספק `[408, 500, 502, 503, 504]`. בצע NOT trip עבור שגיאות ברמת החשבון (רוב 401/403/429 — אלו שייכים ל-cooldown או נעילה).
 
-**התאוששות עצלה (Lazy):** כשתוקף ה-`OPEN` פג, `getStatus()`, `canExecute()`, `getRetryAfterMs()` מרעננים את המצב ל-`HALF_OPEN`. אותן קריאות (והכשל הבא) מדרדרות `DEGRADED` מיושן חזרה ל-`CLOSED`. אין צורך בטיימר רקע.
+**התאוששות עצלנית:** כאשר `OPEN` יפוג, מצב רענון `getStatus()`, `canExecute()`, `getRetryAfterMs()` ל- `HALF_OPEN`. אותו קורא (והכישלון הבא) הדעיכה של `DEGRADED` מעופש בחזרה ל- `CLOSED`. אין צורך בטיימר רקע.
 
 ---
 
-### ‏Provider Cooldown גלובלי בהצטרפות (opt-in) — שער חלון
+### הצטרפות לספק גלובלי להתקרר (שער חלון)
 
-שכבה רביעית, **בהצטרפות (opt-in)** (`PROVIDER_COOLDOWN_ENABLED`, ברירת מחדל **כבוי**), שומרת זיכרון חוצה-בקשות של ספקים נכשלים ב-`open-sse/services/providerCooldownTracker.ts`, ופתרון יעדי combo נועץ בה כך שבקשות combo רצופות מפסיקות לחזור ולעבור על ספק שזה עתה נכשל. רשומות ברמת הספק מכבדות את שער החלון של `PROVIDER_PROFILES`:
+רביעית,** הצטרפות** שכבה (`PROVIDER_COOLDOWN_ENABLED`, ברירת מחדל** כבוי** ) שומרת זיכרון של בקשות צולבות של ספקים כושלים ב- `open-sse/services/providerCooldownTracker.ts`, עם ייעוץ של רזולוציית יעד משולבת, כך שבקשות משולבות רצופות מפסיקות ללכת מחדש לספק שזה עתה נכשל. ערכים ברמת הספק מכבדים את שער החלון `PROVIDER_PROFILES` :
 
-| פרופיל  | שוקע לאחר (`providerFailureThreshold`) | בתוך (`providerFailureWindowMs`) | מתקרר למשך (`providerCooldownMs`) |
-| ------- | -------------------------------------: | -------------------------------: | --------------------------------: |
-| OAuth   |                                   `10` |                          `15min` |                            `5min` |
-| API key |                                   `15` |                          `30min` |                           `10min` |
+| פּרוֹפִיל | טיולים אחרי (`providerFailureThreshold`) | בפנים (`providerFailureWindowMs`) | מתקרר עבור (`providerCooldownMs`) |
+| --------- | ---------------------------------------: | --------------------------------: | --------------------------------: |
+| OAuth     |                                     `10` |                           `15min` |                            `5min` |
+| API       |                                     `15` |                           `30min` |                           `10min` |
 
-מתחת לסף, הספק **לא** נחשב כמתקרר; הצלחה מנקה את החלון. רשומות ברמת החיבור (`provider:connectionId`) שומרות במקום זאת על ה-backoff האקספוננציאלי `minRetryCooldownMs → maxRetryCooldownMs`. עקיפות (Overrides): `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. מנגנון הגנה מפני רגרסיה: `tests/unit/provider-cooldown-window-gate.test.ts`.
+מתחת לסף שהספק נמצא** לֹא** נחשב לקירור; הצלחה מנקה את החלון. ערכים ברמת החיבור (`provider:connectionId`) שומרים על החזרת ה- `minRetryCooldownMs → maxRetryCooldownMs` המעריכית במקום זאת. עקיפות: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. משמר רגרסיה: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. קירור חיבור
 
@@ -697,6 +696,21 @@ connectionId)` לפני החיפוש ב-`exhaustedConnections`) — צירוף �
 
 ---
 
+## כאשר OmniRoute עצמו אינו ניתן להשגה
+
+מפסק החשמל של הספק, התקררות החיבור ונעילת הדגם פועלים כולם בתוך השער. אם הלקוח לא יכול להגיע לשער, הוא מקבל שגיאת חיבור. OmniRoute לא יכול ליירט את הכישלון הזה. הלקוח מחליט אם לנסות שוב ואיזו הודעה להציג.
+
+OmniRoute לא מספקת כרגע נפילה בצד הלקוח ואינה מגדירה עבורה מדיניות. הגדר כל מסלול חלופי בלקוח או מול השער.
+
+- `GET /api/health` בודק חיים ללא אימות.
+- `GET /api/health/ping` בודק מוכנות, כולל האם מסד הנתונים מגיב.
+- `GET /api/monitoring/health` נותן למתקשרים מאומתים סקירה בריאותית עמוקה יותר.
+- `omniroute launch <tool>` חוקר `/api/monitoring/health` לפני הפעלת הלקוח. זה יכול להפעיל שער מקומי באופן אוטומטי. עם `--no-start`, שער בלתי ניתן להשגה מביא ל- `GatewayUnreachable` ולקוד יציאה `69`.
+
+כדי לנתק לקוח מ- OmniRoute, עקוב אחר [Revert Configuration Client](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## ניפוי שגיאות
 
 - קומבו משוקלל (Weighted) משיב `503 all_targets_cooling_down` (`Retry-After` מוגדר, `diagnostics.excluded` מפרט כל יעד עם `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → המאגר מוגדר ומחובר, פשוט כל יעד מוחרג על ידי טיימר שרידות; האזהרה `[COMBO] Weighted selection: every target excluded before dispatch — …` מציינת את הסיבות ואת מספר השניות שנותרו. `404 no_executable_targets` מאותו קומבו פירושו שלא היה מעורב אף טיימר שרידות (אין מה להריץ, או שכל חשבון נכשל בבדיקת הזמינות). נבנה ב-`open-sse/services/combo/pinRecovery.ts` מתוך ההחרגות שנאספו ב-`targetResolution.ts`.
@@ -708,96 +722,68 @@ connectionId)` לפני החיפוש ב-`exhaustedConnections`) — צירוף �
 
 ---
 
-## מצב זמן ריצה — עזר מהיר לסוכן
+## התייחסות מהירה לסוכן — במצב זמן ריצה
 
-> הועבר מילה-במילה מ-`AGENTS.md` ← "Resilience Runtime State" (PR #12743) כדי שמדריך
-> הסוכן יישאר מתחת לתקציב ההקשר של 40k. זוהי התצוגה המקוצרת הפונה לסוכן של
-> הסעיפים שלמעלה; הסעיפים הממוספרים נותרים ההתייחסות המלאה.
+> הועבר מילה במילה מ- `AGENTS.md` → "Resilence Runtime State" (PR #12743) כך שמדריך הסוכן יישאר תחת תקציב ההקשר של 40k. זהו המבט המעובה, הפונה לסוכן, של הקטעים שלמעלה; הסעיפים הממוספרים נשארים ההתייחסות המלאה.
 
-ל-OmniRoute שלושה מנגנוני כשל-זמני קשורים אך נפרדים. שמרו על הפרדת ההיקפים שלהם
-בעת ניפוי שגיאות של התנהגות הניתוב. ראו את
-[דיאגרמת השרידות בת 3 השכבות](../diagrams/exported/resilience-3layers.svg)
-(מקור: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-למפה במבט-על.
+OmniRoute יש שלושה מנגנוני כשל זמני קשורים אך ברורים. שמור את ההיקף שלהם בנפרד בעת איתור באגים בהתנהגות ניתוב. עיין [בתרשים החוסן בן 3 השכבות](../diagrams/exported/resilience-3layers.svg) (מקור: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) למפה במבט חטוף.
 
-### מפסק מעגל ברמת ספק (Provider Circuit Breaker)
+### מפסק חשמל של ספק
 
-**היקף**: הספק כולו, למשל `glm`, `openai`, `anthropic`.
+**תְחוּם** : ספק שלם, למשל `glm`, `openai`, `anthropic`.
 
-**מטרה**: להפסיק לשלוח תעבורה לספק שנכשל שוב ושוב ברמת ה-upstream/שירות,
-כדי שספק לא תקין אחד לא יאט כל בקשה.
+**מַטָרָה** : להפסיק לשלוח תעבורה לספק שנכשל שוב ושוב ברמת upstream/service, כך שספק אחד לא בריא לא מאט כל בקשה.
 
-**יישום**:
+**יישום** :
 
-- מחלקת ליבה: `src/shared/utils/circuitBreaker.ts`
-- חיווט שער/הרצה של צ'אט: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API של סטטוס זמן ריצה: `src/app/api/monitoring/health/route.ts`
+- שיעור ליבה: `src/shared/utils/circuitBreaker.ts`
+- חיווט צ'אט gate/execution : `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- מצב זמן ריצה API: `src/app/api/monitoring/health/route.ts`
 - עטיפות משותפות: `open-sse/services/accountFallback.ts`
-- טבלת מצב נשמרת: `domain_circuit_breakers`
+- טבלת מצב מתמשכת: `domain_circuit_breakers`
 
-**מצבים** (4 — `src/shared/utils/circuitBreaker.ts`):
+**מדינות** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: תעבורה רגילה מורשית.
-- `DEGRADED`: רצועת אזהרה מוקדמת — הכשלים חצו את סף הירידה אך עדיין לא את
-  סף מפסק המעגל; התעבורה עדיין זורמת, לוחות המחוונים מציגים את האזהרה. בדיקת
-  חיבור תקינה או חלון שקט ללא כשל חדש מחזירים אותו ל-`CLOSED`
-  (החלון מופיע ב-`docs/architecture/RESILIENCE_GUIDE.md`).
-- `OPEN`: הספק חסום זמנית; הקוראים מקבלים תגובת provider-circuit-open
-  או שניתוב הקומבו מדלג ליעד אחר.
-- `HALF_OPEN`: חלף ה-timeout של האיפוס; מתאפשרת בקשת בדיקה (probe). הצלחה סוגרת
-  את המפסק, כשל פותח אותו מחדש.
+- `CLOSED`: תנועה רגילה מותרת.
+- `DEGRADED`: כשלים ברצועת — עם אזהרה מוקדמת חצו את סף השפלה אך עדיין לא את סף השבירה; התנועה עדיין זורמת, לוחות מחוונים מראים את האזהרה. בדיקת חיבור חוקית או חלון שקט ללא כשל חדש מחזירה אותו ל- `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` יש את החלון).
+- `OPEN`: הספק חסום זמנית; המתקשרים מקבלים תגובה של ספק-מעגל פתוח או ניתוב משולב דילוג ליעד אחר.
+- `HALF_OPEN`: פסק הזמן לאיפוס חלף; לאפשר בקשת בדיקה. הצלחה סוגרת את המפסק, כישלון פותח אותו שוב.
 
-**ברירות מחדל** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, הנצרכים דרך
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` ב-`src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` ב-`src/sse/handlers/chatHelpers.ts`). מפסק המעגל של
-הספק-כולו פועל על `circuitBreakerThreshold` / `circuitBreakerReset`:
+**ברירות מחדל** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, נצרך דרך `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` `src/sse/handlers/chatHelpers.ts`). מפסק הספק כולו פועל על `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| פרופיל  | ירידת רמה ב- | נפתח ב- (`circuitBreakerThreshold`) | איפוס (`circuitBreakerReset`) |
-| ------- | -----------: | ----------------------------------: | ----------------------------: |
-| OAuth   |          `5` |                                 `8` |                         `60s` |
-| API key |          `7` |                                `12` |                         `30s` |
-| Local   |       (נגזר) |                                 `2` |                         `15s` |
+| פּרוֹפִיל | משפיל ב | נפתח ב (`circuitBreakerThreshold`) | איפוס (`circuitBreakerReset`) |
+| --------- | ------: | ---------------------------------: | ----------------------------: |
+| OAuth     |     `5` |                                `8` |                         `60s` |
+| API       |     `7` |                               `12` |                         `30s` |
 
-`PROVIDER_PROFILES` מגדיר גם את `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 דקות) ו-`providerCooldownMs` (5/10/1 דקות): אלה מפעילים את
-**שער החלון של צינון הספק הגלובלי האופציונלי (opt-in)** (`PROVIDER_COOLDOWN_ENABLED`,
-כבוי כברירת מחדל) — רשומה ברמת ספק ב-`open-sse/services/providerCooldownTracker.ts`
-נחשבת כצוננת רק אחרי `providerFailureThreshold` כשלים בתוך `providerFailureWindowMs`, ואז
-צוננת למשך `providerCooldownMs`. אלה אינם הספים של מפסק המעגל הפעיל — אל תכווננו אותם
-בציפייה להשפיע על התנהגות מפסק המעגל. כל ברירת מחדל ניתנת לעקיפה דרך משתני הסביבה
-`OMNIROUTE_PROVIDER_BREAKER_*` ו-`OMNIROUTE_CIRCUIT_BREAKER_*`;
-טבלת ההתייחסות המדויקת לזמן ריצה נמצאת ב-`docs/architecture/RESILIENCE_GUIDE.md`.
+פרופיל `local` (`2` failures / `15s`) קיים גם ב- `PROVIDER_PROFILES`, אבל הוא לא מחובר למפסק: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) מקבל רק `oauth` או `apikey`, ו- `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) מחזיר אחד מהשניים הללו (ספקים לא רשומים מקבלים `apikey`).
 
-רק סטטוסי כשל ברמת ספק אמורים להפעיל את מפסק המעגל של הספק:
+`PROVIDER_PROFILES` מגדיר גם `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) ו- `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, כאשר הערכים המקומיים אינרטיים מאותה סיבה כמו לעיל: אלה מחזקים את** שער החלון של ה-Opt-in Global Provider Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, ברירת מחדל כבוי) — ערך ברמת ספק ב- `open-sse/services/providerCooldownTracker.ts` נחשב רק לקירור לאחר כשלים `providerFailureThreshold` בתוך `providerFailureWindowMs`, ולאחר מכן מתקרר עבור `providerCooldownMs`. הם NOT הספים של המפסק החי — אינם מכוונים אותם מצפים להתנהגות מפסקת. כל ברירת מחדל ניתנת לביטול באמצעות `OMNIROUTE_PROVIDER_BREAKER_*` ו- `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; טבלת ההתייחסות המדויקת בזמן ריצה חיה ב- `docs/architecture/RESILIENCE_GUIDE.md`.
+
+רק מצבי כשל ברמת הספק צריכים להפעיל את מפסק הספק:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-אל תפעילו את מפסק המעגל של הספק-כולו עבור שגיאות חשבון/מפתח/מודל רגילות כמו רוב
-מקרי `401`, `403` או `429`. אלה בדרך כלל שייכים לצינון חיבור או לנעילת
-מודל. `403` של ספק מפתח-API גנרי אמור להיות ניתן להתאוששות, אלא אם הוא מסווג
-כשגיאת ספק/חשבון סופנית.
+אל תכבה את מפסק הספק כולו עבור שגיאות account/key/model רגילות כמו רוב מקרי `401`, `403` או `429`. אלה שייכים בדרך כלל לצינון חיבור או נעילת דגם. ספק מפתח API גנרי `403` צריך להיות בר שחזור אלא אם כן הוא מסווג כשגיאת provider/account מסוף.
 
-המפסק משתמש בשחזור עצל (lazy), לא בטיימר רקע. כאשר `OPEN` פג תוקף, קריאות כגון
-`getStatus()`, `canExecute()`, ו-`getRetryAfterMs()` מרעננות את המצב ל-`HALF_OPEN`,
-כך שלוחות מחוונים ובוני מועמדים לקומבו לא ממשיכים להחריג ספק שפג תוקפו לנצח.
+המפסק משתמש בהתאוששות עצלה, לא בטיימר רקע. כאשר התוקף של `OPEN` יפוג, קריאות כגון `getStatus()`, `canExecute()` ו- `getRetryAfterMs()` מרעננות את המצב ל- `HALF_OPEN`, כך שמרכזי מחוונים ובוני מועמדים משולבים לא ממשיכים להוציא ספק שפג תוקפו לנצח.
 
-### צינון חיבור (Connection Cooldown)
+### קירור חיבור
 
-**היקף**: חיבור/חשבון/מפתח ספק אחד.
+**תְחוּם** : ספק אחד connection/account/key.
 
-**מטרה**: לדלג זמנית על מפתח/חשבון בעייתי אחד, תוך מתן אפשרות לחיבורים אחרים של
-אותו ספק להמשיך לשרת בקשות.
+**מַטָרָה** : דלג באופן זמני על key/account רע אחד תוך מתן אפשרות לחיבורים אחרים לאותו ספק להמשיך להגיש בקשות.
 
-**יישום**:
+**יישום** :
 
-- נתיב כתיבה/עדכון: `src/sse/services/auth.ts::markAccountUnavailable()`
-- בחירה/סינון חשבונות: `src/sse/services/auth.ts::getProviderCredentials...`
-- חישוב צינון: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- נתיב Write/update : `src/sse/services/auth.ts::markAccountUnavailable()`
+- חשבון selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- חישוב קירור: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - הגדרות: `src/lib/resilience/settings.ts`
 
-שדות חשובים בחיבורי ספק:
+שדות חשובים על חיבורי ספקים:
 
 ```ts
 rateLimitedUntil;
@@ -808,64 +794,50 @@ errorCode;
 backoffLevel;
 ```
 
-במהלך בחירת חשבון, מדלגים על חיבור כל עוד:
+במהלך בחירת החשבון, דילוג על חיבור בזמן:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-גם הצינונים הם עצלים: כאשר `rateLimitedUntil` נמצא בעבר, החיבור הופך שוב לזכאי.
-בשימוש מוצלח, `clearAccountError()` מנקה את `testStatus`, את `rateLimitedUntil`,
-את שדות השגיאה ואת `backoffLevel`.
+גם התקררות עצלנית: כאשר `rateLimitedUntil` בעבר, החיבור הופך לזכאי שוב. בשימוש מוצלח, `clearAccountError()` מנקה `testStatus`, `rateLimitedUntil`, שדות שגיאה ו- `backoffLevel`.
 
 התנהגות ברירת המחדל של צינון חיבור:
 
-- צינון בסיס של OAuth: `5s`.
-- צינון בסיס של מפתח API: `3s`.
-- `429` של מפתח API צריך להעדיף רמזי ניסיון חוזר מה-upstream (`Retry-After`,
-  כותרות reset, או טקסט reset הניתן לניתוח) כשהם זמינים.
-- כשלונות חוזרים הניתנים לשחזור משתמשים ב-backoff מעריכי:
+- OAuth base cooldown: `5s`.
+- קירור בסיס מפתח API: `3s`.
+- API-key `429` צריך להעדיף רמזים לניסיון חוזר במעלה הזרם (`Retry-After`, כותרות איפוס או טקסט איפוס הניתן לניתוח) כאשר הם זמינים.
+- כשלים חוזרים ונשנים ניתנים לשחזור משתמשים בגיבוי אקספוננציאלי:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-מנגנון ההגנה מפני thundering herd מונע מכשלונות מקבילים על אותו חיבור
-להאריך שוב ושוב את הצינון או להגדיל את `backoffLevel` פעמיים.
+השומר נגד רעמים מונע מכשלים במקביל באותו חיבור להאריך שוב ושוב את ההתקררות או הגדלה כפולה `backoffLevel`.
 
-מצבים סופניים (terminal) אינם צינונים. `banned`, `expired` (שהופך לסופני רק לאחר
-N ניסיונות חוזרים חסומים באמצעות `EXPIRED_RETRY_MAX`), ו-`credits_exhausted`
-נועדו להישאר לא זמינים עד שהאישורים/ההגדרות משתנים או שמפעיל מאפס אותם.
-אל תדרסו מצבים סופניים במצב צינון חולף.
+מצבי טרמינל אינם התקררות. `banned`, `expired` (שהופך לטרמינל רק לאחר N ניסיונות חוזרים מוגבלים דרך `EXPIRED_RETRY_MAX`), ו- `credits_exhausted` נועדו להישאר לא זמינים עד לשינוי credentials/settings או שמפעיל יאפס אותם. אל תדרוס מצבי קצה עם מצב קירור חולף.
 
-### נעילת מודל (Model Lockout)
+### נעילת דגם
 
-**היקף**: ספק + חיבור + מודל.
+**תְחוּם** : ספק + חיבור דגם +.
 
-**מטרה**: להימנע מהשבתת חיבור שלם כאשר רק מודל אחד אינו זמין או מוגבל במכסה
-עבור אותו חיבור.
+**מַטָרָה** : הימנע מהשבתת חיבור שלם כאשר רק דגם אחד אינו זמין או מוגבל במכסה עבור חיבור זה.
 
 דוגמאות:
 
-- ספקים עם מכסה לפי מודל שמחזירים `429`.
-- ספקים מקומיים שמחזירים `404` עבור מודל אחד חסר.
-- כשלי הרשאה של מצב/מודל הספציפיים לספק, כגון מצבי Grok נבחרים.
+- ספקי מכסה לפי דגם המחזירים `429`.
+- ספקים מקומיים מחזירים `404` עבור דגם אחד חסר.
+- כשלים בהרשאת mode/model ספציפיים לספק, כגון מצבי Grok נבחרים.
 
-נעילת המודל נמצאת ב-`open-sse/services/accountFallback.ts` ומאפשרת לאותו
-חיבור להמשיך לשרת מודלים אחרים.
+נעילת הדגם גרה `open-sse/services/accountFallback.ts` ונותנת לאותו קשר להמשיך ולשרת דגמים אחרים.
 
 ### הנחיות לניפוי באגים
 
-- אם כל המפתחות של ספק מדולגים, בדקו הן את מצב מפסק הספק והן את
-  `rateLimitedUntil`/`testStatus` של כל חיבור.
-- אם ספק נראה מוחרג לצמיתות לאחר חלון האיפוס, בדקו אם הקוד קורא `state` גולמי
-  במקום להשתמש ב-`getStatus()`/`canExecute()`.
-- אם מפתח ספק אחד נכשל אבל אחרים אמורים לעבוד, העדיפו צינון חיבור על פני
-  מפסק ספק.
-- אם רק מודל אחד נכשל, העדיפו נעילת מודל על פני צינון חיבור.
-- אם מצב אמור להשתקם מעצמו, צריכה להיות לו חותמת זמן עתידית/timeout לאיפוס
-  ונתיב קריאה שמרענן מצב שפג תוקפו. סטטוסים קבועים דורשים שינוי ידני של
-  אישורים או תצורה.
+- אם כל המפתחות של ספק מדלגים, בדוק גם את מצב מפסק הספק וגם `rateLimitedUntil`/`testStatus` של כל חיבור.
+- אם ספק מופיע ללא הכללה לצמיתות לאחר חלון האיפוס, בדוק אם הקוד קורא `state` גולמי במקום להשתמש `getStatus()`/`canExecute()`.
+- אם מפתח ספק אחד נכשל אבל אחרים אמורים לעבוד, העדיפו קירור חיבור על פני מפסק ספק.
+- אם רק דגם אחד נכשל, העדיפו נעילת דגם על פני קירור חיבור.
+- אם מצב צריך להתאושש מעצמו, אמור להיות לו פסק זמן עתידי timestamp/reset ונתיב קריאה שמרענן מצב שפג תוקפו. סטטוסים קבועים דורשים שינויים ידניים של אישורים או תצורה.
 
 ---
 

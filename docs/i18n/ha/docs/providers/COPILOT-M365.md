@@ -166,11 +166,11 @@ Don takaddun shaida da aka liƙa, Haɗin Gwaji yana duba sifar shaidar kuma, lok
 
 Tabbatar an kunna `copilot-m365-web` a ciki** Dashboard → Masu bayarwa** . Ana iya ɓoye mai ba da sabis ta tsohuwa a wasu matakan.
 
-## Manazarta
+## Magana
 
-- Matsala: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Tattaunawa: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Tushe: `src/shared/constants/providers/web-cookie.ts` (ma'anar mai samarwa)
-- Shigo da HAR: `src/shared/utils/m365HarImport.ts`
-- Filayen bayanan shaida: `src/shared/providers/webSessionCredentials.ts`
-- Modal na mataki: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Maudu'i: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Tattaunawa: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Source: `src/shared/constants/providers/web-cookie.ts` (ma'anar mai bayarwa)
+- HAR da: `src/shared/utils/m365HarImport.ts`
+- Filayen shaida: `src/shared/providers/webSessionCredentials.ts`
+- Modal matakin: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

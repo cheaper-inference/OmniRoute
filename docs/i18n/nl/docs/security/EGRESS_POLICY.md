@@ -67,37 +67,37 @@ De richtlijn is bewust **per proxy** en niet globaal — verschillende proxy's i
 
 ---
 
-## De Drie Waarden
+## De drie waarden
 
-| Waarde | UI-label                   | Gedrag                                                                                                                                                                                                                   |
-| ------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auto` | `Automatisch (dual-stack)` | Het besturingssysteem kiest de familie. Voor een proxyhost die als IP-literal is opgegeven, is de familie inherent aan het literal; voor een hostnaam komen beide families in aanmerking. Dit is de standaardinstelling. |
-| `ipv4` | `Alleen IPv4`              | Legt de verbinding vast op IPv4. Weigert de verbinding als de proxyhost geen IPv4-record (A) heeft.                                                                                                                      |
-| `ipv6` | `Alleen IPv6`              | Legt de verbinding vast op IPv6. Weigert de verbinding als de proxyhost geen IPv6-record (AAAA) heeft.                                                                                                                   |
+| Waarde | UI label            | Gedrag                                                                                                                                                                                    |
+| ------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS kiest de familie. Voor een IP-letterlijke proxyhost is de familie intrinsiek aan het letterlijke; voor een hostnaam komen beide families in aanmerking. Dit is de standaardinstelling. |
+| `ipv4` | `IPv4 only`         | Pint de verbinding met IPv4. Kan niet worden gesloten als de proxyhost geen IPv4 (A)-record heeft.                                                                                        |
+| `ipv6` | `IPv6 only`         | Pint de verbinding met IPv6. Kan niet worden gesloten als de proxyhost geen IPv6 record (AAAA) heeft.                                                                                     |
 
-UI-tekenreeksen bevinden zich in `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+UI -reeksen leven in `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Configuratie
+## Hoe het te configureren
 
 ### Dashboard
 
-De keuzelijst bevindt zich in het proxyformulier op het tabblad **Proxypool**:
+De selector heeft de proxyvorm van de** Proxypool** tabblad:
 
-1. Open **Dashboard → Instellingen → Proxy → Proxypool**
-2. Voeg een proxy toe of bewerk er een
-3. Stel de vervolgkeuzelijst **IP-familie** in op `Automatisch (dual-stack)`, `Alleen IPv4` of `Alleen IPv6`
-4. Sla op
+1. Open** Dashboard → Instellingen → Proxy → Proxypool**
+2. Voeg een proxy toe of bewerk deze
+3. Stel de**IP familie** vervolgkeuzelijst naar `Auto (dual-stack)`, `IPv4 only` of `IPv6 only`
+4. Redden
 
-Het besturingselement wordt gerenderd door `ProxyRegistryManager.tsx` (gekoppeld in `proxy/ProxyPoolTab.tsx`).
+De besturing wordt weergegeven door `ProxyRegistryManager.tsx` (gemonteerd in `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Het veld `family` maakt deel uit van de payloads voor het aanmaken/bijwerken van het proxyregister, wordt gevalideerd door `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) en verwerkt door `POST` / `PATCH /api/v1/management/proxies`:
+Het `family` veld maakt deel uit van de create/update payloads van het proxyregister, gevalideerd door `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) en afgehandeld door `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Maak een proxy aan die uitsluitend IPv6 gebruikt
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Wijzig een bestaande proxy zodat deze uitsluitend IPv4 gebruikt
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Hetzelfde veld wordt ook geaccepteerd door het inline proxyconfiguratieobject dat wordt gebruikt voor upstream-proxyvermeldingen (`upstream_proxy_config.family`, zie [Datamodel](#data-model)).
+Hetzelfde veld wordt ook geaccepteerd door het inline proxy-configuratieobject dat wordt gebruikt voor upstream-proxy-items (`upstream_proxy_config.family`, zie [Data Model](#data-model) ).
 
-Zie [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) voor de rest van de CRUD-/toewijzings-API voor proxy's.
+Voor de rest van de proxy CRUD/assignment API, zie [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

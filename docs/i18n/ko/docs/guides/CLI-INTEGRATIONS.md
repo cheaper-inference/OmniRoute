@@ -6,9 +6,20 @@
 
 공유 실행 가능 매니페스트, 제한된 하위 환경 및 영구 Gemini 설정에 대해서는 [CLI 실행 계약을](./CLI-LAUNCH-CONTRACTS.md) 참조하세요.
 
-OmniRoute OmniRoute 백엔드로 사용하도록 코딩 CLI (Codex, Claude Code, OpenCode, Cline, …)를 구성하는 `setup-*` 명령 제품군을 제공합니다.** 하나** 엔드포인트와 OmniRoute 자동 폴백을 통해 올바른 공급자로 라우팅됩니다. 각 명령은** 살다** 실행 중인 OmniRoute (로컬 또는 원격)에서 모델 카탈로그를 작성하고 도구의 자체 구성 파일을 작성합니다.** 당신의** 기계. API 키는 도구가 지원할 때마다 환경 변수에 의해 참조됩니다. 도구-로컬 환경 파일을 유지하는 명령은 아래에 설명되어 있습니다.
+OmniRoute OmniRoute 백엔드 — 로 사용하도록 코딩 CLI (Codex, Claude Code, OpenCode, Cline, …)를 구성하는 `setup-*` 명령 제품군을 제공하므로 도구는 다음과 통신합니다.** 하나** 엔드포인트와 OmniRoute 자동 폴백을 통해 올바른 공급자로 라우팅됩니다. 설정 명령은 활성 로컬 또는 원격 OmniRoute 컨텍스트를 사용하고 도구를 구성합니다.** 당신의** 기계. 카탈로그 기반 레시피는 서버에서 모델을 가져옵니다. 단일 모델 레시피는 `--model` 허용하거나 ID 모델에 대한 프롬프트를 표시합니다. API 키는 도구가 지원할 때마다 환경 변수에 의해 참조됩니다. 도구-로컬 환경 파일을 유지하는 명령은 아래에 설명되어 있습니다.
 
-구성을 전혀 작성하지 않고 올바른 env가 주입된 `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` 또는 `whycodes` 생성하는 일반 실행 프로그램인 `omniroute run <target>` 도 있습니다. 대상과 별칭은 표준 매니페스트 `bin/cli/cli-manifest.mjs` (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`)에서 나오며 `omniroute completion` 동일한 매니페스트 파생 대상 단어를 제공합니다. 레거시 도구별 실행 프로그램인 `omniroute launch` (Claude Code) 및 `omniroute launch-codex` (Codex)는 계속 사용할 수 있습니다.
+카탈로그 및 자동화 명령은 다양한 도구 세트를 다룹니다.
+
+| 표면                           | 세다 | 의미                                                        |
+| ------------------------------ | ---- | ----------------------------------------------------------- |
+| 도구 카탈로그                  | 39   | 수동 및 IDE 통합을 포함한 문서화된 코딩 도구 및 에이전트    |
+| `omniroute run <target>`       | 8    | 대상의 엔드포인트, 자격 증명 및 모델을 제공하는 실행 어댑터 |
+| `omniroute configure <target>` | 12   | `setup-*` 명령으로 지원되는 대화형 구성 레시피              |
+| `setup-*` 명령                 | 16   | guided/manual 편집기 설정을 포함한 등록된 설정 명령         |
+
+개수는 2026년 11월 17일의 [도구 매니페스트](../../config/cli-tools-manifest.json) 및 [명령 레지스트리를](../../bin/cli/commands/registry.mjs) 반영합니다. 카탈로그 항목은 실행 어댑터를 의미하지 않습니다. 전체 인벤토리는 [CLI 도구 카탈로그를](../reference/CLI-TOOLS.md) 참조하세요.
+
+구성을 전혀 작성하지 않고 올바른 env가 주입된 `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` 또는 `whycodes` 생성하는 일반 실행기 — `omniroute run <target>` — 도 있습니다. 대상과 별칭은 표준 매니페스트 `bin/cli/cli-manifest.mjs` (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`)에서 나오며 `omniroute completion` 동일한 매니페스트 파생 대상 단어를 제공합니다. `omniroute launch <tool>` 실행별 세션 토큰과 연결한 공급자로부터 구축된 모델 목록을 사용하여 지원되는 코딩 도구를 시작하고, 아무것도 실행되지 않으면 로컬 게이트웨이를 자동 시작합니다( [LAUNCH.md](./LAUNCH.md) 참조). 도구 이름이 없는 레거시 도구별 실행 프로그램 — `omniroute launch` (Claude 코드) 및 `omniroute launch-codex` (Codex) — 계속 사용할 수 있습니다.
 
 공급자 온보딩은 동일한 local/remote 컨텍스트에서 가능합니다. 아래의 API 우선 명령은 관리 인증을 공급자 자격 증명과 별도로 유지하고 구조화된 출력에 자격 증명을 인쇄하지 않습니다.
 
@@ -35,36 +46,38 @@ omniroute providers remove <connection-id> --yes
 
 ## 마스터 테이블
 
-모든 명령은** 활성 컨텍스트** ( `omniroute connect` 로 설정, [원격 모드](./REMOTE-MODE.md) 참조) 또는 명시적인 `--remote <url> --api-key <key>` 플래그. 아래의 "로컬 대 원격"은 다음을 의미합니다. 플래그가 없으면 `http://localhost:20128` 대상으로 합니다. `--remote` (또는 활성 원격 컨텍스트)를 사용하면 해당 서버에서 카탈로그를 가져오고 구성을 로컬로 작성합니다.
+모든 명령은** 활성 컨텍스트** ( `omniroute connect` 로 설정, [원격 모드](./REMOTE-MODE.md) 참조) 또는 명시적인 `--remote <url> --api-key <key>` 플래그. 아래의 "로컬 대 원격"은 다음을 의미합니다. 플래그가 없으면 `http://localhost:20128` 대상으로 합니다. `--remote` (또는 활성 원격 컨텍스트)를 사용하면 해당 서버를 백엔드로 구성하고 구성을 로컬로 작성합니다. 카탈로그 기반 레시피도 해당 서버에서 모델을 가져옵니다.
 
-| 명령                       | 도구                   | 무엇을 쓰는가                                                                                                                                                                    | 주요 플래그                                                                                                                                | 로컬 대 원격 |
-| -------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
-| `omniroute setup-codex`    | OpenAI Codex CLI       | `~/.codex/<name>.config.toml` — 호환 가능한 텍스트 모델당 하나의 프로필(`codex --profile <name>`)                                                                                | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | 둘 다        |
-| `omniroute setup-claude`   | Claude 코드            | `~/.claude/profiles/<name>/settings.json` — 일치하는 모델당 하나의 프로필(`CLAUDE_CONFIG_DIR`)                                                                                   | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | 둘 다        |
-| `omniroute setup-opencode` | OpenCode (openai 호환) | `~/.config/opencode/opencode.json` — 모든 카탈로그 모델을 갖춘 `omniroute` 공급자(`opencode -m omniroute/<model>`)                                                               | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | 둘 다        |
-| `omniroute setup-cline`    | Cline                  | `~/.cline/data/{globalState,secrets}.json` (CLI 모드) + VS 코드 확장 설정을 인쇄합니다.                                                                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | 둘 다        |
-| `omniroute setup-kilo`     | 킬로 코드              | `~/.local/share/kilo/auth.json` (CLI) + `kilocode.*` VS 로 병합합니다. 코드 `settings.json` 있는 경우                                                                            | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | 둘 다        |
-| `omniroute setup-continue` | 계속 / `cn` CLI        | `~/.continue/config.yaml` — `provider: openai` 모델, `${{ secrets.OMNIROUTE_API_KEY }}` 통한 키                                                                                  | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | 둘 다        |
-| `omniroute setup-cursor`   | Cursor                 | 없음 — 인앱 단계를 인쇄합니다(Cursor config는 불투명합니다 SQLite).                                                                                                              | `--remote` `--api-key` `--only` `--port`                                                                                                   | 둘 다        |
-| `omniroute setup-roo`      | 루코드                 | `~/.omniroute/roo-settings.json` (가져오기 문서) VS 코드 `settings.json` 존재하는 경우 + `roo-cline.autoImportSettingsPath` 설정합니다.                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | 둘 다        |
-| `omniroute setup-crush`    | 으깨다                 | `~/.config/crush/crush.json` — `openai-compat` 공급자, `$OMNIROUTE_API_KEY` 통한 키                                                                                              | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | 둘 다        |
-| `omniroute setup-zed`      | Zed                    | `~/.config/zed/settings.json` — `openai_compatible.omniroute` 공급자(≤ 25 도구 지원 모델), `$OMNIROUTE_API_KEY` 통한 키                                                          | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | 둘 다        |
-| `omniroute setup-goose`    | 거위                   | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + env 레시피를 인쇄합니다.                                                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 둘 다        |
-| `omniroute setup-aider`    | 에이더                 | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + env 레시피를 인쇄합니다.                                                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 둘 다        |
-| `omniroute setup-qwen`     | Qwen 코드              | `~/.qwen/settings.json` — V4 `modelProviders.openai` 배열 + `OMNIROUTE_API_KEY` `~/.qwen/.env`                                                                                   | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | 둘 다        |
-| `omniroute setup-5dive`    | 5dive(에이전트 함대)   | `$HOME` 아래에는 아무것도 없습니다 — 5dive를 작성합니다** 인증 프로필** (`/var/lib/5dive/auth-profiles/<name>/`) `5dive agent auth set` 를 통해; 루트 전용, 플릿 호스트에서 실행 | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | 둘 다        |
-| `omniroute setup-whycodes` | WhyCodes               | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); 경로는 `$WHYCODES_HOME/config.toml` 또는 `~/.whycodes/config.toml` 입니다.                                 | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 둘 다        |
-| `omniroute run <target>`   | 런타임 시작(일반)      | 아무것도 — 올바른 env 및 args를 사용하여 `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` 를 생성합니다. Qwen 와 Gemini 임시 격리된 집을 사용합니다        | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | 둘 다        |
-| `omniroute launch`         | Claude 코드            | 아무것도 — `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` 가 주입된 `claude` 생성합니다.                                                                                            | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | 둘 다        |
-| `omniroute launch-codex`   | OpenAI Codex CLI       | 없음 — `-c` 플래그를 통해 주입된 `omniroute` 공급자로 `codex` 생성합니다.                                                                                                        | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | 둘 다        |
+| 명령                       | 도구                             | 무엇을 쓰는가                                                                                                                                                                 | 주요 플래그                                                                                                                                | 로컬 대 원격 |
+| -------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
+| `omniroute setup-codex`    | OpenAI Codex CLI                 | `~/.codex/<name>.config.toml` — 호환되는 텍스트 모델당 하나의 프로필(`codex --profile <name>`)                                                                                | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | 둘 다        |
+| `omniroute setup-claude`   | Claude 코드                      | `~/.claude/profiles/<name>/settings.json` — 일치하는 모델당 하나의 프로필(`CLAUDE_CONFIG_DIR`)                                                                                | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | 둘 다        |
+| `omniroute setup-opencode` | OpenCode (openai 호환)           | 모든 카탈로그 모델을 갖춘 `~/.config/opencode/opencode.json` — `omniroute` 공급자(`opencode -m omniroute/<model>`)                                                            | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | 둘 다        |
+| `omniroute setup-cline`    | Cline                            | `~/.cline/data/{globalState,secrets}.json` (CLI 모드) + VS 코드 확장 설정을 인쇄합니다.                                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | 둘 다        |
+| `omniroute setup-kilo`     | 킬로 코드                        | `~/.local/share/kilo/auth.json` (CLI) + `kilocode.*` VS 로 병합합니다. 코드 `settings.json` 있는 경우                                                                         | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | 둘 다        |
+| `omniroute setup-continue` | 계속 / `cn` CLI                  | `~/.continue/config.yaml` — `provider: openai` 모델, `${{ secrets.OMNIROUTE_API_KEY }}` 통한 키                                                                               | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | 둘 다        |
+| `omniroute setup-cursor`   | Cursor                           | — 인앱 단계를 인쇄하지 않습니다(Cursor 구성은 불투명합니다 SQLite).                                                                                                           | `--remote` `--api-key` `--only` `--port`                                                                                                   | 둘 다        |
+| `omniroute setup-roo`      | 루코드                           | `~/.omniroute/roo-settings.json` (가져오기 문서) VS 코드 `settings.json` 존재하는 경우 + `roo-cline.autoImportSettingsPath` 설정합니다.                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | 둘 다        |
+| `omniroute setup-crush`    | 으깨다                           | `~/.config/crush/crush.json` — `openai-compat` 공급자, `$OMNIROUTE_API_KEY` 통한 키                                                                                           | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | 둘 다        |
+| `omniroute setup-zed`      | Zed                              | `~/.config/zed/settings.json` — `openai_compatible.omniroute` 공급자(≤ 25 도구 지원 모델), `$OMNIROUTE_API_KEY` 통한 키                                                       | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | 둘 다        |
+| `omniroute setup-goose`    | 거위                             | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + env 레시피를 인쇄합니다.                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 둘 다        |
+| `omniroute setup-aider`    | 에이더                           | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + env 레시피를 인쇄합니다.                                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 둘 다        |
+| `omniroute setup-qwen`     | Qwen 코드                        | `~/.qwen/settings.json` — V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` in `~/.qwen/.env`                                                                                  | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | 둘 다        |
+| `omniroute setup-gemini`   | Gemini CLI (네이티브 Gemini API) | `~/.gemini/settings.json` — 인증 선택 및 모델; `~/.gemini/.env` — 키, 서버 루트 및 Gemini 환경                                                                                | `--remote` `--context` `--api-key` `--model` `--yes` `--dry-run` `--port` `--gemini-home` `--settings-path` `--env-path`                   | 둘 다        |
+| `omniroute setup-5dive`    | 5dive(에이전트 함대)             | `$HOME` — 아래에는 5dive를 기록하는 항목이 없습니다.** 인증 프로필** (`/var/lib/5dive/auth-profiles/<name>/`) `5dive agent auth set` 를 통해; 루트 전용, 플릿 호스트에서 실행 | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | 둘 다        |
+| `omniroute setup-whycodes` | WhyCodes                         | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); 경로는 `$WHYCODES_HOME/config.toml` 또는 `~/.whycodes/config.toml` 입니다.                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | 둘 다        |
+| `omniroute run <target>`   | 런타임 시작(일반)                | — 올바른 env 및 args를 사용하여 `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` 를 생성하지 않습니다. Qwen 와 Gemini 임시 격리된 집을 사용합니다.      | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | 둘 다        |
+| `omniroute launch`         | Claude 코드                      | — `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` 가 주입된 `claude` 생성하지 않습니다.                                                                                           | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | 둘 다        |
+| `omniroute launch <tool>`  | 실행 가능한 모든 도구            | 자체 구성에는 아무것도 없음: 개인 임시 디렉토리의 실행별 구성, 세션 토큰                                                                                                      | `--model` `--all-models` `--list` `--remote` `--port` `--api-key` `--profile` `--dry-run` `--json`                                         | 둘 다        |
+| `omniroute launch-codex`   | OpenAI Codex CLI                 | — `-c` 플래그를 통해 주입된 `omniroute` 공급자로 `codex` 생성하지 않습니다.                                                                                                   | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | 둘 다        |
 
 플래그에 대한 참고 사항(명령 소스에서 확인됨):
 
-- `--remote <url>` — 원격 OmniRoute 에서 카탈로그를 가져옵니다( `--port` 및 활성 컨텍스트를 재정의함). `--api-key <key>` 해당 서버에 대한 자격 증명을 제공합니다(기본값은 `OMNIROUTE_API_KEY` env var 또는 활성 컨텍스트의 토큰).
+- `--remote <url>` — 원격 OmniRoute 사용합니다( `--port` 및 활성 컨텍스트를 재정의함). `--api-key <key>` 해당 서버에 대한 자격 증명을 제공합니다(기본값은 `OMNIROUTE_API_KEY` env var 또는 활성 컨텍스트의 토큰).
 - `--only <patterns>` — 쉼표로 구분된 하위 문자열; 일치하는 모델 IDs 만 유지합니다(예: `--only glm,kimi`). `setup-codex`, `setup-claude`, `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed` 에서 사용할 수 있습니다.
 - `--dry-run` — 파일 시스템을 건드리지 않고 쓰여질 내용을 정확하게 인쇄합니다. 모든 `setup-*` 명령에서 사용 가능** 제외하고** `setup-cursor` (파일을 쓰지 않음).
-- `--model <id>` — 모델 자동 검색 기능이 없는 도구에 필요합니다(또는 대화형으로 선택됨): Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. 이러한 도구는 비대화형 실행을 위해 `--yes` 도 허용합니다(그러면 `--model` 필요). `setup-opencode` `--model` 사용하여 기본 최상위 모델을 설정합니다.
-- `omniroute run` 의 `--model <id>` 매니페스트의 대상별 연결(`bin/cli/cli-manifest.mjs`)을 따릅니다.** 보조원** `--model openai/<id>` 수신하고** 오픈코드** `--model omniroute/<id>` (접두사는 ID에 아직 포함되지 않은 경우에만 추가됩니다)** 퀀** 그리고** 쌍둥이자리** ID를 그대로 수신합니다.** 클로드** `ANTHROPIC_MODEL` 통해 가져옵니다.** 거위** `GOOSE_MODEL` 통해,** 이유 코드** `-P omniroute -m <id>` 통해 그리고** 사본** `-c model_providers.omniroute.*` args를 통해.**Qwen 는 `--model` 강제로 요구하는 유일한 실행 대상입니다.** — `omniroute run qwen` 없으면 명시적인 오류와 함께 `2` 종료됩니다.
+- `--model <id>` — 모델 자동 검색 기능이 없는 도구에 필요합니다(또는 대화형으로 선택됨): Cline, Kilo, Roo, Goose, Qwen, Gemini, Aider, 5dive, WhyCodes. 이러한 도구는 비대화형 실행을 위해 `--yes` 도 허용합니다(그러면 `--model` 필요). `setup-opencode` `--model` 사용하여 기본 최상위 모델을 설정합니다.
+- `omniroute run` 의 `--model <id>` 매니페스트의 대상별 연결(`bin/cli/cli-manifest.mjs`)을 따릅니다.** 보조원** `--model openai/<id>` 수신하고** 오픈코드** `--model omniroute/<id>` (접두사는 ID에 아직 포함되지 않은 경우에만 추가됩니다)** 퀀** 그리고** 쌍둥이자리** ID를 그대로 수신합니다.** 클로드** `ANTHROPIC_MODEL` 통해 가져옵니다.** 거위** `GOOSE_MODEL` 통해,** 이유 코드** `-P omniroute -m <id>` 통해 그리고** 사본** `-c model_providers.omniroute.*` args를 통해.**Qwen 는 `--model` 하드 요구하는 유일한 실행 대상입니다.** — `omniroute run qwen` 없으면 명시적인 오류와 함께 `2` 종료됩니다.
 - `--port <port>` — 로컬 OmniRoute 포트(기본값 `20128`, `--remote` 설정된 경우 무시됨) 모든 `setup-*` 와 두 런처 모두에 존재합니다.
 - `omniroute run` 종료 코드: 자식 CLI 의 자체 종료 코드가 그대로 전파됩니다. `2` = 잘못된 인수(지원되지 않는 대상, 필수 `--model` 누락, 컨테이너 가드); `127` = 대상 바이너리가 `PATH` 에 없습니다. `130`/`143`/`129` `SIGINT`/`SIGTERM`/`SIGHUP` 에 의해 실행이 종료된 경우; `1` = 기타 런타임 실행 실패.
 - 두 런처(`launch`, `launch-codex`)는 `setup-claude` / `setup-codex` 로 작성된 프로필과 기본 `claude` / `codex` 바이너리에 대한 통과 인수를 선택하기 위해 `--profile <name>` 허용합니다.
@@ -76,11 +89,13 @@ omniroute providers remove <connection-id> --yes
 omniroute configure claude
 omniroute configure opencode --provider glm
 omniroute configure qwen --model qwen/qwen3.8-max-preview --yes
+omniroute configure gemini
+omniroute configure whycodes
 ```
 
-`configure` 현재 `codex`, `claude`, `opencode`, `qwen`, `aider`, `goose`, `cline`, `continue`, `kilo` 및 `5dive` 에 대한 테스트된 레시피에 위임합니다. IDE 전용, MITM 및 가이드 전용 카탈로그 항목은 명시적인 `setup-*`/manual 흐름으로 유지되며 실행 가능한 대상으로 표시되지 않습니다.
+`configure` 현재 `codex`, `claude`, `opencode`, `qwen`, `gemini`, `aider`, `goose`, `cline`, `continue`, `kilo`, `5dive` 및 `whycodes` 에 대한 테스트된 레시피에 위임합니다. IDE 전용, MITM 및 가이드 전용 카탈로그 항목은 명시적인 `setup-*`/manual 흐름으로 유지되며 실행 가능한 대상으로 표시되지 않습니다.
 
-> `setup-opencode` 는** 경량 openai 호환** OpenCode 통합. `@omniroute/opencode-plugin` 설치하는 더 풍부한 플러그인 통합인 `omniroute setup opencode` 도 있습니다. 그것들은 다른 명령입니다. 위의 테이블은 `setup-opencode` 문서입니다.
+> `setup-opencode` 는** 경량 openai 호환** OpenCode 통합. `@omniroute/opencode-plugin` 설치하는 더 풍부한 플러그인 통합 — `omniroute setup opencode` — 도 있습니다. 그것들은 다른 명령입니다. 문서 위의 테이블은 `setup-opencode`.
 >
 > 플러그인은 OpenCode major당 하나씩 두 개의 패키지로 제공됩니다. 두 로더는 서로 다른 진입점( OpenCode v1의 경우 `@omniroute/opencode-plugin`, OpenCode v2의 경우 `@omniroute/opencode-plugin-v2` 을 기대하기 때문입니다. v2 패키지는 새로운 패키지(`0.1.0`)이며 여전히 이동 중인 호스트 계약을 따르므로 가정하는 대신 OpenCode 시드 모양을 카탈로그 초안으로 읽어옵니다. `opencode.json` 에 `plugins` 항목을 추가하여 설치하십시오. `omniroute setup opencode` 여전히 v1 패키지를 설치합니다. 옵션과 자격 증명 조회 순서는 README 패키지에 있습니다.
 
@@ -163,24 +178,24 @@ omniroute launch                      # ← 원격 서버에 연결된 Claude Co
 
 ---
 
-## 5dive 에이전트 플릿
+## 5개의 다이빙 에이전트 함대
 
-[5dive](https://5dive.ai)는 장시간 실행되는 코딩 에이전트 플릿을 운영하며, 각 에이전트는 자체 Unix 사용자 계정 아래의 systemd 유닛입니다. 5dive 자체는 코딩 CLI가 아니므로 `omniroute run`으로 실행할 대상이 없습니다. 즉, `5dive`는 **구성 전용** 대상입니다.
+[5dive는](https://5dive.ai) 장기 실행 코딩 에이전트를 실행하며 각 에이전트는 자체 Unix 사용자 아래에 시스템 단위로 구성되어 있습니다. CLI 자체를 코딩하는 것이 아니므로 `omniroute run` — 시작할 수 있는 것은 없습니다. `5dive` 는** 구성 전용** 목표.
 
 ```bash
 omniroute configure 5dive --model failover-demo --yes
 omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent worker1
 ```
 
-두 형식 모두 하나의 5dive **인증 프로필**을 작성하며, 이후 해당 프로필에 바인딩된 모든 `claude` 시트가 OmniRoute와 통신합니다. 이 대상에는 다음 세 가지 고유 사항이 있습니다.
+두 가지 양식 모두 하나의 5dive를 작성합니다.** 인증 프로필** , 해당 프로필에 바인딩된 모든 `claude` 시트는 OmniRoute 와 통신합니다. 이 대상에는 세 가지 사항이 구체적으로 있습니다.
 
-- **플릿 호스트에서 root로 실행됩니다.** 5dive의 동작은 로컬 systemd 유닛과 root 소유 상태 디렉터리에 적용되며, 원격 모드는 없습니다. 이미 root가 아닌 경우 레시피는 `sudo`를 통해 다시 실행됩니다(`--no-sudo`를 사용하면 이 동작을 끄고 대신 명령을 출력합니다).
-- **루프백이 아닌 경우 엔드포인트는 `https://`여야 합니다.** 에이전트의 API 키는 모든 요청에서 해당 URL을 통해 전송되며, 5dive는 외부 머신을 가리키는 평문 엔드포인트를 거부합니다. 사설 LAN 주소도 예외가 아닙니다.
-- **각 시트 자체의 모델 고정 설정이 프로필보다 우선합니다.** 프로필에는 `ANTHROPIC_DEFAULT_{OPUS,SONNET,HAIKU}_MODEL`이 포함되지만, 기본 모델 ID에 여전히 고정된 시트는 첫 번째 턴에서 _"선택한 모델에 문제가 있습니다"_라는 오류와 함께 실패합니다. 시트도 고정하려면 `--agent <name>`을 전달하세요(반복 가능). 전달하지 않으면 레시피가 해당 명령을 출력합니다.
+- **이는 플릿 호스트에서 루트로 실행됩니다.** 5dive의 동사는 로컬 시스템 단위와 루트 소유 상태 디렉토리에 작용합니다. 원격 모드가 없습니다. 레시피는 아직 루트가 아닐 때 `sudo` 통해 다시 실행됩니다(`--no-sudo` 이를 끄고 대신 명령을 인쇄합니다).
+- **루프백이 아닌 이상 엔드포인트는 `https://` 여야 합니다.** 에이전트의 API 키는 모든 요청에서 해당 URL 사용하고 5dive는 일반 텍스트 오프박스 엔드포인트를 거부합니다. 개인 LAN 주소도 예외는 아닙니다.
+- **각 좌석의 모델 핀이 프로필보다 더 중요합니다.** 프로필에는 `ANTHROPIC_DEFAULT_{OPUS,SONNET,HAIKU}_MODEL` 가 있지만 기본 모델 ID에 여전히 고정된 좌석이 _"선택한 모델에 문제가 있습니다"_라는 메시지와 함께 첫 번째 회전에 실패합니다. `--agent <name>` (반복 가능)를 전달하여 좌석도 고정합니다. 그렇지 않은 경우 레시피는 명령을 인쇄합니다.
 
-API 키는 **stdin**을 통해 5dive에 전달되므로(`--api-key=-`) `ps` 출력에 절대 나타나지 않습니다.
+API 키는 5dive에 전달됩니다.** 표준 입력** (`--api-key=-`)이므로 `ps` 출력에는 나타나지 않습니다.
 
-프로필이 단일 모델이 아닌 OmniRoute **콤보**를 가리키도록 해야 플릿 공급자 장애 조치가 적용됩니다. [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578)에 기록된 실행에서는 기본 엔드포인트가 턴 중간에 완전히 다운되었지만, 에이전트는 대체 엔드포인트에서 남은 단계를 완료했으며 장애를 외부에 노출하지 않았습니다.
+프로필을 OmniRoute 로 가리키기** 콤보** 단일 모델이 아니라 플릿 제공자 장애 조치를 가져오는 것입니다. 기본 엔드포인트가 [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) 에 기록된 실행 도중에 하드다운되면 에이전트는 대체에 대한 나머지 단계를 완료하고 중단을 표면화하지 않았습니다.
 
 ---
 

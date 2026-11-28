@@ -185,88 +185,49 @@ ikke det.
 
 ---
 
-## Falske positiver fra antivirusprogrammer
+## Antivirus falske positiver
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG setter `README.md` i karantene med `MD:HttpRequest-inf[Susp]`
+### Avast/AVG karantene `README.md` med `MD:HttpRequest-inf[Susp]`
 
 **Dette er en falsk positiv. Ingenting er infisert, og ingen handling er nødvendig.**
 
-Avast og AVG bruker en heuristikk som flagger ren tekst-/Markdown-filer som inneholder mange
-lenker som ligner på HTTP-forespørsler. OmniRoutes `README.md` følger med i npm-pakken (den er
-oppført i `package.json` → `files`), så den havner i `node_modules/omniroute/README.md` ved
-en global installasjon — og den inneholder rundt 15 eksempler med `http://localhost:20128/...`
-(MCP HTTP/SSE-endepunktene, A2A-URL-en under `.well-known` og `curl`-utdrag). Denne
-lenketettheten er nok til å utløse heuristikken.
+Avast og AVG kjører en heuristikk som flagger plain-text/Markdown -filer som inneholder mange HTTP-søkende lenker. OmniRoute sin `README.md` sendes inne i npm-pakken (den er oppført i `package.json` → `files`), så den lander på `node_modules/omniroute/README.md` på en global installasjon — og den inneholder ~ 15 `http://localhost:20128/...` eksempler ( MCP HTTP/SSE endepunktene, A2A `.well-known` URL og `curl` snippet). Den koblingstettheten er nok til å utløse heuristikken.
 
-Hvis dette først begynte nylig: filtypen eller filens karakter har ikke endret seg. README-filen
-fikk en utvidet endepunkttabell (MCP HTTP + SSE + A2A ble lagt til) og flere `curl`-eksempler,
-noe som førte til at den passerte terskelen.
+Hvis dette startet nylig: filen endret seg ikke. README økte endepunkttabellen (MCP HTTP + SSE + A2A ble lagt til) og flere `curl` eksempler, som presset den forbi terskelen.
 
-Filen er passiv dokumentasjon uten noe kjørbart innhold. Du kan trygt gjenopprette den
-fra karantenen.
+Filen er inert dokumentasjon med null kjørbart innhold. Du kan trygt gjenopprette den fra karantene.
 
-**Dette bør du gjøre:**
+**Hva du skal gjøre:**
 
-1. **Stopp varslene** — ekskluder installasjonskatalogen i antivirusprogrammet
-   (Avast: Innstillinger → Unntak), og legg til den globale `node_modules`-banen og/eller
-   OmniRoutes datakatalog (`~/.omniroute/`).
-2. **Rapporter den falske positiven** — <https://www.avast.com/false-positive-file-form.php>,
-   og legg ved `README.md`-filen fra karantenen. Dette er løsningen som hjelper alle, siden det
-   er leverandørens heuristikk som overreagerer på en tekstfil.
+1. **Stopp varslene** — ekskluder installasjonsmappen i antivirusprogrammet ditt (Avast: Settings → Exceptions), legg til den globale `node_modules` banen and/or OmniRoute data dir (`~/.omniroute/`).
+2. **Rapporter den falske positive** — <https://www.avast.com/false-positive-file-form.php>, fester den karantenesatte `README.md`. Dette er løsningen som hjelper alle, siden det er leverandørens heuristiske overreaksjon på en tekstfil.
 
-**Hvorfor vi ikke «retter» dette på vår side:** Alle eksemplene bruker `http://localhost`, og
-localhost kan ikke bruke `https` uten problemer knyttet til selvsignerte sertifikater. Å
-fordreie dokumentasjonen for å omgå heuristikken til én leverandør ville gjøre den dårligere
-for alle lesere for å tilfredsstille en feil i et skanneprogram.
+**Hvorfor vi ikke "fikser" dette på vår side:** Eksemplene er alle `http://localhost`, og localhost kan ikke være `https` uten selvsignert sertifikatfriksjon. Å mangle dokumentene for å unngå en leverandørs heuristikk ville skade enhver leser for å tilfredsstille en skannerfeil.
 
-### Kaspersky flagger skrivebordsappen som `PDM:Trojan.Win32.Generic`
+### Kaspersky flagger Desktop-appen som `PDM:Trojan.Win32.Generic`
 
-**Dette er en falsk positiv fra en atferdsbasert heuristikk. Ingenting er infisert.**
-Kasperskys `PDM:`-prefiks betyr at vurderingen kommer fra Proactive Defense Module (System
-Watcher), som vurderer hva installasjonsprogrammet _gjør_, i stedet for å sammenligne det med
-kjent skadevare. Når det utløses, «ruller Kaspersky tilbake» hele installasjonen — og sletter
-filer som allerede er skrevet — slik at appen ender opp ødelagt eller mangler helt.
+**Dette er en falsk positiv fra en atferdsheuristikk. Ingenting er infisert.** Kasperskys `PDM:` prefiks betyr at dommen kommer fra dens proaktive forsvarsmodul (System Watcher), som vurderer hva installasjonsprogrammet _gjør_ i stedet for å matche det mot kjent skadelig programvare. Når den utløses, "ruller Kaspersky tilbake" hele installasjonen — sletter filer den allerede hadde skrevet — slik at appen ender opp med å bli ødelagt eller mangler.
 
-Filene som flagges, er standarddeler av oppgitte avhengigheter med åpen kildekode som følger
-med skrivebordsappen, for eksempel:
+Filene den flagger er lagerdeler av deklarerte, åpen kildekode-avhengigheter som er samlet med skrivebordsappen, for eksempel:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` og
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), biblioteket for
-  nettleserautomatisering som brukes til leverandørinnlogging i appen og nettleserbasert chat.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — den fastlåste opprinnelige `wreq-js`-bindingen som brukes for HTTP med
-  nettleserfingeravtrykk hos leverandører som bruker nettinformasjonskapsler (`<arch>` er
-  `x64` eller `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` og `workerProcessEntry.js` — [Playwright](https://playwright.dev), nettleserautomatiseringsbiblioteket som brukes for leverandørpålogging i appen og nettleserstøttet chat.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — den festede `wreq-js` native bindingen som brukes for nettleser-fingeravtrykk av HTTP på nettinformasjonskapselleverandører (`<arch>` er `x64` eller `arm64`).
 
-**Hvorfor det utløses:** Windows-installasjonsprogrammet er **ennå ikke kodesignert**, så et
-usignert NSIS-installasjonsprogram har null omdømme, og atferdsbaserte heuristikker kjøres med
-maksimal aggressivitet. Kombinert med en medfølgende opprinnelig DLL-fil og hundrevis av
-`.js`-filer som skrives under `%LOCALAPPDATA%\Programs\OmniRoute` (inkludert pakkekataloger
-med hash-suffiks fra den frittstående Next.js-byggingen), er dette nok til å utløse
-heuristikken. Kodesignering er planlagt. Frem til den er på plass, kan dette gjenta seg med
-nye utgivelser.
+**Hvorfor det brenner:** Windows installasjonsprogrammet er** ennå ikke kodesignert** , så en usignert NSIS installatør har null rykte og atferdsheuristikk kjører med maksimal aggresjon. Kombinert med en medfølgende native DLL og hundrevis av `.js` -filer skrevet under `%LOCALAPPDATA%\Programs\OmniRoute` (inkludert hash-suffiksede pakkekataloger fra Next.js frittstående build), er det nok til å snu heuristikken. Kodesignering er planlagt; til den lander, kan nye utgivelser gjenta dette.
 
-**Dette bør du gjøre:**
+**Hva du skal gjøre:**
 
-1. **Bekreft nedlastingen først** (utelukker at filen er manipulert). Hver utgivelse
-   publiserer `latest.yml`, der feltet `sha512` (base64) dekker installasjonsprogrammet
-   `OmniRoute.Setup.<version>.exe`. Kjør følgende i PowerShell fra mappen som inneholder
-   installasjonsprogrammet:
+1. **Bekreft nedlastingen din først** (utelukker en manipulert fil). Hver utgivelse publiserer `latest.yml`, hvis `sha512` felt (base64) dekker `OmniRoute.Setup.<version>.exe` installasjonsprogrammet. I PowerShell, fra mappen som inneholder installasjonsprogrammet:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Utdataene må samsvare med `latest.yml` → `sha512`. Hvis de ikke samsvarer, sletter du
-   filen og laster den ned på nytt kun fra
-   [GitHub-utgivelsessiden](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Gjenopprett + ekskluder** — gjenopprett elementene som ble rullet tilbake, fra karantenen,
-   og legg til et unntak for `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Innstillinger →
-   Trusler og unntak). Installer deretter på nytt.
-3. **Rapporter den falske positiven** — <https://opentip.kaspersky.com/>. FP-rapporter som
-   sendes inn av brukere, bidrar faktisk til raskere tillatelseslisting.
+   Utgangen må samsvare med `latest.yml` → `sha512`. Hvis den ikke gjør det, slett filen og last den ned på nytt fra [GitHub -utgivelsessiden](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Gjenopprett + exclude** — gjenoppretter tilbakerullede elementer fra karantene og legg til en ekskludering for `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions), og installer deretter på nytt.
+3. **Rapporter den falske positive** — <https://opentip.kaspersky.com/>. Brukerinnsendte FP -rapporter øker virkelig godkjenningslisten.
 
 ---
 
@@ -875,10 +836,10 @@ Flere symptomer:
 
 ---
 
-## Fremdeles fastlåst?
+## Fortsatt fast?
 
-- **GitHub-problemer**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Arkitektur**: Se [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) for interne detaljer
-- **API-referanse**: Se [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) for alle endepunkter
-- **Helseoversikt**: Sjekk **Kontrollpanel → Helse** for systemstatus i sanntid
-- **Oversetter**: Bruk **Kontrollpanel → Oversetter** for å feilsøke formatproblemer
+- **GitHub problemer** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Arkitektur** : Se [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) for interne detaljer
+- **API Referanse** : Se [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) for alle endepunkter
+- **Helse Dashboard** : Sjekk** Dashboard → Health** for systemstatus i sanntid
+- **Oversetter** : Bruk** Dashboard → Oversetter** for å feilsøke formatproblemer

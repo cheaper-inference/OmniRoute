@@ -31,146 +31,108 @@ Klientas (`src/lib/obsidian/api.ts`) papildo Local REST API šiomis funkcijomis:
 
 ## Sąranka
 
-Obsidian prieigos raktui ar baziniam URL **nėra jokio aplinkos kintamojo** — abu saugomi
-SQLite lentelėje `key_value` (vardų srityje `obsidian`) naudojant
-`src/lib/db/obsidian.ts`. Prieigos raktas **saugomas užšifruotas** (AES-256-GCM, su
-atgalinio suderinamumo atsarginiu mechanizmu, naudojančiu atvirąjį tekstą). Konfigūruokite
-Endpoint valdymo skydelio kortelėje **Context Sources** (`ObsidianSourceCard`) arba
-naudodami nustatymų REST API.
+Yra** nėra aplinkos kintamojo** Obsidian prieigos raktui arba baziniam URL — abu yra saugomi SQLite `key_value` lentelėje (vardų erdvėje `obsidian`) per `src/lib/db/obsidian.ts`. Žetonas yra** užšifruotas ramybės būsenoje** (AES-256-GCM, su paprastu tekstu atgalinio suderinimo atsarginiu variantu). Konfigūruoti iš** Konteksto šaltiniai** Endpoint prietaisų skydelio skirtuką (`ObsidianSourceCard`) arba per nustatymus REST API.
 
 > [!IMPORTANT]
-> **Obsidian Local REST API** papildinys turi būti įdiegtas ir paleistas. Jo REST
-> sąsaja klausosi adresu **HTTP `127.0.0.1:27123`** (numatytasis bazinis URL). Prievadas
-> `27124` yra _atskiras_ MCP/HTTPS galinis taškas, todėl nustatymų maršrutas jį aiškiai
-> atmeta. Jei jungiatės iš kito įrenginio, naudokite `http://<tailscale-ip>:27123`.
+> The**Obsidian Vietinis REST API** papildinys turi būti įdiegtas ir paleistas. Jo REST sąsaja klausosi**HTTP `127.0.0.1:27123`** (numatytasis pagrindas URL). Prievadas `27124` yra _atskiras_ MCP/HTTPS galutinis taškas ir yra aiškiai atmestas nustatymų maršrute. Jei jungiatės iš kito įrenginio, naudokite `http://<tailscale-ip>:27123`.
 
 ### Konfigūracijos raktai (SQLite `key_value`, vardų sritis `obsidian`)
 
-| Raktas            | Paskirtis                                                         | Užšifruota |
-| ----------------- | ----------------------------------------------------------------- | ---------- |
-| `api_key`         | Local REST API nešiklio prieigos raktas                           | taip       |
-| `base_url`        | REST bazinis URL (numatytasis `http://127.0.0.1:27123`)           | ne         |
-| `vault_path`      | Absoliutus saugyklos katalogo kelias (sinchronizavimui)           | ne         |
-| `webdav_username` | Sugeneruotas WebDAV naudotojo vardas (saugyklos sinchronizavimui) | ne         |
-| `webdav_password` | Sugeneruotas WebDAV slaptažodis (saugyklos sinchronizavimui)      | taip       |
-| `webdav_enabled`  | Ar įjungtas saugyklos sinchronizavimas per WebDAV                 | ne         |
+| Raktas            | Tikslas                                                           | Šifruota |
+| ----------------- | ----------------------------------------------------------------- | -------- |
+| `api_key`         | Vietinis REST API nešiklio ženklas                                | taip     |
+| `base_url`        | REST base URL (numatytasis `http://127.0.0.1:27123`)              | ne       |
+| `vault_path`      | Absoliutus kelias į saugyklos katalogą (sinchronizavimui)         | ne       |
+| `webdav_username` | Sugeneruotas WebDAV naudotojo vardas (saugyklos sinchronizavimas) | ne       |
+| `webdav_password` | Sugeneruotas WebDAV slaptažodis (saugyklos sinchronizavimas)      | taip     |
+| `webdav_enabled`  | Ar įjungtas WebDAV saugyklos sinchronizavimas                     | ne       |
 
-### Konfigūravimas naudojant REST
+### Konfigūruoti per REST
 
 ```bash
-# Įrašyti ir patikrinti Local REST API prieigos raktą (POST tikrina pateikdamas būsenos užklausą)
+# Save + validate the Local REST API token (POST validates via a status check)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
 
-# Patikrinti ryšio būseną (grąžina connected, hasToken, baseUrl, vaultPath)
+# Check connection status (returns connected, hasToken, baseUrl, vaultPath)
 curl http://localhost:20128/api/settings/obsidian
 
-# Atsijungti (pašalina išsaugotą prieigos raktą)
+# Disconnect (clears the stored token)
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Visiems metodams reikalingas autentifikavimas valdymo skydelyje. `POST` atmeta bet kokį
-URL, naudojantį prievadą `27124`, ir prieš išsaugodamas patikrina prieigos raktą,
-iškviesdamas Local REST API būsenos galinį tašką.
+Visiems metodams reikalingas prietaisų skydelio autentifikavimas. `POST` atmeta bet kokį URL prievade `27124` ir patvirtina prieigos raktą iškviesdamas vietinį REST API būsenos tašką prieš tęsdamas.
 
-### Saugyklos sinchronizavimas per WebDAV
+### WebDAV saugyklos sinchronizavimas
 
-`src/app/api/settings/obsidian/webdav/route.ts` valdo pasirinktinį WebDAV pagrįstą
-saugyklos sinchronizavimą (kurį vykdo `src/lib/obsidianSync.ts`). Jį įjungus, OmniRoute
-nurodomas vietinis saugyklos katalogas ir sugeneruojama atsitiktinė WebDAV naudotojo
-vardo bei slaptažodžio pora:
+`src/app/api/settings/obsidian/webdav/route.ts` valdo pasirenkamą WebDAV palaikomą saugyklos sinchronizavimą (kurią valdo `src/lib/obsidianSync.ts`). Įjungus, OmniRoute nukreipiamas į vietinio saugyklos katalogą ir sukuriama atsitiktinė WebDAV username/password pora:
 
 ```bash
-# Įjungti WebDAV sinchronizavimą saugyklos katalogui (sugeneruoja naudotojo vardą ir slaptažodį)
+# Enable WebDAV sync for a vault directory (mints username/password)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
 
-# Gauti WebDAV sinchronizavimo būseną (prisijungimo duomenys grąžinami tik tada, kai sinchronizavimas įjungtas)
+# Get WebDAV sync status (credentials returned only while enabled)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# Išjungti WebDAV sinchronizavimą (pašalina prisijungimo duomenis ir valdomą .stignore)
+# Disable WebDAV sync (clears credentials + managed .stignore)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
 ### Saugumas ir transportas
 
-WebDAV autentifikavimas užtikrina IP gedimų sekimą ir blokavimą (10 nesėkmingų bandymų per 60 sekundžių langą suaktyvina 5 minučių blokavimą naudojant `429 Too Many Requests` ir `Retry-After`). Kadangi WebDAV perduoda pagrindinius autentifikavimo kredencialus, primygtinai rekomenduojama nutraukti TLS (arba nukreipti per saugų tunelį, pvz., Tailscale arba Cloudflare Tunnel), kai pasiekiate WebDAV galinį tašką už atgalinės linijos ribų.
+WebDAV autentifikavimas užtikrina IP gedimų sekimą ir blokavimą (10 nesėkmingų bandymų per 60 sekundžių langą suaktyvina 5 minučių blokavimą naudojant `429 Too Many Requests` ir `Retry-After`). Kadangi WebDAV perduoda pagrindinius autentifikavimo kredencialus, primygtinai rekomenduojama nutraukti TLS (arba nukreipti maršrutą saugiu tuneliu, pvz., Tailscale arba Cloudflare tuneliu), kai pasiekiate WebDAV galinį tašką už atgalinės linijos ribų.
 
-### Kiekvienam API raktui atskiras konteksto šaltinis (pasirinktinai)
+### API rakto konteksto šaltinis (pasirenkama)
 
-Obsidian konfigūracija gali būti apribota **kiekvienam API raktui atskirai**, naudojant
-lentelę `api_key_context_sources` (`src/lib/db/apiKeyContextSources.ts`). Kai MCP
-iškvietime pateikiamas autentifikuoto API rakto ID, `getObsidianConfigForApiKey()`
-pirmenybę teikia tam raktui priklausančiam prieigos raktui, baziniam URL ir saugyklos
-keliui (`source: "api_key"`), o kitu atveju naudoja visuotinę konfigūraciją
-(`source: "global"`).
+Obsidian config gali būti taikoma** už API raktą** per `api_key_context_sources` lentelę (`src/lib/db/apiKeyContextSources.ts`). Kai MCP iškvietimas turi autentifikuotą API rakto ID, `getObsidianConfigForApiKey()` teikia pirmenybę to rakto token/base-URL/vault-path (`source: "api_key"`) ir kitu atveju grįžta į visuotinę konfigūraciją (`source: "global"`).
 
-Prieš nuskaitydami šią konfigūraciją, su sinchronizavimu nesusiję MCP įrankiai turi
-nustatyti iškvietėjo tapatybę. Tapatybės neturintis iškvietėjas gauna pranešimą
-`Obsidian API prieigos raktas nesukonfigūruotas`, o saugyklos užklausa nesiunčiama.
-HTTP iškvietėjų tapatybė nustatoma pagal jų užklausos prisijungimo duomenis; stdio
-iškvietėjų tapatybė gali būti nustatyta naudojant `OMNIROUTE_API_KEY` arba
-`ROUTER_API_KEY`. HTTP iškvietėjas, kurio tapatybės nustatyti nepavyko, negali perimti
-serverio aplinkos tapatybės. Vien rezervuoti ID prieigos nesuteikia; vis dar palaikomas
-galiojantis aplinkos prisijungimo duomuo, nustatomas kaip `env-key`. Autentifikuotiems
-raktams, neturintiems atskiros Obsidian konfigūracijos, ir toliau naudojama visuotinė
-atsarginė konfigūracija. Keturi įrankiai `obsidian_sync_*` išlaiko savo atskirą
-sinchronizavimo prieigos rakto veikseną.
+Prieš nuskaitant šią konfigūraciją, nesinchronizuojamiems MCP įrankiams reikia nustatyti skambinančiojo tapatybę. Skambinantis asmuo be tapatybės gauna `Obsidian API token not configured` ir jokia saugyklos užklausa nesiunčiama. HTTP skambinantieji sprendžia naudodami savo užklausos kredencialus; stdio skambinantieji gali išspręsti naudodami `OMNIROUTE_API_KEY` arba `ROUTER_API_KEY`. Neišspręstas HTTP skambutis negali paveldėti serverio aplinkos tapatybės. Vien rezervuota vieta IDs nesuteikia prieigos teisės; galiojantis aplinkos kredencialas, kuris išsprendžia `env-key` išlieka palaikomas. Autentifikuoti raktai be kiekvieno rakto Obsidian konfigūracijos išlaiko visuotinį atsarginį variantą. Keturi `obsidian_sync_*` įrankiai išlaiko savo atskirą sinchronizavimo raktų elgesį.
 
 ## MCP įrankiai (22)
 
-Apibrėžti faile `open-sse/mcp-server/tools/obsidianTools.ts`. Prieigos raktas / bazinis URL nustatomi
-kiekvienam iškvietimui (pirmiausia pagal API raktą, tada visuotiniai). Įrankiams, kurie kreipiasi į OmniRoute **sinchronizavimo serverį**
-(keturiems `obsidian_sync_*` įrankiams), papildomai reikalingas sinchronizavimo autentifikavimo prieigos raktas, sukonfigūruotas
-OmniRoute nustatymuose.
+Apibrėžiama `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL išsprendžiami per skambutį (pirmiausia API raktui, tada visuotiniam). Įrankiai, kurie pasiekė OmniRoute** sinchronizavimo serveris** (keturi `obsidian_sync_*` įrankiai) papildomai reikalauja sinchronizavimo autentifikavimo prieigos rakto, sukonfigūruoto OmniRoute nustatymuose.
 
 ### Skaitymo įrankiai (`read:obsidian`)
 
-| Įrankis                      | Aprašymas                                                                                                                            |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `obsidian_check_status`      | Patikrinti, ar vietinė REST API yra pasiekiama ir autentifikuota.                                                                    |
-| `obsidian_search_simple`     | Viso teksto paieška užrašų turinyje; grąžina fragmentus su failų keliais.                                                            |
-| `obsidian_search_structured` | Paieška naudojant JSON Logic išraišką (and/or/regex/path filtrus).                                                                   |
-| `obsidian_read_note`         | Skaityti užrašą pagal saugyklos atžvilgiu nurodytą kelią; pasirinktinai konkrečią antraštę / bloką / metaduomenis.                   |
-| `obsidian_list_vault`        | Išvardyti saugyklos failus ir katalogus (įrašų medį).                                                                                |
-| `obsidian_get_document_map`  | Gauti užrašo antraščių struktūrą kaip antraščių → eilučių numerių žemėlapį.                                                          |
-| `obsidian_get_note_metadata` | Gauti metaduomenis, žymas, nuorodas ir simbolių / žodžių skaičių be viso turinio.                                                    |
-| `obsidian_get_active_file`   | Gauti šiuo metu aktyvaus Obsidian failo kelią ir turinį.                                                                             |
-| `obsidian_get_periodic_note` | Gauti nurodytos datos dienos / savaitės / mėnesio periodinį užrašą (jei praleista – šiandienos).                                     |
-| `obsidian_get_tags`          | Išvardyti visas saugyklos žymas ir jų dažnius.                                                                                       |
-| `obsidian_list_commands`     | Išvardyti galimus Obsidian komandų ID (naudoti su `obsidian_execute_command`).                                                       |
-| `obsidian_sync_status`       | OmniRoute sinchronizavimo serverio būsena: ar veikia, saugyklos pavadinimas, prievadas, veikimo trukmė, paskutinis sinchronizavimas. |
-| `obsidian_sync_conflicts`    | Išvardyti neišspręstus sinchronizavimo konfliktus (kelias, konflikto kelias, aptikimo laikas).                                       |
+| Įrankis                      | Aprašymas                                                                                                                         |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Patikrinkite, ar vietinis REST API pasiekiamas ir patvirtintas.                                                                   |
+| `obsidian_search_simple`     | Užrašų turinio viso teksto paieška; grąžina fragmentus su failo keliais.                                                          |
+| `obsidian_search_structured` | Ieškokite naudodami JSON Logic išraišką (and/or/regex/path filtrai).                                                              |
+| `obsidian_read_note`         | Skaityti užrašą pagal saugyklos santykinį kelią; pasirinktinai konkretus heading/block/frontmatter.                               |
+| `obsidian_list_vault`        | Išvardykite failus ir katalogus saugykloje (įrašų medyje).                                                                        |
+| `obsidian_get_document_map`  | Gaukite užrašo antraštės struktūrą kaip antraščių → eilučių numerių žemėlapį.                                                     |
+| `obsidian_get_note_metadata` | Gaukite frontmatter, žymas, nuorodas, char/word skaičių be viso turinio.                                                          |
+| `obsidian_get_active_file`   | Gaukite šiuo metu aktyvaus failo kelią + Obsidian.                                                                                |
+| `obsidian_get_periodic_note` | Gaukite daily/weekly/monthly periodinį pasimatymo užrašą (šiandien, jei jis praleistas).                                          |
+| `obsidian_get_tags`          | Išvardykite visas saugyklos žymas su jų dažniais.                                                                                 |
+| `obsidian_list_commands`     | Išvardykite galimą Obsidian komandą IDs (naudokite su `obsidian_execute_command`).                                                |
+| `obsidian_sync_status`       | OmniRoute sinchronizavimo serverio būsena: veikia, saugyklos pavadinimas, prievadas, veikimo laikas, paskutinis sinchronizavimas. |
+| `obsidian_sync_conflicts`    | Išvardykite neišspręstus sinchronizavimo konfliktus (kelias, konflikto kelias, aptikta-at).                                       |
 
 ### Rašymo įrankiai (`write:obsidian`)
 
-| Įrankis                          | Aprašymas                                                                                                            |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Sukurti arba perrašyti užrašą pateiktu Markdown turiniu.                                                             |
-| `obsidian_append_note`           | Pridėti turinį prie užrašo; pasirinktinai prie konkrečios antraštės / bloko.                                         |
-| `obsidian_patch_note`            | Tiksliai pridėti po / prieš arba pakeisti antraštės, bloko ar metaduomenų lauko turinį.                              |
-| `obsidian_delete_note`           | Visam laikui ištrinti užrašą iš saugyklos.                                                                           |
-| `obsidian_move_note`             | Perkelti arba pervardyti užrašą saugykloje.                                                                          |
-| `obsidian_execute_command`       | Vykdyti Obsidian komandą pagal jos komandos ID.                                                                      |
-| `obsidian_open_file`             | Atidaryti failą Obsidian programoje (sukuria jį, jei jis neegzistuoja).                                              |
-| `obsidian_sync_trigger`          | Nedelsiant paleisti dvikryptį darbalaukio ↔ mobiliojo įrenginio saugyklos sinchronizavimą.                           |
-| `obsidian_sync_resolve_conflict` | Išspręsti sinchronizavimo konfliktą: palikti `local` (mobiliojo įrenginio), `remote` (darbalaukio) arba `keep-both`. |
+| Įrankis                          | Aprašymas                                                                                                                                |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Sukurkite arba perrašykite pastabą su nurodytu Markdown turiniu.                                                                         |
+| `obsidian_append_note`           | Pridėti turinį prie užrašo; pasirinktinai į konkrečią heading/block.                                                                     |
+| `obsidian_patch_note`            | Chirurginiu būdu append/prepend/replace ant pozicijos, bloko ar priekinės medžiagos lauke.                                               |
+| `obsidian_delete_note`           | Visam laikui ištrinti užrašą iš saugyklos.                                                                                               |
+| `obsidian_move_note`             | Perkelkite arba pervardykite pastabą saugykloje.                                                                                         |
+| `obsidian_execute_command`       | Vykdykite Obsidian komandą jos komanda ID.                                                                                               |
+| `obsidian_open_file`             | Atidarykite failą Obsidian (sukuria jį, jei jo nėra).                                                                                    |
+| `obsidian_sync_trigger`          | Nedelsiant suaktyvinkite dvikryptį darbalaukio ↔ Mobile saugyklos sinchronizavimą.                                                       |
+| `obsidian_sync_resolve_conflict` | Išspręskite sinchronizavimo konfliktą: palikite `local` (mobiliesiems telefonams), `remote` (staliniams kompiuteriams) arba `keep-both`. |
 
 > [!NOTE]
-> `obsidian_patch_note` paskirties vietos priima `targetType` reikšmes `heading | block | frontmatter`
-> ir `operation` reikšmes `append | prepend | replace`, taip pat pasirinktinį
-> `createTargetIfMissing`. Keturi `obsidian_sync_*` įrankiai susisiekia su vietiniu sinchronizavimo
-> serveriu (pagal numatytuosius nustatymus `http://127.0.0.1:27781`) ir reikalauja sinchronizavimo prieigos rakto.
+> `obsidian_patch_note` taikiniai priima `targetType` iš `heading | block | frontmatter` ir `operation` iš `append | prepend | replace` su pasirenkamu `createTargetIfMissing`. Keturi `obsidian_sync_*` įrankiai palaiko ryšį su vietiniu sinchronizavimo serveriu (pagal numatytuosius nustatymus `http://127.0.0.1:27781` ) ir reikalauja sinchronizavimo prieigos rakto.
 
-### Aprėptys
+### Taikymo sritis
 
-Skaitymo įrankiams reikalinga `read:obsidian`, o rašymo įrankiams – `write:obsidian`. Priverstinis taikymas
-yra toks pat kaip Notion — jį apdoroja `withScopeEnforcement()`, esanti
-`open-sse/mcp-server/server.ts`, ir jis įjungiamas, kai `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, o
-leidžiamos aprėptys gaunamos iš `OMNIROUTE_MCP_SCOPES` arba API rakto aprėpties konteksto. Žr.
-[MCP-SERVER.md](./MCP-SERVER.md).
+Skaitymo įrankiai reikalauja `read:obsidian`; rašymo įrankiams reikia `write:obsidian`. Vykdymas yra identiškas Notion — kurį tvarko `withScopeEnforcement()` `open-sse/mcp-server/server.ts`, apribotas `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ir priverstinai įjungtas HTTP/SSE skambintojams, kurių API raktas neturi `manage`/`admin`, su leidžiamomis apimtimis, gautomis iš `OMNIROUTE_MCP_SCOPES` arba API rakto apimties konteksto. Žiūrėkite [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Galiniai taškai
 

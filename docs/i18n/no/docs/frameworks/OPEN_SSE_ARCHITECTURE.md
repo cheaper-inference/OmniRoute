@@ -236,19 +236,19 @@ Støtter** 22 rutingstrategier** (se `src/shared/constants/routingStrategies.ts`
 | `context-relay`     | Gi bort kontekst på tvers av mål                                                               |
 | `fill-first`        | Fyll kvoten før du går videre til neste                                                        |
 | `p2c`               | Kraften til to valg                                                                            |
-| `random`            | Uniform tilfeldig                                                                              |
-| `least-used`        | Velg den med færrest nyere bruk                                                                |
-| `cost-optimized`    | Billigste sunne mål først                                                                      |
-| `reset-aware`       | Klar over leverandørens tilbakestillingsvinduer                                                |
-| `reset-window`      | Tilbakestill vindusbasert ruting                                                               |
+| `random`            | Fersk shuffle per forespørsel                                                                  |
+| `least-used`        | Velg den med færrest registrerte forespørsler                                                  |
+| `cost-optimized`    | Laveste kataloginngangspris først                                                              |
+| `reset-aware`       | Resterende kvote + tilbakestilling haster                                                      |
+| `reset-window`      | Kvotevindu som tilbakestilles snarest først                                                    |
 | `expiry-first`      | Bruk først ubrukt kontoen hvis kvote ville utløpe                                              |
 | `headroom`          | Mest gjenværende kvoteplass først                                                              |
 | `quota-weighted`    | Hopp over oppbrukte kontoer, og trekk deretter med gjenværende kvote ÷ under flyging           |
-| `strict-random`     | Virkelig ensartet (ingen kvalitetsvekting)                                                     |
+| `strict-random`     | Blandet kortstokk: hvert mål gjentas én gang før                                               |
 | `auto`              | Bruk 16-faktorscore (`autoCombo/`)                                                             |
 | `lkgp`              | Siste kjente gode leverandør først                                                             |
-| `context-optimized` | Best for forespørsler med lang kontekst                                                        |
-| `cache-optimized`   | Fest hvert gjenbrukbare ledetekstprefiks til samme konto (spørsmålsbuffertreff)                |
+| `context-optimized` | Største kjente kontekstvindu først                                                             |
+| `cache-optimized`   | Foretrekk kontoen som sannsynligvis har ledetekstprefikset i hurtigbufferen                    |
 | `fusion`            | Vift ut til et panel parallelt, og syntetiser deretter via en dommer (`fusion.ts`)             |
 | `pipeline`          | Kjedetrinn — hvert måls utgang mater den neste                                                 |
 | `jev`               | Opt-in: TypeSafe Jev innrømmer hvilke rangerte oppføringer som kjører; ellers bestillingen din |
@@ -371,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-Oppløsningen går gjennom `ExecutorRegistry` (`executors/registry.ts`): hver spesialisert eksekutør er deklarert i den innebygde tabellen i `executors/index.ts` og registrert via `registerExecutor(alias, instance)` ved modulbelastning; `getExecutor()` konsulterer registret og faller tilbake til en memoisert `DefaultExecutor` for enhver leverandør uten en spesialisert oppføring. Den fullstendige aliaset → executor mapping er preget av den gylne testen `tests/unit/executor-map-golden.test.ts`.
+Oppløsning går gjennom `ExecutorRegistry` (`executors/registry.ts`): hver spesialisert eksekutør er deklarert i den innebygde tabellen i `executors/index.ts` og registrert via `registerExecutor(alias, instance)` ved modulbelastning; `getExecutor()` konsulterer registret og faller tilbake til en memoisert `DefaultExecutor` for enhver leverandør uten en spesialisert oppføring. Den fullstendige aliaset → executor mapping er preget av den gylne testen `tests/unit/executor-map-golden.test.ts`.
 
 ---
 

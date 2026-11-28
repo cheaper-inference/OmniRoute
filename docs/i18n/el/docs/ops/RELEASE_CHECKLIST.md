@@ -4,12 +4,9 @@
 
 ---
 
-> **Τελευταία ενημέρωση:** 2026-08-28 — v3.8.51
-> Απλοποιημένη ροή έκδοσης που αξιοποιεί τις δεξιότητες του Claude Code για αυτοματοποίηση.
+> Βελτιωμένη ροή απελευθέρωσης που αξιοποιεί τις δεξιότητες κώδικα Claude για αυτοματισμό.
 >
-> **Διατηρείτε την ουρά/τον κλάδο σε πράσινη κατάσταση μεταξύ των εκδόσεων:** δείτε το [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (οικογένεια `/green-prs` + `npm run check:release-green` + `/babysit` + νυχτερινή εκτέλεση). Η περιοδική
-> εκτέλεσή του — και ειδικά **πριν από** αυτήν τη λίστα ελέγχου — εξασφαλίζει ότι το PR της έκδοσης ξεκινά σε πράσινη κατάσταση.
+> **Διατηρήστε το queue/branch πράσινο μεταξύ των εκδόσεων:** δείτε [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` family + `npm run check:release-green` + `/babysit` + nightly). Εκτελώντας αυτό περιοδικά — και ειδικά** προτού** αυτή η λίστα ελέγχου — κάνει την απελευθέρωση PR να ξεκινά πράσινη.
 
 ## TL;DR
 
@@ -58,9 +55,11 @@ npm run test:e2e           # προαιρετικό αλλά συνιστάτα�
 
 **Βιβλίο σπασμένων τεχνουργημάτων (αμετάβλητο):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` ως το προεπιλεγμένο αντανακλαστικό (λεπτά, αναστρέψιμο). `npm unpublish` μόνο μέσα στο παράθυρο 72h/no-dependents και ποτέ ως πρώτη κίνηση. Docker: ποτέ μην ξαναγράψετε μια ετικέτα έκδοσης. Η επαναφορά — επαναλαμβάνει `latest` στην τελευταία καλή σύνοψη.
 
-**Docker Hub `latest` (απαιτείται σε κάθε σταθερή δημοσίευση SemVer ):** η ροή εργασίας `docker-publish` πρέπει να έχει ετικέτα** και οι δύο** `X.Y.Z` και, όταν `should-promote-latest.sh` συμφωνεί, αυτό είναι το υψηλότερο σταθερό SemVer, `:latest` με το** ίδια πέψη** . Μετά την εργασία: Το Hub `latest` digest ισούται με το νέο SemVer digest και `last_updated` moved. Μην αφήνετε `:latest` σε παλαιότερη έκδοση, ενώ οι σημειώσεις έκδοσης μιλούν για διορθώσεις που υπάρχουν μόνο στο git. Σύνταξη γρήγορων εκκινήσεων χρησιμοποιήστε `:latest`; GitOps θα πρέπει να συνεχίσει να καρφιτσώνει `X.Y.Z`. Δείτε [τα κανάλια έκδοσης Docker](../guides/DOCKER_GUIDE.md#release-channels) και #10317.
+**Docker Hub `latest` (απαιτείται σε κάθε σταθερή δημοσίευση SemVer ):** η ροή εργασίας `docker-publish` πρέπει να έχει ετικέτα** και οι δύο** `X.Y.Z` και, όταν `should-promote-latest.sh` συμφωνεί, αυτό είναι το υψηλότερο σταθερό SemVer, `:latest` με το** ίδια πέψη** . Μετά την εργασία: Το Hub `latest` digest ισοδυναμεί με το νέο SemVer digest και `last_updated` moved. Μην αφήνετε `:latest` σε παλαιότερη έκδοση, ενώ οι σημειώσεις έκδοσης μιλούν για διορθώσεις που υπάρχουν μόνο στο git. Σύνταξη γρήγορων εκκινήσεων χρησιμοποιήστε `:latest`; GitOps θα πρέπει να συνεχίσει να καρφιτσώνει `X.Y.Z`. Δείτε [τα κανάλια έκδοσης Docker](../guides/DOCKER_GUIDE.md#release-channels) και #10317.
 
-**Αποθετήριο οργανισμού Docker Hub (`cheaperinference/omniroute`):** Docker Hub δεν μπορεί να μετακινήσει ένα αποθετήριο μεταξύ χώρων ονομάτων, επομένως `diegosouzapw/omniroute` διατηρεί το ιστορικό έλξης του και κάθε κυκλοφορία και η εργασία `mirror-org-dockerhub` του `docker-publish` αντιγράφει κάθε έκδοση που έχει κυκλοφορήσει (και `:latest` όταν προωθείται) από το `ghcr.io/cheaper-inference/omniroute` στο αποθετήριο του οργανισμού. Χρειάζεται τα μυστικά `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN`. χωρίς αυτά η εργασία παραμένει πράσινη με μια προειδοποίηση "Docker Hub org mirror skipped" και τα άλλα μητρώα δημοσιεύονται κανονικά. Για να δημοσιεύσετε μια έκδοση που έχει κυκλοφορήσει εκεί αργότερα, εκτελέστε** Ενέργειες → Αντικατοπτρίστε την εικόνα Docker στο Docker Hub org → Εκτέλεση ροής εργασίας** με `version=X.Y.Z` (και `promote_latest` για την υψηλότερη σταθερή έκδοση): αντιγράφει τις υπάρχουσες εικόνες, χωρίς ανακατασκευή.
+**Αποθετήριο οργανισμού Docker Hub (`cheaperinference/omniroute`):** Docker Hub δεν μπορεί να μετακινήσει ένα αποθετήριο μεταξύ χώρων ονομάτων, επομένως `diegosouzapw/omniroute` διατηρεί το ιστορικό έλξης του και κάθε κυκλοφορία και η εργασία `mirror-org-dockerhub` του `docker-publish` αντιγράφει κάθε έκδοση που έχει κυκλοφορήσει (και `:latest` όταν προωθείται) από το `ghcr.io/cheaper-inference/omniroute` στο αποθετήριο του οργανισμού. Χρειάζεται τα μυστικά `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN`. χωρίς αυτά η εργασία παραμένει πράσινη με μια προειδοποίηση "Docker Hub org mirror skipped" και τα άλλα μητρώα δημοσιεύονται κανονικά. Για να δημοσιεύσετε μια έκδοση που έχει κυκλοφορήσει εκεί αργότερα, εκτελέστε** Ενέργειες → Αντικατοπτρίστε την εικόνα Docker στο Docker Hub org → Εκτέλεση ροής εργασίας** με `version=X.Y.Z` (και `promote_latest` για την υψηλότερη σταθερή έκδοση): αντιγράφει τις υπάρχουσες εικόνες, χωρίς ανακατασκευή. Η επισκόπηση Docker Hub αυτού του αποθετηρίου ρυθμίζεται με το χέρι: τα API που το επεξεργάζονται απορρίπτουν τα διακριτικά πρόσβασης οργανισμού.
+
+Η ίδια ροή εργασίας αντιγράφει επίσης κάθε κυκλοφορία στο πακέτο GHCR παλαιού τύπου `ghcr.io/diegosouzapw/omniroute` μέχρι τις 30-06-2027, επομένως οι εγκαταστάσεις που είναι ακόμα καρφιτσωμένες σε αυτό συνεχίζουν να ενημερώνονται. Το ευρετήριό του φέρει μια περιγραφή "μετακινήθηκε στο `ghcr.io/cheaper-inference/omniroute`". Χρειάζεται το μυστικό `GHCR_LEGACY_TOKEN` (ένα κλασικό διακριτικό προσωπικής πρόσβασης του `diegosouzapw` με `write:packages`). Χωρίς αυτό, η εργασία παραλείπεται με μια προειδοποίηση "Παράβλεψη καθρέφτη GHCR παλαιού τύπου".
 
 ## Γρήγορη λωρίδα επειγουσών διορθώσεων (ετικέτα `hotfix`)
 
@@ -100,7 +99,7 @@ E2E, χωρίς καμία ετικέτα.
   - Προσκρούσεις `package.json`, `electron/package.json`
   - Αναγεννά `CHANGELOG.md` από δεσμεύσεις git από την τελευταία ετικέτα
   - Ενημερώνει τα σήματα README.md
-- [ ] Ελέγξτε με μη αυτόματο τρόπο CHANGELOG.md και καθαρίστε τα μηνύματα δέσμευσης εάν χρειάζεται
+- [ ] Ελέγξτε χειροκίνητα CHANGELOG.md και καθαρίστε τα μηνύματα δέσμευσης εάν χρειάζεται
 - [ ] Βεβαιωθείτε ότι η τελευταία ενότητα semver στην έκδοση `CHANGELOG.md` ισούται με την έκδοση `package.json`
 - [ ] Διατηρήστε `## [Unreleased]` ως την πρώτη ενότητα καταγραφής αλλαγών για επερχόμενη εργασία
 - [ ] Η ενημέρωση `docs/openapi.yaml` → `info.version` πρέπει να ισούται με την έκδοση `package.json`
@@ -140,7 +139,7 @@ E2E, χωρίς καμία ετικέτα.
 
 ### Συμβατικές δεσμεύσεις
 
-Όλες οι δεσμεύσεις που δεσμεύονται με την απελευθέρωση πρέπει να ακολουθούν τη μορφή `type(scope): subject`.
+Όλες οι δεσμεύσεις που δεσμεύονται από την απελευθέρωση πρέπει να ακολουθούν τη μορφή `type(scope): subject`.
 
 **Έγκυροι τύποι:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
@@ -151,7 +150,7 @@ E2E, χωρίς καμία ετικέτα.
 ### Απόδειξη με έγγραφα
 
 - [ ] Πάσες `npm run check:docs-sync` (αυτόματη εκτέλεση με προ-δέσμευση)
-- [ ] `npm run check:docs-all` passes (ομπρέλα: docs-sync + docs-counts + env-doc-sync + decated-versions + doc-links)
+- [ ] `npm run check:docs-all` περνάει. Το συμβουλευτικό `check:deprecated-versions` επισημαίνει εκδόσεις που αποδίδονται ρητά στο OmniRoute (3.6.x και παλαιότερες) και αγνοεί ημερομηνίες.
 - [ ] `npm run check:env-doc-sync` εξέρχεται 0 — κωδικός ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env σύμβαση είναι άθικτη
 - [ ] `npm run check:doc-links` εξέρχεται 0 — χωρίς σπασμένες εσωτερικές αναφορές σήμανσης μετά την αναδιάρθρωση
 - [ ] `docs/architecture/ARCHITECTURE.md` αξιολογήθηκε για storage/runtime drift
@@ -280,7 +279,7 @@ npm run build:release
 - [ ] Smoke `GET /planos`, `/termos`, `/privacidade` και `/reembolso` στον επώνυμο κεντρικό υπολογιστή Radar
 - [ ] Χειριστής αρχείων identity/contact/address και νομικός έλεγχος εγκεκριμένος από τον ιδιοκτήτη στην ιδιωτική υπηρεσία
 - [ ] Ασκήστε το Stripe Checkout και το υπογεγραμμένο webhook μόνο σε δοκιμαστική λειτουργία
-- [ ] Ασκήστε μια κρυπτογραφημένη παράδοση συναλλαγών-email με το εγκεκριμένο sender/domain
+- [ ] Ασκήστε μία κρυπτογραφημένη παράδοση συναλλαγών-email με το εγκεκριμένο sender/domain
 - [ ] Αποδείξτε την επαναφορά αντιγράφων ασφαλείας και μια εποπτευόμενη, περιορισμένη στον προϋπολογισμό εκτέλεση έρευνας
 - [ ] Εγκρίνετε την πολιτική αναθεώρησης BRL/PIX πριν αποδεχτείτε αποδεικτικά στοιχεία δωρεάς
 - [ ] Ενεργοποιήστε το δημόσιο Checkout μόνο μετά τις προηγούμενες πύλες και, στη συνέχεια, ενεργοποιήστε το νέο `news.json` ID
@@ -391,15 +390,15 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
 
 Το develop bump commit είναι χτισμένο με git plumbing (δεν αγγίζεται δέντρο που λειτουργεί) και προσκρούει τα ίδια πέντε αρχεία με μια δέσμευση κυκλικού ανοιχτού: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` και `docs/openapi.yaml`. Το τμήμα `[4.0.0]` CHANGELOG και οι καθρέφτες του i18n ανοίγουν στο `develop` μετά, πριν από το πρώτο PR. Το σενάριο δεν αλλάζει ποτέ npm dist-tags — κάνουν πρόβα εκείνων σε πακέτο scratch.
 
-### τεχνούργημα προεπισκόπησης PR (δημιουργήστε μία φορά, προωθήστε τα ίδια byte)
+### artifact προεπισκόπησης PR (δημιουργία μία φορά, προώθηση των ίδιων byte)
 
-`.github/workflows/preview-artifact.yml` κατασκευάζει ένα tarball παραγωγής από μια κεφαλή PR και επικυρώνει αυτό ακριβώς το build (#8084 slice (a)). Μόνο PRs ίδιου αποθετηρίου. τίποτα δεν δημοσιεύεται.
+`.github/workflows/preview-artifact.yml` κατασκευάζει ένα tarball παραγωγής από μια κεφαλή PR και επικυρώνει αυτή την ακριβή κατασκευή (#8084 slice (a)). Μόνο PRs ίδιου αποθετηρίου. τίποτα δεν δημοσιεύεται.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
@@ -409,14 +408,14 @@ npm install -g ./omniroute-*.tgz                          # preview install
 
 1. GO καταγράφηκε σε [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` εκτυπώνει `RESULT: READY`.
-3. Δημιουργήστε τα κλαδιά στο `origin` με το χέρι με τις εντολές που εκτυπώνει η ξηρή εκτέλεση — το σενάριο αρνείται να ωθήσει στο `origin`. Για να επαναχρησιμοποιήσετε ένα αναθεωρημένο commit ανάπτυξης, εκτελέστε πρώτα την πρόβα `--execute` στο άκρο 3.9.0 στο πιρούνι σας. Εκτυπώνει και τα δύο SHAs και μπορούν να προωθηθούν οι ίδιες δεσμεύσεις:
+3. Δημιουργήστε τους κλάδους στο `origin` με το χέρι με τις εντολές που εκτυπώνει η ξηρή εκτέλεση — το σενάριο αρνείται να προωθήσει στο `origin`. Για να επαναχρησιμοποιήσετε ένα αναθεωρημένο commit ανάπτυξης, εκτελέστε πρώτα την πρόβα `--execute` στο άκρο 3.9.0 ενάντια στο πιρούνι σας. Εκτυπώνει και τα δύο SHAs και μπορούν να προωθηθούν οι ίδιες δεσμεύσεις:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
 4. Προστατέψτε `stable/v3` και `develop` (κανόνες ουράς συγχώνευσης + ) πριν προσγειωθεί το πρώτο PR.
-5. Οι αδρανείς ροές εργασίας ενεργοποιούνται ανάλογα με την ύπαρξη διακλάδωσης: `forward-port.yml` (ώθηση σε `stable/v3`), `validate-stable-pr.yml` (PRs σε `stable/v3`) και `nightly-v4-build.yml` (δημιουργία `develop`). Πριν το go-live, ορίστε το μυστικό αποθετηρίου `secrets.FORWARD_PORT_TOKEN` (έτσι CI εκτελείται στη θύρα προώθησης PRs). Η νυχτερινή δημοσίευση παραμένει απενεργοποιημένη έως ότου ο κάτοχος ορίσει τη μεταβλητή χώρου αποθήκευσης `vars.NIGHTLY_PUBLISH` σε `true` και η npm Trusted Publishing αποδεχτεί `nightly-v4-build.yml`. Η ανάλυση καναλιού είναι `scripts/release/dist-tag.mjs`, την ίδια ανάλυση που χρησιμοποιεί `npm-publish.yml`.
+5. Οι αδρανείς ροές εργασίας ενεργοποιούνται ανάλογα με την ύπαρξη διακλάδωσης: `forward-port.yml` (ώθηση σε `stable/v3`), `validate-stable-pr.yml` (PRs σε `stable/v3`) και `nightly-v4-build.yml` (δημιουργία `develop`). Πριν το go-live, ορίστε το μυστικό του αποθετηρίου `secrets.FORWARD_PORT_TOKEN` (έτσι CI εκτελείται στη θύρα προώθησης PRs). Η νυχτερινή δημοσίευση παραμένει απενεργοποιημένη έως ότου ο κάτοχος ορίσει τη μεταβλητή χώρου αποθήκευσης `vars.NIGHTLY_PUBLISH` σε `true` και η npm Trusted Publishing αποδεχτεί `nightly-v4-build.yml`. Η ανάλυση καναλιού είναι `scripts/release/dist-tag.mjs`, την ίδια ανάλυση που χρησιμοποιεί `npm-publish.yml`.
 6. Επαληθεύστε τα κανάλια: `npm view omniroute dist-tags --json` εμφανίζει `latest` = 3.9.0 και κανένα `next` / `nightly` μέχρι να δημοσιευτεί το v4.
 7. Επαναφορά, εάν χρειάζεται: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` και `npm dist-tag add omniroute@3.8.59 latest`.
 

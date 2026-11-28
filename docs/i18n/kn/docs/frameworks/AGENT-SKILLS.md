@@ -13,12 +13,12 @@ Agent Skills ಎನ್ನುವುದು ಬಾಹ್ಯ ಏಜೆಂಟ್ಗ�
 
 ## ಅವಲೋಕನ
 
-ಕ್ಯಾಟಲಾಗ್ನಲ್ಲಿ **45 Agent Skills** ಇವೆ (23 REST API + 21 CLI + 1 ಸಂರಚನಾ ಕಾರ್ಯಪ್ರವಾಹ). ಪ್ರತಿಯೊಂದು ಕೌಶಲ್ಯವು ಇವುಗಳನ್ನು ಹೊಂದಿದೆ:
+ಕ್ಯಾಟಲಾಗ್ ಒಳಗೊಂಡಿದೆ** 45 ಏಜೆಂಟ್ ಕೌಶಲ್ಯಗಳು** (23 REST API + 21 CLI + 1 ಕಾನ್ಫಿಗರೇಶನ್ ವರ್ಕ್ಫ್ಲೋ). ಪ್ರತಿಯೊಂದು ಕೌಶಲ್ಯವು ಹೊಂದಿದೆ:
 
-- ಒಂದು **ಅಧಿಕೃತ ID** (`omni-auth`, `cli-serve`, ಇತ್ಯಾದಿ)
-- YAML frontmatter (`name`, `description`) + ಸಮೃದ್ಧ markdown ವಿಷಯವನ್ನು ಹೊಂದಿರುವ `skills/{id}/SKILL.md` ನಲ್ಲಿನ ಒಂದು **SKILL.md** ಫೈಲ್
-- OpenAPI ನಿರ್ದಿಷ್ಟತೆ ಮತ್ತು CLI ರಿಜಿಸ್ಟ್ರಿಯಿಂದ ಪಡೆಯಲಾದ **REST ಎಂಡ್ಪಾಯಿಂಟ್ಗಳು** (API ಕೌಶಲ್ಯಗಳು) ಅಥವಾ **CLI ಉಪಕಮಾಂಡ್ಗಳು** (CLI ಕೌಶಲ್ಯಗಳು)
-- ನೇರವಾಗಿ ಪಡೆದುಕೊಳ್ಳಲು ಒಂದು **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ಎ** ಅಂಗೀಕೃತ ID** (`omni-auth`, `cli-serve`, ಇತ್ಯಾದಿ.)
+- ಎ**SKILL.md** YAML ಫ್ರಂಟ್ಮ್ಯಾಟರ್ (`name`, `description`) + ರಿಚ್ ಮಾರ್ಕ್ಡೌನ್ ದೇಹದೊಂದಿಗೆ `skills/{id}/SKILL.md` ನಲ್ಲಿ ಫೈಲ್ ಮಾಡಿ
+- **REST ಅಂತಿಮ ಬಿಂದುಗಳು** (API ಕೌಶಲ್ಯಗಳು) ಅಥವಾ**CLI ಉಪಕಮಾಂಡ್ಗಳು** (CLI ಕೌಶಲ್ಯಗಳು) OpenAPI ಸ್ಪೆಕ್ ಮತ್ತು CLI ರಿಜಿಸ್ಟ್ರಿಯಿಂದ ಪಡೆಯಲಾಗಿದೆ
+- ಎ**GitHub ಕಚ್ಚಾ URL** ಲೈವ್ ತರಲು: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 

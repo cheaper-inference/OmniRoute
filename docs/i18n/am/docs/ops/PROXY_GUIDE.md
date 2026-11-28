@@ -270,114 +270,114 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ---
 
-## 1proxy ነፃ ፕሮክሲ የገበያ ቦታ
+## 1 የተኪ ነፃ ተኪ የገበያ ቦታ
 
-> 🆕 **በ[@oyi77](https://github.com/oyi77) የተበረከተ** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (ጉዳይ [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** በ [@oyi77](https://github.com/oyi77) የተበረከተ** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (ጉዳይ [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute በዓለም ዙሪያ ያሉ **በመቶዎች የሚቆጠሩ ነፃና የተረጋገጡ ፕሮክሲዎችን** ለማግኘት ከ**[1proxy](https://1proxy-api.aitradepulse.com)** የማህበረሰብ መድረክ ጋር ይዋሃዳል። ይህ የራሳቸው የፕሮክሲ መሠረተ ልማት ለሌላቸው ተጠቃሚዎች እጅግ ተስማሚ ነው።
+OmniRoute ከ ጋር ይዋሃዳል** [1 ተኪ](https://1proxy-api.aitradepulse.com)** ተደራሽነትን ለማቅረብ የማህበረሰብ መድረክ** በመቶዎች የሚቆጠሩ ነፃ፣ የተረጋገጡ ፕሮክሲዎች** ከዓለም ዙሪያ. ይህ የራሳቸው የተኪ መሠረተ ልማት ለሌላቸው ተጠቃሚዎች ፍጹም ነው።
 
-### እንዴት እንደሚሠራ
+### እንዴት እንደሚሰራ
 
 ```
-┌─────────────┐   ማመሳሰል    ┌─────────────────┐   ማዞር      ┌──────────┐
-│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ አቅራቢ API │
-│   (ውጫዊ)    │ እስከ 500      │  source=oneproxy │ በጥራት       │           │
-└─────────────┘  ፕሮክሲዎች     └─────────────────┘               └──────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **ማመሳሰል** — OmniRoute ከ1proxy API የተረጋገጡ ፕሮክሲዎችን ያመጣል
-2. **ማከማቸት** — ፕሮክሲዎች `source = 'oneproxy'` በሚል በዚያው `proxy_registry` ሰንጠረዥ ውስጥ ይቀመጣሉ
-3. **ማጣራት** — በፕሮቶኮል፣ በአገር እና በጥራት ነጥብ ያጣሩ
-4. **ማዞር** — የጥራት፣ የዘፈቀደ ወይም ተከታታይ ስልቶችን በመጠቀም ምርጡን ፕሮክሲ ይምረጡ
-5. **ራስ-ሰር የጥራት ቅነሳ** — ያልተሳኩ ፕሮክሲዎች የጥራት ነጥባቸው ይቀነሳል፤ ከገደቡ በታች ሲሆን → እንደ ንቁ ያልሆነ ምልክት ይደረግበታል
+1. **አመሳስል** — OmniRoute ከ1ፕሮክሲ API የተረጋገጡ ፕሮክሲዎችን ያመጣል
+2. **ማከማቻ** — ፕሮክሲዎች `source = 'oneproxy'` ጋር በተመሳሳይ `proxy_registry` ሠንጠረዥ ውስጥ ይቀመጣሉ።
+3. **አጣራ** — በፕሮቶኮል፣ በአገር፣ በጥራት ነጥብ አጣራ
+4. **አሽከርክር** — የጥራት፣ የዘፈቀደ ወይም ተከታታይ ስልቶችን በመጠቀም ምርጡን ፕሮክሲ ይምረጡ
+5. **በራስ-አዋርዱ** — ያልተሳኩ ፕሮክሲዎች የጥራት ውጤታቸው ይቀንሳል; ከደፍ → በታች የቦዘነ ምልክት ተደርጎበታል።
 
-### ፕሮክሲዎችን ማመሳሰል
+### ፕሮክሲዎችን በማመሳሰል ላይ
 
-**በዳሽቦርድ በኩል፦**
+**በዳሽቦርድ በኩል፡**
 
-1. ወደ **ቅንብሮች → 1proxy** ትር ይሂዱ
-2. **"አሁን አመሳስል"** የሚለውን ጠቅ ያድርጉ
-3. ስታቲስቲክስን ይመልከቱ፦ ጠቅላላ ፕሮክሲዎች፣ የንቁ ፕሮክሲዎች ብዛት፣ አማካይ ጥራት እና በአገር የተከፋፈለ ዝርዝር
+1. ወደ ሂድ** ቅንብሮች → 1proxy** ትር
+2. ጠቅ ያድርጉ** "አሁን አስምር"**
+3. ስታቲስቲክስን ይመልከቱ፡ ጠቅላላ ፕሮክሲዎች፣ ገቢር ቆጠራ፣ አማካኝ ጥራት፣ በአገር መከፋፈል
 
-**በAPI በኩል፦**
+**በ API በኩል:**
 
 ```bash
-# ማመሳሰልን አስጀምር
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# ምላሽ፦
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
-### ፕሮክሲዎችን ማጣራት
+### ተኪዎችን በማጣራት ላይ
 
 ```bash
-# በፕሮቶኮል አጣራ
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# በአገር አጣራ
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# በዝቅተኛው የጥራት ነጥብ አጣራ
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# ማጣሪያዎችን አጣምር
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### የፕሮክሲ ጥራት ነጥቦች
+### የተኪ ጥራት ውጤቶች
 
-እያንዳንዱ የ1proxy ፕሮክሲ ከሜታዳታ ጋር ይመጣል፦
+እያንዳንዱ ፕሮክሲ ፕሮክሲ ከሜታዳታ ጋር ነው የሚመጣው፡-
 
-| መስክ             | መግለጫ                                   |
-| --------------- | -------------------------------------- |
-| `qualityScore`  | ከ1proxy ማረጋገጫ የተገኘ የ0-100 ደረጃ          |
-| `latencyMs`     | የተለካ የአውታረ መረብ መዘግየት                   |
-| `anonymity`     | `transparent`፣ `anonymous` ወይም `elite` |
-| `googleAccess`  | ፕሮክሲው የGoogle አገልግሎቶችን ማግኘት መቻሉን       |
-| `countryCode`   | ባለሁለት ፊደል ISO የአገር ኮድ                  |
-| `lastValidated` | የመጨረሻው ማረጋገጫ የጊዜ ማህተም                  |
+| መስክ             | መግለጫ                                    |
+| --------------- | --------------------------------------- |
+| `qualityScore`  | 0-100 ደረጃ ከ 1ፕሮክሲ ማረጋገጫ                 |
+| `latencyMs`     | የሚለካው የአውታረ መረብ መዘግየት                   |
+| `anonymity`     | `transparent`, `anonymous`, ወይም `elite` |
+| `googleAccess`  | ተኪው Google አገልግሎቶችን ማግኘት ይችል እንደሆነ      |
+| `countryCode`   | ባለ ሁለት ፊደል ISO የአገር ኮድ                  |
+| `lastValidated` | የመጨረሻው የማረጋገጫ ጊዜ ማህተም                   |
 
-የጥራት ነጥቦች በተለዋዋጭ ሁኔታ ይስተካከላሉ፦
+የጥራት ውጤቶች በተለዋዋጭ ተስተካክለዋል፡-
 
-- **ያልተሳኩ ጥያቄዎች** ነጥቡን በ10 ይቀንሳሉ
-- **ነጥቡ ወደ ≤10 ይወርዳል** → ፕሮክሲው `inactive` ተብሎ ምልክት ይደረግበታል
-- ንቁ ያልሆኑ ፕሮክሲዎች ከማዞሪያው ይገለላሉ
+- **ያልተሳኩ ጥያቄዎች** ውጤቱን በ 10 ነጥብ ይቀንሱ
+- **ነጥብ ወደ ≤ 10 ዝቅ ይላል።** → ተኪ `inactive` ምልክት ተደርጎበታል።
+- የቦዘኑ ፕሮክሲዎች ከመሽከርከር የተገለሉ ናቸው።
 
 ### የማዞሪያ ስልቶች
 
 ```bash
-# በጥራት አዙር (ምርጡ ፕሮክሲ መጀመሪያ) — ነባሪ
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# የዘፈቀደ ማዞሪያ
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# ተከታታይ (በቅርቡ ያልተረጋገጠው መጀመሪያ)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
-### የወረዳ ተቋራጭ
+### የወረዳ ሰባሪ
 
-የ1proxy ማመሳሰል አብሮገነብ የወረዳ ተቋራጭ አለው፦
+የ1ፕሮክሲ ማመሳሰል አብሮ የተሰራ የወረዳ የሚላተም አለው፡-
 
-- **5 ተከታታይ የማመሳሰል አለመሳካቶች** ካጋጠሙ በኋላ፣ ተጨማሪ የማመሳሰል ሙከራዎች ይታገዳሉ
-- በዚህ ዳግም ያስጀምሩ፦ `resetOneproxyCircuitBreaker()` ወይም አገልጋዩን ዳግም ያስጀምሩ
-- የማመሳሰል ሁኔታ በ`GET /api/settings/oneproxy?action=status` ይገኛል
+- በኋላ** 5 ተከታታይ የማመሳሰል አለመሳካቶች** , ተጨማሪ የማመሳሰል ሙከራዎች ታግደዋል
+- በ `resetOneproxyCircuitBreaker()` ዳግም ያስጀምሩ ወይም አገልጋዩን እንደገና ያስጀምሩ
+- የማመሳሰል ሁኔታ `GET /api/settings/oneproxy?action=status` ላይ ይገኛል።
 
-### የ1proxy ፕሮክሲዎችን ማጽዳት
+### 1 ተኪ ፕሮክሲዎችን በማጽዳት ላይ
 
 ```bash
-# አንድ የ1proxy ፕሮክሲ ሰርዝ
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# ሁሉንም የ1proxy ፕሮክሲዎች አጽዳ (በእጅ የተጨመሩ ፕሮክሲዎች አይነኩም)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
@@ -777,52 +777,28 @@ ORDER BY latency_ms DESC;
 ያሰራጩ)
 ```
 
-## ለራስዎ ፕሮክሲዎች ራስ-ሰር የብልሽት ማግለል
+## በራስ-ሰር አለመሳካት ለእራስዎ ፕሮክሲዎች
 
-የ1proxy የገበያ ቦታ ፑል ያልተሳኩ ፕሮክሲዎችን በራሱ ቀስ በቀስ ከአገልግሎት ያወጣል (ይመልከቱ
-[የፕሮክሲ ጥራት ውጤቶች](#proxy-quality-scores))። ወደ መዝገቡ **እርስዎ** ላከሏቸው
-ፕሮክሲዎች፣ የበስተጀርባ ጤና መርሐግብር አስኪያጁ
-(`src/lib/proxyHealth/scheduler.ts`) ምንም ነገር ሳይሰርዝ፣ ተመሳሳይ የሆነውን
-«የማይሰራ አባልን ከሰንሰለቱ በራስ-ሰር የማግለል» ባህሪ ያቀርባል፦
+የ1ፕሮክሲ የገበያ ቦታ ገንዳ ያልተሳኩ ፕሮክሲዎችን በራሱ አዋርዷል ( [የተኪ የጥራት ውጤቶች](#proxy-quality-scores) ይመልከቱ)። ለፕሮክሲዎች** አንተ** በመዝገቡ ውስጥ የተጨመረው የበስተጀርባ የጤና መርሐግብር (`src/lib/proxyHealth/scheduler.ts`) ምንም ነገር ሳይሰርዝ "የሞተ አባልን ከሰንሰለቱ ውስጥ በራስ-ሰር ማግለል" ተመሳሳይ ባህሪ ያቀርባል.
 
 ```bash
-# .env — አንድን ፕሮክሲ ከ3 ተከታታይ ያልተሳኩ ምርመራዎች በኋላ ለስላሳ በሆነ መንገድ ያሰናክሉ፤
-# እንደገና ለምርመራዎች ምላሽ መስጠት ሲጀምር በራስ-ሰር ያንቁት።
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-በባለብዙ-ፕሮክሲ ሰንሰለት ውስጥ የሚሠራበት መንገድ፦
+ከአንድ ባለ ብዙ ፕሮክሲ ሰንሰለት ጋር እንዴት እንደሚገጣጠም፡-
 
-1. መርሐግብር አስኪያጁ እያንዳንዱን የተመዘገበ ፕሮክሲ በየ`PROXY_HEALTH_INTERVAL_MS`
-   ይመረምራል (ነባሪው 10 ደቂቃ፤ ዝቅተኛው 1 ደቂቃ)።
-2. ከ`PROXY_AUTO_REMOVE_AFTER` ተከታታይ **አሳማኝ** ብልሽቶች በኋላ (እውነተኛ
-   የግንኙነት ብልሽት — የጊዜ ማብቃት ወይም የምርመራ ኢላማው የራሱ 5xx በፍጹም አይቆጠርም፤
-   [የፕሮክሲ ጤና ምርመራ](#proxy-health-checking-v3816)ን ይመልከቱ)፣ የፕሮክሲው `status`
-   ወደ `dead` ይቀየራል።
-3. `dead` በፑል/ሽክርክር መፍቻ የሚጠቀምበት የንቁ-ሁኔታ ማጣሪያ
-   ከሚያገላቸው ሁኔታዎች አንዱ ነው፤ ስለዚህ የአንድ ወሰን ሽክርክር (round-robin / random / sticky /
-   latency — [የሽክርክር ስልት ውሳኔ ዛፍ](#rotation-strategy-decision-tree)ን ይመልከቱ)
-   ያንን ፕሮክሲ ለአዳዲስ ጥያቄዎች መስጠቱን ወዲያውኑ ያቆማል። በፑሉ ውስጥ ያሉ ሌሎች ፕሮክሲዎች
-   አይነኩም፣ እንዲሁም መላው ፑል ያለማስጠንቀቂያ ወደ ቀጥተኛ ግንኙነት
-   ፈጽሞ አይመለስም — የ[ባለ4-ደረጃ ፕሮክሲ ስርዓት](#4-level-proxy-system)ን የዝግ-ብልሽት
-   መከላከያ ይመልከቱ።
-4. መርሐግብር አስኪያጁ `dead` ፕሮክሲዎችን በተመሳሳይ ክፍተተ-ጊዜ መመርመሩን ይቀጥላል። ቀጣዩ
-   የተሳካ ምርመራ `status`ን መልሶ ወደ `active` ይቀይረዋል፣ እናም ፕሮክሲው እንደገና ወደ ሽክርክሩ ይገባል —
-   እንደገና በእጅ ማከል አያስፈልግም።
+1. መርሐግብር አውጪው እያንዳንዱን የተመዘገበ ፕሮክሲ በየ `PROXY_HEALTH_INTERVAL_MS` ይመረምራል (ነባሪ 10 ደቂቃ፣ ቢያንስ 1 ደቂቃ)።
+2. `PROXY_AUTO_REMOVE_AFTER` በኋላ በተከታታይ** መደምደሚያ** አለመሳካቶች (እውነተኛ የግንኙነት አለመሳካት — የጊዜ ማብቂያ ወይም የፍተሻ ኢላማው 5xx በጭራሽ አይቆጠርም ፣ [የተኪ ጤና ማረጋገጥን](#proxy-health-checking-v3816) ይመልከቱ) የተኪ `status` ወደ `dead` ተቀናብሯል።
+3. `dead` ከሁኔታዎች አንዱ ነው በ pool/rotation ጥራት የሚጠቀመው የሕያው-ሁኔታ ማጣሪያ አያካትትም, ስለዚህ የ scope's ሽክርክር (ዙር-ሮቢን / random / sticky / latency / ክፍለ ጊዜ — ተመልከት [የማዞሪያ ስትራቴጂ ውሳኔ ዛፍ](#rotation-strategy-decision-tree) ) ወዲያውኑ ያንን ተኪ ለአዳዲስ ጥያቄዎች መስጠት ያቆማል. በመዋኛ ገንዳ ውስጥ ሌላ ምንም ፕሮክሲዎች አይነኩም፣ እና ገንዳው በሙሉ በዝምታ ወደ ቀጥታ ግንኙነት አይመለስም — ባለ [4-ደረጃ ተኪ ስርዓት](#4-level-proxy-system) ያልተዘጋ ጥበቃን ይመልከቱ።
+4. መርሐግብር አውጪው በተመሳሳይ የጊዜ ክፍተት `dead` ፕሮክሲዎችን መፈተሽ ይቀጥላል። የሚቀጥለው የተሳካ ፍተሻ `status` ወደ `active` ይመለሳል እና እንደገና ወደ ማሽከርከር — ይገባል ምንም በእጅ እንደገና መጨመር አያስፈልግም።
 
-ይህ ሆን ተብሎ **በምርጫ የሚነቃ እና አጥፊ ያልሆነ** ነው፦ በነባሪነት መርሐግብር አስኪያጁ
-ብልሽቶችን ብቻ ይቆጥራል እና ይመዘግባል (`decision.ts` ውስጥ ያለውን ፖሊሲ C ይመልከቱ)፤
-እንዲሁም `PROXY_AUTO_DISABLE` አንድንም ረድፍ ፈጽሞ አይሰርዝም — ለዚያ የተለየውና ይበልጥ ጥብቅ የሆነው
-`PROXY_AUTO_REMOVE` ጠቋሚ አለ። ሁለቱም `true` ከተደረጉ፣ `PROXY_AUTO_REMOVE`
-ቅድሚያ ያገኛል (ሊሰረዝ ለተቃረበ ፕሮክሲ በመካከል ለስላሳ ማሰናከል ምንም ጥቅም የለውም)።
-ለተሟላው የተለዋዋጮች ዝርዝር የ[አካባቢ ውቅር](../reference/ENVIRONMENT.md) ማጣቀሻን
-ይመልከቱ።
+ይህ ሆን ተብሎ ነው።** መርጦ መግባት እና አጥፊ ያልሆነ** : በነባሪ መርሐግብር አውጪው ይቆጥራል እና ውድቀቶችን ይመዘግባል (መመሪያውን በ `decision.ts` ይመልከቱ) እና `PROXY_AUTO_DISABLE` በጭራሽ አይሰርዘውም ረድፍ — የተለየ ፣ የበለጠ ጠበኛ `PROXY_AUTO_REMOVE` ባንዲራ ነው። ሁለቱም ወደ `true` ከተዋቀሩ `PROXY_AUTO_REMOVE` ያሸንፋል (ሊሰረዝ ያለው ፕሮክሲ በመካከላቸው ለስላሳ ማሰናከል ምንም ጥቅም የለውም)። ለሙሉ ተለዋዋጭ ዝርዝር [የአካባቢ ውቅር](../reference/ENVIRONMENT.md) ማጣቀሻን ይመልከቱ።
 
 ---
 
-> 📖 **ተዛማጅ ሰነዶች፦**
+> 📖** ተዛማጅ ሰነዶች፡**
 >
-> - [የተጠቃሚ መመሪያ](../guides/USER_GUIDE.md) — አጠቃላይ ማዋቀር እና ውቅር
-> - [የAPI ማጣቀሻ](../reference/API_REFERENCE.md) — ሙሉ የAPI ሰነድ
-> - [የአካባቢ ውቅር](../reference/ENVIRONMENT.md) — ሁሉም የአካባቢ ተለዋዋጮች
+> - [የተጠቃሚ መመሪያ](../guides/USER_GUIDE.md) — አጠቃላይ ማዋቀር እና ማዋቀር - [API ማጣቀሻ](../reference/API_REFERENCE.md) — ሙሉ API ሰነድ - [የአካባቢ ውቅር](../reference/ENVIRONMENT.md) — ሁሉም የአካባቢ ተለዋዋጮች

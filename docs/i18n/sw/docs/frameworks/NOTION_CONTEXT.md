@@ -62,42 +62,31 @@ Mbinu zote tatu zinahitaji uthibitishaji wa dashibodi (`isAuthenticated`). Kwa `
 OmniRoute huhifadhi tokeni na mara moja huendesha utafutaji wa majaribio wenye tokeo 1; ikiwa Notion
 itarejesha kipengee cha hitilafu, tokeni hufutwa na ombi hushindwa kwa `400`.
 
-## Zana za MCP (6)
+## zana MCP (6)
 
-Zimefafanuliwa katika `open-sse/mcp-server/tools/notionTools.ts`. Tokeni hupatikana wakati wa
-ombi kupitia `getNotionToken()`; ikiwa hakuna iliyosanidiwa, zana hutupa
-`"Tokeni ya muunganisho wa Notion haijasanidiwa. Isanidi katika Mipangilio > Vyanzo vya Muktadha."`
+Imefafanuliwa katika `open-sse/mcp-server/tools/notionTools.ts`. Ishara inatatuliwa wakati wa kupiga simu kupitia `getNotionToken()`; ikiwa hakuna iliyosanidiwa chombo hutupa `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Zana                         | Wigo           | Maelezo                                                                                                              |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Tafuta kurasa na hifadhidata kwa hoja ya maandishi (hurejesha vichwa, vitambulisho, URL). Imegawanywa katika kurasa. |
-| `notion_get_page`            | `read:notion`  | Pata maudhui na metadata ya ukurasa kwa kutumia kitambulisho chake.                                                  |
-| `notion_list_block_children` | `read:notion`  | Orodhesha vizuizi vyote vya chini vya kizuizi au ukurasa (mti wa vizuizi). Imegawanywa katika kurasa.                |
-| `notion_query_database`      | `read:notion`  | Hoji hifadhidata kwa `filter` + `sorts` za hiari (muundo wa API ya Notion). Imegawanywa katika kurasa.               |
-| `notion_get_database`        | `read:notion`  | Pata skima/metadata ya hifadhidata kwa kutumia kitambulisho.                                                         |
-| `notion_append_blocks`       | `write:notion` | Ambatisha vizuizi vya chini kwenye kizuizi au ukurasa uliopo (kiwango cha juu ni vizuizi 100 kwa kila ombi).         |
+| Zana                         | Upeo           | Maelezo                                                                                           |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Tafuta kurasa na hifadhidata kwa hoja ya maandishi (hurejesha mada, IDs, URLs). Iliyowekwa alama. |
+| `notion_get_page`            | `read:notion`  | Pata maudhui na metadata ya ukurasa kwa ID yake.                                                  |
+| `notion_list_block_children` | `read:notion`  | Orodhesha watoto wote wa block wa block au ukurasa (mti wa block). Iliyowekwa alama.              |
+| `notion_query_database`      | `read:notion`  | Hoji hifadhidata kwa hiari `filter` + `sorts` ( umbizo Notion API ). Iliyowekwa alama.            |
+| `notion_get_database`        | `read:notion`  | Pata schema/metadata ya hifadhidata kwa ID.                                                       |
+| `notion_append_blocks`       | `write:notion` | Weka kizuizi cha watoto kwenye kizuizi au ukurasa uliopo (max 100 kwa kila ombi).                 |
 
-### Vigezo vya ingizo
+### Vigezo vya kuingiza
 
-- `notion_search` — `query` (herufi 1–500), `pageSize` (1–100, chaguo-msingi 20),
-  `startCursor` (hiari).
-- `notion_get_page` — `pageId` (heksadesimali ya herufi 32 au UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, chaguo-msingi 50),
-  `startCursor` (hiari).
-- `notion_query_database` — `databaseId`, `filter` (hiari, muundo wa kichujio cha Notion),
-  `sorts` (safu ya hiari), `pageSize` (1–100, chaguo-msingi 50), `startCursor` (hiari).
+- `notion_search` — `query` (char 1–500), `pageSize` (1–100, chaguo-msingi 20), `startCursor` (si lazima).
+- `notion_get_page` — `pageId` (32-char hex au UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, chaguo-msingi 50), `startCursor` (si lazima).
+- `notion_query_database` — `databaseId`, `filter` (si lazima umbizo la kichujio cha Notion ), `sorts` (safu ya hiari), `pageSize` (1–100, chaguo-msingi 50), `startCursor` (si lazima).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (safu ya vipengee vya vizuizi),
-  `after` (nafasi ya hiari).
+- `notion_append_blocks` — `blockId`, `children` (safu ya vitu vya kuzuia), `after` (nafasi ya hiari).
 
 ### Mawanda
 
-Zana za kusoma zinahitaji `read:notion` na zana ya kuandika inahitaji `write:notion`.
-Mawanda hutekelezwa na `withScopeEnforcement()` katika
-`open-sse/mcp-server/server.ts` tu wakati `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; mawanda
-yanayoruhusiwa ya mpigaji hutoka kwenye `OMNIROUTE_MCP_SCOPES` (yakitenganishwa kwa koma) au
-muktadha wa mawanda wa ufunguo wa API uliothibitishwa. Tazama [MCP-SERVER.md](./MCP-SERVER.md) kwa
-mfumo kamili wa mawanda.
+Zana za kusoma zinahitaji `read:notion` na zana ya kuandika inahitaji `write:notion`. Mawanda yanatekelezwa na `withScopeEnforcement()` katika `open-sse/mcp-server/server.ts` wakati `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, na daima kwa mpigaji simu HTTP/SSE ambaye ufunguo wake wa API hauna `manage`/`admin`; mawanda yanayoruhusiwa ya mpigaji simu yanatoka kwa `OMNIROUTE_MCP_SCOPES` (iliyotenganishwa kwa koma) au muktadha wa mawanda ya ufunguo wa API uliothibitishwa. Tazama [MCP-SERVER.md](./MCP-SERVER.md) kwa muundo kamili wa wigo.
 
 ## Vituo vya mwisho
 

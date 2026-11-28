@@ -62,48 +62,31 @@ Bifrost จะรองรับเฉพาะ `external` (เข้าถึ�
 `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) ช่วยให้ผู้เรียกใช้
 กรองตามสิ่งที่เอนจินสามารถทำได้จริง แทนการเขียนเงื่อนไขแยกตามแต่ละ ID โดยตรง
 
-## แกน A — บริการแบบฝังตัว (ฝั่งโปรเซสที่อยู่ภายใต้การควบคุม)
+## บริการฝังตัวของ Axis A — (ด้านกระบวนการที่มีการดูแล)
 
-- **รีจิสทรีของโปรเซสที่อยู่ภายใต้การควบคุม:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (ปัจจุบัน: `9router`, `cliproxy`)
-- **ผู้รับผิดชอบวงจรชีวิต:** `src/lib/services/ServiceSupervisor.ts` — `start()` สร้าง
-  โปรเซสลูก รอให้ผ่านเกต `waitForHealthy()` และส่ง stdout/stderr เข้า ring buffer;
-  `stop()` ใช้ SIGTERM→SIGKILL; การดำเนินการทั้งหมดถูกจัดลำดับภายใต้ล็อก
-- **ยูเนียนของสถานะ** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error` รวมถึง
-  `HealthState = healthy | unhealthy | unknown` ที่เป็นอิสระจากกัน
-- **เหตุใดจึงใช้โปรเซสแยกต่างหาก (แทน SDK ภายในโปรเซส)?** การแยกโปรเซสคือสิ่งที่ทำให้
-  สามารถควบคุมการติดตั้ง/เริ่ม/หยุด/ตรวจสอบสถานะ/บันทึกของแต่ละ sidecar ได้อย่างอิสระ และทำให้
-  spawn-guard สำหรับ loopback มีผล การจำลองอะแดปเตอร์ภายในโปรเซสเป็นงานในอนาคต —
-  capability flag `native-hot-path` คือจุดที่จะใช้ระบุความสามารถดังกล่าว
+- **การลงทะเบียนของกระบวนการที่ได้รับการดูแล:** `src/lib/services/bootstrap.ts` `SERVICES[]` (วันนี้: `9router`, `cliproxy`)
+- **เจ้าของวงจรชีวิต:** `src/lib/services/ServiceSupervisor.ts` — `start()` วางไข่เด็ก ประตูบน `waitForHealthy()` แตะ stdout/stderr ลงในบัฟเฟอร์แหวน `stop()` SIGTERM→SIGKILL; ทั้งหมดต่อเนื่องกันภายใต้การล็อค
+- **สหภาพของรัฐ** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error` บวกมุมตั้งฉาก `HealthState = healthy | unhealthy | unknown`
+- **เหตุใดจึงมีกระบวนการแยกกัน (ไม่ใช่ in-proc SDK)** การแยกกระบวนการคือสิ่งที่ทำให้ install/start/stop/health/logs สามารถควบคุมได้อย่างอิสระต่อไซด์คาร์ และอนุญาตให้ใช้การป้องกันการวางไข่แบบย้อนกลับ การสร้างโมเดลอะแด็ปเตอร์ in-proc ถือเป็นงานในอนาคต — แฟล็กความสามารถ `native-hot-path` คือตำแหน่งที่จะแสดง
 
-### สัญญาของเส้นทางวงจรชีวิต (`/api/services/<tool>/…`)
+### สัญญาเส้นทางวงจรการใช้งาน (`/api/services/<tool>/…`)
 
-รหัสสถานะถูกกำหนดให้ **เฉพาะเจาะจงตามสถานะ/คำกริยา/พาธโดยเจตนา** — นี่คือสัญญา ไม่ใช่
-ความไม่สอดคล้องกัน:
+รหัสสถานะคือ**state/verb/path-specific โดยการออกแบบ** — นี่คือสัญญา ไม่ใช่ความไม่สอดคล้องกัน:
 
-| การเรียกใช้                   | เงื่อนไข                                 | สถานะ                                  |
-| ----------------------------- | ---------------------------------------- | -------------------------------------- |
-| `POST .../start`              | บริการอยู่ในสถานะ `not_installed`        | **409** (เงื่อนไขเบื้องต้น)            |
-| `POST .../stop`               | หยุดอยู่แล้ว                             | **200** (ไม่ดำเนินการใด ๆ และทำซ้ำได้) |
-| `GET .../status`              | ปกติ                                     | **200** (`live ?? row ?? "unknown"`)   |
-| `POST .../start`              | การสร้างโปรเซสล้มเหลว                    | **503** (ชั่วคราว)                     |
-| `GET .../status`, `.../stop`  | ข้อผิดพลาดที่ไม่ได้รับการดักจับ          | **500**                                |
-| `GET /api/services/<x>/logs`  | ไม่รู้จักเครื่องมือ `<x>`                | **404** `Service '<x>' not found`      |
-| `GET .../status?reveal=key`   | ไม่มี `X-Reveal-Confirm: yes`            | **403** (เฉพาะ 9router)                |
-| **ทุกคำขอ** `/api/services/*` | ผู้เรียกไม่ได้มาจาก loopback/private-LAN | **403 LOCAL_ONLY**                     |
+| เรียก                        | เงื่อนไข                          | สถานะ                                 |
+| ---------------------------- | --------------------------------- | ------------------------------------- |
+| `POST .../start`             | บริการ `not_installed`            | **409** (เงื่อนไขเบื้องต้น)           |
+| `POST .../stop`              | หยุดแล้ว                          | **200** (ไอดีเอ็มโพเทนต์ ไม่มีสหกรณ์) |
+| `GET .../status`             | OK                                | **200** (`live ?? row ?? "unknown"`)  |
+| `POST .../start`             | วางไข่ล้มเหลว                     | **503** (ชั่วคราว)                    |
+| `GET .../status`, `.../stop` | ข้อผิดพลาดที่ไม่ถูกตรวจจับ        | **500**                               |
+| `GET /api/services/<x>/logs` | เครื่องมือที่ไม่รู้จัก `<x>`      | **404** `Service '<x>' not found`     |
+| `GET .../status?reveal=key`  | ไม่มี `X-Reveal-Confirm: yes`     | **403** (9เราเตอร์เท่านั้น)           |
+| **ใดๆ** `/api/services/*`    | ผู้โทรไม่ใช่ loopback/private-LAN | **403 LOCAL_ONLY**                    |
 
-เนื้อหาข้อผิดพลาดทั้งหมดถูกจัดรูปแบบโดย `createErrorResponse()` →
-`{ error: { message, type }, requestId }` โดย `type` จะได้มาจากสถานะ
-(`500→server_error`, `404→not_found`, `409→conflict` มิฉะนั้นเป็น `invalid_request`) และเป็น
-ตัวจำแนกที่เครื่องสามารถนำไปดำเนินการต่อได้ ข้อความได้รับการทำให้ปลอดภัยล่วงหน้าแล้ว
-(`sanitizeErrorMessage()`, กฎตายตัวข้อที่ 12)
+เนื้อความข้อผิดพลาดทั้งหมดถูกสร้างขึ้นโดย `createErrorResponse()` → `{ error: { message, type }, requestId }` โดยที่ `type` มาจากสถานะ (`500→server_error`, `404→not_found`, `409→conflict`, else `invalid_request`) และเป็นตัวแบ่งแยกที่ดำเนินการได้ด้วยเครื่องจักร ข้อความได้รับการฆ่าเชื้อล่วงหน้า (`sanitizeErrorMessage()`, Hard Rule #12)
 
-**ตัวป้องกัน loopback** เป็นสาเหตุที่พบบ่อยที่สุดของ `403`: `/api/services/` อยู่ใน
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) และ
-`src/server/authz/policies/management.ts` จะปฏิเสธผู้เรียกที่ไม่ได้มาจาก loopback /
-private-LAN **ก่อนการยืนยันตัวตน** เนื่องจากเส้นทางเหล่านี้สร้างโปรเซสลูก (กฎตายตัวข้อที่ 15
-และ 17) การเข้าถึงเส้นทางเหล่านี้ผ่าน public tunnel จะได้รับ `403` ตามการออกแบบ
+**ยามย้อนกลับ** เป็นแหล่งที่พบมากที่สุดของ `403`: `/api/services/` อยู่ใน `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) และ `src/server/authz/policies/management.ts` ปฏิเสธผู้โทรที่ไม่ใช่ลูปแบ็ค / ไม่ใช่ส่วนตัว LAN** ก่อนการตรวจสอบสิทธิ์** เนื่องจากเส้นทางเหล่านี้วางไข่กระบวนการลูก (กฎยาก 15 และ 17) การเข้าถึงพวกเขาผ่านอุโมงค์สาธารณะนั้น `403` ตามการออกแบบ
 
 ## แกน B — แบ็กเอนด์การกำหนดเส้นทางรีเลย์ (ฝั่งการจัดส่ง)
 

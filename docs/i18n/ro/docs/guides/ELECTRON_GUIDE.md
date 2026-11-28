@@ -4,9 +4,9 @@
 
 ---
 
-> **Sursa adevărului:** spațiu de lucru `electron/`** Ultima actualizare:** 2026-06-28 — v3.8.40
+> **Sursa adevărului:** spațiu de lucru `electron/`
 
-OmniRoute oferă o aplicație desktop multiplatformă (Windows / macOS / Linux) construită pe**Electron 41** +** constructor de electroni 26.10** . Aplicația desktop generează serverul Next.js independent ca un proces copil, indică un `BrowserWindow` către el și adaugă o bară de sistem, un auto-updater, IPC bridge și zero-config secret bootstrap.
+OmniRoute oferă o aplicație desktop multiplatformă (Windows / macOS / Linux) construită pe**Electron 41** +** constructor de electroni 26.10** . Aplicația desktop generează serverul Next.js independent ca un proces copil, indică un `BrowserWindow` către el și adaugă o bară de sistem, un auto-updater, IPC bridge și un bootstrap secret cu zero-config.
 
 ## Arhitectură
 
@@ -198,7 +198,7 @@ Setați prin `session.defaultSession.webRequest.onHeadersReceived`. Directive no
 
 ## Actualizare automată
 
-Utilizează `electron-updater` cu furnizorul GitHub (`diegosouzapw/OmniRoute`).
+Utilizează `electron-updater` cu furnizorul GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Evenimente redirecționate către redator prin `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (cu `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefacte aterizează în `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Lansările sunt publicate în GitHub Releases (`diegosouzapw/OmniRoute`), care este, de asemenea, locul în care `electron-updater` verifică pentru versiuni noi.
+Versiunile sunt publicate în GitHub Releases (`cheaper-inference/OmniRoute`), care este, de asemenea, locul în care `electron-updater` verifică pentru versiuni noi.
 
 ## Depanare
 

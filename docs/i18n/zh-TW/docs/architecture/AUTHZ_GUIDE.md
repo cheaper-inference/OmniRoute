@@ -4,14 +4,13 @@
 
 ---
 
-> **真實來源：** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **上次更新：** 2026-09-22 — 範圍命名空間指向 MCP-SERVER.md
+> **事實來源：** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute 具有一個路由感知授權管道，用於把關每個 API 請求。分類是**確定性**且**故障關閉**的 — 任何無法分類的內容最終都會歸類為 `MANAGEMENT`，並要求會話或管理級別的令牌。本頁解釋了供維護路由或設計新端點的工程師使用的模型。
+OmniRoute有一個路由感知授權管道，可以控制每個API請求。分類是**確定性的**和**故障關閉**—任何無法分類的內容最終都會成為`MANAGEMENT`並需要會話或管理層級代幣。本頁介紹了工程師維護路線或設計新端點的模型。
 
-![授權管道（3 種路由類別 + 策略評估）](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
-> 來源：[diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
+> 來源： [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## 兩種驗證模式
 
@@ -166,7 +165,7 @@ Incoming request → src/proxy.ts
        - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-可信內部標頭（在`src/server/authz/headers.ts`中定義）是**從傳入請求中剝離**分類之前—客戶端無法預先填入`x-omniroute-auth-*`來模擬主題。
+可信內部標頭（在`src/server/authz/headers.ts`中定義）是**從傳入請求中剝離**在分類之前， —客戶端無法預先填入`x-omniroute-auth-*`來模擬主題。
 
 ### 保單合約
 
@@ -174,7 +173,7 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) —總是回傳`allow({ kind: "anonymous", id: "anonymous" })`。
 - **`clientApiPolicy`** (`policies/clientApi.ts`) —提取 Bearer，透過`validateApiKey()`進行驗證。只有當有效`REQUIRE_API_KEY`功能標誌被停用時才會轉為匿名。有效標誌透過`isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) 解析，因此儀表板功能標誌和環境變數一致地管理`/api/v1/*`、 `/api/v1beta/*`和別名；解析器故障無法關閉。允許客戶端API路由（包括儀表板模型目錄使用的`/api/v1/models`）上的儀表板會話請求。當啟用 Entra ID SSO時，結構上是 Entra 令牌的 Bearer（三個 base64url 段、 `RS*` alg、 `kid`）由SSO分支處理**前**`validateApiKey()`及其判決是最終的—它永遠不會落入 API 金鑰路徑或降級為匿名分支，因此身分提供者中斷不能成為開放存取。靜態API密鑰不受影響。參見[Entra ID SSO](../security/ENTRA_SSO.md) 。
-- **`managementPolicy`** (`policies/management.ts`) —接受儀表板會話、內部模型同步請求（與`/api/providers/[name]/(sync-models|models)`匹配），或者如果`isAuthRequired()`返回 false，則完全跳過。當不記名令牌存在但無效時傳回 403 (`AUTH_001`)，否則傳回 401。在任何 auth 分支—也查看[Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)之前強制執行路由保護層 (LOCAL_ONLY / ALWAYS_PROTECTED)。當 Bearer key 攜帶`manage`範圍時，可以從非環回訪問`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`中的LOCAL_ONLY路徑（今天： `/api/mcp/`）；無論範圍如何，所有其他LOCAL_ONLY路徑都保持嚴格環回。
+- **`managementPolicy`** (`policies/management.ts`) —接受儀表板會話、內部模型同步請求（與`/api/providers/[name]/(sync-models|models)`匹配），或者如果`isAuthRequired()`返回 false，則完全跳過。當不記名令牌存在但無效時傳回 403 (`AUTH_001`)，否則傳回 401。在任何 auth 分支—也查看[Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)之前強制執行路由保護層 (LOCAL_ONLY / ALWAYS_PROTECTED)。當承載金鑰攜帶`manage`/`admin`範圍或窄`mcp:connect`範圍 (`hasMcpConnectOrManageScope`) 時，或使用經過驗證的儀表板會話時，可以從非環回存取`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`中的LOCAL_ONLY路徑（今天： `/api/mcp/`）；無論範圍如何，所有其他LOCAL_ONLY路徑都保持嚴格環回。
 
 成功的策略會回到`AuthSubject`和`kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`。下游處理程序可以透過`src/server/authz/assertAuth.ts`中的`assertAuth(request, "CLIENT_API")`讀取它，而不是重新運行身份驗證邏輯。
 
@@ -268,31 +267,22 @@ export async function POST(request: Request) {
 
 ## 範圍
 
-三個命名空間。每個檢查器只讀取其自身的字串。關於為什麼 `manage` 會使 `read:compression` 的 `scopeMatches` 失敗，以及為什麼 `read` 存取權杖無法 `PATCH /api/keys/{id}` 的並排說明，請參閱[三個範圍命名空間](../frameworks/MCP-SERVER.md#three-scope-namespaces)。
+三個命名空間。每個檢查器只讀取自己的字串。並行的內容包括為什麼`manage`對於`read:compression`無法使用`scopeMatches`以及為什麼`read`存取令牌不能`PATCH /api/keys/{id}`，是[三個範圍命名空間](../frameworks/MCP-SERVER.md#three-scope-namespaces)。
 
-API 金鑰帶有一個 `scopes` 陣列（以 JSON 格式儲存在 `api_keys.scopes` 中，請參閱 `src/lib/db/apiKeys.ts`）。
+API鍵攜帶`scopes`數組（在`api_keys.scopes`中儲存為JSON ，請參閱`src/lib/db/apiKeys.ts`）。
 
 ### 管理範圍
 
-- `manage` / `admin` — `hasManageScope`。對管理 API 路由的 Bearer 存取。
-- `mcp:connect`、`self:usage`、`self:account-quota` 和
-  `policy:bypass-provider-quota` 是附加的精確匹配範圍。它們位於
-  `MANAGEMENT_API_KEY_SCOPES` 之外。`mcp:connect` 僅開啟
-  `/api/mcp/` 非迴路（non-loopback）的劃分。
+- `manage` / `admin` — `hasManageScope`。承載存取管理API路由。
+- `mcp:connect`、 `self:usage`、 `self:account-quota`和`policy:bypass-provider-quota`是附加的精確匹配範圍。他們坐在`MANAGEMENT_API_KEY_SCOPES`外面。 `mcp:connect`僅打開`/api/mcp/`非環回剝離。
 
-### MCP 工具範圍
+### MCP工具範圍
 
-目錄和匹配規則（相同字串，或以 `*` 結尾的已授予範圍）：
-[MCP 工具範圍](../frameworks/MCP-SERVER.md#mcp-tool-scopes)。
-`src/shared/constants/mcpScopes.ts` 中的 `MCP_SCOPE_LIST` 是原始的類型化
-子集，而非完整的目錄。在 `resolveCallerScopeContext()` 從 MCP 驗證資訊、請求中繼資料或 `OMNIROUTE_MCP_SCOPES` 解析範圍後，執行會在
-`open-sse/mcp-server/scopeEnforcement.ts` 中進行。除非 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`，否則它會保持關閉。
+目錄和匹配規則（相同的字串，或以`*`結尾的授予範圍）： [MCP工具範圍](../frameworks/MCP-SERVER.md#mcp-tool-scopes)。 `src/shared/constants/mcpScopes.ts`中的`MCP_SCOPE_LIST`是原始類型子集，而不是完整目錄。 `resolveCallerScopeContext()`解析MCP驗證資訊、請求元資料或`OMNIROUTE_MCP_SCOPES`的範圍後，在`open-sse/mcp-server/scopeEnforcement.ts`中執行強制執行。 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`在全域範圍內開啟它（預設`false`），但對於API金鑰缺少`manage`/`admin` （請參閱`open-sse/mcp-server/scopeEnforcement.ts`中的`shouldForceScopeEnforcement()` ）的HTTP/SSE呼叫者始終強制執行，無論標誌為何。
 
-### 存取權杖範圍
+### 訪問令牌範圍
 
-`oma_live_…` 權杖上的 `read` / `write` / `admin`，按 `scopeSatisfies` 排序
-（`src/lib/accessTokens/scopes.ts`）。此排序僅適用於存取權杖憑證。請參閱
-[管理驗證](../guides/MANAGEMENT-AUTH.md)。
+`oma_live_…`代幣上的`read` / `write` / `admin` ，按`scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) 排名。此等級僅適用於存取令牌憑證。請參閱[管理身份驗證](../guides/MANAGEMENT-AUTH.md)。
 
 ## 需要驗證切換
 

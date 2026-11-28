@@ -178,80 +178,49 @@ Sake kunna OmniRoute bayan shigarwar, sannan a sake gwada buƙatar Gemini Web. I
 
 ---
 
-## Sakamakon Ƙarya na Antivirus
+## Maganganun Ƙarya na Antivirus
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG na keɓe `README.md` da `MD:HttpRequest-inf[Susp]`
+### Avast/AVG keɓewa `README.md` tare da `MD:HttpRequest-inf[Susp]`
 
-**Wannan sakamakon ƙarya ne. Babu abin da ya kamu, kuma ba a buƙatar ɗaukar wani mataki.**
+**Wannan gaskiya ce ta karya. Babu wani abu da ya kamu da cutar, kuma ba a buƙatar wani mataki.**
 
-Avast da AVG suna gudanar da wata hanyar hasashe da ke yi wa fayilolin rubutu na yau da kullum/Markdown masu ɗauke da hanyoyin haɗi da yawa masu kama da buƙatun HTTP alama. Ana haɗa `README.md` na OmniRoute a cikin kunshin npm (an jera shi a `package.json` → `files`), don haka yana sauka a `node_modules/omniroute/README.md` yayin shigarwa ta duniya — kuma yana ɗauke da misalai kusan 15 na `http://localhost:20128/...` (wuraren ƙarshen MCP na HTTP/SSE, URL ɗin A2A na `.well-known`, da gutsattsarin `curl`). Yawan waɗannan hanyoyin haɗi ya isa ya kunna wannan hanyar hasashe.
+Avast da AVG suna gudanar da aikin heuristic wanda ke zana fayilolin plain-text/Markdown masu ƙunshe da hanyoyin haɗin HTTP da yawa. OmniRoute's `README.md` jiragen ruwa a cikin kunshin npm (an jera shi a `package.json` → `files`), don haka yana sauka a `node_modules/omniroute/README.md` akan tsarin shigar — na duniya kuma yana ɗauke da misalai ~ 15 `http://localhost:20128/...` (madaidaicin MCP HTTP/SSE, A2A `.well-known` URL, da snippets `curl` ). Wannan haɗin haɗin gwiwa ya isa ya ɓata heuristic.
 
-Idan wannan ya fara ne kwanan nan kawai: nau'in fayil ɗin bai canza ba. README ya faɗaɗa teburin wuraren ƙarshensa (an ƙara MCP HTTP + SSE + A2A) da ƙarin misalan `curl`, wanda ya sa ya wuce iyakar da aka saita.
+Idan wannan ya fara kwanan nan: fayil ɗin bai canza ba. README ta girma tebirin ƙarshen ƙarshenta (an ƙara MCP HTTP + SSE + A2A ) da ƙarin misalai `curl`, waɗanda suka tura shi zuwa bakin kofa.
 
-Fayil ɗin takardu ne marasa aiki kuma ba shi da wani abun da za a iya aiwatarwa. Za ka iya dawo da shi daga keɓewa cikin aminci.
-
-**Abin da za a yi:**
-
-1. **Dakatar da sanarwar** — cire kundin shigarwar daga binciken antivirus ɗinka
-   (Avast: Settings → Exceptions), ta ƙara hanyar `node_modules` ta duniya da/ko kundin
-   bayanan OmniRoute (`~/.omniroute/`).
-2. **Kai rahoton sakamakon ƙaryar** — <https://www.avast.com/false-positive-file-form.php>,
-   tare da haɗa `README.md` da aka keɓe. Wannan ne gyaran da zai taimaki kowa, domin hanyar
-   hasashen mai samarwar ce take wuce gona da iri kan fayil ɗin rubutu.
-
-**Dalilin da ya sa ba ma “gyara” wannan daga ɓangarenmu:** duk misalan `http://localhost`
-ne, kuma localhost ba zai iya zama `https` ba sai da wahalar takardar shaida da aka sanya wa
-hannu da kai. Gurɓata takardun don kauce wa hanyar hasashen mai samarwa guda ɗaya zai cutar
-da kowane mai karatu domin kawai a gamsar da kuskuren na'urar bincike.
-
-### Kaspersky na yi wa manhajar Desktop alama da `PDM:Trojan.Win32.Generic`
-
-**Wannan sakamakon ƙarya ne daga hanyar hasashen ɗabi'a. Babu abin da ya kamu.** Farkon
-`PDM:` na Kaspersky yana nufin hukuncin ya fito ne daga Proactive Defense Module (System Watcher),
-wanda ke tantance abin da mai shigarwar _yake yi_ maimakon kwatanta shi da sanannun manhajojin
-ɓarna. Idan ya kunna, Kaspersky yana “mayar da” dukkan shigarwar baya — yana share fayilolin
-da ya riga ya rubuta — don haka manhajar takan lalace ko ta ɓace.
-
-Fayilolin da yake yi wa alama ɓangarori ne na yau da kullum na dogarorin buɗaɗɗen tushe da
-aka ayyana kuma aka haɗa da manhajar desktop, misali:
-
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` da
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), ma'ajiyar sarrafa
-  burauza ta atomatik da ake amfani da ita wajen shiga ga mai samarwa daga cikin manhaja da
-  tattaunawar da burauza ke tallafawa.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — native binding na `wreq-js` da aka tsayar da nau'insa, wanda ake amfani da shi don HTTP
-  mai kwaikwayon sawun burauza a kan masu samarwa masu amfani da cookies na yanar gizo
-  (`<arch>` shi ne `x64` ko `arm64`).
-
-**Dalilin da ya sa yake kunna:** mai shigarwar Windows **har yanzu ba a sanya masa sa hannun
-lamba ba**, don haka mai shigarwar NSIS mara sa hannu ba shi da wata ƙima ta amincewa kuma
-hanyoyin hasashen ɗabi'a suna aiki da tsaurin kai kololuwa. Idan aka haɗa wannan da native DLL
-da ɗaruruwan fayilolin `.js` da ake rubutawa a ƙarƙashin
-`%LOCALAPPDATA%\Programs\OmniRoute` (ciki har da kundin kunshe-kunshen da ke da hash a
-ƙarshensu daga ginin standalone na Next.js), wannan ya isa ya kunna hanyar hasashen. Ana
-shirin sanya hannu kan lambar; har sai an yi hakan, sabbin fitowa za su iya maimaita wannan.
+Fayil ɗin takaddun shaida ne tare da sifili abun ciki wanda za'a iya aiwatarwa. Kuna iya dawo da shi lafiya daga keɓe.
 
 **Abin da za a yi:**
 
-1. **Da farko ka tabbatar da ingancin abin da ka sauke** (wannan yana kawar da yiwuwar an
-   yi wa fayil ɗin kutse). Kowane fitowa yana wallafa `latest.yml`, wanda filin `sha512`
-   ɗinsa (base64) ya ƙunshi ma'aunin mai shigarwar `OmniRoute.Setup.<version>.exe`.
-   A cikin PowerShell, daga kundin da ke ɗauke da mai shigarwar:
+1. **Dakatar da sanarwar** — keɓe directory ɗin shigarwa a cikin riga-kafi (Avast: Settings → Exceptions), ƙara hanyar `node_modules` ɗinku ta duniya and/or OmniRoute data dir (`~/.omniroute/`).
+2. **Bayar da rahoton tabbataccen ƙarya** — <https://www.avast.com/false-positive-file-form.php>, haɗe da keɓewar `README.md`. Wannan shine gyaran da ke taimakawa kowa da kowa, tun da girman kai na mai siyarwa ne ga fayil ɗin rubutu.
+
+**Me yasa ba ma "gyara" wannan a gefenmu:** Misalan duk `http://localhost` ne, kuma localhost ba zai iya zama `https` ba tare da sa hannun takardar shedar sa hannu ba. Sarrafa takaddun don kawar da heuristic mai siyarwa ɗaya zai cutar da kowane mai karatu don gamsar da bugu na na'urar daukar hotan takardu.
+
+### Kaspersky yana tuta app ɗin Desktop azaman `PDM:Trojan.Win32.Generic`
+
+**Wannan tabbataccen ƙarya ne daga ma'aikacin ɗabi'a. Babu wani abu da ya kamu da cutar.** Kaspersky's `PDM:` prefix yana nufin hukuncin ya fito ne daga Module na tsaro na Proactive (System Watcher), wanda ke yin hukunci akan abin da mai sakawa _yi_ maimakon daidaita shi da sanannen malware. Lokacin da ya kunna, Kaspersky ya "juya baya" duk shigarwar — yana goge fayilolin da ya riga ya rubuta — don haka app ɗin ya ƙare ya karye ko ya ɓace.
+
+Fayilolin da yake yi wa tutocin hannun jari ne na ayyanannu, tushen tushen tushen tushen da aka haɗe tare da ƙa'idar tebur, misali:
+
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` da `workerProcessEntry.js` — [Playwright](https://playwright.dev), ɗakin karatu na sarrafa kansa da aka yi amfani da shi don shigar da mai bada in-app da kuma taɗi mai goyan bayan burauza.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — ɗaurin ɗan asalin `wreq-js` ɗin da aka yi amfani da shi don HTTP mai buguwar yatsa akan masu samar da kuki na yanar gizo (`<arch>` shine `x64` ko `arm64`).
+
+**Me ya sa yake yin wuta:** mai sakawa Windows shine** har yanzu ba a sanya hannu a lamba ba** , don haka mai sakawa NSIS mara sa hannu ba shi da suna kuma ba shi da ƙima da ƙima yana gudana a iyakar zalunci. Haɗe tare da haɗe-haɗe na ɗan asalin DLL da ɗaruruwan fayilolin `.js` da aka rubuta a ƙarƙashin `%LOCALAPPDATA%\Programs\OmniRoute` (gami da kundayen adireshi na fakitin hash-saffixed daga ginin Next.js kadai), wannan ya isa ya gamu da cikas. An shirya rattaba hannu kan lamba; har sai ya sauka, sabbin sakewa na iya maimaita wannan.
+
+**Abin da za a yi:**
+
+1. **Tabbatar da zazzagewar ku tukuna** (yana hana fayil ɗin da aka lalata). Kowane sakin yana buga `latest.yml`, wanda filin `sha512` (base64) ya ƙunshi mai saka `OmniRoute.Setup.<version>.exe`. A cikin PowerShell, daga babban fayil ɗin da ke ɗauke da mai sakawa:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Dole ne sakamakon ya yi daidai da `latest.yml` → `sha512`. Idan bai yi daidai ba, share
-   fayil ɗin sannan ka sake sauke shi kawai daga [shafin fitowar GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Dawo da su + cire su daga bincike** — dawo da abubuwan da aka mayar baya daga keɓewa,
-   sannan ka ƙara cirewa daga bincike ga `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky →
-   Settings → Threats and Exclusions), sannan ka sake shigarwa.
-3. **Kai rahoton sakamakon ƙaryar** — <https://opentip.kaspersky.com/>. Rahotannin FP da
-   masu amfani suka aika suna hanzarta saka manhajar cikin jerin abubuwan da aka amince da su.
+   Abin fitarwa dole ne ya dace da `latest.yml` → `sha512`. Idan ba haka ba, share fayil ɗin kuma sake zazzagewa kawai daga [shafin sakin GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Mayar da cire +** — yana dawo da abubuwan da aka birkice daga keɓe kuma ƙara keɓancewa don `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Saituna → Barazana da Cire), sannan sake sakawa.
+3. **Bayar da rahoton tabbataccen ƙarya** — <https://opentip.kaspersky.com/>. Rahoton FP da mai amfani ya ƙaddamar yana haɓaka lissafin izini da gaske.
 
 ---
 
@@ -861,10 +830,10 @@ Matrix na bincike don matsawa CCR (`ccr`) da kayan aikin `session-dedup`. Don ci
 
 ---
 
-## Har Yanzu Ba Ka Iya Ci Gaba Ba?
+## Har yanzu Manne?
 
-- **Matsalolin GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Tsarin Gine-gine**: Duba [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) don bayanan ciki
-- **Manunin API**: Duba [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) don dukkan endpoints
-- **Dashboard na Lafiyar Tsarin**: Duba **Dashboard → Health** don matsayin tsarin na ainihin lokaci
-- **Mai Fassara**: Yi amfani da **Dashboard → Translator** don gano matsalolin tsari
+- **GitHub Matsaloli** ku: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Gine-gine** : Duba [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) don cikakkun bayanai na ciki
+- **API Reference** : Duba [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) don duk wuraren ƙarshe
+- **Dashboard Lafiya** : Duba** Dashboard → Lafiya** don ainihin tsarin tsarin lokaci
+- **Mai fassara** : Amfani** Dashboard → Translator** don warware matsalolin tsarin

@@ -4,30 +4,13 @@
 
 ---
 
-> **Pagrindinis tiesos šaltinis:** `src/lib/memory/` ir `src/app/api/memory/`
-> **Paskutinį kartą atnaujinta:** 2026-06-28 — v3.8.40 (pagal numatytuosius nustatymus išjungta + int8 kvantizavimo suvienodinimas)
+> **Tiesos šaltinis:** `src/lib/memory/` ir `src/app/api/memory/`
 
-OmniRoute suteikia išliekamąją pokalbių atmintį, susietą su API raktu (ir
-pasirinktinai seanso ID). Prisiminimai automatiškai išgaunami iš LLM atsakymų
-naudojant lengvą reguliariųjų išraiškų šablonų atitikties paiešką ir vėl įterpiami į paskesnes
-užklausas kaip pradinis sistemos pranešimas (arba pirmasis naudotojo pranešimas teikėjams,
-kurie nepriima sistemos vaidmens).
+OmniRoute suteikia nuolatinę pokalbio atmintį, įvestą API klavišu (ir pasirinktinai seanso ID). Prisiminimai automatiškai ištraukiami iš LLM atsakymų naudojant lengvą reguliariojo reiškinio modelio atitikimą ir įterpiami atgal į paskesnes užklausas kaip pagrindinis sistemos pranešimas (arba pirmasis vartotojo pranešimas, jei teikėjas atmeta sistemos vaidmenį).
 
-> **Pagal numatytuosius nustatymus atmintis yra IŠJUNGTA (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> dabar yra `false` (`src/lib/memory/settings.ts`). Įjungus atmintį, į
-> **kiekvieną** pokalbio užklausą įterpiama iki `maxTokens` (~2k) nuskaityto konteksto,
-> už kurį imamas mokestis — tai gali būti netikėtos išlaidos naujiems diegimams ir klientams, kurie
-> patys valdo savo kontekstą. Įjunkite ją aiškiai skiltyje **Nustatymai → Atmintis** (`MemorySkillsTab`
-> rodo įspėjimą apie žetonų kainą, kai atmintis įjungta).
-> Klientas gali išjungti atmintį vienai užklausai naudodamas `x-omniroute-no-memory`
-> užklausos antraštę (`true`/`1`/`yes`) — žr. užklausų antraščių lentelę
-> faile [API_REFERENCE.md](../reference/API_REFERENCE.md). Užklausa be atminties nustato
-> `memoryOwnerId = null`, todėl tai užklausai išjungiamas **ir** atminties, **ir** įgūdžių įterpimas
-> (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Pagal numatytuosius nustatymus atmintis yra OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` dabar yra `false` (`src/lib/memory/settings.ts`). Įjungus atmintį, įterpiama iki `maxTokens` (~ 2k) gauto konteksto** kas** pokalbio užklausa, kuri apmokestinama stebėtinai — už naujus diegimus ir klientams, kurie tvarko savo kontekstą. Aiškiai pasirinkite pagal** Nustatymai → Atmintis** ( `MemorySkillsTab` rodo įspėjimo apie žetonų kainą išnašą, kai įjungta atmintis). Klientas gali atsisakyti vienos užklausos su `x-omniroute-no-memory` užklausos antrašte (`true`/`1`/`yes`) — žr. užklausos antraštės lentelę [API_REFERENCE.md](../reference/API_REFERENCE.md). Užklausa be atminties nustato `memoryOwnerId = null`, kuri išjungiama** tiek** atminties ir įgūdžių injekcija šiai užklausai (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Atmintis yra **apribota pagal API raktą**, o ne pagal naudotoją — visos užklausos, autentifikuotos
-tuo pačiu API raktu, naudoja tą patį atminties telkinį, kurį pasirinktinai galima papildomai
-apriboti pagal `sessionId`.
+Atmintis yra** taikoma pagal API raktą** , ne vienam vartotojui — kiekviena užklausa, autentifikuota naudojant tą patį API raktą, turi tą patį atminties telkinį, pasirenkant papildomą `sessionId` aprėptį.
 
 ## Architektūra
 
@@ -338,25 +321,15 @@ o aprėptis yra viena iš `session`, `apiKey` arba `global`. Numatytoji
 
 ## Faktų išskyrimas (`extraction.ts`)
 
-Išskyrimas yra **pagrįstas reguliariosiomis išraiškomis**, o ne LLM — jis vykdomas tame pačiame procese naudojant
-`setImmediate()`, todėl niekada neblokuoja atsakymo srauto:
+Ištraukimas yra** pagal reguliariąją išraišką** , o ne LLM pagrįstas — jis veikia kartu su `setImmediate()` todėl niekada neblokuoja atsakymų srauto:
 
-- **Nuostatų šablonai** → `MemoryType.FACTUAL`
-  (pvz., `Man labiau patinka …`, `Man labai patinka …`, `mano mėgstamiausias yra …`, `Aš nekenčiu …`)
-- **Sprendimų šablonai** → `MemoryType.EPISODIC`
-  (pvz., `Naudosiu …`, `Pasirinkau …`, `Nusprendžiau naudoti …`, `Ketinu pradėti naudoti …`)
-- **Elgsenos šablonai** → `MemoryType.FACTUAL`
-  (pvz., `Paprastai aš …`, `Aš visada …`, `Esu linkęs …`)
+- **Pirmenybių modeliai** → `MemoryType.FACTUAL` (pvz., `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Sprendimų modeliai** → `MemoryType.EPISODIC` (pvz., `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Šablonų raštai** → `MemoryType.FACTUAL` (pvz., `I usually …`, `I always …`, `I tend to …`)
 
-Kiekviena atitiktis išvaloma (`trim`, tarpų sutraukimas, apribojimas iki 500 simbolių),
-dublikatai pakete pašalinami naudojant stabilų `factKey(category, content)`, o
-duomenys išsaugomi per `createMemory()` su metaduomenimis
-`{category, extractedAt, source: "llm_response"}`. Įvesties tekstas ribojamas iki
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — kai jis ilgesnis, naudojama teksto **pabaiga**,
-kad naujausias asistento turinys visada būtų įtrauktas.
+Kiekviena atitiktis yra išvalyta (`trim`, tarpų sutraukimas, ribojamas iki 500 simbolių), panaikinamas dublikatas iš paketo naudojant stabilų `factKey(category, content)` ir išsaugomas per `createMemory()` su metaduomenimis `{category, extractedAt, source: "llm_response"}`. Įvesties tekstas apribojamas iki 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) —, kai ilgesnis,** uodega** yra naudojamas, todėl visada įtraukiamas naujausias asistento turinys.
 
-`extractFactsFromText(text)` eksportuojama testams ir grąžina struktūrizuotus
-faktus jų neišsaugodama.
+`extractFactsFromText(text)` eksportuojamas bandymams ir grąžina susistemintus faktus jų neišsaugodamas.
 
 ## Gavimas (`retrieval.ts`)
 

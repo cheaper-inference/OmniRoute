@@ -503,25 +503,25 @@ kun tulostaulukon tiedot ovat todella muuttuneet edellisen lähetyksen jälkeen.
 
 ---
 
-## Tokenien jakaminen
+## Tokenin jakaminen
 
 **Tiedosto:** `src/lib/gamification/sharing.ts`
 
-### Kahdenkertainen kirjanpito
+### Kaksoiskirjauskirja
 
-Jokainen siirto luo kaksi riviä `token_ledger`-tauluun:
+Jokainen siirto luo kaksi riviä `token_ledger`:
 
-| Rivi     | `from_key_id` | `to_key_id`   | `amount` |
-| -------- | ------------- | ------------- | -------- |
-| Veloitus | lähettäjä     | vastaanottaja | +amount  |
-| Hyvitys  | vastaanottaja | lähettäjä     | -amount  |
+| Rivi      | `from_key_id` | `to_key_id` | `amount` |
+| --------- | ------------- | ----------- | -------- |
+| Veloittaa | lähettäjä     | vastaanotin | + määrä  |
+| Luotto    | vastaanotin   | lähettäjä   | -amount  |
 
-Hetkinen — käytäntö on seuraava:
+Odota — sopimus on:
 
-| Rivi        | `from_key_id` | `to_key_id`   | `amount` | Merkitys                       |
-| ----------- | ------------- | ------------- | -------- | ------------------------------ |
-| Lähetys     | lähettäjä     | vastaanottaja | +amount  | Ulosvirtaus lähettäjältä       |
-| Vastaanotto | vastaanottaja | lähettäjä     | +amount  | Sisäänvirtaus vastaanottajalle |
+| Rivi       | `from_key_id` | `to_key_id` | `amount` | Merkitys                 |
+| ---------- | ------------- | ----------- | -------- | ------------------------ |
+| Lähetä     | lähettäjä     | vastaanotin | + määrä  | Ulosvirtaus lähettäjältä |
+| Vastaanota | vastaanotin   | lähettäjä   | + määrä  | Tulo vastaanottimeen     |
 
 Saldo lasketaan seuraavasti:
 
@@ -534,7 +534,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Siirron kulku
+### Siirtovirta
 
 ```typescript
 export async function transferTokens(
@@ -545,19 +545,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Validointi**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotenssi**: tarkista, onko `idempotency_key` jo olemassa kirjanpidossa.
-   Jos on, palauta välimuistiin tallennettu tulos.
-3. **Transaktio** (yksi SQLite-transaktio):
-   a. Laske lähettäjän saldo.
-   b. Jos `balance < amount`, keskeytä (saldo ei riitä).
-   c. Lisää lähetysrivi (`from=sender,`.
+1. **Vahvista** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotenssi** : tarkista, onko `idempotency_key` jo olemassa reskontrassa. Jos kyllä, palauta välimuistissa oleva tulos.
+3. **Tapahtuma** (yksittäinen SQLite -tapahtuma): a. Laske lähettäjän saldo. b. Jos `balance < amount`, keskeytä (varat eivät riitä). c. Lisää lähetysrivi (`from=sender, to=receiver, amount`). d. Lisää vastaanottorivi (`from=receiver, to=sender, amount`).
+4. **Hintarajoitus** : tarkista lähettäjän siirtonopeus (max 10 transfers/min).
+5. **Tapahtuma** : lähettää `token_share` gamification -tapahtuman XP + -tunnuksen arviointia varten.
+6. Palauta `{ success: true, balance: newBalance }`.
 
-### Nopeusrajoitukset
+### Rate Limiting
 
-- Enintään 10 siirtoa minuutissa API-avainta kohden.
-- Enintään 10 000 tokenia yhdessä siirrossa.
-- Enintään 100 000 siirrettyä tokenia päivässä API-avainta kohden.
+- Enintään 10 siirtoa minuutissa per API näppäin.
+- Enintään 10 000 merkkiä yhtä siirtoa kohden.
+- Enintään 100 000 merkkiä siirretään päivässä API avainta kohden.
 
 ---
 

@@ -63,51 +63,31 @@ er Bifrost udelukkende `external` (kan kun nås via `BIFROST_BASE_URL`).
 for kaldende kode at filtrere efter, hvad en motor faktisk kan, i stedet for at
 hardkode forgreninger for hvert id.
 
-## Akse A — indlejrede tjenester (siden med overvågede processer)
+## Axis A — indlejrede tjenester (overvåget processide)
 
-- **Register over overvågede processer:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (i dag: `9router`, `cliproxy`).
-- **Livscyklusejer:** `src/lib/services/ServiceSupervisor.ts` — `start()` starter
-  underprocessen, afventer `waitForHealthy()`, leder stdout/stderr ind i en ringbuffer;
-  `stop()` SIGTERM→SIGKILL; alt serialiseres under en lås.
-- **Tilstandsunion** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error`, plus en
-  ortogonal `HealthState = healthy | unhealthy | unknown`.
-- **Hvorfor en separat proces (og ikke et SDK i processen)?** Procesisolering er det,
-  der gør installation/start/stop/helbred/logfiler uafhængigt kontrollerbare for hver
-  sidecar og gør det muligt at anvende loopback-startbeskyttelsen. Modellering af en
-  adapter i processen er fremtidigt arbejde — capability-flaget `native-hot-path` er
-  stedet, hvor dette ville blive udtrykt.
+- **Register over overvågede processer:** `src/lib/services/bootstrap.ts` `SERVICES[]` (i dag: `9router`, `cliproxy`).
+- **Livscyklus ejer:** `src/lib/services/ServiceSupervisor.ts` — `start()` afføder barnet, porter på `waitForHealthy()`, tapper stdout/stderr ind i en ringbuffer; `stop()` SIGTERM→SIGKILL; alt sammen serialiseret under en lås.
+- **Statsforbund** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error`, plus en ortogonal `HealthState = healthy | unhealthy | unknown`.
+- **Hvorfor en separat proces (ikke en in-proc SDK)?** Procesisolering er det, der gør install/start/stop/health/logs uafhængigt kontrollerbar pr. sidevogn og lader loopback spawn-guarden gælde. Modellering af en in-proc-adapter er fremtidigt arbejde — `native-hot-path` kapacitetsflaget er, hvor det ville blive udtrykt.
 
-### Kontrakt for livscyklusruter (`/api/services/<tool>/…`)
+### Livscyklusrutekontrakt (`/api/services/<tool>/…`)
 
-Statuskoder er **tilstands-/verbum-/stispecifikke med vilje** — dette er kontrakten,
-ikke inkonsistens:
+Statuskoder er**state/verb/path-specific af design** — dette er kontrakten, ikke inkonsistens:
 
-| Kald                         | Betingelse                         | Status                               |
-| ---------------------------- | ---------------------------------- | ------------------------------------ |
-| `POST .../start`             | tjenesten er `not_installed`       | **409** (forudsætning)               |
-| `POST .../stop`              | allerede stoppet                   | **200** (idempotent no-op)           |
-| `GET .../status`             | OK                                 | **200** (`live ?? row ?? "unknown"`) |
-| `POST .../start`             | startfejl                          | **503** (midlertidig)                |
-| `GET .../status`, `.../stop` | ikke-opfanget fejl                 | **500**                              |
-| `GET /api/services/<x>/logs` | ukendt værktøj `<x>`               | **404** `Service '<x>' not found`    |
-| `GET .../status?reveal=key`  | mangler `X-Reveal-Confirm: yes`    | **403** (kun 9router)                |
-| **alle** `/api/services/*`   | kalder er ikke loopback/privat LAN | **403 LOCAL_ONLY**                   |
+| Ring                         | Tilstand                         | Status                               |
+| ---------------------------- | -------------------------------- | ------------------------------------ |
+| `POST .../start`             | service `not_installed`          | **409** (forudsætning)               |
+| `POST .../stop`              | allerede stoppet                 | **200** (idempotent no-op)           |
+| `GET .../status`             | OK                               | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`             | spawn fiasko                     | **503** (forbigående)                |
+| `GET .../status`, `.../stop` | uopfanget fejl                   | **500**                              |
+| `GET /api/services/<x>/logs` | ukendt værktøj `<x>`             | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`  | mangler `X-Reveal-Confirm: yes`  | **403** (kun 9 router)               |
+| **enhver** `/api/services/*` | ringer ikke loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-Alle fejlorganer formes af `createErrorResponse()` →
-`{ error: { message, type }, requestId }`, hvor `type` afledes af statuskoden
-(`500→server_error`, `404→not_found`, `409→conflict`, ellers `invalid_request`) og er
-den maskinhandlingsrettede diskriminator. Meddelelser er forhåndssaniterede
-(`sanitizeErrorMessage()`, fast regel nr. 12).
+Alle fejllegemer er formet af `createErrorResponse()` → `{ error: { message, type }, requestId }`, hvor `type` er afledt af status (`500→server_error`, `404→not_found`, `409→conflict`, else `invalid_request`) og er den maskinhandlingsbare diskriminator. Beskeder er præ-saneret (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**Loopback-beskyttelsen** er den mest almindelige årsag til en `403`:
-`/api/services/` findes i `LOCAL_ONLY_API_PREFIXES`
-(`src/server/authz/routeGuard.ts`), og
-`src/server/authz/policies/management.ts` afviser enhver kalder, som ikke er
-loopback eller på et privat LAN, **før autentificering**, fordi disse ruter starter
-underprocesser (faste regler 15 og 17). At tilgå dem gennem en offentlig tunnel giver
-en `403` med vilje.
+**Loopback-beskytteren** er den mest almindelige kilde til en `403`: `/api/services/` er i `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) og `src/server/authz/policies/management.ts` afviser enhver ikke-loopback/ikke-privat LAN-opkalder** før aut** , fordi disse ruter afføder underordnede processer (Hårde regler 15 og 17). At nå dem gennem en offentlig tunnel er `403` af design.
 
 ## Akse B — backend til relay-routing (dispatch-siden)
 

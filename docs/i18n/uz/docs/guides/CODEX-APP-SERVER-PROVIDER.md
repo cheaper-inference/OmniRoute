@@ -21,25 +21,21 @@ talab qiladi va ushbu CLI tizimga **kirgan** bo‘lishi kerak.
 ## 1. Arxitektura
 
 ```
-┌─ OmniRoute ilovasi ─────────────┐        ┌─ codex-app-server yordamchi konteyneri ┐
-│  CodexAppServerExecutor          │  WS    │  codex app-server                     │
-│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456           │
-│  (+ imkoniyat tokeni)            │  JSON  │  --ws-auth capability-token           │
-│                                  │  RPC   │  OpenAI OAuth’ni o‘zi boshqaradi       │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, avtomatik yangilash) │
-        │ ulashadi (compose jildlari)        └────────────────────────────────────────┘
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
+│  CodexAppServerExecutor          │  WS    │  codex app-server                   │
+│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS imkoniyat tokeni (ikkalasi ham uni ulaydi)
-  codex-appserver-home    → ~/.codex (auth.json boshqaruv paneli tomonidan yoziladi,
-                             yordamchi konteynerdagi codex app-server tomonidan o‘qiladi)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Yordamchi konteyner imkoniyat tokeni bilan himoyalangan holda **faqat** ichki compose
-  tarmog‘ida (`ws://codex-app-server:1456`) tinglaydi. U **hech qachon**
-  xost yoki internetga ochilmaydi.
-- Codex CLI `omniroute:base` ichiga oldindan o‘rnatilgan, shu sababli yordamchi
-  konteynerni ishga tushirganda xostga yoki foydalanuvchi qurilmasiga codex o‘rnatish
-  shart emas.
+- Vagon tinglaydi** faqat** qobiliyat tokeni orqasida ichki yaratish tarmog'ida (`ws://codex-app-server:1456`). Bu** hech qachon** xostga yoki internetga e'lon qilinadi.
+- Yotoq mashinasi Codex CLI o'z ichiga olgan `runner-cli-no-docker` maqsadidan qurilgan `omniroute:cli-no-docker` dan foydalanadi.
 
 ## 2. Ishga tushirish
 

@@ -10,27 +10,21 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ## Nastavení vývoje
 
-### Požadavky
+### Předpoklady
 
-- **Node.js** `>=22.22.2 <23`, nebo `>=24.0.0 <27` (doporučeno: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` nebo `>=24.0.0 <27` (doporučeno: 24 LTS)
+- **npm** 10 +
 
-> **Windows s Node 24:** použijte aktuální opravnou verzi 24 LTS (nejméně 24.20.0).
-> Starší verze mohou po úspěšném dokončení testů ukončit proces, když `--test-force-exit`
-> proces zavře. Tento pád za běhu řeší [oprava Windows pro libuv](https://github.com/nodejs/node/pull/61999);
-> ponechte povolené kontroly asercí testů a ukončení runneru.
+> **Windows s Node 24:** použijte aktuální vydání 24 LTS patche (alespoň 24.20.0). Dřívější verze se mohou po úspěšných testech přerušit, když `--test-force-exit` proces uzavře. [Oprava Windows libuv](https://github.com/nodejs/node/pull/61999) uzlu řeší tento pád běhového prostředí; ponechte aktivované testovací výrazy a výstupní kontroly běžců.
 
-> **Uživatelé npm v11+ (Node 24+):** Po `npm install` ověřte, že byly nainstalovány nativní moduly:
-> `node -e "require('better-sqlite3')"`. Pokud příkaz selže s chybou `MODULE_NOT_FOUND`,
-> spusťte `npm approve-scripts better-sqlite3 && npm install`. Viz
-> [Řešení problémů](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Uživatelé npm v11 + (Node 24 +):** Po `npm install` ověřte, že byly nainstalovány nativní moduly: `node -e "require('better-sqlite3')"`. Pokud se `MODULE_NOT_FOUND` nezdaří, spusťte `npm approve-scripts better-sqlite3 && npm install`. Viz [Odstraňování problémů](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klonování a instalace
+### Klonovat a nainstalovat
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,93 +32,83 @@ npm install
 ### Proměnné prostředí
 
 ```bash
-# Vytvořte soubor .env ze šablony
+# Create your .env from the template
 cp .env.example .env
 
-# Vygenerujte požadované tajné hodnoty
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Klíčové proměnné pro vývoj:
 
-| Proměnná               | Výchozí hodnota pro vývoj | Popis                           |
-| ---------------------- | ------------------------- | ------------------------------- |
-| `PORT`                 | `20128`                   | Port serveru                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | Základní URL frontendu          |
-| `JWT_SECRET`           | (vygenerujte výše)        | Tajný klíč pro podepisování JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`                | Heslo pro první přihlášení      |
-| `APP_LOG_LEVEL`        | `info`                    | Úroveň podrobnosti protokolů    |
+| Variabilní             | Výchozí vývoj            | Popis                        |
+| ---------------------- | ------------------------ | ---------------------------- |
+| `PORT`                 | `20128`                  | Port serveru                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Základní URL pro frontend    |
+| `JWT_SECRET`           | (vygenerovat výše)       | JWT podpisové tajemství      |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | První přihlašovací heslo     |
+| `APP_LOG_LEVEL`        | `info`                   | Zaznamenat úroveň výřečnosti |
 
 ### Nastavení řídicího panelu
 
-Řídicí panel poskytuje přepínače uživatelského rozhraní pro funkce, které lze konfigurovat také prostřednictvím proměnných prostředí:
+Ovládací panel poskytuje přepínače UI pro funkce, které lze také konfigurovat pomocí proměnných prostředí:
 
-| Umístění nastavení    | Přepínač                       | Popis                                   |
-| --------------------- | ------------------------------ | --------------------------------------- |
-| Nastavení → Pokročilé | Režim ladění                   | Povolit protokoly požadavků ladění (UI) |
-| Nastavení → Obecné    | Viditelnost postranního panelu | Zobrazit/skrýt části postranního panelu |
+| Nastavení umístění    | Přepnout                       | Popis                                      |
+| --------------------- | ------------------------------ | ------------------------------------------ |
+| Nastavení → Pokročilé | Režim ladění                   | Povolit protokoly požadavků na ladění (UI) |
+| Nastavení → Obecné    | Viditelnost postranního panelu | sekce postranního panelu Show/hide         |
 
-Tato nastavení se ukládají do databáze a přetrvávají po restartování. Pokud jsou nastavena,
-mají přednost před výchozími hodnotami proměnných prostředí.
+Tato nastavení jsou uložena v databázi a přetrvávají po restartování, přičemž při nastavení přepisují výchozí hodnoty env var.
 
-### Lokální spuštění
+### Spuštění lokálně
 
 ```bash
-# Vývojový režim (automatické načítání změn)
+# Development mode (hot reload)
 npm run dev
 
-# Produkční sestavení
-npm run build    # next build → .build/next/ a poté assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Rychlá kompilace pouze backendu/API pro změny přispěvatelů
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Sestavení vydání (čisté sestavení + sentinel HEAD — vyžadováno pro nasazení)
-npm run build:release   # rm -rf .build dist a poté build + zápis dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Běžné nastavení portu
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Sestavení pro přispěvatele provádí pouze ověření kompilace: nesestavuje samostatnou
-distribuci ani nevytváří volitelné nativní balicí prostředky. Pokud potřebujete ověřit
-balíček připravený k distribuci, použijte běžné produkční sestavení.
+Sestavení přispěvatele provádí ověření pouze při kompilaci: nesestavuje samostatnou distribuci ani nesestavuje volitelné aktiva nativního balení. Když potřebujete ověřit dodávaný balíček, použijte běžné produkční sestavení.
 
-### Struktura výstupu sestavení
+### Sestavit rozložení výstupu
 
-| Adresář   | Obsah                                                                                            | Sledován |
-| --------- | ------------------------------------------------------------------------------------------------ | -------- |
-| `src/`    | Zdrojový kód aplikace (TypeScript / TSX)                                                         | Ano      |
-| `.build/` | Meziprodukty — výstup `next build` (ignorován systémem git, `distDir = .build/next`)             | Ne       |
-| `dist/`   | Balíček připravený k distribuci — sestavený pomocí `assembleStandalone` (ignorován systémem git) | Ne       |
+| Adresář   | Obsah                                                                 | Sledováno |
+| --------- | --------------------------------------------------------------------- | --------- |
+| `src/`    | Zdroj aplikace (TypeScript / TSX)                                     | Ano       |
+| `.build/` | Mezilehlý výstup — `next build` (gitignored, `distDir = .build/next`) | Žádný     |
+| `dist/`   | Odesílatelný balíček — sestavený `assembleStandalone` (gitignorováno) | Žádný     |
 
-Proces sestavení probíhá v jediném průchodu:
+Sestavovací kanál je jeden průchod:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (výstup Next.js)
-  └─ assembleStandalone()                 (zkopíruje standalone + static + public + nativní prostředky)
-       └─ výstup: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` navíc nejprve vyčistí oba adresáře a zapíše
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) jako sentinel integrity nasazení.
+`npm run build:release` navíc nejprve vyčistí oba adresáře a zapíše `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) jako hlídač integrity nasazení.
 
-`npm run build:contributor` používá profil sestavení pouze pro backend. Během sestavení
-dočasně nahradí soubory uživatelského rozhraní řídicího panelu, zachová obslužné rutiny
-API tras a po dokončení sestavení obnoví původní soubory. Pro změny ovlivňující uživatelské
-rozhraní řídicího panelu nebo pro úplné ověření vydání použijte `npm run build`;
-profil pro přispěvatele není náhradou za sestavení vydání.
+`npm run build:contributor` používá profil sestavení pouze pro backend. Dočasně zablokuje soubory UI dashboardu při sestavování, zachovává obslužné nástroje směrování API a po sestavení obnoví původní soubory. Použijte `npm run build` pro změny, které ovlivňují řídicí panel UI nebo pro ověření plné verze; profil přispěvatele nenahrazuje sestavení vydání.
 
-> **Poznámka k nasazení na VPS:** vzdálený adresář s obrazem `/usr/lib/node_modules/omniroute/app/`
-> se nemění. Nástroje pro nasazení do něj synchronizují obsah `dist/` pomocí rsync.
-> Přesunuta byla pouze cesta výstupu sestavení v repozitáři (`app/` → `dist/`).
+> **Poznámka k nasazení VPS :** adresář vzdáleného obrazu `/usr/lib/node_modules/omniroute/app/` se nezměnil. Dovednosti nasazení do něj synchronizují obsah `dist/`. Pouze výstupní cesta sestavení v repo se přesunula (`app/` → `dist/`).
 
-Výchozí URL:
+Výchozí URLs:
 
-- **Řídicí panel**: `http://localhost:20128/dashboard`
+- **Dashboard** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -433,8 +417,8 @@ Poté použijte dovednosti `/deploy-vps-*-cc`, které pomocí rsync synchronizuj
 
 ## Získání pomoci
 
-- **Architektura**: Viz [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Referenční dokumentace API**: Viz [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Dokumentace zabezpečení**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Provozní dokumentace**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Hlášení problémů**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Architektura** : Viz [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Reference** : Viz [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Bezpečnostní dokumenty** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops docs** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Problémy** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

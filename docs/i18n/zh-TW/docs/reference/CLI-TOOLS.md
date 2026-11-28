@@ -4,8 +4,6 @@
 
 ---
 
-最後更新: 2026-08-23
-
 OmniRoute與分佈在三個專用儀表板頁面上的三類CLI工具整合：
 
 | 頁          | 路線                    | 概念                                                             | 數數         |
@@ -594,170 +592,148 @@ kiro-cli status
 
 ---
 
-## 10. 內部 OmniRoute CLI
+## 10.內部OmniRoute CLI
 
-`omniroute` 二進位檔提供伺服器生命週期、設定、診斷及提供者管理等指令。進入點：`bin/omniroute.mjs`。
+`omniroute`二進位提供用於伺服器生命週期、設定、診斷和提供者管理的命令。入口點： `bin/omniroute.mjs`。
 
 ```bash
-omniroute                              # 啟動伺服器（預設連接埠為 20128）
-omniroute setup                        # 互動式設定精靈
-omniroute doctor                       # 檢查設定、資料庫、連接埠及執行環境
-omniroute providers list               # 已設定的提供者連線
-omniroute providers test-all           # 測試每個使用中的連線
-omniroute reset-password               # 重設管理員密碼
-omniroute logs                         # 串流顯示請求日誌
-omniroute health                       # 詳細健康狀態（斷路器、快取、記憶體）
-omniroute --version                    # 輸出版本
-omniroute --help                       # 顯示所有指令
+omniroute                              # Start server (default port 20128)
+omniroute setup                        # Interactive setup wizard
+omniroute doctor                       # Check config, DB, ports, runtime
+omniroute providers list               # Configured provider connections
+omniroute providers test-all           # Test every active connection
+omniroute reset-password               # Reset the admin password
+omniroute logs                         # Stream request logs
+omniroute health                       # Detailed health (breakers, cache, memory)
+omniroute --version                    # Print version
+omniroute --help                       # Show all commands
 ```
 
-### 設定與初始化
+### 設定和初始化
 
 ```bash
-omniroute setup                        # 互動式設定精靈
-omniroute setup --non-interactive      # CI／自動化模式（讀取環境變數與旗標）
-omniroute setup --password '<value>'   # 直接設定管理員密碼
+omniroute setup                        # Interactive setup wizard
+omniroute setup --non-interactive      # CI/automation mode (reads env vars + flags)
+omniroute setup --password '<value>'   # Set admin password directly
 omniroute setup --add-provider \
   --provider openai \
   --api-key '<value>' \
-  --test-provider                      # 一次完成新增及測試提供者
+  --test-provider                      # Add and test a provider in one shot
 ```
 
-非互動式設定可辨識的環境變數：
+非互動式設定可識別的環境變數：
 
-| 變數                | 用途                                                          |
-| ------------------- | ------------------------------------------------------------- |
-| `OMNIROUTE_API_KEY` | 提供者 API 金鑰（透過 Commander `.env()` 繫結至 `--api-key`） |
-| `DATA_DIR`          | 覆寫 OmniRoute 資料目錄                                       |
+| 瓦爾                | 目的                                                       |
+| ------------------- | ---------------------------------------------------------- |
+| `OMNIROUTE_API_KEY` | 提供者API金鑰（透過 Commander `.env()`綁定到`--api-key` ） |
+| `DATA_DIR`          | 覆蓋OmniRoute資料目錄                                      |
 
-所有其他非互動式輸入都透過旗標傳遞，而非環境變數：
-`--password`、`--provider`、`--provider-name`、`--provider-base-url`、`--default-model`
-（請參閱上方的 `omniroute setup` 選項）。
+所有其他非互動式輸入都作為標誌傳遞，而不是環境變數： `--password`、 `--provider`、 `--provider-name`、 `--provider-base-url`、 `--default-model` （請參閱上面的`omniroute setup`選項）。
 
 ### 診斷
 
 ```bash
-omniroute doctor                       # 檢查設定、資料庫、連接埠、執行環境、記憶體及存活狀態
-omniroute doctor --json                # 機器可讀的 JSON
-omniroute doctor --no-liveness         # 略過 HTTP 健康狀態探測
-omniroute doctor --host 0.0.0.0        # 覆寫存活狀態主機
-omniroute doctor --liveness-url <url>  # 覆寫完整的健康狀態端點 URL
+omniroute doctor                       # Check config, DB, ports, runtime, memory, liveness
+omniroute doctor --json                # Machine-readable JSON
+omniroute doctor --no-liveness         # Skip the HTTP health probe
+omniroute doctor --host 0.0.0.0        # Override liveness host
+omniroute doctor --liveness-url <url>  # Full health endpoint URL override
 ```
 
-doctor 會執行下列檢查：`設定`、`資料庫`、`儲存空間／加密`、
-`連接埠可用性`、`Node 執行環境`、`原生二進位檔`（better-sqlite3）、
-`記憶體`及`伺服器存活狀態`。若任何檢查結果為 `fail`，程式將以非零狀態碼結束。
+醫生執行以下檢查： `Config`、 `Database`、 `Storage/encryption`、 `Port availability`、 `Node runtime`、 `Native binary` (better-sqlite3)、 `Memory`和`Server liveness`。如果任何檢查為`fail`，則它會以非零值退出。
 
 ### 提供者管理
 
 ```bash
-omniroute providers available                       # OmniRoute 提供者目錄
-omniroute providers available --search openai       # 依 ID／名稱／別名／類別篩選目錄
-omniroute providers available --category api-key    # 依類別篩選（api-key、oauth、free、...）
-omniroute providers available --json                # 機器可讀的 JSON
+omniroute providers available                       # OmniRoute provider catalog
+omniroute providers available --search openai       # Filter catalog by id/name/alias/category
+omniroute providers available --category api-key    # Filter by category (api-key, oauth, free, ...)
+omniroute providers available --json                # Machine-readable JSON
 
-omniroute providers list                            # 已設定的提供者連線
+omniroute providers list                            # Configured provider connections
 omniroute providers list --json
 
-omniroute providers test <id|name>                  # 測試一個已設定的連線
-omniroute providers test-all                        # 測試每個使用中的連線
-omniroute providers validate                        # 僅限本機的結構驗證
+omniroute providers test <id|name>                  # Test one configured connection
+omniroute providers test-all                        # Test every active connection
+omniroute providers validate                        # Local-only structural validation
 omniroute providers add <provider> --credential-env PROVIDER_KEY
 omniroute providers import ./providers.json --dry-run --json
-omniroute providers auth <provider>                 # 現有的 OAuth 流程
+omniroute providers auth <provider>                 # Existing OAuth flow
 omniroute providers edit <id|name> --default-model <model>
 omniroute providers remove <id|name> --yes
 ```
 
-`providers add/import/auth/edit/remove` 採 API 優先，因此會針對
-使用中的本機或遠端情境運作。憑證輸入應使用
-`--credential-stdin` 或 `--credential-env`；`--dry-run --json` 僅會回報
-經遮蔽處理的存在狀態／結構。`providers available` 會讀取 OmniRoute 目錄；
-`providers list/test/test-all/validate` 則保留其本機 SQLite 行為，
-不需要啟動伺服器。
+`providers add/import/auth/edit/remove`是 API 優先的，因此適用於活動的本地或遠端上下文。憑證輸入應使用`--credential-stdin`或`--credential-env`； `--dry-run --json`僅報告經過編輯的presence/shape. `providers available`讀取OmniRoute目錄； `providers list/test/test-all/validate`保留其本機SQLite行為，且不需要伺服器運作。
 
-對於自訂的 OpenAI 相容或 Anthropic 相容節點，請使用 `omniroute nodes add`
-傳回的節點 ID 附加憑證，指令為 `omniroute keys add "$NODE_ID" --stdin`。
-這需要伺服器正在執行，且使用中的情境必須具備管理驗證。
-CLI 使用 `POST /api/providers`，此端點會驗證節點，並將其端點
-設定複製到連線中。若缺少節點、授權失敗或伺服器無法使用，
-則會傳回錯誤，而不會建立本機備援憑證。
+對於自訂 OpenAI 相容或 Anthropic 相容節點，使用`omniroute keys add "$NODE_ID" --stdin`將憑證附加到`omniroute nodes add`傳回的節點ID 。這需要活動上下文的正在運行的伺服器和管理身份驗證。 CLI使用`POST /api/providers`來驗證節點並將其端點設定複製到連線。缺少節點、授權失敗或伺服器不可用會傳回錯誤，而不建立本機回退憑證。
 
-`nodes add --base-url` 會設定節點端點；此位址不同於
-`OMNIROUTE_BASE_URL` 中的伺服器位址。若要處理 OpenAPI 檔案，請使用
-`omniroute openapi dump --format json --out ./openapi.json`；全域 `--output`
-用於選擇 CLI 顯示格式，而不是目的地檔名。
+`nodes add --base-url`設定節點端點；它與`OMNIROUTE_BASE_URL`中的伺服器位址不同。對於OpenAPI文件，使用`omniroute openapi dump --format json --out ./openapi.json`；全域`--output`選擇CLI顯示格式，而不是目標檔名。
 
-### 復原與重設
+### 恢復與重置
 
 ```bash
-omniroute reset-password                # 重設管理員密碼（亦可使用：omniroute-reset-password）
-omniroute reset-encrypted-columns       # 顯示警告，並對加密憑證重設進行試執行
-omniroute reset-encrypted-columns --force  # 實際將 SQLite 中的加密憑證設為 null
+omniroute reset-password                # Reset the admin password (also: omniroute-reset-password)
+omniroute reset-encrypted-columns       # Show warning + dry-run for encrypted credential reset
+omniroute reset-encrypted-columns --force  # Actually null out encrypted credentials in SQLite
 ```
 
-### 憑證匯出（⚠ 請謹慎處理）
+### 憑證導出（⚠謹慎處理）
 
 ```bash
-omniroute auth export                                 # 顯示警告與確認關卡——不存取資料庫
-omniroute auth export --force                          # 將所有連線的已解密憑證以 JSON 格式匯出至 stdout
-omniroute auth export --force --id <id>                 # 僅匯出相符的連線
-omniroute auth export --force --format env               # 輸出 OMNIROUTE_<PROVIDER>_<FIELD>=<value> 格式的行
-omniroute auth export --force --out creds.json           # 寫入檔案（以 0600 權限建立）
+omniroute auth export                                 # Show warning + confirmation gate — no DB access
+omniroute auth export --force                          # Export ALL connections' DECRYPTED credentials to stdout as JSON
+omniroute auth export --force --id <id>                 # Export only the matching connection
+omniroute auth export --force --format env               # Emit OMNIROUTE_<PROVIDER>_<FIELD>=<value> lines
+omniroute auth export --force --out creds.json           # Write to a file (created with 0600 permissions)
 ```
 
-`auth export` **僅限本機使用**（直接讀取 SQLite，不經由 HTTP 路由），且會刻意列印／寫入
-**明文** `apiKey`/`accessToken`/`refreshToken`/`idToken` 值——這是功能，而不是
-錯誤。若未指定 `--force`，則不會從資料庫讀取任何內容，也不會解密任何內容。在輸出任何明文之前，
-一律會先將警告橫幅列印至 stderr。必須設定 `STORAGE_ENCRYPTION_KEY`。
-若某個欄位解密失敗（例如金鑰過期或密文損毀），則會回報為
-`<field>DecryptFailed: true`，而不會中止整個匯出作業或洩漏底層錯誤。
+`auth export`是**限本地**（直接SQLite讀取，無HTTP路線）和故意prints/writes**明文**`apiKey`/`accessToken`/`refreshToken`/`idToken`值—是功能，不是錯誤。如果沒有`--force`，則不會從資料庫中讀取任何內容，也不會解密任何內容。在發出任何純文字之前，請務必列印 stderr 警告橫幅。需要設定`STORAGE_ENCRYPTION_KEY` 。無法解密的欄位（過時的金鑰、損壞的密文）將報告為`<field>DecryptFailed: true`而不是中止整個匯出或洩漏潛在錯誤。
 
 ### 其他子命令
 
-除非另有註明，否則這些命令皆假設 OmniRoute 伺服器正在執行：
+除非另有說明，這些假定OmniRoute伺服器正在運作：
 
 ```bash
-omniroute status                       # 完整的執行階段狀態
-omniroute logs                         # 串流請求日誌（--json、--search、--follow）
-omniroute config list                  # 顯示已設定的 CLI 工具
+omniroute status                       # Comprehensive runtime status
+omniroute logs                         # Stream request logs (--json, --search, --follow)
+omniroute config list                  # Display configured CLI tools
 
-omniroute provider list                # 列出可用的提供者（providers list 的別名）
-omniroute provider add                 # 將 OmniRoute 註冊為工具的提供者
-omniroute keys add | list | remove     # 管理 API 金鑰
-omniroute models [provider]            # 列出模型（--json、--search）
+omniroute provider list                # List available providers (alias of providers list)
+omniroute provider add                 # Register OmniRoute as a provider on a tool
+omniroute keys add | list | remove     # Manage API keys
+omniroute models [provider]            # List models (--json, --search)
 omniroute combo list | switch | create | delete
 
-omniroute backup                       # 建立設定與資料庫的快照
-omniroute restore                      # 從先前的快照還原
+omniroute backup                       # Snapshot config + DB
+omniroute restore                      # Restore from a previous snapshot
 
-omniroute health                       # 詳細的健康狀態（斷路器、快取、記憶體）
-omniroute quota                        # 提供者配額用量
-omniroute cache                        # 快取狀態
-omniroute cache clear                  # 清除語意與簽章快取
+omniroute health                       # Detailed health (breakers, cache, memory)
+omniroute quota                        # Provider quota usage
+omniroute cache                        # Cache status
+omniroute cache clear                  # Clear semantic + signature caches
 
-omniroute mcp status | restart         # MCP 伺服器狀態／重新啟動
-omniroute a2a status | card            # A2A 伺服器狀態／代理程式卡片
+omniroute mcp status | restart         # MCP server status / restart
+omniroute a2a status | card            # A2A server status / agent card
 
-omniroute tunnel list | create | stop  # 管理通道（cloudflare/tailscale/ngrok）
-omniroute env show | get <k> | set <k> <v>  # 檢視／設定環境變數（暫時）
+omniroute tunnel list | create | stop  # Manage tunnels (cloudflare/tailscale/ngrok)
+omniroute env show | get <k> | set <k> <v>  # Inspect / set env vars (temporary)
 
-omniroute test                         # 提供者連線能力冒煙測試
-omniroute update                       # 檢查更新
-omniroute completion                   # 產生 shell 自動補全
+omniroute test                         # Provider connectivity smoke test
+omniroute update                       # Check for updates
+omniroute completion                   # Generate shell completion
 ```
 
-### 常用旗標
+### 常用標誌
 
-| 旗標                | 說明                                            |
-| ------------------- | ----------------------------------------------- |
-| `--no-open`         | 啟動時不自動開啟瀏覽器                          |
-| `--port <n>`        | 覆寫 API 連接埠（預設為 20128）                 |
-| `--mcp`             | 透過 stdio 以 MCP 伺服器模式執行（供 IDE 使用） |
-| `--non-interactive` | CI 模式（不顯示提示；從環境變數／旗標讀取）     |
-| `--json`            | 機器可讀的 JSON 輸出（doctor、providers 等）    |
-| `--help`, `-h`      | 顯示命令專屬說明                                |
-| `--version`, `-v`   | 列印已安裝的版本                                |
+| 旗幟                | 描述                                     |
+| ------------------- | ---------------------------------------- |
+| `--no-open`         | 請勿在啟動時自動開啟瀏覽器               |
+| `--port <n>`        | 覆蓋API埠（預設20128）                   |
+| `--mcp`             | 透過 stdio 作為MCP伺服器運行（對於IDEs） |
+| `--non-interactive` | CI模式（無提示；從env/flags讀取）        |
+| `--json`            | 機器可讀的JSON輸出（醫生、提供者等）     |
+| `--help`, `-h`      | 顯示命令特定的幫助                       |
+| `--version`, `-v`   | 列印安裝的版本                           |
 
 ---
 

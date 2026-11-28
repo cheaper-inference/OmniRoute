@@ -21,24 +21,21 @@ OmniRoute надає **два** способи використання OpenAI C
 ## 1. Архітектура
 
 ```
-┌─ Застосунок OmniRoute ──────────┐        ┌─ Сайдкар codex-app-server ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ токен доступу)               │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  самостійно керує OAuth OpenAI      │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, автооновлення)│
-        │ спільний доступ (томи compose)     └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → токен доступу WS (підключений в обох контейнерах)
-  codex-appserver-home    → ~/.codex (auth.json записується панеллю керування,
-                             читається codex app-server у сайдкарі)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Сайдкар прослуховує **лише** внутрішню мережу compose
-  (`ws://codex-app-server:1456`) із захистом токеном доступу. Він **ніколи**
-  не публікується на хості чи в інтернеті.
-- Codex CLI вбудовано в `omniroute:base`, тому під час запуску сайдкара
-  встановлювати codex на хості чи комп’ютері користувача не потрібно.
+- Коляска слухає** тільки** у внутрішній мережі створення (`ws://codex-app-server:1456`) за маркером можливостей. Це так** ніколи** опубліковано на хості або в Інтернеті.
+- У колясці використовується `omniroute:cli-no-docker`, створений на основі цільового `runner-cli-no-docker`, який включає Codex CLI.
 
 ## 2. Запуск
 

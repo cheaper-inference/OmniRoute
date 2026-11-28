@@ -61,42 +61,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute ले टोकन सुरक्षित गर्छ र तुरुन्तै 1-नतिजाको परीक्षण खोज चलाउँछ; यदि Notion ले
 त्रुटि वस्तु फर्कायो भने टोकन हटाइन्छ र कल `400` सहित असफल हुन्छ।
 
-## MCP उपकरणहरू (6)
+## MCP उपकरण (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` मा परिभाषित छन्। कल गर्ने समयमा
-`getNotionToken()` मार्फत टोकन समाधान गरिन्छ; कुनै पनि टोकन कन्फिगर नगरिएको भए उपकरणले
-`"Notion एकीकरण टोकन कन्फिगर गरिएको छैन। यसलाई Settings > Context Sources मा सेट गर्नुहोस्।"` त्रुटि फ्याँक्छ।
+`open-sse/mcp-server/tools/notionTools.ts` मा परिभाषित। टोकन `getNotionToken()` मार्फत कल समयमा समाधान हुन्छ; यदि कुनै पनि कन्फिगर गरिएको छैन भने उपकरणले `"Notion integration token not configured. Set it in Settings > Context Sources."` फ्याँक्छ
 
-| उपकरण                        | स्कोप          | विवरण                                                                                 |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | पाठ क्वेरीद्वारा पृष्ठ र डेटाबेसहरू खोज्छ (शीर्षक, ID र URL फर्काउँछ)। पृष्ठाङ्कित।   |
-| `notion_get_page`            | `read:notion`  | पृष्ठको ID द्वारा त्यसको सामग्री र मेटाडेटा प्राप्त गर्छ।                             |
-| `notion_list_block_children` | `read:notion`  | ब्लक वा पृष्ठका सबै चाइल्ड ब्लकहरू (ब्लक ट्री) सूचीबद्ध गर्छ। पृष्ठाङ्कित।            |
-| `notion_query_database`      | `read:notion`  | वैकल्पिक `filter` + `sorts` (Notion API ढाँचा) सहित डेटाबेस क्वेरी गर्छ। पृष्ठाङ्कित। |
-| `notion_get_database`        | `read:notion`  | ID द्वारा डेटाबेसको स्किमा/मेटाडेटा प्राप्त गर्छ।                                     |
-| `notion_append_blocks`       | `write:notion` | विद्यमान ब्लक वा पृष्ठमा चाइल्ड ब्लकहरू थप्छ (प्रति अनुरोध बढीमा 100 ब्लक)।           |
+| उपकरण                        | स्कोप          | विवरण                                                                                                |
+| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | पाठ क्वेरीद्वारा पृष्ठहरू र डाटाबेसहरू खोज्नुहोस् (शीर्षकहरू, IDs, URLs फर्काउँछ)। पृष्ठांकन गरिएको। |
+| `notion_get_page`            | `read:notion`  | यसको ID द्वारा पृष्ठको सामग्री र मेटाडेटा प्राप्त गर्नुहोस्।                                         |
+| `notion_list_block_children` | `read:notion`  | ब्लक वा पृष्ठ (ब्लक रूख) को सबै ब्लक बच्चाहरू सूचीबद्ध गर्नुहोस्। पृष्ठांकन गरिएको।                  |
+| `notion_query_database`      | `read:notion`  | वैकल्पिक `filter` + `sorts` (Notion API ढाँचा) को साथ डाटाबेस क्वेरी गर्नुहोस्। पृष्ठांकन गरिएको।    |
+| `notion_get_database`        | `read:notion`  | ID द्वारा डाटाबेसको schema/metadata प्राप्त गर्नुहोस्।                                               |
+| `notion_append_blocks`       | `write:notion` | ब्लक बच्चाहरूलाई अवस्थित ब्लक वा पृष्ठमा जोड्नुहोस् (प्रति अनुरोध अधिकतम 100 ब्लकहरू)।               |
 
 ### इनपुट प्यारामिटरहरू
 
-- `notion_search` — `query` (1–500 वर्ण), `pageSize` (1–100, पूर्वनिर्धारित 20),
-  `startCursor` (वैकल्पिक)।
-- `notion_get_page` — `pageId` (32-वर्णको हेक्स वा UUID)।
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, पूर्वनिर्धारित 50),
-  `startCursor` (वैकल्पिक)।
-- `notion_query_database` — `databaseId`, `filter` (वैकल्पिक, Notion फिल्टर ढाँचा),
-  `sorts` (वैकल्पिक एरे), `pageSize` (1–100, पूर्वनिर्धारित 50), `startCursor` (वैकल्पिक)।
-- `notion_get_database` — `databaseId`।
-- `notion_append_blocks` — `blockId`, `children` (ब्लक वस्तुहरूको एरे),
-  `after` (वैकल्पिक स्थान)।
+- `notion_search` — `query` (1-500 वर्ण), `pageSize` (1-100, पूर्वनिर्धारित 20), `startCursor` (वैकल्पिक)।
+- `notion_get_page` — `pageId` (32-char hex वा UUID)।
+- `notion_list_block_children` — `blockId`, `pageSize` (1-100, पूर्वनिर्धारित 50), `startCursor` (वैकल्पिक)।
+- `notion_query_database` — `databaseId`, `filter` (वैकल्पिक, Notion फिल्टर ढाँचा), `sorts` (वैकल्पिक एरे), `pageSize` (1–100, पूर्वनिर्धारित 50), `startCursor` (वैकल्पिक)।
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`, `children` (ब्लक वस्तुहरूको सरणी), `after` (वैकल्पिक स्थिति)।
 
 ### स्कोपहरू
 
-पढ्ने उपकरणहरूलाई `read:notion` र लेख्ने उपकरणलाई `write:notion` आवश्यक हुन्छ।
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` हुँदा मात्र
-`open-sse/mcp-server/server.ts` को `withScopeEnforcement()` द्वारा स्कोपहरू लागू गरिन्छ;
-कलरका अनुमति प्राप्त स्कोपहरू `OMNIROUTE_MCP_SCOPES` (अल्पविरामले छुट्याइएको) वा
-प्रमाणित API key को स्कोप सन्दर्भबाट आउँछन्। पूर्ण स्कोप मोडेलका लागि
-[MCP-SERVER.md](./MCP-SERVER.md) हेर्नुहोस्।
+पढ्ने उपकरणलाई `read:notion` चाहिन्छ र लेखन उपकरणलाई `write:notion` चाहिन्छ। स्कोपहरू `open-sse/mcp-server/server.ts` मा `withScopeEnforcement()` द्वारा `OMNIROUTE_MCP_ENFORCE_SCOPES=true` जब लागू गरिन्छ, र सधैं HTTP/SSE कलरको लागि जसको API कुञ्जीमा `manage`/`admin` छैन; कलरको अनुमति दिइएको स्कोपहरू `OMNIROUTE_MCP_SCOPES` (अल्पविराम-विभाजित) वा प्रमाणीकृत API कुञ्जीको स्कोप सन्दर्भबाट आउँछन्। पूर्ण दायरा मोडेलको लागि [MCP-SERVER.md](./MCP-SERVER.md) हेर्नुहोस्।
 
 ## एन्डपोइन्टहरू
 

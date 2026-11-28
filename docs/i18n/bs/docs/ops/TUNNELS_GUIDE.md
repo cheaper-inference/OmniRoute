@@ -226,16 +226,16 @@ NEXT_PUBLIC_BASE_URL=https://<your-tunnel-host>
 
 i ponovo pokrenite OmniRoute prije pokretanja OAuth-a. Za efemerne Cloudflare Quick Tunnele URL se mijenja nakon svakog ponovnog pokretanja, stoga za produkcijsku upotrebu OAuth-a preferirajte ngrok sa rezervisanom domenom ili Tailscale Funnel.
 
-## Zdravlje i nadzor
+## Zdravlje i praćenje
 
-Kontrolna tabla prikazuje stanje tunela pod **Settings → Tunnels**:
+Površine kontrolne ploče u stanju tunela ispod** Postavke → Tunels** :
 
-- Aktivna pozadinska usluga (backend) i trenutna faza (`stopped`, `starting`, `running`, `needs_auth`, `error`).
+- Aktivni backend(i) i trenutni `phase` (`stopped`, `starting`, `running`, `needs_auth`, `error`).
 - Trenutni javni URL i izvedeni API URL (`<publicUrl>/v1`).
-- Lokalni ciljni URL na koji tunel prosljeđuje saobraćaj.
-- Posljednja poruka o grešci, ako postoji.
+- Lokalni cilj URL tunel prosljeđuje.
+- Zadnja poruka o grešci, ako postoji.
 
-Za programski nadzor, vršite upite (poll) na `GET` krajnje tačke za svaku pozadinsku uslugu. Dozvoljeno je pokretanje više od jedne pozadinske usluge istovremeno; OmniRoute će pratiti svaku nezavisno.
+Za programsko praćenje anketirajte krajnje tačke `GET` po pozadinskom dijelu. Dozvoljeno je pokretanje više od jednog backenda istovremeno; OmniRoute će pratiti svaki nezavisno.
 
 ## Rješavanje problema
 

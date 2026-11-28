@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Povinné parametre
+## 5. Požadované parametre
 
-Pre tento projekt sa na Fly.io odporúča nakonfigurovať aspoň nasledujúce parametre.
+Tento projekt odporúča na Fly.io nakonfigurovať aspoň nasledujúce parametre.
 
 ### 5.1 Overené parametre
 
-Tieto parametre boli použité pri skutočných nasadeniach aktuálnej aplikácie `omniroute`:
+Tieto parametre boli použité v skutočných nasadeniach v aktuálnej aplikácii `omniroute` :
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (vyžaduje sa v produkcii — používa sa na autentifikáciu mosta WebSocket)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (vyžaduje sa v produkcii — používaná na overenie mosta WebSocket )
 - `STORAGE_ENCRYPTION_KEY`
 
-### 5.2 Informácie o `INITIAL_PASSWORD`
+### 5.2 O `INITIAL_PASSWORD`
 
-Aktuálny projekt nenastavuje `INITIAL_PASSWORD`, pretože toto nasadenie ho nevyžaduje.
+Aktuálny projekt nenastavuje `INITIAL_PASSWORD` pretože toto nasadenie si to nevyžaduje.
 
-Ak nie je nastavené:
+Ak nie je nastavený:
 
-- Záznam pri spustení uvedie, že predvolené heslo je `CHANGEME`
-- Po nasadení by ste mali čo najskôr zmeniť prihlasovacie heslo v systémových nastaveniach
+- Heslo riadiaceho panela vytvoríte v sprievodcovi registráciou pri prvej návšteve. Dokončite krok s heslom: jeho preskočením vypnete prihlásenie na palubnú dosku, vďaka čomu bude palubná doska otvorená pre každého, kto sa dostane k aplikácii URL
+- Proxy Fly sa dostane do aplikácie z adresy bez spätnej slučky, takže po zadaní hesla vás sprievodca požiada o jednorazový bootstrap token, ktorý aplikácia v danom momente vytlačí do svojho denníka: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Ak tento riadok vyšiel z denníka, reštartujte aplikáciu a znova odošlite sprievodcu, aby sa vytlačil nový token
 
-Ak chcete inicializovať heslo backendu bez obsluhy, môžete ho pridať neskôr:
+Ak chcete namiesto toho nastaviť heslo bez dozoru, pridajte ho pred prvou návštevou dashboardu (po uložení hesla sa `INITIAL_PASSWORD` ignoruje):
 
 - `INITIAL_PASSWORD`
 
@@ -276,7 +276,7 @@ Ak stránka `Secrets` v konzole nezobrazuje očakávané premenné, skontrolujte
 
 ## 9. Následné aktualizácie a vydania
 
-Po aktualizácii kódu je proces vydania jednoduchý:
+Po aktualizáciách kódu je proces vydania jednoduchý:
 
 ```powershell
 git pull
@@ -289,13 +289,13 @@ Ak potrebujete iba aktualizovať parametre bez zmeny kódu:
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly automaticky vykoná postupnú aktualizáciu strojov.
+Fly automaticky vykoná priebežnú aktualizáciu strojov.
 
-### 9.1 Sledovanie aktualizácií upstream repozitára pri zachovaní súboru `fly.toml` vo vašom forku
+### 9.1 Sledovanie upstream aktualizácií úložiska pri zachovaní `fly.toml` vašej vidlice
 
-Ak je aktuálny repozitár forkom a chcete synchronizovať aktualizácie z upstream repozitára `https://github.com/diegosouzapw/OmniRoute`, postupujte podľa nasledujúceho pracovného postupu.
+Ak je aktuálnym úložiskom vidlica a chcete synchronizovať aktualizácie z upstream `https://github.com/cheaper-inference/OmniRoute`, postupujte podľa nižšie uvedeného pracovného postupu.
 
-Najprv overte svoje vzdialené repozitáre:
+Najprv skontrolujte svoje diaľkové ovládače:
 
 ```powershell
 git remote -v
@@ -303,31 +303,31 @@ git remote -v
 
 Mali by ste vidieť aspoň:
 
-- `origin` smerujúci na váš vlastný fork
-- `upstream` smerujúci na pôvodný repozitár
+- `origin` ukazuje na vašu vlastnú vidličku
+- `upstream` ukazujúci na pôvodné úložisko
 
 Ak `upstream` nie je nakonfigurovaný, pridajte ho:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Pred synchronizáciou s upstream repozitárom načítajte najnovšie commity a značky:
+Pred synchronizáciou s upstreamom načítajte najnovšie odovzdania a značky:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Skontrolujte aktuálnu verziu a značky upstream repozitára:
+Skontrolujte aktuálnu verziu a upstream značky:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Poznámka: Aktuálna verzia projektu je `v3.8.0`. Odkazy na `v3.4.7` uvedené nižšie sú zachované iba ako historické príklady. Pre skutočné vydania použite `:latest` alebo značku aktuálnej verzie (napr. `:v3.8.0`).
+> Poznámka: Aktuálna verzia projektu je `v3.8.0`. Nižšie uvedené odkazy `v3.4.7` slúžia len ako historické príklady. Pre aktuálne vydania použite `:latest` alebo značku aktuálnej verzie (napr. `:v3.8.0`).
 
-Ak chcete zlúčiť najnovšiu vetvu `main` z upstream repozitára a zároveň vynútene zachovať súbor `fly.toml` zo svojho forku, použite tento pracovný postup:
+Ak chcete zlúčiť najnovšiu upstream `main` pri silnom zachovaní `fly.toml` vašej vidlice, postupujte podľa tohto pracovného postupu:
 
 ```powershell
 git merge upstream/main
@@ -339,32 +339,32 @@ git push origin main
 
 Poznámky:
 
-- `git merge upstream/main` synchronizuje najnovší kód z pôvodného repozitára
-- `git checkout HEAD~1 -- fly.toml` obnoví vlastný súbor `fly.toml` vášho forku zo stavu pred zlúčením
-- Ak upstream repozitár súbor `fly.toml` neupravil, tento krok neprinesie žiadne rozdiely
-- Ak upstream repozitár súbor `fly.toml` upravil, tento krok zabezpečí, že názov vašej aplikácie Fly, pripojenie zväzku, región a ďalšia konfigurácia nasadenia špecifická pre fork nebudú prepísané
+- `git merge upstream/main` synchronizuje najnovší kód z pôvodného úložiska
+- `git checkout HEAD~1 -- fly.toml` obnoví vlastný `fly.toml` vášho forku z obdobia pred zlúčením
+- Ak upstream neupravil `fly.toml`, tento krok nezavedie žiadne rozdiely
+- Ak upstream upravil `fly.toml`, tento krok zabezpečí, že sa neprepíše názov vašej aplikácie Fly, pripojenie zväzku, oblasť a iná konfigurácia nasadenia špecifická pre vidlicu
 
-Ak chcete zosúladiť stav s konkrétnou značkou vydania (napr. `v3.4.7`), najprv overte, či je už značka zahrnutá vo vetve `upstream/main`:
+Ak sa chcete zosúladiť s konkrétnou značkou vydania (napr. `v3.4.7`), najprv skontrolujte, či je značka už zahrnutá v `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Úspešný návrat znamená, že `upstream/main` už túto verziu obsahuje; môžete jednoducho zlúčiť `upstream/main`.
+Úspešný návrat znamená, že `upstream/main` už obsahuje túto verziu; môžete jednoducho zlúčiť `upstream/main`.
 
-### 9.2 Štandardný postup vydania po synchronizácii s upstream repozitárom
+### 9.2 Štandardná postupnosť vydávania po synchronizácii proti prúdu
 
-Po synchronizácii s pôvodným repozitárom dodržte toto odporúčané poradie vydania:
+Po synchronizácii s pôvodným úložiskom postupujte podľa tohto odporúčaného poradia vydania:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Obnovte súbor `fly.toml` forku
+3. Obnovte `fly.toml` vidlice
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Toto je skutočný pracovný postup použitý pri aktualizácii aktuálneho projektu na `v3.4.7` (príklad odkazuje na historickú verziu; aktuálna verzia je `v3.8.0`).
+Toto je skutočný pracovný postup používaný pri aktualizácii aktuálneho projektu na `v3.4.7` (príklad sa týka historickej verzie; aktuálna aktuálna verzia je `v3.8.0`).
 
 ---
 
@@ -420,14 +420,14 @@ Ak namiesto toho vidíte `/app/data/...`, premenná `DATA_DIR` je nesprávne nak
 
 ## 12. Bežné problémy
 
-### 12.1 Stránka `Secrets` je prázdna
+### 12.1 `Secrets` Stránka je prázdna
 
-Zvyčajne to má jeden z dvoch dôvodov:
+Zvyčajne existujú dva dôvody:
 
-- Ešte ste nespustili príkaz `flyctl secrets set`
-- Zobrazujete inú aplikáciu (napr. `oroute` namiesto `omniroute`)
+- Ešte ste nespustili `flyctl secrets set`
+- Prezeráte si inú aplikáciu (napr. `oroute` namiesto `omniroute`)
 
-### 12.2 Príkaz `flyctl deploy` hlási `app not found`
+### 12,2 `flyctl deploy` Správy `app not found`
 
 Najprv vytvorte aplikáciu:
 
@@ -435,23 +435,23 @@ Najprv vytvorte aplikáciu:
 flyctl apps create omniroute
 ```
 
-### 12.3 Analýza súboru `fly.toml` zlyhá
+### Analýza 12,3 `fly.toml` zlyhá
 
-Skontrolujte:
+Skontrolujte nasledovné:
 
-- Či sa v komentároch nenachádzajú poškodené znaky
-- Či sú úvodzovky a odsadenie v TOML správne
+- Či sú v komentároch skomolené znaky
+- Či sú citácie a odsadenie TOML správne
 
-### 12.4 Údaje sa neuchovávajú
+### 12.4 Údaje nie sú trvalé
 
-Overte obe nasledujúce položky:
+Overte obe nasledujúce skutočnosti:
 
-- Súbor `fly.toml` obsahuje `destination = '/data'`
-- Premenná `DATA_DIR` je nastavená na `/data`
+- `fly.toml` obsahuje `destination = '/data'`
+- `DATA_DIR` je nastavené na `/data`
 
-### 12.5 Môže aplikácia bežať bez `INITIAL_PASSWORD`?
+### 12.5 Môže to bežať bez `INITIAL_PASSWORD`?
 
-Áno, môže. Použije sa predvolené heslo `CHANGEME`. V produkčnom prostredí sa odporúča čo najskôr zmeniť heslo backendu.
+áno. Keď je `INITIAL_PASSWORD` deaktivovaný, vytvoríte si heslo dashboardu v sprievodcovi vstupom pri prvej návšteve (časť 5.2 sa zaoberá jednorazovým bootstrap tokenom a krokom hesla).
 
 ---
 

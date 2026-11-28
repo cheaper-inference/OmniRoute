@@ -4,60 +4,60 @@
 
 ---
 
-> **TL;DR**: Gunakan akun penyedia yang memenuhi syarat milik Anda sendiri. OmniRoute menggabungkan koneksi yang Anda konfigurasikan; OmniRoute tidak memberikan anggaran token agregat yang diiklankan. Akses gratis mungkin memerlukan pendaftaran, API key, persetujuan, atau metode pembayaran. Batasan penyedia, kebijakan privasi, dan ketentuan tetap berlaku.
+> **TL;DR** : Bawalah akun penyedia Anda sendiri yang memenuhi syarat. OmniRoute menggabungkan koneksi yang Anda konfigurasikan; itu tidak mengeluarkan anggaran token agregat yang diiklankan. Akses gratis memerlukan pendaftaran, kunci API, persetujuan, atau metode pembayaran. Batasan penyedia, kebijakan privasi, dan ketentuan masih berlaku.
 
 ---
 
-## Apa Itu Tingkat Gratis?
+## Apa itu Tingkatan Gratis?
 
-Banyak penyedia AI menawarkan suatu bentuk **akses gratis**. Bergantung pada penyedianya, hal tersebut dapat berarti endpoint tanpa autentikasi, kuota berkala, akses tanpa batas kuota dengan pembatasan laju, jatah saat pendaftaran, persetujuan manual, atau promosi sementara. Beberapa opsi memerlukan akun, kunci API, kartu kredit, KYC, atau persetujuan terhadap ketentuan khusus penyedia.
+Banyak penyedia AI menawarkan beberapa bentuk** akses gratis** . Tergantung pada penyedianya, hal ini dapat berarti titik akhir tanpa autentikasi, kuota berulang, akses tanpa batasan tarif, izin pendaftaran, persetujuan manual, atau promosi sementara. Beberapa opsi memerlukan akun, kunci API, kartu kredit, KYC, atau penerimaan persyaratan khusus penyedia.
 
-OmniRoute **mengagregasikan** koneksi yang dikonfigurasi ke dalam satu endpoint. Anda tetap perlu mendaftar secara terpisah ke setiap penyedia yang memerlukan akun. Hubungkan akun tersebut dan gunakan `model: "auto"` untuk merutekan permintaan di antara target yang memenuhi syarat. Instalasi baru mungkin tidak memiliki target tanpa kunci yang memenuhi syarat; memasang OmniRoute saja tidak menjamin respons percakapan yang berhasil.
+OmniRoute** agregat** koneksi yang dikonfigurasi ke dalam satu titik akhir. Anda tetap mendaftar secara terpisah untuk setiap penyedia yang memerlukan akun. Hubungkan akun tersebut dan gunakan `model: "auto"` untuk merutekan di antara target yang memenuhi syarat. Instalasi baru tidak boleh memiliki target tanpa kunci yang memenuhi syarat; menginstal OmniRoute saja tidak menjamin respons obrolan berhasil.
 
 ---
 
-## Penyedia Akses Gratis Representatif
+## Penyedia Akses Gratis yang Mewakili
 
 ### Akses Berulang, Tanpa Kunci, atau Tanpa Batas
 
-Penyedia berikut memiliki jalur akses gratis yang berulang, tanpa kunci, atau tanpa batas dalam katalog yang diaudit. “Tanpa batas” berarti tidak ada batas token yang dipublikasikan; batas laju, konkurensi, akun, regional, dan kebijakan masih dapat berlaku:
+Penyedia ini memiliki jalur akses gratis yang berulang, tanpa kunci, atau tidak dibatasi dalam katalog yang diaudit. “Tidak dibatasi” berarti tidak ada batasan token yang dipublikasikan; batasan tarif, konkurensi, akun, regional, dan kebijakan masih dapat berlaku:
 
-| Penyedia          | Model                                                                                     | Kuota                                                                                                                                            | Cara Terhubung                                                                                          |
-| ----------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, dan lainnya                                  | Katalog yang diaudit memperkirakan kumpulan bersama bulanan sebesar 25K token                                                                    | Alur OAuth/akun; Ketentuan Layanan ditandai `avoid` dalam katalog                                       |
-| **Pollinations**  | Kumpulan model tanpa kunci saat ini; beberapa model lama dihentikan atau memerlukan kunci | Tanpa kunci; tidak ada batas token yang dipublikasikan                                                                                           | Tidak memerlukan kredensial penyedia untuk model tanpa kunci                                            |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, dan lainnya                  | Kunci API gratis (tanpa batas laju, tanpa kartu); **setiap permintaan dicatat** untuk penelitian (berhenti berpartisipasi di logfare.ai/consent) | Kunci instan di logfare.ai/register; Ketentuan Layanan/privasi di logfare.ai/tos dan logfare.ai/privacy |
-| **Cloudflare AI** | Katalog Workers AI                                                                        | Kumpulan yang diaudit memperkirakan ~30M token/bulan berdasarkan unit penggunaan yang dipublikasikan                                             | Akun Cloudflare dan kredensial API                                                                      |
-| **Gemini**        | Keluarga Gemini Flash                                                                     | Batas laju bervariasi menurut proyek/model; tidak ada jatah token bulanan tetap yang disertakan dalam ringkasan utama                            | Kunci API Google AI Studio; periksa batas aktif proyek                                                  |
-| **Groq**          | Model Llama, GPT-OSS, dan Qwen                                                            | Kumpulan yang diaudit memperkirakan ~15M token/bulan                                                                                             | Kunci API Groq; batas laju berlaku                                                                      |
+| Penyedia          | Model                                                                                           | Kuota                                                                                                                                | Bagaimana Menghubungkan                                                                   |
+| ----------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Soneta 4.5, Haiku 4.5, DeepSeek V3.2, dan lainnya                                        | Katalog yang diaudit memperkirakan kumpulan bulanan bersama sebesar 25 ribu token                                                    | aliran OAuth/account ; ToS menandai `avoid` di katalog                                    |
+| **Penyerbukan**   | Kumpulan model tanpa kunci saat ini; beberapa model sebelumnya dihentikan atau diperlukan kunci | Tanpa kunci; tidak ada batasan token yang dipublikasikan                                                                             | Tidak ada kredensial penyedia untuk model tanpa kunci                                     |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, dan banyak lagi                    | Kunci API gratis (tanpa batasan tarif, tanpa kartu);** setiap permintaan dicatat** untuk penelitian (menyisih di logfare.ai/consent) | Kunci instan di logfare.ai/register; ToS/privacy di logfare.ai/tos dan logfare.ai/privacy |
+| **Cloudflare AI** | Katalog AI pekerja                                                                              | Kumpulan yang diaudit memperkirakan ~ 23 juta tokens/month dari unit penggunaan yang dipublikasikan (katalog diaudit 23-11-2026)     | akun Cloudflare dan kredensial API                                                        |
+| **Gemini**        | keluarga Gemini Flash                                                                           | Batas laju project/model variabel; tidak ada pemberian token bulanan tetap yang disertakan dalam judul                               | kunci Google AI Studio API ; periksa batas aktif proyek                                   |
+| **Groq**          | model Llama, GPT-OSS, dan Qwen                                                                  | Perkiraan kumpulan yang diaudit ~ 24 juta tokens/month (4 batas per model, katalog diaudit 23-11-2026)                               | kunci Groq API ; batas tarif berlaku                                                      |
 
-### Jatah Pendaftaran dan Kredit Khusus Penyedia
+### Hibah Pendaftaran dan Kredit Khusus Penyedia
 
-Penyedia berikut menawarkan jatah pendaftaran atau kredit promosi, sesuai dengan aturan kelayakan mereka. Seperti yang diverifikasi pada 2026-10-08, [harga Cerebras](https://www.cerebras.ai/pricing) memerlukan metode pembayaran untuk kredit satu kali sebesar $5 yang kedaluwarsa setelah 30 hari; ini bukan kuota token berulang. [Batas laju Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) bervariasi menurut proyek, model, dan tingkat, sehingga tidak dikonversi menjadi jatah token bulanan yang dijamin.
+Penyedia ini menawarkan hibah pendaftaran atau kredit promosi, sesuai dengan aturan kelayakan mereka. Seperti yang diverifikasi pada 08-10-2026, [penetapan harga Cerebras](https://www.cerebras.ai/pricing) memerlukan metode pembayaran untuk kredit $5 satu kali yang kedaluwarsa setelah 30 hari; ini bukan kuota token berulang. [Batasan tarif Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) bervariasi menurut proyek, model, dan tingkatan, sehingga tidak diubah menjadi jaminan pemberian token bulanan.
 
-| Penyedia      | Kredit Gratis                                                                                   | Model                      | Cara Mendapatkannya                                         |
-| ------------- | ----------------------------------------------------------------------------------------------- | -------------------------- | ----------------------------------------------------------- |
-| **Cerebras**  | Kredit promosi satu kali sebesar $5; kedaluwarsa setelah 30 hari                                | Katalog inferensi saat ini | Akun dan metode pembayaran yang valid                       |
-| **DeepSeek**  | 5M token gratis                                                                                 | DeepSeek V4                | Daftar di platform.deepseek.com                             |
-| **LongCat**   | Jatah satu kali sebesar 10M token                                                               | LongCat 2.0                | Kunci API + KYC; bayar sesuai pemakaian setelah jatah habis |
-| **Vertex AI** | Kredit pendaftaran sebesar $300 yang direpresentasikan sebagai ~300M token dalam model anggaran | Gemini dan model mitra     | Akun Google Cloud; aturan penagihan dan kelayakan berlaku   |
+| Penyedia      | Kredit Gratis                                                                           | Model                      | Bagaimana Mendapatkannya                                  |
+| ------------- | --------------------------------------------------------------------------------------- | -------------------------- | --------------------------------------------------------- |
+| **Cerebras**  | Kredit promosi $5 satu kali; kedaluwarsa setelah 30 hari                                | Katalog inferensi saat ini | Akun dan metode pembayaran yang valid                     |
+| **DeepSeek**  | 5 juta token gratis                                                                     | DeepSeek V4                | Daftar di platform.deepseek.com                           |
+| **LongCat**   | Hibah satu kali sebesar 10 juta token                                                   | LongCat 2.0                | kunci API + KYC; bayar sesuai pemakaian setelah hibah     |
+| **simpul AI** | Kredit pendaftaran $300 direpresentasikan sebagai token ~ 300 juta dalam model anggaran | Gemini dan model mitra     | akun Google Cloud; aturan penagihan dan kelayakan berlaku |
 
 ### Akses Terbatas Lainnya
 
-Penyedia berikut memiliki **tingkat gratis** dengan batas tertentu:
+Penyedia ini punya** tingkatan gratis** dengan batasan tertentu:
 
-| Penyedia                   | Batas Gratis                                                                                                     | Model                                | Paling Cocok Untuk |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------ |
-| **GitHub Models**          | Kumpulan bersama yang diaudit memperkirakan ~18M token/bulan                                                     | Evaluasi model secara luas           |
-| **Hugging Face**           | Kumpulan bulanan berulang berukuran kecil                                                                        | Eksperimen dan variasi model         |
-| **OpenRouter free models** | Kumpulan bersama dengan batas permintaan; isi ulang satu kali yang bersifat opsional meningkatkan jatah berulang | Katalog cadangan yang luas           |
-| **AI Horde**               | Kapasitas komunitas tanpa kunci; ketersediaan bervariasi                                                         | Inferensi terdistribusi oportunistik |
+| Penyedia                    | Batas Gratis                                                                                    | Model                                | Terbaik Untuk |
+| --------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------ | ------------- |
+| **Model GitHub**            | Kumpulan bersama yang diaudit memperkirakan ~ 18 juta tokens/month                              | Evaluasi model yang luas             |
+| **Memeluk Wajah**           | Kumpulan bulanan kecil yang berulang                                                            | Eksperimen dan variasi model         |
+| **model gratis OpenRouter** | Kumpulan terbatas permintaan bersama; opsional top-up satu kali meningkatkan tunjangan berulang | Katalog cadangan yang luas           |
+| **AI Gerombolan**           | Kapasitas komunitas tanpa kunci; ketersediaan bervariasi                                        | Inferensi terdistribusi oportunistik |
 
 ---
 
-## Cara Menumpuk Tingkat Gratis
+## Cara Menumpuk Tingkatan Gratis
 
-Keunggulan OmniRoute adalah **menumpuk tingkat gratis**. Alih-alih mengandalkan satu penyedia, Anda menghubungkan beberapa penyedia gratis dan membiarkan OmniRoute secara otomatis memilih penyedia terbaik untuk setiap permintaan.
+Keajaiban OmniRoute adalah** menumpuk tingkatan gratis** . Daripada mengandalkan satu penyedia, Anda menghubungkan beberapa penyedia gratis dan membiarkan OmniRoute secara otomatis memilih yang terbaik untuk setiap permintaan.
 
 ### Contoh: Cakupan Tingkat Gratis yang Lebih Luas
 
@@ -65,17 +65,17 @@ Hubungkan beberapa penyedia untuk mengurangi ketergantungan pada satu kuota:
 
 1. **Gemini** — kuota kunci API berulang
 2. **Groq** — kuota kunci API berulang
-3. **Pollinations** — akses tanpa kunci dengan pembatasan laju
-4. **LongCat** — alokasi satu kali saat mendaftar (memerlukan KYC)
+3. **Penyerbukan** — tanpa kunci, akses dengan tarif terbatas
+4. **LongCat** — hibah pendaftaran satu kali (membutuhkan KYC)
 
 Kemudian gunakan `model: "auto"` dan OmniRoute akan:
 
-- Mencoba koneksi memenuhi syarat dengan peringkat tertinggi terlebih dahulu
-- Jika kuota habis atau pemeriksaan kondisinya gagal → mencoba penyedia berikutnya yang dikonfigurasi
-- Jika penyedia tanpa kunci tidak tersedia → melanjutkan ke target yang tersisa
-- Jika tidak ada koneksi memenuhi syarat yang berhasil → mengembalikan kesalahan; kredit pendaftaran hanya dapat digunakan selama masih valid dan tersedia
+- Coba koneksi memenuhi syarat dengan peringkat tertinggi terlebih dahulu
+- Jika kuota atau pemeriksaan kesehatannya gagal → coba penyedia konfigurasi berikutnya
+- Jika penyedia tanpa kunci tidak tersedia → lanjutkan melalui target yang tersisa
+- Jika tidak ada koneksi yang memenuhi syarat berhasil → mengembalikan kesalahan; kredit pendaftaran hanya dapat digunakan selama valid dan tersedia
 
-**Hasil**: cakupan tingkat gratis yang lebih luas dengan failover otomatis — bukan jaminan kapasitas tanpa batas.
+**Hasil** : cakupan tingkat gratis yang lebih luas dengan fallback otomatis — bukan jaminan kapasitas tak terbatas.
 
 ---
 
@@ -87,84 +87,93 @@ Buka `http://localhost:20128` di browser Anda.
 
 ### Langkah 2: Buka Penyedia
 
-Klik **Penyedia** di bilah sisi.
+Klik** Penyedia** di bilah sisi.
 
 ### Langkah 3: Klik Tambahkan Penyedia
 
-Klik tombol **+ Tambahkan Penyedia**.
+Klik**+ Tambahkan Penyedia** tombol.
 
 ### Langkah 4: Pilih Penyedia Gratis
 
-Telusuri katalog dan periksa metadata `hasFree`, autentikasi, kuota, privasi,
-dan Ketentuan Layanan (ToS) terkini dari setiap penyedia. Kartu penyedia dan
-[Referensi Tingkat Gratis](../reference/FREE_TIERS.md) membedakan kumpulan kuota berulang,
-akses tanpa batas/tanpa kunci, kredit pendaftaran, entri yang dihentikan, dan sumber berisiko lebih tinggi.
+Telusuri katalog dan periksa metadata `hasFree`, auth, kuota, privasi, dan ToS masing-masing penyedia. Kartu penyedia dan [Referensi Tingkat Gratis](../reference/FREE_TIERS.md) membedakan kumpulan berulang, akses uncapped/keyless, kredit pendaftaran, entri yang dihentikan, dan sumber berisiko tinggi.
 
 ### Langkah 5: Klik Hubungkan
 
-Untuk penyedia `NOAUTH`, OmniRoute tidak meminta kredensial upstream. Hal ini tidak menjamin bahwa upstream menerima klien pihak ketiga atau memiliki kapasitas yang tersedia. Penyedia OAuth dan kunci API harus dihubungkan melalui alur akun yang didokumentasikan. Klien Anda tetap menggunakan kunci API OmniRoute yang ditampilkan di **Dasbor → Endpoint** saat autentikasi router diaktifkan.
+Untuk penyedia `NOAUTH`, OmniRoute tidak meminta kredensial upstream. Hal ini tidak menjamin bahwa upstream menerima klien pihak ketiga atau memiliki kapasitas yang tersedia. OAuth dan penyedia kunci API harus terhubung melalui alur akun mereka yang terdokumentasi. Klien Anda masih menggunakan kunci OmniRoute API yang dibuat** Dasbor → API Tombol** (hanya ditampilkan sekali, saat pembuatan) ketika otentikasi router diaktifkan.
 
 ### Langkah 6: Ulangi
 
-Hubungkan beberapa penyedia yang ketentuan dan model privasinya sesuai dengan kasus penggunaan Anda.
+Hubungkan beberapa penyedia yang persyaratan dan model privasinya sesuai dengan kasus penggunaan Anda.
+
+---
+
+## Berasal Dari dsh "Model Gratis Kami"
+
+Plugin [dsh-our-free-model](https://github.com/Ebony-Vinyl/dsh-our-free-model) untuk host agen dsh mencapai dua upstream. OmniRoute sudah memiliki penyedia untuk masing-masingnya, tetapi hanya satu yang merupakan jalur gratis di OmniRoute:
+
+| jalur plugin | Hulu                                        | penyedia OmniRoute          | Gratis di OmniRoute? | Bagaimana cara menghubungkan                                                    |
+| ------------ | ------------------------------------------- | --------------------------- | -------------------- | ------------------------------------------------------------------------------- |
+| saluran kilo | Kilo gerbang AI (`api.kilo.ai/api/gateway`) | `kilo-gateway` (alias `kg`) | Ya                   | kunci API opsional: biarkan kosong untuk menggunakan kumpulan gratis gateway    |
+| jalur bebas  | OpenCode Zen (`opencode.ai`)                | `opencode-zen`              | TIDAK                | Kunci OpenCode API Anda sendiri dari [opencode.ai/zen](https://opencode.ai/zen) |
+
+**Kilo.** Panggil kumpulan gratis sebagai `kilo-gateway/<model>` atau `kg/<model>`, misalnya `kg/kilo-auto/free` (router otomatis gratis Kilo) atau salah satu model `:free` gateway. Set bebas berputar; `kilo-gateway` melewati id model yang tidak ada dalam daftar bawaan OmniRoute, sehingga model yang ada dalam daftar gateway saat ini dapat dipanggil sebelum katalog menyertakannya. Kartu model gratis Kilo menyatakan bahwa perintah dapat dicatat oleh penyedia hulu dan digunakan untuk meningkatkan layanannya, jadi jangan mengirimkan data sensitif.
+
+**OpenCode.** Jalur gratis plugin adalah penawaran bebas kunci OpenCode. OmniRoute tidak memberikan tawaran itu sebagai akses gratis:
+
+- Penyedia OpenCode tanpa kunci OmniRoute telah dihapus atas permintaan operator OpenCode(lihat [Penyedia yang Dihapus](../reference/REMOVED_PROVIDERS.md) ).
+- [Dokumentasi titik akhir](https://opencode.ai/v2/docs/console/models/#endpoints)OpenCode mengikat penawaran obrolan gratisnya dengan klien OpenCode sendiri, jadi OmniRoute tidak menghitung atau memberi lencana pada mereka sebagai gratis.
+
+Id model yang ditampilkan plugin, seperti `deepseek-v4.1-flash-free`, `mimo-v2.6-flash-free` dan `nemotron-3.5-lightning-free`, ada di katalog `opencode-zen`. Hubungkan `opencode-zen` dengan kunci OpenCode Anda sendiri untuk menggunakannya berdasarkan ketentuan akun OpenCode Anda.
+
+**Port lokal plugin.** Plugin dapat mengekspos modelnya pada port lokal yang kompatibel dengan OpenAI (default `18899`). Titik akhir apa pun dapat ditambahkan sebagai [penyedia khusus yang kompatibel dengan OpenAI](../guides/USER_GUIDE.md#custom-openai-compatible-providers), tetapi OmniRoute tidak menginstal, memulai, atau memperbarui plugin, dan plugin memutuskan upstream mana yang melayani setiap permintaan. Pembatasan OpenCode di atas berlaku untuk penawaran OpenCode, klien mana pun yang mengirimkan permintaan.
 
 ---
 
 ## Membaca Katalog dengan Benar
 
-- `NOAUTH` berarti OmniRoute tidak meminta kredensial penyedia dari Anda; hal ini tidak
-  menjamin waktu aktif, privasi, atau kapasitas tanpa batas.
-- `hasFree` adalah metadata penemuan. Ini dapat merepresentasikan kuota berulang, akses tanpa kunci,
-  kredit pendaftaran, program persetujuan, atau promosi.
-- `recurring-uncapped` berarti tidak ada batas maksimum token yang dipublikasikan; batas laju dan
-  konkurensi tetap berlaku.
-- `one-time-initial` tidak berulang setelah jatah pendaftaran habis digunakan.
-- Penyedia dengan `tos: avoid` secara default dikecualikan dari perutean otomatis (`excludeTosAvoid`). Menghubungkan akun tidak melewati filter ini. Setiap pengabaian oleh operator harus dilakukan setelah meninjau ketentuan penyedia dan risiko akun.
-- Entri yang ditandai `discontinued` tetap menjadi bukti historis dan tidak boleh ditampilkan sebagai
-  layanan yang saat ini gratis.
+- `NOAUTH` berarti OmniRoute tidak meminta kredensial penyedia Anda; itu tidak menjamin waktu aktif, privasi, atau kapasitas tidak terbatas.
+- `hasFree` adalah metadata penemuan. Ini dapat mewakili kuota berulang, akses tanpa kunci, kredit pendaftaran, program persetujuan, atau promosi.
+- `recurring-uncapped` berarti tidak ada batas atas token yang dipublikasikan; batas tarif dan konkurensi masih berlaku.
+- `one-time-initial` tidak terulang setelah hibah pendaftaran dikonsumsi.
+- penyedia `tos: avoid` dikecualikan dari perutean otomatis secara default (`excludeTosAvoid`). Menghubungkan akun tidak melewati filter ini. Setiap penggantian operator harus mengikuti peninjauan persyaratan penyedia dan risiko akun.
+- Entri bertanda `discontinued` tetap menjadi bukti sejarah dan tidak boleh disajikan sebagai gratis.
 
 ---
 
-## Cara OmniRoute Meningkatkan Tingkat Gratis
+## Bagaimana OmniRoute Membuat Tingkatan Gratis Lebih Baik
 
-### 1. Peralihan Otomatis
+### 1. Penggantian Otomatis
 
-Jika satu penyedia gratis sibuk atau tidak aktif, OmniRoute secara otomatis mencoba penyedia berikutnya. Anda tidak perlu melakukan apa pun.
+Jika salah satu penyedia gratis sibuk atau tidak aktif, OmniRoute secara otomatis mencoba penyedia berikutnya. Anda tidak perlu melakukan apa pun.
 
 ### 2. Perutean Cerdas
 
-OmniRoute memilih **penyedia gratis terbaik** untuk setiap permintaan berdasarkan:
+OmniRoute mengambil** penyedia gratis terbaik** untuk setiap permintaan berdasarkan:
 
-- Kecepatan — Penyedia mana yang paling cepat saat ini?
+- Kecepatan — Penyedia mana yang tercepat saat ini?
 - Kualitas — Penyedia mana yang terbaik untuk tugas ini?
 - Kapasitas — Penyedia mana yang masih memiliki sisa kuota?
 
 ### 3. Penghematan Token
 
-Alur kompresi OmniRoute dapat mengurangi token dari prompt dan keluaran alat yang memenuhi syarat.
-Penghematan aktual bergantung pada konten, mesin yang dipilih, penghitungan penyedia, dan pengaturan
-fidelitas; kompresi tidak melipatgandakan setiap kuota penyedia dengan jumlah yang tetap.
+Pipa kompresi OmniRoute dapat mengurangi token prompt dan output alat yang memenuhi syarat. Penghematan sebenarnya bergantung pada konten, mesin yang dipilih, akuntansi penyedia, dan pengaturan fidelitas; kompresi tidak mengalikan setiap kuota penyedia dengan jumlah yang tetap.
 
-### 4. Dukungan Multiakun
+### 4. Dukungan Multi-Akun
 
-Jika ketentuan penyedia mengizinkan beberapa akun atau kredensial, OmniRoute dapat memperlakukan setiap
-koneksi sebagai kandidat perutean terpisah. Jangan membuat akun tambahan untuk menghindari
-kebijakan kuota atau akses penyedia.
+Jika ketentuan penyedia mengizinkan beberapa akun atau kredensial, OmniRoute dapat memperlakukan setiap koneksi sebagai kandidat perutean terpisah. Jangan membuat akun tambahan untuk menghindari kuota atau kebijakan akses penyedia.
 
 ---
 
-## Perhitungan Tingkat Gratis
+## Matematika Tingkat Gratis
 
-Katalog aktif yang telah dideduplikasi berdasarkan kumpulan saat ini mencatat:
+Katalog langsung yang diduplikasi kumpulan saat ini melaporkan:
 
-| Metrik                                 |   Nilai audit saat ini | Interpretasi                                                                         |
-| -------------------------------------- | ---------------------: | ------------------------------------------------------------------------------------ |
-| Kuota terukur berulang                 | **~1.62B token/bulan** | Kumpulan bersama dihitung sekali; penyedia tanpa batas tidak disertakan dalam jumlah |
-| Bulan pertama dengan kuota pendaftaran |       **~2.22B token** | Total berulang ditambah kredit satu kali dan kredit berulang                         |
+| Metrik                                 |      Nilai yang diaudit saat ini | Interpretasi                                                                                          |
+| -------------------------------------- | -------------------------------: | ----------------------------------------------------------------------------------------------------- |
+| Hibah terukur yang berulang            |    **~ 90M tokens/month gratis** | Kumpulan bersama dihitung satu kali; tidak termasuk penyedia yang belum dibatasi dari jumlah tersebut |
+| Bulan pertama dengan hibah pendaftaran | **~ 153M di bulan pertama Anda** | Total berulang ditambah kredit satu kali dan berulang                                                 |
 
-Ini adalah estimasi untuk seluruh katalog pada akun-akun terpisah yang memenuhi syarat, bukan kuota yang disediakan oleh OmniRoute atau prediksi untuk instalasi baru. Kapasitas yang dapat Anda gunakan bergantung pada penyedia yang Anda hubungkan dan ketentuan mereka saat ini. Nilai tersebut dihitung dari `open-sse/config/freeModelCatalog.ts`; lihat
-[Referensi Tingkat Gratis](../reference/FREE_TIERS.md) untuk deduplikasi kumpulan, penanda Ketentuan Layanan,
-entri yang dihentikan, dan metodologi kredit pendaftaran.
+Ini adalah perkiraan katalog seluruh akun terpisah yang memenuhi syarat, bukan tunjangan yang diberikan oleh OmniRoute atau prediksi untuk instalasi baru. Kapasitas yang dapat digunakan bergantung pada penyedia yang Anda sambungkan dan kondisinya saat ini. Nilai dihitung dari `open-sse/config/freeModelCatalog.ts`; lihat [Referensi Tingkat Gratis](../reference/FREE_TIERS.md) untuk deduplikasi kumpulan, tanda ToS, entri yang dihentikan, dan metodologi kredit pendaftaran.
 
 ---
 
@@ -172,43 +181,36 @@ entri yang dihentikan, dan metodologi kredit pendaftaran.
 
 ### "Apakah ini benar-benar gratis?"
 
-Katalog mencatat ketentuan yang dipublikasikan penyedia dan hasil riset proyek, tetapi penawaran dapat berubah.
-Verifikasi harga, kuota, kebijakan privasi, dan kelayakan terkini dari penyedia sebelum menggunakannya.
+Katalog mencatat persyaratan dan penelitian proyek yang dipublikasikan penyedia, tetapi penawaran dapat berubah. Verifikasi harga, kuota, kebijakan privasi, dan kelayakan penyedia saat ini sebelum digunakan.
 
-### "Apakah tingkat gratis akan habis?"
+### "Apakah tingkat gratisnya akan habis?"
 
-Setiap penyedia dapat membatasi laju, mengganti model, menangguhkan akses, atau berhenti beroperasi. Beberapa
-koneksi meningkatkan cakupan cadangan, tetapi tidak menjamin tersedianya rute gratis.
+Setiap penyedia dapat membatasi tarif, mengubah model, menangguhkan akses, atau offline. Beberapa koneksi meningkatkan cakupan fallback tetapi tidak menjamin tersedianya rute gratis.
 
 ### "Bisakah saya menggunakan penyedia gratis untuk produksi?"
 
-Hanya jika SLA, penanganan data, batasan, dan ketentuan penyedia memenuhi persyaratan
-produksi Anda. Beban kerja penting harus memiliki cadangan yang dipantau dan sesuai secara kontraktual.
+Hanya jika SLA, penanganan data, batasan, dan ketentuan penyedia memenuhi persyaratan produksi Anda. Beban kerja kritis harus dipantau, fallback yang sesuai kontrak.
 
-### "Apa kekurangannya?"
+### "Apa masalahnya?"
 
-Konsekuensinya dapat mencakup batasan ketat, daftar tunggu, KYC, verifikasi kartu kredit, pelatihan dengan
-prompt, privasi yang lebih lemah, tanpa SLA, pergantian model, pembatasan geografis, biaya atas kelebihan penggunaan, atau
-risiko terkait kebijakan akun. OmniRoute menampilkan metadata yang tersedia; Anda memilih apa yang akan diaktifkan.
+Pengorbanannya mungkin mencakup batasan yang ketat, daftar tunggu, KYC, verifikasi kartu kredit, pelatihan tentang petunjuknya, privasi yang lebih lemah, tidak adanya SLA, churn model, pembatasan geografis, kelebihan pembayaran, atau risiko kebijakan akun. OmniRoute menampilkan metadata yang tersedia; Anda memilih apa yang akan diaktifkan.
 
-### "Bagaimana cara mendapatkan lebih banyak kuota gratis?"
+### "Bagaimana cara mendapatkan kuota gratis lebih banyak?"
 
 1. Hubungkan lebih banyak penyedia gratis
-2. Aktifkan mesin kompresi yang sesuai dan ukur penghematannya untuk beban kerja Anda
-3. Gunakan `auto/cheap` untuk memprioritaskan penyedia gratis/murah
-4. Tambahkan penyedia atau kredensial lain yang diizinkan tanpa melanggar ketentuan penyedia
+2. Aktifkan mesin kompresi yang sesuai dan ukur penghematan beban kerja Anda
+3. Gunakan `auto/cheap` untuk memprioritaskan penyedia free/cheap
+4. Tambahkan penyedia atau kredensial tambahan yang diizinkan tanpa melanggar persyaratan penyedia
 
-### "Apakah kualitas penyedia gratis lebih buruk?"
+### “Apakah penyedia gratis memiliki kualitas yang lebih buruk?”
 
-Belum tentu. Beberapa penyedia menyediakan kelompok model yang sama dengan yang tersedia melalui
-rute berbayar, tetapi batasan, latensi, privasi, keandalan, dan versi model dapat berbeda. Gunakan
-halaman Peringkat Penyedia Gratis sebagai indikator kualitas dan verifikasi model aktual yang disajikan.
+Belum tentu. Beberapa penyedia mengekspos kelompok model yang sama yang tersedia melalui rute berbayar, namun batasan, latensi, privasi, keandalan, dan versi model dapat berbeda. Gunakan halaman Peringkat Penyedia Gratis sebagai sinyal kualitas dan verifikasi model sebenarnya yang disajikan.
 
 ---
 
-## Langkah Selanjutnya?
+## Apa Selanjutnya?
 
-- **[Panduan Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Biarkan OmniRoute memilih AI terbaik untuk Anda
+- **[Panduan Kombo Otomatis](./AUTO-COMBO-GUIDE.md)** — Biarkan OmniRoute memilih AI terbaik untuk Anda
 - **[Panduan Penyedia](./PROVIDERS-GUIDE.md)** — Hubungkan lebih banyak penyedia
-- **[Pemecahan Masalah](../guides/TROUBLESHOOTING.md)** — Atasi masalah umum
-- **[Referensi Tingkat Gratis](../reference/FREE_TIERS.md)** — Daftar lengkap tingkat gratis
+- **[Pemecahan masalah](../guides/TROUBLESHOOTING.md)** — Perbaiki masalah umum
+- **[Referensi Tingkat Gratis](../reference/FREE_TIERS.md)** — Daftar lengkap tingkatan gratis

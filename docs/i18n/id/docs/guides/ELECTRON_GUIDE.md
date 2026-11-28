@@ -4,9 +4,9 @@
 
 ---
 
-> **Sumber kebenaran:** ruang kerja `electron/`** Terakhir diperbarui:** 28-06-2026 — v3.8.40
+> **Sumber kebenaran:** ruang kerja `electron/`
 
-OmniRoute mengirimkan aplikasi desktop lintas platform (Windows / macOS / Linux) yang dibangun di atasnya**Electron 41** +** pembangun elektron 26.10** . Aplikasi desktop memunculkan server mandiri Next.js sebagai proses anak, mengarahkan `BrowserWindow` ke sana, dan menambahkan baki sistem, pembaru otomatis, jembatan IPC, dan bootstrap rahasia tanpa konfigurasi.
+OmniRoute mengirimkan aplikasi desktop lintas platform (Windows / macOS / Linux) yang dibangun di atasnya**Electron 41** +** pembangun elektron 26.10** . Aplikasi desktop memunculkan server mandiri Next.js sebagai proses anak, mengarahkan `BrowserWindow` ke server tersebut, dan menambahkan baki sistem, pembaru otomatis, jembatan IPC, dan bootstrap rahasia tanpa konfigurasi.
 
 ## Arsitektur
 
@@ -198,7 +198,7 @@ Diatur melalui `session.defaultSession.webRequest.onHeadersReceived`. Arahan pen
 
 ## Pembaruan otomatis
 
-Menggunakan `electron-updater` dengan penyedia GitHub (`diegosouzapw/OmniRoute`).
+Menggunakan `electron-updater` dengan penyedia GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Acara diteruskan ke penyaji melalui `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (dengan `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefak mendarat di `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Rilis dipublikasikan ke GitHub Releases (`diegosouzapw/OmniRoute`), yang juga merupakan tempat `electron-updater` memeriksa versi baru.
+Rilis dipublikasikan ke GitHub Releases (`cheaper-inference/OmniRoute`), yang juga merupakan tempat `electron-updater` memeriksa versi baru.
 
 ## Pemecahan masalah
 

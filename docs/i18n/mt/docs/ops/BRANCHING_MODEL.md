@@ -53,7 +53,7 @@ Meta rilaxx ikun qed jiġi rikonċiljat, tinfetaħ kwistjoni ta' markar bit-tikk
 Iċċekkja għal iffriżar miftuħ qabel ma tassumi li l-fergħa li trid hija magħquda:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Merge mechanics (sid `queue` label → Mergify) huma dokumentati [MERGE_TRAIN.md](./MERGE_TRAIN.md).

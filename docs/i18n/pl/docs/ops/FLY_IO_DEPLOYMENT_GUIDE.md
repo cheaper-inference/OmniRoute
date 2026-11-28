@@ -1,4 +1,9 @@
+# OmniRoute Fly.io Deployment Guide (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇪🇹 [am](../../../am/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇦🇿 [az](../../../az/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇩🇰 [da](../../../da/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇩🇪 [de](../../../de/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇬🇷 [el](../../../el/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇪🇸 [es](../../../es/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇪🇪 [et](../../../et/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇱 [he](../../../he/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇩 [id](../../../id/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇹 [it](../../../it/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇰🇭 [km](../../../km/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇲🇲 [my](../../../my/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇳🇴 [no](../../../no/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇳 [or](../../../or/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇱🇰 [si](../../../si/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇮🇳 [te](../../../te/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇹🇭 [th](../../../th/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md)
+
 ---
+
 title: "Przewodnik wdrażania OmniRoute na Fly.io"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -134,30 +139,30 @@ flyctl deploy
 
 ## 5. Wymagane parametry
 
-Ten projekt zaleca skonfigurowanie na Fly.io co najmniej następujących parametrów.
+Ten projekt zaleca skonfigurowanie co najmniej następujących parametrów w Fly.io.
 
 ### 5.1 Zweryfikowane parametry
 
-Te parametry były używane w rzeczywistych wdrożeniach bieżącej aplikacji `omniroute`:
+Te parametry zostały użyte w rzeczywistych wdrożeniach bieżącej aplikacji `omniroute` :
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (wymagany w produkcji — służy do uwierzytelniania mostu WebSocket)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (wymagane w produkcji — używane do uwierzytelniania mostu WebSocket )
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 O `INITIAL_PASSWORD`
 
-Bieżący projekt nie ustawia `INITIAL_PASSWORD`, ponieważ to wdrożenie tego nie wymaga.
+Bieżący projekt nie ustawia `INITIAL_PASSWORD` ponieważ to wdrożenie tego nie wymaga.
 
 Jeśli nie jest ustawione:
 
-- Log startowy wskaże, że domyślne hasło to `CHANGEME`
-- Hasło logowania należy jak najszybciej zmienić w ustawieniach systemowych po wdrożeniu
+- Hasło do panelu kontrolnego tworzysz w kreatorze wdrażania podczas pierwszej wizyty. Ukończ krok związany z hasłem: pominięcie go powoduje wyłączenie logowania do pulpitu nawigacyjnego, co pozostawia pulpit nawigacyjny otwarty dla każdego, kto może uzyskać dostęp do aplikacji URL
+- Serwer proxy Fly dociera do aplikacji z adresu bez sprzężenia zwrotnego, więc po podaniu hasła kreator poprosi o jednorazowy token ładowania początkowego, który w tym momencie aplikacja wydrukuje w swoim dzienniku: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Jeśli ten wiersz zniknął z dziennika, uruchom ponownie aplikację i ponownie uruchom kreatora, aby wydrukować nowy token
 
-Jeśli chcesz zainicjować hasło backendu bez nadzoru, możesz dodać je później:
+Aby zamiast tego ustawić hasło bez nadzoru, dodaj je przed pierwszą wizytą na panelu kontrolnym (po zapisaniu hasła `INITIAL_PASSWORD` jest ignorowana):
 
 - `INITIAL_PASSWORD`
 
@@ -278,26 +283,26 @@ Jeśli strona `Secrets` w konsoli nie pokazuje oczekiwanych zmiennych, sprawdź:
 
 ## 9. Kolejne aktualizacje i wydania
 
-Po aktualizacjach kodu proces wydania jest prosty:
+Po aktualizacji kodu proces wydawania jest prosty:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Jeśli chcesz zaktualizować tylko parametry bez zmiany kodu:
+Jeśli potrzebujesz tylko zaktualizować parametry bez zmiany kodu:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly automatycznie wykona rolling update maszyn.
+Fly automatycznie przeprowadzi ciągłą aktualizację maszyn.
 
-### 9.1 Śledzenie aktualizacji repozytorium upstream przy zachowaniu `fly.toml` forka
+### 9.1 Śledzenie aktualizacji repozytorium nadrzędnego przy jednoczesnym zachowaniu `fly.toml` Twojego Forka
 
-Jeśli bieżące repozytorium jest forkiem i chcesz synchronizować aktualizacje z upstream `https://github.com/diegosouzapw/OmniRoute`, postępuj według poniższego przepływu.
+Jeśli bieżące repozytorium jest forkiem i chcesz zsynchronizować aktualizacje z nadrzędnego `https://github.com/cheaper-inference/OmniRoute`, postępuj zgodnie z poniższą procedurą.
 
-Najpierw zweryfikuj remote'y:
+Najpierw sprawdź swoje piloty:
 
 ```powershell
 git remote -v
@@ -305,31 +310,31 @@ git remote -v
 
 Powinieneś zobaczyć co najmniej:
 
-- `origin` wskazujący na Twój własny fork
-- `upstream` wskazujący na oryginalne repozytorium
+- `origin` wskazując na swój własny widelec
+- `upstream` wskazując na oryginalne repozytorium
 
-Jeśli `upstream` nie jest skonfigurowany, dodaj go:
+Jeśli `upstream` nie jest skonfigurowana, dodaj ją:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Przed synchronizacją z upstream pobierz najnowsze commity i tagi:
+Przed synchronizacją z upstream pobierz najnowsze zatwierdzenia i tagi:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Sprawdź bieżącą wersję i tagi upstream:
+Sprawdź aktualną wersję i tagi źródłowe:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Uwaga: Bieżąca wersja projektu to `v3.8.0`. Poniższe odwołania do `v3.4.7` są zachowane wyłącznie jako historyczne przykłady. Przy rzeczywistych wydaniach używaj `:latest` lub tagu bieżącej wersji (np. `:v3.8.0`).
+> Uwaga: aktualna wersja projektu to `v3.8.0`. Poniższe odniesienia `v3.4.7` służą wyłącznie jako przykłady historyczne. W przypadku aktualnych wydań użyj `:latest` lub znacznika bieżącej wersji (np. `:v3.8.0`).
 
-Jeśli chcesz scalić najnowszy upstream `main`, wymuszając zachowanie `fly.toml` swojego forka, postępuj według tego przepływu:
+Jeśli chcesz scalić najnowszą wersję `main`, jednocześnie na siłę zachowując `fly.toml` swojego widelca, postępuj zgodnie z następującym przepływem pracy:
 
 ```powershell
 git merge upstream/main
@@ -342,31 +347,31 @@ git push origin main
 Uwagi:
 
 - `git merge upstream/main` synchronizuje najnowszy kod z oryginalnego repozytorium
-- `git checkout HEAD~1 -- fly.toml` przywraca własny `fly.toml` forka sprzed merge
-- Jeśli upstream nie modyfikował `fly.toml`, ten krok nie wprowadzi żadnych różnic
-- Jeśli upstream zmodyfikował `fly.toml`, ten krok zapewnia, że nazwa aplikacji Fly, montowanie wolumenu, region i inna konfiguracja wdrożenia specyficzna dla forka nie zostaną nadpisane
+- `git checkout HEAD~1 -- fly.toml` przywraca własne `fly.toml` twojego widelca sprzed połączenia
+- Jeśli upstream nie zmodyfikował `fly.toml`, ten krok nie wprowadzi żadnych różnic
+- Jeśli upstream zmodyfikował `fly.toml`, ten krok gwarantuje, że nazwa aplikacji Fly, mocowanie woluminu, region i inna konfiguracja wdrożenia specyficzna dla forka nie zostaną nadpisane
 
-Jeśli chcesz wyrównać do konkretnego tagu wydania (np. `v3.4.7`), najpierw zweryfikuj, że tag jest już zawarty w `upstream/main`:
+Jeśli chcesz dostosować się do konkretnego tagu wydania (np. `v3.4.7`), najpierw sprawdź, czy tag jest już zawarty w `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Pomyślny wynik oznacza, że `upstream/main` już zawiera tę wersję; możesz po prostu scalić `upstream/main`.
+Pomyślny zwrot oznacza, że `upstream/main` zawiera już tę wersję; możesz po prostu scalić `upstream/main`.
 
-### 9.2 Standardowa sekwencja wydania po synchronizacji upstream
+### 9.2 Standardowa sekwencja wydania po synchronizacji w górę
 
-Po synchronizacji z oryginalnym repozytorium zalecana kolejność wydania:
+Po synchronizacji z oryginalnym repozytorium postępuj zgodnie z zalecaną kolejnością wydań:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Przywróć `fly.toml` forka
+3. Przywróć `fly.toml` widelca
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-To jest rzeczywisty przepływ używany przy aktualizacji bieżącego projektu do `v3.4.7` (przykład odnosi się do historycznej wersji; aktualna rzeczywista wersja to `v3.8.0`).
+To jest rzeczywisty przepływ pracy używany podczas aktualizacji bieżącego projektu do `v3.4.7` (przykład odnosi się do wersji historycznej; aktualna, rzeczywista wersja to `v3.8.0`).
 
 ---
 
@@ -422,14 +427,14 @@ Jeśli zamiast tego widzisz `/app/data/...`, `DATA_DIR` jest źle skonfigurowane
 
 ## 12. Typowe problemy
 
-### 12.1 Strona `Secrets` jest pusta
+### 12.1 `Secrets` Strona jest pusta
 
 Zwykle są dwa powody:
 
 - Nie uruchomiłeś jeszcze `flyctl secrets set`
-- Przeglądasz inną aplikację (np. `oroute` zamiast `omniroute`)
+- Oglądasz inną aplikację (np. `oroute` zamiast `omniroute`)
 
-### 12.2 `flyctl deploy` zgłasza `app not found`
+### 12.2 `flyctl deploy` Raporty `app not found`
 
 Najpierw utwórz aplikację:
 
@@ -437,23 +442,23 @@ Najpierw utwórz aplikację:
 flyctl apps create omniroute
 ```
 
-### 12.3 Parsowanie `fly.toml` kończy się niepowodzeniem
+### 12.3 Analiza `fly.toml` kończy się niepowodzeniem
 
-Sprawdź następujące:
+Sprawdź następujące elementy:
 
-- Czy w komentarzach nie ma uszkodzonych znaków
-- Czy cudzysłowy i wcięcia TOML są poprawne
+- Czy w komentarzach znajdują się zniekształcone znaki
+- Czy cytowanie i wcięcie TOML są poprawne
 
 ### 12.4 Dane nie są trwałe
 
-Zweryfikuj oba poniższe punkty:
+Sprawdź oba poniższe elementy:
 
 - `fly.toml` zawiera `destination = '/data'`
 - `DATA_DIR` jest ustawione na `/data`
 
-### 12.5 Czy można działać bez `INITIAL_PASSWORD`?
+### 12.5 Czy może działać bez `INITIAL_PASSWORD`?
 
-Tak, można. Zostanie użyte domyślne hasło `CHANGEME`. W produkcji zaleca się jak najszybszą zmianę hasła backendu.
+Tak. Gdy `INITIAL_PASSWORD` jest nieskonfigurowana, hasło do pulpitu nawigacyjnego tworzysz w kreatorze wdrażania podczas pierwszej wizyty (sekcja 5.2 opisuje jednorazowy token ładowania początkowego i krok dotyczący hasła).
 
 ---
 

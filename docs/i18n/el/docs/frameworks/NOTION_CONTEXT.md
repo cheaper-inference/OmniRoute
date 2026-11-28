@@ -67,43 +67,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 1 αποτέλεσμα· αν το Notion επιστρέψει αντικείμενο σφάλματος, το token διαγράφεται και η
 κλήση αποτυγχάνει με `400`.
 
-## Εργαλεία MCP (6)
+## εργαλεία MCP (6)
 
-Ορίζονται στο `open-sse/mcp-server/tools/notionTools.ts`. Το token ανακτάται κατά την
-κλήση μέσω του `getNotionToken()`· αν δεν έχει ρυθμιστεί, το εργαλείο εμφανίζει το σφάλμα
-`"Το integration token του Notion δεν έχει ρυθμιστεί. Ορίστε το στις Settings > Context Sources."`
+Ορίζεται σε `open-sse/mcp-server/tools/notionTools.ts`. Το διακριτικό επιλύεται τη στιγμή της κλήσης μέσω `getNotionToken()`. Εάν δεν έχει ρυθμιστεί καμία, το εργαλείο ρίχνει `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Εργαλείο                     | Scope          | Περιγραφή                                                                                                         |
-| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Αναζήτηση σελίδων και βάσεων δεδομένων μέσω ερωτήματος κειμένου (επιστρέφει τίτλους, IDs, URLs). Με σελιδοποίηση. |
-| `notion_get_page`            | `read:notion`  | Λήψη του περιεχομένου και των μεταδεδομένων μιας σελίδας βάσει του ID της.                                        |
-| `notion_list_block_children` | `read:notion`  | Παράθεση όλων των θυγατρικών blocks ενός block ή μιας σελίδας (το δέντρο blocks). Με σελιδοποίηση.                |
-| `notion_query_database`      | `read:notion`  | Υποβολή ερωτήματος σε βάση δεδομένων με προαιρετικά `filter` + `sorts` (μορφή Notion API). Με σελιδοποίηση.       |
-| `notion_get_database`        | `read:notion`  | Λήψη του σχήματος/των μεταδεδομένων μιας βάσης δεδομένων βάσει ID.                                                |
-| `notion_append_blocks`       | `write:notion` | Προσθήκη θυγατρικών blocks σε υπάρχον block ή σελίδα (έως 100 blocks ανά αίτημα).                                 |
+| Εργαλείο                     | Εκταση         | Περιγραφή                                                                                             |
+| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Αναζήτηση σελίδων και βάσεων δεδομένων με ερώτημα κειμένου (επιστρέφει τίτλους, IDs, URLs). Σελιδωτό. |
+| `notion_get_page`            | `read:notion`  | Λάβετε περιεχόμενο και μεταδεδομένα μιας σελίδας με βάση ID της.                                      |
+| `notion_list_block_children` | `read:notion`  | Καταχωρίστε όλα τα παιδιά μπλοκ ενός μπλοκ ή σελίδας (το δέντρο μπλοκ). Σελιδωτό.                     |
+| `notion_query_database`      | `read:notion`  | Ζητήστε μια βάση δεδομένων με προαιρετικό `filter` + `sorts` (μορφή Notion API ). Σελιδωτό.           |
+| `notion_get_database`        | `read:notion`  | Λάβετε το schema/metadata μιας βάσης δεδομένων από ID.                                                |
+| `notion_append_blocks`       | `write:notion` | Προσθήκη θυγατρικών μπλοκ σε υπάρχον μπλοκ ή σελίδα (έως 100 μπλοκ ανά αίτημα).                       |
 
-### Παράμετροι εισόδου
+### Παράμετροι εισαγωγής
 
-- `notion_search` — `query` (1–500 χαρακτήρες), `pageSize` (1–100, προεπιλογή 20),
-  `startCursor` (προαιρετικό).
-- `notion_get_page` — `pageId` (δεκαεξαδική συμβολοσειρά 32 χαρακτήρων ή UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, προεπιλογή 50),
-  `startCursor` (προαιρετικό).
-- `notion_query_database` — `databaseId`, `filter` (προαιρετικό, μορφή φίλτρου Notion),
-  `sorts` (προαιρετικός πίνακας), `pageSize` (1–100, προεπιλογή 50), `startCursor`
-  (προαιρετικό).
+- `notion_search` — `query` (1–500 χαρακτήρες), `pageSize` (1–100, προεπιλογή 20), `startCursor` (προαιρετικό).
+- `notion_get_page` — `pageId` (32-char hex ή UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, προεπιλογή 50), `startCursor` (προαιρετικό).
+- `notion_query_database` — `databaseId`, `filter` (προαιρετικό, μορφή φίλτρου Notion ), `sorts` (προαιρετικός πίνακας), `pageSize` (1–100, προεπιλογή 50), `startCursor` (προαιρετικό).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (πίνακας αντικειμένων block),
-  `after` (προαιρετική θέση).
+- `notion_append_blocks` — `blockId`, `children` (συστοιχία αντικειμένων μπλοκ), `after` (προαιρετική θέση).
 
-### Scopes
+### Πεδίο εφαρμογής
 
-Τα εργαλεία ανάγνωσης απαιτούν `read:notion` και το εργαλείο εγγραφής απαιτεί
-`write:notion`. Τα scopes επιβάλλονται από το `withScopeEnforcement()` στο
-`open-sse/mcp-server/server.ts` μόνο όταν `OMNIROUTE_MCP_ENFORCE_SCOPES=true`· τα
-επιτρεπόμενα scopes του καλούντος προέρχονται από το `OMNIROUTE_MCP_SCOPES`
-(διαχωρισμένα με κόμματα) ή από το context των scopes του πιστοποιημένου API key. Δείτε
-το [MCP-SERVER.md](./MCP-SERVER.md) για το πλήρες μοντέλο scopes.
+Τα εργαλεία ανάγνωσης απαιτούν `read:notion` και το εργαλείο εγγραφής απαιτεί `write:notion`. Τα πεδία επιβάλλονται από `withScopeEnforcement()` σε `open-sse/mcp-server/server.ts` όταν `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, και πάντα για έναν καλούντα HTTP/SSE του οποίου το κλειδί API στερείται `manage`/`admin`. τα επιτρεπόμενα πεδία του καλούντος προέρχονται από `OMNIROUTE_MCP_SCOPES` (χωρισμένο με κόμμα) ή το πλαίσιο εύρους του κλειδιού API που έχει επικυρωθεί. Δείτε [MCP-SERVER.md](./MCP-SERVER.md) για το μοντέλο πλήρους εμβέλειας.
 
 ## Τελικά σημεία
 

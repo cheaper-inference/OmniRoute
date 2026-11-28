@@ -18,27 +18,24 @@ OmniRoute، OpenAI Codex استعمال کرنے کے **دو** طریقے فرا
 
 ---
 
-## 1. فنِ تعمیر
+## 1. فن تعمیر
 
 ```
-┌─ OmniRoute ایپ ─────────────────┐        ┌─ codex-app-server سائیڈکار ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ صلاحیتی ٹوکن)                │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuth کا خود انتظام         │
-└──────────────────────────────────┘        │  (~/.codex/auth.json، خودکار تازگی) │
-        │ اشتراک کرتا ہے (compose volumes)   └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS صلاحیتی ٹوکن (دونوں اسے mount کرتے ہیں)
-  codex-appserver-home    → ~/.codex (auth.json ڈیش بورڈ کے ذریعے لکھی جاتی ہے،
-                             اور سائیڈکار کا codex app-server اسے پڑھتا ہے)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- سائیڈکار صلاحیتی ٹوکن کے پیچھے **صرف** اندرونی compose نیٹ ورک
-  (`ws://codex-app-server:1456`) پر سنتا ہے۔ اسے میزبان یا انٹرنیٹ پر **کبھی**
-  شائع نہیں کیا جاتا۔
-- Codex CLI کو `omniroute:base` میں پہلے سے شامل کیا گیا ہے، اس لیے سائیڈکار
-  چلاتے وقت میزبان یا صارف کی مشین پر codex انسٹال کرنے کی ضرورت نہیں ہوتی۔
+- سائڈکار سنتا ہے۔** صرف** ایک صلاحیت ٹوکن کے پیچھے اندرونی تحریر نیٹ ورک (`ws://codex-app-server:1456`) پر۔ یہ ہے** کبھی نہیں** میزبان یا انٹرنیٹ پر شائع کیا گیا۔
+- سائڈ کار `omniroute:cli-no-docker` استعمال کرتی ہے، جو `runner-cli-no-docker` ہدف سے بنایا گیا ہے، جس میں Codex CLI شامل ہے۔
 
 ## 2. اسے شروع کریں
 

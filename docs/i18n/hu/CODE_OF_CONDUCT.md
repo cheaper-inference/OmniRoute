@@ -42,15 +42,13 @@ Közösségünk képviseletének minősül például a hivatalos e-mail-cím has
 a hivatalos közösségimédia-fiókon keresztül történő közzététel, illetve a kijelölt
 képviselőként való fellépés online vagy személyes eseményen.
 
-## Enforcement
+## Végrehajtás
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+A sértő, zaklató vagy más módon elfogadhatatlan viselkedés eseteit jelentheti a végrehajtásért felelős közösség vezetőinek úgy, hogy privát biztonsági tájékoztatót nyitnak meg a következő címen:
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+vagy a karbantartó e-mailben a diegosouza.pw@outlook.com címen. A biztonsági szempontból érzékeny eseményekről lásd: [`SECURITY.md`](SECURITY.md). Minden panaszt azonnal és tisztességesen megvizsgálunk és kivizsgálunk.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Minden közösségi vezető köteles tiszteletben tartani a bejelentő magánéletét és biztonságát.
 
 ## Érvényesítési irányelvek
 

@@ -66,42 +66,29 @@ xəta obyekti qaytararsa, token təmizlənir və çağırış `400` ilə uğursu
 
 ## MCP alətləri (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` faylında müəyyən edilib. Token çağırış
-zamanı `getNotionToken()` vasitəsilə əldə edilir; heç biri konfiqurasiya edilməyibsə,
-alət `"Notion integration token not configured. Set it in Settings > Context Sources."`
-xətasını yaradır.
+`open-sse/mcp-server/tools/notionTools.ts` ilə müəyyən edilmişdir. Token zəng zamanı `getNotionToken()` vasitəsilə həll edilir; heç biri konfiqurasiya edilməyibsə, alət `"Notion integration token not configured. Set it in Settings > Context Sources."` atır
 
-| Alət                         | Əhatə dairəsi  | Təsvir                                                                                                                         |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `notion_search`              | `read:notion`  | Mətn sorğusu ilə səhifələrdə və verilənlər bazalarında axtarış aparır (başlıqları, ID-ləri və URL-ləri qaytarır). Səhifələnir. |
-| `notion_get_page`            | `read:notion`  | Səhifənin məzmununu və metadatasını ID-si ilə əldə edir.                                                                       |
-| `notion_list_block_children` | `read:notion`  | Blokun və ya səhifənin bütün alt bloklarını (blok ağacını) sadalayır. Səhifələnir.                                             |
-| `notion_query_database`      | `read:notion`  | Verilənlər bazasını istəyə bağlı `filter` + `sorts` ilə sorğulayır (Notion API formatı). Səhifələnir.                          |
-| `notion_get_database`        | `read:notion`  | Verilənlər bazasının sxemini/metadatasını ID ilə əldə edir.                                                                    |
-| `notion_append_blocks`       | `write:notion` | Mövcud bloka və ya səhifəyə alt bloklar əlavə edir (hər sorğu üçün maksimum 100 blok).                                         |
+| Alət                         | Əhatə dairəsi  | Təsvir                                                                                                       |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------ |
+| `notion_search`              | `read:notion`  | Səhifələri və verilənlər bazalarını mətn sorğusu ilə axtarın (başlıqları qaytarır, IDs, URLs). Səhifələnmiş. |
+| `notion_get_page`            | `read:notion`  | ID ilə səhifənin məzmununu və metadatasını əldə edin.                                                        |
+| `notion_list_block_children` | `read:notion`  | Blokun və ya səhifənin (blok ağacı) bütün blok uşaqlarını siyahıya salın. Səhifələnmiş.                      |
+| `notion_query_database`      | `read:notion`  | Əlavə `filter` + `sorts` (Notion API formatı) ilə verilənlər bazasını sorğulayın. Səhifələnmiş.              |
+| `notion_get_database`        | `read:notion`  | ID ilə verilənlər bazası schema/metadata əldə edin.                                                          |
+| `notion_append_blocks`       | `write:notion` | Blok uşaqlarını mövcud bloka və ya səhifəyə əlavə edin (hər sorğu üçün maksimum 100 blok).                   |
 
 ### Giriş parametrləri
 
-- `notion_search` — `query` (1–500 simvol), `pageSize` (1–100, standart 20),
-  `startCursor` (istəyə bağlı).
-- `notion_get_page` — `pageId` (32 simvolluq onaltılıq dəyər və ya UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, standart 50),
-  `startCursor` (istəyə bağlı).
-- `notion_query_database` — `databaseId`, `filter` (istəyə bağlı, Notion filtr formatı),
-  `sorts` (istəyə bağlı massiv), `pageSize` (1–100, standart 50), `startCursor` (istəyə bağlı).
+- `notion_search` — `query` (1–500 simvol), `pageSize` (1–100, standart 20), `startCursor` (isteğe bağlı).
+- `notion_get_page` — `pageId` (32 işarəli hex və ya UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, standart 50), `startCursor` (istəyə görə).
+- `notion_query_database` — `databaseId`, `filter` (istəyə görə, Notion filtr formatı), `sorts` (istəyə bağlı massiv), `pageSize` (1–100, defolt 50), `startCursor` (istəyə görə).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (blok obyektləri massivi),
-  `after` (istəyə bağlı mövqe).
+- `notion_append_blocks` — `blockId`, `children` (blok obyektlərinin massivi), `after` (isteğe bağlı mövqe).
 
 ### Əhatə dairələri
 
-Oxuma alətləri `read:notion`, yazma aləti isə `write:notion` tələb edir.
-Əhatə dairələri `open-sse/mcp-server/server.ts` faylındakı `withScopeEnforcement()`
-tərəfindən yalnız `OMNIROUTE_MCP_ENFORCE_SCOPES=true` olduqda tətbiq edilir;
-çağıranın icazə verilmiş əhatə dairələri `OMNIROUTE_MCP_SCOPES` dəyişənindən
-(vergüllə ayrılmış) və ya autentifikasiya edilmiş API açarının əhatə dairəsi
-kontekstindən əldə edilir. Tam əhatə dairəsi modeli üçün
-[MCP-SERVER.md](./MCP-SERVER.md) sənədinə baxın.
+Oxu alətləri `read:notion`, yazma aləti isə `write:notion` tələb edir. Əhatə dairələri `OMNIROUTE_MCP_ENFORCE_SCOPES=true` olduqda və həmişə API açarında `manage`/`admin` olmayan HTTP/SSE zəng edən üçün `withScopeEnforcement()` `open-sse/mcp-server/server.ts` tətbiq edilir; zəng edənin icazə verilən əhatə dairələri `OMNIROUTE_MCP_SCOPES` (vergüllə ayrılmış) və ya təsdiqlənmiş API açarının əhatə dairəsi kontekstindən gəlir. Tam əhatə modeli üçün [MCP-SERVER.md](./MCP-SERVER.md) baxın.
 
 ## Son nöqtələr
 

@@ -4,14 +4,13 @@
 
 ---
 
-> **የእውነት ምንጭ:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **መጨረሻ የተዘመነው:** 2026-09-22 — የወሰን ስም-ክልሎች ወደ MCP-SERVER.md ያመለክታሉ
+> **የእውነት ምንጭ፡-** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute እያንዳንዱን የAPI ጥያቄ የሚቆጣጠር፣ መንገድን የሚያውቅ የፈቃድ መስጫ ሂደት አለው። ምደባው **ቁርጥ ያለ** እና **ሲሳነው-ዝግ** ነው — ሊመደብ የማይችል ማንኛውም ነገር `MANAGEMENT` ሆኖ ይመደባል፣ እንዲሁም ክፍለ-ጊዜ ወይም የአስተዳደር-ደረጃ ቶከን ይጠይቃል። ይህ ገጽ መንገዶችን ለሚንከባከቡ ወይም አዳዲስ የመዳረሻ ነጥቦችን ለሚነድፉ መሐንዲሶች ሞዴሉን ያብራራል።
+OmniRoute እያንዳንዱን API ጥያቄ የሚዘጋ የመንገዱን የሚያውቅ የፍቃድ መስመር አለው። ምደባ ነው።** የሚወስን** እና** አልተሳካም - ተዘግቷል** — የማይመደብ ማንኛውም ነገር እንደ `MANAGEMENT` ያበቃል እና ክፍለ ጊዜ ወይም የአስተዳደር-ደረጃ ማስመሰያ ይጠይቃል። ይህ ገጽ መስመሮችን ለሚጠብቁ መሐንዲሶች ወይም አዲስ የመጨረሻ ነጥቦችን ለመንደፍ ሞዴሉን ያብራራል።
 
-![የAuthZ ሂደት (3 የመንገድ ምድቦች + የፖሊሲ ግምገማ)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
-> ምንጭ፦ [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
+> ምንጭ [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## ሁለት የማረጋገጫ ሁነታዎች
 
@@ -171,13 +170,13 @@ Incoming request → src/proxy.ts
 
 የታመኑ የውስጥ ራስጌዎች (በ `src/server/authz/headers.ts` የተገለጹ) ናቸው።** ከገቢ ጥያቄዎች ተወግዷል** ከምድብ በፊት — ደንበኞች አንድን ርዕሰ ጉዳይ ለማስመሰል `x-omniroute-auth-*` አስቀድመው መሙላት አይችሉም።
 
-### የፖሊሲ ውሎች
+### የፖሊሲ ኮንትራቶች
 
 እያንዳንዱ የመንገድ ክፍል `src/server/authz/policies/` ውስጥ ፖሊሲ አለው፡-
 
 - **`publicPolicy`** (`policies/public.ts`) — ሁልጊዜ `allow({ kind: "anonymous", id: "anonymous" })` ይመልሳል።
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — ተዋጽኦዎች Bearer፣ በ `validateApiKey()` በኩል ያረጋግጣል። ውጤታማው `REQUIRE_API_KEY` ባህሪ ባንዲራ ሲሰናከል ብቻ ወደ ማንነቱ ያልታወቀ ይሆናል። ውጤታማው ባንዲራ በ `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ነው የሚፈታው ስለዚህ የዳሽቦርድ ባህሪ ባንዲራዎች እና የአካባቢ ተለዋዋጮች `/api/v1/*`, `/api/v1beta/*`, እና ቅጽል ስሞች በወጥነት ይገዛሉ; የመፍትሄው አለመሳካቶች ተዘግተዋል. የዳሽቦርድ-ክፍለ-ጊዜ ጥያቄዎችን በደንበኛ API መንገዶች ( `/api/v1/models` ጨምሮ፣ በዳሽቦርድ ሞዴል ካታሎግ ጥቅም ላይ እንደሚውል) ይፈቅዳል። Entra ID SSO ሲነቃ፣ መዋቅራዊ የኢንትራ ቶከን የሆነ ተሸካሚ (ሦስት base64url ክፍሎች፣ `RS*` alg፣ `kid`) በ SSO ቅርንጫፍ ይካሄዳል።** ከዚህ በፊት** `validateApiKey()` እና ፍርዱ የመጨረሻ ነው — በጭራሽ ወደ ኤፒአይ-ቁልፍ መንገድ ወይም ወደ ስም-አልባ ቅርንጫፉ አይወድቅም፣ ስለዚህ የማንነት አቅራቢው መቋረጥ ክፍት መዳረሻ ሊሆን አይችልም። የማይለዋወጡ API ቁልፎች አልተነኩም። [Entra ID SSO](../security/ENTRA_SSO.md) ይመልከቱ።
-- **`managementPolicy`** (`policies/management.ts`) — የዳሽቦርድ ክፍለ ጊዜን፣ የውስጥ ሞዴል-አመሳስል ጥያቄዎችን ( `/api/providers/[name]/(sync-models|models)` ጋር የሚዛመድ) ይቀበላል ወይም `isAuthRequired()` በውሸት ከተመለሰ ሙሉ በሙሉ ይዘላል። የተሸካሚ ማስመሰያ ሲኖር ግን ልክ ያልሆነ 403 (`AUTH_001`) ይመልሳል፣ ካልሆነ 401። እንዲሁም የመንገድ ጠባቂ ደረጃዎችን (LOCAL_ONLY / ALWAYS_PROTECTED) ከማንኛውም የድጋፍ ቅርንጫፍ በፊት ያስፈጽማል — [የመንገድ ጠባቂ ደረጃዎችን](../security/ROUTE_GUARD_TIERS.md) ይመልከቱ። በ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ውስጥ LOCAL_ONLY ዱካዎች (ዛሬ: `/api/mcp/`) የተሸካሚው ቁልፍ `manage` ወሰን ሲይዝ ከloopback ሊደረስበት ይችላል; ሁሉም ሌሎች LOCAL_ONLY ዱካዎች ምንም ያህል ስፋት ቢኖራቸውም ጥብቅ-loopback ይቆያሉ።
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ተዋጽኦዎች Bearer፣ በ `validateApiKey()` በኩል ያረጋግጣል። ውጤታማው `REQUIRE_API_KEY` ባህሪ ባንዲራ ሲሰናከል ብቻ ወደ ማንነቱ ያልታወቀ ይሆናል። ውጤታማው ባንዲራ በ `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ነው የሚፈታው ስለዚህ የዳሽቦርድ ባህሪ ባንዲራዎች እና የአካባቢ ተለዋዋጮች `/api/v1/*`, `/api/v1beta/*`, እና ቅጽል ስሞች በወጥነት ይገዛሉ; የመፍትሄው አለመሳካቶች ተዘግተዋል. የዳሽቦርድ-ክፍለ-ጊዜ ጥያቄዎችን በደንበኛ API መንገዶች ( `/api/v1/models` ጨምሮ፣ በዳሽቦርድ ሞዴል ካታሎግ ጥቅም ላይ እንደሚውል) ይፈቅዳል። Entra ID SSO ሲነቃ፣ መዋቅራዊ የኢንትራ ቶከን የሆነ ተሸካሚ (ሦስት base64url ክፍሎች፣ `RS*` alg፣ `kid`) በ SSO ቅርንጫፍ ይካሄዳል።** ከዚህ በፊት** `validateApiKey()` እና ፍርዱ የመጨረሻ ነው — በጭራሽ ወደ ኤፒአይ-ቁልፍ መንገድ ወይም ወደ ስም-አልባ ቅርንጫፉ አይወድቅም፣ ስለዚህ የማንነት አቅራቢው መቋረጥ ክፍት መዳረሻ ሊሆን አይችልም። የማይለዋወጡ API ቁልፎች ምንም አልተነኩም። [Entra ID SSO](../security/ENTRA_SSO.md) ይመልከቱ።
+- **`managementPolicy`** (`policies/management.ts`) — የዳሽቦርድ ክፍለ ጊዜን፣ የውስጥ ሞዴል-አመሳስል ጥያቄዎችን ( `/api/providers/[name]/(sync-models|models)` ጋር የሚዛመድ) ይቀበላል ወይም `isAuthRequired()` በውሸት ከተመለሰ ሙሉ በሙሉ ይዘላል። የተሸካሚ ማስመሰያ ሲኖር ግን ልክ ያልሆነ 403 (`AUTH_001`) ይመልሳል፣ ካልሆነ 401። እንዲሁም የመንገድ ጠባቂ ደረጃዎችን (LOCAL_ONLY / ALWAYS_PROTECTED) ከማንኛውም የድጋፍ ቅርንጫፍ በፊት ያስፈጽማል — [የመንገድ ጠባቂ ደረጃዎችን](../security/ROUTE_GUARD_TIERS.md) ይመልከቱ። LOCAL_ONLY ዱካዎች በ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ውስጥ (ዛሬ: `/api/mcp/`) የተሸከመ ቁልፉ የ `manage`/`admin` ወሰን ወይም ጠባብ `mcp:connect` ወሰን (`hasMcpConnectOrManageScope`) ሲይዝ ወይም ከተረጋገጠ የዳሽቦርድ ክፍለ ጊዜ ጋር ካልተመለሰ ሊደረስበት ይችላል። ሁሉም ሌሎች LOCAL_ONLY ዱካዎች ምንም ያህል ስፋት ቢኖራቸውም ጥብቅ-loopback ይቆያሉ።
 
 የተሳካ ፖሊሲ `AuthSubject` በ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ይመልሳል። የታች ተፋሰስ ተቆጣጣሪዎች የድጋሚ የቃል አመክንዮ ከማሄድ ይልቅ በ `assertAuth(request, "CLIENT_API")` በ `src/server/authz/assertAuth.ts` በኩል ሊያነቡት ይችላሉ።
 
@@ -268,35 +267,24 @@ export async function POST(request: Request) {
 
 setን በቅርጹ መሠረት ይምረጡ፣ በአመቺነት መሠረት አይደለም። አንድ መስመር ወደ `PUBLIC_API_ROUTES_EXACT` ይገባል (ወይም GET-only ከሆነ ወደ `PUBLIC_READONLY_CORS_API_ROUTES`)፤ ወደ `PUBLIC_API_ROUTE_PREFIXES` የሚገባው እውነተኛ ንዑስ ዛፍ ብቻ ነው፣ እና **በ`/` መጨረስ አለበት**። ነጠላ መስመርን በprefix ዝርዝሩ ውስጥ ማስቀመጥ፣ ተመሳሳይ መሪ ቁምፊዎችን የሚጋሩ ሁሉንም አጎራባች paths ይፋዊ ያደርጋል — ይህም በኋላ የሚታከሉ dynamic-segment siblingsን ይጨምራል (GHSA-74g9-q8f6-793h)። በ`tests/unit/public-api-routes.test.ts`፣ `tests/unit/authz/public-route-exact-match.test.ts` እና `tests/unit/authz/classify.test.ts` ያሉ unit testsን ያዘምኑ።
 
-## የፈቃድ ወሰኖች
+## ወሰኖች
 
-ሦስት namespace-ዎች አሉ። እያንዳንዱ checker የሚያነበው የራሱን string-ዎች ብቻ ነው። `manage` ለ`read:compression` በ`scopeMatches` ለምን እንደማይዛመድ እና የ`read` access token ለምን `PATCH /api/keys/{id}` ማድረግ እንደማይችል ጨምሮ፣ የጎን-ለጎን ንጽጽሩ
-[ሦስቱ የፈቃድ ወሰን namespace-ዎች](../frameworks/MCP-SERVER.md#three-scope-namespaces) ላይ ይገኛል።
+ሶስት የስም ቦታዎች። እያንዳንዱ አረጋጋጭ የራሱን ሕብረቁምፊዎች ብቻ ያነባል። ጎን ለጎን፣ ለምን `manage` ለ `read:compression` `scopeMatches` እና የ `read` መዳረሻ ቶከን ለምን `PATCH /api/keys/{id}` እንደማይችል ጨምሮ፣ [ሶስት ወሰን የስም ቦታዎች](../frameworks/MCP-SERVER.md#three-scope-namespaces) ነው።
 
-API key-ዎች የ`scopes` array ይይዛሉ (በ`api_keys.scopes` ውስጥ እንደ JSON ይከማቻል፤ `src/lib/db/apiKeys.ts`ን ይመልከቱ)።
+API ቁልፎች የ `scopes` ድርድር ይይዛሉ (በ `api_keys.scopes` ውስጥ እንደ JSON ተከማችቷል፣ `src/lib/db/apiKeys.ts` ይመልከቱ)።
 
-### የአስተዳደር ፈቃድ ወሰን
+### የአስተዳደር ወሰን
 
-- `manage` / `admin` — `hasManageScope`። ወደ የአስተዳደር API route-ዎች የBearer መዳረሻ።
-- `mcp:connect`፣ `self:usage`፣ `self:account-quota` እና
-  `policy:bypass-provider-quota` በትክክል የሚዛመዱ ተጨማሪ የፈቃድ ወሰኖች ናቸው። እነዚህ
-  ከ`MANAGEMENT_API_KEY_SCOPES` ውጭ ይገኛሉ። `mcp:connect` የሚከፍተው
-  የ`/api/mcp/` non-loopback ልዩ ፈቃድን ብቻ ነው።
+- `manage` / `admin` — `hasManageScope`. የአስተዳደር API መንገዶች ተሸካሚ መዳረሻ።
+- `mcp:connect`፣ `self:usage`፣ `self:account-quota` እና `policy:bypass-provider-quota` ተጨማሪ ትክክለኛ-ተዛማጅ ወሰኖች ናቸው። ከ `MANAGEMENT_API_KEY_SCOPES` ውጪ ተቀምጠዋል። `mcp:connect` የሚከፍተው `/api/mcp/` -loopback-out ብቻ ነው።
 
-### የMCP tool ፈቃድ ወሰኖች
+### MCP የመሳሪያ ወሰኖች
 
-Catalog እና የማዛመድ ደንቦች (ተመሳሳይ string፣ ወይም በ`*` የሚያበቃ የተፈቀደ ወሰን)፦
-[የMCP tool ፈቃድ ወሰኖች](../frameworks/MCP-SERVER.md#mcp-tool-scopes)።
-በ`src/shared/constants/mcpScopes.ts` ውስጥ ያለው `MCP_SCOPE_LIST` ያ ሙሉ catalog ሳይሆን የመጀመሪያው typed
-subset ነው። `resolveCallerScopeContext()` ከMCP auth info፣ ከrequest metadata ወይም ከ`OMNIROUTE_MCP_SCOPES`
-የፈቃድ ወሰኖችን ከወሰነ በኋላ፣ ማስፈጸሙ በ`open-sse/mcp-server/scopeEnforcement.ts`
-ውስጥ ይከናወናል። `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ካልሆነ በስተቀር እንደጠፋ ይቆያል።
+ካታሎግ እና ተዛማጅ ሕጎች (ተመሳሳይ ሕብረቁምፊ፣ ወይም የተሰጠው ወሰን በ `*` ያበቃል) [MCP የመሳሪያ ወሰን](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ። `MCP_SCOPE_LIST` በ `src/shared/constants/mcpScopes.ts` የመጀመሪያው የተተየበው ንዑስ ስብስብ እንጂ ያ ሙሉ ካታሎግ አይደለም። ማስፈጸሚያ በ `open-sse/mcp-server/scopeEnforcement.ts` ውስጥ ይሰራል `resolveCallerScopeContext()` ወሰኖችን ከ MCP auth መረጃ ከፈታ፣ ዲበ ዳታ ወይም `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` በአለምአቀፍ ደረጃ ያበራዋል (ነባሪ `false`)፣ ነገር ግን `shouldForceScopeEnforcement()` ምንም ይሁን `open-sse/mcp-server/scopeEnforcement.ts` API ቁልፉ `manage`/`admin` ለሌለው ለ HTTP/SSE ደዋይ ሁልጊዜ ተፈጻሚ ይሆናል።
 
-### የAccess-token ፈቃድ ወሰኖች
+### የመዳረሻ-ቶከን ወሰኖች
 
-በ`oma_live_…` token-ዎች ላይ `read` / `write` / `admin`፣ በ`scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`) ደረጃ የተሰጣቸው። ይህ ደረጃ የሚሠራው ለaccess-token
-credential ብቻ ነው። [የአስተዳደር ማረጋገጫ](../guides/MANAGEMENT-AUTH.md)ን ይመልከቱ።
+`read` / `write` / `admin` በ `oma_live_…` ቶከኖች ላይ፣ በ `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) ደረጃ የተሰጠው። ይህ ደረጃ የሚመለከተው የመዳረሻ-ቶከን ምስክርነት ብቻ ነው። [የአስተዳደር ማረጋገጫን](../guides/MANAGEMENT-AUTH.md) ይመልከቱ።
 
 ## ማረጋገጫ ያስፈልጋል መቀያየር
 

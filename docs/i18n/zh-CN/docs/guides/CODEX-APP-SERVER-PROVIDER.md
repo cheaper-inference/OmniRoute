@@ -18,24 +18,21 @@ OmniRoute 提供了使用 OpenAI Codex 的**两种**方式：
 ## 1. 架构
 
 ```
-┌─ OmniRoute 应用 ────────────────┐        ┌─ codex-app-server 边车 ─────────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  （+ 能力令牌）                   │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  自行管理 OpenAI OAuth              │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, 自动刷新)     │
-        │ 共享（compose 卷）                 └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS 能力令牌（两者都会挂载）
-  codex-appserver-home    → ~/.codex（auth.json 由仪表板写入，
-                             由边车中的 codex app-server 读取）
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- 边车仅监听内部 compose 网络
-  （`ws://codex-app-server:1456`），并由能力令牌保护。它**绝不会**
-  发布到主机或互联网。
-- Codex CLI 已内置于 `omniroute:base` 中，因此运行边车时，
-  无需在主机或用户的计算机上安装 codex。
+- 边车倾听**仅有的**在能力令牌后面的内部撰写网络（`ws://codex-app-server:1456`）上。这是**绝不**发布到主机或互联网。
+- sidecar 使用`omniroute:cli-no-docker`，它是从`runner-cli-no-docker`目标构建的，其中包括Codex CLI。
 
 ## 2. 启动
 

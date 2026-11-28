@@ -4,87 +4,63 @@
 
 ---
 
-> **2026-11-19: Mergify-fletningskøen er trukket tilbage** (ejers beslutning). `.mergify.yml` definerer ikke længere en kø og afviser de Mergify-kommandoer, der fusionerer eller omskriver en pull-anmodning. Release PRs flettes i hånden under repository-regelsættet "Kræv grønne porte på den aktive udgivelse" (`Gate / CI` + `Gate / Quality`) indtil omni-queue kører i live mode, og gennem omni-queue derefter ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Mergify-sektionerne nedenfor beskriver køen, som den var.
+## Lander på en frigørelsesgren
 
-Siden v3.8.49 (WS3.2/WS3.4 af quality/velocity planen) er standardfletningsstien for gennemgået PRs til `release/vX.Y.Z`** Flet sammenfletningskø** (`.mergify.yml`); de** manuelt sammenfletningstog** dokumenteret nedenfor er FALLBACK — der bruges under hændelser, udgivelsesfrysninger, eller hvis Mergify Open Source-planen nogensinde ændres.
+Omni-køen styrer landinger i `release/vX.Y.Z`. Læs `mode` på øverste niveau i `config/merge-queue/config.json` på standardgrenen, før du lander en PR. Se [Omni-Queue](OMNI_QUEUE.md).
 
-## Standardforløb: Mergify-køen
+- **`shadow`** kører validering og overlader landing til en manuel fletning. Anvend `omni-queue` på den godkendte PR ved dets sidste hoved. Tjek berettigelse med `npm run queue -- why <PR>`. Vent på dommen for det hoved i `npm run queue -- history --base <branch>`. Fortsæt på `would-land`. På `culprit-found` eller `would-dequeue` skal du holde sammenfletningen og rette årsagen.
+- **Skygge undtagelser.** Et tog med grøn fuld CI mod den aktuelle basisspids kan fortsætte uden en særskilt kødom. Den samme undtagelse gælder, når PR hovedet allerede indeholder den aktuelle basisspids.
+- **`live`** bruger `omni-queue` etiketten til at udløse landing. Alene køen lander PR. Forlad flettekommandoer og direkte push til køen.
 
-1. PR'en gennemgås/godkendes af kampagnerne og godkendes via ejerens ⭐-kontrol før fletning
-   (rapporten + beslutningen for hvert element — se `/merge-prs` trin 0.75).
-2. Ejeren (eller sessionen, der handler på ejerens beslutning) tilføjer etiketten **`queue`**.
-   Etiketten ER godkendelsen til fletning; Mergify udfører den blot.
-3. Mergify validerer PR'er i køen **sekventielt** (én ad gangen) mod de hurtige kontroller
-   og fletter dem (squash). Batchkørsel + automatisk bisektion kræver et betalt Mergify-niveau
-   ("Cannot use Merge Queue batch" på gratisabonnementet, #7220), så `.mergify.yml` angiver
-   ingen `batch_size`; batchkørsel håndteres fortsat af det manuelle fletningstog nedenfor. En PR,
-   hvis kontroller stadig afventer efter `checks_timeout` (240 min. = 2× den målte p95 for
-   `quality.yml`), fjernes fra køen i stedet for at blokere den.
-4. Efter fletning validerer den kontinuerlige release-green-arbejdsgang den nye spids ved push
-   og opretter en sag med angivelse af årsagen, hvis kombinationen er gået tilbage (automatisk
-   tilbagerulning udføres aldrig).
+Hver landing kræver ejerens tilladelse og de relevante påkrævede kontroller. Anvend først `omni-queue`, efter at ejeren har godkendt landing. PRs i kø, der berører beskyttede stier, kræver også ejerens `protected-approved` beslutning for den PR.
 
-Sikkerhedsforanstaltninger (afspejler de hårde regler #21/#22 i `CLAUDE.md`):
+Regelsættet "Kræv grønne porte på den aktive udgivelse" kræver grønne `Gate / CI` og `Gate / Quality` på hovedet. Brug aldrig `--admin` til at omgå en rød port. En frigivelsesfryseblokke smelter sammen i den frosne gren. Se [hård regel 21](HARD_RULES_DETAIL.md). Aldrig markere, flette eller skubbe til en pull-anmodning om, at en anden session fungerer. Se [hård regel 22](HARD_RULES_DETAIL.md).
 
-- **Releasefrysning aktiv** → tilføj IKKE etiketter til PR'er, der er målrettet den frosne gren;
-  omdiriger dem først til den aktive `release/vX+1`.
-- **En anden sessions igangværende PR** → tilføj aldrig en etiket til den; kun den ejende
-  session sætter sit eget arbejde i kø.
-- Ændringer, der kun omfatter tests, og PR'er med etiketten `hotfix` kører allerede reduceret CI
-  (se `RELEASE_CHECKLIST.md` → Hotfix-hurtigsporet); købetingelserne accepterer det sæt
-  kontroller, der faktisk blev kørt (`#check-failure=0` + `#check-pending=0`).
+## Anmodningen om togtræk
 
-## Reserveløsning: det manuelle flettetog
+1. Start en toggren ved den aktuelle frigivelsesbasespids. Integrer de nøjagtige godkendte medlemshoveder ved hjælp af merge commits. Bevar deres forpligtelseshistorie ved at undgå squash og rebase.
+2. Åbn én pull-anmodning for toggrenen. Valider den PR med sin egen fulde CI på den aktuelle basisspids. Kontroller basisspidsen og de godkendte elementhoveder igen før landing. Opdater toget og dets CI når den validerede kandidat ændres.
+3. Land toget PR med en merge commit under den gældende køtilstand. I live-tilstand bevarer køens `merge-ff` landingsmetode sammenfletningsforpligtelserne. De originale medlemshoveder bliver tilgængelige fra udløsergrenen. GitHub markerer medlemmet PRs som fusioneret, og commits bevarer deres forfattere.
 
-Bruges, når køen ikke er tilgængelig. Dette formaliserer den praksis, der behandlede 33 PR'er på
-én dag under v3.8.47-cyklussen:
+Et offentligt eksempel er [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Det kombinerede 18 medlemmer PRs og landede med en fusionsforpligtelse 2026-11-24.
 
-1. **Sammensæt batchen** (~10–30 gennemgåede og godkendte PR'er). Kontrollér `linked:`-kollisioner
-   (samme `tap.testFiles`, samme CHANGELOG-afsnit), og behandl disse sekventielt.
-2. **Validér ÉN GANG**: I et isoleret worktree baseret på release-spidsen flettes alle batchens
-   heads lokalt, hvorefter den release-ækvivalente suite køres
-   (`npm run check:release-green`; tilføj `--with-build` før en release).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatiserer trin 1–2 (konfliktramte
-   PR'er skubbes ud, og toget fortsætter). Fuld tilstand kører `npm run test:unit` — den
-   maskinoptimerede kørsel (`--test-concurrency=20`), **ikke** de to sekventielle CI-shards
-   med 4 kerner, som fik den dominerende fase til kun at udnytte ~25 % af en maskine med 16 kerner (rettet
-   2026-07-18). `--fast` (tømning af meget store tog inden for samme dag, ejergodkendt 2026-07-18)
-   beholder alle statiske kontroller + vitest, men kører kun de node:test-filer, som er ændret af de
-   medtagne PR'er; den FULDE suite skal stadig køres mindst én gang om dagen på den
-   akkumulerede spids (ét tog uden `--fast`).
-3. **Grøn** → flet PR'erne i rækkefølge (med ny kontrol af `state,headRefOid` før hver —
-   en PR, hvis head er flyttet, sendes tilbage til gennemgang). Bevis, at nettoændringen fra hver fletning er
-   PR'ens egen ændring (ingen automatiske konfliktløsninger, der tilbagefører ændringer: gennemgå `git diff --stat` for
-   sletninger uden for omfanget).
-4. **Rød** → halver batchen (validér hver halvdel) i stedet for at genvalidere
-   én ad gangen; send den fejlende PR tilbage til gennemgangskøen sammen med dokumentationen.
-5. **Aldrig**: flet til den frosne gren under en frysning; brug `git stash` nogen steder;
-   genkør hele CI i håb om, at en rød status forsvinder (regel: en rød status er information).
+En sync-back fra `main` til den næste udgivelsesgren lander også gennem en merge commit. Bevarelse af `main` herkomst er påkrævet for senere sync-backs. Se [Worktree Isolation](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Niveauinddeling (derfor er køen sikker med kun hurtige kontroller)
+## Den lokale fusionstog-validator
 
-- **Pr. PR** (hurtige kontroller i quality.yml): TIA-påvirkede tests + komplette enhedstests med 4 shards +
-  vitest + lint-samlingen + typecheck + integritetskontrol af dokumentation/ændringslog.
-- **Pr. batch/spids** (kontinuerlig release-green): `--quick`-kontroller, der SKAL bestås ved hvert push til
-  release-grenen; fulde `--with-build --full-ci`-gennemløb 3×/dag.
-- **Pr. release** (ci.yml på release-PR'en): den komplette matrix inkl. E2E ×9,
-  pakkeartefakt + boot-smoke-test af tarball, dækning/skærpede tærskler.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Intet valideres mindre end før — den tunge overflade køres blot pr. batch/spids
-i stedet for pr. PR, hvilket fjerner O(N)-rundturene.
+Validatoren henter basis- og PR hovederne og kombinerer dem i et engangsarbejdstræ. Den kører sin paritetssuite én gang på det resulterende træ. En mislykket headfetch- eller fletkonflikt skubber den PR ud, og scriptet fortsætter med den resterende PRs.
 
-## Forudsætninger for `merge-train.sh` ved en frisk checkout
+- **`--plan`** udskriver den valgte tilstands trin og afslutter uden at oprette et arbejdstræ eller kontakte fjernbetjeningen. Kombiner det med `--fast` for at inspicere den hurtige plan.
+- **`--fast`** kører de almindelige statiske porte, de valgte ændrede `node:test` filer under `tests/unit/`, og `npm run test:vitest`. Kør en fuld lokal validering mindst én gang om dagen på den akkumulerede spids, når du bruger hurtig tilstand.
+- **Fuld tilstand** tilføjer de fuldstændige statiske porte og kører `npm run test:unit` og `npm run test:vitest`.
 
-Scriptet kører et **preflight** med hurtig afbrydelse på rod-checkouten (før noget worktree-arbejde),
-så en defekt installation aldrig kan fremstå som et rødt tog:
+En svigtende statisk gate køres igen på den uberørte base, hvis basesonden er tilgængelig. Scriptet rapporterer nedarvede fejl og fortsætter, når hver genkendt overtrædelseslinje også vises på basen, og det samlede antal ikke er vokset.
 
-1. `npm ci`, og kør derefter den `bun`-postinstallering, som npm blokerer:
-   `(cd node_modules/bun && node install.js)` — ellers fejler `check:provider-consistency`
-   og `check:known-symbols` (begge `bun scripts/…`) på både toget OG basen uden
-   nogen overtrædelseslinje.
-2. Ingen uvedkommende `node_modules/node_modules` (et dubleret afhængighedstræ; React indlæses to gange,
-   og UI-vitest-suiter fejler øjeblikkeligt).
-3. `node_modules/.bin/tsc` skal være til stede og kunne køres (en delvis installation mangler den).
+| Udgang | Mening                                                                                                                                   |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`    | Printede planen eller færdiggjorde suiten. Suiteresuméet viser alle nedarvede statiske fejl og udstødt PRs.                              |
+| `1`    | Ugyldige argumenter, ingen Git checkout, mislykket preflight eller ingen PR boarded.                                                     |
+| `2`    | En suitecheck mislykkedes og kvalificerede sig ikke som nedarvet. Operatøren kan opdele partiet, skubbe den stødende PR ud og køre igen. |
 
-Toget kører den blokerende `npm run check:cycles:ratchet`; en ren `npm run check:cycles`
-er vejledende (den oplister SCC'erne og afslutter med en kode forskellig fra nul, selv på en sund base).
+Et lokalt pas leverer kun diagnostisk bevis for ejerens dossier. Hver landing kræver stadig ejerautorisation, egne påkrævede kontroller og skyggekø-afgørelsen, når det er relevant.
+
+## Tiering
+
+- **Per PR.** CI og Quality select kontroller baseret på de ændrede stier. Code PRs kører hurtige kvalitetsporte og påvirkede tests med separate enheds- og Vitest -job i CI.
+- **Pr. køkandidat.** CI og Quality kører den fulde profil for den sammensatte kandidat på dens køref.
+- **Per udløserspids.** Release-Green kører hurtige hårde porte på push, der matcher dens stifiltre. Tre planlagte kørsler om dagen bruger det fulde sweep for frigivelsesgrenen.
+- **Per udgivelse.** Den fulde CI matrix inkluderer E2E shards, pakkevalidering, tarball boot smoke og dækningstjek. Se [udgivelsestjeklisten](RELEASE_CHECKLIST.md).
+
+## Frisk-checkout forudsætninger for `merge-train.sh`
+
+Preflighten kører før oprettelse af arbejdstræer. Installer afhængigheder med `npm ci`. Bekræft, at `node_modules/.bin/tsc` er eksekverbar, og at `node_modules/node_modules` er fraværende. Tjek at `node_modules/.bin/bun --version` lykkes.
+
+Hvis Bun efterinstallationen blev sprunget over, skal du køre `(cd node_modules/bun && node install.js)`. Tjek af udbyderens konsistens og kendte symboler bruger Bun. Validatoren kører `npm run check:cycles:ratchet` som en blokerende gate. Den selvstændige `npm run check:cycles` kommando er rådgivende.
+
+## Historie
+
+Mergify-fletningskøen blev trukket tilbage den 2026-11-19.

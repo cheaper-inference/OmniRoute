@@ -4,13 +4,7 @@
 
 ---
 
-> **Източник на истина:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` и публичните помощни функции за създаване в `open-sse/utils/error.ts`
-> **Тестове:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Последна актуализация:** 2026-09-02 — v3.8.51
-> **Аудитория:** Всеки инженер, който работи с отговори за грешки (HTTP маршрути, SSE потоци, изпълнители, MCP обработчици).
-> **Статус:** **ЗАДЪЛЖИТЕЛНО** за всеки път в кода, който връща съобщение за грешка на клиент.
+> **Източник на истината:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` и публичните създатели в `open-sse/utils/error.ts`** Тестове:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Публика:** Всеки инженер, който докосне отговорите за грешка (HTTP маршрути, SSE потоци, изпълнители, MCP манипулатори).** Статус:****MANDATORY** за всеки кодов път, който връща съобщение за грешка на клиент.
 
 ## Защо съществува това
 

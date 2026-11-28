@@ -4,8 +4,6 @@
 
 ---
 
-Viimati uuendatud: 2026-08-23
-
 OmniRoute integreerub kolme kategooria CLI tööriistadega, mis on jagatud kolmele spetsiaalsele armatuurlaua lehele:
 
 | Lehekülg        | Marsruut                | Kontseptsioon                                                                         | Count           |
@@ -233,7 +231,7 @@ Uutel `configType: "custom"` tööriistadel on spetsiaalsed seaded API marsruudi
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                    |
 | `POST /api/cli-tools/qwen-settings`         | Qwen kood (`~/.qwen/settings.json` + spetsiaalne `.env` võti)            |
 
-Kõik marsruudid kasutavad veavastusteks `sanitizeErrorMessage()` (kõva reegel nr 12).
+Kõik marsruudid kasutavad veavastusteks `sanitizeErrorMessage()` (kõva reegel #12).
 
 ---
 

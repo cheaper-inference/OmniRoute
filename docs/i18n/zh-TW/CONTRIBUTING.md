@@ -17,25 +17,19 @@ UI/UX、i18n、CLI、資料庫和建置/部署變更對應到其合約、重點�
 
 ### 先決條件
 
-- **Node.js** `>=22.22.2 <23`，或 `>=24.0.0 <27`（建議：24 LTS）
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`或`>=24.0.0 <27` （建議：24 LTS）
+- **新專案管理**+
 
-> **使用 Node 24 的 Windows：** 使用目前的 24 LTS 修補版本（至少 24.20.0）。
-> 較早的版本可能會在測試成功後，由 `--test-force-exit` 關閉程序時中止。
-> Node 的 [Windows libuv 修正](https://github.com/nodejs/node/pull/61999) 可解決
-> 此執行階段當機問題；請保持測試判斷和執行器結束檢查啟用。
+> **Windows與節點 24：**使用目前的 24 LTS補丁版本（至少 24.20.0）。當`--test-force-exit`關閉進程時，早期版本可能會在成功測試後中止。 Node 的[Windows libuv 修復](https://github.com/nodejs/node/pull/61999)解決了這個運行時崩潰問題；保持測試斷言和執行程式退出檢查處於啟用狀態。
 
-> **npm v11+ 使用者（Node 24+）：** 執行 `npm install` 後，確認原生模組已安裝：
-> `node -e "require('better-sqlite3')"`。如果因 `MODULE_NOT_FOUND` 而失敗，
-> 請執行 `npm approve-scripts better-sqlite3 && npm install`。請參閱
-> [疑難排解](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)。
+> **npm v11 +用戶（節點 24 +）：**在`npm install`之後，驗證是否安裝了本機模組： `node -e "require('better-sqlite3')"`。如果`MODULE_NOT_FOUND`失敗，請執行`npm approve-scripts better-sqlite3 && npm install`。請參閱[故障排除](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)。
 
-- **Git**
+- **git**
 
-### 複製與安裝
+### 克隆並安裝
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -43,87 +37,84 @@ npm install
 ### 環境變數
 
 ```bash
-# 從範本建立您的 .env
+# Create your .env from the template
 cp .env.example .env
 
-# 產生必要的密鑰
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-開發所需的主要變數：
+發展的關鍵變數：
 
-| 變數                   | 開發預設值               | 說明         |
+| 多變的                 | 發展預設                 | 描述         |
 | ---------------------- | ------------------------ | ------------ |
 | `PORT`                 | `20128`                  | 伺服器連接埠 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 前端基礎 URL |
-| `JWT_SECRET`           | （如上方所示產生）       | JWT 簽署密鑰 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 前端基礎URL  |
+| `JWT_SECRET`           | （上面生成）             | JWT簽名秘籍  |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | 首次登入密碼 |
-| `APP_LOG_LEVEL`        | `info`                   | 記錄詳細程度 |
+| `APP_LOG_LEVEL`        | `info`                   | 日誌詳細級別 |
 
 ### 儀表板設定
 
-儀表板提供可透過環境變數設定之功能的 UI 切換開關：
+儀表板提供UI功能切換，也可以透過環境變數進行設定：
 
-| 設定位置    | 切換開關     | 說明                   |
-| ----------- | ------------ | ---------------------- |
-| 設定 → 進階 | 偵錯模式     | 啟用偵錯要求記錄（UI） |
-| 設定 → 一般 | 側邊欄可見性 | 顯示／隱藏側邊欄區段   |
+| 設定位置  | 切換         | 描述                   |
+| --------- | ------------ | ---------------------- |
+| 設定→高級 | 偵錯模式     | 啟用調試請求日誌（UI） |
+| 設定→常規 | 側邊欄可見性 | Show/hide側邊欄部分    |
 
-這些設定儲存在資料庫中，並在重新啟動後持續生效；設定後會覆寫環境變數的預設值。
+這些設定儲存在資料庫中並在重新啟動後保留，並在設定時覆蓋環境變數預設值。
 
-### 在本機執行
+### 本地運行
 
 ```bash
-# 開發模式（熱重新載入）
+# Development mode (hot reload)
 npm run dev
 
-# 生產環境建置
-npm run build    # next build → .build/next/ 然後 assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# 供貢獻者變更使用的快速後端／API 專用編譯
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# 發行版本建置（清除後重新建置 + HEAD 完整性標記 — 部署所需）
-npm run build:release   # rm -rf .build dist && build + 寫入 dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# 常用連接埠設定
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-貢獻者建置會執行僅限編譯的驗證：不會組裝獨立發行版本，也不會建置選用的原生封裝資產。需要驗證可交付套件時，請使用一般的生產環境建置。
+貢獻者建置執行僅編譯驗證：它不會組裝獨立發行版或建置可選的本機打包資產。當您需要驗證可交付的捆綁包時，請使用常規生產建置。
 
-### 建置輸出配置
+### 建置輸出佈局
 
-| 目錄      | 內容                                                                | 已追蹤 |
-| --------- | ------------------------------------------------------------------- | ------ |
-| `src/`    | 應用程式原始碼（TypeScript / TSX）                                  | 是     |
-| `.build/` | 中間檔案 — `next build` 輸出（gitignored，`distDir = .build/next`） | 否     |
-| `dist/`   | 可交付套件 — 由 `assembleStandalone` 組裝（gitignored）             | 否     |
+| 目錄      | 內容                                                           | 履帶式 |
+| --------- | -------------------------------------------------------------- | ------ |
+| `src/`    | 申請來源（TypeScript / TSX）                                   | 是的   |
+| `.build/` | 中間— `next build`輸出（gitignored、 `distDir = .build/next`） | 不     |
+| `dist/`   | 由`assembleStandalone`組裝的可交付捆綁包— （gitignored）       | 不     |
 
-建置管線是單一流程：
+建置管道是單通道：
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  （Next.js 輸出）
-  └─ assembleStandalone()                 （複製 standalone + static + public + native assets）
-       └─ 輸出：dist/                     （server.js、.next/static/、public/、node_modules/）
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` 會先額外清除兩個目錄，並寫入
-`dist/BUILD_SHA`（= `git rev-parse --short HEAD`）作為部署完整性標記。
+`npm run build:release`另外先清理兩個目錄並寫入`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) 作為部署完整性哨兵。
 
-`npm run build:contributor` 使用僅限後端的建置設定檔。建置期間會暫時替換儀表板 UI 檔案，保留 API 路由處理常式，並在建置後還原原始檔案。對於會影響儀表板 UI 的變更或完整的發行版本驗證，請使用 `npm run build`；貢獻者設定檔不能取代發行版本建置。
+`npm run build:contributor`使用僅後端建置設定檔。它在建置時暫時存根儀表板UI文件，保留API路由處理程序，並在建置後恢復原始檔案。使用`npm run build`進行影響儀表板UI變更或進行完整發布驗證；貢獻者設定檔不能取代發布版本。
 
-> **VPS 部署注意事項：** 遠端映像檔目錄 `/usr/lib/node_modules/omniroute/app/`
-> 維持不變。部署技能會將 `dist/` 的內容 rsync 至該目錄。
-> 只有儲存庫內的建置輸出路徑有所變更（`app/` → `dist/`）。
+> **VPS部署注意事項：**遠端映像目錄`/usr/lib/node_modules/omniroute/app/`未更改。部署技能將`dist/`的內容rsync到其中。僅移動了倉庫內建置輸出路徑（`app/` → `dist/`）。
 
-預設 URL：
+預設URLs：
 
-- **儀表板**：`http://localhost:20128/dashboard`
-- **API**：`http://localhost:20128/v1`
+- **儀表板**： `http://localhost:20128/dashboard`
+- **API**: `http://localhost:20128/v1`
 
 ---
 
@@ -424,10 +415,10 @@ docs/
 
 ---
 
-## 取得協助
+## 尋求協助
 
-- **架構**：請參閱 [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API 參考**：請參閱 [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **安全性文件**：[`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md)、[`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md)、[`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md)、[`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **維運文件**：[`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **問題**：[github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **建築學**：參見[`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API參考**：參見[`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **安全文件**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **營運文件**： [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **問題**： [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

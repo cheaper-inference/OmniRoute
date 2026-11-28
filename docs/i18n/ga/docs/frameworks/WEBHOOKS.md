@@ -5,14 +5,10 @@
 ---
 
 > **Foinse na fírinne:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Nuashonraithe go deireanach:** 2026-06-28 — v3.8.40
 
-Is féidir le OmniRoute glaonna gréasáin HTTP a sheoladh nuair a tharlaíonn teagmhais ardáin. Úsáid iad chun comhtháthú a dhéanamh le
-Slack, PagerDuty, Datadog, seirbhísí foláirimh inmheánacha, nó aon ghlacadóir HTTP.
+is féidir le OmniRoute gréasán HTTP a chur ar imeachtaí ardáin. Úsáid iad chun comhtháthú le Slack, PagerDuty, Datadog , seirbhísí foláirimh inmheánacha, nó aon ghlacadóir HTTP.
 
-Síníonn an seoltóir gach seachadadh le HMAC-SHA256, déanann sé iarracht eile tar éis
-teipeanna sealadacha, rianaíonn sé sláinte seachadta gach glao gréasáin, agus díchumasaíonn sé go huathoibríoch críochphointí
-a leanann orthu ag teip.
+Síníonn an seoltóir gach seachadadh le HMAC-SHA256, déanann sé iarracht ar theipeanna díomuana, rianaíonn sé sláinte an tseachadta in aghaidh na cuaiche gréasáin, agus díchumasaíonn sé críochphointí a leanann teip.
 
 ## Imeachtaí Tacaithe
 

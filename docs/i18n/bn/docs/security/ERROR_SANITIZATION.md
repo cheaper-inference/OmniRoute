@@ -4,13 +4,7 @@
 
 ---
 
-> **প্রামাণিক উৎস:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, এবং `open-sse/utils/error.ts`-এর পাবলিক বিল্ডারগুলো
-> **পরীক্ষা:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **সর্বশেষ হালনাগাদ:** 2026-09-02 — v3.8.51
-> **পাঠক:** ত্রুটি-প্রতিক্রিয়া নিয়ে কাজ করেন এমন যেকোনো প্রকৌশলী (HTTP রুট, SSE স্ট্রিম, এক্সিকিউটর, MCP হ্যান্ডলার)।
-> **অবস্থা:** ক্লায়েন্টকে ত্রুটি-বার্তা ফেরত দেয় এমন প্রতিটি কোড পাথের জন্য **বাধ্যতামূলক**।
+> **সত্যের উত্স:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, এবং `open-sse/utils/error.ts` তে পাবলিক নির্মাতা** পরীক্ষা:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** শ্রোতা:** যেকোন ইঞ্জিনিয়ার স্পর্শ করার ত্রুটির প্রতিক্রিয়া (HTTP রুট, SSE স্ট্রীম, নির্বাহক, MCP হ্যান্ডলার)।** অবস্থা:****MANDATORY** প্রতিটি কোড পাথের জন্য যা একটি ক্লায়েন্টকে একটি ত্রুটি বার্তা প্রদান করে।
 
 ## এটি কেন রয়েছে
 

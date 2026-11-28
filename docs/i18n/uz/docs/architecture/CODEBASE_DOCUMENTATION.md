@@ -4,16 +4,11 @@
 
 ---
 
-> **Versiya:** v3.8.51
-> **Soʻnggi yangilanish:** 2026-06-28
-> **Auditoriya:** OmniRouteʼga hissa qoʻshayotgan yoki uning asosida integratsiyalar yaratayotgan muhandislar.
+> **Versiya:** v3.8.51** Tomoshabinlar:** Muhandislar OmniRoute hissa qo'shmoqda yoki uning ustiga integratsiyalarni qurish.
 >
-> Yuqori darajadagi arxitektura diagrammalari va har bir quyi tizim asosidagi mantiq bilan tanishish uchun
-> [ARCHITECTURE.md](./ARCHITECTURE.md) faylini oʻqing. Alohida quyi tizimlar
-> (Auto Combo, MCP serveri, A2A serveri, Skills, Memory, Cloud Agents, Resilience,
-> Compression va boshqalar) haqida batafsil maʼlumot olish uchun ushbu `docs/` katalogidagi ularga bagʻishlangan fayllarni koʻring.
+> Yuqori darajadagi arxitektura diagrammalari va har bir quyi tizimning asoslari uchun [ARCHITECTURE.md](./ARCHITECTURE.md) o'qing. Individual quyi tizimlar (Auto Combo, MCP server, A2A server, Skills, Memory, Cloud Agents, Resilience, Compression va boshqalar) bo'yicha chuqur sho'ng'ish uchun ushbu `docs/` katalogida ularning ajratilgan fayllarini ko'ring.
 
-Ushbu fayl yangi muhandis kataloglar tuzilmasida yoʻl topishi, bajarilish vaqtida qatlamlarning qanday tashkil etilganini tushunishi va yangi modullarni oʻylab topmasdan kodni qayerga qoʻshish kerakligini bilishi uchun **bugungi kunda repozitoriyda nimalar mavjudligini** tavsiflaydi.
+Ushbu fayl tasvirlangan** bugungi kunda omborda nima bor** Shunday qilib, yangi muhandis daraxt bo'ylab harakatlanishi, ish vaqti qatlamlarini tushunishi va yangi modullarni ixtiro qilmasdan kodni qaerga qo'shishni bilishi mumkin.
 
 ---
 
@@ -564,37 +559,14 @@ Koʻp ishlatiladigan buyruqlar:
 
 ## 8. `scripts/`
 
-Maqsadiga ko‘ra 6 ta quyi jildga ajratilgan.
+Maqsadiga ko'ra 6 ta pastki jildga ajratilgan.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, shuningdek, PR’larni faqat o‘qish rejimida nazorat qilish yordamchilari:
-  `ci-discriminate.sh` (PR’dagi muvaffaqiyatsiz tekshiruv signaturalarini etalon PR yoki
-  asosiy tarmoqdagi xatolik muammosiga nisbatan o‘ziga tegishli / meros bo‘lib o‘tgan /
-  noma’lum toifalarga ajratadi) va `audit-worktree.sh`
-  (o‘zgartirilgan fayllar, himoyalangan qismlar, olib tashlangan assert’lar, bostirishlar
-  soni, qolib ketgan vaqtinchalik tsconfig’lar, PR’dagi head va mahalliy HEAD taqqoslanishi —
-  worker’ning PR’i qabul qilinishidan oldin).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, plus faqat o‘qishga mo‘ljallangan PR chaqaloqqa qarashli yordamchilar akkauntlari (signallari) mos yozuvlar `ci-discriminate.sh` yoki asosiy- PR masalaga qarshi PR / meros / noma'lum) va `audit-worktree.sh` (iflos fayllar, himoyalangan sirtlar, o'chirilgan tasdiqlar, bostirish hisoblari, qolgan tmp tsconfigs, PR head vs local HEAD — ishchi PR qabul qilinishidan oldin).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. OmniRoute (3.6.x va undan oldingi) ga aniq atalgan `check-deprecated-versions.mjs` flags versiyalari. Tekshiruv sanalarni e'tiborsiz qoldiradi.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

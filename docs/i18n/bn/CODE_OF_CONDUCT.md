@@ -38,15 +38,13 @@
 
 এই আচরণবিধি কমিউনিটির সকল পরিসরে প্রযোজ্য এবং কোনো ব্যক্তি যখন আনুষ্ঠানিকভাবে জনপরিসরে কমিউনিটির প্রতিনিধিত্ব করেন, তখনও এটি প্রযোজ্য। আমাদের কমিউনিটির প্রতিনিধিত্ব করার উদাহরণগুলোর মধ্যে রয়েছে কোনো আনুষ্ঠানিক ই-মেইল ঠিকানা ব্যবহার করা, কোনো আনুষ্ঠানিক সামাজিক যোগাযোগমাধ্যম অ্যাকাউন্টের মাধ্যমে পোস্ট করা, অথবা কোনো অনলাইন বা অফলাইন অনুষ্ঠানে নিযুক্ত প্রতিনিধি হিসেবে কাজ করা।
 
-## Enforcement
+## এনফোর্সমেন্ট
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+অপমানজনক, হয়রানি, বা অন্যথায় অগ্রহণযোগ্য আচরণের ঘটনাগুলি এখানে একটি ব্যক্তিগত নিরাপত্তা পরামর্শক খোলার মাধ্যমে প্রয়োগের জন্য দায়ী সম্প্রদায়ের নেতাদের কাছে রিপোর্ট করা যেতে পারে
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+অথবা diegosouza.pw@outlook.com এ রক্ষণাবেক্ষণকারীকে ইমেল করে। নিরাপত্তা-সংবেদনশীল ঘটনার জন্য, [`SECURITY.md`](SECURITY.md) দেখুন। সমস্ত অভিযোগ পর্যালোচনা করা হবে এবং দ্রুত এবং ন্যায্যভাবে তদন্ত করা হবে।
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+সমস্ত সম্প্রদায়ের নেতারা যে কোনও ঘটনার প্রতিবেদকের গোপনীয়তা এবং সুরক্ষাকে সম্মান করতে বাধ্য।
 
 ## প্রয়োগের নির্দেশিকা
 

@@ -508,23 +508,23 @@ apabila data papan pendahulu benar-benar berubah sejak penghantaran terakhir.
 
 **Fail:** `src/lib/gamification/sharing.ts`
 
-### Lejar Catatan Bergu
+### Lejar Catatan Berganda
 
-Setiap pemindahan menghasilkan dua baris dalam `token_ledger`:
+Setiap pemindahan mencipta dua baris dalam `token_ledger`:
 
-| Baris  | `from_key_id` | `to_key_id` | `amount` |
+| baris  | `from_key_id` | `to_key_id` | `amount` |
 | ------ | ------------- | ----------- | -------- |
-| Debit  | pengirim      | penerima    | +amaun   |
-| Kredit | penerima      | pengirim    | -amaun   |
+| Debit  | penghantar    | penerima    | jumlah + |
+| Kredit | penerima      | penghantar  | -amount  |
 
-Tunggu — konvensyennya ialah:
+Tunggu — konvensyen ialah:
 
-| Baris  | `from_key_id` | `to_key_id` | `amount` | Maksud                 |
-| ------ | ------------- | ----------- | -------- | ---------------------- |
-| Hantar | pengirim      | penerima    | +amaun   | Aliran keluar pengirim |
-| Terima | penerima      | pengirim    | +amaun   | Aliran masuk penerima  |
+| baris  | `from_key_id` | `to_key_id` | `amount` | Maknanya                        |
+| ------ | ------------- | ----------- | -------- | ------------------------------- |
+| Hantar | penghantar    | penerima    | jumlah + | Aliran keluar daripada pengirim |
+| terima | penerima      | penghantar  | jumlah + | Aliran masuk ke penerima        |
 
-Baki dikira seperti berikut:
+Baki dikira sebagai:
 
 ```sql
 SELECT
@@ -546,19 +546,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Sahkan**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotensi**: semak sama ada `idempotency_key` sudah wujud dalam lejar.
-   Jika ya, kembalikan hasil yang dicache.
-3. **Transaksi** (satu transaksi SQLite):
-   a. Kira baki pengirim.
-   b. Jika `balance < amount`, batalkan (dana tidak mencukupi).
-   c. Masukkan baris penghantaran (`from=sender,`.
+1. **Sahkan** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotensi** : semak jika `idempotency_key` sudah wujud dalam lejar. Jika ya, kembalikan hasil cache.
+3. **Transaksi** (urus niaga SQLite tunggal): a. Kira baki penghantar. b. Jika `balance < amount`, batalkan (dana tidak mencukupi). c. Sisipkan baris hantar (`from=sender, to=receiver, amount`). d. Sisipkan baris terima (`from=receiver, to=sender, amount`).
+4. **Had kadar** : semak kadar pemindahan untuk pengirim (maks 10 transfers/min).
+5. **Peristiwa** : memancarkan acara gamifikasi `token_share` untuk penilaian lencana XP +.
+6. Kembalikan `{ success: true, balance: newBalance }`.
 
-### Pengehadan Kadar
+### Mengehadkan Kadar
 
-- Maksimum 10 pemindahan seminit bagi setiap kunci API.
-- Maksimum 10,000 token bagi satu pemindahan.
-- Maksimum 100,000 token dipindahkan sehari bagi setiap kunci API.
+- Maksimum 10 pemindahan seminit setiap kunci API.
+- Maks 10,000 token setiap pemindahan tunggal.
+- Maks 100,000 token dipindahkan setiap hari bagi setiap kunci API.
 
 ---
 

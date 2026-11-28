@@ -5,11 +5,10 @@
 ---
 
 > **Zdroj pravdy:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Poslední aktualizace:** 2026-09-22 — jmenné prostory rozsahů odkazují na MCP-SERVER.md
 
-OmniRoute používá autorizační řetězec zohledňující routy, který kontroluje každý požadavek API. Klasifikace je **deterministická** a **fail-closed** — cokoli, co nelze klasifikovat, spadá do kategorie `MANAGEMENT` a vyžaduje relaci nebo token s oprávněními pro správu. Tato stránka vysvětluje model určený technikům, kteří udržují routy nebo navrhují nové koncové body.
+OmniRoute má autorizační kanál, který hlídá každý požadavek API. Klasifikace je** deterministický** a** selhání-zavřeno** — cokoli, co nelze klasifikovat, skončí jako `MANAGEMENT` a vyžaduje relace nebo token úrovně správy. Tato stránka vysvětluje model pro inženýry, kteří udržují trasy nebo navrhují nové koncové body.
 
-![Autorizační řetězec (3 třídy rout + vyhodnocení zásad)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Zdroj: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -186,7 +185,7 @@ Každá třída trasy má zásady v `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — vždy vrátí `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extrahuje nosič, ověřuje přes `validateApiKey()`. Propadne na anonymní pouze tehdy, když je deaktivován efektivní příznak funkce `REQUIRE_API_KEY`. Efektivní příznak je vyřešen pomocí `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), takže příznaky funkcí ovládacího panelu a proměnné prostředí řídí `/api/v1/*`, `/api/v1beta/*` a aliasy konzistentně; Selhání resolveru uzavřeno. Umožňuje požadavky na relaci řídicího panelu na klientských trasách API (včetně `/api/v1/models`, používaného v katalogu modelů řídicích panelů). Když je Entra ID SSO povolen, Nosič, který je strukturálně token Entra (tři segmenty base64url, `RS*` alg, `kid`), zpracovává větev SSO** před** `validateApiKey()` a jeho verdikt je konečný — nikdy neprojde cestou klíče API nebo větve degradace na anonymní, takže výpadek poskytovatele identity se nemůže stát otevřeným přístupem. Statické klávesy API nejsou ovlivněny. Viz [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — přijímá relaci řídicího panelu, požadavky na interní synchronizaci modelu (porovnané se `/api/providers/[name]/(sync-models|models)`) nebo zcela přeskakuje, pokud `isAuthRequired()` vrátí hodnotu false. Vrátí 403 (`AUTH_001`), když je token nositele přítomen, ale neplatný, jinak 401. Také vynucuje úrovně ochrany trasy (LOCAL_ONLY / ALWAYS_PROTECTED) před jakoukoli auth větví — viz [vrstvy Route Guard](../security/ROUTE_GUARD_TIERS.md). Cesty LOCAL_ONLY v `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (dnes: `/api/mcp/`) mohou být přístupné z bez zpětné smyčky, když klíč Nosiče nese rozsah `manage` ; všechny ostatní cesty LOCAL_ONLY zůstávají striktně-loopback bez ohledu na rozsah.
+- **`managementPolicy`** (`policies/management.ts`) — přijímá relaci řídicího panelu, požadavky na interní synchronizaci modelu (porovnané se `/api/providers/[name]/(sync-models|models)`) nebo zcela přeskakuje, pokud `isAuthRequired()` vrátí hodnotu false. Vrátí 403 (`AUTH_001`), když je token nositele přítomen, ale neplatný, jinak 401. Také vynucuje úrovně ochrany trasy (LOCAL_ONLY / ALWAYS_PROTECTED) před jakoukoli auth větví — viz [vrstvy Route Guard](../security/ROUTE_GUARD_TIERS.md). K cestám LOCAL_ONLY v `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (dnes: `/api/mcp/`) lze přistupovat z bez zpětné smyčky, když klíč Nosiče nese rozsah `manage`/`admin` nebo úzký rozsah `mcp:connect` (`hasMcpConnectOrManageScope`), nebo pomocí ověřené relace řídicího panelu; všechny ostatní cesty LOCAL_ONLY zůstávají striktně-loopback bez ohledu na rozsah.
 
 Úspěšná politika vrátí `AuthSubject` s `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Následné obslužné programy jej mohou číst prostřednictvím `assertAuth(request, "CLIENT_API")` v `src/server/authz/assertAuth.ts` namísto opětovného spouštění auth logiky.
 
@@ -279,36 +278,22 @@ Sadu zvolte podle tvaru, nikoli podle pohodlnosti. Jedna trasa patří do `PUBLI
 
 ## Rozsahy
 
-Tři jmenné prostory. Každý kontrolní mechanismus čte pouze své vlastní řetězce. Porovnání vedle sebe,
-včetně toho, proč `manage` nevyhoví funkci `scopeMatches` pro `read:compression` a proč
-přístupový token s rozsahem `read` nemůže provést `PATCH /api/keys/{id}`, najdete v dokumentu
-[Tři jmenné prostory rozsahů](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Tři jmenné prostory. Každá kontrola čte pouze své vlastní řetězce. Vedle sebe, včetně toho, proč `manage` selže `scopeMatches` pro `read:compression` a proč přístupový token `read` nemůže `PATCH /api/keys/{id}`, jsou [tři obory jmenných prostorů](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Klíče API obsahují pole `scopes` (uložené jako JSON v `api_keys.scopes`, viz `src/lib/db/apiKeys.ts`).
+Klíče API nesou pole `scopes` (uložené jako JSON v `api_keys.scopes`, viz `src/lib/db/apiKeys.ts`).
 
-### Rozsah správy
+### Rozsah řízení
 
-- `manage` / `admin` — `hasManageScope`. Přístup s tokenem Bearer k trasám rozhraní API pro správu.
-- `mcp:connect`, `self:usage`, `self:account-quota` a
-  `policy:bypass-provider-quota` jsou doplňkové rozsahy s přesnou shodou. Nacházejí se
-  mimo `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` povoluje pouze
-  výjimku pro přístup k `/api/mcp/` mimo rozhraní loopback.
+- `manage` / `admin` — `hasManageScope`. Přístup nosiče ke správě tras API.
+- `mcp:connect`, `self:usage`, `self:account-quota` a `policy:bypass-provider-quota` jsou aditivní rozsahy přesné shody. Sedí venku `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` otevře pouze vyjmutí `/api/mcp/` bez zpětné smyčky.
 
-### Rozsahy nástrojů MCP
+### rozsahy nástrojů MCP
 
-Katalog a pravidla porovnávání (identický řetězec nebo udělený rozsah končící znakem `*`):
-[Rozsahy nástrojů MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` v `src/shared/constants/mcpScopes.ts` je původní typovaná
-podmnožina, nikoli celý tento katalog. Vynucování probíhá v souboru
-`open-sse/mcp-server/scopeEnforcement.ts` poté, co `resolveCallerScopeContext()`
-zjistí rozsahy z ověřovacích údajů MCP, metadat požadavku nebo `OMNIROUTE_MCP_SCOPES`.
-Zůstává vypnuté, pokud není nastaveno `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Pravidla katalogu a porovnávání (identický řetězec nebo přidělený rozsah končící na `*`): [rozsahy nástrojů MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` v `src/shared/constants/mcpScopes.ts` je původní typovaná podmnožina, nikoli úplný katalog. Vynucení se spustí v `open-sse/mcp-server/scopeEnforcement.ts` poté, co `resolveCallerScopeContext()` vyhodnotí rozsahy z informací o ověření MCP, metadat požadavku nebo `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` jej zapíná globálně (výchozí `false`), ale je vždy vynuceno pro volajícího HTTP/SSE, jehož klíč API postrádá `manage`/`admin` (viz `shouldForceScopeEnforcement()` v `open-sse/mcp-server/scopeEnforcement.ts`), bez ohledu na příznak.
 
 ### Rozsahy přístupových tokenů
 
-`read` / `write` / `admin` u tokenů `oma_live_…`, seřazené funkcí `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Toto pořadí se vztahuje pouze na přihlašovací údaj
-přístupového tokenu. Viz [Ověřování pro správu](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` na žetonech `oma_live_…`, seřazené podle `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Toto hodnocení se vztahuje pouze na pověření přístupového tokenu. Viz [Ověření pro správu](../guides/MANAGEMENT-AUTH.md).
 
 ## Přepínač vyžadováno ověření
 

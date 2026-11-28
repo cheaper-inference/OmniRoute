@@ -4,11 +4,9 @@
 
 ---
 
-> **Zdroj pravdy:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Poslední aktualizace:** 2026-09-02 — v3.8.51
-> **Cílová skupina:** Vývojáři spravující stealth integrace specifické pro jednotlivé poskytovatele.
+> **Zdroj pravdy:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Publikum:** Inženýři udržující integraci stealth specifickou pro poskytovatele.
 
-OmniRoute se integruje s poskytovateli, jejichž hraniční infrastruktura aktivně vytváří otisky neoficiálních klientů (TLS JA3/JA4, pořadí hlaviček, struktura těla JSON, tokeny integrity). Tato stránka dokumentuje stealth prvky, které OmniRoute zpřístupňuje, a místa jejich implementace.
+OmniRoute se integruje s poskytovateli, jejichž okraje aktivně otiskují neoficiální klienty (TLS JA3/JA4, řazení hlaviček, tvar těla JSON, tokeny integrity). Tato stránka dokumentuje stealth povrchy, OmniRoute odhaluje, a kde jsou implementovány.
 
 ## Právní a etické upozornění
 
@@ -83,65 +81,68 @@ změny otisku pomocí explicitně autorizovaného živého účtu.
 
 ---
 
-## Balíček utajení Claude Code
+## Balíček Claude Code Stealth
 
-Když je zapnutý režim `cliCompatMode`, OmniRoute upravuje odchozí požadavky Claude tak, aby byly nerozeznatelné od provozu `claude-cli`. Spolupracují na tom tři moduly:
+Když je `cliCompatMode` zapnuto, OmniRoute přetváří odchozí požadavky Claude tak, aby byly k nerozeznání od provozu `claude-cli`. Spolupracují tři moduly:
 
 ### `claudeCodeFingerprint.ts`
 
-Vypočítává tříznakový otisk `cc_version` vložený do fakturační hlavičky:
+Vypočítá 3znakový otisk `cc_version` vložený do fakturační hlavičky:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
 - `FINGERPRINT_SALT = "59cf53e54c78"` (pevně zakódováno; odpovídá oficiálnímu klientovi)
-- Vstupy: znaky na indexech 4, 7 a 20 textu první uživatelské zprávy + řetězec verze
-- Výstup: tříznakový hexadecimální prefix
+- Vstupy: znaky na indexu 4, 7, 20 prvního textu zprávy uživatele + řetězec verze
+- Výstup: 3znaková hexadecimální předpona
 
-### `claudeCodeCCH.ts` (hash obsahu klienta)
+### `claudeCodeCCH.ts` (Hash klientského obsahu)
 
-Kontrola integrity na straně serveru, kterou oficiální CLI Claude Code počítá prostřednictvím Bun/Zig. OmniRoute ji znovu implementuje pomocí `xxhash-wasm`:
+Kontrola integrity na straně serveru oficiální kód Claude CLI počítá pomocí reimplementací Bun/Zig. OmniRoute pomocí `xxhash-wasm`:
 
-1. Serializovat tělo se zástupným symbolem `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Pětiznaková hexadecimální hodnota malými písmeny doplněná zleva nulami
-4. Nahradit `cch=00000;` vypočítaným tokenem
+1. Serializujte tělo pomocí zástupného symbolu `cch=00000;`
+2. Sestavte zobrazení hash se dvěma nahrazeními prostého textu v tomto pořadí (`hashView()`):
+   - každá shoda `/"model":"[^"]*"/g` se změní `"model":""` — shoda se zastaví na prvním `"`, takže hodnota s uvozovkou (`"model":"a\"b"`) se vyprázdní pouze do této uvozovky, jak to dělá klient
+   - každá shoda `/"max_tokens":\d+,|,?"max_tokens":\d+/g` je odstraněna — pouze číselné hodnoty, v jakékoli hloubce
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. 5-znakový hexadecimální znak s nulovým polstrováním
+5. Nahraďte `cch=00000;` vypočítaným tokenem
 
 Konstanty:
 
-- Seed: `0x6e52736ac806831e`
+- Seed: `0x4d659218e32a3268` (odpovídá zachycení zpětné smyčky kódu Claude 2.1.252 a 2.1.322)
 - Vzor: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Vkládá znak Unicode **spojovník s nulovou šířkou** (`U+200D`) za první znak „citlivých“ názvů klientů, aby je upstreamové filtry nemohly vyhledat pomocí grep. Výchozí seznam slov:
+Vloží Unicode** spojka s nulovou šířkou** (`U+200D`) za prvním znakem "citlivých" názvů klientů, takže je upstream filtry nemohou grep. Výchozí seznam slov:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Používá se na: bloky `system`, veškerý obsah `messages[].content` a `tools[].description` / `tools[].function.description`. Operátor může seznam přepsat pomocí `setSensitiveWords()`.
+Platí pro: bloky `system`, všechny `messages[].content` a `tools[].description` / `tools[].function.description`. Přepsatelné operátorem přes `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — poskytovatelé `anthropic-compatible-cc-*`
+### poskytovatelé `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`
 
-Pro relé Anthropic třetích stran, která přijímají pouze provoz „skutečného Claude Code“:
+Pro relé Anthropic třetích stran, která přijímají pouze provoz „skutečného kódu Claude “:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- Výchozí hodnota `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- Přepínač „Enable redact-thinking beta“ pro jednotlivá připojení přidá `redact-thinking-2026-02-12`, pokud konkrétní upstream kompatibilní s CC vyžaduje proudy uvažování s redigovaným obsahem
-- Přepínač „Enable summarized thinking display“ pro jednotlivá připojení ukládá `providerSpecificData.requestDefaults.summarizeThinking` a přidává `display: "summarized"` do požadavků na uvažování kompatibilních s CC, které dosud nemají nastavený režim zobrazení
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` ve výchozím nastavení
+- Přepínač „Enable redact-thinking beta“ pro jednotlivá připojení přidá `redact-thinking-2026-02-12` když CC kompatibilní upstream konkrétně vyžaduje redigované toky myšlení.
+- Přepínač „Povolit zobrazení souhrnného myšlení“ pro jednotlivé připojení ukládá `providerSpecificData.requestDefaults.summarizeThinking` a přidává `display: "summarized"` do CC kompatibilních požadavků myšlení, které ještě nenastavovaly režim zobrazení
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (rodina Opus/Sonnet 4.x)
 - Výchozí cesta: `/v1/messages?beta=true`
 
 Sesterské moduly ve stejném balíčku:
 
-- `claudeCodeConstraints.ts` — pravidla pro teplotu + řízení mezipaměti
-- `claudeCodeToolRemapper.ts` — přemapování názvů nástrojů
-- `claudeCodeExtraRemap.ts` — dodatečná normalizace datové části
+- `claudeCodeConstraints.ts` — teplota + pravidla řízení mezipaměti
+- `claudeCodeToolRemapper.ts` — přemapování názvu nástroje
+- `claudeCodeExtraRemap.ts` — normalizace extra užitečného zatížení
 
 ---
 
@@ -162,14 +163,14 @@ Vymáhání proti proudu je zapnuto** strana Google** , nic nemůže OmniRoute z
 **Proč to přitahuje detekci zneužití agresivněji než použití pouze na bezplatné úrovni:**
 
 - Trvalé automatizované výdaje na jediném účtu Google se projevují jinak než přístupy-kvóta-a-zastavení zdarma.
-- Překročení kreditu nemá žádný sazbový strop, takže špatně nakonfigurovaný klient může propálit několik stovek USD za pár minut a vypadat jako přeprodej klíčů API nebo provoz botů.
+- Překročení kreditu nemá žádný sazbový strop, takže špatně nakonfigurovaný klient může spálit několik stovek USD za pár minut a vypadat jako přeprodej klíčů API nebo provoz botů.
 - Několik uživatelů OmniRoute, kteří paralelně zaznamenají přebytečné kredity ze stejného externího IP zesílí signál.
 
 **Doporučený postoj:**
 
 1. Ponechte výchozí `ANTIGRAVITY_CREDITS=off`, pokud operátor výslovně nepřijme riziko placeného kreditu a vynucení účtu. `retry` odešle normální žádost jako první a vloží kredity maximálně jednou po způsobilé kvótě 429; `always` vloží kredity na první žádost.
 2. **Rozložte zatížení mezi poskytovatele pomocí funkce Auto-Combo** (`model: "auto"` nebo `kr/glm/etc` -combo) namísto nasycení jednoho účtu Antigravity.
-3. **Nastavte limity RPM na připojení** na stránce úprav poskytovatele Antigravity (Dashboard → Providers → Antigravity → omezení rychlosti připojení → ). 30–60 RPM je obhajitelná horní hranice pro trvalé používání.
+3. **Nastavte limity RPM na připojení** na stránce úprav poskytovatele Antigravity (Dashboard → Providers → Antigravity → connection → rate limit). 30–60 RPM je obhajitelná horní hranice pro trvalé používání.
 4. **Používejte stabilní, operátorem řízené upstream sítě** a vyhněte se sdílení jednoho účtu mezi nesouvisejícími uživateli nebo pracovní zátěží.
 5. **Pokud je zakázáno** : odvolání přes `support.google.com` → "Obnovit Workspace/Account přístup" s přesným odeslaným tělem odpovědi `quota_exceeded` / `service disabled` Google. Obnova není zaručena.
 
@@ -201,7 +202,7 @@ Dotykové body:
 
 - `open-sse/executors/antigravity.ts` — čte `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — pověření instalatérství
-- Původní zpráva o incidentu: Diskuze [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Původní zpráva o incidentu: Diskuze [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

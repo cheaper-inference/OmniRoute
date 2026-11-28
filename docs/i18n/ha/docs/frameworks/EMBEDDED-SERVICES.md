@@ -4,7 +4,7 @@
 
 ---
 
-> **Siga:** v3.8.44** An sabunta ta ƙarshe:** 2026-10-28** Masu sauraro:** Injiniyoyi suna ƙara, kiyayewa, ko gyara ayyukan da aka haɗa (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, akwatin waƙa).
+> **Siga:** v3.8.44** Masu sauraro:** Injiniyoyi suna ƙara, kiyayewa, ko gyara ayyukan da aka haɗa (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, akwatin waƙa).
 
 Sabis ɗin da aka haɗa su ne kayan aikin gefen mota da aka shigar a cikin gida waɗanda OmniRoute ke girkawa, kulawa, da fallasa azaman maƙasudin tuƙi na matakin farko. Ba kamar masu samar da waje (waɗanda ake isa kan intanit ta maɓallan API ), ayyukan da aka haɗa suna gudana akan na'ura ɗaya kamar OmniRoute kuma suna sadarwa ta hanyar dawo da baya.
 
@@ -137,23 +137,23 @@ Duk takwas suna bin tsarin kulawa iri ɗaya:
 
 ### Mabuɗin tushen fayilolin
 
-| Fayil                                       | Matsayi                                                   |
-| ------------------------------------------- | --------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Babban ajin: zagayowar rayuwa, kulle, lafiya, buffer zobe |
-| `src/lib/services/bootstrap.ts`             | Rijistar matakin tsari da farawa ta atomatik              |
-| `src/lib/services/registry.ts`              | Singleton map `tool → supervisor`                         |
-| `src/lib/services/apiKey.ts`                | Ƙirar maɓalli, ɓoyayyen AES-256-GCM a hutawa              |
-| `src/lib/services/modelSync.ts`             | Aiki tare na lokaci-lokaci (minti 5) + akan buƙata        |
-| `src/lib/services/ringBuffer.ts`            | 5 MB madauwari log buffer tare da SSE subscribe           |
-| `src/lib/services/healthCheck.ts`           | binciken lafiyar HTTP (tsabar da za a iya daidaitawa)     |
-| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall for 9 Router                 |
-| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall ga CLIProxyAPI               |
-| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall ga Mux                       |
-| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall for open-wa                  |
-| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall ga LLMLingua                 |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` helper                            |
-| `src/app/api/services/[name]/logs/route.ts` | Raba SSE rajistan ayyukan ƙarshen                         |
-| `open-sse/executors/ninerouter.ts`          | Mai aiwatarwa (Layer 4)                                   |
+| Fayil                                       | Matsayi                                                    |
+| ------------------------------------------- | ---------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | Babban aji: zagayowar rayuwa, kullewa, lafiya, buffer zobe |
+| `src/lib/services/bootstrap.ts`             | Rijistar matakin tsari da farawa ta atomatik               |
+| `src/lib/services/registry.ts`              | Singleton map `tool → supervisor`                          |
+| `src/lib/services/apiKey.ts`                | Ƙirar maɓalli, ɓoyayyen AES-256-GCM a hutawa               |
+| `src/lib/services/modelSync.ts`             | Aiki tare na lokaci-lokaci (minti 5) + akan buƙata         |
+| `src/lib/services/ringBuffer.ts`            | 5 MB madauwari log buffer tare da SSE subscribe            |
+| `src/lib/services/healthCheck.ts`           | HTTP kiwon lafiya bincike (daidaita tazara)                |
+| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall for 9 Router                  |
+| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall ga CLIProxyAPI                |
+| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall ga Mux                        |
+| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall for open-wa                   |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall ga LLMLingua                  |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` helper                             |
+| `src/app/api/services/[name]/logs/route.ts` | Raba SSE rajistan ayyukan ƙarshen                          |
+| `open-sse/executors/ninerouter.ts`          | Mai aiwatarwa (Layer 4)                                    |
 
 ---
 

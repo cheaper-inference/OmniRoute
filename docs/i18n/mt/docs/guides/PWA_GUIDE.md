@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute jitwassal bħala Progressive Web App li jista’ jiġi installat kompletament. Meta taċċessa d-dashboard minn kwalunkwe browser fuq apparat mobbli — Android (Chrome) jew iOS (Safari) — tista’ tagħżel "Żid mal-Iskrin Ewlenin" u tikseb esperjenza simili għal app nattiva mingħajr il-ħtieġa ta’ app store.
+Installa d-dashboard OmniRoute bħala Progressive Web App biex tiftaħha mill-iskrin tad-dar tiegħek jew mid-desktop f'tieqa waħedha. L-app installata għadha teħtieġ konnessjoni mas-server OmniRoute tiegħek għan-navigazzjoni, id-dejta tad-dashboard u t-talbiet API. L-assi statiċi fil-cache ma jipprovdux gateway offline jew dashboard offline.
 
-## X’Inhi PWA?
+## X'inhu PWA?
 
-Progressive Web App tittrasforma d-dashboard tal-web ta’ OmniRoute f’xi ħaġa li tidher u tinħass bħal app mobbli nattiva. Ladarba tiġi installata:
+Progressive Web App tuża d-dashboard tal-web b'ikona tal-app u tieqa separata. Ladarba installati, OmniRoute:
 
-- Tinfetaħ mill-iskrin ewlieni tiegħek bl-ikona tagħha stess
-- Tinfetaħ fuq skrin sħiħ — mingħajr il-bar tal-indirizzi tal-browser jew l-interfaċċa tat-tabs
-- Taħdem offline b’paġna ddedikata għall-konnettività
-- Taħżen assi statiċi fil-cache biex jitgħabbew aktar malajr
-- Tappoġġja kemm l-orjentazzjoni vertikali kif ukoll dik orizzontali
+- Tniedi mill-iskrin tad-dar tiegħek jew mid-desktop
+- Tiftaħ fil-modalità waħedha, mingħajr il-bar u t-tabs tas-soltu tal-indirizz tal-browser
+- Caches magħżula assi statiċi
+- Jappoġġja orjentazzjonijiet ritratt u pajsaġġ
 
 ## Installazzjoni
 
+Uża indirizz HTTPS għal server fuq apparat ieħor. Meta s-server jaħdem fuq l-istess apparat, `http://localhost:20128` jissodisfa wkoll ir-rekwiżiti tal-installazzjoni tal-browser. Indirizz `http://YOUR_IP:20128` sempliċi ma jissodisfax dawk ir-rekwiżiti. Il-menus tal-installazzjoni u l-promps jiddependu fuq il-brawżer u s-sistema operattiva. Ara [r-rekwiżiti ta' installazzjoni PWA ta'MDN](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
+
 ### Android (Chrome)
 
-1. Iftaħ id-dashboard ta’ OmniRoute fi Chrome: `http://YOUR_IP:20128`
-2. Chrome awtomatikament juri banner **"Żid OmniRoute mal-Iskrin Ewlenin"**, jew:
-   - Tektek il-menu **⋮** (tliet tikek) → **"Żid mal-Iskrin Ewlenin"** jew **"Installa l-app"**
-3. Ikkonferma t-talba
-4. OmniRoute jidher fuq l-iskrin ewlieni tiegħek bħala app awtonoma
+1. Iftaħ l-indirizz HTTPS OmniRoute tiegħek, jew `http://localhost:20128` għal server fuq l-istess telefon.
+2. Iftaħ il-**⋮** menu u agħżel** Installa app** jew** Żid mal-iskrin tad-dar** , jekk jiġi offrut.
+3. Ikkonferma l-pront.
+4. Iftaħ OmniRoute mill-home screen.
 
 ### iOS (Safari)
 
-1. Iftaħ id-dashboard ta’ OmniRoute f’Safari: `http://YOUR_IP:20128`
-2. Tektek il-buttuna **Aqsam** (kaxxa bi vleġġa)
-3. Skrollja ’l isfel u tektek **"Żid mal-Iskrin Ewlenin"**
-4. Agħtih isem (l-isem predefinit huwa "OmniRoute") u tektek **Żid**
-5. OmniRoute jidher fuq l-iskrin ewlieni tiegħek bl-ikona tal-app
+1. Iftaħ l-indirizz OmniRoute HTTPS tiegħek f'Safari.
+2. Tektek** Aqsam** →** Żid mal-Iskrin tad-Dar** .
+3. Ikkonferma l-isem u tektek** Żid** .
+4. Iftaħ OmniRoute mill-home screen.
 
-### Desktop (Chrome / Edge)
+### Desktop (Khrome / Edge)
 
-1. Iftaħ id-dashboard ta’ OmniRoute
-2. Ikklikkja l-**ikona tal-installazzjoni** fil-bar tal-indirizzi (jew ⋮ → "Installa OmniRoute...")
-3. Ikkonferma t-talba
-4. OmniRoute jinfetaħ bħala tieqa awtonoma — mingħajr tabs u mingħajr bar tal-indirizzi
+1. Iftaħ id-dashboard OmniRoute tiegħek.
+2. Uża l-ikona tal-installazzjoni tal-browser jew il-** Installa app** dħul fil-menu, jekk offrut.
+3. Ikkonferma l-pront biex tiftaħ OmniRoute fit-tieqa tagħha stess.
 
 ## Karatteristiċi
 
-### Esperjenza fuq Skrin Sħiħ
+### Tieqa Standalone
 
-Il-manifest huwa kkonfigurat b’`display: "fullscreen"`, li jfisser li l-app installata tuża l-iskrin kollu — mingħajr l-interfaċċa tal-browser u mingħajr sovrappożizzjoni mal-bar tal-istatus. Dan jagħmel lid-dashboard jinħass tassew nattiv.
+Il-manifest jistabbilixxi `display: "standalone"` u `start_url: "/dashboard"`. L-app installata tiftaħ id-dashboard f'tieqa tal-app. Il-kontrolli tal-browser u tas-sistema operattiva xorta jistgħu jidhru; il-manifest ma jitlobx mod fullscreen.
 
-### Appoġġ Offline
+### Cached Assi u Rekwiżiti tan-Netwerk
 
-OmniRoute jinkludi service worker (`sw.js`) li jipprovdi caching intelliġenti:
+Il- [ħaddiem tas-servizz](../../public/sw.js) jimmarka r-riżorsi magħżula tal-istess oriġini:
 
-| Tip ta’ Assi                                                                                                                                                                                                                                                    | Strateġija                                 | Imġiba                                                                                                                |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| **Qafas tal-App**                                                                                                                                                                                                                                               | Il-cache l-ewwel                           | `/`, `/offline`, il-manifest u l-ikoni jinħażnu minn qabel fil-cache waqt l-installazzjoni                            |
-| **Assi statiċi** (CSS, JS, immaġnijiet, fonts)                                                                                                                                                                                                                  | In-network l-ewwel b’riżerva mill-cache    | Iġib verżjoni ġdida min-network; juża l-cache bħala riżerva jekk ikun offline                                         |
-| **Bundles ta’ Next.js** (`/_next/`)                                                                                                                                                                                                                             | In-network l-ewwel b’aġġornament tal-cache | Iġibhom min-network u jaġġorna l-cache; jipprovdi l-verżjoni maħżuna fil-cache jekk ikun offline                      |
-| **Talbiet ta’ navigazzjoni**                                                                                                                                                                                                                                    | Jinqabżu (qatt ma jiġu interċettati)       | Il-browser jamministra r-riżerva minn HTTP/3 għal HTTP/2; socket QUIC li ma jaħdimx m’għandux isir `Response.error()` |
-| **Rotot tal-API / dashboard** (`/api/`, `/a2a`, `/dashboard`, l-aliases tal-API tal-klijent `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, flimkien ma’ `/callback`, `/login`; imqabbla mingħajr ma tingħata importanza lill-ittri kbar u żgħar) | Jinqabżu (qatt ma jinħażnu fil-cache)      | Dejjem imorru direttament lejn is-server — qatt ma jiġu interċettati mis-service worker                               |
+| Talba jew assi                             | Strateġija      | Imġieba                                                                                                                  |
+| ------------------------------------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Riżorsi tal-ħin tal-installazzjoni         | Pre-cache       | `/`, `/manifest.webmanifest`, `/icon-512.png` u `/apple-touch-icon.png` huma fil-cache waqt l-installazzjoni tal-ħaddiem |
+| Next.js assi statiċi (`/_next/`)           | Netwerk l-ewwel | Risposti b'suċċess jaġġornaw il-cache; żball tan-netwerk jaqa' lura għal rispons eżistenti fil-cache                     |
+| CSS statiċi oħra , JS, stampi u fonts      | Cache-ewwel     | Rispons eżistenti fil-cache jerġa' jintuża; tweġibiet ta 'suċċess tan-netwerk huma cached fuq miss                       |
+| Navigazzjoni tal-paġna                     | Bypass          | Il-browser iġib il-paġna direttament; ebda fallback offline ma huwa moqdi                                                |
+| API, dashboard u rotot ta' awtentikazzjoni | Bypass          | Il-ħaddiem ma jinterċettax jew ma jaħdimx dawn it-talbiet                                                                |
+| Talbiet oħra mhux statiċi                  | Netwerk         | Ebda tfittxija jew ħażna tal-cache                                                                                       |
 
-### Paġna Offline
+Ir-rotot esklużi huma `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` u `/login`, imqabbla b'mod insensittiv fil-każi fil-konfini tal-mogħdija. Ir-rikjesti ta' oriġini inkroċjata u mhux GET ukoll jevitaw lill-ħaddiem.
 
-Meta n-network ma jkunx disponibbli u utent jinnaviga lejn paġna ġdida, is-service worker jipprovdi paġna ddedikata `/offline` li:
+### Paġna tal-Konnettività
 
-- Turi messaġġ ċar **"Problema ta’ Konnettività"**
-- Turi **indikatur tal-istatus online/offline** attiv li jiġi aġġornat f’ħin reali
-- Tipprovdi buttuna **"Erġa’ Pprova l-Konnessjoni"** biex terġa’ tgħabbi meta tirritorna l-konnettività
-- Tipprovdi link għall-**Paġna tal-Istatus** għad-dijanjostika
+Il-paġna `/offline` tipprovdi messaġġ ta' konnettività, indikatur online/offline, a** Erġa' pprova l-Konnessjoni** buttuna u link għall-paġna tal-istatus. Huwa** mhux pre-cached** u l-ħaddiem tas-servizz jagħmel** le** ridirezzjona navigazzjonijiet falluti lejha. L-eżistenza tiegħu ma tagħmilx paġni ġodda aċċessibbli mingħajr is-server.
 
 ### Ikoni tal-App
 
-OmniRoute jipprovdi ikoni ottimizzati għal kull pjattaforma:
+Il-manifest jirreklama dawn l-ikoni PNG :
 
-| Fajl                   | Daqs              | Użat Minn                                             |
-| ---------------------- | ----------------- | ----------------------------------------------------- |
-| `icon-512.png`         | 512×512           | Talba għall-installazzjoni fuq Android, splash screen |
-| `apple-touch-icon.png` | 180×180           | Ikona tal-iskrin ewlieni fuq iOS                      |
-| `icon-192.svg`         | 192×192 (vettur)  | Ikona adattiva ta’ Android                            |
-| `apple-touch-icon.svg` | 180×180 (vettur)  | Riżerva għal Apple                                    |
-| `favicon.svg`          | Vettur            | Tabs tal-browser                                      |
-| `favicon.ico`          | Diversi daqsijiet | Browsers eqdem                                        |
+| Fajl                   | Daqs    | Użu                                  |
+| ---------------------- | ------- | ------------------------------------ |
+| `icon-192.png`         | 192×192 | Ikona ġenerali tal-app               |
+| `icon-512.png`         | 512×512 | Ikona tal-app ġenerali u maskable    |
+| `apple-touch-icon.png` | 180×180 | Ikona tal-iskrin tad-dar tat-tuffieħ |
+
+Il-browser jagħżel l-ikona xierqa għall-mira tal-installazzjoni.
 
 ### Reġistrazzjoni Awtomatika
 
-Is-service worker jiġi rreġistrat awtomatikament permezz tal-komponent `<PwaRegister />` fil-layout ewlieni. Mhi meħtieġa l-ebda azzjoni mill-utent — l-app tkun tista’ tiġi installata hekk kif il-browser jiskopri l-manifest validu u s-service worker.
+`PwaRegister` jirreġistra l-ħaddiem fil-produzzjoni meta l-browser jappoġġja ħaddiema tas-servizz. Il-mod ta 'żvilupp ineħħi r-reġistrazzjoni tal-ħaddiema u jnaddaf il-caches biex tevita li assi skaduti jinterferixxu ma' rikarigu sħun. Installa prompts jibqgħu deċiżjoni browser.
 
 ## Arkitettura Teknika
 
-### Manifest tal-App tal-Web (`manifest.webmanifest`)
+### Web App Manifest
 
-Iġġenerat minn Next.js permezz ta’ `src/app/manifest.ts`:
+Next.js jiġġenera `/manifest.webmanifest` minn [`src/app/manifest.ts`](../../src/app/manifest.ts). Is-settings ewlenin tiegħu huma:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute huwa gateway tal-AI għal LLMs minn diversi fornituri. Endpoint wieħed għall-fornituri kollha tal-AI tiegħek.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| L-issettjar             | Valur                                               |
+| ----------------------- | --------------------------------------------------- |
+| `short_name`            | `OmniRoute`                                         |
+| `start_url`             | `/dashboard`                                        |
+| `scope`                 | `/`                                                 |
+| `display`               | `standalone`                                        |
+| `orientation`           | `any`                                               |
+| Sfond u kuluri tat-tema | Il-paletta tad-dawl default minn `PWA_THEME_COLORS` |
 
-### Service Worker (`public/sw.js`)
+L-isem u d-deskrizzjoni tal-manifest huma valuri statiċi f'dak il-fajl tas-sors. Il-manifest installat ma jsegwix l-issettjar tal-isem tal-istanza jew il-paletta attiva f'kull żjara.
 
-Service worker sempliċi (mingħajr dipendenzi fuq frameworks) bi:
+### Ħaddiem tas-Servizz
 
-- **Fażi tal-installazzjoni**: Jagħmel pre-cache tal-qoxra tal-app (l-għerq, il-paġna offline, il-manifest u l-ikoni)
-- **Fażi tal-attivazzjoni**: Ineħħi verżjonijiet antiki tal-cache u jieħu kontroll tal-klijenti kollha
-- **Fażi tal-fetch**: Routing intelliġenti bbażat fuq it-tip ta’ talba (navigazzjoni, asset statiku, API)
-- **Verżjonar tal-cache**: `omniroute-pwa-v3` — żid dan biex tisforza cache ġdid meta jsir aġġornament
+[`public/sw.js`](../../public/sw.js) m'għandha l-ebda dipendenza fuq il-qafas tas-servizz:
 
-### Metadata tal-Layout (`src/app/layout.tsx`)
+- **Installa:** pre-caches l-erba’ riżorsi elenkati hawn fuq u jattiva l-ħaddiem il-ġdid.
+- **Attiva:** tneħħi ġenerazzjonijiet ta 'cache anzjani u titlob klijenti.
+- **Ġib:** japplika l-istrateġiji tal-assi statiċi u l-esklużjonijiet tar-rotot hawn fuq.
+- **Verżjoni:** l-isem tal-cache tas-sors huwa `omniroute-pwa-v3`; il-produzzjoni jibnu timbri l-identità cache.
+- **Notifiki:** jimmaniġġja l-avvenimenti `push` deħlin u jiffoka jew jiftaħ tieqa meta tiġi kklikkjata notifika.
 
-Il-layout tal-għerq jipprovdi l-meta tags kollha meħtieġa għall-konformità mal-PWA:
+Push event handlers waħedhom ma jistabbilixxux abbonament push attiv jew konsenja tas-server konfigurat. Tassumux li n-notifiki huma attivati sempliċement għax iż- PWA huwa installat.
 
-- Link `manifest` għal `/manifest.webmanifest`
-- `apple-web-app-capable: true` għall-modalità standalone ta’ iOS
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` għal Chrome fuq Android
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` għal rendering minn tarf sa tarf
+### Metadata tal-Layout u Reġistrazzjoni
 
-### Komponent: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) jipprovdi r-rabta tal-manifest, metadejta awtonoma ta' Apple, kuluri tat-tema u `viewport-fit: cover`. It-titlu tal-paġna u t-titlu tal-app web Apple jużaw l-isem tal-istanza. Il-kulur tat-tema tal-brawżer ħaj isegwi l-paletta; il-manifest tal-installazzjoni juża l-kulur tad-dawl default.
 
-Jinsab f’`src/shared/components/PwaRegister.tsx`, u dan il-komponent tal-klijent:
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) jimxi fuq il-klijent u jirreġistra `/sw.js` mal-build ID fl URL tiegħu. Jiskopri ġenerazzjonijiet ta 'cache li ma jaqblux u jista' jerġa 'jissettja l-ħaddiem u jerġa' jgħabbi darba biex jirkupra minn installazzjoni anzjani. Il-falliment tar-reġistrazzjoni ma jimblokkax id-dashboard.
 
-1. Jitħaddem waqt il-mount (fuq in-naħa tal-klijent biss)
-2. Jiċċekkja jekk il-browser jappoġġjax `serviceWorker`
-3. Jirreġistra `/sw.js` fis-skiet (l-iżbalji jiġu injorati biex jiġi evitat li l-app tiġi mblukkata)
-4. Ma jirrenderja xejn (`return null`) — huwa komponent għal effetti sekondarji biss
+## Uża Ma' Termux (Android)
 
-## Użu Ma’ Termux (Android)
+1. Ibda OmniRoute in Termux: `npx -y omniroute@latest`.
+2. Iftaħ Chrome fuq l-istess telefon: `http://localhost:20128`.
+3. Installa l- PWA permezz tal-menu ta 'installazzjoni tal-browser.
+4. Żomm is-server Termux jaħdem waqt li tuża d-dashboard.
 
-Meta tħaddem OmniRoute fuq Android permezz ta’ Termux, il-PWA taħdem bla xkiel:
+It-telefon jospita kemm il-portal kif ukoll id-dashboard tiegħu. It-talbiet lil fornituri AI remoti għadhom jeħtieġu aċċess għan-netwerk. Ara l- [gwida tat-Termux](TERMUX_GUIDE.md) għal kunsiderazzjonijiet dwar is-setup u l-proċess tal-ħajja tal-Android.
 
-1. Ibda OmniRoute f’Termux: `npx omniroute`
-2. Iftaħ Chrome fuq l-istess telefon: `http://localhost:20128`
-3. Installa l-PWA permezz ta’ “Żid mal-Iskrin Prinċipali”
-4. Il-PWA tikkonnettja mas-server lokali ta’ Termux — kollox jitħaddem fuq l-apparat
+## Użu Minn Apparat Oħra
 
-Din il-kombinazzjoni tfisser li t-telefon Android tiegħek huwa kemm is-**server** (Termux) kif ukoll il-**klijent** (PWA) — gateway tal-AI komplut u awtonomu.
-
-## Użu Minn Apparati Oħra
-
-Installa l-PWA fuq kwalunkwe apparat li għandu aċċess permezz ta’ browser għas-server OmniRoute tiegħek:
-
-- **Telefon/tablet ieħor**: Mur fuq `http://PHONE_IP:20128` u installa l-PWA
-- **Laptop**: Iftaħ Chrome/Edge u installaha bħala PWA tad-desktop
-- **Smart TV bi browser**: Aċċessa d-dashboard bi skrin sħiħ
+Iftaħ l-indirizz HTTPS tas-server fuq telefon, tablet jew desktop, imbagħad segwi l-fluss ta 'installazzjoni ta' dak il-browser. Is-server għandu jibqa' jintlaħaq minn kull apparat. Ara l- [gwida tal-mina](../ops/TUNNELS_GUIDE.md) għal għażliet ta' aċċess mill-bogħod.
 
 ## Personalizzazzjoni
 
 ### Isem tal-Istanza
 
-It-titlu tal-PWA jirrispetta l-konfigurazzjoni tal-**Isem tal-Istanza** minn `Dashboard → Settings`. Jekk tibdel l-isem tal-istanza tiegħek għal “Il-Gateway tal-AI Tiegħi”, il-PWA installata turi dak l-isem.
+Il-** Isem tal-Istanza** l-issettjar jibdel il-metadata tad-dashboard, inkluż it-titlu tal-paġna u t-titlu tal-app web Apple. Il-manifest iġġenerat juża isem statiku, għalhekk dan is-setting ma jiggarantixxix li app diġà installata tingħata isem ġdid.
 
-### Favicon Personalizzat
+### Custom Favicon
 
-Jekk ittella’ favicon personalizzat permezz ta’ `Dashboard → Settings`, l-ikona tal-PWA fuq id-desktop tirrifletti l-ikona personalizzata. L-ikoni fuq l-iskrin prinċipali tal-apparati mobbli jużaw il-fajls `icon-512.png` u `apple-touch-icon.png` mibnija minn qabel.
+Favicon tad-dwana tibdel il-favicon tal-browser. Il-manifest tal-installazzjoni xorta jirreklama l-fajls PNG hawn fuq; it-tibdil tal-favicon ma jissostitwixxix dawk l-ikoni tal-iskrin tad-dar.
 
 ## Limitazzjonijiet
 
-- **Ebda notifiki push** — Is-service worker ma jimplimentax il-Push API. Minflok, in-notifiki jiġu ġestiti mill-app Electron.
-- **Ebda sinkronizzazzjoni fl-isfond** — L-azzjonijiet offline ma jitqegħdux fi kju biex jerġgħu jiġu eżegwiti. Il-PWA hija primarjament dashboard għall-wiri.
-- **Restrizzjonijiet tal-iOS** — Safari fuq iOS ma jappoġġjax il-karatteristiċi kollha tal-PWA (eż., il-prompts tal-installazzjoni jridu jsiru manwalment, u s-service workers fl-isfond huma limitati).
-- **Daqs tal-cache** — Is-service worker jaħżen fil-cache l-assi statiċi biss. Payloads kbar ta’ rispons mir-rotot `/api/` qatt ma jinħażnu fil-cache.
-- **Ikoni personalizzati fuq il-mobile** — Il-bidla tal-favicon fis-settings ma taġġornax l-ikona tal-iskrin tad-dar fuq il-mobile (dan jirrikjedi li l-ikoni tal-PWA jerġgħu jiġu ġġenerati).
+- **Konnessjoni tas-server meħtieġa:** in-navigazzjoni tal-paġna, l-istat tad-dashboard u t-talbiet API m'għandhomx fallback offline.
+- **Ebda sinkronizzazzjoni fl-isfond:** azzjonijiet offline mhumiex fil-kju għal replay.
+- **Differenzi fil-browser:** menus ta 'installazzjoni, preżentazzjoni tat-tieqa u appoġġ ta' notifika jvarjaw skont il-pjattaforma.
+- **Ebda cache ta' rispons API :** il-ħaddiem jeskludi API, dashboard u rotot ta 'awtentikazzjoni.
+- **Ikoni tal-installazzjoni statika:** l-aġġornament ta' dawk l-ikoni jeħtieġ li jinbidlu l-assi reklamati; browsers jistgħu jżommu metadata installata.
 
 ## Referenza tal-Fajls
 
-| Fajl                                    | Għan                                                                   |
-| --------------------------------------- | ---------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Rotta tal-manifest ta’ Next.js (tiġġenera `manifest.webmanifest`)      |
-| `public/sw.js`                          | Service worker b’loġika għall-ħżin fil-cache                           |
-| `src/shared/components/PwaRegister.tsx` | Komponent tal-klijent li jirreġistra s-service worker                  |
-| `src/app/offline/page.tsx`              | Paġna ta’ fallback offline b’indikatur tal-istatus f’ħin reali         |
-| `src/app/layout.tsx`                    | Layout ewlieni bil-metadata tal-PWA (apple-web-app, theme-color, eċċ.) |
-| `public/icon-512.png`                   | Ikona PNG ta’ 512×512 (Android, splash screen)                         |
-| `public/apple-touch-icon.png`           | Ikona PNG ta’ 180×180 (l-iskrin tad-dar tal-iOS)                       |
-| `public/icon-192.svg`                   | Ikona SVG ta’ 192×192 (adattiva għal Android)                          |
-| `public/apple-touch-icon.svg`           | Ikona SVG ta’ 180×180 (fallback għal Apple)                            |
+| Fajl                                                                                   | Għan                                                            |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Manifest tal-app tal-web iġġenerat                              |
+| [public/sw.js](../../public/sw.js)                                                     | Caching, esklużjonijiet u handlers ta 'avvenimenti ta' notifika |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Reġistrazzjoni tal-produzzjoni u rkupru ta' stale-cache         |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Paġna tal-konnettività, mhux riżerva awtomatika offline         |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Metadata tal-paġna u settings tal-viewport                      |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Valuri ta' tema-kulur kondiviżi                                 |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 app icon                                              |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Ikona tat-tuffieħ                                     |

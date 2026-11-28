@@ -14,13 +14,13 @@
 
 ## Bu Nədir
 
-OmniRoute 394 provayderi, o cümlədən 155 kataloq qeydini qeyd edir**free/no-auth** (auth olmayan, pulsuz səviyyəli OAuth və ya pulsuz səviyyəli API açarı — [Pulsuz Tiers Bələdçisinə](../getting-started/FREE-TIERS-GUIDE.md) və tam [Pulsuz Tiers kataloquna](../reference/FREE_TIERS.md) baxın). Tutmaq: pulsuz provayderlər model keyfiyyətində vəhşicəsinə dəyişir. Sərhəd modelinə xidmət edən auth olmayan provayder kiçik bir köhnə modelə xidmət edəndən daha faydalıdır.
+OmniRoute 394 provayderi qeydiyyatdan keçirir, onlardan 50-si pulsuz girişlə (auth olmayan, pulsuz səviyyəli OAuth və ya pulsuz səviyyəli API açarı — [Pulsuz Tiers Bələdçisinə](../getting-started/FREE-TIERS-GUIDE.md) və tam [Pulsuz Tiers kataloquna](../reference/FREE_TIERS.md) baxın). Tutmaq: pulsuz provayderlər model keyfiyyətində vəhşicəsinə dəyişir. Sərhəd modelinə xidmət edən auth təminatçısı kiçik bir köhnə modelə xidmət edəndən daha faydalıdır.
 
 **Pulsuz Provayder Reytinqləri** cavablar"** Hansı pulsuz provayder mənə ən yaxşı modeli verir?** " ilə hər bir pulsuz provayderin kataloquna qoşularaq** izdiham qaynaqlı keyfiyyət balları** dən** Arena AI liderlər lövhəsi** (insan üstünlük ELO, LMArena chatbot arenasının arxasında eyni fikir). Provayderlər daha sonra onların gücünə görə sıralanır** Ən yaxşı pulsuz model** .
 
 Reytinq üç real mənbədən hesablanır:
 
-1. Pulsuz provayder — `NOAUTH_PROVIDERS`, üstəgəl `hasFree` (`src/shared/constants/providers.ts`) ilə işarələnmiş `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` girişlərini siyahıya alır.
+1. Pulsuz provayder — `NOAUTH_PROVIDERS`, üstəgəl `hasFree` (`src/shared/constants/providers.ts`) ilə işarələnmiş `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` daxiletmələrini siyahıya alır.
 2. Provayder reyestrindən (`open-sse/config/providerRegistry.ts`) hər bir provayderin model kataloqu.
 3. Arena ELO sinxronizasiya mühərriki (`src/lib/arenaEloSync.ts`) tərəfindən `model_intelligence` DB cədvəlində saxlanılan ELO-dan əldə edilmiş tapşırıqlara uyğun xallar.
 
