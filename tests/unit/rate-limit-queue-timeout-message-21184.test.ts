@@ -39,7 +39,7 @@ describe("#21184 queue-budget timeout message", () => {
     assert.match(message, /never reached the provider/);
     assert.match(message, /\(requestQueue\.maxWaitMs=30000ms\)/);
     assert.match(message, /openai-compatible-chat-fa0dc13b\/gpt-6\.1-sol/);
-    assert.match(message, /4 request\(s\) queued and 2 running ahead of it/);
+    assert.match(message, /4 request\(s\) queued and 2 running ahead of it in the same queue/);
     assert.match(message, /not an upstream outage/);
     assert.match(message, /lower client concurrency or raise requestQueue\.maxWaitMs/);
     assert.match(message, /does not bound execution \(executionMaxWaitMs=600000ms\)/);
@@ -135,7 +135,10 @@ describe("#21184 queue-budget timeout message", () => {
           assert.match(message, /waited (29|30)ms in OmniRoute's local request queue/);
           assert.match(message, /\(requestQueue\.maxWaitMs=30000ms\)/);
           assert.match(message, /for openai\/gpt-4/);
-          assert.match(message, /0 request\(s\) queued and 1 running ahead of it/);
+          assert.match(
+            message,
+            /0 request\(s\) queued and 1 running ahead of it in the same queue/
+          );
           assert.match(message, /lower client concurrency or raise requestQueue\.maxWaitMs/);
 
           // The client-facing body is built from the same message.
