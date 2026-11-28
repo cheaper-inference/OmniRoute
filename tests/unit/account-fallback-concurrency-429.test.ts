@@ -48,6 +48,20 @@ test("concurrency 429 honors an upstream Retry-After hint", () => {
   assert.ok(out.newBackoffLevel === undefined || out.newBackoffLevel === 2);
 });
 
+test("Retry-After hint keeps its full duration when the clock advances between reads", (t) => {
+  // Every Date.now() read lands one millisecond later. Parsing the relative hint and
+  // subtracting "now" back with two separate reads used to drop that millisecond
+  // ("retry-after: 7" became a 6999 ms cooldown); one shared instant keeps it exact.
+  let clock = 1_700_000_000_000;
+  t.mock.method(Date, "now", () => clock++);
+  const out = checkFallbackError(429, "Too many concurrent requests", 2, null, "openai", {
+    "retry-after": "7",
+  });
+  assert.equal(out.reason, "concurrency_limited");
+  assert.equal(out.usedUpstreamRetryHint, true);
+  assert.equal(out.cooldownMs, 7000);
+});
+
 test("control: plain rate-limit 429 still climbs the backoff ladder", () => {
   const out = checkFallbackError(429, "Rate limit exceeded", 3, null, "openai");
   assert.equal(out.shouldFallback, true);
