@@ -32,6 +32,26 @@ export function getForeignOAuthSessionCount(
   return count;
 }
 
+/**
+ * Opt-in hard cap (OAUTH_MAX_SESSIONS_PER_ACCOUNT): true while `connectionId` serves fewer than
+ * `max` other sessions. A session the account already serves always has room. `max <= 0` or NaN
+ * means no cap. Failed requests release their slot through the release callback.
+ */
+export function hasOAuthSessionRoom(
+  connectionId: string | null | undefined,
+  sessionKey: string | null | undefined,
+  max: number,
+  now = Date.now()
+): boolean {
+  if (!(max > 0)) return true;
+  // The all-full fallback can leave an account above the cap; its sessions still stay on it.
+  if (connectionId && sessionKey) {
+    prune(now);
+    if (occupancy.get(connectionId)?.has(sessionKey)) return true;
+  }
+  return getForeignOAuthSessionCount(connectionId, sessionKey, now) < max;
+}
+
 export function getOAuthSessionAvailability(
   connectionId: string | null | undefined,
   sessionKey: string | null | undefined,

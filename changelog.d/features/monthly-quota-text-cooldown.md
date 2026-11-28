@@ -1,0 +1,1 @@
+- **feat(resilience):** opt-in `QUOTA_MONTHLY_TEXT_COOLDOWN=1` gives a 429 that names a monthly quota cap the long quota cooldown (parsed reset, else 24 h) instead of a 3 s retry loop (off by default).

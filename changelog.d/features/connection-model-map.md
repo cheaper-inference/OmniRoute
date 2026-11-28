@@ -1,0 +1,1 @@
+- **feat(routing):** a connection can set `providerSpecificData.modelMapping` (exact ids or trailing-star patterns, longest pattern wins) to rename a model on the wire for that connection only; connections without a mapping are unchanged.
