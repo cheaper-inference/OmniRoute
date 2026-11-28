@@ -65,6 +65,7 @@ import { refreshChatGptToken } from "./tokenRefresh/providers/chatgpt.ts";
 import { refreshCursorToken } from "./tokenRefresh/providers/cursor.ts";
 import { refreshOpenferenceToken } from "./tokenRefresh/providers/openference.ts";
 import { refreshRenderhourToken } from "./tokenRefresh/providers/renderhour.ts";
+import { refreshNousToken } from "./tokenRefresh/providers/nous.ts";
 import { refreshKiroToken } from "./tokenRefresh/providers/kiro.ts";
 import { refreshQoderToken } from "./tokenRefresh/providers/qoder.ts";
 import { refreshGitHubToken } from "./tokenRefresh/providers/github.ts";
@@ -83,6 +84,7 @@ export {
   refreshCursorToken,
   refreshOpenferenceToken,
   refreshRenderhourToken,
+  refreshNousToken,
   refreshKiroToken,
   refreshQoderToken,
   refreshGitHubToken,
@@ -517,6 +519,11 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     case "workbuddy":
       return await refreshWorkbuddyToken(credentials.refreshToken, log, proxyConfig);
 
+    case "nous-oauth":
+      // Single-use rotating refresh token; the caller persists the replacement
+      // inside the per-connection mutex before the new access token is used.
+      return await refreshNousToken(credentials.refreshToken, log, proxyConfig);
+
     default:
       // Fallback to generic OAuth refresh for unknown providers
       return refreshAccessToken(provider, credentials.refreshToken, credentials, log, proxyConfig);
@@ -544,6 +551,7 @@ export function supportsTokenRefresh(provider) {
     "cline",
     "kimi-coding",
     "muse-code",
+    "nous-oauth",
     // Devin auth is not refreshable here: devin-desktop accepts an imported API
     // key (#8228), while devin-cli is local-CLI owned via `devin auth login`
     // (#8407). Neither connection carries a refresh token, so listing either

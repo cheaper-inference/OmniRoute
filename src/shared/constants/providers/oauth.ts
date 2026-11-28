@@ -412,4 +412,22 @@ export const OAUTH_PROVIDERS = {
     authHint:
       "Sign in with the Freebuff browser login (same as `freebuff login`), or paste an existing Freebuff / Codebuff auth token. The token has no refresh grant — when it expires, sign in again.",
   },
+  "nous-oauth": {
+    id: "nous-oauth",
+    serviceKinds: ["llm"],
+    // Distinct alias, same reason as xai-oauth -> "xao": the api-key provider
+    // already owns "nous", and two providers must not resolve to one alias.
+    alias: "nouso",
+    name: "Nous Research (account login)",
+    icon: "hub",
+    color: "#2563EB",
+    textIcon: "NO",
+    website: "https://portal.nousresearch.com",
+    hasFree: true,
+    freeNote: "Uses your own Nous plan — no API credit is consumed.",
+    subscriptionRisk: true,
+    riskNoticeVariant: "oauth",
+    authHint:
+      "Start a device login, open the verification link and approve the code in any browser. This connects your Nous account (your plan) instead of pasting an API key. The session refreshes automatically; the refresh token is single-use, so do not copy the connection's credentials elsewhere.",
+  },
 };

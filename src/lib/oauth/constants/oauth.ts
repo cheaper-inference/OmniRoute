@@ -628,3 +628,24 @@ export const PROVIDERS = {
   MINIMAX_CODE: "minimax-code",
   COPILOT_M365_WEB: "copilot-m365-web",
 };
+
+// Nous Research OAuth configuration (RFC 8628 device authorization grant).
+//
+// `clientId` is the public constant Hermes Agent ships — there is no client
+// secret, no redirect URI and no dynamic registration in this flow, so a device
+// code can be requested from any client. The Portal mints a user_code, the user
+// approves it in a browser, and the token endpoint returns an access token
+// (1 hour) plus a single-use rotating refresh token.
+//
+// NOTE ON IDENTITY: a token obtained with `hermes-cli` carries
+// `nous_client: hermes-agent` / `product_id: nous-hermes-agent`, i.e. the Portal
+// regards the caller as Hermes Agent. That is fine for a self-hosted router run
+// by the account owner, but it is not a substitute for an OmniRoute-issued
+// client id, and it should not be presented as first-party Nous support.
+export const NOUS_CONFIG = {
+  apiBaseUrl: "https://inference-api.nousresearch.com/v1",
+  initiateUrl: "https://portal.nousresearch.com/api/oauth/device/code",
+  tokenUrl: "https://portal.nousresearch.com/api/oauth/token",
+  clientId: resolvePublicCred("nous_id", "NOUS_OAUTH_CLIENT_ID"),
+  scope: "inference:invoke",
+};

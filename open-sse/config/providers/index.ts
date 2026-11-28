@@ -181,6 +181,7 @@ import { qianfanProvider } from "./registry/qianfan/index.ts";
 import { meta_llamaProvider } from "./registry/meta-llama/index.ts";
 import { cloudflare_aiProvider } from "./registry/cloudflare-ai/index.ts";
 import { nous_researchProvider } from "./registry/nous-research/index.ts";
+import { nous_oauthProvider } from "./registry/nous-oauth/index.ts";
 import { alibabaProvider } from "./registry/alibaba/index.ts";
 import { alibaba_cnProvider } from "./registry/alibaba/cn/index.ts";
 import { doubaoProvider } from "./registry/doubao/index.ts";
@@ -485,6 +486,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "meta-llama": meta_llamaProvider,
   "cloudflare-ai": cloudflare_aiProvider,
   "nous-research": nous_researchProvider,
+  "nous-oauth": nous_oauthProvider,
   alibaba: alibabaProvider,
   "alibaba-cn": alibaba_cnProvider,
   doubao: doubaoProvider,

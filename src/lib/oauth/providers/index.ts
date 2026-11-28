@@ -39,6 +39,7 @@ import { zedHosted } from "./zed-hosted";
 import { museCode } from "./muse-code";
 import { minimaxCode } from "./minimax-code";
 import { copilotM365 } from "./copilot-m365-web";
+import { nous } from "./nous";
 
 export const PROVIDERS = {
   claude,
@@ -87,6 +88,17 @@ export const PROVIDERS = {
   // read), so the provider itself still stores no credential.
   "minimax-code": minimaxCode,
   "copilot-m365-web": copilotM365,
+  // Nous Research — RFC 8628 device grant. The access token lives ~1 hour and
+  // the refresh token is single-use and rotates, so the connection's stored
+  // refresh token must be persisted before the access token is first used.
+  // Registered as `nous-oauth` so it sits ALONGSIDE the existing api-key
+  // `nous-research` provider (same pattern as `xai-oauth` beside `xai`) instead
+  // of changing the auth mode of a provider people already have configured.
+  // Runtime counterpart: open-sse/config/providers/registry/nous-oauth/index.ts
+  // (alias nouso, Nous inference endpoint, oauth.tokenUrl). Without that entry
+  // a nouso/ request falls back to the generic OpenAI configuration and the
+  // saved OAuth token is not routed to the Nous endpoint.
+  "nous-oauth": nous,
 };
 
 export default PROVIDERS;
