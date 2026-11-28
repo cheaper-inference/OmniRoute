@@ -67,24 +67,26 @@ function resolveContextCachePin(ctx: ComboContext): {
         relayOptions?.apiKeyId
       )
     : null;
-  let pinnedModel: string | null = null;
-  let pinnedModelUsedAtMs: number | null = null;
-  let pinnedModelSinceMs: number | null = null;
+  const emptyPin = {
+    effectiveSessionId,
+    pinnedModel: null,
+    pinnedModelUsedAtMs: null,
+    pinnedModelSinceMs: null,
+  };
   if (
-    combo.context_cache_protection &&
-    effectiveSessionId &&
-    !(ctx.body as Record<string, unknown>)?.[SKIP_UNIVERSAL_HANDOFF_FLAG]
+    !combo.context_cache_protection ||
+    !effectiveSessionId ||
+    (ctx.body as Record<string, unknown>)?.[SKIP_UNIVERSAL_HANDOFF_FLAG]
   ) {
-    const usage = getLastSessionModelUsage(effectiveSessionId, combo.name);
-    const pinned = usage?.modelStr ?? null;
-    if (pinned) {
-      ctx.body = { ...ctx.body, model: pinned };
-      pinnedModel = pinned;
-      pinnedModelUsedAtMs = usage?.usedAtMs ?? null;
-      pinnedModelSinceMs = usage?.sinceMs ?? null;
-      log.info("COMBO", `[#401] Context cache: pinned model=${pinned} (server-side)`);
-    }
+    return emptyPin;
   }
+  const usage = getLastSessionModelUsage(effectiveSessionId, combo.name);
+  if (!usage?.modelStr) return emptyPin;
+
+  const pinnedModel = usage.modelStr;
+  ctx.body = { ...ctx.body, model: pinnedModel };
+  const { usedAtMs: pinnedModelUsedAtMs = null, sinceMs: pinnedModelSinceMs = null } = usage;
+  log.info("COMBO", `[#401] Context cache: pinned model=${pinnedModel} (server-side)`);
   return { effectiveSessionId, pinnedModel, pinnedModelUsedAtMs, pinnedModelSinceMs };
 }
 

@@ -330,6 +330,36 @@ async function findReadyHigherPriorityTarget(
   return null;
 }
 
+function shouldCheckHigherPriorityTargets(
+  combo: ComboLike,
+  body: Record<string, unknown>,
+  pinnedModelUsedAtMs: number | null | undefined,
+  pinnedModelSinceMs: number | null | undefined
+): boolean {
+  if (!ORDERED_PIN_STRATEGIES.has(normalizeRoutingStrategy(combo.strategy || "priority"))) {
+    return false;
+  }
+  return (
+    pinCacheExpired(body, pinnedModelUsedAtMs, Date.now()) ||
+    pinFallbackDwellExceeded(pinnedModelSinceMs, Date.now())
+  );
+}
+
+async function releaseFallbackPinIfTargetReady(
+  comboTargets: readonly ResolvedComboTarget[],
+  pinnedModel: string,
+  log: ComboLogger
+): Promise<boolean> {
+  const preferred = await findReadyHigherPriorityTarget(comboTargets, pinnedModel);
+  if (!preferred) return false;
+
+  log.info(
+    "COMBO",
+    `Context pin ${pinnedModel} is a fallback whose prompt cache has expired or whose dwell ceiling passed, and ${preferred} is ready; following the combo order`
+  );
+  return true;
+}
+
 export function normalizeNestedComboMode(value: unknown): NestedComboMode {
   return value === "execute" ? "execute" : "flatten";
 }
@@ -646,18 +676,10 @@ export async function tryPinnedModelDispatch(args: {
   if (
     pinInCombo &&
     haveFullCombos &&
-    ORDERED_PIN_STRATEGIES.has(normalizeRoutingStrategy(combo.strategy || "priority")) &&
-    (pinCacheExpired(body, pinnedModelUsedAtMs, Date.now()) ||
-      pinFallbackDwellExceeded(pinnedModelSinceMs, Date.now()))
+    shouldCheckHigherPriorityTargets(combo, body, pinnedModelUsedAtMs, pinnedModelSinceMs) &&
+    (await releaseFallbackPinIfTargetReady(comboTargets, pinnedModel, log))
   ) {
-    const preferred = await findReadyHigherPriorityTarget(comboTargets, pinnedModel);
-    if (preferred) {
-      log.info(
-        "COMBO",
-        `Context pin ${pinnedModel} is a fallback whose prompt cache has expired or whose dwell ceiling passed, and ${preferred} is ready; following the combo order`
-      );
-      return null;
-    }
+    return null;
   }
   // Honor the pin only if it is still a combo target AND its provider is not
   // DURABLY down. Without the health gate a pin keeps routing a session to a
