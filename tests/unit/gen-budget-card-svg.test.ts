@@ -5,19 +5,30 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { computeFreeModelTotals } from "@omniroute/open-sse/config/freeModelCatalog.ts";
+import {
+  computePublicFreeHeadline,
+  type FreeModelBudget,
+} from "@omniroute/open-sse/config/freeModelCatalog.ts";
+import { computeFreeCatalogCounts } from "@omniroute/open-sse/config/freeModelCatalog.counts.ts";
 
 import {
   buildBudgetCardCopy,
   renderBudgetCard,
 } from "../../scripts/research/gen-budget-card-svg.mjs";
+import { membershipFromProviderConstants } from "./_helpers/providerAccessMembership.ts";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 const fmt = (n: number) => (n >= 1e9 ? (n / 1e9).toFixed(2) + "B" : Math.round(n / 1e6) + "M");
+const catalogMeta = () => {
+  const { publishedQuotaPools, freeModels } = computeFreeCatalogCounts({
+    membershipOf: membershipFromProviderConstants,
+  });
+  return `${publishedQuotaPools} free pools · ${freeModels} models · one endpoint`;
+};
 
 test(
-  "the budget card prints the catalog's own totals (no regex-parsed subset)",
+  "the budget card prints the public catalog counts and headline figures",
   { timeout: 90000 },
   (context) => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "budget-card-"));
@@ -34,9 +45,13 @@ test(
       }
     );
     const svg = readFileSync(out, "utf8");
-    const t = computeFreeModelTotals();
+    const t = computePublicFreeHeadline();
+    const meta = catalogMeta();
+    assert.ok(svg.includes(meta), `expected catalog header: ${meta}`);
     assert.ok(svg.includes(`~${fmt(t.steadyRecurringTokens)}`), "steady figure");
-    assert.ok(svg.includes(`~${fmt(t.firstMonthRealisticTokens)}`), "first-month figure");
+    if (t.firstMonthRealisticTokens !== t.steadyRecurringTokens) {
+      assert.ok(svg.includes(`~${fmt(t.firstMonthRealisticTokens)}`), "first-month figure");
+    }
     assert.ok(svg.includes(`${t.uncappedProviders.length} permanently-free`), "uncapped count");
     if (t.gatedRecurringTokens > 0) {
       assert.ok(svg.includes("behind regional identity verification"), "gated line");
@@ -106,13 +121,60 @@ test("every drawn string is part of the subset input (no missing glyphs)", async
 
 test("the figures stay readable as <text> in the raw file", async () => {
   const svg = await renderBudgetCard();
-  const t = computeFreeModelTotals();
+  const t = computePublicFreeHeadline();
   const text = (s: string) =>
     new RegExp(`<text [^>]*>${s.replace(/[.*+?^$\{\}()|[\]\\]/g, "\\$&")}</text>`);
   assert.match(svg, text(`~${fmt(t.steadyRecurringTokens)}`));
-  assert.match(svg, text(`~${fmt(t.firstMonthRealisticTokens)}`));
-  assert.match(svg, text(buildBudgetCardCopy().meta[0]));
+  if (t.firstMonthRealisticTokens !== t.steadyRecurringTokens) {
+    const firstMonth = `~${fmt(t.firstMonthRealisticTokens)}`;
+    assert.ok(text(firstMonth).test(svg), `expected first-month figure as text: ${firstMonth}`);
+  }
+  assert.match(svg, text(catalogMeta()));
   assert.doesNotMatch(svg, /<image/);
+});
+
+test("equal steady and first-month totals hide the credits section and shorten the card", async () => {
+  const recurring: FreeModelBudget = {
+    provider: "fixture-recurring",
+    modelId: "monthly",
+    displayName: "Monthly model",
+    monthlyTokens: 12_000_000,
+    creditTokens: 0,
+    freeType: "recurring-monthly",
+    poolKey: null,
+    tos: "ok",
+  };
+  const signup: FreeModelBudget = {
+    ...recurring,
+    provider: "fixture-signup",
+    modelId: "trial",
+    monthlyTokens: 0,
+    creditTokens: 5_000_000,
+    freeType: "one-time-initial",
+  };
+  const restrictedRecurring: FreeModelBudget = {
+    ...recurring,
+    provider: "fixture-restricted",
+    modelId: "restricted-monthly",
+    monthlyTokens: 30_000_000,
+    tos: "avoid",
+  };
+  const svg = await renderBudgetCard({
+    perModel: [recurring, restrictedRecurring, { ...signup, tos: "avoid" }],
+  });
+  assert.ok(!/first month|signup credits/i.test(svg), "duplicate first-month section is hidden");
+  assert.ok(!svg.includes("fixture-signup 5M"), "signup credit chips are hidden");
+  assert.ok(svg.includes("~12M"), "the steady figure excludes the ToS-flagged quota");
+
+  const withCredits = await renderBudgetCard({
+    perModel: [recurring, restrictedRecurring, signup],
+  });
+  assert.ok(withCredits.includes("First month (+ signup credits)"), "first-month stat is printed");
+  assert.ok(withCredits.includes("~17M"), "the first-month figure includes the signup credit");
+  assert.ok(withCredits.includes("fixture-signup 5M"), "signup credit chip is printed");
+
+  const height = (card: string) => Number(card.match(/^<svg viewBox="0 0 1200 (\d+)"/)?.[1]);
+  assert.ok(height(svg) < height(withCredits), "the notes move up when the credit strip is hidden");
 });
 
 test("light and dark Editions palettes are both declared and no literal color escapes the theme", async () => {
