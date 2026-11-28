@@ -14,7 +14,7 @@
  */
 
 import { getDbInstance } from "../../src/lib/db/core.ts";
-import { readCallArtifact } from "../../src/lib/usage/callLogArtifacts.ts";
+import { readCallArtifact, type CallLogArtifact } from "../../src/lib/usage/callLogArtifacts.ts";
 import { extractCanonicalTurns, hashTurnContent } from "./conversationTracker.ts";
 
 export type TurnDisplayContent = {
@@ -110,6 +110,15 @@ function turnsFromResponseBody(responseBody: unknown): CanonicalTurnLike[] {
   ];
 }
 
+function turnsFromArtifactResponse(
+  clientResponse: unknown,
+  artifact: CallLogArtifact | null
+): CanonicalTurnLike[] {
+  if (clientResponse) return turnsFromClientResponse(clientResponse);
+  // Assistant-side fallback: only when the pipeline carries no client response (#20988).
+  return turnsFromResponseBody(artifact?.responseBody);
+}
+
 function turnsFromProviderRequest(body: unknown): CanonicalTurnLike[] {
   const rec = asRecord(body);
   return [...turnsFromBody(rec), ...extractChatCompletionsToolUseTurns(rec?.messages)];
@@ -176,11 +185,7 @@ export function resolveTurnDisplayContent(
       result,
       turnsFromBody(asRecord(pipeline?.clientRawRequest)?.body ?? artifact?.requestBody)
     );
-    indexTurns(result, turnsFromClientResponse(pipeline?.clientResponse));
-    // Assistant-side fallback: only when the pipeline carries no client response (#20988).
-    if (!pipeline?.clientResponse) {
-      indexTurns(result, turnsFromResponseBody(artifact?.responseBody));
-    }
+    indexTurns(result, turnsFromArtifactResponse(pipeline?.clientResponse, artifact));
     indexTurns(result, turnsFromProviderRequest(asRecord(pipeline?.providerRequest)?.body));
   }
   return result;
