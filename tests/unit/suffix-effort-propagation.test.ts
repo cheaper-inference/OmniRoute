@@ -8,7 +8,14 @@ const networkFetch = globalThis.fetch;
 import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
 
 const harness = await createChatPipelineHarness("suffix-effort-propagation");
-const { handleChat, buildRequest, buildOpenAIResponse, seedConnection, combosDb } = harness;
+const {
+  handleChat,
+  buildRequest,
+  buildOpenAIResponse,
+  buildClaudeResponse,
+  seedConnection,
+  combosDb,
+} = harness;
 const { persistDiscoveredModels } = await import("../../src/lib/providerModels/modelDiscovery.ts");
 const { resolveModelOrError } = await import("../../src/sse/handlers/chatHelpers.ts");
 
@@ -243,11 +250,15 @@ for (const failure of ["empty"]) {
         { id: fallback, reasoning: { supported_efforts: ["low", "high"] } },
       ]);
       const bodies: Record<string, unknown>[] = [];
-      globalThis.fetch = async (_url, init) => {
+      globalThis.fetch = async (url, init) => {
+        assert.match(String(url), /\/v1\/messages$/);
         const sent = JSON.parse(String(init?.body));
         bodies.push(sent);
-        if (sent.model === model) return buildOpenAIResponse("", model);
-        return buildOpenAIResponse("The requested example is complete.", sent.model);
+        if (sent.model === model) {
+          const empty = await buildClaudeResponse("", model).json();
+          return Response.json({ ...empty, content: [] });
+        }
+        return buildClaudeResponse("The requested example is complete.", sent.model);
       };
       const response = await handleChat(
         buildRequest({
@@ -256,6 +267,7 @@ for (const failure of ["empty"]) {
           body: {
             model: `${provider}/${model}${mode === "suffix" ? "-high" : ""}`,
             stream: false,
+            max_tokens: 2000,
             ...(mode === "explicit" ? { reasoning_effort: "low" } : {}),
             messages: [{ role: "user", content: "Explain a small example." }],
           },
@@ -264,11 +276,18 @@ for (const failure of ["empty"]) {
       assert.equal(response.status, 200, await response.text());
       assert.equal(bodies[0].model, model);
       assert.equal(bodies.at(-1)?.model, fallback);
-      assert.equal(
-        bodies[0].reasoning_effort,
-        mode === "suffix" ? "high" : mode === "explicit" ? "low" : undefined
+      // Sonnet 4.x translates Chat effort to a native thinking budget. The high
+      // budget is capped by the model, and a suffix applies only to the first attempt.
+      assert.deepEqual(
+        bodies[0].thinking,
+        mode === "plain"
+          ? undefined
+          : { type: "enabled", budget_tokens: mode === "suffix" ? 62000 : 1024 }
       );
-      assert.equal(bodies.at(-1)?.reasoning_effort, mode === "explicit" ? "low" : undefined);
+      assert.deepEqual(
+        bodies.at(-1)?.thinking,
+        mode === "explicit" ? { type: "enabled", budget_tokens: 1024 } : undefined
+      );
     });
   }
 }

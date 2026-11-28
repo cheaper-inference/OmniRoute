@@ -12,6 +12,8 @@ import { getEffectiveToolLimit, getKnownToolLimit } from "../../services/toolLim
 import { OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } from "../../services/webSearchFallback.ts";
 import { OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME } from "../../services/webFetchInterception.ts";
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../../translator/request/openai-to-claude.ts";
+import { fitThinkingToMaxTokens } from "../../translator/request/openai-to-claude/thinkingBudget.ts";
+import { claudeThinkingFromOpenAIRequest } from "../../translator/request/openai-to-claude/thinkingConfig.ts";
 import {
   applyToolDisclosure,
   collectHistoryToolNames,
@@ -35,6 +37,7 @@ import {
   normalizeClaudeDisabledThinkingEffort,
 } from "../../services/claudeAdaptiveThinking.ts";
 import { normalizeClaudeHaikuConstraints } from "../../services/claudeHaikuConstraints.ts";
+import { hasExplicitReasoningField } from "../../services/adaptiveEffort.ts";
 import { applyDefaultReasoningEffort } from "../../services/defaultReasoningEffort.ts";
 import { normalizeMimoThinking } from "../../services/mimoThinking.ts";
 import {
@@ -392,13 +395,69 @@ type PrepareUpstreamBodyOptions = {
   bypassDefaultToolLimit?: boolean;
   isOpencodeClient?: boolean;
   /** Raw (pre-translation) request body — turn-scoped signals for adaptive effort (#13448). */
-  rawBody?: { messages?: unknown } | undefined;
+  rawBody?: Body;
   /** Incoming client request — read for the x-omniroute-effort header (#13448). */
   clientRawRequest?: { headers?: unknown } | undefined;
   /** Opt-in relevance-based tool selection (settings.toolDisclosure); null/absent = off. */
   toolDisclosure?: ToolDisclosureConfig | null;
   log?: LoggerLike;
 };
+
+function hasClaudeOutputEffort(body?: Body): boolean {
+  return (body?.output_config as Body | undefined)?.effort !== undefined;
+}
+
+function applyClaudeDefaultThinking(body: Body, effortBody: Body, model: string): void {
+  const toolChoice = body.tool_choice;
+  const choiceType = (toolChoice as Body | undefined)?.type;
+  if (toolChoice === "any" || choiceType === "any" || choiceType === "tool") return;
+
+  const { thinking, effort } = claudeThinkingFromOpenAIRequest(effortBody, model);
+  if (!thinking) return;
+  const fitted = fitThinkingToMaxTokens(
+    model,
+    Number(body.max_tokens) || 0,
+    thinking,
+    "cheaperinference"
+  );
+  if (!fitted.thinking) return;
+  body.thinking = fitted.thinking;
+  body.max_tokens = fitted.maxTokens;
+  if (effort) body.output_config = { ...(body.output_config as Body | undefined), effort };
+  delete body.temperature;
+}
+
+function canDefaultCheaperInferenceThinking(
+  { provider, targetFormat, translatedBody, rawBody }: PrepareUpstreamBodyOptions,
+  hadExplicitReasoning: boolean
+): boolean {
+  // Translation can consume explicit choices such as reasoning_effort: "none".
+  return (
+    provider === "cheaperinference" &&
+    targetFormat === FORMATS.CLAUDE &&
+    !hasClaudeOutputEffort(translatedBody) &&
+    !(rawBody && (hasExplicitReasoningField(rawBody) || hasClaudeOutputEffort(rawBody))) &&
+    !hadExplicitReasoning
+  );
+}
+
+function maybeApplyCheaperInferenceDefaultThinking(
+  body: Body,
+  opts: PrepareUpstreamBodyOptions,
+  shouldDefaultThinking: boolean
+): void {
+  if (!shouldDefaultThinking) return;
+
+  const { modelToCall } = opts;
+  const isOriginModel = modelToCall === opts.originModel;
+  const effortBody = applyDefaultReasoningEffort<Body>(
+    {},
+    modelToCall,
+    isOriginModel ? opts.resolvedThinkingEffort : undefined,
+    isOriginModel ? opts.defaultThinkingEffort : undefined
+  );
+  applyClaudeDefaultThinking(body, effortBody, modelToCall);
+}
 
 function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
   const { translatedBody, modelToCall, provider, targetFormat, log } = opts;
@@ -418,10 +477,8 @@ function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
     (typeof templateKwargs?.thinking === "boolean" ||
       typeof templateKwargs?.enable_thinking === "boolean");
   const hadExplicitReasoning =
-    translatedBody.reasoning_effort !== undefined ||
-    translatedBody.reasoning !== undefined ||
-    translatedBody.thinking !== undefined ||
-    hasExplicitTemplateReasoning;
+    hasExplicitReasoningField(translatedBody) || hasExplicitTemplateReasoning;
+  const shouldDefaultThinking = canDefaultCheaperInferenceThinking(opts, hadExplicitReasoning);
   // Codex's Responses transform normalizes input into new item records before
   // mutation and independently copies its mutable tools/reasoning fields.
   // Keep the potentially huge input history shared until that boundary: the
@@ -433,6 +490,7 @@ function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
       : structuredClone(translatedBody);
   let bodyToSend: Body = { ...attemptSource, model: modelToCall };
   bodyToSend = normalizeThinkingForModel(bodyToSend, modelToCall);
+  maybeApplyCheaperInferenceDefaultThinking(bodyToSend, opts, shouldDefaultThinking);
   bodyToSend = normalizeClaudeAdaptiveThinking(bodyToSend, modelToCall);
   bodyToSend = normalizeClaudeDisabledThinkingEffort(bodyToSend, modelToCall, provider);
   bodyToSend = normalizeClaudeHaikuConstraints(bodyToSend, modelToCall);

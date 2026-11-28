@@ -13,6 +13,10 @@ import type { RegistryEntry, RegistryModel } from "../../shared.ts";
  * The gateway also serves a native `/v1/responses` endpoint (`responsesBaseUrl`).
  * It is stateless and REQUIRES `store:false` — see executors/cheaperinference.ts,
  * which injects it and resolves the URL from the per-model `targetFormat` tag.
+ *
+ * KEA-9430: Claude prompt caching uses the native `/v1/messages` endpoint.
+ * Translating these requests to OpenAI Chat removed the client's `cache_control`
+ * breakpoints, so the Claude catalog opts into the native Messages format.
  */
 export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
   { id: "aion-labs.aion-2-0", name: "Aion 2.0", supportsReasoning: true, toolCalling: true },
@@ -22,6 +26,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "claude-haiku-4.5",
@@ -29,6 +34,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "claude-opus-4-7-fast",
@@ -36,6 +42,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "claude-opus-4-8-fast",
@@ -43,6 +50,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "claude-opus-4.5",
@@ -50,6 +58,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "claude-opus-4.6",
@@ -57,6 +66,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "claude-opus-4.7",
@@ -64,6 +74,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "claude-opus-4.8",
@@ -71,6 +82,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "claude-opus-5",
@@ -78,6 +90,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "claude-opus-5-fast",
@@ -85,6 +98,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "claude-sonnet-4.5",
@@ -92,6 +106,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "claude-sonnet-4.6",
@@ -99,6 +114,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "claude-sonnet-5",
@@ -106,6 +122,7 @@ export const CHEAPERINFERENCE_MODELS: RegistryModel[] = [
     supportsVision: true,
     supportsReasoning: true,
     toolCalling: true,
+    targetFormat: "claude",
   },
   {
     id: "deepseek-v4-flash",
@@ -247,6 +264,7 @@ export const cheaperinferenceProvider: RegistryEntry = {
   // /v1/chat/completions. Consumed by CheaperInferenceExecutor.buildUrl for the
   // models tagged targetFormat: "openai-responses" above.
   responsesBaseUrl: "https://api.cheaperinference.com/v1/responses",
+  messagesUrl: "https://api.cheaperinference.com/v1/messages",
   authType: "apikey",
   authHeader: "bearer",
   models: CHEAPERINFERENCE_MODELS,

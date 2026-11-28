@@ -115,6 +115,33 @@ function buildCodexThinkingMetadata(
   };
 }
 
+function shouldSurfaceRequestTargetFormat(
+  provider: string | null | undefined,
+  targetFormat: string
+): boolean {
+  switch (provider) {
+    // #7364: Z.ai and GLM Coding default to Claude Messages. Surface the per-model
+    // OpenAI override so DefaultExecutor.buildUrl() can select the compatible endpoint.
+    case "zai":
+    case "glm-coding-apikey":
+      return targetFormat === FORMATS.OPENAI;
+    // AgentRouter uses distinct URLs and auth schemes for Claude, OpenAI Chat, and
+    // OpenAI Responses. Keep the selected protocol request-local.
+    case "agentrouter":
+      return targetFormat === FORMATS.OPENAI || targetFormat === FORMATS.OPENAI_RESPONSES;
+    // Cheaper Inference uses the request-local format for its URL, headers, and body transform.
+    case "cheaperinference":
+      return true;
+    // GitHub Copilot's executor consults the static model registry, so it needs the
+    // per-model override to route custom Codex models to the native /responses endpoint.
+    case "github":
+    case "ghe-copilot":
+      return targetFormat === FORMATS.OPENAI_RESPONSES;
+    default:
+      return false;
+  }
+}
+
 export function resolveExecutionCredentials(opts: {
   credentials: CredentialsLike;
   nativeCodexPassthrough: boolean;
@@ -178,37 +205,7 @@ export function resolveExecutionCredentials(opts: {
     providerSpecificData.disableStreamOptions = true;
   }
 
-  // #7364: "zai"/"glm-coding-apikey" default to the Anthropic Messages wire format
-  // (registry format:"claude"), but a per-model targetFormat override (custom-model
-  // dropdown, #2905) can resolve targetFormat to "openai" — e.g. for a vision model
-  // like glm-4.6v that the operator wants routed through the OpenAI-compatible
-  // endpoint. DefaultExecutor.buildUrl()'s "zai" branch has no other way to see that
-  // override, so surface it on providerSpecificData for buildUrl to read.
-  if (targetFormat === FORMATS.OPENAI && (provider === "zai" || provider === "glm-coding-apikey")) {
-    providerSpecificData.targetFormat = targetFormat;
-  }
-
-  // AgentRouter exposes Claude, OpenAI Chat, and OpenAI Responses on distinct URLs with distinct
-  // auth schemes. Keep the executor's URL/header resolution synchronized with chatCore's resolved
-  // per-request protocol without persisting the inferred selection back to the connection.
-  if (
-    provider === "agentrouter" &&
-    (targetFormat === FORMATS.OPENAI || targetFormat === FORMATS.OPENAI_RESPONSES)
-  ) {
-    providerSpecificData.targetFormat = targetFormat;
-  }
-
-  // GitHub Copilot custom models (custom-model dropdown, #2905) can carry a
-  // per-model targetFormat override resolving to "openai-responses" so a
-  // Codex-family custom model routes through Copilot's native /responses
-  // endpoint. GithubExecutor.buildUrl() only consults the static
-  // PROVIDER_MODELS registry via getModelTargetFormat() and has no other way
-  // to see a custom model's override — mirrors the zai/glm-coding-apikey fix
-  // (#7364) for the same class of bug.
-  if (
-    targetFormat === FORMATS.OPENAI_RESPONSES &&
-    (provider === "github" || provider === "ghe-copilot")
-  ) {
+  if (shouldSurfaceRequestTargetFormat(provider, targetFormat)) {
     providerSpecificData.targetFormat = targetFormat;
   }
 
