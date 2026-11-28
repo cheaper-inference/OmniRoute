@@ -287,6 +287,7 @@
     "retentionOpt": "Żomm biss l-aħħar N reżervi",
     "passphrasePrompt": "Passphrase tal-enkripta:",
     "noPassphrase": "Passphrase meħtieġ għal reżerv enkriptat.",
+    "restoreDecryptFailed": "Backup {name} ma setax jiġi decrypted (passphrase ħażina jew fajl bil-ħsara); ma nbidel xejn.",
     "cloudFailed": "Twissija: ittella' tal-cloud falla. Reżerv lokali ġie salvagardjat.",
     "cloudUploaded": "Reżerv cloud ittella': {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Immaniġġja l-konfigurazzjoni tar-reżiljenza",
       "threshold": "Limitu ta' falliment",
       "resetTimeout": "Timeout ta' reset f'ms",
-      "baseCooldown": "Cooldown bażiku f'ms"
+      "baseCooldown": "Cooldown bażiku f'ms",
+      "p2cLatencyWeight": "piż tal-latency p2c, 0 (mitfi) sa 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Ibbda Claude Code indirizzat lejn OmniRoute (lokali jew remot, b'--profile)",
     "token": "Token li l-klijent Claude għandu jibgħat (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute mhux aċċessibbli fuq {port}. Ibda b''omniroute serve'.",
-    "notFound": "Il-CLI 'claude' ma nstabx fil-PATH."
+    "notFound": "Il-CLI 'claude' ma nstabx fil-PATH.",
+    "toolsHelp": "Tnedija ta 'għodda ta' kodifikazzjoni (jibda awtomatikament il-portal, lista tal-mudelli mill-fornituri konnessi tiegħek): omniroute launch <tool> [għażliet] [-- toolArgs...] omniroute launch --list list launchable tools omniroute launch <tool> --help options for a tool launch (--model, --all-models, ...) Mingħajr bidu ta 'hawn fuq isem ta' għodda Claude .",
+    "gatewayDescription": "Spezzjona jew tikkontrolla l-portal li bdiet it-tnedija ta’ omniroute"
   },
   "run": {
     "description": "Nniedi target tal-CLI appoġġat permezz ta' OmniRoute"

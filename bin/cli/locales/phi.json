@@ -287,6 +287,7 @@
     "retentionOpt": "Panatilihin lamang ang huling N backup",
     "passphrasePrompt": "Encryption passphrase:",
     "noPassphrase": "Kailangan ang passphrase para sa naka-encrypt na backup.",
+    "restoreDecryptFailed": "Hindi ma-decrypt ang backup na {name} (maling passphrase o nasirang file); walang pinagbago.",
     "cloudFailed": "Babala: nabigo ang pag-upload sa cloud. Na-save ang lokal na backup.",
     "cloudUploaded": "Na-upload ang cloud backup: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Pamahalaan ang resilience config",
       "threshold": "Hangganan ng pagkabigo",
       "resetTimeout": "Timeout sa pag-reset sa ms",
-      "baseCooldown": "Batayang cooldown sa ms"
+      "baseCooldown": "Batayang cooldown sa ms",
+      "p2cLatencyWeight": "p2c latency weight, 0 (off) hanggang 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Ilunsad ang Claude Code na nakaturo sa OmniRoute (lokal o remote, gamit ang --profile)",
     "token": "Token na dapat ipadala ng Claude client (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "Hindi maabot ang OmniRoute sa {port}. Simulan ito gamit ang 'omniroute serve'.",
-    "notFound": "Hindi natagpuan sa PATH ang 'claude' CLI."
+    "notFound": "Hindi natagpuan sa PATH ang 'claude' CLI.",
+    "toolsHelp": "Maglunsad ng coding tool (awtomatikong sinisimulan ang gateway, listahan ng modelo mula sa iyong mga konektadong provider): omniroute launch <tool> [options] [-- toolArgs...] omniroute launch --list list launchable tools omniroute launch <tool> --help options para sa isang tool launch (--model, --all-models, ...) Kung walang pangalan ng tool, ilunsad ang mga opsyon sa itaas na Claudepre Code.",
+    "gatewayDescription": "Siyasatin o kontrolin ang gateway kung saan nagsimula ang paglulunsad ng omniroute"
   },
   "run": {
     "description": "Maglunsad ng sinusuportahang CLI target sa pamamagitan ng OmniRoute"

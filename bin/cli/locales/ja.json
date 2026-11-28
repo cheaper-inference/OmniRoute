@@ -287,6 +287,7 @@
     "retentionOpt": "最新の N 件のバックアップのみを保持",
     "passphrasePrompt": "暗号化パスフレーズ:",
     "noPassphrase": "暗号化されたバックアップにはパスフレーズが必要です。",
+    "restoreDecryptFailed": "バックアップ{name}を復号化できませんでした (間違ったパスフレーズまたは破損したファイル)。何も変わりませんでした。",
     "cloudFailed": "警告: クラウドへのアップロードに失敗しました。ローカルバックアップは保存されました。",
     "cloudUploaded": "クラウドバックアップをアップロードしました: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "レジリエンス設定を管理",
       "threshold": "失敗しきい値",
       "resetTimeout": "リセットタイムアウト（ms）",
-      "baseCooldown": "基本クールダウン時間（ms）"
+      "baseCooldown": "基本クールダウン時間（ms）",
+      "p2cLatencyWeight": "p2c レイテンシの重み、0 (オフ) ～ 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "OmniRouteを参照するClaude Codeを起動（ローカルまたはリモート、--profile対応）",
     "token": "Claudeクライアントが送信するトークン（ANTHROPIC_AUTH_TOKEN）",
     "notRunning": "ポート{port}でOmniRouteに接続できません。'omniroute serve'で起動してください。",
-    "notFound": "'claude' CLIがPATHに見つかりません。"
+    "notFound": "'claude' CLIがPATHに見つかりません。",
+    "toolsHelp": "コーディング ツールを起動します (ゲートウェイ、接続されているプロバイダーからのモデル リストを自動起動します): オムニルート起動<tool> [オプション] [-- toolArgs...] オムニルート起動--listリスト 起動可能なツール オムニルート起動<tool> --helpツール起動のオプション (--model、 --all-models、...) ツール名を指定しないと、起動は上記のオプションでクロード コードを開始します (非推奨)。",
+    "gatewayDescription": "オムニルートの起動が開始されたゲートウェイを検査または制御する"
   },
   "run": {
     "description": "OmniRoute経由でサポート対象のCLIを起動"

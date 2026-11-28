@@ -287,6 +287,7 @@
     "retentionOpt": "Conserva solo gli ultimi N backup",
     "passphrasePrompt": "Passphrase di crittografia:",
     "noPassphrase": "La passphrase è obbligatoria per un backup crittografato.",
+    "restoreDecryptFailed": "Impossibile decrittografare il backup {name} (passphrase errata o file danneggiato); nulla è stato cambiato.",
     "cloudFailed": "Avviso: caricamento nel cloud non riuscito. Il backup locale è stato salvato.",
     "cloudUploaded": "Backup caricato nel cloud: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Gestisci la configurazione di resilienza",
       "threshold": "Soglia di errore",
       "resetTimeout": "Timeout di reimpostazione in ms",
-      "baseCooldown": "Cooldown di base in ms"
+      "baseCooldown": "Cooldown di base in ms",
+      "p2cLatencyWeight": "Peso della latenza p2c, da 0 (disattivato) a 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Avvia Claude Code configurato per OmniRoute (locale o remoto, con --profile)",
     "token": "Token che il client Claude deve inviare (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute non è raggiungibile sulla porta {port}. Avvialo con 'omniroute serve'.",
-    "notFound": "La CLI 'claude' non è stata trovata nel PATH."
+    "notFound": "La CLI 'claude' non è stata trovata nel PATH.",
+    "toolsHelp": "Avvia uno strumento di codifica (avvia automaticamente il gateway, elenco dei modelli dai tuoi fornitori collegati): omniroute launch <tool> [opzioni] [-- toolArgs...] omniroute launch --list list launchable tools omniroute launch <tool> --help opzioni per l'avvio di uno strumento (--model, --all-models, ...) Senza un nome strumento, launch avvia Claude Code con le opzioni sopra (obsoleto).",
+    "gatewayDescription": "Ispeziona o controlla il gateway avviato dal lancio di omniroute"
   },
   "run": {
     "description": "Avvia una destinazione CLI supportata tramite OmniRoute"

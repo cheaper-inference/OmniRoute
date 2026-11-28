@@ -287,6 +287,7 @@
     "retentionOpt": "الاحتفاظ بآخر N نسخة احتياطية فقط",
     "passphrasePrompt": "عبارة مرور التشفير:",
     "noPassphrase": "عبارة المرور مطلوبة للنسخة الاحتياطية المشفرة.",
+    "restoreDecryptFailed": "لا يمكن فك تشفير النسخة الاحتياطية {name} (عبارة مرور خاطئة أو ملف تالف)؛ لم يتغير شيء.",
     "cloudFailed": "تحذير: فشل الرفع إلى السحابة. تم حفظ النسخة الاحتياطية محليًا.",
     "cloudUploaded": "تم رفع النسخة الاحتياطية إلى السحابة: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "إدارة إعدادات المرونة",
       "threshold": "حد الإخفاقات",
       "resetTimeout": "مهلة إعادة التعيين بالمللي ثانية",
-      "baseCooldown": "فترة الانتظار الأساسية بالمللي ثانية"
+      "baseCooldown": "فترة الانتظار الأساسية بالمللي ثانية",
+      "p2cLatencyWeight": "وزن زمن الوصول P2C، 0 (إيقاف) إلى 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "تشغيل Claude Code موجّهًا إلى OmniRoute (محليًا أو عن بُعد، باستخدام --profile)",
     "token": "الرمز المميز الذي يجب أن يرسله عميل Claude ‏(ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "يتعذر الوصول إلى OmniRoute على {port}. شغّله باستخدام 'omniroute serve'.",
-    "notFound": "لم يتم العثور على واجهة CLI المسماة 'claude' في PATH."
+    "notFound": "لم يتم العثور على واجهة CLI المسماة 'claude' في PATH.",
+    "toolsHelp": "إطلاق أداة ترميز (تشغيل البوابة تلقائيًا، قائمة النماذج من موفري الخدمة المتصلين): omniroute Launch <tool> [options] [-- toolArgs...] omniroute Launch --list list أدوات قابلة للتشغيل omniroute إطلاق <tool> خيارات --help لإطلاق الأداة (--model، --all-models، ...) بدون اسم أداة، يبدأ التشغيل Claude Code بالخيارات المذكورة أعلاه (مهملة).",
+    "gatewayDescription": "قم بفحص البوابة التي بدأ منها الإطلاق الشامل أو التحكم فيها"
   },
   "run": {
     "description": "تشغيل هدف CLI مدعوم عبر OmniRoute"

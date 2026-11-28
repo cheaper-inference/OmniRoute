@@ -287,6 +287,7 @@
     "retentionOpt": "Conservar solo las últimas N copias de seguridad",
     "passphrasePrompt": "Frase de contraseña de cifrado:",
     "noPassphrase": "Se requiere una frase de contraseña para la copia de seguridad cifrada.",
+    "restoreDecryptFailed": "La copia de seguridad {name} no se pudo descifrar (frase de contraseña incorrecta o archivo dañado); No se cambió nada.",
     "cloudFailed": "Advertencia: no se pudo subir a la nube. La copia de seguridad local se guardó.",
     "cloudUploaded": "Copia de seguridad subida a la nube: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Gestionar la configuración de resiliencia",
       "threshold": "Umbral de fallos",
       "resetTimeout": "Tiempo de espera de restablecimiento en ms",
-      "baseCooldown": "Tiempo de espera base en ms"
+      "baseCooldown": "Tiempo de espera base en ms",
+      "p2cLatencyWeight": "Peso de latencia p2c, 0 (apagado) a 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Iniciar Claude Code conectado a OmniRoute (local o remoto, con --profile)",
     "token": "Token que debe enviar el cliente de Claude (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "No se puede acceder a OmniRoute en {port}. Inícialo con 'omniroute serve'.",
-    "notFound": "No se encontró la CLI 'claude' en PATH."
+    "notFound": "No se encontró la CLI 'claude' en PATH.",
+    "toolsHelp": "Inicie una herramienta de codificación (inicia automáticamente la puerta de enlace, lista de modelos de sus proveedores conectados): omniroute launch <tool> [opciones] [-- toolArgs...] omniroute launch --list lista de herramientas ejecutables omniroute launch <tool> --help opciones para el lanzamiento de una herramienta (--model, --all-models, ...) Sin un nombre de herramienta, el lanzamiento inicia Claude Code con las opciones anteriores (en desuso).",
+    "gatewayDescription": "Inspeccionar o controlar la puerta de enlace que inició el lanzamiento omniruta"
   },
   "run": {
     "description": "Iniciar un destino de CLI compatible a través de OmniRoute"

@@ -287,6 +287,7 @@
     "retentionOpt": "Задржи само последњих N резервних копија",
     "passphrasePrompt": "Лозинка за шифровање:",
     "noPassphrase": "Лозинка је потребна за шифровану резервну копију.",
+    "restoreDecryptFailed": "Резервна копија {name} није могла да се дешифрује (погрешна приступна фраза или оштећена датотека); ништа није промењено.",
     "cloudFailed": "Упозорење: отпремање у облак није успело. Локална резервна копија је сачувана.",
     "cloudUploaded": "Резервна копија отпремљена у облак: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Управљање конфигурацијом отпорности",
       "threshold": "Праг неуспеха",
       "resetTimeout": "Време ресетовања у ms",
-      "baseCooldown": "Основно хлађење у ms"
+      "baseCooldown": "Основно хлађење у ms",
+      "p2cLatencyWeight": "Тежина кашњења п2ц, 0 (искључено) до 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Pokreni Claude Code usmeren na OmniRoute (lokalno ili udaljeno, sa --profile)",
     "token": "Token koji Claude klijent treba da šalje (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute nije dostupan na {port}. Pokrenite ga sa 'omniroute serve'.",
-    "notFound": "CLI alat 'claude' nije pronađen u PATH-u."
+    "notFound": "CLI alat 'claude' nije pronađen u PATH-u.",
+    "toolsHelp": "Покрените алатку за кодирање (аутоматски покреће мрежни пролаз, листу модела од ваших повезаних провајдера): омнироуте лаунцх <tool> [опције] [-- toolArgs...] омнироуте лаунцх --list листа алати који се могу покренути омнироуте лаунцх <tool> --help опције за покретање алата (--model, --all-models, ...) Без имена алата за покретање Цладе (Цладе покрета изнад).",
+    "gatewayDescription": "Прегледајте или контролишите гатеваи који је покренуо омнироуте"
   },
   "run": {
     "description": "Покрените подржани CLI циљ преко OmniRoute"

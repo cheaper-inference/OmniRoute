@@ -287,6 +287,7 @@
     "retentionOpt": "နောက်ဆုံး N ခုသော အရန်ဖိုင်များကိုသာ ထိန်းသိမ်းပါ",
     "passphrasePrompt": "ကုဒ်ဝှက် passphrase:",
     "noPassphrase": "ကုဒ်ဝှက်ထားသော အရန်ဖိုင်အတွက် passphrase လိုအပ်သည်။",
+    "restoreDecryptFailed": "မိတ္တူ {name} ကုဒ်ဝှက်၍မရပါ (စကားဝှက်မှားခြင်း သို့မဟုတ် ပျက်စီးနေသောဖိုင်) ဘာမှမပြောင်းလဲခဲ့ပါ။",
     "cloudFailed": "သတိပေးချက်: cloud သို့ တင်ခြင်း မအောင်မြင်ပါ။ စက်တွင်းအရန်ဖိုင်ကို သိမ်းဆည်းပြီးပါပြီ။",
     "cloudUploaded": "Cloud အရန်ဖိုင်ကို တင်ပြီးပါပြီ: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "ခံနိုင်ရည် စီစဉ်သတ်မှတ်ချက်ကို စီမံရန်",
       "threshold": "ချို့ယွင်းမှု သတ်မှတ်အဆင့်",
       "resetTimeout": "ပြန်လည်သတ်မှတ်ရန် အချိန်ကုန်ဆုံးမှု (ms)",
-      "baseCooldown": "အခြေခံ ခေတ္တရပ်နားချိန် (ms)"
+      "baseCooldown": "အခြေခံ ခေတ္တရပ်နားချိန် (ms)",
+      "p2cLatencyWeight": "p2c latency weight, 0 (off) မှ 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "OmniRoute သို့ ချိတ်ဆက်ထားသော Claude Code ကို စတင်ရန် (local သို့မဟုတ် remote၊ --profile ဖြင့်)",
     "token": "Claude client က ပေးပို့သင့်သည့် token (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "{port} တွင် OmniRoute ကို ဆက်သွယ်၍မရပါ။ 'omniroute serve' ဖြင့် စတင်ပါ။",
-    "notFound": "PATH တွင် 'claude' CLI ကို ရှာမတွေ့ပါ။"
+    "notFound": "PATH တွင် 'claude' CLI ကို ရှာမတွေ့ပါ။",
+    "toolsHelp": "coding tool ကိုဖွင့်ပါ (ဂိတ်ဝေးကိုအလိုအလျောက်စတင်သည်၊ သင့်ချိတ်ဆက်ထားသောဝန်ဆောင်မှုပေးသူများထံမှ မော်ဒယ်စာရင်း)- omniroute launch <tool> [ရွေးချယ်စရာများ] [-- toolArgs...] omniroute launch --list list launchable tools omniroute launch <tool> --help ရွေးချယ်စရာများ (--model, --all-models, ...) tool name တစ်ခုမပါပဲ၊ အထက်ဖော်ပြပါ ကုဒ်နံပါတ်များမပါဘဲ စတင်လိုက်ပါ။",
+    "gatewayDescription": "omniroute စတင်သည့် တံခါးပေါက်ကို စစ်ဆေးပါ သို့မဟုတ် ထိန်းချုပ်ပါ။"
   },
   "run": {
     "description": "OmniRoute မှတစ်ဆင့် ပံ့ပိုးထားသော CLI ပစ်မှတ်တစ်ခုကို စတင်ပါ"

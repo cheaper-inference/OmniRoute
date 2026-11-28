@@ -287,6 +287,7 @@
     "retentionOpt": "Zadrži samo posljednjih N rezervnih kopija",
     "passphrasePrompt": "Lozinka za enkripciju:",
     "noPassphrase": "Lozinka je obavezna za enkriptovanu sigurnosnu kopiju.",
+    "restoreDecryptFailed": "Backup {name} nije mogao biti dešifrovan (pogrešna lozinka ili oštećena datoteka); ništa nije promijenjeno.",
     "cloudFailed": "Upozorenje: upload na cloud je nije uspio. Lokalna rezervna kopija je sačuvana.",
     "cloudUploaded": "Cloud backup otpremljen: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Upravljaj konfiguracijom otpornosti",
       "threshold": "Prag neuspjeha",
       "resetTimeout": "Reset timeout u ms",
-      "baseCooldown": "Osnovno vrijeme hlađenja u ms"
+      "baseCooldown": "Osnovno vrijeme hlađenja u ms",
+      "p2cLatencyWeight": "p2c težina kašnjenja, 0 (isključeno) do 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Pokrenite Claude Code usmjeren na OmniRoute (lokalno ili udaljeno, pomoću --profile)",
     "token": "Token koji Claude klijent treba poslati (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute nije dostupan na {port}. Pokrenite ga pomoću 'omniroute serve'.",
-    "notFound": "'claude' CLI nije pronađen u PATH-u."
+    "notFound": "'claude' CLI nije pronađen u PATH-u.",
+    "toolsHelp": "Pokrenite alat za kodiranje (automatski pokreće gateway, listu modela od vaših povezanih provajdera): omniroute launch <tool> [opcije] [-- toolArgs...] omniroute launch --list lista alata koji se mogu pokrenuti omniroute launch <tool> --help opcije za pokretanje alata (--model, --all-models, ...) Bez gore navedenog naziva alata za pokretanje Clade (Clade pokretanje koda).",
+    "gatewayDescription": "Pregledajte ili kontrolirajte gateway koji je pokrenuo omniroute"
   },
   "run": {
     "description": "Pokrenite podržanu CLI metu putem OmniRoute-a"

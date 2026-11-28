@@ -287,6 +287,7 @@
     "retentionOpt": "صرف آخری N بیک اپس رکھیں",
     "passphrasePrompt": "انکرپشن پاس فریز:",
     "noPassphrase": "انکرپٹڈ بیک اپ کے لیے پاس فریز درکار ہے۔",
+    "restoreDecryptFailed": "بیک اپ {name} ڈکرپٹ نہیں کیا جا سکا (غلط پاسفریز یا خراب فائل)؛ کچھ بھی نہیں بدلا.",
     "cloudFailed": "انتباہ: کلاؤڈ اپ لوڈ ناکام رہا۔ مقامی بیک اپ محفوظ کر لیا گیا۔",
     "cloudUploaded": "کلاؤڈ بیک اپ اپ لوڈ ہو گیا: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "لچک پذیری کی کنفیگریشن کا نظم کریں",
       "threshold": "ناکامی کی حد",
       "resetTimeout": "ری سیٹ ٹائم آؤٹ، ms میں",
-      "baseCooldown": "بنیادی کول ڈاؤن، ms میں"
+      "baseCooldown": "بنیادی کول ڈاؤن، ms میں",
+      "p2cLatencyWeight": "p2c لیٹنسی وزن، 0 (آف) سے 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "OmniRoute کی جانب اشارہ کرتے ہوئے Claude Code چلائیں (مقامی یا ریموٹ، --profile کے ساتھ)",
     "token": "وہ ٹوکن جو Claude کلائنٹ کو بھیجنا چاہیے (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute سے {port} پر رابطہ نہیں ہو پا رہا۔ اسے 'omniroute serve' کے ساتھ شروع کریں۔",
-    "notFound": "'claude' CLI، PATH میں نہیں ملا۔"
+    "notFound": "'claude' CLI، PATH میں نہیں ملا۔",
+    "toolsHelp": "ایک کوڈنگ ٹول لانچ کریں (گیٹ وے کو خود بخود شروع کریں، آپ کے منسلک فراہم کنندگان سے ماڈل کی فہرست): omniroute launch <tool> [options] [-- toolArgs...] omniroute launch --list فہرست لانچ ایبل ٹولز omniroute launch <tool> --help آپشنز ٹول لانچ کے لیے (--model, --all-models start with the tool ... اوپر والے اختیارات (فرسودہ)۔",
+    "gatewayDescription": "اس گیٹ وے کا معائنہ کریں یا کنٹرول کریں جس سے اومنی روٹ لانچ شروع ہوا۔"
   },
   "run": {
     "description": "OmniRoute کے ذریعے ایک معاونت یافتہ CLI ہدف چلائیں"

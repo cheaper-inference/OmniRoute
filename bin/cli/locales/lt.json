@@ -287,6 +287,7 @@
     "retentionOpt": "Palikti tik paskutines N atsarginių kopijų",
     "passphrasePrompt": "Šifravimo slaptafrazė:",
     "noPassphrase": "Šifruotai atsarginei kopijai būtina slaptafrazė.",
+    "restoreDecryptFailed": "Nepavyko iššifruoti atsarginės kopijos {name} (neteisinga slaptafrazė arba sugadintas failas); niekas nepasikeitė.",
     "cloudFailed": "Įspėjimas: nepavyko įkelti į debesiją. Vietinė atsarginė kopija išsaugota.",
     "cloudUploaded": "Atsarginė kopija įkelta į debesiją: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Tvarkyti atsparumo konfigūraciją",
       "threshold": "Gedimų slenkstis",
       "resetTimeout": "Nustatymo iš naujo skirtasis laikas, ms",
-      "baseCooldown": "Bazinis atvėsimo laikotarpis, ms"
+      "baseCooldown": "Bazinis atvėsimo laikotarpis, ms",
+      "p2cLatencyWeight": "p2c delsos svoris, nuo 0 (išjungta) iki 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Paleisti Claude Code, nukreiptą į OmniRoute (vietinį arba nuotolinį, naudojant --profile)",
     "token": "Atpažinimo ženklas, kurį turi siųsti Claude klientas (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute nepasiekiamas per {port}. Paleiskite jį naudodami „omniroute serve“.",
-    "notFound": "„claude“ CLI nerastas PATH."
+    "notFound": "„claude“ CLI nerastas PATH.",
+    "toolsHelp": "Paleiskite kodavimo įrankį (automatiškai paleidžia šliuzą, modelių sąrašą iš jūsų prijungtų teikėjų): omniroute paleisti <tool> [parinktys] [-- toolArgs...] omniroute paleisti --list sąrašą paleidžiami įrankiai omniroute paleisti <tool> --help parinktys įrankio paleidimui (--model, --all-models parinktys su aukščiau esančiu Clauds įrankiu, paleisti ...) (nebenaudojama).",
+    "gatewayDescription": "Patikrinkite arba valdykite šliuzą, nuo kurio prasidėjo „Omniroute“ paleidimas"
   },
   "run": {
     "description": "Paleisti palaikomą CLI taikinį per OmniRoute"

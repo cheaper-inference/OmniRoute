@@ -287,6 +287,7 @@
     "retentionOpt": "Ne conserver que les N dernières sauvegardes",
     "passphrasePrompt": "Phrase secrète de chiffrement :",
     "noPassphrase": "Une phrase secrète est requise pour une sauvegarde chiffrée.",
+    "restoreDecryptFailed": "La sauvegarde {name} n'a pas pu être déchiffrée (phrase secrète incorrecte ou fichier endommagé) ; rien n'a été changé.",
     "cloudFailed": "Avertissement : le téléversement vers le cloud a échoué. La sauvegarde locale a été enregistrée.",
     "cloudUploaded": "Sauvegarde téléversée vers le cloud : {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Gérer la configuration de résilience",
       "threshold": "Seuil d’échec",
       "resetTimeout": "Délai de réinitialisation en ms",
-      "baseCooldown": "Période de temporisation de base en ms"
+      "baseCooldown": "Période de temporisation de base en ms",
+      "p2cLatencyWeight": "poids de latence p2c, 0 (off) à 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Lancer Claude Code en le connectant à OmniRoute (local ou distant, avec --profile)",
     "token": "Jeton que le client Claude doit envoyer (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute n’est pas accessible sur {port}. Démarrez-le avec 'omniroute serve'.",
-    "notFound": "La CLI 'claude' est introuvable dans PATH."
+    "notFound": "La CLI 'claude' est introuvable dans PATH.",
+    "toolsHelp": "Lancez un outil de codage (démarrage automatique de la passerelle, liste des modèles de vos fournisseurs connectés) : omniroute launch <tool> [options] [-- toolArgs...] omniroute launch --list list launchable tools omniroute launch <tool> --help options pour un lancement d'outil (--model, --all-models, ...) Sans nom d'outil, launch démarre Claude Code avec les options ci-dessus (obsolète).",
+    "gatewayDescription": "Inspecter ou contrôler la passerelle démarrée par le lancement d'Omniroute"
   },
   "run": {
     "description": "Lancer une cible CLI prise en charge via OmniRoute"

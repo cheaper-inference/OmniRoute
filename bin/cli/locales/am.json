@@ -287,6 +287,7 @@
     "retentionOpt": "የመጨረሻዎቹን N ምትኬዎች ብቻ አቆይ",
     "passphrasePrompt": "የማመስጠሪያ የይለፍ ሐረግ፦",
     "noPassphrase": "ለተመሰጠረ ምትኬ የይለፍ ሐረግ ያስፈልጋል።",
+    "restoreDecryptFailed": "ምትኬ {name} ሊፈታ አልቻለም (የተሳሳተ የይለፍ ሐረግ ወይም የተበላሸ ፋይል)። ምንም አልተለወጠም።",
     "cloudFailed": "ማስጠንቀቂያ፦ ወደ ደመና መስቀሉ አልተሳካም። አካባቢያዊው ምትኬ ተቀምጧል።",
     "cloudUploaded": "የደመና ምትኬው ተሰቅሏል፦ {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "የመቋቋም ውቅረትን ያስተዳድሩ",
       "threshold": "የውድቀት ገደብ",
       "resetTimeout": "የዳግም ማስጀመሪያ ጊዜ ገደብ በms",
-      "baseCooldown": "መሠረታዊ የማቀዝቀዣ ጊዜ በms"
+      "baseCooldown": "መሠረታዊ የማቀዝቀዣ ጊዜ በms",
+      "p2cLatencyWeight": "p2c የመዘግየት ክብደት፣ 0 (ጠፍቷል) እስከ 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "ወደ OmniRoute የተጠቆመ Claude Codeን አስጀምር (አካባቢያዊ ወይም የርቀት፣ በ--profile)",
     "token": "የClaude ደንበኛው መላክ ያለበት ቶከን (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute በ{port} ላይ ሊደረስበት አልቻለም። በ'omniroute serve' ያስጀምሩት።",
-    "notFound": "'claude' CLI በPATH ውስጥ አልተገኘም።"
+    "notFound": "'claude' CLI በPATH ውስጥ አልተገኘም።",
+    "toolsHelp": "የመቀየሪያ መሳሪያውን ያስጀምሩ (በራስ-በራስ ይጀምራል፣ ከተገናኙት አቅራቢዎችዎ የሞዴል ዝርዝር)፡- omniroute launch <tool> [አማራጮች] [-- toolArgs...] omniroute ማስጀመሪያ --list ዝርዝር ማስጀመሪያ መሳሪያዎች ሁሉን አቀፍ ማስጀመሪያ <tool> --help አማራጮችን ለመሳሪያ ማስጀመሪያ (--model, --all-models, ...) ያለ መሳሪያ ስም ከላይ ያሉትን አማራጮች አስጀምር (ኮድ ከአማራጮች ጋር ይጀምራል)።",
+    "gatewayDescription": "በየቦታው ማስጀመር የጀመረውን መግቢያ ይመርምሩ ወይም ይቆጣጠሩ"
   },
   "run": {
     "description": "በOmniRoute በኩል የሚደገፍ CLI ዒላማ ያስጀምሩ"

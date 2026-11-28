@@ -76,7 +76,7 @@ A row counts toward the free figures when all of this holds:
 
 What each public count means:
 
-- **Providers with free access** (50 today: 43 with an API key, 6 without a key, 1 through a tool account): providers with at least one catalog row that gives free access, by how you reach it.
+- **Providers with free access** (50 today: 43 with an API key, 5 without a key, 1 through a tool account): providers with at least one catalog row that gives free access, by how you reach it.
 - **Catalog rows with free access** (214 today): one row per provider and model.
 - **Pools with a published quota** (12 today): the shared quotas behind the real figure, each counted once.
 - **Distinct free models** (185 today): the rows grouped by model ID.

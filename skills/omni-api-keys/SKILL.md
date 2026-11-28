@@ -201,7 +201,7 @@ Update the key's self-service settings. Omitted fields keep their value.
 curl -X PUT http://localhost:20128/api/keys/{id}/self-service \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{}'
+  -d '{"anthropicRateLimitHeaders":"auto"}'
 ```
 
 ### GET /api/keys/groups

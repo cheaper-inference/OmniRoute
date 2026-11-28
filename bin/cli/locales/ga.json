@@ -287,6 +287,7 @@
     "retentionOpt": "Coinnigh ach na N cúltaca is déanaí",
     "passphrasePrompt": "Pasfhocal criptithe:",
     "noPassphrase": "Tá pasfhocal ag teastáil le haghaidh cúltaca criptithe.",
+    "restoreDecryptFailed": "Níorbh fhéidir cúltaca {name} a dhíchriptiú (pasfhrása mícheart nó comhad damáiste); níor athraíodh aon rud.",
     "cloudFailed": "Rabhadh: theip ar uaslódáil scamall. Cúltaca áitiúil shábháilte.",
     "cloudUploaded": "Cúltaca scamall uaslódáilte: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Bainistigh cumraíocht athléimneachta",
       "threshold": "Tairseach teipthe",
       "resetTimeout": "Athshocraigh am an tamaill i ms",
-      "baseCooldown": "Bun-am fuaraithe i ms"
+      "baseCooldown": "Bun-am fuaraithe i ms",
+      "p2cLatencyWeight": "meáchan latency p2c, 0 (as) go 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Seol Claude Code dírithe ar OmniRoute (logánta nó cianda, le --profile)",
     "token": "Comhartha a sheolfaidh an cliant Claude (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "Níl OmniRoute inrochtana ag {port}. Tosaigh é le 'omniroute serve'.",
-    "notFound": "Níor aimsíodh an CLI 'claude' i PATH."
+    "notFound": "Níor aimsíodh an CLI 'claude' i PATH.",
+    "toolsHelp": "Seoladh uirlis códaithe (auto-tosaíonn an geata, liosta samhail ó do sholáthraithe nasctha): omniroute seoladh <tool> [roghanna] [-- toolArgs...] omniroute seoladh liosta --list uirlisí seoltaí omniroute seoladh <tool> --help roghanna le haghaidh seoladh uirlis (--model, --all-models, ...) Gan ainm uirlis, a thosaíonn seoladh Cód Claude leis na roghanna thuas (neamhcheadaithe).",
+    "gatewayDescription": "Déan iniúchadh nó rialú ar an ngeata ar cuireadh tús leis an seoladh omniway"
   },
   "run": {
     "description": "Seol sprioc CLI a thacaítear trí OmniRoute"

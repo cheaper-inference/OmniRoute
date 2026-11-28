@@ -35,9 +35,9 @@ Other catalogs charge from US$ 19 a year to US$ 49 for lifetime access to live d
 
 > **Bring your own provider accounts.** These are third-party free tiers, not a token grant from OmniRoute. Sign up, get credentials where a provider asks for them, and connect the ones you can use. Each provider sets its own limits, availability and terms.
 >
-> Stacking free tiers by hand means dozens of SDKs, dozens of rate limits and no clear idea of what you have left. OmniRoute keeps 214 catalog rows with free access and computes the real figure from 12 pools with a published quota, each shared pool counted once. Quotas that only open after a regional identity check (today, ModelScope) are shown apart, +~6M behind regional identity verification, and never added to the real figure. What is left shows up on the dashboard (`/dashboard/free-tiers`).
+> Stacking free tiers by hand means dozens of SDKs, dozens of rate limits and no clear idea of what you have left. OmniRoute keeps 213 catalog rows with free access and computes the real figure from 12 pools with a published quota, each shared pool counted once. Quotas that only open after a regional identity check (today, ModelScope) are shown apart, +~6M behind regional identity verification, and never added to the real figure. What is left shows up on the dashboard (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card. Free tokens a month: ~11.3B as others count · ~90M real. Up to ~153M in your first month with one-time signup credits. 12 pools with a published quota and 214 catalog rows with free access behind one endpoint, catalog audited 2026-11-23. The bar shows where the real figure comes from, one segment per pool. Signup credits and free providers without a token cap are listed apart and never added to it. Live used and remaining tokens on /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card. Free tokens a month: ~11.3B as others count · ~90M real. Up to ~153M in your first month with one-time signup credits. 12 pools with a published quota and 213 catalog rows with free access behind one endpoint, catalog audited 2026-11-23. The bar shows where the real figure comes from, one segment per pool. Signup credits and free providers without a token cap are listed apart and never added to it. Live used and remaining tokens on /dashboard/free-tiers."/>
 
 > Animated summary of the live `/dashboard/free-tiers` page. How each figure is counted: **[docs/reference/FREE_TIERS.md#how-we-count](docs/reference/FREE_TIERS.md#how-we-count)**.
 >
@@ -225,7 +225,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 # The Promise
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 394 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 394 providers · up to 95% token savings on eligible workloads · $0 to start with 140+ providers with a free offer and 40 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 65,000+ static test declarations across 9,500+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 394 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 394 providers · up to 95% token savings on eligible workloads · $0 to start with 140+ providers with a free offer and 39 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 65,000+ static test declarations across 9,500+ tracked test files."/>
 
 <br/>
 <br/>
@@ -686,11 +686,11 @@ deyin.ai and Zoo Code are not in the catalog or the CLI manifest. Configure them
 
 <a id="ai-providers"></a>
 
-## 394 AI Providers, 50 With Free Access
+## 394 AI Providers, 49 With Free Access
 
 Each number counts something different. None of them is added to another.
 
-<img src="./docs/diagrams/provider-numbers.svg" width="100%" alt="What each number counts. 394 registered providers. 140+ flagged with a free offer. 50 with free access: 43 with an API key, 6 without a key, 1 through a tool account and 0 through a web chat. 214 catalog rows with free access, 185 distinct free models, 40 recurring or keyless providers, and 12 pools with a published quota. Free tokens a month: ~11.3B as others count · ~90M real. The first figure adds up every row, including ended offers. The real figure counts each shared quota once."/>
+<img src="./docs/diagrams/provider-numbers.svg" width="100%" alt="What each number counts. 394 registered providers. 140+ flagged with a free offer. 49 with free access: 43 with an API key, 5 without a key, 1 through a tool account and 0 through a web chat. 213 catalog rows with free access, 184 distinct free models, 40 recurring or keyless providers, and 12 pools with a published quota. Free tokens a month: ~11.3B as others count · ~90M real. The first figure adds up every row, including ended offers. The real figure counts each shared quota once."/>
 
 <sub>Chat catalog: static model lists from 250 of the providers, 3,186 provider/model pairs, 1,539 distinct raw model IDs.</sub>
 
@@ -1408,7 +1408,7 @@ What OmniRoute is built with, as declared in [`package.json`](package.json) on `
   <tr><td nowrap><b>Runtime</b></td><td>Node.js <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code> (22.x from 22.22.2, and 24.x to 26.x). Bun 1.4.2 is pinned only to run a few build scripts and a best-effort compatibility path; it is not a supported runtime</td></tr>
   <tr><td nowrap><b>Language</b></td><td>TypeScript 6 for the app and the streaming engine (<code>src/</code> and <code>open-sse/</code>); the <code>omniroute</code> CLI in <code>bin/</code> is ES-module JavaScript</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4, with the vendored Keak CI UI Kit (<code>packages/ui-kit</code>)</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>SQLite with WAL journaling through better-sqlite3, with a driver fallback chain — 178 modules in <code>src/lib/db/</code>, 252 migrations</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>SQLite with WAL journaling through better-sqlite3, with a driver fallback chain — 178 modules in <code>src/lib/db/</code>, 256 migrations</td></tr>
   <tr><td nowrap><b>Memory</b></td><td>SQLite FTS5 full-text search + int8-quantized vector embeddings with typed decay; optional Qdrant</td></tr>
   <tr><td nowrap><b>Schemas</b></td><td>Zod 4 — API contracts and MCP tool input/output validation</td></tr>
   <tr><td nowrap><b>Protocols</b></td><td>MCP (stdio / SSE / Streamable HTTP, 110 tools) + A2A v0.3 (JSON-RPC 2.0 + SSE) with A2A v1.0 client compatibility</td></tr>
@@ -1545,7 +1545,7 @@ Cost estimation, quota tracking, team budgets and free-tier data. Subject: **Usa
 | [Key Templates](docs/guides/KEY-TEMPLATES.md)                             | Reusable, secret-free snapshots of API key settings                   | `docs/guides/KEY-TEMPLATES.md`             |
 | [Cached input reporting](docs/ops/CACHED_INPUT_REPORTING.md)              | How cache-read tokens are shown in analytics                          | `docs/ops/CACHED_INPUT_REPORTING.md`       |
 | [Quota Telemetry](docs/OMNIROUTE_QUOTA_TELEMETRY.md)                      | Provider quota telemetry versus accounting                            | `docs/OMNIROUTE_QUOTA_TELEMETRY.md`        |
-| [Free Tiers & Free-Token Budget](docs/reference/FREE_TIERS.md)            | 12 pools with a published quota and 214 catalog rows with free access | `docs/reference/FREE_TIERS.md`             |
+| [Free Tiers & Free-Token Budget](docs/reference/FREE_TIERS.md)            | 12 pools with a published quota and 213 catalog rows with free access | `docs/reference/FREE_TIERS.md`             |
 | [Free Provider Rankings](docs/guides/FREE_PROVIDER_RANKINGS.md)           | Arena ELO rankings and real-traffic reliability for free providers    | `docs/guides/FREE_PROVIDER_RANKINGS.md`    |
 | [Monitoring & Observability](docs/ops/MONITORING_GUIDE.md)                | Health endpoints, metrics and logs                                    | `docs/ops/MONITORING_GUIDE.md`             |
 | [Monitoring & Costs navigation](docs/architecture/MONITORING_SECTIONS.md) | Structure of the monitoring and cost pages                            | `docs/architecture/MONITORING_SECTIONS.md` |

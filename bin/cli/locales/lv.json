@@ -287,6 +287,7 @@
     "retentionOpt": "Saglabāt tikai pēdējos N dublējumus",
     "passphrasePrompt": "Šifrēšanas parole:",
     "noPassphrase": "Parole ir nepieciešama šifrētam dublējumam.",
+    "restoreDecryptFailed": "{name} dublējumu nevarēja atšifrēt (nepareiza ieejas frāze vai bojāts fails); nekas netika mainīts.",
     "cloudFailed": "Brīdinājums: mākoņa augšupielāde neizdevās. Lokālais dublējums tika saglabāts.",
     "cloudUploaded": "Mākoņa dublējums augšupielādēts: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Pārvaldīt izturības konfigurāciju",
       "threshold": "Kļūdas slieksnis",
       "resetTimeout": "Atiestatīšanas taimauts milisekundēs",
-      "baseCooldown": "Bāzes atdzišanas laiks milisekundēs"
+      "baseCooldown": "Bāzes atdzišanas laiks milisekundēs",
+      "p2cLatencyWeight": "p2c latentuma svars, no 0 (izslēgts) līdz 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Palaist Claude Code, norādot uz OmniRoute (vietējo vai attālinātu, ar --profile)",
     "token": "Tokens, ko Claude klients jānosūta (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute nav sasniedzams pie {port}. Palaidiet to ar 'omniroute serve'.",
-    "notFound": "'claude' CLI netika atrasts PATH."
+    "notFound": "'claude' CLI netika atrasts PATH.",
+    "toolsHelp": "Palaidiet kodēšanas rīku (automātiski palaiž vārteju, modeļu sarakstu no jūsu savienotajiem pakalpojumu sniedzējiem): omniroute palaišana <tool> [opcijas] [-- toolArgs...] omniroute palaišana --list saraksts palaišanas rīki omniroute palaišana <tool> --help opcijas rīka palaišanai (--model, --all-models palaišanas opcijas ar iepriekš minēto rīku, startēt ar Clauds rīka nosaukumu, ...) (novecojis).",
+    "gatewayDescription": "Pārbaudiet vai kontrolējiet vārteju, kurā sākās universālā maršruta palaišana"
   },
   "run": {
     "description": "Palaidiet atbalstītu CLI mērķi caur OmniRoute"

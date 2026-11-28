@@ -287,6 +287,7 @@
     "retentionOpt": "Hifadhi nakala rudufu N za mwisho pekee",
     "passphrasePrompt": "Kaulisiri ya usimbaji fiche:",
     "noPassphrase": "Kaulisiri inahitajika kwa nakala rudufu iliyosimbwa kwa njia fiche.",
+    "restoreDecryptFailed": "Hifadhi rudufu {name} haikuweza kusimbwa (kauli ya siri isiyo sahihi au faili iliyoharibika); hakuna kilichobadilika.",
     "cloudFailed": "Onyo: upakiaji kwenye wingu umeshindikana. Nakala rudufu ya ndani imehifadhiwa.",
     "cloudUploaded": "Nakala rudufu ya wingu imepakiwa: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Dhibiti usanidi wa ustahimilivu",
       "threshold": "Kikomo cha hitilafu",
       "resetTimeout": "Muda wa kuweka upya kwa ms",
-      "baseCooldown": "Muda msingi wa kusubiri kwa ms"
+      "baseCooldown": "Muda msingi wa kusubiri kwa ms",
+      "p2cLatencyWeight": "p2c uzani wa kusubiri, 0 (imezimwa) hadi 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Zindua Claude Code ikielekezwa kwenye OmniRoute (ya ndani au ya mbali, kwa kutumia --profile)",
     "token": "Tokeni ambayo kiteja cha Claude kinapaswa kutuma (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute haipatikani kwenye {port}. Iwashe kwa kutumia 'omniroute serve'.",
-    "notFound": "CLI ya 'claude' haikupatikana katika PATH."
+    "notFound": "CLI ya 'claude' haikupatikana katika PATH.",
+    "toolsHelp": "Zindua zana ya kusimba (huanzisha lango kiotomatiki, orodha ya vielelezo kutoka kwa watoa huduma wako waliounganishwa): uzinduzi wa omniroute <tool> [options] [-- toolArgs...] omniroute uzinduzi --list orodha zana zinazoweza kuzinduliwa omniroute uzinduzi <tool> --help chaguo kwa ajili ya uzinduzi wa zana (--model, --all-models, ...) Imeweka chaguo za kuzindua juu ya jina ( Chaguzi za uzinduzi wa msimbo hapo juu).",
+    "gatewayDescription": "Kagua au udhibiti lango ambalo uzinduzi wa njia zote ulianza"
   },
   "run": {
     "description": "Zindua lengwa la CLI linalotumika kupitia OmniRoute"

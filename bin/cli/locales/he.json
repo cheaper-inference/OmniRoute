@@ -287,6 +287,7 @@
     "retentionOpt": "שמירת N הגיבויים האחרונים בלבד",
     "passphrasePrompt": "ביטוי סיסמה להצפנה:",
     "noPassphrase": "נדרש ביטוי סיסמה עבור גיבוי מוצפן.",
+    "restoreDecryptFailed": "לא ניתן היה לפענח את הגיבוי {name} (ביטוי סיסמה שגוי או קובץ פגום); שום דבר לא השתנה.",
     "cloudFailed": "אזהרה: ההעלאה לענן נכשלה. הגיבוי המקומי נשמר.",
     "cloudUploaded": "הגיבוי הועלה לענן: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "ניהול תצורת העמידות",
       "threshold": "סף כשלים",
       "resetTimeout": "זמן איפוס באלפיות השנייה",
-      "baseCooldown": "זמן צינון בסיסי באלפיות השנייה"
+      "baseCooldown": "זמן צינון בסיסי באלפיות השנייה",
+      "p2cLatencyWeight": "משקל חביון p2c, 0 (כבוי) עד 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "הפעלת Claude Code כשהוא מופנה אל OmniRoute (מקומי או מרוחק, עם --profile)",
     "token": "האסימון שעל לקוח Claude לשלוח (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute אינו נגיש ביציאה {port}. הפעילו אותו באמצעות 'omniroute serve'.",
-    "notFound": "כלי שורת הפקודה 'claude' לא נמצא ב-PATH."
+    "notFound": "כלי שורת הפקודה 'claude' לא נמצא ב-PATH.",
+    "toolsHelp": "הפעל כלי קידוד (מפעיל אוטומטית את השער, רשימת דגמים מהספקים המחוברים שלך): omniroute launch <tool> [אפשרויות] [-- toolArgs...] omniroute launch --list list כלים ניתנים להשיק omniroute launch <tool> --help אפשרויות להפעלת כלי (--model, --all-models, ...) ללא שם כלי עם האפשרויות ההפעלה למעלה (Claudedeprec).",
+    "gatewayDescription": "בדוק או שלוט בשער שהחלה השקת ה-omniroute"
   },
   "run": {
     "description": "הפעלת יעד CLI נתמך דרך OmniRoute"

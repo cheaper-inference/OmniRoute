@@ -287,6 +287,7 @@
     "retentionOpt": "Säilytä vain viimeisimmät N varmuuskopiota",
     "passphrasePrompt": "Salauslause:",
     "noPassphrase": "Salauslause vaaditaan salattua varmuuskopiota varten.",
+    "restoreDecryptFailed": "Varmuuskopion {name} salausta ei voitu purkaa (väärä tunnuslause tai vahingoittunut tiedosto); mikään ei muuttunut.",
     "cloudFailed": "Varoitus: lataus pilveen epäonnistui. Paikallinen varmuuskopio tallennettiin.",
     "cloudUploaded": "Varmuuskopio ladattu pilveen: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Hallitse vikasietoisuusmäärityksiä",
       "threshold": "Vikakynnys",
       "resetTimeout": "Nollauksen aikakatkaisu millisekunteina",
-      "baseCooldown": "Perusjäähdytysaika millisekunteina"
+      "baseCooldown": "Perusjäähdytysaika millisekunteina",
+      "p2cLatencyWeight": "p2c-viivepaino, 0 (pois) - 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Käynnistä Claude Code OmniRouteen yhdistettynä (paikallinen tai etäyhteys, --profile-valinnalla)",
     "token": "Tunnus, joka Claude-asiakasohjelman tulee lähettää (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute ei ole tavoitettavissa portissa {port}. Käynnistä se komennolla 'omniroute serve'.",
-    "notFound": "'claude'-CLI:tä ei löytynyt PATH-ympäristömuuttujasta."
+    "notFound": "'claude'-CLI:tä ei löytynyt PATH-ympäristömuuttujasta.",
+    "toolsHelp": "Käynnistä koodaustyökalu (käynnistää yhdyskäytävän automaattisesti, malliluettelo liitetyiltä palveluntarjoajilta): omniroute launch <tool> [valinnat] [-- toolArgs...] omniroute launch --list luettelo käynnistettävät työkalut omniroute launch <tool> --help asetukset työkalun käynnistykselle (--model, --all-models asetukset edellä olevan työkalun kanssa, aloita koodi , ...) (poistettu käytöstä).",
+    "gatewayDescription": "Tarkasta tai ohjaa yhdyskäytävää, jonka omniroute-käynnistys aloitti"
   },
   "run": {
     "description": "Käynnistä tuettu CLI-kohde OmniRouten kautta"

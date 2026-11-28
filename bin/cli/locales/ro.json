@@ -287,6 +287,7 @@
     "retentionOpt": "Păstrează doar ultimele N copii de rezervă",
     "passphrasePrompt": "Fraza de acces pentru criptare:",
     "noPassphrase": "Fraza de acces este obligatorie pentru copia de rezervă criptată.",
+    "restoreDecryptFailed": "Backup- {name} nu a putut fi decriptat (frază de acces greșită sau fișier deteriorat); nu s-a schimbat nimic.",
     "cloudFailed": "Avertisment: încărcarea în cloud a eșuat. Copia de rezervă locală a fost salvată.",
     "cloudUploaded": "Copia de rezervă a fost încărcată în cloud: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Gestionează configurația de reziliență",
       "threshold": "Pragul de eșecuri",
       "resetTimeout": "Timp de resetare în ms",
-      "baseCooldown": "Perioada de așteptare de bază în ms"
+      "baseCooldown": "Perioada de așteptare de bază în ms",
+      "p2cLatencyWeight": "Greutatea latenței p2c, de la 0 (dezactivat) la 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Lansează Claude Code configurat pentru OmniRoute (local sau la distanță, cu --profile)",
     "token": "Tokenul pe care clientul Claude trebuie să îl trimită (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute nu este accesibil la {port}. Pornește-l cu 'omniroute serve'.",
-    "notFound": "CLI-ul 'claude' nu a fost găsit în PATH."
+    "notFound": "CLI-ul 'claude' nu a fost găsit în PATH.",
+    "toolsHelp": "Lansați un instrument de codare (pornește automat gateway-ul, lista de modele de la furnizorii dvs. conectați): omniroute lansare <tool> [opțiuni] [-- toolArgs...] omniroute lansare --list list instrumente lansabile omniroute lansare <tool> --help opțiuni pentru lansarea unui instrument (--model, --all-models, ...) Fără opțiunile de lansare de mai sus a instrumentului Claudede pre Start (numele instrumentului de lansare).",
+    "gatewayDescription": "Inspectați sau controlați gateway-ul pe care a început lansarea omniroute"
   },
   "run": {
     "description": "Lansează o țintă CLI acceptată prin OmniRoute"

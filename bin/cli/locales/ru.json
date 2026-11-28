@@ -287,6 +287,7 @@
     "retentionOpt": "Сохранять только последние N резервных копий",
     "passphrasePrompt": "Парольная фраза для шифрования:",
     "noPassphrase": "Для зашифрованной резервной копии требуется парольная фраза.",
+    "restoreDecryptFailed": "Резервную копию {name} не удалось расшифровать (неверная парольная фраза или поврежденный файл); ничего не изменилось.",
     "cloudFailed": "Предупреждение: не удалось загрузить резервную копию в облако. Локальная резервная копия сохранена.",
     "cloudUploaded": "Резервная копия загружена в облако: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Управление конфигурацией отказоустойчивости",
       "threshold": "Порог сбоев",
       "resetTimeout": "Время ожидания перед сбросом в мс",
-      "baseCooldown": "Базовый период ожидания в мс"
+      "baseCooldown": "Базовый период ожидания в мс",
+      "p2cLatencyWeight": "Вес задержки p2c, от 0 (выкл.) до 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Запустить Claude Code с подключением к OmniRoute (локально или удалённо, с --profile)",
     "token": "Токен, который должен отправлять клиент Claude (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute недоступен на порте {port}. Запустите его командой 'omniroute serve'.",
-    "notFound": "CLI 'claude' не найден в PATH."
+    "notFound": "CLI 'claude' не найден в PATH.",
+    "toolsHelp": "Запустите инструмент кодирования (автоматически запускает шлюз, список моделей от подключенных провайдеров): omniroute launch <tool> [options] [-- toolArgs...] omniroute launch --list list launchable Tools omniroute launch <tool> --help options для запуска инструмента (--model, --all-models, ...) Без имени инструмента запуск запускает Claude Code с указанными выше параметрами (устарело).",
+    "gatewayDescription": "Осмотрите или проконтролируйте шлюз, на котором начался запуск omniroute."
   },
   "run": {
     "description": "Запустить поддерживаемый целевой CLI через OmniRoute"

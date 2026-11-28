@@ -287,6 +287,7 @@
     "retentionOpt": "Alleen de laatste N back-ups bewaren",
     "passphrasePrompt": "Wachtwoordzin voor versleuteling:",
     "noPassphrase": "Een wachtwoordzin is vereist voor een versleutelde back-up.",
+    "restoreDecryptFailed": "Back-up {name} kon niet worden gedecodeerd (verkeerde wachtwoordzin of beschadigd bestand); er is niets veranderd.",
     "cloudFailed": "Waarschuwing: uploaden naar de cloud is mislukt. De lokale back-up is opgeslagen.",
     "cloudUploaded": "Cloudback-up geüpload: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Veerkrachtconfiguratie beheren",
       "threshold": "Drempelwaarde voor fouten",
       "resetTimeout": "Resettime-out in ms",
-      "baseCooldown": "Basiscooldown in ms"
+      "baseCooldown": "Basiscooldown in ms",
+      "p2cLatencyWeight": "p2c latentiegewicht, 0 (uit) tot 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Start Claude Code, gericht op OmniRoute (lokaal of extern, met --profile)",
     "token": "Token die de Claude-client moet verzenden (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute is niet bereikbaar op {port}. Start het met 'omniroute serve'.",
-    "notFound": "De 'claude'-CLI is niet gevonden in PATH."
+    "notFound": "De 'claude'-CLI is niet gevonden in PATH.",
+    "toolsHelp": "Start een coderingstool (start automatisch de gateway, modellijst van uw verbonden providers): omniroute start <tool> [opties] [- toolArgs...] omniroute start --list lijst startbare tools omniroute start <tool> --help opties voor het starten van een tool (--model, --all-models, ...) Zonder een toolnaam start het starten Claude Code met de bovenstaande opties (verouderd).",
+    "gatewayDescription": "Inspecteer of controleer de gateway waarmee de omniroute-lancering is gestart"
   },
   "run": {
     "description": "Start een ondersteund CLI-doel via OmniRoute"

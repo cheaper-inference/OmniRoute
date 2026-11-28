@@ -287,6 +287,7 @@
     "retentionOpt": "માત્ર છેલ્લા N બૅકઅપ્સ રાખો",
     "passphrasePrompt": "એન્ક્રિપ્શન પાસફ્રેઝ:",
     "noPassphrase": "એન્ક્રિપ્ટેડ બૅકઅપ માટે પાસફ્રેઝ જરૂરી છે.",
+    "restoreDecryptFailed": "બેકઅપ {name} ને ડિક્રિપ્ટ કરી શકાયું નથી (ખોટો પાસફ્રેઝ અથવા ક્ષતિગ્રસ્ત ફાઇલ); કંઈપણ બદલાયું ન હતું.",
     "cloudFailed": "ચેતવણી: ક્લાઉડ અપલોડ નિષ્ફળ ગયું. સ્થાનિક બૅકઅપ સાચવવામાં આવ્યો.",
     "cloudUploaded": "ક્લાઉડ બૅકઅપ અપલોડ થયો: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "રેઝિલિયન્સ રૂપરેખાંકન મેનેજ કરો",
       "threshold": "નિષ્ફળતાની સીમા",
       "resetTimeout": "રીસેટ સમયસમાપ્તિ ms માં",
-      "baseCooldown": "મૂળ કૂલડાઉન ms માં"
+      "baseCooldown": "મૂળ કૂલડાઉન ms માં",
+      "p2cLatencyWeight": "p2c લેટન્સી વેઇટ, 0 (બંધ) થી 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "OmniRoute તરફ નિર્દેશિત Claude Code લૉન્ચ કરો (સ્થાનિક અથવા રિમોટ, --profile સાથે)",
     "token": "Claude ક્લાયન્ટે મોકલવાનો ટોકન (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute {port} પર પહોંચી શકાય તેમ નથી. તેને 'omniroute serve' વડે શરૂ કરો.",
-    "notFound": "'claude' CLI PATH માં મળ્યું નથી."
+    "notFound": "'claude' CLI PATH માં મળ્યું નથી.",
+    "toolsHelp": "કોડિંગ ટૂલ લોંચ કરો (ગેટવેને સ્વતઃ-પ્રારંભ કરો, તમારા કનેક્ટેડ પ્રદાતાઓ પાસેથી મોડેલ સૂચિ): ઓમ્નીરાઉટ લોન્ચ <tool> [વિકલ્પો] [-- toolArgs...] omniroute લૉન્ચ --list સૂચિ લૉન્ચ કરી શકાય તેવા ટૂલ્સ omniroute લૉન્ચ <tool> --help વિકલ્પો ટૂલ લૉન્ચ (--model, --all-models ટૂલ સાથે શરૂ કરો ... ઉપરના વિકલ્પો (નાપસંદ).",
+    "gatewayDescription": "ગેટવેનું નિરીક્ષણ કરો અથવા તેને નિયંત્રિત કરો કે જે ઑમ્નીરૂટ લૉન્ચ શરૂ થયું હતું"
   },
   "run": {
     "description": "OmniRoute મારફતે સમર્થિત CLI લક્ષ્ય લૉન્ચ કરો"
