@@ -4,7 +4,6 @@
  * POST — Create a destination
  */
 
-import { z } from "zod";
 import { NextResponse } from "next/server";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -16,21 +15,25 @@ import {
   getLogExportDestinations,
 } from "@/lib/db/logExportDestinations";
 import { getLogExportDestinationType } from "@/lib/logExport/registry";
+import { createDestinationSchema } from "@/lib/logExport/destinationSchemas";
 import { encryptDestinationConfig, requiresEncryptionKey } from "@/lib/logExport/secrets";
 import { getMaxCallLogRowId } from "@/lib/usage/callLogExportSource";
 import { toDestinationView } from "@/lib/logExport/presenter";
 
-const createDestinationSchema = z.object({
-  name: z.string().min(1).max(200),
-  type: z.string().min(1).max(64),
-  enabled: z.boolean().optional().default(false),
-  config: z.record(z.string(), z.unknown()).optional().default({}),
-  batchSize: z.number().int().min(1).max(10_000).optional().default(500),
-  startFromCurrentPosition: z.boolean().optional().default(false),
-  includeBodies: z.boolean().optional().default(false),
-  maxBodyBytes: z.number().int().min(1024).max(5_000_000).optional().default(262_144),
-  maxRowsPerRun: z.number().int().min(1).max(1_000_000).optional().default(10_000),
-});
+const destinationConfigEnvelope = createDestinationSchema.pick({ type: true, config: true });
+
+function configIssueDetails(issues: readonly { path: PropertyKey[]; message: string }[]) {
+  return issues.map((issue) => ({ field: issue.path.join("."), message: issue.message }));
+}
+
+function getConfigValidationDetails(body: unknown) {
+  const envelope = destinationConfigEnvelope.safeParse(body);
+  if (!envelope.success) return [];
+
+  const { type, config } = envelope.data;
+  const validation = getLogExportDestinationType(type)?.configSchema.safeParse(config);
+  return validation?.error ? configIssueDetails(validation.error.issues) : [];
+}
 
 export async function GET(request: Request) {
   const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
@@ -53,9 +56,14 @@ export async function POST(request: Request) {
   if (authError) return authError;
 
   try {
-    const validation = validateBody(createDestinationSchema, await request.json());
+    const body: unknown = await request.json();
+    const validation = validateBody(createDestinationSchema, body);
     if (isValidationFailure(validation)) {
-      return NextResponse.json({ error: validation.error }, { status: 400 });
+      const { message, details } = validation.error;
+      return NextResponse.json(
+        { error: { message, details: [...details, ...getConfigValidationDetails(body)] } },
+        { status: 400 }
+      );
     }
     const { data } = validation;
 
@@ -73,10 +81,7 @@ export async function POST(request: Request) {
         {
           error: {
             message: "Invalid destination configuration",
-            details: parsedConfig.error.issues.map((issue) => ({
-              field: issue.path.join("."),
-              message: issue.message,
-            })),
+            details: configIssueDetails(parsedConfig.error.issues),
           },
         },
         { status: 400 }

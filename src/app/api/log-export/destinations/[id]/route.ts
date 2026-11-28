@@ -5,7 +5,6 @@
  * DELETE — Remove it
  */
 
-import { z } from "zod";
 import { NextResponse } from "next/server";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -16,6 +15,7 @@ import {
   updateLogExportDestination,
 } from "@/lib/db/logExportDestinations";
 import { getLogExportDestinationType } from "@/lib/logExport/registry";
+import { updateDestinationSchema } from "@/lib/logExport/destinationSchemas";
 import {
   encryptDestinationConfig,
   decryptDestinationConfig,
@@ -23,16 +23,6 @@ import {
   requiresEncryptionKey,
 } from "@/lib/logExport/secrets";
 import { toDestinationView } from "@/lib/logExport/presenter";
-
-const updateDestinationSchema = z.object({
-  name: z.string().min(1).max(200).optional(),
-  enabled: z.boolean().optional(),
-  config: z.record(z.string(), z.unknown()).optional(),
-  batchSize: z.number().int().min(1).max(10_000).optional(),
-  includeBodies: z.boolean().optional(),
-  maxBodyBytes: z.number().int().min(1024).max(5_000_000).optional(),
-  maxRowsPerRun: z.number().int().min(1).max(1_000_000).optional(),
-});
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });

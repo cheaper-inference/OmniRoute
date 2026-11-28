@@ -1,0 +1,1 @@
+- **fix(dashboard):** Validate BigQuery log-export destinations before saving and show every invalid field at once, with EU prefilled as the dataset location (KEA-9787).

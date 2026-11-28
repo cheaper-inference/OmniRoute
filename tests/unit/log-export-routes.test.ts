@@ -113,6 +113,8 @@ test("GET_types_ReturnsRenderableFieldDescriptorsForEveryDestination", async () 
   ) as Record<string, unknown>;
   assert.equal(secretField.secret, true);
   assert.equal(secretField.type, "textarea");
+  const locationField = bigqueryType.fields.find((field) => field.key === "location");
+  assert.equal(locationField?.defaultValue, "EU");
 });
 
 test("POST_destinations_ValidPayload_CreatesItAndNeverEchoesTheServiceAccount", async () => {
@@ -156,6 +158,29 @@ test("POST_destinations_InvalidDatasetName_IsRejectedByTheTypeSchema", async () 
   assert.ok(
     asError(body).details.some((detail) => detail.field === "datasetId"),
     "dataset id must be validated"
+  );
+});
+
+test("POST_destinations_InvalidEnvelopeAndConfig_ListsAllFieldErrorsTogether", async () => {
+  const { response, body } = await createDestination({
+    batchSize: 99_999_999,
+    config: { location: "", partitionExpirationDays: -5 },
+  });
+
+  assert.equal(response.status, 400);
+  const { message, details } = asError(body);
+  assert.equal(message, "Invalid request");
+  assert.deepEqual(
+    details.map((detail) => detail.field),
+    [
+      "batchSize",
+      "projectId",
+      "datasetId",
+      "tableId",
+      "location",
+      "serviceAccountJson",
+      "partitionExpirationDays",
+    ]
   );
 });
 
