@@ -1,0 +1,1 @@
+- **fix(combo):** a combo no longer cancels the models that already failed once a later model answers or the combo times out, so a fallback stops printing a false `[STREAM] … | disconnect: hedge-cancelled` log line for each failed model (with the time since that model's attempt started)
