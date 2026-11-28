@@ -60,6 +60,7 @@ import { useConnectionGate } from "./hooks/useConnectionGate";
 import { useProviderNodeActions } from "./hooks/useProviderNodeActions";
 import ProviderExtraPanels from "./components/ProviderExtraPanels";
 import ProviderModelsSection from "./components/ProviderModelsSection";
+import OpenAIBillingPanel from "@/shared/components/OpenAIBillingPanel";
 import CustomModelsSection from "./components/CustomModelsSection";
 import ConnectionsListPanel from "./components/ConnectionsListPanel";
 import CoolingConnectionsPanel from "./components/CoolingConnectionsPanel";
@@ -636,6 +637,7 @@ export default function ProviderDetailPageClient() {
       />
 
       <ProviderTosNotice providerId={providerId} />
+      {providerId === "openai" && <OpenAIBillingPanel />}
 
       {providerId === "zed" && (
         <div id="keychain-import-card">
