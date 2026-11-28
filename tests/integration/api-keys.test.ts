@@ -170,10 +170,10 @@ test("POST /api/keys creates a key, preserves special characters, and persists n
   assert.equal(response.status, 201);
   assert.equal(body.name, "Key / Prod #1");
   assert.equal(body.noLog, true);
-  assert.equal(body.compressionEnabled, true);
+  assert.equal(body.compressionEnabled, false);
   assert.match(body.key, /^sk-[a-z0-9-]+/i);
   assert.equal(stored?.noLog, true);
-  assert.equal(stored?.compressionEnabled, true);
+  assert.equal(stored?.compressionEnabled, false);
   assert.equal(compliance.isNoLog(body.id), true);
 });
 

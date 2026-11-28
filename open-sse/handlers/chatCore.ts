@@ -1425,10 +1425,11 @@ async function handleChatCoreInner({
       { provider, model: effectiveModel },
       compressionSettings?.exclusions
     );
-    // A per-key opt-out is a request-scoped hard kill for prompt compression. It
-    // deliberately does not disable the independent reactive context-fit safety
-    // passes, matching the existing x-omniroute-compression: off contract.
-    const apiKeyCompressionEnabled = apiKeyInfo?.compressionEnabled !== false;
+    // Prompt compression is opt-in at both the global and API-key levels.
+    // A key only enables it when `compressionEnabled` is explicitly true;
+    // otherwise the proactive prompt path stays off. Reactive context-fit
+    // safety passes remain independent.
+    const apiKeyCompressionEnabled = apiKeyInfo?.compressionEnabled === true;
     let promptCompressionEnabled =
       compressionSettingsResult.enabled && !compressionExcluded && apiKeyCompressionEnabled;
     reactiveContextCompactionEnabled = compressionSettingsResult.enabled && !compressionExcluded;

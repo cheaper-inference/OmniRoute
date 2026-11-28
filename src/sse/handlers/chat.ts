@@ -349,10 +349,11 @@ const DEFER_METERED_BUDGET = { meteredBudget: "defer-to-candidate" } as const;
  * context-overflow rejection so chatCore's compression runs first.
  *
  * Mirrors handleChatCore's own enablement determination (chatCore.ts): defer only
- * when the global compression switch is ON and the API key has not opted out
- * (`apiKeyInfo.compressionEnabled !== false`). Per-target applicability (server-side
- * exclusions) is checked inside getKnownContextOverflow via the returned exclusions.
- * Fail closed (defer=false) on any lookup error — the existing hard preflight stays.
+ * when the global compression switch is ON and the API key has explicitly
+ * opted in (`apiKeyInfo.compressionEnabled === true`). Per-target applicability
+ * (server-side exclusions) is checked inside getKnownContextOverflow via the
+ * returned exclusions. Fail closed (defer=false) on any lookup error — the
+ * existing hard preflight stays.
  */
 async function resolveComboContextOverflowDeferral(
   logger: { warn?: (...args: unknown[]) => void } | null | undefined,
@@ -361,7 +362,7 @@ async function resolveComboContextOverflowDeferral(
   try {
     const compression = await resolveCompressionSettings(logger);
     return {
-      defer: compression.enabled && apiKeyInfo?.compressionEnabled !== false,
+      defer: compression.enabled && apiKeyInfo?.compressionEnabled === true,
       exclusions: compression.settings?.exclusions,
     };
   } catch {

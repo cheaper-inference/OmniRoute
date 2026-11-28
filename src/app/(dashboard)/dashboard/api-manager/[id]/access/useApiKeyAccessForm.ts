@@ -345,7 +345,7 @@ function initialCatalogBehaviourState(
 ): Pick<ApiKeyAccessFormState, CatalogBehaviourField> {
   return {
     streamDefaultMode: apiKey?.streamDefaultMode === "json" ? "json" : "legacy",
-    compressionEnabled: apiKey?.compressionEnabled !== false,
+    compressionEnabled: apiKey?.compressionEnabled === true,
     allowAutoCombos: apiKey?.allowAutoCombos !== false,
     allowCcDiscoveryAliases: apiKey?.allowCcDiscoveryAliases !== false,
     catalogScope: apiKey?.catalogScope ?? "all",

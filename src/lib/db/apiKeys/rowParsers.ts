@@ -55,9 +55,9 @@ export function parseIsActive(value: unknown): boolean {
 }
 
 export function parseCompressionEnabled(value: unknown): boolean {
-  // DEFAULT 1 — preserve compression for legacy rows unless explicitly disabled.
-  if (value === 0 || value === "0" || value === false) return false;
-  return true;
+  // Prompt compression is opt-in. Persisted 1 means the operator explicitly
+  // enabled it; anything else stays off.
+  return value === true || value === 1 || value === "1";
 }
 
 export function parseAllowAutoCombos(value: unknown): boolean {

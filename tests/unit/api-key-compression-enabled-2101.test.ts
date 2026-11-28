@@ -28,16 +28,9 @@ test.after(async () => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("API key prompt compression defaults on and round-trips an explicit opt-out", async () => {
+test("API key prompt compression defaults off and round-trips an explicit opt-in", async () => {
   const created = await apiKeysDb.createApiKey("raw-prompts", "machine1234567890");
 
-  assert.equal((await apiKeysDb.getApiKeyById(created.id))?.compressionEnabled, true);
-  assert.equal((await apiKeysDb.getApiKeyMetadata(created.key))?.compressionEnabled, true);
-
-  assert.equal(
-    await apiKeysDb.updateApiKeyPermissions(created.id, { compressionEnabled: false }),
-    true
-  );
   assert.equal((await apiKeysDb.getApiKeyById(created.id))?.compressionEnabled, false);
   assert.equal((await apiKeysDb.getApiKeyMetadata(created.key))?.compressionEnabled, false);
 
@@ -45,7 +38,14 @@ test("API key prompt compression defaults on and round-trips an explicit opt-out
     await apiKeysDb.updateApiKeyPermissions(created.id, { compressionEnabled: true }),
     true
   );
+  assert.equal((await apiKeysDb.getApiKeyById(created.id))?.compressionEnabled, true);
   assert.equal((await apiKeysDb.getApiKeyMetadata(created.key))?.compressionEnabled, true);
+
+  assert.equal(
+    await apiKeysDb.updateApiKeyPermissions(created.id, { compressionEnabled: false }),
+    true
+  );
+  assert.equal((await apiKeysDb.getApiKeyMetadata(created.key))?.compressionEnabled, false);
 });
 
 test("API key update schema accepts only boolean compressionEnabled values", () => {

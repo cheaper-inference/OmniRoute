@@ -77,7 +77,7 @@ export const API_KEY_POLICY_FIELDS: readonly FieldSpec[] = [
   { column: "weekly_usage_limit_usd", field: "weeklyUsageLimitUsd", kind: "nullablePositive" },
   { column: "five_hour_usage_limit_usd", field: "fiveHourUsageLimitUsd", kind: "nullablePositive" },
   { column: "chaos_mode_enabled", field: "chaosModeEnabled", kind: "boolFalse" },
-  { column: "compression_enabled", field: "compressionEnabled", kind: "boolTrue" },
+  { column: "compression_enabled", field: "compressionEnabled", kind: "boolFalse" },
   { column: "allow_auto_combos", field: "allowAutoCombos", kind: "boolTrue" },
   { column: "allow_cc_discovery_aliases", field: "allowCcDiscoveryAliases", kind: "boolTrue" },
   {

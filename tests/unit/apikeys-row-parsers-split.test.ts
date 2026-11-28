@@ -91,9 +91,9 @@ test("flag parsers honor the 0/1/true/false matrix", () => {
   assert.equal(P.parseIsActive(undefined), true);
   assert.equal(P.parseIsActive(0), false);
   assert.equal(P.parseIsActive("0"), false);
-  // compressionEnabled also defaults on for legacy/missing rows.
-  assert.equal(P.parseCompressionEnabled(undefined), true);
-  assert.equal(P.parseCompressionEnabled(null), true);
+  // compressionEnabled starts off; only an explicit stored 1 opts in.
+  assert.equal(P.parseCompressionEnabled(undefined), false);
+  assert.equal(P.parseCompressionEnabled(null), false);
   assert.equal(P.parseCompressionEnabled(1), true);
   assert.equal(P.parseCompressionEnabled("1"), true);
   assert.equal(P.parseCompressionEnabled(0), false);
