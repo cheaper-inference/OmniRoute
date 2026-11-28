@@ -128,6 +128,10 @@ export interface EditConnectionModalProps {
   onClose: () => void;
 }
 const stringField = (value: unknown) => (typeof value === "string" ? value : "");
+/**
+ * Modal for editing an existing provider connection (credentials, base URL, request defaults
+ * and, for OpenAI-compatible chat connections, the native JSON schema toggle).
+ */
 export default function EditConnectionModal({
   isOpen,
   connection,
@@ -183,6 +187,7 @@ export default function EditConnectionModal({
     codexOpenaiStoreEnabled: false,
     openaiResponsesStoreEnabled: false,
     preserveEncryptedReasoning: false,
+    nativeJsonSchema: false,
     consoleApiKey: "",
     newApiUserId: "",
     newApiAggregatorBalance: false,
@@ -259,6 +264,8 @@ export default function EditConnectionModal({
         connectionProviderSpecificData?.apiType === "responses" ||
         formData.targetFormat === "openai-responses"));
   const isCustomResponsesConnection = isResponsesConnection && !isCodex && provider !== "openai";
+  const isOpenAICompatibleChatConnection =
+    isOpenAICompatibleProvider(provider) && !isResponsesConnection;
   const isClaude = provider === "claude";
   const isAntigravityFamily = provider === "antigravity" || provider === "agy";
   const localProviderMetadata = getLocalProviderMetadata(provider);
@@ -420,6 +427,7 @@ export default function EditConnectionModal({
         openaiResponsesStoreEnabled: connection.providerSpecificData?.openaiStoreEnabled === true,
         preserveEncryptedReasoning:
           connection.providerSpecificData?.preserveEncryptedReasoning === true,
+        nativeJsonSchema: connection.providerSpecificData?.nativeJsonSchema === true,
         consoleApiKey: existingConsoleApiKey,
         newApiUserId: existingNewApiUserId,
         newApiAggregatorBalance: connection.providerSpecificData?.newApiAggregatorBalance === true,
@@ -781,6 +789,10 @@ export default function EditConnectionModal({
         updates.providerSpecificData.openaiStoreEnabled =
           formData.openaiResponsesStoreEnabled === true;
       }
+      if (isOpenAICompatibleChatConnection && updates.providerSpecificData) {
+        // Explicit boolean: the PUT route merges { ...existing, ...incoming }.
+        updates.providerSpecificData.nativeJsonSchema = formData.nativeJsonSchema === true;
+      }
       const freeOnlyChanged =
         showFreeModelsToggle &&
         formData.importFreeModelsOnly !==
@@ -821,6 +833,18 @@ export default function EditConnectionModal({
         t,
         "preserveEncryptedReasoningDescription",
         "Forward encrypted Responses reasoning items supplied by the client."
+      )}
+    />
+  ) : null;
+  const nativeJsonSchemaToggle = isOpenAICompatibleChatConnection ? (
+    <Toggle
+      checked={formData.nativeJsonSchema}
+      onChange={(checked) => setFormData({ ...formData, nativeJsonSchema: checked })}
+      label={providerText(t, "nativeJsonSchemaLabel", "Native JSON schema support")}
+      description={providerText(
+        t,
+        "nativeJsonSchemaDescription",
+        "Forward response_format json_schema unchanged instead of downgrading it to json_object."
       )}
     />
   ) : null;
@@ -951,6 +975,7 @@ export default function EditConnectionModal({
             />
           )}
           {preserveEncryptedReasoningToggle}
+          {nativeJsonSchemaToggle}
           {openaiResponsesStoreToggle}
           {requireUserLastMessageToggle}
           {keepMidConversationSystemToggle}
