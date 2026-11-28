@@ -49,11 +49,7 @@ import {
 } from "@/shared/utils/fetchTimeout";
 import { sanitizeErrorMessage, sanitizeUpstreamDetails } from "../utils/error.ts";
 
-import {
-  hasRequestedOutputFormat,
-  normalizeImageOutput,
-  prepareImageOutputOptions,
-} from "./imageGeneration/outputFormat.ts";
+import { hasRequestedOutputFormat, normalizeImageOutput } from "./imageGeneration/outputFormat.ts";
 import { prepareFalPreservedOutputOptions } from "./imageGeneration/providerOutputOptions.ts";
 import { handleSDWebUIImageGeneration } from "./imageGeneration/providers/sdWebUI.ts";
 import { handleHyperbolicImageGeneration } from "./imageGeneration/providers/hyperbolic.ts";
@@ -95,6 +91,7 @@ import {
   reportPollinationsAnonOutcome,
 } from "./imageGeneration/pollinationsAnonAuth.ts";
 import { fetchImageEndpoint } from "./imageGeneration/openAiImageFetch.ts";
+import { prepareImageGenerationOptions } from "./imageGeneration/generationOptions.ts";
 
 // Re-export so /v1/images/edits can dispatch Firefly reference-image edits.
 export { handleAdobeFireflyImageGeneration };
@@ -1437,13 +1434,9 @@ async function handleOpenAIImageGeneration({
     Object.assign(upstreamBody, request.body);
   } else if (providerConfig.format !== "agnes-image") {
     // Pass optional parameters for ordinary OpenAI-compatible providers.
-    // An explicit output_format (and its animation/background controls) is forwarded as
-    // asked; without one the upstream body is exactly the historical one.
-    if (hasRequestedOutputFormat(body)) {
-      const output = prepareImageOutputOptions(body);
-      if ("error" in output) return { success: false, status: 400, error: output.error };
-      Object.assign(upstreamBody, output.options);
-    }
+    const output = prepareImageGenerationOptions(provider, body);
+    if ("error" in output) return { success: false, status: 400, error: output.error };
+    Object.assign(upstreamBody, output.options);
     if (body.n !== undefined) upstreamBody.n = body.n;
     if (body.size !== undefined) upstreamBody.size = body.size;
     if (body.quality !== undefined) upstreamBody.quality = body.quality;

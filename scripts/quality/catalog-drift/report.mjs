@@ -4,9 +4,12 @@ import { byCodeUnit } from "./order.mjs";
 
 /** @typedef {import("./probes.mjs").Finding} Finding */
 /** @typedef {import("./probes.mjs").ProbeStats} ProbeStats */
+/** @typedef {import("./registry.mjs").ListingObservation} ListingObservation */
+/** @typedef {import("./registry.mjs").DeclaredListing} DeclaredListing */
 /** @typedef {{ id: string, provider: string, type: string, url: string,
- *   status: "ok"|"drift"|"fetch-failed"|"invalid-response"|"skipped",
- *   httpStatus: number|null, textChars: number|null, detail?: string, findings: Finding[], stats: ProbeStats|null }} ProbeResult */
+ *   status: "ok"|"drift"|"fetch-failed"|"invalid-response"|"skipped"|"inconclusive",
+ *   httpStatus: number|null, textChars: number|null, detail?: string, findings: Finding[], stats: ProbeStats|null,
+ *   scope?: "registry", listing?: ListingObservation, declared?: DeclaredListing }} ProbeResult */
 /** @typedef {{ findings: Finding[], fingerprint: string|null, allProbesFetched: boolean, consecutiveRuns: number,
  *   notInCatalog: boolean, catalogRows: Array<{ modelId: string, poolKey: string|null, monthlyTokens: number, freeType: string }> }} ProviderReport */
 /** @typedef {{ schemaVersion: 1, runAt: string, catalogCuratedAt: string, manifestReviewedAt: string,
@@ -53,6 +56,7 @@ export function buildReport({
 }) {
   const probesByProvider = new Map();
   for (const probe of probeResults) {
+    if (probe.scope === "registry") continue;
     if (!probesByProvider.has(probe.provider)) probesByProvider.set(probe.provider, []);
     probesByProvider.get(probe.provider).push(probe);
   }
@@ -106,7 +110,9 @@ export function renderMarkdown(report) {
   ];
   const providers = Object.keys(report.providers).sort(byCodeUnit);
   for (const provider of providers) {
-    const probes = report.probes.filter((probe) => probe.provider === provider);
+    const probes = report.probes.filter(
+      (probe) => probe.provider === provider && probe.scope !== "registry"
+    );
     const { findings } = report.providers[provider];
     const drift = findings.filter(({ severity }) => severity === "drift").length;
     const failures = probes.filter(
@@ -137,6 +143,42 @@ export function renderMarkdown(report) {
           " `" +
           detailText +
           "`"
+      );
+    }
+  }
+  const registryProbes = report.probes.filter(({ scope }) => scope === "registry");
+  if (registryProbes.length) {
+    lines.push(
+      "",
+      "## Registry model listings",
+      "",
+      "Compared IDs are exact registry targets. The JSON records alias and virtual labels separately.",
+      ""
+    );
+    for (const { provider, id, url, listing, findings } of registryProbes) {
+      const detail = listing
+        ? [
+            listing.status,
+            listing.httpStatus === null ? "no HTTP status" : "HTTP " + listing.httpStatus,
+            listing.checkedAt,
+          ]
+        : ["skipped (deadline)"];
+      if (listing?.status === "complete") {
+        const { declaredOnly, listedOnly } = findings[0].details;
+        detail.push(
+          (Array.isArray(declaredOnly) ? declaredOnly.length : 0) + " declared only",
+          (Array.isArray(listedOnly) ? listedOnly.length : 0) + " listed only"
+        );
+      }
+      lines.push(
+        "- **" +
+          escapeMarkdown(provider) +
+          "** (" +
+          escapeMarkdown(id) +
+          ") · " +
+          detail.join(" · ") +
+          " · " +
+          escapeMarkdown(url)
       );
     }
   }
