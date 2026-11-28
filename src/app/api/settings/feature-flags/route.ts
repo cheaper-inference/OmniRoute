@@ -19,6 +19,7 @@ import {
   clearAllFeatureFlagOverrides,
 } from "@/lib/db/featureFlags";
 import { resolveAllFeatureFlags } from "@/shared/utils/featureFlags";
+import { isRequireApiKeyValueEnabled } from "@/shared/utils/requireApiKeyValue.mjs";
 import { getCcAliasGlobalState } from "@/lib/db/ccDiscoveryAliases";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 
@@ -210,12 +211,26 @@ export async function PUT(request: NextRequest) {
       reportedSource = state.source;
     }
 
+    let securityWarning: string | undefined;
+    if (
+      key === "REQUIRE_API_KEY" &&
+      !isRequireApiKeyValueEnabled(reportedEffectiveValue) &&
+      (reportedSource === "db" || isRequireApiKeyValueEnabled(previousValue))
+    ) {
+      const overrodeEnv = isRequireApiKeyValueEnabled(process.env.REQUIRE_API_KEY);
+      securityWarning = overrodeEnv
+        ? "REQUIRE_API_KEY was disabled via database override while REQUIRE_API_KEY=true is set in the environment — /v1/* inference endpoints now accept unauthenticated requests."
+        : "REQUIRE_API_KEY is now disabled — /v1/* inference endpoints accept unauthenticated requests on every interface this server binds.";
+      console.warn(`[SECURITY] ${securityWarning}`);
+    }
+
     return NextResponse.json({
       key,
       effectiveValue: reportedEffectiveValue,
       source: reportedSource,
       previousValue,
       previousSource,
+      ...(securityWarning ? { securityWarning } : {}),
       ...(key === "UNPRICED_USAGE_BUDGET_POLICY"
         ? {
             configuredSource: updatedFlag.configuredSource,

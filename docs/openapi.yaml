@@ -14490,7 +14490,13 @@ paths:
       summary: "PUT settings › feature flags"
       responses:
         "200":
-          description: OK
+          description: >-
+            OK. When an update leaves `REQUIRE_API_KEY` disabled (for example via a
+            database override while `REQUIRE_API_KEY=true` is set in the environment,
+            or by clearing an active override back to an unkeyed default), the JSON
+            response includes a `securityWarning` string alongside `key`,
+            `effectiveValue`, `source`, `previousValue`, `previousSource`, and
+            `requiresRestart`.
   /api/settings/free-proxies:
     delete:
       tags:

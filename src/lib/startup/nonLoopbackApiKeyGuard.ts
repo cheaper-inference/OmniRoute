@@ -6,6 +6,7 @@
 // OmniRoute may already be doing its own auth) — it only logs a loud warning
 // so the operator notices the exposure instead of discovering it from traffic.
 
+import { getFeatureFlagOverride } from "@/lib/db/featureFlags";
 import { isRequireApiKeyValueEnabled } from "@/shared/utils/requireApiKeyValue.mjs";
 
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "::1", "localhost", "::ffff:127.0.0.1"]);
@@ -14,19 +15,43 @@ function isLoopbackHost(host: string): boolean {
   return LOOPBACK_HOSTS.has(host.trim().toLowerCase());
 }
 
-function isRequireApiKeyDisabled(): boolean {
-  // Same parser as the request gate, but env only: a DB override (which the gate checks
-  // first) is not seen here, so an override of "false" with env "true" stays silent.
-  return !isRequireApiKeyValueEnabled(process.env.REQUIRE_API_KEY);
+function resolveRequireApiKeyPosture(): { disabled: boolean; overriddenOffByDb: boolean } {
+  const envEnabled = isRequireApiKeyValueEnabled(process.env.REQUIRE_API_KEY);
+  let dbOverride: string | undefined;
+  try {
+    dbOverride = getFeatureFlagOverride("REQUIRE_API_KEY");
+  } catch {
+    dbOverride = undefined;
+  }
+  const effectiveEnabled =
+    dbOverride !== undefined ? isRequireApiKeyValueEnabled(dbOverride) : envEnabled;
+  return {
+    disabled: !effectiveEnabled,
+    overriddenOffByDb: dbOverride !== undefined && !effectiveEnabled && envEnabled,
+  };
 }
 
 /**
  * Logs a warning when `host` resolves to a non-loopback interface while
- * REQUIRE_API_KEY is disabled. Never throws and never blocks startup.
+ * REQUIRE_API_KEY is effectively disabled (via env default or DB override).
+ * Never throws and never blocks startup.
  */
 export function warnIfNonLoopbackWithoutApiKey(serverLabel: string, host: string): void {
   if (isLoopbackHost(host)) return;
-  if (!isRequireApiKeyDisabled()) return;
+  const posture = resolveRequireApiKeyPosture();
+  if (!posture.disabled) return;
+
+  if (posture.overriddenOffByDb) {
+    console.warn(
+      `[startup][SECURITY] ${serverLabel} is bound to non-loopback host "${host}" while ` +
+        "REQUIRE_API_KEY is disabled by a database feature-flag override (overriding " +
+        "process.env.REQUIRE_API_KEY=true) — this exposes the anonymous /v1 proxy to " +
+        "every reachable network interface. Remove or set the REQUIRE_API_KEY database " +
+        "override back to true unless a reverse proxy in front of this instance already " +
+        "enforces its own authentication."
+    );
+    return;
+  }
 
   console.warn(
     `[startup] ${serverLabel} is bound to non-loopback host "${host}" while ` +
