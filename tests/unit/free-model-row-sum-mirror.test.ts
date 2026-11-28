@@ -73,6 +73,51 @@ test("a retired ledger row enters retiredTokens and never the real figure", () =
   ]);
 });
 
+test("a revived row contributes the larger quota exactly once, with live winning ties", () => {
+  const ledger = [
+    retired({ provider: "xkiro", lastListedMonthlyTokens: 150e6, revivedAt: "2026-11-19" }),
+  ];
+  const cases = [
+    { liveQuota: 15e6, liveTokens: 0, retiredTokens: 150e6, liveRows: 0, retiredRows: 1 },
+    { liveQuota: 150e6, liveTokens: 150e6, retiredTokens: 0, liveRows: 1, retiredRows: 0 },
+    { liveQuota: 300e6, liveTokens: 300e6, retiredTokens: 0, liveRows: 1, retiredRows: 0 },
+  ];
+  for (const { liveQuota, liveTokens, retiredTokens, liveRows, retiredRows } of cases) {
+    const entries = [row({ provider: "xkiro", modelId: "m", monthlyTokens: liveQuota })];
+    const asOf = new Date("2026-11-19T00:00:00Z");
+    const m = computeRowSumMirror({ entries, retired: ledger, asOf });
+    const totalTokens = Math.max(liveQuota, 150e6);
+    assert.deepEqual(m, {
+      method: "row-sum-v1",
+      liveTokens,
+      retiredTokens,
+      totalTokens,
+      realSteadyTokens: liveQuota,
+      retiredShare: retiredTokens / totalTokens,
+      byProvider: [{ provider: "xkiro", liveRows, retiredRows, tokens: totalTokens }],
+    });
+    assert.equal(
+      m.realSteadyTokens,
+      computeRowSumMirror({ entries, retired: [], asOf }).realSteadyTokens
+    );
+  }
+});
+
+test("a live row keeps its historical peak after the ended-offer window", () => {
+  const entries = [row({ provider: "xkiro", modelId: "m", monthlyTokens: 15e6 })];
+  const ledger = [
+    retired({ provider: "xkiro", lastListedMonthlyTokens: 150e6, revivedAt: "2027-11-19" }),
+    retired({ provider: "mistral" }),
+  ];
+  const m = computeRowSumMirror({ entries, retired: ledger, asOf: new Date("2027-11-19") });
+  assert.equal(m.totalTokens, 150e6);
+  assert.equal(m.liveTokens, 0);
+  assert.equal(m.retiredTokens, 150e6);
+  assert.deepEqual(m.byProvider, [
+    { provider: "xkiro", liveRows: 0, retiredRows: 1, tokens: 150e6 },
+  ]);
+});
+
 test("a row with gates enters the mirror and not the real figure", () => {
   const entries = [row({ provider: "groq", poolKey: "g", monthlyTokens: 7e6, gates: ["card"] })];
   const m = computeRowSumMirror({ entries, retired: [], asOf: NOW });
@@ -130,8 +175,7 @@ test("an empty catalog has a zero share instead of NaN", () => {
 
 test("byProvider is ordered by tokens, then by provider id", () => {
   const entries = [
-    // Fixture providers must have a tokens unit in FREE_QUOTA_UNIT (llm7 left the map when its pool
-    // was retired in the November 2026 re-audit).
+    // Fixture providers must have a tokens unit in FREE_QUOTA_UNIT.
     row({ provider: "xkiro", poolKey: "x", monthlyTokens: 3e6 }),
     row({ provider: "groq", poolKey: "g", monthlyTokens: 3e6 }),
     row({ provider: "nara", poolKey: "n", monthlyTokens: 9e6 }),
