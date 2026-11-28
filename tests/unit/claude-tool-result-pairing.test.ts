@@ -4,6 +4,9 @@ import assert from "node:assert/strict";
 import { FORMATS } from "../../open-sse/translator/formats.ts";
 import { translateRequest } from "../../open-sse/translator/index.ts";
 import { prepareClaudeRequest } from "../../open-sse/translator/helpers/claudeHelper.ts";
+import { resetDbInstance } from "../../src/lib/db/core.ts";
+
+test.after(() => resetDbInstance());
 
 function translate(body: Record<string, unknown>) {
   return translateRequest(
@@ -82,5 +85,69 @@ describe("Claude tool result pairing", () => {
       false
     );
     assert.match(JSON.stringify(out.messages?.[0]?.content), /only output/);
+  });
+
+  test("keeps orphaned text in order and leaves paired results structured", () => {
+    const image = {
+      type: "image",
+      source: { type: "base64", media_type: "image/png", data: "aW1hZ2U=" },
+    };
+    const resultBlocks = [
+      { type: "text", text: "first output" },
+      image,
+      { type: "text", text: "second output" },
+    ];
+    const pairedResult = { type: "tool_result", tool_use_id: "call-valid", content: resultBlocks };
+    const expectedPairedResult = structuredClone(pairedResult);
+    const out = prepareClaudeRequest(
+      {
+        messages: [
+          {
+            role: "assistant",
+            content: [{ type: "tool_use", id: "call-valid", name: "capture", input: {} }],
+          },
+          {
+            role: "user",
+            content: [
+              { type: "tool_result", tool_use_id: "call-orphan", content: resultBlocks },
+              pairedResult,
+              { type: "tool_result", tool_use_id: "call-image-only", content: [image] },
+            ],
+          },
+        ],
+      },
+      "github"
+    );
+
+    assert.deepEqual(out.messages?.[1]?.content, [
+      expectedPairedResult,
+      { type: "text", text: "[Unpaired tool result call-orphan]\nfirst output\nsecond output" },
+      { type: "text", text: "[Unpaired tool result call-image-only]" },
+    ]);
+  });
+
+  test("keeps only text from an unmatched OpenAI tool message when translating to Claude", () => {
+    const out = translate({
+      messages: [
+        {
+          role: "tool",
+          tool_call_id: "call-orphan",
+          content: [
+            { type: "text", text: "first output" },
+            { type: "image_url", image_url: { url: "data:image/png;base64,aW1hZ2U=" } },
+            { type: "text", text: "second output" },
+          ],
+        },
+      ],
+    });
+
+    assert.deepEqual(out.messages, [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: "[Unpaired tool result call-orphan]\nfirst output\nsecond output" },
+        ],
+      },
+    ]);
   });
 });

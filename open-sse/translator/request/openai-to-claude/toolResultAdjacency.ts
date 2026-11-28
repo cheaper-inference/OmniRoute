@@ -1,3 +1,5 @@
+import { unpairedClaudeToolResultText } from "../../helpers/claudeToolResultText.ts";
+
 type ClaudeContentBlock = Record<string, unknown>;
 type ClaudeMessage = {
   role: string;
@@ -58,14 +60,7 @@ function stripAndCollectToolResults(
 
     if (!collectMatchedToolResult(block, assistantsByToolUseId, resultsByAssistant)) {
       const toolUseId = typeof block.tool_use_id === "string" ? block.tool_use_id : "";
-      const serialized =
-        typeof block.content === "string"
-          ? block.content
-          : (JSON.stringify(block.content ?? "") ?? "");
-      remainingBlocks.push({
-        type: "text",
-        text: `[Unpaired tool result ${toolUseId || "unknown"}]\n${serialized}`,
-      });
+      remainingBlocks.push(unpairedClaudeToolResultText(toolUseId, block.content));
     }
   }
 
