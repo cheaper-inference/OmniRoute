@@ -20,7 +20,8 @@ import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import Card from "@/shared/components/Card";
-import Select from "@/shared/components/Select";
+import ProviderFilter from "./ProviderFilter";
+import { parseProviderFilter } from "./providerFilterStorage";
 import { CardSkeleton } from "@/shared/components/Loading";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import {
@@ -170,7 +171,7 @@ function passesQuotaStatusFilter(
 }
 function matchesVisibleQuotaConnection(
   conn: any,
-  providerFilter: string,
+  providerFilter: string[],
   tierFilter: string,
   purchaseTypeFilter: PurchaseTypeKey,
   statusFilter: DisplayFilter,
@@ -279,9 +280,9 @@ export default function ProviderLimits({
     if (typeof window === "undefined") return "all";
     return readLimitsPreference(LS_ENV_FILTER);
   });
-  const [providerFilter, setProviderFilter] = useState<string>(() => {
-    if (typeof window === "undefined") return "all";
-    return readLimitsPreference(LS_PROVIDER_FILTER);
+  const [providerFilter, setProviderFilter] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    return parseProviderFilter(readLimitsPreference(LS_PROVIDER_FILTER));
   });
   const { layoutMode, selectLayout } = useQuotaLayout();
   const { canRequestLive, scheduleLiveRetry } = useAutomaticQuotaRequests(layoutMode);
@@ -792,10 +793,10 @@ export default function ProviderLimits({
     }
   }, []);
 
-  const handleSetProviderFilter = useCallback((value: string) => {
+  const handleSetProviderFilter = useCallback((value: string[]) => {
     setProviderFilter(value);
     try {
-      localStorage.setItem(LS_PROVIDER_FILTER, value);
+      localStorage.setItem(LS_PROVIDER_FILTER, JSON.stringify(value));
     } catch {
       /* ignore */
     }
@@ -960,32 +961,20 @@ export default function ProviderLimits({
             })}
           </div>
 
-          {/* Provider filter — single-select dropdown of providers actually
-              present in the current account set. Auto-falls back to "all" if
-              the persisted choice no longer exists in this session. */}
-          {providerOptions.length > 1 && (
+          {/* Keep the reset available even if selected providers disappear. */}
+          {(providerOptions.length > 1 || providerFilter.length > 0) && (
             <div className="flex items-center gap-2 flex-wrap">
               <span className="ci-eyebrow mr-1" data-size="2xs" data-weight="medium">
                 {tr("filterProviderLabel", "Provider")}
               </span>
-              <Select
-                compact
-                className="w-auto"
-                value={
-                  providerFilter === "all" || providerOptions.includes(providerFilter)
-                    ? providerFilter
-                    : "all"
-                }
-                onChange={(event) => handleSetProviderFilter(event.target.value)}
-                aria-label={tr("filterProviderAriaLabel", "Filter quota providers")}
-              >
-                <option value="all">{tr("filterProviderAll", "All providers")}</option>
-                {providerOptions.map((provider) => (
-                  <option key={provider} value={provider}>
-                    {PROVIDER_LABEL[provider] || provider}
-                  </option>
-                ))}
-              </Select>
+              <ProviderFilter
+                options={providerOptions}
+                value={providerFilter}
+                onChange={handleSetProviderFilter}
+                labels={PROVIDER_LABEL}
+                allLabel={tr("filterProviderAll", "All providers")}
+                ariaLabel={tr("filterProviderAriaLabel", "Filter quota providers")}
+              />
             </div>
           )}
 
