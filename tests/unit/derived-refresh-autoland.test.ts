@@ -459,12 +459,15 @@ test("accounts for hunk context and earlier replacements before a frozen removal
 });
 
 const baseReadme = "Intro\nCount 2\n";
-const baseContents = {
-  type: "file",
-  encoding: "base64",
-  size: Buffer.byteLength(baseReadme),
-  content: Buffer.from(baseReadme).toString("base64"),
-};
+function encodedContents(text: string) {
+  return {
+    type: "file",
+    encoding: "base64",
+    size: Buffer.byteLength(text),
+    content: Buffer.from(text).toString("base64"),
+  };
+}
+const baseContents = encodedContents(baseReadme);
 
 const pull = {
   state: "open",
@@ -483,6 +486,14 @@ const removeLabelArgs = [...labelArgs, "--remove-label", "omni-queue"];
 const comparePath = `compare/${baseSha}...${headSha}?per_page=2`;
 
 type GhCall = { args: string[]; token: string };
+type PrFile = {
+  filename: string;
+  status: string;
+  additions: number;
+  deletions: number;
+  patch?: string;
+  previous_filename?: string;
+};
 
 function runAutoland(
   t: TestContext,
@@ -492,13 +503,20 @@ function runAutoland(
     ancestorContents = baseContents,
     rawContents = "",
     filename = "README.md",
+    entries = [
+      { ...readmeEvidence, filename, patch: linePatch("Count 2", "Count 3", 2) },
+    ] as PrFile[],
+    documentResponses = {} as Record<string, unknown>,
     commitComparison = {
       ...comparison,
       behind_by: Number(ancestor !== baseSha),
       merge_base_commit: { sha: ancestor },
       commits: [{ ...robotCommit, parents: [{ sha: ancestor }] }],
     } as unknown,
-    pulls = [pull, pull, pull] as unknown[],
+    pulls = [pull, pull, pull].map((item) => ({
+      ...item,
+      changed_files: entries.length,
+    })) as unknown[],
     dryRun = true,
     enabled = true,
     removeLabelFails = false,
@@ -511,12 +529,11 @@ function runAutoland(
   const dir = mkdtempSync(join(artifacts, "autoland-test-"));
   t.after(() => rmSync(dir, { force: true, recursive: true }));
   const responses = {
-    "pulls/1/files?per_page=100": [
-      [{ ...readmeEvidence, filename, patch: linePatch("Count 2", "Count 3", 2) }],
-    ],
+    "pulls/1/files?per_page=100": [entries],
     [`contents/README.md?ref=${baseSha}`]: contents,
     [`raw:contents/README.md?ref=${baseSha}`]: rawContents,
     [`contents/README.md?ref=${mergeBaseSha}`]: ancestorContents,
+    ...documentResponses,
     [comparePath]: commitComparison,
     "branches?per_page=100": `${ready.baseBranch}\n`,
     "issues?state=open&per_page=100": "",
@@ -666,6 +683,237 @@ const addLabel = { args: addLabelArgs, token: "label-token" };
 const removeLabel = { args: removeLabelArgs, token: "label-token" };
 const changedHead = { ...pull, head: { ...pull.head, sha: "d".repeat(40) } };
 const derivedFile = "docs/reference/derived-facts.json";
+const comparisonDoc = "docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md";
+const selfHostDoc = "docs/getting-started/SELF_HOST_GUIDE.md";
+const freeTiersDoc = "docs/reference/FREE_TIERS.md";
+const realDocEdits = [
+  [comparisonDoc, "**50 with free access**", "**49 with free access**"],
+  [
+    selfHostDoc,
+    "[50 providers with free access](./FREE-TIERS-GUIDE.md)",
+    "[49 providers with free access](./FREE-TIERS-GUIDE.md)",
+  ],
+  [freeTiersDoc, "6 without a key", "5 without a key"],
+] as const;
+
+function documentEdit(filename: string, before: string, after: string, line = 1) {
+  return { ...readmeEvidence, filename, patch: linePatch(before, after, line) };
+}
+
+function contentsPath(filename: string, sha = baseSha) {
+  return `contents/${filename}?ref=${sha}`;
+}
+
+const freeTiersBefore = "6 without a key";
+const freeTiersEdit = documentEdit(freeTiersDoc, freeTiersBefore, "5 without a key");
+const freeTiersBase = encodedContents(`${freeTiersBefore}\n`);
+const freeTiersBasePath = contentsPath(freeTiersDoc);
+
+test("autoland accepts the three English count updates alongside a derived output", (t) => {
+  const { stdout } = runAutoland(t, {
+    entries: [
+      ...realDocEdits.map(([file, before, after]) => documentEdit(file, before, after)),
+      { ...readmeEvidence, filename: derivedFile },
+    ],
+    documentResponses: Object.fromEntries(
+      realDocEdits.map(([file, before]) => [contentsPath(file), encodedContents(`${before}\n`)])
+    ),
+  });
+  assert.match(stdout, /apply=true eligible/);
+});
+
+test("autoland compares once and reads README and two documents once each at the base SHA", (t) => {
+  const edits = realDocEdits.slice(0, 2);
+  const { stdout, calls } = runAutoland(t, {
+    entries: [
+      documentEdit("README.md", "Count 2", "Count 3", 2),
+      ...edits.map(([file, before, after]) => documentEdit(file, before, after)),
+    ],
+    documentResponses: Object.fromEntries(
+      edits.map(([file, before]) => [contentsPath(file), encodedContents(`${before}\n`)])
+    ),
+  });
+  const endpoints = calls.map(({ args }) => args[1]?.replace(`repos/${ready.repository}/`, ""));
+  assert.match(stdout, /apply=true eligible/);
+  assert.deepEqual(
+    endpoints.filter((endpoint) => endpoint?.startsWith("compare/")),
+    [comparePath]
+  );
+  assert.deepEqual(
+    endpoints.filter((endpoint) => endpoint?.startsWith("contents/")).sort(),
+    ["README.md", comparisonDoc, selfHostDoc].map((file) => contentsPath(file)).sort()
+  );
+});
+
+for (const [name, before, after, base, line] of [
+  ["a changed word", freeTiersBefore, "5 without a token", `${freeTiersBefore}\n`, 1],
+  ["a link target", "[Docs](guide-1.md)", "[Docs](guide-2.md)", "[Docs](guide-1.md)\n", 1],
+  ["inline code", "Run `tool 2`", "Run `tool 3`", "Run `tool 2`\n", 1],
+  ["a fenced code block", "Count 2", "Count 3", "```\nCount 2\n```\n", 2],
+] as const) {
+  test(`autoland rejects a document patch with ${name}`, (t) => {
+    const { stdout } = runAutoland(t, {
+      entries: [documentEdit(freeTiersDoc, before, after, line)],
+      documentResponses: { [freeTiersBasePath]: encodedContents(base) },
+    });
+    assert.equal(stdout.trim(), `PR #1 apply=false doc-not-digits-only:${freeTiersDoc}`);
+  });
+}
+
+for (const [name, changes] of [
+  ["added", { status: "added", deletions: 0 }],
+  ["removed", { status: "removed", additions: 0 }],
+  ["renamed into the list", { status: "renamed", previous_filename: selfHostDoc }],
+  [
+    "renamed out of the list",
+    { status: "renamed", filename: derivedFile, previous_filename: freeTiersDoc },
+  ],
+  ["reported as modified with a previous filename", { previous_filename: derivedFile }],
+  ["missing its patch", { patch: undefined }],
+] as const) {
+  test(`autoland rejects an allowlisted document when ${name}`, (t) => {
+    const { stdout, calls } = runAutoland(t, {
+      entries: [{ ...freeTiersEdit, ...changes }],
+      documentResponses: { [freeTiersBasePath]: freeTiersBase },
+      dryRun: false,
+    });
+    const paths = name === "renamed into the list" ? [selfHostDoc, freeTiersDoc] : [freeTiersDoc];
+    assert.equal(
+      stdout.trim(),
+      `PR #1 apply=false ${paths.map((path) => `doc-not-digits-only:${path}`).join(", ")}`
+    );
+    assert.deepEqual(pullAndLabelCalls(calls), [readPull]);
+  });
+}
+
+for (const [name, contents, reason] of [
+  ["the contents API fails", null, "unavailable"],
+  ["the contents API reports a directory", { ...freeTiersBase, type: "dir" }, "unavailable"],
+  ["the document is empty", encodedContents(""), "empty"],
+  ["the contents API flags truncation", { ...freeTiersBase, truncated: true }, "incomplete"],
+  ["the decoded body is short", { ...freeTiersBase, size: freeTiersBase.size + 1 }, "incomplete"],
+  ["the document exceeds 2 MiB", { ...freeTiersBase, size: 2 * 1024 * 1024 + 1 }, "too-large"],
+] as const) {
+  test(`autoland rejects a document patch when ${name}`, (t) => {
+    const { stdout } = runAutoland(t, {
+      entries: [freeTiersEdit],
+      documentResponses: { [freeTiersBasePath]: contents },
+    });
+    assert.equal(stdout.trim(), `PR #1 apply=false base-doc-${reason}:${freeTiersDoc}`);
+  });
+}
+
+test("autoland rejects an allowlisted document without an exact base SHA", (t) => {
+  const { stdout } = runAutoland(t, {
+    entries: [freeTiersEdit],
+    pulls: [{ ...pull, base: { ref: ready.baseBranch } }],
+  });
+  assert.equal(stdout.trim(), `PR #1 apply=false base-doc-unavailable:${freeTiersDoc}`);
+});
+
+test("autoland reads raw document bytes when metadata has no inline content", (t) => {
+  const rawPath = `raw:${freeTiersBasePath}`;
+  const options = {
+    entries: [freeTiersEdit],
+    documentResponses: {
+      [freeTiersBasePath]: { ...freeTiersBase, encoding: "none", content: "" },
+      [rawPath]: `${freeTiersBefore}\n`,
+    },
+  };
+  assert.match(runAutoland(t, options).stdout, /apply=true eligible/);
+  const { stdout } = runAutoland(t, {
+    ...options,
+    documentResponses: { ...options.documentResponses, [rawPath]: freeTiersBefore },
+  });
+  assert.equal(stdout.trim(), `PR #1 apply=false base-doc-incomplete:${freeTiersDoc}`);
+});
+
+for (const [name, ancestorContents, expected] of [
+  ["identical", freeTiersBase, "apply=true eligible"],
+  [
+    "different",
+    encodedContents("7 without a key\n"),
+    `apply=false doc-diff-base-mismatch:${freeTiersDoc}`,
+  ],
+  ["unavailable", null, `apply=false doc-diff-base-mismatch:${freeTiersDoc}`],
+] as const) {
+  test(`autoland checks a diverged base when the document at the merge base is ${name}`, (t) => {
+    const ancestorPath = contentsPath(freeTiersDoc, mergeBaseSha);
+    const { stdout, calls } = runAutoland(t, {
+      entries: [freeTiersEdit],
+      ancestor: mergeBaseSha,
+      documentResponses: { [freeTiersBasePath]: freeTiersBase, [ancestorPath]: ancestorContents },
+    });
+    assert.equal(stdout.split("\n")[0], `PR #1 ${expected}`);
+    assert.deepEqual(
+      calls.map(({ args }) => args[1]).filter((path) => path?.includes("/contents/")),
+      [freeTiersBasePath, ancestorPath].map((path) => `repos/${ready.repository}/${path}`)
+    );
+  });
+}
+
+test("autoland rejects a mixed diff and reports only the document whose patch failed", (t) => {
+  const { stdout } = runAutoland(t, {
+    entries: [
+      documentEdit(comparisonDoc, "**50 with free access**", "**49 with free access**"),
+      documentEdit(freeTiersDoc, freeTiersBefore, "5 without a token"),
+    ],
+    documentResponses: {
+      [contentsPath(comparisonDoc)]: encodedContents("**50 with free access**\n"),
+      [freeTiersBasePath]: freeTiersBase,
+    },
+    dryRun: false,
+  });
+  assert.equal(stdout.trim(), `PR #1 apply=false doc-not-digits-only:${freeTiersDoc}`);
+});
+
+test("autoland rejects a Markdown document outside the allowlist", (t) => {
+  const { stdout } = runAutoland(t, { filename: "docs/guides/USER_GUIDE.md" });
+  assert.equal(stdout.trim(), "PR #1 apply=false non-derived-file");
+});
+
+test("autoland reports a missing comparison for a document-only diff", (t) => {
+  const { stdout } = runAutoland(t, { entries: [freeTiersEdit], commitComparison: null });
+  assert.equal(stdout.trim(), "PR #1 apply=false doc-diff-base-unavailable");
+});
+
+test("autoland keeps the README reason when README and another document lack a comparison", (t) => {
+  const { stdout } = runAutoland(t, {
+    entries: [freeTiersEdit, documentEdit("README.md", "Count 2", "Count 3", 2)],
+    commitComparison: null,
+  });
+  assert.equal(stdout.trim(), "PR #1 apply=false readme-diff-base-unavailable");
+});
+
+test("decideAutoland reports unverified document paths once each in alphabetical order", () => {
+  assert.deepEqual(
+    decideAutoland({
+      ...ready,
+      files: [freeTiersDoc, comparisonDoc, "README.md", freeTiersDoc, selfHostDoc],
+      digitsOnlyFiles: [comparisonDoc],
+    }),
+    {
+      apply: false,
+      reasons: [
+        "readme-not-digits-only",
+        `doc-not-digits-only:${selfHostDoc}`,
+        `doc-not-digits-only:${freeTiersDoc}`,
+      ],
+    }
+  );
+});
+
+test("decideAutoland rejects a verified document covered by the protection config", () => {
+  assert.deepEqual(
+    decideAutoland({
+      ...ready,
+      files: [freeTiersDoc],
+      digitsOnlyFiles: [freeTiersDoc],
+      config: { ...ready.config, protectedPaths: [...ready.config.protectedPaths, freeTiersDoc] },
+    }),
+    { apply: false, reasons: ["protected-file"] }
+  );
+});
 
 function pullAndLabelCalls(calls: GhCall[]) {
   return calls.filter(({ args }) => args[1] === pullArgs[1] || args[0] === "pr");

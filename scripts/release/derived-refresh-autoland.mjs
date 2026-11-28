@@ -6,13 +6,13 @@ import { categoryOf, loadFamilies } from "../check/check-pr-derived-paths.mjs";
 import { isMainModule } from "../lib/is-main-module.mjs";
 import { isManagedBase, loadConfig } from "../merge-queue/config.mjs";
 import { isProtectedPath, isSha } from "../merge-queue/contracts.mjs";
+import { DIGITS_ONLY_DOCS } from "./derived-refresh-digit-docs.mjs";
 
 const REPOSITORY = "cheaper-inference/OmniRoute";
 const HEAD_BRANCH = "chore/derived-refresh";
 export const BOT_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com";
 const RELEASE_BRANCH = /^release\/v\d+\.\d+\.\d+$/;
 const QUEUE_LABEL = "omni-queue";
-const DIGITS_ONLY_FILES = ["README.md"];
 const GATES = [
   ["Gate / CI", "ci.yml"],
   ["Gate / Quality", "quality.yml"],
@@ -20,13 +20,26 @@ const GATES = [
 
 class AutolandError extends Error {}
 
+function documentReason(filename, readmeReason) {
+  return filename === "README.md"
+    ? readmeReason
+    : `${readmeReason.replace("readme", "doc")}:${filename}`;
+}
+
+function unavailableComparisonReason(files) {
+  if (files.includes("README.md")) return "readme-diff-base-unavailable";
+  return files.some((file) => DIGITS_ONLY_DOCS.includes(file))
+    ? "doc-diff-base-unavailable"
+    : "commit-shape-unavailable";
+}
+
 function isApprover(config, login) {
   return config.approvers.some((approver) => approver.toLowerCase() === login?.toLowerCase());
 }
 
 // Fail closed above the same bound used by the span patterns.
 const MAX_README_LINE_LENGTH = 4096;
-const MAX_README_BYTES = 2 * 1024 * 1024;
+const MAX_DOC_BYTES = 2 * 1024 * 1024;
 const FROZEN_SPAN_START = new RegExp(
   [
     /(?<![\w:-])(?<attribute>href|src|srcset)[ \t]{0,4096}=[ \t]{0,4096}(?:"(?<double>[^"]{0,4096})"|'(?<single>[^']{0,4096})'|(?<bare>[^\s"'`<>]{1,4096}))/,
@@ -297,13 +310,15 @@ export function decideAutoland({
   }
 
   if (!files.length) reasons.push("empty-diff");
-  if (files.some((file) => DIGITS_ONLY_FILES.includes(file) && !digitsOnlyFiles.includes(file))) {
-    reasons.push("readme-not-digits-only");
+  for (const filename of DIGITS_ONLY_DOCS) {
+    if (files.includes(filename) && !digitsOnlyFiles.includes(filename)) {
+      reasons.push(documentReason(filename, "readme-not-digits-only"));
+    }
   }
   if (
     files.some(
       (file) =>
-        !DIGITS_ONLY_FILES.includes(file) &&
+        !DIGITS_ONLY_DOCS.includes(file) &&
         !families.some((family) => categoryOf(file, family) !== null)
     )
   ) {
@@ -341,45 +356,45 @@ function gh(operation, args, env, encoding = "utf8") {
   }
 }
 
-function readReadmeAt(read, raw, sha) {
-  const endpoint = `contents/README.md?ref=${sha}`;
+function readDocumentAt(read, raw, filename, sha) {
+  const endpoint = `contents/${filename.split("/").map(encodeURIComponent).join("/")}?ref=${sha}`;
   let contents;
   try {
     contents = read(
-      "read the base README",
+      "read the base document",
       endpoint,
       "--header",
       "Accept: application/vnd.github.object+json"
     );
   } catch {
-    return { reason: "base-readme-unavailable" };
+    return { reason: "unavailable" };
   }
   if (contents?.type !== "file" || !Number.isSafeInteger(contents.size) || contents.size < 0) {
-    return { reason: "base-readme-unavailable" };
+    return { reason: "unavailable" };
   }
-  if (contents.size > MAX_README_BYTES) return { reason: "base-readme-too-large" };
-  if (contents.truncated) return { reason: "base-readme-incomplete" };
-  if (contents.size === 0) return { reason: "base-readme-empty" };
+  if (contents.size > MAX_DOC_BYTES) return { reason: "too-large" };
+  if (contents.truncated) return { reason: "incomplete" };
+  if (contents.size === 0) return { reason: "empty" };
 
   let bytes;
   if (contents.encoding === "base64" && typeof contents.content === "string") {
     const encoded = contents.content.replace(/[\r\n]/g, "");
     bytes = Buffer.from(encoded, "base64");
-    if (bytes.toString("base64") !== encoded) return { reason: "base-readme-incomplete" };
+    if (bytes.toString("base64") !== encoded) return { reason: "incomplete" };
   } else if (contents.encoding === "none") {
     // The Contents API provides metadata without base64 for larger files.
     try {
-      bytes = raw("read the raw base README", endpoint);
+      bytes = raw("read the raw base document", endpoint);
     } catch {
-      return { reason: "base-readme-unavailable" };
+      return { reason: "unavailable" };
     }
   }
-  if (bytes?.length !== contents.size) return { reason: "base-readme-incomplete" };
+  if (bytes?.length !== contents.size) return { reason: "incomplete" };
   try {
     const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes);
-    return text.trim() ? { text } : { reason: "base-readme-empty" };
+    return text.trim() ? { text } : { reason: "empty" };
   } catch {
-    return { reason: "base-readme-incomplete" };
+    return { reason: "incomplete" };
   }
 }
 
@@ -447,17 +462,21 @@ function main() {
   const files = entries.flatMap(({ filename, previous_filename }) =>
     previous_filename ? [filename, previous_filename] : [filename]
   );
-  const readme = entries.find(
+  const modifiedDocs = entries.filter(
     (entry) =>
-      DIGITS_ONLY_FILES.includes(entry.filename) &&
+      DIGITS_ONLY_DOCS.includes(entry.filename) &&
       !entry.previous_filename &&
       entry.status === "modified"
   );
   const baseSha = pr.base?.sha;
   const headSha = pr.head?.sha;
   const hasBaseSha = typeof baseSha === "string" && isSha(baseSha);
-  if (readme && !hasBaseSha) {
-    return report(number, { apply: false, reasons: ["base-readme-unavailable"] });
+  if (modifiedDocs.length && !hasBaseSha) {
+    const entry = modifiedDocs.find(({ filename }) => filename === "README.md") ?? modifiedDocs[0];
+    return report(number, {
+      apply: false,
+      reasons: [documentReason(entry.filename, "base-readme-unavailable")],
+    });
   }
   let comparison;
   if (hasBaseSha && typeof headSha === "string" && isSha(headSha)) {
@@ -468,34 +487,40 @@ function main() {
         `compare/${baseSha}...${headSha}?per_page=2`
       );
     } catch {
-      // Without a comparison neither the commit shape nor the README merge base can be verified.
+      // The comparison provides both the commit shape and the merge base for document hunks.
     }
   }
   if (!comparison || typeof comparison !== "object" || Array.isArray(comparison)) {
-    const reason = files.some((file) => DIGITS_ONLY_FILES.includes(file))
-      ? "readme-diff-base-unavailable"
-      : "commit-shape-unavailable";
-    return report(number, { apply: false, reasons: [reason] });
+    return report(number, { apply: false, reasons: [unavailableComparisonReason(files)] });
   }
 
   const digitsOnlyFiles = [];
-  if (readme) {
-    const base = readReadmeAt(read, raw, baseSha);
-    if (base.reason) return report(number, { apply: false, reasons: [base.reason] });
-    if (isDigitsOnlyPatch(readme.patch, readme, frozenReadmeLines(base.text))) {
-      // PR hunks are relative to the merge base. Verify they address the same README on both bases.
-      const mergeBaseSha = comparison.merge_base_commit?.sha;
-      if (typeof mergeBaseSha !== "string" || !isSha(mergeBaseSha)) {
-        return report(number, { apply: false, reasons: ["readme-diff-base-unavailable"] });
-      }
-      if (mergeBaseSha !== baseSha) {
-        const ancestor = readReadmeAt(read, raw, mergeBaseSha);
-        if (ancestor.reason || ancestor.text !== base.text) {
-          return report(number, { apply: false, reasons: ["readme-diff-base-mismatch"] });
-        }
-      }
-      digitsOnlyFiles.push(readme.filename);
+  const mergeBaseSha = comparison.merge_base_commit?.sha;
+  for (const entry of modifiedDocs) {
+    const { filename, patch } = entry;
+    const base = readDocumentAt(read, raw, filename, baseSha);
+    if (base.reason) {
+      return report(number, {
+        apply: false,
+        reasons: [documentReason(filename, `base-readme-${base.reason}`)],
+      });
     }
+    if (!isDigitsOnlyPatch(patch, entry, frozenReadmeLines(base.text))) continue;
+
+    // PR hunks are relative to the merge base. Verify the document is identical on both bases.
+    if (typeof mergeBaseSha !== "string" || !isSha(mergeBaseSha)) {
+      return report(number, { apply: false, reasons: [unavailableComparisonReason(files)] });
+    }
+    if (mergeBaseSha !== baseSha) {
+      const ancestor = readDocumentAt(read, raw, filename, mergeBaseSha);
+      if (ancestor.reason || ancestor.text !== base.text) {
+        return report(number, {
+          apply: false,
+          reasons: [documentReason(filename, "readme-diff-base-mismatch")],
+        });
+      }
+    }
+    digitsOnlyFiles.push(filename);
   }
 
   const branches = api(

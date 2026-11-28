@@ -1,0 +1,1 @@
+- **fix(ci):** allow digits-only count updates in the English documents listed for derived refresh autoland.

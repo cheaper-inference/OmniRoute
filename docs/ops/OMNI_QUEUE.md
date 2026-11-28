@@ -524,11 +524,15 @@ It labels only the `chore/derived-refresh` robot PR in this repository, targetin
 The PR must contain exactly one commit whose only parent is the merge base.
 The commit must use the robot email for both the author and the committer.
 Every changed path must be unprotected.
-Changed files must match a derived output category, with an exception for `README.md`.
+Each changed file must match a derived output category or qualify for the digits-only rule.
 Files listed only as companions are ineligible.
-Changes to `README.md` may update only digits.
+The rule applies to `README.md` and the other English documents listed in
+[`scripts/release/derived-refresh-digit-docs.mjs`](../../scripts/release/derived-refresh-digit-docs.mjs).
+Changes to those documents may update only digits.
 Link and image targets (except same-document anchors), inline code, fenced code blocks, version
 numbers, and mixed alphanumeric tokens of at least 16 characters must stay intact.
+The script checks each document against its content at the exact base SHA.
+If the merge base differs, the document must have identical content at both SHAs.
 Changes to donation addresses and referral links require explicit human approval to land.
 The robot publishes regenerated protected files such as `skills/*/SKILL.md` in a separate PR from `chore/derived-refresh-protected`. That PR requires the owner's explicit approval to land.
 Any open `release-freeze` issue blocks labeling. An open `base-red` issue blocks its target branch.
