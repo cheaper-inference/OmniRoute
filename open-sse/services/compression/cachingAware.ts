@@ -141,6 +141,18 @@ export function mustKeepOpenCodeHistoryVerbatim(
 }
 
 /**
+ * Reactive compaction rewrites old messages on every turn above its proactive
+ * threshold. Protect a cacheable upstream prefix independently of the operator's
+ * prompt-compression mode; the last-resort pass still enforces the hard budget.
+ */
+export function shouldPreserveCachedHistory(
+  body: unknown,
+  context: CachingDetectionContext = {}
+): boolean {
+  return detectCachingContext(body, context).isCachingProvider;
+}
+
+/**
  * Get a cache-aware strategy based on the given strategy and caching context.
  *
  * @param strategy - The initial strategy (e.g., "aggressive", "ultra", etc.)

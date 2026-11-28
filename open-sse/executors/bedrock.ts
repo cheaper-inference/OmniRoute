@@ -18,6 +18,8 @@ import * as prl from "../utils/providerRequestLogging.ts";
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { normalizeClaudeAdaptiveThinking } from "../services/claudeAdaptiveThinking.ts";
 import {
+  BEDROCK_CLAUDE_MODEL,
+  bedrockClaudeSpecId as claudeSpecId,
   claudeModelSupportsThinking,
   claudeThinkingFromOpenAIRequest,
 } from "../translator/request/openai-to-claude/thinkingConfig.ts";
@@ -59,7 +61,6 @@ function decodeBase64(value) {
 // Converse prompt caching works only at explicit `cachePoint` blocks, and only on
 // model families that support it; other models reject the block.
 const BEDROCK_CACHE_POINT_MODEL = /anthropic\.claude|amazon\.nova/i;
-const BEDROCK_CLAUDE_MODEL = /anthropic\.claude/i;
 // Converse accepts at most 4 cache points per request.
 const BEDROCK_MAX_CACHE_POINTS = 4;
 
@@ -517,11 +518,8 @@ function toolConfigFromOpenAI(tools, toolChoice): ToolConfiguration | undefined 
 
 // A Bedrock id wraps the Claude id in a region, a provider and a version
 // (us.anthropic.claude-sonnet-4-5-20250929-v1:0); the model specs know the inner one.
-function claudeSpecId(model) {
-  return String(model)
-    .replace(/^.*anthropic\./i, "")
-    .replace(/-v\d+(?::.*)?$/i, "");
-}
+// Moved to thinkingConfig.ts (bedrockClaudeSpecId) so chatCore's final-output-budget
+// gate mirrors the executor's fitting; claudeSpecId is the local alias.
 
 function lastAssistantUsesTool(messages) {
   const assistant = messages.filter((message) => message.role === "assistant").at(-1);

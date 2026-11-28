@@ -44,7 +44,10 @@ import {
   buildDefaultAllowClaudeMessage,
   applyClaudeClassifierReasoningDefault,
 } from "./chatCore/claudeClassifierCompat.ts";
-import { enforceFinalOutputTokenBudget } from "./chatCore/finalOutputBudget.ts";
+import {
+  enforceFinalOutputTokenBudget,
+  requiredOutputHeadroom,
+} from "./chatCore/finalOutputBudget.ts";
 import { withResilienceActionsContext } from "./chatCore/resilienceAttemptContext.ts";
 import { notePreviousResponseResumed } from "./chatCore/resumedResilienceNotes.ts";
 import { runStreamingResponse } from "./chatCore/streamingResponse.ts";
@@ -309,6 +312,7 @@ import { hasMintedPiiTokens } from "../utils/piiTokenVault.ts";
 import { computeRequestHash, shouldDeduplicate } from "../services/requestDedup.ts";
 import {
   compressContext,
+  compactCachedContext,
   estimateTokens,
   getTokenLimit,
   getComboTargetTokenLimit,
@@ -324,6 +328,7 @@ import type {
 } from "../services/compression/types.ts";
 import {
   mustKeepOpenCodeHistoryVerbatim,
+  shouldPreserveCachedHistory,
   type CachingDetectionContext,
 } from "../services/compression/cachingAware.ts";
 import { runLiveZoneCompression } from "./chatCore/liveZoneCompression.ts";
@@ -1386,6 +1391,9 @@ async function handleChatCoreInner({
   // Keep automatic-prefix-cached OpenCode history intact during the proactive pass.
   // Last-resort compaction at the concrete context ceiling remains enabled.
   let protectOpenCodePrefix = false;
+  // Independent of prompt-compression mode: even mode=off still runs reactive compaction.
+  // Cacheable upstreams should let the client compact before the hard ceiling.
+  let protectCachedPrefix = false;
   // Native Codex history stays out of reactive/last-resort compaction unless the default-off
   // NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED flag opts in (#16632; fails closed).
   const skipNativeCodexReactiveCompaction = shouldSkipNativeCodexReactiveCompaction(
@@ -1432,6 +1440,13 @@ async function handleChatCoreInner({
     let promptCompressionEnabled =
       compressionSettingsResult.enabled && !compressionExcluded && apiKeyCompressionEnabled;
     reactiveContextCompactionEnabled = compressionSettingsResult.enabled && !compressionExcluded;
+    protectCachedPrefix = shouldPreserveCachedHistory(body, {
+      provider,
+      targetFormat,
+      model: effectiveModel,
+      geminiPromptCacheMode: isScopedGeminiCacheTarget ? geminiPromptCacheMode : null,
+      connectionCacheOverride: resolveConnectionCacheOverride(credentials?.providerSpecificData),
+    });
     contextEditingEnabled = compressionSettingsResult.contextEditingEnabled;
     if (!apiKeyCompressionEnabled) {
       log?.debug?.("COMPRESSION", "Prompt compression disabled for this API key");
@@ -2092,7 +2107,7 @@ async function handleChatCoreInner({
     if (
       reactiveContextCompactionEnabled &&
       !skipNativeCodexReactiveCompaction &&
-      !protectOpenCodePrefix &&
+      !protectCachedPrefix &&
       estimatedTokens > threshold
     ) {
       log?.info?.(
@@ -2180,22 +2195,45 @@ async function handleChatCoreInner({
 
   const effectiveCompactionCeiling = getEffectiveCompactionCeiling(finalContextLimit);
 
+  // For cacheable Claude translations, reserve the same default output headroom
+  // as the final budget gate before deciding whether last-resort is necessary.
+  const requiredHeadroom =
+    protectCachedPrefix && !contextWindowChecksDisabled && body
+      ? requiredOutputHeadroom(
+          body as Record<string, unknown>, sourceFormat, targetFormat, effectiveModel, provider
+        )
+      : 0;
+  const lastResortCeiling = Math.min(
+    effectiveCompactionCeiling,
+    finalContextLimit - requiredHeadroom
+  );
   // Last-resort compaction against the concrete input budget (not the 70% threshold).
   // Covers cases where the proactive pass was skipped or still left the request oversized (#8560).
   if (
     reactiveContextCompactionEnabled &&
     !skipNativeCodexReactiveCompaction &&
-    finalEstimatedInputTokens >= effectiveCompactionCeiling &&
+    finalEstimatedInputTokens >= lastResortCeiling &&
     body
   ) {
-    const lastResortTarget = Math.max(1, effectiveCompactionCeiling - toolsReserve - 1);
+    const lastResortTarget = Math.max(1, lastResortCeiling - toolsReserve - 1);
     const lastResortAdapter = adaptBodyForCompression(body as Record<string, unknown>);
-    const lastResortResult = compressContext(lastResortAdapter.body, {
-      provider,
-      model: effectiveModel,
-      maxTokens: lastResortTarget,
-      reserveTokens: 0,
-    });
+    const lastResortResult = protectCachedPrefix
+      ? compactCachedContext(lastResortAdapter.body as Record<string, unknown>, {
+          maxTokens: lastResortTarget,
+          fits: (candidate) => {
+            const restored = lastResortAdapter.adapted
+              ? lastResortAdapter.restore(candidate, { dropMissingMappedItems: true })
+              : candidate;
+            return estimateCalibratedFinalInputTokens(restored, provider, effectiveModel) <
+              lastResortCeiling;
+          },
+        })
+      : compressContext(lastResortAdapter.body, {
+          provider,
+          model: effectiveModel,
+          maxTokens: lastResortTarget,
+          reserveTokens: 0,
+        });
     if (lastResortResult.compressed && lastResortResult.body) {
       body = lastResortAdapter.adapted
         ? lastResortAdapter.restore(lastResortResult.body as Record<string, unknown>, {

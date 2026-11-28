@@ -613,6 +613,159 @@ export function resolveTokenLimit(
 export { resolveComboContextLimit } from "./comboContextLimit.ts";
 export type { ComboContextLimitSource } from "./comboContextLimit.ts";
 
+type CachedMessage = Record<string, unknown>;
+type CachedUnit = { start: number; end: number };
+
+function isCachedToolCall(message: CachedMessage): boolean {
+  return (
+    message.role === "assistant" &&
+    ((Array.isArray(message.tool_calls) && message.tool_calls.length > 0) ||
+      (Array.isArray(message.content) &&
+        message.content.some((block: CachedMessage) => block?.type === "tool_use")))
+  );
+}
+
+function isCachedToolResult(message: CachedMessage): boolean {
+  return (
+    message.role === "tool" ||
+    (message.role === "user" &&
+      Array.isArray(message.content) &&
+      message.content.some((block: CachedMessage) => block?.type === "tool_result"))
+  );
+}
+
+function cachedPrefixEnd(messages: CachedMessage[], maxTokens: number): number {
+  // Leading instructions are mandatory, not optional history. Keep them even
+  // when a single instruction exceeds the optional cache-prefix budget.
+  let end = 0;
+  while (end < messages.length && ["system", "developer"].includes(String(messages[end].role))) {
+    end++;
+  }
+  const prefixBudget = Math.min(8192, Math.floor(maxTokens * 0.15));
+  let tokens = 0;
+  while (end < messages.length) {
+    const next = estimateTokens(messages[end]);
+    if (tokens + next > prefixBudget) break;
+    tokens += next;
+    end++;
+  }
+  // Never divide a call from any of its consecutive results.
+  if (end < messages.length && isCachedToolResult(messages[end])) {
+    let start = end - 1;
+    while (start >= 0 && isCachedToolResult(messages[start])) start--;
+    if (start >= 0 && isCachedToolCall(messages[start])) end = start;
+  }
+  // A trailing assistant call may receive results on the next request.
+  if (end === messages.length && end > 0 && isCachedToolCall(messages[end - 1])) end--;
+  return end;
+}
+
+function cachedHistoryUnits(messages: CachedMessage[], start: number): CachedUnit[] {
+  const units: CachedUnit[] = [];
+  for (let i = start; i < messages.length;) {
+    let end = i + 1;
+    if (isCachedToolCall(messages[i])) {
+      while (end < messages.length && isCachedToolResult(messages[end])) end++;
+    }
+    units.push({ start: i, end });
+    i = end;
+  }
+  return units;
+}
+
+function latestCachedUserRequest(messages: CachedMessage[]): number {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (message.role !== "user") continue;
+    if (
+      Array.isArray(message.content) &&
+      !message.content.some((block: CachedMessage) => block?.type !== "tool_result")
+    ) {
+      continue;
+    }
+    return i;
+  }
+  return -1;
+}
+
+/**
+ * Emergency compaction for cacheable requests. Unlike the general compressor,
+ * this never edits a retained message (including tool IDs, thinking signatures,
+ * and cache markers), and never inserts a notice ahead of the cacheable prefix.
+ * The leading prefix is chosen by a fixed forward token budget, so appending
+ * history cannot move its boundary. Only whole units in the middle are omitted.
+ */
+export function compactCachedContext(
+  body: Record<string, unknown>,
+  options: { maxTokens: number; fits: (candidate: Record<string, unknown>) => boolean }
+): {
+  body: Record<string, unknown>;
+  compressed: boolean;
+  stats: { original: number; final: number; prefix: number; omitted: number };
+} {
+  const messages = Array.isArray(body.messages) ? (body.messages as Record<string, unknown>[]) : [];
+  const original = estimateTokens(messages);
+  const unchanged = {
+    body,
+    compressed: false,
+    stats: { original, final: original, prefix: 0, omitted: 0 },
+  };
+  if (!messages.length || options.fits(body)) return unchanged;
+
+  const prefixEnd = cachedPrefixEnd(messages, options.maxTokens);
+  // A Claude user carrier can contain several parallel tool_result blocks, while
+  // OpenAI puts each result in a separate tool message.
+  const units = cachedHistoryUnits(messages, prefixEnd);
+  const anchor = latestCachedUserRequest(messages);
+  // When the current request is already pinned, its entire subsequent interaction
+  // is mandatory. It cannot be reduced to the final assistant/tool unit. A prefix
+  // that covers every message leaves no unit to drop — fail closed.
+  if (!units.length) return unchanged;
+  const mandatoryUnit =
+    anchor < prefixEnd ? 0 : units.findIndex((unit) => unit.start <= anchor && anchor < unit.end);
+  if (mandatoryUnit < 0) return unchanged;
+  // Instruction updates outside the leading run must survive every middle omission.
+  // Keep each at its original position relative to the retained suffix, so the
+  // latest policy is never silently replaced by an older conversation turn.
+  const mandatoryInstructions: number[] = [];
+  for (let i = prefixEnd; i < units[mandatoryUnit].start; i++) {
+    if (messages[i].role === "system" || messages[i].role === "developer") {
+      mandatoryInstructions.push(i);
+    }
+  }
+  const candidate = (from: number): Record<string, unknown> => ({
+    ...body,
+    messages: [
+      ...messages.slice(0, prefixEnd),
+      ...mandatoryInstructions
+        .filter((index) => index < units[from].start)
+        .map((index) => messages[index]),
+      ...messages.slice(units[from].start),
+    ],
+  });
+  if (!options.fits(candidate(mandatoryUnit))) return unchanged;
+
+  // Retaining a longer suffix cannot reduce its token cost. Binary search avoids
+  // a synchronous full-payload scan for every old turn in a long conversation.
+  let low = 0;
+  let high = mandatoryUnit;
+  while (low < high) {
+    const mid = Math.floor((low + high) / 2);
+    if (options.fits(candidate(mid))) high = mid;
+    else low = mid + 1;
+  }
+  const keepFrom = low;
+  const compacted = candidate(keepFrom);
+  const omitted = messages.length - (compacted.messages as CachedMessage[]).length;
+  if (omitted <= 0) return unchanged;
+  const final = estimateTokens(compacted.messages);
+  return {
+    body: compacted,
+    compressed: true,
+    stats: { original, final, prefix: prefixEnd, omitted },
+  };
+}
+
 /**
  * Apply context compression to request body.
  * Operates in layers of increasing aggressiveness:
