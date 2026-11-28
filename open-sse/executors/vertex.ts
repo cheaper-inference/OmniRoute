@@ -1,4 +1,8 @@
 import { SignJWT, importPKCS8 } from "jose";
+import {
+  isGeminiTrailingModelTurnRejectingModel,
+  stripTrailingGeminiModelTurns,
+} from "../translator/helpers/geminiTrailingModelTurn.ts";
 import { BaseExecutor, ExecuteInput } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import {
@@ -414,6 +418,15 @@ function synthesizeClaudeSse(response: Record<string, unknown>): string {
   return events.map((e) => `event: ${e.event}\ndata: ${JSON.stringify(e.data)}\n\n`).join("");
 }
 
+function stripVertexTrailingModelTurns(model: string, body: unknown): void {
+  if (!isGeminiTrailingModelTurnRejectingModel(model, "vertex")) return;
+  if (!body || typeof body !== "object") return;
+  const { contents } = body as Record<string, unknown>;
+  if (Array.isArray(contents)) {
+    stripTrailingGeminiModelTurns(contents);
+  }
+}
+
 export class VertexExecutor extends BaseExecutor {
   constructor() {
     super("vertex", PROVIDERS.vertex);
@@ -472,6 +485,7 @@ export class VertexExecutor extends BaseExecutor {
       delete body.model;
       downgradeUnsupportedVertexClaudeTtl(body, model);
     }
+    stripVertexTrailingModelTurns(model, input.body);
 
     const result = await super.execute(input);
 
