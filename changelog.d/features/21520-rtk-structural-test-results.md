@@ -1,0 +1,1 @@
+- **feat(sse):** With `OMNIROUTE_RTK_STRUCTURAL_RENDERERS_ENABLED`, RTK summarizes Vitest, Jest and pytest runs that provably passed and keeps every other run whole, failures and diagnostics included (#21520).
