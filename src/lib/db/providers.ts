@@ -15,7 +15,7 @@ import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptW
 import { getDbInstance, rowToCamel, cleanNulls } from "./core";
 import { backupDbFile } from "./backup";
 import { encryptConnectionFields, decryptConnectionFields } from "./encryption";
-import { createLazyRowProxy } from "./providers/lazyConnectionView";
+import { createLazyRowProxy, modelAvailabilityRevision } from "./providers/lazyConnectionView";
 import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache";
 import { invalidateConnectionUpdate, type UpdateOpts } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
@@ -281,13 +281,17 @@ export async function getRawProviderConnections(
   const rows = db.prepare(sql).all(params);
   return rows.map((r) => {
     const camelRow = rowToCamel(r);
-    return withNullableRateLimitOverrides(
+    const connection = withNullableRateLimitOverrides(
       withNullableQuotaWindowThresholds(
         withNullableMaxConcurrent(cleanNulls(camelRow), camelRow),
         camelRow
       ),
       camelRow
     );
+    Object.defineProperty(connection, modelAvailabilityRevision, {
+      value: (r as JsonRecord).model_availability_revision,
+    });
+    return connection;
   });
 }
 
@@ -325,7 +329,7 @@ export async function getProviderConnectionById(id: string) {
   if (!row) return null;
 
   const camelRow = rowToCamel(row);
-  return decryptConnectionFields(
+  const connection = decryptConnectionFields(
     withNullableRateLimitOverrides(
       withNullableQuotaWindowThresholds(
         withNullableMaxConcurrent(cleanNulls(camelRow), camelRow),
@@ -334,6 +338,11 @@ export async function getProviderConnectionById(id: string) {
       camelRow
     )
   );
+
+  Object.defineProperty(connection, modelAvailabilityRevision, {
+    value: (row as JsonRecord).model_availability_revision,
+  });
+  return connection;
 }
 
 export interface ProviderConnectionDisplayMetadata {

@@ -1,0 +1,1 @@
+- **feat(resilience):** Opt-in `MODEL_AVAILABILITY_EVIDENCE_ENABLED` skips a model on a connection after two explicit HTTP 404 "model not found" answers within 24 hours, for 30 days or until that connection serves the model again (#21303).

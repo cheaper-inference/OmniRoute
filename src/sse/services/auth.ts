@@ -1,4 +1,7 @@
-import type { CredentialSelectionOptions } from "./credentialSelectionOptions";
+import {
+  MODEL_UNAVAILABLE_SELECTION,
+  type CredentialSelectionOptions,
+} from "./credentialSelectionOptions";
 import { mayWriteCodexConnection } from "@/lib/db/codexConnectionFences";
 export type { CredentialSelectionOptions } from "./credentialSelectionOptions";
 import { qoderSupportsCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
@@ -926,6 +929,7 @@ async function materializeConnection(
     errorCode: connection.errorCode,
     rateLimitedUntil: connection.rateLimitedUntil,
     ...buildConnectionConcurrencyFields(connection),
+    ...options.modelAvailability?.stampCredentials(connection),
     quotaWindowThresholds: connection.quotaWindowThresholds ?? null,
     ...(releaseOAuthSession ? { releaseOAuthSession } : {}),
     ...buildAntigravityRoutingFields(extra.routingLease, connection.id, extra.requestedModel),
@@ -1247,6 +1251,16 @@ export async function getProviderCredentials(
     const providerPool = connections;
     if (resolvedId === "qoder" && options.requireToolCalling) {
       connections = connections.filter(qoderSupportsCallerTools);
+    }
+    if (requestedModel && options.modelAvailability?.shouldFilter()) {
+      const availability = await options.modelAvailability.filterConnections({
+        connections,
+        excludedIds: excludedConnectionIds,
+        provider,
+        model: requestedModel,
+      });
+      if (availability.exhausted) return MODEL_UNAVAILABLE_SELECTION;
+      connections = availability.connections;
     }
     const activeConnectionsCount = connections.length;
     logCredentialPoolState(provider, {

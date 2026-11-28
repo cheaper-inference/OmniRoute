@@ -112,6 +112,12 @@ function dispatchOnce(
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const MAX_REDIRECTS = 5;
+const redirectedResponses = new WeakSet<Response>();
+
+export function wasProviderResponseRedirected(response: Response): boolean {
+  return response.redirected || redirectedResponses.has(response);
+}
+
 const CREDENTIAL_HEADER = /^(authorization|proxy-authorization|cookie)$|key|token|secret/i;
 const BODY_HEADERS = ["content-type", "content-length", "content-encoding", "content-language"];
 
@@ -157,7 +163,10 @@ async function dispatchFollowingRedirects(
   for (let hop = 0; ; hop++) {
     const response = await dispatchOnce(provider, currentUrl, options, credentials, hop > 0);
     // Status first: a non-redirect answer is returned as is, whatever its headers.
-    if (!REDIRECT_STATUSES.has(response.status)) return response;
+    if (!REDIRECT_STATUSES.has(response.status)) {
+      if (hop > 0) redirectedResponses.add(response);
+      return response;
+    }
     const location = response.headers.get("location");
     if (!location) return response;
     void response.body?.cancel().catch(() => {});

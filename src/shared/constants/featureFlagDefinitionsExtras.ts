@@ -1,3 +1,4 @@
+import { MODEL_AVAILABILITY_EVIDENCE_ENABLED_FLAG } from "./featureFlagDefinitionsModelAvailability";
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
 import { CLAUDE_CODE_META_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsClaudeCodeMeta";
 import { QUOTA_SELF_PANEL_FLAG } from "./featureFlagDefinitionsQuotaSelf";
@@ -31,4 +32,5 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
+  MODEL_AVAILABILITY_EVIDENCE_ENABLED_FLAG,
 ];

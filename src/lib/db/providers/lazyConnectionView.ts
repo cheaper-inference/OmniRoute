@@ -15,6 +15,9 @@ import type { ConnectionRateLimitOverrides } from "./columns";
 
 type JsonRecord = Record<string, unknown>;
 
+// The revision follows the same cached snapshot as the encrypted credential.
+export const modelAvailabilityRevision = Symbol("modelAvailabilityRevision");
+
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
@@ -42,6 +45,7 @@ export interface ProviderConnectionView {
   id: string;
   provider: string;
   authType: string | null;
+  modelAvailabilityRevision?: string | null;
   email: string | null;
   isActive: boolean;
   rateLimitedUntil: string | null;
@@ -95,6 +99,7 @@ export function toProviderConnection(value: unknown): ProviderConnectionView {
     id: toStringOrNull(row.id) || "",
     provider: toStringOrNull(row.provider) || "",
     authType: toStringOrNull(row.authType),
+    modelAvailabilityRevision: toStringOrNull(Reflect.get(row, modelAvailabilityRevision)),
     email: toStringOrNull(row.email),
     isActive: row.isActive === true,
     rateLimitedUntil: toStringOrNull(row.rateLimitedUntil),

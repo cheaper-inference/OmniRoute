@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { BaseExecutor, type ExecuteInput } from "./base.ts";
+import { BaseExecutor, type ExecuteInput, type ProviderCredentials } from "./base.ts";
 import { mapNvidiaGlm52ReasoningParams } from "./base/reasoningEffort.ts";
 import { mapBasetenReasoningParams } from "./base/basetenReasoning.ts";
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../config/constants.ts";
@@ -177,7 +177,7 @@ export class DefaultExecutor extends BaseExecutor {
     }
   }
 
-  buildUrl(model, stream, urlIndex = 0, credentials = null) {
+  buildUrl(model, stream, urlIndex = 0, credentials: ProviderCredentials | null = null) {
     void model;
     void stream;
     void urlIndex;

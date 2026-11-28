@@ -1,3 +1,5 @@
+import { inheritModelAvailabilityEvidence } from "../../services/modelAvailabilityEvidence.ts";
+import type { ModelAvailabilityObserver } from "../../utils/modelAvailabilityTypes.ts";
 import type {
   HttpAttemptSelection,
   HttpAttemptRejectionSlot,
@@ -134,7 +136,10 @@ export type ExecuteProviderRequestDeps = {
   connectionId: string | null | undefined;
   contextEditingEnabled?: boolean;
   correlationId: string | null | undefined;
-  credentials: Record<string, unknown> | null | undefined;
+  credentials:
+    | (Record<string, unknown> & { createModelAvailabilityObserver?: ModelAvailabilityObserver })
+    | null
+    | undefined;
   dedupEnabled: boolean;
   dedupHash: string | null;
   effectiveModel: string;
@@ -189,6 +194,18 @@ function sleepUnlessAborted(ms: number, signal: AbortSignal): Promise<void> {
     const timer = setTimeout(done, ms);
     signal.addEventListener("abort", done, { once: true });
   });
+}
+
+// Chat retries and combo targets share the ingress header snapshot even when their
+// core executions (and trace IDs) are separate. Each ingress builds its own snapshot.
+const modelAvailabilityRequestIds = new WeakMap<object, string>();
+
+function getModelAvailabilityRequestId(ingress: object | null | undefined, traceId: string) {
+  if (!ingress) return traceId;
+  const original = modelAvailabilityRequestIds.get(ingress);
+  if (original) return original;
+  modelAvailabilityRequestIds.set(ingress, traceId);
+  return traceId;
 }
 
 export async function executeProviderRequest(
@@ -438,6 +455,12 @@ export async function executeProviderRequest(
                         upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
                         clientHeaders: getExecutorClientHeaders(),
                         clientResponseFormat,
+                        observeModelAvailability: credentials?.createModelAvailabilityObserver?.(
+                          provider,
+                          getModelAvailabilityRequestId(clientRawRequest?.headers, traceId),
+                          credentials,
+                          execCreds
+                        ),
                         onCredentialsRefreshed: fencedCredentialsRefreshed,
                         skipUpstreamRetry,
                         nonReplayableRequest,
@@ -460,9 +483,12 @@ export async function executeProviderRequest(
               recordAdaptiveConnectionResponse(accountSemaphoreKey, res.response.status);
             }
             bindCodexResponseFence(res.response, ownerFence);
-            res.response = inheritCodexResponseFence(
+            res.response = inheritModelAvailabilityEvidence(
               res.response,
-              markEmptyTurnExecution(res.response, res.url, execCreds)
+              inheritCodexResponseFence(
+                res.response,
+                markEmptyTurnExecution(res.response, res.url, execCreds)
+              )
             );
             trace("post_executor", { status: res?.response?.status });
 
@@ -724,15 +750,18 @@ export async function executeProviderRequest(
               return {
                 ...res,
                 _executionCredentials: execCreds,
-                response: inheritCodexResponseFence(
+                response: inheritModelAvailabilityEvidence(
                   res.response,
-                  inheritEmptyTurnPolicy(
+                  inheritCodexResponseFence(
                     res.response,
-                    new Response(clientBody, {
-                      status: res.response.status,
-                      statusText: res.response.statusText,
-                      headers: new Headers(normalizeHeaders(res.response.headers)),
-                    })
+                    inheritEmptyTurnPolicy(
+                      res.response,
+                      new Response(clientBody, {
+                        status: res.response.status,
+                        statusText: res.response.statusText,
+                        headers: new Headers(normalizeHeaders(res.response.headers)),
+                      })
+                    )
                   )
                 ),
               };
@@ -807,11 +836,14 @@ export async function executeProviderRequest(
 
       return {
         ...rawResult,
-        response: inheritCodexResponseFence(
+        response: inheritModelAvailabilityEvidence(
           rawResult.response,
-          inheritEmptyTurnPolicy(
+          inheritCodexResponseFence(
             rawResult.response,
-            new Response(payload, { status, statusText, headers: responseHeaders })
+            inheritEmptyTurnPolicy(
+              rawResult.response,
+              new Response(payload, { status, statusText, headers: responseHeaders })
+            )
           )
         ),
         _dedupSnapshot: {
@@ -846,7 +878,9 @@ export async function executeProviderRequest(
       log?.debug?.("DEDUP", `Joined in-flight request hash=${dedupHash}`);
     }
     const result = materializeDeduplicatedExecutionResult(dedupResult.result);
-    return dedupResult.wasDeduplicated ? { ...result, upstreamHttpSelection: null } : result;
+    if (dedupResult.wasDeduplicated) return { ...result, upstreamHttpSelection: null };
+    inheritModelAvailabilityEvidence(dedupResult.result.response, result.response);
+    return result;
   }
 
   return execute();

@@ -1,7 +1,37 @@
+import type { ProviderConnectionView } from "@/lib/db/providers/lazyConnectionView";
+import type {
+  ModelAvailabilityConnection,
+  ModelAvailabilityObserver,
+} from "@omniroute/open-sse/utils/modelAvailabilityTypes.ts";
 import type { CredentialLeaseSelectionContext } from "./exclusiveConnectionLeasePolicy";
 import type { ConnectionRestrictionSource } from "./credentialSelectionDiagnostics.ts";
 
+export const MODEL_UNAVAILABLE_SELECTION: {
+  modelUnavailable: true;
+  connectionId?: never;
+  allRateLimited?: never;
+  allExpired?: never;
+} = { modelUnavailable: true };
+
+/** Supplied by the chat entry point so generic credential selection can stay executor-independent. */
+export interface ModelAvailabilitySelectionHooks {
+  probe: boolean;
+  shouldFilter(): boolean;
+  stampCredentials(connection: ProviderConnectionView): {
+    modelAvailabilityConnection?: ModelAvailabilityConnection;
+    modelAvailabilityProbe?: boolean;
+    createModelAvailabilityObserver?: ModelAvailabilityObserver;
+  };
+  filterConnections(input: {
+    connections: ProviderConnectionView[];
+    excludedIds: Set<string>;
+    provider: string;
+    model: string;
+  }): Promise<{ connections: ProviderConnectionView[]; exhausted: boolean }>;
+}
+
 export interface CredentialSelectionOptions {
+  modelAvailability?: ModelAvailabilitySelectionHooks;
   /** Provenance of the effective allowlist; does not alter authorization. */
   connectionRestrictionSources?: readonly ConnectionRestrictionSource[];
   /** Exclude credential-specific transports that cannot serve caller tools or image input. */

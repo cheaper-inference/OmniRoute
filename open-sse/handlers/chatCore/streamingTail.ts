@@ -1,3 +1,7 @@
+import {
+  acceptModelAvailabilityResponse,
+  inheritModelAvailabilityEvidence,
+} from "../../services/modelAvailabilityEvidence.ts";
 import { readStreamBuyerCost } from "../../utils/buyerCostMicro.ts";
 import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 import { getCodexClientSessionId } from "../../config/codexIdentity.ts";
@@ -190,7 +194,10 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   // upstream body and synthesize an equivalent OpenAI SSE stream so the
   // streaming pipeline (and the client) get a valid stream.
   const jsonConversion = await convertJsonBodyWithinCap(providerResponse, { log, provider, model });
-  providerResponse = inheritCodexResponseFence(providerResponse, jsonConversion.response);
+  providerResponse = inheritModelAvailabilityEvidence(
+    providerResponse,
+    inheritCodexResponseFence(providerResponse, jsonConversion.response)
+  );
   const streamReadinessPolicy = resolveStreamReadinessTimeout({
     baseTimeoutMs: STREAM_READINESS_TIMEOUT_MS,
     provider,
@@ -307,7 +314,10 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       carry: { onPipelineStreamError, onClientDisconnectFinalize, turnExecutionHandedOffToStream },
     };
   }
-  providerResponse = inheritCodexResponseFence(providerResponse, streamReadiness.response);
+  providerResponse = inheritModelAvailabilityEvidence(
+    providerResponse,
+    inheritCodexResponseFence(providerResponse, streamReadiness.response)
+  );
 
   // Flush-empty retry (opt-in `FLUSH_EMPTY_RETRY_ENABLED`, default off): when the
   // upstream turn carries no usable content (reasoning-only 200, or a
@@ -379,6 +389,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     }
   }
 
+  acceptModelAvailabilityResponse(providerResponse);
   // Notify success - caller can clear error status if needed
   // Freeze the final upstream response's owner before constructing asynchronous callbacks.
   const failureResponseOwner = providerResponse;

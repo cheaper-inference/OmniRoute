@@ -131,7 +131,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/memory/embedding/index.ts": 2,
     "src/lib/search/executeWebSearch.ts": 2,
     "src/lib/skills/webFetchExecution.ts": 1,
-    "src/sse/handlers/chat.ts": 2,
+    "src/sse/handlers/chat.ts": 1,
+    // The chat dispatch credential selection moved out of chat.ts into this helper (model
+    // availability evidence, opt-in): same class-A site, same allowlist and quota preflight.
+    "src/sse/handlers/chatCredentialSelection.ts": 1,
     "src/sse/services/auth.ts": 4,
     "src/sse/services/imageCredentialRetry.ts": 1,
   },
@@ -422,6 +425,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
       file === "open-sse/handlers/chatCore/emptyTurnRetryLoop.ts" ||
       file === "src/app/api/v1/session-leases/route.ts" ||
       file === "src/sse/handlers/chat.ts" ||
+      file === "src/sse/handlers/chatCredentialSelection.ts" ||
       file === "src/sse/services/auth.ts"
         ? "A"
         : "B",

@@ -1,3 +1,4 @@
+import { inheritModelAvailabilityEvidence } from "../../services/modelAvailabilityEvidence.ts";
 import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 /**
  * chatCore stream-readiness fallback (bounded second attempt through the same routing path).
@@ -157,7 +158,7 @@ async function finishRetryLeg(
     args.reqLogger.logTargetRequest(args.providerUrl, args.providerHeaders, nextBody);
     return {
       ...ready,
-      providerResponse: ready.response,
+      providerResponse: inheritModelAvailabilityEvidence(retryResponse, ready.response),
       finalBody: nextBody,
       upstreamHttpSelection: leg.retryResult?.upstreamHttpSelection ?? null,
     };
