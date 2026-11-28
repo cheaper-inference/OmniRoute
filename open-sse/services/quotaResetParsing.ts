@@ -129,14 +129,20 @@ export function parseIsoDateTimeResetMs(
   providerOrZone?: string | null
 ): number | null {
   const match =
-    /(?:\b(?:try again at|wait until|reset(?:s)?\s+at|available at|retry after)\s+|请于\s*)(\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?)\s*(Z|[+-]\d{2}:?\d{2})?/i.exec(
+    /(?:\b(?:try again at|wait until|reset(?:s)?\s+at|available at|retry after|regain access on)\s+|请于\s*)(\d{4}-\d{2}-\d{2})(?:[Tt ]|\s+at\s+)(\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?)\s*(UTC|Z|[+-]\d{2}:?\d{2})?/i.exec(
       msg
     );
   if (!match) return null;
-  const stamp = match[1].replace(/[Tt ]/, "T");
+  const stamp = `${match[1]}T${match[2]}`;
   if (!isCalendarDate(stamp)) return null;
   // Normalize "+0200" to "+02:00": the bare-offset form is not part of the ES Date.parse grammar.
-  const rawZone = match[2] ? match[2].toUpperCase() : resolveNaiveResetZone(msg, providerOrZone);
+  const rawZoneToken = match[3]?.toUpperCase();
+  const rawZone =
+    rawZoneToken === "UTC"
+      ? "Z"
+      : rawZoneToken
+        ? rawZoneToken
+        : resolveNaiveResetZone(msg, providerOrZone);
   const zone = /^[+-]\d{4}$/.test(rawZone) ? `${rawZone.slice(0, 3)}:${rawZone.slice(3)}` : rawZone;
   const resetMs = Date.parse(`${stamp}${zone}`);
   if (!Number.isFinite(resetMs)) return null;

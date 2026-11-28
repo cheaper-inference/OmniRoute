@@ -62,4 +62,9 @@ export const CREDITS_EXHAUSTED_SIGNALS = [
   // would otherwise leave the account selected forever, since it cannot recover
   // until someone buys credits.
   "credit_balance_exhausted",
+  // #21250: terminal free-quota exhaustion on HTTP 403 ("The free quota has been
+  // exhausted...") and Anthropic's HTTP 400 spend/usage cap ("You have reached
+  // your specified API usage limits. You will regain access on ...").
+  "free quota has been exhausted",
+  "you have reached your specified api usage limits",
 ];
