@@ -222,11 +222,21 @@ scenario(
     assert.deepEqual(landStatuses(w, planted), [], "no land status on the planted commit");
     assert.deepEqual(landStatuses(w, f.candidateSha), [], "nor on the composed one");
     assert.equal(w.baseTip(), base0, "nothing landed");
-    assert.equal(after.inFlight, null);
-    assert.equal(after.paused?.reason, "error");
-    assert.match(after.paused.detail, /does not match its candidate/);
-    assert.match(after.paused.detail, /not a queue merge commit/);
+    assert.equal(after.paused, null);
+    assert.notEqual(after.inFlight.batchId, f.batchId);
+    assert.notEqual(after.inFlight.candidateSha, planted);
+    assert.equal(after.inFlight.stage, "testing");
+    assert.deepEqual(after.inFlight.prs, f.prs);
+    const [mismatch] = w.events("composition-mismatch");
+    assert.equal(mismatch.sha, planted);
+    assert.match(mismatch.detail, /does not match its candidate/);
+    assert.match(mismatch.detail, /not a queue merge commit/);
+    assert.equal(w.events("pr-parked").length, 0);
     assert.equal(w.events("land-blessed").length, 0);
+
+    await drain(w);
+    assert.equal(w.baseTip(), after.inFlight.candidateSha);
+    assert.deepEqual(landStatuses(w, planted), []);
   }
 );
 
@@ -358,14 +368,19 @@ scenario(
     assert.deepEqual(landStatuses(w, f.candidateSha), [], "nor on the composed one");
     assert.equal(w.baseTip(), base0, "nothing landed");
     assert.equal(w.events("land-blessed").length, 0);
-    assert.equal(after.inFlight, null);
-    assert.equal(after.paused?.reason, "error");
-    assert.match(after.paused.detail, /does not match its candidate/);
+    assert.equal(after.paused, null);
+    assert.notEqual(after.inFlight.candidateSha, planted);
+    assert.equal(after.inFlight.treeSha, f.treeSha, "fresh composition rebuilt the right tree");
+    assert.deepEqual(after.inFlight.prs, f.prs);
+    const [mismatch] = w.events("composition-mismatch");
+    assert.equal(mismatch.sha, planted);
+    assert.match(mismatch.detail, /does not match its candidate/);
     assert.ok(
-      after.paused.detail.includes(`merge commit ${head12(planted)} of #1: tree `),
-      after.paused.detail
+      mismatch.detail.includes(`merge commit ${head12(planted)} of #1: tree `),
+      mismatch.detail
     );
-    assert.match(after.paused.detail, /recomposing gives [0-9a-f]{12}/);
+    assert.match(mismatch.detail, /recomposing gives [0-9a-f]{12}/);
+    assert.equal(w.events("pr-parked").length, 0);
   }
 );
 

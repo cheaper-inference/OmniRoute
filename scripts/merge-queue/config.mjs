@@ -46,7 +46,7 @@ const CONFIG_KEYS = [
 ];
 
 /** Keys that may be left out: each one has a default (applied by validateConfig). */
-const OPTIONAL_CONFIG_KEYS = ["flakyReruns", "prChecksRequired", "lanes", "voice"];
+const OPTIONAL_CONFIG_KEYS = ["flakyReruns", "prChecksRequired", "lanes", "voice", "parkedLabel"];
 const DEFAULT_VOICE = "app";
 /** Keys of `lanes` (both required when `lanes` is present). */
 const LANE_KEYS = ["hotfixLabel", "baseRepairLabel"];
@@ -192,6 +192,7 @@ function validateLanes(raw, errors) {
  * @typedef {object} QueueConfig
  * @property {1} schemaVersion
  * @property {string} label                    queue label (shadow: "omni-queue")
+ * @property {string} parkedLabel              quarantine label
  * @property {string} protectedApprovalLabel   extra label required for protected surfaces
  * @property {string[]} approvers              logins whose label application counts
  * @property {string} appSlug                  GitHub App slug; its bot is "<slug>[bot]"
@@ -342,6 +343,27 @@ export function validateConfig(raw) {
   }
   stringList(raw.protectedPaths, "protectedPaths", errors, { min: 1 });
   const lanes = validateLanes(raw, errors);
+  const parkedLabel = raw.parkedLabel === undefined ? "omni-queue-parked" : raw.parkedLabel;
+  if (typeof parkedLabel !== "string" || !LABEL_RE.test(parkedLabel)) {
+    errors.push("parkedLabel: invalid");
+  } else {
+    const otherLabels = [
+      raw.label,
+      raw.protectedApprovalLabel,
+      ...(Array.isArray(raw.blockLabels) ? raw.blockLabels : []),
+      lanes?.hotfixLabel,
+      lanes?.baseRepairLabel,
+    ];
+    if (
+      otherLabels.some(
+        (label) => typeof label === "string" && label.toLowerCase() === parkedLabel.toLowerCase()
+      )
+    ) {
+      errors.push(
+        "parkedLabel: must differ from label, protectedApprovalLabel, blockLabels and lane labels"
+      );
+    }
+  }
   if (!QUEUE_MODES.includes(raw.mode))
     errors.push(`mode: expected one of ${QUEUE_MODES.join(", ")}`);
   const voice = Object.hasOwn(raw, "voice") ? raw.voice : DEFAULT_VOICE;
@@ -358,6 +380,7 @@ export function validateConfig(raw) {
           prChecksRequired,
           lanes,
           voice,
+          parkedLabel,
         }),
         errors: [],
       };
