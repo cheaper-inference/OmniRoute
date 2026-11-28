@@ -14,6 +14,7 @@ import {
   DB_BACKUPS_DIR,
   DATA_DIR,
 } from "./core";
+import { openDatabaseAsync } from "./adapters/driverFactory";
 import { listBackupIds, resolveBackupFile, verifyContentAddressedSnapshot } from "./backupPaths";
 import { chmodQuiet, DB_SECRET_DIR_MODE, DB_SECRET_FILE_MODE } from "./filePermissions";
 import { resetAllDbModuleState } from "./stateReset";
@@ -28,6 +29,29 @@ import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import { isEncryptionEnabled } from "./encryption";
 
 type CountRow = { cnt?: number };
+
+/**
+ * Issue #20418: empty the high-volume history tables (`usage_history`, `call_logs`) of a
+ * COPIED SQLite database and VACUUM it, so the encrypted remote-sync bundle stays small and
+ * carries no usage/call-log data. Only the remote-sync export opts into this; the default
+ * `GET /api/db-backups/export` download stays a complete copy. Refuses the live database.
+ *
+ * Opens the copy through the resilient driver factory instead of a direct `better-sqlite3`
+ * import (#3025: the native module can be absent from a packaged standalone tree). Lives in
+ * the db layer because routes must not execute raw SQL (Hard Rule #5).
+ */
+export async function stripPortableHistory(dbPath: string): Promise<void> {
+  if (SQLITE_FILE && path.resolve(dbPath) === path.resolve(SQLITE_FILE)) {
+    throw new Error("stripPortableHistory only runs on an exported copy, never the live database");
+  }
+  const db = await openDatabaseAsync(dbPath);
+  try {
+    db.exec("DELETE FROM usage_history; DELETE FROM call_logs;");
+    db.exec("VACUUM");
+  } finally {
+    db.close();
+  }
+}
 
 // ──────────────── Backup Config ────────────────
 

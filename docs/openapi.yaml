@@ -11895,9 +11895,21 @@ paths:
       tags:
         - Db backups
       summary: "GET db backups › export"
+      parameters:
+        - name: portable
+          in: query
+          required: false
+          description: >-
+            `true` empties `usage_history` and `call_logs` in the exported copy (used by
+            `omniroute sync remote`). Omitted or `false`, the download is the complete database.
+          schema:
+            type: string
+            enum: ["true", "false"]
       responses:
         "200":
           description: OK
+        "400":
+          description: Invalid `portable` value.
         "403":
           description: >-
             Machine credential refused. Exports carry every stored credential, so they require
