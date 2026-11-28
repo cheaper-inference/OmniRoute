@@ -6,6 +6,13 @@ on:
     types: [completed]
   workflow_dispatch:
 
+# Serialize VPS deployments onto the single target host so overlapping
+# workflow_run / workflow_dispatch executions cannot race global `npm install -g`,
+# `INSTALLED_VERSION` verification, and `pm2 delete` / `pm2 start` (#21014).
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -50,9 +57,39 @@ jobs:
             exit 1
           fi
 
+      - name: Resolve expected OmniRoute version
+        if: steps.reach.outputs.reachable == 'true'
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          DISPATCH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          # Read package.json via the GitHub Contents API instead of checking out
+          # workflow_run code (preserves the .zizmor.yml dangerous-triggers invariant).
+          TARGET_SHA="${DISPATCH_SHA}"
+          if [ "${EVENT_NAME}" = "workflow_run" ] && [ -n "${WORKFLOW_RUN_SHA}" ]; then
+            TARGET_SHA="${WORKFLOW_RUN_SHA}"
+          fi
+          EXPECTED=$(gh api "repos/${REPO}/contents/package.json?ref=${TARGET_SHA}" \
+            | node -e 'const fs = require("node:fs"); const body = JSON.parse(fs.readFileSync(0, "utf8")); const pkg = JSON.parse(Buffer.from(body.content, "base64").toString("utf8")); if (typeof pkg.version !== "string") process.exit(1); process.stdout.write(pkg.version.trim());')
+          if [[ "${EXPECTED}" == *$'\n'* || "${EXPECTED}" == *$'\r'* ]] || ! [[ "${EXPECTED}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            SAFE_EXPECTED="${EXPECTED//$'\r'/\\r}"
+            SAFE_EXPECTED="${SAFE_EXPECTED//$'\n'/\\n}"
+            echo "::error title=Invalid expected version::Resolved invalid package.json version '${SAFE_EXPECTED}' from ${TARGET_SHA}"
+            exit 1
+          fi
+          echo "expected=${EXPECTED}" >> "$GITHUB_OUTPUT"
+          echo "Resolved expected OmniRoute version ${EXPECTED} from ${TARGET_SHA}"
+
       - name: Deploy via SSH
         if: steps.reach.outputs.reachable == 'true'
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1
+        env:
+          EXPECTED_VERSION: ${{ steps.version.outputs.expected }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
@@ -60,13 +97,22 @@ jobs:
           port: 22
           timeout: 60s
           command_timeout: 15m
+          envs: EXPECTED_VERSION
           script: |
             set -euo pipefail
 
-            echo "=== Updating OmniRoute ==="
-            npm install -g omniroute@latest
+            if [ -z "${EXPECTED_VERSION:-}" ]; then
+              echo "❌ EXPECTED_VERSION is empty — refusing unpinned install"
+              exit 1
+            fi
+            echo "=== Updating OmniRoute to ${EXPECTED_VERSION} ==="
+            npm install -g "omniroute@${EXPECTED_VERSION}"
             INSTALLED_VERSION=$(omniroute --version 2>/dev/null | tr -d '[:space:]' || echo "unknown")
-            echo "Installed CLI version: $INSTALLED_VERSION"
+            echo "Installed CLI version: $INSTALLED_VERSION (expected: $EXPECTED_VERSION)"
+            if [ "$INSTALLED_VERSION" != "$EXPECTED_VERSION" ]; then
+              echo "❌ Installed CLI version ($INSTALLED_VERSION) does not match expected version ($EXPECTED_VERSION)"
+              exit 1
+            fi
 
             # Recreate the PM2 process instead of `pm2 restart`. A bare restart
             # re-runs whatever script path was saved earlier; after the build-output
