@@ -87,6 +87,10 @@ export function getDispatcherOptions(
     headersTimeout: timeouts.fetchHeadersTimeoutMs,
     bodyTimeout: timeouts.fetchBodyTimeoutMs,
     connectTimeout: timeouts.fetchConnectTimeoutMs,
+    // undici defaults to 16 KB of response headers. A signed-in gemini.google.com
+    // page sends ~30 KB (rotated Set-Cookie values), which failed as
+    // UND_ERR_HEADERS_OVERFLOW ("fetch failed"). Browsers accept far more.
+    maxHeaderSize: 128 * 1024,
     keepAliveTimeout: timeouts.fetchKeepAliveTimeoutMs,
     // Without this, an upstream Keep-Alive: timeout=N header clamps
     // keepAliveTimeout UP to undici's default keepAliveMaxTimeout (600 s),
