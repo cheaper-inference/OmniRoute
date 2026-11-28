@@ -6,6 +6,7 @@ import Icon from "@/shared/components/Icon";
 import { buildClaudeDiscoverySettingsSnippet } from "@/shared/services/claudeCliConfig";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
+import NumberInput from "@/shared/components/NumberInput";
 
 /**
  * ClaudeGatewayOnboardingBlock — the copy-paste `settings.json` fragment that points
@@ -20,10 +21,13 @@ import Card from "@/shared/components/Card";
 export default function ClaudeGatewayOnboardingBlock({ baseUrl }: { baseUrl: string }) {
   const t = useTranslations("cliTools");
   const [copied, setCopied] = useState(false);
+  // null means "not set": an empty field has no number.
+  const [compactWindow, setCompactWindow] = useState<number | null>(null);
 
   const snippet = buildClaudeDiscoverySettingsSnippet({
     baseUrl,
     apiKeyPlaceholder: t("ccOnboardingKeyPlaceholder"),
+    autoCompactWindow: compactWindow ?? undefined,
   });
 
   const handleCopy = async () => {
@@ -45,6 +49,14 @@ export default function ClaudeGatewayOnboardingBlock({ baseUrl }: { baseUrl: str
           {copied ? t("ccOnboardingCopied") : t("ccOnboardingCopy")}
         </Button>
       </div>
+
+      <NumberInput
+        label={t("ccOnboardingWindowLabel")}
+        min={0}
+        value={compactWindow}
+        onValueChange={setCompactWindow}
+        className="mb-2"
+      />
 
       <pre className="overflow-x-auto rounded-md bg-bg-subtle p-2 font-mono text-xs leading-relaxed text-text-main">
         {snippet}
