@@ -48,19 +48,33 @@ export function resolveSyncedEffortVariantBase(
 }
 
 // Chat routing hands a non-reserved prefix claimed by a compatible provider node
-// to that node (src/sse/services/model.ts), so such a prefix must not be judged
-// against the built-in provider whose alias it happens to match.
-async function isPrefixClaimedByProviderNode(prefix: string): Promise<boolean> {
-  if (isReservedProviderPrefix(prefix)) return false;
+// to that node (src/sse/services/model.ts), so such a prefix must resolve to the
+// node's own id rather than the built-in provider whose alias it happens to match.
+async function resolveProviderNodeIdForPrefix(prefix: string): Promise<string | null> {
+  if (isReservedProviderPrefix(prefix)) return null;
   const nodes = await getCachedProviderNodes();
-  return nodes.some((node) => node?.prefix === prefix || node?.id === prefix);
+  const matched =
+    nodes.find(
+      (node) =>
+        node?.type === "openai-compatible" && (node?.prefix === prefix || node?.id === prefix)
+    ) ??
+    nodes.find(
+      (node) =>
+        node?.type === "anthropic-compatible" && (node?.prefix === prefix || node?.id === prefix)
+    ) ??
+    nodes.find((node) => node?.prefix === prefix || node?.id === prefix);
+  return typeof matched?.id === "string" ? matched.id : null;
 }
 
-/** The canonical provider id an alias prefix stands for, or null when it has none. */
+/**
+ * The canonical provider id an alias or compatible provider-node prefix stands
+ * for, or null when it has none.
+ */
 async function canonicalProviderForAlias(prefix: string): Promise<string | null> {
+  const nodeId = await resolveProviderNodeIdForPrefix(prefix);
+  if (nodeId) return nodeId === prefix ? null : nodeId;
   const canonicalId = resolveProviderId(prefix);
-  if (canonicalId === prefix || (await isPrefixClaimedByProviderNode(prefix))) return null;
-  return canonicalId;
+  return canonicalId === prefix ? null : canonicalId;
 }
 
 // Synced and imported models are stored under the canonical provider id, while
