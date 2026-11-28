@@ -41,7 +41,10 @@ export type TranslateFlushTailContext = {
   shouldDropCommentary: (parsed: JsonRecord) => boolean;
   pushProviderPayload: (payload: unknown) => void;
   emitFailureAndAbort: (controller: unknown, parsed: unknown) => boolean;
-  translateAndEmit: (controller: unknown, parsed: unknown) => void;
+  translateAndEmit: (
+    controller: unknown,
+    parsed: NonNullable<ReturnType<typeof parseSSELine>>
+  ) => void;
 };
 
 function mergeUsage(state: { usage?: unknown }, extracted: unknown): void {
