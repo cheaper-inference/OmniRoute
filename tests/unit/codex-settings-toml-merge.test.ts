@@ -13,6 +13,7 @@ import { parse } from "smol-toml";
 
 const TEST_HOME = path.join(os.tmpdir(), `omniroute-codex-toml-merge-${process.pid}-${Date.now()}`);
 const CONFIG_PATH = path.join(TEST_HOME, ".codex", "config.toml");
+const DATA_DIR = path.join(TEST_HOME, "data");
 const originalHome = os.homedir;
 const originalJwtSecret = process.env.JWT_SECRET;
 const originalWriteFlag = process.env.CLI_ALLOW_CONFIG_WRITES;
@@ -20,7 +21,7 @@ const originalDataDir = process.env.DATA_DIR;
 
 os.homedir = () => TEST_HOME;
 process.env.CLI_ALLOW_CONFIG_WRITES = "true";
-process.env.DATA_DIR = path.join(TEST_HOME, "data");
+process.env.DATA_DIR = DATA_DIR;
 
 const route = await import("../../src/app/api/cli-tools/codex-settings/route.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
@@ -80,7 +81,9 @@ const post = (extra: Record<string, unknown> = {}) =>
 const readToml = async () => parse(await fs.readFile(CONFIG_PATH, "utf8")) as Toml;
 
 test.beforeEach(async () => {
+  resetDbInstance();
   await fs.rm(TEST_HOME, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.mkdir(path.dirname(CONFIG_PATH), { recursive: true });
   await fs.writeFile(CONFIG_PATH, USER_CONFIG);
 });

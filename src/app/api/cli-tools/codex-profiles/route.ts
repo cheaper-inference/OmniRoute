@@ -4,13 +4,22 @@ import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
-import { ensureCliConfigWriteAllowed, getCliConfigPaths } from "@/shared/services/cliRuntime";
+import {
+  ensureCliConfigWriteAllowed,
+  getCodexClientConfigHome,
+} from "@/shared/services/cliRuntime";
 import { resolveDataDir } from "@/lib/dataPaths";
+import { getCodexKeepOfficialLogin } from "@/lib/db/cliToolState";
 import { compareTr } from "@/shared/utils/turkishText";
 import { codexProfileIdSchema, codexProfileNameSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 
 const PROFILES_DIR = path.join(resolveDataDir(), "codex-profiles");
+
+function getCodexProfilePaths() {
+  const home = getCodexClientConfigHome();
+  return { config: path.join(home, "config.toml"), auth: path.join(home, "auth.json") };
+}
 
 /**
  * Resolve a path inside PROFILES_DIR and verify it stays within bounds.
@@ -129,10 +138,7 @@ export async function POST(request) {
     }
     const { name } = validation.data;
 
-    const paths = getCliConfigPaths("codex");
-    if (!paths) {
-      return NextResponse.json({ error: "Codex config paths not found" }, { status: 500 });
-    }
+    const paths = getCodexProfilePaths();
 
     // Read current files
     let configToml = null;
@@ -188,7 +194,7 @@ export async function POST(request) {
 
 // PUT - Activate a saved profile (restore its config + auth)
 export async function PUT(request) {
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   let rawBody;
@@ -227,14 +233,19 @@ export async function PUT(request) {
       return NextResponse.json({ error: `Profile "${profileId}" not found` }, { status: 404 });
     }
 
-    const paths = getCliConfigPaths("codex");
-    if (!paths) {
-      return NextResponse.json({ error: "Codex config paths not found" }, { status: 500 });
-    }
+    const paths = getCodexProfilePaths();
+    const keepOfficialLogin = getCodexKeepOfficialLogin();
+    const targetGuard =
+      ensureCliConfigWriteAllowed(paths.config) ||
+      (!keepOfficialLogin && ensureCliConfigWriteAllowed(paths.auth));
+    if (targetGuard) return NextResponse.json({ error: targetGuard }, { status: 403 });
 
     // Create backup of current config before switching
     const { createMultiBackup } = await import("@/shared/services/backupService");
-    await createMultiBackup("codex", [paths.config, paths.auth]);
+    await createMultiBackup(
+      "codex",
+      keepOfficialLogin ? [paths.config] : [paths.config, paths.auth]
+    );
 
     // Ensure codex dir exists
     await fs.mkdir(path.dirname(paths.config), { recursive: true });
@@ -243,7 +254,8 @@ export async function PUT(request) {
     if (profile.configToml) {
       await fs.writeFile(paths.config, profile.configToml);
     }
-    if (profile.authJson) {
+    const restoredAuth = !keepOfficialLogin && !!profile.authJson;
+    if (restoredAuth) {
       await fs.writeFile(paths.auth, profile.authJson);
     }
 
@@ -252,7 +264,7 @@ export async function PUT(request) {
       message: `Profile "${profile.name}" activated`,
       profileId,
       restoredConfig: !!profile.configToml,
-      restoredAuth: !!profile.authJson,
+      restoredAuth,
     });
   } catch (error) {
     console.log("Error activating codex profile:", error.message);

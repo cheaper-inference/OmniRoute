@@ -510,6 +510,7 @@
       "cliCode",
       "cliCommon",
       "cliTools",
+      "clientManagement",
       "cloudSyncStatus",
       "codexKeyServiceMode",
       "common",

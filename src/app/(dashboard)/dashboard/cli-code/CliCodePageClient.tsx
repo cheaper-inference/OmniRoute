@@ -57,6 +57,7 @@ export default function CliCodePageClient({
 }: CliCodePageClientProps) {
   const t = useTranslations("cliCode");
   const tCommon = useTranslations("cliCommon");
+  const tClients = useTranslations("clientManagement");
 
   // ── Batch statuses ──────────────────────────────────────────────────────────
   const { statuses, loading, error, refetch } = useToolBatchStatuses();
@@ -152,6 +153,13 @@ export default function CliCodePageClient({
           </Button>
         }
       />
+
+      <Link
+        href="/dashboard/cli-code/manage"
+        className="w-fit rounded-md border border-border px-3 py-2 text-sm font-medium hover:text-primary"
+      >
+        {tClients("title")}
+      </Link>
 
       {/* Concept card */}
       <CliConceptCard currentType="code" />

@@ -44,6 +44,7 @@ export default function CodexToolCard({
   const [modelMappings, setModelMappings] = useState<Record<string, string>>({});
   const [reasoningEffort, setReasoningEffort] = useState("xhigh");
   const [wireApi, setWireApi] = useState("responses");
+  const [keepOfficialLogin, setKeepOfficialLogin] = useState(false);
   // Opt-in: the catalog file is ~60 KB per model (MBs with a large catalog) in ~/.codex.
   const [writeModelCatalog, setWriteModelCatalog] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -105,6 +106,7 @@ export default function CodexToolCard({
   // status (was a separate codexStatus effect — runs right after each fetch
   // instead so no setState happens synchronously inside an effect body).
   const syncFormFromStatus = useCallback((status) => {
+    setKeepOfficialLogin(status?.keepOfficialLogin === true);
     if (status && !status.config) {
       setWireApi("responses");
     }
@@ -204,6 +206,7 @@ export default function CodexToolCard({
           wireApi,
           modelMappings,
           modelCatalog: writeModelCatalog,
+          keepOfficialLogin,
         }),
       });
       const data = await res.json();
@@ -576,7 +579,9 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     {t("apiKey")}
                   </span>
                   <Icon name="arrow_forward" size={14} className="text-text-muted" />
-                  {apiKeys.length > 0 ? (
+                  {keepOfficialLogin ? (
+                    <code className="text-xs text-text-muted">OMNIROUTE_API_KEY</code>
+                  ) : apiKeys.length > 0 ? (
                     <Select
                       value={effectiveApiKey}
                       onChange={(e) => setSelectedApiKey(e.target.value)}
@@ -685,6 +690,15 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   className="pl-[8.5rem]"
                   label={<span className="text-xs text-text-main">{t("codexModelCatalog")}</span>}
                 />
+                <Checkbox
+                  checked={keepOfficialLogin}
+                  onChange={(e) => setKeepOfficialLogin(e.target.checked)}
+                  title={t("codexKeepOfficialLoginHint")}
+                  className="pl-[8.5rem]"
+                  label={
+                    <span className="text-xs text-text-main">{t("codexKeepOfficialLogin")}</span>
+                  }
+                />
 
                 <div className="h-px bg-border/50 my-2"></div>
 
@@ -773,7 +787,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   disabled={isApplyDisabled({
                     selectedModel,
                     selectedApiKey: effectiveApiKey,
-                    cloudEnabled,
+                    cloudEnabled: cloudEnabled && !keepOfficialLogin,
                     apiKeys,
                   })}
                   loading={applying}

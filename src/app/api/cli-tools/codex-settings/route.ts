@@ -4,14 +4,20 @@ import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import { parse as parseToml, stringify as stringifyToml } from "smol-toml";
+import type { z } from "zod";
 import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
 import {
   ensureCliConfigWriteAllowed,
-  getCliConfigPaths,
+  getCodexClientConfigHome,
   getCliRuntimeStatus,
 } from "@/shared/services/cliRuntime";
 import { createMultiBackup } from "@/shared/services/backupService";
-import { saveCliToolLastConfigured, deleteCliToolLastConfigured } from "@/lib/db/cliToolState";
+import {
+  saveCliToolLastConfigured,
+  deleteCliToolLastConfigured,
+  getCodexKeepOfficialLogin,
+  setCodexKeepOfficialLogin,
+} from "@/lib/db/cliToolState";
 import { codexSettingsConfigSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { resolveApiKey } from "@/shared/services/apiKeyResolver";
@@ -30,9 +36,8 @@ import {
   readExistingConfig,
 } from "../_lib/readExistingConfig";
 
-const getCodexConfigPath = () => getCliConfigPaths("codex").config;
-const getCodexAuthPath = () => getCliConfigPaths("codex").auth;
-const getCodexDir = () => path.dirname(getCodexConfigPath());
+const getCodexConfigPath = () => path.join(getCodexClientConfigHome(), "config.toml");
+const getCodexAuthPath = () => path.join(getCodexClientConfigHome(), "auth.json");
 // The catalog path is stored with forward slashes (Codex accepts them on Windows).
 const toTomlPath = (filePath: string) => filePath.replace(/\\/g, "/");
 
@@ -127,6 +132,7 @@ export async function GET(request: Request) {
       reason: runtime.reason,
       config,
       hasOmniRoute: hasOmniRouteConfig(config),
+      keepOfficialLogin: getCodexKeepOfficialLogin(),
       configPath: getCodexConfigPath(),
     });
   } catch (error) {
@@ -135,10 +141,83 @@ export async function GET(request: Request) {
   }
 }
 
+function isLocalCodexEndpoint(baseUrl: string) {
+  if (!URL.canParse(baseUrl)) return false;
+  const endpoint = new URL(baseUrl);
+  return (
+    ["http:", "https:"].includes(endpoint.protocol) &&
+    ["localhost", "127.0.0.1", "[::1]"].includes(endpoint.hostname)
+  );
+}
+
+function mergeCodexSettings(
+  doc: TomlDoc,
+  settings: z.infer<typeof codexSettingsConfigSchema>,
+  keepOfficialLogin: boolean
+) {
+  const { baseUrl, model, reasoningEffort, wireApi, modelMappings } = settings;
+  // Carry the user's intent forward off the deprecated Codex feature flag (#1327).
+  migrateFeatureFlags(doc);
+
+  // Update only OmniRoute related fields (api_key goes to auth.json, not config.toml)
+  doc.model = model;
+
+  if (reasoningEffort && reasoningEffort !== "none") {
+    // Optional Codex reasoning effort.
+    doc.model_reasoning_effort = reasoningEffort;
+  } else {
+    delete doc.model_reasoning_effort;
+  }
+
+  const effectiveWireApi = wireApi ?? "responses";
+  const normalizedBaseUrl = normalizeCodexBaseUrl(baseUrl, effectiveWireApi);
+
+  // Read the previous OmniRoute URL before the provider section is replaced below.
+  deleteOwnedRootUrl(doc, normalizedBaseUrl);
+
+  // Always create a custom provider to reliably pass wire_api and use OMNIROUTE_API_KEY
+  doc.model_provider = "omniroute";
+  doc.model_providers = {
+    ...asRecord(doc.model_providers),
+    omniroute: {
+      name: "OmniRoute",
+      base_url: normalizedBaseUrl,
+      wire_api: effectiveWireApi,
+      env_key: keepOfficialLogin ? "OMNIROUTE_API_KEY" : "OPENAI_API_KEY",
+    },
+  };
+
+  // Process model aliases into notice.model_migrations
+  const notice = asRecord(doc.notice);
+  if (modelMappings && Object.keys(modelMappings).length > 0) {
+    doc.notice = {
+      ...notice,
+      model_migrations: { ...asRecord(notice.model_migrations), ...modelMappings },
+    };
+  } else if ("model_migrations" in notice) {
+    delete notice.model_migrations;
+    if (Object.keys(notice).length === 0) delete doc.notice;
+  }
+}
+
+function codexSettingsAppliedResponse(configPath: string, catalog: CodexCatalogWriteResult | null) {
+  return NextResponse.json({
+    success: true,
+    message: "Codex settings applied successfully!",
+    configPath,
+    ...(catalog?.catalogPath
+      ? { catalogPath: catalog.catalogPath, catalogModelCount: catalog.count }
+      : {}),
+    ...(catalog?.warning ? { catalogWarning: catalog.warning } : {}),
+  });
+}
+
 // POST - Update OmniRoute settings (merge with existing config)
 export async function POST(request: Request) {
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
+  const writeGuard = ensureCliConfigWriteAllowed();
+  if (writeGuard) return NextResponse.json({ error: writeGuard }, { status: 403 });
 
   let rawBody;
   try {
@@ -156,11 +235,6 @@ export async function POST(request: Request) {
   }
 
   try {
-    const writeGuard = ensureCliConfigWriteAllowed();
-    if (writeGuard) {
-      return NextResponse.json({ error: writeGuard }, { status: 403 });
-    }
-
     // (#549) Extract keyId BEFORE validation — Zod strips unknown fields!
     // The dashboard sends masked key strings — resolving by ID guarantees
     // we always write the full key value to the config file.
@@ -170,92 +244,65 @@ export async function POST(request: Request) {
     if (isValidationFailure(validation)) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
-    const { baseUrl, model, reasoningEffort, wireApi, modelMappings, modelCatalog } =
-      validation.data;
-    // Canonical key resolution (#13563): by keyId -> submitted apiKey -> sk_omniroute.
-    // Matches cline/forge/openclaw/grok-build/jcode-settings.
-    const apiKey = await resolveApiKey(keyId, validation.data.apiKey);
-
-    const codexDir = getCodexDir();
+    const { baseUrl, model, modelCatalog, modelMappings } = validation.data;
+    const keepOfficialLogin = validation.data.keepOfficialLogin ?? getCodexKeepOfficialLogin();
+    if (keepOfficialLogin && !isLocalCodexEndpoint(baseUrl)) {
+      return NextResponse.json(
+        { error: "Keeping official Codex login requires a local OmniRoute endpoint." },
+        { status: 400 }
+      );
+    }
     const configPath = getCodexConfigPath();
     const authPath = getCodexAuthPath();
+    const codexDir = path.dirname(configPath);
+    const targetGuard =
+      ensureCliConfigWriteAllowed(configPath) ||
+      (!keepOfficialLogin && ensureCliConfigWriteAllowed(authPath)) ||
+      (modelCatalog === true && ensureCliConfigWriteAllowed(getCodexCatalogPath(codexDir)));
+    if (targetGuard) return NextResponse.json({ error: targetGuard }, { status: 403 });
+
+    // Canonical key resolution (#13563): by keyId -> submitted apiKey -> sk_omniroute.
+    const apiKey = keepOfficialLogin ? null : await resolveApiKey(keyId, validation.data.apiKey);
 
     // Ensure directory exists
     await fs.mkdir(codexDir, { recursive: true });
 
     // Backup current configs before modifying
-    await createMultiBackup("codex", [configPath, authPath]);
+    await createMultiBackup("codex", keepOfficialLogin ? [configPath] : [configPath, authPath]);
 
     // Read BOTH files before writing either one. A file that exists but cannot
     // be read or parsed is not an empty config: the merge below writes the result
     // back, which would replace every provider/MCP server in config.toml and the
     // ChatGPT OAuth tokens in auth.json. Only ENOENT means "start fresh".
     const doc: TomlDoc = (await readExistingConfig(configPath, parseConfig)) ?? {};
-    const authData: Record<string, any> =
-      (await readExistingConfig(authPath, parseJsonObject)) ?? {};
+    const authData = keepOfficialLogin
+      ? null
+      : ((await readExistingConfig(authPath, parseJsonObject)) ?? {});
 
-    // Carry the user's intent forward off the deprecated Codex feature flag (#1327).
-    migrateFeatureFlags(doc);
+    mergeCodexSettings(doc, validation.data, keepOfficialLogin);
 
-    // Update only OmniRoute related fields (api_key goes to auth.json, not config.toml)
-    doc.model = model;
-
-    if (reasoningEffort && reasoningEffort !== "none") {
-      // Optional Codex reasoning effort.
-      doc.model_reasoning_effort = reasoningEffort;
-    } else {
-      delete doc.model_reasoning_effort;
-    }
-
-    const effectiveWireApi = wireApi ?? "responses";
-    const normalizedBaseUrl = normalizeCodexBaseUrl(baseUrl, effectiveWireApi);
-
-    // Read the previous OmniRoute URL before the provider section is replaced below.
-    deleteOwnedRootUrl(doc, normalizedBaseUrl);
-
-    // Always create a custom provider to reliably pass wire_api and use OMNIROUTE_API_KEY
-    doc.model_provider = "omniroute";
-    doc.model_providers = {
-      ...asRecord(doc.model_providers),
-      omniroute: {
-        name: "OmniRoute",
-        base_url: normalizedBaseUrl,
-        wire_api: effectiveWireApi,
-        env_key: "OPENAI_API_KEY",
-      },
-    };
-
-    // Process model aliases into notice.model_migrations
-    const notice = asRecord(doc.notice);
-    if (modelMappings && Object.keys(modelMappings).length > 0) {
-      doc.notice = {
-        ...notice,
-        model_migrations: { ...asRecord(notice.model_migrations), ...modelMappings },
-      };
-    } else if ("model_migrations" in notice) {
-      delete notice.model_migrations;
-      if (Object.keys(notice).length === 0) delete doc.notice;
-    }
-
-    // Point Codex's /model picker at an OmniRoute catalog. Fail-open: on any failure
-    // Apply still succeeds, a previous value is left alone and a warning is returned.
-    let catalog: CodexCatalogWriteResult | null = null;
-    if (modelCatalog === true) {
-      catalog = await writeCodexModelCatalog({
-        codexDir,
-        selectedModels: [model, ...Object.values(modelMappings ?? {})],
-        listModels: () => listOmniRouteChatModels(request),
-      });
-      if (catalog.catalogPath) doc.model_catalog_json = toTomlPath(catalog.catalogPath);
-    }
+    // A failed catalog refresh leaves the currently configured path in place.
+    const catalog =
+      modelCatalog === true
+        ? await writeCodexModelCatalog({
+            codexDir,
+            selectedModels: [model, ...Object.values(modelMappings ?? {})],
+            listModels: () => listOmniRouteChatModels(request),
+          })
+        : null;
+    if (catalog?.catalogPath) doc.model_catalog_json = toTomlPath(catalog.catalogPath);
 
     // Write merged config
     const configContent = toToml(doc);
     await fs.writeFile(configPath, configContent);
 
-    // Update auth.json with OPENAI_API_KEY (Codex reads this first)
-    authData.OPENAI_API_KEY = apiKey;
-    await fs.writeFile(authPath, JSON.stringify(authData, null, 2));
+    // Preserve the existing auth.json contract for profiles using a stored key.
+    if (authData) {
+      authData.OPENAI_API_KEY = apiKey;
+      await fs.writeFile(authPath, JSON.stringify(authData, null, 2));
+    }
+    if (validation.data.keepOfficialLogin !== undefined)
+      setCodexKeepOfficialLogin(keepOfficialLogin);
 
     // Persist last-configured timestamp
     try {
@@ -264,15 +311,7 @@ export async function POST(request: Request) {
       /* non-critical */
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "Codex settings applied successfully!",
-      configPath,
-      ...(catalog?.catalogPath
-        ? { catalogPath: catalog.catalogPath, catalogModelCount: catalog.count }
-        : {}),
-      ...(catalog?.warning ? { catalogWarning: catalog.warning } : {}),
-    });
+    return codexSettingsAppliedResponse(configPath, catalog);
   } catch (error) {
     const refusal = configClobberRefusalResponse(error);
     if (refusal) return refusal;
@@ -283,7 +322,7 @@ export async function POST(request: Request) {
 
 // DELETE - Remove OmniRoute settings only (keep other settings)
 export async function DELETE(request: Request) {
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   try {
@@ -293,9 +332,17 @@ export async function DELETE(request: Request) {
     }
 
     const configPath = getCodexConfigPath();
+    const authPath = getCodexAuthPath();
+    const codexDir = path.dirname(configPath);
+    const keepOfficialLogin = getCodexKeepOfficialLogin();
+    const targetGuard =
+      ensureCliConfigWriteAllowed(configPath) ||
+      (!keepOfficialLogin && ensureCliConfigWriteAllowed(authPath)) ||
+      ensureCliConfigWriteAllowed(getCodexCatalogPath(codexDir));
+    if (targetGuard) return NextResponse.json({ error: targetGuard }, { status: 403 });
 
     // Backup current configs before resetting
-    await createMultiBackup("codex", [configPath, getCodexAuthPath()]);
+    await createMultiBackup("codex", keepOfficialLogin ? [configPath] : [configPath, authPath]);
 
     // Read and parse existing config; a file that does not parse is refused, not rewritten.
     const doc = await readExistingConfig(configPath, parseConfig);
@@ -325,7 +372,6 @@ export async function DELETE(request: Request) {
     }
 
     // Remove the model catalog only when it is the one OmniRoute wrote
-    const codexDir = getCodexDir();
     const catalogValue = doc.model_catalog_json;
     if (
       typeof catalogValue === "string" &&
@@ -339,20 +385,20 @@ export async function DELETE(request: Request) {
     await fs.writeFile(configPath, configContent);
 
     // Remove OPENAI_API_KEY from auth.json
-    const authPath = getCodexAuthPath();
-    try {
-      const existingAuth = await fs.readFile(authPath, "utf-8");
-      const authData = JSON.parse(existingAuth);
-      delete authData.OPENAI_API_KEY;
+    if (!keepOfficialLogin) {
+      try {
+        const existingAuth = await fs.readFile(authPath, "utf-8");
+        const authData = JSON.parse(existingAuth);
+        delete authData.OPENAI_API_KEY;
 
-      // Write back or delete if empty
-      if (Object.keys(authData).length === 0) {
-        await fs.unlink(authPath);
-      } else {
-        await fs.writeFile(authPath, JSON.stringify(authData, null, 2));
+        if (Object.keys(authData).length === 0) {
+          await fs.unlink(authPath);
+        } else {
+          await fs.writeFile(authPath, JSON.stringify(authData, null, 2));
+        }
+      } catch {
+        /* No auth file */
       }
-    } catch {
-      /* No auth file */
     }
 
     await removeCodexModelCatalog(codexDir);

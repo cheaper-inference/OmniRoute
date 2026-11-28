@@ -92,6 +92,7 @@ export const cliModelConfigSchema = z.object({
  */
 export const codexSettingsConfigSchema = cliModelConfigSchema.extend({
   modelCatalog: z.boolean().optional(),
+  keepOfficialLogin: z.boolean().optional(),
 });
 
 /**
