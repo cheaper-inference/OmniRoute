@@ -101,6 +101,40 @@ test("compressContext: returns unchanged if fits", () => {
   assert.equal(result.compressed, false);
 });
 
+test("compressContext: drops history when Claude system and tools exceed the window", () => {
+  const system = "system ".repeat(1600);
+  const tools = [{ name: "read", description: "tool ".repeat(400) }];
+  const oldTurn = "history ".repeat(200);
+  const messages = [
+    ...Array.from({ length: 4 }, (_, i) => [
+      { role: "user", content: `old ${i} ${oldTurn}` },
+      { role: "assistant", content: `reply ${i} ${oldTurn}` },
+    ]).flat(),
+    { role: "user", content: "keep-this-turn" },
+  ];
+  const body = { model: "claude-opus-4-8", system, tools, messages };
+  const maxTokens = 5000;
+  const reserveTokens = 400;
+  const target = maxTokens - reserveTokens;
+  const messagesOnly = estimateTokens(messages);
+  const full = estimateTokens(system) + estimateTokens(tools) + messagesOnly;
+  assert.ok(messagesOnly <= target, `fixture messages ${messagesOnly} must fit ${target} alone`);
+  assert.ok(full > target, `fixture full ${full} must exceed ${target}`);
+
+  const result = compressContext(body, { maxTokens, reserveTokens });
+
+  assert.equal(result.compressed, true);
+  assert.equal(result.body.system, system);
+  const fitted =
+    estimateTokens(result.body.system) +
+    estimateTokens(result.body.tools) +
+    estimateTokens(result.body.messages);
+  assert.ok(fitted <= target, `fitted ${fitted} still over ${target}`);
+  assert.ok(
+    (result.body.messages as { content?: unknown }[]).some((m) => m.content === "keep-this-turn")
+  );
+});
+
 test("compressContext: default reserve scales down for smaller context windows", () => {
   const body = {
     model: "gpt-4",

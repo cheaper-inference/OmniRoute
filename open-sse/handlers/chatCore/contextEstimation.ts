@@ -2,6 +2,7 @@ import { adaptBodyForCompression } from "../../services/compression/bodyAdapter.
 import { estimateTokens } from "../../services/contextManager.ts";
 import {
   applyEstimatorCalibration,
+  getEstimatorCalibrationFactor,
   recordEstimatorCalibrationFromUsage,
 } from "../../services/estimatorCalibration.ts";
 
@@ -85,6 +86,28 @@ export function estimateCalibratedFinalInputTokens(
     : estimateFinalInputTokens(record);
   if (estimated <= 0) return estimated;
   return applyEstimatorCalibration(provider, model, estimated, toolsPresentIn(record));
+}
+
+/**
+ * The last-resort gate compares the calibrated estimate with the compaction
+ * ceiling, but compressContext measures the raw chars/4 estimate. With a
+ * learned factor above 1, a raw body sized to the ceiling still calibrates
+ * above it, so the raw compaction target shrinks by the same factor. A factor
+ * below 1 never widens the target past the real window.
+ */
+export function calibratedCompactionTarget(
+  ceiling: number,
+  requestBody: unknown,
+  provider: string | null | undefined,
+  model: string | null | undefined
+): number {
+  const factor = getEstimatorCalibrationFactor(
+    provider,
+    model,
+    toolsPresentIn(asJsonRecord(requestBody))
+  );
+  if (!Number.isFinite(factor) || factor <= 1) return ceiling;
+  return Math.max(1, Math.floor(ceiling / factor));
 }
 
 /**
