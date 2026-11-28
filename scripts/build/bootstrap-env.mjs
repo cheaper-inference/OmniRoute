@@ -14,10 +14,12 @@
  * Priority (lowest → highest):
  *   1. Auto-generated defaults
  *   2. {DATA_DIR}/server.env  (persisted on first boot)
- *   3. Preferred config .env  (DATA_DIR/.env, then the default data dir .env, merged: the
- *                              earlier file wins a key; ./.env only when neither exists).
- *                              Same order as bin/omniroute.mjs; a key that only a later
- *                              file supplies is named on stderr.
+ *   3. Preferred config .env  (DATA_DIR/.env, else the default data dir .env, else ./.env: the
+ *                              first existing file wins alone. With
+ *                              OMNIROUTE_STANDALONE_ENV_MERGE_ENABLED=1 the default data dir
+ *                              .env is merged after DATA_DIR/.env, as in bin/omniroute.mjs: the
+ *                              earlier file wins a key, ./.env only when neither exists, and a
+ *                              key that only a later file supplies is named on stderr).
  *   4. process.env            (shell / Docker -e flags, highest priority)
  */
 
@@ -84,16 +86,21 @@ function hasDatabase(dir) {
 
 // bin/omniroute.mjs loads DATA_DIR/.env, then the default data dir .env (unless
 // OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV=1), and a later file fills the keys an earlier one lacks.
-// Do the same here. ./.env stays a fallback for when neither exists: the CLI treats it as untrusted.
+// Opt-in only (OMNIROUTE_STANDALONE_ENV_MERGE_ENABLED, read from the process env because this runs
+// before any database exists): off, the first existing file wins alone, as before. On, do what the
+// CLI does. ./.env stays a fallback for when neither exists: the CLI treats it as untrusted.
 function getPreferredEnvFilePaths(env = process.env) {
   const dataDirEnvs = [];
+  const mergeDefaultDataDirEnv = ["1", "true"].includes(
+    env.OMNIROUTE_STANDALONE_ENV_MERGE_ENABLED?.trim().toLowerCase()
+  );
 
   if (env.DATA_DIR?.trim()) {
     dataDirEnvs.push(join(resolve(env.DATA_DIR.trim()), ".env"));
   }
 
   dataDirEnvs.push(join(resolveDataDir(null, env), ".env"));
-  if (env.OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV !== "1") {
+  if (mergeDefaultDataDirEnv && env.OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV !== "1") {
     dataDirEnvs.push(join(resolveDataDir(null, { ...env, DATA_DIR: "" }), ".env"));
   }
 

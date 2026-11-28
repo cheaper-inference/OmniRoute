@@ -10,8 +10,10 @@ import path from "node:path";
 import { bootstrapEnv } from "../../scripts/build/bootstrap-env.mjs";
 
 const SECRETS = "JWT_SECRET=jwt\nSTORAGE_ENCRYPTION_KEY=key\nAPI_KEY_SECRET=api\n";
+const MERGE_FLAG = "OMNIROUTE_STANDALONE_ENV_MERGE_ENABLED";
 
-function withLayout(fn) {
+// `flag` is the value of the merge flag in the process env; null leaves it unset.
+function withLayout(fn, flag = "1") {
   const originalCwd = process.cwd();
   const originalEnv = { ...process.env };
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-env-merge-"));
@@ -29,11 +31,13 @@ function withLayout(fn) {
     "API_KEY_SECRET",
     "INITIAL_PASSWORD",
     "OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV",
+    MERGE_FLAG,
     "MERGE_PROBE_A",
     "MERGE_PROBE_B",
   ]) {
     delete process.env[key];
   }
+  if (flag !== null) process.env[MERGE_FLAG] = flag;
   process.env.HOME = home;
   // os.homedir() reads USERPROFILE on Windows, so it must point at the temporary home too.
   process.env.USERPROFILE = home;
@@ -114,4 +118,51 @@ test("one data dir .env alone gives no merge warning", () => {
     assert.equal(env.MERGE_PROBE_A, "only");
     assert.doesNotMatch(stderr, /MERGE_PROBE_A/);
   });
+});
+
+// Off by default (maintainer's request on #20231): a standalone launch reads the same single .env
+// file as before, and never reads the default data dir .env when DATA_DIR points elsewhere.
+for (const flag of [null, "0", "false"]) {
+  test(`flag ${flag === null ? "unset" : `"${flag}"`}: a key only in the default data dir .env stays out`, () => {
+    withLayout(({ dataDir, defaultDir }) => {
+      fs.writeFileSync(path.join(dataDir, ".env"), `${SECRETS}MERGE_PROBE_A=from-data-dir\n`);
+      fs.writeFileSync(path.join(defaultDir, ".env"), "MERGE_PROBE_B=from-default-dir\n");
+      const { env, stderr } = boot();
+      assert.equal(env.MERGE_PROBE_A, "from-data-dir");
+      assert.equal(env.MERGE_PROBE_B, undefined);
+      assert.doesNotMatch(stderr, /MERGE_PROBE_B|later \.env/);
+    }, flag);
+  });
+}
+
+test("flag off: the working-directory .env is still the fallback when the data dir has none", () => {
+  withLayout(({ cwd, defaultDir }) => {
+    fs.writeFileSync(path.join(cwd, ".env"), `${SECRETS}MERGE_PROBE_B=from-cwd\n`);
+    fs.writeFileSync(path.join(defaultDir, ".env"), "MERGE_PROBE_B=from-default-dir\n");
+    assert.equal(boot().env.MERGE_PROBE_B, "from-cwd");
+  }, null);
+});
+
+test("flag off: only the first .env is read, so an empty value there does not fall through", () => {
+  withLayout(({ dataDir, defaultDir }) => {
+    fs.writeFileSync(path.join(dataDir, ".env"), `${SECRETS}MERGE_PROBE_A=\n`);
+    fs.writeFileSync(path.join(defaultDir, ".env"), "MERGE_PROBE_A=from-default-dir\n");
+    assert.equal(boot().env.MERGE_PROBE_A, undefined);
+  }, null);
+});
+
+test("the flag is read from the process env, never from a .env file", () => {
+  withLayout(({ dataDir, defaultDir }) => {
+    fs.writeFileSync(path.join(dataDir, ".env"), `${SECRETS}${MERGE_FLAG}=1\n`);
+    fs.writeFileSync(path.join(defaultDir, ".env"), "MERGE_PROBE_B=from-default-dir\n");
+    assert.equal(boot().env.MERGE_PROBE_B, undefined);
+  }, null);
+});
+
+test("flag true: the default data dir .env is merged, like flag 1", () => {
+  withLayout(({ dataDir, defaultDir }) => {
+    fs.writeFileSync(path.join(dataDir, ".env"), SECRETS);
+    fs.writeFileSync(path.join(defaultDir, ".env"), "MERGE_PROBE_B=from-default-dir\n");
+    assert.equal(boot().env.MERGE_PROBE_B, "from-default-dir");
+  }, "true");
 });
