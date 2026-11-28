@@ -22,6 +22,7 @@ interface FlagData {
   source: "db" | "env" | "default";
   configuredSource?: "db" | "env" | "default";
   sourceKey?: string;
+  envOnly?: boolean;
   requiresRestart: boolean;
   warningLevel?: "info" | "caution" | "danger";
 }

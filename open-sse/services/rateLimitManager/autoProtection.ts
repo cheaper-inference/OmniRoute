@@ -17,13 +17,17 @@ import type { RequestQueueSettings } from "../../../src/lib/resilience/settings"
  * needing dashboard access.
  *   RATE_LIMIT_AUTO_ENABLE=false  → never auto-enable
  *   RATE_LIMIT_AUTO_ENABLE=true   → force on regardless of dashboard
- *   (unset)                        → use dashboard setting
+ *   (unset or unrecognized)       → use dashboard setting
  */
-export function isAutoEnableActive(settings: RequestQueueSettings): boolean {
+export function getAutoEnableEnvOverride(): boolean | undefined {
   const env = process.env.RATE_LIMIT_AUTO_ENABLE?.trim().toLowerCase();
   if (env === "false" || env === "0" || env === "off") return false;
   if (env === "true" || env === "1" || env === "on") return true;
-  return settings.autoEnableApiKeyProviders;
+  return undefined;
+}
+
+export function isAutoEnableActive(settings: RequestQueueSettings): boolean {
+  return getAutoEnableEnvOverride() ?? settings.autoEnableApiKeyProviders;
 }
 
 /**

@@ -11,13 +11,18 @@ import { isRequireApiKeyValueEnabled } from "@/shared/utils/requireApiKeyValue.m
  * Priority: DB override > process.env > definition.defaultValue
  */
 export function resolveFeatureFlag(key: string): string {
-  const dbOverride = getFeatureFlagOverride(key);
-  if (dbOverride !== undefined) return dbOverride;
+  const definition = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === key);
+  // Env-only flags are read straight from the environment by their consumers,
+  // so honouring a dashboard override here would report a value the runtime
+  // never uses (#20778).
+  if (!definition?.envOnly) {
+    const dbOverride = getFeatureFlagOverride(key);
+    if (dbOverride !== undefined) return dbOverride;
+  }
 
   const envValue = process.env[key];
   if (envValue !== undefined && envValue !== "") return envValue;
 
-  const definition = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === key);
   return definition?.defaultValue ?? "false";
 }
 
@@ -49,7 +54,7 @@ export function resolveAllFeatureFlags(): Array<{
     if (definition.key === "UNPRICED_USAGE_BUDGET_POLICY") {
       return { key: definition.key, ...resolveUnpricedUsageBudgetPolicy(), definition };
     }
-    const dbOverride = getFeatureFlagOverride(definition.key);
+    const dbOverride = definition.envOnly ? undefined : getFeatureFlagOverride(definition.key);
     if (dbOverride !== undefined) {
       return { key: definition.key, effectiveValue: dbOverride, source: "db", definition };
     }

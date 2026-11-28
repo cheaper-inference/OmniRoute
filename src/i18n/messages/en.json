@@ -15462,7 +15462,8 @@
         "label": "AI Horde Image Catalog Background Refresh",
         "description": "List AI Horde image models from the last successful snapshot while the catalog refreshes in the background. AI Horde image models are absent from the list until the first refresh succeeds. Off by default."
       }
-    }
+    },
+    "envOnlyHint": "Read from the deployment environment. The dashboard cannot change it."
   },
   "combo": {
     "sort": {

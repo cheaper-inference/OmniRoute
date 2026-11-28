@@ -18,6 +18,8 @@ interface FeatureFlagCardProps {
     source: "db" | "env" | "default";
     configuredSource?: "db" | "env" | "default";
     sourceKey?: string;
+    /** Read directly from the environment by its consumers; a stored override never reaches them. */
+    envOnly?: boolean;
     requiresRestart: boolean;
     warningLevel?: "info" | "caution" | "danger";
   };
@@ -84,6 +86,7 @@ export default function FeatureFlagCard({
 }: FeatureFlagCardProps) {
   const t = useTranslations("featureFlags");
   const enabled = flag.type === "boolean" ? isEnabled(flag.effectiveValue) : false;
+  const locked = flag.envOnly === true;
   const source = SOURCE_STYLES[flag.source];
 
   return (
@@ -111,14 +114,14 @@ export default function FeatureFlagCard({
               size="sm"
               ariaLabel={flag.label}
               checked={enabled}
-              disabled={saving}
+              disabled={saving || locked}
               onChange={() => onToggle(flag.key, enabled ? "false" : "true")}
             />
           ) : (
             <Select
               compact
               aria-label={flag.label}
-              disabled={saving}
+              disabled={saving || locked}
               value={flag.effectiveValue}
               onChange={(e) => onToggle(flag.key, e.target.value)}
               options={(flag.enumValues ?? []).map((val) => ({
@@ -168,6 +171,10 @@ export default function FeatureFlagCard({
         </Tooltip>
       )}
 
+      {locked && (
+        <p className="text-xs text-text-muted mb-2">{t("envOnlyHint")}</p>
+      )}
+
       <EnvPrecedenceWarning flag={flag} text={t("ccDiscoveryAliasesEnvWarning")} />
 
       {/* Bottom row: source badge + reset button */}
@@ -182,7 +189,7 @@ export default function FeatureFlagCard({
           )}
         </div>
 
-        {(flag.configuredSource ?? flag.source) === "db" && (
+        {!locked && (flag.configuredSource ?? flag.source) === "db" && (
           <Button
             variant="ghost"
             size="sm"

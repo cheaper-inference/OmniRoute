@@ -21,9 +21,16 @@ import {
 import { resolveAllFeatureFlags } from "@/shared/utils/featureFlags";
 import { getCcAliasGlobalState } from "@/lib/db/ccDiscoveryAliases";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { getSettings } from "@/lib/db/settings";
+import { resolveResilienceSettings } from "@/lib/resilience/settings";
+import {
+  getAutoEnableEnvOverride,
+  isAutoEnableActive,
+} from "@omniroute/open-sse/services/rateLimitManager/autoProtection.ts";
 
 const ACTIVE_VALUES = new Set(["true", "1", "yes"]);
 const CC_DISCOVERY_ALIASES_FLAG_KEY = "EXPOSE_CC_DISCOVERY_ALIASES";
+const RATE_LIMIT_AUTO_ENABLE_FLAG_KEY = "RATE_LIMIT_AUTO_ENABLE";
 
 function isActive(value: string): boolean {
   return ACTIVE_VALUES.has(value);
@@ -51,6 +58,7 @@ function flagPayload(
     source,
     requiresRestart: definition.requiresRestart,
     warningLevel: definition.warningLevel,
+    envOnly: definition.envOnly === true,
   };
 }
 
@@ -65,6 +73,20 @@ export async function GET(request: NextRequest) {
 
   try {
     const resolved = resolveAllFeatureFlags();
+    // One read for the flag below: the limiter's auto-enable verdict lives in
+    // the persisted request-queue settings, with the env variable as an
+    // override. `source` still reports what the operator configured: a value
+    // inherited from the shipped default is "default", not "db", or the
+    // summary would count an override nobody stored.
+    const settingsRecord = (await getSettings()) as unknown as {
+      resilienceSettings?: { requestQueue?: { autoEnableApiKeyProviders?: unknown } };
+    };
+    const autoEnableActive = isAutoEnableActive(
+      resolveResilienceSettings(settingsRecord as never).requestQueue
+    );
+    const autoEnableEnvOverride = getAutoEnableEnvOverride();
+    const autoEnableConfigured =
+      typeof settingsRecord?.resilienceSettings?.requestQueue?.autoEnableApiKeyProviders === "boolean";
 
     const flags = resolved.map(({ key, effectiveValue, source, definition, ...provenance }) => {
       // Flags whose gate resolves with env-wins-over-db precedence (the
@@ -81,6 +103,17 @@ export async function GET(request: NextRequest) {
       if (key === ADAPTIVE_VIRTUAL_LANES_FLAG_KEY) {
         const state = resolveAdaptiveVirtualLanesFlag();
         return flagPayload(definition, state.enabled ? "true" : "false", state.source);
+      }
+      // RATE_LIMIT_AUTO_ENABLE is an env override on top of a dashboard
+      // setting, not a pure env switch: the limiter falls back to
+      // requestQueue.autoEnableApiKeyProviders when the variable is unset or
+      // unrecognized. Report what the limiter actually does, including that fallback.
+      if (key === RATE_LIMIT_AUTO_ENABLE_FLAG_KEY) {
+        return flagPayload(
+          definition,
+          autoEnableActive ? "true" : "false",
+          autoEnableEnvOverride !== undefined ? "env" : autoEnableConfigured ? "db" : "default"
+        );
       }
       return { ...flagPayload(definition, effectiveValue, source), ...provenance };
     });
@@ -175,6 +208,20 @@ export async function PUT(request: NextRequest) {
 
   const authError = await authorizeProtectedFeatureFlagWrite(request, [key]);
   if (authError) return authError;
+
+  // Env-only flags are read with process.env by their consumers, so a stored
+  // override would be reported by this API and ignored by the runtime (#20778).
+  if (definition.envOnly) {
+    return NextResponse.json(
+      {
+        error: sanitizeErrorMessage(
+          `${key} is an environment-only feature flag; set it in the process environment ` +
+            `and restart. The dashboard cannot override it.`
+        ),
+      },
+      { status: 400 }
+    );
+  }
 
   const enumError = rejectInvalidEnumValue(definition, key, value);
   if (enumError) return enumError;
