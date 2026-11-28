@@ -12,11 +12,14 @@ import {
 } from "../provider-catalog.mjs";
 import { registerSetupOpenCode } from "./setup-open-code.mjs";
 import { t } from "../i18n.mjs";
+import { maybePrintStarHint } from "../starHint.mjs";
 
 const PROJECT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 async function getListCliTools() {
-  const { listCliTools } = await import(pathToFileURL(resolve(PROJECT_ROOT, "src/shared/constants/cliTools.ts")).href);
+  const { listCliTools } = await import(
+    pathToFileURL(resolve(PROJECT_ROOT, "src/shared/constants/cliTools.ts")).href
+  );
   return listCliTools;
 }
 
@@ -153,6 +156,7 @@ export function mergeSetupOptions(opts, globalOpts) {
     ...opts,
     apiKey: opts.apiKey ?? globalOpts.apiKey,
     output: globalOpts.output,
+    quiet: globalOpts.quiet,
   };
 }
 
@@ -217,6 +221,7 @@ export async function runSetupCommand(opts = {}) {
 
     console.log("");
     printSuccess("Setup complete");
+    maybePrintStarHint(opts);
     printInfo(
       `Login: ${after.requireLogin === true ? "enabled" : "disabled"}${
         passwordChanged ? " (password updated)" : ""

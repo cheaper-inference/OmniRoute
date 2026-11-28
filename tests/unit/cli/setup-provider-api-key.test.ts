@@ -14,6 +14,7 @@ function parseSetupArgv(argv: string[]) {
   program.exitOverride();
   program.addOption(new Option("--api-key <key>", "server key").env("OMNIROUTE_API_KEY"));
   program.addOption(new Option("--output <format>", "output").default("table"));
+  program.addOption(new Option("-q, --quiet", "quiet"));
 
   let captured: Record<string, unknown> | null = null;
   program
@@ -75,4 +76,8 @@ test("output still comes from the program-level options", () => {
   const merged = mergeSetupOptions({}, { output: "json" });
   assert.equal(merged.output, "json");
   assert.equal(merged.apiKey, undefined);
+});
+
+test("the program-level quiet flag reaches setup", () => {
+  assert.equal(parseSetupArgv(["setup", "--quiet"]).quiet, true);
 });

@@ -1,6 +1,7 @@
 import { apiFetch } from "../api.mjs";
 import { t } from "../i18n.mjs";
 import { emit } from "../output.mjs";
+import { maybePrintStarHint } from "../starHint.mjs";
 
 const statusSchema = [
   { key: "feed", header: "Feed" },
@@ -54,6 +55,7 @@ export async function runRadarSyncCommand(opts = {}) {
     ...(value && typeof value === "object" ? value : { status: "error" }),
   }));
   emit(rows, opts, syncSchema);
+  maybePrintStarHint(opts);
   return 0;
 }
 
