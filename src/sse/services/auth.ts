@@ -3057,7 +3057,12 @@ export async function markAccountUnavailable(
     // ruleScope === "connection" alone — see isAgentrouterConnectionQuotaScope's
     // doc comment for why (a future permanent-state rule could pair scope
     // "connection" with a non-quota reason). That predicate is the actual guard.
+    const digitalOceanConnectionFailure =
+      provider === "digitalocean" && fallbackResult.ruleScope === "connection";
     const ruleScopeIsConnection = isAgentrouterConnectionQuotaScope(provider, fallbackResult);
+    if (digitalOceanConnectionFailure && disableCooling) {
+      return { shouldFallback: true, cooldownMs: 0 };
+    }
     // #2997's disableCooling opt-out is respected here (`!disableCooling` below):
     // a connection with disableCooling=true skips this branch entirely and falls
     // into the per-model-quota block further down, which locks the model for up
@@ -3077,17 +3082,19 @@ export async function markAccountUnavailable(
     // and opencode upstreams rarely send those headers on 429 (the observed
     // envelope is the headers-less "monthly usage limit" body, which keeps
     // flowing to the egress block with ruleScope undefined).
-    if (ruleScopeIsConnection && provider && !disableCooling) {
+    if ((ruleScopeIsConnection || digitalOceanConnectionFailure) && provider && !disableCooling) {
       const connectionCooldownMs =
         fallbackResult.cooldownMs > 0 ? fallbackResult.cooldownMs : COOLDOWN_MS.rateLimit;
       await updateProviderConnection(connectionId, {
         lastErrorType: fallbackResult.reason || RateLimitReason.QUOTA_EXHAUSTED,
-        lastError: `Account quota exhausted (${provider})`,
+        lastError: digitalOceanConnectionFailure
+          ? sanitizeErrorMessage(errorText)
+          : `Account quota exhausted (${provider})`,
         lastErrorAt: new Date().toISOString(),
         // #16305 (opt-in, COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED): this branch only runs for a
         // renewing connection-scoped quota (ruleScopeIsConnection), so persist it as 429 —
         // with the flag on a persisted 403 would make the cooldown-aware retry skip the wait.
-        errorCode: isCooldownRetrySkipRefusalsEnabled() ? 429 : status,
+        errorCode: ruleScopeIsConnection && isCooldownRetrySkipRefusalsEnabled() ? 429 : status,
         backoffLevel: fallbackResult.newBackoffLevel ?? backoffLevel,
         rateLimitedUntil: getUnavailableUntil(connectionCooldownMs),
         testStatus: "unavailable",

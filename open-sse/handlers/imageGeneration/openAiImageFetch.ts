@@ -1,6 +1,7 @@
 import { normalizeImageOutput } from "./outputFormat.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
-import { sanitizeErrorMessage } from "../../utils/error.ts";
+import { parseUpstreamError, sanitizeErrorMessage } from "../../utils/error.ts";
+import { isDigitalOceanPausedKey } from "../../utils/digitaloceanError.ts";
 import { isJsonObject } from "../../utils/kieTask.ts";
 import { buildImageEndpointSuccess, type ImageEndpointResult } from "./result.ts";
 
@@ -57,6 +58,16 @@ async function readImageResponse(
   requestedOutputFormat?: string
 ): Promise<ImageEndpointResult> {
   if (!response.ok) {
+    if (provider === "digitalocean") {
+      const { message } = await parseUpstreamError(response, provider);
+      return {
+        success: false,
+        status: response.status,
+        error: sanitizeErrorMessage(message),
+        upstreamHeaders: response.headers,
+        retryable: isDigitalOceanPausedKey(provider, response.status, message),
+      };
+    }
     const errorText = await response.text();
     log?.error?.("IMAGE", `${provider} error ${response.status}: ${errorText.slice(0, 200)}`);
     return { success: false, status: response.status, error: errorText };

@@ -256,6 +256,14 @@ export function applyComboTargetExhaustion(
     : ({ scope: "provider", provider } as const);
   const canonicalProvider = provider ? resolveProviderId(provider) : provider;
 
+  // DigitalOcean's paused key and request quota belong to the selected connection.
+  // Do not force-allow a cooled key on later legs or exclude healthy sibling keys.
+  if (canonicalProvider === "digitalocean" && opts.fallbackResult.ruleScope === "connection") {
+    if (!effectiveTarget.connectionId) return { ...derived, providerExhausted: false };
+    sets.exhaustedConnections.add(`${provider}:${effectiveTarget.connectionId}`);
+    return { ...derived, providerExhausted: true, durableExhaustion: durableMark };
+  }
+
   // #10334: connection-scope account-wide quota exhaustion (agentrouter "额度不足";
   // exclusive in practice — no opencode-family rule matches 403 today)
   // must skip remaining SAME-CONNECTION targets within THIS request too, not

@@ -30,6 +30,7 @@ import {
 import {
   STANDARD_HEADERS,
   ANTHROPIC_HEADERS,
+  DIGITALOCEAN_HEADERS,
   describeRetryAfter,
   parseResetTime,
   toPlainHeaders,
@@ -919,7 +920,11 @@ export function updateFromHeaders(provider, connectionId, headers, status, model
   const plainHeaders = toPlainHeaders(headers);
   const limiter = getLimiter(provider, connectionId, model);
   const headerMap =
-    provider === "claude" || provider === "anthropic" ? ANTHROPIC_HEADERS : STANDARD_HEADERS;
+    provider === "digitalocean"
+      ? DIGITALOCEAN_HEADERS
+      : provider === "claude" || provider === "anthropic"
+        ? ANTHROPIC_HEADERS
+        : STANDARD_HEADERS;
 
   // Get header values (handle both Headers object and plain object)
   const getHeader = (name: string) => {

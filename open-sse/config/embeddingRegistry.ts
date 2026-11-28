@@ -587,6 +587,14 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
     models: [{ id: "qwen3-embedding", name: "Qwen3 Embedding", dimensions: 4096 }],
   },
 
+  digitalocean: {
+    id: "digitalocean",
+    baseUrl: "https://inference.do-ai.run/v1/embeddings",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [{ id: "qwen3-embedding-0.6b", name: "Qwen3 Embedding 0.6B" }],
+  },
+
   // ParalonCloud — OpenAI-compatible /v1/embeddings behind the chat API key.
   paraloncloud: {
     id: "paraloncloud",

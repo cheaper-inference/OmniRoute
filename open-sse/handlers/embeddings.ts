@@ -19,7 +19,7 @@ import { isDetailedLoggingEnabled } from "@/lib/db/detailedLogs";
 import { getCallLogPipelineCaptureStreamChunks } from "@/lib/logEnv";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { stripStaleEncodingHeaders } from "../utils/upstreamResponseHeaders.ts";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { parseUpstreamError, sanitizeErrorMessage } from "../utils/error.ts";
 import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 import { FETCH_TIMEOUT_MS } from "../config/constants.ts";
 import { fetchRemoteImage } from "../utils/remoteMediaFetch.ts";
@@ -344,10 +344,15 @@ function buildUpstreamBody(runtime: EmbeddingRuntime): Record<string, unknown> {
       runtime.providerConfig.requiresArrayInput && typeof input === "string" ? [input] : input
     ),
   };
-  if (runtime.body.dimensions !== undefined) upstreamBody.dimensions = runtime.body.dimensions;
   if (runtime.body.encoding_format !== undefined) {
     upstreamBody.encoding_format = runtime.body.encoding_format;
   }
+  // Serverless Inference rejects any field outside its embeddings schema.
+  if (runtime.provider === "digitalocean") {
+    if (typeof runtime.body.user === "string") upstreamBody.user = runtime.body.user;
+    return upstreamBody;
+  }
+  if (runtime.body.dimensions !== undefined) upstreamBody.dimensions = runtime.body.dimensions;
   for (const [key, value] of Object.entries(runtime.body)) {
     if (!KNOWN_EMBEDDING_FIELDS.has(key) && value !== undefined) upstreamBody[key] = value;
   }
@@ -844,7 +849,10 @@ async function handleUpstreamFailure(
   runtime: EmbeddingRuntime,
   response: Response
 ): Promise<EmbeddingFailure> {
-  const errorText = await response.text();
+  const isDigitalOcean = runtime.provider === "digitalocean";
+  const errorText = isDigitalOcean
+    ? (await parseUpstreamError(response, runtime.provider)).message
+    : await response.text();
   runtime.log?.error(
     "EMBED",
     `${runtime.provider} error ${response.status}: ${errorText.slice(0, 200)}`
@@ -881,13 +889,19 @@ async function handleUpstreamFailure(
         response.status,
         errorText,
         runtime.connectionProvider || runtime.provider,
-        runtime.model
+        runtime.model,
+        null,
+        isDigitalOcean ? { headers: response.headers } : undefined
       );
     } catch {
       // The upstream response has priority over a best-effort cooldown write.
     }
   }
-  return failure(response.status, errorText, stripStaleEncodingHeaders(response.headers));
+  return failure(
+    response.status,
+    isDigitalOcean ? sanitizeErrorMessage(errorText) : errorText,
+    stripStaleEncodingHeaders(response.headers)
+  );
 }
 
 function normalizeEmbeddingData(

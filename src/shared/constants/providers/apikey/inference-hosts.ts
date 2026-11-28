@@ -468,12 +468,12 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     color: "#0060FF",
     textIcon: "DO",
     passthroughModels: true,
-    website: "https://docs.digitalocean.com/products/ai-platform/",
+    website: "https://docs.digitalocean.com/products/inference/",
     hasFree: false,
     notice: {
-      text: "Use a DigitalOcean Personal Access Token (dop_v1_...) or a Model Access Key from the Inference console. OAuth tokens (doo_v1_...) may not have the required scopes.",
-      apiKeyUrl: "https://cloud.digitalocean.com/account/api/tokens",
+      text: "Use a Model Access Key from Model Studio > Manage keys. A DigitalOcean Personal Access Token (dop_v1_...) is also accepted.",
+      apiKeyUrl: "https://cloud.digitalocean.com/model-studio/manage-keys",
     },
-    serviceKinds: ["llm"],
+    serviceKinds: ["llm", "embedding", "image"],
   },
 };

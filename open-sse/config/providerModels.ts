@@ -328,6 +328,27 @@ function effortBaseTargetFormat(alias: string, bareModelId: string): string | nu
  */
 const RESPONSES_ONLY_PROVIDER_ALIASES = new Set(["gc", "mc", "muse-code"]);
 
+// The live /v1/models catalog has no protocol metadata. Use the model IDs whose
+// usage notes require Responses for all requests or for function calling.
+// https://docs.digitalocean.com/products/inference/details/models/
+const DIGITALOCEAN_RESPONSES_MODELS = new Set([
+  "openai-gpt-5.5",
+  "openai-gpt-5.4",
+  "openai-gpt-5.4-mini",
+  "openai-gpt-5.4-nano",
+  "openai-gpt-5.4-pro",
+  "openai-gpt-6-astra",
+  "openai-gpt-6-1-sol",
+  "openai-gpt-6.1-terra",
+  "openai-gpt-6-sol",
+]);
+
+/** DigitalOcean picks the wire per model; every other ID stays on Chat Completions. */
+function digitalOceanTargetFormat(alias: string, bareModelId: string): string | null {
+  if (alias !== "digitalocean") return null;
+  return DIGITALOCEAN_RESPONSES_MODELS.has(bareModelId) ? "openai-responses" : "openai";
+}
+
 export function getModelTargetFormat(aliasOrId: string, modelId: string): string | null {
   // Accept either the public alias ("cmd") or the raw provider id ("command-code"),
   // mirroring getProviderModels (same pattern as #2798/#3870).
@@ -337,7 +358,8 @@ export function getModelTargetFormat(aliasOrId: string, modelId: string): string
   const prefix = prefixes.find((value) => modelId.startsWith(value));
   const bareModelId = prefix ? modelId.slice(prefix.length) : modelId;
   const found = PROVIDER_MODELS[alias]?.find((m) => m.id === bareModelId);
-  if (found?.targetFormat) return found.targetFormat;
+  const curatedFormat = digitalOceanTargetFormat(alias, bareModelId) ?? found?.targetFormat;
+  if (curatedFormat) return curatedFormat;
   const catalogFormat = publishedCatalogFormat(aliasOrId, bareModelId);
   if (catalogFormat) return catalogFormat;
   const sparkFormat = museSparkTargetFormat(alias, bareModelId);

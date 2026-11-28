@@ -58,6 +58,8 @@ export interface UsageLike {
   cost_usd?: number;
   cache_read_input_tokens?: number;
   cache_creation_input_tokens?: number;
+  /** DigitalOcean Chat Completions alias for cache creation. */
+  cache_created_input_tokens?: number;
   /** OpenRouter / Devin Desktop / codex-chatgpt-web alias for cache creation. */
   cache_write_tokens?: number;
   prompt_cache_hit_tokens?: number;
@@ -286,6 +288,9 @@ export function filterUsageForFormat(usage: UsageLike | null | undefined, target
   // Cross-map between Claude-style and OpenAI-style field names before filtering.
   // Some providers return input_tokens/output_tokens even when using OpenAI format.
   const convertedUsage = { ...usage };
+  if (usage.cache_created_input_tokens !== undefined) {
+    convertedUsage.cache_creation_input_tokens ??= readCacheWriteUsage(usage).total ?? undefined;
+  }
   if (targetFormat === FORMATS.CLAUDE || targetFormat === FORMATS.OPENAI_RESPONSES) {
     // OpenAI → Claude: prompt_tokens → input_tokens
     if (convertedUsage.prompt_tokens !== undefined && convertedUsage.input_tokens === undefined) {
@@ -637,6 +642,7 @@ export function sanitizeProviderUsageForRequest(
     "cached_tokens",
     "cache_read_input_tokens",
     "cache_creation_input_tokens",
+    "cache_created_input_tokens",
     "cache_write_tokens",
     "cachedContentTokenCount",
   ]) {

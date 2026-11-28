@@ -16,6 +16,7 @@ import type {
   recordCoreOwnedAntigravityQuotaState,
 } from "../../services/accountFallback.ts";
 import { createErrorResult } from "../../utils/error.ts";
+import { readDigitalOceanError } from "../../utils/digitaloceanError.ts";
 import { applyStatusRestatement } from "../../config/upstreamStatusRestatement.ts";
 import { appendGoogleDailyQuotaViolation } from "../../services/googleDailyQuota.ts";
 import { recoverAnthropicThinkingSignature } from "./thinkingSignatureRecovery.ts";
@@ -314,6 +315,11 @@ async function toOutcome(
     try {
       body = JSON.parse(text);
       fields = readUpstreamErrorFields(body);
+      if (provider === "digitalocean") {
+        const digitalOcean = readDigitalOceanError(body);
+        fields.message ??= digitalOcean.message;
+        fields.code ??= digitalOcean.code;
+      }
       if (fields.message) message = fields.message;
     } catch {
       // Non-JSON upstream body (plain-text 429, HTML error page). parseUpstreamError

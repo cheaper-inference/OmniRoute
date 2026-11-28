@@ -7,6 +7,7 @@ type CacheWriteDetails = {
 
 type CacheWriteUsageSource = {
   cache_creation_input_tokens?: number;
+  cache_created_input_tokens?: number;
   cache_write_tokens?: number;
   prompt_tokens_details?: CacheWriteDetails;
   input_tokens_details?: CacheWriteDetails;
@@ -54,7 +55,8 @@ export function pickCacheCreationTokens(usage: CacheWriteUsageSource | null | un
     usage.cache_creation_input_tokens ??
     nestedNamedWrite(usage) ??
     nestedAliasWrite(usage) ??
-    usage.cache_write_tokens
+    usage.cache_write_tokens ??
+    usage.cache_created_input_tokens // DigitalOcean Chat Completions
   );
 }
 

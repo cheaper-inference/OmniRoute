@@ -14,7 +14,11 @@ test("digitalocean is registered as an API-key inference-host provider", () => {
   assert.equal(entry.id, "digitalocean");
   assert.equal(entry.alias, "digitalocean");
   assert.equal(entry.name, "DigitalOcean");
-  assert.equal(entry.website, "https://docs.digitalocean.com/products/ai-platform/");
+  assert.equal(entry.website, "https://docs.digitalocean.com/products/inference/");
+  assert.equal(entry.notice?.apiKeyUrl, "https://cloud.digitalocean.com/model-studio/manage-keys");
+  assert.match(entry.notice?.text ?? "", /Model Access Key.*Model Studio > Manage keys/);
+  assert.match(entry.notice?.text ?? "", /Personal Access Token \(dop_v1_\.\.\.\)/);
+  assert.deepEqual(entry.serviceKinds, ["llm", "embedding", "image"]);
   assert.equal(entry.passthroughModels, true);
 });
 
@@ -28,6 +32,7 @@ test("digitalocean registry entry uses OpenAI format with bearer API-key auth", 
   assert.equal(entry.authType, "apikey");
   assert.equal(entry.authHeader, "bearer");
   assert.equal(entry.baseUrl, DO_CHAT_URL);
+  assert.equal(entry.responsesBaseUrl, "https://inference.do-ai.run/v1/responses");
   assert.equal(entry.modelsUrl, DO_MODELS_URL);
   assert.equal(entry.passthroughModels, true);
 });
