@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
+<img src="./images/omniroute.gif" alt="OmniRoute Dashboard" width="820"/>
 
 <br/>
 <br/>
