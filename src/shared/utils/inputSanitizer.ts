@@ -9,10 +9,11 @@
 
 import { getFeatureFlagOverride } from "@/lib/db/featureFlags";
 import { parseEnvBoolean } from "@/shared/utils/envBoolean";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
 import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
 import type { CompiledPiiRule } from "@/shared/utils/piiCustomPatterns";
-import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
+import { buildGdprPopiaRules, isValidLuhn, precedingContext } from "@/shared/utils/piiPatterns";
 
 // ─── Prompt Injection Patterns ───────────────────────────────────────
 
@@ -150,6 +151,7 @@ const PII_PATTERNS = [
     name: "credit_card",
     pattern: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
     replacement: "[CARD_REDACTED]",
+    validate: (match: string) => isValidLuhn(match.replace(/[-\s]/g, "")),
   },
 
   // GDPR (EU) and POPIA (ZA) identifiers, shared with the response-side sanitizer
@@ -537,6 +539,19 @@ function tokenizeMatches(text, rule, tokenize) {
   });
 }
 
+function isCardLuhnEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("PII_CARD_LUHN_ENABLED");
+  } catch {
+    // Keep masking all card matches if the flag store is not available.
+    return false;
+  }
+}
+
+function usesPiiValidator(rule: { name: string; validate?: unknown }): boolean {
+  return Boolean(rule.validate) && (rule.name !== "credit_card" || isCardLuhnEnabled());
+}
+
 /**
  * Scan and optionally redact PII from text.
  * @param {string} text
@@ -550,7 +565,7 @@ function processPII(text, redact = false, options?: PiiRuleOptions) {
   const tokenize = redact && typeof options?.tokenize === "function" ? options.tokenize : undefined;
 
   for (const rule of resolvePiiRules(options)) {
-    if (rule.validate) {
+    if (usesPiiValidator(rule)) {
       const validated = redactValidatedMatches(processed, rule, redact, tokenize);
       if (validated.count > 0) {
         detections.push({ type: rule.name, count: validated.count });
