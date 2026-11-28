@@ -293,10 +293,13 @@ export function resolveCursorEmptyTurnError(options: {
     };
   }
 
+  // A bare empty turn is how Cursor refuses a model the plan/quota does not cover. It is
+  // scoped to this connection + model (404 → model lockout), never a provider outage
+  // (502 would count toward the whole-provider circuit breaker and block every Cursor model).
   return {
-    kind: "upstream",
-    status: 502,
-    type: "api_error",
-    message: CURSOR_EMPTY_TURN_MESSAGE,
+    kind: "not_found",
+    status: 404,
+    type: "invalid_request_error",
+    message: `Cursor model is not available on this account right now (plan or usage limit): ${CURSOR_EMPTY_TURN_MESSAGE}`,
   };
 }

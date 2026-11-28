@@ -64,10 +64,11 @@ test("isCursorBenignCancelError recognizes NGHTTP2_CANCEL / suspend", () => {
   assert.equal(isCursorBenignCancelError(new Error("resource_exhausted")), false);
 });
 
-test("resolveCursorEmptyTurnError: no upstream → actionable 502", () => {
+test("resolveCursorEmptyTurnError: no upstream → model-scoped 404 with actionable hint", () => {
   const out = resolveCursorEmptyTurnError({});
-  assert.equal(out.status, 502);
-  assert.equal(out.message, CURSOR_EMPTY_TURN_MESSAGE);
+  assert.equal(out.status, 404);
+  assert.equal(out.kind, "not_found");
+  assert.ok(out.message.endsWith(CURSOR_EMPTY_TURN_MESSAGE));
 });
 
 test("resolveCursorEmptyTurnError: quotaExhaustedHint → 429", () => {

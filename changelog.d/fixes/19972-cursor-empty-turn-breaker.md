@@ -1,0 +1,1 @@
+- **fix(sse):** A bare Cursor "empty turn" is now a model-scoped 404 (model lockout for that connection+model) instead of a 502 that counted toward the whole-provider circuit breaker and blocked every Cursor model ([#19972](https://github.com/cheaper-inference/OmniRoute/pull/19972) — thanks @krzemienski)
