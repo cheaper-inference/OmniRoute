@@ -323,6 +323,9 @@ export const providerModelMutationSchema = z.object({
   // the same flag flows through `getCustomVisionCapabilityFields()` in the /v1/models
   // catalog. `null` clears a manual override back to the id-based heuristic.
   supportsVision: z.boolean().nullable().optional(),
+  // Manual thinking-capable flag for custom models (self-hosted reasoning backends whose id does
+  // not say they reason). Opt-in: omitted = unchanged. `null` clears it (PUT).
+  supportsThinking: z.boolean().nullable().optional(),
   // #18739: per-node thinking-replay contract persisted on the modelCompatOverrides
   // entry (see open-sse/translator/helpers/thinkingReplayMode.ts). `null` unsets it
   // back to the default provider-derived handling.
