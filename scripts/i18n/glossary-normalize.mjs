@@ -2,11 +2,12 @@
  * OmniRoute — shared glossary terminology normalization.
  *
  * Single implementation of the "canonical term" rules declared in
- * scripts/i18n/glossary/<locale>.json, used by three call sites so they can
- * never disagree about what canonical means:
+ * scripts/i18n/glossary/<locale>.json, shared by the docs and catalog
+ * translation pipelines and the drift gate:
  *
  *   - scripts/i18n/run-translation.mjs        (active docs pipeline)
  *   - scripts/i18n/generate-multilang.mjs     (deprecated legacy generator)
+ *   - scripts/i18n/lib/translate-backend.mjs  (UI and CLI catalogs via Google)
  *   - scripts/i18n/check-glossary-consistency.mjs (drift gate)
  *
  * Why `blockedPrefixes` exists: a synonym is matched as a plain substring, and
@@ -26,21 +27,33 @@ const GLOSSARY_DIR = path.join(SCRIPT_DIR, "glossary");
 
 const cache = new Map();
 
+/** @typedef {{synonym: string, canonical: string, blockedPrefixes?: string[], wholeWords?: boolean}} Replacement */
+
+function isUnblockedMatch(text, at, length, blockedPrefixes, wholeWords) {
+  const prev = text.slice(Math.max(0, at - 1), at);
+  if (prev && blockedPrefixes.includes(prev)) return false;
+  return (
+    !wholeWords ||
+    (!/[\p{L}\p{M}\p{N}_]$/u.test(text.slice(0, at)) &&
+      !/^[\p{L}\p{M}\p{N}_]/u.test(text.slice(at + length)))
+  );
+}
+
 /**
  * @param {string} haystack
  * @param {string} needle
  * @param {string[]} [blockedPrefixes]
- * @returns {boolean} true when at least one occurrence is NOT preceded by a blocked prefix
+ * @param {boolean} [wholeWords]
+ * @returns {boolean} true when at least one occurrence satisfies the matching rules
  */
-export function hasUnblockedOccurrence(haystack, needle, blockedPrefixes = []) {
+export function hasUnblockedOccurrence(haystack, needle, blockedPrefixes = [], wholeWords = false) {
   if (!haystack || !needle) return false;
   const blocked = Array.isArray(blockedPrefixes) ? blockedPrefixes.filter(Boolean) : [];
   let from = 0;
   for (;;) {
     const at = haystack.indexOf(needle, from);
     if (at === -1) return false;
-    const prev = at === 0 ? "" : haystack.slice(at - 1, at);
-    if (!prev || !blocked.includes(prev)) return true;
+    if (isUnblockedMatch(haystack, at, needle.length, blocked, wholeWords)) return true;
     from = at + 1;
   }
 }
@@ -50,10 +63,11 @@ export function hasUnblockedOccurrence(haystack, needle, blockedPrefixes = []) {
  * empty `synonyms` array are documentation-only and produce no rule.
  *
  * @param {object} glossary - parsed scripts/i18n/glossary/<locale>.json
- * @returns {Array<{synonym: string, canonical: string, blockedPrefixes: string[]}>}
+ * @returns {Replacement[]}
  */
 export function buildReplacements(glossary) {
   const terms = glossary && glossary.terms ? glossary.terms : {};
+  const wholeWords = glossary?.wholeWords === true;
   const replacements = [];
   for (const def of Object.values(terms)) {
     if (!def || !def.canonical) continue;
@@ -61,7 +75,15 @@ export function buildReplacements(glossary) {
     const blockedPrefixes = Array.isArray(def.blockedPrefixes) ? def.blockedPrefixes : [];
     for (const synonym of synonyms) {
       if (!synonym) continue;
-      replacements.push({ synonym, canonical: def.canonical, blockedPrefixes });
+      replacements.push({ synonym, canonical: def.canonical, blockedPrefixes, wholeWords });
+    }
+  }
+  for (const [canonical, renderings] of Object.entries(
+    glossary?.protectedTermMistranslations ?? {}
+  )) {
+    if (!Array.isArray(renderings)) continue;
+    for (const synonym of renderings) {
+      if (synonym) replacements.push({ synonym, canonical });
     }
   }
   return replacements;
@@ -69,7 +91,7 @@ export function buildReplacements(glossary) {
 
 /**
  * @param {string} locale
- * @returns {Array<{synonym: string, canonical: string, blockedPrefixes: string[]}>}
+ * @returns {Replacement[]}
  */
 export function loadReplacements(locale) {
   if (cache.has(locale)) return cache.get(locale);
@@ -89,20 +111,19 @@ export function loadReplacements(locale) {
  * Apply one replacement rule, skipping blocked occurrences.
  *
  * @param {string} text
- * @param {{synonym: string, canonical: string, blockedPrefixes: string[]}} rule
+ * @param {Replacement} rule
  * @returns {string}
  */
 export function applyReplacement(text, rule) {
-  const { synonym, canonical, blockedPrefixes = [] } = rule;
+  const { synonym, canonical, blockedPrefixes = [], wholeWords = false } = rule;
   if (!synonym || !text.includes(synonym)) return text;
   let out = "";
   let from = 0;
   for (;;) {
     const at = text.indexOf(synonym, from);
     if (at === -1) return out + text.slice(from);
-    const prev = at === 0 ? "" : text.slice(at - 1, at);
-    const blocked = Boolean(prev) && blockedPrefixes.includes(prev);
-    out += text.slice(from, at) + (blocked ? synonym : canonical);
+    const matches = isUnblockedMatch(text, at, synonym.length, blockedPrefixes, wholeWords);
+    out += text.slice(from, at) + (matches ? canonical : synonym);
     from = at + synonym.length;
   }
 }
