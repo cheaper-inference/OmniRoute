@@ -14,14 +14,13 @@
 
 import * as vm from "vm";
 
+import { getAllMiddlewareHooks } from "@/lib/db/middleware";
 import {
   type HookMiddleware,
   type HookConfig,
   type PreRequestHookContext,
   type HookResult,
-  type HookScope,
   type HookLogEntry,
-  HookPriority,
 } from "./types";
 
 // ── State (globalThis singleton) ──────────────────────────────────────────
@@ -339,6 +338,7 @@ export function updateHook(name: string, updates: Partial<HookConfig>): boolean 
  * Get a hook config by name.
  */
 export function getHook(name: string): HookConfig | undefined {
+  initPreRequestRegistry();
   return getRegistryState().hooks.get(name);
 }
 
@@ -346,6 +346,7 @@ export function getHook(name: string): HookConfig | undefined {
  * Get all registered hooks.
  */
 export function getAllHooks(): HookConfig[] {
+  initPreRequestRegistry();
   return Array.from(getRegistryState().hooks.values());
 }
 
@@ -382,6 +383,7 @@ export async function runHooks(
   context: PreRequestHookContext;
   response?: { status: number; body: Record<string, unknown> };
 }> {
+  initPreRequestRegistry();
   const state = getRegistryState();
   const hooks = Array.from(state.hooks.values())
     .filter(
@@ -479,9 +481,18 @@ export function getHookLogs(hookName?: string, limit = 50): HookLogEntry[] {
 
 /**
  * Initialize registry (idempotent).
+ * Restores persisted hooks from SQLite into the in-memory registry.
  */
 export function initPreRequestRegistry(): void {
-  getRegistryState().initialized = true;
+  const state = getRegistryState();
+  if (state.initialized) return;
+  try {
+    const hooks = getAllMiddlewareHooks();
+    loadHooksFromConfig(hooks);
+    state.initialized = true;
+  } catch (_err: unknown) {
+    // If DB is not ready yet (e.g. before initial migrations or in isolated tests), allow retry on next call
+  }
 }
 
 /**
@@ -489,6 +500,17 @@ export function initPreRequestRegistry(): void {
  */
 export function clearAllHooks(): void {
   const state = getRegistryState();
+  state.hooks.clear();
+  state.middlewares.clear();
+  state.logs = [];
+}
+
+/**
+ * Reset registry initialization state (for testing).
+ */
+export function resetPreRequestRegistryForTesting(): void {
+  const state = getRegistryState();
+  state.initialized = false;
   state.hooks.clear();
   state.middlewares.clear();
   state.logs = [];
@@ -504,6 +526,7 @@ export function getRegistryStats(): {
   comboScopedHooks: number;
   recentLogs: number;
 } {
+  initPreRequestRegistry();
   const state = getRegistryState();
   const hooks = Array.from(state.hooks.values());
   return {
