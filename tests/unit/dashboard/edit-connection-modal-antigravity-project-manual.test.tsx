@@ -134,3 +134,23 @@ describe("EditConnectionModal — antigravity isProjectIdManual persistence (#10
     expect(updates.providerSpecificData?.isProjectIdManual).toBe(false);
   });
 });
+
+describe("EditConnectionModal — Antigravity model availability", () => {
+  it.each([
+    ["antigravity", undefined, true],
+    ["antigravity", "ide", true],
+    ["antigravity", "cli", false],
+    ["agy", "cli", false],
+    ["openai", undefined, false],
+  ] as const)("shows the IDE hint for %s / %s only when applicable", (provider, profile, hint) => {
+    renderModal({
+      id: "conn-model-availability",
+      provider,
+      authType: provider === "openai" ? "apikey" : "oauth",
+      name: "Test connection",
+      providerSpecificData: profile ? { clientProfile: profile } : {},
+    });
+
+    expect(document.body.textContent?.includes("antigravityIdeModelAvailabilityHint")).toBe(hint);
+  });
+});
