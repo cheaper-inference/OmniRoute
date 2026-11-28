@@ -1,0 +1,1 @@
+- Non-streaming `/v1/messages` responses now carry the upstream `anthropic-ratelimit-*` and `anthropic-organization-id` headers, under the same per-API-key policy (`forward` / `auto` / `strip`) that streaming responses already follow, so Claude clients can read rate-limit state either way. ([#20345](https://github.com/cheaper-inference/OmniRoute/pull/20345))
