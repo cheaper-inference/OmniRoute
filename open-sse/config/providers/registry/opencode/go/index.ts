@@ -1,5 +1,5 @@
 import type { RegistryEntry } from "../../../shared.ts";
-import { OPENCODE_ZEN_GO_SHARED_MODELS } from "../../../shared.ts";
+import { GLM_SHARED_MODELS, OPENCODE_ZEN_GO_SHARED_MODELS } from "../../../shared.ts";
 
 export const opencode_goProvider: RegistryEntry = {
   id: "opencode-go",
@@ -7,6 +7,7 @@ export const opencode_goProvider: RegistryEntry = {
   format: "openai",
   executor: "opencode",
   baseUrl: "https://opencode.ai/zen/go/v1",
+  modelsUrl: "https://opencode.ai/zen/go/v1/models",
   // (#532) Key validation must hit the main zen endpoint (same key works for both tiers)
   testKeyBaseUrl: "https://opencode.ai/zen/v1",
   authType: "apikey",
@@ -15,6 +16,9 @@ export const opencode_goProvider: RegistryEntry = {
   defaultContextLength: 200000,
   // Upstream 400s "name must be at most 64 characters" on chat-completions tools.
   toolNameMaxLength: 64,
+  // Sync with https://opencode.ai/zen/go/v1/models — this list is regenerated
+  // from the live API response so new models work without a code deploy.
+  passthroughModels: true,
   // glm-5.3-flash and other always-thinking models need a generous output
   // budget or reasoning consumes every token before content is emitted.
   requestDefaults: { maxTokens: 16_384 },
@@ -23,25 +27,14 @@ export const opencode_goProvider: RegistryEntry = {
   // ceiling well above the 110s global cap for long reasoning generations.
   fetchStartTimeoutCapMs: 600_000,
   models: [
-    // Port from decolua/9router 8efacc11: align with official Go endpoints —
-    // glm-5.2 is now advertised and Kimi chat traffic must route through
-    // `kimi-k2.7-code` (the live API rejects the plain `kimi-k2.7` alias for
-    // `/chat/completions`, even though the docs config example uses it).
-    // GLM-5.2 — base model + effort-tier aliases (#6922).
-    // #10788: the tier vocabulary is declared on the base row so the catalog's
-    // variant synthesis (#9485) and the effort sanitizer share one source of
-    // truth with OpencodeExecutor's EFFORT_TIERS.
-    {
-      id: "glm-5.2",
-      name: "GLM-5.2",
-      supportsReasoning: true,
-      supportedThinkingEfforts: ["high", "max"],
-    },
-    { id: "glm-5.2-high", name: "GLM-5.2 (high effort)", supportsReasoning: true },
-    { id: "glm-5.2-max", name: "GLM-5.2 (max effort)", supportsReasoning: true },
+    // GLM-5.3 and GLM-5.3-Flash (#6922, #20686): same limits and effort vocabulary as the shared
+    // GLM catalog (vendor Go list https://opencode.ai/zen/go/v1/models); the effort sanitizer clamps
+    // by it. Taken from #20693 with credit to @serenity-X.
+    GLM_SHARED_MODELS.find((m) => m.id === "glm-5.3")!,
+    GLM_SHARED_MODELS.find((m) => m.id === "glm-5.3-flash")!,
 
     ...OPENCODE_ZEN_GO_SHARED_MODELS,
-    // models[0] (glm-5.2) is the dashboard default (LlmChatCard/ProviderTestSlideOver take models[0]).
+    // models[0] (glm-5.3) is the dashboard default (LlmChatCard/ProviderTestSlideOver take models[0]).
 
     // glm-5.3 / glm-5.3-flash declared identically on opencode-zen — see
     // OPENCODE_ZEN_GO_SHARED_MODELS.

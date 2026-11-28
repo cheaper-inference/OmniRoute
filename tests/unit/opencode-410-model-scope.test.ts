@@ -15,6 +15,10 @@ const auth = await import("../../src/sse/services/auth.ts");
 const fallback = await import("../../open-sse/services/accountFallback.ts");
 const readCache = await import("../../src/lib/db/readCache.ts");
 const modelLockoutSettings = await import("../../src/lib/resilience/modelLockoutSettings.ts");
+const modelDeprecation = await import("../../open-sse/services/modelDeprecation.ts");
+const { opencode_goProvider } = await import(
+  "../../open-sse/config/providers/registry/opencode/go/index.ts"
+);
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -82,107 +86,159 @@ test.after(async () => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("OpenCode 410 on a retired model stays model-scoped and leaves the connection usable", async () => {
-  const connection = await seedOpencodeConnection("opencode-zen", "opencode-410-model-scope");
+for (const provider of ["opencode-zen", "opencode-go"]) {
+  test(`${provider} 410 on a retired model stays model-scoped and leaves the connection usable`, async () => {
+    const connection = await seedOpencodeConnection(provider, `${provider}-410-model-scope`);
 
-  assert.equal(
-    fallback.hasPerModelQuota("opencode-zen", DEAD_MODEL),
-    true,
-    "OpenCode Zen must use per-model failure scoping (one credential fronts many models)"
-  );
+    assert.equal(
+      fallback.hasPerModelQuota(provider, DEAD_MODEL),
+      true,
+      `${provider} must use per-model failure scoping (one credential fronts many models)`
+    );
+
+    const result = await auth.markAccountUnavailable(
+      connection.id,
+      410,
+      GONE_BODY,
+      provider,
+      DEAD_MODEL
+    );
+
+    assert.equal(result.shouldFallback, true);
+
+    const after = await providersDb.getProviderConnectionById(connection.id);
+
+    assert.equal(
+      after?.rateLimitedUntil ?? null,
+      null,
+      `410 for one retired ${provider} model must not apply a connection-wide cooldown`
+    );
+
+    assert.equal(
+      after?.testStatus,
+      "active",
+      `410 for one retired ${provider} model must leave the connection active`
+    );
+
+    assert.equal(
+      fallback.isModelLocked(provider, connection.id, DEAD_MODEL),
+      true,
+      "the retired model itself should be locked"
+    );
+
+    await assertLockBoundedByMaxCooldown(
+      provider,
+      connection.id,
+      DEAD_MODEL,
+      result.cooldownMs
+    );
+
+    assert.equal(
+      fallback.isModelLocked(provider, connection.id, HEALTHY_MODEL),
+      false,
+      `a healthy sibling ${provider} model must remain unlocked`
+    );
+
+    const healthyCredentials = await auth.getProviderCredentials(
+      provider,
+      null,
+      null,
+      HEALTHY_MODEL
+    );
+
+    assert.equal(
+      healthyCredentials?.connectionId,
+      connection.id,
+      `the same ${provider} connection must remain selectable for healthy sibling models`
+    );
+  });
+
+  test(`${provider} 410 without a model name in the body still locks only that model`, async () => {
+    const connection = await seedOpencodeConnection(provider, `${provider}-410-bare-body`);
+
+    const result = await auth.markAccountUnavailable(
+      connection.id,
+      410,
+      "Gone",
+      provider,
+      DEAD_MODEL
+    );
+
+    assert.equal(result.shouldFallback, true);
+
+    const after = await providersDb.getProviderConnectionById(connection.id);
+
+    assert.equal(
+      after?.rateLimitedUntil ?? null,
+      null,
+      `a body-less 410 must not cool the whole ${provider} connection either`
+    );
+
+    assert.equal(after?.testStatus, "active", "the connection must stay active for sibling models");
+
+    assert.equal(
+      fallback.isModelLocked(provider, connection.id, DEAD_MODEL),
+      true,
+      "the retired model should be locked even when the body names no model"
+    );
+
+    await assertLockBoundedByMaxCooldown(
+      provider,
+      connection.id,
+      DEAD_MODEL,
+      result.cooldownMs
+    );
+  });
+}
+
+test("opencode-go registry exposes live GLM-5.3 probe model and sync capability (#20686)", () => {
+  assert.equal(opencode_goProvider.models[0].id, "glm-5.3");
+  assert.equal(opencode_goProvider.passthroughModels, true);
+  assert.equal(opencode_goProvider.modelsUrl, "https://opencode.ai/zen/go/v1/models");
+  assert.equal(opencode_goProvider.models.some((m) => m.id === "glm-5.3-flash"), true);
+});
+
+test("opencode-go glm-5.2 410 deprecation locks out only glm-5.2 without cooling connection (#20686)", async () => {
+  const connection = await seedOpencodeConnection("opencode-go", "opencode-go-glm-52-deprecate");
+  const DEPRECATED_GLM_BODY = "Model glm-5.2 has been deprecated. Use glm-5.3 instead.";
 
   const result = await auth.markAccountUnavailable(
     connection.id,
     410,
-    GONE_BODY,
-    "opencode-zen",
-    DEAD_MODEL
+    DEPRECATED_GLM_BODY,
+    "opencode-go",
+    "glm-5.2"
   );
 
   assert.equal(result.shouldFallback, true);
 
   const after = await providersDb.getProviderConnectionById(connection.id);
-
   assert.equal(
     after?.rateLimitedUntil ?? null,
     null,
-    "410 for one retired OpenCode model must not apply a connection-wide cooldown"
+    "410 for deprecated glm-5.2 must not apply a connection-wide rate limit"
   );
-
   assert.equal(
     after?.testStatus,
     "active",
-    "410 for one retired OpenCode model must leave the OpenCode connection active"
+    "410 for deprecated glm-5.2 must keep the connection active"
   );
-
   assert.equal(
-    fallback.isModelLocked("opencode-zen", connection.id, DEAD_MODEL),
+    fallback.isModelLocked("opencode-go", connection.id, "glm-5.2"),
     true,
-    "the retired model itself should be locked"
+    "glm-5.2 must be locked"
   );
-
-  await assertLockBoundedByMaxCooldown(
-    "opencode-zen",
-    connection.id,
-    DEAD_MODEL,
-    result.cooldownMs
-  );
-
   assert.equal(
-    fallback.isModelLocked("opencode-zen", connection.id, HEALTHY_MODEL),
+    fallback.isModelLocked("opencode-go", connection.id, "glm-5.3"),
     false,
-    "a healthy sibling OpenCode model must remain unlocked"
-  );
-
-  const healthyCredentials = await auth.getProviderCredentials(
-    "opencode-zen",
-    null,
-    null,
-    HEALTHY_MODEL
-  );
-
-  assert.equal(
-    healthyCredentials?.connectionId,
-    connection.id,
-    "the same OpenCode connection must remain selectable for healthy sibling models"
+    "glm-5.3 must remain unlocked and active"
   );
 });
 
-test("OpenCode 410 without a model name in the body still locks only that model", async () => {
-  const connection = await seedOpencodeConnection("opencode-zen", "opencode-410-bare-body");
-
-  const result = await auth.markAccountUnavailable(
-    connection.id,
-    410,
-    "Gone",
-    "opencode-zen",
-    DEAD_MODEL
-  );
-
-  assert.equal(result.shouldFallback, true);
-
-  const after = await providersDb.getProviderConnectionById(connection.id);
-
-  assert.equal(
-    after?.rateLimitedUntil ?? null,
-    null,
-    "a body-less 410 must not cool the whole OpenCode connection either"
-  );
-
-  assert.equal(after?.testStatus, "active", "the connection must stay active for sibling models");
-
-  assert.equal(
-    fallback.isModelLocked("opencode-zen", connection.id, DEAD_MODEL),
-    true,
-    "the retired model should be locked even when the body names no model"
-  );
-
-  await assertLockBoundedByMaxCooldown(
-    "opencode-zen",
-    connection.id,
-    DEAD_MODEL,
-    result.cooldownMs
-  );
+test("glm-5.2 deprecation aliases forward to glm-5.3 (#20686)", () => {
+  assert.equal(modelDeprecation.resolveModelAlias("glm-5.2", "opencode-go"), "glm-5.3");
+  assert.equal(modelDeprecation.resolveModelAlias("glm-5.2-high", "opencode-go"), "glm-5.3-high");
+  assert.equal(modelDeprecation.resolveModelAlias("glm-5.2-max", "opencode-go"), "glm-5.3-max");
 });
 
 test("other per-model providers retain existing 410 connection scope", async () => {

@@ -67,6 +67,11 @@ const BUILT_IN_ALIASES: Record<string, string> = {
   // keep working.
   "mimo-v2.5-free": "mimo-v2.6-flash-free",
 
+  // OpenCode Zen/Go GLM deprecation (#20686): upstream retired glm-5.2 in favor of glm-5.3
+  "glm-5.2": "glm-5.3",
+  "glm-5.2-high": "glm-5.3-high",
+  "glm-5.2-max": "glm-5.3-max",
+
   // Mistral short aliases
   "mistral-large": "mistral-large-latest",
   "mistral-small": "mistral-small-latest",
