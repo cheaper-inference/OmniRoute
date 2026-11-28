@@ -1,0 +1,1 @@
+- **fix(ci):** the docs-counts gate reads free-token figures in M and B by kind and printed precision, and keeps the row-sum figure tied to its label and to the real figure; no token figure in `package.json` or `llm.txt` ([#21095](https://github.com/cheaper-inference/OmniRoute/pull/21095))

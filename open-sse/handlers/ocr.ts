@@ -10,6 +10,7 @@ import {
   getOcrTransformation,
   parseOcrModel,
   OCR_PROVIDERS,
+  VERTEX_DEEPSEEK_RETIRED_MODEL_ID,
   type OcrResponseShape,
 } from "../config/ocrRegistry.ts";
 import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
@@ -179,6 +180,16 @@ export async function handleOcr({
     return errorResponse(
       400,
       `No OCR provider found for model "${model}". Available: ${Object.keys(OCR_PROVIDERS).join(", ")}`
+    );
+  }
+
+  if (
+    providerId === VERTEX_DEEPSEEK_OCR_PROVIDER_ID &&
+    modelId === VERTEX_DEEPSEEK_RETIRED_MODEL_ID
+  ) {
+    return errorResponse(
+      400,
+      `Model "${VERTEX_DEEPSEEK_RETIRED_MODEL_ID}" was retired by Google on 2026-10-21. Self-deploy DeepSeek-OCR on Vertex Model Garden and pass its model id with the dedicated endpoint URL.`
     );
   }
 

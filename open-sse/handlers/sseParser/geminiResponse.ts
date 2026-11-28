@@ -45,17 +45,19 @@ function stripZeroWidth(value: unknown): unknown {
  * Detect the `[Tool call: name]\nArguments: {...}` textual convention some
  * Gemini/Antigravity models emit instead of a native functionCall part.
  */
-function tryParseTextualToolCall(text: string): { name: string; args: unknown } | null {
+function tryParseTextualToolCall(
+  text: string
+): { name: string; args: unknown; prefix: string } | null {
   const normalized = stripObfuscationZeroWidth(text);
   const match = normalized.match(
-    /^[\s\S]*?\[Tool call:\s*([^\]\n]+)\]\s*\nArguments:\s*([\s\S]+?)\s*$/
+    /^([\s\S]*?)\[Tool call:\s*([^\]\n]+)\]\s*\nArguments:\s*([\s\S]+?)\s*$/
   );
   if (!match) return null;
-  const name = match[1]?.trim();
-  const rawArgs = match[2]?.trim();
+  const name = match[2]?.trim();
+  const rawArgs = match[3]?.trim();
   if (!name || !rawArgs) return null;
   try {
-    return { name, args: stripZeroWidth(JSON.parse(rawArgs)) };
+    return { name, args: stripZeroWidth(JSON.parse(rawArgs)), prefix: match[1] ?? "" };
   } catch {
     return null;
   }
@@ -66,6 +68,18 @@ function extractGeminiMarkdownShortcut(parsed: Record<string, unknown>): string 
   if (typeof parsed.markdown === "string") return parsed.markdown;
   const response = parsed.response as Record<string, unknown> | undefined;
   return typeof response?.markdown === "string" ? response.markdown : null;
+}
+
+function pushTextualToolCall(
+  call: { name: string; args: unknown },
+  acc: GeminiSSEAccumulator
+): void {
+  acc.toolCalls.push({
+    id: `${call.name}-${Date.now()}-${acc.toolCalls.length}`,
+    index: acc.toolCalls.length,
+    type: "function",
+    function: { name: call.name, arguments: JSON.stringify(call.args || {}) },
+  });
 }
 
 /** Append one candidate content part (text or textual tool call) onto the accumulator. */
@@ -85,6 +99,7 @@ function applyCandidatePart(part: Record<string, unknown>, acc: GeminiSSEAccumul
         arguments: JSON.stringify(stripZeroWidth(fc.args ?? {})),
       },
     });
+    acc.sawContent = true; // a tool-only stream cut before finishReason is still a cut stream
     return;
   }
 
@@ -92,15 +107,7 @@ function applyCandidatePart(part: Record<string, unknown>, acc: GeminiSSEAccumul
 
   const textualToolCall = tryParseTextualToolCall(part.text);
   if (textualToolCall) {
-    acc.toolCalls.push({
-      id: `${textualToolCall.name}-${Date.now()}-${acc.toolCalls.length}`,
-      index: acc.toolCalls.length,
-      type: "function",
-      function: {
-        name: textualToolCall.name,
-        arguments: JSON.stringify(textualToolCall.args || {}),
-      },
-    });
+    pushTextualToolCall(textualToolCall, acc);
   } else {
     acc.textContent += part.text;
   }
@@ -365,6 +372,14 @@ export function parseSSEToGeminiResponse(
     if (!payload || payload === "[DONE]") continue;
 
     applyGeminiSSEDataLine(payload, acc);
+  }
+
+  // The marker and its arguments are usually split over several parts: retry on the joined text.
+  const joinedToolCall = tryParseTextualToolCall(acc.textContent);
+  if (joinedToolCall) {
+    pushTextualToolCall(joinedToolCall, acc);
+    // Only the marker and its arguments are the call: prose before the marker stays content.
+    acc.textContent = joinedToolCall.prefix.trim() ? joinedToolCall.prefix.trimEnd() : "";
   }
 
   if (!acc.sawContent && acc.toolCalls.length === 0) return null;

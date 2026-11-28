@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Input, Modal } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 
 interface DenoRelayModalProps {
   isOpen: boolean;
@@ -114,14 +115,7 @@ export default function DenoRelayModal({ isOpen, onClose, onDeployed }: DenoRela
           />
         </div>
 
-        {error && (
-          <div
-            role="alert"
-            className="text-sm text-error bg-error-bg border border-error/20 rounded p-2"
-          >
-            {error}
-          </div>
-        )}
+        {error && <Notice variant="critical">{error}</Notice>}
 
         <p className="text-xs text-text-muted">{t("denoRelayFreeTierNote")}</p>
       </div>

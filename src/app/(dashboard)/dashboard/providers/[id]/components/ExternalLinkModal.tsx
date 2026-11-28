@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import { Spinner } from "@/shared/components/Loading";
 
 import { Modal, Button } from "@/shared/components";
@@ -50,9 +51,7 @@ export default function ExternalLinkModal({
           <p className="text-sm text-error">{error}</p>
         ) : url ? (
           <>
-            <div className="rounded-lg border border-border bg-bg-subtle p-3 break-all text-sm text-text-main">
-              {url}
-            </div>
+            <Card.Section className="break-all text-sm text-text-main">{url}</Card.Section>
             <div className="flex gap-2">
               <Button
                 className="flex-1"

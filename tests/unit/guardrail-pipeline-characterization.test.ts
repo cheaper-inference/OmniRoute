@@ -416,34 +416,38 @@ test("generateSignature namespaces the digest with the apiKeyId as a plaintext p
 test("storeSemanticCacheResponse forwards the apiKeyId into the signature it stores under", () => {
   const signatureArgs: unknown[][] = [];
   const stored: unknown[][] = [];
-  storeSemanticCacheResponse(
-    {
-      enabled: true,
-      body: { messages: [{ role: "user", content: "hi" }], temperature: 0 },
-      headers: {},
-      // A non-object response skips the async dual-layer manager write so this test stays
-      // purely synchronous; the signature/setCachedResponse path is identical.
-      translatedResponse: "cached-text",
-      model: "m",
-      provider: "p",
-      apiKeyId: "key-a",
-      usage: { prompt_tokens: 2, completion_tokens: 3 },
+  const args = {
+    enabled: true,
+    body: { messages: [{ role: "user", content: "hi" }], temperature: 0 },
+    headers: {},
+    // A non-object response skips the async dual-layer manager write so this test stays
+    // purely synchronous; the signature/setCachedResponse path is identical.
+    translatedResponse: "cached-text",
+    model: "m",
+    provider: "p",
+    apiKeyId: "key-a",
+    usage: { prompt_tokens: 2, completion_tokens: 3 },
+  };
+  const deps = {
+    isCacheableForWrite: () => true,
+    isTruncatedCompletion: () => false,
+    isSmallEnoughForSemanticCache: () => true,
+    generateSignature: (...args: unknown[]) => {
+      signatureArgs.push(args);
+      return "sig";
     },
-    {
-      isCacheableForWrite: () => true,
-      isTruncatedCompletion: () => false,
-      isSmallEnoughForSemanticCache: () => true,
-      generateSignature: ((...args: unknown[]) => {
-        signatureArgs.push(args);
-        return "sig";
-      }) as never,
-      setCachedResponse: ((...args: unknown[]) => {
-        stored.push(args);
-      }) as never,
-    }
-  );
+    setCachedResponse: (...args: unknown[]) => {
+      stored.push(args);
+    },
+  };
+
+  storeSemanticCacheResponse(args, deps);
   assert.equal(signatureArgs[0][4], "key-a");
-  assert.deepEqual(stored, [["sig", "m", "cached-text", 5]]);
+  assert.deepEqual(stored, [["sig", "m", "cached-text", 5, undefined, undefined]]);
+
+  storeSemanticCacheResponse({ ...args, originalCostUsd: 0.0125 }, deps);
+  assert.equal(signatureArgs[1][4], "key-a");
+  assert.deepEqual(stored.slice(1), [["sig", "m", "cached-text", 5, undefined, 0.0125]]);
 });
 
 // ─── 5. Self-loop headers ────────────────────────────────────────────────────
@@ -467,7 +471,7 @@ test("stampOwnListenerSelfHop stamps only requests to this process's own listene
   assert.equal(new Headers(presetOpts.headers).get("x-omniroute-self-hop"), "preset");
 });
 
-test("vision-bridge describe self-loop: recursion-guard headers sent, no self-hop header", async () => {
+test("vision-bridge describe self-loop: recursion-guard headers and the process token sent", async () => {
   await createProviderConnection({
     provider: "openai",
     authType: "apikey",
@@ -495,13 +499,10 @@ test("vision-bridge describe self-loop: recursion-guard headers sent, no self-ho
   assert.equal(headers["x-omniroute-compression"], "off");
   assert.equal(headers["x-omniroute-admission-bypass"], "internal");
   assert.equal(headers.Authorization, `Bearer ${resolveSelfLoopBearer()}`);
-  // characterization: the describe call is built WITHOUT x-omniroute-self-hop. Production
-  // injects undici fetch (visionBridge.ts) which bypasses proxyFetch's stamp, so admission
-  // relies on x-omniroute-admission-bypass + the self-loop bearer instead.
-  assert.equal(
-    Object.keys(headers).some((h) => h.toLowerCase() === "x-omniroute-self-hop"),
-    false
-  );
+  // characterization: production injects undici fetch (visionBridge.ts), which bypasses
+  // proxyFetch's stamp, so the describe call sets x-omniroute-self-hop itself: admission
+  // grants the bypass only on that per-process token, never on the header + bearer alone.
+  assert.equal(headers["x-omniroute-self-hop"], selfHop.ownListenerSelfHopToken());
 
   // The receiving chat route resolves the recursion-guard header into a disable list that
   // makes the nested pre-call pass skip both bridges.

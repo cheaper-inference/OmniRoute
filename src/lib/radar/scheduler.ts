@@ -14,7 +14,7 @@
  * mid-flight settings change degrades to a no-op instead of an errant fetch.
  *
  * Referrals (`GET /v1/referrals/latest`) piggyback on the SAME hourly tick,
- * but on their own much shorter staleness window (`REFERRALS_STALE_MS`, 1h —
+ * but on their own shorter staleness window (`REFERRALS_STALE_MS`, 6h —
  * see `referralsSync.ts`) so they stay close to real-time instead of
  * inheriting the catalog's daily cadence. This is independent of, and never
  * gates on, the catalog's own due-ness — the two feeds sync on separate

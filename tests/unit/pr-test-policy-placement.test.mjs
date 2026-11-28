@@ -89,6 +89,33 @@ for (const name of [
   });
 }
 
+test("accepts a new test in a workspace package's own tests/ directory", (t) => {
+  // @omniroute/* packages run their own suites from <package>/tests/ (52 files in
+  // opencode-plugin-v2 alone); a new test there is in the right place.
+  const f = fixture(t);
+  f.write("@omniroute/opencode-plugin-v2/tests/catalog-order.test.ts");
+  f.commit();
+  const result = f.run();
+  assert.equal(result.status, 0);
+  assert.match(result.report, /New test files outside tests\/: 0/);
+});
+
+for (const name of [
+  "@omniroute/opencode-plugin-v2/src/catalog-order.test.ts",
+  "@omniroute/opencode-plugin-v2/tests-old/catalog-order.test.ts",
+  "@other/pkg/tests/catalog-order.test.ts",
+  "packages/ui-kit/tests/button.test.ts",
+]) {
+  test(`still rejects a new test outside a package's own tests/: ${JSON.stringify(name)}`, (t) => {
+    const f = fixture(t);
+    f.write(name);
+    f.commit();
+    const result = f.run();
+    assert.equal(result.status, 1);
+    assert.match(result.report, /must be under `tests\//);
+  });
+}
+
 test("accepts production changes accompanied by a test under tests/", (t) => {
   const f = fixture(t);
   f.write("src/feature.ts", "export const value = 1;\n");
@@ -102,6 +129,96 @@ test("continues to reject production changes with no automated test", (t) => {
   f.write("src/feature.ts", "export const value = 1;\n");
   f.commit();
   assert.equal(f.run().status, 1);
+});
+
+test("accepts a key-order-only regeneration of an existing CLI translation", (t) => {
+  const name = "bin/cli/locales/pt-BR.json";
+  const message = 'Marcadores: {"yes":"Sim"}';
+  const f = fixture(t, {
+    [name]: JSON.stringify({ common: { yes: message, no: "Não" }, setup: { yes: "Sim" } }),
+  });
+  f.write(name, JSON.stringify({ setup: { yes: "Sim" }, common: { no: "Não", yes: message } }));
+  f.commit();
+  const result = f.run();
+  assert.equal(result.status, 0, result.report);
+  assert.match(result.report, /Changed production files: 0/);
+});
+
+for (const [label, before, after] of [
+  ["changed value", '{"yes":"Sim","no":"Não"}', '{"no":"Nunca","yes":"Sim"}'],
+  ["added key", '{"yes":"Sim"}', '{"no":"Não","yes":"Sim"}'],
+  ["removed key", '{"yes":"Sim","no":"Não"}', '{"yes":"Sim"}'],
+  ["added catalog", undefined, '{"yes":"Sim"}'],
+  ["deleted catalog", '{"yes":"Sim"}', undefined],
+  ["malformed base blob", '{"yes":"Sim",}', '{"yes":"Sim"}'],
+  ["malformed head blob", '{"yes":"Sim"}', '{"yes":"Sim",}'],
+  ["malformed UTF-8 head blob", '{"yes":"�"}', Buffer.from('{"yes":"\xff"}', "latin1")],
+  [
+    "duplicate from an escaped key in the head blob",
+    '{"common":{"yes":"Sim"}}',
+    '{"common":{"ye\\u0073":"Sim","yes":"Sim"}}',
+  ],
+  [
+    "duplicate in a nested base object",
+    '{"common":{"yes":"Sim","yes":"Sim"}}',
+    '{"common":{"yes":"Sim"}}',
+  ],
+  [
+    "key order that changes a flattened CLI lookup",
+    '{"common":{"yes":"Sim"},"common.yes":"Claro"}',
+    '{"common.yes":"Claro","common":{"yes":"Sim"}}',
+  ],
+  ["numeric leaf", '{"x":9007199254740992}', '{"x":9007199254740993}'],
+]) {
+  test(`still requires tests for CLI catalogs with a ${label}`, (t) => {
+    const name = "bin/cli/locales/pt-BR.json";
+    const f = fixture(t, before === undefined ? {} : { [name]: before });
+    if (after === undefined) rmSync(path.join(f.repo, name));
+    else f.write(name, after);
+    f.commit();
+    const result = f.run();
+    assert.equal(result.status, 1, result.report);
+    assert.match(result.report, /Changed production files: 1/);
+  });
+}
+
+test("does not exempt canonical ordering on the English source or other production JSON", (t) => {
+  const english = "bin/cli/locales/en.json";
+  const settings = "bin/cli/settings.json";
+  const before = '{"no":"No","yes":"Yes"}';
+  const after = '{"yes":"Yes","no":"No"}';
+  const f = fixture(t, { [english]: before, [settings]: before });
+  f.write(english, after);
+  f.write(settings, after);
+  f.commit();
+  const result = f.run();
+  assert.equal(result.status, 1, result.report);
+  assert.match(result.report, /Changed production files: 2/);
+});
+
+test("does not exempt CLI catalogs when the file mode or type changes", (t) => {
+  const executable = "bin/cli/locales/pt-BR.json";
+  const symlink = "bin/cli/locales/pt.json";
+  const contents = '{"yes":"Sim"}';
+  const f = fixture(t, { [executable]: contents, [symlink]: contents });
+  const blob = f.git("rev-parse", `HEAD:${symlink}`);
+  f.git("update-index", "--chmod=+x", executable);
+  f.git("update-index", "--cacheinfo", `120000,${blob},${symlink}`);
+  f.git("commit", "--quiet", "-m", "change locale file modes");
+  const result = f.run();
+  assert.equal(result.status, 1, result.report);
+  assert.match(result.report, /Changed production files: 2/);
+});
+
+test("assesses the committed CLI catalog rather than the working copy", (t) => {
+  const name = "bin/cli/locales/pt-BR.json";
+  const f = fixture(t, { [name]: '{"yes":"Sim"}' });
+  f.write(name, '{"yes":"Claro"}');
+  f.commit();
+  f.write(name, '{"yes":"Sim"}');
+  const result = f.run();
+  assert.equal(result.status, 1, result.report);
+  assert.match(result.report, /Changed production files: 1/);
 });
 
 test("a valid test does not hide another newly misplaced test", (t) => {

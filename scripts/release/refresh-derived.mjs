@@ -23,6 +23,8 @@
 //   provider-reference docs/reference/PROVIDER_REFERENCE.md (gen-provider-reference.ts, run in a
 //                      scratch tree; the "generated on" date alone never counts as a change)
 //   facts              collect the facts, write docs/reference/derived-facts.json
+//   docker-pulls       sum both Docker Hub pull counts, write docs/badges/docker-pulls.json
+//                      (skipped in --check or when Docker Hub is unreachable)
 //   numbers            the counts gate's planDerivedRewrites() applied to the source files, then
 //                      carried to docs/i18n mirrors (scripts/release/lib/derived-mirrors.mjs)
 //   readme-diagrams    every docs/diagrams/*.svg generator, rendered from the new facts
@@ -64,6 +66,12 @@ import {
   refreshI18nStateEntry,
   refreshI18nTargetHash,
 } from "./lib/derived-mirrors.mjs";
+import {
+  DOCKER_PULLS_BADGE_PATH,
+  buildDockerPullsBadge,
+  fetchDockerPullCounts,
+  serializeDockerPullsBadge,
+} from "./lib/docker-pulls-badge.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..", "..");
@@ -72,6 +80,7 @@ export const STEP_IDS = [
   "changelog",
   "provider-reference",
   "facts",
+  "docker-pulls",
   "numbers",
   "readme-diagrams",
   "skills",
@@ -92,6 +101,7 @@ const HELP = `Usage: npm run release:refresh-derived [-- options]
   --profile=<p>        release (default) | nightly — nightly never touches the changelog
                        nor version claims
   --only=<ids>         run only these steps (comma-separated): ${STEP_IDS.join(", ")}
+                       docker-pulls requires network and is excluded from --check
   --rewritten-since=<ref>
                        UI keys whose English value changed since <ref> go back to translation
                        (default origin/main — the last shipped release; skipped if unresolvable)
@@ -339,6 +349,30 @@ async function stepFacts(ctx) {
     status: changed ? "changed" : "clean",
     detail: changed ? `${FACTS_SNAPSHOT_PATH} rewritten` : `${FACTS_SNAPSHOT_PATH} up to date`,
   };
+}
+
+async function stepDockerPulls(ctx) {
+  if (ctx.check)
+    return {
+      status: "skipped",
+      detail: "requires network and the pull count changes over time (excluded from --check)",
+    };
+
+  const fetchCounts = ctx.fetchDockerPullCounts ?? fetchDockerPullCounts;
+  let total;
+  try {
+    ({ total } = await fetchCounts());
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    return {
+      status: "skipped",
+      detail: `Docker Hub unreachable (${reason}): ${DOCKER_PULLS_BADGE_PATH} kept as is`,
+    };
+  }
+
+  const badge = buildDockerPullsBadge(total);
+  const changed = ctx.vfs.write(DOCKER_PULLS_BADGE_PATH, serializeDockerPullsBadge(badge));
+  return { status: changed ? "changed" : "clean", detail: `${total} pulls (${badge.message})` };
 }
 
 async function loadPlanner(ctx) {
@@ -855,6 +889,7 @@ const STEP_IMPL = {
   changelog: stepChangelog,
   "provider-reference": stepProviderReference,
   facts: stepFacts,
+  "docker-pulls": stepDockerPulls,
   numbers: stepNumbers,
   "readme-diagrams": stepReadmeDiagrams,
   skills: stepSkills,
@@ -873,6 +908,7 @@ const STEP_IMPL = {
  *   facts?: object,                      // inject instead of collecting (tests)
  *   collectFacts?: Function,             // replace the collector (tests)
  *   planDerivedRewrites?: Function,      // inject instead of the gate's export (tests)
+ *   fetchDockerPullCounts?: () => Promise<{ total: number }>, // replace the Docker Hub query (tests)
  *   steps?: Record<string, Function>,    // replace a step implementation (tests)
  *   runNode?: Function,                  // replace the child-process runner (tests)
  *   log?: (line: string) => void,
@@ -902,6 +938,7 @@ export async function refreshDerived(opts = {}) {
     factsError: null,
     collect: opts.collectFacts ?? collectFacts,
     planDerivedRewrites: opts.planDerivedRewrites ?? null,
+    fetchDockerPullCounts: opts.fetchDockerPullCounts ?? null,
     runNode: opts.runNode ?? null,
   };
   const log = opts.log ?? (() => {});

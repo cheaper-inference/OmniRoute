@@ -1,0 +1,1 @@
+- Forward OpenAI image complexity and moderation along with JPEG and WebP compression options ([#20976](https://github.com/cheaper-inference/OmniRoute/pull/20976)).

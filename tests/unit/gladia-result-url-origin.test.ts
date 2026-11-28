@@ -23,6 +23,7 @@ let pinnedTo: Array<{ address: string; family: number }> = [];
 // When set, the first canonical poll answers 503 with a body that records its cancellation.
 let failFirstPoll = false;
 let cancelledPollBodies = 0;
+let uploadFieldNames: string[] = [];
 
 const resultUrlCanonical = "https://api.gladia.io/v2/pre-recorded/job-1";
 // Saved when the suite starts and put back when it ends. The suite scopes the hooks, so
@@ -45,6 +46,15 @@ async function mockFetch(input: string | URL | Request, init: RequestInit = {}) 
     });
   }
   if (url.href === "https://api.gladia.io/v2/upload") {
+    // Like the live API: the file must be in the "audio" field.
+    const body = new TextDecoder().decode(init.body as Uint8Array);
+    uploadFieldNames.push(...[...body.matchAll(/name="([^"]+)"; filename=/g)].map((m) => m[1]));
+    if (!/name="audio"; filename=/.test(body)) {
+      return Response.json(
+        { message: "Invalid parameter(s).", validation_errors: ["Missing audio file"] },
+        { status: 400 }
+      );
+    }
     return Response.json({ audio_url: "https://api.gladia.io/file/1" });
   }
   if (url.href === "https://api.gladia.io/v2/pre-recorded") {
@@ -118,6 +128,7 @@ describe("Gladia result_url origin", () => {
     pinnedTo = [];
     failFirstPoll = false;
     cancelledPollBodies = 0;
+    uploadFieldNames = [];
   });
 
   async function transcribe() {
@@ -140,6 +151,13 @@ describe("Gladia result_url origin", () => {
     const response = await transcribe();
     assert.equal(response.status, 502);
     assert.equal(collectorHits.length, 0, "the redirect target must not be contacted");
+  });
+
+  test("Gladia: the upload sends the file in the audio field", async () => {
+    resultUrl = resultUrlCanonical;
+    const response = await transcribe();
+    assert.equal(response.status, 200);
+    assert.deepEqual(uploadFieldNames, ["audio"]);
   });
 
   test("Gladia: a same-origin result_url is polled with x-gladia-key", async () => {

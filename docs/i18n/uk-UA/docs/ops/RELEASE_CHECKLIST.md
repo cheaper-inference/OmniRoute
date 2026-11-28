@@ -355,111 +355,70 @@ npm run build:release
 
 ---
 
-## Відгалуження 3.9.0 LTS (репетиція у 3.8.58)
+## 3.9.0 LTS cut (перевірено в 3.8.58)
 
-Після v3.8.59 наступною версією буде 3.9.0, а її вершина стане основою двох довготривалих гілок:
-`stable/v3` (лінійка v3 LTS, npm `latest`) і `develop` (v4, версію підвищено до 4.0.0, npm
-`nightly`). Модель гілок/каналів, пряме перенесення змін і мітки описані в
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); план наведено в [ROADMAP](../../ROADMAP.md) (Фаза 3). Відгалуження виконується один раз;
-у 3.8.58 воно репетирується від початку до кінця у форку, а 3.8.59 завершується
-[контрольним списком GO/NO-GO](./LTS_GO_NO_GO.md).
+Після v3.8.59 наступною версією є 3.9.0, і її кінчик стає двома довготривалими гілками: `stable/v3` (лінія v3 LTS, npm `latest`) і `develop` (v4, перенесено на 4.0.0, npm `nightly`). Модель branch/channel, порт пересилання та мітки знаходяться в [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; план знаходиться в [ROADMAP](../../ROADMAP.md) (Фаза 3). Розріз виконується один раз; 3.8.58 репетирує це кінець до кінця на розгалуженні, а 3.8.59 завершується [контрольним списком GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Пробний запуск (лише читання, безпечний у будь-який час)
+### Сухий запуск (тільки для читання, безпечний у будь-який час)
 
 ```bash
-npm run release:dry-run-lts-cut                       # справжнє відгалуження: 3.9.0 з HEAD, попередній тег v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # зафіксувати вихідний коміт
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` нічого не виконує: він читає дані git і `gh` та виводить
-повну послідовність — передумови (вихідне посилання розпізнається, вихідний репозиторій має повну історію —
-неглибокий клон не може відправити `stable/v3`, сторона-одержувач відхиляє пакет на першому
-прищепленому батьківському коміті, тому спочатку виконуйте відгалуження з повного клону або `git fetch --unshallow origin` —
-попередній тег існує, `package.json` містить цільову версію, відкрито задачу `release-freeze`, немає відкритої
-задачі `Release branch not green`
-для наявної гілки випуску — для гілки, якої не існує, повідомляється `?` (невідомо), але ніколи
-не зелений статус — чергу Mergify `release` налаштовано (G11: `queue_rules`, `checks_timeout`,
-мітка `queue`), набір правил `release/*` усе ще блокує видалення та примусове відправлення, а
-`stable/v3` і `develop` ще не існують), два кроки створення гілок, які тригери неактивних робочих процесів
-і умови `if:` стають істинними (а які залишаються заблокованими змінною репозиторію або
-закріпленими за канонічним репозиторієм), очікувані dist-теги (`latest` → 3.9.0, `next` і
-`nightly` порожні) та відкочування. Код виходу `0` = `RESULT: READY`, `1` = не виконано блокувальну
-передумову (`✗`), `2` = помилка використання. `--advisory <id,...>` понижує перевірку до попередження (`!`),
-не приховуючи її.
+`scripts/release/dry-run-lts-cut.mjs` нічого не виконує: він читає git і `gh` і друкує всю послідовність попередніх умов — (джерело вирішує, вихідний репозиторій має повну історію — неглибокий клон не може надіслати `stable/v3`, приймаюча сторона відхиляє пакет на першому щепленому батьківському пристрої, тому вирізається з повного клону або `git fetch --unshallow origin` перший — попередній тег існує, `package.json` є цільовою версією, проблема `release-freeze` відкрита, не відкрито `Release branch not green` проблема в існуючій гілці випуску — гілка, яка не існує, повідомляє, `?` невідомий, ніколи не зелений — omni-queue передає випуск PRs (G11: `config/merge-queue/config.json` дійсний, його `bases` керує гілкою випуску, `mode` `live`, його мітка існує), набір правил `release/*` все ще блокує видалення та примусове надсилання, а `stable/v3` і `develop` ще не існують), два кроки гілки, які тригери бездіяльного робочого процесу та умови `if:` стають істинними (і залишаються обмеженими змінною сховища або закріпленими на канонічному сховищі), очікувані теги dist (`latest` → 3.9.0, `next` і `nightly` порожні) і відкат. Вихід `0` = `RESULT: READY`, `1` = помилка передумови блокування (`✗`), помилка використання `2` =. `--advisory <id,...>` знижує рівень перевірки до попередження (`!`), не приховуючи його.
 
-Виконайте пробний запуск справжнього відгалуження, поки заморожування випуску 3.9.0 ще діє — гілки
-створюються після тега й до того, як Фаза 12c зніме заморожування.
+Запустіть суху перевірку справжнього вирізу, поки заморожування випуску 3.9.0 ще відкрито — гілки створюються після тегу та до того, як фаза 12c зніме заморожування.
 
-### Репетиція 3.8.58 (лише у форку)
+### 3.8.58 репетиція (лише вилка)
 
 ```bash
-# 1. Пробний запуск на поточній вершині з параметрами репетиції
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Виконання для віддаленого ФОРКУ (origin або будь-який віддалений репозиторій, URL якого
-#    вказує на канонічний репозиторій, відхиляється; кожен крок запитує підтвердження в терміналі)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Випробування неактивних робочих процесів у форку (workflow_dispatch там, де пробний запуск
-#    повідомляє про прив’язку до канонічного репозиторію), після чого — відкочування
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Коміт підвищення версії develop створюється за допомогою низькорівневих засобів git (робоче дерево не змінюється) і підвищує
-версію в тих самих п’яти файлах, що й коміт відкриття циклу: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` і `docs/openapi.yaml`. Розділ `[4.0.0]`
-CHANGELOG та його локалізовані копії відкриваються в `develop` після цього, до першого
-PR у цій гілці. Скрипт ніколи не змінює dist-теги npm — репетируйте це з тестовим пакетом.
+Commit bump для розробки створено за допомогою git plumbing (робоче дерево не торкається) і зіштовхує ті самі п’ять файлів, що й коміт для відкриття циклу: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` і `docs/openapi.yaml`. Розділ `[4.0.0]` CHANGELOG і його дзеркала i18n відкриваються на `develop` пізніше, перед його першим PR. Сценарій ніколи не змінює теги npm dist-tags — rehearse ті на скретч-пакеті.
 
-### Артефакт попереднього перегляду PR (зібрати один раз, просувати ті самі байти)
+### PR попередній перегляд артефакту (збірка один раз, просування тих самих байтів)
 
-`.github/workflows/preview-artifact.yml` збирає один робочий tarball із вершини PR і
-перевіряє саме цю збірку (частина (a) задачі #8084). Лише PR з того самого репозиторію; нічого не публікується.
+`.github/workflows/preview-artifact.yml` створює один робочий архів із заголовка PR і перевіряє цю точну збірку (зріз #8084 (a)). Лише PRs у тому самому сховищі; нічого не публікується.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # або додайте мітку `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # встановлення попередньої версії
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Запуск виконує `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, пакує
-tarball, запускає `npm run check:pack-boot` (несправжні секрети, тимчасовий каталог даних), повторно пакує та
-завершується помилкою, якщо дайджест не ідентичний, після чого записує `artifact-identity.json` (SHA вершини, SHA бази,
-хеш lock-файлу, платформа, архітектура, ABI Node, пакувальник, політика збірки —
-`scripts/release/artifact-identity.mjs`) і засвідчує tarball в окремому завданні. Просування
-попередньої версії означає встановлення цього tarball: ніколи не перебудовуйте його з вихідного коду.
+Запуск виконує `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, пакує архів, запускає `npm run check:pack-boot` (фейкові секрети, ефемерний каталог даних), повторно запаковує та виходить з ладу, якщо дайджест не ідентичний, потім записує `artifact-identity.json` (заголовок SHA, базовий SHA, хеш файлу блокування, платформу, арку, вузол ABI, групувальник, політику збірки — `scripts/release/artifact-identity.mjs`) і засвідчує архів в окремій роботі. Просування попереднього перегляду означає встановлення цього архіву: ніколи не перезбирайте з джерела.
 
-### Відгалуження (3.9.0, після GO)
+### Версія (3.9.0, після GO)
 
-1. Рішення GO зафіксовано в [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` виводить `RESULT: READY`.
-3. Створіть гілки в `origin` вручну за допомогою команд, які виводить пробний запуск —
-   скрипт відмовляється виконувати відправлення до `origin`. Щоб повторно використати перевірений коміт develop, спочатку виконайте
-   репетицію з `--execute` на вершині 3.9.0 для свого форку; вона виведе обидва SHA, після чого
-   ті самі коміти можна відправити:
+1. GO записаний у [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` друкує `RESULT: READY`.
+3. Створіть гілки на `origin` вручну за допомогою команд, що сухий запуск друкує — сценарій відмовляється надсилати на `origin`. Щоб повторно використати перевірений комміт розробки, спочатку запустіть репетицію `--execute` на підказці 3.9.0 проти вашого форка; він друкує обидва SHAs, і ті самі коміти можна надсилати:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Захистіть `stable/v3` і `develop` (набори правил + черга злиття) до потрапляння першого PR.
-5. Неактивні робочі процеси вмикаються після створення відповідних гілок: `forward-port.yml` (push до
-   `stable/v3`), `validate-stable-pr.yml` (PR до `stable/v3`) і `nightly-v4-build.yml`
-   (збирає `develop`). Перед запуском налаштуйте секрет репозиторію `secrets.FORWARD_PORT_TOKEN` (щоб CI запускався для
-   PR із перенесенням змін уперед); нічна публікація залишатиметься вимкненою, доки власник не встановить для змінної репозиторію
-   `vars.NIGHTLY_PUBLISH` значення `true` і npm Trusted Publishing не дозволить
-   `nightly-v4-build.yml`. Канал визначається за допомогою `scripts/release/dist-tag.mjs` — того самого
-   засобу визначення, який використовує `npm-publish.yml`.
-6. Перевірте канали: `npm view omniroute dist-tags --json` має показувати `latest` = 3.9.0 і відсутність
-   `next` / `nightly`, доки не буде опубліковано v4.
-7. За потреби виконайте відкат: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   і `npm dist-tag add omniroute@3.8.59 latest`.
+4. Захистіть `stable/v3` та `develop` (черга злиття наборів правил + ) до появи першого PR.
+5. Сплячі робочі процеси вмикаються через існування гілки: `forward-port.yml` (push to `stable/v3`), `validate-stable-pr.yml` (PRs to `stable/v3`) і `nightly-v4-build.yml` (builds `develop`). Перед запуском встановіть секрет репозиторію `secrets.FORWARD_PORT_TOKEN` (тобто CI працює на прямому порту PRs); нічна публікація залишається вимкненою, доки власник не встановить для змінної сховища `vars.NIGHTLY_PUBLISH` значення `true`, а npm Trusted Publishing прийме `nightly-v4-build.yml`. Роздільна здатність каналу – `scripts/release/dist-tag.mjs`, той самий резольвер, який використовує `npm-publish.yml`.
+6. Перевірте канали: `npm view omniroute dist-tags --json` показує `latest` = 3.9.0 і не показує `next` / `nightly` до публікації v4.
+7. Відкат, якщо потрібно: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` та `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

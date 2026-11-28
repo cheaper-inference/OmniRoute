@@ -5,7 +5,7 @@ import {
   isDailyQuotaExhausted,
   isOAuthInvalidToken,
 } from "./accountFallback.ts";
-import { isSubscriptionQuotaText } from "./quotaTextCooldowns.ts";
+import { isSubscriptionQuotaForStatus } from "./quotaTextCooldowns.ts";
 import { isCreditsExhaustedForStatus } from "./accountFallback/creditsExhaustedForStatus.ts";
 import { isProviderSafetyRefusalBody } from "../utils/providerSafety.ts";
 import { isModelScopedAccessDenial } from "./accountFallback/modelScopedAccessDenial.ts";
@@ -448,13 +448,15 @@ function shouldPreserveQuotaSignalsFor429(provider?: string | null): boolean {
 export function classifyProviderError(
   statusCode: number,
   responseBody: unknown,
-  provider?: string | null
+  provider?: string | null,
+  upstreamErrorBody?: unknown
 ): ProviderErrorType | null {
   const bodyStr = responseBodyToString(responseBody);
   const creditsExhausted = isCreditsExhaustedForStatus(statusCode, provider, bodyStr);
   // Claude's native weekly 429 wording is provider-scoped; omitting provider
-  // silently classified the long-window quota as a short RPM rate limit.
-  const subscriptionQuotaExhausted = isSubscriptionQuotaText(bodyStr.toLowerCase(), provider);
+  // silently classified the long-window quota as a short RPM rate limit. On 400 the
+  // phrase needs a structured code (same contract as the credit signal above).
+  const subscriptionQuotaExhausted = isSubscriptionQuotaForStatus(statusCode, provider, bodyStr);
   const accountDeactivated = isAccountDeactivated(bodyStr);
   const oauthInvalid = isOAuthInvalidToken(bodyStr);
   const preserveQuota429 = shouldPreserveQuotaSignalsFor429(provider);
@@ -500,7 +502,7 @@ export function classifyProviderError(
     return PROVIDER_ERROR_TYPES.MODEL_NOT_FOUND;
   }
 
-  if (isModelScopedAccessDenial(provider, statusCode, responseBody)) {
+  if (isModelScopedAccessDenial(provider, statusCode, responseBody, null, upstreamErrorBody)) {
     return PROVIDER_ERROR_TYPES.MODEL_NOT_FOUND;
   }
 

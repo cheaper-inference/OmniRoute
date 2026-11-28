@@ -8,8 +8,16 @@
 //
 // Nothing here force-pushes. Candidate refs are unique per SHA (contracts.candidateRef), so a
 // push either creates a new ref or finds it already at the same SHA.
+//
+// SIGNED MERGE COMMITS (config landing.signing "ssh"): composeCandidate signs each merge commit
+// with `commit-tree -S`, the SSH key file the workflow writes under RUNNER_TEMP
+// (signingKeyPath) given to git as configuration of that one command (gpg.format=ssh,
+// user.signingkey=<path>) through the environment, so neither the key nor its path is ever an
+// argument, a log line, an event or an error message. A missing key or a signature git cannot
+// make never blocks the queue: the commit is composed unsigned, exactly as without signing, and
+// the result says so (`signing`), for the tick to report once per batch.
 
-import { existsSync, mkdirSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 import {
@@ -42,6 +50,55 @@ import {
  *                                        commits are on the base already): NOT included, nothing to
  *                                        test or land; the tick drops it from the queue
  */
+
+/**
+ * Where the tick job's "Write the merge-commit signing key" step leaves the key, under
+ * RUNNER_TEMP (.github/workflows/omni-queue.yml; tests/unit/merge-queue/workflows.test.mjs pins
+ * both). The step removes the directory at the end of the job, failed or cancelled included.
+ */
+export const SIGNING_KEY_DIR = "omni-queue-signing";
+export const SIGNING_KEY_FILE = "signing-key";
+
+/** The signing key file of a job whose RUNNER_TEMP is `runnerTemp`; null without one. */
+export function signingKeyPath(runnerTemp) {
+  if (typeof runnerTemp !== "string" || !runnerTemp) return null;
+  return join(runnerTemp, SIGNING_KEY_DIR, SIGNING_KEY_FILE);
+}
+
+/** Why a batch was composed unsigned although signing is asked for: no key in the job. */
+export const SIGNING_KEY_MISSING_CAUSE =
+  "no signing key file in the job (is the OMNI_QUEUE_SIGNING_KEY secret set?)";
+
+/**
+ * The signer of one composition: `config` (git configuration of the commit-tree call) while
+ * signing works, `cause` once it does not. Never holds anything but the path.
+ * @param {{keyPath: string|null}} signing
+ */
+function createSigner(signing) {
+  const keyPath = typeof signing?.keyPath === "string" ? signing.keyPath : null;
+  let file = false;
+  try {
+    file = keyPath !== null && statSync(keyPath).isFile();
+  } catch {
+    file = false;
+  }
+  const report = { signed: 0, unsigned: 0, cause: file ? null : SIGNING_KEY_MISSING_CAUSE };
+  return {
+    report,
+    /** The configuration that signs, or null once signing is known not to work. */
+    config: () =>
+      report.cause === null
+        ? [
+            ["gpg.format", "ssh"],
+            ["user.signingkey", keyPath],
+          ]
+        : null,
+    fail(code) {
+      // The exit code only: git's message would carry the key path.
+      report.cause = `git could not sign a merge commit (exit ${code})`;
+    },
+  };
+}
 
 /** Local refs of the scratch repository (never pushed anywhere). */
 export const LOCAL_BASE_REF = "refs/omni-queue/base";
@@ -282,11 +339,19 @@ export function haveCommonAncestor(git, a, b) {
  * The merge commits take their author/committer identity from the Git runner (createGit
  * `identity`, the App bot). Their message is built only from validated fields.
  *
+ * `signing` (config landing.signing "ssh"; absent = no signing, and no `signing` field in the
+ * result): each merge commit is signed with the SSH key at `signing.keyPath`. A key that is not
+ * there, or a signature git cannot make, leaves that commit and the rest of the batch unsigned,
+ * byte for byte what the composition is without signing; the result's `signing` says how many
+ * commits were signed and why the others were not ({signed, unsigned, cause}; cause null when
+ * every one was signed). A signature changes nothing else: same tree, parents, identity, message.
+ *
  * @param {{git: Git, base: string, baseSha: string, prs: PrRef[], batchId: string,
- *          heads: Object<number, string|null>}} input   heads = fetchInputs().heads
- * @returns {ComposeResult}
+ *          heads: Object<number, string|null>, signing?: {keyPath: string|null}|null}} input
+ *          heads = fetchInputs().heads
+ * @returns {ComposeResult & {signing?: {signed: number, unsigned: number, cause: string|null}}}
  */
-export function composeCandidate({ git, base, baseSha, prs, batchId, heads }) {
+export function composeCandidate({ git, base, baseSha, prs, batchId, heads, signing = null }) {
   if (!isSha(baseSha)) throw new Error("composeCandidate: invalid baseSha");
   const g = scratchGit(git);
   /** @type {ComposeResult} */
@@ -300,6 +365,23 @@ export function composeCandidate({ git, base, baseSha, prs, batchId, heads }) {
     excludedHeadMoved: [],
     alreadyContained: [],
     alreadyInBase: [],
+  };
+  const signer = signing ? createSigner(signing) : null;
+  /** commit-tree of one merge commit: signed while the signer works, else as without signing. */
+  const commitMerge = (tree, ours, theirs, message) => {
+    const config = signer?.config();
+    if (config) {
+      const args = ["commit-tree", tree, "-p", ours, "-p", theirs, "-S", "-F", "-"];
+      const res = g.run(args, { input: message, config, allowFail: true });
+      const sha = res.stdout.trim();
+      if (res.code === 0 && isSha(sha)) {
+        signer.report.signed += 1;
+        return sha;
+      }
+      signer.fail(res.code);
+    }
+    if (signer) signer.report.unsigned += 1;
+    return g.out(["commit-tree", tree, "-p", ours, "-p", theirs, "-F", "-"], { input: message });
   };
   let current = baseSha;
   for (const pr of prs ?? []) {
@@ -329,9 +411,7 @@ export function composeCandidate({ git, base, baseSha, prs, batchId, heads }) {
       continue;
     }
     const message = buildMergeMessage({ pr, base, baseSha, batchId });
-    current = g.out(["commit-tree", merged.tree, "-p", current, "-p", pr.head, "-F", "-"], {
-      input: message,
-    });
+    current = commitMerge(merged.tree, current, pr.head, message);
     if (!isSha(current)) throw new Error("git commit-tree returned no commit id");
     result.included.push(pr);
   }
@@ -342,6 +422,7 @@ export function composeCandidate({ git, base, baseSha, prs, batchId, heads }) {
     result.candidateSha = current;
     result.treeSha = g.out(["rev-parse", `${current}^{tree}`]);
   }
+  if (signer) result.signing = { ...signer.report };
   return result;
 }
 

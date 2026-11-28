@@ -13,6 +13,7 @@ import { Alert } from "@omniroute/ui-kit/alert";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 import { Skeleton } from "@/shared/components/Loading";
 import Select from "@/shared/components/Select";
 import Toggle from "@/shared/components/Toggle";
@@ -228,7 +229,9 @@ export default function CompressionHub() {
           <Icon name="hub" size={26} className="text-primary" />
           <div>
             {/* Card title: the page title is the PageHeader of CompressionCombosPageClient. */}
-            <h2 className="text-xl text-text-main">{t("hubTitle")}</h2>
+            <h2 className="ci-heading" data-size="xl">
+              {t("hubTitle")}
+            </h2>
             <p className="text-sm text-text-muted">{t("hubDescription")}</p>
           </div>
         </div>
@@ -243,15 +246,11 @@ export default function CompressionHub() {
         </Button>
       </div>
 
-      {error && (
-        <p role="alert" className="rounded border border-error/40 px-3 py-2 text-xs text-error">
-          {error}
-        </p>
-      )}
+      {error && <Notice variant="critical">{error}</Notice>}
 
       {/* ── Explainer ── */}
       {explainerOpen && (
-        <div className="rounded-lg border border-border bg-bg p-4 text-sm text-text-muted">
+        <Card.Section className="text-sm text-text-muted">
           <p className="mb-2">
             {t.rich("explanationIntro", {
               strong: (chunks) => <strong className="text-text-main">{chunks}</strong>,
@@ -279,11 +278,11 @@ export default function CompressionHub() {
               })}
             </li>
           </ol>
-        </div>
+        </Card.Section>
       )}
 
       {/* ── Active profile ── */}
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg p-4">
+      <Card.Section className="flex flex-col gap-3">
         <Select
           id="active-profile"
           label={t("activeProfile")}
@@ -317,12 +316,14 @@ export default function CompressionHub() {
             </span>
           )}
         </div>
-      </div>
+      </Card.Section>
 
       {/* ── Provider-delegated compression ── */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm text-text-main">{t("providerDelegated")}</h2>
-        <div className="flex items-center gap-3 rounded-lg border border-border bg-bg p-4">
+        <h2 className="ci-heading" data-size="sm">
+          {t("providerDelegated")}
+        </h2>
+        <Card.Section className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-text-main">{t("contextEditingClaude")}</p>
             <p className="text-xs text-text-muted">{t("contextEditingDescription")}</p>
@@ -334,7 +335,7 @@ export default function CompressionHub() {
             }
             ariaLabel={t("contextEditingAria")}
           />
-        </div>
+        </Card.Section>
         <Alert
           variant="warning"
           icon={<Icon name="info" size={16} />}

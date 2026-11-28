@@ -1,0 +1,1 @@
+- **fix(gamification):** One XP award (audit row, action counter, level row and the global, weekly and monthly leaderboard scores) is now a single SQLite transaction instead of six separate commits per authenticated request, and a failure part-way no longer leaves XP without a score. ([#20226](https://github.com/cheaper-inference/OmniRoute/pull/20226))

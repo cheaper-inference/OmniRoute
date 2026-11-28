@@ -2,8 +2,8 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import { useTranslations } from "next-intl";
-import { Badge, Button, Input } from "@/shared/components";
-import Icon from "@/shared/components/Icon";
+import { Badge, Button, Card, NumberInput } from "@/shared/components";
+import Notice from "@/shared/components/Notice";
 
 export type BackupCleanupOptions = {
   keepLatest: number;
@@ -43,19 +43,13 @@ function StatusAlert({ status }: { status: BackupRetentionStatus }) {
 
   const isSuccess = status.type === "success";
   return (
-    <div
-      className={`mt-3 p-3 rounded-lg text-sm ${
-        isSuccess
-          ? "bg-success/10 text-success border border-success/20"
-          : "bg-error/10 text-error border border-error/20"
-      }`}
-      role="alert"
+    <Notice
+      variant={isSuccess ? "success" : "critical"}
+      icon={isSuccess ? "check_circle" : "error"}
+      className="mt-3"
     >
-      <div className="flex items-center gap-2">
-        <Icon name={isSuccess ? "check_circle" : "error"} size={16} />
-        {status.message}
-      </div>
-    </div>
+      {status.message}
+    </Notice>
   );
 }
 
@@ -76,7 +70,7 @@ export default function DatabaseBackupRetentionCard({
   const t = useTranslations("settings");
 
   return (
-    <div className={`p-3 rounded-lg bg-bg border border-border ${className}`}>
+    <Card.Section className={className}>
       <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
         <div>
           <p className="text-sm font-medium text-text-main">{title}</p>
@@ -100,34 +94,27 @@ export default function DatabaseBackupRetentionCard({
         </div>
       </div>
       <div className="flex flex-wrap items-end gap-3">
-        <Input
+        <NumberInput
           label={t("storageBackupKeepLatest")}
-          type="number"
           min={1}
           max={200}
           value={backupCleanupOptions.keepLatest}
-          onChange={(e) => {
-            const parsed = Number.parseInt(e.target.value || "1", 10);
+          onValueChange={(value) => {
             setBackupRetentionStatus({ type: "", message: "" });
-            setBackupCleanupOptions((prev) => ({
-              ...prev,
-              keepLatest: Number.isFinite(parsed) ? Math.max(1, parsed) : 1,
-            }));
+            setBackupCleanupOptions((prev) => ({ ...prev, keepLatest: Math.max(1, value ?? 1) }));
           }}
           className="w-32 shrink-0"
         />
-        <Input
+        <NumberInput
           label={t("storageBackupDeleteOlderThan")}
-          type="number"
           min={0}
           max={3650}
           value={backupCleanupOptions.retentionDays}
-          onChange={(e) => {
-            const parsed = Number.parseInt(e.target.value || "0", 10);
+          onValueChange={(value) => {
             setBackupRetentionStatus({ type: "", message: "" });
             setBackupCleanupOptions((prev) => ({
               ...prev,
-              retentionDays: Number.isFinite(parsed) ? Math.max(0, parsed) : 0,
+              retentionDays: Math.max(0, value ?? 0),
             }));
           }}
           className="w-32 shrink-0"
@@ -153,6 +140,6 @@ export default function DatabaseBackupRetentionCard({
       </div>
       <StatusAlert status={backupRetentionStatus} />
       <StatusAlert status={cleanupBackupsStatus} />
-    </div>
+    </Card.Section>
   );
 }

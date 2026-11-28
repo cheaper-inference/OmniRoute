@@ -79,6 +79,7 @@ test("migrated call sites stay byte-identical to the helper", () => {
 // Regression guard: once a call site has moved to the helper it must not grow its own
 // sha256 sink back — that is exactly what re-opens one CodeQL alert per file.
 const MIGRATED_FILES = [
+  "open-sse/executors/codex/promptCacheKey.ts",
   "open-sse/executors/venice-web-auth.ts",
   "open-sse/services/claudeUsageCooldown.ts",
   "open-sse/services/combo/promptCacheAffinity.ts",

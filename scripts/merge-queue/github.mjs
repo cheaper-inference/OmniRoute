@@ -81,18 +81,24 @@ export class GitHubError extends Error {
  * @property {(n: number) => Promise<{id: number, body: string, author: string,
  *            createdAt: string}[]>} listIssueComments
  * @property {(n: number, body: string) => Promise<{id: number}>} createIssueComment
- * @property {(n: number, key: string, body: string) => Promise<{posted: boolean}>} commentOnce
+ * @property {(n: number, key: string, body: string, opts?: {reader?: GitHubClient|null,
+ *            alsoLogins?: string[]}) => Promise<{posted: boolean}>} commentOnce
  *            posts `body + "\n\n" + contracts.commentMarker(key)` unless a comment on issue/PR n
  *            already contains that marker (then {posted:false}). The ONLY way queue code comments.
  *            After posting it re-reads the comments: when two writers raced (approval job + tick,
  *            or a POST replayed after a 5xx), the lowest comment id wins and the newer duplicate
- *            this call created is deleted ({posted:false}).
+ *            this call created is deleted ({posted:false}). opts (owner voice, voice.mjs):
+ *            `reader` = the client that lists the comments (the App's: every read stays the
+ *            App's), the POST and DELETE stay this client's; `alsoLogins` = more logins whose
+ *            markers count next to botLogin (the owner's login, read from the owner's token)
  * @property {(commentId: number) => Promise<void>} deleteIssueComment   404 = already gone
  * @property {(opts: {labels?: string[], state?: "open"|"closed"|"all"}) => Promise<{number: number,
  *            title: string, body: string, labels: string[], state: string,
  *            updatedAt: string}[]>} listIssues   issues only (PRs filtered out)
  * @property {(input: {title: string, body: string, labels?: string[]}) => Promise<{number: number}>} createIssue
  * @property {(n: number, patch: {title?: string, body?: string, state?: string}) => Promise<void>} updateIssue
+ * @property {() => Promise<string>} getAuthenticatedLogin   GET /user: the login of the token's
+ *            own account ("" when the answer names none); voice.mjs reads the owner's with it
  *
  * — commits / checks / statuses —
  * @property {(branch: string) => Promise<string|null>} getBranchSha   null when absent
@@ -439,7 +445,9 @@ function errorMessage(data, fallback) {
  *   baseDelayMs/maxDelayMs/nowMs tune the backoff (tests); maxDelayMs (default 120 s) is also
  *   the longest Retry-After / rate-limit reset wait honored: a longer one throws at once;
  *   botLogin, when set, makes commentOnce
- *   count only markers in comments authored by that login (a third party cannot pre-post one);
+ *   count only markers in comments authored by that login, or by a login its caller adds
+ *   (`alsoLogins`: the owner's, read from the owner's own token): a third party cannot pre-post
+ *   one;
  *   requestTimeoutMs (default 30 s) aborts a hung request, which then counts as a network error.
  * @returns {GitHubClient}
  */
@@ -682,19 +690,25 @@ export function createGitHubClient(options) {
 
     deleteIssueComment,
 
-    async commentOnce(n, key, body) {
+    async commentOnce(n, key, body, { reader = null, alsoLogins = [] } = {}) {
       const marker = commentMarker(key);
-      const ours = (c) => c.body.includes(marker) && (!botLogin || c.author === botLogin);
-      if ((await listIssueComments(n)).some(ours)) return { posted: false };
+      // Logins whose markers are the queue's own: the App's, and the owner's under the owner
+      // voice. Exact logins only, as GitHub returns them; nobody else's marker ever counts.
+      const trusted = botLogin ? new Set([botLogin, ...alsoLogins.filter(Boolean)]) : null;
+      const ours = (c) => c.body.includes(marker) && (!trusted || trusted.has(c.author));
+      // Under the owner voice the App's client reads, this (the owner's) client writes.
+      const list = reader ? (m) => reader.listIssueComments(m) : listIssueComments;
+      if ((await list(n)).some(ours)) return { posted: false };
       const { id } = await createIssueComment(n, `${body}\n\n${marker}`);
       // Read-then-write is not atomic: another writer may have posted the same marker meanwhile,
       // and each POST replayed after a 5xx may have left one more copy. The lowest id wins; drop
-      // every newer copy written by our login (never a comment of someone else).
-      const found = (await listIssueComments(n)).filter(ours).sort((a, b) => a.id - b.id);
+      // every newer copy written by a trusted login (never a comment of someone else).
+      const found = (await list(n)).filter(ours).sort((a, b) => a.id - b.id);
       const winner = found[0]?.id;
       if (winner === undefined || id === undefined) return { posted: true };
-      const self = botLogin ?? found.find((c) => c.id === id)?.author;
-      const extra = found.filter((c) => c.id !== winner && (c.id === id || c.author === self));
+      const self = found.find((c) => c.id === id)?.author;
+      const mine = (c) => (trusted ? trusted.has(c.author) : c.author === self);
+      const extra = found.filter((c) => c.id !== winner && (c.id === id || mine(c)));
       for (const c of extra) await deleteIssueComment(c.id);
       if (extra.length) {
         const ids = extra.map((c) => c.id).join(", ");
@@ -720,6 +734,11 @@ export function createGitHubClient(options) {
     async updateIssue(n, patch) {
       assertNumber(n);
       await request("PATCH", r(`/issues/${n}`), { body: patch });
+    },
+
+    async getAuthenticatedLogin() {
+      const { data } = await request("GET", "/user");
+      return typeof data?.login === "string" ? data.login : "";
     },
 
     async getBranchSha(branch) {

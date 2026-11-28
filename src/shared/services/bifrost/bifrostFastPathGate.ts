@@ -1,3 +1,5 @@
+import { wouldRefuseAgent } from "@/lib/guardrails/agentGuard/enforcement";
+import * as log from "@/sse/utils/logger";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import { resolveApiKeyForcedModel } from "@/sse/handlers/apiKeyForcedModel";
 
@@ -25,11 +27,17 @@ export interface BifrostFastPathGate {
  * falls back to `handleChat()`, which enforces the policy again: a rate-limited key is
  * counted twice for that one request. That is the accepted cost of the fallback and
  * only happens on a sidecar failure.
+ *
+ * A client the agent guard would refuse is also left to the native pipeline, which
+ * decides on the provider the request resolves to.
  */
 export async function gateBifrostFastPath(
   request: Request,
   body: Record<string, unknown>
 ): Promise<BifrostFastPathGate> {
+  if (wouldRefuseAgent({ headers: request.headers, log })) {
+    return { rejection: null, allow: false };
+  }
   if (request.headers.get("x-route-model")?.trim()) {
     return { rejection: null, allow: false };
   }
@@ -39,7 +47,8 @@ export async function gateBifrostFastPath(
 
   const keyPolicy = await enforceApiKeyPolicy(
     request,
-    typeof body.model === "string" ? body.model : null
+    typeof body.model === "string" ? body.model : null,
+    { directModelDispatch: true }
   );
   if (keyPolicy.rejection) {
     return { rejection: keyPolicy.rejection, allow: false };
