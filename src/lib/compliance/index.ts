@@ -22,8 +22,9 @@ import {
 } from "../logEnv";
 import { getUserDatabaseSettings } from "../db/databaseSettings";
 import { generateRequestId, getRequestId } from "@/shared/utils/requestId";
-import { HIGH_LEVEL_ACTIONS } from "@/lib/audit/highLevelActions";
 import { isNoLog } from "./noLog";
+import type { AuditLogFilter, AuditLogRow } from "@/domain/persistence/auditLogRepository";
+import { auditRepositories } from "../db/repositories/auditRepositories";
 
 /** @returns {SqliteAdapter | null} */
 function getDb() {
@@ -45,35 +46,6 @@ type AuditLogWriteEntry = {
   status?: string;
   requestId?: string;
   createdAt?: string;
-};
-
-type AuditLogFilter = {
-  action?: string;
-  actor?: string;
-  target?: string;
-  resourceType?: string;
-  status?: string;
-  requestId?: string;
-  from?: string;
-  to?: string;
-  limit?: number;
-  offset?: number;
-  /** When "high", restricts results to HIGH_LEVEL_ACTIONS only (B7). */
-  levelFilter?: "high";
-};
-
-type AuditLogRow = Record<string, unknown> & {
-  id?: number | null;
-  action?: string | null;
-  actor?: string | null;
-  target?: string | null;
-  status?: string | null;
-  details?: string | null;
-  metadata?: string | null;
-  ip_address?: string | null;
-  resource_type?: string | null;
-  request_id?: string | null;
-  timestamp?: string | null;
 };
 
 /**
@@ -101,13 +73,6 @@ export type AuditLogEntry = Record<string, unknown> & {
   resourceType: string | null;
   request_id: string | null;
   requestId: string | null;
-};
-
-const AUDIT_LOG_REQUIRED_COLUMNS: Record<string, string> = {
-  resource_type: "TEXT",
-  status: "TEXT",
-  request_id: "TEXT",
-  metadata: "TEXT",
 };
 
 const SENSITIVE_AUDIT_KEYS = new Set([
@@ -214,93 +179,9 @@ function parseAuditValue(value: unknown): unknown {
   }
 }
 
+/** The audit_log table is created lazily; storage lives in the audit repository. */
 function ensureAuditLogSchema(db: SqliteAdapter) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS audit_log (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      timestamp TEXT NOT NULL DEFAULT (datetime('now')),
-      action TEXT NOT NULL,
-      actor TEXT NOT NULL DEFAULT 'system',
-      target TEXT,
-      details TEXT,
-      ip_address TEXT,
-      resource_type TEXT,
-      status TEXT,
-      request_id TEXT,
-      metadata TEXT
-    );
-  `);
-
-  let columns: Array<{ name: string }> = [];
-  try {
-    columns = db.prepare("PRAGMA table_info(audit_log)").all() as Array<{ name: string }>;
-  } catch {
-    columns = [];
-  }
-
-  const existingColumns = new Set(columns.map((column) => column.name));
-  for (const [columnName, columnType] of Object.entries(AUDIT_LOG_REQUIRED_COLUMNS)) {
-    if (existingColumns.has(columnName)) continue;
-    try {
-      db.exec(`ALTER TABLE audit_log ADD COLUMN ${columnName} ${columnType}`);
-    } catch {
-      // Another worker may have upgraded the schema first. Ignore.
-    }
-  }
-
-  db.exec(`
-    CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_log(timestamp);
-    CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action);
-    CREATE INDEX IF NOT EXISTS idx_audit_actor ON audit_log(actor);
-    CREATE INDEX IF NOT EXISTS idx_audit_resource_type ON audit_log(resource_type);
-    CREATE INDEX IF NOT EXISTS idx_audit_status ON audit_log(status);
-    CREATE INDEX IF NOT EXISTS idx_audit_request_id ON audit_log(request_id);
-  `);
-}
-
-type AuditLogQuery = {
-  where: string;
-  params: string[];
-};
-
-function buildAuditLogQuery(filter: AuditLogFilter = {}): AuditLogQuery {
-  const conditions: string[] = [];
-  const params: string[] = [];
-
-  const addLikeFilter = (column: string, value?: string) => {
-    if (!value) return;
-    conditions.push(`${column} LIKE ?`);
-    params.push(`%${value}%`);
-  };
-
-  addLikeFilter("action", filter.action);
-  addLikeFilter("actor", filter.actor);
-  addLikeFilter("target", filter.target);
-  addLikeFilter("resource_type", filter.resourceType);
-  addLikeFilter("status", filter.status);
-  addLikeFilter("request_id", filter.requestId);
-
-  if (filter.from) {
-    conditions.push("datetime(timestamp) >= datetime(?)");
-    params.push(filter.from);
-  }
-  if (filter.to) {
-    conditions.push("datetime(timestamp) <= datetime(?)");
-    params.push(filter.to);
-  }
-
-  // B7: level=high filter — restrict to HIGH_LEVEL_ACTIONS via parameterized IN clause
-  if (filter.levelFilter === "high" && HIGH_LEVEL_ACTIONS.length > 0) {
-    const placeholders = HIGH_LEVEL_ACTIONS.map(() => "?").join(", ");
-    conditions.push(`action IN (${placeholders})`);
-    // HIGH_LEVEL_ACTIONS is readonly — create a mutable copy for spread
-    params.push(...Array.from(HIGH_LEVEL_ACTIONS));
-  }
-
-  return {
-    where: conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "",
-    params,
-  };
+  auditRepositories.legacySync.ensureAuditLogSchema(db);
 }
 
 function normalizeAuditLogRow(row: AuditLogRow): AuditLogEntry {
@@ -466,22 +347,12 @@ type ApiKeyAuthTouch = {
  */
 function coalesceApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): number | null {
   const cutoff = new Date(touch.timestampMs - API_KEY_AUTH_TOUCH_COALESCE_MS).toISOString();
-  const recent = db
-    .prepare(
-      `SELECT id, timestamp
-       FROM audit_log
-       WHERE action = ? AND target = ? AND status = 'success'
-         AND ip_address IS ? AND metadata IS ? AND timestamp >= ?
-       ORDER BY timestamp DESC, id DESC
-       LIMIT 1`
-    )
-    .get(
-      API_KEY_AUTH_TOUCH_ACTION,
-      touch.apiKeyId,
-      touch.ipAddress,
-      touch.serializedMetadata,
-      cutoff
-    ) as { id?: number; timestamp?: string } | undefined;
+  const recent = auditRepositories.legacySync.findRecentAuthTouch(
+    db,
+    API_KEY_AUTH_TOUCH_ACTION,
+    touch,
+    cutoff
+  );
   if (!recent?.id) return null;
 
   // Fresh enough: skip the write entirely (no per-request write amplification).
@@ -492,40 +363,17 @@ function coalesceApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): num
   ) {
     return lastStampMs;
   }
-  db.prepare(`UPDATE audit_log SET timestamp = ?, request_id = ? WHERE id = ?`).run(
-    touch.timestamp,
-    touch.requestId,
-    recent.id
-  );
+  auditRepositories.legacySync.restampAuthTouch(db, recent.id, touch.timestamp, touch.requestId);
   return touch.timestampMs;
 }
 
 function insertApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): void {
-  db.prepare(
-    `INSERT INTO audit_log (
-      timestamp, action, actor, target, details, ip_address,
-      resource_type, status, request_id, metadata
-    ) VALUES (?, ?, ?, ?, ?, ?, 'api_key', 'success', ?, ?)`
-  ).run(
-    touch.timestamp,
+  auditRepositories.legacySync.insertAuthTouchAndTrim(
+    db,
     API_KEY_AUTH_TOUCH_ACTION,
-    "api_key",
-    touch.apiKeyId,
-    touch.serializedMetadata,
-    touch.ipAddress,
-    touch.requestId,
-    touch.serializedMetadata
+    touch,
+    API_KEY_AUTH_TOUCH_MAX_ROWS
   );
-
-  db.prepare(
-    `DELETE FROM audit_log
-     WHERE id IN (
-       SELECT id FROM audit_log
-       WHERE action = ?
-       ORDER BY timestamp DESC, id DESC
-       LIMIT -1 OFFSET ?
-     )`
-  ).run(API_KEY_AUTH_TOUCH_ACTION, API_KEY_AUTH_TOUCH_MAX_ROWS);
 }
 
 /** Write (or coalesce) one touch, skipping SQLite entirely for a remembered fresh hit. */
@@ -618,15 +466,12 @@ export function getAuditLog(filter: AuditLogFilter = {}): AuditLogEntry[] {
 
   ensureAuditLogSchema(db);
 
-  const { where, params } = buildAuditLogQuery(filter);
   const limit = Number.isFinite(filter.limit)
     ? Math.max(1, Math.min(500, filter.limit || 100))
     : 100;
   const offset = Number.isFinite(filter.offset) ? Math.max(0, filter.offset || 0) : 0;
 
-  const rows = db
-    .prepare(`SELECT * FROM audit_log ${where} ORDER BY timestamp DESC, id DESC LIMIT ? OFFSET ?`)
-    .all(...params, limit, offset) as AuditLogRow[];
+  const rows = auditRepositories.legacySync.listAuditLogRows(db, filter, limit, offset);
 
   return rows.map((row) => normalizeAuditLogRow(row));
 }
@@ -648,13 +493,7 @@ export function getAuditLogByActionSince(action: string, sinceIso: string): Audi
   if (!db) return [];
 
   ensureAuditLogSchema(db);
-  const rows = db
-    .prepare(
-      `SELECT * FROM audit_log INDEXED BY idx_audit_action
-       WHERE action = ? AND timestamp >= ?
-       ORDER BY timestamp DESC, id DESC`
-    )
-    .all(action, sinceIso) as AuditLogRow[];
+  const rows = auditRepositories.legacySync.listAuditLogRowsByActionSince(db, action, sinceIso);
 
   return rows.map((row) => normalizeAuditLogRow(row));
 }
@@ -664,10 +503,7 @@ export function countAuditLog(filter: AuditLogFilter = {}) {
   if (!db) return 0;
 
   ensureAuditLogSchema(db);
-  const { where, params } = buildAuditLogQuery(filter);
-  const row = db.prepare(`SELECT COUNT(*) as count FROM audit_log ${where}`).get(...params) as
-    { count?: number } | undefined;
-  return Number(row?.count || 0);
+  return auditRepositories.legacySync.countAuditLogRows(db, filter);
 }
 
 // ─── No-Log Opt-Out ────────────────
@@ -832,8 +668,7 @@ export async function cleanupExpiredLogs() {
   }
 
   try {
-    const r5 = db.prepare("DELETE FROM audit_log WHERE timestamp < ?").run(appCutoff);
-    deletedAuditLogs = r5.changes;
+    deletedAuditLogs = auditRepositories.legacySync.deleteAuditLogRowsBefore(db, appCutoff);
   } catch {
     /* table may not exist */
   }
