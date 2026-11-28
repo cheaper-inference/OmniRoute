@@ -1,0 +1,1 @@
+- **chore(quality):** `check-skill-contract.mjs --ref <ref>` reads the skill templates as a commit has them, so a checkout that is behind no longer reports skill drift that the base does not have. `/merge-batch` runs it against the fetched base.
