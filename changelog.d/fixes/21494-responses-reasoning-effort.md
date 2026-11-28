@@ -1,0 +1,1 @@
+- **fix(translator):** a flat `reasoning_effort` now reaches OpenAI Responses targets as `reasoning.effort`, including the singular `openai-response` alias and requests whose `reasoning` object carries only metadata. (thanks @ntdatt812)
