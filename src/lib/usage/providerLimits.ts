@@ -56,7 +56,7 @@ import {
 import {
   extractAntigravityProjectIdFromPayload,
   getStoredAntigravityProjectId,
-} from "@omniroute/open-sse/services/antigravityProjectPersistence.ts";
+} from "@omniroute/open-sse/services/antigravityProjectPersist.ts";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { onUsageRecorded } from "./usageEvents";
 import {

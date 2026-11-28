@@ -12,8 +12,59 @@
  * already persists at OAuth-exchange time (`src/lib/oauth/providers/antigravity.ts`).
  */
 
-import { updateProviderConnection } from "@/lib/db/providers";
+import { mergeConnectionProviderSpecificData, updateProviderConnection } from "@/lib/db/providers";
 import { isUsableAntigravityProjectId } from "./antigravityProjectBootstrap.ts";
+
+type AntigravityProjectConnectionLike = {
+  projectId?: string | null;
+  providerSpecificData?: unknown;
+  errorCode?: string | null;
+};
+
+export function extractAntigravityProjectIdFromPayload(
+  data: Record<string, unknown> | null | undefined
+): string | null {
+  if (!data || typeof data !== "object") return null;
+
+  const raw = data.cloudaicompanionProject;
+  if (typeof raw === "string" && raw.trim()) return raw.trim();
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const id = (raw as Record<string, unknown>).id;
+    if (typeof id === "string" && id.trim()) return id.trim();
+  }
+  return null;
+}
+
+export function getStoredAntigravityProjectId(
+  connection: Pick<AntigravityProjectConnectionLike, "projectId" | "providerSpecificData">
+): string | null {
+  const column = typeof connection.projectId === "string" ? connection.projectId.trim() : "";
+  if (column) return column;
+
+  const psd = connection.providerSpecificData as Record<string, unknown> | undefined;
+  const fromPsd = typeof psd?.projectId === "string" ? psd.projectId.trim() : "";
+  return fromPsd || null;
+}
+
+export function markAntigravityMissingCloudCodeProject(
+  connectionId: string | null | undefined
+): void {
+  if (!connectionId) return;
+
+  // #11284: a CONFIRMED missing Cloud Code project is not transient — disable
+  // the row so selection rotates to healthy siblings instead of re-dispatching
+  // into the same 422 every request. "unavailable" is deliberately NOT a
+  // terminal status: discovery records the recovered project id without
+  // re-enabling the row automatically.
+  void updateProviderConnection(connectionId, {
+    isActive: false,
+    testStatus: "unavailable",
+    errorCode: "missing_project_id",
+    lastError:
+      "Missing Google projectId for Antigravity account. Reconnect OAuth after completing Gemini Code Assist onboarding.",
+    lastErrorType: "oauth_missing_project_id",
+  }).catch(() => {});
+}
 
 /**
  * Write `discoveredProjectId` onto both the `projectId` column and
@@ -35,13 +86,14 @@ import { isUsableAntigravityProjectId } from "./antigravityProjectBootstrap.ts";
  * builds candidate lists without awaiting per-connection work). Tolerates
  * `providerSpecificData` arriving either parsed or as the raw DB JSON string.
  */
-export function preferAntigravityConnectionsWithStoredProject<T extends Record<string, unknown>>(
+export function preferAntigravityConnectionsWithStoredProject<T extends object>(
   connections: T[]
 ): T[] {
   if (!Array.isArray(connections) || connections.length === 0) return connections;
   const hasStoredProject = (connection: T): boolean => {
-    if (isUsableAntigravityProjectId(connection.projectId)) return true;
-    let psd = connection.providerSpecificData;
+    const record = connection as Record<string, unknown>;
+    if (isUsableAntigravityProjectId(record.projectId)) return true;
+    let psd = record.providerSpecificData;
     if (typeof psd === "string") {
       try {
         psd = JSON.parse(psd);
@@ -58,11 +110,13 @@ export function preferAntigravityConnectionsWithStoredProject<T extends Record<s
   // pool so the typed 422 (not an empty-selection 404) explains what to fix.
   const hasHealthySibling = (connection: T): boolean =>
     connections.some(
-      (other) => other !== connection && other.errorCode !== "missing_project_id"
+      (other) =>
+        other !== connection &&
+        (other as Record<string, unknown>).errorCode !== "missing_project_id"
     );
   const candidates = connections.filter(
     (connection) =>
-      connection.errorCode !== "missing_project_id" ||
+      (connection as Record<string, unknown>).errorCode !== "missing_project_id" ||
       !hasHealthySibling(connection) ||
       !hasStoredProject(connection)
   );
@@ -74,16 +128,17 @@ export function preferAntigravityConnectionsWithStoredProject<T extends Record<s
 export async function persistDiscoveredAntigravityProjectId(
   connectionId: string | undefined | null,
   discoveredProjectId: string | undefined | null,
-  existingProviderSpecificData?: Record<string, unknown> | null
+  _existingProviderSpecificData?: Record<string, unknown> | null
 ): Promise<void> {
   if (!connectionId || !isUsableAntigravityProjectId(discoveredProjectId)) return;
   try {
-    await updateProviderConnection(connectionId, {
+    // The column write keeps the other fields of the current row. Patch the
+    // stored key from the value read inside the same write transaction: the
+    // caller's snapshot may predate a concurrent metadata update and must not
+    // replace the whole providerSpecificData object.
+    await updateProviderConnection(connectionId, { projectId: discoveredProjectId });
+    await mergeConnectionProviderSpecificData(connectionId, {
       projectId: discoveredProjectId,
-      providerSpecificData: {
-        ...(existingProviderSpecificData || {}),
-        projectId: discoveredProjectId,
-      },
     });
   } catch {
     // Non-fatal: persistence failure must never block the in-flight request.
