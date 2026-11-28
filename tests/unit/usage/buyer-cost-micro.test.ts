@@ -161,20 +161,33 @@ for (const mode of ["translate", "passthrough"] as const) {
           receipt = result as unknown as Record<string, unknown>;
         },
       });
-      const wire = await new Response(
-        new Response(
-          events.map((event) => `data: ${JSON.stringify(event)}`).join("\n\n") + tail
-        ).body!.pipeThrough(transform)
-      ).text();
+      const input = events.map((event) => `data: ${JSON.stringify(event)}`).join("\n\n") + tail;
+      const splitAt = input.indexOf("buyer_cost_micro") + "buyer_cost".length;
+      const source = new ReadableStream<Uint8Array>({
+        start(controller) {
+          const encoder = new TextEncoder();
+          controller.enqueue(encoder.encode(input.slice(0, splitAt)));
+          controller.enqueue(encoder.encode(input.slice(splitAt)));
+          controller.close();
+        },
+      });
+      const wire = await new Response(source.pipeThrough(transform)).text();
       assert.ok(receipt);
       assert.equal(receipt.buyerCostMicro, 17155);
       assert.ok(Number((receipt.usage as Record<string, unknown>).prompt_tokens) < 119465);
       assert.equal((await save(receipt.buyerCostMicro)).buyer_cost_micro, 17155);
-      // Recording the charge leaves the client wire as it was: a native Claude
-      // passthrough keeps relaying the provider's usage field, and translation
-      // never emitted it.
-      if (mode === "passthrough") assert.ok(wire.includes('"buyer_cost_micro":17155'));
-      else assert.ok(!wire.includes("buyer_cost_micro"));
+      assert.ok(!wire.includes("buyer_cost_micro"));
+      if (mode === "passthrough") {
+        const terminal = wire
+          .split("\n")
+          .filter((line) => line.startsWith("data: {"))
+          .map(
+            (line) =>
+              JSON.parse(line.slice(6)) as { type?: string; usage?: { output_tokens?: number } }
+          )
+          .find((event) => event.type === "message_delta");
+        assert.equal(terminal?.usage?.output_tokens, 663);
+      }
       assert.equal(JSON.stringify(body), before);
     });
   }

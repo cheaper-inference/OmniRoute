@@ -32,8 +32,15 @@ export function createUsageGuard(
     const changed =
       !hasPriorInputForTrailingUsage(payload, getUsage()) &&
       sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat, basis);
-    if ((payload as { type?: string } | null)?.type !== "message_delta") return changed;
-    return repairClaudeFinalWireUsage(payload, getAccountingUsage()) || changed;
+    const event = payload as { type?: string; usage?: Record<string, unknown> } | null;
+    if (event?.type !== "message_delta") return changed;
+    const repaired = repairClaudeFinalWireUsage(payload, getAccountingUsage());
+    // The raw charge has already been captured for the call log.
+    if (event.usage && Object.hasOwn(event.usage, "buyer_cost_micro")) {
+      delete event.usage.buyer_cost_micro;
+      return true;
+    }
+    return repaired || changed;
   };
   return { basis, sanitizePassthrough };
 }

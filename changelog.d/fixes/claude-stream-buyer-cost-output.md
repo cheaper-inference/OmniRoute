@@ -1,0 +1,1 @@
+- **fix(sse):** Omit `buyer_cost_micro` from native Claude streaming `message_delta` usage while retaining the provider charge in call logs.
