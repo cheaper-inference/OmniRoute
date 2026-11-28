@@ -65,6 +65,7 @@ import { resolveZaiUrl } from "./default/zaiFormatOverride.ts";
 import { normalizePoolConfig, rejectStrictPool } from "./default/poolConfig.ts";
 import { isForceStreamProvider } from "./default/forceStreamBody.ts";
 import { acquireNvidiaConcurrencySlot } from "./default/nvidiaConcurrencyGate.ts";
+import { hoistOpenAIResponsesInstructionsToInput } from "./default/openaiResponsesInstructions.ts";
 import { normalizeOpenAIToolCallIds } from "./default/openaiToolCallIds.ts";
 import { applyCustomHeaders } from "./default/customHeaders.ts";
 import { executeCustomJson } from "./customJson.ts";
@@ -791,7 +792,10 @@ export class DefaultExecutor extends BaseExecutor {
     if (this.provider === "muse-code") withDefaults = floorMuseOutputTokens(withDefaults);
 
     if (this.provider === "nvidia") normalizeNvidiaToolCallIds(withDefaults);
-    if (this.provider === "openai") withDefaults = normalizeOpenAIToolCallIds(withDefaults);
+    if (this.provider === "openai") {
+      withDefaults = normalizeOpenAIToolCallIds(withDefaults);
+      withDefaults = hoistOpenAIResponsesInstructionsToInput(withDefaults);
+    }
 
     // Port of decolua/9router commit d652300e:
     // Cerebras returns 400 (wrong_api_format), Mistral returns 422
