@@ -3,29 +3,35 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b81",
+    "batchId": "b82",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b81-8c27caded3d0",
-    "candidateSha": "8c27caded3d0ad4f90a64fcee325ab1b64697901",
-    "baseSha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
-    "treeSha": "68684c6014491234b600da351e4de847e409bf75",
+    "candidateRef": "omni-queue/release-v3.8.55/b82-742dde8f8e1f",
+    "candidateSha": "742dde8f8e1f80d28b164391fcd33d32f0ece117",
+    "baseSha": "8c27caded3d0ad4f90a64fcee325ab1b64697901",
+    "treeSha": "a4fc74f938b633b4614e7a21652dccfcac4e3ed5",
     "prs": [
       {
-        "n": 21475,
-        "head": "e42e272740735fa00088a07f127f4b5edbeabad9",
-        "title": "fix(merge-queue): retry the landing push once when the ruleset has not seen the land status yet",
+        "n": 21489,
+        "head": "c61d88330e8bf074851559c2e779b2380b90502e",
+        "title": "fix(i18n): keep the nightly refresh alive when a few UI translations fail",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-28T07:22:56Z"
+        "labeledAt": "2026-11-28T12:49:58Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-28T16:57:32.761Z",
+    "stage": "testing",
+    "startedAt": "2026-11-28T18:18:09.437Z",
     "attempts": 0,
     "bisect": null,
-    "lane": "hotfix",
-    "landAttempts": 1
+    "lane": "hotfix"
   },
   "baseChecks": [
+    {
+      "baseSha": "8c27caded3d0ad4f90a64fcee325ab1b64697901",
+      "ref": "omni-queue/release-v3.8.55/b81-8c27caded3d0",
+      "status": "green",
+      "startedAt": "2026-11-28T16:57:32.761Z",
+      "signatures": []
+    },
     {
       "baseSha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
       "ref": "omni-queue/release-v3.8.55/b80-r1-a805b064c2c0",
@@ -88,13 +94,6 @@
       "status": "green",
       "startedAt": "2026-11-27T17:34:58.069Z",
       "signatures": []
-    },
-    {
-      "baseSha": "490e5651c3c589b7bbf376f342f6a3e9160c173b",
-      "ref": "omni-queue/release-v3.8.55/b68-490e5651c3c5",
-      "status": "green",
-      "startedAt": "2026-11-27T15:49:22.856Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -119,63 +118,15 @@
     }
   },
   "counters": {
-    "batchSeq": 81,
-    "ciRuns": 87,
-    "landedPrs": 82,
-    "landedBatches": 31,
+    "batchSeq": 82,
+    "ciRuns": 88,
+    "landedPrs": 83,
+    "landedBatches": 32,
     "redBatches": 18,
     "bisections": 6,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-25T06:13:31.003Z",
-      "type": "batch-started",
-      "batchId": "b37",
-      "prs": [
-        21168,
-        21169,
-        21172,
-        21174
-      ],
-      "sha": "dbd1bf7fb797898d338a0f7b26b4bce44cb0ecca",
-      "detail": "4 PR(s) on ae94881fcf54; window 5; excluded #21173 batch-conflict",
-      "labeledAt": {
-        "21168": "2026-11-25T05:25:56Z",
-        "21169": "2026-11-25T05:25:59Z",
-        "21172": "2026-11-25T05:26:02Z",
-        "21174": "2026-11-25T05:26:07Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45558872383"
-    },
-    {
-      "at": "2026-11-25T06:54:57.252Z",
-      "type": "checks-red",
-      "batchId": "b37",
-      "prs": [
-        21168,
-        21169,
-        21172,
-        21174
-      ],
-      "sha": "dbd1bf7fb797898d338a0f7b26b4bce44cb0ecca",
-      "detail": "Gate / CI, Unit Tests (1/8), Unit Tests (5/8)",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45564095571"
-    },
-    {
-      "at": "2026-11-25T06:54:57.252Z",
-      "type": "flaky-rerun",
-      "batchId": "b37",
-      "prs": [
-        21168,
-        21169,
-        21172,
-        21174
-      ],
-      "sha": "dbd1bf7fb797898d338a0f7b26b4bce44cb0ecca",
-      "detail": "re-running the failed jobs of b37 once (Gate / CI, Unit Tests (1/8), Unit Tests (5/8)) before a base check",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45564095571"
-    },
     {
       "at": "2026-11-25T07:29:20.395Z",
       "type": "checks-red",
@@ -2809,12 +2760,43 @@
       ],
       "sha": "8c27caded3d0ad4f90a64fcee325ab1b64697901",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46174871418"
+    },
+    {
+      "at": "2026-11-28T18:16:02.242Z",
+      "type": "land-blessed",
+      "batchId": "b81",
+      "prs": [
+        21475
+      ],
+      "sha": "8c27caded3d0ad4f90a64fcee325ab1b64697901",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46174871418"
+    },
+    {
+      "at": "2026-11-28T18:16:05.548Z",
+      "type": "landed",
+      "batchId": "b81",
+      "prs": [
+        21475
+      ],
+      "sha": "8c27caded3d0ad4f90a64fcee325ab1b64697901",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46174871418"
+    },
+    {
+      "at": "2026-11-28T18:18:12.843Z",
+      "type": "batch-started",
+      "batchId": "b82",
+      "prs": [
+        21489
+      ],
+      "sha": "742dde8f8e1f80d28b164391fcd33d32f0ece117",
+      "detail": "1 PR(s) on 8c27caded3d0; lane hotfix",
+      "labeledAt": {
+        "21489": "2026-11-28T12:49:58Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46174871418"
     }
   ],
-  "updatedAt": "2026-11-28T18:15:59.347Z",
-  "batchWindow": 2,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-28T18:15:59.347Z"
-  }
+  "updatedAt": "2026-11-28T18:18:14.577Z",
+  "batchWindow": 2
 }
