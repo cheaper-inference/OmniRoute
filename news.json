@@ -3,7 +3,7 @@
   "items": [
     {
       "id": "radar-free-2026-11",
-      "active": false,
+      "active": true,
       "publishedAt": "2026-11-24T00:00:00.000Z",
       "text": {
         "en": {
