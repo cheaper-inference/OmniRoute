@@ -196,17 +196,28 @@ test("the login trace id is echoed on success and on failure", async () => {
   assert.equal(malformed.loginTraceId, unknown);
 });
 
-test("a login state expires after fifteen minutes", () => {
-  const start = Date.now();
+test("a login state expires after fifteen minutes", (t) => {
+  let now = 1_700_000_000_000;
+  // Pin the clock before issuance so creation and expiry use the same origin.
+  t.mock.method(Date, "now", () => now);
   const state = createTraeLoginState();
-  mock.method(Date, "now", () => start + 15 * 60 * 1000 + 1);
+  now += 15 * 60 * 1000 + 1;
   assert.equal(consumeTraeLoginState(state), false);
 });
 
-test("a login state is still valid just inside the time limit", () => {
-  const start = Date.now();
+test("a login state expires at exactly fifteen minutes", (t) => {
+  let now = 1_700_000_000_000;
+  t.mock.method(Date, "now", () => now);
   const state = createTraeLoginState();
-  mock.method(Date, "now", () => start + 15 * 60 * 1000 - 1000);
+  now += 15 * 60 * 1000;
+  assert.equal(consumeTraeLoginState(state), false);
+});
+
+test("a login state is still valid just inside the time limit", (t) => {
+  let now = 1_700_000_000_000;
+  t.mock.method(Date, "now", () => now);
+  const state = createTraeLoginState();
+  now += 15 * 60 * 1000 - 1;
   assert.equal(consumeTraeLoginState(state), true);
 });
 

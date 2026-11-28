@@ -60,6 +60,7 @@ export function storeSemanticCacheResponse(
     provider?: string;
     apiKeyId?: string;
     usage?: UsageLike;
+    originalCostUsd?: number;
     log?: LoggerLike;
     videoTranscriptSensitive?: boolean;
     /** Reversible PII vault minted tokens: a cached copy would replay unresolvable tokens. */
@@ -91,7 +92,14 @@ export function storeSemanticCacheResponse(
     outputContractOf(args.body)
   );
   const tokensSaved = args.usage?.prompt_tokens + args.usage?.completion_tokens || 0;
-  deps.setCachedResponse(signature, args.model, args.translatedResponse, tokensSaved);
+  deps.setCachedResponse(
+    signature,
+    args.model,
+    args.translatedResponse,
+    tokensSaved,
+    undefined,
+    args.originalCostUsd
+  );
   args.log?.debug?.("CACHE", `Stored response for ${args.model} (${tokensSaved} tokens)`);
 
   if (args.translatedResponse && typeof args.translatedResponse === "object") {
@@ -108,6 +116,7 @@ export function storeSemanticCacheResponse(
         apiKeyId: args.apiKeyId,
         signature,
         tokensSaved,
+        originalCostUsd: args.originalCostUsd,
       })
       .catch(() => {});
   }
