@@ -73,6 +73,7 @@ function ProviderSelectionCheckbox({
 }) {
   return (
     <Checkbox
+      label={<span className="sr-only">{provider} model access</span>}
       aria-label={`${provider} model access`}
       checked={checked}
       indeterminate={indeterminate}

@@ -254,7 +254,9 @@ test.describe("API key model scope", () => {
       name: /ollama[- ]?cloud/i,
     });
     await expect(ollamaProviderCheckbox).toBeVisible({ timeout: UI_STABILITY_TIMEOUT_MS });
-    await ollamaProviderCheckbox.check();
+    // Exercise the visible checkbox hit target, not Playwright's hidden native input.
+    await ollamaProviderCheckbox.locator("..").locator(".ci-checkbox__box").click();
+    await expect(ollamaProviderCheckbox).toBeChecked();
 
     // Exact OpenAI model selection coexists with the provider scope.
     await modelSearch.fill("openai/gpt-4.1");
@@ -316,7 +318,9 @@ test.describe("API key model scope", () => {
     await expect(reopenedOpenAiModel).toBeEnabled();
 
     // Explicit Restrict with no provider/model selections is a persistent deny-all state.
-    await reopenedProviderCheckbox.uncheck();
+    // Deselect through the visible hit target as well.
+    await reopenedProviderCheckbox.locator("..").locator(".ci-checkbox__box").click();
+    await expect(reopenedProviderCheckbox).not.toBeChecked();
     await reopenedOpenAiModel.click();
     await reopened.getByRole("button", { name: /save changes/i }).click();
     await expect.poll(() => state.patchPayloads.length).toBeGreaterThan(1);
