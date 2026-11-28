@@ -127,6 +127,7 @@ import {
 } from "./emptyContentRetry.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
 import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
+import { recordToolRejection, recordToolServed } from "./toolRejectionTracker.ts";
 import { isVertexSharedCapacityResponse } from "../vertexSharedCapacity.ts";
 
 /**
@@ -809,10 +810,12 @@ export async function executeTargetAttempt(
         });
       }
 
+      recordToolServed(target, deps.body as Record<string, unknown>);
       return { ok: true, response: result };
     }
 
     const failure = await readAttemptFailure(result, { log: deps.log, modelStr });
+    if (result.status === 400) recordToolRejection(target, deps.body as Record<string, unknown>);
     const { errorText, errorBody, structuredError } = failure;
     // Return the original verdict before retry hints, health or affinity mutations.
     // The attempt loop treats this as fatal and cancels already-running hedges.

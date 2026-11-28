@@ -128,6 +128,7 @@ export function buildOmniRouteResponseMetaHeaders({
   strategy = null,
   usage = null,
   ttftMs = null,
+  contextWindow = null,
 }: {
   cacheHit?: boolean;
   costUsd?: unknown;
@@ -156,6 +157,12 @@ export function buildOmniRouteResponseMetaHeaders({
    * is unknown so plugins do not treat `tokens / total_latency` as speed.
    */
   ttftMs?: number | null;
+  /**
+   * Resolved context window (tokens). When positive, emits
+   * `X-OmniRoute-Context-Window` and `X-OmniRoute-Context-Remaining`
+   * (window minus input tokens, floored at 0). Omitted when unknown.
+   */
+  contextWindow?: number | null;
 }): Record<string, string> {
   const tokens = getOmniRouteTokenCounts(usage);
   const headers: Record<string, string> = {
@@ -184,6 +191,14 @@ export function buildOmniRouteResponseMetaHeaders({
   if (costSavedUsd != null) {
     headers[OMNIROUTE_RESPONSE_HEADERS.costSaved] = toHeaderValue(
       formatOmniRouteCost(costSavedUsd)
+    );
+  }
+
+  const windowTokens = toNonNegativeInteger(contextWindow);
+  if (windowTokens > 0) {
+    headers[OMNIROUTE_RESPONSE_HEADERS.contextWindow] = String(windowTokens);
+    headers[OMNIROUTE_RESPONSE_HEADERS.contextRemaining] = String(
+      Math.max(0, windowTokens - tokens.input)
     );
   }
 
