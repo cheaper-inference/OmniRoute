@@ -2213,20 +2213,28 @@ export async function GET(
       const disabledResponse = maybeReturnAutoFetchDisabled();
       if (disabledResponse) return disabledResponse;
 
-      const catalogRequest = buildTokenPlanCatalogRequest(
-        provider,
-        connection.providerSpecificData
-      );
       let liveModels: Array<{ id: string; name: string }>;
+      let catalogScope: "connection" | "product";
       try {
+        const catalogRequest = buildTokenPlanCatalogRequest(
+          provider,
+          connection.providerSpecificData,
+          apiKey
+        );
+        catalogScope = catalogRequest.scope;
         const response = await safeOutboundFetch(catalogRequest.url, {
           ...SAFE_OUTBOUND_FETCH_PRESETS.modelsDiscovery,
           ...catalogRequest.init,
           guard: "public-only",
+          allowRedirect: false,
           proxyConfig: proxy,
         });
-        if (!response.ok) throw new Error("Token Plan catalog request failed");
-        liveModels = parseTokenPlanCatalog(await response.json());
+        if (!response.ok) {
+          throw Object.assign(new Error("Token Plan catalog request failed"), {
+            status: response.status,
+          });
+        }
+        liveModels = parseTokenPlanCatalog(await response.json(), catalogScope);
       } catch (error) {
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "Token Plan live catalog unavailable — using cached catalog",
@@ -2238,7 +2246,7 @@ export async function GET(
       }
       return buildApiDiscoveryResponse(liveModels, undefined, {
         catalogMode: "live_token_plan_catalog",
-        catalogScope: "product",
+        catalogScope,
       });
     }
 
