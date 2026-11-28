@@ -1,0 +1,1 @@
+- **perf(call-logs):** Saving a call log looks up the account label by connection id instead of rebuilding every provider connection. ([#19720](https://github.com/cheaper-inference/OmniRoute/pull/19720))
