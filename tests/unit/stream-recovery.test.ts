@@ -326,3 +326,31 @@ test("createRecoverableStream does not spend an upstream re-open after a client 
   assert.equal(reopened, 0, "a client cancel must never trigger a transparent re-open");
   assert.equal(finalizeCount, 1);
 });
+
+test("continues a committed Responses stream after a split CRLF frame and read error", async () => {
+  const prefix = "Text already delivered to the client.";
+  const delta = (text: string) =>
+    JSON.stringify({
+      type: "response.output_text.delta",
+      delta: text,
+      item_id: "msg_0",
+      output_index: 0,
+      content_index: 0,
+    });
+  const initial = makeStream([`data: ${delta(prefix)}\r\n\r`, "\n"], new TruncatedStreamError());
+  let prefill: string | undefined;
+  let clock = 0;
+  const recovered = createRecoverableStream(initial, async () => null, {
+    finalize() {},
+    now: () => (clock += STREAM_RECOVERY.HOLDBACK_MS + 1),
+    continueStream: async (text) => {
+      prefill = text;
+      return makeStream([`data: ${delta(prefix + " More.")}\r\n\r\ndata: [DONE]\r\n\r\n`], "close");
+    },
+  });
+  const { text, errored } = await readAll(recovered);
+  assert.equal(prefill, prefix);
+  assert.equal(errored, null);
+  assert.ok(text.startsWith(`data: ${delta(prefix)}\r\n\r\n`));
+  assert.match(text, /"delta":" More\."/);
+});
