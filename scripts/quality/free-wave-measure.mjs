@@ -14,9 +14,12 @@ import { membershipFromProviderConstants } from "../../tests/unit/_helpers/provi
 import { catalogKey } from "../check/freeCatalogEvidence.mjs";
 import { providerDefinitions } from "./providerProvenance.ts";
 
+// Code-unit order, the same order a plain sort() gives, written out explicitly.
+const byCodeUnit = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+
 // Compare the fields the Radar publisher counts toward its per-publication limit.
 function publishedFields(row) {
-  const gates = [...(row.gates ?? [])].sort();
+  const gates = [...(row.gates ?? [])].sort(byCodeUnit);
   return {
     budget: gates.length ? [0, 0, null] : [row.monthlyTokens, row.creditTokens, row.poolKey],
     freeType: row.freeType,
@@ -44,7 +47,7 @@ function measureDiff(previous, current) {
   const previousProviders = new Set(previous.map((row) => row.provider));
   const newCatalogProviders = [...new Set(current.map((row) => row.provider))]
     .filter((id) => !previousProviders.has(id))
-    .sort();
+    .sort(byCodeUnit);
   return { rowsAdded, rowsRemoved, rowsChanged: rowsChanged + rowsRemoved, newCatalogProviders };
 }
 
