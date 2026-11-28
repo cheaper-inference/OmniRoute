@@ -8451,6 +8451,27 @@ paths:
         "500":
           description: Health report failed (sanitized message)
 
+  /api/metrics:
+    get:
+      tags: [System]
+      summary: Prometheus metrics (opt-in)
+      description: >-
+        Prometheus text format 0.0.4. Needs `OMNIROUTE_PROMETHEUS_METRICS=true`; while it
+        is off the route answers 404. Histograms for request duration, time to first token
+        and upstream retries, labelled by provider, model and status class (at most 500
+        series). Management-only; scrape with an API key that has the manage scope.
+      responses:
+        "200":
+          description: Metrics in the Prometheus text exposition format
+          content:
+            text/plain:
+              schema:
+                type: string
+        "401":
+          description: Not a management principal
+        "404":
+          description: The metrics endpoint is switched off
+
   /api/monitoring/compression:
     get:
       tags: [System]

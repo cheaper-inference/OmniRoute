@@ -18,6 +18,11 @@ import { validateComboInvariant } from "@/lib/combos/invariants";
 import { toBooleanSetting } from "./booleanSetting";
 import { getTableColumns } from "./jsonMigration/columnUpsert";
 import { getApiKeyImportColumns, importApiKeyRecord } from "./jsonMigration/apiKeysImport";
+import {
+  decideComboSync,
+  isConfigHashSyncEnabled,
+  recordComboHash,
+} from "./jsonMigration/configHashSync";
 import { importProviderConnectionRecord } from "./jsonMigration/connectionsImport";
 import {
   resolveImportedUsageAccountIdentity,
@@ -136,6 +141,7 @@ export function runJsonMigration(
     )
   `);
 
+  const hashSync = isConfigHashSyncEnabled();
   const migrate = db.transaction(() => {
     // 1. Provider Connections — credentials encrypted like normal writes; existing rows
     // only get the columns the backup carries (jsonMigration/connectionsImport.ts).
@@ -204,6 +210,13 @@ export function runJsonMigration(
         sortOrder: typeof combo.sortOrder === "number" ? combo.sortOrder : index + 1,
       });
       validateComboInvariant(normalizedCombo);
+      // Opt-in (OMNIROUTE_CONFIG_HASH_SYNC): keep a database copy edited since the last sync.
+      const sync = hashSync ? decideComboSync(db, normalizedCombo) : null;
+      if (sync?.direction === "db-kept") continue;
+      if (sync?.direction === "in-sync") {
+        recordComboHash(db, String(normalizedCombo.id), sync.fileHash);
+        continue;
+      }
       insertCombo.run({
         id: normalizedCombo.id,
         name: normalizedCombo.name,
@@ -212,6 +225,7 @@ export function runJsonMigration(
         createdAt: normalizedCombo.createdAt ?? new Date().toISOString(),
         updatedAt: normalizedCombo.updatedAt ?? new Date().toISOString(),
       });
+      if (sync) recordComboHash(db, String(normalizedCombo.id), sync.fileHash);
     }
 
     // 6. API Keys — lossless for every carried column; a restore never re-activates a

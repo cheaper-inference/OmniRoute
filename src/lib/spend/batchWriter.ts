@@ -1,3 +1,4 @@
+import { moneyForWrite } from "@/lib/usage/moneyRound";
 import { batchSaveCostEntries } from "@/lib/db/domainState";
 import { getProcessStore } from "@/shared/utils/processSingleton";
 
@@ -35,9 +36,12 @@ function getMaxBufferSize() {
 
 function normalizeEntry(entry: BufferedCostEntry): BufferedCostEntry | null {
   if (!entry?.apiKeyId || !Number.isFinite(entry.cost) || entry.cost <= 0) return null;
+  // Opt-in 8-decimal rule: the pending total a budget check reads then equals what the flush stores.
+  const cost = moneyForWrite(entry.cost);
+  if (cost <= 0) return null; // a sub-0.000000005 amount rounds to zero and is not worth a row
   return {
     apiKeyId: entry.apiKeyId,
-    cost: entry.cost,
+    cost,
     timestamp: Number.isFinite(entry.timestamp) ? entry.timestamp : Date.now(),
   };
 }

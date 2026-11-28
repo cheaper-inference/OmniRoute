@@ -25,7 +25,8 @@ export const MODEL_LOCKOUT_EVICTION_CAP = 1000;
 export function evictLockoutOverflow(
   modelLockouts: Map<string, ModelLockoutEntry>,
   modelFailureState: Map<string, ModelFailureState>,
-  cap: number = MODEL_LOCKOUT_EVICTION_CAP
+  cap: number = MODEL_LOCKOUT_EVICTION_CAP,
+  hardCap: number = resolveActiveLockoutHardCap()
 ): void {
   if (modelLockouts.size > cap) {
     const overflow = modelLockouts.size - cap;
@@ -41,15 +42,52 @@ export function evictLockoutOverflow(
       modelFailureState.delete(key);
     }
   }
+  // The hard cap drops only the lock: the sweep below must not take the escalation state of
+  // the lockouts it just evicted with it.
+  const hardCapped = evictActiveOverHardCap(modelLockouts, Math.max(hardCap, cap), hardCap > 0);
   if (modelFailureState.size > cap) {
     const overflow = modelFailureState.size - cap;
     let evicted = 0;
     for (const key of modelFailureState.keys()) {
       if (evicted >= overflow) break;
-      if (!modelLockouts.has(key)) {
+      if (!modelLockouts.has(key) && !hardCapped.has(key)) {
         modelFailureState.delete(key);
         evicted++;
       }
     }
   }
+}
+
+/**
+ * Opt-in hard cap on ACTIVE lockouts (OMNIROUTE_MODEL_LOCKOUT_HARD_CAP, a positive integer;
+ * unset, 0 or anything else = off). Off is the default and keeps the #6923 rule above: an
+ * active lockout is never evicted, so the map is a soft bound. With a hard cap, a map that is
+ * still over it after the expired entries went loses the active lockouts that are closest to
+ * expiring: those would have cooled off first anyway, so dropping them lets routing try a
+ * model that is about to be free, never one with a long cooldown ahead. The escalation state
+ * (`modelFailureState`) is kept, so a model that fails again keeps escalating.
+ */
+export function resolveActiveLockoutHardCap(
+  env: Record<string, string | undefined> = process.env
+): number {
+  const raw = (env.OMNIROUTE_MODEL_LOCKOUT_HARD_CAP ?? "").trim();
+  return /^[1-9]\d*$/.test(raw) ? Number(raw) : 0;
+}
+
+/** Returns the keys whose active lockout it evicted. */
+function evictActiveOverHardCap(
+  modelLockouts: Map<string, ModelLockoutEntry>,
+  limit: number,
+  enabled: boolean
+): Set<string> {
+  const evicted = new Set<string>();
+  if (!enabled || modelLockouts.size <= limit) return evicted;
+  const soonest = [...modelLockouts.entries()]
+    .sort((a, b) => a[1].until - b[1].until)
+    .slice(0, modelLockouts.size - limit);
+  for (const [key] of soonest) {
+    modelLockouts.delete(key);
+    evicted.add(key);
+  }
+  return evicted;
 }

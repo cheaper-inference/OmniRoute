@@ -47,6 +47,7 @@ import {
   type UsageWriteOptions,
 } from "./usageWriteRetry";
 import { getCallLogApiKeyContext } from "./callLogApiKeyContext";
+import { enqueueUsageWrite, isUsageBatchWriteEnabled } from "./usageBatchWriter";
 
 export type PendingRequestMetadata = {
   clientEndpoint?: string | null;
@@ -989,7 +990,8 @@ export async function saveRequestUsage(entry: UsageEntry, options: SaveRequestUs
       const sessionTurn = agentSession ? await loggableSessionTurn(frozenEntry) : null;
       writeOptions = { ...options, agentSession, sessionTurn };
     }
-    attemptWrite(frozenEntry, writeOptions);
+    if (isUsageBatchWriteEnabled()) enqueueUsageWrite(frozenEntry, writeOptions);
+    else attemptWrite(frozenEntry, writeOptions);
   } catch (error) {
     if (!isWriteLockError(error)) {
       console.error("Failed to save usage stats:", error);
