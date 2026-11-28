@@ -5,6 +5,7 @@ import {
   type FieldCategory,
 } from "./sseTextTransform";
 import { resolveStreamIndices } from "./streamIndices";
+import type { MetadataWindow } from "./sseMetadataHold";
 import {
   bufferField,
   ensureResponsesTextDeltaIds,
@@ -21,6 +22,8 @@ export interface CredentialTransformOptions {
   windowSize?: number;
   maxBufferedChoices?: number;
   maxBufferedBytes?: number;
+  /** Ceiling on the frames waiting behind an unresolved metadata tail (fail closed). */
+  maxDeferredBytes?: number;
 }
 
 export interface CredentialGate {
@@ -31,6 +34,7 @@ export interface CredentialGate {
 const DEFAULT_WINDOW_SIZE = 512;
 const DEFAULT_MAX_BUFFERED_CHOICES = 32;
 const DEFAULT_MAX_BUFFERED_BYTES = 65536;
+const DEFAULT_MAX_DEFERRED_BYTES = 1024 * 1024;
 const MAX_PARTIAL_PROBE = 256;
 
 // Mirror of src/lib/guardrails/registry.ts: HeadersLike (kept local: the
@@ -52,6 +56,11 @@ function resolveMaxChoices(options?: CredentialTransformOptions): number {
 function resolveMaxBytes(options?: CredentialTransformOptions): number {
   if (options?.maxBufferedBytes !== undefined) return Math.max(1024, options.maxBufferedBytes);
   return DEFAULT_MAX_BUFFERED_BYTES;
+}
+
+function resolveMaxDeferredBytes(options?: CredentialTransformOptions): number {
+  if (options?.maxDeferredBytes !== undefined) return Math.max(1024, options.maxDeferredBytes);
+  return DEFAULT_MAX_DEFERRED_BYTES;
 }
 
 /**
@@ -165,6 +174,26 @@ const PARTIAL_TAIL_PATTERNS: RegExp[] = [
     `(?:mongodb(?:\\+srv)?|postgres(?:ql)?|mysql|redis|amqp)${UNCLOSED_AUTHORITY_PREFIX}|[a-zA-Z][a-zA-Z+.-]*:\\/\\/[^:/@\\s"']*:[^:/@\\s"']*$`
   ),
 ];
+
+const LONGEST_PREFIX = Math.max(...PARTIAL_PREFIXES.map(({ prefix }) => prefix.length));
+
+/**
+ * Earliest start of a trailing fragment that can still grow into a catalog prefix ("s",
+ * "sk-an", "-----BEG"), or undefined. Emitting such a fragment on its own would let the next
+ * value, which no longer starts with the prefix, pass the catalog unmatched.
+ */
+export function findPrefixFragmentIndex(text: string): number | undefined {
+  for (let at = Math.max(0, text.length - LONGEST_PREFIX + 1); at < text.length; at++) {
+    const fragment = text.slice(at);
+    if (
+      PARTIAL_PREFIXES.some(
+        ({ prefix }) => prefix.length > fragment.length && prefix.startsWith(fragment)
+      )
+    )
+      return at;
+  }
+  return undefined;
+}
 
 function prefixOccurrence(tail: string, prefix: string, minBody: number): number {
   let from = 0;
@@ -311,6 +340,34 @@ function hasRemainingBuffers(store: ChoiceBufferStore): boolean {
     }
   }
   return false;
+}
+
+// Metadata strings get their own window, keyed by the path they arrived on. They must never
+// share the answer buffers: the generic flush drains leftover answer buffers back into the
+// reply, which is exactly what spliced usage provenance into the client's text. A separate
+// store keeps the sliding window (so a credential split across frames still redacts) while
+// letting each tail go back to its own field.
+export type MetadataBufferStore = {
+  get: (path: string) => string;
+  set: (path: string, value: string) => void;
+  takeAll: () => Array<[string, string]>;
+};
+
+export function createMetadataBufferStore(maxPaths: number): MetadataBufferStore {
+  const buffers = new Map<string, string>();
+  return {
+    get: (path) => buffers.get(path) ?? "",
+    set: (path, value) => {
+      if (!value) {
+        buffers.delete(path);
+        return;
+      }
+      if (!buffers.has(path) && buffers.size >= maxPaths)
+        throw new Error("[PII] Credential metadata path limit exceeded");
+      buffers.set(path, value);
+    },
+    takeAll: () => Array.from(buffers.entries()),
+  };
 }
 
 // Held-back tails of one Claude content block, each as the delta type the block actually
@@ -635,6 +692,79 @@ function flushEmptyStream(
   return remaining;
 }
 
+type MetadataWindowLimits = {
+  windowSize: number;
+  maxBufferedBytes: number;
+  bufferedBytes: () => number;
+  track: (before: string, after: string) => void;
+};
+
+/** How much of a metadata value can leave now; the rest stays held under its path. */
+function metadataEmitLength(raw: string, windowSize: number): number {
+  // A short value with no credential prefix is ordinary metadata (inference_geo, speed): it
+  // leaves with its frame, except a trailing fragment that may still become a prefix.
+  const looksLikeCredential =
+    PARTIAL_PREFIXES.some(({ prefix }) => raw.includes(prefix)) ||
+    findCredentialPartialTailIndex(raw) !== undefined;
+  let emitLength =
+    !looksLikeCredential && raw.length <= windowSize
+      ? raw.length
+      : credentialSafeCut(raw, Math.max(0, raw.length - windowSize));
+  for (const limit of [
+    findCredentialPartialTailIndex(raw),
+    findUnclosedBeginIndex(raw),
+    findPrefixFragmentIndex(raw),
+  ]) {
+    if (limit !== undefined && emitLength > limit) emitLength = limit;
+  }
+  return backOffSurrogate(raw, emitLength);
+}
+
+/**
+ * Same window as the answer path, but the tail stays with the metadata field instead of
+ * joining the reply: the frame that owns it waits (see sseMetadataHold) until a later value
+ * on the same path takes the tail over or the stream terminates and `release` hands it back.
+ * The path is the buffer identity, so two fields never share a window. The byte charge is
+ * shared with the answer buffers through `limits`.
+ */
+function createMetadataWindow(
+  store: MetadataBufferStore,
+  limits: MetadataWindowLimits
+): MetadataWindow {
+  const { windowSize, maxBufferedBytes, bufferedBytes, track } = limits;
+  const release = (path: string): string => {
+    const raw = store.get(path);
+    track(raw, "");
+    store.set(path, "");
+    return markUnclosedBeginHead(redactOutsideDataUrls(raw));
+  };
+  const process = (text: string, path: string, final: boolean): string => {
+    const raw = store.get(path) + text;
+    if (final) {
+      // Emitted whole and retained nowhere: release the path first, then check what is still
+      // held, as the answer path does after its drain.
+      track(store.get(path), "");
+      store.set(path, "");
+      if (bufferedBytes() > maxBufferedBytes)
+        throw new Error("[PII] Credential stream buffer limit exceeded");
+      return markUnclosedBeginHead(redactOutsideDataUrls(raw));
+    }
+    const emitLength = metadataEmitLength(raw, windowSize);
+    const rest = raw.slice(emitLength);
+    track(store.get(path), rest);
+    if (bufferedBytes() > maxBufferedBytes)
+      throw new Error("[PII] Credential stream buffer limit exceeded");
+    store.set(path, rest);
+    return redactOutsideDataUrls(raw.slice(0, emitLength));
+  };
+  return {
+    process,
+    holds: (path) => store.get(path).length > 0,
+    release,
+    heldBytes: (path: string) => store.get(path).length,
+  };
+}
+
 /**
  * Mask credentials across SSE fragments with bounded per-lane buffers and fail-closed limits,
  * retaining independent bounded tails for each streamed block. Snapshots are masked directly;
@@ -652,6 +782,7 @@ export function createCredentialSseTransform(
     bufferedBytes += after.length - before.length;
   };
   const store = createChoiceBufferStore(maxBufferedChoices);
+  const metadataStore = createMetadataBufferStore(4096);
   const state: DrainState = {
     overflow: new CredentialOverflow(),
     windowSize,
@@ -690,6 +821,7 @@ export function createCredentialSseTransform(
         : flushRemainingByShape(store, lastJson, lastContentJson);
     // A per-block flush leaves other tails in memory; keep them charged against the limit.
     bufferedBytes = countBufferedBytes(store);
+    for (const [, value] of metadataStore.takeAll()) bufferedBytes += value.length;
     return flushed;
   };
 
@@ -706,10 +838,19 @@ export function createCredentialSseTransform(
     return appendAndDrain(state, store, field, index, text, isStopSignal);
   };
 
+  const metadataWindow = createMetadataWindow(metadataStore, {
+    windowSize,
+    maxBufferedBytes,
+    bufferedBytes: () => bufferedBytes,
+    track,
+  });
+
   return createSseTextTransform(processor, onFlush, undefined, {
     processToolArgs: true,
     // Only after a Responses lane is drained: dropping the buffer also drops its
     // WeakMap-backed overflow continuation state without recycling identities.
     releaseResponsesLane: (index) => store.buffers.delete(index),
+    metadataWindow,
+    maxDeferredBytes: resolveMaxDeferredBytes(options),
   });
 }

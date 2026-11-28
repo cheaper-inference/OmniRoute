@@ -1,4 +1,5 @@
-import type { FieldCategory } from "./sseTextTransform";
+import { IN_PLACE_METADATA_KEYS } from "./sseMetadataKeys";
+import { escapePathSegment, type FieldCategory } from "./sseTextFields";
 
 type JsonObject = Record<string, unknown>;
 type Processor = (
@@ -21,6 +22,11 @@ export interface ResponsesSseTextOptions {
    * Without it, non-payload strings are not redacted.
    */
   classify?: (key: string) => FieldCategory | null;
+  /**
+   * Windowed redaction, in place, for the metadata keys that can carry a credential, keyed by
+   * path, so a value split across frames still redacts. Absent, those keys are masked per frame.
+   */
+  metadata?: (holder: JsonObject, key: string, path: string) => void;
 }
 
 const DELTA_FIELDS: Record<string, [string, FieldCategory]> = {
@@ -100,7 +106,10 @@ class ResponsesLaneRouter {
     this.learnIdentity(event);
     this.payload = [];
     const flushed = this.routePayload(event, type);
-    this.redactMetadata(event);
+    // Item-scoped metadata keeps a window per item: the learned identity is stable whether a
+    // later event names the item by item_id or by output_index.
+    const identity = this.identities.get(this.identityKeys(event)[0] ?? "");
+    this.redactMetadata(event, identity === undefined ? "" : `item/${escapePathSegment(String(identity))}`);
     this.payload = [];
     return flushed;
   }
@@ -249,18 +258,34 @@ class ResponsesLaneRouter {
    * results, annotations, instructions…), as a standalone value. A metadata key skips a
    * string value only; any object or array under it is still walked.
    */
-  private redactMetadata(value: unknown): void {
+  private redactMetadata(value: unknown, path = "", inMetadata = false): void {
     const classify = this.options.classify;
     if (!classify || !value || typeof value !== "object") return;
     const obj = value as JsonObject;
     for (const key of Object.keys(obj)) {
       if (RESPONSES_OPAQUE_KEYS.has(key) || this.isPayload(obj, key)) continue;
       const field = obj[key];
-      if (typeof field !== "string") this.redactMetadata(field);
-      else if (classify(key) !== null) {
-        obj[key] = this.processor(field, "content", false, "responses:snapshot", true);
-      }
+      const childPath = path ? `${path}/${escapePathSegment(key)}` : escapePathSegment(key);
+      const metadata = inMetadata || IN_PLACE_METADATA_KEYS.has(key);
+      if (typeof field !== "string") this.redactMetadata(field, childPath, metadata);
+      else if (metadata && this.options.metadata) this.options.metadata(obj, key, childPath);
+      else obj[key] = this.redactMetadataString(field, key, metadata, classify);
     }
+  }
+
+  /**
+   * Without a metadata window a string is masked in place, except a label `classify` excludes
+   * (provider, model, id), which passes through untouched as it did before the window existed.
+   */
+  private redactMetadataString(
+    field: string,
+    key: string,
+    metadata: boolean,
+    classify: (key: string) => FieldCategory | null
+  ): string {
+    if (classify(key) !== null || (metadata && IN_PLACE_METADATA_KEYS.has(key)))
+      return this.processor(field, "content", false, "responses:snapshot", true);
+    return field;
   }
 
   private isPayload(holder: JsonObject, key: string): boolean {
