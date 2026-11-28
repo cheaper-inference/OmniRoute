@@ -1,0 +1,1 @@
+- **fix(providers):** the OpenAI Codex (App-Server) connection test reports `app_server_transport_unavailable` instead of healthy when OmniRoute cannot load the wreq-js WebSocket transport, which every request to the app-server needs (fixes #21515)
