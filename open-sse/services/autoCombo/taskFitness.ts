@@ -395,10 +395,20 @@ function lookupStaticFitnessTable(normalizedModel: string, normalizedTask: strin
   return getStaticFitnessTableScore(normalizedModel, normalizedTask);
 }
 
-function lookupWildcardBoosts(normalizedModel: string, normalizedTask: string): number {
+/**
+ * Layer 5: apply the wildcard boosts over a neutral 0.5 baseline.
+ *
+ * Exported as a test seam, like `getStaticFitnessTableScore`: the resolution
+ * chain reaches the DB before this layer, so the scoring rules are pinned
+ * directly rather than through `getTaskFitness`.
+ *
+ * Patterns are matched at segment boundaries, like the static table (layer 4),
+ * so a pattern adopted inside another word does not earn a boost.
+ */
+export function lookupWildcardBoosts(normalizedModel: string, normalizedTask: string): number {
   let baseScore = 0.5;
   for (const wc of WILDCARD_BOOSTS) {
-    if (normalizedModel.includes(wc.pattern) && normalizedTask === wc.taskType) {
+    if (matchesAtSegmentBoundary(normalizedModel, wc.pattern) && normalizedTask === wc.taskType) {
       baseScore += wc.boost;
     }
   }

@@ -16,7 +16,7 @@
  * long tail of the provider catalog.
  */
 import { describe, it, expect } from "vitest";
-import { getStaticFitnessTableScore } from "../taskFitness";
+import { getStaticFitnessTableScore, lookupWildcardBoosts } from "../taskFitness";
 
 describe("#8603 static fitness table matches longest pattern first", () => {
   it("scores gpt-4o-mini from its own row, not gpt-4o's", () => {
@@ -55,5 +55,25 @@ describe("#8603 static fitness table matches longest pattern first", () => {
 
   it("returns null when nothing matches", () => {
     expect(getStaticFitnessTableScore("totally-unknown-model", "coding")).toBeNull();
+  });
+});
+
+describe("wildcard boosts match whole model id segments", () => {
+  it("does not boost encoder-decoder: decoder is not a coder or code segment", () => {
+    expect(lookupWildcardBoosts("encoder-decoder", "coding")).toBe(0.5);
+  });
+
+  it("boosts only the coder segment of deepseek-coder, not its code prefix", () => {
+    expect(lookupWildcardBoosts("deepseek-coder", "coding")).toBe(0.65);
+  });
+
+  it("does not boost mycodexmodel: code sits inside codex, not in its own segment", () => {
+    expect(lookupWildcardBoosts("mycodexmodel", "coding")).toBe(0.5);
+  });
+
+  it("keeps legitimate segment boosts intact", () => {
+    expect(lookupWildcardBoosts("my-code-generator", "coding")).toBe(0.6);
+    expect(lookupWildcardBoosts("my-fast-model", "coding")).toBe(0.55);
+    expect(lookupWildcardBoosts("some-thinking-model", "planning")).toBe(0.6);
   });
 });

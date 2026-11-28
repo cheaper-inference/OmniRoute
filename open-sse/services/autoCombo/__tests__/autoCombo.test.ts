@@ -675,9 +675,9 @@ describe("Task Fitness Resolution Chain", () => {
 
   it("wildcard boosts still work for models containing 'coder'", () => {
     const score = getTaskFitness("my-coder-pro", "coding");
-    // Base 0.5 + coder boost 0.15 + code boost 0.1 = 0.75
-    // "coder" contains "code", so both wildcard patterns match
-    expect(score).toBe(0.75);
+    // Base 0.5 + coder boost 0.15 = 0.65. "code" is only the prefix of the
+    // "coder" segment, not a standalone segment, so it does not stack.
+    expect(score).toBe(0.65);
   });
 
   it("wildcard boosts still work for models containing 'thinking'", () => {

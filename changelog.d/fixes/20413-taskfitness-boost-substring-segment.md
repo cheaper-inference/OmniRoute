@@ -1,0 +1,1 @@
+- **fix(taskfitness):** task fitness coding boosts no longer apply to model ids that merely contain a code pattern as a substring ([#20413](https://github.com/cheaper-inference/OmniRoute/pull/20413)) — thanks @maxmad64bis
