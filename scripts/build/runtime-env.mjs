@@ -150,7 +150,19 @@ export function buildNodeHeapArgs(env = process.env, memoryLimit) {
  * @returns {string[]}
  */
 export function buildNodeRuntimeArgs(env = process.env, memoryLimit, serverPath) {
-  return ["--dns-result-order=ipv4first", ...buildNodeHeapArgs(env, memoryLimit), serverPath];
+  const diagnostics =
+    env.OMNIROUTE_CACHE_DIAGNOSTICS === "1"
+      ? [
+          "--import",
+          new URL("../../bin/cli/runtime/cacheDiagnosticsPreload.mjs", import.meta.url).href,
+        ]
+      : [];
+  return [
+    "--dns-result-order=ipv4first",
+    ...buildNodeHeapArgs(env, memoryLimit),
+    ...diagnostics,
+    serverPath,
+  ];
 }
 
 /**

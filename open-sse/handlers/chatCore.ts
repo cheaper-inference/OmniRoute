@@ -1233,6 +1233,7 @@ async function handleChatCoreInner({
     videoTranscriptSensitive: videoBridgeObserved,
   };
   const providerRequestCapture = createPreparedRequestLogger(reqLogger, pendingScope);
+  providerRequestCapture.diagnosticsOptOut = noLogEnabled;
   drainUnpersistedHttpAttempts = drainUpstreamHttpAttempts.bind(null, {
     httpAttempts: providerRequestCapture.httpAttempts,
     correlationId,

@@ -1,0 +1,1 @@
+- Add default-off local CLI cache diagnostics with bounded, private numeric observations and optional approximate token estimates. Keys configured to skip logging remain excluded.

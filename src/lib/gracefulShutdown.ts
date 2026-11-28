@@ -28,6 +28,7 @@ declare global {
     | undefined;
   var __omnirouteRequestShutdown: ((signal: string) => Promise<void>) | undefined;
   var __omnirouteCustomServerOwnsShutdown: boolean | undefined;
+  var __omnirouteStopCacheDiagnostics: (() => Promise<void>) | undefined;
 }
 
 function getShutdownState() {
@@ -208,6 +209,14 @@ export function requestGracefulShutdown(signal: string): Promise<void> {
     await waitForDrain();
     await waitForConnectionFollowUpsBefore(deadline);
     await cleanup();
+
+    try {
+      await globalThis.__omnirouteStopCacheDiagnostics?.();
+    } catch {
+      console.warn(
+        `${new Date().toISOString()} WARNING [Shutdown] Private diagnostics cleanup unavailable`
+      );
+    }
 
     console.log("[Shutdown] Bye.");
   })();
