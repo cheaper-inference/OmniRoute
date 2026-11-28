@@ -84,6 +84,7 @@ import {
   getAntigravityClientProfile,
   resolveAntigravityClientVersion,
 } from "../services/antigravityClientProfile.ts";
+import { createAntigravityCliFetch } from "../utils/antigravityGoFetch.ts";
 import {
   buildAntigravityEnvelopeIdentity,
   getAntigravityEnvelopeUserAgent,
@@ -783,10 +784,11 @@ export class AntigravityExecutor extends BaseExecutor {
     // here — the helper memoizes per access-token, so this is a one-time round-trip.
     let requiresManualProject = false;
     if (!projectId && credentials?.accessToken) {
+      const clientProfile = getAntigravityClientProfile(credentials);
       const discovered = await ensureAntigravityProjectAssigned(
         credentials.accessToken,
-        fetch,
-        getAntigravityClientProfile(credentials),
+        createAntigravityCliFetch(clientProfile, { provider: this.provider }),
+        clientProfile,
         signal
       );
       if (discovered && discovered !== ANTIGRAVITY_REQUIRES_MANUAL_PROJECT) {
@@ -1038,12 +1040,14 @@ export class AntigravityExecutor extends BaseExecutor {
       if (this.config.clientId) bodyParams.client_id = this.config.clientId;
       if (this.config.clientSecret) bodyParams.client_secret = this.config.clientSecret;
 
-      const response = await fetch(OAUTH_ENDPOINTS.google.token, {
+      const clientProfile = getAntigravityClientProfile(credentials);
+      const cliFetch = createAntigravityCliFetch(clientProfile, { provider: this.provider });
+      const response = await cliFetch(OAUTH_ENDPOINTS.google.token, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           Accept: "application/json",
-          "User-Agent": getAntigravityOAuthUserAgent(getAntigravityClientProfile(credentials)),
+          "User-Agent": getAntigravityOAuthUserAgent(clientProfile),
         },
         body: new URLSearchParams(bodyParams),
       });
@@ -1079,8 +1083,8 @@ export class AntigravityExecutor extends BaseExecutor {
         try {
           const discovered = await ensureAntigravityProjectAssigned(
             newAccessToken,
-            fetch,
-            getAntigravityClientProfile(credentials),
+            cliFetch,
+            clientProfile,
             AbortSignal.timeout(8_000)
           );
           if (discovered && discovered !== ANTIGRAVITY_REQUIRES_MANUAL_PROJECT) {

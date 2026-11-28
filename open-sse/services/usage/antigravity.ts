@@ -49,6 +49,7 @@ import {
   type AntigravityQuotaGroup,
 } from "./antigravityWeeklyQuota.ts";
 import { getAntigravityQuotaFamily } from "../antigravityQuotaFamily.ts";
+import { createAntigravityCliFetch } from "../../utils/antigravityGoFetch.ts";
 
 type JsonRecord = Record<string, unknown>;
 type SubscriptionCacheEntry = {
@@ -211,12 +212,13 @@ async function fetchAntigravityAvailableModelsCached(
   if (inflight) return inflight;
 
   const promise = (async () => {
+    const cliFetch = createAntigravityCliFetch(clientProfile, { provider: "antigravity" });
     let response: Response | null = null;
     let lastError: Error | null = null;
 
     for (const quotaApiUrl of ANTIGRAVITY_CONFIG.quotaApiUrls) {
       try {
-        response = await fetch(quotaApiUrl, {
+        response = await cliFetch(quotaApiUrl, {
           method: "POST",
           headers: getAntigravityContentHeaders(clientProfile, accessToken),
           body: JSON.stringify(projectId ? { project: projectId } : {}),
@@ -277,8 +279,9 @@ async function fetchAntigravityUserQuotaCached(
 
   const promise = (async () => {
     try {
+      const cliFetch = createAntigravityCliFetch(clientProfile, { provider: "antigravity" });
       for (const baseUrl of ANTIGRAVITY_RUNTIME_BASE_URLS) {
-        const response = await fetch(`${baseUrl}/v1internal:retrieveUserQuota`, {
+        const response = await cliFetch(`${baseUrl}/v1internal:retrieveUserQuota`, {
           method: "POST",
           headers: getAntigravityContentHeaders(clientProfile, accessToken),
           body: JSON.stringify({ project: projectId }),
@@ -500,14 +503,18 @@ async function probeAntigravityCreditBalanceUncached(
         Authorization: `Bearer ${accessToken}`,
         Accept: "text/event-stream",
       };
-      applyAntigravityClientProfileHeaders(
+      const clientProfile = applyAntigravityClientProfileHeaders(
         headers,
         { connectionId: accountId, projectId, providerSpecificData },
         body
       );
+      if (clientProfile === "cli") {
+        delete headers.Accept;
+      }
+      const cliFetch = createAntigravityCliFetch(clientProfile, { provider: "antigravity" });
 
       try {
-        const res = await fetch(url, {
+        const res = await cliFetch(url, {
           method: "POST",
           headers,
           body: JSON.stringify(body),
@@ -837,7 +844,8 @@ async function getAntigravitySubscriptionInfo(
 ): Promise<unknown | null> {
   try {
     const profile = getAntigravityClientProfile({ providerSpecificData });
-    const response = await fetch(ANTIGRAVITY_CONFIG.loadProjectApiUrl, {
+    const cliFetch = createAntigravityCliFetch(profile, { provider: "antigravity" });
+    const response = await cliFetch(ANTIGRAVITY_CONFIG.loadProjectApiUrl, {
       method: "POST",
       headers: getAntigravityContentHeaders(profile, accessToken),
       body: JSON.stringify({ metadata: getAntigravityLoadCodeAssistMetadata(profile) }),

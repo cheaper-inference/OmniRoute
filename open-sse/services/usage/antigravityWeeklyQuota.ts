@@ -11,6 +11,7 @@ import { toRecord, toNumber } from "./scalars.ts";
 import { type UsageQuota, parseResetTime } from "./quota.ts";
 import { getAntigravityContentHeaders } from "../antigravityHeaders.ts";
 import type { AntigravityClientProfile } from "../antigravityClientProfile.ts";
+import { createAntigravityCliFetch } from "../../utils/antigravityGoFetch.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -78,9 +79,10 @@ export async function fetchAntigravityUserQuotaSummaryCached(
   }
 
   const promise = (async () => {
+    const cliFetch = createAntigravityCliFetch(clientProfile, { provider: "antigravity" });
     for (const baseUrl of ANTIGRAVITY_RUNTIME_BASE_URLS) {
       try {
-        const response = await fetch(`${baseUrl}/v1internal:retrieveUserQuotaSummary`, {
+        const response = await cliFetch(`${baseUrl}/v1internal:retrieveUserQuotaSummary`, {
           method: "POST",
           headers: getAntigravityContentHeaders(clientProfile, accessToken),
           body: JSON.stringify(projectId ? { project: projectId } : {}),

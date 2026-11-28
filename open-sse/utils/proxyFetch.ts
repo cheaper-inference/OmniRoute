@@ -281,6 +281,11 @@ export function hasAmbientProxyContext(): boolean {
 }
 export const isDirectFetchContext = () => proxyContext.getStore() === DIRECT_PROXY_CONTEXT;
 
+/** Read the current proxy context store (internal transport helper). */
+export function getActiveProxyContext(): unknown {
+  return proxyContext.getStore();
+}
+
 /**
  * Like {@link runWithProxyContext}, but if the assigned proxy is unreachable or fails
  * its pre-checks the request can degrade to a DIRECT connection instead of throwing.

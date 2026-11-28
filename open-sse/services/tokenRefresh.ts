@@ -59,6 +59,8 @@ import {
   ensureAntigravityProjectAssigned,
   isUsableAntigravityProjectId,
 } from "./antigravityProjectBootstrap.ts";
+import { getAntigravityClientProfile } from "./antigravityClientProfile.ts";
+import { createAntigravityCliFetch } from "../utils/antigravityGoFetch.ts";
 import { persistDiscoveredAntigravityProjectId } from "./antigravityProjectPersist.ts";
 import { refreshCodexToken } from "./tokenRefresh/providers/codex.ts";
 import { refreshChatGptToken } from "./tokenRefresh/providers/chatgpt.ts";
@@ -387,12 +389,17 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
         credentials.providerSpecificData?.oauthClient,
         PROVIDERS[provider]
       );
+      const antigravityClientProfile =
+        provider === "antigravity" || provider === "agy"
+          ? getAntigravityClientProfile(credentials)
+          : undefined;
       const result = await refreshGoogleToken(
         credentials.refreshToken,
         refreshClient.clientId,
         refreshClient.clientSecret,
         log,
-        proxyConfig
+        proxyConfig,
+        antigravityClientProfile ? { provider, clientProfile: antigravityClientProfile } : undefined
       );
 
       // Google One AI accounts get no projectId at OAuth exchange time.
@@ -407,7 +414,12 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
         )
       ) {
         try {
-          const discovered = await ensureAntigravityProjectAssigned(result.accessToken, fetch);
+          const clientProfile = antigravityClientProfile ?? "ide";
+          const discovered = await ensureAntigravityProjectAssigned(
+            result.accessToken,
+            createAntigravityCliFetch(clientProfile, { provider }),
+            clientProfile
+          );
           if (isUsableAntigravityProjectId(discovered)) {
             // The refresh result type declares only the token fields; the antigravity
             // recovery adds these two alongside them.

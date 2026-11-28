@@ -2,6 +2,7 @@
 // Extracted from open-sse/services/tokenRefresh.ts — see ../shared.ts for
 // provenance notes (ported idea from KooshaPari's PR #7338, redone on tip).
 import { OAUTH_ENDPOINTS } from "../../../config/constants.ts";
+import { createAntigravityCliFetch } from "../../../utils/antigravityGoFetch.ts";
 import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
 import { buildFormParams } from "../shared.ts";
 
@@ -13,10 +14,16 @@ export async function refreshGoogleToken(
   clientId,
   clientSecret,
   log,
-  proxyConfig: unknown = null
+  proxyConfig: unknown = null,
+  options?: { provider?: string; clientProfile?: string | null }
 ) {
+  const provider = typeof options?.provider === "string" ? options.provider.toLowerCase() : "";
+  const googleFetch =
+    (provider === "antigravity" || provider === "agy") && options?.clientProfile === "cli"
+      ? createAntigravityCliFetch("cli", { provider })
+      : fetch;
   const response = await runCommittedWithProxyContext(proxyConfig, () =>
-    fetch(OAUTH_ENDPOINTS.google.token, {
+    googleFetch(OAUTH_ENDPOINTS.google.token, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",

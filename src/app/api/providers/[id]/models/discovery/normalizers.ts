@@ -21,6 +21,7 @@ import {
   isUsableAntigravityProjectId,
 } from "@omniroute/open-sse/services/antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "@omniroute/open-sse/services/antigravityProjectPersist.ts";
+import { createAntigravityCliFetch } from "@omniroute/open-sse/utils/antigravityGoFetch.ts";
 import { hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
 import { asRecord, toNonEmptyString } from "./helpers";
 import type { DiscoveryFailure } from "@/shared/discovery/degradedCause";
@@ -170,7 +171,8 @@ export async function fetchAntigravityDiscoveryModelsCached(
 
   const promise = (async () => {
     await resolveAntigravityClientVersion(profile);
-    const discovered = await ensureAntigravityProjectAssigned(accessToken, fetch, profile);
+    const cliFetch = createAntigravityCliFetch(profile, { provider });
+    const discovered = await ensureAntigravityProjectAssigned(accessToken, cliFetch, profile);
     if (isUsableAntigravityProjectId(discovered)) {
       // #8491: persist the recovered id so it survives the next token refresh
       // or process restart instead of being silently rediscovered every time.
@@ -196,6 +198,7 @@ export async function fetchAntigravityDiscoveryModelsCached(
           method: "POST",
           headers: getAntigravityContentHeaders(profile, accessToken),
           body: JSON.stringify({}),
+          ...(profile === "cli" ? { fetchFn: cliFetch } : {}),
         });
 
         if (!response.ok) {

@@ -254,6 +254,8 @@ export const TRANSITIVE_SPAWN_INFRA_MODULES: Record<string, string> = {
     "worker_threads pool for the in-repo compression worker; fixed script.",
   "open-sse/services/compression/engines/llmlingua/worker.ts":
     "worker_threads Worker for the in-repo LLMLingua ONNX worker; fixed script.",
+  "open-sse/utils/antigravityGoTlsClient.ts":
+    "spawn()s the fixed in-repo antigravity-go-tls loopback sidecar binary with fixed empty argv; token passed on stdin, no shell, no request-controlled binary/args.",
 };
 
 const G09_BASELINE =

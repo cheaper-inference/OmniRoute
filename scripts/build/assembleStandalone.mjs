@@ -111,6 +111,15 @@ export const NATIVE_ASSET_ENTRIES = [
     src: ["src", "mitm", "tproxy", "native", "build", "Release", "transparent.node"],
     dest: ["src", "mitm", "tproxy", "native", "build", "Release", "transparent.node"],
   },
+  {
+    // Optional Antigravity Go crypto/tls HTTP/1.1 sidecar binary. Built by
+    // build-antigravity-go-tls before assembly when Go is installed; absent on
+    // Go-less builds → syncNativeAssetsToDir skips it gracefully and runtime
+    // falls back to Node fetch().
+    label: "Antigravity Go TLS sidecar (optional)",
+    src: ["open-sse", "native", "antigravity-go-tls", "build"],
+    dest: ["open-sse", "native", "antigravity-go-tls", "build"],
+  },
 ];
 
 /** @type {{label:string, src:string[], dest:string[]}[]} */

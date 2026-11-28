@@ -5,6 +5,7 @@ import { PROXY_REEGRESS_ON_QUOTA_429_FLAG } from "./featureFlagDefinitionsProxyE
 import { QUOTA_DAILY_REVALIDATION_FLAG } from "./featureFlagDefinitionsQuotaRevalidation";
 import { CODEBUDDY_TELEMETRY_ENABLED_FLAG } from "./featureFlagDefinitionsCodebuddy";
 import { AGENT_SESSION_MESSAGES_ENABLED_FLAG } from "./agentSessionFeatureFlagDefinitions";
+import { ANTIGRAVITY_GO_TLS_TRANSPORT_ENABLED_FLAG } from "./featureFlagDefinitionsAntigravityTls";
 
 /**
  * Flags kept out of featureFlagDefinitions.ts because that file sits at its file-size cap.
@@ -18,6 +19,7 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   QUOTA_DAILY_REVALIDATION_FLAG,
   CODEBUDDY_TELEMETRY_ENABLED_FLAG,
   AGENT_SESSION_MESSAGES_ENABLED_FLAG,
+  ANTIGRAVITY_GO_TLS_TRANSPORT_ENABLED_FLAG,
   {
     key: "AIHORDE_CATALOG_BACKGROUND_REFRESH_ENABLED",
     label: "AI Horde Image Catalog Background Refresh",

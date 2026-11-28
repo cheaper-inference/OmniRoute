@@ -13,6 +13,7 @@ import {
   antigravityDegradedProjectState,
   antigravityPersistStatus,
 } from "@/lib/oauth/antigravityProjectGate";
+import { createAntigravityCliFetch } from "@omniroute/open-sse/utils/antigravityGoFetch.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -125,10 +126,11 @@ export async function enrichWithAntigravityBackend(
   let projectId: string | null = null;
   let tier: string | null = null;
 
+  const cliFetch = createAntigravityCliFetch("cli", { provider: "agy" });
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
   try {
-    const userInfoRes = await fetch(`${AGY_CONFIG.userInfoUrl}?alt=json`, {
+    const userInfoRes = await cliFetch(`${AGY_CONFIG.userInfoUrl}?alt=json`, {
       headers: { Authorization: `Bearer ${parsed.accessToken}` },
       signal: controller.signal,
     });
@@ -148,7 +150,7 @@ export async function enrichWithAntigravityBackend(
     const metadata = getAntigravityLoadCodeAssistMetadata("cli");
     for (const endpoint of AGY_CONFIG.loadCodeAssistEndpoints) {
       try {
-        const res = await fetch(endpoint, {
+        const res = await cliFetch(endpoint, {
           method: "POST",
           headers,
           body: JSON.stringify({ metadata }),

@@ -24,6 +24,7 @@ import {
   ANTIGRAVITY_BOOTSTRAP_BASE_URLS,
   getAntigravityOnboardUrls,
 } from "../config/antigravityUpstream.ts";
+import { createAntigravityCliFetch } from "../utils/antigravityGoFetch.ts";
 
 const LOAD_CODE_ASSIST_PATH = "/v1internal:loadCodeAssist";
 const BOOTSTRAP_TIMEOUT_MS = 8_000;
@@ -345,6 +346,10 @@ export async function ensureAntigravityProjectAssigned(
   clientProfile: AntigravityClientProfile = "ide",
   signal?: AbortSignal
 ): Promise<string | undefined> {
+  const effectiveFetch =
+    clientProfile === "cli" && fetchImpl === fetch
+      ? createAntigravityCliFetch("cli", { provider: "antigravity", fallbackFetch: fetchImpl })
+      : fetchImpl;
   const cacheKey = getProjectCacheKey(accessToken, clientProfile);
   if (projectCache.has(cacheKey)) {
     const cached = projectCache.get(cacheKey)!;
@@ -356,7 +361,7 @@ export async function ensureAntigravityProjectAssigned(
 
   const { projectId: initialProjectId, tierId } = await tryLoadCodeAssist(
     accessToken,
-    fetchImpl,
+    effectiveFetch,
     clientProfile,
     signal
   );
@@ -385,7 +390,7 @@ export async function ensureAntigravityProjectAssigned(
         try {
           const status = await tryOnboardUser(
             accessToken,
-            fetchImpl,
+            effectiveFetch,
             clientProfile,
             tierId,
             signal
@@ -396,7 +401,12 @@ export async function ensureAntigravityProjectAssigned(
             return;
           }
           if (status === "onboarded") {
-            const retry = await tryLoadCodeAssist(accessToken, fetchImpl, clientProfile, signal);
+            const retry = await tryLoadCodeAssist(
+              accessToken,
+              effectiveFetch,
+              clientProfile,
+              signal
+            );
             if (retry.projectId) {
               evictOldest(projectCache);
               projectCache.set(cacheKey, retry.projectId);

@@ -11,6 +11,10 @@ import {
   BUILTIN_ANTIGRAVITY_CLIENT,
   type GoogleOauthClientMarker,
 } from "@omniroute/open-sse/services/tokenRefresh/googleClientBinding.ts";
+import {
+  createAntigravityCliFetch,
+  type AntigravityFetchLike,
+} from "@omniroute/open-sse/utils/antigravityGoFetch.ts";
 
 const POSTEXCHANGE_TIMEOUT_MS = 8_000;
 
@@ -49,12 +53,17 @@ type AntigravityPostExchange = {
   oauthClient?: GoogleOauthClientMarker;
 };
 
-async function fetchFirstOk(endpoints: string[], init: RequestInit, timeoutMs?: number) {
+async function fetchFirstOk(
+  endpoints: string[],
+  init: RequestInit,
+  timeoutMs?: number,
+  fetchImpl: AntigravityFetchLike = fetch
+) {
   let lastError: unknown = null;
   const signal = timeoutMs ? AbortSignal.timeout(timeoutMs) : init.signal;
   for (const endpoint of endpoints) {
     try {
-      const response = await fetch(endpoint, { ...init, signal });
+      const response = await fetchImpl(endpoint, { ...init, signal });
       if (response.ok) return response;
       lastError = new Error(`${response.status} ${await response.text()}`);
     } catch (error) {
@@ -109,7 +118,8 @@ async function exchangeAntigravityToken(
   };
   if (config.clientSecret) bodyParams.client_secret = config.clientSecret;
 
-  const response = await fetch(config.tokenUrl, {
+  const cliFetch = createAntigravityCliFetch(clientProfile, { provider: "antigravity" });
+  const response = await cliFetch(config.tokenUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -136,7 +146,8 @@ async function onboardAntigravityUser(
   config: AntigravityOAuthConfig,
   headers: Record<string, string>,
   tierId: string,
-  metadata: ReturnType<typeof getAntigravityLoadCodeAssistMetadata>
+  metadata: ReturnType<typeof getAntigravityLoadCodeAssistMetadata>,
+  fetchImpl: AntigravityFetchLike = fetch
 ): Promise<void> {
   // Bounded onboarding: cap retries (was 10) and jitter the delay so a stuck
   // loop cannot look like scripted automation to the upstream (ban-safety).
@@ -148,7 +159,8 @@ async function onboardAntigravityUser(
       const response = await fetchFirstOk(
         config.onboardUserEndpoints,
         { method: "POST", headers, body: JSON.stringify({ tier_id: tierId, metadata }) },
-        POSTEXCHANGE_TIMEOUT_MS
+        POSTEXCHANGE_TIMEOUT_MS,
+        fetchImpl
       );
       const result = (await response.json()) as { done?: boolean };
       if (result.done === true) return;
@@ -164,9 +176,10 @@ async function postExchangeAntigravity(
   clientProfile: AntigravityClientProfile,
   tokens: AntigravityTokenPayload
 ): Promise<AntigravityPostExchange> {
+  const cliFetch = createAntigravityCliFetch(clientProfile, { provider: "antigravity" });
   const headers = getPostExchangeHeaders(clientProfile, tokens.access_token);
   const metadata = getAntigravityLoadCodeAssistMetadata(clientProfile);
-  const userInfoResponse = await fetch(`${config.userInfoUrl}?alt=json`, {
+  const userInfoResponse = await cliFetch(`${config.userInfoUrl}?alt=json`, {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
     signal: AbortSignal.timeout(POSTEXCHANGE_TIMEOUT_MS),
   }).catch(() => null);
@@ -182,7 +195,8 @@ async function postExchangeAntigravity(
     const response = await fetchFirstOk(
       config.loadCodeAssistEndpoints,
       { method: "POST", headers, body: JSON.stringify({ metadata }) },
-      POSTEXCHANGE_TIMEOUT_MS
+      POSTEXCHANGE_TIMEOUT_MS,
+      cliFetch
     );
     const data = (await response.json()) as Record<string, unknown>;
     projectId = extractProjectId(data);
@@ -193,7 +207,7 @@ async function postExchangeAntigravity(
   }
 
   if (projectId) {
-    void onboardAntigravityUser(config, headers, tierId, metadata).catch(() => {});
+    void onboardAntigravityUser(config, headers, tierId, metadata, cliFetch).catch(() => {});
   } else if (config.onboardUserEndpoints.length > 0) {
     // Accounts without an existing Cloud Code project need one bounded inline
     // onboarding attempt before loadCodeAssist can discover their project.
@@ -202,7 +216,8 @@ async function postExchangeAntigravity(
       const response = await fetchFirstOk(
         config.onboardUserEndpoints,
         { method: "POST", headers, body: JSON.stringify({ tier_id: tierId, metadata }) },
-        POSTEXCHANGE_TIMEOUT_MS
+        POSTEXCHANGE_TIMEOUT_MS,
+        cliFetch
       );
       onboardSucceeded = true;
       // The discovery retry ALWAYS runs after an accepted onboarding — the
@@ -215,7 +230,8 @@ async function postExchangeAntigravity(
       const retryResponse = await fetchFirstOk(
         config.loadCodeAssistEndpoints,
         { method: "POST", headers, body: JSON.stringify({ metadata }) },
-        POSTEXCHANGE_TIMEOUT_MS
+        POSTEXCHANGE_TIMEOUT_MS,
+        cliFetch
       );
       projectId = extractProjectId((await retryResponse.json()) as Record<string, unknown>);
       // Prefer the id straight from the onboarding response when discovery
@@ -357,7 +373,8 @@ async function exchangeAntigravityRefreshToken(
   };
   if (config.clientSecret) bodyParams.client_secret = config.clientSecret;
 
-  const response = await fetch(config.tokenUrl, {
+  const cliFetch = createAntigravityCliFetch(clientProfile, { provider: "antigravity" });
+  const response = await cliFetch(config.tokenUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",

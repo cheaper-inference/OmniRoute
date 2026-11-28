@@ -103,6 +103,9 @@ antigravity-manager-analysis/
 # open-sse tests
 open-sse/test/*
 
+# Optional locally compiled Antigravity Go TLS sidecar binary
+open-sse/native/antigravity-go-tls/build/
+
 # Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
 

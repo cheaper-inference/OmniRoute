@@ -11,6 +11,24 @@ import {
   ANTIGRAVITY_REQUIRES_MANUAL_PROJECT,
 } from "@omniroute/open-sse/services/antigravityProjectBootstrap.ts";
 import { isGeoBlockedError } from "@omniroute/open-sse/services/errorClassifier.ts";
+import {
+  createAntigravityCliFetch,
+  type AntigravityFetchLike,
+} from "@omniroute/open-sse/utils/antigravityGoFetch.ts";
+
+export function getOAuthTestFetcher(connection: {
+  provider?: unknown;
+  providerSpecificData?: unknown;
+}): AntigravityFetchLike {
+  const provider =
+    typeof connection?.provider === "string" ? connection.provider.toLowerCase() : "";
+  if (provider === "antigravity" || provider === "agy") {
+    return createAntigravityCliFetch(getAntigravityClientProfile(connection as never), {
+      provider,
+    });
+  }
+  return fetch;
+}
 
 // Real model-surface probe for antigravity/agy. The previous probe only hit the
 // OAuth userinfo endpoint, which is NOT geo-restricted — so "Test Connection"
@@ -45,7 +63,7 @@ async function buildAntigravityProbe(
     try {
       const discoveredProjectId = await ensureAntigravityProjectAssigned(
         accessToken,
-        fetch,
+        createAntigravityCliFetch(profile, { provider: "antigravity" }),
         profile,
         AbortSignal.timeout(8000)
       );
@@ -64,7 +82,7 @@ async function buildAntigravityProbe(
     headers: {
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
-      Accept: "text/event-stream",
+      ...(profile !== "cli" ? { Accept: "text/event-stream" } : {}),
       ...getAntigravityContentHeaders(profile, accessToken),
     },
     body: JSON.stringify({
