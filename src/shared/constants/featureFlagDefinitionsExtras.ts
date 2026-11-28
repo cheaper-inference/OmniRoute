@@ -31,4 +31,16 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
+  {
+    key: "PII_CARD_LUHN_ENABLED",
+    label: "Request Card Luhn Check",
+    description:
+      "With request PII masking on, mask 16-digit card matches only if they pass the Luhn check. This can leave mistyped card numbers visible.",
+    descriptionI18nKey: "featureFlags.definitions.PII_CARD_LUHN_ENABLED.description",
+    category: "security",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
 ];

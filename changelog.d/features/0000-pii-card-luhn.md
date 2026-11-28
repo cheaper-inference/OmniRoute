@@ -1,1 +1,1 @@
-- **feat(pii):** request-side card masking now checks the Luhn digit, so 16-digit ids and timestamps are no longer masked as card numbers (PII redaction stays opt-in).
+- `PII_CARD_LUHN_ENABLED` (off by default): with request PII masking on, a 16-digit match is masked only if it passes the Luhn check.

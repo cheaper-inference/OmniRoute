@@ -15041,6 +15041,9 @@
       "PII_REDACTION_ENABLED": {
         "description": "Redact personally identifiable information from requests."
       },
+      "PII_CARD_LUHN_ENABLED": {
+        "description": "With request PII masking on, mask 16-digit card matches only if they pass the Luhn check. This can leave mistyped card numbers visible."
+      },
       "PII_RESPONSE_SANITIZATION": {
         "description": "Sanitize personally identifiable information in provider responses."
       },
