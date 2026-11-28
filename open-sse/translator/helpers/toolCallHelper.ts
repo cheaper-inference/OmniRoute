@@ -193,7 +193,62 @@ function generateToolCallId9(): string {
   return s;
 }
 
-/** @param options.use9CharId - When true, normalize ids to 9-char [a-zA-Z0-9] (e.g. Mistral); when false, only fix type/arguments, leave ids as-is */
+function readToolId(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  const id = String(value);
+  return id.trim() ? id : undefined;
+}
+
+function linkToolResults(
+  messages: ToolMessage[],
+  start: number,
+  pendingIds: Set<string>,
+  remappedIds: Map<string, string>
+): void {
+  const missing: Array<(id: string) => void> = [];
+  const link = (value: unknown, setId: (id: string) => void) => {
+    const originalId = readToolId(value);
+    if (originalId === undefined) {
+      missing.push(setId);
+      return;
+    }
+
+    const id = remappedIds.get(originalId) ?? originalId;
+    if (pendingIds.delete(id) && value !== id) setId(id);
+  };
+
+  for (let i = start; i < messages.length; i++) {
+    const msg = messages[i];
+    if (msg.role === "assistant" || pendingIds.size === 0) break;
+
+    if (msg.role === "tool") {
+      link(msg.tool_call_id, (id) => {
+        msg.tool_call_id = id;
+      });
+    } else if (msg.role === "user" && Array.isArray(msg.content)) {
+      const content = msg.content as ToolContentBlock[];
+      let ownedContent: ToolContentBlock[] | undefined;
+      content.forEach((block, index) => {
+        if (block?.type !== "tool_result") return;
+        link(block.tool_use_id, (id) => {
+          // The caller's content array and blocks can be shared across targets.
+          if (!ownedContent) msg.content = ownedContent = [...content];
+          ownedContent[index] = { ...block, tool_use_id: id };
+        });
+      });
+    }
+  }
+
+  // Reserve explicit matches first, including results that arrived after an ID-less one.
+  const unanswered = pendingIds.values();
+  for (const setId of missing) {
+    const next = unanswered.next();
+    if (next.done) break;
+    setId(next.value);
+  }
+}
+
+/** Normalize tool calls and recover missing result IDs within each assistant turn. */
 export function ensureToolCallIds<T extends ToolCallBody>(
   body: T,
   options?: { use9CharId?: boolean }
@@ -204,12 +259,15 @@ export function ensureToolCallIds<T extends ToolCallBody>(
 
   for (let i = 0; i < body.messages.length; i++) {
     const msg = body.messages[i];
-    if (msg.role !== "assistant" || !msg.tool_calls || !Array.isArray(msg.tool_calls)) continue;
+    if (msg.role !== "assistant") continue;
+    const calls = Array.isArray(msg.tool_calls) ? msg.tool_calls : [];
+    const content = Array.isArray(msg.content) ? (msg.content as ToolContentBlock[]) : [];
+    if (calls.length === 0 && !content.some((block) => block?.type === "tool_use")) continue;
 
-    const used9 = new Set<string>();
-    const newIdsInOrder: string[] = [];
+    const pendingIds = new Set<string>();
+    const remappedIds = new Map<string, string>();
 
-    for (const tc of msg.tool_calls) {
+    for (const tc of calls) {
       if (!tc.type) {
         tc.type = "function";
       }
@@ -219,46 +277,33 @@ export function ensureToolCallIds<T extends ToolCallBody>(
       if (tc.function && typeof tc.function === "object") {
         tc.function.arguments = coerceToolCallArguments(tc.function.arguments);
       }
+      const originalId = readToolId(tc.id);
+      let id: string;
       if (use9CharId) {
-        let newId: string;
         do {
-          newId = generateToolCallId9();
-        } while (used9.has(newId));
-        used9.add(newId);
-        newIdsInOrder.push(newId);
-        tc.id = newId;
+          id = generateToolCallId9();
+        } while (pendingIds.has(id));
+        if (originalId !== undefined) remappedIds.set(originalId, id);
       } else {
-        // Leave id as-is, only ensure it exists for later tool message matching
-        const id =
-          tc.id != null && String(tc.id).trim() !== "" ? String(tc.id) : generateToolCallId();
-        tc.id = id;
-        newIdsInOrder.push(id);
+        id = originalId ?? generateToolCallId();
       }
+      tc.id = id;
+      pendingIds.add(id);
     }
 
-    // Tool responses (role "tool") follow in the same order as tool_calls. Rewrite
-    // every id only when the provider requires generated 9-char ids; otherwise keep
-    // explicit client ids and fill only missing ones. Overwriting a compacted orphan's
-    // explicit id by position can make it impersonate a different parallel call.
-    // Stop at the next assistant so we only link responses belonging to this turn.
-    if (newIdsInOrder.length > 0) {
-      let idx = 0;
-      for (let j = i + 1; j < body.messages.length; j++) {
-        const later = body.messages[j];
-        if (later.role === "assistant") break;
-        if (later.role !== "tool") continue;
-        if (idx < newIdsInOrder.length) {
-          if (
-            use9CharId ||
-            later.tool_call_id == null ||
-            String(later.tool_call_id).trim() === ""
-          ) {
-            later.tool_call_id = newIdsInOrder[idx];
-          }
-          idx++;
-        }
+    let ownedContent: ToolContentBlock[] | undefined;
+    content.forEach((block, index) => {
+      if (block?.type !== "tool_use") return;
+      const id = readToolId(block.id) ?? generateToolCallId();
+      pendingIds.add(id);
+      if (block.id !== id) {
+        ownedContent ??= [...content];
+        ownedContent[index] = { ...block, id };
       }
-    }
+    });
+    if (ownedContent) msg.content = ownedContent;
+
+    linkToolResults(body.messages, i + 1, pendingIds, remappedIds);
   }
 
   return body;
