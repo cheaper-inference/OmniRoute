@@ -6,6 +6,7 @@ import {
   ensurePersistentManagementPasswordHash,
   getStoredManagementPassword,
   isKnownInsecureManagementPassword,
+  isStoredManagementPasswordKnownInsecure,
   verifyManagementPassword,
 } from "@/lib/auth/managementPassword";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -147,8 +148,13 @@ export async function POST(request: Request) {
     // install carries `INITIAL_PASSWORD=CHANGEME` (scripts/dev/sync-env.mjs copies
     // .env.example), so without this gate the public default is exchangeable for
     // admin from anywhere the port is reachable. Pair from a local console first,
-    // then rotate.
-    if (isKnownInsecureManagementPassword(password) && !isHostOperatorRequest(request)) {
+    // then rotate. The match is decided on the STORED hash as well as the submitted
+    // string, so an input that bcrypt accepts as the placeholder is refused too.
+    if (
+      !isHostOperatorRequest(request) &&
+      (isKnownInsecureManagementPassword(password) ||
+        (await isStoredManagementPasswordKnownInsecure(storedHash)))
+    ) {
       logAuditEvent({
         action: "cli.connect.insecure_default_blocked",
         actor: "anonymous",

@@ -7,6 +7,7 @@ import {
   ensurePersistentManagementPasswordHash,
   getStoredManagementPassword,
   isKnownInsecureManagementPassword,
+  isStoredManagementPasswordKnownInsecure,
   verifyManagementPassword,
 } from "@/lib/auth/managementPassword";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
@@ -203,7 +204,14 @@ export async function POST(request: NextRequest) {
     // to rotate the password from a trusted local console first. Locality comes
     // from the socket peer the authz pipeline stamped, not from forwarding
     // headers: a remote caller can send `X-Forwarded-For: 127.0.0.1` at will.
-    if (isValid && isKnownInsecureManagementPassword(password) && !isHostOperatorRequest(request)) {
+    // The match is decided on the STORED hash as well as the submitted string: bcrypt
+    // accepts inputs other than the placeholder itself, and those must be refused too.
+    if (
+      isValid &&
+      !isHostOperatorRequest(request) &&
+      (isKnownInsecureManagementPassword(password) ||
+        (await isStoredManagementPasswordKnownInsecure(storedHash)))
+    ) {
       logAuditEvent({
         action: "auth.login.insecure_default_blocked",
         actor: "anonymous",

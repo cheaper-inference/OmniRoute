@@ -118,3 +118,15 @@ test("a public-IP cli/connect with a rotated password still works", async () => 
   const body = (await response.json()) as { token?: string };
   assert.ok(body.token, "a remote pairing with a real password must still receive its token");
 });
+
+test("a public-IP cli/connect with an input bcrypt verifies as the default password gets no token", async () => {
+  // Whole repetitions of the placeholder plus NUL verify as the placeholder under bcryptjs.
+  const response = await postConnect("CHANGEME\u0000CHANGEME", "203.0.113.77");
+
+  assert.ok(
+    response.status === 401 || response.status === 403,
+    `expected the equivalent input to be refused off-host, got ${response.status}`
+  );
+  const body = (await response.json()) as { token?: string };
+  assert.equal(body.token, undefined, "no access token may be minted for the equivalent input");
+});

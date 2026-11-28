@@ -1,0 +1,1 @@
+- **fix(auth):** the off-host refusal of the shipped default management password now also decides on the stored password hash, so an input that bcrypt accepts as the placeholder is refused too; a management password can no longer contain NUL.

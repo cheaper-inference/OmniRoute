@@ -88,3 +88,31 @@ test("an empty INITIAL_PASSWORD leaves the password unset", async () => {
   assert.equal(result.source, "missing");
   assert.equal(result.hash, null);
 });
+
+// bcryptjs appends a NUL to the key and reads it cyclically, so an input made of whole
+// repetitions of the stored placeholder plus NUL verifies as the placeholder itself.
+// The off-host refusal used to compare the submitted string with the list of known
+// defaults, so such an input passed the password check without matching the list.
+const PLACEHOLDER_EQUIVALENT_INPUT = "CHANGEME\u0000CHANGEME";
+
+test("verifyManagementPassword refuses an input with NUL even when bcrypt would accept it", async () => {
+  const hash = await managementPassword.hashManagementPassword("CHANGEME");
+  assert.equal(await managementPassword.verifyManagementPassword("CHANGEME", hash), true);
+  assert.equal(
+    await managementPassword.verifyManagementPassword(PLACEHOLDER_EQUIVALENT_INPUT, hash),
+    false,
+    "a NUL-containing input must never verify, whatever bcrypt says about it"
+  );
+});
+
+test("isStoredManagementPasswordKnownInsecure decides on the stored hash, not the input", async () => {
+  const insecure = await managementPassword.hashManagementPassword("CHANGEME");
+  const strong = await managementPassword.hashManagementPassword("a-strong-unique-password");
+  assert.equal(await managementPassword.isStoredManagementPasswordKnownInsecure(insecure), true);
+  assert.equal(await managementPassword.isStoredManagementPasswordKnownInsecure(strong), false);
+  assert.equal(await managementPassword.isStoredManagementPasswordKnownInsecure(""), false);
+  assert.equal(
+    await managementPassword.isStoredManagementPasswordKnownInsecure("not-a-bcrypt-hash"),
+    false
+  );
+});
