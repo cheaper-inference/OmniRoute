@@ -3,49 +3,62 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b74",
+    "batchId": "b75",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b74-5c36ba1c90a6",
-    "candidateSha": "5c36ba1c90a680b715e65dff8d8ea2f9699edcf6",
-    "baseSha": "d2b6a48c8806e4ea961e0425c443025f3a656608",
-    "treeSha": "fc0b2e0f4a25d8d07739b35e17d64696a7cd9488",
+    "candidateRef": "omni-queue/release-v3.8.55/b75-f2ab85749ba0",
+    "candidateSha": "f2ab85749ba080bed70b981785629d00d7957667",
+    "baseSha": "5c36ba1c90a680b715e65dff8d8ea2f9699edcf6",
+    "treeSha": "9b303413f20871f8aa2dc1621b26ac7842e07341",
     "prs": [
       {
-        "n": 21209,
-        "head": "602be73392439f9eca0978965c3d344d6c706493",
-        "title": "fix(dashboard): localize free-tier card copy and show loading and error states",
+        "n": 21418,
+        "head": "0a417e4f79cb19e120d03cfbfdec7c82828ecc7b",
+        "title": "fix(docker): keep the env template and sync script out of standalone builds",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T08:47:47Z"
+        "labeledAt": "2026-11-27T13:19:15Z"
       },
       {
-        "n": 21404,
-        "head": "36bfceeb584aeeaf23ea18da837af3921f259192",
-        "title": "test(qoder): wait for call-log saves before removing the PAT image test data dir",
+        "n": 21405,
+        "head": "865cf4ca70f620d6ad6671ad0f0ab84c26246d43",
+        "title": "fix(dashboard): hide unmaskable short emails in combo account labels",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T12:57:47Z"
+        "labeledAt": "2026-11-27T13:19:55Z"
       },
       {
-        "n": 21078,
-        "head": "c9a059c48ef39a629b512603d05e4942545c3190",
-        "title": "fix(images): normalize the OpenAI JPG output alias",
-        "author": "KiaroSama",
-        "labeledAt": "2026-11-27T13:17:33Z"
+        "n": 21415,
+        "head": "3cbf4062dee9869b7b23d72ba6cc7cbae0545e0e",
+        "title": "feat(cli): warn when deploy k8s disables the API key with an Ingress enabled",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-27T13:20:27Z"
       },
       {
-        "n": 21411,
-        "head": "743467c585fb162ce2a8a23e60e1a10fd7da120b",
-        "title": "chore(docker): use the shared short description on the legacy Docker Hub repo",
+        "n": 21414,
+        "head": "ace12b24b8d9408fbac96248340b79cc228dd1b6",
+        "title": "chore(ci): delay Dependabot action and image updates by seven days",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T13:17:41Z"
+        "labeledAt": "2026-11-27T13:22:35Z"
+      },
+      {
+        "n": 21294,
+        "head": "83b6f59b876a348685915521cb3eca5a5b5c2f41",
+        "title": "chore(deps): drop the unused fetch-socks and node-loader packages",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-27T13:29:02Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-28T07:24:48.250Z",
+    "stage": "testing",
+    "startedAt": "2026-11-28T08:41:35.218Z",
     "attempts": 0,
-    "bisect": null,
-    "landAttempts": 1
+    "bisect": null
   },
   "baseChecks": [
+    {
+      "baseSha": "5c36ba1c90a680b715e65dff8d8ea2f9699edcf6",
+      "ref": "omni-queue/release-v3.8.55/b74-5c36ba1c90a6",
+      "status": "green",
+      "startedAt": "2026-11-28T07:24:48.250Z",
+      "signatures": []
+    },
     {
       "baseSha": "d2b6a48c8806e4ea961e0425c443025f3a656608",
       "ref": "omni-queue/release-v3.8.55/b73-d2b6a48c8806",
@@ -108,13 +121,6 @@
       "status": "green",
       "startedAt": "2026-11-27T06:27:59.297Z",
       "signatures": []
-    },
-    {
-      "baseSha": "d3f06ea668109f8ac1feadfcae25f6ff9b873b5f",
-      "ref": "omni-queue/release-v3.8.55/b61-d3f06ea66810",
-      "status": "green",
-      "startedAt": "2026-11-27T05:11:07.652Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -139,50 +145,15 @@
     }
   },
   "counters": {
-    "batchSeq": 74,
-    "ciRuns": 79,
-    "landedPrs": 73,
-    "landedBatches": 26,
+    "batchSeq": 75,
+    "ciRuns": 80,
+    "landedPrs": 77,
+    "landedBatches": 27,
     "redBatches": 15,
     "bisections": 5,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-24T00:28:34.127Z",
-      "type": "batch-started",
-      "batchId": "b27",
-      "prs": [
-        20938
-      ],
-      "sha": "cc9b69b491b08dcbd11ba9d042e696e0a54a9c14",
-      "detail": "1 PR(s) on 0488355a73ed; window 4",
-      "labeledAt": {
-        "20938": "2026-11-23T21:58:26Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45297316047"
-    },
-    {
-      "at": "2026-11-24T01:30:34.573Z",
-      "type": "checks-green",
-      "batchId": "b27",
-      "prs": [
-        20938
-      ],
-      "sha": "cc9b69b491b08dcbd11ba9d042e696e0a54a9c14",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45305500129"
-    },
-    {
-      "at": "2026-11-24T01:30:45.113Z",
-      "type": "would-land",
-      "batchId": "b27",
-      "prs": [
-        20938
-      ],
-      "sha": "cc9b69b491b08dcbd11ba9d042e696e0a54a9c14",
-      "detail": "shadow mode: would merge-ff onto 0488355a73ed",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45305500129"
-    },
     {
       "at": "2026-11-24T14:28:40.286Z",
       "type": "batch-started",
@@ -2816,12 +2787,57 @@
       ],
       "sha": "5c36ba1c90a680b715e65dff8d8ea2f9699edcf6",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46126821150"
+    },
+    {
+      "at": "2026-11-28T08:39:56.989Z",
+      "type": "land-blessed",
+      "batchId": "b74",
+      "prs": [
+        21209,
+        21404,
+        21078,
+        21411
+      ],
+      "sha": "5c36ba1c90a680b715e65dff8d8ea2f9699edcf6",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46126821150"
+    },
+    {
+      "at": "2026-11-28T08:39:59.774Z",
+      "type": "landed",
+      "batchId": "b74",
+      "prs": [
+        21209,
+        21404,
+        21078,
+        21411
+      ],
+      "sha": "5c36ba1c90a680b715e65dff8d8ea2f9699edcf6",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46126821150"
+    },
+    {
+      "at": "2026-11-28T08:41:38.980Z",
+      "type": "batch-started",
+      "batchId": "b75",
+      "prs": [
+        21418,
+        21405,
+        21415,
+        21414,
+        21294
+      ],
+      "sha": "f2ab85749ba080bed70b981785629d00d7957667",
+      "detail": "5 PR(s) on 5c36ba1c90a6; window 5",
+      "labeledAt": {
+        "21294": "2026-11-27T13:29:02Z",
+        "21405": "2026-11-27T13:19:55Z",
+        "21414": "2026-11-27T13:22:35Z",
+        "21415": "2026-11-27T13:20:27Z",
+        "21418": "2026-11-27T13:19:15Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46126821150"
     }
   ],
-  "updatedAt": "2026-11-28T08:39:53.675Z",
-  "batchWindow": 4,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-28T08:39:53.675Z"
-  }
+  "updatedAt": "2026-11-28T08:41:40.762Z",
+  "batchWindow": 5
 }
