@@ -1,0 +1,1 @@
+- **refactor(db):** Move the per-connection discovery outcome store and the Claude Code discovery-alias overrides behind Promise-based repositories while preserving the stored shapes, unreadable-entry handling, the provider-deletion cleanup, the env > feature-flag > default global gate and same-turn model-catalog cache invalidation (thanks @xiaoyaner0201).

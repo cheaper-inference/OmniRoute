@@ -6,12 +6,16 @@
  * module only owns the gate (global flag + per-provider/per-model overrides
  * + precedence resolver) — the catalog wiring itself lives elsewhere.
  *
- * Storage: `key_value` table, namespace `ccDiscoveryAliases`, following the
- * established key_value pattern (see `db/models.ts::setModelAlias` /
- * `db/paramFilters.ts`). Keys:
+ * Storage: `key_value` table, namespace `ccDiscoveryAliases`, behind
+ * CcAliasOverrideRepository (`repositories/sqliteCcAliasOverrideRepository.ts`).
+ * Keys:
  *   - `provider:<providerId>`              -> "on" | "off"
  *   - `model:<providerId>/<modelId>`       -> "on" | "off"
  * A missing key means "inherit" (null).
+ *
+ * The exports below stay synchronous (SQLite-only legacy access) for the
+ * cc-alias route, the /v1/models catalog builder and the discovery-alias
+ * resolver; every write invalidates the model catalog cache in the same turn.
  *
  * Global enablement precedence (see `getCcAliasGlobalState`):
  *   env EXPOSE_CC_DISCOVERY_ALIASES ("1"|"true") > DB flag override > default
@@ -20,27 +24,23 @@
  * why this module resolves the flag directly instead of reusing it).
  */
 
+import type {
+  CcAliasOverrideRepository,
+  CcAliasSetting,
+} from "@/domain/persistence/modelDiscoveryRepositories";
 import { getFeatureFlagOverride } from "./featureFlags";
-import { getDbInstance } from "./core";
-import { loadCatalogOverrides } from "./catalogOverrides";
 import { finishModelCatalogWriteWithoutBackup } from "./models/modelCatalogWriteSignals";
+import { modelDiscoveryRepositories } from "./repositories/modelDiscoveryRepositories";
 
-const NAMESPACE = "ccDiscoveryAliases";
+export type { CcAliasSetting } from "@/domain/persistence/modelDiscoveryRepositories";
+
 const FLAG_KEY = "EXPOSE_CC_DISCOVERY_ALIASES";
 
-export type CcAliasSetting = "on" | "off" | null;
+const legacy = modelDiscoveryRepositories.legacySync.ccAliasOverrides;
 
-function providerKey(providerId: string): string {
-  return `provider:${providerId}`;
-}
-
-function modelKey(providerId: string, modelId: string): string {
-  return `model:${providerId}/${modelId}`;
-}
-
-function parseSetting(value: string | undefined): CcAliasSetting {
-  if (value === "on" || value === "off") return value;
-  return null;
+/** Async persistence contract; it never invalidates the model catalog cache. */
+export function getCcAliasOverrideRepository(): CcAliasOverrideRepository {
+  return modelDiscoveryRepositories.ccAliasOverrides;
 }
 
 /**
@@ -61,35 +61,16 @@ export function resolveCcAliasEnabled(opts: {
 }
 
 export function getCcAliasProviderSetting(providerId: string): CcAliasSetting {
-  const db = getDbInstance();
-  const row = db
-    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-    .get(NAMESPACE, providerKey(providerId)) as { value: string } | undefined;
-  return parseSetting(row?.value);
+  return legacy.getProvider(providerId);
 }
 
 export function setCcAliasProviderSetting(providerId: string, v: CcAliasSetting): void {
-  const db = getDbInstance();
-  const key = providerKey(providerId);
-  if (v === null) {
-    db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?").run(NAMESPACE, key);
-    finishModelCatalogWriteWithoutBackup();
-    return;
-  }
-  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
-    NAMESPACE,
-    key,
-    v
-  );
+  legacy.setProvider(providerId, v);
   finishModelCatalogWriteWithoutBackup();
 }
 
 export function getCcAliasModelSetting(providerId: string, modelId: string): CcAliasSetting {
-  const db = getDbInstance();
-  const row = db
-    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-    .get(NAMESPACE, modelKey(providerId, modelId)) as { value: string } | undefined;
-  return parseSetting(row?.value);
+  return legacy.getModel(providerId, modelId);
 }
 
 export function setCcAliasModelSetting(
@@ -97,18 +78,7 @@ export function setCcAliasModelSetting(
   modelId: string,
   v: CcAliasSetting
 ): void {
-  const db = getDbInstance();
-  const key = modelKey(providerId, modelId);
-  if (v === null) {
-    db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?").run(NAMESPACE, key);
-    finishModelCatalogWriteWithoutBackup();
-    return;
-  }
-  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
-    NAMESPACE,
-    key,
-    v
-  );
+  legacy.setModel(providerId, modelId, v);
   finishModelCatalogWriteWithoutBackup();
 }
 
@@ -117,7 +87,7 @@ export function setCcAliasModelSetting(
  * catalog builder, which needs the full set rather than per-row lookups.
  */
 export function getCcAliasSettingsBulk() {
-  return loadCatalogOverrides(NAMESPACE);
+  return legacy.listAll();
 }
 
 function envForcesGlobalOn(): boolean {
