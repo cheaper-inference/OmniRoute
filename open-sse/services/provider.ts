@@ -110,6 +110,21 @@ function buildAnthropicCompatibleUrl(baseUrl) {
 export function detectFormatFromEndpoint(body, endpointPath = "") {
   const path = String(endpointPath || "");
 
+  // #14165 / #21472: the /v1beta Gemini ingress converts gemini -> openai chat format
+  // before re-entering handleChat while keeping its `/v1beta/models/<model>:<action>`
+  // URL. Check `/v1beta` BEFORE `/responses`, `/messages`, and `/antigravity` so
+  // provider-prefixed model segments (e.g. `/v1beta/models/antigravity/<model>:generateContent`)
+  // are never misclassified as those endpoints — misclassifying as `"antigravity"` made
+  // `sourceFormat === targetFormat`, skipping `openai -> antigravity` translation and
+  // forwarding OpenAI `messages` verbatim to Antigravity upstream. A body that still
+  // carries the raw Gemini `contents` envelope returns `"gemini"` directly.
+  if (/\/v1beta(?:\/|$)/i.test(path) || /^v1beta(?:\/|$)/i.test(path)) {
+    if (body && typeof body === "object" && body.contents && Array.isArray(body.contents)) {
+      return "gemini";
+    }
+    return "openai";
+  }
+
   if (/\/responses(?=\/|$)/i.test(path) || /^responses(?=\/|$)/i.test(path)) {
     return "openai-responses";
   }
@@ -125,19 +140,6 @@ export function detectFormatFromEndpoint(body, endpointPath = "") {
   // a cloudcode reply regardless of which provider actually served it.
   if (/\/antigravity(?=\/|:|$)/i.test(path) || /^antigravity(?=\/|:|$)/i.test(path)) {
     return "antigravity";
-  }
-
-  // #14165: the /v1beta Gemini ingress converts gemini -> openai chat format
-  // before re-entering handleChat while the request URL keeps its /v1beta
-  // path. With no path branch, detectFormat's `max_tokens` heuristic misread
-  // the converted body (messages + max_tokens) as claude, so non-streaming
-  // replies came back anthropic-shaped and streaming replies were empty. The
-  // ingress always produces an openai chat body; a body that still carries
-  // the raw gemini `contents` envelope keeps the body-based detection below.
-  if (/\/v1beta(?:\/|$)/i.test(path) || /^v1beta(?:\/|$)/i.test(path)) {
-    if (!(body && typeof body === "object" && body.contents && Array.isArray(body.contents))) {
-      return "openai";
-    }
   }
 
   if (
