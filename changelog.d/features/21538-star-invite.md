@@ -1,0 +1,1 @@
+- **feat(dashboard):** an optional, dismissible invitation to star the repository appears on the Radar screen after the first sync, and the CLI prints a one-time star hint after `setup` and `radar sync` (interactive terminals only, never with JSON output or `--quiet`); no GitHub API call, counter or tracking ([#21538](https://github.com/cheaper-inference/OmniRoute/pull/21538))
