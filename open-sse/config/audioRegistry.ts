@@ -542,6 +542,20 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     models: [{ id: "tortoise-v2", name: "Tortoise v2" }],
   },
 
+  // Ollama 0.40.9+ speech (docs.ollama.com/capabilities/speech): OpenAI-compatible
+  // /v1/audio/speech, keyless on the default host. Only wav and pcm, and only the default
+  // voice unless /api/show lists more, so the handler sends a minimal body (no speed).
+  "ollama-local": {
+    id: "ollama-local",
+    baseUrl: "http://localhost:11434/v1/audio/speech",
+    authType: "none",
+    authHeader: "none",
+    format: "ollama-tts",
+    defaultVoice: "default",
+    supportedFormats: ["wav", "pcm"],
+    models: [{ id: "phonon", name: "Phonon" }],
+  },
+
   qwen: {
     id: "qwen",
     baseUrl: "http://localhost:8000/v1/audio/speech",

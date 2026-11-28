@@ -817,6 +817,43 @@ async function handleMinimaxSpeech(providerConfig, body, modelId, token) {
   });
 }
 
+/** Ollama speech (Phonon): only wav and pcm are served; anything else is a 400 before any call. */
+async function handleOllamaSpeech(providerConfig, body, modelId) {
+  const requested = typeof body.response_format === "string" ? body.response_format : "";
+  // Missing, mp3 and wav all map to wav (a choice, not a vendor rule; the vendor documents wav and pcm only).
+  const format =
+    requested === "pcm"
+      ? "pcm"
+      : requested === "" || requested === "mp3" || requested === "wav"
+        ? "wav"
+        : null;
+  if (!format) {
+    return errorResponse(400, "Ollama speech supports response_format wav or pcm only");
+  }
+
+  const res = await fetch(providerConfig.baseUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: modelId,
+      input: body.input,
+      voice: body.voice || providerConfig.defaultVoice || "default",
+      response_format: format,
+    }),
+  });
+
+  if (!res.ok) {
+    return upstreamErrorResponse(res, await res.text());
+  }
+
+  return new Response(res.body, {
+    status: 200,
+    headers: {
+      "Content-Type": format === "pcm" ? "audio/L16" : "audio/wav",
+    },
+  });
+}
+
 /**
  * Handle Coqui TTS (local, no auth)
  * POST {baseUrl} with { text, speaker_id } → WAV audio
@@ -1071,6 +1108,10 @@ export async function handleAudioSpeech({
 
     if (providerConfig.format === "renderhour-tts") {
       return handleRenderhourSpeech({ providerConfig, body, modelId, credentials });
+    }
+
+    if (providerConfig.format === "ollama-tts") {
+      return handleOllamaSpeech(providerConfig, body, modelId);
     }
 
     if (providerConfig.format === "syntx-audio") {
