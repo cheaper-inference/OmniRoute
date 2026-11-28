@@ -304,6 +304,37 @@ export function createResourcePressureRuntime(
   let criticalSinceMs: number | null = null;
   let selfRestartFired = false;
 
+  // check() trips the absolute heap/RSS fuses and marks the runtime critical,
+  // but the sampled tracker does not classify those fuses (RSS never; the heap
+  // fuse only when explicitly configured). Without this hold, every background
+  // refresh replaced the fuse's critical state with the tracker's verdict and
+  // reset criticalSinceMs, so a process pinned above OMNIROUTE_RSS_PRESSURE_MB
+  // returned 503 for hours and the self-restart circuit never fired. Keep the
+  // fuse's critical state while the sampled value is still over its threshold.
+  const holdImmediateFuse = (
+    observed: ResourcePressureState,
+    signals: ResourceSignals,
+    atMs: number
+  ): ResourcePressureState => {
+    if (observed.severity === "critical") return observed;
+    let reason: PressureReason | null = null;
+    if (heapThresholdMb != null && signals.v8.heapUsedBytes / MB > heapThresholdMb) {
+      reason = "v8_heap_absolute";
+    } else if (rssThresholdMb != null && signals.process.rssBytes / MB > rssThresholdMb) {
+      reason = "rss_absolute";
+    }
+    if (reason === null) return observed;
+    const keepSince =
+      state.severity === "critical" && state.reason === reason ? state.lastTransitionAtMs : atMs;
+    return {
+      ...observed,
+      severity: "critical",
+      reason,
+      lastTransitionAtMs: keepSince,
+      observedAtMs: atMs,
+    };
+  };
+
   const observeSelfRestart = (settledAtMs: number): void => {
     if (state.severity !== "critical") {
       criticalSinceMs = null;
@@ -353,7 +384,7 @@ export function createResourcePressureRuntime(
         if (disposed) return;
         const settledAtMs = nowMs();
         lastSignals = signals;
-        state = tracker.observe(signals);
+        state = holdImmediateFuse(tracker.observe(signals), signals, settledAtMs);
         observeSelfRestart(settledAtMs);
         if (state.severity !== "normal") {
           ensureDriver();
