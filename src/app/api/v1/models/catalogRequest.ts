@@ -36,8 +36,8 @@ async function hasNoCredentialSurface(settings: Record<string, any>): Promise<bo
   if (hasConfiguredPassword(settings) || hasConfiguredOidc(settings)) return false;
   if (process.env.INITIAL_PASSWORD) return false;
   try {
-    const { getApiKeysCount } = await import("@/lib/db/apiKeys");
-    return getApiKeysCount() === 0;
+    const { getPresentableApiKeysCount } = await import("@/lib/db/apiKeys");
+    return getPresentableApiKeysCount() === 0;
   } catch {
     // Fail closed: on a DB hiccup, assume keys exist and keep requiring auth.
     return false;

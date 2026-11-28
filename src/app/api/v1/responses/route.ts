@@ -20,10 +20,8 @@ import {
 import { SSE_HEARTBEAT_INTERVAL_MS } from "@omniroute/open-sse/config/constants";
 import { resolveStreamFlag } from "@omniroute/open-sse/utils/aiSdkCompat";
 import { errorResponse } from "@omniroute/open-sse/utils/error";
-import {
-  withEarlyStreamKeepalive,
-  OPENAI_RESPONSES_ERROR_FRAME,
-} from "@omniroute/open-sse/utils/earlyStreamKeepalive";
+import { OPENAI_RESPONSES_ERROR_FRAME } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
+import { withRequiredApiKeyKeepalive } from "@/shared/utils/requiredApiKeyTransport";
 import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
 import {
@@ -239,13 +237,14 @@ async function postHandler(request: any) {
       const { signal: streamSignal, deadlineController } = createStreamDeadlineSignal(
         request.signal
       );
-      const handlerResponse = releaseChatAdmissionAfterHandler(
-        handleChat(resolved, null, resolvedBody, correlationId, streamSignal),
-        admission.lease,
-        { signal: streamSignal }
-      );
+      const dispatch = () =>
+        releaseChatAdmissionAfterHandler(
+          handleChat(resolved, null, resolvedBody, correlationId, streamSignal),
+          admission.lease,
+          { signal: streamSignal }
+        );
       const keepaliveFrame = buildRequestKeepaliveFrame(resolvedBody);
-      return await withEarlyStreamKeepalive(handlerResponse, {
+      return await withRequiredApiKeyKeepalive(dispatch, {
         signal: streamSignal,
         thresholdMs,
         startupFrame: keepaliveFrame,

@@ -19,6 +19,7 @@ import { parseModelAccessMode } from "../apiKeys/modelAccessMode";
 import { parseAllowedModels, parseIsActive, parseIsBanned } from "../apiKeys/rowParsers";
 import { ensureApiKeyFallbackColumns } from "../apiKeyColumnFallbacks";
 import { decryptApiKeySecret, encryptApiKeySecret } from "../apiKeys/secretAtRest";
+import { SYSTEM_API_KEY_SOURCE, isSystemApiKeySecret } from "../apiKeys/systemKey";
 import {
   getTableColumns,
   mapBackupRecordToColumns,
@@ -96,7 +97,38 @@ export function getApiKeyImportColumns(db: SqliteAdapter): string[] {
   return getTableColumns(db, "api_keys");
 }
 
+/** A backup cannot replace a system identity or make its credential presentable. */
+export function isReservedSystemApiKeyImport(
+  db: SqliteAdapter,
+  { id, source, key, key_hash, keyHash }: JsonRecord
+): boolean {
+  const secret = decryptApiKeySecret(key);
+  if (source === SYSTEM_API_KEY_SOURCE || isSystemApiKeySecret(secret)) return true;
+  const hash = hasText(secret) ? opaqueTokenFingerprint(secret) : null;
+  const suppliedHash = keyHash ?? key_hash;
+  return Boolean(
+    db
+      .prepare(
+        "SELECT 1 FROM api_keys WHERE source = ? AND (id = ? OR key = ? OR key_hash IN (?, ?))"
+      )
+      .get(
+        SYSTEM_API_KEY_SOURCE,
+        hasText(id) ? id : null,
+        hasText(key) ? key : null,
+        hash,
+        hasText(suppliedHash) ? suppliedHash : null
+      )
+  );
+}
+
+export class ReservedSystemApiKeyImportError extends Error {
+  constructor() {
+    super("The JSON contains a reserved system API key identity");
+  }
+}
+
 export function importApiKeyRecord(db: SqliteAdapter, columns: string[], apiKey: JsonRecord) {
+  if (isReservedSystemApiKeyImport(db, apiKey)) throw new ReservedSystemApiKeyImportError();
   const existing = selectExistingRow(db, "api_keys", apiKey.id);
   const values = mapBackupRecordToColumns(apiKey, columns);
   applyModelAccess(values, apiKey, existing);

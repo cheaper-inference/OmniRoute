@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getEvalScorecard, listEvalRuns } from "@/lib/db/evals";
-import { getApiKeys } from "@/lib/db/apiKeys";
+import { getClientApiKeys } from "@/lib/db/apiKeys";
 import { listSuites, runSuite, createScorecard } from "@/lib/evals/evalRunner";
 import { buildEvalTargetOptions, runEvalSuiteAgainstTarget } from "@/lib/evals/runtime";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
       Promise.resolve(listEvalRuns({ limit: 20 })),
       Promise.resolve(getEvalScorecard({ limit: 50 })),
       buildEvalTargetOptions(),
-      getApiKeys(),
+      getClientApiKeys(),
     ]);
 
     return NextResponse.json({

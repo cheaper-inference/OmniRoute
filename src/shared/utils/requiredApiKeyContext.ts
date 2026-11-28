@@ -1,8 +1,15 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+import { randomUUID } from "node:crypto";
+
+import {
+  isInternalAdmissionBypass,
+  resolveSelfLoopBearer,
+} from "@/shared/middleware/chatAdmissionIdentity";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import type { ApiKeyMetadata } from "./apiKeyPolicy";
 import { getProcessStore } from "./processSingleton";
+import { timingSafeCompare } from "./timingSafeCompare";
 
 type ResolvedRequiredApiKey = { apiKey: string; apiKeyInfo: ApiKeyMetadata };
 
@@ -17,7 +24,32 @@ export interface RequiredServerApiKey {
   resolve: (apiKeyId: string) => Promise<ResolvedRequiredApiKey | null>;
 }
 
-type RequiredApiKeyContext = { binding: RequiredServerApiKey; unavailable: boolean };
+export interface RequiredApiKeyOptions {
+  /** Use native dispatch and wait for authorization before sending streaming frames. */
+  nativeTransport?: boolean;
+}
+
+type RequiredApiKeyContext = {
+  binding: RequiredServerApiKey;
+  unavailable: boolean;
+  nativeTransport: boolean;
+  finished: boolean;
+  childReference?: string;
+};
+
+export const SELF_LOOP_KEY_ID_HEADER = "x-omniroute-self-loop-key-id";
+const CHILD_PREFIX = "required-key:";
+const CHILD_PATHS = new Set([
+  "/v1/chat/completions",
+  "/api/v1/chat/completions",
+  "/v1/audio/transcriptions",
+  "/api/v1/audio/transcriptions",
+]);
+
+const children = getProcessStore(
+  "requiredApiKeyChildren",
+  () => new Map<string, RequiredApiKeyContext>()
+);
 
 const storage = getProcessStore(
   "requiredApiKeyContext",
@@ -31,9 +63,77 @@ const storage = getProcessStore(
  */
 export function runWithRequiredApiKey<T>(
   binding: RequiredServerApiKey,
-  run: () => Promise<T>
+  run: () => Promise<T>,
+  options?: RequiredApiKeyOptions
 ): Promise<T> {
-  return storage.run({ binding: { ...binding }, unavailable: false }, run);
+  const context: RequiredApiKeyContext = {
+    binding: { ...binding },
+    unavailable: false,
+    nativeTransport: options?.nativeTransport === true,
+    finished: false,
+  };
+  if (!context.nativeTransport) return storage.run(context, run);
+
+  return storage.run(context, async () => {
+    try {
+      return await run();
+    } finally {
+      context.finished = true;
+      if (context.childReference) children.delete(context.childReference);
+    }
+  });
+}
+
+function hasBearerScopedChildReference(request: Request, reference: string | null): boolean {
+  if (!reference?.startsWith(CHILD_PREFIX) || request.method !== "POST") return false;
+  if (!CHILD_PATHS.has(new URL(request.url).pathname)) return false;
+
+  const bearer = request.headers.get("authorization");
+  return Boolean(
+    bearer?.startsWith("Bearer ") && timingSafeCompare(bearer.slice(7), resolveSelfLoopBearer())
+  );
+}
+
+function readChildReference(request: Request): string | undefined {
+  const reference = request.headers.get(SELF_LOOP_KEY_ID_HEADER);
+  if (!reference || !isInternalAdmissionBypass(request)) return;
+  if (hasBearerScopedChildReference(request, reference)) return reference;
+}
+
+export function usesNativeRequiredApiKeyTransport(request?: Request): boolean {
+  return (
+    storage.getStore()?.nativeTransport === true || Boolean(request && readChildReference(request))
+  );
+}
+
+/** Give a guardrail a short-lived reference for its authenticated loopback call. */
+export function getRequiredApiKeyChildReference(apiKeyId: string): string | undefined {
+  const context = storage.getStore();
+  if (!context?.nativeTransport || context.binding.apiKeyId !== apiKeyId) return;
+
+  if (!context.childReference) {
+    context.childReference = CHILD_PREFIX + randomUUID();
+    // A guardrail that resumes after cancellation must still send a scoped reference.
+    if (!context.finished) children.set(context.childReference, context);
+  }
+  return context.childReference;
+}
+
+export function resolveRequiredApiKeyChild(
+  request: Request
+): Promise<ResolvedRequiredApiKey | null> | undefined {
+  const reference = readChildReference(request);
+  if (!reference) {
+    // Reject bearer-scoped attempts without the internal proof before unbound key policy runs.
+    const unverifiedReference = request.headers.get(SELF_LOOP_KEY_ID_HEADER);
+    return hasBearerScopedChildReference(request, unverifiedReference)
+      ? Promise.resolve(null)
+      : undefined;
+  }
+
+  const context = children.get(reference);
+  if (!context) return Promise.resolve(null);
+  return resolveInContext(context).then((resolved) => (context.finished ? null : resolved));
 }
 
 function isUsableKey({ isActive, isBanned, revokedAt, expiresAt }: ApiKeyMetadata): boolean {
@@ -54,8 +154,8 @@ async function resolveUsableKey({
 
   // Recheck the stored identity and lifecycle at each boundary. In particular, a
   // successful auth check or a resolver snapshot must not authorize a deleted key.
-  const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
-  const current = await getApiKeyMetadata(resolved.apiKey, { bypassCache: true });
+  const { getRequiredApiKeyMetadata } = await import("@/lib/db/apiKeys");
+  const current = await getRequiredApiKeyMetadata(resolved.apiKey, apiKeyId);
   return current?.id === apiKeyId && isUsableKey(current) && isUsableKey(resolved.apiKeyInfo)
     ? resolved
     : null;
@@ -70,6 +170,11 @@ async function resolveInContext(
   const resolved = await resolveUsableKey(context.binding).catch(() => null);
   if (!resolved) context.unavailable = true;
   return context.unavailable ? null : resolved;
+}
+
+/** The key identity bound to this in-process dispatch. */
+export function getRequiredApiKeyId(): string | undefined {
+  return storage.getStore()?.binding.apiKeyId;
 }
 
 /** Undefined means no binding. A promise resolving to null means the binding failed. */

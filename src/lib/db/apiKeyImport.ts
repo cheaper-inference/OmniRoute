@@ -11,6 +11,7 @@ import { ensureApiKeyFallbackColumns } from "./apiKeyColumnFallbacks";
 import { normalizeApiKeyPermissionsUpdate } from "./apiKeys/permissionsUpdate";
 import { decryptApiKeySecret, encryptApiKeySecret } from "./apiKeys/secretAtRest";
 import { isSelfLoopBearer } from "./apiKeys/selfLoopKey";
+import { SYSTEM_API_KEY_SOURCE, isSystemApiKeySecret } from "./apiKeys/systemKey";
 import { parseNullablePositiveNumber } from "./apiKeyUsageLimitFields";
 import { backupDbFile } from "./backup";
 
@@ -25,6 +26,7 @@ interface IdentityRow {
   id: string;
   key_hash: string | null;
   key: string;
+  source: string;
 }
 
 /** No legacy backfill here: even an idempotent retry must leave stored rows untouched. */
@@ -32,6 +34,12 @@ function matchesHash(row: IdentityRow, hash: string): boolean {
   if (row.key_hash) return row.key_hash === hash;
   const raw = decryptApiKeySecret(row.key);
   return typeof raw === "string" && opaqueTokenFingerprint(raw) === hash;
+}
+
+function assertImportRetryMatches(row: IdentityRow, requestedId: string | undefined, hash: string) {
+  if (row.source === SYSTEM_API_KEY_SOURCE || !requestedId || !matchesHash(row, hash)) {
+    throw new ApiKeyImportConflictError();
+  }
 }
 
 /**
@@ -45,7 +53,8 @@ export function importApiKey(input: ImportKeyInput, machineId: string) {
   const reserved = [process.env.OMNIROUTE_API_KEY, process.env.ROUTER_API_KEY];
   if (
     reserved.some((key) => key && timingSafeCompare(data.key, key.trim())) ||
-    isSelfLoopBearer(data.key)
+    isSelfLoopBearer(data.key) ||
+    isSystemApiKeySecret(data.key)
   ) {
     throw new ApiKeyImportConflictError();
   }
@@ -61,17 +70,18 @@ export function importApiKey(input: ImportKeyInput, machineId: string) {
   db.immediate(() => {
     // Serialize first-use fallback DDL too: cold processes may lack the same column.
     ensureApiKeyFallbackColumns(db);
-    const existing = db.prepare("SELECT id, key_hash, key FROM api_keys WHERE id = ?").get(id) as
-      IdentityRow | undefined;
+    const existing = db
+      .prepare("SELECT id, key_hash, key, source FROM api_keys WHERE id = ?")
+      .get(id) as IdentityRow | undefined;
     if (existing) {
-      if (!data.id || !matchesHash(existing, hash)) throw new ApiKeyImportConflictError();
+      assertImportRetryMatches(existing, data.id, hash);
       return;
     }
     // key_hash is intentionally NOT UNIQUE upstream; encrypted ciphertext uniqueness cannot
     // detect plaintext duplicates. Also inspect legacy hashless rows without mutating them.
     const duplicates = db
       .prepare(
-        "SELECT id, key_hash, key FROM api_keys WHERE key_hash = ? OR key_hash IS NULL OR key_hash = ''"
+        "SELECT id, key_hash, key, source FROM api_keys WHERE key_hash = ? OR key_hash IS NULL OR key_hash = ''"
       )
       .all(hash) as IdentityRow[];
     if (duplicates.some((row) => matchesHash(row, hash))) throw new ApiKeyImportConflictError();

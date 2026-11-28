@@ -3,7 +3,7 @@ import { getSettings } from "@/lib/db/settings";
 import { getProviderConnections } from "@/lib/db/providers";
 import { getCachedProviderNodes } from "@/lib/db/readCache";
 import { getCombos } from "@/lib/db/combos";
-import { getApiKeys } from "@/lib/db/apiKeys";
+import { getClientApiKeys } from "@/lib/db/apiKeys";
 import { listAllApiKeyBillingHistory, listTeams } from "@/lib/db/teams";
 import {
   CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
@@ -75,7 +75,7 @@ export async function GET(request: Request) {
     const providerConnections = await getProviderConnections();
     const providerNodes = await getCachedProviderNodes();
     const combosRaw = await getCombos();
-    const apiKeys = await getApiKeys();
+    const apiKeys = await getClientApiKeys();
 
     // #6328: honor hidePaidModels at the export boundary so backup files
     // cannot silently smuggle paid model ids back in on import.

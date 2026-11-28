@@ -1,6 +1,8 @@
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 import { DEFAULT_SSE_HEARTBEAT_INTERVAL_MS } from "@omniroute/open-sse/utils/sseHeartbeat.ts";
+import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal.ts";
+import { waitForRequiredApiKeyAuthorization } from "@/shared/utils/requiredApiKeyTransport";
 import * as log from "@/sse/utils/logger";
 import { PLAYGROUND_IMAGE_RESULT_EVENT } from "@/shared/utils/playgroundImageStream";
 
@@ -27,6 +29,41 @@ export function createPlaygroundImageStreamResponse(
 ): Response {
   const upstreamAbort = new AbortController();
   const forwardedRequest = new Request(request, { signal: upstreamAbort.signal });
+  return streamImageResult(
+    request,
+    upstreamAbort,
+    () => dispatch(forwardedRequest, context),
+    heartbeatIntervalMs
+  );
+}
+
+export async function createAuthorizedImageStreamResponse(
+  request: Request,
+  context: unknown,
+  dispatch: PlaygroundImagePost
+): Promise<Response> {
+  const { signal, deadlineController } = createStreamDeadlineSignal(request.signal);
+  const forwardedRequest = new Request(request, { signal });
+  const { handler, earlyResponse } = await waitForRequiredApiKeyAuthorization(
+    () => dispatch(forwardedRequest, context),
+    signal,
+    deadlineController
+  );
+  if (earlyResponse) return earlyResponse;
+  return streamImageResult(
+    request,
+    deadlineController,
+    () => handler,
+    DEFAULT_SSE_HEARTBEAT_INTERVAL_MS
+  );
+}
+
+function streamImageResult(
+  request: Request,
+  upstreamAbort: AbortController,
+  dispatch: () => ReturnType<PlaygroundImagePost>,
+  heartbeatIntervalMs: number
+): Response {
   let closed = false;
   let intervalId: ReturnType<typeof setInterval> | undefined;
   let streamController: ReadableStreamDefaultController<Uint8Array> | undefined;
@@ -85,7 +122,7 @@ export function createPlaygroundImageStreamResponse(
       }
 
       void Promise.resolve()
-        .then(() => dispatch(forwardedRequest, context))
+        .then(dispatch)
         .then(async (response: Response) => {
           const body = await response.text();
           const contentType = response.headers.get("content-type");
