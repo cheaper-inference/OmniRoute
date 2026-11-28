@@ -1907,7 +1907,7 @@ test("quality.yml: a base-check candidate runs the whole unit suite in the shard
   }
 });
 
-test("quality.yml: TIA only defers broad selections for ready release PRs with full CI", (t) => {
+test("quality.yml: TIA defers broad selections for ready release PRs and omni-queue batches", (t) => {
   const quality = loadWorkflow("quality.yml");
   const ci = loadWorkflow("ci.yml");
   const tia = quality.jobs["fast-gates"].steps.find(
@@ -1915,6 +1915,9 @@ test("quality.yml: TIA only defers broad selections for ready release PRs with f
   );
   const unit = ci.jobs["test-unit"];
   const releasePr = prContext("fix/tia");
+  const batch = pushContext(CANDIDATE_REF);
+  const baseCheck = pushContext(`refs/heads/${baseCheckRef("release/v3.8.54", CANDIDATE_SHA)}`);
+  baseCheck.__outputs.changes.candidateSource = "self";
   const mainPr = prContext("fix/tia");
   mainPr.github.base_ref = "main";
   mainPr.github.event.pull_request.base.ref = "main";
@@ -1927,7 +1930,15 @@ test("quality.yml: TIA only defers broad selections for ready release PRs with f
     });
   const shards = shardsFor(releasePr);
   assert.equal(shards, String(unit.strategy.matrix.shard.length));
+  assert.equal(shardsFor(batch), shards, "an omni-queue batch defers to the same CI shard count");
+  assert.equal(shardsFor(baseCheck), "", "a base check runs its own shards");
+  assert.equal(
+    shardsFor(pushContext("refs/heads/main")),
+    "",
+    "an ordinary push keeps TIA uncapped"
+  );
   assert.equal(scheduledJobs(ci, releasePr)["test-unit"], true);
+  assert.equal(scheduledJobs(ci, batch)["test-unit"], true);
   assert.equal(policy.profiles.ci.jobs["test-unit"].disposition, "required");
   assert.deepEqual(ci.on.pull_request, quality.on.pull_request);
   assert.equal(
@@ -1950,7 +1961,6 @@ test("quality.yml: TIA only defers broad selections for ready release PRs with f
     docsPr,
     prContext("fix/draft", { draft: true }),
     prContext("mergify/merge-queue/test", { draft: true, user: MERGIFY_USER }),
-    pushContext(CANDIDATE_REF),
     pushContext("refs/heads/main", { eventName: "workflow_dispatch" }),
     pushContext(CANDIDATE_REF, { eventName: "merge_group" }),
   ]) {

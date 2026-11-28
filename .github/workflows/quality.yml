@@ -428,11 +428,13 @@ jobs:
           # omni-queue/** candidates: select against the batch base, not HEAD~1.
           GITHUB_BASE_SHA: ${{ needs.changes.outputs.candidateBase }}
           CANDIDATE_SOURCE: ${{ needs.changes.outputs.candidateSource }}
-          # A ready release code PR runs all eight CI unit shards on the same merge SHA.
+          # Ready release code PRs and omni-queue batches run all eight ci.yml unit
+          # shards on the same SHA as this step.
           TIA_CI_UNIT_SHARDS: >-
-            ${{ github.event_name == 'pull_request' && startsWith(github.base_ref, 'release/') &&
-                github.event.pull_request.draft == false && needs.changes.outputs.code == 'true' &&
-                '8' || '' }}
+            ${{ ((github.event_name == 'pull_request' && startsWith(github.base_ref, 'release/') &&
+                  github.event.pull_request.draft == false && needs.changes.outputs.code == 'true') ||
+                 (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') &&
+                  needs.changes.outputs.candidateSource == 'trailer')) && '8' || '' }}
         run: |
           # omni-queue base-check (the bare base, its own base): a base-relative selection is
           # empty, so a test that fails in a red batch's subset could never fail here and the
@@ -562,6 +564,11 @@ jobs:
           GITHUB_BASE_REF: ${{ github.base_ref }}
           GITHUB_BASE_SHA: ${{ needs.changes.outputs.candidateBase }}
           CANDIDATE_SOURCE: ${{ needs.changes.outputs.candidateSource }}
+          TIA_CI_UNIT_SHARDS: >-
+            ${{ ((github.event_name == 'pull_request' && startsWith(github.base_ref, 'release/') &&
+                  github.event.pull_request.draft == false && needs.changes.outputs.code == 'true') ||
+                 (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') &&
+                  needs.changes.outputs.candidateSource == 'trailer')) && '8' || '' }}
         run: npm run test:unit:ci:shard
 
   # ── Pacote 4 (plano mestre testes+CI, aprovado 2026-07-04) ─────────────────────────
