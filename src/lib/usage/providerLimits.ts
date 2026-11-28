@@ -79,6 +79,8 @@ import {
   type ProviderConnectionLike,
 } from "./providerLimits/credentialRefresh";
 export { shouldAttemptRotatingRefresh } from "./providerLimits/credentialRefresh";
+import { usageUnavailableMessage } from "./providerLimits/usageUnavailableMessage";
+export { usageUnavailableMessage };
 type JsonRecord = Record<string, unknown>;
 type SyncSource = "manual" | "scheduled";
 
@@ -1035,7 +1037,7 @@ async function fetchLiveProviderLimitsWithOptions(
   }
 
   if (!isSupportedUsageConnection(connection)) {
-    throw withStatus(new Error("Usage not available for this connection"), 400);
+    throw withStatus(new Error(usageUnavailableMessage(connection)), 400);
   }
 
   if (connection.authType !== "oauth") {

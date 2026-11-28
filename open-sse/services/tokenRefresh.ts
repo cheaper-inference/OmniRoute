@@ -69,6 +69,7 @@ import { refreshKiroToken } from "./tokenRefresh/providers/kiro.ts";
 import { refreshQoderToken } from "./tokenRefresh/providers/qoder.ts";
 import { refreshGitHubToken } from "./tokenRefresh/providers/github.ts";
 import { refreshCopilotToken } from "./tokenRefresh/providers/copilot.ts";
+import { refreshInfCodeToken } from "./tokenRefresh/providers/infcode.ts";
 import { refreshM365Token } from "./tokenRefresh/providers/m365.ts";
 
 export {
@@ -87,6 +88,7 @@ export {
   refreshQoderToken,
   refreshGitHubToken,
   refreshCopilotToken,
+  refreshInfCodeToken,
   extractOAuthErrorCode,
   isUnrecoverableRefreshError,
   NO_REFRESH_NEEDED,
@@ -468,6 +470,9 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     case "qoder":
       return await refreshQoderToken(credentials.refreshToken, log, proxyConfig);
 
+    case "inf-code":
+      return await refreshInfCodeToken(credentials.refreshToken, log, proxyConfig);
+
     case "github":
       return await refreshGitHubToken(credentials.refreshToken, log, proxyConfig);
 
@@ -554,6 +559,7 @@ export function supportsTokenRefresh(provider) {
     "codebuddy-intl",
     "workbuddy",
     "cursor",
+    "inf-code",
   ]);
   if (explicitlySupported.has(provider)) return true;
   const config = PROVIDERS[provider];

@@ -59,6 +59,20 @@ export const OAUTH_PROVIDERS = {
     authHint:
       "Sign in with your Openference account to route requests through api.openference.com. Includes free-tier access to Qwen3.8 27b and Llama 3.2 3B — see openference.com/pricing for current plan terms.",
   },
+  "inf-code": {
+    id: "inf-code",
+    serviceKinds: ["llm"],
+    alias: "infc",
+    name: "InfCode",
+    icon: "auto_awesome",
+    color: "#1677FF",
+    textIcon: "IC",
+    website: "https://www.tokensinfinity.com/infcode",
+    subscriptionRisk: true,
+    riskNoticeVariant: "oauth",
+    authHint:
+      "Sign in with your InfCode (Token Infinity) account to route requests through the Tokfinity gateway. Supports DeepSeek, Qwen, GLM, Kimi and MiniMax coding models.",
+  },
   renderhour: {
     id: "renderhour",
     serviceKinds: ["image", "video", "tts"],

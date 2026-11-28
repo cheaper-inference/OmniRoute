@@ -1,3 +1,4 @@
+import { INF_CODE_CONFIG } from "@/lib/oauth/constants/oauth";
 import { buildGitLabOAuthEndpoints, resolveGitLabOAuthBaseUrl } from "@/lib/oauth/gitlab";
 import { ANTIGRAVITY_RUNTIME_BASE_URLS } from "@omniroute/open-sse/config/antigravityUpstream.ts";
 import { getAntigravityContentHeaders } from "@omniroute/open-sse/services/antigravityHeaders.ts";
@@ -383,6 +384,14 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     authPrefix: "Bearer ",
     refreshable: true,
     acceptStatuses: [402],
+  },
+  // InfCode: userinfo verifies the bearer token without consuming seat credits.
+  "inf-code": {
+    url: INF_CODE_CONFIG.userinfoUrl,
+    method: "GET",
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    refreshable: true,
   },
   // RenderHour: the account's balance is a free authenticated read (credits and dollars).
   renderhour: {
