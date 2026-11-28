@@ -215,6 +215,41 @@ test("processPendingBatches should fail a batch with invalid input JSON", async 
   assert.ok(updatedBatch?.errors![0].message.includes("not valid JSON"));
 });
 
+test("processPendingBatches keeps persisted counters when a resumed batch fails validation", async () => {
+  const file = await localDb.createFile({
+    bytes: 9,
+    filename: "batch_resume_invalid.jsonl",
+    purpose: "batch_input",
+    content: Buffer.from("not json\n"),
+  });
+
+  const batch = await localDb.createBatch({
+    status: "validating",
+    endpoint: "/v1/chat/completions",
+    apiKeyId: "env-key",
+    inputFileId: file.id,
+    completionWindow: "24h",
+  });
+
+  await localDb.updateBatch(batch.id, {
+    requestCountsTotal: 8,
+    requestCountsCompleted: 3,
+    requestCountsFailed: 5,
+  });
+  await localDb.ensureBatchItemCheckpoints(batch.id, [{ lineNumber: 1, customId: "r1" }]);
+
+  await batchProcessor.processPendingBatches();
+
+  const updatedBatch = await localDb.getBatch(batch.id);
+  assert.strictEqual(updatedBatch?.status, "failed");
+  assert.strictEqual(
+    updatedBatch?.requestCountsFailed,
+    5,
+    "a resumed batch keeps its persisted failed count"
+  );
+  assert.ok(updatedBatch?.errors?.[0].message.includes("not valid JSON"));
+});
+
 test("processPendingBatches should fail a batch with mismatched endpoint", async () => {
   const batchId = "test-batch-endpoint";
 
