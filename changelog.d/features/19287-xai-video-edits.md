@@ -1,0 +1,1 @@
+- **feat(sse):** xAI video requests accept a source `video` (public URL, data URI or `{ file_id }`) and route it to `/videos/edits`, or to `/videos/extensions` with `"mode": "extend"`; Grok Build (`grok-cli`) supports edits, and extend returns 400 there because its proxy has no extensions route ([#19287](https://github.com/cheaper-inference/OmniRoute/pull/19287)) — thanks @MHMB
