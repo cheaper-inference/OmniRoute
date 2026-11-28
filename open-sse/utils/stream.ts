@@ -3418,8 +3418,19 @@ export function createSSEStream(options: StreamOptions = {}) {
                   callLogResponseBody,
                   reasoningMeta: reasoningObserver.take(),
                   ...timing.completionTiming(),
-                  // The dashboard needs a protocol-shaped provider summary. The live
-                  // Responses summary includes terminal events even after the capture cap.
+                  // #9315 switched the summary to the accumulated responseBody to avoid
+                  // stale/truncated event data — but responseBody here is synthesized in
+                  // chat-completion shape, which loses the Responses API `response` object.
+                  // Keep a Responses-shaped summary for OPENAI_RESPONSES only. responseBody
+                  // itself never carries an `object` marker (it's built purely for the
+                  // client, which doesn't need one) — the dashboard's Provider Response
+                  // panel does, so stamp `object: "chat.completion"` on a shallow copy
+                  // used only for this summary, leaving responseBody itself untouched.
+                  // getSummary(), not buildStreamSummaryFromEvents(getEvents(), ...): the
+                  // latter only sees the collector's RETAINED (possibly cap-truncated)
+                  // events, silently losing a late response.completed event on a long
+                  // reasoning-heavy stream (live incident 2026-09-04) -- see
+                  // providerPayloadCollector's own `format:` construction comment above.
                   providerPayload: providerPayloadCollector.build(
                     providerWireFormat === FORMATS.OPENAI_RESPONSES
                       ? providerPayloadCollector.getSummary()
