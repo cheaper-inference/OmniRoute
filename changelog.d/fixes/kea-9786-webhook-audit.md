@@ -1,0 +1,1 @@
+- **fix(api):** Record webhook creation, updates, and deletion in the compliance audit log with destination origins and changed field names, keeping credentials and Telegram chat IDs out of audit entries (KEA-9786).

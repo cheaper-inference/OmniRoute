@@ -14,6 +14,7 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { encryptMetadata } from "@/lib/webhookDispatcher";
 import { isEncryptionEnabled } from "@/lib/db/encryption";
 import { parseAndValidateWebhookUrl } from "@/shared/network/outboundUrlGuardPolicy";
+import { emitWebhookAuditEvent } from "@/lib/webhooks/audit";
 
 import { WEBHOOK_EVENT_VALUES } from "@/lib/webhooks/eventDescriptions";
 import { WEBHOOK_SECRET_MAX_LENGTH, WEBHOOK_URL_MAX_LENGTH } from "@/shared/constants/formLimits";
@@ -84,9 +85,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (rest.url !== undefined && effectiveKind !== "telegram") {
       try {
         parseAndValidateWebhookUrl(rest.url);
-      } catch (err: any) {
+      } catch (err) {
         return NextResponse.json(
-          { error: err?.message || "Blocked private or invalid webhook URL" },
+          { error: sanitizeErrorMessage(err) || "Blocked private or invalid webhook URL" },
           { status: 400 }
         );
       }
@@ -101,22 +102,24 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (!webhook) {
       return NextResponse.json({ error: "Webhook not found" }, { status: 404 });
     }
+    await emitWebhookAuditEvent(request, "webhook.update", webhook, existingWebhook);
     return NextResponse.json({ webhook });
   } catch (error: any) {
     return NextResponse.json({ error: sanitizeErrorMessage(error) }, { status: 500 });
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
-  const authError = await requireManagementAuth(_);
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const authError = await requireManagementAuth(request);
   if (authError) return authError;
 
   try {
     const { id } = await params;
-    const deleted = deleteWebhook(id);
-    if (!deleted) {
+    const webhook = getWebhook(id);
+    if (!webhook || !deleteWebhook(id)) {
       return NextResponse.json({ error: "Webhook not found" }, { status: 404 });
     }
+    await emitWebhookAuditEvent(request, "webhook.delete", webhook);
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: sanitizeErrorMessage(error) }, { status: 500 });

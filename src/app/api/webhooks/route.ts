@@ -14,6 +14,7 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { encryptMetadata } from "@/lib/webhookDispatcher";
 import { isEncryptionEnabled } from "@/lib/db/encryption";
 import { parseAndValidateWebhookUrl } from "@/shared/network/outboundUrlGuardPolicy";
+import { emitWebhookAuditEvent } from "@/lib/webhooks/audit";
 
 import { WEBHOOK_EVENT_VALUES } from "@/lib/webhooks/eventDescriptions";
 import { WEBHOOK_SECRET_MAX_LENGTH, WEBHOOK_URL_MAX_LENGTH } from "@/shared/constants/formLimits";
@@ -26,6 +27,7 @@ const createWebhookSchema = z
     url: z.string().min(1).max(WEBHOOK_URL_MAX_LENGTH),
     events: z.array(z.enum(WEBHOOK_EVENT_VALUES_WITH_WILDCARD)).optional().default(["*"]),
     secret: z.string().max(WEBHOOK_SECRET_MAX_LENGTH).optional(),
+    enabled: z.boolean().optional(),
     description: z.string().max(1000).optional().default(""),
     kind: z.enum(WEBHOOK_KINDS).optional().default("custom"),
     metadata: z.record(z.string(), z.string()).optional(),
@@ -34,11 +36,11 @@ const createWebhookSchema = z
     if (data.kind === "telegram") return;
     try {
       parseAndValidateWebhookUrl(data.url);
-    } catch (err: any) {
+    } catch (err) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["url"],
-        message: err?.message || "Blocked private or invalid webhook URL",
+        message: sanitizeErrorMessage(err) || "Blocked private or invalid webhook URL",
       });
     }
   });
@@ -98,10 +100,12 @@ export async function POST(request: Request) {
       url: data.url,
       events: data.events,
       secret: data.secret,
+      enabled: data.enabled,
       description: data.description,
       kind: data.kind,
       metadataEncrypted,
     });
+    await emitWebhookAuditEvent(request, "webhook.create", webhook);
 
     return NextResponse.json({ webhook }, { status: 201 });
   } catch (error: any) {
