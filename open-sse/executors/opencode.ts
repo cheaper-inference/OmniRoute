@@ -65,6 +65,7 @@ import {
 import {
   applyZenResponsesAuth,
   attemptFor,
+  credentialBaseUrlOverride,
   isGatedFreeTierRequest,
   isGoGeminiWire,
   isPremiumOpencodeModel,
@@ -74,7 +75,7 @@ import {
   rebuildJsonFromForcedStream,
   resolveFreeTierCredential,
   resolveGatedCredential,
-  surfaceFromBaseUrl,
+  surfaceForBaseUrls,
 } from "./opencodeFreeTierContract.ts";
 import {
   applyOpencodeOutputBudgetFloors,
@@ -426,7 +427,8 @@ export class OpencodeExecutor extends BaseExecutor {
     if (context) context.session = value;
     else this._sessionFallback = value;
   }
-  private _surface = () => surfaceFromBaseUrl(this.config?.baseUrl);
+  private _surface = (credentials?: ProviderCredentials | null) =>
+    surfaceForBaseUrls(credentials?.providerSpecificData?.baseUrl, this.config?.baseUrl);
 
   /** Free-tier retry context: the request-scoped contract state the retry helper needs. */
   private freeTierRetryCtx(input: ExecuteInput) {
@@ -434,7 +436,7 @@ export class OpencodeExecutor extends BaseExecutor {
     // request body, so read it back from there instead of a shared field.
     const attempt = attemptFor(input.body);
     return {
-      surface: this._surface(),
+      surface: this._surface(input.credentials),
       provider: this.provider,
       requestFormat: this._requestFormat,
       clientSession: this._clientSession,
@@ -1557,15 +1559,16 @@ export class OpencodeExecutor extends BaseExecutor {
     credentials: ProviderCredentials | null = null
   ) {
     void urlIndex;
-    void credentials;
-
-    // Off, unpublished or invalid: the registered base URL. A gated free-tier request keeps
-    // the inference contract's constant and never consults the catalog.
+    const surface = this._surface(credentials);
+    const customBase = credentialBaseUrlOverride(credentials?.providerSpecificData?.baseUrl);
+    // Off, unpublished or invalid: the registered base URL (or operator override).
+    // A gated free-tier request keeps the inference contract's constant and never consults the catalog.
     const base =
-      Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
+      Boolean(model) && isGatedFreeTierRequest(surface, this.provider, model)
         ? freeTierDispatchBase()
-        : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
-    return opencodeEndpointUrl(this._requestFormat, this._surface(), base, model, stream);
+        : (customBase ?? getPublishedBaseUrl(this.provider, model) ?? this.config.baseUrl);
+    const requestFormat = this._requestFormat ?? resolveOpencodeTargetFormat(this.provider, model);
+    return opencodeEndpointUrl(requestFormat, surface, base, model, stream);
   }
 
   /**
@@ -1593,8 +1596,8 @@ export class OpencodeExecutor extends BaseExecutor {
     // A gated request rides buildUrl() to the anonymous /inference lane, which since
     // 2026-10-21 answers 403 "Model access is disabled" to a real API key while serving
     // `Bearer public` — the credential flips with the lane; see opencodeFreeTierContract.ts.
-    const gatedScope =
-      Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model);
+    const surface = this._surface(credentials);
+    const gatedScope = Boolean(model) && isGatedFreeTierRequest(surface, this.provider, model);
     const freeTier = gatedScope ? resolveFreeTierCredential() : null;
     // #8467: honor Extra API Keys rotation via BaseExecutor.resolveEffectiveKey.
     // Fall back to accessToken only when no apiKey/extras resolve to a key.
@@ -1607,7 +1610,7 @@ export class OpencodeExecutor extends BaseExecutor {
         headers["x-api-key"] = key;
       } else if (this.usesZenApiKeyAuth()) {
         applyZenResponsesAuth(headers, key, gatedScope);
-      } else if (isGoGeminiWire(this._requestFormat, this._surface())) {
+      } else if (isGoGeminiWire(this._requestFormat, surface)) {
         headers["x-goog-api-key"] = key;
       } else {
         headers["Authorization"] = `Bearer ${key}`;
@@ -1645,7 +1648,7 @@ export class OpencodeExecutor extends BaseExecutor {
       forwardOpencodeClientHeaders(headers, clientHeaders ?? {}, {
         synthesizeRequestId: true,
         cliDefaults,
-        keepAgentUserAgent: this._surface() === "go" && !gatedScope, // #15311
+        keepAgentUserAgent: surface === "go" && !gatedScope, // #15311
         sessionBody: projectOpencodeSessionBody(body),
         reencodeSession: gatedScope,
         v2Fingerprint,
@@ -1745,7 +1748,7 @@ export class OpencodeExecutor extends BaseExecutor {
     const prepared = prepareFreeTierRequest(
       modifiedBody,
       this._requestFormat ?? resolveOpencodeTargetFormat(this.provider, model),
-      this._surface(),
+      this._surface(credentials),
       this.provider,
       model,
       this._clientSession,

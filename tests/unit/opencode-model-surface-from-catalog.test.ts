@@ -175,6 +175,18 @@ test("flag on: a silent catalog, no npm, or an unmeasured SDK keeps the registry
   );
 });
 
+test("flag on: @ai-sdk/google maps to gemini on the Go section only, Zen keeps the registry answer", () => {
+  process.env[FLAG] = "true";
+  const catalog = catalogWithEntries();
+  catalog["opencode-go"].models["google-model"] = { provider: { npm: "@ai-sdk/google" } };
+  configurePublishedCatalogForTests(catalog);
+  assert.equal(surfaceTargetFormatForNpm("@ai-sdk/google"), null);
+  assert.equal(surfaceTargetFormatForNpm("@ai-sdk/google", "opencode-zen"), null);
+  assert.equal(surfaceTargetFormatForNpm("@ai-sdk/google", "opencode-go"), "gemini");
+  assert.equal(resolveOpencodeTargetFormat("opencode-go", "google-model"), "gemini");
+  assert.equal(resolveOpencodeTargetFormat("opencode-zen", "google-model"), "openai");
+});
+
 test("flag on: providers outside Zen/Go (incl. the removed keyless opencode/oc) never read it", () => {
   process.env[FLAG] = "true";
   configurePublishedCatalogForTests(catalogWithEntries());

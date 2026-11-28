@@ -289,7 +289,7 @@ export function stripOpencodeModelPrefix(model: unknown): unknown {
  * answers nothing and never reads the catalog, so the heuristics below decide as before.
  */
 function publishedCatalogFormat(aliasOrId: string, bareModelId: string): string | null {
-  return surfaceTargetFormatForNpm(getPublishedModelNpm(aliasOrId, bareModelId));
+  return surfaceTargetFormatForNpm(getPublishedModelNpm(aliasOrId, bareModelId), aliasOrId);
 }
 
 /**

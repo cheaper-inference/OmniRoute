@@ -44,6 +44,8 @@ type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
 /** Raw `provider.npm` by `${catalogKey} ${modelId}`; rewritten as a block per catalog read. */
 const npmByModel = new Map<string, string>();
+/** Validated `provider.api` by `${catalogKey} ${modelId}`; rewritten as a block per catalog read. */
+const apiByModel = new Map<string, string>();
 /** Validated `api` by catalog section key; rewritten as a block per catalog read. */
 const apiBySection = new Map<string, string>();
 let fetchedAt = 0;
@@ -111,6 +113,33 @@ export function replacePublishedCatalogNpm(next: Map<string, string>): void {
 }
 
 /**
+ * Validated `provider.api` values by `${catalogKey} ${modelId}`, from one catalog read.
+ * A value that fails `normalizePublishedApi` is dropped.
+ */
+export function readPublishedApiByModel(catalog: unknown): Map<string, string> {
+  const map = new Map<string, string>();
+  if (!catalog || typeof catalog !== "object") return map;
+  const sections = catalog as Record<string, { models?: Record<string, unknown> } | undefined>;
+  for (const sectionKey of new Set(Object.values(CATALOG_SECTION_BY_PROVIDER))) {
+    const models = sections[sectionKey]?.models;
+    if (!models || typeof models !== "object") continue;
+    for (const [modelId, entry] of Object.entries(models)) {
+      const api = normalizePublishedApi(
+        (entry as { provider?: { api?: unknown } } | null | undefined)?.provider?.api
+      );
+      if (api) map.set(`${sectionKey} ${modelId}`, api);
+    }
+  }
+  return map;
+}
+
+/** Replace every entry with one catalog read's result. */
+export function replacePublishedApiByModel(next: Map<string, string>): void {
+  apiByModel.clear();
+  for (const [key, api] of next) apiByModel.set(key, api);
+}
+
+/**
  * The base URL each catalog section publishes in `api`, from one catalog read. A value that
  * fails `normalizePublishedApi` is dropped, so an unreachable or malformed endpoint never
  * replaces the registry base.
@@ -168,9 +197,12 @@ export function refreshPublishedCatalog(): Promise<void> {
       }
       const catalog = await response.json();
       const next = readPublishedNpmByModel(catalog);
-      if (next.size > 0) {
+      const nextApiByModel = readPublishedApiByModel(catalog);
+      const nextApiBySection = readPublishedApiBySection(catalog);
+      if (next.size > 0 || nextApiByModel.size > 0 || nextApiBySection.size > 0) {
         replacePublishedCatalogNpm(next);
-        replacePublishedApiBySection(readPublishedApiBySection(catalog));
+        replacePublishedApiByModel(nextApiByModel);
+        replacePublishedApiBySection(nextApiBySection);
         fetchedAt = Date.now();
       }
     } catch {
@@ -209,32 +241,51 @@ export function getPublishedModelNpm(
 }
 
 /**
- * Sync hot path: the base URL the catalog publishes for this key-based Zen/Go provider, or
- * `undefined` when routing is off, the provider is outside Zen/Go, or the published value
- * was missing or invalid. Same contract as `getPublishedModelNpm`: a stale or cold map
- * starts one coalesced background read, and off starts no read at all.
+ * Sync hot path: the base URL the catalog publishes for this key-based Zen/Go provider
+ * (preferring the model's `provider.api` over the section's `api`), or `undefined` when
+ * routing is off, the provider is outside Zen/Go, or the published value was missing or
+ * invalid. Same contract as `getPublishedModelNpm`: a stale or cold map starts one
+ * coalesced background read, and off starts no read at all.
  */
-export function getPublishedBaseUrl(providerId: string | null | undefined): string | undefined {
+export function getPublishedBaseUrl(
+  providerId: string | null | undefined,
+  modelId?: string | null | undefined
+): string | undefined {
   const catalogKey = normalizeCatalogKey(providerId);
   if (!catalogKey) return undefined;
   if (!isPublishedCatalogRoutingEnabled()) return undefined;
   requestRefreshIfStale();
+  const bareModel = stripCatalogModelPrefix(modelId);
+  if (bareModel) {
+    const modelApi =
+      apiByModel.get(`${catalogKey} ${bareModel}`) ??
+      apiByModel.get(`${catalogKey} ${stripEffortSuffix(bareModel)}`);
+    if (modelApi) return modelApi;
+  }
   return apiBySection.get(catalogKey);
 }
 
 /**
  * The target format a published SDK rides, or `null` when the catalog decides nothing.
  * Only the measured SDKs map: everything else falls back to the registry heuristics.
+ * `@ai-sdk/google` maps to `gemini` for the Go provider only (pass `providerId`).
  */
-export function surfaceTargetFormatForNpm(npm: string | null | undefined): string | null {
+export function surfaceTargetFormatForNpm(
+  npm: string | null | undefined,
+  providerId?: string | null
+): string | null {
   if (npm === "@ai-sdk/openai") return "openai-responses";
   if (npm === "@ai-sdk/anthropic") return "claude";
+  // The Gemini wire is only proven on the Go surface; Zen keeps the registry answer.
+  if (npm === "@ai-sdk/google" && normalizeCatalogKey(providerId) === "opencode-go")
+    return "gemini";
   return null;
 }
 
 /**
- * Test seam. Seeds both maps from a catalog-shaped object, without networking:
- * `catalog[section].models[modelId].provider.npm` (non-empty strings kept) and
+ * Test seam. Seeds the maps from a catalog-shaped object, without networking:
+ * `catalog[section].models[modelId].provider.npm` (non-empty strings kept),
+ * `catalog[section].models[modelId].provider.api` (validated), and
  * `catalog[section].api` (validated). A seeded map counts as fresh, so no background read
  * starts.
  */
@@ -243,18 +294,20 @@ export function configurePublishedCatalogForTests(
   options: { fetchImpl?: FetchLike } = {}
 ): void {
   replacePublishedCatalogNpm(readPublishedNpmByModel(catalog));
+  replacePublishedApiByModel(readPublishedApiByModel(catalog));
   replacePublishedApiBySection(readPublishedApiBySection(catalog));
   fetchedAt = catalog ? Date.now() : 0;
   if (options.fetchImpl) testFetch = options.fetchImpl;
 }
 
 /**
- * Test seam: drop both maps, the timers' bookkeeping and any injected fetch. The
+ * Test seam: drop the maps, the timers' bookkeeping and any injected fetch. The
  * production transport registered through `setPublishedCatalogFetch` is wiring, not state,
  * so it survives (see the executor's registration).
  */
 export function resetPublishedCatalogForTests(): void {
   npmByModel.clear();
+  apiByModel.clear();
   apiBySection.clear();
   fetchedAt = 0;
   lastAttemptAt = 0;

@@ -238,6 +238,7 @@ export type OpencodeSurface = "zen" | "go" | "other";
 
 const ZEN_SURFACE_BASE_URL = "https://opencode.ai/zen/v1";
 const GO_SURFACE_BASE_URL = "https://opencode.ai/zen/go/v1";
+const GO_INFERENCE_BASE_PREFIX = "https://opencode.ai/inference/go";
 
 /**
  * Where a gated free-tier request is sent. Since 2026-10-14 the OpenCode client takes its
@@ -264,7 +265,9 @@ export function isGoGeminiWire(requestFormat: string | null, surface: OpencodeSu
 
 /**
  * The upstream URL of one request, by wire format, under the `base` the caller resolved. The
- * Go Gemini wire has a fixed host, so that lane ignores `base`, published catalog included.
+ * Go Gemini wire defaults to its dedicated inference host unless `base` is an explicit
+ * Google v1beta endpoint (e.g. from the published catalog's per-model `provider.api` or a
+ * connection baseUrl override).
  */
 export function opencodeEndpointUrl(
   requestFormat: string | null,
@@ -279,7 +282,10 @@ export function opencodeEndpointUrl(
     case "openai-responses":
       return `${base}/responses`;
     case "gemini": {
-      const root = isGoGeminiWire(requestFormat, surface) ? GO_GEMINI_INFERENCE_BASE_URL : base;
+      const root =
+        isGoGeminiWire(requestFormat, surface) && !base.endsWith("/google/v1beta")
+          ? GO_GEMINI_INFERENCE_BASE_URL
+          : base;
       return `${root}/models/${model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`;
     }
     default:
@@ -384,11 +390,38 @@ export function freeTierRelayUrl(): string | null {
   return raw;
 }
 
-/** Tell the surfaces apart by registry `baseUrl`, so provider ids and aliases stay out. */
+/** Tell the surfaces apart by registry or configured `baseUrl`, so provider ids and aliases stay out. */
 export function surfaceFromBaseUrl(baseUrl: string | null | undefined): OpencodeSurface {
-  if (baseUrl === ZEN_SURFACE_BASE_URL) return "zen";
-  if (baseUrl === GO_SURFACE_BASE_URL) return "go";
+  const normalized = typeof baseUrl === "string" ? baseUrl.trim().replace(/\/+$/, "") : "";
+  if (normalized === ZEN_SURFACE_BASE_URL) return "zen";
+  if (
+    normalized === GO_SURFACE_BASE_URL ||
+    normalized === GO_INFERENCE_BASE_PREFIX ||
+    normalized.startsWith(`${GO_INFERENCE_BASE_PREFIX}/`)
+  ) {
+    return "go";
+  }
   return "other";
+}
+
+/** A connection's `providerSpecificData.baseUrl` override, trimmed and without trailing slashes. */
+export function credentialBaseUrlOverride(psdBaseUrl: unknown): string | null {
+  return typeof psdBaseUrl === "string" && psdBaseUrl.trim()
+    ? psdBaseUrl.trim().replace(/\/+$/, "")
+    : null;
+}
+
+/**
+ * The surface of a request: a recognised connection `baseUrl` override wins, otherwise the
+ * registry `baseUrl` decides (an unrecognised override never turns a Zen/Go request into "other").
+ */
+export function surfaceForBaseUrls(
+  psdBaseUrl: unknown,
+  registryBaseUrl: string | null | undefined
+): OpencodeSurface {
+  const override = credentialBaseUrlOverride(psdBaseUrl);
+  const configured = override ? surfaceFromBaseUrl(override) : "other";
+  return configured !== "other" ? configured : surfaceFromBaseUrl(registryBaseUrl);
 }
 
 /**
