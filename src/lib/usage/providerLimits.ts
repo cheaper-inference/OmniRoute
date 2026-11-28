@@ -78,7 +78,9 @@ import {
   type CredentialRefreshOptions,
   type ProviderConnectionLike,
 } from "./providerLimits/credentialRefresh";
+import { getProviderLimitsConcurrency } from "./providerLimits/concurrency";
 export { shouldAttemptRotatingRefresh } from "./providerLimits/credentialRefresh";
+export { getProviderLimitsConcurrency };
 type JsonRecord = Record<string, unknown>;
 type SyncSource = "manual" | "scheduled";
 
@@ -1368,7 +1370,7 @@ export async function syncAllProviderLimits(
   caches: Record<string, ProviderLimitsCacheEntry>;
   errors: Record<string, string>;
 }> {
-  const { source = "manual", concurrency = 5 } = options;
+  const { source = "manual", concurrency = getProviderLimitsConcurrency() } = options;
   const connectionRows = (await getProviderConnections({
     isActive: true,
   })) as unknown as ProviderConnectionLike[];
