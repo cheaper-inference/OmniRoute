@@ -595,6 +595,61 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
     authHeader: "bearer",
     models: [{ id: "multilingual-e5-small", name: "Multilingual E5 Small", dimensions: 384 }],
   },
+
+  // TrustedRouter — OpenAI-compatible /v1/embeddings behind the chat API key.
+  trustedrouter: {
+    id: "trustedrouter",
+    baseUrl: "https://api.trustedrouter.com/v1/embeddings",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [
+      {
+        id: "openai/text-embedding-3-small",
+        name: "OpenAI Text Embedding 3 Small (TrustedRouter)",
+        dimensions: 1536,
+      },
+      {
+        id: "openai/text-embedding-3-large",
+        name: "OpenAI Text Embedding 3 Large (TrustedRouter)",
+        dimensions: 3072,
+      },
+      {
+        id: "qwen/qwen3-embedding-8b",
+        name: "Qwen3 Embedding 8B (TrustedRouter)",
+        dimensions: 4096,
+      },
+      {
+        id: "qwen/qwen3-embedding-4b",
+        name: "Qwen3 Embedding 4B (TrustedRouter)",
+        dimensions: 2560,
+      },
+      {
+        id: "google/gemini-embedding-001",
+        name: "Gemini Embedding 001 (TrustedRouter)",
+        dimensions: 3072,
+      },
+      {
+        id: "cohere/embed-v4.0",
+        name: "Cohere Embed v4.0 (TrustedRouter)",
+        dimensions: 1536,
+      },
+      {
+        id: "voyage/voyage-3-large",
+        name: "Voyage 3 Large (TrustedRouter)",
+        dimensions: 1024,
+      },
+      {
+        id: "intfloat/multilingual-e5-large-instruct",
+        name: "Multilingual E5 Large Instruct (TrustedRouter)",
+        dimensions: 1024,
+      },
+      {
+        id: "nomic-ai/nomic-embed-text",
+        name: "Nomic Embed Text (TrustedRouter)",
+        dimensions: 768,
+      },
+    ],
+  },
 };
 
 const EMBEDDING_PROVIDER_ALIASES: Record<string, string> = {

@@ -68,7 +68,8 @@ const P = await import("../../src/shared/constants/providers.ts");
 // ParalonCloud adds one apikey/inference-hosts entry — 258.
 // Replicate, Cerebrium, Hetzner Inference and Grokified (#19206) add four
 // apikey/inference-hosts entries — 262.
-const APIKEY_PROVIDER_COUNT = 263;
+// TrustedRouter adds one apikey entry in its own extract, apikey/trustedrouter.ts — 264.
+const APIKEY_PROVIDER_COUNT = 264;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [
@@ -105,6 +106,7 @@ test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi extract into $
     ["gateways", "APIKEY_PROVIDERS_GATEWAYS"],
     ["beatapi", "APIKEY_PROVIDERS_BEATAPI"],
     ["empiriolabs", "APIKEY_PROVIDERS_EMPIRIOLABS"],
+    ["trustedrouter", "APIKEY_PROVIDERS_TRUSTEDROUTER"],
     ["frontier-labs", "APIKEY_PROVIDERS_FRONTIER"],
     ["inference-hosts", "APIKEY_PROVIDERS_INFERENCE"],
     ["enterprise-cloud", "APIKEY_PROVIDERS_ENTERPRISE"],

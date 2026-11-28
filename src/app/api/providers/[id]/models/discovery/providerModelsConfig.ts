@@ -165,6 +165,84 @@ export function parseEmpirioLabsChatModels(data: any): any[] {
         : {}),
     }));
 }
+
+// TrustedRouter's public /v1/models lists ~600+ rows across chat, responses,
+// embeddings, rerank, video, image, and decision models. Each row carries a
+// `trustedrouter` metadata block (`supports_chat`, `configuration_hidden`,
+// `internal_only`, `synthetic_monitor`) alongside OpenRouter-style context,
+// `top_provider.max_completion_tokens`, `architecture.input_modalities`, and
+// `supported_parameters`. Keep visible chat models and preserve their limits
+// and capabilities; embeddings are merged from EMBEDDING_PROVIDERS.trustedrouter.
+export function parseTrustedRouterChatModels(data: unknown): Array<Record<string, unknown>> {
+  const payload = data && typeof data === "object" ? (data as Record<string, unknown>) : null;
+  const models = Array.isArray(payload?.data) ? payload.data : [];
+  const results: Array<Record<string, unknown>> = [];
+
+  for (const raw of models) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) continue;
+    const model = raw as Record<string, unknown>;
+    const id = typeof model.id === "string" ? model.id : "";
+    if (!id) continue;
+
+    const meta =
+      model.trustedrouter &&
+      typeof model.trustedrouter === "object" &&
+      !Array.isArray(model.trustedrouter)
+        ? (model.trustedrouter as Record<string, unknown>)
+        : null;
+    if (!meta || meta.supports_chat !== true) continue;
+    if (
+      meta.configuration_hidden === true ||
+      meta.internal_only === true ||
+      meta.synthetic_monitor === true
+    ) {
+      continue;
+    }
+
+    const topProvider =
+      model.top_provider &&
+      typeof model.top_provider === "object" &&
+      !Array.isArray(model.top_provider)
+        ? (model.top_provider as Record<string, unknown>)
+        : null;
+    const architecture =
+      model.architecture &&
+      typeof model.architecture === "object" &&
+      !Array.isArray(model.architecture)
+        ? (model.architecture as Record<string, unknown>)
+        : null;
+    const inputModalities = Array.isArray(architecture?.input_modalities)
+      ? architecture.input_modalities
+      : [];
+    const supportedParams = Array.isArray(model.supported_parameters)
+      ? model.supported_parameters
+      : [];
+
+    const contextLength =
+      typeof model.context_length === "number" && model.context_length > 0
+        ? model.context_length
+        : typeof topProvider?.context_length === "number" && topProvider.context_length > 0
+          ? topProvider.context_length
+          : undefined;
+    const outputTokenLimit =
+      typeof topProvider?.max_completion_tokens === "number" &&
+      topProvider.max_completion_tokens > 0
+        ? topProvider.max_completion_tokens
+        : undefined;
+
+    results.push({
+      id,
+      name: typeof model.name === "string" && model.name ? model.name : id,
+      ...(contextLength !== undefined ? { contextLength } : {}),
+      ...(outputTokenLimit !== undefined ? { outputTokenLimit } : {}),
+      ...(inputModalities.includes("image") ? { supportsVision: true } : {}),
+      ...(supportedParams.includes("tools") ? { supportsTools: true } : {}),
+      ...(supportedParams.includes("reasoning") ? { supportsThinking: true } : {}),
+    });
+  }
+
+  return results;
+}
 export type ProviderModelsHeaderContext = {
   id?: string;
   authType?: string;
@@ -884,6 +962,14 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     authHeader: "Authorization",
     authPrefix: "Bearer ",
     parseResponse: parseEmpirioLabsChatModels,
+  },
+  trustedrouter: {
+    url: "https://api.trustedrouter.com/v1/models",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    parseResponse: parseTrustedRouterChatModels,
   },
   openference: {
     url: "https://api.openference.com/v1/models",

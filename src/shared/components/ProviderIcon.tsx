@@ -200,6 +200,7 @@ const KNOWN_SVGS = new Set([
   "tokenrouter",
   "topazlabs",
   "trae",
+  "trustedrouter",
   "udio",
   "uncloseai",
   "upstage",
