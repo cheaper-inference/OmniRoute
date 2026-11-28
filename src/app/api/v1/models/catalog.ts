@@ -1373,6 +1373,9 @@ async function buildUnifiedModelsResponseCore(
       // or via the `cx` alias — check all three so a hide from any of them
       // suppresses the bare model id here.
       if (isModelHiddenBulk("codex", modelId) || isModelHiddenBulk("openai", modelId)) continue;
+      // #20970: same (provider, model) pair the auto/* pool checks via
+      // modelExposureFilter.ts, so an exact allowlist restricts these rows too.
+      if (shouldHideByExposure("codex", modelId)) continue;
 
       const alias = providerIdToAlias.codex || "cx";
       const aliasId = `${alias}/${modelId}`;
@@ -1640,6 +1643,9 @@ async function buildUnifiedModelsResponseCore(
           // #9293: respect per-model hidden flags (e.g. operator hid google/chirp-3
           // from the OpenRouter provider, so it should not appear in the live catalog).
           if (isModelHiddenBulk("openrouter", openRouterModel.id)) continue;
+          // #20970: the auto/* pool checks ("openrouter", <vendor/model>) — use the
+          // raw OpenRouter id, not the `openrouter/`-qualified listing id.
+          if (shouldHideByExposure("openrouter", openRouterModel.id)) continue;
           const supportedParameters = Array.isArray(openRouterModel.supported_parameters)
             ? openRouterModel.supported_parameters
             : [];

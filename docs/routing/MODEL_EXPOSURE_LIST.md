@@ -45,7 +45,8 @@ called from BOTH:
 
 - `src/app/api/v1/models/catalog.ts` — the `/v1/models` listing itself, at the same 5 per-source
   chokepoints `shouldHidePaid()` already gates (static `PROVIDER_MODELS`, synced provider rows,
-  custom rows, alias-backed rows, managed-fallback rows).
+  custom rows, alias-backed rows, managed-fallback rows), plus the Codex-native bare-id loop
+  (`CODEX_NATIVE_UNPREFIXED_MODELS`) and the OpenRouter live-catalog chat rows (#20970).
 - `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — called
   from `virtualFactory.ts::buildPreparedPool`, immediately after the equivalent
   `filterPaidOnlyCandidates()` call, so a denied model can never be selected into an `auto/*`
