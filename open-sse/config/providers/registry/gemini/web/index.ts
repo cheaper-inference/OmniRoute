@@ -21,6 +21,8 @@ export const GEMINI_WEB_ARGON_MODEL: RegistryModel = {
   name: "Gemini 4 Argon",
   toolCalling: false,
   supportsReasoning: false,
+  supportsVision: true,
+  supportsVideo: true,
 };
 
 export const gemini_webProvider: RegistryEntry = {
@@ -39,12 +41,16 @@ export const gemini_webProvider: RegistryEntry = {
   // statement for native function calling; the prompt-emulation shim (#7286)
   // stays available and is advertised separately as `toolCalling: "emulated"`
   // on the provider constant (src/shared/constants/providers/web-cookie.ts).
+  // `supportsVision` / `supportsVideo`: image, video and document parts are uploaded
+  // through the composer's file chooser (open-sse/executors/gemini-web/attachments.ts).
   models: [
     {
       id: "gemini-3.1-pro",
       name: "Gemini 3.1 Pro",
       toolCalling: false,
       supportsReasoning: false,
+      supportsVision: true,
+      supportsVideo: true,
     },
     ...(isGeminiWebArgonEnabled() ? [GEMINI_WEB_ARGON_MODEL] : []),
     {
@@ -52,12 +58,16 @@ export const gemini_webProvider: RegistryEntry = {
       name: "Gemini 3.7 Flash",
       toolCalling: false,
       supportsReasoning: false,
+      supportsVision: true,
+      supportsVideo: true,
     },
     {
       id: "gemini-3.1-flash-lite",
       name: "Gemini 3.1 Flash-Lite",
       toolCalling: false,
       supportsReasoning: false,
+      supportsVision: true,
+      supportsVideo: true,
     },
   ],
 };

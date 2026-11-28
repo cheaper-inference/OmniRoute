@@ -764,12 +764,14 @@ export function translateRequest(
       preserveReasoningContent: isReasoner,
       // Per-provider/model preserveVideoUrl flag from compat overrides.
       // Falls back to true for moonshot/kimi when unset (legacy behavior).
+      // gemini-web uploads video parts itself (open-sse/executors/gemini-web/attachments.ts).
       preserveVideoUrl:
         getModelPreserveVideoUrl(normalizedProvider, normalizedModel) ??
         (normalizedProvider === "moonshot" ||
           normalizedProvider === "kimi" ||
           normalizedProvider === "cheaperinference" ||
-          normalizedProvider === "cinf"),
+          normalizedProvider === "cinf" ||
+          normalizedProvider === "gemini-web"),
       // Same decision normalizeRoles made above — never undo it here.
       preserveDeveloperRole: resolvePreserveDeveloperRole(preserveDeveloperRole, provider),
     });
