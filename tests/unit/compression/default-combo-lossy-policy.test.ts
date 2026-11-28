@@ -12,6 +12,7 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "test-compression-sec
 
 const core = await import("../../../src/lib/db/core.ts");
 const providersDb = await import("../../../src/lib/db/providers.ts");
+const combosDb = await import("../../../src/lib/db/combos.ts");
 const readCacheDb = await import("../../../src/lib/db/readCache.ts");
 const compressionDb = await import("../../../src/lib/db/compression.ts");
 const compressionCombosDb = await import("../../../src/lib/db/compressionCombos.ts");
@@ -170,7 +171,17 @@ const LONG_TOOL_RESULT = Array.from({ length: 160 }, (_, i) => `row ${i}: value-
   "\n"
 );
 
-async function sendPastToolResult(compressionHeader?: string, toolResult = LONG_TOOL_RESULT) {
+async function sendPastToolResult({
+  compressionHeader,
+  toolResult = LONG_TOOL_RESULT,
+  comboName = null,
+  routingComboId,
+}: {
+  compressionHeader?: string;
+  toolResult?: string;
+  comboName?: string | null;
+  routingComboId?: string;
+} = {}) {
   const connection = await providersDb.createProviderConnection({
     provider: "openai",
     apiKey: "sk-test-not-real",
@@ -189,7 +200,7 @@ async function sendPastToolResult(compressionHeader?: string, toolResult = LONG_
   };
   const result = await handleChatCore({
     body: {
-      model: "gpt-4",
+      model: comboName ? `combo/${comboName}` : "gpt-4",
       stream: false,
       messages: [
         { role: "user", content: "read the table" },
@@ -218,7 +229,9 @@ async function sendPastToolResult(compressionHeader?: string, toolResult = LONG_
     onStreamFailure: () => {},
     onDisconnect: () => {},
     userAgent: "test-agent",
-    comboName: null,
+    isCombo: comboName !== null,
+    comboName,
+    routingComboId,
   });
   assert.ok(result.success, "request should succeed");
   assert.ok(capturedBody, "the upstream fetch should receive the request body");
@@ -233,7 +246,98 @@ test("without an opt-in the default pipeline forwards past tool results untrunca
 
 test("allow-lossy still lets lite truncate past tool results", async () => {
   await storeLegacyStackedSettings();
-  const toolContent = await sendPastToolResult("allow-lossy");
+  const toolContent = await sendPastToolResult({ compressionHeader: "allow-lossy" });
+  assert.match(toolContent, /\.\.\.\[truncated\]$/);
+  assert.ok(toolContent.length < LONG_TOOL_RESULT.length);
+});
+
+async function storeToolResultProfile(assignment: "active" | "routing-assigned" | "routing-id") {
+  await storeLegacyStackedSettings();
+  const profile = compressionCombosDb.createCompressionCombo({
+    name: "Tool history profile",
+    pipeline: [{ engine: "session-dedup" }, { engine: "lite" }],
+  });
+  if (assignment === "active") {
+    await compressionDb.updateCompressionSettings({ activeComboId: profile.id });
+    return {};
+  }
+
+  const comboName = "assigned-tool-history";
+  const combo = await combosDb.createCombo({
+    name: comboName,
+    strategy: "priority",
+    models: ["openai/gpt-4"],
+  });
+  assert.equal(compressionCombosDb.assignRoutingCombo(profile.id, combo.id as string), true);
+  return assignment === "routing-id" ? { routingComboId: combo.id as string } : { comboName };
+}
+
+for (const assignment of ["active", "routing-assigned", "routing-id"] as const) {
+  test(`${assignment} profile forwards past tool results without a lossy opt-in`, async () => {
+    const routing = await storeToolResultProfile(assignment);
+
+    const toolContent = await sendPastToolResult(routing);
+
+    assert.equal(toolContent.length, LONG_TOOL_RESULT.length, "the upstream lost tool output");
+    assert.equal(toolContent, LONG_TOOL_RESULT);
+  });
+
+  test(`${assignment} profile still truncates past tool results with allow-lossy`, async () => {
+    const routing = await storeToolResultProfile(assignment);
+
+    const toolContent = await sendPastToolResult({ ...routing, compressionHeader: "allow-lossy" });
+
+    assert.match(toolContent, /\.\.\.\[truncated\]$/);
+    assert.ok(toolContent.length < LONG_TOOL_RESULT.length);
+  });
+}
+
+test("a request-selected profile replaces the active profile's pipeline", async () => {
+  await storeToolResultProfile("active");
+  const profile = compressionCombosDb.createCompressionCombo({
+    name: "Dedup only",
+    pipeline: [{ engine: "session-dedup" }],
+  });
+
+  const toolContent = await sendPastToolResult({ compressionHeader: profile.name });
+
+  assert.equal(toolContent.length, LONG_TOOL_RESULT.length, "the upstream lost tool output");
+  assert.equal(toolContent, LONG_TOOL_RESULT);
+});
+
+async function storeAdaptiveFloor() {
+  await compressionDb.updateCompressionSettings({
+    contextBudget: {
+      mode: "floor",
+      policy: "absolute",
+      absoluteBudget: 128,
+      outputReserve: 4096,
+      safetyMargin: 1024,
+      pct: 0.85,
+    },
+  });
+}
+
+test("an active profile still preserves tool output when an adaptive floor is proposed", async () => {
+  await storeToolResultProfile("active");
+  await storeAdaptiveFloor();
+
+  const toolContent = await sendPastToolResult();
+
+  assert.equal(toolContent.length, LONG_TOOL_RESULT.length, "the upstream lost tool output");
+  assert.equal(toolContent, LONG_TOOL_RESULT);
+});
+
+test("a request-selected Lite profile remains a lossy opt-in with an adaptive floor", async () => {
+  await storeToolResultProfile("active");
+  await storeAdaptiveFloor();
+  const profile = compressionCombosDb.createCompressionCombo({
+    name: "Explicit Lite",
+    pipeline: [{ engine: "lite" }],
+  });
+
+  const toolContent = await sendPastToolResult({ compressionHeader: profile.name });
+
   assert.match(toolContent, /\.\.\.\[truncated\]$/);
   assert.ok(toolContent.length < LONG_TOOL_RESULT.length);
 });
@@ -286,7 +390,7 @@ for (const [label, store] of [
 
   test(`${label}: a request over the window still gets its past tool results truncated to fit`, async () => {
     await store();
-    const toolContent = await sendPastToolResult(undefined, OVER_WINDOW_TOOL_RESULT);
+    const toolContent = await sendPastToolResult({ toolResult: OVER_WINDOW_TOOL_RESULT });
     assert.match(toolContent, /\.\.\.\[truncated\]$/);
     assert.ok(toolContent.length < OVER_WINDOW_TOOL_RESULT.length / 10);
   });

@@ -198,7 +198,7 @@ test("shouldRunResolvedPipeline: the default combo yields only when the budget d
   assert.equal(shouldRunResolvedPipeline({ ...base, adaptiveStagesApplied: 2 }), true);
 });
 
-test("shouldRunResolvedPipeline: an assigned or named combo is never replaced", () => {
+test("shouldRunResolvedPipeline: an untagged adaptive plan cannot replace an explicit profile", () => {
   assert.equal(
     shouldRunResolvedPipeline({
       comboApplied: true,

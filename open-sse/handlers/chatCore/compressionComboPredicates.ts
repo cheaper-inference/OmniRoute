@@ -13,6 +13,7 @@ import type {
   CompressionConfig,
   CompressionPipelineStep,
 } from "../../services/compression/types.ts";
+import type { CompressionSource } from "../../services/compression/deriveDefaultPlan.ts";
 import { applyLossyRequestPolicy } from "../../services/compression/lossyRequestPolicy.ts";
 import { planFromHeader } from "../../services/compression/planResolution.ts";
 
@@ -49,6 +50,15 @@ export function isStackedCompressionCombo(
   return Boolean(compressionCombo && compressionCombo.pipeline.length >= 1);
 }
 
+/** Apply the request's lossy policy to a configured stacked pipeline. */
+export function applyStackedLossyRequestPolicy(
+  pipeline: RuntimeCompressionCombo["pipeline"],
+  header: string | null
+): RuntimeCompressionCombo["pipeline"] {
+  return applyLossyRequestPolicy({ mode: "stacked", stackedPipeline: pipeline }, header)
+    .stackedPipeline as RuntimeCompressionCombo["pipeline"];
+}
+
 /**
  * The legacy default combo as this request may run it, or null when it must not apply. A plan
  * the request header chose (a named combo, engine:<id>, default) wins over every operator layer.
@@ -65,11 +75,10 @@ export function defaultComboForRequest(
 ): RuntimeCompressionCombo | null {
   if (!isStackedCompressionCombo(compressionCombo)) return null;
   if (request.header && planFromHeader(request.config, request.header, request.combos)) return null;
-  const { stackedPipeline } = applyLossyRequestPolicy(
-    { mode: "stacked", stackedPipeline: compressionCombo.pipeline },
-    request.header
-  );
-  return { ...compressionCombo, pipeline: stackedPipeline as RuntimeCompressionCombo["pipeline"] };
+  return {
+    ...compressionCombo,
+    pipeline: applyStackedLossyRequestPolicy(compressionCombo.pipeline, request.header),
+  };
 }
 
 /**
@@ -77,14 +86,24 @@ export function defaultComboForRequest(
  * Without a combo the derived plan always runs. The seeded default combo is operator
  * configuration, not a choice for this request, so when the context-budget dial had to
  * escalate (the request does not fit the model window) its escalated pipeline runs too.
- * Named and routing-assigned combos are explicit choices and keep their own pipeline.
+ * Active profiles, routing overrides, and request headers use their resolved pipeline.
+ * An adaptive escalation drops the source; an explicit profile still keeps its base
+ * pipeline in that case.
  */
 export function shouldRunResolvedPipeline(state: {
   comboApplied: boolean;
   comboIsDefault: boolean;
   comboIdConfigured: boolean;
   adaptiveStagesApplied: number;
+  planSource?: CompressionSource;
 }): boolean {
+  if (
+    state.planSource === "active-profile" ||
+    state.planSource === "routing-override" ||
+    state.planSource === "request-header"
+  ) {
+    return true;
+  }
   if (!state.comboApplied && !state.comboIdConfigured) return true;
   return state.comboIsDefault && state.adaptiveStagesApplied > 0;
 }

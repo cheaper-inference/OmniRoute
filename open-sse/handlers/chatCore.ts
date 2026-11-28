@@ -233,6 +233,7 @@ import {
 } from "./chatCore/compressionSettings.ts";
 import { isCompressionExcluded } from "../services/compression/exclusions.ts";
 import {
+  applyStackedLossyRequestPolicy,
   defaultComboForRequest,
   isBuiltinStackedPipeline,
   shouldRunResolvedPipeline,
@@ -1466,7 +1467,6 @@ async function handleChatCoreInner({
     // Runs BEFORE the existing reactive compressContext() to proactively reduce tokens.
     try {
       const {
-        selectCompressionStrategy,
         selectCompressionPlan,
         enginesMapDerivesStackedPipeline,
         activeComboResolves,
@@ -1557,7 +1557,7 @@ async function handleChatCoreInner({
                 routingComboIds
               )
             ) {
-              compressionComboKey = comboName;
+              compressionComboKey = comboName ?? routingComboId ?? null;
             }
           }
         } catch (err) {
@@ -1607,7 +1607,7 @@ async function handleChatCoreInner({
       const connectionCacheOverride = resolveConnectionCacheOverride(
         credentials?.providerSpecificData
       );
-      const modeBeforeOutputTransform = selectCompressionStrategy(
+      const planBeforeOutputTransform = selectCompressionPlan(
         config,
         compressionComboKey,
         estimatedTokens,
@@ -1623,7 +1623,7 @@ async function handleChatCoreInner({
         compressionHeader
       );
       if (
-        modeBeforeOutputTransform === "stacked" &&
+        planBeforeOutputTransform.mode === "stacked" &&
         !compressionComboApplied &&
         !config.compressionComboId &&
         isBuiltinStackedPipeline(config.stackedPipeline) &&
@@ -1752,31 +1752,37 @@ async function handleChatCoreInner({
         );
       }
       compressionResponseMeta = formatCompressionMeta(compressionPlan);
-      // When the per-engine toggle map derives a stacked pipeline (and no named/routing
-      // combo already set config.stackedPipeline), feed that derived pipeline through so
-      // applyCompressionAsync (which reads config.stackedPipeline for stacked mode) runs the
-      // engines the operator actually toggled on instead of the built-in rtk+caveman default.
-      if (
-        mode === "stacked" &&
-        compressionPlan.stackedPipeline.length > 0 &&
-        shouldRunResolvedPipeline({
+      // Stacked execution reads config.stackedPipeline. A configured profile that keeps
+      // its base pipeline must still honor the request's lossy compression policy.
+      if (mode === "stacked" && compressionPlan.stackedPipeline.length > 0) {
+        const useResolved = shouldRunResolvedPipeline({
           comboApplied: compressionComboApplied,
           comboIsDefault: defaultCompressionComboApplied,
           comboIdConfigured: Boolean(config.compressionComboId),
           adaptiveStagesApplied:
             (adaptiveTelemetry as { stagesApplied: string[] } | null)?.stagesApplied.length ?? 0,
-        })
-      ) {
+          planSource: compressionPlan.source,
+        });
+        // If the adaptive plan drops the source, keep a stacked profile the
+        // request selected, including its opt-in to lossy steps.
+        const requestPipeline =
+          planBeforeOutputTransform.source === "request-header" &&
+          planBeforeOutputTransform.mode === "stacked"
+            ? (planBeforeOutputTransform.stackedPipeline as CompressionConfig["stackedPipeline"])
+            : undefined;
         config = {
           ...config,
-          stackedPipeline: compressionPlan.stackedPipeline as CompressionConfig["stackedPipeline"],
+          stackedPipeline: useResolved
+            ? (compressionPlan.stackedPipeline as CompressionConfig["stackedPipeline"])
+            : (requestPipeline ??
+              applyStackedLossyRequestPolicy(config.stackedPipeline ?? [], compressionHeader)),
         };
       }
       let compressionAnalyticsRecorded = false;
       if (mode !== "off") {
         // #3890: in a caching context, never compress the system prompt (cacheable prefix)
         // even if the operator disabled preserveSystemPrompt — honors the cache-aware flag
-        // that selectCompressionStrategy can only partially apply via the mode string.
+        // that compression planning can only partially apply via the mode string.
         const cacheCtx: CachingDetectionContext = {
           provider,
           targetFormat,
