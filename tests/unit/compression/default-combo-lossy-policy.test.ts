@@ -97,6 +97,7 @@ async function sendRepeatedToolOutput(compressionHeader?: string) {
     },
     modelInfo: { provider: "openai", model: "gpt-4" },
     credentials: { apiKey: "test-key" },
+    apiKeyInfo: { compressionEnabled: true },
     log: {
       debug: (_tag: string, message: string) => debugLines.push(String(message)),
       info: () => {},
@@ -207,6 +208,7 @@ async function sendPastToolResult(compressionHeader?: string, toolResult = LONG_
     },
     modelInfo: { provider: "openai", model: "gpt-4" },
     credentials: { apiKey: "sk-test-not-real" },
+    apiKeyInfo: { compressionEnabled: true },
     log: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} },
     clientRawRequest: {
       endpoint: "/v1/chat/completions",

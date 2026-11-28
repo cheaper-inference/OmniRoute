@@ -13,6 +13,7 @@ const {
   combosDb,
   handleChat,
   resetStorage,
+  seedApiKey,
   seedConnection,
 } = await createChatPipelineHarness("output-styles-auto-clarity");
 const compressionDb = await import("../../../src/lib/db/compression.ts");
@@ -53,6 +54,7 @@ async function styleInstructionReachesUpstream(
       autoClarity,
     },
   });
+  const seededKey = await seedApiKey({ name: "auto-clarity-key", compressionEnabled: true });
   await seedConnection("openai");
   const viaCombo = source === "combo with an assigned compression combo";
   if (viaCombo) {
@@ -83,6 +85,7 @@ async function styleInstructionReachesUpstream(
 
   const response = await handleChat(
     buildRequest({
+      authKey: seededKey.key,
       body: {
         model: viaCombo ? ROUTING_COMBO : "openai/gpt-4o-mini",
         stream: false,
