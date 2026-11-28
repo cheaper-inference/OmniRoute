@@ -218,6 +218,53 @@ export function getLastSessionModel(sessionId: string, comboName: string): strin
   return row?.model_str ?? null;
 }
 
+/** SQLite datetime('now') is "YYYY-MM-DD HH:MM:SS" in UTC; null when it cannot be parsed. */
+function parseSqliteUtcMs(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const ms = Date.parse(`${value.replace(" ", "T")}Z`);
+  return Number.isFinite(ms) ? ms : null;
+}
+
+/**
+ * Like {@link getLastSessionModel}, plus when that model last served the session (`usedAtMs`,
+ * epoch ms) and when the session's current unbroken run on that model began (`sinceMs`: the
+ * first turn after the last turn served by a different model). Either is null when the stored
+ * timestamp cannot be parsed.
+ */
+export function getLastSessionModelUsage(
+  sessionId: string,
+  comboName: string
+): { modelStr: string; usedAtMs: number | null; sinceMs: number | null } | null {
+  const db = getDbInstance() as unknown as DbLike;
+  const row = db
+    .prepare(
+      `SELECT model_str, used_at
+       FROM session_model_history
+       WHERE session_id = ? AND combo_name = ?
+       ORDER BY used_at DESC, id DESC
+       LIMIT 1`
+    )
+    .get(sessionId, comboName) as { model_str: string; used_at: string | null } | undefined;
+  if (!row?.model_str) return null;
+  const since = db
+    .prepare(
+      `SELECT MIN(used_at) AS since
+       FROM session_model_history
+       WHERE session_id = ? AND combo_name = ? AND model_str = ?
+         AND id > COALESCE(
+           (SELECT MAX(id) FROM session_model_history
+            WHERE session_id = ? AND combo_name = ? AND model_str <> ?),
+           0)`
+    )
+    .get(sessionId, comboName, row.model_str, sessionId, comboName, row.model_str) as
+    { since: string | null } | undefined;
+  return {
+    modelStr: row.model_str,
+    usedAtMs: parseSqliteUtcMs(row.used_at),
+    sinceMs: parseSqliteUtcMs(since?.since),
+  };
+}
+
 /**
  * Clear all session model history entries for a given combo name.
  * Called when a combo's model targets are changed to invalidate stale context-cache pins.

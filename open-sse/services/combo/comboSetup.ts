@@ -15,7 +15,7 @@ import {
   resolveUniversalHandoffConfig,
   SKIP_UNIVERSAL_HANDOFF_FLAG,
 } from "../contextHandoff.ts";
-import { getLastSessionModel } from "../../../src/lib/db/contextHandoffs.ts";
+import { getLastSessionModelUsage } from "../../../src/lib/db/contextHandoffs.ts";
 import { scopeHandoffSessionId } from "./handoffSessionScope.ts";
 import { applyComboAgentMiddleware } from "../comboAgentMiddleware.ts";
 import { resolveComboSetupConfig, resolveComboTargetTimeoutMsForCombo } from "../comboConfig.ts";
@@ -32,6 +32,8 @@ export interface ComboSetup {
   universalHandoffConfig: ReturnType<typeof resolveUniversalHandoffConfig>;
   effectiveSessionId: string | null;
   pinnedModel: string | null;
+  pinnedModelUsedAtMs: number | null;
+  pinnedModelSinceMs: number | null;
   clientRequestedStream: boolean;
   config: ReturnType<typeof resolveComboSetupConfig>;
   comboTargetTimeoutMs: number;
@@ -55,6 +57,8 @@ export interface ComboSetup {
 function resolveContextCachePin(ctx: ComboContext): {
   effectiveSessionId: string | null;
   pinnedModel: string | null;
+  pinnedModelUsedAtMs: number | null;
+  pinnedModelSinceMs: number | null;
 } {
   const { combo, relayOptions, log } = ctx;
   const effectiveSessionId: string | null = combo.context_cache_protection
@@ -63,20 +67,27 @@ function resolveContextCachePin(ctx: ComboContext): {
         relayOptions?.apiKeyId
       )
     : null;
-  let pinnedModel: string | null = null;
+  const emptyPin = {
+    effectiveSessionId,
+    pinnedModel: null,
+    pinnedModelUsedAtMs: null,
+    pinnedModelSinceMs: null,
+  };
   if (
-    combo.context_cache_protection &&
-    effectiveSessionId &&
-    !(ctx.body as Record<string, unknown>)?.[SKIP_UNIVERSAL_HANDOFF_FLAG]
+    !combo.context_cache_protection ||
+    !effectiveSessionId ||
+    (ctx.body as Record<string, unknown>)?.[SKIP_UNIVERSAL_HANDOFF_FLAG]
   ) {
-    const pinned = getLastSessionModel(effectiveSessionId, combo.name);
-    if (pinned) {
-      ctx.body = { ...ctx.body, model: pinned };
-      pinnedModel = pinned;
-      log.info("COMBO", `[#401] Context cache: pinned model=${pinned} (server-side)`);
-    }
+    return emptyPin;
   }
-  return { effectiveSessionId, pinnedModel };
+  const usage = getLastSessionModelUsage(effectiveSessionId, combo.name);
+  if (!usage?.modelStr) return emptyPin;
+
+  const pinnedModel = usage.modelStr;
+  ctx.body = { ...ctx.body, model: pinnedModel };
+  const { usedAtMs: pinnedModelUsedAtMs = null, sinceMs: pinnedModelSinceMs = null } = usage;
+  log.info("COMBO", `[#401] Context cache: pinned model=${pinnedModel} (server-side)`);
+  return { effectiveSessionId, pinnedModel, pinnedModelUsedAtMs, pinnedModelSinceMs };
 }
 
 export function phaseComboSetup(ctx: ComboContext): ComboSetup {
@@ -98,7 +109,8 @@ export function phaseComboSetup(ctx: ComboContext): ComboSetup {
   );
 
   // Server-side context cache pinning (rewrites ctx.body when a model is pinned).
-  const { effectiveSessionId, pinnedModel } = resolveContextCachePin(ctx);
+  const { effectiveSessionId, pinnedModel, pinnedModelUsedAtMs, pinnedModelSinceMs } =
+    resolveContextCachePin(ctx);
 
   // ── Combo Agent Middleware (#399 + #401) ────────────────────────────────
   // Apply system_message override, tool_filter_regex.
@@ -131,6 +143,8 @@ export function phaseComboSetup(ctx: ComboContext): ComboSetup {
     universalHandoffConfig,
     effectiveSessionId,
     pinnedModel,
+    pinnedModelUsedAtMs,
+    pinnedModelSinceMs,
     clientRequestedStream,
     config,
     comboTargetTimeoutMs,
