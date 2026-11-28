@@ -53,11 +53,20 @@ export function createManagedLeaseFence(managedLease: ManagedLeaseFenceSubject |
     });
   };
   const getManagedLeaseFenceErrorCode = (code: string | undefined): string | undefined => {
-    if (code === MUSE_OWNERSHIP_REJECTED) return code;
+    if (code === MUSE_OWNERSHIP_REJECTED || code === "KIMI_ACCOUNT_UNAVAILABLE") return code;
     if (managedLease === null) return undefined;
     return code?.startsWith("LEASE_") ? code : undefined;
   };
   const managedLeaseFenceErrorResult = (code: string) => {
+    if (code === "KIMI_ACCOUNT_UNAVAILABLE") {
+      return createErrorResult(
+        409,
+        "The selected Kimi account is no longer available.",
+        null,
+        code,
+        "kimi_local_admission"
+      );
+    }
     if (code === MUSE_OWNERSHIP_REJECTED) {
       return createErrorResult(
         409,

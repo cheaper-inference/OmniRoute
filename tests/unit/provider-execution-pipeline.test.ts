@@ -1240,3 +1240,58 @@ test("Gemini PerDay QuotaFailure reaches the classification text, not the client
     );
   }
 });
+
+for (const stream of [false, true]) {
+  test(`Kimi busy during ${stream ? "stream" : "JSON"} routing preserves waiters and credentials`, async () => {
+    const { runProviderExecutionPipeline } =
+      await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+    const events: string[] = [];
+    const outcome = await runProviderExecutionPipeline(
+      makeInput({
+        provider: "kimi-coding",
+        stream,
+        policy: {
+          allowAccountRotation: true,
+          allowModelFallback: true,
+          expectedConnectionId: undefined,
+        },
+        send: async () => {
+          events.push("send");
+          return makeAttempt(
+            {
+              error: {
+                code: "concurrency_limit_exceeded",
+                message: "Too many concurrent requests",
+              },
+            },
+            403,
+            { headers: { "retry-after": "3" } }
+          );
+        },
+        refreshCredentials: async () => {
+          events.push("refresh");
+          return null;
+        },
+        state: {
+          recordRateLimitHeaders: () => {
+            events.push("quota headers");
+          },
+          recordRateLimitBody: () => {
+            events.push("quota body");
+          },
+          writeTerminalStatus: async () => {
+            events.push("disable");
+          },
+        },
+      })
+    );
+    assert.ok(outcome.kind === "error");
+    assert.equal(outcome.result.status, 429);
+    assert.equal(outcome.result.response.headers.get("retry-after"), "3");
+    const { isKimiCapacityObservation } =
+      await import("../../open-sse/services/kimiConcurrency.ts");
+    assert.equal(isKimiCapacityObservation(outcome.result.response.headers), true);
+    assert.equal(isKimiCapacityObservation(new Headers(outcome.result.response.headers)), false);
+    assert.deepEqual(events, ["send"]);
+  });
+}

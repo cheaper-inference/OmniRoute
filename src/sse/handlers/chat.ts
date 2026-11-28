@@ -1,3 +1,4 @@
+import { isKimiCoding } from "@omniroute/open-sse/services/kimiConcurrency.ts";
 import { requiresQoderHttpTransport } from "@omniroute/open-sse/services/qoderCapabilities";
 import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";
@@ -2653,6 +2654,25 @@ async function handleSingleModelChat(
           }
         }
         return muse.museFailureResponse(museOwner, result);
+      }
+
+      if (isKimiCoding(provider)) {
+        if (
+          result.errorType === "kimi_local_admission" &&
+          result.errorCode === "KIMI_ACCOUNT_UNAVAILABLE"
+        ) {
+          return withRoutingTelemetry(result.response, null);
+        }
+        if (result.errorType === "account_semaphore_capacity") {
+          return withRoutingTelemetry(
+            errorResponse(429, "The Kimi account request queue is full or its wait time expired.", {
+              type: "rate_limit_error",
+              code: "concurrency_limited",
+              retryAfter: 1,
+            }),
+            null
+          );
+        }
       }
 
       // A hard-lease rejection must not mutate account state or retry.

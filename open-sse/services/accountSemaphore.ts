@@ -62,14 +62,22 @@ export interface AccountSemaphoreStatsEntry {
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_QUEUE_SIZE = 20;
-const gates = new Map<string, AccountGate>();
-const queuedRequests = new Set<AcquireRequest>();
+const admissionKey = Symbol.for("omniroute.accountSemaphore.admission.v1");
+const registry = globalThis as typeof globalThis & {
+  [admissionKey]?: { gates: Map<string, AccountGate>; queuedRequests: Set<AcquireRequest> };
+};
+const { gates, queuedRequests } = (registry[admissionKey] ??= {
+  gates: new Map<string, AccountGate>(),
+  queuedRequests: new Set<AcquireRequest>(),
+});
 
 export function buildAccountSemaphoreKey({
   provider,
   accountKey,
 }: AccountSemaphoreKeyParts): string {
-  return `${String(provider)}:${String(accountKey)}`;
+  // The OAuth and API-key Kimi routes can select the same stored connection.
+  const accountProvider = provider === "kimi-coding-apikey" ? "kimi-coding" : provider;
+  return `${String(accountProvider)}:${String(accountKey)}`;
 }
 
 export interface ModelSemaphoreKeyParts extends AccountSemaphoreKeyParts {
@@ -239,6 +247,24 @@ export function acquire(
   return acquireMany([{ key, maxConcurrency }], { timeoutMs, signal, maxQueueSize, failFast });
 }
 
+export function canAdoptAccountSlot(key: string, cap: number): boolean {
+  const gate = gates.get(key);
+  return (
+    !!gate &&
+    !isBlocked(gate) &&
+    gate.running > 0 &&
+    gate.running <= Math.min(cap, gate.maxConcurrency)
+  );
+}
+
+/** Waiting for an occupied account must never raise a stricter active admission limit. */
+export function waitForAccountSlot(key: string, cap: number, options: AcquireManyOptions) {
+  return acquire(key, {
+    ...options,
+    maxConcurrency: Math.min(cap, gates.get(key)?.maxConcurrency ?? cap),
+  });
+}
+
 /**
  * Admission policy for a request that cannot take its slots right now.
  * `failFast` (#12911, Codex WS leases): never wait. `maxQueueSize > 0`: bounded
@@ -379,16 +405,26 @@ export function getStats(): Record<string, AccountSemaphoreStatsEntry> {
   return stats;
 }
 
+export function getAccountSemaphoreFullReason(
+  provider: string,
+  accountKey: string,
+  maxConcurrency?: number | null
+): "blocked" | "occupied" | null {
+  if (isBypassed(maxConcurrency)) return null;
+  const gate = gates.get(buildAccountSemaphoreKey({ provider, accountKey }));
+  if (!gate) return null;
+  const effectiveCap = maxConcurrency ?? gate.maxConcurrency;
+  if (isBypassed(effectiveCap)) return null;
+  if (isBlocked(gate)) return "blocked";
+  return gate.running >= effectiveCap ? "occupied" : null;
+}
+
 export function isAccountSemaphoreFull(
   provider: string,
   accountKey: string,
   maxConcurrency?: number | null
 ): boolean {
-  if (isBypassed(maxConcurrency)) return false;
-  const gate = gates.get(buildAccountSemaphoreKey({ provider, accountKey }));
-  if (!gate) return false;
-  const effectiveCap = maxConcurrency ?? gate.maxConcurrency;
-  return !isBypassed(effectiveCap) && (gate.running >= effectiveCap || isBlocked(gate));
+  return getAccountSemaphoreFullReason(provider, accountKey, maxConcurrency) !== null;
 }
 
 export function reset(key: string): void {

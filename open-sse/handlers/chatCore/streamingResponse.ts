@@ -1,3 +1,4 @@
+import { isKimiCoding, isKimiCapacityObservation } from "../../services/kimiConcurrency.ts";
 import type {
   HttpAttemptSelection,
   HttpAttemptRejectionSlot,
@@ -393,8 +394,12 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
     } else {
       updatePendingScope(pendingScope, { stage: "provider_response_started" });
     }
-    // Ignore observations belonging to an obsolete Codex owner/credential.
-    if (isCodexResponseCurrent(providerResponse, providerResponse.ok))
+    // A translated Kimi busy error is not a physical quota response. Feeding its synthetic
+    // 429 into the rate limiter can disconnect a limiter with pending requests.
+    const observeRateLimits =
+      !isKimiCapacityObservation(providerResponse.headers) &&
+      isCodexResponseCurrent(providerResponse, providerResponse.ok);
+    if (observeRateLimits)
       updateFromHeaders(
         provider,
         responseConnectionId,
@@ -406,7 +411,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
     // Store rate-limit headers for quota saturation signals
     try {
       const { storeRateLimitHeaders } = await import("@/lib/quota/saturationSignals");
-      if (isCodexResponseCurrent(providerResponse, providerResponse.ok))
+      if (observeRateLimits)
         storeRateLimitHeaders(responseConnectionId, provider, providerResponse.headers);
     } catch {
       // fail-open: saturation signal is best-effort
@@ -694,8 +699,8 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
     (providerResponse.status === HTTP_STATUS.UNAUTHORIZED ||
       providerResponse.status === HTTP_STATUS.FORBIDDEN) &&
     !hadStreamOptions && // Skip refresh if failure may be from stream_options removal, not auth
-    // Codex recovery already ran through the owner-checked pipeline. Never bypass it here.
-    !(pipelineRecovered && provider === "codex") &&
+    // The primary pipeline already refreshed through the applicable ownership and admission checks.
+    !(pipelineRecovered && (provider === "codex" || isKimiCoding(provider))) &&
     !(await shouldIsolateProbeFailures()) &&
     !(await shouldSkipCredentialRefresh(provider, providerResponse))
   ) {

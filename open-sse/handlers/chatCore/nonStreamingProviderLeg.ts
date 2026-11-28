@@ -546,6 +546,7 @@ export async function runNonStreamingProviderLeg(
       typeof error === "object" &&
       ((error as { code?: unknown }).code === "SEMAPHORE_TIMEOUT" ||
         (error as { code?: unknown }).code === "SEMAPHORE_QUEUE_FULL" ||
+        (error as { code?: unknown }).code === "KIMI_ACCOUNT_UNAVAILABLE" ||
         (error as { code?: unknown }).code === "MUSE_OWNERSHIP_REJECTED")
     ) {
       throw error;

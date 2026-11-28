@@ -1,3 +1,5 @@
+import { waitForKimiComboTurn } from "./kimiLocalQueue.ts";
+import { dispatchWithKimiTurn } from "./kimiQueueTurn.ts";
 /**
  * Set-try + speculative dispatch loop for handleComboChatInner.
  * Extracted from combo.ts dispatchWithCooldownRetry (#11804 finally lives here).
@@ -267,6 +269,8 @@ export async function dispatchWithCooldownRetry(opts: {
       state.skippedForCircuitOpen = false;
       state.earliestCircuitOpenRetryMs = 0;
       state.skippedConnectionCooldownUntil = undefined;
+      state.kimiCapacitySkips?.clear();
+      state.kimiProtectedCapacityStop = undefined;
       if (setTry > 0) {
         deps.log.info(
           "COMBO",
@@ -387,26 +391,34 @@ export async function dispatchWithCooldownRetry(opts: {
         }
       }
 
+      if (state.kimiTurn) {
+        const selected = dispatchIndices.findIndex(
+          (index) => state.orderedTargets[index].executionKey === state.kimiTurn!.target
+        );
+        if (selected > 0) dispatchIndices.unshift(...dispatchIndices.splice(selected, 1));
+      }
       const executeTarget = async (i: number): Promise<ExecuteTargetResult> => {
         const gate = await extra.evaluateGates({ index: i, state, deps });
         if (gate.kind === "skip") return gate.result;
-        return extra.executeAttempt({
-          index: i,
-          state,
-          deps: {
-            ...deps,
-            retryCooldownWait: {
-              attempt: extra.comboCooldownAttempt,
-              budgetLeftMs: extra.comboCooldownBudgetLeftMs,
-              deadline:
-                extra.comboStartTime +
-                (extra.comboTimeoutMs > 0 ? extra.comboTimeoutMs : COMBO_LOOP_SAFETY_TIMEOUT_MS),
+        return dispatchWithKimiTurn(state.kimiTurn, state.orderedTargets[i].executionKey, () =>
+          extra.executeAttempt({
+            index: i,
+            state,
+            deps: {
+              ...deps,
+              retryCooldownWait: {
+                attempt: extra.comboCooldownAttempt,
+                budgetLeftMs: extra.comboCooldownBudgetLeftMs,
+                deadline:
+                  extra.comboStartTime +
+                  (extra.comboTimeoutMs > 0 ? extra.comboTimeoutMs : COMBO_LOOP_SAFETY_TIMEOUT_MS),
+              },
             },
-          },
-          targetForAttempt: gate.targetForAttempt,
-          profile: gate.profile,
-          protectedPriorityTarget: gate.protectedPriorityTarget,
-        });
+            targetForAttempt: gate.targetForAttempt,
+            profile: gate.profile,
+            protectedPriorityTarget: gate.protectedPriorityTarget,
+          })
+        );
       };
 
       for (const [dispatchPosition, i] of dispatchIndices.entries()) {
@@ -592,12 +604,51 @@ export async function dispatchWithCooldownRetry(opts: {
         );
       }
 
+      const settledResponse = anySuccess ? await globalPromise : null;
+      if (state.kimiCapacitySkips?.size && !state.kimiQueueTarget && !state.globalAttempts) {
+        const queue = deps.resilienceSettings.requestQueue;
+        const deadline =
+          extra.comboStartTime +
+          Math.min(
+            queue.maxWaitMs || Infinity,
+            extra.comboTimeoutMs || COMBO_LOOP_SAFETY_TIMEOUT_MS
+          );
+        const granted = await waitForKimiComboTurn(
+          state,
+          settledResponse,
+          queue.maxQueueDepth,
+          deadline,
+          deps.signal
+        );
+        if (deps.signal?.aborted) {
+          granted?.dispose();
+          return errorResponse(499, "Client disconnected");
+        }
+        if (granted) {
+          state.kimiTurn = granted;
+          state.kimiQueueTarget = granted.target;
+          // Repeat eligibility checks for the same undelivered request. No upstream attempt is replayed.
+          setTry--;
+          continue;
+        }
+        if (
+          (settledResponse && settledResponse === state.kimiProtectedCapacityStop) ||
+          (!settledResponse &&
+            state.orderedTargets.every((target) =>
+              state.kimiCapacitySkips!.has(target.executionKey)
+            ))
+        ) {
+          finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
+          return errorResponse(429, "Kimi account capacity is temporarily unavailable.", {
+            code: "concurrency_limited",
+            type: "rate_limit_error",
+            retryAfter: 1,
+          });
+        }
+      }
       // A resolved fatal response also sets anySuccess to stop dispatching.
       finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
-      if (anySuccess) {
-        const response = await globalPromise;
-        return response;
-      }
+      if (settledResponse) return settledResponse;
 
       // Global combo timeout: return aggregated error immediately, skipping set retries.
       if (state.comboExpired) {
@@ -972,6 +1023,7 @@ export async function dispatchWithCooldownRetry(opts: {
       buildNoUpstreamResponseDiagnostics(state.orderedTargets.length)
     );
   } finally {
+    state.kimiTurn?.dispose();
     // #11804: always release the loop-safety timer. Covering every exit path by
     // construction here means a future `return` added to this function cannot
     // silently reintroduce the leak.

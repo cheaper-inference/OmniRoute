@@ -2913,7 +2913,10 @@ export async function markAccountUnavailable(
       provider,
       options.headers ?? null,
       effectiveProviderProfile,
-      options.structuredError ?? null,
+      options.structuredError && {
+        ...options.structuredError,
+        upstreamBody: options.upstreamErrorBody,
+      },
       null,
       await resolveDailyResetForProvider(provider)
     );

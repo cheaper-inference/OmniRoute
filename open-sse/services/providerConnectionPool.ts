@@ -1,9 +1,23 @@
 import { nodeTypeFromId } from "@/lib/db/providerNodeSelect";
-import { getCachedProviderConnections, getCachedProviderNodes } from "@/lib/db/readCache";
+import {
+  getCachedProviderConnectionById,
+  getCachedProviderConnections,
+  getCachedProviderNodes,
+} from "@/lib/db/readCache";
 import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptWebRetirement";
 import { getProviderById, getProviderAlias, resolveProviderId } from "@/shared/constants/providers";
 
-export { getCachedProviderConnectionById } from "@/lib/db/readCache";
+export { getCachedProviderConnectionById };
+
+/** Retry admission must see manual disable and newly applied holds immediately. */
+export async function readConnectionForCooldownGate(
+  id: string,
+  fresh: boolean
+): Promise<Record<string, unknown> | null | undefined> {
+  if (!fresh) return getCachedProviderConnectionById(id);
+  const { getProviderConnectionById } = await import("@/lib/db/providers");
+  return getProviderConnectionById(id);
+}
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)

@@ -1,9 +1,10 @@
+import { isUnqueueableAccount } from "./kimiLocalQueue.ts";
 /**
  * Production adapter for {@link partitionJevTargets}: the same pre-dispatch
  * gates the attempt loop would apply, without mutating attempt state.
  */
 
-import { isAccountSemaphoreFull, isModelLocked } from "../accountFallback.ts";
+import { isModelLocked } from "../accountFallback.ts";
 import { checkCredentialGate } from "../credentialGate.ts";
 import { isProviderInCooldown } from "../providerCooldownTracker.ts";
 import { parseModel } from "../model.ts";
@@ -119,7 +120,7 @@ export function createJevBlockChecker(deps: JevBlockCheckerDeps): CheckJevBlock 
     async (target) => {
       if (!target.connectionId || !target.provider) return null;
       const cap = await lookupPositiveCap(target.connectionId);
-      return cap && isAccountSemaphoreFull(target.provider, target.connectionId, cap)
+      return cap && isUnqueueableAccount(target.provider, target.connectionId, cap)
         ? "concurrency_cap"
         : null;
     },

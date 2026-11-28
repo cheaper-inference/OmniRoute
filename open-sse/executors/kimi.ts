@@ -8,7 +8,8 @@ import { flattenOpenAIToolRootAnyOf } from "../services/toolSchemaSanitizer.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { isKimiK31Model, mapK31EffortAlias } from "../utils/kimiK31.ts";
 import { DefaultExecutor } from "./default.ts";
-import type { ProviderCredentials } from "./base.ts";
+import { withKimiAccountSlot } from "./kimiAccountDispatch.ts";
+import type { ExecuteInput, ProviderCredentials } from "./base.ts";
 import { ensureToolMessageNames } from "./kimiToolNames.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -439,6 +440,10 @@ function deleteHeaders(headers: Record<string, string>, names: string[]): void {
 }
 
 export class KimiExecutor extends DefaultExecutor {
+  async execute(input: ExecuteInput) {
+    return withKimiAccountSlot(input, () => super.execute(input));
+  }
+
   constructor(provider = "kimi-coding") {
     super(provider);
   }

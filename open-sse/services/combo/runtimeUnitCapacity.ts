@@ -1,3 +1,4 @@
+import { isUnqueueableAccount } from "./kimiLocalQueue.ts";
 /**
  * @file runtimeUnitCapacity.ts
  * @description Concurrency-capacity checks for nested combo execute-mode units so
@@ -6,7 +7,6 @@
  * @changes
  * - [2026-07-24] [Composer] - Initial capacity pre-check for execute-mode runtime units
  */
-import { isAccountSemaphoreFull } from "../accountSemaphore.ts";
 import { resolveComboTargets } from "./comboStructure.ts";
 import { lookupPositiveCap } from "./concurrencyCaps.ts";
 import type {
@@ -40,7 +40,7 @@ async function isConnectionAtConcurrencyCap(
 ): Promise<boolean> {
   const cap = await lookupCap(connectionId);
   if (!cap) return false;
-  return isAccountSemaphoreFull(provider, connectionId, cap);
+  return isUnqueueableAccount(provider, connectionId, cap);
 }
 
 /**
@@ -81,7 +81,7 @@ export async function isRuntimeUnitAtConcurrencyCap(
     const cap = await lookupCap(connectionId);
     if (!cap) continue;
     sawLimitedConnection = true;
-    if (!isAccountSemaphoreFull(provider, connectionId, cap)) {
+    if (!isUnqueueableAccount(provider, connectionId, cap)) {
       return false;
     }
   }
