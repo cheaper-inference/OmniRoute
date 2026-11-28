@@ -1,12 +1,11 @@
-import { pickDisplayValue } from "@/shared/utils/maskEmail";
-
-export function hideUnmaskableEmailLabel(
+// The masker can leave short email addresses fully visible.
+export function hideExposedEmailLabel(
   rawLabel: string | null | undefined,
+  displayLabel: string | null | undefined,
   emailsVisible: boolean
 ): string | null {
-  const label = rawLabel?.trim();
-  if (!label) return null;
+  if (!displayLabel?.trim()) return null;
 
-  const displayLabel = pickDisplayValue([label], emailsVisible);
-  return !emailsVisible && label.includes("@") && displayLabel === label ? null : displayLabel;
+  const label = rawLabel?.trim();
+  return !emailsVisible && label?.includes("@") && displayLabel === label ? null : displayLabel;
 }

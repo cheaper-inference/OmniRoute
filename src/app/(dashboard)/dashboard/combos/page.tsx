@@ -65,7 +65,8 @@ import ComboTimeoutFields from "./ComboTimeoutFields";
 import ComboContextLengthField from "./ComboContextLengthField";
 import ComboRrLegibilityFields from "./ComboRrLegibilityFields";
 import { persistConnectionAwareExpansion, persistStickyRoundRobinLimit } from "./comboRrLegibility";
-import { hideUnmaskableEmailLabel } from "./comboAccountLabel";
+import { pickDisplayValue } from "@/shared/utils/maskEmail";
+import { hideExposedEmailLabel } from "./comboAccountLabel";
 import { collectRemovableFailedStepIds, type ComboTestResultLike } from "./removeFailedComboModels";
 import { useRemoveFailedComboModels } from "./useRemoveFailedComboModels";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
@@ -840,7 +841,13 @@ function formatComboStepWithAccount(
   const liveConnectionIds = listProviderConnectionIds(builderProviders, builderProvider);
   const rawConnectionLabel =
     findComboStepConnectionLabel(builderProvider?.connections, connectionId) || step.label || null;
-  const connectionLabel = hideUnmaskableEmailLabel(rawConnectionLabel, showFullEmails);
+  const connectionLabel = hideExposedEmailLabel(
+    rawConnectionLabel,
+    rawConnectionLabel
+      ? pickDisplayValue([rawConnectionLabel], showFullEmails, rawConnectionLabel)
+      : null,
+    showFullEmails
+  );
 
   const accountState = resolveComboStepAccountState(step, liveConnectionIds);
   if (!connectionId && accountState !== "unroutable") return null;
@@ -2280,7 +2287,11 @@ function ComboTestResultRow({
   result: ComboTestResultRowData;
   emailsVisible: boolean;
 }) {
-  const displayLabel = hideUnmaskableEmailLabel(r.label, emailsVisible);
+  const displayLabel = hideExposedEmailLabel(
+    r.label,
+    r.label ? pickDisplayValue([r.label], emailsVisible, r.label) : null,
+    emailsVisible
+  );
   const accountStr = r.connectionId ? `acct ${r.connectionId.slice(0, 8)}` : "dynamic account";
   const tone = comboTestStatusTone(r.status);
 
@@ -2321,7 +2332,11 @@ function ComboTestResolvedBy({ results, emailsVisible }: { results: any; emailsV
   if (!results.resolvedBy) return null;
   const target = results.resolvedByTarget;
   const connectionId = target?.connectionId;
-  const displayLabel = hideUnmaskableEmailLabel(target?.label, emailsVisible);
+  const displayLabel = hideExposedEmailLabel(
+    target?.label,
+    target?.label ? pickDisplayValue([target.label], emailsVisible, target.label) : null,
+    emailsVisible
+  );
   return (
     <div className="flex items-center gap-2 text-sm">
       <Icon name="check_circle" size={18} className="text-success" />
