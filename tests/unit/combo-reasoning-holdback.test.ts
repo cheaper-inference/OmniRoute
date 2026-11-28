@@ -461,6 +461,40 @@ test("makeCheckpointRequest redacts credential-shaped strings from the draft", a
   assert.ok(!JSON.stringify(next).includes(secret));
 });
 
+test("a disabled per-model timeout cannot bound the hold: the runner says so and streams as before", async () => {
+  const { buildTargetTimeoutRunner } =
+    await import("../../open-sse/services/combo/targetTimeoutRunner.ts");
+  const warnings: string[] = [];
+  const log = {
+    info: noop,
+    debug: noop,
+    warn: (...args: unknown[]) => void warnings.push(args.map(String).join(" ")),
+    error: noop,
+  };
+  const src = source([reasoning("early thought")], "stall");
+  const dispatchedTargets: unknown[] = [];
+  const run = buildTargetTimeoutRunner({
+    handleSingleModel: async (_body, _model, target) => {
+      dispatchedTargets.push(target);
+      return sse(src.stream);
+    },
+    comboTargetTimeoutMs: 0,
+    log,
+  });
+  const response = await run({ stream: true }, a, {
+    reasoningHoldback: { maxBytes: 64 * 1024 },
+  } as never);
+  const reader = response.body!.getReader();
+  const first = await reader.read();
+  assert.match(decoder.decode(first.value), /early thought/);
+  void reader.cancel().catch(noop);
+  assert.ok(
+    warnings.some((line) => /holdback is not applied/i.test(line) && line.includes(a)),
+    warnings.join("\n")
+  );
+  assert.equal("reasoningHoldback" in (dispatchedTargets[0] as object), false);
+});
+
 // ─── handleComboChat: the routing path ─────────────────────────────────────────
 
 let sequence = 0;

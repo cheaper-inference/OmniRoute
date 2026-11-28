@@ -344,6 +344,14 @@ export function buildTargetTimeoutRunner(deps: {
         "COMBO",
         `Per-model combo timeout is DISABLED (effectiveTimeoutMs=${effectiveTimeoutMs}) for ${modelStr} — a hung upstream will hang this target until the combo loop safety timeout`
       );
+      if (reasoningHoldback) {
+        // The hold is bounded by this target's remaining budget, and there is none: say so
+        // instead of silently streaming the reasoning the combo asked to retain.
+        log.warn(
+          "COMBO",
+          `Reasoning holdback is not applied to ${modelStr}: it needs the per-model timeout to bound the hold and that timeout is disabled — reasoning streams to the client as it arrives`
+        );
+      }
       return handleSingleModel(b, modelStr, target).catch((err) =>
         errorResponse(502, err?.message ?? "Upstream model error")
       );

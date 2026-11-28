@@ -503,7 +503,9 @@ combo cannot fail over cleanly. The holdback closes that gap for combos that ask
 - Scope: a streaming, single-choice Chat Completions request with a plain-text history (no
   tools, tool results or media), no bound session or pinned model, and sequential dispatch
   (no hedging, no protected priority target). Anything else keeps today's behavior. It runs
-  inside the per-target first-output gate, so it also needs a per-target timeout above `0`.
+  inside the per-target first-output gate, so it also needs a per-target timeout above `0`: with
+  the timeout disabled the holdback is not applied (the reasoning streams as usual) and the
+  runner logs a warning that names the target.
 - While the target sends only reasoning, role events or comments, the stream is held. The
   first answer token, tool call, refusal, finish reason or unrecognized frame commits it and
   every held byte reaches the client once, in order. At most **64 KiB** is held, and the
