@@ -3,10 +3,10 @@
  *
  * Grok Build (`grok-cli`), grok.com cookie sessions (`grok-web`), and xAI
  * OAuth (`xai-oauth`) bill Chat/Imagine/Voice/Build/API against one weekly
- * percent pool. `passthroughModels: true` still stands for catalog/404
- * behaviour; it must not send this 402 through the #12242 model-only lockout,
- * or a combo of five grok-4.6 steps parks the empty account and then skips the
- * remaining live accounts as "model locked".
+ * percent pool. Only a 402 carrying the usage balance signal is treated as
+ * shared-wallet credit exhaustion: a 402 with an empty body is handled as an
+ * ordinary per-model failure, so one unavailable model does not park the whole
+ * connection or make the remaining live accounts look model locked.
  *
  * `matchesSharedWalletCreditsBody` expects a pre-lowercased string.
  */
@@ -26,7 +26,7 @@ export function isSharedWalletCredits402(
   if (status !== 402 || typeof provider !== "string" || !SHARED_WALLET_402_PROVIDERS.has(provider)) {
     return false;
   }
-  if (errorText == null || String(errorText).trim() === "") return true;
+  if (errorText == null || String(errorText).trim() === "") return false;
   return matchesSharedWalletCreditsBody(String(errorText).toLowerCase());
 }
 
