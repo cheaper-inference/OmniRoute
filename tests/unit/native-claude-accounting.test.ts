@@ -67,6 +67,17 @@ for (const tail of ["", "\n", "\n\n"]) {
   });
 }
 
+test("an incomplete native stream estimates output rather than billing the start count", async () => {
+  const { receipt } = await translate(events({ input_tokens: 5, output_tokens: 1 }));
+  assert.equal(receipt.prompt_tokens, 5);
+  assert.equal(receipt.completion_tokens, 2);
+  assert.equal(receipt.total_tokens, 7);
+  assert.deepEqual(receipt.usage_evidence?.output, {
+    source: "estimated",
+    method: "observed_characters",
+  });
+});
+
 test("a later explicit zero replaces the previous cumulative counter", async () => {
   const input = events({ input_tokens: 5, output_tokens: 7 });
   input.push({
