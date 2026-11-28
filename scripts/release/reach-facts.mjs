@@ -48,6 +48,17 @@ function isMetricKey(key) {
   return typeof key === "string" && /^[a-z][A-Za-z0-9]{1,39}$/.test(key);
 }
 
+// A rolling window such as npmDownloads30d can fall without anything being wrong.
+function isRollingWindow(key) {
+  return /\dd$/.test(key);
+}
+
+// Code-unit order keeps the snapshot byte-stable across locales.
+function byCodeUnit(left, right) {
+  if (left < right) return -1;
+  return left > right ? 1 : 0;
+}
+
 function isCount(value) {
   return Number.isSafeInteger(value) && value > 0;
 }
@@ -109,7 +120,7 @@ export function validateReach(source, { now, previous, allowDrop = [] }) {
     if (
       previous &&
       Object.hasOwn(previous.metrics, key) &&
-      !/\d+d$/.test(key) &&
+      !isRollingWindow(key) &&
       !allowedDrops.has(key) &&
       BigInt(value) * 5n < BigInt(previous.metrics[key].value) * 4n
     ) {
@@ -131,7 +142,7 @@ export function validateReach(source, { now, previous, allowDrop = [] }) {
 export function renderSnapshot({ schema, collectedOn, metrics }) {
   const sorted = Object.fromEntries(
     Object.keys(metrics)
-      .sort()
+      .sort(byCodeUnit)
       .map((key) => {
         const { value, collectedAt } = metrics[key];
         return [key, { value, collectedAt }];
