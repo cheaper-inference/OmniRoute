@@ -48,6 +48,23 @@ async function deleteDraft(id: string): Promise<boolean> {
   return res?.ok ?? false;
 }
 
+function assertWebhookConfigSaved(
+  res: Response,
+  data: { error?: unknown },
+  t: AddWebhookWizardProps["t"]
+) {
+  if (!res.ok) throw new Error(webhookErrorText(data.error, t("saveFailed")));
+}
+
+function requireCreatedDraftId(
+  data: { webhook?: { id?: string } | null },
+  t: AddWebhookWizardProps["t"]
+): string {
+  const id = data.webhook?.id;
+  if (!id) throw new Error(t("saveFailed"));
+  return id;
+}
+
 interface WizardState {
   kind: WebhookKind;
   slack: SlackConfig;
@@ -218,7 +235,7 @@ export function AddWebhookWizard({
           body: JSON.stringify(buildConfigPayload()),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(webhookErrorText(data.error, t("saveFailed")));
+        assertWebhookConfigSaved(res, data, t);
       } else {
         const res = await fetch("/api/webhooks", {
           method: "POST",
@@ -226,9 +243,8 @@ export function AddWebhookWizard({
           body: JSON.stringify({ ...buildConfigPayload(), enabled: false }),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(webhookErrorText(data.error, t("saveFailed")));
-        const id = data.webhook?.id;
-        if (!id) throw new Error(t("saveFailed"));
+        assertWebhookConfigSaved(res, data, t);
+        const id = requireCreatedDraftId(data, t);
         if (sessionRef.current !== session) {
           void deleteDraft(id);
           return;
