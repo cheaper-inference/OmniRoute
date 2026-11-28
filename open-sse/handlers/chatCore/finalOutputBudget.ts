@@ -45,6 +45,7 @@ export function enforceFinalOutputTokenBudget({
   body,
   finalEstimatedInputTokens,
   finalContextLimit,
+  contextLimitSpecific = true,
   contextWindowChecksDisabled,
   modelOutputCap,
   effectiveInputCap,
@@ -57,6 +58,7 @@ export function enforceFinalOutputTokenBudget({
   body: Record<string, unknown>;
   finalEstimatedInputTokens: number;
   finalContextLimit: number;
+  contextLimitSpecific?: boolean;
   contextWindowChecksDisabled: boolean;
   modelOutputCap: number | null;
   effectiveInputCap: number | null;
@@ -69,7 +71,9 @@ export function enforceFinalOutputTokenBudget({
   const outputBudget = enforceOutputTokenBudget(
     body as Record<string, unknown>,
     finalEstimatedInputTokens,
-    contextWindowChecksDisabled ? Number.MAX_SAFE_INTEGER : finalContextLimit,
+    contextWindowChecksDisabled || !contextLimitSpecific
+      ? Number.MAX_SAFE_INTEGER
+      : finalContextLimit,
     targetFormat === FORMATS.CLAUDE && sourceFormat !== FORMATS.CLAUDE ? DEFAULT_MAX_TOKENS : 0,
     modelOutputCap,
     effectiveInputCap
