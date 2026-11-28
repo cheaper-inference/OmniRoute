@@ -646,6 +646,6 @@ export const NOUS_CONFIG = {
   apiBaseUrl: "https://inference-api.nousresearch.com/v1",
   initiateUrl: "https://portal.nousresearch.com/api/oauth/device/code",
   tokenUrl: "https://portal.nousresearch.com/api/oauth/token",
-  clientId: "hermes-cli",
+  clientId: resolvePublicCred("nous_id", "NOUS_OAUTH_CLIENT_ID"),
   scope: "inference:invoke",
 };

@@ -113,7 +113,17 @@ export const nous = {
       };
     }
 
-    const data = await readOAuthResponse(response);
+    let data: Record<string, unknown>;
+    try {
+      data = await readOAuthResponse(response);
+    } catch (error) {
+      // Headers arrived, then the connection dropped while reading the body.
+      // The ticket is still alive; keep polling instead of rejecting.
+      return {
+        ok: false,
+        data: { error: "authorization_pending", error_description: String(error).slice(0, 200) },
+      };
+    }
 
     if (response.ok && data.access_token) {
       return {
@@ -134,8 +144,12 @@ export const nous = {
     }
 
     // 408 / 429 / 5xx with a non-OAuth body: transient, so keep polling rather
-    // than burning the user's ticket on a provider hiccup.
-    if (!code && (response.status === 408 || response.status === 429 || response.status >= 500)) {
+    // than burning the user's ticket on a provider hiccup. A parse failure is
+    // reported as `invalid_response`, which must take this path too (an HTML
+    // 503 or an empty 429 is exactly that case).
+    const transientStatus =
+      response.status === 408 || response.status === 429 || response.status >= 500;
+    if ((!code || code === "invalid_response") && transientStatus) {
       return { ok: false, data: { error: "authorization_pending" } };
     }
 
