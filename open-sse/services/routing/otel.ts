@@ -68,6 +68,8 @@ export class OtlpHttpsEventSink {
   private buffer: RoutingEventLike[] = [];
   private dropped = 0;
   private consecutiveFailures = 0;
+  /** Breaker: no collector call before this time (ms epoch). Flush runs one at a time, so one probe per window. */
+  private openUntil = 0;
   private flushedBatches = 0;
   private timer: ReturnType<typeof setInterval> | null = null;
   private flushing = false;
@@ -120,6 +122,7 @@ export class OtlpHttpsEventSink {
   private async flush(): Promise<void> {
     if (this.flushing) return;
     if (this.buffer.length === 0) return;
+    if (Date.now() < this.openUntil) return;
     this.flushing = true;
     const batch = this.buffer.splice(0, this.maxBatchSize);
     try {
@@ -139,6 +142,7 @@ export class OtlpHttpsEventSink {
       this.consecutiveFailures += 1;
       if (this.consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
         this.dropped += batch.length;
+        this.openUntil = Date.now() + BREAKER_OPEN_MS;
       } else {
         this.buffer.unshift(...batch);
       }
@@ -150,6 +154,9 @@ export class OtlpHttpsEventSink {
 
 /** Drop a batch (and count it) after this many consecutive collector failures. */
 const MAX_CONSECUTIVE_FAILURES = 5;
+
+/** After that many failures, stop calling the collector for this long, then send one probe. */
+const BREAKER_OPEN_MS = 30_000;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type RoutingEventLike = any;
