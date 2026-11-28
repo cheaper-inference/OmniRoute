@@ -1,0 +1,1 @@
+- **fix(server):** Preserve request bodies when serving cleartext h2c requests over HTTP/1.1 on Node.js 26.

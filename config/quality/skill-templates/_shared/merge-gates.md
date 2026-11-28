@@ -148,7 +148,8 @@ a release branch:
    still good.
 4. **Merge trains.** A train whose own full CI ran green on the current base tip is the same
    validation for its members (the train's candidate is the thing tested): they need no separate
-   verdict. Do not label the train PR itself.
+   verdict. Do not label the train PR itself in `shadow`; in `live` the label on the train is its
+   landing (below).
 5. **A head that already contains the base tip.** When the base tip is an ancestor of the PR head
    (`git merge-base --is-ancestor <base tip> <head>`: a branch just updated from the base, a
    sync-back merge) and the PR's gates are green on that head, those checks are about today's
@@ -171,6 +172,11 @@ commits on the base (§8 readback), never the label.
 - The only automatic labeler is the `derived-refresh-autoland` workflow, and only on the
   `chore/derived-refresh` robot PR (`docs/ops/OMNI_QUEUE.md` → "Automatic labeling for the derived
   refresh"). No session, script or loop applies the label on its own.
+- A merge train (`/merge-train`) is one pull request for the queue. After the train's own gates are
+  green and the owner's go for its head, the label goes on the train's pull request and on no
+  member. The queue lands the train with one merge commit; every member head is then in the base
+  and GitHub marks each member merged. The train's member merges carry `Merge-Train-*` trailers
+  that name each member's pull request, head and author, for the release numbers.
 - The queue re-runs the failed jobs of a red batch once, then finds the culprit; a PR it takes out
   of the queue is told why on the PR. Fix it and label it again; do not re-label an unchanged head.
 - `omni-queue-hotfix` (next batch, alone) and `omni-queue-base-repair` (the only work accepted

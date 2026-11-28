@@ -70,6 +70,7 @@ export interface CacheStoreParams {
   apiKeyId?: string | null;
   signature?: string;
   tokensSaved?: number;
+  originalCostUsd?: number;
   ttlMs?: number;
 }
 
@@ -505,6 +506,7 @@ export class SemanticCacheManager {
       response: params.response,
       streamChunks: params.streamChunks,
       tokensSaved: params.tokensSaved || 0,
+      originalCostUsd: params.originalCostUsd,
       createdAt: now,
       expiresAt: now + effectiveTtl,
     };

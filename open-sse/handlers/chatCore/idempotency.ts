@@ -7,6 +7,14 @@ import type { EffectiveServiceTier } from "./serviceTier.ts";
 type HeadersLike = Headers | Record<string, unknown> | null | undefined;
 type IdempotencyRequest = { headers?: HeadersLike } | null | undefined;
 type LoggerLike = { debug?: (...args: unknown[]) => void } | null | undefined;
+type IdempotencyReplay = { success: true; response: Response };
+type IdempotencyReplayContext = {
+  provider: string;
+  model: string;
+  effectiveServiceTier: EffectiveServiceTier | null | undefined;
+  startTime: number;
+  log: LoggerLike;
+};
 
 const IDEMPOTENCY_SEMANTIC_FIELDS = [
   "messages",
@@ -129,18 +137,13 @@ export async function checkIdempotencyCache({
   startTime,
   log,
   videoTranscriptSensitive,
-}: {
+}: IdempotencyReplayContext & {
   clientRawRequest: IdempotencyRequest;
-  provider: string;
-  model: string;
   body?: unknown;
   /** The calling API key, so replays are never shared across callers. */
   apiKeyId?: string | null;
-  effectiveServiceTier: EffectiveServiceTier | null | undefined;
-  startTime: number;
-  log: LoggerLike;
   videoTranscriptSensitive?: boolean;
-}): Promise<{ hit: { success: true; response: Response } | null; idempotencyKey: string | null }> {
+}): Promise<{ hit: IdempotencyReplay | null; idempotencyKey: string | null }> {
   // A response may quote the video transcript. No key means neither a replay
   // from a previous entry nor a write at chatCore's later save site.
   if (videoTranscriptSensitive) return { hit: null, idempotencyKey: null };
@@ -154,41 +157,53 @@ export async function checkIdempotencyCache({
     body,
     apiKeyId,
   });
+  const hit = idempotencyKey
+    ? await readIdempotencyResponse(idempotencyKey, {
+        provider,
+        model,
+        effectiveServiceTier,
+        startTime,
+        log,
+      })
+    : null;
+  return { hit, idempotencyKey };
+}
+
+export async function readIdempotencyResponse(
+  idempotencyKey: string,
+  { provider, model, effectiveServiceTier, startTime, log }: IdempotencyReplayContext
+): Promise<IdempotencyReplay | null> {
   const cachedIdemp = checkIdempotency(idempotencyKey);
-  if (cachedIdemp) {
-    log?.debug?.("IDEMPOTENCY", `Hit for key=${idempotencyKey?.slice(0, 12)}...`);
-    const idempotentUsage =
-      cachedIdemp.response && typeof cachedIdemp.response === "object"
-        ? ((cachedIdemp.response as Record<string, unknown>).usage as
-            Record<string, unknown> | undefined)
-        : undefined;
-    const idempotentCost = idempotentUsage
-      ? await calculateCost(provider, model, idempotentUsage as Record<string, number>, {
-          serviceTier: effectiveServiceTier,
-        })
-      : 0;
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "X-OmniRoute-Idempotent": "true",
-    };
-    attachOmniRouteMetaHeaders(headers, {
-      provider,
-      model,
-      cacheHit: false,
-      latencyMs: Date.now() - startTime,
-      usage: idempotentUsage,
-      costUsd: idempotentCost,
-    });
-    return {
-      idempotencyKey,
-      hit: {
-        success: true,
-        response: new Response(JSON.stringify(cachedIdemp.response), {
-          status: cachedIdemp.status,
-          headers,
-        }),
-      },
-    };
-  }
-  return { hit: null, idempotencyKey };
+  if (!cachedIdemp) return null;
+
+  log?.debug?.("IDEMPOTENCY", `Hit for key=${idempotencyKey.slice(0, 12)}...`);
+  const idempotentUsage =
+    cachedIdemp.response && typeof cachedIdemp.response === "object"
+      ? ((cachedIdemp.response as Record<string, unknown>).usage as
+          Record<string, unknown> | undefined)
+      : undefined;
+  const idempotentCost = idempotentUsage
+    ? await calculateCost(provider, model, idempotentUsage as Record<string, number>, {
+        serviceTier: effectiveServiceTier,
+      })
+    : 0;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "X-OmniRoute-Idempotent": "true",
+  };
+  attachOmniRouteMetaHeaders(headers, {
+    provider,
+    model,
+    cacheHit: false,
+    latencyMs: Date.now() - startTime,
+    usage: idempotentUsage,
+    costUsd: idempotentCost,
+  });
+  return {
+    success: true,
+    response: new Response(JSON.stringify(cachedIdemp.response), {
+      status: cachedIdemp.status,
+      headers,
+    }),
+  };
 }

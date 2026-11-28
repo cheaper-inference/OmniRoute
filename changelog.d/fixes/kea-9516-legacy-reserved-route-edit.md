@@ -1,0 +1,1 @@
+- **fix(combos):** Allow edits and enable/disable toggles on existing combos that keep a reserved name. Creating a combo or renaming one to `auto` or `auto/*` still fails validation.

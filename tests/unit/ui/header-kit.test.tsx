@@ -45,10 +45,13 @@ describe("Header on the kit shell", () => {
       expect(screen.getByRole("button", { name: "Collapse sidebar" })).not.toBeNull();
       expect(screen.getByRole("heading", { level: 1 }).textContent).toMatch(/Providers/);
       expect(screen.getByRole("navigation", { name: "Keak products" })).not.toBeNull();
-      const quickNav = screen.getAllByRole("button", { name: "Open quick navigation" });
-      expect(quickNav).toHaveLength(2); // desktop outline + mobile icon (jsdom ignores md:hidden)
-      fireEvent.click(quickNav[0]);
+      // jsdom omits the separators that the browser derives from the flex layout.
+      const desktopQuickNav = screen.getByRole("button", { name: /^Quick nav\s*Ctrl\s*K$/ });
+      const mobileQuickNav = screen.getByRole("button", { name: "Open quick navigation" });
+      fireEvent.click(desktopQuickNav);
       expect(open).toHaveBeenCalledTimes(1);
+      fireEvent.click(mobileQuickNav);
+      expect(open).toHaveBeenCalledTimes(2);
       expect(screen.getByRole("button", { name: "Logout" }).className).toContain(
         "ci-button--ghost"
       );

@@ -126,6 +126,7 @@ test("syncRadar writes the build date it just validated", async () => {
 });
 
 test("getRadarCatalog reports the build date alongside the fetch date", () => {
+  radarDb.setRadarOptIn(true);
   seed();
 
   const { meta } = getRadarCatalog();
