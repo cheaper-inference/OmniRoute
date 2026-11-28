@@ -558,6 +558,28 @@ once the flag is on, an unauthenticated request gets `401` before any DB read or
 write. `GET /api/radar/settings` never returns the raw supporter key regardless of
 auth state — only the masked form and a `hasSupporterKey` boolean.
 
+### How to send a promotion lead
+
+Use the [Radar promotion lead form on GitHub](https://github.com/cheaper-inference/OmniRoute/issues/new?template=promotion_lead.yml)
+to tell us about a provider offer. Enter the provider name, the offer link on its own site, and
+what the offer includes. If the provider has no offer page, link to its homepage and explain
+where you saw the offer in the details.
+
+Add the end date if you know it, where you saw the offer, and a separate source link if you
+have one. Complete both confirmations. The reward checkbox is optional.
+
+A person checks each lead before any offer is published.
+
+### Offers club policy
+
+1. A post is a lead, not proof. We check every offer before it goes on the list. If we find it on the provider's own site, it gets a "Verified" badge and the date we checked. If we can't find it there, it can still go on the list, marked as not verified.
+2. What gets in: sign-up credits, recurring credits, time-limited promotions, models that are free for a limited time, bonuses from a provider's official referral program, and deals we negotiated ourselves.
+3. What never gets in: third-party codes, shared keys, shortened links, links outside the provider's domain, multi-account tricks, billing loopholes, "connect your wallet" offers, and anything that needs third-party software. Real offers only. No tricks.
+4. Some links are referral links. Most of them are ours. For a few promotions we keep the link of the person who brought the offer to us. Every referral link says "Referral link" next to the button, and the plain official link sits right beside it. We only list referral programs whose terms allow public posting.
+5. Promotions don't change our free-token numbers. While a promotion is active, it shows up as a labeled extra on top of the official number, and it goes away when the promotion ends. Only promotions the provider states in tokens count toward that extra. Dollar credits stay in dollars.
+6. Bots only find offers. A person approves each one, one at a time. A bot only takes an offer down when it expires or when the page we checked is down twice in a row.
+7. By default we don't keep the name, handle or text of whoever sent a lead. Want a shot at a reward? Tick the box in the lead form. The first person to send an offer that turns out to be valid gets a reward once the offer goes live.
+
 ---
 
 ## Supporter offers

@@ -1,0 +1,83 @@
+name: Radar promotion lead
+description: Tell us about a provider offer that Radar should check.
+labels: ["promotion-lead"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A post is a lead. Verification takes more than a post. A person checks every offer before we publish it.
+
+        GitHub shows your account on this public issue. By default, Radar leaves your identity out of its records. If you opt in for a reward, Radar keeps your identity so we can contact you through this issue.
+
+  - type: input
+    id: provider
+    attributes:
+      label: Provider
+      description: Enter the name of the provider making the offer.
+    validations:
+      required: true
+
+  - type: input
+    id: official_url
+    attributes:
+      label: Link to the offer
+      description: >-
+        Link to the offer page on the provider's own site. If the provider hasn't published the offer,
+        paste the provider's homepage and explain where you saw it in the details.
+        If we publish that offer, we mark it as unverified.
+    validations:
+      required: true
+
+  - type: textarea
+    id: what_is_offered
+    attributes:
+      label: Offer details
+      description: Tell us what the offer includes and who can use it.
+    validations:
+      required: true
+
+  - type: input
+    id: ends_on
+    attributes:
+      label: End date
+      description: Enter the end date if you know it.
+
+  - type: dropdown
+    id: seen_on
+    attributes:
+      label: Where did you see the offer?
+      options:
+        - X
+        - Reddit
+        - Discord
+        - Telegram
+        - linux.do
+        - Hacker News
+        - Newsletter
+        - Provider's own site
+        - Other
+
+  - type: input
+    id: seen_at_url
+    attributes:
+      label: Link to where you saw it
+      description: Add a link if it differs from the offer link.
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirm the offer details
+      options:
+        - label: The link is on the provider's own domain
+          required: true
+        - label: This is not a shared key, wallet offer or multi-account trick
+          required: true
+
+  - type: checkboxes
+    id: reward
+    attributes:
+      label: Reward
+      options:
+        - label: >-
+            I'd like to be considered for a reward if this offer turns out to be valid and goes live.
+            You can reach me through this issue.

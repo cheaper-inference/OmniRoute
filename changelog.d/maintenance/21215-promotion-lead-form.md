@@ -1,0 +1,1 @@
+- **docs(radar):** Add a GitHub form for sending Radar promotion leads, with the offers club policy in the Radar guide ([#21215](https://github.com/cheaper-inference/OmniRoute/pull/21215))
