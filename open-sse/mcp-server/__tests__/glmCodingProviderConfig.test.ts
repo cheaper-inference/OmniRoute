@@ -171,7 +171,8 @@ describe("GLM Coding provider registry surfaces", () => {
     // Models with explicit overrides (Z.AI docs)
     expect(get("glm-5.1")?.contextLength).toBe(204800);
     expect(get("glm-4.6v")?.contextLength).toBe(128000);
-    expect(get("glm-4.5v")?.contextLength).toBe(16000);
+    expect(get("glm-4.5v")?.contextLength).toBe(64000);
+    expect(get("glm-4.5v")?.maxOutputTokens).toBe(16384);
     expect(get("glm-4.5")?.contextLength).toBe(128000);
     expect(get("glm-4.5-air")?.contextLength).toBe(128000);
     expect(get("glm-5.1")?.maxOutputTokens).toBe(131072);

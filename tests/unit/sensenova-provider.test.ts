@@ -9,6 +9,8 @@ test("SenseNova Token Plan catalog exposes only supported chat models with 64K o
   const ids = new Set(models.map((model) => model.id));
 
   assert.ok(ids.has("sensenova-6.7-flash-lite"));
+  // Vendor chat id named on the U1.5 Lite Token Plan page (no limits published for it).
+  assert.ok(ids.has("sensenova-6.8-flash-lite"), "sensenova-6.8-flash-lite must be listed");
   assert.ok(ids.has("deepseek-v4-flash"));
   assert.ok(ids.has("glm-5.2"));
   assert.equal(ids.has("sensenova-u1-fast"), false, "U1 Fast is not a chat-completions model");

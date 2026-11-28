@@ -24,6 +24,8 @@ import { COPILOT_M365_IMAGE_PROVIDER } from "./providers/registry/copilot-m365-w
 import { CODEX_IMAGE_PROVIDER } from "./providers/registry/codex/imageModels.ts";
 import { GROK_BUILD_PROXY_BASE_URL } from "./grokBuildEndpoints.ts";
 
+const GPT_IMAGE_SIZES = ["1024x1024", "1536x1024", "1024x1536"];
+
 export interface ImageModelEntry {
   id: string;
   catalogId?: string;
@@ -50,6 +52,8 @@ export interface ImageProviderConfig {
   models: ImageModelEntry[];
   routingAliases?: readonly string[];
   supportedSizes: string[];
+  /** Extra client body fields copied verbatim to the upstream request when the client sends them. */
+  bodyFields?: readonly string[];
 }
 
 export interface ImageModelAliasEntry {
@@ -250,6 +254,20 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     format: "openai", // native OpenAI format
     models: [
       { id: "dall-e-3", name: "DALL·E 3" },
+      // GPT Image 2.5 / 2.6 (OpenAI image generation guide): Sunburst for edit precision, Flare
+      // for fast generation. Sizes are the guide's recommended set; custom WxH also passes through.
+      {
+        id: "gpt-image-2.6-sunburst",
+        name: "GPT Image 2.6 Sunburst",
+        supportedSizes: GPT_IMAGE_SIZES,
+      },
+      { id: "gpt-image-2.6-flare", name: "GPT Image 2.6 Flare", supportedSizes: GPT_IMAGE_SIZES },
+      {
+        id: "gpt-image-2.5-sunburst",
+        name: "GPT Image 2.5 Sunburst",
+        supportedSizes: GPT_IMAGE_SIZES,
+      },
+      { id: "gpt-image-2.5-flare", name: "GPT Image 2.5 Flare", supportedSizes: GPT_IMAGE_SIZES },
       { id: "gpt-image-2", name: "GPT Image 2" },
       { id: "gpt-image-1.5", name: "GPT Image 1.5" },
       { id: "gpt-image-1-mini", name: "GPT Image 1 Mini" },
@@ -754,12 +772,17 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
   // SenseNova api-key/connection as the chat provider. (9router#2233)
   sensenova: {
     id: "sensenova",
-    baseUrl: "https://api.sensenova.cn/v1/images/generations",
+    // Token Plan host, same as the chat route and the vendor's U1.5 Lite page.
+    baseUrl: "https://token.sensenova.cn/v1/images/generations",
     authType: "apikey",
     authHeader: "bearer",
     format: "openai",
-    models: [{ id: "sensenova-u1-fast", name: "SenseNova U1 Fast" }],
+    models: [
+      { id: "sensenova-u1-fast", name: "SenseNova U1 Fast" },
+      { id: "sensenova-u1.5-lite", name: "SenseNova U1.5 Lite" },
+    ],
     supportedSizes: ["1024x1024"],
+    bodyFields: ["output_format", "watermark", "prompt_extend"],
   },
 
   // HuggingFace Hub Inference API text-to-image task. Returns raw image bytes

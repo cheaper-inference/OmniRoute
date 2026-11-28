@@ -597,9 +597,21 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
   codestral: buildModels(["codestral-2508", "codestral-latest"]),
   upstage: buildModels(["solar-pro3", "solar-mini"]),
   maritalk: buildModels(["sabia-4", "sabia-4-thinking", "sabiazinho-4"]),
+  // V2.5 ids were retired by the vendor on 2026-10-21 (mimo.mi.com/docs/updates/deprecate).
   "xiaomi-mimo": [
-    { id: "mimo-v2.5-pro", name: "MiMo-V2.5-Pro", contextLength: 1048576, maxOutputTokens: 131072 },
-    { id: "mimo-v2.5", name: "MiMo-V2.5", contextLength: 1048576, maxOutputTokens: 131072 },
+    { id: "mimo-v2.6-pro", name: "MiMo-V2.6-Pro", contextLength: 1048576, maxOutputTokens: 131072 },
+    {
+      id: "mimo-v2.6-flash",
+      name: "MiMo-V2.6-Flash",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "mimo-v2.6-pro-ultraspeed",
+      name: "MiMo-V2.6-Pro-Ultraspeed",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+    },
   ],
   "xiaomi-mimo-token-plan": [
     { id: "mimo-v2.6-pro", name: "MiMo-V2.6-Pro", contextLength: 1048576, maxOutputTokens: 131072 },
