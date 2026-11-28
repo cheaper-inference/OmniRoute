@@ -2432,11 +2432,26 @@ export async function GET(
     }
 
     const localCatalog = mergeLocalCatalogModels(registryCatalogModels, specialtyCatalogModels);
-    if (!config && localCatalog.length > 0) {
+    // Providers with no discovery config (web-cookie providers such as gemini-web or
+    // claude-web) have no upstream model list: the registry is their only source of
+    // NEW models. Returning just the previously synced list made a sync re-import
+    // that same list forever, so models added to the registry later never reached
+    // the connection's catalog. Put the current registry first and keep any synced
+    // extras behind it.
+    const noDiscoveryCatalog =
+      !config && providerSyncedModels
+        ? mergeLocalCatalogModels(
+            (getModelsByProviderId(provider) || []).map((model) =>
+              toDiscoveryCatalogModel(model, provider)
+            ),
+            providerSyncedModels
+          )
+        : null;
+    if (!config && (noDiscoveryCatalog?.length || localCatalog.length > 0)) {
       return buildResponse({
         provider,
         connectionId,
-        models: toLocalCatalogModels(),
+        models: noDiscoveryCatalog?.length ? noDiscoveryCatalog : toLocalCatalogModels(),
         source: "local_catalog",
         // #5460/#5465 — providers with no discovery config (embedding/rerank/
         // web-cookie providers like voyage-ai, jina-ai, t3-web) are
