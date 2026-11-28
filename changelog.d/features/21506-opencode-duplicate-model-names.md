@@ -1,0 +1,1 @@
+- **feat(cli):** generated `opencode.json` disambiguates duplicate model display names by appending the provider node (or full id as fallback) so OpenCode's picker can tell colliding entries apart ([#21506](https://github.com/cheaper-inference/OmniRoute/pull/21506))
