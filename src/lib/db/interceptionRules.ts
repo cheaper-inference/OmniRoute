@@ -8,32 +8,13 @@
  * rule > undefined (caller falls back to the existing native-bypass defaults).
  */
 
-import { getDbInstance } from "./core";
+import type { ProviderInterceptionRules } from "@/domain/persistence/interceptionRuleRepository";
+import { sqliteInterceptionRuleLegacySync as legacySync } from "./repositories/sqliteInterceptionRuleRepository";
 
-const NAMESPACE = "interception_rules";
-
-// ── Types ───────────────────────────────────────────────────────────────────
-
-export type FetchInterceptionBackend = "firecrawl" | "jina" | "tavily";
-
-export interface ModelInterceptionRule {
-  /** true = route through OmniRoute's /v1/search; false = force native passthrough. */
-  interceptSearch?: boolean;
-  /** true = route through OmniRoute's /v1/web/fetch; false = force native passthrough. */
-  interceptFetch?: boolean;
-  fetchBackend?: FetchInterceptionBackend;
-  fetchProxyUrl?: string;
-}
-
-export interface ProviderInterceptionRules {
-  /** Provider-level default, used when a model has no override. */
-  interceptSearch?: boolean;
-  interceptFetch?: boolean;
-  fetchBackend?: FetchInterceptionBackend;
-  fetchProxyUrl?: string;
-  /** Per-model overrides (stricter/looser than provider-level). */
-  models?: Record<string, ModelInterceptionRule>;
-}
+export type {
+  FetchInterceptionBackend,
+  ProviderInterceptionRules,
+} from "@/domain/persistence/interceptionRuleRepository";
 
 // ── Cache ───────────────────────────────────────────────────────────────────
 
@@ -45,93 +26,17 @@ function invalidateCache(): void {
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
 function toNormalizedString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }
 
-function toOptionalBool(value: unknown): boolean | undefined {
-  return typeof value === "boolean" ? value : undefined;
-}
-
-function toFetchBackend(value: unknown): FetchInterceptionBackend | undefined {
-  return value === "firecrawl" || value === "jina" || value === "tavily" ? value : undefined;
-}
-
-function parseStoredValue(raw: unknown): unknown {
-  if (typeof raw !== "string") return raw;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return raw;
-  }
-}
-
-function toModelInterceptionRule(raw: unknown): ModelInterceptionRule | null {
-  if (!isRecord(raw)) return null;
-  const rule: ModelInterceptionRule = {
-    interceptSearch: toOptionalBool(raw.interceptSearch),
-    interceptFetch: toOptionalBool(raw.interceptFetch),
-    fetchBackend: toFetchBackend(raw.fetchBackend),
-    fetchProxyUrl: toNormalizedString(raw.fetchProxyUrl) ?? undefined,
-  };
-  const hasAnyField = Object.values(rule).some((v) => v !== undefined);
-  return hasAnyField ? rule : null;
-}
-
-function toModelInterceptionRules(raw: unknown): Record<string, ModelInterceptionRule> {
-  const models: Record<string, ModelInterceptionRule> = {};
-  if (!isRecord(raw)) return models;
-  for (const [modelId, val] of Object.entries(raw)) {
-    const rule = toModelInterceptionRule(val);
-    if (rule) models[modelId] = rule;
-  }
-  return models;
-}
-
-function toProviderInterceptionRules(raw: unknown): ProviderInterceptionRules | null {
-  if (!isRecord(raw)) return null;
-  const models = toModelInterceptionRules(raw.models);
-  return {
-    interceptSearch: toOptionalBool(raw.interceptSearch),
-    interceptFetch: toOptionalBool(raw.interceptFetch),
-    fetchBackend: toFetchBackend(raw.fetchBackend),
-    fetchProxyUrl: toNormalizedString(raw.fetchProxyUrl) ?? undefined,
-    models: Object.keys(models).length > 0 ? models : undefined,
-  };
-}
-
 // ── Read ────────────────────────────────────────────────────────────────────
 
-function readNamespace(namespace: string): Record<string, unknown> {
-  const db = getDbInstance();
-  const rows = db
-    .prepare("SELECT key, value FROM key_value WHERE namespace = ?")
-    .all(namespace) as Array<{ key: string; value: string }>;
-
-  const values: Record<string, unknown> = {};
-  for (const row of rows) {
-    values[row.key] = parseStoredValue(row.value);
-  }
-  return values;
-}
-
-function loadAllRules(): Map<string, ProviderInterceptionRules> {
-  const raw = readNamespace(NAMESPACE);
-  const map = new Map<string, ProviderInterceptionRules>();
-  for (const [key, value] of Object.entries(raw)) {
-    const parsed = toProviderInterceptionRules(value);
-    if (parsed) map.set(key, parsed);
-  }
-  return map;
-}
-
+// Request-path resolution is synchronous, so reads go through the SQLite-only
+// synchronous binding; the Promise repository is the portable persistence contract.
 function loadRulesCached(): Map<string, ProviderInterceptionRules> {
   if (rulesCache === null) {
-    rulesCache = loadAllRules();
+    rulesCache = new Map(legacySync.list().map(({ provider, rules }) => [provider, rules]));
   }
   return rulesCache;
 }
@@ -148,20 +53,7 @@ export function setInterceptionRules(provider: string, rules: ProviderIntercepti
   const normalizedProvider = toNormalizedString(provider);
   if (!normalizedProvider) return;
 
-  const db = getDbInstance();
-  const stmt = db.prepare(
-    "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)"
-  );
-
-  const normalized: ProviderInterceptionRules = {
-    interceptSearch: rules.interceptSearch,
-    interceptFetch: rules.interceptFetch,
-    fetchBackend: rules.fetchBackend,
-    fetchProxyUrl: rules.fetchProxyUrl,
-    models: rules.models && Object.keys(rules.models).length > 0 ? rules.models : undefined,
-  };
-
-  stmt.run(NAMESPACE, normalizedProvider, JSON.stringify(normalized));
+  legacySync.upsert(normalizedProvider, rules);
   invalidateCache();
 }
 
@@ -170,11 +62,7 @@ export function deleteInterceptionRules(provider: string): void {
   const normalizedProvider = toNormalizedString(provider);
   if (!normalizedProvider) return;
 
-  const db = getDbInstance();
-  db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?").run(
-    NAMESPACE,
-    normalizedProvider
-  );
+  legacySync.deleteByProvider(normalizedProvider);
   invalidateCache();
 }
 
