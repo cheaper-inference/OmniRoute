@@ -82,6 +82,8 @@ export { shouldAttemptRotatingRefresh } from "./providerLimits/credentialRefresh
 type JsonRecord = Record<string, unknown>;
 type SyncSource = "manual" | "scheduled";
 
+// Google Flow web-session / cookie → Veo / Imagen credits
+const GOOGLEFLOW_PROVIDER_IDS = new Set(["googleflow-web", "googleflow", "gflow"]);
 const PROVIDER_LIMITS_APIKEY_PROVIDERS = new Set([
   "glm",
   "glm-cn",
@@ -122,6 +124,7 @@ const PROVIDER_LIMITS_APIKEY_PROVIDERS = new Set([
   // Tavily API key → /usage account & plan credits
   "tavily-search",
   "tavily",
+  ...GOOGLEFLOW_PROVIDER_IDS,
   // Jina wallet balance (GET https://dash.jina.ai/api/v1/api_key/fe_user)
   "jina-search",
   "jina",
@@ -182,7 +185,8 @@ export function notifyProviderUsageRecorded(
   provider: string | null | undefined,
   connectionId: string | null | undefined
 ): void {
-  if ((provider !== "antigravity" && provider !== "agy") || !connectionId) return;
+  const isAntigravity = provider === "antigravity" || provider === "agy";
+  if (!(isAntigravity || GOOGLEFLOW_PROVIDER_IDS.has(provider ?? "")) || !connectionId) return;
   scheduleProviderLimitsPostUsageRefresh(connectionId);
 }
 
@@ -244,6 +248,8 @@ export function isSupportedUsageConnection(connection: ProviderConnectionLike | 
   if (connection.authType === "oauth") {
     return supportsProviderQuota(connection.provider, connection);
   }
+  const webSession = connection.authType === "web-session" || connection.authType === "cookie";
+  if (webSession && GOOGLEFLOW_PROVIDER_IDS.has(connection.provider)) return true;
   if (connection.authType !== "apikey" && connection.authType !== "api_key") return false;
   if (PROVIDER_LIMITS_APIKEY_PROVIDERS.has(connection.provider)) return true;
   return supportsProviderQuota(connection.provider, connection);

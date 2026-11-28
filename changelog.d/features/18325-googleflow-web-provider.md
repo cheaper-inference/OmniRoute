@@ -1,0 +1,1 @@
+- **feat(providers):** add native Google Flow Web provider (`googleflow-web` with `googleflow`/`gflow` aliases) — support Veo 3.1 video/image generations, session cookie auth, quota and credits tracking with 1h TTL, and pool failover (#18325 — thanks @dkmscc)

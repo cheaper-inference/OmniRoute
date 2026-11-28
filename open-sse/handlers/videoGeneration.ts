@@ -11,6 +11,7 @@ import { getVideoProvider, parseVideoModel } from "../config/videoRegistry.ts";
 import { kieExecutor } from "../executors/kie.ts";
 import { vertexGenerateVideo } from "../executors/vertexMedia.ts";
 import { handleGoogleFlowVideoGeneration } from "./videoGeneration/googleFlowHandler.ts";
+import { handleGoogleFlowWebVideoGeneration } from "./videoGeneration/googleflowWebHandler.ts";
 import { handleDeepinfraVideoGeneration } from "./videoGeneration/deepinfraHandler.ts";
 import { handleLeonardoVideoGeneration } from "./videoGeneration/leonardoHandler.ts";
 import { handleRenderhourVideoGeneration } from "./videoGeneration/renderhourHandler.ts";
@@ -194,6 +195,9 @@ export async function handleVideoGeneration({
   mediaSink = undefined,
   prepareFalInput = null,
   signal = null,
+  // Session-cookie providers (googleflow-web) hand back a rotated cookie; the route persists it
+  // through the provider-connection DB module.
+  onSessionCookieRotated = undefined,
 }) {
   if (signal?.aborted) return abortedVideoResult();
   let { provider, model } = parseVideoModel(body.model);
@@ -315,6 +319,17 @@ export async function handleVideoGeneration({
 
   if (providerConfig.format === "google-flow") {
     return handleGoogleFlowVideoGeneration({ model, providerConfig, body, credentials, log });
+  }
+
+  if (providerConfig.format === "googleflow-web" || provider === "googleflow-web") {
+    return handleGoogleFlowWebVideoGeneration({
+      model,
+      providerConfig,
+      body,
+      credentials,
+      onSessionCookieRotated,
+      log,
+    });
   }
 
   if (providerConfig.format === "comfyui") {

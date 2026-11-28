@@ -86,6 +86,10 @@ export const USAGE_FETCHER_PROVIDERS = [
   // i.e. the balance is now actually fetched, which is the point.
   "adobe-firefly",
   "firefly",
+  // Google Flow web Veo credits (nzlxg RPC with the session cookies)
+  "googleflow-web",
+  "googleflow",
+  "gflow",
   // HyperAgent billing usage (creditBlocks USD)
   "hyperagent",
   "ha",

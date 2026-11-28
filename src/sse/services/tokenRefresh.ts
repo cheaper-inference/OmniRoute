@@ -346,6 +346,21 @@ export async function updateProviderCredentials(
   }
 }
 
+/**
+ * Persister for session-cookie providers (googleflow-web) that rotate their cookie while a
+ * browser run is open: the rotated cookie replaces the connection's encrypted apiKey through
+ * updateProviderConnection (src/lib/db/providers.ts). Undefined without a stored connection.
+ */
+export function persistRotatedSessionCookie(
+  connectionId: unknown
+): ((cookie: string) => Promise<void>) | undefined {
+  if (typeof connectionId !== "string" || !connectionId) return undefined;
+  return async (cookie: string) => {
+    if (typeof cookie !== "string" || !cookie.trim()) return;
+    await updateProviderCredentials(connectionId, { apiKey: cookie });
+  };
+}
+
 // A transient Muse remint failure says nothing about the credential: keep it, as a null refresh does.
 function keepsMuseCredentialsAfterRefreshError(provider: string, error: unknown) {
   return provider === "muse-code" && isTransientRefreshError(error);
