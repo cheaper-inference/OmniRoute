@@ -12,6 +12,7 @@ process.env.DATA_DIR = dataDir;
 process.env.REQUIRE_API_KEY = "false";
 process.env.OMNIROUTE_PLUGINS_DIR = path.join(dataDir, "plugins");
 const core = await import("../../src/lib/db/core.ts");
+const { waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 const { createProviderConnection, deleteProviderConnectionsByProvider } =
   await import("../../src/lib/db/providers.ts");
 const { QoderExecutor } = await import("../../open-sse/executors/qoder.ts");
@@ -23,9 +24,12 @@ const PAT = ["pt", "image", "fixture"].join("-");
 const HTTP_KEY = ["sk", "image", "fixture"].join("_");
 const IMAGE_PART = { type: "image_url", image_url: { url: "data:image/png;base64,AAAA" } };
 
-test.after(() => {
+test.after(async () => {
+  // Call-log saves are fire-and-forget and still write under dataDir after the last case
+  // returns; removing the directory under them failed with ENOTEMPTY on CI.
+  await waitForCallLogSaves(10_000);
   core.resetDbInstance();
-  fs.rmSync(dataDir, { recursive: true, force: true });
+  fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 /** A fake qodercli that records that it ran. */
