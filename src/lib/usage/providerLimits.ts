@@ -1,3 +1,4 @@
+import { ZCODE_PROVIDERS } from "@/shared/constants/zcodeProviders";
 import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
 import { syncCodexWorkspaceInfoIfNeeded } from "@/lib/usage/codexWorkspaceSync";
 import { syncCodexPlanFromUsage } from "@/lib/usage/codexPlanSync";
@@ -39,7 +40,8 @@ import {
 } from "@omniroute/open-sse/services/usage/claudeQuota.ts";
 import { getMachineId } from "@/shared/utils/machine";
 import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
-import { mergeProviderLimitsCacheEntry, toProviderLimitsCacheEntry } from "./providerLimitsCache";
+import { toProviderLimitsCacheEntry } from "./providerLimitsCache";
+import { mergeZcodeUsageCache } from "./zcodeUsageCache";
 import { getCredentialRefreshExecutor } from "@omniroute/open-sse/executors/credential.ts";
 import { getUsageForProvider } from "@omniroute/open-sse/services/usage.ts";
 import {
@@ -224,7 +226,6 @@ function shouldRefreshProviderLimitsCache(
 ): boolean {
   if (!cache?.quotas) return true;
   if (connection.provider !== "antigravity" && connection.provider !== "agy") return false;
-
   return (
     !hasRetrieveUserQuotaSource(connection.provider, cache) ||
     Object.keys(cache.quotas).some(
@@ -240,7 +241,7 @@ function shouldRefreshProviderLimitsCache(
 
 export function isSupportedUsageConnection(connection: ProviderConnectionLike | null): boolean {
   if (!connection?.provider) return false;
-
+  if (ZCODE_PROVIDERS.has(connection.provider)) return connection.authType === "oauth";
   if (connection.authType === "oauth") {
     return supportsProviderQuota(connection.provider, connection);
   }
@@ -1285,7 +1286,7 @@ export async function fetchAndPersistProviderLimits(
       cacheReadObservedAt(connection, usage, readStartedAt)
     );
     const previous = getProviderLimitsCache(connectionId);
-    const cache = mergeProviderLimitsCacheEntry(connection.provider, newCache, previous);
+    const cache = mergeZcodeUsageCache(connection.provider, newCache, previous);
 
     // Don't persist error-only entries (429 etc.) — would wipe prior good cache.
     // Serve the prior entry instead; only successful fetches update the cache.
@@ -1352,7 +1353,7 @@ async function fetchUsageCacheForSync(connection: ProviderConnectionLike, source
     source,
     cacheReadObservedAt(connection, usage, readStartedAt)
   );
-  const cache = mergeProviderLimitsCacheEntry(connection.provider, nextCache, existingCache);
+  const cache = mergeZcodeUsageCache(connection.provider, nextCache, existingCache);
   return { connectionId: connection.id, cache, codexFence };
 }
 

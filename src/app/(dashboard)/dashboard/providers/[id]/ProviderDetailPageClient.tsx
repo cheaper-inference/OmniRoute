@@ -308,6 +308,7 @@ export default function ProviderDetailPageClient() {
   // copilot-m365-web is not keychain-only, so it stays first and unconditional.
   const providerSupportsOAuth =
     providerId === "copilot-m365-web" ||
+    providerId === "zcode" ||
     (!isKeychainImportOnly &&
       (providerInfo?.toggleAuthType === "oauth" ||
         providerInfo?.toggleAuthType === "free" ||
@@ -328,14 +329,15 @@ export default function ProviderDetailPageClient() {
 
   const providerSupportsPat = supportsApiKeyOnFreeProvider(providerId);
   const supportsDualAuth = supportsDualAuthProvider(providerId);
-  const isOAuth = providerSupportsOAuth && !providerSupportsPat;
+  const isOAuth = providerId === "zcode" || (providerSupportsOAuth && !providerSupportsPat);
   const providerAlias = getProviderAlias(providerId);
   const devinAgenticAuthenticated = useDevinAgenticAuthStatus(providerId === "devin-cli-agentic");
   const displayConnectionCount =
     connections.length + (devinAgenticAuthenticated && connections.length === 0 ? 1 : 0);
   const isFreeNoAuth =
-    NOAUTH_PROVIDERS[providerId]?.noAuth === true ||
-    getProviderById(providerId)?.managedAccount === true;
+    providerId !== "zcode" &&
+    (NOAUTH_PROVIDERS[providerId]?.noAuth === true ||
+      getProviderById(providerId)?.managedAccount === true);
   const registryModels = getModelsByProviderId(providerId);
   // Use the server's active-catalog authority decision for display and Test All.
   // Registry entries supply metadata/fallback; operator custom models remain.
@@ -767,7 +769,7 @@ export default function ProviderDetailPageClient() {
             />
           ) : (
             <>
-              <ConnectionPinTip />
+              <ConnectionPinTip providerId={providerId} />
               <CoolingConnectionsPanel
                 connections={connections}
                 onClearCooldown={handleClearCooldown}

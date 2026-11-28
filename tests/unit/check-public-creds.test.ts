@@ -68,14 +68,13 @@ test("allowlist freezes a literal by file:line:value key", () => {
 });
 
 test("allowlist preserves the local ZCode handshake client ID without weakening credential detection", () => {
-  // 335 newlines puts the statement on line 336, which is where it lives in
-  // zcodeProtocol.ts today. The allowlist key carries the line number, so this
-  // literal has to be kept in step with the source (it moved 302 -> 313 -> 336).
-  const src = `${"\n".repeat(335)}clientId: \`omniroute-\${process.pid}\`,`;
+  // The exception is scoped to this file and value, not a brittle source line.
+  const src = `${"\n".repeat(7)}clientId: \`omniroute-\${process.pid}\`,`;
   assert.deepEqual(
     findLiteralCreds(src, KNOWN_LITERAL_CREDS, "open-sse/executors/zcodeProtocol.ts"),
     []
   );
+  assert.equal(findLiteralCreds(src, KNOWN_LITERAL_CREDS, "other.ts").length, 1);
   assert.equal(
     findLiteralCreds(
       src.replace("omniroute-", "upstream-client-"),
@@ -104,20 +103,19 @@ test("real scanned files produce ZERO violations with the frozen allowlist (gate
 test("every frozen literal is actually present in a scanned file (no dead allowlist entries)", () => {
   // Anchor files for bare-value frozen entries. The registry was modularized into
   // per-provider plugins (#3993), so providerRegistry.ts is now a re-export barrel;
-  // entries keyed by an explicit `file:line:value` are checked against the file named
-  // in the key (which is where the literal actually lives), not this anchor blob.
+  // entries keyed by `file:value` or `file:line:value` are checked against the
+  // named file (where the literal actually lives), not this anchor blob.
   const anchorFiles = ["open-sse/config/providerRegistry.ts", "src/lib/oauth/constants/oauth.ts"];
   const anchorBlob = anchorFiles
     .map((rel) => fs.readFileSync(path.join(repoRoot, rel), "utf8") as string)
     .join("\n");
   for (const entry of KNOWN_LITERAL_CREDS) {
-    const keyed = entry.includes(":") && /:\d+:/.test(entry);
-    const value = keyed ? entry.replace(/^.*?:\d+:/, "") : entry;
-    if (keyed) {
-      // `file:line:value` entry — the literal must still be present in its own source
-      // file (this is what makes the entry "not dead"). The line may have drifted, so
-      // match on file content rather than the exact line number.
-      const file = entry.replace(/:\d+:.*$/, "");
+    const lineScoped = entry.match(/^(.*):\d+:(.*)$/);
+    const fileScoped = lineScoped ? null : entry.match(/^((?:open-sse|src)\/[^:]+):(.*)$/);
+    const file = lineScoped?.[1] || fileScoped?.[1] || null;
+    const value = lineScoped?.[2] || fileScoped?.[2] || entry;
+    if (file) {
+      // File-scoped entries must still be present in their own source file.
       const src = fs.readFileSync(path.join(repoRoot, file), "utf8") as string;
       assert.ok(
         src.includes(value),

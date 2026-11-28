@@ -91,18 +91,15 @@ const ENV_KEY_RE = /(clientId|clientSecret|apiKey)Env\s*:/;
 //   The MiniMax family was extracted from services/usage.ts into services/usage/minimax.ts
 //   (god-file decomposition), so the FP moved with the getMiniMaxUsage signature.
 //
-//   open-sse/executors/zcodeProtocol.ts L336: `clientId: \`omniroute-${process.pid}\``
+//   open-sse/executors/zcodeProtocol.ts: `clientId: \`omniroute-${process.pid}\``
 //   is the per-process identifier in the local ZCode app-server handshake. It is
 //   generated from the process PID, is not an upstream OAuth/client credential, and
-//   must remain visible in the wire contract. Frozen by file:line:value key.
-//   NOTE: the key includes the LINE, so any edit that shifts this statement breaks
-//   the gate twice over — a stale-entry error plus a "new violation" for the same
-//   literal. That happened again at L313 -> L336 (#13963, win32 shell:true spawn
-//   fix). Re-point the line; do not remove the entry.
+//   must remain visible in the wire contract. Freeze it by file:value: the file scope
+//   keeps the exception narrow without coupling the security gate to a source line.
 export const KNOWN_LITERAL_CREDS = new Set([
   "open-sse/services/usage/minimax.ts:213:minimax", // TODO(6A.8): pre-existing FP — TS fn-param type, not a credential (getMiniMaxUsage signature)
   "open-sse/services/usage/minimax.ts:213:minimax-cn", // TODO(6A.8): pre-existing FP — TS fn-param type, not a credential (getMiniMaxUsage signature)
-  "open-sse/executors/zcodeProtocol.ts:336:omniroute-${process.pid}", // local per-process ZCode handshake ID, not an upstream credential
+  "open-sse/executors/zcodeProtocol.ts:omniroute-${process.pid}", // local per-process ZCode handshake ID, not an upstream credential
 ]);
 
 /**
@@ -119,12 +116,12 @@ export const KNOWN_LITERAL_CREDS = new Set([
  *   3. Caso contrário, qualquer string literal NÃO-VAZIA no RHS é uma violação
  *      — cobre tanto `key: "literal"` quanto `key: process.env.X || "literal"`.
  *   4. Literais vazios ("" / '') são fallback legítimo de process.env → ignorados.
- *   5. Literais presentes na allowlist (por valor OU por chave "arquivo:linha:valor")
- *      ficam congelados → ignorados.
+ *   5. Literais presentes na allowlist (por valor, "arquivo:valor" ou
+ *      "arquivo:linha:valor") ficam congelados → ignorados.
  *
  * @param {string} source  conteúdo do arquivo
- * @param {Set<string>} allowlist  valores de literal (ou chaves arquivo:linha:valor) congelados
- * @param {string} [relFile]  caminho relativo do arquivo (para chaves arquivo:linha:valor)
+ * @param {Set<string>} allowlist  valores ou chaves arquivo:valor / arquivo:linha:valor congelados
+ * @param {string} [relFile]  caminho relativo do arquivo (para chaves com escopo de arquivo)
  * @returns {string[]}  violações legíveis
  */
 export function findLiteralCreds(source, allowlist, relFile = "") {
@@ -151,8 +148,10 @@ export function findLiteralCreds(source, allowlist, relFile = "") {
       const value = lit[2];
       if (!value) continue; // "" / '' — fallback de env, legítimo
       const lineNo = i + 1;
+      const fileValueKey = relFile ? `${relFile}:${value}` : "";
       const fileLineKey = relFile ? `${relFile}:${lineNo}:${value}` : "";
       if (allowlist.has(value)) continue;
+      if (fileValueKey && allowlist.has(fileValueKey)) continue;
       if (fileLineKey && allowlist.has(fileLineKey)) continue;
       violations.push(`L${lineNo}: ${key} = ${JSON.stringify(value)}`);
     }
@@ -176,6 +175,7 @@ function main() {
       const valMatch = v.match(/"([^"]+)"$/);
       const val = valMatch ? valMatch[1] : v;
       liveViolationKeys.add(`${rel}:${lineNo}:${val}`);
+      liveViolationKeys.add(`${rel}:${val}`);
       liveViolationKeys.add(val); // also track plain value for backward compat
     }
   }

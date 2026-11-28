@@ -163,6 +163,32 @@ test("shared set excludes manual aliases that never intercept nodes at runtime",
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("aq"), false);
 });
 
+test("registry IDs and aliases, including ZCode tariffs, are reserved", async () => {
+  const { REGISTRY } = await import("../../open-sse/config/providerRegistry.ts");
+  for (const entry of Object.values(REGISTRY)) {
+    if (entry.id) assert.equal(isReservedProviderPrefix(entry.id), true, entry.id);
+    if (entry.alias) assert.equal(isReservedProviderPrefix(entry.alias), true, entry.alias);
+  }
+  for (const prefix of [
+    "zcode-start",
+    "zc-start",
+    "zcode-individual",
+    "zc-individual",
+    "zcode-cn-start",
+    "zc-cn-start",
+    "zcode-cn-individual",
+    "zc-cn-individual",
+  ]) {
+    assert.equal(isReservedProviderPrefix(prefix), true, prefix);
+    assert.equal(
+      createProviderNodeSchema.safeParse({ name: "collision", prefix, apiType: "chat" }).success,
+      false,
+      prefix
+    );
+  }
+  assert.equal(RESERVED_PREFIX_COUNT, RESERVED_PROVIDER_PREFIXES.size);
+});
+
 test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen Web prefixes", () => {
   // 2026-08-30: 398 → 400 with Perplexity Agent API (#12103) and the second prefix the same
   // afternoon batch registered — computed, not hand-derived (see the note below).
@@ -232,10 +258,14 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // opencode-server (#16995) registers id "opencode-server" plus the distinct alias "ocs" —
   // two more (444 -> 446).
   // Replicate, Cerebrium, Hetzner and Grokified (#19206) add four distinct prefixes (+4: 446 -> 450).
-  // Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 450.
-  assert.equal(RESERVED_PREFIX_COUNT, 450);
+  // ZCode native accounts (#19307) register four tariff ids plus their four aliases
+  // (zcode-start/zc-start, zcode-individual/zc-individual, zcode-cn-start/zc-cn-start,
+  // zcode-cn-individual/zc-cn-individual): +8 (450 -> 458).
+  // Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 458.
+  assert.equal(RESERVED_PREFIX_COUNT, 458);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("opencode-server"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ocs"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("zcode-start"), true);
   for (const id of ["replicate", "cerebrium", "hetzner", "grokified"]) {
     assert.equal(RESERVED_PROVIDER_PREFIXES.has(id), true);
   }

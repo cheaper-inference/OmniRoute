@@ -21,6 +21,12 @@
  * If you add a new provider to the switch in `services/usage.ts`, add it here too.
  */
 export const USAGE_FETCHER_PROVIDERS = [
+  // Managed ZCode OAuth accounts (Z.AI international and BigModel China).
+  "zcode",
+  "zcode-start",
+  "zcode-individual",
+  "zcode-cn-start",
+  "zcode-cn-individual",
   "github",
   "antigravity",
   "agy",
