@@ -206,24 +206,25 @@ test("PATCH /agents/[id]: valid body persists setup_completed", async () => {
 
 test("GET /detect: returns installed:false for unknown id", async () => {
   const res = await detectRoute.GET(new Request("http://localhost/"), {
-    params: { id: "unknown-agent-xyz" },
+    params: Promise.resolve({ id: "unknown-agent-xyz" }),
   });
   assert.equal(res.status, 404);
 });
 
 test("GET /detect: returns detection result for valid id", async () => {
   const res = await detectRoute.GET(new Request("http://localhost/"), {
-    params: { id: "copilot" },
+    params: Promise.resolve({ id: "codex" }),
   });
   assert.equal(res.status, 200);
   const body = (await res.json()) as Record<string, unknown>;
+  assert.equal(body.agentId, "codex");
   assert.ok("installed" in body);
   assert.ok(typeof body.installed === "boolean");
 });
 
 test("GET /detect: error response does not leak stack trace", async () => {
   const res = await detectRoute.GET(new Request("http://localhost/"), {
-    params: { id: "unknown-id-test" },
+    params: Promise.resolve({ id: "unknown-id-test" }),
   });
   const text = await res.text();
   assert.ok(!text.includes("at /"), "stack trace leaked in detect response");

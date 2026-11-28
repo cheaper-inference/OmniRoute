@@ -54,15 +54,16 @@ export async function GET(request: Request): Promise<Response> {
     const rootCaEnabled = process.env.MITM_ROOT_CA_ENABLED === "true";
     const { certPath } = resolveActiveCertPath(certDir, rootCaEnabled);
     const certExists = fs.existsSync(certPath);
-    const certTrusted = certExists ? await checkCertInstalled(certPath) : false;
-    const port =
-      Number(process.env.MITM_LOCAL_PORT) > 0 ? Number(process.env.MITM_LOCAL_PORT) : 443;
-    const serverReachable = status.running ? await probeTcp(port) : false;
+    const certTrusted =
+      status.transparent && certExists ? await checkCertInstalled(certPath) : false;
+    const { port, configuredPort, effectivePort, transparent } = status;
+    const serverReachable =
+      status.running && effectivePort !== null ? await probeTcp(effectivePort) : false;
 
     // Compute aggregate dnsConfigured when no agentId provided (matches state route)
     // This fixes diagnose showing DNS ❌ for non-Antigravity agents (Kiro, Codex, Cursor)
     let dnsConfigured = status.dnsConfigured;
-    if (!agentId) {
+    if (transparent && !agentId) {
       // Check if ANY agent has DNS configured (aggregate view)
       const agentStates = await getAllAgentBridgeStates();
       dnsConfigured =
@@ -76,9 +77,10 @@ export async function GET(request: Request): Promise<Response> {
       certExists,
       certTrusted,
       dnsConfigured,
+      transparent,
     });
 
-    return Response.json({ ...report, port });
+    return Response.json({ ...report, port, configuredPort, effectivePort, transparent });
   } catch (err) {
     const msg = sanitizeErrorMessage(err instanceof Error ? err.message : String(err));
     return createErrorResponse({ status: 500, message: msg });

@@ -39,6 +39,17 @@ import { canRunPrivilegedMitmSteps } from "./sudoGate.ts";
 export { buildRepairPlan, collectManagedHosts, type RepairPlan };
 
 const log = createLogger("mitm-manager");
+const TRANSPARENT_MITM_PORT = 443;
+
+export function resolveMitmPort(requested?: number, configured = process.env.MITM_LOCAL_PORT) {
+  if (requested === undefined && configured === undefined) return TRANSPARENT_MITM_PORT;
+  const port = requested ?? (/^\d+$/.test(configured?.trim() ?? "") ? Number(configured) : NaN);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    const field = requested === undefined ? "MITM_LOCAL_PORT" : "MITM listener port";
+    throw new Error(`${field} must be an integer from 1 to 65535`);
+  }
+  return port;
+}
 
 /**
  * Map the MITM child process (`server.cjs`) stderr to the actual startup-failure
@@ -79,6 +90,7 @@ export function interpretMitmStartupError(stderr: string, port: number): string 
 // Store server process
 let serverProcess: ChildProcess | null = null;
 let serverPid: number | null = null;
+let serverPort: number | null = null;
 
 /**
  * Test-only seam: install a fake server process (and pid) so stopMitm() can be
@@ -86,9 +98,14 @@ let serverPid: number | null = null;
  * only intended for unit tests that need to assert stopMitm()'s DNS/kill
  * ordering (#1809). No-op in production code paths.
  */
-export function __setServerProcessForTest(proc: ChildProcess | null, pid: number | null): void {
+export function __setServerProcessForTest(
+  proc: ChildProcess | null,
+  pid: number | null,
+  port = TRANSPARENT_MITM_PORT
+): void {
   serverProcess = proc;
   serverPid = pid;
+  serverPort = proc ? port : null;
 }
 
 // Set while startMitm() is in flight, from the guard check through spawn.
@@ -145,6 +162,26 @@ export function clearCachedPassword(): void {
 }
 
 const PID_FILE = path.join(resolveMitmDataDir(), "mitm", ".mitm.pid");
+
+function readMitmProcessRecord() {
+  let text: string;
+  try {
+    text = fs.readFileSync(PID_FILE, "utf8").trim();
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw err;
+  }
+  const [pid, port, ...extra] = text.split(/\s+/);
+  if (!/^\d+$/.test(pid) || Number(pid) <= 0 || extra.length) {
+    throw new Error("Invalid MITM process record");
+  }
+  return { pid: Number(pid), port: resolveMitmPort(undefined, port ?? "443") };
+}
+
+function activeOrConfiguredPort() {
+  if (serverPort !== null) return serverPort;
+  return readMitmProcessRecord()?.port ?? resolveMitmPort();
+}
 const TARGETS_JSON_FILE = path.join(resolveMitmDataDir(), "mitm", "targets.json");
 const BYPASS_JSON_FILE = path.join(resolveMitmDataDir(), "mitm", "bypass.json");
 const CA_PATH_FILE = path.join(resolveMitmDataDir(), "mitm", "upstream-ca.path");
@@ -329,6 +366,7 @@ export async function handleExitCleanup(
     collectManagedHosts?: () => string[];
   }
 ): Promise<void> {
+  const transparent = activeOrConfiguredPort() === TRANSPARENT_MITM_PORT;
   const deps = {
     getCachedPassword: _depsOverride?.getCachedPassword ?? getCachedPassword,
     removeDNSEntry: _depsOverride?.removeDNSEntry ?? removeDNSEntry,
@@ -344,6 +382,7 @@ export async function handleExitCleanup(
   } catch {
     // ignore
   }
+  if (!transparent) return;
 
   const sudoPassword = deps.getCachedPassword();
   if (!sudoPassword) {
@@ -387,34 +426,46 @@ export async function handleExitCleanup(
 export async function getMitmStatus(agentId?: string): Promise<{
   running: boolean;
   pid: number | null;
+  port: number;
+  configuredPort: number;
+  effectivePort: number | null;
+  transparent: boolean;
   dnsConfigured: boolean;
   certExists: boolean;
   orphanedStateDetected: boolean;
 }> {
+  const configuredPort = resolveMitmPort();
   // Check in-memory process first, then fallback to PID file
-  let running = serverProcess !== null && !serverProcess.killed;
-  let pid = serverPid;
+  let running = serverProcess !== null && !serverProcess.killed && !mitmStarting;
+  let pid = running ? serverPid : null;
+  let effectivePort = running ? serverPort : null;
 
-  if (!running) {
+  if (!running && !mitmStarting) {
     try {
-      if (fs.existsSync(PID_FILE)) {
-        const savedPid = parseInt(fs.readFileSync(PID_FILE, "utf-8").trim(), 10);
-        if (savedPid && isProcessAlive(savedPid)) {
+      const record = readMitmProcessRecord();
+      if (record) {
+        const { pid: savedPid, port: savedPort } = record;
+        if (isProcessAlive(savedPid)) {
           running = true;
           pid = savedPid;
+          effectivePort = savedPort;
         } else {
           // Stale PID file: the server died without clean teardown. We cannot
           // run privileged cleanup here (no sudo password in a status read),
           // so flag it for the dashboard to offer a one-click Repair. (Gap 7.)
           fs.unlinkSync(PID_FILE);
-          _orphanedStateDetected = true;
-          log.warn("Stale MITM PID file found — system state may be orphaned (offer Repair).");
+          if (savedPort === TRANSPARENT_MITM_PORT) {
+            _orphanedStateDetected = true;
+            log.warn("Stale MITM PID file found — system state may be orphaned (offer Repair).");
+          }
         }
       }
     } catch {
       // Ignore
     }
   }
+  const port = effectivePort ?? configuredPort;
+  const transparent = port === TRANSPARENT_MITM_PORT;
 
   // Check DNS configuration. When an agentId is provided, check THAT agent's
   // own hosts (#8466) instead of always checking the Antigravity host set.
@@ -422,9 +473,9 @@ export async function getMitmStatus(agentId?: string): Promise<{
   // (reads HOSTS_FILE = C:\Windows\System32\drivers\etc\hosts on Windows).
   let dnsConfigured = false;
   try {
-    if (agentId) {
+    if (transparent && agentId) {
       dnsConfigured = checkDNSEntryForAgent(agentId);
-    } else {
+    } else if (transparent) {
       // Use Windows-aware checkDNSEntry() instead of hardcoded /etc/hosts
       dnsConfigured = checkDNSEntry();
     }
@@ -443,6 +494,10 @@ export async function getMitmStatus(agentId?: string): Promise<{
   return {
     running,
     pid,
+    port,
+    configuredPort,
+    effectivePort,
+    transparent,
     dnsConfigured,
     certExists,
     orphanedStateDetected: deriveOrphanedState({
@@ -466,13 +521,14 @@ export async function getMitmStatus(agentId?: string): Promise<{
 export async function handleMitmChildExit(
   proc: ChildProcess,
   code: number | null,
-  opts: { startConfirmed: boolean },
+  opts: { startConfirmed: boolean; transparent?: boolean },
   _depsOverride?: Partial<UnexpectedExitDeps>
 ): Promise<void> {
   log.info({ exitCode: code }, "MITM server exited");
   if (serverProcess === proc) {
     serverProcess = null;
     serverPid = null;
+    serverPort = null;
     try {
       fs.unlinkSync(PID_FILE);
     } catch {
@@ -480,7 +536,7 @@ export async function handleMitmChildExit(
     }
   }
 
-  if (!opts.startConfirmed || _intentionallyStopped.has(proc)) return;
+  if (opts.transparent === false || !opts.startConfirmed || _intentionallyStopped.has(proc)) return;
 
   const reverted = await revertHostsAfterUnexpectedExit(
     {
@@ -504,7 +560,16 @@ export async function startMitm(
   apiKey: string,
   sudoPassword: string,
   options: { port?: number } = {}
-): Promise<{ running: true; pid: number | null; certTrusted: boolean }> {
+): Promise<{
+  running: true;
+  pid: number | null;
+  certTrusted: boolean;
+  port: number;
+  configuredPort: number;
+  effectivePort: number;
+  transparent: boolean;
+}> {
+  const port = resolveMitmPort(options.port);
   // Check if already running
   if (serverProcess && !serverProcess.killed) {
     throw new Error("MITM proxy is already running");
@@ -517,7 +582,11 @@ export async function startMitm(
   }
 
   try {
-    return await startMitmInternal(apiKey, sudoPassword, options);
+    const savedProcess = readMitmProcessRecord();
+    if (savedProcess && isProcessAlive(savedProcess.pid)) {
+      throw new Error("MITM proxy is already running");
+    }
+    return await startMitmInternal(apiKey, sudoPassword, port);
   } finally {
     releaseMitmStartLock();
   }
@@ -528,11 +597,8 @@ export async function startMitm(
  * startMitm() cleanly wraps it in try/finally without re-indenting the
  * entire implementation.
  */
-async function startMitmInternal(
-  apiKey: string,
-  sudoPassword: string,
-  options: { port?: number }
-): Promise<{ running: true; pid: number | null; certTrusted: boolean }> {
+async function startMitmInternal(apiKey: string, sudoPassword: string, port: number) {
+  const transparent = port === TRANSPARENT_MITM_PORT;
   // Register best-effort teardown on parent SIGINT/SIGTERM (Gap 7).
   installCleanupHandlers();
 
@@ -608,55 +674,50 @@ async function startMitmInternal(
   //    so we start in "untrusted" mode and let the operator trust the CA by hand
   //    (mirrors the best-effort "continuing" pattern used for DNS below). (#4546)
   let certTrusted = false;
-  await runPrivilegedMitmStep(
-    sudoPassword,
-    "Skipping MITM cert trust — no sudo password available (#7938)",
-    async () => {
-      try {
-        const certResult =
-          migrationDecision === "use-root-ca"
-            ? await installCaCert(sudoPassword, certPath)
-            : await installCertResult(sudoPassword, certPath);
-        certTrusted = certResult.installed;
-        if (!certResult.installed) {
-          log.warn(
-            { reason: certResult.reason },
-            "MITM cert not auto-trusted; bridge starting in skip mode (manual trust required)"
+  if (transparent)
+    await runPrivilegedMitmStep(
+      sudoPassword,
+      "Skipping MITM cert trust — no sudo password available (#7938)",
+      async () => {
+        try {
+          const certResult =
+            migrationDecision === "use-root-ca"
+              ? await installCaCert(sudoPassword, certPath)
+              : await installCertResult(sudoPassword, certPath);
+          certTrusted = certResult.installed;
+          if (!certResult.installed) {
+            log.warn(
+              { reason: certResult.reason },
+              "MITM cert not auto-trusted; bridge starting in skip mode (manual trust required)"
+            );
+          }
+        } catch (err) {
+          log.error(
+            { err },
+            "installCertResult threw unexpectedly (continuing without trusted cert)"
           );
         }
-      } catch (err) {
-        log.error(
-          { err },
-          "installCertResult threw unexpectedly (continuing without trusted cert)"
-        );
       }
-    }
-  );
+    );
 
   // 3. Add DNS entries: Antigravity defaults + all agents with dns_enabled=true +
   //    all custom hosts with enabled=true. Best-effort — see provisionDnsEntries.
-  await runPrivilegedMitmStep(
-    sudoPassword,
-    "Skipping DNS provisioning — no sudo password available (#7938)",
-    async () => {
-      log.info("Adding DNS entries...");
-      try {
-        await provisionDnsEntries(sudoPassword);
-      } catch (err) {
-        log.error({ err }, "DNS provisioning threw unexpectedly (continuing)");
+  if (transparent)
+    await runPrivilegedMitmStep(
+      sudoPassword,
+      "Skipping DNS provisioning — no sudo password available (#7938)",
+      async () => {
+        log.info("Adding DNS entries...");
+        try {
+          await provisionDnsEntries(sudoPassword);
+        } catch (err) {
+          log.error({ err }, "DNS provisioning threw unexpectedly (continuing)");
+        }
       }
-    }
-  );
+    );
 
   // 4. Start MITM server
   log.info("Starting MITM server...");
-  const port =
-    typeof options.port === "number" &&
-    Number.isInteger(options.port) &&
-    options.port > 0 &&
-    options.port <= 65535
-      ? options.port
-      : 443;
   // D4 — resolve the inspector ingest token so the spawned proxy can post
   // captured AgentBridge traffic to the local-only ingest endpoint. The token
   // is shared with the OmniRoute process: getIngestTokenForBootstrap() returns
@@ -693,11 +754,12 @@ async function startMitmInternal(
 
   const proc = serverProcess;
   serverPid = proc.pid ?? null;
+  serverPort = port;
 
   // Save PID to file — best-effort, must not orphan spawned child process
   if (serverPid !== null) {
     try {
-      fs.writeFileSync(PID_FILE, String(serverPid));
+      fs.writeFileSync(PID_FILE, `${serverPid}\n${port}\n`);
     } catch (err) {
       log.error({ err, pid: serverPid }, "Failed to write MITM PID file (continuing)");
     }
@@ -722,18 +784,21 @@ async function startMitmInternal(
   // failed start, whose own path reverts DNS.
   let startConfirmed = false;
   proc.on("exit", (code) => {
-    void handleMitmChildExit(proc, code, { startConfirmed });
+    void handleMitmChildExit(proc, code, { startConfirmed, transparent });
   });
 
   // Wait and verify server actually started
   const started = await new Promise<boolean>((resolve) => {
     let resolved = false;
-    const timeout = setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        resolve(true);
-      }
-    }, 2000);
+    const timeout = setTimeout(
+      () => {
+        if (!resolved) {
+          resolved = true;
+          resolve(transparent);
+        }
+      },
+      transparent ? 2000 : 5000
+    );
 
     proc.on("exit", () => {
       clearTimeout(timeout);
@@ -742,7 +807,27 @@ async function startMitmInternal(
         resolve(false);
       }
     });
+    proc.once("error", (error) => {
+      if (!resolved) {
+        clearTimeout(timeout);
+        stderrBuffer = `❌ ${error.message}`;
+        void handleMitmChildExit(proc, null, { startConfirmed, transparent });
+        resolved = true;
+        resolve(false);
+      }
+    });
 
+    if (!transparent) {
+      let stdoutBuffer = "";
+      proc.stdout?.on("data", (chunk) => {
+        stdoutBuffer = (stdoutBuffer + chunk.toString()).slice(-4000);
+        if (!resolved && stdoutBuffer.includes(`MITM ready on 127.0.0.1:${port} `)) {
+          clearTimeout(timeout);
+          resolved = true;
+          resolve(true);
+        }
+      });
+    }
     // Fail fast on any "❌" diagnostic line from server.cjs (covers EADDRINUSE,
     // EACCES, missing ROUTER_API_KEY, and any other server.on("error") cause).
     proc.stderr?.on("data", (data) => {
@@ -763,23 +848,33 @@ async function startMitmInternal(
     // service that actually owns the port answers with a TLS alert — so the
     // hostnames fail machine-wide with the bridge down and no way to recover
     // from the UI. Revert them before surfacing the startup error.
-    await runPrivilegedMitmStep(
-      sudoPassword,
-      "Skipping DNS rollback after a failed start — no sudo password available",
-      () =>
-        removeDnsEntriesAfterFailedStart(
-          { removeDNSEntry, removeDNSEntries, collectManagedHosts },
-          sudoPassword
-        )
-    );
+    if (!transparent) {
+      if (!proc.killed && proc.exitCode === null) proc.kill("SIGTERM");
+      if (!stderrBuffer.trim()) {
+        throw new Error(`MITM server failed to report readiness on 127.0.0.1:${port}`);
+      }
+    } else
+      await runPrivilegedMitmStep(
+        sudoPassword,
+        "Skipping DNS rollback after a failed start — no sudo password available",
+        () =>
+          removeDnsEntriesAfterFailedStart(
+            { removeDNSEntry, removeDNSEntries, collectManagedHosts },
+            sudoPassword
+          )
+      );
     throw new Error(interpretMitmStartupError(stderrBuffer, port));
   }
   startConfirmed = true;
 
   return {
-    running: true,
+    running: true as const,
     pid: serverPid,
     certTrusted,
+    port,
+    configuredPort: port,
+    effectivePort: port,
+    transparent,
   };
 }
 
@@ -802,14 +897,16 @@ async function killMitmServerProcessOnStop(): Promise<void> {
     }
     serverProcess = null;
     serverPid = null;
+    serverPort = null;
     return;
   }
 
   // Fallback: kill by PID file
   try {
-    if (fs.existsSync(PID_FILE)) {
-      const savedPid = parseInt(fs.readFileSync(PID_FILE, "utf-8").trim(), 10);
-      if (savedPid && isProcessAlive(savedPid)) {
+    const record = readMitmProcessRecord();
+    if (record) {
+      const { pid: savedPid } = record;
+      if (isProcessAlive(savedPid)) {
         log.info({ pid: savedPid }, "Killing MITM server by PID...");
         process.kill(savedPid, "SIGTERM");
         await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -823,6 +920,7 @@ async function killMitmServerProcessOnStop(): Promise<void> {
   }
   serverProcess = null;
   serverPid = null;
+  serverPort = null;
 }
 
 /**
@@ -855,11 +953,12 @@ export async function stopMitm(
   };
 
   // 1. Remove DNS entries FIRST — see function doc + module doc above (#1809).
-  await runPrivilegedMitmStep(
-    sudoPassword,
-    "Skipping DNS teardown — no sudo password available (#7938)",
-    () => removeStopDnsEntries(deps, sudoPassword)
-  );
+  if (activeOrConfiguredPort() === TRANSPARENT_MITM_PORT)
+    await runPrivilegedMitmStep(
+      sudoPassword,
+      "Skipping DNS teardown — no sudo password available (#7938)",
+      () => removeStopDnsEntries(deps, sudoPassword)
+    );
 
   // 2. Kill server process (in-memory or from PID file)
   await killMitmServerProcessOnStop();

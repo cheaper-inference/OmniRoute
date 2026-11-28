@@ -1,0 +1,1 @@
+- **fix(agentbridge):** Route Codex HTTP Responses correctly and support an explicit loopback proxy on a configurable port ([#21267](https://github.com/cheaper-inference/OmniRoute/pull/21267)).

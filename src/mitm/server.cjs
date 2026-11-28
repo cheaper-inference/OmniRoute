@@ -29,11 +29,13 @@ const TARGET_HOSTS = new Set([
 const TARGET_HOST_AGENT = new Map();
 for (const h of TARGET_HOSTS) TARGET_HOST_AGENT.set(h, "antigravity");
 
-const parsedLocalPort = Number.parseInt(process.env.MITM_LOCAL_PORT || "443", 10);
-const LOCAL_PORT =
-  Number.isInteger(parsedLocalPort) && parsedLocalPort > 0 && parsedLocalPort <= 65535
-    ? parsedLocalPort
-    : 443;
+const configuredLocalPort = process.env.MITM_LOCAL_PORT?.trim() ?? "443";
+const LOCAL_PORT = /^\d+$/.test(configuredLocalPort) ? Number(configuredLocalPort) : NaN;
+if (!Number.isInteger(LOCAL_PORT) || LOCAL_PORT < 1 || LOCAL_PORT > 65535) {
+  console.error("❌ MITM_LOCAL_PORT must be an integer from 1 to 65535");
+  process.exit(1);
+}
+const LOCAL_HOST = LOCAL_PORT === 443 ? undefined : "127.0.0.1";
 // Idle timeout for sockets/tunnels. Mirrors ProxyBridge's 60s relay timeout so
 // hung/half-open connections cannot accumulate and exhaust fds. (Gap 10.)
 const parsedIdleTimeout = Number.parseInt(process.env.MITM_IDLE_TIMEOUT_MS || "60000", 10);
@@ -548,6 +550,7 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
       routerMessagesUrl: ROUTER_MESSAGES_URL,
       body,
       agentId,
+      requestUrl: req.url,
       fallbackResolver: forwardShim.resolveForwardTarget,
     });
     vlog(1, `[MITM] → forward ${forward.format} ${forward.url}`);
@@ -591,7 +594,10 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
       }
 
       res.writeHead(200, {
-        "Content-Type": "text/event-stream",
+        "Content-Type":
+          forward.format === "openai-responses"
+            ? response.headers.get("content-type") || "application/json"
+            : "text/event-stream",
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
         "X-Accel-Buffering": "no",
@@ -708,7 +714,6 @@ async function startMitmServer() {
     }
 
     const agentId = TARGET_HOST_AGENT.get(host) || "antigravity";
-    const routeConfig = standaloneRoutingShim.getAgentRouteConfig(agentId);
 
     // FIX #8656: Capture ALL agent traffic (even passthrough) so Traffic Inspector
     // and model auto-detection work WITHOUT requiring mappings first.
@@ -738,7 +743,7 @@ async function startMitmServer() {
       upstreamLatencyMs: 0,
     });
 
-    const isChatRequest = routeConfig.chatUrlPatterns.some((p) => req.url.includes(p));
+    const isChatRequest = standaloneRoutingShim.matchesAgentRequest(agentId, req.method, req.url);
 
     if (!isChatRequest) {
       vlog(1, `[MITM] → PASSTHROUGH (URL ${req.url} does not match chat patterns)`);
@@ -915,13 +920,12 @@ async function startMitmServer() {
     }
   });
 
-  // Dual-stack on purpose: the DNS spoof maps hosts to ::1 too, so binding to
-  // 127.0.0.1 alone would break clients that resolve to ::1. The peer guard above
-  // is what keeps LAN peers out.
-  server.listen(LOCAL_PORT, () => {
+  // Transparent mode is dual-stack for the DNS entries. Explicit ports use IPv4 loopback only.
+  server.listen(LOCAL_PORT, LOCAL_HOST, () => {
     stats.startedAt = new Date().toISOString();
     writeStats();
-    console.log(`🚀 MITM ready on :${LOCAL_PORT} (loopback peers only) → ${ROUTER_URL}`);
+    const address = `${LOCAL_HOST ?? ""}:${LOCAL_PORT}`;
+    console.log(`🚀 MITM ready on ${address} (loopback peers only) → ${ROUTER_URL}`);
   });
 
   server.on("connection", (socket) => {

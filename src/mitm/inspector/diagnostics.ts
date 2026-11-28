@@ -17,6 +17,7 @@ export interface DiagnosticInput {
   certExists: boolean;
   certTrusted: boolean;
   dnsConfigured: boolean;
+  transparent?: boolean;
 }
 
 export interface DiagnosticCheck {
@@ -52,16 +53,20 @@ export function summarizeDiagnostics(input: DiagnosticInput): DiagnosticReport {
       input.certExists,
       "No MITM certificate has been generated yet. Generate one from the AgentBridge tab."
     ),
-    check(
-      "cert-trusted",
-      input.certTrusted,
-      "The MITM root CA is not trusted by the OS store, so TLS interception will fail. Trust the certificate from the AgentBridge tab."
-    ),
-    check(
-      "dns-configured",
-      input.dnsConfigured,
-      "Target hostnames are not spoofed in /etc/hosts, so traffic never reaches the proxy. Enable DNS for the agent(s) you want to capture."
-    ),
   ];
+  if (input.transparent !== false) {
+    checks.push(
+      check(
+        "cert-trusted",
+        input.certTrusted,
+        "The MITM root CA is not trusted by the OS store, so TLS interception will fail. Trust the certificate from the AgentBridge tab."
+      ),
+      check(
+        "dns-configured",
+        input.dnsConfigured,
+        "Target hostnames are not spoofed in /etc/hosts, so traffic never reaches the proxy. Enable DNS for the agent(s) you want to capture."
+      )
+    );
+  }
   return { healthy: checks.every((c) => c.ok), checks };
 }

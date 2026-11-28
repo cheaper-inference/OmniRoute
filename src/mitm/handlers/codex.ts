@@ -2,10 +2,10 @@
  * OpenAI Codex CLI handler.
  *
  * Host: `chatgpt.com` (Codex paths).
- * Format: OpenAI-compatible Chat Completions — `body.model` is rewritten to
- * the mapped target and the request is forwarded to the OmniRoute router.
+ * Preserves the Responses or Chat Completions format when mapping the model.
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { isCodexResponses } from "../_internal/standaloneRouting.cjs";
 import type { AgentId } from "../types";
 import { MitmHandlerBase, createBoundedCollector } from "./base";
 
@@ -16,7 +16,7 @@ export class CodexHandler extends MitmHandlerBase {
     req: IncomingMessage,
     res: ServerResponse,
     body: Buffer,
-    mappedModel: string,
+    mappedModel: string
   ): Promise<void> {
     const startedAt = this.now();
     const intercepted = await this.hookBufferStart(req, body, mappedModel);
@@ -26,7 +26,12 @@ export class CodexHandler extends MitmHandlerBase {
       payload.model = mappedModel;
 
       const upstreamStart = this.now();
-      const upstream = await this.fetchRouter(payload, "/v1/chat/completions", req.headers);
+      const responses = isCodexResponses(req.url);
+      const upstream = await this.fetchRouter(
+        payload,
+        responses ? "/v1/responses" : "/v1/chat/completions",
+        req.headers
+      );
 
       if (!upstream.ok) {
         const errText = await upstream.text().catch(() => "");
@@ -34,6 +39,13 @@ export class CodexHandler extends MitmHandlerBase {
       }
 
       const sink = createBoundedCollector();
+      if (responses && !res.headersSent) {
+        res.writeHead(upstream.status, {
+          "Content-Type": upstream.headers.get("content-type") || "application/json",
+          "Cache-Control": "no-cache",
+          "X-Accel-Buffering": "no",
+        });
+      }
       await this.pipeSSE(upstream, res, (chunk) => {
         sink.push(chunk.toString());
       });

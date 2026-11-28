@@ -471,6 +471,25 @@ test("critical routes: MITM settings reject non-443 transparent interception por
   assert.equal(validAntigravityTarget?.localPort, 443);
 });
 
+test("critical routes: legacy MITM settings report the running explicit listener", async (t) => {
+  await enableManagementAuth();
+  const mitmDir = path.join(TEST_DATA_DIR, "mitm");
+  const pidFile = path.join(mitmDir, ".mitm.pid");
+  fs.mkdirSync(mitmDir, { recursive: true });
+  fs.writeFileSync(pidFile, `${process.pid}\n18443\n`);
+  t.after(() => fs.rmSync(pidFile));
+
+  const response = await settingsMitmRoute.GET(
+    await makeManagementSessionRequest("http://localhost/api/settings/mitm")
+  );
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.running, true);
+  assert.equal(body.pid, process.pid);
+  assert.equal(body.port, 18443);
+  assert.equal(body.targets.find((target) => target.id === "antigravity")?.localPort, 443);
+});
+
 test("critical routes: settings proxy covers global fallback and socks5 gating", async () => {
   const setLegacyGlobalProxy = await settingsProxyRoute.PUT(
     makeRequest("http://localhost/api/settings/proxy", {

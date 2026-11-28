@@ -221,3 +221,56 @@ test("standalone MITM returns null when model is unmapped and no catch-all exist
 
   assert.equal(override, null);
 });
+
+test("standalone Codex routing accepts only POST to the declared paths", () => {
+  for (const path of [
+    "/backend-api/codex/responses",
+    "/backend-api/codex/chat/completions",
+    "/v1/responses",
+    "/v1/chat/completions",
+  ]) {
+    assert.equal(routing.matchesAgentRequest("codex", "POST", path + "?source=fixture"), true);
+  }
+  for (const path of [
+    "/backend-api/conversation",
+    "/backend-api/codex/responses/extra",
+    "/backend-api/codex/models?source=/v1/responses",
+  ]) {
+    assert.equal(routing.matchesAgentRequest("codex", "POST", path), false);
+  }
+  assert.equal(routing.matchesAgentRequest("codex", "GET", "/backend-api/codex/responses"), false);
+});
+
+test("standalone Codex forwards Responses and legacy Chat to distinct router endpoints", () => {
+  for (const [requestUrl, url, format] of [
+    [
+      "/backend-api/codex/responses?source=fixture",
+      "http://router/v1/responses",
+      "openai-responses",
+    ],
+    ["/backend-api/codex/chat/completions", "http://router/v1/chat/completions", "openai"],
+  ]) {
+    const result = routing.resolveForwardTargetForAgent({
+      routerBaseUrl: "http://router",
+      requestUrl,
+      body: {},
+      agentId: "codex",
+      fallbackResolver: () => assert.fail("Codex must keep the format of its endpoint"),
+    });
+    assert.deepEqual(result, { url, format });
+  }
+  const override = routing.resolveMappedOverride("codex-source", "codex", {
+    fs: { existsSync: () => false },
+    dbFile: "/unused/db.json",
+    getSqliteDb: () => ({
+      prepare: () => ({
+        get(key: string) {
+          assert.equal(key, "codex");
+          return { value: JSON.stringify({ "codex-source": "provider/mapped" }) };
+        },
+      }),
+    }),
+    aliasConfigShim,
+  });
+  assert.deepEqual(override, { model: "provider/mapped" });
+});
