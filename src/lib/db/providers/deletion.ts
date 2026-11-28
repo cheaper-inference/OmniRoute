@@ -272,6 +272,8 @@ export function reorderConnections(db: DbLike, providerId: string) {
   const update = db.prepare("UPDATE provider_connections SET priority = ? WHERE id = ?");
   rows.forEach((row, index) => {
     const current = toRecord(row);
+    // Skip rows already at their rank: each UPDATE outside a transaction is its own commit.
+    if (current.priority === index + 1) return;
     update.run(index + 1, current.id);
   });
 }

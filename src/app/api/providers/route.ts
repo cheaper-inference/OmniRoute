@@ -219,6 +219,22 @@ export async function GET(request: Request) {
   }
 }
 
+/** 409 for an `allowOverwrite: false` request that matched a stored connection, else null. */
+function providerNameConflictResponse(error: unknown): NextResponse | null {
+  const { code, existingId } = (error ?? {}) as { code?: unknown; existingId?: unknown };
+  if (code !== "PROVIDER_NAME_CONFLICT") return null;
+  return NextResponse.json(
+    {
+      error: {
+        message: "A connection with this name or key already exists",
+        code: "PROVIDER_NAME_CONFLICT",
+        existingId: typeof existingId === "string" ? existingId : null,
+      },
+    },
+    { status: 409 }
+  );
+}
+
 // POST /api/providers - Create new connection (API Key only, OAuth via separate flow)
 export async function POST(request: Request) {
   const authError = await requireManagementAuth(request);
@@ -244,6 +260,7 @@ export async function POST(request: Request) {
       testStatus,
       providerSpecificData: incomingPsd,
       allowNoCredential,
+      allowOverwrite,
       proxyEnabled,
     } = validation.data;
     const provider = resolveProviderId(requestedProvider);
@@ -409,6 +426,7 @@ export async function POST(request: Request) {
     const newConnection = await createProviderConnection({
       provider,
       ...(proxyEnabled !== undefined ? { proxyEnabled } : {}),
+      ...(allowOverwrite === false ? { allowOverwrite } : {}),
       authType: "apikey",
       name,
       apiKey: persistedApiKey,
@@ -503,6 +521,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ connection: result }, { status: 201 });
   } catch (error) {
+    const conflict = providerNameConflictResponse(error);
+    if (conflict) return conflict;
     console.log("Error creating provider:", error);
     return NextResponse.json({ error: "Failed to create provider" }, { status: 500 });
   }

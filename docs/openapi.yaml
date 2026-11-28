@@ -2532,6 +2532,12 @@ paths:
     post:
       tags: [Providers]
       summary: Create provider connection
+      description: >-
+        A request that reuses a stored connection's name, or an API key value that is already stored for
+        the provider, updates that connection in place. Send `allowOverwrite: false` to refuse instead:
+        the call answers 409 `PROVIDER_NAME_CONFLICT` with the `existingId`, and nothing is changed.
+        A script that sends `allowOverwrite: false` and re-posts the same key under the same name gets the
+        409 too, not an idempotent success. Omitting the field keeps the update-in-place behaviour.
       requestBody:
         required: true
         content:
@@ -2541,6 +2547,8 @@ paths:
       responses:
         "201":
           description: Created provider connection
+        "409":
+          description: allowOverwrite was false and the name or key matches a stored connection (PROVIDER_NAME_CONFLICT)
 
   /api/providers/{id}:
     get:
