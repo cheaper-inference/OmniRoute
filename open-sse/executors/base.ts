@@ -41,6 +41,12 @@ import {
 } from "../services/openrouterFreeWindow.ts";
 import { gateOutboundRequest } from "../services/wafRateLimit.ts";
 import { readErrorBodyText } from "../utils/error.ts";
+import {
+  createClientAbortError,
+  isClientAbortError,
+  raceClientAbort,
+  sleepWithAbort,
+} from "../utils/clientAbort.ts";
 import { ClaudeUsageLimitGuard } from "./claudeUsageLimit.ts";
 import {
   INTRA_RETRY_MAX_HINT_MS,
@@ -798,6 +804,10 @@ export class BaseExecutor {
     // Claude OAuth usage wall (opt-in per connection): see ./claudeUsageLimit.ts.
     const claudeUsageLimit = new ClaudeUsageLimitGuard(this.provider, log);
 
+    if (signal?.aborted) {
+      throw createClientAbortError(signal);
+    }
+
     // Probe-origin dispatches must not consume a refresh-token rotation —
     // routing state untouched; the reactive 401/403 path is probe-guarded
     // in chatCore (#9817).
@@ -822,66 +832,77 @@ export class BaseExecutor {
             }
           : null;
 
-        const refreshed = await runWithOnPersist(proactiveOnPersist, () =>
-          this.refreshCredentials(credentials, log || null)
-        );
-
-        // API-key connections (no refresh token) answer with the shared
-        // NO_REFRESH_NEEDED sentinel: nothing was attempted, so there is
-        // nothing to classify, spread or warn about — keep the credentials.
-        if (refreshed && refreshed !== NO_REFRESH_NEEDED && !proactivePersistRan) {
-          // ─────────────────────────────────────────────────────────────────────
-          // ⚠️ SOURCE OF TRUTH — do not flip the proactive path back to
-          //    "persist expired+inactive". Ask the operator first.
-          //
-          // History (do not repeat past regressions):
-          //   - ad3d4b696 (#2718, 2026-05-25): per-connection mutex + onPersist
-          //     wiring so multi-account Codex (rotating refresh tokens) stops
-          //     hitting refresh_token_reused under concurrent load.
-          //   - 0c94c397d (#2743, 2026-05-26): a multi-agent review added a
-          //     `await onCredentialsRefreshed({ testStatus: "expired",
-          //     isActive: false })` here. That BROKE multi-account Codex —
-          //     transient sentinels (refresh_token_reused recoverable via
-          //     rotation map; generic invalid_request blips) were treated as
-          //     terminal, so the proactive path sequentially disabled
-          //     working accounts in the DB before any upstream call confirmed
-          //     the failure. Reverted intentionally.
-          //
-          // Contract for the PROACTIVE refresh path:
-          //   - Classify the sentinel ONLY to avoid spreading it into
-          //     activeCredentials (which would send a non-token upstream).
-          //   - DO NOT persist `{ testStatus: "expired", isActive: false }`
-          //     from here. That decision belongs to the REACTIVE path in
-          //     open-sse/handlers/chatCore.ts:~3912, which runs AFTER the
-          //     upstream confirmed the auth failure. By then the rotation
-          //     map (tokenRefresh.ts:~1541) and the DB-staleness check have
-          //     already had their chance to recover the request.
-          //
-          // If a future review/agent thinks the expired-flip is "missing"
-          // here, STOP — flipping it here re-introduces the multi-account
-          // Codex regression. Discuss with the operator before touching.
-          // ─────────────────────────────────────────────────────────────────────
-          if (isUnrecoverableRefreshError(refreshed)) {
-            const refreshCode = (refreshed as Record<string, unknown>).code;
-            log?.warn?.(
-              "TOKEN",
-              `${this.provider.toUpperCase()} | proactive refresh returned unrecoverable sentinel (code=${String(refreshCode ?? "unknown")}); keeping stale credentials, deferring to reactive path.`
+        await raceClientAbort(
+          (async () => {
+            const refreshed = await runWithOnPersist(proactiveOnPersist, () =>
+              this.refreshCredentials(credentials, log || null)
             );
-            // Intentionally NOT spreading the sentinel and NOT persisting
-            // expired status. The next upstream call either succeeds (rotation
-            // map / DB-staleness saved us) or fails — chatCore.ts then marks
-            // the account expired with confidence.
-          } else {
-            activeCredentials = {
-              ...credentials,
-              ...refreshed,
-            };
-            if (onCredentialsRefreshed) {
-              await onCredentialsRefreshed(refreshed);
+
+            // API-key connections (no refresh token) answer with the shared
+            // NO_REFRESH_NEEDED sentinel: nothing was attempted, so there is
+            // nothing to classify, spread or warn about — keep the credentials.
+            if (refreshed && refreshed !== NO_REFRESH_NEEDED && !proactivePersistRan) {
+              // ─────────────────────────────────────────────────────────────────────
+              // ⚠️ SOURCE OF TRUTH — do not flip the proactive path back to
+              //    "persist expired+inactive". Ask the operator first.
+              //
+              // History (do not repeat past regressions):
+              //   - ad3d4b696 (#2718, 2026-05-25): per-connection mutex + onPersist
+              //     wiring so multi-account Codex (rotating refresh tokens) stops
+              //     hitting refresh_token_reused under concurrent load.
+              //   - 0c94c397d (#2743, 2026-05-26): a multi-agent review added a
+              //     `await onCredentialsRefreshed({ testStatus: "expired",
+              //     isActive: false })` here. That BROKE multi-account Codex —
+              //     transient sentinels (refresh_token_reused recoverable via
+              //     rotation map; generic invalid_request blips) were treated as
+              //     terminal, so the proactive path sequentially disabled
+              //     working accounts in the DB before any upstream call confirmed
+              //     the failure. Reverted intentionally.
+              //
+              // Contract for the PROACTIVE refresh path:
+              //   - Classify the sentinel ONLY to avoid spreading it into
+              //     activeCredentials (which would send a non-token upstream).
+              //   - DO NOT persist `{ testStatus: "expired", isActive: false }`
+              //     from here. That decision belongs to the REACTIVE path in
+              //     open-sse/handlers/chatCore.ts:~3912, which runs AFTER the
+              //     upstream confirmed the auth failure. By then the rotation
+              //     map (tokenRefresh.ts:~1541) and the DB-staleness check have
+              //     already had their chance to recover the request.
+              //
+              // If a future review/agent thinks the expired-flip is "missing"
+              // here, STOP — flipping it here re-introduces the multi-account
+              // Codex regression. Discuss with the operator before touching.
+              // ─────────────────────────────────────────────────────────────────────
+              if (isUnrecoverableRefreshError(refreshed)) {
+                const refreshCode = (refreshed as Record<string, unknown>).code;
+                log?.warn?.(
+                  "TOKEN",
+                  `${this.provider.toUpperCase()} | proactive refresh returned unrecoverable sentinel (code=${String(refreshCode ?? "unknown")}); keeping stale credentials, deferring to reactive path.`
+                );
+                // Intentionally NOT spreading the sentinel and NOT persisting
+                // expired status. The next upstream call either succeeds (rotation
+                // map / DB-staleness saved us) or fails — chatCore.ts then marks
+                // the account expired with confidence.
+              } else {
+                activeCredentials = {
+                  ...credentials,
+                  ...refreshed,
+                };
+                if (onCredentialsRefreshed) {
+                  await onCredentialsRefreshed(refreshed);
+                }
+              }
             }
-          }
+          })(),
+          signal
+        );
+        if (signal?.aborted) {
+          throw createClientAbortError(signal);
         }
       } catch (error) {
+        if (signal?.aborted || isClientAbortError(error)) {
+          throw isClientAbortError(error) ? error : createClientAbortError(signal);
+        }
         // tokenRefresh.ts:1352 documents that onPersist throws are re-thrown so
         // the caller is aware of the persistence failure. Honor that contract:
         // log at error level (not warn), with sanitized message — and let the
@@ -911,6 +932,9 @@ export class BaseExecutor {
     const copilotIdentity = createCopilotIdentityFallback(this.provider, log);
 
     for (let urlIndex = 0; urlIndex < fallbackCount; urlIndex++) {
+      if (signal?.aborted) {
+        throw createClientAbortError(signal);
+      }
       const requestCredentials = withForcedResponsesUpstream(
         this.provider,
         body,
@@ -1844,7 +1868,7 @@ export class BaseExecutor {
               "WAF_RETRY",
               `400 content-blocked intra-retry ${wafAttempt}/${BaseExecutor.WAF_RETRY_CONFIG.maxAttempts} on ${url} — waiting ${wafBackoff}ms`
             );
-            await new Promise((resolve) => setTimeout(resolve, wafBackoff));
+            await sleepWithAbort(wafBackoff, signal);
             urlIndex--; // re-run this urlIndex on the next loop iteration
             continue;
           }
@@ -1875,7 +1899,7 @@ export class BaseExecutor {
             "RETRY",
             `429 intra-retry ${attempt}/${BaseExecutor.RETRY_CONFIG.maxAttempts} on ${url} — waiting ${waitMs}ms${hintMs !== null ? " (upstream hint)" : ""}`
           );
-          await new Promise((resolve) => setTimeout(resolve, waitMs));
+          await sleepWithAbort(waitMs, signal);
           urlIndex--; // re-run this urlIndex on the next loop iteration
           continue;
         }
@@ -1904,6 +1928,9 @@ export class BaseExecutor {
         const err = error instanceof Error ? error : new Error(String(error));
         if (err.name === "TimeoutError") {
           log?.warn?.("TIMEOUT", `Fetch timeout after ${fetchStartTimeoutMs}ms on ${url}`);
+        }
+        if (signal?.aborted || isClientAbortError(err)) {
+          throw isClientAbortError(err) ? err : createClientAbortError(signal);
         }
         lastError = err;
         if (!skipUpstreamRetry && urlIndex + 1 < fallbackCount) {

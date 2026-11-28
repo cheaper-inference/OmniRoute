@@ -9,6 +9,7 @@
 // refresh_token_reused, …) short-circuit retries so the HealthCheck can
 // deactivate the account instead of looping every 60s.
 import { createHash } from "node:crypto";
+import { raceClientAbort, sleepWithAbort } from "../../utils/clientAbort.ts";
 import { isPassiveCodex } from "./passiveCodex.ts";
 import type { RefreshLogger } from "./shared.ts";
 import { isUnrecoverableRefreshError, NO_REFRESH_NEEDED } from "./shared.ts";
@@ -27,6 +28,10 @@ export interface TokenRefreshBreakerOptions {
   scope?: TokenRefreshBreakerScope;
   failureThreshold?: number;
   cooldownMs?: number;
+}
+
+export interface RefreshWithRetryOptions extends TokenRefreshBreakerOptions {
+  signal?: AbortSignal | null;
 }
 
 function resolveBreakerOptions(options?: TokenRefreshBreakerOptions): {
@@ -254,9 +259,25 @@ export async function refreshWithRetry(
   maxRetries = 3,
   log: RefreshLogger = null,
   provider = "unknown",
-  options?: TokenRefreshBreakerOptions
+  options?: RefreshWithRetryOptions
 ) {
-  if (isPassiveCodex(provider)) return refreshFn();
+  const signal = options?.signal ?? null;
+  if (signal?.aborted) return null;
+  if (isPassiveCodex(provider)) {
+    if (!signal) return refreshFn();
+    try {
+      return await raceClientAbort(
+        Promise.resolve().then(() => {
+          if (signal.aborted) return null;
+          return refreshFn();
+        }),
+        signal
+      );
+    } catch (error) {
+      if (signal.aborted) return null;
+      throw error;
+    }
+  }
   const effective = resolveBreakerOptions(options);
   const key = breakerKey(provider, options?.connectionId, effective.scope);
   // Circuit breaker check
@@ -266,6 +287,7 @@ export async function refreshWithRetry(
   }
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
+    if (signal?.aborted) return null;
     if (attempt > 0) {
       const delay = jitteredRetryDelayMs(
         attempt * 1000,
@@ -273,11 +295,17 @@ export async function refreshWithRetry(
         attempt
       );
       log?.debug?.("TOKEN_REFRESH", `Retry ${attempt}/${maxRetries} after ${delay}ms`);
-      await new Promise((r) => setTimeout(r, delay));
+      try {
+        await sleepWithAbort(delay, signal);
+      } catch {
+        return null;
+      }
+      if (signal?.aborted) return null;
     }
 
     try {
-      const result = await withTimeout(refreshFn, REFRESH_TIMEOUT_MS);
+      const result = await raceClientAbort(withTimeout(refreshFn, REFRESH_TIMEOUT_MS), signal);
+      if (signal?.aborted) return null;
       if (isUnrecoverableRefreshError(result)) {
         if (result === NO_REFRESH_NEEDED) return null;
         log?.warn?.(
@@ -291,10 +319,12 @@ export async function refreshWithRetry(
         return result;
       }
     } catch (error) {
+      if (signal?.aborted) return null;
       log?.warn?.("TOKEN_REFRESH", `Attempt ${attempt + 1}/${maxRetries} failed: ${error.message}`);
     }
   }
 
+  if (signal?.aborted) return null;
   // All retries exhausted — record failure for circuit breaker
   recordFailure(key, effective.failureThreshold, effective.cooldownMs, log);
   log?.error?.("TOKEN_REFRESH", `All ${maxRetries} retry attempts failed for ${key}`);

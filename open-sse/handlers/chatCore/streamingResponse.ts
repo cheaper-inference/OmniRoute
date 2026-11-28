@@ -3,7 +3,11 @@ import type {
   HttpAttemptRejectionSlot,
 } from "../../utils/providerHttpAttempts.ts";
 import { projectFailureUsageErrorCode } from "./failureUsage.ts";
-import { isHedgeCancelledReasonError } from "../../services/combo/comboAbortReasons.ts";
+import {
+  isComboPerModelTimeoutAbort,
+  isHedgeCancelledReasonError,
+  isHedgeCancelledSignal,
+} from "../../services/combo/comboAbortReasons.ts";
 import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 
 export { extractSystemRoleMessages, relocateDirectiveOnlyMessages } from "./claudeSystemRole.ts";
@@ -19,6 +23,11 @@ import {
 import { recoverAnthropicThinkingSignature } from "../chatCore/thinkingSignatureRecovery.ts";
 import { runProviderExecutionPipeline } from "../chatCore/providerExecutionPipeline.ts";
 import { admitQuotaShareRotation } from "../chatCore/quotaSharePreHook.ts";
+import {
+  isClientAbortError,
+  isDeadlineAbortReason,
+  raceClientAbort,
+} from "../../utils/clientAbort.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
 import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { buildStreamingResponseHeaders, stripStaleForwardingHeaders } from "./responseHeaders.ts";
@@ -281,6 +290,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
             connectionId: nextConnectionId,
             provider,
             model,
+            signal: streamController.signal,
           }),
       },
       wire: {
@@ -740,26 +750,102 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
         }
       : null;
 
-    const newCredentials = (await tokens.refreshWithRetry(
-      () =>
-        tokens.runWithCasGuard(
-          casReread ? { expectedRefreshToken: attemptedRefreshToken, reread: casReread } : null,
-          () =>
-            tokens.runWithOnPersist(persistFn, () => executor.refreshCredentials(credentials, log))
-        ),
-      3,
-      log,
-      provider, // Explicitly pass the provider to avoid universally tripping the "unknown" circuit breaker
-      {
-        ...(casConnectionId ? { connectionId: casConnectionId } : {}),
-        scope: resilienceSettings.tokenRefreshBreaker.scope,
-        failureThreshold: resilienceSettings.tokenRefreshBreaker.failureThreshold,
-        cooldownMs: resilienceSettings.tokenRefreshBreaker.cooldownMs,
+    const refreshSignal = clientRawRequest?.signal?.aborted
+      ? clientRawRequest.signal
+      : streamController.signal;
+    const abortStreamingRefresh = () => {
+      const carry = {
+        upstreamHttpSelection,
+        translatedBody,
+        currentModel,
+        effectiveServiceTier,
+        finalBody,
+        pipelineRecovered,
+        providerHeaders,
+        providerResponse,
+        providerUrl,
+      };
+      if (isHedgeCancelledSignal(refreshSignal)) {
+        streamController.handleError(createSafeAbortError());
+        return {
+          response: createErrorResult(599, "Superseded by hedge sibling", null, "hedge_cancelled"),
+          carry,
+        };
       }
-    )) as null | {
+      trackPendingRequest(
+        model,
+        provider,
+        pendingConnId,
+        false,
+        undefined,
+        pendingScope.owner ?? pendingRequestId
+      );
+      if (
+        isDeadlineAbortReason(refreshSignal.reason) ||
+        isComboPerModelTimeoutAbort(refreshSignal)
+      ) {
+        const deadlineErr =
+          refreshSignal.reason instanceof Error
+            ? refreshSignal.reason
+            : new Error("Request timed out");
+        streamController.handleError(deadlineErr);
+        return {
+          response: createErrorResult(
+            HTTP_STATUS.GATEWAY_TIMEOUT,
+            "Request timed out",
+            null,
+            "upstream_timeout",
+            "upstream_timeout"
+          ),
+          carry,
+        };
+      }
+      streamController.handleError(createSafeAbortError());
+      return {
+        response: createErrorResult(499, "Request aborted"),
+        carry,
+      };
+    };
+    if (refreshSignal.aborted) return abortStreamingRefresh();
+
+    let newCredentials: null | {
       accessToken?: string;
       copilotToken?: string;
     };
+    try {
+      newCredentials = (await raceClientAbort(
+        tokens.refreshWithRetry(
+          () =>
+            tokens.runWithCasGuard(
+              casReread ? { expectedRefreshToken: attemptedRefreshToken, reread: casReread } : null,
+              () =>
+                tokens.runWithOnPersist(persistFn, () =>
+                  executor.refreshCredentials(credentials, log)
+                )
+            ),
+          3,
+          log,
+          provider, // Explicitly pass the provider to avoid universally tripping the "unknown" circuit breaker
+          {
+            ...(casConnectionId ? { connectionId: casConnectionId } : {}),
+            scope: resilienceSettings.tokenRefreshBreaker.scope,
+            failureThreshold: resilienceSettings.tokenRefreshBreaker.failureThreshold,
+            cooldownMs: resilienceSettings.tokenRefreshBreaker.cooldownMs,
+            signal: refreshSignal,
+          }
+        ),
+        refreshSignal
+      )) as null | {
+        accessToken?: string;
+        copilotToken?: string;
+      };
+    } catch (refreshErr) {
+      if (refreshSignal.aborted || isClientAbortError(refreshErr)) {
+        return abortStreamingRefresh();
+      }
+      throw refreshErr;
+    }
+    if (refreshSignal.aborted) return abortStreamingRefresh();
 
     if (newCredentials?.accessToken || newCredentials?.copilotToken) {
       log?.info?.("TOKEN", `${provider?.toUpperCase()} | refreshed`);

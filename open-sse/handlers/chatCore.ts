@@ -124,6 +124,7 @@ import { createChatStreamController } from "./chatCore/chatStreamController.ts";
 import * as streamFailure from "../utils/streamFailureFinalization.ts";
 import { normalizeUsage } from "../utils/usageTracking.ts";
 import { refreshWithRetry, runWithOnPersist, runWithCasGuard } from "../services/tokenRefresh.ts";
+import { createClientAbortError, raceClientAbort } from "../utils/clientAbort.ts";
 import { createRequestLogger } from "../utils/requestLogger.ts";
 import { createPreparedRequestLogger } from "../utils/providerRequestLogging.ts";
 import { summarizeToolSources } from "../utils/toolSources.ts";
@@ -2652,6 +2653,7 @@ async function handleChatCoreInner({
     finalizePendingRequest: () =>
       trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestOwner ?? pendingRequestId),
     log,
+    signal: clientRawRequest?.signal,
   });
   if (quotaShareBlockResult) return quotaShareBlockResult;
   // === /Quota Share enforcement PRE-hook ===
@@ -2930,23 +2932,37 @@ async function handleChatCoreInner({
         : "";
     const casReread = casConnectionId ? () => readLatestRefreshToken(casConnectionId) : null;
 
-    const newCredentials = (await refreshWithRetry(
-      () =>
-        runWithCasGuard(
-          casReread ? { expectedRefreshToken: attemptedRefreshToken, reread: casReread } : null,
-          () =>
-            runWithOnPersist(persistFn, () => executor.refreshCredentials(targetCredentials, log))
-        ),
-      3,
-      log,
-      provider,
-      {
-        ...(casConnectionId ? { connectionId: casConnectionId } : {}),
-        scope: resilienceSettings.tokenRefreshBreaker.scope,
-        failureThreshold: resilienceSettings.tokenRefreshBreaker.failureThreshold,
-        cooldownMs: resilienceSettings.tokenRefreshBreaker.cooldownMs,
-      }
+    const refreshSignal = clientRawRequest?.signal?.aborted
+      ? clientRawRequest.signal
+      : streamController.signal;
+    if (refreshSignal.aborted) {
+      throw createClientAbortError(refreshSignal);
+    }
+
+    const newCredentials = (await raceClientAbort(
+      refreshWithRetry(
+        () =>
+          runWithCasGuard(
+            casReread ? { expectedRefreshToken: attemptedRefreshToken, reread: casReread } : null,
+            () =>
+              runWithOnPersist(persistFn, () => executor.refreshCredentials(targetCredentials, log))
+          ),
+        3,
+        log,
+        provider,
+        {
+          ...(casConnectionId ? { connectionId: casConnectionId } : {}),
+          scope: resilienceSettings.tokenRefreshBreaker.scope,
+          failureThreshold: resilienceSettings.tokenRefreshBreaker.failureThreshold,
+          cooldownMs: resilienceSettings.tokenRefreshBreaker.cooldownMs,
+          signal: refreshSignal,
+        }
+      ),
+      refreshSignal
     )) as null | Record<string, unknown>;
+    if (refreshSignal.aborted) {
+      throw createClientAbortError(refreshSignal);
+    }
 
     if (newCredentials?.accessToken || newCredentials?.copilotToken) {
       const adoption = adoptRefreshedCodexCredentials({
