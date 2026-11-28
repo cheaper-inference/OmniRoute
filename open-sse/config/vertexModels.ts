@@ -31,6 +31,15 @@ export function getVertexHost(region: string | null | undefined): string {
   return "aiplatform.googleapis.com";
 }
 
+// Google serves Gemini 4 Argon only from these locations; any other region, including the
+// us-central1 default the dashboard stores, answers 404.
+// shortcut: the cyber variant is not listed (not in the registry), add it when it is.
+const ARGON_LOCATIONS = new Set(["global", "us", "eu", "europe-west2", "asia-southeast1"]);
+
+export function resolveVertexLocation(model: string, region: string): string {
+  return model === "gemini-4-argon" && !ARGON_LOCATIONS.has(region) ? "global" : region;
+}
+
 function normalizePublisherModel(publisher: string, model: string): string {
   const normalizedPublisher = publisher.toLowerCase();
   if (NATIVE_PUBLISHERS.has(normalizedPublisher)) return model;

@@ -15,6 +15,7 @@ import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
+import { getReadinessChecks } from "@/lib/readinessChecks";
 
 /**
  * GET /api/monitoring/health — System health overview
@@ -69,7 +70,13 @@ function publicHealthView(payload: unknown): Record<string, unknown> {
 }
 
 function serveHealthPayload(fullView: boolean, payload: unknown) {
-  return NextResponse.json(fullView ? payload : publicHealthView(payload));
+  // Non-gating readiness checks (aegis-10): read live, never from the 30 s payload cache,
+  // and only for a management caller.
+  return NextResponse.json(
+    fullView
+      ? { ...((payload ?? {}) as Record<string, unknown>), readiness: getReadinessChecks() }
+      : publicHealthView(payload)
+  );
 }
 
 function scheduleHealthPayloadRefresh(): void {

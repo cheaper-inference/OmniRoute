@@ -17,7 +17,7 @@ import { computeContextKey } from "./contextKey.ts";
 import { detectKind } from "./kindDetector.ts";
 import type { InterceptedRequest, ListFilters, WsEvent } from "./types.ts";
 
-const TRUNCATION_MARKER = "\n…(truncated for performance)";
+export const TRUNCATION_MARKER = "\n…(truncated for performance)";
 
 function parseEnvNumber(value: string | undefined, fallback: number): number {
   if (!value) return fallback;
@@ -26,7 +26,7 @@ function parseEnvNumber(value: string | undefined, fallback: number): number {
   return parsed;
 }
 
-function getMaxBodyBytes(): number {
+export function getMaxBodyBytes(): number {
   const kb = parseEnvNumber(process.env.INSPECTOR_MAX_BODY_KB, 1024);
   return Math.max(1, Math.floor(kb)) * 1024;
 }
