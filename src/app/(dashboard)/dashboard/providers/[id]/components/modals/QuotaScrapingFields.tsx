@@ -28,6 +28,7 @@ type QuotaScrapingFieldsProps = {
 
 export default function QuotaScrapingFields(props: QuotaScrapingFieldsProps) {
   if (props.provider === "zed-hosted") return <ZedHostedBillingPortalField {...props} />;
+  if (props.provider === "muse-code") return <MuseConsoleSessionFields {...props} />;
   return <ConsoleSessionQuotaFields {...props} />;
 }
 
@@ -63,6 +64,51 @@ function ZedHostedBillingPortalField({
         autoCapitalize="off"
       />
     </Card.Section>
+  );
+}
+
+/** Optional read-only console credentials; edit blanks retain existing saved values. */
+function MuseConsoleSessionFields({
+  values,
+  onChange,
+  t,
+  editMode = false,
+}: QuotaScrapingFieldsProps) {
+  const fields = [
+    {
+      name: "museConsoleSession" as const,
+      label: "Muse Code console session",
+      type: "password",
+      hint: "Copy the cookie value from DevTools > Application > Cookies > dev.meta.ai > llama_dev_sess. Leave blank to keep the stored session.",
+    },
+    {
+      name: "museTeamId" as const,
+      label: "Muse Code team id (optional)",
+      type: "text",
+      hint: "Choose a team when the console account has more than one. Leave blank to keep the stored team id.",
+    },
+  ];
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+      {fields.map((field) => (
+        <Input
+          key={field.name}
+          name={field.name}
+          type={field.type}
+          value={values[field.name] ?? ""}
+          label={providerText(t, `${field.name}Label`, field.label)}
+          hint={providerText(
+            t,
+            `${field.name}Hint`,
+            `${editMode ? "Saved values are retained when blank. " : ""}${field.hint}`
+          )}
+          onChange={(event) => onChange({ [field.name]: event.target.value })}
+          autoComplete="off"
+          spellCheck={false}
+          autoCapitalize="off"
+        />
+      ))}
+    </div>
   );
 }
 

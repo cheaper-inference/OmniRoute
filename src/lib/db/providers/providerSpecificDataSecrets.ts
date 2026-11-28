@@ -20,6 +20,9 @@ export const PROVIDER_SPECIFIC_SECRET_FIELDS = [
   "alibabaConsoleCookie",
   "alibabaConsoleSecToken",
   "xiaomiMimoConsoleCookie",
+  // Muse Code console session cookie (dev.meta.ai `llama_dev_sess`) for the
+  // live 5h/weekly quota fetch — same credential class as the cookies above.
+  "museConsoleSession",
   // Console-only quota cookies/tokens live alongside the inference API key;
   // none are SQLite identity fields. Keeping them plaintext on disk exposes
   // the cloud-console account to anyone who can read the database.

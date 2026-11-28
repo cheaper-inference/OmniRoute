@@ -2,12 +2,25 @@ import { afterEach, expect, it, vi } from "vitest";
 
 const guard = vi.hoisted(() => {
   const attempts: string[] = [];
+  const stages: Array<{ name: string; elapsedMs: number }> = [];
+  let startedAt = 0;
+  const stage = (name: string) => {
+    const now = performance.now();
+    if (!startedAt) startedAt = now;
+    stages.push({ name, elapsedMs: Math.round(now - startedAt) });
+  };
   const blocked = (name: string) =>
     vi.fn(() => {
       attempts.push(name);
       throw new Error(`Forbidden side effect: ${name}`);
     });
-  return { blocked, attempts, fetchers: new Map<string, ReturnType<typeof vi.fn>>() };
+  return {
+    stage,
+    stages,
+    blocked,
+    attempts,
+    fetchers: new Map<string, ReturnType<typeof vi.fn>>(),
+  };
 });
 vi.mock("@/lib/db/readCache", () => ({
   getCachedRawProviderConnections: vi.fn(async () => [
@@ -149,7 +162,10 @@ vi.mock("@/lib/api/modelTestRunner", () => ({
   runSingleModelTest: guard.blocked("runSingleModelTest"),
 }));
 
-afterEach(() => {
+afterEach((context) => {
+  if (context.task.result?.state === "fail") {
+    console.error("[quota-availability] Completed cold-path stages:", guard.stages);
+  }
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -161,8 +177,12 @@ const fetch = vi.fn((input: string | URL | Request) => {
 vi.stubGlobal("fetch", fetch);
 // Collect the real cold graph before starting the timed GET test. Snapshot the
 // import's effects before Vitest clears mock calls at the start of the test.
+guard.stage("cold-route-import:start");
 const route = await import("@/app/api/usage/availability/route");
+guard.stage("cold-route-import:done");
+guard.stage("reasoning-import:start");
 const reasoning = await import("@/lib/db/reasoningCache");
+guard.stage("reasoning-import:done");
 const coldCleanupCalls = vi.mocked(reasoning.cleanupExpiredReasoning).mock.calls.length;
 const coldAttempts = [...guard.attempts];
 const coldUrls = [...urls];
@@ -185,8 +205,12 @@ it("availability GET reads snapshots without fetchers, writes, refreshes or shar
   guard.attempts.length = 0;
   urls.length = 0;
   fetch.mockClear();
+  guard.stage("instrumentation-import:start");
   const { registerQuotaFetchers } = await import("@/instrumentation-node");
+  guard.stage("instrumentation-import:done");
+  guard.stage("fetcher-registration:start");
   await registerQuotaFetchers();
+  guard.stage("fetcher-registration:done");
   const preflight = await import("@omniroute/open-sse/services/quotaPreflight.ts");
   expect(guard.fetchers.size).toBeGreaterThan(0);
   expect([...preflight.getRegisteredQuotaFetchers().keys()].sort()).toEqual(
@@ -222,11 +246,17 @@ it("availability GET reads snapshots without fetchers, writes, refreshes or shar
   });
   const before = structuredClone({ cache: state.cache, healthyUntil: state.healthyUntil });
   try {
+    guard.stage("first-GET:start");
     const response = await route.GET();
+    guard.stage("first-GET:done");
     expect(response.status).toBe(200);
+    guard.stage("second-GET:start");
     const second = await route.GET();
+    guard.stage("second-GET:done");
     expect(second.status).toBe(200);
+    guard.stage("response-body:start");
     const body = await response.json();
+    guard.stage("response-body:done");
     expect(body.connections).toHaveLength(4);
     expect(
       body.connections.find((c: { id: string }) => c.id === "healthy").account.allowanceReasons

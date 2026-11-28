@@ -29,6 +29,8 @@ export type QuotaScrapingFieldValues = {
   qwenCloudSecToken: string;
   volcConsoleCookie: string;
   xiaomiMimoConsoleCookie: string;
+  museConsoleSession: string;
+  museTeamId: string;
   billingPortalUrl: string;
 };
 
@@ -40,6 +42,8 @@ export const EMPTY_QUOTA_SCRAPING_FIELDS: QuotaScrapingFieldValues = {
   qwenCloudSecToken: "",
   volcConsoleCookie: "",
   xiaomiMimoConsoleCookie: "",
+  museConsoleSession: "",
+  museTeamId: "",
   billingPortalUrl: "",
 };
 
@@ -52,7 +56,21 @@ export function assignQuotaScrapingProviderData(
     assignZedHostedBillingPortalUrl(values, target);
     return;
   }
+  if (provider === "muse-code") {
+    assignMuseConsoleSession(values, target);
+    return;
+  }
   assignConsoleSessionProviderData(provider, values, target);
+}
+
+function assignMuseConsoleSession(
+  values: QuotaScrapingFieldValues,
+  target: Record<string, unknown>
+) {
+  for (const field of ["museConsoleSession", "museTeamId"] as const) {
+    const value = values[field]?.trim();
+    if (value) target[field] = value;
+  }
 }
 
 function assignZedHostedBillingPortalUrl(
