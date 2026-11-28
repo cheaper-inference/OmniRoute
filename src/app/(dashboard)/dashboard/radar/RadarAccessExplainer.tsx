@@ -14,7 +14,7 @@ function RuleItem({ children }: { children: ReactNode }) {
   );
 }
 
-/** D32 — normative access, safety, and privacy rules shown before opt-in. */
+/** Explain feed access and the privacy boundary before opt-in. */
 export function RadarAccessExplainer() {
   const t = useTranslations("radarPage");
 
@@ -29,35 +29,20 @@ export function RadarAccessExplainer() {
       <p className="mt-1 text-sm text-text-muted">{t("accessScaleIntro")}</p>
 
       <ul className="mt-4 grid gap-3 text-sm text-text-muted md:grid-cols-2">
-        <RuleItem>{t("accessCommunityRule")}</RuleItem>
-        <RuleItem>{t("accessSingleUseRule")}</RuleItem>
-        <RuleItem>{t("accessContributorRule")}</RuleItem>
-        <RuleItem>{t("accessSupporterRule")}</RuleItem>
+        <RuleItem>{t("accessEveryoneRule")}</RuleItem>
+        <RuleItem>{t("accessOffersRule")}</RuleItem>
       </ul>
 
-      <div className="mt-5 grid gap-4 border-t border-border pt-4 md:grid-cols-2">
-        <section aria-labelledby="radar-access-use-title">
-          <h4 id="radar-access-use-title" className="ci-heading" data-size="sm">
-            {t("accessUseTitle")}
-          </h4>
-          <ul className="mt-2 flex flex-col gap-2 text-sm text-text-muted">
-            <RuleItem>{t("accessInstallationRule")}</RuleItem>
-            <RuleItem>{t("accessAbuseRule")}</RuleItem>
-            <RuleItem>{t("accessOffersRule")}</RuleItem>
-          </ul>
-        </section>
-
-        <section aria-labelledby="radar-privacy-title">
-          <h4 id="radar-privacy-title" className="ci-heading" data-size="sm">
-            {t("privacyTitle")}
-          </h4>
-          <ul className="mt-2 flex flex-col gap-2 text-sm text-text-muted">
-            <RuleItem>{t("privacyDownloadsRule")}</RuleItem>
-            <RuleItem>{t("privacySendsRule")}</RuleItem>
-            <RuleItem>{t("privacyNeverRule")}</RuleItem>
-          </ul>
-        </section>
-      </div>
+      <section aria-labelledby="radar-privacy-title" className="mt-5 border-t border-border pt-4">
+        <h4 id="radar-privacy-title" className="ci-heading" data-size="sm">
+          {t("privacyTitle")}
+        </h4>
+        <ul className="mt-2 flex flex-col gap-2 text-sm text-text-muted">
+          <RuleItem>{t("privacyDownloadsRule")}</RuleItem>
+          <RuleItem>{t("privacySendsRule")}</RuleItem>
+          <RuleItem>{t("privacyNeverRule")}</RuleItem>
+        </ul>
+      </section>
     </section>
   );
 }

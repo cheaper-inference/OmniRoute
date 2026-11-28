@@ -65,7 +65,6 @@ export interface RadarCacheEntry {
 
 export interface RadarSettingsSnapshot {
   optIn: boolean;
-  supporterKey: string | null;
 }
 
 export interface SyncDeps {
@@ -162,7 +161,7 @@ export function nextSyncTime(lastSyncAt: string | null): Date {
  *  4. Verify Ed25519 signature over exact bytes.
  *  5. Parse+validate with RadarFeedSchema.
  *  6. Check the version floor and refresh the fetch time on a matching version and tier.
- *  7. Cache a replacement when the version, entitlement, or schema allows it.
+ *  7. Cache a replacement when the version, served tier, or schema allows it.
  *
  * @param deps - Injectable dependencies for testing.
  */
@@ -200,13 +199,8 @@ export async function syncRadar(deps: SyncDeps = {}): Promise<SyncStatus> {
     const baseUrl = (process.env.RADAR_FEED_URL || DEFAULT_FEED_BASE_URL).replace(/\/+$/, "");
     const url = `${baseUrl}/v1/catalog/latest`;
 
-    const headers: Record<string, string> = { "x-omniroute-radar-schema": "2" };
-    if (settings.supporterKey) {
-      headers["Authorization"] = `Bearer ${settings.supporterKey}`;
-    }
-
     const res = await fetchFn(url, {
-      headers,
+      headers: { "x-omniroute-radar-schema": "2" },
       signal: AbortSignal.timeout(SYNC_TIMEOUT_MS),
     });
 
@@ -279,14 +273,10 @@ export async function syncRadar(deps: SyncDeps = {}): Promise<SyncStatus> {
       return { status: "invalid_schema" };
     }
 
-    // Step 7: Resolve the served tier before the version floor. A single-use
-    // supporter key deliberately transitions from live to community after its
-    // first catalog pull, and the community snapshot can be older.
+    // Resolve the served tier before comparing versions. A legacy feed may
+    // serve an older community snapshot to an installation with a live cache.
     const servedTier = parseServedTierHeader(res.headers.get("x-omniroute-feed-tier")) ?? feed.tier;
 
-    // Step 8: Version floor. Same/older versions generally keep the cached payload,
-    // but a verified live -> community transition must replace the privileged
-    // cache even when the community snapshot is older.
     let existingCache: RadarCacheEntry | null = null;
     if (getCacheFn) {
       existingCache = getCacheFn();
@@ -295,7 +285,7 @@ export async function syncRadar(deps: SyncDeps = {}): Promise<SyncStatus> {
       existingCache = mod.getRadarCache();
     }
 
-    const isEntitlementDowngrade = existingCache?.tier === "live" && servedTier === "community";
+    const isLegacyTierDowngrade = existingCache?.tier === "live" && servedTier === "community";
     const versionComparison = existingCache
       ? compareVersions(feed.version, existingCache.version)
       : 1;
@@ -307,7 +297,7 @@ export async function syncRadar(deps: SyncDeps = {}): Promise<SyncStatus> {
       cachedSchemaVersion(existingCache) === 1;
     if (
       existingCache &&
-      !isEntitlementDowngrade &&
+      !isLegacyTierDowngrade &&
       !isSameVersionSchemaUpgrade &&
       versionComparison <= 0
     ) {

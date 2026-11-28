@@ -13,6 +13,8 @@
  */
 
 import test from "node:test";
+
+import type { RadarCacheEntry } from "../../src/lib/radar/sync.ts";
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -333,7 +335,7 @@ test("syncRadar: opt-in false => opt_out, no fetch call", async () => {
 
 test("syncRadar: valid signature => cache updated, payload byte-identical to fixture", async () => {
   const sig = signBytes(FIXTURE_BYTES);
-  const cacheStore: syncMod.RadarCacheEntry[] = [];
+  const cacheStore: RadarCacheEntry[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -440,7 +442,7 @@ test("syncRadar: same version renews fetchedAt without rewriting the payload", a
 test("syncRadar: same version upgrades a validated v1 cache to the negotiated v2 artifact", async () => {
   const v2Bytes = v2FixtureBytes();
   const sig = signBytes(v2Bytes);
-  const cacheStore: syncMod.RadarCacheEntry[] = [];
+  const cacheStore: RadarCacheEntry[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -535,7 +537,7 @@ test("syncRadar: older version is rejected and does not renew fetchedAt", async 
 
 test("syncRadar: an entitlement downgrade replaces a newer live cache with community", async () => {
   const sig = signBytes(FIXTURE_BYTES);
-  const cacheStore: syncMod.RadarCacheEntry[] = [];
+  const cacheStore: RadarCacheEntry[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -568,7 +570,7 @@ test("syncRadar: version floor — incoming newer => updated", async () => {
   fixtureObj.version = "2026.08.02.1";
   const newerBytes = Buffer.from(JSON.stringify(fixtureObj));
   const sig = signBytes(newerBytes);
-  const cacheStore: syncMod.RadarCacheEntry[] = [];
+  const cacheStore: RadarCacheEntry[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -600,7 +602,7 @@ test("syncRadar: numeric version compare (2026.08.02.9 vs 2026.08.02.10)", async
   fixtureObj.version = "2026.08.02.10";
   const newerBytes = Buffer.from(JSON.stringify(fixtureObj));
   const sig = signBytes(newerBytes);
-  const cacheStore: syncMod.RadarCacheEntry[] = [];
+  const cacheStore: RadarCacheEntry[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -686,7 +688,7 @@ test("syncRadar: HTTP non-200 => error", async () => {
   }
 });
 
-test("syncRadar: sends Authorization header when supporter key exists", async () => {
+test("syncRadar: omits Authorization even when a legacy key exists", async () => {
   let capturedHeaders: Record<string, string> = {};
   const sig = signBytes(FIXTURE_BYTES);
 
@@ -695,7 +697,7 @@ test("syncRadar: sends Authorization header when supporter key exists", async ()
     getSettings: () => ({ optIn: true, supporterKey: "omr_test-key-123" }),
     getCache: () => null,
     setCache: () => {},
-    fetch: ((url: string, init: RequestInit) => {
+    fetch: ((_url: string, init: RequestInit) => {
       capturedHeaders = Object.fromEntries(
         (init.headers as Record<string, string> | undefined)
           ? Object.entries(init.headers as Record<string, string>)
@@ -708,8 +710,8 @@ test("syncRadar: sends Authorization header when supporter key exists", async ()
 
   assert.equal(
     capturedHeaders["Authorization"],
-    "Bearer omr_test-key-123",
-    "must send Bearer token when supporter key exists"
+    undefined,
+    "legacy supporter keys must never leave the installation"
   );
 });
 
@@ -739,7 +741,7 @@ test("syncRadar: no Authorization header when no supporter key", async () => {
     getSettings: () => ({ optIn: true, supporterKey: null }),
     getCache: () => null,
     setCache: () => {},
-    fetch: ((url: string, init: RequestInit) => {
+    fetch: ((_url: string, init: RequestInit) => {
       capturedHeaders = Object.fromEntries(
         (init.headers as Record<string, string> | undefined)
           ? Object.entries(init.headers as Record<string, string>)
@@ -792,7 +794,7 @@ test("syncRadar: header 'community' overrides body tier:'live' — cache + resul
   fixtureObj.tier = "live"; // signed body always says "live"
   const bytes = Buffer.from(JSON.stringify(fixtureObj));
   const sig = signBytes(bytes);
-  const cacheStore: syncMod.RadarCacheEntry[] = [];
+  const cacheStore: RadarCacheEntry[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -832,7 +834,7 @@ test("syncRadar: header 'live' => cache + result use live", async () => {
   fixtureObj.tier = "live";
   const bytes = Buffer.from(JSON.stringify(fixtureObj));
   const sig = signBytes(bytes);
-  const cacheStore: syncMod.RadarCacheEntry[] = [];
+  const cacheStore: RadarCacheEntry[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -863,7 +865,7 @@ test("syncRadar: header absent => falls back to body tier (older server)", async
   fixtureObj.tier = "community";
   const bytes = Buffer.from(JSON.stringify(fixtureObj));
   const sig = signBytes(bytes);
-  const cacheStore: syncMod.RadarCacheEntry[] = [];
+  const cacheStore: RadarCacheEntry[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -895,7 +897,7 @@ test("syncRadar: header holds a garbage value => falls back to body tier, garbag
   fixtureObj.tier = "live";
   const bytes = Buffer.from(JSON.stringify(fixtureObj));
   const sig = signBytes(bytes);
-  const cacheStore: syncMod.RadarCacheEntry[] = [];
+  const cacheStore: RadarCacheEntry[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -932,7 +934,7 @@ test("syncRadar: header holds an empty string => falls back to body tier", async
   fixtureObj.tier = "community";
   const bytes = Buffer.from(JSON.stringify(fixtureObj));
   const sig = signBytes(bytes);
-  const cacheStore: syncMod.RadarCacheEntry[] = [];
+  const cacheStore: RadarCacheEntry[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -960,7 +962,7 @@ test("syncRadar: header holds an empty string => falls back to body tier", async
 
 test("syncRadar: first sync (no cache) with valid data => updated", async () => {
   const sig = signBytes(FIXTURE_BYTES);
-  const cacheStore: syncMod.RadarCacheEntry[] = [];
+  const cacheStore: RadarCacheEntry[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,

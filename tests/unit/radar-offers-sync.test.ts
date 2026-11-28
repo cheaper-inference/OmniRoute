@@ -3,6 +3,8 @@ import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import type { RadarOffersCacheEntry } from "../../src/lib/radar/offersSync.ts";
+
 const { publicKey, privateKey } = crypto.generateKeyPairSync("ed25519");
 process.env.RADAR_FEED_PUBKEY = publicKey
   .export({ type: "spki", format: "der" })
@@ -32,8 +34,8 @@ function liveSettings(supporterKey: string | null = `omr_${"a".repeat(40)}`) {
   return { optIn: true, supporterKey };
 }
 
-test("offers sync gates flag, opt-in, and missing supporter key before fetch", async () => {
-  for (const expected of ["disabled", "opt_out", "no_key"] as const) {
+test("offers sync gates flag and opt-in before fetch", async () => {
+  for (const expected of ["disabled", "opt_out"] as const) {
     let fetched = false;
     const result = await offersSync.syncRadarOffers({
       getFlag: () => expected !== "disabled",
@@ -49,13 +51,13 @@ test("offers sync gates flag, opt-in, and missing supporter key before fetch", a
   }
 });
 
-test("valid live offer feed sends Bearer server-side and caches exact signed bytes", async () => {
+test("valid offer feed without a tier header caches exact signed bytes without credentials", async () => {
   const feed = await fixtureFeed();
   const bytes = Buffer.from(JSON.stringify(feed));
   const signature = sign(bytes);
-  const writes: offersSync.RadarOffersCacheEntry[] = [];
+  const writes: RadarOffersCacheEntry[] = [];
   let requestUrl = "";
-  let authorization = "";
+  let authorization: string | null = "";
 
   const result = await offersSync.syncRadarOffers({
     getFlag: () => true,
@@ -64,10 +66,9 @@ test("valid live offer feed sends Bearer server-side and caches exact signed byt
     setCache: (entry) => writes.push(entry),
     fetch: (async (input, init) => {
       requestUrl = String(input);
-      authorization = new Headers(init?.headers).get("authorization") ?? "";
+      authorization = new Headers(init?.headers).get("authorization");
       return response(bytes, {
         "x-omniroute-feed-signature": signature,
-        "x-omniroute-feed-tier": "live",
       });
     }) as typeof fetch,
     now: () => new Date("2026-08-09T12:05:00.000Z"),
@@ -75,13 +76,13 @@ test("valid live offer feed sends Bearer server-side and caches exact signed byt
 
   assert.deepEqual(result, { status: "updated", version: "2026.08.09.1" });
   assert.equal(requestUrl, "https://radar.omniroute.online/v1/offers/latest");
-  assert.equal(authorization, `Bearer omr_${"a".repeat(40)}`);
+  assert.equal(authorization, null);
   assert.equal(writes[0]!.payload, bytes.toString("utf8"));
   assert.equal(writes[0]!.signature, signature);
   assert.equal(writes[0]!.tier, "live");
 });
 
-test("signature, schema, and live-tier failures preserve the last good cache", async () => {
+test("signature and schema failures preserve the last good cache", async () => {
   const feed = await fixtureFeed();
   const validBytes = Buffer.from(JSON.stringify(feed));
   const cases: Array<{ expected: string; bytes: Buffer; signature: string; tier: string | null }> =
@@ -93,8 +94,12 @@ test("signature, schema, and live-tier failures preserve the last good cache", a
         signature: "valid-for-case",
         tier: "live",
       },
-      { expected: "wrong_tier", bytes: validBytes, signature: "valid-for-case", tier: null },
-      { expected: "wrong_tier", bytes: validBytes, signature: "valid-for-case", tier: "community" },
+      {
+        expected: "invalid_schema",
+        bytes: Buffer.from(JSON.stringify({ ...feed, tier: "community" })),
+        signature: "valid-for-case",
+        tier: "live",
+      },
     ];
 
   for (const item of cases) {
@@ -123,7 +128,7 @@ test("signature, schema, and live-tier failures preserve the last good cache", a
   }
 });
 
-test("same or older signed offer versions are rejected as stale", async () => {
+test("an older signed offer version preserves the payload and fetch time", async () => {
   const feed = await fixtureFeed();
   const bytes = Buffer.from(JSON.stringify(feed));
   let written = false;
@@ -131,7 +136,7 @@ test("same or older signed offer versions are rejected as stale", async () => {
     getFlag: () => true,
     getSettings: () => liveSettings(),
     getCache: () => ({
-      version: "2026.08.09.1",
+      version: "2026.08.10.1",
       tier: "live",
       payload: "last-good",
       signature: "old",
@@ -139,6 +144,7 @@ test("same or older signed offer versions are rejected as stale", async () => {
     setCache: () => {
       written = true;
     },
+    touchCache: () => assert.fail("an older version must not refresh the fetch time"),
     fetch: (async () =>
       response(bytes, {
         "x-omniroute-feed-signature": sign(bytes),

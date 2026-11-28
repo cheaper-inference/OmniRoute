@@ -36,7 +36,7 @@ test("radar status is GET-only, read-only, and prints no secret", async () => {
     url = String(input);
     method = init?.method ?? "GET";
     return makeResponse({
-      settings: { optIn: true, hasSupporterKey: true },
+      settings: { optIn: true },
       feeds: { catalog: { available: true, version: "2026.08.09.1", tier: "live" } },
     });
   }) as typeof fetch;
@@ -62,8 +62,8 @@ test("radar sync posts only to the local aggregate route and prints per-feed res
     return makeResponse({
       catalog: { status: "updated", version: "2026.08.09.1" },
       referrals: { status: "stale" },
-      offers: { status: "no_key" },
-      intel: { status: "no_key" },
+      offers: { status: "updated", version: "2026.08.09.1" },
+      intel: { status: "stale" },
     });
   }) as typeof fetch;
   try {

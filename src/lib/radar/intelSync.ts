@@ -1,6 +1,4 @@
-/** Server-side sync for the signed, supporter-only Radar Intel feed. */
-
-import crypto from "node:crypto";
+/** Server-side sync for the signed, public Radar Intel feed. */
 
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 
@@ -17,10 +15,9 @@ const SYNC_TIMEOUT_MS = 30_000;
 export type IntelSyncStatus =
   | { status: "disabled" }
   | { status: "opt_out" }
-  | { status: "no_key" }
+  | { status: "unpublished" }
   | { status: "invalid_signature" }
   | { status: "invalid_schema" }
-  | { status: "wrong_tier" }
   | { status: "stale" }
   | { status: "too_large" }
   | { status: "updated"; version: string }
@@ -40,18 +37,10 @@ export interface IntelSyncDeps {
   now?: () => Date;
   getFlag?: (key: string) => boolean;
   getSettings?: () => RadarSettingsSnapshot;
-  getCache?: () => RadarIntelCacheEntry | null;
+  getCache?: () => (Omit<RadarIntelCacheEntry, "tier"> & { tier: string }) | null;
   setCache?: (entry: RadarIntelCacheEntry) => void;
-  recognizeSupporter?: (identity: string) => Promise<void>;
-}
-
-function supporterIdentity(key: string): string {
-  return `radar:${crypto.createHash("sha256").update(key, "utf8").digest("hex")}`;
-}
-
-async function recognizeVerifiedSupporter(identity: string): Promise<void> {
-  const { emitGamificationEvent } = await import("@/lib/gamification/events");
-  await emitGamificationEvent({ apiKeyId: identity, action: "radar_supporter" });
+  touchCache?: (fetchedAt: string) => void;
+  clearCache?: () => void;
 }
 
 export async function syncRadarIntel(deps: IntelSyncDeps = {}): Promise<IntelSyncStatus> {
@@ -62,7 +51,8 @@ export async function syncRadarIntel(deps: IntelSyncDeps = {}): Promise<IntelSyn
     getSettings: getSettingsFn,
     getCache: getCacheFn,
     setCache: setCacheFn,
-    recognizeSupporter = recognizeVerifiedSupporter,
+    touchCache: touchCacheFn,
+    clearCache: clearCacheFn,
   } = deps;
 
   try {
@@ -71,14 +61,17 @@ export async function syncRadarIntel(deps: IntelSyncDeps = {}): Promise<IntelSyn
       ? getSettingsFn()
       : (await import("@/lib/db/radar")).getRadarSettings();
     if (!settings.optIn) return { status: "opt_out" };
-    if (!settings.supporterKey) return { status: "no_key" };
 
     const baseUrl = (process.env.RADAR_FEED_URL || DEFAULT_FEED_BASE_URL).replace(/\/+$/, "");
     const response = await fetchFn(`${baseUrl}/v1/intel/latest`, {
       method: "GET",
-      headers: { Authorization: `Bearer ${settings.supporterKey}` },
       signal: AbortSignal.timeout(SYNC_TIMEOUT_MS),
     });
+    if (response.status === 404) {
+      const clearCache = clearCacheFn ?? (await import("@/lib/db/radar")).clearRadarIntelCache;
+      clearCache();
+      return { status: "unpublished" };
+    }
     if (!response.ok) {
       return {
         status: "error",
@@ -98,32 +91,30 @@ export async function syncRadarIntel(deps: IntelSyncDeps = {}): Promise<IntelSyn
     } catch {
       return { status: "invalid_schema" };
     }
-    if (response.headers.get("x-omniroute-feed-tier") !== "live" || feed.tier !== "live") {
-      return { status: "wrong_tier" };
-    }
-
     const existing = getCacheFn
       ? getCacheFn()
       : (await import("@/lib/db/radar")).getRadarIntelCache();
-    if (existing && compareVersions(feed.version, existing.version) <= 0) {
+    const versionComparison = existing ? compareVersions(feed.version, existing.version) : 1;
+    if (versionComparison === 0) {
+      const touchCache =
+        touchCacheFn ?? (await import("@/lib/db/radar")).touchRadarIntelCacheFetchedAt;
+      touchCache(now().toISOString());
+    }
+    if (versionComparison <= 0) {
       return { status: "stale" };
     }
 
-    const identity = supporterIdentity(settings.supporterKey);
     const cacheEntry: RadarIntelCacheEntry = {
       version: feed.version,
       tier: "live",
       payload: rawBytes.toString("utf8"),
       signature,
-      supporterIdentity: identity,
+      supporterIdentity: "",
       fetchedAt: now().toISOString(),
     };
     if (setCacheFn) setCacheFn(cacheEntry);
     else (await import("@/lib/db/radar")).setRadarIntelCache(cacheEntry);
 
-    // Recognition is local and best-effort. It runs only after the signed live
-    // bytes have been accepted and persisted, and never changes sync success.
-    await recognizeSupporter(identity).catch(() => undefined);
     return { status: "updated", version: feed.version };
   } catch (error: unknown) {
     const reason = (sanitizeErrorMessage(error) || "Radar Intel sync failed").replace(

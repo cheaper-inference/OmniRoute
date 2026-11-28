@@ -1,5 +1,5 @@
 /**
- * Server-side sync for the separately signed, supporter-only Radar offers feed.
+ * Server-side sync for the separately signed, public Radar offers feed.
  * Every failure preserves the last verified local cache.
  */
 
@@ -16,10 +16,8 @@ const SYNC_TIMEOUT_MS = 30_000;
 export type OffersSyncStatus =
   | { status: "disabled" }
   | { status: "opt_out" }
-  | { status: "no_key" }
   | { status: "invalid_signature" }
   | { status: "invalid_schema" }
-  | { status: "wrong_tier" }
   | { status: "stale" }
   | { status: "too_large" }
   | { status: "updated"; version: string }
@@ -38,8 +36,9 @@ export interface OffersSyncDeps {
   now?: () => Date;
   getFlag?: (key: string) => boolean;
   getSettings?: () => RadarSettingsSnapshot;
-  getCache?: () => RadarOffersCacheEntry | null;
+  getCache?: () => (Omit<RadarOffersCacheEntry, "tier"> & { tier: string }) | null;
   setCache?: (entry: RadarOffersCacheEntry) => void;
+  touchCache?: (fetchedAt: string) => void;
 }
 
 export async function syncRadarOffers(deps: OffersSyncDeps = {}): Promise<OffersSyncStatus> {
@@ -50,6 +49,7 @@ export async function syncRadarOffers(deps: OffersSyncDeps = {}): Promise<Offers
     getSettings: getSettingsFn,
     getCache: getCacheFn,
     setCache: setCacheFn,
+    touchCache: touchCacheFn,
   } = deps;
 
   try {
@@ -59,12 +59,10 @@ export async function syncRadarOffers(deps: OffersSyncDeps = {}): Promise<Offers
       ? getSettingsFn()
       : (await import("@/lib/db/radar")).getRadarSettings();
     if (!settings.optIn) return { status: "opt_out" };
-    if (!settings.supporterKey) return { status: "no_key" };
 
     const baseUrl = (process.env.RADAR_FEED_URL || DEFAULT_FEED_BASE_URL).replace(/\/+$/, "");
     const response = await fetchFn(`${baseUrl}/v1/offers/latest`, {
       method: "GET",
-      headers: { Authorization: `Bearer ${settings.supporterKey}` },
       signal: AbortSignal.timeout(SYNC_TIMEOUT_MS),
     });
     if (!response.ok) {
@@ -87,14 +85,16 @@ export async function syncRadarOffers(deps: OffersSyncDeps = {}): Promise<Offers
       return { status: "invalid_schema" };
     }
 
-    if (response.headers.get("x-omniroute-feed-tier") !== "live" || feed.tier !== "live") {
-      return { status: "wrong_tier" };
-    }
-
     const existing = getCacheFn
       ? getCacheFn()
       : (await import("@/lib/db/radar")).getRadarOffersCache();
-    if (existing && compareVersions(feed.version, existing.version) <= 0) {
+    const versionComparison = existing ? compareVersions(feed.version, existing.version) : 1;
+    if (versionComparison === 0) {
+      const touchCache =
+        touchCacheFn ?? (await import("@/lib/db/radar")).touchRadarOffersCacheFetchedAt;
+      touchCache(now().toISOString());
+    }
+    if (versionComparison <= 0) {
       return { status: "stale" };
     }
 

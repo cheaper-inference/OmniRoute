@@ -10,9 +10,8 @@ import { notFound } from "next/navigation";
 import Icon from "@/shared/components/Icon";
 import { Card } from "@/shared/components";
 import Button from "@/shared/components/Button";
-import Input from "@/shared/components/Input";
+import StarInviteCard from "@/shared/components/StarInviteCard";
 import { shouldAutoSyncOnOpen } from "@/lib/radar/autoSync";
-import { isValidSupporterKeyFormat } from "@/lib/radar/supporterKey";
 import { RadarAccessExplainer } from "./RadarAccessExplainer";
 import { RadarCatalogTable, type RadarMergedEntry } from "./RadarCatalogTable";
 
@@ -22,8 +21,11 @@ import { RadarCatalogTable, type RadarMergedEntry } from "./RadarCatalogTable";
 
 interface RadarMeta {
   version: string;
-  tier: string;
   fetchedAt: string;
+}
+
+interface RadarStatusResponse {
+  feeds?: { intel?: { available?: boolean } };
 }
 
 type PageState = "flag_off" | "optin_pending" | "empty" | "populated";
@@ -41,7 +43,6 @@ interface RadarReferralItem {
 interface RadarReferralsState {
   fixed: RadarReferralItem[];
   campaigns: RadarReferralItem[];
-  tier: string | null;
 }
 
 type RadarTabId = "catalog" | "referrals";
@@ -81,6 +82,13 @@ function relativeTime(isoDate: string): string {
 // Page Component
 // ---------------------------------------------------------------------------
 
+async function fetchIntelAvailability(): Promise<boolean> {
+  const response = await fetch("/api/radar/status", { cache: "no-store" });
+  if (response.status !== 200) return false;
+  const status = (await response.json()) as RadarStatusResponse;
+  return status.feeds?.intel?.available === true;
+}
+
 export default function RadarPage() {
   const t = useTranslations("radarPage");
   const [entries, setEntries] = useState<RadarMergedEntry[]>([]);
@@ -89,33 +97,15 @@ export default function RadarPage() {
   const [error, setError] = useState("");
   const [featureAvailable, setFeatureAvailable] = useState<boolean | null>(null);
   const [optIn, setOptIn] = useState<boolean | null>(null);
+  const [intelAvailable, setIntelAvailable] = useState(false);
   const [activating, setActivating] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [activeTab, setActiveTab] = useState<RadarTabId>("catalog");
   const [referrals, setReferrals] = useState<RadarReferralsState>({
     fixed: [],
     campaigns: [],
-    tier: null,
   });
-  // F4/T7 — "get a supporter key" outbound links, relayed by
-  // GET /api/radar/settings (server-resolved, see src/lib/radar/links.ts).
-  // Never hardcoded here: this component must never embed an external URL
-  // literal (see tests/unit/radar-referrals-page-tab.test.ts).
-  const [contributorClaimUrl, setContributorClaimUrl] = useState<string | null>(null);
-  const [supporterPlansUrl, setSupporterPlansUrl] = useState<string | null>(null);
 
-  // Paste-key activation — the primary path on the activation screen: paste
-  // an already-obtained supporter key (`omr_` + 40 hex) to activate opt-in
-  // AND the supporter tier in a single POST. `hasSupporterKey`/
-  // `supporterKeyMasked` mirror GET /api/radar/settings so a key set out of
-  // band (e.g. a direct curl call before this UI existed) shows the masked
-  // form instead of an empty input — the raw key is never displayed.
-  const [keyInput, setKeyInput] = useState("");
-  const [keySubmitting, setKeySubmitting] = useState(false);
-  const [hasSupporterKey, setHasSupporterKey] = useState(false);
-  const [supporterKeyMasked, setSupporterKeyMasked] = useState<string | null>(null);
-  const [showKeyForm, setShowKeyForm] = useState(false);
-  // Fetch catalog
   const fetchCatalog = useCallback(
     async (showLoading = true) => {
       if (showLoading) setLoading(true);
@@ -156,61 +146,39 @@ export default function RadarPage() {
       setReferrals({
         fixed: Array.isArray(data.fixed) ? data.fixed : [],
         campaigns: Array.isArray(data.campaigns) ? data.campaigns : [],
-        tier: data.tier ?? null,
       });
     } catch {
       // Best-effort only.
     }
   }, []);
 
-  // Fetch settings to determine opt-in state (GET /api/radar/settings — FIX 3:
-  // previously there was no settings GET, so an already-opted-in operator saw
-  // the activation screen on every reload).
-  const fetchSettings = useCallback(async () => {
-    try {
-      const settingsRes = await fetch("/api/radar/settings", { cache: "no-store" });
-      if (settingsRes.status === 404) {
-        // Flag off
-        setFeatureAvailable(false);
-        setOptIn(null);
-        return;
-      }
-      if (!settingsRes.ok) throw new Error(`HTTP ${settingsRes.status}`);
-      const settingsData = await settingsRes.json();
-      setFeatureAvailable(true);
-      setOptIn(settingsData.optIn === true);
-      setHasSupporterKey(settingsData.hasSupporterKey === true);
-      setSupporterKeyMasked(
-        typeof settingsData.supporterKeyMasked === "string" ? settingsData.supporterKeyMasked : null
-      );
-      // F4/T7 — best-effort: keep whatever we already had if the field is
-      // absent (older cached response shape), never fall back to a literal.
-      if (typeof settingsData.contributorClaimUrl === "string") {
-        setContributorClaimUrl(settingsData.contributorClaimUrl);
-      }
-      if (typeof settingsData.supporterPlansUrl === "string") {
-        setSupporterPlansUrl(settingsData.supporterPlansUrl);
-      }
-
-      if (settingsData.optIn === true) {
-        // Already opted in — load the catalog now so the populated/empty
-        // state renders immediately instead of waiting for a manual sync.
-        await fetchCatalog();
-        // D28 — load the referral links in parallel; best-effort, never
-        // blocks the catalog state above.
-        void fetchReferrals();
-      }
-    } catch {
-      setOptIn(null);
-    } finally {
-      setLoading(false);
-    }
+  const fetchSettings = useCallback(() => {
+    void Promise.all([
+      fetch("/api/radar/settings", { cache: "no-store" }),
+      fetchIntelAvailability().catch(() => false),
+    ])
+      .then(async ([settingsRes, available]) => {
+        setIntelAvailable(available);
+        if (settingsRes.status === 404) {
+          setFeatureAvailable(false);
+          setOptIn(null);
+          return;
+        }
+        if (!settingsRes.ok) throw new Error(`HTTP ${settingsRes.status}`);
+        const settingsData = await settingsRes.json();
+        setFeatureAvailable(true);
+        setOptIn(settingsData.optIn === true);
+        if (settingsData.optIn === true) {
+          await fetchCatalog();
+          void fetchReferrals();
+        }
+      })
+      .catch(() => setOptIn(null))
+      .finally(() => setLoading(false));
   }, [fetchCatalog, fetchReferrals]);
 
   useEffect(() => {
-    void (async () => {
-      await fetchSettings();
-    })();
+    fetchSettings();
   }, [fetchSettings]);
 
   // Sync (defined before handleActivate which depends on it)
@@ -276,40 +244,6 @@ export default function RadarPage() {
     }
   }, [t, handleSync]);
 
-  // Activate with a pasted supporter key — the primary path on this screen.
-  // Submitting a key both sets it AND opts in, in a single POST (pasting a
-  // key unlocks the activation screen). Client-side format validation is a
-  // UX nicety only — the server (Zod) always revalidates.
-  const handleSubmitKey = useCallback(async () => {
-    setError("");
-    const trimmed = keyInput.trim();
-    if (!isValidSupporterKeyFormat(trimmed)) {
-      setError(t("keyInvalidFormatError"));
-      return;
-    }
-    setKeySubmitting(true);
-    try {
-      const res = await fetch("/api/radar/settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ optIn: true, supporterKey: trimmed }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setOptIn(true);
-      setHasSupporterKey(true);
-      setSupporterKeyMasked(typeof data.supporterKey === "string" ? data.supporterKey : null);
-      setKeyInput("");
-      setShowKeyForm(false);
-      // After activation, trigger a sync so the live tier catalog loads.
-      await handleSync();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("activationFailed"));
-    } finally {
-      setKeySubmitting(false);
-    }
-  }, [keyInput, t, handleSync]);
-
   // Feature availability and privacy opt-in are independent states. A successful
   // settings response with `optIn: false` means "show activation", not "flag off".
   const pageState = resolveRadarPageState(
@@ -331,7 +265,7 @@ export default function RadarPage() {
         description={t("subtitle")}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            {(pageState === "empty" || pageState === "populated") && (
+            {intelAvailable && (pageState === "empty" || pageState === "populated") && (
               <Link
                 href="/dashboard/radar/intel"
                 className={buttonVariants({ variant: "outline", size: "sm" })}
@@ -371,12 +305,6 @@ export default function RadarPage() {
             {t("feedVersion")}: <span className="font-mono">{meta.version}</span>
           </span>
           <span>
-            {t("feedTier")}:{" "}
-            <span className={meta.tier === "live" ? "text-success" : "text-warning"}>
-              {meta.tier === "live" ? t("tierLive") : t("tierCommunity")}
-            </span>
-          </span>
-          <span>
             {t("feedFetched")}: {relativeTime(meta.fetchedAt)}
           </span>
         </div>
@@ -401,79 +329,6 @@ export default function RadarPage() {
                 <p className="max-w-2xl text-text-muted">{t("activateDescription")}</p>
 
                 <RadarAccessExplainer />
-
-                {/* F4/T7 — ways to obtain a supporter key. These conditions
-                    intentionally precede both activation actions (D32). */}
-                {contributorClaimUrl && supporterPlansUrl && (
-                  <div className="flex w-full flex-col gap-3 rounded-xl border border-border p-4">
-                    <p className="text-sm font-medium">{t("claimSectionTitle")}</p>
-                    <div className="flex w-full flex-col gap-3 sm:flex-row">
-                      <a
-                        href={contributorClaimUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={buttonVariants({ variant: "outline", className: "flex-1" })}
-                      >
-                        {t("contributorButton")}
-                      </a>
-                      <a
-                        href={supporterPlansUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={buttonVariants({ variant: "outline", className: "flex-1" })}
-                      >
-                        {t("supporterButton")}
-                      </a>
-                    </div>
-                    <p className="text-left text-xs text-text-muted">{t("contributorHint")}</p>
-                    <p className="text-left text-xs text-text-muted">{t("supporterHint")}</p>
-                  </div>
-                )}
-
-                {/* Paste-key activation — primary path: pasting an already-obtained
-                    supporter key both sets it AND opts in (unlocks this screen).
-                    The raw key is NEVER displayed — once set, only the masked
-                    form (supporterKeyMasked) is shown, with a "change key" escape
-                    hatch to paste a new one. */}
-                <div className="w-full flex flex-col gap-3 text-left">
-                  <p className="text-sm font-medium">{t("keySectionTitle")}</p>
-                  {hasSupporterKey && !showKeyForm ? (
-                    <Card.Section className="flex items-center justify-between gap-3">
-                      <span className="font-mono text-sm text-text-muted">
-                        {supporterKeyMasked}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowKeyForm(true)}
-                        className="shrink-0 text-primary"
-                      >
-                        {t("changeKeyButton")}
-                      </Button>
-                    </Card.Section>
-                  ) : (
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Input
-                        type="text"
-                        value={keyInput}
-                        onChange={(e) => setKeyInput(e.target.value)}
-                        placeholder="omr_..."
-                        aria-label={t("keySectionTitle")}
-                        className="flex-1"
-                        mono
-                      />
-                      <Button
-                        onClick={handleSubmitKey}
-                        disabled={keySubmitting || keyInput.trim().length === 0}
-                        className="shrink-0"
-                      >
-                        {keySubmitting ? t("activating") : t("activateWithKeyButton")}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="w-full h-px bg-border" />
 
                 <Button size="lg" onClick={handleActivate} disabled={activating}>
                   {activating ? t("activating") : t("activateButton")}
@@ -543,11 +398,7 @@ export default function RadarPage() {
                 </h3>
                 {referrals.campaigns.length === 0 ? (
                   <Card>
-                    <p className="text-text-muted text-center py-6">
-                      {referrals.tier === "community"
-                        ? t("campaignsUpsellCommunity")
-                        : t("campaignsEmpty")}
-                    </p>
+                    <p className="text-text-muted text-center py-6">{t("campaignsEmpty")}</p>
                   </Card>
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -605,6 +456,8 @@ export default function RadarPage() {
               onError={setError}
             />
           )}
+
+          {pageState === "populated" && <StarInviteCard />}
         </>
       )}
     </div>

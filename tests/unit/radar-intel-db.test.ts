@@ -43,7 +43,8 @@ test("Intel migration provides a byte-preserving single-row cache", () => {
   });
 });
 
-test("changing supporter key invalidates catalog, referrals, offers, and Intel atomically", () => {
+test("turning sync off invalidates catalog, referrals, offers, and Intel atomically", () => {
+  radar.setRadarOptIn(true);
   radar.setRadarCache({ version: "2026.08.09.1", tier: "live", payload: "{}", signature: "a" });
   radar.setRadarReferralsCache({
     generatedAt: "2026-08-09T12:00:00.000Z",
@@ -65,7 +66,7 @@ test("changing supporter key invalidates catalog, referrals, offers, and Intel a
     supporterIdentity: `radar:${"a".repeat(64)}`,
   });
 
-  radar.setRadarKey(`omr_${"b".repeat(40)}`);
+  radar.setRadarOptIn(false);
 
   assert.equal(radar.getRadarCache(), null);
   assert.equal(radar.getRadarReferralsCache(), null);

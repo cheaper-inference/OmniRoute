@@ -13,7 +13,8 @@
     "cancelled": "Cancelled.",
     "jsonOpt": "Output as JSON",
     "yesOpt": "Skip confirmation prompt",
-    "positiveIntegerRequired": "Limit must be a positive integer."
+    "positiveIntegerRequired": "Limit must be a positive integer.",
+    "starHint": "★ OmniRoute is free. If it helped, a star helps others find it: {url}"
   },
   "setup": {
     "title": "OmniRoute Setup",

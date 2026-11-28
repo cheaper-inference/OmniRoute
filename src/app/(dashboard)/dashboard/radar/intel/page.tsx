@@ -16,14 +16,11 @@ import {
 
 import type { RadarIntelFeed } from "@/lib/radar/intelFeedSchema";
 import { Card } from "@/shared/components";
-import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 
 interface IntelMeta {
   version: string;
-  tier: "live";
   fetchedAt: string;
-  supporterVerified: true;
 }
 
 export default function RadarIntelPage() {
@@ -62,9 +59,7 @@ export default function RadarIntelPage() {
       if (!response.ok) throw new Error("intel_sync_failed");
       const status = (await response.json()) as { status?: string };
       if (
-        ["error", "invalid_signature", "invalid_schema", "wrong_tier", "too_large"].includes(
-          status.status ?? ""
-        )
+        ["error", "invalid_signature", "invalid_schema", "too_large"].includes(status.status ?? "")
       ) {
         setError(t("loadFailed"));
       }
@@ -106,16 +101,9 @@ export default function RadarIntelPage() {
         title={t("title")}
         description={t("subtitle")}
         actions={
-          <div className="flex items-center gap-2">
-            {meta?.supporterVerified === true && (
-              <Badge variant="primary" data-badge-id="radar-supporter">
-                {t("supporterBadge")}
-              </Badge>
-            )}
-            <Button variant="outline" onClick={() => void sync()} disabled={syncing}>
-              {syncing ? t("syncing") : t("refresh")}
-            </Button>
-          </div>
+          <Button variant="outline" onClick={() => void sync()} disabled={syncing}>
+            {syncing ? t("syncing") : t("refresh")}
+          </Button>
         }
       />
 

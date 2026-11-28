@@ -1,0 +1,1 @@
+- **feat(radar):** Radar is free for every installation: no supporter key, claim flow or paid plan in the client; every feed syncs without a key, the free-tier summary serves the Radar overlay to every caller, and the Intel tab hides when its feed is not published ([#21502](https://github.com/cheaper-inference/OmniRoute/pull/21502))

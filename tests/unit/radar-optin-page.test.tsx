@@ -4,6 +4,8 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const inviteLink = 'a[href="https://github.com/cheaper-inference/OmniRoute"]';
+
 const { notFoundMock, translationMock } = vi.hoisted(() => ({
   notFoundMock: vi.fn(),
   translationMock: (key: string) => key,
@@ -31,10 +33,6 @@ vi.mock("@/shared/components", () => ({
 
 vi.mock("@/lib/radar/autoSync", () => ({
   shouldAutoSyncOnOpen: () => false,
-}));
-
-vi.mock("@/lib/radar/supporterKey", () => ({
-  isValidSupporterKeyFormat: () => true,
 }));
 
 vi.mock("../../src/app/(dashboard)/dashboard/radar/RadarCatalogTable", () => ({
@@ -68,14 +66,9 @@ describe("Radar opt-in page", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
         const url = typeof input === "string" ? input : input.toString();
+        if (url === "/api/radar/status") return response({ feeds: {} });
         if (url === "/api/radar/settings") {
-          return response({
-            optIn: false,
-            hasSupporterKey: false,
-            supporterKeyMasked: null,
-            contributorClaimUrl: "https://radar.example.test/auth/github",
-            supporterPlansUrl: "https://radar.example.test/planos",
-          });
+          return response({ optIn: false });
         }
         throw new Error(`Unexpected request: ${url}`);
       })
@@ -104,6 +97,7 @@ describe("Radar opt-in page", () => {
     expect(notFoundMock).not.toHaveBeenCalled();
     expect(container.textContent).toContain("activateTitle");
     expect(container.textContent).toContain("activateButton");
+    expect(container.querySelector(inviteLink)).toBeNull();
     const activationIcon = container.querySelector(
       'svg.oi-icon[aria-hidden="true"][data-icon="radar"]'
     );
@@ -111,7 +105,7 @@ describe("Radar opt-in page", () => {
     expect(container.textContent).not.toContain("📡");
   });
 
-  it("shows the complete access and privacy explanation before every activation action", async () => {
+  it("shows the public access and privacy rules before the activation button", async () => {
     await act(async () => {
       root.render(<RadarPage />);
     });
@@ -121,32 +115,88 @@ describe("Radar opt-in page", () => {
     const explanationKeys = [
       "accessScaleTitle",
       "accessScaleIntro",
-      "accessCommunityRule",
-      "accessSingleUseRule",
-      "accessContributorRule",
-      "accessSupporterRule",
-      "accessUseTitle",
-      "accessInstallationRule",
-      "accessAbuseRule",
+      "accessEveryoneRule",
       "accessOffersRule",
       "privacyTitle",
       "privacyDownloadsRule",
       "privacySendsRule",
       "privacyNeverRule",
     ];
-    const firstActivationAction = Math.min(
-      renderedText.indexOf("activateWithKeyButton"),
-      renderedText.indexOf("activateButton")
-    );
-
-    expect(firstActivationAction).toBeGreaterThan(-1);
+    const activationPosition = renderedText.indexOf("activateButton");
+    expect(activationPosition).toBeGreaterThan(-1);
+    expect(renderedText).not.toMatch(/activateWithKeyButton|contributorButton|supporterButton/);
+    expect(container.querySelector("input")).toBeNull();
     for (const key of explanationKeys) {
       const position = renderedText.indexOf(key);
       expect(position, `${key} must be rendered`).toBeGreaterThan(-1);
-      expect(position, `${key} must precede every activation action`).toBeLessThan(
-        firstActivationAction
-      );
+      expect(position, `${key} must precede activation`).toBeLessThan(activationPosition);
     }
+  });
+
+  it.each([
+    { available: true, status: 200, visible: true },
+    { available: false, status: 200, visible: false },
+    { available: true, status: 503, visible: false },
+  ])(
+    "renders the Intel link with cache availability $available and status $status",
+    async ({ available, status, visible }) => {
+      vi.mocked(fetch).mockImplementation(async (input) => {
+        switch (String(input)) {
+          case "/api/radar/settings":
+            return response({ optIn: true });
+          case "/api/radar/catalog":
+            return response({ entries: [], meta: null });
+          case "/api/radar/referrals":
+            return response({ fixed: [], campaigns: [] });
+          case "/api/radar/status":
+            return response({ feeds: { intel: { available } } }, status);
+          default:
+            throw new Error(`Unexpected request: ${String(input)}`);
+        }
+      });
+      await act(async () => {
+        root.render(<RadarPage />);
+      });
+      await settle();
+
+      expect(Boolean(container.querySelector('a[href="/dashboard/radar/intel"]'))).toBe(visible);
+      expect(container.querySelector('a[href="/dashboard/radar/offers"]')).not.toBeNull();
+    }
+  );
+
+  it("shows the star invitation when the first catalog sync supplies metadata", async () => {
+    const meta = { version: "2026.11.28.1", fetchedAt: new Date().toISOString() };
+    let synced = false;
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      switch (String(input)) {
+        case "/api/radar/settings":
+          return response({ optIn: true });
+        case "/api/radar/catalog":
+          return response({ entries: [], meta: synced ? meta : null });
+        case "/api/radar/referrals":
+          return response({ fixed: [], campaigns: [] });
+        case "/api/radar/status":
+          return response({ feeds: {} });
+        case "/api/radar/sync":
+          synced = true;
+          return response({ status: "updated" });
+        default:
+          throw new Error(`Unexpected request: ${String(input)}`);
+      }
+    });
+    await act(async () => {
+      root.render(<RadarPage />);
+    });
+    await settle();
+
+    expect(container.querySelector(inviteLink)).toBeNull();
+    const syncButton = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent === "syncCta"
+    );
+    expect(syncButton).toBeDefined();
+    await act(async () => syncButton?.click());
+
+    expect(container.querySelector(inviteLink)).not.toBeNull();
   });
 
   it("keeps the page hidden when the feature endpoint returns 404", async () => {

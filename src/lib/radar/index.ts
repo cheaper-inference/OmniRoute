@@ -11,7 +11,13 @@
 
 import { FREE_MODEL_BUDGETS } from "@omniroute/open-sse/config/freeModelCatalog";
 import { FREE_CATALOG_CURATED_AT } from "@omniroute/open-sse/config/freeModelCatalog.data";
-import { RadarFeedSchema, type RadarFeed, type RadarReferral } from "./feedSchema";
+import {
+  RadarFeedSchema,
+  type RadarFeed,
+  type RadarFeedPriceReference,
+  type RadarFeedRowSum,
+  type RadarReferral,
+} from "./feedSchema";
 import { RadarReferralsFeedSchema, type RadarReferralsFeed } from "./referralsFeedSchema";
 import {
   filterActiveRadarOffers,
@@ -51,6 +57,8 @@ export interface RadarCatalogResult {
     tier: string;
     fetchedAt: string;
     olderThanRelease: boolean;
+    rowSum: RadarFeedRowSum | null;
+    priceReference: RadarFeedPriceReference | null;
   } | null;
 }
 
@@ -173,6 +181,8 @@ export function getRadarCatalog(deps: GetRadarCatalogDeps = {}): RadarCatalogRes
       tier: cache.tier,
       fetchedAt: cache.fetchedAt,
       olderThanRelease,
+      rowSum: feed.totals.rowSum ?? null,
+      priceReference: feed.priceReference ?? null,
     },
   };
 }
@@ -252,7 +262,7 @@ export function getDefaultReferralFor(
 
 export interface RadarOffersResult {
   offers: RadarOffer[];
-  meta: { version: string; tier: "live"; fetchedAt: string } | null;
+  meta: { version: string; tier: string; fetchedAt: string } | null;
 }
 
 export interface GetRadarOffersDeps {
@@ -268,7 +278,7 @@ export interface GetRadarOffersDeps {
 
 const EMPTY_OFFERS: RadarOffersResult = { offers: [], meta: null };
 
-/** Return only revalidated, unexpired offers from the local live cache. */
+/** Return only revalidated, unexpired offers from the local cache. */
 export function getRadarOffers(deps: GetRadarOffersDeps = {}): RadarOffersResult {
   const {
     getFlag = isFeatureFlagEnabled,
@@ -278,14 +288,14 @@ export function getRadarOffers(deps: GetRadarOffersDeps = {}): RadarOffersResult
   if (!getFlag("RADAR_ENABLED")) return EMPTY_OFFERS;
 
   const cache = getCacheFn();
-  if (!cache || cache.tier !== "live") return EMPTY_OFFERS;
+  if (!cache) return EMPTY_OFFERS;
 
   try {
     const feed = RadarOffersFeedSchema.parse(JSON.parse(cache.payload));
-    if (feed.version !== cache.version || feed.tier !== "live") return EMPTY_OFFERS;
+    if (feed.version !== cache.version) return EMPTY_OFFERS;
     return {
       offers: filterActiveRadarOffers(feed.offers, now()),
-      meta: { version: cache.version, tier: "live", fetchedAt: cache.fetchedAt },
+      meta: { version: cache.version, tier: cache.tier, fetchedAt: cache.fetchedAt },
     };
   } catch {
     return EMPTY_OFFERS;
@@ -296,9 +306,8 @@ export interface RadarIntelResult {
   intel: RadarIntelFeed | null;
   meta: {
     version: string;
-    tier: "live";
+    tier: string;
     fetchedAt: string;
-    supporterVerified: true;
   } | null;
 }
 
@@ -309,24 +318,21 @@ export interface GetRadarIntelDeps {
 
 const EMPTY_INTEL: RadarIntelResult = { intel: null, meta: null };
 
-/** Return only a defensively revalidated live Intel cache. */
+/** Return only a defensively revalidated Intel cache. */
 export function getRadarIntel(deps: GetRadarIntelDeps = {}): RadarIntelResult {
   const { getFlag = isFeatureFlagEnabled, getCache: getCacheFn = getRadarIntelCache } = deps;
   if (!getFlag("RADAR_ENABLED")) return EMPTY_INTEL;
   const cache = getCacheFn();
-  if (!cache || cache.tier !== "live" || !/^radar:[a-f0-9]{64}$/.test(cache.supporterIdentity)) {
-    return EMPTY_INTEL;
-  }
+  if (!cache) return EMPTY_INTEL;
   try {
     const feed = RadarIntelFeedSchema.parse(JSON.parse(cache.payload));
-    if (feed.version !== cache.version || feed.tier !== "live") return EMPTY_INTEL;
+    if (feed.version !== cache.version) return EMPTY_INTEL;
     return {
       intel: feed,
       meta: {
         version: cache.version,
-        tier: "live",
+        tier: cache.tier,
         fetchedAt: cache.fetchedAt,
-        supporterVerified: true,
       },
     };
   } catch {
