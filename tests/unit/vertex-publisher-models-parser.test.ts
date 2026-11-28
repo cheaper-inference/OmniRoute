@@ -109,6 +109,11 @@ test("Google publisher discovery keeps current Gemini chat models and filters me
         { name: "publishers/google/models/gemini-3.7-flash" },
         { name: "publishers/google/models/gemini-3.8-flash" },
         { name: "publishers/google/models/gemini-3.1-pro-preview" },
+        // Gemini 4 codename families are chat models and must survive discovery; before the
+        // allowlist covered them, the import fetched the catalog but silently omitted these.
+        { name: "publishers/google/models/gemini-4-neon" },
+        { name: "publishers/google/models/gemini-4-carbon" },
+        { name: "publishers/google/models/gemini-4-hydrogen" },
         { name: "publishers/google/models/gemini-3.1-flash-image" },
         { name: "publishers/google/models/gemini-2.5-pro-tts" },
         { name: "publishers/google/models/gemini-1.5-pro-002" },
@@ -119,7 +124,14 @@ test("Google publisher discovery keeps current Gemini chat models and filters me
 
   assert.deepEqual(
     models.map((model) => model.id),
-    ["gemini-3.7-flash", "gemini-3.8-flash", "gemini-3.1-pro-preview"]
+    [
+      "gemini-3.7-flash",
+      "gemini-3.8-flash",
+      "gemini-3.1-pro-preview",
+      "gemini-4-neon",
+      "gemini-4-carbon",
+      "gemini-4-hydrogen",
+    ]
   );
   assert.ok(models.every((model) => model.targetFormat === undefined));
 });

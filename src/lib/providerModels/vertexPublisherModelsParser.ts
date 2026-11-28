@@ -20,8 +20,17 @@ export interface VertexPublisherDiscoveryModel {
   description?: string;
 }
 
+// Gemini 4 added codename families (Neon, Hydrogen, Carbon) next to the long-standing
+// flash/flash-lite/pro sizes. Discovery previously whitelisted only the size names, so a live
+// publisher catalog returning gemini-4-neon/carbon/hydrogen had those rows silently dropped at
+// import time even though the catalog listed them. Keep an explicit allowlist instead of
+// accepting any suffix: the same catalog also carries media models (gemini-*-flash-image,
+// gemini-*-pro-tts) that must not be offered as chat transports.
+const GEMINI_CHAT_MODEL_PATTERN =
+  /^gemini-(\d+(?:\.\d+)?)-(flash-lite|flash|pro|neon|carbon|hydrogen)(?:-preview)?$/i;
+
 function isCurrentGeminiChatModel(id: string): boolean {
-  const match = id.match(/^gemini-(\d+(?:\.\d+)?)-(flash-lite|flash|pro)(?:-preview)?$/i);
+  const match = id.match(GEMINI_CHAT_MODEL_PATTERN);
   return !!match && Number(match[1]) >= 2.5;
 }
 
