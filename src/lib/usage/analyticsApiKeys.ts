@@ -7,6 +7,7 @@ type ApiKeyTotal = {
   apiKeyId: string;
   apiKeyName: string;
   requests: number;
+  totalTokens: number;
   cost: number;
   lastUsed: string | null;
 };
@@ -21,7 +22,7 @@ export function addApiKeyAlias(target: Set<string>, value: unknown): void {
   if (trimmed) target.add(trimmed);
 }
 
-/** Name-only legacy rows contribute last use, never another key's requests or cost. */
+/** Name-only legacy rows contribute last use, never another key's requests, tokens, or cost. */
 export function buildApiKeyTotals(
   rows: ApiKeyTotalsRow[],
   apiKeys: Array<{ id?: unknown; name?: unknown }>,
@@ -35,6 +36,7 @@ export function buildApiKeyTotals(
       apiKeyId: apiKey.id,
       apiKeyName: apiKey.name,
       requests: 0,
+      totalTokens: 0,
       cost: 0,
       lastUsed: null,
     };
@@ -54,6 +56,7 @@ export function buildApiKeyTotals(
     const totals = totalsById.get(row.apiKeyId);
     if (!totals) continue;
     totals.requests += Number(row.requests) || 0;
+    totals.totalTokens += (Number(row.promptTokens) || 0) + (Number(row.completionTokens) || 0);
     totals.cost += rowCost(row);
     noteLastUsed(totals, row.lastUsed);
   }
