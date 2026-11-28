@@ -114,6 +114,9 @@ const IGNORE_FROM_CODE = new Set([
   // CI providers (set by the runner).
   "GITHUB_BASE_REF",
   "GITHUB_BASE_SHA",
+  // The pull request's head branch: check-pr-test-policy.mjs compares it with the nightly
+  // refresh branch. Runner-owned, never OmniRoute runtime config.
+  "GITHUB_HEAD_REF",
   // The ref the job checked out: the new-code gates (check-complexity-ratchets.mjs,
   // check-dead-code.mjs) hand it to newCodeMode.resolveMergeBase to tell an omni-queue/**
   // candidate from a PR merge ref. Runner-owned, never OmniRoute runtime config.
