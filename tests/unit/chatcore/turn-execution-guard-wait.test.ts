@@ -13,6 +13,7 @@ import {
 
 test.afterEach(() => {
   clearTurnExecutionsForTesting();
+  delete process.env.OMNIROUTE_TURN_GUARD_TTL_MS;
 });
 
 test("acquires immediately when no turn is in flight", async () => {
@@ -103,4 +104,26 @@ test("different keys in one ownership scope are tracked independently", async ()
     a2.release();
     b.release();
   });
+});
+
+test("acquireTurnExecutionWithWait evicts a stale turn once OMNIROUTE_TURN_GUARD_TTL_MS expires", async () => {
+  process.env.OMNIROUTE_TURN_GUARD_TTL_MS = "60";
+  const first = acquireTurnExecution("wait-ttl");
+  assert.equal(first.acquired, true);
+
+  const second = await acquireTurnExecutionWithWait("wait-ttl", {
+    timeoutMs: 500,
+    pollMs: 20,
+  });
+  assert.equal(second.acquired, true);
+
+  // Late release from the evicted turn must not drop the newly acquired slot.
+  first.release();
+  const third = acquireTurnExecution("wait-ttl");
+  assert.equal(third.acquired, false);
+
+  second.release();
+  const fourth = acquireTurnExecution("wait-ttl");
+  assert.equal(fourth.acquired, true);
+  fourth.release();
 });

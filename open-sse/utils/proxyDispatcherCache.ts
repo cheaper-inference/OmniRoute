@@ -213,6 +213,28 @@ export function evictDispatcherPool(scope: DispatcherPoolScope): void {
   }
 }
 
+export function evictProxyDispatcher(proxyUrl: string): boolean {
+  const cache = getDispatcherCache();
+  let evicted = false;
+  const keysToCheck = [proxyUrl, `retry:${proxyUrl}`];
+  for (const key of keysToCheck) {
+    const dispatcher = cache.get(key);
+    if (dispatcher) {
+      cache.delete(key);
+      closeDispatcher(dispatcher);
+      evicted = true;
+    }
+  }
+  for (const [key, dispatcher] of cache.entries()) {
+    if (key.startsWith("codex-image:") && key.endsWith(`:${proxyUrl}`)) {
+      cache.delete(key);
+      closeDispatcher(dispatcher);
+      evicted = true;
+    }
+  }
+  return evicted;
+}
+
 export function __cacheProxyDispatcherForTest(key: string, dispatcher: Dispatcher): void {
   getDispatcherCache().set(key, dispatcher);
 }
