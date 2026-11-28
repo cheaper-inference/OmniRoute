@@ -28,7 +28,12 @@ test("standard mode compresses even when cavemanConfig.enabled is false (B-MODE-
   };
   const res = applyCompression(body, "standard", {
     config: {
-      cavemanConfig: { enabled: false, compressRoles: ["user"], intensity: "full", minMessageLength: 0 },
+      cavemanConfig: {
+        enabled: false,
+        compressRoles: ["user"],
+        intensity: "full",
+        minMessageLength: 0,
+      },
     },
   } as Record<string, unknown>);
   assert.ok(res.compressed, "standard mode must run caveman regardless of cavemanConfig.enabled");
@@ -39,9 +44,31 @@ test("rtk mode compresses even when rtkConfig.enabled is false (B-MODE-ENGINE-DE
     Array.from({ length: 60 }, (_, i) => `line ${String(i).padStart(3, "0")} routine output`).join(
       "\n"
     ) + "\nERROR: boom";
-  const res = applyCompression({ messages: [{ role: "tool", content }] }, "rtk", {
-    config: { rtkConfig: { enabled: false, intensity: "standard", applyToToolResults: true } },
-  } as Record<string, unknown>);
+  // The tool call carries the command: a filter's include/drop/collapse stages only run on a
+  // command-confirmed selection (see `destructiveStagesAllowed` in rtk/index.ts), so the fixture
+  // states the command that produced this output instead of relying on the content fallback.
+  const res = applyCompression(
+    {
+      messages: [
+        {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            {
+              id: "call-1",
+              type: "function",
+              function: { name: "bash", arguments: JSON.stringify({ command: "docker logs api" }) },
+            },
+          ],
+        },
+        { role: "tool", tool_call_id: "call-1", content },
+      ],
+    },
+    "rtk",
+    {
+      config: { rtkConfig: { enabled: false, intensity: "standard", applyToToolResults: true } },
+    } as Record<string, unknown>
+  );
   assert.ok(res.compressed, "rtk mode must run regardless of rtkConfig.enabled");
 });
 

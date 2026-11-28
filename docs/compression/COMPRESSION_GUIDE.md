@@ -401,6 +401,27 @@ telemetry, not the strategy decision).
 
 OpenRouter counts as a caching provider only for `anthropic/*` models: Claude Code requests keep their `cache_control` breakpoints (4 at most) and the guard protects the prefix, while every other OpenRouter family (`openai/`, `google/`, `qwen/`, …) stays stripped and unguarded.
 
+#### Prefix stability (rolling breakpoints)
+
+A provider matches a cached prefix by content, not by where the breakpoint sits — but the
+breakpoint decides which prefix is cached **at all**. When a client moves its breakpoint every
+turn (Claude Code marks the second-to-last message), a transform that behaves differently on a
+marked block produces a body whose early messages change as the marker advances. The provider
+then matches only up to the last breakpoint that still matches — usually the system prompt — and
+re-bills everything after it.
+
+Compression therefore has to stay a **pure function of the content**: `cache_control` is
+metadata that is carried through untouched, never a reason to skip a block. That rule binds the
+per-message engines; `session-dedup` (content already sent this session), `read-lifecycle` (only
+after a later read/write touches the same path) and progressive aging (turn distance) are not
+functions of the message alone, which is why those ids are outside the deterministic memo
+whitelist (`open-sse/services/compression/resultMemo.ts:59`).
+`open-sse/services/compression/engines/rtk/index.ts` compresses a marked `tool_result` exactly
+like an unmarked one for this reason (regression:
+`tests/unit/compression/rtk-cache-control-preserve.test.ts`), and the live zone
+(`liveZone.ts`) enforces the same rule one level up by reusing a frozen, byte-stable prefix and
+overlaying only the current request's markers.
+
 ### Progressive Aging
 
 Long conversations accumulate many message turns, but older turns become less

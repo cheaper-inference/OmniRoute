@@ -1,7 +1,7 @@
 import type { RtkFilterDefinition } from "./filterSchema.ts";
 import { smartTruncate } from "./smartTruncate.ts";
 import { deduplicateRepeatedLines } from "./deduplicator.ts";
-import { severityPattern } from "./severityVocabulary.ts";
+import { isOutcomeLine, severityPattern } from "./severityVocabulary.ts";
 
 /**
  * The shared severity vocabulary, compiled once (see severityVocabulary.ts for why it is
@@ -9,6 +9,13 @@ import { severityPattern } from "./severityVocabulary.ts";
  * stage below.
  */
 const SEVERITY_PATTERN = severityPattern();
+
+/**
+ * The outcome vocabulary ("VET_OK", "exit code 0", `[rtk:truncated …]`, …). Every line-dropping
+ * stage below consults it: a run's only evidence that it SUCCEEDED is one short line, and the
+ * include-only keep stage used to delete it whenever some other line matched. Additive — no stage
+ * drops more because this exists.
+ */
 
 export interface LineFilterResult {
   text: string;
@@ -160,7 +167,12 @@ export function applyLineFilter(text: string, filter: RtkFilterDefinition): Line
   }
 
   if (stripPatterns.length > 0) {
-    lines = lines.filter((line) => !stripPatterns.some((pattern) => pattern.test(line)));
+    // Outcome lines are exempt from an explicit drop list too: a filter that strips "noise" also
+    // matched `PASS`/`exit code 0`/its own `[rtk:…]` markers, and losing those turns a green run
+    // into an empty result that reads like a crash.
+    lines = lines.filter(
+      (line) => isOutcomeLine(line) || !stripPatterns.some((pattern) => pattern.test(line))
+    );
     if (lines.length !== originalLineCount) appliedRules.push(`${filter.id}:strip`);
   }
 
@@ -174,7 +186,10 @@ export function applyLineFilter(text: string, filter: RtkFilterDefinition): Line
     // A filter with an EMPTY includePatterns keeps skipping this stage entirely (the guard
     // above), so no non-severity line starts being dropped where it previously survived.
     const kept = lines.filter(
-      (line) => keepPatterns.some((pattern) => pattern.test(line)) || SEVERITY_PATTERN.test(line)
+      (line) =>
+        keepPatterns.some((pattern) => pattern.test(line)) ||
+        SEVERITY_PATTERN.test(line) ||
+        isOutcomeLine(line)
     );
     if (kept.length > 0) {
       lines = kept;
@@ -185,6 +200,7 @@ export function applyLineFilter(text: string, filter: RtkFilterDefinition): Line
   if (collapsePatterns.length > 0) {
     const seen = new Set<string>();
     lines = lines.filter((line) => {
+      if (isOutcomeLine(line)) return true;
       if (!collapsePatterns.some((pattern) => pattern.test(line))) return true;
       const key = line.trim();
       if (seen.has(key)) return false;

@@ -78,12 +78,13 @@ Caveman rules but operates on tool metadata, not request payloads.
 Beyond Caveman, RTK, and LLMLingua-2, the registry ships several specialized lossless /
 structural engines (used by stacked pipelines, the playground, and tests):
 
-| Engine        | Id              | What it does                                                                                                                                                               |
-| ------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CCR           | `ccr`           | Content-Compress-Retrieve (H4): replaces large contiguous text blocks with content-addressed references, so repeated/large blocks are sent once and referenced thereafter. |
-| headroom      | `headroom`      | SmartCrusher (H3 + N5): lossless tabular compaction of homogeneous JSON-array payloads into a columnar `[N rows]` form.                                                    |
-| ionizer       | `ionizer`       | Head/middle/tail row sampling for very large homogeneous blocks, storing the elided middle as a CCR content-addressed reference.                                           |
-| session-dedup | `session-dedup` | Content-addressed cross-turn deduplication (TokenMizer-inspired): elides text already seen in earlier turns of the same session.                                           |
+| Engine         | Id               | What it does                                                                                                                                                                                      |
+| -------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CCR            | `ccr`            | Content-Compress-Retrieve (H4): replaces large contiguous text blocks with content-addressed references, so repeated/large blocks are sent once and referenced thereafter.                        |
+| headroom       | `headroom`       | SmartCrusher (H3 + N5): lossless tabular compaction of homogeneous JSON-array payloads into a columnar `[N rows]` form.                                                                           |
+| ionizer        | `ionizer`        | Head/middle/tail row sampling for very large homogeneous blocks, storing the elided middle as a CCR content-addressed reference.                                                                  |
+| session-dedup  | `session-dedup`  | Content-addressed cross-turn deduplication (TokenMizer-inspired): elides text already seen in earlier turns of the same session.                                                                  |
+| read-lifecycle | `read-lifecycle` | Opt-in, default off. Collapses a Read tool-result to a short stub once a strictly later Read/Write touches the same path. Lossy and semantic: it rewrites a message an earlier turn already sent. |
 
 **CCR retrieve-protocol instruction (#8033):** the first time CCR replaces ≥1 block in a
 request, the engine prepends a single, idempotent `system` message (leading with the
@@ -103,7 +104,8 @@ note once per turn.
 
 Caveman mode focuses on semantic condensation of normal prose:
 
-- preserves code blocks, URLs, JSON, paths, and structured data
+- preserves fenced code blocks, URLs, JSON, paths, and structured data; unfenced multi-line
+  code is protected only when a strong majority of its lines look like code (`caveman.ts:241`)
 - removes filler, hedging, repeated context, and verbose connective phrasing
 - supports language-aware file rule packs in `open-sse/services/compression/rules/`
 - remains available through the legacy `standard`, `aggressive`, and `ultra` modes
@@ -122,13 +124,25 @@ RTK mode focuses on command and tool output:
 - detects output classes such as `git status`, `git branch`, `git diff`, Vitest/Jest/Pytest,
   Cargo/Go tests, TypeScript/Vite/Webpack builds, ESLint, npm audit/installs, Docker logs,
   shell `find`/`grep`, stack traces, and generic logs
-- applies 49 JSON filters from `open-sse/services/compression/engines/rtk/filters/`
+- applies the built-in JSON filters from `open-sse/services/compression/engines/rtk/filters/`
+  (run `ls open-sse/services/compression/engines/rtk/filters/*.json | wc -l` for the count)
 - supports the RTK-style declarative pipeline: ANSI stripping, replace, match-output short-circuit,
   strip/keep lines, per-line truncation, head/tail/max-line truncation, and on-empty fallback
 - supports trust-gated project filters in `.rtk/filters.json` and global filters in
   `DATA_DIR/rtk/filters.json`
 - strips ANSI sequences, progress noise, repeated lines, and unhelpful boilerplate
 - preserves actionable failures, warnings, summaries, changed files, and tail context
+- preserves run outcome lines (`VET_OK`, `exit code 0`, `SUCCESS`, its own `[rtk:...]` markers)
+  through the line stages: only `error`/`fail` style diagnostics were protected before, so an
+  include list that matched one `warning:` line deleted the only evidence that the run passed
+- runs a filter's line-deleting stages (`includePatterns` / `dropPatterns` / `collapsePatterns`)
+  only when the command is confirmed (detector confidence `>= 0.5`, or the filter's own command
+  pattern matched), because filter selection also falls back to content regexes and one content
+  hit is confidence `0.25`: `cat README.md` was coming back as the two `* bullet` lines that
+  matched the `git-branch` filter
+- elides a tool result that concatenates several files per file (`--- path ---`,
+  `=== path ===`, `<file path=...>`), so files in the middle keep their header and content
+  instead of vanishing behind one whole-blob head/tail cut
 - can optionally retain redacted raw output for recovery/debugging through authenticated management
   routes
 

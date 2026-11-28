@@ -5,7 +5,7 @@ import { detectCommandType } from "./commandDetector.ts";
 import { RTK_SCHEMA, validateRtkEngineConfig } from "./configSchema.ts";
 import { deduplicateRepeatedLines } from "./deduplicator.ts";
 import { groupSimilarLines } from "./grouper.ts";
-import { matchRtkFilter } from "./filterLoader.ts";
+import { filterMatchesCommand, matchRtkFilter } from "./filterLoader.ts";
 import { applyLineFilter } from "./lineFilter.ts";
 import { smartTruncate } from "./smartTruncate.ts";
 import { normalizeCodeLanguage, stripCode } from "./codeStripper.ts";
@@ -248,8 +248,14 @@ export function processRtkText(
   const hasGenericErrorMarkers = /Error:|Exception:|Traceback \(most recent call last\):/.test(
     text
   );
+  // Non-shell tool results (read/grep/glob, i.e. `skipFilters`) only count as a real
+  // classification when at least two content patterns agree (confidence >= 0.5): a single hit
+  // (0.25) is how a file read whose content mentions `Error:` or a `* bullet` stopped looking
+  // like a document and got its middle capped out by the generic line/char limit.
   const isDocumentLikeRead =
-    detection.type === "unknown" && !detection.command && !hasGenericErrorMarkers;
+    detection.type === "unknown"
+      ? !detection.command && !hasGenericErrorMarkers
+      : Boolean(options.skipFilters) && detection.confidence < 0.5;
   let matchedFilterPatterns: string[] = [];
   if (!options.skipFilters && !isDocumentLikeRead) {
     const filter = matchRtkFilter(text, detection.command, {
@@ -258,8 +264,22 @@ export function processRtkText(
     });
     if (filter && !config.disabledFilters.includes(filter.id)) {
       if (config.enabledFilters.length === 0 || config.enabledFilters.includes(filter.id)) {
+        // A filter with `includePatterns` / `dropPatterns` / `collapsePatterns` DELETES lines.
+        // Selection is not always that confident: `matchRtkFilter` also falls back to the
+        // filter's own content regexes, and one content hit is confidence 0.25. That is how
+        // `bash cat README.md` came back as the two markdown bullets that matched git-branch's
+        // `^\*\s+\S+` probe, every other line deleted. A destructive stage therefore requires a
+        // confirmation the command actually matched (>= 0.5: a command pattern, or two aligned
+        // content patterns); on weaker evidence the filter still contributes its preserve /
+        // priority patterns, it just cannot delete anything.
+        const destructiveStagesAllowed =
+          detection.confidence >= 0.5 ||
+          filterMatchesCommand(filter, detection.command ?? options.command);
         const filtered = applyLineFilter(result, {
           ...filter,
+          ...(destructiveStagesAllowed
+            ? {}
+            : { keepPatterns: [], stripPatterns: [], collapsePatterns: [] }),
           maxLines: effectiveMaxLines(
             filter.maxLines || config.maxLinesPerResult,
             config.intensity
@@ -341,7 +361,15 @@ export function processRtkText(
   // here, a separate array in filterSchema.ts and a THIRD list in rawOutput.ts — three
   // spellings of the same idea, so whether a diagnostic line survived depended on which
   // layer happened to run. Everything below now derives from that single file.
-  const defaultPriorityPatterns: RegExp[] = [severityPattern()];
+  const defaultPriorityPatterns: RegExp[] = [
+    severityPattern(),
+    // Markers this pipeline already emitted (`[rtk:dropped N repeated lines]`,
+    // `[rtk:truncated N lines]`, `[dedup:ref sha=…]`, `[COMPRESSED:…]`) are the record of every
+    // lossy pass that ran. The cap runs after dedup, so without this the count of the lines
+    // dedup removed could itself be truncated out of the middle and the text would show no
+    // trace of either loss.
+    /^\s*\[(?:rtk|dedup|ccr|compressed)[:\]]/i,
+  ];
   const filterPriorityPatterns: RegExp[] = matchedFilterPatterns.flatMap((pattern) => {
     try {
       return [new RegExp(pattern, "i")];
