@@ -1,4 +1,5 @@
 import { getDbInstance } from "./core";
+import { hasColumn } from "./schemaColumns";
 
 interface UsageCostRow {
   storedCost: number | null;
@@ -21,6 +22,8 @@ interface UsageCostRow {
  */
 export function getApiKeySpendRows(apiKeyId: string, sinceIso: string): UsageCostRow[] {
   const db = getDbInstance();
+  // Cloud bootstrap can omit the endpoint column added by filesystem migrations.
+  const endpoint = hasColumn(db, "usage_history", "endpoint") ? "endpoint" : "NULL";
   return db
     .prepare(
       `
@@ -40,7 +43,7 @@ export function getApiKeySpendRows(apiKeyId: string, sinceIso: string): UsageCos
       FROM usage_history
       WHERE api_key_id = @apiKeyId
         AND timestamp >= @sinceIso
-        AND COALESCE(endpoint, '') NOT IN ('/v1/search', '/v1/alpha/search', '/v1/rerank')
+        AND COALESCE(${endpoint}, '') NOT IN ('/v1/search', '/v1/alpha/search', '/v1/rerank')
         AND (
           billing_unit IS NULL OR billing_unit != 'request'
           OR COALESCE(provider_cost_usd, calculated_cost_usd) IS NOT NULL
