@@ -400,6 +400,11 @@ const CI_SCRIPT_INPUTS = new Map([
     path.join("scripts", "release", "derived-refresh-autoland.mjs"),
     new Set(["DERIVED_REFRESH_AUTOLAND", "DERIVED_REFRESH_READ_TOKEN"]),
   ],
+  // The nightly refresh reads reach metrics with a repository variable and a read-only secret.
+  [
+    path.join("scripts", "release", "reach-facts.mjs"),
+    new Set(["TRACKER_EXPORT_READ_TOKEN", "TRACKER_EXPORT_REPOSITORY"]),
+  ],
 ]);
 
 /**
