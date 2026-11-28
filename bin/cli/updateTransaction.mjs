@@ -716,7 +716,33 @@ function readPackageVersion(packageRoot) {
 // Process identity and environment (Linux /proc)
 // ---------------------------------------------------------------------------------------
 
+// The install root as the process may see it: as given and through its real path.
+function installRootAliases(packageRoot, realpath) {
+  const roots = new Set([packageRoot]);
+  try {
+    roots.add(realpath(packageRoot));
+  } catch {
+    // the lexical root still stands
+  }
+  return [...roots];
+}
+
+// True for the root itself or a path below it. A sibling whose name merely starts with the
+// root ("omniroute-canary" next to "omniroute") is not inside it.
+function isInsideRoot(candidate, roots) {
+  return roots.some((root) => {
+    const base = root.endsWith(sep) ? root : `${root}${sep}`;
+    return candidate === root || candidate.startsWith(base);
+  });
+}
+
+const PROCESS_TITLE = /^omniroute(?:\s|$)/i;
+
 /**
+ * Whether a pid is a process of THIS install: its executable or script lies inside
+ * `packageRoot` (on a path boundary), or, when `process.title` has replaced the whole command
+ * line ("omniroute (v...)"), its working directory does. A title alone names no install, so
+ * with an unreadable working directory the answer is "unknown": ambiguous, never signalled.
  * @returns {"ours" | "foreign" | "unknown" | "gone"}
  */
 export function classifyServerProcess(pid, packageRoot, deps = {}) {
@@ -729,12 +755,16 @@ export function classifyServerProcess(pid, packageRoot, deps = {}) {
   }
   const argv = raw.split("\0").filter(Boolean);
   if (argv.length === 0) return "unknown";
-  // The first tokens carry the executable and the script. `process.title` rewrites argv in
-  // place ("omniroute (v...)"), so the title counts as well.
-  const isOurs = argv
-    .slice(0, 4)
-    .some((token) => token.includes(packageRoot) || /^omniroute(?:\s|$)/i.test(token));
-  return isOurs ? "ours" : "foreign";
+  const roots = installRootAliases(packageRoot, deps.realpathSync ?? realpathSync);
+  // The first tokens carry the executable and the script.
+  if (argv.slice(0, 4).some((token) => isInsideRoot(token, roots))) return "ours";
+  if (!PROCESS_TITLE.test(argv[0])) return "foreign";
+  try {
+    const cwd = (deps.readlinkSync ?? readlinkSync)(`/proc/${pid}/cwd`);
+    return isInsideRoot(String(cwd), roots) ? "ours" : "foreign";
+  } catch {
+    return "unknown";
+  }
 }
 
 export function readProcessEnvironment(pid, deps = {}) {

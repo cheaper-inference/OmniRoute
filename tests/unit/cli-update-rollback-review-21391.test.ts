@@ -479,3 +479,56 @@ test("the CLI explains the external-link refusal in words", async () => {
     Object.assign(console, orig);
   }
 });
+
+// ---------------------------------------------------------------------------------------
+// Thread 5: a process is signalled only when its identity is tied to THIS install.
+// ---------------------------------------------------------------------------------------
+
+test("process identity: the install root matches on a path boundary, never as a substring", () => {
+  const root = "/usr/lib/node_modules/omniroute";
+  const cmd = (...argv: string[]) => argv.join("\0") + "\0";
+  const classify = (...argv: string[]) =>
+    tx.classifyServerProcess(4100, root, { readFileSync: () => cmd(...argv) });
+  assert.equal(classify("/usr/bin/node", `${root}/dist/server.js`), "ours");
+  assert.equal(
+    classify("/usr/bin/node", "--max-old-space-size=512", `${root}/dist/server.js`),
+    "ours"
+  );
+  // A sibling install whose directory name starts with ours.
+  assert.equal(
+    classify("/usr/bin/node", "/usr/lib/node_modules/omniroute-canary/dist/server.js"),
+    "foreign"
+  );
+  // The root named inside an option value or as a prefix of another name proves nothing.
+  assert.equal(classify("/usr/bin/node", `--log=${root}/x.log`, "/srv/other/server.js"), "foreign");
+  assert.equal(classify("/usr/bin/node", `${root}-old/server.js`), "foreign");
+});
+
+test("process identity: a symlinked install root is matched through its real path", () => {
+  const classify = (script: string) =>
+    tx.classifyServerProcess(4100, "/usr/local/lib/node_modules/omniroute", {
+      readFileSync: () => ["/usr/bin/node", script].join("\0") + "\0",
+      realpathSync: (p: string) =>
+        p === "/usr/local/lib/node_modules/omniroute" ? "/opt/lib/node_modules/omniroute" : p,
+    });
+  assert.equal(classify("/opt/lib/node_modules/omniroute/dist/server.js"), "ours");
+  assert.equal(classify("/opt/lib/node_modules/omniroute-canary/dist/server.js"), "foreign");
+});
+
+test("process identity: a bare omniroute title needs a working directory inside this install", () => {
+  const root = "/usr/lib/node_modules/omniroute";
+  const classify = (cwd: string | Error) =>
+    tx.classifyServerProcess(4100, root, {
+      readFileSync: () => "omniroute (v3.8.54)\0\0\0\0",
+      readlinkSync: () => {
+        if (cwd instanceof Error) throw cwd;
+        return cwd;
+      },
+    });
+  assert.equal(classify(`${root}/dist`), "ours");
+  assert.equal(classify(root), "ours");
+  assert.equal(classify("/usr/lib/node_modules/omniroute-canary/dist"), "foreign");
+  assert.equal(classify("/srv/somewhere-else"), "foreign");
+  // The title is all there is and the directory cannot be read: ambiguous, so never signalled.
+  assert.equal(classify(new Error("EACCES")), "unknown");
+});

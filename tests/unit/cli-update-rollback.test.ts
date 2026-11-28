@@ -676,8 +676,10 @@ test("process identity: only a command line that names the install counts, and /
     readFileSync: () => cmd("/usr/bin/node", "/usr/lib/node_modules/omniroute/dist/server.js"),
   });
   assert.equal(ours, "ours");
+  // `process.title` replaces the whole command line, so the install is proven by the cwd.
   const titled = tx.classifyServerProcess(4100, "/usr/lib/node_modules/omniroute", {
     readFileSync: () => cmd("omniroute (v3.8.54)"),
+    readlinkSync: () => "/usr/lib/node_modules/omniroute/dist",
   });
   assert.equal(titled, "ours");
   const foreign = tx.classifyServerProcess(4100, "/usr/lib/node_modules/omniroute", {
