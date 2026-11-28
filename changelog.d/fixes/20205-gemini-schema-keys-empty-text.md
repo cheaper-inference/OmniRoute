@@ -1,0 +1,1 @@
+- **fix(gemini):** tool schemas no longer send `discriminator`, `xml`, `externalDocs`, `errorMessages`, `doNotSuggest` or `suggestSortText` to Gemini, and empty text parts are no longer forwarded, so these requests are no longer rejected. ([#20205](https://github.com/cheaper-inference/OmniRoute/pull/20205))

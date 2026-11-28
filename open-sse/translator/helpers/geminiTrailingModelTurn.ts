@@ -1,5 +1,5 @@
 /**
- * Newer Gemini chat families (Gemini 3.x and `gemini-pro-agent`) reject a request whose
+ * Newer Gemini chat families (Gemini 3.x, Gemini 4.x and `gemini-pro-agent`) reject a request whose
  * `contents` end on a `model` turn with HTTP 400 "Requests ending with a model turn are
  * not supported" (#10104, 9router#4345). OpenAI/Claude clients legitimately end a
  * conversation on an assistant turn (prefill, or a tool call not yet answered), so every
@@ -11,11 +11,12 @@
  */
 export function isGeminiTrailingModelTurnRejectingModel(model: unknown): boolean {
   if (typeof model !== "string") return false;
-  const normalizedModel = model.toLowerCase();
+  // Ids can arrive as `models/gemini-3-pro` or `google/gemini-4`: judge the last path segment.
+  const normalizedModel = model.slice(model.lastIndexOf("/") + 1).toLowerCase();
   if (/(?:^|-)image(?:-|$)/.test(normalizedModel)) {
     return false;
   }
-  return /^gemini-(?:3(?:\.\d+)?(?:-[a-z0-9-]+)?|pro-agent)$/.test(normalizedModel);
+  return /^gemini-(?:[34](?:\.\d+)?(?:-[a-z0-9-]+)?|pro-agent)$/.test(normalizedModel);
 }
 
 /**
