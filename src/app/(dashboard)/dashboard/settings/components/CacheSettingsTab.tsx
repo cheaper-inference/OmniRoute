@@ -248,21 +248,23 @@ export default function CacheSettingsTab() {
     const m = availableModelsForProvider.find(
       (item) => item.rawId === modelIdOrRaw || item.id === modelIdOrRaw
     );
-    if (m?.dimensions) {
-      setSemDimension(m.dimensions);
-    }
+    setSemDimension(m?.dimensions);
     setTestResult(null);
   };
 
   const handleProviderChange = (newProvider: string) => {
     setSemProvider(newProvider);
+    setSemBaseUrl("");
+    if (semApiKey === "********") {
+      setSemApiKey("");
+    }
     const provider = embeddingOptions.find((p) => p.id === newProvider);
     if (provider && provider.models.length > 0) {
       const firstModel = provider.models[0];
       setSemModel(firstModel.rawId || firstModel.id);
-      if (firstModel.dimensions) {
-        setSemDimension(firstModel.dimensions);
-      }
+      setSemDimension(firstModel.dimensions);
+    } else {
+      setSemDimension(undefined);
     }
     setTestResult(null);
   };
@@ -296,7 +298,15 @@ export default function CacheSettingsTab() {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error(`Save failed with status ${res.status}`);
+      if (!res.ok) {
+        const errBody = (await res.json().catch(() => null)) as { error?: unknown } | null;
+        const errText =
+          typeof errBody?.error === "string" && errBody.error.trim().length > 0
+            ? errBody.error.trim()
+            : null;
+        setSemMessage({ type: "error", text: errText || t("semanticCacheSaveFailed") });
+        return;
+      }
 
       setSemMessage({ type: "success", text: t("semanticCacheSaveSuccess") });
     } catch (err) {
@@ -326,6 +336,9 @@ export default function CacheSettingsTab() {
       });
 
       const data = await res.json();
+      if (data?.ok && typeof data.dimensions === "number" && data.dimensions > 0) {
+        setSemDimension(data.dimensions);
+      }
       setTestResult(data);
     } catch {
       setTestResult({ ok: false, error: t("semanticCacheConnectionError") });
