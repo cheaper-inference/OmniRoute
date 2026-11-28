@@ -1,0 +1,1 @@
+- **fix(usage):** Cloudflare Workers AI neuron usage is validated before it is shown; missing data no longer appears as zero. (thanks @askidmobile)
