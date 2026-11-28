@@ -105,6 +105,29 @@ export function buildCanonicalToAliasMap(
 }
 
 /**
+ * Reverse of `buildCanonicalToAliasMap`, kept at provider scope so a model
+ * without its own overlay entry can reuse the canonical identity already
+ * known for that alias. No hardcoded alias table.
+ */
+export function buildAliasToCanonicalIdentityMap(
+  enrichment: OmniRouteEnrichmentMap | undefined
+): Map<string, { identity: string; label: string }> {
+  const out = new Map<string, { identity: string; label: string }>();
+  if (!enrichment) return out;
+  for (const entry of enrichment.values()) {
+    const alias = typeof entry.providerAlias === "string" ? entry.providerAlias.trim() : "";
+    const canonical =
+      typeof entry.providerCanonical === "string" ? entry.providerCanonical.trim() : "";
+    if (alias.length === 0 || canonical.length === 0 || alias === canonical) continue;
+    if (out.has(alias)) continue;
+    const displayName =
+      typeof entry.providerDisplayName === "string" ? entry.providerDisplayName.trim() : "";
+    out.set(alias, { identity: canonical, label: displayName || canonical });
+  }
+  return out;
+}
+
+/**
  * Enrichment lookup with alias-fallback chain.
  *
  * Resolution order (first hit wins):
@@ -556,6 +579,8 @@ export interface EnrichmentDisplayContext {
   rawModelId?: string;
   /** Whether to render the editor in a trailing parenthesis (default true). */
   providerTag?: boolean;
+  /** Drop the provider prefix from the name: the publication provider carries it. */
+  omitProvider?: boolean;
 }
 
 /**
@@ -574,7 +599,9 @@ export function applyEnrichment(
   enrichment: OmniRouteEnrichmentEntry | undefined,
   context: EnrichmentDisplayContext = {}
 ): ModelV2 {
-  if (!enrichment) return model;
+  // Prefix omission depends on the caller's alias decision, not on whether the
+  // pricing overlay answered: run it even when enrichment is unavailable.
+  if (!enrichment && context.omitProvider !== true) return model;
   const rawModelId =
     typeof context.rawModelId === "string" && context.rawModelId.length > 0
       ? context.rawModelId
@@ -583,9 +610,9 @@ export function applyEnrichment(
   // its id. Without a raw id from the caller (the /api/combos pass) that is the
   // model's own id, else the builder gets nothing and renders `combo - `.
   const hasEnrichmentName =
-    typeof enrichment.name === "string" && enrichment.name.trim().length > 0;
+    typeof enrichment?.name === "string" && enrichment.name.trim().length > 0;
   const nameSourceId = rawModelId || (hasEnrichmentName ? "" : model.id);
-  let providerDisplayName = enrichment.providerDisplayName;
+  let providerDisplayName = enrichment?.providerDisplayName;
   if (
     (!providerDisplayName || providerDisplayName.trim().length === 0) &&
     typeof rawModelId === "string" &&
@@ -595,21 +622,22 @@ export function applyEnrichment(
   }
   const built = buildModelDisplayName({
     rawId: nameSourceId,
-    enrichmentName: enrichment.name,
-    providerAlias: enrichment.providerAlias,
+    enrichmentName: enrichment?.name,
+    providerAlias: enrichment?.providerAlias,
     providerDisplayName,
     providerTag: context.providerTag,
-    isFree: enrichment.freeType !== undefined,
-    freeType: enrichment.freeType,
-    monthlyTokens: enrichment.monthlyTokens,
-    creditTokens: enrichment.creditTokens,
+    omitProvider: context.omitProvider,
+    isFree: enrichment?.freeType !== undefined,
+    freeType: enrichment?.freeType,
+    monthlyTokens: enrichment?.monthlyTokens,
+    creditTokens: enrichment?.creditTokens,
     isCombo: context.isCombo,
     isAutoCombo: context.isAutoCombo,
   });
   if (built.trim().length > 0) {
     model.name = built;
   }
-  if (enrichment.pricing) {
+  if (enrichment?.pricing) {
     if (typeof enrichment.pricing.input === "number") {
       model.cost.input = enrichment.pricing.input;
     }
@@ -624,4 +652,59 @@ export function applyEnrichment(
     }
   }
   return model;
+}
+
+/** Normalize an upstream alias to the `providerId` character set. */
+export function slugAlias(value: string): string {
+  const slug = value
+    .trim()
+    .replace(/[^A-Za-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug.length > 0 ? slug : "provider";
+}
+
+/**
+ * Stable suffix for an identity whose alias needed slug sanitizing. Two aliases
+ * can normalize to the same slug (`c c` and `c-c`); deriving the suffix from
+ * the identity keeps ids stable when rows are reordered or one is removed.
+ */
+export function stableIdSuffix(value: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+/** Upstream publication identity of an entry, or undefined when it stays on the base provider. */
+export function canonicalInfo(
+  rawId: string,
+  enrichment: OmniRouteEnrichmentEntry | undefined,
+  isCombo: boolean,
+  baseId: string,
+  aliasIdentity?: ReadonlyMap<string, { identity: string; label: string }>
+): { identity: string; label: string } | undefined {
+  if (isCombo) return undefined;
+  const slash = rawId.indexOf("/");
+  if (slash <= 0) return undefined;
+  const first = rawId.substring(0, slash);
+  if (first === "auto" || first === baseId) return undefined;
+  const canonical = (enrichment?.providerCanonical ?? "").trim();
+  const alias = (enrichment?.providerAlias ?? "").trim();
+  const segmentCount = rawId.split("/").length;
+  const viaAlias = alias.length > 0 && first === alias;
+  // The canonical name is a legitimate origin prefix only on a plain
+  // `<canonical>/<model>` id; a longer id is a transformed wrapper. Without
+  // enrichment there is no canonical data, so only a two-segment id is an
+  // origin id. No provider prefix is listed here.
+  const viaCanonical = canonical.length > 0 && first === canonical && segmentCount === 2;
+  if (enrichment && !viaAlias && !viaCanonical) return undefined;
+  if (!enrichment && segmentCount > 2) return undefined;
+  // A sparse overlay may know the alias -> canonical mapping from another
+  // model; reuse it instead of splitting one upstream into two providers.
+  const known = enrichment === undefined ? aliasIdentity?.get(first) : undefined;
+  const identity = canonical || alias || known?.identity || first;
+  const label = (enrichment?.providerDisplayName ?? "").trim() || known?.label || identity;
+  return { identity, label };
 }
