@@ -169,6 +169,8 @@ export function buildClaudePassthroughBody({
       ) as typeof translatedBody.messages;
     }
     if (isFirstPartyAnthropic) {
+      // The marker is written into the last user block, which the client body still owns.
+      detachClaudeCodeRewriteTargets(translatedBody);
       ensureCacheControlOnLastUserMessage(translatedBody, { countTools: provider === "anthropic" });
     }
   } else {

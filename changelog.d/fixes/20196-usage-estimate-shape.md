@@ -1,0 +1,1 @@
+- **fix(sse):** estimate output tokens from Claude and Responses replies, and stop adding a usage key to Gemini replies. ([#20196](https://github.com/cheaper-inference/OmniRoute/pull/20196))

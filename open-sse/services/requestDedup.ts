@@ -178,6 +178,15 @@ export function computeRequestHash(
     top_p: body.top_p ?? null,
     frequency_penalty: body.frequency_penalty ?? null,
     presence_penalty: body.presence_penalty ?? null,
+    // Undefined values drop out of the JSON, so requests without these keep their old digest.
+    n: body.n,
+    stop: body.stop,
+    // chatCore hashes the translated body: the Claude translator carries `stop` as stop_sequences.
+    stop_sequences: body.stop_sequences,
+    seed: body.seed,
+    max_completion_tokens: body.max_completion_tokens,
+    logprobs: body.logprobs,
+    top_logprobs: body.top_logprobs,
     ...(trustedContext === undefined
       ? {}
       : {

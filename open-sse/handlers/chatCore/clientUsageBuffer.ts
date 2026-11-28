@@ -69,6 +69,28 @@ export interface ApplyClientUsageBufferOptions {
   preserveContextBudgetInVisibleUsage?: boolean;
 }
 
+// The reply text in whichever shape the client gets: Chat message, Claude content blocks, or
+// Responses output items. Measuring only the Chat shape made every other reply look empty.
+function replyText(response: ResponseLike): unknown {
+  const body = response as {
+    choices?: Array<{ message?: { content?: unknown } }>;
+    content?: Array<{ text?: unknown }>;
+    output?: Array<{ content?: Array<{ text?: unknown }> }>;
+  } | null;
+  const chat = body?.choices?.[0]?.message?.content;
+  if (chat) return chat;
+  const texts: string[] = [];
+  for (const block of Array.isArray(body?.content) ? body.content : []) {
+    if (typeof block?.text === "string") texts.push(block.text);
+  }
+  for (const item of Array.isArray(body?.output) ? body.output : []) {
+    for (const part of Array.isArray(item?.content) ? item.content : []) {
+      if (typeof part?.text === "string") texts.push(part.text);
+    }
+  }
+  return texts.join("");
+}
+
 export function applyClientUsageBuffer(
   translatedResponse: ResponseLike,
   body: unknown,
@@ -98,10 +120,11 @@ export function applyClientUsageBuffer(
   } else {
     // Fallback: estimate usage when provider returned no usage block
     // (or an all-zero stub — common for cookie/web reverse-engineered providers).
-    const contentLength = JSON.stringify(
-      translatedResponse?.choices?.[0]?.message?.content || ""
-    ).length;
-    if (contentLength > 0) {
+    const contentLength = JSON.stringify(replyText(translatedResponse) || "").length;
+    // A Gemini body already reports usageMetadata; a second top-level `usage` key is noise.
+    const hasGeminiUsage = !!(translatedResponse as { usageMetadata?: unknown } | null)
+      ?.usageMetadata;
+    if (contentLength > 0 && !hasGeminiUsage) {
       const estimated = deps.estimateUsage(body, contentLength, clientResponseFormat);
       translatedResponse.usage = deps.filterUsageForFormat(estimated, clientResponseFormat);
     }

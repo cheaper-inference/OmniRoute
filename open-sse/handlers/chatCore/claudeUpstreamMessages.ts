@@ -12,6 +12,7 @@
  */
 
 import type { ClaudeContentBlock, ClaudeMessage } from "./claudeMessageTypes.ts";
+import { detachClaudeCodeRewriteTargets } from "../../executors/claudeOauthBodyIsolation.ts";
 import { liftSystemRoleMessages, relocateHoistedCacheBoundary } from "./claudeSystemRole.ts";
 import type { SystemRoleRoute } from "./claudeSystemRole.ts";
 import { splitMisplacedToolResults } from "../../translator/helpers/claudeHelper.ts";
@@ -97,6 +98,9 @@ export function normalizeClaudeUpstreamMessages(
 ) {
   const preserveToolResultBlocks = options?.preserveToolResultBlocks === true;
   if (!Array.isArray(payload.messages)) return;
+  // The payload is a shallow copy of the client body (combo legs share its messages). The
+  // passes below assign msg.content and rewrite blocks, so work on this payload's own copies.
+  detachClaudeCodeRewriteTargets(payload);
 
   // Lift system/developer role messages into the top-level system parameter.
   liftSystemRoleMessages(payload, options);
