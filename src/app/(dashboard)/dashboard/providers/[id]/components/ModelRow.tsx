@@ -114,6 +114,8 @@ export interface ModelVisibilityToolbarProps {
   onFreeFilterChange?: (filter: "all" | "free" | "paid") => void;
   sortFreeFirst?: boolean;
   onSortFreeFirstChange?: (v: boolean) => void;
+  onCompare?: () => void;
+  compareDisabled?: boolean;
 }
 
 export function ModelVisibilityToolbar({
@@ -137,6 +139,8 @@ export function ModelVisibilityToolbar({
   onFreeFilterChange,
   sortFreeFirst,
   onSortFreeFirstChange,
+  onCompare,
+  compareDisabled,
 }: ModelVisibilityToolbarProps) {
   return (
     <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -243,6 +247,18 @@ export function ModelVisibilityToolbar({
       >
         <span>{providerText(t, "hideAllModels", "Hide all")}</span>
       </Button>
+      {onCompare && (
+        <Button
+          size="sm"
+          variant="outline"
+          icon="bar_chart"
+          onClick={onCompare}
+          disabled={compareDisabled}
+          title={providerText(t, "compareModelsTitle", "Compare intelligence")}
+        >
+          <span>{providerText(t, "compareModels", "Compare")}</span>
+        </Button>
+      )}
       <span className="whitespace-nowrap text-xs text-text-muted">
         {providerText(t, "modelsActiveCount", "{active}/{total} active", {
           active: activeCount,
