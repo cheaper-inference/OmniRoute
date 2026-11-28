@@ -1,4 +1,5 @@
 import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth.ts";
+import { isSystemApiKeySecret } from "@/lib/db/apiKeys/systemKey";
 import { recordApiKeyAuthTouch } from "@/lib/compliance/index";
 import { classifyIpScope, getClientIpFromRequest } from "@/lib/ipUtils";
 import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
@@ -104,6 +105,23 @@ async function recordClientApiAuthTouch(
   }
 }
 
+async function evaluatePresentedKeys(
+  ctx: PolicyContext,
+  credentials: string[]
+): Promise<AuthOutcome | null> {
+  const { getPresentedApiKeyStatus } = await import("../../../lib/db/apiKeys");
+  for (const credential of credentials) {
+    // Bind identity and usage to the credential that actually validated.
+    const status = await getPresentedApiKeyStatus(credential);
+    if (status === "system") return reject(401, "AUTH_002", "Invalid API key");
+    if (status === "valid") {
+      await recordClientApiAuthTouch(ctx, credential, credentials);
+      return allow({ kind: "client_api_key", id: maskKeyId(credential) });
+    }
+  }
+  return null;
+}
+
 export const clientApiPolicy: RoutePolicy = {
   routeClass: "CLIENT_API",
   async evaluate(ctx: PolicyContext): Promise<AuthOutcome> {
@@ -117,6 +135,7 @@ export const clientApiPolicy: RoutePolicy = {
     // ANTHROPIC_AUTH_TOKEN): the request is accepted when ANY credential validates.
     const allowUrl = !isA2aPath(ctx.classification.normalizedPath);
     const credentials = extractApiKeyCandidates(ctx.request as Request, { allowUrl });
+    if (credentials.some(isSystemApiKeySecret)) return reject(401, "AUTH_002", "Invalid API key");
     if (credentials.length === 0) {
       // The WS descriptor handshake is a metadata read; the route handler
       // performs the actual wsAuth/dashboard/API-key decision and returns the
@@ -157,15 +176,8 @@ export const clientApiPolicy: RoutePolicy = {
       });
     }
 
-    const { validateApiKey } = await import("../../../lib/db/apiKeys");
-    for (const credential of credentials) {
-      // The subject is the credential that actually validated, so identity and
-      // usage never bind to a stale Bearer sent next to a valid x-api-key.
-      if (await validateApiKey(credential)) {
-        await recordClientApiAuthTouch(ctx, credential, credentials);
-        return allow({ kind: "client_api_key", id: maskKeyId(credential) });
-      }
-    }
+    const keyOutcome = await evaluatePresentedKeys(ctx, credentials);
+    if (keyOutcome) return keyOutcome;
 
     // Issue #2257: when REQUIRE_API_KEY is off, a stale CLI config (Codex
     // Desktop auto-config, Hermes, etc.) carrying an invalid Bearer

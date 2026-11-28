@@ -8,7 +8,7 @@ import {
 } from "../../shared/constants/codexServiceMode";
 import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import { v4 as uuidv4 } from "uuid";
-import { getDbInstance, rowToCamel } from "./core";
+import { getDbInstance } from "./core";
 import { backupDbFile } from "./backup";
 import { registerDbStateResetter } from "./stateReset";
 import { invalidateReasoningRoutingRuleCache } from "./reasoningRoutingRules";
@@ -96,6 +96,13 @@ import { getModelCatalogCacheVersion, invalidateModelCatalogCache } from "./read
 import { KeyTemplateError } from "./keyTemplates/errors.ts";
 import type { KeyTemplatePolicy } from "@/shared/types/keyTemplates";
 import type { AccessSchedule, RateLimitRule } from "./apiKeys/types";
+import { projectApiKey } from "./apiKeys/projection";
+import {
+  SYSTEM_API_KEY_SOURCE,
+  generateSystemApiKeySecret,
+  isSystemApiKeySecret,
+} from "./apiKeys/systemKey";
+import { getRequiredApiKeyId } from "@/shared/utils/requiredApiKeyContext";
 
 // ──────────────── Performance Optimizations ────────────────
 
@@ -248,43 +255,6 @@ interface ApiKeysStatements {
   deleteKey: StatementLike;
 }
 
-interface ApiKeyView extends JsonRecord {
-  id?: string;
-  modelAccessMode: ModelAccessMode;
-  allowedModels: string[];
-  blockedModels: string[];
-  allowedCombos: string[];
-  allowedConnections: string[];
-  preferredConnections: string[];
-  allowedQuotas: string[];
-  noLog: boolean;
-  autoResolve: boolean;
-  isActive: boolean;
-  accessSchedule: AccessSchedule | null;
-  throttleDelayMs?: number | null;
-  rateLimits: RateLimitRule[] | null;
-  scopes: string[];
-  proxyId?: string | null;
-  isBanned?: boolean;
-  expiresAt?: string | null;
-  allowedEndpoints: string[];
-  streamDefaultMode: "legacy" | "json";
-  codexServiceMode: ApiKeyCodexServiceMode;
-  cacheDefaultMode: "legacy" | "bypass";
-  disableNonPublicModels?: boolean;
-  allowUsageCommand?: boolean;
-  usageLimitEnabled?: boolean;
-  dailyUsageLimitUsd?: number | null;
-  weeklyUsageLimitUsd?: number | null;
-  fiveHourUsageLimitUsd?: number | null;
-  chaosModeEnabled?: boolean;
-  compressionEnabled: boolean;
-  allowAutoCombos: boolean;
-  allowCcDiscoveryAliases: boolean;
-  catalogScope: "all" | "combos" | "models";
-  forcedModel: string | null;
-}
-
 /**
  * `bypassCache` reads the row from SQLite and leaves this process's cache (and the Redis
  * copy) alone: nothing is read from it and nothing is written to it. For callers that
@@ -295,7 +265,7 @@ export interface ApiKeyLookupOptions {
 }
 
 // LRU cache for API key validation (valid keys only)
-const _keyValidationCache = new Map<string, { valid: boolean; timestamp: number }>();
+const _keyValidationCache = new Map<string, { timestamp: number }>();
 const _keyMetadataCache = new Map<string, CacheEntry<ApiKeyMetadata>>();
 // Keys with no row at all: hash -> time seen. Own map, so a flood of bad keys cannot evict valid entries.
 const _unknownKeyCache = new Map<string, number>();
@@ -307,7 +277,21 @@ const MAX_CACHE_SIZE = 1000;
 const EXCLUSIVE_LEASE_SCOPE = "lease:exclusive";
 
 export class ApiKeyPolicyInvariantError extends Error {
-  readonly code = "LEASE_KEY_POLICY_INVALID";
+  constructor(
+    message: string,
+    readonly code = "LEASE_KEY_POLICY_INVALID"
+  ) {
+    super(message);
+  }
+}
+
+function assertSystemApiKeyScopes(scopes: readonly string[]): void {
+  if (scopes.length > 0) {
+    throw new ApiKeyPolicyInvariantError(
+      "System API keys use inference-only permissions",
+      "SYSTEM_KEY_POLICY_INVALID"
+    );
+  }
 }
 
 function assertExclusiveLeaseKeyPolicy(
@@ -524,13 +508,13 @@ function getPreparedStatements(db: ApiKeysDbLike): ApiKeysStatements {
     _stmtGetAllKeys = db.prepare<ApiKeyRow>("SELECT * FROM api_keys ORDER BY created_at");
     _stmtGetKeyById = db.prepare<ApiKeyRow>("SELECT * FROM api_keys WHERE id = ?");
     _stmtValidateKey = db.prepare<JsonRecord>(
-      "SELECT id, expires_at, revoked_at, is_active, is_banned FROM api_keys WHERE key_hash = ?"
+      "SELECT id, source, expires_at, revoked_at, is_active, is_banned FROM api_keys WHERE key_hash = ?"
     );
     _stmtGetKeyMetadata = db.prepare<ApiKeyRow>(
-      "SELECT id, name, machine_id, model_access_mode, allowed_models, blocked_models, allowed_combos, allowed_connections, preferred_connections, allowed_quotas, no_log, auto_resolve, is_active, access_schedule, max_requests_per_day, max_requests_per_minute, throttle_delay_ms, max_sessions, revoked_at, expires_at, ip_allowlist, scopes, rate_limits, is_banned, key_hash, allowed_endpoints, stream_default_mode, cache_default_mode, codex_service_mode, disable_non_public_models, allow_usage_command, usage_limit_enabled, daily_usage_limit_usd, weekly_usage_limit_usd, five_hour_usage_limit_usd, chaos_mode_enabled, compression_enabled, allow_auto_combos, allow_cc_discovery_aliases, catalog_scope, forced_model, proxy_id FROM api_keys WHERE key_hash = ?"
+      "SELECT id, source, name, machine_id, model_access_mode, allowed_models, blocked_models, allowed_combos, allowed_connections, preferred_connections, allowed_quotas, no_log, auto_resolve, is_active, access_schedule, max_requests_per_day, max_requests_per_minute, throttle_delay_ms, max_sessions, revoked_at, expires_at, ip_allowlist, scopes, rate_limits, is_banned, key_hash, allowed_endpoints, stream_default_mode, cache_default_mode, codex_service_mode, disable_non_public_models, allow_usage_command, usage_limit_enabled, daily_usage_limit_usd, weekly_usage_limit_usd, five_hour_usage_limit_usd, chaos_mode_enabled, compression_enabled, allow_auto_combos, allow_cc_discovery_aliases, catalog_scope, forced_model, proxy_id FROM api_keys WHERE key_hash = ?"
     );
     _stmtInsertKey = db.prepare(
-      "INSERT INTO api_keys (id, name, key, machine_id, model_access_mode, allowed_models, allowed_combos, allowed_connections, preferred_connections, no_log, created_at, key_prefix, key_hash, scopes, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      "INSERT INTO api_keys (id, name, key, machine_id, model_access_mode, allowed_models, allowed_combos, allowed_connections, preferred_connections, no_log, created_at, key_prefix, key_hash, scopes, expires_at, source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     );
     _stmtDeleteKey = db.prepare("DELETE FROM api_keys WHERE id = ?");
   }
@@ -556,20 +540,6 @@ function getPreparedStatements(db: ApiKeysDbLike): ApiKeysStatements {
   };
 }
 
-/**
- * Blank the secret of an SSO-provisioned shadow key before it leaves the DB
- * layer. Its holder authenticates with an Entra token; the row's `key` is an
- * internal implementation detail. Surfacing it would mint a permanent static
- * credential that bypasses SSO — usable after the user is offboarded in Entra,
- * and invisible to the group policy that is supposed to govern them.
- */
-function redactSsoSecret(view: ApiKeyView): ApiKeyView {
-  if ((view as JsonRecord).source === "sso") {
-    (view as JsonRecord).key = "";
-  }
-  return view;
-}
-
 export async function getApiKeys(limit?: number, offset?: number) {
   const db = getDbInstance() as ApiKeysDbLike;
   let rows: ApiKeyRow[];
@@ -577,56 +547,23 @@ export async function getApiKeys(limit?: number, offset?: number) {
     const sql = "SELECT * FROM api_keys ORDER BY created_at LIMIT ? OFFSET ?";
     rows = db.prepare(sql).all(limit, offset ?? 0) as ApiKeyRow[];
   } else {
-    const stmt = getPreparedStatements(db);
-    rows = stmt.getAllKeys.all();
+    rows = getPreparedStatements(db).getAllKeys.all();
   }
-  return rows.map((row) => {
-    const camelRow = toRecord(rowToCamel(row)) as ApiKeyView;
-    // Raw secret for the operator-only JSON export and internal probes; stored encrypted.
-    camelRow.key = decryptApiKeySecret(camelRow.key);
-    camelRow.modelAccessMode = parseModelAccessMode(
-      camelRow.modelAccessMode,
-      camelRow.allowedModels
-    );
-    camelRow.allowedModels = parseAllowedModels(camelRow.allowedModels);
-    camelRow.blockedModels = parseAllowedModels(camelRow.blockedModels);
-    camelRow.allowedCombos = parseAllowedCombos(camelRow.allowedCombos);
-    camelRow.allowedConnections = parseAllowedConnections(camelRow.allowedConnections);
-    camelRow.preferredConnections = parseAllowedConnections(camelRow.preferredConnections);
-    camelRow.allowedQuotas = parseAllowedQuotas((camelRow as JsonRecord).allowedQuotas);
-    camelRow.noLog = parseNoLog(camelRow.noLog);
-    camelRow.autoResolve = parseAutoResolve(camelRow.autoResolve);
-    camelRow.isActive = parseIsActive(camelRow.isActive);
-    camelRow.accessSchedule = parseAccessSchedule(camelRow.accessSchedule);
-    camelRow.rateLimits = parseRateLimits(camelRow.rateLimits);
-    camelRow.isBanned = parseIsBanned(camelRow.isBanned);
-    camelRow.scopes = parseStringList((camelRow as JsonRecord).scopes);
-    camelRow.allowedEndpoints = parseStringList((camelRow as JsonRecord).allowedEndpoints);
-    camelRow.streamDefaultMode = parseStreamDefaultMode((camelRow as JsonRecord).streamDefaultMode);
-    camelRow.codexServiceMode = parseApiKeyCodexServiceMode(
-      (camelRow as JsonRecord).codexServiceMode
-    );
-    camelRow.cacheDefaultMode = parseCacheDefaultMode((camelRow as JsonRecord).cacheDefaultMode);
-    camelRow.disableNonPublicModels = parseDisableNonPublicModels(
-      (camelRow as JsonRecord).disableNonPublicModels
-    );
-    camelRow.allowUsageCommand = parseAllowUsageCommand((camelRow as JsonRecord).allowUsageCommand);
-    camelRow.chaosModeEnabled = parseChaosModeEnabled((camelRow as JsonRecord).chaosModeEnabled);
-    camelRow.compressionEnabled = parseCompressionEnabled(
-      (camelRow as JsonRecord).compressionEnabled
-    );
-    camelRow.allowAutoCombos = parseAllowAutoCombos((camelRow as JsonRecord).allowAutoCombos);
-    camelRow.allowCcDiscoveryAliases = parseAllowCcDiscoveryAliases(
-      (camelRow as JsonRecord).allowCcDiscoveryAliases
-    );
-    camelRow.catalogScope = parseCatalogScope((camelRow as JsonRecord).catalogScope);
-    camelRow.forcedModel = parseForcedModel((camelRow as JsonRecord).forcedModel);
-    Object.assign(camelRow, parseApiKeyUsageLimitFields(camelRow));
-    if (typeof camelRow.id === "string" && camelRow.id.length > 0) {
-      setNoLog(camelRow.id, camelRow.noLog === true);
-    }
-    return redactSsoSecret(camelRow);
-  });
+  return rows.map(projectApiKey);
+}
+
+/** Keys eligible for client-facing selectors and configuration exports. */
+export async function getClientApiKeys() {
+  return (await getApiKeys()).filter((key) => key.source !== SYSTEM_API_KEY_SOURCE);
+}
+
+/** Keep keyless local features available when only server-owned keys exist. */
+export function getPresentableApiKeysCount(): number {
+  const db = getDbInstance() as ApiKeysDbLike;
+  const row = db
+    .prepare<{ cnt: number }>("SELECT count(*) as cnt FROM api_keys WHERE source IS NOT ?")
+    .get(SYSTEM_API_KEY_SOURCE);
+  return row?.cnt ?? 0;
 }
 
 export function getApiKeysCount(): number {
@@ -676,7 +613,7 @@ export async function pickApiKeyForInternalUse(
   purpose: "combo-health-check" | "cloud-sync-verify" | "internal-probe" = "internal-probe"
 ): Promise<string | null> {
   try {
-    const keys = (await getApiKeys()) as Array<{
+    const keys = (await getClientApiKeys()) as Array<{
       key?: string;
       isActive?: boolean;
       revokedAt?: string | null;
@@ -735,49 +672,7 @@ export async function getApiKeyById(id: string, options: { readOnly?: boolean } 
   const row = options.readOnly
     ? db.prepare<ApiKeyRow>("SELECT * FROM api_keys WHERE id = ?").get(id)
     : getPreparedStatements(db).getKeyById.get(id);
-  if (!row) return null;
-  const camelRow = toRecord(rowToCamel(row)) as ApiKeyView;
-  // Raw secret for the admin reveal route and by-id consumers; stored encrypted.
-  camelRow.key = decryptApiKeySecret(camelRow.key);
-  camelRow.modelAccessMode = parseModelAccessMode(camelRow.modelAccessMode, camelRow.allowedModels);
-  camelRow.allowedModels = parseAllowedModels(camelRow.allowedModels);
-  camelRow.blockedModels = parseAllowedModels(camelRow.blockedModels);
-  camelRow.allowedCombos = parseAllowedCombos(camelRow.allowedCombos);
-  camelRow.allowedConnections = parseAllowedConnections(camelRow.allowedConnections);
-  camelRow.preferredConnections = parseAllowedConnections(camelRow.preferredConnections);
-  camelRow.allowedQuotas = parseAllowedQuotas((camelRow as JsonRecord).allowedQuotas);
-  camelRow.noLog = parseNoLog(camelRow.noLog);
-  camelRow.autoResolve = parseAutoResolve(camelRow.autoResolve);
-  camelRow.isActive = parseIsActive(camelRow.isActive);
-  camelRow.accessSchedule = parseAccessSchedule(camelRow.accessSchedule);
-  camelRow.rateLimits = parseRateLimits(camelRow.rateLimits);
-  camelRow.isBanned = parseIsBanned(camelRow.isBanned);
-  camelRow.scopes = parseStringList((camelRow as JsonRecord).scopes);
-  camelRow.allowedEndpoints = parseStringList((camelRow as JsonRecord).allowedEndpoints);
-  camelRow.streamDefaultMode = parseStreamDefaultMode((camelRow as JsonRecord).streamDefaultMode);
-  camelRow.codexServiceMode = parseApiKeyCodexServiceMode(
-    (camelRow as JsonRecord).codexServiceMode
-  );
-  camelRow.cacheDefaultMode = parseCacheDefaultMode((camelRow as JsonRecord).cacheDefaultMode);
-  camelRow.disableNonPublicModels = parseDisableNonPublicModels(
-    (camelRow as JsonRecord).disableNonPublicModels
-  );
-  camelRow.allowUsageCommand = parseAllowUsageCommand((camelRow as JsonRecord).allowUsageCommand);
-  camelRow.chaosModeEnabled = parseChaosModeEnabled((camelRow as JsonRecord).chaosModeEnabled);
-  camelRow.compressionEnabled = parseCompressionEnabled(
-    (camelRow as JsonRecord).compressionEnabled
-  );
-  camelRow.allowAutoCombos = parseAllowAutoCombos((camelRow as JsonRecord).allowAutoCombos);
-  camelRow.allowCcDiscoveryAliases = parseAllowCcDiscoveryAliases(
-    (camelRow as JsonRecord).allowCcDiscoveryAliases
-  );
-  camelRow.catalogScope = parseCatalogScope((camelRow as JsonRecord).catalogScope);
-  camelRow.forcedModel = parseForcedModel((camelRow as JsonRecord).forcedModel);
-  Object.assign(camelRow, parseApiKeyUsageLimitFields(camelRow));
-  if (typeof camelRow.id === "string" && camelRow.id.length > 0) {
-    setNoLog(camelRow.id, camelRow.noLog === true);
-  }
-  return redactSsoSecret(camelRow);
+  return row ? projectApiKey(row) : null;
 }
 
 async function hashKey(key: string): Promise<string> {
@@ -793,6 +688,32 @@ export async function createApiKey(
   machineId: string,
   scopes: string[] = [],
   options: CreateApiKeyOptions = {}
+) {
+  return createStoredApiKey(name, machineId, scopes, options, "manual");
+}
+
+/**
+ * Provision a key for an in-process required-key binding and return its identity.
+ *
+ * @public
+ */
+export async function createSystemApiKey(
+  name: string,
+  machineId: string,
+  scopes: string[] = [],
+  options: CreateApiKeyOptions = {}
+) {
+  assertSystemApiKeyScopes(scopes);
+  const { id } = await createStoredApiKey(name, machineId, [], options, SYSTEM_API_KEY_SOURCE);
+  return { id, name };
+}
+
+async function createStoredApiKey(
+  name: string,
+  machineId: string,
+  scopes: string[],
+  options: CreateApiKeyOptions,
+  source: "manual" | typeof SYSTEM_API_KEY_SOURCE
 ) {
   if (!machineId) {
     throw new Error("machineId is required");
@@ -812,12 +733,15 @@ export async function createApiKey(
   const now = new Date().toISOString();
 
   const { generateApiKeyWithMachine } = await import("@/shared/utils/apiKey");
-  const result = generateApiKeyWithMachine(machineId);
+  const key =
+    source === SYSTEM_API_KEY_SOURCE
+      ? generateSystemApiKeySecret()
+      : generateApiKeyWithMachine(machineId).key;
 
   const apiKey = {
     id: uuidv4(),
     name: name,
-    key: result.key,
+    key,
     machineId: machineId,
     modelAccessMode,
     allowedModels,
@@ -851,7 +775,8 @@ export async function createApiKey(
     apiKey.key.slice(0, 12),
     keyHash,
     JSON.stringify(scopes),
-    apiKey.expiresAt
+    apiKey.expiresAt,
+    source
   );
   setNoLog(apiKey.id, false);
 
@@ -957,7 +882,7 @@ export async function regenerateApiKey(id: string) {
   const db = getDbInstance() as ApiKeysDbLike;
   const stmt = getPreparedStatements(db);
   const row = stmt.getKeyById.get(id) as ApiKeyRow | undefined;
-  if (!row) return null;
+  if (!row || row.source === SYSTEM_API_KEY_SOURCE) return null;
 
   const { generateApiKeyWithMachine } = await import("@/shared/utils/apiKey");
   const machineId = (row.machine_id || row.machineId || "0000000000000000") as string;
@@ -967,9 +892,14 @@ export async function regenerateApiKey(id: string) {
 
   // Update in DB
   const updateStmt = db.prepare(
-    "UPDATE api_keys SET key = ?, key_hash = ?, key_prefix = ? WHERE id = ?"
+    "UPDATE api_keys SET key = ?, key_hash = ?, key_prefix = ? WHERE id = ? AND source IS NOT ?"
   );
-  updateStmt.run(encryptApiKeySecret(newKey), newHash, newPrefix, id);
+  if (
+    !updateStmt.run(encryptApiKeySecret(newKey), newHash, newPrefix, id, SYSTEM_API_KEY_SOURCE)
+      .changes
+  ) {
+    return null;
+  }
 
   // Invalidate all caches
   clearApiKeyCaches();
@@ -1298,14 +1228,15 @@ export async function updateApiKeyPermissions(
     db.exec("BEGIN IMMEDIATE");
     try {
       const prevRow = db
-        .prepare<{ scopes: string | null; allowed_connections: string | null }>(
-          "SELECT scopes, allowed_connections FROM api_keys WHERE id = ?"
+        .prepare<{ scopes: string | null; allowed_connections: string | null; source: string }>(
+          "SELECT scopes, allowed_connections, source FROM api_keys WHERE id = ?"
         )
         .get(id);
       if (!prevRow) {
         db.exec("ROLLBACK");
         return false;
       }
+      if (prevRow.source === SYSTEM_API_KEY_SOURCE) assertSystemApiKeyScopes(nextScopes);
       previousScopes = parseStringList(prevRow.scopes);
       const nextAllowedConnections =
         normalized.allowedConnections === undefined
@@ -1502,26 +1433,41 @@ export async function validateApiKey(
   key: string | null | undefined,
   options: ApiKeyLookupOptions = {}
 ) {
-  if (!key || typeof key !== "string") return false;
+  return (await getPresentedApiKeyStatus(key, options)) === "valid";
+}
 
-  if (isConfiguredEnvApiKey(key) || isSelfLoopBearer(key)) return true;
-  if (isLaunchSessionToken(key)) return validateLaunchSessionKey(key, options);
+type PresentedApiKeyStatus = "valid" | "invalid" | "system";
+
+/** Keep server credentials distinct from stale client keys in keyless mode. */
+export async function getPresentedApiKeyStatus(
+  key: string | null | undefined,
+  options: ApiKeyLookupOptions = {}
+): Promise<PresentedApiKeyStatus> {
+  if (!key || typeof key !== "string") return "invalid";
+  if (isSystemApiKeySecret(key)) return "system";
+  if (isConfiguredEnvApiKey(key) || isSelfLoopBearer(key)) return "valid";
+  if (isLaunchSessionToken(key)) {
+    return (await validateLaunchSessionKey(key, options)) ? "valid" : "invalid";
+  }
 
   return validateApiKeyHash(await hashKey(key), options);
 }
 
 /** The lifecycle-gated lookup behind validateApiKey, by stored key hash. */
-async function validateApiKeyHash(hashedKey: string, options: ApiKeyLookupOptions = {}) {
+async function validateApiKeyHash(
+  hashedKey: string,
+  options: ApiKeyLookupOptions = {}
+): Promise<PresentedApiKeyStatus> {
   const now = Date.now();
   const cacheKey = hashedKey;
 
   const cached = options.bypassCache ? undefined : _keyValidationCache.get(cacheKey);
   if (cached && now - cached.timestamp < CACHE_TTL) {
-    return cached.valid;
+    return "valid";
   }
 
   const unknownAt = options.bypassCache ? undefined : _unknownKeyCache.get(cacheKey);
-  if (unknownAt !== undefined && now - unknownAt < UNKNOWN_KEY_TTL) return false;
+  if (unknownAt !== undefined && now - unknownAt < UNKNOWN_KEY_TTL) return "invalid";
 
   // A Redis hit never authorizes on its own (GHSA-66vh-35g3-78qv): eviction on regenerate/revoke
   // is best-effort and a late SET can resurrect an evicted entry, so the entry could keep a
@@ -1537,22 +1483,24 @@ async function validateApiKeyHash(hashedKey: string, options: ApiKeyLookupOption
       evictIfNeeded(_unknownKeyCache);
       _unknownKeyCache.set(cacheKey, now);
     }
-    return false;
+    return "invalid";
   }
 
+  if (row.source === SYSTEM_API_KEY_SOURCE) return "system";
+
   const isBanned = parseIsBanned(row.is_banned ?? row.isBanned);
-  if (isBanned) return false;
+  if (isBanned) return "invalid";
 
   const isActive = parseIsActive(row.is_active ?? row.isActive);
-  if (!isActive) return false;
+  if (!isActive) return "invalid";
 
   const revokedAt = row.revoked_at ?? row.revokedAt;
-  if (typeof revokedAt === "string" && revokedAt.trim() !== "") return false;
+  if (typeof revokedAt === "string" && revokedAt.trim() !== "") return "invalid";
 
   const expiresAt = row.expires_at ?? row.expiresAt;
   if (typeof expiresAt === "string" && expiresAt.trim() !== "") {
     const expiresMs = Date.parse(expiresAt);
-    if (Number.isFinite(expiresMs) && expiresMs <= now) return false;
+    if (Number.isFinite(expiresMs) && expiresMs <= now) return "invalid";
   }
 
   if (options.bypassCache) {
@@ -1563,11 +1511,11 @@ async function validateApiKeyHash(hashedKey: string, options: ApiKeyLookupOption
     } catch {
       // retried on the next lookup: the throttle entry is only set after a write
     }
-    return true;
+    return "valid";
   }
 
   evictIfNeeded(_keyValidationCache);
-  _keyValidationCache.set(cacheKey, { valid: true, timestamp: now });
+  _keyValidationCache.set(cacheKey, { timestamp: now });
 
   if (isRedisAuthCacheEnabled()) {
     // Update Redis cache for fast validation
@@ -1596,7 +1544,7 @@ async function validateApiKeyHash(hashedKey: string, options: ApiKeyLookupOption
 
   markApiKeyUsed(db, row.id, now);
 
-  return true;
+  return "valid";
 }
 
 /** Stored key hash of a DB-backed parent key, or null when the row is gone. */
@@ -1634,7 +1582,7 @@ export async function isLaunchAnonymousPostureOpen(): Promise<boolean> {
   if (isRequireApiKeyEnabled()) return false;
   if (process.env.INITIAL_PASSWORD) return false;
   try {
-    if (getApiKeysCount() > 0) return false;
+    if (getPresentableApiKeysCount() > 0) return false;
     const [{ getSettings }, { hasConfiguredOidc, hasConfiguredPassword }] = await Promise.all([
       import("./settings"),
       import("@/shared/utils/credentialSurface"),
@@ -1677,7 +1625,7 @@ async function resolveLaunchParent(
   }
   const parentHash = launchParentKeyHash(session.parentKeyId);
   if (!launchParentCredentialMatches(session, parentHash)) return null;
-  return (await validateApiKeyHash(parentHash as string, options))
+  return (await validateApiKeyHash(parentHash as string, options)) === "valid"
     ? { kind: "key", hash: parentHash as string }
     : null;
 }
@@ -1708,7 +1656,7 @@ export async function getApiKeyMetadata(
   key: string | null | undefined,
   options: ApiKeyLookupOptions = {}
 ): Promise<ApiKeyMetadata | null> {
-  if (!key || typeof key !== "string") return null;
+  if (!key || typeof key !== "string" || isSystemApiKeySecret(key)) return null;
 
   // persistent env-var key support (persistent passthrough keys) (#1350)
   if (isConfiguredEnvApiKey(key) || isSelfLoopBearer(key)) {
@@ -1719,6 +1667,32 @@ export async function getApiKeyMetadata(
   if (isLaunchSessionToken(key)) return getLaunchSessionKeyMetadata(key, options);
 
   return getApiKeyMetadataByHash(await hashKey(key), options);
+}
+
+/** Fresh policy for the exact key identity selected by an in-process binding. */
+export function getRequiredApiKeyMetadata(key: string, apiKeyId: string) {
+  if (
+    !isSystemApiKeySecret(key) &&
+    (isConfiguredEnvApiKey(key) || isSelfLoopBearer(key) || isLaunchSessionToken(key))
+  ) {
+    return getApiKeyMetadata(key, { bypassCache: true });
+  }
+  return getApiKeyMetadataByHash(opaqueTokenFingerprint(key), { bypassCache: true }, apiKeyId);
+}
+
+/**
+ * Pass as the resolver of a required-key binding owned by a server feature.
+ *
+ * @public
+ */
+export async function resolveSystemApiKey(apiKeyId: string) {
+  const db = getDbInstance() as ApiKeysDbLike;
+  const row = getPreparedStatements(db).getKeyById.get(apiKeyId);
+  if (row?.source !== SYSTEM_API_KEY_SOURCE) return null;
+  const apiKey = decryptApiKeySecret(row.key);
+  if (typeof apiKey !== "string" || !apiKey) return null;
+  const apiKeyInfo = await getRequiredApiKeyMetadata(apiKey, apiKeyId);
+  return apiKeyInfo?.id === apiKeyId ? { apiKey, apiKeyInfo } : null;
 }
 
 function syntheticEnvKeyMetadata(): ApiKeyMetadata {
@@ -1793,7 +1767,8 @@ function syntheticEnvKeyMetadata(): ApiKeyMetadata {
 /** The metadata lookup behind getApiKeyMetadata, by stored key hash. */
 async function getApiKeyMetadataByHash(
   hashedKey: string,
-  options: ApiKeyLookupOptions = {}
+  options: ApiKeyLookupOptions = {},
+  requiredKeyId?: string
 ): Promise<ApiKeyMetadata | null> {
   const now = Date.now();
   const cached = options.bypassCache ? undefined : _keyMetadataCache.get(hashedKey);
@@ -1806,6 +1781,9 @@ async function getApiKeyMetadataByHash(
   const row = lookupByKeyHash(db, stmt.getKeyMetadata, hashedKey);
 
   if (!row) return null;
+  const systemKey = row.source === SYSTEM_API_KEY_SOURCE;
+  if (systemKey && (row.id !== requiredKeyId || parseStringList(row.scopes).length > 0))
+    return null;
 
   const record = toRecord(row) as ApiKeyRow;
   const metadataId = typeof record.id === "string" ? record.id : "";
@@ -1856,7 +1834,7 @@ async function getApiKeyMetadataByHash(
     ipAllowlist: parseStringList(record.ip_allowlist ?? (record as JsonRecord).ipAllowlist),
     scopes: parseStringList((record as JsonRecord).scopes),
     isBanned: parseIsBanned(record.is_banned ?? (record as JsonRecord).isBanned),
-    keyHash: (record.key_hash ?? (record as JsonRecord).keyHash) as string | null,
+    keyHash: systemKey ? null : ((record.key_hash ?? record.keyHash) as string | null),
     proxyId:
       typeof record.proxy_id === "string" && record.proxy_id.trim() !== "" ? record.proxy_id : null,
     allowedEndpoints: parseStringList(
@@ -1905,12 +1883,18 @@ async function getApiKeyMetadataByHash(
   setNoLog(metadata.id, metadata.noLog === true);
 
   // Cache the result
-  if (!options.bypassCache) {
+  if (!systemKey && !options.bypassCache) {
     evictIfNeeded(_keyMetadataCache);
     _keyMetadataCache.set(hashedKey, { value: metadata, timestamp: now });
   }
 
   return metadata;
+}
+
+async function getModelPolicyMetadata(key: string, requiredKeyId?: string) {
+  if (!requiredKeyId) return getApiKeyMetadata(key);
+  const metadata = await getRequiredApiKeyMetadata(key, requiredKeyId);
+  return metadata?.id === requiredKeyId ? metadata : null;
 }
 
 /**
@@ -1922,7 +1906,8 @@ async function getApiKeyMetadataByHash(
 export async function isModelAllowedForKey(
   key: string | null | undefined,
   modelId: string | null | undefined,
-  resolvedModelId?: string | null
+  resolvedModelId?: string | null,
+  scopedKeyId?: string
 ): Promise<boolean> {
   // If no key provided, allow (request may be using different auth method like JWT)
   // If no modelId provided, deny (invalid request)
@@ -1933,24 +1918,25 @@ export async function isModelAllowedForKey(
   modelId = stripNoThinkingAlias(modelId);
   if (!modelId) return false;
 
+  const requiredKeyId = scopedKeyId ?? getRequiredApiKeyId();
   // Create cache key
   const cacheKey = resolvedModelId
     ? JSON.stringify([key, modelId, resolvedModelId])
     : `${key}:${modelId}`;
   const now = Date.now();
   const catalogGeneration = getModelCatalogCacheVersion();
-  const usesSettingDependentClaudeRouting =
-    isPotentialUnprefixedClaudeCodeModel(modelId) ||
-    (typeof resolvedModelId === "string" && isPotentialUnprefixedClaudeCodeModel(resolvedModelId));
+  const cacheable =
+    !requiredKeyId &&
+    !isPotentialUnprefixedClaudeCodeModel(modelId) &&
+    !(typeof resolvedModelId === "string" && isPotentialUnprefixedClaudeCodeModel(resolvedModelId));
 
   // Check permission cache
   const cached = getCachedModelPermission(cacheKey, now, catalogGeneration);
-  if (!usesSettingDependentClaudeRouting && cached !== undefined) {
+  if (cacheable && cached !== undefined) {
     return cached;
   }
 
-  const metadata = await getApiKeyMetadata(key);
-  // SECURITY: Key not found in database = deny access (invalid/non-existent key)
+  const metadata = await getModelPolicyMetadata(key, requiredKeyId);
   if (!metadata) return false;
 
   const decision = await evaluateModelAccess(
@@ -1968,7 +1954,7 @@ export async function isModelAllowedForKey(
   );
 
   // Preserve the cache boundary: early block/publication denials were never cached.
-  if (decision.reason === "permissions" && !usesSettingDependentClaudeRouting) {
+  if (cacheable && decision.reason === "permissions") {
     evictModelPermissionCache();
     setCachedModelPermission(cacheKey, decision.allowed, now, catalogGeneration);
   }

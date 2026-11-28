@@ -326,7 +326,7 @@ async function transcribeWithAlias(
   if (
     resolvedModel !== modelStr &&
     apiKey &&
-    !(await isModelAllowedForKey(apiKey, modelStr, resolvedModel))
+    !(await isModelAllowedForKey(apiKey, modelStr, resolvedModel, apiKeyId ?? undefined))
   ) {
     return errorResponse(HTTP_STATUS.FORBIDDEN, "API key is not allowed to use the resolved model");
   }

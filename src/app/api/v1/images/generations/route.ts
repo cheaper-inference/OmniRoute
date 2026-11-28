@@ -21,6 +21,8 @@ import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
 import * as log from "@/sse/utils/logger";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
+import { usesNativeRequiredApiKeyTransport } from "@/shared/utils/requiredApiKeyContext";
+import { authorizeRequiredApiKeyStream } from "@/shared/utils/requiredApiKeyTransport";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
   createComboTargetKeyGate,
@@ -66,7 +68,10 @@ import {
   isCommonChatGptWebRetirementError,
 } from "@/shared/constants/chatgptWebRetirement";
 import { PLAYGROUND_IMAGE_STREAM_HEADER } from "@/shared/utils/playgroundImageStream";
-import { createPlaygroundImageStreamResponse } from "@/lib/playground/imageGenerationStream";
+import {
+  createAuthorizedImageStreamResponse,
+  createPlaygroundImageStreamResponse,
+} from "@/lib/playground/imageGenerationStream";
 import { getImageLongJobOptions } from "@/lib/images/imageGenerationLongJobs";
 import { isImageGenerationLongJobsEnabled } from "@/shared/utils/featureFlags";
 
@@ -189,6 +194,8 @@ async function postHandler(request, context) {
     const combo = await getComboByName(body.model as string);
     if (combo) {
       const { executeImageCombo } = await import("@omniroute/open-sse/services/imageCombo");
+      const transportRejection = await authorizeRequiredApiKeyStream(request.signal);
+      if (transportRejection) return transportRejection;
       return executeImageCombo(
         body.model as string,
         body,
@@ -374,6 +381,8 @@ async function postHandler(request, context) {
     }
   }
 
+  const transportRejection = await authorizeRequiredApiKeyStream(request.signal);
+  if (transportRejection) return transportRejection;
   const execution = await executeImageWithCredentialFallback({
     provider,
     requestedModel,
@@ -490,7 +499,9 @@ export function POST(request: Request, context?: unknown) {
     request.headers.get(PLAYGROUND_IMAGE_STREAM_HEADER) === "1" &&
     isImageGenerationLongJobsEnabled()
   ) {
-    return createPlaygroundImageStreamResponse(request, context, guardedPost);
+    return usesNativeRequiredApiKeyTransport()
+      ? createAuthorizedImageStreamResponse(request, context, guardedPost)
+      : createPlaygroundImageStreamResponse(request, context, guardedPost);
   }
   return guardedPost(request, context);
 }

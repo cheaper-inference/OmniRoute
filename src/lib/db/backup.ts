@@ -25,6 +25,7 @@ import {
   resolveDbBackupRetention,
 } from "./backupRetention";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
+import { SYSTEM_API_KEY_SOURCE } from "./apiKeys/systemKey";
 import { isEncryptionEnabled } from "./encryption";
 
 type CountRow = { cnt?: number };
@@ -752,6 +753,40 @@ export async function restoreDbBackup(
 
 // ──────────────── Export-All helpers (for /api/db-backups/exportAll) ────────────────
 
+export const SCRUBBED_SYSTEM_API_KEY_MARKER = "scrubbed-system-key:";
+
+/** Remove system API key secrets from a staged download before publishing it. */
+export async function scrubSystemApiKeySecretsInCopy(filePath: string): Promise<void> {
+  const { openDatabaseAsync } = await import("./adapters/driverFactory");
+  const db = await openDatabaseAsync(filePath, { fileMustExist: true });
+  const persistedCopy = db.driver === "sql.js" ? `${filePath}.scrubbed` : null;
+  try {
+    const journalMode = db.pragma("journal_mode = DELETE", { simple: true });
+    if (journalMode !== "delete" && !(persistedCopy && journalMode === "memory")) {
+      throw new Error("Could not disable WAL on the database export copy");
+    }
+    db.pragma("secure_delete = ON");
+
+    // The row-specific marker satisfies UNIQUE(key). Keeping the original key_hash
+    // makes the marker unusable as a credential, including after an import.
+    db.prepare("UPDATE api_keys SET key = ? || id, key_prefix = '' WHERE source = ?").run(
+      SCRUBBED_SYSTEM_API_KEY_MARKER,
+      SYSTEM_API_KEY_SOURCE
+    );
+    // Rebuild the file to discard stale bytes in freed pages and indexes.
+    db.exec("VACUUM");
+    // The WASM adapter's close is best-effort. Its backup propagates write errors.
+    if (persistedCopy) await db.backup(persistedCopy);
+  } finally {
+    db.close();
+  }
+
+  if (persistedCopy) fs.renameSync(persistedCopy, filePath);
+  if (["-wal", "-shm", "-journal"].some((suffix) => fs.existsSync(`${filePath}${suffix}`))) {
+    throw new Error("Database export copy has unexpected journal files");
+  }
+}
+
 export interface ExportAllRows {
   settings: Record<string, string>;
   combos: unknown[];
@@ -767,8 +802,8 @@ export interface ExportAllRows {
  * - combos:    full combos table
  * - providers: provider_connections rows, **excluding sensitive credentials**
  *              (id, provider, name, auth_type, is_active, email, created_at only)
- * - apiKeys:   api_keys rows with masked prefix
- *              (id, name, first 8 chars of key, machine_id, created_at)
+ * - apiKeys:   api_keys metadata (id, name, prefix, machine_id, created_at).
+ *              System keys have a blank prefix. Other keys retain their first 8 stored chars.
  *
  * Each category is wrapped in a try/catch so a missing table never aborts the
  * entire export — consistent with the original inline behaviour.
@@ -814,9 +849,10 @@ export function exportAllSummaryRows(): ExportAllRows {
     apiKeys.push(
       ...db
         .prepare(
-          "SELECT id, name, substr(key, 1, 8) as prefix, machine_id, created_at FROM api_keys"
+          `SELECT id, name, CASE WHEN source = ? THEN '' ELSE substr(key, 1, 8) END AS prefix,
+                  machine_id, created_at FROM api_keys`
         )
-        .all()
+        .all(SYSTEM_API_KEY_SOURCE)
     );
   } catch {
     // api_keys table might not exist

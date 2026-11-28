@@ -24,10 +24,8 @@ let resolveUserApiKey: (id: number) => Promise<string>;
 
 before(async () => {
   // Stub the DB + machine-id modules so nothing touches SQLite. The loader
-  // matches the specifiers used by chatProxy.ts. The stub must export every
-  // name the real module exports: chatProxy pulls in the chat handler, which
-  // imports other members of this module, and a missing export is a module-load
-  // SyntaxError that would look like a failing assertion.
+  // replaces the API-key DB module while leaving its helper modules available.
+  // Include the exports also imported by chatProxy's transitive dependencies.
   const dbExports = [
     "clearApiKeyCaches",
     "deleteApiKey",
@@ -48,6 +46,8 @@ before(async () => {
 
   const dbStub = `
     export async function getApiKeys() { return []; }
+    export const getClientApiKeys = getApiKeys;
+    export async function getPresentedApiKeyStatus() { return "invalid"; }
     export async function createApiKey(name) {
       globalThis.__mintedKeys.push(name);
       return { key: "sk-omni-" + "x".repeat(32) + "-" + name };
@@ -62,7 +62,7 @@ before(async () => {
 
   const loader = `
     export async function resolve(spec, ctx, next) {
-      if (spec.includes("db/apiKeys")) {
+      if (spec.endsWith("/db/apiKeys") || spec.endsWith("/db/apiKeys.ts")) {
         return { url: "data:text/javascript,${encodeURIComponent(dbStub)}", shortCircuit: true };
       }
       if (spec.includes("machineId")) {

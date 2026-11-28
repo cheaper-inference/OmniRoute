@@ -18,6 +18,10 @@ import { retryProbeIfTransient } from "./probeUtils";
 import fs from "fs";
 import { resolveWritableDataDir, getLegacyDotDataDir } from "../dataPaths";
 import { isNextBuildPhase } from "../buildPhase";
+import {
+  getApiKeyImportColumns,
+  isReservedSystemApiKeyImport,
+} from "./jsonMigration/apiKeysImport";
 import { runMigrations } from "./migrationRunner";
 import { runDbHealthCheck, getPagerCorruption } from "./healthCheck";
 import { createManagedDbBackup as writeManagedDbBackup } from "./managedBackup";
@@ -1768,7 +1772,9 @@ function migrateFromJson(db: SqliteDatabase, jsonPath: string) {
         INSERT OR REPLACE INTO api_keys (id, name, key, machine_id, model_access_mode, allowed_models, no_log, created_at)
         VALUES (@id, @name, @key, @machineId, @modelAccessMode, @allowedModels, @noLog, @createdAt)
       `);
+      if (keyCount > 0) getApiKeyImportColumns(db);
       for (const apiKey of data.apiKeys || []) {
+        if (isReservedSystemApiKeyImport(db, apiKey)) continue;
         insertKey.run({
           id: apiKey.id,
           name: apiKey.name,

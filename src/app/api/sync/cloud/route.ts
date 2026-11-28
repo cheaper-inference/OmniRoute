@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
-import { getApiKeys, createApiKey, pickApiKeyForInternalUse } from "@/lib/db/apiKeys";
+import { getClientApiKeys, createApiKey, pickApiKeyForInternalUse } from "@/lib/db/apiKeys";
 import { updateSettings } from "@/lib/db/settings";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud, fetchWithTimeout, CLOUD_URL } from "@/lib/cloudSync";
@@ -98,7 +98,7 @@ export async function POST(request: any) {
     switch (action) {
       case "enable": {
         // Auto create key if none exists (before sync, so it's included in sync data)
-        const keys = await getApiKeys();
+        const keys = await getClientApiKeys();
         let createdKey = null;
         if (keys.length === 0) {
           createdKey = await createApiKey("Default Key", machineId);

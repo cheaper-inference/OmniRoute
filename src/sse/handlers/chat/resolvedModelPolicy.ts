@@ -10,6 +10,8 @@ import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { isModelAllowedForKey, isModelBlockedByPatterns } from "@/lib/db/apiKeys";
 import { resolveEnforcedPolicyKey } from "@/shared/utils/apiKeyPolicy";
+import { usesNativeRequiredApiKeyTransport } from "@/shared/utils/requiredApiKeyContext";
+import { rejectUnavailableRequiredApiKeyStream } from "@/shared/utils/requiredApiKeyTransport";
 import { getProviderSearchPool } from "@omniroute/open-sse/services/providerConnectionPool.ts";
 import { getCachedProviderNodes } from "@/lib/db/readCache";
 import { getProviderById, resolveProviderId } from "@/shared/constants/providers";
@@ -123,6 +125,7 @@ async function grantedTargetPermission(
 export async function rejectUnauthorizedResolvedModels(opts: {
   hasApiKeyMetadata: boolean;
   apiKey: string | null | undefined;
+  scopedKeyId?: string;
   requestedModel: string;
   resolvedModels: Iterable<string>;
   grantedTargets?: Set<string> | null;
@@ -138,7 +141,8 @@ export async function rejectUnauthorizedResolvedModels(opts: {
             requestedModel: opts.requestedModel,
             resolvedModel,
           },
-          isModelAllowedForKey
+          (key, requested, resolved) =>
+            isModelAllowedForKey(key, requested, resolved, opts.scopedKeyId)
         );
     if (permission === "allowed") continue;
     return markLocalModelPolicyResponse(
@@ -179,12 +183,9 @@ export function comboAuthorizationOptions(
  * key id, self-loop scope). Re-reading only the client headers missed the
  * playground key id, so every selected non-default key failed closed.
  */
-async function resolveGateApiKey(request: Request | null | undefined): Promise<string | null> {
+async function resolveGateApiKey(request: Request | null | undefined) {
   try {
-    if (!request?.headers) return null;
-    const enforced = await resolveEnforcedPolicyKey(request);
-    // A scope that no longer resolves must not fall back to the self-loop bearer.
-    return enforced.rejection ? null : enforced.apiKey;
+    return request?.headers ? await resolveEnforcedPolicyKey(request) : null;
   } catch {
     return null;
   }
@@ -211,7 +212,7 @@ export function createResolvedModelGate(opts: {
   modelStr: string;
 }): (resolvedModels: Iterable<string>) => Promise<Response | null> {
   const hasApiKeyMetadata = Boolean(opts.apiKeyInfo);
-  let apiKey: Promise<string | null> | undefined;
+  let identity: ReturnType<typeof resolveGateApiKey> | undefined;
   const requestedModel = resolveAuthorizationContextModel(opts.contextModel, opts.modelStr);
   const base = {
     hasApiKeyMetadata,
@@ -225,8 +226,17 @@ export function createResolvedModelGate(opts: {
     blockedModels: grantedBlockedModels(opts.apiKeyInfo, requestedModel),
   };
   return async (resolvedModels) => {
-    if (hasApiKeyMetadata) apiKey ??= resolveGateApiKey(opts.request);
-    return rejectUnauthorizedResolvedModels({ ...base, apiKey: await apiKey, resolvedModels });
+    if (hasApiKeyMetadata) identity ??= resolveGateApiKey(opts.request);
+    const key = await identity;
+    if (key?.rejection && usesNativeRequiredApiKeyTransport(opts.request)) {
+      return rejectUnavailableRequiredApiKeyStream();
+    }
+    return rejectUnauthorizedResolvedModels({
+      ...base,
+      apiKey: key?.rejection ? null : key?.apiKey,
+      scopedKeyId: key?.selfLoopScope.requiredBinding ? key?.apiKeyInfo?.id : undefined,
+      resolvedModels,
+    });
   };
 }
 

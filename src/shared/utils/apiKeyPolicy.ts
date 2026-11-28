@@ -46,7 +46,12 @@ import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { hasApiKeyModelRestrictions } from "./resolvedModelAccess";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
 import { timingSafeCompare } from "./timingSafeCompare";
-import { requiredApiKeyUnavailable, resolveRequiredApiKey } from "./requiredApiKeyContext";
+import {
+  SELF_LOOP_KEY_ID_HEADER,
+  requiredApiKeyUnavailable,
+  resolveRequiredApiKey,
+  resolveRequiredApiKeyChild,
+} from "./requiredApiKeyContext";
 
 // Default to no per-key request cap. API keys can still opt into explicit
 // limits via Settings/API Keys, while provider/account quota controls remain
@@ -577,6 +582,7 @@ export async function resolvePlaygroundTestKey(request: Request): Promise<string
 }
 
 type PolicyContext = {
+  scopedKeyId?: string;
   request: Request;
   apiKey: string;
   apiKeyInfo: ApiKeyMetadata;
@@ -763,7 +769,7 @@ async function validateModelAccess(context: PolicyContext): Promise<Response | n
     }
   }
   if (requestedComboName || !hasModelRestrictions) return null;
-  if (await isModelAllowedForKey(apiKey, modelStr)) return null;
+  if (await isModelAllowedForKey(apiKey, modelStr, undefined, context.scopedKeyId)) return null;
   return policyErrorResponse(
     request,
     HTTP_STATUS.FORBIDDEN,
@@ -1010,6 +1016,7 @@ async function resolveUnboundPolicyKey(request: Request): Promise<{
   const ssoSecret = resolveSsoApiKeySecret(request);
   if (ssoSecret) return { apiKey: ssoSecret, rejection: null };
   const resolved = await resolveClientApiKey(request);
+  if (resolved.rejection) return { apiKey: null, rejection: resolved.rejection };
   if (resolved.valid) return { apiKey: resolved.apiKey, rejection: null };
 
   const selection = await resolvePlaygroundKeySelection(request);
@@ -1046,13 +1053,7 @@ export async function checkApiKeyAuthorization(
   );
 }
 
-/**
- * Header an internal self-loop sub-request (the Vision Bridge describe call)
- * uses to scope itself to the caller's API key.
- */
-const SELF_LOOP_KEY_ID_HEADER = "x-omniroute-self-loop-key-id";
-
-type SelfLoopScope = { key: string | null; rejection: Response | null };
+type SelfLoopScope = { key: string | null; rejection: Response | null; requiredBinding?: boolean };
 const NO_SELF_LOOP_SCOPE: SelfLoopScope = { key: null, rejection: null };
 
 /**
@@ -1100,11 +1101,21 @@ export async function resolveEnforcedPolicyKey(request: Request): Promise<{
   rejection: Response | null;
 }> {
   const requiredKey = resolveRequiredApiKey();
-  if (requiredKey) {
-    const resolved = await requiredKey;
-    return resolved
-      ? { ...resolved, selfLoopScope: NO_SELF_LOOP_SCOPE, rejection: null }
-      : { apiKey: null, selfLoopScope: NO_SELF_LOOP_SCOPE, rejection: requiredApiKeyUnavailable() };
+  const requiredChild = requiredKey ? undefined : resolveRequiredApiKeyChild(request);
+  const binding = requiredKey ?? requiredChild;
+  if (binding) {
+    const resolved = await binding;
+    if (!resolved) {
+      return {
+        apiKey: null,
+        selfLoopScope: NO_SELF_LOOP_SCOPE,
+        rejection: requiredApiKeyUnavailable(),
+      };
+    }
+    const selfLoopScope = requiredChild
+      ? { key: resolved.apiKey, rejection: null, requiredBinding: true }
+      : NO_SELF_LOOP_SCOPE;
+    return { ...resolved, selfLoopScope, rejection: null };
   }
 
   const unbound = await resolveUnboundPolicyKey(request);
@@ -1170,9 +1181,15 @@ async function runLimitValidators(
  * allowances are not charged twice.
  */
 async function validateSelfLoopScopedAccess(
-  context: Parameters<typeof validateQuotaAccess>[0]
+  context: PolicyContext,
+  requiredBinding?: boolean
 ): Promise<Response | null> {
-  return (await validateQuotaAccess(context)) ?? (await validateModelAccess(context));
+  const endpointRejection = requiredBinding ? validateEndpointAccess(context) : null;
+  return (
+    endpointRejection ??
+    (await validateQuotaAccess(context)) ??
+    (await validateModelAccess(context))
+  );
 }
 
 function isFalReceiptRead(request: Request, options?: EnforceApiKeyPolicyOptions): boolean {
@@ -1229,6 +1246,7 @@ export async function enforceApiKeyPolicy(
     apiKeyInfo,
     modelStr,
     directModelDispatch: options?.directModelDispatch,
+    scopedKeyId: selfLoopScope.requiredBinding ? apiKeyInfo.id : undefined,
   };
   const statusRejection = validateKeyStatus(context);
   if (statusRejection) return { apiKey, apiKeyInfo, rejection: statusRejection };
@@ -1237,7 +1255,11 @@ export async function enforceApiKeyPolicy(
     return { apiKey, apiKeyInfo, rejection: await validateFalReceiptPolicy(context) };
   }
   if (selfLoopScope.key) {
-    return { apiKey, apiKeyInfo, rejection: await validateSelfLoopScopedAccess(context) };
+    return {
+      apiKey,
+      apiKeyInfo,
+      rejection: await validateSelfLoopScopedAccess(context, selfLoopScope.requiredBinding),
+    };
   }
   const scheduleRejection = await validateKeyScheduleAndUsage(context);
   if (scheduleRejection) return { apiKey, apiKeyInfo, rejection: scheduleRejection };

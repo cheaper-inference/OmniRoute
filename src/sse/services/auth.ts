@@ -57,8 +57,9 @@ import {
 } from "@/lib/providers/peakHourProtection";
 import { buildJinaEnvCredentials } from "@/lib/providers/jina";
 import { buildGeminiEnvCredentials } from "@/lib/providers/gemini";
-import { toNumber } from "@/shared/utils/numeric";
+import { isSystemApiKeySecret } from "@/lib/db/apiKeys/systemKey";
 import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
+import { toNumber } from "@/shared/utils/numeric";
 import { isMicrosoftDesignerWebRetiredProviderId } from "@/shared/constants/designerWebRetirement";
 import { isRuntimeRetiredProviderId } from "@/shared/constants/providerRetirement";
 import { allowlistPermitsSyntheticNoAuth } from "./noAuthAllowlist";
@@ -3896,7 +3897,7 @@ export function extractApiKey(request: AuthRequestLike, opts?: { allowUrl?: bool
  * restarts and backup restores without DB dependency.
  */
 export async function isValidApiKey(apiKey: string, options?: ApiKeyLookupOptions) {
-  if (!apiKey) return false;
+  if (!apiKey || isSystemApiKeySecret(apiKey)) return false;
 
   // Persistent env-var key — always valid regardless of DB state (#1350)
   const envKey = process.env.OMNIROUTE_API_KEY || process.env.ROUTER_API_KEY;

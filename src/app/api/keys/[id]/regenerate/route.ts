@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
+import { SYSTEM_API_KEY_SOURCE } from "@/lib/db/apiKeys/systemKey";
 import { getApiKeyById, regenerateApiKey } from "@/lib/db/apiKeys";
 import {
   requireCredentialForManagementScopedKey,
@@ -23,6 +25,12 @@ export async function POST(request, { params }) {
     }
 
     const existing = await getApiKeyById(id);
+    if (existing?.source === SYSTEM_API_KEY_SOURCE) {
+      return NextResponse.json(buildErrorBody(403, "System API keys cannot be regenerated"), {
+        status: 403,
+      });
+    }
+
     const scopeAuthError = await requireCredentialForManagementScopedKey(request, existing?.scopes);
     if (scopeAuthError) return scopeAuthError;
 

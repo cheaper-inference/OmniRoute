@@ -1,0 +1,1 @@
+- **feat(api):** Server features can provision inference-only API keys for in-process requests. Managers can edit their policies, while client authentication, credential selectors, and configuration exports keep the secrets private (KEA-9523)

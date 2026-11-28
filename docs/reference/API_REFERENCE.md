@@ -1665,6 +1665,11 @@ credential gets `403` there too; `omniroute sync import` sends the local CLI cre
 the persisted values drive the automatic pruning after every backup). Listing (`GET`) and creating
 a manual backup (`PUT`) keep ordinary management auth.
 
+The one exception to "every stored credential" is the secret of a system-owned API key
+(`source = "system"`): the two database downloads replace it with a non-secret marker, and the
+settings JSON export leaves the key out. Restoring a downloaded file therefore leaves system keys
+unusable; restoring a server backup by id (`POST /api/db-backups`) keeps them.
+
 ### Cloud Sync
 
 | Endpoint               | Method  | Description           |

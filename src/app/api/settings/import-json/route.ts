@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDbInstance } from "@/lib/db/core";
 import { backupDbFile } from "@/lib/db/backup";
+import { ReservedSystemApiKeyImportError } from "@/lib/db/jsonMigration/apiKeysImport";
 import { clearApiKeyCaches } from "@/lib/db/apiKeys";
 import { invalidateDbCache } from "@/lib/db/readCache";
 import {
@@ -53,6 +54,17 @@ function dropInvalidSettings(settings: Record<string, unknown>) {
     valid[key] = Object.hasOwn(parsed.data, key) ? parsed.data[key] : value;
   }
   return { valid, ignoredKeys };
+}
+
+function importErrorResponse(err: unknown) {
+  if (err instanceof ReservedSystemApiKeyImportError) {
+    return NextResponse.json({ error: sanitizeErrorMessage(err.message) }, { status: 400 });
+  }
+  console.error("[API] Error importing JSON backup:", err);
+  return NextResponse.json(
+    { error: sanitizeErrorMessage(err instanceof Error ? err.message : String(err)) },
+    { status: 500 }
+  );
 }
 
 /**
@@ -147,10 +159,6 @@ export async function POST(request: Request) {
       ...(ignoredKeys.length > 0 ? { ignoredKeys } : {}),
     });
   } catch (err) {
-    console.error("[API] Error importing JSON backup:", err);
-    return NextResponse.json(
-      { error: sanitizeErrorMessage(err instanceof Error ? err.message : String(err)) },
-      { status: 500 }
-    );
+    return importErrorResponse(err);
   }
 }
