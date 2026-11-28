@@ -57,12 +57,23 @@ import {
 import { saveCallLog, saveRequestUsage } from "@/lib/usageDb";
 import { getAllCustomModels } from "@/lib/db/models";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import { readResponseTextWithinCap } from "../utils/responseBodyCap.ts";
 import {
   FetchTimeoutError,
   fetchWithTimeout,
   getConfiguredTimeout,
 } from "@/shared/utils/fetchTimeout";
 import { handleFalVideoGeneration } from "./mediaGeneration/fal.ts";
+
+/** A provider JSON body under the shared non-streaming byte cap; an over-cap body throws. */
+async function readJsonWithinCap(res: Response) {
+  return JSON.parse(await readResponseTextWithinCap(res));
+}
+
+/** A provider error body under the same cap; an unreadable or over-cap body reads as empty. */
+function readErrorTextWithinCap(res: Response, fallback = "") {
+  return readResponseTextWithinCap(res).catch(() => fallback);
+}
 
 /**
  * Resolve the base URL for OpenAI-compatible video generation endpoints.
@@ -577,11 +588,11 @@ async function handleVeoAiFreeVideoGeneration({ model, provider, body, credentia
     return {
       success: false,
       status: upstreamResponse.status || 502,
-      error: await upstreamResponse.text().catch(() => "Video provider error"),
+      error: await readErrorTextWithinCap(upstreamResponse, "Video provider error"),
     };
   }
 
-  const payload = await upstreamResponse.json().catch(() => null);
+  const payload = await readJsonWithinCap(upstreamResponse).catch(() => null);
   const item = Array.isArray(payload?.data) ? payload.data[0] : null;
   if (
     !payload ||
@@ -758,7 +769,7 @@ async function handleSDWebUIVideoGeneration({ model, provider, providerConfig, b
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
+      const errorText = await readErrorTextWithinCap(response);
       if (log)
         log.error("VIDEO", `${provider} error ${response.status}: ${errorText.slice(0, 200)}`);
       saveCallLog({
@@ -773,7 +784,7 @@ async function handleSDWebUIVideoGeneration({ model, provider, providerConfig, b
       return { success: false, status: response.status, error: errorText };
     }
 
-    const data = await response.json();
+    const data = await readJsonWithinCap(response);
     // SD WebUI AnimateDiff returns { video: "base64..." } or { images: [...] }
     const videos = [];
     if (data.video) {
@@ -1012,7 +1023,7 @@ async function handleRunwayVideoGeneration({
     });
 
     if (!submitResponse.ok) {
-      const errorText = await submitResponse.text();
+      const errorText = await readErrorTextWithinCap(submitResponse);
       if (log) {
         log.error(
           "VIDEO",
@@ -1031,7 +1042,7 @@ async function handleRunwayVideoGeneration({
       return { success: false, status: submitResponse.status, error: errorText };
     }
 
-    const submitData = await submitResponse.json();
+    const submitData = await readJsonWithinCap(submitResponse);
     const taskId = typeof submitData?.id === "string" ? submitData.id : "";
     if (!taskId) {
       const errorText = `Runway submit did not return task id: ${JSON.stringify(submitData).slice(0, 400)}`;
@@ -1057,7 +1068,9 @@ async function handleRunwayVideoGeneration({
       );
 
       if (!taskResponse.ok) {
-        const errorText = await taskResponse.text();
+        const errorText = await readErrorTextWithinCap(taskResponse);
+        // The capped read swallows its own failure, an abort included: re-check the signal.
+        if (signal?.aborted) return abortedVideoResult();
         if (log) {
           log.error(
             "VIDEO",
@@ -1077,7 +1090,7 @@ async function handleRunwayVideoGeneration({
         return { success: false, status: taskResponse.status, error: errorText };
       }
 
-      const task = await taskResponse.json();
+      const task = await readJsonWithinCap(taskResponse);
       lastTask = task;
       const status = String(task?.status || "").toUpperCase();
 
@@ -1186,6 +1199,27 @@ async function deliverHaiperVideo({ videoUrl, model, provider, startTime, signal
   };
 }
 
+/** Log an unreadable Haiper submission answer and turn it into a 502 handler result. */
+function haiperSubmissionReadFailure(
+  err: Error,
+  { provider, model, startTime }: { provider: string; model: string; startTime: number }
+) {
+  saveCallLog({
+    method: "POST",
+    path: "/v1/videos/generations",
+    status: 502,
+    model: `${provider}/${model}`,
+    provider,
+    duration: Date.now() - startTime,
+    error: err.message,
+  }).catch(() => {});
+  return {
+    success: false,
+    status: 502,
+    error: sanitizeErrorMessage(err) || "Video provider error",
+  };
+}
+
 async function handleHaiperVideoGeneration({
   model,
   provider,
@@ -1203,7 +1237,7 @@ async function handleHaiperVideoGeneration({
     body: JSON.stringify({ prompt: body.prompt, duration: 4, aspect_ratio: "16:9" }),
   });
   if (!res.ok) {
-    const errorText = await res.text();
+    const errorText = await readErrorTextWithinCap(res);
     saveCallLog({
       method: "POST",
       path: "/v1/videos/generations",
@@ -1215,7 +1249,13 @@ async function handleHaiperVideoGeneration({
     }).catch(() => {});
     return { success: false, status: res.status, error: errorText };
   }
-  const { job_id } = await res.json();
+  let job_id: unknown;
+  try {
+    ({ job_id } = await readJsonWithinCap(res));
+  } catch (err) {
+    // An over-cap (or unparsable) submission answer is a provider failure, not a rejection.
+    return haiperSubmissionReadFailure(err, { provider, model, startTime });
+  }
   const deadline = Date.now() + 300000;
   while (Date.now() < deadline) {
     const status = await pollJsonAfter(
