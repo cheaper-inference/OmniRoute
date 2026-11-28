@@ -30,8 +30,11 @@ export interface EmbeddingModel {
   /**
    * Model-level default request parameters injected into the upstream body when
    * the client did not already supply them. Used for asymmetric embedding models
-   * that require a mandatory parameter — e.g. NVIDIA NIM `nv-embedqa-*` models
-   * reject requests without `input_type` ("query" | "passage"). See issue #1378.
+   * that require a mandatory parameter, e.g. the verified NVIDIA NIM asymmetric
+   * models (`nv-embedqa-e5-v5`, `llama-nemotron-embed-1b-v2`, `nemotron-3-embed-1b`,
+   * `nemotron-3.5-embed-1b`, `nemotron-3.5-embed-8b`), which reject requests
+   * without `input_type` ("query" | "passage"). The default is "query"; clients
+   * indexing passages must send "passage". See issue #1378.
    */
   defaultParams?: Record<string, unknown>;
 }
@@ -294,14 +297,37 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
     baseUrl: "https://integrate.api.nvidia.com/v1/embeddings",
     authType: "apikey",
     authHeader: "bearer",
-    // nv-embedqa-* are asymmetric models: NVIDIA NIM rejects requests without an
-    // `input_type` ("query" | "passage") with 400 "'input_type' parameter is
-    // required". Default to "query" when the client omits it (issue #1378).
+    // The verified NVIDIA NIM asymmetric models below (nv-embedqa-e5-v5,
+    // llama-nemotron-embed-1b-v2, nemotron-3-embed-1b, nemotron-3.5-embed-1b,
+    // nemotron-3.5-embed-8b) reject requests without an `input_type`
+    // ("query" | "passage") with 400 "'input_type' parameter is required".
+    // Default to "query" when the client omits it; clients indexing passages
+    // must send "passage" (issue #1378).
     models: [
       {
         id: "nvidia/nv-embedqa-e5-v5",
         name: "NV EmbedQA E5 v5",
         dimensions: 1024,
+        defaultParams: { input_type: "query" },
+      },
+      {
+        id: "nvidia/nemotron-3.5-embed-8b",
+        name: "Nemotron 3.5 Embed 8B",
+        defaultParams: { input_type: "query" },
+      },
+      {
+        id: "nvidia/nemotron-3.5-embed-1b",
+        name: "Nemotron 3.5 Embed 1B",
+        defaultParams: { input_type: "query" },
+      },
+      {
+        id: "nvidia/nemotron-3-embed-1b",
+        name: "Nemotron 3 Embed 1B",
+        defaultParams: { input_type: "query" },
+      },
+      {
+        id: "nvidia/llama-nemotron-embed-1b-v2",
+        name: "Llama Nemotron Embed 1B v2",
         defaultParams: { input_type: "query" },
       },
     ],
