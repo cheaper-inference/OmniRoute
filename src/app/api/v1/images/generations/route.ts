@@ -272,6 +272,12 @@ async function postHandler(request, context) {
   // Check provider config for auth bypass
   const providerConfig = getImageProvider(provider);
   const imageModelEntry = getImageModelEntry(body.model);
+  if (imageModelEntry?.editOnly) {
+    return errorResponse(
+      HTTP_STATUS.BAD_REQUEST,
+      `Model ${body.model} only supports image edits with a reference image`
+    );
+  }
   const inputModalities = imageModelEntry?.inputModalities || ["text"];
   const requiresPrompt = inputModalities.includes("text");
   // imageRequired is an explicit registry override for models that list "text" among

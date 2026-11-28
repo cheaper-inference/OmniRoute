@@ -239,6 +239,7 @@ export function getImageModelEntry(modelStr: string | null | undefined): {
   model: string;
   inputModalities: string[];
   imageRequired?: boolean;
+  editOnly?: boolean;
   description?: string;
 } | null {
   if (!modelStr) return null;
@@ -251,6 +252,7 @@ export function getImageModelEntry(modelStr: string | null | undefined): {
       model: alias.model,
       inputModalities: alias.inputModalities || modelConfig?.inputModalities || ["text"],
       imageRequired: resolveAliasImageRequired(alias, modelConfig),
+      editOnly: modelConfig?.editOnly,
       description: alias.description || modelConfig?.description || undefined,
     };
   }
@@ -266,6 +268,7 @@ export function getImageModelEntry(modelStr: string | null | undefined): {
     model,
     inputModalities: modelConfig.inputModalities || ["text"],
     imageRequired: modelConfig.imageRequired,
+    editOnly: modelConfig.editOnly,
     description: modelConfig.description || undefined,
   };
 }
