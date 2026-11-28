@@ -86,6 +86,9 @@ async function compileRuntimeRequireModules(): Promise<string[]> {
         // browserPool.ts imports this helper, which is compiled as its own entry above.
         "../utils/playwrightChromium.ts",
         "./tlsFirstByteWatchdog.ts",
+        // browserPool.ts builds Playwright proxy options from a record via
+        // `../utils/playwrightProxy.ts`. Same isolated-compile reason.
+        "../utils/playwrightProxy.ts",
         // machineToken.ts imports `./dataPaths` since #13909 (random per-install
         // CLI token salt reads the data dir). Same isolated-compile reason.
         "./dataPaths",

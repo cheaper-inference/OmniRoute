@@ -5,6 +5,7 @@
 // deployment surface differs.
 import { randomUUID } from "crypto";
 import { getDbInstance } from "./core";
+import { parseProxyUrl } from "../../../open-sse/utils/executorProxy";
 import { backupDbFile } from "./backup";
 import type {
   JsonRecord,
@@ -1087,6 +1088,58 @@ export async function bulkAssignProxyToScope(
   return { updated, failed };
 }
 
+type LegacyProxyRecord = {
+  type?: string;
+  host: string;
+  port?: number;
+  username?: string;
+  password?: string;
+};
+
+/**
+ * Read one legacy proxy level. `null` means the level is unset; a saved value
+ * without a host is a misconfiguration, not an absent proxy, and throws so the
+ * caller cannot connect direct behind the operator's back.
+ */
+function readLegacyProxyLevel(value: unknown, label: string): LegacyProxyRecord | null {
+  // A legacy level may hold a URL string rather than a record (the shape executorProxy already
+  // parses). Reading it here keeps a global proxy from shadowing the more specific one, and a
+  // string that cannot be parsed stays an error instead of a silent direct connection.
+  if (typeof value === "string") {
+    if (!value.trim()) return null;
+    const parsed = parseProxyUrl(value);
+    const host = String(parsed.host ?? "").trim();
+    if (!host) {
+      throw new Error(`${label} has no host; fix or remove it instead of connecting directly`);
+    }
+    return {
+      type: parsed.type ?? "http",
+      host,
+      port: parsed.port === undefined ? undefined : Number(parsed.port),
+      username: parsed.username ?? undefined,
+      password: parsed.password ?? undefined,
+    };
+  }
+  if (!value || typeof value !== "object") return null;
+  const record = value as {
+    type?: string;
+    host?: string;
+    port?: number;
+    username?: string;
+    password?: string;
+  };
+  if (!String(record.host ?? "").trim()) {
+    throw new Error(`${label} has no host; fix or remove it instead of connecting directly`);
+  }
+  return {
+    type: record.type,
+    host: String(record.host),
+    port: record.port,
+    username: record.username,
+    password: record.password,
+  };
+}
+
 /**
  * Resolve proxy for a provider (without connection ID).
  * Used during OAuth flow before connection is created.
@@ -1112,30 +1165,17 @@ export async function resolveProxyForProvider(providerId: string) {
     // resolveProxyForConnection already has this fallback; mirror it here.
     // Dynamic import avoids a static cycle (settings.ts imports from proxies.ts).
     const { getProxyForLevel } = await import("./settings");
-    const legacyProvider = await getProxyForLevel("provider", providerId);
-    if (legacyProvider && typeof legacyProvider === "object" && legacyProvider.host) {
-      return {
-        type: legacyProvider.type,
-        host: legacyProvider.host,
-        port: legacyProvider.port,
-        username: legacyProvider.username,
-        password: legacyProvider.password,
-      };
-    }
+    const legacyProvider = readLegacyProxyLevel(
+      await getProxyForLevel("provider", providerId),
+      `Provider proxy for "${providerId}"`
+    );
+    if (legacyProvider) return legacyProvider;
 
     const registryGlobal = await resolveProxyForScopeFromRegistry("global");
     if (registryGlobal?.proxy) return registryGlobal.proxy;
 
-    const legacyGlobal = await getProxyForLevel("global");
-    if (legacyGlobal && typeof legacyGlobal === "object" && legacyGlobal.host) {
-      return {
-        type: legacyGlobal.type,
-        host: legacyGlobal.host,
-        port: legacyGlobal.port,
-        username: legacyGlobal.username,
-        password: legacyGlobal.password,
-      };
-    }
+    const legacyGlobal = readLegacyProxyLevel(await getProxyForLevel("global"), "Global proxy");
+    if (legacyGlobal) return legacyGlobal;
 
     return null;
   } catch (error: unknown) {
