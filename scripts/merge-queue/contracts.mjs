@@ -29,6 +29,7 @@ export const FREEZE_LABEL = "release-freeze";
 
 /** Number of history events kept in the state document (oldest dropped first). */
 export const HISTORY_LIMIT = 200;
+export const ALERTED_EPISODES_LIMIT = 50;
 /** Base-check results kept in the state document (most recent first). */
 export const BASE_CHECK_LIMIT = 10;
 /**
@@ -118,10 +119,20 @@ export const PAUSE_REASONS = Object.freeze([
   "error",
 ]);
 
+/** Read-only checks that can lift an automatic pause. */
+export const AUTO_PROBES = Object.freeze([
+  "retry",
+  "land-credential",
+  "land-token-present",
+  "queue-refs-protected",
+  "withdrawals-empty",
+]);
+
 /** History event types (`state.history[].type`). */
 export const EVENT_TYPES = Object.freeze([
   "batch-started", // candidate composed and pushed (detail: included/excluded PRs)
   "pr-skipped-conflict", // conflicts inside the batch only; stays queued
+  "pr-parked", // batch could not land; PRs stay queued
   "pr-dequeued", // removed from the queue (label removed + comment); detail = reason code
   "checks-green",
   "checks-red",
@@ -136,6 +147,7 @@ export const EVENT_TYPES = Object.freeze([
   "would-land", // shadow mode: green candidate that was NOT landed
   "would-dequeue", // shadow mode: live mode would have removed this PR from the queue (label
   // kept, no comment); detail = reason code(s), sha = the PR head it was decided for
+  "composition-mismatch", // candidate discarded before blessing; a repeat pauses the queue
   "land-rejected", // base moved (fast-forward push refused) → recompose
   "bisect-split",
   "culprit-found",
@@ -171,6 +183,7 @@ export const INELIGIBLE_REASONS = Object.freeze([
   "pr-checks-not-green",
   "shadow-processed", // shadow mode already settled this exact head (would-land / would-dequeue)
   "in-flight",
+  "parked",
 ]);
 
 /** Action types that pure modules ask the tick to execute. */
@@ -229,6 +242,7 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                   timeouts, set only while that holds for EVERY run (=
  *                                   attempts); absent otherwise, and in documents written before
  *                                   it existed (= first run not known to be a timeout)
+ * @property {number} [landingRetryTicks] attempts made in the batch's landing retry window
  * @property {number} [landAttempts] ticks that blessed this candidate for landing and reached
  *                                   no verdict, counted (and saved) before each blessing. It
  *                                   belongs to the candidate, at either stage: kept through a
@@ -298,6 +312,9 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {string|null} baseSha  base tip when paused (base-red auto-resumes when it moves)
  * @property {string} detail
  * @property {number|null} issue    related issue number (base-red / divergence), if any
+ * @property {{probe: string, attempts: number, nextProbeAt: string}} [auto]
+ * @property {string} [retryCause]  stable identity of a failure that requires a new batch
+ * @property {string} [candidateRef]  branch name to recheck for queue-refs-protected
  */
 
 /**
@@ -336,6 +353,9 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {number} version            SCHEMA_VERSION
  * @property {string} base               e.g. "release/v3.8.54"
  * @property {PauseInfo|null} paused
+ * @property {Record<string, {since: string, attempts: number}>} [autoPauseEpisodes]
+ *   automatically lifted pauses that can recur before a successful landing or manual resume
+ * @property {string[]} [alertedEpisodes]  e-mail alert keys, oldest first, at most 50
  * @property {InFlight|null} inFlight
  * @property {BaseCheck[]} baseChecks    most recent first, at most BASE_CHECK_LIMIT
  * @property {{processed: Object<string, string>}} shadow  PR number (string) → head SHA already
@@ -358,6 +378,9 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                       (and in documents written before it existed): startSize.
  *                                       When present, validateState requires a positive integer
  *                                       (the clamp to the configured sizes happens on read)
+ * @property {{kind: "parked"|"composition-mismatch", reason: string, count: number}} [batchDiscard]
+ *                                     run of consecutive batch discards with the same result
+ * @property {Record<string, {head: string, baseSha: string, reason: string, at: string, retried: boolean}>} [parked]
  * @property {Object<string, string>} [repairTried]  PR number (string) → head SHA of a base-repair
  *                                       PR whose candidate failed like the base: that head is
  *                                       never composed again. An entry goes when the PR is no
@@ -498,6 +521,9 @@ export function appendEvent(state, event, limit = HISTORY_LIMIT) {
 
 const isRecord = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const isIso = (v) => typeof v === "string" && !Number.isNaN(Date.parse(v));
+const isIsoInstant = (v) =>
+  isIso(v) && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(v);
+const isProbeAttempt = (v) => Number.isSafeInteger(v) && v >= 1;
 const isCount = (v) => Number.isSafeInteger(v) && v >= 0;
 
 function prRefErrors(pr, where) {
@@ -546,8 +572,52 @@ export function validateState(state) {
     const p = state.paused;
     if (!isRecord(p) || !PAUSE_REASONS.includes(p.reason) || !isIso(p.since)) {
       errors.push("paused");
-    } else if (typeof p.detail !== "string") errors.push("paused.detail");
+    } else {
+      if (typeof p.detail !== "string") errors.push("paused.detail");
+      if (
+        p.auto !== undefined &&
+        (!["error", "infra"].includes(p.reason) ||
+          !isRecord(p.auto) ||
+          !AUTO_PROBES.includes(p.auto.probe) ||
+          !isProbeAttempt(p.auto.attempts) ||
+          !isIsoInstant(p.auto.nextProbeAt))
+      )
+        errors.push("paused.auto");
+      if (
+        p.retryCause !== undefined &&
+        (p.auto?.probe !== "retry" ||
+          typeof p.retryCause !== "string" ||
+          !p.retryCause.startsWith("retry:"))
+      ) {
+        errors.push("paused.retryCause");
+      }
+      if (
+        p.candidateRef !== undefined &&
+        (p.auto?.probe !== "queue-refs-protected" || !parseCandidateRef(p.candidateRef))
+      ) {
+        errors.push("paused.candidateRef");
+      }
+    }
   }
+  if (
+    state.autoPauseEpisodes !== undefined &&
+    (!isRecord(state.autoPauseEpisodes) ||
+      !Object.entries(state.autoPauseEpisodes).every(
+        ([cause, episode]) =>
+          (AUTO_PROBES.includes(cause) || cause.startsWith("retry:")) &&
+          isRecord(episode) &&
+          isIso(episode.since) &&
+          isProbeAttempt(episode.attempts)
+      ))
+  )
+    errors.push("autoPauseEpisodes");
+  if (
+    state.alertedEpisodes !== undefined &&
+    (!Array.isArray(state.alertedEpisodes) ||
+      state.alertedEpisodes.length > ALERTED_EPISODES_LIMIT ||
+      !state.alertedEpisodes.every((key) => typeof key === "string" && key.length > 0))
+  )
+    errors.push("alertedEpisodes");
   if (state.inFlight !== null) {
     const f = state.inFlight;
     if (!isRecord(f)) errors.push("inFlight");
@@ -567,6 +637,9 @@ export function validateState(state) {
       if (!isCount(f.attempts)) errors.push("inFlight.attempts");
       if (f.timedOutRuns !== undefined && !isCount(f.timedOutRuns)) {
         errors.push("inFlight.timedOutRuns");
+      }
+      if (f.landingRetryTicks !== undefined && !isCount(f.landingRetryTicks)) {
+        errors.push("inFlight.landingRetryTicks");
       }
       if (f.landAttempts !== undefined && !isCount(f.landAttempts)) {
         errors.push("inFlight.landAttempts");
@@ -621,6 +694,10 @@ export function validateState(state) {
   ) {
     errors.push("batchWindow");
   }
+  if (state.batchDiscard !== undefined && !isBatchDiscard(state.batchDiscard)) {
+    errors.push("batchDiscard");
+  }
+  if (state.parked !== undefined && !isParkedMap(state.parked)) errors.push("parked");
   if (state.repairTried !== undefined && !isRepairTried(state.repairTried)) {
     errors.push("repairTried");
   }
@@ -640,6 +717,33 @@ export function validateState(state) {
   }
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
   return errors;
+}
+
+function isBatchDiscard(entry) {
+  return (
+    isRecord(entry) &&
+    ((entry.kind === "parked" && typeof entry.reason === "string" && entry.reason.length > 0) ||
+      (entry.kind === "composition-mismatch" && entry.reason === "")) &&
+    isCount(entry.count) &&
+    entry.count > 0
+  );
+}
+
+function isParkedMap(map) {
+  return (
+    isRecord(map) &&
+    Object.entries(map).every(
+      ([n, entry]) =>
+        /^[1-9][0-9]*$/.test(n) &&
+        isRecord(entry) &&
+        isSha(entry.head) &&
+        isSha(entry.baseSha) &&
+        typeof entry.reason === "string" &&
+        entry.reason.length > 0 &&
+        isIso(entry.at) &&
+        typeof entry.retried === "boolean"
+    )
+  );
 }
 
 /** Optional state.repairTried: PR number (decimal, no leading zero) → 40-hex head SHA. */

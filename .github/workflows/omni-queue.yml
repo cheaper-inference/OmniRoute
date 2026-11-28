@@ -275,6 +275,9 @@ jobs:
         env:
           OMNI_QUEUE_TOKEN: ${{ steps.app-token.outputs.token }}
           OMNI_QUEUE_LAND_TOKEN: ${{ secrets.OMNI_QUEUE_LAND_TOKEN }}
+          OMNI_QUEUE_ALERT_EMAIL_TO: ${{ secrets.OMNI_QUEUE_ALERT_EMAIL_TO }}
+          OMNI_QUEUE_SMTP_USER: ${{ secrets.OMNI_QUEUE_SMTP_USER }}
+          OMNI_QUEUE_SMTP_APP_PASSWORD: ${{ secrets.OMNI_QUEUE_SMTP_APP_PASSWORD }}
           OMNI_QUEUE_BOT_NAME: ${{ steps.identity.outputs.name }}
           OMNI_QUEUE_BOT_EMAIL: ${{ steps.identity.outputs.email }}
           GITHUB_ACTOR: ${{ github.actor }}

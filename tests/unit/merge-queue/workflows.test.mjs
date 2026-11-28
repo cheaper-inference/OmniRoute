@@ -1045,10 +1045,13 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
   });
   const secrets = [...queueText.matchAll(/secrets\.([A-Za-z0-9_]+)/g)].map((m) => m[1]);
   assert.deepEqual([...new Set(secrets)].sort(), [
+    "OMNI_QUEUE_ALERT_EMAIL_TO",
     "OMNI_QUEUE_APP_CLIENT_ID",
     "OMNI_QUEUE_APP_PRIVATE_KEY",
     "OMNI_QUEUE_LAND_TOKEN",
     "OMNI_QUEUE_SIGNING_KEY",
+    "OMNI_QUEUE_SMTP_APP_PASSWORD",
+    "OMNI_QUEUE_SMTP_USER",
   ]);
   assert.doesNotMatch(queueText, /GITHUB_TOKEN|github\.token/, "the queue never uses GITHUB_TOKEN");
 });
@@ -1139,6 +1142,22 @@ test("omni-queue.yml: the tick may write statuses and receives the land token", 
   // triggered this run (github.triggering_actor, the re-runner of a re-run) are approvers.
   assert.equal(step.env.GITHUB_ACTOR, "${{ github.actor }}");
   assert.equal(step.env.GITHUB_TRIGGERING_ACTOR, "${{ github.triggering_actor }}");
+});
+
+test("omni-queue.yml: only the tick step receives the e-mail secrets from the queue environment", () => {
+  assert.equal(queue.jobs.tick.environment.name, "omni-queue");
+  for (const secret of [
+    "OMNI_QUEUE_ALERT_EMAIL_TO",
+    "OMNI_QUEUE_SMTP_USER",
+    "OMNI_QUEUE_SMTP_APP_PASSWORD",
+  ]) {
+    const holders = [...queueText.matchAll(new RegExp(`secrets\\.${secret}\\b`, "g"))];
+    assert.equal(holders.length, 1, `${secret} appears once`);
+    assert.equal(
+      stepNamed("tick", "Run one queue tick").env[secret],
+      "${{ secrets." + secret + " }}"
+    );
+  }
 });
 
 test("omni-queue.yml: the signing key reaches one step of the tick, and the approval job no owner secret", () => {
@@ -1506,6 +1525,9 @@ test("dispatch inputs reach tick.mjs as argv, never as shell text", (t) => {
   assert.deepEqual(step.env, {
     OMNI_QUEUE_TOKEN: "${{ steps.app-token.outputs.token }}",
     OMNI_QUEUE_LAND_TOKEN: "${{ secrets.OMNI_QUEUE_LAND_TOKEN }}",
+    OMNI_QUEUE_ALERT_EMAIL_TO: "${{ secrets.OMNI_QUEUE_ALERT_EMAIL_TO }}",
+    OMNI_QUEUE_SMTP_USER: "${{ secrets.OMNI_QUEUE_SMTP_USER }}",
+    OMNI_QUEUE_SMTP_APP_PASSWORD: "${{ secrets.OMNI_QUEUE_SMTP_APP_PASSWORD }}",
     OMNI_QUEUE_BOT_NAME: "${{ steps.identity.outputs.name }}",
     OMNI_QUEUE_BOT_EMAIL: "${{ steps.identity.outputs.email }}",
     GITHUB_ACTOR: "${{ github.actor }}",

@@ -1,0 +1,1 @@
+- **feat(merge-queue):** Automatically resume eligible queue pauses after a backoff and show the recovery check and its next scheduled time in the dashboard and CLI.
