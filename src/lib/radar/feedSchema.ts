@@ -231,6 +231,19 @@ const QuirkSchema = z.object({
 // Top-level feed schema
 // ---------------------------------------------------------------------------
 
+const RowSumSchema = z.object({
+  method: z.string(),
+  liveTokensPerMonth: z.number().int().nonnegative(),
+  retiredTokensPerMonth: z.number().int().nonnegative(),
+  totalTokensPerMonth: z.number().int().nonnegative(),
+});
+
+const PriceReferenceSchema = z.object({
+  yearlyUsd: z.number().positive(),
+  lifetimeUsd: z.number().positive(),
+  checkedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});
+
 const RadarFeedV1Schema = z.object({
   feed: z.literal("omniroute-radar"),
   schemaVersion: z.literal(1),
@@ -253,10 +266,13 @@ const RadarFeedV1Schema = z.object({
   models: z.array(ModelV1Schema),
   quirks: z.array(QuirkSchema),
   referrals: RadarReferralsSchema,
+  priceReference: PriceReferenceSchema.optional().catch(undefined),
   totals: z.object({
     dedupedTokensPerMonth: z.number().int(),
     modelCount: z.number().int(),
     poolCount: z.number().int(),
+    rowSum: RowSumSchema.optional().catch(undefined),
+    socialGatedTokensPerMonth: z.number().int().nonnegative().optional().catch(undefined),
   }),
 });
 
@@ -298,3 +314,5 @@ export type RadarProvider = z.infer<typeof ProviderSchema>;
 export type RadarQuirk = z.infer<typeof QuirkSchema>;
 export type RadarBudget = z.infer<typeof BudgetSchema>;
 export type RadarReferral = z.infer<typeof RadarReferralSchema>;
+export type RadarFeedRowSum = z.infer<typeof RowSumSchema>;
+export type RadarFeedPriceReference = z.infer<typeof PriceReferenceSchema>;

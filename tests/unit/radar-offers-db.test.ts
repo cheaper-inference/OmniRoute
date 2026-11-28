@@ -57,8 +57,8 @@ test("Radar offers cache migration creates a single-row byte-preserving store", 
   assert.equal(row.count, 1);
 });
 
-test("changing the supporter key atomically invalidates every entitlement-sensitive cache", () => {
-  const db = core.getDbInstance();
+test("turning sync off atomically invalidates the signed feed caches", () => {
+  radar.setRadarOptIn(true);
   radar.setRadarCache({ version: "2026.08.09.1", tier: "live", payload: "{}", signature: "a" });
   radar.setRadarReferralsCache({
     generatedAt: "2026-08-09T12:00:00.000Z",
@@ -73,13 +73,18 @@ test("changing the supporter key atomically invalidates every entitlement-sensit
     signature: "c",
   });
 
-  radar.setRadarKey(`omr_${"a".repeat(40)}`);
+  radar.setRadarIntelCache({
+    version: "2026.08.09.1",
+    tier: "live",
+    payload: "{}",
+    signature: "d",
+    supporterIdentity: "",
+  });
+
+  radar.setRadarOptIn(false);
 
   assert.equal(radar.getRadarCache(), null);
   assert.equal(radar.getRadarReferralsCache(), null);
   assert.equal(radar.getRadarOffersCache(), null);
-  const stored = db
-    .prepare("SELECT supporter_key_encrypted AS key FROM radar_settings WHERE id = 1")
-    .get() as { key: string };
-  assert.ok(!stored.key.includes("omr_"), "supporter key must stay encrypted at rest");
+  assert.equal(radar.getRadarIntelCache(), null);
 });

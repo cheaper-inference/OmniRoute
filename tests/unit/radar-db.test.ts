@@ -3,10 +3,9 @@
  *
  * TDD regression guard for the Radar client local DB module:
  * - radar_feed_cache: single-row signed feed cache
- * - radar_settings: opt-in + encrypted supporter key
+ * - radar_settings: opt-in and legacy settings
  *
- * Covers: empty state, round-trip, upsert replacement, encryption at rest,
- * key clear, and settings persistence.
+ * Covers empty state, cache round-trip, replacement, and opt-in persistence.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -17,8 +16,6 @@ import path from "node:path";
 // Isolate DB state in a temp directory
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-radar-db-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
-// Enable encryption so we can verify at-rest encryption of supporter key
-process.env.STORAGE_ENCRYPTION_KEY = "test-encryption-key-for-radar-db-tests-32b!";
 
 const core = await import("../../src/lib/db/core.ts");
 const radar = await import("../../src/lib/db/radar.ts");
@@ -52,7 +49,6 @@ test.beforeEach(async () => {
 test.after(async () => {
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-  delete process.env.STORAGE_ENCRYPTION_KEY;
 });
 
 // ---------------------------------------------------------------------------
@@ -60,13 +56,11 @@ test.after(async () => {
 // ---------------------------------------------------------------------------
 
 test("getRadarCache returns null when no cache exists", () => {
-  const db = core.getDbInstance();
   const result = radar.getRadarCache();
   assert.equal(result, null, "empty cache must return null");
 });
 
 test("setRadarCache then getRadarCache round-trips exactly", () => {
-  const db = core.getDbInstance();
   const feed = {
     version: "2026-08-03T00:00:00Z",
     tier: "community",
@@ -114,7 +108,6 @@ test("second setRadarCache REPLACES the row (still single row)", () => {
 });
 
 test("setRadarCache uses fetchedAt when provided", () => {
-  const db = core.getDbInstance();
   const fixed = "2026-08-03T12:00:00.000Z";
 
   radar.setRadarCache({
@@ -135,7 +128,6 @@ test("setRadarCache uses fetchedAt when provided", () => {
 // ---------------------------------------------------------------------------
 
 test("getRadarSettings defaults: optIn false, key null", () => {
-  const db = core.getDbInstance();
   const settings = radar.getRadarSettings();
 
   assert.equal(settings.optIn, false, "default optIn must be false");
@@ -144,8 +136,6 @@ test("getRadarSettings defaults: optIn false, key null", () => {
 });
 
 test("setRadarOptIn(true) persists", () => {
-  const db = core.getDbInstance();
-
   radar.setRadarOptIn(true);
   const settings = radar.getRadarSettings();
   assert.equal(settings.optIn, true, "optIn must be true after setRadarOptIn(true)");
@@ -155,51 +145,8 @@ test("setRadarOptIn(true) persists", () => {
   assert.equal(settings2.optIn, false, "optIn must be false after setRadarOptIn(false)");
 });
 
-test("setRadarKey encrypts at rest and getRadarSettings decrypts", () => {
-  const db = core.getDbInstance();
-  const clearKey = "omr_" + "a".repeat(40);
-
-  radar.setRadarKey(clearKey);
-  const settings = radar.getRadarSettings();
-
-  assert.equal(settings.supporterKey, clearKey, "getRadarSettings must return the clear key");
-
-  // Direct DB query to prove encryption at rest
-  interface SettingsRow {
-    supporter_key_encrypted: string | null;
-  }
-  const row = db
-    .prepare("SELECT supporter_key_encrypted FROM radar_settings WHERE id = 1")
-    .get() as SettingsRow;
-  assert.ok(row, "radar_settings row must exist");
-  assert.ok(
-    row.supporter_key_encrypted !== clearKey,
-    "stored value must NOT be the clear key (encryption at rest)"
-  );
-  assert.ok(
-    row.supporter_key_encrypted?.startsWith("enc:v1:"),
-    "stored value must carry the enc:v1: prefix"
-  );
-});
-
-test("setRadarKey(null) clears the key", () => {
-  const db = core.getDbInstance();
-
-  radar.setRadarKey("omr_" + "b".repeat(40));
-  assert.ok(radar.getRadarSettings().supporterKey, "key must be set");
-
-  radar.setRadarKey(null);
-  const settings = radar.getRadarSettings();
-  assert.equal(settings.supporterKey, null, "key must be null after clearing");
-
-  // Direct DB check
-  const cleared = db
-    .prepare("SELECT supporter_key_encrypted FROM radar_settings WHERE id = 1")
-    .get() as { supporter_key_encrypted: string | null };
-  assert.equal(cleared.supporter_key_encrypted, null, "DB value must be null");
-});
-
-test("changing the supporter key invalidates the entitlement-sensitive referrals cache", () => {
+test("turning sync off invalidates the catalog and referrals caches", () => {
+  radar.setRadarOptIn(true);
   radar.setRadarCache({
     version: "2026.08.07.1",
     tier: "live",
@@ -215,40 +162,10 @@ test("changing the supporter key invalidates the entitlement-sensitive referrals
   assert.ok(radar.getRadarReferralsCache(), "precondition: live referrals cache exists");
   assert.ok(radar.getRadarCache(), "precondition: live catalog cache exists");
 
-  radar.setRadarKey("omr_" + "d".repeat(40));
+  radar.setRadarOptIn(false);
 
-  assert.equal(
-    radar.getRadarReferralsCache(),
-    null,
-    "a new key must force the next referrals read to resolve entitlement server-side"
-  );
-  assert.equal(
-    radar.getRadarCache(),
-    null,
-    "a new key must force the next catalog sync to resolve entitlement server-side"
-  );
-});
-
-test("setRadarKey uses existing AES-256-GCM encryption from encryption.ts", () => {
-  const db = core.getDbInstance();
-  const clearKey = "omr_" + "c".repeat(40);
-
-  radar.setRadarKey(clearKey);
-
-  const encRow = db
-    .prepare("SELECT supporter_key_encrypted FROM radar_settings WHERE id = 1")
-    .get() as { supporter_key_encrypted: string };
-
-  // Verify it uses the enc:v1: format (same as provider credentials)
-  assert.ok(
-    encRow.supporter_key_encrypted.startsWith("enc:v1:"),
-    "must use enc:v1: prefix (AES-256-GCM from encryption.ts)"
-  );
-
-  // Verify the format: enc:v1:<iv_hex>:<ciphertext_hex>:<authTag_hex>
-  const body = encRow.supporter_key_encrypted.slice("enc:v1:".length);
-  const parts = body.split(":");
-  assert.equal(parts.length, 3, "must have 3 parts (iv:ciphertext:authTag)");
+  assert.equal(radar.getRadarReferralsCache(), null, "turning sync off clears referrals");
+  assert.equal(radar.getRadarCache(), null, "turning sync off clears the catalog");
 });
 
 // ---------------------------------------------------------------------------

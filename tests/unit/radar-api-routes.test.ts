@@ -4,8 +4,8 @@
  * TDD regression guard for the Radar API routes:
  * - GET /api/radar/catalog: flag off => 404, flag on + no auth => 401, flag on + auth => shape validated
  * - POST /api/radar/sync: flag off => 404, flag on + no auth => 401, flag on + auth => delegates to syncRadar
- * - POST /api/radar/settings: flag off => 404, flag on + no auth => 401, never echoes clear key
- * - GET /api/radar/settings: flag off => 404, flag on + no auth => 401, flag on + auth => masked snapshot
+ * - POST /api/radar/settings: flag off => 404, flag on + no auth => 401, validates opt-in
+ * - GET /api/radar/settings: flag off => 404, flag on + no auth => 401, flag on + auth => opt-in snapshot
  *
  * Auth wiring (FIX 1 / FIX 3): the flag-off 404 gate must run BEFORE the auth
  * check (byte-identical inertia with the flag off, no auth required to learn
@@ -37,7 +37,6 @@ process.env.INITIAL_PASSWORD = "test-bootstrap-password-for-radar-api-tests";
 
 const core = await import("../../src/lib/db/core.ts");
 const radarDb = await import("../../src/lib/db/radar.ts");
-const featureFlags = await import("../../src/shared/utils/featureFlags.ts");
 
 // We need to test the route handlers. Since Next.js route handlers are just
 // exported functions, we can import and call them directly with mock Request
@@ -240,34 +239,23 @@ test("GET /api/radar/catalog: flag on, authenticated, empty cache => baseline en
   assert.equal(body.meta, null, "meta should be null when no cache");
 });
 
-test("POST /api/radar/settings: flag on, authenticated, set opt-in => success, no key in response", async () => {
+test("POST /api/radar/settings: authenticated opt-in persists", async (t) => {
   resetStorage();
   process.env.RADAR_ENABLED = "true";
+  t.mock.method(globalThis, "fetch", async () => new Response(null, { status: 503 }));
 
-  const settingsRoute = await import("../../src/app/api/radar/settings/route.ts");
-  const response = await settingsRoute.POST(
+  const { POST } = await import("../../src/app/api/radar/settings/route.ts");
+  const response = await POST(
     mockPostRequest(
       "http://localhost:20128/api/radar/settings",
-      {
-        optIn: true,
-        supporterKey: "omr_abcdef01234567890abcdef01234567890abcdef",
-      },
+      { optIn: true },
       await authHeaders()
     )
   );
-  const body = await response.json();
 
   assert.equal(response.status, 200);
-  assert.equal(body.ok, true);
-  assert.equal(body.optIn, true);
-  // Key must be masked, never the clear value
-  assert.ok(body.supporterKey, "should return masked key");
-  assert.ok(
-    !body.supporterKey.includes("abcdef01234567890abcdef01234567890abcdef"),
-    "Must NOT echo the clear key"
-  );
-  assert.ok(body.supporterKey.startsWith("omr_****"), "Key should be masked with omr_**** prefix");
-  assert.ok(body.supporterKey.length <= 12, "Masked key should be short");
+  assert.deepEqual(await response.json(), { ok: true, optIn: true });
+  assert.equal(radarDb.getRadarSettings().optIn, true);
 });
 
 test("POST /api/radar/settings: authenticated, invalid body => 400", async () => {
@@ -278,7 +266,7 @@ test("POST /api/radar/settings: authenticated, invalid body => 400", async () =>
   const response = await settingsRoute.POST(
     mockPostRequest(
       "http://localhost:20128/api/radar/settings",
-      { supporterKey: "invalid-key-format" },
+      { optIn: "true" },
       await authHeaders()
     )
   );
@@ -300,32 +288,6 @@ test("POST /api/radar/settings: authenticated, empty body => 400", async () => {
   assert.equal(response.status, 400);
   const body = await response.json();
   assert.ok(body.error);
-});
-
-test("POST /api/radar/settings: authenticated, null key clears it", async () => {
-  resetStorage();
-  process.env.RADAR_ENABLED = "true";
-
-  const settingsRoute = await import("../../src/app/api/radar/settings/route.ts");
-  const headers = await authHeaders();
-
-  // First set a key
-  await settingsRoute.POST(
-    mockPostRequest(
-      "http://localhost:20128/api/radar/settings",
-      { supporterKey: "omr_abcdef01234567890abcdef01234567890abcdef" },
-      headers
-    )
-  );
-
-  // Then clear it
-  const response = await settingsRoute.POST(
-    mockPostRequest("http://localhost:20128/api/radar/settings", { supporterKey: null }, headers)
-  );
-  const body = await response.json();
-
-  assert.equal(response.status, 200);
-  assert.equal(body.supporterKey, null, "Cleared key should return null");
 });
 
 test("POST /api/radar/sync: flag on, authenticated, not opted in => status opt_out", async () => {
@@ -360,126 +322,23 @@ test("POST /api/radar/sync: authenticated, invalid body => 400", async () => {
 });
 
 // ---------------------------------------------------------------------------
-// FIX 3 — GET /api/radar/settings: { optIn, hasSupporterKey, supporterKeyMasked }
-// F4/T7 — same response also relays contributorClaimUrl/supporterPlansUrl.
+// GET /api/radar/settings
 // ---------------------------------------------------------------------------
 
-test("GET /api/radar/settings: flag on, authenticated, default state => optIn false, no key", async () => {
+test("GET /api/radar/settings: authenticated snapshot includes only opt-in", async () => {
   resetStorage();
   process.env.RADAR_ENABLED = "true";
 
   const { GET } = await import("../../src/app/api/radar/settings/route.ts");
-  const response = await GET(
-    mockGetRequest("http://localhost:20128/api/radar/settings", await authHeaders())
-  );
-  const body = await response.json();
-
+  const request = mockGetRequest("http://localhost:20128/api/radar/settings", await authHeaders());
+  const response = await GET(request);
   assert.equal(response.status, 200);
-  assert.equal(body.optIn, false);
-  assert.equal(body.hasSupporterKey, false);
-  assert.equal(body.supporterKeyMasked, null);
-  // F4/T7: default claim/plans links are always present, opt-in or not.
-  assert.equal(body.contributorClaimUrl, "https://radar.omniroute.online/auth/github");
-  assert.equal(body.supporterPlansUrl, "https://radar.omniroute.online/planos");
-});
+  assert.deepEqual(await response.json(), { optIn: false });
 
-test("GET /api/radar/settings: flag on, authenticated, after opt-in + key => reflects persisted state, never raw key", async () => {
-  resetStorage();
-  process.env.RADAR_ENABLED = "true";
-
-  const settingsRoute = await import("../../src/app/api/radar/settings/route.ts");
-  const headers = await authHeaders();
-  const RAW_KEY = "omr_abcdef01234567890abcdef01234567890abcdef";
-
-  await settingsRoute.POST(
-    mockPostRequest(
-      "http://localhost:20128/api/radar/settings",
-      { optIn: true, supporterKey: RAW_KEY },
-      headers
-    )
-  );
-
-  const response = await settingsRoute.GET(
-    mockGetRequest("http://localhost:20128/api/radar/settings", headers)
-  );
-  const text = await response.text();
-  const body = JSON.parse(text);
-
-  assert.equal(response.status, 200);
-  assert.equal(body.optIn, true);
-  assert.equal(body.hasSupporterKey, true);
-  assert.equal(body.supporterKeyMasked, "omr_****cdef", "must mask to last 4 hex chars");
-  assert.ok(!text.includes(RAW_KEY), "raw key must NEVER appear in the serialized response body");
-});
-
-// ---------------------------------------------------------------------------
-// Paste-key activation UI (Radar activation screen) — opt-in + supporterKey
-// submitted TOGETHER in a single POST, the shape the new page.tsx paste-key
-// form sends (pasting a key both sets it AND activates opt-in in one call).
-// ---------------------------------------------------------------------------
-
-test("POST /api/radar/settings: opt-in+key submitted together => both persist, POST response masked, GET reflects both, raw key never in either body", async () => {
-  resetStorage();
-  process.env.RADAR_ENABLED = "true";
-
-  const settingsRoute = await import("../../src/app/api/radar/settings/route.ts");
-  const headers = await authHeaders();
-  const RAW_KEY = "omr_1234567890abcdef1234567890abcdef12345678";
-
-  const postResponse = await settingsRoute.POST(
-    mockPostRequest(
-      "http://localhost:20128/api/radar/settings",
-      { optIn: true, supporterKey: RAW_KEY },
-      headers
-    )
-  );
-  const postText = await postResponse.text();
-  const postBody = JSON.parse(postText);
-
-  assert.equal(postResponse.status, 200);
-  assert.equal(postBody.ok, true);
-  assert.equal(postBody.optIn, true, "opt-in must be persisted in the same call");
-  assert.equal(
-    postBody.supporterKey,
-    "omr_****5678",
-    "POST response must mask the key, never echo it raw"
-  );
-  assert.ok(!postText.includes(RAW_KEY), "raw key must NEVER appear in the POST response body");
-
-  // Persistence check — a fresh GET must reflect BOTH fields set by the single POST.
-  const getResponse = await settingsRoute.GET(
-    mockGetRequest("http://localhost:20128/api/radar/settings", headers)
-  );
-  const getText = await getResponse.text();
-  const getBody = JSON.parse(getText);
-
-  assert.equal(getResponse.status, 200);
-  assert.equal(getBody.optIn, true, "opt-in must persist across requests");
-  assert.equal(getBody.hasSupporterKey, true, "supporter key must persist across requests");
-  assert.equal(getBody.supporterKeyMasked, "omr_****5678");
-  assert.ok(!getText.includes(RAW_KEY), "raw key must NEVER appear in the GET response body");
-});
-
-test("GET /api/radar/settings: F4/T7 claim/plans links honor env overrides (fork-friendly)", async () => {
-  resetStorage();
-  process.env.RADAR_ENABLED = "true";
-  process.env.RADAR_CONTRIBUTOR_CLAIM_URL = "https://fork.example.com/auth/github";
-  process.env.RADAR_SUPPORTER_PLANS_URL = "https://fork.example.com/plans";
-
-  try {
-    const { GET } = await import("../../src/app/api/radar/settings/route.ts");
-    const response = await GET(
-      mockGetRequest("http://localhost:20128/api/radar/settings", await authHeaders())
-    );
-    const body = await response.json();
-
-    assert.equal(response.status, 200);
-    assert.equal(body.contributorClaimUrl, "https://fork.example.com/auth/github");
-    assert.equal(body.supporterPlansUrl, "https://fork.example.com/plans");
-  } finally {
-    delete process.env.RADAR_CONTRIBUTOR_CLAIM_URL;
-    delete process.env.RADAR_SUPPORTER_PLANS_URL;
-  }
+  radarDb.setRadarOptIn(true);
+  const optedIn = await GET(request);
+  assert.equal(optedIn.status, 200);
+  assert.deepEqual(await optedIn.json(), { optIn: true });
 });
 
 // ---------------------------------------------------------------------------

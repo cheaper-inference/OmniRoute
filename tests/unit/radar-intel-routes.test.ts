@@ -75,7 +75,11 @@ test("verified local Intel is returned without supporter identity or key materia
   const body = await response.json();
   assert.equal(response.status, 200);
   assert.equal(body.intel.rankings.length, 2);
-  assert.equal(body.meta.supporterVerified, true);
+  assert.deepEqual(body.meta, {
+    version: "2026.08.09.1",
+    tier: "live",
+    fetchedAt: "2026-08-09T12:05:00.000Z",
+  });
   assert.ok(!JSON.stringify(body).includes("radar:"));
   assert.ok(!JSON.stringify(body).includes("omr_"));
 });
@@ -87,7 +91,7 @@ test("Radar status is read-only and aggregate sync reports each feed separately"
   const statusRoute = await import("../../src/app/api/radar/status/route.ts");
   const status = await statusRoute.GET(request("/api/radar/status", "GET", headers));
   const statusBody = await status.json();
-  assert.deepEqual(statusBody.settings, { optIn: false, hasSupporterKey: false });
+  assert.deepEqual(statusBody.settings, { optIn: false });
   assert.deepEqual(Object.keys(statusBody.feeds).sort(), [
     "catalog",
     "intel",

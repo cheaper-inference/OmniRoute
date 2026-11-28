@@ -10,7 +10,7 @@ function pageSource(): string {
   return fs.existsSync(pagePath) ? fs.readFileSync(pagePath, "utf8") : "";
 }
 
-test("Radar links to a dedicated supporter offers page", () => {
+test("Radar links to a dedicated offers page", () => {
   assert.ok(fs.existsSync(pagePath), "missing /dashboard/radar/offers page");
   assert.match(fs.readFileSync(radarPagePath, "utf8"), /href="\/dashboard\/radar\/offers"/);
 });
@@ -23,9 +23,9 @@ test("offers page uses only local settings, sync, and cache routes", () => {
   assert.doesNotMatch(source, /RADAR_FEED_URL|radar\.omniroute\.online|localDb|getDbInstance/);
 });
 
-test("offers UI is live-key gated, filters expiry, localizes, and labels partnerships", () => {
+test("offers UI is open to every installation, filters expiry, localizes, and labels partnerships", () => {
   const source = pageSource();
-  assert.match(source, /hasSupporterKey/);
+  assert.doesNotMatch(source, /hasSupporterKey|supporterPlansUrl|contributorClaimUrl|keyRequired/);
   assert.match(source, /filterActiveRadarOffers/);
   assert.match(source, /localizeRadarOfferText/);
   assert.match(source, /offer\.partner/);
@@ -44,10 +44,6 @@ test("every locale carries the complete Radar offers namespace", () => {
     "refreshing",
     "loadFailed",
     "empty",
-    "keyRequiredTitle",
-    "keyRequiredDescription",
-    "contributorButton",
-    "supporterButton",
     "partnerBadge",
     "officialBadge",
     "conditionsLabel",

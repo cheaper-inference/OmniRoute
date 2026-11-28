@@ -144,7 +144,7 @@ export function shouldSyncReferralsOnRead(
  *  6. Replay guard: reject an incoming `generatedAt` older than the cache.
  *     Equal timestamps remain valid because the community and live referral
  *     variants deliberately share one deterministic `generatedAt`; the
- *     served tier can still change after the supporter key changes.
+ *     served tier can still change independently of the link set.
  *  7. Cache the result.
  *
  * @param deps - Injectable dependencies for testing.
@@ -184,13 +184,7 @@ export async function syncRadarReferrals(
     const baseUrl = (process.env.RADAR_FEED_URL || DEFAULT_FEED_BASE_URL).replace(/\/+$/, "");
     const url = `${baseUrl}/v1/referrals/latest`;
 
-    const headers: Record<string, string> = {};
-    if (settings.supporterKey) {
-      headers["Authorization"] = `Bearer ${settings.supporterKey}`;
-    }
-
     const res = await fetchFn(url, {
-      headers,
       signal: AbortSignal.timeout(SYNC_TIMEOUT_MS),
     });
 

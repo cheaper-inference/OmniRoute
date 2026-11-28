@@ -4110,29 +4110,9 @@
       "count": 1
     }
   },
-  "tests/unit/radar-api-routes.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    }
-  },
   "tests/unit/radar-apply-feed.test.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
-    }
-  },
-  "tests/unit/radar-db.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 5
-    }
-  },
-  "tests/unit/radar-referrals-sync.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    }
-  },
-  "tests/unit/radar-sync.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
     }
   },
   "tests/unit/rate-limit-enhanced.test.ts": {

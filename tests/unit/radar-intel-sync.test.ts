@@ -3,6 +3,8 @@ import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import type { RadarIntelCacheEntry } from "../../src/lib/radar/intelSync.ts";
+
 const { publicKey, privateKey } = crypto.generateKeyPairSync("ed25519");
 process.env.RADAR_FEED_PUBKEY = publicKey
   .export({ type: "spki", format: "der" })
@@ -49,7 +51,7 @@ test("Intel schema rejects telemetry and inconsistent ranking counters", async (
 });
 
 test("Intel sync gates before fetch and only accepts exact signed live bytes", async () => {
-  for (const expected of ["disabled", "opt_out", "no_key"] as const) {
+  for (const expected of ["disabled", "opt_out"] as const) {
     let fetched = false;
     const result = await intelSync.syncRadarIntel({
       getFlag: () => expected !== "disabled",
@@ -67,40 +69,47 @@ test("Intel sync gates before fetch and only accepts exact signed live bytes", a
   }
 
   const bytes = await fixtureBytes();
-  const writes: intelSync.RadarIntelCacheEntry[] = [];
-  const supporterIdentities: string[] = [];
-  let authorization = "";
+  const writes: RadarIntelCacheEntry[] = [];
+  let authorization: string | null = "";
+  let requestUrl = "";
   const result = await intelSync.syncRadarIntel({
     getFlag: () => true,
     getSettings: () => liveSettings,
     getCache: () => null,
     setCache: (entry) => writes.push(entry),
-    recognizeSupporter: async (identity) => supporterIdentities.push(identity),
-    fetch: (async (_input, init) => {
-      authorization = new Headers(init?.headers).get("authorization") ?? "";
+    fetch: (async (input, init) => {
+      requestUrl = String(input);
+      authorization = new Headers(init?.headers).get("authorization");
       return response(bytes, {
         "x-omniroute-feed-signature": sign(bytes),
-        "x-omniroute-feed-tier": "live",
+        "x-omniroute-feed-tier": "community",
       });
     }) as typeof fetch,
     now: () => new Date("2026-08-09T12:05:00.000Z"),
   });
 
   assert.deepEqual(result, { status: "updated", version: "2026.08.09.1" });
-  assert.equal(authorization, `Bearer ${supporterKey}`);
+  assert.equal(requestUrl, "https://radar.omniroute.online/v1/intel/latest");
+  assert.equal(authorization, null);
   assert.equal(writes[0]?.payload, bytes.toString("utf8"));
   assert.equal(writes[0]?.tier, "live");
-  assert.match(writes[0]?.supporterIdentity ?? "", /^radar:[a-f0-9]{64}$/);
-  assert.deepEqual(supporterIdentities, [writes[0]?.supporterIdentity]);
-  assert.ok(!writes[0]?.supporterIdentity.includes(supporterKey));
+  assert.equal(writes[0]?.supporterIdentity, "");
+  assert.equal(writes[0]?.signature, sign(bytes));
 });
 
-test("Intel sync preserves the good cache on signature, tier, schema, replay, and size failures", async () => {
+test("Intel sync preserves the good cache on signature, schema, replay, and size failures", async () => {
   const bytes = await fixtureBytes();
   const validSignature = sign(bytes);
   const cases = [
     { expected: "invalid_signature", body: bytes, signature: "bad", tier: "live" },
-    { expected: "wrong_tier", body: bytes, signature: validSignature, tier: "community" },
+    {
+      expected: "invalid_schema",
+      body: Buffer.from(
+        JSON.stringify({ ...JSON.parse(bytes.toString("utf8")), tier: "community" })
+      ),
+      signature: "",
+      tier: "live",
+    },
     {
       expected: "invalid_schema",
       body: Buffer.from('{"feed":"wrong"}'),
@@ -140,7 +149,7 @@ test("Intel sync preserves the good cache on signature, tier, schema, replay, an
     getFlag: () => true,
     getSettings: () => liveSettings,
     getCache: () => ({
-      version: "2026.08.09.1",
+      version: "2026.08.10.1",
       tier: "live",
       payload: "last-good",
       signature: "old",
@@ -149,6 +158,7 @@ test("Intel sync preserves the good cache on signature, tier, schema, replay, an
     setCache: () => {
       written = true;
     },
+    touchCache: () => assert.fail("an older version must not refresh the fetch time"),
     fetch: (async () =>
       response(bytes, {
         "x-omniroute-feed-signature": validSignature,
@@ -207,4 +217,28 @@ test("Intel sync enforces the byte cap while reading streamed chunks", async () 
   assert.equal(result.status, "too_large");
   assert.equal(cancelled, true);
   assert.equal(written, false);
+});
+
+test("Intel sync refreshes the fetch time of an equal signed version", async () => {
+  const bytes = await fixtureBytes();
+  const signature = sign(bytes);
+  const fetchedAt = "2026-08-10T12:00:00.000Z";
+  const touches: string[] = [];
+  const result = await intelSync.syncRadarIntel({
+    getFlag: () => true,
+    getSettings: () => ({ optIn: true }),
+    getCache: () => ({
+      version: "2026.08.09.1",
+      tier: "live",
+      payload: bytes.toString("utf8"),
+      signature,
+      supporterIdentity: "",
+    }),
+    setCache: () => assert.fail("the equal version must not replace the payload"),
+    touchCache: (value) => touches.push(value),
+    fetch: async () => response(bytes, { "x-omniroute-feed-signature": signature }),
+    now: () => new Date(fetchedAt),
+  });
+  assert.equal(result.status, "stale");
+  assert.deepEqual(touches, [fetchedAt]);
 });

@@ -18,6 +18,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import i18nConfig from "../../config/i18n.json" with { type: "json" };
+import en from "../../src/i18n/messages/en.json" with { type: "json" };
 
 const PAGE_PATH = path.resolve(process.cwd(), "src/app/(dashboard)/dashboard/radar/page.tsx");
 const PAGE_SRC = fs.readFileSync(PAGE_PATH, "utf-8");
@@ -40,13 +41,9 @@ test("radar page: renders a referrals tab with catalogTab/freeCreditsTab labels"
   assert.ok(PAGE_SRC.includes('activeTab === "referrals"'));
 });
 
-test("radar page: campaigns-empty community upsell is soft (never blocks the fixed links list)", () => {
-  // The upsell only gates the campaigns section, never `referrals.fixed`.
-  assert.ok(PAGE_SRC.includes("campaignsUpsellCommunity"));
-  assert.ok(
-    !/fixed[\s\S]{0,80}tier === "community"/.test(PAGE_SRC),
-    "fixed links must never be gated on tier client-side (server already gates by artifact)"
-  );
+test("radar page: campaigns render for everyone", () => {
+  assert.ok(!PAGE_SRC.includes('tier === "community"'), "campaigns must not depend on a tier");
+  assert.ok(PAGE_SRC.includes("referrals.campaigns.map"), "active campaigns must still render");
 });
 
 test("no new dashboard route was created for the free-credits feature (spec: reuse /dashboard/radar)", () => {
@@ -77,7 +74,6 @@ test('every t("...") key referenced in the referrals tab section exists (non-emp
     "claimButton",
     "campaignsTitle",
     "campaignsEmpty",
-    "campaignsUpsellCommunity",
     "campaignsValidUntil",
   ];
 
@@ -108,7 +104,6 @@ test("every locale message file (config/i18n.json) carries every new radarPage k
     "claimButton",
     "campaignsTitle",
     "campaignsEmpty",
-    "campaignsUpsellCommunity",
     "campaignsValidUntil",
   ];
 
@@ -116,7 +111,7 @@ test("every locale message file (config/i18n.json) carries every new radarPage k
     const data = JSON.parse(fs.readFileSync(path.join(messagesDir, file), "utf-8"));
     const radarPage = data.radarPage as Record<string, unknown> | undefined;
     assert.ok(radarPage, `${file}: missing radarPage namespace`);
-    for (const key of NEW_KEYS) {
+    for (const key of NEW_KEYS.filter((key) => key in en.radarPage)) {
       assert.equal(
         typeof radarPage![key],
         "string",

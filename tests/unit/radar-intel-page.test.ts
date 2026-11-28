@@ -15,18 +15,19 @@ test("Radar links to a dedicated local-only Intel page", () => {
   assert.doesNotMatch(source, /RADAR_FEED_URL|radar\.omniroute\.online|omr_|getDbInstance/);
 });
 
-test("Intel page exposes methodology, ranking, freshness, trend, and verified supporter badge only", () => {
+test("the Radar page links to Intel only when the local status reports a cached feed", () => {
+  const source = fs.readFileSync(radarPagePath, "utf8");
+  assert.match(source, /\/api\/radar\/status/);
+  assert.match(source, /feeds\??\.intel\??\.available/);
+  assert.match(source, /intelAvailable\s*&&[\s\S]*?href="\/dashboard\/radar\/intel"/);
+});
+
+test("Intel page exposes methodology, ranking, freshness, and trend without a supporter badge", () => {
   const source = fs.readFileSync(pagePath, "utf8");
-  for (const marker of [
-    "methodology",
-    "rankings",
-    "freshness",
-    "trend",
-    "supporterVerified",
-    "radar-supporter",
-  ]) {
+  for (const marker of ["methodology", "rankings", "freshness", "trend"]) {
     assert.match(source, new RegExp(marker));
   }
+  assert.doesNotMatch(source, /supporterVerified|radar-supporter|supporterBadge/);
   assert.doesNotMatch(source, /\bhealth\b|\buptime\b|\blatency\b|\btelemetry\b/i);
 });
 
@@ -39,7 +40,6 @@ test("Intel UI strings exist in English and Brazilian Portuguese", () => {
       "title",
       "subtitle",
       "methodology",
-      "supporterBadge",
       "ranking",
       "freshness",
       "trend",

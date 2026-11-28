@@ -6,7 +6,7 @@
  *
  * Tables (migration 136):
  *   - radar_feed_cache: single-row signed feed cache
- *   - radar_settings:   opt-in + encrypted supporter key
+ *   - radar_settings:   opt-in and the legacy encrypted key column
  *
  * Tables (migration 142):
  *   - radar_referrals_cache: single-row signed referrals feed cache
@@ -21,8 +21,7 @@
  *   - radar_offers_cache: single-row signed live offers feed cache.
  *
  * Tables (migration 145):
- *   - radar_intel_cache: single-row signed live Intel feed cache plus a
- *     one-way supporter identity used for local recognition.
+ *   - radar_intel_cache: single-row signed Intel feed cache with a legacy identity column.
  *
  * The supporter key is encrypted at rest with AES-256-GCM using the same
  * `encrypt()`/`decrypt()` helpers from `./encryption.ts` that protect
@@ -30,7 +29,7 @@
  */
 
 import { getDbInstance } from "./core";
-import { encrypt, decrypt } from "./encryption";
+import { decrypt } from "./encryption";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -62,7 +61,7 @@ export interface RadarReferralsCache {
 
 export interface RadarOffersCache {
   version: string;
-  tier: "live";
+  tier: string;
   payload: string;
   signature: string;
   fetchedAt: string;
@@ -70,7 +69,7 @@ export interface RadarOffersCache {
 
 export interface RadarIntelCache {
   version: string;
-  tier: "live";
+  tier: string;
   payload: string;
   signature: string;
   supporterIdentity: string;
@@ -169,7 +168,7 @@ export function touchRadarCacheFetchedAt(fetchedAt: string): void {
 // ---------------------------------------------------------------------------
 
 /**
- * Read the Radar settings. The supporter key is decrypted on read.
+ * Read the Radar settings, including the legacy supporter key column.
  * The settings row is seeded by migration 134, so this always returns a row.
  */
 export function getRadarSettings(): RadarSettings {
@@ -205,27 +204,7 @@ export function clearRadarFeedCaches(): void {
     db.prepare("DELETE FROM radar_feed_cache WHERE id = 1").run();
     db.prepare("DELETE FROM radar_referrals_cache WHERE id = 1").run();
     db.prepare("DELETE FROM radar_offers_cache WHERE id = 1").run();
-    db.prepare("DELETE FROM radar_intel_cache WHERE id = 1").run();
-  })();
-}
-
-/**
- * Set (or clear) the Radar supporter key.  The key is encrypted at rest
- * using the same AES-256-GCM mechanism as provider credentials.
- * Pass `null` to clear.
- */
-export function setRadarKey(key: string | null): void {
-  const db = getDbInstance();
-  const encrypted = key !== null ? encrypt(key) : null;
-  const updateKey = db.prepare(
-    "UPDATE radar_settings SET supporter_key_encrypted = ?, updated_at = datetime('now') WHERE id = 1"
-  );
-  db.transaction(() => {
-    updateKey.run(encrypted);
-    // All signed feeds are entitlement-sensitive. Clearing their cached
-    // variants forces the next sync/read to resolve the new key server-side
-    // instead of serving data fetched under the previous entitlement.
-    clearRadarFeedCaches();
+    clearRadarIntelCache();
   })();
 }
 
@@ -313,6 +292,13 @@ export function setRadarOffersCache(entry: {
     .run(entry.version, entry.tier, entry.payload, entry.signature, fetchedAt);
 }
 
+/** Record a successful check of the cached Offers version. */
+export function touchRadarOffersCacheFetchedAt(fetchedAt: string): void {
+  getDbInstance()
+    .prepare("UPDATE radar_offers_cache SET fetched_at = ? WHERE id = 1")
+    .run(fetchedAt);
+}
+
 // ---------------------------------------------------------------------------
 // radar_intel_cache
 // ---------------------------------------------------------------------------
@@ -357,6 +343,18 @@ export function setRadarIntelCache(entry: {
       entry.supporterIdentity,
       fetchedAt
     );
+}
+
+/** Drop the local Intel copy when the upstream feed is unpublished. */
+export function clearRadarIntelCache(): void {
+  getDbInstance().prepare("DELETE FROM radar_intel_cache WHERE id = 1").run();
+}
+
+/** Record a successful check of the cached Intel version. */
+export function touchRadarIntelCacheFetchedAt(fetchedAt: string): void {
+  getDbInstance()
+    .prepare("UPDATE radar_intel_cache SET fetched_at = ? WHERE id = 1")
+    .run(fetchedAt);
 }
 
 // ---------------------------------------------------------------------------
