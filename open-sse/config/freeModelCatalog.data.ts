@@ -28,7 +28,7 @@ import type { FreeModelBudget } from "./freeModelCatalog.ts";
 export const FREE_CATALOG_CURATED_AT = "2026-11-27";
 
 export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
-  // evidence: api-public https://agentrouter.org/api/status (2026-11-23), the JSON the signup page reads — FAQ
+  // evidence: api-public https://agentrouter.org/api/status (2026-11-28), the JSON the signup page reads — FAQ
   // "Top-up": "Not supported. Earn: Daily $25 check-in, $50/invite, email bonus draws, official promos.";
   // quota_for_invitee 25000000 at quota_per_unit 500000 (= US$ 50 with an invite). The plain signup value is not
   // published. A dollar credit never becomes tokens here, so creditTokens stays 0 (owner decision 2026-11-21, D53:

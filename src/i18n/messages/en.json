@@ -7195,7 +7195,7 @@
     "onboardingStartOAuthFlow": "Start OAuth flow",
     "onboardingProviderDescriptions": {
       "360ai": "Get API key at ai.360.cn",
-      "agentrouter": "Sign up at https://agentrouter.org/register. Daily $25 check-in credit; sign-ups with an invite code get $50 more (checked 2026-11-23).",
+      "agentrouter": "Sign up at https://agentrouter.org/register. Daily $25 check-in credit; sign-ups with an invite code get $50 more (checked 2026-11-28).",
       "unorouter": "Create an API key at https://unorouter.ai, then paste it here as a Bearer token.",
       "agnes": "Get API key at agnes-ai.com",
       "agnes-cn": "Connect Agnes AI (China) with an API key issued for api.agnes-ai.cn. Keys from apihub.agnes-ai.com will not work.",

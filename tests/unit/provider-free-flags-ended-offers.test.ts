@@ -86,7 +86,8 @@ test("AgentRouter stays free with the amounts its own status page publishes", ()
   assert.equal(agentrouter?.hasFree, true);
   assert.doesNotMatch(agentrouter?.freeNote ?? "", /\$200|\$100/);
   assert.match(agentrouter?.freeNote ?? "", /\$25/);
-  assert.match(agentrouter?.freeNote ?? "", /2026-11-23/);
+  // Owner kept the link on 2026-11-28 after the sources were rechecked (daily $25 check-in, $50 per invite).
+  assert.match(agentrouter?.freeNote ?? "", /2026-11-28/);
 });
 
 // What the provider onboarding wizard shows: the en.json key wins, then
