@@ -196,6 +196,21 @@ function parseTotals(value: string | undefined): Counts | null {
   return sum === parsed.total ? parsed.counts : null;
 }
 
+/** Snapshot results that make up the declared total (obsolete, unchecked and removed do not). */
+const SNAPSHOT_TOTAL_LABELS = ["passed", "failed", "skipped", "written", "updated"];
+
+/** Snapshot counts: parseable, and when a total is declared it equals the results that form it. */
+function validSnapshots(value: string | undefined): boolean {
+  const parsed = parseCounts(value ?? "");
+  if (!parsed) return false;
+  if (parsed.total === null) return true;
+  const sum = SNAPSHOT_TOTAL_LABELS.reduce(
+    (acc, label) => acc + (parsed.counts.get(label) ?? 0),
+    0
+  );
+  return sum === parsed.total;
+}
+
 /** "Key  value" summary lines to a map; a repeated key refuses. Lines that do not fit are skipped. */
 function summaryMap(summary: string[], keyed: RegExp): Map<string, string> | null {
   const map = new Map<string, string>();
@@ -220,13 +235,25 @@ function classifyVitest(line: string): LineKind | null {
   return VITEST_SUMMARY_RE.test(line) ? "summary" : null;
 }
 
-/** Default-reporter file lines ("✓ file (N tests) 12ms") must match the "Test Files" counts. */
+/** A parenthesised tail that opens like a file line's test count: `(4 tests`, `(1 test |`. */
+const VITEST_FILE_TAIL_START_RE = /^\(\d{1,6} tests?\b/;
+
+/**
+ * Default-reporter file lines ("✓ file (N tests) 12ms") must match the "Test Files" counts. A tail
+ * that claims to be a file line's but is outside the grammar (a `| 1 failed` part, an unknown
+ * part) refuses: the summary lines alone would hide it.
+ */
 function vitestFileLinesAgree(pass: string[], files: Counts): boolean {
   let done = 0;
   let skipped = 0;
   for (const line of pass) {
     const cut = line.lastIndexOf(" (");
-    if (cut < 0 || !VITEST_FILE_TAIL_RE.test(line.slice(cut + 1))) continue;
+    if (cut < 0) continue;
+    const tail = line.slice(cut + 1);
+    if (!VITEST_FILE_TAIL_RE.test(tail)) {
+      if (VITEST_FILE_TAIL_START_RE.test(tail) || /^\(\d{1,6} failed\b/.test(tail)) return false;
+      continue;
+    }
     if (line.startsWith("↓")) skipped++;
     else done++;
   }
@@ -241,7 +268,7 @@ function parseVitest(lines: string[]): ParsedRun | null {
   const files = parseTotals(values.get("Test Files"));
   const tests = parseTotals(values.get("Tests"));
   if (!files || !tests || (tests.get("passed") ?? 0) < 1) return null;
-  if (values.has("Snapshots") && !parseCounts(values.get("Snapshots") ?? "")) return null;
+  if (values.has("Snapshots") && !validSnapshots(values.get("Snapshots"))) return null;
   if (!vitestFileLinesAgree(scan.pass, files)) return null;
   return { kept: scan.summary, omitted: scan.pass.length + scan.meta.length };
 }
@@ -263,7 +290,7 @@ function parseJest(lines: string[]): ParsedRun | null {
   const suites = parseTotals(values.get("Test Suites"));
   const tests = parseTotals(values.get("Tests"));
   if (!suites || !tests || (tests.get("passed") ?? 0) < 1) return null;
-  if (values.has("Snapshots") && !parseCounts(values.get("Snapshots") ?? "")) return null;
+  if (values.has("Snapshots") && !validSnapshots(values.get("Snapshots"))) return null;
   // One PASS line per passing suite (none at all under a summary-only reporter).
   const passLines = scan.pass.filter((line) => line.startsWith("PASS")).length;
   if (passLines !== 0 && passLines !== (suites.get("passed") ?? 0)) return null;
@@ -342,6 +369,26 @@ function pytestTallies(pass: string[]): Counts {
   return tallies;
 }
 
+const PYTEST_OUTCOME_LABELS = ["passed", "failed", "skipped", "xfailed", "xpassed"];
+
+/**
+ * Every `collected N items [/ D deselected] [/ S selected]` line must be accounted for by the
+ * final outcomes: selected items (N minus D) each have exactly one. Deselection may be reported
+ * on the collected line, on the final line, or on both (then the two agree).
+ */
+function pytestCollectedAgrees(collected: string[], counts: Counts): boolean {
+  const outcomes = PYTEST_OUTCOME_LABELS.reduce((acc, label) => acc + (counts.get(label) ?? 0), 0);
+  return collected.every((line) => {
+    const total = Number(/^collected (\d+)/.exec(line)?.[1]);
+    const inLine = /\/ (\d+) deselected/.exec(line);
+    const selected = /\/ (\d+) selected/.exec(line);
+    const deselected = inLine ? Number(inLine[1]) : (counts.get("deselected") ?? 0);
+    if (inLine && counts.has("deselected") && counts.get("deselected") !== deselected) return false;
+    if (selected && Number(selected[1]) !== total - deselected) return false;
+    return outcomes === total - deselected;
+  });
+}
+
 function parsePytest(lines: string[]): ParsedRun | null {
   const scan = scanLines(lines, classifyPytest);
   if (!scan || scan.summary.length !== 1) return null;
@@ -356,6 +403,7 @@ function parsePytest(lines: string[]): ParsedRun | null {
     return null;
   }
   const collected = scan.meta.filter((line) => line.startsWith("collected"));
+  if (!pytestCollectedAgrees(collected, counts)) return null;
   const dropped = scan.pass.length + scan.meta.length - collected.length;
   return { kept: [...collected, scan.summary[0]], omitted: dropped };
 }

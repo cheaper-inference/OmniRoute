@@ -86,7 +86,8 @@ function diffRoute(command: string | null): StructuralRoute {
 // Test runners are named by the correlated command: an optional env prefix and package-runner
 // wrapper, then the runner itself. A package script (`npm test`) names no runner, so it only
 // routes when the output identifies one (see selectTestRoute).
-const RUNNER_PREFIX = String.raw`^(?:[A-Za-z_]\w{0,63}=\S{0,256}\s+){0,8}(?:(?:npx|bunx|pnpx)\s+|(?:pnpm|yarn|npm|bun)\s+(?:exec\s+|dlx\s+)?)?`;
+const ENV_PREFIX = String.raw`(?:[A-Za-z_]\w{0,63}=\S{0,256}\s+){0,8}`;
+const RUNNER_PREFIX = String.raw`^${ENV_PREFIX}(?:(?:npx|bunx|pnpx)\s+|(?:pnpm|yarn|npm|bun)\s+(?:exec\s+|dlx\s+)?)?`;
 const TEST_RUNNER_COMMANDS: ReadonlyArray<readonly [string, RegExp]> = [
   ["test-vitest", new RegExp(`${RUNNER_PREFIX}vitest\\b`, "i")],
   ["test-jest", new RegExp(`${RUNNER_PREFIX}jest\\b`, "i")],
@@ -96,7 +97,10 @@ const TEST_RUNNER_COMMANDS: ReadonlyArray<readonly [string, RegExp]> = [
   ],
 ];
 const TEST_RUNNER_TYPES = new Set(TEST_RUNNER_COMMANDS.map(([type]) => type));
-const TEST_SCRIPT_COMMAND_RE = /^(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test(?::\S{1,64})?(?:\s|$)/i;
+const TEST_SCRIPT_COMMAND_RE = new RegExp(
+  String.raw`^${ENV_PREFIX}(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test(?::\S{1,64})?(?:\s|$)`,
+  "i"
+);
 
 /** A test route: the registry renderer, told which runner the command named. */
 function testRoute(type: string, command: string): StructuralRoute {

@@ -369,6 +369,109 @@ describe("execução mista mantém diagnóstico", () => {
   });
 });
 
+describe("resumo recusa contagens que não fecham", () => {
+  const keptWhole = (input: string, command: string, label: string) => {
+    const out = run(input, command);
+    assert.equal(out.text, input, label);
+    assert.ok(!out.techniques.includes(TECHNIQUE), label);
+  };
+  const rendered = (input: string, command: string, label: string) => {
+    const out = run(input, command);
+    assert.ok(out.techniques.includes(TECHNIQUE), `${label}: ${out.text}`);
+    return out;
+  };
+
+  it("Jest: o total de snapshots precisa fechar com os resultados", () => {
+    const withSnapshots = (line: string) =>
+      JEST_GREEN.replace("Snapshots:   0 total", `Snapshots:   ${line}`);
+    for (const line of ["2 passed, 1 total", "1 written, 2 total", "2 passed, 1 failed, 2 total"]) {
+      keptWhole(withSnapshots(line), "jest", line);
+    }
+    for (const line of [
+      "0 total",
+      "2 passed, 2 total",
+      "1 written, 1 total",
+      "1 updated, 1 total",
+      "1 obsolete, 2 passed, 2 total",
+    ]) {
+      rendered(withSnapshots(line), "jest", line);
+    }
+  });
+
+  it("Vitest: o total de snapshots precisa fechar com os resultados", () => {
+    const withSnapshots = (line: string) =>
+      VITEST_GREEN.replace("   Snapshots  4 passed (4)", `   Snapshots  ${line}`);
+    for (const line of ["2 passed (1)", "1 written | 1 passed (3)"]) {
+      keptWhole(withSnapshots(line), "vitest run", line);
+    }
+    for (const line of ["2 passed (2)", "1 written | 1 passed (2)", "4 passed (4)"]) {
+      rendered(withSnapshots(line), "vitest run", line);
+    }
+  });
+
+  it("pytest: os itens coletados precisam fechar com os resultados finais", () => {
+    const collected = (line: string, summary = "139 passed, 3 skipped") =>
+      PYTEST_GREEN.replace("collected 142 items", line).replace("139 passed, 3 skipped", summary);
+    keptWhole(
+      collected("collected 150 items"),
+      "pytest",
+      "nine-plus collected items with no outcome"
+    );
+    keptWhole(
+      collected("collected 147 items / 5 deselected / 142 selected", "139 passed"),
+      "pytest",
+      "selected"
+    );
+    keptWhole(collected("collected 147 items"), "pytest", "deselected items not reported anywhere");
+    // valid deselection: selected = collected - deselected, reported on either line
+    rendered(collected("collected 142 items"), "pytest", "plain");
+    rendered(
+      collected("collected 147 items / 5 deselected / 142 selected", "139 passed, 3 skipped"),
+      "pytest",
+      "deselected on the collected line"
+    );
+    rendered(
+      collected("collected 147 items", "139 passed, 3 skipped, 5 deselected"),
+      "pytest",
+      "deselected on the final line"
+    );
+    rendered(
+      collected("collected 147 items / 5 deselected", "139 passed, 3 skipped, 5 deselected"),
+      "pytest",
+      "deselected on both lines"
+    );
+  });
+
+  it("Vitest: uma linha de arquivo que declara falha recusa o resumo", () => {
+    const fileLine = " ✓ tests/unit/auth.test.ts (4 tests) 10ms";
+    for (const tail of ["(4 tests | 1 failed) 10ms", "(4 tests | 1 weird) 10ms", "(1 failed)"]) {
+      const input = VITEST_GREEN.replace(fileLine, ` ✓ tests/unit/auth.test.ts ${tail}`);
+      assert.notEqual(input, VITEST_GREEN);
+      keptWhole(input, "vitest run", tail);
+    }
+    // a parenthesis in a test title is not a file-line tail
+    const titled = VITEST_GREEN.replace(
+      fileLine,
+      " ✓ tests/unit/auth.test.ts > handles (edge) input 10ms"
+    );
+    rendered(titled, "vitest run", "title with parentheses");
+  });
+
+  it("pacote de teste com variáveis de ambiente à frente também vai à detecção por conteúdo", () => {
+    for (const command of [
+      "CI=1 npm test",
+      "CI=1 NODE_ENV=test pnpm run test:unit",
+      "FORCE_COLOR=0 yarn test",
+    ]) {
+      rendered(VITEST_GREEN, command, command);
+    }
+    const unknown = "TAP version 13\nok 1 - a\nok 2 - b\n1..2\n# tests 2\n# pass 2\n# fail 0\n";
+    const withFlag = run(unknown, "CI=1 npm test");
+    assert.equal(withFlag.text, run(unknown, "CI=1 npm test", { flag: false }).text);
+    assert.ok(!withFlag.techniques.includes(TECHNIQUE));
+  });
+});
+
 describe("portões do despacho para saída de testes", () => {
   it("flag desligada é idêntica ao legado", () => {
     for (const [input, command] of [
