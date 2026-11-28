@@ -26,6 +26,7 @@ import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useLocale, useTranslations } from "next-intl";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import ApiKeyFilterBar from "./components/ApiKeyFilterBar";
+import QuickKeyPermissionControls from "./components/QuickKeyPermissionControls";
 import KeyPolicySixTabEditor from "./components/KeyPolicySixTabEditor";
 import KeyExpiryQuickPicker from "./components/KeyExpiryQuickPicker";
 import SaveKeyAsTemplateModal from "./components/SaveKeyAsTemplateModal";
@@ -164,8 +165,6 @@ export default function ApiManagerPageClient() {
     handleSelectTemplateInCreateModal,
     newKeyName,
     setNewKeyName,
-    newKeyManageEnabled,
-    setNewKeyManageEnabled,
     newKeySelfUsageEnabled,
     setNewKeySelfUsageEnabled,
     newKeyAccountQuotaEnabled,
@@ -1190,23 +1189,10 @@ export default function ApiManagerPageClient() {
             </div>
           </Card.Section>
 
-          <Card.Section className="flex items-start justify-between gap-3">
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-medium text-text-main">{t("managementAccess")}</p>
-              <p className="text-xs text-text-muted">{t("managementAccessDesc")}</p>
-            </div>
-            <Toggle
-              size="sm"
-              className="shrink-0"
-              checked={newKeyManageEnabled}
-              disabled={isSubmitting || loadingTemplatePolicy}
-              onChange={(checked) => {
-                setNewKeyManageEnabled(checked);
-                setCreateKeyFormState((prev) => ({ ...prev, manageEnabled: checked }));
-              }}
-              ariaLabel={t("managementAccess")}
-            />
-          </Card.Section>
+          <QuickKeyPermissionControls
+            draft={templateCreation}
+            disabled={isSubmitting || loadingTemplatePolicy}
+          />
           <Card.Section className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <p className="text-sm font-medium text-text-main">{t("selfServiceVisibility")}</p>

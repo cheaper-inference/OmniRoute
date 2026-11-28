@@ -1,3 +1,5 @@
+import { MCP_CONNECT_SCOPE } from "@/shared/constants/managementScopes";
+import { COMPRESSION_READ_SCOPE } from "@/shared/constants/mcpScopes";
 import { useState, useCallback, useMemo, type Dispatch, type SetStateAction } from "react";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { SELF_ACCOUNT_QUOTA_SCOPE, SELF_USAGE_SCOPE } from "@/shared/constants/selfServiceScopes";
@@ -165,6 +167,8 @@ export interface ApiKeyAccessFormState {
   scheduleTz: string;
   rateLimits: RateLimitEntry[];
   manageEnabled: boolean;
+  mcpConnectEnabled: boolean;
+  compressionReadEnabled: boolean;
   selfUsageEnabled: boolean;
   selfAccountQuotaEnabled: boolean;
   bypassProviderQuotaPolicyEnabled: boolean;
@@ -301,6 +305,8 @@ function initialScheduleState(apiKey: StoredApiKey) {
 function initialScopeState(apiKey: StoredApiKey) {
   return {
     manageEnabled: Array.isArray(apiKey?.scopes) && apiKey.scopes.includes("manage"),
+    mcpConnectEnabled: apiKey?.scopes?.includes(MCP_CONNECT_SCOPE) === true,
+    compressionReadEnabled: apiKey?.scopes?.includes(COMPRESSION_READ_SCOPE) === true,
     selfUsageEnabled: Array.isArray(apiKey?.scopes) && apiKey.scopes.includes(SELF_USAGE_SCOPE),
     selfAccountQuotaEnabled:
       Array.isArray(apiKey?.scopes) && apiKey.scopes.includes(SELF_ACCOUNT_QUOTA_SCOPE),
@@ -497,6 +503,8 @@ export function buildApiKeyAccessPayload(
   // Scopes
   const scopes = mergeApiKeyPermissionScopes(originalKey.scopes, {
     manageEnabled: formState.manageEnabled,
+    mcpConnectEnabled: formState.mcpConnectEnabled,
+    compressionReadEnabled: formState.compressionReadEnabled,
     selfUsageEnabled: formState.selfUsageEnabled,
     selfAccountQuotaEnabled: formState.selfAccountQuotaEnabled,
     bypassProviderQuotaPolicyEnabled: formState.bypassProviderQuotaPolicyEnabled,
@@ -633,6 +641,12 @@ function useGeneralSetters(setFormState: FormStateSetter) {
 
 /** Management scope, self-service scopes and endpoint setters (General tab). */
 function useScopeAndEndpointSetters(setFormState: FormStateSetter) {
+  const setMcpPermission = useCallback(
+    (field: "mcpConnectEnabled" | "compressionReadEnabled", enabled: boolean) => {
+      setFormState((prev) => ({ ...prev, [field]: enabled }));
+    },
+    [setFormState]
+  );
   const setManageEnabled = useCallback(
     (manageEnabled: boolean) => {
       setFormState((prev) => ({ ...prev, manageEnabled }));
@@ -685,6 +699,7 @@ function useScopeAndEndpointSetters(setFormState: FormStateSetter) {
 
   return {
     setManageEnabled,
+    setMcpPermission,
     setSelfUsageEnabled,
     setSelfAccountQuotaEnabled,
     setAllowAllEndpoints,
