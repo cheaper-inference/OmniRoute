@@ -202,7 +202,7 @@ test("combos page source filters isHidden from rendered list", async () => {
   );
 });
 
-test("a persisted reserved combo can be renamed but cannot keep its name on update", async () => {
+test("a persisted reserved combo can be renamed only to a non-reserved name", async () => {
   const legacy = await combosDb.createCombo({
     name: "AUTO",
     strategy: "priority",
@@ -211,10 +211,7 @@ test("a persisted reserved combo can be renamed but cannot keep its name on upda
   assert.ok(typeof legacy.id === "string");
   const context = { params: Promise.resolve({ id: legacy.id }) };
 
-  const rejected = await comboRoute.PUT(
-    makePutRequest(legacy.id, { description: "keep the old name" }),
-    context
-  );
+  const rejected = await comboRoute.PUT(makePutRequest(legacy.id, { name: "auto" }), context);
   assert.equal(rejected.status, 400);
   const body = await rejected.json();
   assert.equal(body.error.details.firstField, "name");

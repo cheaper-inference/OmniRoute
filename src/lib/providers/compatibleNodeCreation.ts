@@ -42,8 +42,10 @@ export function hydrateCompatibleNodeCreation(
             )
         );
 
+  const data = { ...supplied, ...nodeFields };
+  delete data.customHeaderOverrideNames;
   return {
-    data: { ...supplied, ...nodeFields },
+    data,
     error: conflict
       ? `providerSpecificData.${conflict} conflicts with the resolved provider node. Use its concrete node id or matching node settings.`
       : null,
