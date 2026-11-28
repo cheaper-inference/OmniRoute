@@ -115,6 +115,8 @@ export type CatalogCacheOptions = {
   hideNoThinkVariants?: boolean;
   /** Public listing advertises only combos (`settings.exposeCombosOnly`). */
   exposeCombosOnly?: boolean;
+  /** Lean catalog (`settings.leanCatalog`): auto/no-think/effort ids and dual prefixes dropped. */
+  leanCatalog?: boolean;
   /** Management-only build that keeps operator-hidden models (`/api/models/catalog`). */
   revealHidden?: boolean;
   /**
@@ -303,15 +305,20 @@ function buildCatalogCacheKey(
   const hideAuto = catalogSettings?.hideAutoCombos ? "1" : "0";
   const hideNoThink = catalogSettings?.hideNoThinkVariants ? "1" : "0";
   const page = catalogPageCacheKey(parseCatalogPage(request));
-  // Each suffix is appended only when set, so every key built with both flags off
-  // (the public /v1/models default) stays byte-identical.
-  const reveal = catalogSettings?.revealHidden ? "|reveal" : "";
-  const combosOnly = catalogSettings?.exposeCombosOnly ? "|combosOnly" : "";
+  const options = catalogOptionSuffix(catalogSettings);
   // Launch session (`olx_` bearer, catalogLaunchView.ts): keyed on its PARENT credential, so
   // every session of a parent reuses the parent's build; the view suffix ("" without a view)
   // separates a session whose view narrows it. Null for every other bearer.
   const { auth, launchView } = catalogCacheKeyIdentity(apiKey, launch);
-  return `${prefix}|${isCodex}|${auth}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}${launchView}`;
+  return `${prefix}|${isCodex}|${auth}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${options}${launchView}`;
+}
+
+/** Append a suffix only for an enabled catalog option. */
+function catalogOptionSuffix(catalogSettings?: CatalogCacheOptions): string {
+  const reveal = catalogSettings?.revealHidden ? "|reveal" : "";
+  const combosOnly = catalogSettings?.exposeCombosOnly ? "|combosOnly" : "";
+  const lean = catalogSettings?.leanCatalog ? "|lean" : "";
+  return `${reveal}${combosOnly}${lean}`;
 }
 
 /** The credential dimension plus the launch view suffix ("" without a launch session). */

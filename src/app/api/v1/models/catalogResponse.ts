@@ -199,6 +199,26 @@ function appendCcMirrorsWhenEnabled(
   );
 }
 
+/** Lean catalog flag, or the global disable-thinking-level-variants setting. */
+function isEffortVariantsDisabled(leanFlag: boolean | undefined): boolean {
+  return leanFlag === true || isDisableThinkingLevelVariantsEnabled();
+}
+
+const EFFORT_TIER_SUFFIX = /-(low|medium|high|xhigh)$/;
+
+/**
+ * Lean catalog: also drop effort-tier rows that already exist in the source catalog
+ * (static registry ids such as `<model>-high`), not just the ones the append passes
+ * would generate. Listing only; the suffixed ids stay routable. User combos are kept.
+ */
+export function dropEffortTierRows(
+  models: Array<Record<string, any>>,
+  enabled: boolean | undefined
+): Array<Record<string, any>> {
+  if (enabled !== true) return models;
+  return models.filter((m) => m.owned_by === "combo" || !EFFORT_TIER_SUFFIX.test(m.id));
+}
+
 /**
  * Post-filter chain applied AFTER the API-key filter, so variants and mirrors are
  * only derived from models the caller may actually see.
@@ -215,6 +235,8 @@ export async function applyCatalogPostFilters(
     prefixMode: string;
     aliasToProviderId: Record<string, string>;
     hideNoThinkVariants?: boolean;
+    /** Lean catalog: suppress effort-suffix variants like the OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS flag. */
+    disableEffortVariants?: boolean;
     /** Raw settings.blockedProviders; blocked gateways never carry mirrors. */
     blockedProviders?: unknown;
     authorizeSyntheticModel?: CatalogVariantAuthorizer;
@@ -232,6 +254,7 @@ export async function applyCatalogPostFilters(
 ): Promise<Array<Record<string, any>>> {
   const yieldTurn = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
   let finalModels = models;
+  const effortVariantsDisabled = isEffortVariantsDisabled(ctx.disableEffortVariants);
   const authorizeSyntheticModel =
     ctx.authorizeSyntheticModel ?? (await resolveCatalogVariantAuthorizer(request));
   const authorizeEffortVariant = composeEffortVariantAuthorizer(
@@ -262,7 +285,7 @@ export async function applyCatalogPostFilters(
   // suffixed ids (claudeEffortVariant.ts), this just makes them selectable in catalog-only
   // clients (OpenCode) that can't set a reasoning_effort config the way VS Code does.
   // Gated like the synced-effort pass below: OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS suppresses -low/-medium/-high catalog variants.
-  if (!isDisableThinkingLevelVariantsEnabled()) {
+  if (!effortVariantsDisabled) {
     const beforeClaudeEffortVariants = finalModels;
     finalModels = await filterUnauthorizedAppendedVariants(
       beforeClaudeEffortVariants,
@@ -364,7 +387,7 @@ export async function applyCatalogPostFilters(
   // #7694: advertise `<provider>/<model>-<tier>` variants for synced models that
   // captured `reasoning.supported_efforts` at sync time (capabilities.effort_tiers).
   // Derived from the already key-filtered list; skips codex/kimi (own suffix mechanism).
-  if (!isDisableThinkingLevelVariantsEnabled()) {
+  if (!effortVariantsDisabled) {
     const beforeSyncedEffortVariants = finalModels;
     finalModels = await filterUnauthorizedAppendedVariants(
       beforeSyncedEffortVariants,
