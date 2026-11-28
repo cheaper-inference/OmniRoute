@@ -10,6 +10,7 @@ import { notFound } from "next/navigation";
 import Icon from "@/shared/components/Icon";
 import { Card } from "@/shared/components";
 import Button from "@/shared/components/Button";
+import StarInviteCard from "@/shared/components/StarInviteCard";
 import { shouldAutoSyncOnOpen } from "@/lib/radar/autoSync";
 import { RadarAccessExplainer } from "./RadarAccessExplainer";
 import { RadarCatalogTable, type RadarMergedEntry } from "./RadarCatalogTable";
@@ -455,6 +456,8 @@ export default function RadarPage() {
               onError={setError}
             />
           )}
+
+          {pageState === "populated" && <StarInviteCard />}
         </>
       )}
     </div>

@@ -4,6 +4,8 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const inviteLink = 'a[href="https://github.com/cheaper-inference/OmniRoute"]';
+
 const { notFoundMock, translationMock } = vi.hoisted(() => ({
   notFoundMock: vi.fn(),
   translationMock: (key: string) => key,
@@ -95,6 +97,7 @@ describe("Radar opt-in page", () => {
     expect(notFoundMock).not.toHaveBeenCalled();
     expect(container.textContent).toContain("activateTitle");
     expect(container.textContent).toContain("activateButton");
+    expect(container.querySelector(inviteLink)).toBeNull();
     const activationIcon = container.querySelector(
       'svg.oi-icon[aria-hidden="true"][data-icon="radar"]'
     );
@@ -160,6 +163,41 @@ describe("Radar opt-in page", () => {
       expect(container.querySelector('a[href="/dashboard/radar/offers"]')).not.toBeNull();
     }
   );
+
+  it("shows the star invitation when the first catalog sync supplies metadata", async () => {
+    const meta = { version: "2026.11.28.1", fetchedAt: new Date().toISOString() };
+    let synced = false;
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      switch (String(input)) {
+        case "/api/radar/settings":
+          return response({ optIn: true });
+        case "/api/radar/catalog":
+          return response({ entries: [], meta: synced ? meta : null });
+        case "/api/radar/referrals":
+          return response({ fixed: [], campaigns: [] });
+        case "/api/radar/status":
+          return response({ feeds: {} });
+        case "/api/radar/sync":
+          synced = true;
+          return response({ status: "updated" });
+        default:
+          throw new Error(`Unexpected request: ${String(input)}`);
+      }
+    });
+    await act(async () => {
+      root.render(<RadarPage />);
+    });
+    await settle();
+
+    expect(container.querySelector(inviteLink)).toBeNull();
+    const syncButton = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent === "syncCta"
+    );
+    expect(syncButton).toBeDefined();
+    await act(async () => syncButton?.click());
+
+    expect(container.querySelector(inviteLink)).not.toBeNull();
+  });
 
   it("keeps the page hidden when the feature endpoint returns 404", async () => {
     vi.mocked(fetch).mockResolvedValueOnce(response({ error: "Not found" }, 404));

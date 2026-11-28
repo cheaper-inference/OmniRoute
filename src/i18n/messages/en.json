@@ -16060,6 +16060,12 @@
     "offers": "Offers",
     "intel": "Intel"
   },
+  "starInvite": {
+    "title": "Everything here is free. No paywall.",
+    "body": "If OmniRoute saves you time or money, a star on GitHub helps other people find it.",
+    "button": "Like it? Star us on GitHub",
+    "dismiss": "Dismiss"
+  },
   "radarCombosPage": {
     "title": "Radar guided combos",
     "subtitle": "Create priority fallbacks from equivalent free models curated by Radar.",
