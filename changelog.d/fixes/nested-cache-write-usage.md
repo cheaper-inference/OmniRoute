@@ -1,0 +1,1 @@
+- **fix(usage):** Keep nested cache-write counts in streaming Responses-to-Chat and Chat-to-Claude usage so cache writes are accounted for separately from fresh input.
