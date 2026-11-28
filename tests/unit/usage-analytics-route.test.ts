@@ -22,6 +22,17 @@ const analyticsCache = await import("../../src/lib/usage/analyticsResponseCache.
 const clearPendingRequests = usageHistory.clearPendingRequests;
 const EXPECTED_TOTAL_COST = 0.020925;
 
+type ApiKeyTotalsResponse = {
+  byApiKey: Array<{
+    apiKeyId: string;
+    apiKeyName: string;
+    requests: number;
+    totalTokens: number;
+    cost: number;
+    lastUsed: string | null;
+  }>;
+};
+
 async function resetStorage() {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
@@ -684,7 +695,7 @@ test("GET /api/usage/analytics?view=apiKeys returns only lifetime totals per API
   const response = await analyticsRoute.GET(
     makeRequest("http://localhost/api/usage/analytics?range=all&view=apiKeys")
   );
-  const body = await response.json();
+  const body: ApiKeyTotalsResponse = await response.json();
 
   assert.equal(response.status, 200);
   assert.deepEqual(Object.keys(body), ["byApiKey"]);
@@ -692,6 +703,7 @@ test("GET /api/usage/analytics?view=apiKeys returns only lifetime totals per API
   const used = totalsById.get(usedKey.id);
   assert.equal(used.apiKeyName, "Used Key");
   assert.equal(used.requests, 3);
+  assert.equal(used.totalTokens, 780);
   // gpt-4o: 300 in × $2.50 + 150 out × $10; claude-sonnet: 300 in × $3 + 30 out × $15 (per 1M).
   assertClose(used.cost, 0.0036);
   assert.equal(used.lastUsed, at(60_000));
@@ -699,6 +711,7 @@ test("GET /api/usage/analytics?view=apiKeys returns only lifetime totals per API
     apiKeyId: idleKey.id,
     apiKeyName: "Idle Key",
     requests: 0,
+    totalTokens: 0,
     cost: 0,
     lastUsed: at(30_000),
   });
@@ -708,7 +721,30 @@ test("GET /api/usage/analytics?view=apiKeys returns only lifetime totals per API
   ).json();
   const fullEntry = fullReport.byApiKey.find((entry) => entry.apiKeyId === usedKey.id);
   assert.equal(fullEntry.requests, used.requests);
+  assert.equal(fullEntry.totalTokens, used.totalTokens);
   assertClose(fullEntry.cost, used.cost);
+});
+
+test("API Manager totals count input and output tokens by key ID when names collide", async () => {
+  const firstKey = await apiKeysDb.createApiKey("Shared Name", "machine1234567890");
+  const secondKey = await apiKeysDb.createApiKey("Shared Name", "machine1234567890");
+  const insertUsage = core.getDbInstance().prepare(
+    `INSERT INTO usage_history (provider, model, api_key_id, api_key_name, tokens_input, tokens_output, timestamp)
+     VALUES ('openai', 'gpt-4o', ?, 'Shared Name', ?, ?, ?)`
+  );
+  const timestamp = new Date().toISOString();
+  insertUsage.run(firstKey.id, 1200, 34, timestamp);
+  insertUsage.run(secondKey.id, 22, 55, timestamp);
+  insertUsage.run(null, 9000, 1000, timestamp);
+
+  const response = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?range=all&view=apiKeys")
+  );
+  assert.equal(response.status, 200);
+  const { byApiKey }: ApiKeyTotalsResponse = await response.json();
+  const totalsById = new Map(byApiKey.map((entry) => [entry.apiKeyId, entry.totalTokens]));
+  assert.equal(totalsById.get(firstKey.id), 1234);
+  assert.equal(totalsById.get(secondKey.id), 77);
 });
 
 test("GET /api/usage/analytics returns weeklyPattern for the costs dashboard", async () => {

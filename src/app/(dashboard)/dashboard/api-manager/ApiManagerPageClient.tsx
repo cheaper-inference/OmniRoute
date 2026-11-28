@@ -103,6 +103,7 @@ interface ApiKey {
 
 interface KeyUsageStats {
   totalRequests: number;
+  totalTokens: number;
   totalCost: number;
   lastUsed: string | null;
 }
@@ -110,6 +111,7 @@ interface KeyUsageStats {
 export default function ApiManagerPageClient() {
   const t = useTranslations("apiManager");
   const tc = useTranslations("common");
+  const tCosts = useTranslations("costs");
   const locale = useLocale();
   const { requestConfirm, confirmDialog } = useConfirmDialog();
   const newKeyNameInputId = useId();
@@ -272,6 +274,7 @@ export default function ApiManagerPageClient() {
       const totals: Array<{
         apiKeyId: string;
         requests: number;
+        totalTokens: number;
         cost: number;
         lastUsed: string | null;
       }> = res.ok ? (await res.json()).byApiKey || [] : [];
@@ -282,6 +285,7 @@ export default function ApiManagerPageClient() {
         const cost = Number(entry?.cost);
         stats[key.id] = {
           totalRequests: Number(entry?.requests) || 0,
+          totalTokens: Number(entry?.totalTokens) || 0,
           totalCost: Number.isFinite(cost) ? cost : 0,
           lastUsed: entry?.lastUsed || null,
         };
@@ -963,10 +967,15 @@ export default function ApiManagerPageClient() {
                         {stats?.totalRequests ?? 0}{" "}
                         <span className="text-text-muted font-normal text-xs">{t("reqs")}</span>
                       </span>
-                      {(stats?.totalRequests ?? 0) > 0 && (
-                        <span className="text-3xs text-success tabular-nums">
-                          {formatUsdCost(stats?.totalCost ?? 0, locale)}
-                        </span>
+                      {stats && stats.totalRequests > 0 && (
+                        <>
+                          <span className="text-3xs text-text-muted tabular-nums">
+                            {stats.totalTokens.toLocaleString(locale)} {tCosts("tokens")}
+                          </span>
+                          <span className="text-3xs text-success tabular-nums">
+                            {formatUsdCost(stats.totalCost, locale)}
+                          </span>
+                        </>
                       )}
                       {stats?.lastUsed ? (
                         <span className="text-3xs text-text-muted">
