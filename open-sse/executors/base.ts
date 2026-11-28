@@ -1246,7 +1246,13 @@ export class BaseExecutor {
               .summarizeThinking === true
           );
 
-          const seed = activeCredentials?.accessToken || activeCredentials?.apiKey || "anon";
+          // The connection id is stable across a token refresh; the access token is not, so a
+          // token seed gave every refresh a new session id (and a new lazy device id).
+          const seed =
+            activeCredentials?.connectionId ||
+            activeCredentials?.accessToken ||
+            activeCredentials?.apiKey ||
+            "anon";
           const psd = activeCredentials?.providerSpecificData as
             Record<string, unknown> | undefined;
 
