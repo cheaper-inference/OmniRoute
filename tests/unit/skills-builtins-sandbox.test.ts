@@ -262,17 +262,6 @@ test("builtin command and code skills execute through the Docker sandbox", async
   }
 });
 
-test("browser skill fails explicitly instead of returning a fake success", async () => {
-  const { browserSkill } = await importFresh("src/lib/skills/builtin/browser.ts");
-  const context = { apiKeyId: "key-123", sessionId: "session-123" };
-
-  await assert.rejects(
-    () => browserSkill({ action: "navigate", url: "https://example.com" }, context),
-    /Browser automation skill is disabled/
-  );
-  await assert.rejects(() => browserSkill({ action: "launch" }, context), /Unknown action: launch/);
-});
-
 test("registerBuiltinSkills registers every builtin handler with the executor", async () => {
   const { builtinSkills, registerBuiltinSkills } = await importFresh("src/lib/skills/builtins.ts");
   const registered = [];
@@ -284,6 +273,12 @@ test("registerBuiltinSkills registers every builtin handler with the executor", 
 
   registerBuiltinSkills(executor);
 
+  // The disabled browser skill is gone, so no handler can answer a browser call with a fake success.
+  assert.equal("browser" in builtinSkills, false);
+  assert.equal(
+    registered.some((entry) => entry.name === "browser"),
+    false
+  );
   assert.equal(registered.length, Object.keys(builtinSkills).length);
   assert.deepEqual(registered.map((entry) => entry.name).sort(), Object.keys(builtinSkills).sort());
 });
