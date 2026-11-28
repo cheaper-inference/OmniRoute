@@ -40,6 +40,37 @@ test("raw HTTP guard rejects high-risk unsupported methods before Next.js handle
       allow: "POST",
     },
     {
+      // POST /api/keys/groups must not be swallowed by the /api/keys/{id} rule (#20971).
+      label: "key groups QUERY",
+      method: "QUERY",
+      url: "/api/keys/groups",
+      allow: "GET, HEAD, POST",
+    },
+    {
+      label: "key groups PATCH",
+      method: "PATCH",
+      url: "/api/keys/groups",
+      allow: "GET, HEAD, POST",
+    },
+    {
+      label: "key group detail POST",
+      method: "POST",
+      url: "/api/keys/groups/group-1",
+      allow: "GET, HEAD, PUT, DELETE",
+    },
+    {
+      label: "key group members PUT",
+      method: "PUT",
+      url: "/api/keys/groups/group-1/keys",
+      allow: "GET, HEAD, POST, DELETE",
+    },
+    {
+      label: "key group permissions PATCH",
+      method: "PATCH",
+      url: "/api/keys/groups/group-1/permissions",
+      allow: "GET, HEAD, POST, DELETE",
+    },
+    {
       label: "key detail QUERY",
       method: "QUERY",
       url: "/api/keys/0",
@@ -88,6 +119,33 @@ test("raw HTTP guard allows documented methods through", () => {
   assert.equal(maybeHandleDisallowedMethod({ method: "GET", url: "/api/keys" }, response), false);
   assert.equal(
     maybeHandleDisallowedMethod({ method: "POST", url: "/api/keys/import" }, response),
+    false
+  );
+  assert.equal(
+    maybeHandleDisallowedMethod({ method: "GET", url: "/api/keys/groups" }, response),
+    false
+  );
+  assert.equal(
+    maybeHandleDisallowedMethod({ method: "HEAD", url: "/api/keys/groups" }, response),
+    false
+  );
+  assert.equal(
+    maybeHandleDisallowedMethod({ method: "POST", url: "/api/keys/groups" }, response),
+    false
+  );
+  assert.equal(
+    maybeHandleDisallowedMethod({ method: "HEAD", url: "/api/keys/groups/group-1" }, response),
+    false
+  );
+  assert.equal(
+    maybeHandleDisallowedMethod({ method: "HEAD", url: "/api/keys/groups/group-1/keys" }, response),
+    false
+  );
+  assert.equal(
+    maybeHandleDisallowedMethod(
+      { method: "HEAD", url: "/api/keys/groups/group-1/permissions" },
+      response
+    ),
     false
   );
   assert.equal(
