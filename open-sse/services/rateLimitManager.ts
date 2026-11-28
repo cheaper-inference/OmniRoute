@@ -42,6 +42,7 @@ import {
   RATE_LIMIT_EXECUTION_TIMEOUT_CODE,
   RATE_LIMIT_QUEUE_WEDGED_CODE,
   LEGACY_RATE_LIMIT_QUEUE_TIMEOUT_CODE,
+  formatQueueTimeoutMessage,
 } from "./rateLimitManager/errors";
 import { LimiterWedgeWatchdog, WATCHDOG_INTERVAL_MS } from "./rateLimitManager/wedgeWatchdog";
 import { createCancellableJob } from "./rateLimitManager/queuedJobCancel";
@@ -739,8 +740,11 @@ export async function withRateLimit(
   // Issue #6593: opt-in admission cap — fast-reject before Bottleneck's
   // schedule() (and before any downstream compression/prompt work runs) when
   // the queue is already at/over maxQueueDepth. Default 0 = disabled.
+  // One snapshot of the load this request joins: the admission cap reads it,
+  // and a queue timeout reports it (#21184).
+  const queueCounts = limiter.counts();
   const admissionErr = checkQueueAdmission(
-    limiter.counts().QUEUED,
+    queueCounts.QUEUED,
     currentRequestQueueSettings.maxQueueDepth,
     model ? `${provider}/${model}` : provider
   );
@@ -756,7 +760,14 @@ export async function withRateLimit(
   let delayId: ReturnType<typeof setTimeout> | null = null;
   const queueTimeoutErr = markLocalRateLimitError(
     new Error(
-      `Request exceeded queue budget maxWaitMs=${queueRemainingMs}ms for ${provider}/${model ?? ""} — queue budget does not bound execution (executionMaxWaitMs=${executionExpirationMs}ms)`
+      formatQueueTimeoutMessage({
+        target: model ? `${provider}/${model}` : provider,
+        maxWaitMs: queueBudgetMs,
+        queueWaitMs: queueRemainingMs,
+        queuedAhead: queueCounts.RECEIVED + queueCounts.QUEUED,
+        runningAhead: queueCounts.RUNNING + queueCounts.EXECUTING,
+        executionMaxWaitMs: executionExpirationMs,
+      })
     ),
     LEGACY_RATE_LIMIT_QUEUE_TIMEOUT_CODE
   );
