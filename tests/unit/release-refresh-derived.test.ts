@@ -566,6 +566,38 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
     }
   });
 
+  it("refreshes the starred README heading, the distant footnote and the full alt text in place", async () => {
+    const snapshot = loadFactsSnapshot();
+    assert.ok(snapshot);
+    const beforeBig = String(snapshot.code.rowSumTotalLabel);
+    const beforeReal = String(snapshot.code.headlineSteadyLabel);
+    const { formatTokenHeadline } = await import("../../scripts/check/check-docs-counts-sync.mjs");
+    const rowSumTotal = snapshot.code.rowSumTotal + 80_000_000;
+    const headlineSteady = snapshot.code.headlineSteady + 10_000_000;
+    const facts = { ...snapshot, code: { ...snapshot.code, headlineSteady, rowSumTotal } };
+    const before = [
+      `## ${beforeBig}\\* Free Tokens / Month Across Third-Party Free Tiers`,
+      "",
+      '<img alt="Free tokens a month: ' +
+        `${beforeBig} free tokens a month adding up every catalog row, ended offers included; ${beforeReal} a month counting each shared quota once.">`,
+      "",
+      "Body text. ".repeat(70),
+      "",
+      `<sub>\\* Sum of every row in the catalog, ended offers included, the way free-tier catalogs count. Counting each shared quota once, one account per provider reaches about ${beforeReal} a month today. [How we count →](docs/reference/FREE_TIERS.md#how-we-count)</sub>`,
+      "",
+    ].join("\n");
+    const root = tree({ "README.md": before });
+    const result = await refreshDerived({ root, only: ["numbers"], facts });
+    assert.equal(result.infraError, null);
+    assert.deepEqual(result.changedFiles, ["README.md"]);
+    assert.equal(
+      read(root, "README.md"),
+      before
+        .replaceAll(beforeBig, formatTokenHeadline(rowSumTotal))
+        .replaceAll(beforeReal, formatTokenHeadline(headlineSteady))
+    );
+  });
+
   const REPO = path.resolve(import.meta.dirname, "../..");
   const realFile = (rel: string) => fs.readFileSync(path.join(REPO, rel), "utf8");
   const LOCALES = ["pt-BR", "fa"];

@@ -62,7 +62,7 @@ Until this release, this page and the README said 1.62 billion free tokens a mon
 | (none)                                                                                                            | The README promised a re-audit every two weeks. The last one before this was on 2026-09-02                |
 | (none)                                                                                                            | The docs check allowed a 0.05B drift and could not read figures in millions                               |
 
-Summing one quota per row inflates any catalog, ours included. That is why the row-summed figure carries its label and the real one sits right under it.
+Summing one quota per row inflates any catalog, ours included. The README marks the row-summed figure with an asterisk and explains both figures in its footnote.
 
 ## What counts
 
@@ -89,7 +89,7 @@ Every count is catalogued, not tested per call: it says what the catalog lists, 
 Three figures come from the same catalog, audited on 2026-11-23:
 
 - **The real figure, ~90M free tokens a month.** Each shared quota is counted once, so five models behind one daily allowance are one allowance. This is what one account at each provider can actually use. With one-time signup credits, ~153M in your first month.
-- **The big figure, ~11.3B summed row by row**, ended offers included. This is the way other catalogs count. Almost all of it is history: 98.6% from offers that no longer exist. We print it only with its label and with the real figure next to it.
+- **The big figure, ~11.3B summed row by row**, ended offers included. This is the way other catalogs count. Almost all of it is history: 98.6% from offers that no longer exist. The README marks this figure with an asterisk. Its footnote gives the row-sum label, the real figure and a link to this section.
 - **The live catalog, ~159M summed per live row**: the same row-by-row sum without the ended offers.
 
 The row-by-row method (`row-sum-v1`) follows four rules:

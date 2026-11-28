@@ -353,6 +353,53 @@ test("pr: writer branches may write managed numbers", () => {
   assert.match(feature.footer.map((f) => f.text).join("\n"), /managed-value edit/);
 });
 
+test("pr mode accepts moving the same figures to a starred heading and note", () => {
+  const [big, real] = PAIR.match(/~[\d.]+[BM]/g) ?? [];
+  assert.ok(big && real);
+  const heading = `## ${big}\\* Free Tokens / Month`;
+  const label = "* Sum of every row in the catalog, ended offers included.";
+  const steady = `Counting each shared quota once, one account per provider reaches about ${real} a month today.`;
+  const link = "[How we count →](docs/reference/FREE_TIERS.md#how-we-count)";
+  const run = (content: string) =>
+    gate.runCountsGate({
+      mode: "pr",
+      branch: "docs/free-token-footnote",
+      readBase: mem({ "README.md": PAIR }),
+      readHead: mem({ "README.md": content }),
+      changedFiles: ["README.md"],
+    });
+  const result = run(`${heading}\n\n<sub>${label} ${steady} ${link}</sub>`);
+  assert.equal(result.exitCode, 0, result.lines.join("\n"));
+  assert.deepEqual(result.violations, []);
+});
+
+for (const [name, note] of [
+  ["the footnote", ""],
+  ["the ended offers", "* Sum of every row in the catalog. REAL LINK"],
+  ["the real figure", "* Sum of every row in the catalog, ended offers included. LINK"],
+  ["the method link", "* Sum of every row in the catalog, ended offers included. REAL"],
+] as const) {
+  test(`pr mode rejects a starred figure missing ${name}`, () => {
+    const [big, real] = PAIR.match(/~[\d.]+[BM]/g) ?? [];
+    assert.ok(big && real);
+    const footnote = note
+      .replace("REAL", `${real} counting each shared quota once.`)
+      .replace("LINK", "[How we count →](docs/reference/FREE_TIERS.md#how-we-count)");
+    const result = gate.runCountsGate({
+      mode: "pr",
+      branch: "docs/free-token-footnote",
+      readBase: mem({ "README.md": PAIR }),
+      readHead: mem({ "README.md": `${PAIR}\n## Another claim: ${big}*\n\n${footnote}` }),
+      changedFiles: ["README.md"],
+    });
+    assert.equal(result.exitCode, 1, result.lines.join("\n"));
+    assert.ok(
+      result.lines.some((l) => /README.md.*footnote/.test(l)),
+      result.lines.join("\n")
+    );
+  });
+}
+
 test("an invariant that breaks fails in both modes", () => {
   const broken = mem({
     "open-sse/services/autoCombo/modePacks.ts": "  quality: 0.02,\n  quality: 0.03,\n",

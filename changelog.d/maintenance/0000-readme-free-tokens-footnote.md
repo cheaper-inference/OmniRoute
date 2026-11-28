@@ -1,0 +1,1 @@
+- **docs(readme):** mark the catalog row sum with an asterisk and explain the recurring free-token figure in a footnote on the README and its diagrams.

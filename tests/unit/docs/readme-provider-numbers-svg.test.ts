@@ -46,11 +46,11 @@ test("the provider figures use separate denominators for offers, rows, IDs and p
   assert.equal(active.value, readmeFact("code.freeAccessRows"));
   assert.equal(distinct.value, readmeFact("code.freeModels"));
   assert.equal(pools.value, readmeFact("code.freePublishedPools"));
-  assert.equal(budget.value, readmeFactText("code.rowSumTotalLabel"));
-  assert.ok(budget.lines[0].startsWith(`${readmeFactText("code.headlineSteadyLabel")} real`));
-  assert.match(
+  assert.equal(budget.value, `${readmeFactText("code.rowSumTotalLabel")}*`);
+  assert.equal(budget.label, "Free tokens a month");
+  assert.equal(
     budget.lines.join(" "),
-    /First month: .+ with signup credits\. Not an OmniRoute allowance\./
+    `* Sum of every catalog row, ended offers included. ${readmeFactText("code.headlineSteadyLabel")} counting each shared quota once. Not an OmniRoute allowance.`
   );
 });
 
@@ -89,9 +89,24 @@ test("the provider figure SVG shows two rows of four outlined cards and embeds t
     );
   }
   assert.equal(doc.querySelector("text.mono")?.textContent, "hasFree");
+  const budgetCard = cards.at(-1);
+  assert.equal(doc.querySelectorAll("rect.accent").length, 1);
+  assert.equal(budgetCard?.querySelector("rect.accent")?.getAttribute("width"), "6");
+  const metric = budgetCard?.querySelector("g.num");
+  assert.ok(metric);
+  assert.equal(metric.hasAttribute("style"), false, "the metric inherits the kit's ink");
+  assert.match(svg, /\.num\{[^}]*fill:var\(--ink\)/);
   assert.match(svg, /@font-face\{font-family:"CI Mono"/);
   assert.match(svg, /<use href="#g[0-9a-z]+"/);
   assert.match(doc.querySelector("desc")?.textContent ?? "", /None of them is added to another\./);
+  assert.ok(
+    doc
+      .querySelector("desc")
+      ?.textContent?.includes(
+        `${readmeFactText("code.rowSumTotalLabel")} free tokens a month adding up every catalog row, ended offers included; ${readmeFactText("code.headlineSteadyLabel")} a month counting each shared quota once.`
+      )
+  );
+
   assert.ok(Buffer.byteLength(svg) < 200 * 1024);
 });
 

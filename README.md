@@ -9,35 +9,29 @@
 
 **Created by [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 394 providers — 140+ with a free offer — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 394 AI providers · 140+ with a free offer · free tokens a month: ~11.3B as others count · ~90M real · 22 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 394 providers — 140+ with a free offer — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 394 AI providers · 140+ with a free offer · 22 routing strategies · $0 to start. ~11.3B free tokens a month adding up every catalog row, ended offers included; ~90M a month counting each shared quota once."/>
 
 </div>
 
 <a id="free-tokens"></a>
 <div align="center">
 
-## Free Tokens a Month: ~11.3B as Others Count · ~90M Real
+## ~11.3B\* Free Tokens / Month Across Third-Party Free Tiers
 
 </div>
 
-> **~11.3B free tokens / month**<br/>
-> <sub>counted the way other catalogs count: every row added up, ended offers included</sub>
->
-> **~90M real today**<br/>
-> <sub>each shared quota counted once: what you can actually use</sub>
->
 > **Everything here is free. No paywall.**<br/>
 > ★ [Like it? Star us on GitHub](https://github.com/cheaper-inference/OmniRoute)
 
 Other catalogs charge from US$ 19 a year to US$ 49 for lifetime access to live data. Here everything is free. <sub>Prices checked on 2026-11-18.</sub>
 
-<sub>Catalog last audited on 2026-11-23. [How we count →](docs/reference/FREE_TIERS.md#how-we-count)</sub>
-
 > **Bring your own provider accounts.** These are third-party free tiers, not a token grant from OmniRoute. Sign up, get credentials where a provider asks for them, and connect the ones you can use. Each provider sets its own limits, availability and terms.
 >
 > Stacking free tiers by hand means dozens of SDKs, dozens of rate limits and no clear idea of what you have left. OmniRoute keeps 214 catalog rows with free access and computes the real figure from 12 pools with a published quota, each shared pool counted once. Quotas that only open after a regional identity check (today, ModelScope) are shown apart, +~6M behind regional identity verification, and never added to the real figure. What is left shows up on the dashboard (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card. Free tokens a month: ~11.3B as others count · ~90M real. Up to ~153M in your first month with one-time signup credits. 12 pools with a published quota and 214 catalog rows with free access behind one endpoint, catalog audited 2026-11-23. The bar shows where the real figure comes from, one segment per pool. Signup credits and free providers without a token cap are listed apart and never added to it. Live used and remaining tokens on /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card. ~11.3B free tokens a month adding up every catalog row, ended offers included; ~90M a month counting each shared quota once. Up to ~153M in your first month with one-time signup credits. 12 pools with a published quota and 214 catalog rows with free access behind one endpoint, catalog audited 2026-11-23. The bar shows where the real figure comes from, one segment per pool. Signup credits and free providers without a token cap are listed apart and never added to it. Live used and remaining tokens on /dashboard/free-tiers."/>
+
+<sub>\* Sum of every row in the catalog, ended offers included, the way free-tier catalogs count. Counting each shared quota once, one account per provider reaches about ~90M a month today. [How we count →](docs/reference/FREE_TIERS.md#how-we-count)</sub>
 
 > Animated summary of the live `/dashboard/free-tiers` page. How each figure is counted: **[docs/reference/FREE_TIERS.md#how-we-count](docs/reference/FREE_TIERS.md#how-we-count)**.
 >
@@ -97,13 +91,13 @@ Provider and model totals for v3.8.55 to v3.8.59 are measured when each release 
 
 <div align="center">
 
-[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-[![npm downloads per month](https://img.shields.io/npm/dm/omniroute?label=npm%2Fmonth&color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-[![Latest release](https://img.shields.io/github/v/release/cheaper-inference/OmniRoute?label=latest%20release&logo=github&color=20211c)](https://github.com/cheaper-inference/OmniRoute/releases/latest)
-[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
-[![Docker pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![Release asset downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=release%20asset%20downloads&logo=github&color=47848F)](https://github.com/cheaper-inference/OmniRoute/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/omniroute?logo=npm&color=e5ac82&labelColor=20211c)](https://www.npmjs.com/package/omniroute)
+[![npm downloads per month](https://img.shields.io/npm/dm/omniroute?label=npm%2Fmonth&logo=npm&color=e5ac82&labelColor=20211c)](https://www.npmjs.com/package/omniroute)
+[![Latest release](https://img.shields.io/github/v/release/cheaper-inference/OmniRoute?label=latest%20release&logo=github&color=e5ac82&labelColor=20211c)](https://github.com/cheaper-inference/OmniRoute/releases/latest)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=e5ac82&labelColor=20211c)](https://hub.docker.com/r/cheaperinference/omniroute)
+[![Docker pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=e5ac82&labelColor=20211c)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Release asset downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=release%20asset%20downloads&logo=github&color=e5ac82&labelColor=20211c)](https://github.com/cheaper-inference/OmniRoute/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square&color=e5ac82&labelColor=20211c)](LICENSE)
 
 </div>
 
@@ -589,7 +583,7 @@ Every command honors the active remote context (`omniroute connect <host>`). `--
     <td align="center" width="96"><a href="https://github.com/Kilo-Org/kilocode"><img src="./docs/assets/cli-icons/kilo-tile.svg" width="40" height="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub></a></td>
     <td align="center" width="96"><a href="https://5dive.ai"><img src="./docs/assets/cli-icons/5dive-tile.svg" width="40" height="40" alt="5dive"/><br/><sub><b>5dive</b></sub></a></td>
     <td align="center" width="96"><a href="https://docs.cursor.com/settings/models"><img src="./public/providers/cursor.svg" width="40" height="40" alt="Cursor"/><br/><sub><b>Cursor</b></sub></a></td>
-    <td align="center" width="96"><a href="https://docs.roocode.com/"><img src="./public/providers/roocode.svg" width="40" height="40" alt="Roo Code"/><br/><sub><b>Roo Code</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.roocode.com/"><img src="./docs/assets/cli-icons/roocode-themed.svg" width="40" height="40" alt="Roo Code"/><br/><sub><b>Roo Code</b></sub></a></td>
     <td align="center" width="96"><a href="https://github.com/charmbracelet/crush"><img src="./docs/assets/cli-icons/crush-tile.svg" width="40" height="40" alt="Crush"/><br/><sub><b>Crush</b></sub></a></td>
     <td align="center" width="96"><a href="https://zed.dev/docs/ai/llm-providers#openai-api-compatible"><img src="./public/providers/zed-hosted.svg" width="40" height="40" alt="Zed"/><br/><sub><b>Zed</b></sub></a></td>
   </tr>
@@ -666,7 +660,7 @@ These tools do not accept a custom base URL. ZCode connects through its local ap
     <td align="center" width="96"><img src="./public/providers/kiro.svg" width="40" height="40" alt="Kiro"/><br/><sub><b>Kiro</b></sub></td>
     <td align="center" width="96"><img src="./docs/assets/cli-icons/amp-tile.svg" width="40" height="40" alt="Amp"/><br/><sub><b>Amp</b></sub></td>
     <td align="center" width="96"><img src="./docs/assets/cli-icons/devin-tile.svg" width="40" height="40" alt="Devin CLI"/><br/><sub><b>Devin CLI</b></sub></td>
-    <td align="center" width="96"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="40" height="40" alt="Qoder CLI"/><br/><sub><b>Qoder CLI</b></sub></td>
+    <td align="center" width="96"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/qoder-color.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="40" height="40" alt="Qoder CLI"/></picture><br/><sub><b>Qoder CLI</b></sub></td>
     <td align="center" width="96"><img src="./public/providers/windsurf.svg" width="40" height="40" alt="Windsurf"/><br/><sub><b>Windsurf</b></sub></td>
   </tr>
 </table>
@@ -690,7 +684,7 @@ deyin.ai and Zoo Code are not in the catalog or the CLI manifest. Configure them
 
 Each number counts something different. None of them is added to another.
 
-<img src="./docs/diagrams/provider-numbers.svg" width="100%" alt="What each number counts. 394 registered providers. 140+ flagged with a free offer. 50 with free access: 43 with an API key, 6 without a key, 1 through a tool account and 0 through a web chat. 214 catalog rows with free access, 185 distinct free models, 40 recurring or keyless providers, and 12 pools with a published quota. Free tokens a month: ~11.3B as others count · ~90M real. The first figure adds up every row, including ended offers. The real figure counts each shared quota once."/>
+<img src="./docs/diagrams/provider-numbers.svg" width="100%" alt="What each number counts. 394 registered providers. 140+ flagged with a free offer. 50 with free access: 43 with an API key, 6 without a key, 1 through a tool account and 0 through a web chat. 214 catalog rows with free access, 185 distinct free models, 40 recurring or keyless providers, and 12 pools with a published quota. ~11.3B free tokens a month adding up every catalog row, ended offers included; ~90M a month counting each shared quota once."/>
 
 <sub>Chat catalog: static model lists from 250 of the providers, 3,186 provider/model pairs, 1,539 distinct raw model IDs.</sub>
 
@@ -739,7 +733,7 @@ These providers offer recurring or keyless free access.
     <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>Recurring<br/>GPT-OSS 120B, Nemotron 3 Nano 30B<br/>About 200 requests/day</sub></td>
     <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>Recurring<br/>GLM-4.7-Flash, GLM-4.5-Flash<br/>No published token cap</sub></td>
     <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>Recurring<br/>ERNIE 4.0 8K<br/>No published token cap</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>Keyless<br/>24 models, no key<br/>Anonymous access is best-effort</sub></td>
+    <td align="center" width="150"><img src="./docs/assets/provider-icons/pollinations-themed.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>Keyless<br/>24 models, no key<br/>Anonymous access is best-effort</sub></td>
     <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare Workers AI"/><br/><b>Cloudflare Workers AI</b><br/><sub>Daily<br/>9 models<br/>10K Neurons/day</sub></td>
   </tr>
   <tr>
@@ -759,7 +753,7 @@ These trials and signup credits are one-time offers that run out or expire.
 <table>
   <tr>
     <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS 120B<br/>One-time $5 credit, valid 30 days. Card required.</sub></td>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder"/><br/><b>Qoder</b><br/><sub>Qwen3.8-Max-Preview, Kimi-K3<br/>Signup credits on 9 models</sub></td>
+    <td align="center" width="150"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/qoder-color.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder"/></picture><br/><b>Qoder</b><br/><sub>Qwen3.8-Max-Preview, Kimi-K3<br/>Signup credits on 9 models</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>$0 models listed by SiliconFlow<br/>$1 credit, plus $0 models after identity verification</sub></td>
     <td align="center" width="150"><img src="./public/providers/deepseek.svg" width="42" alt="DeepSeek"/><br/><b>DeepSeek</b><br/><sub>DeepSeek V4 Pro, V4 Flash<br/>5M tokens on signup, no card</sub></td>
     <td align="center" width="150"><img src="./public/providers/fireworks.svg" width="42" alt="Fireworks"/><br/><b>Fireworks</b><br/><sub>DeepSeek V4, GLM 5.1<br/>$1 starter credit</sub></td>
@@ -774,11 +768,11 @@ Provider limits and eligibility change; check the provider before you rely on a 
 > One server, many homes: a global npm install, a container, a desktop app, the macOS menu bar or an Android phone. Clients then connect to it from the browser, VS Code or OpenCode.
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/omniroute"><img src="https://img.shields.io/npm/dm/omniroute?logo=npm&label=npm%20downloads" alt="npm downloads per month"/></a>
-  <a href="https://hub.docker.com/r/diegosouzapw/omniroute"><img src="https://img.shields.io/docker/pulls/diegosouzapw/omniroute?logo=docker&label=docker%20pulls" alt="Docker pulls of diegosouzapw/omniroute"/></a>
-  <a href="https://github.com/cheaper-inference/OmniRoute/releases"><img src="https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?logo=github&label=release%20asset%20downloads" alt="GitHub release asset downloads"/></a>
-  <a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"><img src="https://img.shields.io/open-vsx/v/diegosouzapw/omnicopilot?label=OmniCopilot%20on%20Open%20VSX" alt="OmniCopilot version on Open VSX"/></a>
-  <a href="https://github.com/zoispag/omniroute-tray/releases"><img src="https://img.shields.io/github/downloads/zoispag/omniroute-tray/total?logo=apple&label=OmniRouteTray%20downloads" alt="OmniRouteTray DMG downloads"/></a>
+  <a href="https://www.npmjs.com/package/omniroute"><img src="https://img.shields.io/npm/dm/omniroute?logo=npm&label=npm%20downloads&color=e5ac82&labelColor=20211c" alt="npm downloads per month"/></a>
+  <a href="https://hub.docker.com/r/diegosouzapw/omniroute"><img src="https://img.shields.io/docker/pulls/diegosouzapw/omniroute?logo=docker&label=docker%20pulls&color=e5ac82&labelColor=20211c" alt="Docker pulls of diegosouzapw/omniroute"/></a>
+  <a href="https://github.com/cheaper-inference/OmniRoute/releases"><img src="https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?logo=github&label=release%20asset%20downloads&color=e5ac82&labelColor=20211c" alt="GitHub release asset downloads"/></a>
+  <a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"><img src="https://img.shields.io/open-vsx/v/diegosouzapw/omnicopilot?label=OmniCopilot%20on%20Open%20VSX&color=e5ac82&labelColor=20211c" alt="OmniCopilot version on Open VSX"/></a>
+  <a href="https://github.com/zoispag/omniroute-tray/releases"><img src="https://img.shields.io/github/downloads/zoispag/omniroute-tray/total?logo=apple&label=OmniRouteTray%20downloads&color=e5ac82&labelColor=20211c" alt="OmniRouteTray DMG downloads"/></a>
 </p>
 
 ### Run the server
@@ -1322,16 +1316,16 @@ Recent walkthroughs. Each link was checked against YouTube's oEmbed endpoint on 
 
 <table>
   <tr>
-    <td align="center" width="20%"><a href="https://www.instagram.com/reel/Da8ZthUPK98/"><img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nick_saraev&font=montserrat&bold=true" alt="Instagram — nick_saraev" width="160"/></a><br/><sub>#1 · nick_saraev</sub></td>
-    <td align="center" width="20%"><a href="https://www.instagram.com/reel/Dbp7wv_CIO0/"><img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nnapier7&font=montserrat&bold=true" alt="Instagram — nnapier7" width="160"/></a><br/><sub>#2 · nnapier7</sub></td>
+    <td align="center" width="20%"><a href="https://www.instagram.com/reel/Da8ZthUPK98/"><img src="https://placehold.co/320x180/191a16/f2f0e8?text=Instagram+Reel+%7C+nick_saraev&font=montserrat&bold=true" alt="Instagram — nick_saraev" width="160"/></a><br/><sub>#1 · nick_saraev</sub></td>
+    <td align="center" width="20%"><a href="https://www.instagram.com/reel/Dbp7wv_CIO0/"><img src="https://placehold.co/320x180/191a16/f2f0e8?text=Instagram+Reel+%7C+nnapier7&font=montserrat&bold=true" alt="Instagram — nnapier7" width="160"/></a><br/><sub>#2 · nnapier7</sub></td>
     <td align="center" width="20%"><a href="https://www.youtube.com/watch?v=NJ0TQ-pyMDY"><img src="https://i.ytimg.com/vi/NJ0TQ-pyMDY/hqdefault.jpg" alt="YouTube — Amidia AI & Tech" width="160"/></a><br/><sub>#3 · Amidia AI & Tech</sub></td>
     <td align="center" width="20%"><a href="https://www.youtube.com/watch?v=l3WLKr56gQQ"><img src="https://i.ytimg.com/vi/l3WLKr56gQQ/hqdefault.jpg" alt="YouTube — Umair Alam Chaudhry" width="160"/></a><br/><sub>#4 · Umair Alam Chaudhry</sub></td>
-    <td align="center" width="20%"><a href="https://www.instagram.com/reel/DaSs65mMrHk/"><img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+theopenstack&font=montserrat&bold=true" alt="Instagram — theopenstack" width="160"/></a><br/><sub>#5 · theopenstack</sub></td>
+    <td align="center" width="20%"><a href="https://www.instagram.com/reel/DaSs65mMrHk/"><img src="https://placehold.co/320x180/191a16/f2f0e8?text=Instagram+Reel+%7C+theopenstack&font=montserrat&bold=true" alt="Instagram — theopenstack" width="160"/></a><br/><sub>#5 · theopenstack</sub></td>
   </tr>
   <tr>
-    <td align="center" width="20%"><a href="https://www.tiktok.com/@migue.baena/video/7670919268216622358"><img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+migue.baena&font=montserrat&bold=true" alt="TikTok — migue.baena" width="160"/></a><br/><sub>#6 · migue.baena</sub></td>
-    <td align="center" width="20%"><a href="https://www.tiktok.com/@milesreevesai/video/7667980059189366019"><img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+milesreevesai&font=montserrat&bold=true" alt="TikTok — milesreevesai" width="160"/></a><br/><sub>#7 · milesreevesai</sub></td>
-    <td align="center" width="20%"><a href="https://www.tiktok.com/@nikothetech/video/7671890769665477918"><img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+nikothetech&font=montserrat&bold=true" alt="TikTok — nikothetech" width="160"/></a><br/><sub>#8 · nikothetech</sub></td>
+    <td align="center" width="20%"><a href="https://www.tiktok.com/@migue.baena/video/7670919268216622358"><img src="https://placehold.co/320x180/191a16/f2f0e8?text=TikTok+%7C+migue.baena&font=montserrat&bold=true" alt="TikTok — migue.baena" width="160"/></a><br/><sub>#6 · migue.baena</sub></td>
+    <td align="center" width="20%"><a href="https://www.tiktok.com/@milesreevesai/video/7667980059189366019"><img src="https://placehold.co/320x180/191a16/f2f0e8?text=TikTok+%7C+milesreevesai&font=montserrat&bold=true" alt="TikTok — milesreevesai" width="160"/></a><br/><sub>#7 · milesreevesai</sub></td>
+    <td align="center" width="20%"><a href="https://www.tiktok.com/@nikothetech/video/7671890769665477918"><img src="https://placehold.co/320x180/191a16/f2f0e8?text=TikTok+%7C+nikothetech&font=montserrat&bold=true" alt="TikTok — nikothetech" width="160"/></a><br/><sub>#8 · nikothetech</sub></td>
     <td align="center" width="20%"><a href="https://www.youtube.com/watch?v=QucgvbO5gsM"><img src="https://i.ytimg.com/vi/QucgvbO5gsM/hqdefault.jpg" alt="YouTube — Vaibhav Sisinty" width="160"/></a><br/><sub>#9 · Vaibhav Sisinty</sub></td>
     <td align="center" width="20%"><a href="https://www.youtube.com/shorts/fZIBK_4fKq8"><img src="https://i.ytimg.com/vi/fZIBK_4fKq8/hqdefault.jpg" alt="YouTube Shorts — Nick Automates" width="160"/></a><br/><sub>#10 · Nick Automates</sub></td>
   </tr>

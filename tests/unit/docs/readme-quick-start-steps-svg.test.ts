@@ -59,6 +59,14 @@ test("the Quick Start SVG shows six numbered cards with outlined headings and em
     ),
     buildQuickStartSteps().map(({ place, title }, i) => [String(i + 1), place, title])
   );
+  for (const card of cards) {
+    assert.ok(card.querySelector("circle.surface-muted"));
+    const stepNumber = card.querySelector("circle.surface-muted + g.h3");
+    assert.ok(stepNumber);
+    assert.equal(stepNumber.hasAttribute("style"), false, "the step number inherits the kit's ink");
+  }
+  assert.match(svg, /\.h3\{[^}]*fill:var\(--ink\)/);
+  assert.doesNotMatch(svg, /var\(--ok(?:-bg)?\)/);
   assert.deepEqual(
     [...doc.querySelectorAll("text.mono")].map((t) => t.textContent),
     [
