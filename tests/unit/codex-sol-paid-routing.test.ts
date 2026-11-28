@@ -122,6 +122,7 @@ test("Sol allows paid Codex plans and blocks recorded free or go plans", () => {
       "self_serve_business_prolite",
       "enterprise",
       "edu",
+      "edu_plus",
     ]) {
       assert.equal(
         eligibility.isCodexPlanEligibleForModel({ chatgptPlanType: plan }, model),
@@ -157,6 +158,23 @@ test("Sol allows paid Codex plans and blocks recorded free or go plans", () => {
   }
   assert.equal(eligibility.isCodexPlanEligibleForModel({}, "gpt-5.6-terra"), true);
   assert.equal(eligibility.isCodexPlanEligibleForModel({}, "gpt-6-luna-low"), true);
+});
+
+test("an edu_plus plan recorded by the Codex OAuth flow keeps Sol and Astra", () => {
+  // The OAuth flow stores the plan as workspacePlanType; edu_plus is a paid Plus plan.
+  for (const model of ["cx/gpt-6.1-sol-low", "gpt-6-astra"]) {
+    assert.equal(
+      eligibility.isCodexPlanEligibleForModel({ workspacePlanType: "edu_plus" }, model),
+      true,
+      model
+    );
+  }
+});
+
+test("credential routing serves Sol from an edu_plus Codex account", async () => {
+  const eduPlus = await seedCodex("edu_plus", 1);
+  const selected = await auth.getProviderCredentials("codex", null, null, "gpt-6.1-sol-low");
+  assert.equal(selected?.connectionId, eduPlus.id);
 });
 
 test("credential routing skips free Codex accounts for Sol", async () => {
