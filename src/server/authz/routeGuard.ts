@@ -446,6 +446,37 @@ export function isLocalOnlyPath(path: string, method?: string): boolean {
 }
 
 /**
+ * Returns true when `path` matches `SPAWN_CAPABLE_PREFIXES` or
+ * `SPAWN_CAPABLE_PATTERNS` (honoring `LOCAL_ONLY_API_GET_EXEMPTIONS` for safe
+ * read-only methods).
+ *
+ * Spawn-capable routes must remain strictly loopback-only: the private-LAN
+ * widening of `isLocalOnlyPath()` applies only to non-spawning LOCAL_ONLY
+ * routes (e.g. `/api/mcp/*`, `/api/copilot/*`, `/api/jobs*`,
+ * `/api/resilience/connections`), never to routes on the spawn-capable
+ * deny-list (#21017).
+ */
+export function isSpawnCapablePath(path: string, method?: string): boolean {
+  if (method && SAFE_METHODS.has(method.toUpperCase()) && LOCAL_ONLY_API_GET_EXEMPTIONS.has(path)) {
+    return false;
+  }
+  return (
+    SPAWN_CAPABLE_PREFIXES.some(
+      (p) => path === p || path.startsWith(p) || (p.endsWith("/") && path === p.slice(0, -1))
+    ) || SPAWN_CAPABLE_PATTERNS.some((re) => re.test(path))
+  );
+}
+
+/**
+ * Returns true when `path` requires authentication even under
+ * `requireLogin=false` (open mode): either it is an `ALWAYS_PROTECTED` route
+ * OR it is a spawn-capable route (#21017).
+ */
+export function isAlwaysProtectedOrSpawnCapablePath(path: string, method?: string): boolean {
+  return isAlwaysProtectedPath(path) || isSpawnCapablePath(path, method);
+}
+
+/**
  * Runtime predicate consulted by the management policy on every non-loopback
  * request to a LOCAL_ONLY path. Reads the live snapshot:
  *   - returns false if the global kill-switch is off
