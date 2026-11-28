@@ -3,6 +3,7 @@ import { getLearnedReasoningEffortForModel } from "@omniroute/open-sse/services/
 import { isSkippedEffortProvider } from "@omniroute/open-sse/utils/syncedEffortVariants.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import { isReservedProviderPrefix } from "@/shared/constants/reservedProviderPrefixes";
+import { selectCompatibleNodeForPrefix, type CompatibleNodeLike } from "@/lib/providerNodePrefixes";
 import { checkKeyModelAccess } from "../apiKeyGroups";
 import {
   admitSyncedModelsByConnection,
@@ -63,8 +64,34 @@ async function canonicalProviderForAlias(prefix: string): Promise<string | null>
   return canonicalId;
 }
 
+/** Node IDs for a prefix claimed by one or more compatible provider nodes. */
+async function providerNodeIdsForPrefix(prefix: string): Promise<string[]> {
+  if (isReservedProviderPrefix(prefix)) return [];
+  const nodes = (await getCachedProviderNodes()) as CompatibleNodeLike[];
+  const lower = prefix.toLowerCase();
+  const matching = nodes.filter(
+    (node): node is CompatibleNodeLike & { id: string } =>
+      Boolean(node && typeof node.id === "string") &&
+      (node.prefix === prefix ||
+        node.id === prefix ||
+        (typeof node.prefix === "string" && node.prefix.trim().toLowerCase() === lower))
+  );
+  if (matching.length === 0) return [];
+  const ids: string[] = [];
+  const winner = selectCompatibleNodeForPrefix(matching, prefix);
+  if (winner?.id) ids.push(winner.id);
+  for (const node of matching) {
+    if (node.id && !ids.includes(node.id)) {
+      ids.push(node.id);
+    }
+  }
+  return ids;
+}
+
 // Synced and imported models are stored under the canonical provider id, while
 // clients may address the provider by its alias (`sx/tts-rt-v2` for `soniox`).
+// Compatible provider nodes store their models under node.id while clients may
+// address them by their configured prefix (`gufo/Qwen3.8-27B`).
 // The literal prefix is tried first so a provider id that doubles as another
 // provider's alias keeps its current meaning.
 export async function findPublishedModel(
@@ -73,7 +100,14 @@ export async function findPublishedModel(
 ): Promise<{ providerId: string; publishedModelId: string } | null> {
   const providerIds = [providerOrAlias];
   const canonicalId = await canonicalProviderForAlias(providerOrAlias);
-  if (canonicalId) providerIds.push(canonicalId);
+  if (canonicalId && !providerIds.includes(canonicalId)) {
+    providerIds.push(canonicalId);
+  }
+  for (const nodeId of await providerNodeIdsForPrefix(providerOrAlias)) {
+    if (!providerIds.includes(nodeId)) {
+      providerIds.push(nodeId);
+    }
+  }
 
   for (const providerId of providerIds) {
     const [syncedModelsByConnection, admissionRefs, customModels] = await Promise.all([

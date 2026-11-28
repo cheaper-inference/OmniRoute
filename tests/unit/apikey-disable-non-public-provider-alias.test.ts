@@ -150,3 +150,28 @@ test("a group allow rule written against the alias keeps working", async () => {
 
   assert.equal(await apiKeysDb.isModelAllowedForKey(created.key, "sx/tts-rt-v2"), true);
 });
+
+test("disableNonPublicModels allows a provider node's custom and synced models addressed by prefix", async () => {
+  const node = await createProviderNode({
+    type: "openai-compatible",
+    name: "Gufo Node",
+    prefix: "gufo",
+    baseUrl: "https://gufo.example.com/v1",
+  });
+  await modelsDb.addCustomModel(node.id, "Qwen3.8-27B", "Qwen 3.8 27B", "manual", "chat", ["chat"]);
+  await modelsDb.replaceSyncedAvailableModelsForConnection(node.id, "conn-gufo-1", [
+    { id: "DeepSeek-V3", name: "DeepSeek V3" },
+  ]);
+
+  const key = await createRestrictedKey();
+
+  // Both node.id and node.prefix forms must be allowed
+  assert.equal(await apiKeysDb.isModelAllowedForKey(key, `${node.id}/Qwen3.8-27B`), true);
+  assert.equal(await apiKeysDb.isModelAllowedForKey(key, "gufo/Qwen3.8-27B"), true);
+
+  assert.equal(await apiKeysDb.isModelAllowedForKey(key, `${node.id}/DeepSeek-V3`), true);
+  assert.equal(await apiKeysDb.isModelAllowedForKey(key, "gufo/DeepSeek-V3"), true);
+
+  // Unknown model under node prefix is still rejected
+  assert.equal(await apiKeysDb.isModelAllowedForKey(key, "gufo/nonexistent-model"), false);
+});
