@@ -13,7 +13,7 @@ import { resolveEnforcedPolicyKey } from "@/shared/utils/apiKeyPolicy";
 import { getProviderSearchPool } from "@omniroute/open-sse/services/providerConnectionPool.ts";
 import { getCachedProviderNodes } from "@/lib/db/readCache";
 import { getProviderById, resolveProviderId } from "@/shared/constants/providers";
-import { withHiddenModelGate } from "./hiddenModelGate.ts";
+import { withHiddenModelGate, type HiddenModelGateScope } from "./hiddenModelGate.ts";
 import {
   checkResolvedModelPermission,
   markLocalModelPolicyResponse,
@@ -234,9 +234,15 @@ export function createResolvedModelGate(opts: {
  * #12666: the dispatch gate chat.ts uses — key/combo authorization first (its rejection keeps
  * precedence), then hidden-model enforcement on the same resolved targets. Composed here so the
  * frozen chat.ts does not grow (file-size gate).
+ *
+ * `scope` tells the visibility gate whether this dispatch runs as a stored combo step, so a
+ * `combos_only` target stays reachable from a combo while a direct call still 404s.
  */
 export function createVisibleResolvedModelGate(
-  opts: Parameters<typeof createResolvedModelGate>[0]
+  opts: Parameters<typeof createResolvedModelGate>[0] & HiddenModelGateScope
 ): (resolvedModels: Iterable<string>) => Promise<Response | null> {
-  return withHiddenModelGate(createResolvedModelGate(opts), opts.modelStr);
+  return withHiddenModelGate(createResolvedModelGate(opts), opts.modelStr, {
+    isCombo: opts.isCombo,
+    contextModel: opts.contextModel,
+  });
 }

@@ -76,6 +76,7 @@ import CompatibleNodeCard from "./components/CompatibleNodeCard";
 import ProviderModalsPanel from "./components/ProviderModalsPanel";
 import EmptyConnectionsPlaceholder from "./components/EmptyConnectionsPlaceholder";
 import UpstreamProxyCard from "./components/UpstreamProxyCard";
+import ProviderCombosOnlyCard from "./components/ProviderCombosOnlyCard";
 import SearchProviderCard from "./components/SearchProviderCard";
 import NoAuthProviderControls from "./components/NoAuthProviderControls";
 import AnonymousFallbackToggle from "./components/AnonymousFallbackToggle";
@@ -548,7 +549,8 @@ export default function ProviderDetailPageClient() {
   const compat = useModelCompatState(
     modelMeta.customModels,
     modelMeta.modelCompatOverrides,
-    providerId
+    providerId,
+    modelMeta.providerCombosOnly
   );
   // Combo membership for every model on this provider — drives the small
   // "used in combo X" badge behind each model row (#16216).
@@ -557,6 +559,7 @@ export default function ProviderDetailPageClient() {
   const effectiveModelNormalize = compat.effectiveModelNormalize;
   const effectiveModelPreserveDeveloper = compat.effectiveModelPreserveDeveloper;
   const effectiveModelHidden = compat.isModelHidden;
+  const resolveModelVisibility = compat.resolveModelVisibility;
   const getUpstreamHeadersRecordForModel = compat.getUpstreamHeadersRecord;
 
   const compatibleFallbackModels = useMemo(
@@ -583,7 +586,9 @@ export default function ProviderDetailPageClient() {
     setVisibilityFilter,
     saveModelCompatFlags,
     handleToggleModelHidden,
+    handleSetModelVisibility,
     handleBulkToggleModelHidden,
+    handleBulkSetModelVisibility,
     handleClearAllModels,
     onTestModel,
     handleTestAll,
@@ -857,6 +862,14 @@ export default function ProviderDetailPageClient() {
         />
       )}
 
+      {/* Provider-level `combos_only` default — same gate as the model list below. */}
+      {!isSearchProvider && !isUpstreamProxyProvider && (
+        <ProviderCombosOnlyCard
+          providerId={providerId}
+          initialCombosOnly={modelMeta.providerCombosOnly}
+        />
+      )}
+
       {/* Models — hidden for search providers (they don't have models) */}
       {!isSearchProvider && !isUpstreamProxyProvider && (
         <Card>
@@ -915,13 +928,16 @@ export default function ProviderDetailPageClient() {
             setVisibilityFilter={setVisibilityFilter}
             saveModelCompatFlags={saveModelCompatFlags}
             handleToggleModelHidden={handleToggleModelHidden}
+            handleSetModelVisibility={handleSetModelVisibility}
             handleBulkToggleModelHidden={handleBulkToggleModelHidden}
+            handleBulkSetModelVisibility={handleBulkSetModelVisibility}
             handleClearAllModels={handleClearAllModels}
             onTestModel={onTestModel}
             handleTestAll={handleTestAll}
             effectiveModelNormalize={effectiveModelNormalize}
             effectiveModelPreserveDeveloper={effectiveModelPreserveDeveloper}
             effectiveModelHidden={effectiveModelHidden}
+            resolveModelVisibility={resolveModelVisibility}
             getUpstreamHeadersRecordForModel={getUpstreamHeadersRecordForModel}
             t={t}
           />

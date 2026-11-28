@@ -20,6 +20,7 @@ import ProviderTestSlideOver from "@/shared/components/ProviderTestSlideOver";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 import {
+  getProviderAlias,
   isAnthropicCompatibleProvider,
   isClaudeCodeCompatibleProvider,
   isOpenAICompatibleProvider,
@@ -35,6 +36,7 @@ import {
   isKimiPartnerProviderId,
 } from "../featuredProviders";
 import { useOpenRouterProviderStat } from "../context/openRouterProviderStatsContext";
+import { useProviderCombosOnly } from "../context/combosOnlyProvidersContext";
 
 interface ProviderStats {
   total?: number;
@@ -390,6 +392,29 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
   const sponsorBrand = SPONSOR_BRAND_COLORS[provider.id || providerId];
   const openRouterStat = useOpenRouterProviderStat(provider.id || providerId);
   const codexServiceTierChip = renderCodexServiceTierChip(providerId, stats.codexServiceTier, t);
+  // Provider-level `combos_only` default: every model of a marked provider inherits
+  // "reachable from combos only". A chip here so the operator sees the state without
+  // opening the provider, matched through the same key forms the catalog uses.
+  const combosOnlyProvider = useProviderCombosOnly([
+    providerId,
+    provider.id,
+    getProviderAlias(providerId),
+  ]);
+  const combosOnlyChip = combosOnlyProvider ? (
+    <Badge
+      key="combos-only"
+      size="sm"
+      variant="warning"
+      icon="call_split"
+      title={providerText(
+        t,
+        "combosOnlyProviderCardTooltip",
+        "Combos only: this provider's models are hidden from /v1/models and rejected on a direct call"
+      )}
+    >
+      {providerText(t, "combosOnlyBadge", "Combos only")}
+    </Badge>
+  ) : null;
 
   // Kimi (Moonshot AI) official-partnership badge.
   const kimiOfficialSupporterChip = isKimiPartner ? (
@@ -588,10 +613,12 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
               isCcCompatible ||
               isAnthropicCompatible ||
               isSponsorPartner ||
+              combosOnlyProvider ||
               Boolean(openRouterStat)) && (
               <div className="flex flex-wrap items-center gap-1">
                 {kimiOfficialSupporterChip}
                 {cheaperInferenceSupporterChip}
+                {combosOnlyChip}
                 {openRouterPopularityChip}
                 {provider.serviceKinds?.map((k) => (
                   <Badge key={k} size="sm">

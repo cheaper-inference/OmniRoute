@@ -18,6 +18,11 @@ import { ActionBar, AutoGrid, Button } from "@/shared/components";
 import { matchesModelCatalogQuery } from "@/shared/utils/modelCatalogSearch";
 import { isFreeModel, sortModelsFreeFirst } from "@/shared/utils/freeModels";
 import {
+  matchesVisibilityFilter,
+  type ModelVisibilityFilter,
+  type ModelVisibilityMode,
+} from "@/shared/utils/modelVisibility";
+import {
   getDisplayModelAlias,
   providerText,
   type ProviderMessageTranslator,
@@ -59,6 +64,7 @@ export interface ProviderModelsSectionProps {
     customModels: any[];
     modelCompatOverrides?: any[];
     endpointAdapters?: Record<string, "available" | "unavailable" | "unknown">;
+    providerCombosOnly?: boolean;
   };
   modelAliases: Record<string, string>;
   /** model id → combo names that reference it, for the "used in combo" badge. */
@@ -104,17 +110,29 @@ export interface ProviderModelsSectionProps {
   testingAll: boolean;
   testProgress: { done: number; total: number } | null;
   autoHideFailed: boolean;
-  visibilityFilter: "all" | "visible" | "hidden";
+  visibilityFilter: ModelVisibilityFilter;
   providerAliasEntries: [string, string][];
   setModelFilter: (v: string) => void;
   setAutoHideFailed: (v: boolean) => void;
-  setVisibilityFilter: (v: "all" | "visible" | "hidden") => void;
+  setVisibilityFilter: (v: ModelVisibilityFilter) => void;
   saveModelCompatFlags: (modelId: string, patch: ModelCompatSavePatch) => Promise<void>;
   handleToggleModelHidden: (providerKey: string, modelId: string, hidden: boolean) => Promise<void>;
+  /** Set one model's three-state visibility. Absent falls back to `handleToggleModelHidden`. */
+  handleSetModelVisibility?: (
+    providerKey: string,
+    modelId: string,
+    mode: ModelVisibilityMode
+  ) => Promise<void>;
   handleBulkToggleModelHidden: (
     providerKey: string,
     modelIds: string[],
     hidden: boolean
+  ) => Promise<void>;
+  /** Bulk three-state write ("Combos only" in the toolbar). Optional for older callers. */
+  handleBulkSetModelVisibility?: (
+    providerKey: string,
+    modelIds: string[],
+    mode: ModelVisibilityMode
   ) => Promise<void>;
   handleClearAllModels: () => Promise<void>;
   onTestModel: (modelId: string, fullModel: string) => Promise<void>;
@@ -124,6 +142,8 @@ export interface ProviderModelsSectionProps {
   effectiveModelNormalize: (modelId: string, protocol?: string) => boolean;
   effectiveModelPreserveDeveloper: (modelId: string, protocol?: string) => boolean;
   effectiveModelHidden: (modelId: string) => boolean;
+  /** Three-state visibility with the provider-level default already applied. Optional. */
+  resolveModelVisibility?: (modelId: string) => ModelVisibilityMode;
   getUpstreamHeadersRecordForModel: (modelId: string, protocol: string) => Record<string, string>;
 
   // Translation
@@ -184,13 +204,16 @@ export default function ProviderModelsSection({
   setVisibilityFilter,
   saveModelCompatFlags,
   handleToggleModelHidden,
+  handleSetModelVisibility,
   handleBulkToggleModelHidden,
+  handleBulkSetModelVisibility,
   handleClearAllModels,
   onTestModel,
   handleTestAll,
   effectiveModelNormalize,
   effectiveModelPreserveDeveloper,
   effectiveModelHidden,
+  resolveModelVisibility,
   getUpstreamHeadersRecordForModel,
   t,
 }: ProviderModelsSectionProps) {
@@ -326,6 +349,17 @@ export default function ProviderModelsSection({
           onModelsChanged={fetchProviderModelMeta}
           allowImport={allowModelImport && compatibleSupportsModelImport}
           isModelHidden={effectiveModelHidden}
+          resolveModelVisibility={resolveModelVisibility}
+          onSetVisibility={
+            handleSetModelVisibility
+              ? (modelId, mode) => handleSetModelVisibility(providerId, modelId, mode)
+              : undefined
+          }
+          onBulkSetVisibility={
+            handleBulkSetModelVisibility
+              ? (modelIds, mode) => handleBulkSetModelVisibility(providerId, modelIds, mode)
+              : undefined
+          }
           onToggleHidden={(modelId, hidden) => handleToggleModelHidden(providerId, modelId, hidden)}
           onBulkToggleHidden={(modelIds, hidden) =>
             handleBulkToggleModelHidden(providerId, modelIds, hidden)
@@ -404,6 +438,17 @@ export default function ProviderModelsSection({
           saveModelCompatFlags={saveModelCompatFlags}
           compatSavingModelId={compatSavingModelId}
           isModelHidden={effectiveModelHidden}
+          resolveModelVisibility={resolveModelVisibility}
+          onSetVisibility={
+            handleSetModelVisibility
+              ? (modelId, mode) => handleSetModelVisibility(providerId, modelId, mode)
+              : undefined
+          }
+          onBulkSetVisibility={
+            handleBulkSetModelVisibility
+              ? (modelIds, mode) => handleBulkSetModelVisibility(providerId, modelIds, mode)
+              : undefined
+          }
           onToggleHidden={(modelId, hidden) => handleToggleModelHidden(providerId, modelId, hidden)}
           onBulkToggleHidden={(modelIds, hidden) =>
             handleBulkToggleModelHidden(providerId, modelIds, hidden)
@@ -468,23 +513,25 @@ export default function ProviderModelsSection({
     {}
   );
 
-  const modelsWithVisibility = models.map((model) => ({
-    ...model,
-    isHidden: effectiveModelHidden(model.id),
-    isFree: isFreeModel(providerId, { id: model.id, isFree: (model as any).isFree }),
-  }));
+  const modelsWithVisibility = models.map((model) => {
+    // Three-state visibility, provider default included: a `combos_only` model is still a
+    // served model, so it is not "hidden" — the filter and the eye toggle treat it apart.
+    const visibilityMode =
+      resolveModelVisibility?.(model.id) ?? (effectiveModelHidden(model.id) ? "hidden" : "visible");
+    return {
+      ...model,
+      visibilityMode,
+      isHidden: visibilityMode === "hidden",
+      isFree: isFreeModel(providerId, { id: model.id, isFree: (model as any).isFree }),
+    };
+  });
   const filteredModels = modelsWithVisibility.filter((model) => {
     const matchesQuery = matchesModelCatalogQuery(modelFilter, {
       modelId: model.id,
       modelName: model.name,
       source: model.source,
     });
-    const matchesVisibility =
-      visibilityFilter === "all"
-        ? true
-        : visibilityFilter === "visible"
-          ? !model.isHidden
-          : model.isHidden;
+    const matchesVisibility = matchesVisibilityFilter(visibilityFilter, model.visibilityMode);
     const matchesFreeFilter =
       freeFilter === "all" ? true : freeFilter === "free" ? model.isFree : !model.isFree;
     return matchesQuery && matchesVisibility && matchesFreeFilter;
@@ -494,7 +541,7 @@ export default function ProviderModelsSection({
     : filteredModels;
   const activeCount = modelsWithVisibility.filter((m) => !m.isHidden).length;
   const hiddenFilteredCount = filteredModels.filter((m) => m.isHidden).length;
-  const visibleFilteredCount = filteredModels.length - hiddenFilteredCount;
+  const visibleFilteredCount = filteredModels.filter((m) => !m.isHidden).length;
   const testAllTargets = filteredModels
     .filter((m) => !m.isHidden)
     .map((m) => ({ modelId: m.id, fullModel: `${providerDisplayAlias}/${m.id}` }));
@@ -510,11 +557,17 @@ export default function ProviderModelsSection({
           activeCount={activeCount}
           totalCount={modelsWithVisibility.length}
           onSelectAll={() =>
-            handleBulkToggleModelHidden(
-              providerId,
-              filteredModels.map((model) => model.id),
-              false
-            )
+            handleBulkSetModelVisibility
+              ? handleBulkSetModelVisibility(
+                  providerId,
+                  filteredModels.map((model) => model.id),
+                  "visible"
+                )
+              : handleBulkToggleModelHidden(
+                  providerId,
+                  filteredModels.map((model) => model.id),
+                  false
+                )
           }
           onDeselectAll={() =>
             handleBulkToggleModelHidden(
@@ -523,8 +576,19 @@ export default function ProviderModelsSection({
               true
             )
           }
+          onCombosOnly={
+            handleBulkSetModelVisibility
+              ? () =>
+                  handleBulkSetModelVisibility(
+                    providerId,
+                    filteredModels.map((model) => model.id),
+                    "combos_only"
+                  )
+              : undefined
+          }
           selectAllDisabled={hiddenFilteredCount === 0 || bulkVisibilityAction !== null}
           deselectAllDisabled={visibleFilteredCount === 0 || bulkVisibilityAction !== null}
+          combosOnlyDisabled={visibleFilteredCount === 0 || bulkVisibilityAction !== null}
           onTestAll={() => handleTestAll(testAllTargets)}
           testingAll={testingAll}
           testProgress={testProgress}
@@ -583,6 +647,11 @@ export default function ProviderModelsSection({
               compatDisabled={compatSavingModelId === model.id}
               onToggleHidden={(modelId, hidden) =>
                 handleToggleModelHidden(providerId, modelId, hidden)
+              }
+              onSetVisibility={
+                handleSetModelVisibility
+                  ? (modelId, mode) => handleSetModelVisibility(providerId, modelId, mode)
+                  : undefined
               }
               togglingHidden={togglingModelId === model.id}
               onTestModel={onTestModel}

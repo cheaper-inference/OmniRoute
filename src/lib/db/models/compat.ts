@@ -8,7 +8,12 @@ import {
   type ThinkingReplayMode,
 } from "@/shared/constants/modelCompat";
 import { isForbiddenUpstreamHeaderName } from "@/shared/constants/upstreamHeaders";
-import { isHiddenForModality } from "@/shared/utils/modelVisibility";
+import {
+  isHiddenForModality,
+  normalizeVisibilityMode,
+  resolveExplicitVisibility,
+  type ModelVisibilityMode,
+} from "@/shared/utils/modelVisibility";
 import { getKeyValue } from "./shared";
 import { finishModelCatalogWriteWithBackup } from "./modelCatalogWriteSignals";
 
@@ -127,6 +132,15 @@ export type ModelCompatOverride = {
    * everywhere" behavior), so existing rows keep working unchanged.
    */
   hiddenModalities?: Record<string, boolean>;
+  /**
+   * Three-state visibility across every modality (`visible` | `combos_only` | `hidden`).
+   * `hidden` is mirrored into the legacy `isHidden` flag on write so pre-three-state readers
+   * keep behaving; `combos_only` is deliberately NOT mirrored (it must stay reachable from a
+   * stored combo). See `src/shared/utils/modelVisibility.ts` for the precedence rule.
+   */
+  visibilityMode?: ModelVisibilityMode;
+  /** Per-modality three-state override; a key here always wins over `visibilityMode`. */
+  visibilityModalities?: Record<string, ModelVisibilityMode>;
   apiFormat?: string;
   targetFormat?: string;
   supportsVision?: boolean;
@@ -150,6 +164,18 @@ export function isOverrideHiddenForModality(
   modality: string
 ): boolean {
   return isHiddenForModality(override, modality);
+}
+
+/**
+ * The three-state visibility a compat-override row states explicitly for a modality, or
+ * `null` when the row says nothing (so a provider-level default applies). Reads the new
+ * fields first and falls back to the legacy hidden flags — see `resolveExplicitVisibility`.
+ */
+export function getOverrideVisibilityForModality(
+  override: ModelCompatOverride | null | undefined,
+  modality: string = "chat"
+): ModelVisibilityMode | null {
+  return resolveExplicitVisibility(override, modality);
 }
 
 export function readCompatList(providerId: string): ModelCompatOverride[] {
@@ -279,10 +305,20 @@ export type ModelCompatPatch = {
   upstreamHeaders?: Record<string, string> | null;
   isHidden?: boolean | null;
   /**
+   * Three-state visibility write. `hidden` mirrors into the legacy `isHidden` /
+   * `hiddenModalities[modality]` flags so pre-three-state readers (combo filters, older
+   * dashboards) keep agreeing with it; `combos_only` and `visible` never do — a
+   * `combos_only` model must stay dispatchable from a stored combo, and an explicit
+   * `visible` is the positive exception over a provider-level combos-only default.
+   * `null` clears every visibility field for that scope, returning to the default.
+   */
+  visibilityMode?: ModelVisibilityMode | null;
+  /**
    * #12172: when set alongside `isHidden`, scopes the write to that one
    * modality (see {@link ModelCompatOverride.hiddenModalities}) instead of
    * the legacy all-modalities flag. `isHidden: null` with a `modality` clears
    * just that modality's override (reverting it to inherit the legacy flag).
+   * A `visibilityMode` write is scoped the same way.
    */
   modality?: string | null;
   apiFormat?: string | null;
@@ -297,6 +333,53 @@ export function compatByProtocolHasEntries(map: CompatByProtocolMap | undefined)
     const v = map[k as ModelCompatProtocolKey];
     return v && typeof v === "object" && Object.keys(v).length > 0;
   });
+}
+
+/**
+ * Write a three-state visibility choice into a compat row.
+ *
+ * The legacy flags are kept in sync only where it is unambiguous:
+ *  - `hidden` mirrors into `isHidden` / `hiddenModalities[modality]`, so every pre-three-state
+ *    reader (combo candidate filters, older dashboards, `getModelIsHidden`) agrees;
+ *  - `combos_only` and `visible` DELETE the legacy flags for that scope — a combos-only model
+ *    must stay dispatchable from a stored combo, and an explicit `visible` is the positive
+ *    exception over a provider-level combos-only default;
+ *  - `null` removes only the new field and leaves the legacy flags exactly as patched, so a
+ *    caller that says "no three-state statement" is not silently rewritten into one.
+ */
+function applyVisibilityModePatch(
+  next: ModelCompatOverride,
+  value: ModelVisibilityMode | null | undefined,
+  modality: string | null | undefined
+): void {
+  const scope = typeof modality === "string" && modality ? modality : null;
+  const mode = normalizeVisibilityMode(value);
+  if (scope) {
+    const visibilityModalities = { ...(next.visibilityModalities || {}) };
+    if (!mode) delete visibilityModalities[scope];
+    else visibilityModalities[scope] = mode;
+    if (Object.keys(visibilityModalities).length > 0)
+      next.visibilityModalities = visibilityModalities;
+    else delete next.visibilityModalities;
+  } else if (!mode) {
+    delete next.visibilityMode;
+  } else {
+    next.visibilityMode = mode;
+  }
+  // `null` means "no three-state statement": the legacy patch stands on its own.
+  if (!mode) return;
+
+  const hidden = mode === "hidden";
+  if (scope) {
+    const hiddenModalities = { ...(next.hiddenModalities || {}) };
+    if (hidden) hiddenModalities[scope] = true;
+    else delete hiddenModalities[scope];
+    if (Object.keys(hiddenModalities).length > 0) next.hiddenModalities = hiddenModalities;
+    else delete next.hiddenModalities;
+    return;
+  }
+  if (hidden) next.isHidden = true;
+  else delete next.isHidden;
 }
 
 /**
@@ -386,6 +469,9 @@ export function mergeModelCompatOverride(
       next.isHidden = Boolean(patch.isHidden);
     }
   }
+  if ("visibilityMode" in patch) {
+    applyVisibilityModePatch(next, patch.visibilityMode, patch.modality);
+  }
   if ("apiFormat" in patch) {
     if (!patch.apiFormat) {
       delete next.apiFormat;
@@ -409,7 +495,9 @@ export function mergeModelCompatOverride(
   }
   const hasHiddenFlag =
     Object.prototype.hasOwnProperty.call(next, "isHidden") ||
-    (!!next.hiddenModalities && Object.keys(next.hiddenModalities).length > 0);
+    (!!next.hiddenModalities && Object.keys(next.hiddenModalities).length > 0) ||
+    normalizeVisibilityMode(next.visibilityMode) !== null ||
+    (!!next.visibilityModalities && Object.keys(next.visibilityModalities).length > 0);
   const hasApiFormat = Object.prototype.hasOwnProperty.call(next, "apiFormat");
   const hasTargetFormat = Object.prototype.hasOwnProperty.call(next, "targetFormat");
   const hasVisionFlag = Object.prototype.hasOwnProperty.call(next, "supportsVision");

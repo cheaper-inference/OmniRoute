@@ -40,8 +40,11 @@ import {
   admitSyncedModelsByConnection,
   getActiveConnectionAdmissionRefs,
   getCustomModels,
+  getModelVisibilityMap,
   getSyncedAvailableModelsByConnection,
 } from "@/lib/db/models";
+import { normalizeCombosOnlyProviderSet } from "@/shared/utils/providerCombosOnly";
+import { filterCombosOnlyCandidates } from "./combosOnlyFilter";
 import { filterPaidOnlyCandidatesWithDiagnosis } from "./paidModelFilter";
 import { filterLockoutCandidates, warnPoolDrop } from "./modelLockoutFilter";
 import { filterModelExposureCandidates } from "./modelExposureFilter";
@@ -596,6 +599,19 @@ export async function prepareVirtualAutoComboInputs(
       !isRuntimeRetiredProviderId(connection.provider)
   );
   const hiddenModelsMap = getHiddenModelsByProvider();
+  // Three-state visibility snapshot for the auto/* pool: `combos_only` models are never
+  // candidates here (see combosOnlyFilter.ts) — auto/* is not a hand-compiled combo.
+  const visibilityMap = getModelVisibilityMap();
+  const combosOnlyProviders = normalizeCombosOnlyProviderSet(
+    (settings as { combosOnlyProviders?: unknown }).combosOnlyProviders
+  );
+  const combosOnlyProviderAliases = new Map<string, readonly string[]>();
+  for (const [providerId, providerInfo] of Object.entries(getProviderRegistry())) {
+    const alias = (providerInfo as { alias?: unknown }).alias;
+    if (typeof alias === "string" && alias && alias !== providerId) {
+      combosOnlyProviderAliases.set(providerId, [alias]);
+    }
+  }
   // #7622: a no-auth provider's own provider_connections row (#6557) can carry
   // `providerSpecificData.excludedModels` regardless of its isActive state (the
   // dispatch-time enforcement in auth.ts does not gate on isActive either), so
@@ -785,6 +801,18 @@ export async function prepareVirtualAutoComboInputs(
     // see src/shared/utils/modelExposureList.ts for why (#6512's lesson).
     const exposureFilteredPool = filterModelExposureCandidates(pool, settings);
     pool = applyStage(exposureFilteredPool, "model_exposure", "model-exposure");
+
+    // Three-state visibility: a `combos_only` model (its own override, or its provider's
+    // default) stays reachable from combos the operator compiled, but never from `auto/*` —
+    // an auto combo is not a hand-compiled one, so letting it route there would be the same
+    // catalog-only leak #6512/#11481 already closed twice.
+    const combosOnlyFilteredPool = filterCombosOnlyCandidates(pool, {
+      combosOnly: visibilityMap.combosOnly,
+      explicitVisible: visibilityMap.explicitVisible,
+      combosOnlyProviders,
+      providerAliases: combosOnlyProviderAliases,
+    });
+    pool = applyStage(combosOnlyFilteredPool, "combos_only", "combos-only");
 
     // STRICT_ZERO_COST: opt-in, off by default (`settings.freeAccessPolicy !== "strict"`
     // leaves `pool` byte-identical, same contract as `hidePaidModels`). See

@@ -16,6 +16,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Badge, Button } from "@/shared/components";
 import { providerText } from "../providerPageHelpers";
+import type { ModelVisibilityMode } from "@/shared/utils/modelVisibility";
 import ModelCompatPopover from "./ModelCompatPopover";
 import ModelVisionOverrideEditor from "./ModelVisionOverrideEditor";
 import ModelEndpointTagsEditor, { type ModelEndpointEditorInfo } from "./ModelEndpointTagsEditor";
@@ -44,6 +45,8 @@ export interface PassthroughModelRowProps {
   source?: string;
   isFree?: boolean;
   isHidden?: boolean;
+  /** Effective three-state visibility (provider default already applied). */
+  visibilityMode?: ModelVisibilityMode;
   /** Combo names that reference this model, for the "used in combo" badge. */
   combos?: string[];
   copied?: string;
@@ -58,6 +61,8 @@ export interface PassthroughModelRowProps {
   getUpstreamHeadersRecord: (protocol: string) => Record<string, string>;
   compatDisabled?: boolean;
   onToggleHidden?: (modelId: string, hidden: boolean) => Promise<void>;
+  /** Set the row's three-state visibility (`visible` | `combos_only` | `hidden`). */
+  onSetVisibility?: (modelId: string, mode: ModelVisibilityMode) => Promise<void>;
   togglingHidden?: boolean;
   onTestModel?: (modelId: string, fullModel: string) => Promise<void>;
   testStatus?: "ok" | "error" | "quota" | null;
@@ -91,6 +96,7 @@ export default function PassthroughModelRow({
   source,
   isFree,
   isHidden,
+  visibilityMode: visibilityModeProp,
   combos,
   copied,
   onCopy,
@@ -105,6 +111,7 @@ export default function PassthroughModelRow({
   provider,
   compatDisabled,
   onToggleHidden,
+  onSetVisibility,
   togglingHidden,
   onTestModel,
   testStatus,
@@ -168,10 +175,14 @@ export default function PassthroughModelRow({
     }
   };
 
+  const visibilityMode: ModelVisibilityMode =
+    visibilityModeProp ?? (isHidden ? "hidden" : "visible");
+  const isCombosOnly = visibilityMode === "combos_only";
+
   return (
     <div
       className={`flex min-w-0 flex-col gap-2 rounded-lg border border-border px-3.5 py-3 transition-opacity hover:bg-sidebar/50 ${
-        isHidden ? "opacity-50" : ""
+        isHidden ? "opacity-50" : isCombosOnly ? "border-dashed" : ""
       }`}
     >
       <div className="flex min-w-0 items-center gap-2">
@@ -217,6 +228,27 @@ export default function PassthroughModelRow({
       <div className="flex min-w-0 items-center justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
           <ModelSourceBadge source={source} />
+          {visibilityMode !== "visible" && (
+            <Badge
+              size="sm"
+              variant={visibilityMode === "hidden" ? "default" : "warning"}
+              icon={visibilityMode === "hidden" ? "visibility_off" : "call_split"}
+              className="shrink-0 whitespace-nowrap"
+              title={
+                isCombosOnly
+                  ? providerText(
+                      t,
+                      "combosOnlyBadgeTooltip",
+                      "Reachable only from combos — hidden from /v1/models and direct calls"
+                    )
+                  : providerText(t, "hiddenBadgeTooltip", "Hidden from /v1/models and combos")
+              }
+            >
+              {isCombosOnly
+                ? providerText(t, "combosOnlyBadge", "Combos only")
+                : providerText(t, "hiddenBadge", "Hidden")}
+            </Badge>
+          )}
           {endpointInfo && (
             <ModelEndpointTagsEditor
               provider={provider}
@@ -346,13 +378,17 @@ export default function PassthroughModelRow({
               )}
             </Button>
           )}
-          {onToggleHidden && (
+          {(onSetVisibility || onToggleHidden) && (
             <Button
               variant="ghost"
               size="icon-2xs"
               tone="muted"
               icon={isHidden ? "visibility_off" : "visibility"}
-              onClick={() => onToggleHidden(modelId, !isHidden)}
+              onClick={() =>
+                onSetVisibility
+                  ? onSetVisibility(modelId, isHidden ? "visible" : "hidden")
+                  : onToggleHidden?.(modelId, !isHidden)
+              }
               disabled={togglingHidden}
               className="aria-disabled:opacity-40"
               title={
@@ -365,6 +401,38 @@ export default function PassthroughModelRow({
                   ? providerText(t, "showModel", "Show model")
                   : providerText(t, "hideModel", "Hide model")
               }
+            />
+          )}
+          {onSetVisibility && (
+            <Button
+              variant="ghost"
+              size="icon-2xs"
+              tone="muted"
+              icon="call_split"
+              onClick={() => onSetVisibility(modelId, isCombosOnly ? "visible" : "combos_only")}
+              disabled={togglingHidden || isHidden}
+              className={
+                isCombosOnly ? "text-warning aria-disabled:opacity-40" : "aria-disabled:opacity-40"
+              }
+              title={
+                isCombosOnly
+                  ? providerText(t, "makeVisibleModel", "Make this model directly callable")
+                  : providerText(
+                      t,
+                      "makeCombosOnlyModel",
+                      "Keep this model for combos only — hide it from /v1/models and direct calls"
+                    )
+              }
+              aria-label={
+                isCombosOnly
+                  ? providerText(t, "makeVisibleModel", "Make this model directly callable")
+                  : providerText(
+                      t,
+                      "makeCombosOnlyModel",
+                      "Keep this model for combos only — hide it from /v1/models and direct calls"
+                    )
+              }
+              aria-pressed={isCombosOnly}
             />
           )}
           <ModelCompatPopover

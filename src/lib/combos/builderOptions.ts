@@ -1,4 +1,9 @@
-import { getAllCustomModels, getAllSyncedAvailableModels, getModelIsHidden } from "@/lib/db/models";
+import {
+  getAllCustomModels,
+  getAllSyncedAvailableModels,
+  getModelIsHidden,
+  getModelStoredVisibility,
+} from "@/lib/db/models";
 import { getCombos } from "@/lib/db/combos";
 import { getProviderConnections, getProviderNodes } from "@/lib/db/providers";
 import { getSettings } from "@/lib/db/settings";
@@ -8,6 +13,11 @@ import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
 import { getSyncedCapabilities } from "@/lib/modelsDevSync";
 import { getModelsByProviderId } from "@/shared/constants/models";
 import { getWebComboTargets } from "@/shared/utils/webComboTargets";
+import {
+  isProviderCombosOnly,
+  normalizeCombosOnlyProviderSet,
+  resolveVisibilityWithProviderDefault,
+} from "@/shared/utils/providerCombosOnly";
 import { getImageProvider } from "@omniroute/open-sse/config/imageRegistry.ts";
 import {
   getSpeechProvider,
@@ -94,6 +104,12 @@ export interface ComboBuilderModelOption {
   contextLength?: number;
   outputTokenLimit?: number;
   supportsThinking?: boolean;
+  /**
+   * `combos_only` — the model is not advertised in `/v1/models` and a direct call 404s, but a
+   * combo may dispatch it. Surfaced so the builder can show the badge and the operator knows
+   * why this option is absent from their model list.
+   */
+  combosOnly?: boolean;
 }
 
 export interface ComboBuilderConnectionOption {
@@ -337,11 +353,22 @@ function addModelOption(
     supportsThinking?: boolean;
     customPrecedence?: boolean;
     visibilityModality?: string;
+    /** Provider-level `combos_only` default (`settings.combosOnlyProviders`). */
+    providerCombosOnly?: boolean;
   }
 ) {
   const modelId = toStringOrNull(input.id);
   if (!modelId) return;
+  // Only `hidden` is dropped from the builder: a `combos_only` model is exactly what this
+  // selector exists for, so it stays listed and is flagged for the badge. The provider-level
+  // default is resolved through the shared rule, so an explicit `visible` on the model still
+  // wins over it.
   if (getModelIsHidden(providerId, modelId, input.visibilityModality)) return;
+  const combosOnly =
+    resolveVisibilityWithProviderDefault(
+      getModelStoredVisibility(providerId, modelId, input.visibilityModality),
+      input.providerCombosOnly === true
+    ) === "combos_only";
 
   const nextSourcePriority = getSourcePriority(input.source);
   const existing = modelMap.get(modelId);
@@ -352,6 +379,7 @@ function addModelOption(
       name: toStringOrNull(input.name) || modelId,
       source: input.source,
       sources: [input.source],
+      ...(combosOnly ? { combosOnly: true } : {}),
       ...(input.supportedEndpoints && input.supportedEndpoints.length > 0
         ? { supportedEndpoints: input.supportedEndpoints }
         : {}),
@@ -417,6 +445,9 @@ function addModelOption(
   existing.sources = Array.from(mergedSources).sort(
     (left, right) => getSourcePriority(left) - getSourcePriority(right)
   );
+  // Visibility is OR'd across sources: once any source says `combos_only`, the option carries
+  // the badge, otherwise a later source would silently drop the flag.
+  if (combosOnly) existing.combosOnly = true;
 }
 
 /**
@@ -428,7 +459,8 @@ function addModelOption(
  */
 function addStaticMediaModelOptions(
   modelMap: Map<string, ComboBuilderModelOption>,
-  providerId: string
+  providerId: string,
+  providerCombosOnly: boolean
 ): void {
   const append = (
     models: unknown,
@@ -441,6 +473,7 @@ function addStaticMediaModelOptions(
       if (!model || typeof model !== "object" || Array.isArray(model)) continue;
       const entry = model as { id?: unknown; name?: unknown };
       addModelOption(modelMap, providerId, {
+        providerCombosOnly,
         id: toStringOrNull(entry.id),
         name: toStringOrNull(entry.name),
         source: "system",
@@ -490,17 +523,22 @@ function buildModelOptions(
   providerId: string,
   builtInModels: RegistryModel[],
   syncedModels: SyncedModelLike[],
-  customModels: CustomModelLike[]
+  customModels: CustomModelLike[],
+  providerCombosOnly: boolean
 ): Map<string, ComboBuilderModelOption> {
   const modelMap = new Map<string, ComboBuilderModelOption>();
   const fallbackModels = getCompatibleFallbackModels(providerId, builtInModels);
+  // Every option this builder adds inherits the provider-level default; passing it through one
+  // closure keeps the nine call sites below unchanged.
+  const add = (input: Parameters<typeof addModelOption>[2]) =>
+    addModelOption(modelMap, providerId, { ...input, providerCombosOnly });
 
   for (const model of syncedModels) {
     const resolved = getResolvedModelCapabilities({
       provider: providerId,
       model: toStringOrNull(model.id),
     });
-    addModelOption(modelMap, providerId, {
+    add({
       id: toStringOrNull(model.id),
       name: toStringOrNull(model.name),
       source: "imported",
@@ -568,7 +606,7 @@ function buildModelOptions(
       // addModelOption; this guards the base that no longer reaches the map.)
       if (getModelIsHidden(providerId, baseId)) continue;
       const base = modelMap.get(baseId);
-      addModelOption(modelMap, providerId, {
+      add({
         id: rawId,
         name: base ? `${base.name} (${rawId.slice(baseId.length + 1)})` : rawId,
         source: "imported",
@@ -585,7 +623,7 @@ function buildModelOptions(
       provider: providerId,
       model: toStringOrNull(model.id),
     });
-    addModelOption(modelMap, providerId, {
+    add({
       id: toStringOrNull(model.id),
       name: toStringOrNull(model.name),
       source: "system",
@@ -595,9 +633,9 @@ function buildModelOptions(
     });
   }
 
-  addStaticMediaModelOptions(modelMap, providerId);
+  addStaticMediaModelOptions(modelMap, providerId, providerCombosOnly);
   for (const operation of getWebComboTargets(providerId)) {
-    addModelOption(modelMap, providerId, { ...operation, source: "system" });
+    add({ ...operation, source: "system" });
   }
 
   // #9485: static registry models can declare provider-specific effort tiers even
@@ -639,7 +677,7 @@ function buildModelOptions(
       // #16977: same hidden-base guard as the synced-expansion loop above.
       if (getModelIsHidden(providerId, baseId)) continue;
       const base = modelMap.get(baseId);
-      addModelOption(modelMap, providerId, {
+      add({
         id: rawId,
         name: base ? `${base.name} (${rawId.slice(baseId.length + 1)})` : rawId,
         source: base?.source ?? "system",
@@ -658,7 +696,7 @@ function buildModelOptions(
     )
       ? "imported"
       : ("custom" as BuilderModelSource);
-    addModelOption(modelMap, providerId, {
+    add({
       id: toStringOrNull(model.id),
       name: toStringOrNull(model.name),
       source,
@@ -678,7 +716,7 @@ function buildModelOptions(
         provider: providerId,
         model: toStringOrNull(model.id),
       });
-      addModelOption(modelMap, providerId, {
+      add({
         id: toStringOrNull(model.id),
         name: toStringOrNull(model.name),
         source: "fallback",
@@ -794,6 +832,11 @@ export async function getComboBuilderOptions(): Promise<ComboBuilderOptionsPaylo
       ? ((settings as Record<string, unknown>).blockedProviders as string[])
       : []
   );
+  // Provider-level `combos_only` default: these providers' models are flagged with the
+  // "combos only" badge in the selector, which is exactly where they stay selectable.
+  const combosOnlyProviders = normalizeCombosOnlyProviderSet(
+    (settings as Record<string, unknown>).combosOnlyProviders
+  );
 
   const providerNodeMap = new Map<string, ProviderNodeLike>();
   for (const providerNode of providerNodes as ProviderNodeLike[]) {
@@ -832,7 +875,12 @@ export async function getComboBuilderOptions(): Promise<ComboBuilderOptionsPaylo
       providerId,
       builtInModels as RegistryModel[],
       syncedModels,
-      customModels
+      customModels,
+      isProviderCombosOnly(combosOnlyProviders, [
+        providerId,
+        providerVisual.alias,
+        providerNode?.prefix,
+      ])
     );
 
     // #14135: custom provider nodes (provider-node source) configured with a prefix alias
@@ -901,7 +949,8 @@ export async function getComboBuilderOptions(): Promise<ComboBuilderOptionsPaylo
       providerId,
       builtInModels as RegistryModel[],
       syncedModels,
-      customModels
+      customModels,
+      isProviderCombosOnly(combosOnlyProviders, [providerId, noAuthProvider.alias])
     );
 
     // #2901: no-auth providers must route under their alias, not their id — a

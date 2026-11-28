@@ -49,7 +49,7 @@ import {
   loadProviderPageData,
 } from "./providerPageUtils";
 import type { ProviderEntry, OpenRouterProviderStatsEntry } from "./providerPageUtils";
-import { OpenRouterProviderStatsProvider } from "./context/openRouterProviderStatsContext";
+import { ProvidersPageContexts } from "./context/providersPageContexts";
 import {
   shouldSyncProviderDisplayMode,
   writeProviderDisplayModePreference,
@@ -232,6 +232,8 @@ function ProvidersPageContent() {
   const [providerNodes, setProviderNodes] = useState<any[]>([]);
   const [ccCompatibleProviderEnabled, setCcCompatibleProviderEnabled] = useState(false);
   const [blockedProviders, setBlockedProviders] = useState<string[]>([]);
+  /** Provider-level `combos_only` defaults (`settings.combosOnlyProviders`), namespaced. */
+  const [combosOnlyProviders, setCombosOnlyProviders] = useState<unknown>([]);
   const [expirations, setExpirations] = useState<any>(null);
   const [codexGlobalServiceMode, setCodexGlobalServiceMode] =
     useState<CodexGlobalServiceMode>("none");
@@ -310,6 +312,9 @@ function ProvidersPageContent() {
         setCcCompatibleProviderEnabled(data.ccCompatibleProviderEnabled);
         if (data.expirations) setExpirations(data.expirations);
         if (data.blockedProviders) setBlockedProviders(data.blockedProviders);
+        if (Array.isArray(data.settings?.combosOnlyProviders)) {
+          setCombosOnlyProviders(data.settings.combosOnlyProviders);
+        }
         setCodexGlobalServiceMode(getCodexGlobalServiceMode(data.settings));
         void data.openRouterProviderStats.then(setOpenRouterProviderStats);
       } catch (error) {
@@ -895,7 +900,10 @@ function ProvidersPageContent() {
     shouldShowFirstProviderHint(connections.length, searchQuery) && !showAllProviders;
 
   return (
-    <OpenRouterProviderStatsProvider entries={openRouterProviderStats}>
+    <ProvidersPageContexts
+      openRouterProviderStats={openRouterProviderStats}
+      combosOnlyProviders={combosOnlyProviders}
+    >
       <div className="flex flex-col gap-6">
         <DeprecatedProviderBanner />
 
@@ -1875,7 +1883,7 @@ function ProvidersPageContent() {
           {testResults && <ProviderTestResultsView results={testResults} />}
         </Modal>
       </div>
-    </OpenRouterProviderStatsProvider>
+    </ProvidersPageContexts>
   );
 }
 

@@ -1802,6 +1802,7 @@ async function handleSingleModelChat(
     request,
     contextModel: runtimeOptions.authorizationContextModel,
     comboGrantsTargets: runtimeOptions.comboGrantsTargets,
+    isCombo,
     provider,
     model,
     modelStr,

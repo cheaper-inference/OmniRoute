@@ -78,6 +78,7 @@ export const AUTO_EVALUATION_STAGES = [
   "paid_only",
   "model_lockout",
   "model_exposure",
+  "combos_only",
   "strict_zero_cost",
   "tos",
   "candidate_override",

@@ -15,6 +15,7 @@ import Icon from "@/shared/components/Icon";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Badge, Button, CapabilityBadge, Checkbox, Input, Select } from "@/shared/components";
+import type { ModelVisibilityMode } from "@/shared/utils/modelVisibility";
 import {
   normalizeModelSupportedEndpoints,
   type ModelSupportedEndpoint,
@@ -281,15 +282,17 @@ export default function CustomModelsSection({
     }
   };
 
-  const handleToggleHidden = async (modelId: string, hidden: boolean) => {
+  const handleSetVisibility = async (modelId: string, mode: ModelVisibilityMode) => {
     setTogglingModelId(modelId);
     try {
+      // Scoped to "chat": this list manages chat models, and an identically-ID'd model in
+      // another modality's registry must keep its own state (#12172).
       const res = await fetch(
         `/api/provider-models?provider=${encodeURIComponent(providerId)}&modelId=${encodeURIComponent(modelId)}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ isHidden: hidden }),
+          body: JSON.stringify({ visibilityMode: mode, modality: "chat" }),
         }
       );
       if (res.ok) {
@@ -297,10 +300,14 @@ export default function CustomModelsSection({
         onModelsChanged?.();
       }
     } catch (e) {
-      console.error("Failed to toggle model visibility:", e);
+      console.error("Failed to set model visibility:", e);
     } finally {
       setTogglingModelId(null);
     }
+  };
+
+  const handleToggleHidden = async (modelId: string, hidden: boolean) => {
+    await handleSetVisibility(modelId, hidden ? "hidden" : "visible");
   };
 
   const beginEdit = (model: CompatModelRow) => {
@@ -629,6 +636,34 @@ export default function CustomModelsSection({
                       title={t("copyModel")}
                       aria-label={t("copyModel")}
                     />
+                    {model.visibilityMode === "combos_only" && (
+                      <Badge
+                        variant="warning"
+                        size="sm"
+                        icon="call_split"
+                        title={providerText(
+                          t,
+                          "combosOnlyBadgeTooltip",
+                          "Reachable only from combos — hidden from /v1/models and direct calls"
+                        )}
+                      >
+                        {providerText(t, "combosOnlyBadge", "Combos only")}
+                      </Badge>
+                    )}
+                    {model.isHidden && (
+                      <Badge
+                        variant="default"
+                        size="sm"
+                        icon="visibility_off"
+                        title={providerText(
+                          t,
+                          "hiddenBadgeTooltip",
+                          "Hidden from /v1/models and combos"
+                        )}
+                      >
+                        {providerText(t, "hiddenBadge", "Hidden")}
+                      </Badge>
+                    )}
                     {model.apiFormat === "responses" && (
                       <Badge variant="info" size="sm">
                         {t("responses")}
@@ -919,6 +954,43 @@ export default function CustomModelsSection({
                     className="aria-disabled:opacity-50"
                     title={model.isHidden ? t("unhideModel") : t("hideModel")}
                     aria-label={model.isHidden ? t("unhideModel") : t("hideModel")}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon-2xs"
+                    tone="muted"
+                    icon="call_split"
+                    onClick={() =>
+                      handleSetVisibility(
+                        model.id!,
+                        model.visibilityMode === "combos_only" ? "visible" : "combos_only"
+                      )
+                    }
+                    disabled={togglingModelId === model.id || model.isHidden}
+                    className={
+                      model.visibilityMode === "combos_only"
+                        ? "text-warning aria-disabled:opacity-50"
+                        : "aria-disabled:opacity-50"
+                    }
+                    title={
+                      model.visibilityMode === "combos_only"
+                        ? providerText(t, "makeVisibleModel", "Make this model directly callable")
+                        : providerText(
+                            t,
+                            "makeCombosOnlyModel",
+                            "Keep this model for combos only — hide it from /v1/models and direct calls"
+                          )
+                    }
+                    aria-label={
+                      model.visibilityMode === "combos_only"
+                        ? providerText(t, "makeVisibleModel", "Make this model directly callable")
+                        : providerText(
+                            t,
+                            "makeCombosOnlyModel",
+                            "Keep this model for combos only — hide it from /v1/models and direct calls"
+                          )
+                    }
+                    aria-pressed={model.visibilityMode === "combos_only"}
                   />
                   {hasSyncedBase && (
                     <Button

@@ -14,6 +14,8 @@ import { MODEL_COMPAT_PROTOCOL_KEYS } from "@/shared/constants/modelCompat";
 import {
   buildCompatMap,
   isModelHiddenFn,
+  isModelCombosOnlyFn,
+  resolveModelVisibilityFn,
   effectiveNormalizeForProtocol,
   effectivePreserveForProtocol,
   anyNormalizeCompatBadge,
@@ -22,6 +24,7 @@ import {
   type CompatModelRow,
   type CompatModelMap,
 } from "../providerPageHelpers";
+import type { ModelVisibilityMode } from "@/shared/utils/modelVisibility";
 
 export interface ModelCompatState {
   /** The computed custom-model map (memoised). */
@@ -30,6 +33,10 @@ export interface ModelCompatState {
   overrideMap: CompatModelMap;
   /** Stable callback: is the given model hidden? */
   isModelHidden: (modelId: string) => boolean;
+  /** Stable callback: is the given model reachable only from a combo? */
+  isModelCombosOnly: (modelId: string) => boolean;
+  /** Stable callback: the model's three-state visibility, provider default included. */
+  resolveModelVisibility: (modelId: string) => ModelVisibilityMode;
   /** Stable callback: effective normalize flag for (modelId, protocol). */
   effectiveModelNormalize: (modelId: string, protocol?: string) => boolean;
   /** Stable callback: effective preserve-developer flag for (modelId, protocol). */
@@ -48,11 +55,13 @@ export interface ModelCompatState {
  * @param customModels         The `modelMeta.customModels` array from page state.
  * @param modelCompatOverrides The `modelMeta.modelCompatOverrides` array from page state.
  * @param providerId           Provider id, for provider-level runtime defaults (e.g. mistral).
+ * @param providerCombosOnly   The provider-level combos-only default (`settings.combosOnlyProviders`).
  */
 export function useModelCompatState(
   customModels: CompatModelRow[],
   modelCompatOverrides: Array<CompatModelRow & { id: string }>,
-  providerId?: string
+  providerId?: string,
+  providerCombosOnly = false
 ): ModelCompatState {
   const customMap = useMemo(() => buildCompatMap(customModels), [customModels]);
   const overrideMap = useMemo(() => buildCompatMap(modelCompatOverrides), [modelCompatOverrides]);
@@ -60,6 +69,17 @@ export function useModelCompatState(
   const isModelHidden = useCallback(
     (modelId: string) => isModelHiddenFn(modelId, customMap, overrideMap),
     [customMap, overrideMap]
+  );
+
+  const isModelCombosOnly = useCallback(
+    (modelId: string) => isModelCombosOnlyFn(modelId, customMap, overrideMap, providerCombosOnly),
+    [customMap, overrideMap, providerCombosOnly]
+  );
+
+  const resolveModelVisibility = useCallback(
+    (modelId: string) =>
+      resolveModelVisibilityFn(modelId, customMap, overrideMap, providerCombosOnly),
+    [customMap, overrideMap, providerCombosOnly]
   );
 
   const effectiveModelNormalize = useCallback(
@@ -94,6 +114,8 @@ export function useModelCompatState(
     customMap,
     overrideMap,
     isModelHidden,
+    isModelCombosOnly,
+    resolveModelVisibility,
     effectiveModelNormalize,
     effectiveModelPreserveDeveloper,
     getUpstreamHeadersRecord,
