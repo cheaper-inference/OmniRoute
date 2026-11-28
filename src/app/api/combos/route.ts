@@ -14,6 +14,7 @@ import { computeComboContextLength, createComboContextResolution } from "@/lib/c
 import { ComboInvariantError } from "@/lib/combos/invariants";
 import { buildComboNameCollisionWarning } from "@/lib/combos/modelNameCollision";
 import { stripDeadComboConfigKeys } from "@/lib/combos/deadConfigKeys";
+import { rejectUnknownComboModels } from "@/lib/combos/modelWriteCheck";
 import {
   comboWithCapabilityRouteSteps,
   normalizeComboCapabilityRoutes,
@@ -72,6 +73,8 @@ export async function POST(request) {
       // `normalizeComboModels` but TS does not infer the relationship.
       allCombos: allCombos as never,
     });
+    const unknownModels = await rejectUnknownComboModels(request, normalizedModels);
+    if (unknownModels) return unknownModels;
     const comboInput = {
       ...validation.data,
       models: normalizedModels,

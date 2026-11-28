@@ -27,9 +27,20 @@ export function useComboPagination<T>(items: readonly T[], filterKey: string) {
     setPage(visiblePage);
   }
 
+  /**
+   * Select `nextPage` under `nextFilterKey` in one step. Use it when a filter change and the
+   * page choice belong together (revealing a created combo after clearing the search);
+   * otherwise the filter change sends the list back to page 1.
+   */
+  const showPageForFilter = (nextPage: number, nextFilterKey: string) => {
+    setPaginationFilter(nextFilterKey);
+    setPage(nextPage);
+  };
+
   return {
     page: visiblePage,
     setPage,
+    showPageForFilter,
     pageCount: getComboPageCount(items.length),
     pageItems: getComboPageItems(items, visiblePage),
     pageStart: items.length === 0 ? 0 : (visiblePage - 1) * COMBO_PAGE_SIZE + 1,

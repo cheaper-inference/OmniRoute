@@ -1,0 +1,1 @@
+- **feat(combo):** opt-in `COMBO_BUDGET_CLASS_STATUS=1` makes a combo that runs out of attempts return the failure class status (for example 429 when every target was rate limited) instead of a flat 503 (off by default).

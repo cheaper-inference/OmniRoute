@@ -3,6 +3,7 @@
 import type { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Pager from "@/shared/components/Pager";
+import Input from "@/shared/components/Input";
 import { getI18nOrFallback } from "./comboPageHelpers";
 
 type Translator = ReturnType<typeof useTranslations>;
@@ -16,6 +17,9 @@ type ComboListToolbarProps = {
   reordering: boolean;
   savingOrder: boolean;
   onToggleReorder: () => void;
+  /** Search box above the list. Shown only when `onSearchChange` is given. */
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 };
 
 /** Page summary + the "Reorder all" switch above the combo inventory. */
@@ -28,6 +32,8 @@ export function ComboListToolbar({
   reordering,
   savingOrder,
   onToggleReorder,
+  searchQuery = "",
+  onSearchChange,
 }: ComboListToolbarProps) {
   const summary = reordering
     ? getI18nOrFallback(
@@ -51,6 +57,19 @@ export function ComboListToolbar({
       <p className="text-xs text-text-muted" aria-live="polite">
         {summary}
       </p>
+      {onSearchChange && (
+        <Input
+          type="search"
+          size="sm"
+          icon="search"
+          value={searchQuery}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder={getI18nOrFallback(t, "searchCombos", "Search combos by name or model")}
+          aria-label={getI18nOrFallback(t, "searchCombos", "Search combos by name or model")}
+          className="w-full sm:max-w-xs"
+          data-testid="combo-list-search"
+        />
+      )}
       {comboCount > 1 && (
         <Button
           size="sm"

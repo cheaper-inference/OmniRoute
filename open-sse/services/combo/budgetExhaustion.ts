@@ -11,6 +11,7 @@ import { errorResponseWithComboDiagnostics } from "../../utils/error.ts";
 import type { ComboDiagnostics } from "../../utils/error.ts";
 import { isContextOverflow400 } from "./comboPredicates.ts";
 import { buildComboDiag } from "./executeTargetClassify.ts";
+import { resolveComboTerminalStatus } from "./comboErrorAggregation.ts";
 import type { AttemptLoopState } from "./attemptLoopTypes.ts";
 
 export const CONTEXT_OVERFLOW_BUDGET_MESSAGE =
@@ -87,7 +88,14 @@ export function buildBudgetExhaustedResponse(
   const failureReason = reasoningExhausted ? "reasoning_budget_exhausted" : "max_attempts_exceeded";
   const diag = buildComboDiag(state, traceInvocationId, failureReason);
   if (!reasoningExhausted) {
-    return buildContextBudgetResponse(state.lastError, state.comboErrors, diag);
+    const response = buildContextBudgetResponse(state.lastError, state.comboErrors, diag);
+    // Opt-in (COMBO_BUDGET_CLASS_STATUS=1): the flat 503 becomes the class status the other
+    // terminal paths already use (all 429 -> 429, mixed classes -> 5xx). Context overflow keeps its 400.
+    if (process.env.COMBO_BUDGET_CLASS_STATUS !== "1" || response.status !== 503) return response;
+    const status = resolveComboTerminalStatus(state.comboErrors, 503);
+    return status === 503
+      ? response
+      : errorResponseWithComboDiagnostics(status, "Maximum combo retry limit reached", diag);
   }
   return errorResponseWithComboDiagnostics(503, REASONING_EXHAUSTED_MESSAGE, diag);
 }

@@ -22,6 +22,7 @@ import { comboErrorResponse } from "@/lib/api/comboErrorResponse";
 import { ComboInvariantError } from "@/lib/combos/invariants";
 import { buildComboNameCollisionWarning } from "@/lib/combos/modelNameCollision";
 import { stripDeadComboConfigKeys } from "@/lib/combos/deadConfigKeys";
+import { rejectUnknownComboModels } from "@/lib/combos/modelWriteCheck";
 import {
   comboWithCapabilityRouteSteps,
   normalizeComboCapabilityRoutes,
@@ -266,6 +267,11 @@ export async function PUT(request, { params }) {
           .filter((p): p is string => Boolean(p));
         body.allowedProviders = Array.from(new Set([...currentProviders, ...stepProviders]));
       }
+    }
+
+    if (body.models) {
+      const unknownModels = await rejectUnknownComboModels(request, body.models);
+      if (unknownModels) return unknownModels;
     }
 
     const nextComboState = {

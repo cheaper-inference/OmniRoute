@@ -1,0 +1,1 @@
+- **feat(auto-combo):** opt-in `OMNIROUTE_SESSION_TIER_FLOOR=true` keeps the complexity tier of a session from dropping mid-session (it only moves up and expires after 24 h idle), so short follow-ups are not routed to the cheapest model; the default is unchanged.
