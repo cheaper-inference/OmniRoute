@@ -441,6 +441,51 @@ function countPlaceholders(node) {
   return total;
 }
 
+/**
+ * Settles the markers a translation run left behind. A key that was already translated before
+ * the run (`previous`, the stale translations marked for retranslation) gets that translation
+ * back: removing it would lose a key the base has. Any other marker is removed, with the parents
+ * the removal empties, so the next run sees a missing key and retries it. Mutates `node`.
+ *
+ * @param {object} node  locale tree
+ * @param {Map<string, string>} previous  dotted path → translation before the run
+ * @returns {{ dropped: string[], restored: string[] }}
+ */
+function settleFailedPlaceholders(
+  node,
+  previous,
+  out = { dropped: [], restored: [] },
+  prefix = ""
+) {
+  for (const [key, value] of Object.entries(node)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+    if (isPlainObject(value)) {
+      const before = out.dropped.length;
+      settleFailedPlaceholders(value, previous, out, fullKey);
+      if (out.dropped.length > before && Object.keys(value).length === 0) delete node[key];
+    } else if (typeof value === "string" && value.startsWith(PLACEHOLDER_PREFIX)) {
+      if (previous.has(fullKey)) {
+        node[key] = previous.get(fullKey);
+        out.restored.push(fullKey);
+      } else {
+        delete node[key];
+        out.dropped.push(fullKey);
+      }
+    }
+  }
+  return out;
+}
+
+/** The current string at a dotted path of a locale tree, or undefined. */
+function leafAt(tree, dottedPath) {
+  let node = tree;
+  for (const part of dottedPath.split(".")) {
+    if (!isPlainObject(node) || !Object.prototype.hasOwnProperty.call(node, part)) return undefined;
+    node = node[part];
+  }
+  return typeof node === "string" ? node : undefined;
+}
+
 // ----- Translator backend --------------------------------------------------
 // The chat-completions client (`backendConfig`, `translateString`,
 // `translateBatch`) lives in `./lib/translate-backend.mjs` so the other i18n
@@ -911,6 +956,9 @@ export async function processLocale(locale, source, config, opts, backend) {
  *   missing from config/i18n.json or without a catalog file, or `en` — throws before anything
  *   is written.
  * @param {boolean} [options.translate=false]
+ * @param {boolean} [options.dropFailed=false]  with translation enabled, leave no marker behind:
+ *   a new key whose translation failed is omitted (with the parents its removal empties), so the
+ *   next run retries it; a stale translation whose retranslation failed keeps its previous text
  * @param {boolean} [options.pruneExtra=false]
  * @param {string | null} [options.rewrittenSinceRef]
  * @param {boolean} [options.dryRun=false]  compute everything, write nothing
@@ -925,9 +973,10 @@ export async function processLocale(locale, source, config, opts, backend) {
  *   dryRun: boolean,
  *   changedFiles: string[],
  *   added: number, pruned: number, markedRewritten: number, translated: number, failed: number,
+ *   dropped: number, restored: number,
  *   locales: Array<{ locale: string, file: string, changed: boolean, added: string[],
  *     pruned: string[], markedRewritten: string[], translated: number, failed: number,
- *     placeholders: number }>
+ *     dropped: string[], restored: string[], placeholders: number }>
  * }>}  paths are repo-relative POSIX paths
  */
 export async function syncUiKeys(options = {}) {
@@ -935,6 +984,7 @@ export async function syncUiKeys(options = {}) {
     catalog: catalogName = "ui",
     locales = null,
     translate = false,
+    dropFailed = false,
     pruneExtra = false,
     rewrittenSinceRef = null,
     dryRun = false,
@@ -1001,6 +1051,16 @@ export async function syncUiKeys(options = {}) {
     const { merged, addedPaths, extraPaths } = mergeMissing(source, heads.get(code), {
       pruneExtra,
     });
+    const settle = translate && !dryRun && dropFailed;
+    const previousStale = new Map();
+    if (settle) {
+      for (const key of staleByLocale.get(code) ?? []) {
+        const value = leafAt(merged, key);
+        if (value !== undefined && !value.startsWith(PLACEHOLDER_PREFIX)) {
+          previousStale.set(key, value);
+        }
+      }
+    }
     const markedRewritten = markRewrittenAsMissing(merged, staleByLocale.get(code), sourceFlat);
     let stats = { translated: 0, failed: 0 };
     if (translate && !dryRun) {
@@ -1014,6 +1074,9 @@ export async function syncUiKeys(options = {}) {
         translateFns
       );
     }
+    const { dropped, restored } = settle
+      ? settleFailedPlaceholders(merged, previousStale)
+      : { dropped: [], restored: [] };
     mergedByCode.set(code, merged);
     const after = JSON.stringify(merged, null, 2) + "\n";
     const changed = before !== after;
@@ -1030,14 +1093,20 @@ export async function syncUiKeys(options = {}) {
       markedRewritten,
       translated: stats.translated,
       failed: stats.failed,
+      dropped,
+      restored,
       placeholders: countPlaceholders(merged),
     });
   }
 
   // The compact error-boundary catalogs are derived from the full ones: rendered in memory from
   // the merged catalogs (and from disk for the locales outside this run), so a dry run reports
-  // exactly the files a real run writes.
-  if (catalog.name === "ui" && changedFiles.length && source.publicSystem?.globalError) {
+  // exactly the files a real run writes. Dropping a marker can leave the full catalog unchanged
+  // while a derived catalog still needs to be updated.
+  const sum = (pick) => results.reduce((total, r) => total + pick(r), 0);
+  const dropped = sum((r) => r.dropped.length);
+  const refreshDerivedCatalogs = catalog.name === "ui" && (changedFiles.length > 0 || dropped > 0);
+  if (refreshDerivedCatalogs && source.publicSystem?.globalError) {
     const compactDir = path.join(root, "src", "i18n", "global-error-messages");
     if (!dryRun) await fs.mkdir(compactDir, { recursive: true });
     for (const { code } of config.locales) {
@@ -1057,11 +1126,11 @@ export async function syncUiKeys(options = {}) {
   }
 
   // Same for the route-handler catalog (one file, every locale): regenerated from the merged
-  // catalogs whenever this run changed one, and only when en.json has any of its keys.
+  // catalogs when en.json has any of its keys.
   const routeHandlerKeysInSource = ROUTE_HANDLER_MESSAGE_KEYS.some(
     (key) => typeof key.split(".").reduce((node, part) => node?.[part], source) === "string"
   );
-  if (catalog.name === "ui" && changedFiles.length && routeHandlerKeysInSource) {
+  if (refreshDerivedCatalogs && routeHandlerKeysInSource) {
     const catalogsByCode = [];
     for (const { code } of config.locales) {
       const full =
@@ -1080,7 +1149,6 @@ export async function syncUiKeys(options = {}) {
     }
   }
 
-  const sum = (pick) => results.reduce((total, r) => total + pick(r), 0);
   const summary = {
     catalog: catalog.name,
     dryRun,
@@ -1090,6 +1158,8 @@ export async function syncUiKeys(options = {}) {
     markedRewritten: sum((r) => r.markedRewritten.length),
     translated: sum((r) => r.translated),
     failed: sum((r) => r.failed),
+    dropped,
+    restored: sum((r) => r.restored.length),
     locales: results,
   };
   log(

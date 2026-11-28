@@ -33,7 +33,9 @@
 //                      the same run (OMNIROUTE_TRANSLATION_* from the environment or .env, or the
 //                      Google engine). Without a backend it never writes __MISSING__ markers: the
 //                      release profile fails, the nightly skips the keys (--allow-untranslated
-//                      writes them on purpose)
+//                      writes them on purpose). The nightly leaves a failed translation out (a
+//                      new key) or as it was (a stale translation), retries it on the next run,
+//                      and fails the step only above its per-catalog failure limit.
 //   llm-mirrors        docs/i18n/*/llm.txt copies of llm.txt (scripts/i18n/sync-llm-mirrors.mjs)
 //   verify-generated   after a write, every generated artifact must equal its generator:
 //                      check:generated-artifacts (README SVGs, e2e-timings.json) and
@@ -705,6 +707,10 @@ async function stepE2eTimings(ctx) {
   return { status: "changed", detail: `${files.length || "some"} timing file(s) updated` };
 }
 
+export function nightlyTranslationFailureLimit(attempted) {
+  return Math.max(10, Math.ceil(attempted * 0.005));
+}
+
 async function stepUiKeys(ctx) {
   const scriptAbs = path.join(ctx.root, "scripts", "i18n", "sync-ui-keys.mjs");
   const details = [];
@@ -727,6 +733,7 @@ async function stepUiKeys(ctx) {
         catalog,
         pruneExtra: true,
         ...(rewrittenSinceRef ? { rewrittenSinceRef } : {}),
+        ...(ctx.profile === "nightly" ? { dropFailed: true } : {}),
       };
       if (!ctx.check && !canTranslate) {
         // Never write __MISSING__ markers by accident: they reach users as English and fail
@@ -752,16 +759,34 @@ async function stepUiKeys(ctx) {
       const files = Array.isArray(r.changedFiles) ? r.changedFiles : [];
       const n = files.length || Number(r.added) || (r.changed ? 1 : 0);
       if (n) changed = true;
-      details.push(
-        `${catalog}: ${n ? `${files.length || r.added || "some"} change(s)` : "in sync"}`
-      );
+      let detail = `${catalog}: ${n ? `${files.length || r.added || "some"} change(s)` : "in sync"}`;
       if (ctx.check) ctx.extraChanged.push(...files);
       else for (const [rel, b] of before) ctx.vfs.noteExternal(rel, b);
-      if (canTranslate && Number(r.failed || 0) > 0) {
-        throw new StepFailure(
-          `${catalog}: ${r.failed} value(s) failed to translate and were left as __MISSING__ markers — rerun bash scripts/i18n/translate-new-keys.sh${catalog === "cli" ? " --catalog=cli" : ""}`
-        );
+      const failed = Number(r.failed || 0);
+      if (canTranslate && failed > 0) {
+        if (ctx.profile === "release") {
+          throw new StepFailure(
+            `${catalog}: ${r.failed} value(s) failed to translate and were left as __MISSING__ markers — rerun bash scripts/i18n/translate-new-keys.sh${catalog === "cli" ? " --catalog=cli" : ""}`
+          );
+        }
+        const attempted = r.translated + failed;
+        const limit = nightlyTranslationFailureLimit(attempted);
+        if (failed > limit) {
+          throw new StepFailure(
+            `${catalog}: ${failed} value(s) failed to translate out of ${attempted} attempted (nightly limit: ${limit})`
+          );
+        }
+        detail += `; ${failed} value(s) could not be translated (${r.dropped} left out, ${r.restored} kept as before), the next run retries`;
+        for (const { file, dropped, restored } of r.locales) {
+          if (dropped.length + restored.length === 0) continue;
+          ctx.manual.push({
+            path: file,
+            label: `${catalog} translations`,
+            detail: `${dropped.length} key(s) left out and ${restored.length} kept with the previous translation, the next run retries`,
+          });
+        }
       }
+      details.push(detail);
     }
   } else {
     const flagOk = supportsFlag(scriptAbs, "--dry-run");

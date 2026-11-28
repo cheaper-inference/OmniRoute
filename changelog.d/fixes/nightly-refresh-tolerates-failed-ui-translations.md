@@ -1,0 +1,1 @@
+- **fix(i18n):** the nightly refresh now keeps the successful UI and CLI translations when a few fail. A new key that could not be translated is left out and falls back to English, a stale translation keeps its previous text, and the next run retries both. Above 0.5% of the attempted values (minimum 10) the step still fails.
