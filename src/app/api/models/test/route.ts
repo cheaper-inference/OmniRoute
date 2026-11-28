@@ -7,7 +7,7 @@ import { hasNoRunnableEndpointAdapter } from "@/lib/providerModels/endpointAdapt
 import { isModelEndpointCapabilityGateEnabled } from "@/lib/providerModels/endpointCapabilityGateFlag";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { getSettings } from "@/lib/db/settings";
-import { isFreeModel, providerHasFreeModels } from "@/shared/utils/freeModels";
+import { isFreeTestTarget } from "@/shared/utils/freeModels";
 
 const testModelSchema = z.object({
   providerId: z.string().min(1),
@@ -71,10 +71,9 @@ export async function POST(request: Request) {
       const settings = await getSettings();
       hidePaid = settings?.hidePaidModels === true;
     } catch {}
-    if (
-      hidePaid &&
-      !(providerHasFreeModels(providerId) && isFreeModel(providerId, { id: modelId }))
-    ) {
+    // The dashboard sends qualified ids ("horde/google/gemma-4-31b") when the bare id itself
+    // contains "/"; the gate compares the unqualified id, as test-message/route.ts does.
+    if (hidePaid && !isFreeTestTarget(providerId, modelId)) {
       return NextResponse.json(
         {
           status: "error",
