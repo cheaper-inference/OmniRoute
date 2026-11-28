@@ -1,0 +1,1 @@
+- **fix(sse):** the temporary identity-page dump written on console-login timeout is now created with owner-only permissions and removed after diagnostics ([#20782](https://github.com/cheaper-inference/OmniRoute/pull/20782)) — thanks @maxmad64bis

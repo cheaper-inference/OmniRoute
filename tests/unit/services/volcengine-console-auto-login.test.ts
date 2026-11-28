@@ -1,11 +1,34 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { existsSync, statSync, unlinkSync } from "node:fs";
+import fsPromises from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
+import os from "node:os";
+import { join } from "node:path";
 
 import {
   VolcengineConsoleAutoLoginService,
   maskPhone,
   normalizePhone,
 } from "../../../open-sse/services/volcengineConsoleAutoLogin.ts";
+
+// POSIX mode bits are unavailable on NTFS; assert the write mode only where it applies.
+const posixModes = {
+  skip:
+    process.platform === "win32"
+      ? "NTFS does not expose POSIX mode bits; the write mode is asserted on POSIX only"
+      : false,
+};
+
+/** Direct access to the private diagnostic helpers, for focused gate tests. */
+type DiagnosticsAccess = {
+  dumpPageHtml(session: unknown): Promise<string | null>;
+  timeoutDiagnostics(session: unknown): Promise<string>;
+};
+
+const IDENTITY_PAGE_URL = "https://console.volcengine.com/auth/login/select_identity/";
+const dumpPathFor = (sessionId: string) =>
+  join(os.tmpdir(), `omniroute-volc-select-identity-${sessionId.slice(0, 8)}.html`);
 
 // ─── Fake playwright ────────────────────────────────────────────────────────
 
@@ -91,6 +114,9 @@ function makeFakePlaywright() {
     }
     async screenshot() {
       return Buffer.from("fake-page-png");
+    }
+    async content() {
+      return "<html>identity</html>";
     }
   }
 
@@ -800,4 +826,192 @@ test("withBinding returns the view unchanged before success", async () => {
   });
   assert.equal(bindCalls, 0);
   assert.equal(view?.phase, "waiting_code");
+});
+
+// ─── Identity dump is ephemeral ────────────────────────────────────────────
+
+test("identity dump is removed after a timeout on the identity page", async () => {
+  const fake = makeFakePlaywright();
+  happyPathVisible(fake);
+  const service = fastService(fake);
+  const started = (await service.startLogin("13800000000")) as {
+    session: { sessionId: string };
+  };
+  const dumpPath = dumpPathFor(started.session.sessionId);
+  fake.__state.url = IDENTITY_PAGE_URL;
+
+  try {
+    const session = await service.submitCode(started.session.sessionId, "123456", undefined, {
+      timeout: 60,
+    });
+    assert.equal(session?.phase, "timeout");
+    assert.ok(
+      session?.error?.includes(`identityPageHtml=${dumpPath}`),
+      "the diagnostic must still report the dump path"
+    );
+    assert.equal(existsSync(dumpPath), false, "the dump must be gone once diagnostics finish");
+  } finally {
+    try {
+      unlinkSync(dumpPath);
+    } catch {
+      /* best-effort cleanup */
+    }
+  }
+});
+
+test("a successful login never creates an identity dump", async () => {
+  const fake = makeFakePlaywright();
+  happyPathVisible(fake);
+  const service = fastService(fake);
+  const started = (await service.startLogin("13800000000")) as {
+    session: { sessionId: string };
+  };
+  const dumpPath = dumpPathFor(started.session.sessionId);
+  fake.__state.cookiesFn = () => FULL_COOKIES;
+
+  try {
+    const session = await service.submitCode(started.session.sessionId, "123456", undefined, {
+      timeout: 200,
+    });
+    assert.equal(session?.phase, "success");
+    assert.equal(existsSync(dumpPath), false, "no dump file exists for a successful login");
+  } finally {
+    try {
+      unlinkSync(dumpPath);
+    } catch {
+      /* best-effort cleanup */
+    }
+  }
+});
+
+test(
+  "the identity dump is created with restrictive permissions under a permissive umask",
+  posixModes,
+  async () => {
+    const service = fastService(makeFakePlaywright());
+    const sessionId = "perm0001";
+    const dumpPath = dumpPathFor(sessionId);
+    const session = {
+      sessionId,
+      page: { content: async () => "<html>identity</html>" },
+    };
+    const originalUmask = process.umask(0);
+
+    try {
+      const returned = await (service as unknown as DiagnosticsAccess).dumpPageHtml(session);
+      assert.equal(returned, dumpPath);
+      const mode = statSync(dumpPath).mode & 0o777;
+      assert.equal(mode, 0o600, `expected mode 0600, got ${mode.toString(8)}`);
+    } finally {
+      process.umask(originalUmask);
+      try {
+        unlinkSync(dumpPath);
+      } catch {
+        /* best-effort cleanup */
+      }
+    }
+  }
+);
+
+test("repeated identity timeouts leave no dump files behind", async () => {
+  const dumpPaths: string[] = [];
+  try {
+    for (let i = 0; i < 3; i++) {
+      const fake = makeFakePlaywright();
+      happyPathVisible(fake);
+      const service = fastService(fake);
+      const started = (await service.startLogin("13800000000")) as {
+        session: { sessionId: string };
+      };
+      const dumpPath = dumpPathFor(started.session.sessionId);
+      dumpPaths.push(dumpPath);
+      fake.__state.url = IDENTITY_PAGE_URL;
+
+      const session = await service.submitCode(started.session.sessionId, "123456", undefined, {
+        timeout: 30,
+      });
+      assert.equal(session?.phase, "timeout");
+    }
+    for (const dumpPath of dumpPaths) {
+      assert.equal(existsSync(dumpPath), false, `no residue at ${dumpPath}`);
+    }
+  } finally {
+    for (const dumpPath of dumpPaths) {
+      try {
+        unlinkSync(dumpPath);
+      } catch {
+        /* best-effort cleanup */
+      }
+    }
+  }
+});
+
+test("a failing dump removal stays non-fatal and keeps the diagnostic", async (t) => {
+  const fake = makeFakePlaywright();
+  happyPathVisible(fake);
+  const service = fastService(fake);
+  const started = (await service.startLogin("13800000000")) as {
+    session: { sessionId: string };
+  };
+  const dumpPath = dumpPathFor(started.session.sessionId);
+  fake.__state.url = IDENTITY_PAGE_URL;
+
+  // The removal is a dynamic import of fs/promises inside timeoutDiagnostics;
+  // mock the builtin and resync the ESM named exports so that import sees the mock.
+  const unlink = t.mock.method(fsPromises, "unlink", async () => {
+    throw new Error("simulated unlink failure");
+  });
+  syncBuiltinESMExports();
+
+  try {
+    const session = await service.submitCode(started.session.sessionId, "123456", undefined, {
+      timeout: 60,
+    });
+    assert.equal(session?.phase, "timeout", "a failed removal must not change the phase");
+    assert.ok(
+      session?.error?.includes(`identityPageHtml=${dumpPath}`),
+      "the diagnostic must keep the dump path"
+    );
+    assert.ok(unlink.mock.calls.length >= 1, "removal must have been attempted");
+  } finally {
+    t.mock.restoreAll();
+    syncBuiltinESMExports();
+    try {
+      unlinkSync(dumpPath);
+    } catch {
+      /* best-effort cleanup */
+    }
+  }
+});
+
+test("identity dump path follows the OS temporary directory", async () => {
+  const service = fastService(makeFakePlaywright());
+  const sessionId = "tmpd0001";
+  const session = {
+    sessionId,
+    page: { content: async () => "<html>identity</html>" },
+  };
+  const defaultDumpPath = dumpPathFor(sessionId);
+  const customTmp = await fsPromises.mkdtemp(join(os.tmpdir(), "omniroute-dump-test-"));
+  const originalTmpdir = os.tmpdir;
+  os.tmpdir = () => customTmp;
+  syncBuiltinESMExports();
+
+  try {
+    const returned = await (service as unknown as DiagnosticsAccess).dumpPageHtml(session);
+    assert.equal(
+      returned,
+      join(customTmp, `omniroute-volc-select-identity-${sessionId.slice(0, 8)}.html`),
+      "the dump path must be derived from os.tmpdir()"
+    );
+  } finally {
+    os.tmpdir = originalTmpdir;
+    syncBuiltinESMExports();
+    await fsPromises.rm(customTmp, { recursive: true, force: true });
+    try {
+      unlinkSync(defaultDumpPath);
+    } catch {
+      /* best-effort cleanup */
+    }
+  }
 });
