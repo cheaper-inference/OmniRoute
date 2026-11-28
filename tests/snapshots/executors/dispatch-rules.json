@@ -112,6 +112,11 @@
       "status": 400,
       "throws": true
     },
+    "tinyfish": {
+      "message": "Provider \"tinyfish\" is a search provider and does not support chat completions; use POST /v1/search instead.",
+      "status": 400,
+      "throws": true
+    },
     "x-search": {
       "message": "Provider \"x-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,

@@ -524,6 +524,27 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     fallbackOnly: true,
   },
 
+  // TinyFish (https://docs.tinyfish.ai/search-api): GET https://api.search.tinyfish.ai with the
+  // X-API-Key header. Shares the id of the TinyFish fetch pool (one stored key, as firecrawl does).
+  // Free up to 12,000 requests per day per the vendor page; cost 0. fallbackOnly: never displaces a
+  // configured paid provider and a fetch-only key does not become the first auto pick.
+  tinyfish: {
+    id: "tinyfish",
+    name: "TinyFish Search",
+    baseUrl: "https://api.search.tinyfish.ai",
+    method: "GET",
+    authType: "apikey",
+    authHeader: "x-api-key",
+    costPerQuery: 0,
+    freeMonthlyQuota: 0,
+    searchTypes: ["web", "news"],
+    defaultMaxResults: 10,
+    maxMaxResults: 10,
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+    fallbackOnly: true,
+  },
+
   // Subscription-backed, not free: auto-selected as a credentialed last resort only when
   // CODEX_SEARCH_AUTO_FALLBACK_ENABLED is on (src/lib/search/codexSearchAutoFallback.ts).
   "codex-search": {
