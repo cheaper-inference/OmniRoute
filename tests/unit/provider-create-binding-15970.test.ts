@@ -5,7 +5,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { MockAgent, setGlobalDispatcher } from "undici";
+import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "undici";
 import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
 
 settleConnectionFollowUpsAfterEachTest();
@@ -15,10 +15,13 @@ Object.assign(process.env, {
   DATA_DIR: dataDir,
   OMNIROUTE_PLUGINS_DIR: path.join(dataDir, "plugins"),
   APP_LOG_TO_FILE: "false",
+  OMNIROUTE_HIDE_HEALTHCHECK_LOGS: "true",
   DISABLE_SQLITE_AUTO_BACKUP: "true",
   API_KEY_SECRET: "provider-binding-fixture-secret",
   JWT_SECRET: "provider-binding-fixture-session-secret",
 });
+const originalDispatcher = getGlobalDispatcher();
+const originalFetch = globalThis.fetch;
 const network = new MockAgent();
 network.disableNetConnect();
 setGlobalDispatcher(network);
@@ -26,6 +29,8 @@ const core = await import("../../src/lib/db/core.ts");
 const nodes = await import("../../src/lib/db/providers/nodes.ts");
 const connections = await import("../../src/lib/db/providers.ts");
 const { POST } = await import("../../src/app/api/providers/route.ts");
+const { waitForCallLogSaves, closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
+const { clearProxyLogs } = await import("../../src/lib/proxyLogger.ts");
 const { makeManagementSessionRequest } = await import("../helpers/managementSession.ts");
 const { waitForConnectionFollowUps } =
   await import("../../src/lib/providers/connectionFollowUps.ts");
@@ -34,8 +39,12 @@ const { waitForConnectionFollowUps } =
 const requestFetchCalls = new AsyncLocalStorage<string[]>();
 const fetchCallsByResponse = new WeakMap<Response, string[]>();
 const fetchCallsByPost: string[][] = [];
+let probeDelayMs = 0;
 globalThis.fetch = async (input) => {
   requestFetchCalls.getStore()?.push(String(input instanceof Request ? input.url : input));
+  if (probeDelayMs > 0) {
+    await new Promise<void>((resolve) => setTimeout(resolve, probeDelayMs));
+  }
   return Response.json({ data: [], models: [] });
 };
 
@@ -44,8 +53,12 @@ test.beforeEach(() => {
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(dataDir, { recursive: true });
   fetchCallsByPost.length = 0;
+  probeDelayMs = 0;
 });
 test.afterEach(async (t) => {
+  assert.ok(await waitForCallLogSaves(5_000), "call-log writes must settle before DB reset");
+  // Discard the queued fixture proxy logs and invalidate any scheduled retries.
+  clearProxyLogs();
   const created = await connections.getProviderConnections();
   for (const connection of created) {
     // POST starts inactive and validates in the background. Its DNS lookup can
@@ -66,10 +79,15 @@ test.afterEach(async (t) => {
   }
 });
 test.after(async () => {
-  await new Promise<void>((resolve) => setTimeout(resolve, 20));
-  core.resetDbInstance();
-  await network.close();
-  fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  try {
+    await closeCallLogSaves();
+  } finally {
+    globalThis.fetch = originalFetch;
+    setGlobalDispatcher(originalDispatcher);
+    core.resetDbInstance();
+    await network.close();
+    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
 });
 
 async function makeNode(type = "openai-compatible-chat") {
@@ -105,7 +123,11 @@ async function post(provider: string, providerSpecificData?: Record<string, unkn
     )
   );
   fetchCallsByResponse.set(result, calls);
-  await new Promise<void>((resolve) => setTimeout(resolve, 20));
+  // Accepted requests schedule validation after the response; wait for that specific path
+  // through the tracked follow-up registry, not a timing guess. Rejections are checked separately.
+  if (result.status === 201) {
+    assert.equal(await waitForConnectionFollowUps(10_000), true, "credential probes must settle");
+  }
   return result;
 }
 
@@ -255,4 +277,15 @@ test("Cloudflare preserves accountId in the documented nested location", async (
     (await connections.getProviderConnections())[0].providerSpecificData.accountId,
     "fixture-account"
   );
+});
+
+test("accepted POST fixture settles a slow automatic credential probe before reuse", async () => {
+  probeDelayMs = 100;
+  await makeNode();
+  const result = await post("openai-compatible-chat");
+  assert.equal(result.status, 201);
+  const [connection] = await connections.getProviderConnections();
+  assert.ok(connection.lastTested, "the automatic probe must persist its result before reuse");
+  assert.equal(connection.testStatus, "active");
+  assert.equal(fetchCallsByResponse.get(result)?.length, 1, "the probe runs exactly once");
 });
