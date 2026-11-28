@@ -1,0 +1,1 @@
+- **refactor(db):** Move quota group, per-model cap and schedule definitions behind Promise-based repositories while preserving delete guards, schedule field round-trips, model-catalog invalidation on rename and the synchronous quota hot path (#20945 — thanks @xiaoyaner0201).

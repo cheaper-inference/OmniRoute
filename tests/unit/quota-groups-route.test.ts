@@ -49,10 +49,10 @@ test("groups/route.ts: GET calls requireManagementAuth before data access", () =
   const postIdx = listSrc.indexOf("export async function POST");
   const getBody = postIdx >= 0 ? listSrc.slice(getIdx, postIdx) : listSrc.slice(getIdx);
   const authIdx = getBody.indexOf("requireManagementAuth(request)");
-  const dataIdx = getBody.indexOf("listGroups(");
+  const dataIdx = getBody.indexOf("getQuotaGroupRepository().list(");
   assert.ok(authIdx >= 0, "requireManagementAuth call must be in GET handler");
-  assert.ok(dataIdx >= 0, "listGroups call must be in GET handler");
-  assert.ok(authIdx < dataIdx, "auth check must come before listGroups call");
+  assert.ok(dataIdx >= 0, "repository list call must be in GET handler");
+  assert.ok(authIdx < dataIdx, "auth check must come before the repository list call");
 });
 
 test("groups/route.ts: GET returns early when authError is truthy", () => {
@@ -109,10 +109,10 @@ test("groups/[id]/route.ts: DELETE calls requireManagementAuth before data acces
   assert.ok(deleteIdx >= 0, "DELETE handler must exist");
   const deleteBody = idSrc.slice(deleteIdx);
   const authIdx = deleteBody.indexOf("requireManagementAuth(request)");
-  const dataIdx = deleteBody.indexOf("deleteGroup(");
+  const dataIdx = deleteBody.indexOf("getQuotaGroupRepository().deleteById(");
   assert.ok(authIdx >= 0, "requireManagementAuth must be in DELETE handler");
-  assert.ok(dataIdx >= 0, "deleteGroup call must be in DELETE handler");
-  assert.ok(authIdx < dataIdx, "auth check must come before deleteGroup call");
+  assert.ok(dataIdx >= 0, "repository deleteById call must be in DELETE handler");
+  assert.ok(authIdx < dataIdx, "auth check must come before the repository deleteById call");
 });
 
 test("groups/[id]/route.ts: DELETE returns early when authError is truthy", () => {
@@ -207,11 +207,14 @@ test("groups/[id]/route.ts: PATCH uses GroupRenameSchema for Zod validation", ()
   );
 });
 
-test("groups/[id]/route.ts: PATCH calls renameGroup", () => {
+test("groups/[id]/route.ts: PATCH renames through the group repository", () => {
   const patchIdx = idSrc.indexOf("export async function PATCH");
   const deleteIdx = idSrc.indexOf("export async function DELETE");
   const patchBody = deleteIdx >= 0 ? idSrc.slice(patchIdx, deleteIdx) : idSrc.slice(patchIdx);
-  assert.ok(patchBody.includes("renameGroup("), "PATCH must call renameGroup");
+  assert.ok(
+    patchBody.includes("getQuotaGroupRepository().rename("),
+    "PATCH must call the group repository rename"
+  );
 });
 
 test("groups/[id]/route.ts: PATCH re-syncs combos via syncQuotaCombos (dynamic import)", () => {
@@ -331,27 +334,29 @@ test("shared/schemas/quota.ts: exports GroupRenameSchema", () => {
 
 // ── Import correctness ────────────────────────────────────────────────────────
 
-test("groups/route.ts: imports listGroups and createGroup from @/lib/localDb", () => {
+test("groups/route.ts: lists and creates through the group repository", () => {
   assert.ok(
-    listSrc.includes("listGroups") && listSrc.includes("createGroup"),
-    "route must import listGroups and createGroup",
+    listSrc.includes('import { getQuotaGroupRepository } from "@/lib/db/quotaGroups"') &&
+      listSrc.includes("getQuotaGroupRepository().list(") &&
+      listSrc.includes("getQuotaGroupRepository().create("),
+    "route must list and create through getQuotaGroupRepository",
   );
 });
 
-test("groups/[id]/route.ts: imports renameGroup, deleteGroup, getGroup, getPoolsByGroup", () => {
-  assert.ok(idSrc.includes("renameGroup"), "route must import renameGroup");
-  assert.ok(idSrc.includes("deleteGroup"), "route must import deleteGroup");
-  assert.ok(idSrc.includes("getGroup"), "route must import getGroup");
+test("groups/[id]/route.ts: uses the group repository and getPoolsByGroup", () => {
+  assert.ok(idSrc.includes("getQuotaGroupRepository().rename("), "route must rename via the repository");
+  assert.ok(idSrc.includes("getQuotaGroupRepository().deleteById("), "route must delete via the repository");
+  assert.ok(idSrc.includes("getQuotaGroupRepository().findById("), "route must re-read via the repository");
   assert.ok(idSrc.includes("getPoolsByGroup"), "route must import getPoolsByGroup");
 });
 
 // ── GroupDemo: listGroups result includes group-demo ──────────────────────────
 
-test("groups/route.ts: listGroups() is called in GET (will include GroupDemo in real DB)", () => {
+test("groups/route.ts: repository list() is called in GET (will include GroupDemo in real DB)", () => {
   // Source-scan: the call is present; the seed group-demo row is guaranteed
   // by the migration, so a real GET would always include it.
   assert.ok(
-    listSrc.includes("listGroups()"),
-    "GET must call listGroups() — which includes the seeded GroupDemo row",
+    listSrc.includes("getQuotaGroupRepository().list()"),
+    "GET must call the repository list() — which includes the seeded GroupDemo row",
   );
 });
