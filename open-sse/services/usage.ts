@@ -61,6 +61,7 @@ import { getPromptQlUsage } from "./usage/promptql.ts";
 import { getHyperAgentUsage } from "./usage/hyperagent.ts";
 import { getGitHubUsage, formatGitHubQuotaSnapshot, inferGitHubPlanName } from "./usage/github.ts";
 import { getCrofUsage } from "./usage/crof.ts";
+import { getFreebuffUsage } from "./usage/freebuff.ts";
 import { getMistralUsage } from "./usage/mistral.ts";
 import { getClinepassUsage } from "./usage/clinepass.ts";
 import { getNanoGptUsage } from "./usage/nanogpt.ts";
@@ -212,6 +213,9 @@ export async function getUsageForProvider(
       return await getMiniMaxUsage(apiKey || "", provider);
     case "crof":
       return await getCrofUsage(apiKey || "");
+    case "freebuff":
+    case "fb":
+      return await getFreebuffUsage(accessToken, apiKey);
     case "mistral":
       return await getMistralUsage(apiKey || "");
     case "clinepass":

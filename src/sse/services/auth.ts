@@ -2223,6 +2223,7 @@ export async function getProviderCredentials(
     if (
       options.reserveOAuthSession === true &&
       connection?.authType === "oauth" &&
+      resolvedId !== "freebuff" &&
       !selectedByApiKeyPreference &&
       !keepDeadlinePick
     ) {

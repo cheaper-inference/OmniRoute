@@ -29,10 +29,54 @@ const { decodeFreebuffLoginState } = await import("../../src/lib/oauth/providers
 
 const CODE_URL = "https://freebuff.com/api/auth/cli/code";
 const STATUS_URL = "https://freebuff.com/api/auth/cli/status";
-const SESSION_URL = "https://www.codebuff.com/api/v1/freebuff/session";
+const ME_URL = "https://www.codebuff.com/api/v1/me?fields=id%2Cemail";
+const MODELS_URL = "https://www.codebuff.com/api/v1/freebuff/models";
+const DEVICE_KEYS_URL = "https://www.codebuff.com/api/v1/freebuff/device-keys";
+const ADMISSION_URL = "https://www.codebuff.com/api/v1/freebuff/session/admission";
 const RUNS_URL = "https://www.codebuff.com/api/v1/agent-runs";
 const COMPLETIONS_URL = "https://www.codebuff.com/api/v1/chat/completions";
 const AUTH_TOKEN = "fb-auth-token-from-browser-login";
+const CATALOG_HANDLE = "fbm1.test-flash-handle";
+const CATALOG_PAYLOAD = {
+  protocol: 1,
+  fetchId: "fbf1.test-fetch-id",
+  rows: [
+    {
+      key: "m-flash",
+      handle: CATALOG_HANDLE,
+      displayName: "DeepSeek V4.1 Flash Fast",
+      access: "open",
+      premium: false,
+      legacyDigests: ["1e303ac563a6f9cc"],
+    },
+  ],
+};
+
+function sseReply(id: string, content: string, promptTokens = 3, completionTokens = 4) {
+  const chunk1 = JSON.stringify({
+    id,
+    object: "chat.completion.chunk",
+    created: 1,
+    model: CATALOG_HANDLE,
+    choices: [{ index: 0, delta: { role: "assistant", content }, finish_reason: null }],
+  });
+  const chunk2 = JSON.stringify({
+    id,
+    object: "chat.completion.chunk",
+    created: 1,
+    model: CATALOG_HANDLE,
+    choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+    usage: {
+      prompt_tokens: promptTokens,
+      completion_tokens: completionTokens,
+      total_tokens: promptTokens + completionTokens,
+    },
+  });
+  return new Response(`data: ${chunk1}\n\ndata: ${chunk2}\n\ndata: [DONE]\n\n`, {
+    status: 200,
+    headers: { "content-type": "text/event-stream" },
+  });
+}
 
 type Call = { url: string; method: string; headers: Record<string, string>; body: string };
 type Handler = (call: Call) => Response | Promise<Response>;
@@ -284,20 +328,18 @@ test("chat through freebuff/<model> uses the browser-login token on every codebu
 
   // 2) One chat request through the real chat pipeline, codebuff.com stubbed.
   const calls = stubFetch((call) => {
-    if (call.url === SESSION_URL) return json({ instanceId: "inst-e2e" });
+    if (call.url === ME_URL) return json({ id: "user-42" });
+    if (call.url === MODELS_URL) return json(CATALOG_PAYLOAD);
+    if (call.url === DEVICE_KEYS_URL) return json({ keyId: "key-e2e" });
+    if (call.url === ADMISSION_URL) {
+      return json({ status: "active", instanceId: "inst-e2e", model: "m-flash" });
+    }
     if (call.url === RUNS_URL) {
       const action = JSON.parse(call.body).action;
       return json(action === "START" ? { runId: "run-e2e" } : {});
     }
     if (call.url === COMPLETIONS_URL) {
-      return json({
-        id: "chatcmpl-e2e",
-        object: "chat.completion",
-        created: 1,
-        model: "deepseek/deepseek-v4-flash",
-        choices: [{ index: 0, message: { role: "assistant", content: "hello from freebuff" } }],
-        usage: { prompt_tokens: 3, completion_tokens: 4, total_tokens: 7 },
-      });
+      return sseReply("chatcmpl-e2e", "hello from freebuff", 3, 4);
     }
     throw new Error(`Unexpected external fetch: ${call.url}`);
   });
@@ -319,27 +361,27 @@ test("chat through freebuff/<model> uses the browser-login token on every codebu
   assert.equal(payload.choices?.[0]?.message?.content, "hello from freebuff");
 
   const bearer = `Bearer ${AUTH_TOKEN}`;
-  const session = calls.find((c) => c.url === SESSION_URL);
+  const admission = calls.find((c) => c.url === ADMISSION_URL);
   const start = calls.find((c) => c.url === RUNS_URL && JSON.parse(c.body).action === "START");
   const completion = calls.find((c) => c.url === COMPLETIONS_URL);
   assert.ok(
-    session && start && completion,
-    "session, agent-run START and completion all dispatched"
+    admission && start && completion,
+    "admission, agent-run START and completion all dispatched"
   );
 
-  assert.equal(session.method, "POST");
-  assert.equal(session.headers.authorization, bearer);
-  assert.equal(session.headers["x-freebuff-model"], "deepseek/deepseek-v4-flash");
+  assert.equal(admission.method, "POST");
+  assert.equal(admission.headers.authorization, bearer);
+  assert.equal(admission.headers["x-freebuff-model"], CATALOG_HANDLE);
   assert.equal(start.headers.authorization, bearer);
-  assert.equal(JSON.parse(start.body).agentId, "base2-free-deepseek-flash");
+  assert.equal(JSON.parse(start.body).agentId, "base3-free-catalog");
 
   assert.equal(completion.method, "POST");
   assert.equal(completion.headers.authorization, bearer);
-  assert.equal(completion.headers["x-freebuff-instance-id"], "inst-e2e");
-  assert.equal(completion.headers["x-codebuff-run-id"], "run-e2e");
+  assert.equal(completion.headers["x-freebuff-sse-gzip-recovery"], "1");
   const upstreamBody = JSON.parse(completion.body);
-  assert.equal(upstreamBody.model, "deepseek/deepseek-v4-flash");
+  assert.equal(upstreamBody.model, CATALOG_HANDLE);
   assert.equal(upstreamBody.codebuff_metadata.freebuff_instance_id, "inst-e2e");
+  assert.equal(upstreamBody.codebuff_metadata.run_id, "run-e2e");
   assert.equal(upstreamBody.codebuff_metadata.cost_mode, "free");
 
   // The token is only ever sent to the two fixed upstream hosts.
@@ -361,17 +403,15 @@ test("a pasted-token (apikey) connection keeps working after the catalog move to
   assert.ok(connection && typeof connection.id === "string");
 
   const calls = stubFetch((call) => {
-    if (call.url === SESSION_URL) return json({ instanceId: "inst-pasted" });
+    if (call.url === ME_URL) return json({ id: "user-pasted" });
+    if (call.url === MODELS_URL) return json(CATALOG_PAYLOAD);
+    if (call.url === DEVICE_KEYS_URL) return json({ keyId: "key-pasted" });
+    if (call.url === ADMISSION_URL) {
+      return json({ status: "active", instanceId: "inst-pasted", model: "m-flash" });
+    }
     if (call.url === RUNS_URL) return json({ runId: "run-pasted" });
     if (call.url === COMPLETIONS_URL) {
-      return json({
-        id: "chatcmpl-pasted",
-        object: "chat.completion",
-        created: 1,
-        model: "deepseek/deepseek-v4-flash",
-        choices: [{ index: 0, message: { role: "assistant", content: "pasted ok" } }],
-        usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
-      });
+      return sseReply("chatcmpl-pasted", "pasted ok", 1, 1);
     }
     throw new Error(`Unexpected external fetch: ${call.url}`);
   });
