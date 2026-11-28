@@ -1659,9 +1659,9 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     passthroughModels: true,
     website: "https://jembatanai.com",
     apiHint:
-      "Get a key at https://jembatanai.com or from the Telegram bot @jembatanai_bot, then paste it here as a Bearer token. OpenAI-compatible base URL: https://freeai.jembatanai.com/v1. Use a pay-per-use or Token Plan key.",
+      "Get a key at https://jembatanai.com or from the Telegram bot @jembatanai_bot, then paste it here as a Bearer token. OpenAI-compatible base URL: https://freeai.jembatanai.com/v1. Use a pay-per-use, Token Plan or Unlimited Reseller Gateway key.",
     notice: {
-      text: "Pay-per-use (PAYG) / Token Plan keys only. Unlimited plan keys violate JembatanAI ToS sections 2.1 to 2.3 and risk permanent suspension with no refund.",
+      text: "Pay-per-use (PAYG), Token Plan and Unlimited Reseller Gateway keys only. Any other Unlimited plan key violates JembatanAI ToS sections 2.1 to 2.3 and risks permanent suspension with no refund.",
     },
   },
 };
