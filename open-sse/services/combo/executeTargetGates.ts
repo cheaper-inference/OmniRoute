@@ -36,6 +36,7 @@ import { modelAvailabilitySkipReason, type ResolvedComboTarget } from "./types.t
 import { recordSkippedConnectionCooldown } from "./skippedConnectionCooldown.ts";
 import type { PreDispatchExclusion } from "./pinRecovery.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
+import { getProviderModels } from "../../config/providerModels.ts";
 
 /**
  * The breaker that keeps a target from being dispatched: the provider-wide one
@@ -130,6 +131,38 @@ export async function evaluateExecuteTargetGates(opts: {
   const bumpFallback = () => {
     state.fallbackCount++;
   };
+
+  if (provider && deps.body) {
+    const modelMeta = getProviderModels(provider).find(
+      (m) => m.id === rawModel || m.aliases?.includes(rawModel)
+    );
+    if (
+      typeof modelMeta?.maxInputTokens === "number" &&
+      modelMeta.maxInputTokens > 0
+    ) {
+      const estimatedInputTokens = Math.ceil(JSON.stringify(deps.body).length / 4);
+      if (estimatedInputTokens > modelMeta.maxInputTokens) {
+        deps.log.info(
+          "COMBO",
+          `Skipping ${modelStr} — estimated input tokens (~${estimatedInputTokens}) exceed model maxInputTokens (${modelMeta.maxInputTokens})`
+        );
+        recordComboDecision(deps.traceInvocationId, {
+          step: target.executionKey,
+          target: modelStr,
+          decision: "skipped_before_dispatch",
+          reason: "input_tokens_exceed_limit",
+        });
+        bumpFallback();
+        return {
+          kind: "skip",
+          result: stopProtectedPriorityTarget(
+            `Estimated input tokens (~${estimatedInputTokens}) exceed ${modelStr} limit (${modelMeta.maxInputTokens})`,
+            "input_tokens_exceed_limit" as ProtectedPriorityStopCause
+          ),
+        };
+      }
+    }
+  }
 
   const openBreaker = findOpenCircuitBreaker(provider, target.connectionId);
   if (openBreaker) {
