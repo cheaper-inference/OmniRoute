@@ -69,16 +69,16 @@ interface StructuralRoute {
 /**
  * EXTENSION POINT: non-shell tools with a correlated call (native Grep/Glob, directory listings).
  * `resolveToolMeta` marks them `skipFilters` (no RTK filter ever runs on them), so they never
- * reach the shell routing below. A later PR registers a selector here under the lower-cased tool
- * name; it receives the original output and returns the route to render it with, or null to stay
+ * reach the shell routing below. A later PR registers a selector here (`NATIVE_TOOL_ROUTES.set`)
+ * under the lower-cased tool name; it receives the original output and returns the route to render it with, or null to stay
  * on the legacy path. The budget, `config.renderers` allowlist, limits and fidelity checks in
  * `tryStructuralRender` apply to those routes unchanged.
  */
 type NativeToolRouteSelector = (text: string, toolName: string) => StructuralRoute | null;
-const NATIVE_TOOL_ROUTES: Record<string, NativeToolRouteSelector> = {
+const NATIVE_TOOL_ROUTES = new Map<string, NativeToolRouteSelector>([
   // Content-mode output of a native Grep tool (`path:line:text`, optional envelope lines).
-  grep: (text) => (startsLikeSearchMatches(text) ? searchRoute(null) : null),
-};
+  ["grep", (text) => (startsLikeSearchMatches(text) ? searchRoute(null) : null)],
+]);
 
 const DIFF_COMMAND_RE = /^git\s+(?:diff|show)\b/i;
 const DIFF_FILE_HEADER_RE = /^diff --(?:git|cc|combined) /m;
@@ -128,15 +128,30 @@ function selectShellRoute(text: string, rawCommand: string | null | undefined, f
 function selectRoute(text: string, options: RtkTextOptions, full: boolean): StructuralRoute | null {
   if (options.skipFilters) {
     const name = options.toolName?.trim().toLowerCase();
-    const select = name ? NATIVE_TOOL_ROUTES[name] : undefined;
+    // A Map: the name comes from the model, and a plain object would resolve `__proto__` or
+    // `constructor` to an inherited member.
+    const select = name ? NATIVE_TOOL_ROUTES.get(name) : undefined;
     return select && name ? select(text, name) : null;
   }
   return selectShellRoute(text, options.command, full);
 }
 
+/**
+ * Whether one line (`from` to `end`) is within the per-line ceiling. The cheap character test
+ * comes first; only a line that could exceed the ceiling in bytes (UTF-8 takes at most three
+ * bytes per UTF-16 code unit) is measured, so ordinary lines are never copied.
+ */
+function lineWithinBudget(text: string, from: number, end: number): boolean {
+  const { maxLineChars } = STRUCTURAL_ANALYSIS_BUDGET;
+  const chars = end - from;
+  if (chars > maxLineChars) return false;
+  if (chars * 3 <= maxLineChars) return true;
+  return Buffer.byteLength(text.slice(from, end), "utf8") <= maxLineChars;
+}
+
 /** Linear scan, no line array: true while the input stays inside the analysis budget. */
 function withinAnalysisBudget(text: string): boolean {
-  const { maxBytes, maxLines, maxLineChars } = STRUCTURAL_ANALYSIS_BUDGET;
+  const { maxBytes, maxLines } = STRUCTURAL_ANALYSIS_BUDGET;
   // UTF-8 never takes fewer bytes than characters, so the cheap character test comes first.
   if (text.length > maxBytes) return false;
   let lines = 0;
@@ -144,7 +159,7 @@ function withinAnalysisBudget(text: string): boolean {
   while (from < text.length) {
     const newline = text.indexOf("\n", from);
     const end = newline === -1 ? text.length : newline;
-    if (end - from > maxLineChars) return false;
+    if (!lineWithinBudget(text, from, end)) return false;
     if (++lines > maxLines) return false;
     if (newline === -1) break;
     from = newline + 1;
@@ -167,10 +182,13 @@ function legacyFilterOwnsRequest(text: string, command: string | null, config: R
   return filter.source === "project" || filter.source === "global";
 }
 
-/** The RTK line and character limits (positive values only) apply to the candidate summary. */
+/**
+ * The RTK limits apply to the candidate summary exactly as the legacy path applies them: the
+ * line budget is `effectiveMaxLines` (never below one line, so a configured 0 is one line, not
+ * "no cap"), and the character limit counts only when positive.
+ */
 function fitsRtkLimits(summary: string, config: RtkConfig): boolean {
   if (config.maxCharsPerResult > 0 && summary.length > config.maxCharsPerResult) return false;
-  if (config.maxLinesPerResult <= 0) return true;
   const limit = effectiveMaxLines(config.maxLinesPerResult, config.intensity);
   return summary.split("\n").length <= limit;
 }
@@ -214,6 +232,19 @@ function renderOrPreserve(
   return { kind: "rendered", text: rendered.text, renderer: rendered.renderer };
 }
 
+/**
+ * Decide how one tool result is handled by the structural renderers.
+ *
+ * @param text - The ORIGINAL tool output, before any RTK filter, dedup or truncation.
+ * @param config - The merged RTK config. Its `enableRenderers`, `applyToToolResults`, `renderers`
+ *   allowlist, filters and line/character limits gate and bound the render.
+ * @param options - Per-call context. `rtkStructuralRenderersEnabled` is the flag decision captured
+ *   once for the request (see structuralFlag.ts); it is never read from `config` or a step config.
+ *   `toolResult` marks a tool result the path may rewrite; `command`/`toolName` select the format.
+ * @returns `legacy` (the existing RTK pipeline runs as before), `preserve` (a format was
+ *   recognised but cannot be summarised faithfully: the caller bypasses the legacy filters and
+ *   returns the original text unchanged) or `rendered` (a validated summary to use as is).
+ */
 export function tryStructuralRender(
   text: string,
   config: RtkConfig,

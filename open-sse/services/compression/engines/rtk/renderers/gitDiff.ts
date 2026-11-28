@@ -45,8 +45,9 @@ export function renderGitDiff(text: string, _detection: CommandDetectionResult):
 const HUNK_HEADER_RE = /^@@ -(\d{1,9})(?:,(\d{1,9}))? \+(\d{1,9})(?:,(\d{1,9}))? @@(?: .*)?$/;
 const BLOB_INDEX_RE = /^index [0-9a-f]{4,64}\.\.[0-9a-f]{4,64}(?: [0-7]{6})?$/;
 const FILE_METADATA_RE =
-  /^(?:old mode|new mode|deleted file mode|new file mode|copy from|copy to|rename from|rename to|similarity index|dissimilarity index) \S/;
+  /^(old mode|new mode|deleted file mode|new file mode|copy from|copy to|rename from|rename to|similarity index|dissimilarity index) \S/;
 const GIT_FILE_HEADER = "diff --git ";
+const NO_NEWLINE_MARKER = "\\ No newline at end of file";
 
 type Section = { kept: string[]; next: number };
 
@@ -99,7 +100,9 @@ function consumeHunkLine(state: HunkState, line: string): boolean {
   // An empty line is a context line whose single space was stripped in transit.
   const tag = text[0] ?? " ";
   if (tag === "\\") {
-    // "\ No newline at end of file" belongs to the line before it: keep it only after a change.
+    // Only the exact marker belongs to the line before it: keep it only after a change. Any other
+    // backslash line is a diagnostic, and a summary must not swallow it.
+    if (text !== NO_NEWLINE_MARKER) return false;
     if (state.afterChange) state.kept.push(line);
     return true;
   }
@@ -132,21 +135,49 @@ function readHunk(lines: string[], start: number): HunkRead {
   return { next: i, kept: state.kept, adds: state.adds, dels: state.dels };
 }
 
-/** Keep significant file metadata, drop the blob-id line; returns the index after the block. */
-function readFileMetadata(lines: string[], from: number, kept: string[]): number {
+/** Metadata read for one file: where the block ends and which kinds of line it held. */
+interface FileMetadata {
+  next: number;
+  kinds: Set<string>;
+}
+
+/** Keep significant file metadata, drop the blob-id line. */
+function readFileMetadata(lines: string[], from: number, kept: string[]): FileMetadata {
+  const kinds = new Set<string>();
   let i = from;
   while (i < lines.length) {
     const line = bare(lines[i]);
+    const metadata = FILE_METADATA_RE.exec(line);
     if (BLOB_INDEX_RE.test(line)) {
       i++;
-    } else if (FILE_METADATA_RE.test(line)) {
+    } else if (metadata) {
+      kinds.add(metadata[1]);
       kept.push(lines[i]);
       i++;
     } else {
       break;
     }
   }
-  return i;
+  return { next: i, kinds };
+}
+
+/**
+ * Whether a section with no hunk is a whole change on its own: a created or deleted file, a mode
+ * change, a rename or a copy, each with both of its lines. Anything shorter (a bare header, a
+ * blob id with nothing after it, `rename from` without `rename to`) is a cut-off diff.
+ */
+function isCompleteHunklessChange(kinds: Set<string>): boolean {
+  const pairs = [
+    ["old mode", "new mode"],
+    ["rename from", "rename to"],
+    ["copy from", "copy to"],
+  ];
+  if (pairs.some(([first, second]) => kinds.has(first) !== kinds.has(second))) return false;
+  return (
+    kinds.has("new file mode") ||
+    kinds.has("deleted file mode") ||
+    pairs.some(([first]) => kinds.has(first))
+  );
 }
 
 /**
@@ -186,13 +217,20 @@ function readFileSection(lines: string[], start: number): Section | null {
   const header = bare(lines[start]);
   if (!header.startsWith(GIT_FILE_HEADER)) return null;
   const kept = [lines[start]];
-  const afterMetadata = readFileMetadata(lines, start + 1, kept);
-  const afterPaths = readPathHeaders(lines, afterMetadata, header, kept);
+  const metadata = readFileMetadata(lines, start + 1, kept);
+  const afterPaths = readPathHeaders(lines, metadata.next, header, kept);
   if (afterPaths < 0) return null;
   const hunks = readHunks(lines, afterPaths);
   if (!hunks) return null;
   // Anything else before the next file (binary notice, stray text) is not a plain diff.
   if (hunks.next < lines.length && !lines[hunks.next].startsWith(GIT_FILE_HEADER)) return null;
+  // No hunk is fine only for a change that needs none; a `---`/`+++` pair always promises one.
+  if (
+    hunks.count === 0 &&
+    (afterPaths > metadata.next || !isCompleteHunklessChange(metadata.kinds))
+  ) {
+    return null;
+  }
   if (hunks.count > 0) kept.push(`# +${hunks.adds} -${hunks.dels}`);
   return { kept: [...kept, ...hunks.body], next: hunks.next };
 }
