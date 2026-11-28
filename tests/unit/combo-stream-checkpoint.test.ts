@@ -27,6 +27,7 @@ const { SseEventBuffer, findEventEnd } =
 
 const FLAG = "COMBO_STREAM_CHECKPOINT_ENABLED";
 const RESUME_FIELD = "_omnirouteComboCheckpointResume";
+const UPSTREAM_ONLY = "_omnirouteSuppressRequestPersistence";
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const a = "ckpt-a/first";
@@ -1167,6 +1168,21 @@ test("the eligible dispatch is marked for the upstream handler, the replacement 
   await readClient(response);
   assert.equal(dispatched[0].body[RESUME_FIELD], true);
   assert.equal(dispatched[1].body[RESUME_FIELD], undefined);
+});
+
+test("the replacement carries the delivered text upstream only, and no other dispatch is marked", async () => {
+  process.env[FLAG] = "true";
+  const { response, dispatched } = await run(({ model }) =>
+    model === a
+      ? sse(source(pieces(firstTargetFrames, 7)).stream)
+      : sse(source(replacementFrames).stream)
+  );
+  await readClient(response);
+  assert.equal(dispatched.length, 2);
+  assert.equal(dispatched[0].body[UPSTREAM_ONLY], undefined);
+  assert.equal(dispatched[1].body[UPSTREAM_ONLY], true);
+  // The marked body is the one that quotes the delivered text.
+  assert.equal(sentCheckpoint(dispatched[1]).quoted.delivered_text, "A resposta começa aqui 🌱");
 });
 
 // ─── combo schema ──────────────────────────────────────────────────────────────

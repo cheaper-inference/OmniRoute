@@ -25,6 +25,7 @@ import {
 } from "../comboAgentMiddleware.ts";
 import { recordComboRequest } from "../comboMetrics.ts";
 import { isEventStreamResponse } from "./firstOutputStream.ts";
+import { markUpstreamOnlyBody } from "./requestPersistence.ts";
 import { clampGlobalAttempts, toRecordedTarget } from "./comboPredicates.ts";
 import {
   COMBO_CHECKPOINT_RESUME_FIELD,
@@ -174,8 +175,10 @@ function createOpenNext(ctx: ReplacementContext): OpenNextComboStream {
     if (!follower || signal.aborted) return null;
     // One slot of the attempt budget shared with every other dispatch of this request.
     if (state.globalAttempts >= clampGlobalAttempts(deps.config.maxGlobalAttempts)) return null;
-    const body = replacementBody(deps, follower.target, checkpoint);
-    if (!body) return null;
+    const built = replacementBody(deps, follower.target, checkpoint);
+    if (!built) return null;
+    // The body quotes the delivered text and the draft: upstream only, never persisted.
+    const body = markUpstreamOnlyBody(built);
     state.globalAttempts++;
     state.comboAttemptOrder.push({
       provider: follower.target.provider ?? "unknown",
