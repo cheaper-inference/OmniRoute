@@ -1,5 +1,5 @@
 import "./setupPolyfill.ts";
-import { Agent, ProxyAgent, type Dispatcher } from "undici";
+import { Agent, Pool, ProxyAgent, type Dispatcher } from "undici";
 import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { getUpstreamTimeoutConfig } from "@/shared/utils/runtimeTimeouts";
 import { stripIpv6Brackets, detectIpLiteralFamily, parseProxyFamily } from "./proxyFamily.ts";
@@ -562,6 +562,28 @@ function buildProxyAuthorizationToken(parsed: URL): string | null {
   return `Basic ${Buffer.from(`${user}:${pass}`).toString("base64")}`;
 }
 
+function createIpProxyClient(origin: URL, options: Pool.Options): Pool {
+  const { connect } = options;
+  if (typeof connect !== "function") return new Pool(origin, options);
+
+  return new Pool(origin, {
+    ...options,
+    connect(parameters, callback) {
+      // ProxyAgent passes the proxy hostname as SNI even when it is an IP
+      // literal. Node 26 rejects that. Keep the connector's hostname so TLS
+      // still verifies the proxy certificate against the IP address.
+      const { servername } = parameters;
+      connect(
+        {
+          ...parameters,
+          servername: detectIpLiteralFamily(servername ?? "") === null ? servername : undefined,
+        },
+        callback
+      );
+    },
+  });
+}
+
 /**
  * Build a ProxyAgent / socks dispatcher for a normalized proxy URL using the
  * given options. Shared by the pooled dispatcher (keep-alive)
@@ -603,6 +625,8 @@ function buildProxyDispatcher(
   // net.connect (the uri already carries the host:port), so the partial pin is
   // valid; the cast suppresses the spurious missing-`port` error.
   const proxyAuthorization = buildProxyAuthorizationToken(parsed);
+  const usesIpHttpsProxy =
+    parsed.protocol === "https:" && detectIpLiteralFamily(parsed.hostname) !== null;
   return new ProxyAgent({
     uri: cleanUri,
     // undici 8.6+ forwards plain-HTTP requests through the proxy as an origin
@@ -613,6 +637,7 @@ function buildProxyDispatcher(
     proxyTunnel: true,
     ...options,
     ...(proxyAuthorization ? { token: proxyAuthorization } : {}),
+    ...(usesIpHttpsProxy ? { clientFactory: createIpProxyClient } : {}),
     ...(family !== null
       ? {
           proxyTls: {

@@ -25,6 +25,7 @@ const sockets = new Set<net.Socket>();
 const sessions = new Set<http2.ServerHttp2Session>();
 const dispatchers = new Set<Dispatcher>();
 const proxyProtocols: string[] = [];
+const proxyServerNames: tls.TLSSocket["servername"][] = [];
 const proxyAuth = `Basic ${Buffer.from("test:password").toString("base64")}`;
 let upstream: http2.Http2SecureServer;
 let plainProxy: http.Server;
@@ -101,10 +102,20 @@ test.before(async () => {
   const pems = await selfsigned.generate([{ name: "commonName", value: "localhost" }], {
     keySize: 2048,
     algorithm: "sha256",
-    extensions: [{ name: "subjectAltName", altNames: [{ type: 7, ip: "127.0.0.1" }] }],
+    extensions: [
+      {
+        name: "subjectAltName",
+        altNames: [
+          { type: 7, ip: "127.0.0.1" },
+          { type: 7, ip: "::1" },
+          { type: 2, value: "localhost" },
+        ],
+      },
+    ],
   });
   tls.setDefaultCACertificates([...originalCa, pems.cert]);
-  upstream = http2.createSecureServer({ key: pems.private, cert: pems.cert, allowHTTP1: true });
+  const loopbackTls = { key: pems.private, cert: pems.cert };
+  upstream = http2.createSecureServer({ ...loopbackTls, allowHTTP1: true });
   upstream.on("session", (session) => {
     sessions.add(session);
     session.once("close", () => sessions.delete(session));
@@ -122,8 +133,11 @@ test.before(async () => {
   });
   upstreamUrl = `https://127.0.0.1:${await listen(upstream)}/upload`;
   plainProxy = http.createServer();
-  secureProxy = https.createServer({ key: pems.private, cert: pems.cert });
-  secureProxy.on("secureConnection", (socket) => proxyProtocols.push(socket.alpnProtocol || ""));
+  secureProxy = https.createServer(loopbackTls);
+  secureProxy.on("secureConnection", (socket) => {
+    proxyProtocols.push(socket.alpnProtocol || "");
+    proxyServerNames.push(socket.servername);
+  });
   tunnel(plainProxy);
   tunnel(secureProxy);
   await listen(plainProxy);
@@ -183,6 +197,69 @@ test("HTTP and HTTPS proxies retain authentication and family pinning on initial
   }
   assert.ok(proxyProtocols.length >= 2);
   assert.ok(proxyProtocols.every((protocol) => protocol === "http/1.1"));
+  assert.ok(proxyServerNames.every((servername) => !servername));
+});
+
+test("HTTPS proxies send DNS SNI and verify IP certificate identity", async () => {
+  const dnsUrl = `https://test:password@localhost:${(secureProxy.address() as net.AddressInfo).port}?family=ipv4`;
+  await request(createProxyDispatcher(dnsUrl));
+  assert.equal(proxyServerNames.at(-1), "localhost");
+
+  const pems = await selfsigned.generate([{ name: "commonName", value: "dns-only-proxy.test" }], {
+    keySize: 2048,
+    algorithm: "sha256",
+    extensions: [{ name: "subjectAltName", altNames: [{ type: 2, value: "dns-only-proxy.test" }] }],
+  });
+  const trusted = tls.getCACertificates("default");
+  const wrongIdentity = https.createServer({ key: pems.private, cert: pems.cert });
+  tunnel(wrongIdentity);
+  const port = await listen(wrongIdentity);
+  const dispatcher = createProxyDispatcher(`https://test:password@127.0.0.1:${port}`);
+  try {
+    tls.setDefaultCACertificates([...trusted, pems.cert]);
+    await assert.rejects(
+      fetch(upstreamUrl, { dispatcher, signal: AbortSignal.timeout(5000) }),
+      (error: Error & { cause?: { cause?: { code?: string } } }) =>
+        error.cause?.cause?.code === "ERR_TLS_CERT_ALTNAME_INVALID"
+    );
+  } finally {
+    tls.setDefaultCACertificates(trusted);
+    await dispatcher.destroy();
+    await new Promise<void>((resolve) => wrongIdentity.close(() => resolve()));
+  }
+});
+
+test("HTTPS proxies omit SNI and verify identity for bracketed IPv6 literals", async (context) => {
+  const port = (secureProxy.address() as net.AddressInfo).port;
+  const connectTls = tls.connect;
+  let verifiedHost: string | undefined;
+  context.mock.method(tls, "connect", (options: tls.ConnectionOptions) => {
+    if (options.host !== "::1") return connectTls(options);
+
+    // Route TCP through the IPv4 fixture so the TLS check also runs on IPv4-only hosts.
+    // Keep the original TLS options and delegate certificate identity verification.
+    const transport = net.connect(Number(options.port), "127.0.0.1");
+    const verify = options.checkServerIdentity ?? tls.checkServerIdentity;
+    try {
+      return connectTls({
+        ...options,
+        socket: transport,
+        checkServerIdentity(host, certificate) {
+          verifiedHost = host;
+          return verify(host, certificate);
+        },
+      });
+    } catch (error) {
+      transport.destroy();
+      throw error;
+    }
+  });
+  const [[socket]] = await Promise.all([
+    once(secureProxy, "secureConnection") as Promise<[tls.TLSSocket]>,
+    request(createProxyDispatcher(`https://test:password@[::1]:${port}?family=ipv6`)),
+  ]);
+  assert.ok(!socket.servername);
+  assert.equal(verifiedHost, "::1");
 });
 
 test("relay pool and fresh-socket retry honor the startup opt-out", async () => {
