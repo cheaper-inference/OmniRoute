@@ -1,0 +1,1 @@
+- **feat(providers):** Add JembatanAI (`jembatanai`), a hosted OpenAI-compatible multi-model gateway, as an API-key provider with per-key live model discovery from `/v1/models` ([#19256](https://github.com/cheaper-inference/OmniRoute/pull/19256)) — thanks @juliochwd
