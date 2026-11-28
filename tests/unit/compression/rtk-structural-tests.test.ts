@@ -452,8 +452,9 @@ describe("resumo recusa contagens que não fecham", () => {
     // a parenthesis in a test title is not a file-line tail
     const titled = VITEST_GREEN.replace(
       fileLine,
-      " ✓ tests/unit/auth.test.ts > handles (edge) input 10ms"
+      `${fileLine}\n ✓ tests/unit/auth.test.ts > handles (edge) input 10ms`
     );
+    assert.notEqual(titled, VITEST_GREEN);
     rendered(titled, "vitest run", "title with parentheses");
   });
 
