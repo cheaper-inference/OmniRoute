@@ -16,6 +16,7 @@ import {
   resolveImport,
   sourceDepsOf,
 } from "../../scripts/quality/build-test-impact-map.mjs";
+import { selectImpacted } from "../../scripts/quality/select-impacted-tests.mjs";
 
 const roots: string[] = [];
 after(() => {
@@ -93,6 +94,35 @@ test("each file's imports are read and resolved once per graph", () => {
   fs.writeFileSync(core, 'import { a } from "./a";\n');
   assert.equal(graph.edgesOf(core), first, "a second lookup re-read the file");
   assert.deepEqual(graph.edgesOf(path.join(root, "src/lib/none.ts")), []);
+});
+
+test("the impact map and selector cover every curated CI unit directory", () => {
+  const manifest = JSON.parse(
+    fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8")
+  );
+  const curated = manifest.scripts["test:unit:ci:shard"].match(/tests\/unit\/\{([^}]+)\}/);
+  assert.ok(curated, "the sharded unit command declares its curated directories");
+  const changed = curated[1]
+    .split(",")
+    .map((dir: string) => `tests/unit/${dir}/sample.test.ts`)
+    .sort();
+  const source = "src/lib/core.ts";
+  const root = fixture({
+    [source]: "export const value = 1;\n",
+    ...Object.fromEntries(
+      changed.map((testPath: string) => [
+        testPath,
+        'import { value } from "@/lib/core";\nvoid value;\n',
+      ])
+    ),
+  });
+  execFileSync("git", ["init", "-q"], { cwd: root });
+  execFileSync("git", ["add", "-A"], { cwd: root });
+
+  const map = buildTestImpactMap(root);
+  assert.equal(map.testFileCount, changed.length);
+  assert.deepEqual(map.sources[source], changed);
+  assert.deepEqual(selectImpacted({ changed, map }), changed);
 });
 
 test("building the map reads a source shared by several tests once", () => {
