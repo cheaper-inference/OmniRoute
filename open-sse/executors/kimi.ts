@@ -3,6 +3,7 @@ import {
   getKimiCodeCliUserAgent,
   KIMI_CODING_ANTHROPIC_URL,
   KIMI_CODING_OPENAI_URL,
+  KIMI_CODING_RESPONSES_URL,
 } from "../config/providers/registry/kimi/coding/runtime.ts";
 import { flattenOpenAIToolRootAnyOf } from "../services/toolSchemaSanitizer.ts";
 import { FORMATS } from "../translator/formats.ts";
@@ -12,7 +13,7 @@ import type { ProviderCredentials } from "./base.ts";
 import { ensureToolMessageNames } from "./kimiToolNames.ts";
 
 type JsonRecord = Record<string, unknown>;
-type KimiProtocol = "openai" | "claude";
+type KimiProtocol = "openai" | "claude" | "responses";
 
 const KIMI_CONTEXT_MANAGEMENT_BETA = "context-management-2025-06-27";
 
@@ -34,6 +35,7 @@ function resolveKimiProtocol(
   const targetFormat = credentials?.providerSpecificData?._omnirouteKimiTargetFormat;
   if (targetFormat === FORMATS.OPENAI) return "openai";
   if (targetFormat === FORMATS.CLAUDE) return "claude";
+  if (targetFormat === FORMATS.OPENAI_RESPONSES) return "responses";
 
   const record = asRecord(body);
   if (
@@ -237,6 +239,23 @@ function normalizeOpenAIRequest(
     };
   }
   next = backfillKimiReasoningContent(next);
+  return next;
+}
+
+/** Responses bodies keep their own shape; only reasoning.effort goes through the Kimi effort policy. */
+function normalizeResponsesRequest(
+  body: JsonRecord,
+  policy: KimiThinkingPolicy,
+  modelId: string
+): JsonRecord {
+  const next: JsonRecord = { ...body };
+  const reasoning = asRecord(next.reasoning);
+  if (reasoning?.effort !== undefined) {
+    const effort = isKimiK31Model(modelId)
+      ? normalizeK31Effort(reasoning.effort)
+      : normalizeEffort(reasoning.effort);
+    next.reasoning = { ...reasoning, effort: constrainEffort(effort, policy, modelId) };
+  }
   return next;
 }
 
@@ -452,9 +471,9 @@ export class KimiExecutor extends DefaultExecutor {
     void model;
     void stream;
     void urlIndex;
-    return resolveKimiProtocol(credentials) === "claude"
-      ? KIMI_CODING_ANTHROPIC_URL
-      : KIMI_CODING_OPENAI_URL;
+    const protocol = resolveKimiProtocol(credentials);
+    if (protocol === "responses") return KIMI_CODING_RESPONSES_URL;
+    return protocol === "claude" ? KIMI_CODING_ANTHROPIC_URL : KIMI_CODING_OPENAI_URL;
   }
 
   buildHeaders(
@@ -499,8 +518,10 @@ export class KimiExecutor extends DefaultExecutor {
     const withNames = ensureToolMessageNames(record);
 
     const policy = getThinkingPolicy(credentials);
+    const protocol = resolveKimiProtocol(credentials, withNames);
+    if (protocol === "responses") return normalizeResponsesRequest(withNames, policy, model);
     const normalized =
-      resolveKimiProtocol(credentials, withNames) === "claude"
+      protocol === "claude"
         ? normalizeAnthropicRequest(withNames, policy, model)
         : normalizeOpenAIRequest(withNames, stream, policy, model);
     if (isKimiK31Model(model)) delete normalized.enable_thinking;
