@@ -1,8 +1,8 @@
 {
   "id": 9007199254740993,
-  "ratio": 1.5,
+  "ratio": 1.50,
   "tiny": -0.0,
-  "huge": 1e400,
+  "huge": 1E+400,
   "note": "a  b",
   "path": "C:\\temp\\ ",
   "quoted": "she said \"hi  there\"  and left",

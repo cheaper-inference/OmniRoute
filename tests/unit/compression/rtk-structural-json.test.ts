@@ -10,7 +10,9 @@ import { renderJsonOutput } from "../../../open-sse/services/compression/engines
 import { detectCommandType } from "../../../open-sse/services/compression/engines/rtk/commandDetector.ts";
 
 const FIXTURES = path.join(import.meta.dirname, "fixtures", "rtk", "structural");
-const INDENTED = fs.readFileSync(path.join(FIXTURES, "json-indented-lexemes.json"), "utf8");
+// A .txt fixture on purpose: Prettier rewrites number lexemes in .json files (1.50 becomes 1.5,
+// 1E+400 becomes 1e400), which would erase exactly the noncanonical spellings this test needs.
+const INDENTED = fs.readFileSync(path.join(FIXTURES, "json-indented-lexemes.txt"), "utf8");
 
 const encoder = getEncoding("cl100k_base");
 const tokens = (text: string): number => encoder.encode(text).length;
