@@ -1,0 +1,1 @@
+- **feat(audio):** add Azure AI Speech as a text-to-speech provider with regional or custom resource endpoints, SSML-safe voice and speed handling, MP3/WAV/PCM/Opus output, connection validation, and `/v1/audio/speech` routing.

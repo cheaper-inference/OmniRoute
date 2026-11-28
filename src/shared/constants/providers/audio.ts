@@ -3,6 +3,18 @@
  * Pure data literal; re-exported by the providers.ts barrel. No behavior change.
  */
 export const AUDIO_ONLY_PROVIDERS = {
+  "azure-speech": {
+    id: "azure-speech",
+    serviceKinds: [],
+    alias: "azspeech",
+    name: "Azure AI Speech",
+    icon: "record_voice_over",
+    color: "#0078D4",
+    textIcon: "AZ",
+    website: "https://azure.microsoft.com/products/ai-services/ai-speech",
+    authHint:
+      "Use an Azure Speech resource key and configure its region (for example westeurope). You can optionally set the resource endpoint as a custom Base URL.",
+  },
   deepgram: {
     id: "deepgram",
     serviceKinds: [],
