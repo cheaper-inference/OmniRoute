@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { realpathSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { FACTS_SNAPSHOT_PATH, getFactAt, loadFactsSnapshot } from "./facts.mjs";
 
@@ -248,6 +248,6 @@ function runCli(argv) {
   }
 }
 
-if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.exitCode = runCli(process.argv.slice(2));
 }

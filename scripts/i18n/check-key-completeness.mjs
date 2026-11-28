@@ -42,10 +42,11 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 import { describeGateMode, resolveGateModeInfo } from "../check/lib/gateMode.mjs";
 import { prModeSkipLine } from "./lib/release-mode.mjs";
+import { realpathSync } from "node:fs";
 import {
   findCatalogRegressions,
   findTouchedCatalogs,
@@ -225,7 +226,7 @@ async function main() {
   if (!warnOnly) process.exitCode = 1;
 }
 
-const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isDirectRun = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isDirectRun) {
   main().catch((err) => {
     console.error(`[i18n-keys] ${err.message}`);

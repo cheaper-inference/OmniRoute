@@ -40,6 +40,7 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 export const DEFAULT_SOURCE_IMAGE = "ghcr.io/cheaper-inference/omniroute";
 export const DEFAULT_TARGET_IMAGE = "cheaperinference/omniroute";
@@ -250,7 +251,7 @@ export function mirrorToOrg(env, deps = {}) {
   return { exitCode: 0, status: "mirrored", promoted: promoteLatest, summary };
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const result = mirrorToOrg(process.env);
   if (process.env.GITHUB_STEP_SUMMARY) {
     fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${result.summary.join("\n")}\n`);

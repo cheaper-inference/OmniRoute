@@ -20,7 +20,8 @@ import { promises as fs, existsSync } from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import process from "node:process";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..", "..");
@@ -253,7 +254,7 @@ async function main() {
   if (!ok && opts.mode !== "warn") process.exit(1);
 }
 
-const isDirectRun = import.meta.url === pathToFileURL(process.argv[1]).href;
+const isDirectRun = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isDirectRun) {
   main().catch((err) => {
     console.error("[i18n-check] ERROR", err?.stack || err?.message || String(err));

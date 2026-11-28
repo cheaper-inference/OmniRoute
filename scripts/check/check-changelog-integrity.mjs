@@ -33,6 +33,7 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const CHANGELOG = "CHANGELOG.md";
@@ -384,6 +385,6 @@ function main() {
   return 1;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.exit(main());
 }

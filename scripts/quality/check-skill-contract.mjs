@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 const TEMPLATES = fileURLToPath(new URL("../../config/quality/skill-templates/", import.meta.url));
 const CONTRACTS = [
@@ -34,7 +35,7 @@ export function inspectSkillContracts(root, templates = TEMPLATES) {
   return { ok, status: ok ? "MATCH" : "INCOMPLETE", files };
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     const result = inspectSkillContracts(process.argv[2] || resolve(".agents/skills"));
     console.log(JSON.stringify(result, null, 2));

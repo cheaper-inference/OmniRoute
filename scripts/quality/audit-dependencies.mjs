@@ -3,7 +3,8 @@ import { existsSync, readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 export const AUDIT_SCOPES = [
   ".",
@@ -105,7 +106,7 @@ export function auditDependencies({
   };
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const outputDir = resolve("_artifacts/dependency-audit");
   const report = auditDependencies({ outputDir });
   mkdirSync(outputDir, { recursive: true });

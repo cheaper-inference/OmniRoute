@@ -4,9 +4,9 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { z } from "zod";
+import { realpathSync } from "node:fs";
 
 const contextSchema = z
   .object({
@@ -106,7 +106,7 @@ export async function executeVideoLiveSmoke(directory: string, executeReal: bool
   }
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   executeVideoLiveSmoke(process.env.DATA_DIR || "", process.argv.includes("--execute-real"))
     .then((result) => {
       console.log(JSON.stringify(result));

@@ -3,8 +3,7 @@
 //
 //   node scripts/docs/gen-readme-quick-start-steps.mjs [--out path.svg]
 
-import { readFileSync, writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { realpathSync, readFileSync, writeFileSync } from "node:fs";
 import { esc, gridDefs, svgOpen } from "./readme-diagram-theme.mjs";
 import { outlineSvg } from "./readme-outline.mjs";
 
@@ -134,7 +133,7 @@ export async function renderReadmeQuickStartSteps() {
   );
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/quick-start-steps.svg";

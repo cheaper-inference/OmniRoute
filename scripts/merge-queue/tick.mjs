@@ -158,7 +158,7 @@
 import { mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+
 import * as bisectModule from "./bisect.mjs";
 import * as checksModule from "./checks.mjs";
 import * as classifyModule from "./classify.mjs";
@@ -210,6 +210,7 @@ import {
   voiceFallbackNote,
 } from "./voice.mjs";
 import { WATCHDOG_LIMIT_MINUTES } from "./watchdog.mjs";
+import { realpathSync } from "node:fs";
 
 export { StateConflictError };
 
@@ -4966,8 +4967,7 @@ export async function main(argv = process.argv.slice(2), env = process.env) {
   return exitCode;
 }
 
-const invokedDirectly =
-  process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
+const invokedDirectly = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (invokedDirectly) {
   main().then((code) => {
     process.exitCode = code;

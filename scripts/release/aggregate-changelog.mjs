@@ -31,6 +31,7 @@
 import { readFileSync, writeFileSync, readdirSync, unlinkSync, existsSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const FRAGMENTS_DIR = "changelog.d";
@@ -186,6 +187,6 @@ function main() {
   return 0;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.exit(main());
 }

@@ -29,7 +29,8 @@
 // the format every catalog already uses, so only the removed lines change.
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const SOURCE_ROOTS = ["src", "open-sse", "electron", "bin"];
 // .json covers generated maps such as src/i18n/routeNamespaces.generated.json (namespaces
@@ -219,7 +220,7 @@ function main() {
   return 0;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     process.exit(main());
   } catch (err) {

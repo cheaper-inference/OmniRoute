@@ -6,6 +6,7 @@ import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { isDeepStrictEqual, promisify } from "node:util";
 import { gzip, gunzip } from "node:zlib";
+import { realpathSync } from "node:fs";
 import { verifyCoverageSelection } from "./select-v8-coverage.mjs";
 import { createSourceMapLayoutProjector } from "./v8-source-map-layouts.mjs";
 import {
@@ -778,7 +779,7 @@ async function main() {
           );
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main().then(
     ({ inputs: _inputs, sourceFiles: _sources, ...summary }) =>
       console.log(JSON.stringify(summary)),

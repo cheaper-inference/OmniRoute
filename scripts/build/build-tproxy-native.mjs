@@ -17,7 +17,6 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, realpathSync } from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 
 /**
  * Locate npm's bundled `node-gyp/bin/node-gyp.js` without touching the network.
@@ -114,7 +113,7 @@ function defaultRun(cmd, args, cwd) {
   execFileSync(cmd, args, { cwd, stdio: "inherit" });
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const res = buildTproxyNative(process.cwd());
   if (!res.built) {
     console.error(`[build:native:tproxy] skipped/failed: ${res.reason}`);

@@ -22,6 +22,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import v8 from "node:v8";
+import { realpathSync } from "node:fs";
 
 export const BYTES_PER_TOKEN_EQUIVALENT = 4;
 export const DEFAULT_TOKEN_EQUIVALENTS = [100_000, 300_000, 600_000] as const;
@@ -1061,8 +1062,7 @@ async function main(): Promise<void> {
   return runDriver();
 }
 
-const invokedPath = process.argv[1] ? pathToFileURL(path.resolve(process.argv[1])).href : "";
-if (invokedPath === import.meta.url) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.on("exit", () => {
     removeTrackedHeapSnapshots();
   });

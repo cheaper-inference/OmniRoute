@@ -14,14 +14,11 @@
 // buildBudgetCardCopy() returns every string the card draws, formatted exactly as drawn: it is
 // both the drawn text and what the outlining step shapes (or, for the code roles, subsets).
 import fs from "node:fs";
-import { fileURLToPath } from "node:url";
-import {
-  computeFreeModelTotals,
-  isCountingGated,
-  isSocialGated,
-} from "../../open-sse/config/freeModelCatalog.ts";
+
+import { computeFreeModelTotals } from "../../open-sse/config/freeModelCatalog.ts";
 import { svgOpen, gridDefs, esc } from "../docs/readme-diagram-theme.mjs";
 import { outlineSvg } from "../docs/readme-outline.mjs";
+import { realpathSync } from "node:fs";
 
 const W = 1200;
 const STEADY_TYPES = new Set(["recurring-daily", "recurring-monthly", "keyless"]);
@@ -38,15 +35,13 @@ const cleanName = (r) =>
     .replace(/ —.*$/, "")
     .slice(0, 24);
 
-// Gated rows (identity, payment or social) are absent from the real figure, so the card skips them.
-const isGatedRow = (r) => isCountingGated(r) || isSocialGated(r);
+export function buildBudgetCardModel() {
+  const t = computeFreeModelTotals();
 
-/** @param {ReturnType<typeof computeFreeModelTotals>} [t] totals to draw; defaults to the live catalog */
-export function buildBudgetCardModel(t = computeFreeModelTotals()) {
   // One bar segment per steady pool (largest member), gated rows excluded like the headline.
   const poolMap = new Map();
   for (const r of t.perModel) {
-    if (!STEADY_TYPES.has(r.freeType) || isGatedRow(r)) continue;
+    if (!STEADY_TYPES.has(r.freeType) || r.eligibilityGate) continue;
     const k = r.poolKey || `${r.provider}:${r.modelId}`;
     const cur = poolMap.get(k);
     if (!cur || r.monthlyTokens > cur.monthlyTokens) poolMap.set(k, r);
@@ -61,7 +56,7 @@ export function buildBudgetCardModel(t = computeFreeModelTotals()) {
   const otMap = new Map();
   for (const r of t.perModel) {
     // Gated rows are excluded here too — they are absent from firstMonthRealisticTokens.
-    if (r.freeType !== "one-time-initial" || r.creditTokens <= 0 || isGatedRow(r)) continue;
+    if (r.freeType !== "one-time-initial" || r.creditTokens <= 0 || r.eligibilityGate) continue;
     const k = r.poolKey || r.provider;
     otMap.set(k, { provider: r.provider, v: Math.max(otMap.get(k)?.v || 0, r.creditTokens) });
   }
@@ -228,7 +223,7 @@ export async function renderBudgetCard() {
   return outlineSvg(svg);
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const outIdx = process.argv.indexOf("--out");
   if (outIdx >= 0 && !process.argv[outIdx + 1]) throw new Error("--out requires a path");
   const out = outIdx >= 0 ? process.argv[outIdx + 1] : "docs/screenshots/free-tier-budget-card.svg";

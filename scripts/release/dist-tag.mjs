@@ -20,7 +20,8 @@
  *   git tag -l 'v[0-9]*' | node scripts/release/dist-tag.mjs --version 3.8.52 --requested auto
  */
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const SEMVER_RE =
   /^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z.-]+)?$/;
@@ -134,7 +135,7 @@ function main(argv) {
   process.stdout.write(`${resolvePublishDistTag({ version, requested, gitTags })}\n`);
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     main(process.argv.slice(2));
   } catch (error) {

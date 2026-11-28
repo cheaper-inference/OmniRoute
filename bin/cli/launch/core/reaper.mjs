@@ -16,8 +16,7 @@
 // Plain .mjs on purpose: runs under bare `node`, never imports .ts.
 
 import { spawn } from "node:child_process";
-import { closeSync, existsSync, openSync } from "node:fs";
-import { pathToFileURL } from "node:url";
+import { closeSync, existsSync, openSync, realpathSync } from "node:fs";
 import { isPidRunning, readPidFile, sleep, waitForServer } from "../../utils/pid.mjs";
 import { liveLeases, LEASE_STALE_MS } from "./lease.mjs";
 import { isOurProcessAlive, stopPidGracefully, waitForPidExit } from "./gateway/process.mjs";
@@ -473,7 +472,7 @@ async function runReaper(spec) {
 
 const isMain = (() => {
   try {
-    return process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+    return !!process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
   } catch {
     return false;
   }

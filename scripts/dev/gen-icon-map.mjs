@@ -8,7 +8,8 @@
 //   node scripts/dev/gen-icon-map.mjs --names   # só os nomes, um por linha (usado pelo teste de cobertura)
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const DIRS = ["src/app", "src/shared"];
@@ -86,7 +87,7 @@ function existingMap() {
   );
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const names = collectNames();
   if (process.argv.includes("--names")) {
     console.log(names.join("\n"));

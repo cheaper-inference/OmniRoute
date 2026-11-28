@@ -2,11 +2,12 @@
 import { readFile, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod/v4";
 import { sanitizeErrorMessage } from "../../open-sse/utils/errorSanitization.ts";
+import { realpathSync } from "node:fs";
 
 const MAX_JSON_BYTES = 20 * 1024 * 1024;
 const File = z.object({
@@ -214,7 +215,7 @@ export async function startMediaServer() {
   return server;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   startMediaServer().catch(() => {
     process.stderr.write("OmniRoute media tool could not start.\n");
     process.exitCode = 1;

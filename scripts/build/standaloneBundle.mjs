@@ -22,6 +22,7 @@ import {
 } from "./standaloneManifest.mjs";
 import { createTarGz, extractTarGz } from "./standaloneTarball.mjs";
 import { hydratePlatformNatives, verifyBundledNatives } from "./hydrateNativeDeps.mjs";
+import { realpathSync } from "node:fs";
 
 function sha256File(filePath) {
   return new Promise((resolve, reject) => {
@@ -213,9 +214,6 @@ async function main(argv) {
   }
 }
 
-if (
-  process.argv[1] &&
-  import.meta.url === new URL(`file://${path.resolve(process.argv[1])}`).href
-) {
+if (process.argv[1] && process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   await main(process.argv.slice(2));
 }

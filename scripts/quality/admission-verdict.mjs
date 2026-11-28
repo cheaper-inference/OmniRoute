@@ -2,7 +2,8 @@
 import { execFileSync } from "node:child_process";
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const EVENTS = new Set(["pull_request", "push", "workflow_dispatch", "merge_group"]);
 const CONDITIONS = new Set([
@@ -187,7 +188,7 @@ function main() {
   process.exitCode = report.verdict === "PASS" ? 0 : 1;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     main();
   } catch (error) {

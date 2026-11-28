@@ -119,7 +119,7 @@ function main() {
 }
 
 import path from "node:path";
+import { realpathSync } from "node:fs";
 const isDirectRun =
-  process.argv[1] &&
-  path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname);
+  process.argv[1] && process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isDirectRun) main();

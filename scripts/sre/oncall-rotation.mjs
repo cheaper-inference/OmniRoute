@@ -350,7 +350,8 @@ function main() {
   process.exit(2);
 }
 
-import { pathToFileURL } from "node:url";
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+
+import { realpathSync } from "node:fs";
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main();
 }

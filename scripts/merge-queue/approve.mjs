@@ -41,10 +41,11 @@
 // label must not inherit the approval.
 
 import { readFileSync } from "node:fs";
-import { pathToFileURL } from "node:url";
+
 import { DEFAULT_CONFIG_PATH, isManagedBase, loadConfig } from "./config.mjs";
 import { APPROVAL_CONTEXTS, isSha } from "./contracts.mjs";
 import { createGitHubClient } from "./github.mjs";
+import { realpathSync } from "node:fs";
 
 const EVENT_NAMES = ["pull_request_target"];
 const LOGIN_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})(?:\[bot\])?$/;
@@ -192,7 +193,7 @@ export async function main(env = process.env, { log = (m) => console.log(m) } = 
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main().then((code) => {
     process.exitCode = code;
   });

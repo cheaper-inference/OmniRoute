@@ -15,7 +15,8 @@
 // Exit: 0 when the PR is well-formed or there is no PR context, 1 when it targets itself.
 
 import fs from "node:fs";
-import { fileURLToPath } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 /**
  * Classify a PR's head/base pair.
@@ -82,9 +83,6 @@ function main() {
   return 0;
 }
 
-if (
-  process.argv[1] &&
-  fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url))
-) {
+if (process.argv[1] && process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.exit(main());
 }

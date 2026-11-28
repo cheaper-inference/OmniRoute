@@ -28,8 +28,8 @@
  * to handle Docker network setups that isolate loopback interfaces.
  */
 
-import { pathToFileURL } from "node:url";
 import { networkInterfaces } from "node:os";
+import { realpathSync } from "node:fs";
 
 const DEFAULT_HOSTS = ["127.0.0.1", "localhost", "::1"];
 const DEFAULT_TIMEOUT_MS = 4000;
@@ -167,8 +167,7 @@ async function main() {
 
 // Only auto-run when invoked as the entrypoint (so importing the helper in
 // tests does not trigger a real probe + process.exit).
-const isEntrypoint =
-  Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isEntrypoint = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isEntrypoint) {
   main();
 }

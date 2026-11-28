@@ -13,7 +13,6 @@
 //  5. difficulty = (n1 / 2) * (N2 / n2), 0 when n2 is 0, rounded to 2 decimals.
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 const K = ts.SyntaxKind;
@@ -196,7 +195,7 @@ export function runHalstead(files, { root = process.cwd(), limit = Infinity } = 
   return { measured, violations: measured.filter((m) => m.value > limit) };
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && fs.realpathSync(process.argv[1]) === import.meta.filename) {
   const { measured } = runHalstead(process.argv.slice(2));
   for (const m of measured) console.log(`${m.file}:${m.line} ${m.function} ${m.value}`);
 }

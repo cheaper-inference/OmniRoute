@@ -15,9 +15,10 @@
 // and what the outlining step shapes. The figures are illustrative (not gate-checked)
 // and stay verbatim.
 import { writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
+import { realpathSync } from "node:fs";
 
 export const COMPRESSION_PIPELINE_COPY = {
   kickers: ["CLIENT", "PROVIDER", "OMNIROUTE COMPRESSION — 12 ENGINES"],
@@ -194,7 +195,7 @@ export async function renderCompressionPipeline() {
   );
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/compression-pipeline.svg";

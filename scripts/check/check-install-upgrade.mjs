@@ -42,6 +42,7 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { DatabaseSync } from "node:sqlite";
+import { realpathSync } from "node:fs";
 
 import {
   obtainTarball,
@@ -569,10 +570,7 @@ async function main() {
 
 // Only run the (expensive) gate when invoked directly — importing this module for the pure
 // helper above must not pack, install or boot anything.
-if (
-  process.argv[1] &&
-  path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)
-) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main().then(
     (code) => process.exit(code),
     (err) => {

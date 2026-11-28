@@ -15,6 +15,7 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
+import { realpathSync } from "node:fs";
 
 const BOOTSTRAPPED_ENV = "OMNIROUTE_LIVE_WS_BOOTSTRAPPED";
 
@@ -103,7 +104,6 @@ async function main() {
 
 // Only run when invoked as the entry point — importing this module (e.g. from a
 // unit test exercising the spawn-spec helpers) must not spawn or exit.
-const invokedPath = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
-if (import.meta.url === invokedPath) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   await main();
 }

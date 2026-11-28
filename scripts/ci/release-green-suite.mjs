@@ -5,8 +5,9 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+
 import { firstFailureLine, hostedSuiteIdentity } from "../quality/validate-release-green.mjs";
+import { realpathSync } from "node:fs";
 
 const NAME_RE = /^(unit-\d+|integration-\d+|vitest)$/;
 
@@ -25,7 +26,7 @@ export function suiteResult(name, exitCode, log) {
   return { name, code, detail: code === 0 ? "pass" : firstFailureLine(log) };
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const [name, exitCode, logFile, outDir, workflowSha, script, shard = ""] = process.argv.slice(2);
   let log = "";
   try {

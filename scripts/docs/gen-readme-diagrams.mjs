@@ -7,7 +7,7 @@
 // which only `npm run release:refresh-derived` rewrites — that script also re-runs this list.
 //
 //   npm run docs:readme-diagrams
-//   (the provider figures generator reads TypeScript catalogs through tsx)
+//   (no generator imports TypeScript any more; tsx in that npm script is harmless)
 //
 // Output paths are resolved from the repository root, so the command works from any cwd.
 // A generator that throws stops the run with a non-zero exit; the files already written stay
@@ -15,7 +15,7 @@
 //
 // README_DIAGRAMS is exported for tests/unit/docs/readme-diagrams-driver.test.ts (the list must
 // equal the gen-readme-*.mjs glob, in README order) and readme-glyph-coverage.test.ts.
-import { writeFileSync } from "node:fs";
+import { realpathSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderReadmeHero } from "./gen-readme-hero.mjs";
@@ -101,7 +101,7 @@ export const README_DIAGRAMS = [
   },
 ];
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   for (const { name, render, out } of README_DIAGRAMS) {
     let svg;
     try {

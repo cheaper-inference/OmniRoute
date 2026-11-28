@@ -5,7 +5,8 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { arch, platform, tmpdir } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -668,7 +669,7 @@ async function main() {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main().catch((error) => {
     console.error(
       `[electron-smoke] failed: ${error instanceof Error ? error.message : String(error)}`

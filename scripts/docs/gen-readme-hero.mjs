@@ -12,10 +12,11 @@
 // The free tokens are the short pair of the owner's decision D48 (2026-11-21): the big figure with
 // its label and the real one, in ONE string, so no cut of the copy can show one without the other.
 import { writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc, roleWidth } from "./readme-diagram-theme.mjs";
 import { RF } from "./readmeFacts.mjs";
+import { realpathSync } from "node:fs";
 
 // D48 short pair, owner's choice H-A (2026-11-24): "~11.3B as others count · ~90M real".
 const TOKEN_PAIR = `${RF.rowSumTotalLabel} as others count · ${RF.headlineSteadyLabel} real`;
@@ -107,7 +108,7 @@ export async function renderReadmeHero() {
   );
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/readme-hero.svg";

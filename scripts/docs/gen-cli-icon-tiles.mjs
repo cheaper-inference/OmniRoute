@@ -10,7 +10,7 @@
 // Not a gen-readme-*.mjs module on purpose: that glob is the README diagram driver's inventory
 // (tests/unit/docs/readme-diagrams-driver.test.ts), and these tiles are not diagrams. When a real
 // icon for one of these lands in the repo, point the README at it and drop the entry here.
-import { mkdirSync, writeFileSync } from "node:fs";
+import { realpathSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -83,7 +83,7 @@ export function renderCliIconTile({ id, name, initials, desc }) {
   );
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const i = process.argv.indexOf("--out-root");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out-root requires a directory");
   const outRoot = i >= 0 ? resolve(process.argv[i + 1]) : ROOT;

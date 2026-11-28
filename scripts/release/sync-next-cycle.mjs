@@ -24,7 +24,8 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 export const SYNC_USAGE = `usage: node scripts/release/sync-next-cycle.mjs <nextVersion> [--skip-green-gate] [--direct-push]
   e.g. node scripts/release/sync-next-cycle.mjs 3.8.45
@@ -522,8 +523,7 @@ function main() {
 
   const left = git(["rev-list", "--count", "HEAD..origin/main"], { cwd: WT });
   console.log(
-    `[sync-next-cycle] pushed ${target}. origin/main commits not in it: ${left} (expected 0)`
-  );
+    `[sync-next-cycle] pushed ${target}. origin/main commits not in it: ${left} (expected 0)`  );
 
   git(["worktree", "remove", "--force", WT], { cwd: ROOT });
   console.log("[sync-next-cycle] worktree removed.");
@@ -543,4 +543,4 @@ function main() {
   console.log(syncBackNextSteps({ branch: BRANCH, prUrl: pr.url }));
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();

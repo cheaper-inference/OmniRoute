@@ -44,6 +44,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 import {
   MIGRATION_FAILED_EXIT_CODE,
@@ -872,7 +873,8 @@ async function main(): Promise<number> {
 
 const invokedDirectly =
   typeof process.argv[1] === "string" &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  process.argv[1] &&
+  realpathSync(process.argv[1]) === import.meta.filename;
 
 if (invokedDirectly) {
   main().then(

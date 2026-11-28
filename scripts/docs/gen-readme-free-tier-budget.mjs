@@ -23,8 +23,7 @@
 // buildFreeTierBudgetCopy() returns every string the card draws, formatted exactly as drawn: it is
 // both the drawn text and what the outlining step shapes. Numbers stay in <text> nodes
 // because scripts/check/check-docs-counts-sync.mjs reads them from the raw file.
-import { writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { realpathSync, writeFileSync } from "node:fs";
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc, roleWidth } from "./readme-diagram-theme.mjs";
 import { README_FACTS, RF } from "./readmeFacts.mjs";
@@ -383,7 +382,7 @@ export async function renderReadmeFreeTierBudget() {
   );
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/free-tier-budget.svg";

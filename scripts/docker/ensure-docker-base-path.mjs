@@ -12,9 +12,10 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { normalizeBasePath } from "../build/normalizeBasePath.mjs";
 import { patchStandaloneBasePath } from "./patch-standalone-base-path.mjs";
+import { realpathSync } from "node:fs";
 
 const SENTINEL = "BUILD_OMNIROUTE_BASE_PATH";
 
@@ -35,7 +36,9 @@ function writeBakedBasePath(appRoot, basePath) {
  */
 export function ensureDockerBasePath(opts = {}) {
   const appRoot = opts.appRoot || process.cwd();
-  const runtime = normalizeBasePath(opts.env?.OMNIROUTE_BASE_PATH ?? process.env.OMNIROUTE_BASE_PATH);
+  const runtime = normalizeBasePath(
+    opts.env?.OMNIROUTE_BASE_PATH ?? process.env.OMNIROUTE_BASE_PATH
+  );
   const baked = readBakedBasePath(appRoot);
 
   if (runtime === baked) {
@@ -79,8 +82,7 @@ function main() {
   }
 }
 
-const isEntrypoint =
-  Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isEntrypoint = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isEntrypoint) {
   main();
 }

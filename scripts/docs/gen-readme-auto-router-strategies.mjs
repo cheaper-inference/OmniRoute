@@ -1,7 +1,6 @@
 // One animated tile per auto router strategy, with aliases shown together.
 //   node scripts/docs/gen-readme-auto-router-strategies.mjs [--out path.svg]
-import { writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { realpathSync, writeFileSync } from "node:fs";
 import { outlineSvg } from "./readme-outline.mjs";
 import { afterKicker, esc, gridDefs, svgOpen } from "./readme-diagram-theme.mjs";
 
@@ -131,7 +130,7 @@ export async function renderAutoRouterStrategies() {
   );
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/auto-router-strategies.svg";

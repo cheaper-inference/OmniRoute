@@ -30,7 +30,8 @@
 //   node scripts/check/check-fabricated-docs.mjs --json     # machine-readable output
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { realpathSync } from "node:fs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..", "..");
@@ -909,13 +910,18 @@ export function formatHumanReport(result) {
   return lines.join("\n");
 }
 
-export function isDirectExecution(moduleUrl, argvEntry) {
+export function isDirectExecution(moduleUrl = import.meta.url, argvEntry = process.argv[1]) {
   if (!argvEntry) return false;
-  return path.resolve(fileURLToPath(moduleUrl)) === path.resolve(argvEntry);
+  let resolved = argvEntry;
+  try {
+    resolved = realpathSync(argvEntry);
+  } catch {
+    // keep the path as invoked; it may not exist on this machine
+  }
+  return pathToFileURL(path.resolve(resolved)).href === moduleUrl;
 }
-
 // CLI entry — only run when invoked directly (not when imported for tests).
-if (isDirectExecution(import.meta.url, process.argv[1])) {
+if (isDirectExecution()) {
   main();
 }
 

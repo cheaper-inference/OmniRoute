@@ -31,7 +31,8 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 /** Parse the tiny subset of YAML electron-builder emits. No dependency, no surprises. */
 export function parseManifest(text) {
@@ -94,7 +95,12 @@ export function mergeManifests(manifests) {
     // The legacy top-level fields older clients read must agree with the first entry.
     path: primary.url,
     sha512: primary.sha512,
-    releaseDate: usable.map((m) => m.releaseDate).filter(Boolean).sort().pop() ?? "",
+    releaseDate:
+      usable
+        .map((m) => m.releaseDate)
+        .filter(Boolean)
+        .sort()
+        .pop() ?? "",
   };
 }
 
@@ -165,9 +171,6 @@ function main(argv) {
   return 0;
 }
 
-if (
-  process.argv[1] &&
-  fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url))
-) {
+if (process.argv[1] && process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.exit(main(process.argv.slice(2)));
 }
