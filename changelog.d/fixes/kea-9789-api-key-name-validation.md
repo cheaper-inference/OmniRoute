@@ -1,0 +1,1 @@
+- **fix(dashboard):** Show API key name errors while typing or pasting, including the character count above 200, and disable Create until the name is valid (KEA-9789).
