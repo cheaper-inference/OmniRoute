@@ -1,0 +1,1 @@
+- **feat(sse):** With `OMNIROUTE_RTK_STRUCTURAL_RENDERERS_ENABLED`, RTK renders `ls -l`, `find`, `tree` and native Glob listings structurally, keeping every name and path (#21518).
