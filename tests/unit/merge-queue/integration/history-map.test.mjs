@@ -10,8 +10,10 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { buildMergeMessage } from "../../../../scripts/merge-queue/contracts.mjs";
-import { queuePrByCommit } from "../../../../scripts/merge-queue/history-map.mjs";
+import { queuePrByCommit, readTrainAuthors } from "../../../../scripts/merge-queue/history-map.mjs";
 import {
+  landingUnits,
+  rankAuthors,
   readCommits,
   readFragments,
   reconcile,
@@ -497,4 +499,207 @@ test("readCycleCommits: chained batch keyed by short hash, foreign commit covere
   const un = res.uncovered.map((c) => c.hash).sort();
   assert.deepEqual(un, [short(r.a1), short(r.a2)].sort());
   assert.ok(res.uncovered.every((c) => c.queuePr === 34));
+});
+
+function trainMergeMessage(pr, head, author, carried = []) {
+  return [
+    `Merge #${pr} (head ${head.slice(0, 8)}) into the release train`,
+    "",
+    `Merge-Train-PR: ${pr}`,
+    `Merge-Train-Head: ${head}`,
+    `Merge-Train-Author: ${author}`,
+    ...carried.map(([n, sha, login]) => `Merge-Train-Carried: ${n} ${sha} ${login}`),
+  ].join("\n");
+}
+
+function makeTrainRepo(t) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-queue-train-"));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const base = "release/v9.9.9";
+  git(dir, ["init", "-q", "-b", base]);
+  const root = commitFile(
+    dir,
+    "config/merge-queue/config.json",
+    JSON.stringify({ approvers: ["Maint"] }),
+    "chore: configure queue"
+  );
+
+  git(dir, ["checkout", "-q", "-b", "pr-31", root]);
+  const a1 = commitFile(dir, "a1.txt", "a1\n", "wip: start member 31", ALICE);
+  git(dir, ["checkout", "-q", "-b", "pr-31-side"]);
+  const a2 = commitFile(dir, "a2.txt", "a2\n", "wip: finish member 31", ALICE);
+  git(dir, ["checkout", "-q", "pr-31"]);
+  const offChain = mergeWithMessage(dir, a2, trainMergeMessage(999, a2, "mallory"));
+
+  git(dir, ["checkout", "-q", "-b", "pr-32", root]);
+  const b = commitFile(dir, "b.txt", "b\n", "feat(b): second independent member", BOB);
+
+  git(dir, ["checkout", "-q", "-b", "pr-33", root]);
+  const inner = commitFile(dir, "c.txt", "c\n", "wip: inner member", CAROL);
+  git(dir, ["checkout", "-q", "-b", "pr-34"]);
+  const outer = commitFile(dir, "d.txt", "d\n", "wip: outer member", BOB);
+
+  git(dir, ["checkout", "-q", "-b", "train", root]);
+  const m31 = mergeWithMessage(dir, offChain, trainMergeMessage(31, offChain, "alice"));
+  const m32 = mergeWithMessage(dir, b, trainMergeMessage(32, b, "bob"));
+  const m34 = mergeWithMessage(
+    dir,
+    outer,
+    `${trainMergeMessage(34, outer, "bob", [[33, inner, "carol"]])}\n\n# Conflicts:\n# d.txt\n`
+  );
+  const repair = commitFile(dir, "repair.txt", "repair\n", "chore: repair the train");
+  const queueMessage = (author) =>
+    buildMergeMessage({
+      pr: { n: 90, head: repair, title: "chore: merge train", author, labeledAt: "" },
+      base,
+      baseSha: root,
+      batchId: "b8",
+    });
+
+  git(dir, ["checkout", "-q", "-b", "untrusted", root]);
+  mergeWithMessage(dir, repair, queueMessage("mallory"));
+  git(dir, ["checkout", "-q", base]);
+  const mergeSha = mergeWithMessage(dir, repair, queueMessage("maint"));
+  return { dir, root, a1, a2, offChain, b, inner, outer, repair, m31, m32, m34, mergeSha };
+}
+
+test("a real queue train credits its members, with the repair and member merges on the train PR", (t) => {
+  const r = makeTrainRepo(t);
+  const map = queuePrByCommit({ cwd: r.dir, range: `${r.root}..HEAD`, trainAuthors: ["Maint"] });
+  const train = {
+    pr: 90,
+    author: "maint",
+    head: r.repair,
+    batch: "b8",
+    mergeSha: r.mergeSha,
+    title: "chore: merge train",
+  };
+  const member = (pr, author, head) => ({
+    ...train,
+    pr,
+    author,
+    head,
+    title: null,
+    train: 90,
+  });
+  assert.deepEqual(
+    map,
+    new Map([
+      [r.a1, member(31, "alice", r.offChain)],
+      [r.a2, member(31, "alice", r.offChain)],
+      [r.offChain, member(31, "alice", r.offChain)],
+      [r.b, member(32, "bob", r.b)],
+      [r.inner, member(33, "carol", r.inner)],
+      [r.outer, member(34, "bob", r.outer)],
+      ...[r.repair, r.m31, r.m32, r.m34].map((sha) => [sha, train]),
+    ])
+  );
+});
+
+test("the same train history keeps all commits on the train PR without a trusted queue author", (t) => {
+  const r = makeTrainRepo(t);
+  const legacy = queuePrByCommit({ cwd: r.dir, range: `${r.root}..HEAD` });
+  const untrusted = queuePrByCommit({
+    cwd: r.dir,
+    range: `${r.root}..untrusted`,
+    trainAuthors: ["maint"],
+  });
+  assert.equal(legacy.size, 10);
+  assert.deepEqual([...untrusted.keys()].sort(), [...legacy.keys()].sort());
+  for (const [map, author] of [
+    [legacy, "maint"],
+    [untrusted, "mallory"],
+  ]) {
+    for (const info of map.values()) {
+      assert.equal(info.pr, 90);
+      assert.equal(info.author, author);
+      assert.equal("train" in info, false);
+    }
+  }
+});
+
+test("release readers use configured approvers and count and credit each train member once", (t) => {
+  const r = makeTrainRepo(t);
+  const rows = readCommits(r.root, "HEAD", r.dir);
+  const by = new Map(rows.map((row) => [row.hash, row]));
+  assert.equal(rows.length, 6);
+  assert.deepEqual(by.get(r.a1).queue, {
+    pr: 31,
+    author: "alice",
+    title: null,
+    mergeSha: r.mergeSha,
+    subjectPr: null,
+    train: 90,
+  });
+  assert.equal(by.get(r.a2).pr, 31);
+  assert.equal(by.get(r.b).pr, 32);
+  assert.equal(by.get(r.inner).pr, 33);
+  assert.equal(by.get(r.outer).pr, 34);
+  assert.equal(by.get(r.repair).pr, 90);
+  assert.equal("train" in by.get(r.repair).queue, false);
+
+  const { commits, prByCommit } = readCycleCommits(r.root, { cwd: r.dir });
+  const short = (s) => commits.find((c) => s.startsWith(c.hash)).hash;
+  for (const [sha, row] of by) assert.equal(prByCommit.get(short(sha)).pr, row.pr);
+  const cited = computeUncovered(commits, new Set([31, 32, 33, 34]), prByCommit);
+  assert.equal(cited.covered, 5);
+  assert.deepEqual(
+    cited.uncovered.map((c) => [c.hash, c.queuePr]),
+    [[short(r.repair), 90]]
+  );
+
+  const prs = [
+    { ...ghPr(31, "alice"), title: "feat(a): independent member" },
+    { ...ghPr(33, "carol"), title: "feat(c): stacked base" },
+  ];
+  const { changelog } = reconcile({
+    changelog: EMPTY_CHANGELOG,
+    version: "9.9.9",
+    repo: "o/r",
+    rows,
+    prs,
+    extraPrs: new Map([
+      [34, { ...ghPr(34, "bob"), state: "MERGED", title: "fix(d): stacked tip" }],
+    ]),
+    fragments: [],
+    today: "2026-11-13",
+    baseTip: r.root.slice(0, 7),
+    headTip: r.mergeSha.slice(0, 7),
+  });
+  for (const [pr, title, author] of [
+    [31, "**feat(a):** independent member", "alice"],
+    [32, "**feat(b):** second independent member", "bob"],
+    [33, "**feat(c):** stacked base", "carol"],
+    [34, "**fix(d):** stacked tip", "bob"],
+    [90, "**chore:** merge train", "maint"],
+  ]) {
+    const line = `- ${title} ([#${pr}](https://github.com/o/r/pull/${pr})) — thanks @${author}`;
+    assert.ok(changelog.split("\n").includes(line), changelog);
+    assert.equal(changelog.split(`/pull/${pr})`).length - 1, 1);
+  }
+  assert.doesNotMatch(changelog, /wip:|\/pull\/999\)/);
+  assert.match(changelog, /Pull requests landed by omni-queue \| \*\*5\*\* \|/);
+  assert.deepEqual(landingUnits(rows), { count: 5, queuePrs: 5 });
+  assert.deepEqual(rankAuthors(rows).counts, { alice: 1, bob: 2, carol: 1, maint: 1 });
+});
+
+test("readTrainAuthors accepts an approver list and returns empty for missing or invalid config", (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-queue-approvers-"));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  assert.deepEqual(readTrainAuthors(dir), []);
+  const folder = path.join(dir, "config", "merge-queue");
+  fs.mkdirSync(folder, { recursive: true });
+  const config = path.join(folder, "config.json");
+  for (const invalid of [
+    "{",
+    "null",
+    "{}",
+    '{"approvers":"maint"}',
+    '{"approvers":["maint",42]}',
+  ]) {
+    fs.writeFileSync(config, invalid);
+    assert.deepEqual(readTrainAuthors(dir), []);
+  }
+  fs.writeFileSync(config, '{"approvers":["Maint","release_maker"]}');
+  assert.deepEqual(readTrainAuthors(dir), ["Maint", "release_maker"]);
 });

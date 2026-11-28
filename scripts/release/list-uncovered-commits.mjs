@@ -24,7 +24,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { queuePrByCommit } from "../merge-queue/history-map.mjs";
+import { queuePrByCommit, readTrainAuthors } from "../merge-queue/history-map.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const git = (args) => execFileSync("git", args, { cwd: ROOT, encoding: "utf8" }).trim();
@@ -109,7 +109,11 @@ export function readCycleCommits(base, { cwd = ROOT, head = "HEAD", runGit } = {
     runGit ??
     ((args) => execFileSync("git", args, { cwd, encoding: "utf8", maxBuffer: 1 << 28 }).trim());
   const log = run(["log", "--no-merges", `${base}..${head}`, "--pretty=format:%H%x09%h%x09%s"]);
-  const queueMap = queuePrByCommit({ runGit: run, range: `${base}..${head}` });
+  const queueMap = queuePrByCommit({
+    runGit: run,
+    range: `${base}..${head}`,
+    trainAuthors: readTrainAuthors(cwd),
+  });
   const prByCommit = new Map();
   const commits = log
     ? log.split("\n").map((l) => {

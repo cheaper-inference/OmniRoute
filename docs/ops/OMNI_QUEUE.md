@@ -122,6 +122,12 @@ third-party install script runs next to the App token.
   (`[skip ci]` → `(skip ci)`) before the title reaches a merge commit.
 - **Stacked PRs**: a PR whose head is already contained in another PR of the same batch gets no
   merge commit of its own; it lands with the batch and is reported as merged with it.
+- **Merge trains** enter the queue as ordinary pull requests. The queue creates one merge commit
+  for the train. Its member heads become reachable from the base, and GitHub marks the member PRs
+  as merged. Each member merge on the train's first-parent chain carries `Merge-Train-PR`,
+  `Merge-Train-Head`, and `Merge-Train-Author` trailers. `Merge-Train-Carried` identifies a
+  stacked member whose head is included in that merge; an entry that names the merge's own head
+  is ignored.
 - **CI profile**: `ci.yml` and `quality.yml` treat a push to `omni-queue/**` like a `merge_group`
   event (full profile, hosted runners). Deploy and publish workflows never run on that prefix. What
   differs from Release-Green is in [One check profile for candidates and
@@ -139,6 +145,9 @@ third-party install script runs next to the App token.
   `Omni-Queue-PR` trailer, writes one changelog bullet per PR, and counts a PR landed by the queue
   as one commit in "Release by the numbers" and in the Top 25 ranking, so `merge-ff` cycles stay
   comparable with squash-only ones (`landingUnits` in `scripts/release/reconcile-changelog.mjs`).
+  For merge trains, the release tooling credits and counts each member PR only when the train's
+  queue author is listed in `approvers` in `config/merge-queue/config.json`. The train PR gets
+  credit for the remaining commits.
 
 ### Landing modes (`landing.mode`)
 
