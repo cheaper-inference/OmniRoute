@@ -20,6 +20,7 @@ import { toRegistryImageModels as toSyntxImageModels } from "../services/syntxMe
 import { ZENMUX_IMAGE_PROVIDER } from "./providers/registry/zenmux/imageModels.ts";
 import { MUSE_CODE_IMAGE_PROVIDER } from "./providers/registry/muse-code/imageModels.ts";
 import { RENDERHOUR_IMAGE_PROVIDER } from "./providers/registry/renderhour/mediaModels.ts";
+import { MEGABRAIN_IMAGE_PROVIDER } from "./providers/registry/megabrain/mediaModels.ts";
 import { COPILOT_M365_IMAGE_PROVIDER } from "./providers/registry/copilot-m365-web/imageModels.ts";
 import { CODEX_IMAGE_PROVIDER } from "./providers/registry/codex/imageModels.ts";
 import { GROK_BUILD_PROXY_BASE_URL } from "./grokBuildEndpoints.ts";
@@ -1004,6 +1005,8 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
   // Last on purpose: bare model ids resolve first-wins, so RenderHour's ids never shadow
   // an earlier provider's. Address them as renderhour/<model>.
   renderhour: RENDERHOUR_IMAGE_PROVIDER,
+  // Also last, for the same reason: megabrain/<model> addresses MegaBrain's ids.
+  megabrain: MEGABRAIN_IMAGE_PROVIDER,
 };
 
 /**

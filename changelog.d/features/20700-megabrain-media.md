@@ -1,0 +1,1 @@
+- **feat(providers):** MegaBrain image and video generation on the existing `megabrain` connection (device login or `mb-v1-…` key, paid from the account's credits) — Nano Banana Pro / 2, FLUX 2, Seedream 4.5, MiniMax H3 and Kling 3.0 / 2.6, as `megabrain/<model>` ([#20700](https://github.com/cheaper-inference/OmniRoute/pull/20700) — thanks @sha367)

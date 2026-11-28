@@ -10,6 +10,7 @@ import { GROK_BUILD_PROXY_BASE_URL } from "./grokBuild.ts";
 import { RUNWAYML_SUPPORTED_VIDEO_MODELS } from "./runway.ts";
 import { SEGMIND_VIDEO_MODELS } from "./providers/registry/segmind/videoModels.ts";
 import { RENDERHOUR_VIDEO_PROVIDER } from "./providers/registry/renderhour/mediaModels.ts";
+import { MEGABRAIN_VIDEO_PROVIDER } from "./providers/registry/megabrain/mediaModels.ts";
 import { toRegistryVideoModels } from "../services/adobeFireflyModels.ts";
 import { toRegistryVideoModels as toSyntxVideoModels } from "../services/syntxMediaCatalog.ts";
 
@@ -558,6 +559,7 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
   },
   // Last on purpose, as in the image registry: renderhour/<model> addresses these.
   renderhour: RENDERHOUR_VIDEO_PROVIDER,
+  megabrain: MEGABRAIN_VIDEO_PROVIDER,
 };
 
 /**

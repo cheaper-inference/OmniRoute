@@ -14,6 +14,7 @@ import { handleGoogleFlowVideoGeneration } from "./videoGeneration/googleFlowHan
 import { handleDeepinfraVideoGeneration } from "./videoGeneration/deepinfraHandler.ts";
 import { handleLeonardoVideoGeneration } from "./videoGeneration/leonardoHandler.ts";
 import { handleRenderhourVideoGeneration } from "./videoGeneration/renderhourHandler.ts";
+import { handleMegabrainVideoGeneration } from "./videoGeneration/megabrainHandler.ts";
 import { handleDashscopeVideoGeneration } from "./videoGeneration/dashscopeHandler.ts";
 import { handleMinimaxVideoGeneration } from "./videoGeneration/minimaxHandler.ts";
 import { handleNovitaVideoGeneration } from "./videoGeneration/novitaHandler.ts";
@@ -340,6 +341,19 @@ export async function handleVideoGeneration({
 
   if (providerConfig.format === "renderhour-video") {
     return handleRenderhourVideoGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+      recordCall: recordVideoJobCall,
+    });
+  }
+
+  if (providerConfig.format === "megabrain-video") {
+    return handleMegabrainVideoGeneration({
       model,
       provider,
       providerConfig,
