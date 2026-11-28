@@ -117,6 +117,17 @@ function bothSidesFieldMatch(
   return undefined;
 }
 
+/** Both Claude logins carry an accountUUID and the two differ: another account, not a re-login. */
+export function hasDifferentClaudeAccountUUID(existing: unknown, incoming: unknown): boolean {
+  return (
+    typeof existing === "string" &&
+    typeof incoming === "string" &&
+    !!existing &&
+    !!incoming &&
+    existing.toLowerCase() !== incoming.toLowerCase()
+  );
+}
+
 /**
  * Decide whether `row` (an existing `provider_connections` record) is the
  * same OAuth identity as an incoming connection carrying `incomingUsername`
@@ -136,7 +147,8 @@ export function isMatchingOauthIdentity(
   row: { provider_specific_data?: unknown },
   incomingUsername: string | null,
   incomingProfileArn: string | null,
-  incomingOrganizationUuid: string | null = null
+  incomingOrganizationUuid: string | null = null,
+  incomingAccountUuid: string | null = null
 ): boolean {
   const existingPsd = parseProviderSpecificData(row.provider_specific_data);
   const usernameMatch = fieldMatch(incomingUsername, nonEmptyString(existingPsd?.username));
@@ -145,7 +157,12 @@ export function isMatchingOauthIdentity(
     incomingOrganizationUuid,
     nonEmptyString(existingPsd?.organizationUUID)
   );
-  if (usernameMatch === false || profileArnMatch === false || organizationMatch === false) {
+  if (
+    usernameMatch === false ||
+    profileArnMatch === false ||
+    organizationMatch === false ||
+    hasDifferentClaudeAccountUUID(existingPsd?.accountUUID, incomingAccountUuid)
+  ) {
     return false;
   }
   return true;

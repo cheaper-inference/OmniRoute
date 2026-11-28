@@ -21,6 +21,8 @@ import {
   type AntigravityDegradedProjectState,
 } from "@/lib/oauth/antigravityProjectGate";
 import { hasActiveCooldown } from "@/lib/usage/providerLimits";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { hasDifferentClaudeAccountUUID } from "@/lib/db/webSessionDedup";
 
 /**
  * Constant-time string comparison to prevent timing-oracle attacks (CWE-208).
@@ -74,8 +76,18 @@ function isSameCodexAccount(
  */
 function isSameClaudeAccount(
   existingProviderData: Record<string, any> | null | undefined,
-  incomingProviderData: Record<string, any> | null | undefined
+  incomingProviderData: Record<string, any> | null | undefined,
+  checkAccountUUID: boolean
 ): boolean {
+  if (
+    checkAccountUUID &&
+    hasDifferentClaudeAccountUUID(
+      existingProviderData?.accountUUID,
+      incomingProviderData?.accountUUID
+    )
+  ) {
+    return false;
+  }
   const incomingOrganization = incomingProviderData?.organizationUUID;
   const existingOrganization = existingProviderData?.organizationUUID;
   if (incomingOrganization && existingOrganization) {
@@ -111,8 +123,15 @@ export function findExistingOAuthConnectionMatch(
     }
     return existing.find((row) => row.authType === "oauth" && sameM365Account(row, tokenData));
   }
+  const checkClaudeIdentity =
+    provider === "claude" && isFeatureFlagEnabled("CLAUDE_REAUTH_IDENTITY_ENABLED");
   return existing.find((c) => {
-    if (c.id && safeEqual(connectionId, c.id)) return true;
+    if (c.id && safeEqual(connectionId, c.id)) {
+      return (
+        !checkClaudeIdentity ||
+        isSameClaudeAccount(c.providerSpecificData, tokenData.providerSpecificData, true)
+      );
+    }
     // Email dedup only when the payload actually carries an email. Without this
     // guard `safeEqual(undefined, undefined)` is true, so an email-less payload
     // would false-match the first email-less connection of the provider.
@@ -122,7 +141,11 @@ export function findExistingOAuthConnectionMatch(
       return isSameCodexAccount(c.providerSpecificData, tokenData.providerSpecificData);
     }
     if (provider === "claude") {
-      return isSameClaudeAccount(c.providerSpecificData, tokenData.providerSpecificData);
+      return isSameClaudeAccount(
+        c.providerSpecificData,
+        tokenData.providerSpecificData,
+        checkClaudeIdentity
+      );
     }
     return true;
   });
