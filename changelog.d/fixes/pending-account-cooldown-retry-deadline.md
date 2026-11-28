@@ -1,0 +1,1 @@
+- Direct requests now wait for the stored account cooldown deadline before counting a retry, preserving the configured number of dispatch attempts when a timer wakes early.

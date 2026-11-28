@@ -6,13 +6,13 @@ export function setCooldownWaitObserver(value) {
   observer = value;
 }
 
-export async function waitForCooldownAwareRetry(waitMs, signal) {
+export async function waitForCooldownAwareRetry(waitMs, signal, retryAfter) {
   const observation = observer;
-  if (!observation) return actualWait(waitMs, signal);
+  if (!observation) return actualWait(waitMs, signal, retryAfter);
   observation.calls++;
   observation.waitMs = waitMs;
   observation.start();
-  const completed = await actualWait(waitMs, signal);
+  const completed = await actualWait(waitMs, signal, retryAfter);
   observation.done = true;
   observation.complete(waitMs);
   return completed;
