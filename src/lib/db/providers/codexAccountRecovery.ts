@@ -5,6 +5,7 @@ import { getDbInstance, rowToCamel } from "../core";
 import { invalidateDbCache } from "../readCache";
 import { toRecord } from "./columns";
 import { mayWriteCodexConnection } from "../codexConnectionFences";
+import { unblockAccount } from "@omniroute/open-sse/services/accountSemaphore.ts";
 
 type RecordValue = Record<string, unknown>;
 type Scope = "codex" | "spark";
@@ -22,9 +23,60 @@ function clearScope(data: RecordValue, scope: Scope): void {
   if (toRecord(data.codexQuotaState).scope === scope) delete data.codexExhaustedWindow;
 }
 
+/**
+ * Open the account's in-memory semaphore gate once no Codex scope cooldown is
+ * left. A quota 429 blocks the gate until the upstream reset; an early reset
+ * clears the persisted cooldown, and the gate has to follow.
+ */
+function releaseGateWhenNoScopeCooldown(id: string, data: RecordValue | null): void {
+  if (!data) return;
+  const cooldowns = toRecord(data.codexScopeRateLimitedUntil);
+  if (hasActiveCodexScopeCooldown(cooldowns, toRecord(data.codexScopeRateLimitSource))) return;
+  unblockAccount({ provider: "codex", accountKey: id });
+}
+
+/** Grace window absorbing clock skew against the upstream quota server. */
+export const QUOTA_RESET_CLOCK_SKEW_GRACE_MS = 30_000;
+
+/**
+ * True when any scope deadline is still in the future. A deadline that already
+ * passed is not a cooldown, except an upstream `quota_reset` deadline inside
+ * the clock-skew grace; an unparseable one is treated as active.
+ */
+export function hasActiveCodexScopeCooldown(
+  cooldowns: RecordValue,
+  sources: RecordValue = {},
+  now = Date.now()
+): boolean {
+  return Object.entries(cooldowns).some(([scope, until]) => {
+    const ms = typeof until === "string" ? Date.parse(until) : NaN;
+    const grace = sources[scope] === "quota_reset" ? QUOTA_RESET_CLOCK_SKEW_GRACE_MS : 0;
+    return !Number.isFinite(ms) || ms > now - grace;
+  });
+}
+
+/**
+ * Open the in-memory semaphore gate of a connection whose persisted quota
+ * state was just cleared as recovered. The Codex gate is shared by both
+ * scopes, so a scope cooldown still parked on the row keeps it closed.
+ */
+export function releaseRecoveredAccountGate(connection: {
+  id: string;
+  provider: string;
+  providerSpecificData?: RecordValue;
+}): void {
+  if (connection.provider === "codex") {
+    releaseGateWhenNoScopeCooldown(connection.id, toRecord(connection.providerSpecificData));
+    return;
+  }
+  unblockAccount({ provider: connection.provider, accountKey: connection.id });
+}
+
 /** Atomic, account-scoped release. Credentials and terminal account states are untouched. */
 export async function clearCodexAccountCooldown(id: string, scope: Scope = "codex") {
-  return mutate(id, (data) => clearScope(data, scope));
+  const data = mutate(id, (next) => clearScope(next, scope));
+  releaseGateWhenNoScopeCooldown(id, data);
+  return data;
 }
 
 function mutate(id: string, apply: (data: RecordValue) => void): RecordValue | null {
@@ -76,7 +128,8 @@ export async function syncCodexQuotaObservation(id: string, usage: RecordValue, 
   const quotas = toRecord(usage.quotas);
   if (!Object.keys(quotas).length) return null;
   const complete = isCompleteUsageReading(usage);
-  return mutate(id, (data) => {
+  let released = false;
+  const result = mutate(id, (data) => {
     const before = toRecord(expected);
     for (const scope of ["codex", "spark"] as const) {
       const prefix = scope === "spark" ? "gpt_5_3_codex_spark_" : "";
@@ -121,7 +174,12 @@ export async function syncCodexQuotaObservation(id: string, usage: RecordValue, 
       if (!merged) continue;
       byScope[scope] = merged;
       data.codexQuotaStateByScope = byScope;
-      if (scopeRecovered([session, weekly], valid, complete)) clearScope(data, scope);
+      if (scopeRecovered([session, weekly], valid, complete)) {
+        clearScope(data, scope);
+        released = true;
+      }
     }
   });
+  if (released) releaseGateWhenNoScopeCooldown(id, result);
+  return result;
 }
