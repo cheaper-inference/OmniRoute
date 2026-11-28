@@ -8,6 +8,7 @@
 // rewrites a stale one. The facts below are synthetic: the live values move with the catalog.
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
 type Verdict = { ok: boolean; detail: string };
 type Edit = { start: number; end: number; to: string };
@@ -149,4 +150,38 @@ test("a facts document without the counts leaves them unjudged", () => {
   assert.deepEqual(rows.plan("We keep 214 catalog rows with free access.").edits, []);
   const providers = legacy.find((c) => c.label === "providers with free access (live code)");
   assert.equal(providers?.validate?.("50 with free access").ok, true);
+});
+
+test('the reference\'s bold heading form "(N today: …)" is the provider total too', () => {
+  // docs/reference/FREE_TIERS.md writes the total inside the parentheses after the bold label.
+  // The release refresh rewrote the keyless count there and left the total stale (43 + 5 + 1
+  // under "50 today"), because only "N with free access" was read as the total.
+  const providers = byLabel("providers with free access (live code)");
+  const line =
+    "- **Providers with free access** (49 today: 43 with an API key, 5 without a key, 1 through a tool account): providers by access.";
+  assert.deepEqual(
+    providers.extract?.(line).map((c) => c.value),
+    [49]
+  );
+  assert.equal(providers.validate?.(line).ok, false);
+  assert.equal(providers.validate?.(line.replace("(49 today", "(50 today")).ok, true);
+  const plan = providers.plan?.(line);
+  assert.ok(plan);
+  assert.equal(plan.edits.length, 1);
+  const [edit] = plan.edits;
+  assert.equal(line.slice(edit.start, edit.end), "49");
+  assert.equal(edit.to, "50");
+  // The per-access counts in the same parentheses are not the total.
+  assert.deepEqual(
+    providers.extract?.("(43 with an API key, 5 without a key, 1 through a tool account)"),
+    []
+  );
+});
+
+test("the free-tier reference's provider total is a watched claim", () => {
+  const providers = byLabel("providers with free access (live code)");
+  const doc = readFileSync(new URL("../../docs/reference/FREE_TIERS.md", import.meta.url), "utf8");
+  const line = doc.split("\n").find((l) => l.startsWith("- **Providers with free access**"));
+  assert.ok(line, "FREE_TIERS.md lost its provider-total line");
+  assert.equal(providers.extract?.(line).length, 1, line);
 });
