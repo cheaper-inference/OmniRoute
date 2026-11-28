@@ -33,7 +33,38 @@ type CountRow = { cnt?: number };
 
 let _lastBackupAt = 0;
 const BACKUP_THROTTLE_MS = 60 * 60 * 1000; // 60 minutes — high-churn pre-write (models.dev pricing) must not copy the whole SQLite file every call (#10351)
+const BACKUP_RETRY_MS = 60 * 1000; // a FAILED copy waits this long, not the full throttle, before the next try
 const TRUE_ENV_VALUES = new Set(["1", "true", "yes", "on"]);
+
+/**
+ * Copy to `<file>.tmp`, then publish by rename, so a name `listDbBackups()` returns is always a
+ * whole file. `db.backup()` creates its destination when the copy STARTS: a failed or killed copy
+ * would otherwise leave a partial `.sqlite` that restore and pruning treat as a good backup.
+ */
+async function writeBackupFile(backupFile: string) {
+  const tempFile = `${backupFile}.tmp`;
+  try {
+    await getDbInstance().backup(tempFile);
+    await renameFileWithRetry(tempFile, backupFile);
+  } catch (err) {
+    try {
+      fs.rmSync(tempFile, { force: true });
+    } catch {
+      // Best effort (EBUSY/EPERM while a handle is still open): report the copy error.
+    }
+    throw err;
+  }
+}
+
+/**
+ * A failed copy must not hold off the next routine backup for the whole throttle window:
+ * pull the stamp back so the next try is due in BACKUP_RETRY_MS, unless a newer backup
+ * has stamped the throttle since this copy started.
+ */
+function retryThrottleAfterFailure(throttleStamp: number) {
+  if (_lastBackupAt === throttleStamp)
+    _lastBackupAt = throttleStamp - BACKUP_THROTTLE_MS + BACKUP_RETRY_MS;
+}
 
 function setStoredDbBackupInteger(key: string, value: number, options: { min: number }): void {
   if (!Number.isInteger(value) || value < options.min) return;
@@ -409,7 +440,7 @@ async function renameFileWithRetry(from: string, to: string) {
 
 // ──────────────── Backup ────────────────
 
-type BackupPlan = { backupFile: string; size: number };
+type BackupPlan = { backupFile: string; size: number; throttleStamp: number };
 
 /**
  * Run the gates for `reason`; return where to write the snapshot, or null to skip it.
@@ -474,7 +505,11 @@ function planBackup(reason: string, mandatory: boolean): BackupPlan | null {
   stampKeyFingerprint(); // the copy the caller starts carries the running key's fingerprint
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  return { backupFile: path.join(backupDir, `db_${timestamp}_${reason}.sqlite`), size: stat.size };
+  return {
+    backupFile: path.join(backupDir, `db_${timestamp}_${reason}.sqlite`),
+    size: stat.size,
+    throttleStamp: now,
+  };
 }
 
 function finishBackup({ backupFile, size }: BackupPlan) {
@@ -488,13 +523,14 @@ export function backupDbFile(reason = "auto") {
     const plan = planBackup(reason, reason === "manual" || reason === "pre-restore");
     if (!plan) return null;
 
-    // Use native SQLite backup API for consistency
-    getDbInstance()
-      .backup(plan.backupFile)
+    // Use native SQLite backup API for consistency; publish by rename so a failed or
+    // killed copy never leaves a partial file in the backup list.
+    writeBackupFile(plan.backupFile)
       .then(() => finishBackup(plan))
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
         console.error("[DB] Backup failed:", message);
+        retryThrottleAfterFailure(plan.throttleStamp);
       });
 
     return { filename: path.basename(plan.backupFile), size: plan.size };
@@ -520,7 +556,12 @@ export async function backupDbFileAwaited(
 ): Promise<{ filename: string; size: number } | null> {
   const plan = planBackup(reason, options?.mandatory === true);
   if (!plan) return null;
-  await getDbInstance().backup(plan.backupFile);
+  try {
+    await writeBackupFile(plan.backupFile);
+  } catch (err) {
+    retryThrottleAfterFailure(plan.throttleStamp);
+    throw err;
+  }
   finishBackup(plan);
   return { filename: path.basename(plan.backupFile), size: plan.size };
 }

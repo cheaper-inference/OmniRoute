@@ -1,0 +1,1 @@
+- **perf(models):** Combo routing reads the hidden-model list from a short cache instead of re-reading and re-parsing every model override row on each request. Hiding or showing a model clears the cache at once. ([#19689](https://github.com/cheaper-inference/OmniRoute/pull/19689))

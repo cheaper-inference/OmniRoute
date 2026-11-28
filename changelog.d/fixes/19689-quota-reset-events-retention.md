@@ -1,0 +1,1 @@
+- **fix(usage):** the table of recorded weekly quota resets no longer grows without limit; events older than 90 days are removed when a new reset is recorded, and the window-start lookup reads only the last 90 days. ([#19689](https://github.com/cheaper-inference/OmniRoute/pull/19689))

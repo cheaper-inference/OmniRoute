@@ -1,0 +1,1 @@
+- **fix(db):** a database backup that fails halfway no longer leaves a partial file in the backup list, and a failed routine backup is retried after one minute instead of one hour. ([#19689](https://github.com/cheaper-inference/OmniRoute/pull/19689))

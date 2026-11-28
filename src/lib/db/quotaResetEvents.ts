@@ -44,6 +44,8 @@ interface QuotaSnapshotWindowRow {
 
 /** Reset events are recorded for weekly windows only (`isPrimaryWeeklyWindow`). */
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+/** A weekly window starts at most a week back, so older events are never read as a window start. */
+const EVENT_RETENTION_MS = 90 * 24 * 60 * 60 * 1000;
 
 export interface ProviderQuotaWindowStart {
   windowStartIso: string;
@@ -222,6 +224,9 @@ export function recordProviderQuotaResetEventIfChanged(input: ResetEventInput): 
       currentUsed,
       null
     );
+    db.prepare(
+      "DELETE FROM provider_quota_reset_events WHERE connection_id = ? AND observed_at < ?"
+    ).run(input.connectionId, new Date(Date.parse(observedAt) - EVENT_RETENTION_MS).toISOString());
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes("no such table")) return;
     throw error;
@@ -291,6 +296,7 @@ function getRecordedQuotaWindowStartIso(
 
   const db = getDbInstance() as unknown as DbLike;
   const nowIso = new Date(nowMs).toISOString();
+  const sinceIso = new Date(nowMs - EVENT_RETENTION_MS).toISOString();
 
   try {
     const rows = db
@@ -305,10 +311,11 @@ function getRecordedQuotaWindowStartIso(
           AND LOWER(window_key) LIKE '%weekly%'
           AND LOWER(window_key) NOT LIKE '%sonnet%'
           AND observed_at <= @nowIso
+          AND observed_at >= @sinceIso
         ORDER BY observed_at DESC, id DESC
       `
       )
-      .all({ connectionId, nowIso });
+      .all({ connectionId, nowIso, sinceIso });
 
     for (const row of rows) {
       if (resetDay(row.windowResetsAt) === targetDay) return recordedWindowStartIso(row);
