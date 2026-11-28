@@ -11,6 +11,7 @@
  *   cloudflare-ai/jev | cf/jev   → Workers AI /ai/run           (model typesafe/jev)
  *   cloudflare-ai/clef[-flash]   → Workers AI /ai/run/@cf/cloudflare/<model>
  *   ollama-local/<model>         → the ollama-local connection's /v1/systemone
+ *   liquid/d1.2                  → native api.liquid.ai decisions (model d1.2)
  *
  * Anything else is not a decisions model → null (the route 400s with guidance).
  */
@@ -49,7 +50,17 @@ const OLLAMA_LOCAL_SYSTEMONE_PREFIX = "ollama-local/";
 /** Plain Ollama model tags (`qwen3:8b`, `library/llama3.2:latest`); no whitespace or control chars. */
 const OLLAMA_LOCAL_MODEL_ID = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}$/;
 
-export type SystemOneBackend = "typesafe" | "openrouter" | "cloudflare" | "ollama-local";
+/**
+ * Liquid AI's native decisions API (d1, d1.2, d1.2-ultra), on the same System One wire
+ * as TypeSafe. The key comes from the `liquid` connection; the model id only travels
+ * in the JSON body.
+ */
+export const LIQUID_SYSTEMONE_PROVIDER_ID = "liquid";
+export const LIQUID_SYSTEMONE_URL = "https://api.liquid.ai/decisions/v1/systemone";
+const LIQUID_SYSTEMONE_PREFIX = "liquid/";
+const LIQUID_MODEL_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$/;
+
+export type SystemOneBackend = "typesafe" | "openrouter" | "cloudflare" | "ollama-local" | "liquid";
 
 export interface SystemOneTarget {
   backend: SystemOneBackend;
@@ -89,6 +100,18 @@ function resolveOllamaLocalTarget(model: string): SystemOneTarget | null | undef
     provider: OLLAMA_LOCAL_SYSTEMONE_PROVIDER_ID,
     upstreamModel: id,
     upstreamUrl: "",
+  };
+}
+
+function resolveLiquidTarget(model: string): SystemOneTarget | null | undefined {
+  if (!model.startsWith(LIQUID_SYSTEMONE_PREFIX)) return undefined;
+  const id = model.slice(LIQUID_SYSTEMONE_PREFIX.length);
+  if (!LIQUID_MODEL_ID.test(id) || id.includes("..")) return null;
+  return {
+    backend: "liquid",
+    provider: LIQUID_SYSTEMONE_PROVIDER_ID,
+    upstreamModel: id,
+    upstreamUrl: LIQUID_SYSTEMONE_URL,
   };
 }
 
@@ -132,6 +155,8 @@ export function resolveSystemOneTarget(model: string | undefined): SystemOneTarg
   if (cloudflare !== undefined) return cloudflare;
   const ollamaLocal = resolveOllamaLocalTarget(trimmed);
   if (ollamaLocal !== undefined) return ollamaLocal;
+  const liquid = resolveLiquidTarget(trimmed);
+  if (liquid !== undefined) return liquid;
   if (/^jev[-/]/i.test(trimmed)) {
     return {
       backend: "typesafe",
