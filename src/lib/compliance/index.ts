@@ -172,9 +172,22 @@ function sanitizeAuditValue(value: unknown): unknown {
   return value;
 }
 
+/** A string that holds a JSON object or array is parsed first, so its keys are redacted too. */
+function parseStructuredAuditString(value: string): unknown {
+  const trimmed = value.trim();
+  if (trimmed[0] !== "{" && trimmed[0] !== "[") return value;
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return value;
+  }
+}
+
 function serializeAuditValue(value: unknown): string | null {
   if (value === undefined || value === null || value === "") return null;
-  const sanitizedValue = sanitizeAuditValue(value);
+  const sanitizedValue = sanitizeAuditValue(
+    typeof value === "string" ? parseStructuredAuditString(value) : value
+  );
   if (typeof sanitizedValue === "string") {
     return sanitizedValue;
   }
@@ -203,12 +216,14 @@ function normalizeAuditPath(value: unknown): string {
   );
 }
 
+// Redacted again on read: rows written before write-time redaction existed, or by another
+// writer, can still hold secret-looking keys.
 function parseAuditValue(value: unknown): unknown {
   if (value === undefined || value === null || value === "") return null;
-  if (typeof value !== "string") return value;
+  if (typeof value !== "string") return sanitizeAuditValue(value);
 
   try {
-    return JSON.parse(value);
+    return sanitizeAuditValue(JSON.parse(value));
   } catch {
     return value;
   }

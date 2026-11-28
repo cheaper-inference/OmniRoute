@@ -51,6 +51,15 @@ function getRegistryState() {
   return globalThis.__omniroutePreRequestRegistry;
 }
 
+/**
+ * A hook that throws or times out this many times in a row is switched off (in memory) with a
+ * named `lastError`, so one broken hook stops costing every request up to
+ * HOOK_EXECUTION_TIMEOUT_MS of blocked event loop. Keyed by the config object: saving the
+ * hook again (updateHook) makes a new object and so resets the count.
+ */
+const MAX_CONSECUTIVE_HOOK_FAILURES = 5;
+const consecutiveHookFailures = new WeakMap<HookConfig, number>();
+
 // ── Compile hook code into middleware function ────────────────────────────
 
 /**
@@ -416,6 +425,7 @@ export async function runHooks(
 
       // Update run count
       hook.runCount = (hook.runCount || 0) + 1;
+      consecutiveHookFailures.delete(hook);
 
       // Record execution log
       const logEntry: HookLogEntry = {
@@ -446,6 +456,12 @@ export async function runHooks(
       const message = err instanceof Error ? err.message : "Unknown error";
       hook.lastError = message;
       hook.runCount = (hook.runCount || 0) + 1;
+      const failures = (consecutiveHookFailures.get(hook) ?? 0) + 1;
+      consecutiveHookFailures.set(hook, failures);
+      if (failures >= MAX_CONSECUTIVE_HOOK_FAILURES) {
+        hook.enabled = false;
+        hook.lastError = `Hook disabled after ${failures} consecutive failures: ${message}`;
+      }
 
       state.logs.push({
         id: `${hook.name}-err-${Date.now()}`,

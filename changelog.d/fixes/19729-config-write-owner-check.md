@@ -1,0 +1,1 @@
+- **fix(cli-tools):** Applying a CLI tool config now refuses to replace a file owned by another user and names both user ids, so a container apply cannot leave the host user unable to read their own config. ([#19729](https://github.com/cheaper-inference/OmniRoute/pull/19729))

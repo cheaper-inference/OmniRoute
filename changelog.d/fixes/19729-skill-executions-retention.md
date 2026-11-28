@@ -1,0 +1,1 @@
+- **fix(skills):** the skill execution history no longer grows without limit: each stored input or output is capped at 64 KiB, rows older than 30 days are removed, and only the newest 10,000 rows are kept. ([#19729](https://github.com/cheaper-inference/OmniRoute/pull/19729))
