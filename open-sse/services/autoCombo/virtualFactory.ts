@@ -64,6 +64,7 @@ import { resolveProviderAlias } from "../model.ts";
 import { filterExcludedCandidates } from "./candidateOverrides";
 import { getExcludedConnectionIds } from "@/lib/db/autoCandidateOverrides";
 import { isNoAuthProviderReadyForAutoRouting } from "./noAuthReadiness";
+import { isDevinBinAvailable } from "../../executors/devinCliBinary.ts";
 import {
   filterResilienceBlockedCandidates,
   buildConnectionResilienceMap,
@@ -610,6 +611,8 @@ export async function prepareVirtualAutoComboInputs(
   const validConnections = runtimeConnections.filter((conn) => {
     if (!hasUsableConnectionCredential(conn)) return false;
     const providerId = resolveProviderId(conn.provider);
+    // Host runtime availability is not account health; never cool down credentials.
+    if (providerId === "devin-cli" && !isDevinBinAvailable()) return false;
     return (
       !BROWSER_BACKED_NOAUTH_PROVIDER_IDS.has(providerId) ||
       isNoAuthProviderReadyForAutoRouting(providerId)

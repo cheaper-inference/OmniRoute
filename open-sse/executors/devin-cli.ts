@@ -27,40 +27,8 @@
  */
 
 import { spawn } from "node:child_process";
-import path from "node:path";
-import os from "node:os";
-import fs from "node:fs";
 import { BaseExecutor, type ExecuteInput, type ProviderCredentials } from "./base.ts";
-
-// ─── Binary discovery ────────────────────────────────────────────────────────
-
-function resolveDevinBin(): string {
-  // 1. Explicit override
-  const envBin = process.env.CLI_DEVIN_BIN?.trim();
-  if (envBin) return envBin;
-
-  // 2. Common name (PATH lookup handled by spawn shell option)
-  const isWin = process.platform === "win32";
-
-  // 3. Windows installer default: %LOCALAPPDATA%\devin\cli\bin\devin.exe
-  if (isWin) {
-    const localAppData = process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local");
-    const winPath = path.join(localAppData, "devin", "cli", "bin", "devin.exe");
-    if (fs.existsSync(winPath)) return winPath;
-  }
-
-  // 4. Linux/macOS installer paths
-  const home = os.homedir();
-  for (const candidate of [
-    path.join(home, ".local", "share", "devin", "bin", "devin"),
-    path.join(home, ".devin", "bin", "devin"),
-  ]) {
-    if (fs.existsSync(candidate)) return candidate;
-  }
-
-  // Fallback — rely on PATH
-  return isWin ? "devin.exe" : "devin";
-}
+import { resolveDevinBin } from "./devinCliBinary.ts";
 
 // ─── ACP JSON-RPC helpers ────────────────────────────────────────────────────
 
