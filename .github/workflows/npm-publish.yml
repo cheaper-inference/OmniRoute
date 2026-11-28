@@ -302,7 +302,7 @@ jobs:
 
       - name: Generate CycloneDX SBOM (npm)
         if: steps.resolve.outputs.skip != 'true'
-        run: npx @cyclonedx/cyclonedx-npm --ignore-npm-errors --output-format JSON --output-file sbom-npm.cdx.json
+        run: npx --no-install @cyclonedx/cyclonedx-npm --ignore-npm-errors --output-format JSON --output-file sbom-npm.cdx.json
 
       - name: Upload SBOM (npm) as workflow artifact
         if: steps.resolve.outputs.skip != 'true'

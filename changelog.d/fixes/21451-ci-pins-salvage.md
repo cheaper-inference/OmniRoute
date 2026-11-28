@@ -1,0 +1,1 @@
+- **fix(ci):** CI pins its supply-chain tools: `garak==0.17.1`, `schemathesis==4.34.0`, the SBOM step runs `npx --no-install @cyclonedx/cyclonedx-npm`, and `test-bun-sqlite` uses the lockfile-pinned Bun instead of `iwr | iex` or `npm install -g bun` ([#21451](https://github.com/cheaper-inference/OmniRoute/pull/21451), from #21036, refs #21014 — thanks @same7soliman)
