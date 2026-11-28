@@ -99,14 +99,16 @@ test("API-key connection does not fail over to another surface on 403", async ()
   assert.deepEqual(urls, ["https://q.us-east-1.amazonaws.com/generateAssistantResponse"]);
 });
 
-test("IdC connection in us-east-1 still uses codewhisperer.us-east-1 (regression guard)", async () => {
+test("IdC connection in us-east-1 rides the branded gateway first, q.us-east-1 fallback (#19607)", async () => {
+  // Live-verified 2026-11-10: the version-gate 403 hits SSO tokens on the AWS-native
+  // hosts (codewhisperer AND q.*) regardless of User-Agent; only the branded gateway
+  // authenticates them. See tests/unit/kiro-version-gate-19607.test.ts for the
+  // gateway-first + fallback matrix.
   const urls = await captureExecuteUrls({
     accessToken: "idc-token",
     providerSpecificData: { authMethod: "idc", region: "us-east-1" },
   });
-  assert.deepEqual(urls, [
-    "https://codewhisperer.us-east-1.amazonaws.com/generateAssistantResponse",
-  ]);
+  assert.deepEqual(urls, ["https://runtime.us-east-1.kiro.dev/generateAssistantResponse"]);
 });
 
 test("social connection in us-east-1 still tries the Kiro IDE gateway first (regression guard)", async () => {
