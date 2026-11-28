@@ -456,7 +456,7 @@ const SEMANTIC_CACHE_FLAG_TTL_MS = 5_000;
 
 let semanticCacheFlagCache: { value: boolean; expiresAt: number } | null = null;
 
-function clearSemanticCacheFlagCache(): void {
+export function clearSemanticCacheFlagCache(): void {
   semanticCacheFlagCache = null;
 }
 
@@ -534,6 +534,8 @@ export function updateDatabaseSettings(
   const requestedLogs = updates.logs as Partial<UserDatabaseSettings["logs"]> | undefined;
   const pipelineEnabled = requestedLogs?.callLogPipelineEnabled;
   const detailedEnabled = requestedLogs?.detailedLogsEnabled;
+  const requestedCache = updates.cache as Partial<UserDatabaseSettings["cache"]> | undefined;
+  const semanticCacheEnabled = requestedCache?.semanticCacheEnabled;
 
   const requestedBackup = updates.backup as Partial<UserDatabaseSettings["backup"]> | undefined;
   if (requestedBackup?.keepLastNBackups !== undefined) {
@@ -562,6 +564,26 @@ export function updateDatabaseSettings(
 
     if (pipelineEnabled !== undefined) {
       settingsInsert.run("call_log_pipeline_enabled", JSON.stringify(Boolean(pipelineEnabled)));
+    }
+    if (semanticCacheEnabled !== undefined) {
+      settingsInsert.run("semanticCacheEnabled", JSON.stringify(Boolean(semanticCacheEnabled)));
+      const revisionRow = db
+        .prepare(
+          "SELECT value FROM key_value WHERE namespace = 'settings' AND key = '_settingsRevision'"
+        )
+        .get() as { value?: string } | undefined;
+      let currentRevision = 0;
+      if (revisionRow?.value) {
+        try {
+          const parsed = JSON.parse(revisionRow.value) as unknown;
+          if (typeof parsed === "number" && Number.isInteger(parsed) && parsed >= 0) {
+            currentRevision = parsed;
+          }
+        } catch {
+          currentRevision = 0;
+        }
+      }
+      settingsInsert.run("_settingsRevision", JSON.stringify(currentRevision + 1));
     }
     encryptLegacyCacheSecretCopies(db);
   });

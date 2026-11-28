@@ -109,6 +109,13 @@ export async function GET(request: NextRequest) {
         // so reporting the databaseSettings "cache" copy would show a value the
         // runtime never uses.
         config[key] = flatSettings[key] ?? DEFAULTS[key];
+      } else if (key === "semanticCacheEnabled") {
+        // Runtime isSemanticCacheEnabled() requires both flat settings and
+        // databaseSettings.cache.semanticCacheEnabled to be enabled (#20399).
+        const dbEnabled =
+          ((cache as Record<string, unknown>).semanticCacheEnabled ??
+            DEFAULTS.semanticCacheEnabled) !== false;
+        config[key] = dbEnabled && flatSettings.semanticCacheEnabled !== false;
       } else {
         config[key] = (cache as Record<string, unknown>)[key] ?? DEFAULTS[key];
       }
@@ -222,9 +229,10 @@ export async function PUT(request: NextRequest) {
     }
 
     // idempotencyWindowMs and alwaysPreserveClientCache are read from the flat
-    // general settings (see GET) — persisting them into the databaseSettings
-    // "cache" section would be a silent no-op for the runtime, which is what
-    // made this endpoint's alwaysPreserveClientCache writes ineffective before.
+    // general settings by the runtime (see GET) — persisting them only into the
+    // databaseSettings "cache" section would be a silent no-op for the runtime.
+    // semanticCacheEnabled is already mirrored to flat settings inside
+    // updateDatabaseSettings()'s transaction (#20399).
     const flatUpdates: Record<string, unknown> = {};
     if (body.idempotencyWindowMs !== undefined) {
       flatUpdates.idempotencyWindowMs = body.idempotencyWindowMs;

@@ -453,9 +453,25 @@ export async function updateSettings(
       const toStore = ENCRYPTED_SETTING_KEYS.has(key) ? encrypt(value as string) : value;
       insert.run(key, JSON.stringify(toStore));
     }
+    if (updates.semanticCacheEnabled !== undefined) {
+      db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
+        "databaseSettings",
+        "cache.semanticCacheEnabled",
+        JSON.stringify(Boolean(updates.semanticCacheEnabled))
+      );
+    }
     insert.run(SETTINGS_REVISION_KEY, JSON.stringify(currentRevision + 1));
   });
   tx();
+  if (updates.semanticCacheEnabled !== undefined) {
+    const { clearSemanticCacheFlagCache } = await import("./databaseSettings");
+    clearSemanticCacheFlagCache();
+    // Same as PUT /api/settings/cache-config: drop the in-memory manager so the next request
+    // rebuilds it from the freshly-persisted master flag instead of a stale disabled config.
+    const { resetSemanticCacheManager } =
+      await import("@omniroute/open-sse/services/cache/semanticCacheManager.ts");
+    resetSemanticCacheManager();
+  }
   invalidateDbCache("settings"); // Bust the read cache immediately
 
   // Bust proxy resolution cache when proxy toggle settings change
