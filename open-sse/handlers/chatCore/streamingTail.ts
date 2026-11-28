@@ -15,6 +15,7 @@ import {
 } from "../../config/constants.ts";
 import { incrementTokenUsage } from "../../services/geminiRateLimitTracker.ts";
 import { forgetClaudeThinkingForClientResponse } from "../../services/claudeThinkingStore.ts";
+import { sessionScopeOf } from "../../services/reasoningCache.ts";
 import { requestTtftMs, streamEmittedOutput } from "../../utils/streamTiming.ts";
 import { readStreamPartialUsage } from "../../utils/streamPartialUsage.ts";
 import { clearPostOutputFailureStreak } from "../../services/accountFallback/postOutputFailureStreak.ts";
@@ -825,7 +826,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       // tool-name casing back from any provider (OpenCode `read`, Claude Code `Read`).
       (body as Record<string, unknown> | null | undefined)?.tools ?? null,
       undefined,
-      pendingRequestOwner ?? pendingRequestId
+      pendingRequestOwner ?? pendingRequestId,
+      sessionScopeOf(reasoningCacheScope)
     );
   } else {
     log?.debug?.("STREAM", `Standard passthrough mode`);

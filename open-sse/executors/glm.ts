@@ -286,7 +286,8 @@ export function translateSseResponse(
     undefined,
     null,
     streamBufferBytes,
-    false
+    false,
+    null
   );
   const headers = cloneHeaders(response.headers);
   headers.set("content-type", "text/event-stream");
