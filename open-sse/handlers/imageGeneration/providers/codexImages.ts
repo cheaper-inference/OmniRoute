@@ -36,7 +36,13 @@ type CodexImagesSuccess = {
   outputFormat: string | null;
   usage: unknown;
 };
-type CodexImagesFailure = { ok: false; status: number; error: unknown; retryable: boolean };
+type CodexImagesFailure = {
+  ok: false;
+  status: number;
+  error: unknown;
+  logError: string;
+  retryable: boolean;
+};
 type CodexImagesOutcome = CodexImagesSuccess | CodexImagesFailure;
 
 function isFailure(outcome: CodexImagesOutcome): outcome is CodexImagesFailure {
@@ -95,6 +101,7 @@ function readImagesResponse(raw: string): CodexImagesOutcome {
       ok: false,
       status: 502,
       error: "Codex Images API returned no b64_json image",
+      logError: "Codex Images response contained no image",
       retryable: false,
     };
   }
@@ -147,6 +154,7 @@ export async function handleCodexImagesApi({
       status: 400,
       startTime,
       error: `n must be between 1 and ${MAX_CODEX_IMAGES_PER_REQUEST} for Codex image generation`,
+      metadataError: "Codex Images request count exceeds the limit",
       path: logPath,
     });
   }
@@ -158,6 +166,7 @@ export async function handleCodexImagesApi({
       status: 400,
       startTime,
       error: formatCheck.error,
+      metadataError: "Codex Images output format is unsupported",
       path: logPath,
     });
   }
@@ -180,19 +189,6 @@ export async function handleCodexImagesApi({
       image_url: `data:${image.mime || "image/png"};base64,${image.bytes.toString("base64")}`,
     }));
   }
-  // Never log reference image bytes; record their MIME/size only (same as the hosted path).
-  const { prompt: _prompt, images: _images, ...loggedOptions } = upstreamBody;
-  const requestBodyForLog = isEdit
-    ? {
-        ...loggedOptions,
-        prompt_chars: prompt.length,
-        reference_images: referenceImages.map((image) => ({
-          mime: image.mime || "image/png",
-          bytes: image.bytes.length,
-        })),
-      }
-    : upstreamBody;
-
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -203,10 +199,10 @@ export async function handleCodexImagesApi({
   };
   if (typeof workspaceId === "string" && workspaceId) headers["chatgpt-account-id"] = workspaceId;
 
-  if (log) {
-    const promptSummary = isEdit ? `${prompt.length} chars` : `"${prompt.slice(0, 60)}..."`;
-    log.info("IMAGE", `${provider}/${model} (codex-images) | prompt: ${promptSummary}`);
-  }
+  log?.info(
+    "IMAGE",
+    `${provider}/${model} (codex-images) | submitting ${isEdit ? "edit" : "generation"}`
+  );
 
   const fetchOne = async (): Promise<CodexImagesOutcome> => {
     let response: Response;
@@ -219,11 +215,12 @@ export async function handleCodexImagesApi({
       });
     } catch (err) {
       const message = sanitizeErrorMessage(err);
-      if (log) log.error("IMAGE", `${provider} fetch error: ${message}`);
+      log?.error("IMAGE", "Codex Images upstream fetch error");
       return {
         ok: false,
         status: 502,
         error: `Image provider error: ${message}`,
+        logError: "Codex Images upstream fetch error",
         retryable: false,
       };
     }
@@ -232,24 +229,23 @@ export async function handleCodexImagesApi({
       raw = await response.text();
     } catch (err) {
       const message = sanitizeErrorMessage(err);
-      if (log) log.error("IMAGE", `${provider} response read error: ${message}`);
+      log?.error("IMAGE", "Codex Images upstream response read error");
       return {
         ok: false,
         status: 502,
         error: `Image provider response error: ${message}`,
+        logError: "Codex Images upstream response read error",
         retryable: false,
       };
     }
     if (!response.ok) {
       const safeError = sanitizeImageProviderError(raw);
-      if (log) {
-        const safeLog = typeof safeError === "string" ? safeError : JSON.stringify(safeError ?? {});
-        log.error("IMAGE", `${provider} error ${response.status}: ${safeLog}`);
-      }
+      log?.error("IMAGE", `Codex Images upstream HTTP error (${response.status})`);
       return {
         ok: false,
         status: response.status,
         error: safeError,
+        logError: "Codex Images upstream HTTP error",
         retryable: isCodexChatGptModelAccessError(response.status, raw, model),
       };
     }
@@ -270,7 +266,7 @@ export async function handleCodexImagesApi({
         status: outcome.status,
         startTime,
         error: outcome.error,
-        requestBody: requestBodyForLog,
+        metadataError: outcome.logError,
         path: logPath,
         ...(outcome.retryable ? { retryable: true } : {}),
       });
@@ -293,8 +289,7 @@ export async function handleCodexImagesApi({
     provider,
     model,
     startTime,
-    requestBody: requestBodyForLog,
-    responseBody: { images_count: images.length, ...(usage ? { usage } : {}) },
+    metadataOnly: true,
     created,
     images,
     path: logPath,
