@@ -413,36 +413,90 @@ export function cacheReasoningFromAssistantMessage(
 }
 
 /**
- * Look up cached reasoning_content by tool_call_id.
- * Memory first → DB fallback → null (miss).
+ * Check that a stored reasoning entry belongs to the requesting provider/model. Tool call ids are
+ * not unique across providers, so an id alone must not serve another provider's reasoning. An empty
+ * expected value leaves that dimension unguarded for callers without provider context.
  */
-export function lookupReasoning(toolCallId: string): string | null {
-  if (!isReasoningReplayEnabled()) return null;
-  return lookupStoredReasoning(toolCallId);
+function reasoningEntryMatchesRequest(
+  entryProvider: string,
+  entryModel: string,
+  expectedProvider?: string | null,
+  expectedModel?: string | null
+): boolean {
+  const wantedProvider = String(expectedProvider ?? "")
+    .trim()
+    .toLowerCase();
+  if (
+    wantedProvider &&
+    String(entryProvider ?? "")
+      .trim()
+      .toLowerCase() !== wantedProvider
+  ) {
+    return false;
+  }
+  const wantedModel = String(expectedModel ?? "").trim();
+  if (wantedModel && String(entryModel ?? "").trim() !== wantedModel) {
+    return false;
+  }
+  return true;
 }
 
-function lookupStoredReasoning(toolCallId: string): string | null {
+/**
+ * Look up cached reasoning_content by tool_call_id.
+ * Memory first → DB fallback → null (miss). A stored entry is served only to the provider/model
+ * that wrote it when the caller supplies those values.
+ */
+export function lookupReasoning(
+  toolCallId: string,
+  expectedProvider?: string | null,
+  expectedModel?: string | null
+): string | null {
+  if (!isReasoningReplayEnabled()) return null;
+  return lookupStoredReasoning(toolCallId, expectedProvider, expectedModel);
+}
+
+/**
+ * Serve a live memory entry to its owner. undefined means memory has no live entry for the id, so
+ * the caller falls back to the database; a divergent entry stays cached but is never replayed.
+ */
+function lookupMemoryReasoning(
+  toolCallId: string,
+  expectedProvider?: string | null,
+  expectedModel?: string | null
+): string | null | undefined {
+  const mem = memoryCache.get(toolCallId);
+  if (!mem) return undefined;
+  if (Date.now() >= mem.expiresAt) {
+    memoryCache.delete(toolCallId);
+    return undefined;
+  }
+  // ponytail: never replay the internal placeholder from memory.
+  if (isInternalReasoningPlaceholder(mem.reasoning)) {
+    memoryCache.delete(toolCallId);
+    misses++;
+    return null;
+  }
+  if (!reasoningEntryMatchesRequest(mem.provider, mem.model, expectedProvider, expectedModel)) {
+    misses++;
+    return null;
+  }
+  hits++;
+  return mem.reasoning;
+}
+
+function lookupStoredReasoning(
+  toolCallId: string,
+  expectedProvider?: string | null,
+  expectedModel?: string | null
+): string | null {
   if (!toolCallId) {
     misses++;
     return null;
   }
 
   // 1. Check memory
-  const mem = memoryCache.get(toolCallId);
-  if (mem) {
-    if (Date.now() < mem.expiresAt) {
-      // ponytail: never replay the internal placeholder from memory.
-      if (isInternalReasoningPlaceholder(mem.reasoning)) {
-        memoryCache.delete(toolCallId);
-        misses++;
-        return null;
-      }
-      hits++;
-      return mem.reasoning;
-    }
-    // Expired in memory — remove
-    memoryCache.delete(toolCallId);
-  }
+  const fromMemory = lookupMemoryReasoning(toolCallId, expectedProvider, expectedModel);
+  if (fromMemory !== undefined) return fromMemory;
 
   // 2. Fallback to DB
   let dbResult: { reasoning: string; provider: string; model: string; expiresAt: string } | null =
@@ -460,6 +514,18 @@ function lookupStoredReasoning(toolCallId: string): string | null {
     }
     const persistedExpiresAt = Date.parse(dbResult.expiresAt);
     if (!Number.isFinite(persistedExpiresAt) || persistedExpiresAt <= Date.now()) {
+      misses++;
+      return null;
+    }
+    // Check the stored owner before promoting: a foreign entry must not warm the memory cache.
+    if (
+      !reasoningEntryMatchesRequest(
+        dbResult.provider,
+        dbResult.model,
+        expectedProvider,
+        expectedModel
+      )
+    ) {
       misses++;
       return null;
     }
