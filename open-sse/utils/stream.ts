@@ -6,7 +6,7 @@ import { mergeUsageSnapshot } from "./streamUsageMerge.ts";
 import {
   resolveStreamAccountingUsage,
   projectStreamingClientUsage,
-  readReportedChatTotal,
+  updateReportedChatTotal,
   withReportedChatTotal,
 } from "./streamAccountingUsage.ts";
 import { createGeneratedContentTracker } from "./streamGeneratedContent.ts";
@@ -992,7 +992,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   };
   let reportedChatTotal: number | undefined;
   const observeProviderPayload = (payload: unknown) => {
-    reportedChatTotal = readReportedChatTotal(payload, providerWireFormat) ?? reportedChatTotal;
+    reportedChatTotal = updateReportedChatTotal(payload, providerWireFormat, reportedChatTotal);
     observeBuyerCostMicro(payload);
     nativeClaudeUsage.observe(payload);
     nativeContent.observe(payload);

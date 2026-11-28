@@ -38,13 +38,15 @@ export function resolveStreamAccountingUsage(input: StreamAccountingInput): Usag
 }
 
 /** Capture the total before translation or estimation rewrites the provider receipt. */
-export function readReportedChatTotal(
+export function updateReportedChatTotal(
   payload: unknown,
-  upstreamFormat: string
+  upstreamFormat: string,
+  previousTotal: number | undefined
 ): number | undefined {
-  if (upstreamFormat !== FORMATS.OPENAI) return undefined;
+  if (upstreamFormat !== FORMATS.OPENAI) return previousTotal;
   const usage = (payload as { usage?: UsageLike } | null)?.usage;
-  const total = usage?.total_tokens;
+  if (!usage || !Object.hasOwn(usage, "total_tokens")) return previousTotal;
+  const total = usage.total_tokens;
   if (
     typeof total === "number" &&
     Number.isSafeInteger(total) &&

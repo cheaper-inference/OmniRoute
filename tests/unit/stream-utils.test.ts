@@ -64,14 +64,37 @@ function multilineDataEvent(payload, splitBeforeKey) {
 }
 
 for (const mode of ["passthrough", "translate"]) {
-  test(`${mode}: Chat call-log summary preserves the reported usage total`, async () => {
-    for (const reportedTotal of [113, undefined]) {
+  const counts = { prompt_tokens: 100, completion_tokens: 7 };
+  const reported = { ...counts, total_tokens: 113 };
+  const cases = [
+    { name: "preserves the reported total", updates: [reported], expectedTotal: 113 },
+    { name: "falls back when no total is reported", updates: [counts], expectedTotal: 107 },
+    {
+      name: "keeps the total across an update without a total",
+      updates: [reported, counts],
+      expectedTotal: 113,
+    },
+    {
+      name: "clears the total after a fractional update",
+      updates: [reported, { ...counts, total_tokens: 113.5 }],
+      expectedTotal: 107,
+    },
+    {
+      name: "clears the total after an estimated update",
+      updates: [reported, { ...reported, estimated: true }],
+      expectedTotal: 107,
+    },
+  ];
+  for (const { name, updates, expectedTotal } of cases) {
+    test(`${mode}: Chat call-log ${name}`, async () => {
       let completed;
       const chunk = { id: "chatcmpl-model", object: "chat.completion.chunk", model: "gpt-4.1" };
       await readTransformed(
         [
           `data: ${JSON.stringify({ ...chunk, choices: [{ delta: { content: "Hello" }, finish_reason: "stop" }] })}\n\n`,
-          `data: ${JSON.stringify({ ...chunk, choices: [], usage: { prompt_tokens: 100, completion_tokens: 7, total_tokens: reportedTotal } })}\n\n`,
+          ...updates.map(
+            (usage) => `data: ${JSON.stringify({ ...chunk, choices: [], usage })}\n\n`
+          ),
           "data: [DONE]\n\n",
         ],
         {
@@ -86,9 +109,11 @@ for (const mode of ["passthrough", "translate"]) {
         }
       );
       assert.equal(completed?.status, 200);
-      assert.equal(completed?.providerPayload.summary.usage.total_tokens, reportedTotal ?? 107);
-    }
-  });
+      assert.equal(completed?.responseBody.usage.total_tokens, 107);
+      assert.equal(completed?.callLogResponseBody.usage.total_tokens, expectedTotal);
+      assert.equal(completed?.providerPayload.summary.usage.total_tokens, expectedTotal);
+    });
+  }
 }
 
 async function runChatTotalStream(
