@@ -1,5 +1,7 @@
 import { getProviderConnections } from "@/lib/db/providers";
 import { getSyncedAvailableModels, getCustomModels } from "@/lib/db/models";
+import { getCachedProviderNodes } from "@/lib/db/readCache";
+import { inferKnownEmbeddingDimensions } from "@/lib/providerModels/modelDiscovery";
 import {
   EMBEDDING_PROVIDERS,
   getEmbeddingProvider,
@@ -34,6 +36,20 @@ function getProviderBaseUrl(providerSpecificData: unknown): string | undefined {
 
 export async function getEmbeddingOptions(): Promise<EmbeddingProviderOption[]> {
   const connections = await getProviderConnections().catch(() => []);
+  const providerNodes = (await getCachedProviderNodes().catch(() => [])) as Array<{
+    id?: string;
+    baseUrl?: string;
+  }>;
+  const nodeBaseUrlById = new Map<string, string>();
+  for (const node of providerNodes) {
+    if (
+      typeof node?.id === "string" &&
+      typeof node?.baseUrl === "string" &&
+      node.baseUrl.trim().length > 0
+    ) {
+      nodeBaseUrlById.set(node.id, node.baseUrl.trim());
+    }
+  }
   const connectionsByProvider = new Map<string, typeof connections>();
 
   for (const conn of connections) {
@@ -65,7 +81,7 @@ export async function getEmbeddingOptions(): Promise<EmbeddingProviderOption[]> 
     const configuredBaseUrl = activeConn
       ? getProviderBaseUrl(activeConn.providerSpecificData)
       : undefined;
-    const baseUrl = configuredBaseUrl || curated?.baseUrl;
+    const baseUrl = configuredBaseUrl || nodeBaseUrlById.get(providerId) || curated?.baseUrl;
 
     // Collect models for this provider
     const modelsMap = new Map<string, AvailableEmbeddingModelOption>();
@@ -100,7 +116,8 @@ export async function getEmbeddingOptions(): Promise<EmbeddingProviderOption[]> 
             id: `${providerId}/${sm.id}`,
             rawId: sm.id,
             name: sm.name || existing?.name || sm.id,
-            dimensions: sm.dimensions || existing?.dimensions,
+            dimensions:
+              sm.dimensions || existing?.dimensions || inferKnownEmbeddingDimensions(sm.id),
             maxTokens: sm.inputTokenLimit || existing?.maxTokens,
             supportedInputTypes: sm.supportedInputTypes ||
               existing?.supportedInputTypes || ["text"],
@@ -129,7 +146,8 @@ export async function getEmbeddingOptions(): Promise<EmbeddingProviderOption[]> 
               id: `${providerId}/${cm.id}`,
               rawId: cm.id,
               name: cm.name || existing?.name || cm.id,
-              dimensions: cm.dimensions || existing?.dimensions,
+              dimensions:
+                cm.dimensions || existing?.dimensions || inferKnownEmbeddingDimensions(cm.id),
               maxTokens: cm.inputTokenLimit || existing?.maxTokens,
               supportedInputTypes: cm.supportedInputTypes ||
                 existing?.supportedInputTypes || ["text"],

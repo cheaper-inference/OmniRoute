@@ -20,6 +20,9 @@ import { embedTransformers } from "./transformersLocal";
 import { buildCacheKey, get as cacheGet, set as cacheSet } from "./cache";
 import { resolveMemoryCustomEmbeddingProvider } from "./customProvider";
 import { listProviderNodeModalityListings } from "./nodeModalityListings";
+import { getAllActiveSyncedModels } from "@/lib/db/models/activeSyncedCatalog";
+import { getAllCustomModels } from "@/lib/db/models";
+import { inferKnownEmbeddingDimensions } from "@/lib/providerModels/modelDiscovery";
 
 const STATIC_MODEL = process.env.MEMORY_STATIC_MODEL || "minishlab/potion-base-8M";
 const TRANSFORMERS_MODEL = process.env.MEMORY_TRANSFORMERS_MODEL || "Xenova/all-MiniLM-L6-v2";
@@ -328,18 +331,93 @@ export async function embedWithRetry(
   return last as EmbeddingResult | EmbeddingError;
 }
 
+interface DiscoveredEmbeddingRow {
+  id?: unknown;
+  name?: unknown;
+  modelType?: unknown;
+  apiFormat?: unknown;
+  supportedEndpoints?: unknown;
+  dimensions?: unknown;
+}
+
+function isEmbeddingDiscoveredRow(row: DiscoveredEmbeddingRow): boolean {
+  if (row.modelType === "embedding" || row.apiFormat === "embeddings") return true;
+  if (Array.isArray(row.supportedEndpoints) && row.supportedEndpoints.includes("embeddings")) {
+    return true;
+  }
+  return false;
+}
+
+function mergeDiscoveredEmbeddingModels(
+  providerId: string,
+  curatedModels: Array<{ id: string; name: string; dimensions?: number }>,
+  syncedRows: DiscoveredEmbeddingRow[] | undefined,
+  customRows: DiscoveredEmbeddingRow[] | undefined
+): Array<{ id: string; name: string; dimensions: number | null }> {
+  const byRawId = new Map<string, { id: string; name: string; dimensions: number | null }>();
+  for (const m of curatedModels) {
+    byRawId.set(m.id, {
+      id: `${providerId}/${m.id}`,
+      name: m.name,
+      dimensions: m.dimensions ?? inferKnownEmbeddingDimensions(m.id) ?? null,
+    });
+  }
+
+  for (const sourceRows of [syncedRows, customRows]) {
+    if (!Array.isArray(sourceRows)) continue;
+    for (const row of sourceRows) {
+      if (!row || typeof row !== "object" || typeof row.id !== "string" || !row.id.trim()) {
+        continue;
+      }
+      const rawId = row.id.trim();
+      const existing = byRawId.get(rawId);
+      if (!existing && !isEmbeddingDiscoveredRow(row)) continue;
+      const rowDims =
+        typeof row.dimensions === "number" && Number.isFinite(row.dimensions) && row.dimensions > 0
+          ? row.dimensions
+          : null;
+      byRawId.set(rawId, {
+        id: `${providerId}/${rawId}`,
+        name: (typeof row.name === "string" && row.name.trim()) || existing?.name || rawId,
+        dimensions: rowDims ?? existing?.dimensions ?? inferKnownEmbeddingDimensions(rawId) ?? null,
+      });
+    }
+  }
+
+  return Array.from(byRawId.values());
+}
+
 /**
  * List providers that have embedding models, marking which ones have a configured API key.
- * Aggregates from EMBEDDING_PROVIDERS + local provider_nodes.
+ * Aggregates from EMBEDDING_PROVIDERS (enriched with synced/custom embedding models) + local provider_nodes.
  */
 export async function listEmbeddingProviders(): Promise<EmbeddingProviderListing[]> {
   // Local provider nodes, listed with the embedding-typed models they expose
   // (synced + custom rows; see nodeModalityListings.ts).
   const nodeListings = await listProviderNodeModalityListings("embeddings");
 
+  let syncedByProvider: Record<string, DiscoveredEmbeddingRow[] | undefined> = {};
+  try {
+    syncedByProvider = (await getAllActiveSyncedModels()) as Record<
+      string,
+      DiscoveredEmbeddingRow[]
+    >;
+  } catch {
+    syncedByProvider = {};
+  }
+  let customByProvider: Record<string, DiscoveredEmbeddingRow[] | undefined> = {};
+  try {
+    const raw = (await getAllCustomModels()) as Record<string, unknown>;
+    for (const [providerId, rows] of Object.entries(raw)) {
+      if (Array.isArray(rows)) customByProvider[providerId] = rows as DiscoveredEmbeddingRow[];
+    }
+  } catch {
+    customByProvider = {};
+  }
+
   const result: EmbeddingProviderListing[] = [];
 
-  // Process hardcoded EMBEDDING_PROVIDERS
+  // Process hardcoded EMBEDDING_PROVIDERS (enriched with synced & custom embedding models, #21185)
   for (const [providerId, config] of Object.entries(EMBEDDING_PROVIDERS)) {
     let hasKey = false;
     try {
@@ -357,11 +435,12 @@ export async function listEmbeddingProviders(): Promise<EmbeddingProviderListing
     result.push({
       provider: providerId,
       hasKey,
-      models: config.models.map((m) => ({
-        id: `${providerId}/${m.id}`,
-        name: m.name,
-        dimensions: m.dimensions ?? null,
-      })),
+      models: mergeDiscoveredEmbeddingModels(
+        providerId,
+        config.models,
+        syncedByProvider[providerId],
+        customByProvider[providerId]
+      ),
     });
   }
 

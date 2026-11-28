@@ -442,6 +442,34 @@ const KNOWN_EMBEDDING_DIMENSIONS: Record<string, number> = {
   embeddinggemma: 768,
 };
 
+const KNOWN_EMBEDDING_DIMENSION_ENTRIES = Object.entries(KNOWN_EMBEDDING_DIMENSIONS).sort(
+  ([a], [b]) => b.length - a.length
+);
+
+/**
+ * Infer vector dimensions for well-known embedding model families, matching both
+ * exact IDs (`embeddinggemma`) and versioned/tagged variants (`embeddinggemma-2`,
+ * `embeddinggemma:latest`, `embeddinggemma-2-F16.gguf`) (#21185).
+ */
+export function inferKnownEmbeddingDimensions(modelId: string): number | undefined {
+  if (typeof modelId !== "string") return undefined;
+  const leaf = modelId.trim().toLowerCase().split("/").pop() || "";
+  if (!leaf) return undefined;
+  const exact = KNOWN_EMBEDDING_DIMENSIONS[leaf];
+  if (exact !== undefined) return exact;
+  for (const [key, dims] of KNOWN_EMBEDDING_DIMENSION_ENTRIES) {
+    if (
+      leaf.startsWith(`${key}-`) ||
+      leaf.startsWith(`${key}:`) ||
+      leaf.startsWith(`${key}_`) ||
+      leaf.startsWith(`${key}.`)
+    ) {
+      return dims;
+    }
+  }
+  return undefined;
+}
+
 export function detectModelModality(
   record: JsonRecord,
   providerId?: string
@@ -525,7 +553,7 @@ export function detectModelModality(
     record.embedding_dimension,
     record.embedding_dimensions,
     registryModel?.dimensions,
-    KNOWN_EMBEDDING_DIMENSIONS[modelLeaf]
+    inferKnownEmbeddingDimensions(modelLeaf)
   );
 
   const supportedInputTypes: string[] = Array.isArray(record.supportedInputTypes)
