@@ -1,0 +1,22 @@
+services:
+  muse-bridge:
+    build: .
+    image: muse-bridge:latest
+    container_name: muse-bridge
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8791:8791"
+    volumes:
+      - ./data:/data
+    shm_size: "1gb"
+    security_opt:
+      - seccomp=unconfined
+    networks:
+      - default
+      - omniroute
+
+networks:
+  omniroute:
+    external: true
+    name: omniroute_default
