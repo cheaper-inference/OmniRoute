@@ -102,7 +102,9 @@ import { classifyComboOutcome, redactConnectionLabel } from "./comboErrorAggrega
 import { resolveRetryCooldownWait, waitForAuthorizedRetry } from "./authorizedRetryWait.ts";
 import { recordLkgpPin } from "./recordLkgpPin.ts";
 import {
+  extractEstimatedInputTokensFromOverflowText,
   handlePreContentStreamRetry,
+  hasRemainingTargetWithLargerContext,
   isProviderSafetyStreamFailure,
   qualityValidationFailure,
   remainderIsHomogeneous,
@@ -934,15 +936,37 @@ export async function executeTargetAttempt(
     // only holds within a homogeneous same-model pool).
     // #15917: with CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED on, a content-policy refusal
     // stops the combo even with different models remaining.
+    const hedgeActive = Boolean(
+      deps.config.zeroLatencyOptimizationsEnabled && deps.config.hedging
+    );
     const remainderHomogeneous =
       remainderIsHomogeneous(state.orderedTargets, i, modelStr) &&
       // Earlier heterogeneous attempts can still be pending in a hedge.
       // Preserve suffix short-circuiting for serial dispatch.
-      (!(deps.config.zeroLatencyOptimizationsEnabled && deps.config.hedging) ||
-        state.orderedTargets.every((candidate) => candidate.modelStr === modelStr));
+      (!hedgeActive || state.orderedTargets.every((candidate) => candidate.modelStr === modelStr));
+    const isOverflowFailure =
+      result.status === 400 && isContextOverflowFailure(errorText, structuredError);
+    // In heterogeneous combos, also short-circuit on context overflow when every
+    // remaining target has a known context limit <= the failed target's limit
+    // (or < estimatedInputTokens when available). Any remaining target with a
+    // strictly larger known limit or an unknown limit preserves fallback.
+    // Skip when hedging is active so an already-dispatched earlier sibling is not
+    // prematurely abandoned.
+    const hasRemainingLargerContextTarget =
+      isOverflowFailure && !remainderHomogeneous && !hedgeActive
+        ? hasRemainingTargetWithLargerContext({
+            orderedTargets: state.orderedTargets,
+            index: i,
+            failedTarget: target,
+            estimatedInputTokens: extractEstimatedInputTokensFromOverflowText(errorText),
+          })
+        : true;
     const isInputBoundFailure = shouldAbortOnInputBoundFailure({
       structuredError,
       remainderIsHomogeneous: remainderHomogeneous,
+      errorText,
+      status: result.status,
+      hasRemainingLargerContextTarget,
     });
     if (isInputBoundFailure) {
       deps.log.warn(

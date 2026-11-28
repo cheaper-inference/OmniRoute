@@ -4,7 +4,11 @@
  *
  * @internal — not part of the public combo.ts barrel.
  */
-import { isInputBoundRequestFailure } from "./comboPredicates.ts";
+import { isContextOverflowFailure, isInputBoundRequestFailure } from "./comboPredicates.ts";
+import { getModelContextOverrideValue } from "./contextOverrideGate.ts";
+import { getResolvedModelCapabilities } from "../modelCapabilities.ts";
+import { getSourcedTokenLimit } from "../contextManager.ts";
+import { parseModel } from "../model.ts";
 import { comboTargetDecision } from "./statusDecisionTable.ts";
 import {
   errorResponse,
@@ -119,6 +123,141 @@ export function remainderIsHomogeneous(
   return orderedTargets.slice(index + 1).every((nextInPool) => nextInPool.modelStr === modelStr);
 }
 
+type ContextLimitCandidate = {
+  modelStr: string;
+  provider?: string | null;
+  providerId?: string | null;
+};
+
+/**
+ * Resolve a target's effective known context/input token limit, or `null` when
+ * the model has no known sourced limit (fail-open for uncataloged models).
+ *
+ * Resolution order matches OmniRoute's context gate:
+ * 1. Explicit persisted `model_context_override` (with effort-suffix inheritance)
+ * 2. Model capabilities (`maxInputTokens` and `contextWindow` — taking the tighter
+ *    effective input cap when both are positive)
+ * 3. `getSourcedTokenLimit()` (env override / models.dev / registry / known provider)
+ */
+export function resolveTargetKnownContextLimit(target: ContextLimitCandidate): number | null {
+  const override = getModelContextOverrideValue(target.modelStr);
+  if (typeof override === "number" && Number.isFinite(override) && override > 0) {
+    return override;
+  }
+
+  const parsed = parseModel(target.modelStr);
+  const provider =
+    target.providerId || target.provider || parsed.provider || parsed.providerAlias || null;
+  const capabilities = getResolvedModelCapabilities({
+    provider,
+    model: target.modelStr,
+  });
+
+  const maxInput =
+    typeof capabilities.maxInputTokens === "number" &&
+    Number.isFinite(capabilities.maxInputTokens) &&
+    capabilities.maxInputTokens > 0
+      ? capabilities.maxInputTokens
+      : null;
+  const contextWindow =
+    typeof capabilities.contextWindow === "number" &&
+    Number.isFinite(capabilities.contextWindow) &&
+    capabilities.contextWindow > 0
+      ? capabilities.contextWindow
+      : null;
+
+  if (maxInput !== null && contextWindow !== null) {
+    return Math.min(maxInput, contextWindow);
+  }
+  if (maxInput !== null) return maxInput;
+  if (contextWindow !== null) return contextWindow;
+
+  const sourced = getSourcedTokenLimit(provider || "unknown", parsed.model ?? null);
+  return typeof sourced === "number" && Number.isFinite(sourced) && sourced > 0 ? sourced : null;
+}
+
+/**
+ * Extract estimated/observed input token count from a context-overflow error
+ * message when present (OmniRoute, Claude, OpenAI, and Gemini formats),
+ * supporting optional comma separators.
+ */
+export function extractEstimatedInputTokensFromOverflowText(
+  errorText: string | null | undefined
+): number | null {
+  if (!errorText) return null;
+  const match =
+    errorText.match(/estimated\s+([\d,]+)\s+input\s+tokens/i) ||
+    errorText.match(/prompt\s+is\s+too\s+long:\s*([\d,]+)\s+tokens/i) ||
+    errorText.match(/your\s+messages\s+resulted\s+in\s+([\d,]+)\s+tokens/i) ||
+    errorText.match(/input\s+token\s+count\s*\(\s*([\d,]+)\s*\)\s+exceeds/i);
+  if (!match) return null;
+  const parsed = Number.parseInt(match[1].replace(/,/g, ""), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+/**
+ * Determine whether any remaining target in `orderedTargets.slice(index + 1)`
+ * could plausibly accept an input that just failed context-length validation on
+ * `failedTarget`.
+ *
+ * Fail-open contract (#8375 / #8786 / #10734):
+ * - Returns `true` (keep falling back) if ANY remaining target has an UNKNOWN
+ *   context limit (`null`).
+ * - Returns `true` if ANY remaining target has a strictly larger known limit
+ *   than the failed target's known limit (when `estimatedInputTokens` is absent),
+ *   OR has a known limit `>= estimatedInputTokens` (when `estimatedInputTokens`
+ *   is known) AND strictly larger than `failedLimit` (when known).
+ * - Returns `false` (safe to short-circuit) only when there are remaining
+ *   targets (or none) and EVERY remaining target has a known limit that is
+ *   `<= failedLimit` (or `< estimatedInputTokens` when available).
+ */
+export function hasRemainingTargetWithLargerContext(opts: {
+  orderedTargets: ContextLimitCandidate[];
+  index: number;
+  failedTarget?: ContextLimitCandidate | null;
+  estimatedInputTokens?: number | null;
+  resolveLimit?: (target: ContextLimitCandidate) => number | null;
+}): boolean {
+  const remaining = opts.orderedTargets.slice(opts.index + 1);
+  if (remaining.length === 0) return false;
+
+  const resolveLimit = opts.resolveLimit ?? resolveTargetKnownContextLimit;
+  const failedTarget = opts.failedTarget ?? opts.orderedTargets[opts.index] ?? null;
+  const failedLimit = failedTarget ? resolveLimit(failedTarget) : null;
+  const estimatedInput =
+    typeof opts.estimatedInputTokens === "number" &&
+    Number.isFinite(opts.estimatedInputTokens) &&
+    opts.estimatedInputTokens > 0
+      ? opts.estimatedInputTokens
+      : null;
+
+  // Without either a known failed target limit or an estimated input token count,
+  // we cannot prove remaining targets are too small — fail open.
+  if (failedLimit === null && estimatedInput === null) return true;
+
+  for (const candidate of remaining) {
+    const candidateLimit = resolveLimit(candidate);
+    // Unknown context limit → fail-open, preserve fallback.
+    if (candidateLimit === null) return true;
+
+    const exceedsFailedLimit = failedLimit !== null && candidateLimit > failedLimit;
+    const fitsEstimatedInput = estimatedInput !== null && candidateLimit >= estimatedInput;
+
+    if (estimatedInput !== null && failedLimit !== null) {
+      // Both the failed target's limit and the estimated input size are known:
+      // only keep falling back when a remaining target is strictly larger than
+      // the failed target AND large enough for the estimated input.
+      if (candidateLimit > failedLimit && candidateLimit >= estimatedInput) return true;
+    } else if (estimatedInput !== null) {
+      if (fitsEstimatedInput) return true;
+    } else if (exceedsFailedLimit) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 /**
  * Handle a pre-content streaming upstream error: nothing reached the client
  * yet, so re-dispatching the same target cannot duplicate output. Logs and
@@ -204,6 +343,9 @@ export function qualityValidationFailure(quality: ResponseQualityResult): {
 export function shouldAbortOnInputBoundFailure(opts: {
   structuredError: unknown;
   remainderIsHomogeneous: boolean;
+  errorText?: string | null;
+  status?: number;
+  hasRemainingLargerContextTarget?: boolean;
 }): boolean {
   const structured = opts.structuredError as
     { code?: string | null; type?: string | null } | undefined;
@@ -211,7 +353,16 @@ export function shouldAbortOnInputBoundFailure(opts: {
   // remaining — instead of routing around the provider's policy is opt-in via
   // CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED; off keeps the release routing.
   if (isContentPolicyRefusal(structured) && isContentPolicyRefusalComboStopEnabled()) return true;
-  return isInputBoundRequestFailure(structured) && opts.remainderIsHomogeneous;
+  if (opts.remainderIsHomogeneous) {
+    return opts.status === 400
+      ? isContextOverflowFailure(opts.errorText, structured)
+      : isInputBoundRequestFailure(structured);
+  }
+  return (
+    opts.status === 400 &&
+    opts.hasRemainingLargerContextTarget === false &&
+    isContextOverflowFailure(opts.errorText, structured)
+  );
 }
 
 /**
