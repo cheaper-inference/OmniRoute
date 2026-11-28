@@ -1,3 +1,8 @@
+import {
+  normalizeAntigravityCreditsOverride,
+  type CreditsMode,
+} from "@omniroute/open-sse/config/antigravityCreditsMode.ts";
+import { setAntigravityCreditsMode } from "@omniroute/open-sse/services/antigravityCredits.ts";
 import { clearHealthCheckLogCache } from "@/lib/tokenHealthCheck";
 import { setCustomBannedSignals } from "@omniroute/open-sse/services/accountFallback.ts";
 import { setOpencodeServerSettings } from "@omniroute/open-sse/services/opencodeServerSettings.ts";
@@ -26,6 +31,7 @@ export type RuntimeReloadSection =
   | "usageTracking"
   | "healthCheckLogs"
   | "thoughtSignature"
+  | "antigravityCredits"
   | "modelsDevSync"
   | "corsOrigins"
   | "ccBridgeTransforms"
@@ -53,6 +59,7 @@ interface RuntimeSettingsSnapshot {
   cliCompatProviders: string[];
   alwaysPreserveClientCache: string;
   antigravitySignatureCacheMode: string;
+  antigravityCreditsMode: CreditsMode | null;
   usageTokenBuffer: unknown;
   hideHealthCheckLogs: boolean;
   modelsDevSyncEnabled: boolean;
@@ -86,6 +93,7 @@ const DEFAULT_RUNTIME_SETTINGS_SNAPSHOT: RuntimeSettingsSnapshot = {
   cliCompatProviders: [],
   alwaysPreserveClientCache: "auto",
   antigravitySignatureCacheMode: "enabled",
+  antigravityCreditsMode: null,
   usageTokenBuffer: null,
   hideHealthCheckLogs: false,
   modelsDevSyncEnabled: false,
@@ -331,6 +339,7 @@ export function buildRuntimeSettingsSnapshot(
       typeof settings.antigravitySignatureCacheMode === "string"
         ? settings.antigravitySignatureCacheMode
         : DEFAULT_RUNTIME_SETTINGS_SNAPSHOT.antigravitySignatureCacheMode,
+    antigravityCreditsMode: normalizeAntigravityCreditsOverride(settings.antigravityCreditsMode),
     usageTokenBuffer: settings.usageTokenBuffer ?? null,
     hideHealthCheckLogs: settings.hideHealthCheckLogs === true,
     modelsDevSyncEnabled: settings.modelsDevSyncEnabled === true,
@@ -538,6 +547,20 @@ async function applyModelsDevSyncSection(
   }
 }
 
+function applyAntigravityCreditsSection(
+  settings: JsonRecord,
+  currentMode: CreditsMode | null,
+  previousMode: CreditsMode | null,
+  force: boolean,
+  markChanged: (section: RuntimeReloadSection) => void
+): void {
+  // Full DB snapshots provide null for inherited mode. A partial reload that
+  // omits the field must not clear an existing override.
+  if (settings.antigravityCreditsMode === undefined) return;
+  setAntigravityCreditsMode(currentMode);
+  if (force || currentMode !== previousMode) markChanged("antigravityCredits");
+}
+
 export async function applyRuntimeSettings(
   settings: Record<string, unknown>,
   options: { force?: boolean; source?: string } = {}
@@ -555,6 +578,14 @@ export async function applyRuntimeSettings(
 
   const hasChanged = <T>(currentValue: T, previousValue: T) =>
     stableSerialize(currentValue) !== stableSerialize(previousValue);
+
+  applyAntigravityCreditsSection(
+    settings,
+    currentSnapshot.antigravityCreditsMode,
+    previousSnapshot.antigravityCreditsMode,
+    force,
+    markChanged
+  );
 
   if (force || hasChanged(currentSnapshot.payloadRules, previousSnapshot.payloadRules)) {
     await applyPayloadRulesSection(currentSnapshot.payloadRules);
@@ -707,4 +738,5 @@ export async function applyRuntimeSettings(
 export function resetRuntimeSettingsStateForTests() {
   lastAppliedSnapshot = null;
   setCurrentAuthzBypass(DEFAULT_AUTHZ_BYPASS_SNAPSHOT);
+  setAntigravityCreditsMode(null);
 }

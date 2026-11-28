@@ -6,6 +6,7 @@
  * at runtime (see: https://github.com/vercel/next.js/issues/12557).
  */
 import { z } from "zod";
+import { ANTIGRAVITY_CREDITS_MODES } from "@omniroute/open-sse/config/antigravityCreditsMode.ts";
 import { oidcAdmissionClaimSchema } from "@/shared/utils/oidcAdmissionClaim";
 import { CONNECTION_TEST_PROMPT_MAX_LENGTH } from "@/shared/constants/connectionTest";
 import { COMBO_CONFIG_MODES } from "@/shared/constants/comboConfigMode";
@@ -586,6 +587,7 @@ export const updateSettingsSchema = z.object({
   // Gemini through Antigravity only; default off and no explicit cache resources.
   geminiPromptCacheMode: z.enum(["off", "implicit"]).optional(),
   antigravitySignatureCacheMode: z.enum(signatureCacheModeValues).optional(),
+  antigravityCreditsMode: z.enum(ANTIGRAVITY_CREDITS_MODES).optional(),
   // Adaptive Volume Routing
   adaptiveVolumeRouting: z.boolean().optional(),
   // Usage token buffer — safety margin added to reported prompt/input token counts.

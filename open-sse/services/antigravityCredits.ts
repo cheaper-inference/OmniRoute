@@ -9,7 +9,18 @@
  * Based on CLIProxyAPI's antigravity_executor.go line 268.
  */
 
+import {
+  normalizeAntigravityCreditsOverride,
+  normalizeAntigravityCreditsMode,
+  type CreditsMode,
+} from "../config/antigravityCreditsMode.ts";
 import { isCreditsDisabled, recordCreditsFailure } from "./antigravity429Engine.ts";
+
+export {
+  ANTIGRAVITY_CREDITS_MODES,
+  normalizeAntigravityCreditsMode,
+  type CreditsMode,
+} from "../config/antigravityCreditsMode.ts";
 
 /**
  * Inject enabledCreditTypes into the request body for a credits retry.
@@ -41,19 +52,32 @@ export function handleCreditsFailure(authKey: string): boolean {
   return recordCreditsFailure(authKey);
 }
 
+// The settings route and proxy executor may be emitted in different Next.js
+// server bundles. Keep the override shared across those bundles in this process.
+const store = globalThis as typeof globalThis & {
+  __omnirouteAntigravityCreditsMode?: CreditsMode;
+};
+
+export function resolveAntigravityCreditsMode(override: unknown): CreditsMode {
+  return (
+    normalizeAntigravityCreditsOverride(override) ??
+    normalizeAntigravityCreditsMode(process.env.ANTIGRAVITY_CREDITS)
+  );
+}
+
+export function setAntigravityCreditsMode(mode: CreditsMode | null | undefined): void {
+  store.__omnirouteAntigravityCreditsMode = mode ?? undefined;
+}
+
 /**
- * Read the ANTIGRAVITY_CREDITS env var to determine the credits injection strategy.
+ * Read the saved credits strategy, or ANTIGRAVITY_CREDITS when none is saved.
  *
  * - "off"    — never inject credits (default if env var is missing)
  * - "retry"  — inject credits only as a 429 fallback
  * - "always" — inject credits on every request (skip normal quota path)
  */
-export type CreditsMode = "off" | "retry" | "always";
-
 export function getCreditsMode(): CreditsMode {
-  const raw = (process.env.ANTIGRAVITY_CREDITS || "").trim().toLowerCase();
-  if (raw === "always" || raw === "retry") return raw;
-  return "off";
+  return resolveAntigravityCreditsMode(store.__omnirouteAntigravityCreditsMode);
 }
 
 /**
