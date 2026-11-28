@@ -6,6 +6,7 @@ import { Card, Button, Input, Toggle, Modal } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { corsOriginsSchema } from "@/shared/validation/corsOrigins";
 import IPFilterSection from "./IPFilterSection";
 import PiiMaskingCard from "./PiiMaskingCard";
 import SessionInfoCard from "./SessionInfoCard";
@@ -182,6 +183,7 @@ export default function SecurityTab() {
   };
 
   const blockedProviders: string[] = settings.blockedProviders || [];
+  const corsOrigins = typeof settings.corsOrigins === "string" ? settings.corsOrigins : "";
 
   return (
     <div className="flex flex-col gap-6">
@@ -306,14 +308,14 @@ export default function SecurityTab() {
       {/* API Endpoint Protection */}
       <Card title={t("apiEndpointProtection")} icon="api">
         <div className="flex flex-col gap-4">
-          <div className="rounded-lg border border-border bg-bg-subtle p-3 text-sm text-text-muted">
+          <Card.Section className="text-sm text-text-muted">
             <p className="font-medium text-text-main">{t("authModelHeading")}</p>
             <ul className="list-disc pl-5 mt-1 space-y-1">
               <li>{t("authModelClient")}</li>
               <li>{t("authModelManagement")}</li>
               <li>{t("authModelPublic")}</li>
             </ul>
-          </div>
+          </Card.Section>
 
           <div className="flex items-center justify-between">
             <div>
@@ -339,11 +341,18 @@ export default function SecurityTab() {
               label={t("corsAllowedOrigins")}
               hint={t("corsAllowedOriginsDesc")}
               placeholder="https://app.example.com, https://admin.example.com"
-              value={typeof settings.corsOrigins === "string" ? settings.corsOrigins : ""}
+              value={corsOrigins}
+              error={
+                corsOriginsSchema.safeParse(corsOrigins).success
+                  ? undefined
+                  : t("corsAllowedOriginsInvalid")
+              }
               onChange={(e) => setSettings((prev) => ({ ...prev, corsOrigins: e.target.value }))}
               onBlur={(e) => {
-                const next = e.target.value.trim();
-                if (next !== savedCorsOrigins) updateSecuritySetting("corsOrigins", next);
+                const next = corsOriginsSchema.safeParse(e.currentTarget.value);
+                if (next.success && next.data !== savedCorsOrigins) {
+                  updateSecuritySetting("corsOrigins", next.data);
+                }
               }}
             />
           </div>

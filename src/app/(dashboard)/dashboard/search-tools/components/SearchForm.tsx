@@ -5,11 +5,12 @@ import { useId, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
+import { ScopeChip } from "@omniroute/ui-kit/scope-chip";
 // Button/Select stay on the barrel (the search-tab test mocks it); the newly used adapters are
 // imported from their own modules.
 import { Button, Select } from "@/shared/components";
-import Badge from "@/shared/components/Badge";
 import Input from "@/shared/components/Input";
+import NumberInput from "@/shared/components/NumberInput";
 import Textarea from "@/shared/components/Textarea";
 import type { SearchProviderCatalogItem } from "@/shared/schemas/searchTools";
 
@@ -148,7 +149,7 @@ export default function SearchForm({
             />
             {/* Catalog metadata badge (F8 — provider cost/quota/status) */}
             {catalogInfo && (
-              <div className="mt-1 flex flex-wrap gap-x-2 text-[10px] text-text-muted">
+              <div className="mt-1 flex flex-wrap gap-x-2 text-3xs text-text-muted">
                 <span>
                   <span className="font-medium text-text-main">
                     ${catalogInfo.costPerQuery.toFixed(4)}
@@ -204,11 +205,11 @@ export default function SearchForm({
           </div>
         </div>
         <div className="w-20">
-          <Input
+          <NumberInput
             label={t("maxResults")}
-            type="number"
+            precision={0}
             value={maxResults}
-            onChange={(e) => setMaxResults(parseInt(e.target.value) || 5)}
+            onValueChange={(count) => setMaxResults(count || 5)}
             min={1}
             max={100}
           />
@@ -219,7 +220,7 @@ export default function SearchForm({
       <div className="p-4 border-b border-border">
         <Disclosure open={showFilters} onOpenChange={setShowFilters}>
           <DisclosureTrigger>
-            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+            <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
               {t("filters")}
             </span>
           </DisclosureTrigger>
@@ -278,17 +279,14 @@ export default function SearchForm({
               {includeDomains.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1">
                   {includeDomains.map((d) => (
-                    <Badge key={d} size="sm" variant="primary">
+                    <ScopeChip
+                      key={d}
+                      tone="success"
+                      removeLabel={`${tc("delete")}: ${d}`}
+                      onRemove={() => removeDomain(d, "include")}
+                    >
                       {d}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        icon="close"
-                        className="size-4 min-h-4 p-0"
-                        aria-label={`${tc("delete")}: ${d}`}
-                        onClick={() => removeDomain(d, "include")}
-                      />
-                    </Badge>
+                    </ScopeChip>
                   ))}
                 </div>
               )}
@@ -315,17 +313,14 @@ export default function SearchForm({
               {excludeDomains.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1">
                   {excludeDomains.map((d) => (
-                    <Badge key={d} size="sm" variant="error">
+                    <ScopeChip
+                      key={d}
+                      tone="danger"
+                      removeLabel={`${tc("delete")}: ${d}`}
+                      onRemove={() => removeDomain(d, "exclude")}
+                    >
                       {d}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        icon="close"
-                        className="size-4 min-h-4 p-0"
-                        aria-label={`${tc("delete")}: ${d}`}
-                        onClick={() => removeDomain(d, "exclude")}
-                      />
-                    </Badge>
+                    </ScopeChip>
                   ))}
                 </div>
               )}

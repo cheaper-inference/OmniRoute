@@ -8,6 +8,7 @@ import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { isCommonChatGptWebRetirementError } from "@/shared/constants/chatgptWebRetirement";
 import { getModelInfo } from "@/sse/services/model";
+import { wouldRefuseAgent } from "@/lib/guardrails/agentGuard/enforcement";
 import { getProviderCredentials } from "@/sse/services/auth";
 import { resolveApiKeyUpstreamScope } from "@/shared/utils/apiKeyUpstreamScope";
 import { isCredentialDiagnosticSentinel } from "@/sse/services/credentialSentinel";
@@ -57,7 +58,12 @@ export async function POST(request) {
 
   try {
     const modelInfo = await getModelInfo(requestedModel);
-    if (!modelInfo?.provider || !modelInfo?.model) {
+    // A client the agent guard would refuse on this provider gets the local estimate.
+    if (
+      !modelInfo?.provider ||
+      !modelInfo?.model ||
+      wouldRefuseAgent({ headers: request.headers, provider: modelInfo.provider, log })
+    ) {
       return estimated;
     }
 

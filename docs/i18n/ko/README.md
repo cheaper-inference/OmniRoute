@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="약속 — 하나의 엔드포인트와 394개의 제공자. 다른 정상 대상이 사용 가능한 동안 자동 폴백이 라우팅을 유지합니다. 6가지 핵심 요소: 394개 제공자에 걸친 복원력 있는 폴백 · 적격 워크로드에서 최대 95% 토큰 절감 · 150개 이상의 무료 티어와 51개의 반복 제공/키리스 영구 무료 제공자로 $0부터 시작 · 하나의 구성으로 39개의 CLI/에이전트 통합 · /v1에서 OpenAI, Claude, Gemini 및 Responses API 호환 · 회로 차단기, TLS 스텔스, MCP 110개 도구, A2A, 메모리, 가드레일, 평가 및 7,800개 이상의 추적 테스트 파일에 걸친 56,000개 이상의 정적 테스트 선언을 포함한 프로덕션 제어 기능."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="약속 — 하나의 엔드포인트와 394개의 제공자. 다른 정상 대상이 사용 가능한 동안 자동 폴백이 라우팅을 유지합니다. 6가지 핵심 요소: 394개 제공자에 걸친 복원력 있는 폴백 · 적격 워크로드에서 최대 95% 토큰 절감 · 150개 이상의 무료 티어와 40개의 반복 제공/키리스 영구 무료 제공자로 $0부터 시작 · 하나의 구성으로 39개의 CLI/에이전트 통합 · /v1에서 OpenAI, Claude, Gemini 및 Responses API 호환 · 회로 차단기, TLS 스텔스, MCP 110개 도구, A2A, 메모리, 가드레일, 평가 및 7,800개 이상의 추적 테스트 파일에 걸친 56,000개 이상의 정적 테스트 선언을 포함한 프로덕션 제어 기능."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ omniroute configure codex          # 또한: claude opencode qwen aider goose ge
 
 </div>
 
-> **등록된 프로바이더 394개**가 표준 채팅, 미디어, 검색, 로컬, 클라우드 에이전트 및 시스템 컬렉션 전반에 걸쳐 제공되며, 이 중 **153개는 `hasFree: true` 검색 메타데이터를 포함**합니다. 채팅 모델 레지스트리에는 **프로바이더 239개 / 서로 다른 프로바이더-모델 쌍 3,059개 / 원시 모델 ID 1,475개**가 포함되어 있으며, 별도의 무료 예산 카탈로그에는 **모델별 행 465개**, **반복 풀 34개**, **반복 사용 가능하거나 키가 필요 없는 영구 무료 프로바이더 51개**가 있습니다. 이는 설계상 서로 다른 분모입니다. 정의와 풀 중복 제거 계산은 [프로바이더 참조](docs/reference/PROVIDER_REFERENCE.md) 및 [무료 티어](docs/reference/FREE_TIERS.md)에 정리되어 있습니다.
+> **등록된 프로바이더 394개**가 표준 채팅, 미디어, 검색, 로컬, 클라우드 에이전트 및 시스템 컬렉션 전반에 걸쳐 제공되며, 이 중 **153개는 `hasFree: true` 검색 메타데이터를 포함**합니다. 채팅 모델 레지스트리에는 **프로바이더 239개 / 서로 다른 프로바이더-모델 쌍 3,059개 / 원시 모델 ID 1,475개**가 포함되어 있으며, 별도의 무료 예산 카탈로그에는 **모델별 행 465개**, **반복 풀 34개**, **반복 사용 가능하거나 키가 필요 없는 영구 무료 프로바이더 40개**가 있습니다. 이는 설계상 서로 다른 분모입니다. 정의와 풀 중복 제거 계산은 [프로바이더 참조](docs/reference/PROVIDER_REFERENCE.md) 및 [무료 티어](docs/reference/FREE_TIERS.md)에 정리되어 있습니다.
 
 <div align="center">
 
@@ -1321,7 +1321,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
   <tr><td nowrap><b>런타임</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>언어</b></td><td>TypeScript 6.0 — <code>src/</code> 및 <code>open-sse/</code> 전반에서 <b>100% TypeScript</b> (<code>any</code>는 v2.0 이후 코어에서 0개)</td></tr>
   <tr><td nowrap><b>프레임워크</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>데이터베이스</b></td><td>better-sqlite3 (SQLite, WAL 저널링) + LowDB (JSON 레거시) — 147개 도메인 모듈, 244개 마이그레이션</td></tr>
+  <tr><td nowrap><b>데이터베이스</b></td><td>better-sqlite3 (SQLite, WAL 저널링) + LowDB (JSON 레거시) — 147개 도메인 모듈, 252개 마이그레이션</td></tr>
   <tr><td nowrap><b>메모리</b></td><td>SQLite FTS5 전문 검색 + int8 양자화 벡터 임베딩, 타입 지정 감쇠</td></tr>
   <tr><td nowrap><b>스키마</b></td><td>Zod 4 — MCP 도구 I/O 검증 + API 계약</td></tr>
   <tr><td nowrap><b>프로토콜</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

@@ -297,7 +297,7 @@ test("promote_latest recheck: a failed tag listing fails closed before login", (
   assert.equal(docker.dockerCalls().length, 0, "no login and no copy");
 });
 
-test("workflow: one shared mirror concurrency group, and the description follows the recheck", () => {
+test("workflow: one shared mirror concurrency group, and no Docker Hub description step", () => {
   const wf = YAML.parse(
     readFileSync(join(root, ".github/workflows/docker-org-mirror.yml"), "utf8")
   );
@@ -306,7 +306,117 @@ test("workflow: one shared mirror concurrency group, and the description follows
   assert.deepEqual(job.concurrency, { group: "docker-org-mirror", "cancel-in-progress": false });
   const copy = job.steps.find((s) => s.run === "node scripts/ci/docker-org-mirror.mjs");
   assert.equal(copy.id, "mirror");
-  const description = job.steps.find((s) => String(s.uses).startsWith("peter-evans/"));
-  assert.match(description.if, /steps\.mirror\.outputs\.promoted == 'true'/);
-  assert.doesNotMatch(description.if, /inputs\.promote_latest/);
+  // The description step (peter-evans/dockerhub-description) answered "Forbidden" on every
+  // release: it calls the legacy /v2/repositories endpoint, which rejects every Organization
+  // Access Token, and continue-on-error hid it. The org repository overview is set by hand.
+  assert.ok(!job.steps.some((s) => String(s.uses ?? "").startsWith("peter-evans/")));
+});
+
+// Legacy GHCR package (ghcr.io/diegosouzapw/omniroute): it stopped at 2026-10-21 when the
+// repository moved, so installs pinned to it got no updates. Releases are copied there too until
+// 2027-06-30 (owner decision, 2026-11-21), with a "moved" description on the index.
+const legacyEnv = {
+  VERSION: "3.8.55",
+  TARGET_IMAGE: "ghcr.io/diegosouzapw/omniroute",
+  MIRROR_USERNAME: "diegosouzapw",
+  MIRROR_TOKEN: "ghp_fake",
+  MIRROR_LABEL: "Legacy GHCR mirror",
+  MIRROR_SECRET_HINT: "the GHCR_LEGACY_TOKEN secret is",
+  MIRROR_UNTIL: "2999-12-31",
+  INDEX_DESCRIPTION: "Moved to ghcr.io/cheaper-inference/omniroute",
+};
+
+test("legacy GHCR: logs in to ghcr.io with the generic credential and annotates every copy", () => {
+  const docker = fakeDocker(() => false, ["v3.8.54", "v3.8.55"]);
+  const result = mirrorToOrg(legacyEnv, { run: docker.run, log: quiet });
+  assert.equal(result.exitCode, 0);
+  assert.equal(result.status, "mirrored");
+  const [login] = docker.dockerCalls();
+  assert.deepEqual(login.args, [
+    "login",
+    "ghcr.io",
+    "--username",
+    "diegosouzapw",
+    "--password-stdin",
+  ]);
+  assert.equal(login.input, "ghp_fake");
+  const creates = docker.dockerCalls().filter((c) => c.args[2] === "create");
+  assert.ok(creates.length >= 2);
+  for (const c of creates) {
+    const i = c.args.indexOf("--annotation");
+    assert.ok(i > 0, `annotated: ${c.args.join(" ")}`);
+    assert.equal(
+      c.args[i + 1],
+      "index:org.opencontainers.image.description=Moved to ghcr.io/cheaper-inference/omniroute"
+    );
+    assert.match(c.args[c.args.indexOf("-t") + 1], /^ghcr\.io\/diegosouzapw\/omniroute:/);
+  }
+});
+
+test("legacy GHCR: no token skips with the legacy label and secret hint", () => {
+  const docker = fakeDocker();
+  const lines = [];
+  const env = { ...legacyEnv, MIRROR_TOKEN: "" };
+  const result = mirrorToOrg(env, { run: docker.run, log: (l) => lines.push(l) });
+  assert.equal(result.exitCode, 0);
+  assert.equal(result.status, "skipped");
+  assert.equal(docker.calls.length, 0);
+  assert.match(
+    lines.join("\n"),
+    /^::warning title=Legacy GHCR mirror skipped::.*GHCR_LEGACY_TOKEN/m
+  );
+});
+
+test("legacy GHCR: after MIRROR_UNTIL the copy stops with a notice; a bad date fails", () => {
+  const past = fakeDocker();
+  const lines = [];
+  const stopped = mirrorToOrg(
+    { ...legacyEnv, MIRROR_UNTIL: "2000-01-01" },
+    { run: past.run, log: (l) => lines.push(l) }
+  );
+  assert.equal(stopped.exitCode, 0);
+  assert.equal(stopped.status, "skipped");
+  assert.equal(past.calls.length, 0);
+  assert.match(lines.join("\n"), /^::notice title=Legacy GHCR mirror::.*2000-01-01/m);
+
+  const bad = fakeDocker();
+  const failed = mirrorToOrg(
+    { ...legacyEnv, MIRROR_UNTIL: "June 2027" },
+    { run: bad.run, log: quiet }
+  );
+  assert.equal(failed.exitCode, 1);
+  assert.equal(bad.calls.length, 0);
+});
+
+test("Docker Hub targets log in without a registry argument and copy without annotations", () => {
+  const docker = fakeDocker();
+  mirrorToOrg({ VERSION: "3.8.54", ...creds }, { run: docker.run, log: quiet });
+  const [login] = docker.dockerCalls();
+  assert.equal(login.args[1], "--username");
+  for (const c of docker.dockerCalls().filter((x) => x.args[2] === "create")) {
+    assert.ok(!c.args.includes("--annotation"));
+  }
+});
+
+test("workflow wiring: legacy GHCR job with an optional token, deadline and moved description", () => {
+  const wf = YAML.parse(
+    readFileSync(join(root, ".github/workflows/docker-org-mirror.yml"), "utf8")
+  );
+  assert.deepEqual(wf.on.workflow_call.secrets.GHCR_LEGACY_TOKEN, { required: false });
+  const job = wf.jobs["mirror-legacy-ghcr"];
+  assert.ok(job, "mirror-legacy-ghcr job exists");
+  assert.equal(job.concurrency.group, "docker-legacy-ghcr-mirror");
+  const copy = job.steps.find((s) => s.run === "node scripts/ci/docker-org-mirror.mjs");
+  assert.equal(copy.env.TARGET_IMAGE, "ghcr.io/diegosouzapw/omniroute");
+  assert.equal(copy.env.MIRROR_USERNAME, "diegosouzapw");
+  assert.equal(copy.env.MIRROR_TOKEN, "${{ secrets.GHCR_LEGACY_TOKEN }}");
+  assert.equal(copy.env.MIRROR_UNTIL, "2027-06-30");
+  assert.match(copy.env.INDEX_DESCRIPTION, /ghcr\.io\/cheaper-inference\/omniroute/);
+
+  const publish = readFileSync(join(root, ".github/workflows/docker-publish.yml"), "utf8");
+  const block = publish.slice(publish.indexOf("  mirror-org-dockerhub:"));
+  assert.match(
+    block.slice(0, block.indexOf("\n\n")),
+    /GHCR_LEGACY_TOKEN: \$\{\{ secrets\.GHCR_LEGACY_TOKEN \}\}/
+  );
 });

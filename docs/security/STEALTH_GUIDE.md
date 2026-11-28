@@ -7,7 +7,6 @@ lastUpdated: 2026-09-02
 # Stealth Guide
 
 > **Source of truth:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Last updated:** 2026-09-02 — v3.8.51
 > **Audience:** Engineers maintaining provider-specific stealth integrations.
 
 OmniRoute integrates with providers whose edges actively fingerprint non-official clients (TLS JA3/JA4, header ordering, JSON body shape, integrity tokens). This page documents the stealth surfaces OmniRoute exposes and where they are implemented.
@@ -217,7 +216,7 @@ Touch points:
 
 - `open-sse/executors/antigravity.ts` — reads `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — credential plumbing
-- Original incident report: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Original incident report: Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

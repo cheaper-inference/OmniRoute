@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   parseProviderImportFile,
   type ParsedProviderImportEntry,
@@ -17,7 +17,6 @@ export type { ImportResult };
  * State + handlers for ImportProvidersFromFileModal (#6836/#12071).
  */
 export function useImportProvidersFromFile(onImported: () => Promise<void>) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState("");
   const [entries, setEntries] = useState<ParsedProviderImportEntry[]>([]);
   const [errors, setErrors] = useState<ProviderImportParseError[]>([]);
@@ -60,7 +59,6 @@ export function useImportProvidersFromFile(onImported: () => Promise<void>) {
     if (importing) return;
     setFileName("");
     resetParsed();
-    if (fileInputRef.current) fileInputRef.current.value = "";
     onClose();
   };
 
@@ -70,7 +68,8 @@ export function useImportProvidersFromFile(onImported: () => Promise<void>) {
     setImporting(true);
     try {
       const res = await fetch("/api/providers/import", {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entries: toImport }),
       });
       const parsed = await readImportResponse(res);
@@ -79,7 +78,9 @@ export function useImportProvidersFromFile(onImported: () => Promise<void>) {
       if (outcome.shouldRefresh) {
         try {
           await onImported();
-        } catch { /* refresh failure must not replace the import result */ }
+        } catch {
+          /* refresh failure must not replace the import result */
+        }
       }
     } catch (err) {
       setResult(networkImportFailure(err));
@@ -89,7 +90,6 @@ export function useImportProvidersFromFile(onImported: () => Promise<void>) {
   };
 
   return {
-    fileInputRef,
     fileName,
     entries,
     errors,

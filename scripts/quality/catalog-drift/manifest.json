@@ -1,0 +1,385 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-26",
+  "allowedHosts": [
+    "api.airforce",
+    "api.routeway.ai",
+    "api.sambanova.ai",
+    "api.xkiro.com",
+    "backend.poixe.com",
+    "bazaarlink.ai",
+    "console.groq.com",
+    "developers.cloudflare.com",
+    "docs.mistral.ai",
+    "docs.routeway.ai",
+    "kenari.id",
+    "logfare.ai",
+    "onomeo.com",
+    "openrouter.ai",
+    "router.bynara.id",
+    "simplellm.eu",
+    "xkiro.com"
+  ],
+  "pendingCatalogFix": [
+    {
+      "probeId": "nara-plans",
+      "reason": "The active free plan advertises agnes-2.5-flash and 7M tokens per day. The catalog has no active Nara rows.",
+      "sourceUrl": "https://router.bynara.id/api/plans"
+    },
+    {
+      "probeId": "xkiro-models",
+      "reason": "Eight catalog models are no longer listed among the free models. Only the SenseNova model in the catalog still matches.",
+      "sourceUrl": "https://api.xkiro.com/v1/models"
+    }
+  ],
+  "probes": [
+    {
+      "id": "mistral-usage-limits",
+      "provider": "mistral",
+      "type": "page-text",
+      "url": "https://docs.mistral.ai/admin/billing-usage/usage-limits",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["doesn't include API access"],
+      "mustNotContain": ["Free mode lets you create API keys"],
+      "backs": [
+        {
+          "provider": "mistral",
+          "poolKey": "mistral",
+          "monthlyTokens": 0
+        }
+      ],
+      "note": "The usage limits page still excludes API access from Free mode, supporting the catalog's zero allowance."
+    },
+    {
+      "id": "nara-plans",
+      "provider": "nara",
+      "type": "json-assert",
+      "url": "https://router.bynara.id/api/plans",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "assertions": [
+        {
+          "path": "data[code=free].models",
+          "op": "lengthEquals",
+          "value": 0
+        },
+        {
+          "path": "data[code=free].models",
+          "op": "includesCatalogIds"
+        }
+      ],
+      "backs": [
+        {
+          "provider": "nara",
+          "poolKey": "nara-free",
+          "monthlyTokens": 0
+        }
+      ],
+      "note": "The public API lists one model and a 7M-token daily cap on the active free plan. Keep the zero-model assertion until the catalog is reconciled."
+    },
+    {
+      "id": "xkiro-models",
+      "provider": "xkiro",
+      "type": "model-list",
+      "url": "https://api.xkiro.com/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 10,
+      "filter": {
+        "field": "access_tier",
+        "equals": "free"
+      },
+      "note": "The API lists 18 free IDs. Eight catalog IDs are missing, and only one catalog ID is still listed as free."
+    },
+    {
+      "id": "xkiro-home",
+      "provider": "xkiro",
+      "type": "page-text",
+      "url": "https://xkiro.com/",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["500K free-model tokens a day"],
+      "backs": [
+        {
+          "provider": "xkiro",
+          "poolKey": "xkiro-free",
+          "monthlyTokens": 15000000
+        }
+      ],
+      "note": "The base quota remains 500K tokens/day, or 15M over 30 days. The verification bonus is tracked separately in the catalog."
+    },
+    {
+      "id": "groq-rate-limits",
+      "provider": "groq",
+      "type": "page-text",
+      "url": "https://console.groq.com/docs/rate-limits.md",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["| MODEL ID | RPM | RPD | TPM | TPD |", "200K"],
+      "mustContainCatalogIds": true,
+      "backs": [
+        {
+          "provider": "groq",
+          "poolKey": null,
+          "monthlyTokens": 6000000
+        }
+      ],
+      "note": "The public rate limit table contains the active catalog IDs and the 200K daily token figure used for the monthly estimate."
+    },
+    {
+      "id": "cloudflare-pricing",
+      "provider": "cloudflare-ai",
+      "type": "page-text",
+      "url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": [
+        "a total of 10,000 Neurons per day",
+        "5500 neurons per M input tokens 36400 neurons per M output tokens"
+      ],
+      "backs": [
+        {
+          "provider": "cloudflare-ai",
+          "poolKey": "cloudflare-ai",
+          "monthlyTokens": 22700000
+        }
+      ],
+      "note": "The daily 10,000 Neurons and GLM 4.7 Flash rates still support the rounded 22.7M-token estimate at a 3:1 input/output mix over 30 days. The probe now also checks the conversion rates."
+    },
+    {
+      "id": "openrouter-models",
+      "provider": "openrouter",
+      "type": "model-list",
+      "url": "https://openrouter.ai/api/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 5,
+      "filter": {
+        "idEndsWith": ":free"
+      },
+      "note": "The public list still includes the active Gemma 4 31B free ID. Additional free IDs are reported for review."
+    },
+    {
+      "id": "openrouter-limits",
+      "provider": "openrouter",
+      "type": "page-text",
+      "url": "https://openrouter.ai/docs/api-reference/limits.md",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["| less than 10 | 20 | 50 |"],
+      "backs": [
+        {
+          "provider": "openrouter",
+          "poolKey": "openrouter-free",
+          "monthlyTokens": 1200000
+        }
+      ],
+      "note": "The account tier below the $10 threshold still has 50 requests/day, supporting the 1.2M-token estimate at 800 tokens per request over 30 days."
+    },
+    {
+      "id": "arcee-models",
+      "provider": "arcee-ai",
+      "type": "model-list",
+      "url": "https://openrouter.ai/api/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 5,
+      "note": "The shared OpenRouter model endpoint lists paid and free IDs. Its additions alone do not establish Arcee free access."
+    },
+    {
+      "id": "routeway-models",
+      "provider": "routeway",
+      "type": "model-list",
+      "url": "https://api.routeway.ai/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 3,
+      "filter": {
+        "idEndsWith": ":free"
+      },
+      "note": "The public list returns free-suffixed IDs, which are reported for catalog review."
+    },
+    {
+      "id": "routeway-limits",
+      "provider": "routeway",
+      "type": "page-text",
+      "url": "https://docs.routeway.ai/getting-started/rate-limits.md",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["200 Requests Per Day"],
+      "note": "The public rate limits page still includes the 200-request daily limit."
+    },
+    {
+      "id": "bazaarlink-free",
+      "provider": "bazaarlink",
+      "type": "page-text",
+      "url": "https://bazaarlink.ai/free",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["60 weighted units/day"],
+      "backs": [
+        {
+          "provider": "bazaarlink",
+          "poolKey": "bazaarlink",
+          "monthlyTokens": 1440000
+        }
+      ],
+      "note": "Accounts without credit still receive 60 weighted units/day. The 1.44M-token estimate assumes one unit per request and 800 tokens per request over 30 days."
+    },
+    {
+      "id": "bazaarlink-models",
+      "provider": "bazaarlink",
+      "type": "model-list",
+      "url": "https://bazaarlink.ai/api/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 1,
+      "filter": {
+        "zeroPricing": ["pricing.prompt", "pricing.completion"]
+      },
+      "note": "The catalog ID still has zero prompt and completion pricing in the public list. Additional zero-price IDs are reported for review."
+    },
+    {
+      "id": "sambanova-models",
+      "provider": "sambanova",
+      "type": "model-list",
+      "url": "https://api.sambanova.ai/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 1,
+      "backs": [
+        {
+          "provider": "sambanova",
+          "poolKey": "sambanova",
+          "monthlyTokens": 480000
+        }
+      ],
+      "note": "The endpoint still lists both catalog IDs and publishes list prices. The 480K-token estimate comes from the audited free-tier limit of 20 requests/day. The model list cannot verify account-level eligibility."
+    },
+    {
+      "id": "api-airforce-home",
+      "provider": "api-airforce",
+      "type": "page-text",
+      "url": "https://api.airforce/",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["1 000 requests per day"],
+      "backs": [
+        {
+          "provider": "api-airforce",
+          "poolKey": "api-airforce",
+          "monthlyTokens": 24000000
+        }
+      ],
+      "note": "The free plan still advertises 1,000 requests/day, supporting the 24M-token estimate at 800 tokens per request over 30 days."
+    },
+    {
+      "id": "onomeo-info",
+      "provider": "onomeo",
+      "type": "json-assert",
+      "url": "https://onomeo.com/api/info",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "assertions": [
+        {
+          "path": "rate.perAccountWindowMax",
+          "op": "equals",
+          "value": 30
+        },
+        {
+          "path": "rate.windowMinutes",
+          "op": "equals",
+          "value": 300
+        },
+        {
+          "path": "freeModels",
+          "op": "includesCatalogIds"
+        }
+      ],
+      "note": "The API still reports 30 requests per 300 minutes and includes both active catalog IDs."
+    },
+    {
+      "id": "kenari-pricing",
+      "provider": "kenari",
+      "type": "json-assert",
+      "url": "https://kenari.id/api/public/pricing",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "assertions": [
+        {
+          "path": "free_tier.daily",
+          "op": "equals",
+          "value": 50
+        },
+        {
+          "path": "free_tier.rpm",
+          "op": "equals",
+          "value": 5
+        }
+      ],
+      "note": "The public free-tier pricing response still reports 50 requests/day and 5 requests/minute."
+    },
+    {
+      "id": "poixe-free-summaries",
+      "provider": "poixe",
+      "type": "json-assert",
+      "url": "https://backend.poixe.com/api/tool/free_model_summaries",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "assertions": [
+        {
+          "path": "large_cup.free.rpd",
+          "op": "equals",
+          "value": 5
+        },
+        {
+          "path": "small_cup.free.rpd",
+          "op": "equals",
+          "value": 50
+        }
+      ],
+      "note": "The public summary still reports daily limits of 5 for the large cup and 50 for the small cup."
+    },
+    {
+      "id": "logfare-models",
+      "provider": "logfare",
+      "type": "model-list",
+      "url": "https://logfare.ai/v1/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "minIds": 3,
+      "filter": {
+        "field": "access_tier",
+        "equals": "standard"
+      },
+      "note": "The API still returns standard-tier IDs. The probe reports those IDs for catalog review."
+    },
+    {
+      "id": "logfare-docs",
+      "provider": "logfare",
+      "type": "page-text",
+      "url": "https://logfare.ai/docs",
+      "addedAt": "2026-11-25",
+      "source": "public-docs",
+      "mustContain": ["5,000 requests per day"],
+      "note": "The public docs still include the 5,000-request daily limit."
+    },
+    {
+      "id": "simplellm-models",
+      "provider": "simplellm",
+      "type": "json-assert",
+      "url": "https://simplellm.eu/api/models",
+      "addedAt": "2026-11-25",
+      "source": "public-api",
+      "assertions": [
+        {
+          "path": "[is_free=true].id",
+          "op": "lengthAtLeast",
+          "value": 1
+        }
+      ],
+      "note": "The public API still marks at least one model as free."
+    }
+  ]
+}

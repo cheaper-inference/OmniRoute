@@ -23,13 +23,13 @@ export default function ConnectionIdChip({ connectionId }: { connectionId?: stri
   return (
     <Button
       variant="ghost"
-      size="sm"
+      size="2xs"
+      tone="muted"
       icon={isCopied ? "check" : "content_copy"}
       data-testid="connection-id-chip"
       onClick={() => void copy(connectionId, connectionId)}
       title={title}
       aria-label={title}
-      className="h-auto min-h-0 gap-0.5 rounded px-1 font-mono text-[11px] text-text-muted"
     >
       {isCopied ? t("connectionIdCopied") : `${connectionId.slice(0, 8)}…`}
     </Button>

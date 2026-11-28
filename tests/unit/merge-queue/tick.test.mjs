@@ -1,7 +1,7 @@
 // One idempotent tick of omni-queue (scripts/merge-queue/tick.mjs) against in-memory fakes of
 // GitHub and of the WP1/WP2/WP4 modules; the real state store and bisection run underneath.
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -2486,6 +2486,90 @@ test("live merge-ff: the candidate gets the land status from the App before the 
   assert.equal(state.paused, null);
 });
 
+function simulateLandingRejections(h, ...details) {
+  const landMergeFf = h.modules.land.landMergeFf;
+  h.modules.land.landMergeFf = (input) => {
+    if (!details.length) return landMergeFf(input);
+    h.calls.push({ name: "landMergeFf", args: [input] });
+    return { ok: false, reason: "rejected", merged: [], detail: details.shift() };
+  };
+  h.deps.sleep = async (ms) => {
+    h.calls.push({ name: "sleep", args: [ms] });
+  };
+}
+
+const requiredStatusRejection = (context) =>
+  `remote: GH013: Repository rule violations found for refs/heads/${BASE}. | ` +
+  `remote: - Required status check "${context}" is expected.`;
+
+test("live merge-ff: retries once after the ruleset has not seen the configured land status", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  h.config.landing.statusContext = "omni-queue/custom-land";
+  const f = await greenBatch(h, [1]);
+  simulateLandingRejections(h, requiredStatusRejection("omni-queue/custom-land"));
+
+  const result = await h.tick();
+
+  const state = await h.state();
+  assert.deepEqual(types(state), ["batch-started", "checks-green", "land-blessed", "landed"]);
+  assert.equal(state.paused, null);
+  assert.equal(h.gh.branches.get(BASE), f.candidateSha);
+  assert.ok(result.decisions.some((d) => /status .* not yet visible.*retrying/.test(d)));
+  const calls = h.calls.filter((c) =>
+    ["createCommitStatus", "landMergeFf", "sleep"].includes(c.name)
+  );
+  assert.deepEqual(
+    calls.map((c) => c.name),
+    ["createCommitStatus", "landMergeFf", "sleep", "landMergeFf"]
+  );
+  assert.equal(calls[0].args[1].state, "success");
+  assert.equal(calls[0].args[1].context, "omni-queue/custom-land");
+  assert.deepEqual(calls[2].args, [5000]);
+  assert.deepEqual(calls[3].args, calls[1].args);
+});
+
+test("live merge-ff: pauses when the ruleset still expects the land status after the retry", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  const detail = requiredStatusRejection("omni-queue/land");
+  simulateLandingRejections(h, detail, detail);
+
+  await h.tick();
+
+  const state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.ok(state.paused.detail.includes(detail));
+  assert.equal(h.gh.branches.get(BASE), f.baseSha);
+  const calls = h.calls.filter((c) =>
+    ["createCommitStatus", "landMergeFf", "sleep"].includes(c.name)
+  );
+  assert.deepEqual(
+    calls.map((c) => c.name),
+    ["createCommitStatus", "landMergeFf", "sleep", "landMergeFf", "createCommitStatus"]
+  );
+  assert.equal(calls[4].args[1].state, "failure");
+});
+
+test("live merge-ff: pauses without a retry when GH013 names another required status", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  const detail = requiredStatusRejection("omni-queue/land-other");
+  simulateLandingRejections(h, detail);
+
+  await h.tick();
+
+  const state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.ok(state.paused.detail.includes(detail));
+  assert.equal(h.gh.branches.get(BASE), f.baseSha);
+  assert.equal(h.calls.filter((c) => c.name === "landMergeFf").length, 1);
+  assert.equal(h.calls.filter((c) => c.name === "sleep").length, 0);
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args[1].state),
+    ["success", "failure"]
+  );
+});
+
 test("live squash-api: every PR head is blessed and merged with the owner client", async () => {
   const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
   const f = await greenBatch(h, [1, 2]);
@@ -4858,7 +4942,8 @@ test("main: the client counts only the App's own comment markers (botLogin)", as
       created_at: "2026-11-13T10:00:00Z",
     },
   ]);
-  // Live mode: the committed config is in shadow mode, where the tick comments on no PR.
+  // Live mode, set here whatever the committed config ships: in shadow mode the tick comments
+  // on no PR.
   const configPath = join(runnerTemp, "omni-queue.config.json");
   writeFileSync(configPath, JSON.stringify({ ...loadConfig(), mode: "live" }));
   const env = {
@@ -6044,6 +6129,32 @@ test("a gate run superseded by a newer green run of the same workflow lets the P
   }
 });
 
+test("a PR title/body edit run after a retarget does not hide the real runs' gate", async () => {
+  // ci.yml on a `pull_request` `edited` event without a base change: its own concurrency group,
+  // every job skipped (the workflow run concludes `skipped`), the gate job named by its
+  // unevaluated expression. It is the newest ci.yml run on the head, but validated nothing.
+  const EDIT_GATE = "(github.event_name == 'pull_request' && …) && 'Gate / CI (PR metadata edit)'";
+  for (const newer of ["success", "failure"]) {
+    const h = createHarness({ mode: "live" });
+    for (const n of [1, 2]) h.addPr(n);
+    h.prGateRun(2, "Gate / CI", "cancelled"); // the run on the old base, cancelled by the retarget
+    h.prGateRun(2, "Gate / CI", newer); // the run on the new base
+    h.prGateRun(2, EDIT_GATE, "skipped", { workflow: "Gate / CI" }); // a bot edits the body
+    await h.tick();
+    const state = await h.state();
+    if (newer === "success") {
+      assert.deepEqual(nums(state.inFlight.prs), [1, 2], "the green run on the new base counts");
+    } else {
+      assert.deepEqual(nums(state.inFlight.prs), [1]);
+      assert.deepEqual(
+        h.world.renders.at(-1).queue.find((e) => e.number === 2).reasons,
+        [{ code: "pr-checks-not-green", detail: "Gate / CI failure" }],
+        "red, not missing: the edit run neither hides nor greens the real verdict"
+      );
+    }
+  }
+});
+
 test("a green job of the same name in another workflow does not hide a red gate", async () => {
   const h = createHarness({ mode: "live" });
   for (const n of [1, 2, 3]) h.addPr(n);
@@ -6811,9 +6922,10 @@ test("a dry-run of a stalled queue writes nothing", async () => {
  * main() against the fake GitHub API, as the workflow runs it (--base), with a config whose
  * approvers are invented logins. `fake.inject` makes the PR listing of the snapshot fail, so the
  * tick throws after loading the state and before the end of run(). `dashboard: false` starts
- * with no dashboard issue (no tick of the base has completed yet).
+ * with no dashboard issue (no tick of the base has completed yet). `mode` is pinned to `shadow`,
+ * the mode these scenarios were written against, whatever the committed config ships.
  */
-async function mainAgainstFake(t, { dashboard = true } = {}) {
+async function mainAgainstFake(t, { dashboard = true, mode = "shadow" } = {}) {
   const token = "ghs_tick_stalled";
   const fake = await startFakeGitHub({ token, actor: "omni-queue[bot]" });
   t.after(() => fake.close());
@@ -6823,7 +6935,7 @@ async function mainAgainstFake(t, { dashboard = true } = {}) {
   t.mock.method(console, "log", () => {});
   t.mock.method(console, "error", (line) => errors.push(String(line)));
   const configPath = join(runnerTemp, "omni-queue.config.json");
-  writeFileSync(configPath, JSON.stringify({ ...loadConfig(), approvers: TEST_APPROVERS }));
+  writeFileSync(configPath, JSON.stringify({ ...loadConfig(), mode, approvers: TEST_APPROVERS }));
   const base = "release/v3.8.54";
   if (dashboard) {
     fake.addIssue({ number: 40, title: dashboardTitle(base), labels: [DASHBOARD_LABEL] });
@@ -7743,8 +7855,9 @@ test("a PR that produced a would-land in shadow is batched again once the mode i
   assert.ok(types(await h.state()).includes("landed"));
 });
 
-test("M1 through main(), shadow mode (the shipped config): a tick that throws after it left a stored landing withdraws the status and saves the batch at testing with its error", async (t) => {
-  const q = await mainAgainstFake(t);
+test("M1 through main(), shadow mode: a tick that throws after it left a stored landing withdraws the status and saves the batch at testing with its error", async (t) => {
+  const q = await mainAgainstFake(t, { mode: "shadow" });
+  assert.equal(JSON.parse(readFileSync(q.env.OMNI_QUEUE_CONFIG, "utf8")).mode, "shadow");
   const now = new Date().toISOString();
   const candidateSha = fakeSha("main-candidate");
   q.fake.refs.set(`heads/${q.base}`, fakeSha("main-tip"));

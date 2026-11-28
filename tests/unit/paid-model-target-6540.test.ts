@@ -2,8 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { isPaidModelTarget, matchesOnlyPaidModels } from "@/shared/utils/freeModels";
 
+// openrouter/auto stopped being a documented free model in the November 2026 re-audit: the id is
+// not on https://openrouter.ai/api/v1/models (2026-11-23) and the auto router can pick paid models.
 test("isPaidModelTarget — documented free model → 'free'", () => {
-  assert.equal(isPaidModelTarget("openrouter/auto"), "free");
+  assert.equal(isPaidModelTarget("cohere/command-a-03-2025"), "free");
 });
 
 test("isPaidModelTarget — provider in free catalog but model not listed free → 'paid'", () => {
@@ -19,7 +21,10 @@ test("isPaidModelTarget — provider not in free catalog at all → 'unknown' (f
 });
 
 test("isPaidModelTarget — comma-separated form matches slash form", () => {
-  assert.equal(isPaidModelTarget("openrouter,auto"), isPaidModelTarget("openrouter/auto"));
+  assert.equal(
+    isPaidModelTarget("cohere,command-a-03-2025"),
+    isPaidModelTarget("cohere/command-a-03-2025")
+  );
 });
 
 test("isPaidModelTarget — empty/non-string input → 'unknown'", () => {
@@ -33,7 +38,9 @@ test("matchesOnlyPaidModels — true when every match is paid", () => {
 });
 
 test("matchesOnlyPaidModels — false when at least one match is free", () => {
-  assert.equal(matchesOnlyPaidModels("openrouter/*"), false);
+  // Since the November 2026 re-audit every registry model of openrouter is paid (its live free id is
+  // pass-through only), so the mixed-catalog example moved to groq.
+  assert.equal(matchesOnlyPaidModels("groq/*"), false);
 });
 
 test("matchesOnlyPaidModels — false (fail open) when there are zero matches", () => {

@@ -1,4 +1,5 @@
 import { getEmptyTurnDiagnostics, hasTrustedEmptyTurn } from "./emptyTurnPolicy.ts";
+import { formatStreamStatus } from "./streamStatusColor.ts";
 import { createCompletionDrain } from "./streamCompletionDrain.ts";
 import { createClientTerminalWatcher } from "./streamTerminal.ts";
 import type { StreamControllerOptions } from "./streamControllerTypes.ts";
@@ -216,11 +217,11 @@ export function createStreamController({
   let pendingRequestCleared = false;
   let cleanupClientAbortSignal: (() => void) | null = null;
 
-  const logStream = (status) => {
+  const logStream = (status: string) => {
     const duration = Date.now() - startTime;
     const p = provider?.toUpperCase() || "UNKNOWN";
     console.log(
-      `[${getTimeString()}] 🌊 [STREAM] ${p} | ${model || "unknown"} | ${duration}ms | ${status}`
+      `[${getTimeString()}] 🌊 [STREAM] ${p} | ${model || "unknown"} | ${duration}ms | ${formatStreamStatus(status)}`
     );
   };
 

@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaʼda — Bitta endpoint va 394 ta provayder. Avtomatik zaxira yoʻnaltirish boshqa sogʻlom nishon mavjud boʻlganida yoʻnaltirishni davom ettiradi. Oltita ustun: 394 ta provayder boʻylab barqaror zaxira yoʻnaltirish · mos ish yuklamalarida tokenlarni 95% gacha tejash · boshlash uchun $0, 150+ ta bepul tarif va doimiy bepul ishlaydigan 51 ta takroriy/kalitsiz provayder · bitta konfiguratsiya orqali 39 ta CLI/agent integratsiyasi · /v1 manzilida OpenAI, Claude, Gemini va Responses API bilan moslik · production boshqaruvlari, jumladan avtomatik uzgichlar, TLS yashirinligi, MCPʼning 110 ta vositasi, A2A, xotira, himoya qoidalari, baholashlar va 7 800+ ta kuzatiladigan test faylidagi 56 000+ ta statik test deklaratsiyasi."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaʼda — Bitta endpoint va 394 ta provayder. Avtomatik zaxira yoʻnaltirish boshqa sogʻlom nishon mavjud boʻlganida yoʻnaltirishni davom ettiradi. Oltita ustun: 394 ta provayder boʻylab barqaror zaxira yoʻnaltirish · mos ish yuklamalarida tokenlarni 95% gacha tejash · boshlash uchun $0, 150+ ta bepul tarif va doimiy bepul ishlaydigan 40 ta takroriy/kalitsiz provayder · bitta konfiguratsiya orqali 39 ta CLI/agent integratsiyasi · /v1 manzilida OpenAI, Claude, Gemini va Responses API bilan moslik · production boshqaruvlari, jumladan avtomatik uzgichlar, TLS yashirinligi, MCPʼning 110 ta vositasi, A2A, xotira, himoya qoidalari, baholashlar va 7 800+ ta kuzatiladigan test faylidagi 56 000+ ta statik test deklaratsiyasi."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
 
 </div>
 
-> **394 ta roʻyxatdan oʻtgan provayder** kanonik chat, media, qidiruv, lokal, bulut-agent va tizim toʻplamlari boʻylab mavjud, ulardan **153 tasida `hasFree: true` aniqlash metamaʼlumotlari mavjud**. Chat modellari reyestri **239 ta provayder / 3,059 ta alohida provayder-model juftligi / 1,475 ta xom model ID**ni qamrab oladi; alohida bepul byudjet katalogida esa **har bir model uchun 465 ta qator**, **34 ta takrorlanuvchi havza** va **51 ta takrorlanuvchi/kalitsiz abadiy bepul provayder** mavjud. Bular ataylab turli maxrajlardir; taʼriflar va havzalar bo‘yicha takrorlanishlar olib tashlangan hisob-kitoblar [Provayder maʼlumotnomasi](docs/reference/PROVIDER_REFERENCE.md) va [Bepul tariflar](docs/reference/FREE_TIERS.md)da keltirilgan.
+> **394 ta roʻyxatdan oʻtgan provayder** kanonik chat, media, qidiruv, lokal, bulut-agent va tizim toʻplamlari boʻylab mavjud, ulardan **153 tasida `hasFree: true` aniqlash metamaʼlumotlari mavjud**. Chat modellari reyestri **239 ta provayder / 3,059 ta alohida provayder-model juftligi / 1,475 ta xom model ID**ni qamrab oladi; alohida bepul byudjet katalogida esa **har bir model uchun 465 ta qator**, **34 ta takrorlanuvchi havza** va **40 ta takrorlanuvchi/kalitsiz abadiy bepul provayder** mavjud. Bular ataylab turli maxrajlardir; taʼriflar va havzalar bo‘yicha takrorlanishlar olib tashlangan hisob-kitoblar [Provayder maʼlumotnomasi](docs/reference/PROVIDER_REFERENCE.md) va [Bepul tariflar](docs/reference/FREE_TIERS.md)da keltirilgan.
 
 <div align="center">
 
@@ -1310,7 +1310,7 @@ Dashboardʼsiz, headless runtime uchun Dockerʼning `base` profilidan (yuqoriga 
   <tr><td nowrap><b>Ishlash muhiti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Dasturlash tili</b></td><td>TypeScript 6.0 — <code>src/</code> va <code>open-sse/</code> bo‘ylab <b>100% TypeScript</b> (<code>any</code> v2.0 dan beri yadroda mavjud emas)</td></tr>
   <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (JSON legacy) — 147 ta domen moduli, 244 ta migratsiya</td></tr>
+  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (JSON legacy) — 147 ta domen moduli, 252 ta migratsiya</td></tr>
   <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 to‘liq matnli qidiruvi + int8-kvantlangan vektorli embeddinglar, tiplashtirilgan so‘nish</td></tr>
   <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositalari I/O validatsiyasi + API shartnomalari</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

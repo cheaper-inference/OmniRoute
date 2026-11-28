@@ -327,6 +327,35 @@ test("GET /api/settings/qdrant/health — reports named collection vector metada
   }
 });
 
+test("GET /api/settings/qdrant/health — probes configured host even when qdrantEnabled is false (#21115)", async () => {
+  await localDb.updateSettings({
+    qdrantEnabled: false,
+    qdrantHost: "http://qdrant.test",
+    qdrantCollection: "omniroute_memory",
+  });
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    if (String(url).endsWith("/readyz")) return new Response("ready", { status: 200 });
+    if (String(url).endsWith("/collections/omniroute_memory")) {
+      return new Response("not found", { status: 404 });
+    }
+    return new Response("not found", { status: 404 });
+  };
+
+  try {
+    const req = await makeAuthRequest("GET", "http://localhost/api/settings/qdrant/health");
+    const res = await qdrantHealthRoute.GET(asNextRequest(req));
+    const body = await res.json();
+
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(body.ok, true);
+    assert.deepStrictEqual(body.collection, { exists: false });
+  } finally {
+    globalThis.fetch = originalFetch;
+    await localDb.updateSettings({ qdrantHost: "" });
+  }
+});
+
 test("GET /api/settings/qdrant/health — 401 without auth", async () => {
   await setRequireLogin(true);
   const req = makeUnauthRequest("GET", "http://localhost/api/settings/qdrant/health");
@@ -349,6 +378,72 @@ test("POST /api/settings/qdrant/search — returns ok + results array", async ()
   const body = await res.json();
   assert.strictEqual(typeof body.ok, "boolean", "ok should be boolean");
   assert.ok(Array.isArray(body.results), "results should be an array");
+  assert.strictEqual(body.error, "not_configured");
+});
+
+test("POST /api/settings/qdrant/search — validates a configured host even when qdrantEnabled is false (#21115)", async () => {
+  await localDb.updateSettings({
+    qdrantEnabled: false,
+    qdrantHost: "http://qdrant.test",
+    qdrantCollection: "omniroute_memory",
+    qdrantEmbeddingModel: "openai/text-embedding-3-small",
+  });
+  await localDb.createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    name: "qdrant-preactivation-search",
+    apiKey: "sk-test-preactivation",
+  });
+
+  const qdrantCalls: string[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input, init) => {
+    const url = String(input instanceof Request ? input.url : input);
+    if (!url.startsWith("http://qdrant.test")) {
+      // Embeddings upstream (openai): fixed 3-dimensional vector.
+      return Response.json({
+        object: "list",
+        data: [{ object: "embedding", index: 0, embedding: [0.1, 0.2, 0.3] }],
+        model: "text-embedding-3-small",
+        usage: { prompt_tokens: 1, total_tokens: 1 },
+      });
+    }
+    qdrantCalls.push(`${init?.method ?? "GET"} ${url}`);
+    if (url.endsWith("/collections/omniroute_memory/points/search")) {
+      return Response.json({
+        result: [{ id: "m1", score: 0.9, payload: { kind: "omniroute_memory", key: "k" } }],
+      });
+    }
+    if (url.endsWith("/collections/omniroute_memory")) {
+      return Response.json({
+        result: { config: { params: { vectors: { size: 3, distance: "Cosine" } } } },
+      });
+    }
+    return new Response("not found", { status: 404 });
+  };
+
+  try {
+    const req = await makeAuthRequest("POST", "http://localhost/api/settings/qdrant/search", {
+      query: "pre-activation probe",
+      topK: 3,
+    });
+    const res = await qdrantSearchRoute.POST(asNextRequest(req));
+    const body = await res.json();
+
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(body.ok, true, JSON.stringify(body));
+    assert.notStrictEqual(body.error, "not_configured");
+    assert.ok(Array.isArray(body.results));
+    assert.strictEqual(body.results.length, 1);
+    assert.strictEqual(body.results[0].id, "m1");
+    assert.ok(
+      qdrantCalls.some((c) => c.startsWith("POST ") && c.endsWith("/points/search")),
+      "should hit the Qdrant search endpoint while qdrantEnabled is false"
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+    await localDb.updateSettings({ qdrantHost: "" });
+  }
 });
 
 test("POST /api/settings/qdrant/search — 400 invalid body (empty query)", async () => {

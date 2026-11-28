@@ -21,6 +21,15 @@ export interface CredentialRedactionResult {
   modified: boolean;
 }
 
+/** Credential redaction switch shared by the pre/post-call hooks and stored session turns. */
+export async function isCredentialRedactionEnabled(): Promise<boolean> {
+  const settings = await getSettings();
+  return (
+    settings.credentialRedactionEnabled === true ||
+    process.env.CREDENTIAL_REDACTION_ENABLED === "true"
+  );
+}
+
 // Signed or encrypted fields and long base64 blobs must replay byte for byte. Only patterns with a
 // long distinctive prefix may rewrite them: the short-prefix ones (hf_, r8_, sk-, gh*_, npm_, AIza)
 // hit random base64url about once in 30 blobs of 8 KB and would break the signature.
@@ -168,11 +177,7 @@ export class CredentialMaskerGuardrail extends BaseGuardrail {
     payload: unknown,
     _context: GuardrailContext
   ): Promise<GuardrailResult<unknown> | void> {
-    const _s = await getSettings();
-    if (!(
-      _s.credentialRedactionEnabled === true || process.env.CREDENTIAL_REDACTION_ENABLED === "true"
-    ))
-      return { block: false };
+    if (!(await isCredentialRedactionEnabled())) return { block: false };
     const detections: Array<{ type: string; count: number }> = [];
     const { modified, payload: next } = redactPayload(payload, detections);
     if (!modified) return { block: false };
@@ -187,11 +192,7 @@ export class CredentialMaskerGuardrail extends BaseGuardrail {
     response: unknown,
     _context: GuardrailContext
   ): Promise<GuardrailResult<unknown> | void> {
-    const _s = await getSettings();
-    if (!(
-      _s.credentialRedactionEnabled === true || process.env.CREDENTIAL_REDACTION_ENABLED === "true"
-    ))
-      return { block: false };
+    if (!(await isCredentialRedactionEnabled())) return { block: false };
     const detections: Array<{ type: string; count: number }> = [];
     const { modified, response: next } = redactResponse(response, detections);
     if (!modified) return { block: false };

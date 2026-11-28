@@ -1,0 +1,1 @@
+- **chore(npm):** the package description now reads "OmniRoute by Cheaper Inference. Created by Diego Souza. …", the same short text used on Docker Hub and in OmniCopilot; it stays free of provider counts ([#21249](https://github.com/cheaper-inference/OmniRoute/pull/21249))

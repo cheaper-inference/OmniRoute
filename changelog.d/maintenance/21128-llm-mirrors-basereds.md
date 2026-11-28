@@ -1,0 +1,1 @@
+- **chore(docs):** The 66 translated `llm.txt` mirrors match the root again (repository, Docker Hub and GHCR links updated by #20897), which clears the release-branch docs-sync failure (#21099)

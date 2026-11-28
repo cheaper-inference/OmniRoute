@@ -1,0 +1,1 @@
+- **fix(dashboard):** Wrap Available Models card actions when Blacklist and Compatibility exceed the card width.
