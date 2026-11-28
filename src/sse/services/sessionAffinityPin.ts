@@ -273,6 +273,28 @@ function compareLruConnections(a: SessionAffinityConnection, b: SessionAffinityC
   return (a.priority || 999) - (b.priority || 999);
 }
 
+/**
+ * Account strategies that spread unpinned requests. A new session pin keeps the LRU start
+ * under them: LRU is round-robin's rotation step and least-used's own pick, and spreads
+ * session starts the way p2c, random and strict-random spread requests (#1887). expiry-first
+ * keeps it too: OAuth session spreading does not treat it as a priority strategy, so a pin on
+ * its pick could be served from another account. Every other strategy pins the account it
+ * would route the request to (fill-first: the first eligible account in priority order), so
+ * lower priorities stay failover-only (#19262).
+ */
+const LRU_SESSION_START_STRATEGIES = new Set<unknown>([
+  "round-robin",
+  "least-used",
+  "p2c",
+  "random",
+  "strict-random",
+  "expiry-first",
+]);
+
+export function startsNewSessionsOnLru(strategy: unknown): boolean {
+  return LRU_SESSION_START_STRATEGIES.has(strategy);
+}
+
 function liveAffinitySnapshot(
   record: SessionAccountAffinityRecord | null | undefined
 ): SessionAccountAffinityRecord | null {
@@ -329,8 +351,8 @@ function logSharedSessionAffinitySelection(
 /**
  * Session-affinity account selection (moved from auth.ts alongside the #5903
  * pin-override so all session-affinity logic lives in one leaf). Reuses an
- * active pin when its connection is in the pool; otherwise picks the LRU
- * connection and creates a fresh pin. SQLite preserves the original reads,
+ * active pin when its connection is in the pool; otherwise pins the connection
+ * `pickNewPin` returns (default: the LRU connection). SQLite preserves the original reads,
  * mutation order, first yield and selection logs; Redis store operations are awaited.
  */
 export async function selectSessionAffinityConnection<T extends SessionAffinityConnection>(
@@ -338,7 +360,8 @@ export async function selectSessionAffinityConnection<T extends SessionAffinityC
   sessionKey: string | null | undefined,
   connections: T[],
   ttlMs = 0,
-  affinityRecord?: SessionAccountAffinityRecord | null
+  affinityRecord?: SessionAccountAffinityRecord | null,
+  pickNewPin = (pool: T[]): T | undefined => [...pool].sort(compareLruConnections)[0]
 ): Promise<T | null> {
   if (!sessionKey || connections.length === 0 || ttlMs <= 0) return null;
 
@@ -351,7 +374,7 @@ export async function selectSessionAffinityConnection<T extends SessionAffinityC
         ? getSessionAccountAffinity(sessionKey, provider, ttlMs)
         : liveAffinitySnapshot(affinityRecord);
     const pinned = resolveSessionAffinityConnection(existing, connections, provider);
-    const connection = pinned ?? [...connections].sort(compareLruConnections)[0] ?? null;
+    const connection = pinned ?? pickNewPin(connections) ?? null;
     if (!connection) return null;
     if (pinned) {
       store.touch(sessionKey, provider, Date.now(), ttlMs);
@@ -368,7 +391,14 @@ export async function selectSessionAffinityConnection<T extends SessionAffinityC
   }
   const existing =
     affinityRecord === undefined ? await store.get(sessionKey, provider, ttlMs) : affinityRecord;
-  const plan = planSessionAffinityConnection(provider, sessionKey, connections, ttlMs, existing);
+  const plan = planSessionAffinityConnection(
+    provider,
+    sessionKey,
+    connections,
+    ttlMs,
+    existing,
+    pickNewPin
+  );
   if (!plan) return null;
   await plan.commit(true, true);
   return plan.connection;
@@ -376,14 +406,16 @@ export async function selectSessionAffinityConnection<T extends SessionAffinityC
 
 /**
  * Read-only affinity selection used when another durable authority must claim
- * the candidate before any affinity/LRU state is changed.
+ * the candidate before any affinity/LRU state is changed. A miss plans a new pin
+ * on `pickNewPin`'s choice, as in selectSessionAffinityConnection.
  */
 export function planSessionAffinityConnection<T extends SessionAffinityConnection>(
   provider: string,
   sessionKey: string | null | undefined,
   connections: T[],
   ttlMs = 0,
-  affinityRecord?: SessionAccountAffinityRecord | null
+  affinityRecord?: SessionAccountAffinityRecord | null,
+  pickNewPin = (pool: T[]): T | undefined => [...pool].sort(compareLruConnections)[0]
 ) {
   if (!sessionKey || connections.length === 0 || ttlMs <= 0) return null;
   const store = getSessionAffinityStore();
@@ -393,7 +425,7 @@ export function planSessionAffinityConnection<T extends SessionAffinityConnectio
       : affinityRecord;
   const existing = affinityRecord === undefined ? observed : liveAffinitySnapshot(observed);
   const existingConnection = resolveSessionAffinityConnection(existing, connections, provider);
-  const connection = existingConnection ?? [...connections].sort(compareLruConnections)[0] ?? null;
+  const connection = existingConnection ?? pickNewPin(connections) ?? null;
   if (!connection) return null;
 
   const plan = {

@@ -139,7 +139,7 @@ for (const driver of ["sqlite", "redis"] as const) {
           : {}),
       });
       assert.equal(evicted, true, "must exercise the prefetch-to-selection window");
-      // Base SQLite reads at planning time, sees the miss, and picks LRU B.
+      // Base SQLite reads at planning time, sees the miss, and pins fill-first's B.
       // Redis lease planning remains synchronous and intentionally uses snapshot A.
       assert.equal(selected?.connectionId, driver === "redis" && leasePath ? a : b);
       assert.equal(readsAtEviction, driver === "redis" ? 1 : 0);
