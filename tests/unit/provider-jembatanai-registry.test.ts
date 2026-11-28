@@ -27,6 +27,10 @@ test("jembatanai is registered as an API-key gateway provider in the UI catalog"
     "a trial key is not a free tier; no hasFree flag"
   );
   assert.match(entry.apiHint, /https:\/\/freeai\.jembatanai\.com\/v1/);
+  assert.match(
+    String((entry as { notice?: { text?: string } }).notice?.text),
+    /Token Plan keys only/
+  );
 });
 
 test("jembatanai registry entry uses OpenAI format with bearer API-key auth", () => {
