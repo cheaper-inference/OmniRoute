@@ -5,6 +5,7 @@ import fsSync from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import {
+  colocateAndVerifyStandaloneWorkers,
   getTransientBuildPaths,
   movePath,
   pruneStandaloneArtifacts,
@@ -238,4 +239,45 @@ test("shouldBuildStandalone honors OMNIROUTE_SKIP_STANDALONE and contributor pro
     false
   );
   assert.equal(shouldBuildStandalone({ OMNIROUTE_BUILD_PROFILE: "minimal" }), true);
+});
+
+test("colocateAndVerifyStandaloneWorkers runs colocation inside build-next-isolated and fails if worker is missing", async () => {
+  await withTempDir(async (tempDir) => {
+    const calls = [];
+    const fakeSpawn = (execPath, args, opts) => {
+      calls.push({ execPath, args, opts });
+      return { status: 0 };
+    };
+
+    // Missing callLogArtifactWorker.js must fail the build even when spawn exits 0.
+    assert.throws(
+      () => colocateAndVerifyStandaloneWorkers(process.cwd(), tempDir, fakeSpawn),
+      /missing worker: src\/lib\/usage\/callLogArtifactWorker\.js/
+    );
+    assert.equal(calls.length, 1);
+    assert.match(calls[0].args[0], /colocate-standalone\.mjs$/);
+    assert.equal(calls[0].opts.env.OMNIROUTE_STANDALONE_DIR, tempDir);
+
+    // Non-zero colocate exit must fail the build loudly.
+    assert.throws(
+      () =>
+        colocateAndVerifyStandaloneWorkers(
+          process.cwd(),
+          tempDir,
+          () => ({ status: 1 }),
+          () => {}
+        ),
+      /colocate-standalone failed with exit code 1/
+    );
+
+    // Verify build-next-isolated.mjs main() invokes colocateAndVerifyStandaloneWorkers.
+    const builderSource = await fs.readFile(
+      path.join(process.cwd(), "scripts", "build", "build-next-isolated.mjs"),
+      "utf8"
+    );
+    assert.match(
+      builderSource,
+      /colocateAndVerifyStandaloneWorkers\(\s*projectRoot,\s*standaloneDir\s*\)/
+    );
+  });
 });

@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import { mkdirSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import {
   generateGlobalErrorMessages,
@@ -15,6 +15,7 @@ import {
   syncStandaloneNativeAssets as _syncNativeAssets,
   syncStandaloneExtraModules as _syncExtraModules,
 } from "./assembleStandalone.mjs";
+import { verifyColocatedStandaloneWorkers } from "./colocate-standalone.mjs";
 import {
   isBackendOnlyBuild,
   isContributorBuild,
@@ -331,6 +332,29 @@ export async function syncStandaloneExtraModules(
   return _syncExtraModules(rootDir, fsImpl, log);
 }
 
+export function colocateAndVerifyStandaloneWorkers(
+  rootDir = projectRoot,
+  standaloneDir = path.join(distDir, "standalone"),
+  spawnImpl = spawnSync,
+  verifyImpl = verifyColocatedStandaloneWorkers
+) {
+  const scriptPath = path.join(rootDir, "scripts", "build", "colocate-standalone.mjs");
+  const result = spawnImpl(process.execPath, [scriptPath], {
+    cwd: rootDir,
+    env: { ...process.env, OMNIROUTE_STANDALONE_DIR: standaloneDir },
+    stdio: "inherit",
+  });
+  if (result.error) {
+    throw result.error;
+  }
+  if (result.status !== 0) {
+    throw new Error(
+      `[build-next-isolated] colocate-standalone failed with exit code ${result.status ?? "unknown"}`
+    );
+  }
+  verifyImpl(standaloneDir);
+}
+
 export async function main() {
   const movedPaths = [];
   const transientBuildPaths = getTransientBuildPaths();
@@ -432,7 +456,6 @@ export async function main() {
           copyNatives: true,
           materializeSymlinks: true,
         });
-        const { spawnSync } = await import("node:child_process");
         const basePathWrite = spawnSync(
           process.execPath,
           [path.join(projectRoot, "scripts", "build", "write-build-base-path.mjs")],
@@ -446,6 +469,12 @@ export async function main() {
       } catch (assembleErr) {
         console.warn("[build-next-isolated] Non-fatal error assembling standalone:", assembleErr);
       }
+
+      // Colocate runtime workers inside the build step itself (not only in npm
+      // `postbuild`) so direct `node scripts/build/build-next-isolated.mjs`
+      // invocations produce a complete standalone bundle and fail loudly if any
+      // required worker is missing.
+      colocateAndVerifyStandaloneWorkers(projectRoot, standaloneDir);
     } else if (result.code === 0 && !shouldBuildStandalone()) {
       console.log(
         "[build-next-isolated] Skipped standalone packaging (standalone disabled for fast compile)"

@@ -1,12 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { execFileSync } from "node:child_process";
 
 import {
+  REQUIRED_STANDALONE_WORKERS,
   bundleOptionalWorker,
+  resolveStandaloneDir,
+  verifyColocatedStandaloneWorkers,
   writeEsmWorkerScopes,
 } from "../../../scripts/build/colocate-standalone.mjs";
 
@@ -180,5 +183,55 @@ test("colocate-standalone bundles the required compression worker", () => {
     assert.equal(JSON.parse(readFileSync(join(workerDir, "package.json"), "utf8")).type, "module");
   } finally {
     rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
+test("colocate-standalone respects NEXT_DIST_DIR and verifies all required workers", () => {
+  const root = mkdtempSync(join(tmpdir(), "colocate-verify-workers-"));
+  try {
+    writeFileSync(join(root, "server.js"), "module.exports = {};\n");
+    execFileSync(process.execPath, ["scripts/build/colocate-standalone.mjs"], {
+      cwd: join(import.meta.dirname, "..", "..", ".."),
+      env: { ...process.env, OMNIROUTE_STANDALONE_DIR: root },
+      stdio: "pipe",
+    });
+    assert.doesNotThrow(() => verifyColocatedStandaloneWorkers(root));
+
+    // Removing the call-log artifact worker must fail the postbuild check loudly.
+    rmSync(join(root, "src", "lib", "usage", "callLogArtifactWorker.js"));
+    assert.throws(
+      () => verifyColocatedStandaloneWorkers(root),
+      /missing worker: src\/lib\/usage\/callLogArtifactWorker\.js/
+    );
+    assert.ok(REQUIRED_STANDALONE_WORKERS.includes("src/lib/usage/callLogArtifactWorker.js"));
+  } finally {
+    rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
+test("resolveStandaloneDir keeps an absolute NEXT_DIST_DIR absolute (matches the build's path.resolve)", () => {
+  const root = mkdtempSync(join(tmpdir(), "colocate-root-dir-"));
+  const customDist = mkdtempSync(join(tmpdir(), "colocate-custom-dist-"));
+  try {
+    // The postbuild hook runs without OMNIROUTE_STANDALONE_DIR; an absolute
+    // NEXT_DIST_DIR must target the same tree build-next-isolated.mjs writes.
+    assert.equal(
+      resolveStandaloneDir({ NEXT_DIST_DIR: customDist }, root),
+      resolve(customDist, "standalone")
+    );
+    // Relative NEXT_DIST_DIR still resolves under the project root.
+    assert.equal(
+      resolveStandaloneDir({ NEXT_DIST_DIR: "custom-next" }, root),
+      resolve(root, "custom-next", "standalone")
+    );
+    assert.equal(resolveStandaloneDir({}, root), resolve(root, ".build", "next", "standalone"));
+    // An explicit OMNIROUTE_STANDALONE_DIR keeps precedence over NEXT_DIST_DIR.
+    assert.equal(
+      resolveStandaloneDir({ OMNIROUTE_STANDALONE_DIR: root, NEXT_DIST_DIR: customDist }, root),
+      root
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    rmSync(customDist, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
