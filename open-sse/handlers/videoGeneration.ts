@@ -834,6 +834,23 @@ function normalizeKieVideoResult(recordData: unknown): string[] {
   return urls.filter((url: unknown) => typeof url === "string" && url.length > 0);
 }
 
+/** Collect public http(s) start-frame URLs from the OpenAI-style body for KIE. */
+function collectKieImageUrls(body: Record<string, unknown>): string[] {
+  const urls: string[] = [];
+  for (const value of [body.image_urls, body.imageUrls, body.image_url, body.image]) {
+    for (const item of Array.isArray(value) ? value : [value]) {
+      const url =
+        typeof item === "string"
+          ? item
+          : item && typeof item === "object" && typeof (item as { url?: unknown }).url === "string"
+            ? (item as { url: string }).url
+            : null;
+      if (url && /^https?:\/\//i.test(url.trim()) && !urls.includes(url.trim())) urls.push(url.trim());
+    }
+  }
+  return urls;
+}
+
 async function handleKieVideoGeneration({
   model,
   provider,
@@ -876,6 +893,7 @@ async function handleKieVideoGeneration({
     return { success: false, status: 401, error: "KIE API key is required" };
   }
 
+  const imageUrls = collectKieImageUrls(body);
   const payload = {
     model,
     input: {
@@ -883,6 +901,9 @@ async function handleKieVideoGeneration({
       duration: body.duration ? String(body.duration) : "5",
       aspect_ratio: typeof body.aspect_ratio === "string" ? body.aspect_ratio : "16:9",
       sound: body.sound === true,
+      // KIE market image-to-video models (kling-3.0/video, grok-imagine/image-to-video,
+      // wan/2-7-image-to-video, ...) read the start frame from input.image_urls.
+      ...(imageUrls.length > 0 ? { image_urls: imageUrls } : {}),
     },
   };
 
