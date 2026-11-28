@@ -5,7 +5,7 @@
  * clients at or above a minimum version. The usage poll builds headers from the
  * synchronous version cache, so on a cold process (dashboard poll before any chat
  * request) it used to go out with the stale fallback. getAntigravityUsage now resolves
- * the version once before any quota call, and the fallback floor is 2.5.5.
+ * the version once before any quota call, and the fallback floor is 2.7.0.
  *
  * retrieveUserQuotaSummary deliberately goes out with the `cli` fingerprint (#18026), so the
  * CLI version is warmed as well and that one call must carry the CLI version instead.
@@ -40,6 +40,7 @@ function stubFetch(
   const cliFeedCalls: string[] = [];
   globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
     const url = String(input);
+    if (url === "https://antigravity.google/download") return new Response("", { status: 503 });
     if (url.includes(FEED_HOST)) {
       feedCalls.push(url);
       return feed();
@@ -92,8 +93,8 @@ test.after(() => {
   resetDbInstance();
 });
 
-test("IDE fingerprint fallback floor is 2.5.5", () => {
-  assert.equal(ANTIGRAVITY_IDE_FALLBACK_VERSION, "2.5.5");
+test("IDE fingerprint fallback floor is 2.7.0", () => {
+  assert.equal(ANTIGRAVITY_IDE_FALLBACK_VERSION, "2.7.0");
 });
 
 test("cold-cache usage fetch resolves the live IDE version before any quota request", async () => {
@@ -128,7 +129,7 @@ test("cold-cache usage fetch resolves the live IDE version before any quota requ
   assert.ok(result && "quotas" in result, "usage result should carry quotas");
 });
 
-test("unreachable release feed falls back to the 2.5.5 floor and still fetches usage", async () => {
+test("unreachable release feed falls back to the 2.7.0 floor and still fetches usage", async () => {
   const { calls, feedCalls, cliFeedCalls } = stubFetch(
     () => {
       throw new Error("feed offline");
@@ -152,7 +153,7 @@ test("unreachable release feed falls back to the 2.5.5 floor and still fetches u
   const quotaCalls = calls.filter((call) => call.url.includes("fetchAvailableModels"));
   assert.equal(cliFeedCalls.length, 1, "the CLI release is attempted once");
   assert.ok(quotaCalls.length >= 1, "fetchAvailableModels must still be called");
-  assertFingerprints(calls, "2.5.5", "1.3.4");
+  assertFingerprints(calls, "2.7.0", "1.5.9");
   assert.ok(result && "quotas" in result, "usage result should carry quotas");
   if (result && "quotas" in result) {
     assert.ok(result.quotas["gemini-3.8-flash-high"], "quota bucket should be parsed");
