@@ -70,6 +70,7 @@ import { isManagedBase } from "./config.mjs";
  * @property {QueueConfig} config
  * @property {{number: number, title: string, body: string}[]} freezeIssues  open release-freeze issues
  * @property {QueueState|null} state   state of the PR's base (in-flight / shadow bookkeeping)
+ * @property {string|null} [baseSha]   current base tip for parked PRs
  * @property {string} now              ISO
  * @property {string} [lane]           the PR's lane (laneOf; the tick sets it when it builds the
  *                                     queue): on lane "base-repair" the PR-gate rule
@@ -461,6 +462,15 @@ function prInFlight(state, n) {
   return has(f.pendingRed?.prs);
 }
 
+/** Why this head is still parked, if it cannot use its one retry. */
+export function parkedReason(pr, ctx) {
+  const entry = ctx.state?.parked?.[String(pr.number)];
+  if (!entry || entry.head !== pr.headSha) return null;
+  if (entry.retried) return { code: "parked", detail: "until the head changes" };
+  if (ctx.baseSha && ctx.baseSha !== entry.baseSha) return null;
+  return { code: "parked", detail: `${entry.reason}; will retry once when the base moves` };
+}
+
 /**
  * All §3.3 rules. Never performs I/O; returns the side effects as `actions`:
  *  - label by a non-approver → comment once (key "not-approver"), label kept, ineligible;
@@ -543,6 +553,9 @@ export function evaluateEligibility(pr, ctx) {
       );
     }
   }
+
+  const parked = parkedReason(pr, ctx);
+  if (labeled && parked) reasons.push(parked);
 
   if (inFlight) reason("in-flight", "PR is part of the candidate under test");
 

@@ -122,6 +122,7 @@ export const PAUSE_REASONS = Object.freeze([
 export const EVENT_TYPES = Object.freeze([
   "batch-started", // candidate composed and pushed (detail: included/excluded PRs)
   "pr-skipped-conflict", // conflicts inside the batch only; stays queued
+  "pr-parked", // batch could not land; PRs stay queued
   "pr-dequeued", // removed from the queue (label removed + comment); detail = reason code
   "checks-green",
   "checks-red",
@@ -171,6 +172,7 @@ export const INELIGIBLE_REASONS = Object.freeze([
   "pr-checks-not-green",
   "shadow-processed", // shadow mode already settled this exact head (would-land / would-dequeue)
   "in-flight",
+  "parked",
 ]);
 
 /** Action types that pure modules ask the tick to execute. */
@@ -229,6 +231,7 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                   timeouts, set only while that holds for EVERY run (=
  *                                   attempts); absent otherwise, and in documents written before
  *                                   it existed (= first run not known to be a timeout)
+ * @property {number} [landingRetryTicks] attempts made in the batch's landing retry window
  * @property {number} [landAttempts] ticks that blessed this candidate for landing and reached
  *                                   no verdict, counted (and saved) before each blessing. It
  *                                   belongs to the candidate, at either stage: kept through a
@@ -358,6 +361,7 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                       (and in documents written before it existed): startSize.
  *                                       When present, validateState requires a positive integer
  *                                       (the clamp to the configured sizes happens on read)
+ * @property {Record<string, {head: string, baseSha: string, reason: string, at: string, retried: boolean}>} [parked]
  * @property {Object<string, string>} [repairTried]  PR number (string) → head SHA of a base-repair
  *                                       PR whose candidate failed like the base: that head is
  *                                       never composed again. An entry goes when the PR is no
@@ -568,6 +572,9 @@ export function validateState(state) {
       if (f.timedOutRuns !== undefined && !isCount(f.timedOutRuns)) {
         errors.push("inFlight.timedOutRuns");
       }
+      if (f.landingRetryTicks !== undefined && !isCount(f.landingRetryTicks)) {
+        errors.push("inFlight.landingRetryTicks");
+      }
       if (f.landAttempts !== undefined && !isCount(f.landAttempts)) {
         errors.push("inFlight.landAttempts");
       }
@@ -621,6 +628,7 @@ export function validateState(state) {
   ) {
     errors.push("batchWindow");
   }
+  if (state.parked !== undefined && !isParkedMap(state.parked)) errors.push("parked");
   if (state.repairTried !== undefined && !isRepairTried(state.repairTried)) {
     errors.push("repairTried");
   }
@@ -640,6 +648,23 @@ export function validateState(state) {
   }
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
   return errors;
+}
+
+function isParkedMap(map) {
+  return (
+    isRecord(map) &&
+    Object.entries(map).every(
+      ([n, entry]) =>
+        /^[1-9][0-9]*$/.test(n) &&
+        isRecord(entry) &&
+        isSha(entry.head) &&
+        isSha(entry.baseSha) &&
+        typeof entry.reason === "string" &&
+        entry.reason.length > 0 &&
+        isIso(entry.at) &&
+        typeof entry.retried === "boolean"
+    )
+  );
 }
 
 /** Optional state.repairTried: PR number (decimal, no leading zero) → 40-hex head SHA. */

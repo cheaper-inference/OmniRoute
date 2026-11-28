@@ -101,9 +101,9 @@
 //     status on its commits into `failure` (withdrawAbandoned; only statuses created by the App
 //     count, as for the release ruleset). That save also counts the attempt
 //     (inFlight.landAttempts, the candidate's: kept at either stage, started again only by a new
-//     candidate and by an operator's pause or resume): after LANDING_ATTEMPTS_LIMIT attempts
-//     without a verdict a live tick does not bless the batch again and the queue pauses with
-//     reason "error" (shadow never checks it). A batch HELD at
+//     candidate, by an explicit rejection or by an operator's pause or resume). After
+//     LANDING_ATTEMPTS_LIMIT attempts without a verdict, merge-ff begins a bounded retry window
+//     before parking the batch. Squash-api pauses with reason "error". A batch HELD at
 //     the landing stage (release-freeze, checks back to pending, manual pause) goes back to stage
 //     "testing" (leaveLandingStage), so the same tick withdraws its status and later held ticks
 //     read nothing; it is blessed again only right before it lands. A paused base that does not
@@ -281,12 +281,15 @@ export const STATE_HEARTBEAT_MINUTES = 60;
 
 /**
  * How many ticks in a row may bless and land the same batch and end without a verdict (the
- * landing threw, or the tick died after the blessing) before the queue pauses. Without a bound,
+ * landing threw, or the tick died after the blessing) before the merge-ff retry window (or a squash-api pause). Without a bound,
  * such an error repeats on every tick, forever: a success/failure land status pair per commit and
  * one `error` event each time, and nobody is told the queue is stuck. Counted in
  * `inFlight.landAttempts` (markLanding), saved before each blessing.
  */
 export const LANDING_ATTEMPTS_LIMIT = 3;
+
+/** Number of ticks in a merge-ff landing retry window, including the first explicit refusal. */
+export const LANDING_RETRY_TICKS = 3;
 
 /** Time for the newly written land status to become visible to the release ruleset. */
 export const LAND_STATUS_RETRY_DELAY_MS = 5000;
@@ -425,7 +428,7 @@ function couldNotRun(check, error) {
 }
 
 /** Eligibility reasons caused by the batch itself: never a reason to drop one of its PRs. */
-const SELF_REASONS = new Set(["in-flight", "shadow-processed"]);
+const SELF_REASONS = new Set(["in-flight", "shadow-processed", "parked"]);
 
 const head12 = (sha) => String(sha ?? "").slice(0, 12);
 const prNumbers = (prs) => (prs ?? []).map((pr) => pr.n);
@@ -1512,14 +1515,19 @@ class Tick {
    */
   leaveLandingStage(f, { resetCount = false } = {}) {
     if (f.stage !== "landing") {
-      if (!resetCount || f.landAttempts === undefined || this.s.inFlight !== f) return;
+      if (!resetCount || this.s.inFlight !== f) return;
+      if (f.landAttempts === undefined && f.landingRetryTicks === undefined) return;
       const rest = { ...f };
       delete rest.landAttempts;
+      delete rest.landingRetryTicks;
       this.s.inFlight = rest;
       return this.note(`${f.batchId}: its landing attempts count starts again`);
     }
     const rest = { ...f, stage: "testing", landAttempts: storedLandAttempts(f) };
-    if (resetCount) delete rest.landAttempts;
+    if (resetCount) {
+      delete rest.landAttempts;
+      delete rest.landingRetryTicks;
+    }
     this.s.inFlight = rest;
     // A dry-run withdraws nothing (withdrawAbandoned returns early): say what would happen.
     const goes = this.dryRun ? "would go" : "goes";
@@ -1702,10 +1710,10 @@ class Tick {
 
     // Earlier ticks blessed this batch and none of them reached a verdict (stored at the landing
     // stage, or sent back to testing by main()'s failure path with its count kept). After
-    // LANDING_ATTEMPTS_LIMIT of them it is not blessed again: pause and say so.
+    // LANDING_ATTEMPTS_LIMIT of them, merge-ff enters its bounded retry window.
     // Live only: shadow blesses nothing, so a count carried from live mode never pauses it.
     const landAttempts = storedLandAttempts(f);
-    if (live && landAttempts >= LANDING_ATTEMPTS_LIMIT) {
+    if (live && !mergeFf && landAttempts >= LANDING_ATTEMPTS_LIMIT) {
       const lastError = this.s.history.findLast((e) => e.type === "error")?.detail || "unknown";
       return this.pauseLanding(
         f,
@@ -1754,7 +1762,15 @@ class Tick {
       // Nothing is blessed that cannot be landed.
       return this.pauseLanding(f, 'landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")');
     }
-    await this.markLanding(f);
+    const retries = f.landingRetryTicks ?? 0;
+    if (mergeFf && retries >= LANDING_RETRY_TICKS) {
+      // The previous tick died or failed after saving the last attempt. The base and batch
+      // have been rechecked above, and withdrawAbandoned will settle any standing status.
+      return this.parkBatch(f, "attempts-limit", "landing ended without a verdict");
+    }
+    const retryTick =
+      mergeFf && (retries > 0 || landAttempts >= LANDING_ATTEMPTS_LIMIT) ? retries + 1 : undefined;
+    await this.markLanding(f, retryTick);
     try {
       await this.blessForLanding(f);
     } catch (error) {
@@ -1778,6 +1794,9 @@ class Tick {
       if (!isAuthFailure(error)) {
         // Outcome unknown (no verdict): withdraw the blessing and fail the tick; the next tick
         // re-observes the base (a landing that did happen is recognized) and blesses again.
+        if (retryTick === LANDING_RETRY_TICKS && !isRateLimitError(error)) {
+          return this.settleLastLandingAttempt(f, error);
+        }
         await this.revokeOrNote(f, error);
         throw error;
       }
@@ -1805,6 +1824,20 @@ class Tick {
     // A landing that answered: the run of landings without a verdict is over.
     delete this.s.landingsWithoutVerdict;
     if (result.ok) return this.afterLanded(f, result.newBaseSha ?? f.candidateSha);
+    if (mergeFf && result.reason === "rejected" && !isAuthFailureText(result.detail ?? "")) {
+      const tried = retryTick ?? 1;
+      const reason =
+        result.detail?.match(/Required status check "[^"]+"/)?.[0] ??
+        (operatorReason(result.detail) || "push rejected");
+      if (tried < LANDING_RETRY_TICKS) {
+        this.s.inFlight.landingRetryTicks = tried;
+        this.s.inFlight.landAttempts = 0;
+        this.note(`${f.batchId}: landing rejected (${reason}); retrying on the next tick`);
+        return;
+      }
+      await this.revokeLanding(f, "rejected");
+      return this.parkBatch(f, reason);
+    }
     // A blessed commit of a batch that did not land could otherwise be merged by hand.
     await this.revokeLanding(f, result.reason);
     if (result.reason === "base-moved") return this.baseMoved(f, result.detail);
@@ -1817,6 +1850,54 @@ class Tick {
       detail += ' (check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")';
     }
     return this.pauseLanding(f, detail, result.merged ?? []);
+  }
+
+  async settleLastLandingAttempt(f, error) {
+    let tip;
+    try {
+      tip = await this.gh.getBranchSha(this.base);
+    } catch {
+      await this.revokeOrNote(f, error);
+      throw error;
+    }
+    if (tip === f.candidateSha) return this.afterLanded(f, tip);
+    await this.revokeOrNote(f, error);
+    if (!tip) throw error;
+    if (tip !== f.baseSha)
+      return this.baseMoved(f, `base ${this.base} is at ${tip}, expected ${f.baseSha}`);
+    return this.parkBatch(
+      f,
+      "attempts-limit",
+      `landing ended without a verdict: ${operatorReason(error.message)}`
+    );
+  }
+
+  async parkBatch(f, reason, detail = reason) {
+    const parked = (this.s.parked ??= {});
+    for (const { n, head } of f.prs) {
+      const previous = parked[String(n)];
+      parked[String(n)] = {
+        head,
+        baseSha: f.baseSha,
+        reason,
+        at: this.now(),
+        retried: previous?.head === head && previous.retried,
+      };
+      await this.gh.addLabels(n, [this.config.parkedLabel]);
+      await this.commentPr(
+        n,
+        `parked:${head12(head)}`,
+        `This batch did not land (${reason}). The queue will continue and retry this PR once when the base moves.`
+      );
+    }
+    this.s.inFlight = null;
+    this.event("pr-parked", {
+      batchId: f.batchId,
+      prs: prNumbers(f.prs),
+      sha: f.candidateSha,
+      detail: detail === reason ? reason : `${reason}: ${detail}`,
+    });
+    this.note(`${f.batchId}: parked ${formatPrs(f.prs)} (${reason})`);
   }
 
   async landMergeFf(f) {
@@ -1919,9 +2000,14 @@ class Tick {
    * batch the failure path sent back to "testing" with its count kept. A document of the code
    * before the count has no `landAttempts` at the landing stage: that stored attempt counts as 1.
    */
-  async markLanding(f) {
+  async markLanding(f, retryTick) {
     const landAttempts = storedLandAttempts(f) + 1;
-    this.s.inFlight = { ...f, stage: "landing", landAttempts };
+    this.s.inFlight = {
+      ...f,
+      stage: "landing",
+      landAttempts,
+      ...(retryTick === undefined ? {} : { landingRetryTicks: retryTick }),
+    };
     // Landing now: a release-freeze hold is over (saved here, in case the landing dies).
     if (f.freezeHold && f.freezeHold.endedAt === undefined) {
       this.s.inFlight.freezeHold = { ...f.freezeHold, endedAt: this.now() };
@@ -2401,6 +2487,7 @@ class Tick {
     for (const pr of f.prs) {
       await this.removeLabel(pr.n, label);
       await this.removeLabel(pr.n, protectedApprovalLabel);
+      if (this.s.parked?.[String(pr.n)]) await this.removeLabel(pr.n, this.config.parkedLabel);
       await this.commentPr(
         pr.n,
         `landed:${head12(pr.head)}`,
@@ -3438,6 +3525,10 @@ class Tick {
       bisect: bisect ? { ...bisect, segments: [included, ...bisect.segments.slice(1)] } : null,
       ...(lane ? { lane } : {}),
     };
+    for (const { n, head } of included) {
+      const parked = this.s.parked?.[String(n)];
+      if (parked?.head === head) parked.retried = true;
+    }
     this.s.counters.ciRuns += 1;
     const excluded = [
       ...(result.excludedBatchConflict ?? []).map((pr) => `#${pr.n} batch-conflict`),
@@ -3638,12 +3729,16 @@ class Tick {
     }
     this.pruneRepairTried(pulls);
     this.pruneRepairInfraDrops(pulls);
+    await this.pruneParked(pulls);
     const labeled = pulls.filter(
       (p) =>
         p.baseRef === this.base && (p.labels ?? []).includes(label) && !this.touched.has(p.number)
     );
     const freezeIssues = labeled.length ? await this.freezeIssues() : [];
-    const ctx = { config: this.config, freezeIssues, state: this.s, now: this.now() };
+    const baseSha = Object.values(this.s.parked ?? {}).some((entry) => !entry.retried)
+      ? await this.gh.getBranchSha(this.base)
+      : null;
+    const ctx = { config: this.config, freezeIssues, state: this.s, baseSha, now: this.now() };
     const entries = [];
     const candidates = [];
     for (const summary of labeled) {
@@ -3686,6 +3781,27 @@ class Tick {
       (a, b) => (a.labeledAt ?? "￿").localeCompare(b.labeledAt ?? "￿") || a.number - b.number
     );
     return { entries, candidates, ctx };
+  }
+
+  async pruneParked(pulls) {
+    const parked = this.s.parked;
+    if (!parked) return;
+    const { label, parkedLabel } = this.config;
+    const open = new Map(pulls.map((pull) => [String(pull.number), pull]));
+    for (const [n, entry] of Object.entries(parked)) {
+      const pull = open.get(n);
+      if (
+        pull?.headSha === entry.head &&
+        pull.labels.includes(label) &&
+        !this.touched.has(pull.number)
+      )
+        continue;
+      if (pull?.labels.includes(parkedLabel) && !this.dryRun && !this.shadow) {
+        await this.voice.removeLabel(pull.number, parkedLabel);
+      }
+      delete parked[n];
+    }
+    if (!Object.keys(parked).length) delete this.s.parked;
   }
 
   /**
@@ -4729,10 +4845,14 @@ export async function discoverBases(deps) {
     if (bases.has(base) || !isManagedBase(config, base)) continue;
     try {
       const { state } = await store.load(base);
-      // An open episode or a counted run of failures needs one completed tick to end it, even on
-      // a base that lost its work (its labeled PRs gone): that tick clears both, then the base
-      // drops out of this list.
-      if (hasQueueWork(state, false) || state.stalled || state.failedTicks !== undefined) {
+      // Stored quarantine, an open episode and counted failures still need housekeeping after
+      // the last labeled PR leaves. When that state is pruned, the base drops out of this list.
+      if (
+        hasQueueWork(state, false) ||
+        Object.keys(state.parked ?? {}).length > 0 ||
+        state.stalled ||
+        state.failedTicks !== undefined
+      ) {
         bases.add(base);
       }
     } catch {

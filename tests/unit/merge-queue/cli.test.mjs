@@ -813,6 +813,47 @@ test("why on an unmanaged base skips the state and reports eligibility", async (
   assert.equal(await run(["why", "999"], { eligibility }), 1, "missing PR → API error");
 });
 
+test("why shows quarantine until the base moves, then holds a retried head", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  const pull = fake.addPull({ number: 53, labels: [config.label, config.parkedLabel] });
+  fake.timeline.set(53, [
+    {
+      event: "labeled",
+      actor: { login: "diegosouzapw" },
+      created_at: "2026-11-13T11:00:00Z",
+      label: { name: config.label },
+    },
+  ]);
+  fake.statuses.set(pull.head.sha, [
+    {
+      context: "omni-queue/approval",
+      state: "success",
+      creator: { login: "omni-queue[bot]" },
+      created_at: "2026-11-13T11:00:05Z",
+      description: "approved by diegosouzapw",
+    },
+  ]);
+  const state = initialState(BASE, NOW);
+  const baseSha = sha("quarantine-base");
+  state.parked = {
+    53: { head: pull.head.sha, baseSha, reason: "branch protection", at: NOW, retried: false },
+  };
+  writeState(fake, state);
+  fake.refs.set(`heads/${BASE}`, baseSha);
+  const why = async () => {
+    lines.out.length = 0;
+    assert.equal(await run(["why", "53"], { config: { ...config, prChecksRequired: [] } }), 0);
+    return lines.out.join("\n");
+  };
+
+  assert.match(await why(), /parked: branch protection; will retry once when the base moves/);
+  fake.refs.set(`heads/${BASE}`, sha("advanced-base"));
+  assert.match(await why(), /verdict: ELIGIBLE/);
+  state.parked[53].retried = true;
+  writeState(fake, state);
+  assert.match(await why(), /parked: until the head changes/);
+});
+
 test("G6 (T14-a): why judges the PR gates and the lane as the tick does (real eligibility)", async (t) => {
   const { run, lines, fake } = await setup(t);
   const labeled = (label, created_at = "2026-11-13T11:00:00Z") => ({

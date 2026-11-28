@@ -30,10 +30,12 @@ import {
   NO_HEARTBEAT_LINE,
   assessHealth,
   formatTime,
+  renderDashboard,
 } from "../../../scripts/merge-queue/dashboard.mjs";
 import {
   GH_WRITE_METHODS,
   LANDING_ATTEMPTS_LIMIT,
+  LANDING_RETRY_TICKS,
   WITHDRAWAL_ALERT_MINUTES,
   RERUN_START_MINUTES,
   STATE_HEARTBEAT_MINUTES,
@@ -2528,7 +2530,7 @@ test("live merge-ff: retries once after the ruleset has not seen the configured 
   assert.deepEqual(calls[3].args, calls[1].args);
 });
 
-test("live merge-ff: pauses when the ruleset still expects the land status after the retry", async () => {
+test("live merge-ff: retries across ticks when the ruleset still expects the land status", async () => {
   const h = createHarness({ mode: "live" });
   const f = await greenBatch(h, [1]);
   const detail = requiredStatusRejection("omni-queue/land");
@@ -2536,21 +2538,31 @@ test("live merge-ff: pauses when the ruleset still expects the land status after
 
   await h.tick();
 
-  const state = await h.state();
-  assert.equal(state.paused.reason, "error");
-  assert.ok(state.paused.detail.includes(detail));
+  let state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal(state.inFlight.stage, "landing");
+  assert.equal(state.inFlight.landingRetryTicks, 1);
   assert.equal(h.gh.branches.get(BASE), f.baseSha);
   const calls = h.calls.filter((c) =>
     ["createCommitStatus", "landMergeFf", "sleep"].includes(c.name)
   );
   assert.deepEqual(
     calls.map((c) => c.name),
-    ["createCommitStatus", "landMergeFf", "sleep", "landMergeFf", "createCommitStatus"]
+    ["createCommitStatus", "landMergeFf", "sleep", "landMergeFf"]
   );
-  assert.equal(calls[4].args[1].state, "failure");
+  assert.equal(newestLand(h, f.candidateSha), "success");
+
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal(state.inFlight, null);
+  assert.equal(h.gh.branches.get(BASE), f.candidateSha);
+  assert.equal(Object.keys(state.parked ?? {}).length, 0);
+  assert.ok(!types(state).includes("pr-parked"));
+  assert.ok(types(state).includes("landed"));
 });
 
-test("live merge-ff: pauses without a retry when GH013 names another required status", async () => {
+test("live merge-ff: GH013 for another status skips the five-second retry and holds for the next tick", async () => {
   const h = createHarness({ mode: "live" });
   const f = await greenBatch(h, [1]);
   const detail = requiredStatusRejection("omni-queue/land-other");
@@ -2559,15 +2571,141 @@ test("live merge-ff: pauses without a retry when GH013 names another required st
   await h.tick();
 
   const state = await h.state();
-  assert.equal(state.paused.reason, "error");
-  assert.ok(state.paused.detail.includes(detail));
+  assert.equal(state.paused, null);
+  assert.equal(state.inFlight.stage, "landing");
+  assert.equal(state.inFlight.landingRetryTicks, 1);
   assert.equal(h.gh.branches.get(BASE), f.baseSha);
   assert.equal(h.calls.filter((c) => c.name === "landMergeFf").length, 1);
   assert.equal(h.calls.filter((c) => c.name === "sleep").length, 0);
-  assert.deepEqual(
-    statusCalls(h).map((c) => c.args[1].state),
-    ["success", "failure"]
+  assert.deepEqual(statusStates(h), ["success"]);
+});
+
+async function rejectUntilParked(h, detail) {
+  assert.equal(LANDING_RETRY_TICKS, 3);
+  simulateLandingRejections(h, ...Array(LANDING_RETRY_TICKS).fill(detail));
+  for (let tick = 0; tick < LANDING_RETRY_TICKS; tick++) await h.tick();
+}
+
+test("live merge-ff: exhausted refusals withdraw the status, park the PRs and start the next batch", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1, 2]);
+  h.addPr(3);
+  const detail = requiredStatusRejection("Gate / Other");
+  await rejectUntilParked(h, detail);
+
+  const state = await h.state();
+  assert.equal(state.paused, null);
+  assert.deepEqual(nums(state.inFlight.prs), [3], "next batch started in the same tick");
+  assert.equal(landCalls(h).length, LANDING_RETRY_TICKS);
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+  assert.equal(statusStates(h).filter((status) => status === "failure").length, 1);
+  const event = state.history.find((e) => e.type === "pr-parked");
+  assert.equal(event.batchId, f.batchId);
+  assert.deepEqual(event.prs, [1, 2]);
+  assert.match(event.detail, /Gate \/ Other/);
+  for (const { n, head } of f.prs) {
+    assert.ok(h.gh.pulls.get(n).labels.includes(h.config.label));
+    assert.ok(h.gh.pulls.get(n).labels.includes(h.config.parkedLabel));
+    assert.equal(state.parked[n].head, head);
+    assert.equal(state.parked[n].baseSha, f.baseSha);
+    assert.equal(state.parked[n].retried, false);
+    const comments = commentsWithKey(h, n, `parked:${head12(head)}`);
+    assert.equal(comments.length, 1);
+    assert.match(
+      comments[0].body,
+      /did not land.*Gate \/ Other.*queue will continue.*retry.*once.*base moves/i
+    );
+  }
+});
+
+test("live merge-ff: a parked head is selected once on a new base, then waits for a new head", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  await rejectUntilParked(h, "branch protection");
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.inFlight, null, "the unchanged base keeps it out of selection");
+  assert.match(
+    renderDashboard(h.world.renders.at(-1)),
+    /parked.*branch protection.*retry once when the base moves/i
   );
+
+  h.gh.branches.set(BASE, fakeSha("advanced base"));
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [1]);
+  assert.equal(state.parked[1].retried, true);
+  h.runCi(state.inFlight.candidateSha);
+  await rejectUntilParked(h, "another rule");
+  h.gh.branches.set(BASE, fakeSha("advanced base again"));
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.inFlight, null);
+  assert.equal(state.parked[1].retried, true);
+  assert.match(renderDashboard(h.world.renders.at(-1)), /parked.*until the head changes/i);
+  assert.equal(commentsWithKey(h, 1, `parked:${head12(f.prs[0].head)}`).length, 1);
+});
+
+test("live merge-ff: a new head removes the parked label and record, and a removed queue label prunes the record", async () => {
+  const h = createHarness({ mode: "live" });
+  await greenBatch(h, [1, 2]);
+  await rejectUntilParked(h, "branch protection");
+  h.gh.pulls.get(1).headSha = fakeSha("updated PR");
+  h.gh.pulls.get(2).labels = [h.config.parkedLabel];
+  await h.tick();
+  const state = await h.state();
+  assert.equal(Object.keys(state.parked ?? {}).length, 0);
+  assert.ok(!h.gh.pulls.get(1).labels.includes(h.config.parkedLabel));
+  assert.ok(h.gh.pulls.get(1).labels.includes(h.config.label));
+});
+
+test("a scheduled tick still visits a base to prune its last parked PR", async () => {
+  const h = createHarness({ mode: "live" });
+  await greenBatch(h, [1]);
+  await rejectUntilParked(h, "branch protection");
+  h.gh.issues.push({
+    number: 77,
+    title: dashboardTitle(BASE),
+    body: "",
+    labels: [DASHBOARD_LABEL],
+    state: "open",
+  });
+  h.gh.pulls.get(1).state = "closed";
+  assert.deepEqual(await discoverBases(h.deps), [BASE]);
+  await h.tick();
+  assert.equal((await h.state()).parked, undefined);
+  assert.deepEqual(await discoverBases(h.deps), []);
+});
+
+test("live merge-ff: the no-verdict limit starts bounded retries, then parks and starts the next batch", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  h.addPr(2);
+  h.world.landError = notAvailable(1);
+  for (let i = 0; i < LANDING_ATTEMPTS_LIMIT; i++) {
+    await failingTick(h, /not available from origin/);
+  }
+  for (let i = 1; i < LANDING_RETRY_TICKS; i++) {
+    await failingTick(h, /not available from origin/);
+    const state = await h.state();
+    assert.equal(state.paused, null);
+    assert.equal(state.inFlight.stage, "landing");
+    assert.equal(state.inFlight.landingRetryTicks, i);
+  }
+
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused, null);
+  assert.deepEqual(nums(state.inFlight.prs), [2]);
+  assert.equal(landCalls(h).length, LANDING_ATTEMPTS_LIMIT + LANDING_RETRY_TICKS);
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+  assert.ok(h.gh.pulls.get(1).labels.includes(h.config.label));
+  assert.ok(h.gh.pulls.get(1).labels.includes(h.config.parkedLabel));
+  assert.equal(commentsWithKey(h, 1, `parked:${head12(f.prs[0].head)}`).length, 1);
+  const event = state.history.find((e) => e.type === "pr-parked");
+  assert.equal(event.batchId, f.batchId);
+  assert.deepEqual(event.prs, [1]);
+  assert.match(event.detail, /attempts-limit.*ended without a verdict/);
 });
 
 test("live squash-api: every PR head is blessed and merged with the owner client", async () => {
@@ -2785,8 +2923,25 @@ const notAvailable = (attempt) =>
   new Error(`land: attempt ${attempt} is not available from origin`);
 const landPairs = (n) => Array.from({ length: n }, () => ["success", "failure"]).flat();
 
+async function exhaustNoVerdictRetries(h) {
+  for (let tick = 1; tick < LANDING_RETRY_TICKS; tick++) {
+    await failingTick(h, /not available from origin/);
+    const { inFlight, paused } = await h.state();
+    assert.equal(paused, null);
+    assert.equal(inFlight.landingRetryTicks, tick);
+  }
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused, null);
+  assert.match(
+    state.history.findLast((e) => e.type === "pr-parked")?.detail ?? "",
+    /attempts-limit: landing ended without a verdict/
+  );
+  return state;
+}
+
 for (const landing of ["merge-ff", "squash-api"]) {
-  test(`a landing that throws every tick pauses after 3 attempts (${landing})`, async () => {
+  test(`a landing that throws every tick is bounded (${landing})`, async () => {
     assert.equal(LANDING_ATTEMPTS_LIMIT, 3);
     const h = createHarness({ mode: "live", landing, actor: "owner" });
     const f = await greenBatch(h, [1]);
@@ -2802,7 +2957,21 @@ for (const landing of ["merge-ff", "squash-api"]) {
     assert.deepEqual(statusStates(h), landPairs(3), "3 success/failure pairs");
     assert.equal(landCalls(h).length, 3);
 
-    await h.tick(); // the 4th attempt: paused without blessing or landing
+    if (landing === "merge-ff") {
+      const state = await exhaustNoVerdictRetries(h);
+      const total = LANDING_ATTEMPTS_LIMIT + LANDING_RETRY_TICKS;
+      assert.deepEqual(statusStates(h), landPairs(total));
+      assert.equal(landCalls(h).length, total);
+      assert.equal(state.inFlight, null);
+      assert.equal(newestLand(h, sha), "failure");
+      h.clock.advance(10);
+      await h.tick();
+      assert.equal((await h.state()).inFlight, null, "the unchanged base keeps it parked");
+      assert.deepEqual(statusStates(h), landPairs(total));
+      return;
+    }
+
+    await h.tick(); // squash-api pauses without blessing or landing
     let state = await h.state();
     assert.deepEqual(statusStates(h), landPairs(3), "then none");
     assert.equal(landCalls(h).length, 3, "not landed again");
@@ -2879,14 +3048,12 @@ test("a manual pause and resume resets the counter", async () => {
     assert.equal((await h.state()).paused, null);
   }
   assert.equal((await h.state()).inFlight.landAttempts, 3);
-  await h.tick();
-  state = await h.state();
-  assert.equal(state.paused.reason, "error");
-  assert.match(
-    state.paused.detail,
-    /ended without a verdict 3 times since its candidate was composed/
+  await exhaustNoVerdictRetries(h);
+  assert.deepEqual(
+    statusStates(h),
+    landPairs(5 + LANDING_RETRY_TICKS),
+    "2 attempts, then a fresh count and retry window"
   );
-  assert.deepEqual(statusStates(h), landPairs(5), "2 attempts, then 3 after the resume");
 });
 
 test("a state without landAttempts loads and counts from 1", async () => {
@@ -2900,15 +3067,12 @@ test("a state without landAttempts loads and counts from 1", async () => {
     await failingTick(h, /not available from origin/);
     assert.equal((await h.state()).inFlight.landAttempts, attempt, "the stored attempt was 1");
   }
-  await h.tick();
-  const state = await h.state();
-  assert.equal(state.paused.reason, "error");
+  const state = await exhaustNoVerdictRetries(h);
   assert.match(
-    state.paused.detail,
-    /ended without a verdict 3 times since its candidate was composed/
+    state.history.findLast((e) => e.type === "pr-parked").detail,
+    /attempt 3 is not available from origin/
   );
-  assert.match(state.paused.detail, /attempt 3 is not available from origin/);
-  assert.deepEqual(statusStates(h), landPairs(2));
+  assert.deepEqual(statusStates(h), landPairs(2 + LANDING_RETRY_TICKS));
   assert.equal(newestLand(h, f.candidateSha), "failure");
 });
 
@@ -7813,18 +7977,21 @@ test("an authentication failure on the second landing attempt pauses with the st
   assert.equal(newestLand(h, f.candidateSha), "failure");
 });
 
-test("the tick that hits LANDING_ATTEMPTS_LIMIT withdraws a blessing still standing", async () => {
+test("an exhausted retry window withdraws a blessing still standing after a crashed tick", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1]);
-  // The third attempt's tick blessed it and died: no withdrawal ran.
+  // The last retry's tick blessed it and died: no withdrawal ran.
   await diedAfterBlessing(h, f, [f.candidateSha]);
-  await tamperInFlight(h, { landAttempts: LANDING_ATTEMPTS_LIMIT });
+  await tamperInFlight(h, {
+    landAttempts: LANDING_ATTEMPTS_LIMIT + LANDING_RETRY_TICKS,
+    landingRetryTicks: LANDING_RETRY_TICKS,
+  });
   await h.tick();
   const state = await h.state();
-  assert.equal(state.paused?.reason, "error");
+  assert.equal(state.paused, null);
   assert.match(
-    state.paused.detail,
-    /ended without a verdict 3 times since its candidate was composed/
+    state.history.findLast((e) => e.type === "pr-parked").detail,
+    /attempts-limit: landing ended without a verdict/
   );
   assert.deepEqual(
     statusCalls(h).map((c) => c.args),
@@ -7919,7 +8086,7 @@ const brokenGetPull = () => async () => {
   throw new Error("GET /pulls/1 → 502: Bad Gateway");
 };
 
-test("V1 (review probe 1): landings that throw, alternating with ticks that throw before landing, pause at the third landing without a verdict; three blessings", async () => {
+test("V1 (review probe 1): landings that throw, alternating with ticks that throw before landing, reach the retry window after three landings without a verdict", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1]);
   const getPull = h.gh.getPull;
@@ -7937,15 +8104,11 @@ test("V1 (review probe 1): landings that throw, alternating with ticks that thro
     assert.equal(state.paused, null);
   }
   h.gh.getPull = getPull;
-  await h.tick(); // the fourth landing tick: not blessed
-  const state = await h.state();
-  assert.equal(state.paused?.reason, "error");
-  assert.match(
-    state.paused.detail,
-    /ended without a verdict 3 times since its candidate was composed/
-  );
-  assert.equal(statusStates(h).filter((s) => s === "success").length, 3, "three blessings");
-  assert.equal(landCalls(h).length, 3);
+  assert.deepEqual(statusStates(h), landPairs(LANDING_ATTEMPTS_LIMIT));
+  await exhaustNoVerdictRetries(h);
+  const total = LANDING_ATTEMPTS_LIMIT + LANDING_RETRY_TICKS;
+  assert.deepEqual(statusStates(h), landPairs(total));
+  assert.equal(landCalls(h).length, total);
   assert.equal(newestLand(h, f.candidateSha), "failure");
 });
 
@@ -8212,7 +8375,7 @@ test("W2: a base-red pause with a repair in flight is replaced by the full-list 
   assert.equal(statusStates(h).filter((s) => s === "success").length, blessings, "nothing blessed");
 });
 
-test("W3 (re-review RR-2): landings that throw, alternating with checks back to pending, pause at the third landing without a verdict", async () => {
+test("W3 (re-review RR-2): landings that throw, alternating with checks back to pending, reach the retry window after three landings without a verdict", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1]);
   h.world.landError = notAvailable(1);
@@ -8226,14 +8389,9 @@ test("W3 (re-review RR-2): landings that throw, alternating with checks back to 
     assert.equal(state.inFlight.landAttempts, attempt, "the count is the candidate's: kept");
     rerunGate(h, f.candidateSha, "completed");
   }
-  await h.tick();
-  const state = await h.state();
-  assert.equal(state.paused?.reason, "error");
-  assert.match(
-    state.paused.detail,
-    /ended without a verdict 3 times since its candidate was composed/
-  );
-  assert.equal(statusStates(h).filter((s) => s === "success").length, 3, "three blessings");
+  assert.deepEqual(statusStates(h), landPairs(LANDING_ATTEMPTS_LIMIT));
+  await exhaustNoVerdictRetries(h);
+  assert.deepEqual(statusStates(h), landPairs(LANDING_ATTEMPTS_LIMIT + LANDING_RETRY_TICKS));
 });
 
 test("W3 (re-review RR-10): a shadow tick never pauses on a kept count", async () => {
@@ -8509,8 +8667,8 @@ test("X2: a dry-run tick on a base paused with overflow entries makes no GitHub 
   assert.equal(h.gh.writes.length, writes);
 });
 
-test('X3: the attempts-limit pause says what it counts (not "in a row")', async () => {
-  const h = createHarness({ mode: "live", actor: "owner" });
+test('X3: the squash-api attempts-limit pause says what it counts (not "in a row")', async () => {
+  const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
   await greenBatch(h, [1]);
   h.world.landError = notAvailable(1);
   for (let i = 0; i < 3; i++) await failingTick(h, /not available from origin/);

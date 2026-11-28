@@ -606,6 +606,10 @@ async function cmdWhy(ctx) {
     config,
     freezeIssues: freezeIssues.map((i) => ({ number: i.number, title: i.title, body: i.body })),
     state,
+    baseSha:
+      state?.parked?.[String(n)]?.head === pull.headSha
+        ? await gh.getBranchSha(pull.baseRef)
+        : null,
     now: now(),
   };
   // The PR's lane decides whether the PR gates apply, as in the tick (Tick.snapshotQueue).

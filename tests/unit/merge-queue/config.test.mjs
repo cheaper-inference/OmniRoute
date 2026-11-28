@@ -60,6 +60,7 @@ const ConfigSchema = z
     schemaVersion: z.literal(1),
     label,
     protectedApprovalLabel: label,
+    parkedLabel: label.default("omni-queue-parked"),
     approvers: z
       .array(z.string().regex(/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/))
       .min(1)
@@ -100,6 +101,12 @@ const ConfigSchema = z
     voice: z.enum(["app", "owner"]).default("app"),
   })
   .refine((c) => c.label !== c.protectedApprovalLabel)
+  .refine(
+    (c) =>
+      ![c.label, c.protectedApprovalLabel, ...c.blockLabels, ...Object.values(c.lanes ?? {})].some(
+        (other) => other.toLowerCase() === c.parkedLabel.toLowerCase()
+      )
+  )
   // lane labels: distinct from each other and from every other label the queue reads
   // (case-insensitive, as GitHub label names)
   .refine((c) => {
@@ -118,6 +125,34 @@ test("the shipped config passes the Zod schema and the runtime validator", () =>
   assert.equal(parsed.success, true, JSON.stringify(parsed.error?.issues ?? []));
   assert.deepEqual(validateConfig(raw), { ok: true, config: raw, errors: [] });
   assert.equal(loadConfig().label, "omni-queue");
+});
+
+test("parkedLabel defaults, accepts an override and rejects colliding and invalid labels", () => {
+  const { parkedLabel: _, ...config } = raw;
+  assert.equal(validateConfig(config).config?.parkedLabel, "omni-queue-parked");
+  for (const value of ["queue-quarantine", "parked for retry"]) {
+    const input = { ...config, parkedLabel: value };
+    assert.equal(ConfigSchema.safeParse(input).success, true);
+    assert.equal(validateConfig(input).config?.parkedLabel, value);
+  }
+  for (const value of [
+    config.label,
+    config.protectedApprovalLabel,
+    ...config.blockLabels,
+    ...Object.values(config.lanes),
+    " bad",
+    null,
+  ]) {
+    const input = {
+      ...config,
+      parkedLabel: typeof value === "string" ? value.toUpperCase() : value,
+    };
+    assert.equal(ConfigSchema.safeParse(input).success, false);
+    assert.ok(validateConfig(input).errors.some((e) => e.startsWith("parkedLabel:")));
+  }
+  const defaultCollision = { ...config, blockLabels: ["OMNI-QUEUE-PARKED"] };
+  assert.equal(ConfigSchema.safeParse(defaultCollision).success, false);
+  assert.ok(validateConfig(defaultCollision).errors.some((e) => e.startsWith("parkedLabel:")));
 });
 
 test("the shipped config lands as the owner with the noreply identity", () => {
