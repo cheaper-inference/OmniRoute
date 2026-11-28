@@ -1,0 +1,1 @@
+- **fix(responses):** the Chat to Responses stream converter ignores zero or empty usage placeholders, completes on `[DONE]` when it waits for trailing usage, and ends an upstream error chunk with `response.failed`. ([#20203](https://github.com/cheaper-inference/OmniRoute/pull/20203))

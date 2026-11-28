@@ -1,0 +1,1 @@
+- **fix(sse):** stop the early keepalive wrapper from queueing a whole response for a client that is not reading. ([#20203](https://github.com/cheaper-inference/OmniRoute/pull/20203))

@@ -718,6 +718,13 @@ export async function withEarlyStreamKeepalive(
             };
             try {
               while (true) {
+                // Backpressure: do not read the next upstream chunk while the client has not
+                // drained the queue. Otherwise a stalled client holds the whole response in memory.
+                // shortcut: 10 ms poll inside start(); a pull()-driven read is the clean form.
+                while (!aborted && (controller.desiredSize ?? 1) <= 0) {
+                  await new Promise((resolve) => setTimeout(resolve, 10));
+                }
+                if (aborted) break;
                 const { done, value } = await upstreamReader.read();
                 if (done) break;
                 if (value && value.byteLength > 0) {
