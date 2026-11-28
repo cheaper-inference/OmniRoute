@@ -221,6 +221,132 @@ test("assesses the committed CLI catalog rather than the working copy", (t) => {
   assert.match(result.report, /Changed production files: 1/);
 });
 
+const derivedRefreshHead = "chore/derived-refresh";
+const generatedCatalogReport = "CLI catalogs exempted as generated translations on";
+
+function fixtureWithNewCliTranslations(t) {
+  const portuguese = "bin/cli/locales/pt-BR.json";
+  const spanish = "bin/cli/locales/es.json";
+  const f = fixture(t, { [portuguese]: '{"yes":"Sim"}', [spanish]: '{"yes":"Sí"}' });
+  f.write(portuguese, '{"yes":"Claro","no":"Não"}');
+  f.write(spanish, '{"yes":"Por supuesto"}');
+  return f;
+}
+
+test("exempts and counts generated CLI translations on the derived refresh PR", (t) => {
+  const f = fixtureWithNewCliTranslations(t);
+  f.commit();
+  const result = f.run({ GITHUB_HEAD_REF: derivedRefreshHead });
+  assert.equal(result.status, 0, result.report);
+  assert.match(result.report, /Changed production files: 0/);
+  assert.match(result.report, /Changed automated test files: 0/);
+  assert.deepEqual(
+    result.report.split("\n").filter((line) => line.startsWith(generatedCatalogReport)),
+    [`${generatedCatalogReport} \`${derivedRefreshHead}\`: 2`]
+  );
+});
+
+for (const head of [
+  "feat/x",
+  "chore/derived-refresh-protected",
+  "chore/derived-refresh2",
+  "refs/heads/chore/derived-refresh",
+  undefined,
+]) {
+  test(`requires tests for the same CLI translations with head ${head ?? "unset"}`, (t) => {
+    const f = fixtureWithNewCliTranslations(t);
+    f.commit();
+    f.git("branch", "-m", derivedRefreshHead);
+    const result = f.run({ GITHUB_HEAD_REF: head });
+    assert.equal(result.status, 1, result.report);
+    assert.match(result.report, /Changed production files: 2/);
+    assert.ok(!result.report.includes(generatedCatalogReport));
+  });
+}
+
+for (const [label, name, before, after] of [
+  ["modified English catalog", "bin/cli/locales/en.json", '{"yes":"Yes"}', '{"yes":"Indeed"}'],
+  ["added catalog", "bin/cli/locales/fr.json", undefined, '{"yes":"Oui"}'],
+  ["deleted catalog", "bin/cli/locales/pt-BR.json", '{"yes":"Sim"}', undefined],
+  ["numeric leaf", "bin/cli/locales/pt-BR.json", '{"yes":"Sim"}', '{"yes":1}'],
+  ["dotted key", "bin/cli/locales/pt-BR.json", '{"yes":"Sim"}', '{"common.yes":"Sim"}'],
+]) {
+  test(`requires tests for a ${label} on the derived refresh PR`, (t) => {
+    const f = fixture(t, before === undefined ? {} : { [name]: before });
+    if (after === undefined) rmSync(path.join(f.repo, name));
+    else f.write(name, after);
+    f.commit();
+    const result = f.run({ GITHUB_HEAD_REF: derivedRefreshHead });
+    assert.equal(result.status, 1, result.report);
+    assert.match(result.report, /Changed production files: 1/);
+    assert.ok(result.report.includes(`- \`${name}\``));
+    assert.ok(!result.report.includes(generatedCatalogReport));
+  });
+}
+
+test("requires tests when a generated CLI catalog gains the executable bit", (t) => {
+  const name = "bin/cli/locales/pt-BR.json";
+  const f = fixture(t, { [name]: '{"yes":"Sim"}' });
+  f.write(name, '{"yes":"Claro"}');
+  f.git("add", "--chmod=+x", "--", name);
+  f.git("commit", "--quiet", "-m", "change locale contents and mode");
+  const result = f.run({ GITHUB_HEAD_REF: derivedRefreshHead });
+  assert.equal(result.status, 1, result.report);
+  assert.match(result.report, /Changed production files: 1/);
+  assert.ok(result.report.includes(`- \`${name}\``));
+  assert.ok(!result.report.includes(generatedCatalogReport));
+});
+
+test("exempts a valid generated CLI catalog that replaces an invalid base blob", (t) => {
+  const name = "bin/cli/locales/pt-BR.json";
+  const f = fixture(t, { [name]: '{"yes":1}' });
+  f.write(name, '{"yes":"Sim"}');
+  f.commit();
+  const result = f.run({ GITHUB_HEAD_REF: derivedRefreshHead });
+  assert.equal(result.status, 0, result.report);
+  assert.ok(result.report.includes(`${generatedCatalogReport} \`${derivedRefreshHead}\`: 1`));
+});
+
+test("lists only the other production file when generated CLI translations are exempt", (t) => {
+  const f = fixtureWithNewCliTranslations(t);
+  f.write("bin/cli/index.mjs");
+  f.commit();
+  const result = f.run({ GITHUB_HEAD_REF: derivedRefreshHead });
+  assert.equal(result.status, 1, result.report);
+  assert.match(result.report, /Changed production files: 1/);
+  assert.match(
+    result.report,
+    /### Production files in scope\n\n- `bin\/cli\/index\.mjs`\n\nResult: FAIL/
+  );
+  assert.ok(result.report.includes(`${generatedCatalogReport} \`${derivedRefreshHead}\`: 2`));
+});
+
+test("still rejects misplaced tests alongside exempt generated CLI translations", (t) => {
+  const f = fixtureWithNewCliTranslations(t);
+  f.write("root-regression.test.mjs");
+  f.commit();
+  const result = f.run({ GITHUB_HEAD_REF: derivedRefreshHead });
+  assert.equal(result.status, 1, result.report);
+  assert.match(result.report, /New test files outside tests\/: 1/);
+  assert.match(result.report, /must be under `tests\//);
+  assert.ok(result.report.includes('- "root-regression.test.mjs"'));
+  assert.match(result.report, /Changed production files: 0/);
+  assert.ok(result.report.includes(`${generatedCatalogReport} \`${derivedRefreshHead}\`: 2`));
+});
+
+test("keeps the PR test policy branch aligned with the nightly derived refresh workflow", () => {
+  const workflow = readFileSync(
+    new URL("../../.github/workflows/nightly-derived-refresh.yml", import.meta.url),
+    "utf8"
+  );
+  const workflowBranch = workflow.match(/^[ \t]+REFRESH_BRANCH:[ \t]+([^ \t\r\n]+)[ \t]*$/m)?.[1];
+  const policyBranch = readFileSync(policy, "utf8").match(
+    /^const DERIVED_REFRESH_BRANCH = "([^"]+)";$/m
+  )?.[1];
+  assert.ok(workflowBranch, "nightly-derived-refresh.yml must declare REFRESH_BRANCH");
+  assert.equal(policyBranch, workflowBranch);
+});
+
 test("a valid test does not hide another newly misplaced test", (t) => {
   const f = fixture(t);
   f.write("src/feature.ts");
