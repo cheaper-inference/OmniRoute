@@ -1,0 +1,1 @@
+- **fix(dashboard):** The Request Logs "Columns" button now matches the 40px height of the other toolbar controls, and the Translator's Mode control and Advanced section fit a 390px phone screen instead of clipping at the right edge (KEA-9804, KEA-9805)

@@ -188,7 +188,7 @@ export default function SimpleControls({
       </div>
 
       {/* Row 3: mode segmented control */}
-      <div className="flex flex-col gap-1">
+      <div className="flex w-full min-w-0 flex-col gap-1">
         <span className="text-sm font-medium text-text-main">{tr("simpleModeLabel", "Mode")}</span>
         <SegmentedControl
           semantics="radio"
@@ -196,6 +196,7 @@ export default function SimpleControls({
           value={mode}
           onChange={(v) => onModeChange(v as TranslateMode)}
           aria-label={tr("simpleModeLabel", "Mode")}
+          className="min-w-0 max-sm:grid max-sm:grid-cols-1 max-sm:[&>button]:whitespace-normal max-sm:[&>button]:wrap-anywhere"
         />
       </div>
 
