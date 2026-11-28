@@ -777,6 +777,11 @@ function getModelLockKey(
   status?: number | null
 ) {
   const canonicalProvider = getCanonicalLockProvider(provider);
+  // model_not_found locks the missing model only, in the exact namespace so a model
+  // named like a quota scope (`codex`, `spark`) cannot collide with a family key (#20622).
+  if (reason === "model_not_found") {
+    return exactModelLock.buildExactModelLockKey(canonicalProvider, connectionId, model);
+  }
   const lockModel =
     reason === "not_found" || status === 404
       ? model
