@@ -153,6 +153,28 @@ const SEED_REGISTRY: MarketplaceEntry[] = [
 // ── API ──
 
 /**
+ * Keep the entries of a custom registry that carry a string `name`, and make each one satisfy
+ * what search reads: a string `description` and a `string[]` `tags` (empty when absent), so a
+ * sparse entry can never make {@link searchMarketplace} throw.
+ */
+export function normalizeMarketplaceEntries(list: unknown[]): MarketplaceEntry[] {
+  const entries: MarketplaceEntry[] = [];
+  for (const entry of list) {
+    if (!entry || typeof entry !== "object") continue;
+    const record = entry as Record<string, unknown>;
+    if (typeof record.name !== "string") continue;
+    entries.push({
+      ...record,
+      description: typeof record.description === "string" ? record.description : "",
+      tags: Array.isArray(record.tags)
+        ? record.tags.filter((tag): tag is string => typeof tag === "string")
+        : [],
+    } as MarketplaceEntry);
+  }
+  return entries;
+}
+
+/**
  * List all available plugins in the marketplace.
  */
 export async function listMarketplacePlugins(): Promise<MarketplaceEntry[]> {
@@ -171,25 +193,13 @@ export async function listMarketplacePlugins(): Promise<MarketplaceEntry[]> {
         return [...SEED_REGISTRY];
       }
       const data = await res.json();
-      if (Array.isArray(data)) {
-        return data.filter(
-          (entry: unknown) =>
-            entry &&
-            typeof entry === "object" &&
-            typeof (entry as Record<string, unknown>).name === "string"
-        ) as MarketplaceEntry[];
-      }
+      if (Array.isArray(data)) return normalizeMarketplaceEntries(data);
       if (
         data &&
         typeof data === "object" &&
         Array.isArray((data as Record<string, unknown>).plugins)
       ) {
-        return ((data as Record<string, unknown>).plugins as unknown[]).filter(
-          (entry: unknown) =>
-            entry &&
-            typeof entry === "object" &&
-            typeof (entry as Record<string, unknown>).name === "string"
-        ) as MarketplaceEntry[];
+        return normalizeMarketplaceEntries((data as Record<string, unknown>).plugins as unknown[]);
       }
       console.warn("Custom marketplace returned unrecognized format");
     }
@@ -269,13 +279,35 @@ async function readBoundedBody(response: Response, maxBytes: number): Promise<Ui
   return Buffer.concat(chunks);
 }
 
-async function fetchBoundedBytes(url: string, maxBytes: number): Promise<Uint8Array> {
-  const response = await safeOutboundFetch(url, {
-    guard: "public-only",
-    timeoutMs: PACKAGE_FETCH_TIMEOUT_MS,
-  });
-  if (!response.ok) throw new Error(`unexpected status ${response.status}`);
-  return readBoundedBody(response, maxBytes);
+type PackageFetch = (
+  url: string,
+  init: { guard: "public-only"; timeoutMs: number; signal: AbortSignal }
+) => Promise<Response>;
+
+/**
+ * Download with ONE deadline that covers the request and the body read, so a server that sends
+ * headers and then stalls cannot keep an install pending. The deadline is cleared once the read
+ * ends, whether it succeeded or not.
+ */
+export async function fetchBoundedBytes(
+  url: string,
+  maxBytes: number,
+  timeoutMs: number = PACKAGE_FETCH_TIMEOUT_MS,
+  fetchPackage: PackageFetch = safeOutboundFetch as PackageFetch
+): Promise<Uint8Array> {
+  const controller = new AbortController();
+  const deadline = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetchPackage(url, {
+      guard: "public-only",
+      timeoutMs,
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`unexpected status ${response.status}`);
+    return await readBoundedBody(response, maxBytes);
+  } finally {
+    clearTimeout(deadline);
+  }
 }
 
 let verifiedInstallOverrides: Partial<VerifiedInstallDeps> | null = null;
@@ -325,8 +357,10 @@ async function fetchOrRefuse(
  * download -> SHA-256 of the downloaded bytes -> extraction in private staging -> manifest
  * name/version check -> `pluginManager.install(<extracted dir>)`.
  *
- * Any failure throws a {@link MarketplaceIntegrityError} BEFORE the manager is called, so an
- * already installed plugin and its registered version are untouched. This path has no
+ * A failure in a verification step throws a {@link MarketplaceIntegrityError} BEFORE the
+ * manager is called, so an already installed plugin and its registered version are untouched.
+ * An error raised by `pluginManager.install()` follows the manager's existing behavior (the
+ * plugin row is written before its `onInstall` hook and `activate()` run). This path has no
  * fallback to an unsigned install and never consults the custom registry URL.
  */
 async function installVerifiedMarketplacePlugin(

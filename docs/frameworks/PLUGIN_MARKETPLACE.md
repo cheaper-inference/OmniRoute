@@ -184,8 +184,10 @@ The `version` is required in this mode. Steps, all in `src/lib/plugins/`:
 6. Only then is `pluginManager.install()` called, with the extracted directory.
    This includes the upgrade path of an already installed plugin.
 
-Any failure raises a `MarketplaceIntegrityError` before the manager is reached, so
-an installed plugin and its registered version stay as they were. The response is
+A failure in a verification step raises a `MarketplaceIntegrityError` before the manager
+is reached, so an installed plugin and its registered version stay as they were.
+An error raised by `pluginManager.install()` follows the manager's existing behavior
+and can leave the plugin registered. The response for a verification failure is
 a fixed message (`400` verification failure, `404` unknown name+version, `502`
 index or package unreachable, `503` not configured) with the failing step in
 `error.reason`; upstream hosts, paths and stack traces are never returned. **A

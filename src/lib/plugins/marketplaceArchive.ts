@@ -151,15 +151,24 @@ function rawEntryName(block: Buffer, pendingName: string | undefined): string {
   return prefix ? `${prefix}/${baseName}` : baseName;
 }
 
-/** Validate one entry header and turn it into an entry. Order of the checks is deliberate. */
+/** `./` (or `.`): what `tar -C dir .` writes first. Only a directory may be this marker. */
+function isRootDirectoryMarker(rawName: string): boolean {
+  return /^\.(\/\.)*\/?$/.test(rawName);
+}
+
+/**
+ * Validate one entry header and turn it into an entry; null for the harmless root directory
+ * marker. Order of the checks is deliberate.
+ */
 function buildEntry(
   header: RawHeader,
   pendingName: string | undefined,
   seen: Set<string>,
   entryCount: number
-): TarEntry {
+): TarEntry | null {
   const kind = entryKind(header.flag);
   const rawName = rawEntryName(header.block, pendingName);
+  if (kind === "directory" && isRootDirectoryMarker(rawName)) return null;
   // A regular file named like a directory is a malformed (or disguised) entry.
   if (kind === "file" && rawName.endsWith("/")) throw unsafe();
 
@@ -186,7 +195,8 @@ function parseTar(tar: Buffer): TarEntry[] {
       pendingName = meta.pendingName;
       continue;
     }
-    entries.push(buildEntry(header, pendingName, seen, entries.length));
+    const entry = buildEntry(header, pendingName, seen, entries.length);
+    if (entry) entries.push(entry);
     pendingName = undefined;
   }
   // No end-of-archive marker: a truncated stream.

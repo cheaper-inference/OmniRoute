@@ -69,7 +69,10 @@ describe("plugin marketplace", () => {
 
   describe("isSafeMarketplaceUrl — SSRF guard", () => {
     // A resolver stub so the DNS-resolution branch is deterministic in tests.
-    const resolveTo = (...ips: string[]) => async () => ips.map((address) => ({ address }));
+    const resolveTo =
+      (...ips: string[]) =>
+      async () =>
+        ips.map((address) => ({ address }));
 
     it("rejects non-http(s) protocols", async () => {
       const { isSafeMarketplaceUrl } = await import("../../src/lib/plugins/marketplace.ts");
@@ -80,22 +83,38 @@ describe("plugin marketplace", () => {
 
     it("rejects literal private/loopback IPv4 hosts", async () => {
       const { isSafeMarketplaceUrl } = await import("../../src/lib/plugins/marketplace.ts");
-      for (const h of ["http://127.0.0.1", "http://10.0.0.5", "http://192.168.1.1", "http://169.254.169.254"]) {
+      for (const h of [
+        "http://127.0.0.1",
+        "http://10.0.0.5",
+        "http://192.168.1.1",
+        "http://169.254.169.254",
+      ]) {
         assert.equal(await isSafeMarketplaceUrl(h, resolveTo("8.8.8.8")), false, h);
       }
     });
 
     it("rejects literal IPv6 loopback / ULA / link-local hosts (the IPv4-only bypass)", async () => {
       const { isSafeMarketplaceUrl } = await import("../../src/lib/plugins/marketplace.ts");
-      for (const h of ["http://[::1]", "http://[fc00::1]", "http://[fd12:3456::1]", "http://[fe80::1]"]) {
+      for (const h of [
+        "http://[::1]",
+        "http://[fc00::1]",
+        "http://[fd12:3456::1]",
+        "http://[fe80::1]",
+      ]) {
         assert.equal(await isSafeMarketplaceUrl(h, resolveTo("8.8.8.8")), false, h);
       }
     });
 
     it("rejects a public hostname that RESOLVES to a private IPv4 (DNS rebinding / public→private)", async () => {
       const { isSafeMarketplaceUrl } = await import("../../src/lib/plugins/marketplace.ts");
-      assert.equal(await isSafeMarketplaceUrl("https://evil.example.com", resolveTo("10.1.2.3")), false);
-      assert.equal(await isSafeMarketplaceUrl("https://evil.example.com", resolveTo("169.254.169.254")), false);
+      assert.equal(
+        await isSafeMarketplaceUrl("https://evil.example.com", resolveTo("10.1.2.3")),
+        false
+      );
+      assert.equal(
+        await isSafeMarketplaceUrl("https://evil.example.com", resolveTo("169.254.169.254")),
+        false
+      );
     });
 
     it("rejects a public hostname that resolves to a private IPv6 (AAAA bypass)", async () => {
@@ -105,7 +124,10 @@ describe("plugin marketplace", () => {
         await isSafeMarketplaceUrl("https://evil.example.com", resolveTo("8.8.8.8", "::1")),
         false
       );
-      assert.equal(await isSafeMarketplaceUrl("https://evil.example.com", resolveTo("fc00::1")), false);
+      assert.equal(
+        await isSafeMarketplaceUrl("https://evil.example.com", resolveTo("fc00::1")),
+        false
+      );
     });
 
     it("rejects on DNS failure or empty resolution (fail-closed)", async () => {
@@ -120,9 +142,75 @@ describe("plugin marketplace", () => {
     it("accepts a public hostname resolving only to public addresses", async () => {
       const { isSafeMarketplaceUrl } = await import("../../src/lib/plugins/marketplace.ts");
       assert.equal(
-        await isSafeMarketplaceUrl("https://registry.example.com", resolveTo("93.184.216.34", "2606:2800:220:1::1")),
+        await isSafeMarketplaceUrl(
+          "https://registry.example.com",
+          resolveTo("93.184.216.34", "2606:2800:220:1::1")
+        ),
         true
       );
     });
+  });
+});
+
+describe("plugin marketplace: registry entries and the bounded package fetch", () => {
+  it("fills description and tags so a name-only entry cannot break a search", async () => {
+    const { normalizeMarketplaceEntries } = await import("../../src/lib/plugins/marketplace.ts");
+    const entries = normalizeMarketplaceEntries([
+      { name: "bare" },
+      { name: "partial", description: 42, tags: ["ok", 7, null] },
+      { name: "complete", description: "Full entry", tags: ["a", "b"] },
+      { description: "no name" },
+      null,
+      "not an object",
+    ]);
+    assert.deepEqual(
+      entries.map((e: { name: string }) => e.name),
+      ["bare", "partial", "complete"]
+    );
+    assert.deepEqual(
+      entries.map((e: { description: string; tags: string[] }) => [e.description, e.tags]),
+      [
+        ["", []],
+        ["", ["ok"]],
+        ["Full entry", ["a", "b"]],
+      ]
+    );
+    // The same read searchMarketplace performs on a query that does not match the name.
+    for (const e of entries) {
+      assert.doesNotThrow(() => e.description.toLowerCase().includes("zzz"));
+      assert.doesNotThrow(() => e.tags.some((t: string) => t.includes("zzz")));
+    }
+  });
+
+  it("the package deadline covers the body read, not only the response headers", async () => {
+    const { fetchBoundedBytes } = await import("../../src/lib/plugins/marketplace.ts");
+    let sawSignal: AbortSignal | undefined;
+    const stalledBody = async (_url: string, init: { signal?: AbortSignal }) => {
+      sawSignal = init.signal;
+      // Headers arrive at once; the body then never delivers a byte until the signal aborts.
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          init.signal?.addEventListener("abort", () => controller.error(new Error("aborted")));
+        },
+      });
+      return new Response(body, { status: 200 });
+    };
+    const started = Date.now();
+    await assert.rejects(
+      fetchBoundedBytes("https://plugins.example.test/p.tgz", 1024, 30, stalledBody)
+    );
+    assert.ok(Date.now() - started < 2000, "a stalled body must not hang past the deadline");
+    assert.ok(sawSignal, "the deadline signal must reach the fetch");
+  });
+
+  it("a prompt package within the budget is returned and the deadline is cleared", async () => {
+    const { fetchBoundedBytes } = await import("../../src/lib/plugins/marketplace.ts");
+    const bytes = await fetchBoundedBytes(
+      "https://plugins.example.test/p.tgz",
+      1024,
+      5000,
+      async () => new Response(Buffer.from("package-bytes"), { status: 200 })
+    );
+    assert.equal(Buffer.from(bytes).toString(), "package-bytes");
   });
 });

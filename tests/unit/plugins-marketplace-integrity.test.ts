@@ -299,6 +299,32 @@ test.describe("extractMarketplaceArchive", () => {
     assert.ok(fs.existsSync(path.join(pluginDir, "plugin.json")));
   });
 
+  test("accepts a package built from the current directory (a ./ directory header first)", async () => {
+    const entries = [
+      { name: "./", type: "5" as const },
+      ...pluginPackageEntries("signed-fixture", "1.0.0").map((e) => ({
+        ...e,
+        name: `./${e.name}`,
+      })),
+    ];
+    const { pluginDir } = await extract(buildTarGz(entries));
+    assert.ok(fs.existsSync(path.join(pluginDir, "plugin.json")));
+    assert.ok(fs.existsSync(path.join(pluginDir, "index.js")));
+  });
+
+  test("a root marker is skipped only for directories; files, empty names and traversal stay refused", async () => {
+    for (const bad of [
+      [{ name: "./", content: "x" }],
+      [{ name: ".", content: "x" }],
+      [{ name: "", type: "5" as const }],
+      [{ name: "../", type: "5" as const }],
+      [{ name: "/", type: "5" as const }],
+    ]) {
+      const entries = [...bad, ...pluginPackageEntries("signed-fixture", "1.0.0")];
+      assert.equal(await codeOfAsync(extract(buildTarGz(entries))), "archive_unsafe_entry");
+    }
+  });
+
   test("the manifest must carry the signed name and version", async () => {
     const wrongVersion = buildTarGz(pluginPackageEntries("signed-fixture", "2.0.0"));
     assert.equal(await codeOfAsync(extract(wrongVersion)), "manifest_mismatch");
