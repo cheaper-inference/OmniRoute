@@ -254,11 +254,11 @@ See [MCP-SERVER.md](./MCP-SERVER.md) for transport setup and scope assignments.
 
 ## Adding a New Built-in Skill
 
-1. **Define the handler** in `src/lib/skills/builtins.ts` (or a sibling file under `src/lib/skills/builtin/`). Signature: `(input, { apiKeyId, sessionId }) => Promise<output>`.
+1. **Define the handler** in `src/lib/skills/builtins.ts`. Signature: `(input, { apiKeyId, sessionId }) => Promise<output>`.
 2. **Sandboxed code path?** Call `sandboxRunner.run(image, command, env, sandboxConfig({...}))`. Use `normalizeImage()` against the allowlist.
 3. **Filesystem path?** Always pass through `resolveWorkspacePath(input, context)` before touching disk.
 4. **Network call?** Use `safeOutboundFetch` with `guard: "public-only"`; sanitize headers via `sanitizeHeaders()`.
-5. **Register** by adding the entry to `builtinSkills` (or calling `registerBrowserSkill(executor)`-style at boot).
+5. **Register** by adding the entry to `builtinSkills`.
 6. **Wire built-in tool aliases** (optional) in `BUILTIN_TOOL_ALIASES` (`interception.ts:23`) if the upstream model emits a different name.
 7. **Tests** in `src/lib/skills/__tests__/` (Vitest).
 
@@ -366,9 +366,8 @@ const total = skillExecutor.countExecutions("api-key-id");
 The `maxRetries` setting is stored but **not currently used** by the executor's `execute()` method — it only performs a single attempt. The `maxRetries` value is exposed for future implementation and for hooks that want to read it.
 
 For now, retries must be implemented inside the skill handler itself. Built-in
-skills are registered against the executor (e.g. `registerBuiltinSkills(executor)`
-/ `registerBrowserSkill(executor)` in `src/lib/skills/builtin/`); whichever handler
-you register can wrap its own retry loop:
+skills are registered against the executor (e.g. `registerBuiltinSkills(executor)`);
+whichever handler you register can wrap its own retry loop:
 
 ```ts
 // inside a skill handler

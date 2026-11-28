@@ -1,1 +1,0 @@
-- **refactor(skills):** remove the unused `maxRetries` setting and `setMaxRetries()` from the skill executor; it never retried a failed handler.
