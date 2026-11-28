@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
+const previousDataDir = process.env.DATA_DIR;
 const data = fs.mkdtempSync(path.join(os.tmpdir(), "combo-reasoning-holdback-"));
 process.env.DATA_DIR = data;
 process.env.APP_LOG_TO_FILE = "false";
@@ -20,6 +21,7 @@ const { closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 const { dispatchEvent } = await import("../../src/lib/webhookDispatcher.ts");
 
 const FLAG = "COMBO_REASONING_HOLDBACK_ENABLED";
+const UPSTREAM_ONLY = "_omnirouteSuppressRequestPersistence";
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const a = "holdback-a/first";
@@ -138,8 +140,11 @@ test.after(async () => {
   await dispatchEvent("request.completed", {});
   await closeCallLogSaves(2000);
   resetDbInstance();
-  fs.rmSync(data, { recursive: true, force: true });
+  if (previousDataDir === undefined) delete process.env.DATA_DIR;
+  else process.env.DATA_DIR = previousDataDir;
 });
+// Modules that captured DATA_DIR keep the path until the process ends: remove it only then.
+process.on("exit", () => fs.rmSync(data, { recursive: true, force: true }));
 
 // ─── holdComboReasoning: the helper ────────────────────────────────────────────
 
@@ -304,6 +309,43 @@ test("a pipeline stream_error frame after reasoning is a recoverable cut", async
   assert.equal(result.kind, "fallback");
 });
 
+test("the first terminal verdict in stream order wins when an error and [DONE] share a chunk", async () => {
+  const error = `data: ${JSON.stringify({
+    error: { message: "x", type: "stream_error", code: "stream_terminated" },
+  })}\n\n`;
+  const result = await hold(sse(source([reasoning("draft"), `${error}${DONE}`]).stream));
+  assert.equal(result.kind, "fallback");
+  if (result.kind !== "fallback") return;
+  assert.equal(result.reason, "cut");
+  assert.equal(result.checkpoint?.reasoning, "draft");
+});
+
+test("a commit that precedes an error in the same chunk keeps the commit", async () => {
+  const error = `data: ${JSON.stringify({
+    error: { message: "x", type: "stream_error", code: "stream_terminated" },
+  })}\n\n`;
+  const result = await hold(sse(source([reasoning("draft"), `${content("Hi")}${error}`]).stream));
+  assert.equal(result.kind, "commit");
+});
+
+test("the LF that completes a CRLF split across chunks does not end the event", async () => {
+  const { SseOutputScanner } = await import("../../open-sse/services/combo/firstOutputStream.ts");
+  const events: string[] = [];
+  const scanner = new SseOutputScanner(undefined, (payload) => events.push(payload));
+  scanner.push('data: {"choices":\r');
+  scanner.push("\ndata: []}\r\n\r\n");
+  assert.deepEqual(events, ['{"choices":\n[]}']);
+});
+
+test("a blank line whose CRLF is split across chunks still ends the event", async () => {
+  const { SseOutputScanner } = await import("../../open-sse/services/combo/firstOutputStream.ts");
+  const events: string[] = [];
+  const scanner = new SseOutputScanner(undefined, (payload) => events.push(payload));
+  scanner.push('data: {"a":1}\r\n\r');
+  scanner.push('\ndata: {"b":2}\r\n\r\n');
+  assert.deepEqual(events, ['{"a":1}', '{"b":2}']);
+});
+
 test("any other upstream error frame keeps the existing policy", async () => {
   const error = `data: ${JSON.stringify({
     error: { message: "bad", type: "invalid_request_error", code: "context_length_exceeded" },
@@ -428,6 +470,40 @@ test("makeCheckpointRequest redacts credential-shaped strings from the draft", a
   assert.ok(!JSON.stringify(next).includes(secret));
 });
 
+test("a disabled per-model timeout cannot bound the hold: the runner says so and streams as before", async () => {
+  const { buildTargetTimeoutRunner } =
+    await import("../../open-sse/services/combo/targetTimeoutRunner.ts");
+  const warnings: string[] = [];
+  const log = {
+    info: noop,
+    debug: noop,
+    warn: (...args: unknown[]) => void warnings.push(args.map(String).join(" ")),
+    error: noop,
+  };
+  const src = source([reasoning("early thought")], "stall");
+  const dispatchedTargets: unknown[] = [];
+  const run = buildTargetTimeoutRunner({
+    handleSingleModel: async (_body, _model, target) => {
+      dispatchedTargets.push(target);
+      return sse(src.stream);
+    },
+    comboTargetTimeoutMs: 0,
+    log,
+  });
+  const response = await run({ stream: true }, a, {
+    reasoningHoldback: { maxBytes: 64 * 1024 },
+  } as never);
+  const reader = response.body!.getReader();
+  const first = await reader.read();
+  assert.match(decoder.decode(first.value), /early thought/);
+  void reader.cancel().catch(noop);
+  assert.ok(
+    warnings.some((line) => /holdback is not applied/i.test(line) && line.includes(a)),
+    warnings.join("\n")
+  );
+  assert.equal("reasoningHoldback" in (dispatchedTargets[0] as object), false);
+});
+
 // ─── handleComboChat: the routing path ─────────────────────────────────────────
 
 let sequence = 0;
@@ -536,6 +612,32 @@ test("a cut after reasoning carries the draft only to a target the combo lists",
   const quoted = sent[0].content.slice(sent[0].content.indexOf("{"));
   assert.equal(JSON.parse(quoted).draft_reasoning, "Primeiro verifico a condição.");
   assert.equal(dispatched[1].body.tools, undefined);
+});
+
+test("only the attempt that forwards a draft is marked to keep its request out of persisted logs", async () => {
+  process.env[FLAG] = "true";
+  const { response, dispatched } = await run(({ model }) =>
+    model === a
+      ? sse(source([reasoning("draft")], coded()).stream)
+      : sse(source([content("ok"), stop, DONE]).stream)
+  );
+  await readAll(response);
+  assert.equal(dispatched.length, 2);
+  assert.equal(dispatched[0].body[UPSTREAM_ONLY], undefined);
+  assert.equal(dispatched[1].body[UPSTREAM_ONLY], true);
+});
+
+test("a fallback that forwards no draft is not marked", async () => {
+  process.env[FLAG] = "true";
+  const { response, dispatched } = await run(
+    ({ model }) =>
+      model === a
+        ? sse(source([reasoning("draft")], coded()).stream)
+        : sse(source([content("ok"), stop, DONE]).stream),
+    { config: { reasoningCheckpointProviders: ["holdback-z"] } }
+  );
+  await readAll(response);
+  assert.equal(dispatched[1].body[UPSTREAM_ONLY], undefined);
 });
 
 test("a target outside reasoningCheckpointProviders gets the normal fallback with the original body", async () => {

@@ -23,6 +23,7 @@ import {
   makeCheckpointRequest,
   readReasoningCheckpoint,
 } from "./reasoningCheckpoint.ts";
+import { markUpstreamOnlyBody } from "./requestPersistence.ts";
 import type { SingleModelTarget } from "./types.ts";
 
 export const COMBO_REASONING_HOLDBACK_FLAG = "COMBO_REASONING_HOLDBACK_ENABLED";
@@ -160,7 +161,9 @@ export async function dispatchHeldReasoning(
   if (carried && providerIsListed(providers, target, modelStr)) {
     const withDraft = makeCheckpointRequest(body, carried, "before-answer");
     if (withDraft) {
-      sendBody = withDraft;
+      // The draft is for the upstream only: the marker keeps this body out of every persisted
+      // request payload (see requestPersistence.ts).
+      sendBody = markUpstreamOnlyBody(withDraft);
       deps.log.info(
         "COMBO",
         `Forwarding a ${carried.reasoning.length}-char reasoning draft to ${modelStr}`

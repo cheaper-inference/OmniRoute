@@ -184,6 +184,8 @@ function createHeldScanner(
   collector: ChatCheckpointCollector
 ): SseOutputScanner {
   return new SseOutputScanner(createTransportReplayObserver(response), (payload) => {
+    // One chunk can carry several events; the first terminal verdict in stream order stands.
+    if (state.committed || state.cutFrame) return;
     const verdict = classifyHeldEvent(payload);
     if (verdict.kind === "reasoning") collector.addDelta(verdict.delta);
     else if (verdict.kind === "commit") state.committed = true;

@@ -503,7 +503,9 @@ combo cannot fail over cleanly. The holdback closes that gap for combos that ask
 - Scope: a streaming, single-choice Chat Completions request with a plain-text history (no
   tools, tool results or media), no bound session or pinned model, and sequential dispatch
   (no hedging, no protected priority target). Anything else keeps today's behavior. It runs
-  inside the per-target first-output gate, so it also needs a per-target timeout above `0`.
+  inside the per-target first-output gate, so it also needs a per-target timeout above `0`: with
+  the timeout disabled the holdback is not applied (the reasoning streams as usual) and the
+  runner logs a warning that names the target.
 - While the target sends only reasoning, role events or comments, the stream is held. The
   first answer token, tool call, refusal, finish reason or unrecognized frame commits it and
   every held byte reaches the client once, in order. At most **64 KiB** is held, and the
@@ -515,7 +517,9 @@ combo cannot fail over cleanly. The holdback closes that gap for combos that ask
   with credential-shaped strings redacted. A target that is not listed, or a request that
   could call tools, gets the original body. Signed, encrypted or hidden reasoning is never
   part of a draft.
-- The draft lives in memory for the request only and is never logged.
+- The draft lives in memory for the request only. It is never logged, and the dispatch that
+  forwards it is handled like a no-log request: no call log, pipeline capture or retained
+  request payload keeps the body that carries it (usage counters and outcomes are still recorded).
 
 ```json
 {
