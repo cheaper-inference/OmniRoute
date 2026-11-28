@@ -532,3 +532,62 @@ test("process identity: a bare omniroute title needs a working directory inside 
   // The title is all there is and the directory cannot be read: ambiguous, so never signalled.
   assert.equal(classify(new Error("EACCES")), "unknown");
 });
+
+// ---------------------------------------------------------------------------------------
+// Thread 6: updates are serialized by package tree as well as by data directory.
+// ---------------------------------------------------------------------------------------
+
+test("two daemons that share one package tree cannot update at the same time", async () => {
+  const root = tmp("omni-tx-pkglock-");
+  try {
+    const packageRoot = path.join(root, "lib", "node_modules", "omniroute");
+    fs.mkdirSync(packageRoot, { recursive: true });
+    const daemon = (name: string, operationId: string) => {
+      const dataDir = path.join(root, name);
+      fs.mkdirSync(dataDir);
+      const plan = makePlan({ operationId });
+      const deps = tx.createDefaultDependencies({
+        plan,
+        runtime: {
+          dataDir,
+          packageRoot,
+          shape: "daemon",
+          port: 20128,
+          oldPids: [],
+          nodePath: process.execPath,
+          npmPath: "npm",
+        },
+        environment: {},
+      });
+      return { dataDir, plan, deps };
+    };
+    const a = daemon("data-a", OPERATION_ID);
+    const b = daemon("data-b", OTHER_OPERATION_ID);
+    const lockA = await a.deps.acquireLock(a.plan);
+    // Refused at the lock, which is before prepare and before any service is stopped.
+    await assert.rejects(
+      b.deps.acquireLock(b.plan),
+      (err: { code?: string }) => err.code === "update-in-progress"
+    );
+    assert.equal(
+      fs.existsSync(path.join(b.dataDir, "managed-update", "lock")),
+      false,
+      "the refused update does not keep its own data lock"
+    );
+    // The CLI pre-flight of the second daemon already sees the package lock.
+    const context = tx.createDefaultPreflightContext({ dataDir: b.dataDir, packageRoot });
+    assert.equal(context.lockHeld(), true);
+    await lockA.release();
+    assert.equal(context.lockHeld(), false);
+    assert.equal(tx.isLockHeld(a.dataDir), false);
+    const lockB = await b.deps.acquireLock(b.plan);
+    await lockB.release();
+    assert.deepEqual(
+      fs.readdirSync(path.dirname(packageRoot)),
+      ["omniroute"],
+      "no lock file is left next to the package"
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});

@@ -573,6 +573,40 @@ export async function acquireFileLock(dataDir, operationId, options = {}) {
   return acquireLockFile(lockPath(dataDir), operationId, options);
 }
 
+// The npm install is shared by every daemon that runs from it, whatever its DATA_DIR. Its lock
+// sits beside the package (never inside the tree an install replaces), keyed by the real path.
+function packageLockPath(packageRoot) {
+  let real = packageRoot;
+  try {
+    real = realpathSync(packageRoot);
+  } catch {
+    // the lexical path still names the same install for every caller that uses it
+  }
+  return join(dirname(real), `.${basename(real)}.managed-update.lock`);
+}
+
+export function isPackageLockHeld(packageRoot, options = {}) {
+  return isLockFileHeld(packageLockPath(packageRoot), options);
+}
+
+// Data directory first, then package tree; a refusal on the second gives the first back.
+async function acquireUpdateLocks(runtime, operationId) {
+  const dataLock = await acquireFileLock(runtime.dataDir, operationId);
+  let packageLock;
+  try {
+    packageLock = await acquireLockFile(packageLockPath(runtime.packageRoot), operationId);
+  } catch (err) {
+    await dataLock.release();
+    throw err;
+  }
+  return {
+    async release() {
+      await packageLock.release();
+      await dataLock.release();
+    },
+  };
+}
+
 // ---------------------------------------------------------------------------------------
 // Snapshots and restoration
 // ---------------------------------------------------------------------------------------
@@ -987,7 +1021,7 @@ export function createDefaultPreflightContext({
     installedVersion: () => readPackageVersion(packageRoot),
     dataDir,
     service: async () => detectManagedService(dataDir, packageRoot, procDeps),
-    lockHeld: () => isLockHeld(dataDir),
+    lockHeld: () => isLockHeld(dataDir) || isPackageLockHeld(packageRoot),
     diskHeadroom: (args) => checkDiskHeadroom(args),
     nodePath: process.execPath,
     npmPath: "npm",
@@ -1104,7 +1138,7 @@ export function createDefaultDependencies({ plan, runtime, environment }) {
     now: () => Date.now(),
     sleep: sleepReal,
     record: (state) => store.record(state),
-    acquireLock: (p) => acquireFileLock(runtime.dataDir, p.operationId),
+    acquireLock: (p) => acquireUpdateLocks(runtime, p.operationId),
 
     prepare: async (p) => {
       // The environment (platform, container, global install) was proven at launch and cannot
