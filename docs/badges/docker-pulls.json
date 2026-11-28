@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "label": "docker pulls",
+  "message": "2.2M",
+  "color": "2496ED",
+  "namedLogo": "docker",
+  "cacheSeconds": 3600
+}
