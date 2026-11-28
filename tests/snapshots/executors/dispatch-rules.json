@@ -32,6 +32,11 @@
       "status": 400,
       "throws": true
     },
+    "deepseek-search": {
+      "message": "Provider \"deepseek-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
+      "status": 400,
+      "throws": true
+    },
     "duckduckgo-free": {
       "message": "Provider \"duckduckgo-free\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
