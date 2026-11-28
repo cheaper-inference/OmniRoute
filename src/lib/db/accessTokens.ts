@@ -1,6 +1,10 @@
 import { createHash, randomBytes, randomUUID } from "crypto";
-import { getDbInstance } from "./core";
+import type {
+  AccessTokenRepository,
+  AccessTokenRow,
+} from "@/domain/persistence/accessTokenRepository";
 import { type AccessScope, normalizeScope } from "../accessTokens/scopes";
+import { accessTokenRepositories } from "./repositories/accessTokenRepositories";
 
 /**
  * CLI access tokens — scoped credentials for remote-mode management commands.
@@ -9,6 +13,9 @@ import { type AccessScope, normalizeScope } from "../accessTokens/scopes";
  *
  * Token format: `oma_live_<base64url(32 bytes)>`. The first chars are stored as
  * `token_prefix` so tokens can be listed/identified without revealing the secret.
+ *
+ * Persistence lives behind AccessTokenRepository. The exports below stay synchronous
+ * (SQLite-only legacy access) because management auth verifies tokens without awaiting.
  */
 
 const TOKEN_RANDOM_BYTES = 32;
@@ -46,16 +53,11 @@ export interface RevokeAccessTokenResult {
   ambiguous: boolean;
 }
 
-interface AccessTokenRow {
-  id: string;
-  token_hash: string;
-  token_prefix: string;
-  name: string;
-  scope: string;
-  created_at: string;
-  last_used_at: string | null;
-  expires_at: string | null;
-  revoked_at: string | null;
+const legacy = accessTokenRepositories.legacySync.tokens;
+
+/** Async persistence contract. */
+export function getAccessTokenRepository(): AccessTokenRepository {
+  return accessTokenRepositories.tokens;
 }
 
 function rowToRecord(row: AccessTokenRow): AccessTokenRecord {
@@ -103,7 +105,6 @@ export function createAccessToken(input: {
   const name = (input.name ?? "").trim();
   if (!name) throw new Error("Access token name is required");
 
-  const db = getDbInstance();
   const scope = normalizeScope(input.scope, "read");
   const secret = `${TOKEN_SECRET_PREFIX}${randomBytes(TOKEN_RANDOM_BYTES).toString("base64url")}`;
   const id = `tok_${randomUUID()}`;
@@ -112,11 +113,7 @@ export function createAccessToken(input: {
   const createdAt = new Date().toISOString();
   const expiresAt = input.expiresAt ?? null;
 
-  db.prepare(
-    `INSERT INTO cli_access_tokens
-       (id, token_hash, token_prefix, name, scope, created_at, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).run(id, tokenHash, tokenPrefix, name, scope, createdAt, expiresAt);
+  legacy.insert({ id, tokenHash, tokenPrefix, name, scope, createdAt, expiresAt });
 
   return {
     secret,
@@ -139,10 +136,7 @@ export function createAccessToken(input: {
  */
 export function verifyAccessToken(secret: string | null | undefined): VerifiedAccessToken | null {
   if (!secret || typeof secret !== "string") return null;
-  const db = getDbInstance();
-  const row = db
-    .prepare("SELECT * FROM cli_access_tokens WHERE token_hash = ?")
-    .get(hashAccessToken(secret)) as AccessTokenRow | undefined;
+  const row = legacy.findByHash(hashAccessToken(secret));
   if (!row) return null;
   if (row.revoked_at) return null;
   if (isExpired(row.expires_at)) return null;
@@ -154,10 +148,7 @@ export function verifyAccessToken(secret: string | null | undefined): VerifiedAc
     Number.isFinite(lastUsedMs) && Date.now() - lastUsedMs < LAST_USED_WRITE_INTERVAL_MS;
   if (!stampIsFresh) {
     try {
-      db.prepare("UPDATE cli_access_tokens SET last_used_at = ? WHERE id = ?").run(
-        new Date().toISOString(),
-        row.id
-      );
+      legacy.touchLastUsed(row.id, new Date().toISOString());
     } catch {
       /* non-fatal */
     }
@@ -168,18 +159,12 @@ export function verifyAccessToken(secret: string | null | undefined): VerifiedAc
 
 /** List all tokens (masked — never includes the secret or its hash). */
 export function listAccessTokens(): AccessTokenRecord[] {
-  const db = getDbInstance();
-  const rows = db
-    .prepare("SELECT * FROM cli_access_tokens ORDER BY created_at DESC")
-    .all() as AccessTokenRow[];
-  return rows.map(rowToRecord);
+  return legacy.list().map(rowToRecord);
 }
 
 /** Fetch one token's masked record by id, or null. */
 export function getAccessToken(id: string): AccessTokenRecord | null {
-  const db = getDbInstance();
-  const row = db.prepare("SELECT * FROM cli_access_tokens WHERE id = ?").get(id) as
-    AccessTokenRow | undefined;
+  const row = legacy.findById(id);
   return row ? rowToRecord(row) : null;
 }
 
@@ -191,14 +176,8 @@ export function getAccessToken(id: string): AccessTokenRecord | null {
 export function revokeAccessToken(idOrPrefix: string): RevokeAccessTokenResult {
   const none = { revoked: false, alreadyRevoked: false, ambiguous: false };
   if (!idOrPrefix) return none;
-  const db = getDbInstance();
 
-  const matches = db
-    .prepare(
-      `SELECT id, revoked_at FROM cli_access_tokens
-         WHERE id = ? OR token_prefix = ?`
-    )
-    .all(idOrPrefix, idOrPrefix) as Array<{ id: string; revoked_at: string | null }>;
+  const matches = legacy.findRevokeCandidates(idOrPrefix);
   if (matches.length === 0) return none;
 
   const exact = matches.find((row) => row.id === idOrPrefix);
@@ -217,13 +196,7 @@ export function revokeAccessToken(idOrPrefix: string): RevokeAccessTokenResult {
     return { revoked: true, alreadyRevoked: true, ambiguous: false };
   }
 
-  const res = db
-    .prepare(
-      `UPDATE cli_access_tokens SET revoked_at = ?
-         WHERE id = ? AND revoked_at IS NULL`
-    )
-    .run(new Date().toISOString(), target.id);
-  if (res.changes > 0) {
+  if (legacy.markRevoked(target.id, new Date().toISOString())) {
     return { revoked: true, alreadyRevoked: false, ambiguous: false };
   }
   // Lost the race to another revoke of this same id.
