@@ -1,0 +1,1 @@
+- **fix(authz):** exclude `SPAWN_CAPABLE_PREFIXES` and `SPAWN_CAPABLE_PATTERNS` from the private-LAN `LOCAL_ONLY` widening and from the `requireLogin=false` anonymous bypass, and enforce `alwaysRequireAuth` on `PUT`/`POST /api/settings/mitm` and `GET /api/cli-tools/runtime/[toolId]` ([#21017](https://github.com/cheaper-inference/OmniRoute/issues/21017)) — thanks @zerafachris

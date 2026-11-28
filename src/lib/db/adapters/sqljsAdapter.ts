@@ -7,6 +7,27 @@ import type { SqliteAdapter, PreparedStatement, RunResult } from "./types";
 const SAVE_DEBOUNCE_MS = 100;
 const CHECKPOINT_INTERVAL_MS = 60_000;
 
+/**
+ * Thrown when `persist()` has already atomically renamed the new database image
+ * over `filePath` (so the new image is published and visible to readers), but
+ * the subsequent directory `fsync` failed. Callers can distinguish this from a
+ * pre-rename write failure where `filePath` was untouched.
+ */
+export class SqlJsPostRenameDurabilityError extends Error {
+  readonly filePath: string;
+  override readonly cause?: unknown;
+
+  constructor(filePath: string, cause?: unknown) {
+    const detail = cause instanceof Error ? cause.message : String(cause ?? "unknown error");
+    super(
+      `[sqljsAdapter] Database image was published to "${filePath}", but directory fsync failed: ${detail}`
+    );
+    this.name = "SqlJsPostRenameDurabilityError";
+    this.filePath = filePath;
+    this.cause = cause;
+  }
+}
+
 // sql.js's stmt.getAsObject() returns rows whose prototype is `null`
 // (Object.create(null)), whereas better-sqlite3 (the driver we ship and run in
 // production/CI) hands back ordinary Object.prototype rows. That difference is
@@ -222,6 +243,87 @@ async function loadSqlJs(): Promise<typeof _sqlJsLib> {
   return _sqlJsLib;
 }
 
+function statIfExists(filePath: string): fs.Stats | null {
+  try {
+    return fs.statSync(filePath);
+  } catch {
+    return null;
+  }
+}
+
+function applyExistingMetadata(fd: number, existingStat: fs.Stats | null): void {
+  if (!existingStat) return;
+  // `openSync` applies the process umask to the creation mode; `fchmodSync`
+  // restores the exact permission bits the operator configured on `filePath`.
+  fs.fchmodSync(fd, existingStat.mode & 0o777);
+  if (process.platform === "win32") return;
+  try {
+    fs.fchownSync(fd, existingStat.uid, existingStat.gid);
+  } catch {
+    /* best-effort ownership preservation */
+  }
+}
+
+function cleanupTempPersist(fd: number | null, tmpPath: string): void {
+  if (fd !== null) {
+    try {
+      fs.closeSync(fd);
+    } catch {
+      /* already closed */
+    }
+  }
+  try {
+    fs.unlinkSync(tmpPath);
+  } catch {
+    /* never created, or already gone */
+  }
+}
+
+function writeAndRenameAtomic(filePath: string, data: Uint8Array): void {
+  // Same directory, so `rename` stays within one filesystem — a temp file in
+  // os.tmpdir() would make it a cross-device copy, which is not atomic.
+  const tmpPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
+  const existingStat = statIfExists(filePath);
+  const existingMode = existingStat ? existingStat.mode & 0o777 : undefined;
+  let fd: number | null = null;
+  try {
+    fd =
+      existingMode !== undefined
+        ? fs.openSync(tmpPath, "w", existingMode)
+        : fs.openSync(tmpPath, "w");
+    applyExistingMetadata(fd, existingStat);
+    fs.writeFileSync(fd, Buffer.from(data));
+    // The rename is atomic, but only orders against data that already reached
+    // the disk; without this an unclean shutdown can publish an empty file.
+    fs.fsyncSync(fd);
+    fs.closeSync(fd);
+    fd = null;
+    fs.renameSync(tmpPath, filePath);
+  } catch (err) {
+    cleanupTempPersist(fd, tmpPath);
+    throw err;
+  }
+}
+
+function syncParentDirectory(filePath: string): void {
+  if (process.platform === "win32") return;
+  let dirFd: number | null = null;
+  try {
+    dirFd = fs.openSync(path.dirname(filePath), "r");
+    fs.fsyncSync(dirFd);
+  } catch (dirErr) {
+    throw new SqlJsPostRenameDurabilityError(filePath, dirErr);
+  } finally {
+    if (dirFd !== null) {
+      try {
+        fs.closeSync(dirFd);
+      } catch {
+        /* ignore close failure */
+      }
+    }
+  }
+}
+
 export async function createSqlJsAdapter(filePath: string): Promise<SqliteAdapter> {
   const SQLLib = await loadSqlJs();
   if (!SQLLib) throw new Error("[sqljsAdapter] Failed to load sql.js");
@@ -230,6 +332,7 @@ export async function createSqlJsAdapter(filePath: string): Promise<SqliteAdapte
   const db = new SQLLib.Database(buf ? new Uint8Array(buf) : undefined);
 
   let dirty = false;
+  let dirSyncPending = false;
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
   let _isOpen = true;
 
@@ -260,40 +363,18 @@ export async function createSqlJsAdapter(filePath: string): Promise<SqliteAdapte
    */
   function persist(): void {
     if (filePath === ":memory:") return;
-    const data = db.export();
-    // Same directory, so `rename` stays within one filesystem — a temp file in
-    // os.tmpdir() would make it a cross-device copy, which is not atomic.
-    const tmpPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
-    let fd: number | null = null;
-    try {
-      fd = fs.openSync(tmpPath, "w");
-      fs.writeFileSync(fd, Buffer.from(data));
-      // The rename is atomic, but only orders against data that already reached
-      // the disk; without this an unclean shutdown can publish an empty file.
-      fs.fsyncSync(fd);
-      fs.closeSync(fd);
-      fd = null;
-      fs.renameSync(tmpPath, filePath);
-    } catch (err) {
-      if (fd !== null) {
-        try {
-          fs.closeSync(fd);
-        } catch {
-          /* already closed */
-        }
-      }
-      try {
-        fs.unlinkSync(tmpPath);
-      } catch {
-        /* never created, or already gone */
-      }
-      throw err;
+    if (!dirSyncPending) {
+      writeAndRenameAtomic(filePath, db.export());
+      dirSyncPending = true;
     }
+    syncParentDirectory(filePath);
+    dirSyncPending = false;
     dirty = false;
   }
 
   function scheduleSave(): void {
     dirty = true;
+    dirSyncPending = false;
     if (saveTimer) clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       saveTimer = null;
