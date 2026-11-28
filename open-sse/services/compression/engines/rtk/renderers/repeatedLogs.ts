@@ -35,7 +35,7 @@ const LEVEL_RE =
   /^\[?(TRACE|DEBUG|INFO|NOTICE|WARNING|WARN|ERROR|ERR|FATAL|CRITICAL|PANIC|SEVERE)\]?(?=[\s:|-]|$)/i;
 const MARKER_RE = /^\[\d{1,9} repetições omitidas\]$/;
 const RESULT_RE =
-  /\b(?:started|starting|listening|ready|completed?|finished|succe(?:ss|eded|ssful(?:ly)?)|done|exit(?:ed|ing)?|stopped|shutdown|shutting down|passed|summary|total)\b/i;
+  /\b(?:result|started|starting|listening|ready|completed?|finished|succe(?:ss|eded|ssful(?:ly)?)|done|exit(?:ed|ing)?|stopped|shutdown|shutting down|passed|summary|total)\b/i;
 
 const SEVERITY = severityPattern();
 

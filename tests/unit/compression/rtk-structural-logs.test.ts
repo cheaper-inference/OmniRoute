@@ -156,6 +156,8 @@ describe("structural repeated logs", () => {
       "INFO worker finished ok",
       "INFO server listening on :8080",
       "INFO tests passed",
+      "INFO result=42",
+      "INFO Result: ok",
     ]) {
       assert.equal(render(Array(5).fill(line).join("\n")).changed, false, line);
     }
@@ -234,6 +236,32 @@ describe("structural repeated logs dispatch", () => {
     assert.ok(run(LOGS, "cd /srv && docker logs api").techniques.includes(TECHNIQUE));
     assert.ok(!run(LOGS, "cat app.log").techniques.includes(TECHNIQUE));
     assert.ok(!run(LOGS, null).techniques.includes(TECHNIQUE));
+  });
+
+  it("reads the compose options that come before the logs subcommand", () => {
+    for (const command of [
+      "docker compose logs web",
+      "docker compose -f compose.prod.yaml logs web",
+      "docker compose --file compose.prod.yaml logs web",
+      "docker compose --file=compose.prod.yaml logs web",
+      "docker compose -p demo --profile debug --env-file .env.prod logs --tail 100 web",
+      "docker compose --ansi never --progress plain --dry-run logs",
+      "cd /srv && docker compose -f a.yml -f b.yml logs api",
+    ]) {
+      assert.ok(run(LOGS, command).techniques.includes(TECHNIQUE), command);
+    }
+    // another subcommand, or a value mistaken for the subcommand, is not a log command
+    for (const command of [
+      "docker compose -f compose.prod.yaml ps",
+      "docker compose -f logs ps",
+      "docker compose -f compose.prod.yaml up logs",
+      "docker compose -f compose.prod.yaml",
+      "docker compose -f",
+    ]) {
+      const out = run(LOGS, command);
+      assert.ok(!out.techniques.includes(TECHNIQUE), command);
+      assert.equal(out.text, run(LOGS, command, { flag: false }).text, command);
+    }
   });
 
   it("is byte-identical to the legacy path when the flag is off", () => {

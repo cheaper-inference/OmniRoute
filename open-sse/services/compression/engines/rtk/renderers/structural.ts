@@ -75,7 +75,33 @@ interface StructuralRoute {
 type NativeToolRouteSelector = (text: string, toolName: string) => StructuralRoute | null;
 const NATIVE_TOOL_ROUTES = new Map<string, NativeToolRouteSelector>();
 
-const LOGS_COMMAND_RE = /^docker\s+(?:compose\s+)?logs\b/i;
+/** Compose options that take a separate value (`-f compose.yaml`, `--project-name demo`). */
+const COMPOSE_VALUE_OPTIONS = new Set([
+  "-f",
+  "--file",
+  "-p",
+  "--project-name",
+  "--project-directory",
+  "--profile",
+  "--env-file",
+  "--ansi",
+  "--progress",
+  "--parallel",
+]);
+const MAX_COMMAND_TOKENS = 64;
+
+/** `docker logs ...`, or `docker compose [options] logs ...` (the options come before the subcommand). */
+function isDockerLogsCommand(command: string): boolean {
+  const tokens = command.split(/\s+/, MAX_COMMAND_TOKENS);
+  if (tokens[0]?.toLowerCase() !== "docker") return false;
+  if (tokens[1]?.toLowerCase() === "logs") return true;
+  if (tokens[1]?.toLowerCase() !== "compose") return false;
+  let at = 2;
+  while (at < tokens.length && tokens[at].startsWith("-")) {
+    at += COMPOSE_VALUE_OPTIONS.has(tokens[at]) ? 2 : 1;
+  }
+  return tokens[at]?.toLowerCase() === "logs";
+}
 const DIFF_COMMAND_RE = /^git\s+(?:diff|show)\b/i;
 const DIFF_FILE_HEADER_RE = /^diff --(?:git|cc|combined) /m;
 const DIFF_STRONG_START_RE = /^diff --(?:git|cc|combined) /;
@@ -95,7 +121,7 @@ function diffRoute(command: string | null): StructuralRoute {
  */
 function selectShellRoute(text: string, rawCommand: string | null | undefined, full: boolean) {
   const command = lastCommandSegment(rawCommand?.trim() ?? "") || null;
-  if (command && LOGS_COMMAND_RE.test(command)) return logsRoute(command);
+  if (command && isDockerLogsCommand(command)) return logsRoute(command);
   if (command) {
     if (!DIFF_COMMAND_RE.test(command)) return null;
     return !full || DIFF_FILE_HEADER_RE.test(text) ? diffRoute(command) : null;
