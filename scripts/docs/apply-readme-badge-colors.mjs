@@ -1,11 +1,8 @@
 #!/usr/bin/env node
-// One-shot, idempotent: paints the eight shields.io badges of the README header group (the star
-// counter and the "Join the community" block) in the kit's Editions palette, OmniRoute's default
-// look: copper on ink (--ci-color-accent / --ci-color-heading of the light block of
-// packages/ui-kit/src/ci-editions.css), in README.md and every docs/i18n/<locale>/README.md.
-// shields.io picks each text color itself (dark on the copper, white on the ink). It rewrites
-// those URLs' query strings and nothing else: no other byte of a file changes, including the alt
-// text, which the mirrors translate.
+// Idempotent: paints the root README's shields.io badges in the kit's Editions palette
+// (--ci-color-accent / --ci-color-heading of the light block of packages/ui-kit/src/ci-editions.css).
+// In translated READMEs, only the original eight header badges are recolored. The script changes
+// URL query strings and preserves badge paths, surrounding markup, and translated alt text.
 //
 //   node scripts/docs/apply-readme-badge-colors.mjs --dry-run          report, write nothing
 //   node scripts/docs/apply-readme-badge-colors.mjs                    README.md and the mirrors
@@ -27,7 +24,8 @@ export const KIT_COLORS = { color: "e5ac82", labelColor: "20211c" };
 // the label, so both are spelled out to keep the badge's text and logo as they were.
 const HEADER_BADGES = [
   {
-    path: "github/stars/diegosouzapw/OmniRoute",
+    path: "github/stars/cheaper-inference/OmniRoute",
+    legacyPath: "github/stars/diegosouzapw/OmniRoute",
     set: { style: "flat", logo: "github", logoColor: "white", label: "Stars" },
   },
   { path: "badge/Follow_Diego_on-LinkedIn-0A66C2" },
@@ -40,6 +38,13 @@ const HEADER_BADGES = [
 ];
 
 const SHIELDS_URL = /https:\/\/img\.shields\.io\/([^?\s)"'<>]+)(\?[^\s)"'<>]*)?/g;
+
+function headerBadge(path) {
+  return HEADER_BADGES.find((badge) => badge.path === path || badge.legacyPath === path);
+}
+
+// The Open Source Friends tags carry each partner's own colors: they are never repainted.
+const PARTNER_BADGE = /^badge\/(?:Founding_Friend|Open_Source_Friend)-/;
 
 // Hand-rolled on purpose: URLSearchParams would turn the %20 in `label=Follow%20on%20GitHub` into
 // a `+`, a change to the URL that has nothing to do with its color.
@@ -68,24 +73,26 @@ function mergeQuery(query, overrides) {
   return merged.map(([key, value]) => (value === null ? key : `${key}=${value}`)).join("&");
 }
 
-/** Returns the URL in kit colors, or the same string when it is not a header badge. */
-export function recolorBadgeUrl(url) {
+/** Recolors a Shields.io URL in the selected badge group. */
+export function recolorBadgeUrl(url, { allBadges = false } = {}) {
   const match = /^https:\/\/img\.shields\.io\/([^?]+)(\?.*)?$/.exec(url);
-  const badge = match && HEADER_BADGES.find((b) => b.path === match[1]);
-  if (!badge) return url;
-  return `https://img.shields.io/${match[1]}?${mergeQuery(match[2], badge.set ?? {})}`;
+  if (!match) return url;
+  const [, path, query] = match;
+  const badge = headerBadge(path);
+  if (!badge && (!allBadges || PARTNER_BADGE.test(path))) return url;
+  return `https://img.shields.io/${path}?${mergeQuery(query, badge?.set ?? {})}`;
 }
 
 /** @returns {{ text: string, changedLines: number, found: string[] }} */
-export function recolorMarkdown(source) {
+export function recolorMarkdown(source, { allBadges = false } = {}) {
   const found = [];
   let changedLines = 0;
   const text = source
     .split("\n")
     .map((line) => {
       const next = line.replace(SHIELDS_URL, (url, path) => {
-        if (HEADER_BADGES.some((b) => b.path === path)) found.push(path);
-        return recolorBadgeUrl(url);
+        if (headerBadge(path)) found.push(path);
+        return recolorBadgeUrl(url, { allBadges });
       });
       if (next !== line) changedLines += 1;
       return next;
@@ -105,14 +112,19 @@ export function readmeTargets(root = ROOT) {
 function main(argv) {
   const dryRun = argv.includes("--dry-run");
   const onlyRoot = argv.includes("--only-root");
-  const targets = onlyRoot ? [join(ROOT, "README.md")] : readmeTargets();
+  const rootReadme = join(ROOT, "README.md");
+  const targets = onlyRoot ? [rootReadme] : readmeTargets();
   let totalLines = 0;
   let touched = 0;
   const incomplete = [];
   for (const file of targets) {
     const source = readFileSync(file, "utf8");
-    const { text, changedLines, found } = recolorMarkdown(source);
-    const missing = HEADER_BADGES.filter((b) => !found.includes(b.path)).map((b) => b.path);
+    const { text, changedLines, found } = recolorMarkdown(source, {
+      allBadges: file === rootReadme,
+    });
+    const missing = HEADER_BADGES.filter(
+      ({ path, legacyPath }) => !found.includes(path) && !found.includes(legacyPath)
+    ).map(({ path }) => path);
     if (missing.length) incomplete.push(`${relative(ROOT, file)}: ${missing.join(", ")}`);
     if (text === source) continue;
     totalLines += changedLines;

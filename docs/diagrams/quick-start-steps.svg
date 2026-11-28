@@ -9,7 +9,7 @@
 .bg{fill:var(--bg)} .surface{fill:var(--surface);stroke:var(--border)} .grid{stroke:var(--grid)}
 .h3{fill:var(--ink)}
 .label{fill:var(--body)}
-.ok-bg{fill:var(--ok-bg)}
+.surface-muted{fill:var(--surface-muted)}
 .detail{fill:var(--body)}
 .ol{fill-opacity:0}
   </style>
@@ -126,8 +126,8 @@
   <rect width="1200" height="456" fill="url(#quick-start-grid)"/>
   <g class="quick-start-step" transform="translate(32,32)">
     <rect width="368" height="188" rx="12" class="surface"/>
-    <circle cx="36" cy="36" r="16" class="ok-bg"/>
-    <g class="h3" style="fill:var(--ok)" transform="translate(30.82 42) scale(.018 -.018)"><use href="#g0"/></g>
+    <circle cx="36" cy="36" r="16" class="surface-muted"/>
+    <g class="h3" transform="translate(30.82 42) scale(.018 -.018)"><use href="#g0"/></g>
   <text x="36" y="42" class="ol">1</text>
     <g class="label" transform="translate(64 41) scale(.015 -.015)"><use href="#g1"/><use href="#g2" x="645"/><use href="#g3" x="1231"/><use href="#g4" x="1527"/><use href="#g5" x="2113"/><use href="#g2" x="2496"/><use href="#g6" x="3288"/><use href="#g4" x="3829"/><use href="#g7" x="4415"/><use href="#g8" x="5203"/><use href="#g9" x="5449"/><use href="#ga" x="6037"/><use href="#gb" x="6570"/><use href="#gc" x="6896"/><use href="#gd" x="7482"/><use href="#gd" x="7728"/></g>
   <text x="64" y="41" class="ol">Before you install</text>
@@ -140,8 +140,8 @@
   </g>
   <g class="quick-start-step" transform="translate(416,32)">
     <rect width="368" height="188" rx="12" class="surface"/>
-    <circle cx="36" cy="36" r="16" class="ok-bg"/>
-    <g class="h3" style="fill:var(--ok)" transform="translate(30.82 42) scale(.018 -.018)"><use href="#g1e"/></g>
+    <circle cx="36" cy="36" r="16" class="surface-muted"/>
+    <g class="h3" transform="translate(30.82 42) scale(.018 -.018)"><use href="#g1e"/></g>
   <text x="36" y="42" class="ol">2</text>
     <g class="label" transform="translate(64 41) scale(.015 -.015)"><use href="#g1f"/><use href="#g2" x="547"/><use href="#g5" x="1133"/><use href="#g1g" x="1526"/><use href="#g8" x="2409"/><use href="#g9" x="2655"/><use href="#gc" x="3243"/><use href="#gd" x="3829"/></g>
   <text x="64" y="41" class="ol">Terminal</text>
@@ -154,8 +154,8 @@
   </g>
   <g class="quick-start-step" transform="translate(800,32)">
     <rect width="368" height="188" rx="12" class="surface"/>
-    <circle cx="36" cy="36" r="16" class="ok-bg"/>
-    <g class="h3" style="fill:var(--ok)" transform="translate(30.82 42) scale(.018 -.018)"><use href="#g1w"/></g>
+    <circle cx="36" cy="36" r="16" class="surface-muted"/>
+    <g class="h3" transform="translate(30.82 42) scale(.018 -.018)"><use href="#g1w"/></g>
   <text x="36" y="42" class="ol">3</text>
     <g class="label" transform="translate(64 41) scale(.015 -.015)"><use href="#g1"/><use href="#g5" x="645"/><use href="#g4" x="1028"/><use href="#g1x" x="1606"/><use href="#ga" x="2446"/><use href="#g2" x="2979"/><use href="#g5" x="3565"/></g>
   <text x="64" y="41" class="ol">Browser</text>
@@ -168,8 +168,8 @@
   </g>
   <g class="quick-start-step" transform="translate(32,236)">
     <rect width="368" height="188" rx="12" class="surface"/>
-    <circle cx="36" cy="36" r="16" class="ok-bg"/>
-    <g class="h3" style="fill:var(--ok)" transform="translate(30.82 42) scale(.018 -.018)"><use href="#g28"/></g>
+    <circle cx="36" cy="36" r="16" class="surface-muted"/>
+    <g class="h3" transform="translate(30.82 42) scale(.018 -.018)"><use href="#g28"/></g>
   <text x="36" y="42" class="ol">4</text>
     <g class="label" transform="translate(64 41) scale(.015 -.015)"><use href="#g1"/><use href="#g5" x="645"/><use href="#g4" x="1028"/><use href="#g1x" x="1606"/><use href="#ga" x="2446"/><use href="#g2" x="2979"/><use href="#g5" x="3565"/></g>
   <text x="64" y="41" class="ol">Browser</text>
@@ -182,8 +182,8 @@
   </g>
   <g class="quick-start-step" transform="translate(416,236)">
     <rect width="368" height="188" rx="12" class="surface"/>
-    <circle cx="36" cy="36" r="16" class="ok-bg"/>
-    <g class="h3" style="fill:var(--ok)" transform="translate(30.82 42) scale(.018 -.018)"><use href="#g2h"/></g>
+    <circle cx="36" cy="36" r="16" class="surface-muted"/>
+    <g class="h3" transform="translate(30.82 42) scale(.018 -.018)"><use href="#g2h"/></g>
   <text x="36" y="42" class="ol">5</text>
     <g class="label" transform="translate(64 41) scale(.015 -.015)"><use href="#g1f"/><use href="#g2" x="547"/><use href="#g5" x="1133"/><use href="#g1g" x="1526"/><use href="#g8" x="2409"/><use href="#g9" x="2655"/><use href="#gc" x="3243"/><use href="#gd" x="3829"/></g>
   <text x="64" y="41" class="ol">Terminal</text>
@@ -196,8 +196,8 @@
   </g>
   <g class="quick-start-step" transform="translate(800,236)">
     <rect width="368" height="188" rx="12" class="surface"/>
-    <circle cx="36" cy="36" r="16" class="ok-bg"/>
-    <g class="h3" style="fill:var(--ok)" transform="translate(30.82 42) scale(.018 -.018)"><use href="#g2p"/></g>
+    <circle cx="36" cy="36" r="16" class="surface-muted"/>
+    <g class="h3" transform="translate(30.82 42) scale(.018 -.018)"><use href="#g2p"/></g>
   <text x="36" y="42" class="ol">6</text>
     <g class="label" transform="translate(64 41) scale(.015 -.015)"><use href="#g2q"/><use href="#g4" x="563"/><use href="#g7" x="1149"/><use href="#g5" x="1731"/><use href="#g2r" x="2330"/><use href="#g4" x="2894"/><use href="#g2s" x="3480"/><use href="#g8" x="4071"/><use href="#g9" x="4317"/><use href="#g2t" x="4905"/><use href="#gb" x="5703"/><use href="#g4" x="6029"/><use href="#g4" x="6615"/><use href="#gd" x="7201"/></g>
   <text x="64" y="41" class="ol">Your coding tool</text>

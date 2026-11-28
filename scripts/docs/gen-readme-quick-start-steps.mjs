@@ -100,8 +100,8 @@ function card({ place, title, lines }, i) {
   return [
     `  <g class="quick-start-step" transform="translate(${x},${y})">`,
     `    <rect width="${CARD_W}" height="${CARD_H}" rx="12" class="surface"/>`,
-    '    <circle cx="36" cy="36" r="16" class="ok-bg"/>',
-    `    <text x="36" y="42" text-anchor="middle" class="h3" style="fill:var(--ok)">${i + 1}</text>`,
+    '    <circle cx="36" cy="36" r="16" class="surface-muted"/>',
+    `    <text x="36" y="42" text-anchor="middle" class="h3">${i + 1}</text>`,
     `    <text x="64" y="41" class="label" style="font-size:15px">${esc(place)}</text>`,
     `    <text x="20" y="86" class="h3" style="font-size:23px">${esc(title)}</text>`,
     ...lines.map(

@@ -1,11 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
-import { CLI_ICON_TILES, renderCliIconTile } from "../../../scripts/docs/gen-cli-icon-tiles.mjs";
+import { JSDOM } from "jsdom";
+import {
+  CLI_ICON_TILES,
+  README_THEMED_ICONS,
+  renderCliIconTile,
+  renderReadmeThemedIcon,
+} from "../../../scripts/docs/gen-cli-icon-tiles.mjs";
 
-// The README's neutral initials tiles (docs/assets/cli-icons/, docs/assets/provider-icons/) must be
-// exactly what scripts/docs/gen-cli-icon-tiles.mjs writes, the directories must hold nothing the
-// generator does not own, and every tile must stay a self-contained, brand-free text tile.
+// The README's icon directories must hold exactly what gen-cli-icon-tiles.mjs produces.
+// Initials tiles stay brand-free and themed icons preserve the dashboard artwork.
 
 type Tile = { path: string; id: string; name: string; initials: string; desc: string };
 const tiles = CLI_ICON_TILES as Tile[];
@@ -23,13 +28,37 @@ test("every committed tile is exactly what the generator produces", () => {
   }
 });
 
-test("the tile directories hold exactly the generator's files", () => {
+test("every committed themed icon matches the generator and retains the source drawing", () => {
+  const readme = readFileSync("README.md", "utf8");
+  const svgRoot = (svg: string) =>
+    new JSDOM(svg, { contentType: "image/svg+xml" }).window.document.documentElement;
+  for (const icon of README_THEMED_ICONS) {
+    const committed = readFileSync(icon.path, "utf8");
+    assert.equal(committed, renderReadmeThemedIcon(icon), `${icon.path} is stale`);
+    assert.ok(readme.includes(`src="./${icon.path}"`), `${icon.path} is used by the README`);
+    const original = svgRoot(readFileSync(icon.source, "utf8"));
+    const themed = svgRoot(committed);
+    assert.equal(themed.getAttribute("viewBox"), original.getAttribute("viewBox"));
+    assert.equal(themed.getAttribute("fill"), "currentColor");
+    assert.equal(themed.getAttribute("fill-rule"), original.getAttribute("fill-rule"));
+    assert.deepEqual(
+      [...themed.querySelectorAll("path")].map((path) => path.outerHTML),
+      [...original.querySelectorAll("path")].map((path) => path.outerHTML)
+    );
+    assert.equal(
+      themed.querySelector("style")?.textContent,
+      ":root{color:#20211c}@media (prefers-color-scheme: dark){:root{color:#f2f0e8}}"
+    );
+  }
+});
+
+test("the icon directories hold exactly the generator's files", () => {
   const onDisk = DIRS.flatMap((dir) =>
     readdirSync(dir)
       .filter((f) => f.endsWith(".svg"))
       .map((f) => `${dir}/${f}`)
   ).sort();
-  assert.deepEqual(onDisk, tiles.map((t) => t.path).sort());
+  assert.deepEqual(onDisk, [...tiles, ...README_THEMED_ICONS].map(({ path }) => path).sort());
 });
 
 test("ids are unique and every tile is a labelled, self-contained text tile", () => {

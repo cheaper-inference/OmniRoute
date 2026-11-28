@@ -74,7 +74,7 @@ export async function buildProviderNumbersCards() {
     {
       value: RF.rowSumTotalLabel,
       label: "Free tokens a month, as others count",
-      // Marks the highlighted card; the dark-theme polish draws its accent from this flag.
+      // Marks the highlighted card: it gets the copper bar the hero uses.
       highlight: true,
       labelSize: 14.5,
       definitionRole: "cell",
@@ -89,7 +89,10 @@ export async function buildProviderNumbersCards() {
   ];
 }
 
-function card({ value, label, code, lines, labelSize = 17, definitionRole = "definition" }, i) {
+function card(
+  { value, label, code, lines, highlight, labelSize = 17, definitionRole = "definition" },
+  i
+) {
   const x = 32 + (i % COLUMNS) * 288;
   const firstRow = i < COLUMNS;
   const rows = code ? [["mono", code]] : [];
@@ -99,6 +102,7 @@ function card({ value, label, code, lines, labelSize = 17, definitionRole = "def
   return [
     `  <g class="provider-stat" transform="translate(${x},${firstRow ? 96 : 328})">`,
     `    <rect width="${CARD_W}" height="${CARD_H}" rx="12" class="surface"/>`,
+    ...(highlight ? [`    <rect width="6" height="${CARD_H}" rx="3" class="accent"/>`] : []),
     `    <text x="20" y="64" class="num" style="font-size:52px">${esc(String(value))}</text>`,
     `    <text x="20" y="96" class="h3" style="font-size:${labelSize}px">${esc(label)}</text>`,
     ...rows.map(
