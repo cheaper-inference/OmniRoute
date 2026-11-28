@@ -68,7 +68,9 @@ const P = await import("../../src/shared/constants/providers.ts");
 // ParalonCloud adds one apikey/inference-hosts entry — 258.
 // Replicate, Cerebrium, Hetzner Inference and Grokified (#19206) add four
 // apikey/inference-hosts entries — 262.
-const APIKEY_PROVIDER_COUNT = 263;
+// release/v3.8.55 moves uncloseai from NOAUTH back into apikey/gateways — 263.
+// LLMTR (#18536) adds one apikey/gateways entry — 264.
+const APIKEY_PROVIDER_COUNT = 264;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [
