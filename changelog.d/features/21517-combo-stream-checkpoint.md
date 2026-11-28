@@ -1,0 +1,1 @@
+- **feat(sse):** Opt-in `COMBO_STREAM_CHECKPOINT_ENABLED` lets a sequential combo resume a cut stream at its next listed target, sending the client only the words after the delivered text, instead of ending the answer with a failure (#21517).
