@@ -5,17 +5,13 @@ function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
 
-function toFiniteNumberOrNull(value: unknown): number | null {
+function toFiniteNumber(value: unknown): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.trim().length > 0) {
     const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
+    return Number.isFinite(parsed) ? parsed : 0;
   }
-  return null;
-}
-
-function toFiniteNumber(value: unknown): number {
-  return toFiniteNumberOrNull(value) ?? 0;
+  return 0;
 }
 
 function getPromptTokenDetails(tokens: unknown): JsonRecord {
@@ -25,23 +21,26 @@ function getPromptTokenDetails(tokens: unknown): JsonRecord {
   return asRecord(tokenRecord.input_tokens_details);
 }
 
-function getPromptCacheReadValue(tokens: unknown): unknown {
+export function getPromptCacheReadTokens(tokens: unknown): number {
   const tokenRecord = asRecord(tokens);
   const promptDetails = getPromptTokenDetails(tokenRecord);
-  const aliases = [
+  // Compatibility aliases may contain zero while a later field reports a cache hit.
+  const firstPositive = [
     tokenRecord.cacheRead,
     tokenRecord.cache_read_input_tokens,
     tokenRecord.cached_tokens,
     promptDetails.cached_tokens,
-  ];
-  // Compatibility aliases may contain zero while a later field reports a cache hit.
-  return (
-    aliases.find((value) => toFiniteNumber(value) > 0) ?? aliases.find((value) => value != null)
-  );
-}
+  ]
+    .map(toFiniteNumber)
+    .find((value) => value > 0);
+  if (firstPositive !== undefined) return firstPositive;
 
-export function getPromptCacheReadTokens(tokens: unknown): number {
-  return toFiniteNumber(getPromptCacheReadValue(tokens));
+  return toFiniteNumber(
+    tokenRecord.cacheRead ??
+      tokenRecord.cache_read_input_tokens ??
+      tokenRecord.cached_tokens ??
+      promptDetails.cached_tokens
+  );
 }
 
 /**
@@ -227,12 +226,20 @@ function hasAnyKey(record: JsonRecord, keys: string[]): boolean {
 }
 
 /**
- * Return a valid selected cache-read count. Missing or malformed observations remain unknown.
+ * Return prompt cache-read tokens, or `null` if the provider didn't
+ * report any cache-read field at all.
  */
 export function getPromptCacheReadTokensOrNull(tokens: unknown): number | null {
   if (readUsageEvidence(tokens)?.cacheRead.source === "unknown") return null;
-  const selected = toFiniteNumberOrNull(getPromptCacheReadValue(tokens));
-  return selected !== null && Number.isSafeInteger(selected) && selected >= 0 ? selected : null;
+  const tokenRecord = asRecord(tokens);
+  const promptDetails = getPromptTokenDetails(tokenRecord);
+  if (
+    hasAnyKey(tokenRecord, ["cacheRead", "cache_read_input_tokens", "cached_tokens"]) ||
+    hasAnyKey(promptDetails, ["cached_tokens"])
+  ) {
+    return getPromptCacheReadTokens(tokens);
+  }
+  return null;
 }
 
 /**
