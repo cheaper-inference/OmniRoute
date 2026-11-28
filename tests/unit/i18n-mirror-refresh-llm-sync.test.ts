@@ -15,7 +15,14 @@ import { fileURLToPath } from "node:url";
 import { load } from "js-yaml";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-type Step = { name?: string; id?: string; uses?: string; run?: string; if?: string };
+type Step = {
+  name?: string;
+  id?: string;
+  uses?: string;
+  run?: string;
+  if?: string;
+  env?: Record<string, string>;
+};
 const workflow = load(
   fs.readFileSync(path.join(repoRoot, ".github/workflows/i18n-mirror-refresh.yml"), "utf8")
 ) as { jobs: { refresh: { steps: Step[] } } };
@@ -50,6 +57,17 @@ test("stale llm.txt mirrors alone are enough to run the refresh", () => {
   // Translation still runs only for drifted docs: an empty --files would translate every doc.
   const translate = steps[indexOf((s) => s.id === "translate", "translate")];
   assert.equal(translate.if, "steps.drift.outputs.files != ''");
+});
+
+test("translated content is tested under PR policy before the writer publishes", () => {
+  const translate = indexOf((s) => s.id === "translate", "translate");
+  const check = indexOf((s) => s.name === "Check translated mirror content", "mirror content");
+  const commit = indexOf((s) => /git add -A docs\/i18n/.test(s.run ?? ""), "commit");
+  assert.ok(translate < check && check < commit, "translate → mirror content → commit");
+  assert.equal(steps[check].if, steps[translate].if);
+  assert.equal(steps[check].env?.OMNIROUTE_GATE_MODE, "pr");
+  assert.match(steps[check].run ?? "", /node --import tsx\/esm --test\b/);
+  assert.match(steps[check].run ?? "", /tests\/unit\/docs\/route-guard-import-locales\.test\.ts/);
 });
 
 test("the drift step's llm.txt probe runs as written and prints a count", () => {
