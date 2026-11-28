@@ -1,0 +1,1 @@
+- **fix(auth):** The OIDC callback now clears `oidc_state`, `oidc_pkce_verifier`, and `oidc_nonce` with the same `Secure` attribute used when setting them.

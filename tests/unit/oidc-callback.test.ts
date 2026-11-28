@@ -95,7 +95,15 @@ async function createSignedIdToken(claims: Record<string, unknown>) {
   return { idToken, jwks };
 }
 
-test("OIDC callback happy path: exchanges code, validates ID token, mints identical auth_token JWT, sets cookie, redirects to dashboard", async () => {
+async function assertSuccessfulOidcCallback({
+  forwardedProto,
+  authCookieSecure,
+  expectedSecure,
+}: {
+  forwardedProto?: "https";
+  authCookieSecure?: "true";
+  expectedSecure: boolean;
+}) {
   await setupFullOidcSettings();
 
   const { idToken, jwks } = await createSignedIdToken({
@@ -137,11 +145,15 @@ test("OIDC callback happy path: exchanges code, validates ID token, mints identi
     return new Response("not mocked", { status: 404 });
   }) as unknown as typeof fetch;
 
+  const originalAuthCookieSecure = process.env.AUTH_COOKIE_SECURE;
   try {
+    if (authCookieSecure === undefined) delete process.env.AUTH_COOKIE_SECURE;
+    else process.env.AUTH_COOKIE_SECURE = authCookieSecure;
+
     const reqUrl = `http://localhost/api/auth/oidc/callback?code=auth-code-123&state=${testState}`;
     const response = await callbackRoute.GET(
       new Request(reqUrl, {
-        headers: { "x-forwarded-proto": "http" },
+        headers: forwardedProto ? { "x-forwarded-proto": forwardedProto } : undefined,
       })
     );
 
@@ -179,6 +191,20 @@ test("OIDC callback happy path: exchanges code, validates ID token, mints identi
     assert.equal(clearedNonce.value, "", "oidc_nonce must be cleared");
     assert.equal(clearedNonce.options?.maxAge, 0);
 
+    assert.deepEqual(
+      {
+        oidc_state: clearedState.options?.secure ?? false,
+        oidc_pkce_verifier: clearedVerifier.options?.secure ?? false,
+        oidc_nonce: clearedNonce.options?.secure ?? false,
+      },
+      {
+        oidc_state: expectedSecure,
+        oidc_pkce_verifier: expectedSecure,
+        oidc_nonce: expectedSecure,
+      },
+      "Secure attributes on the three expired OIDC cookies"
+    );
+
     // Pure OIDC bootstrap: setupComplete must be marked true so login page
     // does not show "no password / onboarding" screens.
     const { getSettings } = await import("../../src/lib/db/settings.ts");
@@ -186,7 +212,21 @@ test("OIDC callback happy path: exchanges code, validates ID token, mints identi
     assert.equal(after.setupComplete, true, "OIDC login must mark setupComplete");
   } finally {
     globalThis.fetch = originalFetch;
+    if (originalAuthCookieSecure === undefined) delete process.env.AUTH_COOKIE_SECURE;
+    else process.env.AUTH_COOKIE_SECURE = originalAuthCookieSecure;
   }
+}
+
+test("OIDC callback happy path mints a dashboard session and clears cookies without Secure on plain HTTP", async () => {
+  await assertSuccessfulOidcCallback({ expectedSecure: false });
+});
+
+test("OIDC callback clears single-use cookies with Secure on forwarded HTTPS", async () => {
+  await assertSuccessfulOidcCallback({ forwardedProto: "https", expectedSecure: true });
+});
+
+test('OIDC callback clears single-use cookies with Secure on HTTP when AUTH_COOKIE_SECURE="true"', async () => {
+  await assertSuccessfulOidcCallback({ authCookieSecure: "true", expectedSecure: true });
 });
 
 test("OIDC callback rejects invalid state", async () => {
