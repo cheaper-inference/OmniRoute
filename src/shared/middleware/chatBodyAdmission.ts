@@ -569,8 +569,18 @@ export class ChatAdmissionController {
     sessionKey = "default"
   ): Promise<ChatAdmissionLease | null> {
     const deadline = Date.now() + Math.max(0, Math.floor(timeoutMs));
+    // #dispatchFair hands a freed slot to exactly one waiter. If that waiter then gives up
+    // without taking it (its client aborted, or its deadline fired, in the same task), the
+    // wakeup is passed on so the remaining waiters are not shed while capacity sits free.
+    let wokenByDispatch = false;
+    const passOnWakeup = () => {
+      if (wokenByDispatch && this.#activeHeavy < this.maxHeavyInFlight) this.#dispatchFair();
+    };
     for (;;) {
-      if (signal?.aborted) return null;
+      if (signal?.aborted) {
+        passOnWakeup();
+        return null;
+      }
       const lease = this.tryAcquireHeavy();
       if (lease) return lease;
       const remaining = deadline - Date.now();
@@ -599,7 +609,12 @@ export class ChatAdmissionController {
       let resolveParked: (() => void) | null = null;
       const waiter: AdmissionWaiter = {
         key: sessionKey,
-        resolve: () => resolveParked?.(),
+        // Set synchronously: the abort/deadline branch of the race can still win after
+        // #dispatchFair has already shifted this waiter off its queue.
+        resolve: () => {
+          wokenByDispatch = true;
+          resolveParked?.();
+        },
       };
       const parked = new Promise<void>((resolve) => {
         resolveParked = () => resolve();
@@ -624,6 +639,7 @@ export class ChatAdmissionController {
           })
         );
       }
+      wokenByDispatch = false;
       const timedOut = await Promise.race(races);
       // The waiter has left its queue (wake, abort, or timeout) — release its charge.
       this.#queuedBytes = Math.max(0, this.#queuedBytes - queuedBytes);
@@ -632,6 +648,7 @@ export class ChatAdmissionController {
       if (deadlineTimer) clearTimeout(deadlineTimer);
       if (onAbort) signal?.removeEventListener("abort", onAbort);
       if (timedOut) {
+        passOnWakeup();
         // The deadline timer won the race: a genuine shed. When the client ABORT
         // won instead (signal aborted while parked), capacity was never denied —
         // the 503 is dropped on the dead connection, so it is not counted (#11244).
