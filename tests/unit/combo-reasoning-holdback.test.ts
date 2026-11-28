@@ -304,6 +304,25 @@ test("a pipeline stream_error frame after reasoning is a recoverable cut", async
   assert.equal(result.kind, "fallback");
 });
 
+test("the first terminal verdict in stream order wins when an error and [DONE] share a chunk", async () => {
+  const error = `data: ${JSON.stringify({
+    error: { message: "x", type: "stream_error", code: "stream_terminated" },
+  })}\n\n`;
+  const result = await hold(sse(source([reasoning("draft"), `${error}${DONE}`]).stream));
+  assert.equal(result.kind, "fallback");
+  if (result.kind !== "fallback") return;
+  assert.equal(result.reason, "cut");
+  assert.equal(result.checkpoint?.reasoning, "draft");
+});
+
+test("a commit that precedes an error in the same chunk keeps the commit", async () => {
+  const error = `data: ${JSON.stringify({
+    error: { message: "x", type: "stream_error", code: "stream_terminated" },
+  })}\n\n`;
+  const result = await hold(sse(source([reasoning("draft"), `${content("Hi")}${error}`]).stream));
+  assert.equal(result.kind, "commit");
+});
+
 test("the LF that completes a CRLF split across chunks does not end the event", async () => {
   const { SseOutputScanner } = await import("../../open-sse/services/combo/firstOutputStream.ts");
   const events: string[] = [];
