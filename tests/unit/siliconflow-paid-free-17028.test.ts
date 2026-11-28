@@ -47,16 +47,18 @@ describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
     // 466 → 507: E1a adds sourced recurring quotas for seven existing providers.
     // Added identities: Zylo 10 + Requesty 5 + Routeway 7 + Twigpine 1 + Onomeo 4 + DGrid 1 + Naga 13.
     // Seven new recurring pools: 25 → 32.
+    // 507 → 542: E1b adds eight MegaNova, ten Free.ai, two Aion and fifteen Kenari identities.
+    // Ungated recurring pools: 32 → 35. Aion's token quota requires a verified card.
     // Pin identities as well as the total so unrelated replacement is visible.
     const identities = FREE_MODEL_BUDGETS.map((row) => `${row.provider}/${row.modelId}`).sort();
-    assert.equal(new Set(identities).size, 507);
+    assert.equal(new Set(identities).size, 542);
     assert.equal(
       createHash("sha256").update(identities.join("\n")).digest("hex"),
-      "aeed77d4f37d17141190be25c986cbd5d7f1883ef68b430697fdb9c956d5df82"
+      "50fea21899b58ac80dedd67de16fdd67a29c4435d24ffb2248a4eab3dfa1f2ea"
     );
-    assert.equal(totals.modelCount, 507);
+    assert.equal(totals.modelCount, 542);
     // #19385 preserves UncloseAI's retired row for history and removes its live keyless pool.
-    assert.equal(totals.poolCount, 32);
+    assert.equal(totals.poolCount, 35);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
   });
 

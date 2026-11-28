@@ -9,7 +9,14 @@ function daily(
   models: string[],
   tos: WaveRowExpectation["tos"] | ((modelId: string) => WaveRowExpectation["tos"]),
   freeNote: RegExp,
-  options: { trains?: string[]; boost?: number } = {}
+  options: {
+    trains?: string[];
+    boost?: number;
+    gates?: WaveRowExpectation["gates"];
+    trainsOnPrompts?: boolean;
+    hardStopGuaranteed?: boolean;
+    lastWave?: string;
+  } = {}
 ): ProviderExpectation {
   return {
     live: models.map((modelId) => ({
@@ -19,21 +26,23 @@ function daily(
       freeType: "recurring-daily",
       poolKey,
       tos: typeof tos === "function" ? tos(modelId) : tos,
-      ...(options.trains?.includes(modelId) ? { trainsOnPrompts: true } : {}),
+      gates: options.gates,
+      trainsOnPrompts: options.trains?.includes(modelId) ? true : options.trainsOnPrompts,
+      hardStopGuaranteed: options.hardStopGuaranteed,
     })),
     unit,
     hasFree: true,
     freeNote,
     contribution: {
-      real: monthlyTokens,
-      firstMonth: monthlyTokens,
-      gated: 0,
+      real: options.gates ? 0 : monthlyTokens,
+      firstMonth: options.gates ? 0 : monthlyTokens,
+      gated: options.gates ? monthlyTokens : 0,
       socialGated: 0,
       boost: options.boost ?? 0,
       rowSumLive: unit === "tokens" ? monthlyTokens * models.length : 0,
-      publishedPools: 1,
+      publishedPools: options.gates ? 0 : 1,
     },
-    lastWave: "E1a",
+    lastWave: options.lastWave ?? "E1a",
   };
 }
 
@@ -180,5 +189,91 @@ export const PROVIDER_EXPECTATIONS: Record<string, ProviderExpectation> = {
     ],
     "caution",
     /100 requests a day.*may retain/i
+  ),
+  // https://docs.meganova.ai/tiers/tier-1.md and https://api.meganova.ai/v1/models (2026-11-27)
+  "meganova-ai": daily(
+    1_200_000,
+    "requests",
+    "meganova-free",
+    [
+      "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+      "meganova-ai/manta-mini-1.0",
+      "meganova-ai/manta-flash-1.0",
+      "Steelskull/L3.3-MS-Nevoria-70b",
+      "Sao10K/L3-70B-Euryale-v2.1",
+      "Sao10K/L3-8B-Stheno-v3.2",
+      "BruhzWater/Sapphira-L3.3-70b-0.1",
+      "FallenMerick/MN-Violet-Lotus-12B",
+    ],
+    "caution",
+    /per-model quotas of 50 requests a day.*paid overage/i,
+    { lastWave: "E1b" }
+  ),
+  // https://free.ai/api/ and https://api.free.ai/v1/models (2026-11-27)
+  "free-ai": daily(
+    800_000,
+    "requests",
+    "free-ai",
+    [
+      "qwen7b",
+      "qwen-coder",
+      "qwen3-coder",
+      "deepseek-r1",
+      "mistral",
+      "qwen3-8b",
+      "deepseek-r1-7b",
+      "qwen-vl",
+      "qwen25-vl",
+      "moondream2",
+    ],
+    "ok",
+    /30,000 tokens\/day.*1,000 API requests\/month/i,
+    { trainsOnPrompts: false, lastWave: "E1b" }
+  ),
+  // https://www.aionlabs.ai/docs/rate-limits/ and https://api.aionlabs.ai/v1/models (2026-11-27)
+  aion: {
+    ...daily(
+      600_000,
+      "tokens",
+      "aion-free",
+      [
+        "aion-labs/aion-2.0",
+        "aion-labs/aion-3.0",
+        "aion-labs/aion-3.0-mini",
+        "aion-labs/aion-3.5",
+        "aion-labs/aion-3.5-mini",
+        "aion-labs/aion-rp-llama-3.1-8b",
+      ],
+      "ok",
+      /20,000 tokens\/day.*payment card/i,
+      { gates: ["card"], trainsOnPrompts: false, lastWave: "E1b" }
+    ),
+    discontinued: ["aion-labs/aion-2.5"],
+  },
+  // https://kenari.id/api/public/pricing and https://kenari.id/v1/models (2026-11-27)
+  kenari: daily(
+    1_200_000,
+    "requests",
+    "kenari-free",
+    [
+      "beam-1-0:free",
+      "ernie-5-5-flash-preview:free",
+      "flint-v1-0:free",
+      "glm-4-6v-flash:free",
+      "glm-4-7-flash:free",
+      "hy4-flash:free",
+      "laguna-xs-2-1:free",
+      "lfm-3-1-7b:free",
+      "longcat-2-5:free",
+      "nemotron-3-5-lightning:free",
+      "nemotron-3-5-super-vl:free",
+      "nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "nemotron-3-ultra-550b-a55b:free",
+      "particle-1:free",
+      "solar-mini4:free",
+    ],
+    "caution",
+    /50 requests a day.*5 per minute.*third-party gateway/i,
+    { hardStopGuaranteed: true, lastWave: "E1b" }
   ),
 };

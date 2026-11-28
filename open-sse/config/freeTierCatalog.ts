@@ -36,6 +36,9 @@ export const FREE_TIER_BUDGETS: Record<string, number> = {
   onomeo: 3_456_000,
   dgrid: 2_400_000,
   "naga-ac": 2_400_000,
+  "meganova-ai": 1_200_000,
+  "free-ai": 800_000,
+  kenari: 1_200_000,
 };
 
 /**
