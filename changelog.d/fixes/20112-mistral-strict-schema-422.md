@@ -1,0 +1,1 @@
+- **fix(sse):** Mistral chat requests map `seed`/`max_completion_tokens`, drop OpenAI-only fields, clamp `temperature` and normalize `service_tier`; the reactive field-downgrade retry now also handles pydantic 422 validation errors naming top-level fields ([#20112](https://github.com/cheaper-inference/OmniRoute/pull/20112)) — thanks @RayJW
