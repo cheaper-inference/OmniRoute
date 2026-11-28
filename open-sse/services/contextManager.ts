@@ -85,14 +85,30 @@ const CJK_EXTRA_CHARS = CHARS_PER_TOKEN - 1;
 
 function cjkExtraChars(value: string): number {
   let count = 0;
-  // Iterate by code point: a supplementary Han character is two UTF-16 units.
-  for (const char of value) {
-    const code = char.codePointAt(0) as number;
+  const len = value.length;
+  for (let i = 0; i < len; i++) {
+    const unit = value.charCodeAt(i);
+    // Fast path for ASCII / Latin / common non-CJK BMP (< 0x3000)
+    if (unit < 0x3000) continue;
+    if (unit >= 0xd800 && unit <= 0xdbff) {
+      // Surrogate pair: supplementary Han sits in U+20000..U+2FA1F
+      // (high surrogate 0xd840..0xd87e, or 0xd87e with low <= 0xde1f).
+      if (i + 1 < len) {
+        const low = value.charCodeAt(i + 1);
+        if (low >= 0xdc00 && low <= 0xdfff) {
+          i++;
+          const code = ((unit - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
+          if (code >= 0x20000 && code <= 0x2fa1f) {
+            count++;
+          }
+        }
+      }
+      continue;
+    }
     if (
-      (code >= 0x3000 && code <= 0x9fff) ||
-      (code >= 0xac00 && code <= 0xd7af) ||
-      (code >= 0xf900 && code <= 0xfaff) ||
-      (code >= 0x20000 && code <= 0x2fa1f)
+      unit <= 0x9fff ||
+      (unit >= 0xac00 && unit <= 0xd7af) ||
+      (unit >= 0xf900 && unit <= 0xfaff)
     ) {
       count++;
     }
