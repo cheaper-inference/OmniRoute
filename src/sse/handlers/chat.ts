@@ -11,7 +11,10 @@ import {
 export { buildClientRawRequest, resolveDispatchClientRawRequest };
 import { normalizeReasoningRequest } from "@/shared/reasoning/effortStandardization";
 import { isDetailedLoggingEnabled } from "@/lib/db/detailedLogs";
-import { resolvePreviousResponseState } from "@/lib/db/responsesContinuationStore";
+import {
+  resolvePreviousResponseState,
+  withStoredHistory,
+} from "@/lib/db/responsesContinuationStore";
 import { normalizeResponsesPreviousResponseIdMode } from "@omniroute/open-sse/utils/responsesStatePolicy.ts";
 import { FORMATS } from "@omniroute/open-sse/translator/formats.ts";
 import { resolveRoutingModel, RoutingModelOps } from "./resolveRoutingModel";
@@ -864,7 +867,7 @@ async function handleAdmittedChat(
     const deltaInput = Array.isArray((body as { input?: unknown }).input)
       ? (body as { input: unknown[] }).input
       : [];
-    body = { ...body, input: [...stored.input, ...stored.output, ...deltaInput] };
+    body = { ...body, input: withStoredHistory(deltaInput, stored) };
     delete (body as { previous_response_id?: unknown }).previous_response_id;
     // resume flag for the attempt store in handleChatCore (inherited downstream via body).
     (body as { _omniroutePreviousResponseResumed?: boolean })._omniroutePreviousResponseResumed =

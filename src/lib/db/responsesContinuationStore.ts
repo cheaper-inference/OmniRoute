@@ -31,6 +31,7 @@
  * of truth once it exists.
  */
 
+import { isDeepStrictEqual } from "node:util";
 import { getDbInstance } from "./core";
 import { readCallArtifact } from "../usage/callLogArtifacts";
 import { isEncryptedReasoningOmissionMarker } from "../logPayloads";
@@ -322,6 +323,27 @@ export function resolvePreviousResponseState(
     artifact.pipeline as ContinuationPipeline,
     row.video_content_removed === 1
   );
+}
+
+/**
+ * True when a continuation request already starts with the stored history, so
+ * appending it again would show the upstream every turn twice. Equal text alone
+ * proves nothing (a user may repeat a sentence): every stored item must match in
+ * order AND the stored output region must carry an id or call_id.
+ */
+function carriesStoredPrefix(delta: unknown[], prefix: unknown[], output: unknown[]): boolean {
+  if (prefix.length === 0 || delta.length < prefix.length) return false;
+  const hasId = output.some((item) => {
+    const record = item as { id?: unknown; call_id?: unknown } | null;
+    return typeof record?.id === "string" || typeof record?.call_id === "string";
+  });
+  return hasId && isDeepStrictEqual(delta.slice(0, prefix.length), prefix);
+}
+
+/** The full input for a continuation: stored history first, unless the request already carries it. */
+export function withStoredHistory(delta: unknown[], stored: ResponsesContinuationState): unknown[] {
+  const prefix = [...stored.input, ...stored.output];
+  return carriesStoredPrefix(delta, prefix, stored.output) ? delta : [...prefix, ...delta];
 }
 
 /**
