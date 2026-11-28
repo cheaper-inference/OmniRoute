@@ -1,0 +1,1 @@
+- The quota snapshot sweep uses the saved `retention.quotaSnapshots` setting. The default stays at 90 days. ([#21504](https://github.com/cheaper-inference/OmniRoute/pull/21504))
