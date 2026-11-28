@@ -26,7 +26,7 @@ import {
   type BigQueryConfig,
 } from "./bigqueryConfig";
 
-export { bigQueryConfigSchema, type BigQueryConfig } from "./bigqueryConfig";
+export type { BigQueryConfig } from "./bigqueryConfig";
 
 const BIGQUERY_SCOPE = "https://www.googleapis.com/auth/bigquery";
 const BIGQUERY_API = "https://bigquery.googleapis.com/bigquery/v2";
