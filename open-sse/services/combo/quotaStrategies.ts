@@ -1085,6 +1085,166 @@ function overlayQuotaSnapshot<
   });
 }
 
+type OpenPoolConfig = ReturnType<typeof resolveResetAwareConfig>;
+type OpenPoolScope = { stepIds: Set<string> | null; apiIds: Set<string> | null };
+
+const OPEN_POOL_TERMINAL_STATUSES = new Set([
+  "banned",
+  "expired",
+  "credits_exhausted",
+  "deactivated",
+]);
+
+/** Index the provider's active quota-aware pool by connection id (empty on load failure). */
+async function loadOpenPoolIndex(
+  provider: string,
+  comboName: string,
+  log: { warn?: (...args: unknown[]) => void }
+): Promise<Map<string, Record<string, unknown>>> {
+  const index = new Map<string, Record<string, unknown>>();
+  try {
+    const connections = await getCachedProviderPoolConnections({
+      provider,
+      isActive: true,
+    });
+    for (const value of connections) {
+      if (isRecord(value) && typeof value.id === "string") index.set(value.id, value);
+    }
+  } catch (error) {
+    index.clear();
+    log.warn?.("COMBO", "Reset-aware failed to load quota-aware connections.", {
+      comboName,
+      err: error,
+      operation: "getProviderConnections",
+      provider,
+    });
+  }
+  return index;
+}
+
+/** Quota already cached for this connection, if still fresh or within the stale window. */
+function readOpenPoolCachedQuota(
+  provider: string,
+  connectionId: string,
+  modelStr: string,
+  config: OpenPoolConfig
+): unknown {
+  if (!getQuotaFetcher(provider)) return null;
+  const cached = resetAwareQuotaCache.get(
+    `${provider}:${connectionId}:${getQuotaFetchScope(provider, modelStr)}`
+  );
+  if (!cached) return null;
+  const age = Date.now() - cached.fetchedAt;
+  if (!(config.quotaCacheTtlMs > 0)) return null;
+  if (age <= config.quotaCacheTtlMs) return cached.quota;
+  const withinStale =
+    config.quotaCacheMaxStaleMs > 0 && age <= config.quotaCacheTtlMs + config.quotaCacheMaxStaleMs;
+  return withinStale ? cached.quota : null;
+}
+
+/** A real, permitted, non-terminal account that still has quota or usable paid credits. */
+function isOpenPoolConnectionEligible(
+  value: Record<string, unknown> | undefined,
+  target: ResolvedComboTarget,
+  provider: string,
+  scope: OpenPoolScope,
+  config: OpenPoolConfig
+): boolean {
+  if (!value || value.isActive === false) return false;
+  const id = value.id as string;
+  if (scope.stepIds && !scope.stepIds.has(id)) return false;
+  if (scope.apiIds && !scope.apiIds.has(id)) return false;
+  const status = String(value.testStatus || "")
+    .trim()
+    .toLowerCase();
+  if (OPEN_POOL_TERMINAL_STATUSES.has(status)) return false;
+
+  const scratchTarget = { ...target, connectionId: id };
+  const quota = readOpenPoolCachedQuota(provider, id, target.modelStr, config);
+  const [entry] = overlayQuotaSnapshot([
+    {
+      target: scratchTarget,
+      ...scoreQuotaWeightedWithCredits(quota, scratchTarget, value, config, "leftover", 0),
+    },
+  ]);
+  return entry.remainingPercent > 0 || entry.paidCreditsBacked === true;
+}
+
+/**
+ * An OPEN provider is temporary only when its real, permitted account pool
+ * still contains a quota-eligible target. Classification must not fetch quota
+ * or reserve a probe while the provider cannot dispatch.
+ */
+function createOpenTargetClassifier(
+  comboName: string,
+  config: OpenPoolConfig,
+  log: { warn?: (...args: unknown[]) => void },
+  apiKeyAllowedConnectionIds?: string[] | null
+): (target: ResolvedComboTarget) => Promise<boolean> {
+  const poolIndexes = new Map<string, Promise<Map<string, Record<string, unknown>>>>();
+  const normalizedApiIds = normalizeConnectionIds(apiKeyAllowedConnectionIds);
+  const apiIds = normalizedApiIds ? new Set(normalizedApiIds) : null;
+  const stepSets = new Map<string[], Set<string> | null>();
+
+  return async (target) => {
+    const provider = getResetAwareProvider(target);
+    if (!provider) return false;
+    if (!poolIndexes.has(provider)) {
+      poolIndexes.set(provider, loadOpenPoolIndex(provider, comboName, log));
+    }
+    const connections = await poolIndexes.get(provider)!;
+    const allowed = target.allowedConnectionIds;
+    if (Array.isArray(allowed) && !stepSets.has(allowed)) {
+      const ids = normalizeConnectionIds(allowed);
+      stepSets.set(allowed, ids ? new Set(ids) : null);
+    }
+    const stepIds = Array.isArray(allowed) ? (stepSets.get(allowed) ?? null) : null;
+    const scope: OpenPoolScope = { stepIds, apiIds };
+    const isEligible = (value: Record<string, unknown> | undefined) =>
+      isOpenPoolConnectionEligible(value, target, provider, scope, config);
+
+    if (target.connectionId) return isEligible(connections.get(target.connectionId));
+    for (const connection of connections.values()) {
+      if (isEligible(connection)) return true;
+    }
+    return false;
+  };
+}
+
+/**
+ * Keep every target whose provider breaker is not OPEN. An OPEN target whose pool still
+ * has an eligible account is recorded as a temporary `circuit_open` exclusion instead of
+ * silently disappearing; ineligible OPEN targets are dropped without a new exclusion.
+ */
+async function filterOpenCircuitTargets(
+  expandedTargets: ResolvedComboTarget[],
+  hasEligibleOpenTarget: (target: ResolvedComboTarget) => Promise<boolean>,
+  exclusions?: PreDispatchExclusion[]
+): Promise<ResolvedComboTarget[]> {
+  const liveTargets: ResolvedComboTarget[] = [];
+  for (const target of expandedTargets) {
+    const breaker = getCircuitBreaker(target.provider);
+    if (breaker.getStatus().state !== "OPEN") {
+      liveTargets.push(target);
+      continue;
+    }
+    const eligible = await hasEligibleOpenTarget(target);
+    // Pool loading yields: a recovered provider must retain its original target.
+    const status = breaker.getStatus();
+    if (status.state !== "OPEN") {
+      liveTargets.push(target);
+    } else if (eligible) {
+      exclusions?.push({
+        provider: target.provider,
+        model: parseModel(target.modelStr).model || target.modelStr,
+        reason: "circuit_open",
+        retryAfterMs: status.retryAfterMs,
+      });
+    }
+  }
+  return liveTargets;
+}
+
 export async function orderTargetsByQuotaWeighted(
   targets: ResolvedComboTarget[],
   comboName: string,
@@ -1109,10 +1269,11 @@ export async function orderTargetsByQuotaWeighted(
   );
   exclusions?.push(...expansionExclusions);
 
-  const liveTargets = expandedTargets.filter((target) => {
-    const state = getCircuitBreaker(target.provider).getStatus().state;
-    return state !== "OPEN";
-  });
+  const liveTargets = await filterOpenCircuitTargets(
+    expandedTargets,
+    createOpenTargetClassifier(comboName, config, log, apiKeyAllowedConnectionIds),
+    exclusions
+  );
 
   const scoring = resolveQuotaWeightedScoring(configSource);
   // Pace compares every target against one instant, even if quota fetches finish apart.

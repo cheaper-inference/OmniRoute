@@ -1,0 +1,1 @@
+- **fix(combo):** quota-weighted combos return a temporary 503 with circuit-breaker diagnostics and Retry-After when otherwise eligible configured, permitted accounts are blocked by OPEN provider breakers, instead of reporting model_not_found.
