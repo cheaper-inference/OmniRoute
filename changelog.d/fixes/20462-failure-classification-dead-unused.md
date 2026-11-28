@@ -1,0 +1,1 @@
+- **fix(routing):** routing preview now uses a shared error-verdict projection while keeping its labels and existing failover decisions ([#20462](https://github.com/cheaper-inference/OmniRoute/pull/20462)) — thanks @maxmad64bis
