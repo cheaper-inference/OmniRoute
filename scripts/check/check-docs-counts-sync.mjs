@@ -1309,7 +1309,14 @@ const FREE_PROVIDER_COUNT_DOCS = [
 function freeCatalogCountClaims(f, claim) {
   const p = f.freeProviders ?? {};
   return [
-    [p.total, "providers with free access", /(\d+) (?:providers )?with free access\b/gi],
+    [
+      p.total,
+      "providers with free access",
+      // "50 with free access" (README, guides) and the reference's bold label
+      // "**Providers with free access** (50 today: …)": one capture group, so the release
+      // refresh rewrites the total in both forms.
+      /\b(\d+)(?: (?:providers )?with free access\b|(?<=with free access\*{0,2} \(\d+)(?= today\b))/gi,
+    ],
     [p.apiKey, "free providers with an API key", /(\d+) with an API key\b/gi],
     [p.keyless, "free providers without a key", /(\d+) without a key\b/gi],
     [p.toolAccount, "free providers through a tool account", /(\d+) through a tool account\b/gi],

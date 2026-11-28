@@ -1,0 +1,1 @@
+- The docs counts gate and the release refresh now read the provider total written inside the free-tier reference's bold label ("Providers with free access (N today: …)"), so a refresh no longer updates the per-access counts in that line and leaves the total stale. (#21540)
