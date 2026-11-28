@@ -88,6 +88,8 @@ export interface HermesAgentConfigPayload {
   keyId?: string | null;
   apiKey?: string | null;
   selections: HermesAgentRoleSelection[];
+  /** config.yaml to merge into; defaults to the default Hermes home's file. */
+  configPath?: string;
 }
 
 // Resolved lazily at call-time so HERMES_HOME is always honoured (#3628).
@@ -128,11 +130,11 @@ export function sanitizeOmniRouteRoleCredentials(config: any): void {
  * parse, or is not a mapping, returns null so the caller refuses the write
  * instead of replacing the file.
  */
-async function readExistingHermesConfig(): Promise<any | null> {
+async function readExistingHermesConfig(configPath: string): Promise<any | null> {
   let existing: unknown;
   try {
     const fs = await import("node:fs/promises");
-    const raw = await fs.readFile(getConfigPath(), "utf-8");
+    const raw = await fs.readFile(configPath, "utf-8");
     // js-yaml 5 throws on an empty document; an empty file is a fresh start.
     existing = raw.trim() === "" ? {} : yaml.load(raw);
   } catch (error) {
@@ -156,7 +158,7 @@ export async function generateHermesAgentConfig(
     return { yaml: "", error: "baseUrl is required" };
   }
 
-  const existing = await readExistingHermesConfig();
+  const existing = await readExistingHermesConfig(payload.configPath ?? getConfigPath());
   if (existing === null) {
     return { yaml: "", error: UNPARSEABLE_EXISTING_CONFIG };
   }
@@ -240,14 +242,14 @@ export async function generateHermesAgentConfig(
  * Read the current Hermes Agent configuration and extract the model
  * for each supported role.
  */
-export async function getCurrentHermesAgentRoles(): Promise<
-  Record<string, { model: string; provider?: string; base_url?: string }>
-> {
+export async function getCurrentHermesAgentRoles(
+  configPath: string = getConfigPath()
+): Promise<Record<string, { model: string; provider?: string; base_url?: string }>> {
   const fs = await import("node:fs/promises");
   let config: any = {};
 
   try {
-    const raw = await fs.readFile(getConfigPath(), "utf-8");
+    const raw = await fs.readFile(configPath, "utf-8");
     config = yaml.load(raw) || {};
   } catch {
     return {};

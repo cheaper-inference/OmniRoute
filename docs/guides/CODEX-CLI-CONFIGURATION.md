@@ -45,6 +45,14 @@ wire_api             = "responses"
 export OMNIROUTE_API_KEY="<YOUR_KEY>"
 ```
 
+Codex also loads `~/.codex/.env` at startup, so the key can live there instead of your shell profile
+(one line, `OMNIROUTE_API_KEY=<YOUR_KEY>`; keep the file at mode `0600`). The dashboard **Apply** button
+does exactly this: it writes `env_key = "OMNIROUTE_API_KEY"` into `config.toml`, puts the key in
+`~/.codex/.env` (`0600`) and does not touch `~/.codex/auth.json`, which only serves the built-in OpenAI
+provider. **Reset** removes the `OMNIROUTE_API_KEY` line again (and the `OPENAI_API_KEY` entry an older
+Apply left in `auth.json`). If you applied with an earlier version, apply once more so the key is written
+to `~/.codex/.env`.
+
 ### macOS: Codex bundled inside the ChatGPT app
 
 If you installed Codex through the ChatGPT desktop app, the `codex` binary may

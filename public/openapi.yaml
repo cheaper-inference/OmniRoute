@@ -10725,6 +10725,19 @@ paths:
       tags:
         - Cli tools
       summary: "GET cli tools › hermes agent settings"
+      parameters:
+        - name: profile
+          in: query
+          required: false
+          description: Read one Hermes profile (a directory under the Hermes home profiles folder) instead of the default home. Unknown names answer 400.
+          schema:
+            type: string
+        - name: profiles
+          in: query
+          required: false
+          description: When present, the response also lists the available profile names.
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -10732,6 +10745,7 @@ paths:
       tags:
         - Cli tools
       summary: "POST cli tools › hermes agent settings"
+      description: Optional body fields `profile` (apply to one named Hermes profile) and `applyToAll` (apply to every listed profile; the response then carries one result per profile). Use at most one of them. Without either, the default Hermes home is written as before.
       responses:
         "200":
           description: OK

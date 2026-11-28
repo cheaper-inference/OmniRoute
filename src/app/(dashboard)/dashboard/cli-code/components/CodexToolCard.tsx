@@ -385,7 +385,7 @@ model_provider = "omniroute"
 name = "OmniRoute"
 base_url = "${getEffectiveBaseUrl()}"
 wire_api = "responses"
-env_key = "OPENAI_API_KEY"
+env_key = "OMNIROUTE_API_KEY"
 `;
     } else {
       configContent += `
@@ -404,7 +404,8 @@ openai_base_url = "${getEffectiveBaseUrl()}"
       }
     }
 
-    const authContent = JSON.stringify({ OPENAI_API_KEY: keyToUse }, null, 2);
+    // Codex loads ~/.codex/.env at startup; a custom provider reads its key from env_key only.
+    const envContent = `OMNIROUTE_API_KEY=${keyToUse}\n`;
 
     return [
       {
@@ -412,8 +413,8 @@ openai_base_url = "${getEffectiveBaseUrl()}"
         content: configContent,
       },
       {
-        filename: "~/.codex/auth.json",
-        content: authContent,
+        filename: "~/.codex/.env",
+        content: envContent,
       },
     ];
   };
@@ -510,8 +511,8 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     </p>
                     <div className="pt-2 border-t border-border">
                       <p className="text-text-muted text-xs">
-                        {t("codexAuthNotePrefix")} <InlineCode>~/.codex/auth.json</InlineCode>{" "}
-                        {t("codexAuthNoteMiddle")} <InlineCode>OPENAI_API_KEY</InlineCode>.{" "}
+                        {t("codexAuthNotePrefix")} <InlineCode>~/.codex/.env</InlineCode>{" "}
+                        {t("codexAuthNoteMiddle")} <InlineCode>OMNIROUTE_API_KEY</InlineCode>.{" "}
                         {t("codexAuthNoteSuffix")}
                       </p>
                     </div>

@@ -196,19 +196,16 @@ test("configClobberRefusalResponse: null for unrelated errors", () => {
 
 const codexDir = () => path.join(TEST_HOME, ".codex");
 
-test("codex POST: malformed auth.json is refused and neither file is touched", async () => {
+test("codex POST: a malformed auth.json is never read or rewritten (the key goes to .env)", async () => {
   const authPath = path.join(codexDir(), "auth.json");
-  const configPath = path.join(codexDir(), "config.toml");
   const authBytes = '{"OPENAI_API_KEY": null, "tokens": {"refresh_token": "rt-keep';
-  const configBytes = 'model = "o3"\n\n[mcp_servers.docs]\ncommand = "docs-mcp"\n';
   writeFixture(authPath, authBytes);
-  writeFixture(configPath, configBytes);
 
   const res = await call(codexRoute.POST, "/api/cli-tools/codex-settings", "POST", MODEL_BODY);
 
-  await assertRefused(res, "~/.codex/auth.json");
-  assert.equal(fs.readFileSync(authPath, "utf8"), authBytes);
-  assert.equal(fs.readFileSync(configPath, "utf8"), configBytes, "config.toml written before");
+  assert.equal(res.status, 200);
+  assert.equal(fs.readFileSync(authPath, "utf8"), authBytes, "auth.json must stay byte-identical");
+  assert.match(fs.readFileSync(path.join(codexDir(), ".env"), "utf8"), /^OMNIROUTE_API_KEY=/);
 });
 
 test("codex POST: malformed config.toml is refused and left byte-identical", async () => {
@@ -220,25 +217,25 @@ test("codex POST: malformed config.toml is refused and left byte-identical", asy
 
   await assertRefused(res, "~/.codex/config.toml");
   assert.equal(fs.readFileSync(configPath, "utf8"), configBytes);
-  assert.equal(fs.existsSync(path.join(codexDir(), "auth.json")), false);
+  assert.equal(fs.existsSync(path.join(codexDir(), ".env")), false);
 });
 
-test("codex POST: fresh HOME still creates both files", async () => {
+test("codex POST: fresh HOME creates config.toml and .env, not auth.json", async () => {
   const res = await call(codexRoute.POST, "/api/cli-tools/codex-settings", "POST", MODEL_BODY);
   assert.equal(res.status, 200);
-  const auth = JSON.parse(fs.readFileSync(path.join(codexDir(), "auth.json"), "utf8"));
-  assert.equal(auth.OPENAI_API_KEY, "sk-test-no-clobber");
+  assert.equal(fs.existsSync(path.join(codexDir(), "auth.json")), false);
+  const envLine = fs.readFileSync(path.join(codexDir(), ".env"), "utf8");
+  assert.equal(envLine, `OMNIROUTE_API_KEY=sk-test-no-clobber\n`);
   assert.match(fs.readFileSync(path.join(codexDir(), "config.toml"), "utf8"), /omniroute/);
 });
 
-test("codex POST: a valid auth.json keeps its other keys", async () => {
+test("codex POST: a valid auth.json is left byte-identical", async () => {
   const authPath = path.join(codexDir(), "auth.json");
-  writeFixture(authPath, JSON.stringify({ tokens: { refresh_token: "rt-keep" } }));
+  const authBytes = JSON.stringify({ tokens: { refresh_token: "rt-keep" } });
+  writeFixture(authPath, authBytes);
   const res = await call(codexRoute.POST, "/api/cli-tools/codex-settings", "POST", MODEL_BODY);
   assert.equal(res.status, 200);
-  const auth = JSON.parse(fs.readFileSync(authPath, "utf8"));
-  assert.equal(auth.tokens.refresh_token, "rt-keep");
-  assert.equal(auth.OPENAI_API_KEY, "sk-test-no-clobber");
+  assert.equal(fs.readFileSync(authPath, "utf8"), authBytes);
 });
 
 // ── kilo-settings ────────────────────────────────────────────────────────────

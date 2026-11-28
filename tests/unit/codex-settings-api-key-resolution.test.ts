@@ -22,7 +22,7 @@ import { SignJWT } from "jose";
  * keyId first, then falls back to the submitted apiKey, then to `sk_omniroute`.
  *
  * This test drives the real POST handler end-to-end (real DB-backed API key,
- * real JWT auth cookie) and asserts the value written into auth.json.
+ * real JWT auth cookie) and asserts the value written into ~/.codex/.env.
  */
 
 const TEST_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), "omr-codex-settings-key-"));
@@ -43,7 +43,7 @@ const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const route = await import("../../src/app/api/cli-tools/codex-settings/route.ts");
 
-const AUTH_PATH = path.join(TEST_HOME, ".codex", "auth.json");
+const ENV_PATH = path.join(TEST_HOME, ".codex", ".env");
 
 test.after(async () => {
   core.resetDbInstance();
@@ -84,7 +84,11 @@ const post = async (body: Record<string, unknown>) =>
 
 const readWrittenApiKey = (): string | null => {
   try {
-    return JSON.parse(fs.readFileSync(AUTH_PATH, "utf8")).OPENAI_API_KEY ?? null;
+    const line = fs
+      .readFileSync(ENV_PATH, "utf8")
+      .split("\n")
+      .find((l) => l.startsWith("OMNIROUTE_API_KEY="));
+    return line ? line.slice("OMNIROUTE_API_KEY=".length) : null;
   } catch {
     return null;
   }
