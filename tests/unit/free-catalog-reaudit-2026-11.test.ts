@@ -302,8 +302,9 @@ test("catalog counts after the re-audit", () => {
     "tool-account": 1,
     "web-chat": 0,
   });
-  assert.equal(c.accessRows, 213);
-  assert.equal(c.freeModels, 184);
+  // #21007: three Workers AI ids retired on 2026-11-20 are discontinued rows, not access rows.
+  assert.equal(c.accessRows, 210);
+  assert.equal(c.freeModels, 181);
 });
 
 // --- Retired pools and their ledger --------------------------------------------------------

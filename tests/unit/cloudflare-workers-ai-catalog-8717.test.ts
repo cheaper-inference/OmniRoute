@@ -25,15 +25,21 @@ const DEAD_CLOUDFLARE_MODEL_IDS = [
   "@cf/qwen/qwen2.5-coder-15b-instruct",
 ] as const;
 
-const LIVE_CLOUDFLARE_MODEL_IDS = [
-  "@cf/mistral/mistral-7b-instruct-v0.2-lora",
+// Retired on 2026-11-20, requests return HTTP 410 (#21007):
+// https://developers.cloudflare.com/changelog/post/2026-11-05-planned-model-deprecations/
+// They leave the registry; their free rows stay as discontinued, as retired rows do.
+const RETIRED_2026_11_20_MODEL_IDS = [
   "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
-  "@cf/qwen/qwen2.5-coder-32b-instruct",
-  "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
   "@cf/meta/llama-3.2-3b-instruct",
   "@cf/qwen/qwq-32b",
-  "@cf/zai-org/glm-4.7-flash",
   "@cf/moonshotai/kimi-k2.6",
+] as const;
+
+const LIVE_CLOUDFLARE_MODEL_IDS = [
+  "@cf/mistral/mistral-7b-instruct-v0.2-lora",
+  "@cf/qwen/qwen2.5-coder-32b-instruct",
+  "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "@cf/zai-org/glm-4.7-flash",
   "@cf/google/gemma-4-26b-a4b-it",
 ] as const;
 
@@ -53,6 +59,23 @@ test("#8717: FREE_MODEL_BUDGETS must not list dead Cloudflare Workers AI model I
       ids.includes(dead),
       false,
       `dead model ${dead} must be removed from freeModelCatalog (still present)`
+    );
+  }
+});
+
+test("#21007: models retired on 2026-11-20 leave the registry and stay in the free catalog only as discontinued", () => {
+  const registry = cloudflareRegistryIds();
+  const rows = FREE_MODEL_BUDGETS.filter((m) => m.provider === "cloudflare-ai");
+  for (const retired of RETIRED_2026_11_20_MODEL_IDS) {
+    assert.equal(
+      registry.includes(retired),
+      false,
+      `${retired} must be removed from the cloudflare-ai registry`
+    );
+    assert.deepEqual(
+      rows.filter((m) => m.modelId === retired).map((m) => [m.freeType, m.monthlyTokens]),
+      [["discontinued", 0]],
+      `${retired} must stay in freeModelCatalog as discontinued`
     );
   }
 });
