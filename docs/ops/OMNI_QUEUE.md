@@ -2308,6 +2308,31 @@ resume can lift it early. A `checks-timeout` event whose
 detail says "no CI run for candidate" means GitHub never started a workflow for the candidate push:
 check the Actions policies and that `ci.yml` / `quality.yml` still trigger on `omni-queue/**`.
 
+### Alerts by e-mail
+
+In live mode, omni-queue attempts an e-mail when a base starts an `error`, `infra`,
+`tree-divergence` or `base-red` pause, or when a batch enters quarantine (`pr-parked`).
+Manual pauses, shadow ticks and dry runs leave e-mail off.
+
+Set all three secrets on the `omni-queue` environment. E-mail is off by default and stays off
+if any secret is missing.
+
+- `OMNI_QUEUE_ALERT_EMAIL_TO` is the recipient address.
+- `OMNI_QUEUE_SMTP_USER` is the Gmail SMTP account and sender address.
+- `OMNI_QUEUE_SMTP_APP_PASSWORD` is the Gmail app password for that account.
+
+The message links to the base's dashboard issue when the tick knows its number, or to the workflow
+run. The state keeps the 50 most recent keys in `alertedEpisodes`. A pause uses
+`pause:<reason>:<paused.since>` and a quarantined batch uses `parked:<batchId>`. When an automatic
+pause recurs with the same `since`, it uses the same key. A failed send leaves a note in the tick
+log and the tick saves the key so later ticks skip that attempt. The tick attempts delivery before
+its compare-and-swap save. In the rare case that it loses that save and makes the same decision
+again, it can send the e-mail again.
+
+To check the e-mail code without sending, run `node --test tests/unit/merge-queue/alert.test.mjs`.
+The tests use fictitious addresses and substitute for curl. To rehearse queue decisions, dispatch
+the workflow with action `dry-run`, which suppresses delivery even with all three secrets set.
+
 ### Who is told, and when
 
 What you see: a comment that starts "🚨 The omni-queue of `<base>` has stalled" on the dashboard

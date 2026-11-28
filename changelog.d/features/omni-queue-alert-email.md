@@ -1,0 +1,1 @@
+- **feat(merge-queue):** Send one opt-in e-mail per non-manual pause episode or quarantined batch in live mode.
