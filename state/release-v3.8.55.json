@@ -3,12 +3,12 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b76",
+    "batchId": "b77",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b76-2322e03a4bb5",
-    "candidateSha": "2322e03a4bb50483e35e7b381181395b3b9dc7c9",
+    "candidateRef": "omni-queue/release-v3.8.55/b77-cb4234d6abca",
+    "candidateSha": "cb4234d6abca7d3335c732ccd39e4bf27b908059",
     "baseSha": "5c36ba1c90a680b715e65dff8d8ea2f9699edcf6",
-    "treeSha": "72e804eb13939ef09896bd59d300d66994ec83ba",
+    "treeSha": "b098f1d1f85241d9e1bf974bce9c08d3fd15fa54",
     "prs": [
       {
         "n": 21418,
@@ -16,24 +16,10 @@
         "title": "fix(docker): keep the env template and sync script out of standalone builds",
         "author": "diegosouzapw",
         "labeledAt": "2026-11-27T13:19:15Z"
-      },
-      {
-        "n": 21405,
-        "head": "865cf4ca70f620d6ad6671ad0f0ab84c26246d43",
-        "title": "fix(dashboard): hide unmaskable short emails in combo account labels",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T13:19:55Z"
-      },
-      {
-        "n": 21415,
-        "head": "3cbf4062dee9869b7b23d72ba6cc7cbae0545e0e",
-        "title": "feat(cli): warn when deploy k8s disables the API key with an Ingress enabled",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T13:20:27Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-28T09:53:20.278Z",
+    "startedAt": "2026-11-28T11:16:18.043Z",
     "attempts": 0,
     "bisect": {
       "rootBatchId": "b75",
@@ -45,14 +31,9 @@
             "title": "fix(docker): keep the env template and sync script out of standalone builds",
             "author": "diegosouzapw",
             "labeledAt": "2026-11-27T13:19:15Z"
-          },
-          {
-            "n": 21405,
-            "head": "865cf4ca70f620d6ad6671ad0f0ab84c26246d43",
-            "title": "fix(dashboard): hide unmaskable short emails in combo account labels",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-27T13:19:55Z"
-          },
+          }
+        ],
+        [
           {
             "n": 21415,
             "head": "3cbf4062dee9869b7b23d72ba6cc7cbae0545e0e",
@@ -80,20 +61,8 @@
       ],
       "culprits": [],
       "landed": [],
-      "steps": 0,
+      "steps": 1,
       "hang": false
-    },
-    "rerun": {
-      "ref": "omni-queue/release-v3.8.55/b76-2322e03a4bb5",
-      "requestedAt": "2026-11-28T11:07:16.137Z",
-      "afterMs": 1795864014000,
-      "runIds": [
-        46132567375
-      ],
-      "jobs": [
-        "Gate / CI",
-        "Integration Tests (1/2)"
-      ]
     }
   },
   "baseChecks": [
@@ -190,8 +159,8 @@
     }
   },
   "counters": {
-    "batchSeq": 76,
-    "ciRuns": 81,
+    "batchSeq": 77,
+    "ciRuns": 82,
     "landedPrs": 77,
     "landedBatches": 27,
     "redBatches": 17,
@@ -199,51 +168,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-24T18:56:22.382Z",
-      "type": "checks-green",
-      "batchId": "b30",
-      "prs": [
-        21146
-      ],
-      "sha": "e368cf45cbfe0342dcabef2df83cd221ea8ef055",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45464816195"
-    },
-    {
-      "at": "2026-11-24T18:56:32.648Z",
-      "type": "would-land",
-      "batchId": "b30",
-      "prs": [
-        21146
-      ],
-      "sha": "e368cf45cbfe0342dcabef2df83cd221ea8ef055",
-      "detail": "shadow mode: would merge-ff onto 95b18be41592",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45464816195"
-    },
-    {
-      "at": "2026-11-24T18:56:56.110Z",
-      "type": "batch-started",
-      "batchId": "b31",
-      "prs": [
-        21093
-      ],
-      "sha": "4dcc7e40199983a9e84faf722001c670dd45ff11",
-      "detail": "1 PR(s) on 3f2f256c163c; window 5",
-      "labeledAt": {
-        "21093": "2026-11-24T17:54:46Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45464816195"
-    },
-    {
-      "at": "2026-11-24T20:38:10.327Z",
-      "type": "checks-green",
-      "batchId": "b31",
-      "prs": [
-        21093
-      ],
-      "sha": "4dcc7e40199983a9e84faf722001c670dd45ff11",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45482808475"
-    },
     {
       "at": "2026-11-24T20:38:19.193Z",
       "type": "would-land",
@@ -2881,8 +2805,58 @@
       "sha": "2322e03a4bb50483e35e7b381181395b3b9dc7c9",
       "detail": "re-running the failed jobs of b76 once (Gate / CI, Integration Tests (1/2)) before bisecting",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46138333847"
+    },
+    {
+      "at": "2026-11-28T11:16:08.942Z",
+      "type": "checks-red",
+      "batchId": "b76",
+      "prs": [
+        21418,
+        21405,
+        21415
+      ],
+      "sha": "2322e03a4bb50483e35e7b381181395b3b9dc7c9",
+      "detail": "Gate / CI, Integration Tests (1/2)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46139042054"
+    },
+    {
+      "at": "2026-11-28T11:16:08.942Z",
+      "type": "bisect-split",
+      "batchId": "b76",
+      "prs": [
+        21418,
+        21405,
+        21415
+      ],
+      "sha": "2322e03a4bb50483e35e7b381181395b3b9dc7c9",
+      "detail": "segment of 3 red: testing #21418, #21405 next",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46139042054"
+    },
+    {
+      "at": "2026-11-28T11:16:12.314Z",
+      "type": "pr-dequeued",
+      "batchId": "b75",
+      "prs": [
+        21405
+      ],
+      "detail": "withdrawn: head moved to e2abb53d35be",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46139042054"
+    },
+    {
+      "at": "2026-11-28T11:16:21.158Z",
+      "type": "batch-started",
+      "batchId": "b77",
+      "prs": [
+        21418
+      ],
+      "sha": "cb4234d6abca7d3335c732ccd39e4bf27b908059",
+      "detail": "bisect of b75: 1 PR(s) on 5c36ba1c90a6",
+      "labeledAt": {
+        "21418": "2026-11-27T13:19:15Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46139042054"
     }
   ],
-  "updatedAt": "2026-11-28T11:08:44.064Z",
+  "updatedAt": "2026-11-28T11:17:49.873Z",
   "batchWindow": 2
 }
