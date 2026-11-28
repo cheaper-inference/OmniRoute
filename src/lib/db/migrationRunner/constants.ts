@@ -57,6 +57,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "20261116102450",
     toName: "launch_sessions",
   },
+  // #14860 builds ran its session/timestamp index as 237 (2026-11-11 heads) and then 238;
+  // both slots are canonical base migrations now. Move those rows to the timestamped file
+  // so the canonical 237/238 run and the index migration never re-runs.
+  {
+    fromVersion: "237",
+    fromName: "usage_history_session_timestamp_index",
+    toVersion: "20261115225846",
+    toName: "usage_history_session_timestamp_index",
+  },
+  {
+    fromVersion: "238",
+    fromName: "usage_history_session_timestamp_index",
+    toVersion: "20261115225846",
+    toName: "usage_history_session_timestamp_index",
+  },
   {
     fromVersion: "238",
     fromName: "call_logs_artifact_overflow_order_index",

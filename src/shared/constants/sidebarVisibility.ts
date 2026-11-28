@@ -247,6 +247,7 @@ const ADMIN_SHOWN: ReadonlySet<HideableSidebarItemId> = new Set([
   "combos",
   "quota",
   "analytics",
+  "analytics-team-reports",
   "analytics-combo-health",
   "analytics-utilization",
   "costs",
