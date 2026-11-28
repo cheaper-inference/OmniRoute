@@ -9,7 +9,6 @@ lastUpdated: 2026-06-28
 > **Source of truth:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`,
 > `scanner.ts`, `loader.ts`), `src/app/api/plugins/`, and
 > `src/app/(dashboard)/dashboard/plugins/`
-> **Last updated:** 2026-06-28 — v3.8.40
 
 OmniRoute ships a WordPress-style plugin system. Plugins are self-contained
 directories — each with a `plugin.json` manifest and an entry file — that hook

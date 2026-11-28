@@ -8,6 +8,7 @@
  * Sliced out of #3500 (semantic_cache cluster, slice 4).
  */
 
+import { randomUUID } from "node:crypto";
 import { getDbInstance } from "./core";
 import {
   getSemanticCachePruneConfig,
@@ -45,6 +46,55 @@ export interface SemanticCacheListResult {
 // ---------------------------------------------------------------------------
 // Queries
 // ---------------------------------------------------------------------------
+
+type CachedResponseRow = {
+  response: string;
+  tokens_saved: number | null;
+  original_cost_usd: number | null;
+};
+
+export function readSemanticCacheResponse(signature: string, now: string) {
+  return getDbInstance()
+    .prepare(
+      `SELECT response, tokens_saved, original_cost_usd
+       FROM semantic_cache WHERE signature = ? AND expires_at > ?`
+    )
+    .get(signature, now) as CachedResponseRow | undefined;
+}
+
+export function writeSemanticCacheResponse(entry: {
+  signature: string;
+  model: string;
+  response: string;
+  tokensSaved: number;
+  originalCostUsd?: number;
+  createdAt: string;
+  expiresAt: string;
+}): void {
+  getDbInstance()
+    .prepare(
+      `INSERT OR REPLACE INTO semantic_cache
+       (id, signature, model, prompt_hash, response, tokens_saved, original_cost_usd, hit_count, created_at, expires_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`
+    )
+    .run(
+      randomUUID(),
+      entry.signature,
+      entry.model,
+      entry.signature.slice(0, 16),
+      entry.response,
+      entry.tokensSaved,
+      entry.originalCostUsd ?? null,
+      entry.createdAt,
+      entry.expiresAt
+    );
+}
+
+export function incrementSemanticCacheEntryHitCount(signature: string): void {
+  getDbInstance()
+    .prepare("UPDATE semantic_cache SET hit_count = hit_count + 1 WHERE signature = ?")
+    .run(signature);
+}
 
 const VALID_SORT_COLUMNS = ["created_at", "expires_at", "hit_count", "tokens_saved", "model"];
 

@@ -1,7 +1,54 @@
 import { spawn } from "node:child_process";
-import { closeSync, mkdirSync, openSync, writeFileSync, writeSync } from "node:fs";
+import {
+  closeSync,
+  mkdirSync,
+  openSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+  writeSync,
+} from "node:fs";
 import { dirname } from "node:path";
 import { StringDecoder } from "node:string_decoder";
+
+function processGroupExists(groupId) {
+  try {
+    process.kill(-groupId, 0);
+    return true;
+  } catch (error) {
+    if (error.code === "ESRCH") return false;
+    throw error;
+  }
+}
+
+function hasLiveGroupMembers(groupId) {
+  if (!processGroupExists(groupId)) return false;
+  if (process.platform !== "linux") return true;
+
+  // Signal 0 sees zombies until their parent reaps them, even after execution stopped.
+  let sawExitedMember = false;
+  for (const name of readdirSync("/proc")) {
+    if (!/^\d+$/.test(name)) continue;
+    let stat;
+    try {
+      stat = readFileSync(`/proc/${name}/stat`, "utf8");
+    } catch (error) {
+      if (error.code === "ENOENT" || error.code === "ESRCH") continue;
+      throw error;
+    }
+    // The executable name may contain spaces and parentheses. Fields after it start at state.
+    const fields = stat.slice(stat.lastIndexOf(") ") + 2).split(" ");
+    const memberGroup = Number(fields[2]);
+    if (!Number.isInteger(memberGroup) || !/^[A-Za-z]$/.test(fields[0])) {
+      throw new Error("Cannot inspect Linux process state");
+    }
+    if (memberGroup !== groupId) continue;
+    if (fields[0] !== "Z" && fields[0] !== "X") return true;
+    sawExitedMember = true;
+  }
+  // An unaccounted-for group can be treated as empty only if the kernel confirms it disappeared.
+  return !sawExitedMember && processGroupExists(groupId);
+}
 
 /** Run one gate without a shell; persist progress before computing its verdict. */
 export async function runGateProcess(command, args, options) {
@@ -116,10 +163,9 @@ export async function runGateProcess(command, args, options) {
         exitSignal = receivedSignal;
         if (process.platform !== "win32" && child.pid) {
           try {
-            process.kill(-child.pid, 0);
-            terminate("ORPHANED_DESCENDANTS");
-          } catch (error) {
-            if (error.code !== "ESRCH") terminate("CLEANUP_ERROR");
+            if (hasLiveGroupMembers(child.pid)) terminate("ORPHANED_DESCENDANTS");
+          } catch {
+            terminate("CLEANUP_ERROR");
           }
         }
       });

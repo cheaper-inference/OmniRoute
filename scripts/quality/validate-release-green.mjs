@@ -602,10 +602,12 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
   const byName = new Map(results.filter(Boolean).map((r) => [r.name, r]));
   const lane = (id, label, names) => {
     const parts = [];
+    let incomplete = false;
     let line = "";
     for (const name of names) {
       const r = byName.get(name);
       if (!r) {
+        incomplete = true;
         parts.push(`${name} no result`);
         continue;
       }
@@ -618,6 +620,7 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
       label,
       kind: "hard",
       ok: parts.length === 0,
+      evidenceState: incomplete ? "INCOMPLETE" : "COMPLETE",
       detail: parts.length === 0 ? "pass" : `${parts.join(", ")}${line ? ` — ${line}` : ""}`,
     };
   };
@@ -630,6 +633,7 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
             label: "Hosted suite receipt integrity",
             kind: "hard",
             ok: false,
+            evidenceState: "INCOMPLETE",
             detail: "invalid, unexpected or duplicate hosted suite receipt",
           },
         ]
@@ -1115,6 +1119,7 @@ async function main() {
           label: "Hosted suites: read ci.yml's unit and integration matrices",
           kind: "hard",
           ok: false,
+          evidenceState: "INCOMPLETE",
           detail: "could not read the shard counts from .github/workflows/ci.yml",
         });
       } else {

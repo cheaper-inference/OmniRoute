@@ -1,0 +1,1 @@
+- **fix(dashboard):** the free-tier card shows its keyless count, empty-table row, ToS column and freshness line in the dashboard language, labels the shipped catalog date as its curation date instead of an update, and shows a loading status and a load-failure warning instead of an empty card ([#21209](https://github.com/cheaper-inference/OmniRoute/pull/21209))

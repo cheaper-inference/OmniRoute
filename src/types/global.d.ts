@@ -36,13 +36,6 @@ declare module "node-machine-id" {
   export function machineId(original?: boolean): Promise<string>;
 }
 
-declare module "fetch-socks" {
-  export function socksDispatcher(
-    proxy: { type: number; host: string; port: number },
-    options?: Record<string, unknown>
-  ): import("undici").Dispatcher;
-}
-
 declare module "figlet" {
   export default function figlet(
     text: string,

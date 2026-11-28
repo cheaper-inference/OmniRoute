@@ -19,8 +19,9 @@ interface MemberBarProps {
 
 /**
  * How a window's use splits between the pool's members: one segmented bar in slot order, named
- * and valued as a progress bar, and a legend that says every value in words. The asking key is told apart by its place, its outline
- * and its label, never by colour alone. Nothing is drawn when the slices cannot be drawn honestly.
+ * and valued as a meter, and a legend that says every value in words. The asking key is told
+ * apart by its place, its outline and its label, never by colour alone. Nothing is drawn when the
+ * slices cannot be drawn honestly.
  */
 export default function MemberBar({ members, unit, limit }: MemberBarProps) {
   const t = useTranslations("quotaSelf");
@@ -44,7 +45,7 @@ export default function MemberBar({ members, unit, limit }: MemberBarProps) {
       </p>
       {/* One segment per member. The spoken value is the members' total against the track's scale. */}
       <div
-        role="progressbar"
+        role="meter"
         aria-label={t("membersBarLabel", { count: number(slices.length) })}
         aria-valuemin={0}
         aria-valuemax={Math.max(limit, total)}
