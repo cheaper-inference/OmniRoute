@@ -26,8 +26,8 @@ test("package.json files[] excludes Next's .nft.json trace manifests", () => {
   const files = pkg.files ?? [];
   assert.ok(files.length > 0, "package.json must declare files[]");
   assert.ok(
-    files.includes("!**/*.nft.json"),
-    "files[] must negate **/*.nft.json — they are build metadata and were 61% of the 3.8.50 payload"
+    files.includes("!dist/**/*.nft.json"),
+    "files[] must negate dist/**/*.nft.json — they are build metadata and were 61% of the 3.8.50 payload"
   );
 });
 
@@ -37,7 +37,7 @@ test("the negation sits after the positive dist/ entry it has to override", () =
   // just because both strings happen to be present somewhere.
   const files = pkg.files ?? [];
   const dist = files.indexOf("dist/");
-  const negation = files.indexOf("!**/*.nft.json");
+  const negation = files.indexOf("!dist/**/*.nft.json");
   assert.notEqual(dist, -1, "dist/ must still be published");
   assert.ok(negation > dist, "the .nft.json negation must come after dist/");
 });
