@@ -34,6 +34,12 @@ import { persistCreditBalance, getAllPersistedCreditBalances } from "@/lib/db/cr
 import { setConnectionRateLimitUntil } from "@/lib/db/providers";
 import { markAntigravityModelQuotaExhausted } from "../services/antigravityFamilyCooldown.ts";
 import { cleanModelName } from "./antigravity/modelResolution.ts";
+import {
+  AntigravityRemoteImageError,
+  buildAntigravityInvalidImageResponse,
+  inlineAntigravityRemoteImages,
+  isAntigravityLocalImageRejection,
+} from "./antigravity/remoteImageInline.ts";
 export { cleanModelName } from "./antigravity/modelResolution.ts";
 import { resolveAntigravityOutputCap } from "./antigravityOutputCap.ts";
 export { MAX_ANTIGRAVITY_OUTPUT_TOKENS } from "./antigravityOutputCap.ts";
@@ -927,13 +933,13 @@ export class AntigravityExecutor extends BaseExecutor {
         return { ...c, role, parts };
       }) || [];
 
-    const contents: AntigravityContent[] = [];
+    const mergedContents: AntigravityContent[] = [];
     for (const c of normalizedContents) {
       if (!Array.isArray(c.parts) || c.parts.length === 0) continue;
-      if (contents.length > 0 && contents[contents.length - 1].role === c.role) {
-        contents[contents.length - 1].parts.push(...c.parts);
+      if (mergedContents.length > 0 && mergedContents[mergedContents.length - 1].role === c.role) {
+        mergedContents[mergedContents.length - 1].parts.push(...c.parts);
       } else {
-        contents.push(c);
+        mergedContents.push(c);
       }
     }
 
@@ -947,7 +953,7 @@ export class AntigravityExecutor extends BaseExecutor {
     const safetySettings = getAntigravitySafetySettings(normalizedRequest?.safetySettings);
     const rawTransformedRequest = {
       ...normalizedRequest,
-      ...(contents.length > 0 && { contents }),
+      ...(mergedContents.length > 0 && { contents: mergedContents }),
       sessionId: identity.sessionId,
       ...(safetySettings !== undefined && { safetySettings }),
       toolConfig:
@@ -970,6 +976,23 @@ export class AntigravityExecutor extends BaseExecutor {
         : // Other chat models (gemini-4-argon-high, gpt-oss-120b-medium): no trailing-turn strip
           // and no identity rewrite, but empty system parts are rejected the same way.
           dropEmptyAntigravitySystemParts(rawTransformedRequest);
+
+    // Antigravity rejects `fileData` image URLs (the translator labels them `image/*`) with
+    // a 400, so download each remote image and send it as `inlineData` instead. This runs
+    // after the trailing-turn strip so only images that reach upstream are downloaded.
+    const outgoingContents = (transformedRequest as Record<string, unknown>).contents;
+    if (mergedContents.length > 0 && Array.isArray(outgoingContents)) {
+      try {
+        (transformedRequest as Record<string, unknown>).contents =
+          await inlineAntigravityRemoteImages(outgoingContents as AntigravityContent[], {
+            signal,
+            cacheKey: bodyRecord,
+          });
+      } catch (error) {
+        if (!(error instanceof AntigravityRemoteImageError)) throw error;
+        return buildAntigravityInvalidImageResponse(error) as unknown as never;
+      }
+    }
 
     applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);
     // Identity labels join (never replace) the caller's own labels (#16618).
@@ -1399,8 +1422,12 @@ export class AntigravityExecutor extends BaseExecutor {
         }
       }
 
-      // Success (or any non-400) on a candidate → return immediately.
-      if (result.response.status !== HTTP_STATUS.BAD_REQUEST) {
+      // Success (or any non-400) on a candidate → return immediately. A local image
+      // rejection is returned too: no other upstream model id can fix an image URL.
+      if (
+        result.response.status !== HTTP_STATUS.BAD_REQUEST ||
+        isAntigravityLocalImageRejection(result.response)
+      ) {
         return result;
       }
 
