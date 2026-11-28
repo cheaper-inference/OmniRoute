@@ -46,7 +46,11 @@ function success() {
   return stream('data: {"choices":[{"delta":{"content":"success"}}]}\n\ndata: [DONE]\n\n');
 }
 
+// #18668: the retry delay uses full jitter. These scenarios write a cooldown while the
+// retry sleeps, so pin the RNG at 0.5: the first retry then sleeps exactly retryDelayMs.
+const originalRandom = Math.random;
 test.beforeEach(() => {
+  Math.random = () => 0.5;
   __test_resetCredentialHealthCache();
   clearAllModelLockouts();
   clearCooldownState();
@@ -55,6 +59,7 @@ test.beforeEach(() => {
   resetAllCircuitBreakers();
 });
 test.afterEach(() => {
+  Math.random = originalRandom;
   __test_resetCredentialHealthCache();
   restoreCredentialGateFlag();
 });
