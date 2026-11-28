@@ -13,10 +13,49 @@ test("getAntigravityQuotaFamily classifies Argon models and weekly window keys a
   assert.equal(getAntigravityQuotaFamily("agy/gemini-4-argon-medium"), "argon");
   assert.equal(getAntigravityQuotaFamily("gemini_4_argon_weekly"), "argon");
   assert.equal(getAntigravityQuotaFamily("argon_weekly"), "argon");
+  assert.equal(getAntigravityQuotaFamily("gemini-4-neon"), "gemini");
+  assert.equal(getAntigravityQuotaFamily("antigravity/gemini-4-neon-high"), "gemini");
+  assert.equal(getAntigravityQuotaFamily("agy/gemini-4-neon-medium"), "gemini");
+  assert.equal(getAntigravityQuotaFamily("gemini-4-hydrogen"), "gemini");
+  assert.equal(getAntigravityQuotaFamily("antigravity/gemini-4-hydrogen-low"), "gemini");
   assert.equal(getAntigravityQuotaFamily("gemini-3.8-flash"), "gemini");
   assert.equal(getAntigravityQuotaFamily("gemini_weekly"), "gemini");
   assert.equal(getAntigravityQuotaFamily("claude-opus-4-6-thinking"), "claude");
   assert.equal(getAntigravityQuotaFamily("claude-sonnet-4-5"), "claude");
+  assert.equal(getAntigravityQuotaFamily("gpt-oss-120b-medium"), "claude");
+  assert.equal(getAntigravityQuotaFamily("antigravity/gpt-oss-120b-medium"), "claude");
+  assert.equal(getAntigravityQuotaFamily("claude_gpt_session"), "claude");
+  assert.equal(getAntigravityQuotaFamily("claude_gpt_weekly"), "claude");
+});
+
+test("selectAntigravityQuotaWindowNames maps gemini-4-neon and gemini-4-hydrogen to Gemini windows (#20832)", () => {
+  const quotaNames = [
+    "gemini-4-neon",
+    "gemini-4-hydrogen",
+    "gemini-3.8-flash",
+    "gemini_session",
+    "gemini_weekly",
+    "claude_gpt_session",
+    "claude_gpt_weekly",
+    "gemini_4_argon_weekly",
+  ];
+
+  assert.deepEqual(
+    selectAntigravityQuotaWindowNames(quotaNames, "antigravity/gemini-4-neon-high"),
+    ["gemini_session", "gemini_weekly"]
+  );
+  assert.deepEqual(
+    selectAntigravityQuotaWindowNames(quotaNames, "antigravity/gemini-4-neon"),
+    ["gemini-4-neon", "gemini_session", "gemini_weekly"]
+  );
+  assert.deepEqual(
+    selectAntigravityQuotaWindowNames(quotaNames, "agy/gemini-4-hydrogen-medium"),
+    ["gemini_session", "gemini_weekly"]
+  );
+  assert.deepEqual(
+    selectAntigravityQuotaWindowNames(quotaNames, "antigravity/gpt-oss-120b-medium"),
+    ["claude_gpt_session", "claude_gpt_weekly"]
+  );
 });
 
 test("selectAntigravityQuotaWindowNames includes gemini_4_argon_weekly and argon_weekly for Argon requests", () => {

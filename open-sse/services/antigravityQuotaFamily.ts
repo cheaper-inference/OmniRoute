@@ -22,12 +22,7 @@ export function getAntigravityQuotaFamily(
   const slashIndex = normalized.indexOf("/");
   const bare = slashIndex >= 0 ? normalized.slice(slashIndex + 1) : normalized;
 
-  if (
-    bare === "argon_weekly" ||
-    bare === "gemini_4_argon_weekly" ||
-    bare.includes("argon") ||
-    bare.startsWith("gemini-4")
-  ) {
+  if (bare === "argon_weekly" || bare === "gemini_4_argon_weekly" || bare.includes("argon")) {
     return "argon";
   }
   if (bare.startsWith("gemini-") || bare.includes("/gemini-") || bare.includes("gemini")) {
@@ -38,7 +33,10 @@ export function getAntigravityQuotaFamily(
     bare.startsWith("cloud-") ||
     bare.includes("/claude-") ||
     bare.includes("/cloud-") ||
-    bare.includes("anthropic")
+    bare.includes("anthropic") ||
+    bare.startsWith("gpt-oss-") ||
+    bare === "claude_gpt_session" ||
+    bare === "claude_gpt_weekly"
   ) {
     return "claude";
   }
