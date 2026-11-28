@@ -810,6 +810,8 @@ describe("TestBenchAccordion", () => {
     expect(sendCall).toBeTruthy();
     const bodyStr = (sendCall?.[1] as RequestInit)?.body as string;
     const body = JSON.parse(bodyStr);
+    expect(typeof body.provider).toBe("string");
+    expect(typeof body.body).toBe("object");
     expect(body).toEqual({
       provider: "openai",
       sourceFormat: "claude",
