@@ -99,7 +99,11 @@ test("OpenCode 410 on a retired model stays model-scoped and leaves the connecti
     DEAD_MODEL
   );
 
-  assert.equal(result.shouldFallback, true);
+  assert.equal(
+    result.shouldFallback,
+    false,
+    "a retired model is retired for every account, so the first 410 must not walk sibling accounts (#21202)"
+  );
 
   const after = await providersDb.getProviderConnectionById(connection.id);
 
@@ -159,7 +163,11 @@ test("OpenCode 410 without a model name in the body still locks only that model"
     DEAD_MODEL
   );
 
-  assert.equal(result.shouldFallback, true);
+  assert.equal(
+    result.shouldFallback,
+    false,
+    "a retired model is retired for every account, so the first 410 must not walk sibling accounts (#21202)"
+  );
 
   const after = await providersDb.getProviderConnectionById(connection.id);
 
@@ -185,14 +193,14 @@ test("OpenCode 410 without a model name in the body still locks only that model"
   );
 });
 
-test("other per-model providers retain existing 410 connection scope", async () => {
+test("a 410 is model-scoped for other per-model providers too (#21202)", async () => {
   assert.equal(
     fallback.hasPerModelQuota("gemini", DEAD_MODEL),
     true,
     "Gemini provides a non-OpenCode per-model control case"
   );
 
-  const connection = await seedOpencodeConnection("gemini", "gemini-410-control");
+  const connection = await seedOpencodeConnection("gemini", "gemini-410-model-scope");
 
   const result = await auth.markAccountUnavailable(
     connection.id,
@@ -202,24 +210,50 @@ test("other per-model providers retain existing 410 connection scope", async () 
     DEAD_MODEL
   );
 
-  assert.equal(result.shouldFallback, true);
+  assert.equal(
+    result.shouldFallback,
+    false,
+    "a retired model is retired for every account, so the first 410 must not walk sibling accounts (#21202)"
+  );
 
   const after = await providersDb.getProviderConnectionById(connection.id);
 
-  assert.ok(
-    after?.rateLimitedUntil,
-    "410 must remain connection-scoped for per-model providers without an explicit 410 contract"
+  assert.equal(
+    after?.rateLimitedUntil ?? null,
+    null,
+    "410 for one retired model must not apply a connection-wide cooldown (#21202)"
   );
 
   assert.equal(
     after?.testStatus,
-    "unavailable",
-    "the OpenCode-specific 410 fix must not change other provider semantics"
+    "active",
+    "410 for one retired model must leave the connection active"
   );
 
   assert.equal(
     fallback.isModelLocked("gemini", connection.id, DEAD_MODEL),
+    true,
+    "the retired model itself should be locked"
+  );
+
+  await assertLockBoundedByMaxCooldown("gemini", connection.id, DEAD_MODEL, result.cooldownMs);
+
+  assert.equal(
+    fallback.isModelLocked("gemini", connection.id, "gemini-2.5-flash"),
     false,
-    "a generic per-model provider must not inherit the OpenCode 410 model lock"
+    "a healthy sibling model must remain unlocked"
+  );
+
+  const healthyCredentials = await auth.getProviderCredentials(
+    "gemini",
+    null,
+    null,
+    "gemini-2.5-flash"
+  );
+
+  assert.equal(
+    healthyCredentials?.connectionId,
+    connection.id,
+    "the same connection must remain selectable for healthy sibling models"
   );
 });

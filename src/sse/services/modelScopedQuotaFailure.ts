@@ -17,7 +17,8 @@ export function isQuotaExhaustedSignal(fallbackResult: FallbackSignal): boolean 
 /**
  * Statuses/classifications that lock out ONE model instead of cooling the whole connection:
  * 404, a 410 whose model the provider retired ("model gone" — NVIDIA #9833, OpenCode
- * family #17472), (#16380) a 401 whose body attributes the failure to the
+ * family #17472; provider-agnostic since #21202, which showed the same failure
+ * on cloudflare-ai), (#16380) a 401 whose body attributes the failure to the
  * model ("Model X is not supported" — delisted model on a healthy key), 429, 5xx,
  * and (#13548) a model-level quota/credit/rate-limit classification regardless of
  * HTTP status (e.g. a passthrough 400 "credit insufficient"). 402 keeps its

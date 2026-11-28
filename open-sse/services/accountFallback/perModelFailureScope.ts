@@ -109,7 +109,9 @@ export function isExplicitModelCapacityFailure(
 
 /**
  * @param status - When 429, only per-model *quota* providers qualify. Omit for
- *   the non-quota question (404/5xx), which also includes Claude.
+ *   the non-quota question (404/5xx), which also includes Claude. A 410 is
+ *   always model-scoped (#21202): it names a retired model, retired for every
+ *   account of the provider, never an account-scoped signal.
  */
 export function hasPerModelFailureScope(
   provider: string | null | undefined,
@@ -125,6 +127,7 @@ export function hasPerModelFailureScope(
     isExplicitModelCapacityFailure(status, errorText, model)
   )
     return true;
+  if (status === 410) return true;
   if (status === 429) return hasPerModelQuota(provider, model, connectionPassthroughModels);
   if (hasPerModelQuota(provider, model, connectionPassthroughModels)) return true;
   if (typeof connectionPassthroughModels === "boolean") return connectionPassthroughModels;
