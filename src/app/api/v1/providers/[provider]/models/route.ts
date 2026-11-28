@@ -1,4 +1,5 @@
 import { getUnifiedModelsResponse as fetchUnifiedModels } from "@/app/api/v1/models/catalog";
+import { catalogStringResponse } from "@/app/api/v1/models/catalogPagination";
 import { getProviderNodeById } from "@/lib/db/providers/nodes";
 import { getServiceModels } from "@/lib/db/serviceModels";
 import { isServiceBackendPluginId } from "@/lib/services/serviceBackends";
@@ -129,16 +130,17 @@ export async function GET(request: Request, { params }: { params: Promise<{ prov
   // content-length/content-encoding/transfer-encoding must not ride onto this
   // smaller body — a stale length makes the response never complete for the
   // client (the dashboard model picker hangs on "loading" forever, #14092).
+  // Write through the same framed writer GET /v1/models uses, so the declared
+  // length is computed from these exact bytes instead of left to the runtime
+  // (#17196).
   const headers = stripStaleEncodingHeaders(response.headers);
 
-  return Response.json(
-    {
+  return catalogStringResponse(
+    JSON.stringify({
       object: payload.object || "list",
       data: [...deduped.values()],
-    },
-    {
-      status: response.status,
-      headers,
-    }
+    }),
+    headers,
+    response.status
   );
 }
