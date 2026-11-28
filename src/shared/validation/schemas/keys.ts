@@ -1,3 +1,4 @@
+import { API_KEY_BAN_REASONS } from "@/shared/constants/apiKeyBanReasons";
 import { API_KEY_CODEX_SERVICE_MODES } from "../../constants/codexServiceMode";
 import { z } from "zod";
 import {
@@ -186,6 +187,7 @@ export const updateKeyPermissionsSchema = z
     isActive: z.boolean().optional(),
     throttleDelayMs: z.number().int().min(0).max(300000).optional(),
     isBanned: z.boolean().optional(),
+    banReason: z.enum(API_KEY_BAN_REASONS).optional(),
     expiresAt: z.string().datetime().nullable().optional(),
     maxSessions: z.number().int().min(0).max(10000).optional(),
     accessSchedule: z.union([accessScheduleSchema, z.null()]).optional(),
@@ -221,6 +223,13 @@ export const updateKeyPermissionsSchema = z
     anthropicRateLimitHeaders: anthropicRateLimitHeadersField,
   })
   .superRefine((value, ctx) => {
+    if (value.banReason !== undefined && value.isBanned !== true) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "banReason requires isBanned to be true",
+        path: ["banReason"],
+      });
+    }
     if (value.modelAccessMode === "all" && value.allowedModels && value.allowedModels.length > 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

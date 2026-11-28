@@ -133,6 +133,12 @@
     "saveError": "Could not save the service mode. Please try again."
   },
   "common": {
+    "apiKeyBanReason": {
+      "unknown": "No reason recorded",
+      "prompt_injection": "Suspected prompt injection",
+      "compromised_key": "Suspected key compromise",
+      "policy_violation": "Policy violation"
+    },
     "usageEvidence": {
       "compressedTokens": "{count} tokens compressed",
       "reported": "reported",
@@ -2102,6 +2108,10 @@
     "readinessStep4": "Send a test request",
     "readinessContinue": "Continue setup",
     "readinessDismiss": "Dismiss for now",
+    "apiKeyBanTitle": "{count, plural, one {# banned API key} other {# banned API keys}}",
+    "apiKeyBanEntry": "{name} · {reason}",
+    "apiKeyBanMore": "{count, plural, one {# more banned key} other {# more banned keys}}",
+    "apiKeyBanManage": "Manage API keys",
     "unpricedUsageTitle": "{count, plural, one {# model} other {# models}} with recent usage but no configured price",
     "unpricedUsageFailClosed": "{keys, plural, one {# API key with a usage limit} other {# API keys with a usage limit}} used these models in the last 8 days. While that usage is inside a key's daily or weekly window, the key is treated as over quota and its requests are blocked (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
     "unpricedUsageCountAsZero": "This usage counts as $0 toward per-key usage limits (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
@@ -2649,6 +2659,8 @@
     "apiManagerTimezonePlaceholder": "America/Sao_Paulo",
     "noLogPayloadPrivacy": "No-Log Payload Privacy",
     "bannedStatus": "Banned Status",
+    "banReasonLabel": "Ban reason (optional)",
+    "banReasonKeepCurrent": "Leave reason unchanged",
     "managementApiAccess": "Management API Access",
     "expirationDate": "Expiration Date",
     "keyExpiryPresetPlusDays": "+{days} days",

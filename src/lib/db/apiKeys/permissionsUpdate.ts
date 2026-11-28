@@ -1,4 +1,5 @@
 import type { ApiKeyCodexServiceMode } from "../../../shared/constants/codexServiceMode";
+import type { ApiKeyBanReason } from "@/shared/constants/apiKeyBanReasons";
 import type { AccessSchedule, RateLimitRule } from "./types";
 import { normalizeModelAccessUpdate, type ModelAccessMode } from "./modelAccessMode";
 
@@ -20,6 +21,7 @@ export interface ApiKeyPermissionsUpdate {
   throttleDelayMs?: number | null;
   rateLimits?: RateLimitRule[] | null;
   isBanned?: boolean;
+  banReason?: ApiKeyBanReason;
   expiresAt?: string | null;
   maxSessions?: number | null;
   scopes?: string[] | null;
@@ -68,6 +70,7 @@ export function normalizeApiKeyPermissionsUpdate(
     throttleDelayMs: update.throttleDelayMs,
     rateLimits: update.rateLimits,
     isBanned: update.isBanned,
+    banReason: update.banReason,
     expiresAt: update.expiresAt,
     maxSessions: update.maxSessions,
     scopes: update.scopes,

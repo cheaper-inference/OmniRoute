@@ -3317,6 +3317,45 @@ paths:
         "503":
           description: Management authentication backend temporarily unavailable
 
+  /api/monitoring/api-key-bans:
+    get:
+      tags: [API Keys]
+      summary: Summarize banned API keys
+      x-always-protected: true
+      description: >-
+        Returns the total number of banned API keys and up to five key labels with
+        their recorded reason categories. A null reason means no category was recorded.
+      responses:
+        "200":
+          description: API key ban summary
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [total, keys]
+                properties:
+                  total:
+                    type: integer
+                    minimum: 0
+                  keys:
+                    type: array
+                    maxItems: 5
+                    items:
+                      type: object
+                      required: [id, name, reason]
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        reason:
+                          type: [string, "null"]
+                          enum: [prompt_injection, compromised_key, policy_violation, null]
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
+
   /api/keys/{id}:
     get:
       tags: [API Keys]
@@ -3341,6 +3380,11 @@ paths:
           application/json:
             schema:
               type: object
+              properties:
+                banReason:
+                  type: string
+                  enum: [prompt_injection, compromised_key, policy_violation]
+                  description: Optional reason category when isBanned is true. Requires management authentication.
               additionalProperties: true
       responses:
         "200":

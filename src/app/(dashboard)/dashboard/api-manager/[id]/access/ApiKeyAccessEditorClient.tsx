@@ -314,6 +314,7 @@ function AccessGeneralPanelPanelContent({ context }: { context: AccessFormContex
       setName={form.setName}
       setIsActive={form.setIsActive}
       setIsBanned={form.setIsBanned}
+      setBanReason={form.setBanReason}
       setExpiresAt={form.setExpiresAt}
       setManageEnabled={form.setManageEnabled}
       setSelfUsageEnabled={form.setSelfUsageEnabled}

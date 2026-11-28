@@ -1,3 +1,4 @@
+import { parseApiKeyBanReason } from "@/shared/constants/apiKeyBanReasons";
 /**
  * db/apiKeys.js — API key management.
  */
@@ -582,6 +583,8 @@ export async function getApiKeys(limit?: number, offset?: number) {
   }
   return rows.map((row) => {
     const camelRow = toRecord(rowToCamel(row)) as ApiKeyView;
+    delete (camelRow as JsonRecord).banReason;
+    delete (camelRow as JsonRecord).bannedAt;
     // Raw secret for the operator-only JSON export and internal probes; stored encrypted.
     camelRow.key = decryptApiKeySecret(camelRow.key);
     camelRow.modelAccessMode = parseModelAccessMode(
@@ -737,6 +740,8 @@ export async function getApiKeyById(id: string, options: { readOnly?: boolean } 
     : getPreparedStatements(db).getKeyById.get(id);
   if (!row) return null;
   const camelRow = toRecord(rowToCamel(row)) as ApiKeyView;
+  delete (camelRow as JsonRecord).banReason;
+  delete (camelRow as JsonRecord).bannedAt;
   // Raw secret for the admin reveal route and by-id consumers; stored encrypted.
   camelRow.key = decryptApiKeySecret(camelRow.key);
   camelRow.modelAccessMode = parseModelAccessMode(camelRow.modelAccessMode, camelRow.allowedModels);
@@ -1067,6 +1072,8 @@ export async function updateApiKeyPermissions(
     throttleDelayMs?: number | null;
     rateLimits?: string | null;
     isBanned?: number;
+    banTime?: string;
+    banReason?: string | null;
     maxSessions?: number;
     expiresAt?: string | null;
     scopes?: string;
@@ -1181,6 +1188,18 @@ export async function updateApiKeyPermissions(
   if (normalized.isBanned !== undefined) {
     updates.push("is_banned = @isBanned");
     params.isBanned = normalized.isBanned ? 1 : 0;
+    params.banTime = new Date().toISOString();
+    updates.push(
+      "banned_at = CASE WHEN @isBanned = 0 THEN NULL WHEN is_banned = 1 THEN banned_at ELSE @banTime END"
+    );
+    params.banReason = parseApiKeyBanReason(normalized.banReason);
+    updates.push(
+      `ban_reason = CASE
+        WHEN @isBanned = 0 THEN NULL
+        WHEN @banReason IS NOT NULL THEN @banReason
+        WHEN is_banned = 1 THEN ban_reason
+        ELSE NULL END`
+    );
   }
 
   if (normalized.expiresAt !== undefined) {

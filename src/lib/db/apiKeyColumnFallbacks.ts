@@ -30,6 +30,12 @@ export const API_KEY_COLUMN_FALLBACKS = [
   { name: "scopes", definition: "scopes TEXT" },
   { name: "rate_limits", definition: "rate_limits TEXT" },
   { name: "is_banned", definition: "is_banned INTEGER NOT NULL DEFAULT 0" },
+  {
+    name: "ban_reason",
+    definition:
+      "ban_reason TEXT CHECK (ban_reason IN ('prompt_injection', 'compromised_key', 'policy_violation'))",
+  },
+  { name: "banned_at", definition: "banned_at TEXT" },
   { name: "key_hash", definition: "key_hash TEXT" },
   { name: "proxy_id", definition: "proxy_id TEXT" },
   { name: "allowed_endpoints", definition: "allowed_endpoints TEXT" },

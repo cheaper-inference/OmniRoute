@@ -8,6 +8,7 @@ import VscodeCopilotBanner from "../dashboard/VscodeCopilotBanner";
 import NewsBanner from "../dashboard/NewsBanner";
 import FirstRunReadinessCard from "../dashboard/FirstRunReadinessCard";
 import HomePageHeader from "./HomePageHeader";
+import ApiKeyBanBanner from "./ApiKeyBanBanner";
 import HomeSystemMetricsCards from "./HomeSystemMetricsCards";
 import UnpricedUsageBanner from "../dashboard/UnpricedUsageBanner";
 
@@ -22,6 +23,7 @@ export default async function HomePage() {
       <HomePageHeader />
       {isBootstrapped && <BootstrapBanner />}
       <FirstRunReadinessCard setupComplete={Boolean(settings.setupComplete)} />
+      <ApiKeyBanBanner />
       <UnpricedUsageBanner />
       <KimiSponsorBanner />
       <CheaperInferenceSponsorBanner />
