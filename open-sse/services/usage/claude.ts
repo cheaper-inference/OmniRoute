@@ -107,6 +107,7 @@ interface ObservedClaudeUsage {
   /** A `/api/oauth/usage`-shaped body (`five_hour` / `seven_day`) built from the headers. */
   body: Record<string, unknown>;
   observedAt: number;
+  windowObservedAt: Record<string, number>;
 }
 
 const observedUsage = boundedMap<ObservedClaudeUsage>(
@@ -118,11 +119,12 @@ const observedUsage = boundedMap<ObservedClaudeUsage>(
 const UNIFIED_WINDOWS = [
   ["5h", "five_hour"],
   ["7d", "seven_day"],
+  ["7d_oi", "seven_day_overage_included"],
 ] as const;
 
 /**
  * Remember the plan-window utilization Anthropic reports on every OAuth response
- * (`anthropic-ratelimit-unified-{5h,7d}-utilization` 0..1 and `-reset` epoch seconds).
+ * (`anthropic-ratelimit-unified-{5h,7d,7d_oi}-utilization` 0..1 and `-reset` epoch seconds).
  * `/api/oauth/usage` allows only a few calls per credential per hour and a refused call
  * restarts its hour, so these headers are the reliable, free source of the same numbers.
  */
@@ -133,6 +135,7 @@ export function observeClaudeUsageHeaders(
 ): void {
   if (!accessToken || !headers || typeof headers.get !== "function") return;
   const body: Record<string, unknown> = {};
+  const windowObservedAt: Record<string, number> = {};
   for (const [suffix, field] of UNIFIED_WINDOWS) {
     const raw = headers.get(`anthropic-ratelimit-unified-${suffix}-utilization`);
     const utilization = raw === null || raw.trim() === "" ? Number.NaN : Number(raw);
@@ -142,9 +145,24 @@ export function observeClaudeUsageHeaders(
       utilization: Math.min(100, Math.round(utilization * 10_000) / 100),
       resets_at: Number.isFinite(reset) && reset > 0 ? new Date(reset * 1000).toISOString() : null,
     };
+    windowObservedAt[field] = now;
   }
   if (Object.keys(body).length === 0) return;
-  observedUsage.set(hashClaudeCredential(accessToken), { body, observedAt: now });
+  const key = hashClaudeCredential(accessToken);
+  const previous = observedUsage.get(key);
+  // Responses from other models omit Fable's window; omission is not a quota reset.
+  for (const [field, value] of Object.entries(previous?.body ?? {})) {
+    const timestamp = previous?.windowObservedAt[field];
+    if (
+      !(field in body) &&
+      timestamp !== undefined &&
+      now - timestamp < CLAUDE_USAGE_SUCCESS_TTL_MS
+    ) {
+      body[field] = value;
+      windowObservedAt[field] = timestamp;
+    }
+  }
+  observedUsage.set(key, { body, observedAt: now, windowObservedAt });
 }
 
 /** When the endpoint read behind `usage` was taken (NaN when unknown, 0 when there is none). */
@@ -153,7 +171,7 @@ function endpointReadAt(usage: ClaudeUsageResult, cached: CachedClaudeUsage | un
   return usage.quotas ? (cached?.fetchedAt ?? 0) : 0;
 }
 
-/** Per-model weekly windows only come from the endpoint: keep them while that read is recent. */
+/** Keep endpoint-only windows while that read is recent. */
 function recentEndpointRead(
   cached: CachedClaudeUsage | undefined,
   observedAt: number
@@ -173,19 +191,31 @@ function preferNewerObservedUsage(key: string, usage: ClaudeUsageResult): Claude
   if (!usage.quotas && usage.message !== RATE_LIMITED_MESSAGE) return usage;
   const cached = lastSuccessfulUsage.get(key);
   const readAt = endpointReadAt(usage, cached);
-  if (Number.isFinite(readAt) && observed.observedAt <= readAt) return usage;
+  const observedBody = Object.fromEntries(
+    Object.entries(observed.body).filter(
+      ([field]) => Date.now() - observed.windowObservedAt[field] < CLAUDE_USAGE_SUCCESS_TTL_MS
+    )
+  );
+  const normalized = normalizeClaudeUsageQuotas(observedBody);
+  if (Number.isFinite(readAt) && observed.observedAt <= readAt) {
+    // A successful usage poll may still omit the response-only Fable window.
+    if (!Object.keys(normalized.modelQuotas).length) return usage;
+    return { ...usage, modelQuotas: { ...normalized.modelQuotas, ...usage.modelQuotas } };
+  }
+  if (!Object.keys(observedBody).length) return usage;
 
   const recentRead = recentEndpointRead(cached, observed.observedAt);
+  const modelQuotas = { ...recentRead?.modelQuotas, ...normalized.modelQuotas };
   const fresh: ClaudeUsageResult = {
     ...usage,
-    quotas: normalizeClaudeUsageQuotas(observed.body).quotas,
-    modelQuotas: recentRead?.modelQuotas,
+    quotas: normalized.quotas,
+    modelQuotas: Object.keys(modelQuotas).length ? modelQuotas : undefined,
     extraUsage: recentRead?.extraUsage ?? null,
     bootstrap: usage.bootstrap ?? null,
     _source: "response-headers",
     _observedAt: new Date(observed.observedAt).toISOString(),
   };
-  // Without a recent endpoint read the headers are the only evidence, and they list no model window.
+  // Headers only list the windows relevant to that response, not the complete account.
   if (!recentRead) delete fresh.quotasComplete;
   delete fresh._stale;
   delete fresh._staleSince;

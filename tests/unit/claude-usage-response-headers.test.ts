@@ -90,6 +90,46 @@ describe("Claude plan windows from response rate-limit headers", () => {
     assert.equal(result.quotas?.["session (5h)"], undefined, "no 5h header, no 5h window");
   });
 
+  it("keeps Week and Fable separate, including after a non-Fable response", async () => {
+    installFetch(() => new Response("rate limited", { status: 429 }));
+    markClaudeOauthUsage429("tok-fable", T0, 3_600_000);
+    observeClaudeUsageHeaders(
+      "tok-fable",
+      unifiedHeaders({
+        "anthropic-ratelimit-unified-7d-utilization": "0.05",
+        "anthropic-ratelimit-unified-7d_oi-utilization": "0.07",
+        "anthropic-ratelimit-unified-7d_oi-reset": String(WEEKLY_RESET_S),
+      })
+    );
+    const first = await usage("tok-fable");
+    assert.equal(first.quotas?.["weekly (7d)"]?.remainingPercentage, 95);
+    assert.deepEqual(first.modelQuotas?.["weekly fable (7d)"], {
+      used: 7,
+      total: 100,
+      remaining: 93,
+      remainingPercentage: 93,
+      resetAt: new Date(WEEKLY_RESET_S * 1000).toISOString(),
+      unlimited: false,
+      fractionReported: undefined,
+      claudeQuota: {
+        kind: "weekly_scoped",
+        active: false,
+        severity: null,
+        scopeKey: "model:fable",
+        modelId: null,
+        modelDisplayName: "fable",
+      },
+    });
+    mock.timers.tick(1_000);
+    observeClaudeUsageHeaders("tok-fable", unifiedHeaders());
+    const second = await usage("tok-fable");
+    assert.deepEqual(second.modelQuotas, first.modelQuotas);
+    assert.equal(second.quotas?.["weekly (7d)"]?.used, 26);
+    mock.timers.tick(CLAUDE_USAGE_SUCCESS_TTL_MS);
+    observeClaudeUsageHeaders("tok-fable", unifiedHeaders());
+    assert.equal((await usage("tok-fable")).modelQuotas, undefined);
+  });
+
   it("replaces a stale read, keeping its plan label but not its old per-model windows", async () => {
     installFetch(() =>
       Response.json({
@@ -127,6 +167,23 @@ describe("Claude plan windows from response rate-limit headers", () => {
     assert.equal(oauthCalls, 1);
     assert.equal(result._source, undefined);
     assert.equal(result.quotas?.["weekly (7d)"]?.used, 30);
+  });
+
+  it("a successful endpoint read preserves a recent response-only Fable window", async () => {
+    observeClaudeUsageHeaders(
+      "tok-poll-fable",
+      unifiedHeaders({
+        "anthropic-ratelimit-unified-7d_oi-utilization": "0.07",
+        "anthropic-ratelimit-unified-7d_oi-reset": String(WEEKLY_RESET_S),
+      })
+    );
+    mock.timers.tick(1_000);
+    installFetch(() => Response.json({ seven_day: { utilization: 6 } }));
+    const result = await usage("tok-poll-fable");
+    assert.equal(result.quotas?.["weekly (7d)"]?.used, 6);
+    assert.equal((result.modelQuotas?.["weekly fable (7d)"] as { used: number })?.used, 7);
+    const other = await usage("tok-other");
+    assert.deepEqual(other.modelQuotas, {}, "observations never cross credentials");
   });
 
   it("a newer observation wins over a cached read and keeps its per-model windows", async () => {
