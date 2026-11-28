@@ -21,6 +21,7 @@ import net from "node:net";
 import tls from "node:tls";
 import type { EventEmitter } from "node:events";
 
+import { stripIpv6Brackets } from "../../utils/proxyFamily.ts";
 import { hasAmbientProxyContext, resolveProxyForRequest } from "../../utils/proxyFetch.ts";
 
 const DEFAULT_TUNNEL_TIMEOUT_MS = 15_000;
@@ -238,10 +239,12 @@ export function createProxyTunnelSocket(options: ProxyTunnelOptions): Promise<ne
 
     const isTlsProxy = proxy.protocol === "https:";
     const port = Number(proxy.port) || (isTlsProxy ? 443 : 80);
+    const tlsHost = stripIpv6Brackets(proxy.hostname);
     // An https:// proxy speaks TLS before CONNECT. Writing CONNECT in cleartext
     // makes it drop the connection and would expose Proxy-Authorization.
+    // IP literals are verified against the certificate using host, with no SNI.
     const socket: net.Socket = isTlsProxy
-      ? tls.connect({ host: proxy.hostname, port, servername: proxy.hostname })
+      ? tls.connect({ host: tlsHost, port, servername: net.isIP(tlsHost) ? undefined : tlsHost })
       : net.connect({ host: proxy.hostname, port });
     const readyEvent = isTlsProxy ? "secureConnect" : "connect";
 
