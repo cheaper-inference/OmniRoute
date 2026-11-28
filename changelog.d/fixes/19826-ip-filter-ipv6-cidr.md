@@ -1,0 +1,1 @@
+- **fix(authz):** the IP allow/deny list matches IPv6 entries again — CIDRs no longer bail out above `/32`, and `::1`/`0:0:0:0:0:0:0:1` are the same address ([#19826](https://github.com/cheaper-inference/OmniRoute/pull/19826)) — thanks @AndreAlmeidaDC
