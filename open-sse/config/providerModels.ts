@@ -351,6 +351,15 @@ export function getModelTargetFormat(aliasOrId: string, modelId: string): string
   // executor's /codex/i routing, 9router#102). Scoped to the openai alias so other
   // providers shipping *-pro ids keep their own endpoint semantics.
   if (alias === "openai" && /-pro$/i.test(bareModelId)) return "openai-responses";
+  // OpenAI rejects function tools combined with reasoning_effort on
+  // /v1/chat/completions for the GPT-6 and GPT-5.6+ families ("Function tools with
+  // reasoning_effort are not supported for gpt-6.2-sol", seen 2026-11-26 on a combo
+  // target). Every catalogued member is tagged Responses; this keeps a new release
+  // (gpt-6.2-sol, gpt-6.2-astra, ...) on Responses before the catalog lists it,
+  // instead of failing every agent request with tools.
+  if (alias === "openai" && /^gpt-(?:[6-9]|5\.[6-9])/i.test(bareModelId)) {
+    return "openai-responses";
+  }
   // Responses-only providers (see RESPONSES_ONLY_PROVIDER_ALIASES): a passthrough id that
   // post-dates the seed would otherwise fall back to the provider's chat format and 400.
   if (RESPONSES_ONLY_PROVIDER_ALIASES.has(alias)) return "openai-responses";
