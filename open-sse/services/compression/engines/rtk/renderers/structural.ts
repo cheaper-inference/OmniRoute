@@ -87,7 +87,7 @@ function nativeListingRoute(text: string): StructuralRoute | null {
   if (!looksLikeNativeListing(text)) return null;
   return { type: "native-listing", render: STRUCTURAL_REGISTRY["native-listing"], command: null };
 }
-for (const name of NATIVE_LISTING_TOOL_NAMES) NATIVE_TOOL_ROUTES[name] = nativeListingRoute;
+for (const name of NATIVE_LISTING_TOOL_NAMES) NATIVE_TOOL_ROUTES.set(name, nativeListingRoute);
 
 const DIFF_COMMAND_RE = /^git\s+(?:diff|show)\b/i;
 const DIFF_FILE_HEADER_RE = /^diff --(?:git|cc|combined) /m;

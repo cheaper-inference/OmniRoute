@@ -281,7 +281,17 @@ describe("structural file listings (shell)", () => {
     assert.equal(dialect("find . -name '*.ts' | sort"), "find");
     assert.equal(dialect("find 'a|b' -type f"), "find");
     assert.equal(dialect("tree -L 2 src"), "tree");
+    assert.equal(dialect("ls -l --time-style=long-iso"), "ls");
+    assert.equal(dialect("ls -l --time-style long-iso"), "ls");
     for (const command of [
+      // date-only and other timestamp layouts the fixed-column parser cannot read
+      "ls -l --time-style=iso",
+      "ls -l --time-style iso",
+      "ls -l --time-style=full-iso",
+      "ls -l --time-style=locale",
+      "ls -l --time-style=+%F",
+      "ls -l --time-s=iso",
+      "ls -l --time-style",
       "ls",
       "ls src",
       "ls -1",
@@ -300,6 +310,48 @@ describe("structural file listings (shell)", () => {
     ]) {
       assert.equal(dialect(command), null, command);
     }
+  });
+});
+
+describe("structural file listings (ls timestamp styles)", () => {
+  // GNU `ls -l --time-style=iso` prints only the date for an old file, so a name that starts
+  // with `12:34 ` is indistinguishable from a time column: the row below is one file named
+  // "12:34 report.txt", and a fixed-column parser would render it as "report.txt".
+  const DATE_ONLY = [
+    "total 96",
+    ...Array.from(
+      { length: 12 },
+      (_, i) => `-rw-r--r-- 1 dev dev ${100 + i} 2020-01-01 12:34 report-${i}.txt`
+    ),
+    "",
+  ].join("\n");
+
+  it("keeps the original when the timestamp style is not one it can read", () => {
+    for (const command of ["ls -l --time-style=iso", "ls -l --time-style iso"]) {
+      const on = run(DATE_ONLY, command);
+      assert.equal(on.text, run(DATE_ONLY, command, { flag: false }).text, command);
+      assert.ok(on.text.includes("12:34 report-0.txt"), command);
+      assert.ok(!on.techniques.includes("rtk-render:ls-long"), command);
+    }
+    // under long-iso every row carries a time column, so the same rows are read
+    assert.ok(
+      run(DATE_ONLY, "ls -l --time-style=long-iso").techniques.includes("rtk-render:ls-long")
+    );
+  });
+
+  it("still reads the default and the long-iso layouts", () => {
+    assert.ok(run(LS_LONG, "ls -la").techniques.includes("rtk-render:ls-long"));
+    // `--time-style=long-iso` prints every row as `YYYY-MM-DD HH:MM`.
+    const longIso = LS_LONG.replace(
+      / (Nov) (\d{2}) (\d{2}:\d{2}) /g,
+      (_m, _mon: string, day: string, time: string) => ` 2026-11-${day} ${time} `
+    )
+      .replace(" Oct  3  2025 ", " 2025-10-03 00:00 ")
+      .replace(" Sep 30  2025 ", " 2025-09-30 00:00 ");
+    assert.notEqual(longIso, LS_LONG);
+    const out = run(longIso, "ls -la --time-style=long-iso");
+    assert.ok(out.techniques.includes("rtk-render:ls-long"), out.techniques.join(","));
+    assert.ok(out.text.includes("relatório final.ts"));
   });
 });
 

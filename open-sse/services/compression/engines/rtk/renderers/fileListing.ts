@@ -118,6 +118,31 @@ function treeOptionUnsupported(arg: string): boolean {
 }
 
 /**
+ * The `--time-style` value of a GNU `ls` command, `""` when the option has no value, or undefined
+ * when it is absent. getopt accepts any unambiguous prefix of a long option (`--time-s=iso`).
+ */
+function lsTimeStyle(args: string[]): string | undefined {
+  for (let i = 0; i < args.length; i++) {
+    const equals = args[i].indexOf("=");
+    const name = equals === -1 ? args[i] : args[i].slice(0, equals);
+    if (!name.startsWith("--time-") || !"--time-style".startsWith(name)) continue;
+    return equals === -1 ? (args[i + 1] ?? "") : args[i].slice(equals + 1);
+  }
+  return undefined;
+}
+
+/**
+ * `ls -l` is readable in the default layout and in `long-iso`. Any other `--time-style` is not:
+ * `iso` prints only the date for an old file, so a name that starts like a time (`12:34 a.txt`)
+ * would be read as part of the timestamp and lose that part of its name.
+ */
+function lsDialect(args: string[]): ListingDialect | null {
+  if (!args.some((arg) => SHORT_OPTION_CLUSTER.test(arg) && arg.includes("l"))) return null;
+  const style = lsTimeStyle(args);
+  return style === undefined || style === "long-iso" ? "ls" : null;
+}
+
+/**
  * Which listing dialect the correlated shell command produces, or null when it is not a listing
  * this module can read (`ls` without `-l`, `find -exec`, `tree -J`, a pipe into another filter…).
  */
@@ -127,7 +152,7 @@ export function listingDialectForCommand(command: string): ListingDialect | null
   const [program, ...args] = commandTokens(stage);
   switch (programName(program)) {
     case "ls":
-      return args.some((arg) => SHORT_OPTION_CLUSTER.test(arg) && arg.includes("l")) ? "ls" : null;
+      return lsDialect(args);
     case "find":
       return args.some((arg) => FIND_UNSAFE_ARGS.has(arg)) ? null : "find";
     case "tree":
