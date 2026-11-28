@@ -23,6 +23,13 @@ import {
   resolveResponseTimeoutMs,
 } from "./gemini-web/browserErrors.ts";
 import { getStableLauncher } from "./gemini-web/browserLease.ts";
+import {
+  canReadGeminiDom,
+  isGeminiSignedOut,
+  snapshotGeminiDom,
+  waitForGeminiDomReply,
+  waitForGeminiPromptSubmitted,
+} from "./gemini-web/domReply.ts";
 import { normalizeGeminiCookieInput } from "../utils/geminiCookies.ts";
 import { prepareToolMessages } from "../translator/webTools.ts";
 import { buildToolModeResponse } from "./chatgptWebTools.ts";
@@ -36,6 +43,7 @@ import {
   describeModeSelectionFailure,
   selectGeminiExtendedThinking,
   selectGeminiModel,
+  isGeminiMenuModeReplaced,
 } from "./gemini-web/modeSelection.ts";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -687,8 +695,39 @@ export class GeminiWebExecutor extends BaseExecutor {
       // required, or the request is rejected instead of silently running the account
       // default under the requested model's label. See ./gemini-web/modeSelection.ts
       // for why the selectors involved are UNVALIDATED and why that is safe here.
+      // A signed-out page still has a composer, so the readiness check above passes;
+      // without this the mode menu's disabled options read as "locked by the plan".
+      // The "Sign in" item lives inside the mode menu, so the menu path also reports
+      // `signed_out` once it has opened the menu (live, 2026-11-25).
+      const signedOutResult = () => {
+        log?.warn?.("GEMINI-WEB", "Rejected request: the Gemini cookie no longer signs in");
+        return {
+          // Standard error shape, so the gateway keeps the message and the code
+          // (a top-level string `error` was read as "upstream error" / invalid_api_key).
+          response: new Response(
+            JSON.stringify(
+              buildErrorBody(
+                401,
+                "Gemini Web session is signed out: the stored cookie expired or was rotated. " +
+                  "Export a fresh cookie from a signed-in browser and update the connection.",
+                null,
+                { type: "authentication_error", code: "gemini_web_signed_out" }
+              )
+            ),
+            { status: 401, headers: { "Content-Type": "application/json" } }
+          ),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      };
+      if (await isGeminiSignedOut(page)) return signedOutResult();
+
       if (model) {
         const modelSelection = await selectGeminiModel(page, modelId);
+        if (!modelSelection.confirmed && modelSelection.reason === "signed_out") {
+          return signedOutResult();
+        }
         if (!modelSelection.confirmed) {
           log?.warn?.(
             "GEMINI-WEB",
@@ -744,11 +783,25 @@ export class GeminiWebExecutor extends BaseExecutor {
         }
       }
 
-      // Type and send message
-      const inputEl = await page.waitForSelector(".ql-editor, [contenteditable='true']", {
-        timeout: 10000,
-      });
-      await inputEl.click();
+      // Type and send message. The composer is re-rendered shortly after load
+      // (#21116), so a handle taken too early can be detached by the time it is
+      // clicked: re-query and retry instead of failing the request.
+      for (let attempt = 1; ; attempt++) {
+        const inputEl = await page.waitForSelector(".ql-editor, [contenteditable='true']", {
+          timeout: 10000,
+        });
+        try {
+          await inputEl.click();
+          break;
+        } catch (clickError) {
+          const msg = clickError instanceof Error ? clickError.message : String(clickError);
+          if (attempt >= 3 || !/not attached|detached/i.test(msg)) throw clickError;
+          await page.waitForTimeout(500);
+        }
+      }
+      // #21116: remember how many prompts/answers the page already shows, so the
+      // DOM fallback below only accepts an answer to THIS prompt.
+      const domBaseline = canReadGeminiDom(page) ? await snapshotGeminiDom(page) : null;
       // insertText() dispatches a DOM `input` event atomically instead of a
       // per-character keydown/keypress/keyup sequence (#13380) — an embedded
       // `\n` in `prompt` (produced by the multi-turn transcript format above,
@@ -761,12 +814,54 @@ export class GeminiWebExecutor extends BaseExecutor {
       promptSubmitted = true;
       await page.keyboard.press("Enter");
 
-      await Promise.race([responsePromise, page.waitForTimeout(resolveResponseTimeoutMs(modelId))]);
+      const responseTimeoutMs = resolveResponseTimeoutMs(modelId);
+      let domReplyText = "";
+      let domWaitDone = false;
+      let domPromise: Promise<void> = new Promise<void>(() => {});
+      if (domBaseline) {
+        // #21116: an Enter pressed while the composer was still settling is dropped
+        // silently. Confirm a new user-query appeared; press Enter once more if not.
+        // A StreamGenerate answer already proves the prompt went out: never press
+        // Enter again on top of it (that would send the prompt a second time).
+        const networkAnswered = () => Boolean(responseText);
+        const submitted = await waitForGeminiPromptSubmitted(
+          page,
+          domBaseline.queries,
+          5000,
+          250,
+          networkAnswered
+        );
+        if (!submitted && !networkAnswered()) {
+          await page.keyboard.press("Enter");
+          await waitForGeminiPromptSubmitted(page, domBaseline.queries, 5000, 250, networkAnswered);
+        }
+        // Read the answer from the rendered page as well: some accounts no longer
+        // receive it through a StreamGenerate response (geminiweb-pa processSession).
+        domPromise = waitForGeminiDomReply(page, {
+          baselineResponses: domBaseline.responses,
+          timeoutMs: responseTimeoutMs,
+          isCancelled: () => domWaitDone,
+        }).then((text) => {
+          domReplyText = text;
+          // An empty result (timeout) must not win the race against StreamGenerate.
+          if (!text) return new Promise<void>(() => {});
+        });
+      }
+      // StreamGenerate wins only when it produced text; a captured-but-unreadable
+      // body keeps waiting for the DOM answer instead of failing early.
+      const streamPromise = responsePromise.then(() =>
+        responseText || !domBaseline ? undefined : new Promise<void>(() => {})
+      );
+      await Promise.race([streamPromise, domPromise, page.waitForTimeout(responseTimeoutMs)]);
+      domWaitDone = true;
+      // Fix the answer now: a StreamGenerate body read still in flight could otherwise
+      // overwrite it (e.g. with "") while persistRotatedCookies() is awaited below.
+      const answerText = responseText || domReplyText;
       if (signal?.aborted) {
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
       }
 
-      if (!responseText) {
+      if (!answerText) {
         return {
           response: new Response(
             JSON.stringify({
@@ -789,11 +884,41 @@ export class GeminiWebExecutor extends BaseExecutor {
 
       await this.persistRotatedCookies(context, cookie, credentials, onCredentialsRefreshed, log);
 
+      // Under heavy demand Gemini answers with another model and switches the menu to
+      // it (#20842). Only a confirmed switch (the requested option is listed and no
+      // longer checked) discards the answer; an unreadable menu keeps it.
+      if (model && (await isGeminiMenuModeReplaced(page, modelId))) {
+        log?.warn?.("GEMINI-WEB", `"${modelId}" was replaced by Gemini (high demand)`);
+        return {
+          response: new Response(
+            JSON.stringify(
+              buildErrorBody(
+                503,
+                `Gemini answered with a different model because "${modelId}" is under high ` +
+                  "demand right now. The answer was discarded; retry later or use another model.",
+                null,
+                { type: "server_error", code: "server_is_overloaded" }
+              )
+            ),
+            {
+              status: 503,
+              headers: {
+                "Content-Type": "application/json",
+                "X-Omni-Fallback-Hint": "connection_cooldown",
+              },
+            }
+          ),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
+
       if (hasTools) {
         const cid = `chatcmpl-gwe-${crypto.randomUUID().slice(0, 12)}`;
         const created = Math.floor(Date.now() / 1000);
         const toolResponse = await buildGeminiToolResponse(
-          responseText,
+          answerText,
           requestedTools,
           Boolean(stream),
           modelId,
@@ -812,7 +937,7 @@ export class GeminiWebExecutor extends BaseExecutor {
             start(controller) {
               controller.enqueue(
                 encoder.encode(
-                  `data: ${JSON.stringify(formatStreamChunk(responseText, modelId))}\n\n`
+                  `data: ${JSON.stringify(formatStreamChunk(answerText, modelId))}\n\n`
                 )
               );
               controller.enqueue(
@@ -842,7 +967,7 @@ export class GeminiWebExecutor extends BaseExecutor {
       }
 
       return {
-        response: new Response(JSON.stringify(formatChatCompletion(responseText, modelId)), {
+        response: new Response(JSON.stringify(formatChatCompletion(answerText, modelId)), {
           status: 200,
           headers: { "Content-Type": "application/json" },
         }),

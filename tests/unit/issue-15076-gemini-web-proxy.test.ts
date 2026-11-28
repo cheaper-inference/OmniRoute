@@ -1,6 +1,7 @@
 // #15076: gemini-web launches Chromium without applying the configured provider proxy.
 import test from "node:test";
 import assert from "node:assert/strict";
+import { withGeminiMenu } from "./helpers/geminiWebMenu.ts";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -43,14 +44,15 @@ test("#15076 gemini-web passes the provider proxy to Chromium (launch or context
         return {
           addCookies: async () => undefined,
           close: async () => undefined,
-          newPage: async () => ({
-            on: () => undefined,
-            goto: async () => undefined,
-            waitForTimeout: async () => undefined,
-            waitForSelector: async (s: string) =>
-              s.includes(".ql-editor") ? { click: async () => undefined } : null,
-            keyboard: { insertText: async () => undefined, press: async () => undefined },
-          }),
+          newPage: async () =>
+            withGeminiMenu({
+              on: () => undefined,
+              goto: async () => undefined,
+              waitForTimeout: async () => undefined,
+              waitForSelector: async (s: string) =>
+                s.includes(".ql-editor") ? { click: async () => undefined } : null,
+              keyboard: { insertText: async () => undefined, press: async () => undefined },
+            }),
           cookies: async () => [],
         };
       },

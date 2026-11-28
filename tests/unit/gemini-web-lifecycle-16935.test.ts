@@ -1,6 +1,7 @@
 // #16935: gemini-web lifecycle defects reproduced offline (no live Google account needed).
 import test from "node:test";
 import assert from "node:assert/strict";
+import { withGeminiMenu } from "./helpers/geminiWebMenu.ts";
 import {
   acquireGeminiBrowser,
   releaseGeminiBrowser,
@@ -55,19 +56,20 @@ test("#16935 'page.waitForTimeout: ...browser has been closed' is not a terminal
     ({
       newContext: async () => ({
         addCookies: async () => undefined,
-        newPage: async () => ({
-          on: () => undefined,
-          goto: async () => undefined,
-          waitForTimeout: async (ms: number) => {
-            if (ms === 30000) {
-              throw new Error(
-                "page.waitForTimeout: Target page, context or browser has been closed"
-              );
-            }
-          },
-          waitForSelector: async () => ({ click: async () => undefined }),
-          keyboard: { insertText: async () => undefined, press: async () => undefined },
-        }),
+        newPage: async () =>
+          withGeminiMenu({
+            on: () => undefined,
+            goto: async () => undefined,
+            waitForTimeout: async (ms: number) => {
+              if (ms === 30000) {
+                throw new Error(
+                  "page.waitForTimeout: Target page, context or browser has been closed"
+                );
+              }
+            },
+            waitForSelector: async () => ({ click: async () => undefined }),
+            keyboard: { insertText: async () => undefined, press: async () => undefined },
+          }),
         cookies: async () => [],
         close: async () => undefined,
       }),

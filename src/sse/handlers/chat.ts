@@ -108,6 +108,7 @@ import { expandChatPromptTemplates } from "@/lib/promptTemplateExpand";
 import { getCachedSettings, getCombosCacheVersion } from "@/lib/db/readCache";
 import { isManagedComboUnsupported } from "./chat/managedComboSupport.ts";
 import * as muse from "./chat/museOwnership.ts";
+import { upstreamErrorCodeOf } from "./chat/retryErrorCode.ts";
 import { comboCheckProvider, ghComboGate } from "./chat/githubLiveCatalogFilter.ts";
 import { markEmergencyFallback } from "./emergencyFallbackHeader.ts";
 import { resolveEmergencyFallbackDecision } from "./emergencyFallbackHeader.ts";
@@ -1934,6 +1935,7 @@ async function handleSingleModelChat(
   // 3. Credential retry loop
   let requestRetryAttempt = 0;
   let requestRetryLastError = null;
+  let requestRetryLastErrorCode: string | null = null; // see chat/retryErrorCode.ts
   let requestRetryLastStatus = null;
   let requestRetryLastCooldownMs = 0;
   // Bug #3758: per-request counter bounding the early-close (STREAM_EARLY_EOF)
@@ -2202,7 +2204,8 @@ async function handleSingleModelChat(
           candidateAliases,
           isCombo,
           shadowedNode,
-          runtimeOptions?.correlationId ?? null
+          runtimeOptions?.correlationId ?? null,
+          requestRetryLastErrorCode
         );
         // #14360: log the synthesized quota-parking refusal (never for combo targets).
         const skip = { credentials, lastError, lastStatus, provider, model };
@@ -2830,6 +2833,7 @@ async function handleSingleModelChat(
           lastError = classificationError;
           lastStatus = result.status;
           requestRetryLastError = classificationError;
+          requestRetryLastErrorCode = null;
           requestRetryLastStatus = result.status;
           continue;
         }
@@ -2880,6 +2884,7 @@ async function handleSingleModelChat(
           lastError = result.error;
           lastStatus = result.status;
           requestRetryLastError = result.error;
+          requestRetryLastErrorCode = null;
           requestRetryLastStatus = result.status;
           continue;
         }
@@ -2903,6 +2908,7 @@ async function handleSingleModelChat(
         lastError = result.error;
         lastStatus = result.status;
         requestRetryLastError = result.error;
+        requestRetryLastErrorCode = null;
         requestRetryLastStatus = result.status;
         continue;
       }
@@ -3207,6 +3213,7 @@ async function handleSingleModelChat(
         lastError = result.error;
         lastStatus = result.status;
         requestRetryLastError = result.error;
+        requestRetryLastErrorCode = upstreamErrorCodeOf(result);
         requestRetryLastStatus = result.status;
         continue;
       }

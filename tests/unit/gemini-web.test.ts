@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { withGeminiMenu } from "./helpers/geminiWebMenu.ts";
 
 const { GeminiWebExecutor, parseStreamResponse } =
   await import("../../open-sse/executors/gemini-web.ts");
@@ -112,19 +113,20 @@ test("Normalizes a bare __Secure-1PSID value before adding browser cookies", asy
         addCookies: async (cookies: Array<{ name: string; value: string }>) => {
           addedCookies = cookies;
         },
-        newPage: async () => ({
-          on: () => {},
-          goto: async () => {},
-          waitForTimeout: async () => {},
-          waitForSelector: async () => ({
-            click: async () => {},
+        newPage: async () =>
+          withGeminiMenu({
+            on: () => {},
+            goto: async () => {},
+            waitForTimeout: async () => {},
+            waitForSelector: async () => ({
+              click: async () => {},
+            }),
+            keyboard: {
+              type: async () => {},
+              insertText: async () => {},
+              press: async () => {},
+            },
           }),
-          keyboard: {
-            type: async () => {},
-            insertText: async () => {},
-            press: async () => {},
-          },
-        }),
       }),
       close: async () => {},
     }) as any;
@@ -172,6 +174,10 @@ test("Provider: gemini-web has correct models", async () => {
     models.map((m: any) => [m.id, m.name]),
     [
       ["gemini-3.1-pro", "Gemini 3.1 Pro"],
+      ["gemini-4-hydrogen", "Gemini 4 Hydrogen"],
+      ["gemini-4-hydrogen-thinking", "Gemini 4 Hydrogen Thinking"],
+      ["gemini-4-neon", "Gemini 4 Neon"],
+      ["gemini-4-carbon", "Gemini 4 Carbon"],
       ["gemini-3.7-flash", "Gemini 3.7 Flash"],
       ["gemini-3.1-flash-lite", "Gemini 3.1 Flash-Lite"],
     ]
@@ -190,6 +196,10 @@ test("Provider: gemini-web lists gemini-4-argon only with its opt-in switch on",
       on.gemini_webProvider.models.map((m: { id: string; name: string }) => [m.id, m.name]),
       [
         ["gemini-3.1-pro", "Gemini 3.1 Pro"],
+        ["gemini-4-hydrogen", "Gemini 4 Hydrogen"],
+        ["gemini-4-hydrogen-thinking", "Gemini 4 Hydrogen Thinking"],
+        ["gemini-4-neon", "Gemini 4 Neon"],
+        ["gemini-4-carbon", "Gemini 4 Carbon"],
         ["gemini-4-argon", "Gemini 4 Argon"],
         ["gemini-3.7-flash", "Gemini 3.7 Flash"],
         ["gemini-3.1-flash-lite", "Gemini 3.1 Flash-Lite"],

@@ -5,6 +5,7 @@
 // callback contract used by web-session executors.
 import test from "node:test";
 import assert from "node:assert/strict";
+import { withGeminiMenu } from "./helpers/geminiWebMenu.ts";
 
 const { GeminiWebExecutor } = await import("../../open-sse/executors/gemini-web.ts");
 
@@ -26,35 +27,36 @@ test("#7676: GeminiWebExecutor persists rotated __Secure-1PSIDTS/__Secure-1PSIDC
       newContext: async () => ({
         addCookies: async () => {},
         cookies: async () => rotatedJarCookies,
-        newPage: async () => ({
-          on: (
-            event: string,
-            handler: (resp: { url: () => string; text: () => Promise<string> }) => void
-          ) => {
-            if (event === "response") {
-              const body =
-                ")]}'\n" +
-                "30\n" +
-                JSON.stringify([
-                  [
-                    "wrb.fr",
-                    null,
-                    JSON.stringify([null, null, null, null, [[null, ["hello back"]]]]),
-                  ],
-                ]) +
-                "\n";
-              handler({
-                url: () =>
-                  "https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate",
-                text: async () => body,
-              });
-            }
-          },
-          goto: async () => {},
-          waitForTimeout: async () => {},
-          waitForSelector: async () => ({ click: async () => {} }),
-          keyboard: { type: async () => {}, insertText: async () => {}, press: async () => {} },
-        }),
+        newPage: async () =>
+          withGeminiMenu({
+            on: (
+              event: string,
+              handler: (resp: { url: () => string; text: () => Promise<string> }) => void
+            ) => {
+              if (event === "response") {
+                const body =
+                  ")]}'\n" +
+                  "30\n" +
+                  JSON.stringify([
+                    [
+                      "wrb.fr",
+                      null,
+                      JSON.stringify([null, null, null, null, [[null, ["hello back"]]]]),
+                    ],
+                  ]) +
+                  "\n";
+                handler({
+                  url: () =>
+                    "https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate",
+                  text: async () => body,
+                });
+              }
+            },
+            goto: async () => {},
+            waitForTimeout: async () => {},
+            waitForSelector: async () => ({ click: async () => {} }),
+            keyboard: { type: async () => {}, insertText: async () => {}, press: async () => {} },
+          }),
       }),
       close: async () => {},
     }) as unknown as typeof originalLaunch;

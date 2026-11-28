@@ -845,7 +845,8 @@ export function handleNoCredentials(
   candidateAliases?: readonly string[],
   isCombo: boolean = false,
   shadowedNode: ShadowedProviderNode | null = null,
-  correlationId?: string | null
+  correlationId?: string | null,
+  lastErrorCode?: string | null
 ) {
   if (credentials?.allRateLimited) {
     return credentialCooldownResponse(credentials, provider, model, lastError, lastStatus);
@@ -858,7 +859,13 @@ export function handleNoCredentials(
       lastStatus,
       ...(correlationId ? { correlationId } : {}),
     });
-    return errorResponse(lastStatus, lastError);
+    // Keep the upstream's own code (e.g. gemini_web_signed_out); without it the status
+    // table's default (401 → invalid_api_key) reads as "your OmniRoute key is invalid".
+    return errorResponse(
+      lastStatus,
+      lastError,
+      lastErrorCode ? { code: lastErrorCode } : undefined
+    );
   }
   if (credentials?.allExpired) {
     // Every connection for this provider is in a terminal state (expired,

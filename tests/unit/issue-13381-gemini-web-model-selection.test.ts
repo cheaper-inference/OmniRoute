@@ -6,10 +6,10 @@
 //
 // Owner decision (2026-09-15, Option B): implement real selection. gemini-web
 // now drives an in-browser mode-selection step (open-sse/executors/gemini-web/
-// modeSelection.ts) before typing anything: `gemini-3.1-pro` is the mode
-// gemini.google.com/app already opens to (no interaction, matches every other
-// pre-existing gemini-web test's fake page); every OTHER advertised model
-// (and Extended Thinking, the reporter's 2026-09-11 follow-up) is switched to
+// modeSelection.ts) before typing anything: every advertised model, including
+// `gemini-3.1-pro` (no "already the default" shortcut since #21116: an account's
+// active mode varies), plus Extended Thinking (the reporter's 2026-09-11
+// follow-up) is switched to
 // and READ BACK before the executor proceeds — a confirmed match is required,
 // or the request fails closed with 400 `unsupported_control_for_provider`
 // rather than silently running the account default under the requested
@@ -20,6 +20,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { withGeminiMenu } from "./helpers/geminiWebMenu.ts";
 
 const { GeminiWebExecutor } = await import("../../open-sse/executors/gemini-web.ts");
 const { GEMINI_WEB_UNSUPPORTED_CONTROL_CODE } =
@@ -56,46 +57,47 @@ function makeFakePlaywright(calls: Call[], script: PageScript = {}) {
           calls.push({ fn: "addCookies", args: [cookies] });
         },
         cookies: async () => [],
-        newPage: async () => ({
-          on: (event: string) => {
-            calls.push({ fn: "page.on", args: [event] });
-          },
-          goto: async (url: string, opts2: unknown) => {
-            calls.push({ fn: "goto", args: [url, opts2] });
-          },
-          waitForTimeout: async (ms: number) => {
-            calls.push({ fn: "waitForTimeout", args: [ms] });
-          },
-          waitForSelector: async (selector: string, opts2: unknown) => {
-            calls.push({ fn: "waitForSelector", args: [selector, opts2] });
-            if (selector.includes(".ql-editor")) {
+        newPage: async () =>
+          withGeminiMenu({
+            on: (event: string) => {
+              calls.push({ fn: "page.on", args: [event] });
+            },
+            goto: async (url: string, opts2: unknown) => {
+              calls.push({ fn: "goto", args: [url, opts2] });
+            },
+            waitForTimeout: async (ms: number) => {
+              calls.push({ fn: "waitForTimeout", args: [ms] });
+            },
+            waitForSelector: async (selector: string, opts2: unknown) => {
+              calls.push({ fn: "waitForSelector", args: [selector, opts2] });
+              if (selector.includes(".ql-editor")) {
+                return {
+                  click: async () => {
+                    calls.push({ fn: "editor.click", args: [] });
+                  },
+                };
+              }
+              const entry = script.selectors?.[selector];
+              if (!entry || !entry.found) return null;
               return {
                 click: async () => {
-                  calls.push({ fn: "editor.click", args: [] });
+                  calls.push({ fn: "mode.click", args: [selector] });
                 },
+                textContent: async () => entry.text ?? null,
               };
-            }
-            const entry = script.selectors?.[selector];
-            if (!entry || !entry.found) return null;
-            return {
-              click: async () => {
-                calls.push({ fn: "mode.click", args: [selector] });
+            },
+            keyboard: {
+              type: async (text: string, opts2: unknown) => {
+                calls.push({ fn: "keyboard.type", args: [text, opts2] });
               },
-              textContent: async () => entry.text ?? null,
-            };
-          },
-          keyboard: {
-            type: async (text: string, opts2: unknown) => {
-              calls.push({ fn: "keyboard.type", args: [text, opts2] });
+              insertText: async (text: string) => {
+                calls.push({ fn: "keyboard.insertText", args: [text] });
+              },
+              press: async (key: string) => {
+                calls.push({ fn: "keyboard.press", args: [key] });
+              },
             },
-            insertText: async (text: string) => {
-              calls.push({ fn: "keyboard.insertText", args: [text] });
-            },
-            press: async (key: string) => {
-              calls.push({ fn: "keyboard.press", args: [key] });
-            },
-          },
-        }),
+          }),
       };
     },
     close: async () => {
@@ -141,9 +143,9 @@ test(
   "#13381: distinct advertised gemini-web model IDs drive distinguishable Playwright " +
     "automation (per-model selection is genuinely attempted)",
   async () => {
-    // gemini-3.1-pro is the mode gemini.google.com/app already opens to — no mode
-    // switch is attempted, so it reaches the prompt editor and (since this fake page
-    // never fires the "response" event) ends in 502.
+    // gemini-3.1-pro is picked from the model menu (the fake page's menu offers it,
+    // see helpers/geminiWebMenu.ts), so it reaches the prompt editor and (since this
+    // fake page never fires the "response" event) ends in 502.
     const runA = await runWithFakePage("gemini-3.1-pro", {});
     // gemini-3.7-flash requires a confirmed switch. This fake page's script has no
     // entry for its toggle selector, so the control is reported "not found" and the

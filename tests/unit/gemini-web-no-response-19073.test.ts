@@ -7,6 +7,7 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { withGeminiMenu } from "./helpers/geminiWebMenu.ts";
 
 const playwright = await import("playwright");
 const { GeminiWebExecutor } = await import("../../open-sse/executors/gemini-web.ts");
@@ -30,23 +31,24 @@ function stubLaunch(
   playwright.chromium.launch = (async () => ({
     newContext: async () => ({
       addCookies: async () => {},
-      newPage: async () => ({
-        on: (event: string, handler: Handler) => {
-          if (event === "response") onResponse = handler;
-        },
-        goto: async () => {
-          for (const resp of pageLoad) await onResponse?.(resp);
-        },
-        waitForTimeout: async () => {},
-        waitForSelector: async () => ({ click: async () => {} }),
-        keyboard: {
-          type: async () => {},
-          insertText: async () => {},
-          press: async () => {
-            for (const resp of responses) await onResponse?.(resp);
+      newPage: async () =>
+        withGeminiMenu({
+          on: (event: string, handler: Handler) => {
+            if (event === "response") onResponse = handler;
           },
-        },
-      }),
+          goto: async () => {
+            for (const resp of pageLoad) await onResponse?.(resp);
+          },
+          waitForTimeout: async () => {},
+          waitForSelector: async () => ({ click: async () => {} }),
+          keyboard: {
+            type: async () => {},
+            insertText: async () => {},
+            press: async () => {
+              for (const resp of responses) await onResponse?.(resp);
+            },
+          },
+        }),
     }),
     close: async () => {},
   })) as unknown as typeof playwright.chromium.launch;

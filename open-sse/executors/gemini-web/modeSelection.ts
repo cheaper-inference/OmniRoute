@@ -12,9 +12,10 @@
  * model (and for the Extended Thinking control, #13381 follow-up comment
  * 2026-09-11), it tries the corresponding UI control, then READS BACK the
  * active-mode indicator to confirm the switch actually took effect before
- * the caller is allowed to proceed. `gemini-3.1-pro` is treated as the mode
- * `gemini.google.com/app` already opens to (no interaction needed); every
- * other advertised model requires a confirmed switch.
+ * the caller is allowed to proceed. Every advertised model requires a
+ * confirmed switch: there is no "default" mode that is assumed active, because
+ * an account's active mode varies (the #21116 reporter's is Hydrogen, whose
+ * menu has no "3.1 Pro"), and assuming it would answer under the wrong label.
  *
  * ⚠️ SELECTOR SET IS UNVALIDATED. Every CSS selector below is a best-effort
  * guess at Gemini's current DOM, not a value confirmed against a live
@@ -35,26 +36,47 @@ import {
   GEMINI_WEB_ARGON_MODEL,
   isGeminiWebArgonEnabled,
 } from "../../config/providers/registry/gemini/web/index.ts";
+import { isGeminiSignedOutInPage, toInPageExpression } from "./domReply.ts";
 
 /** Reasons `selectGeminiUiMode`/`selectGeminiModel` can fail closed. */
 export type GeminiModeSelectionFailureReason =
-  "control_not_found" | "indicator_not_found" | "indicator_mismatch" | "unknown_model";
+  | "control_not_found"
+  | "indicator_not_found"
+  | "indicator_mismatch"
+  | "unknown_model"
+  | "mode_not_offered"
+  | "mode_locked"
+  | "signed_out";
 
 export interface GeminiWebModeDescriptor {
   /** The advertised `gweb/<model>` id, or a synthetic label for non-model controls. */
   readonly id: string;
-  /**
-   * true: this is the mode `gemini.google.com/app` already shows on load — no
-   * UI interaction is attempted, nothing to confirm.
-   */
-  readonly isDefault: boolean;
-  /** UNVALIDATED — opens/activates the control for this mode. Ignored when `isDefault`. */
+  /** UNVALIDATED — opens/activates the control for this mode. */
   readonly toggleSelector?: string;
   /** UNVALIDATED — element whose text proves which mode is now active. */
   readonly activeIndicatorSelector?: string;
   /** Text the active-mode indicator must contain once the switch is confirmed. */
   readonly expectedIndicatorPattern?: RegExp;
+  /**
+   * Model-menu selection (#21116): the exact, non-localized sublabel of the
+   * option in the mode menu (e.g. "4 Hydrogen"). When set, the menu path is
+   * used instead of the toggle/indicator selectors above.
+   */
+  readonly menuSublabel?: string;
 }
+
+/**
+ * Model menu, checked live 2026-11-24 (consumer Pro account, pt-BR UI):
+ *   button[data-test-id="bard-mode-menu-button"]           opens the menu
+ *   gem-menu-item[role="menuitemradio"][data-test-id^="bard-mode-option-"]
+ *     title (localized, e.g. "Ajuda no dia a dia") + sublabel ("4 Hydrogen")
+ *     aria-checked="true" on the active option
+ *     data-test-id contains "upsell" when the tier does not include it (locked)
+ * The menu also lists a reasoning-level group whose items have no
+ * `bard-mode-option-` id, so they never match.
+ */
+export const GEMINI_WEB_MODE_MENU_BUTTON = '[data-test-id="bard-mode-menu-button"]';
+const GEMINI_WEB_MODE_OPTION = '[role="menuitemradio"][data-test-id^="bard-mode-option-"]';
 
 /**
  * Model -> Gemini UI mode map for the `gweb/<model>` ids advertised by
@@ -65,10 +87,20 @@ export interface GeminiWebModeDescriptor {
  * honest behavior for a model this module cannot yet select.
  */
 export const GEMINI_WEB_MODEL_MODES: Readonly<Record<string, GeminiWebModeDescriptor>> = {
-  "gemini-3.1-pro": { id: "gemini-3.1-pro", isDefault: true },
+  // Sublabels (not localized): "4 Hydrogen", "4 Hydrogen Thinking" and "3.1 Pro" are the
+  // ones PGSCOM saw on a live account (#20842, 2026-11-20, Spanish UI); "4 Neon" and
+  // "4 Carbon" come from the #21116 account (pt-BR). A mode the menu lacks fails closed.
+  "gemini-3.1-pro": { id: "gemini-3.1-pro", menuSublabel: "3.1 Pro" },
+  "gemini-4-hydrogen": { id: "gemini-4-hydrogen", menuSublabel: "4 Hydrogen" },
+  "gemini-4-hydrogen-thinking": {
+    id: "gemini-4-hydrogen-thinking",
+    menuSublabel: "4 Hydrogen Thinking",
+  },
+  "gemini-4-neon": { id: "gemini-4-neon", menuSublabel: "4 Neon" },
+  "gemini-4-carbon": { id: "gemini-4-carbon", menuSublabel: "4 Carbon" },
   "gemini-4-argon": {
     id: "gemini-4-argon",
-    isDefault: false,
+
     toggleSelector:
       '[data-test-id="bard-mode-menu-button"], button[aria-haspopup="menu"][aria-label*="model" i]',
     activeIndicatorSelector:
@@ -77,7 +109,7 @@ export const GEMINI_WEB_MODEL_MODES: Readonly<Record<string, GeminiWebModeDescri
   },
   "gemini-3.7-flash": {
     id: "gemini-3.7-flash",
-    isDefault: false,
+
     toggleSelector:
       '[data-test-id="bard-mode-menu-button"], button[aria-haspopup="menu"][aria-label*="model" i]',
     activeIndicatorSelector:
@@ -86,7 +118,7 @@ export const GEMINI_WEB_MODEL_MODES: Readonly<Record<string, GeminiWebModeDescri
   },
   "gemini-3.1-flash-lite": {
     id: "gemini-3.1-flash-lite",
-    isDefault: false,
+
     toggleSelector:
       '[data-test-id="bard-mode-menu-button"], button[aria-haspopup="menu"][aria-label*="model" i]',
     activeIndicatorSelector:
@@ -98,7 +130,7 @@ export const GEMINI_WEB_MODEL_MODES: Readonly<Record<string, GeminiWebModeDescri
 /** The Extended Thinking control (#13381 follow-up, 2026-09-11) — account-dependent, not a model. */
 export const GEMINI_WEB_EXTENDED_THINKING_MODE: GeminiWebModeDescriptor = {
   id: "extended-thinking",
-  isDefault: false,
+
   toggleSelector:
     '[data-test-id="deep-think-toggle"], button[aria-label*="extended thinking" i], ' +
     'button[aria-label*="deep think" i]',
@@ -120,6 +152,140 @@ export interface GeminiAutomationPage {
     selector: string,
     opts?: { timeout?: number }
   ): Promise<GeminiAutomationElement | null>;
+  /** Real Playwright pages have these; the menu path needs them. */
+  evaluate?: (expression: string) => Promise<unknown>;
+  click?: (selector: string, opts?: { timeout?: number }) => Promise<void>;
+  waitForTimeout?: (ms: number) => Promise<void>;
+  keyboard?: { press(key: string): Promise<void> };
+}
+
+interface GeminiMenuOptionState {
+  testId: string;
+  checked: boolean;
+  locked: boolean;
+}
+
+/** Runs in the page: find the open mode menu's option whose sublabel is exactly `sublabel`. */
+export function findMenuOptionInPage(args: {
+  selector: string;
+  sublabel: string;
+}): GeminiMenuOptionState | null {
+  const options = Array.from(document.querySelectorAll(args.selector));
+  for (const opt of options) {
+    const leaves = Array.from(opt.querySelectorAll("*")).filter((e) => e.children.length === 0);
+    if (!leaves.some((e) => (e.textContent || "").trim() === args.sublabel)) continue;
+    const testId = opt.getAttribute("data-test-id") || "";
+    return {
+      testId,
+      checked: opt.getAttribute("aria-checked") === "true",
+      locked: /upsell/i.test(testId) || opt.getAttribute("aria-disabled") === "true",
+    };
+  }
+  return null;
+}
+
+async function readMenuOption(
+  page: GeminiAutomationPage,
+  sublabel: string,
+  timeoutMs: number
+): Promise<GeminiMenuOptionState | null> {
+  const end = Date.now() + timeoutMs;
+  while (Date.now() < end) {
+    const state = (await page.evaluate!(
+      toInPageExpression(findMenuOptionInPage, { selector: GEMINI_WEB_MODE_OPTION, sublabel })
+    ).catch(() => null)) as GeminiMenuOptionState | null;
+    if (state) return state;
+    await page.waitForTimeout?.(200);
+  }
+  return null;
+}
+
+async function isMenuSignedOut(page: GeminiAutomationPage): Promise<boolean> {
+  try {
+    return Boolean(await page.evaluate!(toInPageExpression(isGeminiSignedOutInPage)));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Model-menu path (#21116): open the mode menu, pick the option whose sublabel
+ * matches exactly, then reopen the menu and require `aria-checked="true"` on it.
+ * A locked (upsell) or missing option fails closed instead of answering with
+ * whatever model the account currently has selected.
+ */
+export async function selectGeminiMenuMode(
+  page: GeminiAutomationPage,
+  descriptor: GeminiWebModeDescriptor,
+  timeoutMs = 5000
+): Promise<GeminiModeSelectionResult> {
+  const sublabel = descriptor.menuSublabel;
+  if (!sublabel || typeof page.evaluate !== "function" || typeof page.click !== "function") {
+    return { confirmed: false, reason: "control_not_found", descriptor };
+  }
+  const closeMenu = async () => {
+    await page.keyboard?.press("Escape").catch(() => {});
+  };
+  const button = await page
+    .waitForSelector(GEMINI_WEB_MODE_MENU_BUTTON, { timeout: timeoutMs })
+    .catch(() => null);
+  if (!button) return { confirmed: false, reason: "control_not_found", descriptor };
+
+  await page.click(GEMINI_WEB_MODE_MENU_BUTTON, { timeout: timeoutMs });
+  let option = await readMenuOption(page, sublabel, timeoutMs);
+  // The signed-out "Sign in" item only exists inside the open menu (live, 2026-11-25),
+  // and there the Gemini 4 options are aria-disabled, which would read as mode_locked.
+  if (await isMenuSignedOut(page)) {
+    await closeMenu();
+    return { confirmed: false, reason: "signed_out", descriptor };
+  }
+  if (!option) {
+    await closeMenu();
+    return { confirmed: false, reason: "mode_not_offered", descriptor };
+  }
+  if (option.locked) {
+    await closeMenu();
+    return { confirmed: false, reason: "mode_locked", descriptor };
+  }
+  if (!option.checked) {
+    await page.click(`[data-test-id="${option.testId}"]`, { timeout: timeoutMs });
+    await page.waitForTimeout?.(500);
+    await page.click(GEMINI_WEB_MODE_MENU_BUTTON, { timeout: timeoutMs });
+    option = await readMenuOption(page, sublabel, timeoutMs);
+  }
+  await closeMenu();
+  if (!option?.checked) return { confirmed: false, reason: "indicator_mismatch", descriptor };
+  return { confirmed: true, descriptor };
+}
+
+/**
+ * After the answer (#20842 review item on #21119): true only when the requested
+ * menu mode is listed and no longer checked, i.e. Gemini switched to another model
+ * while answering (high demand). A model without a menu entry, a page without
+ * in-page access, or an unreadable menu answers false: an unconfirmed switch never
+ * discards an answer.
+ */
+export async function isGeminiMenuModeReplaced(
+  page: GeminiAutomationPage,
+  modelId: string,
+  timeoutMs = 3000
+): Promise<boolean> {
+  const sublabel = GEMINI_WEB_MODEL_MODES[modelId]?.menuSublabel;
+  if (!sublabel || typeof page.evaluate !== "function" || typeof page.click !== "function") {
+    return false;
+  }
+  try {
+    const button = await page
+      .waitForSelector(GEMINI_WEB_MODE_MENU_BUTTON, { timeout: timeoutMs })
+      .catch(() => null);
+    if (!button) return false;
+    await page.click(GEMINI_WEB_MODE_MENU_BUTTON, { timeout: timeoutMs });
+    const option = await readMenuOption(page, sublabel, timeoutMs);
+    await page.keyboard?.press("Escape").catch(() => {});
+    return option !== null && !option.checked;
+  } catch {
+    return false;
+  }
 }
 
 export interface GeminiModeSelectionResult {
@@ -154,7 +320,7 @@ export async function selectGeminiUiMode(
   descriptor: GeminiWebModeDescriptor,
   timeoutMs = 5000
 ): Promise<GeminiModeSelectionResult> {
-  if (descriptor.isDefault) return { confirmed: true, descriptor };
+  if (descriptor.menuSublabel) return selectGeminiMenuMode(page, descriptor, timeoutMs);
 
   const { toggleSelector, activeIndicatorSelector, expectedIndicatorPattern } = descriptor;
   if (!toggleSelector || !activeIndicatorSelector || !expectedIndicatorPattern) {
@@ -167,6 +333,12 @@ export async function selectGeminiUiMode(
   if (!toggle) return { confirmed: false, reason: "control_not_found", descriptor };
 
   await toggle.click();
+  // The toggle is the mode-menu button on current pages; a signed-out session shows
+  // its "Sign in" item only now that the menu is open (live, 2026-11-25).
+  if (typeof page.evaluate === "function" && (await isMenuSignedOut(page))) {
+    await page.keyboard?.press("Escape").catch(() => {});
+    return { confirmed: false, reason: "signed_out", descriptor };
+  }
 
   const indicator = await page
     .waitForSelector(activeIndicatorSelector, { timeout: timeoutMs })
@@ -212,6 +384,9 @@ const REASON_DETAIL: Record<GeminiModeSelectionFailureReason, string> = {
   control_not_found: "the Gemini UI control used to switch modes was not found",
   indicator_not_found: "the active-mode indicator used to confirm the switch was not found",
   indicator_mismatch: "the active-mode indicator did not confirm the switch after attempting it",
+  mode_not_offered: "this account's Gemini mode menu does not offer it",
+  mode_locked: "this account's Gemini plan does not include it (the option is locked)",
+  signed_out: "the stored cookie no longer signs in to Gemini",
 };
 
 /**

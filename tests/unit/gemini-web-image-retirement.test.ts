@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { withGeminiMenu } from "./helpers/geminiWebMenu.ts";
 import { existsSync } from "node:fs";
 import test from "node:test";
 
@@ -51,25 +52,26 @@ test("Gemini Web executor treats the retired image-mode extension as ordinary ch
     ({
       newContext: async () => ({
         addCookies: async () => {},
-        newPage: async () => ({
-          on: (
-            event: string,
-            handler: (response: { url: () => string; text: () => Promise<string> }) => void
-          ) => {
-            if (event === "response") {
-              void handler({
-                url: () => "https://gemini.google.com/_/StreamGenerate",
-                text: async () => raw,
-              });
-            }
-          },
-          goto: async () => {},
-          waitForTimeout: async (duration: number) => {
-            waitDurations.push(duration);
-          },
-          waitForSelector: async () => ({ click: async () => {} }),
-          keyboard: { type: async () => {}, insertText: async () => {}, press: async () => {} },
-        }),
+        newPage: async () =>
+          withGeminiMenu({
+            on: (
+              event: string,
+              handler: (response: { url: () => string; text: () => Promise<string> }) => void
+            ) => {
+              if (event === "response") {
+                void handler({
+                  url: () => "https://gemini.google.com/_/StreamGenerate",
+                  text: async () => raw,
+                });
+              }
+            },
+            goto: async () => {},
+            waitForTimeout: async (duration: number) => {
+              waitDurations.push(duration);
+            },
+            waitForSelector: async () => ({ click: async () => {} }),
+            keyboard: { type: async () => {}, insertText: async () => {}, press: async () => {} },
+          }),
       }),
       close: async () => {},
     }) as unknown as Awaited<ReturnType<typeof originalLaunch>>) as typeof originalLaunch;
@@ -117,7 +119,15 @@ test("Gemini Web chat and legitimate Gemini image providers remain available", a
   assert.equal(REGISTRY["gemini-web"]?.executor, "gemini-web");
   assert.deepEqual(
     REGISTRY["gemini-web"]?.models.map(({ id }) => id),
-    ["gemini-3.1-pro", "gemini-3.7-flash", "gemini-3.1-flash-lite"]
+    [
+      "gemini-3.1-pro",
+      "gemini-4-hydrogen",
+      "gemini-4-hydrogen-thinking",
+      "gemini-4-neon",
+      "gemini-4-carbon",
+      "gemini-3.7-flash",
+      "gemini-3.1-flash-lite",
+    ]
   );
 
   assert.deepEqual(parseImageModel("nano-banana"), {
