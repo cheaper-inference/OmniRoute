@@ -11,6 +11,7 @@ import {
   type CodexConnectionFence,
 } from "./codexConnectionFences";
 
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptWebRetirement";
 import { getDbInstance, rowToCamel, cleanNulls } from "./core";
 import { backupDbFile } from "./backup";
@@ -575,6 +576,10 @@ export async function createProviderConnection(data: JsonRecord) {
       // organization with the same email and the same accountUUID, so
       // organizationUUID is what separates the accounts.
       const incomingOrganizationUuid = toStringOrNull(providerSpecificData.organizationUUID);
+      const incomingAccountUuid =
+        data.provider === "claude" && isFeatureFlagEnabled("CLAUDE_REAUTH_IDENTITY_ENABLED")
+          ? toStringOrNull(providerSpecificData.accountUUID)
+          : null;
       const emailMatches = db
         .prepare(
           "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth' AND email = ?"
@@ -586,7 +591,8 @@ export async function createProviderConnection(data: JsonRecord) {
             row,
             incomingUsername,
             incomingProfileArn,
-            incomingOrganizationUuid
+            incomingOrganizationUuid,
+            incomingAccountUuid
           )
         ) || null;
     }

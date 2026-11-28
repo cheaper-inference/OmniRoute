@@ -31,4 +31,15 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
+  {
+    key: "CLAUDE_REAUTH_IDENTITY_ENABLED",
+    label: "Claude Re-auth Identity",
+    description:
+      "Keep Claude logins separate when the account UUID or organization differs. Off by default: re-auth updates the named connection.",
+    descriptionI18nKey: "featureFlags.definitions.CLAUDE_REAUTH_IDENTITY_ENABLED.description",
+    type: "boolean",
+    defaultValue: "false",
+    category: "runtime",
+    requiresRestart: false,
+  },
 ];

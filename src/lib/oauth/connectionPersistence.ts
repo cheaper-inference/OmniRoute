@@ -21,6 +21,8 @@ import {
   type AntigravityDegradedProjectState,
 } from "@/lib/oauth/antigravityProjectGate";
 import { hasActiveCooldown } from "@/lib/usage/providerLimits";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { hasDifferentClaudeAccountUUID } from "@/lib/db/webSessionDedup";
 
 /**
  * Constant-time string comparison to prevent timing-oracle attacks (CWE-208).
@@ -74,17 +76,15 @@ function isSameCodexAccount(
  */
 function isSameClaudeAccount(
   existingProviderData: Record<string, any> | null | undefined,
-  incomingProviderData: Record<string, any> | null | undefined
+  incomingProviderData: Record<string, any> | null | undefined,
+  checkAccountUUID: boolean
 ): boolean {
-  // Two different accountUUIDs are two different accounts, whatever the email or connectionId says
-  // (a swapped key must not attach to the old account's row). A side without one is unproven: the
-  // lookup that fills it is best-effort, so it does not block a re-login.
-  const incomingAccount = incomingProviderData?.accountUUID;
-  const existingAccount = existingProviderData?.accountUUID;
   if (
-    typeof incomingAccount === "string" &&
-    typeof existingAccount === "string" &&
-    incomingAccount.toLowerCase() !== existingAccount.toLowerCase()
+    checkAccountUUID &&
+    hasDifferentClaudeAccountUUID(
+      existingProviderData?.accountUUID,
+      incomingProviderData?.accountUUID
+    )
   ) {
     return false;
   }
@@ -123,11 +123,13 @@ export function findExistingOAuthConnectionMatch(
     }
     return existing.find((row) => row.authType === "oauth" && sameM365Account(row, tokenData));
   }
+  const checkClaudeIdentity =
+    provider === "claude" && isFeatureFlagEnabled("CLAUDE_REAUTH_IDENTITY_ENABLED");
   return existing.find((c) => {
     if (c.id && safeEqual(connectionId, c.id)) {
       return (
-        provider !== "claude" ||
-        isSameClaudeAccount(c.providerSpecificData, tokenData.providerSpecificData)
+        !checkClaudeIdentity ||
+        isSameClaudeAccount(c.providerSpecificData, tokenData.providerSpecificData, true)
       );
     }
     // Email dedup only when the payload actually carries an email. Without this
@@ -139,7 +141,11 @@ export function findExistingOAuthConnectionMatch(
       return isSameCodexAccount(c.providerSpecificData, tokenData.providerSpecificData);
     }
     if (provider === "claude") {
-      return isSameClaudeAccount(c.providerSpecificData, tokenData.providerSpecificData);
+      return isSameClaudeAccount(
+        c.providerSpecificData,
+        tokenData.providerSpecificData,
+        checkClaudeIdentity
+      );
     }
     return true;
   });

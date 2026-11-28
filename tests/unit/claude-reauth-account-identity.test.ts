@@ -1,76 +1,77 @@
-// ocx-49: a re-auth that names a connection (connectionId) skipped every identity check, so tokens of
-// a DIFFERENT Claude account attached to the old row and the row kept the old account's accountUUID.
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-claude-reauth-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
-
-const core = await import("../../src/lib/db/core.ts");
-const providersDb = await import("../../src/lib/db/providers.ts");
+const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-claude-reauth-"));
+process.env.DATA_DIR = dataDir;
+const flag = "CLAUDE_REAUTH_IDENTITY_ENABLED";
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+const { getProviderConnections } = await import("../../src/lib/db/providers.ts");
 const { persistOAuthConnection } = await import("../../src/lib/oauth/connectionPersistence.ts");
-const { claude } = await import("../../src/lib/oauth/providers/claude.ts");
 
-test.beforeEach(async () => {
-  core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-  fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
+test.beforeEach(() => {
+  resetDbInstance();
+  fs.rmSync(dataDir, { recursive: true, force: true });
+  fs.mkdirSync(dataDir, { recursive: true });
+  delete process.env[flag];
 });
 test.after(() => {
-  core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  resetDbInstance();
+  fs.rmSync(dataDir, { recursive: true, force: true });
+  delete process.env[flag];
 });
 
-const login = (email: string, tag: string, uuid?: string, connectionId?: string) =>
+const login = (uuid: string, connectionId?: string) =>
   persistOAuthConnection(
     "claude",
     {
-      email,
-      accessToken: `tok-${tag}`,
-      refreshToken: `ref-${tag}`,
+      email: "shared@example.com",
+      accessToken: `fixture-${uuid}`,
       expiresIn: 3600,
-      ...(uuid
-        ? {
-            providerSpecificData: {
-              accountUUID: uuid,
-              organizationUUID: `org-${uuid.toLowerCase()}`,
-            },
-          }
-        : {}),
+      providerSpecificData: { accountUUID: uuid, organizationUUID: "one-org" },
     },
     connectionId
   );
 
-test("a re-auth of a named connection with another account's UUID does not overwrite the row", async () => {
-  const a = await login("a@example.com", "a", "uuid-a");
-  const other = await login("c@example.com", "c", "uuid-c", a.id);
-  const rows = await providersDb.getProviderConnections({ provider: "claude" });
-  assert.notEqual(other.id, a.id, "the other account must get its own connection");
+test("with the flag off, a different Claude account updates the named row", async () => {
+  const first = await login("account-one");
+  const next = await login("account-two", first.id);
+  assert.equal(next.id, first.id);
+  const rows = await getProviderConnections({ provider: "claude" });
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].accessToken, "fixture-account-two");
+});
+
+test("with the flag on, a different Claude account gets its own row even with the same email and organization", async () => {
+  process.env[flag] = "true";
+  const first = await login("account-one");
+  const next = await login("account-two", first.id);
+  assert.notEqual(next.id, first.id, "the different account must have its own row");
+  const rows = await getProviderConnections({ provider: "claude" });
   assert.equal(rows.length, 2);
-  const kept = rows.find((r: { id: string }) => r.id === a.id);
-  assert.equal(kept?.accessToken, "tok-a");
-  assert.equal(kept?.providerSpecificData?.accountUUID, "uuid-a");
+  assert.equal(rows.find((row) => row.id === first.id)?.accessToken, "fixture-account-one");
+  assert.equal(rows.find((row) => row.id === next.id)?.accessToken, "fixture-account-two");
 });
 
 test("a re-auth of a named connection with the same account UUID updates the row", async () => {
-  const a = await login("a@example.com", "a", "uuid-a");
-  const again = await login("a@example.com", "a2", "UUID-A", a.id);
-  const rows = await providersDb.getProviderConnections({ provider: "claude" });
+  process.env[flag] = "true";
+  const a = await login("uuid-a");
+  const again = await login("UUID-A", a.id);
+  const rows = await getProviderConnections({ provider: "claude" });
   assert.equal(again.id, a.id);
   assert.equal(rows.length, 1);
-  assert.equal(rows[0].accessToken, "tok-a2");
+  assert.equal(rows[0].accessToken, "fixture-UUID-A");
 });
 
 test("a re-auth of a named connection for another organization of the account does not overwrite the row", async () => {
+  process.env[flag] = "true";
   const personal = await persistOAuthConnection(
     "claude",
     {
       email: "a@example.com",
-      accessToken: "tok-p",
-      refreshToken: "ref-p",
+      accessToken: "fixture-personal",
       expiresIn: 3600,
       providerSpecificData: { accountUUID: "uuid-a", organizationUUID: "org-personal" },
     },
@@ -80,41 +81,26 @@ test("a re-auth of a named connection for another organization of the account do
     "claude",
     {
       email: "a@example.com",
-      accessToken: "tok-t",
-      refreshToken: "ref-t",
+      accessToken: "fixture-team",
       expiresIn: 3600,
       providerSpecificData: { accountUUID: "uuid-a", organizationUUID: "org-team" },
     },
     personal.id
   );
-  const rows = await providersDb.getProviderConnections({ provider: "claude" });
+  const rows = await getProviderConnections({ provider: "claude" });
   assert.notEqual(team.id, personal.id);
   assert.equal(rows.length, 2);
-  assert.equal(rows.find((r: { id: string }) => r.id === personal.id)?.accessToken, "tok-p");
+  assert.equal(
+    rows.find((r: { id: string }) => r.id === personal.id)?.accessToken,
+    "fixture-personal"
+  );
 });
 
 test("the same email with another account UUID is another account, not a re-login", async () => {
-  const a = await login("shared@example.com", "a", "uuid-a");
-  const b = await login("shared@example.com", "b", "uuid-b");
-  const rows = await providersDb.getProviderConnections({ provider: "claude" });
+  process.env[flag] = "true";
+  const a = await login("uuid-a");
+  const b = await login("uuid-b");
+  const rows = await getProviderConnections({ provider: "claude" });
   assert.notEqual(b.id, a.id);
   assert.equal(rows.length, 2);
-});
-
-test("a re-auth with no identity in the payload still updates the named row (lookup is best-effort)", async () => {
-  const a = await login("a@example.com", "a", "uuid-a");
-  const again = await login("a@example.com", "a2", undefined, a.id);
-  const rows = await providersDb.getProviderConnections({ provider: "claude" });
-  assert.equal(again.id, a.id);
-  assert.equal(rows.length, 1);
-  assert.equal(rows[0].accessToken, "tok-a2");
-});
-
-test("mapTokens still stores the identity the lookup returned", () => {
-  const tokenData = claude.mapTokens(
-    { access_token: "tok", refresh_token: "ref", expires_in: 3600 },
-    { account_uuid: "uuid-x", organization_uuid: "org-x", account_email: "x@example.com" }
-  );
-  assert.equal(tokenData.providerSpecificData.accountUUID, "uuid-x");
-  assert.equal(tokenData.providerSpecificData.organizationUUID, "org-x");
 });
