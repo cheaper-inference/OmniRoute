@@ -219,6 +219,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:install-scripts",
+      "command": "node scripts/check/check-install-scripts.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:install-upgrade",
       "command": "node scripts/check/check-install-upgrade.mjs",
       "disposition": "separately-invoked"

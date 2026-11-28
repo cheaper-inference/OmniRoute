@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 1,
+  "lockfiles": {
+    "package-lock.json": [
+      {
+        "path": "",
+        "name": "omniroute",
+        "version": "3.8.55",
+        "integrity": null,
+        "resolved": null,
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "Run the repository's environment setup and Husky setup explicitly in the future rollout."
+      },
+      {
+        "path": "node_modules/@parcel/watcher",
+        "name": "@parcel/watcher",
+        "version": "2.5.6",
+        "integrity": "sha512-tmmZ3lQxAe/k/+rNnXQRawJ4NjxO2hqiOLTHvWchtGZULp4RyFeh6aU4XdOYBFe2KE1oShQTv4AblOs2iOrNnQ==",
+        "resolved": "https://registry.npmjs.org/@parcel/watcher/-/watcher-2.5.6.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "Use the optional platform binary for the Next Intl development watcher."
+      },
+      {
+        "path": "node_modules/@swc/core",
+        "name": "@swc/core",
+        "version": "1.16.13",
+        "integrity": "sha512-k4uUsIMS0IwOKVsrQs48IZK75O4roV3FnuJEdL7ES+DFESftdgvz73QBqN3VUAbUmUr78We4tzG0kgYj36M22Q==",
+        "resolved": "https://registry.npmjs.org/@swc/core/-/core-1.16.13.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "Use the optional platform binding and validate it with a transform instead of running the fallback installer."
+      },
+      {
+        "path": "node_modules/better-sqlite3",
+        "name": "better-sqlite3",
+        "version": "13.0.3",
+        "integrity": "sha512-RbOBxmLBG8uvFUc15X9+9SFemKcQ0WBuISBVkpuiaUB2qblC8UWlHEjdWVoZ8AdhSwmoEgsiXKfopX0CQxaACQ==",
+        "resolved": "https://registry.npmjs.org/better-sqlite3/-/better-sqlite3-13.0.3.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "The reviewed tarball ships Node-API prebuilds and sets gypfile to false. A Docker source build is a separate operation."
+      },
+      {
+        "path": "node_modules/bun",
+        "name": "bun",
+        "version": "1.4.2",
+        "integrity": "sha512-TrSXo6HJfIEaczpb3kjX82I2pL47vK1QUNmHRCUdz9IzaOwa9lzOXSWwu2l18YHE3sNfGRapVLd4nNm+22vVVA==",
+        "resolved": "https://registry.npmjs.org/bun/-/bun-1.4.2.tgz",
+        "decision": "allow",
+        "profiles": ["root-dev", "ci-bun-gates"],
+        "platforms": ["darwin", "linux", "android", "freebsd", "win32"],
+        "command": "node node_modules/bun/install.js",
+        "reason": "Materialize the executable for development and Bun gates after validating the installed platform package."
+      },
+      {
+        "path": "node_modules/esbuild",
+        "name": "esbuild",
+        "version": "0.28.2",
+        "integrity": "sha512-HKVLS8dvII+xoKW9kmqxbRKrnWEXfJJr/FZhhJmiqIB0e053QNYFqOBouTMO/k5sID4MvCiUCvv8b9M4h32wIA==",
+        "resolved": "https://registry.npmjs.org/esbuild/-/esbuild-0.28.2.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "Use the optional platform executable and verify both the JS API and the executable in build smoke tests."
+      },
+      {
+        "path": "node_modules/fsevents",
+        "name": "fsevents",
+        "version": "2.3.2",
+        "integrity": "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==",
+        "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "platforms": ["darwin"],
+        "reason": "The integrity-checked tarball ships fsevents.node and omits install hooks and binding.gyp. Validate loading on macOS."
+      },
+      {
+        "path": "node_modules/keytar",
+        "name": "keytar",
+        "version": "7.9.0",
+        "integrity": "sha512-VPD8mtVtm5JNtA2AErl6Chp06JBfy7diFQ7TQQhdpWOl6MrCRB+eRbvAZUsbGQS9kiMq0coJsy0W0vHpDCkWsQ==",
+        "resolved": "https://registry.npmjs.org/keytar/-/keytar-7.9.0.tgz",
+        "decision": "allow",
+        "profiles": ["keytar-compatibility"],
+        "command": "npm rebuild --ignore-scripts=false --foreground-scripts keytar@7.9.0",
+        "reason": "Prepare the optional native keychain addon where CLI credential storage requires compatibility."
+      },
+      {
+        "path": "node_modules/libxmljs2",
+        "name": "libxmljs2",
+        "version": "0.37.0",
+        "integrity": "sha512-Xb78V8GZouoZFrq8cCwx7+G3WYOcJG0xb3YUbweSyE4z2EIrQCZMr3Ye/dHn4mESs6YxUMeQeUZm5IXg+iLHog==",
+        "resolved": "https://registry.npmjs.org/libxmljs2/-/libxmljs2-0.37.0.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "Revisit the native build only if an SBOM/XML job proves it needs the binding."
+      },
+      {
+        "path": "node_modules/onnxruntime-node",
+        "name": "onnxruntime-node",
+        "version": "1.30.0",
+        "integrity": "sha512-twhs1C2C/BFkz1yc5OY0KIU2GUq6DURO7hD4bx5Q2Qy3nAMJwRXW8xU3NVczE29VA9lolLOYepoD8fjTGOfIqw==",
+        "resolved": "https://registry.npmjs.org/onnxruntime-node/-/onnxruntime-node-1.30.0.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "platforms": ["win32", "darwin", "linux"],
+        "reason": "Use the packaged CPU binaries. Downloading CUDA components is a separate opt-in."
+      },
+      {
+        "path": "node_modules/opencode-ai",
+        "name": "opencode-ai",
+        "version": "1.19.5",
+        "integrity": "sha512-tEqMvQahfhdDj8vceYpXtoIrvjPXm5XRfetWnPN5YISueU7adNx9JcUA3zZ+2GKuDVgDpGdQe1ZLtCZDjqodvA==",
+        "resolved": "https://registry.npmjs.org/opencode-ai/-/opencode-ai-1.19.5.tgz",
+        "decision": "allow",
+        "profiles": ["opencode-integration"],
+        "platforms": ["darwin", "linux", "win32"],
+        "command": "node node_modules/opencode-ai/postinstall.mjs",
+        "reason": "Prepare the OpenCode executable for integration runs after validating the installed platform package."
+      },
+      {
+        "path": "node_modules/protobufjs",
+        "name": "protobufjs",
+        "version": "7.6.5",
+        "integrity": "sha512-/FPD0nUc9jH6rfFjji9IBqOz4pcSE3CsT1m7Ep6Mdb0LxSUMj8hgl6GomOvZzpNpAqqGaXA0P3VSrZLFzIhQrw==",
+        "resolved": "https://registry.npmjs.org/protobufjs/-/protobufjs-7.6.5.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "The hook checks the consumer's version declaration and only emits a warning."
+      },
+      {
+        "path": "node_modules/tsx/node_modules/fsevents",
+        "name": "fsevents",
+        "version": "2.3.3",
+        "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==",
+        "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "platforms": ["darwin"],
+        "reason": "The integrity-checked tarball ships fsevents.node and omits install hooks and binding.gyp. Validate loading on macOS."
+      },
+      {
+        "path": "node_modules/unrs-resolver",
+        "name": "unrs-resolver",
+        "version": "1.11.1",
+        "integrity": "sha512-bSjt9pjaEBnNiGgc9rUiHGKv5l4/TGzDmYw3RhnkJGtLhbnnA/5qJj7x3dNDCRx/PJxu774LlH8lCOlB4hEfKg==",
+        "resolved": "https://registry.npmjs.org/unrs-resolver/-/unrs-resolver-1.11.1.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "Use the packaged optional native binding for ESLint resolution."
+      },
+      {
+        "path": "node_modules/vite/node_modules/fsevents",
+        "name": "fsevents",
+        "version": "2.3.3",
+        "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==",
+        "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "platforms": ["darwin"],
+        "reason": "The integrity-checked tarball ships fsevents.node and omits install hooks and binding.gyp. Validate loading on macOS."
+      }
+    ],
+    "@omniroute/opencode-plugin-v2/package-lock.json": [
+      {
+        "path": "node_modules/esbuild",
+        "name": "esbuild",
+        "version": "0.28.2",
+        "integrity": "sha512-HKVLS8dvII+xoKW9kmqxbRKrnWEXfJJr/FZhhJmiqIB0e053QNYFqOBouTMO/k5sID4MvCiUCvv8b9M4h32wIA==",
+        "resolved": "https://registry.npmjs.org/esbuild/-/esbuild-0.28.2.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "Validate tsup using the optional platform executable bundled as an npm dependency."
+      },
+      {
+        "path": "node_modules/fsevents",
+        "name": "fsevents",
+        "version": "2.3.3",
+        "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==",
+        "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "platforms": ["darwin"],
+        "reason": "The integrity-checked tarball ships fsevents.node and omits install hooks and binding.gyp. Validate loading on macOS."
+      }
+    ],
+    "@omniroute/opencode-plugin/package-lock.json": [
+      {
+        "path": "node_modules/esbuild",
+        "name": "esbuild",
+        "version": "0.28.1",
+        "integrity": "sha512-HrJrvZv5ayxBzPfwphOoNzkzOIIlifzk0KJrGK2c8R4+LKpMtpYLQeUdjnwjWv/LZlkH2laZk+4w78pi99D4Vw==",
+        "resolved": "https://registry.npmjs.org/esbuild/-/esbuild-0.28.1.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "Validate tsup using the optional platform executable bundled as an npm dependency."
+      },
+      {
+        "path": "node_modules/fsevents",
+        "name": "fsevents",
+        "version": "2.3.3",
+        "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==",
+        "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "platforms": ["darwin"],
+        "reason": "The integrity-checked tarball ships fsevents.node and omits install hooks and binding.gyp. Validate loading on macOS."
+      },
+      {
+        "path": "node_modules/msgpackr-extract",
+        "name": "msgpackr-extract",
+        "version": "3.0.7",
+        "integrity": "sha512-/dOQboWnkR1cjm88XyH/cGSivECGgyQu3814+bNUAq5wACQC8Ya/CViB9WApvWJ5Hya/JJQQmUeBFOZj8MLjGA==",
+        "resolved": "https://registry.npmjs.org/msgpackr-extract/-/msgpackr-extract-3.0.7.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "Validate tooling using the optional native accelerator packages before considering a build."
+      }
+    ],
+    "@omniroute/opencode-provider/package-lock.json": [
+      {
+        "path": "node_modules/esbuild",
+        "name": "esbuild",
+        "version": "0.28.1",
+        "integrity": "sha512-HrJrvZv5ayxBzPfwphOoNzkzOIIlifzk0KJrGK2c8R4+LKpMtpYLQeUdjnwjWv/LZlkH2laZk+4w78pi99D4Vw==",
+        "resolved": "https://registry.npmjs.org/esbuild/-/esbuild-0.28.1.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "Validate tsup using the optional platform executable bundled as an npm dependency."
+      },
+      {
+        "path": "node_modules/fsevents",
+        "name": "fsevents",
+        "version": "2.3.3",
+        "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==",
+        "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "platforms": ["darwin"],
+        "reason": "The integrity-checked tarball ships fsevents.node and omits install hooks and binding.gyp. Validate loading on macOS."
+      }
+    ],
+    "electron/package-lock.json": [
+      {
+        "path": "node_modules/electron-winstaller",
+        "name": "electron-winstaller",
+        "version": "5.4.0",
+        "integrity": "sha512-bO3y10YikuUwUuDUQRM4KfwNkKhnpVO7IPdbsrejwN9/AABJzzTQ4GeHwyzNSrVO+tEH3/Np255a3sVZpZDjvg==",
+        "resolved": "https://registry.npmjs.org/electron-winstaller/-/electron-winstaller-5.4.0.tgz",
+        "decision": "deny",
+        "profiles": ["all"],
+        "reason": "The current Windows release targets NSIS and Portable. Squirrel's 7-Zip selection is unnecessary for those targets."
+      }
+    ]
+  }
+}

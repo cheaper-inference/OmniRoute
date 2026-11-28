@@ -219,6 +219,7 @@
     "check:api-docs-refs": "node scripts/check/check-api-docs-refs.mjs",
     "check:openapi-breaking": "node scripts/check/check-openapi-breaking.mjs",
     "check:deps": "node scripts/check/check-deps.mjs",
+    "check:install-scripts": "node scripts/check/check-install-scripts.mjs",
     "check:file-size": "node scripts/check/check-file-size.mjs",
     "check:duplication": "node scripts/check/check-duplication.mjs",
     "check:tracked-artifacts": "node scripts/check/check-tracked-artifacts.mjs",
