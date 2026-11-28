@@ -101,3 +101,45 @@ test("Claude OAuth token mapper leaves providerSpecificData.plan undefined witho
   assert.ok(typeof mapped.providerSpecificData.cliUserID === "string");
   assert.equal(mapped.providerSpecificData.plan, undefined);
 });
+
+const DAY_MS = 86_400_000;
+
+test("Claude OAuth token mapper keeps when the login ends, from refresh_token_expires_in", () => {
+  const before = Date.now();
+  const mapped = claude.mapTokens({
+    access_token: "token-1",
+    refresh_token: "refresh-1",
+    expires_in: 28_800,
+    refresh_token_expires_in: 3 * 86_400,
+  });
+  const after = Date.now();
+
+  const endsAt = Date.parse(mapped.providerSpecificData.refreshTokenExpiresAt);
+  assert.ok(endsAt >= before + 3 * DAY_MS, "not before the login's lifetime from the exchange");
+  assert.ok(endsAt <= after + 3 * DAY_MS, "not after it either");
+});
+
+test("Claude OAuth token mapper records no login end when the response carries none", () => {
+  for (const refreshTtl of [undefined, null, 0, -1, "soon"]) {
+    const mapped = claude.mapTokens({
+      access_token: "token-1",
+      refresh_token_expires_in: refreshTtl,
+    });
+
+    assert.equal(mapped.providerSpecificData?.refreshTokenExpiresAt, undefined, String(refreshTtl));
+  }
+});
+
+test("Claude OAuth token mapper reads a numeric string lifetime as seconds", () => {
+  const before = Date.now();
+  const mapped = claude.mapTokens({ access_token: "token-1", refresh_token_expires_in: "86400" });
+
+  assert.ok(Date.parse(mapped.providerSpecificData.refreshTokenExpiresAt) >= before + DAY_MS);
+});
+
+test("Claude OAuth token mapper drops a login end past Date's range and keeps the tokens", () => {
+  const mapped = claude.mapTokens({ access_token: "token-1", refresh_token_expires_in: 1e20 });
+
+  assert.equal(mapped.accessToken, "token-1");
+  assert.equal(mapped.providerSpecificData.refreshTokenExpiresAt, undefined);
+});
