@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { SignJWT } from "jose";
+import { parse } from "smol-toml";
 
 // Hermetic: a temp HOME for the route AND for the spawned fake `codex`, which is a shell
 // script selected through CLI_CODEX_BIN. The real ~/.codex is never read or written.
@@ -15,8 +16,10 @@ const CONFIG_PATH = path.join(CODEX_DIR, "config.toml");
 const CATALOG_PATH = path.join(CODEX_DIR, "omniroute-models.json");
 const BUNDLED_PATH = path.join(TEST_ROOT, "bundled.json");
 const SEEN_CODEX_HOME = path.join(TEST_ROOT, "seen-codex-home.txt");
-const FAKE_CODEX_OK = path.join(BIN_DIR, "codex-ok");
-const FAKE_CODEX_BROKEN = path.join(BIN_DIR, "codex-broken");
+const windows = process.platform === "win32";
+const FAKE_CODEX_OK = path.join(BIN_DIR, windows ? "codex-ok.cmd" : "codex-ok");
+const FAKE_CODEX_BROKEN = path.join(BIN_DIR, windows ? "codex-broken.cmd" : "codex-broken");
+const tomlPath = (file: string) => file.replaceAll("\\", "/");
 
 const saved = {
   homedir: os.homedir,
@@ -54,12 +57,16 @@ await fs.writeFile(
 );
 await fs.writeFile(
   FAKE_CODEX_OK,
-  `#!/bin/sh\nprintf '%s' "$CODEX_HOME" > '${SEEN_CODEX_HOME}'\n[ "$1 $2 $3" = "debug models --bundled" ] || exit 2\ncat '${BUNDLED_PATH}'\n`,
+  windows
+    ? `@echo off\r\nif "%1"=="--version" (echo codex-cli 0.160.0 & exit /b 0)\r\nif not "%*"=="debug models --bundled" exit /b 2\r\n>"${SEEN_CODEX_HOME}" echo %CODEX_HOME%\r\ntype "${BUNDLED_PATH}"\r\n`
+    : `#!/bin/sh\nif [ "$1" = "--version" ]; then echo 'codex-cli 0.160.0'; exit 0; fi\n[ "$1 $2 $3" = "debug models --bundled" ] || exit 2\nprintf '%s' "$CODEX_HOME" > '${SEEN_CODEX_HOME}'\ncat '${BUNDLED_PATH}'\n`,
   { mode: 0o755 }
 );
-await fs.writeFile(FAKE_CODEX_BROKEN, "#!/bin/sh\necho 'unknown subcommand' >&2\nexit 1\n", {
-  mode: 0o755,
-});
+await fs.writeFile(
+  FAKE_CODEX_BROKEN,
+  windows ? "@echo off\r\nexit /b 1\r\n" : "#!/bin/sh\nexit 1\n",
+  { mode: 0o755 }
+);
 
 const route = await import("../../src/app/api/cli-tools/codex-settings/route.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
@@ -95,6 +102,16 @@ const reset = async () =>
       headers: { cookie: await authCookie() },
     })
   );
+
+const status = async () => {
+  const response = await route.GET(
+    new Request("http://localhost/api/cli-tools/codex-settings", {
+      headers: { cookie: await authCookie() },
+    })
+  );
+  assert.equal(response.status, 200);
+  return response.json();
+};
 
 const exists = async (filePath: string) =>
   fs.access(filePath).then(
@@ -133,11 +150,12 @@ test("POST with modelCatalog writes an OmniRoute catalog and points Codex at it"
   assert.ok(body.catalogModelCount >= 2);
 
   const config = await fs.readFile(CONFIG_PATH, "utf8");
-  assert.match(config, new RegExp(`^model_catalog_json = "${CATALOG_PATH}"$`, "m"));
+  assert.equal(parse(config).model_catalog_json, tomlPath(CATALOG_PATH));
   assert.match(config, /^model = "cx\/gpt-5\.5"$/m);
 
   // The child ran against the same Codex home OmniRoute writes into
-  assert.equal(await fs.readFile(SEEN_CODEX_HOME, "utf8"), CODEX_DIR);
+  assert.equal((await fs.readFile(SEEN_CODEX_HOME, "utf8")).trim(), CODEX_DIR);
+  assert.equal((await status()).modelCatalogEnabled, true);
 
   const catalog = JSON.parse(await fs.readFile(CATALOG_PATH, "utf8"));
   const listedSlugs = catalog.models
@@ -165,17 +183,26 @@ test("POST without modelCatalog leaves Codex's catalog untouched", async () => {
   assert.equal(await exists(SEEN_CODEX_HOME), false, "codex must not be spawned");
 });
 
-test("POST with modelCatalog: false leaves Codex's catalog untouched", async () => {
+test("POST with modelCatalog: false detaches the OmniRoute catalog and preserves other catalogs", async () => {
   await freshCodexDir();
   process.env.CLI_CODEX_BIN = FAKE_CODEX_OK;
 
+  assert.equal((await post({ modelCatalog: true })).status, 200);
+  const contents = await fs.readFile(CATALOG_PATH, "utf8");
+  await fs.rm(SEEN_CODEX_HOME);
   const response = await post({ modelCatalog: false });
   assert.equal(response.status, 200);
   const body = await response.json();
   assert.equal(body.catalogPath, undefined);
   assert.doesNotMatch(await fs.readFile(CONFIG_PATH, "utf8"), /model_catalog_json/);
-  assert.equal(await exists(CATALOG_PATH), false);
+  assert.equal(await fs.readFile(CATALOG_PATH, "utf8"), contents);
   assert.equal(await exists(SEEN_CODEX_HOME), false, "codex must not be spawned");
+  assert.equal((await status()).modelCatalogEnabled, false);
+
+  const custom = tomlPath(path.join(CODEX_DIR, "my-models.json"));
+  await fs.writeFile(CONFIG_PATH, `model_catalog_json = "${custom}"\n`);
+  assert.equal((await post({ modelCatalog: false })).status, 200);
+  assert.equal(parse(await fs.readFile(CONFIG_PATH, "utf8")).model_catalog_json, custom);
 });
 
 test("POST fails open with catalogWarning when Codex cannot dump its catalog", async () => {
@@ -206,14 +233,11 @@ test("DELETE removes the catalog key and file only when the key points to OmniRo
   assert.equal(await exists(CATALOG_PATH), false);
 
   // A user-owned catalog is left alone
-  const userCatalog = path.join(CODEX_DIR, "my-models.json");
+  const userCatalog = tomlPath(path.join(CODEX_DIR, "my-models.json"));
   await fs.writeFile(
     CONFIG_PATH,
     `model_catalog_json = "${userCatalog}"\nmodel = "cx/gpt-5.5"\nmodel_provider = "omniroute"\n`
   );
   assert.equal((await reset()).status, 200);
-  assert.match(
-    await fs.readFile(CONFIG_PATH, "utf8"),
-    new RegExp(`^model_catalog_json = "${userCatalog}"$`, "m")
-  );
+  assert.equal(parse(await fs.readFile(CONFIG_PATH, "utf8")).model_catalog_json, userCatalog);
 });

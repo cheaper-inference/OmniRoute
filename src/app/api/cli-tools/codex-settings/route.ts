@@ -35,6 +35,8 @@ const getCodexAuthPath = () => getCliConfigPaths("codex").auth;
 const getCodexDir = () => path.dirname(getCodexConfigPath());
 // The catalog path is stored with forward slashes (Codex accepts them on Windows).
 const toTomlPath = (filePath: string) => filePath.replace(/\\/g, "/");
+const isOmniRouteCatalog = (value: unknown, codexDir: string) =>
+  typeof value === "string" && toTomlPath(value) === toTomlPath(getCodexCatalogPath(codexDir));
 
 type TomlDoc = Record<string, unknown>;
 
@@ -127,6 +129,9 @@ export async function GET(request: Request) {
       reason: runtime.reason,
       config,
       hasOmniRoute: hasOmniRouteConfig(config),
+      modelCatalogEnabled: config
+        ? isOmniRouteCatalog(parseConfig(config).model_catalog_json, getCodexDir())
+        : false,
       configPath: getCodexConfigPath(),
     });
   } catch (error) {
@@ -209,19 +214,24 @@ export async function POST(request: Request) {
 
     const effectiveWireApi = wireApi ?? "responses";
     const normalizedBaseUrl = normalizeCodexBaseUrl(baseUrl, effectiveWireApi);
+    const providers = asRecord(doc.model_providers);
+    const currentOmniRoute = asRecord(providers.omniroute);
+    const keepEnvironmentKey =
+      currentOmniRoute.base_url === normalizedBaseUrl &&
+      currentOmniRoute.env_key === "OMNIROUTE_API_KEY";
 
     // Read the previous OmniRoute URL before the provider section is replaced below.
     deleteOwnedRootUrl(doc, normalizedBaseUrl);
 
-    // Always create a custom provider to reliably pass wire_api and use OMNIROUTE_API_KEY
+    // Keep the explicit environment credential scoped to its existing endpoint.
     doc.model_provider = "omniroute";
     doc.model_providers = {
-      ...asRecord(doc.model_providers),
+      ...providers,
       omniroute: {
         name: "OmniRoute",
         base_url: normalizedBaseUrl,
         wire_api: effectiveWireApi,
-        env_key: "OPENAI_API_KEY",
+        env_key: keepEnvironmentKey ? "OMNIROUTE_API_KEY" : "OPENAI_API_KEY",
       },
     };
 
@@ -247,13 +257,15 @@ export async function POST(request: Request) {
         listModels: () => listOmniRouteChatModels(request),
       });
       if (catalog.catalogPath) doc.model_catalog_json = toTomlPath(catalog.catalogPath);
+    } else if (modelCatalog === false && isOmniRouteCatalog(doc.model_catalog_json, codexDir)) {
+      delete doc.model_catalog_json;
     }
 
     // Write merged config
     const configContent = toToml(doc);
     await fs.writeFile(configPath, configContent);
 
-    // Update auth.json with OPENAI_API_KEY (Codex reads this first)
+    // Preserve the existing auth.json contract for profiles using a stored key.
     authData.OPENAI_API_KEY = apiKey;
     await fs.writeFile(authPath, JSON.stringify(authData, null, 2));
 
@@ -326,11 +338,7 @@ export async function DELETE(request: Request) {
 
     // Remove the model catalog only when it is the one OmniRoute wrote
     const codexDir = getCodexDir();
-    const catalogValue = doc.model_catalog_json;
-    if (
-      typeof catalogValue === "string" &&
-      toTomlPath(catalogValue) === toTomlPath(getCodexCatalogPath(codexDir))
-    ) {
+    if (isOmniRouteCatalog(doc.model_catalog_json, codexDir)) {
       delete doc.model_catalog_json;
     }
 

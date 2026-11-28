@@ -1,0 +1,1 @@
+- **fix(cli):** Preserve the Codex model picker preference and retain an existing OmniRoute environment-key selector when saving the same endpoint ([#21263](https://github.com/cheaper-inference/OmniRoute/pull/21263)).

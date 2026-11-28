@@ -88,3 +88,19 @@ test("POST resolves the Codex wire API before URL normalization and TOML generat
     });
   }
 });
+
+test("POST keeps the OmniRoute environment key for the existing configured endpoint", async () => {
+  await fs.mkdir(path.dirname(CONFIG_PATH), { recursive: true });
+  await fs.writeFile(
+    CONFIG_PATH,
+    '[model_providers.omniroute]\nbase_url = "http://localhost:20128/v1"\nenv_key = "OMNIROUTE_API_KEY"\n'
+  );
+
+  const response = await post({ baseUrl: "http://localhost:20128/api/v1/responses" });
+  assert.equal(response.status, 200);
+  assert.match(await fs.readFile(CONFIG_PATH, "utf8"), /^env_key = "OMNIROUTE_API_KEY"$/m);
+
+  const changedEndpoint = await post({ baseUrl: "http://localhost:20129/v1" });
+  assert.equal(changedEndpoint.status, 200);
+  assert.match(await fs.readFile(CONFIG_PATH, "utf8"), /^env_key = "OPENAI_API_KEY"$/m);
+});
