@@ -1,5 +1,6 @@
 import { getDbInstance } from "./core.ts";
 import type { SqliteAdapter } from "./adapters/types.ts";
+import { usageStatsRepositories } from "./repositories/usageStatsRepositories.ts";
 
 /**
  * Total input+output tokens for the current calendar month, across BOTH storage legs:
@@ -16,26 +17,13 @@ import type { SqliteAdapter } from "./adapters/types.ts";
  * a row is rolled into `daily_usage_summary` only immediately before being deleted from
  * `usage_history` by the same cleanup step. The analytics layer uses the same
  * reconciliation in `buildUnifiedSource`.
+ *
+ * The query lives in `repositories/sqliteUsageStatsReadRepository.ts`; the
+ * explicit `db` parameter and the 0 fallback on failure stay here.
  */
 export function sumUsageTokensThisMonth(db: SqliteAdapter = getDbInstance()): number {
   try {
-    const row = db
-      .prepare(
-        `SELECT
-           COALESCE((
-             SELECT SUM(tokens_input + tokens_output)
-             FROM usage_history
-             WHERE timestamp >= strftime('%Y-%m-01T00:00:00.000Z','now')
-               AND timestamp < strftime('%Y-%m-01T00:00:00.000Z','now','+1 month')
-           ), 0) +
-           COALESCE((
-             SELECT SUM(total_input_tokens + total_output_tokens)
-             FROM daily_usage_summary
-             WHERE date >= strftime('%Y-%m-01', 'now')
-           ), 0) AS used`
-      )
-      .get() as { used: number } | undefined;
-    return row?.used ?? 0;
+    return usageStatsRepositories.legacySync.sumTokensThisMonth(db);
   } catch {
     return 0; // table may not exist yet on a fresh install — treat as 0 used
   }
